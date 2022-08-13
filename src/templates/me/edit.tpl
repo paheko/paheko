@@ -7,7 +7,7 @@
 	</ul>
 </nav>
 
-{form_errors membre=1}
+{form_errors}
 
 <form method="post" action="{$self_url}">
 

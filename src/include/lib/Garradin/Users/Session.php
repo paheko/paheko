@@ -251,12 +251,16 @@ class Session extends \KD2\UserSession
 		return $out;
 	}
 
-	public function recoverPasswordSend(int $id)
+	public function recoverPasswordSend(int $id): int
 	{
 		$user = $this->fetchUserForPasswordRecovery($id);
 
 		if (!$user) {
-			return false;
+			return 1;
+		}
+
+		if ($user->perm_connect == self::ACCESS_NONE) {
+			return 2;
 		}
 
 		$query = $this->makePasswordRecoveryQuery($user);
@@ -266,12 +270,12 @@ class Session extends \KD2\UserSession
 		$message.= ADMIN_URL . 'password.php?c=' . $query;
 		$message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le, votre mot de passe restera inchangé.";
 
-		if ($membre->clef_pgp) {
-			$content = Security::encryptWithPublicKey($membre->clef_pgp, $message);
+		if ($user->clef_pgp) {
+			$content = Security::encryptWithPublicKey($user->pgp_key, $message);
 		}
 
-		Emails::queue(Emails::CONTEXT_SYSTEM, [$membre->email => null], null, 'Mot de passe perdu ?', $message);
-		return true;
+		Emails::queue(Emails::CONTEXT_SYSTEM, [$user->email => null], null, 'Mot de passe perdu ?', $message);
+		return 0;
 	}
 
 	protected function fetchUserForPasswordRecovery(int $id): ?\stdClass
@@ -282,10 +286,11 @@ class Session extends \KD2\UserSession
 		$email_field = DynamicFields::getFirstEmailField();
 
 		// Fetch user, must have an email
-		$sql = sprintf('SELECT id, %s AS email, password, pgp_key
-			FROM users
-			WHERE %s = ? COLLATE NOCASE
-				AND %1$s IS NOT NULL
+		$sql = sprintf('SELECT u.id, u.%s AS email, u.password, u.pgp_key, u.perm_connect
+			FROM users u
+			INNER JOIN users_categories c ON c.id = u.id_category
+			WHERE u.%s = ? COLLATE NOCASE
+				AND u.%1$s IS NOT NULL
 			LIMIT 1;',
 			$db->quoteIdentifier($email_field),
 			$db->quoteIdentifier($id_field));

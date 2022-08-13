@@ -1,7 +1,7 @@
 {include file="admin/_head.tpl" title="Mot de passe oublié ou première connexion ?"}
 
 
-{if !empty($sent)}
+{if $sent}
     <p class="block confirm">
         Un e-mail vous a été envoyé, cliquez sur le lien dans cet e-mail
         pour modifier votre mot de passe.
@@ -29,7 +29,7 @@
         </fieldset>
 
         <p class="submit">
-            {csrf_field key="recoverPassword"}
+            {csrf_field key=$csrf_key}
             {button type="submit" name="recover" label="Envoyer" shape="right" class="main"}
         </p>
 

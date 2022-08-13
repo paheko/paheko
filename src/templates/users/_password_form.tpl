@@ -5,6 +5,7 @@ use Garradin\Users\DynamicFields;
 $field = current(DynamicFields::getInstance()->fieldsBySystemUse('password'));
 $password_length = Session::MINIMUM_PASSWORD_LENGTH;
 $suggestion = Utils::suggestPassword();
+$required = $required ?? $field->required;
 ?>
 
 <dd class="help">
@@ -15,9 +16,9 @@ $suggestion = Utils::suggestPassword();
 	<input type="text" readonly="readonly" title="Cliquer pour utiliser cette suggestion comme mot de passe" id="pw_suggest" value="{$suggestion}" autocomplete="off" />
 </dd>
 
-{input type="password" name="password" required=$field.required label="Mot de passe" help="Minimum %d caractères"|args:$password_length autocomplete="off" minlength=$password_length}
+{input type="password" name="password" required=$required label="Mot de passe" help="Minimum %d caractères"|args:$password_length autocomplete="off" minlength=$password_length}
 
-{input type="password" name="password_confirmed" required=$field.required label="Encore le mot de pase (vérification)" help="Minimum %d caractères"|args:$password_length autocomplete="off" minlength=$password_length}
+{input type="password" name="password_confirmed" required=$required label="Encore le mot de pase (vérification)" help="Minimum %d caractères"|args:$password_length autocomplete="off" minlength=$password_length}
 
 <script type="text/javascript" async="async">
 {literal}
