@@ -5,19 +5,17 @@
 
 <form method="post" action="{$self_url}">
 
-    <fieldset>
-        <legend>Authentification à double facteur</legend>
-        <dl>
-            <dt><label for="f_code">Code TOTP</label></dt>
-            <dd class="help">Entrez ici le code donné par l'application d'authentification double facteur.</dd>
-            <dd><input type="text" name="code" id="f_code" value="{form_field name=code}" /></dd>
-        </dl>
-    </fieldset>
+	<fieldset>
+		<legend>Authentification à double facteur</legend>
+		<dl>
+			{input type="text" minlength=6 maxlength=6 label="Code TOTP" name="code" help="Entrez ici le code donné par l'application d'authentification double facteur." required=true}
+		</dl>
+	</fieldset>
 
-    <p class="submit">
-        {csrf_field key="otp"}
-        {button type="submit" name="login" label="Se connecter" shape="right" class="main"}
-    </p>
+	<p class="submit">
+		{csrf_field key=$csrf_key}
+		{button type="submit" name="login" label="Se connecter" shape="right" class="main"}
+	</p>
 
 </form>
 

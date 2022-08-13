@@ -311,6 +311,22 @@ select, input[size], input[type=color], button, input[type=button], input[type=s
     min-width: 0;
 }
 
+input.otp {
+    font-family: monospace;
+    font-size: 30px;
+    width: 240px;
+    letter-spacing: 22px;
+    min-width: 0;
+    padding-left: 10px;
+    background: linear-gradient(rgb(var(--gMainColor)) 0 0) 40px,
+        linear-gradient(rgb(var(--gMainColor)) 0 0) 80px,
+        linear-gradient(rgb(var(--gMainColor)) 0 0) 120px,
+        linear-gradient(rgb(var(--gMainColor)) 0 0) 160px,
+        linear-gradient(rgb(var(--gMainColor)) 0 0) 200px;
+    background-size:1px 100%;
+    background-repeat:no-repeat;
+}
+
 /* Radio button lists (eg. new transaction) */
 form .radio-btn {
     display: table;

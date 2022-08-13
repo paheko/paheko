@@ -2,7 +2,7 @@
 
 <nav class="tabs">
 	<ul>
-		<li class="current"><a href="{$admin_url}me/">Mes informations personnelles</a></li>
+		<li class="current"><a href="{$admin_url}me/">Mes informations</a></li>
 		<li><a href="{$admin_url}me/security.php">Mot de passe et options de sécurité</a></li>
 	</ul>
 </nav>
@@ -13,13 +13,11 @@
 </p>
 {/if}
 
-<dl class="describe">
-	<dd>
-		{linkbutton href="!me/edit.php" label="Modifier mes informations" shape="edit"}
-	</dd>
-</dl>
+<p>
+	{linkbutton href="!me/edit.php" label="Modifier mes informations" shape="edit"}
+</p>
 
-{include file="users/_details.tpl" champs=$champs data=$data show_message_button=false mode="user"}
+{include file="users/_details.tpl" data=$user show_message_button=false mode="user"}
 
 <p>
 	{linkbutton href="!me/export.php" label="Télécharger toutes les données détenues sur moi" shape="download"}

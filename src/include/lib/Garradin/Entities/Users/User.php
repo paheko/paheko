@@ -29,6 +29,8 @@ use KD2\DB\EntityManager as EM;
 #[AllowDynamicProperties]
 class User extends Entity
 {
+	const MINIMUM_PASSWORD_LENGTH = 8;
+
 	const TABLE = 'users';
 
 	protected bool $_construct = false;
@@ -74,9 +76,12 @@ class User extends Entity
 		$df = DynamicFields::getInstance();
 
 		foreach ($df->all() as $field) {
-			if ($field->required) {
-				$this->assert(null !== $this->{$field->name}, sprintf('"%s" : ce champ est requis', $field->label));
+			if (!$field->required) {
+				continue;
 			}
+
+			$this->assert(null !== $this->{$field->name}, sprintf('"%s" : ce champ est requis', $field->label));
+			$this->assert('' !== trim((string)$this->{$field->name}), sprintf('"%s" : ce champ ne peut être vide', $field->label));
 		}
 
 		// Check email addresses
@@ -177,12 +182,56 @@ class User extends Entity
 			$source = $_POST;
 		}
 
-		if (isset($source['password'])) {
-			$this->assert($source['password'] == ($source['password_confirmed'] ?? null), 'La confirmation de mot de passe doit être identique au mot de passe.');
-		}
+		// Don't allow changing security credentials from form
+		unset($source['id_category'], $source['password'], $source['otp_secret'], $source['pgp_key']);
 
 		if (isset($source['id_parent']) && is_array($source['id_parent'])) {
 			$source['id_parent'] = Form::getSelectorValue($source['id_parent']);
+		}
+
+		return parent::importForm($source);
+	}
+
+	public function importSecurityForm(bool $user_mode = true, array $source = null)
+	{
+		if (null === $source) {
+			$source = $_POST;
+		}
+
+		$session = Session::getInstance();
+
+		if ($user_mode && !Session::getInstance()->checkPassword($source['password_check'] ?? null, $this->password)) {
+			$this->assert(
+				$session->checkPassword($source['password_check'] ?? null, $this->password),
+				'Le mot de passe fourni ne correspond pas au mot de passe actuel. Merci de bien vouloir renseigner votre mot de passe courant pour confirmer les changements.'
+			);
+		}
+
+		if (isset($source['password'])) {
+			$source['password'] = trim($source['password']);
+			$this->assert(hash_equals($source['password'], $source['password_confirmed'] ?? ''), 'La vérification du mot de passe doit être identique au mot de passe.');
+			$this->assert(strlen($source['password']) >= self::MINIMUM_PASSWORD_LENGTH, sprintf('Le mot de passe doit faire au moins %d caractères.', self::MINIMUM_PASSWORD_LENGTH));
+			$this->assert(!$session->isPasswordCompromised($source['password']), 'Le mot de passe choisi figure dans une liste de mots de passe compromis (piratés), il ne peut donc être utilisé ici. Si vous l\'avez utilisé sur d\'autres sites il est recommandé de le changer sur ces autres sites également.');
+
+			$source['password'] = $session::hashPassword($source['password']);
+		}
+
+		if (isset($source['otp_secret'])) {
+			$this->assert(trim($source['otp_code'] ?? '') !== '', 'Le code TOTP doit être renseigné pour confirmer l\'opération');
+			$this->assert($session->checkOTP($source['otp_secret'], $source['otp_code']), 'Le code TOTP entré n\'est pas valide.');
+		}
+
+		if (!empty($source['otp_disable'])) {
+			$source['otp_secret'] = null;
+		}
+
+		if (!empty($source['pgp_key'])) {
+			$this->assert($session->getPGPFingerprint($source['pgp_key']), 'Clé PGP invalide : impossible de récupérer l\'empreinte de la clé.');
+		}
+
+		// Don't allow user to change password if the password field cannot be changed by user
+		if ($user_mode && !$this->canChangePassword()) {
+			unset($source['password'], $source['password_check']);
 		}
 
 		return parent::importForm($source);
@@ -262,5 +311,32 @@ class User extends Entity
 		if ($send_copy) {
 			Emails::queue(Emails::CONTEXT_PRIVATE, [$config->org_email => null], null, $subject, $message);
 		}
+	}
+
+	public function checkLoginFieldForUserEdit()
+	{
+		$session = Session::getInstance();
+
+		if (!$session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
+			return;
+		}
+
+		$field = DynamicFields::getLoginField();
+
+		if (!$this->isModified($field)) {
+			return;
+		}
+
+		if (trim($this->$field) !== '') {
+			return;
+		}
+
+		throw new UserException("Le champ identifiant ne peut être laissé vide pour un administrateur, sinon vous ne pourriez plus vous connecter.");
+	}
+
+	public function canChangePassword(): bool
+	{
+		$password_field = current(DynamicFields::getInstance()->fieldsBySystemUse('password'));
+		return $password_field->write_access == $password_field::ACCESS_USER;
 	}
 }

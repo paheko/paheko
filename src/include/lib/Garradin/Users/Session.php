@@ -41,8 +41,6 @@ class Session extends \KD2\UserSession
 	protected $remember_me_cookie_name = 'gdinp';
 	protected $remember_me_expiry = '+3 months';
 
-	const MINIMUM_PASSWORD_LENGTH = 8;
-
 	static protected $_instance = null;
 
 	static public function getInstance()
@@ -70,30 +68,18 @@ class Session extends \KD2\UserSession
 		]);
 	}
 
-	static public function checkPasswordValidity($password)
-	{
-		if (strlen($password) < self::MINIMUM_PASSWORD_LENGTH)
-		{
-			throw new UserException(sprintf('Le mot de passe doit faire au moins %d caractères.', self::MINIMUM_PASSWORD_LENGTH));
-		}
-
-		$session = self::getInstance();
-		$session->http = new HTTP;
-
-		if ($session->isPasswordCompromised($password)) {
-			throw new UserException('Ce mot de passe figure dans une liste de mots de passe compromis, il ne peut donc être utilisé ici. Si vous l\'avez utilisé sur d\'autres sites il est recommandé de le changer sur ces autres sites également.');
-		}
-	}
-
 	public function isPasswordCompromised($password)
 	{
+		if (!isset($this->http)) {
+			$this->http = new \KD2\HTTP;
+		}
+
 		// Vérifier s'il n'y a pas un plugin qui gère déjà cet aspect
 		// notamment en installation mutualisée c'est plus efficace
 		$return = ['is_compromised' => null];
-		$called = Plugin::fireSignal('motdepasse.compromis', ['password' => $password], $return);
 
-		if ($called !== null) {
-			return $return['is_compromised'];
+		if (Plugin::fireSignal('password.check', ['password' => $password], $return) && isset($return['is_compromised'])) {
+			return (bool) $return['is_compromised'];
 		}
 
 		return parent::isPasswordCompromised($password);
@@ -145,7 +131,11 @@ class Session extends \KD2\UserSession
 			\ARRAY_FILTER_USE_KEY
 		);
 
-		return (new User)->load($u);
+		$user = new User;
+		$user->load($u);
+		$user->exists(true);
+
+		return $user;
 	}
 
 	protected function storeRememberMeSelector($selector, $hash, $expiry, $user_id)
@@ -231,24 +221,6 @@ class Session extends \KD2\UserSession
 		}
 
 		return false;
-	}
-
-	public function getOTPSecret($secret = null)
-	{
-		if (!$secret)
-		{
-			$secret = Security_OTP::getRandomSecret();
-		}
-
-		$out = [];
-		$out['secret'] = $secret;
-		$out['secret_display'] = implode(' ', str_split($secret, 4));
-		$out['url'] = Security_OTP::getOTPAuthURL(Config::getInstance()->get('org_name'), $secret);
-
-		$qrcode = new QRCode($out['url']);
-		$out['qrcode'] = 'data:image/svg+xml;base64,' . base64_encode($qrcode->toSVG());
-
-		return $out;
 	}
 
 	public function recoverPasswordSend(int $id): void
@@ -367,25 +339,16 @@ class Session extends \KD2\UserSession
 			throw new UserException('Le code permettant de changer le mot de passe a expiré. Merci de bien vouloir recommencer la procédure.');
 		}
 
-		$password = trim($password);
-		$password_confirm = trim($password_confirm);
-
-		if (!hash_equals($password, $password_confirm)) {
-			throw new UserException('Le mot de passe et sa vérification ne sont pas identiques.');
-		}
-
-		self::checkPasswordValidity($password);
-
-		$password = self::hashPassword($password);
+		$ue = Users::get($user->id);
+		$ue->importSecurityForm(compact('password', 'password_confirmed'));
+		$ue->save();
 
 		$message = "Bonjour,\n\nLe mot de passe de votre compte a bien été modifié.\n\n";
 		$message.= "Votre adresse email : ".$user->email."\n";
 		$message.= "La demande émanait de l'adresse IP : ".Utils::getIP()."\n\n";
 		$message.= "Si vous n'avez pas demandé à changer votre mot de passe, merci de nous le signaler.";
 
-		DB::getInstance()->update('users', ['password' => $password], 'id = :id', ['id' => (int)$user->id]);
-
-		return Emails::queue(Emails::CONTEXT_SYSTEM, [$user->email => null], null, 'Mot de passe changé', $message);
+		return Emails::queue(Emails::CONTEXT_SYSTEM, [$user->email => null], null, 'Mot de passe modifié', $message);
 	}
 
 	public function user(): ?User
@@ -421,10 +384,13 @@ class Session extends \KD2\UserSession
 
 	public function getNewOTPSecret()
 	{
+		$config = Config::getInstance();
 		$out = [];
 		$out['secret'] = Security_OTP::getRandomSecret();
 		$out['secret_display'] = implode(' ', str_split($out['secret'], 4));
-		$out['url'] = Security_OTP::getOTPAuthURL(Config::getInstance()->get('org_name'), $out['secret']);
+
+		$icon = $config->fileURL('icon');
+		$out['url'] = Security_OTP::getOTPAuthURL($config->org_name, $out['secret'], 'totp', $icon);
 
 		$qrcode = new QRCode($out['url']);
 		$out['qrcode'] = 'data:image/svg+xml;base64,' . base64_encode($qrcode->toSVG());
@@ -446,36 +412,10 @@ class Session extends \KD2\UserSession
 		return Emails::queue(Emails::CONTEXT_PRIVATE, $dest, null, $sujet, $content);
 	}
 
-	/**
-	 * Change self security data
-	 * @param  \stdClass $data Security data, eg. password, pgp_key or otp_secret
-	 */
-	public function editSecurity(\stdClass $data): void
+	public function countActiveSessions(): int
 	{
-		$user = Users::get($this->user->id);
-
-		$allowed_fields = ['password', 'pgp_key', 'otp_secret'];
-		$data = array_intersect_key($data, array_flip($allowed_fields));
-
-		if (isset($data->password) && trim($data->password) !== '') {
-			self::checkPasswordValidity($data->password);
-			$user->set('password', self::hashPassword($data->password));
-		}
-
-		if (isset($data->pgp_key) && trim($data->pgp_key) !== '') {
-			$data->pgp_key = trim($data->pgp_key);
-
-			if (!$this->getPGPFingerprint($data->pgp_key)) {
-				throw new UserException('Clé PGP invalide : impossible d\'extraire l\'empreinte.');
-			}
-
-			$user->set('pgp_key', $data->pgp_key);
-		}
-
-		if (!empty($data->otp_secret)) {
-			$user->set('otp_secret', $otp_secret);
-		}
-
-		$this->refresh();
+		$selector = $this->getRememberMeCookie()->selector ?? null;
+		$user = $this->getUser();
+		return DB::getInstance()->count('users_sessions', 'id_user = ? AND selector != ?', $user->id(), $selector) + 1;
 	}
 }

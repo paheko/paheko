@@ -41,12 +41,10 @@
 </form>
 
 {literal}
-<script type="text/javascript">
+<script type="text/javascript" async="async">
 if (window.navigator.userAgent.match(/MSIE|Trident\/|Edge\//)) {
 	document.getElementById('old_browser').style.display = 'block';
 }
-
-g.enhancePasswordField($('#f_passe'));
 </script>
 {/literal}
 

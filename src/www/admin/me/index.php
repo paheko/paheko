@@ -1,13 +1,14 @@
 <?php
 namespace Garradin;
 
+use Garradin\Users\Session;
+
 require_once __DIR__ . '/../_inc.php';
 
-$data = $session->getUser();
-$champs = Config::getInstance()->get('champs_membres')->getList();
+$user = Session::getInstance()->getUser();
 
 $ok = qg('ok');
 
-$tpl->assign(compact('champs', 'data', 'ok'));
+$tpl->assign(compact('user', 'ok'));
 
 $tpl->display('me/index.tpl');

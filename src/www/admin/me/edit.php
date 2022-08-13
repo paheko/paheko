@@ -1,31 +1,22 @@
 <?php
 namespace Garradin;
 
+use Garradin\Users\DynamicFields;
+use Garradin\Users\Session;
+
 require_once __DIR__ . '/../_inc.php';
 
 $csrf_key = 'edit_my_info';
+$user = Session::getInstance()->getUser();
 
-$form->runIf('save', function () use ($session) {
-	$data = [];
-	$config = Config::getInstance();
-	$champs = Config::getInstance()->get('champs_membres');
-
-	foreach ($champs->getAll() as $key=>$c) {
-		if (!empty($c->editable)) {
-			$data[$key] = f($key);
-		}
-	}
-
-	if (isset($data[$config->get('champ_identifiant')]) && !trim($data[$config->get('champ_identifiant')]) && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
-		throw new UserException("Le champ identifiant ne peut être vide pour un administrateur, sinon vous ne pourriez plus vous connecter.");
-	}
-
-	$session->editUser($data);
+$form->runIf('save', function () use ($session, $user) {
+	$user->importForm();
+	$user->checkLoginFieldForUserEdit();
+	$user->save();
 }, $csrf_key, '!me/?ok');
 
-$data = $session->getUser();
-$champs = Config::getInstance()->get('champs_membres')->getAll();
+$fields = DynamicFields::getInstance()->all();
 
-$tpl->assign(compact('csrf_key', 'champs', 'data'));
+$tpl->assign(compact('csrf_key', 'user', 'fields'));
 
 $tpl->display('me/edit.tpl');

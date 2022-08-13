@@ -97,9 +97,6 @@ class Template extends Smartyer
 		$this->assign('session', $session);
 		$this->assign('dialog', isset($_GET['_dialog']));
 
-		$this->assign('password_pattern', sprintf('.{%d,}', Session::MINIMUM_PASSWORD_LENGTH));
-		$this->assign('password_length', Session::MINIMUM_PASSWORD_LENGTH);
-
 		$this->register_compile_function('continue', function (Smartyer $s, $pos, $block, $name, $raw_args) {
 			if ($block == 'continue')
 			{
@@ -117,7 +114,6 @@ class Template extends Smartyer
 		$this->register_function('form_errors', [$this, 'formErrors']);
 		$this->register_function('show_error', [$this, 'showError']);
 		$this->register_function('input', [$this, 'formInput']);
-		$this->register_function('password_change', [$this, 'passwordChangeInput']);
 
 		$this->register_function('custom_colors', [$this, 'customColors']);
 		$this->register_function('plugin_url', ['Garradin\Utils', 'plugin_url']);
@@ -300,32 +296,6 @@ class Template extends Smartyer
 		$params['class'] .= ' icn-btn';
 
 		return $this->widgetLink($params);
-	}
-
-	protected function passwordChangeInput(array $params)
-	{
-		$out = $this->formInput(array_merge($params, [
-			'type' => 'password',
-			'help' => sprintf('(Minimum %d caractères)', Session::MINIMUM_PASSWORD_LENGTH),
-			'minlength' => Session::MINIMUM_PASSWORD_LENGTH,
-		]));
-
-		$out.= '<dd class="help">Astuce : un mot de passe de quatre mots choisis au hasard dans le dictionnaire est plus sûr et plus simple à retenir qu\'un mot de passe composé de 10 lettres et chiffres.</dd>';
-
-		$suggestion = Utils::suggestPassword();
-
-		$out .= sprintf('<dd class="help">Pas d\'idée&nbsp;? Voici une suggestion choisie au hasard&nbsp;:
-				<input type="text" readonly="readonly" title="Cliquer pour utiliser cette suggestion comme mot de passe" id="f_%s_suggest" value="%s" autocomplete="off" size="%d" /></dd>', $params['name'], $suggestion, strlen($suggestion));
-
-		$out .= $this->formInput([
-			'type' => 'password',
-			'label' => 'Répéter le mot de passe',
-			'required' => true,
-			'name' => $params['name'] . '_confirm',
-			'minlength' => Session::MINIMUM_PASSWORD_LENGTH,
-		]);
-
-		return $out;
 	}
 
 	protected function formInput(array $params)

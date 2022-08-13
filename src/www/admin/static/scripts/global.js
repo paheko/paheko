@@ -288,13 +288,22 @@
 		}
 	};
 
-	g.enhancePasswordField = function (field, repeat_field)
+	/**
+	 * Adds a "show password" button next to password inputs
+	 */
+	g.enhancePasswordField = function (field)
 	{
+		if (field.id.indexOf('_confirmed') != -1) {
+			return;
+		}
+
 		var show_password = document.createElement('button');
 		show_password.type = 'button';
 		show_password.className = 'icn-btn';
 
 		field.parentNode.insertBefore(show_password, field.nextSibling);
+
+		let repeat_field = document.getElementById(field.id + '_confirmed');
 
 		g.togglePasswordVisibility(field, repeat_field, false);
 
@@ -420,9 +429,9 @@
 
 			let f = form.dataset.focus;
 			let n = f.match(/^\d+$/) ? (parseInt(f, 10) - 1) : null;
-			let i = form.querySelectorAll(n !== null ? '[name]:not([type="hidden"])' : f);
+			let i = form.querySelectorAll(n !== null ? '[name]:not([type="hidden"]):not([readonly]):not([type=button])' : f);
 
-			if(i[n]) {
+			if(n !== null && i[n]) {
 				i[n].focus();
 			}
 		}
@@ -531,6 +540,12 @@
 	g.onload(() => {
 		document.querySelectorAll('input[data-input="date"]').forEach((e) => {
 			g.enhanceDateField(e);
+		});
+	});
+
+	g.onload(() => {
+		document.querySelectorAll('input[type="password"]:not([readonly]):not([disabled])').forEach((e) => {
+			g.enhancePasswordField(e);
 		});
 	});
 

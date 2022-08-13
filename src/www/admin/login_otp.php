@@ -2,31 +2,27 @@
 
 namespace Garradin;
 
+use Garradin\Users\Session;
+
 const LOGIN_PROCESS = true;
 
 require_once __DIR__ . '/_inc.php';
 
-if (!$session->isOTPRequired())
-{
-    Utils::redirect(ADMIN_URL . '');
+$session = Session::getInstance();
+
+if (!$session->isOTPRequired()) {
+	Utils::redirect(ADMIN_URL);
 }
 
 $login = null;
+$csrf_key = 'login_otp';
 
-if (f('login'))
-{
-    $form->check('otp', [
-        'code' => 'numeric|required',
-    ]);
+$form->runIf('login', function () use ($session) {
+	if (!$session->loginOTP(f('code'))) {
+		throw new UserException(sprintf('Code incorrect. Vérifiez que votre téléphone est à l\'heure (heure du serveur : %s).', date('d/m/Y H:i:s')));
+	}
+}, $csrf_key, '!');
 
-    if (!$form->hasErrors() && ($login = $session->loginOTP(f('code'))))
-    {
-        Utils::redirect(ADMIN_URL);
-    }
-}
-
-$tpl->assign('fail', $login === false);
-
-$tpl->assign('time', time());
+$tpl->assign(compact('csrf_key'));
 
 $tpl->display('login_otp.tpl');
