@@ -405,7 +405,7 @@ class Files
 		File::validatePath($parent);
 		self::ensureDirectoryExists($parent);
 
-		$name = File::filterName($file['name']);
+		$name = File::filterName($name);
 
 		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
 
@@ -423,7 +423,7 @@ class Files
 			$file->set('size', strlen($source_content));
 		}
 
-		$file->set('image', in_array($file->mime, self::IMAGE_TYPES));
+		$file->set('image', in_array($file->mime, $file::IMAGE_TYPES));
 
 		// Force empty files as text/plain
 		if ($file->mime == 'application/x-empty' && !$file->size) {

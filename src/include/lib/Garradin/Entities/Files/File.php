@@ -33,7 +33,7 @@ class File extends Entity
 	/**
 	 * Parent directory of file
 	 */
-	protected ?string $parent;
+	protected ?string $parent = null;
 
 	/**
 	 * File name
@@ -49,8 +49,8 @@ class File extends Entity
 	 * Type of file: file or directory
 	 */
 	protected int $type = self::TYPE_FILE;
-	protected ?string $mime;
-	protected ?int $size;
+	protected ?string $mime = null;
+	protected ?int $size = null;
 	protected \DateTime $modified;
 	protected bool $image;
 
@@ -319,7 +319,7 @@ class File extends Entity
 			$this->set('name', $new_name);
 		}
 
-		if (!$this->modified) {
+		if (!isset($this->modified)) {
 			$this->set('modified', new \DateTime);
 		}
 
@@ -809,7 +809,7 @@ class File extends Entity
 		elseif (substr($this->name, -3) == '.md') {
 			$format = Render::FORMAT_MARKDOWN;
 		}
-		else if (substr($this->mime, 0, 5) == 'text/') {
+		else if (substr($this->mime, 0, 5) == 'text/' && $this->mime != 'text/html') {
 			$format = 'text';
 		}
 		else if ($this->size == 0) {
