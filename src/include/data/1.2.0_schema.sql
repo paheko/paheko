@@ -465,3 +465,25 @@ CREATE UNIQUE INDEX IF NOT EXISTS web_pages_file_path ON web_pages (file_path);
 CREATE INDEX IF NOT EXISTS web_pages_parent ON web_pages (parent);
 CREATE INDEX IF NOT EXISTS web_pages_published ON web_pages (published);
 CREATE INDEX IF NOT EXISTS web_pages_title ON web_pages (title);
+
+CREATE TABLE IF NOT EXISTS user_forms
+-- List of user forms
+(
+    id INTEGER NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    label TEXT NOT NULL,
+    description TEXT NULL,
+    config TEXT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS user_forms_name ON user_forms (name);
+
+CREATE TABLE IF NOT EXISTS user_forms_templates
+-- List of forms special templates
+(
+    id INTEGER NOT NULL PRIMARY KEY,
+    id_form INTEGER NOT NULL REFERENCES user_forms (id) ON DELETE CASCADE,
+    name TEXT NOT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS user_forms_templates_name ON user_forms_templates (id_form, name);

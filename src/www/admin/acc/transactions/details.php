@@ -4,6 +4,7 @@ namespace Garradin;
 use Garradin\Accounting\Transactions;
 use Garradin\UserTemplate\UserForms;
 use Garradin\Entities\UserForm;
+use Garradin\Users\Users;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -24,7 +25,7 @@ $variables = compact('csrf_key', 'transaction') + [
 	'transaction_lines'    => $transaction->getLinesWithAccounts(),
 	'transaction_year'     => $transaction->year(),
 	'files'                => $transaction->listFiles(),
-	'creator_name'         => $transaction->id_creator ? (new Membres)->getNom($transaction->id_creator) : null,
+	'creator_name'         => $transaction->id_creator ? Users::getName($transaction->id_creator) : null,
 	'files_edit'           => $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE),
 	'file_parent'          => $transaction->getAttachementsDirectory(),
 	'related_users'        => $transaction->listLinkedUsers(),

@@ -674,7 +674,7 @@ class Transaction extends Entity
 
 			foreach ($source['lines'] as $i => $line) {
 				if (isset($line['account_selector'])) {
-					$line['id_account'] = Form::getSelectorValue($source['account_selector']);
+					$line['id_account'] = Form::getSelectorValue($line['account_selector']);
 				}
 				elseif (isset($line['account'])) {
 					if (empty($this->id_year) && empty($source['id_year'])) {
@@ -692,6 +692,7 @@ class Transaction extends Entity
 				if (empty($line['id_account'])) {
 					throw new ValidationException(sprintf('Ligne %d : aucun compte n\'a été sélectionné', $i + 1));
 				}
+
 
 				$l = new Line;
 				$l->importForm($line);

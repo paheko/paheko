@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Formulaires & modèles" current="config"}
 
-{include file="admin/config/_menu.tpl" current="forms"}
+{include file="config/_menu.tpl" current="forms"}
 
 <table class="list">
 	<tbody>

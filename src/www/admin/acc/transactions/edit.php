@@ -33,6 +33,7 @@ $accounts = $chart->accounts();
 $csrf_key = 'acc_transaction_edit_' . $transaction->id();
 
 $tpl->assign('chart', $chart);
+//var_dump('<pre>', $_POST); exit;
 
 $form->runIf('save', function() use ($transaction, $session) {
 	$transaction->importFromNewForm();

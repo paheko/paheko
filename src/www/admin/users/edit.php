@@ -36,6 +36,10 @@ $csrf_key = 'user_edit_' . $user->id;
 $form->runIf('save', function () use ($user, $logged_user_id, $session) {
 	$user->importForm();
 
+	if (empty($_POST['id_parent'])) {
+		$user->id_parent = null;
+	}
+
 	// Only admins can set a category
 	if (f('id_category') && $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)) {
 		$user->id_category = f('id_category');

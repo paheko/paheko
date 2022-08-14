@@ -3,7 +3,6 @@
 namespace Garradin\UserTemplate;
 
 use KD2\Brindille_Exception;
-use Garradin\Config;
 use Garradin\DB;
 use Garradin\Utils;
 use Garradin\UserException;
@@ -12,6 +11,7 @@ use Garradin\Entities\Web\Page;
 use Garradin\Web\Web;
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
+use Garradin\Users\DynamicFields;
 
 use const Garradin\WWW_URL;
 
@@ -146,11 +146,13 @@ class Sections
 			$params['where'] = '';
 		}
 
-		$config = Config::getInstance();
+		$id_field = DynamicFields::getNameFieldsSQL();
+		$login_field = DynamicFields::getLoginField();
+		$number_field = DynamicFields::getNumberField();
 
 		$params['select'] = sprintf('*, %s AS user_name, %s AS user_login, %s AS user_number',
-			$config->champ_identite, $config->champ_identifiant, 'numero');
-		$params['tables'] = 'membres';
+			$id_field, $login_field, $number_field);
+		$params['tables'] = 'users';
 
 		if (isset($params['id'])) {
 			$params['where'] = ' AND id = :id';
@@ -177,17 +179,17 @@ class Sections
 			unset($params['id']);
 		}
 
-		$config = Config::getInstance();
+		$id_field = DynamicFields::getNameFieldsSQL('u');
 
 		$params['select'] = sprintf('t.*, SUM(l.credit) AS credit, SUM(l.debit) AS debit,
 			GROUP_CONCAT(DISTINCT a.code) AS accounts_codes,
-			GROUP_CONCAT(DISTINCT u.%s) AS users_names', $config->champ_identite);
+			GROUP_CONCAT(DISTINCT %s) AS users_names', $id_field);
 		$params['tables'] = 'acc_transactions AS t
 			INNER JOIN acc_transactions_lines AS l ON l.id_transaction = t.id
 			INNER JOIN acc_accounts AS a ON l.id_account = a.id
 			LEFT JOIN acc_transactions_users tu ON tu.id_transaction = t.id
-			LEFT JOIN membres u ON u.id = tu.id_user';
-		$params['group'] = 't.id';
+			LEFT JOIN users u ON u.id = tu.id_user';
+		$params['group'] = 't.id, u.id';
 
 		return self::sql($params, $tpl, $line);
 	}
@@ -204,11 +206,11 @@ class Sections
 			unset($params['id_transaction']);
 		}
 
-		$config = Config::getInstance();
+		$id_field = DynamicFields::getNameFieldsSQL('u');
 
-		$params['select'] = sprintf('tu.*, u.%s AS name, u.*', $config->champ_identite);
+		$params['select'] = sprintf('tu.*, %s AS name, u.*', $id_field);
 		$params['tables'] = 'acc_transactions_users tu
-			INNER JOIN membres u ON u.id = tu.id_user';
+			INNER JOIN users u ON u.id = tu.id_user';
 
 		return self::sql($params, $tpl, $line);
 	}

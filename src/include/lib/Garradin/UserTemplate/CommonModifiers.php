@@ -480,8 +480,7 @@ class CommonModifiers
 		elseif ($type == 'list') {
 			$multiple = !empty($attributes['multiple']);
 			$can_delete = $multiple || !empty($attributes['can_delete']);
-			// Just an empty input to show that this input has been submitted
-			$values = sprintf('<input type="hidden" name="%s[]" value="" />', $this->escape($name));
+			$values = '';
 			$delete_btn = self::button(['shape' => 'delete']);
 
 			if (null !== $current_value && is_iterable($current_value)) {
