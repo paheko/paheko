@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Contacter un membre" current="membres"}
+{include file="_head.tpl" title="Contacter un membre" current="membres"}
 
 {form_errors}
 
@@ -23,4 +23,4 @@
 </form>
 
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

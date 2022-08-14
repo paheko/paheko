@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Édition de fichier"}
+{include file="_head.tpl" title="Édition de fichier"}
 
 <form method="post" action="{$self_url}">
 	<p>
@@ -14,4 +14,4 @@
 
 <script type="text/javascript" src="{$admin_url}static/scripts/code_editor.js?{$version_hash}"></script>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

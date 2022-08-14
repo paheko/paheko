@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Choisir la page parent" current="web"}
+{include file="_head.tpl" title="Choisir la page parent" current="web"}
 
 <table class="tree-selector list">
 	<tbody>
@@ -40,4 +40,4 @@ buttons.forEach((e) => {
 </script>
 {/literal}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

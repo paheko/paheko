@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" current="config" title="Ajouter un champ aux fiches des membres"}
+{include file="_head.tpl" current="config" title="Ajouter un champ aux fiches des membres"}
 
 {include file="config/_menu.tpl" current="fields"}
 
@@ -36,4 +36,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

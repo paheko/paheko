@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Connexion — double facteur"}
+{include file="_head.tpl" title="Connexion — double facteur"}
 
 {form_errors}
 
@@ -18,4 +18,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

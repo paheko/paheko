@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Renommer" current=null}
+{include file="_head.tpl" title="Renommer" current=null}
 
 {form_errors}
 
@@ -17,4 +17,4 @@
 	</fieldset>
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

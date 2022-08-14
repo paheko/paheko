@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Ajouter un membre" current="users/new"}
+{include file="_head.tpl" title="Ajouter un membre" current="users/new"}
 
 {form_errors}
 
@@ -28,4 +28,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

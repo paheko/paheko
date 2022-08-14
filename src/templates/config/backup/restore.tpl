@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Restaurer" current="config"}
+{include file="_head.tpl" title="Restaurer" current="config"}
 
 {include file="config/_menu.tpl" current="backup"}
 
@@ -105,4 +105,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

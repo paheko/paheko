@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Écritures liées à une inscription" current="acc/accounts"}
+{include file="_head.tpl" title="Écritures liées à une inscription" current="acc/accounts"}
 
 <nav class="tabs">
 	{linkbutton href="!users/details.php?id=%d"|args:$user_id label="Retour à la fiche membre" shape="left"}
@@ -35,4 +35,4 @@
 	</table>
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

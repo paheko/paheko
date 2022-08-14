@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Garradin - Installation" menu=false}
+{include file="_head.tpl" title="Garradin - Installation" menu=false}
 
 <p class="help">
     Bienvenue dans Garradin !
@@ -54,4 +54,4 @@ form.onsubmit = function () {
 </form>
 
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

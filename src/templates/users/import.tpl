@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Import & export des membres" current="users"}
+{include file="_head.tpl" title="Import & export des membres" current="users"}
 
 {include file="users/_nav.tpl" current="import"}
 
@@ -60,4 +60,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

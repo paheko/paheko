@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Supprimer un compte" current="acc/charts"}
+{include file="_head.tpl" title="Supprimer un compte" current="acc/charts"}
 
 {include file="common/delete_form.tpl"
 	legend="Supprimer ce plan comptable ?"
@@ -7,4 +7,4 @@
 	csrf_key="acc_accounts_delete_%s"|args:$account.id
 }
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

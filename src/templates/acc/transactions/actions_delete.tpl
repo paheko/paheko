@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Supprimer %d écritures"|args:$count current="acc"}
+{include file="_head.tpl" title="Supprimer %d écritures"|args:$count current="acc"}
 
 {include file="common/delete_form.tpl"
 	legend="Supprimer ces écritures ?"
@@ -8,4 +8,4 @@
 	extra=$extra
 }
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

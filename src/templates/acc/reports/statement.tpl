@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Compte de résultat" current="acc/years"}
+{include file="_head.tpl" title="Compte de résultat" current="acc/years"}
 
 {include file="acc/reports/_header.tpl" current="statement" title="Compte de résultat" allow_compare=true}
 
@@ -13,4 +13,4 @@
 
 <p class="help">Toutes les écritures sont libellées en {$config.currency}.</p>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

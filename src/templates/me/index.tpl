@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Mes informations personnelles" current="me"}
+{include file="_head.tpl" title="Mes informations personnelles" current="me"}
 
 <nav class="tabs">
 	<ul>
@@ -24,4 +24,4 @@
 	<dd>{linkbutton href="!me/export.php" label="Télécharger toutes les données détenues sur moi" shape="download"}</dd>
 </dl>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

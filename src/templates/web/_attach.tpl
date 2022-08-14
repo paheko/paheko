@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Inclure un fichier"}
+{include file="_head.tpl" title="Inclure un fichier"}
 
 {form_errors}
 
@@ -81,4 +81,4 @@
 </table>
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

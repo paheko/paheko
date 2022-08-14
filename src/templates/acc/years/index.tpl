@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Exercices" current="acc/years"}
+{include file="_head.tpl" title="Exercices" current="acc/years"}
 
 <nav class="tabs">
 	<aside>
@@ -93,4 +93,4 @@
 	</p>
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

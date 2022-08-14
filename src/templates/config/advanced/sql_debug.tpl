@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Journal SQL" current="config" custom_css=["config.css"]}
+{include file="_head.tpl" title="Journal SQL" current="config" custom_css=["config.css"]}
 
 {include file="config/_menu.tpl" current="advanced" sub_current="sql_debug"}
 
@@ -70,4 +70,4 @@
 	{/if}
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

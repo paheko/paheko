@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Rechercher dans le site web" current="web"}
+{include file="_head.tpl" title="Rechercher dans le site web" current="web"}
 
 <form method="post" action="{$self_url}" data-focus="1">
 	<fieldset>
@@ -34,4 +34,4 @@
 	</section>
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

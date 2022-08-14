@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Comptabilité" current="acc"}
+{include file="_head.tpl" title="Comptabilité" current="acc"}
 
 {if !empty($all_years)}
 <form method="get" action="{$admin_url}acc/search.php" class="shortForm">
@@ -92,4 +92,4 @@
 	</p>
 {/foreach}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

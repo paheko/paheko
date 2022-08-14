@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="API" current="config" custom_css=["config.css"]}
+{include file="_head.tpl" title="API" current="config" custom_css=["config.css"]}
 
 {include file="admin/config/_menu.tpl" current="advanced" sub_current="api"}
 
@@ -64,4 +64,4 @@
 	</fieldset>
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

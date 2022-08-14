@@ -1,7 +1,7 @@
 <?php
 use Garradin\Accounting\Export;
 ?>
-{include file="admin/_head.tpl" title="Importer des écritures" current="acc/years"}
+{include file="_head.tpl" title="Importer des écritures" current="acc/years"}
 
 <nav class="acc-year">
 	<h4>Exercice sélectionné&nbsp;:</h4>
@@ -170,4 +170,4 @@ use Garradin\Accounting\Export;
 {/if}
 
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

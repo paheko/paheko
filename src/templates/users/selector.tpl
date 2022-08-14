@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Sélectionner un compte"}
+{include file="_head.tpl" title="Sélectionner un compte"}
 
 <form method="post" action="{$self_url}">
 	<h2 class="ruler">
@@ -60,4 +60,4 @@ document.querySelector('input').focus();
 </script>
 {/literal}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

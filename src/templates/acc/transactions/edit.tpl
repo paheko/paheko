@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Modification d'une écriture" current="acc/simple"}
+{include file="_head.tpl" title="Modification d'une écriture" current="acc/simple"}
 
 {if $has_reconciled_lines}
 <p class="alert block">
@@ -8,4 +8,4 @@
 
 {include file="./_form.tpl"}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

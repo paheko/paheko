@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Supprimer un exercice" current="acc/years"}
+{include file="_head.tpl" title="Supprimer un exercice" current="acc/years"}
 
 {include file="common/delete_form.tpl"
 	legend="Supprimer cet exercice ?"
@@ -8,4 +8,4 @@
 	csrf_key="acc_years_delete_%s"|args:$year.id
 }
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

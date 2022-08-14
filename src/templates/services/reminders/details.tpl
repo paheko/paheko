@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Liste des rappels envoyés" current="users/services"}
+{include file="_head.tpl" title="Liste des rappels envoyés" current="users/services"}
 
 {include file="services/_nav.tpl" current="reminders"}
 
@@ -29,4 +29,4 @@
 {pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count()}
 
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

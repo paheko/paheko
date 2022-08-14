@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Mise à jour" current="config"}
+{include file="_head.tpl" title="Mise à jour" current="config"}
 
 {include file="config/_menu.tpl" current="index"}
 
@@ -86,4 +86,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

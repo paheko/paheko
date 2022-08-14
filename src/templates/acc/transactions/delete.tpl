@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Supprimer l'écriture n°%d"|args:$transaction.id current="acc"}
+{include file="_head.tpl" title="Supprimer l'écriture n°%d"|args:$transaction.id current="acc"}
 
 {include file="common/delete_form.tpl"
 	legend="Supprimer cette écriture ?"
@@ -6,4 +6,4 @@
 	csrf_key="acc_delete_%s"|args:$transaction.id
 }
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

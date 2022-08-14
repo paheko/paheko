@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Plan comptable"|args:$chart.label current="acc/charts"}
+{include file="_head.tpl" title="Plan comptable"|args:$chart.label current="acc/charts"}
 
 {include file="acc/charts/accounts/_nav.tpl" current="all"}
 
@@ -34,4 +34,4 @@
 </table>
 
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

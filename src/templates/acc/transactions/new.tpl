@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Saisie d'une écriture" current="acc/new"}
+{include file="_head.tpl" title="Saisie d'une écriture" current="acc/new"}
 
 {include file="acc/_year_select.tpl"}
 
@@ -10,4 +10,4 @@
 
 {include file="./_form.tpl"}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

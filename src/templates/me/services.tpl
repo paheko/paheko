@@ -1,7 +1,7 @@
 <?php
 use Garradin\Entities\Accounting\Account;
 ?>
-{include file="admin/_head.tpl" title="Mes activités & cotisations" current="me/services"}
+{include file="_head.tpl" title="Mes activités & cotisations" current="me/services"}
 
 <dl class="cotisation">
 	<dt>Mes activités et cotisations</dt>
@@ -77,4 +77,4 @@ use Garradin\Entities\Accounting\Account;
 	{pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count()}
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

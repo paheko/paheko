@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title=$title}
+{include file="_head.tpl" title=$title}
 
 {if $sent}
 	<p class="block confirm">
@@ -41,4 +41,4 @@
 	</form>
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

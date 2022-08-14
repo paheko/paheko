@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Créer un répertoire"}
+{include file="_head.tpl" title="Créer un répertoire"}
 
 {form_errors}
 
@@ -15,4 +15,4 @@
 	</fieldset>
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Sauvegardes" current="config"}
+{include file="_head.tpl" title="Sauvegardes" current="config"}
 
 {include file="config/_menu.tpl" current="backup"}
 
@@ -35,4 +35,4 @@
 	</dl>
 </fieldset>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Extensions" current="config"}
+{include file="_head.tpl" title="Extensions" current="config"}
 
 {include file="config/_menu.tpl" current="plugins"}
 
@@ -104,4 +104,4 @@
     {/if}
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

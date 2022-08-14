@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Nouveau compte" current="acc/charts"}
+{include file="_head.tpl" title="Nouveau compte" current="acc/charts"}
 
 {include file="acc/charts/accounts/_nav.tpl" current="new"}
 
@@ -38,4 +38,4 @@
 
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Importer un nouveau plan comptable" current="acc/charts"}
+{include file="_head.tpl" title="Importer un nouveau plan comptable" current="acc/charts"}
 
 {include file="./_nav.tpl" current="install"}
 
@@ -17,4 +17,4 @@
 	</p>
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

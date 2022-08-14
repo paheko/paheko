@@ -39,14 +39,14 @@ class Functions
 	{
 		$tpl = Template::getInstance();
 		$tpl->assign($params);
-		return $tpl->fetch('admin/_head.tpl');
+		return $tpl->fetch('_head.tpl');
 	}
 
 	static public function admin_footer(array $params): string
 	{
 		$tpl = Template::getInstance();
 		$tpl->assign($params);
-		return $tpl->fetch('admin/_foot.tpl');
+		return $tpl->fetch('_foot.tpl');
 	}
 
 	static public function create_index(array $params, Brindille $tpl, int $line): void

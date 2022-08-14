@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Ajouter/supprimer des écritures à un projet" current="acc/accounts"}
+{include file="_head.tpl" title="Ajouter/supprimer des écritures à un projet" current="acc/accounts"}
 
 {form_errors}
 
@@ -33,4 +33,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

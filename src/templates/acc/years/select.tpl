@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Changer d'exercice" current="acc/years"}
+{include file="_head.tpl" title="Changer d'exercice" current="acc/years"}
 
 <form method="post" action="{$self_url}" data-focus="1">
 	<fieldset>
@@ -23,4 +23,4 @@
 	</p>
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

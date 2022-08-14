@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="%s — Modifier le membre"|args:$user->name() current="users"}
+{include file="_head.tpl" title="%s — Modifier le membre"|args:$user->name() current="users"}
 
 <nav class="tabs">
 	{linkbutton href="details.php?id=%d"|args:$user.id label="Retour à la fiche membre" shape="left"}
@@ -66,4 +66,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

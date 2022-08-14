@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Suivi : %s"|args:$types[$type] current="acc/simple"}
+{include file="_head.tpl" title="Suivi : %s"|args:$types[$type] current="acc/simple"}
 
 {include file="acc/_year_select.tpl"}
 
@@ -91,4 +91,4 @@
 	{pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count()}
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

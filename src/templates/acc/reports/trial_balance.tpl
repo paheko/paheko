@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Balance générale" current="acc/years"}
+{include file="_head.tpl" title="Balance générale" current="acc/years"}
 
 {include file="acc/reports/_header.tpl" current="trial_balance" title="Balance générale" sub_current=$simple}
 
@@ -38,4 +38,4 @@
 
 <p class="help">Toutes les écritures sont libellées en {$config.currency}. Les lignes grisées correspondent aux comptes soldés.</p>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

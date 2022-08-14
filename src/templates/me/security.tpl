@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Mes informations de connexion et sécurité" current="me"}
+{include file="_head.tpl" title="Mes informations de connexion et sécurité" current="me"}
 
 <nav class="tabs">
 	<ul>
@@ -117,4 +117,4 @@
 {/if}
 
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

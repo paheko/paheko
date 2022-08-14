@@ -1,7 +1,7 @@
 <?php
 use Garradin\Entities\Files\File;
 ?>
-{include file="admin/_head.tpl" title="Documents" current="docs"}
+{include file="_head.tpl" title="Documents" current="docs"}
 
 <nav class="tabs">
 	<aside>
@@ -217,4 +217,4 @@ use Garradin\Entities\Files\File;
 	<p class="alert block">Il n'y a aucun fichier dans ce répertoire.</p>
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

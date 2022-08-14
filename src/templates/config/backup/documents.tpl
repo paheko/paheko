@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Documents" current="config"}
+{include file="_head.tpl" title="Documents" current="config"}
 
 {include file="config/_menu.tpl" current="backup"}
 
@@ -58,4 +58,4 @@ g.script('scripts/lib/unzipit.min.js');
 g.script('scripts/unzip_restore.js');
 </script>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

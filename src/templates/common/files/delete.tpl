@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Supprimer un fichier" current=null}
+{include file="_head.tpl" title="Supprimer un fichier" current=null}
 
 {if $file.type == $file::TYPE_DIRECTORY}
 	{include file="common/delete_form.tpl"
@@ -13,4 +13,4 @@
 	}
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

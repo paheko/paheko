@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Écriture n°%d"|args:$transaction.id current="acc"}
+{include file="_head.tpl" title="Écriture n°%d"|args:$transaction.id current="acc"}
 
 
 {if isset($_GET['created'])}
@@ -152,4 +152,4 @@
 
 {$snippets|raw}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

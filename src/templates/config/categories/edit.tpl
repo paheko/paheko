@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Modifier une catégorie de membre" current="config"}
+{include file="_head.tpl" title="Modifier une catégorie de membre" current="config"}
 
 {include file="config/_menu.tpl" current="categories"}
 
@@ -42,4 +42,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

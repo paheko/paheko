@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Vérification d'adresse" current="users/mailing"}
+{include file="_head.tpl" title="Vérification d'adresse" current="users/mailing"}
 
 <form method="post" action="{$self_url}">
 	<fieldset>
@@ -25,4 +25,4 @@
 	</fieldset>
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

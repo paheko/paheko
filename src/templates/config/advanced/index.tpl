@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Fonctions avancées" current="config" custom_css=["config.css"]}
+{include file="_head.tpl" title="Fonctions avancées" current="config" custom_css=["config.css"]}
 
 {include file="config/_menu.tpl" current="advanced" sub_current=null}
 
@@ -98,4 +98,4 @@
 </form>
 
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

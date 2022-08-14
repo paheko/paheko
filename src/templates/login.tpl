@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Connexion"}
+{include file="_head.tpl" title="Connexion"}
 
 {form_errors}
 
@@ -48,4 +48,4 @@ if (window.navigator.userAgent.match(/MSIE|Trident\/|Edge\//)) {
 </script>
 {/literal}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

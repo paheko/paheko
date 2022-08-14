@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Adresses rejetées" current="users/mailing"}
+{include file="_head.tpl" title="Adresses rejetées" current="users/mailing"}
 
 <nav class="tabs">
 	<ul>
@@ -65,4 +65,4 @@
 
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

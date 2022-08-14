@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Formulaires & modèles" current="config"}
+{include file="_head.tpl" title="Formulaires & modèles" current="config"}
 
 {include file="config/_menu.tpl" current="forms"}
 
@@ -26,4 +26,4 @@
 	</tbody>
 </table>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

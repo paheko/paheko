@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Supprimer un membre" current="users"}
+{include file="_head.tpl" title="Supprimer un membre" current="users"}
 
 {include file="common/delete_form.tpl"
     legend="Supprimer ce membre ?"
@@ -8,4 +8,4 @@
     csrf_key=$csrf_key
 }
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

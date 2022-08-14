@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Supprimer une catégorie de membre" current="config"}
+{include file="_head.tpl" title="Supprimer une catégorie de membre" current="config"}
 
 {include file="config/_menu.tpl" current="categories"}
 
@@ -8,4 +8,4 @@
 	alert="Attention, la catégorie ne doit plus contenir de membres pour pouvoir être supprimée."
 	info="Les écritures comptables liées à l'historique des membres inscrits à cette activité ne seront pas supprimées, et la comptabilité demeurera inchangée."}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

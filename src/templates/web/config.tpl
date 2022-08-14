@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Configuration" current="web"}
+{include file="_head.tpl" title="Configuration" current="web"}
 
 <nav class="tabs">
 	<ul>
@@ -129,4 +129,4 @@
 
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

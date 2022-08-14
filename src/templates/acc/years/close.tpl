@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Clôturer un exercice" current="acc/years"}
+{include file="_head.tpl" title="Clôturer un exercice" current="acc/years"}
 
 {form_errors}
 
@@ -31,4 +31,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

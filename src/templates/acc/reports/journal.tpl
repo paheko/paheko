@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Journal général" current="acc/years"}
+{include file="_head.tpl" title="Journal général" current="acc/years"}
 
 {include file="acc/reports/_header.tpl" current="journal" title="Journal général"}
 
@@ -6,4 +6,4 @@
 
 <p class="help">Toutes les écritures sont libellées en {$config.currency}.</p>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" current="config" title="Fiche des membres"}
+{include file="_head.tpl" current="config" title="Fiche des membres"}
 
 {include file="config/_menu.tpl" current="fields"}
 
@@ -70,4 +70,4 @@
 
 <script type="text/javascript" src="{$admin_url}static/scripts/dragdrop-table.js"></script>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

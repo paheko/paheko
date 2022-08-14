@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title=$page.title current="web"}
+{include file="_head.tpl" title=$page.title current="web"}
 
 <nav class="tabs">
 	{if $page.type == $page::TYPE_CATEGORY}
@@ -88,4 +88,4 @@
 {/if}
 
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

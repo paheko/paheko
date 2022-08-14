@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Gestion des plans comptables" current="acc/charts"}
+{include file="_head.tpl" title="Gestion des plans comptables" current="acc/charts"}
 
 {if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 	{include file="./_nav.tpl" current="charts"}
@@ -64,4 +64,4 @@
 	</form>
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

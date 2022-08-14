@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="%s — Inscriptions aux activités et cotisations"|args:$user_name current="users/services"}
+{include file="_head.tpl" title="%s — Inscriptions aux activités et cotisations"|args:$user_name current="users/services"}
 
 
 <nav class="tabs">
@@ -94,4 +94,4 @@
 {pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count()}
 
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

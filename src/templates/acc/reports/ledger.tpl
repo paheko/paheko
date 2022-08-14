@@ -1,8 +1,8 @@
 {if !empty($criterias.analytical_only)}
-	{include file="admin/_head.tpl" title="Grand livre analytique" current="acc/years"}
+	{include file="_head.tpl" title="Grand livre analytique" current="acc/years"}
 	{include file="acc/reports/_header.tpl" current="analytical_ledger" title="Grand livre analytique"}
 {else}
-	{include file="admin/_head.tpl" title="Grand livre" current="acc/years"}
+	{include file="_head.tpl" title="Grand livre" current="acc/years"}
 	{include file="acc/reports/_header.tpl" current="ledger" title="Grand livre"}
 {/if}
 
@@ -101,4 +101,4 @@ document.querySelector('#close_details').onclick = () => {
 
 <p class="help">Toutes les écritures sont libellées en {$config.currency}.</p>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="%s (%s)"|args:$user->name():$category.name current="users"}
+{include file="_head.tpl" title="%s (%s)"|args:$user->name():$category.name current="users"}
 
 <nav class="tabs">
 	<aside>
@@ -92,4 +92,4 @@
 
 {include file="users/_details.tpl" data=$user show_message_button=true mode="edit"}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

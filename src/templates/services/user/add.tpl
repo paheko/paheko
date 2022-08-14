@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Inscrire à une activité" current="users/services"}
+{include file="_head.tpl" title="Inscrire à une activité" current="users/services"}
 
 {include file="services/_nav.tpl" current="save" fee=null service=null}
 
@@ -49,4 +49,4 @@ $('#f_choice_2').onchange = selectChoice;
 {/literal}
 </script>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

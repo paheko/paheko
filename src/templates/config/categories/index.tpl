@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Catégories de membres" current="config"}
+{include file="_head.tpl" title="Catégories de membres" current="config"}
 
 {include file="config/_menu.tpl" current="categories"}
 
@@ -46,4 +46,4 @@
 </form>
 
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

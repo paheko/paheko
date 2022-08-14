@@ -1,7 +1,7 @@
 <?php
 $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 ?>
-{include file="admin/_head.tpl" current="config" title=$title}
+{include file="_head.tpl" current="config" title=$title}
 
 {include file="config/_menu.tpl" current="fields"}
 
@@ -86,4 +86,4 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 
 <script type="text/javascript" src="{$admin_url}static/scripts/config_fields.js"></script>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Édition de fichier" custom_js=['wiki_editor.js']}
+{include file="_head.tpl" title="Édition de fichier" custom_js=['wiki_editor.js']}
 
 <form method="post" action="{$self_url}">
 	<p class="textEditor">
@@ -12,4 +12,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

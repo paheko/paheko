@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Recherche" current="acc" custom_js=['lib/query_builder.min.js']}
+{include file="_head.tpl" title="Recherche" current="acc" custom_js=['lib/query_builder.min.js']}
 
 <nav class="tabs">
 	<ul>
@@ -98,4 +98,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

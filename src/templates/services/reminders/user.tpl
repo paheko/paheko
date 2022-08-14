@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Rappels envoyés à un membre" current="users/services"}
+{include file="_head.tpl" title="Rappels envoyés à un membre" current="users/services"}
 
 <nav class="tabs">
 	<ul>
@@ -33,4 +33,4 @@
 
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

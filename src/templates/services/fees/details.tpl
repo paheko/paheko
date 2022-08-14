@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Tarif : %s — Liste des membres inscrits"|args:$fee.label current="users/services"}
+{include file="_head.tpl" title="Tarif : %s — Liste des membres inscrits"|args:$fee.label current="users/services"}
 
 {include file="services/_nav.tpl" current="index" current_service=$service service_page="index" current_fee=$fee fee_page=$type}
 
@@ -63,4 +63,4 @@ $can_action = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMI
 {pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count()}
 
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

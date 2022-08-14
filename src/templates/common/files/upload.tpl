@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Envoi de fichier"}
+{include file="_head.tpl" title="Envoi de fichier"}
 
 {form_errors}
 
@@ -15,4 +15,4 @@
 	</fieldset>
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

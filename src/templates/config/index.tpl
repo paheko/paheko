@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Configuration" current="config"}
+{include file="_head.tpl" title="Configuration" current="config"}
 
 {include file="config/_menu.tpl" current="index"}
 
@@ -89,4 +89,4 @@
 	</script>
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

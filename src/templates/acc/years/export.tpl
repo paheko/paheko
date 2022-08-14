@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Export d'exercice" current="acc/years"}
+{include file="_head.tpl" title="Export d'exercice" current="acc/years"}
 
 <nav class="acc-year">
 	<h4>Exercice sélectionné&nbsp;:</h4>
@@ -55,4 +55,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Recherches enregistrées" current=$target}
+{include file="_head.tpl" title="Recherches enregistrées" current=$target}
 
 {if $target == 'users'}
 	{include file="users/_nav.tpl" current="saved_searches"}
@@ -80,4 +80,4 @@
 	</table>
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Bonjour %s !"|args:$logged_user._name current="home"}
+{include file="_head.tpl" title="Bonjour %s !"|args:$logged_user._name current="home"}
 
 {$banner|raw}
 
@@ -45,4 +45,4 @@
 
 <script type="text/javascript" src="{$admin_url}static/scripts/homescreen.js" defer="defer"></script>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

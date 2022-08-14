@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Mes informations personnelles" current="me"}
+{include file="_head.tpl" title="Mes informations personnelles" current="me"}
 
 <nav class="tabs">
 	<ul>
@@ -32,4 +32,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

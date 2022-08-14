@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Sélectionner un compte"}
+{include file="_head.tpl" title="Sélectionner un compte"}
 
 <div class="selector">
 
@@ -72,4 +72,4 @@
 
 <script type="text/javascript" src="{$admin_url}static/scripts/selector.js?{$version_hash}"></script>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

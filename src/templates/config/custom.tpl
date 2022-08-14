@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Personnalisation" current="config" custom_css=['config.css']}
+{include file="_head.tpl" title="Personnalisation" current="config" custom_css=['config.css']}
 
 {include file="config/_menu.tpl" current="custom"}
 
@@ -101,4 +101,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}
