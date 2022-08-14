@@ -94,6 +94,11 @@ class DynamicFields
 		return implode(', ', $labels);
 	}
 
+	static public function getFirstNameField(): string
+	{
+		return key(self::getInstance()->fieldsBySystemUse('name'));
+	}
+
 	static public function getNameFieldsSQL(?string $prefix = null): string
 	{
 		$fields = self::getNameFields();
