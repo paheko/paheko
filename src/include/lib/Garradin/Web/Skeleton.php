@@ -207,7 +207,7 @@ class Skeleton
 			$file->setContent($content);
 		}
 		else {
-			File::createAndStore(File::CONTEXT_SKELETON . '/web', $this->path, null, $content);
+			Files::createFromString(sprintf('%s/web/%s', File::CONTEXT_SKELETON, $this->path), $content);
 		}
 	}
 

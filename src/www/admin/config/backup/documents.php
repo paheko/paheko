@@ -15,7 +15,7 @@ $form->runIf('restore', function () {
 			file_put_contents($f, gzinflate(file_get_contents($f), 1024*1024*1024));
 		}
 
-		File::upload(Utils::dirname(f('target')), 'file1');
+		Files::upload(Utils::dirname(f('target')), 'file1');
 	}
 	catch (UserException $e) {
 		die(json_encode(['success' => false, 'error' => f('target') . ': '. $e->getMessage()]));

@@ -285,7 +285,7 @@ class Config extends Entity
 			$f = null;
 		}
 		elseif ($upload) {
-			$f = File::upload(Utils::dirname($path), $value, Utils::basename($path));
+			$f = Files::upload(Utils::dirname($path), $value, Utils::basename($path));
 
 			if ($type == 'image' && !$f->image) {
 				$this->setFile($key, null);
@@ -318,7 +318,7 @@ class Config extends Entity
 			$f->setContent($value);
 		}
 		else {
-			$f = File::createAndStore(Utils::dirname($path), Utils::basename($path), null, $value);
+			$f = Files::createFromString($path, $value);
 		}
 
 		$files[$key] = $f ? $f->modified->getTimestamp() : null;

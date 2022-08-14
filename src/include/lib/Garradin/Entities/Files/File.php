@@ -28,43 +28,31 @@ class File extends Entity
 {
 	const TABLE = 'files';
 
-	protected $id;
+	protected ?int $id;
 
 	/**
 	 * Parent directory of file
 	 */
-	protected $parent;
+	protected ?string $parent;
 
 	/**
 	 * File name
 	 */
-	protected $name;
+	protected string $name;
 
 	/**
 	 * Complete file path (parent + '/' + name)
 	 */
-	protected $path;
+	protected string $path;
 
 	/**
 	 * Type of file: file or directory
 	 */
-	protected $type = self::TYPE_FILE;
-	protected $mime;
-	protected $size;
-	protected $modified;
-	protected $image;
-
-	protected $_types = [
-		'id'           => '?int',
-		'path'         => 'string',
-		'parent'       => '?string',
-		'name'         => 'string',
-		'type'         => 'int',
-		'mime'         => '?string',
-		'size'         => '?int',
-		'modified'     => 'DateTime',
-		'image'        => 'int',
-	];
+	protected int $type = self::TYPE_FILE;
+	protected ?string $mime;
+	protected ?int $size;
+	protected \DateTime $modified;
+	protected bool $image;
 
 	const TYPE_FILE = 1;
 	const TYPE_DIRECTORY = 2;
@@ -242,7 +230,7 @@ class File extends Entity
 			}
 		}
 
-		self::ensureDirectoryExists(Utils::dirname($new_path));
+		Files::ensureDirectoryExists(Utils::dirname($new_path));
 		$return = Files::callStorage('move', $this, $new_path);
 
 		Plugin::fireSignal('files.move', ['file' => $this, 'new_path' => $new_path]);
@@ -398,224 +386,6 @@ class File extends Entity
 	{
 		$db = DB::getInstance();
 		$db->preparedQuery('DELETE FROM files_search WHERE path = ?;', $this->path);
-	}
-
-	/**
-	 * Create and store a file
-	 * If one parameter is supplied, the other must be NULL (you cannot omit one)
-	 * @param  string $path           Target path
-	 * @param  string $name           Target name
-	 * @param  string $source_path    Source file path
-	 * @param  string $source_content OR source file content (binary string)
-	 * @return self
-	 */
-	static public function createAndStore(string $path, string $name, ?string $source_path, ?string $source_content): self
-	{
-		$file = self::create($path, $name, $source_path, $source_content);
-
-		$file->store($source_path, $source_content);
-
-		return $file;
-	}
-
-	/**
-	 * Create a new directory
-	 * @param  string $path          Target parent path
-	 * @param  string $name          Target name
-	 * @param  bool   $create_parent Create parent directories if they don't exist
-	 * @return self
-	 */
-	static public function createDirectory(string $path, string $name, bool $create_parent = true): self
-	{
-		$name = self::filterName($name);
-
-		$fullpath = trim($path . '/' . $name, '/');
-
-		self::validatePath($fullpath);
-		Files::checkQuota();
-
-		if (Files::callStorage('exists', $fullpath)) {
-			throw new ValidationException('Le nom de répertoire choisi existe déjà: ' . $fullpath);
-		}
-
-		if ($path !== '' && $create_parent) {
-			self::ensureDirectoryExists($path);
-		}
-
-		$file = new self;
-		$file->set('path', $fullpath);
-		$file->set('name', $name);
-		$file->set('parent', $path);
-		$file->set('type', self::TYPE_DIRECTORY);
-		$file->set('image', 0);
-		$file->set('modified', new \DateTime);
-
-		Files::callStorage('mkdir', $file);
-
-		Plugin::fireSignal('files.mkdir', ['file' => $file]);
-
-		return $file;
-	}
-
-	static public function ensureDirectoryExists(string $path): void
-	{
-		$db = DB::getInstance();
-		$parts = explode('/', $path);
-		$tree = '';
-
-		foreach ($parts as $part) {
-			$tree = trim($tree . '/' . $part, '/');
-			$exists = $db->test(File::TABLE, 'type = ? AND path = ?', self::TYPE_DIRECTORY, $tree);
-
-			if (!$exists) {
-				try {
-					self::createDirectory(Utils::dirname($tree), Utils::basename($tree), false);
-				}
-				catch (ValidationException $e) {
-					// Ignore when directory already exists
-				}
-			}
-		}
-	}
-
-	static public function create(string $path, string $name, ?string $source_path, ?string $source_content): self
-	{
-		if (!isset($source_path) && !isset($source_content)) {
-			throw new \InvalidArgumentException('Either source path or source content should be set but not both');
-		}
-
-		self::validateFileName($name);
-		self::validatePath($path);
-		self::ensureDirectoryExists($path);
-
-		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
-
-		$fullpath = $path . '/' . $name;
-		$file = Files::callStorage('get', $fullpath) ?: new self;
-		$file->set('path', $fullpath);
-		$file->set('parent', $path);
-		$file->set('name', $name);
-
-		if ($source_path && !$source_content) {
-			$file->set('mime', finfo_file($finfo, $source_path));
-			$file->set('size', filesize($source_path));
-			$file->set('modified', new \DateTime('@' . filemtime($source_path)));
-		}
-		else {
-			$file->set('mime', finfo_buffer($finfo, $source_content));
-			$file->set('size', strlen($source_content));
-		}
-
-		$file->set('image', (int) in_array($file->mime, self::IMAGE_TYPES));
-
-		// Force empty files as text/plain
-		if ($file->mime == 'application/x-empty' && !$file->size) {
-			$file->set('mime', 'text/plain');
-		}
-
-		return $file;
-	}
-
-	/**
-	 * Upload multiple files
-	 * @param  string $path Target parent directory (eg. 'documents/Logos')
-	 * @param  string $key  The name of the file input in the HTML form (this MUST have a '[]' at the end of the name)
-	 * @return array list of File objects created
-	 */
-	static public function uploadMultiple(string $path, string $key): array
-	{
-		if (!isset($_FILES[$key]['name'][0])) {
-			throw new UserException('Aucun fichier reçu');
-		}
-
-		// Transpose array
-		// see https://www.php.net/manual/en/features.file-upload.multiple.php#53240
-		$files = Utils::array_transpose($_FILES[$key]);
-		$out = [];
-
-		// First check all files
-		foreach ($files as $file) {
-			if (!empty($file['error'])) {
-				throw new UserException(self::getErrorMessage($file['error']));
-			}
-
-			if (empty($file['size']) || empty($file['name'])) {
-				throw new UserException('Fichier reçu invalide : vide ou sans nom de fichier.');
-			}
-
-			if (!is_uploaded_file($file['tmp_name'])) {
-				throw new \RuntimeException('Le fichier n\'a pas été envoyé de manière conventionnelle.');
-			}
-		}
-
-		// Then create files
-		foreach ($files as $file) {
-			$name = self::filterName($file['name']);
-
-			$out[] = self::createAndStore($path, $name, $file['tmp_name'], null);
-		}
-
-		return $out;
-	}
-
-	/**
-	 * Upload a file using POST from a HTML form
-	 * @param  string $path Target parent directory (eg. 'documents/Logos')
-	 * @param  string $key  The name of the file input in the HTML form
-	 * @return self Created file object
-	 */
-	static public function upload(string $path, string $key, ?string $name = null): self
-	{
-		if (!isset($_FILES[$key]) || !is_array($_FILES[$key])) {
-			throw new UserException('Aucun fichier reçu');
-		}
-
-		$file = $_FILES[$key];
-
-		if (!empty($file['error'])) {
-			throw new UserException(self::getErrorMessage($file['error']));
-		}
-
-		if (empty($file['size']) || empty($file['name'])) {
-			throw new UserException('Fichier reçu invalide : vide ou sans nom de fichier.');
-		}
-
-		if (!is_uploaded_file($file['tmp_name'])) {
-			throw new \RuntimeException('Le fichier n\'a pas été envoyé de manière conventionnelle.');
-		}
-
-		$name = self::filterName($name ?? $file['name']);
-
-		return self::createAndStore($path, $name, $file['tmp_name'], null);
-	}
-
-
-	/**
-	 * Récupération du message d'erreur
-	 * @param  integer $error Code erreur du $_FILE
-	 * @return string Message d'erreur
-	 */
-	static public function getErrorMessage($error)
-	{
-		switch ($error)
-		{
-			case UPLOAD_ERR_INI_SIZE:
-				return 'Le fichier excède la taille permise par la configuration.';
-			case UPLOAD_ERR_FORM_SIZE:
-				return 'Le fichier excède la taille permise par le formulaire.';
-			case UPLOAD_ERR_PARTIAL:
-				return 'L\'envoi du fichier a été interrompu.';
-			case UPLOAD_ERR_NO_FILE:
-				return 'Aucun fichier n\'a été reçu.';
-			case UPLOAD_ERR_NO_TMP_DIR:
-				return 'Pas de répertoire temporaire pour stocker le fichier.';
-			case UPLOAD_ERR_CANT_WRITE:
-				return 'Impossible d\'écrire le fichier sur le disque du serveur.';
-			case UPLOAD_ERR_EXTENSION:
-				return 'Une extension du serveur a interrompu l\'envoi du fichier.';
-			default:
-				return 'Erreur inconnue: ' . $error;
-		}
 	}
 
 	/**

@@ -17,8 +17,7 @@ $csrf_key = 'create_dir';
 
 $form->runIf('create', function () use ($parent) {
 	$name = trim((string) f('name'));
-	File::validatePath($parent . '/' . $name);
-	$f = File::createDirectory($parent, $name);
+	$f = File::mkdir($parent, $name);
 
 	$url = '!docs/?path=' . $f->path;
 

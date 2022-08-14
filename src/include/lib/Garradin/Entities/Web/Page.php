@@ -170,7 +170,7 @@ class Page extends Entity
 
 		// Create file if required
 		if (!$exists) {
-			$file = $this->_file = File::createAndStore(Utils::dirname($path), Utils::basename($path), null, $export);
+			$file = $this->_file = Files::createFromString($path, $export);
 		}
 		else {
 			$target = $this->filepath(false);

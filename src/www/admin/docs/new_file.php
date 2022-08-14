@@ -22,10 +22,7 @@ $form->runIf('create', function () use ($parent) {
 		$name .= '.skriv';
 	}
 
-	File::validatePath($parent . '/' . $name);
-	$name = File::filterName($name);
-
-	$file = File::createAndStore($parent, $name, null, '');
+	$file = Files::createFromString($parent . '/' . $name, '');
 
 	Utils::redirect('!common/files/edit.php?p=' . rawurlencode($file->path));
 }, $csrf_key);

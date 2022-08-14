@@ -393,4 +393,234 @@ class Files
 
 		$db->commit();
 	}
+
+	static protected function create(string $parent, string $name, ?string $source_path, ?string $source_content): File
+	{
+		if (!isset($source_path) && !isset($source_content)) {
+			throw new \InvalidArgumentException('Either source path or source content should be set but not both');
+		}
+
+		File::validateFileName($name);
+		File::validatePath($parent);
+		self::ensureDirectoryExists($parent);
+
+		$name = File::filterName($file['name']);
+
+		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
+
+		$path = $parent . '/' . $name;
+		$file = Files::callStorage('get', $path) ?: new File;
+		$file->import(compact('path', 'parent', 'name'));
+
+		if ($source_path && !$source_content) {
+			$file->set('mime', finfo_file($finfo, $source_path));
+			$file->set('size', filesize($source_path));
+			$file->set('modified', new \DateTime('@' . filemtime($source_path)));
+		}
+		else {
+			$file->set('mime', finfo_buffer($finfo, $source_content));
+			$file->set('size', strlen($source_content));
+		}
+
+		$file->set('image', in_array($file->mime, self::IMAGE_TYPES));
+
+		// Force empty files as text/plain
+		if ($file->mime == 'application/x-empty' && !$file->size) {
+			$file->set('mime', 'text/plain');
+		}
+
+		return $file;
+	}
+
+
+	/**
+	 * Create and store a file from a local path
+	 * @param  string $path         Target parent path + name
+	 * @param  string $source_path    Source file path
+	 * @return File
+	 */
+	static public function createFromPath(string $path, string $source_path): File
+	{
+		$parent = Utils::dirname($path);
+		$name = Utils::basename($path);
+		$file = self::create($parent, $name, $source_path, null);
+		$file->store($source_path, null);
+		return $file;
+	}
+
+	/**
+	 * Create and store a file from a string
+	 * @param  string $path         Target parent path + name
+	 * @param  string $source_content    Source file contents
+	 * @return File
+	 */
+	static public function createFromString(string $path, string $source_content): File
+	{
+		$parent = Utils::dirname($path);
+		$name = Utils::basename($path);
+		$file = self::create($parent, $name, null, $source_content);
+		$file->store(null, $source_content);
+		return $file;
+	}
+
+
+	/**
+	 * Upload multiple files
+	 * @param  string $parent Target parent directory (eg. 'documents/Logos')
+	 * @param  string $key  The name of the file input in the HTML form (this MUST have a '[]' at the end of the name)
+	 * @return array list of File objects created
+	 */
+	static public function uploadMultiple(string $parent, string $key): array
+	{
+		if (!isset($_FILES[$key]['name'][0])) {
+			throw new UserException('Aucun fichier reçu');
+		}
+
+		// Transpose array
+		// see https://www.php.net/manual/en/features.file-upload.multiple.php#53240
+		$files = Utils::array_transpose($_FILES[$key]);
+		$out = [];
+
+		// First check all files
+		foreach ($files as $file) {
+			if (!empty($file['error'])) {
+				throw new UserException(self::getUploadErrorMessage($file['error']));
+			}
+
+			if (empty($file['size']) || empty($file['name'])) {
+				throw new UserException('Fichier reçu invalide : vide ou sans nom de fichier.');
+			}
+
+			if (!is_uploaded_file($file['tmp_name'])) {
+				throw new \RuntimeException('Le fichier n\'a pas été envoyé de manière conventionnelle.');
+			}
+		}
+
+		// Then create files
+		foreach ($files as $file) {
+			$out[] = self::createFromPath($parent, $name, $file['tmp_name']);
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Upload a file using POST from a HTML form
+	 * @param  string $parent Target parent directory (eg. 'documents/Logos')
+	 * @param  string $key  The name of the file input in the HTML form
+	 * @return self Created file object
+	 */
+	static public function upload(string $parent, string $key, ?string $name = null): self
+	{
+		if (!isset($_FILES[$key]) || !is_array($_FILES[$key])) {
+			throw new UserException('Aucun fichier reçu');
+		}
+
+		$file = $_FILES[$key];
+
+		if (!empty($file['error'])) {
+			throw new UserException(self::getUploadErrorMessage($file['error']));
+		}
+
+		if (empty($file['size']) || empty($file['name'])) {
+			throw new UserException('Fichier reçu invalide : vide ou sans nom de fichier.');
+		}
+
+		if (!is_uploaded_file($file['tmp_name'])) {
+			throw new \RuntimeException('Le fichier n\'a pas été envoyé de manière conventionnelle.');
+		}
+
+		$name = File::filterName($name ?? $file['name']);
+
+		return self::createFromPath($parent, $name, $file['tmp_name']);
+	}
+
+
+	/**
+	 * Récupération du message d'erreur
+	 * @param  integer $error Code erreur du $_FILE
+	 * @return string Message d'erreur
+	 */
+	static public function getUploadErrorMessage($error)
+	{
+		switch ($error)
+		{
+			case UPLOAD_ERR_INI_SIZE:
+				return 'Le fichier excède la taille permise par la configuration.';
+			case UPLOAD_ERR_FORM_SIZE:
+				return 'Le fichier excède la taille permise par le formulaire.';
+			case UPLOAD_ERR_PARTIAL:
+				return 'L\'envoi du fichier a été interrompu.';
+			case UPLOAD_ERR_NO_FILE:
+				return 'Aucun fichier n\'a été reçu.';
+			case UPLOAD_ERR_NO_TMP_DIR:
+				return 'Pas de répertoire temporaire pour stocker le fichier.';
+			case UPLOAD_ERR_CANT_WRITE:
+				return 'Impossible d\'écrire le fichier sur le disque du serveur.';
+			case UPLOAD_ERR_EXTENSION:
+				return 'Une extension du serveur a interrompu l\'envoi du fichier.';
+			default:
+				return 'Erreur inconnue: ' . $error;
+		}
+	}
+
+	/**
+	 * Create a new directory
+	 * @param  string $parent        Target parent path
+	 * @param  string $name          Target name
+	 * @param  bool   $create_parent Create parent directories if they don't exist
+	 * @return self
+	 */
+	static public function mkdir(string $parent, string $name, bool $create_parent = true): File
+	{
+		$name = File::filterName($name);
+
+		$path = trim($parent . '/' . $name, '/');
+
+		File::validatePath($path);
+		Files::checkQuota();
+
+		if (self::exists($path)) {
+			throw new ValidationException('Le nom de répertoire choisi existe déjà: ' . $path);
+		}
+
+		if ($parent !== '' && $create_parent) {
+			self::ensureDirectoryExists($parent);
+		}
+
+		$file = new File;
+		$type = $file::TYPE_DIRECTORY;
+		$file->import(compact('path', 'name', 'parent') + [
+			'type'     => file::TYPE_DIRECTORY,
+			'image'    => false,
+			'modified' => new \DateTime,
+		]);
+
+		Files::callStorage('mkdir', $file);
+
+		Plugin::fireSignal('files.mkdir', compact('file'));
+
+		return $file;
+	}
+
+	static public function ensureDirectoryExists(string $path): void
+	{
+		$db = DB::getInstance();
+		$parts = explode('/', $path);
+		$tree = '';
+
+		foreach ($parts as $part) {
+			$tree = trim($tree . '/' . $part, '/');
+			$exists = $db->test(File::TABLE, 'type = ? AND path = ?', File::TYPE_DIRECTORY, $tree);
+
+			if (!$exists) {
+				try {
+					self::mkdir(Utils::dirname($tree), Utils::basename($tree), false);
+				}
+				catch (ValidationException $e) {
+					// Ignore when directory already exists
+				}
+			}
+		}
+	}
 }

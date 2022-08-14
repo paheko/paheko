@@ -15,7 +15,7 @@ if (!File::checkCreateAccess($parent, $session)) {
 $csrf_key = 'upload_file_' . md5($parent);
 
 $form->runIf('upload', function () use ($parent) {
-	File::uploadMultiple($parent, 'file');
+	Files::uploadMultiple($parent, 'file');
 }, $csrf_key, '!docs/?path=' . $parent);
 
 $tpl->assign(compact('parent', 'csrf_key'));
