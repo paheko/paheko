@@ -51,7 +51,7 @@ class Entity extends AbstractEntity
 		if ($type == 'date') {
 			return self::filterUserDateValue($value);
 		}
-		elseif ($type == 'DateTime') {
+		elseif ($type == 'DateTime' && is_string($value)) {
 			if (preg_match('!^\d{2}/\d{2}/\d{4}\s\d{1,2}:\d{2}$!', $value)) {
 				return \DateTime::createFromFormat('d/m/Y H:i', $value);
 			}

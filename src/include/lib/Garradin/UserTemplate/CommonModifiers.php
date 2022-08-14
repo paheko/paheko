@@ -348,6 +348,10 @@ class CommonModifiers
 		elseif ($type == 'time' && is_object($current_value) && $current_value instanceof \DateTimeInterface) {
 			$current_value = $current_value->format('H:i');
 		}
+		elseif ($type == 'password') {
+			$current_value = null;
+		}
+		// FIXME: is this still needed?
 		elseif ($type == 'date' && is_string($current_value)) {
 			if ($v = \DateTime::createFromFormat('!Y-m-d', $current_value)) {
 				$current_value = $v->format('d/m/Y');
@@ -366,9 +370,6 @@ class CommonModifiers
 			elseif ($v = \DateTime::createFromFormat('!Y-m-d H:i', $current_value)) {
 				$current_value = $v->format('H:i');
 			}
-		}
-		elseif ($type == 'password') {
-			$current_value = null;
 		}
 
 		$attributes['id'] = 'f_' . str_replace(['[', ']'], '', $name);

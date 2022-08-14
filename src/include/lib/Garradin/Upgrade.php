@@ -166,10 +166,18 @@ class Upgrade
 
 				// Move skeletons from skel/ to skel/web/
 				// Don't use Files::get to get around validatePath security
-				$file = Files::callStorage('get', File::CONTEXT_SKELETON);
+				$list = Files::list(File::CONTEXT_SKELETON);
 
-				if ($file) {
-					$file->rename(File::CONTEXT_SKELETON . '/web');
+				foreach ($list as $file) {
+					if ($file->name == 'web') {
+						continue;
+					}
+
+					$file->move(File::CONTEXT_SKELETON . '/web');
+
+					if ($file->type == $file::TYPE_DIRECTORY) {
+						continue;
+					}
 
 					// Prepend "./" to includes functions file parameter
 					foreach (Files::list(File::CONTEXT_SKELETON . '/web') as $file) {

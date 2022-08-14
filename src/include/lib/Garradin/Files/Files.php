@@ -4,6 +4,7 @@ namespace Garradin\Files;
 
 use Garradin\Static_Cache;
 use Garradin\DB;
+use Garradin\Plugin;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\ValidationException;
@@ -571,11 +572,14 @@ class Files
 	 * @param  bool   $create_parent Create parent directories if they don't exist
 	 * @return self
 	 */
-	static public function mkdir(string $parent, string $name, bool $create_parent = true): File
+	static public function mkdir(string $path, bool $create_parent = true): File
 	{
-		$name = File::filterName($name);
+		$path = trim($path, '/');
+		$parent = Utils::dirname($path);
+		$name = Utils::basename($path);
 
-		$path = trim($parent . '/' . $name, '/');
+		$name = File::filterName($name);
+		$path = $parent . '/' . $name;
 
 		File::validatePath($path);
 		Files::checkQuota();
@@ -593,8 +597,9 @@ class Files
 		$file->import(compact('path', 'name', 'parent') + [
 			'type'     => file::TYPE_DIRECTORY,
 			'image'    => false,
-			'modified' => new \DateTime,
 		]);
+
+		$file->modified = new \DateTime;
 
 		Files::callStorage('mkdir', $file);
 
@@ -615,7 +620,7 @@ class Files
 
 			if (!$exists) {
 				try {
-					self::mkdir(Utils::dirname($tree), Utils::basename($tree), false);
+					self::mkdir($tree, false);
 				}
 				catch (ValidationException $e) {
 					// Ignore when directory already exists
