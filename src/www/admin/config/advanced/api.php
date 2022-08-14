@@ -26,4 +26,4 @@ $access_levels = API_Entity::ACCESS_LEVELS;
 $tpl->assign('website', WEBSITE);
 $tpl->assign(compact('list', 'csrf_key', 'default_key', 'secret', 'access_levels'));
 
-$tpl->display('admin/config/advanced/api.tpl');
+$tpl->display('config/advanced/api.tpl');

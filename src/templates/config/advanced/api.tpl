@@ -1,6 +1,6 @@
 {include file="_head.tpl" title="API" current="config" custom_css=["config.css"]}
 
-{include file="admin/config/_menu.tpl" current="advanced" sub_current="api"}
+{include file="config/_menu.tpl" current="advanced" sub_current="api"}
 
 {form_errors}
 

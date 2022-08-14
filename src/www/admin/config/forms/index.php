@@ -11,4 +11,4 @@ $list = UserForms::list();
 
 $tpl->assign(compact('list'));
 
-$tpl->display('admin/config/forms/index.tpl');
+$tpl->display('config/forms/index.tpl');
