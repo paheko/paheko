@@ -5,7 +5,8 @@ namespace Garradin\Entities\Services;
 use Garradin\DynamicList;
 use Garradin\Entity;
 use Garradin\ValidationException;
-use Garradin\Config;
+use Garradin\Users\DynamicFields;
+
 use KD2\DB\EntityManager;
 
 class Reminder extends Entity
@@ -66,14 +67,14 @@ class Reminder extends Entity
 
 	public function sentList(): DynamicList
 	{
-		$identity = Config::getInstance()->get('champ_identite');
+		$id_field = DynamicFields::getNameFieldsSQL('u');
 		$columns = [
 			'id_user' => [
 				'select' => 'srs.id_user',
 			],
 			'identity' => [
 				'label' => 'Membre',
-				'select' => 'm.' . $identity,
+				'select' => $id_field,
 			],
 			'email' => [
 				'label' => 'Adresse e-mail',
@@ -87,7 +88,7 @@ class Reminder extends Entity
 		];
 
 		$tables = 'services_reminders_sent srs
-			INNER JOIN membres m ON m.id = srs.id_user';
+			INNER JOIN users u ON u.id = srs.id_user';
 		$conditions = sprintf('srs.id_reminder = %d', $this->id());
 
 		$list = new DynamicList($columns, $tables, $conditions);

@@ -2,12 +2,12 @@
 
 namespace Garradin\Entities\Services;
 
-use Garradin\Config;
 use Garradin\DB;
 use Garradin\DynamicList;
 use Garradin\Entity;
 use Garradin\ValidationException;
 use Garradin\Utils;
+use Garradin\Users\DynamicFields;
 use Garradin\Services\Fees;
 
 class Service extends Entity
@@ -71,7 +71,7 @@ class Service extends Entity
 
 	public function activeUsersList(): DynamicList
 	{
-		$identity = Config::getInstance()->get('champ_identite');
+		$id_field = DynamicFields::getNameFieldsSQL('u');
 		$columns = [
 			'id_user' => [
 			],
@@ -79,7 +79,7 @@ class Service extends Entity
 			],
 			'identity' => [
 				'label' => 'Membre',
-				'select' => 'm.' . $identity,
+				'select' => $id_field,
 			],
 			'status' => [
 				'label' => 'Statut',
@@ -104,12 +104,12 @@ class Service extends Entity
 		];
 
 		$tables = 'services_users su
-			INNER JOIN membres m ON m.id = su.id_user
+			INNER JOIN users u ON u.id = su.id_user
 			INNER JOIN services s ON s.id = su.id_service
 			LEFT JOIN services_fees sf ON sf.id = su.id_fee
 			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_service) AS su2 ON su2.id = su.id';
 		$conditions = sprintf('su.id_service = %d AND (su.expiry_date >= date() OR su.expiry_date IS NULL)
-			AND m.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
+			AND u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->groupBy('su.id_user');
@@ -121,7 +121,7 @@ class Service extends Entity
 	public function unpaidUsersList(): DynamicList
 	{
 		$list = $this->activeUsersList();
-		$conditions = sprintf('su.id_service = %d AND su.paid = 0 AND m.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
+		$conditions = sprintf('su.id_service = %d AND su.paid = 0 AND u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
 		$list->setConditions($conditions);
 		return $list;
 	}
@@ -129,15 +129,15 @@ class Service extends Entity
 	public function expiredUsersList(): DynamicList
 	{
 		$list = $this->activeUsersList();
-		$conditions = sprintf('su.id_service = %d AND su.expiry_date < date() AND m.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
+		$conditions = sprintf('su.id_service = %d AND su.expiry_date < date() AND u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
 		$list->setConditions($conditions);
 		return $list;
 	}
 
 	public function getUsers(bool $paid_only = false) {
 		$where = $paid_only ? 'AND paid = 1' : '';
-		$id_field = Config::getInstance()->champ_identite;
-		$sql = sprintf('SELECT su.id_user, u.%s FROM services_users su INNER JOIN membres u ON u.id = su.id_user WHERE su.id_service = ? %s;', $id_field, $where);
+		$id_field = DynamicFields::getNameFieldsSQL('u');
+		$sql = sprintf('SELECT su.id_user, %s FROM services_users su INNER JOIN users u ON u.id = su.id_user WHERE su.id_service = ? %s;', $id_field, $where);
 		return DB::getInstance()->getAssoc($sql, $this->id());
 	}
 

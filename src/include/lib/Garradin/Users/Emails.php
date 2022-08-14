@@ -9,6 +9,7 @@ use Garradin\DynamicList;
 use Garradin\Plugin;
 use Garradin\UserException;
 use Garradin\Entities\Users\Email;
+use Garradin\Users\DynamicFields;
 use Garradin\UserTemplate\UserTemplate;
 use Garradin\Web\Render\Render;
 use Garradin\Web\Skeleton;
@@ -663,7 +664,7 @@ class Emails
 	static public function exportMailing(string $format, \stdClass $mailing): void
 	{
 		$rows = $mailing->recipients;
-		$id_field = Config::getInstance()->get('champ_identite');
+		$id_field = DynamicFields::getNameFieldsSQL('u');
 
 		foreach ($rows as $key => &$row) {
 			$row = [$key, $row->$id_field ?? ''];
