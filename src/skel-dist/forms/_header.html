@@ -1,0 +1,40 @@
+{{if $_GET.print == 'pdf'}}
+	{{:http type="pdf" download="%s.pdf"|args:$title}}
+{{/if}}
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{{$title}}</title>
+	<style type="text/css">
+	{{:include file="forms/form.css" page_size=$page_size}}
+	</style>
+</head>
+
+<body>
+
+{{if !$_GET.print}}
+<div id="buttons">
+	{{:linkbutton href="%s&print=yes"|args:$request_url label="Imprimer" shape="print"}}
+	{{:linkbutton href="%s&print=pdf"|args:$request_url label="Télécharger en PDF" shape="download"}}
+</div>
+{{/if}}
+
+<div id="page">
+
+<header class="organization">
+	{{if $config.files.logo}}
+	<figure class="logo">
+		<img src="{{$config.files.logo}}&150px" />
+	</figure>
+	{{/if}}
+	<section>
+		<h1>{{$config.nom_asso}}</h1>
+		<h2>Association « loi 1901 » à but non lucratif</h2>
+		<h3>{{$config.adresse_asso}}
+			{{if $config.telephone_asso}} — {{$config.telephone_asso}}{{/if}}
+			{{if $config.email_asso}} — {{$config.email_asso}}{{/if}}
+			{{if $config.site_asso}} — {{$config.site_asso}}{{/if}}</h3>
+	</section>
+</header>
+
+<main>

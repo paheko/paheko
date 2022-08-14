@@ -5,12 +5,20 @@ namespace Garradin\UserTemplate;
 use KD2\Brindille;
 use KD2\Brindille_Exception;
 use KD2\ErrorManager;
+use KD2\JSONSchema;
 
+use Garradin\Config;
+use Garradin\DB;
+use Garradin\Template;
 use Garradin\Utils;
-use Garradin\Users\Emails;
+use Garradin\UserException;
 use Garradin\Web\Skeleton;
+use Garradin\Users\Emails;
+use Garradin\Files\Files;
+use Garradin\Entities\Files\File;
+use Garradin\Entities\UserForm;
 
-use const Garradin\WWW_URL;
+use const Garradin\{ROOT, WWW_URL};
 
 class Functions
 {
@@ -18,8 +26,147 @@ class Functions
 		'include',
 		'http',
 		'dump',
+		'error',
+		'read',
+		'save',
+		'admin_header',
+		'admin_footer',
+		'signature',
 		'mail',
 	];
+
+	static public function admin_header(array $params): string
+	{
+		$tpl = Template::getInstance();
+		$tpl->assign($params);
+		return $tpl->fetch('admin/_head.tpl');
+	}
+
+	static public function admin_footer(array $params): string
+	{
+		$tpl = Template::getInstance();
+		$tpl->assign($params);
+		return $tpl->fetch('admin/_foot.tpl');
+	}
+
+	static public function create_index(array $params, Brindille $tpl, int $line): void
+	{
+		$id = Utils::basename(Utils::dirname($tpl->_tpl_path));
+
+		if (!$id) {
+			throw new Brindille_Exception('Unique document name could not be found');
+		}
+
+		if (empty($params['name']) || !ctype_alnum($params['name'])) {
+			throw new Brindille_Exception('Missing or invalid index name');
+		}
+
+		$indexes = ['document'];
+		$db = DB::getInstance();
+
+		if (empty($params['column'])) {
+			$indexes[] = sprintf('json_extract(value, %s)', $db->quote($params['column']));
+		}
+
+		if (empty($params['expression'])) {
+			$indexes[] = $params['expression'];
+		}
+
+		if (count($indexes) == 1) {
+			throw new Brindille_Exception('Missing or invalid index columns');
+		}
+
+		$db->exec(sprintf('CREATE INDEX IF NOT EXISTS documents_%s_%s ON documents_data (%s);', $id, implode(',', $indexes)));
+	}
+
+	static public function save(array $params, Brindille $tpl, int $line): void
+	{
+		$name = Utils::basename(Utils::dirname($tpl->_tpl_path));
+
+		if (!$name) {
+			throw new Brindille_Exception('Unique document name could not be found');
+		}
+
+		$table = 'user_forms_' . $name;
+
+		if (!empty($params['key'])) {
+			if ($params['key'] == 'uuid') {
+				$params['key'] = Utils::uuid();
+			}
+
+			$where = 'key = ?';
+			$where_value = $params['key'];
+		}
+		elseif (!empty($params['id'])) {
+			$where = 'id = ?';
+			$where_value = $params['id'];
+		}
+		else {
+			throw new Brindille_Exception('Aucun paramètre "id" ou "key" n\'a été renseigné');
+		}
+
+		$key = $params['key'] ?? null;
+
+		unset($params['key'], $params['id']);
+
+		$validate = null;
+
+		if (isset($params['validate_schema'])) {
+			$validate = $params['validate_schema'];
+			unset($params['validate_schema']);
+		}
+
+		$db = DB::getInstance();
+
+		if ($key == 'config') {
+			$exists = $db->firstColumn(sprintf('SELECT config FROM %s WHERE name = ?;', UserForm::TABLE), $name);
+		}
+		else {
+			$db->exec(sprintf('
+				CREATE TABLE IF NOT EXISTS %s (
+					id INTEGER NOT NULL PRIMARY KEY,
+					key TEXT NULL,
+					value TEXT NOT NULL
+				);
+				CREATE UNIQUE INDEX IF NOT EXISTS %1$s_key ON %1$s (key);', $table));
+
+			$exists = $db->first(sprintf('SELECT value FROM %s WHERE %s AND document = ?;', $table, $where), $where_value, $id);
+		}
+
+		$exists = json_decode((string) $exists, true);
+
+		// Merge before update
+		if ($exists) {
+			$params = array_merge($exists, $params);
+		}
+
+		if ($validate) {
+			$schema = self::read(['file' => $validate_schema], $tpl, $line);
+
+			try {
+				$s = JSONSchema::fromString($schema);
+				$s->validate($params);
+			}
+			catch (\RuntimeException $e) {
+				throw new Brindille_Exception(sprintf("line %d: error in validating data:\n%s\n\n%s",
+					$line, $e->getMessage(), json_encode($params, JSON_PRETTY_PRINT)));
+			}
+		}
+
+		$value = json_encode($params);
+
+		if ($key == 'config') {
+			$db->update(UserForm::TABLE, ['config' => $value], 'name = :name', compact('name'));
+			return;
+		}
+
+		if (!$exists) {
+			$db->insert($table, compact('value', 'key'));
+		}
+		else {
+			$db->update($table, compact('value'), sprintf('%s = :match', $where), ['match' => $where_value]);
+		}
+	}
 
 	static public function mail(array $params, Brindille $tpl, int $line)
 	{
@@ -50,28 +197,86 @@ class Functions
 		return sprintf('<pre style="background: yellow; padding: 5px; overflow: auto">%s</pre>', $dump);
 	}
 
+	static public function error(array $params, Brindille $tpl)
+	{
+		throw new UserException($params['message']);
+	}
+
+	static protected function getFilePath(array $params, string $arg_name, UserTemplate $ut, int $line)
+	{
+		if (empty($params[$arg_name])) {
+			throw new Brindille_Exception(sprintf('Ligne %d: argument "%s" manquant', $arg_name, $line));
+		}
+
+		if (strpos($params[$arg_name], '..') !== false) {
+			throw new Brindille_Exception(sprintf('Ligne %d: argument "%s" invalide', $line, $arg_name));
+		}
+
+		$path = $params[$arg_name];
+
+		if (substr($path, 0, 2) == './') {
+			$path = Utils::dirname($ut->_tpl_path) . substr($path, 1);
+		}
+
+		return $path;
+	}
+
+	static public function read(array $params, UserTemplate $ut, int $line): string
+	{
+		$path = self::getFilePath($params, 'file', $ut, $line);
+
+		$file = Files::get(File::CONTEXT_SKELETON . '/' . $path);
+
+		if ($file) {
+			$content = $file->fetch();
+		}
+		else {
+			$content = file_get_contents(ROOT . '/skel-dist/' . $path);
+		}
+
+		if (!empty($params['base64'])) {
+			return base64_encode($content);
+		}
+
+		return $content;
+	}
+
+	static public function signature(): string
+	{
+		$file = Config::getInstance()->file('signature');
+
+		if (!$file) {
+			return '';
+		}
+
+		// We can't just use the image URL as it would not be accessible by PDF programs
+		$url = 'data:image/png;base64,' . base64_encode($file->fetch());
+
+		return sprintf('<figure class="signature"><img src="%s" alt="Signature" /></figure>', $url);
+	}
+
 	static public function include(array $params, UserTemplate $ut, int $line): void
 	{
-		if (empty($params['file'])) {
-			throw new Brindille_Exception(sprintf('Ligne %d: argument "file" manquant pour la fonction "include"', $line));
-		}
+		$path = self::getFilePath($params, 'file', $ut, $line);
 
 		// Avoid recursive loops
 		$from = $ut->get('included_from') ?? [];
 
-		if (in_array($params['file'], $from)) {
-			throw new Brindille_Exception(sprintf('Ligne %d : boucle infinie d\'inclusion détectée : %s', $line, $params['file']));
+		if (in_array($path, $from)) {
+			throw new Brindille_Exception(sprintf('Ligne %d : boucle infinie d\'inclusion détectée : %s', $line, $path));
 		}
 
-		$s = new Skeleton($params['file']);
-
-		if (!$s->exists()) {
-			throw new Brindille_Exception(sprintf('Ligne %d : fonction "include" : le fichier à inclure "%s" n\'existe pas', $line, $params['file']));
+		try {
+			$include = new UserTemplate($path);
+		}
+		catch (\InvalidArgumentException $e) {
+			throw new Brindille_Exception(sprintf('Ligne %d : fonction "include" : le fichier à inclure "%s" n\'existe pas', $line, $path));
 		}
 
-		$params['included_from'] = array_merge($from, [$params['file']]);
+		$params['included_from'] = array_merge($from, [$path]);
 
-		$s->display($params);
+		$include->assignArray(array_merge($ut->getAllVariables(), $params));
+		$include->display();
 	}
 
 	static public function http(array $params, UserTemplate $tpl): void
@@ -150,9 +355,12 @@ class Functions
 			header(sprintf('HTTP/1.1 %d %s', $params['code'], $codes[$params['code']]), true);
 		}
 
-		if (isset($params['type'])) {
+		if (!empty($params['type'])) {
+			if ($params['type'] == 'pdf') {
+				$params['type'] = 'application/pdf';
+			}
+
 			header('Content-Type: ' . $params['type'], true);
-			$tpl->setContentType($params['type']);
 		}
 
 		if (isset($params['download'])) {

@@ -9,21 +9,21 @@ use KD2\Translate;
 use Garradin\Config;
 use Garradin\Plugin;
 use Garradin\Utils;
-
 use Garradin\Users\Session;
 
 use Garradin\Web\Skeleton;
 use Garradin\Entities\Files\File;
+use Garradin\Files\Files;
 
 use Garradin\UserTemplate\Modifiers;
 use Garradin\UserTemplate\Functions;
 use Garradin\UserTemplate\Sections;
 
-use const Garradin\{WWW_URL, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT, LEGAL_LINE};
+use const Garradin\{WWW_URL, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT, ROOT, LEGAL_LINE};
 
-class UserTemplate extends Brindille
+class UserTemplate extends \KD2\Brindille
 {
-	protected $path = null;
+	public $_tpl_path;
 	protected $modified;
 	protected $file = null;
 	protected $code = null;
@@ -32,8 +32,6 @@ class UserTemplate extends Brindille
 	protected $escape_default = 'html';
 
 	static protected $root_variables;
-
-	protected $content_type = null;
 
 	static public function getRootVariables()
 	{
@@ -74,23 +72,33 @@ class UserTemplate extends Brindille
 			'_POST'        => &$_POST,
 			'visitor_lang' => Translate::getHttpLang(),
 			'config'       => $config,
+			'now'          => new \DateTime,
 			'legal_line'   => LEGAL_LINE,
 			'is_logged'    => $is_logged,
-			'logged_user'  => $is_logged && $session->getUser(),
+			'logged_user'  => $is_logged ? $session->getUser() : null,
 		];
 
 		return self::$root_variables;
 	}
 
-	public function __construct(?File $file = null)
+	public function __construct(string $path)
 	{
-		if ($file) {
+		$this->_tpl_path = $path;
+
+		if ($file = Files::get(File::CONTEXT_SKELETON . '/' . $path)) {
 			if ($file->type != $file::TYPE_FILE) {
 				throw new \LogicException('Cannot construct a UserTemplate with a directory');
 			}
 
 			$this->file = $file;
 			$this->modified = $file->modified->getTimestamp();
+		}
+		else {
+			$this->path = ROOT . '/skel-dist/' . $path;
+
+			if (!($this->modified = @filemtime($this->path))) {
+				throw new \InvalidArgumentException('File not found: ' . $this->path);
+			}
 		}
 
 		$this->assignArray(self::getRootVariables());
@@ -156,8 +164,8 @@ class UserTemplate extends Brindille
 		}
 
 		// Local modifiers
-		foreach (Modifiers::MODIFIERS_LIST as $name) {
-			$this->registerModifier($name, [Modifiers::class, $name]);
+		foreach (Modifiers::MODIFIERS_LIST as $key => $name) {
+			$this->registerModifier(is_int($key) ? $name : $key, is_int($key) ? [Modifiers::class, $name] : $name);
 		}
 
 		// Local functions
@@ -281,25 +289,37 @@ class UserTemplate extends Brindille
 
 	public function displayPDF(?string $filename = null): void
 	{
-		header('Content-type: application/pdf');
+		$html = $this->fetch();
+
+		if (!$filename && preg_match('!<title>([^<]+)</title>!', $html, $match)) {
+			$title = trim(strip_tags(html_entity_decode($match[1])));
+
+			if ($title !== '') {
+				$filename = $title . '.pdf';
+			}
+		}
 
 		if ($filename) {
 			header(sprintf('Content-Disposition: attachment; filename="%s"', Utils::safeFileName($filename)));
 		}
 
-		Utils::streamPDF($this->fetch());
+		header('Content-type: application/pdf');
+		Utils::streamPDF($html);
 	}
 
-	public function setContentType(string $type): void
-	{
-		$this->content_type = $type;
-	}
 
 	public function displayWeb(): void
 	{
 		$content = $this->fetch();
 
-		$type = $this->content_type ?: 'text/html';
+		foreach (headers_list() as $header) {
+			if (preg_match('/^Content-Type: (.*)$/', $header, $match)) {
+				$type = $match[1];
+				break;
+			}
+		}
+
+		$type = $type ?? 'text/html';
 		header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
 
 		if ($type == 'application/pdf') {

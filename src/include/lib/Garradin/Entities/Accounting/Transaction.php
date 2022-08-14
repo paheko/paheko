@@ -323,7 +323,6 @@ class Transaction extends Entity
 
 		foreach ($lines as $l) {
 			$line = new Line;
-
 			foreach ($copy as $field) {
 				// Do not copy id_account when it is null, as it will trigger an error (invalid entity)
 				if ($field == 'id_account' && !isset($l->$field)) {

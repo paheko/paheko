@@ -10,6 +10,7 @@ use Garradin\API;
 use Garradin\Config;
 use Garradin\DB;
 use Garradin\Plugin;
+use Garradin\UserTemplate\UserForms;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\ValidationException;
@@ -203,6 +204,7 @@ class Web
 
 		http_response_code(200);
 
+
 		$uri = substr($uri, 1);
 
 		// Redirect old URLs (pre-1.1)
@@ -215,6 +217,11 @@ class Web
 		}
 		elseif ($uri == 'favicon.ico') {
 			header('Location: ' . Config::getInstance()->fileURL('favicon'), true);
+			return;
+		}
+		elseif (substr($uri, 0, 5) === 'form/') {
+			$uri = substr($uri, 5);
+			UserForms::serve($uri);
 			return;
 		}
 		elseif (substr($uri, 0, 6) === 'admin/') {
@@ -253,12 +260,8 @@ class Web
 			return;
 		}
 
-		$site_disabled = Config::getInstance()->get('site_disabled');
-
-		// Redirect old categories
-		if (substr($uri, -1) == '/') {
-			http_response_code(301);
-			Utils::redirect('/' . rtrim($uri, '/'));
+		if (Config::getInstance()->site_disabled) {
+			Utils::redirect(ADMIN_URL);
 		}
 
 		$page = null;
@@ -266,39 +269,19 @@ class Web
 		if ($uri == '') {
 			$skel = 'index.html';
 		}
-		elseif (!$site_disabled && ($page = self::getByURI($uri)) && $page->status == Page::STATUS_ONLINE) {
+		elseif (($page = self::getByURI($uri)) && $page->status == Page::STATUS_ONLINE) {
 			$skel = $page->template();
 			$page = $page->asTemplateArray();
 		}
+		// No page with this URI, then we expect this might be a skeleton path
+		elseif (Skeleton::isValidPath($uri)) {
+			$skel = $uri;
+		}
 		else {
-			// Trying to see if a custom template with this name exists
-			if (preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $uri)) {
-				$s = new Skeleton($uri);
-
-				if ($s->exists()) {
-					$s->serve();
-					return;
-				}
-			}
-			elseif ($file = Files::getFromURI(File::CONTEXT_SKELETON . '/' . $uri)) {
-				$file->serve();
-				return;
-			}
-
 			$skel = '404.html';
-		}
-
-		if ($site_disabled && ($skel == '404.html' || $uri == '')) {
-			Utils::redirect(ADMIN_URL);
-		}
-
-		if (Plugin::fireSignal('http.request.skeleton.before', compact('page', 'skel', 'uri'))) {
-			return;
 		}
 
 		$s = new Skeleton($skel);
 		$s->serve(compact('uri', 'page', 'skel'));
-
-		Plugin::fireSignal('http.request.skeleton.after', compact('page', 'skel', 'uri'));
 	}
 }

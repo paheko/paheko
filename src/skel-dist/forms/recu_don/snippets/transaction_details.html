@@ -1,0 +1,25 @@
+{{if $form.config.accounts === null}}
+	{{:assign form.config.accounts='756'}}
+{{/if}}
+
+{{if $form.config.accounts}}
+	{{:assign show=false}}
+	{{:assign accounts=$form.config.accounts|regexp_replace:"/\s*,\s*/":"|"}}
+	{{:assign accounts="/%s/"|args:$accounts}}
+	{{#foreach from=$transaction_lines item="line"}}
+		{{if $line.account_code|regexp_match:$accounts}}
+			{{:assign show=true}}
+		{{/if}}
+	{{/foreach}}
+{{else}}
+	{{:assign show=true}}
+{{/if}}
+
+{{if $show}}
+	<h2 class="ruler">{{$form.label}}</h2>
+	<p>
+		{{:linkbutton href="%s?id=%d"|args:$form.url:$transaction.id target="_dialog" label="Prévisualiser" shape="eye"}}
+		{{:linkbutton href="%s?id=%d&print=pdf"|args:$form.url:$transaction.id label="Télécharger en PDF" shape="download"}}
+		{{:linkbutton href="%s?id=%d&print=yes"|args:$form.url:$transaction.id target="_blank" label="Imprimer" shape="print"}}
+	</p>
+{{/if}}

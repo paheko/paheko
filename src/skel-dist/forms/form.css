@@ -1,0 +1,109 @@
+@media print {
+	@page {
+		size: {{if $page_size}}{{$page_size}}{{else}}A4{{/if}};
+		margin: 1.5cm;
+		@bottom {
+			content: "Page " counter(page) " / " counter(pages);
+			font-size: 8pt;
+			margin-bottom: 10mm;
+			text-align: center;
+		}
+	}
+
+	#buttons {
+		display: none;
+	}
+}
+
+@media screen {
+	html, body {
+		background: #666;
+	}
+	#page {
+		margin: 0 auto;
+		padding: .5cm;
+		background: #fff;
+		{{if $page_size == 'A5'}}
+		width: 148mm;
+		height: 210mm;
+		{{else}}
+		width: 210mm;
+		height: 297mm;
+		{{/if}}
+	}
+}
+
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	color: #000;
+	font-size: 10pt;
+}
+
+main {
+	font-size: 1.1em;
+}
+
+header.organization {
+	border: 2px solid #999;
+	padding: 1em;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+header.organization * {
+	margin: 0;
+	padding: 0;
+}
+
+header.organization .logo img {
+	margin-right: 1em;
+	max-height: 100px;
+}
+
+header.organization h1, header.organization h2 {
+	margin-bottom: .5rem;
+}
+
+header.organization h1 {
+	font-size: 1.2rem;
+}
+header.organization h2 {
+	font-size: 1rem;
+	font-weight: normal;
+}
+header.organization h3 {
+	font-size: .8rem;
+	font-weight: normal;
+}
+
+#buttons {
+	text-align: center;
+}
+
+#buttons a {
+	margin: 1em;
+	font-size: 1.2em;
+}
+
+
+a.icn-btn {
+    cursor: pointer;
+    color: #fff;
+    border: 1px solid #ccc;
+    background: #333;
+    user-select: none;
+    display: inline-block;
+    font-size: inherit;
+    border-radius: .2em;
+    padding: .2em .4em;
+    margin: .2em .5em;
+    white-space: pre;
+    transition: box-shadow .3s;
+    text-decoration: underline;
+}
+
+a.icn-btn:hover {
+	text-decoration: none;
+	box-shadow: 0px 0px 5px orange;
+}

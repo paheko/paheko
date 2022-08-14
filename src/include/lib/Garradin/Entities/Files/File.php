@@ -5,6 +5,7 @@ namespace Garradin\Entities\Files;
 use KD2\Graphics\Image;
 use KD2\DB\EntityManager as EM;
 
+use Garradin\Config;
 use Garradin\DB;
 use Garradin\Entity;
 use Garradin\Plugin;
@@ -231,10 +232,17 @@ class File extends Entity
 		self::validatePath($new_path);
 		self::validateFileName(Utils::basename($new_path));
 
-		if ($new_path == $this->path || 0 === strpos($new_path . '/', $this->path . '/')) {
-			throw new UserException('Impossible de renommer ou déplacer un fichier vers lui-même');
+		if ($new_path == $this->path) {
+			throw new UserException(sprintf('Impossible de renommer "%s" lui-même', $this->path));
 		}
 
+		if (0 === strpos($new_path . '/', $this->path . '/')) {
+			if ($this->type != self::TYPE_DIRECTORY) {
+				throw new UserException(sprintf('Impossible de renommer "%s" vers "%s"', $this->path, $new_path));
+			}
+		}
+
+		self::ensureDirectoryExists(Utils::dirname($new_path));
 		$return = Files::callStorage('move', $this, $new_path);
 
 		Plugin::fireSignal('files.move', ['file' => $this, 'new_path' => $new_path]);
@@ -844,7 +852,11 @@ class File extends Entity
 			return false;
 		}
 
-		if ($context == self::CONTEXT_TRANSACTION && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)) {
+		// All config files can be accessed by all logged-in users
+		if ($context == self::CONTEXT_CONFIG) {
+			return true;
+		}
+		elseif ($context == self::CONTEXT_TRANSACTION && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)) {
 			return true;
 		}
 		// The user can access his own profile files
@@ -863,6 +875,15 @@ class File extends Entity
 		return false;
 	}
 
+	static public function checkSkeletonWriteAccess(string $path, ?Session $session): bool
+	{
+		if (strpos($path, self::CONTEXT_SKELETON . '/web') === 0) {
+			return $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN);
+		}
+
+		return $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
+	}
+
 	public function checkWriteAccess(?Session $session): bool
 	{
 		if (null === $session) {
@@ -873,14 +894,14 @@ class File extends Entity
 			case self::CONTEXT_WEB:
 				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 			case self::CONTEXT_DOCUMENTS:
-				// Only admins can delete files
+				// Only managers can change files
 				return $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE);
 			case self::CONTEXT_CONFIG:
 				return $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
 			case self::CONTEXT_TRANSACTION:
 				return $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE);
 			case self::CONTEXT_SKELETON:
-				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN);
+				return self::checkSkeletonWriteAccess($this->path, $session);
 			case self::CONTEXT_USER:
 				return $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 		}
@@ -897,6 +918,8 @@ class File extends Entity
 		switch ($this->context()) {
 			case self::CONTEXT_WEB:
 				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
+			case self::CONTEXT_SKELETON:
+				return self::checkSkeletonWriteAccess($this->path, $session);
 			case self::CONTEXT_DOCUMENTS:
 				// Only admins can delete files
 				return $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_ADMIN);
@@ -904,8 +927,6 @@ class File extends Entity
 				return $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
 			case self::CONTEXT_TRANSACTION:
 				return $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
-			case self::CONTEXT_SKELETON:
-				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN);
 			case self::CONTEXT_USER:
 				return $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 		}
@@ -922,6 +943,8 @@ class File extends Entity
 		$context = strtok($path, '/');
 
 		switch ($context) {
+			case self::CONTEXT_SKELETON:
+				return self::checkSkeletonWriteAccess($path, $session);
 			case self::CONTEXT_WEB:
 				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 			case self::CONTEXT_DOCUMENTS:
@@ -930,8 +953,6 @@ class File extends Entity
 				return $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
 			case self::CONTEXT_TRANSACTION:
 				return $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE);
-			case self::CONTEXT_SKELETON:
-				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN);
 			case self::CONTEXT_USER:
 				return $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 		}
@@ -948,8 +969,16 @@ class File extends Entity
 	{
 		$context = $this->context();
 
-		if ($context == self::CONTEXT_SKELETON || $context == self::CONTEXT_CONFIG || $context == self::CONTEXT_WEB) {
+		if ($context == self::CONTEXT_SKELETON || $context == self::CONTEXT_WEB) {
 			return true;
+		}
+
+		if ($context == self::CONTEXT_CONFIG) {
+			$file = array_search($this->path, Config::FILES);
+
+			if ($file && in_array($file, Config::FILES_PUBLIC)) {
+				return true;
+			}
 		}
 
 		return false;

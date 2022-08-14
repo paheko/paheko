@@ -1,9 +1,9 @@
 (function () {
+	let d = document.documentElement.dataset;
 	window.g = window.garradin = {
-		url: window.location.href.replace(/\/admin\/.*?$/, ''),
-		admin_url: window.location.href.replace(/\/admin\/.*?$/, '/admin/'),
-		static_url: window.location.href.replace(/\/admin\/.*?$/, '/admin/static/'),
-		version: document.documentElement.getAttribute('data-version'),
+		admin_url: d.url,
+		static_url: d.url + 'static/',
+		version: d.version,
 		loaded: {}
 	};
 

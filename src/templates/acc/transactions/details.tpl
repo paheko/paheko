@@ -8,7 +8,7 @@
 {/if}
 
 <nav class="tabs">
-{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$transaction->validated && !$tr_year->closed}
+{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$transaction->validated && !$transaction_year->closed}
 	{linkbutton href="edit.php?id=%d"|args:$transaction.id shape="edit" label="Modifier cette écriture"}
 	{linkbutton href="delete.php?id=%d"|args:$transaction.id shape="delete" label="Supprimer cette écriture"}
 {/if}
@@ -78,9 +78,9 @@
 
 	<dt>Exercice</dt>
 	<dd>
-		<a href="{$admin_url}acc/reports/ledger.php?year={$transaction.id_year}">{$tr_year.label}</a>
-		| Du {$tr_year.start_date|date_short} au {$tr_year.end_date|date_short}
-		| <strong>{if $tr_year.closed}Clôturé{else}En cours{/if}</strong>
+		<a href="{$admin_url}acc/reports/ledger.php?year={$transaction.id_year}">{$transaction_year.label}</a>
+		| Du {$transaction_year.start_date|date_short} au {$transaction_year.end_date|date_short}
+		| <strong>{if $transaction_year.closed}Clôturé{else}En cours{/if}</strong>
 	</dd>
 
 	<dt>Écriture créée par</dt>
@@ -125,7 +125,7 @@
 		</tr>
 	</thead>
 	<tbody>
-		{foreach from=$transaction->getLinesWithAccounts() item="line"}
+		{foreach from=$transaction_lines item="line"}
 		<tr>
 			<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$line.id_account}&amp;year={$transaction.id_year}">{$line.account_code}</a></td>
 			<td>{$line.account_label}</td>
@@ -149,5 +149,7 @@
 	{include file="common/files/_context_list.tpl" files=$files edit=$files_edit path=$file_parent}
 </div>
 {/if}
+
+{$snippets|raw}
 
 {include file="admin/_foot.tpl"}

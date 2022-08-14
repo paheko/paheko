@@ -38,6 +38,7 @@ $form = new Form;
 $tpl->assign_by_ref('form', $form);
 
 $session = Session::getInstance();
+$config = Config::getInstance();
 
 if (!defined('Garradin\LOGIN_PROCESS'))
 {

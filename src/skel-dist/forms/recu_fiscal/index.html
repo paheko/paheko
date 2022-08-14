@@ -1,0 +1,160 @@
+{{#restrict block=true section="accounting" level="read"}}
+{{/restrict}}
+
+{{if !$_GET.id}}
+	{{:error message="Aucun numéro d'écriture n'a été fourni"}}
+{{/if}}
+
+{{if !$form.config}}
+	{{* Valeurs par défaut *}}
+	{{:assign var="form.config"
+		topic=""
+		accounts="756"
+		accounts_cash="530"
+		accounts_cheques="5112"
+		art200=0
+		art238=0
+		art885=0}}
+{{/if}}
+
+{{#transactions id=$_GET.id}}
+{{:assign title="Reçu fiscal %d - %s"|args:$id:$users_names}}
+{{if $_GET.print == 'pdf'}}
+	{{:http type="pdf" download="%s.pdf"|args:$title}}
+{{/if}}
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{{$title}}</title>
+	<style type="text/css">
+	@media print {
+		@page {
+			size: A4 portrait;
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			margin: 0;
+		}
+	}
+
+	@media screen {
+		html {
+			background: #666;
+		}
+		body {
+			margin: 0 auto;
+			padding: 0;
+			background: #fff;
+			width: 210mm;
+			height: 297mm;
+		}
+		.page {
+			margin: 1em 0;
+		}
+	}
+
+	body {
+		font-family: Helvetica, Arial, sans;
+		font-size: 10pt;
+		background: white;
+		padding: 0;
+	}
+
+	.page div {
+		position: absolute;
+	}
+
+	.page {
+		padding: 0;
+		break-after: always;
+		width: 210mm;
+		height: 297mm;
+		background-size: cover;
+		background-position: -5mm -4.8mm;
+		position: relative;
+	}
+
+	#p1 {
+		background-image: url('data:image/png;base64,{{:read base64=true file="./cerfa-1.png"}}');
+	}
+
+	#p2 {
+		background-image: url('data:image/png;base64,{{:read base64=true file="./cerfa-2.png"}}');
+	}
+
+	b {
+		font-weight: normal;
+	}
+
+	.signature img {
+		max-width: 50mm;
+		max-height: 17mm;
+	}
+	</style>
+</head>
+
+<body>
+
+<div class="page" id="p1">
+	<div style="top: 10mm; left: 170mm;">{{$id}}</div>
+
+	<div style="top: 35mm; left: 20mm;">{{$config.nom_asso}}</div>
+	<div style="top: 46mm; left: 14mm; height: 11mm; width: 180mm; background: #fff;">{{$config.adresse_asso}}</div>
+
+	<div style="top: 64mm; left: 14mm; background: white; width: 180mm; height: 17mm; overflow: hidden;">{{$form.config.topic|escape|nl2br}}</div>
+
+	<div style="top: 128.5mm; left: 15mm;">X</div>
+</div>
+
+<div class="page" id="p2">
+{{#transaction_users id_transaction=$id}}
+	<div style="top: 18mm; left: 14mm; background: #fff; width: 175mm;padding: 2mm;">{{$name}}</div>
+	<div style="top: 13mm; left: 100mm; background: #fff; width: 50mm; height: 6mm;"></div>
+	<div style="top: 32mm; left: 18mm;">{{$adresse}}</div>
+	<div style="top: 37mm; left: 38mm;">{{$code_postal}}</div>
+	<div style="top: 37mm; left: 80mm;">{{$ville}}</div>
+{{/transaction_users}}
+
+	<div style="top: 63mm; left: 87mm;">***{{$credit|raw|money}}***</div>
+	<div style="top: 73mm; left: 58mm;">{{$credit|money_raw|spell_out_number}} euros</div>
+
+	<div style="top: 82mm; left: 69mm;">{{$date|date:'d'}}</div>
+	<div style="top: 82mm; left: 82mm;">{{$date|date:'m'}}</div>
+	<div style="top: 82mm; left: 99mm;">{{$date|date:'Y'}}</div>
+
+	<div style="top: 96mm; left: 53mm;">{{if $form.config.art200}}X{{/if}}</div>
+	<div style="top: 96mm; left: 103mm;">{{if $form.config.art238}}X{{/if}}</div>
+	<div style="top: 96mm; left: 153.0mm;">{{if $form.config.art885}}X{{/if}}</div>
+
+	<div style="top: 113mm; left: 115mm;">X</div>
+
+{{* Abandon de frais par bénévoles *}}
+{{if $accounts_codes|strpos:'75412'}}
+	<div style="top: 136mm; left: 115mm;">X</div>
+{{else}}
+	<div style="top: 136mm; left: 15mm;">X</div>
+{{/if}}
+
+	{{* Moyen de paiement *}}
+	{{if $accounts_codes|strpos:$form.config.accounts_cash !== false}}
+	<div style="top: 158.2mm; left: 15mm;">X</div>
+	{{elseif $accounts_codes|strpos:$form.config.accounts_cheques !== false}}
+	<div style="top: 158.2mm; left: 57.3mm;">X</div>
+	{{else}}
+	<div style="top: 158.2mm; left: 115.2mm;">X</div>
+	{{/if}}
+
+	{{* Date du jour *}}
+	<div style="top: 239mm; left: 139mm;">{{$now|date:'d'}}</div>
+	<div style="top: 239mm; left: 148mm;">{{$now|date:'m'}}</div>
+	<div style="top: 239mm; left: 156mm;">{{$now|date:'Y'}}</div>
+
+	<div style="top: 243mm; left: 137mm;">{{:signature}}</div>
+</div>
+
+{{/transactions}}
+
+</body>
+</html>

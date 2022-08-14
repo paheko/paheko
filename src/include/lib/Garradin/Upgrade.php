@@ -121,10 +121,12 @@ class Upgrade
 			}
 
 			if (version_compare($v, '1.2.0', '<')) {
-				$config = (object) $db->getAssoc('SELECT key, value FROM config WHERE key IN (\'champs_membres\', \'champ_identifiant\', \'champ_identite\');');
 				$db->beginSchemaUpdate();
 
-				// Create config_users_fields table
+				// Get old keys
+				$config = (object) $db->getAssoc('SELECT key, value FROM config WHERE key IN (\'champs_membres\', \'champ_identifiant\', \'champ_identite\');');
+
+				// Create config_users_fields table, and lots of stuff
 				$db->import(ROOT . '/include/data/1.2.0_schema.sql');
 
 				// Migrate users table
@@ -154,6 +156,29 @@ class Upgrade
 					}
 
 					$db->update('searches', ['content' => $content], 'id = ' . (int) $row->id);
+				}
+
+				// Add signature to files
+				$files = $db->firstColumn('SELECT value FROM config WHERE key = \'files\';');
+				$files = json_decode($files);
+				$files->signature = null;
+				$db->exec(sprintf('REPLACE INTO config (key, value) VALUES (\'files\', %s);', $db->quote(json_encode($files))));
+
+				// Move skeletons from skel/ to skel/web/
+				// Don't use Files::get to get around validatePath security
+				$file = Files::callStorage('get', File::CONTEXT_SKELETON);
+
+				if ($file) {
+					$file->rename(File::CONTEXT_SKELETON . '/web');
+
+					// Prepend "./" to includes functions file parameter
+					foreach (Files::list(File::CONTEXT_SKELETON . '/web') as $file) {
+						if ($file->type != File::TYPE_FILE || !preg_match('/\.(?:txt|css|js|html|htm)$/', $file->name)) {
+							continue;
+						}
+
+						$file->setContent(preg_replace('/(\s+file=")(\w+)/', '$1./$2', $file->fetch()));
+					}
 				}
 
 				$db->commitSchemaUpdate();
@@ -196,6 +221,11 @@ class Upgrade
 			rename($backup_file, DB_FILE);
 
 			Static_Cache::remove('upgrade');
+
+			if ($e instanceof UserException) {
+				$e = new \RuntimeException($e->getMessage(), 0, $e);
+			}
+
 			throw $e;
 		}
 

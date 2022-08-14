@@ -1,5 +1,10 @@
+<?php
+if (!isset($current)) {
+    $current = '';
+}
+?>
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr" class="{if $dialog}dialog{/if}" data-version="{$version_hash}">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr" class="{if $dialog}dialog{/if}" data-version="{$version_hash}" data-url="{$admin_url}">
 <head>
 	<meta charset="utf-8" />
 	<meta name="v" content="{$version_hash}" />

@@ -6,6 +6,8 @@ use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 use Garradin\UserException;
 use Garradin\UserTemplate\UserTemplate;
+use Garradin\Plugin;
+use Garradin\Utils;
 
 use KD2\Brindille_Exception;
 use KD2\DB\EntityManager as EM;
@@ -16,23 +18,26 @@ class Skeleton
 {
 	const TEMPLATE_TYPES = '!^(?:text/(?:html|plain)|\w+/(?:\w+\+)?xml)$!';
 
-	protected $name;
-	protected $file;
+	protected ?string $path;
+	protected ?File $file = null;
 
-	public function __construct(string $tpl)
+	public function __construct(string $path)
 	{
-		if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $tpl)) {
+		if (!self::isValidPath($path)) {
 			throw new \InvalidArgumentException('Invalid skeleton name');
 		}
 
-		$this->file = Files::get(File::CONTEXT_SKELETON . '/' . $tpl);
+		$this->path = $path;
+	}
 
-		$this->name = $tpl;
+	static public function isValidPath(string $path)
+	{
+		return (bool) preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $path);
 	}
 
 	public function defaultPath(): ?string
 	{
-		$path = ROOT . '/www/skel-dist/' . $this->name;
+		$path = ROOT . '/skel-dist/web/' . $this->path;
 
 		if (file_exists($path)) {
 			return $path;
@@ -44,18 +49,27 @@ class Skeleton
 	public function error_404(): void
 	{
 		// Detect loop if 404.html does not exist
-		if ($this->name == '404.html') {
+		if (Utils::basename($this->path) == '404.html') {
 			throw new UserException('Cette page n\'existe pas.');
 		}
 
 		header('Content-Type: text/html;charset=utf-8', true);
 		header('HTTP/1.1 404 Not Found', true);
 		$tpl = new self('404.html');
+
+		if (!$tpl->exists()) {
+			throw new UserException('Cette page n\'existe pas.');
+		}
+
 		$tpl->serve();
 	}
 
 	public function serve(array $params = []): void
 	{
+		if (Plugin::fireSignal('http.request.skeleton.before', $params)) {
+			return;
+		}
+
 		if (!$this->exists()) {
 			$this->error_404();
 			return;
@@ -77,11 +91,20 @@ class Skeleton
 
 		// Serve a template
 		if (preg_match(self::TEMPLATE_TYPES, $type)) {
-			$ut = new UserTemplate($this->file);
+
+			header(sprintf('Content-Type: %s;charset=utf-8', $this->type()));
+
+			try {
+				$ut = new UserTemplate('web/' . $this->path);
+			}
+			catch (\InvalidArgumentException $e) {
+				header('HTTP/1.1 404 Not Found', true);
 			$ut->setContentType($type);
 
-			if (!$this->file) {
-				$ut->setSource($this->defaultPath());
+				// Fallback to 404
+				$ut = new UserTemplate('web/404.html');
+				$ut->assignArray($params);
+				$ut->display();
 			}
 
 			try {
@@ -97,14 +120,21 @@ class Skeleton
 			}
 		}
 		// Serve a static file
-		elseif ($this->file) {
-			$this->file->serve();
+		elseif ($file = $this->file()) {
+			$file->serve();
 		}
 		// Serve a static skeleton file (from skel-dist)
 		else {
 			header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
 			readfile($this->defaultPath());
 		}
+
+		Plugin::fireSignal('http.request.skeleton.after', $params);
+	}
+
+	public function file(): ?File
+	{
+		return Files::get(File::CONTEXT_SKELETON . '/web/' . $this->path);
 	}
 
 	public function fetch(array $params = []): string
@@ -164,22 +194,20 @@ class Skeleton
 
 	public function raw(): string
 	{
-		if (!$this->exists()) {
-			throw new UserException('Ce fichier n\'existe pas');
+		if ($file = $this->file()) {
+			return $this->file();
 		}
 
-		return $this->file ? $this->file->fetch() : file_get_contents($this->defaultPath());
+		return (string) @file_get_contents($this->defaultPath());
 	}
 
 	public function edit(string $content)
 	{
-		$file = Files::get(File::CONTEXT_SKELETON . '/' . $this->name);
-
-		if ($file) {
+		if ($file = $this->file()) {
 			$file->setContent($content);
 		}
 		else {
-			File::createAndStore(File::CONTEXT_SKELETON, $this->name, null, $content);
+			File::createAndStore(File::CONTEXT_SKELETON . '/web', $this->path, null, $content);
 		}
 	}
 
@@ -227,13 +255,12 @@ class Skeleton
 
 		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
 		return finfo_file($finfo, $this->defaultPath());
-
 	}
 
 	public function reset()
 	{
-		if ($this->file) {
-			$this->file->delete();
+		if ($file = $this->file()) {
+			$file->delete();
 		}
 	}
 
@@ -249,7 +276,7 @@ class Skeleton
 	{
 		$sources = [];
 
-		$path = ROOT . '/www/skel-dist/';
+		$path = ROOT . '/skel-dist/web';
 		$i = new \DirectoryIterator($path);
 
 		foreach ($i as $file) {
@@ -264,7 +291,7 @@ class Skeleton
 
 		unset($i);
 
-		$list = Files::list(File::CONTEXT_SKELETON);
+		$list = Files::list(File::CONTEXT_SKELETON . '/web');
 
 		foreach ($list as $file) {
 			if ($file->type != $file::TYPE_FILE) {
