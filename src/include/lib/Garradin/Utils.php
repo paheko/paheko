@@ -17,6 +17,7 @@ class Utils
         'up'              => '↑',
         'down'            => '↓',
         'export'          => '↷',
+        'import'          => '↶',
         'reset'           => '↺',
         'upload'          => '⇑',
         'download'        => '⇓',
