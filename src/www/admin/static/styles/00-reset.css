@@ -2,12 +2,12 @@
 
 @font-face {
     font-family: 'gicon';
-    src: url('../font/garradin.eot?2021');
-    src: url('../font/garradin.eot?2021#iefix') format('embedded-opentype'),
-        url('../font/garradin.woff?2021') format('woff'),
-        url('../font/garradin.woff2?2021') format('woff2'),
-        url('../font/garradin.ttf?2021') format('truetype'),
-        url('../font/garradin.svg?2021#garradin') format('svg');
+    src: url('../font/garradin.eot?2022');
+    src: url('../font/garradin.eot?2022#iefix') format('embedded-opentype'),
+        url('../font/garradin.woff?2022') format('woff'),
+        url('../font/garradin.woff2?2022') format('woff2'),
+        url('../font/garradin.ttf?2022') format('truetype'),
+        url('../font/garradin.svg?2022#garradin') format('svg');
     font-weight: normal;
     font-style: normal;
 }
