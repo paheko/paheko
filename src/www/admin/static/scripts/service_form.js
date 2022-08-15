@@ -33,7 +33,7 @@ function selectFee(elm) {
 
 	if (accounting && create) {
 		$('#f_create_payment_1').checked = true;
-		let btn = $('#f_account_container').firstElementChild;
+		let btn = $('#f_account_selector_container').querySelector('button');
 		btn.value = btn.value.replace(/&year=\d+/, '') + '&year=' + elm.getAttribute('data-year');
 	}
 
