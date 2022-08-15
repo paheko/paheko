@@ -67,7 +67,7 @@ class Services_User
 			],
 			'amount' => [
 				'label' => 'Reste à régler',
-				'select' => 'expected_amount - SUM(tl.debit)',
+				'select' => 'expected_amount - IFNULL(SUM(tl.debit), 0)',
 			],
 		];
 
