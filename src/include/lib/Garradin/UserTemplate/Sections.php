@@ -182,6 +182,16 @@ class Sections
 					continue;
 				}
 
+				if (isset($row['snippet'])) {
+					$row['snippet'] = preg_replace('!</b>(\s*)<b>!', '$1', $row['snippet']);
+					if (preg_match('!<b>(.*?)</b>!', $row['snippet'], $match)) {
+						$row['url_highlight'] = $page->url() . '#:~:text=' . rawurlencode($match[1]);
+					}
+					else {
+						$row['url_highlight'] = $page->url();
+					}
+				}
+
 				$row = array_merge($row, $page->asTemplateArray());
 			}
 
