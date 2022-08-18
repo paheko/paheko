@@ -49,7 +49,7 @@
 		</section>
 	{else}
 		<p class="help block">Il n'y a pas encore suffisamment d'écritures dans cet exercice pour pouvoir afficher les statistiques.</p>
-		<p>{linkbutton label="Saisir une nouvelle écriture" shape="plus" href="transactions/new.php"}</p>
+		<p>{linkbutton label="Saisir une nouvelle écriture" shape="plus" href="transactions/new.php?set_year=%d"|args:$year.id}</p>
 	{/if}
 
 	{if $year.nb_transactions}

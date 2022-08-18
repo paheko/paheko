@@ -10,6 +10,10 @@ if (!defined('Garradin\ALLOW_ACCOUNTS_ACCESS') || !ALLOW_ACCOUNTS_ACCESS) {
 	$session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ);
 }
 
+if (!empty($_GET['set_year'])) {
+	$session->set('acc_year', (int)$_GET['set_year']);
+}
+
 $current_year_id = $session->get('acc_year');
 $current_year = null;
 
