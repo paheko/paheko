@@ -396,7 +396,7 @@ CREATE TABLE IF NOT EXISTS acc_transactions_users
     id_transaction INTEGER NOT NULL REFERENCES acc_transactions (id) ON DELETE CASCADE,
     id_service_user INTEGER NULL REFERENCES services_users (id) ON DELETE SET NULL,
 
-    PRIMARY KEY (id_user, id_transaction)
+    PRIMARY KEY (id_user, id_transaction, id_service_user)
 );
 
 CREATE INDEX IF NOT EXISTS acc_transactions_users_service ON acc_transactions_users (id_service_user);
