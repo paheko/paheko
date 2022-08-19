@@ -1,5 +1,6 @@
 <?php
 namespace Garradin;
+use Garradin\Services\Services;
 use Garradin\Services\Services_User;
 
 require_once __DIR__ . '/../_inc.php';
@@ -25,11 +26,13 @@ $form->runIf($session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE
 
 $only = (int)qg('only') ?: null;
 
+$only_service = !$only ? null : Services::get($only);
+
 $list = Services_User::perUserList($user->id, $only);
 $list->setTitle(sprintf('Inscriptions — %s', $user->identite));
 $list->loadFromQueryString();
 
 $tpl->assign('services', Services_User::listDistinctForUser($user->id));
-$tpl->assign(compact('list', 'user', 'only'));
+$tpl->assign(compact('list', 'user', 'only', 'only_service'));
 
 $tpl->display('services/user/index.tpl');
