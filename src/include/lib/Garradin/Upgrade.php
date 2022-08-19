@@ -5,6 +5,8 @@ namespace Garradin;
 use Garradin\Membres\Session;
 use Garradin\Membres\Champs;
 
+use Garradin\Accounting\Charts;
+
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 
@@ -455,6 +457,10 @@ class Upgrade
 			if (version_compare($v, '1.1.28', '<')) {
 				$db->createFunction('html_decode', 'htmlspecialchars_decode');
 				$db->exec('UPDATE files_search SET content = html_decode(content) WHERE content IS NOT NULL;');
+			}
+
+			if (version_compare($v, '1.1.29', '<')) {
+				Charts::updateInstalled('fr_pca_2018');
 			}
 
 			// Vérification de la cohérence des clés étrangères
