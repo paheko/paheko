@@ -868,7 +868,7 @@ class Transaction extends Entity
 
 		$db->begin();
 
-		$sql = sprintf('DELETE FROM acc_transactions_users WHERE id_transaction = ? AND %s;', $db->where('id_user', 'NOT IN', $users));
+		$sql = sprintf('DELETE FROM acc_transactions_users WHERE id_transaction = ? AND %s AND id_service_user IS NULL;', $db->where('id_user', 'NOT IN', $users));
 		$db->preparedQuery($sql, $this->id());
 
 		foreach ($users as $id) {
@@ -893,8 +893,14 @@ class Transaction extends Entity
 		$sql = sprintf('SELECT m.id, m.%s AS identity, l.id_service_user
 			FROM membres m
 			INNER JOIN acc_transactions_users l ON l.id_user = m.id
-			WHERE l.id_transaction = ?;', $identity_column);
+			WHERE l.id_transaction = ? AND l.id_service_user IS NULL;', $identity_column);
 		return $db->getAssoc($sql, $this->id());
+	}
+
+	public function unlinkServiceUser(int $id): void
+	{
+		$db = EntityManager::getInstance(self::class)->DB();
+		$db->delete('acc_transactions_users', 'id_transaction = ? AND id_service_user = ?', $this->id(), $id);
 	}
 
 	public function listRelatedTransactions()

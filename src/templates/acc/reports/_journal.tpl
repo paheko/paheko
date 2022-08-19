@@ -10,6 +10,7 @@
 			<td class="money">Crédit</td>
 			<td>Libellé ligne</td>
 			<td>Réf. ligne</td>
+			{if $action}<td></td>{/if}
 		</tr>
 	</thead>
 	{foreach from=$journal item="transaction"}
@@ -19,12 +20,17 @@
 			<td rowspan="{$transaction.lines|count}">{$transaction.reference}</td>
 			<td rowspan="{$transaction.lines|count}">{$transaction.date|date_short}</td>
 			<th rowspan="{$transaction.lines|count}">{$transaction.label}</th>
-		{foreach from=$transaction.lines item="line"}
+		{foreach from=$transaction.lines key="k" item="line"}
 			<td>{$line.account_code} - {$line.account_label}</td>
 			<td class="money">{$line.debit|raw|money}</td>
 			<td class="money">{$line.credit|raw|money}</td>
 			<td>{$line.label}</td>
 			<td>{$line.reference}</td>
+			{if $action && $k == 0}
+			<td class="actions" rowspan="{$transaction.lines|count}">
+				{linkbutton href=$action.href|args:$transaction.id shape=$action.shape label=$action.label}
+			</td>
+			{/if}
 		</tr>
 		<tr>
 		{/foreach}
