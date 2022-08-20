@@ -226,7 +226,7 @@ class Utils
         return $value;
     }
 
-    static public function money_format($number, string $dec_point = ',', string $thousands_sep = ' ', $zero_if_empty = true): string {
+    static public function money_format($number, ?string $dec_point = ',', string $thousands_sep = ' ', $zero_if_empty = true): string {
         if ($number == 0) {
             return $zero_if_empty ? '0' : '0,00';
         }
@@ -236,6 +236,10 @@ class Utils
 
         $decimals = substr('0' . $number, -2);
         $number = (int) substr($number, 0, -2);
+
+        if ($dec_point === null) {
+            $decimals = null;
+        }
 
         return sprintf('%s%s%s%s', $sign, number_format($number, 0, $dec_point, $thousands_sep), $dec_point, $decimals);
     }
