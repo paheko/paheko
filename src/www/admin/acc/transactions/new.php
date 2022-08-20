@@ -90,7 +90,14 @@ if ($id = qg('account')) {
 
 	$transaction->type = Transaction::getTypeFromAccountType($account->type);
 	$index = $transaction->type == Transaction::TYPE_DEBT || $transaction->type == Transaction::TYPE_CREDIT ? 1 : 0;
-	$types_details[$transaction->type]->accounts[$index]->selector_value = [$account->id => sprintf('%s — %s', $account->code, $account->label)];
+	$s = [$account->id => sprintf('%s — %s', $account->code, $account->label)];
+
+	if ($transaction->type) {
+		$types_details[$transaction->type]->accounts[$index]->selector_value = $s;
+	}
+	else {
+		$lines = [['account_selector' => $s], []];
+	}
 }
 
 $form->runIf('save', function () use ($transaction, $session, $current_year) {
