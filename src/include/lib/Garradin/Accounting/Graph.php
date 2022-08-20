@@ -167,7 +167,9 @@ class Graph
 
 		if ($others != 0)
 		{
-			$pie->add(new Pie_Data(abs($others) / 100, 'Autres', '#ccc'));
+			$data = new Pie_Data(abs($others) / 100, 'Autres', '#ccc');
+			$data->sublabel = Utils::money_format(intval($others / 100) * 100, null, ' ', true) . ' ' . $currency;
+			$pie->add($data);
 		}
 
 		$pie->togglePercentage(true);
