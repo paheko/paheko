@@ -1,0 +1,10 @@
+<h2 class="ruler">{{$form.label}}</h2>
+<div style="display: flex;">
+	<iframe src="{{"%scarte.html?id=%d"|args:$form.url:$user.id}}" width="320" height="240" style="border: none"></iframe>
+
+	<p>
+		{{:linkbutton href="%scarte.html?id=%d"|args:$form.url:$user.id target="_dialog" label="Prévisualiser" shape="eye"}}
+		{{:linkbutton href="%scarte.html?id=%d&print=pdf"|args:$form.url:$user.id label="Télécharger en PDF" shape="download"}}
+		{{:linkbutton href="%scarte.html?id=%d&print=yes"|args:$form.url:$user.id target="_blank" label="Imprimer" shape="print"}}
+	</p>
+</div>

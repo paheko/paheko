@@ -499,7 +499,8 @@ class Files
 
 		// Then create files
 		foreach ($files as $file) {
-			$out[] = self::createFromPath($parent, $name, $file['tmp_name']);
+			$name = File::filterName($file['name']);
+			$out[] = self::createFromPath($parent . '/' . $name, $file['tmp_name']);
 		}
 
 		return $out;
@@ -511,7 +512,7 @@ class Files
 	 * @param  string $key  The name of the file input in the HTML form
 	 * @return self Created file object
 	 */
-	static public function upload(string $parent, string $key, ?string $name = null): self
+	static public function upload(string $parent, string $key, ?string $name = null): File
 	{
 		if (!isset($_FILES[$key]) || !is_array($_FILES[$key])) {
 			throw new UserException('Aucun fichier reçu');
@@ -533,7 +534,7 @@ class Files
 
 		$name = File::filterName($name ?? $file['name']);
 
-		return self::createFromPath($parent, $name, $file['tmp_name']);
+		return self::createFromPath($parent . '/' . $name, $file['tmp_name']);
 	}
 
 

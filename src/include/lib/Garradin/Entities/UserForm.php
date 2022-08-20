@@ -42,6 +42,7 @@ class UserForm extends Entity
 	protected string $label;
 	protected ?string $description;
 	protected ?\stdClass $config;
+	protected bool $enabled;
 
 	public function selfCheck(): void
 	{

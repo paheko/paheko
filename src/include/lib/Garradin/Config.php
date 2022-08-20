@@ -212,6 +212,7 @@ class Config extends Entity
 			$this->assert(is_int($value) || is_null($value));
 		}
 
+		$db = DB::getInstance();
 		$this->assert($db->test('users_categories', 'id = ?', $this->default_category), 'Catégorie de membres inconnue');
 	}
 

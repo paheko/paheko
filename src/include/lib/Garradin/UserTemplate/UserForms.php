@@ -7,6 +7,7 @@ use Garradin\Entities\UserForm;
 use Garradin\Files\Files;
 use Garradin\DB;
 use Garradin\Utils;
+use Garradin\UserException;
 
 use const Garradin\ROOT;
 
@@ -96,7 +97,7 @@ class UserForms
 	{
 		return EM::getInstance(UserForm::class)->all('SELECT f.* FROM @TABLE f
 			INNER JOIN user_forms_templates t ON t.id_form = f.id
-			WHERE t.name = ?
+			WHERE t.name = ? AND f.enabled = 1
 			ORDER BY f.label COLLATE NOCASE ASC;', $snippet);
 	}
 
@@ -112,7 +113,7 @@ class UserForms
 
 		$form = self::get($name);
 
-		if (!$form) {
+		if (!$form || !$form->enabled) {
 			http_response_code(404);
 			throw new UserException('Ce formulaire n\'existe pas');
 		}

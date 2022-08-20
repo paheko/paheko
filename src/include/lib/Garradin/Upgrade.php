@@ -30,12 +30,12 @@ class Upgrade
 			return false;
 		}
 
+		Install::checkAndCreateDirectories();
+
 		if (!$v || version_compare($v, self::MIN_REQUIRED_VERSION, '<'))
 		{
 			throw new UserException(sprintf("Votre version de Garradin est trop ancienne pour être mise à jour. Mettez à jour vers Garradin %s avant de faire la mise à jour vers cette version.", self::MIN_REQUIRED_VERSION));
 		}
-
-		Install::checkAndCreateDirectories();
 
 		if (Static_Cache::exists('upgrade'))
 		{
@@ -244,25 +244,6 @@ class Upgrade
 		if ($user_is_logged && !headers_sent())
 		{
 			$session->refresh();
-		}
-	}
-
-	/**
-	 * Move data from root to data/ subdirectory
-	 * (migration from 1.0 to 1.1 version)
-	 */
-	static public function moveDataRoot(): void
-	{
-		Utils::safe_mkdir(ROOT . '/data');
-		file_put_contents(ROOT . '/data/index.html', '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL was not found on this server.</p></body></html>');
-
-		rename(ROOT . '/cache', ROOT . '/data/cache');
-		rename(ROOT . '/plugins', ROOT . '/data/plugins');
-
-		$files = glob(ROOT . '/*.sqlite');
-
-		foreach ($files as $file) {
-			rename($file, ROOT . '/data/' . basename($file));
 		}
 	}
 

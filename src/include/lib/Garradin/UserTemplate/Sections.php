@@ -27,6 +27,7 @@ class Sections
 		'documents',
 		'files',
 		'users',
+		'subscriptions',
 		'transactions',
 		'transaction_users',
 		'accounts_sums',
@@ -163,6 +164,37 @@ class Sections
 		if (empty($params['order'])) {
 			$params['order'] = 'id';
 		}
+
+		return self::sql($params, $tpl, $line);
+	}
+
+	static public function subscriptions(array $params, UserTemplate $tpl, int $line): \Generator
+	{
+		if (!array_key_exists('where', $params)) {
+			$params['where'] = '';
+		}
+
+		$number_field = DynamicFields::getNumberField();
+
+		$params['select'] = sprintf('su.expiry_date, su.date, s.label, su.paid, su.expected_amount');
+		$params['tables'] = 'services_users su INNER JOIN services s ON s.id = su.id_service';
+
+		if (isset($params['user'])) {
+			$params['where'] = ' AND su.id_user = :id_user';
+			$params[':id_user'] = (int) $params['user'];
+			unset($params['user']);
+		}
+
+		if (!empty($params['active'])) {
+			$params['where'] = ' AND MAX(su.expiry_date) >= date()';
+			unset($params['active']);
+		}
+
+		if (empty($params['order'])) {
+			$params['order'] = 'su.id';
+		}
+
+		$params['group'] = 'su.id_user, su.id_service';
 
 		return self::sql($params, $tpl, $line);
 	}

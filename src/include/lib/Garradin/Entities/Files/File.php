@@ -134,7 +134,6 @@ class File extends Entity
 	{
 		$this->assert($this->type === self::TYPE_DIRECTORY || $this->type === self::TYPE_FILE, 'Unknown file type');
 		$this->assert($this->type === self::TYPE_DIRECTORY || $this->size !== null, 'File size must be set');
-		$this->assert($this->image === 0 || $this->image === 1, 'Unknown image value');
 		$this->assert(trim($this->name) !== '', 'Le nom de fichier ne peut rester vide');
 		$this->assert(strlen($this->path), 'Le chemin ne peut rester vide');
 		$this->assert(strlen($this->parent) || '' === $this->parent, 'Le chemin ne peut rester vide');
@@ -245,7 +244,7 @@ class File extends Entity
 	 */
 	public function copy(string $target): self
 	{
-		return self::createAndStore(Utils::dirname($target), Utils::basename($target), Files::callStorage('getFullPath', $this), null);
+		return Files::createFromPath($target, Files::callStorage('getFullPath', $this));
 	}
 
 	public function setContent(string $content): self

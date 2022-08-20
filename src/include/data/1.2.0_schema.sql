@@ -473,7 +473,8 @@ CREATE TABLE IF NOT EXISTS user_forms
     name TEXT NOT NULL,
     label TEXT NOT NULL,
     description TEXT NULL,
-    config TEXT NULL
+    config TEXT NULL,
+    enabled INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS user_forms_name ON user_forms (name);

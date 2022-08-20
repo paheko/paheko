@@ -92,4 +92,6 @@
 
 {include file="users/_details.tpl" data=$user show_message_button=true mode="edit"}
 
+{$snippets|raw}
+
 {include file="_foot.tpl"}

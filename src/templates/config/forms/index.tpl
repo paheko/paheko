@@ -8,6 +8,11 @@
 		<tr>
 			<td><h3>{$form.label}</h3>{$form.description|escape|nl2br}</td>
 			<td class="actions">
+				{if $form.enabled}
+					{linkbutton label="Désactiver" shape="eye-off" href="?disable=%s"|args:$form.name}
+				{else}
+					{linkbutton label="Activer" shape="eye" href="?enable=%s"|args:$form.name}
+				{/if}
 				{*{linkbutton label="Modifier" href="edit.php?form=%s"|args:$form.name shape="edit" target="_dialog"}*}
 				{if $form->hasConfig()}
 					<br />{linkbutton label="Configurer" href=$form->url($form::CONFIG_TEMPLATE) shape="settings" target="_dialog"}
