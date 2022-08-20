@@ -33,31 +33,46 @@ class User extends Entity
 
 	const TABLE = 'users';
 
-	protected bool $_construct = false;
+	protected bool $_loading = false;
 
 	public function __construct()
 	{
-		$this->_construct = true;
-
-		foreach (DynamicField::SYSTEM_FIELDS as $key => $type) {
-			$this->_types[$key] = $type;
-			$this->$key = null;
-		}
-
-		$fields = DynamicFields::getInstance()->all();
-
-		foreach ($fields as $key => $config) {
-			$this->_types[$key] = DynamicField::PHP_TYPES[$config->type];
-			$this->$key = null;
-		}
-
-		$this->_construct = false;
+		$this->reloadProperties();
 
 		parent::__construct();
 	}
 
+	protected function reloadProperties(): void
+	{
+		if (empty(self::$_types_cache[static::class])) {
+			$types = DynamicField::SYSTEM_FIELDS;
+
+			$fields = DynamicFields::getInstance()->all();
+
+			foreach ($fields as $key => $config) {
+				$types[$key] = DynamicField::PHP_TYPES[$config->type];
+			}
+
+			self::$_types_cache[static::class] = $types;
+		}
+
+		$this->_types = self::$_types_cache[static::class];
+		$this->_loading = true;
+
+		foreach ($this->_types as $key => $type) {
+			$this->$key = null;
+		}
+
+		$this->_loading = false;
+	}
+
+	public function __wakeup(): void
+	{
+		$this->reloadProperties();
+	}
+
 	public function set(string $key, $value, bool $loose = false, bool $check_for_changes = true) {
-		if ($this->_construct && $value === null) {
+		if ($this->_loading && $value === null) {
 			$this->$key = $value;
 			return;
 		}
