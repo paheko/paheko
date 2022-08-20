@@ -245,6 +245,8 @@ class Accounts
 
 		try {
 			foreach (CSV::import($file, self::EXPECTED_CSV_COLUMNS) as $line => $row) {
+				$account = null;
+
 				if ($update) {
 					$account = EntityManager::findOne(Account::class, 'SELECT * FROM @TABLE WHERE code = ? AND id_chart = ?;', $row['code'], $this->chart_id);
 				}
