@@ -834,4 +834,9 @@ class File extends Entity
 
 		return null;
 	}
+
+	public function export(): array
+	{
+		return $this->asArray(true) + ['url' => $this->url()];
+	}
 }

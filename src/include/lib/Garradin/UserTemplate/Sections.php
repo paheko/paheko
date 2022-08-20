@@ -30,7 +30,7 @@ class Sections
 		'subscriptions',
 		'transactions',
 		'transaction_users',
-		'accounts_sums',
+		'balances',
 		'sql',
 		'restrict',
 	];
@@ -100,15 +100,9 @@ class Sections
 		}
 	}
 
-	static public function accounts_sums(array $params, UserTemplate $tpl, int $line): \Generator
+	static public function balances(array $params, UserTemplate $tpl, int $line): \Generator
 	{
 		$db = DB::getInstance();
-
-		$table = self::cache('accounts_sums', function () use ($db) {
-			$db->exec('CREATE TEMP TABLE IF NOT EXISTS tmp_acc_sums AS SELECT * FROM acc_accounts_sums WHERE 0;
-				INSERT INTO tmp_acc_sums SELECT * FROM acc_accounts_sums;');
-			return 'tmp_acc_sums';
-		});
 
 		if (!array_key_exists('where', $params)) {
 			$params['where'] = '';
@@ -165,7 +159,19 @@ class Sections
 			$params['order'] = 'id';
 		}
 
-		return self::sql($params, $tpl, $line);
+		$files_fields = array_keys(DynamicFields::getInstance()->fieldsByType('file'));
+
+		foreach (self::sql($params, $tpl, $line) as $row) {
+			foreach ($row as $key => &$value) {
+				if (in_array($key, $files_fields)) {
+					$value = array_map(fn($a) => $a->export(), array_values(Files::list(File::CONTEXT_USER . '/' . $row['id'] . '/' . $key)));
+				}
+			}
+
+			unset($value);
+
+			yield $row;
+		}
 	}
 
 	static public function subscriptions(array $params, UserTemplate $tpl, int $line): \Generator

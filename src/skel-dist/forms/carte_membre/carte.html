@@ -10,7 +10,8 @@
 
 {{else}}
 	{{#users id=$_GET.id}}
-		{{:assign title="%s - Carte de membre"|args:$identity}}
+		{{:assign title="%s - Carte de membre"|args:$user_name}}
+
 		{{if $_GET.print == 'pdf'}}
 			{{:http type="pdf" download="%s.pdf"|args:$title}}
 		{{/if}}
@@ -51,7 +52,11 @@
 		<body>
 
 		<main>
-			<img src="{{$config.files.logo}}" alt="" class="logo" />
+			{{if $photo}}
+				<img src="{{$photo.0.url}}" alt="" class="logo" />
+			{{else}}
+				<img src="{{$config.files.logo}}?150px" alt="" class="logo" />
+			{{/if}}
 
 			<h1>{{$user_name}}</h1>
 
