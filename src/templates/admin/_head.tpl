@@ -51,7 +51,7 @@
     <ul>
     {if $is_logged}
     <?php
-    $current_parent = substr($current, 0, strpos($current, '/'));
+    $current_parent = substr((string)$current, 0, strpos((string)$current, '/'));
     ?>
         <li class="home{if $current == 'home'} current{elseif $current_parent == 'home'} current_parent{/if}"><h3><a href="{$admin_url}"><b data-icn="{icon html=false shape="home"}"></b><span>Accueil</span></a></h3>
             {if !empty($plugins_menu)}
