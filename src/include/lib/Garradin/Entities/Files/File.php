@@ -4,10 +4,12 @@ namespace Garradin\Entities\Files;
 
 use KD2\Graphics\Image;
 use KD2\DB\EntityManager as EM;
+use KD2\Security;
 
 use Garradin\DB;
 use Garradin\Entity;
 use Garradin\Plugin;
+use Garradin\Template;
 use Garradin\UserException;
 use Garradin\ValidationException;
 use Garradin\Membres\Session;
@@ -18,7 +20,7 @@ use Garradin\Web\Render\Render;
 
 use Garradin\Files\Files;
 
-use const Garradin\{WWW_URL, BASE_URL, ENABLE_XSENDFILE};
+use const Garradin\{WWW_URL, BASE_URL, ENABLE_XSENDFILE, SECRET_KEY};
 
 /**
  * This is a virtual entity, it cannot be saved to a SQL table
@@ -630,11 +632,14 @@ class File extends Entity
 	 */
 	public function uri(): string
 	{
+		$parts = explode('/', $this->path);
+		$parts = array_map('rawurlencode', $parts);
+
 		if ($this->context() == self::CONTEXT_WEB) {
-			return Utils::basename(Utils::dirname($this->path)) . '/' . Utils::basename($this->path);
+			return array_shift($parts) . '/' . array_pop($parts);
 		}
 		else {
-			return $this->path;
+			return implode('/', $parts);
 		}
 	}
 
@@ -651,9 +656,24 @@ class File extends Entity
 	/**
 	 * Envoie le fichier au client HTTP
 	 */
-	public function serve(?Session $session = null, bool $download = false): void
+	public function serve(?Session $session = null, bool $download = false, ?string $share_hash = null, ?string $share_password = null): void
 	{
-		if (!$this->checkReadAccess($session)) {
+		$can_access = $this->checkReadAccess($session);
+
+		if (!$can_access && $share_hash) {
+			$can_access = $this->checkShareLink($share_hash, $share_password);
+
+			if (!$can_access && $this->checkShareLinkRequiresPassword($share_hash)) {
+				$tpl = Template::getInstance();
+				$has_password = (bool) $share_password;
+
+				$tpl->assign(compact('can_access', 'has_password'));
+				$tpl->display('ask_share_password.tpl');
+				exit;
+			}
+		}
+
+		if (!$can_access) {
 			header('HTTP/1.1 403 Forbidden', true, 403);
 			throw new UserException('Vous n\'avez pas accès à ce fichier.');
 			return;
@@ -1035,5 +1055,58 @@ class File extends Entity
 		}
 
 		return null;
+	}
+
+	/**
+	 * Returns a sharing link for a file, valid
+	 * @param  int $expiry Expiry, in hours
+	 * @param  string|null $password
+	 * @return string
+	 */
+	public function createShareLink(int $expiry = 24, ?string $password = null): string
+	{
+		$expiry = intval(time() / 3600) + $expiry;
+
+		$hash = $this->_createShareHash($expiry, $password);
+
+		$expiry -= intval(gmmktime(0, 0, 0, 8, 1, 2022) / 3600);
+		$expiry = base_convert($expiry, 10, 36);
+
+		return sprintf('%s?s=%s%s:%s', $this->url(), $password ? ':' : '', $hash, $expiry);
+	}
+
+	protected function _createShareHash(int $expiry, ?string $password): string
+	{
+		$password = trim((string)$password) ?: null;
+
+		$str = sprintf('%s:%s:%s:%s', SECRET_KEY, $this->path, $expiry, $password);
+
+		$hash = hash('sha256', $str, true);
+		$hash = substr($hash, 0, 10);
+		$hash = Security::base64_encode_url_safe($hash);
+		return $hash;
+	}
+
+	public function checkShareLinkRequiresPassword(string $str): bool
+	{
+		return substr($str, 0, 1) == ':';
+	}
+
+	public function checkShareLink(string $str, ?string $password): bool
+	{
+		$str = ltrim($str, ':');
+
+		$hash = strtok($str, ':');
+		$expiry = strtok(false);
+		$expiry = (int)base_convert($expiry, 36, 10);
+		$expiry += intval(gmmktime(0, 0, 0, 8, 1, 2022) / 3600);
+
+		if ($expiry < time()/3600) {
+			return false;
+		}
+
+		$hash_check = $this->_createShareHash($expiry, $password);
+
+		return hash_equals($hash, $hash_check);
 	}
 }

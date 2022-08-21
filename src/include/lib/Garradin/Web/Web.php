@@ -245,7 +245,7 @@ class Web
 				$file->serveThumbnail($session, $size);
 			}
 			else {
-				$file->serve($session, isset($_GET['download']) ? true : false);
+				$file->serve($session, isset($_GET['download']) ? true : false, $_GET['s'] ?? null, $_POST['p'] ?? null);
 			}
 
 			Plugin::fireSignal('http.request.file.after', compact('file', 'uri', 'session'));
