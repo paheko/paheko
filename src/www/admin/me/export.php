@@ -8,10 +8,7 @@ use Garradin\Entities\Files\File;
 
 use KD2\ZipWriter;
 
-require_once __DIR__ . '/../_inc.php';
-
-$session = Session::getInstance();
-$user = $session->getUser();
+require_once __DIR__ . '/_inc.php';
 
 $services_list = Services_User::perUserList($user->id);
 $services_list->setPageSize(null);

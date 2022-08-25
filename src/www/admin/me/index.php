@@ -1,11 +1,7 @@
 <?php
 namespace Garradin;
 
-use Garradin\Users\Session;
-
-require_once __DIR__ . '/../_inc.php';
-
-$user = Session::getInstance()->getUser();
+require_once __DIR__ . '/_inc.php';
 
 $ok = qg('ok');
 

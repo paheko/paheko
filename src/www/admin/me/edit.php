@@ -4,10 +4,9 @@ namespace Garradin;
 use Garradin\Users\DynamicFields;
 use Garradin\Users\Session;
 
-require_once __DIR__ . '/../_inc.php';
+require_once __DIR__ . '/_inc.php';
 
 $csrf_key = 'edit_my_info';
-$user = Session::getInstance()->getUser();
 
 $form->runIf('save', function () use ($session, $user) {
 	$user->importForm();

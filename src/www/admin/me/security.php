@@ -5,9 +5,8 @@ namespace Garradin;
 use Garradin\Users\DynamicFields;
 use Garradin\Users\Session;
 
-require_once __DIR__ . '/../_inc.php';
+require_once __DIR__ . '/_inc.php';
 
-$user = $session->getUser();
 $csrf_key = 'edit_security_' . md5($user->password);
 $edit = qg('edit');
 
