@@ -30,6 +30,10 @@ do
       PORT=$2
       shift;;
 
+    -b|--bind)
+      ADDRESS=$2
+      shift;;
+
     -v|--verbose)
       VERBOSE=1
       shift;;
@@ -40,11 +44,11 @@ Usage : $0 [COMMANDE] [PROJET]
 
 Où COMMANDE peut être :
 
-        server [-p|--port PORT]
+        server [-p|--port PORT] [-b|--bind IP]
                 Démarre un serveur web Garradin sur le port spécifié
-                (ou sur le port 8081 par défaut)
+                (8081 par défaut) et l'IP spécifiée (127.0.0.1 par défaut)
 
-        ui [-p|--port PORT]
+        ui [-p|--port PORT] [-b|--bind IP]
                 Idem que 'server' mais démarre ensuite le navigateur web par défaut
                 et connecte automatiquement avec le premier administrateur
                 de l'association.
@@ -60,6 +64,9 @@ Options :
 
         -p|--port PORT
                 Spécifie le port pour le mode ui ou le mode serveur.
+
+        -b|--bind IP
+                Spécifie l'adresse IP du serveur web.
 
         -v|--verbose
                 Affiche les requêtes reçues sur le serveur web.
