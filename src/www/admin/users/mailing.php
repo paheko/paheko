@@ -66,16 +66,38 @@ $form->runIf('send', function () use ($mailing) {
 	Emails::sendMailing($mailing);
 }, $csrf_key, '!users/mailing.php?sent');
 
-$tpl->assign('categories', Categories::listNotHidden());
-$tpl->assign('services', Services::listAssoc());
-$tpl->assign('search_list', Search::list(Session::getUserId(), SearchEntity::TARGET_USERS));
+$groups = [
+	'category' => Categories::listNotHidden(),
+	'service' => Services::listAssoc(),
+	'search' => Search::listAssoc(SearchEntity::TARGET_USERS, Session::getUserId()),
+];
+
+$optgroups = [];
+
+// Prepend type to key
+foreach ($groups as $group => $options) {
+	$optgroups[$group] = [];
+
+	foreach ($options as $k => $v) {
+		$optgroups[$group][$group . '_' . $k] = $v;
+	}
+}
+
+$targets = [
+	'all_but_hidden' => 'Tous les membres (sauf ceux appartenant à une catégorie cachée)',
+	'Catégories de membres' => $optgroups['category'],
+	'Membres à jour d\'une activité' => $optgroups['service'],
+	'Recherches enregistrées' => $optgroups['search'],
+];
+
+unset($groups, $optgroups);
 
 $tpl->assign('preview', f('preview') && $mailing ? $mailing->preview : null);
 $tpl->assign('recipients_count', $mailing ? count($mailing->recipients) : 0);
 
 $tpl->assign('render_formats', Emails::RENDER_FORMATS);
 
-$tpl->assign(compact('csrf_key'));
+$tpl->assign(compact('csrf_key', 'targets'));
 
 $tpl->assign('sent', null !== qg('sent'));
 

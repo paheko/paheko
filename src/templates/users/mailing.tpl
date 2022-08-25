@@ -66,24 +66,7 @@
 			<dd>{$config.org_name} &lt;{$config.org_email}&gt;</dd>
 			<dt><label for="f_target">Destinataires</label></dt>
 			<dd>
-				<select name="target" id="f_target" required="required">
-					<option value="all_but_hidden">Tous les membres (sauf ceux appartenant à une catégorie cachée)</option>
-					<optgroup label="Catégorie de membres">
-						{foreach from=$categories key="id" item="label"}
-						<option value="category_{$id}" {form_field name="target" selected="category_%d"|args:$id}>{$label}</option>
-						{/foreach}
-					</optgroup>
-					<optgroup label="Membres à jour d'une activité">
-						{foreach from=$services key="id" item="label"}
-						<option value="service_{$id}" {form_field name="target" selected="service_%d"|args:$id}>{$label}</option>
-						{/foreach}
-					</optgroup>
-					<optgroup label="Recherches enregistrées">
-						{foreach from=$search_list item="s"}
-						<option value="search_{$s.id}" {form_field name="target" selected="search_%d"|args:$s.id}>{$s.label}</option>
-						{/foreach}
-					</optgroup>
-				</select>
+				{input type="select_groups" name="target" required=true options=$targets}
 			</dd>
 			<dd class="help">
 				Vous pouvez cibler précisément des membres en créant une <a href="{$admin_url}users/search.php">recherche enregistrée</a>.

@@ -48,7 +48,7 @@ if (qg('edit') || qg('delete'))
 	$mode = qg('edit') ? 'edit' : 'delete';
 }
 else {
-	$tpl->assign('list', Search::list(Session::getInstance()->getUser()->id, CURRENT_SEARCH_TARGET));
+	$tpl->assign('list', Search::list(CURRENT_SEARCH_TARGET, Session::getUserId()));
 	$mode = 'list';
 }
 
