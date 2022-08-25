@@ -24,5 +24,7 @@ Cette clause s'applique même si le logiciel n'est pas distribué et simplement 
 
 Inclus les bibliothèques suivantes :
 
-* [KD2fw](https://fossil.kd2.org/kd2fw/) - Copyright : 2001-2020+ BohwaZ - Licence : GNU AGPL v3
-* [Gibberish AES](https://github.com/mdp/gibberish-aes) - Copyright : Mark Percival 2008 - http://markpercival.us -Licence : MIT
+* [KD2fw](https://fossil.kd2.org/kd2fw/) - Copyright : 2001-2022+ BohwaZ - Licence : GNU AGPL v3
+* [Gibberish AES](https://github.com/mdp/gibberish-aes) - Copyright : Mark Percival 2008 - http://markpercival.us - Licence : MIT
+* [Parsedown](https://github.com/erusev/parsedown) - Copyright Emanuil Rusev - License MIT
+* [Unzipit.js](https://github.com/greggman/unzipit) - Copyright (c) 2019 Gregg Tavares  2014 Josh Wolfe - License MIT
