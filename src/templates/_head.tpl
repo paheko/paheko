@@ -110,11 +110,13 @@ if (!isset($current)) {
 			<li class="{if $current == 'config'} current{elseif $current_parent == 'config'} current_parent{/if}"><h3><a href="{$admin_url}config/"><b data-icn="{icon html=false shape="settings"}"></b><span>Configuration</span></a></h3>
 		{/if}
 
+		{if $logged_user->exists()}
 		<li class="{if $current == 'me'} current{elseif $current_parent == 'me'} current_parent{/if}"><h3><a href="{$admin_url}me/"><b data-icn="{icon html=false shape="user"}"></b><span> Mes infos personnelles</span></a></h3>
 			<ul>
 				<li{if $current == 'me/services'}  class="current"{/if}><a href="{$admin_url}me/services.php">Mes activités &amp; cotisations</a></li>
 			</ul>
 		</li>
+		{/if}
 
 		{if !defined('Garradin\LOCAL_LOGIN') || !LOCAL_LOGIN}
 			<li><h3><a href="{$admin_url}logout.php"><b data-icn="{icon html=false shape="logout"}"></b><span>Déconnexion</span></a></h3></li>

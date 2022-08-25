@@ -216,6 +216,7 @@ static $default_config = [
 	'CONTRIBUTOR_LICENSE'   => null,
 	'SQL_DEBUG'             => null,
 	'SYSTEM_SIGNALS'        => [],
+	'LOCAL_LOGIN'           => null,
 	'LEGAL_LINE'            => 'Propulsé par <a href="https://garradin.eu/" id="garradin" target="_blank">Garradin</a> — logiciel libre de gestion d\'association<br />Hébergé par <strong>%1$s</strong>, %2$s',
 ];
 

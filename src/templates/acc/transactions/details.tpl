@@ -83,18 +83,16 @@
 		| <strong>{if $transaction_year.closed}Clôturé{else}En cours{/if}</strong>
 	</dd>
 
+	{if $transaction.id_creator}
 	<dt>Écriture créée par</dt>
 	<dd>
-		{if $transaction.id_creator}
-			{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
-				<a href="{$admin_url}users/details.php?id={$transaction.id_creator}">{$creator_name}</a>
-			{else}
-				{$creator_name}
-			{/if}
+		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
+			<a href="{$admin_url}users/details.php?id={$transaction.id_creator}">{$creator_name}</a>
 		{else}
-			<em>membre supprimé</em>
+			{$creator_name}
 		{/if}
 	</dd>
+	{/if}
 
 	<dt>Écriture liée à</dt>
 	{if empty($related_users)}

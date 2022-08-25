@@ -29,18 +29,34 @@ namespace Garradin;
 //const SECRET_KEY = '3xUhIgGwuovRKOjVsVPQ5yUMfXUSIOX2GKzcebsz5OINrYC50r';
 
 /**
- * Se connecter automatiquement avec l'ID de membre indiqué
- * Exemple: LOCAL_LOGIN = 42 connectera automatiquement le membre n°42
+ * @var null|int|array
+ *
+ * Forcer la connexion locale
+ *
+ * Si un numéro est spécifié, alors le membre avec l'ID correspondant à ce
+ * numéro sera connecté (sans besoin de mot de passe).
+ *
+ * Exemple: LOCAL_LOGIN = 42 connectera automatiquement le membre avec id = 42
  * Attention à ne pas utiliser en production !
  *
- * Il est aussi possible de mettre "LOCAL_LOGIN = -1" pour se connecter
- * avec le premier membre trouvé qui peut gérer la configuration (et donc
- * modifier les droits des membres).
+ * Si le nombre spécifié est -1, alors c'est le premier membre trouvé qui
+ * peut gérer la configuration (et donc modifier les droits des membres)
+ * qui sera connecté.
  *
- * Défault : false (connexion automatique désactivée)
+ * Si un tableau est spécifié, alors Garradin considérera que l'utilisateur
+ * connecté fourni dans le tableau n'est pas un membre.
+ * Voir la documentation sur l'utilisation avec SSO et LDAP pour plus de détails.
+ *
+ * Exemple :
+ * const LOCAL_LOGIN = [
+ * 	'user' => ['_name' => 'bohwaz'],
+ * 	'permissions' => ['users' => 9, 'config' => 9]
+ * ];
+ *
+ * Défault : null (connexion automatique désactivée)
  */
 
-//const LOCAL_LOGIN = false;
+//const LOCAL_LOGIN = null;
 
 /**
  * Autoriser (ou non) l'import de sauvegarde qui a été modifiée ?

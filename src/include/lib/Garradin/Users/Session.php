@@ -10,11 +10,15 @@ use Garradin\UserException;
 use Garradin\Plugin;
 use Garradin\Users\Emails;
 
+use Garradin\Entities\Users\Category;
 use Garradin\Entities\Users\User;
 
-use const Garradin\SECRET_KEY;
-use const Garradin\WWW_URL;
-use const Garradin\ADMIN_URL;
+use const Garradin\{
+	SECRET_KEY,
+	WWW_URL,
+	ADMIN_URL,
+	LOCAL_LOGIN
+};
 
 use KD2\Security;
 use KD2\Security_OTP;
@@ -177,18 +181,39 @@ class Session extends \KD2\UserSession
 		$logged = parent::isLogged();
 
 		// Ajout de la gestion de LOCAL_LOGIN
-		if (!$disable_local_login && defined('\Garradin\LOCAL_LOGIN')) {
-			$logged = $this->forceLogin(\Garradin\LOCAL_LOGIN);
+		if (!$disable_local_login && LOCAL_LOGIN) {
+			$logged = $this->forceLogin(LOCAL_LOGIN);
 		}
 
 		return $logged;
 	}
 
-	public function forceLogin(int $id)
+	public function forceLogin($login)
 	{
+		// Force login with a static user, that is not in the local database
+		// this is useful for using a SSO like LDAP for example
+		if (is_array($login)) {
+			$this->user = (new User)->import(LOCAL_LOGIN['user'] ?? []);
+
+			if (isset(LOCAL_LOGIN['user']['_name'])) {
+				$name = DynamicFields::getFirstNameField();
+				$this->user->$name = LOCAL_LOGIN['user']['_name'];
+			}
+
+			$permissions = [];
+
+			foreach (Category::PERMISSIONS as $perm => $data) {
+				$permissions['perm_' . $perm] = LOCAL_LOGIN['permissions'][$perm] ?? self::ACCESS_NONE;
+			}
+
+			$this->set('permissions', $permissions);
+
+			return true;
+		}
+
 		// On va chercher le premier membre avec le droit de gérer la config
-		if (-1 === $id) {
-			$id = $this->db->firstColumn('SELECT id FROM users
+		if (-1 === $login) {
+			$login = $this->db->firstColumn('SELECT id FROM users
 				WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config = ?)
 				LIMIT 1', self::ACCESS_ADMIN);
 		}
@@ -196,8 +221,8 @@ class Session extends \KD2\UserSession
 		$logged = parent::isLogged();
 
 		// Only login if required
-		if ($id > 0 && (!$logged || ($logged && $this->user->id != $id))) {
-			return $this->create($id);
+		if ($login > 0 && (!$logged || ($logged && $this->user->id != $login))) {
+			return $this->create($login);
 		}
 
 		return $logged;
@@ -352,7 +377,7 @@ class Session extends \KD2\UserSession
 		return $this->getUser();
 	}
 
-	static public function getUserId(): int
+	static public function getUserId(): ?int
 	{
 		return self::getInstance()->user()->id;
 	}
