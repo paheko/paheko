@@ -65,7 +65,7 @@
 	{foreach from=$files item="file"}
 		<tr>
 			<th>{$file.name}</th>
-			<td>{$file.type}, {$file.size|size_in_bytes}</td>
+			<td>{$file.mime}, {$file.size|size_in_bytes}</td>
 			<td class="actions">
 				<form class="actions" method="post" action="{$self_url}">
 					{linkbutton shape="plus" label="Insérer" href=$file->url() data-name=$file.name data-insert="file"}

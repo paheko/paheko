@@ -59,6 +59,7 @@ class UserTemplate extends Brindille
 		$is_logged = $session->isLogged();
 
 		self::$root_variables = [
+			'version_hash' => Utils::getVersionHash(),
 			'root_url'     => WWW_URL,
 			'request_url'  => Utils::getRequestURI(),
 			'admin_url'    => ADMIN_URL,

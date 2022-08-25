@@ -242,16 +242,24 @@ class Sections
 			// Store attachments in temp table
 			$db = DB::getInstance();
 			$db->begin();
-			$db->exec('CREATE TEMP TABLE IF NOT EXISTS web_pages_attachments (page_id, uri, path, name, modified, image);');
-			$page_file_name = Utils::basename($page->file_path);
+			$db->exec('CREATE TEMP TABLE IF NOT EXISTS web_pages_attachments (page_id, uri, path, name, modified, image, data);');
 
 			foreach ($page->listAttachments() as $file) {
-				if ($file->name == $page_file_name || $file->type != File::TYPE_FILE) {
+				if ($file->type != File::TYPE_FILE) {
 					continue;
 				}
 
-				$db->preparedQuery('INSERT OR REPLACE INTO web_pages_attachments VALUES (?, ?, ?, ?, ?, ?);',
-					$page->id(), $file->uri(), $file->path, $file->name, $file->modified, $file->image);
+				$row = $file->asArray();
+				$row['title'] = str_replace(['_', '-'], ' ', $file->name);
+				$row['title'] = preg_replace('!\.[^\.]{3,5}$!', '', $row['title']);
+				$row['extension'] = strtoupper(preg_replace('!^.*\.([^\.]{3,5})$!', '$1', $file->name));
+				$row['url'] = $file->url();
+				$row['download_url'] = $file->url(true);
+				$row['thumb_url'] = $file->thumb_url();
+				$row['small_url'] = $file->thumb_url(File::THUMB_SIZE_SMALL);
+
+				$db->preparedQuery('INSERT OR REPLACE INTO web_pages_attachments VALUES (?, ?, ?, ?, ?, ?, ?);',
+					$page->id(), rawurldecode($file->uri()), $file->path, $file->name, $file->modified, $file->isImage(), json_encode($row));
 			}
 
 			$db->commit();
@@ -263,7 +271,7 @@ class Sections
 			return;
 		}
 
-		$params['select'] = 'path';
+		$params['select'] = 'data';
 		$params['tables'] = 'web_pages_attachments';
 		$params['where'] .= ' AND page_id = :page';
 		$params[':page'] = $page->id();
@@ -284,6 +292,7 @@ class Sections
 					$db->insert('files_tmp_in_text', ['page_id' => $page->id(), 'uri' => $uri]);
 				}
 
+
 				$db->commit();
 			});
 
@@ -299,18 +308,7 @@ class Sections
 		}
 
 		foreach (self::sql($params, $tpl, $line) as $row) {
-			$file = Files::get($row['path']);
-
-			if (null === $file) {
-				continue;
-			}
-
-			$row = $file->asArray();
-			$row['url'] = $file->url();
-			$row['download_url'] = $file->url(true);
-			$row['thumb_url'] = $file->thumb_url();
-			$row['small_url'] = $file->thumb_url(File::THUMB_SIZE_SMALL);
-			yield $row;
+			yield json_decode($row['data'], true);
 		}
 	}
 
