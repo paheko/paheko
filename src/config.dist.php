@@ -590,6 +590,6 @@ namespace Garradin;
  * Utile pour indiquer les mentions légales obligatoires
  * Le %1$s est remplacé par le nom de l'association, %2$s par son adresse.
  *
- * Défaut : "Hébergé par nom_association, adresse_association | Propulsé par Garradin"
+ * Défaut : "Hébergé par nom_association, adresse_association"
  */
-//const LEGAL_LINE = 'Propulsé par <a href="https://garradin.eu/" id="garradin" target="_blank">Garradin</a> — logiciel libre de gestion d\'association | Hébergé par <strong>%1$s</strong>, %2$s';
+//const LEGAL_LINE = 'Hébergé par <strong>%1$s</strong>, %2$s';
