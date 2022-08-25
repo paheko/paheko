@@ -463,13 +463,18 @@ class CommonModifiers
 			$input = sprintf('<select %s>', $attributes_string);
 
 			foreach ($options as $optgroup => $suboptions) {
-				$input .= sprintf('<optgroup label="%s">', htmlspecialchars((string)$optgroup));
+				if (is_array($suboptions)) {
+					$input .= sprintf('<optgroup label="%s">', htmlspecialchars((string)$optgroup));
 
-				foreach ($suboptions as $_key => $_value) {
-					$input .= sprintf('<option value="%s"%s>%s</option>', $_key, $current_value == $_key ? ' selected="selected"' : '', htmlspecialchars((string)$_value));
+					foreach ($suboptions as $_key => $_value) {
+						$input .= sprintf('<option value="%s"%s>%s</option>', $_key, $current_value == $_key ? ' selected="selected"' : '', htmlspecialchars((string)$_value));
+					}
+
+					$input .= '</optgroup>';
 				}
-
-				$input .= '</optgroup>';
+				else {
+					$input .= sprintf('<option value="%s"%s>%s</option>', $optgroup, $current_value == $optgroup ? ' selected="selected"' : '', htmlspecialchars((string)$suboptions));
+				}
 			}
 
 			$input .= '</select>';
