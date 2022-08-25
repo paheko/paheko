@@ -1079,4 +1079,18 @@ class Utils
         }
         return $r;
     }
+
+    /**
+     * Hash de la version pour les éléments statiques (cache)
+     *
+     * On ne peut pas utiliser la version directement comme query string
+     * pour les éléments statiques (genre /admin/static/admin.css?v0.9.0)
+     * car cela dévoilerait la version de Garradin utilisée, posant un souci
+     * en cas de faille, on cache donc la version utilisée, chaque instance
+     * aura sa propre version
+     */
+    static public function getVersionHash(): string
+    {
+        return substr(sha1(garradin_version() . garradin_manifest() . ROOT . SECRET_KEY), 0, 10);
+    }
 }

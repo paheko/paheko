@@ -66,13 +66,8 @@ class Template extends Smartyer
 		$this->setCompiledDir($cache_dir);
 		$this->setNamespace('Garradin');
 
-		// Hash de la version pour les éléments statiques (cache)
-		// On ne peut pas utiliser la version directement comme query string
-		// pour les éléments statiques (genre /admin/static/admin.css?v0.9.0)
-		// car cela dévoilerait la version de Garradin utilisée, posant un souci
-		// en cas de faille, on cache donc la version utilisée, chaque instance
-		// aura sa propre version
-		$this->assign('version_hash', substr(sha1(garradin_version() . garradin_manifest() . ROOT . SECRET_KEY), 0, 10));
+
+		$this->assign('version_hash', Utils::getVersionHash());
 
 		$this->assign('www_url', WWW_URL);
 		$this->assign('admin_url', ADMIN_URL);

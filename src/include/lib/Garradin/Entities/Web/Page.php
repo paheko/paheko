@@ -395,10 +395,10 @@ class Page extends Entity
 		}
 
 		foreach ($this->listAttachments() as $a) {
-			if ($images && !$a->image) {
+			if ($images && !$a->isImage()) {
 				continue;
 			}
-			elseif (!$images && $a->image) {
+			elseif (!$images && $a->isImage()) {
 				continue;
 			}
 

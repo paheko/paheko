@@ -613,6 +613,20 @@ class File extends Entity
 	}
 
 	/**
+	 * Returns true if this is a vector or bitmap image
+	 * as 'image' property is only for bitmaps
+	 * @return boolean
+	 */
+	public function isImage(): bool
+	{
+		if ($this->image || $this->mime == 'image/svg+xml') {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Full URL with https://...
 	 */
 	public function url(bool $download = false): string
@@ -636,15 +650,18 @@ class File extends Entity
 		$parts = array_map('rawurlencode', $parts);
 
 		if ($this->context() == self::CONTEXT_WEB) {
-			return array_shift($parts) . '/' . array_pop($parts);
+			$parts = array_slice($parts, -2);
 		}
-		else {
-			return implode('/', $parts);
-		}
+
+		return implode('/', $parts);
 	}
 
 	public function thumb_url($size = null): string
 	{
+		if (!$this->image) {
+			return $this->url();
+		}
+
 		if (is_int($size)) {
 			$size .= 'px';
 		}
