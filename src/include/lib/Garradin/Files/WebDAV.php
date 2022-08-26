@@ -22,8 +22,17 @@ class WebDAV extends KD2_WebDAV
 	 */
 	const PUT_IGNORE_PATTERN = '!^~(?:lock\.|^\._)|^(?:\.DS_Store|Thumbs\.db|desktop\.ini)$!';
 
+	const BANNED_USER_AGENTS = '!^WebDAVFS!';
+
 	static public function dispatchURI(string $uri)
 	{
+		if (isset($_SERVER['HTTP_USER_AGENT'])
+			&& preg_match(self::BANNED_USER_AGENTS, $_SERVER['HTTP_USER_AGENT'])) {
+			http_response_code(403);
+			echo "Your WebDAV client is buggy, you need to use another client.";
+			exit;
+		}
+
 		$w = new static;
 
 		try {
