@@ -80,6 +80,24 @@ class FileSystem implements StorageInterface
 		return $return;
 	}
 
+	static public function storePointer(File $file, $pointer): bool
+	{
+		$target = self::getFullPath($file);
+		self::ensureDirectoryExists(dirname($target));
+
+		$fp = fopen($target, 'w');
+
+		while (!feof($pointer)) {
+			fwrite($fp, fread($pointer));
+		}
+
+		fclose($fp);
+
+		touch($target, $file->modified->getTimestamp());
+
+		return true;
+	}
+
 	static public function mkdir(File $file): bool
 	{
 		return Utils::safe_mkdir(self::getFullPath($file));

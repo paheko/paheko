@@ -395,11 +395,17 @@ class Files
 		$db->commit();
 	}
 
-	static protected function create(string $parent, string $name, ?string $source_path, ?string $source_content): File
+	static protected function create(string $parent, string $name, array $source): File
 	{
-		if (!isset($source_path) && !isset($source_content)) {
-			throw new \InvalidArgumentException('Either source path or source content should be set but not both');
+		if (!isset($source['path']) && !isset($source['content']) && !isset($source['pointer'])) {
+			throw new \InvalidArgumentException('Unknown source type');
 		}
+		elseif (count($source) != 1) {
+			throw new \InvalidArgumentException('Invalid source type');
+		}
+
+		$pointer = $path = $content = null;
+		extract($source);
 
 		File::validateFileName($name);
 		File::validatePath($parent);
@@ -409,18 +415,30 @@ class Files
 
 		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
 
-		$path = $parent . '/' . $name;
-		$file = Files::callStorage('get', $path) ?: new File;
-		$file->import(compact('path', 'parent', 'name'));
+		$target = $parent . '/' . $name;
 
-		if ($source_path && !$source_content) {
-			$file->set('mime', finfo_file($finfo, $source_path));
-			$file->set('size', filesize($source_path));
-			$file->set('modified', new \DateTime('@' . filemtime($source_path)));
+		$file = Files::callStorage('get', $target) ?? new File;
+		$file->path = $target;
+		$file->parent = $parent;
+		$file->name = $name;
+
+		if ($pointer) {
+			if (0 !== fseek($pointer, 0, SEEK_END)) {
+				throw new \RuntimeException('Stream is not seekable');
+			}
+
+			$file->set('size', ftell($pointer));
+			fseek($pointer, 0, SEEK_SET);
+			$file->set('mime', mime_content_type($pointer));
+		}
+		elseif ($path) {
+			$file->set('mime', finfo_file($finfo, $path));
+			$file->set('size', filesize($path));
+			$file->set('modified', new \DateTime('@' . filemtime($path)));
 		}
 		else {
-			$file->set('mime', finfo_buffer($finfo, $source_content));
-			$file->set('size', strlen($source_content));
+			$file->set('size', strlen($content));
+			$file->set('mime', finfo_buffer($finfo, $content));
 		}
 
 		$file->set('image', in_array($file->mime, $file::IMAGE_TYPES));
@@ -433,37 +451,41 @@ class Files
 		return $file;
 	}
 
+	static protected function createFrom(string $target, array $source): File
+	{
+		$parent = Utils::dirname($target);
+		$name = Utils::basename($target);
+		$file = self::create($parent, $name, $source);
+		$file->store($source);
+		return $file;
+	}
 
 	/**
 	 * Create and store a file from a local path
-	 * @param  string $path         Target parent path + name
-	 * @param  string $source_path    Source file path
+	 * @param  string $target         Target parent path + name
+	 * @param  string $path    Source file path
 	 * @return File
 	 */
-	static public function createFromPath(string $path, string $source_path): File
+	static public function createFromPath(string $target, string $path): File
 	{
-		$parent = Utils::dirname($path);
-		$name = Utils::basename($path);
-		$file = self::create($parent, $name, $source_path, null);
-		$file->store($source_path, null);
-		return $file;
+		return self::createFrom($target, compact('path'));
 	}
 
 	/**
 	 * Create and store a file from a string
-	 * @param  string $path         Target parent path + name
-	 * @param  string $source_content    Source file contents
+	 * @param  string $target         Target parent path + name
+	 * @param  string $content    Source file contents
 	 * @return File
 	 */
-	static public function createFromString(string $path, string $source_content): File
+	static public function createFromString(string $target, string $content): File
 	{
-		$parent = Utils::dirname($path);
-		$name = Utils::basename($path);
-		$file = self::create($parent, $name, null, $source_content);
-		$file->store(null, $source_content);
-		return $file;
+		return self::createFrom($target, compact('content'));
 	}
 
+	static public function createFromPointer(string $target, $pointer): File
+	{
+		return self::createFrom($target, compact('pointer'));
+	}
 
 	/**
 	 * Upload multiple files

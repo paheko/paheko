@@ -19,55 +19,52 @@ class SQLite implements StorageInterface
 	{
 	}
 
-	/**
-	 * Renvoie le chemin vers le fichier local en cache, et le crée s'il n'existe pas
-	 * @return string Chemin local
-	 */
-	static protected function _getFilePathFromCache(File $file): string
+	static protected function getPointer(File $file)
 	{
-		$cache_id = 'files.' . $file->pathHash();
-
-		if (!Static_Cache::exists($cache_id))
-		{
-			$db = DB::getInstance();
-
-			try {
-				$blob = $db->openBlob('files_contents', 'content', $file->id());
-			}
-			catch (\Exception $e) {
-				if (!strstr($e->getMessage(), 'no such rowid')) {
-					throw $e;
-				}
-
-				throw new \RuntimeException('File does not exist in DB: ' . $file->path);
-			}
-
-			Static_Cache::storeFromPointer($cache_id, $blob);
-			fclose($blob);
-		}
-
-		return Static_Cache::getPath($cache_id);
-	}
-
-	static public function storePath(File $file, string $source_path): bool
-	{
-		return self::store($file, $source_path, null);
-	}
-
-	static public function storeContent(File $file, string $source_content): bool
-	{
-		return self::store($file, null, $source_content);
-	}
-
-	static protected function store(File $file, ?string $source_path, ?string $source_content): bool
-	{
-		if (!isset($source_path) && !isset($source_content)) {
-			throw new \InvalidArgumentException('Either source_path or source_content must be supplied');
-		}
-
 		$db = DB::getInstance();
 
-		$file->size = $source_content !== null ? strlen($source_content) : filesize($source_path);
+		try {
+			$blob = $db->openBlob('files_contents', 'content', $file->id());
+		}
+		catch (\Exception $e) {
+			if (!strstr($e->getMessage(), 'no such rowid')) {
+				throw $e;
+			}
+
+			throw new \RuntimeException('File does not exist in DB: ' . $file->path);
+		}
+
+		return $blob;
+	}
+
+	static public function storePath(File $file, string $path): bool
+	{
+		return self::store($file, compact('path'));
+	}
+
+	static public function storeContent(File $file, string $content): bool
+	{
+		return self::store($file, compact('content'));
+	}
+
+	static public function storePointer(File $file, string $pointer): bool
+	{
+		return self::store($file, compact('pointer'));
+	}
+
+	static protected function store(File $file, array $source): bool
+	{
+		if (!isset($source['path']) && !isset($source['content']) && !isset($source['pointer'])) {
+			throw new \InvalidArgumentException('Unknown source type');
+		}
+		elseif (count($source) != 1) {
+			throw new \InvalidArgumentException('Invalid source type');
+		}
+
+		$content = $path = $pointer = null;
+		extract($source);
+
+		$db = DB::getInstance();
 
 		$file->save();
 
@@ -78,40 +75,71 @@ class SQLite implements StorageInterface
 
 		$blob = $db->openBlob('files_contents', 'content', $id, 'main', \SQLITE3_OPEN_READWRITE);
 
-		if (null !== $source_content) {
-			fwrite($blob, $source_content);
+		if (null !== $content) {
+			fwrite($blob, $content);
 		}
-		else {
-			$in = fopen($source_path, 'r');
-			stream_copy_to_stream($in, $blob);
-			fclose($in);
+		elseif ($path) {
+			$pointer = fopen($path, 'rb');
+		}
+
+		if ($pointer) {
+			while (!feof($pointer)) {
+				fwrite($blob, fread($pointer, 8192));
+			}
+
+			if ($path) {
+				fclose($pointer);
+			}
 		}
 
 		fclose($blob);
 
-		$cache_id = 'files.' . $file->pathHash();
-		Static_Cache::remove($cache_id);
-
 		if ($file->parent) {
 			self::touch($file->parent);
 		}
+
+		$cache_id = 'files.' . $file->pathHash();
+		Static_Cache::remove($cache_id);
 
 		return true;
 	}
 
 	static public function getFullPath(File $file): ?string
 	{
-		return self::_getFilePathFromCache($file);
+		$cache_id = 'files.' . $file->pathHash();
+
+		if (!Static_Cache::exists($cache_id))
+		{
+			$blob = self::getPointer($file);
+			Static_Cache::storeFromPointer($cache_id, $blob);
+			fclose($blob);
+		}
+
+		return Static_Cache::getPath($cache_id);
 	}
 
 	static public function display(File $file): void
 	{
-		readfile(self::getFullPath($file));
+		$blob = self::getPointer($file);
+
+		while (!feof($blob)) {
+			echo fread($blob, 8192);
+		}
+
+		fclose($blob);
 	}
 
 	static public function fetch(File $file): string
 	{
-		return file_get_contents(self::getFullPath($file));
+		$blob = self::getPointer($file);
+		$out = '';
+
+		while (!feof($blob)) {
+			$out .= fread($blob, 8192);
+		}
+
+		fclose($blob);
+		return $out;
 	}
 
 	static public function get(string $path): ?File
@@ -172,6 +200,9 @@ class SQLite implements StorageInterface
 
 	static public function move(File $file, string $new_path): bool
 	{
+		$cache_id = 'files.' . $file->pathHash();
+		Static_Cache::remove($cache_id);
+
 		$current_path = $file->path;
 		$file->set('path', $new_path);
 		$file->set('parent', Utils::dirname($new_path));

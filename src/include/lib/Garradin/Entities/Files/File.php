@@ -3,6 +3,7 @@
 namespace Garradin\Entities\Files;
 
 use KD2\Graphics\Image;
+use KD2\Graphics\Blob;
 use KD2\DB\EntityManager as EM;
 
 use Garradin\Config;
@@ -250,21 +251,19 @@ class File extends Entity
 	public function setContent(string $content): self
 	{
 		$this->set('modified', new \DateTime);
-		$this->store(null, rtrim($content));
-		$this->indexForSearch($content);
+		$this->store(['content' => rtrim($content)]);
 		return $this;
 	}
 
 	/**
-	 * Store contents in file, either from a local path or from a binary string
-	 * If one parameter is supplied, the other must be NULL (you cannot omit one)
+	 * Store contents in file, either from a local path, from a binary string or from a pointer
 	 *
-	 * @param  string $source_path
+	 * @param  array $source [path, content or pointer]
 	 * @param  string $source_content
 	 * @param  bool   $index_search Set to FALSE if you don't want the document to be indexed in the file search
 	 * @return self
 	 */
-	public function store(?string $source_path, ?string $source_content, bool $index_search = true): self
+	public function store(array $source, bool $index_search = true): self
 	{
 		if (!$this->path || !$this->name) {
 			throw new \LogicException('Cannot store a file that does not have a target path and name');
@@ -274,38 +273,61 @@ class File extends Entity
 			throw new \LogicException('Cannot store a directory');
 		}
 
-		if ($source_path && !$source_content)
-		{
-			$this->set('size', filesize($source_path));
+		if (!isset($source['path']) && !isset($source['content']) && !isset($source['pointer'])) {
+			throw new \InvalidArgumentException('Unknown source type');
 		}
-		else
-		{
-			$this->set('size', strlen($source_content));
+		elseif (count($source) != 1) {
+			throw new \InvalidArgumentException('Invalid source type');
 		}
 
-		Files::checkQuota($this->size);
+		$delete_after = false;
+		$path = $content = $pointer = null;
+		extract($source);
+
+		if ($path) {
+			$this->set('size', filesize($path));
+			Files::checkQuota($this->size);
+		}
+		elseif (null !== $content) {
+			$this->set('size', strlen($content));
+			Files::checkQuota($this->size);
+		}
+		elseif ($pointer) {
+			if (0 !== fseek($pointer, 0, SEEK_END)) {
+				throw new \RuntimeException('Stream is not seekable');
+			}
+
+			fseek($pointer, 0, SEEK_SET);
+			$this->set('size', ftell($pointer));
+			Files::checkQuota($this->size);
+		}
 
 		// Check that it's a real image
 		if ($this->image) {
-			try {
-				if ($source_path && !$source_content) {
-					$i = new Image($source_path);
-				}
-				else {
-					$i = Image::createFromBlob($source_content);
-				}
+			if ($path) {
+				$blob = file_get_contents($path, false, null, 0, 20);
+			}
+			elseif ($pointer) {
+				$blob = fread($pointer, 20);
+				fseek($pointer, 0, SEEK_SET);
+			}
+			else {
+				$blob = substr($pointer, 0, 20);
+			}
 
+			if ($type = Blob::getType($blob)) {
 				// Recompress PNG files from base64, assuming they are coming
 				// from JS canvas which doesn't know how to gzip (d'oh!)
-				if ($i->format() == 'png' && null !== $source_content) {
-					$source_content = $i->output('png', true);
-					$this->set('size', strlen($source_content));
+				if ($type == 'image/png' && null !== $content) {
+					$i = Image::createFromBlob($content);
+					$content = $i->output('png', true);
+					$this->set('size', strlen($content));
+					unset($i);
 				}
-
-				unset($i);
 			}
-			catch (\RuntimeException $e) {
-				$this->set('image', 0);
+			else {
+				// Not an image
+				$this->set('image', false);
 			}
 		}
 
@@ -322,11 +344,15 @@ class File extends Entity
 			$this->set('modified', new \DateTime);
 		}
 
-		if (null !== $source_path) {
-			$return = Files::callStorage('storePath', $this, $source_path);
+		if (null !== $path) {
+			$return = Files::callStorage('storePath', $this, $path);
+		}
+		elseif (null !== $content) {
+			$return = Files::callStorage('storeContent', $this, $content);
 		}
 		else {
-			$return = Files::callStorage('storeContent', $this, $source_content);
+			$return = Files::callStorage('storePointer', $this, $pointer);
+			fclose($pointer);
 		}
 
 		if (!$return) {
@@ -335,8 +361,8 @@ class File extends Entity
 
 		Plugin::fireSignal('files.store', ['file' => $this]);
 
-		if ($index_search) {
-			$this->indexForSearch($source_content);
+		if ($index_search && $content) {
+			$this->indexForSearch($content);
 		}
 		else {
 			$this->removeFromSearch();

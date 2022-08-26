@@ -8,6 +8,7 @@ KD2/ErrorManager.php
 KD2/Form.php
 KD2/FossilInstaller.php
 KD2/Garbage2xhtml.php
+KD2/Graphics/Blob.php
 KD2/Graphics/Image.php
 KD2/Graphics/QRCode.php
 KD2/Graphics/SVG/Pie.php
@@ -25,5 +26,6 @@ KD2/Smartyer.php
 KD2/SMTP.php
 KD2/Translate.php
 KD2/UserSession.php
+KD2/WebDAV.php
 KD2/ZipWriter.php
 Parsedown.php
