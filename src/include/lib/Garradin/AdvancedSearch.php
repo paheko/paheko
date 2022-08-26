@@ -63,9 +63,15 @@ abstract class AdvancedSearch
 		// Only select columns that we want
 		$select_columns = array_intersect_key($this->columns(), array_flip($conditions->select));
 
+		$order = $query->order ?? $default_order;
+
+		if (!in_array($order, $select_columns)) {
+			$order = $default_order;
+		}
+
 		$list = new DynamicList($select_columns, $tables, $conditions->where);
 
-		$list->orderBy($query->order ?? $default_order, $query->desc ?? $default_desc);
+		$list->orderBy($order, $query->desc ?? $default_desc);
 		return $list;
 	}
 
@@ -101,6 +107,8 @@ abstract class AdvancedSearch
 				continue;
 			}
 
+			$invalid = 0;
+
 			$query_group_conditions = [];
 
 			foreach ($group['conditions'] as $condition)
@@ -117,6 +125,7 @@ abstract class AdvancedSearch
 					// Ignorer une condition qui se rapporte à une colonne
 					// qui n'existe pas, cas possible si on reprend une recherche
 					// après avoir modifié les fiches de membres
+					$invalid++;
 					continue;
 				}
 
@@ -200,6 +209,10 @@ abstract class AdvancedSearch
 			{
 				$query_groups[] = implode(' ' . $group['operator'] . ' ', $query_group_conditions);
 			}
+		}
+
+		if (!count($query_groups) && count($groups) && $invalid) {
+			throw new UserException('Cette recherche faisait référence à des champs qui n\'existent plus.');
 		}
 
 		return (object) [

@@ -143,7 +143,7 @@ class Search extends Entity
 	/**
 	 * Returns a SQLite3Result for the current search
 	 */
-	protected function query(?int $force_limit = 100, ?string $force_select = null): \SQLite3Result
+	public function query(?int $force_limit = 100, ?string $force_select = null): \SQLite3Result
 	{
 		if (null !== $this->_result) {
 			return $this->_result;
