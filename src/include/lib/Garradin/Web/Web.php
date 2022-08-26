@@ -6,6 +6,7 @@ use Garradin\Entities\Web\Page;
 use Garradin\Entities\Files\File;
 use Garradin\Web\Skeleton;
 use Garradin\Files\Files;
+use Garradin\Files\WebDAV;
 use Garradin\API;
 use Garradin\Config;
 use Garradin\DB;
@@ -214,6 +215,9 @@ class Web
 		elseif (substr($uri, 0, 4) == 'api/') {
 			API::dispatchURI(substr($uri, 4));
 			exit;
+		}
+		elseif (substr($uri, 0, 4) == 'dav/') {
+			WebDAV::dispatchURI($_SERVER['REQUEST_URI'] ?? '');
 		}
 		elseif ($uri == 'favicon.ico') {
 			header('Location: ' . Config::getInstance()->fileURL('favicon'), true);

@@ -433,6 +433,17 @@ CREATE TABLE IF NOT EXISTS files_contents
     content BLOB NOT NULL
 );
 
+CREATE TABLE files_webdav_locks (
+    uri TEXT NOT NULL,
+    token TEXT NOT NULL,
+    scope TEXT NOT NULL,
+    expiry TEXT NOT NULL
+);
+
+CREATE INDEX files_webdav_locks_uri ON files_webdav_locks (uri);
+
+CREATE UNIQUE INDEX files_webdav_locks_unique ON files_webdav_locks (uri, token);
+
 CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4
 -- Search inside files content
 (
