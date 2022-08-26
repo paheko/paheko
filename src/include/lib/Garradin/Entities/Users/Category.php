@@ -43,7 +43,7 @@ class Category extends Entity
 	const PERMISSIONS = [
 		'connect' => [
 			'label' => 'Les membres de cette catégorie peuvent-ils se connecter ?',
-			'shape' => Utils::ICONS['lock'],
+			'shape' => Utils::ICONS['logout'],
 			'options' => [
 				Session::ACCESS_NONE => 'N\'a pas le droit de se connecter',
 				Session::ACCESS_READ => 'A le droit de se connecter',
@@ -51,7 +51,7 @@ class Category extends Entity
 		],
 		'users' => [
 			'label' => 'Gestion des membres',
-			'shape' => Utils::ICONS['user'],
+			'shape' => Utils::ICONS['users'],
 			'options' => [
 				Session::ACCESS_NONE => 'Pas d\'accès',
 				Session::ACCESS_READ => 'Lecture uniquement (peut voir les informations personnelles de tous les membres, y compris leurs inscriptions à des activités)',

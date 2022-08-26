@@ -85,6 +85,15 @@
 				{else}
 					(<b class="icn">🔓</b> sans second facteur)
 				{/if}
+			{/if}
+		</dd>
+		<dd>
+		{if $logged_user.id == $user.id}
+			{linkbutton shape="settings" label="Modifier mon mot de passe" href="!me/security.php"}
+		{elseif $user.password}
+			{linkbutton shape="settings" label="Modifier" href="edit_security.php?id=%d"|args:$user.id target="_dialog"}
+		{else}
+			{linkbutton shape="settings" label="Définir un mot de passe" href="edit_security.php?id=%d"|args:$user.id target="_dialog"}
 		{/if}
 		</dd>
 	</dl>

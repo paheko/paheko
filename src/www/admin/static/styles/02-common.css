@@ -383,6 +383,23 @@ aside.describe dl.describe dt {
     color: rgb(var(--gTextColor));
 }
 
+aside.describe dd a.icn-btn, aside.secondary a.icn-btn {
+    margin-left: 0;
+}
+
+@media handheld,screen and (min-width:1199px) {
+    aside.secondary {
+        width: 25em;
+        float: right;
+        margin: 1em;
+    }
+
+    aside.secondary fieldset {
+        padding: 0;
+        border: none;
+    }
+}
+
 .hidden {
     display: none;
 }

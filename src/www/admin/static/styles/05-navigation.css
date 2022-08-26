@@ -1,7 +1,11 @@
 /** Context-specific tabs */
-nav.tabs ul {
-    list-style-type: none;
+nav.tabs {
     margin: 1em 0;
+}
+
+nav.tabs ul {
+    margin-bottom: 1em;
+    list-style-type: none;
     border-bottom: 2px solid #9c4f15;
     border-bottom-color: rgb(var(--gMainColor));
     padding: 0 1em;

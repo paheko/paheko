@@ -12,18 +12,20 @@
 	</p>
 {/if}
 
-	<!-- This is to avoid chrome autofill, Chrome developers you suck -->
-	<input type="text" name="email" class="hidden" />
-	{if $id_field_name != 'email'}<input type="text" class="hidden" name="{$id_field_name}" />{/if}
-	<input type="password" class="hidden" name="password" />
-
-	<fieldset>
-		<legend>Informations personnelles</legend>
-		<dl>
+	<aside class="secondary">
+		<fieldset>
+			<dl>
 			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
 				{input type="select" name="id_category" label="Catégorie du membre" required=true options=$categories default=$default_category}
 			{/if}
 			{input type="list" name="id_parent" label="Rattacher à un membre" target="!users/selector.php?no_children=1" help="Permet de regrouper les personnes d'un même foyer par exemple. Sélectionner ici le membre responsable." can_delete=true}
+		</dl>
+		</fieldset>
+	</aside>
+
+	<fieldset>
+		<legend>Fiche du membre</legend>
+		<dl>
 			{foreach from=$fields item="field"}
 				{edit_dynamic_field context="new" field=$field user=$user}
 			{/foreach}

@@ -311,6 +311,10 @@ select, input[size], input[type=color], button, input[type=button], input[type=s
     min-width: 0;
 }
 
+select {
+    max-width: calc(100% - 1.5em);
+}
+
 input.otp {
     font-family: monospace;
     font-size: 30px;
@@ -672,11 +676,11 @@ form.progressing {
     position: relative;
 }
 
-form fieldset, form p.submit {
+form fieldset, form p {
     transition: .5s filter linear;
 }
 
-form.progressing fieldset, form.progressing p.submit {
+form.progressing fieldset, form.progressing p {
     pointer-events: none;
     opacity: 0.5;
     filter: blur(3px);

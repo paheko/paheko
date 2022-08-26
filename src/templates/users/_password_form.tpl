@@ -19,7 +19,7 @@ $required = $required ?? $field->required;
 
 {input type="password" name="password" required=$required label="Mot de passe" help="Minimum %d caractères"|args:$password_length autocomplete="off" minlength=$password_length}
 
-{input type="password" name="password_confirmed" required=$required label="Encore le mot de pase (vérification)" help="Minimum %d caractères"|args:$password_length autocomplete="off" minlength=$password_length}
+{input type="password" name="password_confirmed" required=$required label="Encore le mot de passe (vérification)" help="Minimum %d caractères"|args:$password_length autocomplete="off" minlength=$password_length}
 
 <script type="text/javascript" async="async">
 {literal}

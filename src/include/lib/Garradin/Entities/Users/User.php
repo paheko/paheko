@@ -159,12 +159,20 @@ class User extends Entity
 	public function save(bool $selfcheck = true): bool
 	{
 		$columns = array_intersect(DynamicFields::getInstance()->getSearchColumns(), array_keys($this->_modified));
+		$login_field = DynamicFields::getLoginField();
+		$login_modified = $this->isModified($login_field);
+
 		parent::save($selfcheck);
 
 		// We are not using a trigger as it would make modifying the users table from outside impossible
 		// (because the transliterate_to_ascii function does not exist)
 		if (count($columns)) {
 			DynamicFields::getInstance()->rebuildUserSearchCache($this->id());
+		}
+
+		if ($login_modified && $this->password) {
+			Emails::queue(Emails::CONTEXT_SYSTEM, [$this], null, 'Votre identifiant de connexion a été modifié',
+				sprintf("Pour information, vos informations de connexion ont été modifiées.\nVotre nouvel identifiant de connexion est le suivant :\n%s\n\nVous pouvez utiliser cet identifiant pour vous connecter à votre association à l'adresse suivante :\n%s\n\nCe message est envoyé automatiquement lorsque votre identifiant est modifié.", $this->$login_field, ADMIN_URL));
 		}
 
 		return true;
@@ -226,6 +234,9 @@ class User extends Entity
 			$source = $_POST;
 		}
 
+		$allowed = ['password', 'password_check', 'password_confirmed', 'password_delete', 'otp_secret', 'otp_disable', 'pgp_key', 'otp_code'];
+		$source = array_intersect_key($source, array_flip($allowed));
+
 		$session = Session::getInstance();
 
 		if ($user_mode && !Session::getInstance()->checkPassword($source['password_check'] ?? null, $this->password)) {
@@ -235,7 +246,10 @@ class User extends Entity
 			);
 		}
 
-		if (isset($source['password'])) {
+		if (!empty($source['password_delete'])) {
+			$source['password'] = null;
+		}
+		elseif (isset($source['password'])) {
 			$source['password'] = trim($source['password']);
 			$this->assert(hash_equals($source['password'], $source['password_confirmed'] ?? ''), 'La vérification du mot de passe doit être identique au mot de passe.');
 			$this->assert(strlen($source['password']) >= self::MINIMUM_PASSWORD_LENGTH, sprintf('Le mot de passe doit faire au moins %d caractères.', self::MINIMUM_PASSWORD_LENGTH));
@@ -244,13 +258,12 @@ class User extends Entity
 			$source['password'] = $session::hashPassword($source['password']);
 		}
 
-		if (isset($source['otp_secret'])) {
-			$this->assert(trim($source['otp_code'] ?? '') !== '', 'Le code TOTP doit être renseigné pour confirmer l\'opération');
-			$this->assert($session->checkOTP($source['otp_secret'], $source['otp_code']), 'Le code TOTP entré n\'est pas valide.');
-		}
-
 		if (!empty($source['otp_disable'])) {
 			$source['otp_secret'] = null;
+		}
+		elseif (isset($source['otp_secret'])) {
+			$this->assert(trim($source['otp_code'] ?? '') !== '', 'Le code TOTP doit être renseigné pour confirmer l\'opération');
+			$this->assert($session->checkOTP($source['otp_secret'], $source['otp_code']), 'Le code TOTP entré n\'est pas valide.');
 		}
 
 		if (!empty($source['pgp_key'])) {
