@@ -544,7 +544,7 @@
 	});
 
 	g.onload(() => {
-		document.querySelectorAll('input[type="password"]:not([readonly]):not([disabled])').forEach((e) => {
+		document.querySelectorAll('input[type="password"]:not([readonly]):not([disabled]):not(.hidden)').forEach((e) => {
 			g.enhancePasswordField(e);
 		});
 	});
