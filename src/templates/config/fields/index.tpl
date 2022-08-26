@@ -6,7 +6,7 @@
 	{linkbutton shape="plus" label="Ajouter un champ" href="new.php"}
 </nav>
 
-{if $_GET.msg == 'ORDER_SAVED'}
+{if $_GET.msg == 'SAVED_ORDER'}
 	<p class="block confirm">
 		L'ordre a bien été enregistré.
 	</p>
