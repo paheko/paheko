@@ -8,8 +8,8 @@
 
 <form method="post" action="{$self_url}" data-focus="dl [name]">
 	<!-- This is to avoid chrome autofill, Chrome developers you suck -->
-	<input type="text" style="display: none;" name="{$login_field}" />
-	<input type="password" style="display: none;" name="password" />
+	<input type="text" class="hidden" name="{$login_field}" />
+	<input type="password" class="hidden" name="password" />
 
 	<fieldset>
 		<legend>Informations personnelles</legend>

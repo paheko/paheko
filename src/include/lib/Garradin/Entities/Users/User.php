@@ -367,4 +367,11 @@ class User extends Entity
 		$password_field = current(DynamicFields::getInstance()->fieldsBySystemUse('password'));
 		return $password_field->write_access == $password_field::ACCESS_USER;
 	}
+
+	public function checkDuplicate(): ?int
+	{
+		$id_field = DynamicFields::getNameFieldsSQL();
+		$db = DB::getInstance();
+		return $db->firstColumn(sprintf('SELECT id FROM %s WHERE %s = ?;', self::TABLE, $id_field), $this->name());
+	}
 }
