@@ -112,7 +112,6 @@ class Template extends Smartyer
 		});
 
 		$this->register_function('form_errors', [$this, 'formErrors']);
-		$this->register_function('show_error', [$this, 'showError']);
 
 		$this->register_function('custom_colors', [$this, 'customColors']);
 		$this->register_function('plugin_url', ['Garradin\Utils', 'plugin_url']);
@@ -186,19 +185,15 @@ class Template extends Smartyer
 			else {
 				$error = nl2br($this->escape($error));
 			}
+
+			/* Not used currently
+			$error = preg_replace_callback('/\[([^\]]*)\]\(([^\)]+)\)/',
+				fn ($m) => sprintf('<a href="%s">%s</a>', Utils::getLocalURL($m[2]), $m[1] ?? $m[2])
+			);
+			*/
 		}
 
 		return '<div class="block error"><ul><li>' . implode('</li><li>', $errors) . '</li></ul></div>';
-	}
-
-	protected function showError($params)
-	{
-		if (!$params['if'])
-		{
-			return '';
-		}
-
-		return '<p class="block error">' . $this->escape($params['message']) . '</p>';
 	}
 
 	protected function formatPhoneNumber($n)
