@@ -32,7 +32,7 @@ $csrf_key = 'recover_password';
 $new = qg('new') !== null;
 
 $form->runIf('recover', function () use ($session) {
-	$session->recoverPasswordSend((int) f('id'));
+	$session->recoverPasswordSend(f('id'));
 }, $csrf_key, '!password.php?sent' . ($new ? '&new' : ''));
 
 $sent = !$form->hasErrors() && null !== qg('sent');

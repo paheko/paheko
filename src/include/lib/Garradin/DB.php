@@ -6,6 +6,8 @@ use KD2\DB\SQLite3;
 use KD2\DB\DB_Exception;
 use KD2\ErrorManager;
 
+use Garradin\Entities\Email\Email;
+
 class DB extends SQLite3
 {
     /**
@@ -225,7 +227,7 @@ class DB extends SQLite3
         $db->createFunction('basename', [Utils::class, 'basename']);
         $db->createFunction('unicode_like', [self::class, 'unicodeLike']);
         $db->createFunction('transliterate_to_ascii', [Utils::class, 'unicodeTransliterate']);
-        $db->createFunction('email_hash', [Entities\Users\Email::class, 'getHash']);
+        $db->createFunction('email_hash', [Email::class, 'getHash']);
         $db->createCollation('U_NOCASE', [Utils::class, 'unicodeCaseComparison']);
     }
 

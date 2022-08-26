@@ -54,7 +54,7 @@ $fields = DF::getInstance()->all();
 			{display_dynamic_field field=$field value=$value}
 		{/if}
 	</dd>
-		{if $field.type == 'email' && $value && ($email = Users\Emails::getEmail($value))}
+		{if $field.type == 'email' && $value && ($email = Email\Emails::getEmail($value))}
 		<dt>Statut e-mail</dt>
 		<dd>
 			{if $email.optout}

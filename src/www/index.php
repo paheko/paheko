@@ -2,7 +2,7 @@
 
 namespace Garradin;
 
-use Garradin\Users\Emails;
+use Garradin\Email\Emails;
 use Garradin\Web\Web;
 
 require __DIR__ . '/_inc.php';

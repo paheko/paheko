@@ -8,7 +8,7 @@ use Garradin\Utils;
 use Garradin\Users\Users;
 use Garradin\UserException;
 use Garradin\Plugin;
-use Garradin\Users\Emails;
+use Garradin\Email\Templates as EmailsTemplates;
 
 use Garradin\Entities\Users\Category;
 use Garradin\Entities\Users\User;
@@ -248,7 +248,7 @@ class Session extends \KD2\UserSession
 		return false;
 	}
 
-	public function recoverPasswordSend(int $id): void
+	public function recoverPasswordSend(string $id): void
 	{
 		$user = $this->fetchUserForPasswordRecovery($id);
 
@@ -266,15 +266,12 @@ class Session extends \KD2\UserSession
 
 		$query = $this->makePasswordRecoveryQuery($user);
 
-		$message = "Bonjour,\n\nVous avez oublié votre mot de passe ? Pas de panique !\n\n";
-		$message.= "Il vous suffit de cliquer sur le lien ci-dessous pour modifier votre mot de passe.\n\n";
-		$message.= ADMIN_URL . 'password.php?c=' . $query;
-		$message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le, votre mot de passe restera inchangé.";
+		$url = ADMIN_URL . 'password.php?c=' . $query;
 
-		Emails::queue(Emails::CONTEXT_SYSTEM, [$user->email => ['pgp_key' => $user->pgp_key]], null, 'Mot de passe perdu ?', $message);
+		EmailsTemplates::recoverPassword($user->email, $user->pgp_key, $url);
 	}
 
-	protected function fetchUserForPasswordRecovery(int $id): ?\stdClass
+	protected function fetchUserForPasswordRecovery(string $id): ?\stdClass
 	{
 		$db = DB::getInstance();
 
@@ -363,13 +360,7 @@ class Session extends \KD2\UserSession
 		$ue = Users::get($user->id);
 		$ue->importSecurityForm(compact('password', 'password_confirmed'));
 		$ue->save();
-
-		$message = "Bonjour,\n\nLe mot de passe de votre compte a bien été modifié.\n\n";
-		$message.= "Votre adresse email : ".$user->email."\n";
-		$message.= "La demande émanait de l'adresse IP : ".Utils::getIP()."\n\n";
-		$message.= "Si vous n'avez pas demandé à changer votre mot de passe, merci de nous le signaler.";
-
-		return Emails::queue(Emails::CONTEXT_SYSTEM, [$user->email => ['pgp_key' => $user->pgp_key]], null, 'Mot de passe modifié', $message);
+		EmailsTemplates::passwordChanged($ue);
 	}
 
 	public function user(): ?User

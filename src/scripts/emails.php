@@ -2,7 +2,7 @@
 
 namespace Garradin;
 
-use Garradin\Users\Emails;
+use Garradin\Email\Emails;
 
 if (PHP_SAPI != 'cli') {
 	die("Wrong call");

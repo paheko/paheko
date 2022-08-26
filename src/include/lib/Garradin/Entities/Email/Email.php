@@ -1,11 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Garradin\Entities\Users;
+namespace Garradin\Entities\Email;
 
 use Garradin\Entity;
 use Garradin\UserException;
-use Garradin\Users\Emails;
+use Garradin\Email\Emails;
+use Garradin\Email\Templates as EmailsTemplates;
 
 use KD2\SMTP;
 
@@ -69,11 +70,8 @@ class Email extends Entity
 			throw new UserException('Adresse email inconnue');
 		}
 
-		$message = "Bonjour,\n\nPour vérifier votre adresse e-mail pour notre association,\ncliquez sur le lien ci-dessous :\n\n";
-		$message.= self::getOptoutURL($this->hash) . '&v=' . $this->getVerificationCode();
-		$message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le.";
-
-		Emails::queue(Emails::CONTEXT_SYSTEM, [$email => null], null, 'Confirmez votre adresse e-mail', $message);
+		$verify_url = self::getOptoutURL($this->hash) . '&v=' . $this->getVerificationCode();
+		EmailsTemplates::verifyAddress($email, $verify_url);
 	}
 
 	public function verify(string $code): bool

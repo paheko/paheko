@@ -1,7 +1,7 @@
 <?php
 namespace Garradin;
 
-use Garradin\Users\Emails;
+use Garradin\Email\Emails;
 
 const LOGIN_PROCESS = true;
 

@@ -2,7 +2,7 @@
 
 namespace Garradin;
 
-use Garradin\Users\Emails;
+use Garradin\Email\Emails;
 
 require_once __DIR__ . '/../../include/init.php';
 

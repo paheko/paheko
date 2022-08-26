@@ -212,7 +212,7 @@ abstract class AdvancedSearch
 		}
 
 		if (!count($query_groups) && count($groups) && $invalid) {
-			throw new UserException('Cette recherche faisait référence à des champs qui n\'existent plus.');
+			throw new UserException('Cette recherche faisait référence à des champs qui n\'existent plus.' . "\n" . 'Elle ne comporte aucun critère valide. Il vaudrait mieux la supprimer.');
 		}
 
 		return (object) [

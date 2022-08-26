@@ -7,7 +7,7 @@ use Garradin\Users\Users;
 use Garradin\Search;
 use Garradin\Services\Services;
 use Garradin\Entities\Search as SearchEntity;
-use Garradin\Users\Emails;
+use Garradin\Entities\Email\Mailing;
 
 require_once __DIR__ . '/_inc.php';
 
@@ -54,16 +54,16 @@ $form->runIf(f('send') || f('subject'), function () use (&$mailing) {
 		throw new UserException('La liste de destinataires sélectionnée ne comporte aucun membre, ou aucun avec une adresse e-mail renseignée.');
 	}
 
-	$mailing = Emails::createMailing($recipients, f('subject'), f('message'), (bool) f('send_copy'), f('render') ?: null);
+	$mailing = Mailing::create($recipients, f('subject'), f('message'), (bool) f('send_copy'), f('render') ?: null);
 }, $csrf_key);
 
 $form->runIf('export', function() use ($mailing) {
-	Emails::exportMailing(f('export'), $mailing);
+	Mailing::export(f('export'), $mailing);
 	exit;
 });
 
 $form->runIf('send', function () use ($mailing) {
-	Emails::sendMailing($mailing);
+	Mailing::send($mailing);
 }, $csrf_key, '!users/mailing.php?sent');
 
 $groups = [
@@ -95,7 +95,7 @@ unset($groups, $optgroups);
 $tpl->assign('preview', f('preview') && $mailing ? $mailing->preview : null);
 $tpl->assign('recipients_count', $mailing ? count($mailing->recipients) : 0);
 
-$tpl->assign('render_formats', Emails::RENDER_FORMATS);
+$tpl->assign('render_formats', Mailing::RENDER_FORMATS);
 
 $tpl->assign(compact('csrf_key', 'targets'));
 

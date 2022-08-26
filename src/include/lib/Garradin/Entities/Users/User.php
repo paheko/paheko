@@ -16,7 +16,8 @@ use Garradin\ValidationException;
 use Garradin\Files\Files;
 
 use Garradin\Users\Categories;
-use Garradin\Users\Emails;
+use Garradin\Email\Emails;
+use Garradin\Email\Templates as EmailTemplates;
 use Garradin\Users\DynamicFields;
 use Garradin\Users\Session;
 use Garradin\Users\Users;
@@ -161,6 +162,7 @@ class User extends Entity
 		$columns = array_intersect(DynamicFields::getInstance()->getSearchColumns(), array_keys($this->_modified));
 		$login_field = DynamicFields::getLoginField();
 		$login_modified = $this->isModified($login_field);
+		$password_modified = $this->isModified('password');
 
 		parent::save($selfcheck);
 
@@ -171,8 +173,11 @@ class User extends Entity
 		}
 
 		if ($login_modified && $this->password) {
-			Emails::queue(Emails::CONTEXT_SYSTEM, [$this], null, 'Votre identifiant de connexion a été modifié',
-				sprintf("Pour information, vos informations de connexion ont été modifiées.\nVotre nouvel identifiant de connexion est le suivant :\n%s\n\nVous pouvez utiliser cet identifiant pour vous connecter à votre association à l'adresse suivante :\n%s\n\nCe message est envoyé automatiquement lorsque votre identifiant est modifié.", $this->$login_field, ADMIN_URL));
+			EmailTemplates::loginChanged($this);
+		}
+
+		if ($password_modified && $this->password && $this->id == Session::getUserId()) {
+			EmailTemplates::passwordChanged($this);
 		}
 
 		return true;
@@ -278,15 +283,22 @@ class User extends Entity
 		return parent::importForm($source);
 	}
 
-	public function canEmail(): bool
+	public function getEmails(): array
 	{
+		$out = [];
+
 		foreach (DynamicFields::getEmailFields() as $f) {
-			if (!empty($this->$f)) {
-				return true;
+			if (trim($this->$f)) {
+				$out[] = strtolower($this->$f);
 			}
 		}
 
-		return false;
+		return $out;
+	}
+
+	public function canEmail(): bool
+	{
+		return count($this->getEmails()) > 0;
 	}
 
 	public function getNameAndEmail(): string
@@ -347,10 +359,10 @@ class User extends Entity
 
 		$from = $from ? $from->getNameAndEmail() : null;
 
-		Emails::queue(Emails::CONTEXT_PRIVATE, [$this->{$email_field} => ['pgp_key' => $this->pgp_key]], $from, $subject, $message);
+		Emails::queue(Emails::CONTEXT_PRIVATE, [['email' => $this->{$email_field}, 'pgp_key' => $this->pgp_key]], $from, $subject, $message);
 
 		if ($send_copy) {
-			Emails::queue(Emails::CONTEXT_PRIVATE, [$config->org_email => ['pgp_key' => $from->pgp_key]], null, $subject, $message);
+			Emails::queue(Emails::CONTEXT_PRIVATE, [['email' => $config->org_email, 'pgp_key' => $from->pgp_key]], null, $subject, $message);
 		}
 	}
 

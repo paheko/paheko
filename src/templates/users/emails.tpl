@@ -28,14 +28,14 @@
 
 		{foreach from=$list->iterate() item="row"}
 		<tr>
-			<th><a href="fiche.php?id={$row.user_id}">{$row.identity}</a></th>
+			<th><a href="details.php?id={$row.user_id}">{$row.identity}</a></th>
 			<td>{$row.email}</td>
 			<td>{$row.status}</td>
 			<td class="num">{$row.sent_count}</td>
 			<td>{$row.fail_log|escape|nl2br}</td>
 			<td>{$row.last_sent|date}</td>
 			<td>
-				{if $row.email && $row.optout}
+				{if $row.email}
 					{linkbutton target="_dialog" label="Rétablir" href="?verify=%s"|args:$row.email shape="check"}
 				{/if}
 			</td>

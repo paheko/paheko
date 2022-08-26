@@ -20,7 +20,7 @@ class Users
 	 * Return a list for all emails by category
 	 * @param  int|null $id_category If NULL, then all categories except hidden ones will be returned
 	 */
-	static protected function iterateEmailsByCategory(?int $id_category = null): iterable
+	static public function iterateEmailsByCategory(?int $id_category = null): iterable
 	{
 		$db = DB::getInstance();
 		$fields = DynamicFields::getEmailFields();

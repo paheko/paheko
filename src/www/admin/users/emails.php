@@ -1,14 +1,14 @@
 <?php
 namespace Garradin;
 
-use Garradin\Users\Emails;
+use Garradin\Email\Emails;
 
 require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 
 if ($address = qg('verify')) {
-    $email = Emails::getEmail($address);
+    $email = Emails::getOrCreateEmail($address);
 
     if (!$email) {
         throw new UserException('Adresse invalide');

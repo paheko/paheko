@@ -1,14 +1,14 @@
 <?php
 
-namespace Garradin\Users;
+namespace Garradin\Email;
 
 use Garradin\Config;
-use Garradin\CSV;
 use Garradin\DB;
 use Garradin\DynamicList;
 use Garradin\Plugin;
 use Garradin\UserException;
-use Garradin\Entities\Users\Email;
+use Garradin\Entities\Email\Email;
+use Garradin\Entities\Users\User;
 use Garradin\Users\DynamicFields;
 use Garradin\UserTemplate\UserTemplate;
 use Garradin\Web\Render\Render;
@@ -24,12 +24,6 @@ use KD2\DB\EntityManager as EM;
 
 class Emails
 {
-	const RENDER_FORMATS = [
-		null => 'Texte brut',
-		Render::FORMAT_SKRIV => 'SkrivML',
-		Render::FORMAT_MARKDOWN => 'MarkDown',
-	];
-
 	/**
 	 * Email sending contexts
 	 */
@@ -45,7 +39,8 @@ class Emails
 	/**
 	 * Add a message to the sending queue using templates
 	 * @param  int          $context
-	 * @param  array        $recipients List of recipients, 'From' email address as the key, and an array as a value, that contains variables to be used in the email template
+	 * @param  array        $recipients List of recipients, which can be a list of email addresses, or a list of User entities, or a list of:
+	 * ['variables' => [...], 'user' => User]
 	 * @param  string       $sender
 	 * @param  string       $subject
 	 * @param  UserTemplate|string $content
@@ -53,8 +48,59 @@ class Emails
 	 */
 	static public function queue(int $context, array $recipients, ?string $sender, string $subject, $content, ?string $render = null): void
 	{
-		// Remove duplicates due to case changes
-		$recipients = array_change_key_case($recipients, CASE_LOWER);
+		$list = [];
+
+		// Build email list
+		foreach ($recipients as $r) {
+			$variables = [];
+			$user = null;
+			$pgp_key = null;
+			$emails = [];
+
+			if ($r instanceof User || isset($r['user'])) {
+				$user = $r instanceof User ? $r : $r['user'];
+				$pgp_key = $user->pgp_key;
+			}
+
+			if (!is_object($r)) {
+				$pgp_key = $r['pgp_key'] ?? null;
+				$variables = $r['variables'] ?? [];
+			}
+
+			if (is_string($r) || (is_array($r) && isset($r['email']))) {
+				$emails[] = strtolower($r['email'] ?? $r);
+			}
+			elseif ($user) {
+				$emails = $user->getEmails();
+			}
+			else {
+				continue;
+			}
+
+			// Ignore invalid addresses
+			foreach ($emails as $key => $value) {
+				if (!preg_match('/.+@.+\..+$/', $value)) {
+					unset($emails[$key]);
+				}
+			}
+
+			if (!count($emails)) {
+				continue;
+			}
+
+			$data = compact('user', 'variables', 'pgp_key');
+
+			foreach ($emails as $value) {
+				$list[$value] = $data;
+			}
+		}
+
+		if (!count($list)) {
+			return;
+		}
+
+		$recipients = $list;
+		unset($list);
 
 		if (Plugin::fireSignal('email.queue.before', compact('context', 'recipients', 'sender', 'subject', 'content', 'render'))) {
 			// queue handling was done by a plugin
@@ -78,13 +124,8 @@ class Emails
 			$skel = new Skeleton('email.html');
 		}
 
-		foreach ($recipients as $to => $variables) {
-			// Ignore invalid addresses
-			if (!preg_match('/.+@.+\..+$/', $to)) {
-				continue;
-			}
-
-			$variables = (array)$variables;
+		foreach ($recipients as $to => $data) {
+			$variables = (array)$data['variables'];
 
 			// We won't try to reject invalid/optout recipients here,
 			// it's done in the queue clearing (more efficient)
@@ -119,7 +160,7 @@ class Emails
 				]);
 			}
 
-			if (Plugin::fireSignal('email.queue.insert', compact('context', 'to', 'sender', 'subject', 'content', 'render', 'hash', 'content_html') + ['pgp_key' => $variables['pgp_key'] ?? null])) {
+			if (Plugin::fireSignal('email.queue.insert', compact('context', 'to', 'sender', 'subject', 'content', 'render', 'hash', 'content_html') + ['pgp_key' => $data['pgp_key'] ?? null])) {
 				// queue insert was done by a plugin
 				continue;
 			}
@@ -545,76 +586,6 @@ class Emails
 		return $return;
 	}
 
-	/**
-	 * Create a mass mailing
-	 */
-	static public function createMailing(iterable $recipients, string $subject, string $message, bool $send_copy, ?string $render): \stdClass
-	{
-		$list = [];
-
-		foreach ($recipients as $recipient) {
-			if (empty($recipient->email)) {
-				continue;
-			}
-
-			$list[$recipient->email] = $recipient;
-		}
-
-		if (!count($list)) {
-			throw new UserException('La liste de destinataires sélectionnée ne comporte aucun membre, ou aucun avec une adresse e-mail renseignée.');
-		}
-
-		$html = null;
-		$tpl = null;
-
-		$random = array_rand($list);
-
-		if (false !== strpos($message, '{{')) {
-			$tpl = new UserTemplate;
-			$tpl->setCode($message);
-			$tpl->toggleSafeMode(true);
-			$tpl->assignArray((array)$list[$random]);
-			$tpl->setEscapeDefault(null);
-
-			try {
-				if (!$render) {
-					// Disable HTML escaping for plaintext emails
-					$message = $tpl->fetch();
-				}
-				else {
-					$html = $tpl->fetch();
-				}
-			}
-			catch (\KD2\Brindille_Exception $e) {
-				throw new UserException('Erreur de syntaxe dans le corps du message :' . PHP_EOL . $e->getPrevious()->getMessage(), 0, $e);
-			}
-		}
-
-		if ($render) {
-			$html = Render::render($render, null, $html ?? $message);
-		}
-		elseif (null !== $html) {
-			$html = '<pre>' . $html . '</pre>';
-		}
-		else {
-			$html = '<pre>' . htmlspecialchars(wordwrap($message)) . '</pre>';
-		}
-
-		$recipients = $list;
-
-		$config = Config::getInstance();
-		$sender = sprintf('"%s" <%s>', $config->org_name, $config->org_email);
-		$message = (object) compact('recipients', 'subject', 'message', 'sender', 'tpl', 'send_copy', 'render');
-		$message->preview = (object) [
-			'to'      => $random,
-			// Not required to be a valid From header, this is just a preview
-			'from'    => $sender,
-			'subject' => $subject,
-			'html'    => $html,
-		];
-
-		return $message;
-	}
 
 	static public function getFromHeader(string $name = null, string $email = null): string
 	{
@@ -633,45 +604,4 @@ class Emails
 		return sprintf('"%s" <%s>', $name, $email);
 	}
 
-	/**
-	 * Send a mass mailing
-	 */
-	static public function sendMailing(\stdClass $mailing): void
-	{
-		if (!isset($mailing->recipients, $mailing->subject, $mailing->message, $mailing->send_copy)) {
-			throw new \InvalidArgumentException('Invalid $mailing object');
-		}
-
-		if (!count($mailing->recipients)) {
-			throw new UserException('Aucun destinataire de la liste ne possède d\'adresse email.');
-		}
-
-		Emails::queue(Emails::CONTEXT_BULK,
-			$mailing->recipients,
-			null, // Default sender
-			$mailing->subject,
-			$mailing->tpl ?? $mailing->message,
-			$mailing->render ?? null
-		);
-
-		if ($mailing->send_copy)
-		{
-			$config = Config::getInstance();
-			Emails::queue(Emails::CONTEXT_BULK, [$config->org_email => null], null, $mailing->subject, $mailing->message);
-		}
-	}
-
-	static public function exportMailing(string $format, \stdClass $mailing): void
-	{
-		$rows = $mailing->recipients;
-		$id_field = DynamicFields::getNameFieldsSQL('u');
-
-		foreach ($rows as $key => &$row) {
-			$row = [$key, $row->$id_field ?? ''];
-		}
-
-		unset($row);
-
-		CSV::export($format, 'Destinataires message collectif', $rows, ['Adresse e-mail', 'Identité']);
-	}
 }
