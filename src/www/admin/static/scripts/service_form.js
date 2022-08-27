@@ -20,8 +20,13 @@ function selectService(elm, first_load) {
 		first.checked = true;
 		selected = first;
 	}
+	else if (!first) {
+		document.querySelector('input[name=id_fee]:checked').checked = false;
+	}
 
-	selectFee(selected);
+	if (selected) {
+		selectFee(selected);
+	}
 }
 
 function selectFee(elm) {

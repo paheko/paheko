@@ -461,6 +461,7 @@ class Upgrade
 
 			if (version_compare($v, '1.1.29', '<')) {
 				Charts::updateInstalled('fr_pca_2018');
+				$db->import(ROOT . '/include/data/1.1.29_migration.sql');
 			}
 
 			// Vérification de la cohérence des clés étrangères

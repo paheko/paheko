@@ -12,33 +12,24 @@ use Garradin\Accounting\Transactions;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Accounting\Line;
 
+use KD2\DB\Date;
+
 class Service_User extends Entity
 {
 	const TABLE = 'services_users';
 
-	protected $id;
-	protected $id_user;
-	protected $id_service;
+	protected ?int $id;
+	protected int $id_user;
+	protected int $id_service;
 	/**
 	 * This can be NULL if there is no fee for the service
 	 * @var null|int
 	 */
-	protected $id_fee;
-	protected $paid;
-	protected $expected_amount;
-	protected $date;
-	protected $expiry_date;
-
-	protected $_types = [
-		'id'          => 'int',
-		'id_user'     => 'int',
-		'id_service'  => 'int',
-		'id_fee'      => '?int',
-		'paid'        => 'bool',
-		'expected_amount' => '?int',
-		'date'        => 'date',
-		'expiry_date' => '?date',
-	];
+	protected ?int $id_fee = null;
+	protected bool $paid;
+	protected ?int $expected_amount = null;
+	protected Date $date;
+	protected ?Date $expiry_date = null;
 
 	protected $_service, $_fee;
 
@@ -48,6 +39,12 @@ class Service_User extends Entity
 		$this->assert($this->id_service, 'Aucune activité spécifiée');
 		$this->assert($this->id_user, 'Aucun membre spécifié');
 		$this->assert(!$this->isDuplicate(), 'Cette activité a déjà été enregistrée pour ce membre et cette date');
+
+		$db = DB::getInstance();
+		// don't allow an id_fee that does not match a service
+		if (null !== $this->id_fee && !$db->test(Fee::TABLE, 'id = ? AND id_service = ?', $this->id_fee, $this->id_service)) {
+			$this->id_fee = null;
+		}
 	}
 
 	public function isDuplicate(bool $using_date = true): bool
@@ -77,6 +74,8 @@ class Service_User extends Entity
 			$source = $_POST;
 		}
 
+		$service = null;
+
 		if (!empty($source['id_service']) && empty($source['expiry_date'])) {
 			$service = $this->_service = Services::get((int) $source['id_service']);
 
@@ -85,7 +84,7 @@ class Service_User extends Entity
 			}
 
 			if ($service->duration) {
-				$dt = new \DateTime;
+				$dt = new Date;
 				$dt->modify(sprintf('+%d days', $service->duration));
 				$this->set('expiry_date', $dt);
 			}
@@ -94,6 +93,12 @@ class Service_User extends Entity
 			}
 			else {
 				$this->set('expiry_date', null);
+			}
+		}
+
+		if (!empty($source['id_service'])) {
+			if (!$service) {
+				$service = $this->_service = Services::get((int) $source['id_service']);
 			}
 		}
 
@@ -201,7 +206,7 @@ class Service_User extends Entity
 
 		foreach ($users as $id => $name) {
 			$su = new self;
-			$su->date = new \DateTime;
+			$su->date = new Date;
 			$su->importForm($source);
 			$su->id_user = (int) $id;
 

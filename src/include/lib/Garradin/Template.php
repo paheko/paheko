@@ -50,9 +50,18 @@ class Template extends Smartyer
 	{
 	}
 
-	public function __construct()
+	public function __construct($template = null, $parent = null)
 	{
-		parent::__construct();
+		parent::__construct($template, $parent);
+
+		if (null === $parent) {
+			if (self::$_instance !== null) {
+				throw new \LogicException('Instance already exists');
+			}
+		}
+		else {
+			return $this;
+		}
 
 		Translate::extendSmartyer($this);
 
