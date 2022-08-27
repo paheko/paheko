@@ -4,6 +4,7 @@ namespace Garradin;
 
 use Garradin\Form;
 use KD2\DB\AbstractEntity;
+use KD2\DB\Date;
 
 class Entity extends AbstractEntity
 {
@@ -27,19 +28,19 @@ class Entity extends AbstractEntity
 		}
 
 		if (preg_match('!^\d{2}/\d{2}/\d{2}$!', $value)) {
-			return \DateTime::createFromFormat('d/m/y', $value);
+			return Date::createFromFormat('d/m/y', $value);
 		}
 		elseif (preg_match('!^\d{2}/\d{2}/\d{4}$!', $value)) {
-			return \DateTime::createFromFormat('d/m/Y', $value);
+			return Date::createFromFormat('d/m/Y', $value);
 		}
 		elseif (preg_match('!^\d{4}/\d{2}/\d{2}$!', $value)) {
-			return \DateTime::createFromFormat('Y/m/d', $value);
+			return Date::createFromFormat('Y/m/d', $value);
 		}
 		elseif (preg_match('!^20\d{2}[01]\d[0123]\d$!', $value)) {
-			return \DateTime::createFromFormat('Ymd', $value);
+			return Date::createFromFormat('Ymd', $value);
 		}
 		elseif (preg_match('!^\d{4}-\d{2}-\d{2}$!', $value)) {
-			return \DateTime::createFromFormat('Y-m-d', $value);
+			return Date::createFromFormat('Y-m-d', $value);
 		}
 		elseif (null !== $value) {
 			throw new ValidationException('Format de date invalide (merci d\'utiliser le format JJ/MM/AAAA) : ' . $value);
@@ -48,7 +49,7 @@ class Entity extends AbstractEntity
 
 	protected function filterUserValue(string $type, $value, string $key)
 	{
-		if ($type == 'date') {
+		if ($type == 'date' || $type == Date::class) {
 			return self::filterUserDateValue($value);
 		}
 		elseif ($type == 'DateTime') {
