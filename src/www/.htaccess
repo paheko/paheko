@@ -5,8 +5,9 @@ DirectoryIndex index.php
 # Rediriger les adresses dynamiques vers le routeur
 FallbackResource /_route.php
 
-# Si FallbackResource ne fonctionne pas, utiliser ceci :
-#ErrorDocument 404 /_route.php
+# FallbackResource ne fonctionne pas pour les URLs en .php
+# voir https://stackoverflow.com/a/66136226
+ErrorDocument 404 /_route.php
 
 # Explication : FallbackResource n'est dispo que depuis Apache 2.2.16, soit Debian Wheezy (2013)
 # Mais bugue avant Apache 2.4.15, il faut donc bien désactiver le DirectoryIndex
