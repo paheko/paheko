@@ -43,7 +43,7 @@ class Service_User extends Entity
 		$db = DB::getInstance();
 		// don't allow an id_fee that does not match a service
 		if (null !== $this->id_fee && !$db->test(Fee::TABLE, 'id = ? AND id_service = ?', $this->id_fee, $this->id_service)) {
-			$this->id_fee = null;
+			$this->set('id_fee', null);
 		}
 	}
 
