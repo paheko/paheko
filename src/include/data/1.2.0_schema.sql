@@ -50,6 +50,19 @@ CREATE TABLE IF NOT EXISTS plugins_signals
     PRIMARY KEY (signal, plugin)
 );
 
+CREATE TABLE IF NOT EXISTS api_credentials
+(
+    id INTEGER NOT NULL PRIMARY KEY,
+    label TEXT NOT NULL,
+    key TEXT NOT NULL,
+    secret TEXT NOT NULL,
+    created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_use TEXT NULL,
+    access_level INT NOT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS api_credentials_key ON api_credentials (key);
+
 CREATE TABLE IF NOT EXISTS searches
 -- Saved searches
 (
@@ -193,7 +206,8 @@ CREATE TABLE IF NOT EXISTS services_fees
 
     id_service INTEGER NOT NULL REFERENCES services (id) ON DELETE CASCADE,
     id_account INTEGER NULL REFERENCES acc_accounts (id) ON DELETE SET NULL CHECK (id_account IS NULL OR id_year IS NOT NULL), -- NULL if fee is not linked to accounting, this is reset using a trigger if the year is deleted
-    id_year INTEGER NULL REFERENCES acc_years (id) ON DELETE SET NULL -- NULL if fee is not linked to accounting
+    id_year INTEGER NULL REFERENCES acc_years (id) ON DELETE SET NULL, -- NULL if fee is not linked to accounting
+    id_analytical INTEGER NULL REFERENCES acc_accounts (id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS services_users
