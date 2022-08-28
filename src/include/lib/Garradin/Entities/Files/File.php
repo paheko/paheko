@@ -293,26 +293,32 @@ class File extends Entity
 			Files::checkQuota($this->size);
 		}
 		elseif ($pointer) {
-			if (0 !== fseek($pointer, 0, SEEK_END)) {
+			// See https://github.com/php/php-src/issues/9441
+			if (stream_get_meta_data($pointer)['uri'] == 'php://input') {
+				while (!feof($pointer)) {
+					fread($pointer, 8192);
+				}
+			}
+			elseif (0 !== fseek($pointer, 0, SEEK_END)) {
 				throw new \RuntimeException('Stream is not seekable');
 			}
 
-			fseek($pointer, 0, SEEK_SET);
 			$this->set('size', ftell($pointer));
+			fseek($pointer, 0, SEEK_SET);
 			Files::checkQuota($this->size);
 		}
 
 		// Check that it's a real image
 		if ($this->image) {
 			if ($path) {
-				$blob = file_get_contents($path, false, null, 0, 20);
+				$blob = file_get_contents($path, false, null, 0, 100);
 			}
 			elseif ($pointer) {
-				$blob = fread($pointer, 20);
+				$blob = fread($pointer, 100);
 				fseek($pointer, 0, SEEK_SET);
 			}
 			else {
-				$blob = substr($pointer, 0, 20);
+				$blob = substr($content, 0, 100);
 			}
 
 			if ($type = Blob::getType($blob)) {
@@ -326,6 +332,7 @@ class File extends Entity
 				}
 			}
 			else {
+				var_dump($type, $blob); exit;
 				// Not an image
 				$this->set('image', false);
 			}
@@ -472,6 +479,19 @@ class File extends Entity
 		$content = null === $path ? Files::callStorage('fetch', $this) : null;
 
 		$this->_serve($path, $content, $download);
+	}
+
+	public function serveAuto(?Session $session = null, array $params = []): void
+	{
+		$found_sizes = array_intersect_key($params, self::ALLOWED_THUMB_SIZES);
+		$size = key($found_sizes);
+
+		if ($size && $this->image) {
+			$this->serveThumbnail($session, $size);
+		}
+		else {
+			$this->serve($session, isset($params['download']));
+		}
 	}
 
 	/**
