@@ -6,6 +6,8 @@ use KD2\HTTP;
 use Garradin\Users\DynamicFields;
 use Garradin\Users\Session;
 
+use Garradin\ValidationException;
+
 const LOGIN_PROCESS = true;
 
 require_once __DIR__ . '/_inc.php';
@@ -26,9 +28,10 @@ if (qg('keepSessionAlive') !== null)
     exit;
 }
 
+$api_login = qg('tok') ?? (f('token') ?? null);
+
 // L'utilisateur est déjà connecté
-if ($session->isLogged())
-{
+if (!$api_login && $session->isLogged()) {
     Utils::redirect(ADMIN_URL . '');
 }
 
@@ -47,11 +50,24 @@ $form->runIf('login', function () use ($id_field_name, $session) {
     if (!$session->login(f('id'), f('password'), (bool) f('permanent'))) {
         throw new UserException(sprintf("Connexion impossible.\nVérifiez votre identifiant (%s) et votre mot de passe.", $id_field_name));
     }
+
+    if (f('token')) {
+        try {
+            $session->validateAppToken(f('token'));
+        }
+        finally {
+            // We don't want to be logged-in really
+            $session->logout();
+        }
+
+        Utils::redirect('!login.php?tok=ok');
+    }
+
 }, 'login', ADMIN_URL);
 
 $ssl_enabled = HTTP::getScheme() == 'https';
 $changed = qg('changed') !== null;
 
-$tpl->assign(compact('id_field', 'ssl_enabled', 'changed'));
+$tpl->assign(compact('id_field', 'ssl_enabled', 'changed', 'api_login'));
 
 $tpl->display('login.tpl');

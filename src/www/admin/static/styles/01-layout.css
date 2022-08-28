@@ -182,3 +182,29 @@ ul.gallery figcaption {
     overflow: hidden;
     text-align: center;
 }
+
+body.public, body.raw {
+    background: none;
+}
+
+body.raw main {
+    margin: 0;
+}
+
+body.public main {
+    max-width: 650px;
+    margin: 2em auto;
+}
+
+body.public main legend {
+    font-size: 1.3em;
+}
+
+body.public main dl {
+    padding: 1em 0;
+}
+
+body.public main p.block.error, body.public main p.block.alert {
+    margin: 2em 0;
+    font-size: 1.2em;
+}

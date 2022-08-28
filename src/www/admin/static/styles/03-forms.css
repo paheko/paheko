@@ -687,6 +687,11 @@ form.progressing fieldset, form.progressing p {
     filter: grayscale(100%) blur(3px);
 }
 
+.progressing.block {
+    height: 100px;
+    position: relative;
+}
+
 .progressing::after {
     display: inline-block;
     content: " ";

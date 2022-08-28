@@ -41,9 +41,9 @@ if (!isset($current)) {
 	{/if}
 </head>
 
-<body{if isset($transparent)} class="transparent"{/if}>
+<body{if !empty($layout)} class="{$layout}"{/if}>
 
-{if !array_key_exists('_dialog', $_GET) && !isset($transparent)}
+{if !array_key_exists('_dialog', $_GET) && empty($layout)}
 <header class="header">
 	<nav class="menu">
 		{if isset($config)}
