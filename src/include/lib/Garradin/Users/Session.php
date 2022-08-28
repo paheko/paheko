@@ -7,6 +7,7 @@ use Garradin\DB;
 use Garradin\Utils;
 use Garradin\Users\Users;
 use Garradin\UserException;
+use Garradin\ValidationException;
 use Garradin\Plugin;
 use Garradin\Email\Templates as EmailsTemplates;
 
@@ -162,7 +163,7 @@ class Session extends \KD2\UserSession
 		return $this->db->first('SELECT selector, hash,
 			s.id_user AS user_id, u.password AS user_password, expiry
 			FROM users_sessions AS s
-			INNER JOIN users AS u ON u.id = s.id_user
+			LEFT JOIN users AS u ON u.id = s.id_user
 			WHERE s.selector = ? LIMIT 1;', $selector);
 	}
 
@@ -174,6 +175,99 @@ class Session extends \KD2\UserSession
 	protected function deleteAllRememberMeSelectors($user_id)
 	{
 		return $this->db->delete('users_sessions', $this->db->where('id_user', $user_id));
+	}
+
+	/**
+	 * Create a temporary app token for an external service session (eg. NextCloud)
+	 */
+	public function generateAppToken(): string
+	{
+		$token = hash('sha256', random_bytes(16));
+
+		$expiry = time() + 30*60; // 30 minutes
+		DB::getInstance()->preparedQuery('REPLACE INTO users_sessions (selector, hash, id_user, expiry)
+			VALUES (?, ?, ?, ?);',
+			'tok_' . $token, 'waiting', null, $expiry);
+
+		return $token;
+	}
+
+	/**
+	 * Validate the temporary token once the user has logged-in
+	 */
+	public function validateAppToken(string $token): bool
+	{
+		if (!ctype_alnum($token) || strlen($token) > 64) {
+			return false;
+		}
+
+		$token = $this->getRememberMeSelector('tok_' . $token);
+
+		if (!$token || $token->hash != 'waiting') {
+			return false;
+		}
+
+		$user = $this->getUser();
+
+		if (!$user) {
+			throw new \LogicException('Cannot create a token if the user is not logged-in');
+		}
+
+		DB::getInstance()->preparedQuery('UPDATE users_sessions SET hash = \'ok\', id_user = ? WHERE selector = ?;',
+			$user->id, $token->selector);
+
+		return true;
+	}
+
+	/**
+	 * Verify temporary app token and create a session,
+	 * this is similar to "remember me" sessions but without cookies
+	 */
+	public function verifyAppToken(string $token): ?\stdClass
+	{
+		if (!ctype_alnum($token) || strlen($token) > 64) {
+			return null;
+		}
+
+		$token = $this->getRememberMeSelector('tok_' . $token);
+
+		if (!$token || $token->hash != 'ok') {
+			return null;
+		}
+
+		// Delete temporary token
+		#$this->deleteRememberMeSelector($token->selector);
+
+		if ($token->expiry < time()) {
+			return null;
+		}
+
+		// Create a real session, not too long
+		$selector = $this->createSelectorValues($token->user_id, $token->user_password, '+1 month');
+		$this->storeRememberMeSelector($selector->selector, $selector->hash, $selector->expiry, $token->user_id);
+
+		$login = $selector->selector;
+		$password = $selector->verifier;
+
+		return (object) compact('login', 'password');
+	}
+
+	public function checkAppCredentials(string $login, string $password): ?User
+	{
+		$selector = $this->getRememberMeSelector($login);
+
+		if (!$selector) {
+			return null;
+		}
+
+		if (!$this->checkRememberMeSelector($selector, $password)) {
+			$this->deleteRememberMeSelector($selector->selector);
+			return null;
+		}
+
+		$this->user = $this->getUserDataForSession($selector->user_id);
+
+		return $this->user;
 	}
 
 	public function isLogged(bool $disable_local_login = false)
