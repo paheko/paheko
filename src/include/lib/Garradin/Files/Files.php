@@ -651,4 +651,40 @@ class Files
 			}
 		}
 	}
+
+	/**
+	 * Return list of context that can be read by currently logged user
+	 */
+	static public function listReadAccessContexts(?Session $session): array
+	{
+		if (!$session->isLogged()) {
+			return [];
+		}
+
+		$list = [];
+
+		if ($session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
+			$access[] = File::CONTEXT_CONFIG;
+			$access[] = File::CONTEXT_SKELETON;
+		}
+
+		if ($session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)) {
+			$access[] = File::CONTEXT_TRANSACTION;
+		}
+
+		if ($session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)) {
+			$access[] = File::CONTEXT_USER;
+		}
+
+		if ($session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_READ)) {
+			$access[] = File::CONTEXT_DOCUMENTS;
+		}
+
+		if ($session->canAccess($session::SECTION_WEB, $session::ACCESS_READ)) {
+			$access[] = File::CONTEXT_WEB;
+		}
+
+		return array_merge(array_flip($access), File::CONTEXTS_NAMES);
+	}
+
 }
