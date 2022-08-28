@@ -154,12 +154,10 @@ CREATE INDEX IF NOT EXISTS users_categories_hidden ON users_categories (hidden);
 CREATE TABLE IF NOT EXISTS users_sessions
 -- Permanent sessions for logged-in users
 (
-    selector TEXT NOT NULL,
+    selector TEXT NOT NULL PRIMARY KEY,
     hash TEXT NOT NULL,
-    id_user INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-    expiry INT NOT NULL,
-
-    PRIMARY KEY (selector, id_user)
+    id_user INTEGER NULL REFERENCES users (id) ON DELETE CASCADE,
+    expiry INT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS logs
@@ -447,16 +445,16 @@ CREATE TABLE IF NOT EXISTS files_contents
     content BLOB NOT NULL
 );
 
-CREATE TABLE files_webdav_locks (
+CREATE TABLE IF NOT EXISTS files_webdav_locks (
     uri TEXT NOT NULL,
     token TEXT NOT NULL,
     scope TEXT NOT NULL,
     expiry TEXT NOT NULL
 );
 
-CREATE INDEX files_webdav_locks_uri ON files_webdav_locks (uri);
+CREATE INDEX IF NOT EXISTS files_webdav_locks_uri ON files_webdav_locks (uri);
 
-CREATE UNIQUE INDEX files_webdav_locks_unique ON files_webdav_locks (uri, token);
+CREATE UNIQUE INDEX IF NOT EXISTS files_webdav_locks_unique ON files_webdav_locks (uri, token);
 
 CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4
 -- Search inside files content
