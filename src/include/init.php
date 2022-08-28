@@ -217,7 +217,7 @@ static $default_config = [
 	'SQL_DEBUG'             => null,
 	'SYSTEM_SIGNALS'        => [],
 	'LOCAL_LOGIN'           => null,
-	'LEGAL_LINE'            => 'Propulsé par <a href="https://garradin.eu/" id="garradin" target="_blank">Garradin</a> — logiciel libre de gestion d\'association<br />Hébergé par <strong>%1$s</strong>, %2$s',
+	'LEGAL_LINE'            => 'Hébergé par <strong>%1$s</strong>, %2$s',
 ];
 
 foreach ($default_config as $const => $value)
