@@ -4,22 +4,14 @@ namespace Garradin\Web;
 
 use Garradin\Entities\Web\Page;
 use Garradin\Entities\Files\File;
-use Garradin\Web\Skeleton;
 use Garradin\Files\Files;
-use Garradin\Files\WebDAV;
-use Garradin\API;
-use Garradin\Config;
 use Garradin\DB;
-use Garradin\Plugin;
-use Garradin\UserTemplate\UserForms;
 use Garradin\Utils;
-use Garradin\UserException;
 use Garradin\ValidationException;
-use Garradin\Users\Session;
 
 use KD2\DB\EntityManager as EM;
 
-use const Garradin\{WWW_URI, ADMIN_URL, FILE_STORAGE_BACKEND, ROOT};
+use const Garradin\FILE_STORAGE_BACKEND;
 
 class Web
 {
@@ -190,102 +182,5 @@ class Web
 		}
 
 		return $errors;
-	}
-
-	static public function dispatchURI()
-	{
-		$uri = !empty($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
-
-		if ($pos = strpos($uri, '?')) {
-			$uri = substr($uri, 0, $pos);
-		}
-
-		// WWW_URI inclus toujours le slash final, mais on veut le conserver ici
-		$uri = substr($uri, strlen(WWW_URI) - 1);
-
-		http_response_code(200);
-
-
-		$uri = substr($uri, 1);
-
-		// Redirect old URLs (pre-1.1)
-		if ($uri == 'feed/atom/') {
-			Utils::redirect('/atom.xml');
-		}
-		elseif (substr($uri, 0, 4) == 'api/') {
-			API::dispatchURI(substr($uri, 4));
-			exit;
-		}
-		elseif (substr($uri, 0, 4) == 'dav/') {
-			WebDAV::dispatchURI($_SERVER['REQUEST_URI'] ?? '');
-		}
-		elseif ($uri == 'favicon.ico') {
-			header('Location: ' . Config::getInstance()->fileURL('favicon'), true);
-			return;
-		}
-		elseif (substr($uri, 0, 5) === 'form/') {
-			$uri = substr($uri, 5);
-			UserForms::serve($uri);
-			return;
-		}
-		elseif (substr($uri, 0, 6) === 'admin/') {
-			http_response_code(404);
-			throw new UserException('Cette page n\'existe pas.');
-		}
-		elseif (($file = Files::getFromURI($uri))
-			|| ($file = self::getAttachmentFromURI($uri))) {
-			$size = null;
-
-			if ($file->image) {
-				foreach ($_GET as $key => $v) {
-					if (array_key_exists($key, File::ALLOWED_THUMB_SIZES)) {
-						$size = $key;
-						break;
-					}
-				}
-			}
-
-			$session = Session::getInstance();
-
-			if (Plugin::fireSignal('http.request.file.before', compact('file', 'uri', 'session'))) {
-				// If a plugin handled the request, let's stop here
-				return;
-			}
-
-			if ($size) {
-				$file->serveThumbnail($session, $size);
-			}
-			else {
-				$file->serve($session, isset($_GET['download']) ? true : false);
-			}
-
-			Plugin::fireSignal('http.request.file.after', compact('file', 'uri', 'session'));
-
-			return;
-		}
-
-		if (Config::getInstance()->site_disabled) {
-			Utils::redirect(ADMIN_URL);
-		}
-
-		$page = null;
-
-		if ($uri == '') {
-			$skel = 'index.html';
-		}
-		elseif (($page = self::getByURI($uri)) && $page->status == Page::STATUS_ONLINE) {
-			$skel = $page->template();
-			$page = $page->asTemplateArray();
-		}
-		// No page with this URI, then we expect this might be a skeleton path
-		elseif (Skeleton::isValidPath($uri)) {
-			$skel = $uri;
-		}
-		else {
-			$skel = '404.html';
-		}
-
-		$s = new Skeleton($skel);
-		$s->serve(compact('uri', 'page', 'skel'));
 	}
 }

@@ -2,6 +2,8 @@
 
 namespace Garradin;
 
+use Garradin\Web\Router;
+
 if (empty($_SERVER['REQUEST_URI'])) {
 	http_response_code(500);
 	die('Appel non supporté');
@@ -44,5 +46,6 @@ elseif (preg_match('!/admin/plugin/(.+?)/(.*)!', $uri, $match))
 }
 else
 {
-	require __DIR__ . '/index.php';
+	require __DIR__ . '/../include/init.php';
+	Router::route();
 }

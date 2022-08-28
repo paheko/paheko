@@ -3,7 +3,7 @@
 namespace Garradin;
 
 use Garradin\Email\Emails;
-use Garradin\Web\Web;
+use Garradin\Web\Router;
 
 require __DIR__ . '/_inc.php';
 
@@ -29,4 +29,4 @@ if (!empty($_GET['un'])) {
 	Utils::redirect('!optout.php?' . http_build_query($params));
 }
 
-Web::dispatchURI();
+Router::route();
