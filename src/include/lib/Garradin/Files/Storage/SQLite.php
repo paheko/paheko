@@ -31,7 +31,7 @@ class SQLite implements StorageInterface
 				throw $e;
 			}
 
-			throw new \RuntimeException('File does not exist in DB: ' . $file->path);
+			throw new \RuntimeException('File does not exist in DB: ' . $file->path, 0, $e);
 		}
 
 		return $blob;
@@ -47,7 +47,7 @@ class SQLite implements StorageInterface
 		return self::store($file, compact('content'));
 	}
 
-	static public function storePointer(File $file, string $pointer): bool
+	static public function storePointer(File $file, $pointer): bool
 	{
 		return self::store($file, compact('pointer'));
 	}
