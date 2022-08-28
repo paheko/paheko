@@ -434,7 +434,7 @@ class Page extends Entity
 			$link = trim($link, '/');
 
 			// Link is not internal
-			if (preg_match('!https?:|\w+:|/|#!', $link)) {
+			if (!trim($link) || preg_match('!https?:|\w+:|/|#!', $link)) {
 				continue;
 			}
 
