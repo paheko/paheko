@@ -11,6 +11,8 @@ use Garradin\Entities\Files\File;
 use Garradin\Files\Files;
 use Garradin\Users\DynamicFields;
 
+use KD2\DB\Date;
+
 class DynamicField extends Entity
 {
 	const TABLE = 'config_users_fields';
@@ -103,7 +105,7 @@ class DynamicField extends Entity
 		'email'    => '?string',
 		'url'      => '?string',
 		'checkbox' => 'bool',
-		'date'     => '?date',
+		'date'     => '?' . Date::class,
 		'datetime' => '?DateTime',
 		'month'    => '?string',
 		'year'     => '?int',

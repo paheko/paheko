@@ -23,13 +23,24 @@ use const Garradin\{WWW_URI, ADMIN_URL, ROOT};
 
 class Router
 {
+	// Order is important
 	const NEXTCLOUD_ROUTES = [
 		'status.php' => 'status',
-		'index.php/login/v2' => 'login',
+		// Login v1, for Android app
+		'index.php/login/flow' => 'login_v1',
+		// Login v2, for desktop app
 		'index.php/login/v2/poll' => 'poll',
+		'index.php/login/v2' => 'login_v2',
+		'ocs/v1.php/cloud/capabilities' => 'capabilities',
+		'ocs/v2.php/cloud/capabilities' => 'capabilities',
+		'ocs/v2.php/cloud/user' => 'user',
+		'ocs/v1.php/cloud/user' => 'user',
+		'ocs/v2.php/apps/files_sharing/api/v1/shares' => 'shares',
+		'ocs/v2.php/apps/user_status/api/v1/predefined_statuses' => 'empty',
+		'ocs/v2.php/core/navigation/apps' => 'empty',
+		'remote.php/webdav/' => 'webdav',
+		'remote.php/dav' => 'webdav',
 	];
-
-	const NEXTCLOUD_DAV_ROUTE = 'remote.php/webdav/';
 
 	static public function route(): void
 	{
@@ -63,18 +74,17 @@ class Router
 			API::dispatchURI(substr($uri, 4));
 			return;
 		}
+		elseif (substr($uri, 0, 5) === 'form/') {
+			$uri = substr($uri, 5);
+			UserForms::serve($uri);
+			return;
+		}
 		elseif (0 === strpos($uri, 'dav/')) {
 			WebDAV::dispatchURI($uri);
 			return;
 		}
-		elseif (0 === strpos($uri, self::NEXTCLOUD_DAV_ROUTE)
-			|| array_key_exists($uri, self::NEXTCLOUD_ROUTES)) {
+		elseif (array_filter(self::NEXTCLOUD_ROUTES, fn($k) => 0 === strpos($uri, $k), ARRAY_FILTER_USE_KEY)) {
 			NextCloud_Compatibility::route($uri);
-			return;
-		}
-		elseif (substr($uri, 0, 5) === 'form/') {
-			$uri = substr($uri, 5);
-			UserForms::serve($uri);
 			return;
 		}
 		elseif (($file = Files::getFromURI($uri))

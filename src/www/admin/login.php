@@ -53,11 +53,22 @@ $form->runIf('login', function () use ($id_field_name, $session) {
 
     if (f('token')) {
         try {
-            $session->validateAppToken(f('token'));
+            if (f('token') == 'flow') {
+                $data = $session->createAppCredentials();
+            }
+            else {
+                $session->validateAppToken(f('token'));
+            }
         }
         finally {
             // We don't want to be logged-in really
             $session->logout();
+        }
+
+        if ($data->redirect ?? null) {
+            http_response_code(303);
+            header('Location: ' . $data->redirect);
+            exit;
         }
 
         Utils::redirect('!login.php?tok=ok');

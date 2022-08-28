@@ -85,6 +85,64 @@ class WebDAV extends KD2_WebDAV
 		file_put_contents(\Garradin\ROOT . '/webdav.log', vsprintf($message, $params) . "\n", FILE_APPEND);
 	}
 
+	protected function get_extra_ns(string $uri): string
+	{
+		return 'xmlns:oc="http://owncloud.org/ns" xmlns:nc="http://nextcloud.org/ns"';
+	}
+
+	protected function get_extra_propfind(string $uri, string $file, array $meta): string
+	{
+		// oc:size is to give size of a folder (when depth = 0), but not very useful
+
+		// Add properties for NextCloud
+		// from lib/private/Files/Storage/DAV.php in NextCloud
+		// and apps/dav/lib/Connector/Sabre/Node.php
+		// R = Shareable
+		// S = Shared
+		// M = Mounted
+		// D = Delete
+		// G = Readable
+		// NV = Renameable/moveable
+		// Files only:
+		// W = Write (Update)
+		// CK = Create/Update
+
+		$uri = trim($this->root . $uri, '/');
+
+		$session = Session::getInstance();
+
+		if (isset($meta['_file']) && ($f = $meta['_file'])) {
+			$write = $f->checkWriteAccess($session);
+			$delete = $f->checkDeleteAccess($session);
+		}
+		elseif ($uri) {
+			// Root of a context
+			$write = $delete = File::checkCreateAccess($uri, $session);
+		}
+
+		// eg. RGDNVW
+		$perms = [
+			'G' => true,
+			'CK' => $write ?: null,
+			'NV' => $write ?: null,
+			'W' => $write ?: null,
+			'D' => $delete ?: null,
+		];
+
+		$perms = array_filter($perms);
+		$perms = implode('', array_keys($perms));
+
+		return sprintf('
+			<oc:id>%s</oc:id>
+			<oc:size>0</oc:size>
+        	<oc:downloadURL></oc:downloadURL>
+        	<oc:permissions>%s</oc:permissions>
+        	<oc:share-types/>',
+        	md5($uri . $file),
+        	$perms
+        );
+	}
+
 	protected function getLock(string $uri, ?string $token = null): ?string
 	{
 		$uri = trim($this->root . $uri, '/');
@@ -124,6 +182,8 @@ class WebDAV extends KD2_WebDAV
 				'size'       => $file->size,
 				'type'       => $file->mime,
 				'collection' => $file->type == $file::TYPE_DIRECTORY,
+				'etag'       => $this->etag($file),
+				'_file'      => $file,
 			];
 		}
 	}
@@ -179,6 +239,7 @@ class WebDAV extends KD2_WebDAV
 
 		// Serve files
 		if ($type != File::TYPE_DIRECTORY) {
+			header(sprintf('ETag: "%s"', $this->etag($file)));
 			$file->serveAuto($session, $_GET);
 			return null;
 		}
@@ -243,6 +304,11 @@ class WebDAV extends KD2_WebDAV
 		return Files::exists($uri);
 	}
 
+	protected function etag(File $file): string
+	{
+		return md5($file->path . $file->modified->getTimestamp() . $file->size);
+	}
+
 	protected function metadata(string $uri, bool $all = false): ?array
 	{
 		$uri = trim($this->root . $uri, '/');
@@ -264,6 +330,8 @@ class WebDAV extends KD2_WebDAV
 			'size'       => $file->size,
 			'type'       => $file->mime,
 			'collection' => $file->type == $file::TYPE_DIRECTORY,
+			'etag'       => $this->etag($file),
+			'_file'      => $file,
 		];
 
 		if ($all) {
@@ -292,6 +360,10 @@ class WebDAV extends KD2_WebDAV
 		$new = !$target ? true : false;
 
 		if ($new) {
+			if (!File::checkCreateAccess($uri, Session::getInstance())) {
+				throw new WebDAV_Exception('Cannot create here', 403);
+			}
+
 			Files::createFromPointer($uri, $pointer);
 		}
 		else {

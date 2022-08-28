@@ -10,6 +10,7 @@ use Garradin\UserException;
 use Garradin\ValidationException;
 use Garradin\Plugin;
 use Garradin\Email\Templates as EmailsTemplates;
+use Garradin\Files\NextCloud_Compatibility;
 
 use Garradin\Entities\Users\Category;
 use Garradin\Entities\Users\User;
@@ -250,6 +251,24 @@ class Session extends \KD2\UserSession
 		$password = $selector->verifier;
 
 		return (object) compact('login', 'password');
+	}
+
+
+	public function createAppCredentials(): \stdClass
+	{
+		if (!$this->isLogged()) {
+			throw new \LogicException('User is not logged');
+		}
+
+		$user = $this->getUser();
+		$selector = $this->createSelectorValues($user->id, $user->password);
+		$this->storeRememberMeSelector($selector->selector, $selector->hash, $selector->expiry, $user->id);
+
+		$login = $selector->selector;
+		$password = $selector->verifier;
+		$redirect = sprintf(NextCloud_Compatibility::AUTH_REDIRECT_URL, WWW_URL, $login, $password);
+
+		return (object) compact('login', 'password', 'redirect');
 	}
 
 	public function checkAppCredentials(string $login, string $password): ?User
