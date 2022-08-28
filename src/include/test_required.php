@@ -59,3 +59,8 @@ test_requis(
     file_exists(__DIR__ . '/lib/KD2'),
     'Librairie KD2 non disponible.'
 );
+
+test_requis(
+    class_exists('Phar'),
+    'Le module "Phar" n\'est pas disponible, il faut l\'installer.'
+);
