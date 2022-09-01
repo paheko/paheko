@@ -11,6 +11,40 @@ use Garradin\UserException;
 
 class Import
 {
+	static protected function saveImportedTransaction(Transaction $transaction, bool $dry_run = false, array &$report = null): void
+	{
+		if ($transaction->countLines() > 2) {
+			$transaction->type = Transaction::TYPE_ADVANCED;
+		}
+		// Try to magically find out what kind of transaction this is
+		elseif (!isset($transaction->type)) {
+			$transaction->type = $transaction->findTypeFromAccounts();
+		}
+
+		if (!$dry_run) {
+			if ($transaction->isModified()) {
+				$transaction->save();
+			}
+		}
+		else {
+			$transaction->selfCheck();
+		}
+
+		if (null !== $report) {
+			if (!$transaction->isModified()) {
+				$target = 'unchanged';
+			}
+			elseif ($transaction->exists()) {
+				$target = 'modified';
+			}
+			else {
+				$target = 'created';
+			}
+
+			$report[$target][] = $transaction->asJournalArray();
+		}
+	}
+
 	/**
 	 * Imports a CSV file of transactions in a year
 	 * @param  string     $type    Type of CSV format
@@ -29,6 +63,8 @@ class Import
 		];
 
 		$o = (object) array_merge($options_default, $options);
+
+		$dry_run = $o->dry_run;
 
 		if ($type != Export::GROUPED && $type != Export::SIMPLE && $type != Export::FEC) {
 			throw new \InvalidArgumentException('Invalid type value');
@@ -52,37 +88,6 @@ class Import
 			$report = null;
 		}
 
-		$save_transaction = function (Transaction &$transaction) use ($o, &$report) {
-			if (!is_null($report)) {
-				if (!$transaction->isModified()) {
-					$target = 'unchanged';
-				}
-				elseif ($transaction->exists()) {
-					$target = 'modified';
-				}
-				else {
-					$target = 'created';
-				}
-
-				$report[$target][] = $transaction->asJournalArray();
-			}
-
-			if ($transaction->countLines() > 2) {
-				$transaction->type = Transaction::TYPE_ADVANCED;
-			}
-
-			if (!$o->dry_run) {
-				if ($transaction->isModified()) {
-					$transaction->save();
-				}
-			}
-			else {
-				$transaction->selfcheck();
-			}
-
-			$transaction = null;
-		};
-
 		$l = 1;
 
 		try {
@@ -105,7 +110,8 @@ class Import
 
 					// New transaction, save previous one
 					if (null !== $transaction && $has_transaction) {
-						$save_transaction($transaction);
+						self::saveImportedTransaction($transaction, $dry_run, $report);
+						$transaction = null;
 					}
 
 					if (!$has_transaction && null === $transaction) {
@@ -115,14 +121,11 @@ class Import
 				else {
 					if (!empty($row->id) && $row->id != $current_id) {
 						if (null !== $transaction) {
-							$save_transaction($transaction);
+							self::saveImportedTransaction($transaction, $dry_run, $report);
+							$transaction = null;
 						}
 
 						$current_id = (int) $row->id;
-					}
-
-					if (empty($row->type)) {
-						$row->type = Transaction::TYPES_NAMES[Transaction::TYPE_ADVANCED];
 					}
 				}
 
@@ -151,7 +154,7 @@ class Import
 						$transaction->id_year = $year->id();
 					}
 
-					if (!isset($types[$row->type])) {
+					if (isset($row->type) && !isset($types[$row->type])) {
 						throw new UserException(sprintf('le type "%s" est inconnu', $row->type));
 					}
 
@@ -227,7 +230,7 @@ class Import
 					$transaction->addLine($l1);
 					$transaction->addLine($l2);
 
-					$save_transaction($transaction);
+					self::saveImportedTransaction($transaction, $dry_run, $report);
 					$transaction = null;
 				}
 				else {
@@ -253,7 +256,8 @@ class Import
 			}
 
 			if (null !== $transaction) {
-				$save_transaction($transaction);
+				self::saveImportedTransaction($transaction, $dry_run, $report);
+				$transaction = null;
 			}
 		}
 		catch (UserException $e) {

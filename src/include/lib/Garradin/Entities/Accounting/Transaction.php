@@ -109,6 +109,25 @@ class Transaction extends Entity
 		}
 	}
 
+	public function findTypeFromAccounts(): int
+	{
+		if (count($this->getLines()) != 2) {
+			return self::TYPE_ADVANCED;
+		}
+
+		foreach ($this->getLinesWithAccounts() as $line) {
+			if ($line->account_position == Account::REVENUE && $line->credit) {
+				return self::TYPE_REVENUE;
+			}
+			elseif ($line->account_position == Account::EXPENSE && $line->debit) {
+				return self::TYPE_EXPENSE;
+			}
+		}
+
+		// Did not find a expense/revenue account: fall back to advanced
+		return self::TYPE_ADVANCED;
+	}
+
 	public function getLinesWithAccounts(): array
 	{
 		$db = EntityManager::getInstance(Line::class)->DB();
