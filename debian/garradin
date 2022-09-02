@@ -11,7 +11,7 @@ PID_FILE="${XDG_RUNTIME_DIR}/garradin/pid"
 [ ! -d `dirname $PID_FILE` ] && mkdir -p `dirname $PID_FILE`
 
 # Execute getopt
-ARGS=`getopt -o "p:vh" -l "port:,verbose,help" -n "garradin" -- "$@"`
+ARGS=`getopt -o "pb:vh" -l "port:,bind:,verbose,help" -n "garradin" -- "$@"`
 
 # Bad arguments
 if [ $? -ne 0 ];
