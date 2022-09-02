@@ -35,7 +35,6 @@ class Service_User extends Entity
 
 	public function selfCheck(): void
 	{
-		$this->paid = (bool) $this->paid;
 		$this->assert($this->id_service, 'Aucune activité spécifiée');
 		$this->assert($this->id_user, 'Aucun membre spécifié');
 		$this->assert(!$this->isDuplicate(), 'Cette activité a déjà été enregistrée pour ce membre et cette date');
