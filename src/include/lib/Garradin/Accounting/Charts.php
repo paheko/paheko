@@ -57,7 +57,7 @@ class Charts
 		$chart = EntityManager::findOne(Chart::class, 'SELECT * FROM @TABLE WHERE code = ? AND country = ?;', $code, $country);
 
 		if (!$chart) {
-			self::install($chart_code);
+			return self::install($chart_code);
 		}
 
 		$chart->accounts()->importCSV($file, true);
