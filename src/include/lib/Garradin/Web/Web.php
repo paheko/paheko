@@ -89,6 +89,12 @@ class Web
 			}
 		}
 
+		Files::syncVirtualTable(File::CONTEXT_WEB, true);
+
+		$db->begin();
+		$db->exec(sprintf('DELETE FROM files_search WHERE path NOT IN (SELECT path FROM %s);', Files::getVirtualTableName()));
+		$db->commit();
+
 		return $errors;
 
 		/*
