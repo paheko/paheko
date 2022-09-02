@@ -6,7 +6,7 @@ use Garradin\Users\Session;
 
 class Plugin
 {
-	const PLUGIN_ID_SYNTAX = '[a-z]+(?:_[a-z]+)*';
+	const PLUGIN_ID_REGEXP = '[a-z]+(?:_[a-z]+)*';
 
 	protected $id = null;
 	protected $plugin = null;
@@ -305,10 +305,14 @@ class Plugin
 
 		$infos = (object) parse_ini_file($this->path() . '/garradin_plugin.ini', false);
 
+		if (!isset($infos->name)) {
+			return;
+		}
+
 		$data = [
-			'name'		=>	$infos->name ?? $infos->nom,
+			'name'		=>	$infos->name,
 			'description'=>	$infos->description,
-			'author'	=>	$infos->author ?? $infos->auteur,
+			'author'	=>	$infos->author,
 			'url'		=>	$infos->url,
 			'version'	=>	$infos->version,
 			'menu'		=>	(int)(bool)$infos->menu,
@@ -437,13 +441,13 @@ class Plugin
 			if (substr($file, 0, 1) == '.')
 				continue;
 
-			if (preg_match('!^(' . self::PLUGIN_ID_SYNTAX . ')\.tar\.gz$!', $file, $match))
+			if (preg_match('!^(' . self::PLUGIN_ID_REGEXP . ')\.tar\.gz$!', $file, $match))
 			{
 				// Sélectionner les archives PHAR
 				$file = $match[1];
 			}
 			elseif (is_dir(PLUGINS_ROOT . '/' . $file)
-				&& preg_match('!^' . self::PLUGIN_ID_SYNTAX . '$!', $file)
+				&& preg_match('!^' . self::PLUGIN_ID_REGEXP . '$!', $file)
 				&& is_file(sprintf('%s/%s/garradin_plugin.ini', PLUGINS_ROOT, $file)))
 			{
 				// Rien à faire, le nom valide du plugin est déjà dans "$file"
@@ -460,7 +464,14 @@ class Plugin
 				continue;
 			}
 
-			$list[$file] = (object) parse_ini_file(self::getPath($file) . '/garradin_plugin.ini', false);
+			$data = (object) parse_ini_file(self::getPath($file) . '/garradin_plugin.ini', false);;
+
+			if (!isset($data->name)) {
+				// Ignore old plugins
+				continue;
+			}
+
+			$list[$file] = $data;
 		}
 
 		$dir->close();
@@ -671,7 +682,7 @@ class Plugin
 
 		$data = [
 			'id' 		=> 	$id,
-			'officiel' 	=> 	(int)(bool)$official,
+			'official' 	=> 	(int)(bool)$official,
 			'name'		=>	$infos->name,
 			'description'=>	$infos->description,
 			'author'	=>	$infos->author,

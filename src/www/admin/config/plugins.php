@@ -2,61 +2,36 @@
 
 namespace Garradin;
 
+use Garradin\Users\Session;
+
 require_once __DIR__ . '/_inc.php';
 
-if (f('install'))
-{
-    $form->check('install_plugin', [
-        'plugin' => 'required',
-    ]);
+$session = Session::getInstance();
+$csrf_key = 'plugins';
 
-    if (!$form->hasErrors())
-    {
-        try {
-            Plugin::install(f('plugin'), false);
-            $session->set('plugins_menu', null);
-            Utils::redirect(ADMIN_URL . 'config/plugins.php');
-        }
-        catch (UserException $e)
-        {
-            $form->addError($e->getMessage());
-        }
-    }
+$form->runIf('install', function ()  use ($session) {
+	Plugin::install(f('plugin'), false);
+	$session->set('plugins_menu', null);
+}, $csrf_key, '!config/plugins.php');
+
+$form->runIf('delete', function () use ($session) {
+	$plugin = new Plugin(qg('delete'));
+	$plugin->uninstall();
+	$session->set('plugins_menu', null);
+}, $csrf_key, '!config/plugins.php');
+
+if (qg('delete')) {
+	$plugin = new Plugin(qg('delete'));
+	$tpl->assign('plugin', $plugin->getInfos());
+	$tpl->assign('delete', true);
 }
-
-if (f('delete'))
-{
-    $form->check('delete_plugin_' . qg('delete'));
-
-    if (!$form->hasErrors())
-    {
-        try {
-            $plugin = new Plugin(qg('delete'));
-            $plugin->uninstall();
-            $session->set('plugins_menu', null);
-
-            Utils::redirect(ADMIN_URL . 'config/plugins.php');
-        }
-        catch (UserException $e)
-        {
-            $form->addError($e->getMessage());
-        }
-    }
-}
-
-if (qg('delete'))
-{
-    $plugin = new Plugin(qg('delete'));
-    $tpl->assign('plugin', $plugin->getInfos());
-    $tpl->assign('delete', true);
-}
-else
-{
-    $tpl->assign('liste_telecharges', Plugin::listDownloaded());
-    $tpl->assign('liste_installes', Plugin::listInstalled());
+else {
+	$tpl->assign('list_available', Plugin::listDownloaded());
+	$tpl->assign('list_installed', Plugin::listInstalled());
 }
 
 $tpl->assign('garradin_website', WEBSITE);
+$tpl->assign(compact('csrf_key'));
 
 $tpl->display('config/plugins.tpl');
 
