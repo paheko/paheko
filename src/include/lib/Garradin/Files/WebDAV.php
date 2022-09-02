@@ -79,10 +79,8 @@ class WebDAV extends KD2_WebDAV
 	protected function log(string $message, ...$params)
 	{
 		if (PHP_SAPI == 'cli-server') {
-			error_log(vsprintf($message, $params));
+			file_put_contents('php://stderr', vsprintf($message, $params));
 		}
-
-		file_put_contents(\Garradin\ROOT . '/webdav.log', vsprintf($message, $params) . "\n", FILE_APPEND);
 	}
 
 	protected function get_extra_ns(string $uri): string
@@ -135,12 +133,12 @@ class WebDAV extends KD2_WebDAV
 		return sprintf('
 			<oc:id>%s</oc:id>
 			<oc:size>0</oc:size>
-        	<oc:downloadURL></oc:downloadURL>
-        	<oc:permissions>%s</oc:permissions>
-        	<oc:share-types/>',
-        	md5($uri . $file),
-        	$perms
-        );
+			<oc:downloadURL></oc:downloadURL>
+			<oc:permissions>%s</oc:permissions>
+			<oc:share-types/>',
+			md5($uri . $file),
+			$perms
+		);
 	}
 
 	protected function getLock(string $uri, ?string $token = null): ?string
