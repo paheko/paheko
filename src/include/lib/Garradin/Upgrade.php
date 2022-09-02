@@ -4,6 +4,8 @@ namespace Garradin;
 
 use Garradin\Users\Session;
 
+use Garradin\Accounting\Charts;
+
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 
@@ -118,6 +120,11 @@ class Upgrade
 			if (version_compare($v, '1.1.28', '<')) {
 				$db->createFunction('html_decode', 'htmlspecialchars_decode');
 				$db->exec('UPDATE files_search SET content = html_decode(content) WHERE content IS NOT NULL;');
+			}
+
+			if (version_compare($v, '1.1.29', '<')) {
+				Charts::updateInstalled('fr_pca_2018');
+				$db->import(ROOT . '/include/data/1.1.29_migration.sql');
 			}
 
 			if (version_compare($v, '1.2.0', '<')) {

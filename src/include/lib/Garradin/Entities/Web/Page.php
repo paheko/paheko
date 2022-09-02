@@ -388,10 +388,10 @@ class Page extends Entity
 		}
 
 		foreach ($this->listAttachments() as $a) {
-			if ($images && !$a->image) {
+			if ($images && !$a->isImage()) {
 				continue;
 			}
-			elseif (!$images && $a->image) {
+			elseif (!$images && $a->isImage()) {
 				continue;
 			}
 
@@ -427,7 +427,7 @@ class Page extends Entity
 			$link = trim($link, '/');
 
 			// Link is not internal
-			if (preg_match('!https?:|\w+:|/|#!', $link)) {
+			if (!trim($link) || preg_match('!https?:|\w+:|/|#!', $link)) {
 				continue;
 			}
 

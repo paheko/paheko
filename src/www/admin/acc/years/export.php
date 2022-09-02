@@ -38,7 +38,7 @@ $types = [
 	],
 	Export::GROUPED => [
 		'label' => 'Complet groupé',
-		'help' => 'Idem, sauf que les lignes suivantes ne mentionnent pas les informations de l\'écriture.',
+		'help' => 'Les colonnes de l\'écriture ne sont pas répétées pour chaque ligne.',
 	],
 	Export::SIMPLE => [
 		'label' => 'Simplifié (comptabilité de trésorerie)',

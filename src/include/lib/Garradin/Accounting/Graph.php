@@ -8,9 +8,12 @@ use Garradin\Entities\Accounting\Transaction;
 use Garradin\Utils;
 use Garradin\Config;
 use Garradin\DB;
+use Garradin\UserTemplate\CommonModifiers;
+
 use const Garradin\ADMIN_COLOR1;
 use const Garradin\ADMIN_COLOR2;
 use const Garradin\ADMIN_URL;
+
 use KD2\DB\EntityManager;
 
 use KD2\Graphics\SVG\Plot;
@@ -139,6 +142,8 @@ class Graph
 		$count = 0;
 		$i = 0;
 
+		$currency = Config::getInstance()->monnaie;
+
 		foreach ($data as $row) {
 			$total += $row->balance;
 		}
@@ -151,8 +156,10 @@ class Graph
 			}
 			else
 			{
-				$label = strlen($row->label) > 40 ? substr($row->label, 0, 38) . '…' : $row->label;
-				$pie->add(new Pie_Data(abs($row->balance) / 100, $label, $colors[$i-1]));
+				$label = strlen($row->label) > 40 ? trim(substr($row->label, 0, 38)) . '…' : $row->label;
+				$data = new Pie_Data(abs($row->balance) / 100, $label, $colors[$i-1]);
+				$data->sublabel = Utils::money_format(intval($row->balance / 100) * 100, null, ' ', true) . ' ' . $currency;
+				$pie->add($data);
 			}
 
 			$count += $row->balance;
@@ -160,7 +167,9 @@ class Graph
 
 		if ($others != 0)
 		{
-			$pie->add(new Pie_Data(abs($others) / 100, 'Autres', '#ccc'));
+			$data = new Pie_Data(abs($others) / 100, 'Autres', '#ccc');
+			$data->sublabel = Utils::money_format(intval($others / 100) * 100, null, ' ', true) . ' ' . $currency;
+			$pie->add($data);
 		}
 
 		$pie->togglePercentage(true);

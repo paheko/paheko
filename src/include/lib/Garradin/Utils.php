@@ -17,6 +17,7 @@ class Utils
         'up'              => '↑',
         'down'            => '↓',
         'export'          => '↷',
+        'import'          => '↶',
         'reset'           => '↺',
         'upload'          => '⇑',
         'download'        => '⇓',
@@ -225,7 +226,7 @@ class Utils
         return $value;
     }
 
-    static public function money_format($number, string $dec_point = ',', string $thousands_sep = ' ', $zero_if_empty = true): string {
+    static public function money_format($number, ?string $dec_point = ',', string $thousands_sep = ' ', $zero_if_empty = true): string {
         if ($number == 0) {
             return $zero_if_empty ? '0' : '0,00';
         }
@@ -235,6 +236,10 @@ class Utils
 
         $decimals = substr('0' . $number, -2);
         $number = (int) substr($number, 0, -2);
+
+        if ($dec_point === null) {
+            $decimals = null;
+        }
 
         return sprintf('%s%s%s%s', $sign, number_format($number, 0, $dec_point, $thousands_sep), $dec_point, $decimals);
     }
@@ -1106,5 +1111,19 @@ class Utils
             // 48 bits for "node"
             substr($uuid, 20, 12)
         );
+    }
+
+    /**
+     * Hash de la version pour les éléments statiques (cache)
+     *
+     * On ne peut pas utiliser la version directement comme query string
+     * pour les éléments statiques (genre /admin/static/admin.css?v0.9.0)
+     * car cela dévoilerait la version de Garradin utilisée, posant un souci
+     * en cas de faille, on cache donc la version utilisée, chaque instance
+     * aura sa propre version
+     */
+    static public function getVersionHash(): string
+    {
+        return substr(sha1(garradin_version() . garradin_manifest() . ROOT . SECRET_KEY), 0, 10);
     }
 }

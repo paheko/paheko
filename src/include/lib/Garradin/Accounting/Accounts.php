@@ -235,7 +235,7 @@ class Accounts
 		self::importCSV($file['tmp_name']);
 	}
 
-	public function importCSV(string $file): void
+	public function importCSV(string $file, bool $update = false): void
 	{
 		$db = DB::getInstance();
 		$positions = array_flip(Account::POSITIONS_NAMES);
@@ -245,8 +245,17 @@ class Accounts
 
 		try {
 			foreach (CSV::import($file, self::EXPECTED_CSV_COLUMNS) as $line => $row) {
-				$account = new Account;
-				$account->id_chart = $this->chart_id;
+				$account = null;
+
+				if ($update) {
+					$account = EntityManager::findOne(Account::class, 'SELECT * FROM @TABLE WHERE code = ? AND id_chart = ?;', $row['code'], $this->chart_id);
+				}
+
+				if (!$account) {
+					$account = new Account;
+					$account->id_chart = $this->chart_id;
+				}
+
 				try {
 					if (!isset($positions[$row['position']])) {
 						throw new ValidationException('Position inconnue : ' . $row['position']);

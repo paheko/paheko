@@ -10,18 +10,31 @@ garradin - gestionnaire d'association à but non lucratif
 
 SYNOPSIS
 --------
-*garradin* ['OPTIONS'] ['COMMANDE']
+*garradin* ['OPTIONS'] ['COMMANDE'] ['BASE']
 
 
 DESCRIPTION
 -----------
 Lancer garradin(1) sans argument lance le serveur web intégré sur
-l'adresse localhost:8088 et le navigateur web par défaut.
+l'adresse localhost:8081 et le navigateur web par défaut.
+
+*BASE* défini le chemin de la base de données (fichier .sqlite) à
+utiliser. Par défaut, si aucune base n'est spécifiée, c'est le fichier
+'association.sqlite' situé dans le répertoire des données qui est
+utilisé.
 
 OPTIONS
 -------
 *-p, --port*='PORT'::
 Défini le port utilisé par le serveur web.
+Par défaut c'est le port 8081 qui est utilisé.
+
+*-b, --bind*='IP'::
+Adresse IP où sera exposé le serveur web.
+Par défaut c'est 127.0.0.1 qui est utilisé.
+
+Utiliser 0.0.0.0 pour que le serveur web soit accessible d'autres
+machines. (Attention cela peut présenter un risque de sécurité.)
 
 *-v, --verbose*::
 Affiche les messages du serveur web.
@@ -46,10 +59,33 @@ Succès
 *1*::
 Erreur
 
+EMPLACEMENTS DE STOCKAGE
+------------------------
+Les données sont stockées dans $XDG_DATA_HOME/garradin.
+Généralement c'est ~/.local/share/garradin
+
+CONFIGURATION
+-------------
+Il est possible de créer un fichier de configuration dans
+$XDG_CONFIG_HOME/garradin/config.local.php
+
+Voir la documentation pour plus de détails sur les constantes
+de configuration acceptées.
+
+INSTALLATION SERVEUR WEB
+------------------------
+Il est possible d'utiliser ce package avec Apache pour héberger
+une instance Garradin.
+
+La procédure est détaillée ici :
+https://fossil.kd2.org/garradin/wiki?name=Installation%20sous%20Debian-Ubuntu
+
+Les données et plugins seront stockés dans le répertoire
+/var/lib/garradin
 
 BUGS
 ----
-Voir http://dev.kd2.org/garradin/ pour un accès au bugtracker.
+Voir https://fossil.kd2.org/garradin/ pour un accès au bugtracker.
 
 
 AUTEUR
@@ -60,7 +96,7 @@ Garradin est développé par bohwaz et d'autres contributeurs.
 RESSOURCES
 ----------
 
-Site principal : <http://dev.kd2.org/garradin/>
+Site principal : <https://fossil.kd2.org/garradin/>
 
 
 COPYING

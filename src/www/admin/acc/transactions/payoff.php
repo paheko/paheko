@@ -31,7 +31,7 @@ $accounts = $chart->accounts();
 $date = new \DateTime;
 
 if ($session->get('acc_last_date')) {
-	$date = \DateTime::createFromFormat('!d/m/Y', $session->get('acc_last_date'));
+	$date = \DateTime::createFromFormat('!Y-m-d', $session->get('acc_last_date'));
 }
 
 if (!$date || ($date < $current_year->start_date || $date > $current_year->end_date)) {

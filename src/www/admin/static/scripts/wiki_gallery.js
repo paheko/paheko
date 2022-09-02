@@ -40,7 +40,7 @@
         img.pos = pos || 0;
 
         img.onload = function () {
-            fig.style.opacity = 1;
+            fig.classList.remove('loading');
             img.style.width = 'initial';
             img.style.height = 'initial';
         };
@@ -62,9 +62,8 @@
     {
         // Pour animation
         var fig = img.parentNode;
-        fig.style.opacity = 0;
+        fig.classList.add('loading');
 
-        console.log(img);
         var pos = img.pos;
 
         if (pos >= items.length)

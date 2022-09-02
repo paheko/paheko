@@ -111,6 +111,25 @@ class Transaction extends Entity
 		}
 	}
 
+	public function findTypeFromAccounts(): int
+	{
+		if (count($this->getLines()) != 2) {
+			return self::TYPE_ADVANCED;
+		}
+
+		foreach ($this->getLinesWithAccounts() as $line) {
+			if ($line->account_position == Account::REVENUE && $line->credit) {
+				return self::TYPE_REVENUE;
+			}
+			elseif ($line->account_position == Account::EXPENSE && $line->debit) {
+				return self::TYPE_EXPENSE;
+			}
+		}
+
+		// Did not find a expense/revenue account: fall back to advanced
+		return self::TYPE_ADVANCED;
+	}
+
 	public function getLinesWithAccounts(): array
 	{
 		$db = EntityManager::getInstance(Line::class)->DB();
@@ -862,7 +881,7 @@ class Transaction extends Entity
 
 		$db->begin();
 
-		$sql = sprintf('DELETE FROM acc_transactions_users WHERE id_transaction = ? AND %s;', $db->where('id_user', 'NOT IN', $users));
+		$sql = sprintf('DELETE FROM acc_transactions_users WHERE id_transaction = ? AND %s AND id_service_user IS NULL;', $db->where('id_user', 'NOT IN', $users));
 		$db->preparedQuery($sql, $this->id());
 
 		foreach ($users as $id) {
@@ -887,8 +906,14 @@ class Transaction extends Entity
 		$sql = sprintf('SELECT u.id, %s AS identity, l.id_service_user
 			FROM users u
 			INNER JOIN acc_transactions_users l ON l.id_user = u.id
-			WHERE l.id_transaction = ?;', $identity_column);
+			WHERE l.id_transaction = ? AND l.id_service_user IS NULL;', $identity_column);
 		return $db->getAssoc($sql, $this->id());
+	}
+
+	public function unlinkServiceUser(int $id): void
+	{
+		$db = EntityManager::getInstance(self::class)->DB();
+		$db->delete('acc_transactions_users', 'id_transaction = ? AND id_service_user = ?', $this->id(), $id);
 	}
 
 	public function listRelatedTransactions()

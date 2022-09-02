@@ -77,14 +77,14 @@ class Skriv extends AbstractRender
 
 		if (empty($caption))
 		{
-			$caption = $name;
+			$caption = substr($name, 0, strrpos($name, '.'));
 		}
 
 		$url = $this->resolveAttachment($name);
 		$ext = substr($name, strrpos($name, '.')+1);
 
 		return sprintf(
-			'<aside class="file" data-type="%s"><a href="%s" class="internal-file">%s</a> <small>(%s)</small></aside>',
+			'<aside class="file" data-type="%s"><a href="%s" class="internal-file"><b>%s</b> <small>(%s)</small></a></aside>',
 			htmlspecialchars($ext), htmlspecialchars($url), htmlspecialchars($caption), htmlspecialchars(strtoupper($ext))
 		);
 	}
@@ -103,7 +103,7 @@ class Skriv extends AbstractRender
 		$align = $args[1] ?? null;
 		$caption = $args[2] ?? null;
 
-		$align = strtr($align, $align_replace);
+		$align = strtr((string)$align, $align_replace);
 
 		if (!$name || null === $this->current_path)
 		{
@@ -111,12 +111,19 @@ class Skriv extends AbstractRender
 		}
 
 		$url = $this->resolveAttachment($name);
-		$thumb_url = sprintf('%s?%s', $url, $align == 'center' ? '500px' : '200px');
+		$size = $align == 'center' ? 500 : 200;
+		$svg = substr($name, -4) == '.svg';
+		$thumb_url = null;
 
-		$out = sprintf('<a href="%s" class="internal-image" target="_image"><img src="%s" alt="%s" loading="lazy" /></a>',
+		if (!$svg) {
+			$thumb_url = sprintf('%s?%spx', $url, $size);
+		}
+
+		$out = sprintf('<a href="%s" class="internal-image" target="_image"><img src="%s" alt="%s" loading="lazy" style="max-width: %dpx; max-height: %4$dpx;" /></a>',
 			htmlspecialchars($url),
-			htmlspecialchars($thumb_url),
-			htmlspecialchars($caption ?? $name)
+			htmlspecialchars($thumb_url ?? $url),
+			htmlspecialchars($caption ?? ''),
+			$size
 		);
 
 		if (!empty($align))

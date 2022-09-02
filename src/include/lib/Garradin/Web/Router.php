@@ -111,7 +111,7 @@ class Router
 				$file->serveThumbnail($session, $size);
 			}
 			else {
-				$file->serve($session, isset($_GET['download']) ? true : false);
+				$file->serve($session, isset($_GET['download']), $_GET['s'] ?? null, $_POST['p'] ?? null);
 			}
 
 			Plugin::fireSignal('http.request.file.after', compact('file', 'uri', 'session'));

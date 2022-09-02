@@ -48,6 +48,22 @@ class Charts
 		return $chart;
 	}
 
+	static public function updateInstalled(string $chart_code): ?Chart
+	{
+		$file = sprintf('%s/include/data/charts/%s.csv', ROOT, $chart_code);
+		$country = strtoupper(substr($chart_code, 0, 2));
+		$code = strtoupper(substr($chart_code, 3));
+
+		$chart = EntityManager::findOne(Chart::class, 'SELECT * FROM @TABLE WHERE code = ? AND country = ?;', $code, $country);
+
+		if (!$chart) {
+			return self::install($chart_code);
+		}
+
+		$chart->accounts()->importCSV($file, true);
+		return $chart;
+	}
+
 	static public function listInstallable(): array
 	{
 		$installed = DB::getInstance()->getAssoc('SELECT id, LOWER(country || \'_\' || code) FROM acc_charts;');

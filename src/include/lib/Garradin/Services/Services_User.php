@@ -67,8 +67,9 @@ class Services_User
 			],
 			'amount' => [
 				'label' => 'Reste à régler',
-				'select' => 'expected_amount - SUM(tl.debit)',
+				'select' => 'MAX(0, expected_amount - SUM(tl.debit))',
 			],
+			'expected_amount' => [],
 		];
 
 		$tables = 'services_users su

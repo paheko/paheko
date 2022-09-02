@@ -140,10 +140,13 @@ use Garradin\Entities\Files\File;
 						{/if}
 						{linkbutton href=$file->url(true) label="Télécharger" shape="download"}
 						{if $can_write}
-							{linkbutton href="!common/files/rename.php?p=%s"|args:$file.path label="Renommer" shape="minus" target="_dialog"}
+							{linkbutton href="!common/files/rename.php?p=%s"|args:$file.path label="Renommer" shape="reload" target="_dialog"}
 						{/if}
 						{if $can_delete}
 							{linkbutton href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer" shape="delete" target="_dialog"}
+						{/if}
+						{if $can_write}
+							{linkbutton href="!common/files/share.php?p=%s"|args:$file.path label="Partager" shape="export" target="_dialog"}
 						{/if}
 					</td>
 				</tr>

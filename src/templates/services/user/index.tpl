@@ -14,6 +14,7 @@
 
 {form_errors}
 
+{if !$only}
 <dl class="cotisation">
 	<dt>Statut des inscriptions</dt>
 	{foreach from=$services item="service"}
@@ -49,9 +50,10 @@
 		{/if}
 	</dd>
 </dl>
+{/if}
 
 {if $only}
-	<p class="alert block">Cette liste ne montre qu'une seule inscription, liée à une écriture. {link href="?id=%d"|args:$user_id label="Voir toutes les inscriptions"}</p>
+	<p class="alert block">Cette liste ne montre qu'une seule inscription, liée à l'activité <strong>{$only_service.label}</strong><br />{linkbutton shape="right" href="?id=%d"|args:$user_id label="Voir toutes les inscriptions"}</p>
 {/if}
 
 {include file="common/dynamic_list_head.tpl"}
@@ -63,7 +65,7 @@
 			<td>{$row.expiry|date_short}</td>
 			<td>{$row.fee}</td>
 			<td>{if $row.paid}<b class="confirm">Oui</b>{else}<b class="error">Non</b>{/if}</td>
-			<td>{$row.amount|raw|money_currency}</td>
+			<td>{if $row.expected_amount}{$row.amount|raw|money_currency:false}{/if}</td>
 			<td class="actions">
 				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE) && $row.id_account}
 					{linkbutton shape="plus" label="Nouveau règlement" href="payment.php?id=%d"|args:$row.id}

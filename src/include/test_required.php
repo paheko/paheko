@@ -72,3 +72,8 @@ test_requis(
     in_array('ENABLE_FTS4', $options),
     'Le module SQLite3 FTS4 (permettant de faire des recherches) n\'est pas installé ou activé.'
 );
+
+test_requis(
+    class_exists('Phar'),
+    'Le module "Phar" n\'est pas disponible, il faut l\'installer.'
+);
