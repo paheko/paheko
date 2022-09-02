@@ -146,6 +146,9 @@ class CommonModifiers
 		{
 			$day = 'demain';
 		}
+		elseif ($date->getTimestamp() > time() - 3600*24*7) {
+			$day = sprintf('il y a %d jours', round((time() - $date->getTimestamp()) / (3600*24)));
+		}
 		elseif ($date->format('Y') == date('Y'))
 		{
 			$day = strtolower(Utils::strftime_fr($date, '%A %e %B'));

@@ -60,6 +60,8 @@ class Template extends Smartyer
 				throw new \LogicException('Instance already exists');
 			}
 		}
+		// For included templates just return a new instance,
+		// the singleton is only to get the 'master' Template object
 		else {
 			return $this;
 		}

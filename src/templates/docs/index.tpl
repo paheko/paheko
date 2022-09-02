@@ -83,7 +83,6 @@ use Garradin\Entities\Files\File;
 					<td></td>
 					<th>Nom</th>
 					<td>Modifié</td>
-					<td>Type</td>
 					<td>Taille</td>
 					<td></td>
 				</tr>
@@ -102,7 +101,6 @@ use Garradin\Entities\Files\File;
 					<td class="icon">{icon shape="folder"}</td>
 					<th><a href="?path={$file.path}">{$file.name}</a></th>
 					<td></td>
-					<td>Répertoire</td>
 					<td></td>
 					<td class="actions">
 					{if $can_write && ($context == File::CONTEXT_SKELETON || $context == File::CONTEXT_DOCUMENTS)}
@@ -128,8 +126,7 @@ use Garradin\Entities\Files\File;
 							<a href="{$file->url(true)}" target="_blank">{$file.name}</a>
 						{/if}
 					</th>
-					<td>{$file.modified|date}</td>
-					<td>{$file.mime}</td>
+					<td>{$file.modified|relative_date}</td>
 					<td>{$file.size|size_in_bytes}</td>
 					<td class="actions">
 						{if $can_write && $file->editorType()}

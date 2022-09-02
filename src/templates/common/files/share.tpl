@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Partager" current=null}
+{include file="_head.tpl" title="Partager" current="docs"}
 
 {form_errors}
 
@@ -26,4 +26,4 @@
 	Le lien de partage cessera de fonctionner si le fichier est renommé ou déplacé.
 </p>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

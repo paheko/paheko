@@ -1,42 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8" />
-	<title>Accès document</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<link rel="stylesheet" type="text/css" href="{$admin_url}static/admin.css?{$version_hash}" media="all" />
-	<style type="text/css">
-	{literal}
-	main {
-		max-width: 650px;
-		margin: 2em auto;
-		text-align: center;
-	}
-
-	main input[type=password] {
-		font-size: 1.5em;
-	}
-
-	main legend {
-		font-size: 1.3em;
-		padding: 0 2em;
-	}
-
-	main dl {
-		padding: 1em 0;
-	}
-
-	main p.block.error, main p.block.alert {
-		margin: 2em 0;
-		font-size: 1.2em;
-	}
-	{/literal}
-	</style>
-</head>
-
-<body class="transparent dialog">
-
-<main>
+{include file="_head.tpl" title="Accès document" current=null layout="public"}
 
 {if $has_password}
 <p class="block error">
@@ -58,7 +20,4 @@
 	</fieldset>
 </form>
 
-</main>
-
-</body>
-</html>
+{include file="_foot.tpl"}
