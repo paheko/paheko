@@ -148,7 +148,7 @@ class User extends Entity
 			$user = $session->getUser();
 
 			if ($user->id == $this->id) {
-				throw new UserException('Il n\'est pas possible de supprimer son propre compte. Merci de demander à un administrateur de le faire.');
+				throw new UserException('Il n\'est pas possible de supprimer son propre compte. Merci de demander à un autre administrateur de le faire.');
 			}
 		}
 

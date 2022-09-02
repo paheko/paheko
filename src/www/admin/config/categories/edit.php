@@ -16,6 +16,7 @@ if (!$cat) {
 $user = $session->getUser();
 
 $csrf_key = 'cat_edit_' . $cat->id();
+$admin_safe = $session->isAdmin() && $cat->id == $user->id_category;
 
 $form->runIf('save', function () use ($cat, $session) {
 	$user = $session->getUser();
@@ -41,7 +42,7 @@ $form->runIf('save', function () use ($cat, $session) {
 $permissions = Category::PERMISSIONS;
 
 foreach ($permissions as $key => &$config) {
-	if ($cat->id() == $user->id_category && in_array($key, [Session::SECTION_CONFIG, Session::SECTION_CONNECT])) {
+	if ($admin_safe && in_array($key, [Session::SECTION_CONFIG, Session::SECTION_CONNECT])) {
 		$config['disabled'] = true;
 	}
 }

@@ -529,4 +529,10 @@ class Session extends \KD2\UserSession
 		$user = $this->getUser();
 		return DB::getInstance()->count('users_sessions', 'id_user = ? AND selector != ?', $user->id(), $selector) + 1;
 	}
+
+	public function isAdmin(): bool
+	{
+		return $this->canAccess(self::SECTION_CONNECT, self::ACCESS_READ)
+			&& $this->canAccess(self::SECTION_CONFIG, self::ACCESS_ADMIN);
+	}
 }

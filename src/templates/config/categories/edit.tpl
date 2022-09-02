@@ -21,8 +21,9 @@
 		{foreach from=$permissions key="type" item="perm"}
 			<dt><label for="f_perm_{$type}_0">{$perm.label}</label></dt>
 			{if $perm.disabled}
-				<dd class="help">
-					Il n'est pas possible de désactiver ce droit pour votre propre catégorie.
+				<dd class="alert block">
+					En tant qu'administrateur, vous ne pouvez pas désactiver ce droit pour votre propre catégorie.<br />
+					Ceci afin d'empêcher que vous ne puissiez plus vous connecter.
 				</dd>
 			{/if}
 			{foreach from=$perm.options key="level" item="label"}
