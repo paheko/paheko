@@ -47,7 +47,22 @@ class Files
 			ORDER BY points DESC
 			LIMIT 0,50;', $where);
 
-		return DB::getInstance()->get($query, ...$params);
+		$out = [];
+
+		$db = DB::getInstance();
+		$db->begin();
+
+		foreach ($db->iterate($query, ...$params) as $row) {
+			// Remove deleted/moved files
+			if (FILE_STORAGE_BACKEND != 'SQLite' && !Files::callStorage('exists', $row->path)) {
+				$db->delete('files_search', 'path = ?', $row->path);
+				continue;
+			}
+		}
+
+		$db->commit();
+
+		return $out;
 	}
 
 	static public function list(string $parent = ''): array
