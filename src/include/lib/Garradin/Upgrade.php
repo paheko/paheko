@@ -464,6 +464,10 @@ class Upgrade
 				$db->import(ROOT . '/include/data/1.1.29_migration.sql');
 			}
 
+			if (version_compare($v, '1.1.30', '<')) {
+				require ROOT . '/include/migrations/1.1/30.php';
+			}
+
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();
 
