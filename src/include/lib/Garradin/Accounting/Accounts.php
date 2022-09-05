@@ -265,9 +265,16 @@ class Accounts
 						throw new ValidationException('Type inconnu : ' . $row['type']);
 					}
 
+					// Don't update user-set values
+					if ($account->exists()) {
+						unset($row['type'], $row['description']);
+					}
+					else {
+						$row['type'] = $types[$row['type']];
+						$row['user'] = empty($row['added']) ? 0 : 1;
+					}
+
 					$row['position'] = $positions[$row['position']];
-					$row['type'] = $types[$row['type']];
-					$row['user'] = empty($row['added']) ? 0 : 1;
 
 					$account->importForm($row);
 					$account->save();
