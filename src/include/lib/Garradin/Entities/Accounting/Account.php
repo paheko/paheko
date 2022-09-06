@@ -563,9 +563,7 @@ class Account extends Entity
 
 	public function save(bool $selfcheck = true): bool
 	{
-		$c = Config::getInstance();
-		$c->set('last_chart_change', time());
-		$c->save();
+		DB::getInstance()->exec(sprintf('REPLACE INTO config (key, value) VALUES (\'last_chart_change\', %d);', time()));
 
 		return parent::save($selfcheck);
 	}
