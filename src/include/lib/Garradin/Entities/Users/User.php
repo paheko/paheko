@@ -60,8 +60,10 @@ class User extends Entity
 		$this->_types = self::$_types_cache[static::class];
 		$this->_loading = true;
 
-		foreach ($this->_types as $key => $type) {
-			$this->$key = null;
+		foreach ($this->_types as $key => $v) {
+			if (!property_exists($this, $key)) {
+				$this->$key = null;
+			}
 		}
 
 		$this->_loading = false;
@@ -397,6 +399,6 @@ class User extends Entity
 	{
 		$id_field = DynamicFields::getNameFieldsSQL();
 		$db = DB::getInstance();
-		return $db->firstColumn(sprintf('SELECT id FROM %s WHERE %s = ?;', self::TABLE, $id_field), $this->name());
+		return $db->firstColumn(sprintf('SELECT id FROM %s WHERE %s = ?;', self::TABLE, $id_field), $this->name()) ?: null;
 	}
 }
