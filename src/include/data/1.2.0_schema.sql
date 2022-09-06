@@ -170,8 +170,8 @@ CREATE TABLE IF NOT EXISTS logs
     ip_address TEXT NULL
 );
 
-CREATE INDEX IF NOT EXISTS logs_ip ON logs (ip_address, created);
-CREATE INDEX IF NOT EXISTS logs_user ON logs (id_user, created);
+CREATE INDEX IF NOT EXISTS logs_ip ON logs (ip_address, type, created);
+CREATE INDEX IF NOT EXISTS logs_user ON logs (id_user, type, created);
 CREATE INDEX IF NOT EXISTS logs_created ON logs (created);
 
 ---

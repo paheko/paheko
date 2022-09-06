@@ -1,20 +1,6 @@
 {include file="_head.tpl" title="%s (%s)"|args:$user->name():$category.name current="users"}
 
-<nav class="tabs">
-	<aside>
-	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-		{linkbutton href="edit.php?id=%d"|args:$user.id shape="edit" label="Modifier"}
-	{/if}
-	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && $logged_user.id != $user.id}
-		{linkbutton href="delete.php?id=%d"|args:$user.id shape="delete" label="Supprimer" target="_dialog"}
-	{/if}
-	</aside>
-	<ul>
-		<li class="current">{link href="!users/details.php?id=%d"|args:$user.id label="Fiche membre"}</li>
-		<li>{link href="!services/user/?id=%d"|args:$user.id label="Inscriptions aux activités"}</li>
-		<li>{link href="!services/reminders/user.php?id=%d"|args:$user.id label="Rappels envoyés"}</li>
-	</ul>
-</nav>
+{include file="users/_nav_user.tpl" id=$user.id current="details"}
 
 <dl class="cotisation">
 	<dt>Activités et cotisations</dt>
@@ -91,11 +77,16 @@
 		{if $logged_user.id == $user.id}
 			{linkbutton shape="settings" label="Modifier mon mot de passe" href="!me/security.php"}
 		{elseif $user.password}
-			{linkbutton shape="settings" label="Modifier" href="edit_security.php?id=%d"|args:$user.id target="_dialog"}
+			{linkbutton shape="settings" label="Modifier le mot de passe" href="edit_security.php?id=%d"|args:$user.id target="_dialog"}
 		{else}
 			{linkbutton shape="settings" label="Définir un mot de passe" href="edit_security.php?id=%d"|args:$user.id target="_dialog"}
 		{/if}
 		</dd>
+		{if $user.date_login}
+		<dd>
+			{linkbutton shape="menu" label="Journal de connexion" href="!users/log.php?id=%d"|args:$user.id}
+		</dd>
+		{/if}
 	</dl>
 </aside>
 

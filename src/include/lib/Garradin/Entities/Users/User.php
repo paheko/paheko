@@ -9,6 +9,7 @@ use Garradin\DB;
 use Garradin\Config;
 use Garradin\Entity;
 use Garradin\Form;
+use Garradin\Log;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\ValidationException;
@@ -176,10 +177,15 @@ class User extends Entity
 
 		if ($login_modified && $this->password) {
 			EmailTemplates::loginChanged($this);
+			Log::add(Log::LOGIN_CHANGE, null, $this->id());
 		}
 
 		if ($password_modified && $this->password && $this->id == Session::getUserId()) {
 			EmailTemplates::passwordChanged($this);
+		}
+
+		if ($password_modified) {
+			Log::add(Log::LOGIN_PASSWORD_CHANGE, null, $this->id());
 		}
 
 		return true;

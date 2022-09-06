@@ -1,16 +1,6 @@
 {include file="_head.tpl" title="%s — Inscriptions aux activités et cotisations"|args:$user_name current="users/services"}
 
-
-<nav class="tabs">
-	<aside>
-		{linkbutton href="!services/user/subscribe.php?user=%d"|args:$user_id label="Inscrire à une activité" shape="plus"}
-	</aside>
-	<ul>
-		<li>{link href="!users/details.php?id=%d"|args:$user_id label="Fiche membre"}</li>
-		<li class="current">{link href="!services/user/?id=%d"|args:$user_id label="Inscriptions aux activités"}</li>
-		<li>{link href="!services/reminders/user.php?id=%d"|args:$user_id label="Rappels envoyés"}</li>
-	</ul>
-</nav>
+{include file="users/_nav_user.tpl" id=$user_id current="services"}
 
 {form_errors}
 

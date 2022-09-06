@@ -113,6 +113,9 @@
 		<dt>Déconnecter toutes mes sessions</dt>
 		<dd>{{Vous n'avez actuellement qu'une seule session ouverte (celle-ci).}{Vous avez actuellement %n sessions ouvertes (y compris celle-ci).} n=$sessions_count}</dd>
 		<dd>{linkbutton href="!logout.php?all" label="Me déconnecter de toutes les sessions" shape="logout"}</dd>
+		<dt>Journal de connexion</dt>
+		<dd>Permet de voir les tentatives de connexion, les modifications de mot de passe, etc.</dd>
+		<dd>{linkbutton href="!users/log.php?id=%d"|args:$logged_user.id label="Voir mon journal de connexion" shape="menu"}</dd>
 	</dl>
 {/if}
 

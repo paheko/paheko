@@ -4,11 +4,13 @@ namespace Garradin\Users;
 
 use Garradin\Config;
 use Garradin\DB;
+use Garradin\Log;
 use Garradin\Utils;
-use Garradin\Users\Users;
+use Garradin\Plugin;
 use Garradin\UserException;
 use Garradin\ValidationException;
-use Garradin\Plugin;
+
+use Garradin\Users\Users;
 use Garradin\Email\Templates as EmailsTemplates;
 use Garradin\Files\NextCloud_Compatibility;
 
@@ -361,6 +363,43 @@ class Session extends \KD2\UserSession
 		return false;
 	}
 
+	public function login($login, $password, $remember_me = false)
+	{
+		$ok = parent::login($login, $password, $remember_me);
+		$user_agent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 150) ?: null;
+
+		if ($ok) {
+			Log::add(Log::LOGIN_SUCCESS, compact('user_agent'));
+		}
+		elseif ($user = $this->getUserForLogin($login)) {
+			Log::add(Log::LOGIN_FAIL, compact('user_agent'), $user->id);
+		}
+		else {
+			Log::add(Log::LOGIN_FAIL, compact('user_agent'));
+		}
+
+		return $ok;
+	}
+
+	public function loginOTP(string $code): bool
+	{
+		$this->start();
+		$id = $_SESSION['userSessionRequireOTP']->user->id ?? null;
+		$user_agent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 150) ?: null;
+		$details = compact('user_agent') + ['otp' => true];
+
+		$ok = parent::loginOTP($code);
+
+		if ($ok) {
+			Log::add(Log::LOGIN_SUCCESS, $details);
+		}
+		else {
+			Log::add(Log::LOGIN_FAIL, $details, $id);
+		}
+
+		return $ok;
+	}
+
 	public function recoverPasswordSend(string $id): void
 	{
 		$user = $this->fetchUserForPasswordRecovery($id);
@@ -373,15 +412,20 @@ class Session extends \KD2\UserSession
 			throw new UserException('Ce membre n\'a pas le droit de se connecter.');
 		}
 
-		if (!trim($user->email)) {
+		$email = DynamicFields::getFirstEmailField();
+
+		if (!trim($user->$email)) {
 			throw new UserException('Ce membre n\'a pas d\'adresse e-mail renseignée dans son profil.');
 		}
+
+		$user_agent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 150) ?: null;
+		Log::add(Log::LOGIN_RECOVER, compact('user_agent'), $user->id);
 
 		$query = $this->makePasswordRecoveryQuery($user);
 
 		$url = ADMIN_URL . 'password.php?c=' . $query;
 
-		EmailsTemplates::recoverPassword($user->email, $user->pgp_key, $url);
+		EmailsTemplates::passwordRecovery($user->$email, $url, $user->pgp_key);
 	}
 
 	protected function fetchUserForPasswordRecovery(string $id): ?\stdClass
@@ -462,7 +506,7 @@ class Session extends \KD2\UserSession
 		return $user;
 	}
 
-	public function recoverPasswordChange(string $query, string $password, string $password_confirm)
+	public function recoverPasswordChange(string $query, string $password, string $password_confirmed)
 	{
 		$user = $this->checkRecoveryPasswordQuery($query);
 
@@ -471,7 +515,7 @@ class Session extends \KD2\UserSession
 		}
 
 		$ue = Users::get($user->id);
-		$ue->importSecurityForm(compact('password', 'password_confirmed'));
+		$ue->importSecurityForm(false, compact('password', 'password_confirmed'));
 		$ue->save();
 		EmailsTemplates::passwordChanged($ue);
 	}
@@ -483,7 +527,13 @@ class Session extends \KD2\UserSession
 
 	static public function getUserId(): ?int
 	{
-		return self::getInstance()->user()->id;
+		$i = self::getInstance();
+
+		if (!$i->isLogged()) {
+			return null;
+		}
+
+		return $i->user()->id;
 	}
 
 	public function canAccess(string $category, int $permission): bool

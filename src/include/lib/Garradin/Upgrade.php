@@ -47,11 +47,6 @@ class Upgrade
 				. PHP_EOL . $path);
 		}
 
-		// Voir si l'utilisateur est loggé, on le fait ici pour le cas où
-		// il y aurait déjà eu des entêtes envoyés au navigateur plus bas
-		$session = Session::getInstance();
-		$session->start(true);
-		$session->isLogged(true);
 		return true;
 	}
 
@@ -245,13 +240,7 @@ class Upgrade
 		}
 
 		$session = Session::getInstance();
-		$user_is_logged = $session->isLogged(true);
-
-		// Forcer à rafraîchir les données de la session si elle existe
-		if ($user_is_logged && !headers_sent())
-		{
-			$session->refresh();
-		}
+		$session->logout();
 	}
 
 	static public function getLatestVersion(): ?\stdClass

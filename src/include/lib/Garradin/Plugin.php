@@ -736,18 +736,6 @@ class Plugin
 			return null;
 		}
 
-		// Log events
-		if (0 === strpos($signal, 'entity.') && isset($params['entity'])) {
-			$type = str_replace(__NAMESPACE__ . '\Entities\\', '', get_class($params['entity']));
-
-			if ($signal == 'entity.delete.after') {
-				Log::add(Log::DELETE, ['entity' => $type, 'id' => $params['id'] ?? null]);
-			}
-			elseif ($signal == 'entity.save.after') {
-				Log::add(!empty($params['new']) ? Log::CREATE : Log::EDIT, ['entity' => $type, 'id' => $params['entity']->id()]);
-			}
-		}
-
 		// Process SYSTEM_SIGNALS first
 		foreach (SYSTEM_SIGNALS as $system_signal) {
 			if (key($system_signal) != $signal) {
