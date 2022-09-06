@@ -17,9 +17,10 @@ $db->exec(sprintf('ATTACH \'%s\' AS old;', $old_db));
 
 $chart_id = $db->firstColumn('SELECT id FROM acc_charts WHERE code = \'PCA_2018\' AND country = \'FR\';');
 
+// We cannot use UPDATE FROM as it doesn't work with old SQLite < 3.33.0
 $db->exec(sprintf('UPDATE acc_accounts AS a
-	SET description = b.description, type = b.type
-	FROM old.acc_accounts AS b
-	WHERE a.id = b.id AND a.id_chart = %d;', $chart_id));
+	SET description = (SELECT b.description FROM old.acc_accounts b WHERE b.id = a.id),
+		type = (SELECT b.type FROM old.acc_accounts b WHERE b.id = a.id)
+	WHERE a.id_chart = %d AND EXISTS (SELECT b.id FROM old.acc_accounts b WHERE b.id = a.id);', $chart_id));
 
 $db->exec('DETACH \'old\';');
