@@ -638,6 +638,10 @@ class DynamicFields
 				-- Set is_parent to 0 if user has no longer any children
 				UPDATE %1$s SET is_parent = 0 WHERE id = OLD.id_parent
 					AND 0 = (SELECT COUNT(*) FROM users WHERE id_parent = OLD.id_parent);
+			END;
+			-- Keep logs for create/delete/edit actions, just make them anonymous
+			CREATE TRIGGER %1$s_delete_logs BEFORE DELETE ON users BEGIN
+			    UPDATE logs SET id_user = NULL WHERE id_user = OLD.id AND type >= 10;
 			END;', $table_name));
 	}
 

@@ -163,7 +163,7 @@ CREATE TABLE IF NOT EXISTS users_sessions
 CREATE TABLE IF NOT EXISTS logs
 (
     id INTEGER NOT NULL PRIMARY KEY,
-    id_user INTEGER NULL REFERENCES users (id),
+    id_user INTEGER NULL REFERENCES users (id) ON DELETE CASCADE,
     type INTEGER NOT NULL,
     details TEXT NULL,
     created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(created) IS NOT NULL AND datetime(created) = created),

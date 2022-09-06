@@ -4,6 +4,7 @@ namespace Garradin;
 
 use Garradin\Config;
 use Garradin\DB;
+use Garradin\Users\Session;
 
 class Log
 {
@@ -40,9 +41,9 @@ class Log
 		self::EDIT => 'Modification',
 	];
 
-	static public function add(int $type, ?string $details = null): void
+	static public function add(int $type, ?array $details = null): void
 	{
-		if ($type != LOGIN_FAIL) {
+		if ($type != self::LOGIN_FAIL) {
 			$keep = Config::getInstance()->log_retention;
 
 			// Don't log anything
@@ -55,10 +56,10 @@ class Log
 		$session = Session::getInstance();
 		$id_user = $session->isLogged() ? $session->getUser()->id : null;
 
-		DB::getInstance()->insert('log', [
-			'id_user'    => $user_id,
+		DB::getInstance()->insert('logs', [
+			'id_user'    => $id_user,
 			'type'       => $type,
-			'details'    => $details,
+			'details'    => $details ? json_encode($details) : null,
 			'ip_address' => $ip,
 		]);
 	}
