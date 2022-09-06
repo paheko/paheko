@@ -48,6 +48,10 @@ class Service_User extends Entity
 
 	public function isDuplicate(bool $using_date = true): bool
 	{
+		if (!isset($this->id_user, $this->id_service)) {
+			throw new \LogicException('Entity does not define either user or service');
+		}
+
 		$params = [
 			'id_user' => $this->id_user,
 			'id_service' => $this->id_service,
@@ -208,6 +212,10 @@ class Service_User extends Entity
 			$su->date = new Date;
 			$su->importForm($source);
 			$su->id_user = (int) $id;
+
+			if (empty($su->id_service)) {
+				throw new ValidationException('Aucune activité n\'a été sélectionnée.');
+			}
 
 			if ($su->id_fee && $su->fee() && $su->fee()->id_account && $su->id_user) {
 				$su->expected_amount = $su->fee()->getAmountForUser($su->id_user);
