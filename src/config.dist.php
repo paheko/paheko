@@ -585,6 +585,9 @@ namespace Garradin;
  * permettant d'identifier l'installation et éviter les doublons.
  * (voir le code dans lib/.../Install.php)
  *
+ * Le code de stockage des statistiques est visible à :
+ * https://garradin.eu/ping/
+ *
  * Pour désactiver cet envoi il suffit de placer cette constante à TRUE.
  *
  * Défaut : false
