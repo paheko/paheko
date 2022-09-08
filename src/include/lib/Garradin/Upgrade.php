@@ -506,6 +506,7 @@ class Upgrade
 			throw $e;
 		}
 
+		Install::ping();
 
 		$session = Session::getInstance();
 		$user_is_logged = $session->isLogged(true);
