@@ -58,7 +58,7 @@ class Plugin
 	 * @param string $id Identifiant du plugin
 	 * @throws UserException Si le plugin n'est pas installé (n'existe pas en DB)
 	 */
-	public function __construct($id)
+	public function __construct(string $id)
 	{
 		$db = DB::getInstance();
 		$this->plugin = $db->first('SELECT * FROM plugins WHERE id = ?;', $id);
@@ -185,6 +185,36 @@ class Plugin
 	public function id()
 	{
 		return $this->id;
+	}
+
+	public function route(bool $public, string $uri): void
+	{
+		define('Garradin\PLUGIN_ROOT', $this->path());
+		define('Garradin\PLUGIN_URL', WWW_URL . 'p/' . $this->id() . '/');
+		define('Garradin\PLUGIN_QSP', '?');
+
+		if (!$uri || substr($uri, -1) == '/') {
+			$uri .= 'index.php';
+		}
+
+		if (!$public) {
+			require ROOT . '/www/admin/_inc.php';
+		}
+
+		$tpl = Template::getInstance();
+
+		$tpl->assign('plugin', $plugin->getInfos());
+		$tpl->assign('plugin_url', PLUGIN_URL);
+		$tpl->assign('plugin_root', PLUGIN_ROOT);
+
+		try {
+			$prefix = $public ? 'public/' : 'admin/';
+			$plugin->call($prefix . $page);
+		}
+		catch (\UnexpectedValueException $e) {
+			http_response_code(404);
+			throw new UserException($e->getMessage());
+		}
 	}
 
 	/**

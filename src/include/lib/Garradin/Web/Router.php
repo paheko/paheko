@@ -23,25 +23,6 @@ use const Garradin\{WWW_URI, ADMIN_URL, ROOT};
 
 class Router
 {
-	// Order is important
-	const NEXTCLOUD_ROUTES = [
-		'status.php' => 'status',
-		// Login v1, for Android app
-		'index.php/login/flow' => 'login_v1',
-		// Login v2, for desktop app
-		'index.php/login/v2/poll' => 'poll',
-		'index.php/login/v2' => 'login_v2',
-		'ocs/v1.php/cloud/capabilities' => 'capabilities',
-		'ocs/v2.php/cloud/capabilities' => 'capabilities',
-		'ocs/v2.php/cloud/user' => 'user',
-		'ocs/v1.php/cloud/user' => 'user',
-		'ocs/v2.php/apps/files_sharing/api/v1/shares' => 'shares',
-		'ocs/v2.php/apps/user_status/api/v1/predefined_statuses' => 'empty',
-		'ocs/v2.php/core/navigation/apps' => 'empty',
-		'remote.php/webdav/' => 'webdav',
-		'remote.php/dav' => 'webdav',
-	];
-
 	static public function route(): void
 	{
 		$uri = !empty($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
@@ -58,33 +39,37 @@ class Router
 
 		$uri = substr($uri, 1);
 
-		if (substr($uri, 0, 6) === 'admin/') {
-			http_response_code(404);
-			throw new UserException('Cette page n\'existe pas.');
-		}
+		$first = ($pos = strpos($uri, '/')) ? substr($uri, 0, $pos) : null;
+
 		// Redirect old URLs (pre-1.1)
-		elseif ($uri == 'feed/atom/') {
+		if ($uri == 'feed/atom/') {
 			Utils::redirect('/atom.xml');
 		}
 		elseif ($uri == 'favicon.ico') {
 			header('Location: ' . Config::getInstance()->fileURL('favicon'), true);
 			return;
 		}
-		elseif (0 === strpos($uri, 'api/')) {
+		elseif (preg_match('!^(admin/plugin|p)/(' . Plugin::PLUGIN_ID_REGEXP . ')/(.*)$/', $uri, $match)) {
+			$plugin = new Plugin($match[2]);
+			$public = $match[1] == 'p';
+			$plugin->route($public, $match[3]);
+			return;
+		}
+		elseif ('admin' == $first || 'p' == $first) {
+			http_response_code(404);
+			throw new UserException('Cette page n\'existe pas.');
+		}
+		elseif ('api' == $first) {
 			API::dispatchURI(substr($uri, 4));
 			return;
 		}
-		elseif (substr($uri, 0, 5) === 'form/') {
+		elseif ('form' == $first) {
 			$uri = substr($uri, 5);
 			UserForms::serve($uri);
 			return;
 		}
-		elseif (0 === strpos($uri, 'dav/')) {
+		elseif ('dav' == $first) {
 			WebDAV::dispatchURI($uri);
-			return;
-		}
-		elseif (array_filter(self::NEXTCLOUD_ROUTES, fn($k) => 0 === strpos($uri, $k), ARRAY_FILTER_USE_KEY)) {
-			NextCloud_Compatibility::route($uri);
 			return;
 		}
 		elseif (($file = Files::getFromURI($uri))
