@@ -135,7 +135,9 @@ class Install
 		self::assert($source['user_password'] === $source['user_password_confirm'], 'La vérification du mot de passe ne correspond pas');
 
 		try {
-			return self::install($source['name'], $source['user_name'], $source['user_email'], $source['user_password']);
+			$ok = self::install($source['name'], $source['user_name'], $source['user_email'], $source['user_password']);
+			self::ping();
+			return $ok;
 		}
 		catch (\Exception $e) {
 			@unlink(DB_FILE);
