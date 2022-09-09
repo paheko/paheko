@@ -5,7 +5,7 @@ namespace Garradin;
 use Garradin\Email\Emails;
 use Garradin\Web\Router;
 
-require __DIR__ . '/_inc.php';
+require_once __DIR__ . '/../include/init.php';
 
 // Handle __un__subscribe URL
 if (!empty($_GET['un'])) {

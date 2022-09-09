@@ -189,27 +189,12 @@ class Plugin
 
 	public function route(bool $public, string $uri): void
 	{
-		define('Garradin\PLUGIN_ROOT', $this->path());
-		define('Garradin\PLUGIN_URL', WWW_URL . 'p/' . $this->id() . '/');
-		define('Garradin\PLUGIN_QSP', '?');
-
 		if (!$uri || substr($uri, -1) == '/') {
 			$uri .= 'index.php';
 		}
 
-		if (!$public) {
-			require ROOT . '/www/admin/_inc.php';
-		}
-
-		$tpl = Template::getInstance();
-
-		$tpl->assign('plugin', $plugin->getInfos());
-		$tpl->assign('plugin_url', PLUGIN_URL);
-		$tpl->assign('plugin_root', PLUGIN_ROOT);
-
 		try {
-			$prefix = $public ? 'public/' : 'admin/';
-			$plugin->call($prefix . $page);
+			$this->call($public, $uri);
 		}
 		catch (\UnexpectedValueException $e) {
 			http_response_code(404);
@@ -219,14 +204,15 @@ class Plugin
 
 	/**
 	 * Inclure un fichier depuis le plugin (dynamique ou statique)
-	 * @param  string $file Chemin du fichier à aller chercher : si c'est un .php il sera inclus,
+	 * @param bool   $public TRUE si le fichier est situé dans 'public', sinon dans 'admin'
+	 * @param string $file   Chemin du fichier à aller chercher : si c'est un .php il sera inclus,
 	 * sinon il sera juste affiché
 	 * @return void
 	 * @throws UserException Si le fichier n'existe pas ou fait partie des fichiers qui ne peuvent
 	 * être appelés que par des méthodes de Plugin.
 	 * @throws \RuntimeException Si le chemin indiqué tente de sortir du contexte du PHAR
 	 */
-	public function call($file)
+	public function call(bool $public, string $file)
 	{
 		$file = preg_replace('!^[./]*!', '', $file);
 
@@ -237,7 +223,7 @@ class Plugin
 
 		$forbidden = ['install.php', 'garradin_plugin.ini', 'upgrade.php', 'uninstall.php'];
 
-		if (in_array($file, $forbidden))
+		if (in_array(basename($file), $forbidden))
 		{
 			throw new UserException('Le fichier ' . $file . ' ne peut être appelé par cette méthode.');
 		}
@@ -248,29 +234,42 @@ class Plugin
 			throw new UserException('Cette extension n\'est pas disponible.');
 		}
 
-		if (!file_exists($path . '/www/' . $file))
-		{
-			throw new UserException('Le fichier ' . $file . ' n\'existe pas dans le plugin ' . $this->id);
+		$path .= $public ? '/public/' : '/admin/';
+		$path .= $file;
+
+		if (!file_exists($path)) {
+			throw new UserException(sprintf('Le fichier "%s" n\'existe pas dans le plugin "%s"', substr($path, strlen($this->path())), $this->id));
 		}
 
-		if (is_dir($path . '/www/' . $file))
-		{
+		if (is_dir($path)) {
 			throw new UserException(sprintf('Sécurité : impossible de lister le répertoire "%s" du plugin "%s".', $file, $this->id));
 		}
 
-		if (substr($file, -4) === '.php')
+		if (substr($path, -4) === '.php')
 		{
+			define('Garradin\PLUGIN_ROOT', $this->path());
+			define('Garradin\PLUGIN_URL', WWW_URL . ($public ? 'p/' : 'admin/p/') . $this->id() . '/');
+			define('Garradin\PLUGIN_QSP', '?');
+
 			// Créer l'environnement d'exécution du plugin
 			$plugin = $this;
-			global $tpl, $config, $session, $form;
 
-			include $this->path() . '/www/' . $file;
+			if (!$public) {
+				require ROOT . '/www/admin/_inc.php';
+			}
+
+			$tpl = Template::getInstance();
+			$tpl->assign('plugin', $this->getInfos());
+			$tpl->assign('plugin_url', PLUGIN_URL);
+			$tpl->assign('plugin_root', PLUGIN_ROOT);
+
+			include $path;
 		}
 		else
 		{
 			// Récupération du type MIME à partir de l'extension
-			$pos = strrpos($file, '.');
-			$ext = substr($file, $pos+1);
+			$pos = strrpos($path, '.');
+			$ext = substr($path, $pos+1);
 
 			if (isset($this->mimes[$ext]))
 			{
@@ -282,9 +281,9 @@ class Plugin
 			}
 
 			header('Content-Type: ' .$mime);
-			header('Content-Length: ' . filesize($this->path() . '/www/' . $file));
+			header('Content-Length: ' . filesize($path));
 
-			readfile($this->path() . '/www/' . $file);
+			readfile($path);
 		}
 	}
 
@@ -448,7 +447,7 @@ class Plugin
 	{
 		$list = [];
 
-		// First let plugins handle
+		// Let plugins handle their listing
 		self::fireSignal('menu.item', compact('session'), $list);
 		ksort($list);
 

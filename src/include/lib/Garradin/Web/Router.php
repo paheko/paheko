@@ -49,7 +49,7 @@ class Router
 			header('Location: ' . Config::getInstance()->fileURL('favicon'), true);
 			return;
 		}
-		elseif (preg_match('!^(admin/plugin|p)/(' . Plugin::PLUGIN_ID_REGEXP . ')/(.*)$/', $uri, $match)) {
+		elseif (preg_match('!^(admin/p|p)/(' . Plugin::PLUGIN_ID_REGEXP . ')/(.*)$!', $uri, $match)) {
 			$plugin = new Plugin($match[2]);
 			$public = $match[1] == 'p';
 			$plugin->route($public, $match[3]);
