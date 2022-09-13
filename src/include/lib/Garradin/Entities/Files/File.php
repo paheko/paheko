@@ -313,28 +313,35 @@ class File extends Entity
 		// Check that it's a real image
 		if ($this->image) {
 			if ($path) {
-				$blob = file_get_contents($path, false, null, 0, 100);
+				$blob = file_get_contents($path, false, null, 0, 1000);
 			}
 			elseif ($pointer) {
-				$blob = fread($pointer, 100);
+				$blob = fread($pointer, 1000);
 				fseek($pointer, 0, SEEK_SET);
 			}
 			else {
-				$blob = substr($content, 0, 100);
+				$blob = substr($content, 0, 1000);
 			}
 
-			if ($type = Blob::getType($blob)) {
+			if ($size = Blob::getSize($blob)) {
+				// This is to avoid pixel flood attacks
+				if ($size[0] > 8000 || $size[1] > 8000) {
+					throw new ValidationException('Cette image est trop grande (taille max 8000 x 8000 pixels)');
+				}
+
 				// Recompress PNG files from base64, assuming they are coming
 				// from JS canvas which doesn't know how to gzip (d'oh!)
-				if ($type == 'image/png' && null !== $content) {
+				if ($size[2] == 'image/png' && null !== $content) {
 					$i = Image::createFromBlob($content);
 					$content = $i->output('png', true);
 					$this->set('size', strlen($content));
 					unset($i);
 				}
 			}
+			elseif ($type = Blob::getType($blob)) {
+				// WebP is fine, but we cannot get its size
+			}
 			else {
-				var_dump($type, $blob); exit;
 				// Not an image
 				$this->set('image', false);
 			}
