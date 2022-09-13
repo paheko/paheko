@@ -33,6 +33,7 @@ class Utils
         'help'            => '❓',
         'plus'            => '➕',
         'minus'           => '➖',
+        'login'           => '⇥',
         'logout'          => '⤝',
         'eye-off'         => '⤫',
         'menu'            => '𝍢',

@@ -18,6 +18,16 @@ if (!$user) {
 }
 
 $category = $user->category();
+$csrf_key = 'user_' . $user->id();
+
+$form->runIf('login_as', function () use ($user, $category, $session) {
+	if (!$session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
+		throw new \RuntimeException('Security alert: attempt to login as a different user, but does not hold the right to do so.');
+	}
+
+	$session->logout();
+	$session->forceLogin($user->id);
+}, $csrf_key, '!?login_as=1');
 
 $services = Services_User::listDistinctForUser($user->id);
 
@@ -32,7 +42,7 @@ $parent_name = $user->getParentName();
 $children = $user->listChildren();
 $siblings = $user->listSiblings();
 
-$variables += compact('services', 'user', 'category', 'children', 'siblings', 'parent_name');
+$variables += compact('services', 'user', 'category', 'children', 'siblings', 'parent_name', 'csrf_key');
 
 $tpl->assign($variables);
 $tpl->assign('snippets', UserForms::getSnippets(UserForm::SNIPPET_USER, $variables));

@@ -87,6 +87,14 @@
 			{linkbutton shape="menu" label="Journal de connexion" href="!users/log.php?id=%d"|args:$user.id}
 		</dd>
 		{/if}
+		{if !LOCAL_LOGIN && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN) && $user.id != $logged_user.id}
+		<dd>
+			<form method="post" action="" onsubmit="return confirm(&quot;Cela va vous déconnecter et vous reconnecter comme si vous étiez ce membre. Continuer ?&quot);">
+				{csrf_field key=$csrf_key}
+				{button name="login_as" type="submit" shape="login" label="Se connecter à sa place"}
+			</form>
+		</dd>
+		{/if}
 	</dl>
 </aside>
 

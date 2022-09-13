@@ -111,9 +111,6 @@ class Session extends \KD2\UserSession
 
 	protected function getUserDataForSession($id)
 	{
-		// Mettre à jour la date de connexion
-		$this->db->preparedQuery('UPDATE users SET date_login = datetime() WHERE id = ?;', [$id]);
-
 		$sql = sprintf('SELECT u.*,
 			c.perm_connect, c.perm_web, c.perm_users, c.perm_documents,
 			c.perm_subscribe, c.perm_accounting, c.perm_config
@@ -308,17 +305,17 @@ class Session extends \KD2\UserSession
 		// Force login with a static user, that is not in the local database
 		// this is useful for using a SSO like LDAP for example
 		if (is_array($login)) {
-			$this->user = (new User)->import(LOCAL_LOGIN['user'] ?? []);
+			$this->user = (new User)->import($login['user'] ?? []);
 
-			if (isset(LOCAL_LOGIN['user']['_name'])) {
+			if (isset($login['user']['_name'])) {
 				$name = DynamicFields::getFirstNameField();
-				$this->user->$name = LOCAL_LOGIN['user']['_name'];
+				$this->user->$name = $login['user']['_name'];
 			}
 
 			$permissions = [];
 
 			foreach (Category::PERMISSIONS as $perm => $data) {
-				$permissions['perm_' . $perm] = LOCAL_LOGIN['permissions'][$perm] ?? self::ACCESS_NONE;
+				$permissions['perm_' . $perm] = $login['permissions'][$perm] ?? self::ACCESS_NONE;
 			}
 
 			$this->set('permissions', $permissions);
@@ -370,6 +367,9 @@ class Session extends \KD2\UserSession
 
 		if ($ok) {
 			Log::add(Log::LOGIN_SUCCESS, compact('user_agent'));
+
+			// Mettre à jour la date de connexion
+			$this->db->preparedQuery('UPDATE users SET date_login = datetime() WHERE id = ?;', [$this->getUser()->id]);
 		}
 		elseif ($user = $this->getUserForLogin($login)) {
 			Log::add(Log::LOGIN_FAIL, compact('user_agent'), $user->id);
@@ -392,6 +392,9 @@ class Session extends \KD2\UserSession
 
 		if ($ok) {
 			Log::add(Log::LOGIN_SUCCESS, $details);
+
+			// Mettre à jour la date de connexion
+			$this->db->preparedQuery('UPDATE users SET date_login = datetime() WHERE id = ?;', [$this->getUser()->id]);
 		}
 		else {
 			Log::add(Log::LOGIN_FAIL, $details, $id);
