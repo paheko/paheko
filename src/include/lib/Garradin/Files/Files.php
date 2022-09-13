@@ -425,7 +425,7 @@ class Files
 		File::validateFileName($name);
 		File::validatePath($parent);
 
-		File::validateCanHTML($parent, $name);
+		File::validateCanHTML($name, $parent);
 
 		self::ensureDirectoryExists($parent);
 
