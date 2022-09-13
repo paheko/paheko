@@ -183,7 +183,7 @@ class DynamicFields
 			}
 
 			if ($name == 'name') {
-				$field->system |= $field::NAME;
+				$field->system |= $field::NAMES;
 			}
 
 			if ($name == 'numero') {
@@ -239,7 +239,7 @@ class DynamicFields
 				$this->_fields_by_system_use['password'][$key] = $field;
 			}
 
-			if ($field->system & $field::NAME) {
+			if ($field->system & $field::NAMES) {
 				$this->_fields_by_system_use['name'][$key] = $field;
 			}
 
@@ -399,7 +399,7 @@ class DynamicFields
 			}
 
 			if ($name == $name_field) {
-				$field->system |= $field::NAME;
+				$field->system |= $field::NAMES;
 			}
 
 			if ($name == $number_field) {
