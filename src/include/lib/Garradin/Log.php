@@ -26,6 +26,7 @@ class Log
 	const LOGIN_RECOVER = 3;
 	const LOGIN_PASSWORD_CHANGE = 4;
 	const LOGIN_CHANGE = 5;
+	const LOGIN_AS = 6;
 
 	const ACTIONS = [
 		self::LOGIN_FAIL => 'Connexion refusée',
@@ -33,6 +34,7 @@ class Log
 		self::LOGIN_RECOVER => 'Mot de passe perdu',
 		self::LOGIN_PASSWORD_CHANGE => 'Modification de mot de passe',
 		self::LOGIN_CHANGE => 'Modification d\'identifiant',
+		self::LOGIN_AS => 'Connexion par un administrateur',
 	];
 
 	static public function add(int $type, ?array $details = null, int $id_user = null): void

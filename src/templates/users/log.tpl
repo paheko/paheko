@@ -30,6 +30,9 @@
 				{if $row.type == Log::LOGIN_FAIL || $row.type == Log::LOGIN_SUCCESS || $row.type == Log::LOGIN_RECOVER}
 					{$row.details.user_agent}
 				{/if}
+				{if $row.type == Log::LOGIN_AS}
+					"{$row.details.admin}" s'est connecté à la place du membre
+				{/if}
 			</td>
 			<td>{$row.ip_address}</td>
 			<td class="actions">

@@ -25,13 +25,17 @@ $form->runIf('login_as', function () use ($user, $category, $session) {
 		throw new \RuntimeException('Security alert: attempt to login as a different user, but does not hold the right to do so.');
 	}
 
+	$logged_user = $session->getUser();
+
 	// Cannot login as same category, cannot login in an admin category
-	if ($user->id_category == $session->getUser()->id_category || $category->perm_config >= $session::ACCESS_ADMIN) {
+	if ($user->id_category == $logged_user->id_category || $category->perm_config >= $session::ACCESS_ADMIN) {
 		throw new UserException('Accès interdit');
 	}
 
 	$session->logout();
 	$session->forceLogin($user->id);
+	Log::add(Log::LOGIN_AS, ['admin' => $logged_user->name()]);
+
 }, $csrf_key, '!?login_as=1');
 
 $services = Services_User::listDistinctForUser($user->id);
