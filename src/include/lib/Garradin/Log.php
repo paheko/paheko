@@ -49,6 +49,10 @@ class Log
 
 	static public function add(int $type, ?array $details = null, int $id_user = null): void
 	{
+		if (defined('Garradin\INSTALL_PROCESS')) {
+			return;
+		}
+
 		if ($type != self::LOGIN_FAIL) {
 			$keep = Config::getInstance()->log_retention;
 
@@ -76,12 +80,6 @@ class Log
 		$db = DB::getInstance();
 
 		$days_delete = $config->log_retention;
-		$days_anonymous = $config->log_anonymize;
-
-		// Anonymize old logs according to configuration
-		$db->exec(sprintf('UPDATE logs SET ip_address = NULL, id_user = NULL
-			WHERE type != %d AND type != %d AND created < datetime(\'now\', \'-%d days\');',
-			self::LOGIN_FAIL, self::LOGIN_RECOVER, $days_anonymous));
 
 		// Delete old logs according to configuration
 		$db->exec(sprintf('DELETE FROM logs

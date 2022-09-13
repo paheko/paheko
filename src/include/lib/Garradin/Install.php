@@ -171,8 +171,7 @@ class Install
 		$config->set('currency', '€');
 		$config->set('country', 'FR');
 		$config->set('site_disabled', true);
-		$config->set('log_retention', 720);
-		$config->set('log_anonymize', 365);
+		$config->set('log_retention', 365);
 
 		$fields = DynamicFields::getInstance();
 		$fields->install();

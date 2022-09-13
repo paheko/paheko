@@ -2,7 +2,7 @@
 
 namespace Garradin;
 
-const UPGRADE_PROCESS = true;
+const INSTALL_PROCESS = true;
 
 if (PHP_SAPI != 'cli') {
 	die("Wrong call");

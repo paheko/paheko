@@ -2,6 +2,7 @@
 
 namespace Garradin;
 
+use Garradin\Log;
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 
@@ -34,61 +35,31 @@ class Config extends Entity
 		'logo', 'icon', 'favicon',
 	];
 
-	protected $org_name;
-	protected $org_address;
-	protected $org_email;
-	protected $org_phone;
-	protected $org_web;
+	protected string $org_name;
+	protected string $org_email;
+	protected ?string $org_address;
+	protected ?string $org_phone;
+	protected ?string $org_web;
 
-	protected $currency;
-	protected $country;
+	protected string $currency;
+	protected string $country;
 
-	protected $default_category;
+	protected int $default_category;
 
-	protected $backup_frequency;
-	protected $backup_limit;
+	protected ?int $backup_frequency;
+	protected ?int $backup_limit;
 
-	protected $last_chart_change;
-	protected $last_version_check;
+	protected ?int $last_chart_change;
+	protected ?string $last_version_check;
 
-	protected $color1;
-	protected $color2;
+	protected ?string $color1;
+	protected ?string $color2;
 
-	protected $files = [];
+	protected array $files = [];
 
-	protected $site_disabled;
+	protected bool $site_disabled;
 
-	protected $log_retention;
-	protected $log_anonymize;
-
-	protected $_types = [
-		'org_name'              => 'string',
-		'org_address'           => '?string',
-		'org_email'             => 'string',
-		'org_phone'             => '?string',
-		'org_web'               => '?string',
-
-		'currency'              => 'string',
-		'country'               => 'string',
-
-		'default_category'      => 'int',
-
-		'backup_frequency'      => '?int',
-		'backup_limit'          => '?int',
-
-		'last_chart_change'     => '?int',
-		'last_version_check'    => '?string',
-
-		'color1'                => '?string',
-		'color2'                => '?string',
-
-		'files'                 => 'array',
-
-		'site_disabled'         => 'bool',
-
-		'log_retention'         => 'int',
-		'log_anonymize'         => 'int',
-	];
+	protected int $log_retention;
 
 	static protected $_instance = null;
 
@@ -157,6 +128,10 @@ class Config extends Entity
 
 		$this->_modified = [];
 
+		if (array_key_exists('log_retention', $values)) {
+			Log::clean();
+		}
+
 		return true;
 	}
 
@@ -203,6 +178,8 @@ class Config extends Entity
 		$this->assert(trim($this->country) != '' && Utils::getCountryName($this->country), 'Le pays ne peut rester vide.');
 		$this->assert(null === $this->org_web || filter_var($this->org_web, FILTER_VALIDATE_URL), 'L\'adresse URL du site web est invalide.');
 		$this->assert(trim($this->org_email) != '' && SMTP::checkEmailIsValid($this->org_email, false), 'L\'adresse e-mail de l\'association est  invalide.');
+
+		$this->assert($this->log_retention >= 0, 'La durée de rétention doit être égale ou supérieur à zéro.');
 
 		// Files
 		$this->assert(count($this->files) == count(self::FILES));

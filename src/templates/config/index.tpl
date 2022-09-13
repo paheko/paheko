@@ -73,6 +73,7 @@
 		<legend>Membres</legend>
 		<dl>
 			{input type="select" name="default_category" source=$config options=$users_categories required=true label="Catégorie par défaut des nouveaux membres"}
+			{input type="select" options=$log_retention_options source=$config name="log_retention" required=true label="Durée de conservation des journaux d'activité" help="Après ce délai, les journaux seront supprimés."}
 		</dl>
 	</fieldset>
 

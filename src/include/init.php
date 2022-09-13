@@ -387,7 +387,7 @@ Translate::setLocale('fr_FR');
  * Vérifications pour enclencher le processus d'installation ou de mise à jour
  */
 
-if (!defined('Garradin\INSTALL_PROCESS') && !defined('Garradin\UPGRADE_PROCESS'))
+if (!defined('Garradin\INSTALL_PROCESS'))
 {
 	if (!file_exists(DB_FILE)) {
 		if (in_array('install.php', get_included_files())) {
