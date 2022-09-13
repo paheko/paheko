@@ -31,6 +31,9 @@ use KD2\DB\EntityManager as EM;
 #[AllowDynamicProperties]
 class User extends Entity
 {
+	const NAME = 'Membre';
+	const PRIVATE_URL = '!users/details.php?id=%d';
+
 	const MINIMUM_PASSWORD_LENGTH = 8;
 
 	const TABLE = 'users';

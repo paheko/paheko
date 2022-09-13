@@ -15,6 +15,8 @@ use KD2\DB\Date;
 
 class DynamicField extends Entity
 {
+	const NAME = 'Champ de fiche membre';
+
 	const TABLE = 'config_users_fields';
 
 	protected ?int $id;
@@ -75,7 +77,7 @@ class DynamicField extends Entity
 	const PASSWORD = 0x01 << 1;
 	const LOGIN    = 0x01 << 2;
 	const NUMBER   = 0x01 << 3;
-	const NAME     = 0x01 << 4;
+	const NAMES    = 0x01 << 4;
 	const PRESET   = 0x01 << 5;
 
 	const ACCESS_ADMIN = 0;
@@ -207,7 +209,7 @@ class DynamicField extends Entity
 
 	public function canDelete(): bool
 	{
-		if ($this->system & self::PASSWORD || $this->system & self::NUMBER || $this->system & self::NAME || $this->system & self::LOGIN) {
+		if ($this->system & self::PASSWORD || $this->system & self::NUMBER || $this->system & self::NAMES || $this->system & self::LOGIN) {
 			return false;
 		}
 

@@ -16,6 +16,9 @@ use KD2\DB\DB_Exception;
 
 class Fee extends Entity
 {
+	const NAME = 'Tarif';
+	const PRIVATE_URL = '!services/fees/details.php?id=%d';
+
 	const TABLE = 'services_fees';
 
 	protected ?int $id;

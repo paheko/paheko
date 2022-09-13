@@ -11,6 +11,9 @@ use Garradin\Accounting\Accounts;
 
 class Chart extends Entity
 {
+	const NAME = 'Plan comptable';
+	const PRIVATE_URL = '!acc/charts/accounts/all.php?id=%d';
+
 	const TABLE = 'acc_charts';
 
 	protected $id;

@@ -7,6 +7,8 @@ use Garradin\Entity;
 
 class API_Credentials extends Entity
 {
+	const NAME = 'Identifiants API';
+
 	const TABLE = 'api_credentials';
 
 	protected ?int $id;

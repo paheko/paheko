@@ -20,6 +20,9 @@ use Garradin\ValidationException;
 
 class Transaction extends Entity
 {
+	const NAME = 'Écriture';
+	const PRIVATE_URL = '!acc/transactions/details.php?id=%d';
+
 	const TABLE = 'acc_transactions';
 
 	const TYPE_ADVANCED = 0;

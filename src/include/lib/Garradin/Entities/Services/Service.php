@@ -12,6 +12,9 @@ use Garradin\Services\Fees;
 
 class Service extends Entity
 {
+	const NAME = 'Activité';
+	const PRIVATE_URL = '!services/fees/?id=%d';
+
 	const TABLE = 'services';
 
 	protected $id;

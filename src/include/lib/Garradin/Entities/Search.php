@@ -16,6 +16,8 @@ use KD2\DB\DB_Exception;
 
 class Search extends Entity
 {
+	const NAME = 'Recherche enregistrée';
+
 	const TABLE = 'searches';
 
 	const TYPE_JSON = 'json';

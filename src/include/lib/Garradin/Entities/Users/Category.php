@@ -11,6 +11,9 @@ use Garradin\Utils;
 
 class Category extends Entity
 {
+	const NAME = 'Catégorie de membre';
+	const PRIVATE_URL = '!config/categories/edit.php?id=%d';
+
 	const TABLE = 'users_categories';
 
 	protected $id;

@@ -13,6 +13,9 @@ use Garradin\Entities\Files\File;
 
 class Year extends Entity
 {
+	const NAME = 'Exercice';
+	const PRIVATE_URL = '!acc/years/reports/graphs.php?year=%d';
+
 	const TABLE = 'acc_years';
 
 	protected $id;

@@ -15,6 +15,9 @@ use Garradin\Accounting\Charts;
 
 class Account extends Entity
 {
+	const NAME = 'Compte';
+	const PRIVATE_URL = '!acc/charts/accounts/edit.php?id=%d';
+
 	const TABLE = 'acc_accounts';
 
 	const NONE = 0;
