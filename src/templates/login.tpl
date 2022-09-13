@@ -13,6 +13,10 @@
 			Votre mot de passe a bien été modifié.<br />
 			Vous pouvez maintenant l'utiliser pour vous reconnecter.
 		</p>
+	{elseif isset($_GET['logout'])}
+		<p class="block confirm">
+			Vous avez bien été déconnecté.
+		</p>
 	{/if}
 
 	<p class="block error" style="display: none;" id="old_browser">
