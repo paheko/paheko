@@ -55,6 +55,10 @@ class DB extends SQLite3
 
         parent::__construct($driver, $params);
 
+        if (DB_OPEN_SQL) {
+            $this->exec(DB_OPEN_SQL);
+        }
+
         // Enable SQL debug log if configured
         if (SQL_DEBUG) {
             $this->callback = [$this, 'log'];

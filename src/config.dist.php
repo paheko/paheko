@@ -119,6 +119,19 @@ namespace Garradin;
 //const DB_FILE = DATA_ROOT . '/association.sqlite';
 
 /**
+ * DB_OPEN_SQL
+ * Commande SQL exécutée à l'ouverture de la base de données.
+ *
+ * Utile par exemple pour utiliser une base de données chiffrée.
+ *
+ * Voir https://www.zetetic.net/sqlcipher/ par exemple.
+ *
+ * Défaut : null
+ */
+
+//const DB_OPEN_SQL = 'PRAGMA key = \'secret\';';
+
+/**
  * Emplacement de stockage des plugins
  *
  * Défaut : DATA_ROOT . '/plugins'
