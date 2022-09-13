@@ -218,6 +218,7 @@ static $default_config = [
 	'SYSTEM_SIGNALS'        => [],
 	'LOCAL_LOGIN'           => null,
 	'LEGAL_LINE'            => 'Hébergé par <strong>%1$s</strong>, %2$s',
+	'DISABLE_INSTALL_PING'  => false,
 ];
 
 foreach ($default_config as $const => $value)
@@ -248,6 +249,7 @@ define('Garradin\BASE_URL', str_replace('/admin/', '/', ADMIN_URL));
 
 const HELP_URL = 'https://garradin.eu/aide?from=%s';
 const WEBSITE = 'https://fossil.kd2.org/garradin/';
+const PING_URL = 'https://garradin.eu/ping/';
 const PLUGINS_URL = 'https://garradin.eu/plugins/list.json';
 
 const USER_TEMPLATES_CACHE_ROOT = CACHE_ROOT . '/utemplates';

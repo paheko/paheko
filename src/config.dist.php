@@ -582,6 +582,28 @@ namespace Garradin;
 //const API_PASSWORD = 'thisIsASecretPassword42';
 
 /**
+ * DISABLE_INSTALL_PING
+ *
+ * Lors de l'installation, ou d'une mise à jour, la version installée de Garradin,
+ * ainsi que celle de PHP et de SQLite, sont envoyées à Garradin.eu.
+ *
+ * Cela permet de savoir quelles sont les versions utilisées, et également de compter
+ * le nombre d'installations effectuées.
+ *
+ * Aucune donnée personnelle n'est envoyée. Un identifiant anonyme est envoyé,
+ * permettant d'identifier l'installation et éviter les doublons.
+ * (voir le code dans lib/.../Install.php)
+ *
+ * Le code de stockage des statistiques est visible à :
+ * https://garradin.eu/ping/
+ *
+ * Pour désactiver cet envoi il suffit de placer cette constante à TRUE.
+ *
+ * Défaut : false
+ */
+//const DISABLE_INSTALL_PING = false;
+
+/**
  * Clé de licence
  *
  * Cette clé permet de débloquer certaines fonctionnalités dans des extensions officielles.

@@ -67,7 +67,8 @@ class Services_User
 			],
 			'amount' => [
 				'label' => 'Reste à régler',
-				'select' => 'MAX(0, expected_amount - SUM(tl.debit))',
+				'select' => 'CASE WHEN su.paid = 1 AND COUNT(tl.debit) = 0 THEN NULL
+					ELSE MAX(0, expected_amount - IFNULL(SUM(tl.debit), 0)) END',
 			],
 			'expected_amount' => [],
 		];

@@ -861,6 +861,10 @@ class File extends Entity
 			throw new ValidationException('Nom de fichier invalide');
 		}
 
+		if (strlen($name) > 250) {
+			throw new ValidationException('Nom de fichier trop long');
+		}
+
 		$extension = strtolower(substr($name, strrpos($name, '.')+1));
 
 		if (preg_match(self::FORBIDDEN_EXTENSIONS, $extension)) {

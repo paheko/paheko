@@ -122,6 +122,10 @@ class Upgrade
 				$db->import(ROOT . '/include/data/1.1.29_migration.sql');
 			}
 
+			if (version_compare($v, '1.1.30', '<')) {
+				require ROOT . '/include/migrations/1.1/30.php';
+			}
+
 			if (version_compare($v, '1.2.0', '<')) {
 				$db->beginSchemaUpdate();
 
@@ -238,6 +242,8 @@ class Upgrade
 
 			throw $e;
 		}
+
+		Install::ping();
 
 		$session = Session::getInstance();
 		$session->logout();

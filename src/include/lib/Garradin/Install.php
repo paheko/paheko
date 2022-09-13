@@ -9,12 +9,34 @@ use Garradin\Entities\Users\Category;
 use Garradin\Entities\Files\File;
 use Garradin\Users\Session;
 
+use KD2\HTTP;
+
 /**
  * Pour procéder à l'installation de l'instance Garradin
  * Utile pour automatiser l'installation sans passer par la page d'installation
  */
 class Install
 {
+	/**
+	 * This sends the current installed version, as well as the PHP and SQLite versions
+	 * for statistics purposes.
+	 *
+	 * You can disable this by setting DISABLE_INSTALL_PING to TRUE in config.local.php
+	 */
+	static public function ping(): void
+	{
+		if (DISABLE_INSTALL_PING) {
+			return;
+		}
+
+		(new HTTP)->POST(PING_URL, [
+			'id'      => sha1(WWW_URL . SECRET_KEY . ROOT),
+			'version' => garradin_version(),
+			'sqlite'  => \SQLite3::version()['versionString'],
+			'php'     => PHP_VERSION,
+		]);
+	}
+
 	/**
 	 * Reset the database to empty and create a new user with the same password
 	 */
@@ -113,7 +135,9 @@ class Install
 		self::assert($source['user_password'] === $source['user_password_confirm'], 'La vérification du mot de passe ne correspond pas');
 
 		try {
-			return self::install($source['name'], $source['user_name'], $source['user_email'], $source['user_password']);
+			$ok = self::install($source['name'], $source['user_name'], $source['user_email'], $source['user_password']);
+			self::ping();
+			return $ok;
 		}
 		catch (\Exception $e) {
 			@unlink(DB_FILE);
