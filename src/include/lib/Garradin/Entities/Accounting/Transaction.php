@@ -115,17 +115,24 @@ class Transaction extends Entity
 			return self::TYPE_ADVANCED;
 		}
 
+		$types = [];
+
 		foreach ($this->getLinesWithAccounts() as $line) {
 			if ($line->account_position == Account::REVENUE && $line->credit) {
-				return self::TYPE_REVENUE;
+				$types[] = self::TYPE_REVENUE;
 			}
 			elseif ($line->account_position == Account::EXPENSE && $line->debit) {
-				return self::TYPE_EXPENSE;
+				$types[] = self::TYPE_EXPENSE;
 			}
 		}
 
 		// Did not find a expense/revenue account: fall back to advanced
-		return self::TYPE_ADVANCED;
+		// (or if one line is expense and the other is revenue)
+		if (count($types) != 1) {
+			return self::TYPE_ADVANCED;
+		}
+
+		return current($types);
 	}
 
 	public function getLinesWithAccounts(): array
