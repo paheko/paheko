@@ -1,12 +1,12 @@
 @charset "UTF-8";
 @font-face {
   font-family: 'garradin';
-  src: url('../font/garradin.eot?62744060');
-  src: url('../font/garradin.eot?62744060#iefix') format('embedded-opentype'),
-       url('../font/garradin.woff2?62744060') format('woff2'),
-       url('../font/garradin.woff?62744060') format('woff'),
-       url('../font/garradin.ttf?62744060') format('truetype'),
-       url('../font/garradin.svg?62744060#garradin') format('svg');
+  src: url('../font/garradin.eot?66983734');
+  src: url('../font/garradin.eot?66983734#iefix') format('embedded-opentype'),
+       url('../font/garradin.woff2?66983734') format('woff2'),
+       url('../font/garradin.woff?66983734') format('woff'),
+       url('../font/garradin.ttf?66983734') format('truetype'),
+       url('../font/garradin.svg?66983734#garradin') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -16,7 +16,7 @@
 @media screen and (-webkit-min-device-pixel-ratio:0) {
   @font-face {
     font-family: 'garradin';
-    src: url('../font/garradin.svg?62744060#garradin') format('svg');
+    src: url('../font/garradin.svg?66983734#garradin') format('svg');
   }
 }
 */
@@ -75,6 +75,7 @@
 .icn-reset:before { content: '\21ba'; } /* '↺' */
 .icn-upload:before { content: '\21d1'; } /* '⇑' */
 .icn-download:before { content: '\21d3'; } /* '⇓' */
+.icn-login:before { content: '\21e5'; } /* '⇥' */
 .icn-home:before { content: '\2302'; } /* '⌂' */
 .icn-print:before { content: '\2399'; } /* '⎙' */
 .icn-col:before { content: '\259a'; } /* '▚' */

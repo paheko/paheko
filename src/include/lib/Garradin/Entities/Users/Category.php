@@ -43,7 +43,7 @@ class Category extends Entity
 	const PERMISSIONS = [
 		'connect' => [
 			'label' => 'Les membres de cette catégorie peuvent-ils se connecter ?',
-			'shape' => Utils::ICONS['logout'],
+			'shape' => Utils::ICONS['login'],
 			'options' => [
 				Session::ACCESS_NONE => 'N\'a pas le droit de se connecter',
 				Session::ACCESS_READ => 'A le droit de se connecter',

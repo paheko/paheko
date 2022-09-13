@@ -383,7 +383,7 @@ aside.describe dl.describe dt {
     color: rgb(var(--gTextColor));
 }
 
-aside.describe dd a.icn-btn, aside.secondary a.icn-btn {
+aside.describe dd a.icn-btn, aside.secondary a.icn-btn, aside.secondary button, aside.describe button {
     margin-left: 0;
 }
 
