@@ -13,7 +13,7 @@ $session->requireAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 
 $csrf_key = 'web_page_new';
 
-$parent = qg('parent') ?: null;
+$parent = qg('parent') ?: '';
 
 $form->runIf('create', function () use ($parent) {
 	$page = Page::create((int) qg('type'), $parent, f('title'), Page::STATUS_DRAFT);

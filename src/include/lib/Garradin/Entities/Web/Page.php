@@ -18,36 +18,23 @@ use const Garradin\WWW_URL;
 
 class Page extends Entity
 {
+	const NAME = 'Page du site web';
+
 	const TABLE = 'web_pages';
 
-	protected $id;
-	protected $parent;
-	protected $path;
-	protected $uri;
-	protected $_name = 'index.txt';
-	protected $file_path;
-	protected $title;
-	protected $type;
-	protected $status;
-	protected $format;
-	protected $published;
-	protected $modified;
-	protected $content;
-
-	protected $_types = [
-		'id'        => 'int',
-		'parent'    => 'string',
-		'path'      => 'string',
-		'uri'       => 'string',
-		'file_path' => 'string',
-		'title'     => 'string',
-		'type'      => 'int',
-		'status'    => 'string',
-		'format'    => 'string',
-		'published' => 'DateTime',
-		'modified'  => 'DateTime',
-		'content'   => 'string',
-	];
+	protected ?int $id;
+	protected string $parent = '';
+	protected string $path;
+	protected string $uri;
+	protected string $_name = 'index.txt';
+	protected string $file_path;
+	protected string $title;
+	protected int $type;
+	protected string $status;
+	protected string $format;
+	protected \DateTime $published;
+	protected \DateTime $modified;
+	protected string $content;
 
 	const FORMATS_LIST = [
 		//Render::FORMAT_BLOCKS => 'Blocs (beta)',
@@ -274,7 +261,7 @@ class Page extends Entity
 
 		$parent = $this->parent;
 
-		if (isset($source['title']) && is_null($this->path)) {
+		if (isset($source['title']) && !$this->exists()) {
 			$source['uri'] = $source['title'];
 		}
 
@@ -288,7 +275,7 @@ class Page extends Entity
 			$source['path'] = trim($parent . '/' . $source['uri'], '/');
 		}
 
-		$uri = $source['uri'] ?? $this->uri;
+		$uri = $source['uri'] ?? ($this->uri ?? null);
 
 		if (array_key_exists('parent', $source)) {
 			$source['parent'] = Form::getSelectorValue($source['parent']);
