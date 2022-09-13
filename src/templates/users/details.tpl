@@ -87,7 +87,11 @@
 			{linkbutton shape="menu" label="Journal de connexion" href="!users/log.php?id=%d"|args:$user.id}
 		</dd>
 		{/if}
-		{if !LOCAL_LOGIN && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN) && $user.id != $logged_user.id}
+		{if !LOCAL_LOGIN
+			&& $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)
+			&& $user.id != $logged_user.id
+			&& $user.id_category != $logged_user.id_category
+			&& $category.perm_config < $session::ACCESS_ADMIN}
 		<dd>
 			<form method="post" action="" onsubmit="return confirm(&quot;Cela va vous déconnecter et vous reconnecter comme si vous étiez ce membre. Continuer ?&quot);">
 				{csrf_field key=$csrf_key}
