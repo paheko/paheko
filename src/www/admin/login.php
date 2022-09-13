@@ -39,6 +39,10 @@ $id_field = DynamicFields::get(DynamicFields::getLoginField());
 $id_field_name = $id_field->label;
 
 $form->runIf('login', function () use ($id_field_name, $session) {
+    if (Log::isLocked()) {
+        throw new UserException("Vous avez dépassé la limite de tentatives de connexion.\nMerci d'attendre 5 minutes avant de ré-essayer de vous connecter.");
+    }
+
     if (!trim((string) f('id'))) {
         throw new UserException(sprintf('L\'identifiant (%s) n\'a pas été renseigné.', $id_field_name));
     }

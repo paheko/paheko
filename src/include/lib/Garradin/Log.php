@@ -19,7 +19,7 @@ class Log
 	 * Number of maximum login attempts in that delay
 	 * @var int
 	 */
-	const LOCKOUT_ATTEMPTS = 4;
+	const LOCKOUT_ATTEMPTS = 3;
 
 	const LOGIN_FAIL = 1;
 	const LOGIN_SUCCESS = 2;
@@ -93,7 +93,7 @@ class Log
 
 		// is IP locked out?
 		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE type = ? AND ip_address = ? AND created > datetime(\'now\', \'-%d seconds\');', self::LOCKOUT_DELAY);
-		$count = $db->firstColumn($sql, self::LOGIN_FAIL, $ip);
+		$count = DB::getInstance()->firstColumn($sql, self::LOGIN_FAIL, $ip);
 
 		if ($count >= self::LOCKOUT_ATTEMPTS) {
 			return true;
