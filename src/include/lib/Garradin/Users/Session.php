@@ -378,6 +378,9 @@ class Session extends \KD2\UserSession
 			Log::add(Log::LOGIN_FAIL, compact('user_agent'));
 		}
 
+		// Clean up logs
+		Log::clean();
+
 		return $ok;
 	}
 
