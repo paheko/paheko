@@ -2,6 +2,7 @@
 namespace Garradin;
 
 use KD2\HTTP;
+use KD2\Security;
 
 use Garradin\Users\DynamicFields;
 use Garradin\Users\Session;
@@ -37,11 +38,17 @@ if (!$api_login && $session->isLogged()) {
 
 $id_field = DynamicFields::get(DynamicFields::getLoginField());
 $id_field_name = $id_field->label;
+$lock = Log::isLocked();
 
-$form->runIf('login', function () use ($id_field_name, $session) {
-    if (Log::isLocked()) {
-        throw new UserException("Vous avez dépassé la limite de tentatives de connexion.\nMerci d'attendre 5 minutes avant de ré-essayer de vous connecter.");
+$form->runIf('login', function () use ($id_field_name, $session, $lock) {
+    if ($lock == 1) {
+        throw new UserException(sprintf("Vous avez dépassé la limite de tentatives de connexion.\nMerci d'attendre %d minutes avant de ré-essayer de vous connecter.", Log::LOCKOUT_DELAY/60));
     }
+    elseif ($lock == -1 && !Security::checkCaptcha(SECRET_KEY, f('c_hash'), f('c_answer'))) {
+        throw new UserException('Le code de vérification entré n\'est pas correct.');
+    }
+
+    $_POST['c_answer'] = null;
 
     if (!trim((string) f('id'))) {
         throw new UserException(sprintf('L\'identifiant (%s) n\'a pas été renseigné.', $id_field_name));
@@ -80,9 +87,11 @@ $form->runIf('login', function () use ($id_field_name, $session) {
 
 }, 'login', ADMIN_URL);
 
+$captcha = $lock == -1 ? Security::createCaptcha(SECRET_KEY, 'fr_FR') : null;
+
 $ssl_enabled = HTTP::getScheme() == 'https';
 $changed = qg('changed') !== null;
 
-$tpl->assign(compact('id_field', 'ssl_enabled', 'changed', 'api_login'));
+$tpl->assign(compact('id_field', 'ssl_enabled', 'changed', 'api_login', 'captcha'));
 
 $tpl->display('login.tpl');

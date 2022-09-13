@@ -13,13 +13,15 @@ class Log
 	 * How many seconds in the past should we look for failed attempts?
 	 * @var int
 	 */
-	const LOCKOUT_DELAY = 5*60;
+	const LOCKOUT_DELAY = 20*60;
 
 	/**
 	 * Number of maximum login attempts in that delay
 	 * @var int
 	 */
-	const LOCKOUT_ATTEMPTS = 3;
+	const LOCKOUT_ATTEMPTS = 10;
+
+	const SOFT_LOCKOUT_ATTEMPTS = 3;
 
 	const LOGIN_FAIL = 1;
 	const LOGIN_SUCCESS = 2;
@@ -85,9 +87,9 @@ class Log
 
 	/**
 	 * Returns TRUE if the current IP address has done too many failed login attempts
-	 * @return boolean
+	 * @return int 1 if banned from logging in, -1 if a captcha should be presented, 0 if no restriction is in place
 	 */
-	static public function isLocked(): bool
+	static public function isLocked(): int
 	{
 		$ip = Utils::getIP();
 
@@ -96,10 +98,14 @@ class Log
 		$count = DB::getInstance()->firstColumn($sql, self::LOGIN_FAIL, $ip);
 
 		if ($count >= self::LOCKOUT_ATTEMPTS) {
-			return true;
+			return 1;
 		}
 
-		return false;
+		if ($count >= self::SOFT_LOCKOUT_ATTEMPTS) {
+			return -1;
+		}
+
+		return 0;
 	}
 
 	static public function list(?int $id_user = null): DynamicList
