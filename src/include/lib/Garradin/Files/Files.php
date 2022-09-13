@@ -424,6 +424,9 @@ class Files
 
 		File::validateFileName($name);
 		File::validatePath($parent);
+
+		File::validateCanHTML($parent, $name);
+
 		self::ensureDirectoryExists($parent);
 
 		$name = File::filterName($name);

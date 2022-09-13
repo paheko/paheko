@@ -126,7 +126,7 @@ class File extends Entity
 	];
 
 	// https://book.hacktricks.xyz/pentesting-web/file-upload
-	const FORBIDDEN_EXTENSIONS = '!^(?:cgi|exe|sh|bash|com|pif|jspx?|js[wxv]|action|do|php(?:s|\d+)?|pht|phtml?|shtml|phar|htaccess|inc|cfml?|cfc|dbm|swf|pl|perl|py|pyc|asp|so)$!i';
+	const FORBIDDEN_EXTENSIONS = '!^(?:cgi|exe|sh|bash|com|pif|jspx?|jar|js[wxv]|action|do|php(?:s|\d+)?|pht|phtml?|shtml|phar|htaccess|inc|cfml?|cfc|dbm|swf|pl|perl|py|pyc|asp|so)$!i';
 
 	static public function getColumns(): array
 	{
@@ -219,8 +219,11 @@ class File extends Entity
 	 */
 	public function rename(string $new_path): bool
 	{
+		$name = Utils::basename($new_path);
+
 		self::validatePath($new_path);
-		self::validateFileName(Utils::basename($new_path));
+		self::validateFileName($name);
+		self::validateCanHTML($name, $new_path);
 
 		if ($new_path == $this->path) {
 			throw new UserException(sprintf('Impossible de renommer "%s" lui-même', $this->path));
@@ -888,6 +891,18 @@ class File extends Entity
 		$name = array_pop($parts);
 		$ref = implode('/', $parts);
 		return [$context, $ref ?: null, $name];
+	}
+
+	/**
+	 * Only admins can create or rename files to .html / .js
+	 * This is to avoid XSS attacks from a non-admin user
+	 */
+	static public function validateCanHTML(string $name, string $path, ?Session $session = null): void
+	{
+		if (preg_match('/\.(?:htm|js|xhtm)/', $name)
+			&& !File::checkSkeletonWriteAccess($path, $session ?? Session::getInstance())) {
+			throw new ValidationException('Seuls les administrateurs peuvent créer des fichiers de ce type.');
+		}
 	}
 
 	public function renderFormat(): ?string
