@@ -1,8 +1,12 @@
-{include file="_head.tpl" title="Journal de connexion"}
+{include file="_head.tpl" title="Journal de connexion et d'actions"}
 
 {if $id && $current == 'users'}
 	{include file="users/_nav_user.tpl" id=$id}
 {/if}
+
+<p class="help">
+	Cette page liste les tentatives de connexion, les modifications de mot de passe ou d'identifiant, et toutes les actions de création, suppression ou modification de contenu de ce membre.
+</p>
 
 {if $list->count()}
 	{include file="common/dynamic_list_head.tpl"}
@@ -29,9 +33,12 @@
 				{/if}
 				{if $row.type == Log::LOGIN_FAIL || $row.type == Log::LOGIN_SUCCESS || $row.type == Log::LOGIN_RECOVER}
 					{$row.details.user_agent}
-				{/if}
-				{if $row.type == Log::LOGIN_AS}
+				{elseif $row.type == Log::LOGIN_AS}
 					"{$row.details.admin}" s'est connecté à la place du membre
+				{elseif $row.entity_url}
+					{link href=$row.entity_url label=$row.entity_name}
+				{elseif $row.entity_name}
+					{$row.entity_name}
 				{/if}
 			</td>
 			<td>{$row.ip_address}</td>

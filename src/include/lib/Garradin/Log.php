@@ -30,6 +30,10 @@ class Log
 	const LOGIN_CHANGE = 5;
 	const LOGIN_AS = 6;
 
+	const CREATE = 10;
+	const DELETE = 11;
+	const EDIT = 12;
+
 	const ACTIONS = [
 		self::LOGIN_FAIL => 'Connexion refusée',
 		self::LOGIN_SUCCESS => 'Connexion réussie',
@@ -37,6 +41,10 @@ class Log
 		self::LOGIN_PASSWORD_CHANGE => 'Modification de mot de passe',
 		self::LOGIN_CHANGE => 'Modification d\'identifiant',
 		self::LOGIN_AS => 'Connexion par un administrateur',
+
+		self::CREATE => 'Création',
+		self::DELETE => 'Suppression',
+		self::EDIT => 'Modification',
 	];
 
 	static public function add(int $type, ?array $details = null, int $id_user = null): void
@@ -149,6 +157,14 @@ class Log
 			$row->created = \DateTime::createFromFormat('!Y-m-d H:i:s', $row->created);
 			$row->details = $row->details ? json_decode($row->details) : null;
 			$row->type_label = self::ACTIONS[$row->type];
+
+			if (isset($row->details->entity) && constant('Garradin\Entities\\' . $row->details->entity . '::NAME')) {
+				$row->entity_name = constant('Garradin\Entities\\' . $row->details->entity . '::NAME');
+			}
+
+			if (isset($row->details->id, $row->details->entity) && constant('Garradin\Entities\\' . $row->details->entity . '::PRIVATE_URL')) {
+				$row->entity_url = sprintf(constant('Garradin\Entities\\' . $row->details->entity . '::PRIVATE_URL'), $row->details->id);
+			}
 		});
 
 		return $list;

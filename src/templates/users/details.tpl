@@ -60,6 +60,9 @@
 		<dd><span class="permissions">{display_permissions permissions=$category}</span></dd>
 		<dt>Dernière connexion</dt>
 		<dd>{if empty($user.date_login)}Jamais{else}{$user.date_login|date_short:true}{/if}</dd>
+		<dd>
+			{linkbutton shape="menu" label="Journal d'actions" href="!users/log.php?id=%d"|args:$user.id}
+		</dd>
 		<dt>Mot de passe</dt>
 		<dd>
 			{if empty($user.password)}
@@ -82,11 +85,6 @@
 			{linkbutton shape="settings" label="Définir un mot de passe" href="edit_security.php?id=%d"|args:$user.id target="_dialog"}
 		{/if}
 		</dd>
-		{if $user.date_login}
-		<dd>
-			{linkbutton shape="menu" label="Journal de connexion" href="!users/log.php?id=%d"|args:$user.id}
-		</dd>
-		{/if}
 		{if !LOCAL_LOGIN
 			&& $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)
 			&& $user.id != $logged_user.id

@@ -9,6 +9,17 @@ use KD2\DB\Date;
 class Entity extends AbstractEntity
 {
 	/**
+	 * Entity name (eg. "Accounting transaction")
+	 * Entities with no name won't be stored in action logs
+	 */
+	const NAME = null;
+
+	/**
+	 * Entity admin URL
+	 */
+	const PRIVATE_URL = null;
+
+	/**
 	 * Valider les champs avant enregistrement
 	 * @throws ValidationException Si une erreur de validation survient
 	 */
@@ -92,6 +103,7 @@ class Entity extends AbstractEntity
 		}
 
 		$new = $this->exists() ? false : true;
+		$modified = $this->isModified();
 
 		// Specific entity signal
 		if (Plugin::fireSignal($name . '.before', ['entity' => $this, 'new' => $new])) {
@@ -104,6 +116,12 @@ class Entity extends AbstractEntity
 		}
 
 		$return = parent::save(false);
+
+		// Log creation/edit, but don't record stuff that doesn't change anything
+		if ($this::NAME && ($new || $modified)) {
+			$type = str_replace('Garradin\Entities\\', '', get_class($this));
+			Log::add($new ? Log::CREATE : Log::EDIT, ['entity' => $type, 'id' => $this->id()]);
+		}
 
 		Plugin::fireSignal($name . '.after', ['entity' => $this, 'success' => $return, 'new' => $new]);
 
@@ -130,6 +148,12 @@ class Entity extends AbstractEntity
 		}
 
 		$return = parent::delete();
+
+		if ($this::NAME) {
+			$type = str_replace('Garradin\Entities\\', '', get_class($this));
+			Log::add(Log::DELETE, ['entity' => $type, 'id' => $id]);
+		}
+
 		Plugin::fireSignal($name . '.after', ['entity' => $this, 'success' => $return, 'id' => $id]);
 		Plugin::fireSignal('entity.delete.after', ['entity' => $this, 'success' => $return, 'id' => $id]);
 
