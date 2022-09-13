@@ -571,8 +571,7 @@ class Utils
     {
         $limits = [
             self::return_bytes(ini_get('upload_max_filesize')),
-            self::return_bytes(ini_get('post_max_size')),
-            self::return_bytes(ini_get('memory_limit'))
+            self::return_bytes(ini_get('post_max_size'))
         ];
 
         return min(array_filter($limits));
