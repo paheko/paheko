@@ -117,3 +117,19 @@ details summary::after {
 .ruler::after, .ruler::before {
     display: none;
 }
+
+dl.describe {
+    /* Prince does not support grids, yet */
+    display: block;
+    margin-bottom: 2em;
+}
+
+dl.describe dt {
+    width: 12em;
+    float: left;
+    clear: left;
+}
+
+dl.describe dd {
+    float: left;
+}
