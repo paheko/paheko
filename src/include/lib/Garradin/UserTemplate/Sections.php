@@ -29,7 +29,9 @@ class Sections
 		'users',
 		'subscriptions',
 		'transactions',
+		'transaction_lines',
 		'transaction_users',
+		'accounts',
 		'balances',
 		'sql',
 		'restrict',
@@ -135,6 +137,38 @@ class Sections
 		}
 	}
 
+	static public function accounts(array $params, UserTemplate $tpl, int $line): \Generator
+	{
+		$db = DB::getInstance();
+
+		if (!array_key_exists('where', $params)) {
+			$params['where'] = '';
+		}
+
+		$params['tables'] = 'acc_accounts';
+
+		if (isset($params['codes'])) {
+			$params['codes'] = explode(',', $params['codes']);
+
+			foreach ($params['codes'] as &$code) {
+				$code = 'code LIKE ' . $db->quote($code);
+			}
+
+			$params['where'] .= sprintf(' AND (%s)', implode(' OR ', $params['codes']));
+
+			unset($code, $params['codes']);
+		}
+		elseif (isset($params['id'])) {
+			$params['where'] .= ' AND id = :id';
+			$params[':id'] = (int) $params['id'];
+			unset($params['id']);
+		}
+
+		foreach (self::sql($params, $tpl, $line) as $row) {
+			yield $row;
+		}
+	}
+
 	static public function users(array $params, UserTemplate $tpl, int $line): \Generator
 	{
 		if (!array_key_exists('where', $params)) {
@@ -150,7 +184,7 @@ class Sections
 		$params['tables'] = 'users';
 
 		if (isset($params['id'])) {
-			$params['where'] = ' AND id = :id';
+			$params['where'] .= ' AND id = :id';
 			$params[':id'] = (int) $params['id'];
 			unset($params['id']);
 		}
@@ -186,13 +220,13 @@ class Sections
 		$params['tables'] = 'services_users su INNER JOIN services s ON s.id = su.id_service';
 
 		if (isset($params['user'])) {
-			$params['where'] = ' AND su.id_user = :id_user';
+			$params['where'] .= ' AND su.id_user = :id_user';
 			$params[':id_user'] = (int) $params['user'];
 			unset($params['user']);
 		}
 
 		if (!empty($params['active'])) {
-			$params['where'] = ' AND MAX(su.expiry_date) >= date()';
+			$params['where'] .= ' AND MAX(su.expiry_date) >= date()';
 			unset($params['active']);
 		}
 
@@ -212,7 +246,7 @@ class Sections
 		}
 
 		if (isset($params['id'])) {
-			$params['where'] = ' AND t.id = :id';
+			$params['where'] .= ' AND t.id = :id';
 			$params[':id'] = (int) $params['id'];
 			unset($params['id']);
 		}
@@ -228,6 +262,27 @@ class Sections
 			LEFT JOIN acc_transactions_users tu ON tu.id_transaction = t.id
 			LEFT JOIN users u ON u.id = tu.id_user';
 		$params['group'] = 't.id, u.id';
+
+		return self::sql($params, $tpl, $line);
+	}
+
+	static public function transaction_lines(array $params, UserTemplate $tpl, int $line): \Generator
+	{
+		if (!array_key_exists('where', $params)) {
+			$params['where'] = '';
+		}
+
+		if (isset($params['transaction'])) {
+			$params['where'] .= ' AND l.id_transaction = :transaction';
+			$params[':transaction'] = (int) $params['transaction'];
+			unset($params['transaction']);
+		}
+
+		$id_field = DynamicFields::getNameFieldsSQL('u');
+
+		$params['select'] = sprintf('l.*, a.code AS account_code, a.label AS account_label');
+		$params['tables'] = 'acc_transactions_lines AS l
+			INNER JOIN acc_accounts AS a ON l.id_account = a.id';
 
 		return self::sql($params, $tpl, $line);
 	}
