@@ -6,7 +6,7 @@ use Garradin\Entity;
 use Garradin\DB;
 use Garradin\Files\Files;
 use Garradin\UserTemplate\UserTemplate;
-use Garradin\Membres\Session;
+use Garradin\Users\Session;
 
 use Garradin\Entities\Files\File;
 
@@ -71,8 +71,8 @@ class UserForm extends Entity
 			return false;
 		}
 
-		$this->label = $json->label;
-		$this->description = $json->description ?? null;
+		$this->set('label', $json->label);
+		$this->set('description', $json->description ?? null);
 
 		return true;
 	}
