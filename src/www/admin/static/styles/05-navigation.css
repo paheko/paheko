@@ -1,6 +1,6 @@
 /** Context-specific tabs */
 nav.tabs {
-    margin: 1em 0;
+    margin: .7em 0;
 }
 
 nav.tabs ul {
@@ -29,7 +29,7 @@ nav.tabs .sub .title {
 }
 
 nav.tabs li {
-    margin: 0 0.2em; 
+    margin: .3em .2em 0 .2em;
 }
 
 nav.tabs li a {

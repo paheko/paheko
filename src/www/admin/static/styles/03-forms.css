@@ -451,6 +451,10 @@ dd.help.example {
     font-size: .9em;
 }
 
+.actions-center {
+    text-align: center;
+}
+
 form p.actions {
     float: right;
 }

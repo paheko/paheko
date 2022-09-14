@@ -17,7 +17,7 @@
 
 {{if $show}}
 	<h2 class="ruler">{{$form.label}}</h2>
-	<p>
+	<p class="actions-center">
 		{{:linkbutton href="%s?id=%d"|args:$form.url:$transaction.id target="_dialog" label="Prévisualiser" shape="eye"}}
 		{{:linkbutton href="%s?id=%d&print=pdf"|args:$form.url:$transaction.id label="Télécharger en PDF" shape="download"}}
 		{{:linkbutton href="%s?id=%d&print=yes"|args:$form.url:$transaction.id target="_blank" label="Imprimer" shape="print"}}

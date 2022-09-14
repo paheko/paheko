@@ -107,3 +107,17 @@ a.icn-btn:hover {
 	text-decoration: none;
 	box-shadow: 0px 0px 5px orange;
 }
+
+table {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+table th, table td {
+	padding: .2em;
+	border: 1px solid #999;
+}
+
+td.money {
+	text-align: right;
+}

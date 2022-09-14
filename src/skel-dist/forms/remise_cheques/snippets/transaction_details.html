@@ -1,0 +1,5 @@
+{{if $form.config.accounts === null}}
+	{{:assign form.config.accounts='5112'}}
+{{/if}}
+
+{{:include file="forms/recu_don/snippets/transaction_details.html"}}
