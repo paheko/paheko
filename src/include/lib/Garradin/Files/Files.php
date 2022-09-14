@@ -58,6 +58,8 @@ class Files
 				$db->delete('files_search', 'path = ?', $row->path);
 				continue;
 			}
+
+			$out[] = $row;
 		}
 
 		$db->commit();
