@@ -267,6 +267,8 @@ class User extends Entity
 		}
 		elseif (isset($source['password'])) {
 			$source['password'] = trim($source['password']);
+
+			$this->assert(strlen($source['password']) <= 72, 'Le mot de passe doit faire moins de 72 caractères.');
 			$this->assert(hash_equals($source['password'], $source['password_confirmed'] ?? ''), 'La vérification du mot de passe doit être identique au mot de passe.');
 			$this->assert(strlen($source['password']) >= self::MINIMUM_PASSWORD_LENGTH, sprintf('Le mot de passe doit faire au moins %d caractères.', self::MINIMUM_PASSWORD_LENGTH));
 			$this->assert(!$session->isPasswordCompromised($source['password']), 'Le mot de passe choisi figure dans une liste de mots de passe compromis (piratés), il ne peut donc être utilisé ici. Si vous l\'avez utilisé sur d\'autres sites il est recommandé de le changer sur ces autres sites également.');
