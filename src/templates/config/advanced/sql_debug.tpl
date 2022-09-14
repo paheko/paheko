@@ -9,7 +9,6 @@
 				<th>T.</th>
 				<td>Durée</td>
 				<td>Trace</td>
-				<td>SQL</td>
 			</tr>
 		</thead>
 		{foreach from=$debug.list item="row"}
