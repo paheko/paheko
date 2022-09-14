@@ -17,6 +17,7 @@
 			{input type="list" target="!acc/charts/accounts/selector.php?targets=%s"|args:$account_targets name="account_selector" label="Compte de règlement" required=1}
 			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de reçu, de note de frais, etc."}
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc."}
+			{input type="list" target="!acc/charts/accounts/selector.php?targets=%s&year=%d"|args:$analytical_targets,$fee.id_year name="id_analytical" label="Associer les écritures à ce projet" default=$analytical_account required=false}
 		</dl>
 	</fieldset>
 

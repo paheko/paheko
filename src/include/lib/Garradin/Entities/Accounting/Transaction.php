@@ -468,11 +468,11 @@ class Transaction extends Entity
 			}
 
 			if ($this->type == self::TYPE_EXPENSE && $l->account_position == Account::REVENUE) {
-				throw new ValidationException('Il n\'est pas possible d\'attribuer un compte de produit à une dépense');
+				throw new ValidationException(sprintf('Line %d : il n\'est pas possible d\'attribuer un compte de produit (%s) à une dépense', $i+1, $l->account_code));
 			}
 
 			if ($this->type == self::TYPE_REVENUE && $l->account_position == Account::EXPENSE) {
-				throw new ValidationException('Il n\'est pas possible d\'attribuer un compte de dépense à une recette');
+				throw new ValidationException(sprintf('Line %d : il n\'est pas possible d\'attribuer un compte de charge (%s) à une recette', $i+1, $l->account_code));
 			}
 
 			try {
