@@ -81,7 +81,7 @@ class Line extends Entity
 	public function asDetailsArray(): array
 	{
 		return [
-			'Compte'    => $this->id_account ? Accounts::getSelectorLabel($this->id_account) : null,
+			'Compte'    => $this->id_account ? Accounts::getCodeAndLabel($this->id_account) : null,
 			'Libellé'   => $this->label,
 			'Référence' => $this->reference,
 			'Crédit'    => Utils::money_format($this->credit),

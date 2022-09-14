@@ -2,6 +2,7 @@
 namespace Garradin;
 
 use Garradin\Services\Services_User;
+use Garradin\Accounting\Accounts;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
 
@@ -34,6 +35,11 @@ $types_details = $t->getTypesDetails();
 
 $account_targets = $types_details[Transaction::TYPE_REVENUE]->accounts[1]->targets_string;
 
-$tpl->assign(compact('csrf_key', 'account_targets', 'user_name', 'su'));
+// FIXME: improve when analytical is refactored
+$fee = $su->fee();
+$analytical_account = Accounts::getSelector($fee->id_analytical);
+$analytical_targets = Entities\Accounting\Account::TYPE_ANALYTICAL;
+
+$tpl->assign(compact('csrf_key', 'account_targets', 'user_name', 'su', 'fee', 'analytical_account', 'analytical_targets'));
 
 $tpl->display('services/user/payment.tpl');
