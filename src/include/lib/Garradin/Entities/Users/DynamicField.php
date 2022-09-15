@@ -204,7 +204,7 @@ class DynamicField extends Entity
 
 	public function isGenerated(): bool
 	{
-		return $this->type == 'generated';
+		return isset($this->type) && $this->type == 'generated';
 	}
 
 	public function canDelete(): bool
