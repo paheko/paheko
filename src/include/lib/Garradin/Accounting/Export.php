@@ -8,7 +8,7 @@ use Garradin\Entities\Accounting\Year;
 use Garradin\Config;
 use Garradin\CSV;
 use Garradin\DB;
-use Garradin\DynamicFields;
+use Garradin\Users\DynamicFields;
 use Garradin\Utils;
 
 class Export

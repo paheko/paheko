@@ -5,10 +5,13 @@ use Garradin\Accounting\Export;
 use Garradin\Accounting\Import;
 use Garradin\Accounting\Transactions;
 use Garradin\Accounting\Years;
+use Garradin\Users\Session;
 
 require_once __DIR__ . '/../_inc.php';
 
+$session = Session::getInstance();
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
+$user = $session->getUser();
 
 $year_id = (int) qg('year') ?: CURRENT_YEAR_ID;
 
