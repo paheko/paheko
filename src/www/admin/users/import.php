@@ -1,6 +1,8 @@
 <?php
 namespace Garradin;
 
+die('En cours');
+
 require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
