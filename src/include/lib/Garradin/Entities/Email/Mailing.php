@@ -5,7 +5,7 @@ namespace Garradin\Entities\Email;
 use Garradin\Config;
 use Garradin\CSV;
 use Garradin\UserException;
-use Garradin\Entities\Emails\Email;
+use Garradin\Email\Emails;
 use Garradin\Users\DynamicFields;
 use Garradin\UserTemplate\UserTemplate;
 use Garradin\Web\Render\Render;

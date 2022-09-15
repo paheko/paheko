@@ -28,7 +28,7 @@ class Users
 		$where = $id_category ? sprintf('id_category = %d', $id_category) : 'id_category IN (SELECT id FROM users_categories WHERE hidden = 0)';
 
 		foreach ($fields as $field) {
-			$sql[] = sprintf('SELECT *, %s AS email FROM users WHERE %s AND %1$s IS NOT NULL', $db->quoteIdentifier($field), $where);
+			$sql[] = sprintf('SELECT *, %s AS _email FROM users WHERE %s AND %1$s IS NOT NULL', $db->quoteIdentifier($field), $where);
 		}
 
 		return $db->iterate(implode(' UNION ALL ', $sql));
@@ -57,7 +57,7 @@ class Users
 		$sql = [];
 
 		foreach ($fields as $field) {
-			$sql[] = sprintf('SELECT u.*, u.%s AS email FROM users u INNER JOIN users_active_services s ON s.id = u.id
+			$sql[] = sprintf('SELECT u.*, u.%s AS _email FROM users u INNER JOIN users_active_services s ON s.id = u.id
 				WHERE s.service = %d AND %1$s IS NOT NULL', $db->quoteIdentifier($field), $id_service);
 		}
 
@@ -94,7 +94,7 @@ class Users
 		$sql = [];
 
 		foreach ($fields as $field) {
-			$sql[] = sprintf('SELECT u.*, u.%s AS email FROM users u INNER JOIN users_tmp_search AS s ON s.id = u.id', $db->quoteIdentifier($field));
+			$sql[] = sprintf('SELECT u.*, u.%s AS _email FROM users u INNER JOIN users_tmp_search AS s ON s.id = u.id', $db->quoteIdentifier($field));
 		}
 
 		return $db->iterate(implode(' UNION ALL ', $sql));

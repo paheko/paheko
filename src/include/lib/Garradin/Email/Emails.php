@@ -57,20 +57,30 @@ class Emails
 			$pgp_key = null;
 			$emails = [];
 
-			if ($r instanceof User || isset($r['user'])) {
-				$user = $r instanceof User ? $r : $r['user'];
+			if (is_array($r) && isset($r['user'])) {
+				$user = $r['user'];
+			}
+			elseif (is_object($r)) {
+				$user = $r;
+			}
+
+			if (isset($user->pgp_key)) {
 				$pgp_key = $user->pgp_key;
 			}
 
 			if (!is_object($r)) {
-				$pgp_key = $r['pgp_key'] ?? null;
+				$pgp_key ??= $r['pgp_key'] ?? null;
 				$variables = $r['variables'] ?? [];
 			}
 
 			if (is_string($r) || (is_array($r) && isset($r['email']))) {
 				$emails[] = strtolower($r['email'] ?? $r);
 			}
-			elseif ($user) {
+			// From Users::iterateEmailsBy...
+			elseif (is_object($r) && isset($r->_email)) {
+				$emails[] = strtolower($r->_email);
+			}
+			elseif ($user && $user instanceof User) {
 				$emails = $user->getEmails();
 			}
 			else {
