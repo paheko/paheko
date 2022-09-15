@@ -62,9 +62,12 @@
 
 			<h2>N°{{$user_number}}</h2>
 
-			{{#subscriptions user=$id valid=true}}
+			{{#subscriptions user=$id active=true}}
 			<h3>{{$label}} valide jusqu'au {{$expiry_date|date_short}}</h3>
 			{{/subscriptions}}
+
+			<div style="clear:both"></div>
+
 		{{:include file="forms/_footer.html"}}
 	{{else}}
 		{{:error message="Le numéro de membre fourni n'existe pas."}}

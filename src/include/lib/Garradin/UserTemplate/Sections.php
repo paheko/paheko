@@ -226,7 +226,7 @@ class Sections
 		}
 
 		if (!empty($params['active'])) {
-			$params['where'] .= ' AND MAX(su.expiry_date) >= date()';
+			$params['having'] = 'MAX(su.expiry_date) >= date()';
 			unset($params['active']);
 		}
 
