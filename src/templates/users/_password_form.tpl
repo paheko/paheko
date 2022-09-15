@@ -3,7 +3,7 @@ use Garradin\Users\Session;
 use Garradin\Users\DynamicFields;
 use Garradin\Entities\Users\User;
 
-$field = current(DynamicFields::getInstance()->fieldsBySystemUse('password'));
+$field = $field ?? current(DynamicFields::getInstance()->fieldsBySystemUse('password'));
 $password_length = User::MINIMUM_PASSWORD_LENGTH;
 $suggestion = Utils::suggestPassword();
 $required = $required ?? $field->required;

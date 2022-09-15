@@ -425,7 +425,7 @@ CREATE TABLE IF NOT EXISTS files
     type INTEGER NOT NULL, -- File type, 1 = file, 2 = directory
     mime TEXT NULL,
     size INT NULL,
-    modified TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (ddatetime(modified) IS NOT NULL AND atetime(modified) = modified),
+    modified TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(modified) IS NOT NULL AND datetime(modified) = modified),
     image INT NOT NULL DEFAULT 0,
 
     CHECK (type = 2 OR (mime IS NOT NULL AND size IS NOT NULL))

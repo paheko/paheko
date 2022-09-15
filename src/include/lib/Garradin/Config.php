@@ -104,6 +104,15 @@ class Config extends Entity
 		$this->load($config);
 	}
 
+	public function setCreateFlag(): void
+	{
+		foreach ($this->_types as $key => $t) {
+			$this->_modified[$key] = null;
+		}
+
+		$this->files = array_map(fn($a) => null, self::FILES);
+	}
+
 	public function save(bool $selfcheck = true): bool
 	{
 		if (!count($this->_modified)) {
@@ -176,7 +185,7 @@ class Config extends Entity
 		$this->assert(trim($this->org_name) != '', 'Le nom de l\'association ne peut rester vide.');
 		$this->assert(trim($this->currency) != '', 'La monnaie ne peut rester vide.');
 		$this->assert(trim($this->country) != '' && Utils::getCountryName($this->country), 'Le pays ne peut rester vide.');
-		$this->assert(null === $this->org_web || filter_var($this->org_web, FILTER_VALIDATE_URL), 'L\'adresse URL du site web est invalide.');
+		$this->assert(!isset($this->org_web) || filter_var($this->org_web, FILTER_VALIDATE_URL), 'L\'adresse URL du site web est invalide.');
 		$this->assert(trim($this->org_email) != '' && SMTP::checkEmailIsValid($this->org_email, false), 'L\'adresse e-mail de l\'association est  invalide.');
 
 		$this->assert($this->log_retention >= 0, 'La durée de rétention doit être égale ou supérieur à zéro.');

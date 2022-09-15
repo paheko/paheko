@@ -22,7 +22,7 @@
     <dl>
         {input type="text" label="Nom et prénom" required=true name="user_name"}
         {input type="email" label="Adresse E-Mail" required=true name="user_email"}
-        {password_change label="Mot de passe" required=true name="user_password"}
+        {include file="users/_password_form.tpl" field="password" required=true}
     </dl>
 </fieldset>
 
@@ -35,10 +35,6 @@
 
 <script type="text/javascript">
 {literal}
-g.script('scripts/password.js', () => {
-    initPasswordField('user_password');
-});
-
 var form = $('form')[0];
 form.onsubmit = function () {
     $('#f_submit').style.opacity = 0;

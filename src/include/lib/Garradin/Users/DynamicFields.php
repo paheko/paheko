@@ -182,7 +182,7 @@ class DynamicFields
 				$field->system |= $field::LOGIN;
 			}
 
-			if ($name == 'name') {
+			if ($name == 'nom') {
 				$field->system |= $field::NAMES;
 			}
 
@@ -203,6 +203,11 @@ class DynamicFields
 				throw new \LogicException(sprintf('Cannot add "%s" preset if "%s" preset is not installed.', $name, $depends));
 			}
 		}
+
+		$data->read_access ??= 1;
+		$data->write_access ??= 0;
+		$data->required ??= false;
+		$data->list_table ??= false;
 
 		$field = new DynamicField;
 		$field->system |= $field::PRESET;
@@ -672,7 +677,12 @@ class DynamicFields
 		}
 
 		$this->createTable(User::TABLE . '_tmp');
-		$this->copy(User::TABLE, User::TABLE . '_tmp', $fields);
+
+		// No need to copy if the table does not exist (that's the case during first setup)
+		if ($db->firstColumn('SELECT 1 FROM sqlite_master WHERE type = \'table\' AND name = ?;', User::TABLE)) {
+			$this->copy(User::TABLE, User::TABLE . '_tmp', $fields);
+		}
+
 		$db->exec(sprintf('DROP TABLE IF EXISTS %s;', User::TABLE));
 		$db->exec(sprintf('ALTER TABLE %s_tmp RENAME TO %1$s;', User::TABLE));
 
@@ -698,15 +708,21 @@ class DynamicFields
 
 		$db->exec($sql);
 
-		if ($from_users_table) {
+		if ($from_users_table && $db->firstColumn('SELECT 1 FROM sqlite_master WHERE type = \'table\' AND name = ?;', User::TABLE)) {
 			// This is slower but is necessary sometimes
 			$sql = $this->getSQLCopy(User::TABLE, $search_table . '_tmp', $columns, 'transliterate_to_ascii');
 		}
-		else {
+		elseif ($db->firstColumn('SELECT 1 FROM sqlite_master WHERE type = \'table\' AND name = ?;', $search_table)) {
 			$sql = $this->getSQLCopy($search_table, $search_table . '_tmp', $columns);
 		}
+		else {
+			$sql = null;
+		}
 
-		$db->exec($sql);
+		if ($sql) {
+			$db->exec($sql);
+		}
+
 		$db->exec(sprintf('DROP TABLE IF EXISTS %s;', $search_table));
 		$db->exec(sprintf('ALTER TABLE %s_tmp RENAME TO %1$s;', $search_table));
 

@@ -6,7 +6,10 @@ use Garradin\Accounting\Charts;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Year;
 use Garradin\Entities\Users\Category;
+use Garradin\Entities\Users\User;
 use Garradin\Entities\Files\File;
+use Garradin\Entities\Search;
+use Garradin\Users\DynamicFields;
 use Garradin\Users\Session;
 
 use KD2\HTTP;
@@ -127,15 +130,15 @@ class Install
 		self::assert(isset($source['name']) && trim($source['name']) !== '', 'Le nom de l\'association n\'est pas renseigné');
 		self::assert(isset($source['user_name']) && trim($source['user_name']) !== '', 'Le nom du membre n\'est pas renseigné');
 		self::assert(isset($source['user_email']) && trim($source['user_email']) !== '', 'L\'adresse email du membre n\'est pas renseignée');
-		self::assert(isset($source['user_password']) && isset($source['user_password_confirm']) && trim($source['user_password']) !== '', 'Le mot de passe n\'est pas renseigné');
+		self::assert(isset($source['password']) && isset($source['password_confirmed']) && trim($source['password']) !== '', 'Le mot de passe n\'est pas renseigné');
 
 		self::assert((bool)filter_var($source['user_email'], FILTER_VALIDATE_EMAIL), 'Adresse email invalide');
 
-		self::assert(strlen($source['user_password']) >= Session::MINIMUM_PASSWORD_LENGTH, 'Le mot de passe est trop court');
-		self::assert($source['user_password'] === $source['user_password_confirm'], 'La vérification du mot de passe ne correspond pas');
+		self::assert(strlen($source['password']) >= User::MINIMUM_PASSWORD_LENGTH, 'Le mot de passe est trop court');
+		self::assert($source['password'] === $source['password_confirmed'], 'La vérification du mot de passe ne correspond pas');
 
 		try {
-			$ok = self::install($source['name'], $source['user_name'], $source['user_email'], $source['user_password']);
+			$ok = self::install($source['name'], $source['user_name'], $source['user_email'], $source['password']);
 			self::ping();
 			return $ok;
 		}
@@ -164,14 +167,16 @@ class Install
 		file_put_contents(SHARED_CACHE_ROOT . '/version', garradin_version());
 
 		// Configuration de base
-		// c'est dans Config::set que sont vérifiées les données utilisateur (renvoie UserException)
 		$config = Config::getInstance();
-		$config->set('org_name', $name);
-		$config->set('org_email', $user_email);
-		$config->set('currency', '€');
-		$config->set('country', 'FR');
-		$config->set('site_disabled', true);
-		$config->set('log_retention', 365);
+		$config->setCreateFlag();
+		$config->import([
+			'org_name'      => $name,
+			'org_email'     => $user_email,
+			'currency'      => '€',
+			'country'       => 'FR',
+			'site_disabled' => true,
+			'log_retention' => 365,
+		]);
 
 		$fields = DynamicFields::getInstance();
 		$fields->install();
@@ -205,14 +210,21 @@ class Install
 		$cat->save();
 
 		// Create first user
-		$membres = new Membres;
-		$id_membre = $membres->add([
-			'id_category' => $cat->id(),
+		$user = new User;
+		$user->id_category = $cat->id();
+		$user->importForm([
+			'numero'      => 1,
 			'nom'         => $user_name,
 			'email'       => $user_email,
-			'passe'       => $user_password,
 			'pays'        => 'FR',
 		]);
+
+		$user->importSecurityForm(false, [
+			'password' => $user_password,
+			'password_confirmed' => $user_password,
+		]);
+
+		$user->save();
 
 		$config->set('files', array_map(fn () => null, $config::FILES));
 
@@ -260,8 +272,15 @@ class Install
 			'limit' => '10000',
 		];
 
-		$recherche = new Recherche;
-		$recherche->add('Inscrits à la lettre d\'information', null, $recherche::TYPE_JSON, 'membres', $query);
+		$search = new Search;
+		$search->import([
+			'label'   => 'Inscrits à la lettre d\'information',
+			'target'  => $search::TARGET_USERS,
+			'type'    => $search::TYPE_JSON,
+			'content' => json_encode($query),
+		]);
+		$search->created = new \DateTime;
+		$search->save();
 
 		// Create an example saved search (accounting)
 		$query = (object) [
@@ -280,8 +299,16 @@ class Install
 			'limit' => '100',
 		];
 
-		$recherche = new Recherche;
-		$recherche->add('Écritures sans projet', null, $recherche::TYPE_JSON, 'compta', $query);
+
+		$search = new Search;
+		$search->import([
+			'label'   => 'Écritures sans projet',
+			'target'  => $search::TARGET_ACCOUNTING,
+			'type'    => $search::TYPE_JSON,
+			'content' => json_encode($query),
+		]);
+		$search->created = new \DateTime;
+		$search->save();
 
 		// Install welcome plugin if available
 		$has_welcome_plugin = Plugin::getPath('welcome', false);
