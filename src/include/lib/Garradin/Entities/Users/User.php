@@ -167,7 +167,7 @@ class User extends Entity
 	{
 		$columns = array_intersect(DynamicFields::getInstance()->getSearchColumns(), array_keys($this->_modified));
 		$login_field = DynamicFields::getLoginField();
-		$login_modified = $this->isModified($login_field);
+		$login_modified = $this->_modified[$login_field] ?? null;
 		$password_modified = $this->isModified('password');
 
 		parent::save($selfcheck);
