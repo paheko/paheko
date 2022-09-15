@@ -109,13 +109,13 @@
 </div>
 
 <div class="page" id="p2">
-{{#transaction_users id_transaction=$id}}
+{{#transactions_users id_transaction=$id limit=1}}
 	<div style="top: 18mm; left: 14mm; background: #fff; width: 175mm;padding: 2mm;">{{$name}}</div>
 	<div style="top: 13mm; left: 100mm; background: #fff; width: 50mm; height: 6mm;"></div>
 	<div style="top: 32mm; left: 18mm;">{{$adresse}}</div>
 	<div style="top: 37mm; left: 38mm;">{{$code_postal}}</div>
 	<div style="top: 37mm; left: 80mm;">{{$ville}}</div>
-{{/transaction_users}}
+{{/transactions_users}}
 
 	<div style="top: 63mm; left: 87mm;">***{{$credit|raw|money}}***</div>
 	<div style="top: 73mm; left: 58mm;">{{$credit|money_raw|spell_out_number}} euros</div>
