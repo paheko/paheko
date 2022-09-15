@@ -4,7 +4,7 @@
  * Tests : vérification que les conditions pour s'exécuter sont remplies
  */
 
-function test_requis($condition, $message)
+function test_required($condition, $message)
 {
     if ($condition)
     {
@@ -20,43 +20,44 @@ function test_requis($condition, $message)
         echo "\n</head>\n<body>\n<h2>Erreur</h2>\n<h3>Le problème suivant empêche Garradin de fonctionner :</h3>\n";
         echo '<p class="error">' . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . '</p>';
         echo '<hr /><p>Pour plus d\'informations consulter ';
-        echo '<a href="http://dev.kd2.org/garradin/Probl%C3%A8mes%20fr%C3%A9quents">l\'aide sur les problèmes à l\'installation</a>.</p>';
+        echo '<a href="http://fossil.kd2.org/garradin/wiki?name=Probl%C3%A8mes%20fr%C3%A9quents">l\'aide sur les problèmes à l\'installation</a>.</p>';
         echo "\n</body>\n</html>";
     }
     else
     {
         echo "[ERREUR] Le problème suivant empêche Garradin de fonctionner :\n";
         echo $message . "\n";
-        echo "Pour plus d'informations consulter http://dev.kd2.org/garradin/Probl%C3%A8mes%20fr%C3%A9quents\n";
+        echo "Pour plus d'informations consulter http://fossil.kd2.org/garradin/wiki?name=Probl%C3%A8mes%20fr%C3%A9quents\n";
     }
 
     exit;
 }
 
-test_requis(
+test_required(
     version_compare(phpversion(), '7.4', '>='),
     'PHP 7.4 ou supérieur requis. PHP version ' . phpversion() . ' installée.'
 );
 
-test_requis(
+test_required(
     defined('CRYPT_BLOWFISH') && CRYPT_BLOWFISH,
     'L\'algorithme de hashage de mot de passe Blowfish n\'est pas présent (pas installé ou pas compilé).'
 );
 
-test_requis(
+test_required(
     class_exists('SQLite3'),
     'Le module de base de données SQLite3 n\'est pas disponible.'
 );
 
 $v = \SQLite3::version();
 
-test_requis(
-    // Require 3.31 because we need GENERATED columns
-    version_compare($v['versionString'], '3.31', '>='),
-    'SQLite3 version 3.31 ou supérieur requise. Version installée : ' . $v['versionString']
+test_required(
+    //$db->requireFeatures('cte', 'json_patch', 'fts4', 'date_functions_in_constraints', 'index_expressions', 'rename_column', 'upsert');
+    // 3.25.0 = RENAME COLUMN + UPSERT
+    version_compare($v['versionString'], '3.25', '>='),
+    'SQLite3 version 3.25 ou supérieur requise. Version installée : ' . $v['versionString']
 );
 
-test_requis(
+test_required(
     file_exists(__DIR__ . '/lib/KD2'),
     'Librairie KD2 non disponible.'
 );
@@ -68,12 +69,17 @@ while ($row = $r->fetchArray(\SQLITE3_NUM)) {
     $options[] = $row[0];
 }
 
-test_requis(
+test_required(
     in_array('ENABLE_FTS4', $options),
     'Le module SQLite3 FTS4 (permettant de faire des recherches) n\'est pas installé ou activé.'
 );
 
-test_requis(
+test_required(
+    in_array('ENABLE_JSON1', $options) && !in_array('OMIT_JSON', $options),
+    'Le module SQLite3 JSON (utilisé dans les formulaires) n\'est pas installé.'
+);
+
+test_required(
     class_exists('Phar'),
     'Le module "Phar" n\'est pas disponible, il faut l\'installer.'
 );

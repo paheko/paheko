@@ -6,6 +6,7 @@ namespace Garradin\Users;
 use Garradin\Config;
 use Garradin\DB;
 use Garradin\Utils;
+use Garradin\UserException;
 use Garradin\ValidationException;
 
 use Garradin\Entities\Users\DynamicField;
@@ -758,6 +759,15 @@ class DynamicFields
 
 	public function add(DynamicField $df)
 	{
+		if ($df->isGenerated()) {
+			try {
+				DB::getInstance()->requireFeatures('generated_columns');
+			}
+			catch (\KD2\DB_Exception $e) {
+				throw new UserException("Cette fonctionnalité n'est pas disponible.\nLa version de SQLite installée sur votre serveur est trop ancienne.");
+			}
+		}
+
 		$this->_fields[$df->name] = $df;
 		$this->reloadCache();
 	}

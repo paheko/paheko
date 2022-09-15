@@ -157,6 +157,8 @@ class Install
 		self::checkAndCreateDirectories();
 		$db = DB::getInstance();
 
+		$db->requireFeatures('cte', 'json_patch', 'fts4', 'date_functions_in_constraints', 'index_expressions', 'rename_column', 'upsert');
+
 		// Création de la base de données
 		$db->begin();
 		$db->exec('PRAGMA application_id = ' . DB::APPID . ';');
