@@ -39,7 +39,7 @@
 		{foreach from=$fields item="field"}
 			<tr>
 				<td>
-					{button shape="menu" title="Cliquer, glisser et déposer pour modifier l'ordre"}
+					<span class="draggable" title="Cliquer, glisser et déposer pour modifier l'ordre">{button shape="menu"}</span>
 					<input type="hidden" name="sort_order[]" value="{$field.name}" />
 				</td>
 				<th>{$field.label}</th>

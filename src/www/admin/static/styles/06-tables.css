@@ -157,10 +157,28 @@ table.list .folder .icon {
     color: rgba(var(--gTextColor), 0.5);
 }
 
-/** Draggable table rows */
+/* We need a container here or the cursor won't change because of pointer-events: none */
 table .draggable {
     cursor: move;
+}
+
+/** Draggable table rows */
+table .draggable button {
     user-select: none;
+    position: relative;
+    pointer-events: none;
+}
+
+/* Get around Firefox bug https://bugzilla.mozilla.org/show_bug.cgi?id=568313
+   Because Mozilla prefers to pay their CEO millions of dollars instead of fixing Firefox bugs. */
+table .draggable button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    cursor: move;
 }
 
 table tr.placeholder {

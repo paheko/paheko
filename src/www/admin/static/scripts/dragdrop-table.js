@@ -2,9 +2,7 @@ window.enableTableDragAndDrop = function (table) {
 	var items = table.querySelectorAll('tbody tr');
 
 	items.forEach(function (row) {
-		const btn = row.querySelector('button');
 		row.draggable = true;
-		btn.classList.add('draggable');
 		addDragEvents(row);
 	});
 
