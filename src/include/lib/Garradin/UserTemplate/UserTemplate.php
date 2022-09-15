@@ -161,7 +161,7 @@ class UserTemplate extends \KD2\Brindille
 
 		// PHP modifiers
 		foreach (Modifiers::PHP_MODIFIERS_LIST as $name) {
-			$this->registerModifier($name, $name);
+			$this->registerModifier($name, [Modifiers::class, $name]);
 		}
 
 		// Local modifiers
