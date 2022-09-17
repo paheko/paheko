@@ -28,7 +28,7 @@
 		<fieldset class="skelEdit">
 			<legend>{$edit.file}</legend>
 			<p>
-				<textarea name="content" cols="90" rows="50" id="f_content">{form_field name=content data=$edit}</textarea>
+				{input type="textarea" cols=90 rows=50 name="content" default=$edit}
 			</p>
 		</fieldset>
 

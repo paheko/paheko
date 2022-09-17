@@ -20,7 +20,7 @@ class Users
 		],
 		'id' => [
 			'label' => null,
-			'select' => 'm.id',
+			'select' => 'u.id',
 		],
 	];
 
@@ -42,7 +42,7 @@ class Users
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('number', false);
-		$list->setCount('COUNT(DISTINCT m.id)');
+		$list->setCount('COUNT(DISTINCT u.id)');
 
 		return $list;
 	}
