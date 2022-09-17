@@ -3,6 +3,8 @@ namespace Garradin;
 
 use Garradin\Users\Categories;
 
+die('en cours'); // FIXME
+
 require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
@@ -86,4 +88,4 @@ if ($action == 'move')
 
 $tpl->assign('action', $action);
 
-$tpl->display('admin/membres/action.tpl');
+$tpl->display('admin/users/action.tpl');

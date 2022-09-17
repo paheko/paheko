@@ -65,9 +65,6 @@ class DynamicFields
 		return key(self::getInstance()->fieldsByType('email'));
 	}
 
-	/**
-	 * FIXME use generated columns instead https://www.sqlite.org/gencol.html
-	 */
 	static public function getNumberField(): string
 	{
 		return key(self::getInstance()->fieldsBySystemUse('number'));
