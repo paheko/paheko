@@ -261,7 +261,7 @@ class Session extends \KD2\UserSession
 		$message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le, votre mot de passe restera inchangé.";
 
 		if ($membre->clef_pgp) {
-			$content = Security::encryptWithPublicKey($membre->clef_pgp, $message);
+			$message = Security::encryptWithPublicKey($membre->clef_pgp, $message);
 		}
 
 		Emails::queue(Emails::CONTEXT_SYSTEM, [$membre->email => null], null, 'Mot de passe perdu ?', $message);
