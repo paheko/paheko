@@ -74,8 +74,10 @@ class AssistedReconciliation
 	{
 		$this->csv->setTranslationTable($translation_table);
 
-		if (!((in_array('credit', $translation_table) && in_array('debit', $translation_table)) || in_array('amount', $translation_table))) {
-			throw new UserException('Il est nécessaire de sélectionner une colonne "montant" ou deux colonnes "débit" et "crédit"');
+		if ((in_array('credit', $translation_table) && !in_array('debit', $translation_table))
+			|| (!in_array('credit', $translation_table) && in_array('debit', $translation_table))) {
+			$this->csv->clear();
+			throw new UserException('Il est nécessaire de sélectionner les deux colonnes "débit" et "crédit", pas seulement "crédit" ou "débit".');
 		}
 
 		$this->csv->skip($skip);
