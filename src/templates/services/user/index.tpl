@@ -26,6 +26,7 @@
 		Ce membre n'est inscrit à aucune activité ou cotisation.
 	</dd>
 	{/foreach}
+	{if !$only && !$after}
 	<dt>Nombre d'inscriptions pour ce membre</dt>
 	<dd>
 		{$list->count()}
@@ -42,11 +43,17 @@
 		</nav>
 		{/if}
 	</dd>
+	{/if}
 </dl>
 {/if}
 
 {if $only}
-	<p class="alert block">Cette liste ne montre qu'une seule inscription, liée à l'activité <strong>{$only_service.label}</strong><br />{linkbutton shape="right" href="?id=%d"|args:$user.id label="Voir toutes les inscriptions"}</p>
+	<p class="alert block">Cette liste ne montre qu'une seule inscription, liée à l'activité <strong>{$only_service.label}</strong><br />
+	{linkbutton shape="right" href="?id=%d"|args:$user.id label="Voir toutes les inscriptions"}</p>
+{elseif $after}
+	<p class="alert block">Cette liste ne montre que les inscriptions réalisées après le {$after|date_long}.<br />
+		{linkbutton shape="right" href="?id=%d"|args:$user.id label="Voir toutes les inscriptions"}
+	</p>
 {/if}
 
 {include file="common/dynamic_list_head.tpl"}
@@ -80,6 +87,10 @@
 					{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$row.id}
 				{/if}
 			</td>
+		</tr>
+	{foreachelse}
+		<tr>
+			<td colspan="7">Aucune inscription trouvée.</td>
 		</tr>
 	{/foreach}
 
