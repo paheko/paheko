@@ -259,7 +259,7 @@ class Install
 
 		// Create an example saved search (users)
 		$query = (object) [
-			'query' => [[
+			'groups' => [[
 				'operator' => 'AND',
 				'conditions' => [
 					[
@@ -286,7 +286,7 @@ class Install
 
 		// Create an example saved search (accounting)
 		$query = (object) [
-			'query' => [[
+			'groups' => [[
 				'operator' => 'AND',
 				'conditions' => [
 					[
