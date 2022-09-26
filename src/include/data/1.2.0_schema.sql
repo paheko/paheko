@@ -223,7 +223,7 @@ CREATE TABLE IF NOT EXISTS services_users
     expiry_date TEXT NULL CHECK (date(expiry_date) IS NULL OR date(expiry_date) = expiry_date)
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS su_unique ON services_users (id_user, id_service, date);
+CREATE UNIQUE INDEX IF NOT EXISTS su_unique ON services_users (id_user, id_service, id_fee, date);
 
 CREATE INDEX IF NOT EXISTS su_service ON services_users (id_service);
 CREATE INDEX IF NOT EXISTS su_fee ON services_users (id_fee);

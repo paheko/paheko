@@ -6,7 +6,7 @@ ALTER TABLE plugins RENAME TO plugins_old;
 ALTER TABLE plugins_signaux RENAME TO plugins_signaux_old;
 
 -- References old membres table
-ALTER TABLE services_users RENAME TO services_users_old;
+ALTER TABLE services_users RENAME TO services_users_old; -- Also take id_fee into account for unique key
 ALTER TABLE services_reminders_sent RENAME TO services_reminders_sent_old;
 ALTER TABLE acc_transactions RENAME TO acc_transactions_old;
 ALTER TABLE acc_transactions_users RENAME TO acc_transactions_users_old;

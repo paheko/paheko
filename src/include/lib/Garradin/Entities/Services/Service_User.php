@@ -38,7 +38,7 @@ class Service_User extends Entity
 	{
 		$this->assert($this->id_service, 'Aucune activité spécifiée');
 		$this->assert($this->id_user, 'Aucun membre spécifié');
-		$this->assert(!$this->isDuplicate(), 'Cette activité a déjà été enregistrée pour ce membre et cette date');
+		$this->assert(!$this->isDuplicate(), 'Cette activité a déjà été enregistrée pour ce membre, ce tarif et cette date');
 
 		$db = DB::getInstance();
 		// don't allow an id_fee that does not match a service
@@ -56,6 +56,7 @@ class Service_User extends Entity
 		$params = [
 			'id_user' => $this->id_user,
 			'id_service' => $this->id_service,
+			'id_fee' => $this->id_fee,
 		];
 
 		if ($using_date) {
