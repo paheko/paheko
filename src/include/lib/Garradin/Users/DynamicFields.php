@@ -100,49 +100,31 @@ class DynamicFields
 	static public function getNameFieldsSQL(?string $prefix = null): string
 	{
 		$fields = self::getNameFields();
-		$db= DB::getInstance();
+		$db = DB::getInstance();
 
 		if ($prefix) {
 			$fields = array_map(fn($v) => $prefix . '.' . $db->quoteIdentifier($v), $fields);
 		}
 
-		return implode(' || \' \' ', $fields);
+		if (count($fields) == 1) {
+			return $fields[0];
+		}
+
+		foreach ($fields as &$field) {
+			$field = sprintf('IFNULL(%s, \'\')', $field);
+		}
+
+		unset($field);
+
+		$fields = implode(' || \' \' || ', $fields);
+		$fields = sprintf('TRIM(%s)', $fields);
+		return $fields;
 	}
 
 	static public function getEntityProperties(): array
 	{
 		$fields = self::getEntityTypes();
 		return DynamicField::SYSTEM_FIELDS + $fields;
-	}
-
-	static public function changeLoginField(string $new_field): void
-	{
-		$old_field = self::getLoginField();
-
-		if ($old_field === $new_field) {
-			return;
-		}
-
-		$db = DB::getInstance();
-
-		// First check that the field can be used as login
-		$sql = sprintf('SELECT (COUNT(DISTINCT transliterate_to_ascii(%s)) = COUNT(*)) FROM users WHERE %1$s IS NOT NULL AND %1$s != \'\';', $new_field);
-
-		if (!$db->firstColumn($sql)) {
-			throw new UserException(sprintf('Le champ "%s" comporte des doublons et ne peut donc pas servir comme identifiant unique de connexion.', $new_field));
-		}
-
-		$sql = sprintf('UPDATE %s SET system = NULL WHERE system = \'login\';
-			UPDATE %1$s SET system = \'login\' WHERE key = %s;',
-			self::TABLE,
-			$new_field
-		);
-
-		$db->exec($sql);
-
-		// Regenerate login index
-		$db->exec('DROP INDEX IF EXISTS users_id_field;');
-		$this->createIndexes();
 	}
 
 	protected function __construct(bool $load = true)
@@ -225,6 +207,7 @@ class DynamicFields
 		foreach ($this->_fields_by_system_use as &$list) {
 			$list = [];
 		}
+
 		unset($list);
 
 		foreach ($this->_fields as $key => $field) {
@@ -863,5 +846,126 @@ class DynamicFields
 	public function getLastOrderIndex()
 	{
 		return count($this->_fields);
+	}
+
+	public function listEligibleLoginFields(): array
+	{
+		$out = [];
+
+		foreach ($this->_fields as $field) {
+			if (!in_array($field->type, $field::LOGIN_FIELD_TYPES)) {
+				continue;
+			}
+
+			$out[$field->name] = $field->label;
+		}
+
+		return $out;
+	}
+
+	protected function isUnique(string $field): bool
+	{
+		$db = DB::getInstance();
+
+		// First check that the field can be used as login
+		$sql = sprintf('SELECT (COUNT(DISTINCT transliterate_to_ascii(%s)) = COUNT(*)) FROM users WHERE %1$s IS NOT NULL AND %1$s != \'\';', $field);
+
+		return (bool) $db->firstColumn($sql);
+	}
+
+	public function changeLoginField(string $new_field): void
+	{
+		$old_field = self::getLoginField();
+
+		if ($old_field === $new_field) {
+			return;
+		}
+
+		if (empty($this->_fields[$new_field])) {
+			throw new \InvalidArgumentException('This field does not exist.');
+		}
+
+		$type = $this->_fields[$new_field]->type;
+
+		if (!in_array($type, DynamicField::LOGIN_FIELD_TYPES)) {
+			throw new \InvalidArgumentException('This field cannot be used as a login field.');
+		}
+
+		$db = DB::getInstance();
+
+		// First check that the field can be used as login
+		if (!$this->isUnique($new_field)) {
+			throw new UserException(sprintf('Le champ "%s" comporte des doublons et ne peut donc pas servir comme identifiant unique de connexion.', $this->_fields[$new_field]->label));
+		}
+
+		$sql = sprintf('UPDATE %s SET system = system & ~%d WHERE system & %2$d
+			UPDATE %1$s SET system = system | %2$d WHERE name = %s;',
+			self::TABLE,
+			DynamicField::LOGIN,
+			$new_field
+		);
+
+		$db->exec($sql);
+
+		// Regenerate login index
+		$db->exec('DROP INDEX IF EXISTS users_id_field;');
+		$this->createIndexes();
+
+		$this->reload();
+	}
+
+	public function listEligibleNameFields(): array
+	{
+		$out = [];
+
+		foreach ($this->_fields as $field) {
+			if (!in_array($field->type, $field::NAME_FIELD_TYPES)) {
+				continue;
+			}
+
+			$out[$field->name] = $field->label;
+		}
+
+		return $out;
+	}
+
+	public function changeNameFields(array $fields): void
+	{
+		if ($fields === self::getNameFields()) {
+			return;
+		}
+
+		$fields = array_unique($fields);
+
+		if (count($fields) < 1) {
+			throw new UserException('Aucun champ n\'a été sélectionné pour l\'identité des membres.');
+		}
+
+		foreach ($fields as $field) {
+			if (empty($this->_fields[$field])) {
+				throw new \InvalidArgumentException('This field does not exist: ' . $field);
+			}
+
+			$type = $this->_fields[$field]->type;
+
+			if (!in_array($type, DynamicField::NAME_FIELD_TYPES)) {
+				throw new \InvalidArgumentException('This field cannot be used as a name field: ' . $field);
+			}
+		}
+
+		$db = DB::getInstance();
+
+		$sql = sprintf('UPDATE %s SET system = system & ~%d WHERE system & %2$d;
+			UPDATE %1$s SET system = system | %2$d  WHERE %s;',
+			self::TABLE,
+			DynamicField::NAMES,
+			$db->where('name', $fields)
+		);
+
+		$db->begin();
+		$db->exec($sql);
+		$db->commit();
+
+		$this->reload();
 	}
 }

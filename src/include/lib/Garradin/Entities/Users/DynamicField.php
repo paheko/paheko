@@ -150,6 +150,22 @@ class DynamicField extends Entity
 		'url',
 	];
 
+	const LOGIN_FIELD_TYPES = [
+		'email',
+		'url',
+		'text',
+		'number',
+		'tel',
+	];
+
+	const NAME_FIELD_TYPES = [
+		'text',
+		'select',
+		'number',
+		'url',
+		'email',
+	];
+
 	const SQL_CONSTRAINTS = [
 		'checkbox' => '%1s = 1 OR %1s = 0',
 		'date'     => '%1s IS NULL OR (date(%1$s) IS NOT NULL AND date(%1s) = %1$s)',

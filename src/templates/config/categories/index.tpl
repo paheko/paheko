@@ -1,6 +1,6 @@
 {include file="_head.tpl" title="Catégories de membres" current="config"}
 
-{include file="config/_menu.tpl" current="categories"}
+{include file="config/_menu.tpl" current="users" sub_current="categories"}
 
 <table class="list">
 	<thead>

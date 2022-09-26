@@ -1,6 +1,6 @@
 {include file="_head.tpl" current="config" title="Fiche des membres"}
 
-{include file="config/_menu.tpl" current="fields"}
+{include file="config/_menu.tpl" current="users" sub_current="fields"}
 
 <nav class="tabs">
 	{linkbutton shape="plus" label="Ajouter un champ" href="new.php"}

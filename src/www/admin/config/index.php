@@ -34,19 +34,7 @@ $tpl->assign([
 	'server_time'      => time(),
 	'sqlite_version'   => \SQLite3::version()['versionString'],
 	'countries'        => Utils::getCountryList(),
-	'users_categories' => Categories::listSimple(),
 	'garradin_website' => WEBSITE,
-	'login_field'      => DynamicFields::getLoginField(),
-	'name_field'       => DynamicFields::getNameFields()[0],
-	'log_retention_options' => [
-		0 => 'Ne pas enregistrer de journaux',
-		7 => 'Une semaine',
-		30 => 'Un mois',
-		90 => '3 mois',
-		180 => '6 mois',
-		365 => 'Un an',
-		720 => 'Deux ans',
-	],
 ]);
 
 $tpl->display('config/index.tpl');
