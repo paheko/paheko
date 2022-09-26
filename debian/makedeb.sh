@@ -125,12 +125,12 @@ true && {
 Package: ${PACKAGE_DEBNAME}
 Section: web
 Priority: optional
-Maintainer: Garradin <garradin@kd2.org>
+Maintainer: Garradin <garradin@garradin.eu>
 Architecture: ${DEB_ARCH_NAME}
-Depends: dash | bash, php-cli (>=7.4), php-sqlite3
+Depends: dash | bash, php-cli (>=7.4), php-sqlite3, php-intl, sensible-utils
 Version: ${PACKAGE_DEB_VERSION}
-Suggests: www-browser, php-gd, php-imagick, php-intl
-Homepage: http://dev.kd2.org/garradin/
+Suggests: php-gd, php-imagick
+Homepage: https://fossil.kd2.org/garradin/
 Description: Garradin is a tool to manage non-profit organizations.
  It's only available in french.
 Description-fr: Gestionnaire d'association en interface web ou CLI.
