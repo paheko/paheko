@@ -1,6 +1,6 @@
 /*
-    marron : #9c4f15 rgb(156, 79, 21)
-    orange : #d98628 rgb(217, 134, 40)
+    color1 : #20787a rgb(32, 120, 122)
+    colro2 : #85b9ba rgb(133, 185, 186)
 */
 
 /* Light colors */
@@ -13,9 +13,9 @@
     --gLinkColor: blue;
     --gHoverLinkColor: 127, 0, 0;
 
-    --gMainColor: 156, 79, 21;
-    --gSecondColor: 217, 134, 40;
-    --gBgImage: url("../gdin_bg.png");
+    --gMainColor: 32, 120, 122;
+    --gSecondColor: 133, 185, 186;
+    --gBgImage: url("../bg.png");
 }
 
 /* Dark colors */

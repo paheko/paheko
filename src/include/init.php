@@ -204,8 +204,8 @@ static $default_config = [
 	'MAIL_BOUNCE_PASSWORD'  => null,
 	'ADMIN_URL'             => WWW_URL . 'admin/',
 	'NTP_SERVER'            => 'fr.pool.ntp.org',
-	'ADMIN_COLOR1'          => '#9c4f15',
-	'ADMIN_COLOR2'          => '#d98628',
+	'ADMIN_COLOR1'          => '#20787a',
+	'ADMIN_COLOR2'          => '#85b9ba',
 	'FILE_STORAGE_BACKEND'  => 'SQLite',
 	'FILE_STORAGE_CONFIG'   => null,
 	'FILE_STORAGE_QUOTA'    => null,
@@ -242,7 +242,7 @@ if (SMTP_SECURITY) {
 }
 
 if (!defined('Garradin\ADMIN_BACKGROUND_IMAGE')) {
-	define('Garradin\ADMIN_BACKGROUND_IMAGE', ADMIN_URL . 'static/gdin_bg.png');
+	define('Garradin\ADMIN_BACKGROUND_IMAGE', ADMIN_URL . 'static/bg.png');
 }
 
 // Used for private files, just in case WWW_URL is not the same domain as ADMIN_URL
