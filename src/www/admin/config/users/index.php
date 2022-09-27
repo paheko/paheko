@@ -21,7 +21,7 @@ $form->runIf('save', function() use ($df, $config) {
 	if (!empty($_POST['name_fields'])) {
 		$df->changeNameFields(array_keys($_POST['name_fields']));
 	}
-}, $csrf_key, Utils::getSelfURI());
+}, $csrf_key, Utils::getSelfURI(['ok' => 1]));
 
 $names = $df->listAssocNames();
 $name_fields = array_intersect_key($names, array_flip(DynamicFields::getNameFields()));

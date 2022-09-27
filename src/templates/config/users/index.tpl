@@ -2,6 +2,13 @@
 
 {include file="config/_menu.tpl" current="users" sub_current=null}
 
+{if isset($_GET['ok']) && !$form->hasErrors()}
+	<p class="block confirm">
+		La configuration a bien été enregistrée.
+	</p>
+{/if}
+
+
 {form_errors}
 
 <form method="post" action="{$self_url}">

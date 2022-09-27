@@ -898,11 +898,11 @@ class DynamicFields
 			throw new UserException(sprintf('Le champ "%s" comporte des doublons et ne peut donc pas servir comme identifiant unique de connexion.', $this->_fields[$new_field]->label));
 		}
 
-		$sql = sprintf('UPDATE %s SET system = system & ~%d WHERE system & %2$d
+		$sql = sprintf('UPDATE %s SET system = system & ~%d WHERE system & %2$d;
 			UPDATE %1$s SET system = system | %2$d WHERE name = %s;',
 			self::TABLE,
 			DynamicField::LOGIN,
-			$new_field
+			$db->quote($new_field)
 		);
 
 		$db->exec($sql);
