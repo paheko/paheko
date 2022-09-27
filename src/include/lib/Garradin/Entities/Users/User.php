@@ -163,6 +163,24 @@ class User extends Entity
 		return parent::delete();
 	}
 
+	public function asArray(bool $for_database = false): array
+	{
+		$out = parent::asArray($for_database);
+
+		// Remove generated columns
+		if ($for_database) {
+			foreach (DynamicFields::getInstance()->all() as $field) {
+				if ($field->type != 'generated') {
+					continue;
+				}
+
+				unset($out[$field->name]);
+			}
+		}
+
+		return $out;
+	}
+
 	public function save(bool $selfcheck = true): bool
 	{
 		$columns = array_intersect(DynamicFields::getInstance()->getSearchColumns(), array_keys($this->_modified));
