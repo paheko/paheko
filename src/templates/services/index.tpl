@@ -15,7 +15,7 @@
 						{if $row.duration}
 							{$row.duration} jours
 						{elseif $row.start_date}
-							du {$row.start_date|date_short} au {$row.end_date|date_short}
+							{$row.start_date|date_short} au {$row.end_date|date_short}
 						{else}
 							ponctuelle
 						{/if}
