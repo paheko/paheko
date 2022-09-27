@@ -20,9 +20,12 @@ if ('unpaid' == $type) {
 elseif ('expired' == $type) {
 	$list = $service->expiredUsersList();
 }
-else {
-	$type = 'active';
+elseif ('active' == $type) {
 	$list = $service->activeUsersList();
+}
+else {
+	$type = 'all';
+	$list = $service->allUsersList();
 }
 
 $list->loadFromQueryString();
