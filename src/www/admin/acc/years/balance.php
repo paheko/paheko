@@ -5,10 +5,11 @@ use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Accounting\Reports;
 use Garradin\Accounting\Years;
-use Garradin\Membres\Session;
+use Garradin\Users\Session;
 
 require_once __DIR__ . '/../_inc.php';
 
+$session = Session::getInstance();
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
 $year = Years::get((int)qg('id'));
@@ -23,9 +24,9 @@ if ($year->closed) {
 
 $csrf_key = 'acc_years_balance_' . $year->id();
 
-$form->runIf('save', function () use ($year) {
+$form->runIf('save', function () use ($year, $session) {
 	$transaction = new Transaction;
-	$transaction->id_creator = Session::getInstance()->getUser()->id;
+	$transaction->id_creator = Session::getUserId();
 	$transaction->importFromBalanceForm($year);
 	$transaction->save();
 

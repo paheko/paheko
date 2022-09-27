@@ -6,10 +6,11 @@ use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Accounting\Line;
 use Garradin\Accounting\Accounts;
 use Garradin\Accounting\Charts;
-use Garradin\Membres\Session;
+use Garradin\Users\Session;
 
 require_once __DIR__ . '/../../_inc.php';
 
+$session = Session::getInstance();
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
 $chart = Charts::get((int)qg('id'));
@@ -50,7 +51,7 @@ $form->runIf('save', function () use ($account, $accounts, $chart, $current_year
 	if (!empty(f('opening_amount')) && $current_year) {
 		$t = new Transaction;
 		$t->label = 'Solde d\'ouverture du compte';
-		$t->id_creator = Session::getInstance()->getUser()->id;
+		$t->id_creator = Session::getUserId();
 		$t->date = clone $current_year->start_date;
 		$t->type = $t::TYPE_ADVANCED;
 		$t->notes = 'Créé automatiquement à l\'ajout du compte';
