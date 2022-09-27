@@ -321,6 +321,11 @@ class Template extends Smartyer
 			return '';
 		}
 
+		// GENERATED columns cannot be edited
+		if ($type == 'generated') {
+			return '';
+		}
+
 		if ($context == 'user_edit' && !$field->read_access) {
 			return '';
 		}
