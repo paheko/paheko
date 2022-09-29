@@ -741,7 +741,7 @@ class Transaction extends Entity
 			$source = $_POST;
 		}
 
-		if (empty($source['id_related'])) {
+		if (!isset($source['id_related'])) {
 			unset($source['id_related']);
 		}
 
