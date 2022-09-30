@@ -49,6 +49,10 @@ class Services_User
 				'select' => 's.label',
 				'label' => 'Activité',
 			],
+			'fee' => [
+				'label' => 'Tarif',
+				'select' => 'sf.label',
+			],
 			'date' => [
 				'label' => 'Date d\'inscription',
 				'select' => 'su.date',
@@ -56,10 +60,6 @@ class Services_User
 			'expiry' => [
 				'label' => 'Date d\'expiration',
 				'select' => 'MAX(su.expiry_date)',
-			],
-			'fee' => [
-				'label' => 'Tarif',
-				'select' => 'sf.label',
 			],
 			'paid' => [
 				'label' => 'Payé',

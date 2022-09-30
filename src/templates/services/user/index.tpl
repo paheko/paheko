@@ -61,11 +61,14 @@
 	{foreach from=$list->iterate() item="row"}
 		<tr>
 			<th>{$row.label}</th>
+			<td>{$row.fee}</td>
 			<td>{$row.date|date_short}</td>
 			<td>{$row.expiry|date_short}</td>
-			<td>{$row.fee}</td>
 			<td>{if $row.paid}<b class="confirm">Oui</b>{else}<b class="error">Non</b>{/if}</td>
-			<td>{if $row.expected_amount}{$row.amount|raw|money_currency:false}{/if}</td>
+			<td class="money">{if $row.expected_amount}{$row.amount|raw|money_currency:false}
+				{if $row.amount}<br /><small class="help">(sur {$row.expected_amount|raw|money_currency:false})</small>{/if}
+				{/if}
+			</td>
 			<td class="actions">
 				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE) && $row.id_account}
 					{linkbutton shape="plus" label="Nouveau règlement" href="payment.php?id=%d"|args:$row.id}
@@ -83,6 +86,7 @@
 					{else}
 						{linkbutton shape="check" label="Marquer comme payé" href="?id=%d&su_id=%d&paid=1"|args:$user.id,$row.id}
 					{/if}
+					<br />
 					{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$row.id}
 					{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$row.id}
 				{/if}
