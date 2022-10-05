@@ -8,20 +8,24 @@
 			{input name="label" type="text" required=1 label="Libellé" source=$service}
 			{input name="description" type="textarea" label="Description" source=$service}
 
-			<dt><label for="f_periodicite_jours">Période de validité</label> <b title="Champ obligatoire">(obligatoire)</b></dt>
-			<dd class="help">Attention, une modification de la période renseignée ici ne modifie pas la date d'expiration des activités déjà enregistrées.</dd>
-			{input name="period" type="radio" value="0" label="Pas de période (cotisation ponctuelle)" default=$period}
-			{input name="period" type="radio" value="1" label="En nombre de jours" default=$period}
+			<dt><label for="f_periodicite_jours">Durée de validité</label> <b title="Champ obligatoire">(obligatoire)</b></dt>
+
+			{if $service && $service->exists()}
+			<dd class="help">Attention, une modification de la durée renseignée ici ne modifie pas la date d'expiration des activités déjà enregistrées.</dd>
+			{/if}
+
+			{input name="period" type="radio-btn" value="0" label="Pas de durée (activité ou cotisation ponctuelle)" default=$period help="Pour un événement, un concert, un cours ponctuel, etc."}
+			{input name="period" type="radio-btn" value="1" label="En nombre de jours" default=$period help="Par exemple une cotisation valide un an à partir de la date d'inscription"}
 			<dd class="period_1">
 				<dl>
-				{input name="duration" type="number" step="1" label="Durée de validité" size="5" source=$service}
+				{input name="duration" type="number" step="1" label="Nombre de jours" size="5" source=$service required=true default=365}
 				</dl>
 			</dd>
-			{input name="period" type="radio" value="2" label="Période définie (date à date)" default=$period}
+			{input name="period" type="radio-btn" value="2" label="Période définie (date à date)" default=$period help="Par exemple pour une cotisation qui serait valable pour l'année civile en cours, quelle que soit la date d'inscription."}
 			<dd class="period_2">
 				<dl class="periode_dates">
-					{input type="date" name="start_date" label="Date de début" source=$service}
-					{input type="date" name="end_date" label="Date de fin" source=$service}
+					{input type="date" name="start_date" label="Date de début" source=$service required=true}
+					{input type="date" name="end_date" label="Date de fin" source=$service required=true}
 				</dl>
 			</dd>
 		</dl>
