@@ -70,7 +70,6 @@ function initForm() {
 		let checkbox = $('#f_create_payment_1');
 		checkbox.onchange = (e) => {
 			g.toggle('.accounting dl', checkbox.checked);
-			//$('#f_amount').required = checkbox.checked;
 		};
 	}
 
