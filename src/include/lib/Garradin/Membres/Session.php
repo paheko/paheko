@@ -173,6 +173,24 @@ class Session extends \KD2\UserSession
 		return $logged;
 	}
 
+	public function login($login, $password, $remember_me = false)
+	{
+		$success = parent::login($login, $password, $remember_me);
+
+		Plugin::fireSignal('user.login', compact('login', 'password', 'remember_me', 'success'));
+
+		return $success;
+	}
+
+	public function loginOTP(string $code): bool
+	{
+		$success = parent::loginOTP($code);
+		$user_id = $_SESSION['userSessionRequireOTP']->user->id ?? null;
+		Plugin::fireSignal('user.login.otp', compact('success', 'user_id'));
+		return $success;
+	}
+
+
 	public function forceLogin(int $id)
 	{
 		// On va chercher le premier membre avec le droit de gérer la config
@@ -324,6 +342,9 @@ class Session extends \KD2\UserSession
 		}
 
 		self::checkPasswordValidity($password);
+
+		$user_id = $membre->id;
+		Plugin::fireSignal('user.password.change', compact('user_id', 'password'));
 
 		$password = self::hashPassword($password);
 
