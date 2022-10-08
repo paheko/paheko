@@ -85,7 +85,8 @@ a:hover {
 
 .header .menu {
     position: fixed;
-    overflow: auto;
+    overflow: hidden;
+    overflow-y: auto;
     z-index: 1000;
     width: 170px;
     top: 0;
