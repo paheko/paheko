@@ -53,6 +53,11 @@ class Plugin
 		return false;
 	}
 
+	static public function getURL(string $id, string $path = '')
+	{
+		return ADMIN_URL . 'p/' . $id . '/' . ltrim($path, '/');
+	}
+
 	/**
 	 * Construire un objet Plugin pour un plugin
 	 * @param string $id Identifiant du plugin
@@ -248,7 +253,8 @@ class Plugin
 		if (substr($path, -4) === '.php')
 		{
 			define('Garradin\PLUGIN_ROOT', $this->path());
-			define('Garradin\PLUGIN_URL', WWW_URL . ($public ? 'p/' : 'admin/p/') . $this->id() . '/');
+			define('Garradin\PLUGIN_URL', WWW_URL . 'p/' . $this->id() . '/');
+			define('Garradin\PLUGIN_ADMIN_URL', WWW_URL .'admin/p/' . $this->id() . '/');
 			define('Garradin\PLUGIN_QSP', '?');
 
 			// Créer l'environnement d'exécution du plugin
@@ -261,6 +267,7 @@ class Plugin
 			$tpl = Template::getInstance();
 			$tpl->assign('plugin', $this->getInfos());
 			$tpl->assign('plugin_url', PLUGIN_URL);
+			$tpl->assign('plugin_admin_url', PLUGIN_ADMIN_URL);
 			$tpl->assign('plugin_root', PLUGIN_ROOT);
 
 			include $path;
@@ -313,8 +320,9 @@ class Plugin
 	{
 		$infos = (object) parse_ini_file($this->path() . '/garradin_plugin.ini', false);
 
-		if (version_compare($this->plugin->version, $infos->version, '!='))
+		if (version_compare($this->plugin->version, $infos->version, '!=')) {
 			return true;
+		}
 
 		return false;
 	}
@@ -324,18 +332,18 @@ class Plugin
 	 * Appelle le fichier upgrade.php dans l'archive si celui-ci existe.
 	 * @return boolean TRUE si tout a fonctionné
 	 */
-	public function upgrade()
+	public function upgrade(): void
 	{
-		if (file_exists($this->path() . '/upgrade.php'))
-		{
-			$plugin = $this;
-			include $this->path() . '/upgrade.php';
-		}
-
 		$infos = (object) parse_ini_file($this->path() . '/garradin_plugin.ini', false);
 
 		if (!isset($infos->name)) {
 			return;
+		}
+
+		if (file_exists($this->path() . '/upgrade.php'))
+		{
+			$plugin = $this;
+			include $this->path() . '/upgrade.php';
 		}
 
 		$data = [
@@ -344,15 +352,13 @@ class Plugin
 			'author'	=>	$infos->author,
 			'url'		=>	$infos->url,
 			'version'	=>	$infos->version,
-			'menu'		=>	(int)(bool)$infos->menu,
 		];
 
-		if ($infos->menu && !empty($infos->menu_condition))
-		{
-			$data['menu_condition'] = trim($infos->menu_condition);
+		if ($config = self::getDefaultConfig($this->id, $this->path())) {
+			$data['config'] = json_encode($config);
 		}
 
-		return DB::getInstance()->update('plugins', $data, 'id = :id', ['id' => $this->id]);
+		DB::getInstance()->update('plugins', $data, 'id = :id', ['id' => $this->id]);
 	}
 
 	/**
@@ -658,7 +664,7 @@ class Plugin
 
 		$infos = (object) parse_ini_file($path . '/garradin_plugin.ini', false);
 
-		$required = ['name', 'description', 'author', 'url', 'version', 'menu', 'config'];
+		$required = ['name', 'description', 'author', 'url', 'version'];
 
 		foreach ($required as $key)
 		{
@@ -678,36 +684,7 @@ class Plugin
 			throw new UserException('Le plugin '.$id.' nécessite Garradin version '.$infos->max_version.' ou inférieure.');
 		}
 
-		if (!empty($infos->menu) && !file_exists($path . '/www/admin/index.php'))
-		{
-			throw new \RuntimeException('Le plugin '.$id.' ne comporte pas de fichier www/admin/index.php alors qu\'il demande à figurer au menu.');
-		}
-
-		$config = '';
-
-		if ((bool)$infos->config)
-		{
-			if (!file_exists($path . '/config.json'))
-			{
-				throw new \RuntimeException('L\'archive '.$id.'.tar.gz ne comporte pas de fichier config.json 
-					alors que le plugin nécessite le stockage d\'une configuration.');
-			}
-
-			if (!file_exists($path . '/www/admin/config.php'))
-			{
-				throw new \RuntimeException('L\'archive '.$id.'.tar.gz ne comporte pas de fichier www/admin/config.php 
-					alors que le plugin nécessite le stockage d\'une configuration.');
-			}
-
-			$config = json_decode(file_get_contents($path . '/config.json'));
-
-			if (is_null($config))
-			{
-				throw new \RuntimeException('config.json invalide. Erreur JSON: ' . json_last_error_msg());
-			}
-
-			$config = json_encode($config);
-		}
+		$config = self::getDefaultConfig($id, $path);
 
 		$data = [
 			'id' 		=> 	$id,
@@ -717,14 +694,8 @@ class Plugin
 			'author'	=>	$infos->author,
 			'url'		=>	$infos->url,
 			'version'	=>	$infos->version,
-			'menu'		=>	(int)(bool)$infos->menu,
-			'config'	=>	$config,
+			'config'	=>	json_encode($config),
 		];
-
-		if ($infos->menu && !empty($infos->menu_condition))
-		{
-			$data['menu_condition'] = trim($infos->menu_condition);
-		}
 
 		$db = DB::getInstance();
 		$db->begin();
@@ -739,6 +710,29 @@ class Plugin
 		$db->commit();
 
 		return true;
+	}
+
+	static protected function getDefaultConfig(string $id, string $path)
+	{
+		$config = null;
+
+		if (file_exists($path . '/config.json'))
+		{
+			if (!file_exists($path . '/admin/config.php'))
+			{
+				throw new \RuntimeException(sprintf('Le plugin "%s" ne comporte pas de fichier admin/config.php
+					alors que le plugin nécessite le stockage d\'une configuration.', $id));
+			}
+
+			$config = json_decode(file_get_contents($path . '/config.json'));
+
+			if (is_null($config))
+			{
+				throw new \RuntimeException('config.json invalide. Erreur JSON: ' . json_last_error_msg());
+			}
+		}
+
+		return $config;
 	}
 
 	/**

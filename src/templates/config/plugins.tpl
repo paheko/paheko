@@ -55,7 +55,7 @@
 					</td>
 					<td class="actions">
 						{if !empty($plugin.config)}
-							{linkbutton shape="settings" label="Configurer" href="!plugin/%s/config.php"|args:$plugin.id}
+							{linkbutton shape="settings" label="Configurer" href="!p/%s/config.php"|args:$plugin.id}
 						{/if}
 						{linkbutton shape="delete" href="!config/plugins.php?delete=%s"|args:$plugin.id label="Désinstaller"}
 					</td>

@@ -688,11 +688,11 @@ class Utils
     {
         if (isset($params['id']))
         {
-            $url = ADMIN_URL . 'plugin/' . $params['id'] . '/';
+            $url = ADMIN_URL . 'p/' . $params['id'] . '/';
         }
-        elseif (defined('Garradin\PLUGIN_URL'))
+        elseif (defined('Garradin\PLUGIN_ADMIN_URL'))
         {
-            $url = PLUGIN_URL;
+            $url = PLUGIN_ADMIN_URL;
         }
         else {
             throw new \RuntimeException('Missing plugin URL');
