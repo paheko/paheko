@@ -9,7 +9,7 @@ use Garradin\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
 
-$banner = null;
+$banner = '';
 $session = Session::getInstance();
 Plugin::fireSignal('home.banner', ['user' => $session->getUser(), 'session' => $session], $banner);
 
@@ -22,7 +22,10 @@ else {
 	$homepage = null;
 }
 
-$tpl->assign(compact('homepage', 'banner'));
+$buttons = [];
+Plugin::fireSignal('home.button', ['user' => $session->getUser(), 'session' => $session], $buttons);
+
+$tpl->assign(compact('homepage', 'banner', 'buttons'));
 
 $tpl->assign('custom_css', ['!web/css.php']);
 

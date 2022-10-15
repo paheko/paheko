@@ -9,10 +9,6 @@
 	</ul>
 </nav>
 
-<nav class="home-buttons">
-	{button id="homescreen-btn" label="Installer comme application sur l'écran d'accueil" class="hidden" shape="plus"}
-</nav>
-
 <aside class="describe">
 	<h3>{$config.org_name}</h3>
 	{if !empty($config.org_address)}
@@ -36,6 +32,15 @@
 	</p>
 	{/if}
 </aside>
+
+<nav class="home">
+	<ul>
+		<li>{button id="homescreen-btn" label="Installer comme application sur l'écran d'accueil" class="hidden" shape="plus"}</li>
+	{foreach from=$buttons item="button"}
+		<li>{$button|raw}</li>
+	{/foreach}
+	</ul>
+</nav>
 
 {if $homepage}
 	<article class="web-content">
