@@ -396,11 +396,19 @@ class Install
 		<head>
 		<meta charset="utf-8" />
 		<style type="text/css">
+		* { padding: 0; margin: 0; }
+		html {
+			height: 100%%;
+		}
 		body {
 			font-family: sans-serif;
+			text-align: center;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			height: 100%%;
 		}
 		h2, p {
-			margin: 0;
 			margin-bottom: 1rem;
 		}
 		div {
@@ -409,6 +417,7 @@ class Install
 			max-width: 500px;
 			padding: 1em;
 			border-radius: .5em;
+			background: #999;
 		}
 		.spinner h2::after {
 			display: block;
@@ -429,7 +438,7 @@ class Install
 		<body>
 		<div class="spinner">
 			<h2>%s</h2>
-		</div>', $next, htmlspecialchars($message));
+		</div>', $next, nl2br(htmlspecialchars($message)));
 
 		flush();
 	}
