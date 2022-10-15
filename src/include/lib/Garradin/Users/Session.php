@@ -365,7 +365,7 @@ class Session extends \KD2\UserSession
 		$ok = parent::login($login, $password, $remember_me);
 		$user_agent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 150) ?: null;
 
-		if ($ok) {
+		if (true === $ok) {
 			Log::add(Log::LOGIN_SUCCESS, compact('user_agent'));
 
 			// Mettre à jour la date de connexion
