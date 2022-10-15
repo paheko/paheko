@@ -36,8 +36,6 @@ CREATE TABLE IF NOT EXISTS plugins
     author TEXT NULL,
     url TEXT NULL,
     version TEXT NOT NULL,
-    menu INTEGER NOT NULL DEFAULT 0, -- 1 if plugin should be shown in sidebar menu
-    menu_condition TEXT NULL, -- Brindille condition to know if item should be shown in menu
     config TEXT NULL
 );
 

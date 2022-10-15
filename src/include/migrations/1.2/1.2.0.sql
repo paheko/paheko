@@ -15,7 +15,7 @@ ALTER TABLE emails_queue RENAME TO emails_queue_old;
 
 DROP VIEW acc_accounts_balances;
 
-.read 1.2.0_schema.sql
+.read ../../data/1.2.0_schema.sql
 
 -- Add recipient_pgp_key column
 INSERT INTO emails_queue
@@ -40,7 +40,7 @@ DROP TABLE acc_transactions_users_old;
 DROP TABLE acc_transactions_old;
 DROP TABLE services_users_old;
 
-INSERT INTO plugins SELECT * FROM plugins_old;
+INSERT INTO plugins SELECT id, officiel, nom, description, auteur, url, version, config FROM plugins_old;
 INSERT INTO plugins_signals SELECT * FROM plugins_signaux_old;
 
 DROP TABLE plugins_signaux_old;
