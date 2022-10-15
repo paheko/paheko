@@ -471,12 +471,14 @@ class Reports
 
 		$out->caption_left = 'Charges';
 		$out->caption_right = 'Produits';
+		$total_left = 'Total charges';
+		$total_right = 'Total produits';
 
 		$out->body_left = self::getAccountsBalances($criterias + ['position' => Account::EXPENSE]);
 		$out->body_right = self::getAccountsBalances($criterias + ['position' => Account::REVENUE]);
 
-		$out->foot_left = [self::getTotalLine($out->body_left, 'Total charges')];
-		$out->foot_right = [self::getTotalLine($out->body_right, 'Total produits')];
+		$out->foot_left = [self::getTotalLine($out->body_left, $total_left)];
+		$out->foot_right = [self::getTotalLine($out->body_right, $total_right)];
 
 		$r = self::getResultLine($criterias);
 
@@ -487,6 +489,30 @@ class Reports
 		else {
 			$out->foot_right[] = $r;
 		}
+
+		return $out;
+	}
+
+	static public function getVolunteeringStatement(array $criterias, \stdClass $general_statement): \stdClass
+	{
+		$out = new \stdClass;
+
+		$criterias_all = $criterias + ['type' => Account::TYPE_VOLUNTEERING];
+
+		$out->caption_left = 'Emplois des contributions';
+		$out->caption_right = 'Sources des contributions';
+
+		$out->body_left = self::getAccountsBalances($criterias_all + ['position' => Account::EXPENSE]);
+		$out->body_right = self::getAccountsBalances($criterias_all + ['position' => Account::REVENUE]);
+
+		$out->foot_left = [
+			self::getTotalLine($out->body_left, 'Total emplois'),
+			self::getTotalLine($out->body_left + $general_statement->body_left, 'Total charges et emplois'),
+		];
+		$out->foot_right = [
+			self::getTotalLine($out->body_right, 'Total sources'),
+			self::getTotalLine($out->body_right + $general_statement->body_right, 'Total produits et sources'),
+		];
 
 		return $out;
 	}
