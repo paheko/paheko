@@ -12,6 +12,7 @@ use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Users\Category;
 use Garradin\Entities\Users\User;
 use Garradin\UserTemplate\CommonModifiers;
+use Garradin\UserTemplate\CommonFunctions;
 use Garradin\Web\Render\Skriv;
 use Garradin\Files\Files;
 
@@ -153,8 +154,8 @@ class Template extends Smartyer
 			$this->register_modifier(is_int($key) ? $name : $key, is_int($key) ? [CommonModifiers::class, $name] : $name);
 		}
 
-		foreach (CommonModifiers::FUNCTIONS_LIST as $key => $name) {
-			$this->register_function(is_int($key) ? $name : $key, is_int($key) ? [CommonModifiers::class, $name] : $name);
+		foreach (CommonFunctions::FUNCTIONS_LIST as $key => $name) {
+			$this->register_function(is_int($key) ? $name : $key, is_int($key) ? [CommonFunctions::class, $name] : $name);
 		}
 
 		$this->register_modifier('local_url', [Utils::class, 'getLocalURL']);
@@ -383,7 +384,7 @@ class Template extends Smartyer
 					unset($params['label']);
 				}
 
-				$out .= CommonModifiers::input($params);
+				$out .= CommonFunctions::input($params);
 			}
 
 			return $out;
@@ -400,7 +401,7 @@ class Template extends Smartyer
 			$params['required'] = false;
 			$params['value'] = 1;
 			unset($params['label']);
-			return sprintf('<dt><label>%s %s</label></dt>', CommonModifiers::input($params), htmlspecialchars($field->label));
+			return sprintf('<dt><label>%s %s</label></dt>', CommonFunctions::input($params), htmlspecialchars($field->label));
 		}
 		elseif ($field->system & $field::NUMBER && $context == 'new') {
 			$params['default'] = DB::getInstance()->firstColumn(sprintf('SELECT MAX(%s) + 1 FROM %s;', $key, User::TABLE));
@@ -414,7 +415,7 @@ class Template extends Smartyer
 			$params['default'] = new \DateTime;
 		}
 
-		$out = CommonModifiers::input($params);
+		$out = CommonFunctions::input($params);
 
 		if ($context != 'edit' && $field->system & $field::LOGIN) {
 			$out .= '<dd class="help"><small>(Sera utilisé comme identifiant de connexion si le membre a le droit de se connecter.)</small></dd>';

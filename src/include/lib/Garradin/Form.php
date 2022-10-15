@@ -114,7 +114,7 @@ class Form
 
 	/**
 	 * Returns a value from a custom list selector
-	 * see CommonModifiers::input
+	 * see CommonFunctions::input
 	 */
 	static public function getSelectorValue($value) {
 		if (!is_array($value)) {

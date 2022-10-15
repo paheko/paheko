@@ -155,8 +155,8 @@ class UserTemplate extends \KD2\Brindille
 			$this->registerModifier(is_int($key) ? $name : $key, is_int($key) ? [CommonModifiers::class, $name] : $name);
 		}
 
-		foreach (CommonModifiers::FUNCTIONS_LIST as $key => $name) {
-			$this->registerFunction(is_int($key) ? $name : $key, is_int($key) ? [CommonModifiers::class, $name] : $name);
+		foreach (CommonFunctions::FUNCTIONS_LIST as $key => $name) {
+			$this->registerFunction(is_int($key) ? $name : $key, is_int($key) ? [CommonFunctions::class, $name] : $name);
 		}
 
 		// PHP modifiers
