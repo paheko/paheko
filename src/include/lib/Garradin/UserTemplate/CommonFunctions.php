@@ -468,9 +468,10 @@ class CommonFunctions
 
 	static public function button(array $params): string
 	{
-		$icon = Utils::iconUnicode($params['shape']);
 		$label = isset($params['label']) ? htmlspecialchars($params['label']) : '';
-		unset($params['label'], $params['shape']);
+		unset($params['label']);
+
+		self::setIconAttribute($params);
 
 		if (!isset($params['type'])) {
 			$params['type'] = 'button';
@@ -495,13 +496,12 @@ class CommonFunctions
 
 		$params = implode(' ', $params);
 
-		return sprintf('<button %s data-icon="%s">%s</button>', $params, $icon, $label);
+		return sprintf('<button %s>%s</button>', $params, $label);
 	}
 
 	static public function linkbutton(array $params): string
 	{
-		$params['data-icon'] = Utils::iconUnicode($params['shape']);
-		unset($params['shape']);
+		self::setIconAttribute($params);
 
 		if (!isset($params['class'])) {
 			$params['class'] = '';
@@ -510,5 +510,21 @@ class CommonFunctions
 		$params['class'] .= ' icn-btn';
 
 		return self::link($params);
+	}
+
+	static protected function setIconAttribute(array &$params): void
+	{
+		if (isset($params['shape'])) {
+			$params['data-icon'] = Utils::iconUnicode($params['shape']);
+		}
+		elseif (isset($params['icon'])) {
+			$params['data-custom-icon'] = true;
+			$params['style'] = sprintf('--custom-icon: url(\'%s\')', $params['icon']);
+		}
+		else {
+			throw new \InvalidArgumentException('Missing parameter: either shape or icon');
+		}
+
+		unset($params['icon'], $params['shape']);
 	}
 }
