@@ -35,7 +35,13 @@ class API_Credentials
 
 	static public function delete(int $id): void
 	{
-		EM::findOneById(Entity::class, $id)->delete();
+		$e = EM::findOneById(Entity::class, $id);
+
+		if (!$e) {
+			return;
+		}
+
+		$e->delete();
 	}
 
 	static public function login(string $key, string $secret): ?Entity
