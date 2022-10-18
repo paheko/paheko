@@ -70,7 +70,7 @@
 				{/if}
 			</td>
 			<td class="actions">
-				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE) && $row.id_account}
+				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE) && $row.id_account}
 					{linkbutton shape="plus" label="Nouveau règlement" href="payment.php?id=%d"|args:$row.id}
 				{/if}
 				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
