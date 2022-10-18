@@ -64,14 +64,14 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 	{if !($field->system & $field::PASSWORD)}
 		<dt>Le champ est visible…</dt>
 		{input type="radio" name="read_access" value=$field::ACCESS_ADMIN label="Seulement aux gestionnaires des membres" source=$field}
-		{input type="radio" name="read_access" value=$field::ACCESS_USER label="Au membre lui-même, et aux gestionnaires" source=$field help="Le membre pourra voir cette information en se connectant" default=$field::ACCESS_USER}
+		{input type="radio" name="read_access" value=$field::ACCESS_USER label="Au membre lui-même, et aux gestionnaires" source=$field help="Le membre pourra voir cette information dans sa section 'Mes infos personnelles'" default=$field::ACCESS_USER}
 		<dd class="help">Attention&nbsp;: conformément à la réglementation (RGPD), quel que soit votre choix, le membre pourra voir le contenu de ce champ en effectuant un export de ses données personnelles s'il a le droit de se connecter.</dd>
 	{/if}
 
 		{if !$field->isGenerated()}
 		<dt>Le champ peut être modifié…</dt>
 		{input type="radio" name="write_access" value=$field::ACCESS_ADMIN label="Par les gestionnaires des membres" source=$field}
-		{input type="radio" name="write_access" value=$field::ACCESS_USER label="Par le membre lui-même, et les gestionnaires" source=$field help="Le membre pourra modifier cette information en se connectant" default=$field::ACCESS_USER}
+		{input type="radio" name="write_access" value=$field::ACCESS_USER label="Par le membre lui-même, et les gestionnaires" source=$field help="Le membre pourra modifier cette information dans sa section 'Mes infos personnelles'" default=$field::ACCESS_USER}
 		{/if}
 	</dl>
 </fieldset>
