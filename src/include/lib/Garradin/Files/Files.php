@@ -73,6 +73,16 @@ class Files
 			File::validatePath($parent);
 		}
 
+		$dir = self::get($parent);
+
+		if (!$dir) {
+			throw new UserException('Ce répertoire n\'existe pas.');
+		}
+
+		if ($dir->type != File::TYPE_DIRECTORY) {
+			throw new UserException('Ce chemin n\'est pas un répertoire');
+		}
+
 		// Update this path
 		return self::callStorage('list', $parent);
 	}
