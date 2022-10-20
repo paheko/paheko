@@ -308,7 +308,10 @@ class Session extends \KD2\UserSession
 			return false;
 		}
 
-		$membre = $db->first('SELECT id, email, passe, clef_pgp FROM membres WHERE id = ? LIMIT 1;', (int)$id);
+		$login_field = Config::getInstance()->get('champ_identifiant');
+		$sql = sprintf('SELECT id, email, passe, clef_pgp, %s AS login FROM membres WHERE id = ? LIMIT 1;', $login_field);
+
+		$membre = $db->first($sql, (int)$id);
 
 		if (!$membre || trim($membre->email) == '')
 		{
@@ -349,8 +352,8 @@ class Session extends \KD2\UserSession
 		$password = self::hashPassword($password);
 
 		$message = "Bonjour,\n\nLe mot de passe de votre compte a bien été modifié.\n\n";
-		$message.= "Votre adresse email : ".$membre->email."\n";
-		$message.= "La demande émanait de l'adresse IP : ".Utils::getIP()."\n\n";
+		$message.= "Pour rappel, votre identifiant de connexion est :\n".$membre->login."\n\n";
+		$message.= "La demande émanait de l'adresse IP :\n".Utils::getIP()."\n\n";
 		$message.= "Si vous n'avez pas demandé à changer votre mot de passe, merci de nous le signaler.";
 
 		DB::getInstance()->update('membres', ['passe' => $password], 'id = :id', ['id' => (int)$membre->id]);
