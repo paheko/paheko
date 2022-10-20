@@ -165,7 +165,8 @@ class CSV
 		$delims = [
 			';' => substr_count($line, ';'),
 			',' => substr_count($line, ','),
-			"\t"=> substr_count($line, "\t")
+			"\t"=> substr_count($line, "\t"),
+			'|' => substr_count($line, '|'),
 		];
 
 		arsort($delims);
