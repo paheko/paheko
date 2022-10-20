@@ -76,7 +76,7 @@ class Files
 		$dir = self::get($parent);
 
 		if (!$dir) {
-			throw new UserException('Ce répertoire n\'existe pas.');
+			return [];
 		}
 
 		if ($dir->type != File::TYPE_DIRECTORY) {
