@@ -677,7 +677,6 @@ class Transaction extends Entity
 			}
 
 			$line = [
-				'id_analytical' => $source['id_analytical'] ?? null,
 				'reference' => $source['payment_reference'] ?? null,
 			];
 
@@ -693,6 +692,10 @@ class Transaction extends Entity
 					'account' => $source[$accounts[1]->direction] ?? null,
 				],
 			];
+
+			if ($this->type != self::TYPE_TRANSFER) {
+				$source['lines'][0]['id_analytical'] = $source['id_analytical'] ?? null;
+			}
 
 			unset($line, $accounts, $account, $source['simple']);
 		}
@@ -811,13 +814,15 @@ class Transaction extends Entity
 		}
 
 		$line = [
-			'id_analytical' => $source['id_analytical'] ?? null,
 			'reference' => $source['payment_reference'] ?? null,
 		];
 
 		$source['lines'] = [
 			// First line is third-party account
-			$line + compact('id_account') + [$d1 => $source['amount']],
+			$line + compact('id_account') + [
+				$d1 => $source['amount'],
+				'id_analytical' => $source['id_analytical'] ?? null,
+			],
 			// Second line is payment account
 			$line + ['account_selector' => $source['account'], $d2 => $source['amount']],
 		];
