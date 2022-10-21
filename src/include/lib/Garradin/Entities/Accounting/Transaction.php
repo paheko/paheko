@@ -1026,7 +1026,7 @@ class Transaction extends Entity
 					],
 				],
 				'label' => self::TYPES_NAMES[self::TYPE_CREDIT],
-				'help' => 'Quand un membre ou un fournisseur doit de l\'argent à l\'association',
+				'help' => 'Quand un membre ou un client doit de l\'argent à l\'association',
 			],
 			self::TYPE_ADVANCED => [
 				'accounts' => [],
