@@ -75,11 +75,7 @@ class Files
 
 		$dir = self::get($parent);
 
-		if (!$dir) {
-			return [];
-		}
-
-		if ($dir->type != File::TYPE_DIRECTORY) {
+		if ($dir && $dir->type != File::TYPE_DIRECTORY) {
 			throw new UserException('Ce chemin n\'est pas un répertoire');
 		}
 
