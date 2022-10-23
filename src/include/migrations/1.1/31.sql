@@ -32,10 +32,5 @@ UPDATE acc_accounts SET position = 5
 	AND position NOT IN (0, 5)
 	AND code LIKE '87_%';
 
--- Force types
-UPDATE acc_accounts SET position = 4 WHERE type = 5 AND position != 4;
-UPDATE acc_accounts SET position = 5 WHERE type = 6 AND position != 5;
-UPDATE acc_accounts SET position = 3 WHERE type IN (1, 2, 3, 4) AND position != 3;
-
 -- Force analytical to be hidden
 UPDATE acc_accounts SET position = 0 WHERE type = 7 AND position != 0;
