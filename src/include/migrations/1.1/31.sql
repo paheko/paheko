@@ -32,9 +32,6 @@ UPDATE acc_accounts SET position = 5
 	AND position NOT IN (0, 5)
 	AND code LIKE '87_%';
 
--- Force analytical to be hidden
-UPDATE acc_accounts SET position = 0 WHERE type = 7 AND position != 0;
-
 -- Remove type from accounts that are outside their class
 UPDATE acc_accounts SET type = 0 WHERE type = 1 AND code NOT LIKE '51%';
 UPDATE acc_accounts SET type = 0 WHERE type = 2 AND code NOT LIKE '53%';
