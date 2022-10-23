@@ -9,10 +9,11 @@
 <form method="post" action="{$self_url}" data-focus="1">
 	<fieldset>
 		<legend>Créer un nouveau compte</legend>
-		<dl><label for="f_type">Type de compte</label></dl>
+		<dl>
 		{foreach from=$types_create item="t" key="v"}
 			{input type="radio-btn" name="type" value=$v label=$t.label help=$t.help}
 		{/foreach}
+		</dl>
 	</fieldset>
 	<p class="submit">
 		<input type="hidden" name="id" value="{$chart.id}" />
