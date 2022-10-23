@@ -190,14 +190,85 @@ class Account extends Entity
 		$where .= $this->exists() ? sprintf(' AND id != %d', $this->id()) : '';
 
 		if ($db->test(self::TABLE, $where, $this->code, $this->id_chart)) {
-			throw new ValidationException(sprintf('Le code "%s" est déjà utilisé par un autre compte.', $this->code));
+			throw new ValidationException(sprintf('Le numéro "%s" est déjà utilisé par un autre compte.', $this->code));
 		}
 
 		$this->assert(array_key_exists($this->type, self::TYPES_NAMES), 'Type invalide: ' . $this->type);
 		$this->assert(array_key_exists($this->position, self::POSITIONS_NAMES), 'Position invalide');
 		$this->assert($this->user === 0 || $this->user === 1);
 
+		$this->checkLocalRules();
+
 		parent::selfCheck();
+	}
+
+	public function checkLocalRules(): void
+	{
+		static $charts_countries = null;
+
+		if (null === $charts_countries) {
+			$charts_countries = DB::getInstance()->getAssoc('SELECT id, country FROM acc_charts;');
+		}
+
+		if ('FR' != ($charts_countries[$this->id_chart] ?? null)) {
+			return;
+		}
+
+		$classe = substr($this->code, 0, 1);
+		$sous_classe = substr($this->code, 0, 2);
+
+		if ($this->type == self::TYPE_BANK) {
+			$this->assert($sous_classe == '51', 'Le numéro d\'un compte de banque doit commencer par 51');
+			$this->assert($this->position == self::ASSET_OR_LIABILITY, 'Un compte de banque doit être en position "actif ou passif"');
+		}
+		elseif ($this->type == self::TYPE_CASH) {
+			$this->assert($sous_classe == '53', 'Le numéro d\'un compte de caisse doit commencer par 53');
+			$this->assert($this->position == self::ASSET_OR_LIABILITY, 'Un compte de caisse doit être en position "actif ou passif"');
+		}
+		elseif ($this->type == self::TYPE_OUTSTANDING) {
+			$this->assert(substr($this->code, 0, 3) == '511', 'Le numéro d\'un compte d\'attente doit commencer par 511');
+			$this->assert($this->position == self::ASSET_OR_LIABILITY, 'Un compte d\'attente doit être en position "actif ou passif"');
+		}
+		elseif ($this->type == self::TYPE_ANALYTICAL) {
+			$this->assert($classe == '9', 'Le numéro d\'un compte analytique doit commencer par 9');
+		}
+		elseif ($this->type == self::TYPE_THIRD_PARTY) {
+			$this->assert($classe == '4', 'Le numéro d\'un compte de tiers doit commencer par 4');
+		}
+		elseif ($this->type == self::TYPE_EXPENSE) {
+			$this->assert($classe == '6', 'Le numéro d\'un compte de dépense doit commencer par 6');
+		}
+		elseif ($this->type == self::TYPE_REVENUE) {
+			$this->assert($classe == '7', 'Le numéro d\'un compte de recettes doit commencer par 7');
+		}
+		elseif ($this->type == self::TYPE_VOLUNTEERING) {
+			$this->assert($sous_classe == '86' || $sous_classe == '87', 'Le numéro d\'un compte de bénévolat doit commencer par 86 ou 87');
+		}
+
+		if ($classe == 4) {
+			$this->assert($this->position <= self::ASSET_OR_LIABILITY, 'Un compte de tiers doit être en position "actif ou passif"');
+		}
+		elseif ($this->position == self::EXPENSE && $sous_classe != 86) {
+			$this->assert($classe == 6, 'Le numéro d\'un compte de charge doit commencer par 6.');
+		}
+		elseif ($this->position == self::REVENUE && $sous_classe != 87) {
+			$this->assert($classe == 7, 'Le numéro d\'un compte de produit doit commencer par 7.');
+		}
+		elseif ($classe == 6) {
+			$this->assert($this->position == self::EXPENSE || $this->position == self::NONE, 'Un compte de dépense doit être en position "charge"');
+		}
+		elseif ($classe == 7) {
+			$this->assert($this->position == self::REVENUE || $this->position == self::NONE, 'Un compte de recettes doit être en position "produit"');
+		}
+		elseif ($classe == 9) {
+			$this->assert($this->position == self::NONE, 'Un compte analytique ne peut figurer au bilan ou au compte de résultat');
+		}
+		elseif ($sous_classe == '86' && strlen($this->code) >= 3) {
+			$this->assert($this->position == self::EXPENSE, 'Un compte de bénévolat en 86 doit être en position "charge"');
+		}
+		else if ($sous_classe == '87' && strlen($this->code) >= 3) {
+			$this->assert($this->position == self::REVENUE, 'Un compte de bénévolat en 87 doit être en position "produit"');
+		}
 	}
 
 	public function listJournal(int $year_id, bool $simple = false, ?DateTimeInterface $start = null, ?DateTimeInterface $end = null)

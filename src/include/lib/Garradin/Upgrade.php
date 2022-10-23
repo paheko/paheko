@@ -468,6 +468,10 @@ class Upgrade
 				require ROOT . '/include/migrations/1.1/30.php';
 			}
 
+			if (version_compare($v, '1.1.31', '<')) {
+				$db->import(ROOT . '/include/migrations/1.1/31.sql');
+			}
+
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();
 
@@ -499,9 +503,15 @@ class Upgrade
 				$db->rollback();
 			}
 
-			$s = new Sauvegarde;
-			$s->restoreFromLocal($backup_name);
-			$s->remove($backup_name);
+			try {
+				$s = new Sauvegarde;
+				$s->restoreFromLocal($backup_name);
+				$s->remove($backup_name);
+			}
+			catch (\Exception $e2) {
+				throw $e;
+			}
+
 			Static_Cache::remove('upgrade');
 			throw $e;
 		}

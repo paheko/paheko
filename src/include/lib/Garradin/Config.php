@@ -47,6 +47,12 @@ class Config extends Entity
 	protected $champ_identifiant;
 	protected $champ_identite;
 
+	/**
+	 * This setting means that when creating a new transaction, if analytical_set_all
+	 * is TRUE then all lines will be affected
+	 */
+	protected $analytical_set_all;
+
 	protected $last_chart_change;
 	protected $last_version_check;
 
@@ -76,6 +82,8 @@ class Config extends Entity
 
 		'champ_identifiant'     => 'string',
 		'champ_identite'        => 'string',
+
+		'analytical_set_all'    => '?bool',
 
 		'last_chart_change'     => '?int',
 		'last_version_check'    => '?string',

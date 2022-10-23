@@ -668,6 +668,7 @@ class Transaction extends Entity
 
 			$accounts = $this->getTypesDetails($source)[$this->type]->accounts;
 
+			// either supply debit/credit keys or simple accounts
 			if (!isset($source['debit'], $source['credit'])) {
 				foreach ($accounts as $account) {
 					if (empty($account->selector_value)) {
@@ -693,8 +694,12 @@ class Transaction extends Entity
 				],
 			];
 
-			if ($this->type != self::TYPE_TRANSFER) {
+			if ($this->type != self::TYPE_TRANSFER || Config::getInstance()->analytical_set_all) {
 				$source['lines'][0]['id_analytical'] = $source['id_analytical'] ?? null;
+			}
+
+			if (Config::getInstance()->analytical_set_all) {
+				$source['lines'][1]['id_analytical'] = $source['lines'][0]['id_analytical'];
 			}
 
 			unset($line, $accounts, $account, $source['simple']);
@@ -725,7 +730,7 @@ class Transaction extends Entity
 					$line['id_account'] = $db->firstColumn('SELECT id FROM acc_accounts WHERE code = ? AND id_chart = ?;', $line['account'], $id_chart);
 
 					if (empty($line['id_account'])) {
-						throw new ValidationException('Le compte choisi n\'existe pas.');
+						throw new ValidationException(sprintf('Le compte avec le code "%s" sur la ligne %d n\'existe pas.', $line['account'], $i+1));
 					}
 				}
 
@@ -819,13 +824,16 @@ class Transaction extends Entity
 
 		$source['lines'] = [
 			// First line is third-party account
-			$line + compact('id_account') + [
-				$d1 => $source['amount'],
-				'id_analytical' => $source['id_analytical'] ?? null,
-			],
+			$line + compact('id_account') + [$d1 => $source['amount']],
 			// Second line is payment account
 			$line + ['account_selector' => $source['account'], $d2 => $source['amount']],
 		];
+
+		$source['lines'][0]['id_analytical'] = $source['id_analytical'] ?? null;
+
+		if (Config::getInstance()->analytical_set_all) {
+			$source['lines'][1]['id_analytical'] = $source['lines'][0]['id_analytical'];
+		}
 
 		$this->importFromNewForm($source);
 	}
