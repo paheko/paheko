@@ -184,6 +184,7 @@ class Install
 		$config->set('monnaie', '€');
 		$config->set('pays', 'FR');
 		$config->set('site_disabled', true);
+		$config->set('analytical_set_all', true);
 
 		$champs = Membres\Champs::importInstall();
 		$champs->create(); // Pas de copie car pas de table membres existante

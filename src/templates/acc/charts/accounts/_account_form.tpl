@@ -14,7 +14,6 @@
 	{if !$account.type || $account.type == $account::TYPE_VOLUNTEERING}
 		<dt><label for="f_position_0">Position au bilan ou résultat</label>{if !$edit_disabled} <b>(obligatoire)</b>{/if}</dt>
 		<dd class="help">La position permet d'indiquer dans quelle partie du bilan ou du résultat doit figurer le compte.</dd>
-		<dd class="help">Les comptes inscrits en actif ou passif figureront dans le bilan, alors que ceux inscrits en produit ou charge figureront au compte de résultat.</dd>
 		{input type="radio" label="Ne pas utiliser ce compte au bilan ni au résultat" name="position" value=0 source=$account disabled=$edit_disabled}
 		{if $account.type != $account::TYPE_VOLUNTEERING}
 		{input type="radio" label="Bilan : actif" name="position" value=Entities\Accounting\Account::ASSET source=$account help="ce que possède l'association : stocks, locaux, soldes bancaires, etc." disabled=$edit_disabled}

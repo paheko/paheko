@@ -224,7 +224,7 @@
 508,"Autres valeurs mobilières de placement et autres créances assimilées",,"Actif",
 509,"Versements restant à effectuer sur valeurs mobilières de placement non libérées",,"Actif",
 51,"BANQUES, ÉTABLISSEMENTS FINANCIERS ET ASSIMILÉS",,"Actif",
-511,"Valeurs à l’encaissement",,"Actif","Attente d'encaissement"
+511,"Valeurs à l’encaissement",,"Actif ou passif","Attente d'encaissement"
 512,"Banques",,"Actif ou passif",
 "512A","Compte courant",,"Actif ou passif","Banque"
 514,"Chèques postaux",,"Actif ou passif","Banque"
