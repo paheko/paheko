@@ -25,7 +25,8 @@
 			{$current_service->long_label()}
 		</li>
 		<li{if $service_page == 'index'} class="current"{/if}><a href="{$admin_url}services/fees/?id={$current_service.id}"><strong>Tarifs</strong></a></li>
-		<li{if $service_page == 'active'} class="current"{/if}><a href="{$admin_url}services/details.php?id={$current_service.id}">À jour</a></li>
+		<li{if $service_page == 'all'} class="current"{/if}><a href="{$admin_url}services/details.php?id={$current_service.id}">Tous les inscrits</a></li>
+		<li{if $service_page == 'active'} class="current"{/if}><a href="{$admin_url}services/details.php?id={$current_service.id}&amp;type=active">À jour</a></li>
 		<li{if $service_page == 'expired'} class="current"{/if}><a href="{$admin_url}services/details.php?id={$current_service.id}&amp;type=expired">Inscription expirée</a></li>
 		<li{if $service_page == 'unpaid'} class="current"{/if}><a href="{$admin_url}services/details.php?id={$current_service.id}&amp;type=unpaid">En attente de règlement</a></li>
 	</ul>
@@ -37,7 +38,8 @@
 			{$current_fee.label}
 			{if $current_fee.amount} — {$current_fee.amount|money_currency|raw}{/if}
 		</li>
-		<li{if $fee_page == 'active'} class="current"{/if}><a href="{$admin_url}services/fees/details.php?id={$current_fee.id}">À jour</a></li>
+		<li{if $fee_page == 'all'} class="current"{/if}><a href="{$admin_url}services/fees/details.php?id={$current_fee.id}">Tous les inscrits</a></li>
+		<li{if $fee_page == 'active'} class="current"{/if}><a href="{$admin_url}services/fees/details.php?id={$current_fee.id}&amp;type=active">À jour</a></li>
 		<li{if $fee_page == 'expired'} class="current"{/if}><a href="{$admin_url}services/fees/details.php?id={$current_fee.id}&amp;type=expired">Inscription expirée</a></li>
 		<li{if $fee_page == 'unpaid'} class="current"{/if}><a href="{$admin_url}services/fees/details.php?id={$current_fee.id}&amp;type=unpaid">En attente de règlement</a></li>
 	</ul>

@@ -68,7 +68,7 @@ class Transactions
 				$line = new Line;
 				$line->importForm([
 					'reference'  => $row->line_reference,
-					'label'      => $row->line_label,
+					'label'      => $row->line_label ?? $row->label,
 					'id_account' => $row->id_account,
 				]);
 

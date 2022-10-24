@@ -32,11 +32,24 @@ class Install
 			return;
 		}
 
+		$options = '';
+		$db = new \SQLite3(':memory:');
+		$res = $db->query('PRAGMA compile_options;');
+
+		while ($row = $res->fetchArray(\SQLITE3_NUM)) {
+			if (0 !== strpos($row[0], 'ENABLE_')) {
+				continue;
+			}
+
+			$options .= substr($row[0], strlen('ENABLE_')) . ',';
+		}
+
 		(new HTTP)->POST(PING_URL, [
 			'id'      => sha1(WWW_URL . SECRET_KEY . ROOT),
 			'version' => garradin_version(),
 			'sqlite'  => \SQLite3::version()['versionString'],
 			'php'     => PHP_VERSION,
+			'sqlite_options' => trim($options, ', '),
 		]);
 	}
 
@@ -178,6 +191,7 @@ class Install
 			'country'       => 'FR',
 			'site_disabled' => true,
 			'log_retention' => 365,
+			'analytical_set_all' => true,
 		]);
 
 		$fields = DynamicFields::getInstance();

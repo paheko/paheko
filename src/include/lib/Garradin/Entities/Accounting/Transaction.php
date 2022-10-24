@@ -120,17 +120,24 @@ class Transaction extends Entity
 			return self::TYPE_ADVANCED;
 		}
 
+		$types = [];
+
 		foreach ($this->getLinesWithAccounts() as $line) {
 			if ($line->account_position == Account::REVENUE && $line->credit) {
-				return self::TYPE_REVENUE;
+				$types[] = self::TYPE_REVENUE;
 			}
 			elseif ($line->account_position == Account::EXPENSE && $line->debit) {
-				return self::TYPE_EXPENSE;
+				$types[] = self::TYPE_EXPENSE;
 			}
 		}
 
 		// Did not find a expense/revenue account: fall back to advanced
-		return self::TYPE_ADVANCED;
+		// (or if one line is expense and the other is revenue)
+		if (count($types) != 1) {
+			return self::TYPE_ADVANCED;
+		}
+
+		return current($types);
 	}
 
 	public function getLinesWithAccounts(): array
@@ -463,11 +470,11 @@ class Transaction extends Entity
 			}
 
 			if ($this->type == self::TYPE_EXPENSE && $l->account_position == Account::REVENUE) {
-				throw new ValidationException('Il n\'est pas possible d\'attribuer un compte de produit à une dépense');
+				throw new ValidationException(sprintf('Line %d : il n\'est pas possible d\'attribuer un compte de produit (%s) à une dépense', $i+1, $l->account_code));
 			}
 
 			if ($this->type == self::TYPE_REVENUE && $l->account_position == Account::EXPENSE) {
-				throw new ValidationException('Il n\'est pas possible d\'attribuer un compte de dépense à une recette');
+				throw new ValidationException(sprintf('Line %d : il n\'est pas possible d\'attribuer un compte de charge (%s) à une recette', $i+1, $l->account_code));
 			}
 
 			try {
@@ -660,6 +667,7 @@ class Transaction extends Entity
 
 			$accounts = $this->getTypesDetails($source)[$this->type]->accounts;
 
+			// either supply debit/credit keys or simple accounts
 			if (!isset($source['debit'], $source['credit'])) {
 				foreach ($accounts as $account) {
 					if (empty($account->selector_value)) {
@@ -669,7 +677,6 @@ class Transaction extends Entity
 			}
 
 			$line = [
-				'id_analytical' => $source['id_analytical'] ?? null,
 				'reference' => $source['payment_reference'] ?? null,
 			];
 
@@ -685,6 +692,14 @@ class Transaction extends Entity
 					'account' => $source[$accounts[1]->direction] ?? null,
 				],
 			];
+
+			if ($this->type != self::TYPE_TRANSFER || Config::getInstance()->analytical_set_all) {
+				$source['lines'][0]['id_analytical'] = $source['id_analytical'] ?? null;
+			}
+
+			if (Config::getInstance()->analytical_set_all) {
+				$source['lines'][1]['id_analytical'] = $source['lines'][0]['id_analytical'];
+			}
 
 			unset($line, $accounts, $account, $source['simple']);
 		}
@@ -707,7 +722,7 @@ class Transaction extends Entity
 					$line['id_account'] = $db->firstColumn('SELECT id FROM acc_accounts WHERE code = ? AND id_chart = ?;', $line['account'], $id_chart);
 
 					if (empty($line['id_account'])) {
-						throw new ValidationException('Le compte choisi n\'existe pas.');
+						throw new ValidationException(sprintf('Le compte avec le code "%s" sur la ligne %d n\'existe pas.', $line['account'], $i+1));
 					}
 				}
 
@@ -731,7 +746,7 @@ class Transaction extends Entity
 			$source = $_POST;
 		}
 
-		if (empty($source['id_related'])) {
+		if (!isset($source['id_related'])) {
 			unset($source['id_related']);
 		}
 
@@ -801,7 +816,6 @@ class Transaction extends Entity
 		}
 
 		$line = [
-			'id_analytical' => $source['id_analytical'] ?? null,
 			'reference' => $source['payment_reference'] ?? null,
 		];
 
@@ -811,6 +825,12 @@ class Transaction extends Entity
 			// Second line is payment account
 			$line + ['account_selector' => $source['account'], $d2 => $source['amount']],
 		];
+
+		$source['lines'][0]['id_analytical'] = $source['id_analytical'] ?? null;
+
+		if (Config::getInstance()->analytical_set_all) {
+			$source['lines'][1]['id_analytical'] = $source['lines'][0]['id_analytical'];
+		}
 
 		$this->importFromNewForm($source);
 	}
@@ -1011,7 +1031,7 @@ class Transaction extends Entity
 					],
 				],
 				'label' => self::TYPES_NAMES[self::TYPE_CREDIT],
-				'help' => 'Quand un membre ou un fournisseur doit de l\'argent à l\'association',
+				'help' => 'Quand un membre ou un client doit de l\'argent à l\'association',
 			],
 			self::TYPE_ADVANCED => [
 				'accounts' => [],

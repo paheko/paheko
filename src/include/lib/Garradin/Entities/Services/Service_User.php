@@ -170,22 +170,14 @@ class Service_User extends Entity
 		$label .= sprintf(' (%s)', Users::getName($this->id_user));
 
 		$transaction = Transactions::create(array_merge($source, [
+			'type' => Transaction::TYPE_REVENUE,
 			'label' => $label,
-			'lines' => [
-				[
-					'id_account'    => $this->fee()->id_account,
-					'credit'        => $source['amount'],
-					'id_analytical' => $this->fee()->id_analytical,
-					'reference'     => $source['payment_reference'] ?? null,
-				],
-				[
-					'id_account'    => $account,
-					'debit'         => $source['amount'],
-					'id_analytical' => $this->fee()->id_analytical,
-					'reference'     => $source['payment_reference'] ?? null,
-
-				],
-			],
+			'id_analytical' => $source['id_analytical'] ?? $this->fee()->id_analytical,
+			'simple' => [Transaction::TYPE_REVENUE => [
+				[$this->fee()->id_account => null],
+				$source['account_selector'],
+			]],
+			'id_year' => $this->fee()->id_year,
 		]));
 
 		$transaction->id_creator = $user_id;

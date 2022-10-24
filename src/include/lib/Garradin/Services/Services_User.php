@@ -33,7 +33,7 @@ class Services_User
 			GROUP BY su.id_service ORDER BY expiry_date DESC;', $user_id);
 	}
 
-	static public function perUserList(int $user_id, ?int $only_id = null): DynamicList
+	static public function perUserList(int $user_id, ?int $only_id = null, ?\DateTime $after = null): DynamicList
 	{
 		$columns = [
 			'id' => [
@@ -49,6 +49,10 @@ class Services_User
 				'select' => 's.label',
 				'label' => 'Activité',
 			],
+			'fee' => [
+				'label' => 'Tarif',
+				'select' => 'sf.label',
+			],
 			'date' => [
 				'label' => 'Date d\'inscription',
 				'select' => 'su.date',
@@ -56,10 +60,6 @@ class Services_User
 			'expiry' => [
 				'label' => 'Date d\'expiration',
 				'select' => 'MAX(su.expiry_date)',
-			],
-			'fee' => [
-				'label' => 'Tarif',
-				'select' => 'sf.label',
 			],
 			'paid' => [
 				'label' => 'Payé',
@@ -82,6 +82,10 @@ class Services_User
 
 		if ($only_id) {
 			$conditions .= sprintf(' AND su.id = %d', $only_id);
+		}
+
+		if ($after) {
+			$conditions .= sprintf(' AND su.date >= %s', DB::getInstance()->quote($after->format('Y-m-d')));
 		}
 
 		$list = new DynamicList($columns, $tables, $conditions);

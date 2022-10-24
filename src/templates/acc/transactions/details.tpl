@@ -15,6 +15,9 @@
 {if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
 	{linkbutton href="new.php?copy=%d"|args:$transaction.id shape="plus" label="Dupliquer cette écriture"}
 {/if}
+	<aside>
+		{linkbutton href="?id=%d&_pdf"|args:$transaction.id shape="download" label="Télécharger en PDF"}
+	</aside>
 </nav>
 
 {if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE) && $transaction.status & $transaction::STATUS_WAITING}

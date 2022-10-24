@@ -31,9 +31,11 @@ $account->position = Account::ASSET_OR_LIABILITY;
 $types = $account::TYPES_NAMES;
 $types[0] = '-- Pas un compte usuel';
 
+$type = f('type') ?? qg('type');
+
 // Simple creation with pre-determined account type
-if (f('type') !== null) {
-	$account->type = (int)f('type');
+if ($type !== null) {
+	$account->type = (int)$type;
 	$account->position = Accounts::getPositionFromType($account->type);
 	$account->code = $accounts->getNextCodeForType($account->type);
 }
@@ -108,7 +110,7 @@ $types_create = [
 		'help' => 'Permet de suivre un budget spécifique, un projet, par exemple : bourse aux vélos, séjour au ski, etc.',
 	],
 	Account::TYPE_VOLUNTEERING => [
-		'label' => Account::TYPES_NAMES[Account::TYPE_VOLUNTEERING],
+		'label' => 'Projet analytique',
 		'help' => 'Pour valoriser le temps de bénévolat, les dons en nature, etc.',
 	],
 	Account::TYPE_NONE => [

@@ -89,3 +89,42 @@ main nav.menu:hover span, main nav.menu:active span {
 main nav.menu button {
     text-align: left;
 }
+
+nav.home ul {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+}
+
+nav.home ul li {
+    display: block;
+    width: 15em;
+    margin: .5em;
+}
+
+nav.home ul li a, nav.home ul li button {
+    display: block;
+    width: calc(100% - 1em);
+    height: calc(100% - 1em);
+    white-space: normal;
+    margin: 0;
+    padding: .5em;
+    text-align: center;
+    position: relative;
+}
+
+nav.home ul li a::before, nav.home ul li button::before {
+    position: absolute;
+    z-index: -1;
+    opacity: .5;
+    margin: auto;
+}
+
+a[data-custom-icon]::before {
+    content: "";
+    display: inline-block;
+    width: 2em;
+    height: 2em;
+    background: var(--custom-icon) no-repeat center center;
+    background-size: contain;
+}

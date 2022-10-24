@@ -60,6 +60,7 @@ class Config extends Entity
 	protected bool $site_disabled;
 
 	protected int $log_retention;
+	protected bool $analytical_set_all;
 
 	static protected $_instance = null;
 

@@ -25,7 +25,7 @@
 							-
 						{/if}
 					</td>
-					<td class="num"><a href="details.php?id={$row.id}">{$row.nb_users_ok}</a></td>
+					<td class="num"><a href="details.php?id={$row.id}&amp;type=active">{$row.nb_users_ok}</a></td>
 					<td class="num"><a href="details.php?id={$row.id}&amp;type=expired">{$row.nb_users_expired}</a></td>
 					<td class="num"><a href="details.php?id={$row.id}&amp;type=unpaid">{$row.nb_users_unpaid}</td>
 					<td class="actions">

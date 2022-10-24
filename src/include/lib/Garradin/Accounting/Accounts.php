@@ -33,7 +33,16 @@ class Accounts
 		return EntityManager::findOneById(Account::class, $id);
 	}
 
-	static public function getSelectorLabel(int $id)
+	static public function getSelector(?int $id): ?array
+	{
+		if (!$id) {
+			return null;
+		}
+
+		return [$id => self::getCodeAndLabel($id)];
+	}
+
+	static public function getCodeAndLabel(int $id): string
 	{
 		return EntityManager::getInstance(Account::class)->col('SELECT code || \' — \' || label FROM @TABLE WHERE id = ?;', $id);
 	}

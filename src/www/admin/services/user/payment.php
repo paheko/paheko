@@ -2,6 +2,8 @@
 namespace Garradin;
 
 use Garradin\Services\Services_User;
+use Garradin\Accounting\Accounts;
+use Garradin\Accounting\Years;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
 
@@ -13,6 +15,12 @@ $su = Services_User::get((int)qg('id'));
 
 if (!$su) {
 	throw new UserException("Cette inscription n'existe pas");
+}
+
+$fee = $su->fee();
+
+if (!$fee->id_year) {
+	throw new UserException('Cette inscription n\'est pas liée à un tarif relié à la comptabilité, il n\'est pas possible de saisir un règlement.');
 }
 
 $user_name = (new Membres)->getNom($su->id_user);
@@ -34,6 +42,13 @@ $types_details = $t->getTypesDetails();
 
 $account_targets = $types_details[Transaction::TYPE_REVENUE]->accounts[1]->targets_string;
 
-$tpl->assign(compact('csrf_key', 'account_targets', 'user_name', 'su'));
+$year = Years::get($fee->id_year);
+$chart = $year->chart();
+$accounts = $chart->accounts();
+
+// FIXME: improve when analytical is refactored
+$tpl->assign('analytical_accounts', ['' => '-- Aucun'] + $accounts->listAnalytical());
+
+$tpl->assign(compact('csrf_key', 'account_targets', 'user_name', 'su', 'fee'));
 
 $tpl->display('services/user/payment.tpl');

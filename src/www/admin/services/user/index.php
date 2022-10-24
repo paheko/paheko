@@ -29,13 +29,18 @@ $form->runIf($session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE
 }, null, ADMIN_URL . 'services/user/?id=' . $user_id);
 
 $only = (int)qg('only') ?: null;
+
+if ($after = qg('after')) {
+	$after = \DateTime::createFromFormat('!Y-m-d', $after) ?: null;
+}
+
 $only_service = !$only ? null : Services::get($only);
 
-$list = Services_User::perUserList($user_id, $only);
+$list = Services_User::perUserList($user_id, $only, $after);
 $list->setTitle(sprintf('Inscriptions — %s', $user_name));
 $list->loadFromQueryString();
 
 $tpl->assign('services', Services_User::listDistinctForUser($user_id));
-$tpl->assign(compact('list', 'user_id', 'user_name', 'only', 'only_service'));
+$tpl->assign(compact('list', 'user_id', 'user_name', 'only', 'only_service', 'after'));
 
 $tpl->display('services/user/index.tpl');

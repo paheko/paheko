@@ -24,3 +24,10 @@ ErrorDocument 404 /_route.php
 <IfModule mod_deflate.c>
 	FileETag None
 </IfModule>
+# Décommenter les lignes suivantes pour autoriser l'envoi de gros fichier
+# (documents et sauvegardes)
+#
+#<If "%{REQUEST_URI} =~ m!^/admin/(common/files|config/backup)/! && -n %{HTTP_COOKIE}">
+#	php_value post_max_size 256M
+#	php_value upload_max_filesize 256M
+#</If>

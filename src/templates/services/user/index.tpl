@@ -23,6 +23,7 @@
 		Ce membre n'est inscrit à aucune activité ou cotisation.
 	</dd>
 	{/foreach}
+	{if !$only && !$after}
 	<dt>Nombre d'inscriptions pour ce membre</dt>
 	<dd>
 		{$list->count()}
@@ -39,11 +40,14 @@
 		</nav>
 		{/if}
 	</dd>
+	{/if}
 </dl>
 {/if}
 
 {if $only}
-	<p class="alert block">Cette liste ne montre qu'une seule inscription, liée à l'activité <strong>{$only_service.label}</strong><br />{linkbutton shape="right" href="?id=%d"|args:$user_id label="Voir toutes les inscriptions"}</p>
+	<p class="alert block">Cette liste ne montre qu'une seule inscription, liée à l'activité <strong>{$only_service.label}</strong><br />
+		{linkbutton shape="right" href="?id=%d"|args:$user_id label="Voir toutes les inscriptions"}
+	</p>
 {/if}
 
 {include file="common/dynamic_list_head.tpl"}
@@ -51,13 +55,16 @@
 	{foreach from=$list->iterate() item="row"}
 		<tr>
 			<th>{$row.label}</th>
+			<td>{$row.fee}</td>
 			<td>{$row.date|date_short}</td>
 			<td>{$row.expiry|date_short}</td>
-			<td>{$row.fee}</td>
 			<td>{if $row.paid}<b class="confirm">Oui</b>{else}<b class="error">Non</b>{/if}</td>
-			<td>{if $row.expected_amount}{$row.amount|raw|money_currency:false}{/if}</td>
+			<td class="money">{if $row.expected_amount}{$row.amount|raw|money_currency:false}
+				{if $row.amount}<br /><small class="help">(sur {$row.expected_amount|raw|money_currency:false})</small>{/if}
+				{/if}
+			</td>
 			<td class="actions">
-				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE) && $row.id_account}
+				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE) && $row.id_account}
 					{linkbutton shape="plus" label="Nouveau règlement" href="payment.php?id=%d"|args:$row.id}
 				{/if}
 				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
@@ -73,10 +80,15 @@
 					{else}
 						{linkbutton shape="check" label="Marquer comme payé" href="?id=%d&su_id=%d&paid=1"|args:$user_id,$row.id}
 					{/if}
+					<br />
 					{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$row.id}
 					{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$row.id}
 				{/if}
 			</td>
+		</tr>
+	{foreachelse}
+		<tr>
+			<td colspan="7">Aucune inscription trouvée.</td>
 		</tr>
 	{/foreach}
 

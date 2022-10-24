@@ -59,6 +59,8 @@ class Files
 				$db->delete('files_search', 'path = ?', $row->path);
 				continue;
 			}
+
+			$out[] = $row;
 		}
 
 		$db->commit();
@@ -75,6 +77,12 @@ class Files
 	{
 		if ($parent !== '') {
 			File::validatePath($parent);
+		}
+
+		$dir = self::get($parent);
+
+		if ($dir && $dir->type != File::TYPE_DIRECTORY) {
+			throw new UserException('Ce chemin n\'est pas un répertoire');
 		}
 
 		// Update this path

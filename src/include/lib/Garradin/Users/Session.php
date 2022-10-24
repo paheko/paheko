@@ -362,10 +362,10 @@ class Session extends \KD2\UserSession
 
 	public function login($login, $password, $remember_me = false)
 	{
-		$ok = parent::login($login, $password, $remember_me);
+		$success = parent::login($login, $password, $remember_me);
 		$user_agent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 150) ?: null;
 
-		if (true === $ok) {
+		if (true === $success) {
 			Log::add(Log::LOGIN_SUCCESS, compact('user_agent'));
 
 			// Mettre à jour la date de connexion
@@ -378,32 +378,36 @@ class Session extends \KD2\UserSession
 			Log::add(Log::LOGIN_FAIL, compact('user_agent'));
 		}
 
+		Plugin::fireSignal('user.login', compact('login', 'password', 'remember_me', 'success'));
+
 		// Clean up logs
 		Log::clean();
 
-		return $ok;
+		return $success;
 	}
 
 	public function loginOTP(string $code): bool
 	{
 		$this->start();
-		$id = $_SESSION['userSessionRequireOTP']->user->id ?? null;
+		$user_id = $_SESSION['userSessionRequireOTP']->user->id ?? null;
 		$user_agent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 150) ?: null;
 		$details = compact('user_agent') + ['otp' => true];
 
-		$ok = parent::loginOTP($code);
+		$success = parent::loginOTP($code);
 
-		if ($ok) {
-			Log::add(Log::LOGIN_SUCCESS, $details);
+		if ($success) {
+			Log::add(Log::LOGIN_SUCCESS, $details, $user_id);
 
 			// Mettre à jour la date de connexion
-			$this->db->preparedQuery('UPDATE users SET date_login = datetime() WHERE id = ?;', [$this->getUser()->id]);
+			$this->db->preparedQuery('UPDATE users SET date_login = datetime() WHERE id = ?;', [$user_id]);
 		}
 		else {
-			Log::add(Log::LOGIN_FAIL, $details, $id);
+			Log::add(Log::LOGIN_FAIL, $details, $user_id);
 		}
 
-		return $ok;
+		Plugin::fireSignal('user.login.otp', compact('success', 'user_id'));
+
+		return $success;
 	}
 
 	public function recoverPasswordSend(string $id): void

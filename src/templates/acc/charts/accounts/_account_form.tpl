@@ -1,20 +1,19 @@
+{if $create}
+<input type="hidden" name="type" value="{$account.type}" />
+{/if}
+
 <dl>
-	{if !$account.type || !$create}
-		{input type="select" label="Type de compte usuel" name="type" source=$account required=true options=$types}
-		<dd class="help">Le statut de compte usuel est utilisé pour les écritures <em>«&nbsp;simplifiées&nbsp;»</em> (recettes, dépenses, dettes, créances, virements), pour la liste des comptes, et également pour proposer certaines fonctionnalités (rapprochement pour les comptes bancaires, règlement rapide de dette et créance, dépôt de chèques).</dd>
-		<dd class="help">Un compte qui n'a pas de type usuel ne pourra être utilisé que dans une saisie avancée, et ne sera visible que dans les rapports de l'exercice.</dd>
-	{else}
+
+	{if $account.type}
 	<dt>Type de compte</dt>
 	<dd>
 		<?php $t = $types[$account->type]; ?> {$t}
-		<input type="hidden" name="type" value="{$account.type}" />
 	</dd>
 	{/if}
 
 	{if !$account.type || $account.type == $account::TYPE_VOLUNTEERING}
 		<dt><label for="f_position_0">Position au bilan ou résultat</label>{if !$edit_disabled} <b>(obligatoire)</b>{/if}</dt>
 		<dd class="help">La position permet d'indiquer dans quelle partie du bilan ou du résultat doit figurer le compte.</dd>
-		<dd class="help">Les comptes inscrits en actif ou passif figureront dans le bilan, alors que ceux inscrits en produit ou charge figureront au compte de résultat.</dd>
 		{input type="radio" label="Ne pas utiliser ce compte au bilan ni au résultat" name="position" value=0 source=$account disabled=$edit_disabled}
 		{if $account.type != $account::TYPE_VOLUNTEERING}
 		{input type="radio" label="Bilan : actif" name="position" value=Entities\Accounting\Account::ASSET source=$account help="ce que possède l'association : stocks, locaux, soldes bancaires, etc." disabled=$edit_disabled}

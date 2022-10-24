@@ -112,7 +112,7 @@ sleep .5
 [ "$CMD" = "ui" ] && {
     URL="http://${ADDRESS}:${PORT}/admin/"
     [ "$DISPLAY" != "" ] && {
-        x-www-browser ${URL} &
+        sensible-browser ${URL} &
     } || {
         www-browser ${URL} &
     }

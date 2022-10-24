@@ -123,6 +123,10 @@ class Upgrade
 				require ROOT . '/include/migrations/1.1/30.php';
 			}
 
+			if (version_compare($v, '1.1.31', '<')) {
+				$db->import(ROOT . '/include/migrations/1.1/31.sql');
+			}
+
 			if (version_compare($v, '1.2.0', '<')) {
 				require ROOT . '/include/migrations/1.2/1.2.0.php';
 			}
