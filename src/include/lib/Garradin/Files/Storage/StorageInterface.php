@@ -34,6 +34,11 @@ interface StorageInterface
 	static public function getFullPath(File $file): ?string;
 
 	/**
+	 * Returns a read-only file pointer (resource) to the file contents
+	 */
+	static public function getReadOnlyPointer(File $file);
+
+	/**
 	 * Returns the binary of a content to php://output
 	 */
 	static public function display(File $file): void;

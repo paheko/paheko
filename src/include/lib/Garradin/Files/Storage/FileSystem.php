@@ -128,6 +128,11 @@ class FileSystem implements StorageInterface
 		return self::_getRealPath($file->path);
 	}
 
+	static public function getReadOnlyPointer(File $file)
+	{
+		return fopen(self::getFullPath($file), 'rb');
+	}
+
 	static public function display(File $file): void
 	{
 		readfile(self::getFullPath($file));

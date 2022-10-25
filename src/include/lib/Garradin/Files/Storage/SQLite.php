@@ -118,6 +118,11 @@ class SQLite implements StorageInterface
 		return Static_Cache::getPath($cache_id);
 	}
 
+	static public function getReadOnlyPointer(File $file)
+	{
+		return self::getPointer($file);
+	}
+
 	static public function display(File $file): void
 	{
 		$blob = self::getPointer($file);

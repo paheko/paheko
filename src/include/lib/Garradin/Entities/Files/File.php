@@ -1011,4 +1011,9 @@ class File extends Entity
 	{
 		Files::callStorage('touch', $this->path, $date);
 	}
+
+	public function getReadOnlyPointer()
+	{
+		return Files::callStorage('getReadOnlyPointer', $this);
+	}
 }
