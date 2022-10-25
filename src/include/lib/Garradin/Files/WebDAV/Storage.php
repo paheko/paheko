@@ -53,41 +53,6 @@ class Storage extends AbstractStorage
 	/**
 	 * @extends
 	 */
-	public function getLock(string $uri, ?string $token = null): ?string
-	{
-		// It is important to check also for a lock on parent directory as we support depth=1
-		$sql = 'SELECT scope FROM files_webdav_locks WHERE (uri = ? OR uri = ?)';
-		$params = [$uri, Utils::dirname($uri)];
-
-		if ($token) {
-			$sql .= ' AND token = ?';
-			$params[] = $token;
-		}
-
-		$sql .= ' LIMIT 1';
-
-		return DB::getInstance()->firstColumn($sql, ...$params);
-	}
-
-	/**
-	 * @extends
-	 */
-	public function lock(string $uri, string $token, string $scope): void
-	{
-		DB::getInstance()->preparedQuery('REPLACE INTO files_webdav_locks VALUES (?, ?, ?, datetime(\'now\', \'+5 minutes\'));', $uri, $token, $scope);
-	}
-
-	/**
-	 * @extends
-	 */
-	public function unlock(string $uri, string $token): void
-	{
-		DB::getInstance()->preparedQuery('DELETE FROM files_webdav_locks WHERE uri = ? AND token = ?;', $uri, $token);
-	}
-
-	/**
-	 * @extends
-	 */
 	public function list(string $uri, ?array $properties): iterable
 	{
 		if (!$uri) {
@@ -232,16 +197,7 @@ class Storage extends AbstractStorage
 				break;
 		}
 
-		if (in_array($name, NextCloud::NC_PROPERTIES) || in_array($name, WebDAV::BASIC_PROPERTIES) || in_array($name, WebDAV::EXTENDED_PROPERTIES)) {
-			return null;
-		}
-
-		return $this->getCustomProperty($uri, $name);
-	}
-
-	protected function getCustomProperty(string $uri, string $name)
-	{
-		return DB::getInstance()->first('SELECT * FROM files_webdav_properties WHERE uri = ? AND name = ?;', $uri, $name);
+		return null;
 	}
 
 	/**
@@ -280,6 +236,10 @@ class Storage extends AbstractStorage
 
 	public function put(string $uri, $pointer, ?string $hash, ?int $mtime): bool
 	{
+		if (!strpos($uri, '/')) {
+			throw new WebDAV_Exception('Impossible de créer un fichier ici', 403);
+		}
+
 		if (preg_match(self::PUT_IGNORE_PATTERN, basename($uri))) {
 			return false;
 		}
@@ -294,15 +254,15 @@ class Storage extends AbstractStorage
 		$session = Session::getInstance();
 
 		if ($new && !File::checkCreateAccess($uri, $session)) {
-			throw new WebDAV_Exception('Cannot create here', 403);
+			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de créer ce fichier', 403);
 		}
 		elseif (!$new && $target->checkWriteAccess($session)) {
-			throw new WebDAV_Exception('You cannot write to this file', 403);
+			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de modifier ce fichier', 403);
 		}
 
 		$h = $hash ? hash_init('md5') : null;
 
-		while (!feof($fp)) {
+		while (!feof($pointer)) {
 			if ($h) {
 				hash_update($h, fread($pointer, 8192));
 			}
@@ -348,22 +308,47 @@ class Storage extends AbstractStorage
 	 */
 	public function delete(string $uri): void
 	{
+		if (!strpos($uri, '/')) {
+			throw new WebDAV_Exception('Ce répertoire ne peut être supprimé', 403);
+		}
+
 		$target = Files::get($uri);
 
 		if (!$target) {
-			throw new WebDAV_Exception('Target does not exist', 404);
+			throw new WebDAV_Exception('This file does not exist', 404);
+		}
+
+		if (!$target->checkDeleteAccess(Session::getInstance())) {
+			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de supprimer ce fichier', 403);
 		}
 
 		$target->delete();
-		DB::getInstance()->preparedQuery('DELETE FROM files_webdav_properties WHERE uri = %d;', [$uri]);
 	}
 
 	protected function copymove(bool $move, string $uri, string $destination): bool
 	{
+		if (!strpos($uri, '/')) {
+			throw new WebDAV_Exception('Ce répertoire ne peut être modifié', 403);
+		}
+
 		$source = Files::get($uri);
 
 		if (!$source) {
 			throw new WebDAV_Exception('File not found', 404);
+		}
+
+		$session = Session::getInstance();
+
+		if (!$source->checkReadAccess($session)) {
+			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de lire ce fichier', 403);
+		}
+
+		if ($move && !$source->checkWriteAccess($session)) {
+			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de déplacer ce fichier', 403);
+		}
+
+		if (!Files::checkCreateAccess($destination, $session)) {
+			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de déplacer ce fichier à cet endroit', 403);
 		}
 
 		$parent = Files::get($source->parent);
@@ -387,18 +372,6 @@ class Storage extends AbstractStorage
 		$method = $move ? 'rename' : 'copy';
 
 		$source->$method($destination);
-
-		if ($move) {
-			$db = DB::getInstance();
-			$db->begin();
-			$db->preparedQuery('UPDATE files_webdav_properties SET uri = ? WHERE uri = ?;', $destination, $uri);
-			$db->preparedQuery('UPDATE files_webdav_properties SET uri = ? || SUBSTR(uri, ?) WHERE uri LIKE ? ESCAPE \\;',
-				$destination,
-				strlen($uri),
-				strtr($uri, ['%' => '\\%', '_' => '\\_']) . '/%'
-			);
-			$db->commit();
-		}
 
 		return $overwritten;
 	}
@@ -424,6 +397,14 @@ class Storage extends AbstractStorage
 	 */
 	public function mkcol(string $uri): void
 	{
+		if (!strpos($uri, '/')) {
+			throw new WebDAV_Exception('Impossible de créer un répertoire ici', 403);
+		}
+
+		if (!Files::checkCreateAccess($uri, Session::getInstance())) {
+			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de créer un répertoire ici', 403);
+		}
+
 		if (Files::exists($uri)) {
 			throw new WebDAV_Exception('There is already a file with that name', 405);
 		}
@@ -433,38 +414,6 @@ class Storage extends AbstractStorage
 		}
 
 		Files::mkdir($uri);
-	}
-
-	/**
-	 * @extends
-	 */
-	public function setProperties(string $uri, string $body): void
-	{
-		$properties = WebDAV::parsePropPatch($body);
-
-		if (!count($properties)) {
-			return;
-		}
-
-		$db = DB::getInstance();
-
-		$db->begin();
-
-		foreach ($properties as $name => $prop) {
-			if ($prop['action'] == 'set') {
-				$db->preparedQuery(
-					'REPLACE INTO files_webdav_properties (uri, name, attributes, xml) VALUES (?, ?, ?, ?);',
-					[$uri, $name, $prop['attributes'], $prop['content']]
-				);
-			}
-			else {
-				$db->preparedQuery('DELETE FROM files_webdav_properties WHERE uri = ? AND name = ?;', $uri, $name);
-			}
-		}
-
-		$db->commit();
-
-		return;
 	}
 
 	protected function createWopiToken(string $uri)

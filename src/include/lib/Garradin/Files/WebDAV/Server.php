@@ -74,8 +74,10 @@ class Server
 			return false;
 		}
 
-		if (!$session->login($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
-			return false;
+		if ($session->login($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
+			return true;
 		}
+
+		return false;
 	}
 }

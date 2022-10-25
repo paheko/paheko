@@ -88,7 +88,7 @@ class FileSystem implements StorageInterface
 		$fp = fopen($target, 'w');
 
 		while (!feof($pointer)) {
-			fwrite($fp, fread($pointer));
+			fwrite($fp, fread($pointer, 8192));
 		}
 
 		fclose($fp);
