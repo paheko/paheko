@@ -4,8 +4,7 @@ namespace Garradin\Web;
 
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
-use Garradin\Files\NextCloud_Compatibility;
-use Garradin\Files\WebDAV;
+use Garradin\Files\WebDAV\Server as WebDAV_Server;
 
 use Garradin\UserTemplate\UserForms;
 use Garradin\Web\Skeleton;
@@ -23,6 +22,14 @@ use const Garradin\{WWW_URI, ADMIN_URL, ROOT};
 
 class Router
 {
+	const DAV_ROUTES = [
+		'dav',
+		'wopi',
+		'remote.php',
+		'index.php',
+		'ocs',
+	];
+
 	static public function route(): void
 	{
 		$uri = !empty($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
@@ -68,8 +75,7 @@ class Router
 			UserForms::serve($uri);
 			return;
 		}
-		elseif ('dav' == $first) {
-			WebDAV::dispatchURI($uri);
+		elseif (in_array($first, self::DAV_ROUTES) && WebDAV_Server::route($uri)) {
 			return;
 		}
 		elseif (($file = Files::getFromURI($uri))
