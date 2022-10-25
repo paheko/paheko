@@ -219,7 +219,7 @@ static $default_config = [
 	'LOCAL_LOGIN'           => null,
 	'LEGAL_LINE'            => 'Hébergé par <strong>%1$s</strong>, %2$s',
 	'DISABLE_INSTALL_PING'  => false,
-	'DB_OPEN_SQL'           => null,
+	'WOPI_DISCOVERY_URL'    => null,
 ];
 
 foreach ($default_config as $const => $value)
