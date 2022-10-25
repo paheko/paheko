@@ -158,6 +158,11 @@ class File extends Entity
 		return $path;
 	}
 
+	public function etag(): string
+	{
+		return md5($this->path . $this->size . $this->modified->getTimestamp());
+	}
+
 	/**
 	 * Return TRUE if the file can be previewed natively in a browser
 	 * @return bool
@@ -609,7 +614,7 @@ class File extends Entity
 	protected function _serve(?string $path, ?string $content, bool $download = false): void
 	{
 		if ($this->isPublic()) {
-			Utils::HTTPCache(md5($this->path . $this->size . $this->modified->getTimestamp()), $this->modified->getTimestamp());
+			Utils::HTTPCache($this->etag(), $this->modified->getTimestamp());
 		}
 		else {
 			// Disable browser cache
@@ -1000,5 +1005,10 @@ class File extends Entity
 		$hash_check = $this->_createShareHash($expiry, $password);
 
 		return hash_equals($hash, $hash_check);
+	}
+
+	public function touch(?\DateTimeInterface $date = null)
+	{
+		Files::callStorage('touch', $this->path, $date);
 	}
 }

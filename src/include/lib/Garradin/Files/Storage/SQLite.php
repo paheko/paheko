@@ -221,9 +221,9 @@ class SQLite implements StorageInterface
 		return true;
 	}
 
-	static public function touch(string $path): bool
+	static public function touch(string $path, ?\DateTimeInterface $date = null): bool
 	{
-		return DB::getInstance()->preparedQuery('UPDATE files SET modified = ? WHERE path = ?;', new \DateTime, $path);
+		return DB::getInstance()->preparedQuery('UPDATE files SET modified = ? WHERE path = ?;', $date ?? new \DateTime, $path);
 	}
 
 	static public function mkdir(File $file): bool

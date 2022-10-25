@@ -103,9 +103,9 @@ class FileSystem implements StorageInterface
 		return Utils::safe_mkdir(self::getFullPath($file));
 	}
 
-	static public function touch(string $path): bool
+	static public function touch(string $path, ?\DateTimeInterface $date = null): bool
 	{
-		return touch(self::_getRealPath($path));
+		return touch(self::_getRealPath($path), $date ? $date->getTimestamp() : null);
 	}
 
 	static protected function _getRealPath(string $path): ?string
