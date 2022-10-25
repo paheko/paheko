@@ -19,11 +19,6 @@ use const Garradin\{FILE_STORAGE_BACKEND, FILE_STORAGE_QUOTA, FILE_STORAGE_CONFI
 
 class Files
 {
-	/**
-	 * To enable or disable quota check
-	 */
-	static protected $quota = true;
-
 	static public function search(string $search, string $path = null): array
 	{
 		if (strlen($search) > 100) {
@@ -360,25 +355,11 @@ class Files
 
 	static public function checkQuota(int $size = 0): void
 	{
-		if (!self::$quota) {
-			return;
-		}
-
 		$remaining = self::getRemainingQuota(true);
 
 		if (($remaining - (float) $size) < 0) {
 			throw new ValidationException('L\'espace disque est insuffisant pour réaliser cette opération');
 		}
-	}
-
-	static public function enableQuota(): void
-	{
-		self::$quota = true;
-	}
-
-	static public function disableQuota(): void
-	{
-		self::$quota = false;
 	}
 
 	static public function getVirtualTableName(): string
@@ -710,7 +691,7 @@ class Files
 			$access[] = File::CONTEXT_WEB;
 		}
 
-		return array_merge(array_flip($access), File::CONTEXTS_NAMES);
+		return array_intersect_key(File::CONTEXTS_NAMES, array_flip($access));
 	}
 
 }
