@@ -454,6 +454,15 @@ CREATE INDEX IF NOT EXISTS files_webdav_locks_uri ON files_webdav_locks (uri);
 
 CREATE UNIQUE INDEX IF NOT EXISTS files_webdav_locks_unique ON files_webdav_locks (uri, token);
 
+CREATE TABLE IF NOT EXISTS files_webdav_properties (
+    uri TEXT NOT NULL,
+    name TEXT NOT NULL,
+    attributes TEXT NULL,
+    xml TEXT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS properties_unique ON files_webdav_properties (uri, name);
+
 CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4
 -- Search inside files content
 (
