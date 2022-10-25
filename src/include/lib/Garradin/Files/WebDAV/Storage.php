@@ -347,7 +347,7 @@ class Storage extends AbstractStorage
 			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de déplacer ce fichier', 403);
 		}
 
-		if (!Files::checkCreateAccess($destination, $session)) {
+		if (!File::checkCreateAccess($destination, $session)) {
 			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de déplacer ce fichier à cet endroit', 403);
 		}
 
@@ -401,7 +401,7 @@ class Storage extends AbstractStorage
 			throw new WebDAV_Exception('Impossible de créer un répertoire ici', 403);
 		}
 
-		if (!Files::checkCreateAccess($uri, Session::getInstance())) {
+		if (!File::checkCreateAccess($uri, Session::getInstance())) {
 			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de créer un répertoire ici', 403);
 		}
 
