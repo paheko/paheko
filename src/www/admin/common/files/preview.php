@@ -12,7 +12,7 @@ if (!$file) {
 	throw new UserException('Ce fichier est introuvable.');
 }
 
-if (!$file->checkReadAccess($session)) {
+if (!$file->canRead()) {
 	throw new UserException('Vous n\'avez pas le droit de lire ce fichier.');
 }
 
@@ -22,5 +22,5 @@ try {
 	$tpl->display('common/files/_preview.tpl');
 }
 catch (\LogicException $e) {
-	$file->serve($session);
+	$file->serve();
 }

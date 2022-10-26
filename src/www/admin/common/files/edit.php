@@ -12,7 +12,7 @@ if (!$file) {
 	throw new UserException('Fichier inconnu');
 }
 
-if (!$file->checkWriteAccess($session)) {
+if (!$file->canWrite()) {
 	throw new UserException('Vous n\'avez pas le droit de modifier ce fichier.');
 }
 

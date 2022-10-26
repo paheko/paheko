@@ -24,7 +24,7 @@ $form->runIf('delete', function () use ($page, $session) {
 	$path = Utils::dirname($page->file_path) . '/' . f('delete');
 	$file = Files::get($path);
 
-	if (!$file || !$file->checkDeleteAccess($session)) {
+	if (!$file || !$file->canDelete()) {
 		throw new UserException('Vous ne pouvez pas supprimer ce fichier');
 	}
 

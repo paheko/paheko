@@ -27,80 +27,129 @@ class Files
 		$is_admin = $s->canAccess($s::SECTION_CONFIG, $s::ACCESS_ADMIN);
 		$is_web_admin = $is_admin || $s->canAccess($s::SECTION_WEB, $s::ACCESS_ADMIN);
 
+		$p = [];
+
 		if ($s->isLogged() && $id = $s::getUserId()) {
-			$user_permissions = [
-				// The user can always access his own profile files
-				File::CONTEXT_USER . '/' . $s::getUserId() => [
-					'mkdir' => false,
-					'write_root' => false,
-					'create' => false,
-					'read' => true,
-					'write' => false,
-					'delete' => false,
-				],
+			// The user can always access his own profile files
+			$p[File::CONTEXT_USER . '/' . $s::getUserId()] = [
+				'mkdir' => false,
+				'move' => false,
+				'create' => false,
+				'read' => true,
+				'write' => false,
+				'delete' => false,
+				'share' => false,
 			];
 		}
 
-		return $user_permissions + [
-			File::CONTEXT_USER => [
-				'mkdir' => false,
-				'write_root' => false,
-				// Only users able to manage users can see their profile files
-				'create' => $s->canAccess($s::SECTION_USERS, $s::ACCESS_WRITE),
-				'read' => $s->canAccess($s::SECTION_USERS, $s::ACCESS_READ),
-				'write' => $s->canAccess($s::SECTION_USERS, $s::ACCESS_WRITE),
-				'delete' => $s->canAccess($s::SECTION_USERS, $s::ACCESS_WRITE),
-			],
-			File::CONTEXT_CONFIG => [
-				'mkdir' => false,
-				'write_root' => false,
-				'create' => false,
-				'read' => $s->isLogged(), // All config files can be accessed by all logged-in users
-				'write' => $is_admin,
-				'delete' => $is_admin,
-			],
-			// Web skeletons
-			File::CONTEXT_SKELETON . '/web' => [
-				'mkdir' => $is_web_admin,
-				'write_root' => $is_web_admin,
-				'create' => $is_web_admin,
-				'read' => $s->isLogged(),
-				'write' => $is_web_admin,
-				'delete' => $is_web_admin,
-			],
-			File::CONTEXT_SKELETON => [
-				'mkdir' => $is_admin,
-				'write_root' => $is_admin,
-				'create' => $is_admin,
-				'read' => $s->isLogged(),
-				'write' => $is_admin,
-				'delete' => $is_admin,
-			],
-			File::CONTEXT_WEB => [
-				'mkdir' => false,
-				'write_root' => false,
-				'create' => $s->canAccess($s::SECTION_WEB, $s::ACCESS_WRITE),
-				'read' => $s->canAccess($s::SECTION_WEB, $s::ACCESS_READ),
-				'write' => $s->canAccess($s::SECTION_WEB, $s::ACCESS_WRITE),
-				'delete' => $s->canAccess($s::SECTION_WEB, $s::ACCESS_WRITE),
-			],
-			File::CONTEXT_DOCUMENTS => [
-				'mkdir' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
-				'write_root' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
-				'create' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
-				'read' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_READ),
-				'write' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
-				'delete' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_ADMIN),
-			],
-			File::CONTEXT_TRANSACTION => [
-				'mkdir' => false,
-				'write_root' => false,
-				'create' => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_WRITE),
-				'read' => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_READ),
-				'write' => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_WRITE),
-				'delete' => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_ADMIN),
-			],
+		// Subdirectories can be managed by member managemnt
+		$p[File::CONTEXT_USER . '//'] = [
+			'mkdir' => false,
+			'move' => false,
+			'create' => $s->canAccess($s::SECTION_USERS, $s::ACCESS_WRITE),
+			'read' => $s->canAccess($s::SECTION_USERS, $s::ACCESS_READ),
+			'write' => $s->canAccess($s::SECTION_USERS, $s::ACCESS_WRITE),
+			'delete' => $s->canAccess($s::SECTION_USERS, $s::ACCESS_WRITE),
+			'share' => false,
 		];
+
+		// Users can't do anything on the root though
+		$p[File::CONTEXT_USER] = [
+			'mkdir' => false,
+			'move' => false,
+			'create' => false,
+			'write' => false,
+			'delete' => false,
+			'read' => $s->canAccess($s::SECTION_USERS, $s::ACCESS_READ),
+			'share' => false,
+		];
+
+		$p[File::CONTEXT_CONFIG] = [
+			'mkdir' => false,
+			'move' => false,
+			'create' => false,
+			'read' => $s->isLogged(), // All config files can be accessed by all logged-in users
+			'write' => $is_admin,
+			'delete' => false,
+			'share' => false,
+		];
+
+		// Web skeletons
+		$p[File::CONTEXT_SKELETON . '/web'] = [
+			'mkdir' => $is_web_admin,
+			'move' => $is_web_admin,
+			'create' => $is_web_admin,
+			'read' => $s->isLogged(),
+			'write' => $is_web_admin,
+			'delete' => $is_web_admin,
+			'share' => false,
+		];
+
+		// All skeletons
+		$p[File::CONTEXT_SKELETON] = [
+			'mkdir' => $is_admin,
+			'move' => $is_admin,
+			'create' => $is_admin,
+			'read' => $s->isLogged(),
+			'write' => $is_admin,
+			'delete' => $is_admin,
+			'share' => false,
+		];
+
+		$p[File::CONTEXT_WEB . '//'] = [
+			'mkdir' => false,
+			'move' => false,
+			'create' => $s->canAccess($s::SECTION_WEB, $s::ACCESS_WRITE),
+			'read' => $s->canAccess($s::SECTION_WEB, $s::ACCESS_READ),
+			'write' => $s->canAccess($s::SECTION_WEB, $s::ACCESS_WRITE),
+			'delete' => $s->canAccess($s::SECTION_WEB, $s::ACCESS_WRITE),
+			'share' => false,
+		];
+
+		// At root level of web you can only create new articles
+		$p[File::CONTEXT_WEB] = [
+			'mkdir' => $s->canAccess($s::SECTION_WEB, $s::ACCESS_WRITE),
+			'move' => false,
+			'create' => false,
+			'read' => $s->canAccess($s::SECTION_WEB, $s::ACCESS_READ),
+			'write' => false,
+			'delete' => false,
+			'share' => false,
+		];
+
+		$p[File::CONTEXT_DOCUMENTS] = [
+			'mkdir' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
+			'move' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
+			'create' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
+			'read' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_READ),
+			'write' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
+			'delete' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_ADMIN),
+			'share' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
+		];
+
+		// You can write in transaction subdirectories
+		$p[File::CONTEXT_TRANSACTION . '//'] = [
+			'mkdir' => false,
+			'move' => false,
+			'create' => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_WRITE),
+			'read' => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_READ),
+			'write' => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_WRITE),
+			'delete' => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_ADMIN),
+			'share' => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_WRITE),
+		];
+
+		// But not in root
+		$p[File::CONTEXT_TRANSACTION] = [
+			'mkdir' => false,
+			'move' => false,
+			'write' => false,
+			'create' => false,
+			'delete' => false,
+			'read' => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_READ),
+			'share' => false,
+		];
+
+		return $p;
 	}
 
 	static public function search(string $search, string $path = null): array
@@ -191,7 +240,7 @@ class Files
 			throw new UserException('Ce répertoire n\'existe pas.');
 		}
 
-		if ($session && !$file->checkReadAccess($session)) {
+		if ($session && !$file->canRead()) {
 			throw new UserException('Vous n\'avez pas accès à ce répertoire');
 		}
 
@@ -347,6 +396,16 @@ class Files
 
 	static public function get(string $path, int $type = null): ?File
 	{
+		// Root contexts always exist, same with root itself
+		if ($path == '' || array_key_exists($path, File::CONTEXTS_NAMES)) {
+			$file = new File;
+			$file->parent = '';
+			$file->name = $path;
+			$file->path = $path;
+			$file->type = $file::TYPE_DIRECTORY;
+			return $file;
+		}
+
 		try {
 			File::validatePath($path);
 		}

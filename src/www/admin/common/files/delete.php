@@ -12,14 +12,8 @@ if (!$file) {
 	throw new UserException('Fichier inconnu');
 }
 
-if (!$file->checkDeleteAccess($session)) {
+if (!$file->canDelete()) {
     throw new UserException('Vous n\'avez pas le droit de supprimer ce fichier.');
-}
-
-$context = $file->context();
-
-if ($context == File::CONTEXT_CONFIG || $context == File::CONTEXT_WEB) {
-	throw new UserException('Vous n\'avez pas le droit de supprimer ce fichier.');
 }
 
 $csrf_key = 'file_delete_' . $file->pathHash();

@@ -5,13 +5,11 @@ use Garradin\Entities\Files\File;
 
 <nav class="tabs">
 	<aside>
-	{if $context == File::CONTEXT_DOCUMENTS}
 		{linkbutton shape="search" label="Rechercher" href="search.php" target="_dialog"}
-	{/if}
-	{if $can_mkdir}
+	{if $parent->canCreateDirHere()}
 		{linkbutton shape="plus" label="Nouveau répertoire" target="_dialog" href="!docs/new_dir.php?path=%s"|args:$path}
 	{/if}
-	{if $can_upload}
+	{if $parent->canCreateHere()}
 		{linkbutton shape="plus" label="Nouveau fichier texte" target="_dialog" href="!docs/new_file.php?path=%s"|args:$path}
 		{linkbutton shape="upload" label="Ajouter un fichier" target="_dialog" href="!common/files/upload.php?p=%s"|args:$path}
 	{/if}
@@ -58,7 +56,7 @@ use Garradin\Entities\Files\File;
 	</aside>
 </nav>
 
-{if !$can_mkdir && !$context_ref && $can_upload}
+{if !$parent->canCreateDirHere()}
 <p class="block alert">
 	Il n'est pas possible de créer de répertoire ici.
 	{if $context == File::CONTEXT_USER}
@@ -77,9 +75,7 @@ use Garradin\Entities\Files\File;
 		<table class="list">
 			<thead>
 				<tr>
-					{if $can_delete}
-						<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>
-					{/if}
+					<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>
 					<td></td>
 					<th>Nom</th>
 					<td>Modifié</td>
@@ -91,9 +87,9 @@ use Garradin\Entities\Files\File;
 			<tbody>
 
 			{foreach from=$list item="file"}
-				{if $file.type == $file::TYPE_DIRECTORY}
+				{if $file->isDir()}
 				<tr class="folder">
-					{if $can_delete}
+					{if $file->canDelete()}
 					<td class="check">
 						{input type="checkbox" name="check[]" value=$file.path}
 					</td>
@@ -103,22 +99,22 @@ use Garradin\Entities\Files\File;
 					<td></td>
 					<td></td>
 					<td class="actions">
-					{if $can_write && ($context == File::CONTEXT_SKELETON || $context == File::CONTEXT_DOCUMENTS)}
+					{if $parent->canCreateHere()}
 						{linkbutton href="!common/files/rename.php?p=%s"|args:$file.path label="Renommer" shape="minus" target="_dialog"}
 					{/if}
-					{if $can_delete}
+					{if $file->canDelete()}
 						{linkbutton href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer" shape="delete" target="_dialog"}
 					{/if}
 					</td>
 				</tr>
 				{else}
 				</tr>
-					{if $can_delete}
+					{if $file->canDelete()}
 					<td class="check">
 						{input type="checkbox" name="check[]" value=$file.path}
 					</td>
 					{/if}
-					<td class="icon">{if $file->image}{icon shape="image"}{/if}</td>
+					<td class="icon">{if $file->isImage()}{icon shape="image"}{/if}</td>
 					<th>
 						{if $file->canPreview()}
 							<a href="{"!common/files/preview.php?p=%s"|local_url|args:$file.path}" target="_dialog" data-mime="{$file.mime}">{$file.name}</a>
@@ -129,20 +125,20 @@ use Garradin\Entities\Files\File;
 					<td>{$file.modified|relative_date}</td>
 					<td>{$file.size|size_in_bytes}</td>
 					<td class="actions">
-						{if $can_write && $file->editorType()}
+						{if $file->canWrite() && $file->editorType()}
 							{linkbutton href="!common/files/edit.php?p=%s"|args:$file.path label="Modifier" shape="edit" target="_dialog" data-dialog-height="90%"}
 						{/if}
 						{if $file->canPreview()}
 							{linkbutton href="!common/files/preview.php?p=%s"|args:$file.path label="Voir" shape="eye" target="_dialog" data-mime=$file.mime}
 						{/if}
 						{linkbutton href=$file->url(true) label="Télécharger" shape="download"}
-						{if $can_write}
+						{if $parent->canCreateHere()}
 							{linkbutton href="!common/files/rename.php?p=%s"|args:$file.path label="Renommer" shape="reload" target="_dialog"}
 						{/if}
-						{if $can_delete}
+						{if $file->canDelete()}
 							{linkbutton href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer" shape="delete" target="_dialog"}
 						{/if}
-						{if $can_write}
+						{if $file->canShare()}
 							{linkbutton href="!common/files/share.php?p=%s"|args:$file.path label="Partager" shape="export" target="_dialog"}
 						{/if}
 					</td>
@@ -152,7 +148,7 @@ use Garradin\Entities\Files\File;
 
 			</tbody>
 
-			{if $can_delete}
+			{if $file->canDelete()}
 			<tfoot>
 				<tr>
 					<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all2" /><label for="f_all2"></label></td>

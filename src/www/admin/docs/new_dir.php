@@ -9,7 +9,7 @@ require_once __DIR__ . '/_inc.php';
 
 $parent = qg('path');
 
-if (!File::checkCreateAccess($parent, $session)) {
+if (!File::canCreate($parent)) {
 	throw new UserException('Vous n\'avez pas le droit de créer de répertoire ici.');
 }
 

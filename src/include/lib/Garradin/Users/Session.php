@@ -13,6 +13,7 @@ use Garradin\ValidationException;
 use Garradin\Users\Users;
 use Garradin\Email\Templates as EmailsTemplates;
 use Garradin\Files\NextCloud_Compatibility;
+use Garradin\Files\Files;
 
 use Garradin\Entities\Users\Category;
 use Garradin\Entities\Users\User;
@@ -552,17 +553,28 @@ class Session extends \KD2\UserSession
 		}
 	}
 
-	public function checkFilePermission(string $context, string $permission): bool
+	public function checkFilePermission(string $path, string $permission): bool
 	{
+		$path_level = preg_replace('!/[^/]+!', '/', $path);
+		$path = trim($path, '/');
+
 		if (!isset($this->_files_permissions)) {
 			$this->_files_permissions = Files::buildUserPermissions($this);
 		}
 
-		if (!isset($this->_files_permissions[$context][$permission])) {
-			throw new \InvalidArgumentException(sprintf('Unknown context/permission: %s/%s', $context, $permission));
+		foreach ($this->_files_permissions as $context => $permissions) {
+			if (!array_key_exists($permission, $permissions)) {
+				throw new \InvalidArgumentException(sprintf('Unknown permission "%s" in context "%s"', $permission, $context));
+			}
+
+			if ($context == $path
+				|| 0 === strpos($path, $context)
+				|| 0 === strpos($path_level, $context)) {
+				return $permissions[$permission];
+			}
 		}
 
-		return $this->_files_permissions[$context][$permission];
+		throw new \InvalidArgumentException(sprintf('Unknown context: %s', $context));
 	}
 
 	public function requireFilePermission(string $context, string $permission)

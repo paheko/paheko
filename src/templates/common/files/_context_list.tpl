@@ -8,7 +8,7 @@ if (!isset($files)) {
 $can_upload = false;
 
 if ($edit
-	&& Entities\Files\File::checkCreateAccess($path, $session)) {
+	&& Entities\Files\File::canCreate($path)) {
 	$can_upload = true;
 }
 
@@ -23,7 +23,7 @@ if ($edit
 <div class="files-list">
 {foreach from=$files item="file"}
 	<?php
-	if (!$file->checkReadAccess($session)) {
+	if (!$file->canRead()) {
 		break;
 	}
 	$preview = $file->canPreview();
@@ -44,7 +44,7 @@ if ($edit
 			<small>({$file.mime}, {$file.size|size_in_bytes})</small>
 		{/if}
 		{linkbutton shape="download" href=$file->url(true) target="_blank" label="Télécharger"}
-		{if $edit && $file->checkDeleteAccess($session)}
+		{if $edit && $file->canDelete()}
 			{linkbutton shape="delete" target="_dialog" href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer"}
 		{/if}
 	</aside>

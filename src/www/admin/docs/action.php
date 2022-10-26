@@ -23,7 +23,7 @@ $form->runIf('confirm_delete', function () use ($check, $session) {
 	foreach ($check as &$file) {
 		$file = Files::get($file);
 
-		if (!$file || !$file->checkDeleteAccess($session)) {
+		if (!$file || !$file->canDelete()) {
 			throw new UserException('Impossible de supprimer un fichier car vous n\'avez pas le droit de le supprimer');
 		}
 	}
@@ -36,15 +36,16 @@ $form->runIf('confirm_delete', function () use ($check, $session) {
 }, $csrf_key, '!docs/?path=' . $parent);
 
 $form->runIf(f('move') && f('select'), function () use ($check, $session) {
+	$target = f('select');
+
 	foreach ($check as &$file) {
 		$file = Files::get($file);
 
-		if (!$file || !$file->checkWriteAccess($session) || $file->context() != File::CONTEXT_DOCUMENTS) {
-			throw new UserException('Impossible de déplacer un fichier car vous n\'avez pas le droit de le modifier');
+		if (!$file || !$file->canMove($target)) {
+			throw new UserException('Impossible de déplacer un fichier car vous n\'avez pas le droit de le déplacer à cet endroit');
 		}
 	}
 
-	$target = f('select');
 	unset($file);
 
 	foreach ($check as $file) {

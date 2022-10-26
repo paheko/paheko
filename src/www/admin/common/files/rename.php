@@ -12,14 +12,10 @@ if (!$file) {
 	throw new UserException('Fichier inconnu');
 }
 
-if (!$file->checkWriteAccess($session)) {
-    throw new UserException('Vous n\'avez pas le droit de modifier ce fichier.');
-}
+$parent = $file->parent();
 
-$context = $file->context();
-
-if ($context == File::CONTEXT_CONFIG || $context == File::CONTEXT_WEB) {
-	throw new UserException('Vous n\'avez pas le droit de renommer ce fichier.');
+if (!$parent->canCreateHere()) {
+	throw new UserException('Vous n\'avez pas le droit de modifier ce fichier.');
 }
 
 $csrf_key = 'file_rename_' . $file->pathHash();

@@ -19,14 +19,14 @@ if (null == $content) {
 if ($path = qg('f')) {
 	$file = Files::get($path);
 
-	if (!$file || !$file->checkReadAccess($session)) {
+	if (!$file || !$file->canRead()) {
 		throw new UserException('Vous n\'avez pas le droit de lire ce fichier.');
 	}
 }
 elseif ($web = qg('w')) {
 	$page = Web::get($web);
 
-	if (!$page || !$page->file() || !$page->file()->checkReadAccess($session)) {
+	if (!$page || !$page->file() || !$page->file()->canRead()) {
 		throw new UserException('Vous n\'avez pas le droit de lire ce fichier.');
 	}
 

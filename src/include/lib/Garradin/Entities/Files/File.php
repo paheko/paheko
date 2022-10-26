@@ -147,6 +147,11 @@ class File extends Entity
 		return strtok($this->path, '/');
 	}
 
+	public function parent(): File
+	{
+		return Files::get($this->parent);
+	}
+
 	public function fullpath(): string
 	{
 		$path = Files::callStorage('getFullPath', $this);
@@ -451,6 +456,11 @@ class File extends Entity
 		return false;
 	}
 
+	public function isDir(): bool
+	{
+		return $this->type == self::TYPE_DIRECTORY;
+	}
+
 	/**
 	 * Full URL with https://...
 	 */
@@ -500,7 +510,7 @@ class File extends Entity
 	 */
 	public function serve(?Session $session = null, bool $download = false, ?string $share_hash = null, ?string $share_password = null): void
 	{
-		$can_access = $this->checkReadAccess($session);
+		$can_access = $this->canRead();
 
 		if (!$can_access && $share_hash) {
 			$can_access = $this->checkShareLink($share_hash, $share_password);
@@ -551,7 +561,7 @@ class File extends Entity
 	 */
 	public function serveThumbnail(?Session $session = null, string $size = null): void
 	{
-		if (!$this->checkReadAccess($session)) {
+		if (!$this->canRead()) {
 			header('HTTP/1.1 403 Forbidden', true, 403);
 			throw new UserException('Accès interdit');
 			return;
@@ -705,126 +715,121 @@ class File extends Entity
 		}
 	}
 
-	public function checkReadAccess(?Session $session): bool
+	public function canRead(): bool
 	{
 		// Web pages and config files are always public
 		if ($this->isPublic()) {
 			return true;
 		}
 
-		$context = $this->context();
-		$ref = strtok(substr($this->path, strpos($this->path, '/')), '/');
+		return Session::getInstance()->checkFilePermission($this->path, 'read');
+	}
 
-		if (null === $session || !$session->isLogged()) {
+	public function canShare(): bool
+	{
+		$session = Session::getInstance();
+
+		if (!$session->isLogged()) {
 			return false;
 		}
 
-		// All config files can be accessed by all logged-in users
-		if ($context == self::CONTEXT_CONFIG) {
-			return true;
-		}
-		elseif ($context == self::CONTEXT_TRANSACTION && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)) {
-			return true;
-		}
-		// The user can access his own profile files
-		else if ($context == self::CONTEXT_USER && $ref == $session->getUser()->id) {
-			return true;
-		}
-		// Only users able to manage users can see their profile files
-		else if ($context == self::CONTEXT_USER && $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)) {
-			return true;
-		}
-		// Only users with right to access documents can read documents
-		else if ($context == self::CONTEXT_DOCUMENTS && $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_READ)) {
-			return true;
-		}
-
-		return false;
+		return $session->checkFilePermission($this->path, 'share');
 	}
 
-	static public function checkSkeletonWriteAccess(string $path, ?Session $session): bool
+	public function canWrite(): bool
 	{
-		if (strpos($path, self::CONTEXT_SKELETON . '/web') === 0) {
-			return $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN);
-		}
+		$session = Session::getInstance();
 
-		return $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
-	}
-
-	public function checkWriteAccess(?Session $session): bool
-	{
-		if (null === $session) {
+		if (!$session->isLogged()) {
 			return false;
 		}
 
-		switch ($this->context()) {
-			case self::CONTEXT_WEB:
-				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
-			case self::CONTEXT_DOCUMENTS:
-				// Only managers can change files
-				return $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE);
-			case self::CONTEXT_CONFIG:
-				return $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
-			case self::CONTEXT_TRANSACTION:
-				return $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE);
-			case self::CONTEXT_SKELETON:
-				return self::checkSkeletonWriteAccess($this->path, $session);
-			case self::CONTEXT_USER:
-				return $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
-		}
-
-		return false;
+		return $session->checkFilePermission($this->path, 'write');
 	}
 
-	public function checkDeleteAccess(?Session $session): bool
+	public function canDelete(): bool
 	{
-		if (null === $session) {
+		$session = Session::getInstance();
+
+		if (!$session->isLogged()) {
 			return false;
 		}
 
-		switch ($this->context()) {
-			case self::CONTEXT_WEB:
-				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
-			case self::CONTEXT_SKELETON:
-				return self::checkSkeletonWriteAccess($this->path, $session);
-			case self::CONTEXT_DOCUMENTS:
-				// Only admins can delete files
-				return $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_ADMIN);
-			case self::CONTEXT_CONFIG:
-				return $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
-			case self::CONTEXT_TRANSACTION:
-				return $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
-			case self::CONTEXT_USER:
-				return $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
-		}
-
-		return false;
+		return $session->checkFilePermission($this->path, 'delete');
 	}
 
-	static public function checkCreateAccess(string $path, ?Session $session): bool
+	public function canMoveTo(string $destination): bool
 	{
-		if (null === $session) {
+		$session = Session::getInstance();
+
+		if (!$session->isLogged()) {
 			return false;
 		}
 
-		$context = strtok($path, '/');
+		return $session->checkFilePermission($this->path, 'move') && $this->canDelete() && self::canCreate($destination);
+	}
 
-		switch ($context) {
-			case self::CONTEXT_SKELETON:
-				return self::checkSkeletonWriteAccess($path, $session);
-			case self::CONTEXT_WEB:
-				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
-			case self::CONTEXT_DOCUMENTS:
-				return $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE);
-			case self::CONTEXT_CONFIG:
-				return $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
-			case self::CONTEXT_TRANSACTION:
-				return $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE);
-			case self::CONTEXT_USER:
-				return $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
+	public function canCopyTo(string $destination): bool
+	{
+		$session = Session::getInstance();
+
+		if (!$session->isLogged()) {
+			return false;
 		}
 
-		return false;
+		return $this->canRead() && self::canCreate($destination);
+	}
+
+	public function canCreateDirHere()
+	{
+		if (!$this->isDir()) {
+			return false;
+		}
+
+		$session = Session::getInstance();
+
+		if (!$session->isLogged()) {
+			return false;
+		}
+
+		return $session->checkFilePermission($this->path, 'mkdir');
+	}
+
+	static public function canCreateDir(string $path)
+	{
+		$session = Session::getInstance();
+
+		if (!$session->isLogged()) {
+			return false;
+		}
+
+		return $session->checkFilePermission($path, 'mkdir');
+	}
+
+	public function canCreateHere(): bool
+	{
+		if (!$this->isDir()) {
+			return false;
+		}
+
+		$session = Session::getInstance();
+
+		if (!$session->isLogged()) {
+			return false;
+		}
+
+		return $session->checkFilePermission($this->path, 'create');
+	}
+
+	static public function canCreate(string $path): bool
+	{
+		$session = Session::getInstance();
+
+		if (!$session->isLogged()) {
+			return false;
+		}
+
+		return $session->checkFilePermission($path, 'create');
 	}
 
 	public function pathHash(): string
