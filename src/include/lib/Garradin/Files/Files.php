@@ -19,6 +19,90 @@ use const Garradin\{FILE_STORAGE_BACKEND, FILE_STORAGE_QUOTA, FILE_STORAGE_CONFI
 
 class Files
 {
+	/**
+	 * Returns an array of all file permissions for a given user
+	 */
+	static public function buildUserPermissions(Session $s): array
+	{
+		$is_admin = $s->canAccess($s::SECTION_CONFIG, $s::ACCESS_ADMIN);
+		$is_web_admin = $is_admin || $s->canAccess($s::SECTION_WEB, $s::ACCESS_ADMIN);
+
+		if ($s->isLogged() && $id = $s::getUserId()) {
+			$user_permissions = [
+				// The user can always access his own profile files
+				File::CONTEXT_USER . '/' . $s::getUserId() => [
+					'mkdir' => false,
+					'write_root' => false,
+					'create' => false,
+					'read' => true,
+					'write' => false,
+					'delete' => false,
+				],
+			];
+		}
+
+		return $user_permissions + [
+			File::CONTEXT_USER => [
+				'mkdir' => false,
+				'write_root' => false,
+				// Only users able to manage users can see their profile files
+				'create' => $s->canAccess($s::SECTION_USERS, $s::ACCESS_WRITE),
+				'read' => $s->canAccess($s::SECTION_USERS, $s::ACCESS_READ),
+				'write' => $s->canAccess($s::SECTION_USERS, $s::ACCESS_WRITE),
+				'delete' => $s->canAccess($s::SECTION_USERS, $s::ACCESS_WRITE),
+			],
+			File::CONTEXT_CONFIG => [
+				'mkdir' => false,
+				'write_root' => false,
+				'create' => false,
+				'read' => $s->isLogged(), // All config files can be accessed by all logged-in users
+				'write' => $is_admin,
+				'delete' => $is_admin,
+			],
+			// Web skeletons
+			File::CONTEXT_SKELETON . '/web' => [
+				'mkdir' => $is_web_admin,
+				'write_root' => $is_web_admin,
+				'create' => $is_web_admin,
+				'read' => $s->isLogged(),
+				'write' => $is_web_admin,
+				'delete' => $is_web_admin,
+			],
+			File::CONTEXT_SKELETON => [
+				'mkdir' => $is_admin,
+				'write_root' => $is_admin,
+				'create' => $is_admin,
+				'read' => $s->isLogged(),
+				'write' => $is_admin,
+				'delete' => $is_admin,
+			],
+			File::CONTEXT_WEB => [
+				'mkdir' => false,
+				'write_root' => false,
+				'create' => $s->canAccess($s::SECTION_WEB, $s::ACCESS_WRITE),
+				'read' => $s->canAccess($s::SECTION_WEB, $s::ACCESS_READ),
+				'write' => $s->canAccess($s::SECTION_WEB, $s::ACCESS_WRITE),
+				'delete' => $s->canAccess($s::SECTION_WEB, $s::ACCESS_WRITE),
+			],
+			File::CONTEXT_DOCUMENTS => [
+				'mkdir' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
+				'write_root' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
+				'create' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
+				'read' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_READ),
+				'write' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
+				'delete' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_ADMIN),
+			],
+			File::CONTEXT_TRANSACTION => [
+				'mkdir' => false,
+				'write_root' => false,
+				'create' => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_WRITE),
+				'read' => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_READ),
+				'write' => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_WRITE),
+				'delete' => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_ADMIN),
+			],
+		];
+	}
+
 	static public function search(string $search, string $path = null): array
 	{
 		if (strlen($search) > 100) {

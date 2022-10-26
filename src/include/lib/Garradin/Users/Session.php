@@ -49,8 +49,8 @@ class Session extends \KD2\UserSession
 	protected $remember_me_cookie_name = 'gdinp';
 	protected $remember_me_expiry = '+3 months';
 
-	protected User $userObject;
-	protected Category $category;
+	protected ?User $_user;
+	protected ?array $_permissions;
 
 	static protected $_instance = null;
 
@@ -285,20 +285,18 @@ class Session extends \KD2\UserSession
 		// Force login with a static user, that is not in the local database
 		// this is useful for using a SSO like LDAP for example
 		if (is_array($login)) {
-			$this->userObject = (new User)->import($login['user'] ?? []);
+			$this->_user = (new User)->import($login['user'] ?? []);
 
 			if (isset($login['user']['_name'])) {
 				$name = DynamicFields::getFirstNameField();
-				$this->userObject->$name = $login['user']['_name'];
+				$this->_user->$name = $login['user']['_name'];
 			}
 
-			$permissions = [];
+			$this->_permissions = [];
 
 			foreach (Category::PERMISSIONS as $perm => $data) {
-				$permissions['perm_' . $perm] = $login['permissions'][$perm] ?? self::ACCESS_NONE;
+				$this->_permissions[$perm] = $login['permissions'][$perm] ?? self::ACCESS_NONE;
 			}
-
-			$this->set('permissions', $permissions);
 
 			return true;
 		}
@@ -318,26 +316,6 @@ class Session extends \KD2\UserSession
 		}
 
 		return $logged;
-	}
-
-	// Ici checkOTP utilise NTP en second recours
-	public function checkOTP($secret, $code)
-	{
-		if (Security_OTP::TOTP($secret, $code))
-		{
-			return true;
-		}
-
-		// Vérifier encore, mais avec le temps NTP
-		// au cas où l'horloge du serveur n'est pas à l'heure
-		if (\Garradin\NTP_SERVER
-			&& ($time = Security_OTP::getTimeFromNTP(\Garradin\NTP_SERVER))
-			&& Security_OTP::TOTP($secret, $code, $time))
-		{
-			return true;
-		}
-
-		return false;
 	}
 
 	public function login($login, $password, $remember_me = false)
@@ -388,6 +366,15 @@ class Session extends \KD2\UserSession
 		Plugin::fireSignal('user.login.otp', compact('success', 'user_id'));
 
 		return $success;
+	}
+
+	public function logout(bool $all = false)
+	{
+		$this->_user = null;
+		$this->_permissions = null;
+		$this->_files_permissions = null;
+
+		return parent::logout();
 	}
 
 	public function recoverPasswordSend(string $id): void
@@ -517,8 +504,8 @@ class Session extends \KD2\UserSession
 
 	public function getUser()
 	{
-		if (isset($this->userObject)) {
-			return $this->userObject;
+		if (isset($this->_user)) {
+			return $this->_user;
 		}
 
 		if (!$this->isLogged())
@@ -526,8 +513,10 @@ class Session extends \KD2\UserSession
 			throw new \LogicException('User is not logged in.');
 		}
 
-		$this->userObject = Users::get($this->user);
-		return $this->userObject;
+		$this->_user = Users::get($this->user);
+		$this->_permissions = null;
+		$this->_files_permissions = null;
+		return $this->_user;
 	}
 
 	static public function getUserId(): ?int
@@ -541,27 +530,66 @@ class Session extends \KD2\UserSession
 		return $i->user()->id;
 	}
 
-	public function canAccess(string $category, int $permission): bool
+	public function canAccess(string $section, int $permission): bool
 	{
 		if (!$this->isLogged()) {
 			return false;
 		}
 
-		if (!isset($this->category)) {
-			$this->category = $this->user()->category();
+		if (!isset($this->_permissions)) {
+			$this->_permissions = $this->user()->category()->getPermissions();
 		}
 
-		$perm = $this->category->{'perm_' . $category};
+		$perm = $this->_permissions[$section];
 
 		return ($perm >= $permission);
 	}
 
-	public function requireAccess(string $category, int $permission): void
+	public function requireAccess(string $section, int $permission): void
 	{
-		if (!$this->canAccess($category, $permission))
-		{
+		if (!$this->canAccess($section, $permission)) {
 			throw new UserException('Vous n\'avez pas le droit d\'accéder à cette page.');
 		}
+	}
+
+	public function checkFilePermission(string $context, string $permission): bool
+	{
+		if (!isset($this->_files_permissions)) {
+			$this->_files_permissions = Files::buildUserPermissions($this);
+		}
+
+		if (!isset($this->_files_permissions[$context][$permission])) {
+			throw new \InvalidArgumentException(sprintf('Unknown context/permission: %s/%s', $context, $permission));
+		}
+
+		return $this->_files_permissions[$context][$permission];
+	}
+
+	public function requireFilePermission(string $context, string $permission)
+	{
+		if (!$this->checkFilePermission($context, $permission)) {
+			throw new UserException('Vous n\'avez pas le droit d\'effectuer cette action.');
+		}
+	}
+
+	// Ici checkOTP utilise NTP en second recours
+	public function checkOTP($secret, $code)
+	{
+		if (Security_OTP::TOTP($secret, $code))
+		{
+			return true;
+		}
+
+		// Vérifier encore, mais avec le temps NTP
+		// au cas où l'horloge du serveur n'est pas à l'heure
+		if (\Garradin\NTP_SERVER
+			&& ($time = Security_OTP::getTimeFromNTP(\Garradin\NTP_SERVER))
+			&& Security_OTP::TOTP($secret, $code, $time))
+		{
+			return true;
+		}
+
+		return false;
 	}
 
 	public function getNewOTPSecret()

@@ -138,4 +138,15 @@ class Category extends Entity
 			$this->set('perm_' . $key, $perm_access);
 		}
 	}
+
+	public function getPermissions(): array
+	{
+		$out = [];
+
+		foreach (self::PERMISSIONS as $key => $perm) {
+			$out[$key] = $this->{'perm_' . $key};
+		}
+
+		return $out;
+	}
 }
