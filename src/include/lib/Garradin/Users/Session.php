@@ -49,6 +49,9 @@ class Session extends \KD2\UserSession
 	protected $remember_me_cookie_name = 'gdinp';
 	protected $remember_me_expiry = '+3 months';
 
+	protected User $userObject;
+	protected Category $category;
+
 	static protected $_instance = null;
 
 	static public function getInstance()
@@ -111,36 +114,13 @@ class Session extends \KD2\UserSession
 
 	protected function getUserDataForSession($id)
 	{
-		$sql = sprintf('SELECT u.*,
-			c.perm_connect, c.perm_web, c.perm_users, c.perm_documents,
-			c.perm_subscribe, c.perm_accounting, c.perm_config
-			FROM users AS u
-			INNER JOIN users_categories AS c ON u.id_category = c.id
-			WHERE u.id = ? LIMIT 1;',
-			$this->db->quoteIdentifier(DynamicFields::getLoginField('u')));
+		$user = Users::get($id);
 
-		$u = $this->db->first($sql, $id);
-
-		if (!$u) {
+		if (!$user) {
 			return null;
 		}
 
-		$this->set('permissions', array_filter((array) $u,
-			fn($k) => substr($k, 0, 5) == 'perm_',
-			\ARRAY_FILTER_USE_KEY)
-		);
-
-		$u = array_filter(
-			(array) $u,
-			fn($k) => substr($k, 0, 5) != 'perm_',
-			\ARRAY_FILTER_USE_KEY
-		);
-
-		$user = new User;
-		$user->load($u);
-		$user->exists(true);
-
-		return $user;
+		return $id;
 	}
 
 	protected function storeRememberMeSelector($selector, $hash, $expiry, $user_id)
@@ -305,11 +285,11 @@ class Session extends \KD2\UserSession
 		// Force login with a static user, that is not in the local database
 		// this is useful for using a SSO like LDAP for example
 		if (is_array($login)) {
-			$this->user = (new User)->import($login['user'] ?? []);
+			$this->userObject = (new User)->import($login['user'] ?? []);
 
 			if (isset($login['user']['_name'])) {
 				$name = DynamicFields::getFirstNameField();
-				$this->user->$name = $login['user']['_name'];
+				$this->userObject->$name = $login['user']['_name'];
 			}
 
 			$permissions = [];
@@ -333,7 +313,7 @@ class Session extends \KD2\UserSession
 		$logged = parent::isLogged();
 
 		// Only login if required
-		if ($login > 0 && (!$logged || ($logged && $this->user->id != $login))) {
+		if ($login > 0 && (!$logged || (self::getUserId() != $login))) {
 			return $this->create($login);
 		}
 
@@ -535,6 +515,21 @@ class Session extends \KD2\UserSession
 		return $this->getUser();
 	}
 
+	public function getUser()
+	{
+		if (isset($this->userObject)) {
+			return $this->userObject;
+		}
+
+		if (!$this->isLogged())
+		{
+			throw new \LogicException('User is not logged in.');
+		}
+
+		$this->userObject = Users::get($this->user);
+		return $this->userObject;
+	}
+
 	static public function getUserId(): ?int
 	{
 		$i = self::getInstance();
@@ -548,13 +543,15 @@ class Session extends \KD2\UserSession
 
 	public function canAccess(string $category, int $permission): bool
 	{
-		$permissions = $this->get('permissions');
-
-		if (!$permissions) {
+		if (!$this->isLogged()) {
 			return false;
 		}
 
-		$perm = $permissions['perm_' . $category];
+		if (!isset($this->category)) {
+			$this->category = $this->user()->category();
+		}
+
+		$perm = $this->category->{'perm_' . $category};
 
 		return ($perm >= $permission);
 	}
