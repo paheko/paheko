@@ -514,6 +514,20 @@ namespace Garradin;
 //const FILE_STORAGE_QUOTA = 10*1024*1024; // Forcer le quota alloué à 10 Mo, quel que soit le backend de stockage
 
 /**
+ * Adresse de découverte d'un client d'édition de documents (WOPI)
+ * (type OnlyOffice, Collabora, MS Office)
+ *
+ * Cela permet de savoir quels types de fichiers sont éditables
+ * avec l'éditeur web.
+ *
+ * Si NULL, alors l'édition de documents est désactivée.
+ *
+ * Défaut : null
+ */
+
+//const WOPI_DISCOVERY_URL = 'http://localhost:9980/hosting/discovery';
+
+/**
  * PDF_COMMAND
  * Commande de création de PDF
  *
