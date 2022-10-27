@@ -40,7 +40,7 @@ class Service extends Entity
 		$this->assert(null === $this->start_date || $this->start_date instanceof \DateTimeInterface);
 		$this->assert(null === $this->end_date || $this->end_date instanceof \DateTimeInterface);
 		$this->assert(null === $this->duration || (is_int($this->duration) && $this->duration > 0), 'La durée n\'est pas valide');
-		$this->assert(null === $this->start_date || $this->end_date > $this->start_date, 'La date de fin de validité doit être après la date de début');
+		$this->assert(null === $this->start_date || $this->end_date >= $this->start_date, 'La date de fin de validité ne peut être avant la date de début');
 	}
 
 	public function importForm(?array $source = null)
