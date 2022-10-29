@@ -56,7 +56,7 @@ class Account extends Entity
 	const TYPE_EXPENSE = 5;
 	const TYPE_REVENUE = 6;
 
-	const TYPE_ANALYTICAL = 7;
+	// Not used anymore: const TYPE_ANALYTICAL = 7;
 	const TYPE_VOLUNTEERING = 8;
 
 	const TYPE_OPENING = 9;
@@ -78,7 +78,7 @@ class Account extends Entity
 		'Tiers',
 		'Dépenses',
 		'Recettes',
-		'Analytique',
+		'--UNUSED--', // Used to be Analytique
 		'Bénévolat',
 		'Ouverture',
 		'Clôture',
@@ -138,12 +138,12 @@ class Account extends Entity
 			'label' => 'Réf. ligne',
 			'select' => 'l.reference',
 		],
-		'id_analytical' => [
-			'select' => 'l.id_analytical',
+		'id_project' => [
+			'select' => 'l.id_project',
 		],
-		'code_analytical' => [
+		'project_code' => [
 			'label' => 'Projet',
-			'select' => 'b.code',
+			'select' => 'p.code',
 		],
 		'status' => [
 			'select' => 't.status',
@@ -229,9 +229,6 @@ class Account extends Entity
 			$this->assert(substr($this->code, 0, 3) == '511', 'Le numéro d\'un compte d\'attente doit commencer par 511');
 			$this->assert($this->position == self::ASSET_OR_LIABILITY, 'Un compte d\'attente doit être en position "actif ou passif"');
 		}
-		elseif ($this->type == self::TYPE_ANALYTICAL) {
-			$this->assert($classe == '9', 'Le numéro d\'un compte analytique doit commencer par 9');
-		}
 		elseif ($this->type == self::TYPE_THIRD_PARTY) {
 			$this->assert($classe == '4', 'Le numéro d\'un compte de tiers doit commencer par 4');
 		}
@@ -278,7 +275,7 @@ class Account extends Entity
 
 		$tables = 'acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
-			LEFT JOIN acc_accounts b ON b.id = l.id_analytical';
+			LEFT JOIN acc_projects b ON b.id = l.id_project';
 		$conditions = sprintf('l.id_account = %d AND t.id_year = %d', $this->id(), $year_id);
 
 		$sum = null;

@@ -63,8 +63,8 @@ class Accounts
 	 */
 	public function listCommonTypes(): array
 	{
-		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? AND type != 0 AND type NOT IN (?) ORDER BY code COLLATE U_NOCASE;',
-			$this->chart_id, Account::TYPE_ANALYTICAL);
+		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? AND type != 0 AND type != ORDER BY code COLLATE U_NOCASE;',
+			$this->chart_id, Account::TYPE_VOLUNTEERING);
 	}
 
 	/**
@@ -116,17 +116,6 @@ class Accounts
 		}
 	}
 
-	/**
-	 * Return only analytical accounts
-	 */
-	public function listAnalytical(): array
-	{
-		return $this->em->DB()->getAssoc($this->em->formatQuery('SELECT id, label FROM @TABLE WHERE id_chart = ? AND type = ? ORDER BY label COLLATE U_NOCASE;'), $this->chart_id, Account::TYPE_ANALYTICAL);
-	}
-
-	/**
-	 * Return only analytical accounts
-	 */
 	public function listVolunteering(): array
 	{
 		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? AND type = ? ORDER BY code COLLATE U_NOCASE;',
@@ -215,8 +204,6 @@ class Accounts
 	static public function getPositionFromType(int $type): int
 	{
 		switch ($type) {
-			case Account::TYPE_ANALYTICAL:
-				return Account::NONE;
 			case Account::TYPE_REVENUE;
 				return Account::REVENUE;
 			case Account::TYPE_EXPENSE;
