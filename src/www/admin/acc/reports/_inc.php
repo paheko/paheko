@@ -3,6 +3,7 @@
 namespace Garradin;
 
 use Garradin\Accounting\Years;
+use Garradin\Accounting\Projects;
 use Garradin\Accounting\Accounts;
 
 require_once __DIR__ . '/../../_inc.php';
@@ -10,6 +11,8 @@ require_once __DIR__ . '/../../_inc.php';
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ);
 
 $criterias = [];
+
+$tpl->assign('project_title', null);
 
 if (qg('project'))
 {
@@ -21,6 +24,7 @@ if (qg('project'))
 
 	$criterias['project'] = $project->id();
 	$tpl->assign('project', $project);
+	$tpl->assign('project_title', sprintf('%s - ', $project->label));
 }
 
 if (qg('year'))

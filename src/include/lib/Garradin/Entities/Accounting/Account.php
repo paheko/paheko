@@ -146,6 +146,7 @@ class Account extends Entity
 		],
 		'projects' => [
 			'label' => 'Projet',
+			'select' => null,
 		],
 		'status' => [
 			'select' => 't.status',

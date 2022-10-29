@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Bilan" current="acc/years"}
+{include file="admin/_head.tpl" title="%sBilan"|args:$project_title current="acc/years"}
 
 {include file="acc/reports/_header.tpl" current="balance_sheet" title="Bilan" allow_compare=true}
 

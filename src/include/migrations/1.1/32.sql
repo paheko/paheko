@@ -4,7 +4,7 @@ ALTER TABLE services_fees RENAME TO services_fees_old;
 
 .read ../../data/1.1.0_schema.sql
 
-INSERT INTO acc_projects (id, code, label, description) SELECT id, code, label, description FROM acc_accounts_old WHERE type = 7;
+INSERT INTO acc_projects (id, code, label, description) SELECT id, SUBSTR(code, 2), label, description FROM acc_accounts_old WHERE type = 7;
 
 -- Delete old analytical accounts
 DELETE FROM acc_accounts_old AS a WHERE type = 7 OR

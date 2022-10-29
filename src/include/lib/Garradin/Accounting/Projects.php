@@ -12,7 +12,7 @@ class Projects
 {
 	static public function get(int $id): ?Project
 	{
-		return EM::findOneById(Project::class, $id);
+		return EntityManager::findOneById(Project::class, $id);
 	}
 
 	static public function count(): int
