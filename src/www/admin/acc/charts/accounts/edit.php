@@ -52,9 +52,6 @@ if (f('edit') && $form->check('acc_accounts_edit_' . $account->id()))
 	}
 }
 
-$types = $account::TYPES_NAMES;
-$types[0] = '-- Pas un compte usuel';
-
-$tpl->assign(compact('types', 'account', 'edit_disabled'));
+$tpl->assign(compact('account', 'edit_disabled'));
 
 $tpl->display('acc/charts/accounts/edit.tpl');

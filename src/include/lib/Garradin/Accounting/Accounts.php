@@ -20,7 +20,7 @@ class Accounts
 	protected $chart_id;
 	protected $em;
 
-	const EXPECTED_CSV_COLUMNS = ['code', 'label', 'description', 'position', 'type'];
+	const EXPECTED_CSV_COLUMNS = ['code', 'label', 'description', 'position', 'bookmark'];
 
 	public function __construct(int $chart_id)
 	{
@@ -263,11 +263,11 @@ class Accounts
 
 					// Don't update user-set values
 					if ($account->exists()) {
-						unset($row['type'], $row['description']);
+						unset($row['bookmark'], $row['description']);
 					}
 					else {
-						$row['type'] = $types[$row['type']];
-						$row['user'] = empty($row['added']) ? 0 : 1;
+						$row['user'] = !empty($row['added']);
+						$row['bookmark'] = !empty($row['bookmark']);
 					}
 
 					$row['position'] = $positions[$row['position']];

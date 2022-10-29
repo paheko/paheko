@@ -10,6 +10,9 @@
 	<ul>
 		<li class="current"><a href="{$self_url}">Exercices</a></li>
 		<li><a href="{$admin_url}acc/projects/">Projets <em>(compta analytique)</em></a></li>
+		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
+		<li><a href="{$admin_url}acc/charts/">Plans comptables</a></li>
+		{/if}
 	</ul>
 </nav>
 
