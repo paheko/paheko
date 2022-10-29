@@ -25,9 +25,8 @@ $form->runIf($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN
 
 $accounting_enabled = false;
 $years = Years::listOpen();
-$analytical_account = null;
 
-$tpl->assign(compact('service', 'accounting_enabled', 'years', 'analytical_account'));
+$tpl->assign(compact('service', 'accounting_enabled', 'years'));
 $tpl->assign('list', $fees->listWithStats());
 
 $tpl->display('services/fees/index.tpl');
