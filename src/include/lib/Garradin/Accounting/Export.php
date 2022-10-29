@@ -41,7 +41,7 @@ class Export
 		'Référence ligne'   => 'line_reference',
 		'Libellé ligne'     => 'line_label',
 		'Rapprochement'     => 'reconciled',
-		'Compte analytique' => 'analytical',
+		'Projet analytique' => 'project',
 		'Membres associés'  => 'linked_users',
 	];
 
@@ -60,7 +60,7 @@ class Export
 			'Compte de débit'        => 'debit_account',
 			'Compte de crédit'       => 'credit_account',
 			'Montant'                => 'amount',
-			'Compte analytique'      => 'analytical',
+			'Projet analytique'      => 'project',
 			'Membres associés'       => 'linked_users',
 		],
 		self::FEC => [
@@ -160,14 +160,14 @@ class Export
 				a1.code AS debit_account,
 				a2.code AS credit_account,
 				l1.debit AS amount,
-				a3.code AS analytical,
+				p.code AS project,
 				GROUP_CONCAT(u.%s) AS linked_users
 				FROM acc_transactions t
 				INNER JOIN acc_transactions_lines l1 ON l1.id_transaction = t.id AND l1.debit != 0
 				INNER JOIN acc_transactions_lines l2 ON l2.id_transaction = t.id AND l2.credit != 0
 				INNER JOIN acc_accounts a1 ON a1.id = l1.id_account
 				INNER JOIN acc_accounts a2 ON a2.id = l2.id_account
-				LEFT JOIN acc_accounts a3 ON a3.id = l1.id_analytical
+				LEFT JOIN acc_projects p ON p.id = l1.id_project
 				LEFT JOIN acc_transactions_users tu ON tu.id_transaction = t.id
 				LEFT JOIN membres u ON u.id = tu.id_user
 				WHERE t.id_year = ?
@@ -207,12 +207,12 @@ class Export
 			$sql = 'SELECT t.id, t.type, t.status, t.label, t.date, t.notes, t.reference,
 				a.code AS account, a.label AS account_label, l.debit AS debit, l.credit AS credit,
 				l.reference AS line_reference, l.label AS line_label, l.reconciled,
-				a2.code AS analytical,
+				p.code AS project,
 				GROUP_CONCAT(u.%s) AS linked_users
 				FROM acc_transactions t
 				INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
 				INNER JOIN acc_accounts a ON a.id = l.id_account
-				LEFT JOIN acc_accounts a2 ON a2.id = l.id_analytical
+				LEFT JOIN acc_accounts p ON p.id = l.id_project
 				LEFT JOIN acc_transactions_users tu ON tu.id_transaction = t.id
 				LEFT JOIN membres u ON u.id = tu.id_user
 				WHERE t.id_year = ?

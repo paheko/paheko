@@ -137,8 +137,8 @@
 			<td>{$line.label}</td>
 			<td>{$line.reference}</td>
 			<td>
-				{if $line.id_analytical}
-					<a href="{$admin_url}acc/reports/statement.php?analytical={$line.id_analytical}">{$line.analytical_name}</a>
+				{if $line.id_project}
+					<a href="{$admin_url}acc/reports/statement.php?project={$line.id_project}">{$line.project_name}</a>
 				{/if}
 			</td>
 		</tr>
