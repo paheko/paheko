@@ -1,7 +1,7 @@
 <?php
 namespace Garradin;
 
-use Garradin\Entities\Accounting\Account;
+use Garradin\Accounting\Projects;
 use Garradin\Accounting\Years;
 use Garradin\Entities\Services\Fee;
 use Garradin\Services\Services;
@@ -28,5 +28,6 @@ $years = Years::listOpen();
 
 $tpl->assign(compact('service', 'accounting_enabled', 'years'));
 $tpl->assign('list', $fees->listWithStats());
+$tpl->assign('projects', Projects::listAssocWithEmpty());
 
 $tpl->display('services/fees/index.tpl');

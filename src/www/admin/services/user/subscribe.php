@@ -2,6 +2,7 @@
 namespace Garradin;
 
 use Garradin\Services\Services;
+use Garradin\Accounting\Projects;
 use Garradin\Entities\Services\Service_User;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
@@ -74,5 +75,6 @@ $account_targets = $types_details[Transaction::TYPE_REVENUE]->accounts[1]->targe
 $service_user = null;
 
 $tpl->assign(compact('csrf_key', 'users', 'account_targets', 'service_user'));
+$tpl->assign('projects', Projects::listAssocWithEmpty());
 
 $tpl->display('services/user/subscribe.tpl');

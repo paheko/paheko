@@ -3,6 +3,7 @@ namespace Garradin;
 
 use Garradin\Services\Fees;
 use Garradin\Accounting\Accounts;
+use Garradin\Accounting\Projects;
 use Garradin\Accounting\Years;
 
 require_once __DIR__ . '/../_inc.php';
