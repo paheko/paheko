@@ -27,9 +27,6 @@ $accounts = $chart->accounts();
 $account = new Account;
 $account->position = Account::ASSET_OR_LIABILITY;
 
-$types = $account::TYPES_NAMES;
-$types[0] = '-- Pas un compte usuel';
-
 $type = f('type') ?? qg('type');
 
 // Simple creation with pre-determined account type

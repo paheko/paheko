@@ -19,7 +19,7 @@
 		<li class="title">{$chart.label}</li>
 {/if}
 
-		<li{if $current == 'favorites'} class="current"{/if}>{link href="!acc/charts/accounts/?id=%d"|args:$chart.id label="Comptes usuels"}</li>
+		<li{if $current == 'favorites'} class="current"{/if}>{link href="!acc/charts/accounts/?id=%d"|args:$chart.id label="Comptes favoris"}</li>
 		<li{if $current == 'all'} class="current"{/if}>{link href="!acc/charts/accounts/all.php?id=%d"|args:$chart.id label="Tous les comptes"}</li>
 	</ul>
 </nav>

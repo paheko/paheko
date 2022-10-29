@@ -19,7 +19,7 @@
 			<p class="edit">{linkbutton label="Modifier les comptes" href="!acc/charts/accounts/%s?id=%d"|args:$page,$chart.id shape="edit"}</aside></p>
 		{/if}
 
-		<p><label>{input type="checkbox" name="typed_only" value=0 default=0 default=$all} N'afficher que les comptes usuels</label></p>
+		<p><label>{input type="checkbox" name="typed_only" value=0 default=0 default=$all} N'afficher que les comptes favoris</label></p>
 	</header>
 
 	{if isset($grouped_accounts)}

@@ -13,8 +13,8 @@
 			<td>{$account.code}</td>
 			<th>{$account.label}</th>
 			<td>
-				{if $account.type}
-					{icon shape="star"} <?=Entities\Accounting\Account::TYPES_NAMES[$account->type]?>
+				{if $account.bookmark}
+					{icon shape="star"} Favori
 				{/if}
 			</td>
 			<td>

@@ -14,7 +14,7 @@ DELETE FROM acc_accounts_old AS a WHERE type = 7 OR
 		AND user = 0
 	);
 
-INSERT INTO acc_accounts SELECT *, CASE WHEN type IS NOT NULL THEN 1 ELSE 0 END FROM acc_accounts_old;
+INSERT INTO acc_accounts SELECT *, CASE WHEN type > 0 AND type <= 8 THEN 1 ELSE 0 END FROM acc_accounts_old;
 
 UPDATE acc_accounts SET type = 0;
 

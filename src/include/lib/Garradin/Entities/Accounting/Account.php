@@ -161,7 +161,7 @@ class Account extends Entity
 	protected int $position;
 	protected int $type;
 	protected bool $user;
-	protected bool $favorite;
+	protected bool $bookmark;
 
 	protected $_position = [];
 

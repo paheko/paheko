@@ -4,13 +4,6 @@
 
 <dl>
 
-	{if $account.type}
-	<dt>Type de compte</dt>
-	<dd>
-		<?php $t = $types[$account->type]; ?> {$t}
-	</dd>
-	{/if}
-
 	{if !$account.type || $account.type == $account::TYPE_VOLUNTEERING}
 		<dt><label for="f_position_0">Position au bilan ou résultat</label>{if !$edit_disabled} <b>(obligatoire)</b>{/if}</dt>
 		<dd class="help">La position permet d'indiquer dans quelle partie du bilan ou du résultat doit figurer le compte.</dd>
@@ -28,6 +21,7 @@
 	<dd class="help">Le numéro ne doit contenir que des chiffres et des lettres majuscules.</dd>
 	{input type="text" label="Libellé" name="label" source=$account required=true disabled=$edit_disabled}
 	{input type="textarea" label="Description" name="description" source=$account}
+	{input type="checkbox" label="Compte favori" name="bookmark" source=$account value=1 help="Si coché, le compte apparaîtra en priorité dans les listes de comptes"}
 
 	{if $create && in_array($account.type, [$account::TYPE_BANK, $account::TYPE_CASH, $account::TYPE_OUTSTANDING, $account::TYPE_THIRD_PARTY]) && !empty($current_year)}
 		{input type="money" name="opening_amount" label="Solde d'ouverture" help="Si renseigné, ce solde sera inscrit dans l'exercice « %s »."|args:$current_year.label}

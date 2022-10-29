@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Comptes usuels" current="acc/charts"}
+{include file="admin/_head.tpl" title="Comptes favoris" current="acc/charts"}
 
 {include file="acc/charts/accounts/_nav.tpl" current="favorites"}
 

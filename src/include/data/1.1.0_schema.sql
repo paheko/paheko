@@ -148,13 +148,13 @@ CREATE TABLE IF NOT EXISTS acc_accounts
     position INTEGER NOT NULL, -- position actif/passif/charge/produit
     type INTEGER NOT NULL DEFAULT 0, -- Type de compte spécial : banque, caisse, en attente d'encaissement, etc.
     user INTEGER NOT NULL DEFAULT 1, -- 0 = fait partie du plan comptable original, 1 = a été ajouté par l'utilisateur
-    favorite INTEGER NOT NULL DEFAULT 0 -- 1 = is marked as favorite
+    bookmark INTEGER NOT NULL DEFAULT 0 -- 1 = is marked as favorite
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS acc_accounts_codes ON acc_accounts (code, id_chart);
 CREATE INDEX IF NOT EXISTS acc_accounts_type ON acc_accounts (type);
 CREATE INDEX IF NOT EXISTS acc_accounts_position ON acc_accounts (position);
-CREATE INDEX IF NOT EXISTS acc_accounts_favorite ON acc_accounts (id_chart, favorite, code);
+CREATE INDEX IF NOT EXISTS acc_accounts_bookmarks ON acc_accounts (id_chart, bookmark, code);
 
 -- Balance des comptes par exercice
 CREATE VIEW IF NOT EXISTS acc_accounts_balances
