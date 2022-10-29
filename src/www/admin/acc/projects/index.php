@@ -15,4 +15,4 @@ $tpl->assign('list', Projects::getBalances($by_year, $order_code));
 
 $tpl->assign('projects_count', Projects::count());
 
-$tpl->display('acc/reports/projects.tpl');
+$tpl->display('acc/projects/index.tpl');

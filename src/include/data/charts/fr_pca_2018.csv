@@ -549,8 +549,3 @@ code,label,description,position,type
 89,COMPTES DE BILAN,,,
 890,Bilan d'ouverture,,Actif ou passif,Ouverture
 891,Bilan de clôture,,Actif ou passif,Clôture
-9,Classe 9 — Comptes analytiques,,,
-90,COMPTES RÉFLÉCHIS,,,
-906,Charges réfléchies,,,
-907,Produits réfléchis,,,
-99,Projets,,,Analytique

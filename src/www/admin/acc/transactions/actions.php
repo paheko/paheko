@@ -33,9 +33,9 @@ $form->runIf('delete', function () use ($transactions) {
 	}
 }, $csrf_key, f('from') ?: ADMIN_URL);
 
-// Add/remove lines to analytical
-$form->runIf('change_analytical', function () use ($transactions, $lines) {
-	$id = f('id_analytical') ?: null;
+// Add/remove lines to analytical project
+$form->runIf('change_project', function () use ($transactions, $lines) {
+	$id = f('id_project') ?: null;
 
 	if (f('apply_lines')) {
 		$lines = null;
@@ -44,7 +44,7 @@ $form->runIf('change_analytical', function () use ($transactions, $lines) {
 		$transactions = null;
 	}
 
-	Transactions::setAnalytical($id, $transactions, $lines);
+	Transactions::setProject($id, $transactions, $lines);
 }, $csrf_key, f('from') ?: ADMIN_URL);
 
 $from = f('from');
@@ -58,15 +58,7 @@ if (f('action') == 'delete')
 }
 else
 {
-	// Get year to get analytical accounts
-	$year = Years::get((int) f('year'));
+	$tpl->assign('projects', Projects::listAssocWithEmpty());
 
-	if (!$year) {
-		throw new UserException("Aucun exercice sélectionné.");
-	}
-
-	$analytical = $year->chart()->accounts()->listAnalytical();
-	$tpl->assign('analytical_accounts', ['' => '-- Aucun projet'] + $analytical);
-
-	$tpl->display('acc/transactions/actions_analytical.tpl');
+	$tpl->display('acc/transactions/actions_project.tpl');
 }

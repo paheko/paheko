@@ -192,6 +192,7 @@ CREATE TABLE IF NOT EXISTS acc_projects
     code TEXT NULL,
 
     label TEXT NOT NULL,
+    description TEXT NULL,
 
     archived INTEGER NOT NULL DEFAULT 0
 );

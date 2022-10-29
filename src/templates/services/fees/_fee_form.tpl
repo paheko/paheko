@@ -3,7 +3,6 @@ assert(isset($legend));
 assert(isset($csrf_key));
 assert(isset($submit_label));
 $targets = Entities\Accounting\Account::TYPE_REVENUE;
-$analytical_targets = Entities\Accounting\Account::TYPE_ANALYTICAL;
 ?>
 
 {form_errors}

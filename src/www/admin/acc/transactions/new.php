@@ -4,7 +4,7 @@ namespace Garradin;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Files\File;
-use Garradin\Accounting\AssistedReconciliation;
+use Garradin\Accounting\Projects;
 use Garradin\Accounting\Transactions;
 use Garradin\Accounting\Years;
 
@@ -22,7 +22,7 @@ $accounts = $chart->accounts();
 $csrf_key = 'acc_transaction_new';
 $transaction = new Transaction;
 $amount = 0;
-$id_analytical = null;
+$id_project = null;
 $linked_users = null;
 $lines = isset($_POST['lines']) ? Transaction::getFormLines() : [[], []];
 $types_details = $transaction->getTypesDetails();
@@ -59,7 +59,7 @@ if (qg('copy')) {
 		$types_details = $transaction->getTypesDetails();
 	}
 
-	$id_analytical = $old->getAnalyticalId();
+	$id_project = $old->getProjectId();
 	$amount = $transaction->getLinesCreditSum();
 	$linked_users = $old->listLinkedUsersAssoc();
 
@@ -116,9 +116,9 @@ $form->runIf('save', function () use ($transaction, $session, $current_year) {
 	Utils::redirect(sprintf('!acc/transactions/details.php?id=%d&created', $transaction->id()));
 }, $csrf_key);
 
-$tpl->assign(compact('csrf_key', 'transaction', 'amount', 'lines', 'id_analytical', 'types_details', 'linked_users'));
+$tpl->assign(compact('csrf_key', 'transaction', 'amount', 'lines', 'id_project', 'types_details', 'linked_users'));
 
 $tpl->assign('chart_id', $chart->id());
-$tpl->assign('analytical_accounts', ['' => '-- Aucun'] + $accounts->listAnalytical());
+$tpl->assign('projects', Projects::listAssocWithEmpty());
 
 $tpl->display('acc/transactions/new.tpl');
