@@ -153,25 +153,15 @@ class Account extends Entity
 		],
 	];
 
-	protected $id;
-	protected $id_chart;
-	protected $code;
-	protected $label;
-	protected $description;
-	protected $position;
-	protected $type;
-	protected $user = 0;
-
-	protected $_types = [
-		'id'          => 'int',
-		'id_chart'    => 'int',
-		'code'        => 'string',
-		'label'       => 'string',
-		'description' => '?string',
-		'position'    => 'int',
-		'type'        => 'int',
-		'user'        => 'int',
-	];
+	protected ?int $id;
+	protected int $id_chart;
+	protected string $code;
+	protected string $label;
+	protected ?string $description;
+	protected int $position;
+	protected int $type;
+	protected bool $user;
+	protected bool $favorite;
 
 	protected $_position = [];
 
