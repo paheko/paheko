@@ -372,7 +372,7 @@ if (!defined('Garradin\SECRET_KEY'))
 	define('Garradin\SECRET_KEY', $key);
 }
 
-// Intégration du secret pour les tokens
+// Intégration du secret pour les tokens CSRF
 Form::tokenSetSecret(SECRET_KEY);
 
 EntityManager::setGlobalDB(DB::getInstance());
