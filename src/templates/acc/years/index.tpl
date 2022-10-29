@@ -9,7 +9,7 @@
 	</aside>
 	<ul>
 		<li class="current"><a href="{$self_url}">Exercices</a></li>
-		<li><a href="{$admin_url}acc/reports/projects.php">Projets <em>(compta analytique)</em></a></li>
+		<li><a href="{$admin_url}acc/projects/">Projets <em>(compta analytique)</em></a></li>
 	</ul>
 </nav>
 
