@@ -19,7 +19,8 @@ $targets_str = implode(':', $targets);
 
 $all = qg('all');
 
-if (null !== $all) {
+if (null !== $all || !$targets) {
+	$all = true;
 	$session->set('account_selector_all', (bool) $all);
 }
 

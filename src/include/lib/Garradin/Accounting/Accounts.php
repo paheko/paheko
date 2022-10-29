@@ -63,7 +63,7 @@ class Accounts
 	 */
 	public function listCommonTypes(): array
 	{
-		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? AND type != 0 AND type != ORDER BY code COLLATE U_NOCASE;',
+		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? AND type != 0 AND type != ? ORDER BY code COLLATE U_NOCASE;',
 			$this->chart_id, Account::TYPE_VOLUNTEERING);
 	}
 
