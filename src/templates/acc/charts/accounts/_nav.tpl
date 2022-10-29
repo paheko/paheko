@@ -10,7 +10,9 @@
 	<ul>
 {else}
 	<ul>
-		<li class="current">{link href="!acc/charts/" label="Plans comptables"}</li>
+		<li><a href="{$admin_url}acc/years/">Exercices</a></li>
+		<li><a href="{$admin_url}acc/projects/">Projets <em>(compta analytique)</em></a></li>
+		<li class="current"><a href="{$admin_url}acc/charts/">Plans comptables</a></li>
 	</ul>
 	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 		<aside>{linkbutton href="!acc/charts/accounts/new.php?id=%d"|args:$chart.id label="Ajouter un compte" shape="plus"}</aside>
