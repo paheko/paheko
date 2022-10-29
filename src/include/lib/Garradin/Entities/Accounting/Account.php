@@ -142,8 +142,10 @@ class Account extends Entity
 			'select' => 'l.id_project',
 		],
 		'project_code' => [
-			'label' => 'Projet',
 			'select' => 'p.code',
+		],
+		'projects' => [
+			'label' => 'Projet',
 		],
 		'status' => [
 			'select' => 't.status',

@@ -4,6 +4,7 @@ namespace Garradin;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Files\File;
+use Garradin\Accounting\Projects;
 use Garradin\Accounting\Transactions;
 use Garradin\Accounting\Years;
 
@@ -61,12 +62,12 @@ $form->runIf('save', function () use ($transaction, $session, $current_year) {
 	Utils::redirect('!acc/transactions/details.php?created&id=' . $transaction->id());
 }, 'acc_transaction_new');
 
-$id_analytical = $payoff_for->id_analytical;
+$id_project = $payoff_for->id_project;
 
-$tpl->assign(compact('transaction', 'payoff_for', 'amount', 'id_analytical'));
+$tpl->assign(compact('transaction', 'payoff_for', 'amount', 'id_project'));
 $tpl->assign('payoff_targets', implode(':', [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]));
 
 $tpl->assign('chart_id', $chart->id());
 
-$tpl->assign('analytical_accounts', ['' => '-- Aucun'] + $accounts->listAnalytical());
+$tpl->assign('projects', Projects::listAssocWithEmpty());
 $tpl->display('acc/transactions/payoff.tpl');

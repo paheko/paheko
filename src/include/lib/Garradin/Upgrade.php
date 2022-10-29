@@ -464,12 +464,14 @@ class Upgrade
 				$db->import(ROOT . '/include/data/1.1.29_migration.sql');
 			}
 
-			if (version_compare($v, '1.1.30', '<')) {
-				require ROOT . '/include/migrations/1.1/30.php';
-			}
-
 			if (version_compare($v, '1.1.31', '<')) {
 				$db->import(ROOT . '/include/migrations/1.1/31.sql');
+			}
+
+			if (version_compare($v, '1.1.32', '<')) {
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/migrations/1.1/32.sql');
+				$db->commitSchemaUpdate();
 			}
 
 			// Vérification de la cohérence des clés étrangères

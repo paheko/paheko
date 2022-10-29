@@ -11,16 +11,16 @@ $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ);
 
 $criterias = [];
 
-if (qg('analytical'))
+if (qg('project'))
 {
-	$account = Accounts::get((int) qg('analytical'));
+	$project = Projects::get((int) qg('project'));
 
-	if (!$account) {
-		throw new UserException('Numéro de compte analytique inconnu.');
+	if (!$project) {
+		throw new UserException('Numéro de projet inconnu.');
 	}
 
-	$criterias['analytical'] = $account->id();
-	$tpl->assign('analytical', $account);
+	$criterias['project'] = $project->id();
+	$tpl->assign('project', $project);
 }
 
 if (qg('year'))
@@ -36,8 +36,8 @@ if (qg('year'))
 	$tpl->assign('close_date', $year->closed ? $year->end_date : time());
 }
 
-if (qg('analytical_only')) {
-	$criterias['analytical_only'] = true;
+if (qg('projects_only')) {
+	$criterias['projects_only'] = true;
 }
 
 if (!count($criterias))

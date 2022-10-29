@@ -10,9 +10,14 @@ use KD2\DB\EntityManager;
 
 class Projects
 {
+	static public function get(int $id): ?Project
+	{
+		return EM::findOneById(Project::class, $id);
+	}
+
 	static public function count(): int
 	{
-		return DB()::getInstance()->count(Project::TABLE);
+		return DB::getInstance()->count(Project::TABLE);
 	}
 
 	static public function listAssoc(): array
@@ -52,14 +57,14 @@ class Projects
 			GROUP BY %s
 			ORDER BY %s;';
 
-		$order = $order_code ? 'a.code COLLATE U_NOCASE' : 'a.label COLLATE U_NOCASE';
+		$order = $order_code ? 'p.code COLLATE U_NOCASE' : 'p.label COLLATE U_NOCASE';
 
 		if ($by_year) {
-			$group = 'y.id, a.code';
+			$group = 'y.id, p.code';
 			$order = 'y.start_date DESC, ' . $order;
 		}
 		else {
-			$group = 'a.code, y.id';
+			$group = 'p.code, y.id';
 			$order = $order . ', y.id';
 		}
 
@@ -86,7 +91,7 @@ class Projects
 		};
 
 		foreach (DB::getInstance()->iterate($sql) as $row) {
-			$id = $by_year ? $row->id_year : $row->account_code;
+			$id = $by_year ? $row->id_year : $row->project_code;
 
 			if (null !== $current && $current->selector !== $id) {
 				$current->items[] = $total($current, $by_year);
@@ -98,9 +103,9 @@ class Projects
 			if (null === $current) {
 				$current = (object) [
 					'selector' => $id,
-					'id' => $by_year ? $row->id_year : $row->id_account,
-					'label' => $by_year ? $row->year_label : ($order_code ? $row->account_code . ' - ' : '') . $row->account_label,
-					'description' => !$by_year ? $row->account_description : null,
+					'id' => $by_year ? $row->id_year : $row->id_project,
+					'label' => $by_year ? $row->year_label : ($order_code ? $row->project_code . ' - ' : '') . $row->project_label,
+					'description' => !$by_year ? $row->project_description : null,
 					'items' => []
 				];
 
@@ -109,7 +114,7 @@ class Projects
 				}
 			}
 
-			$row->label = !$by_year ? $row->year_label : ($order_code ? $row->account_code . ' - ' : '') . $row->account_label;
+			$row->label = !$by_year ? $row->year_label : ($order_code ? $row->project_code . ' - ' : '') . $row->project_label;
 			$current->items[] = $row;
 
 			foreach ($sums as $s) {
