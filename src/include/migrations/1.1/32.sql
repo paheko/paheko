@@ -11,6 +11,7 @@ DELETE FROM acc_accounts_old AS a WHERE type = 7 OR
 	(id_chart IN (SELECT id FROM acc_charts WHERE country = 'FR')
 		AND code LIKE '9%'
 		AND (SELECT COUNT(*) FROM acc_transactions_lines AS b WHERE b.id_account = a.id) = 0
+		AND user = 0
 	);
 
 INSERT INTO acc_accounts SELECT *, CASE WHEN type IS NOT NULL THEN 1 ELSE 0 END FROM acc_accounts_old;

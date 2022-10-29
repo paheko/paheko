@@ -9,6 +9,7 @@ use Garradin\Entity;
 use Garradin\ValidationException;
 use Garradin\Utils;
 use Garradin\Entities\Accounting\Account;
+use Garradin\Entities\Accounting\Project;
 use Garradin\Entities\Accounting\Year;
 use KD2\DB\EntityManager;
 use KD2\DB\DB_Exception;
