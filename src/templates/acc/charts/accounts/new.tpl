@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Nouveau compte" current="acc/charts"}
+{include file="admin/_head.tpl" title="Nouveau compte" current="acc/years"}
 
 {include file="acc/charts/accounts/_nav.tpl" current="new"}
 
