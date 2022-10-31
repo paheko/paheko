@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Modifier un plan comptable" current="acc/charts"}
+{include file="admin/_head.tpl" title="Modifier un plan comptable" current="acc/years"}
 
 {form_errors}
 
