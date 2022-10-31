@@ -101,16 +101,17 @@ td.money, th.money {
     max-width: 500px;
 }
 
-table.accounts { width: 100%; }
-table.accounts .actions { text-align: right; }
-table.accounts tbody tr td:first-child { font-family: monospace; }
-table.accounts th { font-weight: normal; }
-table.accounts .account-level-1 th { font-size: 1.6em; }
-table.accounts .account-level-2 th { padding-left: 1em; font-size: 1.3em; }
-table.accounts .account-level-3 th { padding-left: 2em; }
-table.accounts .account-level-4 th { padding-left: 3em; }
-table.accounts .account-level-5 th { padding-left: 4em; }
-table.accounts .account-level-6 th { padding-left: 5em; }
+tr.account td:first-child { font-family: monospace; }
+table tr.account th { font-weight: normal; }
+tr.account-level-1 th { font-size: 1.6em; }
+tr.account-level-2 th { padding-left: 1em; font-size: 1.3em; }
+tr.account-level-3 th { padding-left: 2em; }
+tr.account-level-4 th { padding-left: 3em; }
+tr.account-level-5 th { padding-left: 4em; }
+tr.account-level-6 th { padding-left: 5em; }
+tr.account button { opacity: 0.6; transition: opacity .3s; width: 8em;}
+tr.account button[value="1"] { opacity: 1; }
+
 table.projects tr.title p.help { font-weight: normal; text-align: center; }
 
 .attachments {
