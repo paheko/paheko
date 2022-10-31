@@ -1,4 +1,4 @@
-code,label,description,position,type
+code,label,description,position,bookmark
 1,"Classe 1 — Comptes de capitaux (Fonds propres, emprunts et dettes assimilés)",,Passif,
 10,FONDS ASSOCIATIFS ET RÉSERVES,,Passif,
 102,Fonds associatif sans droit de reprise,,Passif,
@@ -11,13 +11,13 @@ code,label,description,position,type
 106,Réserves,,Passif,
 1063,Réserves statutaires ou contractuelles,,Passif,
 1064,Réserves réglementées,,Passif,
-1068,Autres réserves (dont réserves pour projet associatif),,Passif,Affectation du résultat
+1068,Autres réserves (dont réserves pour projet associatif),,Passif,
 11,REPORT À NOUVEAU,,Passif,
-110,Report à nouveau (Solde créditeur),,Passif,Report à nouveau créditeur
-119,Report à nouveau (Solde débiteur),,Passif,Report à nouveau débiteur
+110,Report à nouveau (Solde créditeur),,Passif,
+119,Report à nouveau (Solde débiteur),,Passif,
 12,RÉSULTAT NET DE L'EXERCICE,,Passif,
-120,Résultat de l'exercice (excédent),,Passif,Résultat excédentaire
-129,Résultat de l'exercice (déficit),,Passif,Résultat déficitaire
+120,Résultat de l'exercice (excédent),,Passif,
+129,Résultat de l'exercice (déficit),,Passif,
 13,SUBVENTIONS D'INVESTISSEMENT AFFECTÉES A DES BIENS NON RENOUVELABLES,,Passif,
 131,Subventions d'investissement (renouvelables),,Passif,
 139,Subventions d'investissement inscrites au compte de résultat,,Passif,
@@ -90,12 +90,12 @@ code,label,description,position,type
 4,Classe 4 — Comptes de tiers,,Actif ou passif,
 40,FOURNISSEURS ET COMPTES RATTACHÉS,,Passif,
 401,Fournisseurs,,Passif,
-4010,Autres fournisseurs,,Actif ou passif,Tiers
+4010,Autres fournisseurs,,Actif ou passif,
 408,Fournisseurs - Factures non parvenues,,Passif,
 409,Avances aux fournisseurs,,Actif,
 41,USAGERS ET COMPTES RATTACHÉS,,Actif,
 411,Usagers,,Actif,
-4110,Autres usagers,,Actif ou passif,Tiers
+4110,Autres usagers,,Actif ou passif,
 419,Avances aux usagers,,Passif,
 42,PERSONNEL ET COMPTES RATTACHÉS,,Passif,
 421,Personnel - Rémunérations dues,,Passif,
@@ -177,11 +177,11 @@ code,label,description,position,type
 50,VALEURS MOBILIÈRES DE PLACEMENT,,Actif,
 51,"BANQUES, ÉTABLISSEMENTS FINANCIERS ET ASSIMILÉS",,Actif,
 511,Valeurs à l'encaissement,,Actif,
-5112,Chèques à encaisser,,Actif ou passif,Attente d'encaissement
+5112,Chèques à encaisser,,Actif ou passif,
 5115,Paiements par carte à encaisser,,Actif ou passif,
 512,Banques,,Actif ou passif,
 53,CAISSE,,Actif,
-530,Caisse,,Actif ou passif,Caisse
+530,Caisse,,Actif ou passif,
 54,RÉGIES D'AVANCES ET ACCRÉDITIFS,,Actif,
 58,VIREMENTS INTERNES,,Actif,
 59,PROVISIONS POUR DÉPRÉCIATION DES COMPTES FINANCIERS,,Actif,
@@ -189,34 +189,34 @@ code,label,description,position,type
 60,ACHATS,,Charge,
 601,Achats stockés - Matières premières et fournitures,,Charge,
 602,Achats stockés - Autres approvisionnements,,Charge,
-604,Achat d'études et prestations de services,,Charge,Dépenses
+604,Achat d'études et prestations de services,,Charge,
 606,Achats non stockés de matières et fournitures,,Charge,
-6061,"Fournitures non stockables (eau, énergie...)","Facture d'eau, d'opérateur électrique, etc.",Charge,Dépenses
-6063,Fournitures d'entretien et de petit équipement,,Charge,Dépenses
-6064,Fournitures administratives,"Cartouches d'encre, papier, matériel bureautique, etc.",Charge,Dépenses
-6068,Autres matières et fournitures,,Charge,Dépenses
-607,Achats de marchandises,Marchandises destinées à être revendues en l'état.,Charge,Dépenses
+6061,"Fournitures non stockables (eau, énergie...)","Facture d'eau, d'opérateur électrique, etc.",Charge,
+6063,Fournitures d'entretien et de petit équipement,,Charge,
+6064,Fournitures administratives,"Cartouches d'encre, papier, matériel bureautique, etc.",Charge,
+6068,Autres matières et fournitures,,Charge,
+607,Achats de marchandises,Marchandises destinées à être revendues en l'état.,Charge,
 61,SERVICES EXTÉRIEURS,,Charge,
 611,Sous-traitance générale,,Charge,
 612,Redevances de crédit-bail,,Charge,
-613,Locations,Locations versées pour un local ou du matériel.,Charge,Dépenses
+613,Locations,Locations versées pour un local ou du matériel.,Charge,
 614,Charges locatives et de co-propriété,,Charge,
 615,Entretiens et réparations,,Charge,
-616,Primes d'assurance,,Charge,Dépenses
+616,Primes d'assurance,,Charge,
 618,Divers,,Charge,
 62,AUTRES SERVICES EXTÉRIEURS,,Charge,
 621,Personnel extérieur à l'association,,Charge,
-62141,Mises à disposition de personnel salarié,,Charge,Dépenses
+62141,Mises à disposition de personnel salarié,,Charge,
 622,Rémunérations d'intermédiaires et honoraires,,Charge,
 6226,Honoraires,,Charge,
-6227,Frais d'actes et de contentieux,"Insertion au Journal Officiel, frais de justice, etc.",Charge,Dépenses
+6227,Frais d'actes et de contentieux,"Insertion au Journal Officiel, frais de justice, etc.",Charge,
 6228,Divers,,Charge,
-623,"Publicité, publications, relations publiques","Bulletins, affiches, communication, etc.",Charge,Dépenses
+623,"Publicité, publications, relations publiques","Bulletins, affiches, communication, etc.",Charge,
 624,Transports de biens et transports collectifs du personnel,,Charge,
-625,"Déplacements, missions et réceptions","Billet SNCF, remboursement de frais kilométrique, etc.",Charge,Dépenses
-626,Frais postaux et de télécommunications,"Facture d'accès à Internet, timbres, etc.",Charge,Dépenses
-627,Services bancaires et assimilés,Frais bancaires,Charge,Dépenses
-628,Divers,,Charge,Dépenses
+625,"Déplacements, missions et réceptions","Billet SNCF, remboursement de frais kilométrique, etc.",Charge,
+626,Frais postaux et de télécommunications,"Facture d'accès à Internet, timbres, etc.",Charge,
+627,Services bancaires et assimilés,Frais bancaires,Charge,
+628,Divers,,Charge,
 63,"IMPÔTS, TAXES ET VERSEMENTS ASSIMILÉS",,Charge,
 631,"Impôts, taxes et versements assimilés sur rémunérations (Administration des impôts)",,Charge,
 6311,Taxes sur les salaires,,Charge,
@@ -232,12 +232,12 @@ code,label,description,position,type
 647,Autres charges sociales,,Charge,
 648,Autres charges de personnel,,Charge,
 65,AUTRES CHARGES DE GESTION COURANTE,,Charge,
-652,Licences fédérales,Licences payées pour les adhérents (par exemple fédération sportive etc.),Charge,Dépenses
-658,Charges diverses de gestion courante,,Charge,Dépenses
+652,Licences fédérales,Licences payées pour les adhérents (par exemple fédération sportive etc.),Charge,
+658,Charges diverses de gestion courante,,Charge,
 66,CHARGES FINANCIÈRES,,Charge,
 661,Charges d'intérêts,,Charge,
 67,CHARGES EXCEPTIONNELLES,,Charge,
-670,Charges exceptionnelles,Autres dépenses exceptionnelles,Charge,Dépenses
+670,Charges exceptionnelles,Autres dépenses exceptionnelles,Charge,
 671,Charges exceptionnelles sur opérations de gestion,,Charge,
 6713,"Dons, libéralités",,Charge,
 678,Autres charges exceptionnelles,,Charge,
@@ -252,17 +252,17 @@ code,label,description,position,type
 695,Impôts sur les sociétés (y compris impôts sur les sociétés des personnes morales non lucratives),,Charge,
 7,Classe 7 — Comptes de produits,,Produit,
 70,"VENTES DE PRODUITS FINIS, PRESTATIONS DE SERVICES, MARCHANDISES",,Produit,
-701,Ventes de produits finis,Vente de produits fabriqués par l'association.,Produit,Recettes
-706,Prestations de services,,Produit,Recettes
-707,Ventes de marchandises,,Produit,Recettes
+701,Ventes de produits finis,Vente de produits fabriqués par l'association.,Produit,
+706,Prestations de services,,Produit,
+707,Ventes de marchandises,,Produit,
 708,Produits des activités annexes,,Produit,
 71,PRODUCTION STOCKÉE (OU DÉSTOCKAGE),,Produit,
 72,PRODUCTION IMMOBILISÉE,,Produit,
 74,SUBVENTIONS D'EXPLOITATION,,Produit,
-740,Subventions reçues,,Produit,Recettes
+740,Subventions reçues,,Produit,
 75,AUTRES PRODUITS DE GESTION COURANTE,,Produit,
-754,Collectes,,Produit,Recettes
-756,Cotisations,,Produit,Recettes
+754,Collectes,,Produit,
+756,Cotisations,,Produit,
 758,Produits divers de gestion courante,,Produit,
 7587,Ventes de dons en nature,,Produit,
 7588,Autres produits de la générosité du public,,Produit,
@@ -274,7 +274,7 @@ code,label,description,position,type
 7715,Subventions d'équilibre,,Produit,
 775,Produits des cessions d'éléments d'actifs,,Produit,
 778,Autres produits exceptionnels,,Produit,
-7780,Manifestations diverses,"Revenus provenant de manifestations au profit de l'association : droit d'entrée, location d'emplacement en vide grenier, ventes, etc.",Produit,Recettes
+7780,Manifestations diverses,"Revenus provenant de manifestations au profit de l'association : droit d'entrée, location d'emplacement en vide grenier, ventes, etc.",Produit,
 7788,Produits exceptionnels divers,,Produit,
 78,REPRISES SUR AMORTISSEMENTS ET PROVISIONS,,Produit,
 79,TRANSFERT DE CHARGES,,Produit,
@@ -283,13 +283,13 @@ code,label,description,position,type
 797,Transferts de charges exceptionnels,,Produit,
 8,Classe 8 ­— Comptes spéciaux,,,
 86,RÉPARTITION PAR NATURE DE CHARGES,,Charge,
-861,Mise à dispositions gratuites de biens,,Charge,Bénévolat
-862,Prestations,,Charge,Bénévolat
-864,Personnel bénévole,,Charge,Bénévolat
+861,Mise à dispositions gratuites de biens,,Charge,
+862,Prestations,,Charge,
+864,Personnel bénévole,,Charge,
 87,RÉPARTITION PAR NATURE DE RESSOURCES,,Produit,
-870,Bénévolat,,Produit,Bénévolat
-871,Prestations en nature,,Produit,Bénévolat
-875,Dons en nature,,Produit,Bénévolat
+870,Bénévolat,,Produit,
+871,Prestations en nature,,Produit,
+875,Dons en nature,,Produit,
 89,BILAN,,,
-890,Bilan d'ouverture,,Actif ou passif,Ouverture
-891,Bilan de clôture,,Actif ou passif,Clôture
+890,Bilan d'ouverture,,Actif ou passif,
+891,Bilan de clôture,,Actif ou passif,

@@ -7,7 +7,6 @@ use Garradin\Entities\Accounting\Line;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Accounting\Year;
 use Garradin\Config;
-use Garradin\CSV;
 use Garradin\DB;
 use Garradin\DynamicList;
 use Garradin\Utils;
@@ -19,8 +18,6 @@ class Accounts
 {
 	protected $chart_id;
 	protected $em;
-
-	const EXPECTED_CSV_COLUMNS = ['code', 'label', 'description', 'position', 'bookmark'];
 
 	public function __construct(int $chart_id)
 	{
@@ -65,6 +62,51 @@ class Accounts
 	{
 		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? AND type != 0 AND type != ? ORDER BY code COLLATE U_NOCASE;',
 			$this->chart_id, Account::TYPE_VOLUNTEERING);
+	}
+
+	public function list(): DynamicList
+	{
+		$columns = [
+			'id' => [
+				'select' => 'u.id',
+			],
+			'user_number' => [
+				'select' => 'u.numero',
+				'label' => 'N° membre',
+			],
+			'user_identity' => [
+				'select' => 'u.' . $id_field,
+				'label' => 'Membre',
+			],
+			'balance' => [
+				'select' => 'SUM(l.debit - l.credit)',
+				'label'  => 'Solde',
+				//'order'  => 'balance != 0 %s, balance < 0 %1$s',
+			],
+			'status' => [
+				'select' => null,
+				'label' => 'Statut',
+			],
+		];
+
+		$tables = 'acc_transactions_users tu
+			INNER JOIN membres u ON u.id = tu.id_user
+			INNER JOIN acc_transactions t ON tu.id_transaction = t.id
+			INNER JOIN acc_transactions_lines l ON t.id = l.id_transaction
+			INNER JOIN acc_accounts a ON a.id = l.id_account';
+
+		$conditions = 'a.type = ' . Account::TYPE_THIRD_PARTY . ' AND t.id_year = ' . $year_id;
+
+		$list = new DynamicList($columns, $tables, $conditions);
+		$list->orderBy('balance', false);
+		$list->groupBy('u.id');
+		$list->setCount('COUNT(*)');
+		$list->setPageSize(null);
+		$list->setExportCallback(function (&$row) {
+			$row->balance = Utils::money_format($row->balance, '.', '', false);
+		});
+
+		return $list;
 	}
 
 	/**
@@ -212,79 +254,6 @@ class Accounts
 				return Account::NONE;
 			default:
 				return Account::ASSET_OR_LIABILITY;
-		}
-	}
-
-	public function copyFrom(int $id)
-	{
-		$db = DB::getInstance();
-		return $db->exec(sprintf('INSERT INTO %s (id_chart, code, label, description, position, type, user)
-			SELECT %d, code, label, description, position, type, user FROM %1$s WHERE id_chart = %d;', Account::TABLE, $this->chart_id, $id));
-	}
-
-	public function importUpload(array $file)
-	{
-		if (empty($file['size']) || empty($file['tmp_name'])) {
-			throw new UserException('Fichier invalide');
-		}
-
-		self::importCSV($file['tmp_name']);
-	}
-
-	public function importCSV(string $file, bool $update = false): void
-	{
-		$db = DB::getInstance();
-		$positions = array_flip(Account::POSITIONS_NAMES);
-		$types = array_flip(Account::TYPES_NAMES);
-
-		$db->begin();
-
-		try {
-			foreach (CSV::import($file, self::EXPECTED_CSV_COLUMNS) as $line => $row) {
-				$account = null;
-
-				if ($update) {
-					$account = EntityManager::findOne(Account::class, 'SELECT * FROM @TABLE WHERE code = ? AND id_chart = ?;', $row['code'], $this->chart_id);
-				}
-
-				if (!$account) {
-					$account = new Account;
-					$account->id_chart = $this->chart_id;
-				}
-
-				try {
-					if (!isset($positions[$row['position']])) {
-						throw new ValidationException('Position inconnue : ' . $row['position']);
-					}
-
-					if (!isset($types[$row['type']])) {
-						throw new ValidationException('Type inconnu : ' . $row['type']);
-					}
-
-					// Don't update user-set values
-					if ($account->exists()) {
-						unset($row['bookmark'], $row['description']);
-					}
-					else {
-						$row['user'] = !empty($row['added']);
-						$row['bookmark'] = !empty($row['bookmark']);
-					}
-
-					$row['position'] = $positions[$row['position']];
-
-					$account->importForm($row);
-					$account->save();
-				}
-				catch (ValidationException $e) {
-					throw new UserException(sprintf('Ligne %d : %s', $line, $e->getMessage()));
-				}
-			}
-
-			$db->commit();
-		}
-		catch (\Exception $e) {
-			$db->rollback();
-			throw $e;
 		}
 	}
 

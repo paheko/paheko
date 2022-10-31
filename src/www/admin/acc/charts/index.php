@@ -12,41 +12,23 @@ $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ);
 $tpl->assign('list', Charts::list());
 
 if ($session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)) {
-	if (f('new') && $form->check('acc_charts_new')) {
-		try {
-			$chart = new Chart;
-			$chart->importForm();
-			$chart->save();
+	$csrf_key = 'acc_charts_new';
 
-			if (f('copy')) {
-				$chart->accounts()->copyFrom((int) f('copy'));
-			}
+	$form->runIf(f('type') == 'copy', function () {
+		Charts::copyFrom((int) f('copy'), f('label'), f('country'));
+	}, $csrf_key, '!acc/charts/');
 
-			Utils::redirect(Utils::getSelfURI(false));
-		}
-		catch (UserException $e) {
-			$form->addError($e->getMessage());
-		}
-	}
-
-	$form->runIf('install', function () {
+	$form->runIf(f('type') == 'install', function () {
 		Charts::install(f('install'));
-	}, 'acc_charts_new', '!acc/charts/');
+	}, $csrf_key, '!acc/charts/');
 
+	$form->runIf(f('type') == 'import', function () {
+		Charts::import('file', f('label'), f('country'));
+	}, $csrf_key, '!acc/charts/');
 
-	$form->runIf('import', function () {
-		$db = DB::getInstance();
-		$db->begin();
+	$tpl->assign(compact('csrf_key'));
 
-		$chart = new Chart;
-		$chart->importForm();
-		$chart->save();
-		$chart->accounts()->importUpload($_FILES['file']); // This will save everything
-
-		$db->commit();
-	}, 'acc_charts_new', '!acc/charts/');
-
-	$tpl->assign('columns', implode(', ', Accounts::EXPECTED_CSV_COLUMNS));
+	$tpl->assign('columns', implode(', ', Chart::EXPECTED_CSV_COLUMNS));
 	$tpl->assign('country_list', Utils::getCountryList());
 
 	$tpl->assign('from', (int)qg('from'));

@@ -2,6 +2,7 @@
 
 namespace Garradin\Entities\Accounting;
 
+use Garradin\CSV;
 use Garradin\DB;
 use Garradin\Entity;
 use Garradin\Utils;
@@ -9,23 +10,19 @@ use Garradin\ValidationException;
 use Garradin\UserException;
 use Garradin\Accounting\Accounts;
 
+use KD2\DB\EntityManager;
+
 class Chart extends Entity
 {
 	const TABLE = 'acc_charts';
 
-	protected $id;
-	protected $label;
-	protected $country;
-	protected $code;
-	protected $archived = 0;
+	protected ?int $id;
+	protected string $label;
+	protected string $country;
+	protected ?string $code;
+	protected bool $archived = false;
 
-	protected $_types = [
-		'id'       => 'int',
-		'label'    => 'string',
-		'country'  => 'string',
-		'code'     => '?string',
-		'archived' => 'int',
-	];
+	const EXPECTED_CSV_COLUMNS = ['code', 'label', 'description', 'position', 'bookmark'];
 
 	public function selfCheck(): void
 	{
@@ -33,7 +30,6 @@ class Chart extends Entity
 		$this->assert(strlen($this->label) <= 200, 'Le libellé ne peut faire plus de 200 caractères.');
 		$this->assert(trim($this->country) !== '', 'Le pays ne peut rester vide.');
 		$this->assert(Utils::getCountryName($this->country), 'Le code pays doit être un code ISO valide');
-		$this->assert($this->archived === 0 || $this->archived === 1);
 		parent::selfCheck();
 	}
 
@@ -45,5 +41,57 @@ class Chart extends Entity
 	public function canDelete()
 	{
 		return !DB::getInstance()->firstColumn(sprintf('SELECT 1 FROM %s WHERE id_chart = ? LIMIT 1;', Year::TABLE), $this->id());
+	}
+
+	public function importCSV(string $file, bool $update = false): void
+	{
+		$db = DB::getInstance();
+		$positions = array_flip(Account::POSITIONS_NAMES);
+		$types = array_flip(Account::TYPES_NAMES);
+
+		$db->begin();
+
+		try {
+			foreach (CSV::import($file, self::EXPECTED_CSV_COLUMNS) as $line => $row) {
+				$account = null;
+
+				if ($update) {
+					$account = EntityManager::findOne(Account::class, 'SELECT * FROM @TABLE WHERE code = ? AND id_chart = ?;', $row['code'], $this->id());
+				}
+
+				if (!$account) {
+					$account = new Account;
+					$account->id_chart = $this->id();
+				}
+
+				try {
+					if (!isset($positions[$row['position']])) {
+						throw new ValidationException('Position inconnue : ' . $row['position']);
+					}
+					// Don't update user-set values
+					if ($account->exists()) {
+						unset($row['bookmark'], $row['description']);
+					}
+					else {
+						$row['user'] = !empty($row['added']);
+						$row['bookmark'] = !empty($row['bookmark']);
+					}
+
+					$row['position'] = $positions[$row['position']];
+
+					$account->importForm($row);
+					$account->save();
+				}
+				catch (ValidationException $e) {
+					throw new UserException(sprintf('Ligne %d : %s', $line, $e->getMessage()));
+				}
+			}
+
+			$db->commit();
+		}
+		catch (\Exception $e) {
+			$db->rollback();
+			throw $e;
+		}
 	}
 }

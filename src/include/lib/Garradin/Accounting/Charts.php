@@ -2,6 +2,7 @@
 
 namespace Garradin\Accounting;
 
+use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Chart;
 use Garradin\Utils;
 use Garradin\DB;
@@ -39,29 +40,18 @@ class Charts
 			throw new \RuntimeException('Ce plan comptable est déjà installé');
 		}
 
+		$db = DB::getInstance();
+		$db->begin();
+
 		$chart = new Chart;
         $chart->label = self::BUNDLED_CHARTS[$chart_code];
         $chart->country = $country;
         $chart->code = $code;
         $chart->save();
-        $chart->accounts()->importCSV($file);
+        $chart->importCSV($file);
+
+        $db->commit();
         return $chart;
-	}
-
-	static public function updateInstalled(string $chart_code): ?Chart
-	{
-		$file = sprintf('%s/include/data/charts/%s.csv', ROOT, $chart_code);
-		$country = strtoupper(substr($chart_code, 0, 2));
-		$code = strtoupper(substr($chart_code, 3));
-
-		$chart = EntityManager::findOne(Chart::class, 'SELECT * FROM @TABLE WHERE code = ? AND country = ?;', $code, $country);
-
-		if (!$chart) {
-			return self::install($chart_code);
-		}
-
-		$chart->accounts()->importCSV($file, true);
-		return $chart;
 	}
 
 	static public function listInstallable(): array
@@ -109,5 +99,36 @@ class Charts
 		}
 
 		return $out;
+	}
+
+	static public function copyFrom(int $from_id, ?string $label, ?string $country): void
+	{
+		$db = DB::getInstance();
+		$db->begin();
+
+		$chart = new Chart;
+		$chart->importForm(compact('label', 'country'));
+		$chart->save();
+
+		$db->exec(sprintf('INSERT INTO %s (id_chart, code, label, description, position, type, user, bookmark)
+			SELECT %d, code, label, description, position, type, user, bookmark FROM %1$s WHERE id_chart = %d;', Account::TABLE, $chart->id, $from_id));
+		$db->commit();
+	}
+
+	static public function import(string $file_key, ?string $label, ?string $country): void
+	{
+		if (empty($_FILES[$file_key]) || empty($_FILES[$file_key]['size']) || empty($_FILES[$file_key]['tmp_name'])) {
+			throw new UserException('Fichier invalide');
+		}
+
+		$db = DB::getInstance();
+		$db->begin();
+
+		$chart = new Chart;
+		$chart->importForm(compact('label', 'country'));
+		$chart->save();
+		$chart->importCSV($_FILES[$file_key]['tmp_name']); // This will save everything
+
+		$db->commit();
 	}
 }
