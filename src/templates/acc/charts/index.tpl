@@ -13,6 +13,8 @@
 </p>
 {/if}
 
+{form_errors}
+
 {if count($list)}
 	<table class="list">
 		<thead>
@@ -49,7 +51,6 @@
 
 {if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 	<form method="post" action="{$self_url_no_qs}" enctype="multipart/form-data">
-		<h2 class="ruler">Ajouter un nouveau plan comptable</h2>
 		<fieldset>
 			<legend>Créer un nouveau plan comptable</legend>
 			<dl>
@@ -57,15 +58,27 @@
 				{input type="radio-btn" name="type" value="copy" label="Recopier un plan comptable pour le modifier"}
 				{input type="radio-btn" name="type" value="import" label="Importer un plan comptable personnel" help="À partir d'un tableau (CSV, Office, etc.)"}
 			</dl>
-			<dl class="type-copy">
+		</fieldset>
+
+		<fieldset class="type-copy hidden">
+			<legend>Créer un nouveau plan comptable à partir d'un existant</legend>
+			<dl>
 				{input type="select_groups" name="copy" options=$charts_groupped label="Recopier depuis" required=1 default=$from}
 				{input type="text" name="label" label="Libellé" required=1}
 				{input type="select" name="country" label="Pays" required=1 options=$country_list default=$config.pays}
 			</dl>
-			<dl class="type-install">
+		</fieldset>
+
+		<fieldset class="type-install hidden">
+			<legend>Installer un nouveau plan comptable officiel</legend>
+			<dl>
 				{input type="select" name="install" label="Plan comptable" required=true options=$install_list}
 			</dl>
-			<dl class="type-import">
+		</fieldset>
+
+		<fieldset class="type-import hidden">
+			<legend>Importer un plan comptable personnel</legend>
+			<dl>
 				{input type="text" name="label" label="Libellé" required=1}
 				{input type="select" name="country" label="Pays" required=1 options=$country_list default=$config.pays}
 				{input type="file" name="file" label="Fichier à importer" accept="csv" required=1}
@@ -77,12 +90,34 @@
 					</ul>
 				</dd>
 			</dl>
-			<p class="submit type-all">
-				{csrf_field key="acc_charts_new"}
-				{button type="submit" name="new" label="Créer" shape="right" class="main"}
-			</p>
 		</fieldset>
+
+		<p class="submit type-all">
+			{csrf_field key=$csrf_key}
+			{button type="submit" name="new" label="Créer" shape="right" class="main"}
+		</p>
 	</form>
+	<script type="text/javascript">
+	{literal}
+	function toggleFormOption() {
+		var v = $('input[name="type"]:checked')[0].value;
+
+		if (!v) {
+			return;
+		}
+
+		g.toggle('.type-import, .type-copy, .type-install', false);
+		g.toggle('.type-' + v, true);
+		g.toggle('.type-all', true);
+	}
+
+	$('input[name="type"]').forEach((e) => {
+		e.onchange = toggleFormOption;
+	});
+
+	toggleFormOption();
+	{/literal}
+	</script>
 {/if}
 
 {include file="admin/_foot.tpl"}
