@@ -25,15 +25,13 @@ if ($chart->archived) {
 $accounts = $chart->accounts();
 
 $account = new Account;
-$account->position = Account::ASSET_OR_LIABILITY;
+$account->id_chart = $chart->id();
 
 $type = f('type') ?? qg('type');
 
 // Simple creation with pre-determined account type
 if ($type !== null) {
 	$account->type = (int)$type;
-	$account->position = Accounts::getPositionFromType($account->type);
-	$account->code = $accounts->getNextCodeForType($account->type);
 }
 
 $form->runIf('save', function () use ($account, $accounts, $chart, $current_year) {
@@ -43,7 +41,8 @@ $form->runIf('save', function () use ($account, $accounts, $chart, $current_year
 	$account->importForm();
 
 	$account->id_chart = $chart->id();
-	$account->user = 1;
+	$account->user = true;
+	$account->bookmark = (bool) f('bookmark');
 	$account->save();
 
 	if (!empty(f('opening_amount')) && $current_year) {
@@ -77,6 +76,14 @@ $form->runIf('save', function () use ($account, $accounts, $chart, $current_year
 }, 'acc_accounts_new');
 
 $types_create = [
+	Account::TYPE_EXPENSE => [
+		'label' => Account::TYPES_NAMES[Account::TYPE_EXPENSE],
+		'help' => 'Compte destiné à recevoir les dépenses (charges)',
+	],
+	Account::TYPE_REVENUE => [
+		'label' => Account::TYPES_NAMES[Account::TYPE_REVENUE],
+		'help' => 'Compte destiné à recevoir les recettes (produits)',
+	],
 	Account::TYPE_BANK => [
 		'label' => Account::TYPES_NAMES[Account::TYPE_BANK],
 		'help' => 'Compte bancaire, livret, ou intermédiaire financier (type HelloAsso, Paypal, Stripe, SumUp, etc.)',
@@ -93,21 +100,13 @@ $types_create = [
 		'label' => Account::TYPES_NAMES[Account::TYPE_THIRD_PARTY],
 		'help' => 'Fournisseur, membres de l\'association, collectivités ou services de l\'État par exemple.',
 	],
-	Account::TYPE_EXPENSE => [
-		'label' => Account::TYPES_NAMES[Account::TYPE_EXPENSE],
-		'help' => 'Compte destiné à recevoir les dépenses (charges)',
+	Account::TYPE_VOLUNTEERING_REVENUE => [
+		'label' => 'Source du bénévolat',
+		'help' => 'Pour indiquer d\'où provient le bénévolat (temps donné, prestation gratuite, etc.)',
 	],
-	Account::TYPE_REVENUE => [
-		'label' => Account::TYPES_NAMES[Account::TYPE_REVENUE],
-		'help' => 'Compte destiné à recevoir les recettes (produits)',
-	],
-	Account::TYPE_ANALYTICAL => [
-		'label' => Account::TYPES_NAMES[Account::TYPE_ANALYTICAL],
-		'help' => 'Permet de suivre un budget spécifique, un projet, par exemple : bourse aux vélos, séjour au ski, etc.',
-	],
-	Account::TYPE_VOLUNTEERING => [
-		'label' => 'Projet analytique',
-		'help' => 'Pour valoriser le temps de bénévolat, les dons en nature, etc.',
+	Account::TYPE_VOLUNTEERING_EXPENSE => [
+		'label' => 'Utilisation du bénévolat',
+		'help' => 'Pour valoriser l\'utilisation du temps de bénévolat, les dons en nature, etc.',
 	],
 	Account::TYPE_NONE => [
 		'label' => 'Autre type de compte',
@@ -116,6 +115,11 @@ $types_create = [
 
 $type = $account->type;
 
-$tpl->assign(compact('types', 'types_create', 'account', 'chart'));
+if ($type) {
+	$tpl->assign('code_base', $account->getNumberBase());
+	$tpl->assign('code_value', $account->getNewNumberAvailable());
+}
+
+$tpl->assign(compact('types_create', 'account', 'chart'));
 
 $tpl->display('acc/charts/accounts/new.tpl');

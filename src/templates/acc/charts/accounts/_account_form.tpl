@@ -3,23 +3,44 @@
 {/if}
 
 <dl>
-
-	{if !$account.type || $account.type == $account::TYPE_VOLUNTEERING}
-		<dt><label for="f_position_0">Position au bilan ou résultat</label>{if !$edit_disabled} <b>(obligatoire)</b>{/if}</dt>
-		<dd class="help">La position permet d'indiquer dans quelle partie du bilan ou du résultat doit figurer le compte.</dd>
-		{input type="radio" label="Ne pas utiliser ce compte au bilan ni au résultat" name="position" value=0 source=$account disabled=$edit_disabled}
-		{if $account.type != $account::TYPE_VOLUNTEERING}
-		{input type="radio" label="Bilan : actif" name="position" value=Entities\Accounting\Account::ASSET source=$account help="ce que possède l'association : stocks, locaux, soldes bancaires, etc." disabled=$edit_disabled}
-		{input type="radio" label="Bilan : passif" name="position" value=Entities\Accounting\Account::LIABILITY source=$account help="ce que l'association doit : dettes, provisions, réserves, etc." disabled=$edit_disabled}
-		{input type="radio" label="Bilan : actif ou passif" name="position" value=Entities\Accounting\Account::ASSET_OR_LIABILITY source=$account help="le compte sera placé à l'actif si son solde est débiteur, ou au passif s'il est créditeur" disabled=$edit_disabled}
+	{if $can_edit}
+		{if !$account.type}
+			<dt><label for="f_position_0">Position au bilan ou résultat</label> <b>(obligatoire)</b></dt>
+			<dd class="help">La position permet d'indiquer dans quelle partie du bilan ou du résultat doit figurer le compte.</dd>
+			{input type="radio" label="Ne pas utiliser ce compte au bilan ni au résultat" name="position" value=0 source=$account}
+			{input type="radio" label="Bilan : actif" name="position" value=Entities\Accounting\Account::ASSET source=$account help="ce que possède l'association : stocks, locaux, soldes bancaires, etc."}
+			{input type="radio" label="Bilan : passif" name="position" value=Entities\Accounting\Account::LIABILITY source=$account help="ce que l'association doit : dettes, provisions, réserves, etc."}
+			{input type="radio" label="Bilan : actif ou passif" name="position" value=Entities\Accounting\Account::ASSET_OR_LIABILITY source=$account help="le compte sera placé à l'actif si son solde est débiteur, ou au passif s'il est créditeur"}
+			{input type="radio" label="Résultat : charge" name="position" value=Entities\Accounting\Account::EXPENSE source=$account help="dépenses"}
+			{input type="radio" label="Résultat : produit" name="position" value=Entities\Accounting\Account::REVENUE source=$account help="recettes"}
 		{/if}
-		{input type="radio" label="Résultat : charge" name="position" value=Entities\Accounting\Account::EXPENSE source=$account help="dépenses" disabled=$edit_disabled}
-		{input type="radio" label="Résultat : produit" name="position" value=Entities\Accounting\Account::REVENUE source=$account help="recettes" disabled=$edit_disabled}
+
+		{if $account.type}
+			<dt><label for="f_code">Numéro de compte</label>  <b>(obligatoire)</b></dt>
+			<dd>
+				<input type="text" readonly=true value="{$code_base}" size="{$code_base|strlen}" />
+				{input type="text" maxlength="15" size="15" pattern="[A-Z0-9]+" name="code" required=true default=$code_value}
+			</dd>
+			<dd class="help">Le numéro du compte sert à trier le compte dans le plan comptable, et à retrouver le compte plus rapidement.</dd>
+		{else}
+			{input type="text" label="Numéro" maxlength="20" pattern="[A-Z0-9]+" name="code" source=$account required=true help="Le numéro du compte sert à trier le compte dans le plan comptable, attention à choisir un numéro qui correspond au plan comptable."}
+		{/if}
+		<dd class="help">Le numéro ne peut contenir que des chiffres et des lettres majuscules.</dd>
+		{input type="text" label="Libellé" name="label" source=$account required=true}
+	{else}
+		<dt>Position du compte</dt>
+		<dd>
+			{if $account.position == $account::EXPENSE || $account.position == $account::REVENUE}Au compte de résultat{else}Au bilan{/if}
+			—
+			{$account->position_name()}
+		</dd>
+		<dt>Type</dt>
+		<dd>{$account->type_name()}</dd>
+		<dd class="help">Le type est déterminé selon le numéro du compte.</dd>
+		{input type="text" disabled=true name="code" source=$account label="Numéro de compte"}
+		{input type="text" label="Libellé" name="label" source=$account disabled=true}
 	{/if}
 
-	{input type="text" label="Numéro" maxlength="20" pattern="[A-Z0-9]+" name="code" source=$account required=true help="Le numéro du compte sert à trier le compte dans le plan comptable, attention à choisir un numéro qui correspond au plan comptable." disabled=$edit_disabled}
-	<dd class="help">Le numéro ne doit contenir que des chiffres et des lettres majuscules.</dd>
-	{input type="text" label="Libellé" name="label" source=$account required=true disabled=$edit_disabled}
 	{input type="textarea" label="Description" name="description" source=$account}
 	{input type="checkbox" label="Compte favori" name="bookmark" source=$account value=1 help="Si coché, le compte apparaîtra en priorité dans les listes de comptes"}
 

@@ -19,39 +19,38 @@ if ($chart->archived) {
 	throw new UserException("Il n'est pas possible de modifier un compte d'un plan comptable archivé.");
 }
 
-$edit_disabled = !$account->canEdit();
+$can_edit = $account->canEdit();
+$csrf_key = 'acc_accounts_edit_' . $account->id();
 
-if (f('edit') && $form->check('acc_accounts_edit_' . $account->id()))
-{
-	try {
-		if ($edit_disabled) {
-			$account->importLimitedForm();
-		}
-		else {
-			$account->importForm();
-		}
-
-		// Force account position from type
-		if ($account->isModified('type') && $account->user) {
-			$account->position = Accounts::getPositionFromType($account->type);
-		}
-
-		$account->save();
-
-		$page = '';
-
-		if (!$account->type) {
-			$page = 'all.php';
-		}
-
-		Utils::redirect(sprintf('%sacc/charts/accounts/%s?id=%d', ADMIN_URL, $page, $account->id_chart));
+$form->runIf('edit', function () use ($account, $can_edit) {
+	if (!$can_edit) {
+		$account->importLimitedForm();
 	}
-	catch (UserException $e)
-	{
-		$form->addError($e->getMessage());
+	else {
+		$account->importForm();
 	}
+
+	$account->save();
+
+	if (isset($_GET['_dialog'])) {
+		Utils::reloadParentFrame();
+		return;
+	}
+
+	$page = '';
+
+	if (!$account->type) {
+		$page = 'all.php';
+	}
+
+	Utils::redirect(sprintf('!acc/charts/accounts/%s?id=%d', $page, $account->id_chart));
+}, $csrf_key);
+
+if ($account->type) {
+	$tpl->assign('code_base', $account->getNumberBase());
+	$tpl->assign('code_value', $account->getNumberUserPart());
 }
 
-$tpl->assign(compact('account', 'edit_disabled'));
+$tpl->assign(compact('account', 'can_edit', 'chart'));
 
 $tpl->display('acc/charts/accounts/edit.tpl');

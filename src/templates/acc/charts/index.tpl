@@ -32,7 +32,7 @@
 					<td>{if $item.code}Officiel{else}Personnel{/if}</td>
 					<td>{if $item.archived}<em>Archivé</em>{/if}</td>
 					<td class="actions">
-						{linkbutton shape="star" label="Comptes favoris" href="!acc/charts/accounts/?id=%d"|args:$item.id}
+						{linkbutton shape="star" label="Comptes usuels" href="!acc/charts/accounts/?id=%d"|args:$item.id}
 						{linkbutton shape="menu" label="Tous les comptes" href="!acc/charts/accounts/all.php?id=%d"|args:$item.id}
 						{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 							{linkbutton shape="edit" label="Modifier" href="!acc/charts/edit.php?id=%d"|args:$item.id}

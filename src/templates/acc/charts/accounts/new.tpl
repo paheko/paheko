@@ -23,11 +23,11 @@
 
 {else}
 
-<form method="post" action="{$self_url}" data-focus="1">
+<form method="post" action="{$self_url}" data-focus="[name='code']">
 
 	<fieldset>
 		<legend>Créer un nouveau compte</legend>
-		{include file="acc/charts/accounts/_account_form.tpl" edit_disabled=false create=true}
+		{include file="acc/charts/accounts/_account_form.tpl" can_edit=true create=true}
 	</fieldset>
 
 	<p class="submit">
