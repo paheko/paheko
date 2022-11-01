@@ -23,26 +23,12 @@ if (($chart->code && !$account->user) || !$account->canDelete()) {
 	throw new UserException("Ce compte ne peut être supprimé car des écritures y sont liées (sur l'exercice courant ou sur un exercice déjà clôturé).\nSi vous souhaitez faire du ménage dans la liste des comptes il est recommandé de créer un nouveau plan comptable. Attention, il n'est pas possible de modifier le plan comptable d'un exercice ouvert.");
 }
 
-if (f('delete') && $form->check('acc_accounts_delete_' . $account->id()))
-{
-	try
-	{
-		$page = '';
+$csrf_key = 'acc_accounts_delete_' . $account->id();
 
-		if (!$account->type) {
-			$page = 'all.php';
-		}
+$form->runIf('delete', function () use ($account) {
+	$account->delete();
+}, $csrf_key, sprintf('!acc/charts/accounts/?id=%d', $account->id_chart));
 
-		$account->delete();
-
-		Utils::redirect(sprintf('%sacc/charts/accounts/%s?id=%d', ADMIN_URL, $page, $account->id_chart));
-	}
-	catch (UserException $e)
-	{
-		$form->addError($e->getMessage());
-	}
-}
-
-$tpl->assign(compact('account'));
+$tpl->assign(compact('account', 'csrf_key'));
 
 $tpl->display('acc/charts/accounts/delete.tpl');

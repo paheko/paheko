@@ -398,7 +398,7 @@ class Reports
 	{
 		$out = new \stdClass;
 
-		$criterias_all = $criterias + ['type' => Account::TYPE_VOLUNTEERING];
+		$criterias_all = $criterias + ['type' => [Account::TYPE_VOLUNTEERING_EXPENSE, Account::TYPE_VOLUNTEERING_REVENUE]];
 
 		$out->caption_left = 'Emplois des contributions';
 		$out->caption_right = 'Sources des contributions';
@@ -448,7 +448,7 @@ class Reports
 	 */
 	static public function getClosingSumsFavoriteAccounts(array $criterias): \Generator
 	{
-		$types = [Account::TYPE_EXPENSE, Account::TYPE_REVENUE, Account::TYPE_BANK, Account::TYPE_OUTSTANDING, Account::TYPE_CASH, Account::TYPE_THIRD_PARTY, Account::TYPE_VOLUNTEERING];
+		$types = Account::COMMON_TYPES;
 		$accounts = self::getAccountsBalances($criterias + ['type' => $types], 'type, code COLLATE NOCASE', false);
 
 		$group = null;

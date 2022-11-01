@@ -230,6 +230,10 @@ class Template extends Smartyer
 		// propagate _dialog param if we are in an iframe
 		if (isset($_GET['_dialog']) && !isset($params['target'])) {
 			$href .= (strpos($href, '?') === false ? '?' : '&') . '_dialog';
+
+			if (!empty($_GET['_dialog'])) {
+				$href .= '=' . rawurlencode($_GET['_dialog']);
+			}
 		}
 
 		if (!isset($params['class'])) {

@@ -27,9 +27,9 @@
 			<td class="actions">
 				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$chart.archived}
 					{if $account.user || !$chart.code}
-						{linkbutton shape="delete" label="Supprimer" href="!acc/charts/accounts/delete.php?id=%d"|args:$account.id}
+						{linkbutton shape="delete" label="Supprimer" href="!acc/charts/accounts/delete.php?id=%d"|args:$account.id target="_dialog=manage"}
 					{/if}
-					{linkbutton shape="edit" label="Modifier" href="!acc/charts/accounts/edit.php?id=%d"|args:$account.id}
+					{linkbutton shape="edit" label="Modifier" href="!acc/charts/accounts/edit.php?id=%d"|args:$account.id target="_dialog=manage"}
 				{/if}
 			</td>
 		</tr>
@@ -37,22 +37,7 @@
 	</tbody>
 </table>
 
-<script type="text/javascript">
-{literal}
-$('button[name]').forEach((b) => {
-	b.onclick = () => {
-		b.value = parseInt(b.value) ? 0 : 1;
-		b.setAttribute('data-icon', b.value == 1 ? '☑' : '☐');
-		fetch(document.forms[0].action, {
-			'method': 'POST',
-			'headers': {"Content-Type": "application/x-www-form-urlencoded"},
-			'body': b.name + '=' + b.value
-		});
-		return false;
-	};
-});
-{/literal}
-</script>
+<script type="text/javascript" src="{$admin_url}static/scripts/accounts_bookmark.js"></script>
 
 </form>
 

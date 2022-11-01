@@ -60,79 +60,48 @@ class Accounts
 	 */
 	public function listCommonTypes(): array
 	{
-		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? AND type != 0 AND type != ? ORDER BY code COLLATE U_NOCASE;',
-			$this->chart_id, Account::TYPE_VOLUNTEERING);
+		$sql = sprintf('SELECT * FROM @TABLE WHERE id_chart = %d AND %s ORDER BY code COLLATE NOCASE;',
+			$this->chart_id,
+			DB::getInstance()->where('type', Account::COMMON_TYPES)
+		);
+		return $this->em->all($sql);
 	}
 
-	public function list(): DynamicList
+	public function list(?array $types = null): DynamicList
 	{
 		$columns = [
 			'id' => [
-				'select' => 'u.id',
 			],
-			'user_number' => [
-				'select' => 'u.numero',
-				'label' => 'N° membre',
+			'code' => [
+				'label' => 'N°',
+				'order' => 'code COLLATE NOCASE %s',
 			],
-			'user_identity' => [
-				'select' => 'u.' . $id_field,
-				'label' => 'Membre',
+			'label' => [
+				'label' => 'Libellé',
 			],
-			'balance' => [
-				'select' => 'SUM(l.debit - l.credit)',
-				'label'  => 'Solde',
-				//'order'  => 'balance != 0 %s, balance < 0 %1$s',
+			'level' => [
+				'select' => 'CASE WHEN LENGTH(code) >= 6 THEN 6 ELSE LENGTH(code) END',
 			],
-			'status' => [
-				'select' => null,
-				'label' => 'Statut',
+			'bookmark' => [
+				'label' => 'Favori',
+			],
+			'user' => [
+				'label' => 'Ajouté',
 			],
 		];
 
-		$tables = 'acc_transactions_users tu
-			INNER JOIN membres u ON u.id = tu.id_user
-			INNER JOIN acc_transactions t ON tu.id_transaction = t.id
-			INNER JOIN acc_transactions_lines l ON t.id = l.id_transaction
-			INNER JOIN acc_accounts a ON a.id = l.id_account';
+		$tables = 'acc_accounts';
+		$conditions = 'id_chart = ' . $this->chart_id;
 
-		$conditions = 'a.type = ' . Account::TYPE_THIRD_PARTY . ' AND t.id_year = ' . $year_id;
-
-		$list = new DynamicList($columns, $tables, $conditions);
-		$list->orderBy('balance', false);
-		$list->groupBy('u.id');
-		$list->setCount('COUNT(*)');
-		$list->setPageSize(null);
-		$list->setExportCallback(function (&$row) {
-			$row->balance = Utils::money_format($row->balance, '.', '', false);
-		});
-
-		return $list;
-	}
-
-	/**
-	 * Return all accounts from current chart
-	 */
-	public function listAll(?array $targets = null): array
-	{
-		$where = '';
-
-		if (!empty($targets)) {
-			$position = null;
-
-			if (in_array(Account::TYPE_EXPENSE, $targets)) {
-				$position = Account::EXPENSE;
-			}
-			elseif (in_array(Account::TYPE_REVENUE, $targets)) {
-				$position = Account::REVENUE;
-			}
-
-			if ($position) {
-				$where = sprintf('AND position = %d', $position);
-			}
+		if (!empty($types)) {
+			$conditions .= ' AND ' . DB::getInstance()->where('type', $types);
 		}
 
-		return $this->em->all(sprintf('SELECT * FROM @TABLE WHERE id_chart = ? %s ORDER BY code COLLATE U_NOCASE;', $where),
-			$this->chart_id);
+		$list = new DynamicList($columns, $tables, $conditions);
+		$list->orderBy('code', false);
+		$list->setPageSize(null);
+
+		return $list;
 	}
 
 	public function listForCodes(array $codes): array
@@ -158,103 +127,39 @@ class Accounts
 		}
 	}
 
-	public function listVolunteering(): array
-	{
-		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? AND type = ? ORDER BY code COLLATE U_NOCASE;',
-			$this->chart_id, Account::TYPE_VOLUNTEERING);
-	}
-
 	/**
 	 * List common accounts, grouped by type
 	 * @return array
 	 */
-	public function listCommonGrouped(array $types = null, bool $include_empty_types = false): array
+	public function listCommonGrouped(): array
 	{
-		if (null === $types) {
-			$types = '';
-		}
-		else {
-			$types = array_map('intval', $types);
-			$types = ' AND ' . $this->em->DB()->where('type', $types);
-		}
-
+		$types = Account::COMMON_TYPES;
 		$out = [];
 
-		if ($include_empty_types) {
-			foreach (Account::TYPES_NAMES as $key => $label) {
-				if (!$label) {
-					continue;
-				}
-
-				$out[$key] = (object) [
-					'label'    => $label,
-					'type'     => $key,
-					'accounts' => [],
-				];
-			}
+		foreach ($types as $type) {
+			$out[$type] = (object) [
+				'label'    => Account::TYPES_NAMES[$type],
+				'type'     => $type,
+				'accounts' => [],
+			];
 		}
 
-		$query = $this->em->iterate('SELECT * FROM @TABLE WHERE id_chart = ? AND type != 0 ' . $types . ' ORDER BY type, code COLLATE U_NOCASE;',
-			$this->chart_id);
+		$sql = sprintf('SELECT a.* FROM @TABLE a
+			LEFT JOIN acc_transactions_lines b ON b.id_account = a.id
+			WHERE a.id_chart = %d AND a.%s AND (a.bookmark = 1 OR a.user = 1 OR b.id IS NOT NULL)
+			GROUP BY a.id
+			ORDER BY type, code COLLATE U_NOCASE;',
+			$this->chart_id,
+			$this->em->DB()->where('type', $types)
+		);
+
+		$query = $this->em->iterate($sql);
 
 		foreach ($query as $row) {
-			if (!isset($out[$row->type])) {
-				$out[$row->type] = (object) [
-					'label'    => Account::TYPES_NAMES[$row->type],
-					'type'     => $row->type,
-					'accounts' => [],
-				];
-			}
-
 			$out[$row->type]->accounts[] = $row;
 		}
 
 		return $out;
-	}
-
-	public function getNextCodeForType(int $type): string
-	{
-		$db = DB::getInstance();
-		$used_codes = $db->getAssoc(sprintf('SELECT code, code FROM %s WHERE type = ? AND user = 1 AND id_chart = ?;', Account::TABLE), $this->chart_id, $type);
-		$used_codes = array_values($used_codes);
-
-		$sql = sprintf('SELECT type, MIN(code) AS code, (SELECT COUNT(*) FROM %s WHERE user = 1 AND type = a.type) AS count
-			FROM %1$s AS a
-			WHERE id_chart = ? AND type = ?
-			GROUP BY type;', Account::TABLE);
-		$r = $db->first($sql, $this->chart_id, $type);
-
-		if (!$r) {
-			return '';
-		}
-
-		$code = preg_replace('/[^\d]/', '', $r->code);
-
-		$count = $r->count;
-		$found = null;
-
-		// Make sure we don't reuse an existing code
-		while (!$found || in_array($found, $used_codes)) {
-			// Get new account code, eg. 512A, 99AA, 99BZ etc.
-			$letter = Utils::num2alpha($count++);
-			$found = $code . $letter;
-		}
-
-		return $found;
-	}
-
-	static public function getPositionFromType(int $type): int
-	{
-		switch ($type) {
-			case Account::TYPE_REVENUE;
-				return Account::REVENUE;
-			case Account::TYPE_EXPENSE;
-				return Account::EXPENSE;
-			case Account::TYPE_VOLUNTEERING:
-				return Account::NONE;
-			default:
-				return Account::ASSET_OR_LIABILITY;
-		}
 	}
 
 	public function countByType(int $type)
