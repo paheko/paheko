@@ -285,8 +285,10 @@ class Template extends Smartyer
 
 	protected function widgetLinkButton(array $params): string
 	{
-		$params['data-icon'] = Utils::iconUnicode($params['shape']);
-		unset($params['shape']);
+		if (!empty($params['shape'])) {
+			$params['data-icon'] = Utils::iconUnicode($params['shape']);
+			unset($params['shape']);
+		}
 
 		if (!isset($params['class'])) {
 			$params['class'] = '';

@@ -37,10 +37,8 @@ $form->runIf('bookmark', function () use ($accounts) {
 
 
 $list = $accounts->list();
-$list->setTitle($chart->label);
 $list->loadFromQueryString();
 
-$tpl->assign('chart', $chart);
-$tpl->assign('list', $accounts->list());
+$tpl->assign(compact('chart', 'list'));
 
 $tpl->display('acc/charts/accounts/all.tpl');

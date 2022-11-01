@@ -243,10 +243,11 @@ class Account extends Entity
 			throw new ValidationException(sprintf('Le numéro "%s" est déjà utilisé par un autre compte.', $this->code));
 		}
 
+		$this->checkLocalRules();
+
 		$this->assert(array_key_exists($this->type, self::TYPES_NAMES), 'Type invalide: ' . $this->type);
 		$this->assert(array_key_exists($this->position, self::POSITIONS_NAMES), 'Position invalide');
 
-		$this->checkLocalRules();
 
 		parent::selfCheck();
 	}
@@ -319,9 +320,9 @@ class Account extends Entity
 		$this->assert($this->matchType($this->type), sprintf('Le numéro des comptes de type "%s" doit commencer par "%s" (%s).', self::TYPES_NAMES[$this->type], self::LOCAL_TYPES[$country][$this->type], $this->code));
 	}
 
-	public function getNewNumberAvailable(): ?string
+	public function getNewNumberAvailable(?string $base = null): ?string
 	{
-		$base = $this->getNumberBase();
+		$base ??= $this->getNumberBase();
 
 		if (!$base) {
 			return $base;
@@ -596,10 +597,12 @@ class Account extends Entity
 	public function canEdit(): bool
 	{
 		if (!$this->exists()) {
-			return false;
+			return true;
 		}
 
-		if (!$this->user) {
+		$is_user = $this->user ?: $db->test(Chart::TABLE, 'id = ? AND code IS NULL', $this->id_chart);
+
+		if (!$is_user) {
 			return false;
 		}
 
@@ -615,7 +618,7 @@ class Account extends Entity
 			return false;
 		}
 
-		return $db->test(Chart::TABLE, 'id = ? AND code IS NULL', $this->id_chart);
+		return true;
 	}
 
 	public function chart(): Chart
@@ -650,8 +653,8 @@ class Account extends Entity
 			$source = $_POST;
 		}
 
-		if ($this->canEdit() && $this->type && isset($source['code'])) {
-			$source['code'] = $this->getNumberBase() . trim($source['code']);
+		if (isset($source['code_value'], $source['code_base'])) {
+			$source['code'] = trim($source['code_base']) . trim($source['code_value']);
 		}
 
 		parent::importForm($source);

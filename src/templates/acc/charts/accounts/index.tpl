@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Comptes usuels" current="acc/years"}
+{include file="admin/_head.tpl" title=$chart.label current="acc/years"}
 
 {include file="acc/charts/accounts/_nav.tpl" current="favorites"}
 
@@ -22,7 +22,7 @@
 
 	{foreach from=$group.accounts item="account"}
 		<tr class="account">
-			<td>{$account.code}</td>
+			<td class="num">{$account.code}</td>
 			<th>{$account.label}</th>
 			<td class="desc">{$account.description}</td>
 			<td>
