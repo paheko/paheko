@@ -19,7 +19,7 @@
 			<p class="edit">{linkbutton label="Modifier les comptes" href="!acc/charts/accounts/%s?id=%d"|args:$page,$chart.id shape="edit"}</aside></p>
 		{/if}
 
-		<p><label>{input type="checkbox" name="typed_only" value=0 default=0 default=$all} N'afficher que les comptes favoris</label></p>
+		<p>{input type="select" name="filter" options=$filter_options default=$filter}</p>
 	</header>
 
 	{if isset($grouped_accounts)}
@@ -30,8 +30,9 @@
 			<table class="list">
 				<tbody>
 				{foreach from=$group.accounts item="account"}
-					<tr data-idx="{$index}">
-						<td>{$account.code}</td>
+					<tr data-idx="{$index}" class="account">
+						<td class="bookmark">{if $account.bookmark}{icon shape="star" title="Compte favori"}{/if}</td>
+						<td class="num">{$account.code}</td>
 						<th>{$account.label}</th>
 						<td class="desc">{$account.description}</td>
 						<td class="actions">
@@ -46,17 +47,13 @@
 
 	{else}
 
-		<table class="accounts">
+		<table class="list">
 			<tbody>
 			{foreach from=$accounts item="account"}
-				<tr data-idx="{$iteration}" class="account-level-{$account.code|strlen}">
-					<td>{$account.code}</td>
+				<tr data-idx="{$iteration}" class="account account-level-{$account->level()}">
+					<td class="bookmark">{if $account.bookmark}{icon shape="star" title="Compte favori"}{/if}</td>
+					<td class="num">{$account.code}</td>
 					<th>{$account.label}</th>
-					<td>
-					{if $account.type}
-						{icon shape="star"} <?=Entities\Accounting\Account::TYPES_NAMES[$account->type]?>
-					{/if}
-					</td>
 					<td class="actions">
 						<button class="icn-btn" value="{$account.id}" data-label="{$account.code} — {$account.label}" data-icon="&rarr;">Sélectionner</button>
 					</td>

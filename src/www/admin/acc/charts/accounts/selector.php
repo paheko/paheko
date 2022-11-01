@@ -17,18 +17,29 @@ $chart = (int) qg('chart') ?: null;
 $targets = array_map('intval', $targets);
 $targets_str = implode(':', $targets);
 
-$all = qg('all');
+$year = null;
+$filter = qg('filter');
+$filter_options = [
+//	'bookmark' => 'Voir seulement les comptes favoris',
+	'usual' => 'Voir seulement les comptes favoris et usuels',
+	'all' => 'Voir tous les comptes',
+	'any' => 'Voir tout le plan comptable',
+];
 
-if (null !== $all || !$targets) {
-	$all = true;
-	$session->set('account_selector_all', (bool) $all);
+if (null !== $filter) {
+	if (!array_key_exists($filter, $filter_options)) {
+		$filter = 'usual';
+	}
+
+	$session->set('account_selector_filter', $filter);
 }
 
-$all = (bool) $session->get('account_selector_all');
+$filter = $session->get('account_selector_filter') ?? 'usual';
+
 
 // Cache the page until the charts have changed
 $last_change = Config::getInstance()->get('last_chart_change') ?: time();
-$hash = sha1($targets_str . $chart . $last_change . '=' . $all);
+$hash = sha1($targets_str . $chart . $last_change . '=' . $filter);
 
 // Exit if there's no need to reload
 Utils::HTTPCache($hash, null, 10);
@@ -45,6 +56,7 @@ elseif (qg('year')) {
 }
 elseif ($current_year) {
 	$chart = $current_year->chart();
+	$year = $current_year;
 }
 
 if (!$chart) {
@@ -53,18 +65,22 @@ if (!$chart) {
 
 $accounts = $chart->accounts();
 
-$tpl->assign(compact('chart', 'targets', 'targets_str'));
+$tpl->assign(compact('chart', 'targets', 'targets_str', 'filter_options', 'filter'));
 
 if (!count($targets)) {
-	$tpl->assign('accounts', !$all ? $accounts->listCommonTypes() : $accounts->listAll());
+	$tpl->assign('accounts', $filter != 'all' ? $accounts->listCommonTypes() : $accounts->listAll());
 }
-elseif ($all) {
+elseif ($filter == 'all') {
 	$tpl->assign('accounts', $accounts->listAll($targets));
+}
+elseif ($filter == 'any') {
+	$tpl->assign('accounts', $accounts->listAll());
+}
+elseif ($year) {
+	$tpl->assign('grouped_accounts', $year->listCommonGrouped($targets));
 }
 else {
 	$tpl->assign('grouped_accounts', $accounts->listCommonGrouped($targets));
 }
-
-$tpl->assign('all', $all);
 
 $tpl->display('acc/charts/accounts/selector.tpl');

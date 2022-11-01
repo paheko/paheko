@@ -94,6 +94,7 @@ class Accounts
 		$conditions = 'id_chart = ' . $this->chart_id;
 
 		if (!empty($types)) {
+			$types = array_map('intval', $types);
 			$conditions .= ' AND ' . DB::getInstance()->where('type', $types);
 		}
 
@@ -102,6 +103,19 @@ class Accounts
 		$list->setPageSize(null);
 
 		return $list;
+	}
+
+	public function listAll(array $types = null): array
+	{
+		$condition = '';
+
+		if (!empty($types)) {
+			$types = array_map('intval', $types);
+			$condition = ' AND ' . DB::getInstance()->where('type', $types);
+		}
+
+		$sql = sprintf('SELECT * FROM @TABLE WHERE id_chart = %d %s;', $this->chart_id, $condition);
+		return $this->em->all($sql);
 	}
 
 	public function listForCodes(array $codes): array
@@ -131,9 +145,12 @@ class Accounts
 	 * List common accounts, grouped by type
 	 * @return array
 	 */
-	public function listCommonGrouped(): array
+	public function listCommonGrouped(array $types = null): array
 	{
-		$types = Account::COMMON_TYPES;
+		if (null === $types) {
+			$types = Account::COMMON_TYPES;
+		}
+
 		$out = [];
 
 		foreach ($types as $type) {
@@ -146,7 +163,7 @@ class Accounts
 
 		$sql = sprintf('SELECT a.* FROM @TABLE a
 			LEFT JOIN acc_transactions_lines b ON b.id_account = a.id
-			WHERE a.id_chart = %d AND a.%s AND (a.bookmark = 1 OR a.user = 1 OR b.id IS NOT NULL)
+			WHERE a.id_chart = %d AND a.%s AND (a.bookmark = 1 OR b.id IS NOT NULL)
 			GROUP BY a.id
 			ORDER BY type, code COLLATE NOCASE;',
 			$this->chart_id,

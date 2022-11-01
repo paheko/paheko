@@ -464,6 +464,11 @@
 						url += '=' + m[1];
 					}
 
+					if (location.href.match(/_dialog/)) {
+						location.href = url;
+						return false;
+					}
+
 					g.openFrameDialog(url, e.getAttribute('data-dialog-height') ? '90%' : 'auto');
 					return false;
 				}
