@@ -101,7 +101,7 @@ td.money, th.money {
     max-width: 500px;
 }
 
-tr.account td:first-child { font-family: monospace; }
+tr.account td.num { font-family: monospace; text-align: left; }
 table tr.account th { font-weight: normal; }
 tr.account-level-1 th { font-size: 1.6em; }
 tr.account-level-2 th { padding-left: 1em; font-size: 1.3em; }

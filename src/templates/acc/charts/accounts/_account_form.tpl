@@ -18,8 +18,8 @@
 		{if $account.type}
 			<dt><label for="f_code">Numéro de compte</label>  <b>(obligatoire)</b></dt>
 			<dd>
-				<input type="text" readonly=true value="{$code_base}" size="{$code_base|strlen}" />
-				{input type="text" maxlength="15" size="15" pattern="[A-Z0-9]+" name="code" required=true default=$code_value}
+				{input type="text" readonly=true name="code_base" default=$code_base size=$code_base|strlen}
+				{input type="text" maxlength="15" size="15" pattern="[A-Z0-9]+" name="code_value" required=true default=$code_value}
 			</dd>
 			<dd class="help">Le numéro du compte sert à trier le compte dans le plan comptable, et à retrouver le compte plus rapidement.</dd>
 		{else}

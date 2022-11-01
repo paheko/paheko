@@ -34,6 +34,14 @@ if ($type !== null) {
 	$account->type = (int)$type;
 }
 
+$csrf_key = 'account_new';
+
+$form->runIf('bookmark', function () use ($accounts) {
+	$a = $accounts->get(f('bookmark'));
+	$a->bookmark = true;
+	$a->save();
+}, $csrf_key, '!acc/charts/accounts/?id=' . $chart->id());
+
 $form->runIf('save', function () use ($account, $accounts, $chart, $current_year) {
 	$db = DB::getInstance();
 
@@ -73,7 +81,7 @@ $form->runIf('save', function () use ($account, $accounts, $chart, $current_year
 
 	$url = sprintf('!acc/charts/accounts/%s?id=%d', $page, $account->id_chart);
 	Utils::redirect($url);
-}, 'acc_accounts_new');
+}, $csrf_key);
 
 $types_create = [
 	Account::TYPE_EXPENSE => [
@@ -113,13 +121,24 @@ $types_create = [
 	],
 ];
 
-$type = $account->type;
+$ask = $from = $missing = $code_base = $code_value = null;
 
-if ($type) {
-	$tpl->assign('code_base', $account->getNumberBase());
-	$tpl->assign('code_value', $account->getNewNumberAvailable());
+if ($id = (int)f('from')) {
+	$from = $accounts->get($id);
+	$code_base = $from->code;
+	$code_value = $account->getNewNumberAvailable($code_base);
+}
+elseif ($id = (int)qg('ask')) {
+	$ask = $accounts->get($id);
 }
 
-$tpl->assign(compact('types_create', 'account', 'chart'));
+if ($account->type && !$from) {
+	$code_base = $account->getNumberBase();
+	$code_value = $account->getNewNumberAvailable($code_base);
+
+	$missing = $accounts->listMissing($account->type);
+}
+
+$tpl->assign(compact('types_create', 'account', 'chart', 'ask', 'csrf_key', 'missing', 'code_base', 'code_value', 'from'));
 
 $tpl->display('acc/charts/accounts/new.tpl');

@@ -148,7 +148,7 @@ class Accounts
 			LEFT JOIN acc_transactions_lines b ON b.id_account = a.id
 			WHERE a.id_chart = %d AND a.%s AND (a.bookmark = 1 OR a.user = 1 OR b.id IS NOT NULL)
 			GROUP BY a.id
-			ORDER BY type, code COLLATE U_NOCASE;',
+			ORDER BY type, code COLLATE NOCASE;',
 			$this->chart_id,
 			$this->em->DB()->where('type', $types)
 		);
@@ -160,6 +160,20 @@ class Accounts
 		}
 
 		return $out;
+	}
+
+	public function listMissing(int $type): array
+	{
+		if ($type != Account::TYPE_EXPENSE && $type != Account::TYPE_REVENUE && $type != Account::TYPE_THIRD_PARTY) {
+			return [];
+		}
+
+		return $this->em->DB()->get($this->em->formatQuery('SELECT a.*, CASE WHEN LENGTH(a.code) >= 6 THEN 6 ELSE LENGTH(a.code) END AS level
+			FROM @TABLE a
+			LEFT JOIN acc_transactions_lines b ON b.id_account = a.id
+			WHERE a.id_chart = ? AND a.type = ? AND NOT (a.bookmark = 1 OR a.user = 1 OR b.id IS NOT NULL)
+			GROUP BY a.id
+			ORDER BY type, code COLLATE NOCASE;'), $this->chart_id, $type);
 	}
 
 	public function countByType(int $type)

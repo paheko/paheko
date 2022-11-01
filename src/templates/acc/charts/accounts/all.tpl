@@ -12,7 +12,7 @@
 
 	{foreach from=$list->iterate() item="account"}
 		<tr class="account account-level-{$account.level}">
-			<td>{$account.code}</td>
+			<td class="num">{$account.code}</td>
 			<th>{$account.label}</th>
 			<td>
 				<?php
