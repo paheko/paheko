@@ -13,6 +13,13 @@
 			{input type="radio" label="Bilan : actif ou passif" name="position" value=Entities\Accounting\Account::ASSET_OR_LIABILITY source=$account help="le compte sera placé à l'actif si son solde est débiteur, ou au passif s'il est créditeur"}
 			{input type="radio" label="Résultat : charge" name="position" value=Entities\Accounting\Account::EXPENSE source=$account help="dépenses"}
 			{input type="radio" label="Résultat : produit" name="position" value=Entities\Accounting\Account::REVENUE source=$account help="recettes"}
+		{elseif $account->exists()}
+			<dt>Position du compte</dt>
+			<dd>
+				{if $account.position == $account::EXPENSE || $account.position == $account::REVENUE}Au compte de résultat{else}Au bilan{/if}
+				—
+				{$account->position_name()}
+			</dd>
 		{/if}
 
 		{if $account.type}
