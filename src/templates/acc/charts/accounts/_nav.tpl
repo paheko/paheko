@@ -1,4 +1,4 @@
-{if $dialog != 'manage'}
+{if $dialog !== 'manage'}
 <nav class="tabs">
 {if $dialog}
 	{* JS trick to get back to the original iframe URL! *}

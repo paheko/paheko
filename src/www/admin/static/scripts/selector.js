@@ -137,12 +137,12 @@ if (q) {
 	q.focus();
 }
 
-var o = document.getElementById('f_typed_only_0');
+var o = document.getElementById('f_filter');
 
 if (o) {
 	o.onchange = () => {
 		let s = new URLSearchParams(window.location.search);
-		s.set("all", o.checked ? 0 : 1);
+		s.set("filter", o.value);
 		window.location.search = s.toString();
 	};
 }

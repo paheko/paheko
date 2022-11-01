@@ -715,6 +715,15 @@ fieldset.progressing > dl, fieldset.progressing > p {
     width: calc(100% - 1em);
 }
 
+.selector select {
+    font-size: .9em;
+    margin: .2em 0;
+    padding: .2em;
+    border-color: var(--gLightBorderColor);
+    cursor: pointer;
+    width: auto;
+}
+
 @media screen and (max-width: 1279px) {
     #queryBuilder table tr {
         display: flex;

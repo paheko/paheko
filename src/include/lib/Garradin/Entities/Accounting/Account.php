@@ -659,4 +659,15 @@ class Account extends Entity
 
 		parent::importForm($source);
 	}
+
+	public function level(): int
+	{
+		$level = strlen($this->code);
+
+		if ($level > 6) {
+			$level = 6;
+		}
+
+		return $level;
+	}
 }

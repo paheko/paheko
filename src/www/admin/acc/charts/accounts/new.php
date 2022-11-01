@@ -25,6 +25,7 @@ if ($chart->archived) {
 $accounts = $chart->accounts();
 
 $account = new Account;
+$account->bookmark = true;
 $account->id_chart = $chart->id();
 
 $type = f('type') ?? qg('type');
