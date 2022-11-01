@@ -600,13 +600,13 @@ class Account extends Entity
 			return true;
 		}
 
+		$db = DB::getInstance();
 		$is_user = $this->user ?: $db->test(Chart::TABLE, 'id = ? AND code IS NULL', $this->id_chart);
 
 		if (!$is_user) {
 			return false;
 		}
 
-		$db = DB::getInstance();
 		$sql = sprintf('SELECT 1 FROM %s l
 			INNER JOIN %s t ON t.id = l.id_transaction
 			INNER JOIN %s y ON y.id = t.id_year
