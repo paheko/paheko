@@ -215,10 +215,10 @@ class Account extends Entity
 	protected string $code;
 	protected string $label;
 	protected ?string $description;
-	protected int $position;
-	protected int $type;
-	protected bool $user;
-	protected bool $bookmark;
+	protected int $position = 0;
+	protected int $type = 0;
+	protected bool $user = false;
+	protected bool $bookmark = false;
 
 	protected $_position = [];
 
