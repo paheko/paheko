@@ -218,6 +218,15 @@ class Emails
 		$queue = self::listQueueAndMarkAsSending($context);
 		$ids = [];
 
+		$save_sent = function () use (&$ids, $db) {
+			if (!count($ids)) {
+				return;
+			}
+
+			$db->exec(sprintf('UPDATE emails_queue SET sending = 2 WHERE %s;', $db->where('id', $ids)));
+			$ids = [];
+		};
+
 		// listQueue nettoie déjà la queue
 		foreach ($queue as $row) {
 			// Don't send emails to opt-out address, unless it's a password reminder
@@ -245,15 +254,23 @@ class Emails
 				'Subject' => $row->subject,
 			];
 
-			self::send($row->context, $row->recipient_hash, $headers, $row->content, $row->content_html);
+			try {
+				self::send($row->context, $row->recipient_hash, $headers, $row->content, $row->content_html);
+			}
+			catch (\Exception $e) {
+				// If sending fails, at least save what has been sent so far
+				// so they won't get re-sent again
+				$save_sent();
+				throw $e;
+			}
+
 			$ids[] = $row->id;
 
 			// Mark messages as sent from time to time
-			// to avoid starting from the beginning if the queue crashes
+			// to avoid starting from the beginning if the queue is killed
 			// and also avoid passing too many IDs to SQLite at once
 			if (count($ids) >= 50) {
-				$db->exec(sprintf('UPDATE emails_queue SET sending = 2 WHERE %s;', $db->where('id', $ids)));
-				$ids = [];
+				$save_sent();
 			}
 		}
 
