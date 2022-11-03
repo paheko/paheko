@@ -94,10 +94,17 @@
 
 <fieldset>
 	<legend>Remise à zéro</legend>
-	<p class="block error">
-		Attention : toutes les données seront effacées&nbsp;! Ceci inclut les membres, les écritures comptables, les pages du wiki, etc.
-		Seul votre compte membre sera re-créé avec le même email et mot de passe.
-	</p>
+	<div class="block error">
+		<h3>Attention : toutes les données seront effacées&nbsp;!</h3>
+		<ul>
+			<li>Les membres seront supprimés, ainsi que les activités et l'historique d'inscription</li>
+			<li>Les écritures et exercices comptables seront aussi supprimés, avec toutes les autres données comptables</li>
+			<li>Le contenu du site web</li>
+			<li>Les documents, etc.</li>
+			<li>Bref : tout sera effacé !</li>
+		</ul>
+		<p>Seul votre compte membre sera re-créé avec le même email et mot de passe.</p>
+	</div>
 	<p class="help">
 		Une sauvegarde sera automatiquement créée avant de procéder à la remise à zéro.
 	</p>
