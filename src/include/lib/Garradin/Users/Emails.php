@@ -247,6 +247,14 @@ class Emails
 
 			self::send($row->context, $row->recipient_hash, $headers, $row->content, $row->content_html);
 			$ids[] = $row->id;
+
+			// Mark messages as sent from time to time
+			// to avoid starting from the beginning if the queue crashes
+			// and also avoid passing too many IDs to SQLite at once
+			if (count($ids) >= 50) {
+				$db->exec(sprintf('UPDATE emails_queue SET sending = 2 WHERE %s;', $db->where('id', $ids)));
+				$ids = [];
+			}
 		}
 
 		// Update emails list and send count
