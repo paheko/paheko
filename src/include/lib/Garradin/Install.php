@@ -7,6 +7,7 @@ use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Year;
 use Garradin\Entities\Users\Category;
 use Garradin\Entities\Files\File;
+use Garradin\Files\Files;
 use Garradin\Membres\Session;
 
 use KD2\HTTP;
@@ -75,7 +76,19 @@ class Install
 			throw new UserException('L\'utilisateur connecté ne dispose pas d\'adresse e-mail, merci de la renseigner.');
 		}
 
-		(new Sauvegarde)->create(date('Y-m-d-His-') . 'avant-remise-a-zero');
+		$name = date('Y-m-d-His-') . 'avant-remise-a-zero';
+
+		$s = new Sauvegarde;
+		$s->create($name);
+
+		// Keep a backup file of files
+		if (FILE_STORAGE_BACKEND == 'FileSystem') {
+			$name = 'documents_' . $name . '.zip';
+			$s->dumpFilesZip(CACHE_ROOT . '/' . $name);
+			Files::callStorage('truncate');
+			@mkdir(FILE_STORAGE_CONFIG . '/documents');
+			@rename(CACHE_ROOT . '/' . $name, FILE_STORAGE_CONFIG . '/documents/' . $name);
+		}
 
 		Config::deleteInstance();
 		DB::getInstance()->close();
@@ -109,14 +122,23 @@ class Install
 			throw new \LogicException('Invalid reset data');
 		}
 
-		// We can't use the real password, as it might not be valid (too short or compromised)
-		$ok = self::install($data->organization ?? 'Association', $data->name, $data->email, md5($data->password));
+		try {
+			// We can't use the real password, as it might not be valid (too short or compromised)
+			$ok = self::install($data->organization ?? 'Association', $data->name, $data->email, md5($data->password));
 
-		// Restore password
-		DB::getInstance()->preparedQuery('UPDATE membres SET passe = ? WHERE id = 1;', [$data->password]);
+			// Restore password
+			DB::getInstance()->preparedQuery('UPDATE membres SET passe = ? WHERE id = 1;', [$data->password]);
 
-		if (defined('\Garradin\LOCAL_LOGIN') && \Garradin\LOCAL_LOGIN) {
-			Session::getInstance()->refresh();
+			if (defined('\Garradin\LOCAL_LOGIN') && \Garradin\LOCAL_LOGIN) {
+				Session::getInstance()->refresh();
+			}
+		}
+		catch (\Exception $e) {
+			Config::deleteInstance();
+			DB::getInstance()->close();
+			DB::deleteInstance();
+			Utils::safe_unlink(DB_FILE);
+			throw $e;
 		}
 
 		@unlink(CACHE_ROOT . '/reset');
@@ -165,6 +187,7 @@ class Install
 		}
 
 		self::checkAndCreateDirectories();
+		Files::disableQuota();
 		$db = DB::getInstance();
 
 		// Création de la base de données
@@ -308,6 +331,7 @@ class Install
 		}
 
 		$config->save();
+		Files::enableQuota();
 	}
 
 	static public function checkAndCreateDirectories()
@@ -330,13 +354,13 @@ class Install
 
 			if (!is_dir($path))
 			{
-				throw new UserException('Le répertoire '.$path.' n\'existe pas ou n\'est pas un répertoire.');
+				throw new \RuntimeException('Le répertoire '.$path.' n\'existe pas ou n\'est pas un répertoire.');
 			}
 
 			// On en profite pour vérifier qu'on peut y lire et écrire
 			if (!is_writable($path) || !is_readable($path))
 			{
-				throw new UserException('Le répertoire '.$path.' n\'est pas accessible en lecture/écriture.');
+				throw new \RuntimeException('Le répertoire '.$path.' n\'est pas accessible en lecture/écriture.');
 			}
 
 			// Some basic safety against misconfigured hosts

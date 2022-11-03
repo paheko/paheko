@@ -13,14 +13,8 @@ if (file_exists(DB_FILE))
     throw new UserException('Garradin est déjà installé');
 }
 
-try {
-    Install::checkAndCreateDirectories();
-	Install::checkReset();
-}
-catch (UserException $e) {
-    echo $e->getMessage();
-    exit;
-}
+Install::checkAndCreateDirectories();
+Install::checkReset();
 
 function f($key)
 {

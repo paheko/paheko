@@ -125,7 +125,7 @@ class FileSystem implements StorageInterface
 		$path = self::getFullPath($file);
 
 		if ($file->type == File::TYPE_DIRECTORY) {
-			return Utils::deleteRecursive($path);
+			return Utils::deleteRecursive($path, true);
 		}
 
 		return Utils::safe_unlink($path);
@@ -303,7 +303,7 @@ class FileSystem implements StorageInterface
 
 	static public function truncate(): void
 	{
-		Utils::deleteRecursive(self::_getRoot());
+		Utils::deleteRecursive(self::_getRoot(), false);
 	}
 
 	static public function lock(): void
