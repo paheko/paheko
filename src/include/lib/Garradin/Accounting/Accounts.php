@@ -275,7 +275,7 @@ class Accounts
 		$transaction->id_year = $year->id();
 		$transaction->type = Transaction::TYPE_ADVANCED;
 		$transaction->label = 'Clôture de l\'exercice';
-		$transaction->date = new \DateTime;
+		$transaction->date = new \KD2\DB\Date;
 		$debit = 0;
 		$credit = 0;
 

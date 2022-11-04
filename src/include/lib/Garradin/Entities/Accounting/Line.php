@@ -17,10 +17,10 @@ class Line extends Entity
 	protected int $id_account;
 	protected int $credit = 0;
 	protected int $debit = 0;
-	protected ?string $reference;
-	protected ?string $label;
-	protected bool $reconciled;
-	protected ?int $id_project;
+	protected ?string $reference = null;
+	protected ?string $label = null;
+	protected bool $reconciled = false;
+	protected ?int $id_project = null;
 
 	static public function create(int $id_account, int $credit, int $debit, ?string $label = null, ?string $reference = null): Line
 	{
@@ -59,7 +59,6 @@ class Line extends Entity
 		$this->assert($this->credit || $this->debit, 'Aucun montant au débit ou au crédit');
 		$this->assert($this->credit >= 0 && $this->debit >= 0, 'Le montant ne peut être négatif');
 		$this->assert(($this->credit * $this->debit) === 0 && ($this->credit + $this->debit) > 0, 'Ligne non équilibrée : crédit ou débit doit valoir zéro.');
-		$this->assert($this->reconciled === 0 || $this->reconciled === 1);
 
 		$this->assert(null === $this->id_project || DB::getInstance()->test(Project::TABLE, 'id = ?', $this->id_project), 'Le projet analytique indiqué n\'existe pas.');
 		$this->assert(!empty($this->id_transaction), 'Aucune écriture n\'a été indiquée pour cette ligne.');

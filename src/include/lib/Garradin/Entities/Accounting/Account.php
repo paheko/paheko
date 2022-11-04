@@ -381,7 +381,7 @@ class Account extends Entity
 
 		$tables = 'acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
-			LEFT JOIN acc_projects b ON b.id = l.id_project';
+			LEFT JOIN acc_projects p ON p.id = l.id_project';
 		$conditions = sprintf('l.id_account = %d AND t.id_year = %d', $this->id(), $year_id);
 
 		$sum = null;
