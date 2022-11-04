@@ -146,7 +146,7 @@ code,label,description,position,bookmark
 407,Créances douteuses,,Passif,
 409,Réductions de valeurs actées,,Passif,
 41,Autres créances,,Passif,
-410,,,Passif,
+410,Autres tiers,,Passif,
 411,Tva à récupérer,,Passif,
 412,Impôts et précomptes à récupérer,,Passif,
 4120,4120 à 4124,,Passif,
@@ -362,7 +362,6 @@ code,label,description,position,bookmark
 732,Legs,,Produit,Favori
 733,Subsides,,Produit,Favori
 74,Autres produits d’exploitation,,Produit,Favori
-740,,,Produit,
 741,Plus-values sur réalisations courantes d'immobilisations corporelles,,Produit,
 742,Plus-values sur réalisation de créances commerciales,,Produit,
 743,743-749 Produits d'exploitation divers,À subdiviser,Produit,
@@ -395,6 +394,8 @@ code,label,description,position,bookmark
 790,Résultat positif de l'exercice antérieur reporté,Résultat excédentaire,Produit,
 791,Autres réserves,,Produit,
 792,Résultat négatif à reporter,Résultat déficitaire,Charge,
+890,Ouverture,,,
+891,Clôture,,,
 0,DROITS ET ENGAGEMENTS HORS BILAN,Sont portés dans les comptes de la classe 0 les droits et engagements autres que ceux qui doivent être portés dans les comptes des classes 1 à 5.,,
 00,Garanties constituées par des tiers pour compte de l’association ou de la fondation,,,
 000,"Créanciers de l'association ou de la fondation, bénéficiaires de garanties de tiers",,,
