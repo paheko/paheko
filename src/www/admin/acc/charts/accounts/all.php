@@ -3,7 +3,7 @@ namespace Garradin;
 
 use Garradin\Accounting\Charts;
 
-require_once __DIR__ . '/../../_inc.php';
+require_once __DIR__ . '/_inc.php';
 
 $chart = null;
 
@@ -36,9 +36,11 @@ $form->runIf('bookmark', function () use ($accounts) {
 }, null, Utils::getSelfURI());
 
 
-$list = $accounts->list();
+$list = $accounts->list($types);
 $list->loadFromQueryString();
 
-$tpl->assign(compact('chart', 'list'));
+$target = !isset($_GET['_dialog']) ? '_dialog=manage' : null;
+
+$tpl->assign(compact('chart', 'list', 'target'));
 
 $tpl->display('acc/charts/accounts/all.tpl');

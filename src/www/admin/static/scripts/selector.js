@@ -101,7 +101,9 @@ document.addEventListener('keydown', (evt) => {
 	return false;
 });
 
-buttons[0].focus();
+if (buttons[0]) {
+	buttons[0].focus();
+}
 
 var q = document.getElementById('lookup');
 

@@ -216,7 +216,7 @@ class Account extends Entity
 	protected string $label;
 	protected ?string $description;
 	protected int $position = 0;
-	protected int $type = 0;
+	protected int $type;
 	protected bool $user = false;
 	protected bool $bookmark = false;
 
@@ -331,11 +331,11 @@ class Account extends Entity
 		$pattern = $base . '_%';
 
 		$db = DB::getInstance();
-		$used_codes = $db->getAssoc(sprintf('SELECT code, code FROM %s WHERE code LIKE ? AND id_chart = ?;', Account::TABLE), $this->chart_id, $pattern);
+		$used_codes = $db->getAssoc(sprintf('SELECT code, code FROM %s WHERE code LIKE ? AND id_chart = ?;', Account::TABLE), $pattern, $this->id_chart);
 		$used_codes = array_values($used_codes);
 		$used_codes = array_map(fn($a) => substr($a, strlen($base)), $used_codes);
 
-		$count = $db->count(Account::TABLE, 'id_chart = ? AND code LIKE ?', $this->chart_id, $pattern);
+		$count = $db->count(Account::TABLE, 'id_chart = ? AND code LIKE ?', $this->id_chart, $pattern);
 		$letter = null;
 
 		// Make sure we don't reuse an existing code
