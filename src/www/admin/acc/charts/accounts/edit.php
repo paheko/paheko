@@ -3,7 +3,7 @@ namespace Garradin;
 
 use Garradin\Accounting\Accounts;
 
-require_once __DIR__ . '/../../_inc.php';
+require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
@@ -32,18 +32,13 @@ $form->runIf('edit', function () use ($account, $can_edit) {
 
 	$account->save();
 
-	if (isset($_GET['_dialog'])) {
-		Utils::reloadParentFrame();
-		return;
-	}
-
 	$page = '';
 
 	if (!$account->type) {
 		$page = 'all.php';
 	}
 
-	Utils::redirect(sprintf('!acc/charts/accounts/%s?id=%d', $page, $account->id_chart));
+	chart_reload_or_redirect(sprintf('!acc/charts/accounts/%s?id=%d', $page, $account->id_chart));
 }, $csrf_key);
 
 if ($account->type) {

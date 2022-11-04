@@ -2,7 +2,9 @@
 
 {include file="./_nav.tpl" current=null}
 
-<form method="post" action="">
+{form_errors}
+
+<form method="post" action="" data-focus="1">
 	<fieldset>
 		<legend>{if $project->exists()}Modifier un projet{else}Créer un projet{/if}</legend>
 		<dl>

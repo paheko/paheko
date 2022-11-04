@@ -8,7 +8,7 @@
 
 	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 	<aside>
-		{linkbutton label="Créer un nouveau projet" href="edit.php" shape="plus"}
+		{linkbutton label="Créer un nouveau projet" href="edit.php" shape="plus" target="_dialog"}
 	</aside>
 
 	<ul class="sub">

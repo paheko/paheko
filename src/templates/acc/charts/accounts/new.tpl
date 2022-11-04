@@ -40,7 +40,7 @@
 
 		<p class="submit">
 			{csrf_field key=$csrf_key}
-			{button type="submit" shape="star" name="bookmark" value=$ask.id label="Ajouter ce compte à mes favoris" class="main"}
+			{button type="submit" shape="star" name="toggle_bookmark" value=$ask.id label="Ajouter ce compte à mes favoris" class="main"}
 			— ou —
 			{button type="submit" shape="right" name="from" value=$ask.id label="Créer un sous-compte" class="main"}
 		</p>
@@ -68,10 +68,10 @@
 			{foreach from=$missing item="item"}
 				<tr class="account account-level-{$item.level}">
 					<td class="num">{$item.code}</td>
-					<th>{linkbutton href="?id=%d&type=%d&ask=%d"|args:$account.id_chart,$account.type,$item.id label=$item.label}</th>
+					<th>{linkbutton href="?id=%d&type=%d&ask=%d&%s"|args:$account.id_chart,$account.type,$item.id,$types_arg label=$item.label}</th>
 					<td>{if $item.description}<span class="help">{$item.description|escape|nl2br}</span>{/if}</td>
 					<td class="actions">
-						{linkbutton href="?id=%d&type=%d&ask=%d"|args:$account.id_chart,$account.type,$item.id label="Sélectionner" shape="right"}
+						{linkbutton href="?id=%d&type=%d&ask=%d&%s"|args:$account.id_chart,$account.type,$item.id,$types_arg label="Sélectionner" shape="right"}
 					</td>
 				</tr>
 			{/foreach}

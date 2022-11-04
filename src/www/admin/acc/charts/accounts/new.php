@@ -8,7 +8,7 @@ use Garradin\Accounting\Accounts;
 use Garradin\Accounting\Charts;
 use Garradin\Membres\Session;
 
-require_once __DIR__ . '/../../_inc.php';
+require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
@@ -34,14 +34,19 @@ $type = f('type') ?? qg('type');
 if ($type !== null) {
 	$account->type = (int)$type;
 }
+elseif (isset($types) && is_array($types) && count($types) == 1) {
+	$account->type = (int)current($types);
+}
 
 $csrf_key = 'account_new';
 
-$form->runIf('bookmark', function () use ($accounts) {
-	$a = $accounts->get(f('bookmark'));
+$form->runIf('toggle_bookmark', function () use ($accounts, $chart) {
+	$a = $accounts->get(f('toggle_bookmark'));
 	$a->bookmark = true;
 	$a->save();
-}, $csrf_key, '!acc/charts/accounts/?id=' . $chart->id());
+
+	chart_reload_or_redirect('!acc/charts/accounts/?id=' . $chart->id());
+}, $csrf_key);
 
 $form->runIf('save', function () use ($account, $accounts, $chart, $current_year) {
 	$db = DB::getInstance();
@@ -80,8 +85,7 @@ $form->runIf('save', function () use ($account, $accounts, $chart, $current_year
 		$page = 'all.php';
 	}
 
-	$url = sprintf('!acc/charts/accounts/%s?id=%d', $page, $account->id_chart);
-	Utils::redirect($url);
+	chart_reload_or_redirect(sprintf('!acc/charts/accounts/%s?id=%d', $page, $account->id_chart));
 }, $csrf_key);
 
 $types_create = [
@@ -137,7 +141,9 @@ if ($account->type && !$from) {
 	$code_base = $account->getNumberBase();
 	$code_value = $account->getNewNumberAvailable($code_base);
 
-	$missing = $accounts->listMissing($account->type);
+	if (null === f('from')) {
+		$missing = $accounts->listMissing($account->type);
+	}
 }
 
 $tpl->assign(compact('types_create', 'account', 'chart', 'ask', 'csrf_key', 'missing', 'code_base', 'code_value', 'from'));

@@ -2,6 +2,7 @@
 
 namespace Garradin\Entities\Accounting;
 
+use Garradin\DB;
 use Garradin\Entity;
 
 /**
@@ -30,6 +31,15 @@ class Project extends Entity
 		if (null !== $this->description) {
 			$this->assert(trim($this->description) !== '', 'L\'intitulé de projet est invalide.');
 			$this->assert(strlen($this->description) <= 2000, 'L\'intitulé de compte ne peut faire plus de 2000 caractères.');
+		}
+
+		$db = DB::getInstance();
+
+		if ($this->exists()) {
+			$this->assert(!$db->test(self::TABLE, 'code = ? AND id != ?', $this->code, $this->id()), 'Ce code est déjà utilisé par un autre projet.');
+		}
+		else {
+			$this->assert(!$db->test(self::TABLE, 'code = ?', $this->code), 'Ce code est déjà utilisé par un autre projet.');
 		}
 
 		parent::selfCheck();

@@ -16,7 +16,7 @@
 
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 			<?php $page = isset($grouped_accounts) ? '' : 'all.php'; ?>
-			<p class="edit">{linkbutton label="Modifier les comptes" href="!acc/charts/accounts/%s?id=%d"|args:$page,$chart.id shape="edit"}</aside></p>
+			<p class="edit">{linkbutton label="Modifier les comptes" href="!acc/charts/accounts/%s?id=%d&types=%s"|args:$page,$chart.id,$targets_str shape="edit"}</aside></p>
 		{/if}
 
 		<p>{input type="select" name="filter" options=$filter_options default=$filter}</p>

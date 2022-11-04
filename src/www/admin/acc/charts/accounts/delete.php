@@ -3,7 +3,7 @@ namespace Garradin;
 
 use Garradin\Accounting\Accounts;
 
-require_once __DIR__ . '/../../_inc.php';
+require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
@@ -27,7 +27,9 @@ $csrf_key = 'acc_accounts_delete_' . $account->id();
 
 $form->runIf('delete', function () use ($account) {
 	$account->delete();
-}, $csrf_key, sprintf('!acc/charts/accounts/?id=%d', $account->id_chart));
+
+	chart_reload_or_redirect(sprintf('!acc/charts/accounts/?id=%d', $account->id_chart));
+}, $csrf_key);
 
 $tpl->assign(compact('account', 'csrf_key'));
 

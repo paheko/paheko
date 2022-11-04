@@ -198,13 +198,13 @@ class Year extends Entity
 
 		$sql = sprintf('SELECT a.* FROM acc_accounts a
 			LEFT JOIN acc_transactions_lines b ON b.id_account = a.id
-			LEFT JOIN acc_transactions c ON c.id = b.id_transaction
-			WHERE a.id_chart = %d AND a.%s AND (a.bookmark = 1 OR a.user = 1 OR b.id IS NOT NULL) AND c.id_year = ?
+			LEFT JOIN acc_transactions c ON c.id = b.id_transaction AND c.id_year = %d
+			WHERE a.id_chart = %d AND a.%s AND (a.bookmark = 1 OR a.user = 1 OR c.id IS NOT NULL)
 			GROUP BY a.id
 			ORDER BY type, code COLLATE NOCASE;',
-			$this->chart_id,
-			$db->where('type', $types),
-			$this->id()
+			$this->id(),
+			$this->id_chart,
+			$db->where('type', $types)
 		);
 
 		$query = $db->iterate($sql);

@@ -23,8 +23,11 @@ $filter_options = [
 //	'bookmark' => 'Voir seulement les comptes favoris',
 	'usual' => 'Voir seulement les comptes favoris et usuels',
 	'all' => 'Voir tous les comptes',
-	'any' => 'Voir tout le plan comptable',
 ];
+
+if (!count($targets)) {
+	$filter_options['any'] = 'Voir tout le plan comptable';
+}
 
 if (null !== $filter) {
 	if (!array_key_exists($filter, $filter_options)) {
@@ -77,7 +80,7 @@ elseif ($filter == 'any') {
 	$tpl->assign('accounts', $accounts->listAll());
 }
 elseif ($year) {
-	$tpl->assign('grouped_accounts', $year->listCommonGrouped($targets));
+	$tpl->assign('grouped_accounts', $year->listCommonAccountsGrouped($targets));
 }
 else {
 	$tpl->assign('grouped_accounts', $accounts->listCommonGrouped($targets));

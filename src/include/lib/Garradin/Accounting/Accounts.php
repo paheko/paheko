@@ -114,7 +114,7 @@ class Accounts
 			$condition = ' AND ' . DB::getInstance()->where('type', $types);
 		}
 
-		$sql = sprintf('SELECT * FROM @TABLE WHERE id_chart = %d %s;', $this->chart_id, $condition);
+		$sql = sprintf('SELECT * FROM @TABLE WHERE id_chart = %d %s ORDER BY code COLLATE NOCASE;', $this->chart_id, $condition);
 		return $this->em->all($sql);
 	}
 
@@ -130,7 +130,7 @@ class Accounts
 	{
 		$res = $this->em->DB()->iterate($this->em->formatQuery('SELECT
 			code, label, description, position, type, user AS added
-			FROM @TABLE WHERE id_chart = ? ORDER BY code COLLATE U_NOCASE;'),
+			FROM @TABLE WHERE id_chart = ? ORDER BY code COLLATE NOCASE;'),
 			$this->chart_id);
 
 		foreach ($res as $row) {

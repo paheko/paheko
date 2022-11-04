@@ -3,7 +3,7 @@ namespace Garradin;
 
 use Garradin\Accounting\Charts;
 
-require_once __DIR__ . '/../../_inc.php';
+require_once __DIR__ . '/_inc.php';
 
 $chart = null;
 
@@ -22,5 +22,5 @@ if (!$chart) {
 $accounts = $chart->accounts();
 
 $tpl->assign(compact('chart'));
-$tpl->assign('accounts_grouped', $accounts->listCommonGrouped(null, true));
+$tpl->assign('accounts_grouped', $accounts->listCommonGrouped($types, true));
 $tpl->display('acc/charts/accounts/index.tpl');
