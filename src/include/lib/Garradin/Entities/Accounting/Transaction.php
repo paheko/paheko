@@ -47,39 +47,23 @@ class Transaction extends Entity
 		'Créance',
 	];
 
-	protected $id;
-	protected $type = null;
-	protected $status = 0;
-	protected $label;
-	protected $notes;
-	protected $reference;
+	protected ?int $id;
+	protected int $type = 0;
+	protected int $status = 0;
+	protected string $label;
+	protected ?string $notes = null;
+	protected ?string $reference = null;
 
-	protected $date;
+	protected \KD2\DB\Date $date;
 
-	protected $validated = 0;
+	protected bool $validated = false;
 
-	protected $hash;
-	protected $prev_hash;
+	protected ?string $hash = null;
+	protected ?string $prev_hash = null;
 
-	protected $id_year;
-	protected $id_creator;
-	protected $id_related;
-
-	protected $_types = [
-		'id'        => 'int',
-		'type'      => 'int',
-		'status'    => 'int',
-		'label'     => 'string',
-		'notes'     => '?string',
-		'reference' => '?string',
-		'date'      => 'date',
-		'validated' => 'bool',
-		'hash'      => '?string',
-		'prev_hash' => '?string',
-		'id_year'   => 'int',
-		'id_creator' => '?int',
-		'id_related' => '?int',
-	];
+	protected int $id_year;
+	protected ?int $id_creator = null;
+	protected ?int $id_related = null;
 
 	protected $_lines;
 	protected $_old_lines = [];
@@ -159,7 +143,8 @@ class Transaction extends Entity
 
 		if (count($accounts)) {
 			$sql = sprintf('SELECT id, label, code, position FROM acc_accounts WHERE %s;', $db->where('id', 'IN', $accounts));
-			$this->_accounts = array_merge($this->_accounts, $db->getGrouped($sql));
+			// Don't use array_merge here or keys will be lost
+			$this->_accounts = $this->_accounts + $db->getGrouped($sql);
 		}
 
 		if (count($projects)) {
@@ -314,7 +299,7 @@ class Transaction extends Entity
 
 		$id_project = null;
 
-		foreach ($this->lines as $line) {
+		foreach ($lines as $line) {
 			if ($line->id_project != $id_project) {
 				$id_project = $line->id_project;
 				break;

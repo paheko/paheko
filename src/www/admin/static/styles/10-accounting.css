@@ -122,8 +122,7 @@ table.projects tr.title p.actions {
 }
 
 table.projects tr.total {
-    border-top: 6px double var(--gBorderColor);
-    border-bottom: 6px double var(--gLightBorderColor);
+    border-top: 6px double var(--gLightBorderColor);
     background: rgba(var(--gSecondColor), 0.2);
 }
 

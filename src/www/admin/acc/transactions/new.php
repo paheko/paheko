@@ -8,6 +8,8 @@ use Garradin\Accounting\Projects;
 use Garradin\Accounting\Transactions;
 use Garradin\Accounting\Years;
 
+use KD2\DB\Date;
+
 require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE);
@@ -37,7 +39,7 @@ if (qg('l')) {
 }
 
 if (qg('d')) {
-	$transaction->date = new \DateTime(qg('d'));
+	$transaction->date = new Date(qg('d'));
 }
 
 if (qg('t')) {
@@ -67,12 +69,12 @@ if (qg('copy')) {
 }
 
 // Set last used date
-if (empty($transaction->date) && $session->get('acc_last_date') && $date = \DateTime::createFromFormat('!Y-m-d', $session->get('acc_last_date'))) {
+if (empty($transaction->date) && $session->get('acc_last_date') && $date = Date::createFromFormat('!Y-m-d', $session->get('acc_last_date'))) {
 	$transaction->date = $date;
 }
 // Set date of the day if no date was set
 elseif (empty($transaction->date)) {
-	$transaction->date = new \DateTime;
+	$transaction->date = new Date;
 }
 
 // Make sure the date cannot be outside of the current year
