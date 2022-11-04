@@ -24,6 +24,15 @@ class Chart extends Entity
 
 	const EXPECTED_CSV_COLUMNS = ['code', 'label', 'description', 'position', 'bookmark'];
 
+	const COLUMNS = [
+		'code' => 'Numéro',
+		'label' => 'Libellé',
+		'description' => 'Description',
+		'position' => 'Position',
+		'added' => 'Ajouté',
+		'bookmark' => 'Favori',
+	];
+
 	public function selfCheck(): void
 	{
 		$this->assert(trim($this->label) !== '', 'Le libellé ne peut rester vide.');
@@ -102,14 +111,14 @@ class Chart extends Entity
 	public function export(): \Generator
 	{
 		$res = DB::getInstance()->iterate('SELECT
-			code, label, description, position, type, user AS added
+			code, label, description, position, user, bookmark
 			FROM acc_accounts WHERE id_chart = ? ORDER BY code COLLATE NOCASE;',
 			$this->id);
 
 		foreach ($res as $row) {
-			$row->type = Account::TYPES_NAMES[$row->type];
 			$row->position = Account::POSITIONS_NAMES[$row->position];
-			$row->added = $row->added ? 'Ajouté' : '';
+			$row->user = $row->user ? 'Ajouté' : '';
+			$row->bookmark = $row->bookmark ? 'Favori' : '';
 			yield $row;
 		}
 	}

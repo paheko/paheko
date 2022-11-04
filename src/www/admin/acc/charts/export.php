@@ -14,5 +14,6 @@ if (!$chart) {
 CSV::export(
 	qg('format'),
 	sprintf('Plan comptable - %s - %s', Config::getInstance()->get('nom_asso'), $chart->label),
-	$chart->export()
+	$chart->export(),
+	$chart::COLUMNS
 );
