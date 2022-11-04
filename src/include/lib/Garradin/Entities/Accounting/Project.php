@@ -20,8 +20,6 @@ class Project extends Entity
 
 	public function selfCheck(): void
 	{
-		$db = DB::getInstance();
-
 		$this->assert(trim($this->code) !== '', 'Le numéro de projet est invalide.');
 		$this->assert(strlen($this->code) <= 100, 'Le numéro de projet est trop long.');
 		$this->assert(preg_match('/^[A-Z0-9_]+$/', $this->code), 'Le numéro de projet ne peut comporter que des lettres majuscules et des chiffres.');
@@ -47,6 +45,6 @@ class Project extends Entity
 			$source['code'] = strtoupper($source['code']);
 		}
 
-		parent::importForm($data);
+		parent::importForm($source);
 	}
 }

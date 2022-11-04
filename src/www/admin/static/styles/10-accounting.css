@@ -115,6 +115,21 @@ tr.account td.bookmark { width: 2%; }
 tr.account td.bookmark b { color: var(--gBorderColor); }
 
 table.projects tr.title p.help { font-weight: normal; text-align: center; }
+table.projects tr.title p.actions {
+    text-align: center;
+    margin: 0;
+    margin-bottom: .8em;
+}
+
+table.projects tr.total {
+    border-top: 6px double var(--gBorderColor);
+    border-bottom: 6px double var(--gLightBorderColor);
+    background: rgba(var(--gSecondColor), 0.2);
+}
+
+table.projects .archived {
+    opacity: 0.7;
+}
 
 .attachments {
     text-align: center;

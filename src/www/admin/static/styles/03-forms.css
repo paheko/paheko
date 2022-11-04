@@ -190,6 +190,7 @@ a.icn-btn, b.btn {
     white-space: pre;
     transition: color .3s, background-color .3s;
     text-decoration: underline;
+    font-weight: normal;
 }
 
 b.btn {

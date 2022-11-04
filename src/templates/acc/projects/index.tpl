@@ -1,34 +1,23 @@
 {include file="admin/_head.tpl" title="Projets" current="acc/years"}
 
-<nav class="tabs">
-	{if CURRENT_YEAR_ID}
-	<aside>
-		{linkbutton label="Créer un nouveau projet" href="!acc/projects/new.php" shape="plus"}
-	</aside>
-	{/if}
-
-	<ul>
-		<li><a href="{$admin_url}acc/years/">Exercices</a></li>
-		<li class="current"><a href="{$admin_url}acc/projects/">Projets <em>(compta analytique)</em></a></li>
-		<li><a href="{$admin_url}acc/charts/">Plans comptables</a></li>
-	</ul>
-
-	<aside>
-	{if $order_code}
-		{linkbutton href="%s?by_year=%d"|args:$self_url_no_qs,$by_year label="Trier les projets par libellé" shape="menu"}
-	{else}
-		{linkbutton href="%s?by_year=%d&order_code=1"|args:$self_url_no_qs,$by_year label="Trier les projets par code" shape="menu"}
-	{/if}
-	</aside>
-
-	<ul class="sub">
-		<li{if !$by_year} class="current"{/if}><a href="{$self_url_no_qs}?order_code={$order_code}">Par projet</a></li>
-		<li{if $by_year} class="current"{/if}><a href="{$self_url_no_qs}?by_year=1&order_code={$order_code}">Par exercice</a></li>
-	</ul>
-</nav>
+{include file="./_nav.tpl" current=$current}
 
 <div class="year-header">
 	<h2>{$config.nom_asso} — Projets</h2>
+
+	<p class="noprint">
+		{if $by_year}
+			{linkbutton href="?order_code=%s"|args:$order_code label="Grouper par projet" shape="left"}
+		{else}
+			{linkbutton href="?by_year=1&order_code=%s"|args:$order_code label="Grouper par exercice" shape="right"}
+		{/if}
+		{if $order_code}
+			{linkbutton href="%s?by_year=%d"|args:$self_url_no_qs,$by_year label="Trier les projets par libellé" shape="up"}
+		{else}
+			{linkbutton href="%s?by_year=%d&order_code=1"|args:$self_url_no_qs,$by_year label="Trier les projets par code" shape="down"}
+		{/if}
+	</p>
+
 
 	<p class="noprint print-btn">
 		<button onclick="window.print(); return false;" class="icn-btn" data-icon="⎙">Imprimer</button>
@@ -51,16 +40,22 @@
 			</tr>
 		</thead>
 		{foreach from=$list item="parent"}
-			<tbody>
+			<tbody{if $parent.archived} class="archived"{/if}>
 				<tr class="title">
-					<th colspan="5">
-						<h2 class="ruler">{$parent.label}</h2>
+					<th colspan="7">
+						<h2 class="ruler">{$parent.label}{if $parent.archived} <em>(archivé)</em>{/if}</h2>
 						{if $parent.description}<p class="help">{$parent.description|escape|nl2br}</p>{/if}
+					{if !$by_year && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
+					<p class="actions">
+						{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$parent.id target="_dialog"}
+						{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$parent.id target="_dialog"}
+					</p>
+					{/if}
 					</th>
 				</tr>
 			{foreach from=$parent.items item="item"}
-				<tr>
-					<th>{$item.label}</th>
+				<tr class="{if $item.label == 'Total'}total{/if} {if $item.archived}archived{/if}">
+					<th>{$item.label}{if $item.archived} <em>(archivé)</em>{/if}</th>
 					<td>
 					<span class="noprint">
 						<a href="{$admin_url}acc/reports/graphs.php?project={$item.id_project}&amp;year={$item.id_year}">Graphiques</a>

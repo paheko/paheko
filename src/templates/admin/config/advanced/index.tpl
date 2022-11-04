@@ -16,25 +16,8 @@
 	<p class="block confirm">
 		L'exercice sélectionné a été réouvert.
 	</p>
-{else if $_GET.msg == 'SAVED'}
-	<p class="block confirm">
-		La configuration a été enregistrée.
-	</p>
 {/if}
 
-<form method="post" action="{$self_url_no_qs}">
-<fieldset>
-	<legend>Configuration avancée de la comptabilité</legend>
-	<dl>
-		<dt><label for="f_analytical_set_all_0">Lors de la saisie d'une écriture simplifiée (recette ou dépense), affecter le projet analytique…</label></dt>
-		{input type="radio" name="analytical_set_all" value="1" label="à tous les comptes" source=$config help="permet de suivre la caisse, banque, comptes de tiers, etc. dans un projet"}
-		{input type="radio" name="analytical_set_all" value="0" label="seulement aux comptes de charge et de produit" source=$config}
-	</dl>
-	<p>
-		{csrf_field key="save_config"}
-		{button type="submit" name="save_config" label="Enregistrer" shape="right"}
-	</p>
-</fieldset>
 
 {if count($closed_years)}
 <fieldset>
