@@ -27,7 +27,7 @@
 
 	<h2>{$config.nom_asso} — {$title}</h2>
 	{if isset($project)}
-		<h3>Projet&nbsp;: {$project.label}</h3>
+		<h3>Projet&nbsp;: {$project.label}{if $project.archived} <em>(archivé)</em>{/if}</h3>
 	{/if}
 	{if isset($year)}
 		<p>Exercice&nbsp;: {$year.label} ({if $year.closed}clôturé{else}en cours{/if}, du

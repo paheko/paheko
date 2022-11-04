@@ -38,8 +38,9 @@ class Projects
 	 */
 	static public function getBalances(bool $by_year = false, bool $order_code = false): \Generator
 	{
+		$join = $by_year ? 'INNER' : 'LEFT';
 		$sql = 'SELECT p.label AS project_label, p.description AS project_description, p.id AS id_project,
-			p.code AS project_code,
+			p.code AS project_code, p.archived,
 			y.id AS id_year, y.label AS year_label, y.start_date, y.end_date,
 			SUM(l.credit - l.debit) AS sum, SUM(l.credit) AS credit, SUM(l.debit) AS debit, 0 AS total,
 			(SELECT SUM(l2.credit - l2.debit) FROM acc_transactions_lines l2
@@ -50,12 +51,12 @@ class Projects
 				INNER JOIN acc_transactions t2 ON t2.id = l2.id_transaction
 				INNER JOIN acc_accounts a2 ON a2.id = l2.id_account
 				WHERE a2.position = %d AND l2.id_project = l.id_project AND t2.id_year = t.id_year) AS sum_revenue
-			FROM acc_transactions_lines l
-			INNER JOIN acc_transactions t ON t.id = l.id_transaction
-			INNER JOIN acc_projects p ON p.id = l.id_project
-			INNER JOIN acc_years y ON y.id = t.id_year
+			FROM acc_projects p
+			%s JOIN acc_transactions_lines l ON p.id = l.id_project
+			%3$s JOIN acc_transactions t ON t.id = l.id_transaction
+			%3$s JOIN acc_years y ON y.id = t.id_year
 			GROUP BY %s
-			ORDER BY %s;';
+			ORDER BY p.archived, %s;';
 
 		$order = $order_code ? 'p.code COLLATE U_NOCASE' : 'p.label COLLATE U_NOCASE';
 
@@ -68,17 +69,17 @@ class Projects
 			$order = $order . ', y.id';
 		}
 
-		$sql = sprintf($sql, Account::EXPENSE, Account::REVENUE, $group, $order);
+		$sql = sprintf($sql, Account::EXPENSE, Account::REVENUE, $join, $group, $order);
 
 		$current = null;
 
-		static $sums = ['credit', 'debit', 'sum'];
+		static $sums = ['credit', 'debit', 'sum', 'sum_expense', 'sum_revenue'];
 
 		$total = function (\stdClass $current, bool $by_year) use ($sums)
 		{
 			$out = (object) [
 				'label' => 'Total',
-				'id_account' => $by_year ? null : $current->id,
+				'id_project' => $by_year ? null : $current->id,
 				'id_year' => $by_year ? $current->id : null,
 				'total' => 1,
 			];
@@ -94,7 +95,9 @@ class Projects
 			$id = $by_year ? $row->id_year : $row->project_code;
 
 			if (null !== $current && $current->selector !== $id) {
-				$current->items[] = $total($current, $by_year);
+				if (null !== $current->sum) {
+					$current->items[] = $total($current, $by_year);
+				}
 
 				yield $current;
 				$current = null;
@@ -106,12 +109,17 @@ class Projects
 					'id' => $by_year ? $row->id_year : $row->id_project,
 					'label' => $by_year ? $row->year_label : ($order_code ? $row->project_code . ' - ' : '') . $row->project_label,
 					'description' => !$by_year ? $row->project_description : null,
-					'items' => []
+					'archived' => !$by_year ? $row->archived : 0,
+					'items' => [],
 				];
 
 				foreach ($sums as $s) {
 					$current->$s = 0;
 				}
+			}
+
+			if (null === $row->sum) {
+				continue;
 			}
 
 			$row->label = !$by_year ? $row->year_label : ($order_code ? $row->project_code . ' - ' : '') . $row->project_label;
@@ -126,7 +134,9 @@ class Projects
 			return;
 		}
 
-		$current->items[] = $total($current, $by_year);
+		if (null !== $current->sum) {
+			$current->items[] = $total($current, $by_year);
+		}
 
 		yield $current;
 	}
