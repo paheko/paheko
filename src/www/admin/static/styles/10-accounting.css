@@ -113,6 +113,7 @@ tr.account button[name*="bookmark"] { opacity: 0.6; transition: opacity .3s; wid
 tr.account button[value="1"] { opacity: 1; }
 tr.account td.bookmark { width: 2%; }
 tr.account td.bookmark b { color: var(--gBorderColor); }
+tr.account .help { font-size: 1rem; }
 
 table.projects tr.title p.help { font-weight: normal; text-align: center; }
 table.projects tr.title p.actions {

@@ -121,6 +121,17 @@ class Account extends Entity
 			'^86' => self::EXPENSE,
 			'^87' => self::REVENUE,
 		],
+		'BE' => [
+			'^69' => self::ASSET_OR_LIABILITY,
+			'^6' => self::EXPENSE,
+			'^79' => self::ASSET_OR_LIABILITY,
+			'^7' => self::REVENUE,
+			'^5' => self::ASSET_OR_LIABILITY,
+			'^4' => self::ASSET_OR_LIABILITY,
+			'^3' => self::ASSET,
+			'^2' => self::ASSET,
+			'^1' => self::LIABILITY,
+		],
 	];
 
 	/**
@@ -143,6 +154,21 @@ class Account extends Entity
 			self::TYPE_APPROPRIATION_RESULT => '1068',
 			self::TYPE_CREDIT_REPORT => '110',
 			self::TYPE_DEBIT_REPORT => '119',
+		],
+		'BE' => [
+			self::TYPE_APPROPRIATION_RESULT => '139',
+			self::TYPE_CREDIT_REPORT => '4931',
+			self::TYPE_DEBIT_REPORT => '4932',
+			self::TYPE_BANK => '56',
+			self::TYPE_CASH => '570',
+			self::TYPE_OUTSTANDING => '499',
+			self::TYPE_EXPENSE => '6',
+			self::TYPE_REVENUE => '7',
+			self::TYPE_POSITIVE_RESULT => '692',
+			self::TYPE_NEGATIVE_RESULT => '690',
+			self::TYPE_THIRD_PARTY => '4',
+			self::TYPE_OPENING => '890',
+			self::TYPE_CLOSING => '891',
 		],
 	];
 
@@ -243,6 +269,8 @@ class Account extends Entity
 			throw new ValidationException(sprintf('Le numéro "%s" est déjà utilisé par un autre compte.', $this->code));
 		}
 
+		$this->assert(isset($this->type));
+
 		$this->checkLocalRules();
 
 		$this->assert(array_key_exists($this->type, self::TYPES_NAMES), 'Type invalide: ' . $this->type);
@@ -286,22 +314,24 @@ class Account extends Entity
 	{
 		$country = $this->getCountry();
 
-		if ('FR' != $country) {
-			return;
-		}
+		if (array_key_exists($country, self::LOCAL_TYPES)) {
+			foreach (self::LOCAL_TYPES[$country] as $type => $number) {
+				if ($this->matchType($type)) {
+					$this->set('type', $type);
+					break;
+				}
+			}
 
-		foreach (self::LOCAL_TYPES[$country] as $type => $number) {
-			if ($this->matchType($type)) {
-				$this->set('type', $type);
-				break;
+			foreach (self::LOCAL_POSITIONS[$country] as $pattern => $position) {
+				if (preg_match('/' . $pattern . '/', $this->code)) {
+					$this->set('position', $position);
+					break;
+				}
 			}
 		}
 
-		foreach (self::LOCAL_POSITIONS[$country] as $pattern => $position) {
-			if (preg_match('/' . $pattern . '/', $this->code)) {
-				$this->set('position', $position);
-				break;
-			}
+		if (!isset($this->type)) {
+			$this->set('type', 0);
 		}
 	}
 
@@ -309,11 +339,11 @@ class Account extends Entity
 	{
 		$country = $this->getCountry();
 
-		if ('FR' != $country) {
+		if (!$this->type) {
 			return;
 		}
 
-		if (!$this->type) {
+		if (!isset(self::LOCAL_TYPES[$country][$this->type])) {
 			return;
 		}
 
@@ -366,7 +396,7 @@ class Account extends Entity
 
 		$country = $this->getCountry();
 
-		if ('FR' != $country) {
+		if (!isset(self::LOCAL_TYPES[$country][$this->type])) {
 			return null;
 		}
 
