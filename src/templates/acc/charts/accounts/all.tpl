@@ -13,7 +13,11 @@
 	{foreach from=$list->iterate() item="account"}
 		<tr class="account account-level-{$account.level}">
 			<td class="num">{$account.code}</td>
-			<th>{$account.label}</th>
+			<th>{$account.label}
+				{if $account.description}
+				<br /><p class="help block">{$account.description}</p>
+				{/if}
+			</th>
 			<td>
 				<?php
 				$shape = $account->bookmark ? 'check' : 'uncheck';

@@ -138,7 +138,7 @@ elseif ($id = (int)qg('ask')) {
 }
 
 if ($account->type && !$from) {
-	$code_base = $account->getNumberBase();
+	$code_base = $account->getNumberBase() ?? '';
 	$code_value = $account->getNewNumberAvailable($code_base);
 
 	if (null === f('from')) {

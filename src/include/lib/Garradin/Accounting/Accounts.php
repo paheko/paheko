@@ -88,6 +88,7 @@ class Accounts
 			'user' => [
 				'label' => 'Ajouté',
 			],
+			'description' => [],
 		];
 
 		$tables = 'acc_accounts';
