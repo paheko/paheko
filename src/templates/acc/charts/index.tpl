@@ -36,12 +36,20 @@
 						{linkbutton shape="menu" label="Tous les comptes" href="!acc/charts/accounts/all.php?id=%d"|args:$item.id}
 						{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 							{linkbutton shape="edit" label="Modifier" href="!acc/charts/edit.php?id=%d"|args:$item.id}
-							{linkbutton shape="export" label="Export CSV" href="!acc/charts/export.php?id=%d"|args:$item.id}
-							{linkbutton shape="export" label="Export tableur" href="!acc/charts/export.php?id=%d&ods"|args:$item.id}
 							{if !$item.code && !$item.archived}
 								{linkbutton shape="delete" label="Supprimer" href="!acc/charts/delete.php?id=%d"|args:$item.id}
 							{/if}
 						{/if}
+						<nav class="menu menu-right">
+							<b data-icon="↷" class="btn">Export</b>
+							<span>
+								{linkbutton href="export.php?id=%d&format=csv"|args:$item.id label="Export CSV" shape="export"}
+								{linkbutton href="export.php?id=%d&format=ods"|args:$item.id label="Export LibreOffice" shape="export"}
+								{if CALC_CONVERT_COMMAND}
+									{linkbutton href="export.php?id=%d&format=xlsx"|args:$item.id label="Export Excel" shape="export"}
+								{/if}
+							</span>
+						</nav>
 					</td>
 				</tr>
 			{/foreach}

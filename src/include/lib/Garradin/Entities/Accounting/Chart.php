@@ -94,4 +94,23 @@ class Chart extends Entity
 			throw $e;
 		}
 	}
+
+
+	/**
+	 * Return all accounts from current chart
+	 */
+	public function export(): \Generator
+	{
+		$res = DB::getInstance()->iterate('SELECT
+			code, label, description, position, type, user AS added
+			FROM acc_accounts WHERE id_chart = ? ORDER BY code COLLATE NOCASE;',
+			$this->id);
+
+		foreach ($res as $row) {
+			$row->type = Account::TYPES_NAMES[$row->type];
+			$row->position = Account::POSITIONS_NAMES[$row->position];
+			$row->added = $row->added ? 'Ajouté' : '';
+			yield $row;
+		}
+	}
 }
