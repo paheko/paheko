@@ -4,7 +4,12 @@ ALTER TABLE services_fees RENAME TO services_fees_old;
 
 .read ../../data/1.1.0_schema.sql
 
-INSERT INTO acc_projects (id, code, label, description) SELECT id, SUBSTR(code, 2), label, description FROM acc_accounts_old WHERE type = 7;
+INSERT OR IGNORE INTO acc_projects (id, code, label, description)
+	SELECT a.id, SUBSTR(a.code, 2), a.label, a.description
+	FROM acc_accounts_old a
+	LEFT JOIN acc_transactions_lines_old b ON b.id_analytical = a.id
+	WHERE a.type = 7
+		AND b.id IS NOT NULL;
 
 -- Delete old analytical accounts
 DELETE FROM acc_accounts_old AS a WHERE type = 7 OR
@@ -37,7 +42,13 @@ UPDATE acc_accounts SET type = 15 WHERE code = '119' AND id_chart IN (SELECT id 
 -- Copy data to change the reference from acc_accounts to acc_projects
 INSERT INTO services_fees SELECT * FROM services_fees_old;
 
---UPDATE acc_transactions_lines_old SET id_analytical = NULL WHERE id_analytical NOT IN (SELECT id FROM acc_projects);
+UPDATE acc_transactions_lines_old AS l
+	SET id_analytical = (SELECT a.id FROM acc_projects a INNER JOIN acc_accounts_old b ON b.code = a.code WHERE b.id = l.id_analytical)
+	WHERE
+		id_analytical NOT IN (SELECT id FROM acc_projects)
+		AND EXISTS (SELECT a.id FROM acc_projects a INNER JOIN acc_accounts_old b ON b.code = a.code WHERE b.id = l.id_analytical);
+UPDATE acc_transactions_lines_old SET id_analytical = NULL WHERE id_analytical NOT IN (SELECT id FROM acc_projects);
+
 INSERT INTO acc_transactions_lines SELECT * FROM acc_transactions_lines_old;
 
 -- Cleanup
