@@ -57,7 +57,7 @@
 	{input type="textarea" label="Description" name="description" source=$account}
 	{input type="checkbox" label="Compte favori" name="bookmark" source=$account value=1 help="Si coché, le compte apparaîtra en priorité dans les listes de comptes"}
 
-	{if $create && in_array($account.type, [$account::TYPE_BANK, $account::TYPE_CASH, $account::TYPE_OUTSTANDING, $account::TYPE_THIRD_PARTY]) && !empty($current_year)}
+	{if !$account->exists() && in_array($account.type, [$account::TYPE_BANK, $account::TYPE_CASH, $account::TYPE_OUTSTANDING, $account::TYPE_THIRD_PARTY]) && !empty($current_year)}
 		{input type="money" name="opening_amount" label="Solde d'ouverture" help="Si renseigné, ce solde sera inscrit dans l'exercice « %s »."|args:$current_year.label}
 	{/if}
 </dl>

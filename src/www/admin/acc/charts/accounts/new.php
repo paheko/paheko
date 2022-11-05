@@ -146,6 +146,11 @@ if ($account->type && !$from) {
 	}
 }
 
+if ($account->type && $code_base && $code_value) {
+	$account->code = $code_base . $code_value;
+	$account->setLocalRules();
+}
+
 $tpl->assign(compact('types_create', 'account', 'chart', 'ask', 'csrf_key', 'missing', 'code_base', 'code_value', 'from'));
 
 $tpl->display('acc/charts/accounts/new.tpl');
