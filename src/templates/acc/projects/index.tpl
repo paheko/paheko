@@ -8,21 +8,16 @@
 {if $projects_count}
 	<p class="noprint">
 		{if $by_year}
-			{linkbutton href="?order_code=%s"|args:$order_code label="Grouper par projet" shape="left"}
+			{linkbutton href="./" label="Grouper par projet" shape="left"}
 		{else}
-			{linkbutton href="?by_year=1&order_code=%s"|args:$order_code label="Grouper par exercice" shape="right"}
-		{/if}
-		{if $order_code}
-			{linkbutton href="%s?by_year=%d"|args:$self_url_no_qs,$by_year label="Trier les projets par libellé" shape="up"}
-		{else}
-			{linkbutton href="%s?by_year=%d&order_code=1"|args:$self_url_no_qs,$by_year label="Trier les projets par code" shape="down"}
+			{linkbutton href="?by_year=1" label="Grouper par exercice" shape="right"}
 		{/if}
 	</p>
 
 
 	<p class="noprint print-btn">
 		<button onclick="window.print(); return false;" class="icn-btn" data-icon="⎙">Imprimer</button>
-		{linkbutton shape="download" href="%s?by_year=%d&order_code=%d&_pdf"|args:$self_url_no_qs,$by_year,$order_code label="Télécharger en PDF"}
+		{linkbutton shape="download" href="%s?by_year=%d&_pdf"|args:$self_url_no_qs,$by_year label="Télécharger en PDF"}
 	</p>
 {/if}
 </div>

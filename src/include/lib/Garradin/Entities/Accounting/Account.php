@@ -225,7 +225,7 @@ class Account extends Entity
 			'select' => 'l.id_project',
 		],
 		'project_code' => [
-			'select' => 'p.code',
+			'select' => 'IFNULL(p.code, SUBSTR(p.label, 1, 10) || \'…\')',
 		],
 		'projects' => [
 			'label' => 'Projet',

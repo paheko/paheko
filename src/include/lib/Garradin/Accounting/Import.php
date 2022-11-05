@@ -185,7 +185,7 @@ class Import
 				$data = [];
 
 				if (!empty($row->project)) {
-					$id_project = Projects::getIdFromCode($row->project);
+					$id_project = Projects::getIdFromCodeOrLabel($row->project);
 
 					if (!$id_project) {
 						throw new UserException(sprintf('le projet analytique "%s" n\'existe pas', $row->project));
