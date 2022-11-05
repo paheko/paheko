@@ -435,6 +435,7 @@ dd.help.example {
 
 form p.actions {
     float: right;
+    margin: .5em;
 }
 
 /** Datepicker widget */
@@ -714,6 +715,17 @@ fieldset.progressing > dl, fieldset.progressing > p {
 
 .selector header h2 input {
     width: calc(100% - 1em);
+}
+
+.quick-search button[type=reset] {
+    margin-left: -2.5em;
+    background: none;
+    border: none;
+    color: var(--gBorderColor);
+}
+
+h2.quick-search button[type=reset] {
+    font-size: 1rem;
 }
 
 .selector select {
