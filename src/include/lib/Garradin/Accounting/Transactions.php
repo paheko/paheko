@@ -126,7 +126,7 @@ class Transactions
 		$columns['line_reference']['label'] = 'Réf. paiement';
 		$columns['change']['select'] = sprintf('SUM(l.credit) * %d', $reverse);
 		$columns['change']['label'] = 'Montant';
-		$columns['project_code']['select'] = 'GROUP_CONCAT(b.code, \',\')';
+		$columns['project_code']['select'] = 'GROUP_CONCAT(IFNULL(b.code, SUBSTR(b.label, 1, 10) || \'…\'), \',\')';
 		$columns['id_project']['select'] = 'GROUP_CONCAT(l.id_project, \',\')';
 
 		if (!$type) {

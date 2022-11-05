@@ -29,8 +29,7 @@ UPDATE acc_transactions_lines AS a
 UPDATE acc_projects SET code = CASE WHEN SUBSTR(code, 1, 2) = '99' AND LENGTH(code) > 2 THEN SUBSTR(code, 3) ELSE code END;
 UPDATE acc_projects SET code = CASE WHEN SUBSTR(code, 1, 1) = '9' AND LENGTH(code) > 1 THEN SUBSTR(code, 2) ELSE code END;
 
---UPDATE acc_transactions_lines SET id_project = NULL WHERE id_project NOT IN (SELECT id FROM acc_projects);
---UPDATE acc_transactions_lines SET id_project = 424242 WHERE id_project IS NULL;
+UPDATE acc_transactions_lines SET id_project = NULL WHERE id_project NOT IN (SELECT id FROM acc_projects);
 
 INSERT INTO acc_accounts SELECT *, CASE WHEN type > 0 AND type <= 8 THEN 1 ELSE 0 END FROM acc_accounts_old;
 

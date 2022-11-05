@@ -13,7 +13,7 @@ class Project extends Entity
 	const TABLE = 'acc_projects';
 
 	protected ?int $id;
-	protected string $code;
+	protected ?string $code;
 	protected string $label;
 	protected ?string $description;
 	protected bool $archived = false;
@@ -21,9 +21,20 @@ class Project extends Entity
 
 	public function selfCheck(): void
 	{
-		$this->assert(trim($this->code) !== '', 'Le numéro de projet est invalide.');
-		$this->assert(strlen($this->code) <= 100, 'Le numéro de projet est trop long.');
-		$this->assert(preg_match('/^[A-Z0-9_]+$/', $this->code), 'Le numéro de projet ne peut comporter que des lettres majuscules et des chiffres.');
+		if (null !== $this->code) {
+			$this->assert(trim($this->code) !== '', 'Le numéro de projet est invalide.');
+			$this->assert(strlen($this->code) <= 100, 'Le numéro de projet est trop long.');
+			$this->assert(preg_match('/^[A-Z0-9_]+$/', $this->code), 'Le numéro de projet ne peut comporter que des lettres majuscules et des chiffres.');
+
+			$db = DB::getInstance();
+
+			if ($this->exists()) {
+				$this->assert(!$db->test(self::TABLE, 'code = ? AND id != ?', $this->code, $this->id()), 'Ce code est déjà utilisé par un autre projet.');
+			}
+			else {
+				$this->assert(!$db->test(self::TABLE, 'code = ?', $this->code), 'Ce code est déjà utilisé par un autre projet.');
+			}
+		}
 
 		$this->assert(trim($this->label) !== '', 'L\'intitulé de projet ne peut rester vide.');
 		$this->assert(strlen($this->label) <= 200, 'L\'intitulé de compte ne peut faire plus de 200 caractères.');
@@ -33,14 +44,6 @@ class Project extends Entity
 			$this->assert(strlen($this->description) <= 2000, 'L\'intitulé de compte ne peut faire plus de 2000 caractères.');
 		}
 
-		$db = DB::getInstance();
-
-		if ($this->exists()) {
-			$this->assert(!$db->test(self::TABLE, 'code = ? AND id != ?', $this->code, $this->id()), 'Ce code est déjà utilisé par un autre projet.');
-		}
-		else {
-			$this->assert(!$db->test(self::TABLE, 'code = ?', $this->code), 'Ce code est déjà utilisé par un autre projet.');
-		}
 
 		parent::selfCheck();
 	}

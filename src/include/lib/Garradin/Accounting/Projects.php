@@ -15,6 +15,11 @@ class Projects
 		return EntityManager::findOneById(Project::class, $id);
 	}
 
+	static public function getIdFromCodeOrLabel(string $str): ?int
+	{
+		return DB::getInstance()->firstColumn('SELECT id FROM acc_projects WHERE code = ? OR label = ?;', $str, $str) ?: null;
+	}
+
 	static public function count(): int
 	{
 		return DB::getInstance()->count(Project::TABLE);
@@ -23,7 +28,7 @@ class Projects
 	static public function listAssoc(): array
 	{
 		$em = EntityManager::getInstance(Project::class);
-		$sql = $em->formatQuery('SELECT id, code || \' - \' || label FROM @TABLE WHERE archived = 0 ORDER BY code COLLATE NOCASE, label COLLATE U_NOCASE;');
+		$sql = $em->formatQuery('SELECT id, CASE WHEN code IS NOT NULL THEN code || \' — \' || label ELSE label END FROM @TABLE WHERE archived = 0 ORDER BY code COLLATE NOCASE, label COLLATE U_NOCASE;');
 		return $em->DB()->getAssoc($sql);
 	}
 
@@ -36,11 +41,11 @@ class Projects
 	 * Return account balances per year or per project
 	 * @param  bool $by_year If true will return projects grouped by year, if false it will return years grouped by project
 	 */
-	static public function getBalances(bool $by_year = false, bool $order_code = false): \Generator
+	static public function getBalances(bool $by_year = false): \Generator
 	{
 		$join = $by_year ? 'INNER' : 'LEFT';
 		$sql = 'SELECT p.label AS project_label, p.description AS project_description, p.id AS id_project,
-			p.code AS project_code, p.archived,
+			p.code AS project_code, p.archived, p.id AS project_id,
 			y.id AS id_year, y.label AS year_label, y.start_date, y.end_date,
 			SUM(l.credit - l.debit) AS sum, SUM(l.credit) AS credit, SUM(l.debit) AS debit, 0 AS total,
 			(SELECT SUM(l2.credit - l2.debit) FROM acc_transactions_lines l2
@@ -58,14 +63,14 @@ class Projects
 			GROUP BY %s
 			ORDER BY p.archived, %s;';
 
-		$order = $order_code ? 'p.code COLLATE U_NOCASE' : 'p.label COLLATE U_NOCASE';
+		$order = 'p.code COLLATE NOCASE, p.label COLLATE U_NOCASE';
 
 		if ($by_year) {
-			$group = 'y.id, p.code';
+			$group = 'y.id, p.id';
 			$order = 'y.start_date DESC, ' . $order;
 		}
 		else {
-			$group = 'p.code, y.id';
+			$group = 'p.id, y.id';
 			$order = $order . ', y.id';
 		}
 
@@ -92,10 +97,10 @@ class Projects
 		};
 
 		foreach (DB::getInstance()->iterate($sql) as $row) {
-			$id = $by_year ? $row->id_year : $row->project_code;
+			$id = $by_year ? $row->id_year : $row->project_id;
 
 			if (null !== $current && $current->selector !== $id) {
-				if (null !== $current->sum) {
+				if (count($current->items)) {
 					$current->items[] = $total($current, $by_year);
 				}
 
@@ -107,7 +112,7 @@ class Projects
 				$current = (object) [
 					'selector' => $id,
 					'id' => $by_year ? $row->id_year : $row->id_project,
-					'label' => $by_year ? $row->year_label : ($order_code ? $row->project_code . ' - ' : '') . $row->project_label,
+					'label' => $by_year ? $row->year_label : ($row->project_code  ? $row->project_code . ' — ' : '') . $row->project_label,
 					'description' => !$by_year ? $row->project_description : null,
 					'archived' => !$by_year ? $row->archived : 0,
 					'items' => [],
@@ -122,7 +127,7 @@ class Projects
 				continue;
 			}
 
-			$row->label = !$by_year ? $row->year_label : ($order_code ? $row->project_code . ' - ' : '') . $row->project_label;
+			$row->label = !$by_year ? $row->year_label : ($row->project_code  ? $row->project_code . ' — ' : '') . $row->project_label;
 			$current->items[] = $row;
 
 			foreach ($sums as $s) {
@@ -134,7 +139,7 @@ class Projects
 			return;
 		}
 
-		if (null !== $current->sum) {
+		if (count($current->items)) {
 			$current->items[] = $total($current, $by_year);
 		}
 

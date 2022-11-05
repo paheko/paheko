@@ -160,7 +160,7 @@ class Export
 				a1.code AS debit_account,
 				a2.code AS credit_account,
 				l1.debit AS amount,
-				p.code AS project,
+				IFNULL(p.code, p.label) AS project,
 				GROUP_CONCAT(u.%s) AS linked_users
 				FROM acc_transactions t
 				INNER JOIN acc_transactions_lines l1 ON l1.id_transaction = t.id AND l1.debit != 0
@@ -207,12 +207,12 @@ class Export
 			$sql = 'SELECT t.id, t.type, t.status, t.label, t.date, t.notes, t.reference,
 				a.code AS account, a.label AS account_label, l.debit AS debit, l.credit AS credit,
 				l.reference AS line_reference, l.label AS line_label, l.reconciled,
-				p.code AS project,
+				IFNULL(p.code, p.label) AS project,
 				GROUP_CONCAT(u.%s) AS linked_users
 				FROM acc_transactions t
 				INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
 				INNER JOIN acc_accounts a ON a.id = l.id_account
-				LEFT JOIN acc_accounts p ON p.id = l.id_project
+				LEFT JOIN acc_projects p ON p.id = l.id_project
 				LEFT JOIN acc_transactions_users tu ON tu.id_transaction = t.id
 				LEFT JOIN membres u ON u.id = tu.id_user
 				WHERE t.id_year = ?
