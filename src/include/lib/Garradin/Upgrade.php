@@ -474,6 +474,11 @@ class Upgrade
 			if (version_compare($v, '1.2.0', '<')) {
 				$db->beginSchemaUpdate();
 				$db->import(ROOT . '/include/migrations/1.2/0.sql');
+				Charts::updateInstalled('fr_pca_2018');
+				Charts::updateInstalled('fr_pca_1999');
+				Charts::updateInstalled('fr_pcc_2020');
+				Charts::updateInstalled('fr_pcg_2014');
+				Charts::updateInstalled('be_pcmn_2019');
 				$db->commitSchemaUpdate();
 			}
 

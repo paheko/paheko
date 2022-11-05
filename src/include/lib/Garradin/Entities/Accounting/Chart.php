@@ -47,6 +47,22 @@ class Chart extends Entity
 		return new Accounts($this->id());
 	}
 
+	public function importForm(array $source = null)
+	{
+		if (null === $source) {
+			$source = $_POST;
+		}
+
+		// Don't allow to change country
+		if ($this->code) {
+			unset($source['country']);
+		}
+
+		unset($source['code']);
+
+		return parent::importForm($source);
+	}
+
 	public function canDelete()
 	{
 		return !DB::getInstance()->firstColumn(sprintf('SELECT 1 FROM %s WHERE id_chart = ? LIMIT 1;', Year::TABLE), $this->id());

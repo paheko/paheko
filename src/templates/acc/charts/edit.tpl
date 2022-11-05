@@ -7,7 +7,9 @@
 		<legend>Modifier un plan comptable</legend>
 		<dl>
 			{input type="text" name="label" label="Libellé" required=1 source=$chart}
+			{if !$chart.code}
 			{input type="select" name="country" label="Pays" required=1 options=$country_list source=$chart}
+			{/if}
 			<dt><label for="f_archived_1">Archivage</label></dt>
 			{input type="checkbox" name="archived" value="1" source=$chart label="Plan comptable archivé" help="Ce plan comptable ne pourra plus être modifié"}
 		</dl>

@@ -344,7 +344,7 @@ class CSV
 		return self::import($file['tmp_name'], $expected_columns);
 	}
 
-	static public function import(string $file, array $columns, array $required_columns = []): \Generator
+	static public function import(string $file, ?array $columns = null, array $required_columns = []): \Generator
 	{
 		$delete_after = is_uploaded_file($file);
 		$file = self::convertUploadIfRequired($file, $delete_after);
@@ -368,20 +368,26 @@ class CSV
 			$header = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $header);
 
 			$columns_map = [];
-			$columns_is_list = is_int(key($columns));
 
-			// Check for columns
-			foreach ($header as $key => $label) {
-				// try to find with string key
-				if (!$columns_is_list && array_key_exists($label, $columns)) {
-					$columns_map[] = $label;
-				}
-				// Or with label
-				elseif (in_array($label, $columns)) {
-					$columns_map[] = $columns_is_list ? $label : array_search($label, $columns);
-				}
-				else {
-					$columns_map[] = null;
+			if (null === $columns) {
+				$columns_map = $header;
+			}
+			else {
+				$columns_is_list = is_int(key($columns));
+
+				// Check for columns
+				foreach ($header as $key => $label) {
+					// try to find with string key
+					if (!$columns_is_list && array_key_exists($label, $columns)) {
+						$columns_map[] = $label;
+					}
+					// Or with label
+					elseif (in_array($label, $columns)) {
+						$columns_map[] = $columns_is_list ? $label : array_search($label, $columns);
+					}
+					else {
+						$columns_map[] = null;
+					}
 				}
 			}
 
