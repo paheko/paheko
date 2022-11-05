@@ -156,7 +156,7 @@ class Transaction extends Entity
 			$l->account_code = $this->_accounts[$line->id_account]->code ?? null;
 			$l->account_label = $this->_accounts[$line->id_account]->label ?? null;
 			$l->account_position = $this->_accounts[$line->id_account]->position ?? null;
-			$l->project_name = $projects[$line->id_project]->label ?? null;
+			$l->project_name = $projects[$line->id_project] ?? null;
 			$l->account_selector = [$line->id_account => sprintf('%s — %s', $l->account_code, $l->account_label)];
 			$l->line =& $line;
 

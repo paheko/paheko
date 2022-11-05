@@ -25,7 +25,7 @@
 	</p>
 </div>
 
-{if !empty($list)}
+{if $projects_count}
 
 
 	<table class="list projects">
@@ -52,6 +52,11 @@
 						{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$parent.id target="_dialog"}
 					</p>
 					{/if}
+					{if $by_year}
+					<p class="actions">
+						{linkbutton href="!acc/reports/ledger.php?projects_only=1&year=%d"|args:$parent.id_year label="Grand livre analytique"}
+					</p>
+					{/if}
 					</th>
 				</tr>
 			{foreach from=$parent.items item="item"}
@@ -65,9 +70,6 @@
 						| <a href="{$admin_url}acc/reports/ledger.php?project={$item.id_project}&amp;year={$item.id_year}">Grand livre</a>
 						| <a href="{$admin_url}acc/reports/statement.php?project={$item.id_project}&amp;year={$item.id_year}">Compte de résultat</a>
 						| <a href="{$admin_url}acc/reports/balance_sheet.php?project={$item.id_project}&amp;year={$item.id_year}">Bilan</a>
-						{if $item.total && $by_year}
-						| <a href="{$admin_url}acc/reports/ledger.php?projects_only=1&amp;year={$item.id_year}">Grand livre analytique</a>
-						{/if}
 					</span>
 					</td>
 					<td class="money">{$item.sum_expense|raw|money}</td>
@@ -82,14 +84,11 @@
 	</table>
 
 {else}
-	<p class="block alert">
-		Il n'y a pas de projet visible en cours.
-		{if !$projects_count}
-			{linkbutton label="Créer un nouveau projet" href="new.php" shape="plus"}
-		{else}
-			Le solde des projets apparaîtra quand des écritures seront affectées à ces projets.
-		{/if}
-	</p>
+	<div class="block alert">
+		<p>Il n'existe pas encore de projet.</p>
+		<p>{linkbutton label="Créer un nouveau projet" href="edit.php" shape="plus"}</p>
+		<p>Les projets (aussi appelés comptabilité analytique) permettent de suivre le budget d'une activité ou d'un projet. {linkbutton shape="help" label="Aide sur les projets" target="_dialog" href="https://garradin.eu/comptabilite-analytique"}</p>
+	</div>
 {/if}
 
 {include file="admin/_foot.tpl"}

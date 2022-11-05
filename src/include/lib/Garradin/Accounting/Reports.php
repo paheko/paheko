@@ -63,7 +63,7 @@ class Reports
 			$where[] = sprintf($accounts_alias . 'id = %d', $criterias['account']);
 		}
 
-		if (!empty($criterias['project_only'])) {
+		if (!empty($criterias['projects_only'])) {
 			$where[] = $lines_alias . 'id_project IS NOT NULL';
 		}
 
@@ -145,7 +145,7 @@ class Reports
 
 	static public function getResult(array $criterias): int
 	{
-		if (!empty($criterias['project']) || !empty($criterias['project_only'])) {
+		if (!empty($criterias['project']) || !empty($criterias['projects_only'])) {
 			$where = self::getWhereClause($criterias, 't', 'l', 'a');
 			$sql = self::getBalancesSQL(['inner_select' => 'l.id_project', 'inner_where' => $where]);
 			$sql = sprintf('SELECT position, SUM(balance) FROM (%s) GROUP BY position;', $sql);
@@ -484,7 +484,7 @@ class Reports
 
 		$db = DB::getInstance();
 
-		if (!empty($criterias['project_only'])) {
+		if (!empty($criterias['projects_only'])) {
 			$join = 'acc_projects a ON a.id = l.id_project';
 		}
 		else {
