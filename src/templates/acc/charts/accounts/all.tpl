@@ -2,11 +2,16 @@
 
 {include file="acc/charts/accounts/_nav.tpl" current="all"}
 
-<p class="help">
-	Les comptes marqués comme «&nbsp;<em>Ajouté</em>&nbsp;» ont été ajoutés au plan comptable officiel par vous-même.
-</p>
+<form method="post" action="{$self_url}" data-focus="1">
 
-<form method="post" action="{$self_url}">
+	<p class="actions quick-search">
+		<input type="text" placeholder="Recherche rapide…" title="Filtrer la liste" />{button shape="delete" type="reset" title="Effacer la recherche"}
+		{* We can't use input type="search" because Firefox sucks *}
+	</p>
+
+	<p class="help">
+		Les comptes marqués comme «&nbsp;<em>Ajouté</em>&nbsp;» ont été ajoutés au plan comptable officiel par vous-même.
+	</p>
 
 {include file="common/dynamic_list_head.tpl"}
 
@@ -40,7 +45,7 @@
 	</tbody>
 </table>
 
-<script type="text/javascript" src="{$admin_url}static/scripts/accounts_bookmark.js"></script>
+<script type="text/javascript" src="{$admin_url}static/scripts/accounts_list.js"></script>
 
 </form>
 

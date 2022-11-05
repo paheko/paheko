@@ -2,11 +2,17 @@
 
 {include file="acc/charts/accounts/_nav.tpl" current="favorites"}
 
-<p class="help">
-	Cette liste regroupe les comptes de banque, caisse, attente, tiers, dépense, recette ou bénévolat qui sont soit marqués comme favori, soit ajoutés manuellement, soit déjà utilisés dans un exercice.
-</p>
-
 <form method="post" action="all.php?id={$chart.id}">
+
+	<p class="actions quick-search">
+		<input type="text" placeholder="Recherche rapide…" title="Filtrer la liste" />{button shape="delete" type="reset" title="Effacer la recherche"}
+		{* We can't use input type="search" because Firefox sucks *}
+	</p>
+
+
+	<p class="help">
+		Cette liste regroupe les comptes de banque, caisse, attente, tiers, dépense, recette ou bénévolat qui sont soit marqués comme favori, soit ajoutés manuellement, soit déjà utilisés dans un exercice.
+	</p>
 
 <table class="list">
 {foreach from=$accounts_grouped item="group"}
@@ -46,7 +52,8 @@
 {/foreach}
 </table>
 
-<script type="text/javascript" src="{$admin_url}static/scripts/accounts_bookmark.js"></script>
+<script type="text/javascript" src="{$admin_url}static/scripts/accounts_list.js"></script>
+
 </form>
 
 {include file="admin/_foot.tpl"}

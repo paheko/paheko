@@ -25,8 +25,9 @@ UPDATE acc_transactions_lines AS a
 	SET id_project = (SELECT b.id FROM acc_projects AS b INNER JOIN acc_accounts_old c ON c.code = b.code WHERE c.id = a.id_project)
 	WHERE id_project IS NOT NULL;
 
--- Remove first 9 from code (added in 1.1.30)
-UPDATE acc_projects SET code = CASE WHEN SUBSTR(code, 1, 1) = '9' THEN SUBSTR(code, 2) ELSE code END;
+-- Remove first 99 and 9 from code (added in 1.1.30)
+UPDATE acc_projects SET code = CASE WHEN SUBSTR(code, 1, 2) = '99' AND LENGTH(code) > 2 THEN SUBSTR(code, 3) ELSE code END;
+UPDATE acc_projects SET code = CASE WHEN SUBSTR(code, 1, 1) = '9' AND LENGTH(code) > 1 THEN SUBSTR(code, 2) ELSE code END;
 
 --UPDATE acc_transactions_lines SET id_project = NULL WHERE id_project NOT IN (SELECT id FROM acc_projects);
 --UPDATE acc_transactions_lines SET id_project = 424242 WHERE id_project IS NULL;

@@ -10,8 +10,9 @@
 {else}
 
 	<header>
-		<h2>
-			<input type="text" placeholder="Recherche rapide" id="lookup" />
+		<h2 class="quick-search">
+			<input type="text" placeholder="Recherche rapide…" title="Filtrer la liste" />{button shape="delete" type="reset" title="Effacer la recherche"}
+			{* We can't use input type="search" because Firefox sucks *}
 		</h2>
 
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
@@ -36,7 +37,7 @@
 						<th>{$account.label}</th>
 						<td class="desc">{$account.description}</td>
 						<td class="actions">
-							<button class="icn-btn" value="{$account.id}" data-label="{$account.code} — {$account.label}" data-icon="&rarr;">Sélectionner</button>
+							{button shape="right" value=$account.id data-label="%s — %s"|args:$account.code,$account.label label="Sélectionner"}
 						</td>
 					</tr>
 					<?php $index++; ?>
@@ -55,7 +56,7 @@
 					<td class="num">{$account.code}</td>
 					<th>{$account.label}</th>
 					<td class="actions">
-						<button class="icn-btn" value="{$account.id}" data-label="{$account.code} — {$account.label}" data-icon="&rarr;">Sélectionner</button>
+						{button shape="right" value=$account.id data-label="%s — %s"|args:$account.code,$account.label label="Sélectionner"}
 					</td>
 				</tr>
 			{/foreach}
