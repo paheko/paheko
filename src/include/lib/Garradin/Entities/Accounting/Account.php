@@ -623,6 +623,10 @@ class Account extends Entity
 
 	public function canDelete(): bool
 	{
+		if ($this->chart()->code && !$this->user) {
+			return false;
+		}
+
 		return !DB::getInstance()->firstColumn(sprintf('SELECT 1 FROM %s WHERE id_account = ? LIMIT 1;', Line::TABLE), $this->id());
 	}
 

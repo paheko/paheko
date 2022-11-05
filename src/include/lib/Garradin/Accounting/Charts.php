@@ -21,6 +21,22 @@ class Charts
 		'be_pcmn_2019' => 'Plan comptable minimum normalisé des associations et fondations 2019',
 	];
 
+	static public function updateInstalled(string $chart_code): ?Chart
+	{
+		$file = sprintf('%s/include/data/charts/%s.csv', ROOT, $chart_code);
+		$country = strtoupper(substr($chart_code, 0, 2));
+		$code = strtoupper(substr($chart_code, 3));
+
+		$chart = EntityManager::findOne(Chart::class, 'SELECT * FROM @TABLE WHERE code = ? AND country = ?;', $code, $country);
+
+		if (!$chart) {
+			return null;
+		}
+
+		$chart->importCSV($file, true);
+		return $chart;
+	}
+
 	static public function install(string $chart_code): Chart
 	{
 		if (!array_key_exists($chart_code, self::BUNDLED_CHARTS)) {
