@@ -28,7 +28,7 @@ if ($session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)) {
 
 	$tpl->assign(compact('csrf_key'));
 
-	$tpl->assign('columns', implode(', ', Chart::EXPECTED_CSV_COLUMNS));
+	$tpl->assign('columns', implode(', ', Chart::COLUMNS));
 	$tpl->assign('country_list', Utils::getCountryList());
 
 	$tpl->assign('from', (int)qg('from'));

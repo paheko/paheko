@@ -79,6 +79,10 @@ class Accounts
 			'label' => [
 				'label' => 'Libellé',
 			],
+			'description' => [
+				'label' => '',
+				'order' => null,
+			],
 			'level' => [
 				'select' => 'CASE WHEN LENGTH(code) >= 6 THEN 6 ELSE LENGTH(code) END',
 			],
@@ -88,7 +92,6 @@ class Accounts
 			'user' => [
 				'label' => 'Ajouté',
 			],
-			'description' => [],
 		];
 
 		$tables = 'acc_accounts';
