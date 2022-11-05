@@ -2,7 +2,7 @@ ALTER TABLE acc_accounts RENAME TO acc_accounts_old;
 ALTER TABLE acc_transactions_lines RENAME TO acc_transactions_lines_old;
 ALTER TABLE services_fees RENAME TO services_fees_old;
 
-.read ../../data/1.1.0_schema.sql
+.read ../../data/1.2.0_schema.sql
 
 INSERT OR IGNORE INTO acc_projects (code, label, description)
 	SELECT

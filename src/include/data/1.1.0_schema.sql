@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS services_fees
     id_service INTEGER NOT NULL REFERENCES services (id) ON DELETE CASCADE,
     id_account INTEGER NULL REFERENCES acc_accounts (id) ON DELETE SET NULL CHECK (id_account IS NULL OR id_year IS NOT NULL), -- NULL if fee is not linked to accounting, this is reset using a trigger if the year is deleted
     id_year INTEGER NULL REFERENCES acc_years (id) ON DELETE SET NULL, -- NULL if fee is not linked to accounting
-    id_project INTEGER NULL REFERENCES acc_projects (id) ON DELETE SET NULL
+    id_analytical INTEGER NULL REFERENCES acc_accounts (id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS services_users
@@ -147,14 +147,12 @@ CREATE TABLE IF NOT EXISTS acc_accounts
 
     position INTEGER NOT NULL, -- position actif/passif/charge/produit
     type INTEGER NOT NULL DEFAULT 0, -- Type de compte spécial : banque, caisse, en attente d'encaissement, etc.
-    user INTEGER NOT NULL DEFAULT 1, -- 0 = fait partie du plan comptable original, 1 = a été ajouté par l'utilisateur
-    bookmark INTEGER NOT NULL DEFAULT 0 -- 1 = is marked as favorite
+    user INTEGER NOT NULL DEFAULT 1 -- 0 = fait partie du plan comptable original, 1 = a été ajouté par l'utilisateur
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS acc_accounts_codes ON acc_accounts (code, id_chart);
 CREATE INDEX IF NOT EXISTS acc_accounts_type ON acc_accounts (type);
 CREATE INDEX IF NOT EXISTS acc_accounts_position ON acc_accounts (position);
-CREATE INDEX IF NOT EXISTS acc_accounts_bookmarks ON acc_accounts (id_chart, bookmark, code);
 
 -- Balance des comptes par exercice
 CREATE VIEW IF NOT EXISTS acc_accounts_balances
@@ -183,22 +181,6 @@ AS
         INNER JOIN acc_transactions t ON t.id = l.id_transaction
         GROUP BY t.id_year, a.id
     );
-
-CREATE TABLE IF NOT EXISTS acc_projects
--- Analytical projects
-(
-    id INTEGER NOT NULL PRIMARY KEY,
-
-    code TEXT NULL,
-
-    label TEXT NOT NULL,
-    description TEXT NULL,
-
-    archived INTEGER NOT NULL DEFAULT 0
-);
-
-CREATE UNIQUE INDEX IF NOT EXISTS acc_projects_code ON acc_projects (code);
-CREATE INDEX IF NOT EXISTS acc_projects_list ON acc_projects (archived, code);
 
 CREATE TABLE IF NOT EXISTS acc_years
 -- Exercices
@@ -268,7 +250,7 @@ CREATE TABLE IF NOT EXISTS acc_transactions_lines
 
     reconciled INTEGER NOT NULL DEFAULT 0,
 
-    id_project INTEGER NULL REFERENCES acc_projects(id) ON DELETE SET NULL,
+    id_analytical INTEGER NULL REFERENCES acc_accounts(id) ON DELETE SET NULL,
 
     CONSTRAINT line_check1 CHECK ((credit * debit) = 0),
     CONSTRAINT line_check2 CHECK ((credit + debit) > 0)
@@ -276,7 +258,7 @@ CREATE TABLE IF NOT EXISTS acc_transactions_lines
 
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_transaction ON acc_transactions_lines (id_transaction);
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_account ON acc_transactions_lines (id_account);
-CREATE INDEX IF NOT EXISTS acc_transactions_lines_project ON acc_transactions_lines (id_project);
+CREATE INDEX IF NOT EXISTS acc_transactions_lines_analytical ON acc_transactions_lines (id_analytical);
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_reconciled ON acc_transactions_lines (reconciled);
 
 CREATE TABLE IF NOT EXISTS acc_transactions_users

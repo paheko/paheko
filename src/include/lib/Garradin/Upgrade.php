@@ -471,9 +471,9 @@ class Upgrade
 				$db->import(ROOT . '/include/migrations/1.1/31.sql');
 			}
 
-			if (version_compare($v, '1.1.32', '<')) {
+			if (version_compare($v, '1.2.0', '<')) {
 				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/migrations/1.1/32.sql');
+				$db->import(ROOT . '/include/migrations/1.2/0.sql');
 				$db->commitSchemaUpdate();
 			}
 
