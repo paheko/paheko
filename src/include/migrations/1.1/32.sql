@@ -4,22 +4,43 @@ ALTER TABLE services_fees RENAME TO services_fees_old;
 
 .read ../../data/1.1.0_schema.sql
 
-INSERT OR IGNORE INTO acc_projects (id, code, label, description)
-	SELECT a.id, SUBSTR(a.code, 2), a.label, a.description
+INSERT OR IGNORE INTO acc_projects (code, label, description)
+	SELECT
+		a.code,
+		a.label,
+		a.description
 	FROM acc_accounts_old a
-	LEFT JOIN acc_transactions_lines_old b ON b.id_analytical = a.id
-	WHERE a.type = 7
-		AND b.id IS NOT NULL;
+	WHERE a.type = 7;
+
+-- Copy data to change the column name from acc_accounts to acc_projects
+INSERT INTO services_fees SELECT * FROM services_fees_old;
+INSERT INTO acc_transactions_lines SELECT * FROM acc_transactions_lines_old;
+
+-- Update references to analytical accounts
+UPDATE services_fees AS a
+	SET id_project = (SELECT b.id FROM acc_projects AS b INNER JOIN acc_accounts_old c ON c.code = b.code WHERE c.id = a.id_project)
+	WHERE id_project IS NOT NULL;
+
+UPDATE acc_transactions_lines AS a
+	SET id_project = (SELECT b.id FROM acc_projects AS b INNER JOIN acc_accounts_old c ON c.code = b.code WHERE c.id = a.id_project)
+	WHERE id_project IS NOT NULL;
+
+-- Remove first 9 from code (added in 1.1.30)
+UPDATE acc_projects SET code = CASE WHEN SUBSTR(code, 1, 1) = '9' THEN SUBSTR(code, 2) ELSE code END;
+
+--UPDATE acc_transactions_lines SET id_project = NULL WHERE id_project NOT IN (SELECT id FROM acc_projects);
+--UPDATE acc_transactions_lines SET id_project = 424242 WHERE id_project IS NULL;
+
+INSERT INTO acc_accounts SELECT *, CASE WHEN type > 0 AND type <= 8 THEN 1 ELSE 0 END FROM acc_accounts_old;
 
 -- Delete old analytical accounts
-DELETE FROM acc_accounts_old AS a WHERE type = 7 OR
+DELETE FROM acc_accounts AS a WHERE type = 7 OR
 	(id_chart IN (SELECT id FROM acc_charts WHERE country = 'FR')
+		AND type != 7
 		AND code LIKE '9%'
 		AND (SELECT COUNT(*) FROM acc_transactions_lines AS b WHERE b.id_account = a.id) = 0
 		AND user = 0
 	);
-
-INSERT INTO acc_accounts SELECT *, CASE WHEN type > 0 AND type <= 8 THEN 1 ELSE 0 END FROM acc_accounts_old;
 
 UPDATE acc_accounts SET type = 0;
 
@@ -39,17 +60,7 @@ UPDATE acc_accounts SET type = 13 WHERE code = '1068' AND id_chart IN (SELECT id
 UPDATE acc_accounts SET type = 14 WHERE code = '110' AND id_chart IN (SELECT id FROM acc_charts WHERE country = 'FR');
 UPDATE acc_accounts SET type = 15 WHERE code = '119' AND id_chart IN (SELECT id FROM acc_charts WHERE country = 'FR');
 
--- Copy data to change the reference from acc_accounts to acc_projects
-INSERT INTO services_fees SELECT * FROM services_fees_old;
 
-UPDATE acc_transactions_lines_old AS l
-	SET id_analytical = (SELECT a.id FROM acc_projects a INNER JOIN acc_accounts_old b ON b.code = a.code WHERE b.id = l.id_analytical)
-	WHERE
-		id_analytical NOT IN (SELECT id FROM acc_projects)
-		AND EXISTS (SELECT a.id FROM acc_projects a INNER JOIN acc_accounts_old b ON b.code = a.code WHERE b.id = l.id_analytical);
-UPDATE acc_transactions_lines_old SET id_analytical = NULL WHERE id_analytical NOT IN (SELECT id FROM acc_projects);
-
-INSERT INTO acc_transactions_lines SELECT * FROM acc_transactions_lines_old;
 
 -- Cleanup
 DROP TABLE acc_accounts_old;

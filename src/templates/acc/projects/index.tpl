@@ -5,6 +5,7 @@
 <div class="year-header">
 	<h2>{$config.nom_asso} — Projets</h2>
 
+{if $projects_count}
 	<p class="noprint">
 		{if $by_year}
 			{linkbutton href="?order_code=%s"|args:$order_code label="Grouper par projet" shape="left"}
@@ -23,6 +24,7 @@
 		<button onclick="window.print(); return false;" class="icn-btn" data-icon="⎙">Imprimer</button>
 		{linkbutton shape="download" href="%s?by_year=%d&order_code=%d&_pdf"|args:$self_url_no_qs,$by_year,$order_code label="Télécharger en PDF"}
 	</p>
+{/if}
 </div>
 
 {if $projects_count}
@@ -84,11 +86,8 @@
 	</table>
 
 {else}
-	<div class="block alert">
-		<p>Il n'existe pas encore de projet.</p>
-		<p>{linkbutton label="Créer un nouveau projet" href="edit.php" shape="plus"}</p>
-		<p>Les projets (aussi appelés comptabilité analytique) permettent de suivre le budget d'une activité ou d'un projet. {linkbutton shape="help" label="Aide sur les projets" target="_dialog" href="https://garradin.eu/comptabilite-analytique"}</p>
-	</div>
+	<p class="block alert">Il n'existe pas encore de projet. {linkbutton label="Créer un nouveau projet" href="edit.php" shape="plus" target="_dialog"}</p>
+	<p class="help">Les projets (aussi appelés comptabilité analytique) permettent de suivre le budget d'une activité ou d'un projet. {linkbutton shape="help" label="Aide sur les projets" target="_dialog" href="https://garradin.eu/comptabilite-analytique"}</p>
 {/if}
 
 {include file="admin/_foot.tpl"}
