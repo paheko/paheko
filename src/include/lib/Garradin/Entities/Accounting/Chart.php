@@ -22,7 +22,7 @@ class Chart extends Entity
 	protected ?string $code;
 	protected bool $archived = false;
 
-	const EXPECTED_CSV_COLUMNS = ['code', 'label', 'description', 'position', 'bookmark'];
+	const REQUIRED_COLUMNS = ['code', 'label', 'description', 'position', 'bookmark'];
 
 	const COLUMNS = [
 		'code' => 'Numéro',
@@ -61,7 +61,7 @@ class Chart extends Entity
 		$db->begin();
 
 		try {
-			foreach (CSV::import($file, self::EXPECTED_CSV_COLUMNS) as $line => $row) {
+			foreach (CSV::import($file, self::COLUMNS, self::REQUIRED_COLUMNS) as $line => $row) {
 				$account = null;
 
 				if ($update) {

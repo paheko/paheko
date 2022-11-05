@@ -247,6 +247,7 @@ class Account extends Entity
 	protected bool $bookmark = false;
 
 	protected $_position = [];
+	protected ?Chart $_chart = null;
 
 	public function selfCheck(): void
 	{
@@ -324,6 +325,13 @@ class Account extends Entity
 
 			foreach (self::LOCAL_POSITIONS[$country] as $pattern => $position) {
 				if (preg_match('/' . $pattern . '/', $this->code)) {
+					// If the allowed position is asset OR liability, we allow either one of those 3 choices
+					if ($position == self::ASSET_OR_LIABILITY
+						&& in_array($this->position, [self::ASSET_OR_LIABILITY, self::ASSET, self::LIABILITY])) {
+						break;
+					}
+
+					// Or else we force the position
 					$this->set('position', $position);
 					break;
 				}
@@ -651,9 +659,23 @@ class Account extends Entity
 		return true;
 	}
 
+	public function canSetAssetOrLiabilityPosition(): bool
+	{
+		if ($this->position == self::REVENUE || $this->position == self::EXPENSE) {
+			return false;
+		}
+
+		if (!$this->type || $this->type == self::TYPE_THIRD_PARTY) {
+			return true;
+		}
+
+		return false;
+	}
+
 	public function chart(): Chart
 	{
-		return Charts::get($this->id_chart);
+		$this->_chart ??= Charts::get($this->id_chart);
+		return $this->_chart;
 	}
 
 	public function save(bool $selfcheck = true): bool

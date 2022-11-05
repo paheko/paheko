@@ -4,7 +4,7 @@
 
 <dl>
 	{if $can_edit}
-		{if !$account.type}
+		{if !$account.type && !$account->exists()}
 			<dt><label for="f_position_0">Position au bilan ou résultat</label> <b>(obligatoire)</b></dt>
 			<dd class="help">La position permet d'indiquer dans quelle partie du bilan ou du résultat doit figurer le compte.</dd>
 			{input type="radio" label="Ne pas utiliser ce compte au bilan ni au résultat" name="position" value=0 source=$account}
@@ -13,6 +13,12 @@
 			{input type="radio" label="Bilan : actif ou passif" name="position" value=Entities\Accounting\Account::ASSET_OR_LIABILITY source=$account help="le compte sera placé à l'actif si son solde est débiteur, ou au passif s'il est créditeur"}
 			{input type="radio" label="Résultat : charge" name="position" value=Entities\Accounting\Account::EXPENSE source=$account help="dépenses"}
 			{input type="radio" label="Résultat : produit" name="position" value=Entities\Accounting\Account::REVENUE source=$account help="recettes"}
+		{elseif $account->canSetAssetOrLiabilityPosition()}
+			<dt><label for="f_position_0">Position au bilan</label> <b>(obligatoire)</b></dt>
+			<dd class="help">La position permet d'indiquer dans quelle partie du bilan doit figurer le compte.</dd>
+			{input type="radio" label="Bilan : actif" name="position" value=Entities\Accounting\Account::ASSET source=$account help="ce que possède l'association : stocks, locaux, soldes bancaires, etc."}
+			{input type="radio" label="Bilan : passif" name="position" value=Entities\Accounting\Account::LIABILITY source=$account help="ce que l'association doit : dettes, provisions, réserves, etc."}
+			{input type="radio" label="Bilan : actif ou passif" name="position" value=Entities\Accounting\Account::ASSET_OR_LIABILITY source=$account help="le compte sera placé à l'actif si son solde est débiteur, ou au passif s'il est créditeur"}
 		{elseif $account->exists()}
 			<dt>Position du compte</dt>
 			<dd>

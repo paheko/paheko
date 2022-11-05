@@ -35,9 +35,9 @@
 						{linkbutton shape="star" label="Comptes usuels" href="!acc/charts/accounts/?id=%d"|args:$item.id}
 						{linkbutton shape="menu" label="Tous les comptes" href="!acc/charts/accounts/all.php?id=%d"|args:$item.id}
 						{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-							{linkbutton shape="edit" label="Modifier" href="!acc/charts/edit.php?id=%d"|args:$item.id}
-							{if !$item.code && !$item.archived}
-								{linkbutton shape="delete" label="Supprimer" href="!acc/charts/delete.php?id=%d"|args:$item.id}
+							{linkbutton shape="edit" label="Modifier" href="!acc/charts/edit.php?id=%d"|args:$item.id target="_dialog"}
+							{if $item->canDelete()}
+								{linkbutton shape="delete" label="Supprimer" href="!acc/charts/delete.php?id=%d"|args:$item.id target="_dialog"}
 							{/if}
 						{/if}
 						<nav class="menu menu-right">
