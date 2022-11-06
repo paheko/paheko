@@ -2,6 +2,7 @@
 
 namespace Garradin;
 
+use Garradin\Accounting\Projects;
 use Garradin\Services\Services;
 
 
@@ -40,3 +41,5 @@ $tpl->assign([
 
 $tpl->assign(compact('form_url', 'today', 'grouped_services', 'current_only', 'has_past_services',
 	'create', 'copy_service', 'copy_service_only_paid', 'users'));
+
+$tpl->assign('projects', Projects::listAssocWithEmpty());

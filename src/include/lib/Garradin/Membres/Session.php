@@ -329,7 +329,7 @@ class Session extends \KD2\UserSession
 		return true;
 	}
 
-	public function recoverPasswordChange($code, $password, $password_confirm)
+	public function recoverPasswordChange($code, $password, $password_confirm): void
 	{
 		if (!$this->recoverPasswordCheck($code, $membre))
 		{
@@ -358,7 +358,7 @@ class Session extends \KD2\UserSession
 
 		DB::getInstance()->update('membres', ['passe' => $password], 'id = :id', ['id' => (int)$membre->id]);
 
-		return Emails::queue(Emails::CONTEXT_SYSTEM, [$membre->email => null], null, 'Mot de passe changé', $message);
+		Emails::queue(Emails::CONTEXT_SYSTEM, [$membre->email => null], null, 'Mot de passe changé', $message);
 	}
 
 	public function editUser($data)
@@ -427,7 +427,7 @@ class Session extends \KD2\UserSession
 
 		$dest = $copie ? [$dest => null, $user->email => null] : [$dest => null];
 
-		return Emails::queue(Emails::CONTEXT_PRIVATE, $dest, null, $sujet, $content);
+		Emails::queue(Emails::CONTEXT_PRIVATE, $dest, null, $sujet, $content);
 	}
 
 	public function editSecurity(Array $data = [])

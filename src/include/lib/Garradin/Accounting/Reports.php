@@ -55,16 +55,16 @@ class Reports
 			$where[] = sprintf($transactions_alias . 'id IN (SELECT tu.id_transaction FROM acc_transactions_users tu WHERE id_service_user = %d)', $criterias['subscription']);
 		}
 
-		if (!empty($criterias['analytical'])) {
-			$where[] = sprintf($lines_alias . 'id_analytical = %d', $criterias['analytical']);
+		if (!empty($criterias['project'])) {
+			$where[] = sprintf($lines_alias . 'id_project = %d', $criterias['project']);
 		}
 
 		if (!empty($criterias['account'])) {
 			$where[] = sprintf($accounts_alias . 'id = %d', $criterias['account']);
 		}
 
-		if (!empty($criterias['analytical_only'])) {
-			$where[] = $lines_alias . 'id_analytical IS NOT NULL';
+		if (!empty($criterias['projects_only'])) {
+			$where[] = $lines_alias . 'id_project IS NOT NULL';
 		}
 
 		if (!empty($criterias['has_type'])) {
@@ -76,105 +76,6 @@ class Reports
 		}
 
 		return implode(' AND ', $where);
-	}
-
-	/**
-	 * Return account sums per year or per account
-	 * @param  bool $by_year If true will return accounts grouped by year, if false it will return years grouped by account
-	 */
-	static public function getAnalyticalSums(bool $by_year = false, bool $order_code = false): \Generator
-	{
-		$sql = 'SELECT a.label AS account_label, a.description AS account_description, a.id AS id_account,
-			a.code AS account_code,
-			y.id AS id_year, y.label AS year_label, y.start_date, y.end_date,
-			SUM(l.credit - l.debit) AS sum, SUM(l.credit) AS credit, SUM(l.debit) AS debit, 0 AS total,
-			(SELECT SUM(l2.credit - l2.debit) FROM acc_transactions_lines l2
-				INNER JOIN acc_transactions t2 ON t2.id = l2.id_transaction
-				INNER JOIN acc_accounts a2 ON a2.id = l2.id_account
-				WHERE a2.position = %d AND l2.id_analytical = l.id_analytical AND t2.id_year = t.id_year) * -1 AS sum_expense,
-			(SELECT SUM(l2.credit - l2.debit) FROM acc_transactions_lines l2
-				INNER JOIN acc_transactions t2 ON t2.id = l2.id_transaction
-				INNER JOIN acc_accounts a2 ON a2.id = l2.id_account
-				WHERE a2.position = %d AND l2.id_analytical = l.id_analytical AND t2.id_year = t.id_year) AS sum_revenue
-			FROM acc_transactions_lines l
-			INNER JOIN acc_transactions t ON t.id = l.id_transaction
-			INNER JOIN acc_accounts a ON a.id = l.id_analytical
-			INNER JOIN acc_years y ON y.id = t.id_year
-			GROUP BY %s
-			ORDER BY %s;';
-
-		$order = $order_code ? 'a.code COLLATE U_NOCASE' : 'a.label COLLATE U_NOCASE';
-
-		if ($by_year) {
-			$group = 'y.id, a.code';
-			$order = 'y.start_date DESC, ' . $order;
-		}
-		else {
-			$group = 'a.code, y.id';
-			$order = $order . ', y.id';
-		}
-
-		$sql = sprintf($sql, Account::EXPENSE, Account::REVENUE, $group, $order);
-
-		$current = null;
-
-		static $sums = ['credit', 'debit', 'sum'];
-
-		$total = function (\stdClass $current, bool $by_year) use ($sums)
-		{
-			$out = (object) [
-				'label' => 'Total',
-				'id_account' => $by_year ? null : $current->id,
-				'id_year' => $by_year ? $current->id : null,
-				'total' => 1,
-			];
-
-			foreach ($sums as $s) {
-				$out->{$s} = $current->{$s};
-			}
-
-			return $out;
-		};
-
-		foreach (DB::getInstance()->iterate($sql) as $row) {
-			$id = $by_year ? $row->id_year : $row->account_code;
-
-			if (null !== $current && $current->selector !== $id) {
-				$current->items[] = $total($current, $by_year);
-
-				yield $current;
-				$current = null;
-			}
-
-			if (null === $current) {
-				$current = (object) [
-					'selector' => $id,
-					'id' => $by_year ? $row->id_year : $row->id_account,
-					'label' => $by_year ? $row->year_label : ($order_code ? $row->account_code . ' - ' : '') . $row->account_label,
-					'description' => !$by_year ? $row->account_description : null,
-					'items' => []
-				];
-
-				foreach ($sums as $s) {
-					$current->$s = 0;
-				}
-			}
-
-			$row->label = !$by_year ? $row->year_label : ($order_code ? $row->account_code . ' - ' : '') . $row->account_label;
-			$current->items[] = $row;
-
-			foreach ($sums as $s) {
-				$current->$s += $row->$s;
-			}
-		}
-
-		if ($current === null) {
-			return;
-		}
-
-		$current->items[] = $total($current, $by_year);
-
-		yield $current;
 	}
 
 	static public function getSumsPerYear(array $criterias): array
@@ -244,9 +145,9 @@ class Reports
 
 	static public function getResult(array $criterias): int
 	{
-		if (!empty($criterias['analytical']) || !empty($criterias['analytical_only'])) {
+		if (!empty($criterias['project']) || !empty($criterias['projects_only'])) {
 			$where = self::getWhereClause($criterias, 't', 'l', 'a');
-			$sql = self::getBalancesSQL(['inner_select' => 'l.id_analytical', 'inner_where' => $where]);
+			$sql = self::getBalancesSQL(['inner_select' => 'l.id_project', 'inner_where' => $where]);
 			$sql = sprintf('SELECT position, SUM(balance) FROM (%s) GROUP BY position;', $sql);
 		}
 		else {
@@ -319,7 +220,7 @@ class Reports
 
 		$table = null;
 
-		if (empty($criterias['analytical']) && empty($criterias['user']) && empty($criterias['creator']) && empty($criterias['subscription'])) {
+		if (empty($criterias['project']) && empty($criterias['user']) && empty($criterias['creator']) && empty($criterias['subscription'])) {
 			$table = 'acc_accounts_balances';
 		}
 
@@ -497,7 +398,7 @@ class Reports
 	{
 		$out = new \stdClass;
 
-		$criterias_all = $criterias + ['type' => Account::TYPE_VOLUNTEERING];
+		$criterias_all = $criterias + ['type' => [Account::TYPE_VOLUNTEERING_EXPENSE, Account::TYPE_VOLUNTEERING_REVENUE]];
 
 		$out->caption_left = 'Emplois des contributions';
 		$out->caption_right = 'Sources des contributions';
@@ -547,7 +448,7 @@ class Reports
 	 */
 	static public function getClosingSumsFavoriteAccounts(array $criterias): \Generator
 	{
-		$types = [Account::TYPE_EXPENSE, Account::TYPE_REVENUE, Account::TYPE_BANK, Account::TYPE_OUTSTANDING, Account::TYPE_CASH, Account::TYPE_THIRD_PARTY, Account::TYPE_VOLUNTEERING];
+		$types = Account::COMMON_TYPES;
 		$accounts = self::getAccountsBalances($criterias + ['type' => $types], 'type, code COLLATE NOCASE', false);
 
 		$group = null;
@@ -583,8 +484,8 @@ class Reports
 
 		$db = DB::getInstance();
 
-		if (!empty($criterias['analytical_only'])) {
-			$join = 'acc_accounts a ON a.id = l.id_analytical';
+		if (!empty($criterias['projects_only'])) {
+			$join = 'acc_projects a ON a.id = l.id_project';
 		}
 		else {
 			$join = 'acc_accounts a ON a.id = l.id_account';

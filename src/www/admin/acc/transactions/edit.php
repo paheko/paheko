@@ -4,6 +4,7 @@ namespace Garradin;
 
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Files\File;
+use Garradin\Accounting\Projects;
 use Garradin\Accounting\Transactions;
 use Garradin\Accounting\Years;
 
@@ -53,13 +54,13 @@ $lines = isset($_POST['lines']) ? Transaction::getFormLines() : $transaction->ge
 
 $amount = $transaction->getLinesCreditSum();
 $types_details = $transaction->getTypesDetails();
-$id_analytical = $transaction->getAnalyticalId();
+$id_project = $transaction->getProjectId();
 $has_reconciled_lines = $transaction->hasReconciledLines();
 
-$tpl->assign(compact('csrf_key', 'transaction', 'lines', 'amount', 'has_reconciled_lines', 'types_details', 'id_analytical'));
+$tpl->assign(compact('csrf_key', 'transaction', 'lines', 'amount', 'has_reconciled_lines', 'types_details', 'id_project'));
 
 $tpl->assign('chart_id', $chart->id());
-$tpl->assign('analytical_accounts', ['' => '-- Aucun'] + $accounts->listAnalytical());
+$tpl->assign('projects', Projects::listAssocWithEmpty());
 $tpl->assign('linked_users', $transaction->listLinkedUsersAssoc());
 
 $tpl->display('acc/transactions/new.tpl');

@@ -1,8 +1,8 @@
-{if !empty($criterias.analytical_only)}
+{if !empty($criterias.projects_only)}
 	{include file="admin/_head.tpl" title="Grand livre analytique" current="acc/years"}
 	{include file="acc/reports/_header.tpl" current="analytical_ledger" title="Grand livre analytique"}
 {else}
-	{include file="admin/_head.tpl" title="Grand livre" current="acc/years"}
+	{include file="admin/_head.tpl" title="%sGrand livre"|args:$project_title current="acc/years"}
 	{include file="acc/reports/_header.tpl" current="ledger" title="Grand livre"}
 {/if}
 
@@ -15,8 +15,8 @@
 
 <details open="open">
 	<summary><h2 class="ruler">
-		{if !empty($criterias.analytical_only)}
-			<?php $link = sprintf('%sacc/reports/trial_balance.php?analytical=%d&year=%d', $admin_url, $account->id, $account->id_year); ?>
+		{if !empty($criterias.projects_only)}
+			<?php $link = sprintf('%sacc/reports/trial_balance.php?project=%d&year=%d', $admin_url, $account->id, $account->id_year); ?>
 		{else}
 			<?php $link = sprintf('%sacc/accounts/journal.php?id=%d&year=%d', $admin_url, $account->id, $account->id_year); ?>
 		{/if}

@@ -85,7 +85,7 @@ class Template extends Smartyer
 		$this->assign('self_url_no_qs', Utils::getSelfURI(false));
 
 		$this->assign('is_logged', false);
-		$this->assign('dialog', isset($_GET['_dialog']));
+		$this->assign('dialog', isset($_GET['_dialog']) ? ($_GET['_dialog'] ?: true) : false);
 
 		$this->assign('password_pattern', sprintf('.{%d,}', Session::MINIMUM_PASSWORD_LENGTH));
 		$this->assign('password_length', Session::MINIMUM_PASSWORD_LENGTH);
@@ -230,6 +230,10 @@ class Template extends Smartyer
 		// propagate _dialog param if we are in an iframe
 		if (isset($_GET['_dialog']) && !isset($params['target'])) {
 			$href .= (strpos($href, '?') === false ? '?' : '&') . '_dialog';
+
+			if (!empty($_GET['_dialog'])) {
+				$href .= '=' . rawurlencode($_GET['_dialog']);
+			}
 		}
 
 		if (!isset($params['class'])) {
@@ -281,8 +285,10 @@ class Template extends Smartyer
 
 	protected function widgetLinkButton(array $params): string
 	{
-		$params['data-icon'] = Utils::iconUnicode($params['shape']);
-		unset($params['shape']);
+		if (!empty($params['shape'])) {
+			$params['data-icon'] = Utils::iconUnicode($params['shape']);
+			unset($params['shape']);
+		}
 
 		if (!isset($params['class'])) {
 			$params['class'] = '';

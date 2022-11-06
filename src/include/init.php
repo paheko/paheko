@@ -342,7 +342,7 @@ ErrorManager::setHtmlHeader('<!DOCTYPE html><meta charset="utf-8" /><style type=
 </section>
 ');
 
-function user_error(\Exception $e)
+function user_error(UserException $e)
 {
 	if (PHP_SAPI == 'cli')
 	{

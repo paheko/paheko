@@ -184,17 +184,17 @@ class Import
 
 				$data = [];
 
-				if (!empty($row->analytical)) {
-					$id_analytical = $accounts->getIdFromCode($row->analytical);
+				if (!empty($row->project)) {
+					$id_project = Projects::getIdFromCodeOrLabel($row->project);
 
-					if (!$id_analytical) {
-						throw new UserException(sprintf('le compte analytique "%s" n\'existe pas dans le plan comptable', $row->analytical));
+					if (!$id_project) {
+						throw new UserException(sprintf('le projet analytique "%s" n\'existe pas', $row->project));
 					}
 
-					$data['id_analytical'] = $id_analytical;
+					$data['id_project'] = $id_project;
 				}
-				elseif (property_exists($row, 'analytical')) {
-					$data['id_analytical'] = null;
+				elseif (property_exists($row, 'project')) {
+					$data['id_project'] = null;
 				}
 
 				// Add two transaction lines for each CSV line

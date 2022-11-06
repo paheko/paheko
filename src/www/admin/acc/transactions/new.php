@@ -4,9 +4,11 @@ namespace Garradin;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Files\File;
-use Garradin\Accounting\AssistedReconciliation;
+use Garradin\Accounting\Projects;
 use Garradin\Accounting\Transactions;
 use Garradin\Accounting\Years;
+
+use KD2\DB\Date;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -22,7 +24,7 @@ $accounts = $chart->accounts();
 $csrf_key = 'acc_transaction_new';
 $transaction = new Transaction;
 $amount = 0;
-$id_analytical = null;
+$id_project = null;
 $linked_users = null;
 $lines = isset($_POST['lines']) ? Transaction::getFormLines() : [[], []];
 $types_details = $transaction->getTypesDetails();
@@ -37,7 +39,7 @@ if (qg('l')) {
 }
 
 if (qg('d')) {
-	$transaction->date = new \DateTime(qg('d'));
+	$transaction->date = new Date(qg('d'));
 }
 
 if (qg('t')) {
@@ -59,7 +61,7 @@ if (qg('copy')) {
 		$types_details = $transaction->getTypesDetails();
 	}
 
-	$id_analytical = $old->getAnalyticalId();
+	$id_project = $old->getProjectId();
 	$amount = $transaction->getLinesCreditSum();
 	$linked_users = $old->listLinkedUsersAssoc();
 
@@ -67,12 +69,12 @@ if (qg('copy')) {
 }
 
 // Set last used date
-if (empty($transaction->date) && $session->get('acc_last_date') && $date = \DateTime::createFromFormat('!Y-m-d', $session->get('acc_last_date'))) {
+if (empty($transaction->date) && $session->get('acc_last_date') && $date = Date::createFromFormat('!Y-m-d', $session->get('acc_last_date'))) {
 	$transaction->date = $date;
 }
 // Set date of the day if no date was set
 elseif (empty($transaction->date)) {
-	$transaction->date = new \DateTime;
+	$transaction->date = new Date;
 }
 
 // Make sure the date cannot be outside of the current year
@@ -116,9 +118,9 @@ $form->runIf('save', function () use ($transaction, $session, $current_year) {
 	Utils::redirect(sprintf('!acc/transactions/details.php?id=%d&created', $transaction->id()));
 }, $csrf_key);
 
-$tpl->assign(compact('csrf_key', 'transaction', 'amount', 'lines', 'id_analytical', 'types_details', 'linked_users'));
+$tpl->assign(compact('csrf_key', 'transaction', 'amount', 'lines', 'id_project', 'types_details', 'linked_users'));
 
 $tpl->assign('chart_id', $chart->id());
-$tpl->assign('analytical_accounts', ['' => '-- Aucun'] + $accounts->listAnalytical());
+$tpl->assign('projects', Projects::listAssocWithEmpty());
 
 $tpl->display('acc/transactions/new.tpl');

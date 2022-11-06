@@ -217,7 +217,7 @@ class UserTemplate extends Brindille
 
 	public function display(): void
 	{
-		$compiled_path = $this->_getCachePath(true);
+		$compiled_path = $this->_getCachePath();
 
 		if (!is_dir(dirname($compiled_path))) {
 			// Force cache directory mkdir

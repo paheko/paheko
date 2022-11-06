@@ -2,6 +2,7 @@
 
 namespace Garradin;
 
-const WWW_URL = 'http://localhost/';
-
-const WWW_URI = '/';
+if (!defined('\Garradin\WWW_URL')) {
+	define('Garradin\WWW_URL', 'http://localhost/');
+	define('Garradin\WWW_URI', '/');
+}

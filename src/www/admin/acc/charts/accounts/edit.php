@@ -3,7 +3,7 @@ namespace Garradin;
 
 use Garradin\Accounting\Accounts;
 
-require_once __DIR__ . '/../../_inc.php';
+require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
@@ -19,42 +19,33 @@ if ($chart->archived) {
 	throw new UserException("Il n'est pas possible de modifier un compte d'un plan comptable archivé.");
 }
 
-$edit_disabled = !$account->canEdit();
+$can_edit = $account->canEdit();
+$csrf_key = 'acc_accounts_edit_' . $account->id();
 
-if (f('edit') && $form->check('acc_accounts_edit_' . $account->id()))
-{
-	try {
-		if ($edit_disabled) {
-			$account->importLimitedForm();
-		}
-		else {
-			$account->importForm();
-		}
-
-		// Force account position from type
-		if ($account->isModified('type') && $account->user) {
-			$account->position = Accounts::getPositionFromType($account->type);
-		}
-
-		$account->save();
-
-		$page = '';
-
-		if (!$account->type) {
-			$page = 'all.php';
-		}
-
-		Utils::redirect(sprintf('%sacc/charts/accounts/%s?id=%d', ADMIN_URL, $page, $account->id_chart));
+$form->runIf('edit', function () use ($account, $can_edit) {
+	if (!$can_edit) {
+		$account->importLimitedForm();
 	}
-	catch (UserException $e)
-	{
-		$form->addError($e->getMessage());
+	else {
+		$account->importForm();
 	}
+
+	$account->save();
+
+	$page = '';
+
+	if (!$account->type) {
+		$page = 'all.php';
+	}
+
+	chart_reload_or_redirect(sprintf('!acc/charts/accounts/%s?id=%d', $page, $account->id_chart));
+}, $csrf_key);
+
+if ($account->type) {
+	$tpl->assign('code_base', $account->getNumberBase());
+	$tpl->assign('code_value', $account->getNumberUserPart());
 }
 
-$types = $account::TYPES_NAMES;
-$types[0] = '-- Pas un compte usuel';
-
-$tpl->assign(compact('types', 'account', 'edit_disabled'));
+$tpl->assign(compact('account', 'can_edit', 'chart'));
 
 $tpl->display('acc/charts/accounts/edit.tpl');

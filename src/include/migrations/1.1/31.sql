@@ -1,5 +1,5 @@
 -- New config value
-INSERT INTO config (key, value) VALUES ('analytical_set_all', 1);
+INSERT OR IGNORE INTO config (key, value) VALUES ('analytical_set_all', 1);
 
 -- Fix charts positions
 

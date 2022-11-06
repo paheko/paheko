@@ -6,7 +6,7 @@ function normalizeString(str) {
 	return str.normalize('NFD').replace(/[\u0300-\u036f]/g, "")
 }
 
-var buttons = document.querySelectorAll('button');
+var buttons = document.querySelectorAll('button[type=button]');
 
 buttons.forEach((e) => {
 	e.onclick = () => {
@@ -101,48 +101,58 @@ document.addEventListener('keydown', (evt) => {
 	return false;
 });
 
-buttons[0].focus();
+if (buttons[0]) {
+	buttons[0].focus();
+}
 
-var q = document.getElementById('lookup');
+var q = document.querySelector('.quick-search input[type=text]');
+var qr = document.querySelector('.quick-search button[type=reset]');
 
-if (q) {
-	q.addEventListener('keyup', (e) => {
-		var query = new RegExp(RegExp.escape(normalizeString(q.value)), 'i');
-
-		rows.forEach((elm) => {
-			if (elm.getAttribute('data-search-label').match(query)) {
-				g.toggle(elm, true);
-			}
-			else {
-				g.toggle(elm, false);
-			}
-		});
-
-		if (first = document.querySelector('tbody tr:not(.hidden)')) {
-			if (f = document.querySelector('tr.focused')) {
-				f.classList.remove('focused');
-			}
-			first.classList.add('focused');
-		}
-
-		if (e.key == 'Enter') {
-			if (first = document.querySelector('tbody tr.focused:not(.hidden) button')) {
-				first.click();
-			}
-		}
-
-		return false;
-	});
+if (q && qr) {
+	q.addEventListener('keyup', filterTableList);
+	qr.onclick = (e) => {
+		q.value = '';
+		q.focus();
+		return filterTableList(e);
+	};
 
 	q.focus();
 }
 
-var o = document.getElementById('f_typed_only_0');
+function filterTableList(e) {
+	var query = new RegExp(RegExp.escape(normalizeString(q.value)), 'i');
+
+	rows.forEach((elm) => {
+		if (elm.getAttribute('data-search-label').match(query)) {
+			g.toggle(elm, true);
+		}
+		else {
+			g.toggle(elm, false);
+		}
+	});
+
+	if (first = document.querySelector('tbody tr:not(.hidden)')) {
+		if (f = document.querySelector('tr.focused')) {
+			f.classList.remove('focused');
+		}
+		first.classList.add('focused');
+	}
+
+	if (e.key == 'Enter') {
+		if (first = document.querySelector('tbody tr.focused:not(.hidden) button')) {
+			first.click();
+		}
+	}
+
+	return false;
+}
+
+var o = document.getElementById('f_filter');
 
 if (o) {
 	o.onchange = () => {
 		let s = new URLSearchParams(window.location.search);
-		s.set("all", o.checked ? 0 : 1);
+		s.set("filter", o.value);
 		window.location.search = s.toString();
 	};
 }

@@ -376,12 +376,12 @@ class Recherche
 				'alias'    => 'id_year',
 			];
 
-			$columns['a2.code'] = (object) [
+			$columns['p.code'] = (object) [
 				'textMatch'=> true,
 				'label'    => 'N° de compte projet',
 				'type'     => 'text',
 				'null'     => true,
-				'alias'    => 'id_analytical',
+				'alias'    => 'id_project',
 			];
 		}
 
@@ -568,10 +568,10 @@ class Recherche
 				FROM acc_transactions AS t
 				INNER JOIN acc_transactions_lines AS l ON l.id_transaction = t.id
 				INNER JOIN acc_accounts AS a ON l.id_account = a.id
-				LEFT JOIN acc_accounts AS a2 ON l.id_analytical = a2.id
+				LEFT JOIN acc_projects AS p ON l.id_project = p.id
 				WHERE %s GROUP BY t.id ORDER BY %s %s LIMIT %d;',
 				$query_columns, $query_groups, $order, $desc, (int) $limit);
-			$sql_query = preg_replace('/"(a|a2|l|t)\./', '"$1"."', $sql_query);
+			$sql_query = preg_replace('/"(a|p|l|t)\./', '"$1"."', $sql_query);
 		}
 		else if ('membres' === $target) {
 			$sql_query = sprintf('SELECT id AS _user_id, %s FROM %s WHERE %s ORDER BY %s %s LIMIT %d;',
