@@ -43,6 +43,9 @@ class Account extends Entity
 		'Produit',
 	];
 
+	/**
+	 * TYPEs are special kinds of accounts, to help force the account position in the chart
+	 */
 	const TYPE_NONE = 0;
 	const TYPE_BANK = 1;
 	const TYPE_CASH = 2;
@@ -56,8 +59,8 @@ class Account extends Entity
 	const TYPE_EXPENSE = 5;
 	const TYPE_REVENUE = 6;
 
-	const TYPE_ANALYTICAL = 7;
-	const TYPE_VOLUNTEERING = 8;
+	const TYPE_VOLUNTEERING_EXPENSE = 7;
+	const TYPE_VOLUNTEERING_REVENUE = 8;
 
 	const TYPE_OPENING = 9;
 	const TYPE_CLOSING = 10;
@@ -78,8 +81,8 @@ class Account extends Entity
 		'Tiers',
 		'Dépenses',
 		'Recettes',
-		'Analytique',
-		'Bénévolat',
+		'Bénévolat — Emploi', // Used to be Analytique
+		'Bénévolat — Contribution',
 		'Ouverture',
 		'Clôture',
 		'Résultat excédentaire',
@@ -87,6 +90,86 @@ class Account extends Entity
 		'Affectation du résultat',
 		'Report à nouveau créditeur',
 		'Report à nouveau débiteur',
+	];
+
+	/**
+	 * Show only these types of accounts in the quick account view
+	 */
+	const COMMON_TYPES = [
+		self::TYPE_BANK,
+		self::TYPE_CASH,
+		self::TYPE_OUTSTANDING,
+		self::TYPE_THIRD_PARTY,
+		self::TYPE_EXPENSE,
+		self::TYPE_REVENUE,
+		self::TYPE_VOLUNTEERING_EXPENSE,
+		self::TYPE_VOLUNTEERING_REVENUE,
+	];
+
+	/**
+	 * Positions that should be enforced according to account code
+	 */
+	const LOCAL_POSITIONS = [
+		'FR' => [
+			'^1' => self::LIABILITY,
+			'^2' => self::ASSET,
+			'^3' => self::ASSET,
+			'^4' => self::ASSET_OR_LIABILITY,
+			'^5' => self::ASSET_OR_LIABILITY,
+			'^6' => self::EXPENSE,
+			'^7' => self::REVENUE,
+			'^86' => self::EXPENSE,
+			'^87' => self::REVENUE,
+		],
+		'BE' => [
+			'^69' => self::ASSET_OR_LIABILITY,
+			'^6' => self::EXPENSE,
+			'^79' => self::ASSET_OR_LIABILITY,
+			'^7' => self::REVENUE,
+			'^5' => self::ASSET_OR_LIABILITY,
+			'^4' => self::ASSET_OR_LIABILITY,
+			'^3' => self::ASSET,
+			'^2' => self::ASSET,
+			'^1' => self::LIABILITY,
+		],
+	];
+
+	/**
+	 * Codes that should be enforced according to type (and vice-versa)
+	 */
+	const LOCAL_TYPES = [
+		'FR' => [
+			self::TYPE_BANK => '512',
+			self::TYPE_CASH => '53',
+			self::TYPE_OUTSTANDING => '511',
+			self::TYPE_THIRD_PARTY => '4',
+			self::TYPE_EXPENSE => '6',
+			self::TYPE_REVENUE => '7',
+			self::TYPE_VOLUNTEERING_EXPENSE => '86',
+			self::TYPE_VOLUNTEERING_REVENUE => '87',
+			self::TYPE_OPENING => '890',
+			self::TYPE_CLOSING => '891',
+			self::TYPE_POSITIVE_RESULT => '120',
+			self::TYPE_NEGATIVE_RESULT => '129',
+			self::TYPE_APPROPRIATION_RESULT => '1068',
+			self::TYPE_CREDIT_REPORT => '110',
+			self::TYPE_DEBIT_REPORT => '119',
+		],
+		'BE' => [
+			self::TYPE_APPROPRIATION_RESULT => '139',
+			self::TYPE_CREDIT_REPORT => '4931',
+			self::TYPE_DEBIT_REPORT => '4932',
+			self::TYPE_BANK => '56',
+			self::TYPE_CASH => '570',
+			self::TYPE_OUTSTANDING => '499',
+			self::TYPE_EXPENSE => '6',
+			self::TYPE_REVENUE => '7',
+			self::TYPE_POSITIVE_RESULT => '692',
+			self::TYPE_NEGATIVE_RESULT => '690',
+			self::TYPE_THIRD_PARTY => '4',
+			self::TYPE_OPENING => '890',
+			self::TYPE_CLOSING => '891',
+		],
 	];
 
 	const LIST_COLUMNS = [
@@ -138,39 +221,33 @@ class Account extends Entity
 			'label' => 'Réf. ligne',
 			'select' => 'l.reference',
 		],
-		'id_analytical' => [
-			'select' => 'l.id_analytical',
+		'id_project' => [
+			'select' => 'l.id_project',
 		],
-		'code_analytical' => [
+		'project_code' => [
+			'select' => 'IFNULL(p.code, SUBSTR(p.label, 1, 10) || \'…\')',
+		],
+		'projects' => [
 			'label' => 'Projet',
-			'select' => 'b.code',
+			'select' => null,
 		],
 		'status' => [
 			'select' => 't.status',
 		],
 	];
 
-	protected $id;
-	protected $id_chart;
-	protected $code;
-	protected $label;
-	protected $description;
-	protected $position;
-	protected $type;
-	protected $user = 0;
-
-	protected $_types = [
-		'id'          => 'int',
-		'id_chart'    => 'int',
-		'code'        => 'string',
-		'label'       => 'string',
-		'description' => '?string',
-		'position'    => 'int',
-		'type'        => 'int',
-		'user'        => 'int',
-	];
+	protected ?int $id;
+	protected int $id_chart;
+	protected string $code;
+	protected string $label;
+	protected ?string $description;
+	protected int $position = 0;
+	protected int $type;
+	protected bool $user = false;
+	protected bool $bookmark = false;
 
 	protected $_position = [];
+	protected ?Chart $_chart = null;
 
 	public function selfCheck(): void
 	{
@@ -193,16 +270,18 @@ class Account extends Entity
 			throw new ValidationException(sprintf('Le numéro "%s" est déjà utilisé par un autre compte.', $this->code));
 		}
 
-		$this->assert(array_key_exists($this->type, self::TYPES_NAMES), 'Type invalide: ' . $this->type);
-		$this->assert(array_key_exists($this->position, self::POSITIONS_NAMES), 'Position invalide');
-		$this->assert($this->user === 0 || $this->user === 1);
+		$this->assert(isset($this->type));
 
 		$this->checkLocalRules();
+
+		$this->assert(array_key_exists($this->type, self::TYPES_NAMES), 'Type invalide: ' . $this->type);
+		$this->assert(array_key_exists($this->position, self::POSITIONS_NAMES), 'Position invalide');
+
 
 		parent::selfCheck();
 	}
 
-	public function checkLocalRules(): void
+	protected function getCountry(): ?string
 	{
 		static $charts_countries = null;
 
@@ -210,65 +289,127 @@ class Account extends Entity
 			$charts_countries = DB::getInstance()->getAssoc('SELECT id, country FROM acc_charts;');
 		}
 
-		if ('FR' != ($charts_countries[$this->id_chart] ?? null)) {
+		return $charts_countries[$this->id_chart] ?? null;
+	}
+
+	protected function matchType(int $type): bool
+	{
+		$country = $this->getCountry();
+		$pattern = self::LOCAL_TYPES[$country][$type] ?? null;
+
+		if (!$pattern) {
+			return false;
+		}
+
+		if (in_array($type, self::COMMON_TYPES)) {
+			$pattern = sprintf('/^%s.+/', $pattern);
+		}
+		else {
+			$pattern = sprintf('/^%s$/', $pattern);
+		}
+
+		return (bool) preg_match($pattern, $this->code);
+	}
+
+	public function setLocalRules(): void
+	{
+		$country = $this->getCountry();
+
+		if (array_key_exists($country, self::LOCAL_TYPES)) {
+			foreach (self::LOCAL_TYPES[$country] as $type => $number) {
+				if ($this->matchType($type)) {
+					$this->set('type', $type);
+					break;
+				}
+			}
+
+			foreach (self::LOCAL_POSITIONS[$country] as $pattern => $position) {
+				if (preg_match('/' . $pattern . '/', $this->code)) {
+					// If the allowed position is asset OR liability, we allow either one of those 3 choices
+					if ($position == self::ASSET_OR_LIABILITY
+						&& in_array($this->position, [self::ASSET_OR_LIABILITY, self::ASSET, self::LIABILITY])) {
+						break;
+					}
+
+					// Or else we force the position
+					$this->set('position', $position);
+					break;
+				}
+			}
+		}
+
+		if (!isset($this->type)) {
+			$this->set('type', 0);
+		}
+	}
+
+	public function checkLocalRules(): void
+	{
+		$country = $this->getCountry();
+
+		if (!$this->type) {
 			return;
 		}
 
-		$classe = substr($this->code, 0, 1);
-		$sous_classe = substr($this->code, 0, 2);
-
-		if ($this->type == self::TYPE_BANK) {
-			$this->assert($sous_classe == '51', 'Le numéro d\'un compte de banque doit commencer par 51');
-			$this->assert($this->position == self::ASSET_OR_LIABILITY, 'Un compte de banque doit être en position "actif ou passif"');
-		}
-		elseif ($this->type == self::TYPE_CASH) {
-			$this->assert($sous_classe == '53', 'Le numéro d\'un compte de caisse doit commencer par 53');
-			$this->assert($this->position == self::ASSET_OR_LIABILITY, 'Un compte de caisse doit être en position "actif ou passif"');
-		}
-		elseif ($this->type == self::TYPE_OUTSTANDING) {
-			$this->assert(substr($this->code, 0, 3) == '511', 'Le numéro d\'un compte d\'attente doit commencer par 511');
-			$this->assert($this->position == self::ASSET_OR_LIABILITY, 'Un compte d\'attente doit être en position "actif ou passif"');
-		}
-		elseif ($this->type == self::TYPE_ANALYTICAL) {
-			$this->assert($classe == '9', 'Le numéro d\'un compte analytique doit commencer par 9');
-		}
-		elseif ($this->type == self::TYPE_THIRD_PARTY) {
-			$this->assert($classe == '4', 'Le numéro d\'un compte de tiers doit commencer par 4');
-		}
-		elseif ($this->type == self::TYPE_EXPENSE) {
-			$this->assert($classe == '6', 'Le numéro d\'un compte de dépense doit commencer par 6');
-		}
-		elseif ($this->type == self::TYPE_REVENUE) {
-			$this->assert($classe == '7', 'Le numéro d\'un compte de recettes doit commencer par 7');
-		}
-		elseif ($this->type == self::TYPE_VOLUNTEERING) {
-			$this->assert($sous_classe == '86' || $sous_classe == '87', 'Le numéro d\'un compte de bénévolat doit commencer par 86 ou 87');
+		if (!isset(self::LOCAL_TYPES[$country][$this->type])) {
+			return;
 		}
 
-		if ($classe == 4) {
-			$this->assert($this->position <= self::ASSET_OR_LIABILITY, 'Un compte de tiers doit être en position "actif ou passif"');
+		$this->assert($this->matchType($this->type), sprintf('Le numéro des comptes de type "%s" doit commencer par "%s" (%s).', self::TYPES_NAMES[$this->type], self::LOCAL_TYPES[$country][$this->type], $this->code));
+	}
+
+	public function getNewNumberAvailable(?string $base = null): ?string
+	{
+		$base ??= $this->getNumberBase();
+
+		if (!$base) {
+			return $base;
 		}
-		elseif ($this->position == self::EXPENSE && $sous_classe != 86) {
-			$this->assert($classe == 6, 'Le numéro d\'un compte de charge doit commencer par 6.');
+
+		$pattern = $base . '_%';
+
+		$db = DB::getInstance();
+		$used_codes = $db->getAssoc(sprintf('SELECT code, code FROM %s WHERE code LIKE ? AND id_chart = ?;', Account::TABLE), $pattern, $this->id_chart);
+		$used_codes = array_values($used_codes);
+		$used_codes = array_map(fn($a) => substr($a, strlen($base)), $used_codes);
+
+		$count = $db->count(Account::TABLE, 'id_chart = ? AND code LIKE ?', $this->id_chart, $pattern);
+		$letter = null;
+
+		// Make sure we don't reuse an existing code
+		while (!$letter || in_array($letter, $used_codes)) {
+			// Get new account code, eg. 512A, 99AA, 99BZ etc.
+			$letter = Utils::num2alpha($count++);
 		}
-		elseif ($this->position == self::REVENUE && $sous_classe != 87) {
-			$this->assert($classe == 7, 'Le numéro d\'un compte de produit doit commencer par 7.');
+
+		return $letter;
+	}
+
+	public function getNumberUserPart(): ?string
+	{
+		$base = $this->getNumberBase();
+
+		if (!$base) {
+			return $base;
 		}
-		elseif ($classe == 6) {
-			$this->assert($this->position == self::EXPENSE || $this->position == self::NONE, 'Un compte de dépense doit être en position "charge"');
+
+		return substr($this->code, strlen($base));
+	}
+
+	public function getNumberBase(): ?string
+	{
+		if (!$this->type) {
+			return null;
 		}
-		elseif ($classe == 7) {
-			$this->assert($this->position == self::REVENUE || $this->position == self::NONE, 'Un compte de recettes doit être en position "produit"');
+
+		$country = $this->getCountry();
+
+		if (!isset(self::LOCAL_TYPES[$country][$this->type])) {
+			return null;
 		}
-		elseif ($classe == 9) {
-			$this->assert($this->position == self::NONE, 'Un compte analytique ne peut figurer au bilan ou au compte de résultat');
-		}
-		elseif ($sous_classe == '86' && strlen($this->code) >= 3) {
-			$this->assert($this->position == self::EXPENSE, 'Un compte de bénévolat en 86 doit être en position "charge"');
-		}
-		else if ($sous_classe == '87' && strlen($this->code) >= 3) {
-			$this->assert($this->position == self::REVENUE, 'Un compte de bénévolat en 87 doit être en position "produit"');
-		}
+
+
+		return self::LOCAL_TYPES[$country][$this->type];
 	}
 
 	public function listJournal(int $year_id, bool $simple = false, ?DateTimeInterface $start = null, ?DateTimeInterface $end = null)
@@ -278,7 +419,7 @@ class Account extends Entity
 
 		$tables = 'acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
-			LEFT JOIN acc_accounts b ON b.id = l.id_analytical';
+			LEFT JOIN acc_projects p ON p.id = l.id_project';
 		$conditions = sprintf('l.id_account = %d AND t.id_year = %d', $this->id(), $year_id);
 
 		$sum = null;
@@ -482,6 +623,10 @@ class Account extends Entity
 
 	public function canDelete(): bool
 	{
+		if ($this->chart()->code && !$this->user) {
+			return false;
+		}
+
 		return !DB::getInstance()->firstColumn(sprintf('SELECT 1 FROM %s WHERE id_account = ? LIMIT 1;', Line::TABLE), $this->id());
 	}
 
@@ -493,7 +638,17 @@ class Account extends Entity
 	 */
 	public function canEdit(): bool
 	{
+		if (!$this->exists()) {
+			return true;
+		}
+
 		$db = DB::getInstance();
+		$is_user = $this->user ?: $db->test(Chart::TABLE, 'id = ? AND code IS NULL', $this->id_chart);
+
+		if (!$is_user) {
+			return false;
+		}
+
 		$sql = sprintf('SELECT 1 FROM %s l
 			INNER JOIN %s t ON t.id = l.id_transaction
 			INNER JOIN %s y ON y.id = t.id_year
@@ -505,24 +660,70 @@ class Account extends Entity
 			return false;
 		}
 
-		if ($this->user) {
+		return true;
+	}
+
+	public function canSetAssetOrLiabilityPosition(): bool
+	{
+		if ($this->position == self::REVENUE || $this->position == self::EXPENSE) {
+			return false;
+		}
+
+		if (!$this->type || $this->type == self::TYPE_THIRD_PARTY) {
 			return true;
 		}
 
-		return $db->test(Chart::TABLE, 'id = ? AND code IS NULL', $this->id_chart);
+		return false;
 	}
 
 	public function chart(): Chart
 	{
-		return Charts::get($this->id_chart);
+		$this->_chart ??= Charts::get($this->id_chart);
+		return $this->_chart;
 	}
 
 	public function save(bool $selfcheck = true): bool
 	{
+		$this->setLocalRules();
+
 		$c = Config::getInstance();
 		$c->set('last_chart_change', time());
 		$c->save();
 
 		return parent::save($selfcheck);
+	}
+
+	public function position_name(): string
+	{
+		return self::POSITIONS_NAMES[$this->position];
+	}
+
+	public function type_name(): string
+	{
+		return self::TYPES_NAMES[$this->type];
+	}
+
+	public function importForm(array $source = null)
+	{
+		if (null === $source) {
+			$source = $_POST;
+		}
+
+		if (isset($source['code_value'], $source['code_base'])) {
+			$source['code'] = trim($source['code_base']) . trim($source['code_value']);
+		}
+
+		parent::importForm($source);
+	}
+
+	public function level(): int
+	{
+		$level = strlen($this->code);
+
+		if ($level > 6) {
+			$level = 6;
+		}
+
+		return $level;
 	}
 }

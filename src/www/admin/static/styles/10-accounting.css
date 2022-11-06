@@ -101,17 +101,34 @@ td.money, th.money {
     max-width: 500px;
 }
 
-table.accounts { width: 100%; }
-table.accounts .actions { text-align: right; }
-table.accounts tbody tr td:first-child { font-family: monospace; }
-table.accounts th { font-weight: normal; }
-table.accounts .account-level-1 th { font-size: 1.6em; }
-table.accounts .account-level-2 th { padding-left: 1em; font-size: 1.3em; }
-table.accounts .account-level-3 th { padding-left: 2em; }
-table.accounts .account-level-4 th { padding-left: 3em; }
-table.accounts .account-level-5 th { padding-left: 4em; }
-table.accounts .account-level-6 th { padding-left: 5em; }
+tr.account td.num { font-family: monospace; text-align: left; width: 8%;}
+table tr.account th { font-weight: normal; }
+tr.account-level-1 th { font-size: 1.6em; }
+tr.account-level-2 th { padding-left: 1em; font-size: 1.3em; }
+tr.account-level-3 th { padding-left: 2em; }
+tr.account-level-4 th { padding-left: 3em; }
+tr.account-level-5 th { padding-left: 4em; }
+tr.account-level-6 th { padding-left: 5em; }
+tr.account button[name*="bookmark"] { opacity: 0.6; transition: opacity .3s; width: 8em;}
+tr.account button[value="1"] { opacity: 1; }
+tr.account td.bookmark { width: 2%; }
+tr.account td.bookmark b { color: var(--gBorderColor); }
+
 table.projects tr.title p.help { font-weight: normal; text-align: center; }
+table.projects tr.title p.actions {
+    text-align: center;
+    margin: 0;
+    margin-bottom: .8em;
+}
+
+table.projects tr.total {
+    border-top: 6px double var(--gLightBorderColor);
+    background: rgba(var(--gSecondColor), 0.2);
+}
+
+table.projects .archived {
+    opacity: 0.7;
+}
 
 .attachments {
     text-align: center;
@@ -119,4 +136,9 @@ table.projects tr.title p.help { font-weight: normal; text-align: center; }
 
 .attachments .files-list {
     justify-content: center;
+}
+
+input[name=code_base] {
+    text-align: right;
+    color: rgb(var(--gTextColor));
 }

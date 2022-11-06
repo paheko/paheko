@@ -322,7 +322,7 @@ class Sauvegarde
 			throw new UserException('Le fichier fourni n\'existe pas.');
 		}
 
-		return $this->restoreDB(DATA_ROOT . '/' . $file, false, false);
+		return $this->restoreDB(DATA_ROOT . '/' . $file, false);
 	}
 
 	/**

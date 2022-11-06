@@ -3,7 +3,6 @@ assert(isset($legend));
 assert(isset($csrf_key));
 assert(isset($submit_label));
 $targets = Entities\Accounting\Account::TYPE_REVENUE;
-$analytical_targets = Entities\Accounting\Account::TYPE_ANALYTICAL;
 ?>
 
 {form_errors}
@@ -56,7 +55,9 @@ $analytical_targets = Entities\Accounting\Account::TYPE_ANALYTICAL;
 				</select>
 			</dd>
 			{input type="list" target="!acc/charts/accounts/selector.php?targets=%s&year=%d"|args:$targets,$fee.id_year name="account" label="Compte de recettes à utiliser" default=$account required=true}
-			{input type="list" target="!acc/charts/accounts/selector.php?targets=%s&year=%d"|args:$analytical_targets,$fee.id_year name="analytical" label="Associer les écritures à ce projet" default=$analytical_account required=false}
+			{if count($projects) > 1}
+			{input type="select" options=$projects name="id_project" label="Projet analytique" default=$fee.id_project required=false}
+			{/if}
 		</dl>
 		{/if}
 	</fieldset>

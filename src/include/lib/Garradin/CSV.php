@@ -344,7 +344,7 @@ class CSV
 		return self::import($file['tmp_name'], $expected_columns);
 	}
 
-	static public function import(string $file, array $expected_columns): \Generator
+	static public function import(string $file, ?array $columns = null, array $required_columns = []): \Generator
 	{
 		$delete_after = is_uploaded_file($file);
 		$file = self::convertUploadIfRequired($file, $delete_after);
@@ -362,15 +362,38 @@ class CSV
 
 			$line = 0;
 
-			$columns = fgetcsv($fp, 4096, $delim);
+			$header = fgetcsv($fp, 4096, $delim);
 
 			// Make sure the data is UTF-8 encoded
-			$columns = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $columns);
+			$header = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $header);
 
-			// Check for required columns
-			foreach ($expected_columns as $column) {
-				if (!in_array($column, $columns, true)) {
-					throw new UserException(sprintf('La colonne "%s" est absente du fichier importé', $column));
+			$columns_map = [];
+
+			if (null === $columns) {
+				$columns_map = $header;
+			}
+			else {
+				$columns_is_list = is_int(key($columns));
+
+				// Check for columns
+				foreach ($header as $key => $label) {
+					// try to find with string key
+					if (!$columns_is_list && array_key_exists($label, $columns)) {
+						$columns_map[] = $label;
+					}
+					// Or with label
+					elseif (in_array($label, $columns)) {
+						$columns_map[] = $columns_is_list ? $label : array_search($label, $columns);
+					}
+					else {
+						$columns_map[] = null;
+					}
+				}
+			}
+
+			foreach ($required_columns as $key) {
+				if (!in_array($key, $columns_map)) {
+					throw new UserException(sprintf('La colonne "%s" est absente du fichier importé', $columns[$key] ?? $key));
 				}
 			}
 
@@ -384,7 +407,7 @@ class CSV
 					continue;
 				}
 
-				if (count($row) != count($columns))
+				if (count($row) != count($header))
 				{
 					throw new UserException('Erreur sur la ligne ' . $line . ' : le nombre de colonnes est incorrect.');
 				}
@@ -392,7 +415,7 @@ class CSV
 				// Make sure the data is UTF-8 encoded
 				$row = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $row);
 
-				$row = array_combine($columns, $row);
+				$row = array_combine($columns_map, $row);
 
 				yield $line => $row;
 			}

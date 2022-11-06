@@ -453,12 +453,22 @@
 		});
 
 		// Open links in dialog
-		$('a[target="_dialog"]').forEach((e) => {
+		$('a[target*="_dialog"]').forEach((e) => {
 			e.onclick = () => {
 				let type = e.getAttribute('data-mime');
 
 				if (!type) {
 					let url = e.href + (e.href.indexOf('?') > 0 ? '&' : '?') + '_dialog';
+
+					if (m = e.getAttribute('target').match(/_dialog=(.*)/)) {
+						url += '=' + m[1];
+					}
+
+					if (location.href.match(/_dialog/)) {
+						location.href = url;
+						return false;
+					}
+
 					g.openFrameDialog(url, e.getAttribute('data-dialog-height') ? '90%' : 'auto');
 					return false;
 				}

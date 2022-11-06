@@ -123,7 +123,7 @@
 			<th>{$line.label}</th>
 			{if !$simple}<td>{$line.line_label}</td>{/if}
 			<td>{$line.line_reference}</td>
-			<td class="num">{if $line.id_analytical}<a href="{$admin_url}acc/reports/statement.php?analytical={$line.id_analytical}">{$line.code_analytical}</a>{/if}</td>
+			<td class="num">{if $line.id_project}<a href="{$admin_url}acc/reports/statement.php?project={$line.id_project}">{$line.project_code}</a>{/if}</td>
 			<td class="actions">
 			{if ($line.status & Entities\Accounting\Transaction::STATUS_WAITING)}
 				{if $line.type == Entities\Accounting\Transaction::TYPE_DEBT}
@@ -167,7 +167,7 @@
 					{csrf_field key="projects_action"}
 					<select name="action">
 						<option value="">— Choisir une action à effectuer —</option>
-						<option value="change_analytical">Ajouter/enlever d'un projet</option>
+						<option value="change_project">Ajouter/enlever d'un projet</option>
 						<option value="delete">Supprimer les écritures</option>
 					</select>
 					<noscript>

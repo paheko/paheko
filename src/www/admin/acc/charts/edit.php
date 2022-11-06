@@ -13,21 +13,13 @@ if (!$chart) {
 	throw new UserException("Le plan comptable demandé n'existe pas.");
 }
 
-if (f('save') && $form->check('acc_charts_edit_' . $chart->id()))
-{
-	try
-	{
-		$chart->importForm();
-		$chart->set('archived', (int) f('archived'));
-		$chart->save();
+$csrf_key = 'acc_charts_edit_' . $chart->id();
 
-		Utils::redirect(sprintf('%sacc/charts/', ADMIN_URL));
-	}
-	catch (UserException $e)
-	{
-		$form->addError($e->getMessage());
-	}
-}
+$form->runIf('save', function() use ($chart) {
+	$chart->importForm();
+	$chart->set('archived', (bool) f('archived'));
+	$chart->save();
+}, $csrf_key, '!acc/charts/');
 
 $tpl->assign(compact('chart'));
 $tpl->assign('country_list', Utils::getCountryList());

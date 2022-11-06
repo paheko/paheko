@@ -172,4 +172,48 @@ class Year extends Entity
 		$end = Utils::date_fr($this->end_date, 'Y');
 		return $start == $end ? $start : sprintf('%s-%s', $start, substr($end, -2));
 	}
+
+
+	/**
+	 * List common accounts used in this year, grouped by type
+	 * @return array
+	 */
+	public function listCommonAccountsGrouped(array $types = null): array
+	{
+		if (null === $types) {
+			$types = Account::COMMON_TYPES;
+		}
+
+		$out = [];
+
+		foreach ($types as $type) {
+			$out[$type] = (object) [
+				'label'    => Account::TYPES_NAMES[$type],
+				'type'     => $type,
+				'accounts' => [],
+			];
+		}
+
+		$db = DB::getInstance();
+
+		$sql = sprintf('SELECT a.* FROM acc_accounts a
+			LEFT JOIN acc_transactions_lines b ON b.id_account = a.id
+			LEFT JOIN acc_transactions c ON c.id = b.id_transaction AND c.id_year = %d
+			WHERE a.id_chart = %d AND a.%s AND (a.bookmark = 1 OR a.user = 1 OR c.id IS NOT NULL)
+			GROUP BY a.id
+			ORDER BY type, code COLLATE NOCASE;',
+			$this->id(),
+			$this->id_chart,
+			$db->where('type', $types)
+		);
+
+		$query = $db->iterate($sql);
+
+		foreach ($query as $row) {
+			$out[$row->type]->accounts[] = $row;
+		}
+
+		return $out;
+	}
+
 }
