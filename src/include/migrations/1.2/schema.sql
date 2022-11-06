@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS acc_charts
 -- Plans comptables : il peut y en avoir plusieurs
 (
     id INTEGER NOT NULL PRIMARY KEY,
-    country TEXT NOT NULL,
+    country TEXT NULL,
     code TEXT NULL, -- NULL = plan comptable créé par l'utilisateur
     label TEXT NOT NULL,
     archived INTEGER NOT NULL DEFAULT 0 -- 1 = archivé, non-modifiable

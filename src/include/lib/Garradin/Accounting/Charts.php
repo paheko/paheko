@@ -108,7 +108,7 @@ class Charts
 		$out = [];
 
 		foreach ($list as $row) {
-			$country = Utils::getCountryName($row->country);
+			$country = $row->country ? Utils::getCountryName($row->country) : 'Aucun';
 
 			if (!array_key_exists($country, $out)) {
 				$out[$country] = [];

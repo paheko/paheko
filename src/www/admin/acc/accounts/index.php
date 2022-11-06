@@ -6,7 +6,7 @@ use Garradin\Accounting\Reports;
 require_once __DIR__ . '/../_inc.php';
 
 if (!CURRENT_YEAR_ID) {
-	Utils::redirect(ADMIN_URL . 'acc/years/?msg=OPEN');
+	Utils::redirect('!acc/years/?msg=OPEN');
 }
 
 $tpl->assign('chart_id', $current_year->id_chart);
