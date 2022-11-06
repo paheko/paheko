@@ -181,15 +181,26 @@ class Year extends Entity
 	public function listCommonAccountsGrouped(array $types = null): array
 	{
 		if (null === $types) {
-			$types = Account::COMMON_TYPES;
+			$target = Account::COMMON_TYPES;
+		}
+		else {
+			$target = $types;
 		}
 
 		$out = [];
 
-		foreach ($types as $type) {
+		foreach ($target as $type) {
 			$out[$type] = (object) [
 				'label'    => Account::TYPES_NAMES[$type],
 				'type'     => $type,
+				'accounts' => [],
+			];
+		}
+
+		if (null === $types) {
+			$out[0] = (object) [
+				'label'    => 'Autres',
+				'type'     => 0,
 				'accounts' => [],
 			];
 		}
@@ -199,18 +210,25 @@ class Year extends Entity
 		$sql = sprintf('SELECT a.* FROM acc_accounts a
 			LEFT JOIN acc_transactions_lines b ON b.id_account = a.id
 			LEFT JOIN acc_transactions c ON c.id = b.id_transaction AND c.id_year = %d
-			WHERE a.id_chart = %d AND a.%s AND (a.bookmark = 1 OR a.user = 1 OR c.id IS NOT NULL)
+			WHERE a.id_chart = %d %s AND (a.bookmark = 1 OR a.user = 1 OR c.id IS NOT NULL)
 			GROUP BY a.id
 			ORDER BY type, code COLLATE NOCASE;',
 			$this->id(),
 			$this->id_chart,
-			$db->where('type', $types)
+			$types !== null ? 'AND a.' . $db->where('type', $target) : ''
 		);
 
 		$query = $db->iterate($sql);
 
 		foreach ($query as $row) {
-			$out[$row->type]->accounts[] = $row;
+			$t = in_array($row->type, $target, true) ? $row->type : 0;
+			$out[$t]->accounts[] = $row;
+		}
+
+		foreach ($out as $key => $v) {
+			if (!count($v->accounts)) {
+				unset($out[$key]);
+			}
 		}
 
 		return $out;
