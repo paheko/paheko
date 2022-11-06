@@ -19,7 +19,7 @@ $form->runIf('create', function () use ($parent) {
 	$name = trim((string) f('name'));
 
 	if (!strpos($name, '.')) {
-		$name .= '.skriv';
+		$name .= '.md';
 	}
 
 	File::validatePath($parent . '/' . $name);
