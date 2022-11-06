@@ -628,7 +628,7 @@ class Recherche
 		try {
 			$db = DB::getInstance();
 			static $allowed = [
-				'compta' => ['acc_transactions' => null, 'acc_transactions_lines' => null, 'acc_accounts' => null, 'acc_charts' => null, 'acc_years' => null, 'acc_transactions_users' => null],
+				'compta' => ['acc_transactions' => null, 'acc_transactions_lines' => null, 'acc_accounts' => null, 'acc_charts' => null, 'acc_years' => null, 'acc_transactions_users' => null, 'acc_projects' => null],
 				'membres' => ['membres' => null, 'users_categories' => null],
 			];
 
