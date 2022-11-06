@@ -144,6 +144,25 @@ class Chart extends Entity
 		}
 	}
 
+	public function resetAccountsRules(): void
+	{
+		$db = DB::getInstance();
+		$db->begin();
+
+		try {
+			foreach ($this->accounts()->listAll() as $account) {
+				$account->setLocalRules($this->country);
+				$account->save();
+			}
+		}
+		catch (UserException $e) {
+			$db->rollback();
+			throw $e;
+		}
+
+		$db->commit();
+	}
+
 	public function save(bool $selfcheck = true): bool
 	{
 		$country_modified = $this->isModified('country');
@@ -153,15 +172,7 @@ class Chart extends Entity
 
 		// Change account types
 		if ($ok && $exists && $country_modified) {
-			$db = DB::getInstance();
-			$db->begin();
-
-			foreach ($this->accounts()->listAll() as $account) {
-				$account->setLocalRules($this->country);
-				$account->save();
-			}
-
-			$db->commit();
+			$this->resetAccountsRules();
 		}
 
 		return $ok;

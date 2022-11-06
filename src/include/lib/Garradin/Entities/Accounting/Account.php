@@ -304,11 +304,6 @@ class Account extends Entity
 		parent::selfCheck();
 	}
 
-	static public function clearCache(): void
-	{
-		self::$_charts = null;
-	}
-
 	protected function getCountry(): ?string
 	{
 		if (!isset(self::$_charts)) {
@@ -331,7 +326,10 @@ class Account extends Entity
 	 */
 	protected function getLocalPosition(string $country = null): ?int
 	{
-		$country ??= $this->getCountry();
+		if (!func_num_args()) {
+			$country = $this->getCountry();
+		}
+
 		$is_official = $this->isChartOfficial();
 
 		if (!$country) {
@@ -361,7 +359,9 @@ class Account extends Entity
 
 	protected function getLocalType(string $country = null): int
 	{
-		$country ??= $this->getCountry();
+		if (!func_num_args()) {
+			$country = $this->getCountry();
+		}
 
 		if (!$country) {
 			return self::TYPE_NONE;
@@ -378,7 +378,10 @@ class Account extends Entity
 
 	protected function matchType(int $type, string $country = null): bool
 	{
-		$country ??= $this->getCountry();
+		if (func_num_args() < 2) {
+			$country = $this->getCountry();
+		}
+
 		$pattern = self::LOCAL_TYPES[$country][$type] ?? null;
 
 		if (!$pattern) {
@@ -397,7 +400,9 @@ class Account extends Entity
 
 	public function setLocalRules(string $country = null): void
 	{
-		$country ??= $this->getCountry();
+		if (!func_num_args()) {
+			$country = $this->getCountry();
+		}
 
 		if (!$country) {
 			$this->set('type', 0);
@@ -427,7 +432,7 @@ class Account extends Entity
 			return;
 		}
 
-		$this->assert($this->matchType($this->type), sprintf('Le numéro des comptes de type "%s" doit commencer par "%s" (%s).', self::TYPES_NAMES[$this->type], self::LOCAL_TYPES[$country][$this->type], $this->code));
+		$this->assert($this->matchType($this->type), sprintf('Compte "%s - %s" : le numéro des comptes de type "%s" doit commencer par "%s" (%s).', $this->code, $this->label, self::TYPES_NAMES[$this->type], self::LOCAL_TYPES[$country][$this->type], $this->code));
 	}
 
 	public function getNewNumberAvailable(?string $base = null): ?string

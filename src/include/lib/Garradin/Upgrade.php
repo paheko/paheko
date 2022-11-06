@@ -485,6 +485,7 @@ class Upgrade
 			if (version_compare($v, '1.2.1', '<')) {
 				$db->beginSchemaUpdate();
 				$db->import(ROOT . '/include/migrations/1.2/1.2.1.sql');
+				Charts::resetRules(['FR', 'CH', 'BE']);
 				$db->commitSchemaUpdate();
 			}
 
