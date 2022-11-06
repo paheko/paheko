@@ -132,6 +132,13 @@ class Account extends Entity
 			'^2' => self::ASSET,
 			'^1' => self::LIABILITY,
 		],
+		'CH' => [
+			'^1' => self::ASSET,
+			'^2' => self::LIABILITY,
+			'^3(?!910)|^4910' => self::EXPENSE,
+			'^4(?!910)|^3910' => self::REVENUE,
+			'^5' => self::ASSET_OR_LIABILITY,
+		],
 	];
 
 	/**
@@ -169,6 +176,21 @@ class Account extends Entity
 			self::TYPE_THIRD_PARTY => '4',
 			self::TYPE_OPENING => '890',
 			self::TYPE_CLOSING => '891',
+		],
+		'CH' => [
+			self::TYPE_BANK => '102',
+			self::TYPE_CASH => '100',
+			self::TYPE_OUTSTANDING => '109',
+			self::TYPE_THIRD_PARTY => '5',
+			self::TYPE_EXPENSE => '3',
+			self::TYPE_REVENUE => '4',
+			self::TYPE_OPENING => '9100',
+			self::TYPE_CLOSING => '9101',
+			self::TYPE_POSITIVE_RESULT => '29991',
+			self::TYPE_NEGATIVE_RESULT => '29999',
+			self::TYPE_APPROPRIATION_RESULT => '2910',
+			self::TYPE_CREDIT_REPORT => '2990',
+			self::TYPE_DEBIT_REPORT => '2990',
 		],
 	];
 
