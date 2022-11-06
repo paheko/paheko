@@ -115,7 +115,6 @@ class Upgrade
 			}
 
 			if (version_compare($v, '1.1.29', '<')) {
-				Charts::updateInstalled('fr_pca_2018');
 				$db->import(ROOT . '/include/data/1.1.29_migration.sql');
 			}
 
@@ -128,7 +127,18 @@ class Upgrade
 			}
 
 			if (version_compare($v, '1.2.0', '<')) {
-				require ROOT . '/include/migrations/1.2/1.2.0.php';
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/migrations/1.2/0.sql');
+				Charts::updateInstalled('fr_pca_2018');
+				Charts::updateInstalled('fr_pca_1999');
+				Charts::updateInstalled('fr_pcc_2020');
+				Charts::updateInstalled('fr_pcg_2014');
+				Charts::updateInstalled('be_pcmn_2019');
+				$db->commitSchemaUpdate();
+			}
+
+			if (version_compare($v, '1.3.0', '<')) {
+				require ROOT . '/include/migrations/1.3/1.3.0.php';
 			}
 
 			Plugin::upgradeAllIfRequired();

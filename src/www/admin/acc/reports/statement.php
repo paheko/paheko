@@ -8,7 +8,7 @@ use Garradin\Entities\Accounting\Account;
 
 require_once __DIR__ . '/_inc.php';
 
-$general = Reports::getStatement($criterias + ['exclude_type' => Account::TYPE_VOLUNTEERING]);
+$general = Reports::getStatement($criterias + ['exclude_type' => [Account::TYPE_VOLUNTEERING_REVENUE, Account::TYPE_VOLUNTEERING_EXPENSE]]);
 $tpl->assign('general', $general);
 $tpl->assign('volunteering', Reports::getVolunteeringStatement($criterias, $general));
 

@@ -1,7 +1,7 @@
 <?php
 use Garradin\Entities\Accounting\Account;
 ?>
-{include file="_head.tpl" title="Comptes usuels" current="acc/accounts"}
+{include file="_head.tpl" title="Comptes favoris" current="acc/accounts"}
 
 {include file="acc/_year_select.tpl"}
 
@@ -75,7 +75,7 @@ use Garradin\Entities\Accounting\Account;
 
 	{if !$has_accounts}
 	<div class="alert block">
-		<p>Aucun compte usuel ne comporte d'écriture sur cet exercice.</p>
+		<p>Aucun compte favori ne comporte d'écriture sur cet exercice.</p>
 		<p>
 			{linkbutton href="!acc/transactions/new.php" label="Saisir une écriture" shape="plus"}
 		</p>
@@ -84,7 +84,7 @@ use Garradin\Entities\Accounting\Account;
 {/if}
 
 <p class="help">
-	Note : n'apparaissent ici que les comptes <strong>usuels</strong> qui ont été utilisés dans cet exercice (au moins une écriture).<br />
+	Note : n'apparaissent ici que les comptes <strong>favoris</strong> qui ont été utilisés dans cet exercice (au moins une écriture).<br />
 	Pour voir le solde de tous les comptes, se référer à la <a href="all.php">liste de tous comptes de l'exercice</a>.<br />
 	Pour voir la liste complète des comptes, même ceux qui n'ont pas été utilisés, se référer au <a href="{$admin_url}acc/charts/accounts/?id={$current_year.id_chart}">plan comptable</a>.
 </p>

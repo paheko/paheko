@@ -172,7 +172,7 @@ class Service_User extends Entity
 		$transaction = Transactions::create(array_merge($source, [
 			'type' => Transaction::TYPE_REVENUE,
 			'label' => $label,
-			'id_analytical' => $source['id_analytical'] ?? $this->fee()->id_analytical,
+			'id_project' => $source['id_project'] ?? $this->fee()->id_project,
 			'simple' => [Transaction::TYPE_REVENUE => [
 				[$this->fee()->id_account => null],
 				$source['account_selector'],

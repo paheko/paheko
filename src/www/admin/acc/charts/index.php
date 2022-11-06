@@ -2,6 +2,7 @@
 namespace Garradin;
 
 use Garradin\Entities\Accounting\Chart;
+use Garradin\Accounting\Accounts;
 use Garradin\Accounting\Charts;
 
 require_once __DIR__ . '/../_inc.php';
@@ -11,26 +12,30 @@ $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ);
 $tpl->assign('list', Charts::list());
 
 if ($session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)) {
-	if (f('new') && $form->check('acc_charts_new')) {
-		try {
-			$chart = new Chart;
-			$chart->importForm();
-			$chart->save();
+	$csrf_key = 'acc_charts_new';
 
-			if (f('copy')) {
-				$chart->accounts()->copyFrom((int) f('copy'));
-			}
+	$form->runIf(f('type') == 'copy', function () {
+		Charts::copyFrom((int) f('copy'), f('label'), f('country'));
+	}, $csrf_key, '!acc/charts/');
 
-			Utils::redirect(Utils::getSelfURI(false));
-		}
-		catch (UserException $e) {
-			$form->addError($e->getMessage());
-		}
-	}
+	$form->runIf(f('type') == 'install', function () {
+		Charts::install(f('install'));
+	}, $csrf_key, '!acc/charts/');
+
+	$form->runIf(f('type') == 'import', function () {
+		Charts::import('file', f('label'), f('country'));
+	}, $csrf_key, '!acc/charts/');
+
+	$tpl->assign(compact('csrf_key'));
+
+	$tpl->assign('columns', implode(', ', Chart::COLUMNS));
+	$tpl->assign('country_list', Utils::getCountryList());
 
 	$tpl->assign('from', (int)qg('from'));
 	$tpl->assign('charts_groupped', Charts::listByCountry());
 	$tpl->assign('country_list', Utils::getCountryList());
+
+	$tpl->assign('install_list', Charts::listInstallable());
 }
 
 $tpl->display('acc/charts/index.tpl');

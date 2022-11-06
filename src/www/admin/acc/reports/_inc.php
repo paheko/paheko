@@ -3,6 +3,7 @@
 namespace Garradin;
 
 use Garradin\Accounting\Years;
+use Garradin\Accounting\Projects;
 use Garradin\Accounting\Accounts;
 
 require_once __DIR__ . '/../../_inc.php';
@@ -11,16 +12,19 @@ $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ);
 
 $criterias = [];
 
-if (qg('analytical'))
-{
-	$account = Accounts::get((int) qg('analytical'));
+$tpl->assign('project_title', null);
 
-	if (!$account) {
-		throw new UserException('Numéro de compte analytique inconnu.');
+if (qg('project'))
+{
+	$project = Projects::get((int) qg('project'));
+
+	if (!$project) {
+		throw new UserException('Numéro de projet inconnu.');
 	}
 
-	$criterias['analytical'] = $account->id();
-	$tpl->assign('analytical', $account);
+	$criterias['project'] = $project->id();
+	$tpl->assign('project', $project);
+	$tpl->assign('project_title', sprintf('%s - ', $project->label));
 }
 
 if (qg('year'))
@@ -36,8 +40,8 @@ if (qg('year'))
 	$tpl->assign('close_date', $year->closed ? $year->end_date : time());
 }
 
-if (qg('analytical_only')) {
-	$criterias['analytical_only'] = true;
+if (qg('projects_only')) {
+	$criterias['projects_only'] = true;
 }
 
 if (!count($criterias))

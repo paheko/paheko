@@ -101,7 +101,7 @@ class Template extends Smartyer
 		$this->assign('is_logged', $is_logged);
 		$this->assign('logged_user', $is_logged ? $session->getUser() : null);
 
-		$this->assign('dialog', isset($_GET['_dialog']));
+		$this->assign('dialog', isset($_GET['_dialog']) ? ($_GET['_dialog'] ?: true) : false);
 
 		$this->register_compile_function('continue', function (Smartyer $s, $pos, $block, $name, $raw_args) {
 			if ($block == 'continue')

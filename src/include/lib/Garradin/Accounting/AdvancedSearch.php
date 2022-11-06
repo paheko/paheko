@@ -118,10 +118,10 @@ class AdvancedSearch extends A_S
 			],
 			'project_code' => [
 				'textMatch'=> true,
-				'label'    => 'N° de compte projet',
+				'label'    => 'Code projet',
 				'type'     => 'text',
 				'null'     => true,
-				'select'   => 'a2.code',
+				'select'   => 'p.code',
 			],
 		];
 	}
@@ -235,7 +235,7 @@ class AdvancedSearch extends A_S
 			INNER JOIN acc_transactions_lines AS l ON l.id_transaction = t.id
 			INNER JOIN acc_accounts AS a ON l.id_account = a.id
 			INNER JOIN acc_years AS y ON t.id_year = y.id
-			LEFT JOIN acc_accounts AS a2 ON l.id_analytical = a2.id';
+			LEFT JOIN acc_projects AS p ON l.id_project = p.id';
 		return $this->makeList($query, $tables, 'id', true, ['id', 'account_code', 'debit', 'credit']);
 	}
 

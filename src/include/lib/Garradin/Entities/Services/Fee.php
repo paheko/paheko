@@ -10,6 +10,7 @@ use Garradin\ValidationException;
 use Garradin\Utils;
 use Garradin\Users\DynamicFields;
 use Garradin\Entities\Accounting\Account;
+use Garradin\Entities\Accounting\Project;
 use Garradin\Entities\Accounting\Year;
 use KD2\DB\EntityManager;
 use KD2\DB\DB_Exception;
@@ -29,7 +30,7 @@ class Fee extends Entity
 	protected int $id_service;
 	protected ?int $id_account = null;
 	protected ?int $id_year = null;
-	protected ?int $id_analytical = null;
+	protected ?int $id_project = null;
 
 	public function filterUserValue(string $type, $value, string $key)
 	{
@@ -48,10 +49,6 @@ class Fee extends Entity
 
 		if (isset($source['account'])) {
 			$source['id_account'] = Form::getSelectorValue($source['account']);
-		}
-
-		if (isset($source['analytical']) && is_array($source['analytical'])) {
-			$source['id_analytical'] = Form::getSelectorValue($source['analytical']);
 		}
 
 		if (isset($source['amount_type'])) {
@@ -91,7 +88,7 @@ class Fee extends Entity
 		$this->assert(null === $this->id_account || $db->test(Account::TABLE, 'id = ?', $this->id_account), 'Le compte indiqué n\'existe pas');
 		$this->assert(null === $this->id_year || $db->test(Year::TABLE, 'id = ?', $this->id_year), 'L\'exercice indiqué n\'existe pas');
 		$this->assert(null === $this->id_account || $db->test(Account::TABLE, 'id = ? AND id_chart = (SELECT id_chart FROM acc_years WHERE id = ?)', $this->id_account, $this->id_year), 'Le compte sélectionné ne correspond pas à l\'exercice');
-		$this->assert(null === $this->id_analytical || $db->test(Account::TABLE, 'id = ? AND id_chart = (SELECT id_chart FROM acc_years WHERE id = ?)', $this->id_analytical, $this->id_year), 'Le projet sélectionné ne correspond pas à l\'exercice');
+		$this->assert(null === $this->id_project || $db->test(Project::TABLE, 'id = ?', $this->id_project), 'Le projet sélectionné n\'existe pas.');
 
 		if (null !== $this->formula && ($error = $this->checkFormula())) {
 			throw new ValidationException('Formule de calcul invalide: ' . $error);

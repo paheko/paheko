@@ -1,13 +1,6 @@
-{include file="_head.tpl" title="Balance générale" current="acc/years"}
+{include file="_head.tpl" title="%sBalance générale"|args:$project_title current="acc/years"}
 
 {include file="acc/reports/_header.tpl" current="trial_balance" title="Balance générale" sub_current=$simple}
-
-{if !$simple}
-<p class="help block noprint">
-	Attention&nbsp;: cette vue présente le solde selon les normes comptables.<br />
-	Si le montant est <strong>positif</strong> c'est que le compte est <strong>débiteur</strong>.<br />Si le montant est <strong>négatif</strong> c'est que le compte est <strong>créditeur</strong>.
-</p>
-{/if}
 
 <table class="list">
 	<thead>
@@ -16,7 +9,12 @@
 			<th>Compte</th>
 			<td class="money">Total des débits</td>
 			<td class="money">Total des crédits</td>
+			{if !$simple}
+			<td class="money">Solde débiteur</td>
+			<td class="money">Solde créditeur</td>
+			{else}
 			<td class="money">Solde</td>
+			{/if}
 		</tr>
 	</thead>
 	<tbody>
@@ -30,7 +28,12 @@
 			<th>{$account.label}</th>
 			<td class="money{if !$account.debit} disabled{/if}">{$account.debit|raw|money:false}</td>
 			<td class="money{if !$account.credit} disabled{/if}">{$account.credit|raw|money:false}</td>
+			{if !$simple}
+			<td class="money">{if $account.balance > 0}{$account.balance|abs|escape|money:false}{/if}</td>
+			<td class="money">{if $account.balance < 0}{$account.balance|abs|escape|money:false}{/if}</td>
+			{else}
 			<td class="money">{if $account.balance !== null}<b>{$account.balance|escape|money:false}</b>{/if}</td>
+			{/if}
 		</tr>
 	{/foreach}
 	</tbody>

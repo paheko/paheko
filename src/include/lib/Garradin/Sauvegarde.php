@@ -271,13 +271,15 @@ class Sauvegarde
 		}
 	}
 
-	public function dumpFilesZip(): void
+	public function dumpFilesZip(?string $target = null): void
 	{
-		$name = Config::getInstance()->get('org_name') . ' - Documents.zip';
-		header('Content-type: application/zip');
-		header(sprintf('Content-Disposition: attachment; filename="%s"', $name));
+		if (!$target) {
+			$name = Config::getInstance()->get('nom_asso') . ' - Documents.zip';
+			header('Content-type: application/zip');
+			header(sprintf('Content-Disposition: attachment; filename="%s"', $name));
+		}
 
-		$zip = new ZipWriter('php://output');
+		$zip = new ZipWriter($target ?? 'php://output');
 		$zip->setCompression(0);
 
 		$add_directory = function ($path) use ($zip, &$add_directory) {
@@ -320,7 +322,7 @@ class Sauvegarde
 			throw new UserException('Le fichier fourni n\'existe pas.');
 		}
 
-		return $this->restoreDB(DATA_ROOT . '/' . $file, false, false);
+		return $this->restoreDB(DATA_ROOT . '/' . $file, false);
 	}
 
 	/**

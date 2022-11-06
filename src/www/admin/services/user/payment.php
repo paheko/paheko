@@ -3,6 +3,7 @@ namespace Garradin;
 
 use Garradin\Services\Services_User;
 use Garradin\Accounting\Accounts;
+use Garradin\Accounting\Projects;
 use Garradin\Accounting\Years;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
@@ -42,12 +43,7 @@ $types_details = $t->getTypesDetails();
 
 $account_targets = $types_details[Transaction::TYPE_REVENUE]->accounts[1]->targets_string;
 
-$year = Years::get($fee->id_year);
-$chart = $year->chart();
-$accounts = $chart->accounts();
-
-// FIXME: improve when analytical is refactored
-$tpl->assign('analytical_accounts', ['' => '-- Aucun'] + $accounts->listAnalytical());
+$tpl->assign('projects', Projects::listAssocWithEmpty());
 
 $tpl->assign(compact('csrf_key', 'account_targets', 'user_name', 'su', 'fee'));
 

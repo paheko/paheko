@@ -26,11 +26,6 @@ if (!$year) {
 	throw new UserException("L'exercice demandé n'existe pas.");
 }
 
-if (qg('export')) {
-	Transactions::export($year->id());
-	exit;
-}
-
 if ($year->closed) {
 	throw new UserException('Impossible de modifier un exercice clôturé.');
 }

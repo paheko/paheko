@@ -1,6 +1,6 @@
 <?php
 assert(is_array($lines));
-assert(is_array($analytical_accounts));
+assert(is_array($projects));
 assert(!isset($lines_accounts) || is_array($lines_accounts));
 ?>
 
@@ -12,7 +12,7 @@ assert(!isset($lines_accounts) || is_array($lines_accounts));
 			<td>Crédit</td>
 			<td>Libellé ligne</td>
 			<td>Réf. ligne</td>
-			{if count($analytical_accounts) > 1}
+			{if count($projects) > 1}
 				<td>Projet</td>
 			{/if}
 			<td></td>
@@ -28,8 +28,8 @@ assert(!isset($lines_accounts) || is_array($lines_accounts));
 			<td class="money">{input type="money" name="lines[credit][]" default=$line.credit size=5}</td>
 			<td>{input type="text" name="lines[label][]" default=$line.label}</td>
 			<td>{input type="text" name="lines[reference][]" default=$line.reference size=10}</td>
-			{if count($analytical_accounts) > 1}
-				<td>{input default=$line.id_analytical type="select" name="lines[id_analytical][]" options=$analytical_accounts}</td>
+			{if count($projects) > 1}
+				<td>{input default=$line.id_project type="select" name="lines[id_project][]" options=$projects}</td>
 			{/if}
 			<td>{button label="Enlever" title="Enlever la ligne" shape="minus" min="2" name="remove_line"}</td>
 		</tr>
@@ -40,7 +40,7 @@ assert(!isset($lines_accounts) || is_array($lines_accounts));
 			<th>Total</th>
 			<td class="money">{input type="money" name="debit_total" readonly="readonly" tabindex="-1" }</td>
 			<td class="money">{input type="money" name="credit_total" readonly="readonly" tabindex="-1" }</td>
-			<td colspan="{if count($analytical_accounts) > 1}3{else}2{/if}" id="lines_message"></td>
+			<td colspan="{if count($projects) > 1}3{else}2{/if}" id="lines_message"></td>
 			<td>{button label="Ajouter" title="Ajouter une ligne" shape="plus"}</td>
 		</tr>
 	</tfoot>

@@ -521,9 +521,6 @@ class CommonFunctions
 			$params['data-custom-icon'] = true;
 			$params['style'] = sprintf('--custom-icon: url(\'%s\')', $params['icon']);
 		}
-		else {
-			throw new \InvalidArgumentException('Missing parameter: either shape or icon');
-		}
 
 		unset($params['icon'], $params['shape']);
 	}

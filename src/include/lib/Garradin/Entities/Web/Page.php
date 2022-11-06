@@ -340,7 +340,7 @@ class Page extends Entity
 	 */
 	public function listOrphanAttachments(): array
 	{
-		$used = $this->listTaggedAttachements();
+		$used = $this->listTaggedAttachments();
 		$orphans = [];
 
 		foreach ($this->listAttachments() as $file) {
@@ -371,7 +371,7 @@ class Page extends Entity
 		$tagged = [];
 
 		if (!$all) {
-			$tagged = $this->listTaggedAttachments($this->content);
+			$tagged = $this->listTaggedAttachments();
 		}
 
 		foreach ($this->listAttachments() as $a) {

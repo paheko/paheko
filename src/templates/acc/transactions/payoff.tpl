@@ -37,8 +37,8 @@
 			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30}
 		</dl>
 		<dl data-types="all-but-advanced">
-			{if count($analytical_accounts) > 1}
-				{input type="select" name="id_analytical" label="Projet (compte analytique)" options=$analytical_accounts default=$id_analytical}
+			{if count($projects) > 1}
+				{input type="select" name="id_project" label="Projet (analytique)" options=$projects default=$id_project}
 			{/if}
 		</dl>
 	</fieldset>

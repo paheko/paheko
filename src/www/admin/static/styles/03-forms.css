@@ -190,6 +190,7 @@ a.icn-btn, b.btn {
     white-space: pre;
     transition: color .3s, background-color .3s;
     text-decoration: underline;
+    font-weight: normal;
 }
 
 b.btn {
@@ -457,6 +458,7 @@ dd.help.example {
 
 form p.actions {
     float: right;
+    margin: .5em;
 }
 
 /** Datepicker widget */
@@ -747,6 +749,26 @@ form.progressing fieldset, form.progressing p {
 
 .selector header h2 input {
     width: calc(100% - 1em);
+}
+
+.quick-search button[type=reset] {
+    margin-left: -2.5em;
+    background: none;
+    border: none;
+    color: var(--gBorderColor);
+}
+
+h2.quick-search button[type=reset] {
+    font-size: 1rem;
+}
+
+.selector select {
+    font-size: .9em;
+    margin: .2em 0;
+    padding: .2em;
+    border-color: var(--gLightBorderColor);
+    cursor: pointer;
+    width: auto;
 }
 
 @media screen and (max-width: 1279px) {

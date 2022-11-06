@@ -52,39 +52,23 @@ class Transaction extends Entity
 		'Créance',
 	];
 
-	protected $id;
-	protected $type = null;
-	protected $status = 0;
-	protected $label;
-	protected $notes;
-	protected $reference;
+	protected ?int $id;
+	protected ?int $type = null;
+	protected int $status = 0;
+	protected string $label;
+	protected ?string $notes = null;
+	protected ?string $reference = null;
 
-	protected $date;
+	protected \KD2\DB\Date $date;
 
-	protected $validated = 0;
+	protected bool $validated = false;
 
-	protected $hash;
-	protected $prev_hash;
+	protected ?string $hash = null;
+	protected ?string $prev_hash = null;
 
-	protected $id_year;
-	protected $id_creator;
-	protected $id_related;
-
-	protected $_types = [
-		'id'        => 'int',
-		'type'      => 'int',
-		'status'    => 'int',
-		'label'     => 'string',
-		'notes'     => '?string',
-		'reference' => '?string',
-		'date'      => 'date',
-		'validated' => 'bool',
-		'hash'      => '?string',
-		'prev_hash' => '?string',
-		'id_year'   => 'int',
-		'id_creator' => '?int',
-		'id_related' => '?int',
-	];
+	protected int $id_year;
+	protected ?int $id_creator = null;
+	protected ?int $id_related = null;
 
 	protected $_lines;
 	protected $_old_lines = [];
@@ -146,6 +130,7 @@ class Transaction extends Entity
 
 		// Merge data from accounts with lines
 		$accounts = [];
+		$projects = [];
 		$lines_with_accounts = [];
 
 		foreach ($this->getLines() as $line) {
@@ -153,8 +138,8 @@ class Transaction extends Entity
 				$accounts[] = $line->id_account;
 			}
 
-			if ($line->id_analytical && !array_key_exists($line->id_analytical, $this->_accounts)) {
-				$accounts[] = $line->id_analytical;
+			if ($line->id_project) {
+				$projects[] = $line->id_project;
 			}
 		}
 
@@ -163,7 +148,12 @@ class Transaction extends Entity
 
 		if (count($accounts)) {
 			$sql = sprintf('SELECT id, label, code, position FROM acc_accounts WHERE %s;', $db->where('id', 'IN', $accounts));
+			// Don't use array_merge here or keys will be lost
 			$this->_accounts = $this->_accounts + $db->getGrouped($sql);
+		}
+
+		if (count($projects)) {
+			$projects = $db->getAssoc(sprintf('SELECT id, label FROM acc_projects WHERE %s;', $db->where('id', $projects)));
 		}
 
 		foreach ($this->getLines() as &$line) {
@@ -171,7 +161,7 @@ class Transaction extends Entity
 			$l->account_code = $this->_accounts[$line->id_account]->code ?? null;
 			$l->account_label = $this->_accounts[$line->id_account]->label ?? null;
 			$l->account_position = $this->_accounts[$line->id_account]->position ?? null;
-			$l->analytical_name = $this->_accounts[$line->id_analytical]->label ?? null;
+			$l->project_name = $projects[$line->id_project] ?? null;
 			$l->account_selector = [$line->id_account => sprintf('%s — %s', $l->account_code, $l->account_label)];
 			$l->line =& $line;
 
@@ -304,7 +294,7 @@ class Transaction extends Entity
 		return false;
 	}
 
-	public function getAnalyticalId(): ?int
+	public function getProjectId(): ?int
 	{
 		$lines = $this->getLines();
 
@@ -312,7 +302,16 @@ class Transaction extends Entity
 			return null;
 		}
 
-		return current($lines)->id_analytical;
+		$id_project = null;
+
+		foreach ($lines as $line) {
+			if ($line->id_project != $id_project) {
+				$id_project = $line->id_project;
+				break;
+			}
+		}
+
+		return $id_project;
 	}
 
 	public function related(): ?Transaction
@@ -337,13 +336,13 @@ class Transaction extends Entity
 			$new->$field = $this->$field;
 		}
 
-		$copy = ['credit', 'debit', 'id_account', 'label', 'reference', 'id_analytical'];
+		$copy = ['credit', 'debit', 'id_account', 'label', 'reference', 'id_project'];
 		$lines = DB::getInstance()->get('SELECT
-				l.credit, l.debit, l.label, l.reference, b.id AS id_account, c.id AS id_analytical
+				l.credit, l.debit, l.label, l.reference, b.id AS id_account, c.id AS id_project
 			FROM acc_transactions_lines l
 			INNER JOIN acc_accounts a ON a.id = l.id_account
 			LEFT JOIN acc_accounts b ON b.code = a.code AND b.id_chart = ?
-			LEFT JOIN acc_accounts c ON c.id = l.id_analytical AND c.id_chart = ?
+			LEFT JOIN acc_projects c ON c.id = l.id_project
 			WHERE l.id_transaction = ?;',
 			$year->chart()->id,
 			$year->chart()->id,
@@ -694,11 +693,11 @@ class Transaction extends Entity
 			];
 
 			if ($this->type != self::TYPE_TRANSFER || Config::getInstance()->analytical_set_all) {
-				$source['lines'][0]['id_analytical'] = $source['id_analytical'] ?? null;
+				$source['lines'][0]['id_project'] = $source['id_project'] ?? null;
 			}
 
 			if (Config::getInstance()->analytical_set_all) {
-				$source['lines'][1]['id_analytical'] = $source['lines'][0]['id_analytical'];
+				$source['lines'][1]['id_project'] = $source['lines'][0]['id_project'];
 			}
 
 			unset($line, $accounts, $account, $source['simple']);
@@ -826,10 +825,10 @@ class Transaction extends Entity
 			$line + ['account_selector' => $source['account'], $d2 => $source['amount']],
 		];
 
-		$source['lines'][0]['id_analytical'] = $source['id_analytical'] ?? null;
+		$source['lines'][0]['id_project'] = $source['id_project'] ?? null;
 
 		if (Config::getInstance()->analytical_set_all) {
-			$source['lines'][1]['id_analytical'] = $source['lines'][0]['id_analytical'];
+			$source['lines'][1]['id_project'] = $source['lines'][0]['id_project'];
 		}
 
 		$this->importFromNewForm($source);
@@ -867,7 +866,7 @@ class Transaction extends Entity
 		$open_account = EntityManager::findOne(Account::class, 'SELECT * FROM @TABLE WHERE id_chart = ? AND type = ? LIMIT 1;', $year->id_chart, Account::TYPE_OPENING);
 
 		if (!$open_account) {
-			throw new ValidationException('Aucun compte usuel de bilan d\'ouverture n\'existe dans le plan comptable');
+			throw new ValidationException('Aucun compte de bilan d\'ouverture n\'existe dans le plan comptable');
 		}
 
 		$line->id_account = $open_account->id();
@@ -1097,9 +1096,9 @@ class Transaction extends Entity
 		$this->type = self::TYPE_ADVANCED;
 
 		$out = (object) [
-			'id'            => $this->_related->id,
-			'amount'        => $this->_related->sum(),
-			'id_analytical' => $this->_related->getAnalyticalId(),
+			'id'         => $this->_related->id,
+			'amount'     => $this->_related->sum(),
+			'id_project' => $this->_related->getProjectId(),
 		];
 
 		return $out;

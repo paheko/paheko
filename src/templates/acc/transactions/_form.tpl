@@ -67,8 +67,8 @@ $is_quick = count(array_intersect_key($_GET, array_flip(['a', 'l', 'd', 't', 'ac
 			{input type="number" name="id_related" label="Lier à l'écriture numéro" source=$transaction help="Indiquer ici un numéro d'écriture pour faire le lien par exemple avec une dette"}
 		</dl>
 		<dl data-types="all-but-advanced">
-			{if count($analytical_accounts) > 1}
-				{input type="select" name="id_analytical" label="Projet (compte analytique)" options=$analytical_accounts default=$id_analytical}
+			{if count($projects) > 1}
+				{input type="select" name="id_project" label="Projet (analytique)" options=$projects default=$id_project}
 			{/if}
 		</dl>
 	</fieldset>

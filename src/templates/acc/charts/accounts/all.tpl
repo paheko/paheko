@@ -1,21 +1,33 @@
-{include file="_head.tpl" title="Plan comptable"|args:$chart.label current="acc/charts"}
+{include file="_head.tpl" title=$chart.label current="acc/years"}
 
 {include file="acc/charts/accounts/_nav.tpl" current="all"}
 
-<p class="help">
-	Les comptes marqués comme «&nbsp;<em>Ajouté</em>&nbsp;» ont été ajoutés au plan comptable officiel par vous-même.
-</p>
+<form method="post" action="{$self_url}" data-focus="1">
 
-<table class="accounts">
-	<tbody>
-	{foreach from=$accounts item="account"}
-		<tr class="account-level-{$account.code|strlen}">
-			<td>{$account.code}</td>
-			<th>{$account.label}</th>
+	<p class="actions quick-search">
+		<input type="text" placeholder="Recherche rapide…" title="Filtrer la liste" />{button shape="delete" type="reset" title="Effacer la recherche"}
+		{* We can't use input type="search" because Firefox sucks *}
+	</p>
+
+	<p class="help">
+		Les comptes marqués comme «&nbsp;<em>Ajouté</em>&nbsp;» ont été ajoutés au plan comptable officiel par vous-même.
+	</p>
+
+{include file="common/dynamic_list_head.tpl"}
+
+	{foreach from=$list->iterate() item="account"}
+		<tr class="account account-level-{$account.level}">
+			<td class="num">{$account.code}</td>
+			<th{if !$account.description} colspan=2{/if}>{$account.label}</th>
+			{if $account.description}
+			<td class="help">{$account.description|escape|nl2br}</td>
+			{/if}
 			<td>
-				{if $account.type}
-					{icon shape="star"} <?=Entities\Accounting\Account::TYPES_NAMES[$account->type]?>
-				{/if}
+				<?php
+				$shape = $account->bookmark ? 'check' : 'uncheck';
+				$title = $account->bookmark ? 'Ôter des favoris' : 'Marquer comme favori';
+				?>
+				{button shape=$shape name="bookmark[%d]"|args:$account.id value=$account.bookmark label="Favori" title=$title type="submit"}
 			</td>
 			<td>
 				{if $account.user}<em>Ajouté</em>{/if}
@@ -23,9 +35,9 @@
 			<td class="actions">
 				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$chart.archived}
 					{if $account.user || !$chart.code}
-						{linkbutton shape="delete" label="Supprimer" href="!acc/charts/accounts/delete.php?id=%d"|args:$account.id}
+						{linkbutton shape="delete" label="Supprimer" href="!acc/charts/accounts/delete.php?id=%d&%s"|args:$account.id,$types_arg target=$dialog_target}
 					{/if}
-					{linkbutton shape="edit" label="Modifier" href="!acc/charts/accounts/edit.php?id=%d"|args:$account.id}
+					{linkbutton shape="edit" label="Modifier" href="!acc/charts/accounts/edit.php?id=%d%s"|args:$account.id,$types_arg target=$dialog_target}
 				{/if}
 			</td>
 		</tr>
@@ -33,5 +45,8 @@
 	</tbody>
 </table>
 
+<script type="text/javascript" src="{$admin_url}static/scripts/accounts_list.js"></script>
+
+</form>
 
 {include file="_foot.tpl"}

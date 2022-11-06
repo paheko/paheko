@@ -8,12 +8,6 @@ require_once __DIR__ . '/../_inc.php';
 
 $quota_used = Files::getUsedQuota(true);
 
-$form->runIf('save_config', function () {
-	$config = Config::getInstance();
-	$config->importForm();
-	$config->save();
-}, 'save_config', Utils::getSelfURI(['msg' => 'SAVED']));
-
 $form->runIf('reset_ok', function () use ($session) {
 	Install::reset($session, f('passe_verif'));
 }, 'reset');

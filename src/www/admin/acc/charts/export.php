@@ -5,8 +5,6 @@ use Garradin\Accounting\Charts;
 
 require_once __DIR__ . '/../_inc.php';
 
-$session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
-
 $chart = Charts::get((int) qg('id'));
 
 if (!$chart) {
@@ -14,7 +12,8 @@ if (!$chart) {
 }
 
 CSV::export(
-	null !== qg('ods') ? 'ods' : 'csv',
+	qg('format'),
 	sprintf('Plan comptable - %s - %s', Config::getInstance()->get('org_name'), $chart->label),
-	$chart->accounts()->export()
+	$chart->export(),
+	$chart::COLUMNS
 );

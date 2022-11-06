@@ -4,6 +4,7 @@ namespace Garradin\Accounting;
 
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Line;
+use Garradin\Entities\Accounting\Project;
 use Garradin\Entities\Accounting\Transaction;
 use KD2\DB\EntityManager;
 use Garradin\DB;
@@ -98,12 +99,12 @@ class Transactions
 		return DB::getInstance()->count('acc_transactions', 'id_creator = ?', $user_id);
 	}
 
-	static public function setAnalytical(?int $id_analytical, ?array $transactions = null, ?array $lines = null)
+	static public function setProject(?int $id_project, ?array $transactions = null, ?array $lines = null)
 	{
 		$db = DB::getInstance();
 
-		if (null !== $id_analytical && !$db->test(Account::TABLE, 'type = ? AND id = ?', Account::TYPE_ANALYTICAL, $id_analytical)) {
-			throw new \InvalidArgumentException('Chosen account ID is not analytical');
+		if (null !== $id_project && !$db->test(Project::TABLE, 'id = ?', $id_project)) {
+			throw new \InvalidArgumentException('Invalid project ID');
 		}
 
 		if (isset($transactions, $lines) || ($transactions === null && $lines === null)) {
@@ -113,8 +114,8 @@ class Transactions
 		$selection = array_map('intval', $transactions ?? $lines);
 		$where = sprintf($transactions ? 'id_transaction IN (%s)' : 'id IN (%s)', implode(', ', $selection));
 
-		return $db->exec(sprintf('UPDATE acc_transactions_lines SET id_analytical = %s WHERE %s;',
-			(int)$id_analytical ?: 'NULL', $where));
+		return $db->exec(sprintf('UPDATE acc_transactions_lines SET id_project = %s WHERE %s;',
+			(int)$id_project ?: 'NULL', $where));
 	}
 
 	static public function listByType(int $year_id, ?int $type)
@@ -126,8 +127,8 @@ class Transactions
 		$columns['line_reference']['label'] = 'Réf. paiement';
 		$columns['change']['select'] = sprintf('SUM(l.credit) * %d', $reverse);
 		$columns['change']['label'] = 'Montant';
-		$columns['code_analytical']['select'] = 'GROUP_CONCAT(b.code, \',\')';
-		$columns['id_analytical']['select'] = 'GROUP_CONCAT(l.id_analytical, \',\')';
+		$columns['project_code']['select'] = 'GROUP_CONCAT(IFNULL(b.code, SUBSTR(b.label, 1, 10) || \'…\'), \',\')';
+		$columns['id_project']['select'] = 'GROUP_CONCAT(l.id_project, \',\')';
 
 		if (!$type) {
 			$columns = ['type_label' => [
@@ -140,7 +141,7 @@ class Transactions
 		$tables = 'acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
 			INNER JOIN acc_accounts a ON a.id = l.id_account
-			LEFT JOIN acc_accounts b ON b.id = l.id_analytical';
+			LEFT JOIN acc_projects b ON b.id = l.id_project';
 		$conditions = sprintf('t.id_year = %d', $year_id);
 
 		if (null !== $type) {
@@ -156,11 +157,10 @@ class Transactions
 		$list->setModifier(function (&$row) {
 			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
 
-			if (isset($row->id_analytical, $row->code_analytical)) {
-				$row->code_analytical = array_combine(explode(',', $row->id_analytical), explode(',', $row->code_analytical));
-			}
-			else {
-				$row->code_analytical = [];
+			$row->projects = [];
+
+			if (isset($row->id_project, $row->project_code)) {
+				$row->projects = array_combine(explode(',', $row->id_project), explode(',', $row->project_code));
 			}
 
 			if (isset($row->type_label)) {
@@ -169,7 +169,7 @@ class Transactions
 		});
 		$list->setExportCallback(function (&$row) {
 			$row->change = Utils::money_format($row->change, '.', '', false);
-			$row->code_analytical = implode(', ', $row->code_analytical);
+			$row->projects = implode(', ', $row->projects);
 		});
 
 		return $list;

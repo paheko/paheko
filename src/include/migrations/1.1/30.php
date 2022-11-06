@@ -21,6 +21,6 @@ $chart_id = $db->firstColumn('SELECT id FROM acc_charts WHERE code = \'PCA_2018\
 $db->exec(sprintf('UPDATE acc_accounts AS a
 	SET description = (SELECT b.description FROM old.acc_accounts b WHERE b.id = a.id),
 		type = (SELECT b.type FROM old.acc_accounts b WHERE b.id = a.id)
-	WHERE a.id_chart = %d AND EXISTS (SELECT b.id FROM old.acc_accounts b WHERE b.id = a.id);', $chart_id));
+	WHERE a.id_chart = %d AND EXISTS (SELECT b.id FROM old.acc_accounts b WHERE b.id = a.id AND b.label = a.label AND b.code = a.code);', $chart_id));
 
 $db->exec('DETACH \'old\';');

@@ -4,8 +4,11 @@ namespace Garradin;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Files\File;
+use Garradin\Accounting\Projects;
 use Garradin\Accounting\Transactions;
 use Garradin\Accounting\Years;
+
+use KD2\DB\Date;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -28,10 +31,10 @@ $amount = $payoff_for->amount;
 $chart = $current_year->chart();
 $accounts = $chart->accounts();
 
-$date = new \DateTime;
+$date = new Date;
 
 if ($session->get('acc_last_date')) {
-	$date = \DateTime::createFromFormat('!Y-m-d', $session->get('acc_last_date'));
+	$date = Date::createFromFormat('!Y-m-d', $session->get('acc_last_date'));
 }
 
 if (!$date || ($date < $current_year->start_date || $date > $current_year->end_date)) {
@@ -56,17 +59,17 @@ $form->runIf('save', function () use ($transaction, $session, $current_year) {
 		$transaction->updateLinkedUsers(array_keys(f('users')));
 	}
 
-	$session->set('acc_last_date', f('date'));
+	$session->set('acc_last_date', $transaction->date->format('Y-m-d'));
 
 	Utils::redirect('!acc/transactions/details.php?created&id=' . $transaction->id());
 }, 'acc_transaction_new');
 
-$id_analytical = $payoff_for->id_analytical;
+$id_project = $payoff_for->id_project;
 
-$tpl->assign(compact('transaction', 'payoff_for', 'amount', 'id_analytical'));
+$tpl->assign(compact('transaction', 'payoff_for', 'amount', 'id_project'));
 $tpl->assign('payoff_targets', implode(':', [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]));
 
 $tpl->assign('chart_id', $chart->id());
 
-$tpl->assign('analytical_accounts', ['' => '-- Aucun'] + $accounts->listAnalytical());
+$tpl->assign('projects', Projects::listAssocWithEmpty());
 $tpl->display('acc/transactions/payoff.tpl');

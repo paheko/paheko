@@ -2,8 +2,8 @@
 
 	<nav class="tabs noprint">
 		<ul>
-		{if isset($analytical) || $current == 'analytical_ledger'}
-			<li><strong><a href="{$admin_url}acc/reports/projects.php">Projets</a></strong></li>
+		{if isset($project) || $current == 'analytical_ledger'}
+			<li><strong><a href="{$admin_url}acc/projects/">Projets</a></strong></li>
 		{/if}
 		{if $current == 'analytical_ledger'}
 				<li class="current"><a href="{$admin_url}acc/reports/ledger.php?{$criterias_query_no_compare}">Grand livre analytique</a></li>
@@ -26,15 +26,15 @@
 	</nav>
 
 	<h2>{$config.org_name} — {$title}</h2>
-	{if isset($analytical)}
-		<h3>Projet&nbsp;: {$analytical.label}</h3>
+	{if isset($project)}
+		<h3>Projet&nbsp;: {if $project.code}{$project.code} — {/if}{$project.label}{if $project.archived} <em>(archivé)</em>{/if}</h3>
 	{/if}
 	{if isset($year)}
 		<p>Exercice&nbsp;: {$year.label} ({if $year.closed}clôturé{else}en cours{/if}, du
 			{$year.start_date|date_short} au {$year.end_date|date_short}, généré le {$close_date|date_short})</p>
 	{/if}
 
-	{if !empty($allow_compare) && !empty($other_years) && empty($criterias['analytical'])}
+	{if !empty($allow_compare) && !empty($other_years) && empty($criterias['project'])}
 	<form method="get" action="" class="noprint">
 		<fieldset>
 			<legend>Comparer avec un autre exercice</legend>
@@ -43,8 +43,8 @@
 				{button type="submit" label="Comparer" shape="right"}
 			</p>
 			<input type="hidden" name="year" value="{$year.id}" />
-			{if isset($analytical)}
-				<input type="hidden" name="analytical" value="{$analytical.id}" />
+			{if isset($project)}
+				<input type="hidden" name="project" value="{$project.id}" />
 			{/if}
 		</fieldset>
 	</form>

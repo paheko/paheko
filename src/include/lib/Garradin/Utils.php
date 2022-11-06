@@ -353,6 +353,10 @@ class Utils
 
         if (isset($_GET['_dialog'])) {
             $destination .= (strpos($destination, '?') === false ? '?' : '&') . '_dialog';
+
+            if (!empty($_GET['_dialog'])) {
+                $destination .= '=' . rawurlencode($_GET['_dialog']);
+            }
         }
 
         if (PHP_SAPI == 'cli') {
@@ -668,7 +672,7 @@ class Utils
 
             if (is_dir($path . DIRECTORY_SEPARATOR . $file))
             {
-                if (!self::deleteRecursive($path . DIRECTORY_SEPARATOR . $file))
+                if (!self::deleteRecursive($path . DIRECTORY_SEPARATOR . $file, true))
                     return false;
             }
             else
@@ -678,7 +682,10 @@ class Utils
         }
 
         $dir->close();
-        rmdir($path);
+
+        if ($delete_self) {
+            rmdir($path);
+        }
 
         return true;
     }

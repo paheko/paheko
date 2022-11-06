@@ -2,17 +2,22 @@ parameters:
     bootstrapFiles:
       - phpstan.config.php
       - ../src/include/init.php
-    level: 1
+    level: 3
     scanDirectories:
       - ../src/include
       - ../src/www
       - ../src/scripts
-    excludes_analyse:
+    excludePaths:
       - ../src/include/lib/KD2
+      - ../src/include/lib/Parsedown.php
     reportUnmatchedIgnoredErrors: false
     ignoreErrors:
         - '#Access to protected property Garradin\\Entities#'
         - '#Access to an undefined property KD2\\DB\\AbstractEntity#'
+        - '#but returns KD2\\DB\\AbstractEntity#'
+        - '#Call to an undefined method KD2\\DB\\AbstractEntity#'
+        - '#Property .* does not accept KD2\\DB\\AbstractEntity#'
+        - '#PHPDoc#'
         -
           message: '#Variable \$(tpl|form|session|user|session|wiki|config|membres|current_year) might not be defined#'
           path: ../src/www/*

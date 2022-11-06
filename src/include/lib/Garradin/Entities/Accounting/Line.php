@@ -12,27 +12,15 @@ class Line extends Entity
 {
 	const TABLE = 'acc_transactions_lines';
 
-	protected $id;
-	protected $id_transaction;
-	protected $id_account;
-	protected $credit = 0;
-	protected $debit = 0;
-	protected $reference;
-	protected $label;
-	protected $reconciled = 0;
-	protected $id_analytical;
-
-	protected $_types = [
-		'id'             => 'int',
-		'id_transaction' => 'int',
-		'id_account'     => 'int',
-		'credit'         => 'int',
-		'debit'          => 'int',
-		'reference'      => '?string',
-		'label'          => '?string',
-		'reconciled'     => 'int',
-		'id_analytical'  => '?int',
-	];
+	protected ?int $id;
+	protected int $id_transaction;
+	protected int $id_account;
+	protected int $credit = 0;
+	protected int $debit = 0;
+	protected ?string $reference = null;
+	protected ?string $label = null;
+	protected bool $reconciled = false;
+	protected ?int $id_project = null;
 
 	static public function create(int $id_account, int $credit, int $debit, ?string $label = null, ?string $reference = null): Line
 	{
@@ -51,7 +39,7 @@ class Line extends Entity
 		if ($key == 'credit' || $key == 'debit') {
 			$value = Utils::moneyToInteger($value);
 		}
-		elseif ($key == 'id_analytical' && $value == 0) {
+		elseif ($key == 'id_project' && $value == 0) {
 			$value = null;
 		}
 
@@ -71,9 +59,8 @@ class Line extends Entity
 		$this->assert($this->credit || $this->debit, 'Aucun montant au débit ou au crédit');
 		$this->assert($this->credit >= 0 && $this->debit >= 0, 'Le montant ne peut être négatif');
 		$this->assert(($this->credit * $this->debit) === 0 && ($this->credit + $this->debit) > 0, 'Ligne non équilibrée : crédit ou débit doit valoir zéro.');
-		$this->assert($this->reconciled === 0 || $this->reconciled === 1);
 
-		$this->assert(null === $this->id_analytical || DB::getInstance()->test(Account::TABLE, 'id = ?', $this->id_analytical), 'Le projet analytique indiqué n\'existe pas.');
+		$this->assert(null === $this->id_project || DB::getInstance()->test(Project::TABLE, 'id = ?', $this->id_project), 'Le projet analytique indiqué n\'existe pas.');
 		$this->assert(!empty($this->id_transaction), 'Aucune écriture n\'a été indiquée pour cette ligne.');
 		parent::selfCheck();
 	}

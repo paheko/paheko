@@ -45,7 +45,7 @@ $fields = DF::getInstance()->all();
 		{elseif $field.type == 'multiple'}
 			<ul>
 			{foreach from=$field.options key="b" item="name"}
-				{if $value & (0x01 << $b)}
+				{if (int)$value & (0x01 << (int)$b)}
 					<li>{$name}</li>
 				{/if}
 			{/foreach}

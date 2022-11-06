@@ -16,25 +16,8 @@
 	<p class="block confirm">
 		L'exercice sélectionné a été réouvert.
 	</p>
-{else if $_GET.msg == 'SAVED'}
-	<p class="block confirm">
-		La configuration a été enregistrée.
-	</p>
 {/if}
 
-<form method="post" action="{$self_url_no_qs}">
-<fieldset>
-	<legend>Configuration avancée de la comptabilité</legend>
-	<dl>
-		<dt><label for="f_analytical_set_all_0">Lors de la saisie d'une écriture simplifiée (recette ou dépense), affecter le projet analytique…</label></dt>
-		{input type="radio" name="analytical_set_all" value="1" label="à tous les comptes" source=$config help="permet de suivre la caisse, banque, comptes de tiers, etc. dans un projet"}
-		{input type="radio" name="analytical_set_all" value="0" label="seulement aux comptes de charge et de produit" source=$config}
-	</dl>
-	<p>
-		{csrf_field key="save_config"}
-		{button type="submit" name="save_config" label="Enregistrer" shape="right"}
-	</p>
-</fieldset>
 
 {if count($closed_years)}
 <fieldset>
@@ -94,10 +77,17 @@
 
 <fieldset>
 	<legend>Remise à zéro</legend>
-	<p class="block error">
-		Attention : toutes les données seront effacées&nbsp;! Ceci inclut les membres, les écritures comptables, les pages du wiki, etc.
-		Seul votre compte membre sera re-créé avec le même email et mot de passe.
-	</p>
+	<div class="block error">
+		<h3>Attention : toutes les données seront effacées&nbsp;!</h3>
+		<ul>
+			<li>Les membres seront supprimés, ainsi que les activités et l'historique d'inscription</li>
+			<li>Les écritures et exercices comptables seront aussi supprimés, avec toutes les autres données comptables</li>
+			<li>Le contenu du site web</li>
+			<li>Les documents, etc.</li>
+			<li>Bref : tout sera effacé !</li>
+		</ul>
+		<p>Seul votre compte membre sera re-créé avec le même email et mot de passe.</p>
+	</div>
 	<p class="help">
 		Une sauvegarde sera automatiquement créée avant de procéder à la remise à zéro.
 	</p>

@@ -50,7 +50,7 @@
 				<td>{$line.reference}</td>
 				<th>{$line.label}</th>
 				<td>{$line.line_reference}</td>
-				<td class="num">{foreach from=$line.code_analytical item="code" key="id"}<a href="{$admin_url}acc/reports/statement.php?analytical={$id}">{$code}</a> {/foreach}</td>
+				<td class="num">{foreach from=$line.projects item="code" key="id"}<a href="{$admin_url}acc/reports/statement.php?project={$id}">{$code}</a> {/foreach}</td>
 				<td class="actions">
 					{if $line.type == Entities\Accounting\Transaction::TYPE_DEBT && ($line.status & Entities\Accounting\Transaction::STATUS_WAITING)}
 						{linkbutton shape="check" label="Régler cette dette" href="!acc/transactions/payoff.php?for=%d"|args:$line.id}
@@ -74,7 +74,7 @@
 					{csrf_field key="projects_action"}
 					<select name="action">
 						<option value="">— Choisir une action à effectuer —</option>
-						<option value="change_analytical">Ajouter/enlever d'un projet</option>
+						<option value="change_project">Ajouter/enlever d'un projet</option>
 						<option value="delete">Supprimer les écritures</option>
 					</select>
 					<noscript>

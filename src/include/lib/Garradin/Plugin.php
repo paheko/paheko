@@ -415,7 +415,7 @@ class Plugin
 
 		foreach ($plugins as &$row)
 		{
-			$row->disabled = !self::getPath($row->id, false);
+			$row->disabled = !self::getPath($row->id);
 		}
 
 		return $plugins;

@@ -119,6 +119,7 @@ class Storage extends AbstractStorage
 	protected function get_file_property(string $uri, string $name, int $depth)
 	{
 		$file = $this->load($uri);
+		$is_dir = $file->type == File::TYPE_DIRECTORY;
 
 		if (!$file) {
 			throw new \LogicException('File does not exist');
@@ -128,13 +129,13 @@ class Storage extends AbstractStorage
 
 		switch ($name) {
 			case 'DAV::getcontentlength':
-				return $file->type == File::TYPE_DIRECTORY ? null : $file->size;
+				return $is_dir ? null : $file->size;
 			case 'DAV::getcontenttype':
 				// ownCloud app crashes if mimetype is provided for a directory
 				// https://github.com/owncloud/android/issues/3768
-				return $file->type == File::TYPE_DIRECTORY ? null : $file->mime;
+				return $is_dir ? null : $file->mime;
 			case 'DAV::resourcetype':
-				return $file->type == File::TYPE_DIRECTORY ? 'collection' : '';
+				return $is_dir ? 'collection' : '';
 			case 'DAV::getlastmodified':
 				return $file->modified ?? null;
 			case 'DAV::displayname':
@@ -142,7 +143,7 @@ class Storage extends AbstractStorage
 			case 'DAV::ishidden':
 				return false;
 			case 'DAV::getetag':
-				return $file instanceof File ? $file->etag() : null;
+				return !$is_dir ? $file->etag() : null;
 			case 'DAV::lastaccessed':
 				return null;
 			case 'DAV::creationdate':
@@ -402,7 +403,7 @@ class Storage extends AbstractStorage
 	protected function createWopiToken(string $uri)
 	{
 		$ttl = time()+(3600*10);
-		$hash = sha1(SECRET_KEY . $uri . $ttl);
+		$hash = WebDAV::hmac(compact('uri', 'ttl'), SECRET_KEY);
 		$data = sprintf('%s_%s', $hash, $ttl);
 
 		return [
@@ -417,9 +418,10 @@ class Storage extends AbstractStorage
 		$uri = gzuncompress($id);
 		$token_decode = WOPI::base64_decode_url_safe($token);
 		$hash = strtok($token_decode, ':');
-		$ttl = strtok(false);
+		$ttl = (int) strtok(false);
+		$check = WebDAV::hmac(compact('uri', 'ttl'), SECRET_KEY);
 
-		if ($hash != sha1(SECRET_KEY . $uri . $ttl)) {
+		if (!hash_equals($hash, $check)) {
 			return null;
 		}
 

@@ -11,6 +11,7 @@ use Garradin\Entities\Files\File;
 use Garradin\Entities\Search;
 use Garradin\Users\DynamicFields;
 use Garradin\Users\Session;
+use Garradin\Files\Files;
 
 use KD2\HTTP;
 
@@ -78,7 +79,19 @@ class Install
 			throw new UserException('L\'utilisateur connecté ne dispose pas d\'adresse e-mail, merci de la renseigner.');
 		}
 
-		(new Sauvegarde)->create(date('Y-m-d-His-') . 'avant-remise-a-zero');
+		$name = date('Y-m-d-His-') . 'avant-remise-a-zero';
+
+		$s = new Sauvegarde;
+		$s->create($name);
+
+		// Keep a backup file of files
+		if (FILE_STORAGE_BACKEND == 'FileSystem') {
+			$name = 'documents_' . $name . '.zip';
+			$s->dumpFilesZip(CACHE_ROOT . '/' . $name);
+			Files::callStorage('truncate');
+			@mkdir(FILE_STORAGE_CONFIG . '/documents');
+			@rename(CACHE_ROOT . '/' . $name, FILE_STORAGE_CONFIG . '/documents/' . $name);
+		}
 
 		Config::deleteInstance();
 		DB::getInstance()->close();
@@ -112,14 +125,23 @@ class Install
 			throw new \LogicException('Invalid reset data');
 		}
 
-		// We can't use the real password, as it might not be valid (too short or compromised)
-		$ok = self::install($data->organization ?? 'Association', $data->name, $data->email, md5($data->password));
+		try {
+			// We can't use the real password, as it might not be valid (too short or compromised)
+			$ok = self::install($data->organization ?? 'Association', $data->name, $data->email, md5($data->password));
 
-		// Restore password
-		DB::getInstance()->preparedQuery('UPDATE users SET password = ? WHERE id = 1;', [$data->password]);
+			// Restore password
+			DB::getInstance()->preparedQuery('UPDATE membres SET passe = ? WHERE id = 1;', [$data->password]);
 
-		if (defined('\Garradin\LOCAL_LOGIN') && \Garradin\LOCAL_LOGIN) {
-			Session::getInstance()->refresh();
+			if (defined('\Garradin\LOCAL_LOGIN') && \Garradin\LOCAL_LOGIN) {
+				Session::getInstance()->refresh();
+			}
+		}
+		catch (\Exception $e) {
+			Config::deleteInstance();
+			DB::getInstance()->close();
+			DB::deleteInstance();
+			Utils::safe_unlink(DB_FILE);
+			throw $e;
 		}
 
 		@unlink(CACHE_ROOT . '/reset');
@@ -134,7 +156,7 @@ class Install
 		}
 	}
 
-	static public function installFromForm(array $source = null)
+	static public function installFromForm(array $source = null): void
 	{
 		if (null === $source) {
 			$source = $_POST;
@@ -151,9 +173,8 @@ class Install
 		self::assert($source['password'] === $source['password_confirmed'], 'La vérification du mot de passe ne correspond pas');
 
 		try {
-			$ok = self::install($source['name'], $source['user_name'], $source['user_email'], $source['password']);
+			self::install($source['name'], $source['user_name'], $source['user_email'], $source['user_password']);
 			self::ping();
-			return $ok;
 		}
 		catch (\Exception $e) {
 			@unlink(DB_FILE);
@@ -168,6 +189,7 @@ class Install
 		}
 
 		self::checkAndCreateDirectories();
+		Files::disableQuota();
 		$db = DB::getInstance();
 
 		$db->requireFeatures('cte', 'json_patch', 'fts4', 'date_functions_in_constraints', 'index_expressions', 'rename_column', 'upsert');
@@ -327,13 +349,14 @@ class Install
 		$search->save();
 
 		// Install welcome plugin if available
-		$has_welcome_plugin = Plugin::getPath('welcome', false);
+		$has_welcome_plugin = Plugin::getPath('welcome');
 
 		if ($has_welcome_plugin) {
 			Plugin::install('welcome', true);
 		}
 
 		$config->save();
+		Files::enableQuota();
 	}
 
 	static public function checkAndCreateDirectories()
@@ -356,13 +379,13 @@ class Install
 
 			if (!is_dir($path))
 			{
-				throw new UserException('Le répertoire '.$path.' n\'existe pas ou n\'est pas un répertoire.');
+				throw new \RuntimeException('Le répertoire '.$path.' n\'existe pas ou n\'est pas un répertoire.');
 			}
 
 			// On en profite pour vérifier qu'on peut y lire et écrire
 			if (!is_writable($path) || !is_readable($path))
 			{
-				throw new UserException('Le répertoire '.$path.' n\'est pas accessible en lecture/écriture.');
+				throw new \RuntimeException('Le répertoire '.$path.' n\'est pas accessible en lecture/écriture.');
 			}
 
 			// Some basic safety against misconfigured hosts

@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Graphiques" current="acc"}
+{include file="_head.tpl" title="%sGraphiques"|args:$project_title current="acc"}
 
 {include file="acc/reports/_header.tpl" current="graphs" title="Graphiques"}
 

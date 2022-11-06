@@ -10,16 +10,17 @@
 {else}
 
 	<header>
-		<h2>
-			<input type="text" placeholder="Recherche rapide" id="lookup" />
+		<h2 class="quick-search">
+			<input type="text" placeholder="Recherche rapide…" title="Filtrer la liste" />{button shape="delete" type="reset" title="Effacer la recherche"}
+			{* We can't use input type="search" because Firefox sucks *}
 		</h2>
 
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 			<?php $page = isset($grouped_accounts) ? '' : 'all.php'; ?>
-			<p class="edit">{linkbutton label="Modifier les comptes" href="!acc/charts/accounts/%s?id=%d"|args:$page,$chart.id shape="edit"}</aside></p>
+			<p class="edit">{linkbutton label="Modifier les comptes" href="!acc/charts/accounts/%s?id=%d&types=%s"|args:$page,$chart.id,$targets_str shape="edit"}</aside></p>
 		{/if}
 
-		<p><label>{input type="checkbox" name="typed_only" value=0 default=0 default=$all} N'afficher que les comptes usuels</label></p>
+		<p>{input type="select" name="filter" options=$filter_options default=$filter}</p>
 	</header>
 
 	{if isset($grouped_accounts)}
@@ -30,12 +31,13 @@
 			<table class="list">
 				<tbody>
 				{foreach from=$group.accounts item="account"}
-					<tr data-idx="{$index}">
-						<td>{$account.code}</td>
+					<tr data-idx="{$index}" class="account">
+						<td class="bookmark">{if $account.bookmark}{icon shape="star" title="Compte favori"}{/if}</td>
+						<td class="num">{$account.code}</td>
 						<th>{$account.label}</th>
 						<td class="desc">{$account.description}</td>
 						<td class="actions">
-							<button class="icn-btn" value="{$account.id}" data-label="{$account.code} — {$account.label}" data-icon="&rarr;">Sélectionner</button>
+							{button shape="right" value=$account.id data-label="%s — %s"|args:$account.code,$account.label label="Sélectionner"}
 						</td>
 					</tr>
 					<?php $index++; ?>
@@ -46,19 +48,15 @@
 
 	{else}
 
-		<table class="accounts">
+		<table class="list">
 			<tbody>
 			{foreach from=$accounts item="account"}
-				<tr data-idx="{$iteration}" class="account-level-{$account.code|strlen}">
-					<td>{$account.code}</td>
+				<tr data-idx="{$iteration}" class="account account-level-{$account->level()}">
+					<td class="bookmark">{if $account.bookmark}{icon shape="star" title="Compte favori"}{/if}</td>
+					<td class="num">{$account.code}</td>
 					<th>{$account.label}</th>
-					<td>
-					{if $account.type}
-						{icon shape="star"} <?=Entities\Accounting\Account::TYPES_NAMES[$account->type]?>
-					{/if}
-					</td>
 					<td class="actions">
-						<button class="icn-btn" value="{$account.id}" data-label="{$account.code} — {$account.label}" data-icon="&rarr;">Sélectionner</button>
+						{button shape="right" value=$account.id data-label="%s — %s"|args:$account.code,$account.label label="Sélectionner"}
 					</td>
 				</tr>
 			{/foreach}
