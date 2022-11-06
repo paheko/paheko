@@ -47,10 +47,6 @@ class Fee extends Entity
 			$source['id_account'] = (int)key($source['account']);
 		}
 
-		if (isset($source['project']) && is_array($source['project'])) {
-			$source['id_project'] = (int)key($source['project']);
-		}
-
 		if (isset($source['amount_type'])) {
 			if ($source['amount_type'] == 2) {
 				$source['amount'] = null;
