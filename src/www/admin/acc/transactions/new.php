@@ -23,7 +23,6 @@ $accounts = $chart->accounts();
 
 $csrf_key = 'acc_transaction_new';
 $transaction = new Transaction;
-$transaction->id_year = $current_year->id();
 
 $amount = 0;
 $id_project = null;
@@ -69,6 +68,8 @@ if (qg('copy')) {
 
 	$tpl->assign('duplicate_from', $old->id());
 }
+
+$transaction->id_year = $current_year->id();
 
 // Set last used date
 if (empty($transaction->date) && $session->get('acc_last_date') && $date = Date::createFromFormat('!Y-m-d', $session->get('acc_last_date'))) {
