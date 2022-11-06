@@ -138,4 +138,28 @@ class Chart extends Entity
 			yield $row;
 		}
 	}
+
+	public function save(bool $selfcheck = true): bool
+	{
+		$country_modified = $this->isModified('country');
+		$exists = $this->exists();
+
+		$ok = parent::save($selfcheck);
+
+		// Change account types
+		if ($ok && $exists && $country_modified && isset(Account::LOCAL_TYPES[$this->country])) {
+			$db = DB::getInstance();
+			$db->begin();
+
+			foreach ($this->accounts()->listAll() as $account) {
+				$account->setLocalRules();
+				$account->save();
+			}
+
+			$db->commit();
+		}
+
+		return $ok;
+	}
+
 }
