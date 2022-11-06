@@ -149,7 +149,7 @@ class Years
 		$t->id_year = $year->id();
 		$t->label = 'Affectation automatique du résultat';
 		$t->notes = 'Le résultat a été affecté automatiquement lors de l\'ouverture de l\'exercice';
-		$t->date = new \DateTime;
+		$t->date = new \KD2\DB\Date;
 
 		if ($t->date > $year->end_date) {
 			$t->date = $year->end_date;

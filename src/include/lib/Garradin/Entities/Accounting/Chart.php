@@ -60,7 +60,7 @@ class Chart extends Entity
 
 		unset($source['code']);
 
-		return parent::importForm($source);
+		return Entity::importForm($source);
 	}
 
 	public function canDelete()
