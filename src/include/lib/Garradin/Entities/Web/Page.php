@@ -50,8 +50,8 @@ class Page extends Entity
 
 	const FORMATS_LIST = [
 		//Render::FORMAT_BLOCKS => 'Blocs (beta)',
-		Render::FORMAT_SKRIV => 'SkrivML',
 		Render::FORMAT_MARKDOWN => 'MarkDown',
+		Render::FORMAT_SKRIV => 'SkrivML',
 		Render::FORMAT_ENCRYPTED => 'Chiffré',
 	];
 
@@ -305,8 +305,8 @@ class Page extends Entity
 		if (!empty($source['encryption']) ) {
 			$this->set('format', Render::FORMAT_ENCRYPTED);
 		}
-		else {
-			$this->set('format', Render::FORMAT_SKRIV);
+		elseif (empty($source['format'])) {
+			$this->set('format', Render::FORMAT_MARKDOWN);
 		}
 
 		return parent::importForm($source);
