@@ -6,6 +6,8 @@ use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Chart;
 use Garradin\Utils;
 use Garradin\DB;
+use Garradin\UserException;
+
 use KD2\DB\EntityManager;
 
 use const Garradin\ROOT;

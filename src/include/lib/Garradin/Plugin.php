@@ -366,7 +366,7 @@ class Plugin
 
 		foreach ($plugins as &$row)
 		{
-			$row->disabled = !self::getPath($row->id, false);
+			$row->disabled = !self::getPath($row->id);
 		}
 
 		return $plugins;
@@ -432,7 +432,7 @@ class Plugin
 
 		foreach ($plugins as $id => $row)
 		{
-			if (!self::getPath($row->id, false))
+			if (!self::getPath($row->id))
 			{
 				// Ne pas lister les plugins dont le code a disparu
 				unset($list[$id]);

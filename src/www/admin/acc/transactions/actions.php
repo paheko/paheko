@@ -2,6 +2,7 @@
 
 namespace Garradin;
 
+use Garradin\Accounting\Projects;
 use Garradin\Accounting\Transactions;
 use Garradin\Accounting\Years;
 
@@ -60,5 +61,5 @@ else
 {
 	$tpl->assign('projects', Projects::listAssocWithEmpty());
 
-	$tpl->display('acc/transactions/actions_project.tpl');
+	$tpl->display('acc/transactions/action_project.tpl');
 }

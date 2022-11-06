@@ -4,6 +4,7 @@ namespace Garradin\Accounting;
 
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Line;
+use Garradin\Entities\Accounting\Project;
 use Garradin\Entities\Accounting\Transaction;
 use KD2\DB\EntityManager;
 use Garradin\DB;
