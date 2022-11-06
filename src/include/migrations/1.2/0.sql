@@ -26,10 +26,12 @@ UPDATE acc_transactions_lines AS a
 	WHERE id_project IS NOT NULL;
 
 -- Remove first 99 and 9 from code (added in 1.1.30)
-UPDATE acc_projects AS a SET code = CASE WHEN SUBSTR(code, 1, 2) = '99' AND LENGTH(code) > 2 THEN SUBSTR(code, 3) ELSE code END
-	WHERE NOT EXISTS (SELECT id FROM acc_projects WHERE code = SUBSTR(a.code, 3));
-UPDATE acc_projects AS a SET code = CASE WHEN SUBSTR(code, 1, 1) = '9' AND LENGTH(code) > 1 THEN SUBSTR(code, 2) ELSE code END
-	WHERE NOT EXISTS (SELECT id FROM acc_projects WHERE code = SUBSTR(a.code, 2));
+UPDATE acc_projects AS a SET code = SUBSTR(code, 3)
+	WHERE  SUBSTR(code, 1, 2) = '99' AND LENGTH(code) > 2
+	AND NOT EXISTS (SELECT id FROM acc_projects WHERE code = SUBSTR(a.code, 3));
+UPDATE acc_projects AS a SET code = SUBSTR(code, 2)
+	WHERE SUBSTR(code, 1, 1) = '9' AND LENGTH(code) > 1
+	AND NOT EXISTS (SELECT id FROM acc_projects WHERE code = SUBSTR(a.code, 2));
 
 UPDATE acc_transactions_lines SET id_project = NULL WHERE id_project NOT IN (SELECT id FROM acc_projects);
 
