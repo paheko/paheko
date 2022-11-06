@@ -4,7 +4,7 @@
 
 <dl>
 	{if $can_edit}
-		{if !$account.type && !$account->exists()}
+		{if $account->canSetPosition()}
 			<dt><label for="f_position_0">Position au bilan ou résultat</label> <b>(obligatoire)</b></dt>
 			<dd class="help">La position permet d'indiquer dans quelle partie du bilan ou du résultat doit figurer le compte.</dd>
 			{input type="radio" label="Ne pas utiliser ce compte au bilan ni au résultat" name="position" value=0 source=$account}

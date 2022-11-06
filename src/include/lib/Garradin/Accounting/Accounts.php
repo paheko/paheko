@@ -86,11 +86,18 @@ class Accounts
 			'level' => [
 				'select' => 'CASE WHEN LENGTH(code) >= 6 THEN 6 ELSE LENGTH(code) END',
 			],
-			'bookmark' => [
-				'label' => 'Favori',
+			'report' => [
+				'label' => ' ',
+				'select' => null,
+			],
+			'position' => [
+				'label' => 'Position',
 			],
 			'user' => [
 				'label' => 'Ajouté',
+			],
+			'bookmark' => [
+				'label' => 'Favori',
 			],
 		];
 
@@ -105,6 +112,10 @@ class Accounts
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('code', false);
 		$list->setPageSize(null);
+		$list->setModifier(function (&$row) {
+			$row->position_report = !$row->position ? '' : ($row->position <= Account::ASSET_OR_LIABILITY ? 'Bilan' : 'Résultat');
+			$row->position_name = Account::POSITIONS_NAMES[$row->position];
+		});
 
 		return $list;
 	}

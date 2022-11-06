@@ -122,7 +122,7 @@ $form->runIf('save', function () use ($transaction, $session, $current_year) {
 
 $tpl->assign(compact('csrf_key', 'transaction', 'amount', 'lines', 'id_project', 'types_details', 'linked_users'));
 
-$tpl->assign('chart_id', $chart->id());
+$tpl->assign('chart', $chart);
 $tpl->assign('projects', Projects::listAssocWithEmpty());
 
 $tpl->display('acc/transactions/new.tpl');

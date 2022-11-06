@@ -24,7 +24,9 @@
 		<li class="title">{$chart.label}</li>
 {/if}
 
+	{if $chart.country}
 		<li{if $current == 'favorites'} class="current"{/if}>{link href="!acc/charts/accounts/?id=%d&%s"|args:$chart.id,$types_arg label="Comptes usuels"}</li>
+	{/if}
 		<li{if $current == 'all'} class="current"{/if}>{link href="!acc/charts/accounts/all.php?id=%d&%s"|args:$chart.id,$types_arg label="Tous les comptes"}</li>
 	</ul>
 </nav>
