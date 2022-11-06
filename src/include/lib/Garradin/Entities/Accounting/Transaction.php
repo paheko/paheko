@@ -340,7 +340,6 @@ class Transaction extends Entity
 			LEFT JOIN acc_projects c ON c.id = l.id_project
 			WHERE l.id_transaction = ?;',
 			$year->chart()->id,
-			$year->chart()->id,
 			$this->id()
 		);
 
