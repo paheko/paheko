@@ -18,7 +18,7 @@ nav.tabs .sub {
     border-bottom-left-radius: .5em;
 }
 
-nav.tabs .sub .title {
+nav.tabs .title {
     margin: 0 1em 0 -1em;
     font-weight: bold;
     padding: .1em .5em;
