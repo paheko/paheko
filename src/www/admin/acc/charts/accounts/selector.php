@@ -26,7 +26,8 @@ $filter_options = [
 ];
 
 if (!count($targets)) {
-	$filter_options['any'] = 'Voir tout le plan comptable';
+	$filter_options['all'] = 'Voir tout le plan comptable';
+	$targets = null;
 }
 
 if (null !== $filter) {
@@ -68,16 +69,12 @@ if (!$chart) {
 
 $accounts = $chart->accounts();
 
-$tpl->assign(compact('chart', 'targets', 'targets_str', 'filter_options', 'filter'));
+$edit_url = sprintf('!acc/charts/accounts/%s?id=%d&types=%s', isset($grouped_accounts) ? '' : 'all.php', $chart->id(), $targets_str);
 
-if (!count($targets)) {
-	$tpl->assign('accounts', $filter != 'all' ? $accounts->listCommonTypes() : $accounts->listAll());
-}
-elseif ($filter == 'all') {
+$tpl->assign(compact('chart', 'targets', 'targets_str', 'filter_options', 'filter', 'edit_url'));
+
+if ($filter == 'all') {
 	$tpl->assign('accounts', $accounts->listAll($targets));
-}
-elseif ($filter == 'any') {
-	$tpl->assign('accounts', $accounts->listAll());
 }
 elseif ($year) {
 	$tpl->assign('grouped_accounts', $year->listCommonAccountsGrouped($targets));

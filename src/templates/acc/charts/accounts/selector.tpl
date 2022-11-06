@@ -4,8 +4,11 @@
 
 {if empty($grouped_accounts) && empty($accounts)}
 	<p class="block alert">Le plan comptable ne comporte aucun compte de ce type.<br />
-		{linkbutton href="!acc/charts/accounts/new.php?id=%s&type=%s"|args:$chart.id,$targets[0] label="Créer un compte" shape="plus"}
 	</p>
+
+	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
+		<p class="edit">{linkbutton label="Modifier les comptes" href=$edit_url shape="edit"}</p>
+	{/if}
 
 {else}
 
@@ -16,8 +19,7 @@
 		</h2>
 
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-			<?php $page = isset($grouped_accounts) ? '' : 'all.php'; ?>
-			<p class="edit">{linkbutton label="Modifier les comptes" href="!acc/charts/accounts/%s?id=%d&types=%s"|args:$page,$chart.id,$targets_str shape="edit"}</aside></p>
+			<p class="edit">{linkbutton label="Modifier les comptes" href=$edit_url shape="edit"}</p>
 		{/if}
 
 		<p>{input type="select" name="filter" options=$filter_options default=$filter}</p>

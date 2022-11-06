@@ -8,7 +8,9 @@
 		{/if}
 		{linkbutton shape="left" label="Retour à la sélection de compte" href="#" onclick="g.reloadParentDialog(); return false;"}
 	</aside>
+
 	<ul>
+		<li class="title">{$chart.label}</li>
 {else}
 	<ul>
 		<li><a href="{$admin_url}acc/years/">Exercices</a></li>

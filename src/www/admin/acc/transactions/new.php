@@ -23,6 +23,8 @@ $accounts = $chart->accounts();
 
 $csrf_key = 'acc_transaction_new';
 $transaction = new Transaction;
+$transaction->id_year = $current_year->id();
+
 $amount = 0;
 $id_project = null;
 $linked_users = null;
@@ -104,7 +106,6 @@ if ($id = qg('account')) {
 
 $form->runIf('save', function () use ($transaction, $session, $current_year) {
 	$transaction->importFromNewForm();
-	$transaction->id_year = $current_year->id();
 	$transaction->id_creator = $session->getUser()->id;
 	$transaction->save();
 
