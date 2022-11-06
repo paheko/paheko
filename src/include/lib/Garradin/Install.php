@@ -110,7 +110,7 @@ class Install
 		}
 
 		// We can't use the real password, as it might not be valid (too short or compromised)
-		$ok = self::install($data->organization ?? 'Association', $data->name, $data->email, md5($data->password));
+		self::install($data->organization ?? 'Association', $data->name, $data->email, md5($data->password));
 
 		// Restore password
 		DB::getInstance()->preparedQuery('UPDATE membres SET passe = ? WHERE id = 1;', [$data->password]);
@@ -131,7 +131,7 @@ class Install
 		}
 	}
 
-	static public function installFromForm(array $source = null)
+	static public function installFromForm(array $source = null): void
 	{
 		if (null === $source) {
 			$source = $_POST;
@@ -148,9 +148,8 @@ class Install
 		self::assert($source['user_password'] === $source['user_password_confirm'], 'La vérification du mot de passe ne correspond pas');
 
 		try {
-			$ok = self::install($source['name'], $source['user_name'], $source['user_email'], $source['user_password']);
+			self::install($source['name'], $source['user_name'], $source['user_email'], $source['user_password']);
 			self::ping();
-			return $ok;
 		}
 		catch (\Exception $e) {
 			@unlink(DB_FILE);
@@ -301,7 +300,7 @@ class Install
 		$recherche->add('Écritures sans projet', null, $recherche::TYPE_JSON, 'compta', $query);
 
 		// Install welcome plugin if available
-		$has_welcome_plugin = Plugin::getPath('welcome', false);
+		$has_welcome_plugin = Plugin::getPath('welcome');
 
 		if ($has_welcome_plugin) {
 			Plugin::install('welcome', true);

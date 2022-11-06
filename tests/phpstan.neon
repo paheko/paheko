@@ -7,8 +7,9 @@ parameters:
       - ../src/include
       - ../src/www
       - ../src/scripts
-    excludes_analyse:
+    excludePaths:
       - ../src/include/lib/KD2
+      - ../src/include/lib/Parsedown.php
     reportUnmatchedIgnoredErrors: false
     ignoreErrors:
         - '#Access to protected property Garradin\\Entities#'
