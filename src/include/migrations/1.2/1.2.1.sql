@@ -17,6 +17,9 @@ UPDATE acc_charts SET country = NULL WHERE country NOT IN ('FR', 'BE', 'CH');
 -- Reset type to zero if not supported
 UPDATE acc_accounts SET type = 0 WHERE id_chart IN (SELECT id FROM acc_charts WHERE country IS NULL);
 
--- Reset other charts in PHP code
+-- Reset other charts is done in PHP code
+
+-- Fix some search
+UPDATE recherches SET contenu = REPLACE(contenu, 'a2.code', 'p.code') WHERE contenu LIKE '%a2.code%';
 
 DROP TABLE acc_charts_old;
