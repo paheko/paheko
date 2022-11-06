@@ -45,6 +45,8 @@ class Entity extends AbstractEntity
 		elseif (null !== $value) {
 			throw new ValidationException('Format de date invalide (merci d\'utiliser le format JJ/MM/AAAA) : ' . $value);
 		}
+
+		return null;
 	}
 
 	protected function filterUserValue(string $type, $value, string $key)
