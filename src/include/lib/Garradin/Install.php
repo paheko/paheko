@@ -308,7 +308,7 @@ class Install
 				'operator' => 'AND',
 				'conditions' => [
 					[
-						'column'   => 'a2.code',
+						'column'   => 'p.code',
 						'operator' => 'IS NULL',
 						'values'   => [],
 					],
