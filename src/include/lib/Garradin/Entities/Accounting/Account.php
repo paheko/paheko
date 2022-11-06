@@ -248,10 +248,7 @@ class Account extends Entity
 		],
 		'project_code' => [
 			'select' => 'IFNULL(p.code, SUBSTR(p.label, 1, 10) || \'…\')',
-		],
-		'projects' => [
 			'label' => 'Projet',
-			'select' => null,
 		],
 		'status' => [
 			'select' => 't.status',
