@@ -21,6 +21,7 @@ use Garradin\Entities\Accounting\Account;
 	<table class="list">
 		<thead>
 			<tr>
+				<td></td>
 				<td class="num">Numéro</td>
 				<th>Compte</th>
 				<td class="money">Solde</td>
@@ -34,7 +35,8 @@ use Garradin\Entities\Accounting\Account;
 				<td colspan="5"><h2 class="ruler">{$group.label}</h2></td>
 			</tr>
 			{foreach from=$group.accounts item="account"}
-				<tr>
+				<tr class="account">
+					<td class="bookmark">{if $account.bookmark}{icon shape="star" title="Compte favori"}{/if}</td>
 					<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$current_year.id}">{$account.code}</a></td>
 					<th><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$current_year.id}">{$account.label}</a></th>
 					<td class="money">
@@ -84,7 +86,7 @@ use Garradin\Entities\Accounting\Account;
 {/if}
 
 <p class="help">
-	Note : n'apparaissent ici que les comptes <strong>favoris</strong> qui ont été utilisés dans cet exercice (au moins une écriture).<br />
+	Note : n'apparaissent ici que les comptes qui ont été utilisés dans cet exercice (au moins une écriture) de types banque, caisse, tiers, dépenses ou recettes. Les autres comptes n'apparaissent que s'ils ont été utilisés et sont marqués comme favoris.<br />
 	Pour voir le solde de tous les comptes, se référer à la <a href="all.php">liste de tous comptes de l'exercice</a>.<br />
 	Pour voir la liste complète des comptes, même ceux qui n'ont pas été utilisés, se référer au <a href="{$admin_url}acc/charts/accounts/?id={$current_year.id_chart}">plan comptable</a>.
 </p>

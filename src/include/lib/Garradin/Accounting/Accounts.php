@@ -145,12 +145,17 @@ class Accounts
 	public function listCommonGrouped(array $types = null): array
 	{
 		if (null === $types) {
-			$types = Account::COMMON_TYPES;
+			// If we want all types, then we will get used or bookmarked accounts in common types
+			// and only bookmarked accounts for other types, grouped in "Others"
+			$target = Account::COMMON_TYPES;
+		}
+		else {
+			$target = $types;
 		}
 
 		$out = [];
 
-		foreach ($types as $type) {
+		foreach ($target as $type) {
 			$out[$type] = (object) [
 				'label'    => Account::TYPES_NAMES[$type],
 				'type'     => $type,
@@ -158,19 +163,37 @@ class Accounts
 			];
 		}
 
+		if (null === $types) {
+			$out[0] = (object) [
+				'label'    => 'Autres',
+				'type'     => 0,
+				'accounts' => [],
+			];
+		}
+
+		$db = $this->em->DB();
+
 		$sql = sprintf('SELECT a.* FROM @TABLE a
 			LEFT JOIN acc_transactions_lines b ON b.id_account = a.id
-			WHERE a.id_chart = %d AND a.%s AND (a.bookmark = 1 OR b.id IS NOT NULL)
+			WHERE a.id_chart = %d AND (a.%s AND (a.bookmark = 1 OR b.id IS NOT NULL)) %s
 			GROUP BY a.id
 			ORDER BY type, code COLLATE NOCASE;',
 			$this->chart_id,
-			$this->em->DB()->where('type', $types)
+			$db->where('type', $target),
+			(null === $types) ? 'OR (a.bookmark = 1)' : ''
 		);
 
 		$query = $this->em->iterate($sql);
 
 		foreach ($query as $row) {
-			$out[$row->type]->accounts[] = $row;
+			$t = in_array($row->type, $target) ? $row->type : 0;
+			$out[$t]->accounts[] = $row;
+		}
+
+		foreach ($out as $key => $v) {
+			if (!count($v->accounts)) {
+				unset($out[$key]);
+			}
 		}
 
 		return $out;
