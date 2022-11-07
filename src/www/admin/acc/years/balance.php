@@ -24,6 +24,10 @@ if ($year->closed) {
 $csrf_key = 'acc_years_balance_' . $year->id();
 
 $form->runIf('save', function () use ($year) {
+	$db = DB::getInstance();
+	// Fail everything if appropriation failed
+	$db->begin();
+
 	$transaction = new Transaction;
 	$transaction->id_creator = Session::getInstance()->getUser()->id;
 	$transaction->importFromBalanceForm($year);
@@ -37,7 +41,11 @@ $form->runIf('save', function () use ($year) {
 			$t2->id_creator = $transaction->id_creator;
 			$t2->save();
 		}
+	}
 
+	$db->commit();
+
+	if (f('appropriation')) {
 		Utils::redirect('!acc/reports/journal.php?year=' . $year->id());
 	}
 
