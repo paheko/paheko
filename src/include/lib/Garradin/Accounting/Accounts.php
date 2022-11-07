@@ -175,7 +175,7 @@ class Accounts
 
 		$sql = sprintf('SELECT a.* FROM @TABLE a
 			LEFT JOIN acc_transactions_lines b ON b.id_account = a.id
-			WHERE a.id_chart = %d AND (a.%s AND (a.bookmark = 1 OR b.id IS NOT NULL)) %s
+			WHERE a.id_chart = %d AND ((a.%s AND (a.bookmark = 1 OR b.id IS NOT NULL)) %s)
 			GROUP BY a.id
 			ORDER BY type, code COLLATE NOCASE;',
 			$this->chart_id,
