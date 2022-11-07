@@ -40,6 +40,15 @@ class Charts
 		return $chart;
 	}
 
+	static public function resetRules(array $country_list): void
+	{
+		foreach (self::list() as $c) {
+			if (in_array($c->country, $country_list)) {
+				$c->resetAccountsRules();
+			}
+		}
+	}
+
 	static public function install(string $chart_code): Chart
 	{
 		if (!array_key_exists($chart_code, self::BUNDLED_CHARTS)) {
@@ -108,7 +117,7 @@ class Charts
 		$out = [];
 
 		foreach ($list as $row) {
-			$country = Utils::getCountryName($row->country);
+			$country = $row->country ? Utils::getCountryName($row->country) : 'Aucun';
 
 			if (!array_key_exists($country, $out)) {
 				$out[$country] = [];

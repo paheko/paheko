@@ -23,7 +23,7 @@ if ($session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)) {
 	}, $csrf_key, '!acc/charts/');
 
 	$form->runIf(f('type') == 'import', function () {
-		Charts::import('file', f('label'), f('country'));
+		Charts::import('file', f('label'), f('country_import'));
 	}, $csrf_key, '!acc/charts/');
 
 	$tpl->assign(compact('csrf_key'));
@@ -32,8 +32,8 @@ if ($session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)) {
 	$tpl->assign('country_list', Utils::getCountryList());
 
 	$tpl->assign('from', (int)qg('from'));
-	$tpl->assign('charts_groupped', Charts::listByCountry());
-	$tpl->assign('country_list', Utils::getCountryList());
+	$tpl->assign('charts_grouped', Charts::listByCountry());
+	$tpl->assign('country_list', Chart::COUNTRY_LIST + ['' => '— Autre']);
 
 	$tpl->assign('install_list', Charts::listInstallable());
 }

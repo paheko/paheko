@@ -29,7 +29,10 @@ if (q) {
 		e.setAttribute('data-search-label', normalizeString(l));
 	});
 
-	q.addEventListener('keyup', filterTableList);
+	q.addEventListener('keyup', (e) => {
+		filterTableList();
+		return true;
+	});
 	document.querySelector('.quick-search button[type=reset]').onclick = () => {
 		q.value = '';
 		q.focus();

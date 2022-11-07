@@ -27,12 +27,14 @@
 		<tbody>
 			{foreach from=$list item="item"}
 				<tr{if $item.archived} class="disabled"{/if}>
-					<td>{$item.country|get_country_name}</td>
+					<td>{if $item.country}{$item.country|get_country_name}{else}-Autre-{/if}</td>
 					<th><a href="{$admin_url}acc/charts/accounts/?id={$item.id}">{$item.label}</a></th>
 					<td>{if $item.code}Officiel{else}Personnel{/if}</td>
 					<td>{if $item.archived}<em>Archivé</em>{/if}</td>
 					<td class="actions">
-						{linkbutton shape="star" label="Comptes usuels" href="!acc/charts/accounts/?id=%d"|args:$item.id}
+						{if $item.country}
+							{linkbutton shape="star" label="Comptes usuels" href="!acc/charts/accounts/?id=%d"|args:$item.id}
+						{/if}
 						{linkbutton shape="menu" label="Tous les comptes" href="!acc/charts/accounts/all.php?id=%d"|args:$item.id}
 						{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 							{linkbutton shape="edit" label="Modifier" href="!acc/charts/edit.php?id=%d"|args:$item.id target="_dialog"}
@@ -71,10 +73,9 @@
 		<fieldset class="type-copy hidden">
 			<legend>Créer un nouveau plan comptable à partir d'un existant</legend>
 			<dl>
-				{input type="select_groups" name="copy" options=$charts_groupped label="Recopier depuis" required=1 default=$from}
+				{input type="select_groups" name="copy" options=$charts_grouped label="Recopier depuis" required=1 default=$from}
 				{input type="text" name="label" label="Libellé" required=1}
-				{input type="select" name="country" label="Pays" required=1 options=$country_list default=$config.pays}
-			</dl>
+				{include file="./_country_input.tpl"}
 		</fieldset>
 
 		<fieldset class="type-install hidden">
@@ -88,7 +89,7 @@
 			<legend>Importer un plan comptable personnel</legend>
 			<dl>
 				{input type="text" name="label" label="Libellé" required=1}
-				{input type="select" name="country" label="Pays" required=1 options=$country_list default=$config.pays}
+				{include file="./_country_input.tpl" name="import_country"}
 				{input type="file" name="file" label="Fichier à importer" accept="csv" required=1}
 				<dd class="help"> {* FIXME utiliser _csv_help.tpl ici ! *}
 					Règles à suivre pour créer le fichier&nbsp;:
@@ -108,11 +109,13 @@
 	<script type="text/javascript">
 	{literal}
 	function toggleFormOption() {
-		var v = $('input[name="type"]:checked')[0].value;
+		var v = $('input[name="type"]:checked');
 
-		if (!v) {
+		if (!v.length) {
 			return;
 		}
+
+		v = v[0].value;
 
 		g.toggle('.type-import, .type-copy, .type-install', false);
 		g.toggle('.type-' + v, true);
