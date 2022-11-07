@@ -1,6 +1,7 @@
 <?php
 namespace Garradin;
 
+use Garradin\Entities\Accounting\Chart;
 use Garradin\Accounting\Charts;
 
 require_once __DIR__ . '/../_inc.php';
@@ -22,6 +23,5 @@ $form->runIf('save', function() use ($chart) {
 }, $csrf_key, '!acc/charts/');
 
 $tpl->assign(compact('chart'));
-$tpl->assign('country_list', Utils::getCountryList());
 
 $tpl->display('acc/charts/edit.tpl');

@@ -67,6 +67,11 @@ if (!$chart) {
 	throw new UserException('Aucun exercice ouvert disponible');
 }
 
+// Charts with no country don't allow to use types
+if (!$chart->country) {
+	$targets = null;
+}
+
 $accounts = $chart->accounts();
 
 $edit_url = sprintf('!acc/charts/accounts/%s?id=%d&types=%s', isset($grouped_accounts) ? '' : 'all.php', $chart->id(), $targets_str);

@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS acc_charts
 -- Plans comptables : il peut y en avoir plusieurs
 (
     id INTEGER NOT NULL PRIMARY KEY,
-    country TEXT NOT NULL,
+    country TEXT NULL,
     code TEXT NULL, -- NULL = plan comptable créé par l'utilisateur
     label TEXT NOT NULL,
     archived INTEGER NOT NULL DEFAULT 0 -- 1 = archivé, non-modifiable
@@ -159,7 +159,7 @@ CREATE INDEX IF NOT EXISTS acc_accounts_bookmarks ON acc_accounts (id_chart, boo
 -- Balance des comptes par exercice
 CREATE VIEW IF NOT EXISTS acc_accounts_balances
 AS
-    SELECT id_year, id, label, code, type, debit, credit,
+    SELECT id_year, id, label, code, type, debit, credit, bookmark,
         CASE -- 3 = dynamic asset or liability depending on balance
             WHEN position = 3 AND (debit - credit) > 0 THEN 1 -- 1 = Asset (actif) comptes fournisseurs, tiers créditeurs
             WHEN position = 3 THEN 2 -- 2 = Liability (passif), comptes clients, tiers débiteurs
@@ -175,7 +175,7 @@ AS
         END AS balance,
         CASE WHEN debit - credit > 0 THEN 1 ELSE 0 END AS is_debt
     FROM (
-        SELECT t.id_year, a.id, a.label, a.code, a.position, a.type,
+        SELECT t.id_year, a.id, a.label, a.code, a.position, a.type, a.bookmark,
             SUM(l.credit) AS credit,
             SUM(l.debit) AS debit
         FROM acc_accounts a

@@ -38,6 +38,11 @@ class Reports
 			$where[] = sprintf($accounts_alias . 'type IN (%s)', implode(',', $criterias['type']));
 		}
 
+		if (!empty($criterias['type_or_bookmark'])) {
+			$criterias['type'] = array_map('intval', (array)$criterias['type_or_bookmark']);
+			$where[] = sprintf('(%stype IN (%s) OR %1$sbookmark = 1)', $accounts_alias, implode(',', $criterias['type']));
+		}
+
 		if (!empty($criterias['exclude_type'])) {
 			$criterias['exclude_type'] = array_map('intval', (array)$criterias['exclude_type']);
 			$where[] = sprintf($accounts_alias . 'type NOT IN (%s)', implode(',', $criterias['exclude_type']));
@@ -444,35 +449,35 @@ class Reports
 
 	/**
 	 * Return list of favorite accounts (accounts with a type), grouped by type, with their current sum
-	 * @return \Generator list of accounts grouped by type
+	 * @return array list of accounts grouped by type
 	 */
-	static public function getClosingSumsFavoriteAccounts(array $criterias): \Generator
+	static public function getClosingSumsFavoriteAccounts(array $criterias): array
 	{
 		$types = Account::COMMON_TYPES;
-		$accounts = self::getAccountsBalances($criterias + ['type' => $types], 'type, code COLLATE NOCASE', false);
+		$accounts = self::getAccountsBalances($criterias + ['type_or_bookmark' => $types], 'type, code COLLATE NOCASE', false);
 
-		$group = null;
+		$out = [];
+
+		foreach ($types as $type) {
+			$out[$type] = (object) [
+				'label'    => Account::TYPES_NAMES[$type],
+				'type'     => $type,
+				'accounts' => [],
+			];
+		}
+
+		$out[0] = (object) [
+			'label'    => 'Autres',
+			'type'     => 0,
+			'accounts' => [],
+		];
 
 		foreach ($accounts as $row) {
-			if (null !== $group && $row->type !== $group->type) {
-				yield $group;
-				$group = null;
-			}
-
-			if (null === $group) {
-				$group = (object) [
-					'label'    => Account::TYPES_NAMES[$row->type],
-					'type'     => $row->type,
-					'accounts' => []
-				];
-			}
-
-			$group->accounts[] = $row;
+			$t = in_array($row->type, $types, true) ? $row->type : 0;
+			$out[$t]->accounts[] = $row;
 		}
 
-		if (null !== $group) {
-			yield $group;
-		}
+		return $out;
 	}
 
 	/**

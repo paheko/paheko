@@ -23,14 +23,19 @@
 			<td class="help">{$account.description|escape|nl2br}</td>
 			{/if}
 			<td>
+				{$account.position_report}
+			<td>
+				{$account.position_name}
+			</td>
+			<td>
+				{if $account.user}<em>Ajouté</em>{/if}
+			</td>
+			<td>
 				<?php
 				$shape = $account->bookmark ? 'check' : 'uncheck';
 				$title = $account->bookmark ? 'Ôter des favoris' : 'Marquer comme favori';
 				?>
 				{button shape=$shape name="bookmark[%d]"|args:$account.id value=$account.bookmark label="Favori" title=$title type="submit"}
-			</td>
-			<td>
-				{if $account.user}<em>Ajouté</em>{/if}
 			</td>
 			<td class="actions">
 				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$chart.archived}

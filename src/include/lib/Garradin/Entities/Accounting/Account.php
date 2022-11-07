@@ -268,6 +268,8 @@ class Account extends Entity
 	protected $_position = [];
 	protected ?Chart $_chart = null;
 
+	static protected ?array $_charts;
+
 	public function selfCheck(): void
 	{
 		$db = DB::getInstance();
@@ -275,8 +277,12 @@ class Account extends Entity
 		$this->assert(trim($this->code) !== '', 'Le numéro de compte ne peut rester vide.');
 		$this->assert(trim($this->label) !== '', 'L\'intitulé de compte ne peut rester vide.');
 
-		$this->assert(strlen($this->code) <= 20, 'Le numéro de compte ne peut faire plus de 20 caractères.');
-		$this->assert(preg_match('/^[a-z0-9_]+$/i', $this->code), 'Le numéro de compte ne peut comporter que des lettres et des chiffres.');
+		// Only enforce code limits if the account is new, or if the code is changed
+		if (!$this->exists() || $this->isModified('code')) {
+			$this->assert(strlen($this->code) <= 20, 'Le numéro de compte ne peut faire plus de 20 caractères.');
+			$this->assert(preg_match('/^[a-z0-9_]+$/i', $this->code), 'Le numéro de compte ne peut comporter que des lettres et des chiffres.');
+		}
+
 		$this->assert(strlen($this->label) <= 200, 'L\'intitulé de compte ne peut faire plus de 200 caractères.');
 		$this->assert(!isset($this->description) || strlen($this->description) <= 2000, 'La description de compte ne peut faire plus de 2000 caractères.');
 
@@ -296,24 +302,80 @@ class Account extends Entity
 		$this->assert(array_key_exists($this->type, self::TYPES_NAMES), 'Type invalide: ' . $this->type);
 		$this->assert(array_key_exists($this->position, self::POSITIONS_NAMES), 'Position invalide');
 
-
 		parent::selfCheck();
 	}
 
 	protected function getCountry(): ?string
 	{
-		static $charts_countries = null;
-
-		if (null === $charts_countries) {
-			$charts_countries = DB::getInstance()->getAssoc('SELECT id, country FROM acc_charts;');
+		if (!isset(self::$_charts)) {
+			self::$_charts = DB::getInstance()->getGrouped('SELECT id, country, code FROM acc_charts;');
 		}
 
-		return $charts_countries[$this->id_chart] ?? null;
+		return self::$_charts[$this->id_chart]->country ?? null;
 	}
 
-	protected function matchType(int $type): bool
+	protected function isChartOfficial(): bool
 	{
 		$country = $this->getCountry();
+		return !empty(self::$_charts[$this->id_chart]->code);
+	}
+
+	/**
+	 * This sets the account position according to local rules
+	 * if the chart is linked to a country, but only
+	 * if the account is user-created, or if the chart is non-official
+	 */
+	protected function getLocalPosition(string $country = null): ?int
+	{
+		if (!func_num_args()) {
+			$country = $this->getCountry();
+		}
+
+		$is_official = $this->isChartOfficial();
+
+		if (!$country) {
+			return null;
+		}
+
+		// Do not change position of official chart accounts
+		if (!$this->user && $is_official) {
+			return null;
+		}
+
+		foreach (self::LOCAL_POSITIONS[$country] as $pattern => $position) {
+			if (preg_match('/' . $pattern . '/', $this->code)) {
+				return $position;
+			}
+		}
+
+		return null;
+	}
+
+	protected function getLocalType(string $country = null): int
+	{
+		if (!func_num_args()) {
+			$country = $this->getCountry();
+		}
+
+		if (!$country) {
+			return self::TYPE_NONE;
+		}
+
+		foreach (self::LOCAL_TYPES[$country] as $type => $number) {
+			if ($this->matchType($type, $country)) {
+				return $type;
+			}
+		}
+
+		return self::TYPE_NONE;
+	}
+
+	protected function matchType(int $type, string $country = null): bool
+	{
+		if (func_num_args() < 2) {
+			$country = $this->getCountry();
+		}
+
 		$pattern = self::LOCAL_TYPES[$country][$type] ?? null;
 
 		if (!$pattern) {
@@ -330,30 +392,24 @@ class Account extends Entity
 		return (bool) preg_match($pattern, $this->code);
 	}
 
-	public function setLocalRules(): void
+	public function setLocalRules(string $country = null): void
 	{
-		$country = $this->getCountry();
+		if (!func_num_args()) {
+			$country = $this->getCountry();
+		}
 
-		if (array_key_exists($country, self::LOCAL_TYPES)) {
-			foreach (self::LOCAL_TYPES[$country] as $type => $number) {
-				if ($this->matchType($type)) {
-					$this->set('type', $type);
-					break;
-				}
-			}
+		if (!$country) {
+			$this->set('type', 0);
+			return;
+		}
 
-			foreach (self::LOCAL_POSITIONS[$country] as $pattern => $position) {
-				if (preg_match('/' . $pattern . '/', $this->code)) {
-					// If the allowed position is asset OR liability, we allow either one of those 3 choices
-					if ($position == self::ASSET_OR_LIABILITY
-						&& in_array($this->position, [self::ASSET_OR_LIABILITY, self::ASSET, self::LIABILITY])) {
-						break;
-					}
+		$this->set('type', $this->getLocalType($country));
 
-					// Or else we force the position
-					$this->set('position', $position);
-					break;
-				}
+		if (null !== ($p = $this->getLocalPosition($country))) {
+			// If the allowed local position is asset OR liability, we allow either one of those 3 choices
+			if ($p != self::ASSET_OR_LIABILITY
+				|| !in_array($this->position, [self::ASSET_OR_LIABILITY, self::ASSET, self::LIABILITY])) {
+				$this->set('position', $p);
 			}
 		}
 
@@ -374,7 +430,7 @@ class Account extends Entity
 			return;
 		}
 
-		$this->assert($this->matchType($this->type), sprintf('Le numéro des comptes de type "%s" doit commencer par "%s" (%s).', self::TYPES_NAMES[$this->type], self::LOCAL_TYPES[$country][$this->type], $this->code));
+		$this->assert($this->matchType($this->type), sprintf('Compte "%s - %s" : le numéro des comptes de type "%s" doit commencer par "%s" (%s).', $this->code, $this->label, self::TYPES_NAMES[$this->type], self::LOCAL_TYPES[$country][$this->type], $this->code));
 	}
 
 	public function getNewNumberAvailable(?string $base = null): ?string
@@ -695,13 +751,56 @@ class Account extends Entity
 		return true;
 	}
 
-	public function canSetAssetOrLiabilityPosition(): bool
+	/**
+	 * We can set account position if:
+	 * - account is not in a supported chart country
+	 * - account is not part of an official chart
+	 * - account is not affected by local position rules
+	 */
+	public function canSetPosition(): bool
 	{
-		if ($this->position == self::REVENUE || $this->position == self::EXPENSE) {
+		if (!$this->getCountry()) {
+			return true;
+		}
+
+		if ($this->isChartOfficial() && !$this->user) {
 			return false;
 		}
 
-		if (!$this->type || $this->type == self::TYPE_THIRD_PARTY) {
+		if ($this->type || $this->getLocalType()) {
+			return false;
+		}
+
+		if (null !== $this->getLocalPosition()) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * We can set account asset or liability if:
+	 * - local position rules allow for asset or liability
+	 */
+	public function canSetAssetOrLiabilityPosition(): bool
+	{
+		if (!$this->getCountry()) {
+			return true;
+		}
+
+		if ($this->isChartOfficial() && !$this->user) {
+			return false;
+		}
+
+		$type = $this->type ?: $this->getLocalType();
+
+		if ($type == self::TYPE_THIRD_PARTY) {
+			return true;
+		}
+
+		$position = $this->getLocalPosition();
+
+		if ($position == self::ASSET_OR_LIABILITY) {
 			return true;
 		}
 

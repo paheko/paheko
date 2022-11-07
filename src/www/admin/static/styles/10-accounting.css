@@ -102,6 +102,7 @@ td.money, th.money {
 }
 
 tr.account td.num { font-family: monospace; text-align: left; width: 8%;}
+tr.account td.num a { font-family: "Trebuchet MS", Arial, Helvetica, sans-serif; }
 table tr.account th { font-weight: normal; }
 tr.account-level-1 th { font-size: 1.6em; }
 tr.account-level-2 th { padding-left: 1em; font-size: 1.3em; }

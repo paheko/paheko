@@ -26,6 +26,8 @@ $accounts = $chart->accounts();
 
 $account = new Account;
 $account->bookmark = true;
+$account->user = true;
+$account->code = '';
 $account->id_chart = $chart->id();
 
 $type = f('type') ?? qg('type');
@@ -36,6 +38,9 @@ if ($type !== null) {
 }
 elseif (isset($types) && is_array($types) && count($types) == 1) {
 	$account->type = (int)current($types);
+}
+elseif (!$chart->country) {
+	$account->type = $account::TYPE_NONE;
 }
 
 $csrf_key = 'account_new';
