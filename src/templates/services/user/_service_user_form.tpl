@@ -91,7 +91,7 @@ assert(isset($grouped_services) && is_array($grouped_services));
 			<dt><label for="f_fee">Tarif</label> <b>(obligatoire)</b></dt>
 			{foreach from=$service.fees key="service_id" item="fee"}
 			<dd class="radio-btn">
-				{input type="radio" name="id_fee" value=$fee.id data-user-amount=$fee.user_amount data-account=$fee.id_account data-year=$fee.id_year label=null source=$service_user }
+				{input type="radio" name="id_fee" value=$fee.id data-user-amount=$fee.user_amount data-account=$fee.id_account data-year=$fee.id_year label=null data-project=$fee.id_project source=$service_user }
 				<label for="f_id_fee_{$fee.id}">
 					<div>
 						<h3>{$fee.label}</h3>
@@ -148,7 +148,7 @@ assert(isset($grouped_services) && is_array($grouped_services));
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc."}
 			{input type="textarea" name="notes" label="Remarques"}
 			{if count($projects) > 1}
-			{input type="select" options=$projects name="id_project" label="Projet analytique" default=$fee.id_project required=false}
+			{input type="select" options=$projects name="id_project" label="Projet analytique" required=false}
 			{/if}
 		</dl>
 	</fieldset>

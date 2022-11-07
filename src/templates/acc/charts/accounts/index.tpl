@@ -20,7 +20,7 @@
 		<tr>
 			<td colspan="4"><h2 class="ruler">{$group.label}</h2></td>
 			<td class="actions">
-				{if !$chart.archived}
+				{if !$chart.archived && $group.type}
 					{linkbutton label="Ajouter un compte" shape="plus" href="!acc/charts/accounts/new.php?id=%d&type=%d&%s"|args:$chart.id,$group.type,$types_arg  target=$dialog_target}
 				{/if}
 			</td>

@@ -46,6 +46,10 @@ function selectFee(elm) {
 	if (amount && create) {
 		$('#f_amount').value = g.formatMoney(amount);
 	}
+
+	if (elm.dataset.project) {
+		$('#f_id_project').value = elm.dataset.project;
+	}
 }
 
 function initForm() {

@@ -345,7 +345,6 @@ class Transaction extends Entity
 			LEFT JOIN acc_projects c ON c.id = l.id_project
 			WHERE l.id_transaction = ?;',
 			$year->chart()->id,
-			$year->chart()->id,
 			$this->id()
 		);
 
@@ -537,6 +536,8 @@ class Transaction extends Entity
 		if ($db->test(Year::TABLE, 'id = ? AND closed = 1', $this->id_year)) {
 			throw new ValidationException('Il n\'est pas possible de supprimer une écriture qui fait partie d\'un exercice clôturé');
 		}
+
+		// FIXME when lettering is properly implemented: mark parent transaction non-deposited when deleting a deposit transaction
 
 		Files::delete($this->getAttachementsDirectory());
 

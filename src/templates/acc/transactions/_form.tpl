@@ -43,11 +43,11 @@ $is_quick = count(array_intersect_key($_GET, array_flip(['a', 'l', 'd', 't', 'ac
 			<legend>{$type.label}</legend>
 			{if $type.id == $transaction::TYPE_ADVANCED}
 				{* Saisie avancée *}
-				{include file="acc/transactions/_lines_form.tpl" chart_id=$current_year.id_chart}
+				{include file="acc/transactions/_lines_form.tpl" chart_id=$chart.id}
 			{else}
 				<dl>
 				{foreach from=$type.accounts key="key" item="account"}
-					{input type="list" target="!acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$account.targets_string,$chart_id name=$account.selector_name label=$account.label required=1 default=$account.selector_value}
+					{input type="list" target="!acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$account.targets_string,$chart.id name=$account.selector_name label=$account.label required=1 default=$account.selector_value}
 				{/foreach}
 				</dl>
 			{/if}

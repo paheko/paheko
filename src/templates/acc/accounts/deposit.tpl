@@ -2,9 +2,17 @@
 
 {form_errors}
 
+{if $missing_balance > 0}
+<p class="alert block">
+	Il existe une différence de {$missing_balance|raw|money_currency} entre la liste des écritures à déposer
+	et le solde du compte.<br />
+	Cette situation est généralement dûe à des écritures de dépôt qui ont été supprimées.<br />
+	{linkbutton shape="plus" label="Faire un virement pour régulariser" href="!acc/transactions/new.php?a0=%d&l=Régularisation%%20dépôt&account=%d"|args:$missing_balance,$account.id}
+</p>
+{/if}
+
 {if !$journal_count}
-	<p class="alert block">Il n'y a aucune écriture qui nécessite un dépôt.<br />
-		{linkbutton href="!acc/transactions/new.php" shape="plus" label="Saisir un virement"}
+	<p class="alert block">Il n'y a aucune écriture qui nécessiterait un dépôt.
 	</p>
 {else}
 	<p class="help">

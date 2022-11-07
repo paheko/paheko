@@ -53,7 +53,7 @@ class Graph
 	];
 
 	const PIE_TYPES = [
-		'revenue' => ['type' => Account::REVENUE, 'exclude_type' => Account::TYPE_VOLUNTEERING_REVENUE],
+		'revenue' => ['position' => Account::REVENUE, 'exclude_type' => Account::TYPE_VOLUNTEERING_REVENUE],
 		'expense' => ['position' => Account::EXPENSE, 'exclude_type' => Account::TYPE_VOLUNTEERING_EXPENSE],
 		'assets' => ['type' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]],
 	];
@@ -239,7 +239,7 @@ class Graph
 
 		$colors = [];
 
-		for ($i = 0; $i < 6; $i++) {
+		for ($i = 0; $i < 5; $i++) {
 			if ($i % 2 == 0) {
 				$s = $v = 50;
 				$h =& $h1;

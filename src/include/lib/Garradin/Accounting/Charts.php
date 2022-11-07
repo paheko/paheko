@@ -21,6 +21,7 @@ class Charts
 		'fr_cse_2015' => 'Plan comptable des CSE (Comité Social et Économique) (Règlement ANC n°2015-01)',
 		'fr_pcc_2020' => 'Plan comptable des copropriétés (2005 révisé en 2020)',
 		'be_pcmn_2019' => 'Plan comptable minimum normalisé des associations et fondations 2019',
+		'ch_asso' => 'Plan comptable associatif',
 	];
 
 	static public function updateInstalled(string $chart_code): ?Chart
@@ -37,6 +38,15 @@ class Charts
 
 		$chart->importCSV($file, true);
 		return $chart;
+	}
+
+	static public function resetRules(array $country_list): void
+	{
+		foreach (self::list() as $c) {
+			if (in_array($c->country, $country_list)) {
+				$c->resetAccountsRules();
+			}
+		}
 	}
 
 	static public function install(string $chart_code): Chart
@@ -108,7 +118,7 @@ class Charts
 		$out = [];
 
 		foreach ($list as $row) {
-			$country = Utils::getCountryName($row->country);
+			$country = $row->country ? Utils::getCountryName($row->country) : 'Aucun';
 
 			if (!array_key_exists($country, $out)) {
 				$out[$country] = [];

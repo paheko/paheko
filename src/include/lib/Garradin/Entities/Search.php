@@ -200,7 +200,7 @@ class Search extends Entity
 		}
 
 		if ($this->target == self::TARGET_ACCOUNTING) {
-			return ['acc_transactions' => null, 'acc_transactions_lines' => null, 'acc_accounts' => null, 'acc_charts' => null, 'acc_years' => null, 'acc_transactions_users' => null];
+			return ['acc_transactions' => null, 'acc_transactions_lines' => null, 'acc_accounts' => null, 'acc_charts' => null, 'acc_years' => null, 'acc_transactions_users' => null, 'acc_projects' => null];
 		}
 		else {
 			return ['users' => null, 'users_search' => null, 'users_categories' => null];

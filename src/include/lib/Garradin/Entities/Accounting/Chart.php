@@ -21,9 +21,15 @@ class Chart extends Entity
 
 	protected ?int $id;
 	protected string $label;
-	protected string $country;
+	protected ?string $country = null;
 	protected ?string $code;
 	protected bool $archived = false;
+
+	const COUNTRY_LIST = [
+		'FR' => 'France',
+		'BE' => 'Belgique',
+		'CH' => 'Suisse',
+	];
 
 	const REQUIRED_COLUMNS = ['code', 'label', 'description', 'position', 'bookmark'];
 
@@ -40,8 +46,7 @@ class Chart extends Entity
 	{
 		$this->assert(trim($this->label) !== '', 'Le libellé ne peut rester vide.');
 		$this->assert(strlen($this->label) <= 200, 'Le libellé ne peut faire plus de 200 caractères.');
-		$this->assert(trim($this->country) !== '', 'Le pays ne peut rester vide.');
-		$this->assert(Utils::getCountryName($this->country), 'Le code pays doit être un code ISO valide');
+		$this->assert(null === $this->country || array_key_exists($this->country, self::COUNTRY_LIST), 'Pays inconnu');
 		parent::selfCheck();
 	}
 
@@ -57,7 +62,7 @@ class Chart extends Entity
 		}
 
 		// Don't allow to change country
-		if ($this->code) {
+		if (isset($this->code)) {
 			unset($source['country']);
 		}
 
@@ -141,4 +146,39 @@ class Chart extends Entity
 			yield $row;
 		}
 	}
+
+	public function resetAccountsRules(): void
+	{
+		$db = DB::getInstance();
+		$db->begin();
+
+		try {
+			foreach ($this->accounts()->listAll() as $account) {
+				$account->setLocalRules($this->country);
+				$account->save();
+			}
+		}
+		catch (UserException $e) {
+			$db->rollback();
+			throw $e;
+		}
+
+		$db->commit();
+	}
+
+	public function save(bool $selfcheck = true): bool
+	{
+		$country_modified = $this->isModified('country');
+		$exists = $this->exists();
+
+		$ok = parent::save($selfcheck);
+
+		// Change account types
+		if ($ok && $exists && $country_modified) {
+			$this->resetAccountsRules();
+		}
+
+		return $ok;
+	}
+
 }

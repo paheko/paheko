@@ -23,6 +23,7 @@ $accounts = $chart->accounts();
 
 $csrf_key = 'acc_transaction_new';
 $transaction = new Transaction;
+
 $amount = 0;
 $id_project = null;
 $linked_users = null;
@@ -32,6 +33,10 @@ $types_details = $transaction->getTypesDetails();
 // Quick-fill transaction from query parameters
 if (qg('a')) {
 	$amount = Utils::moneyToInteger(qg('a'));
+}
+
+if (qg('a0')) {
+	$amount = (int)qg('a0');
 }
 
 if (qg('l')) {
@@ -67,6 +72,8 @@ if (qg('copy')) {
 
 	$tpl->assign('duplicate_from', $old->id());
 }
+
+$transaction->id_year = $current_year->id();
 
 // Set last used date
 if (empty($transaction->date) && $session->get('acc_last_date') && $date = Date::createFromFormat('!Y-m-d', $session->get('acc_last_date'))) {
@@ -104,7 +111,6 @@ if ($id = qg('account')) {
 
 $form->runIf('save', function () use ($transaction, $session, $current_year) {
 	$transaction->importFromNewForm();
-	$transaction->id_year = $current_year->id();
 	$transaction->id_creator = $session->getUser()->id;
 	$transaction->save();
 
@@ -120,7 +126,7 @@ $form->runIf('save', function () use ($transaction, $session, $current_year) {
 
 $tpl->assign(compact('csrf_key', 'transaction', 'amount', 'lines', 'id_project', 'types_details', 'linked_users'));
 
-$tpl->assign('chart_id', $chart->id());
+$tpl->assign('chart', $chart);
 $tpl->assign('projects', Projects::listAssocWithEmpty());
 
 $tpl->display('acc/transactions/new.tpl');

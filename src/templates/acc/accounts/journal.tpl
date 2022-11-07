@@ -124,6 +124,15 @@
 			{if !$simple}<td>{$line.line_label}</td>{/if}
 			<td>{$line.line_reference}</td>
 			<td class="num">{if $line.id_project}<a href="{$admin_url}acc/reports/statement.php?project={$line.id_project}">{$line.project_code}</a>{/if}</td>
+			{* Deposit status, might be consufing
+			<td>
+				{if $account.type == $account::TYPE_OUTSTANDING && $line.debit}
+					{if !($line.status & Entities\Accounting\Transaction::STATUS_DEPOSIT)}
+						{icon shape="alert" title="Cette opération n'a pas été déposée"}
+					{/if}
+				{/if}
+			</td>
+			*}
 			<td class="actions">
 			{if ($line.status & Entities\Accounting\Transaction::STATUS_WAITING)}
 				{if $line.type == Entities\Accounting\Transaction::TYPE_DEBT}

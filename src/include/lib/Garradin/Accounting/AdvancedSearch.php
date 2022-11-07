@@ -225,7 +225,7 @@ class AdvancedSearch extends A_S
 	public function schema(): array
 	{
 		$db = DB::getInstance();
-		$sql = sprintf('SELECT name, sql FROM sqlite_master WHERE %s ORDER BY name;', $db->where('name', ['acc_transactions', 'acc_transactions_lines', 'acc_accounts', 'acc_years']));
+		$sql = sprintf('SELECT name, sql FROM sqlite_master WHERE %s ORDER BY name;', $db->where('name', ['acc_transactions', 'acc_transactions_lines', 'acc_accounts', 'acc_years', 'acc_projects']));
 		return $db->getAssoc($sql);
 	}
 

@@ -19,6 +19,10 @@ if (!$chart) {
 	throw new UserException('Aucun plan comptable spécifié');
 }
 
+if (!$chart->country) {
+	Utils::redirect('!acc/charts/accounts/all.php?id=' . $chart->id);
+}
+
 $accounts = $chart->accounts();
 
 $tpl->assign(compact('chart'));

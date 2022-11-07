@@ -23,8 +23,13 @@ if ($year->closed) {
 }
 
 $csrf_key = 'acc_years_balance_' . $year->id();
+$accounts = $year->accounts();
 
 $form->runIf('save', function () use ($year, $session) {
+	$db = DB::getInstance();
+	// Fail everything if appropriation failed
+	$db->begin();
+
 	$transaction = new Transaction;
 	$transaction->id_creator = Session::getUserId();
 	$transaction->importFromBalanceForm($year);
@@ -38,7 +43,11 @@ $form->runIf('save', function () use ($year, $session) {
 			$t2->id_creator = $transaction->id_creator;
 			$t2->save();
 		}
+	}
 
+	$db->commit();
+
+	if (f('appropriation')) {
 		Utils::redirect('!acc/reports/journal.php?year=' . $year->id());
 	}
 
@@ -76,17 +85,17 @@ if ($previous_year) {
 			$codes[] = $line->code;
 		}
 
-		$matching_accounts = $year->accounts()->listForCodes($codes);
+		$matching_accounts = $accounts->listForCodes($codes);
 	}
 
 	// Append result
 	$result = Reports::getResult(['year' => $previous_year->id()]);
 
 	if ($result > 0) {
-		$account = $year->accounts()->getSingleAccountForType(Account::TYPE_POSITIVE_RESULT);
+		$account = $accounts->getSingleAccountForType(Account::TYPE_POSITIVE_RESULT);
 	}
 	else {
-		$account = $year->accounts()->getSingleAccountForType(Account::TYPE_NEGATIVE_RESULT);
+		$account = $accounts->getSingleAccountForType(Account::TYPE_NEGATIVE_RESULT);
 	}
 
 	if (!$account) {
@@ -112,11 +121,11 @@ if ($previous_year) {
 		if ($chart_change) {
 			if (array_key_exists($line->code, $matching_accounts)) {
 				$acc = $matching_accounts[$line->code];
-				$line->account = [$acc->id => sprintf('%s — %s', $acc->code, $acc->label)];
+				$line->account_selector = [$acc->id => sprintf('%s — %s', $acc->code, $acc->label)];
 			}
 		}
 		else {
-			$line->account = $line->id ? [$line->id => sprintf('%s — %s', $line->code, $line->label)] : null;
+			$line->account_selector = $line->id ? [$line->id => sprintf('%s — %s', $line->code, $line->label)] : null;
 		}
 
 		$line = (array) $line;
@@ -125,15 +134,14 @@ if ($previous_year) {
 	unset($line);
 }
 
-if (!empty($_POST['lines']) && is_array($_POST['lines'])) {
-	$lines = Utils::array_transpose($_POST['lines']);
 
-	foreach ($lines as &$line) {
-		$line['credit'] = Utils::moneyToInteger($line['credit']);
-		$line['debit'] = Utils::moneyToInteger($line['debit']);
-	}
+if (!empty($_POST['lines']) && is_array($_POST['lines'])) {
+	$lines = Transaction::getFormLines();
 }
 
-$tpl->assign(compact('lines', 'years', 'chart_change', 'previous_year', 'year_selected', 'year', 'csrf_key'));
+$appropriation_account = $accounts->getSingleAccountForType(Account::TYPE_APPROPRIATION_RESULT);
+$can_appropriate = $accounts->getIdForType(Account::TYPE_NEGATIVE_RESULT) && $accounts->getIdForType(Account::TYPE_POSITIVE_RESULT);
+
+$tpl->assign(compact('lines', 'years', 'chart_change', 'previous_year', 'year_selected', 'year', 'csrf_key', 'can_appropriate', 'appropriation_account'));
 
 $tpl->display('acc/years/balance.tpl');

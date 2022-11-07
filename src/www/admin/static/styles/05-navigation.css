@@ -22,7 +22,7 @@ nav.tabs .sub {
     border-bottom-left-radius: .5em;
 }
 
-nav.tabs .sub .title {
+nav.tabs .title {
     margin: 0 1em 0 -1em;
     font-weight: bold;
     padding: .1em .5em;
@@ -92,8 +92,7 @@ main nav.menu-right span {
 
 main nav.menu button {
     text-align: left;
-}
-nav.home ul {
+}nav.home ul {
     display: flex;
     flex-wrap: wrap;
     align-items: stretch;

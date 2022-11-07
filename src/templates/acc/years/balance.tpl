@@ -81,7 +81,7 @@
 						</td>
 					{/if}
 					<th>
-						{input type="list" target="!acc/charts/accounts/selector.php?chart=%d"|args:$year.id_chart name="lines[account_selector][]" default=$line.account}
+						{input type="list" target="!acc/charts/accounts/selector.php?chart=%d"|args:$year.id_chart name="lines[account_selector][]" default=$line.account_selector}
 					</th>
 					<td>{input type="money" name="lines[debit][]" default=$line.debit size=5}</td>
 					<td>{input type="money" name="lines[credit][]" default=$line.credit size=5}</td>
@@ -101,9 +101,13 @@
 				</tr>
 			</tfoot>
 		</table>
+		{if $can_appropriate}
 		<dl>
-			{input type="checkbox" name="appropriation" value="1" checked="checked" label="Affecter automatiquement le résultat (conseillé)" help="Si cette case est cochée, le résultat sera automatiquement affecté aux réserves s'il est excédentaire"}
+			{input type="checkbox" name="appropriation" value="1" checked="checked" label="Affecter automatiquement le résultat (conseillé)"}
+			<dd class="help">Si cette case est cochée, le résultat sera automatiquement affecté au compte « {$appropriation_account.code} — {$appropriation_account.label} ».</dd>
+		</dl>
 		{/if}
+	{/if}
 	</fieldset>
 
 	<p class="submit">

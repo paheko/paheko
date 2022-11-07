@@ -86,11 +86,18 @@ class Accounts
 			'level' => [
 				'select' => 'CASE WHEN LENGTH(code) >= 6 THEN 6 ELSE LENGTH(code) END',
 			],
-			'bookmark' => [
-				'label' => 'Favori',
+			'report' => [
+				'label' => ' ',
+				'select' => null,
+			],
+			'position' => [
+				'label' => 'Position',
 			],
 			'user' => [
 				'label' => 'Ajouté',
+			],
+			'bookmark' => [
+				'label' => 'Favori',
 			],
 		];
 
@@ -105,6 +112,10 @@ class Accounts
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('code', false);
 		$list->setPageSize(null);
+		$list->setModifier(function (&$row) {
+			$row->position_report = !$row->position ? '' : ($row->position <= Account::ASSET_OR_LIABILITY ? 'Bilan' : 'Résultat');
+			$row->position_name = Account::POSITIONS_NAMES[$row->position];
+		});
 
 		return $list;
 	}
@@ -134,12 +145,17 @@ class Accounts
 	public function listCommonGrouped(array $types = null): array
 	{
 		if (null === $types) {
-			$types = Account::COMMON_TYPES;
+			// If we want all types, then we will get used or bookmarked accounts in common types
+			// and only bookmarked accounts for other types, grouped in "Others"
+			$target = Account::COMMON_TYPES;
+		}
+		else {
+			$target = $types;
 		}
 
 		$out = [];
 
-		foreach ($types as $type) {
+		foreach ($target as $type) {
 			$out[$type] = (object) [
 				'label'    => Account::TYPES_NAMES[$type],
 				'type'     => $type,
@@ -147,24 +163,45 @@ class Accounts
 			];
 		}
 
+		if (null === $types) {
+			$out[0] = (object) [
+				'label'    => 'Autres',
+				'type'     => 0,
+				'accounts' => [],
+			];
+		}
+
+		$db = $this->em->DB();
+
 		$sql = sprintf('SELECT a.* FROM @TABLE a
 			LEFT JOIN acc_transactions_lines b ON b.id_account = a.id
-			WHERE a.id_chart = %d AND a.%s AND (a.bookmark = 1 OR b.id IS NOT NULL)
+			WHERE a.id_chart = %d AND ((a.%s AND (a.bookmark = 1 OR b.id IS NOT NULL)) %s)
 			GROUP BY a.id
 			ORDER BY type, code COLLATE NOCASE;',
 			$this->chart_id,
-			$this->em->DB()->where('type', $types)
+			$db->where('type', $target),
+			(null === $types) ? 'OR (a.bookmark = 1)' : ''
 		);
 
 		$query = $this->em->iterate($sql);
 
 		foreach ($query as $row) {
-			$out[$row->type]->accounts[] = $row;
+			$t = in_array($row->type, $target) ? $row->type : 0;
+			$out[$t]->accounts[] = $row;
+		}
+
+		foreach ($out as $key => $v) {
+			if (!count($v->accounts)) {
+				unset($out[$key]);
+			}
 		}
 
 		return $out;
 	}
 
+	/**
+	 * List accounts from this type that are missing in current "usual" accounts list
+	 */
 	public function listMissing(int $type): array
 	{
 		if ($type != Account::TYPE_EXPENSE && $type != Account::TYPE_REVENUE && $type != Account::TYPE_THIRD_PARTY) {
@@ -179,7 +216,7 @@ class Accounts
 			ORDER BY type, code COLLATE NOCASE;'), $this->chart_id, $type);
 	}
 
-	public function countByType(int $type)
+	public function countByType(int $type): int
 	{
 		return DB::getInstance()->count(Account::TABLE, 'id_chart = ? AND type = ?', $this->chart_id, $type);
 	}
@@ -189,14 +226,19 @@ class Accounts
 		return DB::getInstance()->first('SELECT * FROM acc_accounts WHERE type = ? AND id_chart = ? LIMIT 1;', $type, $this->chart_id);
 	}
 
-	public function getOpeningAccountId(): ?int
+	public function getIdForType(int $type): ?int
 	{
-		return DB::getInstance()->firstColumn('SELECT id FROM acc_accounts WHERE type = ? AND id_chart = ?;', Account::TYPE_OPENING, $this->chart_id) ?: null;
+		return DB::getInstance()->firstColumn('SELECT id FROM acc_accounts WHERE type = ? AND id_chart = ? LIMIT 1;', $type, $this->chart_id);
 	}
 
-	public function getClosingAccountId()
+	public function getOpeningAccountId(): ?int
 	{
-		return DB::getInstance()->firstColumn('SELECT id FROM acc_accounts WHERE type = ? AND id_chart = ?;', Account::TYPE_CLOSING, $this->chart_id);
+		return $this->getIdForType(Account::TYPE_OPENING);
+	}
+
+	public function getClosingAccountId(): ?int
+	{
+		return $this->getIdForType(Account::TYPE_CLOSING);
 	}
 
 	public function listUserAccounts(int $year_id): DynamicList
