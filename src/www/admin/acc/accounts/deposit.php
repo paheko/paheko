@@ -52,13 +52,17 @@ $target = $account::TYPE_BANK;
 
 $journal_count = $account->countDepositJournal(CURRENT_YEAR_ID);
 
+$missing_balance = $account->getDepositMissingBalance(CURRENT_YEAR_ID);
+
 $tpl->assign(compact(
 	'account',
 	'journal',
 	'date',
 	'target',
 	'checked',
-	'journal_count'
+	'journal_count',
+	'missing_balance',
+	'transaction'
 ));
 
 $tpl->display('acc/accounts/deposit.tpl');

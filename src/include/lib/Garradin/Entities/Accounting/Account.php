@@ -610,6 +610,19 @@ class Account extends Entity
 			$year_id, $this->id(), Transaction::STATUS_DEPOSIT);
 	}
 
+	public function getDepositMissingBalance(int $year_id): int
+	{
+		$deposit_balance = DB::getInstance()->firstColumn('SELECT SUM(l.debit)
+			FROM acc_transactions_lines l
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			WHERE t.id_year = ? AND l.id_account = ? AND l.credit = 0 AND NOT (t.status & ?)
+			ORDER BY t.date, t.id;',
+			$year_id, $this->id(), Transaction::STATUS_DEPOSIT);
+		$account_balance = $this->getSum($year_id)->balance;
+
+		return $account_balance - $deposit_balance;
+	}
+
 	public function getSum(int $year_id, bool $simple = false): ?\stdClass
 	{
 		$sum = DB::getInstance()->first('SELECT balance, credit, debit
