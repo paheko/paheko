@@ -14,6 +14,12 @@ $name ??= 'country';
 
 {input type="select" name=$name label="Appliquer les règles comptables de ce pays" required=1 options=$country_list default=$chart.country}
 
+{if !$chart->exists()}
+<dd class="help">Ce choix ne pourra plus être modifié une fois le plan comptable créé.</dd>
+{else}
+<dd class="help">Si un pays est sélectionné, ce choix ne pourra plus être modifié.</dd>
+{/if}
+
 <dd class="alert block {$name}_empty hidden"><strong>Attention&nbsp;:</strong> si <em>«&nbsp;Autre&nbsp;»</em> est sélectionné, alors&nbsp;:<br />
 	- les comptes ne pourront pas être catégorisés automatiquement (banque, caisse, dépenses, recettes, etc.)&nbsp;;<br />
 	- il faudra donc parcourir tout le plan comptable pour sélectionner un compte<br />
@@ -38,3 +44,5 @@ $name ??= 'country';
 })();
 {/literal}
 </script>
+
+</dd>
