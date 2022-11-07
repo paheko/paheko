@@ -15,8 +15,10 @@ $name ??= 'country';
 {input type="select" name=$name label="Appliquer les règles comptables de ce pays" required=1 options=$country_list default=$chart.country}
 
 <dd class="alert block {$name}_empty hidden"><strong>Attention&nbsp;:</strong> si <em>«&nbsp;Autre&nbsp;»</em> est sélectionné, alors&nbsp;:<br />
-	- des erreurs de position au bilan ou au résultat seront possibles<br />
-	- il ne sera pas possible d'utiliser les comptes usuels
+	- les comptes ne pourront pas être catégorisés automatiquement (banque, caisse, dépenses, recettes, etc.)&nbsp;;<br />
+	- il faudra donc parcourir tout le plan comptable pour sélectionner un compte<br />
+	- la position des comptes au bilan ou compte de résultat ne pourra pas être contrôlée : des erreurs sont possibles<br />
+	<em>Si vous avez besoin d'ajouter les règles comptables d'un autre pays, merci de <a href="https://garradin.eu/contact" target="_blank">nous contacter</a>.</em>
 </dd>
 
 <dd class="help">
