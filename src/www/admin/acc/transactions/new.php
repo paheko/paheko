@@ -35,6 +35,10 @@ if (qg('a')) {
 	$amount = Utils::moneyToInteger(qg('a'));
 }
 
+if (qg('a0')) {
+	$amount = (int)qg('a0');
+}
+
 if (qg('l')) {
 	$transaction->label = qg('l');
 }

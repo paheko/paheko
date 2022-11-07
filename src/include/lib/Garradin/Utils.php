@@ -825,6 +825,7 @@ class Utils
         }
 
         if ($hash) {
+            $hash = md5(Utils::getVersionHash() . $hash);
             header(sprintf('Etag: "%s"', $hash), true);
         }
 
