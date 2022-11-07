@@ -101,9 +101,13 @@
 				</tr>
 			</tfoot>
 		</table>
+		{if $can_appropriate}
 		<dl>
-			{input type="checkbox" name="appropriation" value="1" checked="checked" label="Affecter automatiquement le résultat (conseillé)" help="Si cette case est cochée, le résultat sera automatiquement affecté aux réserves s'il est excédentaire"}
+			{input type="checkbox" name="appropriation" value="1" checked="checked" label="Affecter automatiquement le résultat (conseillé)"}
+			<dd class="help">Si cette case est cochée, le résultat sera automatiquement affecté au compte « {$appropriation_account.code} — {$appropriation_account.label} ».</dd>
+		</dl>
 		{/if}
+	{/if}
 	</fieldset>
 
 	<p class="submit">

@@ -22,6 +22,7 @@ if ($year->closed) {
 }
 
 $csrf_key = 'acc_years_balance_' . $year->id();
+$accounts = $year->accounts();
 
 $form->runIf('save', function () use ($year) {
 	$db = DB::getInstance();
@@ -83,17 +84,17 @@ if ($previous_year) {
 			$codes[] = $line->code;
 		}
 
-		$matching_accounts = $year->accounts()->listForCodes($codes);
+		$matching_accounts = $accounts->listForCodes($codes);
 	}
 
 	// Append result
 	$result = Reports::getResult(['year' => $previous_year->id()]);
 
 	if ($result > 0) {
-		$account = $year->accounts()->getSingleAccountForType(Account::TYPE_POSITIVE_RESULT);
+		$account = $accounts->getSingleAccountForType(Account::TYPE_POSITIVE_RESULT);
 	}
 	else {
-		$account = $year->accounts()->getSingleAccountForType(Account::TYPE_NEGATIVE_RESULT);
+		$account = $accounts->getSingleAccountForType(Account::TYPE_NEGATIVE_RESULT);
 	}
 
 	if (!$account) {
@@ -137,6 +138,9 @@ if (!empty($_POST['lines']) && is_array($_POST['lines'])) {
 	$lines = Transaction::getFormLines();
 }
 
-$tpl->assign(compact('lines', 'years', 'chart_change', 'previous_year', 'year_selected', 'year', 'csrf_key'));
+$appropriation_account = $accounts->getSingleAccountForType(Account::TYPE_APPROPRIATION_RESULT);
+$can_appropriate = $accounts->getIdForType(Account::TYPE_NEGATIVE_RESULT) && $accounts->getIdForType(Account::TYPE_POSITIVE_RESULT);
+
+$tpl->assign(compact('lines', 'years', 'chart_change', 'previous_year', 'year_selected', 'year', 'csrf_key', 'can_appropriate', 'appropriation_account'));
 
 $tpl->display('acc/years/balance.tpl');
