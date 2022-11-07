@@ -111,11 +111,11 @@ if ($previous_year) {
 		if ($chart_change) {
 			if (array_key_exists($line->code, $matching_accounts)) {
 				$acc = $matching_accounts[$line->code];
-				$line->account = [$acc->id => sprintf('%s — %s', $acc->code, $acc->label)];
+				$line->account_selector = [$acc->id => sprintf('%s — %s', $acc->code, $acc->label)];
 			}
 		}
 		else {
-			$line->account = $line->id ? [$line->id => sprintf('%s — %s', $line->code, $line->label)] : null;
+			$line->account_selector = $line->id ? [$line->id => sprintf('%s — %s', $line->code, $line->label)] : null;
 		}
 
 		$line = (array) $line;
@@ -124,13 +124,9 @@ if ($previous_year) {
 	unset($line);
 }
 
-if (!empty($_POST['lines']) && is_array($_POST['lines'])) {
-	$lines = Utils::array_transpose($_POST['lines']);
 
-	foreach ($lines as &$line) {
-		$line['credit'] = Utils::moneyToInteger($line['credit']);
-		$line['debit'] = Utils::moneyToInteger($line['debit']);
-	}
+if (!empty($_POST['lines']) && is_array($_POST['lines'])) {
+	$lines = Transaction::getFormLines();
 }
 
 $tpl->assign(compact('lines', 'years', 'chart_change', 'previous_year', 'year_selected', 'year', 'csrf_key'));
