@@ -7,7 +7,7 @@
 		<legend>Modifier un plan comptable</legend>
 		<dl>
 			{input type="text" name="label" label="Libellé" required=1 source=$chart}
-			{if !$chart.code}
+			{if !$chart.code && !$chart.country}
 				{include file="./_country_input.tpl"}
 			{/if}
 			<dt><label for="f_archived_1">Archivage</label></dt>
