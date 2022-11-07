@@ -2,7 +2,8 @@
 <nav class="tabs">
 	<aside>
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-			{linkbutton shape="edit" href="!acc/charts/accounts/?id=%d"|args:$current_year.id_chart label="Modifier les comptes"}
+			<?php $page = $current == 'all' ? 'all.php' : ''; ?>
+			{linkbutton shape="edit" href="!acc/charts/accounts/%s?id=%d"|args:$page,$current_year.id_chart label="Modifier les comptes"}
 		{/if}
 		{linkbutton shape="search" href="!acc/search.php?year=%d"|args:$current_year.id label="Recherche"}
 	</aside>
