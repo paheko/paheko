@@ -535,6 +535,8 @@ class Transaction extends Entity
 			throw new ValidationException('Il n\'est pas possible de supprimer une écriture qui fait partie d\'un exercice clôturé');
 		}
 
+		// FIXME when lettering is properly implemented: mark parent transaction non-deposited when deleting a deposit transaction
+
 		Files::delete($this->getAttachementsDirectory());
 
 		return parent::delete();
