@@ -1,4 +1,5 @@
 ALTER TABLE acc_charts RENAME TO acc_charts_old;
+DROP VIEW acc_accounts_balances;
 
 .read schema.sql
 

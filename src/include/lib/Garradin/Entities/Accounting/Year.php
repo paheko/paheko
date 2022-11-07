@@ -181,6 +181,8 @@ class Year extends Entity
 	public function listCommonAccountsGrouped(array $types = null): array
 	{
 		if (null === $types) {
+			// If we want all types, then we will get used or bookmarked accounts in common types
+			// and only bookmarked accounts for other types, grouped in "Others"
 			$target = Account::COMMON_TYPES;
 		}
 		else {
@@ -210,12 +212,13 @@ class Year extends Entity
 		$sql = sprintf('SELECT a.* FROM acc_accounts a
 			LEFT JOIN acc_transactions_lines b ON b.id_account = a.id
 			LEFT JOIN acc_transactions c ON c.id = b.id_transaction AND c.id_year = %d
-			WHERE a.id_chart = %d %s AND (a.bookmark = 1 OR a.user = 1 OR c.id IS NOT NULL)
+			WHERE a.id_chart = %d AND ((a.%s AND (a.bookmark = 1 OR a.user = 1 OR c.id IS NOT NULL)) %s)
 			GROUP BY a.id
 			ORDER BY type, code COLLATE NOCASE;',
 			$this->id(),
 			$this->id_chart,
-			$types !== null ? 'AND a.' . $db->where('type', $target) : ''
+			$db->where('type', $target),
+			(null === $types) ? 'OR (a.bookmark = 1)' : ''
 		);
 
 		$query = $db->iterate($sql);
