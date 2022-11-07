@@ -54,7 +54,7 @@ class Chart extends Entity
 		}
 
 		// Don't allow to change country
-		if ($this->code) {
+		if (isset($this->code)) {
 			unset($source['country']);
 		}
 
