@@ -109,11 +109,13 @@
 	<script type="text/javascript">
 	{literal}
 	function toggleFormOption() {
-		var v = $('input[name="type"]:checked')[0].value;
+		var v = $('input[name="type"]:checked');
 
-		if (!v) {
+		if (!v.length) {
 			return;
 		}
+
+		v = v[0].value;
 
 		g.toggle('.type-import, .type-copy, .type-install', false);
 		g.toggle('.type-' + v, true);
