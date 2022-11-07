@@ -199,6 +199,9 @@ class Accounts
 		return $out;
 	}
 
+	/**
+	 * List accounts from this type that are missing in current "usual" accounts list
+	 */
 	public function listMissing(int $type): array
 	{
 		if ($type != Account::TYPE_EXPENSE && $type != Account::TYPE_REVENUE && $type != Account::TYPE_THIRD_PARTY) {
@@ -213,7 +216,7 @@ class Accounts
 			ORDER BY type, code COLLATE NOCASE;'), $this->chart_id, $type);
 	}
 
-	public function countByType(int $type)
+	public function countByType(int $type): int
 	{
 		return DB::getInstance()->count(Account::TABLE, 'id_chart = ? AND type = ?', $this->chart_id, $type);
 	}
@@ -223,14 +226,19 @@ class Accounts
 		return DB::getInstance()->first('SELECT * FROM acc_accounts WHERE type = ? AND id_chart = ? LIMIT 1;', $type, $this->chart_id);
 	}
 
-	public function getOpeningAccountId(): ?int
+	public function getIdForType(int $type): ?int
 	{
-		return DB::getInstance()->firstColumn('SELECT id FROM acc_accounts WHERE type = ? AND id_chart = ?;', Account::TYPE_OPENING, $this->chart_id) ?: null;
+		return DB::getInstance()->firstColumn('SELECT id FROM acc_accounts WHERE type = ? AND id_chart = ? LIMIT 1;', $type, $this->chart_id);
 	}
 
-	public function getClosingAccountId()
+	public function getOpeningAccountId(): ?int
 	{
-		return DB::getInstance()->firstColumn('SELECT id FROM acc_accounts WHERE type = ? AND id_chart = ?;', Account::TYPE_CLOSING, $this->chart_id);
+		return $this->getIdForType(Account::TYPE_OPENING);
+	}
+
+	public function getClosingAccountId(): ?int
+	{
+		return $this->getIdForType(Account::TYPE_CLOSING);
 	}
 
 	public function listUserAccounts(int $year_id): DynamicList

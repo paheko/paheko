@@ -123,7 +123,8 @@ class Years
 	 */
 	static public function makeAppropriation(Year $year): ?Transaction
 	{
-		$balances = DB::getInstance()->getGrouped('SELECT a.type, a.id, SUM(l.credit) - SUM(l.debit) AS balance
+		$db = DB::getInstance();
+		$balances = $db->getGrouped('SELECT a.type, a.id, SUM(l.credit) - SUM(l.debit) AS balance
 			FROM acc_accounts a
 			INNER JOIN acc_transactions_lines l ON l.id_account = a.id
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
@@ -135,12 +136,10 @@ class Years
 			return null;
 		}
 
-		$positive_appropriation = DB::getInstance()->firstColumn('SELECT id FROM acc_accounts WHERE type = ? AND id_chart = ?;',
+		$appropriation_account = $db->firstColumn('SELECT id FROM acc_accounts WHERE type = ? AND id_chart = ?;',
 			Account::TYPE_APPROPRIATION_RESULT, $year->id_chart);
-		$negative_appropriation = DB::getInstance()->firstColumn('SELECT id FROM acc_accounts WHERE type = ? AND id_chart = ?;',
-			Account::TYPE_DEBIT_REPORT, $year->id_chart);
 
-		if (!$positive_appropriation || !$negative_appropriation) {
+		if (!$appropriation_account) {
 			return null;
 		}
 
@@ -148,16 +147,8 @@ class Years
 		$t->type = $t::TYPE_ADVANCED;
 		$t->id_year = $year->id();
 		$t->label = 'Affectation automatique du résultat';
-		$t->notes = 'Le résultat a été affecté automatiquement lors de l\'ouverture de l\'exercice';
-		$t->date = new \KD2\DB\Date;
-
-		if ($t->date > $year->end_date) {
-			$t->date = $year->end_date;
-		}
-
-		if ($t->date < $year->start_date) {
-			$t->date = $year->start_date;
-		}
+		$t->notes = 'Le résultat a été affecté automatiquement lors de la balance d\'ouverture';
+		$t->date = $year->start_date;
 
 		$sum = 0;
 
@@ -176,17 +167,18 @@ class Years
 			$line = Line::create($account->id, 0, abs($account->balance));
 			$t->addLine($line);
 
-			$sum += $account->balance;
+			$sum -= $account->balance;
 		}
 
 		if ($sum > 0) {
-			$line = Line::create($positive_appropriation, $sum, 0);
+			$line = Line::create($appropriation_account, $sum, 0);
 		}
 		else {
-			$line = Line::create($negative_appropriation, 0, abs($sum));
+			$line = Line::create($appropriation_account, 0, abs($sum));
 		}
 
 		$t->addLine($line);
+
 		return $t;
 	}
 }
