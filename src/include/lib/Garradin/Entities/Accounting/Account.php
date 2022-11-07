@@ -277,8 +277,12 @@ class Account extends Entity
 		$this->assert(trim($this->code) !== '', 'Le numéro de compte ne peut rester vide.');
 		$this->assert(trim($this->label) !== '', 'L\'intitulé de compte ne peut rester vide.');
 
-		$this->assert(strlen($this->code) <= 20, 'Le numéro de compte ne peut faire plus de 20 caractères.');
-		$this->assert(preg_match('/^[a-z0-9_]+$/i', $this->code), 'Le numéro de compte ne peut comporter que des lettres et des chiffres.');
+		// Only enforce code limits if the account is new, or if the code is changed
+		if (!$this->exists() || $this->isModified('code')) {
+			$this->assert(strlen($this->code) <= 20, 'Le numéro de compte ne peut faire plus de 20 caractères.');
+			$this->assert(preg_match('/^[a-z0-9_]+$/i', $this->code), 'Le numéro de compte ne peut comporter que des lettres et des chiffres.');
+		}
+
 		$this->assert(strlen($this->label) <= 200, 'L\'intitulé de compte ne peut faire plus de 200 caractères.');
 		$this->assert(!isset($this->description) || strlen($this->description) <= 2000, 'La description de compte ne peut faire plus de 2000 caractères.');
 
