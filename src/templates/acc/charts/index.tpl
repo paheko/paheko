@@ -73,7 +73,7 @@
 		<fieldset class="type-copy hidden">
 			<legend>Créer un nouveau plan comptable à partir d'un existant</legend>
 			<dl>
-				{input type="select_groups" name="copy" options=$charts_groupped label="Recopier depuis" required=1 default=$from}
+				{input type="select_groups" name="copy" options=$charts_grouped label="Recopier depuis" required=1 default=$from}
 				{input type="text" name="label" label="Libellé" required=1}
 				{include file="./_country_input.tpl"}
 		</fieldset>

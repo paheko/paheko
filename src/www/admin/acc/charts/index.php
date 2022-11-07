@@ -32,7 +32,7 @@ if ($session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)) {
 	$tpl->assign('country_list', Utils::getCountryList());
 
 	$tpl->assign('from', (int)qg('from'));
-	$tpl->assign('charts_groupped', Charts::listByCountry());
+	$tpl->assign('charts_grouped', Charts::listByCountry());
 	$tpl->assign('country_list', Chart::COUNTRY_LIST + ['' => '— Autre']);
 
 	$tpl->assign('install_list', Charts::listInstallable());
