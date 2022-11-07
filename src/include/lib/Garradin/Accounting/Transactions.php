@@ -170,6 +170,7 @@ class Transactions
 		$list->setExportCallback(function (&$row) {
 			$row->change = Utils::money_format($row->change, '.', '', false);
 			$row->projects = implode(', ', $row->projects);
+			unset($row->project_code, $row->id_project);
 		});
 
 		return $list;
