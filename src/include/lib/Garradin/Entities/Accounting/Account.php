@@ -344,13 +344,6 @@ class Account extends Entity
 
 		foreach (self::LOCAL_POSITIONS[$country] as $pattern => $position) {
 			if (preg_match('/' . $pattern . '/', $this->code)) {
-				// If the allowed position is asset OR liability, we allow either one of those 3 choices
-				if ($position == self::ASSET_OR_LIABILITY
-					&& in_array($this->position, [self::ASSET_OR_LIABILITY, self::ASSET, self::LIABILITY])) {
-					return null;
-				}
-
-				// Or else we force the position
 				return $position;
 			}
 		}
@@ -413,7 +406,11 @@ class Account extends Entity
 		$this->set('type', $this->getLocalType($country));
 
 		if (null !== ($p = $this->getLocalPosition($country))) {
-			$this->set('position', $p);
+			// If the allowed local position is asset OR liability, we allow either one of those 3 choices
+			if ($p != self::ASSET_OR_LIABILITY
+				|| !in_array($this->position, [self::ASSET_OR_LIABILITY, self::ASSET, self::LIABILITY])) {
+				$this->set('position', $p);
+			}
 		}
 
 		if (!isset($this->type)) {
