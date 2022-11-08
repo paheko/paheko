@@ -203,7 +203,7 @@ CREATE TABLE IF NOT EXISTS services_fees
     id_service INTEGER NOT NULL REFERENCES services (id) ON DELETE CASCADE,
     id_account INTEGER NULL REFERENCES acc_accounts (id) ON DELETE SET NULL CHECK (id_account IS NULL OR id_year IS NOT NULL), -- NULL if fee is not linked to accounting, this is reset using a trigger if the year is deleted
     id_year INTEGER NULL REFERENCES acc_years (id) ON DELETE SET NULL, -- NULL if fee is not linked to accounting
-    id_analytical INTEGER NULL REFERENCES acc_accounts (id) ON DELETE SET NULL
+    id_project INTEGER NULL REFERENCES acc_projects (id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS services_users
@@ -413,7 +413,7 @@ CREATE TABLE IF NOT EXISTS acc_transactions_lines
 
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_transaction ON acc_transactions_lines (id_transaction);
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_account ON acc_transactions_lines (id_account);
-CREATE INDEX IF NOT EXISTS acc_transactions_lines_analytical ON acc_transactions_lines (id_analytical);
+CREATE INDEX IF NOT EXISTS acc_transactions_lines_project ON acc_transactions_lines (id_project);
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_reconciled ON acc_transactions_lines (reconciled);
 
 CREATE TABLE IF NOT EXISTS acc_transactions_users

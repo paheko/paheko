@@ -15,7 +15,7 @@ ALTER TABLE emails_queue RENAME TO emails_queue_old;
 
 DROP VIEW acc_accounts_balances;
 
-.read ../../data/1.2.0_schema.sql
+.read schema.sql
 
 -- Add recipient_pgp_key column
 INSERT INTO emails_queue
