@@ -13,6 +13,11 @@ $db->begin();
 
 foreach ($db->iterate($sql) as $row) {
 	$new_code = '5120' . substr($row->code, 2);
+
+	if ($db->firstColumn('SELECT 1 FROM acc_accounts WHERE code = ? AND id_chart = ?;', $new_code, $row->id_chart)) {
+		$new_code = '51200' . substr($row->code, 2);
+	}
+
 	// Change code
 	$db->preparedQuery('UPDATE acc_accounts SET code = ?, type = 1, user = ? WHERE id = ?;', [$new_code, $row->chart_code ? 1 : 0, $row->id]);
 
