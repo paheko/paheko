@@ -67,6 +67,7 @@
 		<tbody>
 			{foreach from=$list->iterate() item="line"}
 			<tr>
+				<td>{$line.type_label}</td>
 				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
 				<td>{$line.date|date_short}</td>
 				<td class="money">{$line.change|abs|raw|money}</td>
