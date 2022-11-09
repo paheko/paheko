@@ -58,6 +58,8 @@ class Project extends Entity
 			$source['code'] = strtoupper($source['code']);
 		}
 
+		$source['archived'] = !empty($source['archived']);
+
 		parent::importForm($source);
 	}
 }
