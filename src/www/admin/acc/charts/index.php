@@ -23,7 +23,7 @@ if ($session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)) {
 	}, $csrf_key, '!acc/charts/');
 
 	$form->runIf(f('type') == 'import', function () {
-		Charts::import('file', f('label'), f('country_import'));
+		Charts::import('file', f('label'), f('import_country'));
 	}, $csrf_key, '!acc/charts/');
 
 	$tpl->assign(compact('csrf_key'));
