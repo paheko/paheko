@@ -797,6 +797,9 @@ class Account extends Entity
 		if ($type == self::TYPE_THIRD_PARTY) {
 			return true;
 		}
+		elseif ($type) {
+			return false;
+		}
 
 		$position = $this->getLocalPosition();
 
