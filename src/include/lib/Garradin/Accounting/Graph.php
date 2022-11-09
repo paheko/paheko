@@ -31,9 +31,9 @@ class Graph
 		ADMIN_URL . 'acc/reports/graph_plot.php?type=assets&%s' => 'Évolution banques et caisses',
 		ADMIN_URL . 'acc/reports/graph_plot.php?type=result&%s' => 'Évolution dépenses et recettes',
 		ADMIN_URL . 'acc/reports/graph_plot.php?type=debts&%s' => 'Évolution créances (positif) et dettes (négatif)',
+		ADMIN_URL . 'acc/reports/graph_pie.php?type=assets&%s' => 'Répartition actif',
 		ADMIN_URL . 'acc/reports/graph_pie.php?type=revenue&%s' => 'Répartition recettes',
 		ADMIN_URL . 'acc/reports/graph_pie.php?type=expense&%s' => 'Répartition dépenses',
-		ADMIN_URL . 'acc/reports/graph_pie.php?type=assets&%s' => 'Répartition actif',
 	];
 
 	const PLOT_TYPES = [
