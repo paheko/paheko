@@ -18,6 +18,7 @@
 	</p>
 {/if}
 
+<form method="post" action="{$self_url_no_qs}">
 
 {if count($closed_years)}
 <fieldset>
