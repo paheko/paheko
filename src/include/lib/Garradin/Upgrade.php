@@ -489,6 +489,10 @@ class Upgrade
 				$db->commitSchemaUpdate();
 			}
 
+			if (version_compare($v, '1.2.2', '<')) {
+				require ROOT . '/include/migrations/1.2/1.2.2.php';
+			}
+
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();
 
