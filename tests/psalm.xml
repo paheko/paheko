@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<psalm autoloader="../src/include/init.php">
+	<projectFiles>
+		<directory name="../src/"/>
+		<ignoreFiles>
+			<directory name="../src/data"/>
+			<directory name="../src/include/lib/KD2"/>
+			<file name="../src/include/lib/Parsedown.php"/>
+		</ignoreFiles>
+	</projectFiles>
+	<issueHandlers>
+		<MissingPropertyType errorLevel="suppress"/>
+		<PossiblyUndefinedVariable errorLevel="suppress"/>
+		<UndefinedVariable errorLevel="suppress"/>
+		<PossiblyUndefinedGlobalVariable>
+			<errorLevel type="suppress">
+				<referencedVariable name="$plugin"/>
+				<referencedVariable name="$tpl"/>
+				<referencedVariable name="$session"/>
+				<referencedVariable name="$form"/>
+				<referencedVariable name="$config"/>
+				<referencedVariable name="$user"/>
+			</errorLevel>
+		</PossiblyUndefinedGlobalVariable>
+		<UndefinedGlobalVariable>
+			<errorLevel type="suppress">
+				<referencedVariable name="$plugin"/>
+				<referencedVariable name="$tpl"/>
+				<referencedVariable name="$session"/>
+				<referencedVariable name="$form"/>
+				<referencedVariable name="$config"/>
+				<referencedVariable name="$user"/>
+			</errorLevel>
+		</UndefinedGlobalVariable>
+	</issueHandlers>
+</psalm>

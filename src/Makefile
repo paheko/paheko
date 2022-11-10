@@ -21,6 +21,12 @@ test:
 phpstan:
 	phpstan.phar analyze -c ../tests/phpstan.neon include www
 
+psalm:
+	@# This is required by psalm, but useless
+	@-mkdir vendor
+	@-echo '{"require": {}}' > vendor/autoload.php
+	psalm.phar -c ../tests/psalm.xml
+
 release: test minify
 	$(eval VERSION=$(shell cat VERSION))
 	rm -rf /tmp/garradin-build
