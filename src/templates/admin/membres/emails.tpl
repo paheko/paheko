@@ -2,7 +2,7 @@
 
 <nav class="tabs">
 	<ul>
-		<li><a href="message_collectif.php">Envoyer</a></li>
+		<li><a href="message_collectif.php">Rédaction de message</a></li>
 		<li class="current"><a href="emails.php">Adresses rejetées</a></li>
 	</ul>
 </nav>
