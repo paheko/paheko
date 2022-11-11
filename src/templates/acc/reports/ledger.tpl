@@ -20,7 +20,7 @@
 		{else}
 			<?php $link = sprintf('%sacc/accounts/journal.php?id=%d&year=%d', $admin_url, $account->id, $account->id_year); ?>
 		{/if}
-			<a href="{$link}">{$account.code} — {$account.label}</a>
+			<a href="{$link}">{if $account.code}{$account.code} — {/if}{$account.label}</a>
 	</h2></summary>
 
 	<table class="list">
