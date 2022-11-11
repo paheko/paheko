@@ -1,10 +1,13 @@
 (function () {
 let create = false;
+var selected;
 
 function selectService(elm, first_load) {
 	$('[data-service]').forEach((e) => {
 		e.style.display = ('s' + elm.value == e.getAttribute('data-service')) ? 'block' : 'none';
 	});
+
+	selected = elm;
 
 	let expiry = $('#f_expiry_date');
 
@@ -14,18 +17,18 @@ function selectService(elm, first_load) {
 	}
 
 	let first = document.querySelector('[data-service="s' + elm.value + '"] input[name=id_fee]');
-	let selected = document.querySelector('[data-service="s' + elm.value + '"] input[name=id_fee]:checked');
+	let fee = document.querySelector('[data-service="s' + elm.value + '"] input[name=id_fee]:checked');
 
-	if (first && !selected) {
+	if (first && !fee) {
 		first.checked = true;
-		selected = first;
+		fee = first;
 	}
 	else if (!first) {
 		document.querySelector('input[name=id_fee]:checked').checked = false;
 	}
 
-	if (selected) {
-		selectFee(selected);
+	if (fee) {
+		selectFee(fee);
 	}
 }
 
@@ -61,7 +64,7 @@ function initForm() {
 		e.onchange = () => { selectFee(e); };
 	});
 
-	var selected = document.querySelector('input[name="id_service"]:checked') || document.querySelector('input[name="id_service"]');
+	selected = document.querySelector('input[name="id_service"]:checked') || document.querySelector('input[name="id_service"]');
 	selected.checked = true;
 
 	let date_input = $('#f_date');
