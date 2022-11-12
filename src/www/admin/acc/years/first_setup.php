@@ -50,6 +50,10 @@ $form->runIf('save', function () use ($year, $new_accounts, $appropriation_accou
 	$year->save();
 
 	foreach ($new_accounts as $row) {
+		if (empty($row['label'])) {
+			continue;
+		}
+
 		$account = new Account;
 		$account->bookmark = true;
 		$account->user = true;
@@ -67,7 +71,7 @@ $form->runIf('save', function () use ($year, $new_accounts, $appropriation_accou
 	}
 
 	if (f('result') && $appropriation_account) {
-		$t = $appropriation_account->createOpeningBalance($year, Utils::moneyToInteger(f('result')), 'Report du résultat de l\'exercice précédent');
+		$t = $appropriation_account->createOpeningBalance($year, Utils::moneyToInteger(f('result')) * -1, 'Report du résultat de l\'exercice précédent');
 		$t->id_creator = Session::getUserId();
 		$t->save();
 	}
