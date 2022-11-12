@@ -24,6 +24,11 @@ class Charts
 		'ch_asso' => 'Plan comptable associatif',
 	];
 
+	static public function getFirstId(): ?int
+	{
+		return DB::getInstance()->firstColumn('SELECT id FROM acc_charts WHERE archived = 0;') ?: null;
+	}
+
 	static public function updateInstalled(string $chart_code): ?Chart
 	{
 		$file = sprintf('%s/include/data/charts/%s.csv', ROOT, $chart_code);
@@ -47,6 +52,21 @@ class Charts
 				$c->resetAccountsRules();
 			}
 		}
+	}
+
+	static public function installCountryDefault(string $country_code): Chart
+	{
+		if ($country_code == 'CH') {
+			$chart_code = 'ch_asso';
+		}
+		elseif ($country_code == 'be') {
+			$chart_code = 'be_pcmn_2019';
+		}
+		else {
+			$chart_code = 'fr_pca_2018';
+		}
+
+		return self::install($chart_code);
 	}
 
 	static public function install(string $chart_code): Chart

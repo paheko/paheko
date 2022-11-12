@@ -6,6 +6,7 @@ use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Line;
 use Garradin\Entities\Accounting\Project;
 use Garradin\Entities\Accounting\Transaction;
+use Garradin\Entities\Accounting\Year;
 use KD2\DB\EntityManager;
 use Garradin\DB;
 use Garradin\DynamicList;
@@ -14,7 +15,7 @@ use Garradin\UserException;
 
 class Transactions
 {
-	static public function create(array $data)
+	static public function create(array $data): Transaction
 	{
 		$transaction = new Transaction;
 		$transaction->importForm($data);

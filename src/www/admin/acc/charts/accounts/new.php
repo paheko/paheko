@@ -66,20 +66,8 @@ $form->runIf('save', function () use ($account, $accounts, $chart, $current_year
 	$account->save();
 
 	if (!empty(f('opening_amount')) && $current_year) {
-		$t = new Transaction;
-		$t->label = 'Solde d\'ouverture du compte';
+		$t = $account->createOpeningBalance($current_year, Utils::moneyToInteger(f('opening_amount')));
 		$t->id_creator = Session::getUserId();
-		$t->date = clone $current_year->start_date;
-		$t->type = $t::TYPE_ADVANCED;
-		$t->notes = 'Créé automatiquement à l\'ajout du compte';
-		$t->id_year = $current_year->id;
-
-		$opening_account = $accounts->getOpeningAccountId();
-		$amount = Utils::moneyToInteger(f('opening_amount'));
-		$a = $amount > 0 ? 0 : abs($amount);
-		$b = $amount < 0 ? 0 : abs($amount);
-		$t->addLine(Line::create($account->id, $a, $b));
-		$t->addLine(Line::create($opening_account, $b, $a));
 		$t->save();
 	}
 

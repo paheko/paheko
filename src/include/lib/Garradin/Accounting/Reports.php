@@ -83,6 +83,13 @@ class Reports
 		return implode(' AND ', $where);
 	}
 
+	static public function countTransactions(array $criterias): int
+	{
+		$where = self::getWhereClause($criterias);
+		return DB::getInstance()->firstColumn('SELECT COUNT(DISTINCT t.id)
+			FROM acc_transactions_lines l INNER JOIN acc_transactions t ON t.id = l.id_transaction WHERE ' .$where);
+	}
+
 	static public function getSumsPerYear(array $criterias): array
 	{
 		$where = self::getWhereClause($criterias);
@@ -475,6 +482,12 @@ class Reports
 		foreach ($accounts as $row) {
 			$t = in_array($row->type, $types, true) ? $row->type : 0;
 			$out[$t]->accounts[] = $row;
+		}
+
+		foreach ($out as $t => $group) {
+			if (!count($group->accounts)) {
+				unset($out[$t]);
+			}
 		}
 
 		return $out;

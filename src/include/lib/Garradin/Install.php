@@ -173,7 +173,7 @@ class Install
 		self::assert($source['password'] === $source['password_confirmed'], 'La vérification du mot de passe ne correspond pas');
 
 		try {
-			self::install($source['name'], $source['user_name'], $source['user_email'], $source['user_password']);
+			self::install($source['country'], $source['name'], $source['user_name'], $source['user_email'], $source['password']);
 			self::ping();
 		}
 		catch (\Exception $e) {
@@ -182,7 +182,7 @@ class Install
 		}
 	}
 
-	static public function install(string $name, string $user_name, string $user_email, string $user_password, ?string $welcome_text = null): void
+	static public function install(string $country_code, string $name, string $user_name, string $user_email, string $user_password, ?string $welcome_text = null): void
 	{
 		if (file_exists(DB_FILE)) {
 			throw new UserException('La base de données existe déjà.');
@@ -203,14 +203,16 @@ class Install
 
 		file_put_contents(SHARED_CACHE_ROOT . '/version', garradin_version());
 
+		$currency = $country_code == 'CH' ? 'CHF' : '€';
+
 		// Configuration de base
 		$config = Config::getInstance();
 		$config->setCreateFlag();
 		$config->import([
 			'org_name'      => $name,
 			'org_email'     => $user_email,
-			'currency'      => '€',
-			'country'       => 'FR',
+			'currency'      => $currency,
+			'country'       => $country_code,
 			'site_disabled' => true,
 			'log_retention' => 365,
 			'analytical_set_all' => true,
@@ -271,27 +273,7 @@ class Install
 		$config->setFile('admin_homepage', $welcome_text);
 
         // Import accounting chart
-        $chart = Charts::install('fr_pca_2018');
-
-        // Create first accounting year
-        $year = new Year;
-        $year->label = sprintf('Exercice %d', date('Y'));
-        $year->start_date = new \DateTime('January 1st');
-        $year->end_date = new \DateTime('December 31');
-        $year->id_chart = $chart->id();
-        $year->save();
-
-        // Create a first bank account
-        $account = new Account;
-        $account->import([
-        	'label' => 'Compte courant',
-        	'code' => '512A',
-        	'type' => Account::TYPE_BANK,
-        	'position' => Account::ASSET_OR_LIABILITY,
-        	'id_chart' => $chart->id(),
-        	'user' => 1,
-        ]);
-        $account->save();
+        $chart = Charts::installCountryDefault($country_code);
 
 		// Create an example saved search (users)
 		$query = (object) [

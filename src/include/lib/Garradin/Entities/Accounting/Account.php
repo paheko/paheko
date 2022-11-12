@@ -975,4 +975,24 @@ class Account extends Entity
 
 		return $level;
 	}
+
+	public function createOpeningBalance(Year $year, int $amount, ?string $label = null): Transaction
+	{
+		$t = new Transaction;
+		$t->label = $label ?? 'Solde d\'ouverture du compte';
+		$t->date = clone $year->start_date;
+		$t->type = $t::TYPE_ADVANCED;
+		$t->notes = 'Créé automatiquement à l\'ajout du compte';
+		$t->id_year = $year->id;
+
+		$accounts = $year->accounts();
+
+		$opening_account = $accounts->getOpeningAccountId();
+		$credit = $amount > 0 ? 0 : abs($amount);
+		$debit = $amount < 0 ? 0 : abs($amount);
+		$t->addLine(Line::create($this->id(), $credit, $debit));
+		$t->addLine(Line::create($opening_account, $debit, $credit));
+		return $t;
+	}
+
 }

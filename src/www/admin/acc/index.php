@@ -8,6 +8,10 @@ require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ);
 
+if (!Years::count()) {
+	Utils::redirect('!acc/years/first_setup.php');
+}
+
 $tpl->assign('graphs', array_slice(Graph::URL_LIST, 0, 3));
 
 $years = Years::listOpen(true);
