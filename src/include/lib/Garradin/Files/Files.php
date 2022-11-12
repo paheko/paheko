@@ -20,6 +20,21 @@ use const Garradin\{FILE_STORAGE_BACKEND, FILE_STORAGE_QUOTA, FILE_STORAGE_CONFI
 class Files
 {
 	/**
+	 * To enable or disable quota check
+	 */
+	static protected $quota = true;
+
+	static public function enableQuota(): void
+	{
+		self::$quota = true;
+	}
+
+	static public function disableQuota(): void
+	{
+		self::$quota = false;
+	}
+
+	/**
 	 * Returns an array of all file permissions for a given user
 	 */
 	static public function buildUserPermissions(Session $s): array
@@ -498,6 +513,10 @@ class Files
 
 	static public function checkQuota(int $size = 0): void
 	{
+		if (!self::$quota) {
+			return;
+		}
+
 		$remaining = self::getRemainingQuota(true);
 
 		if (($remaining - (float) $size) < 0) {
