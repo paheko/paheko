@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Démarrer la comptabilité" current="acc"}
+{include file="_head.tpl" title="Démarrer la comptabilité" current="acc"}
 
 {form_errors}
 
@@ -74,4 +74,4 @@
 
 <script type="text/javascript" src="{$admin_url}static/scripts/accounting_setup.js"></script>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}
