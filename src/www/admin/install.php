@@ -1,6 +1,7 @@
 <?php
 namespace Garradin;
 
+use Garradin\Entities\Accounting\Chart;
 use Garradin\Membres\Session;
 
 const INSTALL_PROCESS = true;
@@ -31,5 +32,7 @@ $form->runIf('save', function () {
     Install::installFromForm();
     Session::getInstance()->forceLogin(1);
 }, 'install', ADMIN_URL);
+
+$tpl->assign('countries', Chart::COUNTRY_LIST);
 
 $tpl->display('admin/install.tpl');
