@@ -67,8 +67,8 @@ class Services
 				paid
 			FROM services_users su
 			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_service) su2 ON su2.id = su.id
-			INNER JOIN users u ON u.id = su.id_user WHERE %s',
-			$db->where('u.id_category', 'NOT IN', $hidden_cats));
+			INNER JOIN users u ON u.id = su.id_user WHERE u.%s',
+			$db->where('id_category', 'NOT IN', $hidden_cats));
 
 		$db->exec($sql);
 

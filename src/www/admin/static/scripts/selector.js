@@ -18,7 +18,7 @@ var rows = document.querySelectorAll('table tr');
 
 rows.forEach((e, k) => {
 	e.classList.add('clickable');
-	var l = e.querySelector('td').innerText + ' ' + e.querySelector('th').innerText;
+	var l = e.querySelector('td.num').innerText + ' ' + e.querySelector('th').innerText;
 	e.setAttribute('data-search-label', normalizeString(l));
 
 	e.querySelector('button').onfocus = () => {

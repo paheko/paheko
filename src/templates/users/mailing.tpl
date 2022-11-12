@@ -1,8 +1,8 @@
-{include file="_head.tpl" title="Envoyer un message collectif" current="users/mailing" custom_css=["!web/css.php"]}
+{include file="_head.tpl" title="Message collectif" current="users/mailing" custom_css=["!web/css.php"]}
 
 <nav class="tabs">
 	<ul>
-		<li class="current"><a href="{$self_url}">Envoyer</a></li>
+		<li class="current"><a href="{$self_url}">Rédaction de message</a></li>
 		<li><a href="emails.php">Adresses rejetées</a></li>
 	</ul>
 </nav>

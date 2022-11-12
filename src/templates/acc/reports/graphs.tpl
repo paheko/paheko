@@ -13,4 +13,8 @@
 	</section>
 </section>
 
+<p class="help">
+	En raison des arrondis, la somme des pourcentages peut ne pas être égale à 100%.
+</p>
+
 {include file="_foot.tpl"}
