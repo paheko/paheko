@@ -221,9 +221,9 @@ class Accounts
 		return DB::getInstance()->count(Account::TABLE, 'id_chart = ? AND type = ?', $this->chart_id, $type);
 	}
 
-	public function getSingleAccountForType(int $type)
+	public function getSingleAccountForType(int $type): ?Account
 	{
-		return DB::getInstance()->first('SELECT * FROM acc_accounts WHERE type = ? AND id_chart = ? LIMIT 1;', $type, $this->chart_id);
+		return $this->em->one('SELECT * FROM @TABLE WHERE type = ? AND id_chart = ? LIMIT 1;', $type, $this->chart_id);
 	}
 
 	public function getIdForType(int $type): ?int

@@ -22,6 +22,14 @@
 </p>
 {/if}
 
+{if $_GET.msg == 'WELCOME'}
+<div class="block confirm">
+	<h3>Votre premier exercice a été créé&nbsp;!</h3>
+	<p>Vous pouvez désormais utiliser la comptabilité.</p>
+	<p>{linkbutton shape="plus" href="!acc/transactions/new.php" label="Saisir une écriture"}</p>
+</div>
+{/if}
+
 {if $_GET.msg == 'OPEN'}
 <p class="block error">
 	Il n'existe aucun exercice ouvert.

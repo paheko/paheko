@@ -72,6 +72,11 @@ class Years
 		return DB::getInstance()->count(Year::TABLE, 'closed = 1');
 	}
 
+	static public function count()
+	{
+		return DB::getInstance()->count(Year::TABLE);
+	}
+
 	static public function list(bool $reverse = false)
 	{
 		$desc = $reverse ? 'DESC' : '';
@@ -108,9 +113,8 @@ class Years
 			$end_date->modify('+1 year');
 		}
 		else {
-			$start_date = new \DateTime;
-			$end_date = clone $start_date;
-			$end_date->modify('+1 year');
+			$start_date = new \DateTime('January 1st');
+			$end_date = new \DateTime('December 31');
 		}
 
 		return [$start_date, $end_date];

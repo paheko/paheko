@@ -6,6 +6,7 @@ use Garradin\Accounting\Years;
 
 require_once __DIR__ . '/../_inc.php';
 
+// ALLOW_ACCOUNTS_ACCESS is true when coming from the account selector only
 if (!defined('Garradin\ALLOW_ACCOUNTS_ACCESS') || !ALLOW_ACCOUNTS_ACCESS) {
 	$session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ);
 }
