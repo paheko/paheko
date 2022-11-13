@@ -1,18 +1,11 @@
 Options -Indexes -Multiviews
-DirectoryIndex disabled
-DirectoryIndex index.php
-
-# Rediriger les adresses dynamiques vers le routeur
-FallbackResource /_route.php
-
-# FallbackResource ne fonctionne pas pour les URLs en .php
-# voir https://stackoverflow.com/a/66136226
-ErrorDocument 404 /_route.php
 
 # Explication : FallbackResource n'est dispo que depuis Apache 2.2.16, soit Debian Wheezy (2013)
 # Mais bugue avant Apache 2.4.15, il faut donc bien désactiver le DirectoryIndex
 # cf. https://bz.apache.org/bugzilla/show_bug.cgi?id=58292
 # et https://serverfault.com/questions/559067/apache-hangs-for-five-seconds-with-fallbackresource-when-accessing
+DirectoryIndex disabled
+DirectoryIndex index.php
 
 # Un peu de sécurité
 <IfModule mod_alias.c>
@@ -24,10 +17,40 @@ ErrorDocument 404 /_route.php
 <IfModule mod_deflate.c>
 	FileETag None
 </IfModule>
-# Décommenter les lignes suivantes pour autoriser l'envoi de gros fichier
+
+# Décommenter les lignes suivantes pour autoriser l'envoi de gros fichier jusqu'à 256 Mo
 # (documents et sauvegardes)
 #
 #<If "%{REQUEST_URI} =~ m!^/admin/(common/files|config/backup)/! && -n %{HTTP_COOKIE}">
 #	php_value post_max_size 256M
 #	php_value upload_max_filesize 256M
 #</If>
+
+# Avec FallbackResource, on ne peut pas faire de PUT/DELETE/etc. sur les URLs en .php
+# (genre remote.php/webdav/... utilisées par le client ownCloud/NextCloud)
+# et ce même si le fichier PHP n'existe pas
+# cf. https://stackoverflow.com/a/66136226
+# DONC: on utilise mod_rewrite si dispo
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	RewriteBase /
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteRule ^.*$ /_route.php [L,QSA]
+</IfModule>
+
+# Sinon le reste marchera, sauf les clients OC/NC
+<IfModule !mod_rewrite.c>
+	# Rediriger les adresses dynamiques vers le routeur
+	FallbackResource /_route.php
+
+	# FallbackResource ne fonctionne pas pour les URLs en .php
+	# voir https://stackoverflow.com/a/66136226
+	ErrorDocument 404 /_route.php
+
+	# Les clients NextCloud/ownCloud ne peuvent fonctionner sans mod_rewrite
+	<IfModule mod_alias.c>
+		Redirect 501 /remote.php
+		Redirect 501 /status.php
+	</IfModule>
+</IfModule>
