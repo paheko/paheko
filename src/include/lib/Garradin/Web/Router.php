@@ -78,8 +78,9 @@ class Router
 		elseif (in_array($first, self::DAV_ROUTES) && WebDAV_Server::route($uri)) {
 			return;
 		}
-		elseif (($file = Files::getFromURI($uri))
-			|| ($file = Web::getAttachmentFromURI($uri))) {
+		elseif (Files::getContext($uri)
+			&& (($file = Files::getFromURI($uri))
+				|| ($file = Web::getAttachmentFromURI($uri)))) {
 			$size = null;
 
 			if ($file->image) {

@@ -452,7 +452,11 @@ class Files
 
 	static public function getContext(string $path): ?string
 	{
-		$context = strtok($path, '/');
+		$context = substr($path, strpos($path, '/'));
+
+		if (!$context) {
+			return null;
+		}
 
 		if (!array_key_exists($context, File::CONTEXTS_NAMES)) {
 			return null;

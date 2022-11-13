@@ -574,7 +574,7 @@ class Session extends \KD2\UserSession
 			}
 		}
 
-		throw new \InvalidArgumentException(sprintf('Unknown context: %s', $context));
+		throw new \InvalidArgumentException(sprintf('Unknown context: %s', $path));
 	}
 
 	public function requireFilePermission(string $context, string $permission)
