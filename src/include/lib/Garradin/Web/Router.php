@@ -49,6 +49,24 @@ class Router
 
 		$first = ($pos = strpos($uri, '/')) ? substr($uri, 0, $pos) : null;
 
+		if (HTTP_LOG_FILE) {
+			$method = $_SERVER['REQUEST_METHOD'] ?? $_SERVER['REDIRECT_REQUEST_METHOD'];
+			$qs = $_SERVER['QUERY_STRING'] ?? null;
+			$headers = apache_request_headers();
+
+			self::log("===== ROUTER: Got new request: %s from %s =====", date('d/m/Y H:i:s'), $_SERVER['REMOTE_ADDR']);
+
+			self::log("ROUTER: <= %s %s\nRequest headers:\n  %s",
+				$method,
+				$uri . ($qs ? '?' : '') . $qs,
+				implode("\n  ", array_map(fn ($v, $k) => $k . ': ' . $v, $headers, array_keys($headers)))
+			);
+
+			if ($method != 'GET' && $method != 'OPTIONS' && $method != 'HEAD') {
+				self::log("ROUTER: <= Request body:\n%s", file_get_contents('php://input'));
+			}
+		}
+
 		// Redirect old URLs (pre-1.1)
 		if ($uri == 'feed/atom/') {
 			Utils::redirect('/atom.xml');
