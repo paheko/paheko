@@ -275,7 +275,7 @@ class Storage extends AbstractStorage
 		if ($new && !File::canCreate($uri)) {
 			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de créer ce fichier', 403);
 		}
-		elseif (!$new && $target->canWrite()) {
+		elseif (!$new && !$target->canWrite()) {
 			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de modifier ce fichier', 403);
 		}
 
