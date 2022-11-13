@@ -34,6 +34,29 @@ class Files
 		self::$quota = false;
 	}
 
+	static public function listContextsPermissions(Session $s): array
+	{
+		$perm = self::buildUserPermissions($s);
+		$contexts = [
+			'Fichiers de votre fiche de membre personnelle' => File::CONTEXT_USER . '/' . $s::getUserId() . '/',
+			'Documents de l\'association' => File::CONTEXT_DOCUMENTS,
+			'Fichiers des membres' => File::CONTEXT_USER . '//',
+			'Fichiers des écritures comptables' => File::CONTEXT_TRANSACTION . '//',
+			'Fichiers du site web (contenu des pages, images, etc.)' => File::CONTEXT_WEB . '//',
+			'Squelettes du site web' => File::CONTEXT_SKELETON . '/web/',
+			'Fichiers de la configuration (logo, etc.)' => File::CONTEXT_CONFIG,
+			'Squelettes des formulaires' => File::CONTEXT_SKELETON,
+		];
+
+		$out = [];
+
+		foreach ($contexts as $name => $path) {
+			$out[$name] = $perm[$path] ?? null;
+		}
+
+		return $out;
+	}
+
 	/**
 	 * Returns an array of all file permissions for a given user
 	 */
@@ -46,7 +69,7 @@ class Files
 
 		if ($s->isLogged() && $id = $s::getUserId()) {
 			// The user can always access his own profile files
-			$p[File::CONTEXT_USER . '/' . $s::getUserId()] = [
+			$p[File::CONTEXT_USER . '/' . $s::getUserId() . '/'] = [
 				'mkdir' => false,
 				'move' => false,
 				'create' => false,
@@ -90,7 +113,7 @@ class Files
 		];
 
 		// Web skeletons
-		$p[File::CONTEXT_SKELETON . '/web'] = [
+		$p[File::CONTEXT_SKELETON . '/web/'] = [
 			'mkdir' => $is_web_admin,
 			'move' => $is_web_admin,
 			'create' => $is_web_admin,

@@ -22,11 +22,14 @@ class Storage extends AbstractStorage
 	 */
 	const PUT_IGNORE_PATTERN = '!^~(?:lock\.|^\._)|^(?:\.DS_Store|Thumbs\.db|desktop\.ini)$!';
 
-	protected $cache = [];
-	protected $root = [];
+	protected array $cache = [];
+	protected array $root = [];
 
-	public function __construct()
+	protected NextCloud $nextcloud;
+
+	public function __construct(NextCloud $nextcloud)
 	{
+		$this->nextcloud = $nextcloud;
 		$access = Files::listReadAccessContexts(Session::getInstance());
 
 		$this->cache[''] = (object) ['name' => '', 'type' => File::TYPE_DIRECTORY];
@@ -161,7 +164,7 @@ class Storage extends AbstractStorage
 			case NextCloud::PROP_OC_SHARETYPES:
 				return WebDAV::EMPTY_PROP_VALUE;
 			case NextCloud::PROP_OC_DOWNLOADURL:
-				return NextCloud::getDirectURL($uri, $this->users->current()->login);
+				return $this->nextcloud->getDirectURL($uri, 'null');
 			case Nextcloud::PROP_NC_RICH_WORKSPACE:
 				return '';
 			case NextCloud::PROP_OC_ID:

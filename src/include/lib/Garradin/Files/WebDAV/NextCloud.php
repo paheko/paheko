@@ -13,9 +13,8 @@ class NextCloud extends WebDAV_NextCloud
 {
 	protected string $temporary_chunks_path;
 
-	public function __construct(WebDAV $server)
+	public function __construct()
 	{
-		$this->setServer($server);
 		$this->temporary_chunks_path =  CACHE_ROOT . '/webdav.chunks';
 		$this->setRootURL(WWW_URL);
 	}
@@ -26,6 +25,10 @@ class NextCloud extends WebDAV_NextCloud
 
 		if ($session->isLogged()) {
 			return true;
+		}
+
+		if (!$login || !$password) {
+			return false;
 		}
 
 		if ($session->checkAppCredentials($login, $password)) {
@@ -71,16 +74,16 @@ class NextCloud extends WebDAV_NextCloud
 	public function getLoginURL(?string $token): string
 	{
 		if ($token) {
-			return sprintf('%slogin.php?nc=%s', ADMIN_URL, $token);
+			return sprintf('%slogin.php?app=%s', ADMIN_URL, $token);
 		}
 		else {
-			return sprintf('%slogin.php?nc=redirect', ADMIN_URL);
+			return sprintf('%slogin.php?app=redirect', ADMIN_URL);
 		}
 	}
 
 	public function getDirectDownloadSecret(string $uri, string $login): string
 	{
-		return hash('sha256', $uri . SECRET_KEY);
+		return hash_hmac('sha1', $uri, SECRET_KEY);
 	}
 
 	protected function cleanChunks(): void

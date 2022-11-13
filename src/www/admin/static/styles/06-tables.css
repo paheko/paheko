@@ -74,7 +74,7 @@ table.list .confirm {
     color: darkgreen;
 }
 
-table.list .num {
+table.list .num, table.list .check {
     text-align: center;
 }
 

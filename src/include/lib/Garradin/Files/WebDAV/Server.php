@@ -15,7 +15,9 @@ class Server
 		$uri = '/' . ltrim($uri, '/');
 
 		$dav = new WebDAV;
-		$dav->setStorage(new Storage);
+		$nc = new NextCloud($dav);
+		$storage = new Storage($nc);
+		$dav->setStorage($storage);
 
 		header('Access-Control-Allow-Origin: *', true);
 		$method = $_SERVER['REQUEST_METHOD'] ?? null;
@@ -36,7 +38,7 @@ class Server
 			}
 		}
 
-		$nc = new NextCloud($dav);
+		$nc->setServer($dav);
 
 		if ($r = $nc->route($uri)) {
 			// NextCloud route already replied something, stop here

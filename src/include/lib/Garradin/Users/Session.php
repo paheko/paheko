@@ -158,6 +158,11 @@ class Session extends \KD2\UserSession
 		return $this->db->delete('users_sessions', $this->db->where('id_user', $user_id));
 	}
 
+	public function getAppLoginToken(): ?string
+	{
+		return $_GET['app'] ?? null;
+	}
+
 	/**
 	 * Create a temporary app token for an external service session (eg. NextCloud)
 	 */
@@ -204,7 +209,7 @@ class Session extends \KD2\UserSession
 	 * Verify temporary app token and create a session,
 	 * this is similar to "remember me" sessions but without cookies
 	 */
-	public function verifyAppToken(string $token): ?\stdClass
+	public function verifyAppToken(string $token): ?array
 	{
 		if (!ctype_alnum($token) || strlen($token) > 64) {
 			return null;
@@ -230,7 +235,7 @@ class Session extends \KD2\UserSession
 		$login = $selector->selector;
 		$password = $selector->verifier;
 
-		return (object) compact('login', 'password');
+		return compact('login', 'password');
 	}
 
 
@@ -264,9 +269,15 @@ class Session extends \KD2\UserSession
 			return null;
 		}
 
-		$this->user = $this->getUserDataForSession($selector->user_id);
+		$this->_user = Users::get($selector->user_id);
 
-		return $this->user;
+		if (!$this->_user) {
+			return null;
+		}
+
+		$this->user = $selector->user_id;
+
+		return $this->_user;
 	}
 
 	public function isLogged(bool $disable_local_login = false)

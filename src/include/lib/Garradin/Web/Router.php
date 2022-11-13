@@ -27,6 +27,7 @@ class Router
 		'wopi',
 		'remote.php',
 		'index.php',
+		'status.php',
 		'ocs',
 	];
 
@@ -75,7 +76,8 @@ class Router
 			UserForms::serve($uri);
 			return;
 		}
-		elseif (in_array($first, self::DAV_ROUTES) && WebDAV_Server::route($uri)) {
+		elseif ((in_array($uri, self::DAV_ROUTES) || in_array($first, self::DAV_ROUTES))
+			&& WebDAV_Server::route($uri)) {
 			return;
 		}
 		elseif (Files::getContext($uri)
