@@ -259,6 +259,22 @@ namespace Garradin;
 // const SQL_DEBUG = __DIR__ . '/debug_sql.sqlite';
 
 /**
+ * Activation du log HTTP (option de développement)
+ *
+ * Si cette constante est renseignée par un fichier texte, *TOUTES* les requêtes HTTP
+ * ainsi que leur contenu y sera enregistré.
+ *
+ * C'est surtout utile pour débuguer les problèmes de WebDAV par exemple.
+ *
+ * ATTENTION : cela signifie que des informations personnelles (mot de passe etc.)
+ * peuvent se retrouver dans le log. Ne pas utiliser à moins de tester en développement.
+ *
+ * Default : null (= désactivé)
+ * @var string|null
+ */
+// const HTTP_LOG_FILE = __DIR__ . '/http.log';
+
+/**
  * Activer la possibilité de faire une mise à jour semi-automatisée
  * depuis fossil.kd2.org.
  *
