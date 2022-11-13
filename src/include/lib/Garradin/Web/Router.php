@@ -18,7 +18,7 @@ use Garradin\Utils;
 
 use Garradin\Users\Session;
 
-use const Garradin\{WWW_URI, ADMIN_URL, ROOT};
+use const Garradin\{WWW_URI, ADMIN_URL, ROOT, HTTP_LOG_FILE};
 
 class Router
 {
@@ -136,5 +136,16 @@ class Router
 
 		$s = new Skeleton($skel);
 		$s->serve(compact('uri', 'page', 'skel'));
+	}
+
+	static public function log(string $message, ...$params)
+	{
+		if (!HTTP_LOG_FILE) {
+			return;
+		}
+
+		$msg = vsprintf($message, $params) . "\n\n";
+
+		file_put_contents(HTTP_LOG_FILE, $msg, FILE_APPEND);
 	}
 }

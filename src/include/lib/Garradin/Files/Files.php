@@ -187,6 +187,16 @@ class Files
 			'share' => false,
 		];
 
+		$p[''] = [
+			'mkdir' => false,
+			'move' => false,
+			'write' => false,
+			'create' => false,
+			'delete' => false,
+			'read' => true,
+			'share' => false,
+		];
+
 		return $p;
 	}
 

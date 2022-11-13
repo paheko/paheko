@@ -3,6 +3,7 @@
 namespace Garradin\Files\WebDAV;
 
 use Garradin\Utils;
+use Garradin\Web\Router;
 
 use KD2\WebDAV\Server as KD2_WebDAV;
 use KD2\WebDAV\Exception;
@@ -38,4 +39,8 @@ class WebDAV extends KD2_WebDAV
 		return $out;
 	}
 
+	public function log(string $message, ...$params)
+	{
+		Router::log('DAV: ' . $message, ...$params);
+	}
 }

@@ -22,7 +22,7 @@ class Storage extends AbstractStorage
 	 */
 	const PUT_IGNORE_PATTERN = '!^~(?:lock\.|^\._)|^(?:\.DS_Store|Thumbs\.db|desktop\.ini)$!';
 
-	protected array $cache = [];
+	protected ?array $cache = null;
 	protected array $root = [];
 
 	protected NextCloud $nextcloud;
@@ -30,18 +30,29 @@ class Storage extends AbstractStorage
 	public function __construct(NextCloud $nextcloud)
 	{
 		$this->nextcloud = $nextcloud;
-		$access = Files::listReadAccessContexts(Session::getInstance());
+	}
 
-		$this->cache[''] = (object) ['name' => '', 'type' => File::TYPE_DIRECTORY];
+	protected function populateRootCache(): void
+	{
+		if (isset($this->cache)) {
+			return;
+		}
+
+		$s = Session::getInstance();
+		$access = Files::listReadAccessContexts($s);
+
+		$this->cache = ['' => Files::get('')];
 
 		foreach ($access as $context => $name) {
-			$this->cache[$context] = (object) ['name' => $context, 'type' => File::TYPE_DIRECTORY];
+			$this->cache[$context] = Files::get($context);
 			$this->root[] = $context;
 		}
 	}
 
 	protected function load(string $uri)
 	{
+		$this->populateRootCache();
+
 		if (!isset($this->cache[$uri])) {
 			$this->cache[$uri] = Files::get($uri);
 
@@ -58,6 +69,8 @@ class Storage extends AbstractStorage
 	 */
 	public function list(string $uri, ?array $properties): iterable
 	{
+		$this->populateRootCache();
+
 		if (!$uri) {
 			foreach ($this->root as $name) {
 				yield $name => null;
@@ -69,6 +82,10 @@ class Storage extends AbstractStorage
 
 		if (!$file) {
 			return null;
+		}
+
+		if ($file->type != $file::TYPE_DIRECTORY) {
+			return;
 		}
 
 		foreach (Files::list($uri) as $file) {
@@ -85,7 +102,7 @@ class Storage extends AbstractStorage
 	{
 		$session = Session::getInstance();
 
-		$file = Files::get($uri);
+		$file = $this->load($uri);
 
 		if (!$file) {
 			throw new WebDAV_Exception('File Not Found', 404);
@@ -112,6 +129,8 @@ class Storage extends AbstractStorage
 	 */
 	public function exists(string $uri): bool
 	{
+		$this->populateRootCache();
+
 		if (isset($this->cache[$uri])) {
 			return true;
 		}
@@ -134,8 +153,6 @@ class Storage extends AbstractStorage
 			case 'DAV::getcontentlength':
 				return $is_dir ? null : $file->size;
 			case 'DAV::getcontenttype':
-				// ownCloud app crashes if mimetype is provided for a directory
-				// https://github.com/owncloud/android/issues/3768
 				return $is_dir ? null : $file->mime;
 			case 'DAV::resourcetype':
 				return $is_dir ? 'collection' : '';
@@ -146,7 +163,7 @@ class Storage extends AbstractStorage
 			case 'DAV::ishidden':
 				return false;
 			case 'DAV::getetag':
-				return !$is_dir ? $file->etag() : null;
+				return !$is_dir ? $file->etag() : md5($file->getRecursiveSize() . $file->path);
 			case 'DAV::lastaccessed':
 				return null;
 			case 'DAV::creationdate':
@@ -185,7 +202,7 @@ class Storage extends AbstractStorage
 			case 'DAV::quota-used-bytes':
 				return Files::getUsedQuota();
 			case Nextcloud::PROP_OC_SIZE:
-				return $file->size;
+				return $file->getRecursiveSize();
 			case WOPI::PROP_USER_NAME:
 				return $session->getUser()->name();
 			case WOPI::PROP_READ_ONLY:
@@ -206,6 +223,7 @@ class Storage extends AbstractStorage
 	 */
 	public function properties(string $uri, ?array $properties, int $depth): ?array
 	{
+		$this->populateRootCache();
 		$file = $this->load($uri);
 
 		if (!$file) {
