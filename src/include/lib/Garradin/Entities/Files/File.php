@@ -1021,4 +1021,13 @@ class File extends Entity
 	{
 		return Files::callStorage('getReadOnlyPointer', $this);
 	}
+
+	public function getRecursiveSize(): int
+	{
+		if ($this->type == self::TYPE_FILE) {
+			return $this->size;
+		}
+
+		return Files::callStorage('getDirectorySize', $this->path);
+	}
 }

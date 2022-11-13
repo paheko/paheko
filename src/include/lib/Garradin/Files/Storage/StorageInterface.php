@@ -80,6 +80,11 @@ interface StorageInterface
 	static public function listDirectoriesRecursively(string $path): array;
 
 	/**
+	 * Return recursive directory size
+	 */
+	static public function getDirectorySize(string $path): int;
+
+	/**
 	 * Moves a file to a new path, when its name or path has changed
 	 */
 	static public function move(File $file, string $new_path): bool;

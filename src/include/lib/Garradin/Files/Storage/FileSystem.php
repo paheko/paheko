@@ -272,6 +272,24 @@ class FileSystem implements StorageInterface
 		return self::_recurseGlob($fullpath, '*', \GLOB_ONLYDIR);
 	}
 
+	static public function getDirectorySize(string $path): int
+	{
+		$fullpath = self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
+		$fullpath = rtrim($fullpath, DIRECTORY_SEPARATOR);
+
+		foreach (glob($fullpath . '/*', GLOB_NOSORT) as $f) {
+			if (is_dir($f)) {
+				$f = substr($f, strlen($path) + 1);
+				$total += self::getDirectorySize($f);
+			}
+			else {
+				$total += filesize($f);
+			}
+		}
+
+		return $total;
+	}
+
 	static protected function _recurseGlob(string $path, string $pattern = '*', int $flags = 0): array
 	{
 		$target = $path . DIRECTORY_SEPARATOR . $pattern;
