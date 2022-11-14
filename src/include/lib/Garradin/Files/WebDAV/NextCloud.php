@@ -13,6 +13,7 @@ use const Garradin\{SECRET_KEY, ADMIN_URL, CACHE_ROOT, WWW_URL};
 class NextCloud extends WebDAV_NextCloud
 {
 	protected string $temporary_chunks_path;
+	protected string $prefix = 'documents/';
 
 	public function __construct()
 	{
