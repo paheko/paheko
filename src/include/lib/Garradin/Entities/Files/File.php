@@ -19,6 +19,7 @@ use Garradin\Static_Cache;
 use Garradin\Utils;
 use Garradin\Entities\Web\Page;
 use Garradin\Web\Render\Render;
+use Garradin\Web\Router;
 
 use Garradin\Files\Files;
 
@@ -651,20 +652,9 @@ class File extends Entity
 		header(sprintf('Content-Disposition: %s; filename="%s"', $download ? 'attachment' : 'inline', $this->name));
 
 		// Utilisation de XSendFile si disponible
-		if (null !== $path && ENABLE_XSENDFILE && isset($_SERVER['SERVER_SOFTWARE']))
+		if (null !== $path && Router::xSendFile($path))
 		{
-			if (stristr($_SERVER['SERVER_SOFTWARE'], 'apache')
-				&& function_exists('apache_get_modules')
-				&& in_array('mod_xsendfile', apache_get_modules()))
-			{
-				header('X-Sendfile: ' . $path);
-				return;
-			}
-			else if (stristr($_SERVER['SERVER_SOFTWARE'], 'lighttpd'))
-			{
-				header('X-Sendfile: ' . $path);
-				return;
-			}
+			return;
 		}
 
 		// Désactiver gzip

@@ -18,7 +18,7 @@ use Garradin\Utils;
 
 use Garradin\Users\Session;
 
-use const Garradin\{WWW_URI, ADMIN_URL, ROOT, HTTP_LOG_FILE};
+use const Garradin\{WWW_URI, ADMIN_URL, ROOT, HTTP_LOG_FILE, ENABLE_XSENDFILE};
 
 class Router
 {
@@ -165,5 +165,27 @@ class Router
 		$msg = vsprintf($message, $params) . "\n\n";
 
 		file_put_contents(HTTP_LOG_FILE, $msg, FILE_APPEND);
+	}
+
+	static public function xSendFile(string $path): bool
+	{
+		// Utilisation de XSendFile si disponible
+		if (ENABLE_XSENDFILE && isset($_SERVER['SERVER_SOFTWARE']))
+		{
+			if (stristr($_SERVER['SERVER_SOFTWARE'], 'apache')
+				&& function_exists('apache_get_modules')
+				&& in_array('mod_xsendfile', apache_get_modules()))
+			{
+				header('X-Sendfile: ' . $path);
+				return true;
+			}
+			else if (stristr($_SERVER['SERVER_SOFTWARE'], 'lighttpd'))
+			{
+				header('X-Sendfile: ' . $path);
+				return true;
+			}
+		}
+
+		return false;
 	}
 }
