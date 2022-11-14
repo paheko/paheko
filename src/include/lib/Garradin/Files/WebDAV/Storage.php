@@ -13,6 +13,9 @@ use Garradin\ValidationException;
 use Garradin\Users\Session;
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
+use Garradin\Web\Router;
+
+use const Garradin\FILE_STORAGE_BACKEND;
 
 class Storage extends AbstractStorage
 {
@@ -119,6 +122,10 @@ class Storage extends AbstractStorage
 			return null;
 		}
 
+		if (FILE_STORAGE_BACKEND == 'FileSystem' && Router::xSendFile($file->fullpath())) {
+			return ['stop' => true];
+		}
+
 		// We trust the WebDAV server to be more efficient that File::serve
 		// with serving a file for WebDAV clients
 		return ['resource' => $file->getReadOnlyPointer()];
@@ -181,7 +188,7 @@ class Storage extends AbstractStorage
 			case NextCloud::PROP_OC_SHARETYPES:
 				return WebDAV::EMPTY_PROP_VALUE;
 			case NextCloud::PROP_OC_DOWNLOADURL:
-				return $this->nextcloud->getDirectURL($uri, 'null');
+				return $this->nextcloud->getDirectURL($uri, $session::getUserId());
 			case Nextcloud::PROP_NC_RICH_WORKSPACE:
 				return '';
 			case NextCloud::PROP_OC_ID:
@@ -196,7 +203,7 @@ class Storage extends AbstractStorage
 				];
 
 				$permissions = array_filter($permissions, fn($a) => $a);
-				return implode('', array_values($permissions));
+				return implode('', array_keys($permissions));
 			case 'DAV::quota-available-bytes':
 				return Files::getRemainingQuota();
 			case 'DAV::quota-used-bytes':
