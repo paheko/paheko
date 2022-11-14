@@ -1,12 +1,14 @@
 <?php
 namespace Garradin;
 
-use Garradin\Files\Files;
 use Garradin\Users\Session;
+use Garradin\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
 
 $session = Session::getInstance();
+
+$session->requireAccess($session::SECTION_DOCUMENTS, $session::ACCESS_READ);
 
 $app_token = $session->getAppLoginToken();
 
@@ -37,7 +39,7 @@ $form->runIf('confirm', function () use ($app_token, $session) {
 	Utils::redirect('!login_app.php?app=ok');
 }, $csrf_key);
 
-$permissions = Files::listContextsPermissions($session);
+$permissions = $session->getFilePermissions(File::CONTEXT_DOCUMENTS);
 
 $tpl->assign(compact('app_token', 'csrf_key', 'permissions'));
 

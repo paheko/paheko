@@ -588,6 +588,15 @@ class Session extends \KD2\UserSession
 		throw new \InvalidArgumentException(sprintf('Unknown context: %s', $path));
 	}
 
+	public function getFilePermissions(string $path): ?array
+	{
+		if (!isset($this->_files_permissions)) {
+			$this->_files_permissions = Files::buildUserPermissions($this);
+		}
+
+		return $this->_files_permissions[$path] ?? null;
+	}
+
 	public function requireFilePermission(string $context, string $permission)
 	{
 		if (!$this->checkFilePermission($context, $permission)) {
