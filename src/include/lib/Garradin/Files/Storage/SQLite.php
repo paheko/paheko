@@ -177,7 +177,7 @@ class SQLite implements StorageInterface
 
 	static public function getDirectorySize(string $path): int
 	{
-		return DB::getInstance()->firstColumn('SELECT SUM(size) FROM @files WHERE (parent = ? OR parent LIKE ?) AND type = ?;', $path, $path . '/%', File::TYPE_FILE);
+		return DB::getInstance()->firstColumn('SELECT SUM(size) FROM files WHERE (parent = ? OR parent LIKE ?) AND type = ?;', $path, $path . '/%', File::TYPE_FILE);
 	}
 
 	static public function exists(string $path): bool
