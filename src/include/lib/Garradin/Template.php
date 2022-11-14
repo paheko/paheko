@@ -364,7 +364,7 @@ class Template extends Smartyer
 				}
 			}
 			else {
-				$value = $params['user']->$key;
+				$value = $params['source']->$key ?? null;
 			}
 
 			// Forcer la valeur à être un entier (depuis PHP 7.1)

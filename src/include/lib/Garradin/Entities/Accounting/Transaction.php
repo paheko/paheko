@@ -4,6 +4,7 @@ namespace Garradin\Entities\Accounting;
 
 use KD2\DB\EntityManager;
 
+use Garradin\Config;
 use Garradin\DB;
 use Garradin\Entity;
 use Garradin\Form;

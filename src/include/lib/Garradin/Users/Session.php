@@ -539,7 +539,7 @@ class Session extends \KD2\UserSession
 			return null;
 		}
 
-		return $i->user()->id;
+		return $i->user;
 	}
 
 	public function canAccess(string $section, int $permission): bool

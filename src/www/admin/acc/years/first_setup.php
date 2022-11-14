@@ -2,7 +2,7 @@
 namespace Garradin;
 
 use Garradin\DB;
-use Garradin\Membres\Session;
+use Garradin\Users\Session;
 use Garradin\Accounting\Charts;
 use Garradin\Accounting\Transactions;
 use Garradin\Accounting\Years;
