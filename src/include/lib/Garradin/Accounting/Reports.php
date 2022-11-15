@@ -420,11 +420,11 @@ class Reports
 
 		$out->foot_left = [
 			self::getTotalLine($out->body_left, 'Total emplois'),
-			self::getTotalLine($out->body_left + $general_statement->body_left, 'Total charges et emplois'),
+			self::getTotalLine(array_merge($out->body_left, $general_statement->body_left), 'Total charges et emplois'),
 		];
 		$out->foot_right = [
 			self::getTotalLine($out->body_right, 'Total sources'),
-			self::getTotalLine($out->body_right + $general_statement->body_right, 'Total produits et sources'),
+			self::getTotalLine(array_merge($out->body_right, $general_statement->body_right), 'Total produits et sources'),
 		];
 
 		return $out;
