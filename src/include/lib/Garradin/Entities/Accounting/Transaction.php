@@ -963,11 +963,18 @@ class Transaction extends Entity
 						'label' => 'Type de recette',
 						'targets' => [Account::TYPE_REVENUE],
 						'direction' => 'credit',
+						'defaults' => [
+							self::TYPE_CREDIT => 'credit',
+						],
 					],
 					[
 						'label' => 'Compte d\'encaissement',
 						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
 						'direction' => 'debit',
+						'defaults' => [
+							self::TYPE_EXPENSE => 'credit',
+							self::TYPE_TRANSFER => 'credit',
+						],
 					],
 				],
 				'label' => self::TYPES_NAMES[self::TYPE_REVENUE],
@@ -978,11 +985,18 @@ class Transaction extends Entity
 						'label' => 'Type de dépense',
 						'targets' => [Account::TYPE_EXPENSE],
 						'direction' => 'debit',
+						'defaults' => [
+							self::TYPE_DEBT => 'debit',
+						],
 					],
 					[
 						'label' => 'Compte de décaissement',
 						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
 						'direction' => 'credit',
+						'defaults' => [
+							self::TYPE_REVENUE => 'debit',
+							self::TYPE_TRANSFER => 'credit',
+						],
 					],
 				],
 				'label' => self::TYPES_NAMES[self::TYPE_EXPENSE],
@@ -994,6 +1008,10 @@ class Transaction extends Entity
 						'label' => 'De',
 						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
 						'direction' => 'credit',
+						'defaults' => [
+							self::TYPE_EXPENSE => 'credit',
+							self::TYPE_REVENUE => 'debit',
+						],
 					],
 					[
 						'label' => 'Vers',
@@ -1010,11 +1028,17 @@ class Transaction extends Entity
 						'label' => 'Type de dette (dépense)',
 						'targets' => [Account::TYPE_EXPENSE],
 						'direction' => 'debit',
+						'defaults' => [
+							self::TYPE_EXPENSE => 'debit',
+						],
 					],
 					[
 						'label' => 'Compte de tiers',
 						'targets' => [Account::TYPE_THIRD_PARTY],
 						'direction' => 'credit',
+						'defaults' => [
+							self::TYPE_CREDIT => 'debit',
+						],
 					],
 				],
 				'label' => self::TYPES_NAMES[self::TYPE_DEBT],
@@ -1026,11 +1050,17 @@ class Transaction extends Entity
 						'label' => 'Type de créance (recette)',
 						'targets' => [Account::TYPE_REVENUE],
 						'direction' => 'credit',
+						'defaults' => [
+							self::TYPE_REVENUE => 'credit',
+						],
 					],
 					[
 						'label' => 'Compte de tiers',
 						'targets' => [Account::TYPE_THIRD_PARTY],
 						'direction' => 'debit',
+						'defaults' => [
+							self::TYPE_DEBT => 'credit',
+						],
 					],
 				],
 				'label' => self::TYPES_NAMES[self::TYPE_CREDIT],
@@ -1048,10 +1078,10 @@ class Transaction extends Entity
 
 		foreach ($this->getLinesWithAccounts() as $i => $l) {
 			if ($l->debit) {
-				$current_accounts[] = $l->account_selector;
+				$current_accounts['debit'] = $l->account_selector;
 			}
 			elseif ($l->credit) {
-				$current_accounts[] = $l->account_selector;
+				$current_accounts['credit'] = $l->account_selector;
 			}
 
 			if (count($current_accounts) == 2) {
@@ -1062,22 +1092,23 @@ class Transaction extends Entity
 		foreach ($details as $key => &$type) {
 			$type = (object) $type;
 			$type->id = $key;
-			foreach ($type->accounts as $i => &$account) {
+			foreach ($type->accounts as &$account) {
 				$account = (object) $account;
 				$account->targets_string = implode(':', $account->targets);
-				$account->selector_name = sprintf('simple[%s][%d]', $key, $i);
+				$account->selector_name = sprintf('simple[%s][%s]', $key, $account->direction);
 
-				// Try to find out if we can replicate the value
-				// debt and credit can have same values, but not others
-				// as it can lead to weird stuff
-				// exception: revenue/expense can have the same payment account, no issue
-				if (($type->id == $this->type)
-					|| ($type->id == self::TYPE_CREDIT && $this->type == self::TYPE_DEBT)
-					|| ($type->id == self::TYPE_DEBT && $this->type == self::TYPE_CREDIT)
-					|| ($type->id == self::TYPE_REVENUE && $this->type == self::TYPE_EXPENSE && $i == 1)
-					|| ($type->id == self::TYPE_EXPENSE && $this->type == self::TYPE_REVENUE && $i == 1)
-				) {
-					$account->selector_value = $source['simple'][$key][$i] ?? ($current_accounts[$i] ?? null);
+				$d = null;
+
+				// Copy selector value for current type
+				if ($type->id == $this->type) {
+					$d = $account->direction;
+				}
+				else {
+					$d = $account->defaults[$this->type] ?? null;
+				}
+
+				if ($d) {
+					$account->selector_value = $source['simple'][$key][$d] ?? ($current_accounts[$d] ?? null);
 				}
 			}
 		}
