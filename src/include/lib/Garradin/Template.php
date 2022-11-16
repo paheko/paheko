@@ -308,9 +308,9 @@ class Template extends Smartyer
 				<span>%s %s %s</span>
 			</span>',
 			htmlspecialchars($params['class'] ?? ''),
-			$this->widgetLinkButton(['href' => sprintf($params['href'], 'csv'), 'label' => 'Export CSV', 'shape' => 'export']),
-			$this->widgetLinkButton(['href' => sprintf($params['href'], 'ods'), 'label' => 'Export LibreOffice', 'shape' => 'export']),
-			CALC_CONVERT_COMMAND ? $this->widgetLinkButton(['href' => sprintf($params['href'], 'xlsx'), 'label' => 'Export Excel', 'shape' => 'export']) : ''
+			$this->widgetLinkButton(['href' => $params['href'] . 'csv', 'label' => 'Export CSV', 'shape' => 'export']),
+			$this->widgetLinkButton(['href' => $params['href'] . 'ods', 'label' => 'Export LibreOffice', 'shape' => 'export']),
+			CALC_CONVERT_COMMAND ? $this->widgetLinkButton(['href' => $params['href'] . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']) : ''
 		);
 	}
 
