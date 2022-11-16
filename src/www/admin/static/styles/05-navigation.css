@@ -57,20 +57,20 @@ nav.tabs aside {
     clear: right;
 }
 
-main nav.menu > b {
+.menu-btn > b {
     font-weight: normal;
 }
 
-main nav.menu {
+.menu-btn {
     display: inline-block;
     position: relative;
 }
 
-main nav.menu span {
+.menu-btn span {
     display: none;
 }
 
-main nav.menu:hover span, main nav.menu:active span {
+.menu-btn:hover span, .menu-btn:active span {
     display: flex;
     position: absolute;
     flex-direction: column;
@@ -82,10 +82,10 @@ main nav.menu:hover span, main nav.menu:active span {
     box-shadow: 2px 2px 5px var(--gLightBorderColor);
 }
 
-main nav.menu-right span {
+.menu-btn-right span {
     right: -1em;
 }
 
-main nav.menu button {
+main .menu-btn button {
     text-align: left;
 }

@@ -31,16 +31,7 @@
 	<dd>
 		{$list->count()}
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
-		<nav class="menu">
-			<b data-icon="↷" class="btn">Export</b>
-			<span>
-				{linkbutton href="?id=%d&export=csv"|args:$user.id shape="export" label="Export CSV"}
-				{linkbutton href="?id=%d&export=ods"|args:$user.id shape="export" label="Export LibreOffice"}
-				{if CALC_CONVERT_COMMAND}
-					{linkbutton href="?id=%d&export=xlsx"|args:$user.id shape="export" label="Export Excel"}
-				{/if}
-			</span>
-		</nav>
+			{exportmenu href="?id=%d&export=%%s"|args:$user.id}
 		{/if}
 	</dd>
 	{/if}
