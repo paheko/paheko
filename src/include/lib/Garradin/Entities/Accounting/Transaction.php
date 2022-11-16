@@ -572,6 +572,7 @@ class Transaction extends Entity
 		$this->assert($count == 2 ||  $this->type == self::TYPE_ADVANCED, sprintf('Une écriture de type "%s" ne peut comporter que deux lignes au maximum.', self::TYPES_NAMES[$this->type]));
 
 		$accounts_ids = [];
+		$chart_id = $db->firstColumn('SELECT id_chart FROM acc_years WHERE id = ?;', $this->id_year);
 
 		foreach ($lines as $k => $line) {
 			$k = $k+1;
@@ -579,8 +580,8 @@ class Transaction extends Entity
 			$this->assert($line->credit || $line->debit, sprintf('Ligne %d: Aucun montant au débit ou au crédit', $k));
 			$this->assert($line->credit >= 0 && $line->debit >= 0, sprintf('Ligne %d: Le montant ne peut être négatif', $k));
 			$this->assert(($line->credit * $line->debit) === 0 && ($line->credit + $line->debit) > 0, sprintf('Ligne %d: non équilibrée, crédit ou débit doit valoir zéro.', $k));
+			$this->assert($db->test(Account::TABLE, 'id = ? AND id_chart = ?', $line->id_account, $chart_id), sprintf('Ligne %d: le compte spécifié n\'est pas lié au bon plan comptable', $k));
 
-			$accounts_ids = [$line->id_account];
 			$total += $line->credit;
 			$total -= $line->debit;
 		}
@@ -589,11 +590,6 @@ class Transaction extends Entity
 
 		$this->assert($db->test('acc_years', 'id = ?', $this->id_year), 'L\'exercice sélectionné n\'existe pas');
 		$this->assert($this->id_creator === null || $db->test('membres', 'id = ?', $this->id_creator), 'Le compte membre créateur de l\'écriture n\'existe pas');
-
-		$found_accounts = $db->getAssoc(sprintf('SELECT id, id FROM acc_accounts WHERE %s AND id_chart = (SELECT id_chart FROM acc_years WHERE id = %d);', $db->where('id', $accounts_ids), $this->id_year));
-
-		$diff = array_diff($accounts_ids, $found_accounts);
-		$this->assert(count($diff) == 0, sprintf('Certains comptes (%s) ne sont pas liés au bon plan comptable', implode(', ', $diff)));
 
 		$this->assert(!$this->id_related || $db->test('acc_transactions', 'id = ?', $this->id_related), 'L\'écriture liée indiquée n\'existe pas');
 		$this->assert(!$this->id_related || !$this->exists() || $this->id_related != $this->id, 'Il n\'est pas possible de lier une écriture à elle-même');
