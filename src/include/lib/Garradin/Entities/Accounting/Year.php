@@ -178,7 +178,7 @@ class Year extends Entity
 	 * List common accounts used in this year, grouped by type
 	 * @return array
 	 */
-	public function listCommonAccountsGrouped(array $types = null): array
+	public function listCommonAccountsGrouped(array $types = null, bool $hide_empty = false): array
 	{
 		if (null === $types) {
 			// If we want all types, then we will get used or bookmarked accounts in common types
@@ -228,9 +228,11 @@ class Year extends Entity
 			$out[$t]->accounts[] = $row;
 		}
 
-		foreach ($out as $key => $v) {
-			if (!count($v->accounts)) {
-				unset($out[$key]);
+		if ($hide_empty) {
+			foreach ($out as $key => $v) {
+				if (!count($v->accounts)) {
+					unset($out[$key]);
+				}
 			}
 		}
 
