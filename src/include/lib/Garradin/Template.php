@@ -124,6 +124,7 @@ class Template extends Smartyer
 		$this->register_function('button', [$this, 'widgetButton']);
 		$this->register_function('link', [$this, 'widgetLink']);
 		$this->register_function('linkbutton', [$this, 'widgetLinkButton']);
+		$this->register_function('exportmenu', [$this, 'widgetExportMenu']);
 
 		$this->register_modifier('strlen', fn($a) => strlen($a ?? ''));
 		$this->register_modifier('dump', ['KD2\ErrorManager', 'dump']);
@@ -297,6 +298,20 @@ class Template extends Smartyer
 		$params['class'] .= ' icn-btn';
 
 		return $this->widgetLink($params);
+	}
+
+	protected function widgetExportMenu(array $params): string
+	{
+		return sprintf('
+			<span class="menu-btn %s">
+				<b data-icon="↷" class="btn">Export</b>
+				<span>%s %s %s</span>
+			</span>',
+			htmlspecialchars($params['class'] ?? ''),
+			$this->widgetLinkButton(['href' => sprintf($params['href'], 'csv'), 'label' => 'Export CSV', 'shape' => 'export']),
+			$this->widgetLinkButton(['href' => sprintf($params['href'], 'ods'), 'label' => 'Export LibreOffice', 'shape' => 'export']),
+			CALC_CONVERT_COMMAND ? $this->widgetLinkButton(['href' => sprintf($params['href'], 'xlsx'), 'label' => 'Export Excel', 'shape' => 'export']) : ''
+		);
 	}
 
 	protected function passwordChangeInput(array $params)

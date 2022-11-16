@@ -42,16 +42,7 @@
 								{linkbutton shape="delete" label="Supprimer" href="!acc/charts/delete.php?id=%d"|args:$item.id target="_dialog"}
 							{/if}
 						{/if}
-						<nav class="menu menu-right">
-							<b data-icon="↷" class="btn">Export</b>
-							<span>
-								{linkbutton href="export.php?id=%d&format=csv"|args:$item.id label="Export CSV" shape="export"}
-								{linkbutton href="export.php?id=%d&format=ods"|args:$item.id label="Export LibreOffice" shape="export"}
-								{if CALC_CONVERT_COMMAND}
-									{linkbutton href="export.php?id=%d&format=xlsx"|args:$item.id label="Export Excel" shape="export"}
-								{/if}
-							</span>
-						</nav>
+						{exportmenu class="menu-btn-right" href="export.php?id=%d&format=%%s"|args:$item.id}
 					</td>
 				</tr>
 			{/foreach}
