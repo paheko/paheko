@@ -26,5 +26,5 @@ if (!$chart->country) {
 $accounts = $chart->accounts();
 
 $tpl->assign(compact('chart'));
-$tpl->assign('accounts_grouped', $accounts->listCommonGrouped($types, true));
+$tpl->assign('accounts_grouped', $accounts->listCommonGrouped($types, false));
 $tpl->display('acc/charts/accounts/index.tpl');
