@@ -77,7 +77,7 @@ $accounts = $chart->accounts();
 
 $edit_url = sprintf('!acc/charts/accounts/%s?id=%d&types=%s', isset($grouped_accounts) ? '' : 'all.php', $chart->id(), $targets_str);
 
-$targets_names = count($targets) ? array_intersect_key(Account::TYPES_NAMES, array_flip($targets)) : [];
+$targets_names = !empty($targets) ? array_intersect_key(Account::TYPES_NAMES, array_flip($targets)) : [];
 $targets_names = implode(', ', $targets_names);
 
 $tpl->assign(compact('chart', 'targets', 'targets_str', 'filter_options', 'filter', 'edit_url', 'targets_names'));
