@@ -56,7 +56,7 @@
 		{linkbutton shape="download" href="%s&_pdf"|args:$self_url label="Télécharger en PDF"}
 		{/if}
 		{if $current == 'statement' && !$criterias.compare_year}
-			{exportmenu href="%s&export=%%s"|args:$self_url}
+			{exportmenu href="%s&export="|args:$self_url}
 		{/if}
 	</p>
 </div>

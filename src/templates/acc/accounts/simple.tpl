@@ -5,7 +5,7 @@
 <nav class="tabs">
 	<aside>
 	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-		{exportmenu href="?type=%d&export=%%s"|args:$type}
+		{exportmenu href="?type=%d&export="|args:$type}
 	{/if}
 		{linkbutton shape="search" href="!acc/search.php?year=%d&type=%d"|args:$year.id,$type label="Recherche"}
 	</aside>
