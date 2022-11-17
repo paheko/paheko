@@ -4,7 +4,8 @@
 
 <div class="help block">
 	<h3>Bienvenue dans la comptabilité&nbsp;!</h3>
-	<p>Pour commencer à saisir la comptabilité, merci d'indiquer les quelques informations ci-dessous.</p>
+	<p>Les informations ci-dessous sont nécessaire pour démarrer la comptabilité.</p>
+	<p>{linkbutton shape="help" href=$help_pattern_url|args:"premier-exercice-avec-garradin" target="_dialog" label="Démarrer le premier exercice comptable"}</p>
 </div>
 
 <form method="post" action="{$self_url}" data-focus="1">
@@ -12,7 +13,8 @@
 	<fieldset>
 		<legend>1. Premier exercice</legend>
 		<p class="help">
-			La comptabilité utilise des exercices. Un exercice c'est une période comptable, en général une année civile, du 1<sup>er</sup> janvier au 31 décembre.
+			La comptabilité utilise des exercices. Un exercice, c'est une période comptable, généralement d'une année (12 mois), souvent une année civile, du 1<sup>er</sup> janvier au 31 décembre, mais d'autres choix sont possibles.
+			{linkbutton shape="help" href=$help_pattern_url|args:"exercice-comptable" target="_dialog" label="Qu'est-ce qu'un exercice comptable ?"}
 		</p>
 		<dl>
 			{input type="date" label="Date de début de l'exercice" name="start_date" required=true source=$year}
