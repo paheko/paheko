@@ -1,9 +1,9 @@
 {if !empty($criterias.projects_only)}
 	{include file="admin/_head.tpl" title="Grand livre analytique" current="acc/years"}
-	{include file="acc/reports/_header.tpl" current="analytical_ledger" title="Grand livre analytique"}
+	{include file="acc/reports/_header.tpl" current="analytical_ledger" title="Grand livre analytique" allow_filter=true}
 {else}
 	{include file="admin/_head.tpl" title="%sGrand livre"|args:$project_title current="acc/years"}
-	{include file="acc/reports/_header.tpl" current="ledger" title="Grand livre"}
+	{include file="acc/reports/_header.tpl" current="ledger" title="Grand livre" allow_filter=true}
 {/if}
 
 <div class="year-header noprint">
