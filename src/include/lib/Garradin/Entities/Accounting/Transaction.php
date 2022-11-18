@@ -1130,6 +1130,7 @@ class Transaction extends Entity
 			'id'         => $this->_related->id,
 			'amount'     => $this->_related->sum(),
 			'id_project' => $this->_related->getProjectId(),
+			'type'       => $this->_related->type,
 		];
 
 		return $out;
