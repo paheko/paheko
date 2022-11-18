@@ -1,5 +1,6 @@
 <div class="year-header">
 	<nav class="tabs noprint">
+		{if !empty($year)}
 		<aside>
 			{if $current == 'statement' && !$criterias.compare_year}
 				{exportmenu href="%s&export="|args:$self_url}
@@ -11,6 +12,7 @@
 				{linkbutton shape="search" href="#" id="filterFormButton" label="Filtrer" onclick="var a = $('#filterForm'); a.disabled = false; g.toggle(a, true); this.remove(); var a = $('#compareFormButton'); a ? a.remove() : null; return false;"}
 			{/if}
 		</aside>
+		{/if}
 
 		<ul>
 		{if isset($project) || $current == 'analytical_ledger'}
@@ -36,6 +38,7 @@
 		{/if}
 	</nav>
 
+	{if !empty($year)}
 	<div class="forms">
 		{if !empty($allow_compare) && !empty($other_years) && empty($criterias['project'])}
 		<form method="get" action="" class="{if !$criterias.compare_year}hidden {/if}noprint" id="compareForm">
@@ -73,8 +76,7 @@
 		</form>
 		{/if}
 	</div>
-
-	</form>
+	{/if}
 
 	<h2>{$config.nom_asso} — {$title}</h2>
 	{if isset($project)}
