@@ -58,7 +58,7 @@ if (!isset($current)) {
 	<?php
 	$current_parent = substr($current, 0, strpos($current, '/'));
 	?>
-		<li class="home{if $current == 'home'} current{elseif $current_parent == 'home'} current_parent{/if}"><h3><a href="{$admin_url}"><b data-icn="{icon html=false shape="home"}"></b><span>Accueil</span></a></h3>
+		<li class="home{if $current == 'home'} current{elseif $current_parent == 'home'} current_parent{/if}"><h3><a href="{$admin_url}">{icon shape="home"}<b>Accueil</b></a></h3>
 			{if !empty($plugins_menu)}
 				<ul>
 				{foreach from=$plugins_menu key="key" item="html"}
@@ -68,7 +68,7 @@ if (!isset($current)) {
 			{/if}
 		</li>
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)}
-			<li class="{if $current == 'users'} current{elseif $current_parent == 'users'} current_parent{/if}"><h3><a href="{$admin_url}users/"><b data-icn="{icon html=false shape="users"}"></b></b><span>Membres</span></a></h3>
+			<li class="{if $current == 'users'} current{elseif $current_parent == 'users'} current_parent{/if}"><h3><a href="{$admin_url}users/">{icon shape="users"}<b>Membres</b></a></h3>
 			<ul>
 			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
 				<li{if $current == 'users/new'} class="current"{/if}><a href="{$admin_url}users/new.php">Ajouter</a></li>
@@ -81,7 +81,7 @@ if (!isset($current)) {
 			</li>
 		{/if}
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
-			<li class="{if $current == 'acc'} current{elseif $current_parent == 'acc'} current_parent{/if}"><h3><a href="{$admin_url}acc/"><b data-icn="{icon html=false shape="money"}"></b><span>Comptabilité</span></a></h3>
+			<li class="{if $current == 'acc'} current{elseif $current_parent == 'acc'} current_parent{/if}"><h3><a href="{$admin_url}acc/">{icon shape="money"}<b>Comptabilité</b></a></h3>
 			<ul>
 			{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
 				<li class="{if $current == 'acc/new'} current{/if}"><a href="{$admin_url}acc/transactions/new.php">Saisie</a></li>
@@ -94,21 +94,21 @@ if (!isset($current)) {
 		{/if}
 
 		{if $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_READ)}
-			<li class="{if $current == 'docs'} current{elseif $current_parent == 'docs'} current_parent{/if}"><h3><a href="{$admin_url}docs/"><b data-icn="{icon html=false shape="folder"}"></b><span>Documents</span></a></h3>
+			<li class="{if $current == 'docs'} current{elseif $current_parent == 'docs'} current_parent{/if}"><h3><a href="{$admin_url}docs/">{icon shape="folder"}<b>Documents</b></a></h3>
 			</li>
 		{/if}
 
 		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_READ)}
-			<li class="{if $current == 'web'} current{elseif $current_parent == 'web'} current_parent{/if}"><h3><a href="{$admin_url}web/"><b data-icn="{icon html=false shape="globe"}"></b><span>Site web</span></a></h3>
+			<li class="{if $current == 'web'} current{elseif $current_parent == 'web'} current_parent{/if}"><h3><a href="{$admin_url}web/">{icon shape="globe"}<b>Site web</b></a></h3>
 			</li>
 		{/if}
 
 		{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
-			<li class="{if $current == 'config'} current{elseif $current_parent == 'config'} current_parent{/if}"><h3><a href="{$admin_url}config/"><b data-icn="{icon html=false shape="settings"}"></b><span>Configuration</span></a></h3>
+			<li class="{if $current == 'config'} current{elseif $current_parent == 'config'} current_parent{/if}"><h3><a href="{$admin_url}config/">{icon shape="settings"}<b>Configuration</b></a></h3>
 		{/if}
 
 		{if $logged_user->exists()}
-		<li class="{if $current == 'me'} current{elseif $current_parent == 'me'} current_parent{/if}"><h3><a href="{$admin_url}me/"><b data-icn="{icon html=false shape="user"}"></b><span> Mes infos personnelles</span></a></h3>
+		<li class="{if $current == 'me'} current{elseif $current_parent == 'me'} current_parent{/if}"><h3><a href="{$admin_url}me/">{icon shape="user"}<b>Mes infos personnelles</b></a></h3>
 			<ul>
 				<li{if $current == 'me/services'}  class="current"{/if}><a href="{$admin_url}me/services.php">Mes activités &amp; cotisations</a></li>
 			</ul>

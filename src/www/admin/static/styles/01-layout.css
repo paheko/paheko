@@ -139,21 +139,20 @@ a:hover {
     position: relative;
 }
 
-.header .menu h3 b[data-icn]::before {
+.header .menu h3 span[data-icon]::before {
     position: absolute;
     right: .4rem;
-    content: attr(data-icn);
     display: block;
-    font-family: "gicon";
-    float: right;
     text-decoration: none;
-    margin-top: -.2em;
+    text-shadow: none;
+    margin: 0;
+    top: .4rem;
     font-size: 20pt;
     color: rgba(var(--gBgColor), .5);
     font-weight: normal;
 }
 
-.header .menu li.current h3 b[data-icn]::before {
+.header .menu li.current h3 span[data-icon]::before {
     color: rgba(var(--gMainColor));
 }
 

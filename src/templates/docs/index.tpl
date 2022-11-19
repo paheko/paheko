@@ -94,7 +94,7 @@ use Garradin\Entities\Files\File;
 						{input type="checkbox" name="check[]" value=$file.path}
 					</td>
 					{/if}
-					<td class="icon">{icon shape="folder"}</td>
+					<td class="file-icon">{icon shape="folder"}</td>
 					<th><a href="?path={$file.path}">{$file.name}</a></th>
 					<td></td>
 					<td></td>

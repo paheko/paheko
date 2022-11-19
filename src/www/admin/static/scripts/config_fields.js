@@ -11,13 +11,13 @@ changeType();
 var addBtn = document.createElement('button');
 addBtn.type = "button";
 addBtn.dataset.icon = "➕";
-addBtn.className = "icn add";
+addBtn.className = "icn-btn add";
 addBtn.title = "Ajouter une option";
 
 var delBtn = document.createElement('button');
 delBtn.type = "button";
 delBtn.dataset.icon = "➖";
-delBtn.className = "icn delete";
+delBtn.className = "icn-btn delete";
 delBtn.title = "Enlever cette option";
 
 var options = $('.options dd');

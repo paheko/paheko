@@ -68,11 +68,11 @@
 			{if empty($user.password)}
 				Pas de mot de passe configuré
 			{else}
-				<b class="icn">☑</b> Oui
+				{icon shape="check"} Oui
 				{if !empty($user.otp_secret)}
-					(<b class="icn">🔒</b> avec second facteur)
+					({icon shape="lock"} avec second facteur)
 				{else}
-					(<b class="icn">🔓</b> sans second facteur)
+					({icon shape="unlock"} sans second facteur)
 				{/if}
 			{/if}
 		</dd>

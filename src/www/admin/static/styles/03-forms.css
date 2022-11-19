@@ -208,40 +208,12 @@ b.btn {
     line-height: .8em;
     vertical-align: middle;
     content: attr(data-icon);
+    font-weight: normal;
 }
 
 [data-icon]:empty:before {
     padding: 0;
 }
-
-.icn, .icnl {
-    font-family: "gicon", sans-serif;
-    font-style: normal;
-    font-weight: normal;
-    speak: none;
-    font-variant: normal;
-    text-transform: none;
-    position: relative;
-}
-
-.actions .icn, .icn.action {
-    text-decoration: none;
-    border-radius: 1em;
-    display: inline-block;
-    text-align: center;
-    font-size: 1.2em;
-    line-height: .8em;
-    vertical-align: middle;
-    padding: .2em;
-    font-family: "gicon", sans-serif;
-    color: rgb(var(--gMainColor));
-    text-shadow: 1px 1px 1px var(--gBorderColor);
-    border: none;
-    cursor: pointer;
-    position: relative;
-    z-index: 200;
-}
-
 
 button.main, .icn-btn.main {
     color: rgb(var(--gTextColor));

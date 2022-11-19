@@ -125,10 +125,11 @@ table.list .userOrder .check {
     padding-left: .5em;
 }
 
-.userOrder .icn {
+.userOrder [data-icon]::before {
     display: inline-block;
     color: rgb(var(--gMainColor));
     font-size: 1.5em;
+    text-shadow: none !important;
     line-height: .2em;
     width: 1em;
     text-align: center;
@@ -136,7 +137,7 @@ table.list .userOrder .check {
     font-weight: normal;
 }
 
-thead .cur .icn {
+thead .cur [data-icon]::before {
     color: rgb(var(--gBgColor));
 }
 
@@ -148,12 +149,12 @@ table.list .separator {
     border-left: 2px dashed #999;
 }
 
-table.list .icon {
+table.list .file-icon {
     width: 1.5em;
     color: rgba(var(--gTextColor), 0.3);
 }
 
-table.list .folder .icon {
+table.list .folder .file-icon {
     color: rgba(var(--gTextColor), 0.5);
 }
 

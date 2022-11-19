@@ -14,9 +14,9 @@
 					{/if}
 
 					{if $list.desc}
-						<span class="icn dn">&darr;</span>
+						{icon shape="down" class="dn"}
 					{else}
-						<span class="icn up">&uarr;</span>
+						{icon shape="up" class="up"}
 					{/if}
 
 					{$column.label}

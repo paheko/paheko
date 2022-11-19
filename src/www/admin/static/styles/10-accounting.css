@@ -113,7 +113,7 @@ tr.account-level-6 th { padding-left: 5em; }
 tr.account button[name*="bookmark"] { opacity: 0.6; transition: opacity .3s; width: 8em;}
 tr.account button[value="1"] { opacity: 1; }
 tr.account td.bookmark { width: 2%; }
-tr.account td.bookmark b { color: var(--gBorderColor); }
+tr.account td.bookmark span[data-icon] { color: var(--gBorderColor); font-size: .9em; }
 
 table.projects tr.title p.help { font-weight: normal; text-align: center; }
 table.projects tr.title p.actions {

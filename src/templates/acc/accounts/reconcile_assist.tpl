@@ -128,7 +128,7 @@
 						{if $line->journal && $line->csv}
 							==
 						{else}
-							<b class="icn">⚠</b>
+							{icon shape="alert"}
 						{/if}
 						</td>
 					{if isset($line->csv)}

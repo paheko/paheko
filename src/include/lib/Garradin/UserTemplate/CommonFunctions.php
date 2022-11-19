@@ -427,13 +427,18 @@ class CommonFunctions
 			return Utils::iconUnicode($params['shape']);
 		}
 
+		$label = $params['label'] ?? '';
+		unset($params['label']);
+
+		self::setIconAttribute($params);
+
 		$attributes = array_diff_key($params, ['shape']);
 		$attributes = array_map(fn($v, $k) => sprintf('%s="%s"', $k, htmlspecialchars($v)),
 			$attributes, array_keys($attributes));
 
 		$attributes = implode(' ', $attributes);
 
-		return sprintf('<b class="icn" %s>%s</b>', $attributes, Utils::iconUnicode($params['shape']));
+		return sprintf('<span %s>%s</span>', $attributes, htmlspecialchars($label));
 	}
 
 	static public function link(array $params): string

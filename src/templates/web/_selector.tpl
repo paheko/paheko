@@ -10,19 +10,19 @@
 		{foreach from=$breadcrumbs item="_title" key="_path"}
 		<tr{if $_path == $parent} class="focused"{/if}>
 			<td><input type="button" value="Choisir" data-path="{$_path}" data-label="{$_title}" /></td>
-			<th><?=str_repeat('<i>&nbsp;</i>', $iteration)?> <b class="icn">&rarr;</b> <a href="?parent={$_path}&amp;current={$selected}&amp;_dialog">{$_title}</a></th>
+			<th><?=str_repeat('<i>&nbsp;</i>', $iteration)?> {icon shape="right"} <a href="?parent={$_path}&amp;current={$selected}&amp;_dialog">{$_title}</a></th>
 			<?php $last = $iteration; ?>
 		</tr>
 		{/foreach}
 		{foreach from=$categories item="cat"}
 		<tr{if $cat.path == $parent} class="focused"{/if}>
 			<td><input type="button" value="Choisir" data-path="{$cat.path}" data-label="{$cat.title}" /></td>
-			<th><?=str_repeat('<i>&nbsp;</i>', $last+1)?> <b class="icn">&rarr;</b> <a href="?parent={$cat.path}&amp;current={$selected}&amp;_dialog">{$cat.title}</a></th>
+			<th><?=str_repeat('<i>&nbsp;</i>', $last+1)?> {icon shape="right"} <a href="?parent={$cat.path}&amp;current={$selected}&amp;_dialog">{$cat.title}</a></th>
 		</tr>
 		{foreachelse}
 		<tr>
 			<td></td>
-			<th><?=str_repeat('<i>&nbsp;</i>', $last+1)?> <b class="icn">&rarr;</b> <em>Pas de sous-catégorie…</em></th>
+			<th><?=str_repeat('<i>&nbsp;</i>', $last+1)?> {icon shape="right"} <em>Pas de sous-catégorie…</em></th>
 		</tr>
 		{/foreach}
 	</tbody>
