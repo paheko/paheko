@@ -58,7 +58,7 @@ class Category extends Entity
 			'options' => [
 				Session::ACCESS_NONE => 'Pas d\'accès',
 				Session::ACCESS_READ => 'Lecture uniquement (peut voir les informations personnelles de tous les membres, y compris leurs inscriptions à des activités)',
-				Session::ACCESS_WRITE => 'Lecture & écriture (peut ajouter et modifier des membres, mais pas les supprimer ni les changer de catégorie, peut inscrire des membres à des activités)',
+				Session::ACCESS_WRITE => 'Lecture & écriture (peut ajouter et modifier des membres, mais pas les supprimer ni les changer de catégorie, peut inscrire des membres à des activités, peut envoyer des messages collectifs)',
 				Session::ACCESS_ADMIN => 'Administration (peut tout faire)',
 			],
 		],
@@ -69,7 +69,7 @@ class Category extends Entity
 				Session::ACCESS_NONE => 'Pas d\'accès',
 				Session::ACCESS_READ => 'Lecture uniquement (peut lire toutes les informations de tous les exercices)',
 				Session::ACCESS_WRITE => 'Lecture & écriture (peut ajouter des écritures, mais pas les modifier ni les supprimer)',
-				Session::ACCESS_ADMIN => 'Administration (peut modifier et supprimer des écritures, gérer les comptes, les exercices, etc.)',
+				Session::ACCESS_ADMIN => 'Administration (peut tout faire)',
 			],
 		],
 		'documents' => [
@@ -78,7 +78,7 @@ class Category extends Entity
 			'options' => [
 				Session::ACCESS_NONE => 'Pas d\'accès',
 				Session::ACCESS_READ => 'Lecture uniquement (peut lire tous les fichiers)',
-				Session::ACCESS_WRITE => 'Lecture & écriture (peut lire, ajouter, modifier et déplacer des fichiers, mais pas les supprimer)',
+				Session::ACCESS_WRITE => 'Lecture & écriture (peut ajouter, modifier et déplacer des fichiers, mais pas les supprimer)',
 				Session::ACCESS_ADMIN => 'Administration (peut tout faire)',
 			],
 		],
