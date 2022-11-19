@@ -373,9 +373,8 @@ CREATE TABLE IF NOT EXISTS acc_transactions
 
     date TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(date) IS NOT NULL AND date(date) = date),
 
-    validated INTEGER NOT NULL DEFAULT 0, -- 1 means transaction is locked
-
     hash TEXT NULL,
+    prev_id INTEGER NULL REFERENCES acc_transactions(id) ON DELETE SET NULL,
     prev_hash TEXT NULL,
 
     id_year INTEGER NOT NULL REFERENCES acc_years(id),

@@ -53,6 +53,23 @@ class Transaction extends Entity
 		'Créance',
 	];
 
+	const LOCKED_PROPERTIES = [
+		'label',
+		'reference',
+		'date',
+		'id_year',
+		'prev_id',
+		'prev_hash',
+	];
+
+	const LOCKED_LINE_PROPERTIES = [
+		'id_account',
+		'debit',
+		'credit',
+		'label',
+		'reference',
+	];
+
 	protected ?int $id;
 	protected ?int $type = null;
 	protected int $status = 0;
@@ -62,9 +79,8 @@ class Transaction extends Entity
 
 	protected \KD2\DB\Date $date;
 
-	protected bool $validated = false;
-
 	protected ?string $hash = null;
+	protected ?int $prev_id = null;
 	protected ?string $prev_hash = null;
 
 	protected int $id_year;
@@ -383,41 +399,109 @@ class Transaction extends Entity
 	}
 
 
-/*
-	public function getHash()
+	public function getHash(): string
 	{
 		if (!$this->id_year) {
 			throw new \LogicException('Il n\'est pas possible de hasher un mouvement qui n\'est pas associé à un exercice');
 		}
 
-		static $keep_keys = [
-			'label',
-			'notes',
-			'reference',
-			'date',
-			'validated',
-			'prev_hash',
-		];
-
 		$hash = hash_init('sha256');
-		$values = $this->asArray();
-		$values = array_intersect_key($values, $keep_keys);
+		$values = $this->asArray(true);
+		$values = array_intersect_key($values, array_flip(self::LOCKED_PROPERTIES));
 
 		hash_update($hash, implode(',', array_keys($values)));
 		hash_update($hash, implode(',', $values));
 
 		foreach ($this->getLines() as $line) {
-			hash_update($hash, implode(',', [$line->compte, $line->debit, $line->credit]));
+			$values = $line->asArray(true);
+			$values = array_intersect_key($values, array_flip(self::LOCKED_LINE_PROPERTIES));
+
+			hash_update($hash, implode(',', array_keys($values)));
+			hash_update($hash, implode(',', $values));
 		}
 
 		return hash_final($hash, false);
 	}
 
-	public function checkHash()
+	public function isVerified(): bool
+	{
+		if (!$this->prev_id) {
+			return false;
+		}
+
+		if (!$this->prev_hash) {
+			return false;
+		}
+
+		return $this->verify();
+	}
+
+	public function isLocked(): bool
+	{
+		// locking just got set
+		if ($this->hash && array_key_exists('hash', $this->_modified) && $this->_modified['hash'] === null) {
+			return false;
+		}
+
+		return $this->hash === null ? false : true;
+	}
+
+	public function canSaveChanges(): bool
+	{
+		if (!$this->isLocked()) {
+			return true;
+		}
+
+		if ($this->isModified('hash')) {
+			return false;
+		}
+
+		foreach (self::LOCKED_PROPERTIES as $prop) {
+			if ($this->isModified($prop)) {
+				return false;
+			}
+		}
+
+		foreach ($this->getLines() as $line) {
+			foreach (self::LOCKED_LINE_PROPERTIES as $prop) {
+				if ($line->isModified($prop)) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	public function assertCanBeModified(): void
+	{
+		// We allow to change notes and id_project in a locked transaction
+		if (!$this->canSaveChanges()) {
+			throw new ValidationException('Il n\'est pas possible de modifier une écriture qui a été verrouillée');
+		}
+
+		$db = DB::getInstance();
+
+		if ($db->test(Year::TABLE, 'id = ? AND closed = 1', $this->id_year)) {
+			throw new ValidationException('Il n\'est pas possible de créer ou modifier une écriture dans un exercice clôturé');
+		}
+	}
+
+	public function verify(): bool
 	{
 		return hash_equals($this->getHash(), $this->hash);
 	}
-*/
+
+	public function lock(): void
+	{
+		// Select last locked transaction
+		$prev = DB::getInstance()->first('SELECT MAX(id) AS id, hash FROM acc_transactions WHERE hash IS NOT NULL AND id_year = ?;', $this->id_year);
+
+		$this->set('prev_id', $prev->id ?? null);
+		$this->set('prev_hash', $prev->hash ?? null);
+		$this->set('hash', $this->getHash());
+		$this->save();
+	}
 
 	public function addLine(Line $line)
 	{
@@ -445,16 +529,7 @@ class Transaction extends Entity
 			}
 		}
 
-		if ($this->validated && !(isset($this->_modified['validated']) && $this->_modified['validated'] === 0)) {
-			throw new ValidationException('Il n\'est pas possible de modifier une écriture qui a été validée');
-		}
-
-		$db = DB::getInstance();
-
-		if ($db->test(Year::TABLE, 'id = ? AND closed = 1', $this->id_year)) {
-			throw new ValidationException('Il n\'est pas possible de créer ou modifier une écriture dans un exercice clôturé');
-		}
-
+		$this->assertCanBeModified();
 		$this->selfCheck();
 
 		$lines = $this->getLinesWithAccounts();
@@ -490,6 +565,7 @@ class Transaction extends Entity
 			$this->removeStatus(self::STATUS_ERROR);
 		}
 
+		$db = DB::getInstance();
 		$db->begin();
 
 		if (!parent::save()) {

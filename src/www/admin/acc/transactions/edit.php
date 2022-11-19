@@ -18,15 +18,7 @@ if (!$transaction) {
 	throw new UserException('Cette écriture n\'existe pas');
 }
 
-if ($transaction->validated) {
-	throw new UserException('Cette écriture est validée et ne peut être modifiée');
-}
-
-$year = Years::get($transaction->id_year);
-
-if ($year->closed) {
-	throw new UserException('Cette écriture ne peut être modifiée car elle appartient à un exercice clôturé');
-}
+$transaction->assertCanBeModified();
 
 $chart = $year->chart();
 $accounts = $chart->accounts();

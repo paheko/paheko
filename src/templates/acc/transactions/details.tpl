@@ -8,7 +8,7 @@
 {/if}
 
 <nav class="tabs">
-{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$transaction->validated && !$transaction_year->closed}
+{if !$transaction.hash && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$transaction_year->closed}
 	{linkbutton href="edit.php?id=%d"|args:$transaction.id shape="edit" label="Modifier cette écriture"}
 	{linkbutton href="delete.php?id=%d"|args:$transaction.id shape="delete" label="Supprimer cette écriture"}
 {/if}
@@ -16,6 +16,9 @@
 	{linkbutton href="new.php?copy=%d"|args:$transaction.id shape="plus" label="Dupliquer cette écriture"}
 {/if}
 	<aside>
+		{if !$transaction.hash && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
+			{linkbutton href="lock.php?id=%d"|args:$transaction.id shape="lock" label="Verrouiller" target="_dialog"}
+		{/if}
 		{linkbutton href="?id=%d&_pdf"|args:$transaction.id shape="download" label="Télécharger en PDF"}
 	</aside>
 </nav>
@@ -48,6 +51,9 @@
 <dl class="describe">
 	<dt>Libellé</dt>
 	<dd><h2>{$transaction.label|escape|linkify_transactions}</h2></dd>
+	{if $transaction.hash}
+		<dd><span class="alert">{icon shape="lock"} Écriture verrouillée</span></dd>
+	{/if}
 	<dt>Type</dt>
 	<dd>
 		{$transaction->getTypeName()}

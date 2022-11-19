@@ -31,7 +31,12 @@ INSERT INTO services_users SELECT * FROM services_users_old;
 
 INSERT INTO services_reminders_sent SELECT * FROM services_reminders_sent_old;
 
-INSERT INTO acc_transactions SELECT * FROM acc_transactions_old;
+INSERT INTO acc_transactions
+	SELECT
+		id, type, status, label, notes, reference, date,
+		NULL, NULL, NULL, --hash/prev_id/prev_hash
+		id_year, id_creator, id_related
+	FROM acc_transactions_old;
 
 INSERT INTO acc_transactions_users SELECT * FROM acc_transactions_users_old;
 

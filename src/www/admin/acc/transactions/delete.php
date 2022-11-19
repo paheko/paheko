@@ -10,27 +10,14 @@ $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
 $transaction = Transactions::get((int) qg('id'));
 
-if (!$transaction) {
-	throw new UserException('Cette écriture n\'existe pas');
-}
+$transaction->assertCanBeModified();
 
-if ($transaction->validated) {
-	throw new UserException('Cette écriture est validée et ne peut être modifiée');
-}
+$csrf_id = 'acc_delete_' . $transaction->id;
 
-if (f('delete') && $form->check('acc_delete_' . $transaction->id))
-{
-	try
-	{
-		$transaction->delete();
-		Utils::redirect(ADMIN_URL . 'acc/');
-	}
-	catch (UserException $e)
-	{
-		$form->addError($e->getMessage());
-	}
-}
+$form->runIf('delete', function () use ($transaction) {
+	$transaction->delete();
+}, $csrf_key, '!acc/');
 
-$tpl->assign('transaction', $transaction);
+$tpl->assign(compact('transaction'));
 
 $tpl->display('acc/transactions/delete.tpl');

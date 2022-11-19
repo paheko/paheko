@@ -253,6 +253,10 @@ class Account extends Entity
 			'select' => 'IFNULL(p.code, SUBSTR(p.label, 1, 10) || \'…\')',
 			'label' => 'Projet',
 		],
+		'locked' => [
+			'label' => '',
+			'select' => 't.hash IS NOT NULL',
+		],
 		'status' => [
 			'select' => 't.status',
 		],

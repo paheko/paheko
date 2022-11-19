@@ -95,7 +95,6 @@ class Year extends Entity
 			'type'       => Transaction::TYPE_ADVANCED,
 			'date'       => $this->end_date->format('d/m/Y'),
 			'id_creator' => $user_id,
-			'validated'  => 1,
 			'notes'      => 'Écriture automatique créée lors de la réouverture, à des fins de transparence. Cette écriture ne peut pas être supprimée ni modifiée.',
 		]);
 
@@ -114,6 +113,9 @@ class Year extends Entity
 			'id_account' => $closing_id,
 		]);
 		$t->addLine($line);
+
+		// Lock transaction
+		$t->lock();
 
 		$t->save();
 	}
