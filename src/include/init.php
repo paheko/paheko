@@ -322,7 +322,7 @@ ErrorManager::setProductionErrorTemplate(defined('Garradin\ERRORS_TEMPLATE') && 
 	<p><a href="' . WWW_URL . '">&larr; Retour à la page d\'accueil</a></p>
 	</body></html>');
 
-ErrorManager::setHtmlHeader('<!DOCTYPE html><meta charset="utf-8" /><style type="text/css">
+ErrorManager::setHtmlHeader('<!DOCTYPE html><html><head><meta charset="utf-8" /><style type="text/css">
 	body { font-family: sans-serif; background: #fff; } * { margin: 0; padding: 0; }
 	u, code b, i, h3 { font-style: normal; font-weight: normal; text-decoration: none; }
 	#icn { color: #fff; font-size: 2em; float: right; margin: 1em; padding: 1em; background: #900; border-radius: 50%; }
@@ -335,7 +335,7 @@ ErrorManager::setHtmlHeader('<!DOCTYPE html><meta charset="utf-8" /><style type=
 	table { border-collapse: collapse; margin: 1em; } td, th { border: 1px solid #ccc; padding: .2em .5em; text-align: left; 
 	vertical-align: top; }
 	input { padding: .3em; margin: .5em; font-size: 1.2em; cursor: pointer; }
-</style>
+</style></head><body>
 <pre id="icn"> \__/<br /> (xx)<br />//||\\\\</pre>
 <section>
 	<article>
