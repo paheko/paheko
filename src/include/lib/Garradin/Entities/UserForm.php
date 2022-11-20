@@ -148,23 +148,6 @@ class UserForm extends Entity
 		return sprintf('%sform/%s/%s%s', WWW_URL, $this->name, $file, $params);
 	}
 
-	public function serve(string $file)
-	{
-		$this->template($file)->serve();
-	}
-
-	public function fetch(string $file, array $variables = [])
-	{
-		try {
-			$t = $this->template($file);
-			$t->assignArray($variables);
-			return $t->fetch();
-		}
-		catch (Brindille_Exception $e) {
-			return sprintf('<div style="border: 5px solid orange; padding: 10px; background: yellow;"><h2>Erreur dans le code du document</h2><p>%s</p></div>', nl2br(htmlspecialchars($e->getMessage())));
-		}
-	}
-
 	public function template(string $file)
 	{
 		if ($file == self::CONFIG_TEMPLATE) {

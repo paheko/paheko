@@ -12,7 +12,6 @@ use Garradin\DB;
 use Garradin\Template;
 use Garradin\Utils;
 use Garradin\UserException;
-use Garradin\Web\Skeleton;
 use Garradin\Email\Emails;
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;

@@ -12,7 +12,6 @@ use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\Users\Session;
 
-use Garradin\Web\Skeleton;
 use Garradin\Entities\Files\File;
 use Garradin\Files\Files;
 
@@ -27,6 +26,7 @@ class UserTemplate extends \KD2\Brindille
 	const DIST_ROOT = ROOT . '/skel-dist/';
 
 	public $_tpl_path;
+	protected $content_type = null;
 	protected $modified;
 	protected $file = null;
 	protected $code = null;
@@ -87,6 +87,10 @@ class UserTemplate extends \KD2\Brindille
 
 	public function __construct(string $path)
 	{
+		if (!self::isTemplate($path)) {
+			throw new \InvalidArgumentException('Not a valid template file extension: ' . $path);
+		}
+
 		$this->_tpl_path = $path;
 
 		if ($file = Files::get(File::CONTEXT_SKELETON . '/' . $path)) {
@@ -314,10 +318,9 @@ class UserTemplate extends \KD2\Brindille
 		Utils::streamPDF($html);
 	}
 
-	public function type(): ?string
+	static public function isTemplate(string $filename): bool
 	{
-		$name = $this->file->name ?? $this->path;
-		$dot = strrpos($name, '.');
+		$dot = strrpos($filename, '.');
 
 		// Templates with no extension are returned as HTML by default
 		// unless {{:http type=...}} is used
@@ -325,46 +328,27 @@ class UserTemplate extends \KD2\Brindille
 			return 'text/html';
 		}
 
-		$ext = substr($name, $dot+1);
+		$ext = substr($filename, $dot+1);
 
 		switch ($ext) {
-			case 'txt':
-				return 'text/plain';
-			case 'css':
-				return 'text/css';
 			case 'html':
 			case 'htm':
-				return 'text/html';
-			case 'xml':
-				return 'text/xml';
-			case 'js':
-				return 'text/javascript';
-			case 'png':
-			case 'gif':
-			case 'webp':
-				return 'image/' . $ext;
-			case 'jpeg':
-			case 'jpg':
-				return 'image/jpeg';
+			case 'tpl':
+			case 'btpl':
+			case 'b':
+			case 'skel':
+				return true;
+			default:
+				return false;
 		}
-
-		if (preg_match('/php\d*/i', $ext)) {
-			return null;
-		}
-
-		if ($this->file) {
-			return $this->file->mime;
-  		}
-
-		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
-		return finfo_file($finfo, $this->path);
 	}
-
 
 	public function serve(): void
 	{
 		$content = $this->fetch();
 		$type = null;
+
+		$type = 'text/html';
 
 		// When the header has already been defined by the template
 		foreach (headers_list() as $header) {
@@ -374,11 +358,6 @@ class UserTemplate extends \KD2\Brindille
 			}
 		}
 
-		if (!$type) {
-			$type = $this->type();
-		}
-
-		$type = $type ?: 'text/html';
 		header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
 
 		if ($type == 'application/pdf') {

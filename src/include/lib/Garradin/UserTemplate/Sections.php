@@ -35,6 +35,7 @@ class Sections
 		'balances',
 		'sql',
 		'restrict',
+		'form',
 	];
 
 	static protected $_cache = [];
@@ -588,6 +589,24 @@ class Sections
 		foreach (self::sql($params, $tpl, $line) as $row) {
 			yield json_decode($row['data'], true);
 		}
+	}
+
+	static public function form(array $params, UserTemplate $tpl, int $line): \Generator
+	{
+		if (empty($params['name'])) {
+			throw new Brindille_Exception('Missing parameter "name"');
+		}
+
+		$form = DB::getInstance()->first('SELECT * FROM user_forms WHERE name = ?;', $params['name']);
+
+		if (!$form || !$form->enabled) {
+			return null;
+		}
+
+		$form->config = json_decode($form->config);
+		$form->path = 'forms/' . $form->name;
+
+		yield (array) $form;
 	}
 
 	static public function sql(array $params, UserTemplate $tpl, int $line): \Generator

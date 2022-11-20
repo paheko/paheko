@@ -5,7 +5,9 @@ namespace Garradin\Web;
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 use Garradin\UserException;
+use Garradin\UserTemplate\UserForms;
 use Garradin\UserTemplate\UserTemplate;
+use Garradin\Config;
 use Garradin\Plugin;
 use Garradin\Utils;
 
@@ -21,10 +23,58 @@ class Skeleton
 	protected ?string $path;
 	protected ?File $file = null;
 
+	static public function route(string $uri): void
+	{
+		$page = null;
+
+		if (substr($uri, 0, 5) == 'form/') {
+			$uri = substr($uri, 5);
+			$path = 'forms/' . $uri;
+		}
+		else {
+			if (Config::getInstance()->site_disabled && $uri != 'content.css') {
+				Utils::redirect(ADMIN_URL);
+			}
+
+			if ($uri == '') {
+				$path = 'web/index.html';
+			}
+			elseif (($page = Web::getByURI($uri)) && $page->status == Page::STATUS_ONLINE) {
+				$path = 'web/' . $page->template();
+				$page = $page->asTemplateArray();
+			}
+			// No page with this URI, then we expect this might be a skeleton path
+			else {
+				$path = 'web/' . $uri;
+			}
+		}
+
+		try {
+			$s = new self($path);
+			$s->serve($uri, compact('page'));
+		}
+		catch (\InvalidArgumentException $e) {
+			if (file_exists(UserTemplate::DIST_ROOT . 'web/404.html')) {
+				header('Content-Type: text/html;charset=utf-8', true);
+				header('HTTP/1.1 404 Not Found', true);
+				$path = 'web/404.html';
+
+				$s = new self($path);
+				$s->serve($uri);
+			}
+			else {
+				throw new UserException('Cette page n\'existe pas');
+			}
+		}
+	}
+
 	public function __construct(string $path)
 	{
 		if (!self::isValidPath($path)) {
-			throw new \InvalidArgumentException('Invalid skeleton name');
+		}
+
+		if (!Files::exists(File::CONTEXT_SKELETON . '/' . $path) && !file_exists(UserTemplate::DIST_ROOT . $path)) {
+			throw new \InvalidArgumentException('This skeleton does not exist');
 		}
 
 		$this->path = $path;
@@ -32,12 +82,12 @@ class Skeleton
 
 	static public function isValidPath(string $path)
 	{
-		return (bool) preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $path);
+		return (bool) preg_match('!^(?:web|forms/[\w\d_-]+)/[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $path);
 	}
 
 	public function defaultPath(): ?string
 	{
-		$path = ROOT . '/skel-dist/web/' . $this->path;
+		$path = UserTemplate::DIST_ROOT . $this->path;
 
 		if (file_exists($path)) {
 			return $path;
@@ -46,76 +96,37 @@ class Skeleton
 		return null;
 	}
 
-	public function error_404(): void
-	{
-		// Detect loop if 404.html does not exist
-		if (Utils::basename($this->path) == '404.html') {
-			throw new UserException('Cette page n\'existe pas.');
-		}
-
-		header('Content-Type: text/html;charset=utf-8', true);
-		header('HTTP/1.1 404 Not Found', true);
-		$tpl = new self('404.html');
-
-		if (!$tpl->exists()) {
-			throw new UserException('Cette page n\'existe pas.');
-		}
-
-		$tpl->serve();
-	}
-
-	public function serve(array $params = []): void
+	public function serve(string $uri, array $params = []): void
 	{
 		if (Plugin::fireSignal('http.request.skeleton.before', $params)) {
 			return;
 		}
 
-		if (!$this->exists()) {
-			$this->error_404();
-			return;
-		}
-
 		$type = $this->type();
 
-		// Unknown type
-		if (null === $type) {
-			$this->error_404();
-			return;
-		}
-
-		// We can't serve directories
-		if ($this->file && $this->file->type != $this->file::TYPE_FILE) {
-			$this->error_404();
-			return;
+		if (!$type) {
+			throw new \InvalidArgumentException('Invalid skeleton type');
 		}
 
 		// Serve a template
 		if (preg_match(self::TEMPLATE_TYPES, $type)) {
+			if (substr($this->path, 0, 6) == 'forms/') {
+				$name = substr($uri, 0, strrpos($uri, '/'));
+				$file = substr($uri, strrpos($uri, '/') + 1) ?: 'index.html';
+				$form = UserForms::get($name);
 
-			header(sprintf('Content-Type: %s;charset=utf-8', $this->type()));
-
-			try {
-				$ut = new UserTemplate('web/' . $this->path);
-			}
-			catch (\InvalidArgumentException $e) {
-				header('HTTP/1.1 404 Not Found', true);
-
-				// Fallback to 404
-				$ut = new UserTemplate('web/404.html');
-				$ut->assignArray($params);
-				$ut->display();
-			}
-
-			try {
-				$ut->assignArray($params);
-				$ut->displayWeb();
-			}
-			catch (Brindille_Exception $e) {
-				if (!headers_sent()) {
-					header('Content-Type: text/html; charset=utf-8', true);
+				if (!$form || !$form->enabled) {
+					http_response_code(404);
+					throw new UserException('Ce formulaire n\'existe pas ou n\'est pas activé.');
 				}
 
-				printf('<div style="border: 5px solid orange; padding: 10px; background: yellow;"><h2>Erreur dans le squelette</h2><p>%s</p></div>', nl2br(htmlspecialchars($e->getMessage())));
+				$path = 'forms/' . $name . '/' . $file;
+				$form->template($file)->serve();
+			}
+			else {
+				$ut = new UserTemplate($this->path);
+				$ut->assignArray($params);
+				$ut->serve();
 			}
 		}
 		// Serve a static file
@@ -133,81 +144,7 @@ class Skeleton
 
 	public function file(): ?File
 	{
-		return Files::get(File::CONTEXT_SKELETON . '/web/' . $this->path);
-	}
-
-	public function fetch(array $params = []): string
-	{
-		if (!$this->exists()) {
-			return '';
-		}
-
-		if (preg_match(self::TEMPLATE_TYPES, $this->type())) {
-			$ut = new UserTemplate($this->file);
-
-			if (!$this->file) {
-				$ut->setSource($this->defaultPath());
-			}
-
-			$ut->assignArray($params);
-
-			return $ut->fetch();
-		}
-		elseif ($this->file) {
-			return $this->file->fetch();
-		}
-		else {
-			return file_get_contents($this->defaultPath());
-		}
-	}
-
-	public function display(array $params = []): void
-	{
-		if (!$this->exists()) {
-			return;
-		}
-
-		if (preg_match(self::TEMPLATE_TYPES, $this->type())) {
-			$ut = new UserTemplate($this->file);
-
-			if (!$this->file) {
-				$ut->setSource($this->defaultPath());
-			}
-
-			$ut->assignArray($params);
-
-			$ut->display();
-		}
-		elseif ($this->file) {
-			echo $this->file->fetch();
-		}
-		else {
-			readfile($this->defaultPath());
-		}
-	}
-
-	public function exists()
-	{
-		return $this->file ? true : ($this->defaultPath() ? true : false);
-	}
-
-	public function raw(): string
-	{
-		if ($file = $this->file()) {
-			return $this->file();
-		}
-
-		return (string) @file_get_contents($this->defaultPath());
-	}
-
-	public function edit(string $content)
-	{
-		if ($file = $this->file()) {
-			$file->setContent($content);
-		}
-		else {
-			Files::createFromString(sprintf('%s/web/%s', File::CONTEXT_SKELETON, $this->path), $content);
-		}
+		return Files::get(File::CONTEXT_SKELETON . '/' . $this->path);
 	}
 
 	public function reset()
@@ -257,5 +194,54 @@ class Skeleton
 		ksort($sources);
 
 		return $sources;
+	}
+
+	public function type(): ?string
+	{
+		$name = $this->file->name ?? $this->path;
+		$dot = strrpos($name, '.');
+
+		// Templates with no extension are returned as HTML by default
+		// unless {{:http type=...}} is used
+		if ($dot === false) {
+			return 'text/html';
+		}
+
+		$ext = substr($name, $dot+1);
+
+		// Common types
+		switch ($ext) {
+			case 'txt':
+				return 'text/plain';
+			case 'html':
+			case 'htm':
+			case 'tpl':
+			case 'btpl':
+			case 'skel':
+				return 'text/html';
+			case 'xml':
+				return 'text/xml';
+			case 'css':
+				return 'text/css';
+			case 'js':
+				return 'text/javascript';
+			case 'png':
+			case 'gif':
+			case 'webp':
+				return 'image/' . $ext;
+			case 'jpeg':
+			case 'jpg':
+				return 'image/jpeg';
+		}
+
+		if (preg_match('/php\d*/i', $ext)) {
+			return null;
+		}
+
+		if ($this->file) {
+			return $this->file->mime;
+  		}
+
+		return null;
 	}
 }

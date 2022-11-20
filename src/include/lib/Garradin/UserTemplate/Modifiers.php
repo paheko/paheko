@@ -19,6 +19,7 @@ class Modifiers
 		'strtoupper',
 		'ucfirst',
 		'ucwords',
+		'strtotime',
 		'htmlentities',
 		'htmlspecialchars',
 		'trim',
@@ -65,7 +66,6 @@ class Modifiers
 		'money_int' => [Utils::class, 'moneyToInteger'],
 		'array_transpose' => [Utils::class, 'array_transpose'],
 		'check_email',
-		'validate_date_string',
 	];
 
 	const LEADING_NUMBER_REGEXP = '/^([\d.]+)\s*[.\)]\s*/';
@@ -91,8 +91,12 @@ class Modifiers
 		return call_user_func_array($name, $arguments);
 	}
 
-	static public function replace($str, $find, $replace): string
+	static public function replace($str, $find, $replace = null): string
 	{
+		if (is_array($find) && null === $replace) {
+			return strtr($str, $find);
+		}
+
 		return str_replace($find, $replace, $str);
 	}
 
@@ -243,11 +247,6 @@ class Modifiers
 		else {
 			return false;
 		}
-	}
-
-	static public function validate_date_string(string $value): bool
-	{
-		return (bool) strtotime($value);
 	}
 
 	static public function math(string $expression, ... $params)

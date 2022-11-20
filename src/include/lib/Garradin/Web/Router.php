@@ -6,7 +6,6 @@ use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 use Garradin\Files\WebDAV\Server as WebDAV_Server;
 
-use Garradin\UserTemplate\UserForms;
 use Garradin\Web\Skeleton;
 use Garradin\Web\Web;
 
@@ -89,11 +88,6 @@ class Router
 			API::dispatchURI(substr($uri, 4));
 			return;
 		}
-		elseif ('form' == $first) {
-			$uri = substr($uri, 5);
-			UserForms::serve($uri);
-			return;
-		}
 		elseif ((in_array($uri, self::DAV_ROUTES) || in_array($first, self::DAV_ROUTES))
 			&& WebDAV_Server::route($uri)) {
 			return;
@@ -131,29 +125,7 @@ class Router
 			return;
 		}
 
-		if (Config::getInstance()->site_disabled) {
-			Utils::redirect(ADMIN_URL);
-		}
-
-		$page = null;
-
-		if ($uri == '') {
-			$skel = 'index.html';
-		}
-		elseif (($page = Web::getByURI($uri)) && $page->status == Page::STATUS_ONLINE) {
-			$skel = $page->template();
-			$page = $page->asTemplateArray();
-		}
-		// No page with this URI, then we expect this might be a skeleton path
-		elseif (Skeleton::isValidPath($uri)) {
-			$skel = $uri;
-		}
-		else {
-			$skel = '404.html';
-		}
-
-		$s = new Skeleton($skel);
-		$s->serve(compact('uri', 'page', 'skel'));
+		Skeleton::route($uri);
 	}
 
 	static public function log(string $message, ...$params)

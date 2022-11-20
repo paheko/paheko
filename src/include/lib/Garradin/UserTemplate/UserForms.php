@@ -106,19 +106,8 @@ class UserForms
 		return EM::findOne(UserForm::class, 'SELECT * FROM @TABLE WHERE name = ?;', $name);
 	}
 
-	static public function serve(string $uri): void
+	static public function isEnabled(string $name): bool
 	{
-		$name = substr($uri, 0, strrpos($uri, '/'));
-		$file = substr($uri, strrpos($uri, '/') + 1) ?: 'index.html';
-
-		$form = self::get($name);
-
-		if (!$form || !$form->enabled) {
-			http_response_code(404);
-			throw new UserException('Ce formulaire n\'existe pas');
-		}
-
-		$form->serve($file);
+		return (bool) EM::getInstance(UserForm::class)->col('SELECT 1 FROM @TABLE WHERE name = ? AND enabled = 1;', $name);
 	}
-
 }
