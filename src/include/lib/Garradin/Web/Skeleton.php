@@ -99,7 +99,6 @@ class Skeleton
 			}
 			catch (\InvalidArgumentException $e) {
 				header('HTTP/1.1 404 Not Found', true);
-			$ut->setContentType($type);
 
 				// Fallback to 404
 				$ut = new UserTemplate('web/404.html');
@@ -209,52 +208,6 @@ class Skeleton
 		else {
 			Files::createFromString(sprintf('%s/web/%s', File::CONTEXT_SKELETON, $this->path), $content);
 		}
-	}
-
-	public function type(): ?string
-	{
-		$name = $this->file->name ?? $this->defaultPath();
-		$dot = strrpos($name, '.');
-
-		// Templates with no extension are returned as HTML by default
-		// unless {{:http type=...}} is used
-		if ($dot === false) {
-			return 'text/html';
-		}
-
-		$ext = substr($name, $dot+1);
-
-		switch ($ext) {
-			case 'txt':
-				return 'text/plain';
-			case 'css':
-				return 'text/css';
-			case 'html':
-			case 'htm':
-				return 'text/html';
-			case 'xml':
-				return 'text/xml';
-			case 'js':
-				return 'text/javascript';
-			case 'png':
-			case 'gif':
-			case 'webp':
-				return 'image/' . $ext;
-			case 'jpeg':
-			case 'jpg':
-				return 'image/jpeg';
-		}
-
-		if (preg_match('/php\d*/i', $ext)) {
-			return null;
-		}
-
-		if ($this->file) {
-			return $this->file->mime;
-  		}
-
-		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
-		return finfo_file($finfo, $this->defaultPath());
 	}
 
 	public function reset()

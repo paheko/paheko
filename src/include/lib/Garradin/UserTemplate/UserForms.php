@@ -118,7 +118,7 @@ class UserForms
 			throw new UserException('Ce formulaire n\'existe pas');
 		}
 
-		$form->displayWeb($file);
+		$form->serve($file);
 	}
 
 }

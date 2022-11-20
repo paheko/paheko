@@ -9,6 +9,7 @@ use KD2\Translate;
 use Garradin\Config;
 use Garradin\Plugin;
 use Garradin\Utils;
+use Garradin\UserException;
 use Garradin\Users\Session;
 
 use Garradin\Web\Skeleton;
@@ -23,6 +24,8 @@ use const Garradin\{WWW_URL, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_T
 
 class UserTemplate extends \KD2\Brindille
 {
+	const DIST_ROOT = ROOT . '/skel-dist/';
+
 	public $_tpl_path;
 	protected $modified;
 	protected $file = null;
@@ -95,7 +98,7 @@ class UserTemplate extends \KD2\Brindille
 			$this->modified = $file->modified->getTimestamp();
 		}
 		else {
-			$this->path = ROOT . '/skel-dist/' . $path;
+			$this->path = self::DIST_ROOT . $path;
 
 			if (!($this->modified = @filemtime($this->path))) {
 				throw new \InvalidArgumentException('File not found: ' . $this->path);
@@ -178,6 +181,22 @@ class UserTemplate extends \KD2\Brindille
 		foreach (Sections::SECTIONS_LIST as $name) {
 			$this->registerSection($name, [Sections::class, $name]);
 		}
+
+		$this->registerCompileBlock(':break', function (string $name, string $params, Brindille $tpl, int $line) {
+			$in_loop = false;
+			foreach ($this->_stack as $element) {
+				if ($element[0] == $this::SECTION) {
+					$in_loop = true;
+					break;
+				}
+			}
+
+			if (!$in_loop) {
+				throw new Brindille_Exception(sprintf('Error on line %d: break can only be used inside a section', $line));
+			}
+
+			return '<?php break; ?>';
+		});
 	}
 
 	public function setSource(string $path)
@@ -238,9 +257,23 @@ class UserTemplate extends \KD2\Brindille
 			require $tmp_path;
 		}
 		catch (Brindille_Exception $e) {
-			throw new Brindille_Exception(sprintf("Erreur de syntaxe dans '%s' : %s",
-				$this->file ? $this->file->name : ($this->code ? 'code' : Utils::basename($this->path)),
-				$e->getMessage()), 0, $e);
+			$path = $this->file ? $this->file->name : ($this->code ? 'code' : Utils::basename($this->path));
+
+			$message = sprintf("Erreur dans '%s' :\n%s", $path, $e->getMessage());
+
+			if (0 === strpos($this->path ?? '', self::DIST_ROOT)) {
+				// We want errors in shipped code to be reported, it is not normal
+				throw new \RuntimeException($message, 0, $e);
+			}
+			elseif (Session::getInstance()->isAdmin()) {
+				// Report error to admin with the highlighted line
+				$this->error($e, $message);
+				return;
+			}
+			else {
+				// Only report error
+				throw new UserException($message, 0, $e);
+			}
 		}
 		catch (\Throwable $e) {
 			// Don't delete temporary file as it can be used to debug
@@ -281,19 +314,71 @@ class UserTemplate extends \KD2\Brindille
 		Utils::streamPDF($html);
 	}
 
+	public function type(): ?string
+	{
+		$name = $this->file->name ?? $this->path;
+		$dot = strrpos($name, '.');
 
-	public function displayWeb(): void
+		// Templates with no extension are returned as HTML by default
+		// unless {{:http type=...}} is used
+		if ($dot === false) {
+			return 'text/html';
+		}
+
+		$ext = substr($name, $dot+1);
+
+		switch ($ext) {
+			case 'txt':
+				return 'text/plain';
+			case 'css':
+				return 'text/css';
+			case 'html':
+			case 'htm':
+				return 'text/html';
+			case 'xml':
+				return 'text/xml';
+			case 'js':
+				return 'text/javascript';
+			case 'png':
+			case 'gif':
+			case 'webp':
+				return 'image/' . $ext;
+			case 'jpeg':
+			case 'jpg':
+				return 'image/jpeg';
+		}
+
+		if (preg_match('/php\d*/i', $ext)) {
+			return null;
+		}
+
+		if ($this->file) {
+			return $this->file->mime;
+  		}
+
+		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
+		return finfo_file($finfo, $this->path);
+	}
+
+
+	public function serve(): void
 	{
 		$content = $this->fetch();
+		$type = null;
 
+		// When the header has already been defined by the template
 		foreach (headers_list() as $header) {
-			if (preg_match('/^Content-Type: (.*)$/', $header, $match)) {
+			if (preg_match('/^Content-Type: ([\w-]+\/[\w-]+)$/', $header, $match)) {
 				$type = $match[1];
 				break;
 			}
 		}
 
-		$type = $type ?? 'text/html';
+		if (!$type) {
+			$type = $this->type();
+		}
+
+		$type = $type ?: 'text/html';
 		header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
 
 		if ($type == 'application/pdf') {
@@ -302,5 +387,42 @@ class UserTemplate extends \KD2\Brindille
 		else {
 			echo $content;
 		}
+	}
+
+	public function error(\Exception $e, string $message)
+	{
+		$header = ini_get('error_prepend_string');
+		$header = preg_replace('!<if\((sent|logged|report|email|log)\)>(.*?)</if>!is', '', $header);
+		echo $header;
+
+		$path = $this->file->name ?? $this->path;
+		$location = false !== strpos($path, '/web/') ? 'Dans un squelette du site web' : 'Dans le code d\'un formulaire';
+
+		printf('<section><header><h1>%s</h1><h2>%s</h2></header>',
+			$location, nl2br(htmlspecialchars($message)));
+
+		if ($this->code || !preg_match('/Line (\d+)\s*:/i', $message, $match)) {
+			return;
+		}
+
+		$line = $match[1] - 1;
+
+		$file = file($path);
+		$start = max(0, $line - 5);
+		$max = min(count($file), $line + 6);
+
+		echo '<pre><code>';
+
+		for ($i = $start; $i < $max; $i++) {
+			$code = sprintf('<b>%d</b>%s', $i + 1, htmlspecialchars($file[$i]));
+
+			if ($i == $line) {
+				$code = sprintf('<u>%s</u>', $code);
+			}
+
+			echo $code;
+		}
+
+		echo '</code></pre>';
 	}
 }
