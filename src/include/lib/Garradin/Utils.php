@@ -721,20 +721,25 @@ class Utils
     static public function iconUnicode(string $shape): string
     {
         if (!isset(self::ICONS[$shape])) {
-            throw new \InvalidArgumentException('Unknown icon shape: ' . $shape);
+            throw new \UnexpectedValueException('Unknown icon shape: ' . $shape);
         }
 
         return self::ICONS[$shape];
     }
 
-    static public function array_transpose(array $array): array
+    static public function array_transpose(?array $array): array
     {
         $out = [];
+
+        if (!$array) {
+            return $out;
+        }
+
         $max = 0;
 
         foreach ($array as $rows) {
             if (!is_array($rows)) {
-                throw new \InvalidArgumentException('Invalid multi-dimensional array: not an array: ' . gettype($rows));
+                throw new \UnexpectedValueException('Invalid multi-dimensional array: not an array: ' . gettype($rows));
             }
 
             $max = max($max, count($rows));
