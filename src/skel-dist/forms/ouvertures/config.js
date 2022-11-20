@@ -1,9 +1,3 @@
-{{:include file="./_common.tpl" keep="months,frequencies,days"}}
-
-const months = {{$months|json_encode|raw}};
-const frequencies = {{$frequencies|json_encode|raw}};
-const days = {{$days|json_encode|raw}};
-
 if (!open_data) {
 	open_data = {
 		'closed': [{'day_close': '25', 'month_close': 'december', 'day_reopen': '2', 'month_reopen': 'january'}],
@@ -19,16 +13,10 @@ if (!open_data) {
 const open_row = `<tr>
 	<td>
 		<select name="slots[frequency][]">
-		{{#foreach from=$frequencies key="value" item="label"}}
-			<option value="{{$value}}"{{if $key == ''}} selected{{/if}}>{{$label}}</option>
-		{{/foreach}}
 		</select>
 	</td>
 	<td>
 		<select name="slots[day][]">
-		{{#foreach from=$days key="value" item="label"}}
-			<option value="{{$value}}">{{$label}}</option>
-		{{/foreach}}
 		</select>
 	</td>
 	<td>
@@ -48,17 +36,11 @@ const close_row = `<tr>
 	<td>
 		<input type="number" name="closed[close_day][]" min="1" max="31" step="1" required="required" class="time" pattern="^\d{1,2}$" />
 		<select name="closed[close_month][]">
-		{{#foreach from=$months key="value" item="label"}}
-			<option value="{{$value}}">{{$label}}</option>
-		{{/foreach}}
 		</select>
 	</td>
 	<td>
 		<input type="number" name="closed[reopen_day][]" min="1" max="31" step="1" required="required" class="time" pattern="^\d{1,2}$" />
 		<select name="closed[reopen_month][]">
-		{{#foreach from=$months key="value" item="label"}}
-			<option value="{{$value}}">{{$label}}</option>
-		{{/foreach}}
 		</select>
 		inclus
 	</td>
@@ -67,10 +49,21 @@ const close_row = `<tr>
 	</td>
 </tr>`;
 
+const populate_select = (s, data) => {
+	Object.entries(data).forEach((e) => {
+		const [k, v] = e;
+		var o = `<option value="${k}">${v}</option>`;
+		s.insertAdjacentHTML('beforeend', o);
+	});
+}
+
 const add_slot_row = (data) => {
 	$('fieldset.slots table tbody')[0].insertAdjacentHTML('beforeend', open_row);
 	var r = $('fieldset.slots table tbody tr:last-child')[0];
 	r.querySelector('button').onclick = removeRow;
+	var s = r.querySelectorAll('select');
+	populate_select(s[0], frequencies);
+	populate_select(s[1], days);
 
 	if (!data) {
 		return;
@@ -95,6 +88,10 @@ const add_closed_row = (data) => {
 	$('fieldset.closed table tbody')[0].insertAdjacentHTML('beforeend', close_row);
 	var r = $('fieldset.closed table tbody tr:last-child')[0];
 	r.querySelector('button').onclick = removeRow;
+
+	var s = r.querySelectorAll('select');
+	populate_select(s[0], months);
+	populate_select(s[1], months);
 
 	if (!data) {
 		return;

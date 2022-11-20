@@ -1,0 +1,58 @@
+{{:assign now="now"|strtotime}}
+
+{{#foreach from=$config.closed item="slot"}}
+	{{:assign
+		start="%s %s, 00:00:00"|args:$slot.close_day:$slot.close_month|strtotime
+		end="%s %s, 23:59:59"|args:$slot.reopen_day:$slot.reopen_month|strtotime
+	}}
+	{{if $end < $start}}
+		{{:assign
+			end="%s %s, 23:59:59, +1 year"|args:$slot.reopen_day:$slot.reopen_month|strtotime
+		}}
+	{{/if}}
+	{{if $now >= $start && $now <= $end}}
+		<strong class="closed">Actuellement fermé jusqu'au {{$end|date_long}} inclus.</strong>
+		{{:assign stop=1 closed=1}}
+		{{:break}}
+	{{/if}}
+{{/foreach}}
+
+{{if !$stop}}
+	{{#foreach from=$config.open item="slot"}}
+		{{if $slot.frequency != "this"}}
+			{{:assign
+				start="%s %s of this month, %s:00"|args:$slot.frequency:$slot.day:$slot.open|strtotime
+				end="%s %s of this month, %s:00"|args:$slot.frequency:$slot.day:$slot.close|strtotime
+			}}
+			{{* Try next month *}}
+			{{if $start < $now && $end < $now}}
+				{{:assign
+					start="%s %s of next month, %s:00"|args:$slot.frequency:$slot.day:$slot.open|strtotime
+					end="%s %s of next month, %s:00"|args:$slot.frequency:$slot.day:$slot.close|strtotime
+				}}
+			{{/if}}
+		{{else}}
+			{{:assign
+				start="%s %s, %s:00"|args:$slot.frequency:$slot.day:$slot.open|strtotime
+				end="%s %s, %s:00"|args:$slot.frequency:$slot.day:$slot.close|strtotime
+			}}
+		{{/if}}
+		{{if $now >= $start && $now <= $end}}
+			<em class="open">Ouvert aujourd'hui jusqu'à {{$slot.close}}</em>
+			{{:assign stop=1}}
+			{{:break}}
+		{{/if}}
+		{{:assign diff="%d-%d"|math:$now:$start}}
+		{{if $diff > $closest}}
+			{{:assign closest=$diff closest_slot=$slot closest_date=$start}}
+		{{/if}}
+	{{/foreach}}
+{{/if}}
+
+{{if !$stop && $closest}}
+	{{if $closest_date|date:'Ymd' == "tomorrow"|strtotime|date:'Ymd'}}
+		<em class="next">Prochaine ouverture demain à {{$closest_slot.open}}</em>
+	{{else}}
+		<em class="next">Prochaine ouverture le {{$closest_date|strftime:"%A %e %B"}} à {{$closest_slot.open}}</em>
+	{{/if}}
+{{/if}}

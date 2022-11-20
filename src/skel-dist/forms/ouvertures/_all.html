@@ -1,0 +1,34 @@
+{{:include file="./_common.tpl" keep="months,days,frequencies"}}
+
+
+{{if $config.open|count}}
+	<h3>Nous sommes ouverts</h3>
+
+	<ul>
+	{{#foreach from=$config.open item="slot"}}
+		<li>
+			{{if $slot.frequency != "this"}}
+				{{$slot.frequency|replace:$frequencies}}
+				{{$slot.day|replace:$days}}
+				du mois&nbsp;:
+			{{else}}
+				{{$slot.day|replace:$days}}&nbsp;:
+			{{/if}}
+			{{$slot.open}} — {{$slot.close}}
+		</li>
+	{{/foreach}}
+	</ul>
+{{/if}}
+
+
+{{if $config.closed|count}}
+	<h3>Fermetures</h3>
+
+	<ul>
+	{{#foreach from=$config.closed item="slot"}}
+		<li>du {{$slot.close_day}} {{$slot.close_month|replace:$months}}
+			au {{$slot.reopen_day}} {{$slot.reopen_month|replace:$months}} inclus
+		</li>
+	{{/foreach}}
+	</ul>
+{{/if}}
