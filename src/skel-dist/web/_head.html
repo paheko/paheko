@@ -66,6 +66,11 @@
 		</p>
 	</form>
 
+	{{#form name="ouvertures"}}
+		{{:include file="%s/_next_opening.html"|args:$path}}
+		{{:include file="%s/_all.html"|args:$path}}
+	{{/form}}
+
 	<ul>
 	{{#categories parent=null order="title"}}
 		<li><a href="{{$url}}" {{if $url == $.url}}class="current"{{/if}}>{{ $title }}</a></li>

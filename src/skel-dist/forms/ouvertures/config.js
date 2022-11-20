@@ -34,12 +34,12 @@ const open_row = `<tr>
 
 const close_row = `<tr>
 	<td>
-		<input type="number" name="closed[close_day][]" min="1" max="31" step="1" required="required" class="time" pattern="^\d{1,2}$" />
+		<input type="number" name="closed[close_day][]" min="1" max="31" step="1" size="2" required="required" class="time" pattern="^\d{1,2}$" />
 		<select name="closed[close_month][]">
 		</select>
 	</td>
 	<td>
-		<input type="number" name="closed[reopen_day][]" min="1" max="31" step="1" required="required" class="time" pattern="^\d{1,2}$" />
+		<input type="number" name="closed[reopen_day][]" min="1" max="31" step="1" size="2" required="required" class="time" pattern="^\d{1,2}$" />
 		<select name="closed[reopen_month][]">
 		</select>
 		inclus
