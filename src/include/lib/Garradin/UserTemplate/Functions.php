@@ -25,7 +25,7 @@ class Functions
 	const FUNCTIONS_LIST = [
 		'include',
 		'http',
-		'dump',
+		'debug',
 		'error',
 		'read',
 		'save',
@@ -141,14 +141,14 @@ class Functions
 		}
 
 		if ($validate) {
-			$schema = self::read(['file' => $validate_schema], $tpl, $line);
+			$schema = self::read(['file' => $validate], $tpl, $line);
 
 			try {
 				$s = JSONSchema::fromString($schema);
 				$s->validate($params);
 			}
 			catch (\RuntimeException $e) {
-				throw new Brindille_Exception(sprintf("line %d: error in validating data:\n%s\n\n%s",
+				throw new Brindille_Exception(sprintf("ligne %d: impossible de valider le schéma:\n%s\n\n%s",
 					$line, $e->getMessage(), json_encode($params, JSON_PRETTY_PRINT)));
 			}
 		}
@@ -185,7 +185,7 @@ class Functions
 		Emails::queue(Emails::CONTEXT_PRIVATE, [$params['to']], null, $params['subject'], $params['body']);
 	}
 
-	static public function dump(array $params, Brindille $tpl)
+	static public function debug(array $params, Brindille $tpl)
 	{
 		if (!count($params)) {
 			$params = $tpl->getAllVariables();
@@ -277,6 +277,16 @@ class Functions
 
 		$include->assignArray(array_merge($ut->getAllVariables(), $params));
 		$include->display();
+
+		if (isset($params['keep'])) {
+			$keep = explode(',', $params['keep']);
+			$keep = array_map('trim', $keep);
+
+			foreach ($keep as $name) {
+				// Transmit variables
+				$ut::__assign(['var' => $name, 'value' => $include->get($name)], $ut);
+			}
+		}
 	}
 
 	static public function http(array $params, UserTemplate $tpl): void
