@@ -9,6 +9,7 @@ use Garradin\Entities\Users\Email;
 
 use KD2\SMTP;
 
+use KD2\Brindille;
 use KD2\Brindille_Exception;
 
 class Modifiers
@@ -51,6 +52,7 @@ class Modifiers
 		'protect_contact',
 		'atom_date',
 		'xml_escape',
+		'json_encode',
 		'replace',
 		'regexp_replace',
 		'regexp_match',
@@ -61,7 +63,9 @@ class Modifiers
 		'parse_date',
 		'math',
 		'money_int' => [Utils::class, 'moneyToInteger'],
+		'array_transpose' => [Utils::class, 'array_transpose'],
 		'check_email',
+		'validate_date_string',
 	];
 
 	const LEADING_NUMBER_REGEXP = '/^([\d.]+)\s*[.\)]\s*/';
@@ -94,12 +98,12 @@ class Modifiers
 
 	static public function regexp_replace($str, $pattern, $replace)
 	{
-		return preg_replace($pattern, $replace, $str);
+		return preg_replace((string) $pattern, (string) $replace, (string) $str);
 	}
 
 	static public function regexp_match($str, $pattern)
 	{
-		return (int) preg_match($pattern, $str);
+		return (int) preg_match((string) $pattern, (string) $str);
 	}
 
 	static public function match($str, $pattern)
@@ -196,6 +200,11 @@ class Modifiers
 		return htmlspecialchars($str, ENT_XML1 | ENT_QUOTES);
 	}
 
+	static public function json_encode($str)
+	{
+		return json_encode($str, JSON_PRETTY_PRINT);
+	}
+
 	static public function remove_leading_number($str): string
 	{
 		return preg_replace(self::LEADING_NUMBER_REGEXP, '', trim($str));
@@ -236,37 +245,60 @@ class Modifiers
 		}
 	}
 
-	static public function math($start, ... $params)
+	static public function validate_date_string(string $value): bool
 	{
-		$tuples = array_chunk($params, 2);
-		foreach ($tuples as $tuple) {
-			if (count($tuple) !== 2) {
-				continue;
-			}
+		return (bool) strtotime($value);
+	}
 
-			list($sign, $value) = $tuple;
+	static public function math(string $expression, ... $params)
+	{
+		static $tokens_list = [
+			'function'  => '(?:round|ceil|floor|cos|sin|tan|asin|acos|atan|sinh|cosh|tanh|abs|max|min|exp|sqrt|log10|log|pi)\(',
+			'open'      => '\(',
+			'close'     => '\)',
+			'number'    => '-?\d+(?:[,\.]\d+)?',
+			'sign'      => '[+\-\*\/]',
+			'separator' => ',',
+		];
 
-			if (!is_numeric($value) && !is_null($value)) {
-				throw new Brindille_Exception('Invalid numeric value for math modifier');
-			}
+		$expression = vsprintf($expression, $params);
+		$expression = preg_replace('/\s+/', '', $expression);
 
-			if ($sign == '+') {
-				$start += $value;
-			}
-			elseif ($sign == '-') {
-				$start -= $value;
-			}
-			elseif ($sign == '*') {
-				$start *= $value;
-			}
-			elseif ($sign == '/') {
-				$start /= $value;
-			}
-			else {
-				throw new Brindille_Exception('Invalid math operator, only + - * / are supported');
-			}
+		try {
+			$tokens = Brindille::tokenize($expression, $tokens_list);
+		}
+		catch (\InvalidArgumentException $e) {
+			throw new Brindille_Exception('Invalid value for math modifier: ' . $e->getMessage());
 		}
 
-		return $start;
+		$stack = [];
+		$expression = '';
+
+		foreach ($tokens as $i => $token) {
+			if ($token->type == 'function') {
+				$stack[] = ['function' => $token->value, 'value' => &$value];
+			}
+			elseif ($token->type == 'open') {
+				$stack[] = ['function' => null, 'value' => &$value];
+			}
+			elseif ($token->type == 'close') {
+				$last = array_pop($stack);
+
+				if (!$last) {
+					throw new Brindille_Exception('Invalid closing parenthesis in math modifier on position ' . $token->offset);
+				}
+			}
+			elseif ($token->type == 'number') {
+				$token->value = str_replace(',', '.', $token->value);
+			}
+
+			$expression .= $token->value;
+		}
+
+		if (count($stack)) {
+			throw new Brindille_Exception('Unmatched open parenthesis in math modifier on position ' . $token->offset);
+		}
+
+		return @eval('return ' . $expression . ';') ?: 0;
 	}
 }
