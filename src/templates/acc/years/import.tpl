@@ -45,13 +45,9 @@ use Garradin\Accounting\Export;
 	{/if}
 
 	{if $report.unchanged_count}
-	<details>
-		<summary>
-			<h2>{{%n écriture ne sera pas affectée}{%n écritures ne seront pas affectées} n=$report.unchanged_count}</h2>
-		</summary>
-		<p class="help">Les écritures suivantes mentionnées dans le fichier ne seront pas modifiées.</p>
-		{include file="acc/reports/_journal.tpl" journal=$report.unchanged}
-	</details>
+	<p class="help">
+		<strong>{{%n écriture ne sera pas affectée.}{%n écritures ne seront pas affectées.} n=$report.unchanged_count}</strong>
+	</div>
 	{/if}
 
 	{if !$report.modified_count && !$report.created_count}
