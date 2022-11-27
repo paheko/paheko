@@ -133,9 +133,15 @@ class Router
 			return;
 		}
 
-		$msg = vsprintf($message, $params) . "\n\n";
+		static $log = '';
 
-		file_put_contents(HTTP_LOG_FILE, $msg, FILE_APPEND);
+		if (!$log) {
+			register_shutdown_function(function () use (&$log) {
+				file_put_contents(HTTP_LOG_FILE, $log, FILE_APPEND);
+			});
+		}
+
+		$log .= vsprintf($message, $params) . "\n\n";
 	}
 
 	static public function xSendFile(string $path): bool
