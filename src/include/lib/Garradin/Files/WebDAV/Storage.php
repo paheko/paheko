@@ -197,8 +197,10 @@ class Storage extends AbstractStorage
 					NextCloud::PERM_READ => $file->canRead($session),
 					NextCloud::PERM_WRITE => $file->canWrite($session),
 					NextCloud::PERM_DELETE => $file->canDelete($session),
-					NextCloud::PERM_RENAME_MOVE => $file->canDelete($session),
+					NextCloud::PERM_RENAME => $file->canDelete($session),
+					NextCloud::PERM_MOVE => $file->canDelete($session),
 					NextCloud::PERM_CREATE => $file->canCreateHere($session),
+					NextCloud::PERM_MKDIR => $file->canCreateDirHere($session),
 				];
 
 				$permissions = array_filter($permissions, fn($a) => $a);
