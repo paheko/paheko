@@ -522,20 +522,20 @@ class File extends Entity
 
 				$tpl->assign(compact('can_access', 'has_password'));
 				$tpl->display('ask_share_password.tpl');
-				exit;
+				return;
 			}
 		}
 
 		if (!$can_access) {
 			header('HTTP/1.1 403 Forbidden', true, 403);
-			throw new UserException('Vous n\'avez pas accès à ce fichier.');
+			throw new UserException('Vous n\'avez pas accès à ce fichier.', 403);
 			return;
 		}
 
 		// Only simple files can be served, not directories
 		if ($this->type != self::TYPE_FILE) {
 			header('HTTP/1.1 404 Not Found', true, 404);
-			throw new UserException('Page non trouvée');
+			throw new UserException('Page non trouvée', 404);
 		}
 
 		$path = Files::callStorage('getFullPath', $this);
@@ -562,9 +562,9 @@ class File extends Entity
 	 */
 	public function serveThumbnail(?Session $session = null, string $size = null): void
 	{
-		if (!$this->canRead()) {
+		if (!$this->canRead($session)) {
 			header('HTTP/1.1 403 Forbidden', true, 403);
-			throw new UserException('Accès interdit');
+			throw new UserException('Accès interdit', 403);
 			return;
 		}
 

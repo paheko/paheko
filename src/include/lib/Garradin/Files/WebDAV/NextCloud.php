@@ -7,6 +7,7 @@ use KD2\WebDAV\Exception as WebDAV_Exception;
 
 use Garradin\Config;
 use Garradin\Utils;
+use Garradin\UserException;
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 
@@ -207,13 +208,6 @@ class NextCloud extends WebDAV_NextCloud
 			return;
 		}
 
-		// NextCloud Android just cannot display thumbnails, not sure why
-		if (false !== strpos($_SERVER['HTTP_USER_AGENT'] ?? '', 'Nextcloud-android')) {
-			http_response_code(404);
-			echo 'Banned client';
-			return;
-		}
-
 		$this->requireAuth();
 		$uri = preg_replace(self::WEBDAV_BASE_REGEXP, '', $uri);
 		$file = Files::get(File::CONTEXT_DOCUMENTS . '/' . $uri);
@@ -236,7 +230,15 @@ class NextCloud extends WebDAV_NextCloud
 			$size = '150px';
 		}
 
-		$file->serveThumbnail(Session::getInstance(), $size);
+		$session = Session::getInstance();
+		$this->server->log('Serving thumbnail for: %s - size: %s', $uri, $size);
+
+		try {
+			$file->serveThumbnail($session, $size);
+		}
+		catch (UserException $e) {
+			throw new WebDAV_Exception($e->getMessage(), $e->getCode(), $e);
+		}
 	}
 
 	protected function nc_avatar(): void

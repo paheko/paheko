@@ -28,13 +28,10 @@ class Storage extends AbstractStorage
 	protected array $root = [];
 
 	protected NextCloud $nextcloud;
-	protected bool $can_preview;
 
 	public function __construct(NextCloud $nextcloud)
 	{
 		$this->nextcloud = $nextcloud;
-		// NextCloud Android just cannot display previews/thumbnails
-		$this->can_preview = false === strpos($_SERVER['HTTP_USER_AGENT'] ?? '', 'Nextcloud-android');
 	}
 
 	protected function populateRootCache(): void
@@ -185,7 +182,7 @@ class Storage extends AbstractStorage
 				return md5_file($file->fullpath());
 			// NextCloud stuff
 			case NextCloud::PROP_NC_HAS_PREVIEW:
-				return $file->image && $this->can_preview ? 'true' : 'false';
+				return $file->image ? 'true' : 'false';
 			case NextCloud::PROP_NC_IS_ENCRYPTED:
 				return 'false';
 			case NextCloud::PROP_OC_SHARETYPES:
