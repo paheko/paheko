@@ -228,6 +228,9 @@ class NextCloud extends WebDAV_NextCloud
 			$size = '150px';
 		}
 
+		header('Content-Disposition: inline; filename="image.png"');
+		header(sprintf('Etag: "%s"', md5($uri . $size)));
+
 		$file->serveThumbnail(Session::getInstance(), $size);
 	}
 
@@ -255,6 +258,7 @@ class NextCloud extends WebDAV_NextCloud
 		header('Content-Disposition: inline; filename="icon.png"');
 
 		$file = Config::getInstance()->file('icon');
+		header(sprintf('Etag: "%s"', md5($uri)));
 
 		if (!$file) {
 			$path = ROOT . '/www/admin/static/icon.png';
