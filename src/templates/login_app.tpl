@@ -6,6 +6,7 @@
 	<p class="help">Vous pourrez fermer cette fenêtre quand l'application aura terminé l'autorisation.</p>
 {else}
 	<p class="alert block">Une application tiers demande à accéder aux documents de l'association.</p>
+	{form_errors}
 	<form method="post" action="{$self_url}">
 		<fieldset>
 			<legend>Confirmer l'accès</legend>

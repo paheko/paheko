@@ -35,8 +35,8 @@ $form->runIf('confirm', function () use ($app_token, $session) {
 		echo json_encode($data, JSON_PRETTY_PRINT);
 		exit;
 	}
-	else {
-		$session->validateAppToken($app_token);
+	elseif (!$session->validateAppToken($app_token)) {
+		throw new UserException('La demande a expiré ou est invalide, merci de recommencer.');
 	}
 
 	if ($data->redirect ?? null) {

@@ -126,6 +126,7 @@ class Session extends \KD2\UserSession
 
 	protected function storeRememberMeSelector($selector, $hash, $expiry, $user_id)
 	{
+		$selector = $this->cookie_name . '_' . $selector;
 		return $this->db->insert('users_sessions', [
 			'selector'  => $selector,
 			'hash'      => $hash,
@@ -141,15 +142,17 @@ class Session extends \KD2\UserSession
 
 	protected function getRememberMeSelector($selector)
 	{
-		return $this->db->first('SELECT selector, hash,
+		$selector = $this->cookie_name . '_' . $selector;
+		return $this->db->first('SELECT REPLACE(selector, ?, \'\') AS selector, hash,
 			s.id_user AS user_id, u.password AS user_password, expiry
 			FROM users_sessions AS s
 			LEFT JOIN users AS u ON u.id = s.id_user
-			WHERE s.selector = ? LIMIT 1;', $selector);
+			WHERE s.selector = ? LIMIT 1;', $this->cookie_name . '_', $selector);
 	}
 
 	protected function deleteRememberMeSelector($selector)
 	{
+		$selector = $this->cookie_name . '_' . $selector;
 		return $this->db->delete('users_sessions', $this->db->where('selector', $selector));
 	}
 
@@ -522,7 +525,7 @@ class Session extends \KD2\UserSession
 	{
 		$selector = $this->getRememberMeCookie()->selector ?? null;
 		$user = $this->getUser();
-		return DB::getInstance()->count('users_sessions', 'id_user = ? AND selector != ?', $user->id(), $selector) + 1;
+		return DB::getInstance()->count('users_sessions', 'id_user = ? AND selector != ?', $user->id(), $this->cookie_name . '_' . $selector) + 1;
 	}
 
 	public function isAdmin(): bool

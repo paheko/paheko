@@ -24,12 +24,9 @@ class Session extends UserSession
 	public function generateAppToken(): string
 	{
 		$token = hash('sha256', random_bytes(10));
-		$token = base_convert($token, 16, 36);
 
 		$expiry = time() + 30*60; // 30 minutes
-		DB::getInstance()->preparedQuery('REPLACE INTO users_sessions (selector, hash, id_user, expiry)
-			VALUES (?, ?, ?, ?);',
-			'tok_' . $token, 'waiting', null, $expiry);
+		$this->storeRememberMeSelector('tok_' . $token, 'waiting', $expiry, null);
 
 		return $token;
 	}
@@ -55,8 +52,10 @@ class Session extends UserSession
 			throw new \LogicException('Cannot create a token if the user is not logged-in');
 		}
 
-		DB::getInstance()->preparedQuery('UPDATE users_sessions SET hash = \'ok\', id_user = ? WHERE selector = ?;',
-			$user->id, $token->selector);
+		DB::getInstance()->preparedQuery('UPDATE users_sessions
+			SET hash = \'ok\', id_user = ?, expiry = expiry + 30*60
+			WHERE selector = ?;',
+			$user->id, $this->cookie_name . '_' . $token->selector);
 
 		return true;
 	}
@@ -78,14 +77,14 @@ class Session extends UserSession
 		}
 
 		// Delete temporary token
-		#$this->deleteRememberMeSelector($token->selector);
+		$this->deleteRememberMeSelector($token->selector);
 
 		if ($token->expiry < time()) {
 			return null;
 		}
 
-		// Create a real session, not too long
-		$selector = 'app_' . substr($this->generateAppToken(), 0, 16);
+		$new_token = base_convert(sha1(random_bytes(10)), 16, 36);
+		$selector = 'app_' . substr($new_token, 0, 16);
 		$selector = $this->createSelectorValues($token->user_id, $token->user_password, null, $selector);
 		$this->storeRememberMeSelector($selector->selector, $selector->hash, $selector->expiry, $token->user_id);
 
@@ -103,7 +102,8 @@ class Session extends UserSession
 		}
 
 		$user = $this->getUser();
-		$selector = 'app_' . substr($this->generateAppToken(), 0, 16);
+		$token = base_convert(sha1(random_bytes(10)), 16, 36);
+		$selector = 'app_' . substr($token, 0, 16);
 		$selector = $this->createSelectorValues($user->id, $user->password, null, $selector);
 		$this->storeRememberMeSelector($selector->selector, $selector->hash, $selector->expiry, $user->id);
 

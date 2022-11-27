@@ -5,6 +5,7 @@ namespace Garradin\Files\WebDAV;
 use KD2\WebDAV\NextCloud as WebDAV_NextCloud;
 use KD2\WebDAV\Exception as WebDAV_Exception;
 
+use Garradin\Config;
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 
@@ -249,12 +250,20 @@ class NextCloud extends WebDAV_NextCloud
 
 	protected function nc_avatar(): void
 	{
-		// Doesn't work
 		header('Content-Type: image/png');
 		header('X-NC-IsCustomAvatar: 1');
 		header('Content-Disposition: inline; filename="icon.png"');
-		header('Last-Modified: ' . gmdate(DATE_ISO8601));
-		header('Content-Length: ' . filesize(ROOT . '/www/admin/static/icon.png'));
-		readfile(ROOT . '/www/admin/static/icon.png');
+
+		$file = Config::getInstance()->file('icon');
+
+		if (!$file) {
+			$path = ROOT . '/www/admin/static/icon.png';
+			header('Last-Modified: ' . gmdate(DATE_ISO8601));
+			header('Content-Length: ' . filesize($path));
+			readfile($path);
+		}
+		else {
+			$file->serveThumbnail(Session::getInstance(), 'crop-256px');
+		}
 	}
 }
