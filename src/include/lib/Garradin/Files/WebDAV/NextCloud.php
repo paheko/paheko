@@ -180,4 +180,10 @@ class NextCloud extends WebDAV_NextCloud
 
 		return ['created' => !$exists, 'etag' => $file->etag()];
 	}
+
+	protected function nc_avatar(): ?array
+	{
+		header('Location: ' . WWW_URL . '/config/icon.png');
+		return null;
+	}
 }

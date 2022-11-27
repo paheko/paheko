@@ -14,7 +14,7 @@ use Garradin\Utils;
 use KD2\Brindille_Exception;
 use KD2\DB\EntityManager as EM;
 
-use const Garradin\ROOT;
+use const Garradin\{ROOT, ADMIN_URL};
 
 class Skeleton
 {
