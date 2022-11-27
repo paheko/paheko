@@ -181,6 +181,65 @@ class NextCloud extends WebDAV_NextCloud
 		return ['created' => !$exists, 'etag' => $file->etag()];
 	}
 
+
+	/**
+	 * File preview, large
+	 * @see https://help.nextcloud.com/t/getting-image-preview-with-android-library-or-via-webdav/75743
+	 */
+	protected function nc_preview(string $uri): void
+	{
+		$width = $_GET['x'] ?? null;
+		$height = $_GET['y'] ?? null;
+		$crop = !($_GET['a'] ?? null);
+
+		if (!preg_match('/\.(?:jpe?g|gif|png|webp)$/', $uri)) {
+			http_response_code(404);
+			return;
+		}
+
+		$url = str_replace('%2F', '/', rawurlencode(rawurldecode($_GET['file'] ?? '')));
+		$url = ltrim($url, '/');
+
+		$this->_thumbnail($uri, (int) $width, $crop);
+	}
+
+	protected function _thumbnail(string $uri, int $width, bool $crop = false): void
+	{
+		$this->requireAuth();
+		$file = Files::get(File::CONTEXT_DOCUMENTS . '/' . $uri);
+
+		if (!$file) {
+			throw new WebDAV_Exception('Not found', 404);
+		}
+
+		if (!$file->image) {
+			throw new WebDAV_Exception('Not an image', 404);
+		}
+
+		if ($crop) {
+			$size = 'crop-256px';
+		}
+		elseif ($width >= 500) {
+			$size = '500px';
+		}
+		else {
+			$size = '150px';
+		}
+
+		$file->serveThumbnail(Session::getInstance(), $size);
+	}
+
+	protected function nc_thumbnail(string $uri): void
+	{
+		// Remove "/index.php/apps/files/api/v1/thumbnail/"
+		$uri = str_replace(array_search('thumbnail', self::ROUTES), '', $uri);
+		$uri = trim($uri, '/');
+
+		list($width, $height, $uri) = array_pad(explode('/', $uri, 3), 3, null);
+
+		$this->_thumbnail($uri, (int)$width, false);
+	}
+
 	/*
 	protected function nc_avatar(): ?array
 	{
