@@ -49,6 +49,10 @@ class Skeleton
 			}
 		}
 
+		if (substr($path, -1) == '/') {
+			$path .= 'index.html';
+		}
+
 		try {
 			$s = new self($path);
 			$s->serve($uri, compact('page'));

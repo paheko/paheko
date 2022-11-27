@@ -148,15 +148,20 @@ class UserForm extends Entity
 		return sprintf('%sform/%s/%s%s', WWW_URL, $this->name, $file, $params);
 	}
 
+	public function validateFileName(string $file)
+	{
+		if (!preg_match('!^(?:snippets/)?[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $file)) {
+			throw new \InvalidArgumentException('Invalid skeleton name');
+		}
+	}
+
 	public function template(string $file)
 	{
 		if ($file == self::CONFIG_TEMPLATE) {
 			Session::getInstance()->requireAccess(Session::SECTION_CONFIG, Session::ACCESS_ADMIN);
 		}
 
-		if (!preg_match('!^(?:snippets/)?[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $file)) {
-			throw new \InvalidArgumentException('Invalid skeleton name');
-		}
+		$this->validateFileName($file);
 
 		$ut = new UserTemplate('forms/' . $this->name . '/' . $file);
 		$ut->assign('form', $this->asArray(false) + ['url' => $this->url()]);
@@ -164,4 +169,10 @@ class UserForm extends Entity
 		return $ut;
 	}
 
+	public function fetch(string $file, array $params): string
+	{
+		$ut = $this->template($file);
+		$ut->assignArray($params);
+		return $ut->fetch();
+	}
 }

@@ -87,10 +87,6 @@ class UserTemplate extends \KD2\Brindille
 
 	public function __construct(string $path)
 	{
-		if (!self::isTemplate($path)) {
-			throw new \InvalidArgumentException('Not a valid template file extension: ' . $path);
-		}
-
 		$this->_tpl_path = $path;
 
 		if ($file = Files::get(File::CONTEXT_SKELETON . '/' . $path)) {
@@ -325,7 +321,7 @@ class UserTemplate extends \KD2\Brindille
 		// Templates with no extension are returned as HTML by default
 		// unless {{:http type=...}} is used
 		if ($dot === false) {
-			return 'text/html';
+			return true;
 		}
 
 		$ext = substr($filename, $dot+1);
@@ -345,6 +341,10 @@ class UserTemplate extends \KD2\Brindille
 
 	public function serve(): void
 	{
+		if (!self::isTemplate($this->path)) {
+			throw new \InvalidArgumentException('Not a valid template file extension: ' . $this->path);
+		}
+
 		$content = $this->fetch();
 		$type = null;
 
