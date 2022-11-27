@@ -85,6 +85,7 @@ class Session extends UserSession
 
 		// Create a real session, not too long
 		$selector = $this->createSelectorValues($token->user_id, $token->user_password, '+1 month');
+		$selector->selector = 'app_' . substr($selector->selector, 0, 32);
 		$this->storeRememberMeSelector($selector->selector, $selector->hash, $selector->expiry, $token->user_id);
 
 		$login = $selector->selector;
@@ -102,6 +103,7 @@ class Session extends UserSession
 
 		$user = $this->getUser();
 		$selector = $this->createSelectorValues($user->id, $user->password);
+		$selector->selector = 'app_' . substr($selector->selector, 0, 32);
 		$this->storeRememberMeSelector($selector->selector, $selector->hash, $selector->expiry, $user->id);
 
 		$login = $selector->selector;
