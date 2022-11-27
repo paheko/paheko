@@ -288,7 +288,7 @@ class Config extends Entity
 				$f->setContent($i->output($format, true));
 			}
 			// Force icon format
-			else if ($key == 'favicon') {
+			else if ($key == 'icon') {
 				$format = 'png';
 				$i = new Image($f->fullpath());
 				$i->cropResize(512, 512);
