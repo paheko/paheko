@@ -485,7 +485,7 @@ class Files
 
 	static public function getContext(string $path): ?string
 	{
-		$context = substr($path, strpos($path, '/'));
+		$context = substr($path, 0, strpos($path, '/'));
 
 		if (!$context) {
 			return null;
