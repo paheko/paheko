@@ -4,8 +4,6 @@ namespace Garradin\Files\WebDAV;
 
 use KD2\WebDAV\WOPI;
 
-use Garradin\Users\Session;
-
 use const Garradin\WOPI_DISCOVERY_URL;
 
 class Server

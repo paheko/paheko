@@ -705,19 +705,21 @@ class File extends Entity
 		}
 	}
 
-	public function canRead(): bool
+	public function canRead(Session $session = null): bool
 	{
 		// Web pages and config files are always public
 		if ($this->isPublic()) {
 			return true;
 		}
 
-		return Session::getInstance()->checkFilePermission($this->path, 'read');
+		$session ??= Session::getInstance();
+
+		return $session->checkFilePermission($this->path, 'read');
 	}
 
-	public function canShare(): bool
+	public function canShare(Session $session = null): bool
 	{
-		$session = Session::getInstance();
+		$session ??= Session::getInstance();
 
 		if (!$session->isLogged()) {
 			return false;
@@ -726,9 +728,9 @@ class File extends Entity
 		return $session->checkFilePermission($this->path, 'share');
 	}
 
-	public function canWrite(): bool
+	public function canWrite(Session $session = null): bool
 	{
-		$session = Session::getInstance();
+		$session ??= Session::getInstance();
 
 		if (!$session->isLogged()) {
 			return false;
@@ -737,9 +739,9 @@ class File extends Entity
 		return $session->checkFilePermission($this->path, 'write');
 	}
 
-	public function canDelete(): bool
+	public function canDelete(Session $session = null): bool
 	{
-		$session = Session::getInstance();
+		$session ??= Session::getInstance();
 
 		if (!$session->isLogged()) {
 			return false;
@@ -748,9 +750,9 @@ class File extends Entity
 		return $session->checkFilePermission($this->path, 'delete');
 	}
 
-	public function canMoveTo(string $destination): bool
+	public function canMoveTo(string $destination, Session $session = null): bool
 	{
-		$session = Session::getInstance();
+		$session ??= Session::getInstance();
 
 		if (!$session->isLogged()) {
 			return false;
@@ -759,9 +761,9 @@ class File extends Entity
 		return $session->checkFilePermission($this->path, 'move') && $this->canDelete() && self::canCreate($destination);
 	}
 
-	public function canCopyTo(string $destination): bool
+	public function canCopyTo(string $destination, Session $session = null): bool
 	{
-		$session = Session::getInstance();
+		$session ??= Session::getInstance();
 
 		if (!$session->isLogged()) {
 			return false;
@@ -770,13 +772,13 @@ class File extends Entity
 		return $this->canRead() && self::canCreate($destination);
 	}
 
-	public function canCreateDirHere()
+	public function canCreateDirHere(Session $session = null)
 	{
 		if (!$this->isDir()) {
 			return false;
 		}
 
-		$session = Session::getInstance();
+		$session ??= Session::getInstance();
 
 		if (!$session->isLogged()) {
 			return false;
@@ -785,9 +787,9 @@ class File extends Entity
 		return $session->checkFilePermission($this->path, 'mkdir');
 	}
 
-	static public function canCreateDir(string $path)
+	static public function canCreateDir(string $path, Session $session = null)
 	{
-		$session = Session::getInstance();
+		$session ??= Session::getInstance();
 
 		if (!$session->isLogged()) {
 			return false;
@@ -796,13 +798,13 @@ class File extends Entity
 		return $session->checkFilePermission($path, 'mkdir');
 	}
 
-	public function canCreateHere(): bool
+	public function canCreateHere(Session $session = null): bool
 	{
 		if (!$this->isDir()) {
 			return false;
 		}
 
-		$session = Session::getInstance();
+		$session ??= Session::getInstance();
 
 		if (!$session->isLogged()) {
 			return false;
@@ -811,9 +813,9 @@ class File extends Entity
 		return $session->checkFilePermission($this->path, 'create');
 	}
 
-	static public function canCreate(string $path): bool
+	static public function canCreate(string $path, Session $session = null): bool
 	{
-		$session = Session::getInstance();
+		$session ??= Session::getInstance();
 
 		if (!$session->isLogged()) {
 			return false;

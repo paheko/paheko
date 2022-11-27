@@ -5,7 +5,8 @@ use KD2\HTTP;
 use KD2\Security;
 
 use Garradin\Users\DynamicFields;
-use Garradin\Users\Session;
+use Garradin\Users\Session as UserSession;
+use Garradin\Files\WebDAV\Session as AppSession;
 
 use Garradin\UserException;
 
@@ -13,7 +14,14 @@ const LOGIN_PROCESS = true;
 
 require_once __DIR__ . '/_inc.php';
 
-$session = Session::getInstance();
+$app_token = $_GET['app'] ?? null;
+
+if ($app_token) {
+	$session = AppSession::getInstance();
+}
+else {
+	$session = UserSession::getInstance();
+}
 
 // Relance session_start et renvoie une image de 1px transparente
 if (qg('keepSessionAlive') !== null)
@@ -29,7 +37,6 @@ if (qg('keepSessionAlive') !== null)
 	exit;
 }
 
-$app_token = $session->getAppLoginToken();
 $args = $app_token ? '?app=' . rawurlencode($app_token) : '';
 $layout = $app_token ? 'public' : null;
 
@@ -71,7 +78,7 @@ $form->runIf('login', function () use ($id_field_name, $session, $lock, $args) {
 		throw new UserException(sprintf("Connexion impossible.\nVérifiez votre identifiant (%s) et votre mot de passe.", $id_field_name));
 	}
 
-	if ($session::REQUIRE_OTP == $ok) {
+	if ($session::REQUIRE_OTP === $ok) {
 		Utils::redirect('!login_otp.php' . $args);
 	}
 	elseif ($args) {

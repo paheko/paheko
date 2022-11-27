@@ -1,16 +1,18 @@
 <?php
 namespace Garradin;
 
-use Garradin\Users\Session;
+use Garradin\Files\WebDAV\Session as AppSession;
 use Garradin\Entities\Files\File;
+
+const LOGIN_PROCESS = true;
 
 require_once __DIR__ . '/_inc.php';
 
-$session = Session::getInstance();
+$session = AppSession::getInstance();
 
 $session->requireAccess($session::SECTION_DOCUMENTS, $session::ACCESS_READ);
 
-$app_token = $session->getAppLoginToken();
+$app_token = $_GET['app'] ?? null;
 
 if (!$app_token) {
 	die("No app token was supplied.");
@@ -18,8 +20,9 @@ if (!$app_token) {
 
 $csrf_key = 'app_confirm_' . $app_token;
 
-$form->runIf('cancel', function () {
-	Utils::redirect('!logout.php');
+$form->runIf('cancel', function () use ($app_token, $session) {
+	$session->logout();
+	Utils::redirect('!login.php?app=' . $app_token);
 });
 
 $form->runIf('confirm', function () use ($app_token, $session) {

@@ -6,7 +6,6 @@ use KD2\WebDAV\NextCloud as WebDAV_NextCloud;
 use KD2\WebDAV\Exception as WebDAV_Exception;
 
 use Garradin\Files\Files;
-use Garradin\Users\Session;
 
 use const Garradin\{SECRET_KEY, ADMIN_URL, CACHE_ROOT, WWW_URL};
 

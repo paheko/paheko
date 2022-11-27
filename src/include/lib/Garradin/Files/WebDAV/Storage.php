@@ -10,7 +10,6 @@ use Garradin\DB;
 use Garradin\Utils;
 use Garradin\ValidationException;
 
-use Garradin\Users\Session;
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 use Garradin\Web\Router;
@@ -111,7 +110,7 @@ class Storage extends AbstractStorage
 			throw new WebDAV_Exception('File Not Found', 404);
 		}
 
-		if (!$file->canRead()) {
+		if (!$file->canRead($session)) {
 			throw new WebDAV_Exception('Vous n\'avez pas accès à ce chemin', 403);
 		}
 
@@ -195,11 +194,11 @@ class Storage extends AbstractStorage
 				return NextCloud::getDirectID('', $uri);
 			case NextCloud::PROP_OC_PERMISSIONS:
 				$permissions = [
-					NextCloud::PERM_READ => $file->canRead(),
-					NextCloud::PERM_WRITE => $file->canWrite(),
-					NextCloud::PERM_DELETE => $file->canDelete(),
-					NextCloud::PERM_RENAME_MOVE => $file->canDelete(),
-					NextCloud::PERM_CREATE => $file->canCreateHere(),
+					NextCloud::PERM_READ => $file->canRead($session),
+					NextCloud::PERM_WRITE => $file->canWrite($session),
+					NextCloud::PERM_DELETE => $file->canDelete($session),
+					NextCloud::PERM_RENAME_MOVE => $file->canDelete($session),
+					NextCloud::PERM_CREATE => $file->canCreateHere($session),
 				];
 
 				$permissions = array_filter($permissions, fn($a) => $a);
@@ -213,7 +212,7 @@ class Storage extends AbstractStorage
 			case WOPI::PROP_USER_NAME:
 				return $session->getUser()->name();
 			case WOPI::PROP_READ_ONLY:
-				return $file->canWrite() ? false : true;
+				return $file->canWrite($session) ? false : true;
 			case WOPI::PROP_FILE_URL:
 				$id = gzcompress($uri);
 				$id = WOPI::base64_encode_url_safe($id);
@@ -279,10 +278,10 @@ class Storage extends AbstractStorage
 		$new = !$target ? true : false;
 		$session = Session::getInstance();
 
-		if ($new && !File::canCreate($uri)) {
+		if ($new && !File::canCreate($uri, $session)) {
 			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de créer ce fichier', 403);
 		}
-		elseif (!$new && !$target->canWrite()) {
+		elseif (!$new && !$target->canWrite($session)) {
 			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de modifier ce fichier', 403);
 		}
 
@@ -344,7 +343,9 @@ class Storage extends AbstractStorage
 			throw new WebDAV_Exception('This file does not exist', 404);
 		}
 
-		if (!$target->canDelete()) {
+		$session = Session::getInstance();
+
+		if (!$target->canDelete($session)) {
 			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de supprimer ce fichier', 403);
 		}
 
@@ -365,7 +366,7 @@ class Storage extends AbstractStorage
 
 		$session = Session::getInstance();
 
-		if (!$source->canMoveTo($destination)) {
+		if (!$source->canMoveTo($destination, $session)) {
 			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de déplacer ce fichier', 403);
 		}
 

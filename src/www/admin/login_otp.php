@@ -2,13 +2,21 @@
 
 namespace Garradin;
 
-use Garradin\Users\Session;
+use Garradin\Users\Session as UserSession;
+use Garradin\Files\WebDAV\Session as AppSession;
 
 const LOGIN_PROCESS = true;
 
 require_once __DIR__ . '/_inc.php';
 
-$session = Session::getInstance();
+$app_token = $_GET['app'] ?? null;
+
+if ($app_token) {
+	$session = AppSession::getInstance();
+}
+else {
+	$session = UserSession::getInstance();
+}
 
 if (!$session->isOTPRequired()) {
 	Utils::redirect(ADMIN_URL);
@@ -17,7 +25,6 @@ if (!$session->isOTPRequired()) {
 $login = null;
 $csrf_key = 'login_otp';
 
-$app_token = $session->getAppLoginToken();
 $args = $app_token ? '?app=' . rawurlencode($app_token) : '';
 $layout = $app_token ? 'public' : null;
 
