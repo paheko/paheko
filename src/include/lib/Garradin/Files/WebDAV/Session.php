@@ -2,9 +2,11 @@
 
 namespace Garradin\Files\WebDAV;
 
-use Garradin\Users\Session as UserSession;
-
 use Garradin\DB;
+use Garradin\Users\Users;
+use Garradin\Entities\Users\User;
+
+use Garradin\Users\Session as UserSession;
 
 use const Garradin\{WWW_URL};
 

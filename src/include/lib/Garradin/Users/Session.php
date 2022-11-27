@@ -12,7 +12,6 @@ use Garradin\ValidationException;
 
 use Garradin\Users\Users;
 use Garradin\Email\Templates as EmailsTemplates;
-use Garradin\Files\NextCloud_Compatibility;
 use Garradin\Files\Files;
 
 use Garradin\Entities\Users\Category;
