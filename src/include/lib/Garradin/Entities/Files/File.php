@@ -1002,7 +1002,7 @@ class File extends Entity
 		return hash_equals($hash, $hash_check);
 	}
 
-	public function touch(?\DateTimeInterface $date = null)
+	public function touch($date = null)
 	{
 		Files::callStorage('touch', $this->path, $date);
 	}

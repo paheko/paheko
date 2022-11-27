@@ -56,7 +56,7 @@ interface StorageInterface
 	/**
 	 * Change file mtime
 	 */
-	static public function touch(string $path, ?\DateTimeInterface $date = null): bool;
+	static public function touch(string $path, $date = null): bool;
 
 	/**
 	 * Return TRUE if file exists
