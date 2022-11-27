@@ -198,7 +198,7 @@ class NextCloud extends WebDAV_NextCloud
 			return;
 		}
 
-		$url = str_replace('%2F', '/', rawurlencode(rawurldecode($_GET['file'] ?? '')));
+		$url = rawurldecode($_GET['file'] ?? '');
 		$url = ltrim($url, '/');
 
 		$this->_thumbnail($uri, (int) $width, $crop);
@@ -237,12 +237,12 @@ class NextCloud extends WebDAV_NextCloud
 		$uri = trim($uri, '/');
 
 		list($width, $height, $uri) = array_pad(explode('/', $uri, 3), 3, null);
+		$uri = rawurldecode($uri);
 
 		$this->_thumbnail($uri, (int)$width, false);
 	}
 
-	/*
-	protected function nc_avatar(): ?array
+	protected function nc_avatar(): void
 	{
 		// Doesn't work
 		header('Content-Type: image/png');
@@ -251,7 +251,5 @@ class NextCloud extends WebDAV_NextCloud
 		header('Last-Modified: ' . gmdate(DATE_ISO8601));
 		header('Content-Length: ' . filesize(ROOT . '/www/admin/static/icon.png'));
 		readfile(ROOT . '/www/admin/static/icon.png');
-		return null;
 	}
-	*/
 }
