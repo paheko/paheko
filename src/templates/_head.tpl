@@ -116,24 +116,20 @@ if (!isset($current)) {
 		{/if}
 
 		{if !defined('Garradin\LOCAL_LOGIN') || !LOCAL_LOGIN}
-			<li><h3><a href="{$admin_url}logout.php"><b data-icn="{icon html=false shape="logout"}"></b><span>Déconnexion</span></a></h3></li>
+			<li><h3><a href="{$admin_url}logout.php">{icon shape="logout"}<b>Déconnexion</b></a></h3></li>
 		{/if}
 
 		{if $help_url}
 		<li>
-			<h3><a href="{$help_url}" target="_dialog"><b data-icn="{icon html=false shape="help"}"></b><span>Aide</span></a></h3>
+			<h3><a href="{$help_url}" target="_dialog">{icon shape="help"}<b>Aide</b></a></h3>
 		</li>
 		{/if}
 
 	{elseif !defined('Garradin\INSTALL_PROCESS')}
         {if $config.org_web || !$config.site_disabled}
-		<li><a href="{if $config.org_web}{$config.org_web}{else}{$www_url}{/if}">&larr; Retour au site</a></li>
+		<li><h3><a href="{if $config.org_web}{$config.org_web}{else}{$www_url}{/if}">{icon shape="left"}<b>Retour au site</b></a></h3></li>
         {/if}
-		<li><a href="{$admin_url}">Connexion</a>
-			<ul>
-				<li><a href="{$admin_url}password.php">Mot de passe perdu</a>
-			</ul>
-		</li>
+		<li{if $current == 'login'} class="current"{/if}><h3><a href="{$admin_url}">{icon shape="login"}<b>Connexion</b></a></h3></li>
 	{/if}
 	</ul>
 	</nav>

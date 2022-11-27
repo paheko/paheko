@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Connexion"}
+{include file="_head.tpl" title="Connexion" current="login"}
 
 {form_errors}
 

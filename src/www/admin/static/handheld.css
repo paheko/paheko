@@ -85,7 +85,7 @@ nav.breadcrumbs ul {
 	display: inline;
 }
 
-.header .menu > ul > li > h3 a span {
+.header .menu > ul > li > h3 a b {
 	display: none;
 }
 
@@ -98,7 +98,7 @@ nav.breadcrumbs ul {
 	text-decoration: none !important;
 }
 
-.header .menu h3 b[data-icn]::before {
+.header .menu h3 span[data-icon]::before {
 	float: none;
 	display: block;
 	position: relative;
@@ -108,15 +108,15 @@ nav.breadcrumbs ul {
 	line-height: 10pt;
 	color: rgb(var(--gBgColor));
 	font-size: 20pt;
+	top: 0;
 }
 
-.header .menu li.current_parent h3 a {
-	background: rgb(var(--gBgColor));
-}
-
-.header .menu li.current h3 b[data-icn]::before,
-.header .menu > ul > li.current_parent h3 b[data-icn]::before {
+.header .menu li.current_parent h3 a, .header .menu li.current h3 a {
 	background: rgb(var(--gSecondColor));
+}
+
+.header .menu li.current h3 span[data-icon]::before,
+.header .menu > ul > li.current_parent h3 span[data-icon]::before {
 	color: rgb(var(--gBgColor));
 	text-shadow: 0px 0px 5px rgb(var(--gTextColor)), 0px 0px 5px rgb(var(--gTextColor));
 }

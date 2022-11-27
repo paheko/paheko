@@ -6,7 +6,7 @@
 	<fieldset>
 		<legend>Créer un répertoire</legend>
 		<dl>
-			{input type="text" minlength="1" size="60" name="name" required="required" label="Nom du répertoire à créer"}
+			{input type="text" minlength="1" name="name" required="required" label="Nom du répertoire à créer"}
 		</dl>
 		<p class="submit">
 			{csrf_field key=$csrf_key}
