@@ -71,6 +71,7 @@ class Skeleton
 	public function __construct(string $path)
 	{
 		if (!self::isValidPath($path)) {
+			throw new \InvalidArgumentException('This skeleton path is invalid');
 		}
 
 		if (!Files::exists(File::CONTEXT_SKELETON . '/' . $path) && !file_exists(UserTemplate::DIST_ROOT . $path)) {
