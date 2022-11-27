@@ -200,30 +200,13 @@ class NextCloud extends WebDAV_NextCloud
 		return ['created' => !$exists, 'etag' => $file->etag()];
 	}
 
-
-	/**
-	 * File preview, large
-	 * @see https://help.nextcloud.com/t/getting-image-preview-with-android-library-or-via-webdav/75743
-	 */
-	protected function nc_preview(string $uri): void
+	public function serveThumbnail(string $uri, int $width, int $height, bool $crop = false): void
 	{
-		$width = $_GET['x'] ?? null;
-		$height = $_GET['y'] ?? null;
-		$crop = !($_GET['a'] ?? null);
-
 		if (!preg_match('/\.(?:jpe?g|gif|png|webp)$/', $uri)) {
 			http_response_code(404);
 			return;
 		}
 
-		$uri = rawurldecode($_GET['file'] ?? '');
-		$uri = ltrim($uri, '/');
-
-		$this->_thumbnail($uri, (int) max($width, $height), $crop);
-	}
-
-	protected function _thumbnail(string $uri, int $width, bool $crop = false): void
-	{
 		// NextCloud Android just cannot display thumbnails, not sure why
 		if (false !== strpos($_SERVER['HTTP_USER_AGENT'] ?? '', 'Nextcloud-android')) {
 			http_response_code(404);
@@ -232,6 +215,7 @@ class NextCloud extends WebDAV_NextCloud
 		}
 
 		$this->requireAuth();
+		$uri = preg_replace(self::WEBDAV_BASE_REGEXP, '', $uri);
 		$file = Files::get(File::CONTEXT_DOCUMENTS . '/' . $uri);
 
 		if (!$file) {
@@ -245,7 +229,7 @@ class NextCloud extends WebDAV_NextCloud
 		if ($crop) {
 			$size = 'crop-256px';
 		}
-		elseif ($width >= 500) {
+		elseif ($width >= 500 || $height >= 500) {
 			$size = '500px';
 		}
 		else {
@@ -253,23 +237,6 @@ class NextCloud extends WebDAV_NextCloud
 		}
 
 		$file->serveThumbnail(Session::getInstance(), $size);
-	}
-
-	protected function nc_thumbnail(string $uri): void
-	{
-		// Remove "/index.php/apps/files/api/v1/thumbnail/"
-		$uri = str_replace(array_search('thumbnail', self::ROUTES), '', $uri);
-		$uri = trim($uri, '/');
-
-		list($width, $height, $uri) = array_pad(explode('/', $uri, 3), 3, null);
-		$uri = rawurldecode($uri);
-
-		if (!preg_match('/\.(?:jpe?g|gif|png|webp)$/', $uri)) {
-			http_response_code(404);
-			return;
-		}
-
-		$this->_thumbnail($uri, (int)max($width, $height), false);
 	}
 
 	protected function nc_avatar(): void
