@@ -855,8 +855,8 @@ class File extends Entity
 
 	static public function validateFileName(string $name): void
 	{
-		if (substr($name[0], 0, 1) === '.') {
-			throw new ValidationException('Le nom de fichier ne peut commencer par un point');
+		if (0 === strpos($name, '.ht')) {
+			throw new ValidationException('Nom de fichier interdit');
 		}
 
 		if (strpos($name, "\0") !== false) {
@@ -876,6 +876,10 @@ class File extends Entity
 
 	static public function validatePath(string $path): array
 	{
+		if (false != strpos($path, '..')) {
+			throw new ValidationException('Chemin invalide: ' . $path);
+		}
+
 		$parts = explode('/', $path);
 
 		if (count($parts) < 1) {
@@ -886,12 +890,6 @@ class File extends Entity
 
 		if (!array_key_exists($context, self::CONTEXTS_NAMES)) {
 			throw new ValidationException('Chemin invalide: ' . $path);
-		}
-
-		foreach ($parts as $part) {
-			if (substr($part, 0, 1) == '.') {
-				throw new ValidationException('Chemin invalide: ' . $path);
-			}
 		}
 
 		$name = array_pop($parts);
