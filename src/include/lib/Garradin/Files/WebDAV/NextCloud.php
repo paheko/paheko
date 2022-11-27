@@ -7,7 +7,7 @@ use KD2\WebDAV\Exception as WebDAV_Exception;
 
 use Garradin\Files\Files;
 
-use const Garradin\{SECRET_KEY, ADMIN_URL, CACHE_ROOT, WWW_URL};
+use const Garradin\{SECRET_KEY, ADMIN_URL, CACHE_ROOT, WWW_URL, ROOT};
 
 class NextCloud extends WebDAV_NextCloud
 {
@@ -181,9 +181,17 @@ class NextCloud extends WebDAV_NextCloud
 		return ['created' => !$exists, 'etag' => $file->etag()];
 	}
 
+	/*
 	protected function nc_avatar(): ?array
 	{
-		header('Location: ' . WWW_URL . '/config/icon.png');
+		// Doesn't work
+		header('Content-Type: image/png');
+		header('X-NC-IsCustomAvatar: 1');
+		header('Content-Disposition: inline; filename="icon.png"');
+		header('Last-Modified: ' . gmdate(DATE_ISO8601));
+		header('Content-Length: ' . filesize(ROOT . '/www/admin/static/icon.png'));
+		readfile(ROOT . '/www/admin/static/icon.png');
 		return null;
 	}
+	*/
 }

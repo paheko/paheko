@@ -29,6 +29,12 @@ $form->runIf('confirm', function () use ($app_token, $session) {
 	if ($app_token == 'redirect') {
 		$data = $session->createAppCredentials();
 	}
+	elseif ($app_token == 'test') {
+		$data = $session->createAppCredentials();
+		header('Content-Type: text/plain');
+		echo json_encode($data, JSON_PRETTY_PRINT);
+		exit;
+	}
 	else {
 		$session->validateAppToken($app_token);
 	}

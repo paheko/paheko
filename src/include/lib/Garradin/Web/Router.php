@@ -28,15 +28,14 @@ class Router
 		'index.php',
 		'status.php',
 		'ocs',
+		'avatars',
 	];
 
 	static public function route(): void
 	{
 		$uri = !empty($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
 
-		if ($pos = strpos($uri, '?')) {
-			$uri = substr($uri, 0, $pos);
-		}
+		$uri = parse_url($uri, \PHP_URL_PATH);
 
 		// WWW_URI inclus toujours le slash final, mais on veut le conserver ici
 		$uri = substr($uri, strlen(WWW_URI) - 1);

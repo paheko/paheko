@@ -96,6 +96,7 @@ nav.breadcrumbs ul {
 .header .menu h3 a {
 	text-align: center;
 	text-decoration: none !important;
+	font-weight: normal;
 }
 
 .header .menu h3 span[data-icon]::before {
@@ -109,6 +110,7 @@ nav.breadcrumbs ul {
 	color: rgb(var(--gBgColor));
 	font-size: 20pt;
 	top: 0;
+	text-shadow: none;
 }
 
 .header .menu li.current_parent h3 a, .header .menu li.current h3 a {
