@@ -6,6 +6,7 @@ use KD2\WebDAV\NextCloud as WebDAV_NextCloud;
 use KD2\WebDAV\Exception as WebDAV_Exception;
 
 use Garradin\Config;
+use Garradin\Utils;
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 
@@ -14,7 +15,7 @@ use const Garradin\{SECRET_KEY, ADMIN_URL, CACHE_ROOT, WWW_URL, ROOT};
 class NextCloud extends WebDAV_NextCloud
 {
 	protected string $temporary_chunks_path;
-	protected string $prefix = 'documents/';
+	protected string $prefix = File::CONTEXT_DOCUMENTS . '/';
 
 	public function __construct()
 	{
@@ -160,24 +161,32 @@ class NextCloud extends WebDAV_NextCloud
 		$path = $this->temporary_chunks_path . '/' . $name;
 		$tmp_file = $path . '/__complete';
 
+		$target = $this->prefix . $target;
+
 		$exists = Files::exists($target);
 
 		try {
 			$out = fopen($tmp_file, 'wb');
+			$processed = 0;
 
 			foreach (glob($path . '/*') as $file) {
+				if ($file == $tmp_file) {
+					continue;
+				}
+
 				$in = fopen($file, 'rb');
 
 				while (!feof($in)) {
-					fwrite($out, fread($in, 8192));
+					$data = fread($in, 8192);
+					fwrite($out, $data);
+					$processed += strlen($data);
 				}
 
 				fclose($in);
 			}
 
-			$file = Files::createFromPointer($target, $out);
-
 			fclose($out);
+			$file = Files::createFromPath($target, $tmp_file);
 
 			if ($mtime) {
 				$file->touch($mtime);
@@ -210,11 +219,18 @@ class NextCloud extends WebDAV_NextCloud
 		$uri = rawurldecode($_GET['file'] ?? '');
 		$uri = ltrim($uri, '/');
 
-		$this->_thumbnail($uri, (int) $width, $crop);
+		$this->_thumbnail($uri, (int) max($width, $height), $crop);
 	}
 
 	protected function _thumbnail(string $uri, int $width, bool $crop = false): void
 	{
+		// NextCloud Android just cannot display thumbnails, not sure why
+		if (false !== strpos($_SERVER['HTTP_USER_AGENT'] ?? '', 'Nextcloud-android')) {
+			http_response_code(404);
+			echo 'Banned client';
+			return;
+		}
+
 		$this->requireAuth();
 		$file = Files::get(File::CONTEXT_DOCUMENTS . '/' . $uri);
 
@@ -236,9 +252,6 @@ class NextCloud extends WebDAV_NextCloud
 			$size = '150px';
 		}
 
-		header('Content-Disposition: inline; filename="image.png"');
-		header(sprintf('Etag: "%s"', md5($uri . $size)));
-
 		$file->serveThumbnail(Session::getInstance(), $size);
 	}
 
@@ -256,20 +269,19 @@ class NextCloud extends WebDAV_NextCloud
 			return;
 		}
 
-		$this->_thumbnail($uri, (int)$width, false);
+		$this->_thumbnail($uri, (int)max($width, $height), false);
 	}
 
 	protected function nc_avatar(): void
 	{
-		header('Content-Type: image/png');
 		header('X-NC-IsCustomAvatar: 1');
-		header('Content-Disposition: inline; filename="icon.png"');
 
 		$file = Config::getInstance()->file('icon');
-		header(sprintf('Etag: "%s"', md5($uri)));
 
 		if (!$file) {
 			$path = ROOT . '/www/admin/static/icon.png';
+
+			header('Content-Type: image/png');
 			header('Last-Modified: ' . gmdate(DATE_ISO8601));
 			header('Content-Length: ' . filesize($path));
 			readfile($path);

@@ -17,7 +17,6 @@ class Server
 		$storage = new Storage($nc);
 		$dav->setStorage($storage);
 
-		header('Access-Control-Allow-Origin: *', true);
 		$method = $_SERVER['REQUEST_METHOD'] ?? null;
 
 		// Always say YES to OPTIONS
