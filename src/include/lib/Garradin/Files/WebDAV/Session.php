@@ -23,7 +23,8 @@ class Session extends UserSession
 	 */
 	public function generateAppToken(): string
 	{
-		$token = hash('sha256', random_bytes(16));
+		$token = hash('sha256', random_bytes(10));
+		$token = base_convert($token, 16, 36);
 
 		$expiry = time() + 30*60; // 30 minutes
 		DB::getInstance()->preparedQuery('REPLACE INTO users_sessions (selector, hash, id_user, expiry)
@@ -84,8 +85,8 @@ class Session extends UserSession
 		}
 
 		// Create a real session, not too long
-		$selector = $this->createSelectorValues($token->user_id, $token->user_password, '+1 month');
-		$selector->selector = 'app_' . substr($selector->selector, 0, 32);
+		$selector = 'app_' . substr($this->generateAppToken(), 0, 16);
+		$selector = $this->createSelectorValues($token->user_id, $token->user_password, null, $selector);
 		$this->storeRememberMeSelector($selector->selector, $selector->hash, $selector->expiry, $token->user_id);
 
 		$login = $selector->selector;
@@ -102,8 +103,8 @@ class Session extends UserSession
 		}
 
 		$user = $this->getUser();
-		$selector = $this->createSelectorValues($user->id, $user->password);
-		$selector->selector = 'app_' . substr($selector->selector, 0, 32);
+		$selector = 'app_' . substr($this->generateAppToken(), 0, 16);
+		$selector = $this->createSelectorValues($user->id, $user->password, null, $selector);
 		$this->storeRememberMeSelector($selector->selector, $selector->hash, $selector->expiry, $user->id);
 
 		$login = $selector->selector;
