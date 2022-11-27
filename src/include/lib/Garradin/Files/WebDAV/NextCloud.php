@@ -239,6 +239,11 @@ class NextCloud extends WebDAV_NextCloud
 		list($width, $height, $uri) = array_pad(explode('/', $uri, 3), 3, null);
 		$uri = rawurldecode($uri);
 
+		if (!preg_match('/\.(?:jpe?g|gif|png|webp)$/', $uri)) {
+			http_response_code(404);
+			return;
+		}
+
 		$this->_thumbnail($uri, (int)$width, false);
 	}
 
