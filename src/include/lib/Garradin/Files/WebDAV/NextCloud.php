@@ -198,8 +198,8 @@ class NextCloud extends WebDAV_NextCloud
 			return;
 		}
 
-		$url = rawurldecode($_GET['file'] ?? '');
-		$url = ltrim($url, '/');
+		$uri = rawurldecode($_GET['file'] ?? '');
+		$uri = ltrim($uri, '/');
 
 		$this->_thumbnail($uri, (int) $width, $crop);
 	}
