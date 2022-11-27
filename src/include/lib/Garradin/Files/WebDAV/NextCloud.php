@@ -140,6 +140,14 @@ class NextCloud extends WebDAV_NextCloud
 		Utils::deleteRecursive($path, true);
 	}
 
+	public function listChunks(string $login, string $name): array
+	{
+		$path = $this->temporary_chunks_path . '/' . $name;
+		$list = glob($path . '/*');
+		$list = array_map(fn($a) => str_replace($path . '/', '', $a), $list);
+		return $list;
+	}
+
 	public function assembleChunks(string $login, string $name, string $target, ?int $mtime): array
 	{
 		$parent = Utils::dirname($target);
