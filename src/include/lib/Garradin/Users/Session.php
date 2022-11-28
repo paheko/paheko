@@ -315,7 +315,7 @@ class Session extends \KD2\UserSession
 			$db->quoteIdentifier($email_field),
 			$db->quoteIdentifier($id_field));
 
-		return $db->first($sql, trim($id));
+		return $db->first($sql, trim($id)) ?: null;
 	}
 
 	protected function makePasswordRecoveryHash(\stdClass $user, ?int $expire = null): string

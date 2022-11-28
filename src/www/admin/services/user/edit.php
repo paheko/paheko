@@ -2,6 +2,7 @@
 namespace Garradin;
 
 use Garradin\Services\Services_User;
+use Garradin\Users\Users;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -14,7 +15,7 @@ if (!$su) {
 }
 
 $csrf_key = 'su_edit_' . $su->id();
-$users = [$su->id_user => (new Membres)->getNom($su->id_user)];
+$users = [$su->id_user => Users::getName($su->id_user)];
 $form_url = sprintf('edit.php?id=%d&', $su->id());
 $create = false;
 
