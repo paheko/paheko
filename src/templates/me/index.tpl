@@ -24,4 +24,6 @@
 	<dd>{linkbutton href="!me/export.php" label="Télécharger toutes les données détenues sur moi" shape="download"}</dd>
 </dl>
 
+{$snippets|raw}
+
 {include file="_foot.tpl"}
