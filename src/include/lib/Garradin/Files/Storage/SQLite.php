@@ -233,11 +233,17 @@ class SQLite implements StorageInterface
 
 	static public function touch(string $path, $date = null): bool
 	{
-		if ($date instanceof \DateTimeInterface) {
-			$date = $date->getTimestamp();
+		if (null === $date) {
+			$date = new \DateTime;
+		}
+		elseif (!($date instanceof \DateTimeInterface) && ctype_digit($date)) {
+			$date = new \DateTime('@' . $date);
+		}
+		elseif (!($date instanceof \DateTimeInterface)) {
+			throw new \InvalidArgumentException('Invalid date string: ' . $date);
 		}
 
-		return DB::getInstance()->preparedQuery('UPDATE files SET modified = ? WHERE path = ?;', $date ?: new \DateTime, $path);
+		return DB::getInstance()->preparedQuery('UPDATE files SET modified = ? WHERE path = ?;', $date, $path);
 	}
 
 	static public function mkdir(File $file): bool
