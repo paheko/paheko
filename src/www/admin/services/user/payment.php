@@ -7,6 +7,7 @@ use Garradin\Accounting\Projects;
 use Garradin\Accounting\Years;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
+use Garradin\Users\Users;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -24,7 +25,7 @@ if (!$fee->id_year) {
 	throw new UserException('Cette inscription n\'est pas liée à un tarif relié à la comptabilité, il n\'est pas possible de saisir un règlement.');
 }
 
-$user_name = (new Membres)->getNom($su->id_user);
+$user_name = Users::getName($su->id_user);
 
 $csrf_key = 'service_pay';
 

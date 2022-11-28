@@ -30,8 +30,6 @@ if (qg('toggle_type') !== null && $session->canAccess($session::SECTION_WEB, $se
 	Utils::redirect('!web/page.php?p=' . $page->path);
 }
 
-$membres = new Membres;
-
 $tpl->assign('breadcrumbs', $page->getBreadcrumbs());
 
 $images = $page->getImageGallery(true);
