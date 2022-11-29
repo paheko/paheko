@@ -145,7 +145,7 @@ class CSV_Custom
 		return $selected;
 	}
 
-	public function getTranslationTable(): array
+	public function getTranslationTable(): ?array
 	{
 		return $this->translation;
 	}
