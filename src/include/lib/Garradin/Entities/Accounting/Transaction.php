@@ -985,7 +985,7 @@ class Transaction extends Entity
 		$db->preparedQuery($sql, $this->id());
 
 		foreach ($users as $id) {
-			$db->preparedQuery('INSERT OR IGNORE INTO acc_transactions_users (id_transaction, id_user) VALUES (?, ?);', $this->id(), $id);
+			$db->preparedQuery('INSERT OR IGNORE INTO acc_transactions_users (id_transaction, id_user, id_service_user) VALUES (?, ?, NULL);', $this->id(), $id);
 		}
 
 		$db->commit();
