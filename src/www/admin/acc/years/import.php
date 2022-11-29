@@ -107,7 +107,8 @@ $types = [
 	],
 ];
 
-$tpl->assign('with_linked_users', in_array('linked_users', $csv->getTranslationTable()));
-$tpl->assign(compact('csv', 'year', 'csrf_key', 'examples', 'type', 'type_name', 'ignore_ids', 'types', 'report'));
+$with_linked_users = ($table = $csv->getTranslationTable()) && in_array('linked_users', $table);
+
+$tpl->assign(compact('csv', 'year', 'csrf_key', 'examples', 'type', 'type_name', 'ignore_ids', 'types', 'report', 'with_linked_users'));
 
 $tpl->display('acc/years/import.tpl');
