@@ -49,6 +49,8 @@ $hash = sha1($targets_str . $chart_id . $year_id . $last_change . '=' . $filter)
 // Exit if there's no need to reload
 Utils::HTTPCache($hash, null, 10);
 
+$chart = null;
+
 if ($chart_id) {
 	$chart = Charts::get($chart_id);
 }
