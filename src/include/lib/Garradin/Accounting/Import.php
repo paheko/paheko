@@ -6,13 +6,47 @@ use Garradin\Entities\Accounting\Line;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Accounting\Year;
 use Garradin\CSV_Custom;
+use Garradin\Config;
 use Garradin\DB;
 use Garradin\UserException;
 
 class Import
 {
-	static protected function saveImportedTransaction(Transaction $transaction, bool $dry_run = false, array &$report = null): void
+	static protected function saveImportedTransaction(Transaction $transaction, ?array $linked_users, bool $dry_run = false, array &$report = null): void
 	{
+		static $users = [];
+		$found_users = null;
+
+		// Associate users
+		if (is_array($linked_users) && count($linked_users)) {
+			$found_users = array_intersect_key($users, array_flip($linked_users));
+
+			foreach ($linked_users as $name) {
+				if (!array_key_exists($name, $users)) {
+					continue;
+				}
+
+				$found_users[$name] = $users[$name];
+			}
+
+			if (count($found_users) != count($linked_users)) {
+				$id_field = Config::getInstance()->champ_identite;
+				$db = DB::getInstance();
+				$sql = sprintf('SELECT %s AS name, id FROM membres WHERE %s;', $db->quoteIdentifier($id_field), $db->where($id_field, $linked_users));
+
+				foreach ($db->iterate($sql) as $row) {
+					$found_users[$row->name] = $row->id;
+					$users[$row->name] = $row->id;
+				}
+
+				$missing = array_diff_key($users, array_flip($linked_users));
+
+				foreach ($missing as $key => $v) {
+					$users[$key] = null;
+				}
+			}
+		}
+
 		if ($transaction->countLines() > 2) {
 			$transaction->type = Transaction::TYPE_ADVANCED;
 		}
@@ -25,13 +59,17 @@ class Import
 			if ($transaction->isModified()) {
 				$transaction->save();
 			}
+
+			if (null !== $found_users) {
+				$transaction->updateLinkedUsers($found_users);
+			}
 		}
 		else {
 			$transaction->selfCheck();
 		}
 
 		if (null !== $report) {
-			if (!$transaction->isModified()) {
+			if (!$transaction->isModified() && (null === $found_users || !$transaction->checkLinkedUsersChange($found_users))) {
 				$target = 'unchanged';
 			}
 			elseif ($transaction->exists()) {
@@ -41,7 +79,8 @@ class Import
 				$target = 'created';
 			}
 
-			$report[$target][] = $transaction->asJournalArray();
+			$report[$target][] = $transaction->asJournalArray()
+				+ ['linked_users' => null !== $found_users ? implode(', ', array_keys($found_users)) : null];
 		}
 	}
 
@@ -79,6 +118,7 @@ class Import
 
 		$accounts = $year->accounts();
 		$transaction = null;
+		$linked_users = null;
 		$types = array_flip(Transaction::TYPES_NAMES);
 
 		if ($o->return_report) {
@@ -110,8 +150,9 @@ class Import
 
 					// New transaction, save previous one
 					if (null !== $transaction && $has_transaction) {
-						self::saveImportedTransaction($transaction, $dry_run, $report);
+						self::saveImportedTransaction($transaction, $linked_users, $dry_run, $report);
 						$transaction = null;
+						$linked_users = null;
 					}
 
 					if (!$has_transaction && null === $transaction) {
@@ -121,8 +162,9 @@ class Import
 				else {
 					if (!empty($row->id) && $row->id != $current_id) {
 						if (null !== $transaction) {
-							self::saveImportedTransaction($transaction, $dry_run, $report);
+							self::saveImportedTransaction($transaction, $linked_users, $dry_run, $report);
 							$transaction = null;
+							$linked_users = null;
 						}
 
 						$current_id = (int) $row->id;
@@ -180,6 +222,10 @@ class Import
 
 						$transaction->status = $status;
 					}
+
+					if (isset($row->linked_users)) {
+						$linked_users = array_map('trim', explode(',', $row->linked_users));
+					}
 				}
 
 				$data = [];
@@ -230,8 +276,9 @@ class Import
 					$transaction->addLine($l1);
 					$transaction->addLine($l2);
 
-					self::saveImportedTransaction($transaction, $dry_run, $report);
+					self::saveImportedTransaction($transaction, $linked_users, $dry_run, $report);
 					$transaction = null;
+					$linked_users = null;
 				}
 				else {
 					$id_account = $accounts->getIdFromCode($row->account);
@@ -256,8 +303,9 @@ class Import
 			}
 
 			if (null !== $transaction) {
-				self::saveImportedTransaction($transaction, $dry_run, $report);
+				self::saveImportedTransaction($transaction, $linked_users, $dry_run, $report);
 				$transaction = null;
+				$linked_users = null;
 			}
 		}
 		catch (UserException $e) {

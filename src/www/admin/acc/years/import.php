@@ -46,11 +46,6 @@ if (f('cancel')) {
 if ($type && $type_name) {
 	$columns = Export::COLUMNS[$type];
 
-	// Remove linked users from import
-	if ($found = array_search('linked_users', $columns)) {
-		unset($columns[$found]);
-	}
-
 	// Remove NULLs
 	$columns = array_filter($columns);
 	$columns_table = $columns = array_flip($columns);
@@ -112,6 +107,7 @@ $types = [
 	],
 ];
 
+$tpl->assign('with_linked_users', in_array('linked_users', $csv->getTranslationTable()));
 $tpl->assign(compact('csv', 'year', 'csrf_key', 'examples', 'type', 'type_name', 'ignore_ids', 'types', 'report'));
 
 $tpl->display('acc/years/import.tpl');

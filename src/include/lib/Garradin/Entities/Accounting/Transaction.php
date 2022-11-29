@@ -897,9 +897,13 @@ class Transaction extends Entity
 			$this->id(), $user_id, $service_id);
 	}
 
-	public function updateLinkedUsers(array $users)
+	public function updateLinkedUsers(array $users): void
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
+
+		if (!$this->checkLinkedUsersChange($users)) {
+			return;
+		}
 
 		$db->begin();
 
@@ -913,7 +917,20 @@ class Transaction extends Entity
 		$db->commit();
 	}
 
-	public function listLinkedUsers()
+	public function checkLinkedUsersChange(array $users): bool
+	{
+		$existing = $this->listLinkedUsersAssoc();
+		ksort($users);
+		ksort($existing);
+
+		if ($users === $existing) {
+			return false;
+		}
+
+		return true;
+	}
+
+	public function listLinkedUsers(): array
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
 		$identity_column = Config::getInstance()->get('champ_identite');
@@ -921,7 +938,7 @@ class Transaction extends Entity
 		return $db->get($sql, $this->id());
 	}
 
-	public function listLinkedUsersAssoc()
+	public function listLinkedUsersAssoc(): array
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
 		$identity_column = Config::getInstance()->get('champ_identite');
