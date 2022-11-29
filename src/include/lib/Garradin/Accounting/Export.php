@@ -232,7 +232,7 @@ class Export
 		foreach ($res as $row) {
 			if ($type == self::GROUPED && $previous_id === $row->id) {
 				// Remove transaction data to differentiate lines and transactions
-				$row->id = $row->type = $row->status = $row->label = $row->date = $row->notes = $row->reference = null;
+				$row->id = $row->type = $row->status = $row->label = $row->date = $row->notes = $row->reference = $row->linked_users = null;
 			}
 			else {
 				$row->type = Transaction::TYPES_NAMES[$row->type];

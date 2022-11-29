@@ -5,6 +5,7 @@
 			<td>Pièce comptable</td>
 			<td>Date</td>
 			<th>Libellé</th>
+			{if !empty($with_linked_users)}<td>Membres liés</td>{/if}
 			<td>Comptes</td>
 			<td class="money">Débit</td>
 			<td class="money">Crédit</td>
@@ -20,6 +21,7 @@
 			<td rowspan="{$transaction.lines|count}">{$transaction.reference}</td>
 			<td rowspan="{$transaction.lines|count}">{$transaction.date|date_short}</td>
 			<th rowspan="{$transaction.lines|count}">{$transaction.label}</th>
+			{if !empty($with_linked_users)}<td rowspan="{$transaction.lines|count}">{$transaction.linked_users}</td>{/if}
 		{foreach from=$transaction.lines key="k" item="line"}
 			<td>{$line.account_code} - {$line.account_label}</td>
 			<td class="money">{$line.debit|raw|money}</td>
