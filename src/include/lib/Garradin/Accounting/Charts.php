@@ -24,9 +24,17 @@ class Charts
 		'ch_asso' => 'Plan comptable associatif',
 	];
 
-	static public function getFirstId(): ?int
+	static public function getFirstForCountry(string $country): ?Chart
 	{
-		return DB::getInstance()->firstColumn('SELECT id FROM acc_charts WHERE archived = 0;') ?: null;
+		$db = DB::getInstance();
+
+		$chart = EntityManager::findOne(Chart::class, 'SELECT * FROM acc_charts WHERE archived = 0 AND country = ? AND code IS NOT NULL LIMIT 1;', $country);
+
+		if (!$chart) {
+			$chart = EntityManager::findOne(Chart::class, 'SELECT * FROM acc_charts LIMIT 1;',);
+		}
+
+		return $chart;
 	}
 
 	static public function updateInstalled(string $chart_code): ?Chart
@@ -127,6 +135,43 @@ class Charts
 	{
 		$em = EntityManager::getInstance(Chart::class);
 		return $em->all('SELECT * FROM @TABLE ORDER BY country, label;');
+	}
+
+	static public function listForCountry(string $country): array
+	{
+		$installed = DB::getInstance()->getAssoc(sprintf('SELECT id, label FROM %s WHERE country = ? AND code IS NULL ORDER BY label COLLATE U_NOCASE;', Chart::TABLE), $country);
+		$country = strtolower($country);
+
+		$list = [];
+
+		foreach (self::BUNDLED_CHARTS as $code => $label) {
+			if (substr($code, 0, 2) != $country) {
+				continue;
+			}
+
+			$list[$code] = $label;
+		}
+
+		// Don't use array_merge here, or it will erase ID keys
+		return $list + $installed;
+	}
+
+	static public function getOrInstall(string $id_or_code): int
+	{
+		if (ctype_digit($id_or_code)) {
+			return (int) $id_or_code;
+		}
+
+		$country = strtoupper(substr($id_or_code, 0, 2));
+		$code = strtoupper(substr($id_or_code, 3));
+		$id = DB::getInstance()->firstColumn('SELECT id FROM acc_charts WHERE country = ? AND code = ?;', $country, $code);
+
+		if ($id) {
+			return $id;
+		}
+
+		$chart = self::install($id_or_code);
+		return $chart->id;
 	}
 
 	static public function listByCountry(bool $filter_archived = false)

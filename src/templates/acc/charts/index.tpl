@@ -55,7 +55,7 @@
 		<fieldset>
 			<legend>Créer un nouveau plan comptable</legend>
 			<dl>
-				{input type="radio-btn" name="type" value="install" label="Installer un autre plan comptable officiel"}
+				{input type="radio-btn" name="type" value="install" label="Ajouter un autre plan comptable officiel"}
 				{input type="radio-btn" name="type" value="copy" label="Recopier un plan comptable pour le modifier"}
 				{input type="radio-btn" name="type" value="import" label="Importer un plan comptable personnel" help="À partir d'un tableau (CSV, Office, etc.)"}
 			</dl>
@@ -70,7 +70,7 @@
 		</fieldset>
 
 		<fieldset class="type-install hidden">
-			<legend>Installer un nouveau plan comptable officiel</legend>
+			<legend>Ajouter un nouveau plan comptable officiel</legend>
 			<dl>
 				{input type="select" name="install" label="Plan comptable" required=true options=$install_list}
 			</dl>

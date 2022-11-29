@@ -178,4 +178,12 @@ class Chart extends Entity
 		return $ok;
 	}
 
+	public function country_code(): ?string
+	{
+		if (!$this->code) {
+			return null;
+		}
+
+		return strtolower($this->country . '_' . $this->code);
+	}
 }
