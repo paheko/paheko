@@ -9,6 +9,7 @@ code,label,description,position,bookmark
 104,Primes liées au capital social,,Passif,
 105,Écarts de réévaluation,,Passif,
 106,Réserves,,Passif,
+1068,Autres réserves,,Passif,
 107,Écart d’équivalence,,Passif,
 108,Compte de l’exploitant,,Passif,
 109,Actionnaires : capital souscrit – non appelé,,Passif,
@@ -30,8 +31,7 @@ code,label,description,position,bookmark
 1318,Autres,,Passif,
 138,Autres subventions d’investissement,"Même ventilation que celle du compte 131, à rajouter si nécessaire",Passif,
 139,Subventions d’investissement inscrites au compte de résultat,,Passif,
-1391," Subventions d'équipement 
-","Même ventilation que celle du compte 131, à rajouter si nécessaire",Passif,
+1391,"Subventions d'équipement","Même ventilation que celle du compte 131, à rajouter si nécessaire",Passif,
 1398,Autres subventions d’investissement ,"Même ventilation que celle du compte 131, à rajouter si nécessaire",Passif,
 14,PROVISIONS RÉGLEMENTÉES,,Passif,
 142,Provisions réglementées relatives aux immobilisations,,Passif,
