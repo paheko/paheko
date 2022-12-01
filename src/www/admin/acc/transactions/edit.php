@@ -50,7 +50,16 @@ $form->runIf('save', function() use ($transaction, $session) {
 }, $csrf_key, '!acc/transactions/details.php?id=' . $transaction->id());
 
 $types_accounts = [];
-$lines = isset($_POST['lines']) ? Transaction::getFormLines() : $transaction->getLinesWithAccounts();
+
+$lines = null;
+
+$form->runIf(f('lines') !== null, function () use (&$lines) {
+	$lines = Transaction::getFormLines();
+});
+
+if (null === $lines) {
+	$lines = $transaction->getLinesWithAccounts();
+}
 
 $amount = $transaction->getLinesCreditSum();
 $types_details = $transaction->getTypesDetails();
