@@ -7,6 +7,7 @@ use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 
 use KD2\ZipWriter;
+use KD2\ErrorManager;
 
 class Sauvegarde
 {
@@ -64,18 +65,28 @@ class Sauvegarde
 				continue;
 			}
 
-			$db = new \SQLite3(DATA_ROOT . '/' . $file, \SQLITE3_OPEN_READONLY);
-			$version = DB::getVersion($db);
-			$db->close();
+			$error = null;
+			$version = null;
+			$db = null;
+
+			try {
+				$db = new \SQLite3(DATA_ROOT . '/' . $file, \SQLITE3_OPEN_READONLY);
+				$version = DB::getVersion($db);
+				$db->close();
+			}
+			catch (\Exception $e) {
+				$error = $db ? $db->lastErrorMsg() : $e->getMessage();
+			}
 
 			$out[$file] = (object) [
 				'filename'    => $file,
 				'date'        => filemtime(DATA_ROOT . '/' . $file),
 				'name'        => $name != $file ? $name : null,
 				'version'     => $version,
-				'can_restore' => version_compare($version, Upgrade::MIN_REQUIRED_VERSION, '>='),
+				'can_restore' => $version ? version_compare($version, Upgrade::MIN_REQUIRED_VERSION, '>=') : false,
 				'auto'        => $auto,
 				'size'        => filesize(DATA_ROOT . '/' . $file),
+				'error'       => $error,
 			];
 		}
 
