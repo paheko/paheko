@@ -46,9 +46,9 @@ class Router
 		$uri = substr($uri, 1);
 
 		$first = ($pos = strpos($uri, '/')) ? substr($uri, 0, $pos) : null;
+		$method = $_SERVER['REQUEST_METHOD'] ?? $_SERVER['REDIRECT_REQUEST_METHOD'];
 
 		if (HTTP_LOG_FILE) {
-			$method = $_SERVER['REQUEST_METHOD'] ?? $_SERVER['REDIRECT_REQUEST_METHOD'];
 			$qs = $_SERVER['QUERY_STRING'] ?? null;
 			$headers = apache_request_headers();
 
@@ -89,6 +89,10 @@ class Router
 		}
 		elseif ((in_array($uri, self::DAV_ROUTES) || in_array($first, self::DAV_ROUTES))
 			&& WebDAV_Server::route($uri)) {
+			return;
+		}
+		elseif ($method == 'PROPFIND') {
+			header('Location: /dav/documents/');
 			return;
 		}
 		elseif (Files::getContext($uri)
