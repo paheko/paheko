@@ -45,6 +45,11 @@ class Import
 					$users[$key] = null;
 				}
 			}
+
+			$found_users = array_filter($found_users);
+		}
+		elseif (is_array($linked_users) && count($linked_users) == 0) {
+			$found_users = [];
 		}
 
 		if ($transaction->countLines() > 2) {
