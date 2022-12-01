@@ -472,6 +472,10 @@ class Files
 
 	static public function exists(string $path): bool
 	{
+		if (array_key_exists($path, File::CONTEXTS_NAMES)) {
+			return true;
+		}
+
 		return self::callStorage('exists', $path);
 	}
 
