@@ -27,8 +27,12 @@ $transaction = new Transaction;
 $amount = 0;
 $id_project = null;
 $linked_users = null;
-$lines = isset($_POST['lines']) ? Transaction::getFormLines() : [[], []];
 $types_details = $transaction->getTypesDetails();
+
+$lines = [[], []];
+$form->runIf(f('lines') !== null, function () use (&$lines) {
+	$lines = Transaction::getFormLines();
+});
 
 // Quick-fill transaction from query parameters
 if (qg('a')) {
