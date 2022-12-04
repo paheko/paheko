@@ -127,7 +127,7 @@ class Service extends Entity
 		$list = $this->allUsersList();
 		$conditions = sprintf('su.id_service = %d AND (su.expiry_date >= date() OR su.expiry_date IS NULL)
 			AND su.paid = 1
-			AND m.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
+			AND u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
 		$list->setConditions($conditions);
 		return $list;
 	}
