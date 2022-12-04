@@ -5,10 +5,10 @@
 			{if $current == 'statement' && !$criterias.compare_year}
 				{exportmenu href="%s&export="|args:$self_url}
 			{/if}
-			{if !$criterias.compare_year && !empty($allow_compare) && !empty($other_years) && empty($criterias['project'])}
+			{if !$criterias.before && !$criterias.compare_year && !empty($allow_compare) && !empty($other_years)}
 				{linkbutton shape="list-ol" href="#" id="compareFormButton" label="Comparer" onclick="var a = $('#compareForm'); a.disabled = false; g.toggle(a, true); this.remove(); var a = $('#filterFormButton'); a ? a.remove() : null; return false;"}
 			{/if}
-			{if !empty($allow_filter) && !$criterias.before && !$criterias.after}
+			{if !$criterias.compare_year  && !empty($allow_filter) && !$criterias.before && !$criterias.after}
 				{linkbutton shape="search" href="#" id="filterFormButton" label="Filtrer" onclick="var a = $('#filterForm'); a.disabled = false; g.toggle(a, true); this.remove(); var a = $('#compareFormButton'); a ? a.remove() : null; return false;"}
 			{/if}
 		</aside>
@@ -40,7 +40,7 @@
 
 	{if !empty($year)}
 	<div class="forms">
-		{if !empty($allow_compare) && !empty($other_years) && empty($criterias['project'])}
+		{if !empty($allow_compare) && !empty($other_years)}
 		<form method="get" action="" class="{if !$criterias.compare_year}hidden {/if}noprint" id="compareForm">
 			<input type="hidden" name="year" value="{$year.id}" />
 			{if isset($project)}
