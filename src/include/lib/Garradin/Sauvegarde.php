@@ -488,7 +488,7 @@ class Sauvegarde
 		// Empêchons l'admin de se tirer une balle dans le pied
 		if ($session->isLogged(true))
 		{
-			if (version_compare($version, '1.2', '<')) { // FIXME remove in 1.3
+			if (version_compare($version, '1.3', '<')) { // FIXME remove in 1.4
 				$sql = 'SELECT 1 FROM users_categories WHERE id = (SELECT id_category FROM membres WHERE id = %d) AND perm_connect >= %d AND perm_config >= %d';
 			}
 			else {
