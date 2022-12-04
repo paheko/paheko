@@ -20,6 +20,7 @@ if (!$transaction) {
 
 $transaction->assertCanBeModified();
 
+$year = Years::get($transaction->id_year);
 $chart = $year->chart();
 $accounts = $chart->accounts();
 
