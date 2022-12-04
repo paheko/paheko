@@ -51,6 +51,11 @@ class Years
 		return DB::getInstance()->getAssoc('SELECT id, label FROM acc_years ORDER BY end_date;');
 	}
 
+	static public function listAssocExcept(int $id)
+	{
+		return DB::getInstance()->getAssoc('SELECT id, label FROM acc_years WHERE id != ? ORDER BY end_date;', $id);
+	}
+
 	static public function listClosedAssoc()
 	{
 		return DB::getInstance()->getAssoc('SELECT id, label FROM acc_years WHERE closed = 1 ORDER BY end_date;');
