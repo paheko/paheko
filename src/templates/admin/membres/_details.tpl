@@ -48,12 +48,12 @@ $user_files_path = (new Membres)->getAttachementsDirectory($data->id);
 			{$value|display_champ_membre:$c_config|raw}
 		{/if}
 	</dd>
-		{if $c_config.type == 'email' && $value && ($email = Users\Emails::getEmail($value))}
+		{if $mode != 'user' && $c_config.type == 'email' && $value && ($email = Users\Emails::getEmail($value))}
 		<dt>Statut e-mail</dt>
 		<dd>
 			{if $email.optout}
 				<b class="alert">{icon shape="alert"}</b> Ne souhaite plus recevoir de messages
-				<br/>{linkbutton target="_dialog" label="Rétablir l'envoi à cette adresse" href="emails.php?verify=%s"|args:$value shape="check"}
+				<br/>{linkbutton target="_dialog" label="Rétablir l'envoi à cette adresse" href="!membres/emails.php?verify=%s"|args:$value shape="check"}
 			{elseif $email.invalid}
 				<b class="error">{icon shape="alert"} Adresse invalide</b>
 			{elseif $email->hasReachedFailLimit()}
