@@ -14,7 +14,8 @@
 	</p>
 
 	<p class="help">
-		Vous pouvez revenir sur cette page pour vous réinscrire à tout moment.
+		Vous pouvez vous réinscrire à tout moment en cliquant à nouveau sur le lien de désinscription présent à la fin de nos e-mails.<br />
+		{linkbutton href="?un=%s"|args:$code label="Me réinscrire" shape="reload"}
 	</p>
 {elseif $resub_ok}
 	<p class="block confirm">
@@ -33,7 +34,7 @@
 		<fieldset>
 			<dl>
 				{input type="email" required=true name="email" label="Adresse e-mail"}
-				{input type="checkbox" name="confirm_resub" value="1" required=true label="Oui, je veux à nouveau recevoir les messages de l'association"}
+				{input type="checkbox" name="confirm_resub" value="1" required=true label="Oui, je veux à nouveau recevoir les messages de « %s »"|args:$config.nom_asso}
 			</dl>
 		</fieldset>
 
