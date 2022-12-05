@@ -67,6 +67,7 @@
 			<dt><label for="f_target">Destinataires</label></dt>
 			<dd>
 				<select name="target" id="f_target" required="required">
+					<option value="">— Sélectionner une option —</option>
 					<option value="all_">Tous les membres (sauf ceux appartenant à une catégorie cachée)</option>
 					<optgroup label="Catégorie de membres">
 						{foreach from=$categories key="id" item="label"}
