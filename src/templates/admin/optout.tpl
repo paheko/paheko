@@ -4,6 +4,16 @@
 	<p class="block confirm">
 		Votre adresse e-mail a bien été vérifiée, merci !
 	</p>
+
+	<p>
+	{if $config.site_asso || !$config.site_disabled}
+		<?php $url = $config->site_asso ?? $www_url; ?>
+		{linkbutton href=$url label="Retour au site" shape="left"}
+	{else}
+		{linkbutton href=$admin_url label="Connexion" shape="left"}
+	{/if}
+	</p>
+
 {elseif $verify === false}
 	<p class="block error">
 		Erreur de vérification de votre adresse e-mail.
