@@ -45,6 +45,6 @@ $form->runIf('optout', function () use ($email) {
 $ok = isset($_GET['ok']);
 $resub_ok = isset($_GET['resub_ok']);
 
-$tpl->assign(compact('email', 'ok', 'resub_ok', 'verify'));
+$tpl->assign(compact('email', 'ok', 'resub_ok', 'code', 'verify'));
 
 $tpl->display('admin/optout.tpl');
