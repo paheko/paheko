@@ -84,6 +84,7 @@ foreach ($groups as $group => $options) {
 }
 
 $targets = [
+	'' => '— Sélectionner une option —',
 	'all_buthidden' => 'Tous les membres (sauf ceux appartenant à une catégorie cachée)',
 	'Catégories de membres' => $optgroups['category'],
 	'Membres à jour d\'une activité' => $optgroups['service'],

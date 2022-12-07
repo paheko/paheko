@@ -33,7 +33,7 @@
 		<fieldset>
 			<dl>
 				{input type="email" required=true name="email" label="Adresse e-mail"}
-				{input type="checkbox" name="confirm_resub" value="1" required=true label="Oui, je veux à nouveau recevoir les messages de l'association"}
+				{input type="checkbox" name="confirm_resub" value="1" required=true label="Oui, je veux à nouveau recevoir les messages de « %s »"|args:$config.org_name}
 			</dl>
 		</fieldset>
 
