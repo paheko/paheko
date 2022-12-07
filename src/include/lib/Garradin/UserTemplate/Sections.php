@@ -252,17 +252,15 @@ class Sections
 			unset($params['id']);
 		}
 
-		$id_field = DynamicFields::getNameFieldsSQL('u');
+		$id_field = DynamicFields::getNameFieldsSQL();
 
 		$params['select'] = sprintf('t.*, SUM(l.credit) AS credit, SUM(l.debit) AS debit,
 			GROUP_CONCAT(DISTINCT a.code) AS accounts_codes,
-			GROUP_CONCAT(DISTINCT %s) AS users_names', $id_field);
+			(SELECT GROUP_CONCAT(DISTINCT %s) FROM users WHERE id IN (SELECT id_user FROM acc_transactions_users WHERE id_transaction = t.id)) AS users_names', $id_field);
 		$params['tables'] = 'acc_transactions AS t
 			INNER JOIN acc_transactions_lines AS l ON l.id_transaction = t.id
-			INNER JOIN acc_accounts AS a ON l.id_account = a.id
-			LEFT JOIN acc_transactions_users tu ON tu.id_transaction = t.id
-			LEFT JOIN users u ON u.id = tu.id_user';
-		$params['group'] = 't.id, u.id';
+			INNER JOIN acc_accounts AS a ON l.id_account = a.id';
+		$params['group'] = 't.id';
 
 		return self::sql($params, $tpl, $line);
 	}
