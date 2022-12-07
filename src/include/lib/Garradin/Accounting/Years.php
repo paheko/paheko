@@ -179,11 +179,15 @@ class Years
 			$sum -= $account->balance;
 		}
 
-		if ($sum > 0) {
-			$line = Line::create($appropriation_account, $sum, 0);
+		if ($sum == 0) {
+			return null;
 		}
-		else {
-			$line = Line::create($appropriation_account, 0, abs($sum));
+
+		if ($sum > 0) {
+			$line = Line::create($appropriation_account, 0, $sum);
+		}
+		elseif ($sum < 0) {
+			$line = Line::create($appropriation_account, abs($sum), 0);
 		}
 
 		$t->addLine($line);
