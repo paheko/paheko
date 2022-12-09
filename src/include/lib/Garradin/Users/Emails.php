@@ -425,7 +425,7 @@ class Emails
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('last_sent', true);
 		$list->setModifier(function (&$row) {
-			$row->last_sent = new \DateTime($row->last_sent);
+			$row->last_sent = $row->last_sent ? new \DateTime($row->last_sent) : null;
 		});
 		return $list;
 	}
