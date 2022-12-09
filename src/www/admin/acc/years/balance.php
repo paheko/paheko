@@ -58,7 +58,7 @@ $previous_year = null;
 $year_selected = f('from_year') !== null;
 $chart_change = false;
 $lines = [[]];
-$years = Years::list(true);
+$years = Years::list(true, $year->id);
 
 // Empty balance
 if (!count($years) || f('from_year') === '') {
