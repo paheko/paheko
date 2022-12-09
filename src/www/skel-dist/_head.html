@@ -49,7 +49,7 @@
 				<h4>{{$config.adresse_asso|escape|nl2br}}</h4>
 			{{/if}}
 			{{if $config.telephone_asso}}
-				<h5>{{$config.telephone_asso|raw|protect_contact}}</h5>
+				<h5>{{$config.telephone_asso|raw|protect_contact:'tel'}}</h5>
 			{{/if}}
 			{{if $config.email_asso}}
 				<h5>{{$config.email_asso|raw|protect_contact}}</h5>

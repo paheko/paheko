@@ -5,6 +5,10 @@
  * Généralement il n'est pas nécessaire de le modifier.
  */
 
+.protected-contact::before {
+    content: attr(data-a) "\0040" attr(data-b) "." attr(data-c);
+}
+
 .web-content p, .web-content h1, .web-content h2, .web-content h3, .web-content h4, .web-content h5, .web-content h6,
 .web-content ul, .web-content ol, .web-content table, .web-content blockquote, .web-content pre {
     margin: 0;
