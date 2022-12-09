@@ -82,15 +82,18 @@ class Years
 		return DB::getInstance()->count(Year::TABLE);
 	}
 
-	static public function list(bool $reverse = false)
+	static public function list(bool $reverse = false, ?int $except_id = null)
 	{
 		$desc = $reverse ? 'DESC' : '';
-		return DB::getInstance()->get(sprintf('SELECT y.*,
+		$except = $except_id ? ' AND y.id != ' . (int)$except_id : '';
+		$sql = sprintf('SELECT y.*,
 			(SELECT COUNT(*) FROM acc_transactions WHERE id_year = y.id) AS nb_transactions,
 			c.label AS chart_name
 			FROM acc_years y
 			INNER JOIN acc_charts c ON c.id = y.id_chart
-			ORDER BY end_date %s;', $desc));
+			WHERE 1 %s
+			ORDER BY end_date %s;', $except, $desc);
+		return DB::getInstance()->get($sql);
 	}
 
 	static public function listLastTransactions(int $count, array $years): array
@@ -167,7 +170,7 @@ class Years
 			$line = Line::create($account->id, abs($account->balance), 0);
 			$t->addLine($line);
 
-			$sum += $account->balance;
+			$sum += abs($account->balance);
 		}
 
 		if (!empty($balances[Account::TYPE_POSITIVE_RESULT])) {
@@ -176,7 +179,7 @@ class Years
 			$line = Line::create($account->id, 0, abs($account->balance));
 			$t->addLine($line);
 
-			$sum -= $account->balance;
+			$sum -= abs($account->balance);
 		}
 
 		if ($sum == 0) {
