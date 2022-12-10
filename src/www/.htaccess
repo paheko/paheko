@@ -10,6 +10,7 @@ DirectoryIndex index.php
 # Un peu de sécurité
 <IfModule mod_alias.c>
 	RedirectMatch 404 _inc\.php
+	RedirectMatch 404 _cache/
 </IfModule>
 
 # This is to avoid caching mismatch when using mod_deflate
@@ -28,7 +29,7 @@ DirectoryIndex index.php
 
 # Cache statique
 <IfModule mod_rewrite.c>
-	<If "%{REQUEST_URI} !~ m;admin/|\.php$; && %{REQUEST_METHOD} =~ /GET|HEAD/ && %{HTTP_COOKIE} !~ /pko/">
+	<If "-s '%{DOCUMENT_ROOT}/_cache' && %{REQUEST_URI} !~ m;admin/|\.php$; && %{REQUEST_METHOD} =~ /GET|HEAD/ && %{HTTP_COOKIE} !~ /pko/">
 		<If "%{QUERY_STRING} =~ /^\d+px(?:-[a-z]+)?$/ && -f '%{DOCUMENT_ROOT}/_cache/%{REQUEST_URI}_%{QUERY_STRING}'">
 			RewriteEngine On
 			RewriteBase /

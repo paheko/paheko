@@ -15,10 +15,23 @@ class Cache
 		Utils::deleteRecursive(self::ROOT, false);
 	}
 
-	static public function link(string $uri, string $destination): void
+	static public function init(): bool
 	{
 		// Symlinks on Windows… Not sure if that works
 		if (PHP_OS_FAMILY == 'Windows') {
+			return false;
+		}
+
+		if (!file_exists(ROOT . '/www/_cache')) {
+			symlink(self::ROOT, ROOT . '/www/_cache');
+		}
+
+		return true;
+	}
+
+	static public function link(string $uri, string $destination): void
+	{
+		if (!self::init()) {
 			return;
 		}
 
@@ -35,6 +48,10 @@ class Cache
 
 	static public function store(string $uri, string $html): void
 	{
+		if (!self::init()) {
+			return;
+		}
+
 		$target = self::ROOT . '/' . ltrim($uri, '/');
 		$dir = Utils::dirname($target);
 
