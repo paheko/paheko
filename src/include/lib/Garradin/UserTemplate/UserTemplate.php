@@ -19,6 +19,8 @@ use Garradin\UserTemplate\Modifiers;
 use Garradin\UserTemplate\Functions;
 use Garradin\UserTemplate\Sections;
 
+use Garradin\Web\Cache as Web_Cache;
+
 use const Garradin\{WWW_URL, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT, ROOT, LEGAL_LINE};
 
 class UserTemplate extends \KD2\Brindille
@@ -339,7 +341,7 @@ class UserTemplate extends \KD2\Brindille
 		}
 	}
 
-	public function serve(): void
+	public function serve(?string $cache_as_uri = null): void
 	{
 		if (!self::isTemplate($this->path)) {
 			throw new \InvalidArgumentException('Not a valid template file extension: ' . $this->path);
@@ -358,6 +360,10 @@ class UserTemplate extends \KD2\Brindille
 			}
 		}
 
+		if ($type != 'text/html' || !empty($this->_variables[0]['nocache'])) {
+			$cache_as_uri = null;
+		}
+
 		header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
 
 		if ($type == 'application/pdf') {
@@ -365,6 +371,10 @@ class UserTemplate extends \KD2\Brindille
 		}
 		else {
 			echo $content;
+		}
+
+		if (null !== $cache_as_uri) {
+			Web_Cache::store($cache_as_uri ?: 'index.html', $content);
 		}
 	}
 

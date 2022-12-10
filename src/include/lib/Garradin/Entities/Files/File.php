@@ -20,6 +20,7 @@ use Garradin\Utils;
 use Garradin\Entities\Web\Page;
 use Garradin\Web\Render\Render;
 use Garradin\Web\Router;
+use Garradin\Web\Cache as Web_Cache;
 
 use Garradin\Files\Files;
 
@@ -613,6 +614,10 @@ class File extends Entity
 		}
 
 		$this->_serve($destination, null);
+
+		if (in_array($this->context(), [self::CONTEXT_WEB, self::CONTEXT_CONFIG])) {
+			Web_Cache::link($this->uri() . '_' . $size, $destination);
+		}
 	}
 
 	/**
@@ -674,7 +679,11 @@ class File extends Entity
 		flush();
 
 		if (null !== $path) {
-			readfile($path);
+			//readfile($path);
+
+			if (in_array($this->context(), [self::CONTEXT_WEB, self::CONTEXT_CONFIG])) {
+				Web_Cache::link($this->uri(), $path);
+			}
 		}
 		else {
 			echo $content;

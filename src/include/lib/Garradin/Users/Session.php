@@ -45,8 +45,8 @@ class Session extends \KD2\UserSession
 	const ACCESS_ADMIN = 9;
 
 	// Personalisation de la config de UserSession
-	protected $cookie_name = 'gdin';
-	protected $remember_me_cookie_name = 'gdinp';
+	protected $cookie_name = 'pko';
+	protected $remember_me_cookie_name = 'pkop';
 	protected $remember_me_expiry = '+3 months';
 
 	protected ?User $_user;

@@ -11,6 +11,7 @@ use Garradin\Entities\Files\File;
 use Garradin\Files\Files;
 use Garradin\Web\Render\Render;
 use Garradin\Web\Web;
+use Garradin\Web\Cache;
 
 use KD2\DB\EntityManager as EM;
 
@@ -223,12 +224,15 @@ class Page extends Entity
 			$db->exec($sql);
 		}
 
+		Cache::clear();
+
 		return true;
 	}
 
 	public function delete(): bool
 	{
 		Files::get(Utils::dirname($this->file_path))->delete();
+		Cache::clear();
 		return parent::delete();
 	}
 
@@ -278,7 +282,7 @@ class Page extends Entity
 		$uri = $source['uri'] ?? ($this->uri ?? null);
 
 		if (array_key_exists('parent', $source)) {
-			$source['parent'] = Form::getSelectorValue($source['parent']);
+			$source['parent'] = Form::getSelectorValue($source['parent']) ?: '';
 			$source['path'] = trim($source['parent'] . '/' . $uri, '/');
 		}
 

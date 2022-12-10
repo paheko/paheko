@@ -26,9 +26,30 @@ DirectoryIndex index.php
 #	php_value upload_max_filesize 256M
 #</If>
 
+# Cache statique
+<IfModule mod_rewrite.c>
+	<If "%{REQUEST_URI} !~ m;admin/|\.php$; && %{REQUEST_METHOD} =~ /GET|HEAD/ && %{HTTP_COOKIE} !~ /pko/">
+		<If "%{QUERY_STRING} =~ /^\d+px(?:-[a-z]+)?$/ && -f '%{DOCUMENT_ROOT}/_cache/%{REQUEST_URI}_%{QUERY_STRING}'">
+			RewriteEngine On
+			RewriteBase /
+			RewriteRule (.*) "/_cache/%{REQUEST_URI}_%{QUERY_STRING}" [END]
+		</If>
+		<ElseIf "(-z %{QUERY_STRING} || %{QUERY_STRING} =~ /^h=[a-f0-9]+$/) && -f '%{DOCUMENT_ROOT}/_cache/%{REQUEST_URI}'">
+			RewriteEngine On
+			RewriteBase /
+			RewriteRule (.*) "/_cache/%{REQUEST_URI}" [END]
+		</ElseIf>
+		<ElseIf "-z %{QUERY_STRING} && %{REQUEST_URI} =~ m;/$; && -f '%{DOCUMENT_ROOT}/_cache/index.html'">
+			RewriteEngine On
+			RewriteBase /
+			RewriteRule (.*) "/_cache/index.html" [END]
+		</ElseIf>
+	</If>
+</IfModule>
+
 # Avec FallbackResource, on ne peut pas faire de PUT/DELETE/etc. sur les URLs en .php
 # (genre remote.php/webdav/... utilisées par le client ownCloud/NextCloud)
-# et ce même si le fichier PHP n'existe pas
+# et ce, même si le fichier PHP n'existe pas
 # cf. https://stackoverflow.com/a/66136226
 # DONC: on utilise mod_rewrite si dispo
 <IfModule mod_rewrite.c>

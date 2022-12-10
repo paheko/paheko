@@ -4,6 +4,7 @@ namespace Garradin\Web;
 
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
+use Garradin\Entities\Web\Page;
 use Garradin\UserException;
 use Garradin\UserTemplate\UserForms;
 use Garradin\UserTemplate\UserTemplate;
@@ -131,7 +132,7 @@ class Skeleton
 			else {
 				$ut = new UserTemplate($this->path);
 				$ut->assignArray($params);
-				$ut->serve();
+				$ut->serve($uri);
 			}
 		}
 		// Serve a static file
@@ -142,6 +143,8 @@ class Skeleton
 		else {
 			header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
 			readfile($this->defaultPath());
+			flush();
+			Cache::link($uri, $this->defaultPath());
 		}
 
 		Plugin::fireSignal('http.request.skeleton.after', $params);

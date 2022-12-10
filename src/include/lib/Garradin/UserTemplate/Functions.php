@@ -286,6 +286,11 @@ class Functions
 				$ut::__assign(['var' => $name, 'value' => $include->get($name)], $ut);
 			}
 		}
+
+		// Transmit nocache to parent template
+		if ($include->get('nocache')) {
+			$ut::__assign(['nocache' => true], $ut);
+		}
 	}
 
 	static public function http(array $params, UserTemplate $tpl): void

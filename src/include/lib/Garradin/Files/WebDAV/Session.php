@@ -16,7 +16,7 @@ class Session extends UserSession
 
 	// Use a different session name so that someone cannot access the admin
 	// with a cookie from WebDAV/app
-	protected $cookie_name = 'gdinw';
+	protected $cookie_name = 'pkow';
 
 	/**
 	 * Create a temporary app token for an external service session (eg. NextCloud)
