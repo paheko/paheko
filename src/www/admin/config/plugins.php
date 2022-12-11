@@ -35,4 +35,6 @@ $tpl->assign(compact('csrf_key'));
 
 $tpl->display('config/plugins.tpl');
 
-Plugin::upgradeAllIfRequired();
+if (Plugin::upgradeAllIfRequired()) {
+	$session->set('plugins_menu', null);
+}

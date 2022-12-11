@@ -379,7 +379,7 @@ class Plugin
 		// pour empêcher d'appeler des méthodes de Garradin après un import de base de données "hackée"
 		if (strpos($callable_name, 'Garradin\\Plugin\\') !== 0)
 		{
-			throw new \LogicException('Le callback donné n\'utilise pas le namespace Garradin\\Plugin');
+			throw new \LogicException('Le callback donné n\'utilise pas le namespace Garradin\\Plugin : ' . $callable_name);
 		}
 
 		$db = DB::getInstance();
@@ -425,8 +425,10 @@ class Plugin
 	 * Checks if a plugin requires an upgrade and upgrade it
 	 * This is run after an upgrade, a database restoration, or in the Plugins page
 	 */
-	static public function upgradeAllIfRequired(): void
+	static public function upgradeAllIfRequired(): bool
 	{
+		$i = 0;
+
 		// Mettre à jour les plugins si nécessaire
 		foreach (self::listInstalled() as $id => $infos)
 		{
@@ -439,10 +441,13 @@ class Plugin
 
 			if ($plugin->needUpgrade()) {
 				$plugin->upgrade();
+				$i++;
 			}
 
 			unset($plugin);
 		}
+
+		return $i > 0;
 	}
 
 	/**
