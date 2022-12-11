@@ -92,41 +92,55 @@ main nav.menu-right span {
 
 main nav.menu button {
     text-align: left;
-}nav.home ul {
+}
+
+nav.home ul {
     display: flex;
     flex-wrap: wrap;
     align-items: stretch;
 }
 
 nav.home ul li {
-    display: block;
+    display: flex;
     width: 15em;
     margin: .5em;
+    height: auto;
 }
 
 nav.home ul li a, nav.home ul li button {
     display: block;
     width: calc(100% - 1em);
-    height: calc(100% - 1em);
     white-space: normal;
     margin: 0;
     padding: .5em;
     text-align: center;
     position: relative;
+    border: none;
+    text-decoration: none;
+    box-shadow: none;
 }
 
 nav.home ul li a::before, nav.home ul li button::before {
-    position: absolute;
-    z-index: -1;
-    opacity: .5;
-    margin: auto;
+    display: flex;
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    align-items: center;
+    justify-content: center;
+    border-radius: .1em;
+    margin: 0 auto 0 auto;
+    padding: .1em;
+    background: rgba(var(--gSecondColor), .5);
+    margin-bottom: 5px;
 }
 
-a[data-custom-icon]::before {
+nav.home ul li a[data-custom-icon]::before {
     content: "";
-    display: inline-block;
-    width: 2em;
-    height: 2em;
+    padding: 0;
+    border-radius: 0;
+    font-size: 56px;
+    width: 1em;
+    height: 1em;
     background: var(--custom-icon) no-repeat center center;
     background-size: contain;
 }
