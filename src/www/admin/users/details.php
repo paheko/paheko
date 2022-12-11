@@ -11,7 +11,12 @@ use Garradin\Entities\UserForm;
 
 require_once __DIR__ . '/_inc.php';
 
-$user = Users::get((int) qg('id'));
+if (qg('number')) {
+	$user = Users::getFromNumber(qg('number'));
+}
+else {
+	$user = Users::get((int) qg('id'));
+}
 
 if (!$user) {
 	throw new UserException("Ce membre n'existe pas.");
