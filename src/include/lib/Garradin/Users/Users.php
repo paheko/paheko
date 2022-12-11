@@ -156,6 +156,19 @@ class Users
 		return EM::getInstance(User::class)->col(sprintf('SELECT %s FROM @TABLE WHERE id = ?;', $name), $id);
 	}
 
+	static public function getFromNumber(string $number): ?User
+	{
+		$field = DynamicFields::getNumberField();
+		return EM::findOne(User::class, 'SELECT * FROM @TABLE WHERE ' . $field . ' = ?', $number);
+	}
+
+	static public function getNameFromNumber(string $number): ?string
+	{
+		$name = DynamicFields::getNameFieldsSQL();
+		$field = DynamicFields::getNumberField();
+		return EM::getInstance(User::class)->col(sprintf('SELECT %s FROM @TABLE WHERE %s = ?;', $name, $field), $number);
+	}
+
 	static public function deleteMultiple(array $ids): void
 	{
 		$session = Session::getInstance();
