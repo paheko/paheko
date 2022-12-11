@@ -141,10 +141,10 @@ class Skeleton
 		}
 		// Serve a static skeleton file (from skel-dist)
 		else {
+			Cache::link($uri, $this->defaultPath());
 			header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
 			readfile($this->defaultPath());
 			flush();
-			Cache::link($uri, $this->defaultPath());
 		}
 
 		Plugin::fireSignal('http.request.skeleton.after', $params);

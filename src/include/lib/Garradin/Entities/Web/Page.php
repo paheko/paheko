@@ -84,6 +84,8 @@ class Page extends Entity
 
 		$page->file_path = $page->filepath(false);
 
+		Cache::clear();
+
 		return $page;
 	}
 

@@ -184,6 +184,7 @@ if (!defined('Garradin\WWW_URL') && $host !== null) {
 static $default_config = [
 	'CACHE_ROOT'            => DATA_ROOT . '/cache',
 	'SHARED_CACHE_ROOT'     => DATA_ROOT . '/cache/shared',
+	'WEB_CACHE_ROOT'        => DATA_ROOT . '/cache/web/%host%',
 	'DB_FILE'               => DATA_ROOT . '/association.sqlite',
 	'DB_SCHEMA'             => ROOT . '/include/data/schema.sql',
 	'PLUGINS_ROOT'          => DATA_ROOT . '/plugins',

@@ -335,6 +335,7 @@ class UserTemplate extends \KD2\Brindille
 			case 'btpl':
 			case 'b':
 			case 'skel':
+			case 'xml':
 				return true;
 			default:
 				return false;
@@ -374,7 +375,7 @@ class UserTemplate extends \KD2\Brindille
 		}
 
 		if (null !== $cache_as_uri) {
-			Web_Cache::store($cache_as_uri ?: 'index.html', $content);
+			Web_Cache::store($cache_as_uri, $content);
 		}
 	}
 

@@ -83,6 +83,10 @@ class Web
 			}
 		}
 
+		if (count($new) || count($deleted)) {
+			Cache::clear();
+		}
+
 		return $errors;
 
 		/*

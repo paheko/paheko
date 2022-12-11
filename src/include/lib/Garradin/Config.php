@@ -232,7 +232,7 @@ class Config extends Entity
 
 		$params = $params ? $params . '&' : '';
 
-		return BASE_URL . self::FILES[$key] . '?' . $params . substr(md5($this->files[$key]), 0, 10);
+		return BASE_URL . self::FILES[$key] . '?' . $params . 'h=' . substr(md5($this->files[$key]), 0, 10);
 	}
 
 

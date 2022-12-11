@@ -183,6 +183,8 @@ class File extends Entity
 	{
 		Files::callStorage('checkLock');
 
+		Web_Cache::delete($this->uri());
+
 		// Delete actual file content
 		Files::callStorage('delete', $this);
 
@@ -196,6 +198,7 @@ class File extends Entity
 
 		DB::getInstance()->delete('files_search', 'path = ? OR path LIKE ?', $this->path, $this->path . '/%');
 
+		// Delete entity if it exists
 		if ($this->exists()) {
 			return parent::delete();
 		}
@@ -405,6 +408,8 @@ class File extends Entity
 			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->pathHash(), $key));
 		}
 
+		Web_Cache::delete($this->uri());
+
 		return $this;
 	}
 
@@ -543,6 +548,10 @@ class File extends Entity
 		$content = null === $path ? Files::callStorage('fetch', $this) : null;
 
 		$this->_serve($path, $content, $download);
+
+		if (in_array($this->context(), [self::CONTEXT_WEB, self::CONTEXT_CONFIG])) {
+			Web_Cache::link($this->uri(), $path);
+		}
 	}
 
 	public function serveAuto(?Session $session = null, array $params = []): void
@@ -616,7 +625,7 @@ class File extends Entity
 		$this->_serve($destination, null);
 
 		if (in_array($this->context(), [self::CONTEXT_WEB, self::CONTEXT_CONFIG])) {
-			Web_Cache::link($this->uri() . '_' . $size, $destination);
+			Web_Cache::link($this->uri(), $destination, $size);
 		}
 	}
 
@@ -679,11 +688,7 @@ class File extends Entity
 		flush();
 
 		if (null !== $path) {
-			//readfile($path);
-
-			if (in_array($this->context(), [self::CONTEXT_WEB, self::CONTEXT_CONFIG])) {
-				Web_Cache::link($this->uri(), $path);
-			}
+			readfile($path);
 		}
 		else {
 			echo $content;

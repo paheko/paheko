@@ -111,6 +111,27 @@ namespace Garradin;
 //const SHARED_CACHE_ROOT = CACHE_ROOT . '/shared';
 
 /**
+ * Motif qui détermine l'emplacement des fichiers de cache du site web.
+ *
+ * Le site web peut créer des fichiers de cache pour les pages et catégories.
+ * Ensuite le serveur web (Apache) servira ces fichiers directement, sans faire
+ * appel au PHP, permettant de supporter beaucoup de trafic si le site web
+ * a une vague de popularité.
+ *
+ * Certaines valeurs sont remplacées :
+ * %host% = hash MD5 du hostname (utile en cas d'hébergement de plusieurs instances)
+ * %host.2% = 2 premiers caractères du hash MD5 du hostname
+ *
+ * Utiliser NULL pour désactiver le cache.
+ *
+ * Défault : CACHE_ROOT . '/web/%host%'
+ *
+ * @var null|string
+ */
+
+//const WEB_CACHE_ROOT = CACHE_ROOT . '/web/%host%';
+
+/**
  * Emplacement du fichier de base de données de Garradin
  *
  * Défaut : DATA_ROOT . '/association.sqlite'
