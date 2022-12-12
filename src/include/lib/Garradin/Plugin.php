@@ -27,10 +27,9 @@ class Plugin
 		'jpe' => 'image/jpeg',
 		'jpg' => 'image/jpeg',
 		'jpeg' => 'image/jpeg',
-		'js' => 'application/x-javascript',
+		'js' => 'application/javascript',
 		'pdf' => 'application/pdf',
 		'png' => 'image/png',
-		'swf' => 'application/shockwave-flash',
 		'xml' => 'text/xml',
 		'svg' => 'image/svg+xml',
 	];
@@ -56,6 +55,11 @@ class Plugin
 	static public function getURL(string $id, string $path = '')
 	{
 		return ADMIN_URL . 'p/' . $id . '/' . ltrim($path, '/');
+	}
+
+	static public function getPublicURL(string $id, string $path = '')
+	{
+		return WWW_URL . 'p/' . $id . '/' . ltrim($path, '/');
 	}
 
 	/**
@@ -289,6 +293,8 @@ class Plugin
 
 			header('Content-Type: ' .$mime);
 			header('Content-Length: ' . filesize($path));
+			header('Cache-Control: public, max-age=3600');
+			header('Last-Modified: ' . date(DATE_RFC7231, filemtime($path)));
 
 			readfile($path);
 		}
@@ -367,7 +373,7 @@ class Plugin
 	 * @param  mixed  $callback Callback, sous forme d'un nom de fonction ou de méthode statique
 	 * @return boolean TRUE
 	 */
-	public function registerSignal($signal, $callback)
+	public function registerSignal(string $signal, callable $callback): void
 	{
 		$callable_name = '';
 
@@ -384,24 +390,14 @@ class Plugin
 
 		$db = DB::getInstance();
 
-		// Signaux exclusifs, qui ne peuvent être attribués qu'à un seul plugin
-		if (strpos($signal, 'boucle.') === 0)
-		{
-			$registered = $db->firstColumn('SELECT plugin FROM plugins_signals WHERE signal = ? AND plugin != ?;', $signal, $this->id);
-
-			if ($registered)
-			{
-				throw new \LogicException('Le signal ' . $signal . ' est exclusif et déjà associé au plugin "'.$registered.'"');
-			}
-		}
-
 		$callable_name = str_replace('Garradin\\Plugin\\', '', $callable_name);
 
-		$st = $db->prepare('INSERT OR REPLACE INTO plugins_signals VALUES (:signal, :plugin, :callback);');
-		$st->bindValue(':signal', $signal);
-		$st->bindValue(':plugin', $this->id);
-		$st->bindValue(':callback', $callable_name);
-		return $st->execute();
+		$db->preparedQuery('INSERT OR REPLACE INTO plugins_signals VALUES (?, ?, ?);', [$signal, $this->id, $callable_name]);
+	}
+
+	public function unregisterSignal(string $signal): void
+	{
+		DB::getInstance()->preparedQuery('DELETE FROM plugins_signals WHERE plugin = ? AND signal = ?;', [$this->id, $signal]);
 	}
 
 	/**
