@@ -361,8 +361,29 @@ class UserTemplate extends \KD2\Brindille
 			}
 		}
 
-		if ($type != 'text/html' || !empty($this->_variables[0]['nocache'])) {
+		if ($this->file && strpos($this->file->path, 'skel/web/') === 0) {
+			$is_web = true;
+		}
+		elseif ($this->path && strpos($this->path, 'skel-dist/web') !== false) {
+			$is_web = true;
+		}
+		else {
+			$is_web = false;
+		}
+
+		if (!$is_web && $type != 'text/html' || !empty($this->_variables[0]['nocache'])) {
 			$cache_as_uri = null;
+		}
+
+		if ($is_web && $type == 'text/html') {
+			$scripts = [];
+			Plugin::fireSignal('usertemplate.appendscript', ['template' => $this, 'content' => $content], $scripts);
+
+			if (count($scripts)) {
+				$scripts = array_map(fn($a) => sprintf('<script type="text/javascript" defer src="%s"></script>', $a), $scripts);
+				$scripts = implode("\n", $scripts);
+				$content = str_ireplace('</body', $scripts . '</body', $content);
+			}
 		}
 
 		header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
