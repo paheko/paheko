@@ -33,6 +33,6 @@ $variables = compact('csrf_key', 'transaction') + [
 ];
 
 $tpl->assign($variables);
-$tpl->assign('snippets', UserForms::getSnippets(UserForm::SNIPPET_TRANSACTION, $variables));
+$tpl->assign('snippets', UserForms::snippetsAsString(UserForm::SNIPPET_TRANSACTION, $variables));
 
 $tpl->display('acc/transactions/details.tpl');

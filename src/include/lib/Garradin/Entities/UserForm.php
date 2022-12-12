@@ -22,10 +22,10 @@ class UserForm extends Entity
 
 	const SNIPPET_TRANSACTION = 'snippets/transaction_details.html';
 	const SNIPPET_USER = 'snippets/user_details.html';
-	const SNIPPET_HOME_ICON = 'snippets/home_icon.html';
+	const SNIPPET_HOME_BUTTON = 'snippets/home_button.html';
 
 	const SNIPPETS = [
-		self::SNIPPET_HOME_ICON => 'Icône sur la page d\'accueil',
+		self::SNIPPET_HOME_BUTTON => 'Icône sur la page d\'accueil',
 		self::SNIPPET_USER => 'En bas de la fiche d\'un membre',
 		self::SNIPPET_TRANSACTION => 'En bas de la fiche d\'une écriture',
 	];

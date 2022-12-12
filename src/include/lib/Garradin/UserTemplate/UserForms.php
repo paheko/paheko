@@ -81,13 +81,17 @@ class UserForms
 		return EM::getInstance(UserForm::class)->all('SELECT * FROM @TABLE ORDER BY label COLLATE NOCASE ASC;');
 	}
 
-	static public function getSnippets(string $snippet, array $variables = []): string
+	static public function snippetsAsString(string $snippet, array $variables = []): string
 	{
-		$out = '';
+		return implode("\n", self::snippets($snippet, $variables));
+	}
+
+	static public function snippets(string $snippet, array $variables = []): array
+	{
+		$out = [];
 
 		foreach (self::listForSnippet($snippet) as $form) {
-			$out .= $form->fetch($snippet, $variables);
-			$out .= PHP_EOL;
+			$out[] = $form->fetch($snippet, $variables);
 		}
 
 		return $out;

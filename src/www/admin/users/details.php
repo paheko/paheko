@@ -59,6 +59,6 @@ $siblings = $user->listSiblings();
 $variables += compact('services', 'user', 'category', 'children', 'siblings', 'parent_name', 'csrf_key');
 
 $tpl->assign($variables);
-$tpl->assign('snippets', UserForms::getSnippets(UserForm::SNIPPET_USER, $variables));
+$tpl->assign('snippets', UserForms::snippetsAsString(UserForm::SNIPPET_USER, $variables));
 
 $tpl->display('users/details.tpl');

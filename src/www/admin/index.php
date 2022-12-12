@@ -6,6 +6,8 @@ use Garradin\Web\Web;
 use Garradin\Files\Files;
 use Garradin\Users\Session;
 use Garradin\Entities\Files\File;
+use Garradin\UserTemplate\UserForms;
+use Garradin\Entities\UserForm;
 
 require_once __DIR__ . '/_inc.php';
 
@@ -24,6 +26,14 @@ else {
 
 $buttons = [];
 Plugin::fireSignal('home.button', ['user' => $session->getUser(), 'session' => $session], $buttons);
+
+foreach (UserForms::snippets(UserForm::SNIPPET_HOME_BUTTON) as $snippet) {
+	if (trim($snippet) === '') {
+		continue;
+	}
+
+	$buttons[] = $snippet;
+}
 
 $tpl->assign(compact('homepage', 'banner', 'buttons'));
 

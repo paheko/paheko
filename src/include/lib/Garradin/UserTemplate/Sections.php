@@ -319,6 +319,7 @@ class Sections
 			return null;
 		}
 
+
 		if (empty($params['level']) && empty($params['section'])) {
 			yield [];
 			return null;
@@ -337,6 +338,7 @@ class Sections
 		$ok = $session->canAccess($params['section'] ?? '', $convert[$params['level']]);
 
 		if ($ok) {
+			yield [];
 			return null;
 		}
 
