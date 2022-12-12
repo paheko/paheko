@@ -1,0 +1,6 @@
+src/data/*
+src/*.tar.gz
+src/*.asc
+src/*.log
+src/include/lib/KD2
+src/debug_sql.sqlite
