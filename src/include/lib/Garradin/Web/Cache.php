@@ -106,7 +106,7 @@ class Cache
 	static public function store(string $uri, string $html): void
 	{
 		// Do not store if the page content might be influenced by either POST, query string, or logged-in user
-		if ($_SERVER['REQUEST_METHOD'] != 'GET' || !empty($_SERVER['QUERY_STRING']) || isset($_COOKIE['pko'])) {
+		if (!isset($_GET['__reload']) && ($_SERVER['REQUEST_METHOD'] != 'GET' || !empty($_SERVER['QUERY_STRING']) || isset($_COOKIE['pko']))) {
 			return;
 		}
 
@@ -120,7 +120,7 @@ class Cache
 		$target = self::$root . '/' . md5($uri);
 
 		if (false !== stripos($html, '<html')) {
-			$expire = time() + 1800;
+			$expire = time() + 3600;
 
 			$close = sprintf('<script type="text/javascript">
 				document.addEventListener(\'DOMContentLoaded\', () => {
@@ -129,7 +129,9 @@ class Cache
 						return;
 					}
 
-					fetch(location.href + \'?reload\').then(r => r.text()).then(r => {
+					console.log(\'reloading\', now, %1$d);
+
+					fetch(location.href + \'?__reload\').then(r => r.text()).then(r => {
 						document.open();
 						document.write(r);
 						document.close();
