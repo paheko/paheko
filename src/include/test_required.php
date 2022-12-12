@@ -75,8 +75,9 @@ test_required(
 );
 
 test_required(
-    in_array('ENABLE_JSON1', $options) && !in_array('OMIT_JSON', $options),
-    'Le module SQLite3 JSON (utilisé dans les formulaires) n\'est pas installé.'
+    in_array('ENABLE_JSON1', $options)
+    || (version_compare($v['versionString'], '3.38', '>=') && !in_array('OMIT_JSON', $options)),
+    'Le module SQLite3 JSON1 (utilisé dans les formulaires) n\'est pas installé.'
 );
 
 test_required(
