@@ -3,6 +3,9 @@
 {$banner|raw}
 
 <nav class="tabs">
+	<aside>
+		{button id="homescreen-btn" label="Installer comme application sur l'écran d'accueil" class="hidden" shape="plus"}
+	</aside>
 	<ul>
 		<li><a href="{$admin_url}me/">Mes informations personnelles</a></li>
 		<li><a href="{$admin_url}me/services.php">Suivi de mes activités et cotisations</a></li>
@@ -35,7 +38,6 @@
 
 <nav class="home">
 	<ul>
-		<li>{button id="homescreen-btn" label="Installer comme application sur l'écran d'accueil" class="hidden" shape="plus"}</li>
 	{foreach from=$buttons item="button"}
 		<li>{$button|raw}</li>
 	{/foreach}

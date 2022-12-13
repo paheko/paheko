@@ -107,7 +107,7 @@ nav.home ul li {
     height: auto;
 }
 
-nav.home ul li a, nav.home ul li button {
+nav.home ul li a {
     display: block;
     width: calc(100% - 1em);
     white-space: normal;
@@ -117,10 +117,9 @@ nav.home ul li a, nav.home ul li button {
     position: relative;
     border: none;
     text-decoration: none;
-    box-shadow: none;
 }
 
-nav.home ul li a::before, nav.home ul li button::before {
+nav.home ul li a::before {
     display: flex;
     font-size: 48px;
     width: 48px;
@@ -132,15 +131,14 @@ nav.home ul li a::before, nav.home ul li button::before {
     padding: .1em;
     background: rgba(var(--gSecondColor), .5);
     margin-bottom: 5px;
+    text-shadow: none;
 }
 
 nav.home ul li a[data-custom-icon]::before {
     content: "";
-    padding: 0;
-    border-radius: 0;
-    font-size: 56px;
     width: 1em;
     height: 1em;
-    background: var(--custom-icon) no-repeat center center;
-    background-size: contain;
+    color: #fff;
+    background: rgba(var(--gSecondColor), .5) var(--custom-icon) no-repeat center center;
+    background-size: calc(100% - .2em);
 }
