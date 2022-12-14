@@ -4,7 +4,7 @@
 
 * [Guides d'installation](/wiki/?name=Installation)
 * [Documentation](/wiki/?name=Documentation)
-* <a href="https://garradin.eu/" target="_blank">Essayer gratuitement</a>
+* <a href="https://paheko.cloud/" target="_blank">Essayer gratuitement</a>
 * [Entraide](/wiki/?name=Entraide)
 
 <ul id="download">
@@ -14,14 +14,16 @@
 
 </nav>
 
-<p id="give"><a href="https://kd2.org/soutien.html" target="_blank">Soutenir Garradin en effectuant un don :-)</a></p>
+<p><a href="https://paheko.cloud/garradin-devient-paheko" target="_blank">Garradin devient Paheko !</a></p>
+
+<p id="give"><a href="https://kd2.org/soutien.html" target="_blank">Soutenir Paheko en effectuant un don :-)</a></p>
 
 <form method="GET" action="$ROOT/wiki" onsubmit="var t = this.querySelector('[type=radio]:checked'); this.querySelector('[name=s]').name=t.dataset.name; this.action=t.dataset.action; this.target=t.dataset.target;">
 <fieldset class="searchForm searchFormWiki">
 	<legend>Rechercher</legend>
 	<input type="search" name="s" size="40" value="" />
 	<label><input type="radio" name="t" value="" data-name="s" data-action="/garradin/wiki" data-target="" checked="checked" /> Chercher dans la documentation technique</label>
-	<label><input type="radio" name="t" value="1" data-action="https://garradin.eu/search" data-name="search" data-target="_blank" /> Chercher dans l'aide utilisateur</label>
+	<label><input type="radio" name="t" value="1" data-action="https://paheko.cloud/search" data-name="search" data-target="_blank" /> Chercher dans l'aide utilisateur</label>
 	<input type="submit" value="Rechercher" />
 </fieldset>
 </form>
