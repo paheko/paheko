@@ -5,7 +5,7 @@
 <div class="help block">
 	<h3>Bienvenue dans la comptabilité&nbsp;!</h3>
 	<p>Les informations ci-dessous sont nécessaire pour démarrer la comptabilité.</p>
-	<p>{linkbutton shape="help" href=$help_pattern_url|args:"premier-exercice-avec-garradin" target="_dialog" label="Démarrer le premier exercice comptable"}</p>
+	<p>{linkbutton shape="help" href=$help_pattern_url|args:"premier-exercice" target="_dialog" label="Démarrer le premier exercice comptable"}</p>
 </div>
 
 <form method="post" action="{$self_url}" data-focus="1">
