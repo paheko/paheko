@@ -636,7 +636,7 @@ namespace Garradin;
  * DISABLE_INSTALL_PING
  *
  * Lors de l'installation, ou d'une mise à jour, la version installée de Garradin,
- * ainsi que celle de PHP et de SQLite, sont envoyées à Garradin.eu.
+ * ainsi que celle de PHP et de SQLite, sont envoyées à Paheko.cloud.
  *
  * Cela permet de savoir quelles sont les versions utilisées, et également de compter
  * le nombre d'installations effectuées.
@@ -646,7 +646,7 @@ namespace Garradin;
  * (voir le code dans lib/.../Install.php)
  *
  * Le code de stockage des statistiques est visible à :
- * https://garradin.eu/ping/
+ * https://paheko.cloud/ping/
  *
  * Pour désactiver cet envoi il suffit de placer cette constante à TRUE.
  *
@@ -659,10 +659,10 @@ namespace Garradin;
  *
  * Cette clé permet de débloquer certaines fonctionnalités dans des extensions officielles.
  *
- * Pour l'obtenir il faut se créer un compte sur Garradin.eu
+ * Pour l'obtenir il faut se créer un compte sur Paheko.cloud
  * et faire une contribution financière.
  * La clé apparaîtra ensuite en dessous des informations
- * de l'association dans la page "Mon abonnement Garradin.eu".
+ * de l'association dans la page "Mon abonnement Paheko.cloud".
  *
  * Il faut recopier cette clé dans le fichier config.local.php
  * dans la constante CONTRIBUTOR_LICENSE.

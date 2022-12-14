@@ -12,7 +12,8 @@ require_once __DIR__ . '/../../_inc.php';
 
 $targets = qg('targets');
 $targets = $targets ? explode(':', $targets) : [];
-$chart = (int) qg('chart') ?: null;
+$chart_id = (int) qg('chart') ?: null;
+$year_id = (int)qg('year') ?: null;
 
 $targets = array_map('intval', $targets);
 $targets_str = implode(':', $targets);
@@ -43,16 +44,18 @@ $filter = $session->get('account_selector_filter') ?? 'usual';
 
 // Cache the page until the charts have changed
 $last_change = Config::getInstance()->get('last_chart_change') ?: time();
-$hash = sha1($targets_str . $chart . $last_change . '=' . $filter);
+$hash = sha1($targets_str . $chart_id . $year_id . $last_change . '=' . $filter);
 
 // Exit if there's no need to reload
 Utils::HTTPCache($hash, null, 10);
 
-if ($chart) {
-	$chart = Charts::get($chart);
+$chart = null;
+
+if ($chart_id) {
+	$chart = Charts::get($chart_id);
 }
-elseif (qg('year')) {
-	$year = Years::get((int)qg('year'));
+elseif ($year_id) {
+	$year = Years::get($year_id);
 
 	if ($year) {
 		$chart = $year->chart();
@@ -76,7 +79,10 @@ $accounts = $chart->accounts();
 
 $edit_url = sprintf('!acc/charts/accounts/%s?id=%d&types=%s', isset($grouped_accounts) ? '' : 'all.php', $chart->id(), $targets_str);
 
-$tpl->assign(compact('chart', 'targets', 'targets_str', 'filter_options', 'filter', 'edit_url'));
+$targets_names = !empty($targets) ? array_intersect_key(Account::TYPES_NAMES, array_flip($targets)) : [];
+$targets_names = implode(', ', $targets_names);
+
+$tpl->assign(compact('chart', 'targets', 'targets_str', 'filter_options', 'filter', 'edit_url', 'targets_names'));
 
 if ($filter == 'all') {
 	$tpl->assign('accounts', $accounts->listAll($targets));

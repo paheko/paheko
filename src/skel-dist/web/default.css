@@ -233,10 +233,10 @@ footer.main a:hover {
     text-decoration: underline;
 }
 
-footer.main a#garradin {
-    padding-left: 20px;
-    background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAGFBMVEX///+qjnmcTxWgYzWeWyiysrGzs7Ozs7MzVhJAAAAAB3RSTlMAGtv2e9p5oKuvKgAAAH1JREFUCNcdzLEOwjAMBNCrFDoXEGK3zA906RoifwBLmpVUSrMTpf59DNM9nU4HYNhjzJNlUaUPAzddN54NKU5uJsGoL4CYce9vA3mUJiLEHrURiRUoXQLRM6N2F4jrajcXm9YDJ+Xwx5AegX/Addn82eA4tah6QPwYNe75C+4yHrwP6fqUAAAAAElFTkSuQmCC") no-repeat left center;
-    min-height: 16px;
+footer.main a#paheko {
+    padding-left: 36px;
+    background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAWBAMAAABTd4N3AAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAADBQTFRFBUqmR3BMAwl4KZDEBD2dATCVBy+TJU6mC2y1BCWU/v//m7jbUXC3c53NvtPp3ur1QHGW/AAAAAh0Uk5T/gD6+WqzLO5BK691AAABR0lEQVQY02MQhAKRcIbyECDNAOMrMXR0dLTABcSCJnAABTjLYAIOmkB+swUDO1QglXNG8yogWHcgECwgwjCT23jXqvX/V61hY3BJFHPVnFnAd6N/1QOGU+tZGCJncirNPHmu7wfvqscW3avaGTKBApUPTp1e27HqRUfvqgMMohNqzux4W7VnNcevFx28qxoYRCZVnr59ftbn/x2vXnT0r2dgEFSaW8MzV+dAb8erv7d/rWFnEHTS3HOaW/vl645XQIfcYGUQFFVg+LOvau9q41+/d99gYGEQFNNk2LTmVv1i41UvOGfOnAZ0adLMOTdfn3psu+oFw8yZIKeLTZqj9GDX5b5VDzo4ZzqC/JKkpDTztYUV0GEdrRDfBikpXQBa8qJhgiFEQCxy5kyGu3cvW7DCQkwkknMCR7OxsSMiTFNCmY1NEoEMABmgiBzVXBbdAAAAAElFTkSuQmCC") no-repeat left center;
+    min-height: 22px;
     display: inline-block;
 }
 

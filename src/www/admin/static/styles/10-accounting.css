@@ -81,9 +81,14 @@ td.money, th.money {
     font-size: 1.3rem;
 }
 
-.year-header form {
-    max-width: 30em;
-    margin: 1em auto;
+.year-header .forms {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.year-header .forms fieldset {
+    margin: 1em;
 }
 
 .year-infos .graphs {

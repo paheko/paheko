@@ -94,7 +94,7 @@ class CommonModifiers
 			return $ts;
 		}
 
-		return strftime($format, $ts->getTimestamp());
+		return @strftime($format, $ts->getTimestamp());
 	}
 
 	static public function date($ts, string $format = null, string $locale = 'fr'): ?string

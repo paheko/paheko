@@ -49,7 +49,7 @@
 				<h4>{{$config.org_address|escape|nl2br}}</h4>
 			{{/if}}
 			{{if $config.org_phone}}
-				<h5>{{$config.org_phone|raw|protect_contact}}</h5>
+				<h5>{{$config.org_phone|raw|protect_contact:'tel'}}</h5>
 			{{/if}}
 			{{if $config.org_email}}
 				<h5>{{$config.org_email|raw|protect_contact}}</h5>

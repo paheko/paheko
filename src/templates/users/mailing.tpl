@@ -18,7 +18,7 @@
 		<fieldset class="mailing">
 			<legend>Prévisualisation du message</legend>
 			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
-			<nav class="menu">
+			<nav class="menu-btn">
 				<b data-icon="↷" class="btn">Exporter la liste des destinataires</b>
 				<span>
 					{button type="submit" name="export" value="csv" shape="export" label="Export CSV"}

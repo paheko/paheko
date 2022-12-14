@@ -1,6 +1,6 @@
 {include file="_head.tpl" title="%sBalance générale"|args:$project_title current="acc/years"}
 
-{include file="acc/reports/_header.tpl" current="trial_balance" title="Balance générale" sub_current=$simple}
+{include file="acc/reports/_header.tpl" current="trial_balance" title="Balance générale" sub_current=$simple allow_filter=true}
 
 <table class="list">
 	<thead>

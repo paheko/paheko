@@ -2,6 +2,7 @@
 
 namespace Garradin;
 
+use Garradin\Entity;
 use Garradin\Accounting\Years;
 use Garradin\Accounting\Projects;
 use Garradin\Accounting\Accounts;
@@ -35,9 +36,19 @@ if (qg('year'))
 		throw new UserException('Exercice inconnu.');
 	}
 
+	if (qg('before') && ($b = Entity::filterUserDateValue(qg('before')))) {
+		$criterias['before'] = $b;
+	}
+
+	if (qg('after') && ($a = Entity::filterUserDateValue(qg('after')))) {
+		$criterias['after'] = $a;
+	}
+
 	$criterias['year'] = $year->id();
 	$tpl->assign('year', $year);
-	$tpl->assign('close_date', $year->closed ? $year->end_date : time());
+	$tpl->assign('close_date', $year->closed && empty($criterias['before']) ? $year->end_date : time());
+	$tpl->assign('before_default', $criterias['before'] ?? $year->end_date);
+	$tpl->assign('after_default', $criterias['after'] ?? $year->start_date);
 }
 
 if (qg('projects_only')) {
@@ -54,9 +65,15 @@ if ($y2 = Years::get((int)qg('compare_year'))) {
 	$criterias['compare_year'] = $y2->id;
 }
 
-$criterias_query = $criterias;
-unset($criterias_query['compare_year']);
-
 $tpl->assign('criterias', $criterias);
-$tpl->assign('criterias_query', http_build_query($criterias));
+$criterias_query = $criterias;
+
+foreach ($criterias_query as &$c) {
+	if ($c instanceof \DateTimeInterface) {
+		$c = $c->format('Y-m-d');
+	}
+}
+
+$tpl->assign('criterias_query', http_build_query($criterias_query));
+unset($criterias_query['compare_year']);
 $tpl->assign('criterias_query_no_compare', http_build_query($criterias_query));

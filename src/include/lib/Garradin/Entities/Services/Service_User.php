@@ -174,8 +174,8 @@ class Service_User extends Entity
 			'label' => $label,
 			'id_project' => $source['id_project'] ?? $this->fee()->id_project,
 			'simple' => [Transaction::TYPE_REVENUE => [
-				[$this->fee()->id_account => null],
-				$source['account_selector'],
+				'credit' => [$this->fee()->id_account => null],
+				'debit' => $source['account_selector'],
 			]],
 			'id_year' => $this->fee()->id_year,
 		]));

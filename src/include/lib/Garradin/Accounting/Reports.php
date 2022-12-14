@@ -6,6 +6,7 @@ use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Line;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Utils;
+use Garradin\CSV;
 use Garradin\DB;
 use KD2\DB\EntityManager;
 
@@ -14,6 +15,7 @@ class Reports
 	static public function getWhereClause(array $criterias, string $transactions_alias = '', string $lines_alias = '', string $accounts_alias = ''): string
 	{
 		$where = [];
+		$db = DB::getInstance();
 
 		$transactions_alias = $transactions_alias ? $transactions_alias . '.' : '';
 		$lines_alias = $lines_alias ? $lines_alias . '.' : '';
@@ -74,6 +76,14 @@ class Reports
 
 		if (!empty($criterias['has_type'])) {
 			$where[] = $accounts_alias . 'type != 0';
+		}
+
+		if (!empty($criterias['before']) && $criterias['before'] instanceof \DateTimeInterface) {
+			$where[] = 'date <= ' . $db->quote($criterias['before']->format('Y-m-d'));
+		}
+
+		if (!empty($criterias['after']) && $criterias['after'] instanceof \DateTimeInterface) {
+			$where[] = 'date >= ' . $db->quote($criterias['after']->format('Y-m-d'));
 		}
 
 		if (!count($where)) {
@@ -157,7 +167,8 @@ class Reports
 
 	static public function getResult(array $criterias): int
 	{
-		if (!empty($criterias['project']) || !empty($criterias['projects_only'])) {
+		if (!empty($criterias['project']) || !empty($criterias['projects_only'])
+			|| !empty($criterias['before']) || !empty($criterias['after'])) {
 			$where = self::getWhereClause($criterias, 't', 'l', 'a');
 			$sql = self::getBalancesSQL(['inner_select' => 'l.id_project', 'inner_where' => $where]);
 			$sql = sprintf('SELECT position, SUM(balance) FROM (%s) GROUP BY position;', $sql);
@@ -232,7 +243,8 @@ class Reports
 
 		$table = null;
 
-		if (empty($criterias['project']) && empty($criterias['user']) && empty($criterias['creator']) && empty($criterias['subscription'])) {
+		if (empty($criterias['project']) && empty($criterias['user']) && empty($criterias['creator']) && empty($criterias['subscription'])
+			&& empty($criterias['before']) && empty($criterias['after'])) {
 			$table = 'acc_accounts_balances';
 		}
 
@@ -375,6 +387,55 @@ class Reports
 		return (object) compact('label', 'balance', 'balance2', 'change');
 	}
 
+	static public function exportStatement(string $format, array $criterias): void
+	{
+		$fmt = fn($a, $b) => isset($a->$b) ? Utils::money_format($a->$b, ',', '') : '';
+		$rows = [];
+
+		$body_to_rows = function ($left, $right) use (&$rows, $fmt) {
+			$max = max(count($left), count($right));
+
+			for ($i = 0; $i < $max; $i++) {
+				$l = $left[$i] ?? null;
+				$r = $right[$i] ?? null;
+
+				$rows[] = [
+					$l->code ?? null,
+					$l->label ?? null,
+					$fmt($l, 'balance'),
+					'',
+					$r->code ?? null,
+					$r->label ?? null,
+					$fmt($r, 'balance'),
+				];
+			}
+		};
+
+		$to_rows = function ($in) use (&$rows, &$body_to_rows) {
+			$rows[] = ['', $in->caption_left, '', '', '', $in->caption_right, ''];
+			$rows[] = ['', '', '', '', '', '', ''];
+
+			$body_to_rows($in->body_left, $in->body_right);
+
+			$rows[] = ['', '', '', '', '', '', ''];
+			$body_to_rows($in->foot_left, $in->foot_right);
+		};
+
+		$header = ['', 'Compte de résultat', '', '', '', '', ''];
+		$general = Reports::getStatement($criterias + ['exclude_type' => [Account::TYPE_VOLUNTEERING_REVENUE, Account::TYPE_VOLUNTEERING_EXPENSE]]);
+		$to_rows($general);
+
+		$v = Reports::getVolunteeringStatement($criterias, $general);
+
+		if (!empty($v->body_left) || !empty($v->body_right)) {
+			$rows[] = ['', '', '', '', '', '', ''];
+			$to_rows($v);
+		}
+
+		$title = 'Compte de résultat';
+		CSV::export($format, $title, $rows, $header);
+	}
+
 	/**
 	 * Statement / Compte de résultat
 	 */
@@ -420,11 +481,11 @@ class Reports
 
 		$out->foot_left = [
 			self::getTotalLine($out->body_left, 'Total emplois'),
-			self::getTotalLine($out->body_left + $general_statement->body_left, 'Total charges et emplois'),
+			self::getTotalLine(array_merge($out->body_left, $general_statement->body_left), 'Total charges et emplois'),
 		];
 		$out->foot_right = [
 			self::getTotalLine($out->body_right, 'Total sources'),
-			self::getTotalLine($out->body_right + $general_statement->body_right, 'Total produits et sources'),
+			self::getTotalLine(array_merge($out->body_right, $general_statement->body_right), 'Total produits et sources'),
 		];
 
 		return $out;

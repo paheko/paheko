@@ -493,6 +493,7 @@ details summary.block::after {
 }
 
 nav.breadcrumbs {
+    clear: both;
     margin: .5em 0;
     color: var(--gLightBorderColor);
 }
@@ -579,7 +580,6 @@ aside.quota h4 {
     font-size: .9em;
     margin-bottom: .8em;
 }
-
 dl.large dt {
     font-size: 1.5em;
     font-weight: bold;

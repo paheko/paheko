@@ -35,7 +35,7 @@
 			<td>{$row.fail_log|escape|nl2br}</td>
 			<td>{$row.last_sent|date}</td>
 			<td>
-				{if $row.email}
+				{if $row.email && ($row.optout || $row.last_sent < $limit_date)}
 					{linkbutton target="_dialog" label="Rétablir" href="?verify=%s"|args:$row.email shape="check"}
 				{/if}
 			</td>
@@ -61,6 +61,9 @@
 			<dt>Trop d'erreurs</dt>
 			<dd>Le service destinataire a renvoyé une erreur temporaire plus de {$max_fail_count} fois.<br />Cela arrive par exemple si vos messages sont vus comme du spam trop souvent, ou si la boîte mail destinataire est pleine. Cette adresse ne recevra plus de message.</dd>
 		</dl>
+		<p class="help">
+			Il est possible de rétablir la réception de messages pour les adresses invalides après un délai d'un mois, et les adresses désinscrites immédiatement, en cliquant sur le bouton "Rétablir" qui enverra un message de validation à la personne.
+		</p>
 	</div>
 
 {/if}

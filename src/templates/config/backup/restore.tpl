@@ -84,7 +84,12 @@
 					<th><label for="f_selected_{$backup.filename}">{$backup.name}</label></th>
 					<td>{$backup.size|size_in_bytes}</td>
 					<td>{$backup.date|date_short:true}</td>
-					<td>{$backup.version}{if !$backup.can_restore} — <span class="alert">Version trop ancienne pour pouvoir être restaurée</span>{/if}</td>
+					<td>{if $backup.error}
+							<span class="alert">Sauvegarde corrompue :</span> {$backup.error}
+						{else}
+							{$backup.version}{if !$backup.can_restore} — <span class="alert">Version trop ancienne pour pouvoir être restaurée</span>{/if}
+						{/if}
+					</td>
 					<td class="actions">
 						{linkbutton href="?download=%s"|args:$backup.filename label="Télécharger" shape="download"}
 					</td>

@@ -4,6 +4,16 @@
 	<p class="block confirm">
 		Votre adresse e-mail a bien été vérifiée, merci !
 	</p>
+
+	<p>
+	{if $config.site_asso || !$config.site_disabled}
+		<?php $url = $config->site_asso ?? $www_url; ?>
+		{linkbutton href=$url label="Retour au site" shape="left"}
+	{else}
+		{linkbutton href=$admin_url label="Connexion" shape="left"}
+	{/if}
+	</p>
+
 {elseif $verify === false}
 	<p class="block error">
 		Erreur de vérification de votre adresse e-mail.
@@ -14,7 +24,8 @@
 	</p>
 
 	<p class="help">
-		Vous pouvez revenir sur cette page pour vous réinscrire à tout moment.
+		Vous pouvez vous réinscrire à tout moment en cliquant à nouveau sur le lien de désinscription présent à la fin de nos e-mails.<br />
+		{linkbutton href="?un=%s"|args:$code label="Me réinscrire" shape="reload"}
 	</p>
 {elseif $resub_ok}
 	<p class="block confirm">

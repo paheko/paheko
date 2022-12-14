@@ -2,70 +2,80 @@
 
 <div class="selector">
 
-{if empty($grouped_accounts) && empty($accounts)}
-	<p class="block alert">Le plan comptable ne comporte aucun compte de ce type.<br />
-	</p>
+<header>
+	<h2 class="quick-search">
+		<input type="text" placeholder="Recherche rapide…" title="Filtrer la liste" />{button shape="delete" type="reset" title="Effacer la recherche"}
+		{* We can't use input type="search" because Firefox sucks *}
+	</h2>
 
 	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 		<p class="edit">{linkbutton label="Modifier les comptes" href=$edit_url shape="edit"}</p>
 	{/if}
 
-{else}
+	<p>{input type="select" name="filter" options=$filter_options default=$filter}</p>
+</header>
 
-	<header>
-		<h2 class="quick-search">
-			<input type="text" placeholder="Recherche rapide…" title="Filtrer la liste" />{button shape="delete" type="reset" title="Effacer la recherche"}
-			{* We can't use input type="search" because Firefox sucks *}
-		</h2>
-
+{if empty($grouped_accounts) && empty($accounts)}
+	<p class="block alert">
+		Il n'existe aucun compte dans la catégorie «&nbsp;{$targets_names}&nbsp;» dans le plan comptable.
+	</p>
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-			<p class="edit">{linkbutton label="Modifier les comptes" href=$edit_url shape="edit"}</p>
+		<p class="help">
+			Il faut <a href="{$edit_url}">modifier le plan comptable</a> pour ajouter un compte de cette catégorie et pouvoir le sélectionner ensuite.
+		</p>
 		{/if}
+	</p>
 
-		<p>{input type="select" name="filter" options=$filter_options default=$filter}</p>
-	</header>
+{elseif isset($grouped_accounts)}
+	<?php $index = 1; ?>
+	{foreach from=$grouped_accounts item="group"}
+		<h2 class="ruler">{$group.label}</h2>
 
-	{if isset($grouped_accounts)}
-		<?php $index = 1; ?>
-		{foreach from=$grouped_accounts item="group"}
-			<h2 class="ruler">{$group.label}</h2>
-
-			<table class="list">
-				<tbody>
-				{foreach from=$group.accounts item="account"}
-					<tr data-idx="{$index}" class="account">
-						<td class="bookmark">{if $account.bookmark}{icon shape="star" title="Compte favori"}{/if}</td>
-						<td class="num">{$account.code}</td>
-						<th>{$account.label}</th>
-						<td class="desc">{$account.description}</td>
-						<td class="actions">
-							{button shape="right" value=$account.id data-label="%s — %s"|args:$account.code,$account.label label="Sélectionner"}
-						</td>
-					</tr>
-					<?php $index++; ?>
-				{/foreach}
-				</tbody>
-			</table>
-		{/foreach}
-
-	{else}
-
+		{if count($group.accounts)}
 		<table class="list">
 			<tbody>
-			{foreach from=$accounts item="account"}
-				<tr data-idx="{$iteration}" class="account account-level-{$account->level()}">
+			{foreach from=$group.accounts item="account"}
+				<tr data-idx="{$index}" class="account">
 					<td class="bookmark">{if $account.bookmark}{icon shape="star" title="Compte favori"}{/if}</td>
 					<td class="num">{$account.code}</td>
 					<th>{$account.label}</th>
+					<td class="desc">{$account.description}</td>
 					<td class="actions">
 						{button shape="right" value=$account.id data-label="%s — %s"|args:$account.code,$account.label label="Sélectionner"}
 					</td>
 				</tr>
+				<?php $index++; ?>
 			{/foreach}
 			</tbody>
 		</table>
-
+		{else}
+			<p class="help">Le plan comptable ne comporte aucun compte de ce type.</p>
+		{/if}
+	{/foreach}
+	{if $index == 1 && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
+	<p class="help">
+		Il faut <a href="{$edit_url}">modifier le plan comptable</a> pour ajouter un compte dans une catégorie et pouvoir le sélectionner ensuite.
+	</p>
 	{/if}
+
+
+{else}
+
+	<table class="list">
+		<tbody>
+		{foreach from=$accounts item="account"}
+			<tr data-idx="{$iteration}" class="account account-level-{$account->level()}">
+				<td class="bookmark">{if $account.bookmark}{icon shape="star" title="Compte favori"}{/if}</td>
+				<td class="num">{$account.code}</td>
+				<th>{$account.label}</th>
+				<td class="actions">
+					{button shape="right" value=$account.id data-label="%s — %s"|args:$account.code,$account.label label="Sélectionner"}
+				</td>
+			</tr>
+		{/foreach}
+		</tbody>
+	</table>
+
 {/if}
 
 </div>

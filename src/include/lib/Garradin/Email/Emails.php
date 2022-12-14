@@ -283,14 +283,16 @@ class Emails
 			$ids = [];
 		};
 
+		$limit_time = strtotime('1 month ago');
+
 		// listQueue nettoie déjà la queue
 		foreach ($queue as $row) {
-			// Don't send emails to opt-out address, unless it's a password reminder
- 			// Invalid and failed-too-many addresses are purged from the queue before processing, no need to handle them here
- 			// We still allow emails to be sent to failed or optout addresses if it's a system email
-			if ($row->context != self::CONTEXT_SYSTEM && $row->optout) {
-				self::deleteFromQueue($row->id);
-				continue;
+			// We allow system emails to be sent to invalid addresses after a while, and to optout addresses all the time
+			if ($row->optout || $row->invalid || $row->fail_count >= self::FAIL_LIMIT) {
+				if ($row->context != self::CONTEXT_SYSTEM || (!$row->optout && $row->last_sent > $limit_time)) {
+					self::deleteFromQueue($row->id);
+					continue;
+				}
 			}
 
 			// Create email address in database
@@ -385,7 +387,8 @@ class Emails
 
 		$condition = null === $context ? '' : sprintf(' AND context = %d', $context);
 
-		return DB::getInstance()->get(sprintf('SELECT q.*, e.optout, e.verified, e.hash AS email_hash
+		return DB::getInstance()->get(sprintf('SELECT q.*, e.optout, e.verified, e.hash AS email_hash,
+				e.invalid, e.fail_count, strftime(\'%%s\', e.last_sent) AS last_sent
 			FROM emails_queue q
 			LEFT JOIN emails e ON e.hash = q.recipient_hash
 			WHERE q.sending = 0 %s;', $condition));
@@ -404,7 +407,8 @@ class Emails
 	static protected function purgeQueueFromRejected(): void
 	{
 		DB::getInstance()->delete('emails_queue',
-			'recipient_hash IN (SELECT hash FROM emails WHERE invalid = 1 OR fail_count >= ?)',
+			'recipient_hash IN (SELECT hash FROM emails WHERE (invalid = 1 OR fail_count >= ?)
+			AND last_sent >= datetime(\'now\', \'-1 month\'));',
 			self::FAIL_LIMIT);
 	}
 
@@ -476,6 +480,9 @@ class Emails
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('last_sent', true);
+		$list->setModifier(function (&$row) {
+			$row->last_sent = $row->last_sent ? new \DateTime($row->last_sent) : null;
+		});
 		return $list;
 	}
 

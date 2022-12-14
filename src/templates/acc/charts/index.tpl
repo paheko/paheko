@@ -42,16 +42,7 @@
 								{linkbutton shape="delete" label="Supprimer" href="!acc/charts/delete.php?id=%d"|args:$item.id target="_dialog"}
 							{/if}
 						{/if}
-						<nav class="menu menu-right">
-							<b data-icon="↷" class="btn">Export</b>
-							<span>
-								{linkbutton href="export.php?id=%d&format=csv"|args:$item.id label="Export CSV" shape="export"}
-								{linkbutton href="export.php?id=%d&format=ods"|args:$item.id label="Export LibreOffice" shape="export"}
-								{if CALC_CONVERT_COMMAND}
-									{linkbutton href="export.php?id=%d&format=xlsx"|args:$item.id label="Export Excel" shape="export"}
-								{/if}
-							</span>
-						</nav>
+						{exportmenu class="menu-btn-right" href="export.php?id=%d&format="|args:$item.id}
 					</td>
 				</tr>
 			{/foreach}
@@ -64,7 +55,7 @@
 		<fieldset>
 			<legend>Créer un nouveau plan comptable</legend>
 			<dl>
-				{input type="radio-btn" name="type" value="install" label="Installer un autre plan comptable officiel"}
+				{input type="radio-btn" name="type" value="install" label="Ajouter un autre plan comptable officiel"}
 				{input type="radio-btn" name="type" value="copy" label="Recopier un plan comptable pour le modifier"}
 				{input type="radio-btn" name="type" value="import" label="Importer un plan comptable personnel" help="À partir d'un tableau (CSV, Office, etc.)"}
 			</dl>
@@ -79,7 +70,7 @@
 		</fieldset>
 
 		<fieldset class="type-install hidden">
-			<legend>Installer un nouveau plan comptable officiel</legend>
+			<legend>Ajouter un nouveau plan comptable officiel</legend>
 			<dl>
 				{input type="select" name="install" label="Plan comptable" required=true options=$install_list}
 			</dl>

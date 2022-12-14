@@ -51,6 +51,11 @@ class Years
 		return DB::getInstance()->getAssoc('SELECT id, label FROM acc_years ORDER BY end_date;');
 	}
 
+	static public function listAssocExcept(int $id)
+	{
+		return DB::getInstance()->getAssoc('SELECT id, label FROM acc_years WHERE id != ? ORDER BY end_date;', $id);
+	}
+
 	static public function listClosedAssoc()
 	{
 		return DB::getInstance()->getAssoc('SELECT id, label FROM acc_years WHERE closed = 1 ORDER BY end_date;');
@@ -77,15 +82,18 @@ class Years
 		return DB::getInstance()->count(Year::TABLE);
 	}
 
-	static public function list(bool $reverse = false)
+	static public function list(bool $reverse = false, ?int $except_id = null)
 	{
 		$desc = $reverse ? 'DESC' : '';
-		return DB::getInstance()->get(sprintf('SELECT y.*,
+		$except = $except_id ? ' AND y.id != ' . (int)$except_id : '';
+		$sql = sprintf('SELECT y.*,
 			(SELECT COUNT(*) FROM acc_transactions WHERE id_year = y.id) AS nb_transactions,
 			c.label AS chart_name
 			FROM acc_years y
 			INNER JOIN acc_charts c ON c.id = y.id_chart
-			ORDER BY end_date %s;', $desc));
+			WHERE 1 %s
+			ORDER BY end_date %s;', $except, $desc);
+		return DB::getInstance()->get($sql);
 	}
 
 	static public function listLastTransactions(int $count, array $years): array
@@ -162,7 +170,7 @@ class Years
 			$line = Line::create($account->id, abs($account->balance), 0);
 			$t->addLine($line);
 
-			$sum += $account->balance;
+			$sum += abs($account->balance);
 		}
 
 		if (!empty($balances[Account::TYPE_POSITIVE_RESULT])) {
@@ -171,14 +179,18 @@ class Years
 			$line = Line::create($account->id, 0, abs($account->balance));
 			$t->addLine($line);
 
-			$sum -= $account->balance;
+			$sum -= abs($account->balance);
+		}
+
+		if ($sum == 0) {
+			return null;
 		}
 
 		if ($sum > 0) {
-			$line = Line::create($appropriation_account, $sum, 0);
+			$line = Line::create($appropriation_account, 0, $sum);
 		}
-		else {
-			$line = Line::create($appropriation_account, 0, abs($sum));
+		elseif ($sum < 0) {
+			$line = Line::create($appropriation_account, abs($sum), 0);
 		}
 
 		$t->addLine($line);

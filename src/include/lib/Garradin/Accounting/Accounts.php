@@ -142,7 +142,7 @@ class Accounts
 	 * List common accounts, grouped by type
 	 * @return array
 	 */
-	public function listCommonGrouped(array $types = null): array
+	public function listCommonGrouped(array $types = null, bool $hide_empty = false): array
 	{
 		if (null === $types) {
 			// If we want all types, then we will get used or bookmarked accounts in common types
@@ -190,9 +190,11 @@ class Accounts
 			$out[$t]->accounts[] = $row;
 		}
 
-		foreach ($out as $key => $v) {
-			if (!count($v->accounts)) {
-				unset($out[$key]);
+		if ($hide_empty) {
+			foreach ($out as $key => $v) {
+				if (!count($v->accounts)) {
+					unset($out[$key]);
+				}
 			}
 		}
 

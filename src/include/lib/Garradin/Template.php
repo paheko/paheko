@@ -83,6 +83,7 @@ class Template extends Smartyer
 
 		$this->assign('www_url', WWW_URL);
 		$this->assign('admin_url', ADMIN_URL);
+		$this->assign('help_pattern_url', HELP_PATTERN_URL);
 		$this->assign('help_url', sprintf(HELP_URL, str_replace('/admin/', '', Utils::getSelfURI(false))));
 		$this->assign('admin_url', ADMIN_URL);
 		$this->assign('self_url', Utils::getSelfURI());
@@ -129,6 +130,8 @@ class Template extends Smartyer
 		$this->register_function('csrf_field', function ($params) {
 			return Form::tokenHTML($params['key']);
 		});
+
+		$this->register_function('exportmenu', [$this, 'widgetExportMenu']);
 
 		$this->register_modifier('strlen', fn($a) => strlen($a ?? ''));
 		$this->register_modifier('dump', ['KD2\ErrorManager', 'dump']);
@@ -200,6 +203,20 @@ class Template extends Smartyer
 		}
 
 		return '<div class="block error"><ul><li>' . implode('</li><li>', $errors) . '</li></ul></div>';
+	}
+
+	protected function widgetExportMenu(array $params): string
+	{
+		return sprintf('
+			<span class="menu-btn %s">
+				<b data-icon="↷" class="btn">Export</b>
+				<span>%s %s %s</span>
+			</span>',
+			htmlspecialchars($params['class'] ?? ''),
+			CommonFunctions::widgetLinkButton(['href' => $params['href'] . 'csv', 'label' => 'Export CSV', 'shape' => 'export']),
+			CommonFunctions::widgetLinkButton(['href' => $params['href'] . 'ods', 'label' => 'Export LibreOffice', 'shape' => 'export']),
+			CALC_CONVERT_COMMAND ? CommonFunctions::widgetLinkButton(['href' => $params['href'] . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']) : ''
+		);
 	}
 
 	protected function formatPhoneNumber($n)

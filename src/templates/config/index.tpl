@@ -13,7 +13,7 @@
 <form method="post" action="{$self_url}">
 
 	<fieldset>
-		<legend>Garradin</legend>
+		<legend>Paheko</legend>
 		<dl>
 			<dt>Version installée</dt>
 			<dd>{$garradin_version}</dd>

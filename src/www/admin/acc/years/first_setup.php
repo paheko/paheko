@@ -17,8 +17,21 @@ $csrf_key = 'first_setup';
 
 $year = new Year;
 
+$config = Config::getInstance();
+$default_chart = Charts::getFirstForCountry($config->pays);
+$selected_chart = f('chart');
+
+if ($id_chart = (int) f('id_chart')) {
+	$year->id_chart = $id_chart;
+}
+elseif ($selected_chart) {
+	$year->id_chart = Charts::getOrInstall($selected_chart);
+}
+elseif ($default_chart) {
+	$year->id_chart = $default_chart->id;
+}
+
 $new_dates = Years::getNewYearDates();
-$year->id_chart = Charts::getFirstId();
 $year->start_date = $new_dates[0];
 $year->end_date = $new_dates[1];
 $year->label = sprintf('Exercice %s', $year->label_years());
@@ -40,7 +53,7 @@ else {
 	$new_accounts = [];
 }
 
-$appropriation_account = $year->chart()->accounts()->getSingleAccountForType(Account::TYPE_APPROPRIATION_RESULT);
+$appropriation_account = $year->id_chart ? $year->chart()->accounts()->getSingleAccountForType(Account::TYPE_APPROPRIATION_RESULT) : null;
 
 $form->runIf('save', function () use ($year, $new_accounts, $appropriation_account) {
 	$db = DB::getInstance();
@@ -83,6 +96,9 @@ if (!count($new_accounts)) {
 	$new_accounts[] = ['label' => 'Compte courant', 'balance' => 0];
 }
 
-$tpl->assign(compact('year', 'new_accounts', 'csrf_key', 'appropriation_account'));
+$step = (int)f('step');
+$charts_list = Charts::listForCountry($config->pays);
+$default_chart_code = $default_chart ? $default_chart->country_code() : null;
+$tpl->assign(compact('year', 'new_accounts', 'csrf_key', 'appropriation_account', 'charts_list', 'default_chart', 'default_chart_code', 'step'));
 
 $tpl->display('acc/years/first_setup.tpl');

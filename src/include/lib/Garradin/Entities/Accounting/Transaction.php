@@ -651,6 +651,7 @@ class Transaction extends Entity
 		$this->assert($count == 2 ||  $this->type == self::TYPE_ADVANCED, sprintf('Une écriture de type "%s" ne peut comporter que deux lignes au maximum.', self::TYPES_NAMES[$this->type]));
 
 		$accounts_ids = [];
+		$chart_id = $db->firstColumn('SELECT id_chart FROM acc_years WHERE id = ?;', $this->id_year);
 
 		foreach ($lines as $k => $line) {
 			$k = $k+1;
@@ -658,8 +659,8 @@ class Transaction extends Entity
 			$this->assert($line->credit || $line->debit, sprintf('Ligne %d: Aucun montant au débit ou au crédit', $k));
 			$this->assert($line->credit >= 0 && $line->debit >= 0, sprintf('Ligne %d: Le montant ne peut être négatif', $k));
 			$this->assert(($line->credit * $line->debit) === 0 && ($line->credit + $line->debit) > 0, sprintf('Ligne %d: non équilibrée, crédit ou débit doit valoir zéro.', $k));
+			$this->assert($db->test(Account::TABLE, 'id = ? AND id_chart = ?', $line->id_account, $chart_id), sprintf('Ligne %d: le compte spécifié n\'est pas lié au bon plan comptable', $k));
 
-			$accounts_ids = [$line->id_account];
 			$total += $line->credit;
 			$total -= $line->debit;
 		}
@@ -667,11 +668,6 @@ class Transaction extends Entity
 		$this->assert(0 === $total, sprintf('Écriture non équilibrée : déséquilibre (%s) entre débits et crédits', Utils::money_format($total)));
 
 		// Foreign keys constraints will check for validity of id_creator and id_year
-
-		$found_accounts = $db->getAssoc(sprintf('SELECT id, id FROM acc_accounts WHERE %s AND id_chart = (SELECT id_chart FROM acc_years WHERE id = %d);', $db->where('id', $accounts_ids), $this->id_year));
-
-		$diff = array_diff($accounts_ids, $found_accounts);
-		$this->assert(count($diff) == 0, sprintf('Certains comptes (%s) ne sont pas liés au bon plan comptable', implode(', ', $diff)));
 
 		$this->assert(!$this->id_related || $db->test('acc_transactions', 'id = ?', $this->id_related), 'L\'écriture liée indiquée n\'existe pas');
 		$this->assert(!$this->id_related || !$this->exists() || $this->id_related != $this->id, 'Il n\'est pas possible de lier une écriture à elle-même');
@@ -975,9 +971,13 @@ class Transaction extends Entity
 			$this->id(), $user_id, $service_id);
 	}
 
-	public function updateLinkedUsers(array $users)
+	public function updateLinkedUsers(array $users): void
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
+
+		if (!$this->checkLinkedUsersChange($users)) {
+			return;
+		}
 
 		$db->begin();
 
@@ -991,7 +991,20 @@ class Transaction extends Entity
 		$db->commit();
 	}
 
-	public function listLinkedUsers()
+	public function checkLinkedUsersChange(array $users): bool
+	{
+		$existing = $this->listLinkedUsersAssoc();
+		ksort($users);
+		ksort($existing);
+
+		if ($users === $existing) {
+			return false;
+		}
+
+		return true;
+	}
+
+	public function listLinkedUsers(): array
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
 		$identity_column = DynamicFields::getNameFieldsSQL('u');
@@ -999,7 +1012,7 @@ class Transaction extends Entity
 		return $db->get($sql, $this->id());
 	}
 
-	public function listLinkedUsersAssoc()
+	public function listLinkedUsersAssoc(): array
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
 		$identity_column = DynamicFields::getNameFieldsSQL('u');
@@ -1037,11 +1050,18 @@ class Transaction extends Entity
 						'label' => 'Type de recette',
 						'targets' => [Account::TYPE_REVENUE],
 						'direction' => 'credit',
+						'defaults' => [
+							self::TYPE_CREDIT => 'credit',
+						],
 					],
 					[
 						'label' => 'Compte d\'encaissement',
 						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
 						'direction' => 'debit',
+						'defaults' => [
+							self::TYPE_EXPENSE => 'credit',
+							self::TYPE_TRANSFER => 'credit',
+						],
 					],
 				],
 				'label' => self::TYPES_NAMES[self::TYPE_REVENUE],
@@ -1052,11 +1072,18 @@ class Transaction extends Entity
 						'label' => 'Type de dépense',
 						'targets' => [Account::TYPE_EXPENSE],
 						'direction' => 'debit',
+						'defaults' => [
+							self::TYPE_DEBT => 'debit',
+						],
 					],
 					[
 						'label' => 'Compte de décaissement',
 						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
 						'direction' => 'credit',
+						'defaults' => [
+							self::TYPE_REVENUE => 'debit',
+							self::TYPE_TRANSFER => 'credit',
+						],
 					],
 				],
 				'label' => self::TYPES_NAMES[self::TYPE_EXPENSE],
@@ -1068,6 +1095,10 @@ class Transaction extends Entity
 						'label' => 'De',
 						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
 						'direction' => 'credit',
+						'defaults' => [
+							self::TYPE_EXPENSE => 'credit',
+							self::TYPE_REVENUE => 'debit',
+						],
 					],
 					[
 						'label' => 'Vers',
@@ -1084,11 +1115,17 @@ class Transaction extends Entity
 						'label' => 'Type de dette (dépense)',
 						'targets' => [Account::TYPE_EXPENSE],
 						'direction' => 'debit',
+						'defaults' => [
+							self::TYPE_EXPENSE => 'debit',
+						],
 					],
 					[
 						'label' => 'Compte de tiers',
 						'targets' => [Account::TYPE_THIRD_PARTY],
 						'direction' => 'credit',
+						'defaults' => [
+							self::TYPE_CREDIT => 'debit',
+						],
 					],
 				],
 				'label' => self::TYPES_NAMES[self::TYPE_DEBT],
@@ -1100,11 +1137,17 @@ class Transaction extends Entity
 						'label' => 'Type de créance (recette)',
 						'targets' => [Account::TYPE_REVENUE],
 						'direction' => 'credit',
+						'defaults' => [
+							self::TYPE_REVENUE => 'credit',
+						],
 					],
 					[
 						'label' => 'Compte de tiers',
 						'targets' => [Account::TYPE_THIRD_PARTY],
 						'direction' => 'debit',
+						'defaults' => [
+							self::TYPE_DEBT => 'credit',
+						],
 					],
 				],
 				'label' => self::TYPES_NAMES[self::TYPE_CREDIT],
@@ -1122,10 +1165,10 @@ class Transaction extends Entity
 
 		foreach ($this->getLinesWithAccounts() as $i => $l) {
 			if ($l->debit) {
-				$current_accounts[] = $l->account_selector;
+				$current_accounts['debit'] = $l->account_selector;
 			}
 			elseif ($l->credit) {
-				$current_accounts[] = $l->account_selector;
+				$current_accounts['credit'] = $l->account_selector;
 			}
 
 			if (count($current_accounts) == 2) {
@@ -1136,22 +1179,23 @@ class Transaction extends Entity
 		foreach ($details as $key => &$type) {
 			$type = (object) $type;
 			$type->id = $key;
-			foreach ($type->accounts as $i => &$account) {
+			foreach ($type->accounts as &$account) {
 				$account = (object) $account;
 				$account->targets_string = implode(':', $account->targets);
-				$account->selector_name = sprintf('simple[%s][%d]', $key, $i);
+				$account->selector_name = sprintf('simple[%s][%s]', $key, $account->direction);
 
-				// Try to find out if we can replicate the value
-				// debt and credit can have same values, but not others
-				// as it can lead to weird stuff
-				// exception: revenue/expense can have the same payment account, no issue
-				if (($type->id == $this->type)
-					|| ($type->id == self::TYPE_CREDIT && $this->type == self::TYPE_DEBT)
-					|| ($type->id == self::TYPE_DEBT && $this->type == self::TYPE_CREDIT)
-					|| ($type->id == self::TYPE_REVENUE && $this->type == self::TYPE_EXPENSE && $i == 1)
-					|| ($type->id == self::TYPE_EXPENSE && $this->type == self::TYPE_REVENUE && $i == 1)
-				) {
-					$account->selector_value = $source['simple'][$key][$i] ?? ($current_accounts[$i] ?? null);
+				$d = null;
+
+				// Copy selector value for current type
+				if ($type->id == $this->type) {
+					$d = $account->direction;
+				}
+				else {
+					$d = $account->defaults[$this->type] ?? null;
+				}
+
+				if ($d) {
+					$account->selector_value = $source['simple'][$key][$d] ?? ($current_accounts[$d] ?? null);
 				}
 			}
 		}
@@ -1177,6 +1221,7 @@ class Transaction extends Entity
 			'id'         => $this->_related->id,
 			'amount'     => $this->_related->sum(),
 			'id_project' => $this->_related->getProjectId(),
+			'type'       => $this->_related->type,
 		];
 
 		return $out;

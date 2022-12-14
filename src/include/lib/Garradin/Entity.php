@@ -63,6 +63,13 @@ class Entity extends AbstractEntity
 	protected function filterUserValue(string $type, $value, string $key)
 	{
 		if ($type == 'date' || $type == Date::class) {
+			if ($value instanceof Date) {
+				return $value;
+			}
+			elseif ($value instanceof \DateTimeInterface) {
+				return Date::createFromInterface($value);
+			}
+
 			return self::filterUserDateValue($value);
 		}
 		elseif ($type == 'DateTime' && is_string($value)) {

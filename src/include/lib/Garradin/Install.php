@@ -102,6 +102,7 @@ class Install
 			'name'         => $user->identite,
 			'email'        => $user->email,
 			'organization' => $config->org_name,
+			'country'      => $config->pays,
 		]));
 
 		rename(DB_FILE, sprintf(DATA_ROOT . '/association.%s.sqlite', date('Y-m-d-His-') . 'avant-remise-a-zero'));
@@ -127,7 +128,7 @@ class Install
 
 		try {
 			// We can't use the real password, as it might not be valid (too short or compromised)
-			$ok = self::install($data->organization ?? 'Association', $data->name, $data->email, md5($data->password));
+			$ok = self::install($data->country ?? 'FR', $data->organization ?? 'Association', $data->name, $data->email, md5($data->password));
 
 			// Restore password
 			DB::getInstance()->preparedQuery('UPDATE membres SET passe = ? WHERE id = 1;', [$data->password]);

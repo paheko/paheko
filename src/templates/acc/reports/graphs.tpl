@@ -1,6 +1,6 @@
 {include file="_head.tpl" title="%sGraphiques"|args:$project_title current="acc/years"}
 
-{include file="acc/reports/_header.tpl" current="graphs" title="Graphiques"}
+{include file="acc/reports/_header.tpl" current="graphs" title="Graphiques" allow_filter=false}
 
 {if $nb_transactions < 3}
 	<p class="alert block">Il n'y a pas encore suffisamment d'écritures dans cet exercice pour pouvoir afficher les statistiques.</p>
