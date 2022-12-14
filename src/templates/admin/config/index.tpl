@@ -13,7 +13,7 @@
 <form method="post" action="{$self_url}">
 
 	<fieldset>
-		<legend>Garradin</legend>
+		<legend>Paheko</legend>
 		<dl>
 			<dt>Version installée</dt>
 			<dd>{$garradin_version}</dd>
@@ -52,7 +52,7 @@
 			{input type="email" name="email_asso" required=true source=$config label="Adresse e-mail de contact"}
 			{input type="textarea" name="adresse_asso" source=$config label="Adresse postale"}
 			{input type="tel" name="telephone_asso" source=$config label="Numéro de téléphone"}
-			{input type="url" name="site_asso" source=$config label="Site web" help="Si vous n'utilisez pas la fonctionnalité site web de Garradin"}
+			{input type="url" name="site_asso" source=$config label="Site web" help="Si vous n'utilisez pas la fonctionnalité site web de Paheko"}
 		</dl>
 	</fieldset>
 
@@ -69,7 +69,7 @@
 		<dl>
 			{input type="select" name="categorie_membres" source=$config options=$membres_cats required=true label="Catégorie par défaut des nouveaux membres"}
 			{input type="select" name="champ_identite" source=$config options=$champs required=true label="Champ utilisé pour définir l'identité des membres" help="Ce champ des fiches membres sera utilisé comme identité du membre dans les emails, les fiches, les pages, etc."}
-			{input type="select" name="champ_identifiant" source=$config options=$champs required=true label="Champ utilisé comme identifiant de connexion" help="Ce champ des fiches membres sera utilisé comme identifiant pour se connecter à Garradin. Ce champ doit être unique (il ne peut pas contenir deux membres ayant la même valeur dans ce champ)."}
+			{input type="select" name="champ_identifiant" source=$config options=$champs required=true label="Champ utilisé comme identifiant de connexion" help="Ce champ des fiches membres sera utilisé comme identifiant pour se connecter à Paheko. Ce champ doit être unique (il ne peut pas contenir deux membres ayant la même valeur dans ce champ)."}
 		</dl>
 	</fieldset>
 

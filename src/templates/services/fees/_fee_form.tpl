@@ -34,7 +34,7 @@ $targets = Entities\Accounting\Account::TYPE_REVENUE;
 			</dd>
 			<dt><strong>Comptabilité</strong></dt>
 			{input name="accounting" type="checkbox" value="1" label="Enregistrer en comptabilité" default=$accounting_enabled}
-			<dd class="help">Laissez cette case décochée si vous n'utilisez pas Garradin pour la comptabilité. Il ne sera pas possible de suivre le montant des règlements effectués pour ce tarif.</dd>
+			<dd class="help">Laissez cette case décochée si vous n'utilisez pas Paheko pour la comptabilité. Il ne sera pas possible de suivre le montant des règlements effectués pour ce tarif.</dd>
 		</dl>
 	</fieldset>
 
