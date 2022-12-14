@@ -57,7 +57,9 @@
 			{input type="email" name="org_email" required=true source=$config label="Adresse e-mail de contact"}
 			{input type="textarea" name="org_address" source=$config label="Adresse postale"}
 			{input type="tel" name="org_phone" source=$config label="Numéro de téléphone"}
-			{input type="url" name="org_web" source=$config label="Site web" help="Si vous n'utilisez pas la fonctionnalité site web de Garradin"}
+			{if $config.site_disabled}
+			{input type="url" name="org_web" source=$config label="Site web"}
+			{/if}
 		</dl>
 	</fieldset>
 
