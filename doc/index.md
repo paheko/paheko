@@ -14,9 +14,11 @@
 
 </nav>
 
-<p><a href="https://paheko.cloud/garradin-devient-paheko" target="_blank">Garradin devient Paheko !</a></p>
-
 <p id="give"><a href="https://kd2.org/soutien.html" target="_blank">Soutenir Paheko en effectuant un don :-)</a></p>
+
+<h3><a href="https://paheko.cloud/garradin-devient-paheko" target="_blank">Garradin devient Paheko !</a></h3>
+
+<p>Garradin.eu est devenu Paheko.cloud, mais le nom du logiciel à installer sur son propre serveur changera avec la version 1.3.</p>
 
 <form method="GET" action="$ROOT/wiki" onsubmit="var t = this.querySelector('[type=radio]:checked'); this.querySelector('[name=s]').name=t.dataset.name; this.action=t.dataset.action; this.target=t.dataset.target;">
 <fieldset class="searchForm searchFormWiki">
