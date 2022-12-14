@@ -13,7 +13,7 @@
 
 <p class="help">
 	Le rapprochement assisté permet de s'aider d'un relevé de compte pour trouver les écritures manquantes ou erronées.<br />
-	<a href="https://garradin.eu/rapprochement_assiste" target="_blank">Aide détaillée</a>
+	{linkbutton shape="help" href=$help_pattern_url|args:"rapprochement-assiste" target="_dialog" label="Aide détaillée"}
 </p>
 <form method="post" action="{$self_url}" enctype="multipart/form-data">
 	{if !$csv->loaded()}

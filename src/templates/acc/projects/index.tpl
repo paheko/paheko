@@ -82,7 +82,7 @@
 
 {else}
 	<p class="block alert">Il n'existe pas encore de projet. {linkbutton label="Créer un nouveau projet" href="edit.php" shape="plus" target="_dialog"}</p>
-	<p class="help">Les projets (aussi appelés comptabilité analytique) permettent de suivre le budget d'une activité ou d'un projet. {linkbutton shape="help" label="Aide sur les projets" target="_dialog" href="https://garradin.eu/comptabilite-analytique"}</p>
+	<p class="help">Les projets (aussi appelés comptabilité analytique) permettent de suivre le budget d'une activité ou d'un projet. {linkbutton shape="help" label="Aide sur les projets" target="_dialog" href=$help_pattern_url|args:"comptabilite-analytique"}</p>
 {/if}
 
 {include file="admin/_foot.tpl"}

@@ -24,7 +24,7 @@ $name ??= 'country';
 	- les comptes ne pourront pas être catégorisés automatiquement (banque, caisse, dépenses, recettes, etc.)&nbsp;;<br />
 	- il faudra donc parcourir tout le plan comptable pour sélectionner un compte<br />
 	- la position des comptes au bilan ou compte de résultat ne pourra pas être contrôlée : des erreurs sont possibles<br />
-	<em>Si vous avez besoin d'ajouter les règles comptables d'un autre pays, merci de <a href="https://garradin.eu/contact" target="_blank">nous contacter</a>.</em>
+	<em>Si vous avez besoin d'ajouter les règles comptables d'un autre pays, merci de <a href="https://paheko.cloud/contact" target="_blank">nous contacter</a>.</em>
 </dd>
 
 <dd class="help">
