@@ -28,7 +28,7 @@ $targets = Entities\Accounting\Account::TYPE_REVENUE;
 				<dl>
 					{input name="formula" type="textarea" label="Formule de calcul" source=$fee required=true}
 					<dd class="help">
-						<a href="https://garradin.eu/Formule-calcul-activite">Aide sur les formules de calcul</a>
+						{linkbutton shape="help" href=$help_pattern_url|args:"formule-calcul-activite" target="_dialog" label="Aide sur les formules de calcul"}
 					</dd>
 				</dl>
 			</dd>

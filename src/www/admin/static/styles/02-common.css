@@ -461,6 +461,7 @@ details summary.block::after {
 }
 
 nav.breadcrumbs {
+    clear: both;
     margin: .5em 0;
     color: var(--gLightBorderColor);
 }
