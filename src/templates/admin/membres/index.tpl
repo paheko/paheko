@@ -11,7 +11,7 @@
     <fieldset>
         <legend>Filtrer par catégorie</legend>
         <select name="cat" id="f_cat" onchange="this.form.submit();">
-            <option value="0" {if $current_cat == 0} selected="selected"{/if}>-- Toutes</option>
+            <option value="0" {if $current_cat == 0} selected="selected"{/if}>-- Toutes (sauf cachées)</option>
         {foreach from=$categories key="id" item="nom"}
             {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)
                 || !array_key_exists($id, $hidden_categories)}
