@@ -524,38 +524,45 @@ nav.breadcrumbs aside {
 }
 
 aside.quota {
-    background: rgba(var(--gMainColor), 0.1);
-    border-radius: .5rem;
-    padding: .2rem .5rem;
-    color: rgb(var(--gTextColor));
     margin: .5em 0;
 }
 
-aside.quota i {
-    font-style: normal;
-}
 
-aside.quota h4 {
-    display: inline-block;
-}
-
-.meter {
-    min-width: 20rem;
-    height: 1rem;
-    background: rgba(var(--gSecondColor), 0.5);
-    border-radius: .2rem;
+.quota meter {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: var(--gLightBackgroundColor);
+    background-image: linear-gradient(90deg, rgba(var(--gMainColor), 0.3) calc(var(--quota-percent) * 1%), var(--gLightBackgroundColor) calc(var(--quota-percent) * 1% + 2%));
+    border-radius: .3em;
+    border: 1px solid rgb(var(--gMainColor));
+    height: 1.5em;
+    width: 15em;
     display: inline-flex;
-    padding: 0;
-    vertical-align: middle;
-    margin-left: 1rem;
+    justify-content: center;
+    align-items: center;
+    cursor: help;
+    position: relative;
 }
 
-.meter span {
-    border-radius: .2rem;
-    background: rgb(var(--gMainColor));
-    display: inline-block;
-    height: 1rem;
-    vertical-align: middle;
+.quota meter span.more {
+    color: var(--gTextColor);
+    position: absolute;
+    display: none;
+    left: 0;
+    right: 0;
+    text-align: center;
+    margin-top: .2em;
+    font-size: .9em;
+    background: var(--gLightBackgroundColor);
+    white-space: nowrap;
+    border-radius: .3em;
+    padding: .3em .5em;
+    z-index: 1000;
+    box-shadow: 2px 2px 5px var(--gBorderColor);
+}
+
+.quota meter:active span.more, .quota meter:hover span.more {
+    display: block;
 }
 
 .search-results article {

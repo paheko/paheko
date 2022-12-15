@@ -132,12 +132,14 @@ class Template extends Smartyer
 		});
 
 		$this->register_function('exportmenu', [$this, 'widgetExportMenu']);
+		$this->register_block('linkmenu', [$this, 'widgetLinkMenu']);
 
 		$this->register_modifier('strlen', fn($a) => strlen($a ?? ''));
 		$this->register_modifier('dump', ['KD2\ErrorManager', 'dump']);
 		$this->register_modifier('get_country_name', ['Garradin\Utils', 'getCountryName']);
 		$this->register_modifier('format_tel', [$this, 'formatPhoneNumber']);
 		$this->register_modifier('abs', function($a) { return abs($a ?? 0); });
+
 
 		$this->register_modifier('linkify_transactions', function ($str) {
 			return preg_replace_callback('/(?<=^|\s)#(\d+)(?=\s|$)/', function ($m) {
@@ -207,16 +209,40 @@ class Template extends Smartyer
 
 	protected function widgetExportMenu(array $params): string
 	{
-		return sprintf('
+		$out  = CommonFunctions::widgetLinkButton(['href' => $params['href'] . 'csv', 'label' => 'Export CSV', 'shape' => 'export']);
+		$out .= ' ' . CommonFunctions::widgetLinkButton(['href' => $params['href'] . 'ods', 'label' => 'Export LibreOffice', 'shape' => 'export']);
+
+		if (CALC_CONVERT_COMMAND) {
+			$out .= ' ' . CommonFunctions::widgetLinkButton(['href' => $params['href'] . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']);
+		}
+
+		$params = array_merge($params, ['shape' => 'export', 'label' => 'Export…']);
+		return $this->widgetLinkMenu($params, $out);
+	}
+
+	protected function widgetLinkMenu(array $params, ?string $content): string
+	{
+		if (null === $content) {
+			return '';
+		}
+
+		if (!empty($params['right'])) {
+			$params['class'] = 'menu-btn-right';
+		}
+
+		$out = sprintf('
 			<span class="menu-btn %s">
-				<b data-icon="↷" class="btn">Export</b>
-				<span>%s %s %s</span>
-			</span>',
+				<b data-icon="%s" class="btn">%s</b>
+				<span><span>',
 			htmlspecialchars($params['class'] ?? ''),
-			CommonFunctions::widgetLinkButton(['href' => $params['href'] . 'csv', 'label' => 'Export CSV', 'shape' => 'export']),
-			CommonFunctions::widgetLinkButton(['href' => $params['href'] . 'ods', 'label' => 'Export LibreOffice', 'shape' => 'export']),
-			CALC_CONVERT_COMMAND ? CommonFunctions::widgetLinkButton(['href' => $params['href'] . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']) : ''
+			Utils::iconUnicode($params['shape']),
+			htmlspecialchars($params['label'])
 		);
+
+		$out .= $content . '</span></span>
+			</span>';
+
+		return $out;
 	}
 
 	protected function formatPhoneNumber($n)

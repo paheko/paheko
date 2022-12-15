@@ -70,24 +70,40 @@ nav.tabs aside {
     position: relative;
 }
 
-.menu-btn span {
+.menu-btn > span {
     display: none;
+    position: absolute;
+    left: -.1em;
+    top: 2em;
+    z-index: 1000;
 }
 
-.menu-btn:hover span, .menu-btn:active span {
+.menu-btn span span {
     display: flex;
-    position: absolute;
     flex-direction: column;
-    text-align: left;
     background: rgb(var(--gBgColor));
     border-radius: .3em;
-    padding: .3em;
-    z-index: 1000;
-    box-shadow: 2px 2px 5px var(--gLightBorderColor);
+    padding: .4em;
+    box-shadow: 0px 0px 10px .1rem rgb(var(--gSecondColor));
+    border-top: 2px solid rgb(var(--gSecondColor));
+    text-align: left;
 }
 
-.menu-btn-right span {
-    right: -1em;
+.menu-btn:hover b, .menu-btn:active b {
+    background-color: rgba(var(--gSecondColor), .7);
+}
+
+.menu-btn:hover > span, .menu-btn:active > span {
+    display: block;
+}
+
+.menu-btn button, .menu-btn .icn-btn {
+    white-space: nowrap;
+}
+
+.menu-btn-right > span {
+    right: -.1em;
+    left: unset !important;
 }
 
 main .menu-btn button {

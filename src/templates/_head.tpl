@@ -134,7 +134,9 @@ if (!isset($current)) {
 	</ul>
 	</nav>
 
+	{if empty($hide_title)}
 	<h1>{$title}</h1>
+	{/if}
 </header>
 {/if}
 

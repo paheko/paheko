@@ -1,18 +1,16 @@
 <?php
 use Garradin\Entities\Files\File;
 ?>
-{include file="_head.tpl" title="Documents" current="docs"}
+{include file="_head.tpl" title="Documents" current="docs" hide_title=true}
 
 <nav class="tabs">
-	<aside>
-		{linkbutton shape="search" label="Rechercher" href="search.php" target="_dialog"}
-	{if $parent->canCreateDirHere()}
-		{linkbutton shape="plus" label="Nouveau répertoire" target="_dialog" href="!docs/new_dir.php?path=%s"|args:$path}
-	{/if}
-	{if $parent->canCreateHere()}
-		{linkbutton shape="plus" label="Nouveau fichier texte" target="_dialog" href="!docs/new_file.php?path=%s"|args:$path}
-		{linkbutton shape="upload" label="Ajouter un fichier" target="_dialog" href="!common/files/upload.php?p=%s"|args:$path}
-	{/if}
+	<aside class="quota">
+		<meter min="0" max="100" value="{$quota_percent}" high="80" style="--quota-percent: {$quota_percent}">
+			<span class="text">{$quota_left|size_in_bytes} libres</span>
+			<span class="more">
+				{$quota_percent}% utilisé ({$quota_used|size_in_bytes}) sur {$quota_max|size_in_bytes}
+			</span>
+		</meter>
 	</aside>
 	<ul>
 		<li{if $context == File::CONTEXT_DOCUMENTS} class="current"{/if}><a href="./">Documents</a></li>
@@ -26,13 +24,61 @@ use Garradin\Entities\Files\File;
 			<li{if $context == File::CONTEXT_SKELETON} class="current"{/if}><a href="./?path=<?=File::CONTEXT_SKELETON?>">Squelettes du site web</a></li>
 		{/if}
 	</ul>
-
 </nav>
 
+<nav class="tabs">
+	<aside>
+	{if $parent->canCreateDirHere() || $parent->canCreateHere()}
+		{linkmenu label="Ajouter…" shape="plus"}
+			{if $parent->canCreateDirHere()}
+				{linkbutton shape="plus" label="Répertoire" target="_dialog" href="!docs/new_dir.php?path=%s"|args:$path}
+			{/if}
+			{if $parent->canCreateHere()}
+				{linkbutton shape="plus" label="Fichier texte" target="_dialog" href="!docs/new_file.php?path=%s"|args:$path}
+				{linkbutton shape="upload" label="Depuis mon ordinateur" target="_dialog" href="!common/files/upload.php?p=%s"|args:$path}
+			{/if}
+		{/linkmenu}
+	{/if}
+		{linkbutton shape="search" label="Rechercher" href="search.php" target="_dialog"}
+	</aside>
+
+	<h2>
+		{if $context == File::CONTEXT_TRANSACTION}
+			{if $context_ref}
+				Écriture #{$context_ref}
+			{else}
+				Fichiers joints aux écritures comptables
+			{/if}
+		{elseif $context == File::CONTEXT_USER}
+			{if $context_ref}
+				Fichiers joints à la fiche du membre&nbsp;: {$user_name}
+			{else}
+				Fichiers joints aux fiches des membres
+			{/if}
+		{elseif $context == File::CONTEXT_SKELETON}
+			{if $context_ref == 'web'}
+				Code du site web
+			{elseif $context_ref == 'forms'}
+				Code des modèles et formulaires
+			{else}
+				Code
+			{/if}
+		{elseif $context_ref}
+			{$parent->name}
+		{else}
+			Documents
+		{/if}
+	</h2>
+</nav>
+
+
+{if $context_ref}
 <nav class="breadcrumbs">
+	<aside>
 	{if count($breadcrumbs) > 1}
 		{linkbutton href="?path=%s"|args:$parent_path label="Retour au répertoire parent" shape="left"}
 	{/if}
+</aside>
 
 {if $context == File::CONTEXT_TRANSACTION}
 	{if $context_ref}
@@ -49,12 +95,8 @@ use Garradin\Entities\Files\File;
 	{/foreach}
 	</ul>
 {/if}
-
-	<aside class="quota">
-		<h4><b>{$quota_left|size_in_bytes}</b> libres sur <i>{$quota_max|size_in_bytes}</i></h4>
-		<span class="meter"><span style="width: {$quota_percent}%"></span></span>
-	</aside>
 </nav>
+{/if}
 
 {if !$parent->canCreateDirHere()}
 <p class="block alert">
@@ -99,11 +141,15 @@ use Garradin\Entities\Files\File;
 					<td></td>
 					<td></td>
 					<td class="actions">
-					{if $parent->canCreateHere()}
-						{linkbutton href="!common/files/rename.php?p=%s"|args:$file.path label="Renommer" shape="minus" target="_dialog"}
-					{/if}
-					{if $file->canDelete()}
-						{linkbutton href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer" shape="delete" target="_dialog"}
+					{if $parent->canCreateHere() || $file->canDelete()}
+						{linkmenu label="Modifier…" shape="edit"}
+							{if $parent->canRename()}
+								{linkbutton href="!common/files/rename.php?p=%s"|args:$file.path label="Renommer" shape="minus" target="_dialog"}
+							{/if}
+							{if $file->canDelete()}
+								{linkbutton href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer" shape="delete" target="_dialog"}
+							{/if}
+						{/linkmenu}
 					{/if}
 					</td>
 				</tr>
@@ -125,21 +171,22 @@ use Garradin\Entities\Files\File;
 					<td>{$file.modified|relative_date}</td>
 					<td>{$file.size|size_in_bytes}</td>
 					<td class="actions">
-						{if $file->canWrite() && $file->editorType()}
-							{linkbutton href="!common/files/edit.php?p=%s"|args:$file.path label="Modifier" shape="edit" target="_dialog" data-dialog-height="90%"}
-						{/if}
-						{if $file->canPreview()}
-							{linkbutton href="!common/files/preview.php?p=%s"|args:$file.path label="Voir" shape="eye" target="_dialog" data-mime=$file.mime}
-						{/if}
 						{linkbutton href=$file->url(true) label="Télécharger" shape="download"}
-						{if $parent->canCreateHere()}
-							{linkbutton href="!common/files/rename.php?p=%s"|args:$file.path label="Renommer" shape="reload" target="_dialog"}
-						{/if}
-						{if $file->canDelete()}
-							{linkbutton href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer" shape="delete" target="_dialog"}
-						{/if}
 						{if $file->canShare()}
 							{linkbutton href="!common/files/share.php?p=%s"|args:$file.path label="Partager" shape="export" target="_dialog"}
+						{/if}
+						{if $file->canRename() || $file->canDelete() || ($file->canWrite() && $file->editorType())}
+							{linkmenu label="Modifier…" shape="edit" right=true}
+								{if $file->canWrite() && $file->editorType()}
+									{linkbutton href="!common/files/edit.php?p=%s"|args:$file.path label="Éditer" shape="edit" target="_dialog" data-dialog-height="90%"}
+								{/if}
+								{if $file->canRename()}
+									{linkbutton href="!common/files/rename.php?p=%s"|args:$file.path label="Renommer" shape="reload" target="_dialog"}
+								{/if}
+								{if $file->canDelete()}
+									{linkbutton href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer" shape="delete" target="_dialog"}
+								{/if}
+							{/linkmenu}
 						{/if}
 					</td>
 				</tr>

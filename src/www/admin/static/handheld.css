@@ -12,9 +12,9 @@ input[type=number], input[type=color],
 input[type=email], input[type=file], input[type=url], input[type=month],
 input[type=password], input[type=range], input[type=search], input[type=tel],
 textarea, select, .input-list, .file-selector, input[type=text]:not([data-input]):not([size]) {
-    min-width: 0 !important;
-    max-width: calc(100% - 2em);
-    width: calc(95% - 2em);
+	min-width: 0 !important;
+	max-width: calc(100% - 2em);
+	width: calc(95% - 2em);
 }
 
 input[size] {
@@ -25,8 +25,13 @@ img {
 	max-width: 100% !important;
 }
 
-a.icn-btn, input[type=submit], input[type=button], button, input[type=file] {
+a.icn-btn, input[type=submit], input[type=button], button, input[type=file], .menu-btn > b {
 	padding: .4em .6em;
+}
+
+.menu-btn > span {
+	top: 2.2em;
+	left: -.2em;
 }
 
 a.icn-btn {
@@ -76,8 +81,8 @@ nav.breadcrumbs ul {
 .header .menu > ul {
 	background: rgb(var(--gMainColor));
 	flex-wrap: nowrap;
-    grid-template: none / repeat(auto-fit, minmax(20px, 1fr));
-    display: grid;
+	grid-template: none / repeat(auto-fit, minmax(20px, 1fr));
+	display: grid;
 	align-items: center;
 }
 
@@ -282,7 +287,7 @@ table.list th {
 	}
 
 	#dialog {
-		background: black;
+		background: #222;
 	}
 
 	#dialog > iframe {
@@ -290,8 +295,14 @@ table.list th {
 		height: 100%;
 		margin: 0;
 		max-width: 100%;
-    	border-radius: 0;
-    	box-shadow: none;
+		border-radius: 0;
+		box-shadow: none;
+		border-top: 10px solid rgb(var(--gSecondColor));
+		border-bottom: 10px solid rgb(var(--gSecondColor));
+	}
+
+	#dialog > button.closeBtn {
+		color: var(--gLightBackgroundColor);
 	}
 
 	#dialog.loaded > iframe {

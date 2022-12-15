@@ -4,7 +4,8 @@ namespace Garradin;
 
 use Garradin\Files\Files;
 use Garradin\Files\Transactions;
-use Garradin\Files\Users;
+use Garradin\Files\Users as Users_Files;
+use Garradin\Users\Users;
 use Garradin\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
@@ -24,6 +25,7 @@ if (!$parent->canRead()) {
 $context = Files::getContext($path);
 $context_ref = Files::getContextRef($path);
 $list = null;
+$user_name = null;
 
 // Specific lists for some contexts
 if (!$context_ref) {
@@ -31,8 +33,11 @@ if (!$context_ref) {
 		$list = Transactions::list();
 	}
 	elseif ($context == File::CONTEXT_USER) {
-		$list = Users::list();
+		$list = Users_Files::list();
 	}
+}
+elseif ($context_ref && $context == File::CONTEXT_USER) {
+	$user_name = Users::getName($context_ref);
 }
 
 if (null == $list) {
@@ -51,6 +56,6 @@ $quota_max = Files::getQuota();
 $quota_left = Files::getRemainingQuota();
 $quota_percent = $quota_max ? round(($quota_used / $quota_max) * 100) : 100;
 
-$tpl->assign(compact('path', 'list', 'parent', 'context', 'context_ref', 'breadcrumbs', 'parent_path', 'quota_used', 'quota_max', 'quota_percent', 'quota_left'));
+$tpl->assign(compact('path', 'list', 'parent', 'context', 'context_ref', 'breadcrumbs', 'parent_path', 'quota_used', 'quota_max', 'quota_percent', 'quota_left', 'user_name'));
 
 $tpl->display('docs/index.tpl');

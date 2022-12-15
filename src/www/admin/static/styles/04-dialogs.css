@@ -70,14 +70,14 @@ html.dialog main {
     background: unset;
     border: unset;
     box-shadow: unset;
-    color: #999;
+    color: var(--gBorderColor);
     font-size: 1.3em;
     display: block;
     width: 90%;
 }
 
 #dialog > button.closeBtn:hover {
-    color: #fff !important;
+    color: var(--gLightBackgroundColor) !important;
 }
 
 .loader {

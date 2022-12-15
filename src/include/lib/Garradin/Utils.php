@@ -601,15 +601,32 @@ class Utils
 
     static public function format_bytes($size)
     {
-        if ($size > (1024 * 1024 * 1024)) {
-            $size = round($size / 1024 / 1024 / 1024, 2);
-            $decimals = $size == (int) $size ? 0 : 2;
-            return number_format($size, $decimals, ',', '') . ' Go';
+        if ($size > (1024 * 1024 * 1024 * 1024)) {
+            $size = $size / 1024 / 1024 / 1024 / 1024;
+
+            if ($size < 10) {
+                $decimals = $size == (int) $size ? 0 : 1;
+                return number_format(round($size, 1), $decimals, ',', '') . ' To';
+            }
+            else {
+                return round($size) . ' To';
+            }
+        }
+        elseif ($size > (1024 * 1024 * 1024)) {
+            $size = $size / 1024 / 1024 / 1024;
+
+            if ($size < 10) {
+                $decimals = $size == (int) $size ? 0 : 1;
+                return number_format(round($size, 1), $decimals, ',', '') . ' Go';
+            }
+            else {
+                return round($size) . ' Go';
+            }
         }
         elseif ($size > (1024 * 1024)) {
-            $size = round($size / 1024 / 1024, 2);
+            $size = $size / 1024 / 1024;
             $decimals = $size == (int) $size ? 0 : 2;
-            return number_format($size, $decimals, ',', '') . ' Mo';
+            return round($size) . ' Mo';
         }
         elseif ($size > 1024) {
             return round($size / 1024) . ' Ko';

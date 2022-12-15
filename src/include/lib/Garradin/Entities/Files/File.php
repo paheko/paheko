@@ -827,6 +827,11 @@ class File extends Entity
 		return $session->checkFilePermission($this->path, 'create');
 	}
 
+	public function canRename(Session $session = null): bool
+	{
+		return $this->canCreate($this->parent, $session);
+	}
+
 	static public function canCreate(string $path, Session $session = null): bool
 	{
 		$session ??= Session::getInstance();
