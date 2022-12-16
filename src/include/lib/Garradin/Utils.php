@@ -1001,6 +1001,10 @@ class Utils
         // It is important that you close any pipes before calling
         // proc_close in order to avoid a deadlock
         proc_close($process);
+
+        if (defined('Garradin\PDF_LOG')) {
+            file_put_contents(\Garradin\PDF_LOG, date("[d/m/Y H:i:s]\n"), FILE_APPEND);
+        }
     }
 
     /**
@@ -1069,6 +1073,10 @@ class Utils
 
         if (!file_exists($target)) {
             throw new \RuntimeException('PDF command failed: ' . $output);
+        }
+
+        if (defined('Garradin\PDF_LOG')) {
+            file_put_contents(\Garradin\PDF_LOG, date("[d/m/Y H:i:s]\n"), FILE_APPEND);
         }
 
         return $target;
