@@ -583,6 +583,17 @@ class Sauvegarde
 		return filesize(DB_FILE) + ($signed ? 40 : 0);
 	}
 
+	static public function getAllBackupsTotalSize(): int
+	{
+		$size = 0;
+
+		foreach (glob(DATA_ROOT . '/*.sqlite') as $f) {
+			$size += filesize($f);
+		}
+
+		return $size;
+	}
+
 	/**
 	 * Taille occupée par les fichiers dans la base de données
 	 * @return integer Taille en octets

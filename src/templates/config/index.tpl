@@ -13,10 +13,10 @@
 <form method="post" action="{$self_url}">
 
 	<fieldset>
-		<legend>Paheko</legend>
+		<legend>Informations</legend>
 		<dl>
 			<dt>Version installée</dt>
-			<dd>{$garradin_version}</dd>
+			<dd>Paheko {$garradin_version}</dd>
 			{if CONTRIBUTOR_LICENSE === null}
 			<dd class="help">
 				Le développement et le support de Garradin ne sont possibles que grâce à votre soutien&nbsp;!<br />
@@ -47,6 +47,11 @@
 				Chiffrement GnuPG&nbsp;: {if $has_gpg_support}disponible, module activé{else}non, module PHP gnupg non installé&nbsp;?{/if}<br />
 			</dd>
 			{/if}
+			<dt>Espace disque utilisé</dt>
+			<dd class="help">
+				Base de données et sauvegardes&nbsp;: {$backups_size|size_in_bytes}<br />
+				Documents&nbsp;: {$quota_used|size_in_bytes} (sur {$quota_max|size_in_bytes} autorisés)
+			</dd>
 		</dl>
 	</fieldset>
 
