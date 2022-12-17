@@ -143,7 +143,7 @@ use Garradin\Entities\Files\File;
 					<td class="actions">
 					{if $parent->canCreateHere() || $file->canDelete()}
 						{linkmenu label="Modifier…" shape="edit"}
-							{if $parent->canRename()}
+							{if $file->canRename()}
 								{linkbutton href="!common/files/rename.php?p=%s"|args:$file.path label="Renommer" shape="minus" target="_dialog"}
 							{/if}
 							{if $file->canDelete()}

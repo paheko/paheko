@@ -14,25 +14,17 @@
 <form method="get" action="{$self_url}" class="shortFormRight">
 	<fieldset>
 		<legend>Filtrer par catégorie</legend>
-		<select name="cat" id="f_cat" onchange="this.form.submit();">
-			<option value="0" {if $current_cat == 0} selected="selected"{/if}>-- Toutes</option>
-		{foreach from=$categories key="id" item="name"}
-			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)
-				|| !array_key_exists($id, $hidden_categories)}
-			<option value="{$id}"{if $current_cat == $id} selected="selected"{/if}>{$name}</option>
-			{/if}
-		{/foreach}
-		</select>
-		<noscript><input type="submit" value="Filtrer &rarr;" /></noscript>
+		{input type="select" name="cat" onchange="this.form.submit();" options=$categories}
+		<noscript>{button type="submit" name="" label="Filtrer" shape="right"}</noscript>
 	</fieldset>
 </form>
 {/if}
 
-<form method="get" action="search.php" class="shortFormLeft">
+<form method="get" action="search.php" class="shortFormLeft" data-focus="1">
 	<fieldset>
 		<legend>Rechercher un membre</legend>
-		<input type="text" name="qt" value="" />
-		<input type="submit" value="Chercher &rarr;" />
+		<input type="text" name="qt" value="" placeholder="Nom, numéro, ou adresse e-mail" />
+		{button type="submit" name="" label="Chercher" shape="search"}
 	</fieldset>
 </form>
 

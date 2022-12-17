@@ -131,7 +131,16 @@ class Users
 		}
 
 		$tables = User::TABLE;
-		$conditions = $id_category ? sprintf('id_category = %d', $id_category) : sprintf('id_category IN (SELECT id FROM users_categories WHERE hidden = 0)');
+
+		if (!$id_category) {
+			$conditions = sprintf('id_category IN (SELECT id FROM users_categories WHERE hidden = 0)');
+		}
+		elseif ($id_category > 0) {
+			$conditions = sprintf('id_category = %d', $id_category);
+		}
+		else {
+			$conditions = '1';
+		}
 
 		$order = 'identity';
 
