@@ -1026,15 +1026,16 @@ class File extends Entity
 		}
 
 		$ext = substr($this->name, strrpos($this->name, '.') + 1);
+		$url = null;
 
 		if (isset($data['extensions'][$ext]['edit'])) {
-			return $data['extensions'][$ext]['edit'];
+			$url = $data['extensions'][$ext]['edit'];
 		}
 		elseif (isset($data['mimetypes'][$this->mime]['edit'])) {
-			return $data['mimetypes'][$this->mime]['edit'];
+			$url = $data['mimetypes'][$this->mime]['edit'];
 		}
 
-		return null;
+		return $url;
 	}
 
 	public function editorHTML(): ?string

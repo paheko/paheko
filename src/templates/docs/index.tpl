@@ -188,7 +188,7 @@ use Garradin\Entities\Files\File;
 						{if $file->canRename() || $file->canDelete() || ($file->canWrite() && $file->editorType())}
 							{linkmenu label="Modifier…" shape="edit" right=true}
 								{if $file->canWrite() && $file->editorType()}
-									{linkbutton href="!common/files/edit.php?p=%s"|args:$file.path label="Éditer" shape="edit" target="_dialog" data-dialog-height="90%"}
+									{linkbutton href="!common/files/edit.php?p=%s"|args:$file.path label="Éditer" shape="edit" target="_dialog" data-dialog-class="fullscreen"}
 								{/if}
 								{if $file->canRename()}
 									{linkbutton href="!common/files/rename.php?p=%s"|args:$file.path label="Renommer" shape="reload" target="_dialog"}
