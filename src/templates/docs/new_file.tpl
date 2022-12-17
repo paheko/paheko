@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Créer un répertoire"}
+{include file="_head.tpl" title="Créer un fichier texte"}
 
 {form_errors}
 

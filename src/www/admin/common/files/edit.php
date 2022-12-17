@@ -32,6 +32,9 @@ $tpl->assign('file', $file);
 if (!$editor) {
 	$tpl->display('common/file_upload.tpl');
 }
+elseif ($editor == 'wopi') {
+	echo $file->editorHTML();
+}
 else {
 	$content = $file->fetch();
 	$path = $file->path;

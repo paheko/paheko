@@ -149,13 +149,14 @@ table.list .separator {
     border-left: 2px dashed #999;
 }
 
-table.list .file-icon {
+table.list .icon span::before {
     width: 1.5em;
-    color: rgba(var(--gTextColor), 0.3);
+    color: rgba(var(--gMainColor), 0.5);
+    text-shadow: none;
 }
 
-table.list .folder .file-icon {
-    color: rgba(var(--gTextColor), 0.5);
+table.list .folder .icon span::before {
+    color: rgba(var(--gMainColor), 0.9);
 }
 
 /* We need a container here or the cursor won't change because of pointer-events: none */

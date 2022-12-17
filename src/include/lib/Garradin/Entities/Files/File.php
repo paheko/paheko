@@ -21,10 +21,12 @@ use Garradin\Entities\Web\Page;
 use Garradin\Web\Render\Render;
 use Garradin\Web\Router;
 use Garradin\Web\Cache as Web_Cache;
+use KD2\WebDAV\WOPI;
+use Garradin\Files\WebDAV\Storage;
 
 use Garradin\Files\Files;
 
-use const Garradin\{WWW_URL, BASE_URL, ENABLE_XSENDFILE, SECRET_KEY};
+use const Garradin\{WWW_URL, BASE_URL, ENABLE_XSENDFILE, SECRET_KEY, WOPI_DISCOVERY_URL, SHARED_CACHE_ROOT};
 
 /**
  * This is a virtual entity, it cannot be saved to a SQL table
@@ -466,6 +468,37 @@ class File extends Entity
 	public function isDir(): bool
 	{
 		return $this->type == self::TYPE_DIRECTORY;
+	}
+
+	public function iconShape(): ?string
+	{
+		if ($this->isImage()) {
+			return 'image';
+		}
+		elseif ($this->isDir()) {
+			return 'directory';
+		}
+
+		$ext = substr($this->name, strrpos($this->name, '.') + 1);
+		$ext = strtolower($ext);
+
+		switch ($ext) {
+			case 'ods':
+			case 'xls':
+			case 'xlsx':
+			case 'csv':
+				return 'table';
+			case 'odt':
+			case 'doc':
+			case 'docx':
+			case 'pdf':
+				return 'document';
+			case 'txt':
+			case 'md':
+				return 'text';
+		}
+
+		return null;
 	}
 
 	/**
@@ -933,13 +966,10 @@ class File extends Entity
 		if (substr($this->name, -6) == '.skriv') {
 			$format = Render::FORMAT_SKRIV;
 		}
-		elseif (substr($this->name, -3) == '.md') {
+		if (substr($this->name, -3) == '.md') {
 			$format = Render::FORMAT_MARKDOWN;
 		}
 		else if (substr($this->mime, 0, 5) == 'text/' && $this->mime != 'text/html') {
-			$format = 'text';
-		}
-		else if ($this->size == 0) {
 			$format = 'text';
 		}
 		else {
@@ -951,16 +981,77 @@ class File extends Entity
 
 	public function editorType(): ?string
 	{
+		static $text_extensions = ['css', 'txt', 'xml', 'html', 'htm', 'tpl'];
+
+		$ext = substr($this->name, strrpos($this->name, '.') + 1);
+
 		$format = $this->renderFormat();
 
-		if ($format == 'text') {
+		if ($format == Render::FORMAT_SKRIV || $format == Render::FORMAT_MARKDOWN) {
+			return 'web';
+		}
+		elseif ($format == 'text' || in_array($ext, $text_extensions)) {
 			return 'code';
 		}
-		elseif ($format == Render::FORMAT_SKRIV || $format == Render::FORMAT_MARKDOWN) {
-			return 'web';
+		elseif (!WOPI_DISCOVERY_URL) {
+			return null;
+		}
+
+		if ($this->getWopiURL()) {
+			return 'wopi';
 		}
 
 		return null;
+	}
+
+	public function getWopiURL(): ?string
+	{
+		if (!WOPI_DISCOVERY_URL) {
+			return null;
+		}
+
+		$cache_file = SHARED_CACHE_ROOT . '/wopi.json';
+		static $data = null;
+
+		if (null === $data) {
+			// We are caching discovery for 15 days, there is no need to request the server all the time
+			if (file_exists($cache_file) && filemtime($cache_file) >= 3600*24*15) {
+				$data = json_decode(file_get_contents($cache_file), true);
+			}
+
+			if (!$data) {
+				$data = WOPI::discover(WOPI_DISCOVERY_URL);
+				file_put_contents($cache_file, json_encode($data));
+			}
+		}
+
+		$ext = substr($this->name, strrpos($this->name, '.') + 1);
+
+		if (isset($data['extensions'][$ext]['edit'])) {
+			return $data['extensions'][$ext]['edit'];
+		}
+		elseif (isset($data['mimetypes'][$this->mime]['edit'])) {
+			return $data['mimetypes'][$this->mime]['edit'];
+		}
+
+		return null;
+	}
+
+	public function editorHTML(): ?string
+	{
+		$url = $this->getWopiURL();
+
+		if (!$url) {
+			return null;
+		}
+
+		if (!$this->canWrite()) {
+			return null;
+		}
+
+		$wopi = new WOPI;
+		$wopi->setStorage(new Storage(Session::getInstance()));
+		return $wopi->getEditorHTML($url, $this->path);
 	}
 
 	public function export(): array

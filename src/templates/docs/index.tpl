@@ -30,12 +30,16 @@ use Garradin\Entities\Files\File;
 	<aside>
 	{if $parent->canCreateDirHere() || $parent->canCreateHere()}
 		{linkmenu label="Ajouter…" shape="plus"}
-			{if $parent->canCreateDirHere()}
-				{linkbutton shape="plus" label="Répertoire" target="_dialog" href="!docs/new_dir.php?path=%s"|args:$path}
-			{/if}
 			{if $parent->canCreateHere()}
-				{linkbutton shape="plus" label="Fichier texte" target="_dialog" href="!docs/new_file.php?path=%s"|args:$path}
 				{linkbutton shape="upload" label="Depuis mon ordinateur" target="_dialog" href="!common/files/upload.php?p=%s"|args:$path}
+			{if $parent->canCreateDirHere()}
+				{linkbutton shape="folder" label="Répertoire" target="_dialog" href="!docs/new_dir.php?path=%s"|args:$path}
+			{/if}
+				{linkbutton shape="text" label="Fichier texte" target="_dialog" href="!docs/new_file.php?path=%s"|args:$path}
+				{if WOPI_DISCOVERY_URL}
+					{linkbutton shape="document" label="Document" target="_dialog" data-dialog-class="fullscreen" href="!docs/new_doc.php?ext=odt&path=%s"|args:$path}
+					{linkbutton shape="table" label="Tableur" target="_dialog" data-dialog-class="fullscreen" href="!docs/new_doc.php?ext=ods&path=%s"|args:$path}
+				{/if}
 			{/if}
 		{/linkmenu}
 	{/if}
@@ -136,7 +140,7 @@ use Garradin\Entities\Files\File;
 						{input type="checkbox" name="check[]" value=$file.path}
 					</td>
 					{/if}
-					<td class="file-icon">{icon shape="folder"}</td>
+					<td class="icon">{icon shape="folder"}</td>
 					<th><a href="?path={$file.path}">{$file.name}</a></th>
 					<td></td>
 					<td></td>
@@ -160,10 +164,16 @@ use Garradin\Entities\Files\File;
 						{input type="checkbox" name="check[]" value=$file.path}
 					</td>
 					{/if}
-					<td class="icon">{if $file->isImage()}{icon shape="image"}{/if}</td>
+					<td class="icon">
+						{if $shape = $file->iconShape()}
+							{icon shape=$shape}
+						{/if}
+					</td>
 					<th>
 						{if $file->canPreview()}
 							<a href="{"!common/files/preview.php?p=%s"|local_url|args:$file.path}" target="_dialog" data-mime="{$file.mime}">{$file.name}</a>
+						{elseif $file->canWrite() && $file->editorType()}
+							{link href="!common/files/edit.php?p=%s"|args:$file.path label=$file.name target="_dialog" data-dialog-class="fullscreen"}
 						{else}
 							<a href="{$file->url(true)}" target="_blank">{$file.name}</a>
 						{/if}

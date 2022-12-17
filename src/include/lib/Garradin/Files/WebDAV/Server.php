@@ -2,19 +2,48 @@
 
 namespace Garradin\Files\WebDAV;
 
+use Garradin\Users\Session as UserSession;
+
 use KD2\WebDAV\WOPI;
 
 use const Garradin\WOPI_DISCOVERY_URL;
 
 class Server
 {
+	/**
+	 * WOPI routes are only available to users logged-in in /admin/
+	 * Not people logged-in using webdav
+	 */
+	static public function wopiRoute(?string $uri = null): bool
+	{
+		if (!WOPI_DISCOVERY_URL) {
+			return false;
+		}
+
+		if (0 !== strpos($uri, '/wopi/')) {
+			return false;
+		}
+
+		$wopi = new WOPI;
+		$dav = new WebDAV;
+		$storage = new Storage(UserSession::getInstance());
+		$dav->setStorage($storage);
+		$wopi->setServer($dav);
+
+		return $wopi->route($uri);
+	}
+
 	static public function route(?string $uri = null): bool
 	{
 		$uri = '/' . ltrim($uri, '/');
 
+		if (self::wopiRoute($uri)) {
+			return true;
+		}
+
 		$dav = new WebDAV;
 		$nc = new NextCloud($dav);
-		$storage = new Storage($nc);
+		$storage = new Storage(Session::getInstance(), $nc);
 		$dav->setStorage($storage);
 
 		$method = $_SERVER['REQUEST_METHOD'] ?? null;
@@ -25,15 +54,6 @@ class Server
 			return true;
 		}
 
-
-		if (WOPI_DISCOVERY_URL) {
-			$wopi = new WOPI;
-			$wopi->setServer($dav);
-
-			if ($wopi->route($uri)) {
-				return true;
-			}
-		}
 
 		$nc->setServer($dav);
 

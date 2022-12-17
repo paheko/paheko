@@ -66,14 +66,22 @@ html.dialog main {
     opacity: 1;
 }
 
+#dialog.fullscreen iframe {
+    width: 100%;
+    max-width: unset;
+    max-height: unset;
+    height: calc(100% - 2em);
+    border-radius: 0;
+}
+
 #dialog > button.closeBtn {
     background: unset;
     border: unset;
     box-shadow: unset;
-    color: var(--gBorderColor);
+    color: var(--gLightBorderColor);
     font-size: 1.3em;
     display: block;
-    width: 90%;
+    width: 100%;
 }
 
 #dialog > button.closeBtn:hover {

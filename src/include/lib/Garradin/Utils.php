@@ -50,6 +50,7 @@ class Utils
         'bold'            => 'B',
         'italic'          => 'I',
         'header'          => 'H',
+        'text'            => 'T',
         'paragraph'       => '§',
         'list-ol'         => '1',
         'list-ul'         => '•',

@@ -98,7 +98,7 @@
 
 	g.dialog = null;
 
-	g.openDialog = function (content) {
+	g.openDialog = function (content, classname) {
 		if (null !== g.dialog) {
 			g.closeDialog();
 		}
@@ -106,6 +106,7 @@
 		g.dialog = document.createElement('dialog');
 		g.dialog.id = 'dialog';
 		g.dialog.open = true;
+		g.dialog.className = classname || '';
 
 		var btn = document.createElement('button');
 		btn.className = 'icn-btn closeBtn';
@@ -156,7 +157,7 @@
 		return content;
 	}
 
-	g.openFrameDialog = function (url, height = '90%', callback) {
+	g.openFrameDialog = function (url, height = '90%', classname) {
 		var iframe = document.createElement('iframe');
 		iframe.src = url;
 		iframe.name = 'dialog';
@@ -167,13 +168,18 @@
 		iframe.setAttribute('data-height', height);
 		iframe.addEventListener('load', () => {
 			iframe.contentWindow.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
+
+			if (iframe.parentNode.className) {
+				return;
+			}
+
 			// We need to wait a bit for the height to be correct, not sure why
 			window.setTimeout(() => {
 				iframe.style.height = iframe.dataset.height == 'auto' ? iframe.contentWindow.document.body.offsetHeight + 'px' : iframe.dataset.height;
 			}, 100);
 		});
 
-		g.openDialog(iframe, callback);
+		g.openDialog(iframe, classname);
 		return iframe;
 	};
 
@@ -501,7 +507,7 @@
 						return false;
 					}
 
-					g.openFrameDialog(url, e.getAttribute('data-dialog-height') ? '90%' : 'auto');
+					g.openFrameDialog(url, e.getAttribute('data-dialog-height') || 'auto', e.getAttribute('data-dialog-class'));
 					return false;
 				}
 
@@ -540,7 +546,7 @@
 				e.setAttribute('action', url);
 				e.target = 'dialog';
 
-				g.openFrameDialog('about:blank', e.getAttribute('data-dialog-height') ? '90%' : 'auto');
+				g.openFrameDialog('about:blank', e.getAttribute('data-dialog-height') ? 90 : 'auto');
 				e.submit();
 				return false;
 			});

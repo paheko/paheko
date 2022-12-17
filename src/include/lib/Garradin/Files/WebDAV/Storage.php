@@ -9,12 +9,13 @@ use KD2\WebDAV\Exception as WebDAV_Exception;
 use Garradin\DB;
 use Garradin\Utils;
 use Garradin\ValidationException;
+use Garradin\Users\Session as UserSession;
 
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 use Garradin\Web\Router;
 
-use const Garradin\FILE_STORAGE_BACKEND;
+use const Garradin\{FILE_STORAGE_BACKEND, SECRET_KEY, WWW_URL};
 
 class Storage extends AbstractStorage
 {
@@ -27,10 +28,12 @@ class Storage extends AbstractStorage
 	protected ?array $cache = null;
 	protected array $root = [];
 
-	protected NextCloud $nextcloud;
+	protected ?NextCloud $nextcloud;
+	protected UserSession $session;
 
-	public function __construct(NextCloud $nextcloud)
+	public function __construct(UserSession $session, ?NextCloud $nextcloud = null)
 	{
+		$this->session = $session;
 		$this->nextcloud = $nextcloud;
 	}
 
@@ -40,8 +43,7 @@ class Storage extends AbstractStorage
 			return;
 		}
 
-		$s = Session::getInstance();
-		$access = Files::listReadAccessContexts($s);
+		$access = Files::listReadAccessContexts($this->session);
 
 		$this->cache = ['' => Files::get('')];
 
@@ -102,15 +104,13 @@ class Storage extends AbstractStorage
 	 */
 	public function get(string $uri): ?array
 	{
-		$session = Session::getInstance();
-
 		$file = $this->load($uri);
 
 		if (!$file) {
 			throw new WebDAV_Exception('File Not Found', 404);
 		}
 
-		if (!$file->canRead($session)) {
+		if (!$file->canRead($this->session)) {
 			throw new WebDAV_Exception('Vous n\'avez pas accès à ce chemin', 403);
 		}
 
@@ -153,8 +153,6 @@ class Storage extends AbstractStorage
 			throw new \LogicException('File does not exist');
 		}
 
-		$session = Session::getInstance();
-
 		switch ($name) {
 			case 'DAV::getcontentlength':
 				return $is_dir ? null : $file->size;
@@ -188,20 +186,20 @@ class Storage extends AbstractStorage
 			case NextCloud::PROP_OC_SHARETYPES:
 				return WebDAV::EMPTY_PROP_VALUE;
 			case NextCloud::PROP_OC_DOWNLOADURL:
-				return $this->nextcloud->getDirectURL($uri, $session::getUserId());
+				return $this->nextcloud->getDirectURL($uri, $this->session::getUserId());
 			case Nextcloud::PROP_NC_RICH_WORKSPACE:
 				return '';
 			case NextCloud::PROP_OC_ID:
 				return NextCloud::getDirectID('', $uri);
 			case NextCloud::PROP_OC_PERMISSIONS:
 				$permissions = [
-					NextCloud::PERM_READ => $file->canRead($session),
-					NextCloud::PERM_WRITE => $file->canWrite($session),
-					NextCloud::PERM_DELETE => $file->canDelete($session),
-					NextCloud::PERM_RENAME => $file->canDelete($session),
-					NextCloud::PERM_MOVE => $file->canDelete($session),
-					NextCloud::PERM_CREATE => $file->canCreateHere($session),
-					NextCloud::PERM_MKDIR => $file->canCreateDirHere($session),
+					NextCloud::PERM_READ => $file->canRead($this->session),
+					NextCloud::PERM_WRITE => $file->canWrite($this->session),
+					NextCloud::PERM_DELETE => $file->canDelete($this->session),
+					NextCloud::PERM_RENAME => $file->canDelete($this->session),
+					NextCloud::PERM_MOVE => $file->canDelete($this->session),
+					NextCloud::PERM_CREATE => $file->canCreateHere($this->session),
+					NextCloud::PERM_MKDIR => $file->canCreateDirHere($this->session),
 				];
 
 				$permissions = array_filter($permissions, fn($a) => $a);
@@ -213,9 +211,11 @@ class Storage extends AbstractStorage
 			case Nextcloud::PROP_OC_SIZE:
 				return $file->getRecursiveSize();
 			case WOPI::PROP_USER_NAME:
-				return $session->getUser()->name();
+				return $this->session->getUser()->name();
+			case WOPI::PROP_USER_ID:
+				return $this->session->getUser()->id;
 			case WOPI::PROP_READ_ONLY:
-				return $file->canWrite($session) ? false : true;
+				return $file->canWrite($this->session) ? false : true;
 			case WOPI::PROP_FILE_URL:
 				$id = gzcompress($uri);
 				$id = WOPI::base64_encode_url_safe($id);
@@ -279,12 +279,11 @@ class Storage extends AbstractStorage
 		}
 
 		$new = !$target ? true : false;
-		$session = Session::getInstance();
 
-		if ($new && !File::canCreate($uri, $session)) {
+		if ($new && !File::canCreate($uri, $this->session)) {
 			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de créer ce fichier', 403);
 		}
-		elseif (!$new && !$target->canWrite($session)) {
+		elseif (!$new && !$target->canWrite($this->session)) {
 			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de modifier ce fichier', 403);
 		}
 
@@ -346,9 +345,7 @@ class Storage extends AbstractStorage
 			throw new WebDAV_Exception('This file does not exist', 404);
 		}
 
-		$session = Session::getInstance();
-
-		if (!$target->canDelete($session)) {
+		if (!$target->canDelete($this->session)) {
 			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de supprimer ce fichier', 403);
 		}
 
@@ -367,9 +364,7 @@ class Storage extends AbstractStorage
 			throw new WebDAV_Exception('File not found', 404);
 		}
 
-		$session = Session::getInstance();
-
-		if (!$source->canMoveTo($destination, $session)) {
+		if (!$source->canMoveTo($destination, $this->session)) {
 			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de déplacer ce fichier', 403);
 		}
 
@@ -435,8 +430,9 @@ class Storage extends AbstractStorage
 	protected function createWopiToken(string $uri)
 	{
 		$ttl = time()+(3600*10);
-		$hash = WebDAV::hmac(compact('uri', 'ttl'), SECRET_KEY);
-		$data = sprintf('%s_%s', $hash, $ttl);
+		$session_id = $this->session->id();
+		$hash = WebDAV::hmac(compact('uri', 'ttl', 'session_id'), SECRET_KEY);
+		$data = sprintf('%s_%s_%s', $hash, $session_id, $ttl);
 
 		return [
 			WOPI::PROP_TOKEN => WOPI::base64_encode_url_safe($data),
@@ -449,15 +445,23 @@ class Storage extends AbstractStorage
 		$id = WOPI::base64_decode_url_safe($id);
 		$uri = gzuncompress($id);
 		$token_decode = WOPI::base64_decode_url_safe($token);
-		$hash = strtok($token_decode, ':');
+		$hash = strtok($token_decode, '_');
+		$session_id = strtok('_');
 		$ttl = (int) strtok(false);
-		$check = WebDAV::hmac(compact('uri', 'ttl'), SECRET_KEY);
+		$check = WebDAV::hmac(compact('uri', 'ttl', 'session_id'), SECRET_KEY);
 
 		if (!hash_equals($hash, $check)) {
 			return null;
 		}
 
 		if ($ttl < time()) {
+			return null;
+		}
+
+		$this->session->setId($session_id);
+		$this->session->start(true);
+
+		if (!$this->session->isLogged()) {
 			return null;
 		}
 
