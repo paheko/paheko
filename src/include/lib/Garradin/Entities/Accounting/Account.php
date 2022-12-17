@@ -859,6 +859,19 @@ class Account extends Entity
 		return $level;
 	}
 
+	public function isListedAsFavourite(): bool
+	{
+		if ($this->bookmark) {
+			return true;
+		}
+
+		if ($this->user) {
+			return true;
+		}
+
+		return DB::getInstance()->test('acc_transactions_lines', 'id_account = ?', $this->id);
+	}
+
 	public function createOpeningBalance(Year $year, int $amount, ?string $label = null): Transaction
 	{
 		$t = new Transaction;
