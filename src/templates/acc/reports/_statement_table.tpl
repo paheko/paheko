@@ -7,8 +7,8 @@
 			<tr>
 				<td></td>
 				<th></th>
-				<td class="money" width="10%">{$year->label_years()}</td>
 				<td class="money" width="10%">{$year2->label_years()}</td>
+				<td class="money" width="10%">{$year->label_years()}</td>
 				<td class="money" width="10%">Écart</td>
 			</tr>
 		</thead>
@@ -22,9 +22,11 @@
 				{/if}
 			</td>
 			<th>{$account.label}</th>
-			<td class="money">{$account.balance|raw|money:false}</td>
 			{if isset($year2)}
 				<td class="money">{$account.balance2|raw|money:false}</td>
+			{/if}
+			<td class="money">{$account.balance|raw|money:false}</td>
+			{if isset($year2)}
 				<td class="money">{$account.change|raw|money:false:true}</td>
 			{/if}
 		</tr>
