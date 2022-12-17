@@ -359,6 +359,20 @@
       "src": "fontawesome"
     },
     {
+      "uid": "0a431e7db6907fe4d22f4a4069374e4a",
+      "css": "text",
+      "code": 84,
+      "src": "custom_icons",
+      "selected": true,
+      "svg": {
+        "path": "M0 0V250H62.5C62.5 181.3 118.8 125 187.5 125H375V812.5C375 847.5 347.5 875 312.5 875H250V1000H750V875H687.5C652.5 875 625 847.5 625 812.5V125H812.5C881.3 125 937.5 181.3 937.5 250H1000V0Z",
+        "width": 1000
+      },
+      "search": [
+        "text"
+      ]
+    },
+    {
       "uid": "c5845105a87df2ee1999826d90622f6a",
       "css": "paragraph",
       "code": 167,
