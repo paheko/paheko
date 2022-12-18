@@ -100,16 +100,16 @@ use Garradin\Entities\Files\File;
 					</td>
 					{/if}
 					<td class="icon">{icon shape="folder"}</td>
-					<th><a href="?path={$file.path}">{$file.name}</a></th>
+					<th><a href="?path={$file->path_uri()}">{$file.name}</a></th>
 					<td></td>
 					<td>Répertoire</td>
 					<td></td>
 					<td class="actions">
 					{if $can_write && ($context == File::CONTEXT_SKELETON || $context == File::CONTEXT_DOCUMENTS)}
-						{linkbutton href="!common/files/rename.php?p=%s"|args:$file.path label="Renommer" shape="minus" target="_dialog"}
+						{linkbutton href="!common/files/rename.php?p=%s"|args:$file->path_uri() label="Renommer" shape="minus" target="_dialog"}
 					{/if}
 					{if $can_delete}
-						{linkbutton href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer" shape="delete" target="_dialog"}
+						{linkbutton href="!common/files/delete.php?p=%s"|args:$file->path_uri() label="Supprimer" shape="delete" target="_dialog"}
 					{/if}
 					</td>
 				</tr>
@@ -123,7 +123,7 @@ use Garradin\Entities\Files\File;
 					<td class="icon">{if $file->image}{icon shape="image"}{/if}</td>
 					<th>
 						{if $file->canPreview()}
-							<a href="{"!common/files/preview.php?p=%s"|local_url|args:$file.path}" target="_dialog" data-mime="{$file.mime}">{$file.name}</a>
+							<a href="{"!common/files/preview.php?p=%s"|local_url|args:$file->path_uri()}" target="_dialog" data-mime="{$file.mime}">{$file.name}</a>
 						{else}
 							<a href="{$file->url(true)}" target="_blank">{$file.name}</a>
 						{/if}
@@ -133,20 +133,20 @@ use Garradin\Entities\Files\File;
 					<td>{$file.size|size_in_bytes}</td>
 					<td class="actions">
 						{if $can_write && $file->editorType()}
-							{linkbutton href="!common/files/edit.php?p=%s"|args:$file.path label="Modifier" shape="edit" target="_dialog" data-dialog-height="90%"}
+							{linkbutton href="!common/files/edit.php?p=%s"|args:$file->path_uri() label="Modifier" shape="edit" target="_dialog" data-dialog-height="90%"}
 						{/if}
 						{if $file->canPreview()}
-							{linkbutton href="!common/files/preview.php?p=%s"|args:$file.path label="Voir" shape="eye" target="_dialog" data-mime=$file.mime}
+							{linkbutton href="!common/files/preview.php?p=%s"|args:$file->path_uri() label="Voir" shape="eye" target="_dialog" data-mime=$file.mime}
 						{/if}
 						{linkbutton href=$file->url(true) label="Télécharger" shape="download"}
 						{if $can_write}
-							{linkbutton href="!common/files/rename.php?p=%s"|args:$file.path label="Renommer" shape="reload" target="_dialog"}
+							{linkbutton href="!common/files/rename.php?p=%s"|args:$file->path_uri() label="Renommer" shape="reload" target="_dialog"}
 						{/if}
 						{if $can_delete}
-							{linkbutton href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer" shape="delete" target="_dialog"}
+							{linkbutton href="!common/files/delete.php?p=%s"|args:$file->path_uri() label="Supprimer" shape="delete" target="_dialog"}
 						{/if}
 						{if $can_write}
-							{linkbutton href="!common/files/share.php?p=%s"|args:$file.path label="Partager" shape="export" target="_dialog"}
+							{linkbutton href="!common/files/share.php?p=%s"|args:$file->path_uri() label="Partager" shape="export" target="_dialog"}
 						{/if}
 					</td>
 				</tr>
