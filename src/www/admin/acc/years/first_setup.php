@@ -18,7 +18,7 @@ $csrf_key = 'first_setup';
 $year = new Year;
 
 $config = Config::getInstance();
-$default_chart = Charts::getFirstForCountry($config->pays);
+$default_chart = Charts::getFirstForCountry($config->country);
 $selected_chart = f('chart');
 
 if ($id_chart = (int) f('id_chart')) {
@@ -97,7 +97,7 @@ if (!count($new_accounts)) {
 }
 
 $step = (int)f('step');
-$charts_list = Charts::listForCountry($config->pays);
+$charts_list = Charts::listForCountry($config->country);
 $default_chart_code = $default_chart ? $default_chart->country_code() : null;
 $tpl->assign(compact('year', 'new_accounts', 'csrf_key', 'appropriation_account', 'charts_list', 'default_chart', 'default_chart_code', 'step'));
 

@@ -99,10 +99,10 @@ class Install
 
 		file_put_contents(CACHE_ROOT . '/reset', json_encode([
 			'password'     => $session::hashPassword($password),
-			'name'         => $user->identite,
+			'name'         => $user->name(),
 			'email'        => $user->email,
 			'organization' => $config->org_name,
-			'country'      => $config->pays,
+			'country'      => $config->country,
 		]));
 
 		rename(DB_FILE, sprintf(DATA_ROOT . '/association.%s.sqlite', date('Y-m-d-His-') . 'avant-remise-a-zero'));
