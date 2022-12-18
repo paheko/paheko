@@ -446,9 +446,7 @@ class User extends Entity
 
 	public function setPreference(string $key, $value)
 	{
-		if (gettype($value) != gettype(self::PREFERENCES[$key])) {
-			throw new \InvalidArgumentException('Invalid value for ' . $key . ' : ' . gettype($value));
-		}
+		settype($value, gettype(self::PREFERENCES[$key]));
 
 		$this->preferences[$key] = $value;
 		$this->_modified['preferences'] = null;

@@ -3,7 +3,8 @@
 <nav class="tabs">
 	<ul>
 		<li class="current"><a href="{$admin_url}me/">Mes informations</a></li>
-		<li><a href="{$admin_url}me/security.php">Mot de passe et options de sécurité</a></li>
+		<li><a href="{$admin_url}me/security.php">Mot de passe et sécurité</a></li>
+		<li><a href="{$admin_url}me/preferences.php">Préférences</a></li>
 	</ul>
 </nav>
 
