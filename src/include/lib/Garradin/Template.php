@@ -209,11 +209,11 @@ class Template extends Smartyer
 
 	protected function widgetExportMenu(array $params): string
 	{
-		$out  = CommonFunctions::widgetLinkButton(['href' => $params['href'] . 'csv', 'label' => 'Export CSV', 'shape' => 'export']);
-		$out .= ' ' . CommonFunctions::widgetLinkButton(['href' => $params['href'] . 'ods', 'label' => 'Export LibreOffice', 'shape' => 'export']);
+		$out  = CommonFunctions::linkButton(['href' => $params['href'] . 'csv', 'label' => 'Export CSV', 'shape' => 'export']);
+		$out .= ' ' . CommonFunctions::linkButton(['href' => $params['href'] . 'ods', 'label' => 'Export LibreOffice', 'shape' => 'export']);
 
 		if (CALC_CONVERT_COMMAND) {
-			$out .= ' ' . CommonFunctions::widgetLinkButton(['href' => $params['href'] . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']);
+			$out .= ' ' . CommonFunctions::linkButton(['href' => $params['href'] . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']);
 		}
 
 		$params = array_merge($params, ['shape' => 'export', 'label' => 'Export…']);
