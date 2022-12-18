@@ -78,7 +78,7 @@ nav.tabs aside {
     z-index: 1000;
 }
 
-.menu-btn span span {
+.menu-btn > span > span {
     display: flex;
     flex-direction: column;
     background: rgb(var(--gBgColor));

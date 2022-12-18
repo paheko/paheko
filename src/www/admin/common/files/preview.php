@@ -16,11 +16,14 @@ if (!$file->canRead()) {
 	throw new UserException('Vous n\'avez pas le droit de lire ce fichier.');
 }
 
-try {
+if ($file->renderFormat()) {
 	$tpl->assign('content', $file->render('common/files/_preview.php?p='));
 	$tpl->assign('file', $file);
 	$tpl->display('common/files/_preview.tpl');
 }
-catch (\LogicException $e) {
+else if ($html = $file->editorHTML(true)) {
+	echo $html;
+}
+else {
 	$file->serve();
 }

@@ -632,8 +632,9 @@ class Utils
         elseif ($size > 1024) {
             return round($size / 1024) . ' Ko';
         }
-        else
-            return $size . ' o';
+        else {
+            return '< 1 Ko';
+        }
     }
 
     static public function createEmptyDirectory(string $path)

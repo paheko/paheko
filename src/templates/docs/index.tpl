@@ -39,11 +39,17 @@ use Garradin\Entities\Files\File;
 				{if WOPI_DISCOVERY_URL}
 					{linkbutton shape="document" label="Document" target="_dialog" data-dialog-class="fullscreen" href="!docs/new_doc.php?ext=odt&path=%s"|args:$path}
 					{linkbutton shape="table" label="Tableur" target="_dialog" data-dialog-class="fullscreen" href="!docs/new_doc.php?ext=ods&path=%s"|args:$path}
+					{linkbutton shape="gallery" label="Présentation" target="_dialog" data-dialog-class="fullscreen" href="!docs/new_doc.php?ext=odp&path=%s"|args:$path}
 				{/if}
 			{/if}
 		{/linkmenu}
 	{/if}
 		{linkbutton shape="search" label="Rechercher" href="search.php" target="_dialog"}
+		{if $gallery}
+			{linkbutton shape="menu" label="Afficher en liste" href="?path=%s&gallery=0"|args:$parent.path}
+		{else}
+			{linkbutton shape="gallery" label="Afficher en galerie" href="?path=%s&gallery=1"|args:$parent.path}
+		{/if}
 	</aside>
 
 	<h2>
@@ -102,12 +108,12 @@ use Garradin\Entities\Files\File;
 </nav>
 {/if}
 
-{if !$parent->canCreateDirHere()}
+{if $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE) && !$parent->canCreateDirHere()}
 <p class="block alert">
 	Il n'est pas possible de créer de répertoire ici.
 	{if $context == File::CONTEXT_USER}
 		Utiliser le <a href="{"!users/new.php"|local_url}">formulaire de création</a> pour enregistrer un membre.
-	{else}
+	{elseif $context == File::CONTEXT_TRANSACTION}
 		Utiliser le <a href="{"!acc/transactions/new.php"|local_url}">formulaire de saisie</a> pour créer une nouvelle écriture.
 	{/if}
 </p>
@@ -118,14 +124,16 @@ use Garradin\Entities\Files\File;
 
 	{if is_array($list)}
 
-		<table class="list">
+		<table class="list files{if $gallery} gallery{/if}">
 			<thead>
 				<tr>
+					{if $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE)}
 					<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>
+					{/if}
 					<td></td>
 					<th>Nom</th>
-					<td>Modifié</td>
-					<td>Taille</td>
+					<td class="size">Taille</td>
+					<td class="date">Modifié</td>
 					<td></td>
 				</tr>
 			</thead>
@@ -140,10 +148,8 @@ use Garradin\Entities\Files\File;
 						{input type="checkbox" name="check[]" value=$file.path}
 					</td>
 					{/if}
-					<td class="icon">{icon shape="folder"}</td>
-					<th><a href="?path={$file.path}">{$file.name}</a></th>
-					<td></td>
-					<td></td>
+					<td class="icon"><a href="?path={$file.path}">{icon shape="folder"}</a></td>
+					<th colspan="3"><a href="?path={$file.path}">{$file.name}</a></th>
 					<td class="actions">
 					{if $parent->canCreateHere() || $file->canDelete()}
 						{linkmenu label="Modifier…" shape="edit"}
@@ -158,32 +164,28 @@ use Garradin\Entities\Files\File;
 					</td>
 				</tr>
 				{else}
-				</tr>
-					{if $file->canDelete()}
+				<tr>
+				{if $file->canDelete()}
 					<td class="check">
 						{input type="checkbox" name="check[]" value=$file.path}
 					</td>
-					{/if}
+				{/if}
+				{if $gallery && $file->isImage()}
+					<td class="preview">{$file->edit_link($session, '150px')|raw}</td>
+				{else}
 					<td class="icon">
-						{if $shape = $file->iconShape()}
-							{icon shape=$shape}
-						{/if}
+						{$file->edit_link($session, 'icon')|raw}
 					</td>
+				{/if}
 					<th>
-						{if $file->canPreview()}
-							<a href="{"!common/files/preview.php?p=%s"|local_url|args:$file.path}" target="_dialog" data-mime="{$file.mime}">{$file.name}</a>
-						{elseif $file->canWrite() && $file->editorType()}
-							{link href="!common/files/edit.php?p=%s"|args:$file.path label=$file.name target="_dialog" data-dialog-class="fullscreen"}
-						{else}
-							<a href="{$file->url(true)}" target="_blank">{$file.name}</a>
-						{/if}
+						{$file->edit_link($session)|raw}
 					</th>
-					<td>{$file.modified|relative_date}</td>
-					<td>{$file.size|size_in_bytes}</td>
+					<td class="size">{$file.size|size_in_bytes}</td>
+					<td class="date">{$file.modified|relative_date_short:true}</td>
 					<td class="actions">
-						{linkbutton href=$file->url(true) label="Télécharger" shape="download"}
+						{linkbutton href=$file->url(true) label="Télécharger" shape="download" title="Télécharger"}
 						{if $file->canShare()}
-							{linkbutton href="!common/files/share.php?p=%s"|args:$file.path label="Partager" shape="export" target="_dialog"}
+							{linkbutton href="!common/files/share.php?p=%s"|args:$file.path label="Partager" shape="export" target="_dialog" title="Partager"}
 						{/if}
 						{if $file->canRename() || $file->canDelete() || ($file->canWrite() && $file->editorType())}
 							{linkmenu label="Modifier…" shape="edit" right=true}
@@ -218,6 +220,7 @@ use Garradin\Entities\Files\File;
 								<option value="move">Déplacer</option>
 								{/if}
 								<option value="delete">Supprimer</option>
+								<option value="download">Télécharger dans un fichier ZIP</option>
 							</select>
 							<noscript>
 								{button type="submit" value="OK" shape="right" label="Valider"}
@@ -260,10 +263,6 @@ use Garradin\Entities\Files\File;
 		{pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count()}
 
 	{/if}
-
-	<p class="actions">
-		{linkbutton href="!docs/zip.php?path=%s"|args:$path label="Télécharger ce répertoire (ZIP)" shape="download"}
-	</p>
 
 </form>
 {else}

@@ -15,6 +15,7 @@ class CommonModifiers
 		'money_raw',
 		'money_currency',
 		'relative_date',
+		'relative_date_short',
 		'date_short',
 		'date_long',
 		'date_hour',
@@ -146,6 +147,49 @@ class CommonModifiers
 		else
 		{
 			$day = strtolower(Utils::strftime_fr($date, '%e %B %Y'));
+		}
+
+		if ($with_hour)
+		{
+			$hour = $date->format('H\hi');
+			return sprintf('%s, %s', $day, $hour);
+		}
+
+		return $day;
+	}
+
+	static public function relative_date_short($ts, bool $with_hour = false): string
+	{
+		$day = null;
+
+		if (null === $ts) {
+			return '';
+		}
+
+		$date = Utils::get_datetime($ts);
+
+		if ($date->format('Ymd') == date('Ymd'))
+		{
+			$day = 'aujourd\'hui';
+		}
+		elseif ($date->format('Ymd') == date('Ymd', strtotime('yesterday')))
+		{
+			$day = 'hier';
+		}
+		elseif ($date->format('Ymd') == date('Ymd', strtotime('tomorrow')))
+		{
+			$day = 'demain';
+		}
+		elseif ($date->getTimestamp() > time() - 3600*24*7) {
+			$day = sprintf('il y a %d jours', round((time() - $date->getTimestamp()) / (3600*24)));
+		}
+		elseif ($date->format('Y') == date('Y'))
+		{
+			$day = strtolower(Utils::strftime_fr($date, '%e %B'));
+		}
+		else
+		{
+			$day = strtolower(Utils::strftime_fr($date, '%d/%m/%Y'));
 		}
 
 		if ($with_hour)

@@ -55,9 +55,9 @@ table.multi tr {
     background: inherit !important;
 }
 
-table.list tr.checked {
-    color: #633;
-    background: #ffc;
+table.list tbody tr.checked {
+    color: #633 !important;
+    background: #ffc !important;
 }
 
 table.list .error {
@@ -149,14 +149,136 @@ table.list .separator {
     border-left: 2px dashed #999;
 }
 
+/* Files list */
+table.list.files tbody tr td {
+    height: 2em;
+}
+
+table.list.files .date {
+    text-align: left;
+    color: var(--gBorderColor);
+    font-size: .9em;
+}
+
+table.list.files .size {
+    font-size: .9em;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    color: var(--gBorderColor);
+}
+
+table.list.files th {
+    font-weight: normal;
+}
+
+table.list.files th a {
+    display: block;
+}
+
+table.list.files .folder th {
+    font-weight: bold;
+}
+
 table.list .icon span::before {
     width: 1.5em;
     color: rgba(var(--gMainColor), 0.5);
     text-shadow: none;
+    transition: color .2s;
 }
 
 table.list .folder .icon span::before {
     color: rgba(var(--gMainColor), 0.9);
+}
+
+table.files.gallery {
+    display: block;
+}
+
+table.files.gallery thead {
+    display: none;
+}
+
+table.files.gallery tfoot {
+    display: block;
+    margin: 1em 0;
+}
+
+table.files.gallery tbody {
+    display: grid;
+    grid-template-columns: repeat( auto-fit, minmax(12em, 1fr) );
+    grid-gap: .5em;
+    justify-content: space-between;
+}
+
+table.files.gallery tbody tr {
+    display: grid;
+    grid-gap: .2em;
+    grid-template-columns: .3fr .7fr;
+    text-align: center;
+    padding: .3em 0;
+}
+
+table.files.gallery tbody tr td {
+    padding: 0 .3em;
+    height: auto;
+}
+
+table.files.gallery tbody tr:nth-child(even) {
+    background: unset;
+}
+
+table.files.gallery .preview {
+    height: 150px;
+}
+
+table.files.gallery .icon a:hover span::before {
+    color: rgba(var(--gMainColor), 1);
+}
+
+table.files.gallery tbody .check {
+    position: absolute;
+}
+
+table.files.gallery .icon, table.files.gallery .preview {
+    grid-column: span 2;
+    font-size: 4em;
+    line-height: .6em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 150px;
+}
+
+table.files.gallery th {
+    grid-column: span 2;
+    text-align: center;
+    font-size: .9em;
+    text-overflow: ellipsis;
+}
+
+table.files.gallery .size, table.files.gallery .date {
+    display: none;
+}
+
+table.files.gallery tbody .actions {
+    font-size: .9em;
+    grid-column: span 2;
+    text-align: center;
+}
+
+table.files.gallery tbody .actions a {
+    margin: .1em;
+}
+
+table.files.gallery tbody .actions > a::before {
+    padding: 0;
+}
+
+table.files.gallery tbody .actions > a span {
+    text-indent: -70em;
+    overflow: hidden;
+    display: none;
 }
 
 /* We need a container here or the cursor won't change because of pointer-events: none */

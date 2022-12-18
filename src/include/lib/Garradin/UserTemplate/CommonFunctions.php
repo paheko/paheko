@@ -468,7 +468,7 @@ class CommonFunctions
 
 		$params = implode(' ', $params);
 
-		return sprintf('<a href="%s" %s>%s</a>', htmlspecialchars($href), $params, htmlspecialchars($label));
+		return sprintf('<a href="%s" %s><span>%s</span></a>', htmlspecialchars($href), $params, htmlspecialchars($label));
 	}
 
 	static public function button(array $params): string

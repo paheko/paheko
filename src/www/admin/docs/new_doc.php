@@ -26,7 +26,15 @@ $form->runIf('create', function () use ($parent, $ext) {
 	Utils::redirect('!common/files/edit.php?p=' . rawurlencode($file->path));
 }, $csrf_key);
 
-$submit_name = $ext == 'ods' ? 'Créer le tableau' : 'Créer le document';
+if ($ext == 'ods') {
+	$submit_name = 'Créer le tableau';
+}
+elseif ($ext == 'odp') {
+	$submit_name = 'Créer la présentation';
+}
+else {
+	$submit_name = 'Créer le document';
+}
 
 $tpl->assign(compact('csrf_key', 'submit_name'));
 

@@ -6,6 +6,7 @@ use Garradin\Files\Files;
 use Garradin\Files\Transactions;
 use Garradin\Files\Users as Users_Files;
 use Garradin\Users\Users;
+use Garradin\Users\Session;
 use Garradin\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
@@ -56,6 +57,17 @@ $quota_max = Files::getQuota();
 $quota_left = Files::getRemainingQuota();
 $quota_percent = $quota_max ? round(($quota_used / $quota_max) * 100) : 100;
 
-$tpl->assign(compact('path', 'list', 'parent', 'context', 'context_ref', 'breadcrumbs', 'parent_path', 'quota_used', 'quota_max', 'quota_percent', 'quota_left', 'user_name'));
+$pref = Session::getPreference('folders_gallery');
+$gallery = $pref ?? false;
+
+if (null !== qg('gallery')) {
+	$gallery = (bool) qg('gallery');
+}
+
+if ($gallery !== $pref) {
+	Session::getLoggedUser()->setPreference('folders_gallery', $gallery);
+}
+
+$tpl->assign(compact('path', 'list', 'parent', 'context', 'context_ref', 'breadcrumbs', 'parent_path', 'quota_used', 'quota_max', 'quota_percent', 'quota_left', 'user_name', 'gallery'));
 
 $tpl->display('docs/index.tpl');

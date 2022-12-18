@@ -178,7 +178,19 @@ class File extends Entity
 	 */
 	public function canPreview(): bool
 	{
-		return in_array($this->mime, self::PREVIEW_TYPES);
+		if (in_array($this->mime, self::PREVIEW_TYPES)) {
+			return true;
+		}
+
+		if (!WOPI_DISCOVERY_URL) {
+			return false;
+		}
+
+		if ($this->getWopiURL()) {
+			return true;
+		}
+
+		return false;
 	}
 
 	public function delete(): bool
@@ -493,12 +505,22 @@ class File extends Entity
 			case 'docx':
 			case 'pdf':
 				return 'document';
+			case 'odp':
+			case 'ppt':
+			case 'pptx':
+				return 'gallery';
 			case 'txt':
 			case 'md':
 				return 'text';
+			case 'mkv':
+			case 'mp4':
+			case 'avi':
+			case 'ogm':
+			case 'ogv':
+				return 'video';
 		}
 
-		return null;
+		return 'document';
 	}
 
 	/**
@@ -543,6 +565,34 @@ class File extends Entity
 
 		$size = isset(self::ALLOWED_THUMB_SIZES[$size]) ? $size : key(self::ALLOWED_THUMB_SIZES);
 		return sprintf('%s?%dpx', $this->url(), $size);
+	}
+
+	public function edit_link(Session $session, ?string $thumb = null)
+	{
+		if ($thumb == 'icon') {
+			$label = sprintf('<span data-icon="%s"></span>', Utils::iconUnicode($this->iconShape()));
+		}
+		elseif ($thumb) {
+			$label = sprintf('<img src="%s" alt="%s" />', htmlspecialchars($this->thumb_url($thumb)), htmlspecialchars($this->name));
+		}
+		else {
+			$label = preg_replace('/[_.-]/', '$0&shy;', htmlspecialchars($this->name));
+		}
+
+		if ($this->canWrite($session) && $this->editorType()) {
+			$attrs = sprintf('href="%s" target="_dialog" data-dialog-class="fullscreen"',
+				Utils::getLocalURL('!common/files/edit.php?p=') . rawurlencode($this->path));
+		}
+		elseif ($this->canPreview($session)) {
+			$attrs = sprintf('href="%s" target="_dialog" data-mime="%s"',
+				Utils::getLocalURL('!common/files/preview.php?p=') . rawurlencode($this->path),
+				$this->mime);
+		}
+		else {
+			$attrs = sprintf('href="%s" target="_blank"', $this->url(true));
+		}
+
+		return sprintf('<a %s>%s</a>', $attrs, $label);
 	}
 
 	/**
@@ -741,14 +791,14 @@ class File extends Entity
 	{
 		$editor_type = $this->renderFormat();
 
-		if ($editor_type == 'text') {
+		if ($editor_type == 'skriv' || $editor_type == 'markdown') {
+			return Render::render($editor_type, $this, $this->fetch(), $user_prefix);
+		}
+		elseif ($editor_type == 'text') {
 			return sprintf('<pre>%s</pre>', htmlspecialchars($this->fetch()));
 		}
-		elseif (!$editor_type) {
-			throw new \LogicException('Cannot render file of this type');
-		}
 		else {
-			return Render::render($editor_type, $this, $this->fetch(), $user_prefix);
+			throw new \LogicException('Cannot render file of this type');
 		}
 	}
 
@@ -966,10 +1016,10 @@ class File extends Entity
 		if (substr($this->name, -6) == '.skriv') {
 			$format = Render::FORMAT_SKRIV;
 		}
-		if (substr($this->name, -3) == '.md') {
+		elseif (substr($this->name, -3) == '.md') {
 			$format = Render::FORMAT_MARKDOWN;
 		}
-		else if (substr($this->mime, 0, 5) == 'text/' && $this->mime != 'text/html') {
+		elseif (substr($this->mime, 0, 5) == 'text/' && $this->mime != 'text/html') {
 			$format = 'text';
 		}
 		else {
@@ -1020,8 +1070,13 @@ class File extends Entity
 			}
 
 			if (!$data) {
-				$data = WOPI::discover(WOPI_DISCOVERY_URL);
-				file_put_contents($cache_file, json_encode($data));
+				try {
+					$data = WOPI::discover(WOPI_DISCOVERY_URL);
+					file_put_contents($cache_file, json_encode($data));
+				}
+				catch (\RuntimeException $e) {
+					return null;
+				}
 			}
 		}
 
@@ -1038,7 +1093,7 @@ class File extends Entity
 		return $url;
 	}
 
-	public function editorHTML(): ?string
+	public function editorHTML(bool $readonly = false): ?string
 	{
 		$url = $this->getWopiURL();
 
@@ -1046,11 +1101,16 @@ class File extends Entity
 			return null;
 		}
 
-		if (!$this->canWrite()) {
-			return null;
-		}
-
 		$wopi = new WOPI;
+		$url = $wopi->setEditorOptions($url, [
+			// Undocumented editor parameters
+			// see https://github.com/nextcloud/richdocuments/blob/2338e2ff7078040d54fc0c70a96c8a1b860f43a0/src/helpers/url.js#L49
+			'lang' => 'fr',
+			//'closebutton' => 1,
+			//'revisionhistory' => 1,
+			//'title' => 'Test',
+			'permission' => $readonly || !$this->canWrite() ? 'readonly' : 'write',
+		]);
 		$wopi->setStorage(new Storage(Session::getInstance()));
 		return $wopi->getEditorHTML($url, $this->path);
 	}
