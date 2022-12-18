@@ -73,7 +73,7 @@ class Cache
 		self::$root = rtrim(self::getPath(), '/');
 
 		if (!file_exists(self::$root)) {
-			Utils::safe_mkdir(self::$root);
+			Utils::safe_mkdir(self::$root, 0777, true);
 		}
 
 		// Create symlink for self-hosting with .htaccess
