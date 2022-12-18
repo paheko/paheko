@@ -56,6 +56,10 @@ class Cache
 
 	static public function init(): bool
 	{
+		if (!WEB_CACHE_ROOT) {
+			return false;
+		}
+
 		// Symlinks on Windows… Not sure if that works
 		if (PHP_OS_FAMILY == 'Windows') {
 			return false;
