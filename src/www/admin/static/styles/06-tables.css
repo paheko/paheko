@@ -206,9 +206,8 @@ table.files.gallery tfoot {
 
 table.files.gallery tbody {
     display: grid;
-    grid-template-columns: repeat( auto-fit, minmax(12em, 1fr) );
+    grid-template-columns: repeat( auto-fit, minmax(12em, 20em) );
     grid-gap: .5em;
-    justify-content: space-between;
 }
 
 table.files.gallery tbody tr {
