@@ -1,6 +1,6 @@
 if (!open_data) {
 	open_data = {
-		'closed': [{'day_close': '25', 'month_close': 'december', 'day_reopen': '2', 'month_reopen': 'january'}],
+		'closed': [{'close_day': '25', 'close_month': 'december', 'reopen_day': '2', 'reopen_month': 'january'}],
 		'open': [{
 			'frequency': '',
 			'day': 'saturday',

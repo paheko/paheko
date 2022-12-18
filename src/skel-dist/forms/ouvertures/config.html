@@ -90,7 +90,7 @@
 	const months = {{$months|json_encode|raw}};
 	const frequencies = {{$frequencies|json_encode|raw}};
 	const days = {{$days|json_encode|raw}};
-	const open_data = {{$form.config|json_encode|raw}};
+	var open_data = {{$form.config|json_encode|raw}};
 	</script>
 	<script type="text/javascript" src="{{$form.url}}config.js"></script>
 </form>
