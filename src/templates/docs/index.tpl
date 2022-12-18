@@ -29,7 +29,13 @@ use Garradin\Entities\Files\File;
 <nav class="tabs">
 	<aside>
 	{if $parent->canCreateDirHere() || $parent->canCreateHere()}
-		{linkmenu label="Ajouter…" shape="plus"}
+		{if $gallery}
+			{linkbutton shape="menu" label="Afficher en liste" href="?path=%s&gallery=0"|args:$parent.path}
+		{else}
+			{linkbutton shape="gallery" label="Afficher en galerie" href="?path=%s&gallery=1"|args:$parent.path}
+		{/if}
+		{linkbutton shape="search" label="Rechercher" href="search.php" target="_dialog"}
+		{linkmenu label="Ajouter…" shape="plus" right=true}
 			{if $parent->canCreateHere()}
 				{linkbutton shape="upload" label="Depuis mon ordinateur" target="_dialog" href="!common/files/upload.php?p=%s"|args:$path}
 			{if $parent->canCreateDirHere()}
@@ -44,12 +50,6 @@ use Garradin\Entities\Files\File;
 			{/if}
 		{/linkmenu}
 	{/if}
-		{linkbutton shape="search" label="Rechercher" href="search.php" target="_dialog"}
-		{if $gallery}
-			{linkbutton shape="menu" label="Afficher en liste" href="?path=%s&gallery=0"|args:$parent.path}
-		{else}
-			{linkbutton shape="gallery" label="Afficher en galerie" href="?path=%s&gallery=1"|args:$parent.path}
-		{/if}
 	</aside>
 
 	<h2>
@@ -220,7 +220,7 @@ use Garradin\Entities\Files\File;
 								<option value="move">Déplacer</option>
 								{/if}
 								<option value="delete">Supprimer</option>
-								<option value="download">Télécharger dans un fichier ZIP</option>
+								<option value="zip">Télécharger dans un fichier ZIP</option>
 							</select>
 							<noscript>
 								{button type="submit" value="OK" shape="right" label="Valider"}

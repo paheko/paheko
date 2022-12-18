@@ -3,6 +3,7 @@
 namespace Garradin\Files;
 
 use Garradin\Static_Cache;
+use Garradin\Config;
 use Garradin\DB;
 use Garradin\Plugin;
 use Garradin\Utils;
@@ -258,7 +259,7 @@ class Files
 		$dir = self::get($parent);
 
 		if ($dir && $dir->type != File::TYPE_DIRECTORY) {
-			throw new UserException('Ce chemin n\'est pas un répertoire');
+			return [$dir];
 		}
 
 		// Update this path
@@ -275,41 +276,51 @@ class Files
 	}
 
 	/**
-	 * Creates a ZIP file archive from a $parent path
-	 * @param  string  $parent  Parent path
+	 * Creates a ZIP file archive from multiple paths
+	 * @param null|string $target Target file name, if left NULL, then will be sent to browser
+	 * @param  array $paths List of paths to append to ZIP file
 	 * @param  Session $session Logged-in user session, if set access rights to the path will be checked,
 	 * if left NULL, then no check will be made (!).
 	 */
-	static public function zip(string $parent, ?Session $session): void
+	static public function zip(?string $target, array $paths, ?Session $session, ?string $download_name = null): void
 	{
-		$file = Files::get($parent);
-
-		if (!$file) {
-			throw new UserException('Ce répertoire n\'existe pas.');
+		if (!$target) {
+			$download_name ??= Config::getInstance()->org_name . ' - Documents';
+			header('Content-type: application/zip');
+			header(sprintf('Content-Disposition: attachment; filename="%s"', $download_name. '.zip'));
+			$target = 'php://output';
 		}
 
-		if ($session && !$file->canRead()) {
-			throw new UserException('Vous n\'avez pas accès à ce répertoire');
-		}
-
-		$zip = new ZipWriter('php://output');
+		$zip = new ZipWriter($target);
 		$zip->setCompression(0);
 
-		$add_file = function ($subpath) use ($zip, $parent, &$add_file) {
-			foreach (self::list($subpath) as $file) {
-				if ($file->type == $file::TYPE_DIRECTORY) {
-					$add_file($file->path);
-					continue;
-				}
-
-				$dest_path = substr($file->path, strlen($parent . '/'));
-				$zip->add($dest_path, null, $file->fullpath());
+		foreach ($paths as $path) {
+			foreach (Files::listRecursive($path, $session, false) as $file) {
+				$zip->add($file->path, null, $file->fullpath());
 			}
-		};
-
-		$add_file($parent);
+		}
 
 		$zip->close();
+	}
+
+	static public function listRecursive(string $path, ?Session $session, bool $include_directories = true): \Generator
+	{
+		foreach (self::list($path) as $file) {
+			if ($session && !$file->canRead($session)) {
+				continue;
+			}
+
+			if ($file->isDir()) {
+				yield from self::listRecursive($file->path, $session, $include_directories);
+
+				if ($include_directories) {
+					yield $file;
+				}
+			}
+			else {
+				yield $file;
+			}
+		}
 	}
 
 	/**

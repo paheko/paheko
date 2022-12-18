@@ -2,6 +2,8 @@
 
 namespace Garradin;
 
+use Garradin\Users\Session;
+
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 
@@ -11,13 +13,18 @@ $check = f('check');
 $action = f('action');
 $parent = f('parent');
 
-$actions = ['move', 'delete'];
+$actions = ['move', 'delete', 'zip'];
 
 if (!is_array($check) || !count($check) || !in_array($action, $actions)) {
 	throw new UserException('Action invalide');
 }
 
 $csrf_key = 'action_' . $action;
+
+$form->runIf('zip', function() use ($check, $session) {
+	Files::zip(null, $check, $session);
+	exit;
+}, $csrf_key);
 
 $form->runIf('confirm_delete', function () use ($check, $session) {
 	foreach ($check as &$file) {
@@ -60,6 +67,18 @@ $tpl->assign(compact('csrf_key', 'extra', 'action', 'count'));
 
 if ($action == 'delete') {
 	$tpl->display('docs/action_delete.tpl');
+}
+elseif ($action == 'zip') {
+	$size = 0;
+
+	foreach ($check as $selected) {
+		foreach (Files::listRecursive($selected, Session::getInstance(), false) as $file) {
+			$size += $file->size;
+		}
+	}
+
+	$tpl->assign(compact('extra', 'count', 'size'));
+	$tpl->display('docs/action_zip.tpl');
 }
 else {
 	$parent = f('current') ?? f('parent');

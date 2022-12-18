@@ -217,6 +217,7 @@ table.files.gallery tbody tr {
     grid-template-columns: .3fr .7fr;
     text-align: center;
     padding: .3em 0;
+    max-width: 20em;
 }
 
 table.files.gallery tbody tr td {

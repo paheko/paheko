@@ -282,40 +282,6 @@ class Sauvegarde
 		}
 	}
 
-	public function dumpFilesZip(?string $target = null): void
-	{
-		if (!$target) {
-			$name = Config::getInstance()->get('nom_asso') . ' - Documents.zip';
-			header('Content-type: application/zip');
-			header(sprintf('Content-Disposition: attachment; filename="%s"', $name));
-		}
-
-		$zip = new ZipWriter($target ?? 'php://output');
-		$zip->setCompression(0);
-
-		$add_directory = function ($path) use ($zip, &$add_directory) {
-			try {
-				$list = Files::list($path);
-			}
-			catch (ValidationException $e) {
-				// Ignore invalid paths
-				return;
-			}
-
-			foreach ($list as $file) {
-				if ($file->type == $file::TYPE_DIRECTORY) {
-					$add_directory($file->path);
-				}
-				else {
-					$zip->add($file->path, null, $file->fullpath());
-				}
-			}
-		};
-
-		$add_directory('');
-		$zip->close();
-	}
-
 	/**
 	 * Restaure une sauvegarde locale
 	 * @param  string $file Le nom de fichier à utiliser comme point de restauration
