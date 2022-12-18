@@ -2,6 +2,8 @@
 
 namespace Garradin;
 
+use Garradin\Users\Session;
+
 class DynamicList implements \Countable
 {
 	protected $columns;
@@ -249,6 +251,10 @@ class DynamicList implements \Countable
 
 		if ($page) {
 			$this->page = (int) $page;
+		}
+
+		if ($nb = Session::getPreference('page_size')) {
+			$this->setPageSize((int) $nb);
 		}
 	}
 }

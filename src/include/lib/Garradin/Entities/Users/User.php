@@ -40,8 +40,9 @@ class User extends Entity
 
 	const PREFERENCES = [
 		'folders_gallery'   => false,
-		'page_size'         => 50,
+		'page_size'         => 100,
 		'accounting_expert' => false,
+		'dark_theme'        => false,
 	];
 
 	protected bool $_loading = false;
