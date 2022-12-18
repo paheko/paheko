@@ -567,8 +567,17 @@ class File extends Entity
 		return sprintf('%s?%dpx', $this->url(), $size);
 	}
 
-	public function edit_link(Session $session, ?string $thumb = null)
+	public function link(Session $session, ?string $thumb = null, bool $allow_edit = false)
 	{
+		if ($thumb == 'auto') {
+			if ($this->isImage()) {
+				$thumb = '150px';
+			}
+			else {
+				$thumb = 'icon';
+			}
+		}
+
 		if ($thumb == 'icon') {
 			$label = sprintf('<span data-icon="%s"></span>', Utils::iconUnicode($this->iconShape()));
 		}
@@ -576,10 +585,10 @@ class File extends Entity
 			$label = sprintf('<img src="%s" alt="%s" />', htmlspecialchars($this->thumb_url($thumb)), htmlspecialchars($this->name));
 		}
 		else {
-			$label = preg_replace('/[_.-]/', '$0&shy;', htmlspecialchars($this->name));
+			$label = preg_replace('/[_.-]/', '&shy;$0', htmlspecialchars($this->name));
 		}
 
-		if ($this->canWrite($session) && $this->editorType()) {
+		if ($allow_edit && $this->canWrite($session) && $this->editorType()) {
 			$attrs = sprintf('href="%s" target="_dialog" data-dialog-class="fullscreen"',
 				Utils::getLocalURL('!common/files/edit.php?p=') . rawurlencode($this->path));
 		}
@@ -1109,7 +1118,7 @@ class File extends Entity
 			//'closebutton' => 1,
 			//'revisionhistory' => 1,
 			//'title' => 'Test',
-			'permission' => $readonly || !$this->canWrite() ? 'readonly' : 'write',
+			'permission' => $readonly || !$this->canWrite() ? 'readonly' : '',
 		]);
 		$wopi->setStorage(new Storage(Session::getInstance()));
 		return $wopi->getEditorHTML($url, $this->path);

@@ -480,11 +480,18 @@ details summary.block::after {
 }
 
 .files-list aside.file {
+    max-width: 20em;
     border-radius: .5rem;
     background: rgba(var(--gSecondColor), 0.1);
     text-align: center;
     padding: .5rem;
     margin: .5rem;
+}
+
+.files-list aside.file a span::before {
+    color: rgba(var(--gMainColor), 0.7);
+    font-size: 3em;
+    padding: .2em;
 }
 
 .files-list aside small {

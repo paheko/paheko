@@ -8,7 +8,7 @@ require __DIR__ . '/../../_inc.php';
 
 $parent = qg('p');
 
-if (!File::canCreate($parent)) {
+if (!File::canCreate($parent . '/')) {
 	throw new UserException('Vous n\'avez pas le droit d\'ajouter de fichier ici.');
 }
 

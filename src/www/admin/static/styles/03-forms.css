@@ -193,6 +193,10 @@ a.icn-btn, b.btn {
     font-weight: normal;
 }
 
+a.icn-btn > span {
+    text-decoration: underline;
+}
+
 b.btn {
     cursor: unset;
     text-decoration: none;

@@ -58,7 +58,7 @@ $quota_left = Files::getRemainingQuota();
 $quota_percent = $quota_max ? round(($quota_used / $quota_max) * 100) : 100;
 
 $pref = Session::getPreference('folders_gallery');
-$gallery = $pref ?? false;
+$gallery = $pref ?? true;
 
 if (null !== qg('gallery')) {
 	$gallery = (bool) qg('gallery');

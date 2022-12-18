@@ -8,7 +8,7 @@ if (!isset($files)) {
 $can_upload = false;
 
 if ($edit
-	&& Entities\Files\File::canCreate($path)) {
+	&& Entities\Files\File::canCreate($path . '/')) {
 	$can_upload = true;
 }
 
@@ -26,23 +26,14 @@ if ($edit
 	if (!$file->canRead()) {
 		break;
 	}
-	$preview = $file->canPreview();
-	$target = $preview ? '_dialog' : '_blank';
-	$url = $preview ? ADMIN_URL . 'common/files/preview.php?p=' . $file->path : $file->url();
 	?>
 	<aside class="file">
-		{if $file.image}
-			<figure>
-				<a target="{$target}" href="{$url}" data-mime="{$file.mime}"><img src="{$file->thumb_url()}" alt="" /></a>
-				<figcaption>
-					<a target="{$target}" href="{$url}" data-mime="{$file.mime}">{$file.name}</a>
-					<small>({$file.mime}, {$file.size|size_in_bytes})</small>
-				</figcaption>
-			</figure>
-		{else}
-			<a target="{$target}" href="{$url}" data-mime="{$file.mime}">{$file.name}</a>
-			<small>({$file.mime}, {$file.size|size_in_bytes})</small>
-		{/if}
+		<figure>
+			<span>{$file->link($session, 'auto')|raw}</span>
+			<figcaption>
+				{$file->link($session)|raw}
+			</figcaption>
+		</figure>
 		{linkbutton shape="download" href=$file->url(true) target="_blank" label="Télécharger"}
 		{if $edit && $file->canDelete()}
 			{linkbutton shape="delete" target="_dialog" href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer"}
