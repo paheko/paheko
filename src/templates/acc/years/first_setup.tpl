@@ -18,7 +18,7 @@
 		</p>
 		<dl>
 			<dt>Pays</dt>
-			<dd>{$config.pays|get_country_name} {linkbutton href="!config/" shape="settings" label="Modifier le pays dans la configuration"}</dd>
+			<dd>{$config.country|get_country_name} {linkbutton href="!config/" shape="settings" label="Modifier le pays dans la configuration"}</dd>
 		</dl>
 		{if $default_chart && $year.id_chart == $default_chart.id}
 		<dl class="chart-default">
