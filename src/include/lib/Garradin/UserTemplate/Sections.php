@@ -603,7 +603,7 @@ class Sections
 			return null;
 		}
 
-		$form->config = json_decode($form->config);
+		$form->config = $form->config ? @json_decode($form->config) : null;
 		$form->path = 'forms/' . $form->name;
 
 		yield (array) $form;
