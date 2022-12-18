@@ -992,9 +992,14 @@ class File extends Entity
 		return false;
 	}
 
+	public function path_uri(): string
+	{
+		return rawurlencode($this->path);
+	}
+
 	static public function filterName(string $name): string
 	{
-		return preg_replace('/[^\w\d\p{L}_. -]+/iu', '-', $name);
+		return preg_replace('/[^\w\d\p{L}_. -]+/iu', '-', trim($name));
 	}
 
 	static public function validateFileName(string $name): void
