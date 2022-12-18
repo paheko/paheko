@@ -181,6 +181,7 @@ class DynamicField extends Entity
 		'date_login'   => '?DateTime',
 		'id_parent'    => '?int',
 		'is_parent'    => 'bool',
+		'preferences'  => '?array',
 	];
 
 	const SYSTEM_FIELDS_SQL = [
@@ -191,6 +192,7 @@ class DynamicField extends Entity
 		'pgp_key TEXT NULL,',
 		'id_parent INTEGER NULL REFERENCES users(id) ON DELETE SET NULL CHECK (id_parent IS NULL OR is_parent = 0),',
 		'is_parent INTEGER NOT NULL DEFAULT 0,',
+		'preferences TEXT NULL,'
 	];
 
 	public function delete(): bool

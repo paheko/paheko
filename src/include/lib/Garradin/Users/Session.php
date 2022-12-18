@@ -395,6 +395,22 @@ class Session extends \KD2\UserSession
 		return $this->getUser();
 	}
 
+	static public function getPreference(string $key)
+	{
+		return self::getLoggedUser()->getPreference($key);
+	}
+
+	static public function getLoggedUser(): ?User
+	{
+		$s = self::getInstance();
+
+		if (!$s->isLogged()) {
+			return null;
+		}
+
+		return $s->getUser();
+	}
+
 	public function getUser()
 	{
 		if (isset($this->_user)) {

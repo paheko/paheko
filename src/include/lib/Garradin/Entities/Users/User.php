@@ -38,6 +38,12 @@ class User extends Entity
 
 	const TABLE = 'users';
 
+	const PREFERENCES = [
+		'folders_gallery'   => false,
+		'page_size'         => 50,
+		'accounting_expert' => false,
+	];
+
 	protected bool $_loading = false;
 
 	public function __construct()
@@ -430,5 +436,30 @@ class User extends Entity
 		$id_field = DynamicFields::getNameFieldsSQL();
 		$db = DB::getInstance();
 		return $db->firstColumn(sprintf('SELECT id FROM %s WHERE %s = ?;', self::TABLE, $id_field), $this->name()) ?: null;
+	}
+
+	public function getPreference(string $key)
+	{
+		return $this->preferences[$key] ?? null;
+	}
+
+	public function setPreference(string $key, $value)
+	{
+		if (gettype($value) != gettype(self::PREFERENCES[$key])) {
+			throw new \InvalidArgumentException('Invalid value for ' . $key . ' : ' . gettype($value));
+		}
+
+		$this->preferences[$key] = $value;
+		$this->_modified['preferences'] = null;
+	}
+
+	public function __destruct()
+	{
+		if (!($this->isModified('preferences') && count($this->_modified) == 1)) {
+			return;
+		}
+
+		// Save preferences
+		$this->save();
 	}
 }
