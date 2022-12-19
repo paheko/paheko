@@ -135,6 +135,10 @@ class Template extends Smartyer
 		$this->register_modifier('display_champ_membre', [$this, 'displayChampMembre']);
 
 		$this->register_modifier('linkify_transactions', function ($str) {
+			$str = preg_replace_callback('/(?<=^|\s)(https?:\/\/.*?)(?=\s|$)/', function ($m) {
+				return sprintf('<a href="%s" target="_blank">%1$s</a>', htmlspecialchars($m[1]));
+			}, $str);
+
 			return preg_replace_callback('/(?<=^|\s)#(\d+)(?=\s|$)/', function ($m) {
 				return sprintf('<a href="%s%d">#%2$d</a>',
 					Utils::getLocalURL('!acc/transactions/details.php?id='),
