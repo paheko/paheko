@@ -534,10 +534,10 @@ aside.quota {
     margin: .5em 0;
 }
 
-
-.quota meter {
-    appearance: none;
-    -webkit-appearance: none;
+/**
+ * We cannot use <meter> here as Firefox sucks
+ */
+.quota .meter {
     background-color: var(--gLightBackgroundColor);
     background-image: linear-gradient(90deg, rgba(var(--gMainColor), 0.3) calc(var(--quota-percent) * 1%), var(--gLightBackgroundColor) calc(var(--quota-percent) * 1% + 2%));
     border-radius: .3em;
@@ -551,7 +551,7 @@ aside.quota {
     position: relative;
 }
 
-.quota meter span.more {
+.quota .meter span.more {
     color: var(--gTextColor);
     position: absolute;
     display: none;
@@ -568,7 +568,7 @@ aside.quota {
     box-shadow: 2px 2px 5px var(--gBorderColor);
 }
 
-.quota meter:active span.more, .quota meter:hover span.more {
+.quota .meter:active span.more, .quota .meter:hover span.more {
     display: block;
 }
 

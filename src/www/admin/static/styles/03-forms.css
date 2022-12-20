@@ -195,6 +195,11 @@ a.icn-btn, b.btn {
 
 a.icn-btn > span {
     text-decoration: underline;
+    text-decoration-color: rgba(var(--gTextColor), 0.25);
+}
+
+a.icn-btn:hover span {
+    text-decoration-color: rgba(var(--gHoverLinkColor), 1) !important;
 }
 
 b.btn {

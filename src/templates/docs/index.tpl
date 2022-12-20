@@ -5,12 +5,13 @@ use Garradin\Entities\Files\File;
 
 <nav class="tabs">
 	<aside class="quota">
-		<meter min="0" max="100" value="{$quota_percent}" high="80" style="--quota-percent: {$quota_percent}">
+		{* We cannot use <meter> here as Firefox sucks :( *}
+		<span class="meter" style="--quota-percent: {$quota_percent}">
 			<span class="text">{$quota_left|size_in_bytes} libres</span>
 			<span class="more">
 				{$quota_percent}% utilisé ({$quota_used|size_in_bytes}) sur {$quota_max|size_in_bytes}
 			</span>
-		</meter>
+		</span>
 	</aside>
 	<ul>
 		<li{if $context == File::CONTEXT_DOCUMENTS} class="current"{/if}><a href="./">Documents</a></li>
