@@ -503,15 +503,24 @@ class File extends Entity
 			case 'odt':
 			case 'doc':
 			case 'docx':
-			case 'pdf':
+			case 'rtf':
 				return 'document';
+			case 'pdf':
+				return 'pdf';
 			case 'odp':
 			case 'ppt':
 			case 'pptx':
 				return 'gallery';
 			case 'txt':
-			case 'md':
+			case 'skriv':
 				return 'text';
+			case 'md':
+				return 'markdown';
+			case 'html':
+			case 'css':
+			case 'js':
+			case 'tpl':
+				return 'code';
 			case 'mkv':
 			case 'mp4':
 			case 'avi':
@@ -1014,10 +1023,21 @@ class File extends Entity
 	 */
 	static public function validateCanHTML(string $name, string $path, ?Session $session = null): void
 	{
-		if (preg_match('/\.(?:htm|js|xhtm)/', $name)
-			&& !File::checkSkeletonWriteAccess($path, $session ?? Session::getInstance())) {
-			throw new ValidationException('Seuls les administrateurs peuvent créer des fichiers de ce type.');
+		if (!preg_match('/\.(?:htm|js|xhtm)/', $name)) {
+			return;
 		}
+
+		$session ??= Session::getInstance();
+
+		if (0 === strpos($path, self::CONTEXT_SKELETON . '/web') && $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)) {
+			return;
+		}
+
+		if ($session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
+			return;
+		}
+
+		throw new ValidationException('Seuls les administrateurs peuvent créer des fichiers de ce type.');
 	}
 
 	public function renderFormat(): ?string

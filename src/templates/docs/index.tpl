@@ -171,14 +171,14 @@ use Garradin\Entities\Files\File;
 					</td>
 				{/if}
 				{if $gallery && $file->isImage()}
-					<td class="preview">{$file->link($session, '150px', true)|raw}</td>
+					<td class="preview">{$file->link($session, '150px', false)|raw}</td>
 				{else}
 					<td class="icon">
-						{$file->link($session, 'icon', true)|raw}
+						{$file->link($session, 'icon', false)|raw}
 					</td>
 				{/if}
 					<th>
-						{$file->link($session, null, true)|raw}
+						{$file->link($session, null, false)|raw}
 					</th>
 					<td class="size">{$file.size|size_in_bytes}</td>
 					<td class="date">{$file.modified|relative_date_short:true}</td>

@@ -72,6 +72,7 @@ class Utils
         'video'           => '▶',
         'quote'           => '«',
         'money'           => '€',
+        'pdf'             => 'P',
     ];
 
     const FRENCH_DATE_NAMES = [
