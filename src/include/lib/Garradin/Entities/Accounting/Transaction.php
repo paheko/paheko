@@ -48,15 +48,6 @@ class Transaction extends Entity
 		'Créance',
 	];
 
-	const FIELDS_NAMES = [
-		'type'      => 'Type',
-		'status'    => 'Statut',
-		'label'     => 'Libellé',
-		'notes'     => 'Notes',
-		'reference' => 'Numéro pièce comptable',
-		'date'      => 'Date',
-	];
-
 	protected ?int $id;
 	protected ?int $type = null;
 	protected int $status = 0;
@@ -1225,7 +1216,7 @@ class Transaction extends Entity
 		];
 
 		foreach ($this->_modified as $key => $old) {
-			$out['transaction'][self::FIELDS_NAMES[$key]] = [$old, $this->$key];
+			$out['transaction'][$key] = [$old, $this->$key];
 		}
 
 		static $keys = [
