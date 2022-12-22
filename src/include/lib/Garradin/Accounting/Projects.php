@@ -20,6 +20,24 @@ class Projects
 		return DB::getInstance()->firstColumn('SELECT id FROM acc_projects WHERE code = ? OR label = ?;', $str, $str) ?: null;
 	}
 
+	static public function getName(?int $id): ?string
+	{
+		if (!$id) {
+			return null;
+		}
+
+		static $projects = [];
+
+		if (array_key_exists($id, $projects)) {
+			return $projects[$id];
+		}
+
+		$p = DB::getInstance()->first('SELECT code, label FROM acc_projects WHERE id = ?;', $id);
+
+		$projects[$id] = $p ? sprintf('%s — %s', $p->code, $p->label) : null;
+		return $projects[$id];
+	}
+
 	static public function count(): int
 	{
 		return DB::getInstance()->count(Project::TABLE);

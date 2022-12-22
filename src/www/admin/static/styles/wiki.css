@@ -60,6 +60,7 @@ form#f_upload fieldset {
     position: relative;
 }
 
+
 .diff {
     margin: 1em;
 }
@@ -88,8 +89,6 @@ form#f_upload fieldset {
     vertical-align: middle;
 }
 
-.diff ins { background: #9f9; }
-.diff del { background: #f99; }
 
 .diff hr {
     background: none;

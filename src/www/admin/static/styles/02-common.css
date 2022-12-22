@@ -549,3 +549,6 @@ aside.quota h4 {
     font-size: .9em;
     margin-bottom: .8em;
 }
+
+.diff ins { background: #cfc; color: #000; text-decoration: none; }
+.diff del { background: #fcc; color: #000; }

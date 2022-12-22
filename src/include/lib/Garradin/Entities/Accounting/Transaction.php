@@ -14,6 +14,7 @@ use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 
 use Garradin\Accounting\Accounts;
+use Garradin\Accounting\Projects;
 use Garradin\ValidationException;
 
 class Transaction extends Entity
@@ -45,6 +46,15 @@ class Transaction extends Entity
 		'Virement',
 		'Dette',
 		'Créance',
+	];
+
+	const FIELDS_NAMES = [
+		'type'      => 'Type',
+		'status'    => 'Statut',
+		'label'     => 'Libellé',
+		'notes'     => 'Notes',
+		'reference' => 'Numéro pièce comptable',
+		'date'      => 'Date',
 	];
 
 	protected ?int $id;
@@ -934,7 +944,7 @@ class Transaction extends Entity
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
 		$identity_column = Config::getInstance()->get('champ_identite');
-		$sql = sprintf('SELECT m.id, m.%s AS identity, l.id_service_user FROM membres m INNER JOIN acc_transactions_users l ON l.id_user = m.id WHERE l.id_transaction = ?;', $identity_column);
+		$sql = sprintf('SELECT m.id, m.%s AS identity, l.id_service_user FROM membres m INNER JOIN acc_transactions_users l ON l.id_user = m.id WHERE l.id_transaction = ? ORDER BY id;', $identity_column);
 		return $db->get($sql, $this->id());
 	}
 
@@ -1158,23 +1168,30 @@ class Transaction extends Entity
 		return self::TYPES_NAMES[$this->type];
 	}
 
-	public function asDetailsArray(): array
+	public function asDetailsArray(bool $modified = false): array
 	{
 		$lines = [];
+		$debit = 0;
+		$credit = 0;
 
-		foreach ($this->getLines() as $i => $line) {
+		foreach ($this->getLine() as $i => $line) {
 			$lines[$i+1] = $line->asDetailsArray();
+
+			$debit += $line->debit;
+			$credit +=$line->credit;
 		}
 
+		$src = $this->asArray();
+
 		return [
-			'Numéro'          => $this->id ?? '--',
-			'Type'            => self::TYPES_NAMES[$this->type ?? self::TYPE_ADVANCED],
-			'Libellé'         => $this->label ?? null,
-			'Date'            => $this->date ?? null,
-			'Pièce comptable' => $this->reference ?? null,
-			'Remarques'       => $this->notes ?? null,
-			'Total crédit'    => Utils::money_format($this->getLinesCreditSum()),
-			'Total débit'     => Utils::money_format($this->getLinesDebitSum()),
+			'Numéro'          => $src['id'] ?? '--',
+			'Type'            => self::TYPES_NAMES[$src['type'] ?? self::TYPE_ADVANCED],
+			'Libellé'         => $src['label'] ?? null,
+			'Date'            => isset($src['date']) ? $src['date']->format('d/m/Y') : null,
+			'Pièce comptable' => $src['reference'] ?? null,
+			'Remarques'       => $src['notes'] ?? null,
+			'Total crédit'    => Utils::money_format($debit),
+			'Total débit'     => Utils::money_format($credit),
 			'Lignes'          => $lines,
 		];
 	}
@@ -1192,6 +1209,112 @@ class Transaction extends Entity
 			unset($line->line);
 		}
 		unset($line);
+		return $out;
+	}
+
+	/**
+	 * Compare transaction, to see if something has changed
+	 */
+	public function diff(): ?array
+	{
+		$out = [
+			'transaction' => [],
+			'lines' => [],
+			'lines_new' => [],
+			'lines_removed' => [],
+		];
+
+		foreach ($this->_modified as $key => $old) {
+			$out['transaction'][self::FIELDS_NAMES[$key]] = [$old, $this->$key];
+		}
+
+		static $keys = [
+			'id_account' => 'Numéro de compte',
+			'label'      => 'Libellé ligne',
+			'reference'  => 'Référence ligne',
+			'credit'     => 'Crédit',
+			'debit'      => 'Débit',
+			'id_project' => 'Projet',
+		];
+
+		$new_lines = [];
+		$old_line = [];
+
+		foreach ($this->getLines() as $line) {
+			$new_line = [];
+
+			foreach ($keys as $key => $label) {
+				$new_line[$key] = $line->$key;
+			}
+
+			$new_lines[] = $new_line;
+
+			if ($line->exists() && $line->isModified()) {
+				$old_line = [];
+
+				foreach ($keys as $key => $label) {
+					$old_line[$key] = $line->getModifiedProperty($key) ?? $line->$key;
+				}
+
+				$old_lines[] = $old_line;
+			}
+		}
+
+		foreach ($this->_old_lines as $line) {
+			$old_line = [];
+
+			foreach ($keys as $key => $label) {
+				$old_line[$key] = $line->$key;
+			}
+
+			$old_lines[] = $old_line;
+		}
+
+		// Append new lines and changed lines
+		foreach ($new_lines as $i => $new_line) {
+			$found = array_search($new_line, $old_lines);
+
+			if (false === $found) {
+				$new_line['account'] = Accounts::getCodeAndLabel($new_line['id_account']);
+				$new_line['project'] = Projects::getName($new_line['id_project']);
+				$out['lines_new'][] = $new_line;
+			}
+			/*
+			// Currently unused, as we can't really compare lines unless it keeps the same ID
+			// And in import we reset the lines
+			else {
+				$found = $old_lines[$found];
+				$out['lines'][$i] = $new_line;
+				$out['lines'][$i]['account'] = Accounts::getCodeAndLabel($new_line['id_account']);
+				$out['lines'][$i]['diff'] = [];
+
+				foreach ($keys as $key => $label) {
+					$value = $new_line[$key];
+
+					if ($found[$key] !== $value) {
+						$out['lines'][$i]['diff'][$key] = [$found[$key], $value];
+					}
+				}
+
+				if (isset($out['lines'][$i]['diff']['id_project'])) {
+					$out['lines'][$i]['diff']['project'] = [Projects::getName($out['lines'][$i]['diff']['id_project'][0]), Projects::getName($out['lines'][$i]['diff']['id_project'][1])];
+				}
+			}*/
+		}
+
+		// Append removed lines
+		foreach ($old_lines as $i => $old_line) {
+			if (!in_array($old_line, $new_lines)) {
+				$old_line['account'] = Accounts::getCodeAndLabel($old_line['id_account']);
+				$old_line['project'] = Projects::getName($old_line['id_project']);
+				$out['lines_removed'][] = $old_line;
+			}
+		}
+
+		if (!count($out['transaction']) && !count($out['lines']) && !count($out['lines_new']) && !count($out['lines_removed'])) {
+			return null;
+		}
+
 		return $out;
 	}
 

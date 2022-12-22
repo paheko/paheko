@@ -10,6 +10,8 @@ use Garradin\Config;
 use Garradin\DB;
 use Garradin\UserException;
 
+use KD2\SimpleDiff;
+
 class Import
 {
 	static protected function saveImportedTransaction(Transaction $transaction, ?array $linked_users, bool $dry_run = false, array &$report = null): void
@@ -39,10 +41,11 @@ class Import
 					$users[$row->name] = $row->id;
 				}
 
-				$missing = array_diff_key($users, array_flip($linked_users));
-
-				foreach ($missing as $key => $v) {
-					$users[$key] = null;
+				// Fill array with NULL for missing user names, so that we won't go fetch them again
+				foreach ($linked_users as $name) {
+					if (!array_key_exists($name, $users)) {
+						$users[$name] = null;
+					}
 				}
 			}
 
@@ -51,6 +54,7 @@ class Import
 		elseif (is_array($linked_users) && count($linked_users) == 0) {
 			$found_users = [];
 		}
+
 
 		if ($transaction->countLines() > 2) {
 			$transaction->type = Transaction::TYPE_ADVANCED;
@@ -61,7 +65,7 @@ class Import
 		}
 
 		if (!$dry_run) {
-			if ($transaction->isModified()) {
+			if ($transaction->isModified() || $transaction->diff()) {
 				$transaction->save();
 			}
 
@@ -74,18 +78,34 @@ class Import
 		}
 
 		if (null !== $report) {
-			if (!$transaction->isModified() && (null === $found_users || !$transaction->checkLinkedUsersChange($found_users))) {
-				$target = 'unchanged';
-			}
-			elseif ($transaction->exists()) {
-				$target = 'modified';
-			}
-			else {
+			$diff = null;
+
+			if (!$transaction->exists()) {
 				$target = 'created';
 			}
+			elseif (($diff = $transaction->diff())
+				|| ($linked_users = $transaction->listLinkedUsersAssoc()) && (array_values($linked_users) != array_keys($found_users))) {
+				if (!$diff) {
+					$diff = [];
+				}
 
-			$report[$target][] = $transaction->asJournalArray()
-				+ ['linked_users' => null !== $found_users ? implode(', ', array_keys($found_users)) : null];
+				$target = 'modified';
+
+				if (array_values($linked_users) != array_keys($found_users)) {
+					$diff['linked_users'] = [
+						implode(', ', $linked_users),
+						implode(', ', array_keys($found_users))
+					];
+				}
+
+				$linked_users = implode(', ', $linked_users);
+				$diff = compact('diff', 'transaction', 'linked_users');
+			}
+			else {
+				$target = 'unchanged';
+			}
+
+			$report[$target][] = $diff ?? array_merge($transaction->asJournalArray(), ['linked_users' => implode(', ', array_keys($found_users))]);
 		}
 	}
 
@@ -228,8 +248,11 @@ class Import
 						$transaction->status = $status;
 					}
 
-					if (isset($row->linked_users)) {
+					if (isset($row->linked_users) && trim($row->linked_users) !== '') {
 						$linked_users = array_map('trim', explode(',', $row->linked_users));
+					}
+					else {
+						$linked_users = [];
 					}
 				}
 
@@ -331,6 +354,7 @@ class Import
 				$report[$type . '_count'] = count($entries);
 			}
 		}
+
 
 		return $report;
 	}
