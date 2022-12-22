@@ -1205,7 +1205,7 @@ class Transaction extends Entity
 		$debit = 0;
 		$credit = 0;
 
-		foreach ($this->getLine() as $i => $line) {
+		foreach ($this->getLines() as $i => $line) {
 			$lines[$i+1] = $line->asDetailsArray();
 
 			$debit += $line->debit;
