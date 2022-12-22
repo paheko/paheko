@@ -25,7 +25,7 @@
 			<td rowspan="{$lines_count}" class="num">{if $transaction.id}<a href="{$admin_url}acc/transactions/details.php?id={$transaction.id}">#{$transaction.id}</a>{/if}</td>
 			<td rowspan="{$lines_count}">
 				{if $diff.transaction.reference}
-					<del>{$diff.transaction.reference[0]}</del>
+					<del>{$diff.transaction.reference[0]}</del><br />
 					<ins>{$diff.transaction.reference[1]}</ins>
 				{else}
 					{$transaction.reference}
@@ -33,7 +33,7 @@
 			</td>
 			<td rowspan="{$lines_count}">
 				{if $diff.transaction.date}
-					<del>{$diff.transaction.date[0]|date_short}</del>
+					<del>{$diff.transaction.date[0]|date_short}</del><br />
 					<ins>{$diff.transaction.date[1]|date_short}</ins>
 				{else}
 					{$transaction.date|date_short}
@@ -41,7 +41,7 @@
 			</td>
 			<th rowspan="{$lines_count}">
 				{if $diff.transaction.label}
-					<del>{$diff.transaction.label[0]}</del>
+					<del>{$diff.transaction.label[0]}</del><br />
 					<ins>{$diff.transaction.label[1]}</ins>
 				{else}
 					{$transaction.label}
@@ -49,13 +49,13 @@
 			</th>
 			<td rowspan="{$lines_count}">
 				{if $diff.linked_users}
-					<del>{$diff.linked_users[0]}</del>
+					<del>{$diff.linked_users[0]}</del><br />
 					<ins>{$diff.linked_users[1]}</ins>
 				{else}
 					{$t.linked_users}
 				{/if}
 			</td>
-	{if isset($diff['transaction'])}
+	{if $diff.lines_removed || $diff.lines_new || $diff.lines}
 		{foreach from=$diff.lines_removed item="line"}
 			<td><del>{$line.account}</del></td>
 			<td class="money"><del>{$line.debit|raw|money}</del></td>
