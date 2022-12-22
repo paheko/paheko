@@ -5,7 +5,7 @@
 			<td>Pièce comptable</td>
 			<td>Date</td>
 			<th>Libellé</th>
-			{if !empty($with_linked_users)}<td>Membres liés</td>{/if}
+			{if !empty($with_linked_users)}<td>Membres associés</td>{/if}
 			<td>Comptes</td>
 			<td class="money">Débit</td>
 			<td class="money">Crédit</td>

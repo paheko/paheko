@@ -946,15 +946,12 @@ class Template extends Smartyer
 
 	protected function diff(array $params)
 	{
-		if (!isset($params['old']) || !isset($params['new']))
-		{
+		if (isset($params['old'], $params['new'])) {
+			$diff = \KD2\SimpleDiff::diff_to_array(false, $params['old'], $params['new'], $params['context'] ?? 3);
+		}
+		else {
 			throw new \BadFunctionCallException('Paramètres old et new requis.');
 		}
-
-		$old = $params['old'];
-		$new = $params['new'];
-
-		$diff = \KD2\SimpleDiff::diff_to_array(false, $old, $new, 3);
 
 		$out = '<table class="diff">';
 		$prev = key($diff);
