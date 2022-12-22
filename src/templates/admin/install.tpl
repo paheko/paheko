@@ -1,7 +1,7 @@
-{include file="admin/_head.tpl" title="Garradin - Installation" menu=false}
+{include file="admin/_head.tpl" title="Paheko - Installation" menu=false}
 
 <p class="help">
-    Bienvenue dans Garradin !
+    Bienvenue dans Paheko !
     Veuillez remplir les quelques informations suivantes pour terminer
     l'installation.
 </p>
@@ -45,7 +45,7 @@ form.onsubmit = function () {
     $('#f_submit').style.opacity = 0;
     var loader = document.createElement('div');
     loader.className = 'loader install';
-    loader.innerHTML = '<b>Garradin est en cours d\'installation…</b>';
+    loader.innerHTML = '<b>Paheko est en cours d\'installation…</b>';
     $('#f_submit').parentNode.appendChild(loader);
     animatedLoader(loader, 5);
 };
