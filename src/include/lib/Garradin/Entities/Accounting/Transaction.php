@@ -70,6 +70,7 @@ class Transaction extends Entity
 	protected $_old_lines = [];
 
 	protected $_accounts = [];
+	protected $_default_selector = [];
 
 	/**
 	 * @var Transaction
@@ -961,6 +962,11 @@ class Transaction extends Entity
 		return EntityManager::getInstance(self::class)->all('SELECT * FROM @TABLE WHERE id_related = ?;', $this->id);
 	}
 
+	public function setDefaultAccount(int $type, string $direction, int $id): void
+	{
+		$this->_default_selector[$type][$direction] = Accounts::getSelector($id);
+	}
+
 	/**
 	 * Return tuples of accounts selectors according to each "simplified" type
 	 */
@@ -1123,6 +1129,10 @@ class Transaction extends Entity
 
 				if ($d) {
 					$account->selector_value = $source['simple'][$key][$d] ?? ($current_accounts[$d] ?? null);
+				}
+
+				if (empty($account->selector_value) && isset($this->_default_selector[$key][$account->direction])) {
+					$account->selector_value = $this->_default_selector[$key][$account->direction];
 				}
 			}
 		}

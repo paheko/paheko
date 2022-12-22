@@ -27,7 +27,6 @@ $transaction = new Transaction;
 $amount = 0;
 $id_project = null;
 $linked_users = null;
-$types_details = $transaction->getTypesDetails();
 
 $lines = [[], []];
 $form->runIf(f('lines') !== null, function () use (&$lines) {
@@ -54,6 +53,15 @@ if (qg('d')) {
 if (qg('t')) {
 	$transaction->type = (int) qg('t');
 }
+
+// Quick-set bank account
+if ($id = (int)qg('bk')) {
+	$transaction->setDefaultAccount($transaction::TYPE_REVENUE, 'debit', $id);
+	$transaction->setDefaultAccount($transaction::TYPE_EXPENSE, 'credit', $id);
+	$transaction->setDefaultAccount($transaction::TYPE_TRANSFER, 'debit', $id);
+}
+
+$types_details = $transaction->getTypesDetails();
 
 // Duplicate transaction
 if (qg('copy')) {
