@@ -76,7 +76,6 @@
 		</tr>
 		<tr>
 		{/foreach}
-		{* Currently unused as we cannot really compare values of lines *}
 		{foreach from=$diff.lines item="line"}
 			<td>
 				{if $line.diff.account}

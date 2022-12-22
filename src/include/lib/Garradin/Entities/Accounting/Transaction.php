@@ -221,6 +221,36 @@ class Transaction extends Entity
 		return null;
 	}
 
+	public function getCreditLine(): ?Line
+	{
+		if ($this->type == self::TYPE_ADVANCED) {
+			return null;
+		}
+
+		foreach ($this->getLines() as $line) {
+			if ($line->credit) {
+				return $line;
+			}
+		}
+
+		return null;
+	}
+
+	public function getDebitLine(): ?Line
+	{
+		if ($this->type == self::TYPE_ADVANCED) {
+			return null;
+		}
+
+		foreach ($this->getLines() as $line) {
+			if ($line->debit) {
+				return $line;
+			}
+		}
+
+		return null;
+	}
+
 	public function getFirstLine()
 	{
 		$lines = $this->getLines();
@@ -1239,25 +1269,43 @@ class Transaction extends Entity
 		];
 
 		$new_lines = [];
-		$old_line = [];
+		$old_lines = [];
 
-		foreach ($this->getLines() as $line) {
-			$new_line = [];
-
-			foreach ($keys as $key => $label) {
-				$new_line[$key] = $line->$key;
-			}
-
-			$new_lines[] = $new_line;
-
-			if ($line->exists() && $line->isModified()) {
-				$old_line = [];
+		foreach ($this->getLines() as $i => $line) {
+			if ($line->exists()) {
+				$diff = [];
 
 				foreach ($keys as $key => $label) {
-					$old_line[$key] = $line->getModifiedProperty($key) ?? $line->$key;
+					if ($line->isModified($key)) {
+						$diff[$key] = [$line->getModifiedProperty($key), $line->$key];
+					}
 				}
 
-				$old_lines[] = $old_line;
+				if (count($diff)) {
+					if (isset($diff['id_project'])) {
+						$diff['project'] = [Projects::getName($diff['id_project'][0]), Projects::getName($diff['id_project'][1])];
+					}
+
+					if (isset($diff['id_account'])) {
+						$diff['account'] = [Accounts::getCodeAndLabel($diff['id_account'][0]), Accounts::getCodeAndLabel($diff['id_account'][1])];
+					}
+				}
+
+				$l = array_merge($line->asArray(), compact('diff'));
+
+				$l['account'] = Accounts::getCodeAndLabel($l['id_account']);
+				$l['project'] = Projects::getName($l['id_project']);
+
+				$out['lines'][$i] = $l;
+			}
+			else {
+				$new_line = [];
+
+				foreach ($keys as $key => $label) {
+					$new_line[$key] = $line->$key;
+				}
+
+				$new_lines[] = $new_line;
 			}
 		}
 
@@ -1273,34 +1321,11 @@ class Transaction extends Entity
 
 		// Append new lines and changed lines
 		foreach ($new_lines as $i => $new_line) {
-			$found = array_search($new_line, $old_lines);
-
-			if (false === $found) {
+			if (!in_array($new_line, $old_lines)) {
 				$new_line['account'] = Accounts::getCodeAndLabel($new_line['id_account']);
 				$new_line['project'] = Projects::getName($new_line['id_project']);
 				$out['lines_new'][] = $new_line;
 			}
-			/*
-			// Currently unused, as we can't really compare lines unless it keeps the same ID
-			// And in import we reset the lines
-			else {
-				$found = $old_lines[$found];
-				$out['lines'][$i] = $new_line;
-				$out['lines'][$i]['account'] = Accounts::getCodeAndLabel($new_line['id_account']);
-				$out['lines'][$i]['diff'] = [];
-
-				foreach ($keys as $key => $label) {
-					$value = $new_line[$key];
-
-					if ($found[$key] !== $value) {
-						$out['lines'][$i]['diff'][$key] = [$found[$key], $value];
-					}
-				}
-
-				if (isset($out['lines'][$i]['diff']['id_project'])) {
-					$out['lines'][$i]['diff']['project'] = [Projects::getName($out['lines'][$i]['diff']['id_project'][0]), Projects::getName($out['lines'][$i]['diff']['id_project'][1])];
-				}
-			}*/
 		}
 
 		// Append removed lines

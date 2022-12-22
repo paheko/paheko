@@ -213,7 +213,9 @@ class Import
 							throw new UserException(sprintf('l\'écriture #%d est validée et ne peut être modifiée', $row->id));
 						}
 
-						$transaction->resetLines();
+						if ($type != Export::SIMPLE) {
+							$transaction->resetLines();
+						}
 					}
 					else {
 						$transaction = new Transaction;
@@ -286,8 +288,8 @@ class Import
 
 					$data['reference'] = isset($row->p_reference) ? $row->p_reference : null;
 
-					$l1 = new Line;
-					$l2 = new Line;
+					$l1 = $transaction->getCreditLine() ?? new Line;
+					$l2 = $transaction->getDebitLine() ?? new Line;
 
 					$l1->importForm($data + [
 						'credit'     => $row->amount,
@@ -301,8 +303,13 @@ class Import
 						'id_account' => $debit_account,
 					]);
 
-					$transaction->addLine($l1);
-					$transaction->addLine($l2);
+					if (!$l1->exists()) {
+						$transaction->addLine($l1);
+					}
+
+					if (!$l2->exists()) {
+						$transaction->addLine($l2);
+					}
 
 					self::saveImportedTransaction($transaction, $linked_users, $dry_run, $report);
 					$transaction = null;
