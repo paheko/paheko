@@ -12,12 +12,12 @@ $transaction = Transactions::get((int) qg('id'));
 
 $transaction->assertCanBeModified();
 
-$csrf_id = 'acc_delete_' . $transaction->id;
+$csrf_key = 'acc_delete_' . $transaction->id;
 
 $form->runIf('delete', function () use ($transaction) {
 	$transaction->delete();
 }, $csrf_key, '!acc/');
 
-$tpl->assign(compact('transaction'));
+$tpl->assign(compact('transaction', 'csrf_key'));
 
 $tpl->display('acc/transactions/delete.tpl');

@@ -3,7 +3,7 @@
 {include file="common/delete_form.tpl"
 	legend="Supprimer cette écriture ?"
 	warning="Êtes-vous sûr de vouloir supprimer l'écriture n°%d « %s » ?"|args:$transaction.id,$transaction.label
-	csrf_key="acc_delete_%s"|args:$transaction.id
+	csrf_key=$csrf_key
 }
 
 {include file="_foot.tpl"}
