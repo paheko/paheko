@@ -21,7 +21,7 @@ if (!$account) {
 
 $csrf_key = 'acc_reconcile_assist_' . $account->id();
 
-$ar = new AssistedReconciliation;
+$ar = new AssistedReconciliation($account);
 $csv = $ar->csv();
 
 $form->runIf('cancel', function () use ($csv) {

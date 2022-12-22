@@ -6,6 +6,7 @@ use Garradin\CSV_Custom;
 use Garradin\UserException;
 use Garradin\Utils;
 use Garradin\Membres\Session;
+use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entity;
 
@@ -27,13 +28,15 @@ class AssistedReconciliation
 	];
 
 	protected $csv;
+	protected Account $account;
 
-	public function __construct()
+	public function __construct(Account $account)
 	{
+		$this->account = $account;
 		$this->csv = new CSV_Custom(Session::getInstance(), 'acc_reconcile_csv');
 		$this->csv->setColumns(self::COLUMNS);
 		$this->csv->setMandatoryColumns(['label', 'date']);
-		$this->csv->setModifier(function (\stdClass $line): \stdClass {
+		$this->csv->setModifier(function (\stdClass $line) use ($account) {
 			$date = Entity::filterUserDateValue($line->date);
 
 			$line->date = $date;
@@ -59,6 +62,7 @@ class AssistedReconciliation
 				'l' => $line->label,
 				'd' => $date ? $date->format('Y-m-d') : '',
 				't' => $line->amount < 0 ? Transaction::TYPE_EXPENSE : Transaction::TYPE_REVENUE,
+				'account' => $account->id,
 			]);
 
 			return $line;
