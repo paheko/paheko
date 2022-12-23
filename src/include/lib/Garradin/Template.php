@@ -686,12 +686,17 @@ class Template extends Smartyer
 	{
 		$config = Config::getInstance();
 
-		$couleur1 = $config->get('couleur1') ?: ADMIN_COLOR1;
-		$couleur2 = $config->get('couleur2') ?: ADMIN_COLOR2;
-		$admin_background = ADMIN_BACKGROUND_IMAGE;
+		$c1 = ADMIN_COLOR1;
+		$c2 = ADMIN_COLOR2;
+		$bg = ADMIN_BACKGROUND_IMAGE;
 
-		if ($url = $config->fileURL('admin_background')) {
-			$admin_background = $url;
+		if (!FORCE_CUSTOM_COLORS) {
+			$c1 = $config->get('couleur1') ?: $c1;
+			$c2 = $config->get('couleur2') ?: $c2;
+
+			if ($url = $config->fileURL('admin_background')) {
+				$bg = $url;
+			}
 		}
 
 		$out = '
@@ -707,7 +712,7 @@ class Template extends Smartyer
 			$out .= "\n" . sprintf('<link rel="stylesheet" type="text/css" href="%s" />', $url);
 		}
 
-		return sprintf($out, CommonModifiers::css_hex_to_rgb($couleur1), CommonModifiers::css_hex_to_rgb($couleur2), $admin_background);
+		return sprintf($out, CommonModifiers::css_hex_to_rgb($c1), CommonModifiers::css_hex_to_rgb($c2), $bg);
 	}
 
 	protected function displayChampMembre($v, $config = null)

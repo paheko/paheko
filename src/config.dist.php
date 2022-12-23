@@ -431,14 +431,14 @@ namespace Garradin;
  * Couleur primaire de l'interface admin par défaut
  * (peut être personnalisée dans la configuration)
  *
- * Défaut : #9c4f15
+ * Défaut : #20787a
  */
 
 //const ADMIN_COLOR1 = '#20787a';
 
 /**
  * Couleur secondaire de l'interface admin
- * Défaut : #d98628
+ * Défaut : #85b9ba
  */
 
 //const ADMIN_COLOR2 = '#85b9ba';
@@ -453,11 +453,23 @@ namespace Garradin;
  *
  * sinon la personnalisation des couleurs ne fonctionnera pas
  *
- * Défaut : [ADMIN_URL]static/gdin_bg.png
+ * Défaut : [ADMIN_URL]static/bg.png
  */
 
-//const ADMIN_BACKGROUND_IMAGE = 'http://mon-asso.fr/fond_garradin.png';
+//const ADMIN_BACKGROUND_IMAGE = 'https://mon-asso.fr/fond_paheko.png';
 
+/**
+ * Forcer l'image de fond et couleurs dans l'interface d'administration
+ *
+ * Si positionné à TRUE, les couleurs et l'image de fond définies dans la configuration
+ * seront ignorés.
+ *
+ * Utile pour s'assurer qu'on est sur une instance de test par exemple.
+ *
+ * Défault : false
+ * @var bool
+ */
+//const FORCE_CUSTOM_COLORS = false;
 
 /**
  * Stockage des fichiers
