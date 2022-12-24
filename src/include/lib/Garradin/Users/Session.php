@@ -115,9 +115,9 @@ class Session extends \KD2\UserSession
 
 	protected function getUserDataForSession($id)
 	{
-		$user = Users::get($id);
+		$this->_user = Users::get($id);
 
-		if (!$user) {
+		if (!$this->_user) {
 			return null;
 		}
 
@@ -222,17 +222,30 @@ class Session extends \KD2\UserSession
 			// Mettre à jour la date de connexion
 			$this->db->preparedQuery('UPDATE users SET date_login = datetime() WHERE id = ?;', [$this->getUser()->id]);
 		}
-		elseif ($user = $this->getUserForLogin($login)) {
+		elseif (!$success && ($user = $this->getUserForLogin($login))) {
 			Log::add(Log::LOGIN_FAIL, compact('user_agent'), $user->id);
 		}
-		else {
+		elseif (!$success) {
 			Log::add(Log::LOGIN_FAIL, compact('user_agent'));
 		}
+		// Last case: $success === self::REQUIRE_OTP
 
 		Plugin::fireSignal('user.login', compact('login', 'password', 'remember_me', 'success'));
 
 		// Clean up logs
 		Log::clean();
+
+		// Populate user object, even for OTP, as we can only create private key using password here
+		if ($success === self::REQUIRE_OTP) {
+			$this->_user = Users::get($_SESSION['userSessionRequireOTP']->user->id);
+		}
+
+		// Generate user public/private key pair using password if required
+		if ($success && ($user = $this->user())) {
+			if (!$user->encryption) {
+				$user->generateKeyPair($password, true);
+			}
+		}
 
 		return $success;
 	}

@@ -182,6 +182,8 @@ class DynamicField extends Entity
 		'id_parent'    => '?int',
 		'is_parent'    => 'bool',
 		'preferences'  => '?array',
+		'public_key'   => '?string',
+		'private_key'  => '?string',
 	];
 
 	const SYSTEM_FIELDS_SQL = [
@@ -192,7 +194,9 @@ class DynamicField extends Entity
 		'pgp_key TEXT NULL,',
 		'id_parent INTEGER NULL REFERENCES users(id) ON DELETE SET NULL CHECK (id_parent IS NULL OR is_parent = 0),',
 		'is_parent INTEGER NOT NULL DEFAULT 0,',
-		'preferences TEXT NULL,'
+		'preferences TEXT NULL,',
+		'public_key TEXT NULL,',
+		'private_key TEXT NULL,',
 	];
 
 	public function delete(): bool

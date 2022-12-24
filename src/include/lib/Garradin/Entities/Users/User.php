@@ -299,6 +299,8 @@ class User extends Entity
 			$this->assert(hash_equals($source['password'], trim($source['password_confirmed'] ?? '')), 'La vérification du mot de passe doit être identique au mot de passe.');
 			$this->assert(!$session->isPasswordCompromised($source['password']), 'Le mot de passe choisi figure dans une liste de mots de passe compromis (piratés), il ne peut donc être utilisé ici. Si vous l\'avez utilisé sur d\'autres sites il est recommandé de le changer sur ces autres sites également.');
 
+			$this->changePrivateKeyPassword($source['password'], $source['password_check'] ?? null);
+
 			$source['password'] = $session::hashPassword($source['password']);
 		}
 
@@ -460,5 +462,53 @@ class User extends Entity
 
 		// Save preferences
 		$this->save();
+	}
+
+	/**
+	 * Generate user key pair and save it
+	 */
+	public function generateKeyPair(string $password, bool $save = false): void
+	{
+		if (!function_exists('\openssl_pkey_new')) {
+			return;
+		}
+
+		$pkey = openssl_pkey_new();
+
+		// Export public key
+		$this->public_key = openssl_pkey_get_details($private_key)['key'];
+
+		// Export private key, encrypted using password
+		openssl_pkey_export($pkey, $this->private_key, trim($password));
+		openssl_free_key($pkey);
+
+		if ($save) {
+			// Save only what has been set
+			$user = clone $this;
+			$user->import([
+				'private_key' => $this->private_key,
+				'public_key'  => $this->public_key,
+			]);
+			$user->save();
+			unset($user);
+		}
+		else {
+			$this->_modified['public_key'] = null;
+			$this->_modified['private_key'] = null;
+		}
+	}
+
+	public function changePrivateKeyPassword(string $new_password, ?string $old_password): void
+	{
+		if (!$old_password || !$this->public_key) {
+			$this->generateKeyPair($new_password);
+			return;
+		}
+
+		$pkey = openssl_pkey_get_private($this->private_key, trim($old_password));
+		openssl_pkey_export($pkey, $new_pkey, trim($new_password));
+		openssl_free_key($pkey);
+
+		$this->set('private_key', $new_pkey);
 	}
 }
