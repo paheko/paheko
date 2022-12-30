@@ -31,6 +31,12 @@ if ($address = qg('verify')) {
     exit;
 }
 
+$form->runIf(f('force_queue') && !USE_CRON, function () use ($session) {
+    $session->requireAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
+
+    Emails::runQueue();
+}, null, '!membres/emails.php?forced');
+
 $list = Emails::listRejectedUsers();
 $list->loadFromQueryString();
 
