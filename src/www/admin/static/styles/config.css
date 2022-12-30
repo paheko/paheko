@@ -47,7 +47,6 @@
     position: relative;
     min-height: 2em;
     transition: all 1s;
-    overflow: hidden;
     max-height: 5000px;
 }
 
@@ -60,7 +59,7 @@
 #orderFields fieldset .actions {
     display: block;
     position: absolute;
-    top: 1em;
+    top: 0;
     right: 1em;
 }
 
