@@ -82,7 +82,7 @@
 				</select>
 			</dd>
 			<dd class="help">
-				Vous pouvez cibler précisément des membres en créant une <a href="{$admin_url}membres/recherche.php">recherche enregistrée</a>.
+				Vous pouvez cibler précisément des membres en créant une <a href="{$admin_url}membres/recherche.php">recherche avancée</a> et en l'enregistant.
 				Les recherches enregistrées apparaîtront dans ce formulaire.
 			</dd>
 			{input type="text" name="subject" required=true label="Sujet"}
