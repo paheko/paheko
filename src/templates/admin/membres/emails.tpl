@@ -11,15 +11,24 @@
 <p class="confirm block">
 	Un message de demande de confirmation a bien été envoyé. Le destinataire doit désormais cliquer sur le lien dans ce message.
 </p>
+{elseif isset($_GET['forced'])}
+<p class="confirm block">
+	La file d'attente a été envoyée.
+</p>
 {/if}
 
+<form method="post" action="">
 <p class="help">
 	{if !$queue_count}
 		Il n'y a aucun message en attente d'envoi.
 	{else}
 		Il y a {$queue_count} messages dans la file d'attente, ils seront envoyés dans quelques instants.
+		{if !USE_CRON && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
+			{button shape="right" label="Forcer l'envoi des messages en attente" type="submit" name="force_queue"}
+		{/if}
 	{/if}
 </p>
+</form>
 
 {if !$list->count()}
 	<p class="alert block">Aucune adresse e-mail n'a été rejetée pour le moment. Cette page présentera les adresses e-mail invalides ou qui ont demandé à se désinscrire.</p>
