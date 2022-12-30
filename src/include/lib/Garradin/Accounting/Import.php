@@ -234,6 +234,15 @@ class Import
 
 					$fields = array_intersect_key((array)$row, array_flip(['label', 'date', 'notes', 'reference']));
 
+					// Remove NULL fields
+					if (array_key_exists('date', $fields) && null === $fields['date']) {
+						unset($fields['date']);
+					}
+
+					if (array_key_exists('label', $fields) && null === $fields['label']) {
+						unset($fields['label']);
+					}
+
 					$transaction->importForm($fields);
 
 					// Set status
