@@ -149,12 +149,10 @@ class Email extends Entity
 			throw new UserException('Adresse e-mail invalide (le domaine indiqué n\'a pas de service e-mail) : vérifiez que vous n\'avez pas fait une faute de frappe.');
 		}
 
-		$mx_list = array_filter($mx_list,
-  			fn ($mx) => !preg_match(self::BLACKLIST_MANUAL_VALIDATION_MX, $mx)
-  		);
-
-		if (!count($mx_list)) {
-			throw new UserException('Adresse e-mail invalide : impossible d\'envoyer des mails à un service (de type mailinblack ou spamenmoins) qui demande une validation manuelle de l\'expéditeur. Merci de choisir une autre adresse e-mail.');
+		foreach ($mx_list as $mx) {
+  			if (preg_match(self::BLACKLIST_MANUAL_VALIDATION_MX, $mx)) {
+				throw new UserException('Adresse e-mail invalide : impossible d\'envoyer des mails à un service (de type mailinblack ou spamenmoins) qui demande une validation manuelle de l\'expéditeur. Merci de choisir une autre adresse e-mail.');
+			}
 		}
 	}
 
