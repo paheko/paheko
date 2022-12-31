@@ -441,14 +441,14 @@ class User extends Entity
 
 	public function getPreference(string $key)
 	{
-		return $this->preferences[$key] ?? null;
+		return $this->preferences->$key ?? null;
 	}
 
 	public function setPreference(string $key, $value)
 	{
 		settype($value, gettype(self::PREFERENCES[$key]));
 
-		$this->preferences[$key] = $value;
+		$this->preferences->$key = $value;
 		$this->_modified['preferences'] = null;
 	}
 

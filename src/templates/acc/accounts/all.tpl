@@ -7,8 +7,6 @@ use Garradin\Entities\Accounting\Account;
 
 {include file="acc/accounts/_nav.tpl" current="all"}
 
-{include file="acc/_simple_help.tpl" link="../reports/trial_balance.php?year=%d"|args:$current_year.id type=null}
-
 {if !empty($balance)}
 <table class="list">
 	<thead>

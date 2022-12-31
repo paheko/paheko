@@ -288,6 +288,19 @@ class Accounts
 		return $list;
 	}
 
+	/**
+	 * Renvoie TRUE si le solde du compte est inversé (= crédit - débit, au lieu de débit - crédit)
+	 * @return boolean
+	 */
+	static public function isReversed(bool $simple, int $type): bool
+	{
+		if ($simple && in_array($type, [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING, Account::TYPE_EXPENSE, Account::TYPE_THIRD_PARTY])) {
+			return false;
+		}
+
+		return true;
+	}
+
 /* FIXME: implement closing of accounts
 
 	public function closeRevenueExpenseAccounts(Year $year, int $user_id)

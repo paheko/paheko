@@ -11,6 +11,7 @@ use Garradin\Entity;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\ValidationException;
+use Garradin\Accounting\Accounts;
 use Garradin\Accounting\Charts;
 
 class Account extends Entity
@@ -571,8 +572,10 @@ class Account extends Entity
 	 */
 	public function isReversed(bool $simple, int $id_year): bool
 	{
-		if ($simple && in_array($this->type, [self::TYPE_BANK, self::TYPE_CASH, self::TYPE_OUTSTANDING, self::TYPE_EXPENSE, self::TYPE_THIRD_PARTY])) {
-			return false;
+		$is_reversed = Accounts::isReversed($simple, $this->type);
+
+		if (!$is_reversed) {
+			return $is_reversed;
 		}
 
 		$position = $this->getPosition($id_year);

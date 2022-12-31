@@ -44,7 +44,7 @@ if ($account->id_chart != $year->id_chart) {
 }
 
 $can_edit = $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$year->closed;
-$simple = qg('simple');
+$simple = !empty($session->user()->preferences->accounting_expert) ? false : true;
 
 // Use simplified view for favourite accounts
 if (null === $simple) {

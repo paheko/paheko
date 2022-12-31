@@ -30,12 +30,6 @@
 		{/if}
 		</ul>
 
-		{if $current == 'trial_balance'}
-		<ul class="sub">
-			<li{if $sub_current == 'simple'} class="current"{/if}>{link href="?%s"|args:$criterias_query_no_compare label="Vue simplifiée"}</li>
-			<li{if $sub_current != 'simple'} class="current"{/if}>{link href="?%s&simple=0"|args:$criterias_query_no_compare label="Vue comptable"}</li>
-		</ul>
-		{/if}
 	</nav>
 
 	{if !empty($year)}

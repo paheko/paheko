@@ -181,7 +181,7 @@ class DynamicField extends Entity
 		'date_login'   => '?DateTime',
 		'id_parent'    => '?int',
 		'is_parent'    => 'bool',
-		'preferences'  => '?array',
+		'preferences'  => '?stdClass',
 	];
 
 	const SYSTEM_FIELDS_SQL = [

@@ -557,7 +557,7 @@ class Reports
 	/**
 	 * Grand livre
 	 */
-	static public function getGeneralLedger(array $criterias): \Generator
+	static public function getGeneralLedger(array $criterias, bool $simple = false): \Generator
 	{
 		$where = self::getWhereClause($criterias);
 
@@ -573,7 +573,7 @@ class Reports
 		$sql = sprintf('SELECT
 			t.id_year, a.id AS id_account, t.id, t.date, t.reference,
 			l.debit, l.credit, l.reference AS line_reference, t.label, l.label AS line_label,
-			a.label AS account_label, a.code AS account_code
+			a.label AS account_label, a.code AS account_code, a.type AS account_type
 			FROM acc_transactions t
 			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
 			INNER JOIN %s
@@ -604,7 +604,13 @@ class Reports
 
 			$row->date = \DateTime::createFromFormat('Y-m-d', $row->date);
 
-			$account->sum += ($row->credit - $row->debit);
+			$sum = $row->debit - $row->credit;
+
+			if (Accounts::isReversed($simple, $row->account_type)) {
+				$sum *= -1;
+			}
+
+			$account->sum += $sum;
 			$account->debit += $row->debit;
 			$account->credit += $row->credit;
 			$debit += $row->debit;

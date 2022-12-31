@@ -11,10 +11,6 @@
 
 {if $account.type}
 
-	{if $simple && !$account->isReversed($simple, $year.id)}
-		{include file="acc/_simple_help.tpl" link="?id=%d&simple=0&year=%d"|args:$account.id,$year.id type=$account.type}
-	{/if}
-
 	{if $simple}
 		{if $account.type == $account::TYPE_THIRD_PARTY}
 			{if $account->getPosition($year->id) == $account::ASSET && $sum.balance > 0}
@@ -50,6 +46,9 @@
 
 	<nav class="tabs">
 		<aside>
+		{if !$filter.start && !$filter.end}
+			{linkbutton shape="search" href="?start=1" label="Filtrer" onclick="g.toggle('#filterForm', true); this.remove(); return false;"}
+		{/if}
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 			{exportmenu href="%s&export="|args:$self_url}
 		{/if}
@@ -58,17 +57,6 @@
 			{linkbutton href="!acc/transactions/new.php?account=%d"|args:$account.id label="Saisir une écriture dans ce compte" shape="plus"}
 		{/if}
 		</aside>
-		<ul>
-			<li{if $simple} class="current"{/if}><a href="?id={$account.id}&amp;simple=1&amp;year={$year.id}">Vue simplifiée</a></li>
-			<li{if !$simple} class="current"{/if}><a href="?id={$account.id}&amp;simple=0&amp;year={$year.id}">Vue comptable</a></li>
-		</ul>
-
-	{if !$filter.start && !$filter.end}
-	<aside>
-		{linkbutton shape="search" href="?start=1" label="Filtrer" onclick="g.toggle('#filterForm', true); this.remove(); return false;"}
-	</aside>
-	{/if}
-
 	</nav>
 {/if}
 
@@ -82,7 +70,6 @@
 			{input type="date" name="end" source=$filter default=$year.end_date}
 			<input type="hidden" name="id" value="{$account.id}" />
 			<input type="hidden" name="year" value="{$year.id}" />
-			<input type="hidden" name="simple" value="{$simple}" />
 			<input type="submit" value="Filtrer" />
 		</p>
 	</fieldset>

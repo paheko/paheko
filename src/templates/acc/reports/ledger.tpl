@@ -66,10 +66,10 @@
 {if isset($account->all_debit)}
 	<table class="list">
 		<colgroup>
-			<col width="70%" />
-			<col width="10%" />
-			<col width="10%" />
-			<col width="10%" />
+			<col width="85%" />
+			<col width="5%" />
+			<col width="5%" />
+			<col width="5%" />
 		</colgroup>
 		<tfoot>
 			<tr>
