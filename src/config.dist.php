@@ -257,6 +257,32 @@ namespace Garradin;
 // const SQL_DEBUG = __DIR__ . '/debug_sql.sqlite';
 
 /**
+ * Mode de journalisation de SQLite
+ *
+ * Paheko utilise par défaut le mode 'WAL' de SQLite, qui permet à SQLite
+ * d'être extrêmement rapide.
+ *
+ * Cependant, sur certains hébergeurs utilisant une vieille version de NFS,
+ * ce mode peut provoquer dans certains rares cas une corruption de la
+ * base de données.
+ *
+ * Depuis la version 1.2.4 Paheko détecte si l'hébergeur est OVH. Si c'est le cas,
+ * il utilise le mode 'DELETE' au lieu de 'WAL'.
+ * Celui-ci ne présente pas de risque, mais la base de données est alors plus
+ * lente.
+ *
+ * Si votre hébergement risque de corrompre la base de données, il est conseillé
+ * d'inscrire ici 'DELETE' au lieu de 'WAL'.
+ *
+ * @see https://www.sqlite.org/wal.html
+ * @see https://stackoverflow.com/questions/52378361/which-nfs-implementation-is-safe-for-sqlite-database-accessed-by-multiple-proces
+ *
+ * Défaut : 'WAL'
+ * @var string|null
+ */
+//const SQLITE_JOURNAL_MODE = 'WAL';
+
+/**
  * Activer la possibilité de faire une mise à jour semi-automatisée
  * depuis fossil.kd2.org.
  *

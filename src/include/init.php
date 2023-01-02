@@ -220,6 +220,7 @@ static $default_config = [
 	'SQL_DEBUG'             => null,
 	'SYSTEM_SIGNALS'        => [],
 	'DISABLE_INSTALL_PING'  => false,
+	'SQLITE_JOURNAL_MODE'   => null,
 ];
 
 foreach ($default_config as $const => $value)
