@@ -186,6 +186,8 @@ class Install
 			throw new UserException('La base de données existe déjà.');
 		}
 
+		self::detectJournalMode();
+
 		self::checkAndCreateDirectories();
 		Files::disableQuota();
 		$db = DB::getInstance();
@@ -352,18 +354,35 @@ class Install
 		return true;
 	}
 
-	static public function setLocalConfig($key, $value)
+	static public function detectJournalMode(): void
+	{
+		// Journal mode is already set
+		if (null !== SQLITE_JOURNAL_MODE) {
+			return;
+		}
+
+		// Try to get around OVH issues
+		if (false !== stripos(php_uname('a'), 'ovh')) {
+			$mode = 'DELETE';
+			self::setLocalConfig('SQLITE_JOURNAL_MODE', 'DELETE', false);
+		}
+	}
+
+	static public function setLocalConfig(string $key, $value, bool $overwrite = true): void
 	{
 		$path = ROOT . DIRECTORY_SEPARATOR . 'config.local.php';
 		$new_line = sprintf('const %s = %s;', $key, var_export($value, true));
 
-		if (file_exists($path))
-		{
+		if (file_exists($path)) {
 			$config = file_get_contents($path);
 
 			$pattern = sprintf('/^.*(?:const\s+%s|define\s*\(.*%1$s).*$/m', $key);
 
 			$config = preg_replace($pattern, $new_line, $config, -1, $count);
+
+			if ($count && !$overwrite) {
+				return;
+			}
 
 			if (!$count)
 			{
@@ -378,7 +397,7 @@ class Install
 				. $new_line . PHP_EOL;
 		}
 
-		return file_put_contents($path, $config);
+		file_put_contents($path, $config);
 	}
 
 	static public function showProgressSpinner(?string $next = null, string $message = '')
