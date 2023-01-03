@@ -592,6 +592,10 @@ class Utils
             return false;
         }
 
+        if (PHP_VERSION_ID >= 80200) {
+            return ini_parse_quantity($size_str);
+        }
+
         switch (substr($size_str, -1))
         {
             case 'G': case 'g': return (int)$size_str * pow(1024, 3);
@@ -953,7 +957,12 @@ class Utils
         }
 
         // Check if string is already UTF-8 encoded or not
-        return !preg_match('//u', $str) ? utf8_encode($str) : $str;
+        if (preg_match('//u', $str)) {
+            return $str;
+        }
+
+        // FIXME for PHP 9.0+ see https://php.watch/versions/8.2/utf8_encode-utf8_decode-deprecated
+        return @utf8_encode($str);
     }
 
     /**
