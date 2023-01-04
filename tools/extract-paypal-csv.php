@@ -156,7 +156,7 @@ foreach ($out as $c) {
 		fputcsv($fp, ['', $c->Date, 'Commission PayPal sur transaction', '', '', $amount, '', $ref, $notes]);
 	}
 
-	$amount = preg_replace('/[\s ]+/U', '', $c->Net);
+	$amount = preg_replace('/[\s ]+/U', '', $c->{'Avant commission'});
 	fputcsv($fp, ['', $c->Date, $label, '', '', $amount, '', $ref, $notes]);
 }
 
