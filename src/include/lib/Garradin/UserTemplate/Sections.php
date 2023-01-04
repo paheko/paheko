@@ -120,7 +120,7 @@ class Sections
 			$params['where'] = '';
 		}
 
-		$params['tables'] = $table;
+		$params['tables'] = 'acc_accounts_balances';
 
 		if (isset($params['codes'])) {
 			$params['codes'] = explode(',', $params['codes']);
