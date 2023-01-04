@@ -501,8 +501,8 @@ class Reports
 		$out->caption_left = 'Actif';
 		$out->caption_right = 'Passif';
 
-		$out->body_left = self::getAccountsBalances($criterias + ['position' => Account::ASSET], null, false);
-		$out->body_right = self::getAccountsBalances($criterias + ['position' => Account::LIABILITY], null, false);
+		$out->body_left = self::getAccountsBalances($criterias + ['position' => Account::ASSET]);
+		$out->body_right = self::getAccountsBalances($criterias + ['position' => Account::LIABILITY]);
 
 		// Append result to liability
 		$r = self::getResultLine($criterias);
