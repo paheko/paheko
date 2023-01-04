@@ -124,7 +124,7 @@ class Files
 			'share' => false,
 		];
 
-		// All skeletons
+		// Other skeletons
 		$p[File::CONTEXT_SKELETON] = [
 			'mkdir' => $is_admin,
 			'move' => $is_admin,

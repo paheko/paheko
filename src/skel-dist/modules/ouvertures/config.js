@@ -140,7 +140,7 @@ function removeRow(e) {
 	var row = e.target.parentNode.parentNode;
 	var table = row.parentNode.parentNode;
 
-	if (table.rows.length == 1)
+	if (table.rows.length <= 2)
 	{
 		return false;
 	}

@@ -139,6 +139,9 @@ class Functions
 			$params = array_merge($exists, $params);
 		}
 
+		// Remove NULL values
+		$params = array_filter($params, fn($a) => !is_null($a));
+
 		if ($validate) {
 			$schema = self::read(['file' => $validate], $tpl, $line);
 
@@ -198,7 +201,7 @@ class Functions
 
 	static public function error(array $params, Brindille $tpl)
 	{
-		throw new UserException($params['message']);
+		throw new UserException($params['message'] ?? 'Erreur du module');
 	}
 
 	static protected function getFilePath(array $params, string $arg_name, UserTemplate $ut, int $line)

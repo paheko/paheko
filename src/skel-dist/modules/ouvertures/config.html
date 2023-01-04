@@ -25,14 +25,13 @@
 
 	{{if $error}}
 		<p class="error block">{{$error}}</p>
-	{{elseif true}}
+	{{else}}
 		{{:save key="config"
 			validate_schema="./schema.json"
 			open=$slots
 			closed=$_POST.closed|array_transpose
 		}}
 		{{:http redirect="?ok=1"}}
-	{{else}}
 	{{/if}}
 {{/if}}
 
