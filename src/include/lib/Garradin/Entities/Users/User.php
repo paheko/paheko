@@ -448,6 +448,10 @@ class User extends Entity
 	{
 		settype($value, gettype(self::PREFERENCES[$key]));
 
+		if (null === $this->preferences) {
+			$this->preferences = new \stdClass;
+		}
+
 		$this->preferences->$key = $value;
 		$this->_modified['preferences'] = null;
 	}
