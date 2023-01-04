@@ -128,7 +128,7 @@ class DynamicList implements \Countable
 		$this->count = $count;
 	}
 
-	public function getHeaderColumns()
+	public function getHeaderColumns(bool $export = false)
 	{
 		$columns = [];
 
@@ -146,11 +146,11 @@ class DynamicList implements \Countable
 				continue;
 			}
 
-			if (!empty($properties['export_only'])) {
+			if (!$export && !empty($properties['export_only'])) {
 				continue;
 			}
 
-			$columns[$alias] = $properties;
+			$columns[$alias] = $export ? $properties['label'] : $properties;
 		}
 
 		return $columns;
@@ -158,21 +158,7 @@ class DynamicList implements \Countable
 
 	public function getExportHeaderColumns(): array
 	{
-		$columns = [];
-
-		foreach ($this->columns as $alias => $properties) {
-			if (isset($properties['only_with_order'])) {
-				continue;
-			}
-
-			if (!isset($properties['label'])) {
-				continue;
-			}
-
-			$columns[$alias] = $properties['label'];
-		}
-
-		return $columns;
+		return $this->getHeaderColumns(true);
 	}
 
 	public function iterate(bool $include_hidden = true)
