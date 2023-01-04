@@ -35,7 +35,7 @@ class Sections
 		'balances',
 		'sql',
 		'restrict',
-		'form',
+		'module',
 	];
 
 	static protected $_cache = [];
@@ -84,7 +84,7 @@ class Sections
 		}
 
 		$params['select'] = isset($params['select']) ? $params['select'] : 'value AS json';
-		$params['tables'] = 'user_forms_' . $name;
+		$params['tables'] = 'module_data_' . $name;
 
 		try {
 			$query = self::sql($params, $tpl, $line);
@@ -600,22 +600,22 @@ class Sections
 		}
 	}
 
-	static public function form(array $params, UserTemplate $tpl, int $line): \Generator
+	static public function module(array $params, UserTemplate $tpl, int $line): \Generator
 	{
 		if (empty($params['name'])) {
 			throw new Brindille_Exception('Missing parameter "name"');
 		}
 
-		$form = DB::getInstance()->first('SELECT * FROM user_forms WHERE name = ?;', $params['name']);
+		$module = DB::getInstance()->first('SELECT * FROM modules WHERE name = ?;', $params['name']);
 
-		if (!$form || !$form->enabled) {
+		if (!$module || !$module->enabled) {
 			return null;
 		}
 
-		$form->config = $form->config ? @json_decode($form->config) : null;
-		$form->path = 'forms/' . $form->name;
+		$module->config = $module->config ? @json_decode($module->config) : null;
+		$module->path = 'modules/' . $module->name;
 
-		yield (array) $form;
+		yield (array) $module;
 	}
 
 	static public function sql(array $params, UserTemplate $tpl, int $line): \Generator

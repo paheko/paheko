@@ -492,8 +492,8 @@ CREATE INDEX IF NOT EXISTS web_pages_parent ON web_pages (parent);
 CREATE INDEX IF NOT EXISTS web_pages_published ON web_pages (published);
 CREATE INDEX IF NOT EXISTS web_pages_title ON web_pages (title);
 
-CREATE TABLE IF NOT EXISTS user_forms
--- List of user forms
+CREATE TABLE IF NOT EXISTS modules
+-- List of modules
 (
     id INTEGER NOT NULL PRIMARY KEY,
     name TEXT NOT NULL,
@@ -503,14 +503,14 @@ CREATE TABLE IF NOT EXISTS user_forms
     enabled INTEGER NOT NULL DEFAULT 0
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS user_forms_name ON user_forms (name);
+CREATE UNIQUE INDEX IF NOT EXISTS modules_name ON modules (name);
 
-CREATE TABLE IF NOT EXISTS user_forms_templates
+CREATE TABLE IF NOT EXISTS modules_templates
 -- List of forms special templates
 (
     id INTEGER NOT NULL PRIMARY KEY,
-    id_form INTEGER NOT NULL REFERENCES user_forms (id) ON DELETE CASCADE,
+    id_module INTEGER NOT NULL REFERENCES modules (id) ON DELETE CASCADE,
     name TEXT NOT NULL
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS user_forms_templates_name ON user_forms_templates (id_form, name);
+CREATE UNIQUE INDEX IF NOT EXISTS modules_templates_name ON modules_templates (id_module, name);

@@ -1,0 +1,38 @@
+{{:admin_header title="Configuration du reçu fiscal"}}
+
+{{if $_POST.save}}
+	{{if $_POST.accounts|trim == ''}}
+		<p class="error block">Les numéros de comptes éligibles n'ont pas été renseignés.</p>
+	{{else}}
+		{{:save key="config"
+			accounts=$_POST.accounts
+		}}
+		{{:http redirect="?ok=1"}}
+	{{/if}}
+{{/if}}
+
+{{if $_GET.ok}}
+	<p class="block confirm">Configuration enregistrée.</p>
+{{/if}}
+
+<form method="post" action="">
+
+<fieldset>
+	<legend>Configuration du modèle de reçu</legend>
+	<dl>
+		{{:input required=false name="accounts" type="text" label="Numéros de comptes éligibles aux reçus" source=$module.config default="756"}}
+		<dd class="help">
+			Pour chaque numéro de compte indiqué dans ce champ, le reçu de don sera proposé (en dessous de la fiche de l'écriture).<br />
+			Séparer les numéros de compte avec des virgules, par exemple : <tt>754, 756</tt>.<br />
+			Laisser vide pour que le reçu de don soit proposé quel que soit le compte.
+		</dd>
+	</dl>
+</fieldset>
+
+<p class="submit">
+	{{:button type="submit" name="save" label="Enregistrer" shape="right" class="main"}}
+</p>
+
+</form>
+
+{{:admin_footer}}

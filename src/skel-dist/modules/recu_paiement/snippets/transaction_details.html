@@ -1,0 +1,8 @@
+{{if $related_users|count >= 1}}
+	<h2 class="ruler">{{$module.label}}</h2>
+	<p class="actions-center">
+		{{:linkbutton href="%s?id=%d"|args:$module.url:$transaction.id target="_dialog" label="Prévisualiser" shape="eye"}}
+		{{:linkbutton href="%s?id=%d&print=pdf"|args:$module.url:$transaction.id label="Télécharger en PDF" shape="download"}}
+		{{:linkbutton href="%s?id=%d&print=yes"|args:$module.url:$transaction.id target="_blank" label="Imprimer" shape="print"}}
+	</p>
+{{/if}}

@@ -1,0 +1,7 @@
+{{if $module.config.accounts === null}}
+	{{:assign module.config.accounts='5112'}}
+{{/if}}
+
+{{* FIXME: ne proposer le bordereau que pour les écritures de dépot *}}
+
+{{:include file="modules/recu_don/snippets/transaction_details.html"}}

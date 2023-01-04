@@ -6,7 +6,7 @@ use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 use Garradin\Entities\Web\Page;
 use Garradin\UserException;
-use Garradin\UserTemplate\UserForms;
+use Garradin\UserTemplate\Modules;
 use Garradin\UserTemplate\UserTemplate;
 use Garradin\Config;
 use Garradin\Plugin;
@@ -28,9 +28,9 @@ class Skeleton
 	{
 		$page = null;
 
-		if (substr($uri, 0, 5) == 'form/') {
-			$uri = substr($uri, 5);
-			$path = 'forms/' . $uri;
+		if (substr($uri, 0, 2) == 'm/') {
+			$uri = substr($uri, 2);
+			$path = 'modules/' . $uri;
 		}
 		else {
 			if (Config::getInstance()->site_disabled && $uri != 'content.css') {
@@ -88,7 +88,7 @@ class Skeleton
 
 	static public function isValidPath(string $path)
 	{
-		return (bool) preg_match('!^(?:web|forms/[\w\d_-]+)/[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $path);
+		return (bool) preg_match('!^(?:web|modules/[\w\d_-]+)/[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $path);
 	}
 
 	public function defaultPath(): ?string
@@ -116,18 +116,18 @@ class Skeleton
 
 		// Serve a template
 		if (preg_match(self::TEMPLATE_TYPES, $type)) {
-			if (substr($this->path, 0, 6) == 'forms/') {
+			if (0 === strpos($this->path, 'modules/')) {
 				$name = substr($uri, 0, strrpos($uri, '/'));
 				$file = substr($uri, strrpos($uri, '/') + 1) ?: 'index.html';
-				$form = UserForms::get($name);
+				$module = Modules::get($name);
 
-				if (!$form || !$form->enabled) {
+				if (!$module || !$module->enabled) {
 					http_response_code(404);
-					throw new UserException('Ce formulaire n\'existe pas ou n\'est pas activé.');
+					throw new UserException('Ce module n\'existe pas ou n\'est pas activé.');
 				}
 
-				$path = 'forms/' . $name . '/' . $file;
-				$form->template($file)->serve();
+				$path = 'modules/' . $name . '/' . $file;
+				$module->template($file)->serve();
 			}
 			else {
 				$ut = new UserTemplate($this->path);

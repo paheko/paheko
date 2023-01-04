@@ -2,8 +2,7 @@
 namespace Garradin;
 
 use Garradin\Accounting\Transactions;
-use Garradin\UserTemplate\UserForms;
-use Garradin\Entities\UserForm;
+use Garradin\UserTemplate\Modules;
 use Garradin\Users\Users;
 
 require_once __DIR__ . '/../_inc.php';
@@ -33,6 +32,6 @@ $variables = compact('csrf_key', 'transaction') + [
 ];
 
 $tpl->assign($variables);
-$tpl->assign('snippets', UserForms::snippetsAsString(UserForm::SNIPPET_TRANSACTION, $variables));
+$tpl->assign('snippets', Modules::snippetsAsString(Modules::SNIPPET_TRANSACTION, $variables));
 
 $tpl->display('acc/transactions/details.tpl');

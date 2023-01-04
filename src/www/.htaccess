@@ -32,8 +32,8 @@ DirectoryIndex index.php
 
 	RewriteRule \.cache - [R=404]
 
-	# Do not try to get from cache if URL is private, or belongs to forms/plugins
-	RewriteCond %{REQUEST_URI} admin/|dav/|wopi/|ocs|avatars|p/|api/|documents/|user/|transaction/|form/|\.php$ [OR]
+	# Do not try to get from cache if URL is private, or belongs to modules/plugins
+	RewriteCond %{REQUEST_URI} admin/|dav/|wopi/|ocs|avatars|p/|api/|documents/|user/|transaction/|m/|\.php$ [OR]
 	# Do not try cache if method is not GET or HEAD
 	RewriteCond %{REQUEST_METHOD} !GET|HEAD
 	# Skip, go to router directly

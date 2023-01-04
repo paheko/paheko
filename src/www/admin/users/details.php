@@ -6,8 +6,7 @@ use Garradin\Services\Services_User;
 use Garradin\Users\Categories;
 use Garradin\Users\Users;
 
-use Garradin\UserTemplate\UserForms;
-use Garradin\Entities\UserForm;
+use Garradin\UserTemplate\Modules;
 
 require_once __DIR__ . '/_inc.php';
 
@@ -59,6 +58,6 @@ $siblings = $user->listSiblings();
 $variables += compact('services', 'user', 'category', 'children', 'siblings', 'parent_name', 'csrf_key');
 
 $tpl->assign($variables);
-$tpl->assign('snippets', UserForms::snippetsAsString(UserForm::SNIPPET_USER, $variables));
+$tpl->assign('snippets', Modules::snippetsAsString(Modules::SNIPPET_USER, $variables));
 
 $tpl->display('users/details.tpl');

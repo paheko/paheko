@@ -1,0 +1,75 @@
+{{#restrict block=true section="users" level="read"}}
+{{/restrict}}
+{{if !$_GET.id}}
+
+	{{:admin_header title="Carte de membre" current="users"}}
+
+	{{:error message="Aucun numéro de membre n'a été fourni"}}
+
+	{{:admin_footer}}
+
+{{else}}
+	{{#users id=$_GET.id}}
+		{{:assign title="%s - Carte de membre"|args:$user_name}}
+
+		{{if $_GET.print == 'pdf'}}
+			{{:http type="pdf" download="%s.pdf"|args:$title}}
+		{{/if}}
+		<!DOCTYPE html>
+		<html>
+		<head>
+			<title>{{$title}}</title>
+			<style type="text/css">
+			* { margin: 0; padding: 0; }
+			body {
+				border: 5px solid {{$config.color1}};
+				background: #fff;
+				border-radius: .5em;
+				font-family: sans-serif;
+				padding: 10px;
+				max-width: 320px;
+			}
+			.logo {
+				max-width: 100px;
+				float: right;
+			}
+			h1 {
+				font-size: 18pt;
+				margin-bottom: .5em;
+			}
+			h2 {
+				font-size: 14pt;
+				font-weight: normal;
+				margin-bottom: .5em;
+			}
+			h3 {
+				font-size: 11pt;
+				font-weight: normal;
+			}
+			</style>
+		</head>
+
+		<body>
+
+		<main>
+			{{if $photo}}
+				<img src="{{$photo.0.url}}" alt="" class="logo" />
+			{{else}}
+				<img src="{{$config.files.logo}}?150px" alt="" class="logo" />
+			{{/if}}
+
+			<h1>{{$user_name}}</h1>
+
+			<h2>N°{{$user_number}}</h2>
+
+			{{#subscriptions user=$id active=true}}
+			<h3>{{$label}} valide jusqu'au {{$expiry_date|date_short}}</h3>
+			{{/subscriptions}}
+
+			<div style="clear:both"></div>
+
+		{{:include file="modules/_footer.html"}}
+	{{else}}
+		{{:error message="Le numéro de membre fourni n'existe pas."}}
+	{{/users}}
+{{/if}}

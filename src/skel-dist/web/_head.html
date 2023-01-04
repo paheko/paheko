@@ -66,10 +66,10 @@
 		</p>
 	</form>
 
-	{{#form name="ouvertures"}}
+	{{#module name="ouvertures"}}
 		{{:include file="%s/_next_opening.html"|args:$path}}
 		{{:include file="%s/_all.html"|args:$path}}
-	{{/form}}
+	{{/module}}
 
 	<ul>
 	{{#categories parent=null order="title"}}

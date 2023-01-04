@@ -15,7 +15,7 @@ use Garradin\UserException;
 use Garradin\Email\Emails;
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
-use Garradin\Entities\UserForm;
+use Garradin\Entities\Module;
 
 use const Garradin\{ROOT, WWW_URL};
 
@@ -86,7 +86,7 @@ class Functions
 			throw new Brindille_Exception('Unique document name could not be found');
 		}
 
-		$table = 'user_forms_' . $name;
+		$table = 'module_data_' . $name;
 
 		if (!empty($params['key'])) {
 			if ($params['key'] == 'uuid') {
@@ -118,7 +118,7 @@ class Functions
 		$db = DB::getInstance();
 
 		if ($key == 'config') {
-			$exists = $db->firstColumn(sprintf('SELECT config FROM %s WHERE name = ?;', UserForm::TABLE), $name);
+			$exists = $db->firstColumn(sprintf('SELECT config FROM %s WHERE name = ?;', Module::TABLE), $name);
 		}
 		else {
 			$db->exec(sprintf('
@@ -155,7 +155,7 @@ class Functions
 		$value = json_encode($params);
 
 		if ($key == 'config') {
-			$db->update(UserForm::TABLE, ['config' => $value], 'name = :name', compact('name'));
+			$db->update(Module::TABLE, ['config' => $value], 'name = :name', compact('name'));
 			return;
 		}
 
