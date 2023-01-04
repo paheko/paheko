@@ -136,6 +136,11 @@ class Fee extends Entity
 			'id_user' => [
 				'select' => 'su.id_user',
 			],
+			'user_number' => [
+				'label' => 'Numéro de membre',
+				'select' => 'm.numero',
+				'export_only' => true,
+			],
 			'identity' => [
 				'label' => 'Membre',
 				'select' => 'm.' . $identity,
