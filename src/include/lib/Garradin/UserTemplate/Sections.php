@@ -57,8 +57,17 @@ class Sections
 			throw new Brindille_Exception('Unique document name could not be found');
 		}
 
+		$db = DB::getInstance();
+
 		if (!isset($params['where'])) {
 			$params['where'] = '1';
+		}
+		else {
+			$params['where'] = preg_replace_callback(
+				'/\$(\$[\[\.][^=\s]+)/',
+				fn ($m) => sprintf('json_extract(value, %s)', $db->quote($m[1])),
+				$params['where']
+			);
 		}
 
 		if (isset($params['key'])) {
