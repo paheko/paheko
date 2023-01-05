@@ -209,11 +209,12 @@ class DB extends SQLite3
         // 10 secondes
         $this->db->busyTimeout(10 * 1000);
 
-        // Default to WAL
-        $mode = SQLITE_JOURNAL_MODE ? strtoupper(SQLITE_JOURNAL_MODE) : 'WAL';
+        // Default to DELETE
+        $mode = strtoupper(SQLITE_JOURNAL_MODE);
         $set_mode = $this->db->querySingle('PRAGMA journal_mode;');
+        $set_mode = strtoupper($set_mode);
 
-        if (strtoupper($set_mode) !== $mode) {
+        if ($set_mode !== $mode) {
             // WAL = performance enhancement
             // see https://www.cs.utexas.edu/~jaya/slides/apsys17-sqlite-slides.pdf
             // https://ericdraken.com/sqlite-performance-testing/
