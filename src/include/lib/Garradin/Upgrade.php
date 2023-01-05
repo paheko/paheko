@@ -35,7 +35,6 @@ class Upgrade
 		}
 
 		Install::checkAndCreateDirectories();
-		Install::detectJournalMode();
 
 		if (Static_Cache::exists('upgrade'))
 		{
