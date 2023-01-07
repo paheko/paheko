@@ -1,4 +1,4 @@
-# Garradin, le gestionnaire d'association libre et simple
+# Paheko, le gestionnaire d'association libre et simple
 
 <nav id="gnav">
 
@@ -18,13 +18,13 @@
 
 <h3><a href="https://paheko.cloud/garradin-devient-paheko" target="_blank">Garradin devient Paheko !</a></h3>
 
-<p>Garradin.eu est devenu Paheko.cloud, mais le nom du logiciel à installer sur son propre serveur changera avec la version 1.3.</p>
+<p>Garradin.eu est devenu Paheko.cloud !</p>
 
 <form method="GET" action="$ROOT/wiki" onsubmit="var t = this.querySelector('[type=radio]:checked'); this.querySelector('[name=s]').name=t.dataset.name; this.action=t.dataset.action; this.target=t.dataset.target;">
 <fieldset class="searchForm searchFormWiki">
 	<legend>Rechercher</legend>
 	<input type="search" name="s" size="40" value="" />
-	<label><input type="radio" name="t" value="" data-name="s" data-action="/garradin/wiki" data-target="" checked="checked" /> Chercher dans la documentation technique</label>
+	<label><input type="radio" name="t" value="" data-name="s" data-action="/paheko/wiki" data-target="" checked="checked" /> Chercher dans la documentation technique</label>
 	<label><input type="radio" name="t" value="1" data-action="https://paheko.cloud/search" data-name="search" data-target="_blank" /> Chercher dans l'aide utilisateur</label>
 	<input type="submit" value="Rechercher" />
 </fieldset>
@@ -125,13 +125,13 @@ function isNewerVersion (oldVer, newVer) {
 	return false
 }
 
-fetch('/garradin/juvlist?'+(+(new Date))).then((r) => {
+fetch('/paheko/juvlist?'+(+(new Date))).then((r) => {
 	r.json().then((list) => {
 		let last;
 		let selected;
 
 		list.forEach((file) => {
-			var v = file.name.match(/^garradin-(.*)\.tar\./);
+			var v = file.name.match(/^paheko-(.*)\.tar\./);
 
 			if (!v || v[1].match(/-(alpha|rc|beta)/)) {
 				return;
@@ -161,9 +161,9 @@ fetch('/garradin/juvlist?'+(+(new Date))).then((r) => {
 
 ## C'est quoi ?
 
-<a href="$ROOT/raw/7bb068963b9f6301b27b81fe925caae9e86a229b?m=image/png" target="_blank" style="float: right; margin: 1em;"><img src="/garradin/raw/7bb068963b9f6301b27b81fe925caae9e86a229b?m=image/png" alt="Liste des membres" width="400" /></a>
+<a href="$ROOT/raw/7bb068963b9f6301b27b81fe925caae9e86a229b?m=image/png" target="_blank" style="float: right; margin: 1em;"><img src="/paheko/raw/7bb068963b9f6301b27b81fe925caae9e86a229b?m=image/png" alt="Liste des membres" width="400" /></a>
 
-Garradin est un logiciel de gestion d'association (loi 1901 / ASBL / etc.). Son but est de permettre :
+Paheko est un logiciel de gestion d'association (loi 1901 / ASBL / etc.). Son but est de permettre :
 
 *  la gestion des __adhérent⋅e⋅s__ : ajout, modification, suppression, possibilité de choisir les informations présentes sur les fiches adhérent, envoi de mails collectifs aux adhérent⋅e⋅s
 *  la tenue de la __comptabilité__ : avoir une gestion comptable complète à même de satisfaire un expert-comptable tout en restant à la portée de celles et ceux qui ne savent pas ce qu'est la comptabilité à double entrée, permettre la production des rapports et bilans annuels et de suivre au jour le jour le budget de l'association
@@ -179,9 +179,9 @@ Tous ces objectifs ne sont pas encore réalisés, voir :
 * [la liste des fonctionnalités disponibles](/wiki/?name=Fonctionnalités) pour ce qui est actuellement disponible ;
 * [la feuille de route](/wiki/?name=Roadmap) pour la liste des fonctionnalités qu'il reste à implémenter.
 
-Garradin est un logiciel libre disponible sous licence [AGPL v3](https://www.gnu.org/licenses/why-affero-gpl.fr.html).
+Paheko est un logiciel libre disponible sous licence [AGPL v3](https://www.gnu.org/licenses/why-affero-gpl.fr.html).
 
-Garradin signifie *argent* en *Wagiman*, un dialecte aborigène du nord de l'Australie.
+Paheko signifie *coopérer* en *Māori*, langue indigène de la Nouvelle-Zélande.
 
 ## Documentation et entraide
 
@@ -190,10 +190,10 @@ Garradin signifie *argent* en *Wagiman*, un dialecte aborigène du nord de l'Aus
 
 ## Participer
 
-Tout coup de main est le bienvenu, pas besoin d'avoir des connaissances techniques ! Nous avons un [guide de contribution](/wiki/?name=Contribuer) pour vous aider à voir comment vous pouvez participer à Garradin :)
+Tout coup de main est le bienvenu, pas besoin d'avoir des connaissances techniques ! Nous avons un [guide de contribution](/wiki/?name=Contribuer) pour vous aider à voir comment vous pouvez participer à Paheko :)
 
 ### Développement
 
-Garradin est un logiciel libre, développé en PHP, utilisant la base de données SQLite, et avec une interface utilisant HTML, CSS et un peu de Javascript.
+Paheko est un logiciel libre, développé en PHP, utilisant la base de données SQLite, et avec une interface utilisant HTML, CSS et un peu de Javascript.
 
 Nous acceptons les contributions (plugins, patch, code, tickets, etc.) avec plaisir, consultez la [documentation développeur⋅euse](/wiki/?name=Documentation développeur) pour découvrir comment vous pouvez contribuer.
