@@ -185,7 +185,8 @@ class Reports
 
 	static public function getBalancesSQL(array $parts = [])
 	{
-		return sprintf('SELECT %s id_year, id, label, code, type, debit, credit, position, balance, is_debt
+		// Note: SUM(balance) is important for grouping projects when id is different but code is the same
+		return sprintf('SELECT %s id_year, id, label, code, type, debit, credit, position, SUM(balance) AS balance, is_debt
 			FROM (
 				SELECT %s t.id_year, a.id, a.label, a.code, a.type,
 					SUM(l.credit) AS credit,
