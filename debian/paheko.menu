@@ -1,0 +1,3 @@
+?package(paheko):needs="X11" section="Applications/Office"\
+  title="Paheko" command="/usr/bin/paheko"\
+  icon="/usr/share/paheko/paheko.png"

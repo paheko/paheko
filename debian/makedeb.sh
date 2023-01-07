@@ -2,18 +2,18 @@
 # Ripped from fossil makdedeb.sh
 
 DEB_REV=${1-1} # .deb package build/revision number.
-PACKAGE_DEBNAME=garradin
+PACKAGE_DEBNAME=paheko
 THISDIR=${PWD}
 
 DEB_ARCH_NAME=all
 
 PACKAGE_VERSION=`cat ../src/VERSION`
 
-[ ! -f ../src/garradin-${PACKAGE_VERSION}.tar.gz ] && (cd ../src; make release)
+[ ! -f ../src/paheko-${PACKAGE_VERSION}.tar.gz ] && (cd ../src; make release)
 
-tar xzvf ../src/garradin-${PACKAGE_VERSION}.tar.gz -C /tmp
+tar xzvf ../src/paheko-${PACKAGE_VERSION}.tar.gz -C /tmp
 
-SRCDIR="/tmp/garradin-${PACKAGE_VERSION}"
+SRCDIR="/tmp/paheko-${PACKAGE_VERSION}"
 
 test -e ${SRCDIR} || {
     echo "This script must be run from a BUILT copy of the source tree."
@@ -27,19 +27,19 @@ DEBLOCALPREFIX=${DEBROOT}/usr
 BINDIR=${DEBLOCALPREFIX}/bin
 mkdir -p ${BINDIR}
 mkdir -p ${DEBLOCALPREFIX}/share/doc/${PACKAGE_DEBNAME}
-cp ${THISDIR}/garradin ${BINDIR}
+cp ${THISDIR}/paheko ${BINDIR}
 
 mkdir -p "${DEBLOCALPREFIX}/share/menu"
-cp ${THISDIR}/garradin.menu "${DEBLOCALPREFIX}/share/menu/garradin"
+cp ${THISDIR}/paheko.menu "${DEBLOCALPREFIX}/share/menu/paheko"
 mkdir -p "${DEBLOCALPREFIX}/share/applications"
-cp ${THISDIR}/garradin.desktop "${DEBLOCALPREFIX}/share/applications/"
+cp ${THISDIR}/paheko.desktop "${DEBLOCALPREFIX}/share/applications/"
 
 CODEDIR=${DEBLOCALPREFIX}/share/${PACKAGE_DEBNAME}
 mkdir -p ${CODEDIR}
 cp -r ${SRCDIR}/* ${CODEDIR}
 cp ${THISDIR}/config.debian.php ${CODEDIR}/config.local.php
 rm -rf ${CODEDIR}/*.sqlite ${CODEDIR}/cache ${CODEDIR}/www/squelettes ${CODEDIR}/www/plugins/*
-cp ${THISDIR}/garradin.png "${CODEDIR}"
+cp ${THISDIR}/paheko.png "${CODEDIR}"
 
 mkdir -p "${DEBROOT}/var/lib/${PACKAGE_DEBNAME}"
 mkdir -p "${DEBROOT}/var/cache/${PACKAGE_DEBNAME}"
@@ -78,10 +78,10 @@ true && {
     cat <<EOF > DEBIAN/postinst
 #!/bin/sh
 
-chown www-data:www-data /var/lib/garradin /var/cache/garradin
-chown root:www-data /etc/garradin
-chmod g=rX,o= /etc/garradin
-chmod ug=rwX,o= /var/lib/garradin /var/cache/garradin
+chown www-data:www-data /var/lib/paheko /var/cache/paheko
+chown root:www-data /etc/paheko
+chmod g=rX,o= /etc/paheko
+chmod ug=rwX,o= /var/lib/paheko /var/cache/paheko
 EOF
 
     chmod +x DEBIAN/postinst
@@ -96,7 +96,7 @@ ${PACKAGE_DEBNAME} ${PACKAGE_DEB_VERSION}; urgency=low
 This release has no changes over the core source distribution. It has
 simply been Debianized.
 
-Packaged by ${USER} <http://dev.kd2.org/garradin/> on
+Packaged by ${USER} <http://dev.kd2.org/paheko/> on
 ${PACKAGE_TIME}.
 
 EOF
@@ -111,8 +111,8 @@ true && {
     cp ${THISDIR}/../README.md ${DOCDIR}
     a2x --doctype manpage --format manpage ${THISDIR}/manpage.txt
     mkdir -p ${DEBLOCALPREFIX}/share/man/man1
-    gzip -c ${THISDIR}/garradin.1 > ${DEBLOCALPREFIX}/share/man/man1/${PACKAGE_DEBNAME}.1.gz
-    rm -f ${THISDIR}/garradin.1
+    gzip -c ${THISDIR}/paheko.1 > ${DEBLOCALPREFIX}/share/man/man1/${PACKAGE_DEBNAME}.1.gz
+    rm -f ${THISDIR}/paheko.1
 } || {
     echo "Fail."
     exit 1
@@ -125,16 +125,16 @@ true && {
 Package: ${PACKAGE_DEBNAME}
 Section: web
 Priority: optional
-Maintainer: Garradin <garradin@garradin.eu>
+Maintainer: Paheko <paheko@paheko.eu>
 Architecture: ${DEB_ARCH_NAME}
 Depends: dash | bash, php-cli (>=7.4), php-sqlite3, php-intl, sensible-utils
 Version: ${PACKAGE_DEB_VERSION}
 Suggests: php-gd, php-imagick
-Homepage: https://fossil.kd2.org/garradin/
-Description: Garradin is a tool to manage non-profit organizations.
+Homepage: https://fossil.kd2.org/paheko/
+Description: Paheko is a tool to manage non-profit organizations.
  It's only available in french.
 Description-fr: Gestionnaire d'association en interface web ou CLI.
- Garradin est un gestionnaire d'association à but non lucratif.
+ Paheko est un gestionnaire d'association à but non lucratif.
  Il permet de gérer les membres, leur adhésion et leurs contributions financières.
  Les membres peuvent se connecter eux-même et modifier leurs informations
  ou communiquer entre eux par e-mail. Une gestion précise des droits et
