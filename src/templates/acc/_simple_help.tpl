@@ -5,7 +5,7 @@
 		{elseif $type}les écritures apparaissent tels que sur le relevé de banque ou le journal de caisse&nbsp;!
 		{else}les comptes de banque, caisse, dépenses et tiers apparaissent de manière «&nbsp;simplifiée&nbsp;»&nbsp;!
 		{/if}
-		C'est l'inverse de la {if $link}<a href="{$link}">{/if}la vue comptable{if $link}</a>{/if} en comptabilité en partie double.</summary>
+		C'est l'inverse de {if $link}<a href="{$link}">{/if}la vue comptable{if $link}</a>{/if} en comptabilité en partie double.</summary>
 	<div class="help block">
 		<p>L'extrait de compte fourni par la banque fonctionne « à l'envers », parce qu'il est établi du point de vue de la banque&nbsp;:</p>
 		<ul>
