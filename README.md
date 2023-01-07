@@ -1,14 +1,16 @@
-# Garradin - Le gestionnaire d'association
+# Paheko - Le gestionnaire d'association
 
-Garradin est un logiciel de gestion de petite et moyenne association.
+Paheko est un logiciel de gestion de petite et moyenne association.
 
-Plus d'infos sur le site de développement ici : [fossil.kd2.org/garradin](https://fossil.kd2.org/garradin/)
+Plus d'infos sur le site de développement ici : [fossil.kd2.org/paheko](https://fossil.kd2.org/paheko/)
 
-[Documentation développeuse⋅développeur](https://fossil.kd2.org/garradin/wiki?name=Documentation+d%C3%A9veloppeur)
+[Documentation développeuse⋅développeur](https://fossil.kd2.org/paheko/wiki?name=Documentation+d%C3%A9veloppeur)
 
-Il est possible d'essayer et utiliser gratuitement Garradin sur la plateforme [Garradin.eu](https://garradin.eu/).
+Il est possible d'essayer et utiliser gratuitement Garradin sur la plateforme [Paheko.cloud](https://paheko.cloud/).
 
-Le code sur Github, n'est qu'un miroir, le développement principal se passe sur Fossil.
+Le code sur Github n'est qu'un miroir, le développement principal se passe sur Fossil, mais les PR sont quand même possibles.
+
+Pour les PR, sauf si c'est une correction de bug, le mieux est de discuter de la modification sur dev(arobase)paheko.cloud avant de proposer la PR, pour qu'elle ait plus de chances d'êter acceptée.
 
 ## Licence
 
