@@ -130,6 +130,7 @@ Architecture: ${DEB_ARCH_NAME}
 Depends: dash | bash, php-cli (>=7.4), php-sqlite3, php-intl, sensible-utils
 Version: ${PACKAGE_DEB_VERSION}
 Suggests: php-gd, php-imagick
+Replaces: garradin
 Homepage: https://fossil.kd2.org/paheko/
 Description: Paheko is a tool to manage non-profit organizations.
  It's only available in french.
