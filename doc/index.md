@@ -163,7 +163,7 @@ fetch('/paheko/juvlist?'+(+(new Date))).then((r) => {
 
 <a href="$ROOT/raw/7bb068963b9f6301b27b81fe925caae9e86a229b?m=image/png" target="_blank" style="float: right; margin: 1em;"><img src="/paheko/raw/7bb068963b9f6301b27b81fe925caae9e86a229b?m=image/png" alt="Liste des membres" width="400" /></a>
 
-Paheko est un logiciel de gestion d'association (loi 1901 / ASBL / etc.). Son but est de permettre :
+Paheko (anciennement appelé <em>Garradin</em>) est un logiciel de gestion d'association (loi 1901 / ASBL / etc.). Son but est de permettre :
 
 *  la gestion des __adhérent⋅e⋅s__ : ajout, modification, suppression, possibilité de choisir les informations présentes sur les fiches adhérent, envoi de mails collectifs aux adhérent⋅e⋅s
 *  la tenue de la __comptabilité__ : avoir une gestion comptable complète à même de satisfaire un expert-comptable tout en restant à la portée de celles et ceux qui ne savent pas ce qu'est la comptabilité à double entrée, permettre la production des rapports et bilans annuels et de suivre au jour le jour le budget de l'association
