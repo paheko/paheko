@@ -1,17 +1,17 @@
 #!/bin/sh
 
-ROOT=/usr/share/garradin/www
-#ROOT=~/fossil/garradin/src/www
+ROOT=/usr/share/paheko/www
+#ROOT=~/fossil/paheko/src/www
 ROUTER=${ROOT}/_route.php
 PORT=8081
 ADDRESS="127.0.0.1"
 VERBOSE=0
-PID_FILE="${XDG_RUNTIME_DIR}/garradin/pid"
+PID_FILE="${XDG_RUNTIME_DIR}/paheko/pid"
 
 [ ! -d `dirname $PID_FILE` ] && mkdir -p `dirname $PID_FILE`
 
 # Execute getopt
-ARGS=`getopt -o "pb:vh" -l "port:,bind:,verbose,help" -n "garradin" -- "$@"`
+ARGS=`getopt -o "pb:vh" -l "port:,bind:,verbose,help" -n "paheko" -- "$@"`
 
 # Bad arguments
 if [ $? -ne 0 ];
@@ -53,10 +53,10 @@ Où COMMANDE peut être :
                 et connecte automatiquement avec le premier administrateur
                 de l'association.
 
-Si aucune COMMANDE n'est donnée, Garradin utilisera 'ui' par défaut.
+Si aucune COMMANDE n'est donnée, Paheko utilisera 'ui' par défaut.
 
-PROJET est le chemin menant à un projet Garradin précis
-        (fichier .garradin.sqlite). Si aucun projet n'est indiqué, le
+PROJET est le chemin menant à un projet Paheko précis
+        (fichier .sqlite). Si aucun projet n'est indiqué, le
         dernier projet ouvert sera rouvert. Si aucun projet n'a jamais été
         ouvert un nouveau projet sera créé.
 
@@ -93,7 +93,7 @@ PROJECT="$2"
 
 [ "$PROJECT" = "" ] && PROJECT="1"
 
-export GARRADIN_STANDALONE="$PROJECT"
+export PAHEKO_STANDALONE="$PROJECT"
 
 [ -f $PID_FILE ] && kill `cat $PID_FILE` > /dev/null 2>&1 && rm -f $PID_FILE
 
