@@ -58,7 +58,7 @@ publish: release deb
 	#fossil uv ls | fgrep -v 'paheko-0.8.5' | grep '^paheko-.*\.(tar\.bz2|deb)' | xargs fossil uv rm
 	fossil uv add paheko-${VERSION}.tar.gz
 	fossil uv add paheko-${VERSION}.tar.gz.asc
-	cd ../debian && fossil uv add paheko-${VERSION}-*.deb
+	cd ../debian && fossil uv add paheko-${VERSION}.deb
 	cd ../tools && php make_installer.php > install.php && fossil uv add install.php && rm install.php
 	fossil uv sync
 
