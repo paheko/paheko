@@ -156,7 +156,7 @@ fetch('/paheko/juvlist?'+(+(new Date))).then((r) => {
 
 		document.querySelector('#download').innerHTML = `<li class="last"><strong>Dernière version : ${last}</strong><br />
 			<em>il y a ${time}</em></li>
-			<li><a href="$ROOT/uv/${selected.name}"><strong>Télécharger</strong><br /><small>(.tar.gz)</small></a></li>
+			<li><a href="$ROOT/uv/${selected.name}"><strong>Télécharger</strong> <small>(.tar.gz)</small></a></li>
 			<li><a href="$ROOT/uv/${deb}">Debian</a></li>` + document.querySelector('#download').innerHTML;
 	});
 });
