@@ -51,6 +51,7 @@ class Session extends \KD2\UserSession
 
 	protected ?User $_user;
 	protected ?array $_permissions;
+	protected ?array $_files_permissions;
 
 	static protected $_instance = null;
 

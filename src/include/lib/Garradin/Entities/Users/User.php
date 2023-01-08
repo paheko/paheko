@@ -28,7 +28,7 @@ use Garradin\Entities\Files\File;
 use KD2\SMTP;
 use KD2\DB\EntityManager as EM;
 
-#[AllowDynamicProperties]
+#[\AllowDynamicProperties]
 class User extends Entity
 {
 	const NAME = 'Membre';
