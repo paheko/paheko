@@ -152,9 +152,11 @@ fetch('/paheko/juvlist?'+(+(new Date))).then((r) => {
 			time = Math.round(days / 30.5) + ' mois';
 		}
 
+		let deb = selected.name.replace(/\.tar\..*$/, '.deb');
+
 		document.querySelector('#download').innerHTML = `<li><strong>Dernière version : ${last}</strong></li>
 			<li><em>il y a ${time}</em></li>
-			<li><a href="$ROOT/uv/${selected.name}">Télécharger</a></li>` + document.querySelector('#download').innerHTML;
+			<li><a href="$ROOT/uv/${selected.name}">Télécharger</a><br /><small><a href="$ROOT/uv/${deb}">(paquet Debian)</a></small></li>` + document.querySelector('#download').innerHTML;
 	});
 });
 </script>
