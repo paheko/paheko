@@ -627,7 +627,7 @@ class Upgrade
 	static public function getInstaller(): FossilInstaller
 	{
 		if (!isset(self::$installer)) {
-			$i = new FossilInstaller(WEBSITE, ROOT, CACHE_ROOT, '!^garradin-(.*)\.tar\.gz$!');
+			$i = new FossilInstaller(WEBSITE, ROOT, CACHE_ROOT, '!^paheko-(.*)\.tar\.gz$!');
 			$i->setPublicKeyFile(ROOT . '/pubkey.asc');
 
 			if (0 === ($pos = strpos(CACHE_ROOT, ROOT))) {

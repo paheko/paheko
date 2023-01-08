@@ -165,7 +165,7 @@ if (!defined('Garradin\WWW_URL')) {
 if (WWW_URI === null || (!empty($host) && $host == 'host.unknown')) {
 	$title = 'Impossible de détecter automatiquement l\'URL du site web.';
 	$info = 'Consulter l\'aide pour configurer manuellement l\'URL avec la directive WWW_URL et WWW_URI.';
-	$url ='https://fossil.kd2.org/garradin/wiki?name=Installation';
+	$url ='https://fossil.kd2.org/paheko/wiki?name=Installation';
 
 	if (PHP_SAPI == 'cli') {
 		printf("\n/!\\ %s\n%s\n-> %s\n\n", $title, $info, $url);
@@ -247,7 +247,7 @@ define('Garradin\BASE_URL', str_replace('/admin/', '/', ADMIN_URL));
 
 const HELP_URL = 'https://paheko.cloud/aide?from=%s';
 const HELP_PATTERN_URL = 'https://paheko.cloud/%s';
-const WEBSITE = 'https://fossil.kd2.org/garradin/';
+const WEBSITE = 'https://fossil.kd2.org/paheko/';
 const PING_URL = 'https://paheko.cloud/ping/';
 const PLUGINS_URL = 'https://paheko.cloud/plugins/list.json';
 
@@ -311,8 +311,8 @@ ErrorManager::setProductionErrorTemplate(defined('Garradin\ERRORS_TEMPLATE') && 
 	form { text-align: center; }
 	</style></head><body><h1>Erreur interne</h1><p>Désolé mais le serveur a rencontré une erreur interne
 	et ne peut répondre à votre requête. Merci de ré-essayer plus tard.</p>
-	<p>Si vous suspectez un bug dans Garradin, vous pouvez suivre 
-	<a href="https://fossil.kd2.org/garradin/wiki?name=Rapporter+un+bug&p">ces instructions</a>
+	<p>Si vous suspectez un bug dans Paheko, vous pouvez suivre
+	<a href="https://fossil.kd2.org/paheko/wiki?name=Rapporter+un+bug&p">ces instructions</a>
 	pour le rapporter.</p>
 	<if(sent)><p>Un-e responsable a été notifié-e et cette erreur sera corrigée dès que possible.</p></if>
 	<if(logged)><code>L\'erreur a été enregistrée dans les journaux système (error.log) sous la référence : <b>{$ref}</b></code></if>
@@ -337,7 +337,7 @@ ErrorManager::setHtmlHeader('<!DOCTYPE html><meta charset="utf-8" /><style type=
 <section>
 	<article>
 	<h1>Une erreur s\'est produite</h1>
-	<if(report)><form method="post" action="{$report_url}"><p><input type="hidden" name="report" value="{$report_json}" /><input type="submit" value="Rapporter l\'erreur aux développeur⋅euses de Garradin &rarr;" /></p></form></if>
+	<if(report)><form method="post" action="{$report_url}"><p><input type="hidden" name="report" value="{$report_json}" /><input type="submit" value="Rapporter l\'erreur aux développeur⋅euses de Paheko &rarr;" /></p></form></if>
 	</article>
 </section>
 ');
