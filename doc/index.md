@@ -79,7 +79,7 @@ document.head.innerHTML += `<style type="text/css">
 	text-decoration: none;
 }
 
-#gnav li strong, #gnav li em {
+#gnav li.last {
 	height: 100%;
 	padding: .5rem;
 	display: block;
@@ -154,10 +154,10 @@ fetch('/paheko/juvlist?'+(+(new Date))).then((r) => {
 
 		let deb = selected.name.replace(/\.tar\..*$/, '.deb');
 
-		document.querySelector('#download').innerHTML = `<li><strong>Dernière version : ${last}</strong><br />
+		document.querySelector('#download').innerHTML = `<li class="last"><strong>Dernière version : ${last}</strong><br />
 			<em>il y a ${time}</em></li>
-			<li><a href="$ROOT/uv/${selected.name}">Télécharger<br />(.tar.gz)</a></li>
-			<li><a href="$ROOT/uv/${deb}">Paquet Debian</a></li>` + document.querySelector('#download').innerHTML;
+			<li><a href="$ROOT/uv/${selected.name}"><strong>Télécharger</strong><br /><small>(.tar.gz)</small></a></li>
+			<li><a href="$ROOT/uv/${deb}">Debian</a></li>` + document.querySelector('#download').innerHTML;
 	});
 });
 </script>
