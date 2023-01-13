@@ -143,6 +143,15 @@ document.head.innerHTML += `<style type="text/css">
 #download p, #download h3, #download h4 {
 	margin: 0;
 	margin-bottom: 8px;
+	text-align: center;
+}
+
+#download p em {
+	color: #333;
+	background: #ddd;
+	padding: 2px;
+	border-radius: 4px;
+	display: inline-block;
 }
 
 .searchForm {
