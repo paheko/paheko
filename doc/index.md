@@ -141,7 +141,7 @@ function isNewerVersion (oldVer, newVer) {
 
 fetch('/paheko/juvlist?'+(+(new Date))).then((r) => {
 	r.json().then((list) => {
-		let last;
+		let last = {};
 		let selected;
 
 		list.forEach((file) => {
