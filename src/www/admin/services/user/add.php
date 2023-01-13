@@ -17,7 +17,7 @@ if (!$count_all) {
 	Utils::redirect(ADMIN_URL . 'services/?CREATE');
 }
 
-$services = [0 => '-- Sélectionner une activité'] + Services::listAssoc();
+$services = Services::listAssocWithFees();
 
 $tpl->assign(compact('services'));
 

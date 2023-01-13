@@ -37,8 +37,12 @@ assert(isset($grouped_services) && is_array($grouped_services));
 			</dd>
 		{elseif $create && $copy_service}
 			<dt>Recopier depuis l'activité</dt>
-			<dd><strong>{$copy_service.label}</strong><input type="hidden" name="copy_service" value="{$copy_service.id}" /></dd>
-			<dd><em>{if $copy_service_only_paid}(seulement les inscriptions marquées comme payées){else}(toutes les inscriptions){/if}</em><input type="hidden" name="copy_service_only_paid" value="{$copy_service_only_paid}" /></dd>
+			<dd><strong>{$copy_service.label}</strong><input type="hidden" name="copy" value="s{$copy_service.id}" /></dd>
+			<dd><em>{if $copy_only_paid}(seulement les inscriptions marquées comme payées){else}(toutes les inscriptions){/if}</em><input type="hidden" name="copy_only_paid" value="{$copy_service_only_paid}" /></dd>
+		{elseif $create && $copy_fee}
+			<dt>Recopier depuis le tarif</dt>
+			<dd><strong>{$copy_fee->service()->label} — {$copy_fee.label}</strong><input type="hidden" name="copy" value="f{$copy_fee.id}" /></dd>
+			<dd><em>{if $copy_only_paid}(seulement les inscriptions marquées comme payées){else}(toutes les inscriptions){/if}</em><input type="hidden" name="copy_only_paid" value="{$copy_service_only_paid}" /></dd>
 		{/if}
 
 			<dt><label for="f_service_ID">Activité</label> <b>(obligatoire)</b></dt>
