@@ -9,7 +9,7 @@ use Garradin\Users\Emails;
 
 use KD2\SMTP;
 
-use const Garradin\{WWW_URL, SECRET_KEY};
+use const Garradin\{WWW_URL, SECRET_KEY, OFFLINE};
 
 class Email extends Entity
 {
@@ -143,9 +143,14 @@ class Email extends Entity
 			throw new UserException('Adresse e-mail invalide : vérifiez que vous n\'avez pas fait une faute de frappe.');
 		}
 
+		// Windows does not support MX lookups
+		if (PHP_OS_FAMILY == 'Windows') {
+			return;
+		}
+
 		getmxrr($host, $mx_list);
 
-		if (!count($mx_list)) {
+		if (empty($mx_list)) {
 			throw new UserException('Adresse e-mail invalide (le domaine indiqué n\'a pas de service e-mail) : vérifiez que vous n\'avez pas fait une faute de frappe.');
 		}
 
