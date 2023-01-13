@@ -118,7 +118,7 @@ document.head.innerHTML += `<style type="text/css">
 }
 
 #download div {
-	margin: 10px 0;
+	margin: 0 20px;
 }
 
 #download div h3 a, #download div h4 a {
