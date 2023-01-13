@@ -99,7 +99,11 @@ document.head.innerHTML += `<style type="text/css">
 	background: #dfd;
 }
 
-#download {
+#download > h2 {
+	text-align: center;
+}
+
+#download nav {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
@@ -113,10 +117,15 @@ document.head.innerHTML += `<style type="text/css">
 	justify-content: center;
 }
 
+#download div {
+	margin: 10px 0;
+}
+
 #download div h3 a, #download div h4 a {
 	background: #eef;
 	border: 2px solid #ccf;
 	padding: 5px;
+	border-radius: 8px;
 }
 
 #download a:hover {
@@ -128,6 +137,7 @@ document.head.innerHTML += `<style type="text/css">
 	height: 124px;
 	box-shadow: none;
 	padding: 5px;
+	margin: 0;
 }
 
 #download p, #download h3, #download h4 {
@@ -199,6 +209,9 @@ fetch('/paheko/juvlist?'+(+(new Date))).then((r) => {
 			<li class="last"><em>il y a ${time}</em></li>` + document.querySelector('#news').innerHTML;
 
 		document.querySelector('#news').insertAdjacentHTML('afterend', `<div id="download">
+			<h2>Télécharger&nbsp;:</h2>
+
+			<nav>
 			<div>
 
 				<h3><a href="$ROOT/uv/${last['tar.gz'].name}"><img src="data:image/svg+xml;base64,PHN2ZwogIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIKICB3aWR0aD0iMjQiCiAgaGVpZ2h0PSIyNCIKICB2aWV3Qm94PSIwIDAgMjQgMjQiCiAgZmlsbD0ibm9uZSIKICBzdHJva2U9ImN1cnJlbnRDb2xvciIKICBzdHJva2Utd2lkdGg9IjIiCiAgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIgogIHN0cm9rZS1saW5lam9pbj0icm91bmQiCj4KICA8cmVjdCB4PSIyIiB5PSIyIiB3aWR0aD0iMjAiIGhlaWdodD0iOCIgcng9IjIiIHJ5PSIyIiAvPgogIDxyZWN0IHg9IjIiIHk9IjE0IiB3aWR0aD0iMjAiIGhlaWdodD0iOCIgcng9IjIiIHJ5PSIyIiAvPgogIDxsaW5lIHgxPSI2IiB5MT0iNiIgeDI9IjYuMDEiIHkyPSI2IiAvPgogIDxsaW5lIHgxPSI2IiB5MT0iMTgiIHgyPSI2LjAxIiB5Mj0iMTgiIC8+Cjwvc3ZnPgo=" alt="" /><span>Serveur</span></a></h3>
@@ -208,7 +221,7 @@ fetch('/paheko/juvlist?'+(+(new Date))).then((r) => {
 			</div>
 			<div>
 
-				<h4><a href="$ROOT/uv/${last['deb'].name}"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGUAAAB8AgMAAAANy5YPAAAADFBMVEX////IAjfrobXZTnPqtJDBAAAACXBIWXMAAAsSAAALEgHS3X78AAADUklEQVRIx51WPWsbQRBdrZDxSZZJo14JHAQcgxv1+gdx4dFdIZQrg0khUgnj4nCXIpDmejdpbBICwSGNQT8hzcVl1KRyEwJOEQjO7ezX7J1GhbfR6d7O7Js3H3tC0HVxLtYuubcSzLqCiy8yX4dEAHD5Y7bOXQm4Fk1oH8xacUYAs27OGAGUhyFUegimDXpuJb8oNKIQTAjShnARIrF5df9P/849NMAXx5W4e8jHayIJsR4+1/hlxHkWHDWjLlzUhfp36pPj6eO+mUtwX0VNjkrykNRSP3dquhUhJxIkbk39rnlNa+NFMaLpk46ipCE6N/jQosK4FC2N6zCvyGNc/a76dX/IQ73K4iB1NrOVijIfBQm3nFNdgWkdKuB4oQlmdWgA47k+s9EeMWTvkGnSaIAOnB7gDh/V3v3KpGzyFEM/JKR13iKY7AgxLDyLkc1GC5IKelS6hMgqAfLGmHeF+OS5R0rTXqaTIYV4opVEysjnK0LJGdrasAo039Wuz1AMpxwRMZHI01Kf0ibNVXRHtjTTGtRxuscZhVAnK8Zg2YBsxIWoOYxdxDcBNFdnWWgSpDlTkBFDhh0xJlDLQlvocEmgyAax6+MynCMbRNeTr0NaQ4SM8P1D2kYzzkqW08CK1nCZDgkUWfJDdVZ6vgaSQ3XWAjW0RWPypqZyG14GkNFwZ6mqYkyhloH2czW/cwq1TVf0UF0pCCRJL5WTABLgC6A82qYhy7LKnrxFHF5tY5dZqFBFcpVr3wEkfqZ+WKIkLpXDDxPfZ6ZtTdk8e+zsyxfG2NTh1pkrBXhtIGMVHRT6MPne7ImsVftjrA/rlYkIIfH8jb4n3bRouXb4/BvfVTMrs5AL589Imd256dP2UPwW4PbKDfJKFFfrrZPwzpOuYatQ78L7nMzQ/fk1wEmtN42H76J7HrSS99A/ycNhmtD7fhZeBWRrt3YVjJnvls6aie1viW8MVI025hNJTUzuLBHehrUPlJSDBkTgxgUyFWxgrFW05r7xN0nOB8ZBevitXyM+5piPOWrevp4iy75SccWr+DAerMByA4+Cl2pDyjbkRQIZa43IFhzU3yTj0Qb6S95jyhdI+PkcVsH0Ifkc8UTafNKqwcCWgbiGvyx2cUnt/gORWTpBwiiSSwAAAABJRU5ErkJggg==" alt="" /><span>Linux</span></a></h4>
+				<h4><a href="$ROOT/uv/${last['deb'].name}"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGoAAAB8AgMAAAD8wM2CAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAAlwSFlzAAAF3gAABd4BiRluJgAAAAxQTFRFAAAAR3BMAAAAAAAAoOHXxQAAAAR0Uk5T/QBQozL7B+YAAAPySURBVEjHndc9aBxHFADgd7u64hTv4eYgxRVulijYpQURpDgIKVwILtbN7GAt9jquEl/gItUOl5gUhgjUbNKkMBhhkDE2rhOY2LhwYVvNgiEu0qhOwKiISSAzszPz3q7mhIlKfczuzJv3swds4d8Y3tEu/fNyb4FxCQBl2HJFkIRtpI0spGYIVkM2qS0JWV5bFLKiNnwhsZm1KmAja2nA5ta6AZMnmCXonWDJCdY5btxZ9D8tDtkpgD5fYKVUFzQKWqT+P9ARD5yh80UB1b/jkPHkh1346dTPwXXJ8gG8Wn6NF0hsuXMaXkXDsMVnYBifCxucgXMwxIsn9hz69z6G00F7LP+8MYXdoD355qvP2KNx0KTOaP4XqOAcz6XSZmnAbrrMT4/bt6Y8+WLbyrCSiH2it7IqMEFpzqtnTcsiaPNfGf9bZ3cSsN/fvinFa0zQxtm/3GPbE0wmas/VXnpqnxDIszslKyqO1YmWwWRtMzFlkbZNxEzGlSnRbtvGEbu0V5d20rZZx7eLqG2yh22mZdyFWPiNehNud5nf6BgPWmEddps2cinLfcl7k0DqN25YhiXpe5ozgS1Aus04y7GtzN1mnBVoM9ebnI2wVRWxrF/gbI7tL49tP3Amsb9P4IO6Pp3B+wNMgKSuCWscditMnGhuDuFtRufLzLzdWhbdZKThH5jma23S6TAyKIbmRNZEvzG/VkwkrOVLPTrrVkzkrY0/wvGl4n6e2myYMjLQlkxgrI0OBi0rvcnbeHR1z0vmdq3BrGzZwFkWj9gim9CwKDtPLI++a1vqrOg8JsbV2dFmnd8a66jNG8Z18/UmW+sOTOOqDaKdxrrbZB3E6411V6Q3VR73qSX7P0piA2pnISoGaF1qfwCs+LisTSNid1W1vOfuIVOdCu9BxHrouvublGyOObGhO0V8aE2oiOJDv9adIn5q7ZrOLX/x67rikwvGcujrHPFJuK4rfvWGse39Uh8jQlMVX101dst2B/fQW2aOf27syBbuqrdCveCisdQWT+KNv6nYZWJj33wu1BEgJvwMri2r8H2Zv4vaWBcNO4W1bWJ+o89syFNl37tKrl+cuQDtoOV2L8LZNWWf2qqzQSuc5Wg8bc4CJnb9M/1Z6LqjRjwKbxvKXPpdtd/RZJ+Z/3zQ+5z6dBSHYxA+v9T1X8dvzBcqLlfId7LEj2ihY30RS4R+YO8wapxaZmolL1sfoMY2zHXzfstS+0h9R9N+ecy469fX45KajkXuZ8CmQQ5v1bfNA6ltC2fHpn5ntob3cUTmynTNxqzOCdGYfw8PmWtpWzqPGjP1yS8u58WHm73WfN/3xfnQ7jv426l8h99V/wEOtd7r5KQmrQAAAABJRU5ErkJggg==" alt="" /><span>Linux</span></a></h4>
 				<p>hors-ligne, pour ordinateur</p>
 				<p><small>(.deb, ${last['deb'].human_size})</small></p>
 
@@ -220,6 +233,7 @@ fetch('/paheko/juvlist?'+(+(new Date))).then((r) => {
 				<p><small>(.exe, ${last['exe'].human_size})</small></p>
 
 			</div>
+			</nav>
 
 		</div>`);
 	});
