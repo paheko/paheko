@@ -176,7 +176,7 @@ fetch('/paheko/juvlist?'+(+(new Date))).then((r) => {
 		document.querySelector('#news').innerHTML = `<li class="last"><strong>Dernière version : ${last}</strong></li>
 			<li class="last"><em>il y a ${time}</em></li>` + document.querySelector('#news').innerHTML;
 
-		document.querySelector('#news').insertAdjacent('afterend', `<div id="download">
+		document.querySelector('#news').insertAdjacentHTML('afterend', `<div id="download">
 			<div>
 
 				<h3><a href="$ROOT/uv/${last['tar.gz'].name}"><img src="data:image/svg+xml;base64,PHN2ZwogIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIKICB3aWR0aD0iMjQiCiAgaGVpZ2h0PSIyNCIKICB2aWV3Qm94PSIwIDAgMjQgMjQiCiAgZmlsbD0ibm9uZSIKICBzdHJva2U9ImN1cnJlbnRDb2xvciIKICBzdHJva2Utd2lkdGg9IjIiCiAgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIgogIHN0cm9rZS1saW5lam9pbj0icm91bmQiCj4KICA8cmVjdCB4PSIyIiB5PSIyIiB3aWR0aD0iMjAiIGhlaWdodD0iOCIgcng9IjIiIHJ5PSIyIiAvPgogIDxyZWN0IHg9IjIiIHk9IjE0IiB3aWR0aD0iMjAiIGhlaWdodD0iOCIgcng9IjIiIHJ5PSIyIiAvPgogIDxsaW5lIHgxPSI2IiB5MT0iNiIgeDI9IjYuMDEiIHkyPSI2IiAvPgogIDxsaW5lIHgxPSI2IiB5MT0iMTgiIHgyPSI2LjAxIiB5Mj0iMTgiIC8+Cjwvc3ZnPgo=" alt="" /><span>Serveur</span></a></h3>
