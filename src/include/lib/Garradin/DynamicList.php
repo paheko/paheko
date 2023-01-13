@@ -99,7 +99,7 @@ class DynamicList implements \Countable
 			$columns[] = $column['label'];
 		}
 
-		CSV::export($format, $name, $this->iterate(false), $this->getHeaderColumns(true), $this->export_callback);
+		CSV::export($format, $name, $this->iterate(false), $this->getExportHeaderColumns(), $this->export_callback);
 	}
 
 	public function asArray(): array
@@ -130,7 +130,7 @@ class DynamicList implements \Countable
 		$this->count = $count;
 	}
 
-	public function getHeaderColumns(bool $label_only = false)
+	public function getHeaderColumns(bool $export = false)
 	{
 		$columns = [];
 
@@ -148,7 +148,11 @@ class DynamicList implements \Countable
 				continue;
 			}
 
-			$columns[$alias] = $label_only ? $properties['label'] : $properties;
+			if (!$export && !empty($properties['export_only'])) {
+				continue;
+			}
+
+			$columns[$alias] = $export ? $properties['label'] : $properties;
 		}
 
 		return $columns;
@@ -157,6 +161,11 @@ class DynamicList implements \Countable
 	public function countHeaderColumns(): int
 	{
 		return count($this->getHeaderColumns());
+	}
+
+	public function getExportHeaderColumns(): array
+	{
+		return $this->getHeaderColumns(true);
 	}
 
 	public function iterate(bool $include_hidden = true)

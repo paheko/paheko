@@ -141,6 +141,11 @@ class Fee extends Entity
 			'id_user' => [
 				'select' => 'su.id_user',
 			],
+			'user_number' => [
+				'label' => 'Numéro de membre',
+				'select' => 'm.numero',
+				'export_only' => true,
+			],
 			'identity' => [
 				'label' => 'Membre',
 				'select' => $identity,
@@ -205,5 +210,14 @@ class Fee extends Entity
 		$conditions = sprintf('su.id_fee = %d AND su.expiry_date < date() AND u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
 		$list->setConditions($conditions);
 		return $list;
+	}
+
+
+	public function getUsers(bool $paid_only = false): array
+	{
+		$where = $paid_only ? 'AND paid = 1' : '';
+		$id_field = Config::getInstance()->champ_identite;
+		$sql = sprintf('SELECT su.id_user, u.%s FROM services_users su INNER JOIN membres u ON u.id = su.id_user WHERE su.id_fee = ? %s;', $id_field, $where);
+		return DB::getInstance()->getAssoc($sql, $this->id());
 	}
 }

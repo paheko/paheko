@@ -100,9 +100,11 @@ td.num a {
     background: none;
 }
 
+/* Disable hyperlinks */
 a {
     color: black !important;
     text-decoration: none;
+    prince-link: none !important;
 }
 
 /* Don't repeat the table footer on every printed page */

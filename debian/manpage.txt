@@ -1,21 +1,21 @@
-GARRADIN(1)
-===========
+PAHEKO(1)
+=========
 :doctype: manpage
 
 
 NAME
 ----
-garradin - gestionnaire d'association à but non lucratif
+paheko - Gestionnaire d'association à but non lucratif
 
 
 SYNOPSIS
 --------
-*garradin* ['OPTIONS'] ['COMMANDE'] ['BASE']
+*paheko* ['OPTIONS'] ['COMMANDE'] ['BASE']
 
 
 DESCRIPTION
 -----------
-Lancer garradin(1) sans argument lance le serveur web intégré sur
+Lancer paheko(1) sans argument lance le serveur web intégré sur
 l'adresse localhost:8081 et le navigateur web par défaut.
 
 *BASE* défini le chemin de la base de données (fichier .sqlite) à
@@ -45,7 +45,7 @@ Affiche un message d'aide sur l'utilisation de la commande.
 COMMANDES
 ---------
 *server*::
-Lance le serveur web autonome de Garradin sans lancer de navigateur
+Lance le serveur web autonome de Paheko sans lancer de navigateur
 web.
 
 *ui*::
@@ -61,13 +61,13 @@ Erreur
 
 EMPLACEMENTS DE STOCKAGE
 ------------------------
-Les données sont stockées dans $XDG_DATA_HOME/garradin.
-Généralement c'est ~/.local/share/garradin
+Les données sont stockées dans $XDG_DATA_HOME/paheko.
+Généralement c'est ~/.local/share/paheko
 
 CONFIGURATION
 -------------
 Il est possible de créer un fichier de configuration dans
-$XDG_CONFIG_HOME/garradin/config.local.php
+$XDG_CONFIG_HOME/paheko/config.local.php
 
 Voir la documentation pour plus de détails sur les constantes
 de configuration acceptées.
@@ -75,32 +75,32 @@ de configuration acceptées.
 INSTALLATION SERVEUR WEB
 ------------------------
 Il est possible d'utiliser ce package avec Apache pour héberger
-une instance Garradin.
+une instance Paheko.
 
 La procédure est détaillée ici :
-https://fossil.kd2.org/garradin/wiki?name=Installation%20sous%20Debian-Ubuntu
+https://fossil.kd2.org/paheko/wiki?name=Installation%20sous%20Debian-Ubuntu
 
 Les données et plugins seront stockés dans le répertoire
-/var/lib/garradin
+/var/lib/paheko
 
 BUGS
 ----
-Voir https://fossil.kd2.org/garradin/ pour un accès au bugtracker.
+Voir https://fossil.kd2.org/paheko/ pour un accès au bugtracker.
 
 
 AUTEUR
 ------
-Garradin est développé par bohwaz et d'autres contributeurs.
+Paheko est développé par bohwaz et d'autres contributeurs.
 
 
 RESSOURCES
 ----------
 
-Site principal : <https://fossil.kd2.org/garradin/>
+Site principal : <https://fossil.kd2.org/paheko/>
 
 
 COPYING
 -------
-Copyright \(C) 2011-2014 BohwaZ. Free use of this software is
+Copyright \(C) 2011-2023 BohwaZ. Free use of this software is
 granted under the terms of the GNU Affero General Public License v3
 (AGPL).

@@ -213,13 +213,19 @@ class DB extends SQLite3
         // 10 secondes
         $this->db->busyTimeout(10 * 1000);
 
-        $mode = $this->db->querySingle('PRAGMA journal_mode;');
+        $mode = strtoupper(SQLITE_JOURNAL_MODE);
+        $set_mode = $this->db->querySingle('PRAGMA journal_mode;');
+        $set_mode = strtoupper($set_mode);
 
-        if (strtoupper($mode) != 'WAL') {
-            // Performance enhancement
+        if ($set_mode !== $mode) {
+            // WAL = performance enhancement
             // see https://www.cs.utexas.edu/~jaya/slides/apsys17-sqlite-slides.pdf
             // https://ericdraken.com/sqlite-performance-testing/
-            $this->exec(sprintf('PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; PRAGMA journal_size_limit = %d;', 32 * 1024 * 1024));
+            $this->exec(sprintf(
+                'PRAGMA journal_mode = %s; PRAGMA synchronous = NORMAL; PRAGMA journal_size_limit = %d;',
+                $mode,
+                32 * 1024 * 1024
+            ));
         }
 
         self::registerCustomFunctions($this->db);

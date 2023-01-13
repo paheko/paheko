@@ -21,6 +21,31 @@
 	</p>
 </form>
 
+{elseif $ask && $ask->isListedAsFavourite()}
+
+<form method="post" action="{$self_url}" data-focus="1">
+	<fieldset>
+		<legend>Créer un sous-compte&nbsp;?</legend>
+
+		<div class="help block">
+			<p>Vous avez sélectionné le compte suivant&nbsp;:</p>
+
+			<h2>{$ask.code} — {$ask.label}</h2>
+		</div>
+
+		<p class="help">
+			Ce compte fait déjà partie de la liste des comptes favoris.
+			Vous pouvez créer un sous-compte pour détailler les écritures, si besoin.
+		</p>
+
+		<p class="submit">
+			{csrf_field key=$csrf_key}
+			{button type="submit" shape="right" name="from" value=$ask.id label="Créer un sous-compte" class="main"}
+		</p>
+	</fieldset>
+
+</form>
+
 {elseif $ask}
 
 <form method="post" action="{$self_url}" data-focus="1">
@@ -34,7 +59,7 @@
 		</div>
 
 		<p class="help">
-			Si ce compte vous convient tel quel, vous pouvez l'ajouter à vos comptes favoris, il sera ainsi toujours dans les listes de comptes.<br />
+			Si ce compte vous convient tel quel, vous pouvez l'ajouter à vos comptes favoris, il apparaîtra ainsi toujours dans les listes de comptes.<br />
 			Sinon vous pouvez créer un sous-compte pour plus de détails.
 		</p>
 
@@ -67,6 +92,7 @@
 			<tbody>
 			{foreach from=$missing item="item"}
 				<tr class="account account-level-{$item.level}">
+					<td>{if $item.already_listed}{icon shape="star" title="Ce compte est déjà favori"}{/if}</td>
 					<td class="num">{$item.code}</td>
 					<th>{linkbutton href="?id=%d&type=%d&ask=%d&%s"|args:$account.id_chart,$account.type,$item.id,$types_arg label=$item.label}</th>
 					<td>{if $item.description}<span class="help">{$item.description|escape|nl2br}</span>{/if}</td>

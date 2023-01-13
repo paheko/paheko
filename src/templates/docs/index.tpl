@@ -31,22 +31,22 @@ use Garradin\Entities\Files\File;
 	<aside>
 	{if $parent->canCreateDirHere() || $parent->canCreateHere()}
 		{if $gallery}
-			{linkbutton shape="menu" label="Afficher en liste" href="?path=%s&gallery=0"|args:$parent.path}
+			{linkbutton shape="menu" label="Afficher en liste" href="?path=%s&gallery=0"|args:$parent_path_uri}
 		{else}
-			{linkbutton shape="gallery" label="Afficher en galerie" href="?path=%s&gallery=1"|args:$parent.path}
+			{linkbutton shape="gallery" label="Afficher en galerie" href="?path=%s&gallery=1"|args:$parent_path_uri}
 		{/if}
 		{linkbutton shape="search" label="Rechercher" href="search.php" target="_dialog"}
 		{linkmenu label="Ajouter…" shape="plus" right=true}
 			{if $parent->canCreateHere()}
-				{linkbutton shape="upload" label="Depuis mon ordinateur" target="_dialog" href="!common/files/upload.php?p=%s"|args:$path}
+				{linkbutton shape="upload" label="Depuis mon ordinateur" target="_dialog" href="!common/files/upload.php?p=%s"|args:$parent_path_uri}
 			{if $parent->canCreateDirHere()}
-				{linkbutton shape="folder" label="Répertoire" target="_dialog" href="!docs/new_dir.php?path=%s"|args:$path}
+				{linkbutton shape="folder" label="Répertoire" target="_dialog" href="!docs/new_dir.php?path=%s"|args:$parent_path_uri}
 			{/if}
-				{linkbutton shape="text" label="Fichier texte" target="_dialog" href="!docs/new_file.php?path=%s"|args:$path}
+				{linkbutton shape="text" label="Fichier texte" target="_dialog" href="!docs/new_file.php?path=%s"|args:$parent_path_uri}
 				{if WOPI_DISCOVERY_URL}
-					{linkbutton shape="document" label="Document" target="_dialog" data-dialog-class="fullscreen" href="!docs/new_doc.php?ext=odt&path=%s"|args:$path}
-					{linkbutton shape="table" label="Tableur" target="_dialog" data-dialog-class="fullscreen" href="!docs/new_doc.php?ext=ods&path=%s"|args:$path}
-					{linkbutton shape="gallery" label="Présentation" target="_dialog" data-dialog-class="fullscreen" href="!docs/new_doc.php?ext=odp&path=%s"|args:$path}
+					{linkbutton shape="document" label="Document" target="_dialog" data-dialog-class="fullscreen" href="!docs/new_doc.php?ext=odt&path=%s"|args:$parent_path_uri}
+					{linkbutton shape="table" label="Tableur" target="_dialog" data-dialog-class="fullscreen" href="!docs/new_doc.php?ext=ods&path=%s"|args:$parent_path_uri}
+					{linkbutton shape="gallery" label="Présentation" target="_dialog" data-dialog-class="fullscreen" href="!docs/new_doc.php?ext=odp&path=%s"|args:$parent_path_uri}
 				{/if}
 			{/if}
 		{/linkmenu}
@@ -146,19 +146,19 @@ use Garradin\Entities\Files\File;
 				<tr class="folder">
 					{if $file->canDelete()}
 					<td class="check">
-						{input type="checkbox" name="check[]" value=$file.path}
+						{input type="checkbox" name="check[]" value=$file->path_uri()}
 					</td>
 					{/if}
-					<td class="icon"><a href="?path={$file.path}">{icon shape="folder"}</a></td>
-					<th colspan="3"><a href="?path={$file.path}">{$file.name}</a></th>
+					<td class="icon"><a href="?path={$file->path_uri()}">{icon shape="folder"}</a></td>
+					<th colspan="3"><a href="?path={$file->path_uri()}">{$file.name}</a></th>
 					<td class="actions">
 					{if $parent->canCreateHere() || $file->canDelete()}
 						{linkmenu label="Modifier…" shape="edit"}
 							{if $file->canRename()}
-								{linkbutton href="!common/files/rename.php?p=%s"|args:$file.path label="Renommer" shape="minus" target="_dialog"}
+								{linkbutton href="!common/files/rename.php?p=%s"|args:$file->path_uri() label="Renommer" shape="minus" target="_dialog"}
 							{/if}
 							{if $file->canDelete()}
-								{linkbutton href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer" shape="delete" target="_dialog"}
+								{linkbutton href="!common/files/delete.php?p=%s"|args:$file->path_uri() label="Supprimer" shape="delete" target="_dialog"}
 							{/if}
 						{/linkmenu}
 					{/if}
@@ -168,7 +168,7 @@ use Garradin\Entities\Files\File;
 				<tr>
 				{if $file->canDelete()}
 					<td class="check">
-						{input type="checkbox" name="check[]" value=$file.path}
+						{input type="checkbox" name="check[]" value=$file->path_uri()}
 					</td>
 				{/if}
 				{if $gallery && $file->isImage()}
@@ -186,18 +186,18 @@ use Garradin\Entities\Files\File;
 					<td class="actions">
 						{linkbutton href=$file->url(true) label="Télécharger" shape="download" title="Télécharger"}
 						{if $file->canShare()}
-							{linkbutton href="!common/files/share.php?p=%s"|args:$file.path label="Partager" shape="export" target="_dialog" title="Partager"}
+							{linkbutton href="!common/files/share.php?p=%s"|args:$file->path_uri() label="Partager" shape="export" target="_dialog" title="Partager"}
 						{/if}
 						{if $file->canRename() || $file->canDelete() || ($file->canWrite() && $file->editorType())}
 							{linkmenu label="Modifier…" shape="edit" right=true}
 								{if $file->canWrite() && $file->editorType()}
-									{linkbutton href="!common/files/edit.php?p=%s"|args:$file.path label="Éditer" shape="edit" target="_dialog" data-dialog-class="fullscreen"}
+									{linkbutton href="!common/files/edit.php?p=%s"|args:$file->path_uri() label="Éditer" shape="edit" target="_dialog" data-dialog-class="fullscreen"}
 								{/if}
 								{if $file->canRename()}
-									{linkbutton href="!common/files/rename.php?p=%s"|args:$file.path label="Renommer" shape="reload" target="_dialog"}
+									{linkbutton href="!common/files/rename.php?p=%s"|args:$file->path_uri() label="Renommer" shape="reload" target="_dialog"}
 								{/if}
 								{if $file->canDelete()}
-									{linkbutton href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer" shape="delete" target="_dialog"}
+									{linkbutton href="!common/files/delete.php?p=%s"|args:$file->path_uri() label="Supprimer" shape="delete" target="_dialog"}
 								{/if}
 							{/linkmenu}
 						{/if}
@@ -214,7 +214,7 @@ use Garradin\Entities\Files\File;
 					<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all2" /><label for="f_all2"></label></td>
 					<td class="actions" colspan="6">
 						<em>Pour les fichiers sélectionnés&nbsp;:</em>
-							<input type="hidden" name="parent" value="{$path}" />
+							<input type="hidden" name="parent" value="{$parent_path_uri}" />
 							<select name="action">
 								<option value="">— Choisir une action à effectuer —</option>
 								{if $context == File::CONTEXT_DOCUMENTS}

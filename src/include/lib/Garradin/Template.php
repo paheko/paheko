@@ -142,6 +142,10 @@ class Template extends Smartyer
 
 
 		$this->register_modifier('linkify_transactions', function ($str) {
+			$str = preg_replace_callback('/(?<=^|\s)(https?:\/\/.*?)(?=\s|$)/', function ($m) {
+				return sprintf('<a href="%s" target="_blank">%1$s</a>', htmlspecialchars($m[1]));
+			}, $str);
+
 			return preg_replace_callback('/(?<=^|\s)#(\d+)(?=\s|$)/', function ($m) {
 				return sprintf('<a href="%s%d">#%2$d</a>',
 					Utils::getLocalURL('!acc/transactions/details.php?id='),
@@ -268,12 +272,17 @@ class Template extends Smartyer
 	{
 		$config = Config::getInstance();
 
-		$color1 = $config->get('color1') ?: ADMIN_COLOR1;
-		$color2 = $config->get('color2') ?: ADMIN_COLOR2;
-		$admin_background = ADMIN_BACKGROUND_IMAGE;
+		$c1 = ADMIN_COLOR1;
+		$c2 = ADMIN_COLOR2;
+		$bg = ADMIN_BACKGROUND_IMAGE;
 
-		if ($url = $config->fileURL('admin_background')) {
-			$admin_background = $url;
+		if (!FORCE_CUSTOM_COLORS) {
+			$c1 = $config->get('color1') ?: $c1;
+			$c2 = $config->get('color2') ?: $c2;
+
+			if ($url = $config->fileURL('admin_background')) {
+				$bg = $url;
+			}
 		}
 
 		$out = '
@@ -289,7 +298,7 @@ class Template extends Smartyer
 			$out .= "\n" . sprintf('<link rel="stylesheet" type="text/css" href="%s" />', $url);
 		}
 
-		return sprintf($out, CommonModifiers::css_hex_to_rgb($color1), CommonModifiers::css_hex_to_rgb($color2), $admin_background);
+		return sprintf($out, CommonModifiers::css_hex_to_rgb($c1), CommonModifiers::css_hex_to_rgb($c2), $bg);
 	}
 
 	protected function displayDynamicField(array $params): string
@@ -476,15 +485,12 @@ class Template extends Smartyer
 
 	protected function diff(array $params)
 	{
-		if (!isset($params['old']) || !isset($params['new']))
-		{
+		if (isset($params['old'], $params['new'])) {
+			$diff = \KD2\SimpleDiff::diff_to_array(false, $params['old'], $params['new'], $params['context'] ?? 3);
+		}
+		else {
 			throw new \BadFunctionCallException('Paramètres old et new requis.');
 		}
-
-		$old = $params['old'];
-		$new = $params['new'];
-
-		$diff = \KD2\SimpleDiff::diff_to_array(false, $old, $new, 3);
 
 		$out = '<table class="diff">';
 		$prev = key($diff);

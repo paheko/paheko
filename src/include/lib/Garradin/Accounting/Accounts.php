@@ -210,10 +210,11 @@ class Accounts
 			return [];
 		}
 
-		return $this->em->DB()->get($this->em->formatQuery('SELECT a.*, CASE WHEN LENGTH(a.code) >= 6 THEN 6 ELSE LENGTH(a.code) END AS level
+		return $this->em->DB()->get($this->em->formatQuery('SELECT a.*, CASE WHEN LENGTH(a.code) >= 6 THEN 6 ELSE LENGTH(a.code) END AS level,
+			(a.bookmark = 1 OR a.user = 1 OR b.id IS NOT NULL) AS already_listed
 			FROM @TABLE a
 			LEFT JOIN acc_transactions_lines b ON b.id_account = a.id
-			WHERE a.id_chart = ? AND a.type = ? AND NOT (a.bookmark = 1 OR a.user = 1 OR b.id IS NOT NULL)
+			WHERE a.id_chart = ? AND a.type = ?
 			GROUP BY a.id
 			ORDER BY type, code COLLATE NOCASE;'), $this->chart_id, $type);
 	}

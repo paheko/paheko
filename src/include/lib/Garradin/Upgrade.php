@@ -236,7 +236,7 @@ class Upgrade
 		}
 
 		// Only check once every two weeks
-		if ($last && $last->time > (time() - 3600 * 24 * 2)) {
+		if ($last && $last->time > (time() - 3600 * 24 * 7)) {
 			return $last;
 		}
 
@@ -260,7 +260,7 @@ class Upgrade
 	static public function getInstaller(): FossilInstaller
 	{
 		if (!isset(self::$installer)) {
-			$i = new FossilInstaller(WEBSITE, ROOT, CACHE_ROOT, '!^garradin-(.*)\.tar\.gz$!');
+			$i = new FossilInstaller(WEBSITE, ROOT, CACHE_ROOT, '!^paheko-(.*)\.tar\.gz$!');
 			$i->setPublicKeyFile(ROOT . '/pubkey.asc');
 
 			if (0 === ($pos = strpos(CACHE_ROOT, ROOT))) {

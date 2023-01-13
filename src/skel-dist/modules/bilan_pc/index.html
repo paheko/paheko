@@ -84,232 +84,58 @@
 		</tr>
 	</thead>
 	<tbody>
-		<tr>
-			<th>ACTIF IMMOBILISÉ</th>
+	{{:assign tsum1=0 tsum2=0 tsum3=0 tsum4=0}}
+	{{:assign sum1=0 sum2=0 sum3=0 sum4=0}}
+	{{:load_json file="./comptes_bilan.json" assign="bilan"}}
+	{{#foreach from=$bilan key="label" item="accounts"}}
+
+		{{:assign c1=null c2=null c3=null c4=null}}
+
+		<tr class="{{if $accounts.2}}{{$accounts.2}}{{elseif $accounts}}level2{{/if}}">
+			<th>{{$label}}</th>
+
+		{{if $accounts.0 == 'SUM_ALL'}}
+			<td>{{$tsum1|raw|money}}</td>
+			<td>{{$tsum2|raw|money}}</td>
+			<td>{{$tsum3|raw|money}}</td>
+			<td>{{$tsum4|raw|money}}</td>
+		{{elseif $accounts.0 == 'SUM'}}
+			<td>{{$sum1|raw|money}}</td>
+			<td>{{$sum2|raw|money}}</td>
+			<td>{{$sum3|raw|money}}</td>
+			<td>{{$sum4|raw|money}}</td>
+			{{:assign sum1=0 sum2=0 sum3=0 sum4=0}}
+		{{elseif !$accounts}}
 			<td></td>
 			<td></td>
 			<td></td>
 			<td></td>
-		</tr>
-	{{* On liste tous les comptes quelle que soit l'année, on récupérera les soldes par année ensuite *}}
-	{{:assign parent=null}}
-	{{#balances
-		codes="20%,21%,23%,24%,25%,26%,27%"
-		where="(id_year = %d OR id_year = %d)"|args:$y1:$y2
-		group="SUBSTR(code, 1, 3)"
-		having="SUM(balance) != 0"
-		order="code"}}
-		{{if $parent !== $code|substr:0:2}}
-			{{#balances
-				select="label, code"
-				limit=1
-				codes=$code|substr:0:2}}
-				{{:assign parent=$code}}
-				<tr>
-					<th>{{$label}}</th>
-					<td></td>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-			{{/balances}}
+		{{else}}
+			{{#balances codes=$accounts.0 year=$y1 assign="c1"}}{{/balances}}
+			{{#balances codes=$accounts.1 year=$y1 assign="c2"}}{{/balances}}
+			{{:assign c3="%d-%d"|math:$c1.balance:$c2.balance}}
+			{{#balances codes="%s,%s"|args:$accounts.0:$accounts.1 year=$y2 assign="c4"}}{{/balances}}
+
+			{{:assign
+				sum1="%d+%d"|math:$sum1:$c1.balance
+				sum2="%d+%d"|math:$sum2:$c2.balance
+				sum3="%d+%d"|math:$sum3:$c3
+				sum4="%d+%d"|math:$sum2:$c4.balance
+				tsum1="%d+%d"|math:$tsum1:$c1.balance
+				tsum2="%d+%d"|math:$tsum2:$c2.balance
+				tsum3="%d+%d"|math:$tsum3:$c3
+				tsum4="%d+%d"|math:$tsum2:$c4.balance
+			}}
+
+			<td>{{$c1.balance|raw|money}}</td>
+			<td>{{$c2.balance|raw|money}}</td>
+			<td>{{$c3|raw|money}}</td>
+			<td>{{$c4.balance|raw|money}}</td>
 		{{/if}}
 
-		{{#balances codes="%s%%"|args:$code year=$y1 assign="c1"}}{{/balances}}
-
-		{{* On obtient le code de compte 28XX ou 29XX correspondant au compte 2XX *}}
-		{{:assign c1_end=$code|substr:1:2}}
-		{{:assign c2_codes="28%02d%%,29%1$02d%%"|args:$c1_end}}
-
-		{{#balances codes=$c2_codes year=$y1 assign="c2"}}{{/balances}}
-
-		{{:assign c3="%d-%d"|math:$c1.balance:$c2.balance}}
-
-		{{#balances codes="%s%%,%s"|args:$code:$c2_codes year=$y2 assign="c4"}}{{/balances}}
-		<tr class="level2">
-			<th>{{$label}}</th>
-			<td>{{$c1.balance|raw|money}}</td>
-			<td>{{$c2.balance|raw|money:false}}</td>
-			<td>{{$c3|raw|money}}</td>
-			<td>{{$c4.balance|raw|money}}</td>
-		</tr>
-	{{/balances}}
-		<tr class="total">
-			<th>Total I</th>
-			<td>
-				{{#balances codes="20%,21%,23%,24%,25%,26%,27%" year=$y1 assign="t11"}}{{$balance|raw|money}}{{/balances}}
-			</td>
-			<td>
-				{{#balances codes="28%,29%" year=$y1 assign="t12"}}{{$balance|raw|money}}{{/balances}}
-			</td>
-			<td>
-				{{:assign t13="%d-%d"|math:$t11.balance:$t12.balance}
-				{{$t13|raw|money}}
-			</td>
-			<td>
-				{{#balances codes="2%" year=$y2 assign="t14"}}{{$balance|raw|money}}{{/balances}}
-			</td>
-		</tr>
-		<tr>
-			<th>ACTIF CIRCULANT</th>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-		</tr>
-		{{#balances where="code LIKE '3%' AND code NOT LIKE '39%'" year=$y1 assign="c1"}}{{/balances}}
-		{{#balances where="code LIKE '39%'" year=$y1 assign="c2"}}{{/balances}}
-		{{:assign c3="%d-%d"|math:$c1.balance:$c2.balance}}
-		{{#balances where="code LIKE '3%'" year=$y2 assign="c4"}}{{/balances}}
-		{{:assign t21="%d+%d"|math:$t21:$c1.balance}}
-		{{:assign t22="%d+%d"|math:$t22:$c2.balance}}
-		{{:assign t23="%d+%d"|math:$t23:$c3}}
-		{{:assign t24="%d+%d"|math:$t24:$c4.balance}}
-		<tr>
-			<th>Stocks et en-cours</th>
-			<td>{{$c1.balance|raw|money}}</td>
-			<td>{{$c2.balance|raw|money}}</td>
-			<td>{{$c3|raw|money}}</td>
-			<td>{{$c4.balance|raw|money}}</td>
-		</tr>
-		<tr>
-			<th>Créances</th>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-		</tr>
-		{{#balances codes="41%" year=$y1 assign="c1" where="balance > 0"}}{{/balances}}
-		{{#balances codes="491%" year=$y1 assign="c2"}}{{/balances}}
-		{{:assign c3="%d-%d"|math:$c1.balance:$c2.balance}}
-		{{#balances codes="41%" year=$y2 assign="c4" where="balance > 0"}}{{/balances}}
-		{{:assign t21="%d+%d"|math:$t21:$c1.balance}}
-		{{:assign t22="%d+%d"|math:$t22:$c2.balance}}
-		{{:assign t23="%d+%d"|math:$t23:$c3}}
-		{{:assign t24="%d+%d"|math:$t24:$c4.balance}}
-		<tr class="level2">
-			<th>Créances clients, usagers et comptes rattachés</th>
-			<td>{{$c1.balance|raw|money}}</td>
-			<td>{{$c2.balance|raw|money}}</td>
-			<td>{{$c3|raw|money}}</td>
-			<td>{{$c4.balance|raw|money}}</td>
-		</tr>
-		{{#balances codes="461%" year=$y1 assign="c1"}}{{/balances}}
-		{{#balances codes="461%" year=$y2 assign="c4"}}{{/balances}}
-		{{:assign t21="%d+%d"|math:$t21:$c1.balance}}
-		{{:assign t23="%d+%d"|math:$t23:$c1.balance}}
-		{{:assign t24="%d+%d"|math:$t24:$c4.balance}}
-		<tr class="level2">
-			<th>Créances reçues par legs ou donations</th>
-			<td>{{$c1.balance|raw|money}}</td>
-			<td></td>
-			<td>{{$c1.balance|raw|money}}</td>
-			<td>{{$c4.balance|raw|money}}</td>
-		</tr>
-		{{#balances codes="40%,42%,43%,44%,45%,461%,4671%,4687%" where="balance > 0" year=$y1 assign="c1"}}{{/balances}}
-		{{#balances codes="496%" year=$y1 assign="c2"}}{{/balances}}
-		{{:assign c3="%d-%d"|math:$c1.balance:$c2.balance}}
-		{{#balances codes="40%,42%,43%,44%,45%,461%,4671%,4687%" where="balance > 0" year=$y2 assign="c4"}}{{/balances}}
-		{{:assign t21="%d+%d"|math:$t21:$c1.balance}}
-		{{:assign t22="%d+%d"|math:$t22:$c2.balance}}
-		{{:assign t23="%d+%d"|math:$t23:$c3}}
-		{{:assign t24="%d+%d"|math:$t24:$c4.balance}}
-		<tr class="level2">
-			<th>Autres</th>
-			<td>{{$c1.balance|raw|money}}</td>
-			<td>{{$c2.balance|raw|money}}</td>
-			<td>{{$c3|raw|money}}</td>
-			<td>{{$c4.balance|raw|money}}</td>
-		</tr>
-		{{#balances codes="501%,502%,503%,504%,505%,506%,507%,508%" year=$y1 assign="c1"}}{{/balances}}
-		{{#balances codes="59%" year=$y1 assign="c2"}}{{/balances}}
-		{{:assign c3="%d-%d"|math:$c1.balance:$c2.balance}}
-		{{#balances codes="501%,502%,503%,504%,505%,506%,507%,508%,59%" year=$y2 assign="c4"}}{{/balances}}
-		{{:assign t21="%d+%d"|math:$t21:$c1.balance}}
-		{{:assign t22="%d+%d"|math:$t22:$c2.balance}}
-		{{:assign t23="%d+%d"|math:$t23:$c3}}
-		{{:assign t24="%d+%d"|math:$t24:$c4.balance}}
-		<tr>
-			<th>Valeurs mobilières de placement</th>
-			<td>{{$c1.balance|raw|money}}</td>
-			<td>{{$c2.balance|raw|money}}</td>
-			<td>{{$c3|raw|money}}</td>
-			<td>{{$c4.balance|raw|money}}</td>
-		</tr>
-		{{#balances codes="51%,53%" where="code NOT LIKE '5186%' AND balance < 0" year=$y1 assign="c1"}}{{/balances}}
-		{{#balances codes="51%,53%" where="code NOT LIKE '5186%' AND balance < 0" year=$y2 assign="c4"}}{{/balances}}
-		{{:assign t21="%d+%d"|math:$t21:$c1.balance}}
-		{{:assign t23="%d+%d"|math:$t23:$c1.balance}}
-		{{:assign t24="%d+%d"|math:$t24:$c4.balance}}
-		<tr>
-			<th>Disponibilités</th>
-			<td>{{$c1.balance|raw|money}}</td>
-			<td></td>
-			<td>{{$c1.balance|raw|money}}</td>
-			<td>{{$c4.balance|raw|money}}</td>
 		</tr>
 
-		{{#balances codes="486%" year=$y1 assign="c1"}}{{/balances}}
-		{{#balances codes="486%" year=$y2 assign="c4"}}{{/balances}}
-		{{:assign t21="%d+%d"|math:$t21:$c1.balance}}
-		{{:assign t23="%d+%d"|math:$t23:$c1.balance}}
-		{{:assign t24="%d+%d"|math:$t24:$c4.balance}}
-		<tr>
-			<th>Charges constatées d'avance</th>
-			<td>{{$c1.balance|raw|money}}</td>
-			<td></td>
-			<td>{{$c1.balance|raw|money}}</td>
-			<td>{{$c4.balance|raw|money}}</td>
-		</tr>
-
-		<tr class="total">
-			<th>Total II</th>
-			<td>
-				{{$t21|raw|money}}
-			</td>
-			<td>
-				{{$t22|raw|money}}
-			</td>
-			<td>
-				{{$t23|raw|money}}
-			</td>
-			<td>
-				{{$t24|raw|money}}
-			</td>
-		</tr>
-
-		<tr>
-			<th>Frais d'émission des emprunts (III)</th>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-		</tr>
-
-		<tr>
-			<th>Primes de remboursement des emprunts (IV)<br />
-				Écarts de conversion Actif (V)</th>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-		</tr>
-
-		<tr class="total">
-			<th>TOTAL GÉNÉRAL (I + II + III + IV + V)</th>
-			<td>
-				{{"%d+%d"|math:$t21:$t11.balance|raw|money}}
-			</td>
-			<td>
-				{{"%d+%d"|math:$t22:$t12.balance|raw|money}}
-			</td>
-			<td>
-				{{"%d+%d"|math:$t23:$t13|raw|money}}
-			</td>
-			<td>
-				{{"%d+%d"|math:$t24:$t14.balance|raw|money}}
-			</td>
-		</tr>
+	{{/foreach}}
 	</tbody>
 </table>
 

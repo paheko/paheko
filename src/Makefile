@@ -29,36 +29,36 @@ psalm:
 
 release: test minify
 	$(eval VERSION=$(shell cat VERSION))
-	rm -rf /tmp/garradin-build
-	mkdir -p /tmp/garradin-build
-	fossil zip ${VERSION} /tmp/garradin-build/src.zip --name garradin
-	unzip -d /tmp/garradin-build /tmp/garradin-build/src.zip
+	rm -rf /tmp/paheko-build
+	mkdir -p /tmp/paheko-build
+	fossil zip ${VERSION} /tmp/paheko-build/src.zip --name paheko
+	unzip -d /tmp/paheko-build /tmp/paheko-build/src.zip
 	cd include/lib; \
-		rsync --files-from=dependencies.list -r ./ /tmp/garradin-build/garradin/src/include/lib/
-	mv www/admin/static/mini.css /tmp/garradin-build/garradin/src/www/admin/static/admin.css
-	cd /tmp/garradin-build/garradin/src/www/admin/static; \
+		rsync --files-from=dependencies.list -r ./ /tmp/paheko-build/paheko/src/include/lib/
+	mv www/admin/static/mini.css /tmp/paheko-build/paheko/src/www/admin/static/admin.css
+	cd /tmp/paheko-build/paheko/src/www/admin/static; \
 		rm -f styles/[0-9]*.css; \
 		rm -f font/*.css font/*.json
-	cd /tmp/garradin-build/garradin/src; \
+	cd /tmp/paheko-build/paheko/src; \
 		rm -f Makefile include/lib/KD2/data/countries.en.json
-	cd /tmp/garradin-build/garradin/src/data; mkdir plugins && cd plugins; \
-		wget https://fossil.kd2.org/garradin-plugins/uv/welcome.tar.gz
-	mv /tmp/garradin-build/garradin/src /tmp/garradin-build/garradin-${VERSION}
-	@#cd /tmp/garradin-build/; zip -r -9 garradin-${VERSION}.zip garradin-${VERSION};
-	@#mv -f /tmp/garradin-build/garradin-${VERSION}.zip ./
-	tar czvfh garradin-${VERSION}.tar.gz --hard-dereference -C /tmp/garradin-build garradin-${VERSION}
+	cd /tmp/paheko-build/paheko/src/data; mkdir plugins && cd plugins; \
+		wget https://fossil.kd2.org/paheko-plugins/uv/welcome.tar.gz
+	mv /tmp/paheko-build/paheko/src /tmp/paheko-build/paheko-${VERSION}
+	@#cd /tmp/paheko-build/; zip -r -9 paheko-${VERSION}.zip paheko-${VERSION};
+	@#mv -f /tmp/paheko-build/paheko-${VERSION}.zip ./
+	tar czvfh paheko-${VERSION}.tar.gz --hard-dereference -C /tmp/paheko-build paheko-${VERSION}
 
 deb:
 	cd ../debian; ./makedeb.sh
 
 publish: release deb
 	$(eval VERSION=$(shell cat VERSION))
-	gpg --armor --detach-sign garradin-${VERSION}.tar.gz
+	gpg --armor --detach-sign paheko-${VERSION}.tar.gz
 	fossil uv sync
-	#fossil uv ls | fgrep -v 'garradin-0.8.5' | grep '^garradin-.*\.(tar\.bz2|deb)' | xargs fossil uv rm
-	fossil uv add garradin-${VERSION}.tar.gz
-	fossil uv add garradin-${VERSION}.tar.gz.asc
-	cd ../debian && fossil uv add garradin-${VERSION}-*.deb
+	#fossil uv ls | fgrep -v 'paheko-0.8.5' | grep '^paheko-.*\.(tar\.bz2|deb)' | xargs fossil uv rm
+	fossil uv add paheko-${VERSION}.tar.gz
+	fossil uv add paheko-${VERSION}.tar.gz.asc
+	cd ../debian && fossil uv add paheko-${VERSION}.deb
 	cd ../tools && php make_installer.php > install.php && fossil uv add install.php && rm install.php
 	fossil uv sync
 
@@ -67,5 +67,5 @@ check-dependencies:
 
 minify:
 	cat `ls www/admin/static/styles/[0-9]*.css` | sed 's/\.\.\///' > www/admin/static/mini.css
-	# Minify is only gaining 500 gzipped bytes (4kB uncompressed) but making things hard to read/hack
-	#yui-compressor --nomunge www/admin/static/mini.css -o www/admin/static/mini.css
+	@# Minify is only gaining 500 gzipped bytes (4kB uncompressed) but making things hard to read/hack
+	@#yui-compressor --nomunge www/admin/static/mini.css -o www/admin/static/mini.css

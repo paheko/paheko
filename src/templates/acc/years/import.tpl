@@ -30,7 +30,7 @@ use Garradin\Accounting\Export;
 			<h2>{{%n écriture sera créée}{%n écritures seront créées} n=$report.created_count}</h2>
 		</summary>
 		<p class="help">Les écritures suivantes mentionnées dans le fichier seront ajoutées.</p>
-		{include file="acc/reports/_journal.tpl" journal=$report.created}
+		{include file="acc/reports/_journal.tpl" journal=$report.created with_linked_users=true}
 	</details>
 	{/if}
 
@@ -39,15 +39,19 @@ use Garradin\Accounting\Export;
 		<summary>
 			<h2>{{%n écriture sera modifiée}{%n écritures seront modifiées} n=$report.modified_count}</h2>
 		</summary>
-		<p class="help">Les écritures suivantes mentionnées dans le fichier seront modifiées.</p>
-		{include file="acc/reports/_journal.tpl" journal=$report.modified}
+		<p class="help">Les écritures suivantes mentionnées dans le fichier seront modifiées.<br />En rouge ce qui sera supprimé, en vert ce qui sera ajouté.</p>
+		{include file="acc/reports/_journal_diff.tpl" journal=$report.modified}
 	</details>
 	{/if}
 
 	{if $report.unchanged_count}
-	<p class="help">
-		<strong>{{%n écriture ne sera pas affectée.}{%n écritures ne seront pas affectées.} n=$report.unchanged_count}</strong>
-	</div>
+	<details>
+		<summary>
+			<h3>{{%n écriture ne sera pas affectée.}{%n écritures ne seront pas affectées.} n=$report.unchanged_count}</h3>
+		</summary>
+		<p class="help">Les écritures suivantes mentionnées dans le fichier <strong>ne seront pas modifiées</strong>.</p>
+		{include file="acc/reports/_journal.tpl" journal=$report.unchanged with_linked_users=true}
+	</details>
 	{/if}
 
 	{if !$report.modified_count && !$report.created_count}

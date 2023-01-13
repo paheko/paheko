@@ -21,9 +21,13 @@
 						{foreach from=$statement.foot_left item="row"}
 						<tr>
 							<th>{$row.label}</th>
-							<td class="money" width="10%">{$row.balance|raw|money:false}</td>
-							{if $row.balance2 || $row.change}
+							{if isset($criterias.compare_year)}
 							<td class="money" width="10%">{$row.balance2|raw|money:false}</td>
+							{/if}
+
+							<td class="money" width="10%">{$row.balance|raw|money:false}</td>
+
+							{if isset($criterias.compare_year)}
 							<td class="money" width="10%">{$row.change|raw|money:false:true}</td>
 							{/if}
 						</tr>
@@ -37,9 +41,13 @@
 						{foreach from=$statement.foot_right item="row"}
 						<tr>
 							<th>{$row.label}</th>
-							<td class="money" width="10%">{$row.balance|raw|money:false}</td>
-							{if $row.balance2 || $row.change}
+							{if isset($criterias.compare_year)}
 							<td class="money" width="10%">{$row.balance2|raw|money:false}</td>
+							{/if}
+
+							<td class="money" width="10%">{$row.balance|raw|money:false}</td>
+
+							{if isset($criterias.compare_year)}
 							<td class="money" width="10%">{$row.change|raw|money:false:true}</td>
 							{/if}
 						</tr>

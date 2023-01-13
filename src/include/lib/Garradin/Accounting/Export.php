@@ -157,7 +157,7 @@ class Export
 
 		if (self::SIMPLE == $type) {
 			$sql =  'SELECT t.id, t.type, t.status, t.label, t.date, t.notes, t.reference,
-				l1.reference AS p_reference,
+				IFNULL(l1.reference, l2.reference) AS p_reference,
 				a1.code AS debit_account,
 				a2.code AS credit_account,
 				l1.debit AS amount,

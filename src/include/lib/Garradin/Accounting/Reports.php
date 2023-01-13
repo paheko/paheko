@@ -180,12 +180,14 @@ class Reports
 
 		$balances = DB::getInstance()->getAssoc($sql);
 
+		//var_dump('<pre>', $sql, $balances[Account::REVENUE]); exit;
+
 		return ($balances[Account::REVENUE] ?? 0) - ($balances[Account::EXPENSE] ?? 0);
 	}
 
 	static public function getBalancesSQL(array $parts = [])
 	{
-		return sprintf('SELECT %s id_year, id, label, code, type, debit, credit, position, balance, is_debt
+		return sprintf('SELECT %s id_year, id, label, code, type, debit, credit, position, %s, is_debt
 			FROM (
 				SELECT %s t.id_year, a.id, a.label, a.code, a.type,
 					SUM(l.credit) AS credit,
@@ -216,6 +218,8 @@ class Reports
 			%s
 			ORDER BY %s',
 			isset($parts['select']) ? $parts['select'] . ',' : '',
+			// SUM(balance) is important for grouping projects when id is different but code is the same
+			isset($parts['group']) ? 'SUM(balance) AS balance' : 'balance',
 			isset($parts['inner_select']) ? $parts['inner_select'] . ',' : '',
 			$parts['inner_join'] ?? '',
 			isset($parts['inner_where']) ? 'WHERE ' . $parts['inner_where'] : '',
@@ -273,7 +277,7 @@ class Reports
 		else {
 			$where = self::getWhereClause($criterias);
 
-			$query = 'SELECT *, SUM(credit) AS credit, SUM(debit) AS debit, SUM(balance) AS balance FROM %s
+			$query = 'SELECT id_year, id, label, code, type, SUM(debit) AS debit, SUM(credit) AS credit, position, SUM(balance) AS balance, is_debt FROM %s
 				WHERE %s
 				GROUP BY %s %s
 				ORDER BY %s';
@@ -302,19 +306,35 @@ class Reports
 			$criterias2 = array_merge($criterias, ['year' => $criterias['compare_year']]);
 			$sql2 = self::getAccountsBalancesInnerSQL($criterias2, $order, true);
 
+			// Create temporary tables to store data, so that the request is not too complex
+			// and doesn't require to do the same SELECTs twice or more
+			$table_name = md5(random_bytes(10));
+			$db->begin();
+			$db->exec(sprintf('
+				CREATE TEMP TABLE acc_compare_a_%1$s (id_year, id, label, code, type, debit, credit, position, balance, is_debt);
+				CREATE TEMP TABLE acc_compare_b_%1$s (id_year, id, label, code, type, debit, credit, position, balance, is_debt);
+				INSERT INTO acc_compare_a_%1$s %2$s;
+				INSERT INTO acc_compare_b_%1$s %3$s;',
+				$table_name, $sql, $sql2));
+			$db->commit();
+
+			// The magic!
+			// Here we are selecting the balances of year A, joining with year B
+			// BUT to show the accounts used in year B but NOT in year A, we need to do this
+			// UNION ALL to select accounts from year B which are NOT in year A
 			$sql_union = 'SELECT a.id, a.code AS code, a.label, a.position, a.type, a.debit, a.credit, a.balance, IFNULL(b.balance, 0) AS balance2, IFNULL(a.balance - b.balance, a.balance) AS change
-				FROM (%1$s) AS a
-				LEFT JOIN %3$s b ON b.code = a.code AND a.position = b.position AND b.id_year = %4$d
+				FROM acc_compare_a_%1$s AS a
+				LEFT JOIN acc_compare_b_%1$s AS b ON b.code = a.code AND a.position = b.position AND b.id_year = %2$d
 				UNION ALL
 				-- Select balances of second year accounts that are =zero in first year
 				SELECT
 					NULL AS id, c.code AS code, c.label, c.position, c.type, c.debit, c.credit, 0 AS balance, c.balance AS balance2, c.balance * -1 AS change
-				FROM (%2$s) AS c
-				LEFT JOIN %3$s d ON d.code = c.code AND d.balance != 0 AND d.position = c.position AND d.id_year = %5$d
+				FROM acc_compare_b_%1$s AS c
+				LEFT JOIN acc_compare_a_%1$s AS d ON d.code = c.code AND d.balance != 0 AND d.position = c.position AND d.id_year = %3$d
 				WHERE d.id IS NULL
 				ORDER BY code COLLATE NOCASE;';
 
-			$sql = sprintf($sql_union, $sql, $sql2, 'acc_accounts_balances', $criterias['compare_year'], $criterias['year']);
+			$sql = sprintf($sql_union, $table_name, $criterias['compare_year'], $criterias['year']);
 		}
 
 		$out = $db->get($sql);

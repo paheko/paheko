@@ -24,7 +24,9 @@ assert(isset($grouped_services) && is_array($grouped_services));
 					<tr>
 						<td>
 							<input type="hidden" name="users[{$id}]" value="{$name}" />
+							{if !empty($allow_users_edit)}
 							{button shape="delete" onclick="this.parentNode.parentNode.remove();" title="Supprimer de la liste"}
+							{/if}
 						</td>
 						<th>
 							{$name}
@@ -35,8 +37,12 @@ assert(isset($grouped_services) && is_array($grouped_services));
 			</dd>
 		{elseif $create && $copy_service}
 			<dt>Recopier depuis l'activité</dt>
-			<dd><strong>{$copy_service.label}</strong><input type="hidden" name="copy_service" value="{$copy_service.id}" /></dd>
-			<dd><em>{if $copy_service_only_paid}(seulement les inscriptions marquées comme payées){else}(toutes les inscriptions){/if}</em><input type="hidden" name="copy_service_only_paid" value="{$copy_service_only_paid}" /></dd>
+			<dd><strong>{$copy_service.label}</strong><input type="hidden" name="copy" value="s{$copy_service.id}" /></dd>
+			<dd><em>{if $copy_only_paid}(seulement les inscriptions marquées comme payées){else}(toutes les inscriptions){/if}</em><input type="hidden" name="copy_only_paid" value="{$copy_service_only_paid}" /></dd>
+		{elseif $create && $copy_fee}
+			<dt>Recopier depuis le tarif</dt>
+			<dd><strong>{$copy_fee->service()->label} — {$copy_fee.label}</strong><input type="hidden" name="copy" value="f{$copy_fee.id}" /></dd>
+			<dd><em>{if $copy_only_paid}(seulement les inscriptions marquées comme payées){else}(toutes les inscriptions){/if}</em><input type="hidden" name="copy_only_paid" value="{$copy_service_only_paid}" /></dd>
 		{/if}
 
 			<dt><label for="f_service_ID">Activité</label> <b>(obligatoire)</b></dt>
@@ -157,10 +163,6 @@ assert(isset($grouped_services) && is_array($grouped_services));
 	<p class="submit">
 		{csrf_field key=$csrf_key}
 		{button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
-
-		{if $create && $users && count($users) == 1}
-			{button type="submit" name="save_and_add_payment" class="accounting" label="Enregistrer et ajouter un autre règlement" shape="plus"}
-		{/if}
 	</p>
 
 </form>

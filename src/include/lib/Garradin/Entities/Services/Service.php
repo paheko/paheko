@@ -80,6 +80,11 @@ class Service extends Entity
 			],
 			'end_date' => [
 			],
+			'user_number' => [
+				'label' => 'Numéro de membre',
+				'select' => 'm.numero',
+				'export_only' => true,
+			],
 			'identity' => [
 				'label' => 'Membre',
 				'select' => $id_field,

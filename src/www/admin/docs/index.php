@@ -68,6 +68,8 @@ if ($gallery !== $pref) {
 	Session::getLoggedUser()->setPreference('folders_gallery', $gallery);
 }
 
-$tpl->assign(compact('path', 'list', 'parent', 'context', 'context_ref', 'breadcrumbs', 'parent_path', 'quota_used', 'quota_max', 'quota_percent', 'quota_left', 'user_name', 'gallery'));
+$parent_path_uri = $parent->path_uri();
+
+$tpl->assign(compact('path', 'parent_path_uri', 'list', 'parent', 'context', 'context_ref', 'breadcrumbs', 'parent_path', 'quota_used', 'quota_max', 'quota_percent', 'quota_left', 'user_name', 'gallery'));
 
 $tpl->display('docs/index.tpl');

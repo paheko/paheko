@@ -34,7 +34,9 @@ class Entity extends AbstractEntity
 
 	static public function filterUserDateValue(?string $value): ?\DateTime
 	{
-		if (!trim((string) $value)) {
+		$value = trim((string) $value);
+
+		if (!$value) {
 			return null;
 		}
 

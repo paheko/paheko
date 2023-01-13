@@ -3,7 +3,7 @@
 namespace Garradin;
 
 /**
- * Ce fichier permet de configurer Garradin pour une utilisation
+ * Ce fichier permet de configurer Paheko pour une utilisation
  * avec plusieurs associations, mais une seule copie du code source.
  * (aussi appelé installation multi-sites, ferme ou usine)
  *
@@ -12,9 +12,17 @@ namespace Garradin;
  * N'oubliez pas d'installer également le script cron.sh fournit
  * pour lancer les rappels automatiques et sauvegardes.
  *
- * Si cela ne suffit pas à vos besoins, contactez-nous : https://garradin.eu/contact
+ * Si cela ne suffit pas à vos besoins, contactez-nous :
+ * https://paheko.cloud/contact
  * pour une aide spécifique à votre installation.
  */
+
+// Décommenter cette ligne si vous n'utilisez pas NFS,
+// pour rendre les bases de données plus rapides.
+//
+// Si vous utilisez NFS, décommenter cette ligne risque
+// de provoquer des corruptions de base de données !
+#const SQLITE_JOURNAL_MODE = 'WAL';
 
 // Nom de domaine parent des associations hébergées
 // Exemple : si vos associations sont hébergées en clubdetennis.garradin.eu,

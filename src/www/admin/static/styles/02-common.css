@@ -594,6 +594,7 @@ aside.quota {
     font-size: .9em;
     margin-bottom: .8em;
 }
+
 dl.large dt {
     font-size: 1.5em;
     font-weight: bold;
@@ -607,3 +608,6 @@ dl.large dd {
     margin: .5em 0;
     padding-left: 2rem;
 }
+
+.diff ins { background: #cfc; color: #000; text-decoration: none; }
+.diff del { background: #fcc; color: #000; }
