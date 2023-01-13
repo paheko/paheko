@@ -159,10 +159,6 @@ assert(isset($grouped_services) && is_array($grouped_services));
 	<p class="submit">
 		{csrf_field key=$csrf_key}
 		{button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
-
-		{if $create && $users && count($users) == 1}
-			{button type="submit" name="save_and_add_payment" class="accounting" label="Enregistrer et ajouter un autre règlement" shape="plus"}
-		{/if}
 	</p>
 
 </form>
