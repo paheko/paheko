@@ -21,14 +21,39 @@ class Services
 		return DB::getInstance()->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE U_NOCASE;');
 	}
 
+	static public function listAssocWithFees()
+	{
+		$out = [];
+
+		foreach (self::listGroupedWithFees(null, 2) as $service) {
+			$out[$service->label] = [
+				's' . $service->id => '— Tous les tarifs —',
+			];
+
+			foreach ($service->fees as $fee) {
+				$out[$service->label]['f' . $fee->id] = $fee->label;
+			}
+		}
+
+		return $out;
+	}
+
 	static public function count()
 	{
 		return DB::getInstance()->count(Service::TABLE, 1);
 	}
 
-	static public function listGroupedWithFees(?int $user_id = null, bool $current_only = true)
+	static public function listGroupedWithFees(?int $user_id = null, int $current = 1)
 	{
-		$where = $current_only ? 'WHERE end_date IS NULL OR end_date >= date()' : 'WHERE end_date IS NOT NULL AND end_date < date()';
+		if ($current === 1) {
+			$where = 'WHERE end_date IS NULL OR end_date >= date()';
+		}
+		elseif ($current === 2) {
+			$where = '';
+		}
+		else {
+			$where = 'WHERE end_date IS NOT NULL AND end_date < date()';
+		}
 
 		$sql = sprintf('SELECT
 			id, label, duration, start_date, end_date, description,
