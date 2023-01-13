@@ -106,11 +106,33 @@ document.head.innerHTML += `<style type="text/css">
 	justify-content: center;
 }
 
-#download div {
+#download div, #download div h3 a, #download div h4 a {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+}
+
+#download div h3 a, #download div h4 a {
+	background: #eef;
+	border: 2px solid #ccf;
+	padding: 5px;
+}
+
+#download a:hover {
+	background: #fee;
+	border-color: #fcc;
+}
+
+#download img {
+	height: 124px;
+	box-shadow: none;
+	padding: 5px;
+}
+
+#download p, #download h3, #download h4 {
+	margin: 0;
+	margin-bottom: 8px;
 }
 
 .searchForm {
@@ -153,7 +175,7 @@ fetch('/paheko/juvlist?'+(+(new Date))).then((r) => {
 
 			file.type = v[2];
 			file.version = v[1];
-			file.human_size = (Math.round((file.size / 1024 / 1024) * 100) / 100 + ' Mo').replace(/\./, ',');
+			file.human_size = (Math.round((file.size / 1024 / 1024) * 10) / 10 + ' Mo').replace(/\./, ',');
 
 			if (!last.hasOwnProperty(file.type) || isNewerVersion(last[file.type].version, file.version)) {
 				last[file.type] = file;
@@ -173,7 +195,7 @@ fetch('/paheko/juvlist?'+(+(new Date))).then((r) => {
 			time = Math.round(days / 30.5) + ' mois';
 		}
 
-		document.querySelector('#news').innerHTML = `<li class="last"><strong>Dernière version : ${last}</strong></li>
+		document.querySelector('#news').innerHTML = `<li class="last"><strong>Dernière version : ${last['tar.gz'].version}</strong></li>
 			<li class="last"><em>il y a ${time}</em></li>` + document.querySelector('#news').innerHTML;
 
 		document.querySelector('#news').insertAdjacentHTML('afterend', `<div id="download">
