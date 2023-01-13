@@ -9,7 +9,7 @@ use Garradin\Users\Emails;
 
 use KD2\SMTP;
 
-use const Garradin\{WWW_URL, SECRET_KEY, OFFLINE};
+use const Garradin\{WWW_URL, SECRET_KEY};
 
 class Email extends Entity
 {
