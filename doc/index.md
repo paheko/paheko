@@ -1,4 +1,4 @@
-# Paheko, le gestionnaire d'association libre et simple
+# La gestion d'association libre et simple
 
 <nav id="gnav">
 
@@ -7,7 +7,7 @@
 * <a href="https://paheko.cloud/" target="_blank">Essayer gratuitement</a>
 * [Entraide](/wiki/?name=Entraide)
 
-<ul id="download">
+<ul id="news">
 	<li><a href="$ROOT/wiki/?name=Changelog">Nouveautés</a></li>
 	<li><a href="$ROOT/uvlist">Anciennes versions</a></li>
 </ul>
@@ -90,13 +90,27 @@ document.head.innerHTML += `<style type="text/css">
 	opacity: 0.7;
 }
 
-#download li {
+#news li {
 	font-size: 1em;
 }
 
-#download li a {
+#news li a {
 	border-color: #060;
 	background: #dfd;
+}
+
+#download {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+}
+
+#download div {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
 }
 
 .searchForm {
@@ -131,15 +145,22 @@ fetch('/paheko/juvlist?'+(+(new Date))).then((r) => {
 		let selected;
 
 		list.forEach((file) => {
-			var v = file.name.match(/^paheko-(.*)\.tar\./);
+			var v = file.name.match(/^paheko-(\d+\.\d+\.\d+)\.(deb|exe|tar\.gz)$/);
 
 			if (!v || v[1].match(/-(alpha|rc|beta)/)) {
 				return;
 			}
 
-			if (!last || isNewerVersion(last, v[1])) {
-				last = v[1];
-				selected = file;
+			file.type = v[2];
+			file.version = v[1];
+			file.human_size = (Math.round((file.size / 1024 / 1024) * 100) / 100 + ' Mo').replace(/\./, ',');
+
+			if (!last.hasOwnProperty(file.type) || isNewerVersion(last[file.type].version, file.version)) {
+				last[file.type] = file;
+
+				if (file.type == 'tar.gz') {
+					selected = file;
+				}
 			}
 		});
 
@@ -152,12 +173,33 @@ fetch('/paheko/juvlist?'+(+(new Date))).then((r) => {
 			time = Math.round(days / 30.5) + ' mois';
 		}
 
-		let deb = selected.name.replace(/\.tar\..*$/, '.deb');
+		document.querySelector('#news').innerHTML = `<li class="last"><strong>Dernière version : ${last}</strong></li>
+			<li class="last"><em>il y a ${time}</em></li>` + document.querySelector('#news').innerHTML;
 
-		document.querySelector('#download').innerHTML = `<li class="last"><strong>Dernière version : ${last}</strong><br />
-			<em>il y a ${time}</em></li>
-			<li><a href="$ROOT/uv/${selected.name}"><strong>Télécharger</strong> <small>(.tar.gz)</small></a></li>
-			<li><a href="$ROOT/uv/${deb}">Debian</a></li>` + document.querySelector('#download').innerHTML;
+		document.querySelector('#news').insertAdjacent('afterend', `<div id="download">
+			<div>
+
+				<h3><a href="$ROOT/uv/${last['tar.gz'].name}"><img src="data:image/svg+xml;base64,PHN2ZwogIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIKICB3aWR0aD0iMjQiCiAgaGVpZ2h0PSIyNCIKICB2aWV3Qm94PSIwIDAgMjQgMjQiCiAgZmlsbD0ibm9uZSIKICBzdHJva2U9ImN1cnJlbnRDb2xvciIKICBzdHJva2Utd2lkdGg9IjIiCiAgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIgogIHN0cm9rZS1saW5lam9pbj0icm91bmQiCj4KICA8cmVjdCB4PSIyIiB5PSIyIiB3aWR0aD0iMjAiIGhlaWdodD0iOCIgcng9IjIiIHJ5PSIyIiAvPgogIDxyZWN0IHg9IjIiIHk9IjE0IiB3aWR0aD0iMjAiIGhlaWdodD0iOCIgcng9IjIiIHJ5PSIyIiAvPgogIDxsaW5lIHgxPSI2IiB5MT0iNiIgeDI9IjYuMDEiIHkyPSI2IiAvPgogIDxsaW5lIHgxPSI2IiB5MT0iMTgiIHgyPSI2LjAxIiB5Mj0iMTgiIC8+Cjwvc3ZnPgo=" alt="" /><span>Serveur</span></a></h3>
+				<p>pour auto-hébergement</p>
+				<p><small>(.tar.gz, ${last['tar.gz'].human_size})</small></p>
+
+			</div>
+			<div>
+
+				<h4><a href="$ROOT/uv/${last['deb'].name}"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGUAAAB8AgMAAAANy5YPAAAADFBMVEX////IAjfrobXZTnPqtJDBAAAACXBIWXMAAAsSAAALEgHS3X78AAADUklEQVRIx51WPWsbQRBdrZDxSZZJo14JHAQcgxv1+gdx4dFdIZQrg0khUgnj4nCXIpDmejdpbBICwSGNQT8hzcVl1KRyEwJOEQjO7ezX7J1GhbfR6d7O7Js3H3tC0HVxLtYuubcSzLqCiy8yX4dEAHD5Y7bOXQm4Fk1oH8xacUYAs27OGAGUhyFUegimDXpuJb8oNKIQTAjShnARIrF5df9P/849NMAXx5W4e8jHayIJsR4+1/hlxHkWHDWjLlzUhfp36pPj6eO+mUtwX0VNjkrykNRSP3dquhUhJxIkbk39rnlNa+NFMaLpk46ipCE6N/jQosK4FC2N6zCvyGNc/a76dX/IQ73K4iB1NrOVijIfBQm3nFNdgWkdKuB4oQlmdWgA47k+s9EeMWTvkGnSaIAOnB7gDh/V3v3KpGzyFEM/JKR13iKY7AgxLDyLkc1GC5IKelS6hMgqAfLGmHeF+OS5R0rTXqaTIYV4opVEysjnK0LJGdrasAo039Wuz1AMpxwRMZHI01Kf0ibNVXRHtjTTGtRxuscZhVAnK8Zg2YBsxIWoOYxdxDcBNFdnWWgSpDlTkBFDhh0xJlDLQlvocEmgyAax6+MynCMbRNeTr0NaQ4SM8P1D2kYzzkqW08CK1nCZDgkUWfJDdVZ6vgaSQ3XWAjW0RWPypqZyG14GkNFwZ6mqYkyhloH2czW/cwq1TVf0UF0pCCRJL5WTABLgC6A82qYhy7LKnrxFHF5tY5dZqFBFcpVr3wEkfqZ+WKIkLpXDDxPfZ6ZtTdk8e+zsyxfG2NTh1pkrBXhtIGMVHRT6MPne7ImsVftjrA/rlYkIIfH8jb4n3bRouXb4/BvfVTMrs5AL589Imd256dP2UPwW4PbKDfJKFFfrrZPwzpOuYatQ78L7nMzQ/fk1wEmtN42H76J7HrSS99A/ycNhmtD7fhZeBWRrt3YVjJnvls6aie1viW8MVI025hNJTUzuLBHehrUPlJSDBkTgxgUyFWxgrFW05r7xN0nOB8ZBevitXyM+5piPOWrevp4iy75SccWr+DAerMByA4+Cl2pDyjbkRQIZa43IFhzU3yTj0Qb6S95jyhdI+PkcVsH0Ifkc8UTafNKqwcCWgbiGvyx2cUnt/gORWTpBwiiSSwAAAABJRU5ErkJggg==" alt="" /><span>Linux</span></a></h4>
+				<p>hors-ligne, pour ordinateur</p>
+				<p><small>(.deb, ${last['deb'].human_size})</small></p>
+
+			</div>
+			<div>
+
+				<h4><a href="$ROOT/uv/${last['exe'].name}"><img src="data:image/svg+xml;base64,PHN2ZyBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCAyNCAyNCIgdmlld0JveD0iMCAwIDI0IDI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Im0yMiAyLTEwLjggMS42djhsMTAuOC0uMXptLTExLjggMTAuNS04LjItLjF2Ni44bDguMSAxLjF6bS04LjItNy43djYuOGg4LjF2LTcuOXptOS4xIDcuN3Y3LjlsMTAuOSAxLjZ2LTkuNHoiLz48L3N2Zz4=" alt="" /><span>Windows</span></a></h4>
+				<p>hors-ligne, pour ordinateur</p>
+				<p><small>(.exe, ${last['exe'].human_size})</small></p>
+
+			</div>
+
+		</div>`);
 	});
 });
 </script>
