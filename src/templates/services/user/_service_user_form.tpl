@@ -24,7 +24,9 @@ assert(isset($grouped_services) && is_array($grouped_services));
 					<tr>
 						<td>
 							<input type="hidden" name="users[{$id}]" value="{$name}" />
+							{if !empty($allow_users_edit)}
 							{button shape="delete" onclick="this.parentNode.parentNode.remove();" title="Supprimer de la liste"}
+							{/if}
 						</td>
 						<th>
 							{$name}
