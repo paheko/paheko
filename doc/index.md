@@ -215,22 +215,28 @@ fetch('/paheko/juvlist?'+(+(new Date))).then((r) => {
 			<div>
 
 				<h3><a href="$ROOT/uv/${last['tar.gz'].name}"><img src="data:image/svg+xml;base64,PHN2ZwogIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIKICB3aWR0aD0iMjQiCiAgaGVpZ2h0PSIyNCIKICB2aWV3Qm94PSIwIDAgMjQgMjQiCiAgZmlsbD0ibm9uZSIKICBzdHJva2U9ImN1cnJlbnRDb2xvciIKICBzdHJva2Utd2lkdGg9IjIiCiAgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIgogIHN0cm9rZS1saW5lam9pbj0icm91bmQiCj4KICA8cmVjdCB4PSIyIiB5PSIyIiB3aWR0aD0iMjAiIGhlaWdodD0iOCIgcng9IjIiIHJ5PSIyIiAvPgogIDxyZWN0IHg9IjIiIHk9IjE0IiB3aWR0aD0iMjAiIGhlaWdodD0iOCIgcng9IjIiIHJ5PSIyIiAvPgogIDxsaW5lIHgxPSI2IiB5MT0iNiIgeDI9IjYuMDEiIHkyPSI2IiAvPgogIDxsaW5lIHgxPSI2IiB5MT0iMTgiIHgyPSI2LjAxIiB5Mj0iMTgiIC8+Cjwvc3ZnPgo=" alt="" /><span>Serveur</span></a></h3>
-				<p>pour auto-hébergement</p>
-				<p><small>(.tar.gz, ${last['tar.gz'].human_size})</small></p>
+				<p>pour auto-hébergement<br />
+					<em>(.tar.gz, ${last['tar.gz'].human_size})</em><br />
+					<small><a href="$ROOT/wiki/?name=Installation">Guides d'installation</a></small>
+				</p>
 
 			</div>
 			<div>
 
 				<h4><a href="$ROOT/uv/${last['deb'].name}"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGoAAAB8AgMAAAD8wM2CAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAAlwSFlzAAAF3gAABd4BiRluJgAAAAxQTFRFAAAAR3BMAAAAAAAAoOHXxQAAAAR0Uk5T/QBQozL7B+YAAAPySURBVEjHndc9aBxHFADgd7u64hTv4eYgxRVulijYpQURpDgIKVwILtbN7GAt9jquEl/gItUOl5gUhgjUbNKkMBhhkDE2rhOY2LhwYVvNgiEu0qhOwKiISSAzszPz3q7mhIlKfczuzJv3swds4d8Y3tEu/fNyb4FxCQBl2HJFkIRtpI0spGYIVkM2qS0JWV5bFLKiNnwhsZm1KmAja2nA5ta6AZMnmCXonWDJCdY5btxZ9D8tDtkpgD5fYKVUFzQKWqT+P9ARD5yh80UB1b/jkPHkh1346dTPwXXJ8gG8Wn6NF0hsuXMaXkXDsMVnYBifCxucgXMwxIsn9hz69z6G00F7LP+8MYXdoD355qvP2KNx0KTOaP4XqOAcz6XSZmnAbrrMT4/bt6Y8+WLbyrCSiH2it7IqMEFpzqtnTcsiaPNfGf9bZ3cSsN/fvinFa0zQxtm/3GPbE0wmas/VXnpqnxDIszslKyqO1YmWwWRtMzFlkbZNxEzGlSnRbtvGEbu0V5d20rZZx7eLqG2yh22mZdyFWPiNehNud5nf6BgPWmEddps2cinLfcl7k0DqN25YhiXpe5ozgS1Aus04y7GtzN1mnBVoM9ebnI2wVRWxrF/gbI7tL49tP3Amsb9P4IO6Pp3B+wNMgKSuCWscditMnGhuDuFtRufLzLzdWhbdZKThH5jma23S6TAyKIbmRNZEvzG/VkwkrOVLPTrrVkzkrY0/wvGl4n6e2myYMjLQlkxgrI0OBi0rvcnbeHR1z0vmdq3BrGzZwFkWj9gim9CwKDtPLI++a1vqrOg8JsbV2dFmnd8a66jNG8Z18/UmW+sOTOOqDaKdxrrbZB3E6411V6Q3VR73qSX7P0piA2pnISoGaF1qfwCs+LisTSNid1W1vOfuIVOdCu9BxHrouvublGyOObGhO0V8aE2oiOJDv9adIn5q7ZrOLX/x67rikwvGcujrHPFJuK4rfvWGse39Uh8jQlMVX101dst2B/fQW2aOf27syBbuqrdCveCisdQWT+KNv6nYZWJj33wu1BEgJvwMri2r8H2Zv4vaWBcNO4W1bWJ+o89syFNl37tKrl+cuQDtoOV2L8LZNWWf2qqzQSuc5Wg8bc4CJnb9M/1Z6LqjRjwKbxvKXPpdtd/RZJ+Z/3zQ+5z6dBSHYxA+v9T1X8dvzBcqLlfId7LEj2ihY30RS4R+YO8wapxaZmolL1sfoMY2zHXzfstS+0h9R9N+ecy469fX45KajkXuZ8CmQQ5v1bfNA6ltC2fHpn5ntob3cUTmynTNxqzOCdGYfw8PmWtpWzqPGjP1yS8u58WHm73WfN/3xfnQ7jv426l8h99V/wEOtd7r5KQmrQAAAABJRU5ErkJggg==" alt="" /><span>Linux</span></a></h4>
-				<p>hors-ligne, pour ordinateur</p>
-				<p><small>(.deb, ${last['deb'].human_size})</small></p>
+				<p>hors-ligne, pour ordinateur<br />
+					<em>(.deb, ${last['deb'].human_size})</em><br />
+					<small><a href="$ROOT/wiki/?name=Fonctionnement+hors-ligne">Guide d'installation</a></small>
+				</p>
 
 			</div>
 			<div>
 
 				<h4><a href="$ROOT/uv/${last['exe'].name}"><img src="data:image/svg+xml;base64,PHN2ZyBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCAyNCAyNCIgdmlld0JveD0iMCAwIDI0IDI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Im0yMiAyLTEwLjggMS42djhsMTAuOC0uMXptLTExLjggMTAuNS04LjItLjF2Ni44bDguMSAxLjF6bS04LjItNy43djYuOGg4LjF2LTcuOXptOS4xIDcuN3Y3LjlsMTAuOSAxLjZ2LTkuNHoiLz48L3N2Zz4=" alt="" /><span>Windows</span></a></h4>
-				<p>hors-ligne, pour ordinateur</p>
-				<p><small>(.exe, ${last['exe'].human_size})</small></p>
+				<p>hors-ligne, pour ordinateur<br />
+					<em>(.exe, ${last['exe'].human_size})</em><br />
+					<small><a href="$ROOT/wiki/?name=Installation/Windows">Guide d'installation</a></small>
+				</p>
 
 			</div>
 			</nav>
