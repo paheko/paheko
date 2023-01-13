@@ -49,7 +49,7 @@ $create = true;
 // Only load the form if a user has been selected
 require __DIR__ . '/_form.php';
 
-$form->runIf(f('save') || f('save_and_add_payment'), function () use ($session, $users, $copy_service, $copy_service_only_paid) {
+$form->runIf('save', function () use ($session, $users, $copy_service, $copy_service_only_paid) {
 	if ($copy_service) {
 		$users = $copy_service->getUsers($copy_service_only_paid);
 	}
@@ -58,9 +58,6 @@ $form->runIf(f('save') || f('save_and_add_payment'), function () use ($session, 
 
 	if (count($users) > 1) {
 		$url = ADMIN_URL . 'services/details.php?id=' . $su->id_service;
-	}
-	elseif (f('save_and_add_payment')) {
-		$url = ADMIN_URL . 'services/user/payment.php?id=' . $su->id;
 	}
 	else {
 		$url = ADMIN_URL . 'services/user/?id=' . $su->id_user;
