@@ -20,7 +20,7 @@ namespace KD2 {
 }
 
 namespace {
-	const WEBSITE = 'https://fossil.kd2.org/garradin/';
+	const WEBSITE = 'https://fossil.kd2.org/paheko/';
 	const INSTALL_DIR = __DIR__ . '/.install';
 
 	echo '
@@ -95,17 +95,30 @@ namespace {
 	}
 
 	$step = $_GET['step'] ?? null;
+	$error = null;
 
 	@mkdir(INSTALL_DIR);
-	$i = new KD2\FossilInstaller(WEBSITE, __DIR__, INSTALL_DIR, '!^garradin-(.*)\.tar\.gz$!');
+	$i = new KD2\FossilInstaller(WEBSITE, __DIR__, INSTALL_DIR, '!^paheko-(.*)\.tar\.gz$!');
 
 	if ($step == 'download') {
-		$i->download($i->latest());
+		$latest = $i->latest();
+
+		if (!$latest) {
+			die('</head><h1>Aucune version à télécharger n\'a été trouvée.</h1>');
+		}
+
+		$i->download($latest);
 		$next = 'install';
 	}
 	elseif ($step == 'install') {
-		$i->install($i->latest());
-		$i->clean($i->latest());
+		$latest = $i->latest();
+
+		if (!$latest) {
+			die('</head><h1>Aucune version à télécharger n\'a été trouvée.</h1>');
+		}
+
+		$i->install($latest);
+		$i->clean($latest);
 		$next = null;
 	}
 	else {
