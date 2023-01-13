@@ -24,9 +24,11 @@ if (!$count_all) {
 $users = null;
 $copy_service = null;
 $copy_service_only_paid = null;
+$allow_users_edit = true;
 
 if (qg('user') && ($name = (new Membres)->getNom((int)qg('user')))) {
 	$users = [(int)qg('user') => $name];
+	$allow_users_edit = false;
 }
 elseif (f('users') && is_array(f('users')) && count(f('users'))) {
 	$users = f('users');
@@ -74,7 +76,7 @@ $account_targets = $types_details[Transaction::TYPE_REVENUE]->accounts[1]->targe
 
 $service_user = null;
 
-$tpl->assign(compact('csrf_key', 'users', 'account_targets', 'service_user'));
+$tpl->assign(compact('csrf_key', 'users', 'account_targets', 'service_user', 'allow_users_edit'));
 $tpl->assign('projects', Projects::listAssocWithEmpty());
 
 $tpl->display('services/user/subscribe.tpl');
