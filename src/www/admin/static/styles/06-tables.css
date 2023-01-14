@@ -193,6 +193,7 @@ table.list .folder .icon span::before {
 
 table.files.gallery {
     display: block;
+    clear: both;
 }
 
 table.files.gallery thead {
@@ -206,8 +207,9 @@ table.files.gallery tfoot {
 
 table.files.gallery tbody {
     display: grid;
-    grid-template-columns: repeat( auto-fit, minmax(12em, 20em) );
+    grid-template-columns: repeat(auto-fit, minmax(15em, .9fr));
     grid-gap: .5em;
+    justify-content: center;
 }
 
 table.files.gallery tbody tr {
@@ -216,7 +218,7 @@ table.files.gallery tbody tr {
     grid-template-columns: .3fr .7fr;
     text-align: center;
     padding: .3em 0;
-    max-width: 20em;
+    min-width: 15em;
 }
 
 table.files.gallery tbody tr td {
