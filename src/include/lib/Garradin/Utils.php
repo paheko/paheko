@@ -1053,7 +1053,7 @@ class Utils
                 $cmd = 'prince -o %2$s %1$s';
                 break;
             case 'chromium':
-                $cmd = 'chromium --headless --disable-gpu --run-all-compositor-stages-before-draw --print-to-pdf-no-header --print-to-pdf=%s %s';
+                $cmd = 'chromium --headless --disable-gpu --run-all-compositor-stages-before-draw --print-to-pdf-no-header --print-to-pdf=%2$s %1$s';
                 break;
             case 'wkhtmltopdf':
                 $cmd = 'wkhtmltopdf -q --print-media-type --enable-local-file-access --disable-smart-shrinking %s %s';
