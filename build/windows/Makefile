@@ -55,12 +55,11 @@ php: php.zip
 
 	du -hs install_dir/php
 
-#installer: clean php
-installer: php
+installer: clean php
 	$(eval VERSION=$(shell cat ../../src/VERSION))
 	mkdir -p install_dir
-	#cp ../../src/paheko-${VERSION}.tar.gz install_dir/
-	#cd install_dir && tar xzf paheko-${VERSION}.tar.gz && mv paheko-${VERSION} paheko
+	cp ../../src/paheko-${VERSION}.tar.gz install_dir/
+	cd install_dir && tar xzf paheko-${VERSION}.tar.gz && mv paheko-${VERSION} paheko
 	cp config.local.php install_dir/paheko/
 	cp php.ini install_dir/php
 	cp launch.bat install_dir
