@@ -182,6 +182,7 @@ class DynamicList implements \Countable
 	{
 		$start = ($this->page - 1) * $this->per_page;
 		$columns = [];
+		$db = DB::getInstance();
 
 		foreach ($this->columns as $alias => $properties) {
 			// Skip columns that require a certain order (eg. calculating a running sum)
@@ -194,13 +195,13 @@ class DynamicList implements \Countable
 				continue;
 			}
 
-			$select = array_key_exists('select', $properties) ? $properties['select'] : $alias;
-
-			if (null === $select) {
-				$select = 'NULL';
+			if (array_key_exists('select', $properties)) {
+				$select = $properties['select'] ?? 'NULL';
+				$columns[] = sprintf('%s AS %s', $select, $db->quoteIdentifier($alias));
 			}
-
-			$columns[] = sprintf('%s AS %s', $select, $alias);
+			else {
+				$columns[] = $db->quoteIdentifier($alias);
+			}
 		}
 
 		$columns = implode(', ', $columns);
@@ -209,7 +210,7 @@ class DynamicList implements \Countable
 			$order = sprintf($this->columns[$this->order]['order'], $this->desc ? 'DESC' : 'ASC');
 		}
 		else {
-			$order = $this->order;
+			$order = $db->quoteIdentifiers($this->order);
 
 			if (true === $this->desc) {
 				$order .= ' DESC';
