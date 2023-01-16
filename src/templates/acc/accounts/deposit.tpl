@@ -11,7 +11,7 @@
 </p>
 {/if}
 
-{if !$journal_count}
+{if !$journal->count()}
 	<p class="alert block">Il n'y a aucune écriture qui nécessiterait un dépôt.
 	</p>
 {else}
@@ -20,29 +20,9 @@
 	</p>
 
 	<form method="post" action="{$self_url}" data-focus="1">
-		<table class="list">
-			<thead>
-				<tr>
-					<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>
-					<td></td>
-					<td>Date</td>
-					<td>Réf. écriture</td>
-					<td>Réf. ligne</td>
-					<th>Libellé</th>
-					<td class="money">Montant</td>
-					<td class="money">Solde cumulé</td>
-				</tr>
-			</thead>
-			<tbody>
-				{foreach from=$journal item="line"}
-				{if isset($line.sum)}
-				<tr>
-					<td colspan="5"></td>
-					<td class="money">{if $line.sum > 0}-{/if}{$line.sum|abs|raw|money:false}</td>
-					<th>Solde au {$line.date|date_short}</th>
-					<td colspan="2"></td>
-				</tr>
-				{else}
+		{include file="common/dynamic_list_head.tpl" check=true list=$journal}
+
+		{foreach from=$journal->iterate() item="line"}
 				<tr>
 					<td class="check">
 						{input type="checkbox" name="deposit[%d]"|args:$line.id_line value="1" data-debit=$line.debit|abs data-credit=$line.credit default=$line.checked}
@@ -55,7 +35,6 @@
 					<td class="money">{$line.debit|raw|money}</td>
 					<td class="money">{if $line.running_sum > 0}-{/if}{$line.running_sum|abs|raw|money:false}</td>
 				</tr>
-				{/if}
 			{/foreach}
 			</tbody>
 		</table>
