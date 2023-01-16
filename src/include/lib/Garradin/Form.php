@@ -121,7 +121,7 @@ class Form
 			return $value;
 		}
 
-		$values = array_keys(array_filter($value));
+		$values = array_filter(array_keys($value));
 
 		if (count($values) == 1) {
 			return current($values);
