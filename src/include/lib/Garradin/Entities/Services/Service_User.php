@@ -186,6 +186,18 @@ class Service_User extends Entity
 		return $transaction;
 	}
 
+	public function updateExpectedAmount(): void
+	{
+		$fee = $this->fee();
+
+		if ($fee && $fee->id_account && $this->id_user) {
+			$this->set('expected_amount', $fee->getAmountForUser($this->id_user));
+		}
+		else {
+			$this->set('expected_amount', null);
+		}
+	}
+
 	static public function createFromForm(array $users, int $creator_id, bool $from_copy = false, ?array $source = null): self
 	{
 		if (null === $source) {
@@ -209,9 +221,7 @@ class Service_User extends Entity
 				throw new ValidationException('Aucune activité n\'a été sélectionnée.');
 			}
 
-			if ($su->id_fee && $su->fee() && $su->fee()->id_account && $su->id_user) {
-				$su->expected_amount = $su->fee()->getAmountForUser($su->id_user);
-			}
+			$su->updateExpectedAmount();
 
 			if ($su->isDuplicate($from_copy ? false : true)) {
 				if ($from_copy) {
