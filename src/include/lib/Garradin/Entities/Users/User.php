@@ -28,6 +28,13 @@ use Garradin\Entities\Files\File;
 use KD2\SMTP;
 use KD2\DB\EntityManager as EM;
 
+/**
+ * WARNING: do not use $user->property = 'value' to set a property value on this class
+ * as they will not be saved using save(). Please use $user->set('property', 'value').
+ *
+ * This is because dynamic properties are set as public, and __set is not called.
+ * TODO: change to storing properties in an array
+ */
 #[\AllowDynamicProperties]
 class User extends Entity
 {

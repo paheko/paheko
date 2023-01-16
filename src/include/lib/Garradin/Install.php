@@ -252,7 +252,7 @@ class Install
 
 		// Create first user
 		$user = new User;
-		$user->id_category = $cat->id();
+		$user->set('id_category', $cat->id());
 		$user->importForm([
 			'numero'      => 1,
 			'nom'         => $user_name,

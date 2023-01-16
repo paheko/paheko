@@ -30,12 +30,12 @@ $form->runIf('save', function () use ($user, $session) {
 	$user->importForm();
 
 	if (empty($_POST['id_parent'])) {
-		$user->id_parent = null;
+		$user->set('id_parent', null);
 	}
 
 	// Only admins can set a category
 	if (f('id_category') && $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)) {
-		$user->id_category = f('id_category');
+		$user->set('id_category', (int) f('id_category'));
 	}
 
 	$user->save();

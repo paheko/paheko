@@ -21,8 +21,8 @@ $form->runIf('save', function () use ($default_category, $user, $session, &$is_d
 		return;
 	}
 
-    if ($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)) {
-        $user->id_category = $default_category;
+    if (!$session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)) {
+        $user->set('id_category', $default_category);
     }
 
     $user->save();
