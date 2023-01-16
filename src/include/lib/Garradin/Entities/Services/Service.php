@@ -82,7 +82,7 @@ class Service extends Entity
 			],
 			'user_number' => [
 				'label' => 'Numéro de membre',
-				'select' => 'm.numero',
+				'select' => 'u.' . DynamicFields::getNumberField(),
 				'export_only' => true,
 			],
 			'identity' => [

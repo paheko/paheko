@@ -251,7 +251,7 @@ class Accounts
 				'select' => 'u.id',
 			],
 			'user_number' => [
-				'select' => 'u.numero',
+				'select' => 'u.' . DynamicFields::getNumberField(),
 				'label' => 'N° membre',
 			],
 			'user_identity' => [
