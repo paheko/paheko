@@ -1,0 +1,49 @@
+{{:admin_header title="Ajouter un article au devis"}}
+
+<script type="text/javascript">
+function add_item() {
+	const DEVISE = '€'; // Need to load paheko constant here
+	let rowLine;
+	let td;
+
+	rowLine = document.createElement('tr');
+	rowLine.classList.add('item');
+	let fields = ['item_name_0', 'item_description_0', 'item_unit_price_0', 'item_quantity_0'];
+	for (let i = 0; i < 4; ++i) {
+		td = document.createElement('td');
+		td.classList.add(fields[i]);
+		td.innerHTML = document.getElementById(fields[i]).value;
+		rowLine.appendChild(td);
+	}
+	window.parent.document.getElementById('item_list_no_item_message').style.display = 'none';
+	window.parent.document.getElementById('item_list').style.display = 'block';
+	window.parent.document.getElementById('item_list').appendChild(rowLine);
+	window.parent.document.getElementById('quotation_total').textContent = computeTotal() + ' ' + DEVISE;
+	window.parent.g.closeDialog();
+}
+
+function computeTotal() {
+	let items = window.parent.document.getElementById('item_list').getElementsByClassName('item');
+	let total = 0.0;
+
+	for (let i = 0; i < items.length; ++i) {
+		total += items[i].children[2].textContent * items[i].children[3].textContent;
+	}
+	return total;
+}
+</script>
+
+<form method="POST" action="" id="item_creation_form">
+	<fieldset>
+		<legend>Ajouter un article</legend>
+		<ul>
+			<li><label for="item_name_0">Dénomination</label><input type="text" name="item_name[]" id="item_name_0" label="" placeholder="ex : barnum" value="" /></li>
+			<li><label for="item_description_0">Description</label><textarea name="item_description[]" id="item_description_0" label="" placeholder=""></textarea></li>
+			<li><label for="item_unit_price">Prix unitaire</label><input type="text" name="item_unit_price[]" id="item_unit_price_0" label="" placeholder="" value="" /></li>
+			<li><label for="item_quantity">Quantité</label><input type="text" name="item_quantity[]" id="item_quantity_0" label="" placeholder="" value="" /></li>
+		</ul>
+		<input type="button" name="" id="item_addition_button" onclick="add_item()" value="Ajouter l'article au devis" />
+	</fieldset>
+</form>
+
+{{:admin_footer}}
