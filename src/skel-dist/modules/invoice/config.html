@@ -1,0 +1,61 @@
+{{:admin_header title="Configuration du module de devis et facture"}}
+
+{{if $_POST.save}}
+	<!-- Todo: add a nice error check here -->
+	{{if $error}}
+		<p class="error block">{{$error}}</p>
+	{{else}}
+		{{:save key="config"
+			validate_schema="./config_schema.json"
+			bic=$_POST.bic
+			iban=$_POST.iban
+			bank=$_POST.bank
+			payment_detail=$_POST.payment_detail
+		}}
+		{{:http redirect="?ok=1"}}
+	{{/if}}
+{{elseif $_GET.ok}}
+	<p class="block confirm">RIB enregistré.</p>
+{{/if}}
+
+<form method="POST" action="{{$self_url}}">
+	<fieldset>
+		<legend>RIB à indiquer dans le devis</legend>
+		<ul>
+			<li>{{:input required=false name="bic" type="text" label="BIC" default=$module.config.bic placeholder="ex : ABCDEFGH012"}}</li>
+			<li>{{:input required=false name="iban" type="text" label="IBAN" default=$module.config.iban placeholder="ex : FR9901234567890123456789012"}}</li>
+			<li>{{:input required=false name="bank" type="text" label="Banque" default=$module.config.bank placeholder="La banque éthique - compte associatif"}}</li>
+		</ul>
+	</fieldset>
+	<fieldset>
+		<legend>Options</legend>
+		{{:input required=false name="payment_detail" type="text" label="Instructions de paiement" default=$module.config.payment_detail placeholder="ex : Paiement à réaliser sous 15 jours."}}
+	</fieldset>
+	{{:button type="submit" name="save" label="Enregistrer le RIB"}}
+</form>
+
+<!--
+<form method="POST" action="{{$self_url}}">
+	<fieldset>
+		<legend>Création d'un devis</legend>
+		<ul>
+			<li>{{:input required=true name="subject" type="text" label="Objet" default="" placeholder="ex : Prêt d'un barnum pour festival"}}</li>
+			<li>{{:input required=true name="recepient" type="text" label="Destinataire" default="" placeholder="ex : Asso ejp92"}}</li>
+			<li>{{:input required=true name="date" type="date" label="Date" default=""}}</li>
+		</ul>
+	</fieldset>
+	<fieldset>
+		<legend>Article</legend>
+		<ul>
+			<li>{{:input required=true name="name" type="text" label="Nom" default="" placeholder="ex : Prêt d'un barnum 1/2 journée"}}</li>
+			<li>{{:input required=true name="description" type="textarea" label="Description" default="" placeholder="ex : Prêt pour une demi-journée"}}</li>
+			<li>{{:input required=true name="quantity" type="text" label="Quantité" default=""}}</li>
+			<li>{{:input required=true name="unit_price" type="text" label="Prix unitaire" default=""}}</li>
+			<li>{{:input required=true name="total" type="text" label="Total" default=""}}</li>
+		</ul>
+	</fieldset>
+	{{:button type="submit" name="save" label="Créer le devis"}}
+</form>
+-->
+
+{{:admin_footer}}

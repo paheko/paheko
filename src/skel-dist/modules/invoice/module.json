@@ -1,4 +1,6 @@
 {
 	"label": "Devis et factures",
-	"description": "Permet de créer des devis et des factures, et de les imprimer"
+	"description": "Permet de créer des devis et des factures, et de les imprimer",
+	"author": "Paheko",
+	"license": "GNU AGPL v3"
 }
