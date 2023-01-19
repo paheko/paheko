@@ -15,18 +15,20 @@ $user = new User;
 $is_duplicate = null;
 
 $form->runIf('save', function () use ($default_category, $user, $session, &$is_duplicate) {
-    $user->importForm();
+	$user->set('id_category', $default_category);
+
+	if ($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && !empty($_POST['id_category'])) {
+		$user->set('id_category', (int) $_POST['id_category']);
+	}
+
+	$user->importForm();
 
 	if (f('save') != 'anyway' && ($is_duplicate = $user->checkDuplicate())) {
 		return;
 	}
 
-    if (!$session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)) {
-        $user->set('id_category', $default_category);
-    }
-
-    $user->save();
-    Utils::redirect('!users/details.php?id=' . $user->id());
+	$user->save();
+	Utils::redirect('!users/details.php?id=' . $user->id());
 }, $csrf_key);
 
 
