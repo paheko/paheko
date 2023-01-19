@@ -63,7 +63,12 @@ class Functions
 			throw new Brindille_Exception(sprintf('Ligne %d : boucle infinie d\'inclusion détectée : %s', $line, $params['file']));
 		}
 
-		$s = new Skeleton($params['file']);
+		try {
+			$s = new Skeleton($params['file']);
+		}
+		catch (\InvalidArgumentException $e) {
+			throw new Brindille_Exception(sprintf('Ligne %d : fonction "include" : le nom de fichier à inclure "%s" est invalide', $line, $params['file']));
+		}
 
 		if (!$s->exists()) {
 			throw new Brindille_Exception(sprintf('Ligne %d : fonction "include" : le fichier à inclure "%s" n\'existe pas', $line, $params['file']));
