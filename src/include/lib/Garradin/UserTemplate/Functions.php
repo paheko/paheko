@@ -129,7 +129,7 @@ class Functions
 				);
 				CREATE UNIQUE INDEX IF NOT EXISTS %1$s_key ON %1$s (key);', $table));
 
-			$exists = $db->first(sprintf('SELECT value FROM %s WHERE %s AND document = ?;', $table, $where), $where_value, $id);
+			$exists = $db->first(sprintf('SELECT value FROM %s WHERE %s;', $table, $where), $where_value);
 		}
 
 		$exists = json_decode((string) $exists, true);
