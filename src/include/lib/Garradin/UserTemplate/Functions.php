@@ -133,10 +133,9 @@ class Functions
 			$exists = $db->first(sprintf('SELECT value FROM %s WHERE %s;', $table, ($field . ' = ?')), $where_value);
 		}
 
-		$exists = json_decode((string) $exists->value, true);
-
 		// Merge before update
 		if ($exists) {
+			$exists = json_decode((string) $exists->value, true);
 			$params = array_merge($exists, $params);
 		}
 
