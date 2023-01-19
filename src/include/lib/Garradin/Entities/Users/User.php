@@ -109,6 +109,8 @@ class User extends Entity
 
 	public function selfCheck(): void
 	{
+		$this->assert(!empty($this->id_category), 'Aucune catégorie n\'a été sélectionnée.');
+
 		$df = DynamicFields::getInstance();
 
 		foreach ($df->all() as $field) {

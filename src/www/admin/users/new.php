@@ -12,11 +12,10 @@ $session->requireAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 $csrf_key = 'users_new';
 $default_category = Config::getInstance()->default_category;
 $user = new User;
+$user->set('id_category', $default_category);
 $is_duplicate = null;
 
 $form->runIf('save', function () use ($default_category, $user, $session, &$is_duplicate) {
-	$user->set('id_category', $default_category);
-
 	if ($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && !empty($_POST['id_category'])) {
 		$user->set('id_category', (int) $_POST['id_category']);
 	}
