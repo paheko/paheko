@@ -10,7 +10,7 @@
 
 	<ul>
 		<li{{if !$_GET.show}} class="current"{{/if}}><a href="./">Tous les documents</a></li>
-		<li{{if $_GET.show == 'quote'}} class="current"{{/if}}><a href="./?show=quote">Devis</a></li>
+		<li{{if $_GET.show == 'quotation'}} class="current"{{/if}}><a href="./?show=quotation">Devis</a></li>
 		<li{{if $_GET.show == 'unpaid'}} class="current"{{/if}}><a href="./?show=unpaid">Factures en souffrance</a></li>
 		<li{{if $_GET.show == 'paid'}} class="current"{{/if}}><a href="./?show=paid">Factures réglées</a></li>
 		<li><a href="clients.html">Clients</a></li>
@@ -18,7 +18,7 @@
 </nav>
 
 {{if $_GET.show == 'quote'}}
-	{{:assign filter="json_extract(value, '$.type') = 'quote'"}}
+	{{:assign filter="json_extract(value, '$.type') = 'quotation'"}}
 {{elseif $_GET.show == 'paid'}}
 	{{:assign filter="json_extract(value, '$.type') = 'invoice' AND json_extract(value, '$.date_paid') IS NOT NULL"}}
 {{elseif $_GET.show == 'unpaid'}}
@@ -34,6 +34,7 @@
 			<td>Émission</td>
 			<td>Échéance</td>
 			<td>Tiers</td>
+			<td>Intitulé</td>
 			<td class="money">Montant</td>
 			<td>Statut</td>
 			<td></td>
@@ -42,10 +43,11 @@
 	<tbody>
 {{#load where="key != 'config' AND %s"|args:$filter select="value AS json, key, datetime(json_extract(value, '$.date')) AS date" order="date DESC"}}
 		<tr>
-			<th>{{$number}}</th>
+			<th>{{$key}}</th>
 			<td>{{$date|date_short}}</td>
-			<td>{{$date_required|date_short}}</td>
-			<td></td>
+			<td>{{$deadline|date_short}}</td>
+			<td>{{$recipient_business_name}}</td>
+			<td>{{$subject}}</td>
 			<td class="money">{{$total|raw|money_currency}}</td>
 			<td>
 				{{if $archived}}
@@ -68,9 +70,48 @@
 </tbody>
 </table>
 
-<h1>Création d'un devis</h1>
+<h1>Création dun devis</h1>
+
+{{if $_POST.quotation_submit}}
+	<!-- Todo: add a nice error check here -->
+	{{if $error}}
+		<p class="error block">{{$error}}</p>
+	{{else}}
+		{{:assign new_key="%d+1"|math:$module.config.last_id}}
+		{{:assign id="%d+1"|math:$module.config.last_quotation_id}}
+
+		{{:save key="quotation_"|cat:$id
+			validate_schema="./quotation.schema.json"
+			id=$new_key
+			recipient_business_name=$_POST.recipient_business_name
+			recipient_address=$_POST.recipient_address
+			subject=$_POST.subject
+			date=$_POST.date
+			deadline=$_POST.deadline
+			contact_info=$_POST.contact_info
+		}}
+		{{:save key="config" last_id=$new_key last_quotation_id=$id}}
+		{{:http redirect="?ok=1"}}
+	{{/if}}
+{{elseif $_GET.ok}}
+	<p class="block confirm">Devis enregistré.</p>
+{{/if}}
 
 <form method="POST" action="">
+	<fieldset>
+		<legend><h2>Destinataire</h2></legend>
+		{{:input type="text" name="recipient_business_name" label="Raison sociale" placeholder="ex : SARL J'aime les deux vies" required=true}}
+		{{:input type="textarea" name="recipient_address" label="Adresse" placeholder="" required=true}}
+	</fieldset>
+	<fieldset>
+		<legend><h2>Objet</h2></legend>
+		<ul>
+			<li>{{:input type="text" name="subject" label="Objet" placeholder="ex : Devis pour une location de barnum" required=true}}</li>
+			<li>{{:input type="date" name="date" label="Date du devis" placeholder="" required=true}}</li>
+			<li>{{:input type="date" name="deadline" label="Échéance pour validation" placeholder="" required=false}}</li>
+			<li>{{:input type="text" name="contact_info" label="Contact" default=$config.org_email required=true}}</li>
+		</ul>
+	</fieldset>
 	<fieldset>
 		<legend><h2>Liste des articles</h2></legend>
 		<p id="item_list_no_item_message">Aucun article pour le moment.</p>
@@ -81,14 +122,12 @@
 				<th>Quantité</th>
 				<th>Total</th>
 			</tr>
-			<tr>
-				<td colspan="3">Total :</td>
-				<td><em id="quotation_total">0</em></td>
-			</tr>
 		</table>
 		<p>{{:linkbutton label="Ajouter un article" href="item_form.html" shape="settings" target="_dialog"}}</p>
+		<h3>Total des articles</h3>
+		<p id="quotation_total">0 {{$config.currency}}</p>
 	</fieldset>
-	<input type="submit" name="" label="" value="Valider la création de devis (prochainement)" disabled="disabled" />
+	<input type="submit" name="quotation_submit" label="" value="Valider la création de devis" />
 </form>
 
 {{if $module.config.payment_detail || $module.config.bic}}

@@ -2,17 +2,21 @@
 
 <script type="text/javascript">
 function add_item() {
-	const DEVISE = '€'; // Need to load paheko constant here
+	const DEVISE = '{{$config.currency}}';
 	let rowLine;
 	let td;
+	let fieldsIds = ['item_name', 'item_description', 'item_unit_price', 'item_quantity'];
+	let rowIndex;
+	let value;
 
 	rowLine = document.createElement('tr');
 	rowLine.classList.add('item');
-	let fields = ['item_name_0', 'item_description_0', 'item_unit_price_0', 'item_quantity_0'];
+	rowIndex = window.parent.document.getElementById('item_list').children.length - 1;
 	for (let i = 0; i < 4; ++i) {
 		td = document.createElement('td');
-		td.classList.add(fields[i]);
-		td.innerHTML = document.getElementById(fields[i]).value;
+		td.classList.add(fieldsIds[i]);
+		value = document.getElementById(fieldsIds[i]).value;
+		td.innerHTML = '<input type="hidden" name="' + fieldsIds[i] + '[]" id="' + fieldsIds[i] + '_' + rowIndex + '" value="' + value + '" />' + value;
 		rowLine.appendChild(td);
 	}
 	window.parent.document.getElementById('item_list_no_item_message').style.display = 'none';
@@ -37,10 +41,10 @@ function computeTotal() {
 	<fieldset>
 		<legend>Ajouter un article</legend>
 		<ul>
-			<li><label for="item_name_0">Dénomination</label><input type="text" name="item_name[]" id="item_name_0" label="" placeholder="ex : barnum" value="" /></li>
-			<li><label for="item_description_0">Description</label><textarea name="item_description[]" id="item_description_0" label="" placeholder=""></textarea></li>
-			<li><label for="item_unit_price">Prix unitaire</label><input type="text" name="item_unit_price[]" id="item_unit_price_0" label="" placeholder="" value="" /></li>
-			<li><label for="item_quantity">Quantité</label><input type="text" name="item_quantity[]" id="item_quantity_0" label="" placeholder="" value="" /></li>
+			<li><label for="item_name">Dénomination</label><input type="text" name="item_name[]" id="item_name" label="" placeholder="ex : barnum" value="" /></li>
+			<li><label for="item_description">Description</label><textarea name="item_description[]" id="item_description" label="" placeholder=""></textarea></li>
+			<li><label for="item_unit_price">Prix unitaire</label><input type="text" name="item_unit_price[]" id="item_unit_price" label="" placeholder="" value="" /></li>
+			<li><label for="item_quantity">Quantité</label><input type="text" name="item_quantity[]" id="item_quantity" label="" placeholder="" value="" /></li>
 		</ul>
 		<input type="button" name="" id="item_addition_button" onclick="add_item()" value="Ajouter l'article au devis" />
 	</fieldset>

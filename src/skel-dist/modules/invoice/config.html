@@ -6,7 +6,7 @@
 		<p class="error block">{{$error}}</p>
 	{{else}}
 		{{:save key="config"
-			validate_schema="./config_schema.json"
+			validate_schema="./config.schema.json"
 			bic=$_POST.bic
 			iban=$_POST.iban
 			bank=$_POST.bank
@@ -24,7 +24,7 @@
 		<ul>
 			<li>{{:input required=false name="bic" type="text" label="BIC" default=$module.config.bic placeholder="ex : ABCDEFGH012"}}</li>
 			<li>{{:input required=false name="iban" type="text" label="IBAN" default=$module.config.iban placeholder="ex : FR9901234567890123456789012"}}</li>
-			<li>{{:input required=false name="bank" type="text" label="Banque" default=$module.config.bank placeholder="La banque éthique - compte associatif"}}</li>
+			<li>{{:input required=false name="bank" type="text" label="Banque" default=$module.config.bank placeholder="ex : La banque eh! tic"}}</li>
 		</ul>
 	</fieldset>
 	<fieldset>

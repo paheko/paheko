@@ -1,0 +1,31 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"type": "object",
+	"properties": {
+		"recipient_business_name": {
+			"description": "Raison sociale",
+			"type": "string"
+		},
+		"recipient_address": {
+			"description": "Adresse",
+			"type": "string"
+		},
+		"subject": {
+			"description": "Objet",
+			"type": "string"
+		},
+		"date": {
+			"description": "Date",
+			"type": "string"
+		},
+		"deadline": {
+			"description": "Échéance",
+			"type": "string"
+		},
+		"contact_info": {
+			"description": "Contact",
+			"type": "string"
+		}
+	},
+	"required": [ "recipient_business_name", "recipient_address", "subject", "date", "contact_info" ]
+}
