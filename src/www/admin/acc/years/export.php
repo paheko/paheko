@@ -6,8 +6,6 @@ use Garradin\Accounting\Years;
 
 require_once __DIR__ . '/../_inc.php';
 
-$session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
-
 $year_id = (int) qg('year') ?: CURRENT_YEAR_ID;
 
 if ($year_id === CURRENT_YEAR_ID) {
