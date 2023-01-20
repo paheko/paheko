@@ -49,15 +49,56 @@ class Sections
 		return self::$_cache[$id];
 	}
 
-	static public function load(array $params, UserTemplate $tpl, int $line): \Generator
+	/**
+	 * Creates indexes for json_extract expressions
+	 */
+	static protected function _createModuleIndexes(string $table, string $where): void
 	{
-		$name = Utils::basename(Utils::dirname($tpl->_tpl_path));
+		preg_match_all('/json_extract\s*\(\s*value\s*,\s*(?:\'(.*?)\'|\"(.*?)\")\s*\)/', $where, $match, PREG_SET_ORDER);
 
-		if (!$name) {
-			throw new Brindille_Exception('Unique document name could not be found');
+		if (!count($match)) {
+			return;
 		}
 
+		$search_params = [];
+
+		foreach ($match as $m) {
+			$search_params[$m[2] ?? $m[1]] = $m[0];
+		}
+
+		if (!count($search_params)) {
+			return;
+		}
+
+		ksort($search_params);
+		$hash = sha1(implode('', array_keys($search_params)));
+
 		$db = DB::getInstance();
+
+		try {
+			$db->exec(sprintf('CREATE INDEX IF NOT EXISTS %s_auto_%s ON %1$s (%s);', $table, $hash, implode(', ', $search_params)));
+		}
+		catch (\KD2\DB\DB_Exception $e) {
+			throw new Brindille_Exception(sprintf("à la ligne %d, impossible de créer l'index, erreur SQL :\n%s\n\nRequête exécutée :\n%s", $line, $db->lastErrorMsg(), $sql));
+		}
+	}
+
+	static public function load(array $params, UserTemplate $tpl, int $line): \Generator
+	{
+		$name = $params['module'] ?? Utils::basename(Utils::dirname($tpl->_tpl_path));
+
+		if (!$name) {
+			throw new Brindille_Exception('Unique module name could not be found');
+		}
+
+		$params['tables'] = 'module_data_' . $name;
+
+		$db = DB::getInstance();
+		$has_table = $db->test('sqlite_master', 'type = \'table\' AND name = ?', $params['tables']);
+
+		if (!$has_table) {
+			return;
+		}
 
 		if (!isset($params['where'])) {
 			$params['where'] = '1';
@@ -83,32 +124,36 @@ class Sections
 			unset($params['id']);
 		}
 
-		$params['select'] = isset($params['select']) ? $params['select'] : 'value AS json';
-		$params['tables'] = 'module_data_' . $name;
-
-		try {
-			$query = self::sql($params, $tpl, $line);
-
-			foreach ($query as $row) {
-				if (isset($row['json'])) {
-					$json = json_decode($row['json'], true);
-
-					if (is_array($json)) {
-						unset($row['json']);
-						$row = array_merge($row, $json);
-					}
-				}
-
-				yield $row;
+		// Replace '$.name = "value"' parameters with json_extract
+		foreach ($params as $key => $value) {
+			if (substr($key, 0, 1) != '$') {
+				continue;
 			}
+
+			$hash = sha1($key);
+			$params['where'] .= sprintf(' AND json_extract(value, %s) = :quick_%s', $db->quote($key), $hash);
+			$params[':quick_' . $hash] = $value;
+			unset($params[$key]);
 		}
-		catch (Brindille_Exception $e) {
-			// Table does not exists: return nothing
-			if (false !== strpos($e->getMessage(), 'no such table: ' . $params['tables'])) {
-				return;
+
+		$params['select'] = isset($params['select']) ? $params['select'] : 'value AS json';
+
+		// Try to create an index if required
+		self::_createModuleIndexes($params['tables'], $params['where']);
+
+		$query = self::sql($params, $tpl, $line);
+
+		foreach ($query as $row) {
+			if (isset($row['json'])) {
+				$json = json_decode($row['json'], true);
+
+				if (is_array($json)) {
+					unset($row['json']);
+					$row = array_merge($row, $json);
+				}
 			}
 
-			throw $e;
+			yield $row;
 		}
 	}
 

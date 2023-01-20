@@ -48,42 +48,12 @@ class Functions
 		return $tpl->fetch('_foot.tpl');
 	}
 
-	static public function create_index(array $params, Brindille $tpl, int $line): void
-	{
-		$id = Utils::basename(Utils::dirname($tpl->_tpl_path));
-
-		if (!$id) {
-			throw new Brindille_Exception('Unique document name could not be found');
-		}
-
-		if (empty($params['name']) || !ctype_alnum($params['name'])) {
-			throw new Brindille_Exception('Missing or invalid index name');
-		}
-
-		$indexes = ['document'];
-		$db = DB::getInstance();
-
-		if (empty($params['column'])) {
-			$indexes[] = sprintf('json_extract(value, %s)', $db->quote($params['column']));
-		}
-
-		if (empty($params['expression'])) {
-			$indexes[] = $params['expression'];
-		}
-
-		if (count($indexes) == 1) {
-			throw new Brindille_Exception('Missing or invalid index columns');
-		}
-
-		$db->exec(sprintf('CREATE INDEX IF NOT EXISTS documents_%s_%s ON documents_data (%s);', $id, implode(',', $indexes)));
-	}
-
 	static public function save(array $params, Brindille $tpl, int $line): void
 	{
 		$name = Utils::basename(Utils::dirname($tpl->_tpl_path));
 
 		if (!$name) {
-			throw new Brindille_Exception('Unique document name could not be found');
+			throw new Brindille_Exception('Module name could not be found');
 		}
 
 		$table = 'module_data_' . $name;
