@@ -96,11 +96,11 @@ class Functions
 				CREATE TABLE IF NOT EXISTS %s (
 					id INTEGER NOT NULL PRIMARY KEY,
 					key TEXT NULL,
-					value TEXT NOT NULL
+					document TEXT NOT NULL
 				);
 				CREATE UNIQUE INDEX IF NOT EXISTS %1$s_key ON %1$s (key);', $table));
 
-			$result = $db->firstColumn(sprintf('SELECT value FROM %s WHERE %s;', $table, ($field . ' = ?')), $where_value);
+			$result = $db->firstColumn(sprintf('SELECT document FROM %s WHERE %s;', $table, ($field . ' = ?')), $where_value);
 		}
 
 		// Merge before update
@@ -133,10 +133,10 @@ class Functions
 		}
 
 		if (!$result) {
-			$db->insert($table, compact('value', 'key'));
+			$db->insert($table, compact('document', 'key'));
 		}
 		else {
-			$db->update($table, compact('value'), sprintf('%s = :match', $field), ['match' => $where_value]);
+			$db->update($table, compact('document'), sprintf('%s = :match', $field), ['match' => $where_value]);
 		}
 	}
 
