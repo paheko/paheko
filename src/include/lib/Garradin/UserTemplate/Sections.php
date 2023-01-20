@@ -54,7 +54,7 @@ class Sections
 	 */
 	static protected function _createModuleIndexes(string $table, string $where): void
 	{
-		preg_match_all('/json_extract\s*\(\s*value\s*,\s*(?:\'(.*?)\'|\"(.*?)\")\s*\)/', $where, $match, PREG_SET_ORDER);
+		preg_match_all('/json_extract\s*\(\s*document\s*,\s*(?:\'(.*?)\'|\"(.*?)\")\s*\)/', $where, $match, PREG_SET_ORDER);
 
 		if (!count($match)) {
 			return;
@@ -106,7 +106,7 @@ class Sections
 		else {
 			$params['where'] = preg_replace_callback(
 				'/\$(\$[\[\.][^=\s]+)/',
-				fn ($m) => sprintf('json_extract(value, %s)', $db->quote($m[1])),
+				fn ($m) => sprintf('json_extract(document, %s)', $db->quote($m[1])),
 				$params['where']
 			);
 		}
@@ -131,12 +131,12 @@ class Sections
 			}
 
 			$hash = sha1($key);
-			$params['where'] .= sprintf(' AND json_extract(value, %s) = :quick_%s', $db->quote($key), $hash);
+			$params['where'] .= sprintf(' AND json_extract(document, %s) = :quick_%s', $db->quote($key), $hash);
 			$params[':quick_' . $hash] = $value;
 			unset($params[$key]);
 		}
 
-		$params['select'] = isset($params['select']) ? $params['select'] : 'value AS json';
+		$params['select'] = isset($params['select']) ? $params['select'] : 'document AS json';
 
 		// Try to create an index if required
 		self::_createModuleIndexes($params['tables'], $params['where']);
