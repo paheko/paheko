@@ -119,7 +119,7 @@ class Functions
 		$db = DB::getInstance();
 
 		if ($key == 'config') {
-			$exists = $db->firstColumn(sprintf('SELECT config AS value FROM %s WHERE name = ?;', Module::TABLE), $name);
+			$result = $db->firstColumn(sprintf('SELECT config AS value FROM %s WHERE name = ?;', Module::TABLE), $name);
 		}
 		else {
 			$db->exec(sprintf('
@@ -130,13 +130,13 @@ class Functions
 				);
 				CREATE UNIQUE INDEX IF NOT EXISTS %1$s_key ON %1$s (key);', $table));
 
-			$exists = $db->first(sprintf('SELECT value FROM %s WHERE %s;', $table, ($field . ' = ?')), $where_value);
+			$result = $db->first(sprintf('SELECT value FROM %s WHERE %s;', $table, ($field . ' = ?')), $where_value);
 		}
 
 		// Merge before update
-		if ($exists) {
-			$exists = json_decode((string) $exists->value, true);
-			$params = array_merge($exists, $params);
+		if ($result) {
+			$result = json_decode(is_string($result) ? $result : ((string) $result->value), true);
+			$params = array_merge($result, $params);
 		}
 
 		// Remove NULL values
@@ -162,7 +162,7 @@ class Functions
 			return;
 		}
 
-		if (!$exists) {
+		if (!$result) {
 			$db->insert($table, compact('value', 'key'));
 		}
 		else {
