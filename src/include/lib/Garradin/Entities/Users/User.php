@@ -251,6 +251,24 @@ class User extends Entity
 		return $files;
 	}
 
+	public function number(): ?string
+	{
+		$field = DynamicFields::getNumberField();
+		return $this->$field;
+	}
+
+	public function setNumberIfEmpty(): void
+	{
+		$field = DynamicFields::getNumberField();
+
+		if ($this->$field) {
+			return;
+		}
+
+		$new = DB::getInstance()->firstColumn(sprintf('SELECT MAX(%s) + 1 FROM %s;', $field, User::TABLE));
+		$this->set($field, $new);
+	}
+
 	public function name(): string
 	{
 		$out = [];
