@@ -42,7 +42,7 @@ class Module extends Entity
 
 	protected string $label;
 	protected ?string $description;
-	protected ?\stdClass $config;
+	protected ?string $config;
 	protected bool $enabled;
 
 	public function selfCheck(): void
@@ -54,7 +54,7 @@ class Module extends Entity
 	/**
 	 * Fills information from module.json file
 	 */
-	public function updateFromJSON(): bool
+	public function updateFromJSON(bool $loadConfig = false): bool
 	{
 		if ($file = Files::get($this->path(self::META_FILE))) {
 			$json = $file->fetch();
@@ -71,11 +71,22 @@ class Module extends Entity
 		if (!isset($json->label)) {
 			return false;
 		}
-
 		$this->set('label', $json->label);
 		$this->set('description', $json->description ?? null);
-
+		if ($loadConfig) {
+			$this->setConfig(get_object_vars($json));
+		}
 		return true;
+	}
+
+	public function setConfig(array $config): void
+	{
+		$tmp = [];
+		foreach($config as $configKey => $value) {
+			if (is_string($value) && $configKey !== 'label' && $configKey !== 'description') // black-list would be welcomed
+				$tmp[$configKey] = $value;
+		}
+		$this->set('config', json_encode($tmp));
 	}
 
 	public function updateTemplates(): void
@@ -165,7 +176,9 @@ class Module extends Entity
 		$this->validateFileName($file);
 
 		$ut = new UserTemplate('modules/' . $this->name . '/' . $file);
-		$ut->assign('module', array_merge($this->asArray(false), ['url' => $this->url()]));
+		$moduleVars = array_merge($this->asArray(false), ['url' => $this->url()]);
+		$moduleVars['config'] = json_decode($this->config, true);
+		$ut->assign('module', $moduleVars);
 
 		return $ut;
 	}

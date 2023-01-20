@@ -13,6 +13,7 @@ $form->runIf(qg('enable') !== null, function () {
 	}
 
 	$m->enabled = true;
+	$m->updateFromJSON(true);
 	$m->save();
 }, null, '!config/modules/');
 
