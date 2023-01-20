@@ -13,8 +13,6 @@ $db = DB::getInstance();
 $tables_list = $db->getGrouped('SELECT name, sql, NULL AS count FROM sqlite_master WHERE type = \'table\' ORDER BY name;');
 $index_list = null;
 $triggers_list = null;
-$result = null;
-$result_header = null;
 
 if ($table) {
 	$all_columns = $db->get(sprintf('PRAGMA table_info(%s);', $db->quoteIdentifier($table)));
@@ -35,13 +33,16 @@ if ($table) {
 }
 elseif ($query) {
 	try {
-		$result = Recherche::rawSQL($query);
+		$s = Search::fromSQL($query);
+		$query_time = microtime(true);
+		$result = $s->iterateResults();
+		$query_time = round((microtime(true) - $query_time) * 1000, 3);
+		$result_header = $s->getHeader();
+		$result_count = $s->countResults();
 
-		if (count($result)) {
-			$result_header = array_keys((array)reset($result));
-		}
+		$tpl->assign(compact('result', 'result_header', 'result_count', 'query_time'));
 	}
-	catch (\Exception $e) {
+	catch (UserException $e) {
 		$form->addError($e->getMessage());
 	}
 }
@@ -55,6 +56,6 @@ else {
 	$triggers_list = $db->getAssoc('SELECT name, sql FROM sqlite_master WHERE type = \'trigger\' ORDER BY name;');
 }
 
-$tpl->assign(compact('index_list', 'triggers_list', 'tables_list', 'query', 'table', 'list', 'result', 'result_header'));
+$tpl->assign(compact('index_list', 'triggers_list', 'tables_list', 'query', 'table', 'list'));
 
 $tpl->display('config/advanced/sql.tpl');

@@ -4,7 +4,7 @@
 
 {form_errors}
 
-{if $query}
+{if !empty($query)}
 	<h2 class="ruler">Requête SQL</h2>
 
 	<form method="post" action="{$self_url}">
@@ -19,16 +19,15 @@
 		</fieldset>
 	</form>
 
-	{if !empty($result)}
+	{if !empty($result_count)}
 
-		<p class="help">{$result|count} résultats trouvés pour cette requête.</p>
+		<p class="alert block">{$result_count} résultats trouvés pour cette requête, en {$query_time} ms.</p>
 		<table class="list search">
 			<thead>
 				<tr>
 					{foreach from=$result_header item="label"}
 						<td>{$label}</td>
 					{/foreach}
-					<td></td>
 				</tr>
 			</thead>
 			<tbody>
