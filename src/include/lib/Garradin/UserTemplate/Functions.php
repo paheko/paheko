@@ -166,7 +166,13 @@ class Functions
 		$dump = htmlspecialchars(ErrorManager::dump($params));
 
 		// FIXME: only send back HTML when content-type is text/html, or send raw text
-		return sprintf('<pre style="background: yellow; padding: 5px; overflow: auto">%s</pre>', $dump);
+		$out = sprintf('<pre style="background: yellow; padding: 5px; overflow: auto">%s</pre>', $dump);
+
+		if (!empty($params['stop'])) {
+			echo $out; exit;
+		}
+
+		return $out;
 	}
 
 	static public function error(array $params, Brindille $tpl)
