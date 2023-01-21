@@ -34,32 +34,66 @@ $form->runIf(f('lines') !== null, function () use (&$lines) {
 });
 
 // Quick-fill transaction from query parameters
-if (qg('a')) {
-	$amount = Utils::moneyToInteger(qg('a'));
+// 0 = amount, in single currency units
+if (qg('0')) {
+	$amount = Utils::moneyToInteger(qg('0'));
 }
 
-if (qg('a0')) {
-	$amount = (int)qg('a0');
+// 00 = Amount, in cents
+if (qg('00')) {
+	$amount = (int)qg('00');
 }
 
+// l = label
 if (qg('l')) {
 	$transaction->label = qg('l');
 }
 
-if (qg('d')) {
+// dt = date
+if (qg('dt')) {
 	$transaction->date = new Date(qg('d'));
 }
 
+// t = type
 if (qg('t')) {
 	$transaction->type = (int) qg('t');
 }
 
-// Quick-set bank account
-if ($id = (int)qg('bk')) {
-	$transaction->setDefaultAccount($transaction::TYPE_REVENUE, 'debit', $id);
-	$transaction->setDefaultAccount($transaction::TYPE_EXPENSE, 'credit', $id);
-	$transaction->setDefaultAccount($transaction::TYPE_TRANSFER, 'debit', $id);
+// ab = Bank/cash account
+if (qg('ab') && ($a = $accounts->getWithCode(qg('ab')))
+	&& in_array($a->type, [$a::TYPE_BANK, $a::TYPE_CASH, $a::TYPE_OUTSTANDING])) {
+	$transaction->setDefaultAccount($transaction::TYPE_REVENUE, 'debit', $a->id);
+	$transaction->setDefaultAccount($transaction::TYPE_EXPENSE, 'credit', $a->id);
+	$transaction->setDefaultAccount($transaction::TYPE_TRANSFER, 'debit', $a->id);
 }
+
+// ar = Revenue account
+if (qg('ar') && ($a = $accounts->getWithCode(qg('ar')))
+	&& $a->type == $a::TYPE_REVENUE) {
+	$transaction->setDefaultAccount($transaction::TYPE_REVENUE, 'credit', $a->id);
+	$transaction->setDefaultAccount($transaction::TYPE_CREDIT, 'credit', $a->id);
+}
+
+// ae = Expense account
+if (qg('ae') && ($a = $accounts->getWithCode(qg('ae')))
+	&& $a->type == $a::TYPE_REVENUE) {
+	$transaction->setDefaultAccount($transaction::TYPE_EXPENSE, 'debit', $a->id);
+	$transaction->setDefaultAccount($transaction::TYPE_DEBT, 'debit', $a->id);
+}
+
+// at = Transfer account
+if (qg('at') && ($a = $accounts->getWithCode(qg('at')))
+	&& $a->type == $a::TYPE_BANK) {
+	$transaction->setDefaultAccount($transaction::TYPE_TRANSFER, 'credit', $a->id);
+}
+
+// a3 = Third-party account
+if (qg('a3') && ($a = $accounts->getWithCode(qg('a3')))
+	&& $a->type == $a::TYPE_BANK) {
+	$transaction->setDefaultAccount($transaction::TYPE_CREDIT, 'debit', $a->id);
+	$transaction->setDefaultAccount($transaction::TYPE_DEBT, 'credit', $a->id);
+}
+
 
 $types_details = $transaction->getTypesDetails();
 
