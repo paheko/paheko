@@ -209,12 +209,41 @@ class API
 				throw new APIException('Wrong request method', 400);
 			}
 
-			if (preg_match('!^(\d+)/journal!', $param, $match)) {
-				try {
-					return iterator_to_array(Reports::getJournal(['year' => $match[1]]));
+			if (preg_match('!^(\d+)/(journal|account/journal)!', $param, $match)) {
+				if ($match[2] == 'journal') {
+					try {
+						return iterator_to_array(Reports::getJournal(['year' => (int) $match[1]]));
+					}
+					catch (\LogicException $e) {
+						throw new APIException('Missing parameter for journal: ' . $e->getMessage(), 400, $e);
+					}
 				}
-				catch (\LogicException $e) {
-					throw new APIException('Missing parameter for journal: ' . $e->getMessage(), 400, $e);
+				else {
+					$year = Years::get((int) $match[1]);
+
+					if (!$year) {
+						throw new APIException('Invalid year.', 400, $e);
+					}
+
+					$a = $year->chart()->accounts();
+
+					if (!empty($_GET['code'])) {
+						$account = $a->getWithCode($_GET['code']);
+					}
+					else {
+						$account = $a->get((int)$_GET['code'] ?? null);
+					}
+
+					if (!$account) {
+						throw new APIException('Unknown account id or code.', 400, $e);
+					}
+
+					$list = $account->listJournal($year->id, false);
+					$list->setTitle(sprintf('Journal - %s - %s', $account->code, $account->label));
+					$list->loadFromQueryString();
+					$list->setPageSize(null);
+					$list->orderBy('date', false);
+					return iterator_to_array($list->iterate());
 				}
 			}
 			elseif ($param == '') {
