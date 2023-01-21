@@ -43,7 +43,7 @@
 	{/if}
 	</table>
 
-	{pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count() use_buttons=true}
+	{$list->getHTMLPagination(true)|raw}
 
 {elseif $results}
 

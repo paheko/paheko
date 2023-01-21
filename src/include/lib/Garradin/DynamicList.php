@@ -113,11 +113,6 @@ class DynamicList implements \Countable
 		return $out;
 	}
 
-	public function paginationURL()
-	{
-		return Utils::getModifiedURL('?p=[ID]');
-	}
-
 	public function orderURL(string $order, bool $desc)
 	{
 		$query = array_merge($_GET, ['o' => $order, 'd' => (int) $desc]);
@@ -235,7 +230,7 @@ class DynamicList implements \Countable
 		return $sql;
 	}
 
-	public function loadFromQueryString()
+	public function loadFromQueryString(): void
 	{
 		$export = $_POST['_dl_export'] ?? ($_GET['export'] ?? null);
 		$page = $_POST['_dl_page'] ?? ($_GET['p'] ?? null);
@@ -265,5 +260,51 @@ class DynamicList implements \Countable
 		if ($nb = Session::getPreference('page_size')) {
 			$this->setPageSize((int) $nb);
 		}
+	}
+
+	public function isPaginated(): bool
+	{
+		if (null === $this->per_page) {
+			return false;
+		}
+
+		return $this->count() > $this->per_page;
+	}
+
+	public function getHTMLPagination(bool $use_buttons = false): string
+	{
+		if (!$this->isPaginated()) {
+			return '';
+		}
+
+		$pagination = Utils::getGenericPagination($this->page, $this->count(), $this->per_page);
+
+		if (empty($pagination)) {
+			return '';
+		}
+
+		$url = Utils::getModifiedURL('?p=%d');
+
+		$out = '<ul class="pagination">';
+
+		foreach ($pagination as $page) {
+			$out .= sprintf('<li class="%s">', $page['class'] ?? '');
+
+			if (!empty($use_buttons)) {
+				$out .= sprintf('<button type="submit" name="_dl_page" value="%d">%s</button>', $page['id'], htmlspecialchars($page['label']));
+			}
+			else {
+				$out .= sprintf('<a accesskey="%s" href="%s">%s</a>',
+					$page['accesskey'] ?? '',
+					str_replace('%d', $page['id'], $url),
+					htmlspecialchars($page['label'])
+				);
+			}
+
+			$out .= "</li>\n";
+		}
+
+		$out .= '</ul>';
+		return $out;
 	}
 }

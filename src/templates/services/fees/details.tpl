@@ -51,7 +51,7 @@ $can_action = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMI
 </form>
 {/if}
 
-{pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count()}
+{$list->getHTMLPagination()|raw}
 
 
 {include file="_foot.tpl"}

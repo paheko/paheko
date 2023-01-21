@@ -31,7 +31,7 @@
 <form method="post" action="action.php" class="memberList">
 
 {if $list->count()}
-	{pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count()}
+	{$list->getHTMLPagination()|raw}
 
 	{include file="common/dynamic_list_head.tpl" check=$can_edit}
 
@@ -72,7 +72,7 @@
 
 	</table>
 
-	{pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count()}
+	{$list->getHTMLPagination()|raw}
 {else}
 	<p class="block alert">
 		Aucun membre trouvé.
