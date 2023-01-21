@@ -57,6 +57,11 @@
         <a href="{$admin_url}password.php">Première connexion ou mot de passe perdu ?</a>
     </p>
 
+    <p class="help">
+        Suggestion : mettez cette page dans vos favoris pour la retrouver facilement :-)<br />
+        <small>(Sur ordinateur appuyez sur <tt>Ctrl</tt> + <tt>D</tt>. Aide&nbsp;: <a href="https://support.mozilla.org/fr/kb/marque-pages-firefox#w_marquer-une-page" target="_blank">Firefox</a>, <a href="https://support.google.com/chrome/answer/188842?hl=fr&co=GENIE.Platform%3DDesktop&oco=0" target="_blank">Chrome</a>)</small>
+    </p>
+
 </form>
 
 {literal}
