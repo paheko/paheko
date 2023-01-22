@@ -3,14 +3,13 @@ assert(isset($columns));
 assert(isset($action_url));
 assert(isset($query));
 assert(isset($is_admin));
-$sql_disabled = !$is_admin || (!$session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN) && $is_unprotected);
 ?>
 
 {form_errors}
 
 <form method="post" action="{$action_url}" id="queryBuilderForm">
 	<fieldset>
-	{if $sql_query && !$sql_disabled}
+	{if $sql_query}
 		<legend>Recherche SQL</legend>
 		<dl>
 			{input type="textarea" name="sql_query" cols="100" rows="10" required=1 label="Requête SQL" help="Si aucune limite n'est précisée, une limite de 100 résultats sera appliquée." default=$sql_query}
@@ -30,7 +29,9 @@ $sql_disabled = !$is_admin || (!$session->canAccess($session::SECTION_CONFIG, $s
 			{button type="submit" name="run" label="Exécuter" shape="search" class="main"}
 			<input type="hidden" name="id" value="{$search.id}" />
 			{if $search.id}
-				{button name="save" value=1 type="submit" label="Enregistrer : %s"|args:$search.intitule|truncate:40:"…":true shape="upload"}
+				{if $search.id_membre || $is_admin}
+					{button name="save" value=1 type="submit" label="Enregistrer : %s"|args:$search.intitule|truncate:40:"…":true shape="upload"}
+				{/if}
 				{button name="save_new" value=1 type="submit" label="Enregistrer nouvelle recherche" shape="plus"}
 			{else}
 				{button name="save" value=1 type="submit" label="Enregistrer cette recherche" shape="upload"}
@@ -58,14 +59,14 @@ $sql_disabled = !$is_admin || (!$session->canAccess($session::SECTION_CONFIG, $s
 			<input type="hidden" name="q" id="jsonQuery" />
 			<input type="hidden" name="id" value="{$search.id}" />
 			{if $search.id}
-				{button name="save" value=1 type="submit" label="Enregistrer : %s"|args:$search.intitule|truncate:40:"…":true shape="upload"}
+				{if $search.id_membre || $is_admin}
+					{button name="save" value=1 type="submit" label="Enregistrer : %s"|args:$search.intitule|truncate:40:"…":true shape="upload"}
+				{/if}
 				{button name="save_new" value=1 type="submit" label="Enregistrer nouvelle recherche" shape="plus"}
 			{else}
 				{button name="save" value=1 type="submit" label="Enregistrer cette recherche" shape="upload"}
 			{/if}
-			{if $is_admin}
-				{button name="to_sql" value=1 type="submit" label="Recherche SQL" shape="edit"}
-			{/if}
+			{button name="to_sql" value=1 type="submit" label="Recherche SQL" shape="edit"}
 		</p>
 	{else}
 		<legend>Recherche enregistrée</legend>

@@ -14,7 +14,7 @@
 {if $mode == 'edit'}
 	{form_errors}
 
-	<form method="post" action="{$self_url}">
+	<form method="post" action="{$self_url}" data-focus="1">
 		<fieldset>
 			<legend>Modifier une recherche enregistrée</legend>
 			<dl>
@@ -22,7 +22,9 @@
 				<dt>Statut</dt>
 				<?php $checked = (int)(bool)$recherche->id_membre; ?>
 				{input type="radio" name="prive" value="1" default=$checked label="Recherche privée" help="Visible seulement par moi-même"}
-				{input type="radio" name="prive" value="0" default=$checked label="Recherche publique" help="Visible et exécutable par tous les membres ayant accès à la gestion %s"|args:$target}
+				{if $session->canAccess($access_section, $session::ACCESS_WRITE)}
+					{input type="radio" name="prive" value="0" default=$checked label="Recherche publique" help="Visible et exécutable par tous les membres ayant accès à la gestion %s"|args:$target}
+				{/if}
 				<dt>Type</dt>
 				<dd>
 					{if $recherche.type == Recherche::TYPE_JSON}

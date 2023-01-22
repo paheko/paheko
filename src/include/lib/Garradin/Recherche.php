@@ -629,7 +629,7 @@ class Recherche
 			$db = DB::getInstance();
 			static $allowed = [
 				'compta' => ['acc_transactions' => null, 'acc_transactions_lines' => null, 'acc_accounts' => null, 'acc_charts' => null, 'acc_years' => null, 'acc_transactions_users' => null, 'acc_projects' => null],
-				'membres' => ['membres' => null, 'users_categories' => null],
+				'membres' => ['membres' => null, 'users_categories' => null, 'services' => null, 'services_fees' => null, 'services_users' => null],
 			];
 
 			if ($unprotected) {
@@ -802,6 +802,9 @@ class Recherche
 			$tables = [
 				'membres'    => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres\';'),
 				'users_categories' => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'users_categories\';'),
+				'services' => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'services\';'),
+				'services_fees' => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'services_fees\';'),
+				'services_users' => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'services_users\';'),
 			];
 		}
 		elseif ($target == 'compta') {

@@ -66,8 +66,6 @@ elseif ($id && empty($query->query))
 
 // Recherche SQL
 if (f('sql_query')) {
-	// Only admins can run custom queries, others can only run saved queries
-	$session->requireAccess($access_section, $session::ACCESS_ADMIN);
 	$sql_query = f('sql_query');
 
 	if ($session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
