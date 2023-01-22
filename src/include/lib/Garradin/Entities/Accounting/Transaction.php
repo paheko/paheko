@@ -580,7 +580,7 @@ class Transaction extends Entity
 
 		$this->assert(!empty($this->id_year), 'L\'ID de l\'exercice doit être renseigné.');
 
-		$this->assert(trim((string)$this->label) !== '', 'Le champ libellé ne peut rester vide.');
+		$this->assert(!empty($this->label) && trim((string)$this->label) !== '', 'Le champ libellé ne peut rester vide.');
 		$this->assert(strlen($this->label) <= 200, 'Le champ libellé ne peut faire plus de 200 caractères.');
 		$this->assert(!isset($this->reference) || strlen($this->reference) <= 200, 'Le champ numéro de pièce comptable ne peut faire plus de 200 caractères.');
 		$this->assert(!isset($this->notes) || strlen($this->notes) <= 2000, 'Le champ remarques ne peut faire plus de 2000 caractères.');
