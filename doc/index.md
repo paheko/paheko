@@ -1,11 +1,34 @@
 # La gestion d'association libre et simple
 
+<div id="prez">
+	<figure>
+		<img src="./selfhost2.png" alt="Illustration d'une personne aidant une autre à installer Paheko sur un ordinateur" />
+	</figure>
+
+### Paheko — la gestion d'association simple</h3>
+
+**Paheko** <small>(anciennement appelé *Garradin*)</small> est un logiciel de gestion d'association, libre, simple et efficace. Son but est de&nbsp;:
+
+* **réduire le temps** passé sur les tâches administratives&nbsp;;
+* re-**donner de l'autonomie aux adhérent⋅e⋅s** dans la gestion de leurs données&nbsp;;
+* **simplifier la gestion** de l'association, pour inciter à participer à la gestion de l'association&nbsp;;
+* intégrer les outils habituels, afin de réduire le nombre de logiciels à gérer.
+	
+Pour en savoir plus : [voir les principales fonctionnalités](#features).
+</div>
+
+<div id="warn">
+	<p><strong>Attention&nbsp;: ce site est dédié au logiciel libre Paheko.</strong><br />
+	Son installation, sur un serveur ou sur un ordinateur personnel, nécessite quelques compétences techniques.</p>
+	<p>Si votre association n'a pas ces compétences, nous recommandons l'utilisation de notre service d'hébergement&nbsp;:<br /><strong class="cloud"><a href="https://paheko.cloud/" target="_blank"><img src="./icon.png" alt="" /> Paheko.cloud</a></strong> 
+		<small>(<strong>Essai gratuit</strong>, puis contribution à prix libre, à partir de 5&nbsp;€ par an)</small>
+</div>
 <nav id="gnav">
 
 * [Guides d'installation](/wiki/?name=Installation)
 * [Documentation](/wiki/?name=Documentation)
-* <a href="https://paheko.cloud/" target="_blank">Essayer gratuitement</a>
 * [Entraide](/wiki/?name=Entraide)
+* <a href="https://paheko.cloud/" target="_blank">Essayer gratuitement sur &nbsp; <b><img src="./icon.png" alt="" /> Paheko.cloud</b></a>
 
 <ul id="news">
 	<li><a href="$ROOT/wiki/?name=Changelog">Nouveautés</a></li>
@@ -15,10 +38,6 @@
 </nav>
 
 <p id="give"><a href="https://kd2.org/soutien.html" target="_blank">Soutenir Paheko en effectuant un don :-)</a></p>
-
-<h3><a href="https://paheko.cloud/garradin-devient-paheko" target="_blank">Garradin devient Paheko !</a></h3>
-
-<p>Garradin.eu est devenu Paheko.cloud !</p>
 
 <form method="GET" action="$ROOT/wiki" onsubmit="var t = this.querySelector('[type=radio]:checked'); this.querySelector('[name=s]').name=t.dataset.name; this.action=t.dataset.action; this.target=t.dataset.target;">
 <fieldset class="searchForm searchFormWiki">
@@ -32,9 +51,48 @@
 
 <script type="text/javascript">
 document.head.innerHTML += `<style type="text/css">
+#prez {
+}
+
+#warn {
+	border: 2px solid #990;
+	padding: .5em;
+	border-radius: .5em;
+	background: #ffd;
+	margin: 1em 0;
+	clear: both;
+}
+
+#warn .cloud {
+	font-size: 1.2em;
+}
+
+#prez figure {
+	float: right;
+}
+
+.markdown img {
+	display: inline-block;
+	max-width: unset;
+	vertical-align: middle;
+	box-shadow: none;
+	margin: 0;
+}
+
+/*
+#info {
+	text-align: center;
+	margin: 1em auto;
+	background: #ddd;
+	padding: .5em;
+	border-radius: .5em;
+	max-width: 40em;
+}
+*/
+
 #give {
 	text-align: center;
-	padding: 1em;
+	margin: 1em;
 }
 
 #give a {
@@ -52,7 +110,7 @@ document.head.innerHTML += `<style type="text/css">
 	padding: 0;
 	margin: 1em;
 	margin-bottom: 1em;
-	font-size: 1.2em;
+	font-size: 1.1em;
 	list-style: none;
 	justify-content: center;
 	align-items: center;
@@ -255,11 +313,26 @@ fetch('/paheko/juvlist?'+(+(new Date))).then((r) => {
 });
 </script>
 
-## C'est quoi ?
+<a name="features"></a>
 
 <a href="$ROOT/raw/7bb068963b9f6301b27b81fe925caae9e86a229b?m=image/png" target="_blank" style="float: right; margin: 1em;"><img src="/paheko/raw/7bb068963b9f6301b27b81fe925caae9e86a229b?m=image/png" alt="Liste des membres" width="400" /></a>
 
-Paheko (anciennement appelé <em>Garradin</em>) est un logiciel de gestion d'association (loi 1901 / ASBL / etc.). Son but est de permettre :
+## C'est quoi ?
+
+* **100% libre :** placé sous la licence [AGPL v3](https://www.gnu.org/licenses/why-affero-gpl.fr.html).
+* Gestion des **adhérent⋅e⋅s** : fiches de membre personnalisables, recherches personnalisées…
+* Gestion des **cotisations** et **activités** : suivi des adhérent⋅e⋅s à jour, des paiements en attente, **rappels automatiques** de cotisation par e-mail, etc.
+* Envoi de **newsletters** avec suivi des adresses e-mail invalides
+* **Comptabilité** puissante (à double entrée), **simple à utiliser par les débutant⋅e⋅s** : recettes, dépenses, suivi des dettes et créances, bilan et compte de résultat annuel, **comptabilité analytique**, export PDF, etc.
+* Stockage et **partage** de **documents** : édition collaborative, synchronisation des fichiers sur un ordinateur, etc.
+* Gestion du **site web** de l'association
+* Comptabilisation du **temps bénévole** et sa **valorisation**
+* Gestion de la **caisse informatisée** d'un atelier ou d'une boutique
+* **Conforme au RGPD** : export des données de l'adhérent⋅e, désabonnement des e-mails, chiffrement des mots de passe…
+
+## Dans quels buts ?
+
+Le but est de permettre :
 
 *  la gestion des __adhérent⋅e⋅s__ : ajout, modification, suppression, possibilité de choisir les informations présentes sur les fiches adhérent, envoi de mails collectifs aux adhérent⋅e⋅s
 *  la tenue de la __comptabilité__ : avoir une gestion comptable complète à même de satisfaire un expert-comptable tout en restant à la portée de celles et ceux qui ne savent pas ce qu'est la comptabilité à double entrée, permettre la production des rapports et bilans annuels et de suivre au jour le jour le budget de l'association
