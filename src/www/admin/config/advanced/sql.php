@@ -6,15 +6,15 @@ use KD2\ErrorManager;
 require_once __DIR__ . '/../_inc.php';
 
 $list = null;
-$table = qg('table');
 $query = f('query') ?? qg('query');
 
 $db = DB::getInstance();
-$tables_list = $db->getGrouped('SELECT name, sql, NULL AS count FROM sqlite_master WHERE type = \'table\' ORDER BY name;');
-$index_list = null;
-$triggers_list = null;
+$tables_list = $db->getGrouped('SELECT name, sql, NULL AS count, NULL AS schema FROM sqlite_master
+	WHERE type = \'table\' AND name NOT LIKE \'files_search_%\' AND name NOT IN (\'sqlite_stat1\')
+	ORDER BY name;');
 
-if ($table) {
+if (qg('table') && array_key_exists(qg('table'), $tables_list)) {
+	$table = qg('table');
 	$all_columns = $db->get(sprintf('PRAGMA table_info(%s);', $db->quoteIdentifier($table)));
 
 	if (!$all_columns) {
@@ -30,6 +30,22 @@ if ($table) {
 	$list = new DynamicList($columns, $table);
 	$list->orderBy(key($columns), false);
 	$list->loadFromQueryString();
+	$tpl->assign(compact('table', 'list'));
+}
+elseif (qg('table_info') && array_key_exists(qg('table_info'), $tables_list)) {
+	$name = qg('table_info');
+	$info = $tables_list[$name];
+	$info->schema = $db->getTableSchema($name);
+	$info->indexes = $db->getTableIndexes($name);
+
+	$sql_indexes = [];
+
+	foreach ($info->indexes as $index) {
+		$sql_indexes[] = $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'index\' AND name = ?;', $index['name']);
+	}
+
+	$info->sql_indexes = implode(";\n", $sql_indexes);
+	$tpl->assign('table_info', $info);
 }
 elseif ($query) {
 	try {
@@ -49,13 +65,15 @@ elseif ($query) {
 else {
 	foreach ($tables_list as $name => &$data) {
 		$data->count = $db->count($name);
+		$data->size = $db->getTableSize($name);
 	}
 
 	unset($data);
-	$index_list = $db->getAssoc('SELECT name, sql FROM sqlite_master WHERE type = \'index\' AND name NOT LIKE \'sqlite_%\' ORDER BY name;');
-	$triggers_list = $db->getAssoc('SELECT name, sql FROM sqlite_master WHERE type = \'trigger\' ORDER BY name;');
+
+	$tpl->assign('index_list',$db->getAssoc('SELECT name, sql FROM sqlite_master WHERE type = \'index\' AND name NOT LIKE \'sqlite_%\' ORDER BY name;'));
+	$tpl->assign('triggers_list', $db->getAssoc('SELECT name, sql FROM sqlite_master WHERE type = \'trigger\' ORDER BY name;'));
 }
 
-$tpl->assign(compact('index_list', 'triggers_list', 'tables_list', 'query', 'table', 'list'));
+$tpl->assign(compact('tables_list', 'query', 'list'));
 
 $tpl->display('config/advanced/sql.tpl');

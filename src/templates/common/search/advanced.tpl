@@ -16,17 +16,18 @@ $sql_disabled = !$is_admin || (!$session->canAccess($session::SECTION_CONFIG, $s
 	{else}
 		<legend>Recherche SQL</legend>
 		<dl>
-			{input type="textarea" name="sql" cols="100" rows="10" required=1 label="Requête SQL" help="Si aucune limite n'est précisée, une limite de 100 résultats sera appliquée." default=$s.content}
+			{input type="textarea" name="sql" cols="100" rows="8" required=1 label="Requête SQL" help="Si aucune limite n'est précisée, une limite de 100 résultats sera appliquée." default=$s.content}
 			{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
 				{input type="checkbox" name="unprotected" value=1 label="Autoriser l'accès à toutes les tables de la base de données" default=$is_unprotected}
 				<dd class="help">Attention : en cochant cette case vous autorisez la requête à lire toutes les données de toutes les tables de la base de données&nbsp;!</dd>
 			{/if}
 
-			<dd class="help">
-				{foreach from=$schema item="sql" key="table"}
+			<dd>
+				{foreach from=$schema item="table"}
 				<details>
-					<summary>Schéma de la table <strong>{$table}</strong></summary>
-					<pre class="block help">{$sql}</pre>
+					<summary>Schéma&nbsp;: <strong>{$table.name}</strong> (<em>{$table.comment}</em>)</summary>
+					{include file="common/_sql_table.tpl" indexes=null class=null}
+					</div>
 				</details>
 				{/foreach}
 			</dd>

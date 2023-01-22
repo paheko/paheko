@@ -473,6 +473,7 @@ details summary.block::after {
     right: 0;
     left: inherit;
 }
+
 .files-list {
     display: flex;
     flex-wrap: wrap;
@@ -611,3 +612,20 @@ dl.large dd {
 
 .diff ins { background: #cfc; color: #000; text-decoration: none; }
 .diff del { background: #fcc; color: #000; }
+
+.center-block {
+    margin: 1em auto;
+}
+
+.center-block > p {
+    text-align: center;
+}
+
+.center-block > pre {
+    max-width: 90%;
+    overflow: auto;
+    margin: 1em auto;
+    background: #eee;
+    padding: .5em;
+    white-space: pre-wrap;
+}
