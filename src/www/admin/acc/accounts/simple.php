@@ -34,6 +34,12 @@ $list->loadFromQueryString();
 
 $can_edit = $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$year->closed;
 
-$tpl->assign(compact('type', 'list', 'types', 'can_edit', 'year'));
+$pending_count = null;
+
+if ($type == Transaction::TYPE_CREDIT || $type == Transaction::TYPE_DEBT) {
+	$pending_count = Transactions::listPendingCreditAndDebtForClosedYears()->count();
+}
+
+$tpl->assign(compact('type', 'list', 'types', 'can_edit', 'year', 'pending_count'));
 
 $tpl->display('acc/accounts/simple.tpl');

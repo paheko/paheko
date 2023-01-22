@@ -14,6 +14,10 @@ use Garradin\Entities\Accounting\Account;
 </p>
 {/if}
 
+{if $pending_count}
+	{include file="acc/transactions/_pending_message.tpl"}
+{/if}
+
 {include file="acc/_simple_help.tpl" link="../reports/trial_balance.php?year=%d"|args:$current_year.id type=null}
 
 {if !empty($grouped_accounts)}

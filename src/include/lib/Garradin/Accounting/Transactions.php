@@ -100,6 +100,58 @@ class Transactions
 		return DB::getInstance()->count('acc_transactions', 'id_creator = ?', $user_id);
 	}
 
+	/**
+	 * Returns a dynamic list of all waiting credit and debt transactions for closed years
+	 */
+	static public function listPendingCreditAndDebtForClosedYears(): DynamicList
+	{
+		$columns = Account::LIST_COLUMNS;
+
+		unset($columns['line_label'], $columns['sum'], $columns['debit'], $columns['credit']);
+		unset($columns['project_code'], $columns['id_project'], $columns['line_reference']);
+
+		$columns['change']['select'] = 'SUM(l.credit)';
+		$columns['change']['label'] = 'Montant';
+
+		$columns = [
+			'year_label' => [
+				'select' => 'y.label',
+				'label' => 'Exercice',
+			],
+			'type_label' => [
+				'select' => 't.type',
+				'label' => 'Type',
+			]]
+			+ $columns;
+
+		$conditions = sprintf('y.closed = 1 AND t.status & %d AND t.type IN (%d, %d)',
+			Transaction::STATUS_WAITING, Transaction::TYPE_CREDIT, Transaction::TYPE_DEBT);
+
+		$tables = 'acc_transactions_lines l
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			INNER JOIN acc_years y ON y.id = t.id_year';
+
+		$list = new DynamicList($columns, $tables, $conditions);
+		$list->orderBy('date', true);
+		$list->setCount('COUNT(DISTINCT t.id)');
+		$list->groupBy('t.id');
+		$list->setModifier(function (&$row) {
+			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
+
+			if (isset($row->type_label)) {
+				$row->type_label = Transaction::TYPES_NAMES[(int)$row->type_label];
+			}
+		});
+
+		$list->setExportCallback(function (&$row) {
+			$row->change = Utils::money_format($row->change, '.', '', false);
+		});
+
+		$list->setTitle('Dettes et créances en attente');
+
+		return $list;
+	}
+
 	static public function setProject(?int $id_project, ?array $transactions = null, ?array $lines = null)
 	{
 		$db = DB::getInstance();
@@ -119,7 +171,7 @@ class Transactions
 			(int)$id_project ?: 'NULL', $where));
 	}
 
-	static public function listByType(int $year_id, ?int $type)
+	static public function listByType(int $year_id, ?int $type): DynamicList
 	{
 		$reverse = 1;
 
