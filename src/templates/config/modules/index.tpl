@@ -6,6 +6,9 @@
 	<tbody>
 		{foreach from=$list item="module"}
 		<tr>
+			<td class="icon">
+				{if $url = $module->icon_url()}<img src="{$url}" alt="" width="48" />{/if}
+			</td>
 			<td><h3>{$module.label}</h3>{$module.description|escape|nl2br}</td>
 			<td class="actions">
 				{*{linkbutton label="Modifier" href="edit.php?module=%s"|args:$module.name shape="edit" target="_dialog"}*}
