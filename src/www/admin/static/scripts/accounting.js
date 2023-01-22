@@ -1,4 +1,29 @@
 function initTransactionForm(is_new) {
+	var form = $('form')[0];
+	// Check if an account is listed twice and ask for confirmation
+	form.addEventListener('submit', (e) => {
+		var accounts = [];
+		var lines = $('.transaction-lines tbody tr');
+
+		for (var i = 0; i < lines.length; i++) {
+			var a = lines[i].querySelector('.input-list input[type="hidden"]');
+
+			if (!a) {
+				continue;
+			}
+
+			if (accounts.includes(a.value)
+				&& !window.confirm(`Attention, cette écriture affecte deux fois le même compte (${a.value}). Confirmer ?`)) {
+				e.preventDefault();
+				return false;
+			}
+
+			accounts.push(a.value);
+		}
+
+		return true;
+	});
+
 	// Advanced transaction: line management
 	var lines = $('.transaction-lines tbody tr');
 
