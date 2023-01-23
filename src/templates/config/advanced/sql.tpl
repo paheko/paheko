@@ -47,7 +47,7 @@
 			</tbody>
 		</table>
 
-	{elseif isset($result) AND $result !== null}
+	{elseif isset($result)}
 
 		<p class="block alert">
 			Aucun résultat trouvé.
