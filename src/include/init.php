@@ -10,6 +10,8 @@ use KD2\DB\EntityManager;
 
 error_reporting(-1);
 
+const CONFIG_FILE = 'config.local.php';
+
 /*
  * Version de Garradin
  */
@@ -90,12 +92,12 @@ if (!defined('\SQLITE3_OPEN_READWRITE')) {
  */
 
 // Configuration externalisée
-if (file_exists(__DIR__ . '/../config.local.php'))
+if (file_exists(__DIR__ . '/../' . CONFIG_FILE))
 {
-	require __DIR__ . '/../config.local.php';
+	require __DIR__ . '/../' . CONFIG_FILE;
 }
 
-// Configuration par défaut, si les constantes ne sont pas définies dans config.local.php
+// Configuration par défaut, si les constantes ne sont pas définies dans CONFIG_FILE
 // (fallback)
 if (!defined('Garradin\ROOT'))
 {
@@ -264,7 +266,7 @@ const SMARTYER_CACHE_ROOT = SHARED_CACHE_ROOT . '/compiled';
 // il sait pas faire (sauf sur Debian qui a le bon patch pour ça), donc pour
 // éviter le message d'erreur à la con on définit une timezone par défaut
 // Pour utiliser une autre timezone, il suffit de définir date.timezone dans
-// un .htaccess ou dans config.local.php
+// un .htaccess ou dans CONFIG_FILE
 if (!ini_get('date.timezone'))
 {
 	if (($tz = @date_default_timezone_get()) && $tz != 'UTC')
@@ -373,6 +375,9 @@ ErrorManager::setCustomExceptionHandler('\Garradin\UserException', '\Garradin\us
 // Clé secrète utilisée pour chiffrer les tokens CSRF etc.
 if (!defined('Garradin\SECRET_KEY'))
 {
+	if (!is_writable(ROOT)) {
+		throw new \RuntimeException('Impossible de créer le fichier de configuration "'. CONFIG_FILE .'". Le répertoire "'. ROOT . '" n\'est pas accessible en écriture.');
+	}
 	$key = base64_encode(random_bytes(64));
 	Install::setLocalConfig('SECRET_KEY', $key);
 	define('Garradin\SECRET_KEY', $key);

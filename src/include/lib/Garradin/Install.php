@@ -25,7 +25,7 @@ class Install
 	 * This sends the current installed version, as well as the PHP and SQLite versions
 	 * for statistics purposes.
 	 *
-	 * You can disable this by setting DISABLE_INSTALL_PING to TRUE in config.local.php
+	 * You can disable this by setting DISABLE_INSTALL_PING to TRUE in CONFIG_FILE
 	 */
 	static public function ping(): void
 	{
@@ -358,6 +358,7 @@ class Install
 
 		foreach ($paths as $path)
 		{
+			$index_file = $path . '/index.html';
 			Utils::safe_mkdir($path, 0777, true);
 
 			if (!is_dir($path))
@@ -370,9 +371,12 @@ class Install
 			{
 				throw new \RuntimeException('Le répertoire '.$path.' n\'est pas accessible en lecture/écriture.');
 			}
+			if (file_exists($index_file) AND (!is_writable($index_file) || !is_readable($index_file))) {
+				throw new \RuntimeException('Le fichier ' . $index_file . ' n\'est pas accessible en lecture/écriture.');
+			}
 
 			// Some basic safety against misconfigured hosts
-			file_put_contents($path . '/index.html', '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL was not found on this server.</p></body></html>');
+			file_put_contents($index_file, '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL was not found on this server.</p></body></html>');
 		}
 
 		return true;
@@ -380,7 +384,7 @@ class Install
 
 	static public function setLocalConfig(string $key, $value, bool $overwrite = true): void
 	{
-		$path = ROOT . DIRECTORY_SEPARATOR . 'config.local.php';
+		$path = ROOT . DIRECTORY_SEPARATOR . CONFIG_FILE;
 		$new_line = sprintf('const %s = %s;', $key, var_export($value, true));
 
 		if (file_exists($path)) {
