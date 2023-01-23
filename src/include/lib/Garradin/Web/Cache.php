@@ -3,6 +3,7 @@
 namespace Garradin\Web;
 
 use Garradin\Utils;
+use Garradin\UserException;
 
 use const Garradin\{DATA_ROOT, ROOT, WEB_CACHE_ROOT, WWW_URL};
 
@@ -82,6 +83,9 @@ class Cache
 
 		// Create symlink for self-hosting with .htaccess
 		if (!file_exists(ROOT . '/www/.cache') && file_exists(DATA_ROOT . '/cache/web')) {
+			if (!is_writable(ROOT . '/www')) {
+				throw new UserException('Le répertoire "'. ROOT . '/www" n\'est pas accessible en écriture.');
+			}
 			symlink(DATA_ROOT . '/cache/web', ROOT . '/www/.cache');
 		}
 
