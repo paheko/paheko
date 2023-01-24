@@ -146,8 +146,17 @@ class AdvancedSearch extends A_S
 	public function schema(): array
 	{
 		$db = DB::getInstance();
-		$sql = sprintf('SELECT name, sql FROM sqlite_master WHERE %s ORDER BY name;', $db->where('name', ['users', 'users_categories']));
-		return $db->getAssoc($sql);
+		$r = $db->query(sprintf('SELECT name, sql FROM sqlite_master WHERE %s ORDER BY name;', $db->where('name', ['users', 'users_categories'])));
+		
+		$schema = [];
+		$row = [];
+		while ($row = $r->fetchArray(\SQLITE3_ASSOC)) {
+			$schema[] = array_merge($row, (['comment' => null, 'columns' => []]));
+			// Still need to load columns definition here to match Accounting\AdvancedSearch::schema() method
+			// See KD2\DB\SQLite3::getTableSchema()
+		}
+
+		return $schema;
 	}
 
 	public function simple(string $query, bool $allow_redirect = false): \stdClass
