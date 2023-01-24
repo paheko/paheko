@@ -27,6 +27,7 @@ if ($id) {
 else {
 	$s = new SE;
 	$s->target = CURRENT_SEARCH_TARGET;
+	$s->created = new \DateTime();
 }
 
 $text_query = trim((string) qg('qt'));
