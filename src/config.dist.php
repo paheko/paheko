@@ -499,6 +499,18 @@ namespace Garradin;
 //const FORCE_CUSTOM_COLORS = false;
 
 /**
+ * Désactiver le formulaire d'installation
+ *
+ * Si TRUE, alors le formulaire d'installation renverra une erreur.
+ *
+ * Utile pour une installation multi-associations.
+ *
+ * Défaut : false
+ * @var bool
+ */
+//const DISABLE_INSTALL_FORM = false;
+
+/**
  * Stockage des fichiers
  *
  * Indiquer ici le nom d'une classe de stockage de fichiers

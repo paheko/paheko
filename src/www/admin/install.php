@@ -14,6 +14,10 @@ if (file_exists(DB_FILE))
     throw new UserException('Garradin est déjà installé');
 }
 
+if (DISABLE_INSTALL_FORM) {
+	throw new \RuntimeException('Install form has been disabled');
+}
+
 Install::checkAndCreateDirectories();
 Install::checkReset();
 
