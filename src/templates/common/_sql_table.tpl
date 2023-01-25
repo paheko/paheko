@@ -1,8 +1,8 @@
 
 <table class="schema list auto {$class}">
 	<caption>
-		{$table.name}
-		{if $table.comment}<br /><small><em>{$table.comment}</em></small>{/if}
+		<strong><tt>{$table.name}</tt></strong>
+		{if $table.comment} <small><em>({$table.comment})</em></small>{/if}
 	</caption>
 	<thead>
 		<tr>
@@ -31,7 +31,7 @@
 			</td>
 		{/if}
 			<th>{$column.name}</th>
-			<td>{$column.type}</td>
+			<td>{if $column.type}{$column.type}{else}<em>Dynamique</em>{/if}</td>
 			<td>{if $column.notnull}{else}Oui{/if}</td>
 			<td>{if $column.dflt_value !== null}<tt>{$column.dflt_value}</tt>{elseif !$column.notnull}<em>NULL</em>{else}<em>Aucune</em>{/if}</td>
 			<td>
@@ -45,7 +45,7 @@
 					({$column.fk.to})
 				{/if}
 			</td>
-			<td>{$column.comment}</td>
+			<td class="comment">{$column.comment}</td>
 		</tr>
 	{/foreach}
 	</tbody>

@@ -215,18 +215,34 @@ class Search extends Entity
 		CSV::export($format, 'Recherche', $this->iterateResults(), $this->getHeader());
 	}
 
+	public function schema(): array
+	{
+		$out = [];
+		$db = DB::getInstance();
+
+		foreach ($this->getAdvancedSearch()->schemaTables() as $table => $comment) {
+			$schema = $db->getTableSchema($table);
+			$schema['comment'] = $comment;
+			$out[$table] = $schema;
+		}
+
+		return $out;
+	}
+
 	public function getProtectedTables(): ?array
 	{
 		if ($this->type != self::TYPE_SQL || $this->target == self::TARGET_ALL) {
 			return null;
 		}
 
-		if ($this->target == self::TARGET_ACCOUNTING) {
-			return ['acc_transactions' => null, 'acc_transactions_lines' => null, 'acc_accounts' => null, 'acc_charts' => null, 'acc_years' => null, 'acc_transactions_users' => null, 'acc_projects' => null];
+		$list = $this->getAdvancedSearch()->tables();
+		$tables = [];
+
+		foreach ($list as $name) {
+			$tables[$name] = null;
 		}
-		else {
-			return ['users' => null, 'users_search' => null, 'users_categories' => null];
-		}
+
+		return $tables;
 	}
 
 	public function getGroups(): array

@@ -3,7 +3,7 @@ assert(isset($columns));
 assert(isset($s));
 assert(isset($is_admin));
 $is_unprotected = $s->type == $s::TYPE_SQL_UNPROTECTED;
-$sql_disabled = !$is_admin || (!$session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN) && $is_unprotected);
+$sql_disabled = (!$session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN) && $is_unprotected);
 ?>
 
 {form_errors}
@@ -25,7 +25,7 @@ $sql_disabled = !$is_admin || (!$session->canAccess($session::SECTION_CONFIG, $s
 			<dd>
 				{foreach from=$schema item="table"}
 				<details>
-					<summary>Schéma&nbsp;: <strong>{$table.name}</strong> (<em>{$table.comment}</em>)</summary>
+					<summary>Table&nbsp;: <strong>{$table.comment}</strong> (<tt>{$table.name}</tt>)</summary>
 					{include file="common/_sql_table.tpl" indexes=null class=null}
 					</div>
 				</details>

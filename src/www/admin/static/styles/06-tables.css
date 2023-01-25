@@ -323,3 +323,8 @@ table tr.dragging {
 table.dragging td {
     opacity: 0;
 }
+
+table.schema caption {
+    background: rgba(var(--gSecondColor), 0.2);
+
+}
