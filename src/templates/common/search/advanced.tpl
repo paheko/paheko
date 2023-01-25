@@ -3,13 +3,17 @@ assert(isset($columns));
 assert(isset($action_url));
 assert(isset($query));
 assert(isset($is_admin));
+$sql_disabled = (!$session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN) && $is_unprotected);
 ?>
 
 {form_errors}
 
 <form method="post" action="{$action_url}" id="queryBuilderForm">
 	<fieldset>
-	{if $sql_query}
+	{if $sql_disabled}
+		<legend>Recherche enregistrée</legend>
+		<h3>{$search.intitule}</h3>
+	{elseif $sql_query}
 		<legend>Recherche SQL</legend>
 		<dl>
 			{input type="textarea" name="sql_query" cols="100" rows="10" required=1 label="Requête SQL" help="Si aucune limite n'est précisée, une limite de 100 résultats sera appliquée." default=$sql_query}
