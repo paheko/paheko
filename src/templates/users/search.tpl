@@ -9,12 +9,8 @@
 {if $list !== null}
 	<p class="help">{$list->count()} membres trouvés pour cette recherche.</p>
 
-	{if $list->count() > 0 && $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-	<p class="actions">
-		{button type="submit" name="_dl_export" value="csv" shape="export" label="Export CSV"}
-		{button type="submit" name="_dl_export" value="ods" shape="export" label="Export LibreOffice"}
-		{button type="submit" name="_dl_export" value="xlsx" shape="export" label="Export Excel"}
-	</p>
+	{if $list->count() > 0}
+	<p class="actions">{exportmenu form=true name="_dl_export" class="menu-btn-right"}</p>
 	{/if}
 
 	{include file="common/dynamic_list_head.tpl" check=$is_admin use_buttons=true}
@@ -47,13 +43,7 @@
 
 {elseif $results}
 
-	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-	<p class="actions">
-		{button type="submit" name="_export" value="csv" shape="export" label="Export CSV"}
-		{button type="submit" name="_export" value="ods" shape="export" label="Export LibreOffice"}
-		{button type="submit" name="_export" value="xlsx" shape="export" label="Export Excel"}
-	</p>
-	{/if}
+	<p class="actions">{exportmenu form=true name="_export" class="menu-btn-right"}</p>
 
 	<table class="list">
 		<thead>
