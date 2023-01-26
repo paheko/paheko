@@ -357,7 +357,7 @@ class Install
 		$path = ROOT . DIRECTORY_SEPARATOR . 'config.local.php';
 		$new_line = sprintf('const %s = %s;', $key, var_export($value, true));
 
-		if (file_exists($path)) {
+		if (file_exists($path) AND filesize($path)) {
 			$config = file_get_contents($path);
 
 			$pattern = sprintf('/^.*(?:const\s+%s|define\s*\(.*%1$s).*$/m', $key);
