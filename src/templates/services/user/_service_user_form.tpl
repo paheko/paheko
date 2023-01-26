@@ -92,42 +92,35 @@ assert(isset($grouped_services) && is_array($grouped_services));
 		</dl>
 
 		{foreach from=$grouped_services item="service"}
+		<?php if (!count($service->fees)) { continue; } ?>
 		<dl data-service="s{$service.id}">
 			<dt><label for="f_fee">Tarif</label> <b>(obligatoire)</b></dt>
-			{if count($service->fees) > 0}
-				{foreach from=$service.fees key="service_id" item="fee"}
-					<dd class="radio-btn">
-						{input type="radio" name="id_fee" value=$fee.id data-user-amount=$fee.user_amount data-account=$fee.id_account data-year=$fee.id_year label=null data-project=$fee.id_project source=$service_user }
-						<label for="f_id_fee_{$fee.id}">
-							<div>
-								<h3>{$fee.label}</h3>
-								<p>
-									{if $fee.user_amount && $fee.formula}
-										<strong>{$fee.user_amount|raw|money_currency}</strong> (montant calculé)
-									{elseif $fee.formula}
-										montant calculé, variable selon les membres
-									{elseif $fee.user_amount}
-										<strong>{$fee.user_amount|raw|money_currency}</strong>
-									{else}
-										prix libre ou gratuit
-									{/if}
-								</p>
-								{if $fee.description}
-								<p class="help">
-									{$fee.description|escape|nl2br}
-								</p>
-								{/if}
-							</div>
-						</label>
-					</dd>
-				{/foreach}
-			{else}
-				<dd>
-					<p><em>Aucun tarif disponible sur la période de l'exercice sélectionné ({$accounting_year->label}).</em></p>
-					<p>{linkbutton href="!services/fees/?id="|cat:$service.id label="Ajouter un tarif pour l'exercie courant" shape="plus"}</p>
-					<p>Si l'exercice "{$accounting_year->label}" n'est pas celui que vous désirez, vous pouvez basculer sur un autre exercice {link href="!acc/accounts/simple.php" label="depuis cette page"}.</p>
-				</dd>
-			{/if}
+			{foreach from=$service.fees key="service_id" item="fee"}
+			<dd class="radio-btn">
+				{input type="radio" name="id_fee" value=$fee.id data-user-amount=$fee.user_amount data-account=$fee.id_account data-year=$fee.id_year label=null data-project=$fee.id_project source=$service_user }
+				<label for="f_id_fee_{$fee.id}">
+					<div>
+						<h3>{$fee.label}</h3>
+						<p>
+							{if $fee.user_amount && $fee.formula}
+								<strong>{$fee.user_amount|raw|money_currency}</strong> (montant calculé)
+							{elseif $fee.formula}
+								montant calculé, variable selon les membres
+							{elseif $fee.user_amount}
+								<strong>{$fee.user_amount|raw|money_currency}</strong>
+							{else}
+								prix libre ou gratuit
+							{/if}
+						</p>
+						{if $fee.description}
+						<p class="help">
+							{$fee.description|escape|nl2br}
+						</p>
+						{/if}
+					</div>
+				</label>
+			</dd>
+			{/foreach}
 		</dl>
 		{/foreach}
 

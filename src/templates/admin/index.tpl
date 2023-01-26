@@ -13,6 +13,9 @@
 	{button id="homescreen-btn" label="Installer comme application sur l'écran d'accueil" class="hidden" shape="plus"}
 </nav>
 
+{assign var="lol" value=42}
+{$lol}
+
 <aside class="describe">
 	<h3>{$config.nom_asso}</h3>
 	{if !empty($config.adresse_asso)}
