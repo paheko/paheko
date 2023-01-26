@@ -4,6 +4,8 @@ namespace Garradin;
 
 use Garradin\Accounting\Projects;
 use Garradin\Services\Services;
+use Garradin\Entities\Accounting\Year;
+use KD2\DB\EntityManager;
 
 
 if (!defined('\Garradin\ROOT')) {
@@ -30,6 +32,17 @@ if (!count($grouped_services)) {
 if (!isset($count_all)) {
 	$count_all = Services::count();
 }
+
+// Quick fix. Will be better implemented inside 1.3 version
+foreach ($grouped_services as &$service) {
+	foreach ($service->fees as $key => $fee) {
+		if ($fee->id_year != $session->get('acc_year')) {
+			unset($service->fees[$key]);
+		}
+	}
+}
+
+$tpl->assign('accounting_year', EntityManager::findOneById(Year::class, $session->get('acc_year')));
 
 $has_past_services = count($grouped_services) != $count_all;
 
