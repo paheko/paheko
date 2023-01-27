@@ -440,11 +440,10 @@ class Install
 		}
 		div {
 			position: relative;
-			border: 1px solid #999;
 			max-width: 500px;
 			padding: 1em;
 			border-radius: .5em;
-			background: #999;
+			background: #ccc;
 		}
 		.spinner h2::after {
 			display: block;
@@ -452,7 +451,7 @@ class Install
 			margin: 1rem auto;
 			width: 50px;
 			height: 50px;
-			border: 5px solid #ccc;
+			border: 5px solid #999;
 			border-radius: 50%%;
 			border-top-color: #000;
 			animation: spin 1s ease-in-out infinite;
