@@ -31,10 +31,11 @@ class Form
 
 	public function run(callable $fn, ?string $csrf_key = null, ?string $redirect = null, bool $follow_redirect = false): bool
 	{
-		try {
-			if (null !== $csrf_key)
-				$this->check($csrf_key);
+		if (null !== $csrf_key && !$this->check($csrf_key)) {
+			return false;
+		}
 
+		try {
 			call_user_func($fn);
 
 			if (null !== $redirect) {
@@ -50,10 +51,6 @@ class Form
 		catch (UserException $e) {
 			$this->addError($e);
 			return false;
-		}
-		catch (\LogicException $e) {
-			$this->addError('Une erreur est survenue, merci de bien vouloir renvoyer le formulaire.');
-			throw $e; // The main exception handler needs to handle the exception (e.g. log the exception)
 		}
 	}
 
@@ -71,8 +68,10 @@ class Form
 
 	public function check($token_action = '', Array $rules = null)
 	{
-		if (!\KD2\Form::tokenCheck($token_action)) {
-			throw new \LogicException(sprintf('Wrong token: %s', $token_action));
+		if (!\KD2\Form::tokenCheck($token_action))
+		{
+			$this->errors[] = 'Une erreur est survenue, merci de bien vouloir renvoyer le formulaire.';
+			return false;
 		}
 
 		if (!is_null($rules) && !$this->validate($rules))
