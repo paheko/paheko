@@ -209,17 +209,28 @@ class API
 				throw new APIException('Wrong request method', 400);
 			}
 
-			if (preg_match('!^(\d+)/(journal|account/journal)!', $param, $match)) {
+			if (preg_match('!^(\d+|current)/(journal|account/journal)!', $param, $match)) {
+				if ($match[1] == 'current') {
+					$id_year = Years::getCurrentOpenYearId();
+
+					if (!$id_year) {
+						throw new APIException('There are no currently open years', 404);
+					}
+				}
+				else {
+					$id_year = (int)$match[1];
+				}
+
 				if ($match[2] == 'journal') {
 					try {
-						return iterator_to_array(Reports::getJournal(['year' => (int) $match[1]]));
+						return iterator_to_array(Reports::getJournal(['year' => $id_year]));
 					}
 					catch (\LogicException $e) {
 						throw new APIException('Missing parameter for journal: ' . $e->getMessage(), 400, $e);
 					}
 				}
 				else {
-					$year = Years::get((int) $match[1]);
+					$year = Years::get($id_year);
 
 					if (!$year) {
 						throw new APIException('Invalid year.', 400, $e);
