@@ -23,7 +23,7 @@ echo '<!DOCTYPE html>
 <body>
 <header class="header">
     <nav class="menu"></nav>
-    <h1>Mise à jour de Garradin vers la version '.garradin_version().'...</h1>
+    <h1>Mise à jour de Paheko vers la version '.garradin_version().'...</h1>
 </header>
 <main>
 <div id="loader" class="loader" style="margin: 2em 0; height: 50px;"></div>
