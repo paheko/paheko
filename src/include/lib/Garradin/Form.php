@@ -33,7 +33,7 @@ class Form
 	{
 		try {
 			if (null !== $csrf_key && !\KD2\Form::tokenCheck($csrf_key)) {
-				throw ValidationException('Une erreur est survenue, merci de bien vouloir renvoyer le formulaire.');
+				throw new ValidationException('Une erreur est survenue, merci de bien vouloir renvoyer le formulaire.');
 			}
 
 			call_user_func($fn);
