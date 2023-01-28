@@ -15,6 +15,7 @@ use Garradin\Entities\Files\File;
 
 use Garradin\Accounting\Accounts;
 use Garradin\Accounting\Projects;
+use Garradin\Accounting\Years;
 use Garradin\ValidationException;
 
 class Transaction extends Entity
@@ -596,7 +597,15 @@ class Transaction extends Entity
 
 		$is_in_year = $db->test(Year::TABLE, 'id = ? AND start_date <= ? AND end_date >= ?', $this->id_year, $this->date->format('Y-m-d'), $this->date->format('Y-m-d'));
 
-		$this->assert($is_in_year, 'La date ne correspond pas à l\'exercice sélectionné : ' . $this->date->format('d/m/Y'));
+		if (!$is_in_year) {
+			$year = Years::get($this->id_year);
+			throw new ValidationException(sprintf('La date (%s) de l\'écriture ne correspond pas à l\'exercice "%s" : la date doit être entre le %s et le %s.',
+				Utils::shortDate($this->date),
+				$year->label ?? '',
+				Utils::shortDate($year->start_date),
+				Utils::shortDate($year->end_date)
+			));
+		}
 
 		$total = 0;
 

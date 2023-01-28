@@ -174,6 +174,11 @@ class Utils
         return $date;
     }
 
+    static public function shortDate($ts, bool $with_hour = false): ?string
+    {
+        return self::date_fr($ts, 'd/m/Y' . ($with_hour ? ' à H\hi' : ''));
+    }
+
     /**
      * @deprecated
      */
