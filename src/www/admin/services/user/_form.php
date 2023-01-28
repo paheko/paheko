@@ -4,8 +4,6 @@ namespace Garradin;
 
 use Garradin\Accounting\Projects;
 use Garradin\Services\Services;
-use Garradin\Entities\Accounting\Year;
-use KD2\DB\EntityManager;
 
 
 if (!defined('\Garradin\ROOT')) {
@@ -43,21 +41,5 @@ $tpl->assign([
 
 $tpl->assign(compact('form_url', 'today', 'grouped_services', 'current_only', 'has_past_services',
 	'create', 'copy_service', 'copy_service_only_paid', 'users'));
-
-if ($session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)) {
-	$accounting_years = [];
-	foreach (EntityManager::getInstance(Year::class)->iterate(sprintf('SELECT * FROM %s;', Year::TABLE)) as $accounting_year) {
-		$accounting_years[$accounting_year->id] = $accounting_year;
-	}
-
-	$no_accounting_fee = true;
-	foreach ($grouped_services as $service) {
-		foreach ($service->fees as $fee)
-			if ($no_accounting_fee && $accounting_years[$fee->id_year]->start_date <= $today && $today <= $accounting_years[$fee->id_year]->end_date) {
-				$no_accounting_fee = false;
-			}
-	}
-	$tpl->assign(compact('accounting_years', 'no_accounting_fee'));
-}
 
 $tpl->assign('projects', Projects::listAssocWithEmpty());

@@ -97,14 +97,7 @@ assert(isset($grouped_services) && is_array($grouped_services));
 			<dt><label for="f_fee">Tarif</label> <b>(obligatoire)</b></dt>
 			{foreach from=$service.fees key="service_id" item="fee"}
 			<dd class="radio-btn">
-				{assign var="class" value=""}
-				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
-					{assign var="accounting_year" value=$accounting_years[$fee->id_year]}
-					{if $today < $accounting_year->start_date || $today > $accounting_year->end_date}
-						{assign var="class" value="unavailable_to_accounting"}
-					{/if}
-				{/if}
-				{input type="radio" name="id_fee" value=$fee.id data-user-amount=$fee.user_amount data-account=$fee.id_account data-year=$fee.id_year label=null data-project=$fee.id_project source=$service_user class=$class}
+				{input type="radio" name="id_fee" value=$fee.id data-user-amount=$fee.user_amount data-account=$fee.id_account data-year=$fee.id_year label=null data-project=$fee.id_project source=$service_user }
 				<label for="f_id_fee_{$fee.id}">
 					<div>
 						<h3>{$fee.label}</h3>
@@ -123,9 +116,6 @@ assert(isset($grouped_services) && is_array($grouped_services));
 						<p class="help">
 							{$fee.description|escape|nl2br}
 						</p>
-						{/if}
-						{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
-							<p class="help">{$accounting_year->label}</p>
 						{/if}
 					</div>
 				</label>
@@ -152,16 +142,11 @@ assert(isset($grouped_services) && is_array($grouped_services));
 	{if $create}
 	<fieldset class="accounting">
 		<legend>{input type="checkbox" name="create_payment" value=1 default=1 label="Enregistrer en comptabilité"}</legend>
-		<p id="no_fee_available_message" style="display: none;" class="help">
-			Non disponible pour ce tarif car il est associé à un exercice comptable ne correspondant pas à cette année {$today|date_format:"%Y"}.<br />
-			{if $no_accounting_fee}
-				L'activité "{$service.label}" ne posséde actuellement aucun tarif pour cette année. {linkbutton href="!services/fees/?id="|cat:$service.id label="Ajouter un tarif" shape="plus"}
-			{/if}
-		</p>
+
 		<dl>
-			{if !empty($users)}
-			<dd class="help">Une écriture sera créée pour chaque membre inscrit.</dd>
-			{/if}
+		{if !empty($users)}
+		<dd class="help">Une écriture sera créée pour chaque membre inscrit.</dd>
+		{/if}
 
 			{input type="money" name="amount" label="Montant réglé par le membre" required=true help="En cas de règlement en plusieurs fois il sera possible d'ajouter des règlements via la page de suivi des activités de ce membre."}
 			{input type="list" target="!acc/charts/accounts/selector.php?targets=%s&year=0"|args:$account_targets name="account_selector" label="Compte de règlement" required=true}

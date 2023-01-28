@@ -28,11 +28,11 @@ function selectService(elm, first_load) {
 	}
 
 	if (fee) {
-		selectFee(fee, !document.querySelector('input[name=id_fee]').classList.contains('unavailable_to_accounting'));
+		selectFee(fee);
 	}
 }
 
-function selectFee(elm, accountable) {
+function selectFee(elm) {
 	var amount = parseInt(elm.getAttribute('data-user-amount'), 10);
 
 	// Toggle accounting part of the form
@@ -53,12 +53,6 @@ function selectFee(elm, accountable) {
 	if (elm.dataset.project) {
 		$('#f_id_project').value = elm.dataset.project;
 	}
-	
-	// Toogle the accounting block
-	$('#f_create_payment_1').disabled = !accountable;
-	$('#f_create_payment_1').checked = accountable;
-	g.toggle('.accounting dl', accountable);
-	$('#no_fee_available_message').style.display = accountable ? 'none' : 'block';
 }
 
 function initForm() {
@@ -67,10 +61,7 @@ function initForm() {
 	});
 
 	$('input[name=id_fee]').forEach((e) => {
-		e.onchange = () => { selectFee(e, true); };
-	});
-	$('input[class=unavailable_to_accounting]').forEach((e) => {
-		e.onchange = () => { selectFee(e, false); };
+		e.onchange = () => { selectFee(e); };
 	});
 
 	selected = document.querySelector('input[name="id_service"]:checked') || document.querySelector('input[name="id_service"]');
