@@ -468,28 +468,40 @@ class User extends Entity
 
 	public function getPreference(string $key)
 	{
-		return $this->preferences->$key ?? null;
+		return $this->preferences->{$key} ?? null;
 	}
 
-	public function setPreference(string $key, $value)
+	public function setPreference(string $key, $value): void
 	{
-		settype($value, gettype(self::PREFERENCES[$key]));
+		if (isset($this->$key)) {
+			settype($value, gettype(self::PREFERENCES[$key]));
+		}
 
 		if (null === $this->preferences) {
 			$this->preferences = new \stdClass;
 		}
 
-		$this->preferences->$key = $value;
+		$this->preferences->{$key} = $value;
 		$this->_modified['preferences'] = null;
 	}
 
+	/**
+	 * Save preferences if they have been modified
+	 */
 	public function __destruct()
 	{
-		if (!($this->isModified('preferences') && count($this->_modified) == 1)) {
+		// We can't save preferences if user does not exist (eg. LDAP/Forced Login via LOCAL_LOGIN)
+		if (!$this->exists()) {
 			return;
 		}
 
-		// Save preferences
-		$this->save();
+		// Nothing to save
+		if (!$this->isModified('preferences')) {
+			return;
+		}
+
+
+		DB::getInstance()->update(self::TABLE, ['preferences' => json_encode($this->preferences)], 'id = ' . $this->id());
+		$this->clearModifiedProperties(['preferences']);
 	}
 }

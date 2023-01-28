@@ -235,18 +235,39 @@ class DynamicList implements \Countable
 		$export = $_POST['_dl_export'] ?? ($_GET['export'] ?? null);
 		$page = $_POST['_dl_page'] ?? ($_GET['p'] ?? null);
 
+		$order = null;
+		$desc = null;
+		$hash = null;
+		$preferences = null;
+		$u = null;
+
+		if ($u = Session::getLoggedUser()) {
+			$hash = md5(json_encode([$this->tables, $this->conditions, $this->columns, $this->group]));
+			$preferences = $u->getPreference('list_' . $hash) ?? null;
+
+			$order = $preferences->o ?? null;
+			$desc = $preferences->d ?? null;
+		}
+
 		if (!empty($_POST['_dl_order'])) {
 			$order = substr($_POST['_dl_order'], 1);
 			$desc = substr($_POST['_dl_order'], 0, 1) == '>' ? true : false;
 		}
-		else {
-			$order = $_GET['o'] ?? null;
+		elseif (!empty($_GET['o'])) {
+			$order = $_GET['o'];
 			$desc = !empty($_GET['d']);
 		}
 
 		if ($export) {
 			$this->export($this->title, $export);
 			exit;
+		}
+
+		// Save current order, if different than default
+		if ($u && $hash
+			&& (($order != ($preferences->o ?? null) && $order != $this->order)
+				|| ($desc != ($preferences->d ?? null) && $desc != $this->desc))) {
+			$u->setPreference('list_' . $hash, ['o' => $order, 'd' => $desc]);
 		}
 
 		if ($order) {
