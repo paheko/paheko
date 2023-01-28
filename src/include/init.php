@@ -199,6 +199,7 @@ static $default_config = [
 	'ENABLE_UPGRADES'       => true,
 	'USE_CRON'              => false,
 	'ENABLE_XSENDFILE'      => false,
+	'DISABLE_EMAIL'         => false,
 	'SMTP_HOST'             => false,
 	'SMTP_USER'             => null,
 	'SMTP_PASSWORD'         => null,
