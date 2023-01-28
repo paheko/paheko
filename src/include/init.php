@@ -192,6 +192,7 @@ static $default_config = [
 	'SHOW_ERRORS'           => true,
 	'MAIL_ERRORS'           => false,
 	'ERRORS_REPORT_URL'     => null,
+	'REPORT_USER_EXCEPTIONS' => 0,
 	'ENABLE_TECH_DETAILS'   => true,
 	'ENABLE_UPGRADES'       => true,
 	'USE_CRON'              => false,
@@ -362,8 +363,10 @@ function user_error(UserException $e)
 	exit;
 }
 
-// Message d'erreur simple pour les erreurs de l'utilisateur
-ErrorManager::setCustomExceptionHandler('\Garradin\UserException', '\Garradin\user_error');
+if (REPORT_USER_EXCEPTIONS < 2) {
+	// Message d'erreur simple pour les erreurs de l'utilisateur
+	ErrorManager::setCustomExceptionHandler('\Garradin\UserException', '\Garradin\user_error');
+}
 
 // Clé secrète utilisée pour chiffrer les tokens CSRF etc.
 if (!defined('Garradin\SECRET_KEY'))

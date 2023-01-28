@@ -221,6 +221,23 @@ namespace Garradin;
 // const ERRORS_TEMPLATE = null;
 
 /**
+ * Loguer / envoyer par mail les erreurs utilisateur ?
+ *
+ * Si positionné à 1, *toutes* les erreurs utilisateur (champ mal rempli dans un formulaire,
+ * formulaire dont le token CSRF a expiré, etc.) seront loguées et/ou envoyées par mail
+ * (selon le réglage choisit ci-dessus).
+ *
+ * Si positionné à 2, alors l'exception sera remontée dans la stack, *et* loguée/envoyée.
+ *
+ * Utile pour le développement.
+ *
+ * Défaut : 0 (ne rien faire)
+ * @var int
+ */
+
+// const REPORT_USER_EXCEPTIONS = 0;
+
+/**
  * Activation des détails techniques (utile en auto-hébergement) :
  * - version de PHP
  * - page permettant de visualiser les erreurs présentes dans le error.log
