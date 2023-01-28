@@ -49,9 +49,12 @@ release: test minify
 	tar czvfh paheko-${VERSION}.tar.gz --hard-dereference -C /tmp/paheko-build paheko-${VERSION}
 
 deb:
-	cd ../debian; ./makedeb.sh
+	cd ../build/debian; ./makedeb.sh
 
-publish: release deb
+windows:
+	cd ../build/windows; make installer
+
+publish: release deb windows
 	$(eval VERSION=$(shell cat VERSION))
 	gpg --armor --detach-sign paheko-${VERSION}.tar.gz
 	fossil uv sync
@@ -59,6 +62,7 @@ publish: release deb
 	fossil uv add paheko-${VERSION}.tar.gz
 	fossil uv add paheko-${VERSION}.tar.gz.asc
 	cd ../debian && fossil uv add paheko-${VERSION}.deb
+	cd ../windows && fossil uv add paheko-${VERSION}.exe
 	cd ../tools && php make_installer.php > install.php && fossil uv add install.php && rm install.php
 	fossil uv sync
 
