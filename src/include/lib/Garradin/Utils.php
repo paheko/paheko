@@ -925,16 +925,16 @@ class Utils
     }
 
     /**
-     * Poly-fill to encode a ISO-8859-1 string to UTF-8 for PHP > =8.2
+     * Poly-fill to encode a ISO-8859-1 string to UTF-8 for PHP >= 9.0
      * @see https://php.watch/versions/8.2/utf8_encode-utf8_decode-deprecated
      */
-    static public function iso8859_1_to_utf8(string $string): string
+    static public function iso8859_1_to_utf8(string $s): string
     {
-        if (PHP_VERSION_ID < 80200) {
-            return utf8_encode($string);
+        if (PHP_VERSION_ID < 90000) {
+            return @utf8_encode($s);
         }
 
-        $s = $string;
+        $s .= $s;
         $len = strlen($s);
 
         for ($i = $len >> 1, $j = 0; $i < $len; ++$i, ++$j) {
