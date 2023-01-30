@@ -33,6 +33,7 @@ class Transaction extends Entity
 	const STATUS_PAID = 2;
 	const STATUS_DEPOSIT = 4;
 	const STATUS_ERROR = 8;
+	const STATUS_OPENING_BALANCE = 16;
 
 	const STATUS_NAMES = [
 		1 => 'En attente de règlement',
@@ -889,6 +890,7 @@ class Transaction extends Entity
 		$this->date = $year->start_date;
 		$this->id_year = $year->id();
 		$this->type = self::TYPE_ADVANCED;
+		$this->addStatus(self::STATUS_OPENING_BALANCE);
 
 		$this->importFromNewForm($source);
 

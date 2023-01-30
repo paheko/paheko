@@ -1,7 +1,7 @@
 {include file="admin/_head.tpl" title="Commencer un exercice" current="acc/years"}
 
 {if isset($_GET.from)}
-	<p class="confirm block"><strong>L'exercice a bien été clôturé.</strong><br />Vous pouvez créer un nouvel exercice ci-dessous.</p>
+	<p class="confirm block"><strong>L'exercice a bien été clôturé.</strong><br />Vous pouvez commencer un nouvel exercice ci-dessous.</p>
 {/if}
 
 {form_errors}
@@ -26,7 +26,11 @@
 
 	<p class="submit">
 		{csrf_field key="acc_years_new"}
-		{linkbutton shape="left" href="./" label="Annuler"}
+		{if isset($_GET.from)}
+			{linkbutton shape="left" href="./" label="Ne pas créer de nouvel exercice"}
+		{else}
+			{linkbutton shape="left" href="./" label="Annuler"}
+		{/if}
 		{button type="submit" name="new" label="Créer ce nouvel exercice" shape="right" class="main"}
 	</p>
 
