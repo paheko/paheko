@@ -129,7 +129,7 @@ class User extends Entity
 
 		// check user number
 		$field = DynamicFields::getNumberField();
-		$this->assert($this->$field !== null && is_numeric($this->$field), 'Numéro de membre invalide : ne peut contenir que des chiffres');
+		$this->assert($this->$field !== null && !ctype_digit($this->$field), 'Numéro de membre invalide : ne peut contenir que des chiffres');
 
 		$db = DB::getInstance();
 
