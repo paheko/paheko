@@ -921,7 +921,39 @@ class Utils
         }
 
         // Check if string is already UTF-8 encoded or not
-        return !preg_match('//u', $str) ? utf8_encode($str) : $str;
+        return !preg_match('//u', $str) ? self::iso8859_1_to_utf8($str) : $str;
+    }
+
+    /**
+     * Poly-fill to encode a ISO-8859-1 string to UTF-8 for PHP > =8.2
+     * @see https://php.watch/versions/8.2/utf8_encode-utf8_decode-deprecated
+     */
+    static public function iso8859_1_to_utf8(string $string): string
+    {
+        if (PHP_VERSION_ID < 80200) {
+            return utf8_encode($string);
+        }
+
+        $s = $string;
+        $len = strlen($s);
+
+        for ($i = $len >> 1, $j = 0; $i < $len; ++$i, ++$j) {
+            switch (true) {
+                case $s[$i] < "\x80":
+                    $s[$j] = $s[$i];
+                    break;
+                case $s[$i] < "\xC0":
+                    $s[$j] = "\xC2";
+                    $s[++$j] = $s[$i];
+                    break;
+                default:
+                    $s[$j] = "\xC3";
+                    $s[++$j] = chr(ord($s[$i]) - 64);
+                    break;
+            }
+        }
+
+        return substr($s, 0, $j);
     }
 
     /**
