@@ -167,7 +167,10 @@ class Membres
         {
             if (empty($data['numero']))
             {
-                $data['numero'] = $db->firstColumn('SELECT MAX(numero) + 1 FROM membres;') ?: 1;
+                $data['numero'] = $db->firstColumn('SELECT MAX(CAST(numero AS INT)) + 1 FROM membres;');
+            }
+            elseif (!ctype_digit($data['numero'])) {
+                throw new UserException(sprintf('Le numéro de membre "%s" n\'est pas valide : il ne doit contenir que des chiffres.', $data['numero']));
             }
             elseif ($db->test('membres', $db->where('numero', $data['numero'])))
             {
