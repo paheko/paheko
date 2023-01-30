@@ -7,11 +7,11 @@ THISDIR=${PWD}
 
 DEB_ARCH_NAME=all
 
-PACKAGE_VERSION=`cat ../src/VERSION`
+PACKAGE_VERSION=`cat ../../src/VERSION`
 
-[ ! -f ../src/paheko-${PACKAGE_VERSION}.tar.gz ] && (cd ../src; make release)
+[ ! -f ../../src/paheko-${PACKAGE_VERSION}.tar.gz ] && (cd ../../src; make release)
 
-tar xzvf ../src/paheko-${PACKAGE_VERSION}.tar.gz -C /tmp
+tar xzvf ../../src/paheko-${PACKAGE_VERSION}.tar.gz -C /tmp
 
 SRCDIR="/tmp/paheko-${PACKAGE_VERSION}"
 
@@ -68,7 +68,7 @@ find ${DEBLOCALPREFIX} -type f -exec md5sum {} \; > DEBIAN/md5sums
 
 true && {
     echo "Generating Debian-specific files..."
-    cp ${THISDIR}/../COPYING ${DEBLOCALPREFIX}/share/doc/${PACKAGE_DEBNAME}/copyright
+    cp ${THISDIR}/../../COPYING ${DEBLOCALPREFIX}/share/doc/${PACKAGE_DEBNAME}/copyright
 } || {
 	echo "Fail."
 	exit 1
@@ -108,7 +108,7 @@ DOCDIR=${DEBLOCALPREFIX}/share/doc/${PACKAGE_DEBNAME}
 
 true && {
     echo "Generating doc..."
-    cp ${THISDIR}/../README.md ${DOCDIR}
+    cp ${THISDIR}/../../README.md ${DOCDIR}
     a2x --doctype manpage --format manpage ${THISDIR}/manpage.txt
     mkdir -p ${DEBLOCALPREFIX}/share/man/man1
     gzip -c ${THISDIR}/paheko.1 > ${DEBLOCALPREFIX}/share/man/man1/${PACKAGE_DEBNAME}.1.gz

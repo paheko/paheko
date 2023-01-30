@@ -20,3 +20,9 @@ if (!defined('Garradin\SECRET_KEY')) {
 
 // Always log in as admin user
 const LOCAL_LOGIN = -1;
+
+// Disable PDF export
+const PDF_COMMAND = null;
+
+// Disable e-mails as Windows is not able to send e-mails
+const DISABLE_EMAIL = true;
