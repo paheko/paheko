@@ -962,6 +962,10 @@ class Utils
     static public function streamPDF(string $str): void
     {
         if (!PDF_COMMAND) {
+            return;
+        }
+
+        if (PDF_COMMAND == 'auto') {
             // Try to see if there's a plugin
             $in = ['string' => $str];
 
@@ -1007,8 +1011,8 @@ class Utils
         // proc_close in order to avoid a deadlock
         proc_close($process);
 
-        if (defined('Garradin\PDF_LOG') && \Garradin\PDF_LOG) {
-            file_put_contents(\Garradin\PDF_LOG, date("[d/m/Y H:i:s]\n"), FILE_APPEND);
+        if (PDF_USAGE_LOG) {
+            file_put_contents(PDF_USAGE_LOG, date("Y-m-d H:i:s\n"), FILE_APPEND);
         }
     }
 
@@ -1019,14 +1023,18 @@ class Utils
      */
     static public function filePDF(string $str): ?string
     {
+        $cmd = PDF_COMMAND;
+
+        if (!$cmd) {
+            return null;
+        }
+
         $source = sprintf('%s/print-%s.html', CACHE_ROOT, md5(random_bytes(16)));
         $target = str_replace('.html', '.pdf', $source);
 
         file_put_contents($source, $str);
 
-        $cmd = PDF_COMMAND;
-
-        if (!$cmd) {
+        if ($cmd == 'auto') {
             // Try to see if there's a plugin
             $in = ['source' => $source, 'target' => $target];
 
@@ -1080,8 +1088,8 @@ class Utils
             throw new \RuntimeException('PDF command failed: ' . $output);
         }
 
-        if (defined('Garradin\PDF_LOG') && \Garradin\PDF_LOG) {
-            file_put_contents(\Garradin\PDF_LOG, date("[d/m/Y H:i:s]\n"), FILE_APPEND);
+        if (PDF_USAGE_LOG) {
+            file_put_contents(PDF_USAGE_LOG, date("Y-m-d H:i:s\n"), FILE_APPEND);
         }
 
         return $target;
