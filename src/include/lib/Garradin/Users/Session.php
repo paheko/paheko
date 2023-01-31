@@ -195,21 +195,19 @@ class Session extends \KD2\UserSession
 			return true;
 		}
 
-		// On va chercher le premier membre avec le droit de gérer la config
+		// Look for the first user with the permission to manage the configuration
 		if (-1 === $login) {
 			$login = $this->db->firstColumn('SELECT id FROM users
 				WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config = ?)
 				LIMIT 1', self::ACCESS_ADMIN);
 		}
 
-		$logged = parent::isLogged();
-
 		// Only login if required
-		if ($login > 0 && (!$logged || (self::getUserId() != $login))) {
+		if ($login > 0 && ($this->user ?? null) != $login) {
 			return $this->create($login);
 		}
 
-		return $logged;
+		return isset($this->user) ? true : false;
 	}
 
 	public function login($login, $password, $remember_me = false)

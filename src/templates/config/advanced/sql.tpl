@@ -4,7 +4,7 @@
 
 {form_errors}
 
-{if $query}
+{if !empty($query)}
 	<h2 class="ruler">Requête SQL</h2>
 
 	<form method="post" action="{$self_url}">
@@ -19,16 +19,15 @@
 		</fieldset>
 	</form>
 
-	{if !empty($result)}
+	{if !empty($result_count)}
 
-		<p class="help">{$result|count} résultats trouvés pour cette requête.</p>
+		<p class="alert block">{$result_count} résultats trouvés pour cette requête, en {$query_time} ms.</p>
 		<table class="list search">
 			<thead>
 				<tr>
 					{foreach from=$result_header item="label"}
 						<td>{$label}</td>
 					{/foreach}
-					<td></td>
 				</tr>
 			</thead>
 			<tbody>
@@ -48,7 +47,7 @@
 			</tbody>
 		</table>
 
-	{elseif $result !== null}
+	{elseif isset($result)}
 
 		<p class="block alert">
 			Aucun résultat trouvé.
@@ -56,8 +55,32 @@
 
 	{/if}
 
-{elseif $table}
+{elseif !empty($table_info)}
+
+<div class="center-block">
+	<h2 class="ruler">Table : {$table_info.name}</h2>
+	<p class="actions">
+		{linkbutton shape="menu" href="?table=%s"|args:$table_info.name label="Parcourir les données"}
+	</p>
+
+
+	{include file="common/_sql_table.tpl" table=$table_info.schema indexes=$table_info.indexes fk_link=true class="center"}
+
+	<h2 class="ruler">Schéma</h2>
+	<pre>{$table_info.sql}</pre>
+	<pre>{$table_info.sql_indexes}</pre>
+</div>
+
+{elseif !empty($table)}
+
 	<h2 class="ruler">Table : {$table}</h2>
+	<div class="center-block">
+		<p class="actions">
+			{linkbutton shape="table" href="?table_info=%s"|args:$table label="Voir la structure"}
+		</p>
+	</div>
+
+	{$list->getHTMLPagination()|raw}
 
 	{include file="common/dynamic_list_head.tpl"}
 
@@ -79,53 +102,74 @@
 		</tbody>
 	</table>
 
-	{pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count()}
+	{$list->getHTMLPagination()|raw}
 
 {else}
 
+<div class="center-block">
 	<p class="help block">
 		Cette page vous permet de visualiser les données brutes de la base de données.
 	</p>
 
 	<form method="post" action="{$self_url}">
 		<fieldset>
-			<legend>Requête SQL</legend>
+			<legend>Faire une requête SQL en lecture</legend>
 			<dl>
-				{input type="textarea" cols="70" rows="10" name="query" default=$query}
+				{input type="textarea" cols="70" rows="3" name="query" default=$query class="full-width"}
 			</dl>
-			<p class="submit">
-				{button type="submit" name="run" label="Exécuter" shape="search" class="main"}
+			<p>
+				{button type="submit" name="run" label="Exécuter" shape="search"}
 			</p>
 		</fieldset>
 	</form>
-
+</div>
 	<h2 class="ruler">Liste des tables</h2>
 
-	<dl class="describe">
+	<table class="list auto center">
+		<thead>
+			<tr>
+				<th>Nom</th>
+				<td></td>
+				<td>Nombre de lignes</td>
+				<td>Taille</td>
+			</tr>
+		</thead>
+		<tbody>
 		{foreach from=$tables_list key="name" item="table"}
-			<dt><a href="?table={$name}">{$name}</a></dt>
-			<dd><em>{$table.count} lignes</em></dd>
-			<dd><pre>{$table.sql}</pre></dd>
+			<tr>
+				<th><a href="?table={$name}">{$name}</a></th>
+				<td>
+					{linkbutton shape="menu" href="?table=%s"|args:$name label="Parcourir"}
+					{linkbutton shape="table" href="?table_info=%s"|args:$name label="Structure"}
+				</td>
+				<td>{$table.count} lignes</td>
+				<td class="size">{if $table.size !== null}{$table.size|size_in_bytes}{else}(inconnue){/if}</td>
+			</tr>
 		{/foreach}
-	</dl>
-
-	<h2 class="ruler">Liste des index</h2>
-
-	<dl class="describe">
-		{foreach from=$index_list key="name" item="sql"}
-			<dt>{$name}</dt>
-			<dd><pre>{$sql}</pre></dd>
-		{/foreach}
-	</dl>
+		</tbody>
+	</table>
 
 	<h2 class="ruler">Liste des triggers</h2>
 
-	<dl class="describe">
+	<table class="list">
 		{foreach from=$triggers_list key="name" item="sql"}
-			<dt>{$name}</dt>
-			<dd><pre>{$sql}</pre></dd>
+		<tr>
+			<th>{$name}</th>
+			<td><pre>{$sql}</pre></td>
+		</tr>
 		{/foreach}
-	</dl>
+	</table>
+
+	<h2 class="ruler">Liste des index</h2>
+
+	<table class="list">
+		{foreach from=$index_list key="name" item="sql"}
+		<tr>
+			<th>{$name}</th>
+			<td><tt>{$sql}</tt></td>
+		</tr>
+		{/foreach}
+	</table>
 
 {/if}
 

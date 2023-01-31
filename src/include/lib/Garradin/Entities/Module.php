@@ -108,6 +108,15 @@ class Module extends Entity
 		$db->commit();
 	}
 
+	public function icon_url(): ?string
+	{
+		if (!$this->hasFile('icon.svg')) {
+			return null;
+		}
+
+		return $this->url('icon.svg');
+	}
+
 	public function path(string $file = null): string
 	{
 		return self::ROOT . '/' . $this->name . ($file ? '/' . $file : '');
@@ -121,6 +130,19 @@ class Module extends Entity
 	public function dir(): ?File
 	{
 		return Files::get(self::ROOT . $this->name);
+	}
+
+	public function hasFile(string $file): bool
+	{
+		if (Files::exists($this->path($file))) {
+			return true;
+		}
+
+		if (file_exists($this->distPath($file))) {
+			return true;
+		}
+
+		return false;
 	}
 
 	public function hasDist(): bool

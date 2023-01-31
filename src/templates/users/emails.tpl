@@ -54,7 +54,7 @@
 	</tbody>
 	</table>
 
-	{pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count()}
+	{$list->getHTMLPagination()|raw}
 
 	<div class="block help">
 		<h3>Statuts possibles d'une adresse e-mail&nbsp;:</h3>

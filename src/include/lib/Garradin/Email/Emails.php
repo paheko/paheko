@@ -48,6 +48,10 @@ class Emails
 	 */
 	static public function queue(int $context, array $recipients, ?string $sender, string $subject, $content, ?string $render = null): void
 	{
+		if (DISABLE_EMAIL) {
+			return;
+		}
+
 		$list = [];
 
 		// Build email list
@@ -546,8 +550,12 @@ class Emails
 		self::sendMessage($context, $message);
 	}
 
-	static public function sendMessage(int $context, Mail_Message $message)
+	static public function sendMessage(int $context, Mail_Message $message): void
 	{
+		if (DISABLE_EMAIL) {
+			return;
+		}
+
 		$email_sent_via_plugin = Plugin::fireSignal('email.send.before', compact('context', 'message'));
 
 		if ($email_sent_via_plugin) {

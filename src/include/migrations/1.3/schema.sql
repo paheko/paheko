@@ -276,7 +276,7 @@ CREATE TABLE IF NOT EXISTS acc_accounts
 -- Accounts of the charts (comptes)
 (
     id INTEGER NOT NULL PRIMARY KEY,
-    id_chart INTEGER NOT NULL REFERENCES acc_charts ON DELETE CASCADE,
+    id_chart INTEGER NOT NULL REFERENCES acc_charts (id) ON DELETE CASCADE,
 
     code TEXT NOT NULL, -- can contain numbers and letters, eg. 53A, 53B...
 

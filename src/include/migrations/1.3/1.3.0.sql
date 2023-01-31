@@ -11,11 +11,17 @@ ALTER TABLE services_reminders_sent RENAME TO services_reminders_sent_old;
 ALTER TABLE acc_transactions RENAME TO acc_transactions_old;
 ALTER TABLE acc_transactions_users RENAME TO acc_transactions_users_old;
 
+-- Fix error on foreign key
+ALTER TABLE acc_charts RENAME TO acc_charts_old;
+
 ALTER TABLE emails_queue RENAME TO emails_queue_old;
 
 DROP VIEW acc_accounts_balances;
 
 .read schema.sql
+
+INSERT INTO acc_charts SELECT * FROM acc_charts_old;
+DROP TABLE acc_charts_old;
 
 -- Add recipient_pgp_key column
 INSERT INTO emails_queue

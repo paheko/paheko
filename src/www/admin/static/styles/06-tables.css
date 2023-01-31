@@ -7,6 +7,10 @@ table.list.auto {
     width: auto;
 }
 
+table.list.center {
+    margin: 1em auto;
+}
+
 table.list caption {
     text-align: center;
     font-size: 1.2em;
@@ -15,10 +19,6 @@ table.list caption {
 table.list tbody td.desc {
     font-size: .9em;
     color: var(--gBorderColor);
-}
-
-table.list.auto {
-    width: auto;
 }
 
 table.list table {
@@ -160,11 +160,14 @@ table.list.files .date {
     font-size: .9em;
 }
 
-table.list.files .size {
-    font-size: .9em;
+table.list .size {
     text-align: right;
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
+}
+
+table.list.files .size {
+    font-size: .9em;
     color: var(--gBorderColor);
 }
 
@@ -319,4 +322,9 @@ table tr.dragging {
 
 table.dragging td {
     opacity: 0;
+}
+
+table.schema caption {
+    background: rgba(var(--gSecondColor), 0.2);
+
 }

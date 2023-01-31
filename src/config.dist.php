@@ -402,6 +402,23 @@ namespace Garradin;
 //const NTP_SERVER = 'fr.pool.ntp.org';
 
 /**
+ * Désactiver l'envoi d'e-mails
+ *
+ * Si positionné à TRUE, l'envoi d'e-mail ne sera pas proposé, et il ne sera
+ * pas non plus possible de récupérer un mot de passe perdu.
+ * Les parties de l'interface relatives à l'envoi d'e-mail seront cachées.
+ *
+ * Ce réglage est utilisé pour la version autonome sous Windows, car Windows
+ * ne permet pas l'envoi d'e-mails.
+ *
+ * Défaut : false
+ * @var bool
+ */
+
+//const DISABLE_EMAIL = false;
+
+
+/**
  * Hôte du serveur SMTP, mettre à false (défaut) pour utiliser la fonction
  * mail() de PHP
  *

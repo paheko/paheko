@@ -19,8 +19,6 @@ use const Garradin\{ROOT, ADMIN_URL};
 
 class Skeleton
 {
-	const TEMPLATE_TYPES = '!^(?:text/(?:html|plain)|\w+/(?:\w+\+)?xml)$!';
-
 	protected ?string $path;
 	protected ?File $file = null;
 
@@ -115,7 +113,7 @@ class Skeleton
 		}
 
 		// Serve a template
-		if (preg_match(self::TEMPLATE_TYPES, $type)) {
+		if (UserTemplate::isTemplate($this->path)) {
 			if (0 === strpos($this->path, 'modules/')) {
 				$name = substr($uri, 0, strrpos($uri, '/'));
 				$file = substr($uri, strrpos($uri, '/') + 1) ?: 'index.html';
@@ -237,6 +235,8 @@ class Skeleton
 			case 'gif':
 			case 'webp':
 				return 'image/' . $ext;
+			case 'svg':
+				return 'image/svg+xml';
 			case 'jpeg':
 			case 'jpg':
 				return 'image/jpeg';

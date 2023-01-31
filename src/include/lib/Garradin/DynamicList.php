@@ -113,11 +113,6 @@ class DynamicList implements \Countable
 		return $out;
 	}
 
-	public function paginationURL()
-	{
-		return Utils::getModifiedURL('?p=[ID]');
-	}
-
 	public function orderURL(string $order, bool $desc)
 	{
 		$query = array_merge($_GET, ['o' => $order, 'd' => (int) $desc]);
@@ -235,23 +230,44 @@ class DynamicList implements \Countable
 		return $sql;
 	}
 
-	public function loadFromQueryString()
+	public function loadFromQueryString(): void
 	{
 		$export = $_POST['_dl_export'] ?? ($_GET['export'] ?? null);
 		$page = $_POST['_dl_page'] ?? ($_GET['p'] ?? null);
+
+		$order = null;
+		$desc = null;
+		$hash = null;
+		$preferences = null;
+		$u = null;
+
+		if ($u = Session::getLoggedUser()) {
+			$hash = md5(json_encode([$this->tables, $this->conditions, $this->columns, $this->group]));
+			$preferences = $u->getPreference('list_' . $hash) ?? null;
+
+			$order = $preferences->o ?? null;
+			$desc = $preferences->d ?? null;
+		}
 
 		if (!empty($_POST['_dl_order'])) {
 			$order = substr($_POST['_dl_order'], 1);
 			$desc = substr($_POST['_dl_order'], 0, 1) == '>' ? true : false;
 		}
-		else {
-			$order = $_GET['o'] ?? null;
+		elseif (!empty($_GET['o'])) {
+			$order = $_GET['o'];
 			$desc = !empty($_GET['d']);
 		}
 
 		if ($export) {
 			$this->export($this->title, $export);
 			exit;
+		}
+
+		// Save current order, if different than default
+		if ($u && $hash
+			&& (($order != ($preferences->o ?? null) && $order != $this->order)
+				|| ($desc != ($preferences->d ?? null) && $desc != $this->desc))) {
+			$u->setPreference('list_' . $hash, ['o' => $order, 'd' => $desc]);
 		}
 
 		if ($order) {
@@ -265,5 +281,51 @@ class DynamicList implements \Countable
 		if ($nb = Session::getPreference('page_size')) {
 			$this->setPageSize((int) $nb);
 		}
+	}
+
+	public function isPaginated(): bool
+	{
+		if (null === $this->per_page) {
+			return false;
+		}
+
+		return $this->count() > $this->per_page;
+	}
+
+	public function getHTMLPagination(bool $use_buttons = false): string
+	{
+		if (!$this->isPaginated()) {
+			return '';
+		}
+
+		$pagination = Utils::getGenericPagination($this->page, $this->count(), $this->per_page);
+
+		if (empty($pagination)) {
+			return '';
+		}
+
+		$url = Utils::getModifiedURL('?p=%d');
+
+		$out = '<ul class="pagination">';
+
+		foreach ($pagination as $page) {
+			$out .= sprintf('<li class="%s">', $page['class'] ?? '');
+
+			if (!empty($use_buttons)) {
+				$out .= sprintf('<button type="submit" name="_dl_page" value="%d">%s</button>', $page['id'], htmlspecialchars($page['label']));
+			}
+			else {
+				$out .= sprintf('<a accesskey="%s" href="%s">%s</a>',
+					$page['accesskey'] ?? '',
+					str_replace('%d', $page['id'], $url),
+					htmlspecialchars($page['label'])
+				);
+			}
+
+			$out .= "</li>\n";
+		}
+
+		$out .= '</ul>';
+		return $out;
 	}
 }

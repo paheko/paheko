@@ -222,11 +222,23 @@ class AdvancedSearch extends A_S
 		];
 	}
 
-	public function schema(): array
+	public function schemaTables(): array
 	{
-		$db = DB::getInstance();
-		$sql = sprintf('SELECT name, sql FROM sqlite_master WHERE %s ORDER BY name;', $db->where('name', ['acc_transactions', 'acc_transactions_lines', 'acc_accounts', 'acc_years', 'acc_projects']));
-		return $db->getAssoc($sql);
+		return [
+			'acc_transactions' => 'Écritures',
+			'acc_transactions_lines' => 'Lignes des écritures',
+			'acc_accounts' => 'Comptes des plans comptables',
+			'acc_years' => 'Exercices',
+			'acc_projects' => 'Projets',
+		];
+	}
+
+	public function tables(): array
+	{
+		return array_merge(array_keys($this->schemaTables()), [
+			'acc_charts',
+			'acc_transactions_users',
+		]);
 	}
 
 	public function make(string $query): DynamicList

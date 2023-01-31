@@ -74,7 +74,7 @@ if (!isset($current)) {
 				<li{if $current == 'users/new'} class="current"{/if}><a href="{$admin_url}users/new.php">Ajouter</a></li>
 			{/if}
 				<li{if $current == 'users/services'} class="current"{/if}><a href="{$admin_url}services/">Activités &amp; cotisations</a></li>
-			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
+			{if !DISABLE_EMAIL && $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
 				<li{if $current == 'users/mailing'} class="current"{/if}><a href="{$admin_url}users/mailing.php">Messages collectifs</a></li>
 			{/if}
 			</ul>

@@ -48,42 +48,12 @@ class Functions
 		return $tpl->fetch('_foot.tpl');
 	}
 
-	static public function create_index(array $params, Brindille $tpl, int $line): void
-	{
-		$id = Utils::basename(Utils::dirname($tpl->_tpl_path));
-
-		if (!$id) {
-			throw new Brindille_Exception('Unique document name could not be found');
-		}
-
-		if (empty($params['name']) || !ctype_alnum($params['name'])) {
-			throw new Brindille_Exception('Missing or invalid index name');
-		}
-
-		$indexes = ['document'];
-		$db = DB::getInstance();
-
-		if (empty($params['column'])) {
-			$indexes[] = sprintf('json_extract(value, %s)', $db->quote($params['column']));
-		}
-
-		if (empty($params['expression'])) {
-			$indexes[] = $params['expression'];
-		}
-
-		if (count($indexes) == 1) {
-			throw new Brindille_Exception('Missing or invalid index columns');
-		}
-
-		$db->exec(sprintf('CREATE INDEX IF NOT EXISTS documents_%s_%s ON documents_data (%s);', $id, implode(',', $indexes)));
-	}
-
 	static public function save(array $params, Brindille $tpl, int $line): void
 	{
 		$name = Utils::basename(Utils::dirname($tpl->_tpl_path));
 
 		if (!$name) {
-			throw new Brindille_Exception('Unique document name could not be found');
+			throw new Brindille_Exception('Module name could not be found');
 		}
 
 		$table = 'module_data_' . $name;
@@ -119,23 +89,23 @@ class Functions
 		$db = DB::getInstance();
 
 		if ($key == 'config') {
-			$result = $db->firstColumn(sprintf('SELECT config AS value FROM %s WHERE name = ?;', Module::TABLE), $name);
+			$result = $db->firstColumn(sprintf('SELECT config FROM %s WHERE name = ?;', Module::TABLE), $name);
 		}
 		else {
 			$db->exec(sprintf('
 				CREATE TABLE IF NOT EXISTS %s (
 					id INTEGER NOT NULL PRIMARY KEY,
 					key TEXT NULL,
-					value TEXT NOT NULL
+					document TEXT NOT NULL
 				);
 				CREATE UNIQUE INDEX IF NOT EXISTS %1$s_key ON %1$s (key);', $table));
 
-			$result = $db->first(sprintf('SELECT value FROM %s WHERE %s;', $table, ($field . ' = ?')), $where_value);
+			$result = $db->firstColumn(sprintf('SELECT document FROM %s WHERE %s;', $table, ($field . ' = ?')), $where_value);
 		}
 
 		// Merge before update
 		if ($result) {
-			$result = json_decode(is_string($result) ? $result : ((string) $result->value), true);
+			$result = json_decode((string) $result, true);
 			$params = array_merge($result, $params);
 		}
 
@@ -163,10 +133,10 @@ class Functions
 		}
 
 		if (!$result) {
-			$db->insert($table, compact('value', 'key'));
+			$db->insert($table, compact('document', 'key'));
 		}
 		else {
-			$db->update($table, compact('value'), sprintf('%s = :match', $field), ['match' => $where_value]);
+			$db->update($table, compact('document'), sprintf('%s = :match', $field), ['match' => $where_value]);
 		}
 	}
 
@@ -196,7 +166,13 @@ class Functions
 		$dump = htmlspecialchars(ErrorManager::dump($params));
 
 		// FIXME: only send back HTML when content-type is text/html, or send raw text
-		return sprintf('<pre style="background: yellow; padding: 5px; overflow: auto">%s</pre>', $dump);
+		$out = sprintf('<pre style="background: yellow; padding: 5px; overflow: auto">%s</pre>', $dump);
+
+		if (!empty($params['stop'])) {
+			echo $out; exit;
+		}
+
+		return $out;
 	}
 
 	static public function error(array $params, Brindille $tpl)

@@ -23,9 +23,14 @@ abstract class AdvancedSearch
 	abstract public function columns(): array;
 
 	/**
-	 * Returns schema of supported tables
+	 * Returns list of tables that should be documented for SQL queries
 	 */
-	abstract public function schema(): array;
+	abstract public function schemaTables(): array;
+
+	/**
+	 * Returns list of tables the user has access to for SQL queries
+	 */
+	abstract public function tables(): array;
 
 	/**
 	 * Builds a DynamicList object from the supplied search groups

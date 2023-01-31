@@ -27,6 +27,7 @@ if ($id) {
 else {
 	$s = new SE;
 	$s->target = CURRENT_SEARCH_TARGET;
+	$s->created = new \DateTime();
 }
 
 $text_query = trim((string) qg('qt'));
@@ -103,7 +104,7 @@ if (!$default) {
 }
 
 $is_admin = $session->canAccess($access_section, $session::ACCESS_ADMIN);
-$schema = $s->getAdvancedSearch()->schema();
+$schema = $s->schema();
 $columns = $s->getAdvancedSearch()->columns();
 $columns = array_filter($columns, fn($c) => $c['label'] ?? null && $c['type'] ?? null); // remove columns only for dynamiclist
 

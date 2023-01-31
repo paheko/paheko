@@ -143,11 +143,22 @@ class AdvancedSearch extends A_S
 		return $columns;
 	}
 
-	public function schema(): array
+	public function schemaTables(): array
 	{
-		$db = DB::getInstance();
-		$sql = sprintf('SELECT name, sql FROM sqlite_master WHERE %s ORDER BY name;', $db->where('name', ['users', 'users_categories']));
-		return $db->getAssoc($sql);
+		return [
+			'users' => 'Membres',
+			'users_categories' => 'Catégories de membres',
+			'services' => 'Activités',
+			'services_fees' => 'Tarifs des activités',
+			'services_users' => 'Inscriptions aux activités',
+		];
+	}
+
+	public function tables(): array
+	{
+		return array_merge(array_keys($this->schemaTables()), [
+			'users_search',
+		]);
 	}
 
 	public function simple(string $query, bool $allow_redirect = false): \stdClass

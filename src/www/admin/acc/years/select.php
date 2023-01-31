@@ -1,6 +1,7 @@
 <?php
 namespace Garradin;
 
+use Garradin\Users\Session;
 use Garradin\Accounting\Years;
 
 require_once __DIR__ . '/../../_inc.php';
@@ -14,7 +15,9 @@ if (f('change')) {
 		throw new UserException('Exercice inconnu');
 	}
 
-	$session->set('acc_year', $year->id());
+	$user = Session::getLoggedUser();
+	$user->setPreference('accounting_year', $year->id());
+
 	Utils::redirect(f('from') ?: ADMIN_URL . 'acc/years/');
 }
 

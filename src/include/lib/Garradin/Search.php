@@ -47,4 +47,13 @@ class Search
 		$s->target = $target;
 		return $s->quick($query);
 	}
+
+	static public function fromSQL(string $sql): SE
+	{
+		$s = new SE;
+		$s->type = $s::TYPE_SQL;
+		$s->content = $sql;
+		$s->target = $s::TARGET_ALL;
+		return $s;
+	}
 }

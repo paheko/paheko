@@ -26,7 +26,7 @@
 	</tbody>
 </table>
 
-{pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count()}
+{$list->getHTMLPagination()|raw}
 
 
 {include file="_foot.tpl"}

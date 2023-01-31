@@ -2,6 +2,7 @@
 
 namespace Garradin\UserTemplate;
 
+use Garradin\DB;
 use Garradin\Utils;
 use Garradin\UserException;
 
@@ -45,6 +46,7 @@ class Modifiers
 		'floatval',
 		'substr',
 		'abs',
+		'base64_encode'
 	];
 
 	const MODIFIERS_LIST = [
@@ -66,6 +68,8 @@ class Modifiers
 		'money_int' => [Utils::class, 'moneyToInteger'],
 		'array_transpose' => [Utils::class, 'array_transpose'],
 		'check_email',
+		'implode',
+		'quote_sql_identifier',
 	];
 
 	const LEADING_NUMBER_REGEXP = '/^([\d.]+)\s*[.\)]\s*/';
@@ -302,5 +306,29 @@ class Modifiers
 		}
 
 		return @eval('return ' . $expression . ';') ?: 0;
+	}
+
+	static public function implode($array, string $separator): string
+	{
+		if (!is_array($array)) {
+			throw new Brindille_Exception('Supplied argument is not an array');
+		}
+
+		return implode($separator, $array);
+	}
+
+	static public function quote_sql_identifier($in)
+	{
+		if (null === $in) {
+			return '';
+		}
+
+		$db = DB::getInstance();
+
+		if (is_array($in)) {
+			return array_map([$db, 'quoteIdentifier'], $in);
+		}
+
+		return $db->quoteIdentifier($in);
 	}
 }

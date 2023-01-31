@@ -213,11 +213,22 @@ class Template extends Smartyer
 
 	protected function widgetExportMenu(array $params): string
 	{
-		$out  = CommonFunctions::linkButton(['href' => $params['href'] . 'csv', 'label' => 'Export CSV', 'shape' => 'export']);
-		$out .= ' ' . CommonFunctions::linkButton(['href' => $params['href'] . 'ods', 'label' => 'Export LibreOffice', 'shape' => 'export']);
+		if (!empty($params['form'])) {
+			$name = $params['name'] ?? 'export';
+			$out = CommonFunctions::button(['value' => 'csv', 'shape' => 'export', 'label' => 'Export CSV', 'name' => $name, 'type' => 'submit']);
+			$out .= CommonFunctions::button(['value' => 'ods', 'shape' => 'export', 'label' => 'Export LibreOffice', 'name' => $name, 'type' => 'submit']);
 
-		if (CALC_CONVERT_COMMAND) {
-			$out .= ' ' . CommonFunctions::linkButton(['href' => $params['href'] . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']);
+			if (CALC_CONVERT_COMMAND) {
+				$out .= CommonFunctions::button(['value' => 'xlsx', 'shape' => 'export', 'label' => 'Export Excel', 'name' => $name, 'type' => 'submit']);
+			}
+		}
+		else {
+			$out  = CommonFunctions::linkButton(['href' => $params['href'] . 'csv', 'label' => 'Export CSV', 'shape' => 'export']);
+			$out .= ' ' . CommonFunctions::linkButton(['href' => $params['href'] . 'ods', 'label' => 'Export LibreOffice', 'shape' => 'export']);
+
+			if (CALC_CONVERT_COMMAND) {
+				$out .= ' ' . CommonFunctions::linkButton(['href' => $params['href'] . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']);
+			}
 		}
 
 		$params = array_merge($params, ['shape' => 'export', 'label' => 'Export…']);
