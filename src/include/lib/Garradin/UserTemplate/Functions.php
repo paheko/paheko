@@ -132,6 +132,7 @@ class Functions
 			return;
 		}
 
+		$document = $value;
 		if (!$result) {
 			$db->insert($table, compact('document', 'key'));
 		}
