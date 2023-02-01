@@ -30,7 +30,7 @@
 	<table class="list projects">
 		<thead>
 			<tr>
-				<td>Année</td>
+				<td>Projet</td>
 				<td></td>
 				<td class="money">Charges</td>
 				<td class="money">Produits</td>
