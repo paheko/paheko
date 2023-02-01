@@ -36,6 +36,7 @@ class Config extends Entity
 	];
 
 	protected string $org_name;
+	protected ?string $org_infos;
 	protected string $org_email;
 	protected ?string $org_address;
 	protected ?string $org_phone;
