@@ -45,7 +45,7 @@ class UserTemplate extends \KD2\Brindille
 			return self::$root_variables;
 		}
 
-		static $keys = ['color1', 'color2', 'org_name', 'org_address', 'org_email', 'org_phone', 'org_web', 'currency', 'country', 'files'];
+		static $keys = ['color1', 'color2', 'org_name', 'org_address', 'org_email', 'org_phone', 'org_web', 'org_infos', 'currency', 'country', 'files'];
 
 		$config = Config::getInstance();
 
