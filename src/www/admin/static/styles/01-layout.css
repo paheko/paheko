@@ -29,8 +29,14 @@ html.dark {
     --gHoverLinkColor: 250, 127, 127;
 }
 
-html.dark .header .menu, html.dark .header .menu a, html.dark .header .menu li.current h3 span[data-icon]::before  {
+html.dark .header .menu, html.dark .header .menu a, html.dark .header .menu li.current h3 span[data-icon]::before {
     color: rgb(var(--gTextColor)) !important;
+}
+
+html.dark td.icon svg {
+    fill: #fff;
+    max-width: 48px;
+    max-height: 48px;
 }
 
 html {

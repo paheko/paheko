@@ -25,7 +25,7 @@ $form->runIf(qg('disable') !== null, function () {
 
 	$m->enabled = false;
 	$m->save();
-}, null, '!config/Modules/');
+}, null, '!config/modules/');
 
 Modules::refresh();
 
