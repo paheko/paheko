@@ -4,7 +4,7 @@
 		objet_asso=""
 		type_asso=""
 		comptes_don="754"
-		comptes_abandon_frais="75412"
+		comptes_don_nature="75412"
 		comptes_especes="530"
 		comptes_cheques="5112"
 		art200=false
