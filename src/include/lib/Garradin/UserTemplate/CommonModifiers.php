@@ -10,6 +10,64 @@ use Garradin\Utils;
  */
 class CommonModifiers
 {
+	const PHP_MODIFIERS_LIST = [
+		'strtolower',
+		'strtoupper',
+		'ucfirst',
+		'ucwords',
+		'strtotime',
+		'htmlentities',
+		'htmlspecialchars',
+		'trim',
+		'ltrim',
+		'rtrim',
+		'lcfirst',
+		'md5',
+		'sha1',
+		'metaphone',
+		'nl2br',
+		'soundex',
+		'str_split',
+		'str_word_count',
+		'strrev',
+		'strlen',
+		'strpos',
+		'strrpos',
+		'wordwrap',
+		'strip_tags',
+		'strlen',
+		'boolval',
+		'intval',
+		'floatval',
+		'substr',
+		'abs',
+		'base64_encode'
+	];
+
+	/**
+	 * Used for PHP modifiers
+	 */
+	static public function __callStatic(string $name, array $arguments)
+	{
+		if (!in_array($name, self::PHP_MODIFIERS_LIST)) {
+			throw new \Exception('Invalid method: ' . $name);
+		}
+
+		// That change sucks PHP :(
+		// https://php.watch/versions/8.1/internal-func-non-nullable-null-deprecation
+		if (PHP_VERSION_ID >= 80100) {
+			foreach ($arguments as &$arg) {
+				if (null === $arg) {
+					$arg = '';
+				}
+			}
+
+			unset($arg);
+		}
+
+		return call_user_func_array($name, $arguments);
+	}
+
 	const MODIFIERS_LIST = [
 		'money',
 		'money_raw',
@@ -25,7 +83,6 @@ class CommonModifiers
 		'typo',
 		'css_hex_to_rgb',
 	];
-
 
 	/**
 	 * See also money/money_currency in UserTemplate (overriden)
