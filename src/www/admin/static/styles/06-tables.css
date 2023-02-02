@@ -90,6 +90,10 @@ table.list tr.disabled, table.list td.disabled, table.list th.disabled {
     color: var(--gBorderColor);
 }
 
+table.list tr.crossed th, table.list tr.crossed td {
+    text-decoration: line-through;
+}
+
 table.list tr:nth-child(even).disabled {
     background: var(--gLightBackgroundColor);
 }

@@ -65,6 +65,7 @@
 			{if $config.site_disabled}
 			{input type="url" name="org_web" source=$config label="Site web"}
 			{/if}
+			{input type="textarea" cols="50" rows="2" name="org_infos" required=false source=$config label="Informations diverses" help="Ce champ sera utilisé sur les reçus. Il peut être utile de faire figurer ici le numéro de SIRET par exemple."}
 		</dl>
 	</fieldset>
 

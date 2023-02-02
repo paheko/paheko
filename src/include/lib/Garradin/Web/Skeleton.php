@@ -86,7 +86,7 @@ class Skeleton
 
 	static public function isValidPath(string $path)
 	{
-		return (bool) preg_match('!^(?:web|modules/[\w\d_-]+)/[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $path);
+		return (bool) preg_match('!^(?:web|modules(?:/[\w\d_-]+)?)/[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $path);
 	}
 
 	public function defaultPath(): ?string

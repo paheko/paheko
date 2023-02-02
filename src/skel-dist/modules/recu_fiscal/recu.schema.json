@@ -1,0 +1,41 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"type": "object",
+	"properties": {
+		"annule": {
+			"description": "Annulé",
+			"type": "bool"
+		},
+		"date": {
+			"description": "Date d'émission",
+			"type": "string",
+			"format": "date"
+		},
+		"nom": {
+			"description": "Nom du bénéficiaire",
+			"type": "string"
+		},
+		"adresse": {
+			"description": "Adresse du bénéficiaire",
+			"type": "string"
+		},
+		"montant": {
+			"description": "Montant",
+			"type": "integer",
+			"minimum": 0
+		},
+		"linked_user": {
+			"type": ["null", "integer"]
+		},
+		"linked_transactions": {
+			"type": ["null", "array"],
+			"items": {
+				"type": "integer"
+			}
+		},
+		"recu": {
+			"type": "string"
+		}
+	},
+	"required": [ "annule", "date", "nom", "adresse", "montant", "recu", "linked_user", "linked_transactions"]
+}

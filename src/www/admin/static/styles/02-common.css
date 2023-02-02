@@ -265,6 +265,13 @@ dd.help li {
     float: right;
 }
 
+.shortForms {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    text-align: center;
+}
+
 .memberList {
     clear: both;
 }

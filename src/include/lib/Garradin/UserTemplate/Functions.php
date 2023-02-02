@@ -71,20 +71,15 @@ class Functions
 			$where_value = $params['id'];
 		}
 		else {
-			throw new Brindille_Exception('Aucun paramètre "id" ou "key" n\'a été renseigné');
+			$field = null;
 		}
 
 		$key = $params['key'] ?? null;
 		$id = $params['id'] ?? null;
+		$assign_new_id = $params['assign_new_id'] ?? null;
+		$validate = $params['validate_schema'] ?? null;
 
-		unset($params['key'], $params['id']);
-
-		$validate = null;
-
-		if (isset($params['validate_schema'])) {
-			$validate = $params['validate_schema'];
-			unset($params['validate_schema']);
-		}
+		unset($params['key'], $params['id'], $params['assign_new_id'], $params['validate_schema']);
 
 		$db = DB::getInstance();
 
@@ -100,7 +95,12 @@ class Functions
 				);
 				CREATE UNIQUE INDEX IF NOT EXISTS %1$s_key ON %1$s (key);', $table));
 
-			$result = $db->firstColumn(sprintf('SELECT document FROM %s WHERE %s;', $table, ($field . ' = ?')), $where_value);
+			if ($field) {
+				$result = $db->firstColumn(sprintf('SELECT document FROM %s WHERE %s;', $table, ($field . ' = ?')), $where_value);
+			}
+			else {
+				$result = null;
+			}
 		}
 
 		// Merge before update
@@ -108,9 +108,6 @@ class Functions
 			$result = json_decode((string) $result, true);
 			$params = array_merge($result, $params);
 		}
-
-		// Remove NULL values
-		$params = array_filter($params, fn($a) => !is_null($a));
 
 		if ($validate) {
 			$schema = self::read(['file' => $validate], $tpl, $line);
@@ -132,8 +129,13 @@ class Functions
 			return;
 		}
 
+		$document = $value;
 		if (!$result) {
 			$db->insert($table, compact('document', 'key'));
+
+			if ($assign_new_id) {
+				$tpl->assign($assign_new_id, $db->lastInsertId());
+			}
 		}
 		else {
 			$db->update($table, compact('document'), sprintf('%s = :match', $field), ['match' => $where_value]);
@@ -166,7 +168,7 @@ class Functions
 		$dump = htmlspecialchars(ErrorManager::dump($params));
 
 		// FIXME: only send back HTML when content-type is text/html, or send raw text
-		$out = sprintf('<pre style="background: yellow; padding: 5px; overflow: auto">%s</pre>', $dump);
+		$out = sprintf('<pre style="background: yellow; color: black; padding: 5px; overflow: auto">%s</pre>', $dump);
 
 		if (!empty($params['stop'])) {
 			echo $out; exit;
@@ -254,7 +256,13 @@ class Functions
 		$params['included_from'] = array_merge($from, [$path]);
 
 		$include->assignArray(array_merge($ut->getAllVariables(), $params));
-		$include->display();
+
+		if (!empty($params['capture']) && preg_match('/^[a-z0-9_]+$/', $params['capture'])) {
+			$ut::__assign([$params['capture'] => $include->fetch()], $ut);
+		}
+		else {
+			$include->display();
+		}
 
 		if (isset($params['keep'])) {
 			$keep = explode(',', $params['keep']);

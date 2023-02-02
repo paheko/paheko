@@ -18,6 +18,7 @@ class DynamicList implements \Countable
 	protected $desc = true;
 	protected $per_page = 100;
 	protected $page = 1;
+	protected array $parameters = [];
 
 	private $count_result;
 
@@ -37,6 +38,10 @@ class DynamicList implements \Countable
 	public function __get($key)
 	{
 		return $this->$key;
+	}
+
+	public function setParameter($key, $value) {
+		$this->parameters[$key] = $value;
 	}
 
 	public function setTitle(string $title) {
@@ -165,7 +170,7 @@ class DynamicList implements \Countable
 
 	public function iterate(bool $include_hidden = true)
 	{
-		foreach (DB::getInstance()->iterate($this->SQL()) as $row) {
+		foreach (DB::getInstance()->iterate($this->SQL(), $this->parameters) as $row) {
 			if ($this->modifier) {
 				call_user_func_array($this->modifier, [&$row]);
 			}

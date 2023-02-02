@@ -159,6 +159,10 @@ class Template extends Smartyer
 			return $skriv->render((string) $str);
 		});
 
+		foreach (CommonModifiers::PHP_MODIFIERS_LIST as $name) {
+			$this->register_modifier($name, [CommonModifiers::class, $name]);
+		}
+
 		foreach (CommonModifiers::MODIFIERS_LIST as $key => $name) {
 			$this->register_modifier(is_int($key) ? $name : $key, is_int($key) ? [CommonModifiers::class, $name] : $name);
 		}
@@ -211,7 +215,7 @@ class Template extends Smartyer
 		return '<div class="block error"><ul><li>' . implode('</li><li>', $errors) . '</li></ul></div>';
 	}
 
-	protected function widgetExportMenu(array $params): string
+	public function widgetExportMenu(array $params): string
 	{
 		if (!empty($params['form'])) {
 			$name = $params['name'] ?? 'export';

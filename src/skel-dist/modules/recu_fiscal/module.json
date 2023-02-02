@@ -1,4 +1,4 @@
 {
-	"label": "Reçu fiscal (CERFA)",
-	"description": "Permet de créer un reçu fiscal à partir d'une écriture comptable de don."
+	"label": "Reçus fiscaux",
+	"description": "Permet de générer des reçus fiscaux. Conforme aux exigences fiscales de 2022. Seuls les membres ayant accès à la comptabilité auront accès à ce module."
 }
