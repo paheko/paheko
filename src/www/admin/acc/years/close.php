@@ -1,6 +1,7 @@
 <?php
 namespace Garradin;
 
+use Garradin\Users\Session;
 use Garradin\Accounting\Years;
 
 require_once __DIR__ . '/../_inc.php';
