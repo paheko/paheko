@@ -4,6 +4,8 @@ namespace Garradin\UserTemplate;
 
 use KD2\Brindille_Exception;
 use Garradin\DB;
+use Garradin\DynamicList;
+use Garradin\Template;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\Users\Session;
@@ -19,6 +21,7 @@ class Sections
 {
 	const SECTIONS_LIST = [
 		'load',
+		'list',
 		'categories',
 		'articles',
 		'pages',
@@ -39,6 +42,29 @@ class Sections
 	];
 
 	static protected $_cache = [];
+
+	static protected function _debug(string $str): void
+	{
+		echo sprintf('<pre style="padding: 5px; margin: 5px; background: yellow; white-space: pre;">%s</pre>', htmlspecialchars($str));
+	}
+
+	static protected function _debugExplain(string $sql): void
+	{
+		$explain = '';
+
+		try {
+			$r = DB::getInstance()->get('EXPLAIN QUERY PLAN ' . $sql);
+
+			foreach ($r as $e) {
+				$explain .= $e->detail . "\n";
+			}
+		}
+		catch (DB_Exception $e) {
+			$explain = 'Error: ' . $e->getMessage();
+		}
+
+		self::_debug($explain);
+	}
 
 	static protected function cache(string $id, callable $callback)
 	{
@@ -104,11 +130,7 @@ class Sections
 			$params['where'] = '1';
 		}
 		else {
-			$params['where'] = preg_replace_callback(
-				'/\$(\$[\[\.][^=\s]+)/',
-				fn ($m) => sprintf('json_extract(document, %s)', $db->quote($m[1])),
-				$params['where']
-			);
+			$params['where'] = self::_moduleReplaceJSONExtract($params['where']);
 		}
 
 		if (isset($params['key'])) {
@@ -136,7 +158,19 @@ class Sections
 			unset($params[$key]);
 		}
 
-		$params['select'] = isset($params['select']) ? $params['select'] : 'document AS json';
+		$params['select'] = isset($params['select']) ? self::_moduleReplaceJSONExtract($params['select']) : 'id, key, document AS json';
+
+		if (isset($params['group'])) {
+			$params['group'] = self::_moduleReplaceJSONExtract($params['group']);
+		}
+
+		if (isset($params['having'])) {
+			$params['having'] = self::_moduleReplaceJSONExtract($params['having']);
+		}
+
+		if (isset($params['order'])) {
+			$params['order'] = self::_moduleReplaceJSONExtract($params['order']);
+		}
 
 		// Try to create an index if required
 		self::_createModuleIndexes($params['tables'], $params['where']);
@@ -155,6 +189,176 @@ class Sections
 
 			yield $row;
 		}
+	}
+
+	static protected function _getModuleColumnsFromSchema(string $schema, ?string $columns, UserTemplate $tpl, int $line): array
+	{
+		$schema = Functions::read(['file' => $schema], $tpl, $line);
+		$schema = json_decode($schema, true);
+
+		if (!$schema) {
+			throw new Brindille_Exception(sprintf("ligne %d: impossible de lire le schéma:\n%s",
+				$line, json_last_error_msg()));
+		}
+
+		if (empty($schema['properties'])) {
+			return [];
+		}
+
+		$out = [];
+
+		$out['id'] = [];
+		$out['key'] = [];
+
+		if (null !== $columns) {
+			$columns = explode(',', $columns);
+			$columns = array_map('trim', $columns);
+		}
+		else {
+			$columns = array_keys($schema['properties']);
+		}
+
+		foreach ($columns as $key) {
+			$rule = $schema['properties'][$key] ?? null;
+
+			// This column is not in the schema
+			if (!$rule) {
+				continue;
+			}
+
+			$types = is_array($rule['type']) ? $rule['type'] : [$rule['type']];
+
+			// Only "simple" types are supported
+			if (in_array('array', $types) || in_array('object', $types)) {
+				continue;
+			}
+
+			$out[$key] = [
+				'label' => $rule['description'] ?? null,
+				'select' => sprintf('json_extract(document, \'$.%s\')', $key),
+			];
+		}
+
+		return $out;
+	}
+
+	static public function _moduleReplaceJSONExtract(string $str): string
+	{
+		if (!strstr($str, '$')) {
+			return $str;
+		}
+
+		return preg_replace_callback(
+			'/\$(\$[\[\.][\w\d\.\[\]#]+)/',
+			fn ($m) => sprintf('json_extract(document, %s)', DB::getInstance()->quote($m[1])),
+			$str
+		);
+	}
+
+	static public function list(array $params, UserTemplate $tpl, int $line): \Generator
+	{
+		if (empty($params['schema']) && empty($params['select'])) {
+			throw new Brindille_Exception('Missing schema parameter');
+		}
+
+		$name = $params['module'] ?? Utils::basename(Utils::dirname($tpl->_tpl_path));
+
+		if (!$name) {
+			throw new Brindille_Exception('Unique module name could not be found');
+		}
+
+		$table = 'module_data_' . $name;
+
+		$db = DB::getInstance();
+		$has_table = $db->test('sqlite_master', 'type = \'table\' AND name = ?', $table);
+
+		if (!$has_table) {
+			return;
+		}
+
+		if (!isset($params['where'])) {
+			$where = '1';
+		}
+		else {
+			$where = self::_moduleReplaceJSONExtract($params['where']);
+		}
+
+		$columns = [];
+
+		if (!empty($params['select'])) {
+			foreach (explode(',', $params['select']) as $c) {
+				$c = trim($c);
+				$name = trim(strtok($c, ' AS '));
+				$alias = strtok(false);
+
+				$hash = md5($c);
+				$columns[$hash] = [
+					'label' => $alias ? trim($alias, ' \'"') : $name,
+					'select' => $this->_moduleReplaceJSONExtract($name),
+				];
+			}
+
+			if (!empty($params['order'])) {
+				$params['order'] = md5($this->_moduleReplaceJSONExtract($params['order']));
+			}
+		}
+		else {
+			$columns = self::_getModuleColumnsFromSchema($params['schema'], $params['columns'] ?? null, $tpl, $line);
+		}
+
+		$columns['document'] = [];
+
+		$list = new DynamicList($columns, $table);
+
+		foreach ($params as $key => $value) {
+			$f = substr($key, 0, 1);
+
+			if ($f == ':' && strstr($where, $key)) {
+				$list->setParameter(substr($key, 1), $value);
+			}
+			elseif ($f == '$') {
+				// Replace '$.name = "value"' parameters with json_extract
+				$hash = sha1($key);
+				$where .= sprintf(' AND json_extract(document, %s) = :quick_%s', $db->quote($key), $hash);
+				$list->setParameter('quick_' . $hash, $value);
+			}
+		}
+
+		$list->setConditions($where);
+		$list->setPageSize((int) ($params['max'] ?? 50));
+
+		if (isset($params['order'])) {
+			$list->orderBy($params['order'], $params['desc'] ?? false);
+		}
+
+		$list->setModifier(function(&$row) {
+			$row = array_merge(json_decode($row->document, true), (array)$row);
+		});
+
+		// Try to create an index if required
+		self::_createModuleIndexes($table, $where);
+
+		$list->loadFromQueryString();
+
+		if (!empty($params['debug'])) {
+			self::_debug($list->SQL());
+		}
+
+		if (!empty($params['explain'])) {
+			self::_debugExplain($list->SQL());
+		}
+
+		$tpl = Template::getInstance();
+		$tpl->assign(compact('list'));
+		$tpl->assign('check', $params['check'] ?? false);
+		$tpl->display('common/dynamic_list_head.tpl');
+
+		yield from $list->iterate();
+
+		echo '</tbody>';
+		echo '</table>';
+
+		echo $list->getHTMLPagination();
 	}
 
 	static public function balances(array $params, UserTemplate $tpl, int $line): \Generator
@@ -234,7 +438,11 @@ class Sections
 		$login_field = DynamicFields::getLoginField();
 		$number_field = DynamicFields::getNumberField();
 
-		$params['select'] = sprintf('*, %s AS user_name, %s AS user_login, %s AS user_number',
+		if (empty($params['select'])) {
+			$params['select'] = '1';
+		}
+
+		$params['select'] .= sprintf(', %s AS _name, %s AS _login, %s AS _number',
 			$id_field, $login_field, $number_field);
 		$params['tables'] = 'users';
 
@@ -722,7 +930,11 @@ class Sections
 			}
 
 			if (!empty($params['debug'])) {
-				echo sprintf('<pre style="padding: 5px; background: yellow; white-space: normal;">%s</pre>', htmlspecialchars($statement->getSQL(true)));
+				self::_debug($statement->getSQL(true));
+			}
+
+			if (!empty($params['explain'])) {
+				self::_debugExplain($statement->getSQL(true));
 			}
 
 			$result = $statement->execute();
