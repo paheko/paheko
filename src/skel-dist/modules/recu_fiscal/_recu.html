@@ -1,0 +1,89 @@
+{{#restrict block=true section="accounting" level="write"}}
+{{/restrict}}
+
+{{if !$_POST}}
+	{{:error message="Aucune donnée fournie"}}
+{{/if}}
+
+{{:assign var="r" value=$_POST}}
+{{:assign var="montant" value="%d*100"|math:$r.montant}}
+
+{{:include file="./_config_default.tpl"}}
+
+<h1>Reçu au titre des dons à certains organismes d’intérêt général</h1>
+<p><em>Article 200, 238 bis et 978 du code général des impôts (CGI)</em></p>
+
+<h4>Numéro d'ordre du reçu&nbsp;: {{if $preview}}(Brouillon){{else}}%ID%{{/if}}</h4>
+
+
+<h3>Bénéficiaire des versements</h3>
+
+<table>
+	<tr>
+		<th style="width: 33%">Nom&nbsp;:</th>
+		<td>{{$config.org_name}}</td>
+	</tr>
+	<tr>
+		<th>Adresse&nbsp;:</th>
+		<td>{{$config.org_address|escape|nl2br}}</td>
+	</tr>
+	<tr>
+		<th>Objet&nbsp;:</th>
+		<td>{{$module.config.objet_asso|escape|nl2br}}<br />
+			{{$module.config.type_asso}}
+		</td>
+	</tr>
+</table>
+
+<h3>Donateur</h3>
+
+<table>
+	<tr>
+		<th style="width: 33%">Nom&nbsp;:</th>
+		<td>{{$r.nom}}</td>
+	</tr>
+	<tr>
+		<th>Adresse&nbsp;:</th>
+		<td>{{$r.adresse|escape|nl2br}}</td>
+	</tr>
+</table>
+
+<p>Le bénéficiaire reconnaît avoir reçu au titre des dons et versements ouvrant droit à réduction d’impôt, la somme de&nbsp;:
+	{{$montant|money_raw|spell_out_number}} euros (***<strong>{{$montant|raw|money_currency:true}}</strong>***).</p>
+
+<p>Date du versement ou du don&nbsp;: {{$r.date|date_short}}</p>
+
+<p>Le bénéficiaire certifie sur l’honneur que les dons et versements qu’il reçoit ouvrent droit à la réduction d’impôt prévue à l’article&nbsp;:<br />
+	{{if $module.config.art200}}[X] 200 du CGI{{/if}}
+	{{if $module.config.art238}}[X] 238 bis du CGI{{/if}}
+	{{if $module.config.art978}}[X] 978 du CGI{{/if}}
+</p>
+
+<table>
+	<tr>
+		<th style="width: 33%">Forme du don&nbsp;:</th>
+		<td>Don manuel</td>
+	</tr>
+	<tr>
+		<th>Nature du don&nbsp;:</th>
+		<td>{{if $r.type == 'nature'}}Autres{{else}}Numéraire{{/if}}</td>
+	</tr>
+	{{if $r.type == 'numeraire'}}
+	<tr>
+		<th>Mode de versement&nbsp;:</th>
+		<td>
+		{{if $r.moyens.especes}}
+			- Remise d’espèces<br />
+		{{/if}}
+		{{if $r.moyens.cheques}}
+			- Chèque<br />
+		{{/if}}
+		{{if $r.moyens.autres}}
+			- Virement, prélèvement, carte bancaire, ou autre
+		{{/if}}
+		</td>
+	</tr>
+	{{/if}}
+</table>
+
+{{* La signature n'est pas stockée dans le reçu *}}

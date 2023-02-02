@@ -1,4 +1,4 @@
 {
 	"label": "Reçu fiscal (CERFA)",
-	"description": "Permet de créer un reçu fiscal à partir d'une écriture comptable de don."
+	"description": "Permet de générer des reçu fiscaux."
 }

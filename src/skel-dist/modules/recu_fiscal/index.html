@@ -1,160 +1,110 @@
 {{#restrict block=true section="accounting" level="read"}}
 {{/restrict}}
 
-{{if !$_GET.id}}
-	{{:error message="Aucun numéro d'écriture n'a été fourni"}}
-{{/if}}
+{{:include file="./_config_default.tpl"}}
 
-{{if !$module.config}}
-	{{* Valeurs par défaut *}}
-	{{:assign var="form.config"
-		topic=""
-		accounts="756"
-		accounts_cash="530"
-		accounts_cheques="5112"
-		art200=0
-		art238=0
-		art885=0}}
-{{/if}}
+{{:admin_header title="Reçus fiscaux" current="acc"}}
 
-{{#transactions id=$_GET.id}}
-{{:assign title="Reçu fiscal %d - %s"|args:$id:$users_names}}
-{{if $_GET.print == 'pdf'}}
-	{{:http type="pdf" download="%s.pdf"|args:$title}}
-{{/if}}
-<!DOCTYPE html>
-<html>
-<head>
-	<title>{{$title}}</title>
-	<style type="text/css">
-	@media print {
-		@page {
-			size: A4 portrait;
-			margin: 0;
-			padding: 0;
-		}
+<nav class="tabs">
+	{{#restrict section="accounting" level="write"}}
+	<aside>
+		{{#restrict section="accounting" level="admin"}}
+			{{:linkbutton href="config.html" label="Configuration" shape="settings"}}
+		{{/restrict}}
+		{{*{{:linkbutton href="generer.html" label="Générer des reçus" shape="check"}}*}}
+		{{:linkbutton href="nouveau.html?type=vierge" label="Nouveau reçu" shape="plus"}}
+	</aside>
+	{{/restrict}}
 
-		body {
-			margin: 0;
-		}
-	}
+	<ul>
+		<li class="current"><a href="./">Liste des reçus</a></li>
+		<li><a href="./recap.html">Récapitulatif annuel pour déclaration</a></li>
+	</ul>
+</nav>
 
-	@media screen {
-		html {
-			background: #666;
-		}
-		body {
-			margin: 0 auto;
-			padding: 0;
-			background: #fff;
-			width: 210mm;
-			height: 297mm;
-		}
-		.page {
-			margin: 1em 0;
-		}
-	}
+<div class="shortForms">
+	<form method="get" action="">
+		<fieldset>
+			<legend>Filtrer par année</legend>
+			<p>
+				{{:assign var="years[]" value="— Voir toutes les années —"}}
 
-	body {
-		font-family: Helvetica, Arial, sans;
-		font-size: 10pt;
-		background: white;
-		padding: 0;
-	}
+				{{#load select="SUBSTR($$.date, 1, 4) AS year" group="SUBSTR($$.date, 1, 4)"}}
+					{{:assign var="years[%d]"|args:$year value=$year}}
+				{{/load}}
 
-	.page div {
-		position: absolute;
-	}
+				{{:input type="select" name="year" options=$years default=$_GET.year onchange="this.form.submit();"}}
+			</p>
+		</fieldset>
+	</form>
 
-	.page {
-		padding: 0;
-		break-after: always;
-		width: 210mm;
-		height: 297mm;
-		background-size: cover;
-		background-position: -5mm -4.8mm;
-		position: relative;
-	}
-
-	#p1 {
-		background-image: url('data:image/png;base64,{{:read base64=true file="./cerfa-1.png"}}');
-	}
-
-	#p2 {
-		background-image: url('data:image/png;base64,{{:read base64=true file="./cerfa-2.png"}}');
-	}
-
-	b {
-		font-weight: normal;
-	}
-
-	.signature img {
-		max-width: 50mm;
-		max-height: 17mm;
-	}
-	</style>
-</head>
-
-<body>
-
-<div class="page" id="p1">
-	<div style="top: 10mm; left: 170mm;">{{$id}}</div>
-
-	<div style="top: 35mm; left: 20mm;">{{$config.nom_asso}}</div>
-	<div style="top: 46mm; left: 14mm; height: 11mm; width: 180mm; background: #fff;">{{$config.adresse_asso}}</div>
-
-	<div style="top: 64mm; left: 14mm; background: white; width: 180mm; height: 17mm; overflow: hidden;">{{$module.config.topic|escape|nl2br}}</div>
-
-	<div style="top: 128.5mm; left: 15mm;">X</div>
+	<form method="get" action="" data-focus="1">
+		<fieldset>
+			<legend>Chercher un reçu</legend>
+			<p>
+				{{:input type="search" name="q" placeholder="Nom, numéro, ou date" default=$_GET.q}}
+				{{:button type="submit" label="Chercher" shape="right"}}
+			</p>
+		</fieldset>
+	</form>
 </div>
 
-<div class="page" id="p2">
-{{#transaction_users id_transaction=$id limit=1}}
-	<div style="top: 18mm; left: 14mm; background: #fff; width: 175mm;padding: 2mm;">{{$name}}</div>
-	<div style="top: 13mm; left: 100mm; background: #fff; width: 50mm; height: 6mm;"></div>
-	<div style="top: 32mm; left: 18mm;">{{$adresse}}</div>
-	<div style="top: 37mm; left: 38mm;">{{$code_postal}}</div>
-	<div style="top: 37mm; left: 80mm;">{{$ville}}</div>
-{{/transaction_users}}
-
-	<div style="top: 63mm; left: 87mm;">***{{$credit|raw|money}}***</div>
-	<div style="top: 73mm; left: 58mm;">{{$credit|money_raw|spell_out_number}} euros</div>
-
-	<div style="top: 82mm; left: 69mm;">{{$date|date:'d'}}</div>
-	<div style="top: 82mm; left: 82mm;">{{$date|date:'m'}}</div>
-	<div style="top: 82mm; left: 99mm;">{{$date|date:'Y'}}</div>
-
-	<div style="top: 96mm; left: 53mm;">{{if $module.config.art200}}X{{/if}}</div>
-	<div style="top: 96mm; left: 103mm;">{{if $module.config.art238}}X{{/if}}</div>
-	<div style="top: 96mm; left: 153.0mm;">{{if $module.config.art885}}X{{/if}}</div>
-
-	<div style="top: 113mm; left: 115mm;">X</div>
-
-{{* Abandon de frais par bénévoles *}}
-{{if $accounts_codes|strpos:'75412'}}
-	<div style="top: 136mm; left: 115mm;">X</div>
-{{else}}
-	<div style="top: 136mm; left: 15mm;">X</div>
-{{/if}}
-
-	{{* Moyen de paiement *}}
-	{{if $accounts_codes|strpos:$module.config.accounts_cash !== false}}
-	<div style="top: 158.2mm; left: 15mm;">X</div>
-	{{elseif $accounts_codes|strpos:$module.config.accounts_cheques !== false}}
-	<div style="top: 158.2mm; left: 57.3mm;">X</div>
+{{if $_GET.q}}
+	{{if $_GET.q|regexp_match:'/^\d+$/'}}
+		{{:assign where="id = :id_search" id=$_GET.q|intval}}
+	{{elseif $_GET.q|parse_date}}
+		{{:assign where="$$.date = :date" date=$_GET.q|parse_date}}
 	{{else}}
-	<div style="top: 158.2mm; left: 115.2mm;">X</div>
+		{{:assign nom2=$_GET.q|trim|regexp_replace:'/[!%_]/':'!$0'}}
+		{{:assign where="$$.nom LIKE :nom ESCAPE '!'" nom="%%%s%%"|args:$nom2}}
 	{{/if}}
+{{elseif $_GET.year}}
+	{{:assign where="SUBSTR($$.date, 1, 4) = :year"}}
+{{/if}}
 
-	{{* Date du jour *}}
-	<div style="top: 239mm; left: 139mm;">{{$now|date:'d'}}</div>
-	<div style="top: 239mm; left: 148mm;">{{$now|date:'m'}}</div>
-	<div style="top: 239mm; left: 156mm;">{{$now|date:'Y'}}</div>
+{{#list
+	select="id AS 'Numéro'; $$.nom AS 'Nom du bénéficiaire'; $$.date AS 'Date d''émission';  $$.montant AS 'Montant'"
+	where=$where
+	order="id" desc=true
+	:year=$_GET.year
+	:date=$date
+	:id_search=$id
+	:nom=$nom
+}}
+	<tr class="{{if $annule}}disabled crossed{{/if}}">
+		<td class="num">
+			{{:link href="voir.html?id=%d"|args:$id label=$id target="_dialog"}}
+		</td>
+		<th>
+			{{if $linked_user}}
+				{{:link href="!users/details.php?id=%d"|args:$linked_user label=$nom}}
+			{{else}}
+				{{$nom}}
+			{{/if}}
+		</th>
+		<td>
+			{{$date|date_short}}
+		</td>
+		<td>
+			{{$montant|raw|money_currency}}
+		</td>
+		<td class="actions">
+			{{if !$annule}}
+				{{:linkbutton shape="delete" label="Annuler" href="./annuler.html?id=%d"|args:$id target="_dialog"}}
+			{{/if}}
+			{{:linkbutton shape="eye" label="Ouvrir" href="./voir.html?id=%d"|args:$id target="_dialog"}}
+		</td>
+	</tr>
+{{else}}
+	<p class="alert block">
+		{{if $_GET.q}}
+			Aucun reçu n'a été trouvé pour la recherche "{{$_GET.q}}".
+		{{elseif $_GET.year}}
+			Aucun reçu n'a été trouvé pour l'année sélectionnée.
+		{{else}}
+			Aucun reçu n'a encore été créé.
+		{{/if}}
+	</p>
+{{/list}}
 
-	<div style="top: 243mm; left: 137mm;">{{:signature}}</div>
-</div>
-
-{{/transactions}}
-
-</body>
-</html>
+{{:admin_footer}}

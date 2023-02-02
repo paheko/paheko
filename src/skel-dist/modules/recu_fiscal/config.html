@@ -33,6 +33,10 @@
 	<legend>Configuration du modèle de reçu fiscal</legend>
 	<dl>
 		{{:input required=true name="topic" type="textarea" label="Objet de l'association" source=$module.config cols="70" rows="4" help="Inscrire ici l'objet de l'association, conformément aux statuts."}}
+{{*
+		{{:input type="checkbox" name="envoi_auto" value=1 label="Envoyer automatiquement le reçu par e-mail"}}
+		<dd class="help">Si cette case est cochée, chaque reçu créé sera automatiquement envoyé par e-mail au membre</dd>
+*}}
 		{{:input required=false name="accounts" type="text" label="Numéros des comptes éligibles aux reçus" source=$module.config default="756"}}
 		<dd class="help">
 			Pour chaque numéro de compte indiqué dans ce champ, le reçu de don sera proposé (en dessous de la fiche de l'écriture).<br />
