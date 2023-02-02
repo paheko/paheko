@@ -56,7 +56,7 @@ windows:
 
 publish: release deb windows
 	$(eval VERSION=$(shell cat VERSION))
-	gpg --armor --detach-sign paheko-${VERSION}.tar.gz
+	gpg --armor -r dev@paheko.cloud --detach-sign paheko-${VERSION}.tar.gz
 	fossil uv sync
 	#fossil uv ls | fgrep -v 'paheko-0.8.5' | grep '^paheko-.*\.(tar\.bz2|deb)' | xargs fossil uv rm
 	fossil uv add paheko-${VERSION}.tar.gz
