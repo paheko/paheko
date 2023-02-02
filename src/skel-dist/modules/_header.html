@@ -5,15 +5,53 @@
 <html>
 <head>
 	<title>{{$title}}</title>
+	<link rel="stylesheet" type="text/css" href="{{$root_url}}m/form.css" />
 	<style type="text/css">
-	{{:include file="./form.css" page_size=$page_size}}
+	@media print {
+		@page {
+			size: {{if $page_size}}{{$page_size}}{{else}}A4{{/if}};
+			margin: 1cm;
+			@bottom {
+				content: "Page " counter(page) " / " counter(pages);
+				font-size: 8pt;
+				margin-bottom: 10mm;
+				text-align: center;
+			}
+		}
+
+		#buttons {
+			display: none;
+		}
+	}
+
+	@media screen {
+		html, body {
+			background: #666;
+		}
+		#page {
+			position: relative;
+			margin: 0 auto;
+			padding: 1cm;
+			background: #fff;
+			{{if $page_size == 'A5'}}
+			width: 148mm;
+			height: 210mm;
+			{{else}}
+			width: 210mm;
+			height: 297mm;
+			{{/if}}
+		}
+	}
 	</style>
 </head>
 
 <body>
 
-{{if !$_GET.print}}
+{{if !$_GET.print && !$hide_buttons}}
 <div id="buttons">
+	{{if $back_link}}
+		{{:linkbutton href=$back_link label="Retour" shape="left"}}
+	{{/if}}
 	{{:linkbutton href="%s&print=yes"|args:$request_url label="Imprimer" shape="print"}}
 	{{:linkbutton href="%s&print=pdf"|args:$request_url label="Télécharger en PDF" shape="download"}}
 </div>
@@ -21,6 +59,7 @@
 
 <div id="page">
 
+{{if !$hide_header}}
 <header class="organization">
 	{{if $config.files.logo}}
 	<figure class="logo">
@@ -36,5 +75,6 @@
 			{{if $config.org_web}} — {{$config.org_web}}{{/if}}</h3>
 	</section>
 </header>
+{{/if}}
 
 <main>

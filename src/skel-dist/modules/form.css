@@ -1,46 +1,50 @@
-@media print {
-	@page {
-		size: {{if $page_size}}{{$page_size}}{{else}}A4{{/if}};
-		margin: 1.5cm;
-		@bottom {
-			content: "Page " counter(page) " / " counter(pages);
-			font-size: 8pt;
-			margin-bottom: 10mm;
-			text-align: center;
-		}
-	}
-
-	#buttons {
-		display: none;
-	}
+@font-face {
+    font-family: 'gicon';
+    src: url('../admin/static/font/garradin.eot');
+    src: url('../admin/static/font/garradin.eot#iefix') format('embedded-opentype'),
+        url('../admin/static/font/garradin.woff') format('woff'),
+        url('../admin/static/font/garradin.woff2') format('woff2'),
+        url('../admin/static/font/garradin.ttf') format('truetype'),
+        url('../admin/static/font/garradin.svg#garradin') format('svg');
+    font-weight: normal;
+    font-style: normal;
 }
 
-@media screen {
-	html, body {
-		background: #666;
-	}
-	#page {
-		margin: 0 auto;
-		padding: .5cm;
-		background: #fff;
-		{{if $page_size == 'A5'}}
-		width: 148mm;
-		height: 210mm;
-		{{else}}
-		width: 210mm;
-		height: 297mm;
-		{{/if}}
-	}
+body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, 
+pre, form, fieldset, input, textarea, p, blockquote, th, td,
+figure, article, aside, section, header, footer { 
+    padding: 0;
+    margin: 0;
+}
+fieldset, img {
+    border: 0;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+caption, th {
+    text-align: left;
+}
+th, td {
+    vertical-align: top;
+}
+
+h1  { font-size: 2em; }
+h2  { font-size: 1.5em; }
+h3  { font-size: 1.2em; }
+h4  { font-size: 1em; }
+h5  { font-size: 0.9em; }
+h6  { font-size: 0.8em; }
+
+dl, ul, ol, h1, h2, h3, h4, h5, h6, pre, p, blockquote, figure, table {
+	margin-bottom: 1rem;
 }
 
 body {
 	font-family: Arial, Helvetica, sans-serif;
 	color: #000;
 	font-size: 10pt;
-}
-
-main {
-	font-size: 1.1em;
 }
 
 header.organization {
@@ -99,13 +103,25 @@ a.icn-btn {
     padding: .2em .4em;
     margin: .2em .5em;
     white-space: pre;
-    transition: box-shadow .3s;
+    transition: box-shadow .2s;
     text-decoration: underline;
 }
 
 a.icn-btn:hover {
 	text-decoration: none;
 	box-shadow: 0px 0px 5px orange;
+}
+
+[data-icon]:before, .main[data-icon]:after {
+    display: inline-block;
+    font-family: "gicon", sans-serif;
+    text-shadow: 1px 1px 1px #000;
+    padding-right: .5em;
+    font-size: 1.2em;
+    line-height: .8em;
+    vertical-align: middle;
+    content: attr(data-icon);
+    font-weight: normal;
 }
 
 table {
@@ -116,8 +132,40 @@ table {
 table th, table td {
 	padding: .2em;
 	border: 1px solid #999;
+	text-align: left;
 }
 
 td.money {
 	text-align: right;
+}
+
+.watermark {
+	position: absolute;
+	font-size: 180pt;
+	color: rgba(0, 0, 0, 0.2);
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.watermark-red {
+	color: rgba(128, 0, 0, 0.4);
+}
+
+.watermark div {
+	transform: rotate(-45deg);
+}
+
+figure.signature {
+	text-align: center;
+}
+
+figure.signature img {
+	max-height: 2.5cm;
 }

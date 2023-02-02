@@ -83,6 +83,7 @@ class UserTemplate extends \KD2\Brindille
 			'legal_line'   => LEGAL_LINE,
 			'is_logged'    => $is_logged,
 			'logged_user'  => $is_logged ? $session->getUser() : null,
+			'dialog'       => isset($_GET['_dialog']) ? ($_GET['_dialog'] ?: true) : false,
 		];
 
 		return self::$root_variables;
