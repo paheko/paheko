@@ -286,20 +286,27 @@ class Sections
 		$columns = [];
 
 		if (!empty($params['select'])) {
-			foreach (explode(',', $params['select']) as $c) {
+			foreach (explode(';', $params['select']) as $i => $c) {
 				$c = trim($c);
-				$name = trim(strtok($c, ' AS '));
-				$alias = strtok(false);
 
-				$hash = md5($c);
-				$columns[$hash] = [
-					'label' => $alias ? trim($alias, ' \'"') : $name,
-					'select' => $this->_moduleReplaceJSONExtract($name),
-				];
+				$pos = strpos($c, ' AS ');
+
+				if ($pos) {
+					$select = trim(substr($c, 0, $pos));
+					$label = str_replace("''", "'", trim(substr($c, $pos + 5), ' \'"'));
+				}
+				else {
+					$select = $c;
+					$label = null;
+				}
+
+				$select = self::_moduleReplaceJSONExtract($select);
+
+				$columns['col' . $i] = compact('label', 'select');
 			}
 
 			if (!empty($params['order'])) {
-				$params['order'] = md5($this->_moduleReplaceJSONExtract($params['order']));
+				$params['order'] = self::_moduleReplaceJSONExtract($params['order']);
 			}
 		}
 		else {
