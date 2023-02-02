@@ -70,6 +70,7 @@ class Modifiers
 		'check_email',
 		'implode',
 		'quote_sql_identifier',
+		'quote_sql',
 	];
 
 	const LEADING_NUMBER_REGEXP = '/^([\d.]+)\s*[.\)]\s*/';
@@ -317,7 +318,7 @@ class Modifiers
 		return implode($separator, $array);
 	}
 
-	static public function quote_sql_identifier($in)
+	static public function quote_sql_identifier($in): string
 	{
 		if (null === $in) {
 			return '';
@@ -330,5 +331,20 @@ class Modifiers
 		}
 
 		return $db->quoteIdentifier($in);
+	}
+
+	static public function quote_sql($in): string
+	{
+		if (null === $in) {
+			return '';
+		}
+
+		$db = DB::getInstance();
+
+		if (is_array($in)) {
+			return array_map([$db, 'quote'], $in);
+		}
+
+		return $db->quote($in);
 	}
 }
