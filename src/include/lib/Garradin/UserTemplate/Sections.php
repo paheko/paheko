@@ -207,9 +207,6 @@ class Sections
 
 		$out = [];
 
-		$out['id'] = [];
-		$out['key'] = [];
-
 		if (null !== $columns) {
 			$columns = explode(',', $columns);
 			$columns = array_map('trim', $columns);
@@ -313,6 +310,8 @@ class Sections
 			$columns = self::_getModuleColumnsFromSchema($params['schema'], $params['columns'] ?? null, $tpl, $line);
 		}
 
+		$columns['id'] = [];
+		$columns['key'] = [];
 		$columns['document'] = [];
 
 		$list = new DynamicList($columns, $table);
