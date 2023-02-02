@@ -45,7 +45,7 @@ class Sections
 
 	static protected function _debug(string $str): void
 	{
-		echo sprintf('<pre style="padding: 5px; margin: 5px; background: yellow; white-space: pre;">%s</pre>', htmlspecialchars($str));
+		echo sprintf('<pre style="padding: 5px; margin: 5px; background: yellow; white-space: pre-wrap;">%s</pre>', htmlspecialchars($str));
 	}
 
 	static protected function _debugExplain(string $sql): void
@@ -338,7 +338,12 @@ class Sections
 		}
 
 		$list->setModifier(function(&$row) {
+			//$row->original = clone $row;
 			$row = array_merge(json_decode($row->document, true), (array)$row);
+		});
+
+		$list->setExportCallback(function(&$row) {
+			//$row = $row['original'];
 		});
 
 		// Try to create an index if required
@@ -355,6 +360,14 @@ class Sections
 		}
 
 		$tpl = Template::getInstance();
+
+		/*
+		FIXME: Export is broken currently
+		$export_url = Utils::getSelfURI();
+		$export_url .= strstr($export_url, '?') ? '&export=' : '?export=';
+		printf('<p class="actions">%s</p>', $tpl->widgetExportMenu(['href' => $export_url, 'class' => 'menu-btn-right']));
+		*/
+
 		$tpl->assign(compact('list'));
 		$tpl->assign('check', $params['check'] ?? false);
 		$tpl->display('common/dynamic_list_head.tpl');
@@ -363,6 +376,7 @@ class Sections
 
 		echo '</tbody>';
 		echo '</table>';
+
 
 		echo $list->getHTMLPagination();
 	}

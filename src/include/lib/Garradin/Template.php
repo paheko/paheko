@@ -211,7 +211,7 @@ class Template extends Smartyer
 		return '<div class="block error"><ul><li>' . implode('</li><li>', $errors) . '</li></ul></div>';
 	}
 
-	protected function widgetExportMenu(array $params): string
+	public function widgetExportMenu(array $params): string
 	{
 		if (!empty($params['form'])) {
 			$name = $params['name'] ?? 'export';
