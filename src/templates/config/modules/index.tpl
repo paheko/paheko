@@ -7,7 +7,11 @@
 		{foreach from=$list item="module"}
 		<tr>
 			<td class="icon">
-				{if $url = $module->icon_url()}<img src="{$url}" alt="" width="48" />{/if}
+				{if $url = $module->icon_url()}
+				<svg>
+					<use xlink:href='{$url}#img' href="{$url}#img"></use>
+				</svg>
+				{/if}
 			</td>
 			<td><h3>{$module.label}</h3>{$module.description|escape|nl2br}</td>
 			<td class="actions">

@@ -49,7 +49,7 @@
 
 {{if !$_GET.print && !$hide_buttons}}
 <div id="buttons">
-	{{if $back_link}}
+	{{if $back_link && !$dialog}}
 		{{:linkbutton href=$back_link label="Retour" shape="left"}}
 	{{/if}}
 	{{:linkbutton href="%s&print=yes"|args:$request_url label="Imprimer" shape="print"}}
