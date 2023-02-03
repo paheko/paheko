@@ -194,6 +194,13 @@ table.list .icon span::before {
     transition: color .2s;
 }
 
+table.list td.icon svg {
+    fill: rgb(var(--gTextColor));
+    stroke: rgb(var(--gTextColor));
+    max-width: 48px;
+    max-height: 48px;
+}
+
 table.list .folder .icon span::before {
     color: rgba(var(--gMainColor), 0.9);
 }

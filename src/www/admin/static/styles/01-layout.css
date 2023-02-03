@@ -33,12 +33,6 @@ html.dark .header .menu, html.dark .header .menu a, html.dark .header .menu li.c
     color: rgb(var(--gTextColor)) !important;
 }
 
-html.dark td.icon svg {
-    fill: #fff;
-    max-width: 48px;
-    max-height: 48px;
-}
-
 html {
     width: 100%;
     height: 100%;
