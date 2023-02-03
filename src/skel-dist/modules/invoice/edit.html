@@ -1,3 +1,5 @@
+{{:error message="Fonctionnalité non disponible pour le moment."}}
+
 {{if $logged_user.perm_accounting < $access_level.write}}
 	{{:error message="Seuls les membres avec accès en écriture à la comptabilité peuvent générer ce document"}}
 {{/if}}

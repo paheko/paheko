@@ -20,12 +20,21 @@
 		},
 		"deadline": {
 			"description": "Échéance",
-			"type": "string"
+			"type": ["string", "null"]
+		},
+		"status": {
+			"description": "Statut",
+			"type": "string",
+			"enum": ["awaiting", "rejected", "validated", "misc"]
+		},
+		"total": {
+			"description": "Total",
+			"type": ["float", "integer"]
 		},
 		"contact_info": {
 			"description": "Contact",
 			"type": "string"
 		}
 	},
-	"required": [ "recipient_business_name", "recipient_address", "subject", "date", "contact_info" ]
+	"required": [ "recipient_business_name", "recipient_address", "subject", "date", "status", "contact_info" ]
 }

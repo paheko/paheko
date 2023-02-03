@@ -3,6 +3,7 @@
 {{/if}}
 {{:admin_header title="Devis et factures" current="acc"}}
 
+{{* ==================== Header ==================== *}}
 <nav class="tabs">
 	<aside>
 		{{:linkbutton href="edit.html" label="Nouveau document" shape="plus" target="_dialog"}}
@@ -17,19 +18,31 @@
 	</ul>
 </nav>
 
+<style>
+#item_list th, #item_list td {
+	width: 25%;
+	padding: 0em 2em 0em 0em;
+}
+</style>
+
+{{* ==================== Listing ==================== *}}
+
 {{if $_GET.show == 'quote'}}
-	{{:assign filter="json_extract(value, '$.type') = 'quotation'"}}
+	{{:assign filter="json_extract(document, '$.type') = 'quotation'"}}
 {{elseif $_GET.show == 'paid'}}
-	{{:assign filter="json_extract(value, '$.type') = 'invoice' AND json_extract(value, '$.date_paid') IS NOT NULL"}}
+	{{:assign filter="json_extract(document, '$.type') = 'invoice' AND json_extract(document, '$.date_paid') IS NOT NULL"}}
 {{elseif $_GET.show == 'unpaid'}}
-	{{:assign filter="json_extract(value, '$.type') = 'invoice' AND json_extract(value, '$.date_paid') IS NULL"}}
+	{{:assign filter="json_extract(document, '$.type') = 'invoice' AND json_extract(document, '$.date_paid') IS NULL"}}
 {{else}}
 	{{:assign filter="1"}}
 {{/if}}
+{{:assign var='type_labels' quotation='Devis' invoice='Facture'}}
+{{:assign var='status_labels' awaiting='En attente de validation', rejected='Rejeté', validated='Validé', misc='Autre'}}
 
 <table class="list">
 	<thead>
 		<tr>
+			{{if !$_GET.show}}<th>Type</th>{{/if}}
 			<th>Numéro</th>
 			<td>Émission</td>
 			<td>Échéance</td>
@@ -41,17 +54,26 @@
 		</tr>
 	</thead>
 	<tbody>
-{{#load where="key != 'config' AND %s"|args:$filter select="value AS json, key, datetime(json_extract(value, '$.date')) AS date" order="date DESC"}}
+{{#load where="$$.type IN ('quotation', 'invoice') AND %s"|args:$filter select="key, document AS json, datetime(json_extract(document, '$.date')) AS date" order="date DESC"}}
 		<tr>
-			<th>{{$key}}</th>
+			{{if !$_GET.show}}<td>{{$type}}</td>{{/if}}
+			<td>{{$key}}</td>
 			<td>{{$date|date_short}}</td>
 			<td>{{$deadline|date_short}}</td>
 			<td>{{$recipient_business_name}}</td>
 			<td>{{$subject}}</td>
-			<td class="money">{{$total|raw|money_currency}}</td>
+			<td class="money">{{$total|floatval|money_int|raw|money_currency}}{{* Hacks awaiting #495af6eee05e451d9369b80023c38b8e128fa6cd resolution *}}</td>
 			<td>
+				{{if $type == 'quotation'}}
+					{{if $status == 'awaiting'}}En attente de validation
+					{{elseif $status == 'rejected'}}Rejeté
+					{{elseif $status == 'validated'}}Validé
+					{{elseif $status == 'misc'}}Autre
+					{{/if}}
+				{{/if}}
+
 				{{if $archived}}
-					Archivé
+					<span title="Archivé">🗃</span>
 				{{elseif $date_paid}}
 					Payé le {{$date_paid|date_short}}
 				{{elseif $type == 'invoice'}}
@@ -60,7 +82,7 @@
 			</td>
 			<td class="actions">
 				{{if !$archived}}
-				{{:linkbutton shape="edit" label="Modifier" href="edit.html?key=%s"|args:$key}}
+				{{:linkbutton shape="edit" label="Modifier" href="edit.html?key=%s"|args:$key|htmlspecialchars}}
 				{{/if}}
 			</td>
 		</tr>
@@ -70,29 +92,43 @@
 </tbody>
 </table>
 
-<h1>Création dun devis</h1>
+{{* ==================== Creation form ==================== *}}
+
+<h1>Création d'un devis</h1>
 
 {{if $_POST.quotation_submit}}
-	<!-- Todo: add a nice error check here -->
+	{{:assign computed_total=0}}
+	{{#foreach from=$_POST.items item='item'}}
+		{{:assign var='computed_total' value="%d + %d * %d"|args:$computed_total:$item.unit_price:$item.quantity|math}}
+	{{/foreach}}
+	
+	{{if $computed_total != $_POST.quotation_total}}
+		{{:assign error="Erreur de calcul du total.\nEnregistrement du devis refusé."}}
+	{{/if}}
+
 	{{if $error}}
 		<p class="error block">{{$error}}</p>
 	{{else}}
 		{{:assign new_key="%d+1"|math:$module.config.last_id}}
 		{{:assign id="%d+1"|math:$module.config.last_quotation_id}}
 
-		{{:save key="quotation_"|cat:$id
+		{{:save key=$id
 			validate_schema="./quotation.schema.json"
 			id=$new_key
+			type='quotation'
 			recipient_business_name=$_POST.recipient_business_name
 			recipient_address=$_POST.recipient_address
 			subject=$_POST.subject
 			date=$_POST.date
 			deadline=$_POST.deadline
+			status=$_POST.status
+			total=$computed_total
 			contact_info=$_POST.contact_info
 		}}
 		{{:save key="config" last_id=$new_key last_quotation_id=$id}}
 		{{:http redirect="?ok=1"}}
 	{{/if}}
+
 {{elseif $_GET.ok}}
 	<p class="block confirm">Devis enregistré.</p>
 {{/if}}
@@ -110,6 +146,17 @@
 			<li>{{:input type="date" name="date" label="Date du devis" placeholder="" required=true}}</li>
 			<li>{{:input type="date" name="deadline" label="Échéance pour validation" placeholder="" required=false}}</li>
 			<li>{{:input type="text" name="contact_info" label="Contact" default=$config.org_email required=true}}</li>
+			<li>
+				<dt><label for="status">Statut</label></dt>
+				<dd>
+					<select name="status" id="status" required="required">
+						<option label="En attente de validation" value="awaiting"{{if !$_POST.status || $_POST.status == 'awaiting'}} selected="selected"{{/if}}>En attente de validation</option>
+						<option label="Rejeté" value="rejected"{{if $_POST.status && $_POST.status == 'rejected'}} selected="selected"{{/if}}>Rejeté</option>
+						<option label="Validé" value="validated"{{if $_POST.status && $_POST.status == 'validated'}} selected="selected"{{/if}}>Validé</option>
+						<option label="Autre" value="misc"{{if $_POST.status && $_POST.status == 'misc'}} selected="selected"{{/if}}>Autre</option>
+					</select>
+				</dd>
+			</li>
 		</ul>
 	</fieldset>
 	<fieldset>
@@ -125,7 +172,10 @@
 		</table>
 		<p>{{:linkbutton label="Ajouter un article" href="item_form.html" shape="settings" target="_dialog"}}</p>
 		<h3>Total des articles</h3>
-		<p id="quotation_total">0 {{$config.currency}}</p>
+		<p>
+			<span id="quotation_total">0 {{$config.currency|htmlspecialchars}}</span>
+			<input type="hidden" name="quotation_total" id="quotation_total_input" label="" value="" />
+		</p>
 	</fieldset>
 	<input type="submit" name="quotation_submit" label="" value="Valider la création de devis" />
 </form>
@@ -146,5 +196,6 @@
 	{{/if}}
 	<p>(Ces informations sont modifiables dans la configuration du module.)</p>
 {{/if}}
+
 
 {{:admin_footer}}
