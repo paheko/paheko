@@ -4,7 +4,7 @@
     font-feature-settings: "tnum";
 }
 
-b.money {
+span.money {
     font-weight: inherit;
     white-space: pre;
 }
