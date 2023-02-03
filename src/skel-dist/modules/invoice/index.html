@@ -37,7 +37,7 @@
 	{{:assign filter="1"}}
 {{/if}}
 {{:assign var='type_labels' quotation='Devis' invoice='Facture'}}
-{{:assign var='status_labels' awaiting='En attente de validation', rejected='Rejeté', validated='Validé', misc='Autre'}}
+{{:assign var='status_labels' awaiting='En attente de validation' rejected='Rejeté' validated='Validé' misc='Autre'}}
 
 <table class="list">
 	<thead>
@@ -67,13 +67,8 @@
 			<td>{{$subject}}</td>
 			<td class="money">{{$total|floatval|money_int|raw|money_currency}}{{* Hacks awaiting #495af6eee05e451d9369b80023c38b8e128fa6cd resolution *}}</td>
 			<td>
-				{{if $type == 'quotation'}}
-					{{if $status == 'awaiting'}}En attente de validation
-					{{elseif $status == 'rejected'}}Rejeté
-					{{elseif $status == 'validated'}}Validé
-					{{elseif $status == 'misc'}}Autre
-					{{/if}}
-				{{/if}}
+				{{:assign var="label" from="status_labels.%s"|args:$status}}
+				{{$label}}
 
 				{{if $archived}}
 					<span title="Archivé">🗃</span>
