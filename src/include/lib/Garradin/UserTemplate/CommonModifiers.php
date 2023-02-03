@@ -95,7 +95,7 @@ class CommonModifiers
 
 		$sign = ($force_sign && $number > 0) ? '+' : '';
 
-		return sprintf('<b class="money">%s</b>', $sign . Utils::money_format($number, ',', '&nbsp;', $hide_empty));
+		return sprintf('<span class="money">%s</span>', $sign . Utils::money_format($number, ',', '&nbsp;', $hide_empty));
 	}
 
 	static public function money_raw($number, bool $hide_empty = true): string
