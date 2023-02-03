@@ -56,7 +56,10 @@
 	<tbody>
 {{#load where="$$.type IN ('quotation', 'invoice') AND %s"|args:$filter select="key, document AS json, datetime(json_extract(document, '$.date')) AS date" order="date DESC"}}
 		<tr>
-			{{if !$_GET.show}}<td>{{$type}}</td>{{/if}}
+			{{if !$_GET.show}}
+				{{:assign var="label" from="type_labels.%s"|args:$type}}
+				<td>{{$label}}</td>
+			{{/if}}
 			<td>{{$key}}</td>
 			<td>{{$date|date_short}}</td>
 			<td>{{$deadline|date_short}}</td>
