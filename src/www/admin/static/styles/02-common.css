@@ -636,3 +636,8 @@ dl.large dd {
     padding: .5em;
     white-space: pre-wrap;
 }
+
+svg.icon {
+    fill: rgb(var(--gTextColor));
+    stroke: rgb(var(--gTextColor));
+}

@@ -134,7 +134,7 @@ nav.home ul li a {
     text-decoration: none;
 }
 
-nav.home ul li a::before {
+nav.home ul li a::before, nav.home ul li a .icon {
     display: flex;
     font-size: 48px;
     width: 48px;
@@ -149,11 +149,3 @@ nav.home ul li a::before {
     text-shadow: none;
 }
 
-nav.home ul li a[data-custom-icon]::before {
-    content: "";
-    width: 1em;
-    height: 1em;
-    color: #fff;
-    background: rgba(var(--gSecondColor), .5) var(--custom-icon) no-repeat center center;
-    background-size: calc(100% - .2em);
-}

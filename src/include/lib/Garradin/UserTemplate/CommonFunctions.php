@@ -303,11 +303,22 @@ class CommonFunctions
 
 	static public function icon(array $params): string
 	{
-		if (isset($params['html']) && $params['html'] == false) {
+		if (isset($params['shape']) && isset($params['html']) && $params['html'] == false) {
 			return Utils::iconUnicode($params['shape']);
 		}
 
-		$label = $params['label'] ?? '';
+		if (!isset($params['shape']) && !isset($params['url'])) {
+			throw new \InvalidArgumentException('Missing parameter: shape or url');
+		}
+
+		$html = '';
+
+		if (isset($params['url'])) {
+			$html = self::getIconHTML(['icon' => $params['url']]);
+			unset($params['url']);
+		}
+
+		$html .= htmlspecialchars($params['label'] ?? '');
 		unset($params['label']);
 
 		self::setIconAttribute($params);
@@ -318,13 +329,14 @@ class CommonFunctions
 
 		$attributes = implode(' ', $attributes);
 
-		return sprintf('<span %s>%s</span>', $attributes, htmlspecialchars($label));
+		return sprintf('<span %s>%s</span>', $attributes, $html);
 	}
 
 	static public function link(array $params): string
 	{
 		$href = $params['href'];
 		$label = $params['label'];
+		$prefix = $params['prefix'] ?? '';
 
 		// href can be prefixed with '!' to make the URL relative to ADMIN_URL
 		if (substr($href, 0, 1) == '!') {
@@ -340,7 +352,7 @@ class CommonFunctions
 			$params['class'] = '';
 		}
 
-		unset($params['href'], $params['label']);
+		unset($params['href'], $params['label'], $params['prefix']);
 
 		array_walk($params, function (&$v, $k) {
 			$v = sprintf('%s="%s"', $k, htmlspecialchars($v));
@@ -348,7 +360,7 @@ class CommonFunctions
 
 		$params = implode(' ', $params);
 
-		return sprintf('<a href="%s" %s><span>%s</span></a>', htmlspecialchars($href), $params, htmlspecialchars($label));
+		return sprintf('<a href="%s" %s>%s<span>%s</span></a>', htmlspecialchars($href), $params, $prefix, htmlspecialchars($label));
 	}
 
 	static public function button(array $params): string
@@ -370,6 +382,13 @@ class CommonFunctions
 			$params['value'] = 1;
 		}
 
+		$prefix = '';
+
+		if (isset($params['icon'])) {
+			$prefix = self::getIconHTML($params);
+			unset($params['icon'], $params['icon_html']);
+		}
+
 		$params['class'] .= ' icn-btn';
 
 		// Remove NULL params
@@ -381,12 +400,17 @@ class CommonFunctions
 
 		$params = implode(' ', $params);
 
-		return sprintf('<button %s>%s</button>', $params, $label);
+		return sprintf('<button %s>%s%s</button>', $params, $prefix, $label);
 	}
 
 	static public function linkbutton(array $params): string
 	{
 		self::setIconAttribute($params);
+
+		if (isset($params['icon']) || isset($params['icon_html'])) {
+			$params['prefix'] = self::getIconHTML($params);
+			unset($params['icon'], $params['icon_html']);
+		}
 
 		if (!isset($params['class'])) {
 			$params['class'] = '';
@@ -397,16 +421,23 @@ class CommonFunctions
 		return self::link($params);
 	}
 
+	static protected function getIconHTML(array $params): string
+	{
+		if (isset($params['icon_html'])) {
+			return '<i class="icon">' . $params['icon_html'] . '</i>';
+		}
+
+		return sprintf('<svg class="icon"><use xlink:href="%s#img" href="%1$s#img"></use></svg> ',
+			htmlspecialchars(Utils::getLocalURL($params['icon']))
+		);
+	}
+
 	static protected function setIconAttribute(array &$params): void
 	{
 		if (isset($params['shape'])) {
 			$params['data-icon'] = Utils::iconUnicode($params['shape']);
 		}
-		elseif (isset($params['icon'])) {
-			$params['data-custom-icon'] = true;
-			$params['style'] = sprintf('--custom-icon: url(\'%s\')', $params['icon']);
-		}
 
-		unset($params['icon'], $params['shape']);
+		unset($params['shape']);
 	}
 }

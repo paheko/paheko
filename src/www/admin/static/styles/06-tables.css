@@ -195,8 +195,6 @@ table.list .icon span::before {
 }
 
 table.list td.icon svg {
-    fill: rgb(var(--gTextColor));
-    stroke: rgb(var(--gTextColor));
     max-width: 48px;
     max-height: 48px;
 }

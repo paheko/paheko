@@ -224,6 +224,21 @@ b.btn {
     padding: 0;
 }
 
+/* Custom SVG icon */
+.icn-btn > .icon {
+    display: inline-block;
+    padding-right: .3em;
+    height: 1em;
+    width: 1em;
+    vertical-align: middle;
+    transition: fill .3s, stroke .3s;
+}
+
+.icn-btn:hover > .icon {
+    fill: rgb(var(--gHoverLinkColor)) !important;
+    stroke: rgb(var(--gHoverLinkColor)) !important;
+}
+
 button.main, .icn-btn.main {
     color: rgb(var(--gTextColor));
     font-size: 1.2em;
