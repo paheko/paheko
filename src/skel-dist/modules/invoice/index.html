@@ -98,16 +98,32 @@
 
 {{if $_POST.quotation_submit}}
 	{{:assign computed_total=0}}
-	{{#foreach from=$_POST.items item='item'}}
+	{{:assign errors=null}}
+	{{:assign items=null}}
+	{{#foreach from=$_POST.items key='index' item='item'}}
 		{{:assign var='computed_total' value="%d + %d * %d"|args:$computed_total:$item.unit_price:$item.quantity|math}}
+
+		{{* ToDo: allow zero as unit_price (#d10fbfa243f3cdb8cdf68ac67f5043c199bd44e2) *}}
+		
+		{{if $item.unit_price < 0 || $item.unit_price != $item.unit_price|floatval|strtolower}} {{* Hack to check the data is a number *}}
+			{{:assign var='errors[]' value='Le prix saisi pour "%s" est invalide.'|args:$item.name}}
+		{{/if}}
+		{{if $item.quantity < 0 || $item.quantity != $item.quantity|floatval|strtolower}}{{:assign var='errors[]' value='La quantité saisie pour "%s" est invalide.'|args:$item.name}}{{/if}}
+
+		{{:assign var='computed_item' value=$item}}
+		{{:assign var='computed_item[unit_price]' value=$item.unit_price|floatval}}
+		{{:assign var='computed_item[quantity]' value=$item.quantity|floatval}}
+		{{:assign var='items[]' value=$computed_item}}
 	{{/foreach}}
 	
-	{{if $computed_total != $_POST.quotation_total}}
+	{{if $computed_total != $_POST.quotation_total || $computed_total < 0}}
 		{{:assign error="Erreur de calcul du total.\nEnregistrement du devis refusé."}}
 	{{/if}}
 
-	{{if $error}}
-		<p class="error block">{{$error}}</p>
+	{{if $errors|count}}
+		{{#foreach from=$errors item='error'}}
+			<p class="error block">{{$error}}</p>
+		{{/foreach}}
 	{{else}}
 		{{:assign new_key="%d+1"|math:$module.config.last_id}}
 		{{:assign id="%d+1"|math:$module.config.last_quotation_id}}
@@ -122,6 +138,7 @@
 			date=$_POST.date
 			deadline=$_POST.deadline
 			status=$_POST.status
+			items=$items
 			total=$computed_total
 			contact_info=$_POST.contact_info
 		}}

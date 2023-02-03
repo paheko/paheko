@@ -27,6 +27,10 @@
 			"type": "string",
 			"enum": ["awaiting", "rejected", "validated", "misc"]
 		},
+		"items": {
+			"description": "Articles",
+			"type": ["array", "null"]
+		},
 		"total": {
 			"description": "Total",
 			"type": ["float", "integer"]
