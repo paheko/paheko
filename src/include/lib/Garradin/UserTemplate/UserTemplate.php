@@ -201,6 +201,29 @@ class UserTemplate extends \KD2\Brindille
 
 			return '<?php break; ?>';
 		});
+
+
+		$this->registerCompileBlock('#select', function (string $name, string $sql, Brindille $tpl, int $line) {
+			$params = '';
+			$i = 0;
+
+			$sql = strtok($sql, ';');
+			$extra_params = strtok(false);
+
+			$sql = preg_replace_callback('/\{(\$.*?)\}/', function ($match) use (&$params, &$i) {
+				$i++;
+				$params .= ' :p' . $i . '=' . $match[1];
+				return ':p' . $i;
+			}, $sql);
+
+			$params .= ' sql=' . var_export('SELECT ' . $sql, true) . ' ' . $extra_params;
+
+			return $this->_section('sql', $params, $line);
+		});
+
+		$this->registerCompileBlock('/select', function (string $name, string $params, Brindille $tpl, int $line) {
+			return $this->_close('sql', '{{/select}}');
+		});
 	}
 
 	public function setSource(string $path)

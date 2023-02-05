@@ -901,36 +901,41 @@ class Sections
 			'where' => '',
 		];
 
-		if (empty($params['tables'])) {
-			throw new Brindille_Exception(sprintf('"sql" section: missing parameter "tables" on line %d', $line));
+		if (isset($params['sql'])) {
+			$sql = $params['sql'];
 		}
-
-		foreach ($defaults as $key => $default_value) {
-			if (!isset($params[$key])) {
-				$params[$key] = $default_value;
+		else {
+			if (empty($params['tables'])) {
+				throw new Brindille_Exception(sprintf('"sql" section: missing parameter "tables" on line %d', $line));
 			}
-		}
 
-		// Allow for count=true, count=1 and also count="DISTINCT user_id" count="id"
-		if (!empty($params['count'])) {
-			$params['select'] = sprintf('COUNT(%s) AS count', $params['count'] == 1 ? '*' : $params['count']);
-			$params['order'] = '1';
-		}
+			foreach ($defaults as $key => $default_value) {
+				if (!isset($params[$key])) {
+					$params[$key] = $default_value;
+				}
+			}
 
-		if (!empty($params['where']) && !preg_match('/^\s*AND\s+/i', $params['where'])) {
-			$params['where'] = ' AND ' . $params['where'];
-		}
+			// Allow for count=true, count=1 and also count="DISTINCT user_id" count="id"
+			if (!empty($params['count'])) {
+				$params['select'] = sprintf('COUNT(%s) AS count', $params['count'] == 1 ? '*' : $params['count']);
+				$params['order'] = '1';
+			}
 
-		$sql = sprintf('SELECT %s FROM %s WHERE 1 %s %s %s ORDER BY %s LIMIT %d,%d;',
-			$params['select'],
-			$params['tables'],
-			$params['where'] ?? '',
-			isset($params['group']) ? 'GROUP BY ' . $params['group'] : '',
-			isset($params['having']) ? 'HAVING ' . $params['having'] : '',
-			$params['order'],
-			$params['begin'],
-			$params['limit']
-		);
+			if (!empty($params['where']) && !preg_match('/^\s*AND\s+/i', $params['where'])) {
+				$params['where'] = ' AND ' . $params['where'];
+			}
+
+			$sql = sprintf('SELECT %s FROM %s WHERE 1 %s %s %s ORDER BY %s LIMIT %d,%d;',
+				$params['select'],
+				$params['tables'],
+				$params['where'] ?? '',
+				isset($params['group']) ? 'GROUP BY ' . $params['group'] : '',
+				isset($params['having']) ? 'HAVING ' . $params['having'] : '',
+				$params['order'],
+				$params['begin'],
+				$params['limit']
+			);
+		}
 
 		$db = DB::getInstance();
 
