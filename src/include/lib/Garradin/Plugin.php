@@ -516,145 +516,11 @@ class Plugin
 	}
 
 	/**
-	 * Liste des plugins officiels depuis le repository signé
-	 * @return array Liste des plugins
-	 */
-	static public function listOfficial()
-	{
-		// La liste est stockée en cache une heure pour ne pas tuer le serveur distant
-		if (Static_Cache::expired('plugins_list', 3600 * 24))
-		{
-			$url = parse_url(PLUGINS_URL);
-
-			$context_options = [
-				'ssl' => [
-					'verify_peer'   => TRUE,
-					'verify_depth'  => 5,
-					'CN_match'      => $url['host'],
-					'SNI_enabled'	=> true,
-					'SNI_server_name'		=>	$url['host'],
-					'disable_compression'	=>	true,
-				]
-			];
-
-			$context = stream_context_create($context_options);
-
-			try {
-				$result = file_get_contents(PLUGINS_URL, false, $context);
-			}
-			catch (\Exception $e)
-			{
-				throw new UserException('Le téléchargement de la liste des plugins a échoué : ' . $e->getMessage());
-			}
-
-			Static_Cache::store('plugins_list', $result);
-		}
-		else
-		{
-			$result = Static_Cache::get('plugins_list');
-		}
-
-		$list = json_decode($result, true);
-		return $list;
-	}
-
-	static public function fetchOfficialList()
-	{
-		return []; // FIXME
-	}
-
-	/**
-	 * Vérifier le hash du plugin $id pour voir s'il correspond au hash du fichier téléchargés
-	 * @param  string $id Identifiant du plugin
-	 * @return boolean    TRUE si le hash correspond (intégrité OK), sinon FALSE
-	 */
-	static public function checkHash($id)
-	{
-		$list = self::fetchOfficialList();
-
-		if (!array_key_exists($id, $list))
-			return null;
-
-		$hash = sha1_file(PLUGINS_ROOT . '/' . $id . '.tar.gz');
-
-		return ($hash === $list[$id]['hash']);
-	}
-
-	/**
-	 * Est-ce que le plugin est officiel ?
-	 * @param  string  $id Identifiant du plugin
-	 * @return boolean     TRUE si le plugin est officiel, FALSE sinon
-	 */
-	static public function isOfficial($id)
-	{
-		$list = self::fetchOfficialList();
-		return array_key_exists($id, $list);
-	}
-
-	/**
-	 * Télécharge un plugin depuis le repository officiel, et l'installe
-	 * @param  string $id Identifiant du plugin
-	 * @return boolean    TRUE si ça marche
-	 * @throws \LogicException Si le plugin n'est pas dans la liste des plugins officiels
-	 * @throws UserException Si le plugin est déjà installé ou que le téléchargement a échoué
-	 * @throws \RuntimeException Si l'archive téléchargée est corrompue (intégrité du hash ne correspond pas)
-	 */
-	static public function download($id)
-	{
-		$list = self::fetchOfficialList();
-
-		if (!array_key_exists($id, $list))
-		{
-			throw new \LogicException($id . ' n\'est pas un plugin officiel (absent de la liste)');
-		}
-
-		if (file_exists(PLUGINS_ROOT . '/' . $id . '.tar.gz'))
-		{
-			throw new UserException('Le plugin '.$id.' existe déjà.');
-		}
-
-		$url = parse_url(PLUGINS_URL);
-
-		$context_options = [
-			'ssl' => [
-				'verify_peer'   => TRUE,
-				'cafile'        => ROOT . '/include/data/cacert.pem',
-				'verify_depth'  => 5,
-				'CN_match'      => $url['host'],
-				'SNI_enabled'	=> true,
-				'SNI_server_name'		=>	$url['host'],
-				'disable_compression'	=>	true,
-			]
-		];
-
-		$context = stream_context_create($context_options);
-
-		try {
-			copy($list[$id]['phar'], PLUGINS_ROOT . '/' . $id . '.tar.gz', $context);
-		}
-		catch (\Exception $e)
-		{
-			throw new UserException('Le téléchargement du plugin '.$id.' a échoué : ' . $e->getMessage());
-		}
-
-		if (!self::checkHash($id))
-		{
-			Utils::safe_unlink(PLUGINS_ROOT . '/' . $id . '.tar.gz');
-			throw new \RuntimeException('L\'archive du plugin '.$id.' est corrompue (le hash SHA1 ne correspond pas).');
-		}
-
-		self::install($id, true);
-
-		return true;
-	}
-
-	/**
 	 * Installer un plugin
 	 * @param  string  $id       Identifiant du plugin
-	 * @param  boolean $official TRUE si le plugin est officiel
 	 * @return boolean           TRUE si tout a fonctionné
 	 */
-	static public function install($id, $official = false)
+	static public function install($id)
 	{
 		$path = self::getPath($id);
 
@@ -689,7 +555,6 @@ class Plugin
 
 		$data = [
 			'id' 		=> 	$id,
-			'official' 	=> 	(int)(bool)$official,
 			'name'		=>	$infos->name,
 			'description'=>	$infos->description,
 			'author'	=>	$infos->author,

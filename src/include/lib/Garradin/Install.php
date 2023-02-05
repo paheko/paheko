@@ -183,7 +183,7 @@ class Install
 		}
 	}
 
-	static public function install(string $country_code, string $name, string $user_name, string $user_email, string $user_password, ?string $welcome_text = null): void
+	static public function install(string $country_code, string $name, string $user_name, string $user_email, string $user_password, array $extensions = [], array $modules = []): void
 	{
 		if (file_exists(DB_FILE)) {
 			throw new UserException('La base de données existe déjà.');
@@ -269,7 +269,7 @@ class Install
 
 		$config->set('files', array_map(fn () => null, $config::FILES));
 
-		$welcome_text = $welcome_text ?? sprintf("Bienvenue dans l'administration de %s !\n\nUtilisez le menu à gauche pour accéder aux différentes sections.\n\nCe message peut être modifié dans la 'Configuration'.", $name);
+		$welcome_text = sprintf("Bienvenue dans l'administration de %s !\n\nUtilisez le menu à gauche pour accéder aux différentes sections.\n\nSi vous êtes perdu, n'hésitez pas à consulter l'aide :-)", $name);
 
 		$config->setFile('admin_homepage', $welcome_text);
 
@@ -331,14 +331,27 @@ class Install
 		$search->created = new \DateTime;
 		$search->save();
 
+		$config->save();
+
 		// Install welcome plugin if available
 		$has_welcome_plugin = Plugin::getPath('welcome');
 
 		if ($has_welcome_plugin) {
-			Plugin::install('welcome', true);
+			Plugin::install('welcome');
 		}
 
-		$config->save();
+		foreach ($plugins as $plugin) {
+			Plugin::install($plugin);
+		}
+
+		Modules::refresh();
+
+		foreach ($modules as $module) {
+			$m = Modules::get($module);
+			$m->set('enabled', true);
+			$m->save();
+		}
+
 		Files::enableQuota();
 	}
 

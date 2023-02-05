@@ -30,7 +30,6 @@ CREATE UNIQUE INDEX IF NOT EXISTS config_users_fields_name ON config_users_field
 CREATE TABLE IF NOT EXISTS plugins
 (
     id TEXT NOT NULL PRIMARY KEY,
-    official INTEGER NOT NULL DEFAULT 0, -- 1 if plugin is official
     name TEXT NOT NULL,
     description TEXT NULL,
     author TEXT NULL,
