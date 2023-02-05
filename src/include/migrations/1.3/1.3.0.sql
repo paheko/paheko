@@ -51,6 +51,11 @@ DROP TABLE acc_transactions_users_old;
 DROP TABLE acc_transactions_old;
 DROP TABLE services_users_old;
 
+-- Remove old plugin as it cannot be uninstalled as it no longer exists
+DELETE FROM plugins_old WHERE nom = 'ouvertures';
+DELETE FROM plugins_signaux_old WHERE plugin = 'ouvertures';
+
+-- Rename plugins table columns to English
 INSERT INTO plugins SELECT id, nom, description, auteur, url, version, config FROM plugins_old;
 INSERT INTO plugins_signals SELECT * FROM plugins_signaux_old;
 
