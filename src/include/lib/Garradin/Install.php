@@ -28,7 +28,6 @@ class Install
 	const DEFAULT_PLUGINS = [
 		'caisse',
 		'taima',
-		'dompdf',
 	];
 
 	const DEFAULT_MODULES = [
