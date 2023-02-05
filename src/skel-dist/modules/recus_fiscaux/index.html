@@ -12,7 +12,7 @@
 			{{:linkbutton href="config.html" label="Configuration" shape="settings" target="_dialog"}}
 		{{/restrict}}
 		{{*{{:linkbutton href="generer.html" label="Générer des reçus" shape="check"}}*}}
-		{{:linkbutton href="nouveau.html?type=vierge" label="Nouveau reçu" shape="plus"}}
+		{{:linkbutton href="nouveau.html" label="Nouveau reçu" shape="plus"}}
 	</aside>
 	{{/restrict}}
 
@@ -27,10 +27,10 @@
 		<fieldset>
 			<legend>Filtrer par année</legend>
 			<p>
-				{{:assign var="years[]" value="— Voir toutes les années —"}}
+				{{:assign var="years." value="— Voir toutes les années —"}}
 
 				{{#load select="SUBSTR($$.date, 1, 4) AS year" group="SUBSTR($$.date, 1, 4)"}}
-					{{:assign var="years[%d]"|args:$year value=$year}}
+					{{:assign var="years.%d"|args:$year value=$year}}
 				{{/load}}
 
 				{{:input type="select" name="year" options=$years default=$_GET.year onchange="this.form.submit();"}}
