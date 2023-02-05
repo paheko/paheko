@@ -34,6 +34,30 @@ class Functions
 		'mail',
 	];
 
+	const COMPILE_FUNCTIONS_LIST = [
+		':break' => [self::class, 'break'],
+	];
+
+	/**
+	 * Compile function to break inside a loop
+	 */
+	static public function break(string $name, string $params, Brindille $tpl, int $line)
+	{
+		$in_loop = false;
+		foreach ($this->_stack as $element) {
+			if ($element[0] == $this::SECTION) {
+				$in_loop = true;
+				break;
+			}
+		}
+
+		if (!$in_loop) {
+			throw new Brindille_Exception(sprintf('Error on line %d: break can only be used inside a section', $line));
+		}
+
+		return '<?php break; ?>';
+	}
+
 	static public function admin_header(array $params): string
 	{
 		$tpl = Template::getInstance();

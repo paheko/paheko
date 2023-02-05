@@ -41,7 +41,45 @@ class Sections
 		'module',
 	];
 
+	const COMPILE_SECTIONS_LIST = [
+		'#select' => [self::class, 'selectStart'],
+		'/select' => [self::class, 'selectEnd'],
+	];
+
 	static protected $_cache = [];
+
+	static public function selectStart(string $name, string $sql, UserTemplate $tpl, int $line): string
+	{
+		$sql = strtok($sql, ';');
+		$extra_params = strtok(false);
+
+		$i = 0;
+		$params = '';
+
+		$sql = preg_replace_callback('/\{(.*?)\}/', function ($match) use (&$params, &$i) {
+			// Raw SQL
+			if ('!' === substr($match[1], 0, 1)) {
+				$params .= ' **' . $i . '**=' . substr($match[1], 1);
+				return '**' . $i++ . '**';
+			}
+			else {
+				$params .= ' :p' . $i . '=' . $match[1];
+				return ':p' . $i++;
+			}
+		}, $sql);
+
+		$sql = 'SELECT ' . $sql;
+		$sql = var_export($sql, true);
+
+		$params .= ' sql=' . $sql . ' ' . $extra_params;
+
+		return $tpl->_section('sql', $params, $line);
+	}
+
+	static public function selectEnd(string $name, string $params, UserTemplate $tpl, int $line): string
+	{
+		return $tpl->_close('sql', '{{/select}}');
+	}
 
 	static protected function _debug(string $str): void
 	{
@@ -904,6 +942,7 @@ class Sections
 		if (isset($params['sql'])) {
 			$sql = $params['sql'];
 
+			// Replace raw SQL parameters (undocumented feature, this is for #select section)
 			foreach ($params as $k => $v) {
 				if (substr($k, 0, 2) == '**') {
 					$sql = str_replace($k, $v, $sql);

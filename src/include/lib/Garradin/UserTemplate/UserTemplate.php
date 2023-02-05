@@ -181,58 +181,18 @@ class UserTemplate extends \KD2\Brindille
 			$this->registerFunction($name, [Functions::class, $name]);
 		}
 
+		foreach (Functions::COMPILE_FUNCTIONS_LIST as $name => $callback) {
+			$this->registerCompileBlock($name, $callback);
+		}
+
 		// Local sections
 		foreach (Sections::SECTIONS_LIST as $name) {
 			$this->registerSection($name, [Sections::class, $name]);
 		}
 
-		$this->registerCompileBlock(':break', function (string $name, string $params, Brindille $tpl, int $line) {
-			$in_loop = false;
-			foreach ($this->_stack as $element) {
-				if ($element[0] == $this::SECTION) {
-					$in_loop = true;
-					break;
-				}
-			}
-
-			if (!$in_loop) {
-				throw new Brindille_Exception(sprintf('Error on line %d: break can only be used inside a section', $line));
-			}
-
-			return '<?php break; ?>';
-		});
-
-
-		$this->registerCompileBlock('#select', function (string $name, string $sql, Brindille $tpl, int $line) {
-			$sql = strtok($sql, ';');
-			$extra_params = strtok(false);
-
-			$i = 0;
-			$params = '';
-
-			$sql = preg_replace_callback('/\{(.*?)\}/', function ($match) use (&$params, &$i) {
-				// Raw SQL
-				if ('**' === substr($match[1], 0, 2)) {
-					$params .= ' **' . $i . '**=' . substr($match[1], 2);
-					return '**' . $i++ . '**';
-				}
-				else {
-					$params .= ' :p' . $i . '=' . $match[1];
-					return ':p' . $i++;
-				}
-			}, $sql);
-
-			$sql = 'SELECT ' . $sql;
-			$sql = var_export($sql, true);
-
-			$params .= ' sql=' . $sql . ' ' . $extra_params;
-
-			return $this->_section('sql', $params, $line);
-		});
-
-		$this->registerCompileBlock('/select', function (string $name, string $params, Brindille $tpl, int $line) {
-			return $this->_close('sql', '{{/select}}');
-		});
+		foreach (Sections::COMPILE_SECTIONS_LIST as $name => $callback) {
+			$this->registerCompileBlock($name, $callback);
+		}
 	}
 
 	public function setSource(string $path)
