@@ -901,8 +901,8 @@ class Sections
 			'where' => '',
 		];
 
-		if (!isset($params['tables'])) {
-			throw new Brindille_Exception('Missing parameter "tables"');
+		if (empty($params['tables'])) {
+			throw new Brindille_Exception(sprintf('"sql" section: missing parameter "tables" on line %d', $line));
 		}
 
 		foreach ($defaults as $key => $default_value) {
