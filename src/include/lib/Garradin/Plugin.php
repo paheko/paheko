@@ -566,7 +566,7 @@ class Plugin
 			'author'	=>	$infos->author,
 			'url'		=>	$infos->url,
 			'version'	=>	$infos->version,
-			'config'	=>	json_encode($config),
+			'config'	=>	$config ? json_encode($config) : null,
 		];
 
 		$db = DB::getInstance();

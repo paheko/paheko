@@ -29,7 +29,7 @@
 			<thead>
 				<tr>
 					<th>Extension</th>
-					<td></td>
+					<td>Auteur</td>
 					<td>Version installée</td>
 					<td></td>
 				</tr>
@@ -37,10 +37,10 @@
 			<tbody>
 				{foreach from=$list_installed item="plugin"}
 				<tr{if $plugin.disabled} class="disabled"{/if}>
-					<th>
+					<td>
 						<h4>{$plugin.name}</h4>
-						<small>{$plugin.description}</small>
-					</th>
+						<small>{$plugin.description|escape|nl2br}</small>
+					</td>
 					{if $plugin.disabled}
 					<td colspan="3">
 						<span class="alert">Code source du plugin non trouvé dans le répertoire <em>plugins</em>&nbsp;!</span><br />
@@ -48,7 +48,7 @@
 					</td>
 					{else}
 					<td>
-						<a href="{$plugin.url}" onclick="return !window.open(this.href);">{$plugin.auteur}</a>
+						<a href="{$plugin.url}" target="_blank">{$plugin.author}</a>
 					</td>
 					<td>
 						{$plugin.version}
