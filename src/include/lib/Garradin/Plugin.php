@@ -465,15 +465,21 @@ class Plugin
 	 * Liste les plugins téléchargés mais non installés
 	 * @return array Liste des plugins téléchargés
 	 */
-	static public function listDownloaded()
+	static public function listDownloaded(bool $remove_installed_from_list = true)
 	{
-		$installed = self::listInstalled();
+		if ($remove_installed_from_list) {
+			$installed = self::listInstalled();
+		}
+		else {
+			$installed = [];
+		}
 
 		$list = [];
-		$dir = dir(PLUGINS_ROOT);
 
-		while ($file = $dir->read())
+		foreach (glob(PLUGINS_ROOT . '/*') as $file)
 		{
+			$file = basename($file);
+
 			if (substr($file, 0, 1) == '.')
 				continue;
 
@@ -510,7 +516,7 @@ class Plugin
 			$list[$file] = $data;
 		}
 
-		$dir->close();
+		ksort($list);
 
 		return $list;
 	}

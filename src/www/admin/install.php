@@ -3,6 +3,8 @@ namespace Garradin;
 
 use Garradin\Users\Session;
 use Garradin\Entities\Accounting\Chart;
+use Garradin\UserTemplate\Modules;
+use Garradin\Plugin;
 
 const INSTALL_PROCESS = true;
 
@@ -34,5 +36,26 @@ $form->runIf('save', function () {
 }, 'install', ADMIN_URL);
 
 $tpl->assign('countries', Chart::COUNTRY_LIST);
+
+$modules = Modules::listLocal();
+$plugins = Plugin::listDownloaded(false);
+
+$installable = [];
+
+foreach (Install::DEFAULT_PLUGINS as $plugin) {
+	if (array_key_exists($plugin, $plugins)) {
+		$installable[$plugin] = ['plugin' => $plugins[$plugin]];
+	}
+}
+
+foreach (Install::DEFAULT_MODULES as $module) {
+	if (array_key_exists($module, $modules)) {
+		$installable[$module] = ['module' => $modules[$module]];
+	}
+}
+
+ksort($installable);
+
+$tpl->assign('installable', $installable);
 
 $tpl->display('install.tpl');

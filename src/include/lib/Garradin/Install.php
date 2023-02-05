@@ -12,6 +12,7 @@ use Garradin\Entities\Search;
 use Garradin\Users\DynamicFields;
 use Garradin\Users\Session;
 use Garradin\Files\Files;
+use Garradin\UserTemplate\Modules;
 
 use KD2\HTTP;
 
@@ -21,6 +22,24 @@ use KD2\HTTP;
  */
 class Install
 {
+	/**
+	 * List of plugins that should be displayed during installation (if present)
+	 */
+	const DEFAULT_PLUGINS = [
+		'caisse',
+		'taima',
+		'dompdf',
+	];
+
+	const DEFAULT_MODULES = [
+		'recus_fiscaux',
+		'carte_membre',
+		'recu_don',
+		'recu_paiement',
+		//'bilan_pc',
+		//'invoice',
+	];
+
 	/**
 	 * This sends the current installed version, as well as the PHP and SQLite versions
 	 * for statistics purposes.
@@ -173,8 +192,11 @@ class Install
 		self::assert(strlen($source['password']) >= User::MINIMUM_PASSWORD_LENGTH, 'Le mot de passe est trop court');
 		self::assert($source['password'] === $source['password_confirmed'], 'La vérification du mot de passe ne correspond pas');
 
+		$plugins = isset($source['plugins']) ? array_keys($source['plugins']) : [];
+		$modules = isset($source['modules']) ? array_keys($source['modules']) : [];
+
 		try {
-			self::install($source['country'], $source['name'], $source['user_name'], $source['user_email'], $source['password']);
+			self::install($source['country'], $source['name'], $source['user_name'], $source['user_email'], $source['password'], $plugins, $modules);
 			self::ping();
 		}
 		catch (\Exception $e) {
@@ -183,7 +205,7 @@ class Install
 		}
 	}
 
-	static public function install(string $country_code, string $name, string $user_name, string $user_email, string $user_password, array $extensions = [], array $modules = []): void
+	static public function install(string $country_code, string $name, string $user_name, string $user_email, string $user_password, array $plugins = [], array $modules = []): void
 	{
 		if (file_exists(DB_FILE)) {
 			throw new UserException('La base de données existe déjà.');

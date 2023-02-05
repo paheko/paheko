@@ -26,26 +26,7 @@ class Modules
 	static public function refresh(): void
 	{
 		$existing = DB::getInstance()->getAssoc(sprintf('SELECT id, name FROM %s;', Module::TABLE));
-		$list = [];
-
-		foreach (Files::list(Module::ROOT) as $file) {
-			if ($file->type != $file::TYPE_DIRECTORY) {
-				continue;
-			}
-
-			$list[] = $file->name;
-		}
-
-		foreach (glob(Module::DIST_ROOT . '/*') as $file) {
-			if (!is_dir($file)) {
-				continue;
-			}
-
-			$list[] = Utils::basename($file);
-		}
-
-		$list = array_unique($list);
-		sort($list);
+		$list = self::listRaw();
 
 		$create = array_diff($list, $existing);
 		$delete = array_diff($existing, $list);
@@ -67,6 +48,60 @@ class Modules
 		}
 	}
 
+	/**
+	 * List modules names from locally installed directories
+	 */
+	static public function listRaw(): array
+	{
+		$list = [];
+
+		// First list modules bundled
+		foreach (glob(Module::DIST_ROOT . '/*') as $file) {
+			if (!is_dir($file)) {
+				continue;
+			}
+
+			$name = Utils::basename($file);
+			$list[$name] = $name;
+		}
+
+		// Then add modules in files
+		foreach (Files::list(Module::ROOT) as $file) {
+			if ($file->type != $file::TYPE_DIRECTORY) {
+				continue;
+			}
+
+			$list[$file->name] = $file->name;
+		}
+
+		$list = array_reverse($list);
+		sort($list);
+		return $list;
+	}
+
+	/**
+	 * List locally installed modules, directly from the filesystem, without creating them in the database cache
+	 * (used in Install form)
+	 */
+	static public function listLocal(): array
+	{
+		$list = self::listRaw();
+		$out = [];
+
+		foreach ($list as $name) {
+			$m = new Module;
+			$m->name = $name;
+
+			if (!$m->updateFromJSON()) {
+				continue;
+			}
+
+			$out[$name] = $m;
+		}
+
+		return $out;
+	}
+
 	static public function create(string $name): ?Module
 	{
 		$module = new Module;
@@ -81,6 +116,9 @@ class Modules
 		return $module;
 	}
 
+	/**
+	 * List modules from the database
+	 */
 	static public function list(): array
 	{
 		return EM::getInstance(Module::class)->all('SELECT * FROM @TABLE ORDER BY label COLLATE NOCASE ASC;');
