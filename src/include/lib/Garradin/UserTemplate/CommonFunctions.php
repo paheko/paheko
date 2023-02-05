@@ -183,6 +183,10 @@ class CommonFunctions
 		if ($type == 'select') {
 			$input = sprintf('<select %s>', $attributes_string);
 
+			if (empty($attributes['required'])) {
+				$input .= '<option value=""></option>';
+			}
+
 			foreach ($options as $_key => $_value) {
 				$input .= sprintf('<option value="%s"%s>%s</option>', $_key, $current_value == $_key ? ' selected="selected"' : '', htmlspecialchars((string)$_value));
 			}
@@ -191,6 +195,10 @@ class CommonFunctions
 		}
 		elseif ($type == 'select_groups') {
 			$input = sprintf('<select %s>', $attributes_string);
+
+			if (empty($attributes['required'])) {
+				$input .= '<option value=""></option>';
+			}
 
 			foreach ($options as $optgroup => $suboptions) {
 				if (is_array($suboptions)) {
