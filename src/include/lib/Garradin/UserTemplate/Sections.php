@@ -903,6 +903,12 @@ class Sections
 
 		if (isset($params['sql'])) {
 			$sql = $params['sql'];
+
+			foreach ($params as $k => $v) {
+				if (substr($k, 0, 2) == '**') {
+					$sql = str_replace($k, $v, $sql);
+				}
+			}
 		}
 		else {
 			if (empty($params['tables'])) {

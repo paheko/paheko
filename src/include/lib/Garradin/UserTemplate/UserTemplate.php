@@ -204,19 +204,28 @@ class UserTemplate extends \KD2\Brindille
 
 
 		$this->registerCompileBlock('#select', function (string $name, string $sql, Brindille $tpl, int $line) {
-			$params = '';
-			$i = 0;
-
 			$sql = strtok($sql, ';');
 			$extra_params = strtok(false);
 
-			$sql = preg_replace_callback('/\{(\$.*?)\}/', function ($match) use (&$params, &$i) {
-				$i++;
-				$params .= ' :p' . $i . '=' . $match[1];
-				return ':p' . $i;
+			$i = 0;
+			$params = '';
+
+			$sql = preg_replace_callback('/\{(.*?)\}/', function ($match) use (&$params, &$i) {
+				// Raw SQL
+				if ('**' === substr($match[1], 0, 2)) {
+					$params .= ' **' . $i . '**=' . substr($match[1], 2);
+					return '**' . $i++ . '**';
+				}
+				else {
+					$params .= ' :p' . $i . '=' . $match[1];
+					return ':p' . $i++;
+				}
 			}, $sql);
 
-			$params .= ' sql=' . var_export('SELECT ' . $sql, true) . ' ' . $extra_params;
+			$sql = 'SELECT ' . $sql;
+			$sql = var_export($sql, true);
+
+			$params .= ' sql=' . $sql . ' ' . $extra_params;
 
 			return $this->_section('sql', $params, $line);
 		});
