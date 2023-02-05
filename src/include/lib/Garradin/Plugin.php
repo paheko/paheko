@@ -230,7 +230,7 @@ class Plugin
 			throw new \UnexpectedValueException('Chemin de fichier incorrect.');
 		}
 
-		$forbidden = ['install.php', 'garradin_plugin.ini', 'upgrade.php', 'uninstall.php'];
+		$forbidden = ['install.php', 'paheko_plugin.ini', 'upgrade.php', 'uninstall.php'];
 
 		if (in_array(basename($file), $forbidden))
 		{
@@ -319,12 +319,12 @@ class Plugin
 
 	/**
 	 * Renvoie TRUE si le plugin a besoin d'être mis à jour
-	 * (si la version notée dans la DB est différente de la version notée dans garradin_plugin.ini)
+	 * (si la version notée dans la DB est différente de la version notée dans paheko_plugin.ini)
 	 * @return boolean TRUE si le plugin doit être mis à jour, FALSE sinon
 	 */
 	public function needUpgrade()
 	{
-		$infos = (object) parse_ini_file($this->path() . '/garradin_plugin.ini', false);
+		$infos = (object) parse_ini_file($this->path() . '/paheko_plugin.ini', false);
 
 		if (version_compare($this->plugin->version, $infos->version, '!=')) {
 			return true;
@@ -340,7 +340,7 @@ class Plugin
 	 */
 	public function upgrade(): void
 	{
-		$infos = (object) parse_ini_file($this->path() . '/garradin_plugin.ini', false);
+		$infos = (object) parse_ini_file($this->path() . '/paheko_plugin.ini', false);
 
 		if (!isset($infos->name)) {
 			return;
@@ -484,7 +484,7 @@ class Plugin
 			}
 			elseif (is_dir(PLUGINS_ROOT . '/' . $file)
 				&& preg_match('!^' . self::PLUGIN_ID_REGEXP . '$!', $file)
-				&& is_file(sprintf('%s/%s/garradin_plugin.ini', PLUGINS_ROOT, $file)))
+				&& is_file(sprintf('%s/%s/paheko_plugin.ini', PLUGINS_ROOT, $file)))
 			{
 				// Rien à faire, le nom valide du plugin est déjà dans "$file"
 			}
@@ -500,7 +500,7 @@ class Plugin
 				continue;
 			}
 
-			$data = (object) parse_ini_file(self::getPath($file) . '/garradin_plugin.ini', false);;
+			$data = (object) parse_ini_file(self::getPath($file) . '/paheko_plugin.ini', false);;
 
 			if (!isset($data->name)) {
 				// Ignore old plugins
@@ -524,12 +524,12 @@ class Plugin
 	{
 		$path = self::getPath($id);
 
-		if (!file_exists($path . '/garradin_plugin.ini'))
+		if (!file_exists($path . '/paheko_plugin.ini'))
 		{
-			throw new UserException(sprintf('Le plugin "%s" n\'est pas une extension Garradin : fichier garradin_plugin.ini manquant.', $id));
+			throw new UserException(sprintf('Le plugin "%s" n\'est pas une extension Garradin : fichier paheko_plugin.ini manquant.', $id));
 		}
 
-		$infos = (object) parse_ini_file($path . '/garradin_plugin.ini', false);
+		$infos = (object) parse_ini_file($path . '/paheko_plugin.ini', false);
 
 		$required = ['name', 'description', 'author', 'url', 'version'];
 
@@ -537,7 +537,7 @@ class Plugin
 		{
 			if (!property_exists($infos, $key))
 			{
-				throw new \RuntimeException('Le fichier garradin_plugin.ini ne contient pas d\'entrée "'.$key.'".');
+				throw new \RuntimeException('Le fichier paheko_plugin.ini ne contient pas d\'entrée "'.$key.'".');
 			}
 		}
 
