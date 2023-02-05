@@ -59,8 +59,8 @@ class Sections
 		$sql = preg_replace_callback('/\{(.*?)\}/', function ($match) use (&$params, &$i) {
 			// Raw SQL
 			if ('!' === substr($match[1], 0, 1)) {
-				$params .= ' **' . $i . '**=' . substr($match[1], 1);
-				return '**' . $i++ . '**';
+				$params .= ' !' . $i . '=' . substr($match[1], 1);
+				return '!' . $i++;
 			}
 			else {
 				$params .= ' :p' . $i . '=' . $match[1];
@@ -944,8 +944,9 @@ class Sections
 
 			// Replace raw SQL parameters (undocumented feature, this is for #select section)
 			foreach ($params as $k => $v) {
-				if (substr($k, 0, 2) == '**') {
-					$sql = str_replace($k, $v, $sql);
+				if (substr($k, 0, 1) == '!') {
+					$r = '/' . preg_quote($k, '/') . '\b/';
+					$sql = preg_replace($r, $v, $sql);
 				}
 			}
 		}
@@ -985,7 +986,24 @@ class Sections
 		$db = DB::getInstance();
 
 		try {
-			$statement = $db->protectSelect(null, $sql);
+			$tables = [
+				// Allow access to all tables
+				'*' => null,
+				// Restrict access to private fields in users
+				'users' => ['~password', '~pgp_key', '~otp_secret'],
+				// Restrict access to some private tables
+				'!emails' => null,
+				'!emails_queue' => null,
+				'!compromised_passwords_cache' => null,
+				'!compromised_passwords_cache_ranges' => null,
+				'!api_credentials' => null,
+				'!plugins_signals' => null,
+				'!config' => null,
+				'!users_sessions' => null,
+				'!logs' => null,
+			];
+
+			$statement = $db->protectSelect($tables, $sql);
 
 			$args = [];
 
