@@ -282,7 +282,7 @@ class Functions
 		$include->assignArray(array_merge($ut->getAllVariables(), $params));
 
 		if (!empty($params['capture']) && preg_match('/^[a-z0-9_]+$/', $params['capture'])) {
-			$ut::__assign([$params['capture'] => $include->fetch()], $ut);
+			$ut::__assign([$params['capture'] => $include->fetch()], $ut, $line);
 		}
 		else {
 			$include->display();
@@ -294,13 +294,13 @@ class Functions
 
 			foreach ($keep as $name) {
 				// Transmit variables
-				$ut::__assign(['var' => $name, 'value' => $include->get($name)], $ut);
+				$ut::__assign(['var' => $name, 'value' => $include->get($name)], $ut, $line);
 			}
 		}
 
 		// Transmit nocache to parent template
 		if ($include->get('nocache')) {
-			$ut::__assign(['nocache' => true], $ut);
+			$ut::__assign(['nocache' => true], $ut, $line);
 		}
 	}
 
