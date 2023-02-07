@@ -1,12 +1,6 @@
 {include file="_head.tpl" title="Mes préférences" current="me"}
 
-<nav class="tabs">
-	<ul>
-		<li><a href="{$admin_url}me/">Mes informations</a></li>
-		<li><a href="{$admin_url}me/security.php">Mot de passe et sécurité</a></li>
-		<li class="current"><a href="{$admin_url}me/preferences.php">Préférences</a></li>
-	</ul>
-</nav>
+{include file="./_nav.tpl" current="preferences"}
 
 {if $ok !== null}
 <p class="confirm block">

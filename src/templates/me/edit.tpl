@@ -1,11 +1,6 @@
 {include file="_head.tpl" title="Mes informations personnelles" current="me"}
 
-<nav class="tabs">
-	<ul>
-		<li class="current"><a href="{$admin_url}me/">Mes informations</a></li>
-		<li><a href="{$admin_url}me/security.php">Mot de passe et options de sécurité</a></li>
-	</ul>
-</nav>
+{include file="./_nav.tpl" current="me"}
 
 {form_errors}
 
