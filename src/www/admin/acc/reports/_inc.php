@@ -46,7 +46,6 @@ if (qg('year'))
 
 	$criterias['year'] = $year->id();
 	$tpl->assign('year', $year);
-	$tpl->assign('close_date', $year->closed && empty($criterias['before']) ? $year->end_date : time());
 	$tpl->assign('before_default', $criterias['before'] ?? $year->end_date);
 	$tpl->assign('after_default', $criterias['after'] ?? $year->start_date);
 }
@@ -77,3 +76,5 @@ foreach ($criterias_query as &$c) {
 $tpl->assign('criterias_query', http_build_query($criterias_query));
 unset($criterias_query['compare_year']);
 $tpl->assign('criterias_query_no_compare', http_build_query($criterias_query));
+
+$tpl->assign('now', new \DateTime);

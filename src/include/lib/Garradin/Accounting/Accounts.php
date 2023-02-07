@@ -30,6 +30,11 @@ class Accounts
 		return EntityManager::findOneById(Account::class, $id);
 	}
 
+	public function getWithCode(string $code): ?Account
+	{
+		return EntityManager::findOne(Account::class, 'SELECT * FROM @TABLE WHERE code = ? AND id_chart = ?', $code, $this->chart_id);
+	}
+
 	static public function getSelector(?int $id): ?array
 	{
 		if (!$id) {

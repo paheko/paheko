@@ -38,6 +38,7 @@ class Modifiers
 		'quote_sql_identifier',
 		'quote_sql',
 		'sql_where',
+		'urlencode',
 	];
 
 	const LEADING_NUMBER_REGEXP = '/^([\d.]+)\s*[.\)]\s*/';
@@ -297,5 +298,10 @@ class Modifiers
 	static public function sql_where(...$args)
 	{
 		return DB::getInstance()->where(...$args);
+	}
+
+	static public function urlencode($str): string
+	{
+		return rawurlencode($str ?? '');
 	}
 }

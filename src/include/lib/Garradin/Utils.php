@@ -177,6 +177,11 @@ class Utils
         return $date;
     }
 
+    static public function shortDate($ts, bool $with_hour = false): ?string
+    {
+        return self::date_fr($ts, 'd/m/Y' . ($with_hour ? ' à H\hi' : ''));
+    }
+
     /**
      * @deprecated
      */
@@ -961,8 +966,39 @@ class Utils
             return $str;
         }
 
-        // FIXME for PHP 9.0+ see https://php.watch/versions/8.2/utf8_encode-utf8_decode-deprecated
-        return @utf8_encode($str);
+        return !preg_match('//u', $str) ? self::iso8859_1_to_utf8($str) : $str;
+    }
+
+    /**
+     * Poly-fill to encode a ISO-8859-1 string to UTF-8 for PHP >= 9.0
+     * @see https://php.watch/versions/8.2/utf8_encode-utf8_decode-deprecated
+     */
+    static public function iso8859_1_to_utf8(string $s): string
+    {
+        if (PHP_VERSION_ID < 90000) {
+            return @utf8_encode($s);
+        }
+
+        $s .= $s;
+        $len = strlen($s);
+
+        for ($i = $len >> 1, $j = 0; $i < $len; ++$i, ++$j) {
+            switch (true) {
+                case $s[$i] < "\x80":
+                    $s[$j] = $s[$i];
+                    break;
+                case $s[$i] < "\xC0":
+                    $s[$j] = "\xC2";
+                    $s[++$j] = $s[$i];
+                    break;
+                default:
+                    $s[$j] = "\xC3";
+                    $s[++$j] = chr(ord($s[$i]) - 64);
+                    break;
+            }
+        }
+
+        return substr($s, 0, $j);
     }
 
     /**
@@ -1003,6 +1039,10 @@ class Utils
     static public function streamPDF(string $str): void
     {
         if (!PDF_COMMAND) {
+            return;
+        }
+
+        if (PDF_COMMAND == 'auto') {
             // Try to see if there's a plugin
             $in = ['string' => $str];
 
@@ -1048,8 +1088,8 @@ class Utils
         // proc_close in order to avoid a deadlock
         proc_close($process);
 
-        if (defined('Garradin\PDF_LOG') && \Garradin\PDF_LOG) {
-            file_put_contents(\Garradin\PDF_LOG, date("[d/m/Y H:i:s]\n"), FILE_APPEND);
+        if (PDF_USAGE_LOG) {
+            file_put_contents(PDF_USAGE_LOG, date("Y-m-d H:i:s\n"), FILE_APPEND);
         }
     }
 
@@ -1060,14 +1100,18 @@ class Utils
      */
     static public function filePDF(string $str): ?string
     {
+        $cmd = PDF_COMMAND;
+
+        if (!$cmd) {
+            return null;
+        }
+
         $source = sprintf('%s/print-%s.html', CACHE_ROOT, md5(random_bytes(16)));
         $target = str_replace('.html', '.pdf', $source);
 
         file_put_contents($source, $str);
 
-        $cmd = PDF_COMMAND;
-
-        if (!$cmd) {
+        if ($cmd == 'auto') {
             // Try to see if there's a plugin
             $in = ['source' => $source, 'target' => $target];
 
@@ -1099,7 +1143,7 @@ class Utils
                 $cmd = 'prince -o %2$s %1$s';
                 break;
             case 'chromium':
-                $cmd = 'chromium --headless --disable-gpu --run-all-compositor-stages-before-draw --print-to-pdf-no-header --print-to-pdf=%s %s';
+                $cmd = 'chromium --headless --disable-gpu --run-all-compositor-stages-before-draw --print-to-pdf-no-header --print-to-pdf=%2$s %1$s';
                 break;
             case 'wkhtmltopdf':
                 $cmd = 'wkhtmltopdf -q --print-media-type --enable-local-file-access --disable-smart-shrinking --encoding "UTF-8" %s %s';
@@ -1121,8 +1165,8 @@ class Utils
             throw new \RuntimeException('PDF command failed: ' . $output);
         }
 
-        if (defined('Garradin\PDF_LOG') && \Garradin\PDF_LOG) {
-            file_put_contents(\Garradin\PDF_LOG, date("[d/m/Y H:i:s]\n"), FILE_APPEND);
+        if (PDF_USAGE_LOG) {
+            file_put_contents(PDF_USAGE_LOG, date("Y-m-d H:i:s\n"), FILE_APPEND);
         }
 
         return $target;

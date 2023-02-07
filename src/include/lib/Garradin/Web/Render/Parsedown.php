@@ -25,6 +25,9 @@ class Parsedown extends Parent_Parsedown
 		$this->BlockTypes['<'][] = 'SkrivExtension';
 		$this->BlockTypes['['][]= 'TOC';
 
+		// Make Skriv extensions also available inline, before anything else
+		array_unshift($this->InlineTypes['<'], 'SkrivExtension');
+
 		# identify footnote definitions before reference definitions
 		array_unshift($this->BlockTypes['['], 'Footnote');
 
@@ -32,6 +35,24 @@ class Parsedown extends Parent_Parsedown
 		array_unshift($this->InlineTypes['['], 'FootnoteMarker');
 
 		$this->skriv = new Skriv($file, $user_prefix);
+	}
+
+	protected function inlineSkrivExtension(array $str): ?array
+	{
+		if (preg_match('/<<<?([a-z_]+)((?:(?!>>>?).)*?)>>>?/i', $str['text'], $match)) {
+			$text = $this->skriv->callExtension($match);
+
+			return [
+				'extent'    => strlen($match[0]),
+				'element' => [
+					'name'                   => 'div',
+					'rawHtml'                => $text,
+					'allowRawHtmlInSafeMode' => true,
+				],
+			];
+		}
+
+		return null;
 	}
 
 	protected function blockSkrivExtension(array $line): ?array

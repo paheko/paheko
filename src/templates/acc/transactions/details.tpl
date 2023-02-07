@@ -15,12 +15,14 @@
 {if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
 	{linkbutton href="new.php?copy=%d"|args:$transaction.id shape="plus" label="Dupliquer cette écriture"}
 {/if}
+{if PDF_COMMAND}
 	<aside>
 		{if !$transaction.hash && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 			{linkbutton href="lock.php?id=%d"|args:$transaction.id shape="lock" label="Verrouiller" target="_dialog"}
 		{/if}
 		{linkbutton href="?id=%d&_pdf"|args:$transaction.id shape="download" label="Télécharger en PDF"}
 	</aside>
+{/if}
 </nav>
 
 {if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE) && $transaction.status & $transaction::STATUS_WAITING}

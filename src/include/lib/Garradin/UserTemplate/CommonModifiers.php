@@ -136,7 +136,7 @@ class CommonModifiers
 
 	static public function date_short($ts, bool $with_hour = false): ?string
 	{
-		return Utils::date_fr($ts, 'd/m/Y' . ($with_hour ? ' à H\hi' : ''));
+		return Utils::shortDate($ts, $with_hour);
 	}
 
 	static public function date_hour($ts, bool $minutes_only_if_required = false): ?string

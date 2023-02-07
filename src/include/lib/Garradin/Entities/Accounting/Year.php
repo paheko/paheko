@@ -244,4 +244,18 @@ class Year extends Entity
 		return $out;
 	}
 
+	public function hasOpeningBalance(): bool
+	{
+		return DB::getInstance()->test(Transaction::TABLE, 'id_year = ? AND status & ?', $this->id(), Transaction::STATUS_OPENING_BALANCE);
+	}
+
+	public function deleteOpeningBalance(): void
+	{
+		$em = EntityManager::getInstance(Transaction::class);
+		$list = $em->iterate('SELECT * FROM @TABLE WHERE id_year = ? AND status & ?', $this->id(), Transaction::STATUS_OPENING_BALANCE);
+
+		foreach ($list as $t) {
+			$t->delete();
+		}
+	}
 }

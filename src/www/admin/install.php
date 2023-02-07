@@ -19,6 +19,10 @@ if (file_exists(DB_FILE))
 Install::checkAndCreateDirectories();
 Install::checkReset();
 
+if (DISABLE_INSTALL_FORM) {
+	throw new \RuntimeException('Install form has been disabled');
+}
+
 function f($key)
 {
     return \KD2\Form::get($key);

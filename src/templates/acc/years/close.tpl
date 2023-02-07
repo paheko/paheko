@@ -10,7 +10,7 @@
 			Êtes-vous sûr de vouloir clôturer l'exercice «&nbsp;{$year.label}&nbsp;» ?
 		</h3>
 		<p class="block alert">
-			Un exercice clôturé ne peut plus être rouvert ou modifié&nbsp;!<br />
+			<strong>Un exercice clôturé ne peut plus être modifié&nbsp;!</strong><br />
 			Il ne sera plus possible de modifier ou supprimer les écritures de l'exercice clôturé.
 		</p>
 		<dl>

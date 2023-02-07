@@ -83,15 +83,13 @@
 			<tr>
 				<td><em>{if $year.closed}Clôturé{else}En cours{/if}</em></td>
 				<td>
-				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-					{linkbutton label="Export" shape="export" href="export.php?year=%d"|args:$year.id}
-					{if !$year.closed}
-						{linkbutton label="Import" shape="upload" href="import.php?year=%d"|args:$year.id}
-						{linkbutton label="Balance d'ouverture" shape="reset" href="balance.php?id=%d"|args:$year.id}
-						{linkbutton label="Modifier" shape="edit" href="edit.php?id=%d"|args:$year.id}
-						{linkbutton label="Clôturer" shape="lock" href="close.php?id=%d"|args:$year.id}
-						{linkbutton label="Supprimer" shape="delete" href="delete.php?id=%d"|args:$year.id}
-					{/if}
+				{linkbutton label="Export" shape="export" href="export.php?year=%d"|args:$year.id}
+				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$year.closed}
+					{linkbutton label="Import" shape="upload" href="import.php?year=%d"|args:$year.id}
+					{linkbutton label="Balance d'ouverture" shape="reset" href="balance.php?id=%d"|args:$year.id}
+					{linkbutton label="Modifier" shape="edit" href="edit.php?id=%d"|args:$year.id}
+					{linkbutton label="Clôturer" shape="lock" href="close.php?id=%d"|args:$year.id}
+					{linkbutton label="Supprimer" shape="delete" href="delete.php?id=%d"|args:$year.id}
 				{/if}
 				</td>
 			</tr>

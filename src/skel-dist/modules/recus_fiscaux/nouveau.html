@@ -2,6 +2,14 @@
 {{/restrict}}
 {{:include file="./_config_default.tpl" keep="module"}}
 
+{{if $_GET.user}}
+	{{#foreach from=$_GET.user key="id" item="user"}}
+		{{:assign id_user=$id|intval}}
+	{{/foreach}}
+{{elseif $_GET.id_user}}
+	{{:assign id_user=$_GET.id_user|intval}}
+{{/if}}
+
 {{if $_POST}}
 	{{if !$_POST.date|trim|parse_date}}
 		{{:assign error="Date d'émission invalide ou vide."}}
@@ -31,26 +39,45 @@
 		}}
 		{{:http redirect="voir.html?id=%d"|args:$new_id}}
 	{{/if}}
-{{elseif $_GET.id_user}}
+{{/if}}
+
+{{:admin_header title="Créer un nouveau reçu fiscal" current="acc"}}
+
+{{if $id_user}}
 	{{:assign var="champs_adresse" value=$module.config.champs_adresse|quote_sql_identifier|implode:" || ' — ' || "}}
 
-	{{#users id=$_GET.id_user select="%s AS _adresse"|args:$champs_adresse}}
+	{{#users id=$id_user select="%s AS _adresse"|args:$champs_adresse}}
 		{{:assign .="user"}}
 	{{else}}
 		{{:error message="Ce membre n'existe pas."}}
 	{{/users}}
 
-	{{:assign data.montant=0}}
+	{{* Récupération des comptes et soldes *}}
+	{{#select
+		SUM(l.credit) AS total, strftime('%Y', t.date) AS year, a.code AS account
+		FROM acc_transactions t
+		INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
+		INNER JOIN acc_transactions_users tu ON tu.id_transaction = t.id
+		INNER JOIN acc_accounts a ON a.id = l.id_account AND a.!code_don
+		WHERE tu.id_user = {$id_user}
+		GROUP BY strftime('%Y', t.date), a.code;
+		!code_don="code"|sql_where:"IN":$module.config.comptes_don
+	}}
+		{{:assign var="year_total" from="user_years.%d.total"|args:$year}}
+		{{:assign .="user_years.%d"|args:$year}}
+		{{:assign var="user_years.%d.total"|args:$year value="%d+%d"|math:$total:$year_total}}
+	{{/select}}
 
-	{{#sql select="SUM(l.credit) AS somme" tables=""}}
-		{{:assign data.montant="%d+%d"|math:$data.montant:$somme}}
-	{{/sql}}
+	{{#foreach from=$user_years item="year"}}
+		{{:assign total_money=$year.total|money_currency}}
+		{{:assign var="user_select.%d"|args:$year.year value="%d (%s)"|args:$year.year:$total_money}}
+	{{/foreach}}
+
+	<script type="text/javascript">
+	var user_years = {{$user_years|json_encode}};
+	</script>
 {{elseif $_GET.id_transaction}}
 {{/if}}
-
-{{:include file="./_config_default.tpl"}}
-
-{{:admin_header title="Créer un nouveau reçu fiscal" current="acc"}}
 
 <nav class="tabs">
 	{{:linkbutton href="./" label="Retour à la liste des reçus" shape="left"}}
@@ -73,7 +100,7 @@
 		<fieldset class="type-user hidden">
 			<legend>Reçu pour un membre</legend>
 			<dl>
-				{{:input type="list" multiple=false name="id_user" label="Sélectionner un membre" target="!users/selector.php" required=true}}
+				{{:input type="list" multiple=false name="user" label="Sélectionner un membre" target="!users/selector.php" required=true}}
 			</dl>
 		</fieldset>
 		<fieldset class="type-transaction hidden">
@@ -109,15 +136,15 @@
 			<dl>
 				{{:input type="text" name="nom" label="Nom du bénéficiaire" required=true default=$user._name}}
 				{{:input type="textarea" cols="50" rows="3" name="adresse" label="Adresse du bénéficiaire" required=true default=$user._adresse}}
-				{{if $user_years}}
-					{{:input type="select" name="annees" label="Pour quelle année le reçu doit-il être généré ?" options=$user_years}}
+				{{if $user_select}}
+					{{:input type="select" name="annees" label="Pour quelle année le reçu doit-il être généré ?" required=true options=$user_select}}
 				{{/if}}
 
 				{{:input type="date" name="date" required=true label="Date du reçu" default=$now}}
-				{{:input type="money" name="montant" required=true label="Montant des dons"}}
+				{{:input type="money" name="montant" required=true label="Montant des dons" default=$user.total}}
 
 				<dt>Type de don</dt>
-				{{:input type="radio" name="type" value="numeraire" label="Don en numéraire (en euros)"}}
+				{{:input type="radio" name="type" value="numeraire" label="Don en numéraire (en euros)" default=$user.}}
 				{{:input type="radio" name="type" value="nature" label="Don en nature" help="Par exemple abandon de frais par les bénévoles"}}
 			</dl>
 			<dl class="hidden type-numeraire">

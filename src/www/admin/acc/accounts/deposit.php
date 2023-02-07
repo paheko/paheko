@@ -32,7 +32,7 @@ $form->runIf('save', function () use ($checked, $transaction, $journal) {
 	}
 
 	$transaction->importFromDepositForm();
-	Transactions::saveDeposit($transaction, $journal, $checked);
+	Transactions::saveDeposit($transaction, $journal->iterate(), $checked);
 
 	Utils::redirect(ADMIN_URL . 'acc/transactions/details.php?id=' . $transaction->id());
 }, 'acc_deposit_' . $account->id());
@@ -50,9 +50,9 @@ if ($date > $current_year->end_date) {
 
 $target = $account::TYPE_BANK;
 
-$journal_count = $account->countDepositJournal(CURRENT_YEAR_ID);
-
 $missing_balance = $account->getDepositMissingBalance(CURRENT_YEAR_ID);
+
+$journal->loadFromQueryString();
 
 $tpl->assign(compact(
 	'account',
@@ -60,7 +60,6 @@ $tpl->assign(compact(
 	'date',
 	'target',
 	'checked',
-	'journal_count',
 	'missing_balance',
 	'transaction'
 ));

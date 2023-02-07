@@ -55,18 +55,22 @@ release: test minify
 	tar czvfh paheko-${VERSION}.tar.gz --hard-dereference -C /tmp/paheko-build paheko-${VERSION}
 
 deb:
-	cd ../debian; ./makedeb.sh
+	cd ../build/debian; ./makedeb.sh
 
-publish: release deb
+windows:
+	cd ../build/windows; make installer
+
+publish: release deb windows
 	$(eval VERSION=$(shell cat VERSION))
-	gpg --armor --detach-sign paheko-${VERSION}.tar.gz
+	gpg --armor -r dev@paheko.cloud --detach-sign paheko-${VERSION}.tar.gz
 	fossil uv sync
 	#fossil uv ls | fgrep -v 'paheko-0.8.5' | grep '^paheko-.*\.(tar\.bz2|deb)' | xargs fossil uv rm
 	fossil uv add paheko-${VERSION}.tar.gz
 	fossil uv add paheko-${VERSION}.tar.gz.asc
-	cd ../debian && fossil uv add paheko-${VERSION}.deb
+	cd ../build/debian && fossil uv add paheko-${VERSION}.deb
 	cd ../tools && php make_installer.php > install.php && fossil uv add install.php && rm install.php
 	fossil uv sync
+	cd ../build/windows && make publish
 
 check-dependencies:
 	grep -hEo '^use \\?KD2\\[^; ]+|\\KD2\\[^\(:; ]+' -R include/lib/Garradin www | sed -r 's/^use \\?KD2\\|^\\KD2\\//' | sort | uniq

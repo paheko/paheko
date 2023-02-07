@@ -244,6 +244,23 @@ namespace Garradin;
 // const ERRORS_TEMPLATE = null;
 
 /**
+ * Loguer / envoyer par mail les erreurs utilisateur ?
+ *
+ * Si positionné à 1, *toutes* les erreurs utilisateur (champ mal rempli dans un formulaire,
+ * formulaire dont le token CSRF a expiré, etc.) seront loguées et/ou envoyées par mail
+ * (selon le réglage choisit ci-dessus).
+ *
+ * Si positionné à 2, alors l'exception sera remontée dans la stack, *et* loguée/envoyée.
+ *
+ * Utile pour le développement.
+ *
+ * Défaut : 0 (ne rien faire)
+ * @var int
+ */
+
+// const REPORT_USER_EXCEPTIONS = 0;
+
+/**
  * Activation des détails techniques (utile en auto-hébergement) :
  * - version de PHP
  * - page permettant de visualiser les erreurs présentes dans le error.log
@@ -556,6 +573,18 @@ namespace Garradin;
 //const FORCE_CUSTOM_COLORS = false;
 
 /**
+ * Désactiver le formulaire d'installation
+ *
+ * Si TRUE, alors le formulaire d'installation renverra une erreur.
+ *
+ * Utile pour une installation multi-associations.
+ *
+ * Défaut : false
+ * @var bool
+ */
+//const DISABLE_INSTALL_FORM = false;
+
+/**
  * Stockage des fichiers
  *
  * Indiquer ici le nom d'une classe de stockage de fichiers
@@ -623,27 +652,50 @@ namespace Garradin;
 
 /**
  * PDF_COMMAND
- * Commande de création de PDF
- *
  * Commande qui sera exécutée pour créer un fichier PDF à partir d'un HTML.
- * Si laissé non spécifié (ou NULL), Garradin essaiera de détecter une solution entre
- * PrinceXML, Chromium, wkhtmltopdf ou weasyprint. Si aucune solution n'est disponible,
- * une erreur sera levée.
  *
- * %1$s sera remplacé par le chemin du fichier HTML, et %2$s par le chemin du fichier PDF.
+ * Si laissé sur 'auto', Garradin essaiera de détecter une solution entre
+ * PrinceXML, Chromium, wkhtmltopdf ou weasyprint (dans cet ordre).
+ * Si aucune solution n'est disponible, une erreur sera affichée.
  *
- * Exemple : chromium --headless --print-to-pdf=%2$s %1$s
+ * Il est possible d'indiquer NULL pour désactiver l'export en PDF.
  *
- * Il est aussi possible de simplement spécifier le nom du programme à utiliser,
- * et Garradin placera les arguments automatiquement : prince, chromium, wkhtmltopdf ou weasyprint.
+ * Il est possible d'indiquer uniquement le nom du programme :
+ * 'chromium', 'prince', 'weasyprint', ou 'wkhtmltopdf'.
+ * Dans ce cas, Paheko utilisera les paramètres par défaut de ce programme.
+ *
+ * Alternativement, il est possible d'indiquer la commande complète avec
+ * les options, par exemple '/usr/bin/chromium --headless --print-to-pdf=%2$s %1$s'
+ * Dans ce cas :
+ * - %1$s sera remplacé par le chemin du fichier HTML existant,
+ * - %2$s sera remplacé par le chemin du fichier PDF à créer.
+ *
+ * Si vous utilisez une extension pour générer les PDF (comme DomPDF), alors
+ * laisser cette constante sur 'auto'.
+ *
+ * Exemples :
+ * 'weasyprint'
+ * 'wkhtmltopdf -q --print-media-type --enable-local-file-access %s %s'
  *
  * Si vous utilisez Prince, un message mentionnant l'utilisation de Prince
  * sera joint aux e-mails utilisant des fichiers PDF, conformément à la licence :
  * https://www.princexml.com/purchase/license_faq/#non-commercial
  *
- * Défaut : null
+ * Défaut : 'auto'
+ * @var null|string
  */
-//const PDF_COMMAND = 'wkhtmltopdf -q --print-media-type --enable-local-file-access %s %s';
+//const PDF_COMMAND = 'auto';
+
+/**
+ * PDF_USAGE_LOG
+ * Chemin vers le fichier où enregistrer la date de chaque export en PDF
+ *
+ * Ceci est utilisé notamment pour estimer le prix de la licence PrinceXML.
+ *
+ * Défaut : NULL
+ * @var null|string
+ */
+//const PDF_USAGE_LOG = null;
 
 /**
  * CALC_CONVERT_COMMAND

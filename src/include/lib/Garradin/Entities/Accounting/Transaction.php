@@ -18,6 +18,7 @@ use Garradin\Entities\Files\File;
 
 use Garradin\Accounting\Accounts;
 use Garradin\Accounting\Projects;
+use Garradin\Accounting\Years;
 use Garradin\ValidationException;
 
 class Transaction extends Entity
@@ -38,6 +39,7 @@ class Transaction extends Entity
 	const STATUS_PAID = 2;
 	const STATUS_DEPOSIT = 4;
 	const STATUS_ERROR = 8;
+	const STATUS_OPENING_BALANCE = 16;
 
 	const STATUS_NAMES = [
 		1 => 'En attente de règlement',
@@ -507,6 +509,11 @@ class Transaction extends Entity
 
 	public function assertCanBeModified(): void
 	{
+		// Allow to change the status
+		if (count($this->_modified) === 1 && array_key_exists('status', $this->_modified)) {
+			return;
+		}
+
 		// We allow to change notes and id_project in a locked transaction
 		if (!$this->canSaveChanges()) {
 			throw new ValidationException('Il n\'est pas possible de modifier une écriture qui a été verrouillée');
@@ -659,7 +666,7 @@ class Transaction extends Entity
 
 		$this->assert(!empty($this->id_year), 'L\'ID de l\'exercice doit être renseigné.');
 
-		$this->assert(trim((string)$this->label) !== '', 'Le champ libellé ne peut rester vide.');
+		$this->assert(!empty($this->label) && trim((string)$this->label) !== '', 'Le champ libellé ne peut rester vide.');
 		$this->assert(strlen($this->label) <= 200, 'Le champ libellé ne peut faire plus de 200 caractères.');
 		$this->assert(!isset($this->reference) || strlen($this->reference) <= 200, 'Le champ numéro de pièce comptable ne peut faire plus de 200 caractères.');
 		$this->assert(!isset($this->notes) || strlen($this->notes) <= 2000, 'Le champ remarques ne peut faire plus de 2000 caractères.');
@@ -671,7 +678,15 @@ class Transaction extends Entity
 
 		$is_in_year = $db->test(Year::TABLE, 'id = ? AND start_date <= ? AND end_date >= ?', $this->id_year, $this->date->format('Y-m-d'), $this->date->format('Y-m-d'));
 
-		$this->assert($is_in_year, 'La date ne correspond pas à l\'exercice sélectionné : ' . $this->date->format('d/m/Y'));
+		if (!$is_in_year) {
+			$year = Years::get($this->id_year);
+			throw new ValidationException(sprintf('La date (%s) de l\'écriture ne correspond pas à l\'exercice "%s" : la date doit être entre le %s et le %s.',
+				Utils::shortDate($this->date),
+				$year->label ?? '',
+				Utils::shortDate($year->start_date),
+				Utils::shortDate($year->end_date)
+			));
+		}
 
 		$total = 0;
 
@@ -950,6 +965,7 @@ class Transaction extends Entity
 		$this->date = $year->start_date;
 		$this->id_year = $year->id();
 		$this->type = self::TYPE_ADVANCED;
+		$this->addStatus(self::STATUS_OPENING_BALANCE);
 
 		$this->importFromNewForm($source);
 

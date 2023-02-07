@@ -30,6 +30,8 @@ $form->runIf('save', function () use ($year, $session) {
 	// Fail everything if appropriation failed
 	$db->begin();
 
+	$year->deleteOpeningBalance();
+
 	$transaction = new Transaction;
 	$transaction->id_creator = Session::getUserId();
 	$transaction->importFromBalanceForm($year);
@@ -141,7 +143,8 @@ if (!empty($_POST['lines']) && is_array($_POST['lines'])) {
 
 $appropriation_account = $accounts->getSingleAccountForType(Account::TYPE_APPROPRIATION_RESULT);
 $can_appropriate = $accounts->getIdForType(Account::TYPE_NEGATIVE_RESULT) && $accounts->getIdForType(Account::TYPE_POSITIVE_RESULT);
+$has_balance = $year->hasOpeningBalance();
 
-$tpl->assign(compact('lines', 'years', 'chart_change', 'previous_year', 'year_selected', 'year', 'csrf_key', 'can_appropriate', 'appropriation_account'));
+$tpl->assign(compact('lines', 'years', 'chart_change', 'previous_year', 'year_selected', 'year', 'csrf_key', 'can_appropriate', 'appropriation_account', 'has_balance'));
 
 $tpl->display('acc/years/balance.tpl');

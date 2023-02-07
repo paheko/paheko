@@ -77,16 +77,16 @@
 		<h3>Projet&nbsp;: {if $project.code}{$project.code} — {/if}{$project.label}{if $project.archived} <em>(archivé)</em>{/if}</h3>
 	{/if}
 	{if isset($year)}
-		<p>Exercice&nbsp;: {$year.label} ({if $year.closed}clôturé{else}en cours{/if})
+		<p>Exercice&nbsp;: {$year.label} ({if $year.closed}clôturé{else}<strong>en cours</strong>{/if})
 			— du {$year.start_date|date_short}
 			— au {$year.end_date|date_short}<br />
-			<em>Document généré le {$close_date|date_short}</em>
+			<em>Document généré le {$now|date_short}</em>
 		</p>
 	{/if}
 
 	<p class="noprint print-btn">
 		<button onclick="window.print(); return false;" class="icn-btn" data-icon="⎙">Imprimer</button>
-		{if $current != 'graphs'}
+		{if $current != 'graphs' && PDF_COMMAND}
 		{linkbutton shape="download" href="%s&_pdf"|args:$self_url label="Télécharger en PDF"}
 		{/if}
 	</p>
