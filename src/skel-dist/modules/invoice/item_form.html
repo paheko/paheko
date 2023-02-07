@@ -8,6 +8,7 @@ function add_item() {
 	let td;
 	let item_properties = ['name', 'description', 'unit_price', 'quantity'];
 	let value;
+	let input;
 	let total;
 
 	row_line = document.createElement('tr');
@@ -17,7 +18,13 @@ function add_item() {
 		td = document.createElement('td');
 		td.classList.add('item_' + item_properties[i]);
 		value = document.getElementById('item_' + item_properties[i]).value;
-		td.innerHTML = '<input type="hidden" name="items[' + row_index + '][' + item_properties[i] + ']" id="item_' + item_properties[i] + '_' + row_index + '" value="' + value + '" />' + value; // Need to escape (e.g., htmlspecialchars) "value"
+		input = document.createElement('input');
+		input.type = 'hidden';
+		input.name = 'items[' + row_index + '][' + item_properties[i] + ']';
+		input.id = 'item_' + item_properties[i] + '_' + row_index;
+		input.value = value;
+		td.appendChild(input);
+		td.appendChild(document.createTextNode(value));
 		row_line.appendChild(td);
 	}
 	window.parent.document.getElementById('item_list_no_item_message').style.display = 'none';
