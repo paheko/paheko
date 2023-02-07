@@ -50,6 +50,7 @@ class Modifiers
 		'remove_leading_number',
 		'get_leading_number',
 		'check_email',
+		'urlencode',
 	];
 
 	const LEADING_NUMBER_REGEXP = '/^([\d.]+)\s*[.\)]\s*/';
@@ -175,5 +176,10 @@ class Modifiers
 	{
 		$match = preg_match(self::LEADING_NUMBER_REGEXP, $str);
 		return $match[1] ?? null;
+	}
+
+	static public function urlencode($str): string
+	{
+		return rawurlencode($str ?? '');
 	}
 }
