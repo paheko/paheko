@@ -19,7 +19,7 @@
 			<dd>Paheko {$garradin_version}</dd>
 			{if CONTRIBUTOR_LICENSE === null}
 			<dd class="help">
-				Le développement et le support de Garradin ne sont possibles que grâce à votre soutien&nbsp;!<br />
+				Le développement et le support de Paheko ne sont possibles que grâce à votre soutien&nbsp;!<br />
 				{linkbutton href="https://kd2.org/soutien.html" label="Faire un don pour soutenir le développement" target="_blank" shape="export"} :-)
 			</dd>
 			{/if}

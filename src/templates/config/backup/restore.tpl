@@ -17,7 +17,7 @@
 			{if $ok_code & Sauvegarde::NOT_AN_ADMIN}
 			</p>
 			<p class="block alert">
-				<strong>Vous n'êtes pas administrateur dans cette sauvegarde.</strong> Garradin a donné les droits d'administration à toutes les catégories afin d'empêcher de ne plus pouvoir se connecter.
+				<strong>Vous n'êtes pas administrateur dans cette sauvegarde.</strong> Paheko a donné les droits d'administration à toutes les catégories afin d'empêcher de ne plus pouvoir se connecter.
 				Merci de corriger les droits des catégories maintenant.
 			{elseif $ok_code & Sauvegarde::CHANGED_USER}
 			</p>
