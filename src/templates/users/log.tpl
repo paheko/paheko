@@ -51,6 +51,8 @@
 	</table>
 
 	{$list->getHTMLPagination()|raw}
+
+	<p class="help">Note : les heures correspondent au fuseau horaire du serveur (<?=ini_get('date.timezone')?>).</p>
 {else}
 	<p class="block alert">
 		Aucune activité trouvée.
