@@ -45,6 +45,7 @@ class Session extends \KD2\UserSession
 	const ACCESS_ADMIN = 9;
 
 	// Personalisation de la config de UserSession
+	protected bool $non_locking = true;
 	protected $cookie_name = 'pko';
 	protected $remember_me_cookie_name = 'pkop';
 	protected $remember_me_expiry = '+3 months';
@@ -408,6 +409,20 @@ class Session extends \KD2\UserSession
 		}
 
 		return $s->getUser();
+	}
+
+	/**
+	 * Returns cookie string for PDF printing
+	 */
+	static public function getCookie(): ?string
+	{
+		$i = self::getInstance();
+
+		if (!$i->isLogged()) {
+			return null;
+		}
+
+		return sprintf('%s=%s', $i->cookie_name, $i->id());
 	}
 
 	public function getUser()
