@@ -497,7 +497,7 @@ class Sections
 		$number_field = DynamicFields::getNumberField();
 
 		if (empty($params['select'])) {
-			$params['select'] = '1';
+			$params['select'] = '*';
 		}
 
 		$params['select'] .= sprintf(', %s AS _name, %s AS _login, %s AS _number',
