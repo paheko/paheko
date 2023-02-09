@@ -35,10 +35,10 @@
 			<dd class="help">Pour reprendre les soldes des comptes de l'exercice précédent.</dd>
 			<dd>
 				<select id="f_from_year" name="from_year">
-					<option value="">-- Aucun</option>
 					{foreach from=$years item="year"}
 					<option value="{$year.id}"{if $year.id == $_GET.from} selected="selected"{/if} data-closed="{$year.closed}">{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short} ({if $year.closed}clôturé{else}en cours{/if})</option>
 					{/foreach}
+					<option value="">Saisie manuelle</option>
 				</select>
 			</dd>
 			<dd class="hidden warn-not-closed">
@@ -136,8 +136,11 @@
 			{else}
 				<input type="hidden" name="from_year" value="" />
 			{/if}
-			{button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
-
+			{if $year_selected}
+				{button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
+			{else}
+				{button type="submit" name="save" label="Continuer" shape="right" class="main"}
+			{/if}
 			{literal}
 			<script type="text/javascript" defer="defer" async="async">
 			g.script('scripts/accounting.js', () => { initTransactionForm(); });
