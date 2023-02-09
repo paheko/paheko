@@ -89,7 +89,7 @@ class Emails
 			$content_html = null;
 
 			if ($template) {
-				$template->assignArray((array) $variables);
+				$template->assignArray((array) $variables, null, false);
 
 				// Disable HTML escaping for plaintext emails
 				$template->setEscapeDefault(null);
@@ -590,7 +590,7 @@ class Emails
 			$tpl = new UserTemplate;
 			$tpl->setCode($message);
 			$tpl->toggleSafeMode(true);
-			$tpl->assignArray((array)$list[$random]);
+			$tpl->assignArray((array)$list[$random], null, false);
 			$tpl->setEscapeDefault(null);
 
 			try {
