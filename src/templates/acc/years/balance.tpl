@@ -38,7 +38,7 @@
 					{foreach from=$years item="year"}
 					<option value="{$year.id}"{if $year.id == $_GET.from} selected="selected"{/if} data-closed="{$year.closed}">{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short} ({if $year.closed}clôturé{else}en cours{/if})</option>
 					{/foreach}
-					<option value="">Saisie manuelle</option>
+					<option value="">— Saisie manuelle —</option>
 				</select>
 			</dd>
 			<dd class="hidden warn-not-closed">
@@ -122,13 +122,11 @@
 	<p class="submit">
 		{if null === $previous_year}
 			{button type="submit" name="next" label="Continuer" shape="right" class="main"}
-			- ou -
 			{if $_GET.from}
+				— ou —
 				{linkbutton shape="reset" href="!acc/years/appropriation.php?id=%d&from=%d"|args:$year.id,$_GET.from label="Passer cet étape"}
-			{else}
-				{linkbutton shape="reset" href="!acc/years/" label="Passer cet étape"}
-			{/if}
 				<i class="help">(Il sera toujours possible de reprendre la balance d'ouverture plus tard.)</i>
+			{/if}
 		{else}
 			{csrf_field key=$csrf_key}
 			{if $previous_year}
