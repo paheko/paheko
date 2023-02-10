@@ -58,11 +58,11 @@ class AssistedReconciliation
 			}
 
 			$line->new_params = http_build_query([
-				'0' => abs($line->amount)/100,
+				'00' => abs($line->amount),
 				'l' => $line->label,
 				'dt' => $date ? $date->format('Y-m-d') : '',
 				't' => $line->amount < 0 ? Transaction::TYPE_EXPENSE : Transaction::TYPE_REVENUE,
-				'account' => $account->id,
+				'ab' => $account->code,
 			]);
 
 			return $line;
