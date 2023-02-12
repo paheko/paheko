@@ -114,7 +114,7 @@ class Log
 		return 0;
 	}
 
-	static public function list(?int $id_user = null): DynamicList
+	static public function list(array $params = []): DynamicList
 	{
 		$id_field = DynamicFields::getNameFieldsSQL('u');
 
@@ -122,7 +122,7 @@ class Log
 			'id_user' => [
 			],
 			'identity' => [
-				'label' => $id_user ? null : 'Membre',
+				'label' => isset($params['id_self']) ? null : (isset($params['history']) ? 'Membre à l\'origine de la modification' : 'Membre'),
 				'select' => $id_field,
 			],
 			'created' => [
@@ -146,7 +146,18 @@ class Log
 
 		$tables = 'logs LEFT JOIN users u ON u.id = logs.id_user';
 
-		$conditions = $id_user ? 'logs.id_user = ' . $id_user : '1';
+		if (isset($params['id_user'])) {
+			$conditions = 'logs.id_user = ' . (int)$params['id_user'];
+		}
+		elseif (isset($params['id_self'])) {
+			$conditions = sprintf('logs.id_user = %d AND type < 10', (int)$params['id_self']);
+		}
+		elseif (isset($params['history'])) {
+			$conditions = sprintf('logs.type IN (%d, %d, %d) AND json_extract(logs.details, \'$.entity\') = \'Users\\User\' AND json_extract(logs.details, \'$.id\') = %d', self::CREATE, self::EDIT, self::DELETE, (int)$params['history']);
+		}
+		else {
+			$conditions = '1';
+		}
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('created', true);

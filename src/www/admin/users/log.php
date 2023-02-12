@@ -6,22 +6,27 @@ use Garradin\Users\Session;
 
 require_once __DIR__ . '/../_inc.php';
 
-if (!$session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)) {
-	$id = Session::getUserId();
+$params = [];
 
-	if (!$id) {
-		throw new UserException('');
-	}
+if ($id = (int)qg('history')) {
+	$params['history'] = $id;
+}
+elseif (($id = (int)qg('id')) && $session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)) {
+	$params['id_user'] = $id;
 }
 else {
-	$id = (int)qg('id') ?: null;
+	$params['id_self'] = Session::getUserId();
+
+	if (!$params['id_self']) {
+		throw new UserException('Access forbidden');
+	}
 }
 
-$tpl->assign('current', $id == Session::getUserId() ? 'me' : 'users');
+$tpl->assign('current', isset($params['id_self']) ? 'me' : 'users');
 
-$list = Log::list($id);
+$list = Log::list($params);
 $list->loadFromQueryString();
 
-$tpl->assign(compact('list', 'id'));
+$tpl->assign(compact('list', 'params'));
 
 $tpl->display('users/log.tpl');

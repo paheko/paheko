@@ -143,8 +143,8 @@ class Entity extends AbstractEntity
 
 	public function delete(): bool
 	{
-		$name = get_class($this);
-		$name = str_replace('Garradin\Entities\\', '', $name);
+		$type = get_class($this);
+		$type = str_replace('Garradin\Entities\\', '', $type);
 		$name = 'entity.' . $name . '.delete';
 
 		$id = $this->id();
@@ -161,8 +161,7 @@ class Entity extends AbstractEntity
 		$return = parent::delete();
 
 		if ($this::NAME) {
-			$type = str_replace('Garradin\Entities\\', '', get_class($this));
-			Log::add(Log::DELETE, ['entity' => $type, 'id' => $id]);
+			Log::add(Log::DELETE, ['entity' => $name, 'id' => $id]);
 		}
 
 		Plugin::fireSignal($name . '.after', ['entity' => $this, 'success' => $return, 'id' => $id]);
