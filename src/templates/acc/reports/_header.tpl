@@ -72,6 +72,10 @@
 	</div>
 	{/if}
 
+	{if $config.files.logo}
+	<figure class="logo print-only"><img src="{$config->fileURL('logo', '150px')}" alt="" /></figure>
+	{/if}
+
 	<h2>{$config.org_name} — {$title}</h2>
 	{if isset($project)}
 		<h3>Projet&nbsp;: {if $project.code}{$project.code} — {/if}{$project.label}{if $project.archived} <em>(archivé)</em>{/if}</h3>

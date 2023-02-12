@@ -641,3 +641,7 @@ svg.icon, .icon svg {
     fill: rgb(var(--gTextColor));
     stroke: rgb(var(--gTextColor));
 }
+
+.print-only {
+    display: none;
+}

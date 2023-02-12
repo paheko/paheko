@@ -91,6 +91,11 @@ td.money, th.money {
     margin: 1em;
 }
 
+.year-header figure.logo img {
+    float: left;
+    max-height: 100px;
+}
+
 .year-infos .graphs {
     text-align: center;
     display: flex;
