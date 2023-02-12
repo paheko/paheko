@@ -44,8 +44,8 @@ class Functions
 	static public function break(string $name, string $params, Brindille $tpl, int $line)
 	{
 		$in_loop = false;
-		foreach ($this->_stack as $element) {
-			if ($element[0] == $this::SECTION) {
+		foreach ($tpl->_stack as $element) {
+			if ($element[0] == $tpl::SECTION) {
 				$in_loop = true;
 				break;
 			}
