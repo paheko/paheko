@@ -93,7 +93,7 @@ class Modules
 			$m = new Module;
 			$m->name = $name;
 
-			if (!$m->updateFromJSON()) {
+			if (!$m->updateFromJSON(false)) {
 				continue;
 			}
 

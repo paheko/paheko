@@ -54,9 +54,9 @@ class Module extends Entity
 	/**
 	 * Fills information from module.json file
 	 */
-	public function updateFromJSON(): bool
+	public function updateFromJSON(bool $use_local = true): bool
 	{
-		if ($file = Files::get($this->path(self::META_FILE))) {
+		if ($use_local && ($file = Files::get($this->path(self::META_FILE)))) {
 			$json = $file->fetch();
 		}
 		elseif (file_exists($this->distPath(self::META_FILE))) {

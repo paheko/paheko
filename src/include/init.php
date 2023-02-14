@@ -404,11 +404,6 @@ if (!defined('Garradin\INSTALL_PROCESS'))
 {
 	$exists = file_exists(DB_FILE);
 
-	if ($exists && !filesize(DB_FILE)) {
-		//@unlink(DB_FILE);
-		$exists = false;
-	}
-
 	if (!$exists) {
 		if (in_array('install.php', get_included_files())) {
 			die('Erreur de redirection en boucle : problème de configuration ?');
