@@ -44,6 +44,13 @@ class Session extends \KD2\UserSession
 	const ACCESS_WRITE = 2;
 	const ACCESS_ADMIN = 9;
 
+	const ACCESS_WORDS = [
+		'none' => self::ACCESS_NONE,
+		'read' => self::ACCESS_READ,
+		'write' => self::ACCESS_WRITE,
+		'admin' => self::ACCESS_ADMIN,
+	];
+
 	// Personalisation de la config de UserSession
 	protected bool $non_locking = true;
 	protected $cookie_name = 'pko';

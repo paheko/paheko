@@ -16,7 +16,7 @@ class Module extends Entity
 {
 	const ROOT = File::CONTEXT_SKELETON . '/modules';
 	const DIST_ROOT = ROOT . '/skel-dist/modules';
-	const META_FILE = 'module.json';
+	const META_FILE = 'module.ini';
 
 	const CONFIG_TEMPLATE = 'config.html';
 
@@ -42,6 +42,12 @@ class Module extends Entity
 
 	protected string $label;
 	protected ?string $description;
+	protected ?string $author;
+	protected ?string $url;
+	protected ?string $restrict_section;
+	protected ?int $restrict_level;
+	protected bool $home_button;
+	protected bool $menu;
 	protected ?\stdClass $config;
 	protected bool $enabled;
 
@@ -52,28 +58,40 @@ class Module extends Entity
 	}
 
 	/**
-	 * Fills information from module.json file
+	 * Fills information from module.ini file
 	 */
-	public function updateFromJSON(bool $use_local = true): bool
+	public function updateFromINI(bool $use_local = true): bool
 	{
 		if ($use_local && ($file = Files::get($this->path(self::META_FILE)))) {
-			$json = $file->fetch();
+			$ini = $file->fetch();
 		}
 		elseif (file_exists($this->distPath(self::META_FILE))) {
-			$json = file_get_contents($this->distPath(self::META_FILE));
+			$ini = file_get_contents($this->distPath(self::META_FILE));
 		}
 		else {
 			return false;
 		}
 
-		$json = json_decode($json);
+		$ini = @parse_ini_string($ini, false, \INI_SCANNER_TYPED);
 
-		if (!isset($json->label)) {
+		if (empty($ini)) {
 			return false;
 		}
 
-		$this->set('label', $json->label);
-		$this->set('description', $json->description ?? null);
+		$ini = (object) $ini;
+
+		if (!isset($ini->name)) {
+			return false;
+		}
+
+		$this->set('label', $ini->name);
+		$this->set('description', $ini->description ?? null);
+		$this->set('author', $ini->author ?? null);
+		$this->set('url', $ini->url ?? null);
+		$this->set('home_button', !empty($ini->home_button));
+		$this->set('menu', !empty($ini->menu));
+		$this->set('restrict_section', $ini->restrict_section ?? null);
+		$this->set('restrict_level', isset($ini->restrict_section, $ini->restrict_level, Session::ACCESS_WORDS[$ini->restrict_level]) ? Session::ACCESS_WORDS[$ini->restrict_level] : null);
 
 		return true;
 	}

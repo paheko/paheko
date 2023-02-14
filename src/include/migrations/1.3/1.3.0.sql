@@ -56,7 +56,7 @@ DELETE FROM plugins_old WHERE nom = 'ouvertures';
 DELETE FROM plugins_signaux_old WHERE plugin = 'ouvertures';
 
 -- Rename plugins table columns to English
-INSERT INTO plugins SELECT id, nom, description, auteur, url, version, config FROM plugins_old;
+INSERT INTO plugins (id, label, description, author, url, version, config, menu) SELECT id, nom, description, auteur, url, version, config, 0 FROM plugins_old;
 INSERT INTO plugins_signals SELECT * FROM plugins_signaux_old;
 
 DROP TABLE plugins_signaux_old;

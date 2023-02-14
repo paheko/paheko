@@ -8,6 +8,7 @@ use Garradin\Files\Files;
 use Garradin\DB;
 use Garradin\Utils;
 use Garradin\UserException;
+use Garradin\Users\Session;
 
 use const Garradin\ROOT;
 
@@ -42,7 +43,7 @@ class Modules
 
 		foreach ($existing as $name) {
 			$f = self::get($name);
-			$f->updateFromJSON();
+			$f->updateFromINI();
 			$f->save();
 			$f->updateTemplates();
 		}
@@ -93,7 +94,7 @@ class Modules
 			$m = new Module;
 			$m->name = $name;
 
-			if (!$m->updateFromJSON(false)) {
+			if (!$m->updateFromINI(false)) {
 				continue;
 			}
 
@@ -108,7 +109,7 @@ class Modules
 		$module = new Module;
 		$module->name = $name;
 
-		if (!$module->updateFromJSON()) {
+		if (!$module->updateFromINI()) {
 			return null;
 		}
 
@@ -147,6 +148,31 @@ class Modules
 			INNER JOIN modules_templates t ON t.id_module = f.id
 			WHERE t.name = ? AND f.enabled = 1
 			ORDER BY f.label COLLATE NOCASE ASC;', $snippet);
+	}
+
+	static public function listModulesAndPluginsMenu(): array
+	{
+		$list = [];
+		$session = Session::getInstance();
+
+		foreach (DB::getInstance()->get('SELECT name, label, restrict_section, restrict_level FROM modules WHERE menu = 1;') as $m) {
+			if (!$session->canAccess($m->restrict_section, $m->restrict_level)) {
+				continue;
+			}
+
+			$list[$m->name] = sprintf('<a href="%sm/%s">%s</a>', ADMIN_URL, $m->name, $m->label);
+		}
+
+		foreach (DB::getInstance()->get('SELECT id, label, restrict_section, restrict_level FROM plugins WHERE menu = 1;') as $p) {
+			if (!$session->canAccess($p->restrict_section, $p->restrict_level)) {
+				continue;
+			}
+
+			$list[$m->name] = sprintf('<a href="%sp/%s">%s</a>', ADMIN_URL, $p->name, $p->label);
+		}
+
+		ksort($list);
+		return $list;
 	}
 
 	static public function get(string $name): ?Module

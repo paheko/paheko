@@ -35,6 +35,10 @@ CREATE TABLE IF NOT EXISTS plugins
     author TEXT NULL,
     url TEXT NULL,
     version TEXT NOT NULL,
+    menu INT NOT NULL DEFAULT 0,
+    home_button INT NOT NULL DEFAULT 0,
+    restrict_section TEXT NULL,
+    restrict_level INT NULL,
     config TEXT NULL
 );
 
@@ -498,6 +502,12 @@ CREATE TABLE IF NOT EXISTS modules
     name TEXT NOT NULL,
     label TEXT NOT NULL,
     description TEXT NULL,
+    author TEXT NULL,
+    url TEXT NULL,
+    menu INT NOT NULL DEFAULT 0,
+    home_button INT NOT NULL DEFAULT 0,
+    restrict_section TEXT NULL,
+    restrict_level INT NULL,
     config TEXT NULL,
     enabled INTEGER NOT NULL DEFAULT 0
 );
