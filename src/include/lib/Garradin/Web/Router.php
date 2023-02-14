@@ -76,8 +76,8 @@ class Router
 		elseif (preg_match('!^(?:admin/p|p|m)/\w+$!', $uri)) {
 			Utils::redirect('/' . $uri . '/');
 		}
-		elseif (preg_match('!^(admin/p|p)/(' . Plugins::NAME_REGEXP . ')/(.*)$!', $uri, $match)) {
-			$plugin = Plugins::get($match[2]);
+		elseif (preg_match('!^(admin/p|p)/(' . Plugins::NAME_REGEXP . ')/(.*)$!', $uri, $match)
+			&& ($plugin = Plugins::get($match[2]))) {
 			$uri = ($match[1] == 'admin/p' ? 'admin/' : '') . $match[3];
 			$plugin->route($uri);
 			return;

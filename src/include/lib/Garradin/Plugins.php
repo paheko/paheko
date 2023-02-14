@@ -12,7 +12,7 @@ use Garradin\UserTemplate\Modules;
 
 use \KD2\DB\EntityManager as EM;
 
-use const Garradin\{SYSTEM_SIGNALS, ADMIN_URL};
+use const Garradin\{SYSTEM_SIGNALS, ADMIN_URL, WWW_URL, PLUGINS_ROOT};
 
 class Plugins
 {
@@ -27,6 +27,16 @@ class Plugins
 	static public function toggleSignals(bool $enabled)
 	{
 		self::$signals = $enabled;
+	}
+
+	static public function getPrivateURL(string $id, string $path = '')
+	{
+		return ADMIN_URL . 'p/' . $id . '/' . ltrim($path, '/');
+	}
+
+	static public function getPublicURL(string $id, string $path = '')
+	{
+		return WWW_URL . 'p/' . $id . '/' . ltrim($path, '/');
 	}
 
 	static public function getPath(string $name): string

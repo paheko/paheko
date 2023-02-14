@@ -3,16 +3,19 @@ namespace Garradin;
 
 use Garradin\UserTemplate\Modules;
 use Garradin\Plugins;
+use Garradin\Users\Session;
 
 require_once __DIR__ . '/../_inc.php';
 
 $csrf_key = 'ext';
+$session = Session::getInstance();
 
-$form->runIf('install', function () {
+$form->runIf('install', function () use ($session) {
 	Plugins::install(f('install'));
+	$session->set('plugins_menu', null);
 }, $csrf_key, '!config/ext/?focus=' . f('install'));
 
-$form->runIf('enable', function () {
+$form->runIf('enable', function () use ($session) {
 	$m = Modules::get(f('enable'));
 
 	if (!$m) {
@@ -21,9 +24,10 @@ $form->runIf('enable', function () {
 
 	$m->enabled = true;
 	$m->save();
+	$session->set('plugins_menu', null);
 }, $csrf_key, '!config/ext/?focus=' . f('enable'));
 
-$form->runIf('disable_module', function () {
+$form->runIf('disable_module', function () use ($session) {
 	$m = Modules::get(f('disable_module'));
 
 	if (!$m) {
@@ -32,9 +36,10 @@ $form->runIf('disable_module', function () {
 
 	$m->enabled = false;
 	$m->save();
+	$session->set('plugins_menu', null);
 }, $csrf_key, '!config/ext/');
 
-$form->runIf('disable_plugin', function () {
+$form->runIf('disable_plugin', function () use ($session) {
 	$p = Plugins::get(f('disable_plugin'));
 
 	if (!$p) {
@@ -43,6 +48,7 @@ $form->runIf('disable_plugin', function () {
 
 	$p->set('enabled', false);
 	$p->save();
+	$session->set('plugins_menu', null);
 }, $csrf_key, '!config/ext/');
 
 Modules::refresh();
