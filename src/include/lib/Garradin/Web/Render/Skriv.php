@@ -4,7 +4,7 @@ namespace Garradin\Web\Render;
 
 use Garradin\Entities\Files\File;
 
-use Garradin\Plugin;
+use Garradin\Plugins;
 use Garradin\UserTemplate\CommonModifiers;
 
 use KD2\SkrivLite;
@@ -28,7 +28,7 @@ class Skriv extends AbstractRender
 		$this->skriv->registerExtension('html', [$this, 'SkrivHTML']);
 
 		// Enregistrer d'autres extensions éventuellement
-		Plugin::fireSignal('skriv.init', ['skriv' => $this->skriv]);
+		Plugins::fireSignal('skriv.init', ['skriv' => $this->skriv]);
 	}
 
 	public function render(?string $content = null): string

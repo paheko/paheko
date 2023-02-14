@@ -1,0 +1,107 @@
+{include file="_head.tpl" title="Extensions" current="config"}
+
+{include file="config/_menu.tpl" current="ext"}
+
+<nav class="tabs">
+
+	<ul class="sub">
+		<li{if !$installable} class="current"{/if}><a href="./">Activées</a></li>
+		<li{if $installable} class="current"{/if}><a href="./?install=1">Inactives</a></li>
+	</ul>
+</nav>
+
+{if !empty($url_plugins)}
+<p class="actions">
+	{linkbutton shape="help" href=$url_plugins label="Trouver d'autres extensions à installer" target="_blank"}
+</p>
+{/if}
+
+
+{form_errors}
+
+<form method="post" action="">
+	<table class="list">
+		<thead>
+			<td></td>
+			<td>Extension</td>
+			<td>Accès restreint</td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</thead>
+		<tbody>
+			{foreach from=$list item="item"}
+			<tr {if $_GET.focus == $item.name}class="highlight"{/if}>
+				<td class="icon">
+					{if $item.icon_url}
+					<svg>
+						<use xlink:href='{$item.icon_url}#img' href="{$item.icon_url}#img"></use>
+					</svg>
+					{/if}
+				</td>
+				<td>
+					<h3>{$item.label}
+						{if $item.module && $item.module->canDelete()}
+							<strong class="tag">Modifiée</strong>
+						{elseif $item.module}
+							<span class="tag">Modifiable</span>
+						{/if}
+					</h3>
+					<small>{$item.description|escape|nl2br}</small><br />
+					<small class="help">
+						Par {link label=$item.author href=$item.url target="_blank"}
+						{if $item.plugin && $item.plugin.version}— Version {$item.plugin.version}{/if}
+						{if $item.readme_url}
+							— {link href=$item.readme_url label="Documentation" target="_dialog"}
+						{/if}
+					</small>
+				</td>
+				<td>
+					{if $item.restrict_section}
+						<span class="permissions">{display_permissions section=$item.restrict_section level=$item.restrict_level}</span>
+					{/if}
+				</td>
+				<td class="actions">
+					{if $item.module && $item.enabled}
+						{if $item.module->hasLocal() && $item.module->hasDist()}
+							{linkbutton label="Remettre à zéro" href="delete.php?module=%s"|args:$item.name shape="reset" target="_dialog"}
+						{/if}
+						{*FIXME{linkbutton label="Modifier" href="edit.php?module=%s"|args:$item.name shape="edit" target="_dialog"}*}
+					{elseif $item.module && !$item.enabled && $item.module->canDelete()}
+						{linkbutton label="Supprimer" href="delete.php?module=%s"|args:$item.name shape="delete" target="_dialog"}
+					{elseif $item.plugin && !$item.enabled && $item.installed}
+						{linkbutton label="Supprimer" href="delete.php?plugin=%s"|args:$item.name shape="delete" target="_dialog"}
+					{/if}
+				</td>
+				<td class="actions">
+					{if $item.config_url && $item.enabled}
+						{linkbutton label="Configurer" href=$item.config_url shape="settings" target="_dialog"}
+					{/if}
+				</td>
+				<td class="actions">
+					{if $item.module}
+						{if $item.enabled}
+							{button type="submit" label="Désactiver" shape="eye-off" name="disable_module" value=$item.name}
+						{else}
+							{button type="submit" label="Activer" shape="eye" name="enable" value=$item.name}
+						{/if}
+					{else}
+						{if $item.enabled}
+							{button type="submit" label="Désactiver" shape="eye-off" name="disable_plugin" value=$item.name}
+						{else}
+							{button type="submit" label="Activer" shape="eye" name="install" value=$item.name}
+						{/if}
+					{/if}
+				</td>
+			</tr>
+			{/foreach}
+		</tbody>
+	</table>
+	{csrf_field key=$csrf_key}
+</form>
+
+<p class="help">
+	La mention <em class="tag">Modifiable</em> indique que cette extension est un module que vous pouvez modifier. {linkbutton shape="help" label="Documentation des modules" href=$url_help_modules target="_dialog"}
+</p>
+
+{include file="_foot.tpl"}

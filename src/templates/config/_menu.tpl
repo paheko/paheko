@@ -5,8 +5,7 @@
 		<li{if $current == 'custom'} class="current"{/if}><a href="{$admin_url}config/custom.php">Personnalisation</a></li>
 		<li{if $current == 'users'} class="current"{/if}><a href="{$admin_url}config/users/">Membres</a></li>
 		<li{if $current == 'backup'} class="current"{/if}><a href="{$admin_url}config/backup/">Sauvegardes</a></li>
-		<li{if $current == 'modules'} class="current"{/if}><a href="{$admin_url}config/modules/">Modules</a></li>
-		<li{if $current == 'plugins'} class="current"{/if}><a href="{$admin_url}config/plugins.php">Extensions</a></li>
+		<li{if $current == 'ext'} class="current"{/if}><a href="{$admin_url}config/ext/">Extensions</a></li>
 		<li{if $current == 'advanced'} class="current"{/if}><a href="{$admin_url}config/advanced/">Fonctions avancées</a></li>
 	</ul>
 

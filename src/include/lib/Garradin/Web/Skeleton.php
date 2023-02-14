@@ -9,7 +9,7 @@ use Garradin\UserException;
 use Garradin\UserTemplate\Modules;
 use Garradin\UserTemplate\UserTemplate;
 use Garradin\Config;
-use Garradin\Plugin;
+use Garradin\Plugins;
 use Garradin\Utils;
 
 use KD2\Brindille_Exception;
@@ -102,7 +102,7 @@ class Skeleton
 
 	public function serve(string $uri, array $params = []): void
 	{
-		if (Plugin::fireSignal('http.request.skeleton.before', $params)) {
+		if (Plugins::fireSignal('http.request.skeleton.before', $params)) {
 			return;
 		}
 
@@ -145,7 +145,7 @@ class Skeleton
 			flush();
 		}
 
-		Plugin::fireSignal('http.request.skeleton.after', $params);
+		Plugins::fireSignal('http.request.skeleton.after', $params);
 	}
 
 	public function file(): ?File

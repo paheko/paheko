@@ -585,11 +585,18 @@ class Template extends Smartyer
 
 	protected function displayPermissions(array $params): string
 	{
-		$perms = $params['permissions'];
-
 		$out = [];
 
-		foreach (Category::PERMISSIONS as $name => $config) {
+		if (isset($params['section'], $params['level'])) {
+			$list = [$params['section'] => Category::PERMISSIONS[$params['section']]];
+			$perms = (object) ['perm_' . $params['section'] => $params['level']];
+		}
+		else {
+			$perms = $params['permissions'];
+			$list = Category::PERMISSIONS;
+		}
+
+		foreach ($list as $name => $config) {
 			$access = $perms->{'perm_' . $name};
 			$label = sprintf('%s : %s', $config['label'], $config['options'][$access]);
 			$out[$name] = sprintf('<b class="access_%s %s" title="%s">%s</b>', $access, $name, htmlspecialchars($label), $config['shape']);

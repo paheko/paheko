@@ -114,7 +114,7 @@ if (!defined('Garradin\ROOT'))
 		$plugin_name = substr($classname, 0, strpos($classname, '\\'));
 		$filename = str_replace('\\', '/', substr($classname, strpos($classname, '\\')+1));
 
-		$path = Plugin::getPath(strtolower($plugin_name)) . '/lib/' . $filename . '.php';
+		$path = Plugins::getPath(strtolower($plugin_name)) . '/lib/' . $filename . '.php';
 	}
 	else
 	{

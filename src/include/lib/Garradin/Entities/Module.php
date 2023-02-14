@@ -17,8 +17,9 @@ class Module extends Entity
 	const ROOT = File::CONTEXT_SKELETON . '/modules';
 	const DIST_ROOT = ROOT . '/skel-dist/modules';
 	const META_FILE = 'module.ini';
-
-	const CONFIG_TEMPLATE = 'config.html';
+	const ICON_FILE = 'icon.svg';
+	const README_FILE = 'README.md';
+	const CONFIG_FILE = 'config.html';
 
 	// Snippets, don't forget to create alias constant in UserTemplate\Modules class
 	const SNIPPET_TRANSACTION = 'snippets/transaction_details.html';
@@ -98,7 +99,7 @@ class Module extends Entity
 
 	public function updateTemplates(): void
 	{
-		$check = self::SNIPPETS + [self::CONFIG_TEMPLATE => 'Config'];
+		$check = self::SNIPPETS + [self::CONFIG_FILE => 'Config'];
 		$templates = [];
 		$db = DB::getInstance();
 
@@ -117,11 +118,11 @@ class Module extends Entity
 
 	public function icon_url(): ?string
 	{
-		if (!$this->hasFile('icon.svg')) {
+		if (!$this->hasFile(self::ICON_FILE)) {
 			return null;
 		}
 
-		return $this->url('icon.svg');
+		return $this->url(self::ICON_FILE);
 	}
 
 	public function path(string $file = null): string
@@ -157,14 +158,24 @@ class Module extends Entity
 		return file_exists($this->distPath());
 	}
 
+	public function hasLocal(): bool
+	{
+		return Files::exists($this->path());
+	}
+
 	public function hasConfig(): bool
 	{
-		return DB::getInstance()->test('modules_templates', 'id_module = ? AND name = ?', $this->id(), self::CONFIG_TEMPLATE);
+		return DB::getInstance()->test('modules_templates', 'id_module = ? AND name = ?', $this->id(), self::CONFIG_FILE);
+	}
+
+	public function hasData(): bool
+	{
+		return DB::getInstance()->test('sqlite_master', 'type = \'table\' AND name = ?', sprintf('modules_data_%s', $this->name));
 	}
 
 	public function canDelete(): bool
 	{
-		return $this->dir() ? true : false;
+		return !empty($this->config) || $this->hasLocal() || $this->hasData();
 	}
 
 	public function delete(): bool
@@ -198,7 +209,7 @@ class Module extends Entity
 
 	public function template(string $file)
 	{
-		if ($file == self::CONFIG_TEMPLATE) {
+		if ($file == self::CONFIG_FILE) {
 			Session::getInstance()->requireAccess(Session::SECTION_CONFIG, Session::ACCESS_ADMIN);
 		}
 

@@ -7,7 +7,7 @@ use KD2\Brindille_Exception;
 use KD2\Translate;
 
 use Garradin\Config;
-use Garradin\Plugin;
+use Garradin\Plugins;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\Users\Session;
@@ -113,7 +113,7 @@ class UserTemplate extends \KD2\Brindille
 
 		$this->registerAll();
 
-		Plugin::fireSignal('usertemplate.init', ['template' => $this]);
+		Plugins::fireSignal('usertemplate.init', ['template' => $this]);
 	}
 
 	/**
@@ -371,7 +371,7 @@ class UserTemplate extends \KD2\Brindille
 
 		if ($is_web && $type == 'text/html') {
 			$scripts = [];
-			Plugin::fireSignal('usertemplate.appendscript', ['template' => $this, 'content' => $content], $scripts);
+			Plugins::fireSignal('usertemplate.appendscript', ['template' => $this, 'content' => $content], $scripts);
 
 			if (count($scripts)) {
 				$scripts = array_map(fn($a) => sprintf('<script type="text/javascript" defer src="%s"></script>', $a), $scripts);

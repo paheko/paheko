@@ -60,6 +60,10 @@ table.list tbody tr.checked {
     background: #ffc !important;
 }
 
+table.list tbody tr.highlight {
+    box-shadow: 0px 0px 5px 5px rgba(var(--gSecondColor), 1);
+}
+
 table.list .error {
     color: red;
     font-weight: bold;

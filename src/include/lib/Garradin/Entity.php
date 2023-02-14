@@ -117,12 +117,12 @@ class Entity extends AbstractEntity
 		$modified = $this->isModified();
 
 		// Specific entity signal
-		if (Plugin::fireSignal($name . '.before', ['entity' => $this, 'new' => $new])) {
+		if (Plugins::fireSignal($name . '.before', ['entity' => $this, 'new' => $new])) {
 			return true;
 		}
 
 		// Generic entity signal
-		if (Plugin::fireSignal('entity.save.before', ['entity' => $this, 'new' => $new])) {
+		if (Plugins::fireSignal('entity.save.before', ['entity' => $this, 'new' => $new])) {
 			return true;
 		}
 
@@ -134,9 +134,9 @@ class Entity extends AbstractEntity
 			Log::add($new ? Log::CREATE : Log::EDIT, ['entity' => $type, 'id' => $this->id()]);
 		}
 
-		Plugin::fireSignal($name . '.after', ['entity' => $this, 'success' => $return, 'new' => $new]);
+		Plugins::fireSignal($name . '.after', ['entity' => $this, 'success' => $return, 'new' => $new]);
 
-		Plugin::fireSignal('entity.save.after', ['entity' => $this, 'success' => $return, 'new' => $new]);
+		Plugins::fireSignal('entity.save.after', ['entity' => $this, 'success' => $return, 'new' => $new]);
 
 		return $return;
 	}
@@ -145,16 +145,16 @@ class Entity extends AbstractEntity
 	{
 		$type = get_class($this);
 		$type = str_replace('Garradin\Entities\\', '', $type);
-		$name = 'entity.' . $name . '.delete';
+		$name = 'entity.' . $type . '.delete';
 
 		$id = $this->id();
 
-		if (Plugin::fireSignal($name . '.before', ['entity' => $this, 'id' => $id])) {
+		if (Plugins::fireSignal($name . '.before', ['entity' => $this, 'id' => $id])) {
 			return true;
 		}
 
 		// Generic entity signal
-		if (Plugin::fireSignal('entity.delete.before', ['entity' => $this, 'id' => $id])) {
+		if (Plugins::fireSignal('entity.delete.before', ['entity' => $this, 'id' => $id])) {
 			return true;
 		}
 
@@ -164,8 +164,8 @@ class Entity extends AbstractEntity
 			Log::add(Log::DELETE, ['entity' => $name, 'id' => $id]);
 		}
 
-		Plugin::fireSignal($name . '.after', ['entity' => $this, 'success' => $return, 'id' => $id]);
-		Plugin::fireSignal('entity.delete.after', ['entity' => $this, 'success' => $return, 'id' => $id]);
+		Plugins::fireSignal($name . '.after', ['entity' => $this, 'success' => $return, 'id' => $id]);
+		Plugins::fireSignal('entity.delete.after', ['entity' => $this, 'success' => $return, 'id' => $id]);
 
 		return $return;
 	}

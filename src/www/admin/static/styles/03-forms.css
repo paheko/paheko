@@ -452,7 +452,7 @@ dd.help.example {
     text-align: center;
 }
 
-form p.actions {
+p.actions {
     float: right;
     margin: .5em;
 }

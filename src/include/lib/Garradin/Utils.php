@@ -1166,7 +1166,7 @@ class Utils
             // Try to see if there's a plugin
             $in = ['string' => $str];
 
-            if (Plugin::fireSignal('pdf.stream', $in)) {
+            if (Plugins::fireSignal('pdf.stream', $in)) {
                 return;
             }
 
@@ -1217,7 +1217,7 @@ class Utils
             // Try to see if there's a plugin
             $in = ['source' => $source, 'target' => $target];
 
-            if (Plugin::fireSignal('pdf.create', $in)) {
+            if (Plugins::fireSignal('pdf.create', $in)) {
                 Utils::safe_unlink($source);
                 return $target;
             }

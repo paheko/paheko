@@ -5,7 +5,7 @@ namespace Garradin\Services;
 use Garradin\Config;
 use Garradin\DB;
 use Garradin\DynamicList;
-use Garradin\Plugin;
+use Garradin\Plugins;
 use Garradin\Utils;
 use Garradin\Users\DynamicFields;
 use Garradin\Email\Emails;
@@ -127,7 +127,7 @@ class Reminders
 			'due_date'    => $reminder->reminder_date,
 		]);
 
-		Plugin::fireSignal('reminder.send.after', $reminder);
+		Plugins::fireSignal('reminder.send.after', $reminder);
 
 		return true;
 	}

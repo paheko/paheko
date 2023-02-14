@@ -10,7 +10,7 @@ use KD2\Security;
 use Garradin\Config;
 use Garradin\DB;
 use Garradin\Entity;
-use Garradin\Plugin;
+use Garradin\Plugins;
 use Garradin\Template;
 use Garradin\UserException;
 use Garradin\ValidationException;
@@ -202,7 +202,7 @@ class File extends Entity
 		// Delete actual file content
 		Files::callStorage('delete', $this);
 
-		Plugin::fireSignal('files.delete', ['file' => $this]);
+		Plugins::fireSignal('files.delete', ['file' => $this]);
 
 		// clean up thumbnails
 		foreach (self::ALLOWED_THUMB_SIZES as $key => $operations)
@@ -267,7 +267,7 @@ class File extends Entity
 		Files::ensureDirectoryExists(Utils::dirname($new_path));
 		$return = Files::callStorage('move', $this, $new_path);
 
-		Plugin::fireSignal('files.move', ['file' => $this, 'new_path' => $new_path]);
+		Plugins::fireSignal('files.move', ['file' => $this, 'new_path' => $new_path]);
 
 		return $return;
 	}
@@ -407,7 +407,7 @@ class File extends Entity
 			throw new UserException('Le fichier n\'a pas pu être enregistré.');
 		}
 
-		Plugin::fireSignal('files.store', ['file' => $this]);
+		Plugins::fireSignal('files.store', ['file' => $this]);
 
 		if ($index_search && $content) {
 			$this->indexForSearch($content);

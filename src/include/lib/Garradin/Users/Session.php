@@ -6,7 +6,7 @@ use Garradin\Config;
 use Garradin\DB;
 use Garradin\Log;
 use Garradin\Utils;
-use Garradin\Plugin;
+use Garradin\Plugins;
 use Garradin\UserException;
 use Garradin\ValidationException;
 
@@ -99,7 +99,7 @@ class Session extends \KD2\UserSession
 		// notamment en installation mutualisée c'est plus efficace
 		$return = ['is_compromised' => null];
 
-		if (Plugin::fireSignal('password.check', ['password' => $password], $return) && isset($return['is_compromised'])) {
+		if (Plugins::fireSignal('password.check', ['password' => $password], $return) && isset($return['is_compromised'])) {
 			return (bool) $return['is_compromised'];
 		}
 
@@ -236,7 +236,7 @@ class Session extends \KD2\UserSession
 			Log::add(Log::LOGIN_FAIL, compact('user_agent'));
 		}
 
-		Plugin::fireSignal('user.login', compact('login', 'password', 'remember_me', 'success'));
+		Plugins::fireSignal('user.login', compact('login', 'password', 'remember_me', 'success'));
 
 		// Clean up logs
 		Log::clean();
@@ -263,7 +263,7 @@ class Session extends \KD2\UserSession
 			Log::add(Log::LOGIN_FAIL, $details, $user_id);
 		}
 
-		Plugin::fireSignal('user.login.otp', compact('success', 'user_id'));
+		Plugins::fireSignal('user.login.otp', compact('success', 'user_id'));
 
 		return $success;
 	}

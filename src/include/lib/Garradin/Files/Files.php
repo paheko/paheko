@@ -5,7 +5,7 @@ namespace Garradin\Files;
 use Garradin\Static_Cache;
 use Garradin\Config;
 use Garradin\DB;
-use Garradin\Plugin;
+use Garradin\Plugins;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\ValidationException;
@@ -871,7 +871,7 @@ class Files
 
 		Files::callStorage('mkdir', $file);
 
-		Plugin::fireSignal('files.mkdir', compact('file'));
+		Plugins::fireSignal('files.mkdir', compact('file'));
 
 		return $file;
 	}

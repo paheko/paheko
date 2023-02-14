@@ -29,8 +29,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS config_users_fields_name ON config_users_field
 
 CREATE TABLE IF NOT EXISTS plugins
 (
-    id TEXT NOT NULL PRIMARY KEY,
+    id INTEGER NOT NULL PRIMARY KEY,
     name TEXT NOT NULL,
+    label TEXT NOT NULL,
     description TEXT NULL,
     author TEXT NULL,
     url TEXT NULL,
@@ -39,17 +40,49 @@ CREATE TABLE IF NOT EXISTS plugins
     home_button INT NOT NULL DEFAULT 0,
     restrict_section TEXT NULL,
     restrict_level INT NULL,
-    config TEXT NULL
+    config TEXT NULL,
+    enabled INTEGER NOT NULL DEFAULT 0
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS plugins_name ON plugins (name);
 
 CREATE TABLE IF NOT EXISTS plugins_signals
 -- Link between plugins and signals
 (
     signal TEXT NOT NULL,
-    plugin TEXT NOT NULL REFERENCES plugins (id),
+    plugin TEXT NOT NULL REFERENCES plugins (name),
     callback TEXT NOT NULL,
     PRIMARY KEY (signal, plugin)
 );
+
+CREATE TABLE IF NOT EXISTS modules
+-- List of modules
+(
+    id INTEGER NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    label TEXT NOT NULL,
+    description TEXT NULL,
+    author TEXT NULL,
+    url TEXT NULL,
+    menu INT NOT NULL DEFAULT 0,
+    home_button INT NOT NULL DEFAULT 0,
+    restrict_section TEXT NULL,
+    restrict_level INT NULL,
+    config TEXT NULL,
+    enabled INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS modules_name ON modules (name);
+
+CREATE TABLE IF NOT EXISTS modules_templates
+-- List of forms special templates
+(
+    id INTEGER NOT NULL PRIMARY KEY,
+    id_module INTEGER NOT NULL REFERENCES modules (id) ON DELETE CASCADE,
+    name TEXT NOT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS modules_templates_name ON modules_templates (id_module, name);
 
 CREATE TABLE IF NOT EXISTS api_credentials
 (
@@ -494,32 +527,3 @@ CREATE UNIQUE INDEX IF NOT EXISTS web_pages_file_path ON web_pages (file_path);
 CREATE INDEX IF NOT EXISTS web_pages_parent ON web_pages (parent);
 CREATE INDEX IF NOT EXISTS web_pages_published ON web_pages (published);
 CREATE INDEX IF NOT EXISTS web_pages_title ON web_pages (title);
-
-CREATE TABLE IF NOT EXISTS modules
--- List of modules
-(
-    id INTEGER NOT NULL PRIMARY KEY,
-    name TEXT NOT NULL,
-    label TEXT NOT NULL,
-    description TEXT NULL,
-    author TEXT NULL,
-    url TEXT NULL,
-    menu INT NOT NULL DEFAULT 0,
-    home_button INT NOT NULL DEFAULT 0,
-    restrict_section TEXT NULL,
-    restrict_level INT NULL,
-    config TEXT NULL,
-    enabled INTEGER NOT NULL DEFAULT 0
-);
-
-CREATE UNIQUE INDEX IF NOT EXISTS modules_name ON modules (name);
-
-CREATE TABLE IF NOT EXISTS modules_templates
--- List of forms special templates
-(
-    id INTEGER NOT NULL PRIMARY KEY,
-    id_module INTEGER NOT NULL REFERENCES modules (id) ON DELETE CASCADE,
-    name TEXT NOT NULL
-);
-
-CREATE UNIQUE INDEX IF NOT EXISTS modules_templates_name ON modules_templates (id_module, name);

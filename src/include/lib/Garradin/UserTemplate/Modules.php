@@ -136,10 +136,10 @@ class Modules
 		$out = [];
 
 		foreach (self::listForSnippet($snippet) as $module) {
-			$out[] = $module->fetch($snippet, $variables);
+			$out[$module->name] = $module->fetch($snippet, $variables);
 		}
 
-		return $out;
+		return array_filter($out, fn($a) => trim($a) !== '');
 	}
 
 	static public function listForSnippet(string $snippet): array
@@ -148,31 +148,6 @@ class Modules
 			INNER JOIN modules_templates t ON t.id_module = f.id
 			WHERE t.name = ? AND f.enabled = 1
 			ORDER BY f.label COLLATE NOCASE ASC;', $snippet);
-	}
-
-	static public function listModulesAndPluginsMenu(): array
-	{
-		$list = [];
-		$session = Session::getInstance();
-
-		foreach (DB::getInstance()->get('SELECT name, label, restrict_section, restrict_level FROM modules WHERE menu = 1;') as $m) {
-			if (!$session->canAccess($m->restrict_section, $m->restrict_level)) {
-				continue;
-			}
-
-			$list[$m->name] = sprintf('<a href="%sm/%s">%s</a>', ADMIN_URL, $m->name, $m->label);
-		}
-
-		foreach (DB::getInstance()->get('SELECT id, label, restrict_section, restrict_level FROM plugins WHERE menu = 1;') as $p) {
-			if (!$session->canAccess($p->restrict_section, $p->restrict_level)) {
-				continue;
-			}
-
-			$list[$m->name] = sprintf('<a href="%sp/%s">%s</a>', ADMIN_URL, $p->name, $p->label);
-		}
-
-		ksort($list);
-		return $list;
 	}
 
 	static public function get(string $name): ?Module

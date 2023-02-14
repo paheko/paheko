@@ -645,3 +645,18 @@ svg.icon, .icon svg {
 .print-only {
     display: none;
 }
+
+.tag {
+    font-size: .8rem;
+    font-weight: normal;
+    background: rgba(var(--gSecondColor), 0.3);
+    border-radius: .5em;
+    padding: .2em .4em;
+    display: inline-block;
+    margin: 0 .2em;
+}
+
+strong.tag {
+    background: rgba(var(--gMainColor), 0.7);
+    color: rgb(var(--gBgColor));
+}

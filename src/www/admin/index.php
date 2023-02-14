@@ -6,13 +6,13 @@ use Garradin\Web\Web;
 use Garradin\Files\Files;
 use Garradin\Users\Session;
 use Garradin\Entities\Files\File;
-use Garradin\UserTemplate\Modules;
+use Garradin\Plugins;
 
 require_once __DIR__ . '/_inc.php';
 
 $banner = '';
 $session = Session::getInstance();
-Plugin::fireSignal('home.banner', ['user' => $session->getUser(), 'session' => $session], $banner);
+Plugins::fireSignal('home.banner', ['user' => $session->getUser(), 'session' => $session], $banner);
 
 $homepage = Config::getInstance()->file('admin_homepage');
 
@@ -23,16 +23,7 @@ else {
 	$homepage = null;
 }
 
-$buttons = [];
-Plugin::fireSignal('home.button', ['user' => $session->getUser(), 'session' => $session], $buttons);
-
-foreach (Modules::snippets(Modules::SNIPPET_HOME_BUTTON) as $snippet) {
-	if (trim($snippet) === '') {
-		continue;
-	}
-
-	$buttons[] = $snippet;
-}
+$buttons = Plugins::listModulesAndPluginsHomeButtons($session);
 
 $tpl->assign(compact('homepage', 'banner', 'buttons'));
 
