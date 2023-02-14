@@ -51,7 +51,7 @@ class Modules
 	/**
 	 * List modules names from locally installed directories
 	 */
-	static public function listRaw(): array
+	static public function listRaw(bool $include_installed = true): array
 	{
 		$list = [];
 
@@ -65,16 +65,17 @@ class Modules
 			$list[$name] = $name;
 		}
 
-		// Then add modules in files
-		foreach (Files::list(Module::ROOT) as $file) {
-			if ($file->type != $file::TYPE_DIRECTORY) {
-				continue;
-			}
+		if ($include_installed) {
+			// Then add modules in files
+			foreach (Files::list(Module::ROOT) as $file) {
+				if ($file->type != $file::TYPE_DIRECTORY) {
+					continue;
+				}
 
-			$list[$file->name] = $file->name;
+				$list[$file->name] = $file->name;
+			}
 		}
 
-		$list = array_reverse($list);
 		sort($list);
 		return $list;
 	}
@@ -85,7 +86,7 @@ class Modules
 	 */
 	static public function listLocal(): array
 	{
-		$list = self::listRaw();
+		$list = self::listRaw(false);
 		$out = [];
 
 		foreach ($list as $name) {
