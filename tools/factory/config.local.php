@@ -101,5 +101,5 @@ if (!is_dir($user_data_dir)) {
 define('Garradin\DATA_ROOT', $user_data_dir);
 
 // Définir l'URL
-define('Garradin\WWW_URL', 'https://' . $login . FACTORY_DOMAIN . '/');
+define('Garradin\WWW_URL', 'https://' . $login . '.' . FACTORY_DOMAIN . '/');
 define('Garradin\WWW_URI', '/');
