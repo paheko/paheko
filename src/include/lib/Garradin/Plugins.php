@@ -78,7 +78,8 @@ class Plugins
 			}
 		}
 
-		$list = DB::getInstance()->get('SELECT * FROM plugins_signals WHERE signal = ?;', $signal);
+		$list = DB::getInstance()->get('SELECT s.* FROM plugins_signals AS s INNER JOIN plugins p ON p.name = s.plugin
+			WHERE s.signal = ? AND p.enabled = 1;', $signal);
 
 		if (!count($list)) {
 			return null;
@@ -141,6 +142,12 @@ class Plugins
 					continue;
 				}
 
+				if (!$p->hasCode()) {
+					$p->set('enabled', false);
+					$p->save();
+					continue;
+				}
+
 				$list[$p->name] = ['plugin'   => $p];
 			}
 		}
@@ -157,6 +164,7 @@ class Plugins
 			$item['readme_url'] = $c->hasFile($c::README_FILE) ? $c->url($c::README_FILE) : null;
 			$item['enabled'] = $c->enabled;
 			$item['installed'] = isset($item['plugin']) ? $c->exists() : true;
+			$item['broken'] = isset($item['plugin']) ? !$c->hasCode() : false;
 			$item['restrict_section'] = $c->restrict_section;
 			$item['restrict_level'] = $c->restrict_level;
 		}
@@ -172,25 +180,34 @@ class Plugins
 	{
 		$list = [];
 
-		foreach (DB::getInstance()->get('SELECT name, label, restrict_section, restrict_level FROM modules WHERE menu = 1;') as $m) {
-			if ($m->restrict_section && !$session->canAccess($m->restrict_section, $m->restrict_level)) {
+		$sql = 'SELECT \'module\' AS type, name, label, restrict_section, restrict_level FROM modules WHERE menu = 1 AND enabled = 1
+			UNION ALL
+			SELECT \'plugin\' AS type, name, label, restrict_section, restrict_level FROM plugins WHERE menu = 1 AND enabled = 1;';
+
+		foreach (DB::getInstance()->get($sql) as $item) {
+			if ($item->restrict_section && !$session->canAccess($item->restrict_section, $item->restrict_level)) {
 				continue;
 			}
 
-			$list['module_' . $m->name] = sprintf('<a href="%sm/%s/">%s</a>', ADMIN_URL, $m->name, $m->label);
+			$list[$item->type . '_' . $item->name] = $item;
 		}
 
-		foreach (DB::getInstance()->get('SELECT name, label, restrict_section, restrict_level FROM plugins WHERE menu = 1;') as $p) {
-			if ($p->restrict_section && !$session->canAccess($p->restrict_section, $p->restrict_level)) {
-				continue;
-			}
+		// Sort items by label
+		uasort($list, fn ($a, $b) => strnatcasecmp($a->label, $b->label));
 
-			$list['plugin_' . $p->name] = sprintf('<a href="%sp/%s/">%s</a>', ADMIN_URL, $p->name, $p->label);
+		foreach ($list as &$item) {
+			$item = sprintf('<a href="%s/%s/">%s</a>',
+				$item->type == 'plugin' ? ADMIN_URL . 'p' : WWW_URL  . 'm',
+				$item->name,
+				$item->label
+			);
 		}
 
+		unset($item);
+
+		// Append plugins from signals
 		self::fireSignal('menu.item', compact('session'), $list);
 
-		ksort($list);
 		return $list;
 	}
 
@@ -198,39 +215,38 @@ class Plugins
 	{
 		$list = [];
 
-		foreach (DB::getInstance()->get('SELECT name, label, restrict_section, restrict_level FROM modules WHERE menu = 1;') as $m) {
-			if ($m->restrict_section && !$session->canAccess($m->restrict_section, $m->restrict_level)) {
+		$sql = 'SELECT \'module\' AS type, name, label, restrict_section, restrict_level FROM modules WHERE home_button = 1 AND enabled = 1
+			UNION ALL
+			SELECT \'plugin\' AS type, name, label, restrict_section, restrict_level FROM plugins WHERE home_button = 1 AND enabled = 1;';
+
+		foreach (DB::getInstance()->get($sql) as $item) {
+			if ($item->restrict_section && !$session->canAccess($item->restrict_section, $item->restrict_level)) {
 				continue;
 			}
 
-			$url = ADMIN_URL . 'm/' . $m->name . '/';
-			$list[$m->name] = CommonFunctions::linkButton([
-				'label' => $m->label,
+			$list[$item->type . '_' . $item->name] = $item;
+		}
+
+		// Sort items by label
+		uasort($list, fn ($a, $b) => strnatcasecmp($a->label, $b->label));
+
+		foreach ($list as &$item) {
+			$url = sprintf('%s/%s/', $item->type == 'plugin' ? ADMIN_URL . 'p' : WWW_URL  . 'm', $item->name);
+			$item = CommonFunctions::linkButton([
+				'label' => $item->label,
 				'icon' => $url . 'icon.svg',
 				'href' => $url,
 			]);
 		}
+
+		unset($item);
 
 		foreach (Modules::snippets(Modules::SNIPPET_HOME_BUTTON) as $name => $v) {
-			$list[$name] = $v;
-		}
-
-		foreach (DB::getInstance()->get('SELECT name, label, restrict_section, restrict_level FROM plugins WHERE menu = 1;') as $p) {
-			if ($p->restrict_section && !$session->canAccess($p->restrict_section, $p->restrict_level)) {
-				continue;
-			}
-
-			$url = ADMIN_URL . 'p/' . $p->name . '/';
-			$list[$p->name] = CommonFunctions::linkButton([
-				'label' => $p->label,
-				'icon' => $url . 'icon.svg',
-				'href' => $url,
-			]);
+			$list['module_' . $name] = $v;
 		}
 
 		Plugins::fireSignal('home.button', ['user' => $session->getUser(), 'session' => $session], $list);
 
-		ksort($list);
 		return $list;
 	}
 

@@ -56,13 +56,7 @@ if (!defined('Garradin\LOGIN_PROCESS'))
 
 	$tpl->assign('current', '');
 
-	if ($session->get('plugins_menu') === null) {
-		// Construction de la liste de plugins pour le menu
-		// et stockage en session pour ne pas la recalculer à chaque page
-		$session->set('plugins_menu', Plugins::listModulesAndPluginsMenu($session));
-	}
-
-	$tpl->assign('plugins_menu', $session->get('plugins_menu'));
+	$tpl->assign('plugins_menu', Plugins::listModulesAndPluginsMenu($session));
 }
 
 // Make sure we allow frames to work

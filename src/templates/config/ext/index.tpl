@@ -56,6 +56,18 @@
 						{/if}
 					</small>
 				</td>
+			{if $item.broken}
+				<td colspan="4">
+					<strong class="error">Extension cassée</strong><br />
+					{if ENABLE_TECH_DETAILS}
+						<strong>Le code source de l'extension est absent du répertoire <tt>…/data/plugins/</tt></strong>
+					{else}
+						<strong>Cette extension n'est pas installée sur ce serveur.</strong><br />
+					{/if}
+					<br />
+					<small>Il n'est pas possible de la supprimer non plus, le code source est nécessaire pour pouvoir la supprimer.</small>
+				</td>
+			{else}
 				<td>
 					{if $item.restrict_section}
 						<span class="permissions">{display_permissions section=$item.restrict_section level=$item.restrict_level}</span>
@@ -93,6 +105,7 @@
 						{/if}
 					{/if}
 				</td>
+			{/if}
 			</tr>
 			{/foreach}
 		</tbody>

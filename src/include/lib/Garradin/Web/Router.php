@@ -77,16 +77,17 @@ class Router
 			Utils::redirect('/' . $uri . '/');
 		}
 		elseif (preg_match('!^(admin/p|p)/(' . Plugins::NAME_REGEXP . ')/(.*)$!', $uri, $match)
-			&& ($plugin = Plugins::get($match[2]))) {
+			&& ($plugin = Plugins::get($match[2])) && $plugin->enabled) {
 			$uri = ($match[1] == 'admin/p' ? 'admin/' : '') . $match[3];
 			$plugin->route($uri);
 			return;
 		}
-		elseif ('admin' == $first || 'p' == $first) {
+		// Other admin/plugin routes are not found
+		elseif ($first === 'admin' || $first === 'p') {
 			http_response_code(404);
 			throw new UserException('Cette page n\'existe pas.');
 		}
-		elseif ('api' == $first) {
+		elseif ('api' === $first) {
 			API::dispatchURI(substr($uri, 4));
 			return;
 		}

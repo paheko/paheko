@@ -9,6 +9,7 @@ use KD2\JSONSchema;
 
 use Garradin\Config;
 use Garradin\DB;
+use Garradin\Plugins;
 use Garradin\Template;
 use Garradin\Utils;
 use Garradin\UserException;
@@ -16,6 +17,7 @@ use Garradin\Email\Emails;
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 use Garradin\Entities\Module;
+use Garradin\Users\Session;
 
 use const Garradin\{ROOT, WWW_URL};
 
@@ -62,6 +64,7 @@ class Functions
 	{
 		$tpl = Template::getInstance();
 		$tpl->assign($params);
+		$tpl->assign('plugins_menu', Plugins::listModulesAndPluginsMenu(Session::getInstance()));
 		return $tpl->fetch('_head.tpl');
 	}
 

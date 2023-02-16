@@ -10,12 +10,11 @@ require_once __DIR__ . '/../_inc.php';
 $csrf_key = 'ext';
 $session = Session::getInstance();
 
-$form->runIf('install', function () use ($session) {
+$form->runIf('install', function () {
 	Plugins::install(f('install'));
-	$session->set('plugins_menu', null);
 }, $csrf_key, '!config/ext/?focus=' . f('install'));
 
-$form->runIf('enable', function () use ($session) {
+$form->runIf('enable', function () {
 	$m = Modules::get(f('enable'));
 
 	if (!$m) {
@@ -24,10 +23,9 @@ $form->runIf('enable', function () use ($session) {
 
 	$m->enabled = true;
 	$m->save();
-	$session->set('plugins_menu', null);
 }, $csrf_key, '!config/ext/?focus=' . f('enable'));
 
-$form->runIf('disable_module', function () use ($session) {
+$form->runIf('disable_module', function () {
 	$m = Modules::get(f('disable_module'));
 
 	if (!$m) {
@@ -36,10 +34,9 @@ $form->runIf('disable_module', function () use ($session) {
 
 	$m->enabled = false;
 	$m->save();
-	$session->set('plugins_menu', null);
 }, $csrf_key, '!config/ext/');
 
-$form->runIf('disable_plugin', function () use ($session) {
+$form->runIf('disable_plugin', function () {
 	$p = Plugins::get(f('disable_plugin'));
 
 	if (!$p) {
@@ -48,7 +45,6 @@ $form->runIf('disable_plugin', function () use ($session) {
 
 	$p->set('enabled', false);
 	$p->save();
-	$session->set('plugins_menu', null);
 }, $csrf_key, '!config/ext/');
 
 Modules::refresh();
@@ -67,3 +63,6 @@ $url_help_modules = sprintf(HELP_PATTERN_URL, 'modules');
 $tpl->assign(compact('list', 'csrf_key', 'url_help_modules'));
 
 $tpl->display('config/ext/index.tpl');
+
+flush();
+Plugins::upgradeAllIfRequired();
