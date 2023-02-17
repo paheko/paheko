@@ -1,0 +1,130 @@
+{{#restrict section="accounting" level="write"}}
+
+{{* ==================== Header ==================== *}}
+
+{{:admin_header title="Devis et factures" current="acc"}}
+<nav class="tabs">
+	<aside>
+		{{:linkbutton href="edit.html" label="Nouveau document" shape="plus" target="_dialog"}}
+	</aside>
+	{{:include file='./include/main_nav_tabs.html'}}
+</nav>
+{{:include file='./include/constants.tpl' keep='type_labels,status_labels,status_options'}}
+{{:include file='./include/style.tpl'}}
+
+<h1>Création d'un devis</h1>
+
+{{if $_POST.quotation_submit}}
+	{{:assign computed_total=0}}
+	{{:assign errors=null}}
+	{{:assign items=null}}
+	{{#foreach from=$_POST.items key='index' item='item'}}
+		{{if $item.name === ''}}{{:assign var='errors[]' value="Le nom de l'article est requis."}}{{/if}}
+		{{if $item.unit_price < 0 || $item.unit_price != $item.unit_price|floatval|strtolower}} {{* Hack to check the data is a number *}}
+			{{:assign var='errors[]' value='Le prix saisi pour "%s" est invalide.'|args:$item.name}}
+		{{/if}}
+		{{if $item.quantity < 0 || $item.quantity != $item.quantity|floatval|strtolower}}{{:assign var='errors[]' value='La quantité saisie pour "%s" est invalide.'|args:$item.name}}{{/if}}
+
+		{{:assign var='computed_item' value=$item}}
+		{{:assign var='computed_item[unit_price]' value=$item.unit_price|floatval}}
+		{{:assign var='computed_item[quantity]' value=$item.quantity|intval}}
+		{{:assign var='items[]' value=$computed_item}}
+		{{:assign var='computed_total' value="%d + %d * %d"|args:$computed_total:$item.unit_price:$item.quantity|math}}
+	{{/foreach}}
+
+	{{if ($computed_total != $_POST.quotation_total) || ($computed_total < 0)}}
+		{{:assign var='errors[]' value='Erreur de calcul du total. Enregistrement du devis refusé.'}}
+	{{/if}}
+
+	{{if $errors|count}}
+		{{#foreach from=$errors item='error'}}
+			<p class="error block">{{$error}}</p>
+		{{/foreach}}
+	{{else}}
+		{{:assign new_key="%d+1"|math:$module.config.last_id}}
+		{{:assign id="%d+1"|math:$module.config.last_quotation_id}}
+
+		{{:save key=$id
+			validate_schema="./quotation.schema.json"
+			id=$new_key
+			type='quotation'
+			recipient_business_name=$_POST.recipient_business_name
+			recipient_address=$_POST.recipient_address
+			subject=$_POST.subject
+			date=$_POST.date
+			deadline=$_POST.deadline
+			status=$_POST.status
+			items=$items
+			total=$computed_total
+			contact_info=$_POST.contact_info
+			payment_detail=$_POST.payment_detail
+			extra_info=$_POST.extra_info
+		}}
+		{{:save key="config" last_id=$new_key last_quotation_id=$id}}
+		{{:http redirect="./index.html?ok=1"}}
+	{{/if}}
+{{/if}}
+
+<form method="POST" action="">
+	<fieldset>
+		<legend><h2>Destinataire</h2></legend>
+		{{:input type="text" name="recipient_business_name" label="Raison sociale" placeholder="ex : SARL J'aime les deux vies" required=true}}
+		{{:input type="textarea" name="recipient_address" label="Adresse" placeholder="" required=true}}
+	</fieldset>
+	<fieldset>
+		<legend><h2>Objet</h2></legend>
+		<ul>
+			<li>{{:input type="text" name="subject" label="Objet" placeholder="ex : Devis pour une location de barnum" required=true}}</li>
+			<li>{{:input type="date" name="date" label="Date du devis" placeholder="" required=true}}</li>
+			<li>{{:input type="date" name="deadline" label="Échéance pour validation" placeholder="" required=false}}</li>
+			<li>{{:input type="text" name="contact_info" label="Contact" default=$config.org_email required=true}}</li>
+			<li>
+				<dt><label for="status">Statut</label></dt>
+				<dd>
+					{{:input type="select" name="status" options=$status_options default=$status required=true}}
+				</dd>
+			</li>
+		</ul>
+	</fieldset>
+	<fieldset>
+		<legend><h2>Liste des articles</h2></legend>
+		<p id="item_list_no_item_message">Aucun article pour le moment.</p>
+		<table id="item_list" style="display: none;">
+			<tr>
+				<th>Dénomination</th>
+				<th>Description</th>
+				<th>Prix unitaire</th>
+				<th>Quantité</th>
+			</tr>
+		</table>
+		<p>{{:linkbutton label="Ajouter un article" href="item_form.html" shape="settings" target="_dialog"}}</p>
+		<h3>Total des articles</h3>
+		<p>
+			<span id="quotation_total">0 {{$config.currency|htmlspecialchars}}</span>
+			<input type="hidden" name="quotation_total" id="quotation_total_input" label="" value="" />
+		</p>
+	</fieldset>
+
+	{{if $module.config.payment_detail || $module.config.quotation_extra_info}}
+		<fieldset>
+			<legend><h2>Informations complémentaires affichées en bas du devis</h2></legend>
+			<ul>
+			{{if $module.config.payment_detail}}
+				<li>{{:input type="textarea" name="payment_detail" label="Instructions de paiement" default=$module.config.payment_detail|escape|nl2br}}</li>
+			{{/if}}
+			{{if $module.config.quotation_extra_info}}
+				<li>{{:input type="textarea" name="extra_info" label="Informations complémentaires" default=$module.config.quotation_extra_info|escape|nl2br}}</li>
+			{{/if}}
+			</ul>
+		<p>(La valeur pré-remplie de ces informations est modifiable dans la configuration du module.)</p>
+		</fieldset>
+	{{/if}}
+
+	<input type="submit" name="quotation_submit" label="" value="Valider la création de devis" />
+</form>
+
+{{:admin_footer}}
+
+{{else}}
+	{{:error message="Seuls les membres avec accès en lecture à la comptabilité peuvent visualiser cette page."}}
+{{/restrict}}
