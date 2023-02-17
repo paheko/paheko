@@ -1,4 +1,5 @@
-{{:admin_header title="Configuration du module de devis et facture"}}
+{{:assign page_title="Configuration du module de devis et facture"}}
+{{:admin_header title=$page_title}}
 
 {{if $_POST.save}}
 	<!-- Todo: add a nice error check here -->
@@ -7,31 +8,23 @@
 	{{else}}
 		{{:save key="config"
 			validate_schema="./config.schema.json"
-			bic=$_POST.bic
-			iban=$_POST.iban
-			bank=$_POST.bank
 			payment_detail=$_POST.payment_detail
+			quotation_extra_info=$_POST.quotation_extra_info
 		}}
 		{{:http redirect="?ok=1"}}
 	{{/if}}
 {{elseif $_GET.ok}}
-	<p class="block confirm">RIB enregistré.</p>
+	<p class="block confirm">Configuration enregistrée.</p>
 {{/if}}
 
+<h1>{{$page_title}}</h1>
 <form method="POST" action="{{$self_url}}">
 	<fieldset>
-		<legend>RIB à indiquer dans le devis</legend>
-		<ul>
-			<li>{{:input required=false name="bic" type="text" label="BIC" default=$module.config.bic placeholder="ex : ABCDEFGH012"}}</li>
-			<li>{{:input required=false name="iban" type="text" label="IBAN" default=$module.config.iban placeholder="ex : FR9901234567890123456789012"}}</li>
-			<li>{{:input required=false name="bank" type="text" label="Banque" default=$module.config.bank placeholder="ex : La banque eh! tic"}}</li>
-		</ul>
+		<legend></legend>
+		{{:input required=false name="payment_detail" type="textarea" label="Instructions de paiement" default=$module.config.payment_detail placeholder="BIC :&#10;ABCDEFGH012&#10;FR9901234567890123456789012&#10;La banque eh! tic&#10;&#10;Paiement à réaliser sous 15 jours."}}
+		{{:input required=false name="quotation_extra_info" type="textarea" label="Informations complémentaires affichées en bas des devis" default=$module.config.quotation_extra_info placeholder="ex : Site officiel : https://www.mon-asso.fr"}}
 	</fieldset>
-	<fieldset>
-		<legend>Options</legend>
-		{{:input required=false name="payment_detail" type="text" label="Instructions de paiement" default=$module.config.payment_detail placeholder="ex : Paiement à réaliser sous 15 jours."}}
-	</fieldset>
-	{{:button type="submit" name="save" label="Enregistrer le RIB"}}
+	{{:button type="submit" name="save" label="Enregistrer la configuration"}}
 </form>
 
 <!--

@@ -131,6 +131,8 @@
 			items=$items
 			total=$computed_total
 			contact_info=$_POST.contact_info
+			payment_detail=$_POST.payment_detail
+			extra_info=$_POST.extra_info
 		}}
 		{{:save key="config" last_id=$new_key last_quotation_id=$id}}
 		{{:http redirect="?ok=1"}}
@@ -184,25 +186,26 @@
 			<input type="hidden" name="quotation_total" id="quotation_total_input" label="" value="" />
 		</p>
 	</fieldset>
+
+
+	{{if $module.config.payment_detail || $module.config.quotation_extra_info}}
+		<fieldset>
+			<legend><h2>Informations complémentaires affichées en bas du devis</h2></legend>
+			<ul>
+			{{if $module.config.payment_detail}}
+				<li>{{:input type="textarea" name="payment_detail" label="Instructions de paiement" default=$module.config.payment_detail|escape|nl2br}}</li>
+			{{/if}}
+			{{if $module.config.quotation_extra_info}}
+				<li>{{:input type="textarea" name="extra_info" label="Informations complémentaires" default=$module.config.quotation_extra_info|escape|nl2br}}</li>
+			{{/if}}
+			</ul>
+		<p>(La valeur pré-remplie de ces informations est modifiable dans la configuration du module.)</p>
+		</fieldset>
+	{{/if}}
+
+
 	<input type="submit" name="quotation_submit" label="" value="Valider la création de devis" />
 </form>
-
-{{if $module.config.payment_detail || $module.config.bic}}
-	<h2>Informations affichées en bas du devis</h2>
-	{{if $module.config.payment_detail}}
-		<p>
-			{{$module.config.payment_detail}}
-		</p>
-	{{/if}}
-	{{if $module.config.bic}}
-		<p>
-			BIC : {{$module.config.bic}}<br />
-			IBAN : {{$module.config.iban}}<br />
-			BANQUE : {{$module.config.bank}}
-		</p>
-	{{/if}}
-	<p>(Ces informations sont modifiables dans la configuration du module.)</p>
-{{/if}}
 
 
 {{:admin_footer}}

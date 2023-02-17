@@ -80,6 +80,15 @@
 				<li>Contact : {{$contact_info}}</li>
 			</ul>
 		</fieldset>
+		
+		{{if $payment_detail || $extra_info}}
+			<fieldset>
+				<legend><h2>Infos complémentaires</h2></legend>
+				{{if $payment_detail}}<p>{{$payment_detail|escape|nl2br}}</p>{{/if}}
+				{{if $extra_info}}<p>{{$extra_info|escape|nl2br}}</p>{{/if}}
+			</fieldset>
+		{{/if}}
+
 	{{/load}}
 {{else}}
 	<p class="error block">Aucun document séléctionné.</p>

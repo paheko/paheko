@@ -49,6 +49,14 @@
 		"contact_info": {
 			"description": "Contact",
 			"type": "string"
+		},
+		"payment_detail": {
+			"description": "Instructions de paiement",
+			"type": "string"
+		},
+		"extra_info": {
+			"description": "Informations complémentaires",
+			"type": "string"
 		}
 	},
 	"required": [ "recipient_business_name", "recipient_address", "subject", "date", "status", "contact_info" ]
