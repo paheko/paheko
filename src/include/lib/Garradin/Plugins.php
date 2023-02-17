@@ -49,6 +49,11 @@ class Plugins
 		}
 	}
 
+	static public function exists(string $name): bool
+	{
+		return file_exists(self::getPath($name));
+	}
+
 	/**
 	 * Déclenche le signal donné auprès des plugins enregistrés
 	 * @param  string $signal Nom du signal
@@ -91,17 +96,22 @@ class Plugins
 
 		foreach ($list as $row)
 		{
-			$path = self::getPath($row->plugin);
+			$path = self::exists($row->plugin);
 
 			// Ne pas appeler les plugins dont le code n'existe pas/plus,
-			if (!$path)
-			{
+			if (!$path) {
 				continue;
 			}
 
-			$params['plugin_root'] = $path;
+			$callback = 'Garradin\\Plugin\\' . $row->callback;
 
-			$return = call_user_func_array('Garradin\\Plugin\\' . $row->callback, [&$params, &$callback_return]);
+			if (!is_callable($callback)) {
+				continue;
+			}
+
+			$params['plugin_root'] = self::getPath($row->plugin);
+
+			$return = call_user_func_array($callback, [&$params, &$callback_return]);
 
 			if (true === $return) {
 				return true;
@@ -120,8 +130,8 @@ class Plugins
 				$list[$m->name] = ['module' => $m];
 			}
 
-			foreach (self::listInstallable() as $p) {
-				$list[$p->name] = ['plugin'   => $p];
+			foreach (self::listInstallable() as $name => $p) {
+				$list[$name] = ['plugin'   => $p];
 			}
 
 			foreach (self::listInstalled() as $p) {
@@ -159,19 +169,26 @@ class Plugins
 			$item['label'] = $c->label;
 			$item['description'] = $c->description;
 			$item['author'] = $c->author;
-			$item['url'] = $c->url;
+			$item['author_url'] = $c->author_url;
 			$item['config_url'] = $c->hasConfig() ? $c->url($c::CONFIG_FILE) : null;
 			$item['readme_url'] = $c->hasFile($c::README_FILE) ? $c->url($c::README_FILE) : null;
 			$item['enabled'] = $c->enabled;
 			$item['installed'] = isset($item['plugin']) ? $c->exists() : true;
 			$item['broken'] = isset($item['plugin']) ? !$c->hasCode() : false;
+			$item['broken_message'] = isset($item['plugin']) ? $c->getBrokenMessage() : false;
 			$item['restrict_section'] = $c->restrict_section;
 			$item['restrict_level'] = $c->restrict_level;
+
+			$item['url'] = null;
+
+			if ($c->hasFile($c::INDEX_FILE)) {
+				$item['url'] = $c->url($c::INDEX_FILE);
+			}
 		}
 
 		unset($item);
 
-		usort($list, fn ($a, $b) => strnatcasecmp($a['label'], $b['label']));
+		usort($list, fn ($a, $b) => strnatcasecmp($a['label'] ?? $a['name'], $b['label'] ?? $b['name']));
 
 		return $list;
 	}
@@ -263,10 +280,16 @@ class Plugins
 	/**
 	 * Liste les plugins téléchargés mais non installés
 	 */
-	static public function listInstallable(): array
+	static public function listInstallable(bool $check_exists = true): array
 	{
 		$list = [];
-		$exists = DB::getInstance()->getAssoc('SELECT name, name FROM plugins;');
+
+		if ($check_exists) {
+			$exists = DB::getInstance()->getAssoc('SELECT name, name FROM plugins;');
+		}
+		else {
+			$exists = [];
+		}
 
 		foreach (glob(PLUGINS_ROOT . '/*') as $file)
 		{
@@ -293,15 +316,16 @@ class Plugins
 
 			$list[$file] = null;
 
+			$p = new Plugin;
+			$p->name = $name;
+			$p->updateFromINI();
+			$list[$name] = $p;
+
 			try {
-				$p = new Plugin;
-				$p->name = $name;
-				$p->updateFromINI();
 				$p->selfCheck();
-				$list[$name] = $p;
 			}
 			catch (ValidationException $e) {
-				$list[$name] = $file . ': ' . $e->getMessage();
+				$p->setBrokenMessage($e->getMessage());
 			}
 		}
 

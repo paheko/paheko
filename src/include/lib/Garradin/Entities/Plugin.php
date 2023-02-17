@@ -66,7 +66,7 @@ class Plugin extends Entity
 
 	protected ?string $description;
 	protected ?string $author;
-	protected ?string $url;
+	protected ?string $author_url;
 
 	protected bool $home_button;
 	protected bool $menu;
@@ -76,6 +76,8 @@ class Plugin extends Entity
 	protected ?\stdClass $config;
 	protected bool $enabled;
 
+	protected ?string $_broken_message = null;
+
 	public function hasCode(): bool
 	{
 		return file_exists($this->path());
@@ -84,14 +86,24 @@ class Plugin extends Entity
 	public function selfCheck(): void
 	{
 		$this->assert(preg_match('/^' . Plugins::NAME_REGEXP . '$/', $this->name), 'Nom unique d\'extension invalide: ' . $this->name);
-		$this->assert(trim($this->label) !== '', 'Le libellé ne peut rester vide');
-		$this->assert(trim($this->version) !== '', 'La version ne peut rester vide');
+		$this->assert(isset($this->label) && trim($this->label) !== '', sprintf('%s : le nom de l\'extension ("name") ne peut rester vide', $this->name));
+		$this->assert(isset($this->label) && trim($this->version) !== '', sprintf('%s : la version ne peut rester vide', $this->name));
 
 		if ($this->hasCode() || $this->enabled) {
 			$this->assert(!$this->menu || $this->hasFile(self::INDEX_FILE), 'Le fichier admin/index.php n\'existe pas alors que la directive "menu" est activée.');
 			$this->assert(!$this->home_button || $this->hasFile(self::INDEX_FILE), 'Le fichier admin/index.php n\'existe pas alors que la directive "home_button" est activée.');
 			$this->assert(!$this->home_button || $this->hasFile(self::ICON_FILE), 'Le fichier admin/icon.svg n\'existe pas alors que la directive "home_button" est activée.');
 		}
+	}
+
+	public function setBrokenMessage(string $str)
+	{
+		$this->_broken_message = $str;
+	}
+
+	public function getBrokenMessage(): ?string
+	{
+		return $this->_broken_message;
 	}
 
 	/**
@@ -117,7 +129,7 @@ class Plugin extends Entity
 		$this->set('version', $ini->version);
 		$this->set('description', $ini->description ?? null);
 		$this->set('author', $ini->author ?? null);
-		$this->set('url', $ini->url ?? null);
+		$this->set('author_url', $ini->author_url ?? null);
 		$this->set('home_button', !empty($ini->home_button));
 		$this->set('menu', !empty($ini->menu));
 		$this->set('restrict_section', $ini->restrict_section ?? null);
@@ -156,7 +168,15 @@ class Plugin extends Entity
 			$params = '?' . http_build_query($params);
 		}
 
-		return sprintf('%sp/%s/%s%s', WWW_URL, $this->name, $file, $params);
+		if (substr($file, 0, 6) == 'admin/') {
+			$url = ADMIN_URL;
+			$file = substr($file, 6);
+		}
+		else {
+			$url = WWW_URL;
+		}
+
+		return sprintf('%sp/%s/%s%s', $url, $this->name, $file, $params);
 	}
 
 	public function getConfig(string $key = null)
@@ -174,6 +194,10 @@ class Plugin extends Entity
 
 	public function setConfigProperty(string $key, $value = null)
 	{
+		if (null === $this->config) {
+			$this->config = new \stdClass;
+		}
+
 		if (is_null($value)) {
 			unset($this->config->$key);
 		}
@@ -348,7 +372,12 @@ class Plugin extends Entity
 	{
 		$uri = ltrim($uri, '/');
 
-		if (0 !== strpos($uri, 'admin/')) {
+		if (0 === strpos($uri, 'admin/')) {
+			if (!Session::getInstance()->isLogged()) {
+				Utils::redirect('!login.php');
+			}
+		}
+		else {
 			$uri = 'public/' . $uri;
 		}
 

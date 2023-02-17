@@ -89,11 +89,11 @@ class UserTemplate extends \KD2\Brindille
 		return self::$root_variables;
 	}
 
-	public function __construct(string $path)
+	public function __construct(?string $path)
 	{
 		$this->_tpl_path = $path;
 
-		if ($file = Files::get(File::CONTEXT_SKELETON . '/' . $path)) {
+		if ($path && $file = Files::get(File::CONTEXT_SKELETON . '/' . $path)) {
 			if ($file->type != $file::TYPE_FILE) {
 				throw new \LogicException('Cannot construct a UserTemplate with a directory');
 			}
@@ -101,7 +101,7 @@ class UserTemplate extends \KD2\Brindille
 			$this->file = $file;
 			$this->modified = $file->modified->getTimestamp();
 		}
-		else {
+		elseif ($path) {
 			$this->path = self::DIST_ROOT . $path;
 
 			if (!($this->modified = @filemtime($this->path))) {

@@ -346,6 +346,10 @@ class CommonFunctions
 		$label = $params['label'];
 		$prefix = $params['prefix'] ?? '';
 
+		if (!$href || !$label) {
+			return '';
+		}
+
 		// href can be prefixed with '!' to make the URL relative to ADMIN_URL
 		if (substr($href, 0, 1) == '!') {
 			$href = ADMIN_URL . substr($params['href'], 1);

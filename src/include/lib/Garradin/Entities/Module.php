@@ -20,6 +20,7 @@ class Module extends Entity
 	const ICON_FILE = 'icon.svg';
 	const README_FILE = 'README.md';
 	const CONFIG_FILE = 'config.html';
+	const INDEX_FILE = 'index.html';
 
 	// Snippets, don't forget to create alias constant in UserTemplate\Modules class
 	const SNIPPET_TRANSACTION = 'snippets/transaction_details.html';
@@ -44,7 +45,7 @@ class Module extends Entity
 	protected string $label;
 	protected ?string $description;
 	protected ?string $author;
-	protected ?string $url;
+	protected ?string $author_url;
 	protected ?string $restrict_section;
 	protected ?int $restrict_level;
 	protected bool $home_button;
@@ -88,7 +89,7 @@ class Module extends Entity
 		$this->set('label', $ini->name);
 		$this->set('description', $ini->description ?? null);
 		$this->set('author', $ini->author ?? null);
-		$this->set('url', $ini->url ?? null);
+		$this->set('author_url', $ini->author_url ?? null);
 		$this->set('home_button', !empty($ini->home_button));
 		$this->set('menu', !empty($ini->menu));
 		$this->set('restrict_section', $ini->restrict_section ?? null);

@@ -13,6 +13,7 @@ use Garradin\Users\DynamicFields;
 use Garradin\Users\Session;
 use Garradin\Files\Files;
 use Garradin\UserTemplate\Modules;
+use Garradin\Plugins;
 
 use KD2\HTTP;
 
@@ -355,14 +356,14 @@ class Install
 		$config->save();
 
 		// Install welcome plugin if available
-		$has_welcome_plugin = Plugin::getPath('welcome');
+		$has_welcome_plugin = Plugins::exists('welcome');
 
 		if ($has_welcome_plugin) {
-			Plugin::install('welcome');
+			Plugins::install('welcome');
 		}
 
 		foreach ($plugins as $plugin) {
-			Plugin::install($plugin);
+			Plugins::install($plugin);
 		}
 
 		Modules::refresh();

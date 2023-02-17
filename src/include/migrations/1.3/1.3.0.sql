@@ -49,11 +49,11 @@ DROP TABLE acc_transactions_old;
 DROP TABLE services_users_old;
 
 -- Remove old plugin as it cannot be uninstalled as it no longer exists
-DELETE FROM plugins_old WHERE nom = 'ouvertures';
+DELETE FROM plugins_old WHERE id = 'ouvertures';
 DELETE FROM plugins_signaux_old WHERE plugin = 'ouvertures';
 
 -- Rename plugins table columns to English
-INSERT INTO plugins (name, label, description, author, url, version, config, enabled, menu, restrict_level, restrict_section)
+INSERT INTO plugins (name, label, description, author, author_url, version, config, enabled, menu, restrict_level, restrict_section)
 	SELECT id, nom, description, auteur, url, version, config, 1, menu,
 	CASE WHEN menu_condition IS NOT NULL THEN 2 ELSE NULL END,
 	CASE WHEN menu_condition IS NOT NULL THEN 'users' ELSE NULL END
