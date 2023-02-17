@@ -1,23 +1,14 @@
-{{if $logged_user.perm_accounting < $access_level.write}}
-	{{:error message="Seuls les membres avec accès en écriture à la comptabilité peuvent générer ce document"}}
-{{/if}}
-{{:admin_header title="Devis et factures" current="acc"}}
+{{#restrict section="accounting" level="write"}}
 
 {{* ==================== Header ==================== *}}
+
+{{:admin_header title="Devis et factures" current="acc"}}
 <nav class="tabs">
 	<aside>
 		{{:linkbutton href="edit.html" label="Nouveau document" shape="plus" target="_dialog"}}
 	</aside>
-
-	<ul>
-		<li{{if !$_GET.show}} class="current"{{/if}}><a href="./">Tous les documents</a></li>
-		<li{{if $_GET.show == 'quotation'}} class="current"{{/if}}><a href="./?show=quotation">Devis</a></li>
-		<li{{if $_GET.show == 'unpaid'}} class="current"{{/if}}><a href="./?show=unpaid">Factures en souffrance</a></li>
-		<li{{if $_GET.show == 'paid'}} class="current"{{/if}}><a href="./?show=paid">Factures réglées</a></li>
-		<li><a href="clients.html">Clients</a></li>
-	</ul>
+	{{:include file='./include/main_nav_tabs.html'}}
 </nav>
-
 {{:include file='./include/style.tpl'}}
 
 {{* ==================== Listing ==================== *}}
@@ -31,7 +22,7 @@
 {{else}}
 	{{:assign filter="1"}}
 {{/if}}
-{{:include file='./include/constants.tpl' keep='type_labels,status_labels'}}
+{{:include file='./include/constants.tpl' keep='type_labels,status_labels,status_options'}}
 
 <table class="list">
 	<thead>
@@ -73,7 +64,7 @@
 				{{/if}}
 			</td>
 			<td class="actions">
-				{{if !$archived}}
+				{{if !$archived && $status == 'draft'}}
 				{{:linkbutton shape="edit" label="Modifier" href="edit.html?key=%s"|args:$key|htmlspecialchars}}
 				{{/if}}
 			</td>
@@ -158,12 +149,7 @@
 			<li>
 				<dt><label for="status">Statut</label></dt>
 				<dd>
-					<select name="status" id="status" required="required">
-						<option label="En attente de validation" value="awaiting"{{if !$_POST.status || $_POST.status == 'awaiting'}} selected="selected"{{/if}}>En attente de validation</option>
-						<option label="Rejeté" value="rejected"{{if $_POST.status && $_POST.status == 'rejected'}} selected="selected"{{/if}}>Rejeté</option>
-						<option label="Validé" value="validated"{{if $_POST.status && $_POST.status == 'validated'}} selected="selected"{{/if}}>Validé</option>
-						<option label="Autre" value="misc"{{if $_POST.status && $_POST.status == 'misc'}} selected="selected"{{/if}}>Autre</option>
-					</select>
+					{{:input type="select" name="status" options=$status_options default=$status required=true}}
 				</dd>
 			</li>
 		</ul>
@@ -207,5 +193,8 @@
 	<input type="submit" name="quotation_submit" label="" value="Valider la création de devis" />
 </form>
 
-
 {{:admin_footer}}
+
+{{else}}
+	{{:error message="Seuls les membres avec accès en lecture à la comptabilité peuvent visualiser cette page."}}
+{{/restrict}}

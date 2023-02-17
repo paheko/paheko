@@ -1,8 +1,6 @@
-{{:error message="Fonctionnalité non disponible pour le moment."}}
+{{#restrict section="accounting" level="write"}}
 
-{{if $logged_user.perm_accounting < $access_level.write}}
-	{{:error message="Seuls les membres avec accès en écriture à la comptabilité peuvent générer ce document"}}
-{{/if}}
+{{:error message="Fonctionnalité non disponible pour le moment."}}
 
 {{if $_GET.key}}
 	{{#load key=$_GET.key}}
@@ -179,3 +177,7 @@
 </script>
 
 {{:admin_footer}}
+
+{{else}}
+	{{:error message="Seuls les membres avec accès en écriture à la comptabilité peuvent générer ce document"}}
+{{/restrict}}

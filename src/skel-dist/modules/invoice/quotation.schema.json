@@ -25,7 +25,7 @@
 		"status": {
 			"description": "Statut",
 			"type": "string",
-			"enum": ["awaiting", "rejected", "validated", "misc"]
+			"enum": ["draft", "awaiting", "rejected", "validated", "misc"]
 		},
 		"items": {
 			"description": "Articles",
@@ -38,7 +38,7 @@
 					"unit_price": { "type": "number", "minimum": 0 },
 					"quantity": { "type": "integer", "minimum": 0 }
 				},
-				"required" : [ "name" ]
+				"required" : ["name"]
 			}
 		},
 		"total": {
@@ -52,11 +52,11 @@
 		},
 		"payment_detail": {
 			"description": "Instructions de paiement",
-			"type": "string"
+			"type": ["string", "null"]
 		},
 		"extra_info": {
 			"description": "Informations complémentaires",
-			"type": "string"
+			"type": ["string", "null"]
 		}
 	},
 	"required": [ "recipient_business_name", "recipient_address", "subject", "date", "status", "contact_info" ]
