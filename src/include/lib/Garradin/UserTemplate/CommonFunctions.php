@@ -30,7 +30,7 @@ class CommonFunctions
 		extract($params, \EXTR_SKIP);
 
 		if (!isset($name, $type)) {
-			throw new \InvalidArgumentException('Missing name or type');
+			throw new \RuntimeException('Missing name or type');
 		}
 
 		$suffix = null;
@@ -316,7 +316,7 @@ class CommonFunctions
 		}
 
 		if (!isset($params['shape']) && !isset($params['url'])) {
-			throw new \InvalidArgumentException('Missing parameter: shape or url');
+			throw new \RuntimeException('Missing parameter: shape or url');
 		}
 
 		$html = '';
