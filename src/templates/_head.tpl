@@ -37,8 +37,8 @@ if (!isset($current)) {
 	<link rel="manifest" href="{$admin_url}manifest.php" />
 	{if isset($config)}
 		<link rel="icon" type="image/png" href="{$config->fileURL('favicon')}" />
-		{custom_colors config=$config}
 	{/if}
+	{custom_colors config=$config}
 </head>
 
 <body{if !empty($layout)} class="{$layout}"{/if}>
@@ -46,13 +46,11 @@ if (!isset($current)) {
 {if !array_key_exists('_dialog', $_GET) && empty($layout)}
 <header class="header">
 	<nav class="menu">
-		{if isset($config)}
 		<figure class="logo">
-		{if $url = $config->fileURL('logo', '150px')}
-			<a href="{$admin_url}"><img src="{$url}" alt="" /></a>
+		{if isset($config) && ($url = $config->fileURL('logo', '150px'))}
+				<a href="{$admin_url}"><img src="{$url}" alt="" /></a>
 		{/if}
 		</figure>
-		{/if}
 	<ul>
 	{if $is_logged}
 	<?php

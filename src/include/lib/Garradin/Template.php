@@ -95,6 +95,9 @@ class Template extends Smartyer
 			$session = Session::getInstance();
 			$this->assign('config', Config::getInstance());
 		}
+		else {
+			$this->assign('config', null);
+		}
 
 		$is_logged = $session ? $session->isLogged() : null;
 
@@ -289,13 +292,13 @@ class Template extends Smartyer
 
 	protected function customColors()
 	{
-		$config = Config::getInstance();
+		$config = defined('Garradin\INSTALL_PROCESS') ? null : Config::getInstance();
 
 		$c1 = ADMIN_COLOR1;
 		$c2 = ADMIN_COLOR2;
 		$bg = ADMIN_BACKGROUND_IMAGE;
 
-		if (!FORCE_CUSTOM_COLORS) {
+		if (!FORCE_CUSTOM_COLORS && $config) {
 			$c1 = $config->get('color1') ?: $c1;
 			$c2 = $config->get('color2') ?: $c2;
 
@@ -313,7 +316,7 @@ class Template extends Smartyer
 		}
 		</style>';
 
-		if ($url = $config->fileURL('admin_css')) {
+		if ($config && $url = $config->fileURL('admin_css')) {
 			$out .= "\n" . sprintf('<link rel="stylesheet" type="text/css" href="%s" />', $url);
 		}
 
