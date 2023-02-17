@@ -18,12 +18,7 @@
 	</ul>
 </nav>
 
-<style>
-#item_list th, #item_list td {
-	width: 25%;
-	padding: 0em 2em 0em 0em;
-}
-</style>
+{{:include file='./include/style.tpl'}}
 
 {{* ==================== Listing ==================== *}}
 
@@ -36,8 +31,7 @@
 {{else}}
 	{{:assign filter="1"}}
 {{/if}}
-{{:assign var='type_labels' quotation='Devis' invoice='Facture'}}
-{{:assign var='status_labels' awaiting='En attente de validation' rejected='Rejeté' validated='Validé' misc='Autre'}}
+{{:include file='./include/constants.tpl' keep='type_labels,status_labels'}}
 
 <table class="list">
 	<thead>
@@ -54,17 +48,17 @@
 		</tr>
 	</thead>
 	<tbody>
-{{#load where="$$.type IN ('quotation', 'invoice') AND %s"|args:$filter select="key, document AS json, datetime(json_extract(document, '$.date')) AS date" order="date DESC"}}
+{{#load where="$$.type IN ('quotation', 'invoice') AND %s"|args:$filter select="id, key, document AS json, datetime(json_extract(document, '$.date')) AS date" order="date DESC"}}
 		<tr>
 			{{if !$_GET.show}}
 				{{:assign var="label" from="type_labels.%s"|args:$type}}
 				<td>{{$label}}</td>
 			{{/if}}
-			<td>{{$key}}</td>
+			<td><a href="details.html?id={{$id|intval}}">{{$key}}</a></td>
 			<td>{{$date|date_short}}</td>
 			<td>{{$deadline|date_short}}</td>
 			<td>{{$recipient_business_name}}</td>
-			<td>{{$subject}}</td>
+			<td><a href="details.html?id={{$id|intval}}">{{$subject}}</a></td>
 			<td class="money">{{$total|floatval|money_int|raw|money_currency}}{{* Hacks awaiting #495af6eee05e451d9369b80023c38b8e128fa6cd resolution *}}</td>
 			<td>
 				{{:assign var="label" from="status_labels.%s"|args:$status}}

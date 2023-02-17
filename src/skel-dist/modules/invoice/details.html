@@ -1,0 +1,88 @@
+{{if $logged_user.perm_accounting < $access_level.write}}
+	{{:error message="Seuls les membres avec accès en écriture à la comptabilité peuvent générer ce document"}}
+{{/if}}
+{{:admin_header title="Devis et factures" current="acc"}}
+
+{{* ==================== Header ==================== *}}
+<nav class="tabs">
+	<aside>
+		{{:linkbutton href="edit.html" label="Nouveau document" shape="plus" target="_dialog"}}
+	</aside>
+
+	<ul>
+		<li{{if !$_GET.show}} class="current"{{/if}}><a href="./">Tous les documents</a></li>
+		<li{{if $_GET.show == 'quotation'}} class="current"{{/if}}><a href="./?show=quotation">Devis</a></li>
+		<li{{if $_GET.show == 'unpaid'}} class="current"{{/if}}><a href="./?show=unpaid">Factures en souffrance</a></li>
+		<li{{if $_GET.show == 'paid'}} class="current"{{/if}}><a href="./?show=paid">Factures réglées</a></li>
+		<li><a href="clients.html">Clients</a></li>
+	</ul>
+</nav>
+
+{{:include file='./include/constants.tpl' keep='type_labels,status_labels'}}
+{{:include file='./include/style.tpl'}}
+
+{{if $_GET.id}}
+	{{#load id=$_GET.id}}
+		{{:assign var="label" from="type_labels.%s"|args:$type}}
+		<h1>{{$label}} n° {{$key}}</h1>
+		
+		<fieldset>
+			<legend><h2>Statut</h2></legend>
+			{{:assign var="label" from="status_labels.%s"|args:$status}}
+			<p>{{$label}}</p>
+		</fieldset>
+		
+		<fieldset>
+			<legend><h2>Destinataire</h2></legend>
+			<p>{{$recipient_business_name}}</p>
+			<p>{{$recipient_address}}</p>
+		</fieldset>
+		
+		<fieldset>
+			<legend><h2>Objet</h2></legend>
+			<ul>
+				<li>Objet : {{$subject}}</li>
+				<li>Date : {{$date|date_short}}</li>
+				{{if $deadline}}<li>Échéance : {{$deadline|date_short}}</li>{{/if}}
+				<li>Total : {{$total|floatval|money_int|raw|money_currency}}</li>
+			</ul>
+		</fieldset>
+		
+		<fieldset>
+			<legend><h2>Articles</h2></legend>
+			{{if $items}}
+				<table id="item_list">
+					<tr>
+						<th>Dénomination</th>
+						<th>Description</th>
+						<th>Prix unitaire</th>
+						<th>Quantité</th>
+					</tr>
+					{{#foreach from=$items item='item'}}
+						<tr>
+							<td>{{$item.name}}</td>
+							<td>{{$item.description}}</td>
+							<td>{{$item.unit_price}}</td>
+							<td>{{$item.quantity}}</td>
+						</tr>
+					{{/foreach}}
+				</table>
+
+				</ul>
+			{{else}}
+				<p>Aucun article.</p>
+			{{/if}}
+		</fieldset>
+		
+		<fieldset>
+			<legend><h2>Infos</h2></legend>
+			<ul>
+				<li>Contact : {{$contact_info}}</li>
+			</ul>
+		</fieldset>
+	{{/load}}
+{{else}}
+	<p class="error block">Aucun document séléctionné.</p>
+{{/if}}
+
+{{:admin_footer}}
