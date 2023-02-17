@@ -99,10 +99,7 @@
 	{{:assign errors=null}}
 	{{:assign items=null}}
 	{{#foreach from=$_POST.items key='index' item='item'}}
-		{{:assign var='computed_total' value="%d + %d * %d"|args:$computed_total:$item.unit_price:$item.quantity|math}}
-
-		{{* ToDo: allow zero as unit_price (#d10fbfa243f3cdb8cdf68ac67f5043c199bd44e2) *}}
-		
+		{{if $item.name === ''}}{{:assign var='errors[]' value="Le nom de l'article est requis."}}{{/if}}
 		{{if $item.unit_price < 0 || $item.unit_price != $item.unit_price|floatval|strtolower}} {{* Hack to check the data is a number *}}
 			{{:assign var='errors[]' value='Le prix saisi pour "%s" est invalide.'|args:$item.name}}
 		{{/if}}
@@ -110,12 +107,13 @@
 
 		{{:assign var='computed_item' value=$item}}
 		{{:assign var='computed_item[unit_price]' value=$item.unit_price|floatval}}
-		{{:assign var='computed_item[quantity]' value=$item.quantity|floatval}}
+		{{:assign var='computed_item[quantity]' value=$item.quantity|intval}}
 		{{:assign var='items[]' value=$computed_item}}
+		{{:assign var='computed_total' value="%d + %d * %d"|args:$computed_total:$item.unit_price:$item.quantity|math}}
 	{{/foreach}}
-	
-	{{if $computed_total != $_POST.quotation_total || $computed_total < 0}}
-		{{:assign error="Erreur de calcul du total.\nEnregistrement du devis refusé."}}
+
+	{{if ($computed_total != $_POST.quotation_total) || ($computed_total < 0)}}
+		{{:assign var='errors[]' value='Erreur de calcul du total. Enregistrement du devis refusé.'}}
 	{{/if}}
 
 	{{if $errors|count}}
@@ -180,9 +178,9 @@
 		<table id="item_list" style="display: none;">
 			<tr>
 				<th>Dénomination</th>
+				<th>Description</th>
 				<th>Prix unitaire</th>
 				<th>Quantité</th>
-				<th>Total</th>
 			</tr>
 		</table>
 		<p>{{:linkbutton label="Ajouter un article" href="item_form.html" shape="settings" target="_dialog"}}</p>
