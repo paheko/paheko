@@ -17,6 +17,7 @@ use Garradin\Email\Emails;
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 use Garradin\Entities\Module;
+use Garradin\Entities\User\Email;
 use Garradin\Users\Session;
 
 use const Garradin\{ROOT, WWW_URL};
@@ -33,6 +34,7 @@ class Functions
 		'admin_header',
 		'admin_footer',
 		'signature',
+		'captcha',
 		'mail',
 	];
 
@@ -169,6 +171,46 @@ class Functions
 		}
 	}
 
+	static public function captcha(array $params, Brindille $tpl, int $line)
+	{
+		$secret = md5(SECRET_KEY . Utils::getSelfURL(false));
+
+		if (isset($params['html'])) {
+			$c = Security::createCaptcha($secret, $params['lang'] ?? 'fr');
+			return sprintf('<label for="f_c_42">Merci d\'écrire <strong><q>%s</q></strong> en chiffres&nbsp;:</label>
+				<input type="text" name="f_c_42" id="f_c_42" placeholder="Exemple : 1234" />
+				<input type="hidden" name="f_c_43" value="%s" />',
+				$c['spellout'], $c['hash']);
+		}
+		elseif (isset($params['assign_hash']) && isset($params['assign_number'])) {
+			$c = Security::createCaptcha($secret, $params['lang'] ?? 'fr');
+			$tpl->assign($params['assign_hash'], $c['hash']);
+			$tpl->assign($params['assign_number'], $c['spellout']);
+		}
+		elseif (isset($params['verify'])) {
+			$hash = $_POST['f_c_43'] ?? '';
+			$number = $_POST['f_c_42'] ?? '';
+		}
+		elseif (array_key_exists('verify_number', $params)) {
+			$hash = $params['verify_hash'] ?? '';
+			$number = $params['verify_number'] ?? '';
+		}
+		else {
+			throw new Brindille_Exception(sprintf('Line %d: no valid arguments supplied for "captcha" function', $line));
+		}
+
+		$error = 'Réponse invalide à la vérification anti-robot';
+
+		if (!Security::checkCaptcha($secret, trim($hash), trim($number))) {
+			if (isset($params['assign_error'])) {
+				$tpl->assign($params['assign_error'], $error);
+			}
+			else {
+				throw new UserException($error);
+			}
+		}
+	}
+
 	static public function mail(array $params, Brindille $tpl, int $line)
 	{
 		if (empty($params['to'])) {
@@ -181,6 +223,10 @@ class Functions
 
 		if (empty($params['body'])) {
 			throw new Brindille_Exception(sprintf('Ligne %d: argument "body" manquant pour la fonction "mail"', $line));
+		}
+
+		if (!empty($params['block_urls']) && preg_match('!https?://!', $params['subject'] . $params['body'])) {
+			throw new UserException('Merci de ne pas inclure d\'adresse web (http:…) dans le message');
 		}
 
 		static $external = 0;
@@ -201,6 +247,7 @@ class Functions
 
 		unset($to);
 
+		$db = DB::getInstance();
 		$internal_count = $db->count('users', $db->where($email_field, 'IN', $params['to']));
 		$external_count = count($params['to']) - $internal_count;
 
@@ -210,6 +257,14 @@ class Functions
 
 		if (($internal_count + $internal) > 10) {
 			throw new Brindille_Exception(sprintf('Ligne %d: l\'envoi d\'email à une adresse interne est limité à un envoi par page', $line));
+		}
+
+		if ($external_count && preg_match_all('!(https?://.*?)(?=\s|$)!', $params['subject'] . ' ' . $params['body'], $match, PREG_PATTERN_ORDER)) {
+			foreach ($match[1] as $m) {
+				if (0 !== strpos($m, WWW_URL) && 0 !== strpos($m, ADMIN_URL)) {
+					throw new Brindille_Exception(sprintf('Ligne %d: l\'envoi d\'email à une adresse externe interdit l\'utilisation d\'une adresse web autre que le site de l\'association : %s', $line, $m));
+				}
+			}
 		}
 
 		$context = count($params['to']) == 1 ? Emails::CONTEXT_PRIVATE : Emails::CONTEXT_BULK;
