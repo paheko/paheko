@@ -183,7 +183,40 @@ class Functions
 			throw new Brindille_Exception(sprintf('Ligne %d: argument "body" manquant pour la fonction "mail"', $line));
 		}
 
-		Emails::queue(Emails::CONTEXT_PRIVATE, [$params['to']], null, $params['subject'], $params['body']);
+		static $external = 0;
+		static $internal = 0;
+
+		if (is_string($params['to'])) {
+			$params['to'] = [$params['to']];
+		}
+
+		if (!count($params['to'])) {
+			throw new Brindille_Exception(sprintf('Ligne %d: aucune adresse destinataire n\'a été précisée pour la fonction "mail"', $line));
+		}
+
+		foreach ($params['to'] as &$to) {
+			$to = trim($to);
+			Email::validateAddress($to);
+		}
+
+		unset($to);
+
+		$internal_count = $db->count('users', $db->where($email_field, 'IN', $params['to']));
+		$external_count = count($params['to']) - $internal_count;
+
+		if (($external_count + $external) > 1) {
+			throw new Brindille_Exception(sprintf('Ligne %d: l\'envoi d\'email à une adresse externe est limité à un envoi par page', $line));
+		}
+
+		if (($internal_count + $internal) > 10) {
+			throw new Brindille_Exception(sprintf('Ligne %d: l\'envoi d\'email à une adresse interne est limité à un envoi par page', $line));
+		}
+
+		$context = count($params['to']) == 1 ? Emails::CONTEXT_PRIVATE : Emails::CONTEXT_BULK;
+		Emails::queue($context, $params['to'], null, $params['subject'], $params['body']);
+
+		$internal += $internal_count;
+		$external_count += $external_count;
 	}
 
 	static public function debug(array $params, Brindille $tpl)
