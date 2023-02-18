@@ -16,6 +16,7 @@
 </p>
 {/if}
 
+<p class="help">Les extensions apportent des fonctionnalités supplémentaires, et peuvent être activées selon vos besoins.</p>
 
 {form_errors}
 

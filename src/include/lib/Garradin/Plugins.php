@@ -39,19 +39,21 @@ class Plugins
 		return WWW_URL . 'p/' . $id . '/' . ltrim($path, '/');
 	}
 
-	static public function getPath(string $name): string
+	static public function getPath(string $name): ?string
 	{
-		if (file_exists(PLUGINS_ROOT . '/' . $name . '.tar.gz')) {
-			return 'phar://' . PLUGINS_ROOT . '/' . $name . '.tar.gz';
-		}
-		else {
+		if (file_exists(PLUGINS_ROOT . '/' . $name)) {
 			return PLUGINS_ROOT . '/' . $name;
 		}
+		elseif (file_exists(PLUGINS_ROOT . '/' . $name . '.tar.gz')) {
+			return 'phar://' . PLUGINS_ROOT . '/' . $name . '.tar.gz';
+		}
+
+		return null;
 	}
 
 	static public function exists(string $name): bool
 	{
-		return file_exists(self::getPath($name));
+		return self::getPath($name) !== null;
 	}
 
 	/**
@@ -96,7 +98,7 @@ class Plugins
 
 		foreach ($list as $row)
 		{
-			$path = self::exists($row->plugin);
+			$path = self::getPath($row->plugin);
 
 			// Ne pas appeler les plugins dont le code n'existe pas/plus,
 			if (!$path) {
@@ -109,7 +111,7 @@ class Plugins
 				continue;
 			}
 
-			$params['plugin_root'] = self::getPath($row->plugin);
+			$params['plugin_root'] = $path;
 
 			$return = call_user_func_array($callback, [&$params, &$callback_return]);
 

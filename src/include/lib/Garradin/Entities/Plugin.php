@@ -80,7 +80,7 @@ class Plugin extends Entity
 
 	public function hasCode(): bool
 	{
-		return file_exists($this->path());
+		return Plugins::exists($this->name);
 	}
 
 	public function selfCheck(): void

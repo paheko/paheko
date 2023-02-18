@@ -104,7 +104,7 @@ if (!defined('Garradin\ROOT'))
 	define('Garradin\ROOT', dirname(__DIR__));
 }
 
-\spl_autoload_register(function (string $classname) {
+\spl_autoload_register(function (string $classname): void {
 	$classname = ltrim($classname, '\\');
 
 	// Plugins
@@ -114,7 +114,14 @@ if (!defined('Garradin\ROOT'))
 		$plugin_name = substr($classname, 0, strpos($classname, '\\'));
 		$filename = str_replace('\\', '/', substr($classname, strpos($classname, '\\')+1));
 
-		$path = Plugins::getPath(strtolower($plugin_name)) . '/lib/' . $filename . '.php';
+		$path = Plugins::getPath(strtolower($plugin_name));
+
+		// Plugin does not exist, just abort
+		if (!$path) {
+			return;
+		}
+
+		$path = $path . '/lib/' . $filename . '.php';
 	}
 	else
 	{
