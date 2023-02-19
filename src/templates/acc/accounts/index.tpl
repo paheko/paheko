@@ -14,6 +14,10 @@ use Garradin\Entities\Accounting\Account;
 </p>
 {/if}
 
+{if $pending_count}
+	{include file="acc/transactions/_pending_message.tpl"}
+{/if}
+
 {if !empty($grouped_accounts)}
 	<table class="list">
 		<thead>

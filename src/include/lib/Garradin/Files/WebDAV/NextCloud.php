@@ -24,6 +24,18 @@ class NextCloud extends WebDAV_NextCloud
 		$this->setRootURL(WWW_URL);
 	}
 
+	public function route(?string $uri = null): bool
+	{
+		$ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+
+		// Currently, iOS apps are broken
+		if (stristr($ua, 'nextcloud-ios') || stristr($ua, 'owncloudapp')) {
+			throw new WebDAV_Exception('Your client is not compatible with this server. Consider using a different WebDAV client.', 403);
+		}
+
+		return parent::route($uri);
+	}
+
 	public function auth(?string $login, ?string $password): bool
 	{
 		$session = Session::getInstance();

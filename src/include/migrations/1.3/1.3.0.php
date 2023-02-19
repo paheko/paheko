@@ -10,8 +10,24 @@ $db->beginSchemaUpdate();
 // Get old keys
 $config = (object) $db->getAssoc('SELECT key, value FROM config WHERE key IN (\'champs_membres\', \'champ_identifiant\', \'champ_identite\');');
 
-// Create config_users_fields table, and lots of stuff
-$db->import(ROOT . '/include/migrations/1.3/schema.sql');
+// Create config_users_fields table
+$db->exec('
+CREATE TABLE IF NOT EXISTS config_users_fields (
+    id INTEGER NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    sort_order INTEGER NOT NULL,
+    type TEXT NOT NULL,
+    label TEXT NOT NULL,
+    help TEXT NULL,
+    required INTEGER NOT NULL DEFAULT 0,
+    read_access INTEGER NOT NULL DEFAULT 0,
+    write_access INTEGER NOT NULL DEFAULT 1,
+    list_table INTEGER NOT NULL DEFAULT 0,
+    options TEXT NULL,
+    default_value TEXT NULL,
+    sql TEXT NULL,
+    system TEXT NULL
+);');
 
 // Migrate users table
 $df = \Garradin\Users\DynamicFields::fromOldINI($config->champs_membres, $config->champ_identifiant, $config->champ_identite, 'numero');

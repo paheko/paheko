@@ -4,7 +4,7 @@ namespace Garradin\Web\Render;
 
 use Garradin\Entities\Files\File;
 
-use Garradin\Plugin;
+use Garradin\Plugins;
 use Garradin\UserTemplate\CommonModifiers;
 
 use KD2\SkrivLite;
@@ -28,7 +28,7 @@ class Skriv extends AbstractRender
 		$this->skriv->registerExtension('html', [$this, 'SkrivHTML']);
 
 		// Enregistrer d'autres extensions éventuellement
-		Plugin::fireSignal('skriv.init', ['skriv' => $this->skriv]);
+		Plugins::fireSignal('skriv.init', ['skriv' => $this->skriv]);
 	}
 
 	public function render(?string $content = null): string
@@ -46,7 +46,7 @@ class Skriv extends AbstractRender
 		$str = CommonModifiers::typo($str);
 
 		$str = preg_replace_callback(';<a href="((?!https?://|\w+:).+?)">;i', function ($matches) {
-			return sprintf('<a href="%s" target="_parent">', htmlspecialchars($this->resolveLink($matches[1])));
+			return sprintf('<a href="%s" target="_parent">', htmlspecialchars($this->resolveLink(htmlspecialchars_decode($matches[1]))));
 		}, $str);
 
 		return sprintf('<div class="web-content">%s</div>', $str);

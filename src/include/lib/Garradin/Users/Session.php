@@ -6,7 +6,7 @@ use Garradin\Config;
 use Garradin\DB;
 use Garradin\Log;
 use Garradin\Utils;
-use Garradin\Plugin;
+use Garradin\Plugins;
 use Garradin\UserException;
 use Garradin\ValidationException;
 
@@ -44,7 +44,15 @@ class Session extends \KD2\UserSession
 	const ACCESS_WRITE = 2;
 	const ACCESS_ADMIN = 9;
 
+	const ACCESS_WORDS = [
+		'none' => self::ACCESS_NONE,
+		'read' => self::ACCESS_READ,
+		'write' => self::ACCESS_WRITE,
+		'admin' => self::ACCESS_ADMIN,
+	];
+
 	// Personalisation de la config de UserSession
+	protected bool $non_locking = true;
 	protected $cookie_name = 'pko';
 	protected $remember_me_cookie_name = 'pkop';
 	protected $remember_me_expiry = '+3 months';
@@ -91,7 +99,7 @@ class Session extends \KD2\UserSession
 		// notamment en installation mutualisée c'est plus efficace
 		$return = ['is_compromised' => null];
 
-		if (Plugin::fireSignal('password.check', ['password' => $password], $return) && isset($return['is_compromised'])) {
+		if (Plugins::fireSignal('password.check', ['password' => $password], $return) && isset($return['is_compromised'])) {
 			return (bool) $return['is_compromised'];
 		}
 
@@ -228,7 +236,7 @@ class Session extends \KD2\UserSession
 			Log::add(Log::LOGIN_FAIL, compact('user_agent'));
 		}
 
-		Plugin::fireSignal('user.login', compact('login', 'password', 'remember_me', 'success'));
+		Plugins::fireSignal('user.login', compact('login', 'password', 'remember_me', 'success'));
 
 		// Clean up logs
 		Log::clean();
@@ -255,7 +263,7 @@ class Session extends \KD2\UserSession
 			Log::add(Log::LOGIN_FAIL, $details, $user_id);
 		}
 
-		Plugin::fireSignal('user.login.otp', compact('success', 'user_id'));
+		Plugins::fireSignal('user.login.otp', compact('success', 'user_id'));
 
 		return $success;
 	}
@@ -408,6 +416,20 @@ class Session extends \KD2\UserSession
 		}
 
 		return $s->getUser();
+	}
+
+	/**
+	 * Returns cookie string for PDF printing
+	 */
+	static public function getCookie(): ?string
+	{
+		$i = self::getInstance();
+
+		if (!$i->isLogged()) {
+			return null;
+		}
+
+		return sprintf('%s=%s', $i->cookie_name, $i->id());
 	}
 
 	public function getUser()

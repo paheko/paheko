@@ -37,6 +37,8 @@ class Modifiers
 		'implode',
 		'quote_sql_identifier',
 		'quote_sql',
+		'sql_where',
+		'urlencode',
 	];
 
 	const LEADING_NUMBER_REGEXP = '/^([\d.]+)\s*[.\)]\s*/';
@@ -263,7 +265,7 @@ class Modifiers
 		return implode($separator, $array);
 	}
 
-	static public function quote_sql_identifier($in): string
+	static public function quote_sql_identifier($in)
 	{
 		if (null === $in) {
 			return '';
@@ -278,7 +280,7 @@ class Modifiers
 		return $db->quoteIdentifier($in);
 	}
 
-	static public function quote_sql($in): string
+	static public function quote_sql($in)
 	{
 		if (null === $in) {
 			return '';
@@ -291,5 +293,15 @@ class Modifiers
 		}
 
 		return $db->quote($in);
+	}
+
+	static public function sql_where(...$args)
+	{
+		return DB::getInstance()->where(...$args);
+	}
+
+	static public function urlencode($str): string
+	{
+		return rawurlencode($str ?? '');
 	}
 }

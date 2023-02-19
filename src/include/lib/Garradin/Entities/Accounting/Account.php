@@ -761,34 +761,67 @@ class Account extends Entity
 		return $lines;
 	}
 
-	public function getDepositJournal(int $year_id, array $checked = []): \Generator
+	public function getDepositJournal(int $year_id, array $checked = []): DynamicList
 	{
-		$res = DB::getInstance()->iterate('SELECT l.debit, l.credit, t.id, t.date, t.reference, l.reference AS line_reference, t.label, l.label AS line_label, l.reconciled, l.id AS id_line, l.id_account
-			FROM acc_transactions_lines l
-			INNER JOIN acc_transactions t ON t.id = l.id_transaction
-			WHERE t.id_year = ? AND l.id_account = ? AND l.credit = 0 AND NOT (t.status & ?)
-			ORDER BY t.date, t.id;',
+		$columns = [
+			'id' => [
+				'label' => 'Num.',
+				'select' => 't.id',
+			],
+			'date' => [
+				'select' => 't.date',
+				'label' => 'Date',
+				'order' => 't.date %s, t.id %1$s',
+			],
+			'reference' => [
+				'select' => 't.reference',
+				'label' => 'Réf. écriture',
+			],
+			'line_reference' => [
+				'select' => 'l.reference',
+				'label' => 'Réf. paiement',
+			],
+			'label' => [
+				'label' => 'Libellé',
+				'select' => 't.label',
+			],
+			'amount' => [
+				'label' => 'Montant',
+				'select' => 'l.debit',
+			],
+			'running_sum' => [
+				'label' => 'Solde cumulé',
+				'only_with_order' => 'date',
+				'select' => null,
+			],
+			'credit' => [
+				'select' => 'l.credit',
+			],
+			'debit' => [
+				'select' => 'l.debit',
+			],
+			'id_account' => [
+				'select' => 'l.id_account',
+			],
+			'id_line' => [
+				'select' => 'l.id',
+			],
+		];
+
+		$tables = 'acc_transactions_lines l INNER JOIN acc_transactions t ON t.id = l.id_transaction';
+		$conditions = sprintf('t.id_year = %d AND l.id_account = %d AND l.credit = 0 AND NOT (t.status & %d)',
 			$year_id, $this->id(), Transaction::STATUS_DEPOSIT);
 
-		$sum = 0;
-
-		foreach ($res as $row) {
-			$row->date = \DateTime::createFromFormat('Y-m-d', $row->date);
+		$list = new DynamicList($columns, $tables, $conditions);
+		$list->setPageSize(null);
+		$list->orderBy('date', true);
+		$list->setModifier(function (&$row) use (&$sum, $checked) {
 			$sum += ($row->credit - $row->debit);
 			$row->running_sum = $sum;
 			$row->checked = array_key_exists($row->id, $checked);
-			yield $row;
-		}
-	}
+		});
 
-	public function countDepositJournal(int $year_id): int
-	{
-		 return DB::getInstance()->firstColumn('SELECT COUNT(*)
-			FROM acc_transactions_lines l
-			INNER JOIN acc_transactions t ON t.id = l.id_transaction
-			WHERE t.id_year = ? AND l.id_account = ? AND l.credit = 0 AND NOT (t.status & ?)
-			ORDER BY t.date, t.id;',
-			$year_id, $this->id(), Transaction::STATUS_DEPOSIT);
+		return $list;
 	}
 
 	public function getDepositMissingBalance(int $year_id): int

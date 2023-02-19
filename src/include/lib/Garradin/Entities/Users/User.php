@@ -129,7 +129,7 @@ class User extends Entity
 
 		// check user number
 		$field = DynamicFields::getNumberField();
-		$this->assert($this->$field !== null && !ctype_digit((string)$this->$field), 'Numéro de membre invalide : ne peut contenir que des chiffres');
+		$this->assert($this->$field !== null && ctype_digit((string)$this->$field), 'Numéro de membre invalide : ne peut contenir que des chiffres');
 
 		$db = DB::getInstance();
 
@@ -199,10 +199,16 @@ class User extends Entity
 
 	public function save(bool $selfcheck = true): bool
 	{
+		if (!count($this->_modified) && $this->exists()) {
+			return true;
+		}
+
 		$columns = array_intersect(DynamicFields::getInstance()->getSearchColumns(), array_keys($this->_modified));
 		$login_field = DynamicFields::getLoginField();
 		$login_modified = $this->_modified[$login_field] ?? null;
 		$password_modified = $this->_modified['password'] ?? null;
+
+		$this->set('date_updated', new \DateTime);
 
 		parent::save($selfcheck);
 

@@ -206,11 +206,3 @@ form#insertImage .cancel input {
     margin: .5em;
     opacity: 0.8;
 }
-
-#confirm_saved {
-    position: absolute;
-    top: .5em;
-    right: 10em;
-    text-align: center;
-    transition: all .5s, opacity 2s;
-}

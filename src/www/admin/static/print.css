@@ -90,6 +90,10 @@ table.list td {
     display: none;
 }
 
+.print-only {
+    display: unset;
+}
+
 td.actions *, nav.tabs, .icn-btn, .pagination, a.icn {
     display: none !important;
 }

@@ -1,19 +1,29 @@
-{include file="_head.tpl" title="Journal de connexion et d'actions"}
-
-{if $id && $current == 'users'}
-	{include file="users/_nav_user.tpl" id=$id}
+{if $params.history}
+	{include file="_head.tpl" title="Historique des modifications"}
+{else}
+	{include file="_head.tpl" title="Journal de connexion et d'actions"}
 {/if}
 
+{if $params.id_user}
+	{include file="users/_nav_user.tpl" id=$params.id_user}
+{elseif $params.history}
+	{include file="users/_nav_user.tpl" id=$params.history}
+{else}
+	{include file="me/_nav.tpl" current="security"}
+{/if}
+
+{if !$params.history}
 <p class="help">
 	Cette page liste les tentatives de connexion, les modifications de mot de passe ou d'identifiant, et toutes les actions de création, suppression ou modification de contenu de ce membre.
 </p>
+{/if}
 
 {if $list->count()}
 	{include file="common/dynamic_list_head.tpl"}
 
 	{foreach from=$list->iterate() item="row"}
 		<tr>
-			{if !$id}
+			{if !$params.id_self}
 			<th>{if !$row.identity}*{else}{$row.identity}{/if}</th>
 			{/if}
 			<td>{$row.created|date_short:true}</td>
@@ -51,6 +61,8 @@
 	</table>
 
 	{$list->getHTMLPagination()|raw}
+
+	<p class="help">Note : les heures correspondent au fuseau horaire du serveur (<?=ini_get('date.timezone')?>).</p>
 {else}
 	<p class="block alert">
 		Aucune activité trouvée.

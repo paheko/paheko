@@ -262,7 +262,7 @@ class Storage extends AbstractStorage
 		return $out;
 	}
 
-	public function put(string $uri, $pointer, ?string $hash, ?int $mtime): bool
+	public function put(string $uri, $pointer, ?string $hash_algo, ?string $hash, ?int $mtime): bool
 	{
 		if (!strpos($uri, '/')) {
 			throw new WebDAV_Exception('Impossible de créer un fichier ici', 403);
@@ -287,7 +287,7 @@ class Storage extends AbstractStorage
 			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de modifier ce fichier', 403);
 		}
 
-		$h = $hash ? hash_init('md5') : null;
+		$h = $hash ? hash_init($hash_algo == 'MD5' ? 'md5' : 'sha1') : null;
 
 		while (!feof($pointer)) {
 			if ($h) {
@@ -300,7 +300,7 @@ class Storage extends AbstractStorage
 
 		if ($h) {
 			if (hash_final($h) != $hash) {
-				throw new WebDAV_Exception('The data sent does not match the supplied MD5 hash', 400);
+				throw new WebDAV_Exception('The data sent does not match the supplied hash', 400);
 			}
 		}
 

@@ -161,6 +161,7 @@ class Years
 		$t->label = 'Affectation automatique du résultat';
 		$t->notes = 'Le résultat a été affecté automatiquement lors de la balance d\'ouverture';
 		$t->date = $year->start_date;
+		$t->addStatus($t::STATUS_OPENING_BALANCE);
 
 		$sum = 0;
 

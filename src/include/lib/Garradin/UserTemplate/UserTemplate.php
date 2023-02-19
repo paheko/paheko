@@ -7,7 +7,7 @@ use KD2\Brindille_Exception;
 use KD2\Translate;
 
 use Garradin\Config;
-use Garradin\Plugin;
+use Garradin\Plugins;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\Users\Session;
@@ -89,11 +89,11 @@ class UserTemplate extends \KD2\Brindille
 		return self::$root_variables;
 	}
 
-	public function __construct(string $path)
+	public function __construct(?string $path)
 	{
 		$this->_tpl_path = $path;
 
-		if ($file = Files::get(File::CONTEXT_SKELETON . '/' . $path)) {
+		if ($path && $file = Files::get(File::CONTEXT_SKELETON . '/' . $path)) {
 			if ($file->type != $file::TYPE_FILE) {
 				throw new \LogicException('Cannot construct a UserTemplate with a directory');
 			}
@@ -101,7 +101,7 @@ class UserTemplate extends \KD2\Brindille
 			$this->file = $file;
 			$this->modified = $file->modified->getTimestamp();
 		}
-		else {
+		elseif ($path) {
 			$this->path = self::DIST_ROOT . $path;
 
 			if (!($this->modified = @filemtime($this->path))) {
@@ -113,7 +113,7 @@ class UserTemplate extends \KD2\Brindille
 
 		$this->registerAll();
 
-		Plugin::fireSignal('usertemplate.init', ['template' => $this]);
+		Plugins::fireSignal('usertemplate.init', ['template' => $this]);
 	}
 
 	/**
@@ -181,26 +181,18 @@ class UserTemplate extends \KD2\Brindille
 			$this->registerFunction($name, [Functions::class, $name]);
 		}
 
+		foreach (Functions::COMPILE_FUNCTIONS_LIST as $name => $callback) {
+			$this->registerCompileBlock($name, $callback);
+		}
+
 		// Local sections
 		foreach (Sections::SECTIONS_LIST as $name) {
 			$this->registerSection($name, [Sections::class, $name]);
 		}
 
-		$this->registerCompileBlock(':break', function (string $name, string $params, Brindille $tpl, int $line) {
-			$in_loop = false;
-			foreach ($this->_stack as $element) {
-				if ($element[0] == $this::SECTION) {
-					$in_loop = true;
-					break;
-				}
-			}
-
-			if (!$in_loop) {
-				throw new Brindille_Exception(sprintf('Error on line %d: break can only be used inside a section', $line));
-			}
-
-			return '<?php break; ?>';
-		});
+		foreach (Sections::COMPILE_SECTIONS_LIST as $name => $callback) {
+			$this->registerCompileBlock($name, $callback);
+		}
 	}
 
 	public function setSource(string $path)
@@ -379,7 +371,7 @@ class UserTemplate extends \KD2\Brindille
 
 		if ($is_web && $type == 'text/html') {
 			$scripts = [];
-			Plugin::fireSignal('usertemplate.appendscript', ['template' => $this, 'content' => $content], $scripts);
+			Plugins::fireSignal('usertemplate.appendscript', ['template' => $this, 'content' => $content], $scripts);
 
 			if (count($scripts)) {
 				$scripts = array_map(fn($a) => sprintf('<script type="text/javascript" defer src="%s"></script>', $a), $scripts);

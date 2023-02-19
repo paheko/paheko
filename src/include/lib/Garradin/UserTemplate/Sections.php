@@ -41,7 +41,71 @@ class Sections
 		'module',
 	];
 
+	const COMPILE_SECTIONS_LIST = [
+		'#select' => [self::class, 'selectStart'],
+		'/select' => [self::class, 'selectEnd'],
+	];
+
+	/**
+	 * List of tables and columns that are restricted in SQL queries
+	 *
+	 * ~column means the column will always be returned as NULL
+	 * -column or !table means trying to access this column or table will return an error
+	 * see KD2/DB/SQLite3 code for details
+	 *
+	 * Note: column restrictions are only possible with PHP >= 8.0
+	 */
+	const SQL_TABLES = [
+		// Allow access to all tables
+		'*' => null,
+		// Restrict access to private fields in users
+		'users' => ['~password', '~pgp_key', '~otp_secret'],
+		// Restrict access to some private tables
+		'!emails' => null,
+		'!emails_queue' => null,
+		'!compromised_passwords_cache' => null,
+		'!compromised_passwords_cache_ranges' => null,
+		'!api_credentials' => null,
+		'!plugins_signals' => null,
+		'!config' => null,
+		'!users_sessions' => null,
+		'!logs' => null,
+	];
+
 	static protected $_cache = [];
+
+	static public function selectStart(string $name, string $sql, UserTemplate $tpl, int $line): string
+	{
+		$sql = strtok($sql, ';');
+		$extra_params = strtok(false);
+
+		$i = 0;
+		$params = '';
+
+		$sql = preg_replace_callback('/\{(.*?)\}/', function ($match) use (&$params, &$i) {
+			// Raw SQL
+			if ('!' === substr($match[1], 0, 1)) {
+				$params .= ' !' . $i . '=' . substr($match[1], 1);
+				return '!' . $i++;
+			}
+			else {
+				$params .= ' :p' . $i . '=' . $match[1];
+				return ':p' . $i++;
+			}
+		}, $sql);
+
+		$sql = 'SELECT ' . $sql;
+		$sql = var_export($sql, true);
+
+		$params .= ' sql=' . $sql . ' ' . $extra_params;
+
+		return $tpl->_section('sql', $params, $line);
+	}
+
+	static public function selectEnd(string $name, string $params, UserTemplate $tpl, int $line): string
+	{
+		return $tpl->_close('sql', '{{/select}}');
+	}
 
 	static protected function _debug(string $str): void
 	{
@@ -459,7 +523,7 @@ class Sections
 		$number_field = DynamicFields::getNumberField();
 
 		if (empty($params['select'])) {
-			$params['select'] = '1';
+			$params['select'] = '*';
 		}
 
 		$params['select'] .= sprintf(', %s AS _name, %s AS _login, %s AS _number',
@@ -595,6 +659,11 @@ class Sections
 
 		if (!$session->isLogged()) {
 			if (!empty($params['block'])) {
+				if (!headers_sent()) {
+					// FIXME: implement redirect to correct URL after login
+					Utils::redirect('!login.php');
+				}
+
 				throw new UserException('Vous n\'avez pas accès à cette page.');
 			}
 
@@ -901,41 +970,54 @@ class Sections
 			'where' => '',
 		];
 
-		if (!isset($params['tables'])) {
-			throw new Brindille_Exception('Missing parameter "tables"');
-		}
+		if (isset($params['sql'])) {
+			$sql = $params['sql'];
 
-		foreach ($defaults as $key => $default_value) {
-			if (!isset($params[$key])) {
-				$params[$key] = $default_value;
+			// Replace raw SQL parameters (undocumented feature, this is for #select section)
+			foreach ($params as $k => $v) {
+				if (substr($k, 0, 1) == '!') {
+					$r = '/' . preg_quote($k, '/') . '\b/';
+					$sql = preg_replace($r, $v, $sql);
+				}
 			}
 		}
+		else {
+			if (empty($params['tables'])) {
+				throw new Brindille_Exception(sprintf('"sql" section: missing parameter "tables" on line %d', $line));
+			}
 
-		// Allow for count=true, count=1 and also count="DISTINCT user_id" count="id"
-		if (!empty($params['count'])) {
-			$params['select'] = sprintf('COUNT(%s) AS count', $params['count'] == 1 ? '*' : $params['count']);
-			$params['order'] = '1';
+			foreach ($defaults as $key => $default_value) {
+				if (!isset($params[$key])) {
+					$params[$key] = $default_value;
+				}
+			}
+
+			// Allow for count=true, count=1 and also count="DISTINCT user_id" count="id"
+			if (!empty($params['count'])) {
+				$params['select'] = sprintf('COUNT(%s) AS count', $params['count'] == 1 ? '*' : $params['count']);
+				$params['order'] = '1';
+			}
+
+			if (!empty($params['where']) && !preg_match('/^\s*AND\s+/i', $params['where'])) {
+				$params['where'] = ' AND ' . $params['where'];
+			}
+
+			$sql = sprintf('SELECT %s FROM %s WHERE 1 %s %s %s ORDER BY %s LIMIT %d,%d;',
+				$params['select'],
+				$params['tables'],
+				$params['where'] ?? '',
+				isset($params['group']) ? 'GROUP BY ' . $params['group'] : '',
+				isset($params['having']) ? 'HAVING ' . $params['having'] : '',
+				$params['order'],
+				$params['begin'],
+				$params['limit']
+			);
 		}
-
-		if (!empty($params['where']) && !preg_match('/^\s*AND\s+/i', $params['where'])) {
-			$params['where'] = ' AND ' . $params['where'];
-		}
-
-		$sql = sprintf('SELECT %s FROM %s WHERE 1 %s %s %s ORDER BY %s LIMIT %d,%d;',
-			$params['select'],
-			$params['tables'],
-			$params['where'] ?? '',
-			isset($params['group']) ? 'GROUP BY ' . $params['group'] : '',
-			isset($params['having']) ? 'HAVING ' . $params['having'] : '',
-			$params['order'],
-			$params['begin'],
-			$params['limit']
-		);
 
 		$db = DB::getInstance();
 
 		try {
-			$statement = $db->protectSelect(null, $sql);
+			$statement = $db->protectSelect(self::SQL_TABLES, $sql);
 
 			$args = [];
 

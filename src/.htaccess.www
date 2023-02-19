@@ -24,9 +24,9 @@ DirectoryIndex index.php index.html
 <IfModule mod_rewrite.c>
 	RewriteEngine on
 	## Remplacer dans les lignes suivantes
-	## /garradin/ par le nom du sous-répertoire où est installé Garradin
- 	RewriteBase /garradin/
-	FallbackResource /garradin/www/_route.php
+	## /paheko/ par le nom du sous-répertoire où est installé Paheko
+ 	RewriteBase /paheko/
+	FallbackResource /paheko/www/_route.php
 
 	## Ne pas modifier les lignes suivantes, les décommenter simplement !
 	RewriteCond %{REQUEST_URI} !www/

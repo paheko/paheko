@@ -16,9 +16,11 @@ class Module extends Entity
 {
 	const ROOT = File::CONTEXT_SKELETON . '/modules';
 	const DIST_ROOT = ROOT . '/skel-dist/modules';
-	const META_FILE = 'module.json';
-
-	const CONFIG_TEMPLATE = 'config.html';
+	const META_FILE = 'module.ini';
+	const ICON_FILE = 'icon.svg';
+	const README_FILE = 'README.md';
+	const CONFIG_FILE = 'config.html';
+	const INDEX_FILE = 'index.html';
 
 	// Snippets, don't forget to create alias constant in UserTemplate\Modules class
 	const SNIPPET_TRANSACTION = 'snippets/transaction_details.html';
@@ -42,7 +44,13 @@ class Module extends Entity
 
 	protected string $label;
 	protected ?string $description;
-	protected ?string $config;
+	protected ?string $author;
+	protected ?string $author_url;
+	protected ?string $restrict_section;
+	protected ?int $restrict_level;
+	protected bool $home_button;
+	protected bool $menu;
+	protected ?\stdClass $config;
 	protected bool $enabled;
 
 	public function selfCheck(): void
@@ -52,46 +60,47 @@ class Module extends Entity
 	}
 
 	/**
-	 * Fills information from module.json file
+	 * Fills information from module.ini file
 	 */
-	public function updateFromJSON(bool $loadConfig = false): bool
+	public function updateFromINI(bool $use_local = true): bool
 	{
-		if ($file = Files::get($this->path(self::META_FILE))) {
-			$json = $file->fetch();
+		if ($use_local && ($file = Files::get($this->path(self::META_FILE)))) {
+			$ini = $file->fetch();
 		}
 		elseif (file_exists($this->distPath(self::META_FILE))) {
-			$json = file_get_contents($this->distPath(self::META_FILE));
+			$ini = file_get_contents($this->distPath(self::META_FILE));
 		}
 		else {
 			return false;
 		}
 
-		$json = json_decode($json);
+		$ini = @parse_ini_string($ini, false, \INI_SCANNER_TYPED);
 
-		if (!isset($json->label)) {
+		if (empty($ini)) {
 			return false;
 		}
-		$this->set('label', $json->label);
-		$this->set('description', $json->description ?? null);
-		if ($loadConfig) {
-			$this->setConfig(get_object_vars($json));
-		}
-		return true;
-	}
 
-	public function setConfig(array $config): void
-	{
-		$tmp = [];
-		foreach($config as $configKey => $value) {
-			if (is_string($value) && $configKey !== 'label' && $configKey !== 'description') // black-list would be welcomed
-				$tmp[$configKey] = $value;
+		$ini = (object) $ini;
+
+		if (!isset($ini->name)) {
+			return false;
 		}
-		$this->set('config', json_encode($tmp));
+
+		$this->set('label', $ini->name);
+		$this->set('description', $ini->description ?? null);
+		$this->set('author', $ini->author ?? null);
+		$this->set('author_url', $ini->author_url ?? null);
+		$this->set('home_button', !empty($ini->home_button));
+		$this->set('menu', !empty($ini->menu));
+		$this->set('restrict_section', $ini->restrict_section ?? null);
+		$this->set('restrict_level', isset($ini->restrict_section, $ini->restrict_level, Session::ACCESS_WORDS[$ini->restrict_level]) ? Session::ACCESS_WORDS[$ini->restrict_level] : null);
+
+		return true;
 	}
 
 	public function updateTemplates(): void
 	{
-		$check = self::SNIPPETS + [self::CONFIG_TEMPLATE => 'Config'];
+		$check = self::SNIPPETS + [self::CONFIG_FILE => 'Config'];
 		$templates = [];
 		$db = DB::getInstance();
 
@@ -110,11 +119,11 @@ class Module extends Entity
 
 	public function icon_url(): ?string
 	{
-		if (!$this->hasFile('icon.svg')) {
+		if (!$this->hasFile(self::ICON_FILE)) {
 			return null;
 		}
 
-		return $this->url('icon.svg');
+		return $this->url(self::ICON_FILE);
 	}
 
 	public function path(string $file = null): string
@@ -150,14 +159,24 @@ class Module extends Entity
 		return file_exists($this->distPath());
 	}
 
+	public function hasLocal(): bool
+	{
+		return Files::exists($this->path());
+	}
+
 	public function hasConfig(): bool
 	{
-		return DB::getInstance()->test('modules_templates', 'id_module = ? AND name = ?', $this->id(), self::CONFIG_TEMPLATE);
+		return DB::getInstance()->test('modules_templates', 'id_module = ? AND name = ?', $this->id(), self::CONFIG_FILE);
+	}
+
+	public function hasData(): bool
+	{
+		return DB::getInstance()->test('sqlite_master', 'type = \'table\' AND name = ?', sprintf('modules_data_%s', $this->name));
 	}
 
 	public function canDelete(): bool
 	{
-		return $this->dir() ? true : false;
+		return !empty($this->config) || $this->hasLocal() || $this->hasData();
 	}
 
 	public function delete(): bool
@@ -191,16 +210,14 @@ class Module extends Entity
 
 	public function template(string $file)
 	{
-		if ($file == self::CONFIG_TEMPLATE) {
+		if ($file == self::CONFIG_FILE) {
 			Session::getInstance()->requireAccess(Session::SECTION_CONFIG, Session::ACCESS_ADMIN);
 		}
 
 		$this->validateFileName($file);
 
 		$ut = new UserTemplate('modules/' . $this->name . '/' . $file);
-		$moduleVars = array_merge($this->asArray(false), ['url' => $this->url()]);
-		$moduleVars['config'] = json_decode($this->config, true);
-		$ut->assign('module', $moduleVars);
+		$ut->assign('module', array_merge($this->asArray(false), ['url' => $this->url()]));
 
 		return $ut;
 	}

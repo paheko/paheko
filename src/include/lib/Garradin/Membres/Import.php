@@ -166,6 +166,10 @@ class Import
 				}
 			}
 
+			if (!count($data)) {
+				throw new UserException('Erreur sur la ligne ' . $line . ' : aucun champ de la fiche membre n\'a été trouvé');
+			}
+
 			if (!empty($data['numero']) && $data['numero'] > 0)
 			{
 				$numero = (int)$data['numero'];

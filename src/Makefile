@@ -42,25 +42,35 @@ release: test minify
 	cd /tmp/paheko-build/paheko/src; \
 		rm -f Makefile include/lib/KD2/data/countries.en.json
 	cd /tmp/paheko-build/paheko/src/data; mkdir plugins && cd plugins; \
-		wget https://fossil.kd2.org/paheko-plugins/uv/welcome.tar.gz
+		wget https://fossil.kd2.org/paheko-plugins/uv/welcome.tar.gz \
+		&& wget https://fossil.kd2.org/paheko-plugins/uv/caisse.tar.gz \
+		&& wget https://fossil.kd2.org/paheko-plugins/uv/taima.tar.gz \
+		&& wget https://fossil.kd2.org/paheko-plugins/uv/dompdf.tar.gz \
+		&& wget https://fossil.kd2.org/paheko-plugins/uv/reservations.tar.gz \
+		&& wget https://fossil.kd2.org/paheko-plugins/uv/webstats.tar.gz \
+		&& wget https://fossil.kd2.org/paheko-plugins/uv/stock_velos.tar.gz
 	mv /tmp/paheko-build/paheko/src /tmp/paheko-build/paheko-${VERSION}
 	@#cd /tmp/paheko-build/; zip -r -9 paheko-${VERSION}.zip paheko-${VERSION};
 	@#mv -f /tmp/paheko-build/paheko-${VERSION}.zip ./
 	tar czvfh paheko-${VERSION}.tar.gz --hard-dereference -C /tmp/paheko-build paheko-${VERSION}
 
 deb:
-	cd ../debian; ./makedeb.sh
+	cd ../build/debian; ./makedeb.sh
 
-publish: release deb
+windows:
+	cd ../build/windows; make installer
+
+publish: release deb windows
 	$(eval VERSION=$(shell cat VERSION))
-	gpg --armor --detach-sign paheko-${VERSION}.tar.gz
+	gpg --armor -r dev@paheko.cloud --detach-sign paheko-${VERSION}.tar.gz
 	fossil uv sync
 	#fossil uv ls | fgrep -v 'paheko-0.8.5' | grep '^paheko-.*\.(tar\.bz2|deb)' | xargs fossil uv rm
 	fossil uv add paheko-${VERSION}.tar.gz
 	fossil uv add paheko-${VERSION}.tar.gz.asc
-	cd ../debian && fossil uv add paheko-${VERSION}.deb
+	cd ../build/debian && fossil uv add paheko-${VERSION}.deb
 	cd ../tools && php make_installer.php > install.php && fossil uv add install.php && rm install.php
 	fossil uv sync
+	cd ../build/windows && make publish
 
 check-dependencies:
 	grep -hEo '^use \\?KD2\\[^; ]+|\\KD2\\[^\(:; ]+' -R include/lib/Garradin www | sed -r 's/^use \\?KD2\\|^\\KD2\\//' | sort | uniq

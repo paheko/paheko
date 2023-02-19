@@ -73,7 +73,7 @@
 			</dt>
 			<dd class="help">
 				En désactivant le site public, les visiteurs seront automatiquement redirigés vers la page de connexion.<br />
-				Cette option est utile si vous avez déjà un site web et ne souhaitez pas utiliser la fonctionnalité site web de Garradin.
+				Cette option est utile si vous avez déjà un site web et ne souhaitez pas utiliser la fonctionnalité site web de Paheko.
 			</dd>
 		</dl>
 	</fieldset>

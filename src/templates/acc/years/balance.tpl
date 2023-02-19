@@ -8,19 +8,28 @@
 </p>
 {/if}
 
-{if $year->countTransactions()}
-<p class="block alert">
-	<strong>Attention&nbsp;!</strong>
-	Cet exercice a déjà des écritures, peut-être avez-vous déjà renseigné la balance d'ouverture&nbsp;?
-</p>
+{if $year_selected}
+	{if $has_balance}
+	<p class="block alert">
+		<strong>Attention&nbsp;!</strong>
+		Une balance d'ouverture existe déjà dans cet exercice.<br />
+		En validant ce formulaire, les écritures de balance et d'affectation du résultat qui existent <strong>seront supprimées et remplacées</strong>.
+	</p>
+	{elseif $year->countTransactions()}
+	<p class="block alert">
+		<strong>Attention&nbsp;!</strong>
+		Cet exercice a déjà des écritures, peut-être avez-vous déjà renseigné manuellement la balance d'ouverture&nbsp;?
+	</p>
+	{/if}
 {/if}
+
 
 <form method="post" action="{$self_url}">
 
 	<fieldset>
 		<legend>Exercice&nbsp;: «&nbsp;{$year.label}&nbsp;» du {$year.start_date|date_short} au {$year.end_date|date_short}</legend>
 
-		{if !$year_selected}
+	{if !$year_selected}
 		<dl>
 			<dt><label for="f_from_year">Reporter les soldes de fermeture d'un exercice</label></dt>
 			<dd class="help">Pour reprendre les soldes des comptes de l'exercice précédent.</dd>
@@ -47,7 +56,7 @@
 		checkOpen();
 		</script>
 		{/literal}
-		{else}
+	{else}
 		<p class="help">
 			Renseigner ici les soldes d'ouverture (débiteur ou créditeur) des comptes.
 		</p>

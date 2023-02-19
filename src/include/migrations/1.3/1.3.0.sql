@@ -1,6 +1,3 @@
--- Already created before, so we need to drop it to migrate
-DROP TABLE plugins_signals;
-
 -- The new users table has already been created and copied
 ALTER TABLE plugins RENAME TO plugins_old;
 ALTER TABLE plugins_signaux RENAME TO plugins_signaux_old;
@@ -51,7 +48,16 @@ DROP TABLE acc_transactions_users_old;
 DROP TABLE acc_transactions_old;
 DROP TABLE services_users_old;
 
-INSERT INTO plugins SELECT id, officiel, nom, description, auteur, url, version, config FROM plugins_old;
+-- Remove old plugin as it cannot be uninstalled as it no longer exists
+DELETE FROM plugins_old WHERE id = 'ouvertures';
+DELETE FROM plugins_signaux_old WHERE plugin = 'ouvertures';
+
+-- Rename plugins table columns to English
+INSERT INTO plugins (name, label, description, author, author_url, version, config, enabled, menu, restrict_level, restrict_section)
+	SELECT id, nom, description, auteur, url, version, config, 1, menu,
+	CASE WHEN menu_condition IS NOT NULL THEN 2 ELSE NULL END,
+	CASE WHEN menu_condition IS NOT NULL THEN 'users' ELSE NULL END
+	FROM plugins_old;
 INSERT INTO plugins_signals SELECT * FROM plugins_signaux_old;
 
 DROP TABLE plugins_signaux_old;

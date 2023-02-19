@@ -104,7 +104,7 @@ if (!defined('Garradin\ROOT'))
 	define('Garradin\ROOT', dirname(__DIR__));
 }
 
-\spl_autoload_register(function (string $classname) {
+\spl_autoload_register(function (string $classname): void {
 	$classname = ltrim($classname, '\\');
 
 	// Plugins
@@ -114,7 +114,14 @@ if (!defined('Garradin\ROOT'))
 		$plugin_name = substr($classname, 0, strpos($classname, '\\'));
 		$filename = str_replace('\\', '/', substr($classname, strpos($classname, '\\')+1));
 
-		$path = Plugin::getPath(strtolower($plugin_name)) . '/lib/' . $filename . '.php';
+		$path = Plugins::getPath(strtolower($plugin_name));
+
+		// Plugin does not exist, just abort
+		if (!$path) {
+			return;
+		}
+
+		$path = $path . '/lib/' . $filename . '.php';
 	}
 	else
 	{
@@ -194,6 +201,7 @@ static $default_config = [
 	'SHOW_ERRORS'           => true,
 	'MAIL_ERRORS'           => false,
 	'ERRORS_REPORT_URL'     => null,
+	'REPORT_USER_EXCEPTIONS' => 0,
 	'ENABLE_TECH_DETAILS'   => true,
 	'HTTP_LOG_FILE'         => null,
 	'ENABLE_UPGRADES'       => true,
@@ -213,12 +221,14 @@ static $default_config = [
 	'ADMIN_COLOR2'          => '#85b9ba',
 	'ADMIN_BACKGROUND_IMAGE' => WWW_URL . 'admin/static/bg.png',
 	'FORCE_CUSTOM_COLORS'   => false,
+	'DISABLE_INSTALL_FORM'  => false,
 	'FILE_STORAGE_BACKEND'  => 'SQLite',
 	'FILE_STORAGE_CONFIG'   => null,
 	'FILE_STORAGE_QUOTA'    => null,
 	'API_USER'              => null,
 	'API_PASSWORD'          => null,
-	'PDF_COMMAND'           => null,
+	'PDF_COMMAND'           => 'auto',
+	'PDF_USAGE_LOG'         => null,
 	'CALC_CONVERT_COMMAND'  => null,
 	'CONTRIBUTOR_LICENSE'   => null,
 	'SQL_DEBUG'             => null,
@@ -370,8 +380,10 @@ function user_error(UserException $e)
 	exit;
 }
 
-// Message d'erreur simple pour les erreurs de l'utilisateur
-ErrorManager::setCustomExceptionHandler('\Garradin\UserException', '\Garradin\user_error');
+if (REPORT_USER_EXCEPTIONS < 2) {
+	// Message d'erreur simple pour les erreurs de l'utilisateur
+	ErrorManager::setCustomExceptionHandler('\Garradin\UserException', '\Garradin\user_error');
+}
 
 // Clé secrète utilisée pour chiffrer les tokens CSRF etc.
 if (!defined('Garradin\SECRET_KEY'))
@@ -397,7 +409,9 @@ Translate::setLocale('fr_FR');
 
 if (!defined('Garradin\INSTALL_PROCESS'))
 {
-	if (!file_exists(DB_FILE)) {
+	$exists = file_exists(DB_FILE);
+
+	if (!$exists) {
 		if (in_array('install.php', get_included_files())) {
 			die('Erreur de redirection en boucle : problème de configuration ?');
 		}

@@ -54,6 +54,13 @@
 
 <aside class="describe">
 	<dl class="describe">
+		{if $user.date_updated}
+			<dt>Fiche modifiée le</dt>
+			<dd>{$user.date_updated|date_short:true}</dd>
+			<dd>
+				{linkbutton shape="menu" label="Historique" href="!users/log.php?history=%d"|args:$user.id}
+			</dd>
+		{/if}
 		<dt>Catégorie</dt>
 		<dd>{$category.name}</dd>
 		<dt>Droits</dt>

@@ -19,21 +19,21 @@
 	{{:assign errors=null}}
 	{{:assign items=null}}
 	{{#foreach from=$_POST.items key='index' item='item'}}
-		{{if $item.name === ''}}{{:assign var='errors[]' value="Le nom de l'article est requis."}}{{/if}}
+		{{if $item.name === ''}}{{:assign var='errors.' value="Le nom de l'article est requis."}}{{/if}}
 		{{if $item.unit_price < 0 || $item.unit_price != $item.unit_price|floatval|strtolower}} {{* Hack to check the data is a number *}}
-			{{:assign var='errors[]' value='Le prix saisi pour "%s" est invalide.'|args:$item.name}}
+			{{:assign var='errors.' value='Le prix saisi pour "%s" est invalide.'|args:$item.name}}
 		{{/if}}
-		{{if $item.quantity < 0 || $item.quantity != $item.quantity|floatval|strtolower}}{{:assign var='errors[]' value='La quantité saisie pour "%s" est invalide.'|args:$item.name}}{{/if}}
+		{{if $item.quantity < 0 || $item.quantity != $item.quantity|floatval|strtolower}}{{:assign var='errors.' value='La quantité saisie pour "%s" est invalide.'|args:$item.name}}{{/if}}
 
 		{{:assign var='computed_item' value=$item}}
-		{{:assign var='computed_item[unit_price]' value='%d * 100'|math:$item.unit_price|floatval}}
-		{{:assign var='computed_item[quantity]' value=$item.quantity|intval}}
-		{{:assign var='items[]' value=$computed_item}}
+		{{:assign var='computed_item.unit_price' value='%d * 100'|math:$item.unit_price|floatval}}
+		{{:assign var='computed_item.quantity' value=$item.quantity|intval}}
+		{{:assign var='items.' value=$computed_item}}
 		{{:assign var='computed_total' value="%d + %d * %d"|args:$computed_total:$item.unit_price:$item.quantity|math}}
 	{{/foreach}}
 
 	{{if ($computed_total != $_POST.quotation_total) || ($computed_total < 0)}}
-		{{:assign var='errors[]' value='Erreur de calcul du total. Enregistrement du devis refusé.'}}
+		{{:assign var='errors.' value='Erreur de calcul du total. Enregistrement du devis refusé.'}}
 	{{/if}}
 
 	{{if $errors|count}}

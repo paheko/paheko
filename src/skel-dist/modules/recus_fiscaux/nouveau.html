@@ -1,0 +1,200 @@
+{{#restrict block=true section="accounting" level="write"}}
+{{/restrict}}
+{{:include file="./_config_default.tpl" keep="module"}}
+
+{{if $_GET.user}}
+	{{#foreach from=$_GET.user key="id" item="user"}}
+		{{:assign id_user=$id|intval}}
+	{{/foreach}}
+{{elseif $_GET.id_user}}
+	{{:assign id_user=$_GET.id_user|intval}}
+{{/if}}
+
+{{if $_POST}}
+	{{if !$_POST.date|trim|parse_date}}
+		{{:assign error="Date d'émission invalide ou vide."}}
+	{{elseif !$_POST.nom|trim}}
+		{{:assign error="Le nom du donateur ne peut être laissé vide."}}
+	{{elseif !$_POST.adresse|trim}}
+		{{:assign error="L'adresse du donateur ne peut être laissée vide."}}
+	{{elseif !$_POST.type}}
+		{{:assign error="Le type de don n'a pas été sélectionné."}}
+	{{elseif $_POST.type == 'numeraire' && !$_POST.moyens|count}}
+		{{:assign error="Aucun moyen de paiement n'a été coché."}}
+	{{elseif !$_POST.montant|trim || $_POST.montant < 0}}
+		{{:assign error="Le montant du don ne peut être laissé vide."}}
+	{{else}}
+		{{:include file="./_recu.html" capture="recu"}}
+		{{:save
+			validate_schema="./recu.schema.json"
+			assign_new_id="new_id"
+			nom=$_POST.nom|trim
+			adresse=$_POST.adresse|trim
+			date=$_POST.date|parse_date
+			montant=$_POST.montant|money_int
+			linked_user=$_POST.id_user
+			linked_transactions=$_POST.transactions
+			annule=false
+			recu=$recu
+		}}
+		{{:http redirect="voir.html?id=%d"|args:$new_id}}
+	{{/if}}
+{{/if}}
+
+{{:admin_header title="Créer un nouveau reçu fiscal" current="acc"}}
+
+{{if $id_user}}
+	{{:assign var="champs_adresse" value=$module.config.champs_adresse|quote_sql_identifier|implode:" || ' — ' || "}}
+
+	{{#users id=$id_user select="%s AS _adresse"|args:$champs_adresse}}
+		{{:assign .="user"}}
+	{{else}}
+		{{:error message="Ce membre n'existe pas."}}
+	{{/users}}
+
+	{{* Récupération des comptes et soldes *}}
+	{{#select
+		SUM(l.credit) AS total, strftime('%Y', t.date) AS year, a.code AS account
+		FROM acc_transactions t
+		INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
+		INNER JOIN acc_transactions_users tu ON tu.id_transaction = t.id
+		INNER JOIN acc_accounts a ON a.id = l.id_account AND a.!code_don
+		WHERE tu.id_user = {$id_user}
+		GROUP BY strftime('%Y', t.date), a.code;
+		!code_don="code"|sql_where:"IN":$module.config.comptes_don
+	}}
+		{{:assign var="year_total" from="user_years.%d.total"|args:$year}}
+		{{:assign .="user_years.%d"|args:$year}}
+		{{:assign var="user_years.%d.total"|args:$year value="%d+%d"|math:$total:$year_total}}
+	{{/select}}
+
+	{{#foreach from=$user_years item="year"}}
+		{{:assign total_money=$year.total|money_currency}}
+		{{:assign var="user_select.%d"|args:$year.year value="%d (%s)"|args:$year.year:$total_money}}
+	{{/foreach}}
+
+	<script type="text/javascript">
+	var user_years = {{$user_years|json_encode}};
+	</script>
+{{elseif $_GET.id_transaction}}
+{{/if}}
+
+<nav class="tabs">
+	{{:linkbutton href="./" label="Retour à la liste des reçus" shape="left"}}
+</nav>
+
+{{if $error}}
+	<p class="error block">{{$error}}</p>
+{{/if}}
+
+{{if !$_GET.type}}
+	<form method="get" action="">
+		<fieldset>
+			<legend>Nouveau reçu</legend>
+			<dl>
+				{{:input type="radio-btn" name="type" value="user" label="Créer un reçu pour un membre"}}
+				{{:input type="radio-btn" name="type" value="transaction" label="Créer un reçu à partir d'une écriture"}}
+				{{:input type="radio-btn" name="type" value="vierge" label="Créer un reçu vierge"}}
+			</dl>
+		</fieldset>
+		<fieldset class="type-user hidden">
+			<legend>Reçu pour un membre</legend>
+			<dl>
+				{{:input type="list" multiple=false name="user" label="Sélectionner un membre" target="!users/selector.php" required=true}}
+			</dl>
+		</fieldset>
+		<fieldset class="type-transaction hidden">
+			<legend>Reçu pour une écriture</legend>
+			<dl>
+				{{:input type="number" name="id_transaction" label="Indiquer le numéro de l'écriture" min=0 required=true}}
+			</dl>
+		</fieldset>
+
+		<p class="submit hidden">
+			{{:button type="submit" shape="right" label="Continuer" class="main"}}
+		</p>
+	</form>
+
+	<script type="text/javascript">
+	$('[name="type"]').forEach((i) => {
+		i.onchange = selectType;
+	});
+
+	function selectType() {
+		var type = $('[name="type"]:checked')[0].value;
+
+		g.toggle('.type-user', type == 'user');
+		g.toggle('.type-transaction', type == 'transaction');
+		g.toggle('.submit', true);
+	}
+	</script>
+
+{{else}}
+	<form method="post" action="">
+		<fieldset>
+			<legend>Nouveau reçu</legend>
+			<dl>
+				{{:input type="text" name="nom" label="Nom du bénéficiaire" required=true default=$user._name}}
+				{{:input type="textarea" cols="50" rows="3" name="adresse" label="Adresse du bénéficiaire" required=true default=$user._adresse}}
+				{{if $user_select}}
+					{{:input type="select" name="annees" label="Pour quelle année le reçu doit-il être généré ?" required=true options=$user_select}}
+				{{/if}}
+
+				{{:input type="date" name="date" required=true label="Date du reçu" default=$now}}
+				{{:input type="money" name="montant" required=true label="Montant des dons" default=$user.total}}
+
+				<dt>Type de don</dt>
+				{{:input type="radio" name="type" value="numeraire" label="Don en numéraire (en euros)" default=$user.}}
+				{{:input type="radio" name="type" value="nature" label="Don en nature" help="Par exemple abandon de frais par les bénévoles"}}
+			</dl>
+			<dl class="hidden type-numeraire">
+				<dt>Moyens de paiement</dt>
+				{{:input type="checkbox" name="moyens[especes]" value=1 label="Paiement en espèces"}}
+				{{:input type="checkbox" name="moyens[cheques]" value=1 label="Paiement en chèques"}}
+				{{:input type="checkbox" name="moyens[autres]" value=1 label="Paiement par virement, prélèvement, carte bancaire, ou autre"}}
+			</dl>
+		</fieldset>
+
+		<p class="help">
+			Note&nbsp;: un reçu créé ne peut plus être modifié, mais seulement annulé.
+		</p>
+
+		<p class="submit hidden">
+			{{:button type="button" name="preview" shape="eye" label="Prévisualiser"}}
+			{{:button type="submit" name="create" shape="right" label="Créer ce reçu" class="main"}}
+		</p>
+	</form>
+
+	<script type="text/javascript">
+	$('[name="type"]').forEach((i) => {
+		i.onchange = selectType;
+	});
+
+	function selectType() {
+		let a = $('[name="type"]:checked')[0];
+		if (!a) return;
+		var type = a.value;
+
+		g.toggle('.type-numeraire', type == 'numeraire');
+		g.toggle('.type-nature', type == 'nature');
+		g.toggle('.submit', true);
+	}
+
+	selectType();
+
+	let p = $('[name=preview]')[0];
+
+	p.addEventListener('click', (e) => {
+		console.log('ok');
+		let form = e.target.form;
+		form.action = "previsualiser.html";
+		form.target = "dialog";
+		g.openFrameDialog('about:blank', 'auto');
+		form.submit();
+		form.action = "";
+		form.target = "";
+	});
+	</script>
+{{/if}}
+
+{{:admin_footer}}

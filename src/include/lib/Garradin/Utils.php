@@ -8,6 +8,8 @@ use KD2\HTTP;
 use KD2\Translate;
 use KD2\SMTP;
 
+use Garradin\Users\Session;
+
 class Utils
 {
     static protected $collator;
@@ -175,6 +177,11 @@ class Utils
 
         $date = strtr($date, self::FRENCH_DATE_NAMES);
         return $date;
+    }
+
+    static public function shortDate($ts, bool $with_hour = false): ?string
+    {
+        return self::date_fr($ts, 'd/m/Y' . ($with_hour ? ' à H\hi' : ''));
     }
 
     /**
@@ -961,8 +968,39 @@ class Utils
             return $str;
         }
 
-        // FIXME for PHP 9.0+ see https://php.watch/versions/8.2/utf8_encode-utf8_decode-deprecated
-        return @utf8_encode($str);
+        return !preg_match('//u', $str) ? self::iso8859_1_to_utf8($str) : $str;
+    }
+
+    /**
+     * Poly-fill to encode a ISO-8859-1 string to UTF-8 for PHP >= 9.0
+     * @see https://php.watch/versions/8.2/utf8_encode-utf8_decode-deprecated
+     */
+    static public function iso8859_1_to_utf8(string $s): string
+    {
+        if (PHP_VERSION_ID < 90000) {
+            return @utf8_encode($s);
+        }
+
+        $s .= $s;
+        $len = strlen($s);
+
+        for ($i = $len >> 1, $j = 0; $i < $len; ++$i, ++$j) {
+            switch (true) {
+                case $s[$i] < "\x80":
+                    $s[$j] = $s[$i];
+                    break;
+                case $s[$i] < "\xC0":
+                    $s[$j] = "\xC2";
+                    $s[++$j] = $s[$i];
+                    break;
+                default:
+                    $s[$j] = "\xC3";
+                    $s[++$j] = chr(ord($s[$i]) - 64);
+                    break;
+            }
+        }
+
+        return substr($s, 0, $j);
     }
 
     /**
@@ -995,6 +1033,124 @@ class Utils
         return $array;
     }
 
+    static public function appendCookieToURLs(string $str): string
+    {
+        $cookie = Session::getCookie();
+
+        if (!$cookie) {
+            return $str;
+        }
+
+        // Append session cookie to URLs, so that <img> tags and others work
+        $r = preg_quote(WWW_URL, '!');
+        $r = '!(?<=["\'])(' . $r . '.*?)(?=["\'])!';
+        $str = preg_replace_callback($r, function ($match) use ($cookie): string {
+            if (false !== strpos($match[1], '?')) {
+                $separator = '&amp;';
+            }
+            else {
+                $separator = '?';
+            }
+
+            return $match[1] . $separator . $cookie;
+        }, $str);
+
+        return $str;
+    }
+
+    /**
+     * Execute a system command with a timeout
+     * @see https://blog.dubbelboer.com/2012/08/24/execute-with-timeout.html
+     */
+    static public function exec(string $cmd, int $timeout, ?callable $stdin, ?callable $stdout, ?callable $stderr = null): int
+    {
+        if (!function_exists('proc_open') || !function_exists('proc_terminate')
+            || preg_match('/proc_(?:open|terminate|get_status|close)/', ini_get('disable_functions'))) {
+            throw new \RuntimeException('Execution of system commands is disabled.');
+        }
+
+        $descriptorspec = [
+            0 => ["pipe", "r"], // stdin is a pipe that the child will read from
+            1 => ["pipe", "w"], // stdout is a pipe that the child will write to
+            2 => ['pipe', 'w'], // stderr
+        ];
+
+        $process = proc_open($cmd, $descriptorspec, $pipes);
+
+        if (!is_resource($process)) {
+            throw new \RuntimeException('Cannot execute command: ' . $cmd);
+        }
+
+        // $pipes now looks like this:
+        // 0 => writeable handle connected to child stdin
+        // 1 => readable handle connected to child stdout
+
+        // Set to non-blocking
+        stream_set_blocking($pipes[0], false);
+        stream_set_blocking($pipes[1], false);
+        stream_set_blocking($pipes[2], false);
+
+        $timeout_ms = $timeout * 1000000; // in microseconds
+
+        if (null !== $stdin) {
+            // Send STDIN
+            fwrite($pipes[0], $stdin());
+        }
+
+        fclose($pipes[0]);
+
+        while ($timeout_ms > 0) {
+            $start = microtime(true);
+
+            // Wait until we have output or the timer expired.
+            $read  = [$pipes[1]];
+            $other = [];
+
+            if (null !== $stderr) {
+                $read[] = $pipes[2];
+            }
+
+            // Wait every 0.5 seconds
+            stream_select($read, $other, $other, 0, 500000);
+
+            // Get the status of the process.
+            // Do this before we read from the stream,
+            // this way we can't lose the last bit of output if the process dies between these     functions.
+            $status = proc_get_status($process);
+
+            // Read the contents from the buffer.
+            // This function will always return immediately as the stream is none-blocking.
+            $stdout(stream_get_contents($pipes[1]));
+
+            if (null !== $stderr) {
+                $stderr(stream_get_contents($pipes[2]));
+            }
+
+            if (!$status['running']) {
+                // Break from this loop if the process exited before the timeout.
+                break;
+            }
+
+            // Subtract the number of microseconds that we waited.
+            $timeout_ms -= (microtime(true) - $start) * 1000000;
+        }
+
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+
+        $status = proc_get_status($process);
+
+        if ($status['running']) {
+            proc_terminate($process, 9);
+            throw new \RuntimeException(sprintf("Command killed after taking more than %d seconds: \n%s", $timeout, $cmd));
+        }
+
+        $status = proc_get_status($process);
+        proc_close($process);
+
+        return $status['exitcode'];
+    }
+
     /**
      * Displays a PDF from a string, only works when PDF_COMMAND constant is set to "prince"
      * @param  string $str HTML string
@@ -1003,10 +1159,14 @@ class Utils
     static public function streamPDF(string $str): void
     {
         if (!PDF_COMMAND) {
+            return;
+        }
+
+        if (PDF_COMMAND == 'auto') {
             // Try to see if there's a plugin
             $in = ['string' => $str];
 
-            if (Plugin::fireSignal('pdf.stream', $in)) {
+            if (Plugins::fireSignal('pdf.stream', $in)) {
                 return;
             }
 
@@ -1021,35 +1181,16 @@ class Utils
             return;
         }
 
-        $descriptorspec = [
-            0 => ["pipe", "r"], // stdin is a pipe that the child will read from
-            1 => ["pipe", "w"], // stdout is a pipe that the child will write to
-            2 => ['pipe', 'w'], // stderr
-        ];
+        $str = self::appendCookieToURLs($str);
 
-        $cmd = 'prince -o - -';
-        $process = proc_open($cmd, $descriptorspec, $pipes);
+        // 3 seconds is plenty enough to fetch resources, right?
+        $cmd = 'prince --http-timeout=3 -o - -';
 
-        if (!is_resource($process)) {
-            throw new \RuntimeException('Cannot execute Prince XML');
-        }
+        // Prince is fast, right? Fingers crossed
+        self::exec($cmd, 10, fn () => $str, fn ($data) => print($data));
 
-        // $pipes now looks like this:
-        // 0 => writeable handle connected to child stdin
-        // 1 => readable handle connected to child stdout
-
-        fwrite($pipes[0], $str);
-        fclose($pipes[0]);
-
-        echo stream_get_contents($pipes[1]);
-        fclose($pipes[1]);
-
-        // It is important that you close any pipes before calling
-        // proc_close in order to avoid a deadlock
-        proc_close($process);
-
-        if (defined('Garradin\PDF_LOG') && \Garradin\PDF_LOG) {
-            file_put_contents(\Garradin\PDF_LOG, date("[d/m/Y H:i:s]\n"), FILE_APPEND);
+        if (PDF_USAGE_LOG) {
+            file_put_contents(PDF_USAGE_LOG, date("Y-m-d H:i:s\n"), FILE_APPEND);
         }
     }
 
@@ -1060,18 +1201,23 @@ class Utils
      */
     static public function filePDF(string $str): ?string
     {
-        $source = sprintf('%s/print-%s.html', CACHE_ROOT, md5(random_bytes(16)));
-        $target = str_replace('.html', '.pdf', $source);
-
-        file_put_contents($source, $str);
-
         $cmd = PDF_COMMAND;
 
         if (!$cmd) {
+            return null;
+        }
+
+        $source = sprintf('%s/print-%s.html', CACHE_ROOT, md5(random_bytes(16)));
+        $target = str_replace('.html', '.pdf', $source);
+
+        $str = self::appendCookieToURLs($str);
+        file_put_contents($source, $str);
+
+        if ($cmd == 'auto') {
             // Try to see if there's a plugin
             $in = ['source' => $source, 'target' => $target];
 
-            if (Plugin::fireSignal('pdf.create', $in)) {
+            if (Plugins::fireSignal('pdf.create', $in)) {
                 Utils::safe_unlink($source);
                 return $target;
             }
@@ -1094,12 +1240,15 @@ class Utils
             }
         }
 
+        $timeout = 25;
+
         switch ($cmd) {
             case 'prince':
-                $cmd = 'prince -o %2$s %1$s';
+                $timeout = 10;
+                $cmd = 'prince --http-timeout=3 -o %2$s %1$s';
                 break;
             case 'chromium':
-                $cmd = 'chromium --headless --disable-gpu --run-all-compositor-stages-before-draw --print-to-pdf-no-header --print-to-pdf=%s %s';
+                $cmd = 'chromium --headless --timeout=5000 --disable-gpu --run-all-compositor-stages-before-draw --print-to-pdf-no-header --print-to-pdf=%2$s %1$s';
                 break;
             case 'wkhtmltopdf':
                 $cmd = 'wkhtmltopdf -q --print-media-type --enable-local-file-access --disable-smart-shrinking --encoding "UTF-8" %s %s';
@@ -1111,18 +1260,24 @@ class Utils
                 break;
         }
 
+        $cmd = sprintf($cmd, escapeshellarg($source), escapeshellarg($target));
         $cmd .= ' 2>&1';
 
-        $cmd = sprintf($cmd, escapeshellarg($source), escapeshellarg($target));
-        $output = shell_exec($cmd);
-        Utils::safe_unlink($source);
+        $output = '';
+
+        try {
+            self::exec($cmd, $timeout, null, fn ($data) => $output .= $data);
+        }
+        finally {
+            Utils::safe_unlink($source);
+        }
 
         if (!file_exists($target)) {
             throw new \RuntimeException('PDF command failed: ' . $output);
         }
 
-        if (defined('Garradin\PDF_LOG') && \Garradin\PDF_LOG) {
-            file_put_contents(\Garradin\PDF_LOG, date("[d/m/Y H:i:s]\n"), FILE_APPEND);
+        if (PDF_USAGE_LOG) {
+            file_put_contents(PDF_USAGE_LOG, date("Y-m-d H:i:s\n"), FILE_APPEND);
         }
 
         return $target;

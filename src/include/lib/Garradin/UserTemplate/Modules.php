@@ -8,6 +8,7 @@ use Garradin\Files\Files;
 use Garradin\DB;
 use Garradin\Utils;
 use Garradin\UserException;
+use Garradin\Users\Session;
 
 use const Garradin\ROOT;
 
@@ -26,26 +27,7 @@ class Modules
 	static public function refresh(): void
 	{
 		$existing = DB::getInstance()->getAssoc(sprintf('SELECT id, name FROM %s;', Module::TABLE));
-		$list = [];
-
-		foreach (Files::list(Module::ROOT) as $file) {
-			if ($file->type != $file::TYPE_DIRECTORY) {
-				continue;
-			}
-
-			$list[] = $file->name;
-		}
-
-		foreach (glob(Module::DIST_ROOT . '/*') as $file) {
-			if (!is_dir($file)) {
-				continue;
-			}
-
-			$list[] = Utils::basename($file);
-		}
-
-		$list = array_unique($list);
-		sort($list);
+		$list = self::listRaw();
 
 		$create = array_diff($list, $existing);
 		$delete = array_diff($existing, $list);
@@ -61,10 +43,65 @@ class Modules
 
 		foreach ($existing as $name) {
 			$f = self::get($name);
-			$f->updateFromJSON();
+			$f->updateFromINI();
 			$f->save();
 			$f->updateTemplates();
 		}
+	}
+
+	/**
+	 * List modules names from locally installed directories
+	 */
+	static public function listRaw(bool $include_installed = true): array
+	{
+		$list = [];
+
+		// First list modules bundled
+		foreach (glob(Module::DIST_ROOT . '/*') as $file) {
+			if (!is_dir($file)) {
+				continue;
+			}
+
+			$name = Utils::basename($file);
+			$list[$name] = $name;
+		}
+
+		if ($include_installed) {
+			// Then add modules in files
+			foreach (Files::list(Module::ROOT) as $file) {
+				if ($file->type != $file::TYPE_DIRECTORY) {
+					continue;
+				}
+
+				$list[$file->name] = $file->name;
+			}
+		}
+
+		sort($list);
+		return $list;
+	}
+
+	/**
+	 * List locally installed modules, directly from the filesystem, without creating them in the database cache
+	 * (used in Install form)
+	 */
+	static public function listLocal(): array
+	{
+		$list = self::listRaw(false);
+		$out = [];
+
+		foreach ($list as $name) {
+			$m = new Module;
+			$m->name = $name;
+
+			if (!$m->updateFromINI(false)) {
+				continue;
+			}
+
+			$out[$name] = $m;
+		}
+
+		return $out;
 	}
 
 	static public function create(string $name): ?Module
@@ -72,7 +109,7 @@ class Modules
 		$module = new Module;
 		$module->name = $name;
 
-		if (!$module->updateFromJSON()) {
+		if (!$module->updateFromINI()) {
 			return null;
 		}
 
@@ -81,6 +118,9 @@ class Modules
 		return $module;
 	}
 
+	/**
+	 * List modules from the database
+	 */
 	static public function list(): array
 	{
 		return EM::getInstance(Module::class)->all('SELECT * FROM @TABLE ORDER BY label COLLATE NOCASE ASC;');
@@ -96,10 +136,10 @@ class Modules
 		$out = [];
 
 		foreach (self::listForSnippet($snippet) as $module) {
-			$out[] = $module->fetch($snippet, $variables);
+			$out[$module->name] = $module->fetch($snippet, $variables);
 		}
 
-		return $out;
+		return array_filter($out, fn($a) => trim($a) !== '');
 	}
 
 	static public function listForSnippet(string $snippet): array

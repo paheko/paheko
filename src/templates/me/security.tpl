@@ -1,11 +1,6 @@
 {include file="_head.tpl" title="Mes informations de connexion et sécurité" current="me"}
 
-<nav class="tabs">
-	<ul>
-		<li><a href="{$admin_url}me/">Mes informations personnelles</a></li>
-		<li class="current"><a href="{$admin_url}me/security.php">Mot de passe et options de sécurité</a></li>
-	</ul>
-</nav>
+{include file="./_nav.tpl" current="security"}
 
 {if $ok}
 <p class="block confirm">
@@ -115,7 +110,7 @@
 		<dd>{linkbutton href="!logout.php?all" label="Me déconnecter de toutes les sessions" shape="logout"}</dd>
 		<dt>Journal de connexion</dt>
 		<dd>Permet de voir les tentatives de connexion, les modifications de mot de passe, etc.</dd>
-		<dd>{linkbutton href="!users/log.php?id=%d"|args:$logged_user.id label="Voir mon journal de connexion" shape="menu"}</dd>
+		<dd>{linkbutton href="!users/log.php" label="Voir mon journal de connexion" shape="menu"}</dd>
 	</dl>
 {/if}
 

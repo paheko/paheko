@@ -9,7 +9,7 @@
 			open='%02d:%02d'|args:$slot.open_hour:$slot.open_minutes
 			close='%02d:%02d'|args:$slot.close_hour:$slot.close_minutes
 		}}
-		{{:assign var="slots[%d]"|args:$i value=$slot}}
+		{{:assign var="slots.%d"|args:$i value=$slot}}
 
 		{{if !"%s %s"|args:$slot.frequency:$slot.day|trim|strtotime}}
 			{{:assign error="Ouvertures - ligne %d : le sélecteur de jour est invalide: %s %s"|args:$line:$slot.frequency:$slot.day}}

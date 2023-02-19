@@ -11,7 +11,7 @@ use Garradin\Web\Web;
 
 use Garradin\API;
 use Garradin\Config;
-use Garradin\Plugin;
+use Garradin\Plugins;
 use Garradin\UserException;
 use Garradin\Utils;
 
@@ -73,17 +73,21 @@ class Router
 			header('Location: ' . Config::getInstance()->fileURL('favicon'), true);
 			return;
 		}
-		elseif (preg_match('!^(admin/p|p)/(' . Plugin::PLUGIN_ID_REGEXP . ')/(.*)$!', $uri, $match)) {
-			$plugin = new Plugin($match[2]);
-			$public = $match[1] == 'p';
-			$plugin->route($public, $match[3]);
+		elseif (preg_match('!^(?:admin/p|p|m)/\w+$!', $uri)) {
+			Utils::redirect('/' . $uri . '/');
+		}
+		elseif (preg_match('!^(admin/p|p)/(' . Plugins::NAME_REGEXP . ')/(.*)$!', $uri, $match)
+			&& ($plugin = Plugins::get($match[2])) && $plugin->enabled) {
+			$uri = ($match[1] == 'admin/p' ? 'admin/' : '') . $match[3];
+			$plugin->route($uri);
 			return;
 		}
-		elseif ('admin' == $first || 'p' == $first) {
+		// Other admin/plugin routes are not found
+		elseif ($first === 'admin' || $first === 'p') {
 			http_response_code(404);
 			throw new UserException('Cette page n\'existe pas.');
 		}
-		elseif ('api' == $first) {
+		elseif ('api' === $first) {
 			API::dispatchURI(substr($uri, 4));
 			return;
 		}
@@ -110,7 +114,7 @@ class Router
 
 			$session = Session::getInstance();
 
-			if (Plugin::fireSignal('http.request.file.before', compact('file', 'uri', 'session'))) {
+			if (Plugins::fireSignal('http.request.file.before', compact('file', 'uri', 'session'))) {
 				// If a plugin handled the request, let's stop here
 				return;
 			}
@@ -122,7 +126,7 @@ class Router
 				$file->serve($session, isset($_GET['download']), $_GET['s'] ?? null, $_POST['p'] ?? null);
 			}
 
-			Plugin::fireSignal('http.request.file.after', compact('file', 'uri', 'session'));
+			Plugins::fireSignal('http.request.file.after', compact('file', 'uri', 'session'));
 
 			return;
 		}

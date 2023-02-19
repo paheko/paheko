@@ -72,6 +72,8 @@ class CommonModifiers
 		'money',
 		'money_raw',
 		'money_currency',
+		'money_html',
+		'money_currency_html',
 		'relative_date',
 		'relative_date_short',
 		'date_short',
@@ -84,10 +86,7 @@ class CommonModifiers
 		'css_hex_to_rgb',
 	];
 
-	/**
-	 * See also money/money_currency in UserTemplate (overriden)
-	 */
-	static public function money($number, bool $hide_empty = true, bool $force_sign = false): string
+	static public function money($number, bool $hide_empty = true, bool $force_sign = false, bool $html = false): string
 	{
 		if ($hide_empty && !$number) {
 			return '';
@@ -95,7 +94,13 @@ class CommonModifiers
 
 		$sign = ($force_sign && $number > 0) ? '+' : '';
 
-		return sprintf('<span class="money">%s</span>', $sign . Utils::money_format($number, ',', '&nbsp;', $hide_empty));
+		$out = $sign . Utils::money_format($number, ',', $html ? '&nbsp;' : ' ', $hide_empty);
+
+		if ($html) {
+			$out = sprintf('<span class="money">%s</span>', $out);
+		}
+
+		return $out;
 	}
 
 	static public function money_raw($number, bool $hide_empty = true): string
@@ -103,15 +108,25 @@ class CommonModifiers
 		return Utils::money_format($number, ',', '', $hide_empty);
 	}
 
-	static public function money_currency($number, bool $hide_empty = true): string
+	static public function money_currency($number, bool $hide_empty = true, bool $force_sign = false, bool $html = false): string
 	{
-		$out = self::money($number, $hide_empty);
+		$out = self::money($number, $hide_empty, $force_sign, $html);
 
 		if ($out !== '') {
-			$out .= '&nbsp;' . Config::getInstance()->get('currency');
+			$out .= ($html ? '&nbsp;' : ' ') . Config::getInstance()->get('currency');
 		}
 
 		return $out;
+	}
+
+	static public function html_money($number, bool $hide_empty = true, bool $force_sign = false): string
+	{
+		return self::money($number, $hide_empty, $force_sign, false);
+	}
+
+	static public function html_money_currency($number, bool $hide_empty = true, bool $force_sign = false): string
+	{
+		return self::money_currency($number, $hide_empty, $force_sign, false);
 	}
 
 	static public function date_long($ts, bool $with_hour = false): ?string
@@ -121,7 +136,7 @@ class CommonModifiers
 
 	static public function date_short($ts, bool $with_hour = false): ?string
 	{
-		return Utils::date_fr($ts, 'd/m/Y' . ($with_hour ? ' à H\hi' : ''));
+		return Utils::shortDate($ts, $with_hour);
 	}
 
 	static public function date_hour($ts, bool $minutes_only_if_required = false): ?string

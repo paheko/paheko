@@ -5,7 +5,7 @@ namespace Garradin\Email;
 use Garradin\Config;
 use Garradin\DB;
 use Garradin\DynamicList;
-use Garradin\Plugin;
+use Garradin\Plugins;
 use Garradin\UserException;
 use Garradin\Entities\Email\Email;
 use Garradin\Entities\Users\User;
@@ -14,7 +14,7 @@ use Garradin\UserTemplate\UserTemplate;
 use Garradin\Web\Render\Render;
 use Garradin\Web\Skeleton;
 
-use const Garradin\{USE_CRON, MAIL_RETURN_PATH};
+use const Garradin\{USE_CRON, MAIL_RETURN_PATH, DISABLE_EMAIL};
 use const Garradin\{SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURITY};
 
 use KD2\SMTP;
@@ -116,7 +116,7 @@ class Emails
 		$recipients = $list;
 		unset($list);
 
-		if (Plugin::fireSignal('email.queue.before', compact('context', 'recipients', 'sender', 'subject', 'content', 'render'))) {
+		if (Plugins::fireSignal('email.queue.before', compact('context', 'recipients', 'sender', 'subject', 'content', 'render'))) {
 			// queue handling was done by a plugin
 			return;
 		}
@@ -174,7 +174,7 @@ class Emails
 				]);
 			}
 
-			if (Plugin::fireSignal('email.queue.insert', compact('context', 'to', 'sender', 'subject', 'content', 'render', 'hash', 'content_html') + ['pgp_key' => $data['pgp_key'] ?? null])) {
+			if (Plugins::fireSignal('email.queue.insert', compact('context', 'to', 'sender', 'subject', 'content', 'render', 'hash', 'content_html') + ['pgp_key' => $data['pgp_key'] ?? null])) {
 				// queue insert was done by a plugin
 				continue;
 			}
@@ -195,7 +195,7 @@ class Emails
 
 		$db->commit();
 
-		if (Plugin::fireSignal('email.queue.after', compact('context', 'recipients', 'sender', 'subject', 'content', 'render'))) {
+		if (Plugins::fireSignal('email.queue.after', compact('context', 'recipients', 'sender', 'subject', 'content', 'render'))) {
 			return;
 		}
 
@@ -556,7 +556,7 @@ class Emails
 			return;
 		}
 
-		$email_sent_via_plugin = Plugin::fireSignal('email.send.before', compact('context', 'message'));
+		$email_sent_via_plugin = Plugins::fireSignal('email.send.before', compact('context', 'message'));
 
 		if ($email_sent_via_plugin) {
 			return;
@@ -573,7 +573,7 @@ class Emails
 			$message->send();
 		}
 
-		Plugin::fireSignal('email.send.after', compact('context', 'message'));
+		Plugins::fireSignal('email.send.after', compact('context', 'message'));
 	}
 
 	/**
@@ -587,7 +587,7 @@ class Emails
 
 		$return = $message->identifyBounce();
 
-		if (Plugin::fireSignal('email.bounce', compact('message', 'return', 'raw_message'))) {
+		if (Plugins::fireSignal('email.bounce', compact('message', 'return', 'raw_message'))) {
 			return null;
 		}
 
@@ -629,7 +629,7 @@ class Emails
 			return null;
 		}
 
-		Plugin::fireSignal('email.bounce', compact('email', 'return'));
+		Plugins::fireSignal('email.bounce', compact('email', 'return'));
 		$email->hasFailed($return);
 		$email->save();
 

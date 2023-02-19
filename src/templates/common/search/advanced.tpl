@@ -84,8 +84,8 @@ var translations = {
 	"is less than or equal to": "est inférieur ou égal à",
 	"is between": "est situé entre",
 	"is not between": "n'est pas situé entre",
-	"is null": "est renseigné",
-	"is not null": "n'est pas renseigné",
+	"is null": "n'est pas renseigné",
+	"is not null": "est renseigné",
 	"begins with": "commence par",
 	"doesn't begin with": "ne commence pas par",
 	"ends with": "se termine par",
@@ -109,7 +109,7 @@ q.loadDefaultOperators();
 q.default_operator = "1";
 
 // Add specific condition just to have the column show up in result
-q.operators["1"] = "afficher cette colonne dans le résultat";
+q.operators["1"] = "afficher cette colonne";
 
 for (var i in q.types_operators) {
 	q.types_operators[i]["1"] = q.operators["1"];

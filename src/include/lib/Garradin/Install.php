@@ -12,6 +12,8 @@ use Garradin\Entities\Search;
 use Garradin\Users\DynamicFields;
 use Garradin\Users\Session;
 use Garradin\Files\Files;
+use Garradin\UserTemplate\Modules;
+use Garradin\Plugins;
 
 use KD2\HTTP;
 
@@ -21,6 +23,23 @@ use KD2\HTTP;
  */
 class Install
 {
+	/**
+	 * List of plugins that should be displayed during installation (if present)
+	 */
+	const DEFAULT_PLUGINS = [
+		'caisse',
+		'taima',
+	];
+
+	const DEFAULT_MODULES = [
+		'recus_fiscaux',
+		'carte_membre',
+		'recu_don',
+		'recu_paiement',
+		//'bilan_pc',
+		//'invoice',
+	];
+
 	/**
 	 * This sends the current installed version, as well as the PHP and SQLite versions
 	 * for statistics purposes.
@@ -173,8 +192,11 @@ class Install
 		self::assert(strlen($source['password']) >= User::MINIMUM_PASSWORD_LENGTH, 'Le mot de passe est trop court');
 		self::assert($source['password'] === $source['password_confirmed'], 'La vérification du mot de passe ne correspond pas');
 
+		$plugins = isset($source['plugins']) ? array_keys($source['plugins']) : [];
+		$modules = isset($source['modules']) ? array_keys($source['modules']) : [];
+
 		try {
-			self::install($source['country'], $source['name'], $source['user_name'], $source['user_email'], $source['password']);
+			self::install($source['country'], $source['name'], $source['user_name'], $source['user_email'], $source['password'], $plugins, $modules);
 			self::ping();
 		}
 		catch (\Exception $e) {
@@ -183,7 +205,7 @@ class Install
 		}
 	}
 
-	static public function install(string $country_code, string $name, string $user_name, string $user_email, string $user_password, ?string $welcome_text = null): void
+	static public function install(string $country_code, string $name, string $user_name, string $user_email, string $user_password, array $plugins = [], array $modules = []): void
 	{
 		if (file_exists(DB_FILE)) {
 			throw new UserException('La base de données existe déjà.');
@@ -269,7 +291,7 @@ class Install
 
 		$config->set('files', array_map(fn () => null, $config::FILES));
 
-		$welcome_text = $welcome_text ?? sprintf("Bienvenue dans l'administration de %s !\n\nUtilisez le menu à gauche pour accéder aux différentes sections.\n\nCe message peut être modifié dans la 'Configuration'.", $name);
+		$welcome_text = sprintf("Bienvenue dans l'administration de %s !\n\nUtilisez le menu à gauche pour accéder aux différentes sections.\n\nSi vous êtes perdu, n'hésitez pas à consulter l'aide :-)", $name);
 
 		$config->setFile('admin_homepage', $welcome_text);
 
@@ -331,14 +353,27 @@ class Install
 		$search->created = new \DateTime;
 		$search->save();
 
+		$config->save();
+
 		// Install welcome plugin if available
-		$has_welcome_plugin = Plugin::getPath('welcome');
+		$has_welcome_plugin = Plugins::exists('welcome');
 
 		if ($has_welcome_plugin) {
-			Plugin::install('welcome', true);
+			Plugins::install('welcome');
 		}
 
-		$config->save();
+		foreach ($plugins as $plugin) {
+			Plugins::install($plugin);
+		}
+
+		Modules::refresh();
+
+		foreach ($modules as $module) {
+			$m = Modules::get($module);
+			$m->set('enabled', true);
+			$m->save();
+		}
+
 		Files::enableQuota();
 	}
 
@@ -387,7 +422,7 @@ class Install
 		$path = ROOT . DIRECTORY_SEPARATOR . CONFIG_FILE;
 		$new_line = sprintf('const %s = %s;', $key, var_export($value, true));
 
-		if (file_exists($path)) {
+		if (@filesize($path)) {
 			$config = file_get_contents($path);
 
 			$pattern = sprintf('/^.*(?:const\s+%s|define\s*\(.*%1$s).*$/m', $key);

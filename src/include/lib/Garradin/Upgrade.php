@@ -53,7 +53,7 @@ class Upgrade
 		$backup = new Sauvegarde;
 		$v = $db->version();
 
-		Plugin::toggleSignals(false);
+		Plugins::toggleSignals(false);
 
 		Static_Cache::store('upgrade', 'Updating');
 
@@ -152,7 +152,7 @@ class Upgrade
 				require ROOT . '/include/migrations/1.3/1.3.0.php';
 			}
 
-			Plugin::upgradeAllIfRequired();
+			Plugins::upgradeAllIfRequired();
 
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();

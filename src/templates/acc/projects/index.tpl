@@ -17,7 +17,9 @@
 
 	<p class="noprint print-btn">
 		<button onclick="window.print(); return false;" class="icn-btn" data-icon="⎙">Imprimer</button>
-		{linkbutton shape="download" href="%s?by_year=%d&_pdf"|args:$self_url_no_qs,$by_year label="Télécharger en PDF"}
+		{if PDF_COMMAND}
+			{linkbutton shape="download" href="%s?by_year=%d&_pdf"|args:$self_url_no_qs,$by_year label="Télécharger en PDF"}
+		{/if}
 	</p>
 {/if}
 </div>
@@ -28,7 +30,7 @@
 	<table class="list projects">
 		<thead>
 			<tr>
-				<td>Année</td>
+				<td>Projet</td>
 				<td></td>
 				<td class="money">Charges</td>
 				<td class="money">Produits</td>

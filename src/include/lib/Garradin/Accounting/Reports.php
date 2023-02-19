@@ -180,8 +180,6 @@ class Reports
 
 		$balances = DB::getInstance()->getAssoc($sql);
 
-		//var_dump('<pre>', $sql, $balances[Account::REVENUE]); exit;
-
 		return ($balances[Account::REVENUE] ?? 0) - ($balances[Account::EXPENSE] ?? 0);
 	}
 

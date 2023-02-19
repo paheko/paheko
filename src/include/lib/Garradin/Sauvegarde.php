@@ -528,7 +528,7 @@ class Sauvegarde
 			}
 
 			// Check and upgrade plugins, if a software upgrade is necessary, plugins will be upgraded after the upgrade
-			Plugin::upgradeAllIfRequired();
+			Plugins::upgradeAllIfRequired();
 		}
 
 		return $return;

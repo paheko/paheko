@@ -31,11 +31,11 @@ class Form
 
 	public function run(callable $fn, ?string $csrf_key = null, ?string $redirect = null, bool $follow_redirect = false): bool
 	{
-		if (null !== $csrf_key && !$this->check($csrf_key)) {
-			return false;
-		}
-
 		try {
+			if (null !== $csrf_key && !\KD2\Form::tokenCheck($csrf_key)) {
+				throw new ValidationException('Une erreur est survenue, merci de bien vouloir renvoyer le formulaire.');
+			}
+
 			call_user_func($fn);
 
 			if (null !== $redirect) {
@@ -50,7 +50,20 @@ class Form
 		}
 		catch (UserException $e) {
 			$this->addError($e);
+
+			Form::reportUserException($e);
+
 			return false;
+		}
+	}
+
+	static public function reportUserException(UserException $e): void
+	{
+		if (REPORT_USER_EXCEPTIONS === 2) {
+			throw $e;
+		}
+		elseif (REPORT_USER_EXCEPTIONS === 1) {
+			\KD2\ErrorManager::reportExceptionSilent($e);
 		}
 	}
 
@@ -66,6 +79,9 @@ class Form
 		return $this->run($fn, $csrf_key, $redirect, $follow_redirect);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public function check($token_action = '', Array $rules = null)
 	{
 		if (!\KD2\Form::tokenCheck($token_action))
@@ -82,6 +98,9 @@ class Form
 		return true;
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public function validate(Array $rules, array $source = null)
 	{
 		return \KD2\Form::validate($rules, $this->errors, $source);

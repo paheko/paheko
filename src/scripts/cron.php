@@ -23,4 +23,4 @@ if ($config->backup_frequency && $config->backup_limit)
 // Exécution des rappels automatiques
 Reminders::sendPending();
 
-Plugin::fireSignal('cron');
+Plugins::fireSignal('cron');
