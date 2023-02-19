@@ -5,12 +5,12 @@
 {{:admin_header title="Devis et factures" current="acc"}}
 <nav class="tabs">
 	<aside>
-		{{:linkbutton href="edit.html" label="Nouveau document" shape="plus" target="_dialog"}}
+		{{:linkbutton href="new_quotation.html" label="Nouveau devis" shape="plus"}}
 	</aside>
 	{{:include file='./include/main_nav_tabs.html'}}
 </nav>
 {{:include file='./include/constants.tpl' keep='type_labels,status_labels,status_options'}}
-{{:include file='./include/style.tpl'}}
+{{* {{:include file='./include/style.tpl'}} *}}
 
 <h1>Création d'un devis</h1>
 
@@ -26,7 +26,7 @@
 		{{if $item.quantity < 0 || $item.quantity != $item.quantity|floatval|strtolower}}{{:assign var='errors[]' value='La quantité saisie pour "%s" est invalide.'|args:$item.name}}{{/if}}
 
 		{{:assign var='computed_item' value=$item}}
-		{{:assign var='computed_item[unit_price]' value=$item.unit_price|floatval}}
+		{{:assign var='computed_item[unit_price]' value='%d * 100'|math:$item.unit_price|floatval}}
 		{{:assign var='computed_item[quantity]' value=$item.quantity|intval}}
 		{{:assign var='items[]' value=$computed_item}}
 		{{:assign var='computed_total' value="%d + %d * %d"|args:$computed_total:$item.unit_price:$item.quantity|math}}
@@ -41,12 +41,19 @@
 			<p class="error block">{{$error}}</p>
 		{{/foreach}}
 	{{else}}
-		{{:assign new_key="%d+1"|math:$module.config.last_id}}
-		{{:assign id="%d+1"|math:$module.config.last_quotation_id}}
+		{{if $_POST.key}}
+			{{:assign key=$_POST.key}}
+		{{else}}
+			{{#load select="MAX(key) AS last" where="json_extract(document, '$.type') = :type" :type='quotation'}} 
+				{{:assign last_numeric=$last|regexp_replace:'~\D~':''}}
+				{{:assign next_numeric='%d+1'|math:$last_numeric}}
+				{{:assign key="D%06d"|args:$next_numeric}}
+			{{/load}}
+		{{/if}}
 
-		{{:save key=$id
+		{{:save 
 			validate_schema="./quotation.schema.json"
-			id=$new_key
+			key=$key
 			type='quotation'
 			recipient_business_name=$_POST.recipient_business_name
 			recipient_address=$_POST.recipient_address
@@ -60,7 +67,7 @@
 			payment_detail=$_POST.payment_detail
 			extra_info=$_POST.extra_info
 		}}
-		{{:save key="config" last_id=$new_key last_quotation_id=$id}}
+
 		{{:http redirect="./index.html?ok=1"}}
 	{{/if}}
 {{/if}}
@@ -74,6 +81,7 @@
 	<fieldset>
 		<legend><h2>Objet</h2></legend>
 		<ul>
+			<li>{{:input type="text" name="key" label="Numéro" help="Ce numéro doit être unique. Laisser vide pour générer un nouveau numéro."}}</li>
 			<li>{{:input type="text" name="subject" label="Objet" placeholder="ex : Devis pour une location de barnum" required=true}}</li>
 			<li>{{:input type="date" name="date" label="Date du devis" placeholder="" required=true}}</li>
 			<li>{{:input type="date" name="deadline" label="Échéance pour validation" placeholder="" required=false}}</li>
@@ -86,41 +94,28 @@
 			</li>
 		</ul>
 	</fieldset>
-	<fieldset>
-		<legend><h2>Liste des articles</h2></legend>
-		<p id="item_list_no_item_message">Aucun article pour le moment.</p>
-		<table id="item_list" style="display: none;">
-			<tr>
-				<th>Dénomination</th>
-				<th>Description</th>
-				<th>Prix unitaire</th>
-				<th>Quantité</th>
-			</tr>
-		</table>
-		<p>{{:linkbutton label="Ajouter un article" href="item_form.html" shape="settings" target="_dialog"}}</p>
-		<h3>Total des articles</h3>
-		<p>
-			<span id="quotation_total">0 {{$config.currency|htmlspecialchars}}</span>
-			<input type="hidden" name="quotation_total" id="quotation_total_input" label="" value="" />
-		</p>
-	</fieldset>
+
+	{{:include file='./include/item_list.tpl'}}
 
 	{{if $module.config.payment_detail || $module.config.quotation_extra_info}}
 		<fieldset>
 			<legend><h2>Informations complémentaires affichées en bas du devis</h2></legend>
 			<ul>
 			{{if $module.config.payment_detail}}
-				<li>{{:input type="textarea" name="payment_detail" label="Instructions de paiement" default=$module.config.payment_detail|escape|nl2br}}</li>
+				<li>{{:input type="textarea" name="payment_detail" label="Instructions de paiement" default=$module.config.payment_detail}}</li>
 			{{/if}}
 			{{if $module.config.quotation_extra_info}}
-				<li>{{:input type="textarea" name="extra_info" label="Informations complémentaires" default=$module.config.quotation_extra_info|escape|nl2br}}</li>
+				<li>{{:input type="textarea" name="extra_info" label="Informations complémentaires" default=$module.config.quotation_extra_info}}</li>
 			{{/if}}
 			</ul>
 		<p>(La valeur pré-remplie de ces informations est modifiable dans la configuration du module.)</p>
 		</fieldset>
 	{{/if}}
 
-	<input type="submit" name="quotation_submit" label="" value="Valider la création de devis" />
+	{{*<input type="submit" name="quotation_submit" label="" value="Valider la création de devis" />*}}
+	<p class="submit">
+		{{:button type="submit" name="quotation_submit" label="Valider la création de devis" class="main"}}
+	</p>
 </form>
 
 {{:admin_footer}}

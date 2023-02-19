@@ -1,54 +1,79 @@
 {{:admin_header title="Ajouter un article au devis"}}
 
 <script type="text/javascript">
-function add_item() {
-	const DEVISE = '{{$config.currency|htmlspecialchars|args:ENT_QUOTES}}';
-	let row_line;
-	let row_index;
-	let td;
-	let item_properties = ['name', 'description', 'unit_price', 'quantity'];
-	let value;
+{{* Reproduce brindille {{:input}} partial behavior *}}
+function generate_item_input(type, name, index) {
 	let input;
-	let total;
+
+	if (type === 'textarea') {
+		input = document.createElement('textarea');
+		input.cols = 50;
+		input.rows = 2;
+	}
+	else {
+		input = document.createElement('input');
+		input.type = type;
+		if (type === 'money') {
+			input.type = 'text';
+			input.pattern = '-?[0-9]+([.,][0-9]{1,2})?';
+			input.inputmode = 'decimal';
+			input.size = 8;
+			input.class = 'money';
+			input.autocomplete = 'off';
+		}
+	}
+	if (name === 'unit_price' || name === 'quantity')
+		input.classList.add('impact_total');
+	input.name = 'items[' + index + '][' + name + ']';
+	input.id = 'item_' + name + '_' + index;
+	return (input);
+}
+
+function generate_item_empty_line() {
+	let row_line;
+	let index;
 
 	row_line = document.createElement('tr');
 	row_line.classList.add('item');
-	row_index = window.parent.document.getElementById('item_list').children.length - 1;
+	row_line.classList.add('need_delete_button');
+	index = window.parent.document.getElementById('item_list').getElementsByTagName('tbody')[0].children.length;
+	row_line.id = 'item_' + index + '_row';
+	row_line.setAttribute('data-item-id', index);
+	return row_line;
+}
+
+function add_item() {
+	let row_line;
+	let td;
+	let item_properties = [['name', 'text'], ['description', 'textarea'], ['unit_price', 'money'], ['quantity', 'number']];
+	let input;
+	let nobr;
+
+	row_line = generate_item_empty_line();
 	for (let i = 0; i < 4; ++i) {
 		td = document.createElement('td');
-		td.classList.add('item_' + item_properties[i]);
-		value = document.getElementById('item_' + item_properties[i]).value;
-		input = document.createElement('input');
-		input.type = 'hidden';
-		input.name = 'items[' + row_index + '][' + item_properties[i] + ']';
-		input.id = 'item_' + item_properties[i] + '_' + row_index;
-		input.value = value;
+		td.classList.add('item_' + item_properties[i][0]);
+		input = generate_item_input(item_properties[i][1], item_properties[i][0], row_line.id);
+		input.value = document.getElementById('item_' + item_properties[i][0]).value;
+		if (item_properties[i][1] === 'money') {
+			nobr = document.createElement('nobr');
+			nobr.appendChild(input);
+			input = nobr;
+		}
 		td.appendChild(input);
-		td.appendChild(document.createTextNode(value));
 		row_line.appendChild(td);
 	}
 	window.parent.document.getElementById('item_list_no_item_message').style.display = 'none';
 	window.parent.document.getElementById('item_list').style.display = 'block';
-	window.parent.document.getElementById('item_list').appendChild(row_line);
-	total = computeTotal();
-	window.parent.document.getElementById('quotation_total').textContent = parseFloat(total) + ' ' + DEVISE;
-	window.parent.document.getElementById('quotation_total_input').value = parseFloat(total);
+	window.parent.document.getElementById('item_list').getElementsByTagName('tbody')[0].appendChild(row_line);
+	window.parent.refresh_total();
+	window.parent.add_delete_buttons();
+	window.parent.add_input_refresh_total_behavior();
 	window.parent.g.closeDialog();
-}
-
-function computeTotal() {
-	let items = window.parent.document.getElementById('item_list').getElementsByClassName('item');
-	let total = 0.0;
-
-	for (let i = 0; i < items.length; ++i) {
-		if (!isNaN(items[i].children[2].textContent) && !isNaN(items[i].children[3].textContent))
-			total += parseFloat(items[i].children[2].textContent) * parseFloat(items[i].children[3].textContent);
-	}
-	return total;
 }
 </script>
 
-<form method="POST" action="" id="item_creation_form">
+<form method="POST" action="" id="item_creation_form" onsubmit="add_item()">
 	<fieldset>
 		<legend>Ajouter un article</legend>
 		<ul>
@@ -57,7 +82,7 @@ function computeTotal() {
 			<li><label for="item_unit_price">Prix unitaire</label><input type="text" name="item_unit_price" id="item_unit_price" label="" placeholder="" value="" /></li>
 			<li><label for="item_quantity">Quantité</label><input type="text" name="item_quantity" id="item_quantity" label="" placeholder="" value="1" /></li>
 		</ul>
-		<input type="button" name="" id="item_addition_button" onclick="add_item()" value="Ajouter l'article au devis" />
+		<input type="submit" name="" id="item_addition_button" value="Ajouter l'article au devis" />
 	</fieldset>
 </form>
 

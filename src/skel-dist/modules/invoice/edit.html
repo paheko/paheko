@@ -1,16 +1,83 @@
 {{#restrict section="accounting" level="write"}}
 
-{{:error message="Fonctionnalité non disponible pour le moment."}}
-
-{{if $_GET.key}}
-	{{#load key=$_GET.key}}
+{{if $_GET.id}}
+	{{#load id=$_GET.id}}
 		{{:assign .="doc"}}
 	{{/load}}
+{{else}}
+	{{:error message="Aucun document sélectionné."}}
 {{/if}}
 
-{{if !$doc.draft}}
+{{:admin_header title="Devis et factures" current="acc"}}
+<nav class="tabs">
+	<aside>
+		{{:linkbutton href="new_quotation.html" label="Nouveau devis" shape="plus"}}
+	</aside>
+	{{:include file='./include/main_nav_tabs.html'}}
+</nav>
+{{:include file='./include/constants.tpl' keep='type_labels,status_labels,status_options'}}
+
+<h1>Édition du devis n°{{$doc.key}} "{{$doc.subject}}"</h1>
+
+{{if $doc.status !== 'draft'}}
 	{{:error message="Ce document n'est plus un brouillon et ne peut plus être modifié"}}
 {{/if}}
+
+
+{{if $_POST.quotation_submit}}
+	{{:assign computed_total=0}}
+	{{:assign errors=null}}
+	{{:assign items=null}}
+	{{#foreach from=$_POST.items key='index' item='item'}}
+		{{if $item.name === ''}}{{:assign var='errors[]' value="Le nom de l'article est requis."}}{{/if}}
+		{{:assign var='unit_price' value=$item.unit_price|replace:',':'.'}}
+		{{:assign var='quantity' value=$item.quantity|replace:',':'.'}}
+		{{if $unit_price < 0 || $unit_price != $unit_price|floatval|strtolower}} {{* Hack to check the data is a number *}}
+			{{:assign var='errors[]' value='Le prix saisi pour "%s" est invalide.'|args:$item.name}}
+		{{/if}}
+		{{if $item.quantity < 0 || $item.quantity != $item.quantity|floatval|strtolower}}{{:assign var='errors[]' value='La quantité saisie pour "%s" est invalide.'|args:$item.name}}{{/if}}
+
+		{{:assign var='computed_item' value=$item}}
+		{{:assign var='computed_item[unit_price]' value='%d * 100'|math:$item.unit_price|floatval}}
+		{{:assign var='computed_item[quantity]' value=$item.quantity|intval}}
+		{{:assign var='items[]' value=$computed_item}}
+		{{:assign var='computed_total' value="%d + %d * %d"|args:$computed_total:$item.unit_price:$item.quantity|math}}
+	{{/foreach}}
+
+	{{if ($computed_total != $_POST.quotation_total) || ($computed_total < 0)}}
+		{{:assign var='errors[]' value='Erreur de calcul du total. Enregistrement du devis refusé.'}}
+	{{/if}}
+
+	{{if $errors|count}}
+		{{#foreach from=$errors item='error'}}
+			<p class="error block">{{$error}}</p>
+		{{/foreach}}
+	{{else}}
+
+		{{:save id=$_POST.id|intval
+			validate_schema="./quotation.schema.json"
+			key=$_POST.key
+			type='quotation'
+			recipient_business_name=$_POST.recipient_business_name
+			recipient_address=$_POST.recipient_address
+			subject=$_POST.subject
+			date=$_POST.date
+			deadline=$_POST.deadline
+			status=$_POST.status
+			items=$items
+			total=$computed_total
+			contact_info=$_POST.contact_info
+			payment_detail=$_POST.payment_detail
+			extra_info=$_POST.extra_info
+		}}
+		{{:save key="config" last_id=$new_key last_quotation_id=$id}}
+		{{:http redirect="./index.html?ok=2"}}
+	{{/if}}
+{{/if}}
+
+
+
+{{*
 
 {{if $_POST.save}}
 	{{if !$_POST.date|trim|parse_date}}
@@ -70,81 +137,40 @@
 	{{/if}}
 {{/if}}
 
-{{:admin_header title="Document" current="acc"}}
+*}}
 
-<form method="post" action="" id="docForm" data-type="{{$doc.type}}">
+<form method="post" action="" id="docForm" data-type="{{$doc.type}}" data-disable-progress="1">
 
-<fieldset>
-	<legend>Document</legend>
-	<dl>
-	{{if !$doc}}
-		<dt>Type</dt>
-		{{:input type="radio" name="type" value="quote" label="Devis" default="quote"}}
-		{{:input type="radio" name="type" value="invoice" label="Facture"}}
-	{{/if}}
-		{{:input required=true name="number" type="text" label="Numéro" help="Ce numéro doit être unique. Laisser vide pour générer un nouveau numéro." source=$doc data-last-number=$last_number}}
-		{{:input required=true name="date" type="date" label="Date d'émission" source=$doc default=$now}}
-	</dl>
-	<dl class="invoice-only">
-		{{:input required=false name="date_required" type="date" label="Date d'échéance" source=$doc}}
-	</dl>
-	<dl>
-		<dt><label for="f_client">Client</label></dt>
-		<dd>
-			<select name="client" id="f_client">
-				<option value="user">-- Membre de l'association</option>
-			</select>
-		</dd>
-	</dl>
-</fieldset>
-
-<fieldset>
-	<legend>Lignes</legend>
-	<table class="list">
-		<thead>
-			<tr>
-				<th>Désignation</th>
-				<td>Quantité</td>
-				<td>Unité</td>
-				<td>Prix unitaire</td>
-				<td>Montant</td>
-				<td></td>
-			</tr>
-		</thead>
-		<tbody>
-		{{if !$rows && $doc.rows}}
-			{{:assign rows=$doc.rows}}
-		{{/if}}
-
-		{{if !$rows}}
-			<tr>
-				<th><textarea cols="50" rows="2" name="rows[0][label]" class="full-width"></textarea></th>
-				<td>{{:input type="money" name="rows[0][amount]"}}</td>
-				<td></td>
-			</tr>
-			<tr>
-				<th><textarea cols="50" rows="2" name="rows[1][label]" class="full-width"></textarea></th>
-				<td>{{:input type="money" name="rows[1][amount]"}}</td>
-				<td></td>
-			</tr>
-		{{else}}
-			{{#foreach from=$rows}}
-				<tr>
-					<th>{{:input type="textarea" cols="50" rows="2" name="rows[%s][label]"|args:$key source=$value class="full-width"}}</th>
-					<td>{{:input type="number" name="rows[%d][qty]"|args:$key source=$value}}</td>
-					<td>{{:input type="text" name="rows[%d][unit]"|args:$key source=$value}}</td>
-					<td>{{:input type="unit_price" name="rows[%d][unit_price]"|args:$key source=$value}}</td>
-					<td>{{:input type="money" name="rows[%d][amount]"|args:$key source=$value}}</td>
-				</tr>
-			{{/foreach}}
-		{{/if}}
-		</tbody>
-		<tfoot>
-	</table>
-</fieldset>
+	<fieldset>
+		<legend><h2>Destinataire</h2></legend>
+		{{:input type="text" name="recipient_business_name" label="Raison sociale" source=$doc placeholder="ex : SARL J'aime les deux vies" required=true}}
+		{{:input type="textarea" name="recipient_address" label="Adresse" source=$doc placeholder="" required=true}}
+	</fieldset>
+	<fieldset>
+		<legend><h2>Objet</h2></legend>
+		<ul>
+			<li>
+				{{:input type="hidden" name="id" default=$doc.id|intval}}
+				{{:input type="text" name="key" label="Numéro" source=$doc help="Ce numéro doit être unique. Laisser vide pour générer un nouveau numéro."}}
+			</li>
+			<li>{{:input type="text" name="subject" label="Objet" source=$doc placeholder="ex : Devis pour une location de barnum" required=true}}</li>
+			<li>{{:input type="date" name="date" label="Date d'émission" source=$doc placeholder="" required=true}}</li>
+			<li>{{:input type="date" name="deadline" label="Échéance pour validation" source=$doc placeholder="" required=false}}</li>
+			<li>{{:input type="text" name="contact_info" label="Contact" source=$doc required=true}}</li>
+			<li>
+				<dt><label for="status">Statut</label></dt>
+				<dd>
+					{{:input type="select" name="status" options=$status_options source=$doc required=true}}
+				</dd>
+			</li>
+		</ul>
+	</fieldset>
+	
+	{{:assign items=$doc.items}}
+	{{:include file='./include/item_list.tpl'}}
 
 <p class="submit">
-	{{:button type="submit" name="save" label="Enregistrer" shape="right" class="main"}}
+	{{:button type="submit" name="quotation_submit" label="Enregistrer" class="main"}}
 </p>
 
 </form>

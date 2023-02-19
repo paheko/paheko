@@ -51,7 +51,7 @@
 		<nav class="tabs">
 			<aside>
 				{{if $status == 'draft'}}
-					{{:linkbutton href="./edit.html" label="Modifier le devis" shape="edit"}}
+					{{:linkbutton href="./edit.html?id=%d"|args:$id label="Modifier le devis" shape="edit"}}
 				{{else}} {{* Hack awaiting #ac34cf8f45a5a79815b16ea505da08ffad2268cf implementation *}}
 					{{:button name="hack" title="Ce document n'est plus un brouillon et ne peut plus être modifié" label="Modifier le devis" disabled=true}}
 				{{/if}}

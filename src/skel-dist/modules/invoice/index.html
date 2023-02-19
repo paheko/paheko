@@ -24,8 +24,10 @@
 {{/if}}
 {{:include file='./include/constants.tpl' keep='type_labels,status_labels,status_options'}}
 
-{{if $_GET.ok}}
+{{if $_GET.ok === '1'}}
 	<p class="block confirm">Devis enregistré.</p>
+{{elseif $_GET.ok === '2'}}
+	<p class="block confirm">Devis modifié avec succès.</p>
 {{/if}}
 
 <table class="list">
@@ -69,7 +71,7 @@
 			</td>
 			<td class="actions">
 				{{if !$archived && $status == 'draft'}}
-				{{:linkbutton shape="edit" label="Modifier" href="edit.html?key=%s"|args:$key|htmlspecialchars}}
+				{{:linkbutton shape="edit" label="Modifier" href="edit.html?id=%d"|args:$id}}
 				{{/if}}
 			</td>
 		</tr>
