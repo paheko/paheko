@@ -10,7 +10,7 @@
 	{{:include file='./include/main_nav_tabs.html'}}
 </nav>
 {{:include file='./include/constants.tpl' keep='type_labels,status_labels,status_options'}}
-{{* {{:include file='./include/style.tpl'}} *}}
+{{:include file='./include/style.tpl'}}
 
 {{if $_GET.id}}
 	{{#load id=$_GET.id}}
@@ -39,6 +39,7 @@
 		{{if $quantity < 0 || $quantity != $quantity|floatval|strtolower}}{{:assign var='errors.' value='La quantité saisie pour "%s" est invalide.'|args:$item.name}}{{/if}}
 
 		{{:assign var='computed_item' value=$item}}
+		{{:assign var='computed_item.id' value=$index|intval}}
 		{{:assign var='computed_item.unit_price' value=$unit_price|money_int}}
 		{{:assign var='computed_item.quantity' value=$quantity|floatval}}
 		{{:assign var='items.' value=$computed_item}}
@@ -139,7 +140,11 @@
 	{{/if}}
 
 	<p class="submit">
-		{{:button type="submit" name="quotation_submit" label="Valider la création de devis" class="main"}}
+		{{if !$document}}
+			{{:button type="submit" name="quotation_submit" label="Valider la création de devis" class="main"}}
+		{{else}}
+			{{:button type="submit" name="quotation_submit" label="Modifier le devis" class="main"}}
+		{{/if}}
 	</p>
 </form>
 

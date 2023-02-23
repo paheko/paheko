@@ -24,6 +24,8 @@ function generate_item_input(type, name, index) {
 	}
 	if (name === 'unit_price' || name === 'quantity')
 		input.classList.add('impact_total');
+	if (name === 'reference')
+		input.classList.add('reference');
 	input.name = 'items[' + index + '][' + name + ']';
 	input.id = 'item_' + name + '_' + index;
 	return (input);
@@ -45,16 +47,16 @@ function generate_item_empty_line() {
 function add_item() {
 	let row_line;
 	let td;
-	let item_properties = [['name', 'text'], ['description', 'textarea'], ['unit_price', 'money'], ['quantity', 'number']];
+	let item_properties = [['reference', 'text'], ['name', 'text'], ['description', 'textarea'], ['unit_price', 'money'], ['quantity', 'number']];
 	let input;
 	let nobr;
 
 	row_line = generate_item_empty_line();
-	for (let i = 0; i < 4; ++i) {
+	for (let i = 0; i < item_properties.length; ++i) {
 		td = document.createElement('td');
 		td.classList.add('item_' + item_properties[i][0]);
 		input = generate_item_input(item_properties[i][1], item_properties[i][0], row_line.id);
-		input.value = document.getElementById('item_' + item_properties[i][0]).value;
+		input.value = document.getElementById('f_item_' + item_properties[i][0]).value;
 		if (item_properties[i][1] === 'money') {
 			nobr = document.createElement('nobr');
 			nobr.appendChild(input);
@@ -77,10 +79,14 @@ function add_item() {
 	<fieldset>
 		<legend>Ajouter un article</legend>
 		<ul>
-			<li><label for="item_name">Dénomination</label><input type="text" name="item_name" id="item_name" label="" placeholder="ex : barnum" value="" /></li>
-			<li><label for="item_description">Description</label><textarea name="item_description" id="item_description" label="" placeholder=""></textarea></li>
-			<li><label for="item_unit_price">Prix unitaire</label><input type="text" name="item_unit_price" id="item_unit_price" label="" placeholder="" value="0" /></li>
-			<li><label for="item_quantity">Quantité</label><input type="text" name="item_quantity" id="item_quantity" label="" placeholder="" value="1" /></li>
+			<li>{{:input type="text" name="item_reference" label="Référence" placeholder="ex : S-812"}}</li>
+			<li>{{:input type="text" name="item_name" label="Dénomination" placeholder="ex : Location vélo - Forfait six jours"}}</li>
+			<li>{{:input type="textarea" name="item_description" label="Description"}}</li>
+			<li>
+				<label for="item_unit_price">Prix unitaire</label><input type="text" name="item_unit_price" id="f_item_unit_price" label="" placeholder="" value="0" />
+				{{* Awaiting #eeb7d3e36ef4e3d7f2e8bc49c18c3c6b672f2e18 resolution {{:input type="money" name="item_unit_price" id="item_unit_price" label="Prix unitaire" default="0"}} *}}
+			</li>
+			<li>{{:input type="number" name="item_quantity" label="Quantité" default="1"}}</li>
 		</ul>
 		<input type="submit" name="" id="item_addition_button" value="Ajouter l'article au devis" />
 	</fieldset>

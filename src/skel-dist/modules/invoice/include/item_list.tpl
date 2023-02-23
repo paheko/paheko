@@ -6,8 +6,8 @@ function compute_total() {
 	let quantity;
 
 	for (let i = 0; i < items.length; ++i) {
-		unit_price = items[i].children[2].firstChild.firstChild.value.replace(',', '.');
-		quantity = items[i].children[3].firstChild.value.replace(',', '.');
+		unit_price = items[i].children[3].firstChild.firstChild.value.replace(',', '.');
+		quantity = items[i].children[4].firstChild.value.replace(',', '.');
 		if (!isNaN(unit_price) && !isNaN(quantity) && unit_price > 0)
 			total += parseFloat(unit_price) * parseFloat(quantity);
 	}
@@ -71,6 +71,7 @@ function add_input_refresh_total_behavior() {
 	<table id="item_list" class="list" style="display: {{if $items}}block{{else}}none{{/if}};">
 		<thead>
 			<tr>
+				<th>Réf.</th>
 				<th>Dénomination</th>
 				<th>Description</th>
 				<th>Prix unitaire</th>
@@ -82,6 +83,7 @@ function add_input_refresh_total_behavior() {
 
 		{{#foreach from=$items key='key' item='item'}}
 			<tr id={{"item_%d_row"|args:$key}} class="item" data-item-id="{{$key}}">
+				<td>{{:input type="text" name="items[%d][reference]"|args:$key default=$item.reference class="reference"}}</td>
 				<td>{{:input type="text" name="items[%d][name]"|args:$key default=$item.name}}</td>
 				<td>{{:input type="textarea" cols="50" rows="2" name="items[%s][description]"|args:$key default=$item.description class="full-width"}}</td>
 				<td>{{:input type="money" name="items[%d][unit_price]"|args:$key default=$item.unit_price class="impact_total"}}</td>

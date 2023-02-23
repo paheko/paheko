@@ -33,12 +33,14 @@
 			"items": {
 				"type": "object",
 				"properties": {
+					"id": { "type": "integer" },
+					"reference": { "type": "string", "maxLength": 128 },
 					"name": { "type": "string", "minLength": 1, "maxLength": 128 },
 					"description": { "type": "string", "maxLength": 512 },
 					"unit_price": { "type": "number", "minimum": 0 },
 					"quantity": { "type": "number", "minimum": 0 }
 				},
-				"required" : ["name"]
+				"required" : ["id", "name"]
 			}
 		},
 		"total": {

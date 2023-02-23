@@ -1,6 +1,6 @@
 <style>
-#item_list th, #item_list td {
-	width: 25%;
-	padding: 0em 2em 0em 0em;
+#item_list .reference {
+	min-width: 0;
+	max-width: 7em;
 }
 </style>

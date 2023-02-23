@@ -97,8 +97,9 @@
 		<fieldset>
 			<legend><h2>Articles</h2></legend>
 			{{if $items}}
-				<table id="item_list">
+				<table id="item_list" class="list">
 					<tr>
+						<th>Réf.</th>
 						<th>Dénomination</th>
 						<th>Description</th>
 						<th>Prix unitaire</th>
@@ -106,6 +107,7 @@
 					</tr>
 					{{#foreach from=$items item='item'}}
 						<tr>
+							<td>{{$item.reference}}</td>
 							<td>{{$item.name}}</td>
 							<td>{{$item.description}}</td>
 							<td>{{$item.unit_price|intval|money:false}}</td>
