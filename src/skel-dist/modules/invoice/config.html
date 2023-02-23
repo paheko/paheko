@@ -21,10 +21,10 @@
 <form method="POST" action="{{$self_url}}">
 	<fieldset>
 		<legend></legend>
-		{{:input required=false name="payment_detail" type="textarea" label="Instructions de paiement" default=$module.config.payment_detail placeholder="BIC :&#10;ABCDEFGH012&#10;FR9901234567890123456789012&#10;La banque eh! tic&#10;&#10;Paiement à réaliser sous 15 jours."}}
-		{{:input required=false name="quotation_extra_info" type="textarea" label="Informations complémentaires affichées en bas des devis" default=$module.config.quotation_extra_info placeholder="ex : Site officiel : https://www.mon-asso.fr"}}
+		{{:input required=false name="payment_detail" type="textarea" label="Instructions de paiement" default=$module.config.payment_detail placeholder="BIC :&#10;ABCDEFGH012&#10;FR9901234567890123456789012&#10;La banque eh! tic&#10;&#10;Paiement à réaliser sous 15 jours." cols="50" rows="5"}}
+		{{:input required=false name="quotation_extra_info" type="textarea" label="Informations complémentaires affichées en bas des devis" default=$module.config.quotation_extra_info placeholder="ex : Site officiel : https://www.mon-asso.fr" cols="50" rows="3"}}
 	</fieldset>
-	{{:button type="submit" name="save" label="Enregistrer la configuration"}}
+	{{:button type="submit" name="save" label="Enregistrer la configuration" class="main"}}
 </form>
 
 <!--

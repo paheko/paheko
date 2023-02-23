@@ -5,7 +5,7 @@
 {{:admin_header title="Devis et factures" current="acc"}}
 <nav class="tabs">
 	<aside>
-		{{:linkbutton href="new_quotation.html" label="Nouveau devis" shape="plus"}}
+		{{:linkbutton href="edit.html" label="Nouveau devis" shape="plus"}}
 	</aside>
 	{{:include file='./include/main_nav_tabs.html'}}
 </nav>
@@ -56,7 +56,7 @@
 			<td>{{$deadline|date_short}}</td>
 			<td>{{$recipient_business_name}}</td>
 			<td><a href="details.html?id={{$id|intval}}">{{$subject}}</a></td>
-			<td class="money">{{$total|floatval|money_int|raw|money_currency}}{{* Hacks awaiting #495af6eee05e451d9369b80023c38b8e128fa6cd resolution *}}</td>
+			<td class="money">{{$total|money_currency}}</td>
 			<td>
 				{{:assign var="label" from="status_labels.%s"|args:$status}}
 				{{$label}}

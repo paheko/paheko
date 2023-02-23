@@ -1,51 +1,53 @@
 {{#restrict section="accounting" level="write"}}
 
-{{if $_GET.id}}
-	{{#load id=$_GET.id}}
-		{{:assign .="doc"}}
-	{{/load}}
-{{else}}
-	{{:error message="Aucun document sélectionné."}}
-{{/if}}
+{{* ==================== Header ==================== *}}
 
 {{:admin_header title="Devis et factures" current="acc"}}
 <nav class="tabs">
 	<aside>
-		{{:linkbutton href="new_quotation.html" label="Nouveau devis" shape="plus"}}
+		{{:linkbutton href="edit.html" label="Nouveau devis" shape="plus"}}
 	</aside>
 	{{:include file='./include/main_nav_tabs.html'}}
 </nav>
 {{:include file='./include/constants.tpl' keep='type_labels,status_labels,status_options'}}
+{{* {{:include file='./include/style.tpl'}} *}}
 
-<h1>Édition du devis n°{{$doc.key}} "{{$doc.subject}}"</h1>
-
-{{if $doc.status !== 'draft'}}
-	{{:error message="Ce document n'est plus un brouillon et ne peut plus être modifié"}}
+{{if $_GET.id}}
+	{{#load id=$_GET.id}}
+		{{:assign .="document"}}
+	{{/load}}
+	<h1>Édition du devis n°{{$document.key}} "{{$document.subject}}"</h1>
+{{else}}
+	<h1>Création d'un devis</h1>
 {{/if}}
 
+{{if $document && $document.status !== 'draft'}}
+	{{:error message="Ce document n'est plus un brouillon et ne peut plus être modifié"}}
+{{/if}}
 
 {{if $_POST.quotation_submit}}
 	{{:assign computed_total=0}}
 	{{:assign errors=null}}
 	{{:assign items=null}}
 	{{#foreach from=$_POST.items key='index' item='item'}}
-		{{if $item.name === ''}}{{:assign var='errors[]' value="Le nom de l'article est requis."}}{{/if}}
+		{{if $item.name === ''}}{{:assign var='errors.' value="Le nom de l'article est requis."}}{{/if}}
 		{{:assign var='unit_price' value=$item.unit_price|replace:',':'.'}}
 		{{:assign var='quantity' value=$item.quantity|replace:',':'.'}}
 		{{if $unit_price < 0 || $unit_price != $unit_price|floatval|strtolower}} {{* Hack to check the data is a number *}}
-			{{:assign var='errors[]' value='Le prix saisi pour "%s" est invalide.'|args:$item.name}}
+			{{:assign var='errors.' value='Le prix saisi pour "%s" est invalide.'|args:$item.name}}
 		{{/if}}
-		{{if $item.quantity < 0 || $item.quantity != $item.quantity|floatval|strtolower}}{{:assign var='errors[]' value='La quantité saisie pour "%s" est invalide.'|args:$item.name}}{{/if}}
+		{{if $quantity < 0 || $quantity != $quantity|floatval|strtolower}}{{:assign var='errors.' value='La quantité saisie pour "%s" est invalide.'|args:$item.name}}{{/if}}
 
 		{{:assign var='computed_item' value=$item}}
-		{{:assign var='computed_item[unit_price]' value='%d * 100'|math:$item.unit_price|floatval}}
-		{{:assign var='computed_item[quantity]' value=$item.quantity|intval}}
-		{{:assign var='items[]' value=$computed_item}}
-		{{:assign var='computed_total' value="%d + %d * %d"|args:$computed_total:$item.unit_price:$item.quantity|math}}
+		{{:assign var='computed_item.unit_price' value=$unit_price|money_int}}
+		{{:assign var='computed_item.quantity' value=$quantity|floatval}}
+		{{:assign var='items.' value=$computed_item}}
+		{{:assign var='computed_total' value="%d + %d * %F"|args:$computed_total:$computed_item.unit_price:$computed_item.quantity|math}}
+
 	{{/foreach}}
 
-	{{if ($computed_total != $_POST.quotation_total) || ($computed_total < 0)}}
-		{{:assign var='errors[]' value='Erreur de calcul du total. Enregistrement du devis refusé.'}}
+	{{if ($computed_total != $_POST.quotation_total|money_int) || ($computed_total < 0)}}
+		{{:assign var='errors.' value='Erreur de calcul du total. Enregistrement du devis refusé.'}}
 	{{/if}}
 
 	{{if $errors|count}}
@@ -53,10 +55,25 @@
 			<p class="error block">{{$error}}</p>
 		{{/foreach}}
 	{{else}}
+		{{if $_POST.key}}
+			{{:assign key=$_POST.key}}
+		{{else}}
+			{{#load select="MAX(key) AS last" where="json_extract(document, '$.type') = :type" :type='quotation'}} 
+				{{:assign last_numeric=$last|regexp_replace:'~\D~':''}}
+				{{:assign next_numeric='%d+1'|math:$last_numeric}}
+				{{:assign key="D%06d"|args:$next_numeric}}
+			{{/load}}
+		{{/if}}
+		{{if $document}}
+			{{:assign id=$document.id|intval}}
+		{{else}}
+			{{:assign id=null}}
+		{{/if}}
 
-		{{:save id=$_POST.id|intval
+		{{:save 
 			validate_schema="./quotation.schema.json"
-			key=$_POST.key
+			id=$id
+			key=$key
 			type='quotation'
 			recipient_business_name=$_POST.recipient_business_name
 			recipient_address=$_POST.recipient_address
@@ -70,140 +87,64 @@
 			payment_detail=$_POST.payment_detail
 			extra_info=$_POST.extra_info
 		}}
-		{{:save key="config" last_id=$new_key last_quotation_id=$id}}
-		{{:http redirect="./index.html?ok=2"}}
+
+		{{if !$document}}
+			{{:http redirect="./index.html?ok=1"}}
+		{{else}}
+			{{:http redirect="./index.html?ok=2"}}
+		{{/if}}
+
 	{{/if}}
 {{/if}}
 
-
-
-{{*
-
-{{if $_POST.save}}
-	{{if !$_POST.date|trim|parse_date}}
-		{{:assign error="Date d'émission invalide ou vide."}}
-	{{elseif $_POST.date_required|trim|parse_date === false}}
-		{{:assign error="Date d'échéance invalide ou vide."}}
-	{{else}}
-		{{if $doc.paid_date}}
-			{{:assign date_paid=$doc.paid_date}}
-		{{elseif $_POST.paid && !$doc.paid}}
-			{{:assign date_paid=$now}}
-		{{else}}
-			{{:assign date_paid=null}}
-		{{/if}}
-
-		{{if $doc.type}}
-			{{:assign type=$doc.type}}
-		{{else}}
-			{{:assign type=$_POST.type}}
-		{{/if}}
-
-		{{if !$_POST.number}}
-			{{:assign number=$_POST.number|trim|strtoupper}}
-		{{else}}
-			{{#load select="COUNT(*) + 1 AS count" where="json_extract('$.type') = :type" :type=$type}}
-				{{if $type == 'invoice'}}
-					{{:assign key="F%06d"|args:$count}}
-				{{else}}
-					{{:assign key="D%06d"|args:$count}}
-				{{/if}}
-			{{/load}}
-		{{/if}}
-
-		{{:assign total=0}}
-
-		{{#foreach from=$_POST.rows}}
-			{{:assign amount=$value.amount|money_int}}
-			{{:assign total=$total|math:'+':$amount}}
-			{{:assign var="rows[]" label=$value.label|trim amount=$amount}}
-		{{/foreach}}
-
-		{{:save key=$key
-			validate_schema="./document.schema.json"
-			draft=true
-			date_paid=null
-			archived=false
-			type=$type
-			date=$_POST.date|parse_date
-			date_required=$date_required|parse_date
-			id_transaction1=null
-			id_transaction2=null
-			total=$total
-			rows=$rows
-		}}
-
-		{{:http redirect="doc.html?key=%s"|args:$key}}
-	{{/if}}
-{{/if}}
-
-*}}
-
-<form method="post" action="" id="docForm" data-type="{{$doc.type}}" data-disable-progress="1">
-
+<form method="POST" action="{{$request_url}}">
 	<fieldset>
 		<legend><h2>Destinataire</h2></legend>
-		{{:input type="text" name="recipient_business_name" label="Raison sociale" source=$doc placeholder="ex : SARL J'aime les deux vies" required=true}}
-		{{:input type="textarea" name="recipient_address" label="Adresse" source=$doc placeholder="" required=true}}
+		{{:input type="text" name="recipient_business_name" label="Raison sociale" source=$document placeholder="ex : SARL J'aime les deux vies" required=true}}
+		{{:input type="textarea" name="recipient_address" label="Adresse" source=$document placeholder="" required=true}}
 	</fieldset>
 	<fieldset>
 		<legend><h2>Objet</h2></legend>
 		<ul>
-			<li>
-				{{:input type="hidden" name="id" default=$doc.id|intval}}
-				{{:input type="text" name="key" label="Numéro" source=$doc help="Ce numéro doit être unique. Laisser vide pour générer un nouveau numéro."}}
-			</li>
-			<li>{{:input type="text" name="subject" label="Objet" source=$doc placeholder="ex : Devis pour une location de barnum" required=true}}</li>
-			<li>{{:input type="date" name="date" label="Date d'émission" source=$doc placeholder="" required=true}}</li>
-			<li>{{:input type="date" name="deadline" label="Échéance pour validation" source=$doc placeholder="" required=false}}</li>
-			<li>{{:input type="text" name="contact_info" label="Contact" source=$doc required=true}}</li>
+			<li>{{:input type="text" name="key" label="Numéro" source=$document help="Ce numéro doit être unique. Laisser vide pour générer un nouveau numéro."}}</li>
+			<li>{{:input type="text" name="subject" label="Objet" source=$document placeholder="ex : Devis pour une location de barnum" required=true}}</li>
+			<li>{{:input type="date" name="date" label="Date du devis" source=$document placeholder="" required=true}}</li>
+			<li>{{:input type="date" name="deadline" label="Échéance pour validation" source=$document placeholder="" required=false}}</li>
+			<li>{{:input type="text" name="contact_info" label="Contact" source=$document default=$config.org_email required=true}}</li>
 			<li>
 				<dt><label for="status">Statut</label></dt>
 				<dd>
-					{{:input type="select" name="status" options=$status_options source=$doc required=true}}
+					{{:input type="select" name="status" options=$status_options source=$document default=$status required=true}}
 				</dd>
 			</li>
 		</ul>
 	</fieldset>
-	
-	{{:assign items=$doc.items}}
+
+	{{:assign items=$document.items}}
 	{{:include file='./include/item_list.tpl'}}
 
-<p class="submit">
-	{{:button type="submit" name="quotation_submit" label="Enregistrer" class="main"}}
-</p>
+	{{if $module.config.payment_detail || $module.config.quotation_extra_info}}
+		<fieldset>
+			<legend><h2>Informations complémentaires affichées en bas du devis</h2></legend>
+			<ul>
+			{{if $module.config.payment_detail}}
+				<li>{{:input type="textarea" name="payment_detail" label="Instructions de paiement" source=$document default=$module.config.payment_detail cols="50" rows="5"}}</li>
+			{{/if}}
+			{{if $module.config.quotation_extra_info}}
+				<li>{{:input type="textarea" name="extra_info" label="Informations complémentaires" source=$document default=$module.config.quotation_extra_info cols="50" rows="2"}}</li>
+			{{/if}}
+			</ul>
+		{{if !$document}}<p>(La valeur pré-remplie de ces informations est modifiable dans la configuration du module.)</p>{{/if}}
+		</fieldset>
+	{{/if}}
 
+	<p class="submit">
+		{{:button type="submit" name="quotation_submit" label="Valider la création de devis" class="main"}}
+	</p>
 </form>
-
-<script type="text/javascript">
-(function () {
-	const form = $('#docForm');
-
-	$('#f_type_invoice, #f_type_quote').forEach((e) => {
-		e.onchange = () => typeChanged(e.value, true);
-	});
-
-	function typeChanged(t, change_number) {
-		if (change_number) {
-			let num = t == 'quote' ? 'D' : 'F';
-			num += $('#f_number').dataset.lastNumber;
-			$('#f_number').value = num;
-		}
-
-		g.toggle('.invoice-only', t == 'quote' ? false : true);
-	}
-
-	if (e = $('#f_type_invoice')) {
-		typeChanged(e.selected ? 'invoice' : 'quote', true);
-	}
-	else if (form.dataset.type) {
-		typeChanged(form.dataset.type, false);
-	}
-})();
-</script>
 
 {{:admin_footer}}
 
 {{else}}
-	{{:error message="Seuls les membres avec accès en écriture à la comptabilité peuvent générer ce document"}}
+	{{:error message="Seuls les membres avec accès en écriture à la comptabilité peuvent générer ce document."}}
 {{/restrict}}

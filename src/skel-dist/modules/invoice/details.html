@@ -50,6 +50,7 @@
 
 		<nav class="tabs">
 			<aside>
+				{{:linkbutton href="edit.html" label="Nouveau devis" shape="plus"}}
 				{{if $status == 'draft'}}
 					{{:linkbutton href="./edit.html?id=%d"|args:$id label="Modifier le devis" shape="edit"}}
 				{{else}} {{* Hack awaiting #ac34cf8f45a5a79815b16ea505da08ffad2268cf implementation *}}
@@ -89,7 +90,7 @@
 				<li>Objet : {{$subject}}</li>
 				<li>Date : {{$date|date_short}}</li>
 				{{if $deadline}}<li>Échéance : {{$deadline|date_short}}</li>{{/if}}
-				<li>Total : {{$total|floatval|money_int|raw|money_currency}}</li>
+				<li>Total : {{$total|floatval|money_currency:false}}</li>
 			</ul>
 		</fieldset>
 		
@@ -107,7 +108,7 @@
 						<tr>
 							<td>{{$item.name}}</td>
 							<td>{{$item.description}}</td>
-							<td>{{$item.unit_price}}</td>
+							<td>{{$item.unit_price|intval|money:false}}</td>
 							<td>{{$item.quantity}}</td>
 						</tr>
 					{{/foreach}}
