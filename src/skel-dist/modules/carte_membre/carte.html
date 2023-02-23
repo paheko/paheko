@@ -52,9 +52,9 @@
 		<body>
 
 		<main>
-			{{if $photo}}
+			{{if $photo.0}}
 				<img src="{{$photo.0.url}}?150px" alt="" class="photo" />
-			{{else}}
+			{{elseif $config.files.logo}}
 				<img src="{{$config.files.logo}}?150px" alt="" class="logo" />
 			{{/if}}
 
