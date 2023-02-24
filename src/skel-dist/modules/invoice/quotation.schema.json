@@ -4,23 +4,28 @@
 	"properties": {
 		"recipient_business_name": {
 			"description": "Raison sociale",
-			"type": "string"
+			"type": "string",
+			"maxLength": 128
 		},
 		"recipient_address": {
 			"description": "Adresse",
-			"type": "string"
+			"type": "string",
+			"maxLength": 512
 		},
 		"subject": {
 			"description": "Objet",
-			"type": "string"
+			"type": "string",
+			"maxLength": 256
 		},
 		"date": {
 			"description": "Date",
-			"type": "string"
+			"type": "string",
+			"maxLength": 10
 		},
 		"deadline": {
 			"description": "Échéance",
-			"type": ["string", "null"]
+			"type": ["string", "null"],
+			"maxLength": 10
 		},
 		"status": {
 			"description": "Statut",
@@ -50,15 +55,18 @@
 		},
 		"contact_info": {
 			"description": "Contact",
-			"type": "string"
+			"type": "string",
+			"maxLength": 256
 		},
 		"payment_detail": {
 			"description": "Instructions de paiement",
-			"type": ["string", "null"]
+			"type": ["string", "null"],
+			"maxLength": 512
 		},
 		"extra_info": {
 			"description": "Informations complémentaires",
-			"type": ["string", "null"]
+			"type": ["string", "null"],
+			"maxLength": 1024
 		}
 	},
 	"required": [ "recipient_business_name", "recipient_address", "subject", "date", "status", "contact_info" ]

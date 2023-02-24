@@ -29,6 +29,69 @@
 	{{:assign computed_total=0}}
 	{{:assign errors=null}}
 	{{:assign items=null}}
+
+	{{if !$_POST.recipient_business_name}}
+		{{:assign var='errors.' value='La raison sociale est obligatoire.'}}
+	{{/if}}
+	{{if $_POST.recipient_business_name|strlen > 128}}
+		{{:assign length=$_POST.recipient_business_name|strlen}}
+		{{:assign var='errors.' value="Raison sociale trop longue. %d caractères sur les 128 autorisés."|args:$length}}
+	{{/if}}
+	{{if !$_POST.recipient_address}}
+		{{:assign var='errors.' value="L'adresse est obligatoire."}}
+	{{/if}}
+	{{if $_POST.recipient_address|strlen > 512}}
+		{{:assign length=$_POST.recipient_address|strlen}}
+		{{:assign var='errors.' value="Adresse trop longue. %d caractères sur les 512 autorisés."|args:$length}}
+	{{/if}}
+	{{if !$_POST.subject}}
+		{{:assign var='errors.' value="L'objet est obligatoire."}}
+	{{/if}}
+	{{if $_POST.subject|strlen > 256}}
+		{{:assign length=$_POST.subject|strlen}}
+		{{:assign var='errors.' value="Objet trop long. %d caractères sur les 256 autorisés."|args:$length}}
+	{{/if}}
+
+	{{:assign date=$_POST.date|date:'Y-m-d'}}
+	{{:assign deadline=$_POST.deadline|date:'Y-m-d'}}
+
+	{{if !$_POST.date}}
+		{{:assign var='errors.' value="La date est obligatoire."}}
+	{{/if}}
+	{{if $_POST.date|date_short === null}} {{* Means data is not a date *}}
+		{{:assign var='errors.' value="La date du devis doit être une date."}}
+	{{/if}}
+	{{if $_POST.deadline && ($_POST.deadline|date_short === null)}}
+		{{:assign var='errors.' value="L'échéance doit être une date."}}
+	{{/if}}
+	{{if $deadline && $deadline < $date}}
+		{{:assign var='errors.' value="L'échéance doit se situer après la date du devis."}}
+	{{/if}}
+
+	{{if !$_POST.status}}
+		{{:assign var='errors.' value="Le statut est obligatoire."}}
+	{{/if}}
+	{{:assign var='allowed_status' from='status_options.%s'|args:$_POST.status}}
+	{{if !$allowed_status}}
+		{{:assign var='errors.' value='Statut invalide.'}}
+	{{/if}}
+
+	{{if !$_POST.contact_info}}
+		{{:assign var='errors.' value="Le contact est obligatoire."}}
+	{{/if}}
+	{{if $_POST.contact_info|strlen > 256}}
+		{{:assign length=$_POST.contact_info|strlen}}
+		{{:assign var='errors.' value="Contact trop long. %d caractères sur les 256 autorisés."|args:$length}}
+	{{/if}}
+	{{if $_POST.payment_detail|strlen > 512}}
+		{{:assign length=$_POST.payment_detail|strlen}}
+		{{:assign var='errors.' value="Instructions de paiement trop longues. %d caractères sur les 512 autorisés."|args:$length}}
+	{{/if}}
+	{{if $_POST.extra_info|strlen > 1024}}
+		{{:assign length=$_POST.extra_info|strlen}}
+		{{:assign var='errors.' value="Informations complémentaires trop longues. %d caractères sur les 1024 autorisés."|args:$length}}
+	{{/if}}
+
 	{{#foreach from=$_POST.items key='index' item='item'}}
 		{{if $item.name === ''}}{{:assign var='errors.' value="Le nom de l'article est requis."}}{{/if}}
 		{{:assign var='unit_price' value=$item.unit_price|replace:',':'.'}}
@@ -38,13 +101,27 @@
 		{{/if}}
 		{{if $quantity < 0 || $quantity != $quantity|floatval|strtolower}}{{:assign var='errors.' value='La quantité saisie pour "%s" est invalide.'|args:$item.name}}{{/if}}
 
+		{{if $item.reference|strlen > 128}}
+			{{:assign length=$item.reference|strlen}}
+			{{:assign shorted=$item.reference|substr:0:16|cat:'...'}}
+			{{:assign var='errors.' value="Référence d'article '%s' trop longue. %d caractères sur les 128 autorisés."|args:$shorted:$length}}
+		{{/if}}
+		{{if $item.name|strlen > 128}}
+			{{:assign length=$item.name|strlen}}
+			{{:assign shorted=$item.name|substr:0:16|cat:'...'}}
+			{{:assign var='errors.' value="Nom d'article '%s' trop long. %d caractères sur les 128 autorisés."|args:$shorted:$length}}
+		{{/if}}
+		{{if $item.description|strlen > 512}}
+			{{:assign length=$item.description|strlen}}
+			{{:assign var='errors.' value="Description de l'article '%s' trop longue. %d caractères sur les 512 autorisés."|args:$item.name:$length}}
+		{{/if}}
+
 		{{:assign var='computed_item' value=$item}}
 		{{:assign var='computed_item.id' value=$index|intval}}
 		{{:assign var='computed_item.unit_price' value=$unit_price|money_int}}
 		{{:assign var='computed_item.quantity' value=$quantity|floatval}}
 		{{:assign var='items.' value=$computed_item}}
 		{{:assign var='computed_total' value="%d + %d * %F"|args:$computed_total:$computed_item.unit_price:$computed_item.quantity|math}}
-
 	{{/foreach}}
 
 	{{if ($computed_total != $_POST.quotation_total|money_int) || ($computed_total < 0)}}
@@ -79,8 +156,8 @@
 			recipient_business_name=$_POST.recipient_business_name
 			recipient_address=$_POST.recipient_address
 			subject=$_POST.subject
-			date=$_POST.date
-			deadline=$_POST.deadline
+			date=$date
+			deadline=$deadline
 			status=$_POST.status
 			items=$items
 			total=$computed_total
