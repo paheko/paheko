@@ -30,6 +30,11 @@ abstract class AbstractRender
 
 	abstract public function render(?string $content = null): string;
 
+	public function hasPath(): bool
+	{
+		return isset($this->current_path);
+	}
+
 	public function registerAttachment(string $uri)
 	{
 		Render::registerAttachment($this->file, $uri);

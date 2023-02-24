@@ -14,36 +14,30 @@ use const Garradin\{ADMIN_URL, WWW_URL};
 
 class Skriv extends AbstractRender
 {
-	protected $skriv;
-	protected $g2x;
+	static protected $skriv = null;
+	protected Extensions $extensions;
 
 	public function __construct(?File $file = null, ?string $user_prefix = null)
 	{
 		parent::__construct($file, $user_prefix);
 
-		$this->skriv = new SkrivLite;
-		$this->skriv->registerExtension('file', [$this, 'SkrivFile']);
-		$this->skriv->registerExtension('fichier', [$this, 'SkrivFile']);
-		$this->skriv->registerExtension('image', [$this, 'SkrivImage']);
-		$this->skriv->registerExtension('html', [$this, 'SkrivHTML']);
+		self::$skriv ??= new SkrivLite;
 
-		// Enregistrer d'autres extensions éventuellement
-		Plugin::fireSignal('skriv.init', ['skriv' => $this->skriv]);
+		$this->extensions = new Extensions($this);
+		self::$skriv->registerExtensions($this->extensions->getList());
 	}
 
 	public function render(?string $content = null): string
 	{
-		$skriv =& $this->skriv;
-
 		$str = $content ?? $this->file->fetch();
 
 		$str = preg_replace_callback('/#file:\[([^\]\h]+)\]/', function ($match) {
 			return $this->resolveAttachment($match[1]);
 		}, $str);
 
-		$str = $skriv->render($str);
-
 		$str = CommonModifiers::typo($str);
+		$str = self::$skriv->render($str);
+		$str = $this->extensions->replaceTempTOC($str, self::$skriv->toc);
 
 		$str = preg_replace_callback(';<a href="((?!https?://|\w+:).+?)">;i', function ($matches) {
 			return sprintf('<a href="%s" target="_parent">', htmlspecialchars($this->resolveLink(htmlspecialchars_decode($matches[1]))));
@@ -52,107 +46,4 @@ class Skriv extends AbstractRender
 		return sprintf('<div class="web-content">%s</div>', $str);
 	}
 
-	public function callExtension(array $match)
-	{
-		$method = new \ReflectionMethod($this->skriv, '_callExtension');
-		$method->setAccessible(true);
-		return $method->invoke($this->skriv, $match);
-	}
-
-	/**
-	 * Callback utilisé pour l'extension <<file>> dans le wiki-texte
-	 * @param array $args    Arguments passés à l'extension
-	 * @param string $content Contenu éventuel (en mode bloc)
-	 * @param SkrivLite $skriv   Objet SkrivLite
-	 */
-	public function SkrivFile(array $args, ?string $content, SkrivLite $skriv): string
-	{
-		$name = $args[0] ?? null;
-		$caption = $args[1] ?? null;
-
-		if (!$name || null === $this->current_path)
-		{
-			return $skriv->parseError('/!\ Tag file : aucun nom de fichier indiqué.');
-		}
-
-		if (empty($caption))
-		{
-			$caption = substr($name, 0, strrpos($name, '.'));
-		}
-
-		$url = $this->resolveAttachment($name);
-		$ext = substr($name, strrpos($name, '.')+1);
-
-		return sprintf(
-			'<aside class="file" data-type="%s"><a href="%s" class="internal-file"><b>%s</b> <small>(%s)</small></a></aside>',
-			htmlspecialchars($ext), htmlspecialchars($url), htmlspecialchars($caption), htmlspecialchars(strtoupper($ext))
-		);
-	}
-
-	/**
-	 * Callback utilisé pour l'extension <<image>> dans le wiki-texte
-	 * @param array $args    Arguments passés à l'extension
-	 * @param string $content Contenu éventuel (en mode bloc)
-	 * @param SkrivLite $skriv   Objet SkrivLite
-	 */
-	public function SkrivImage(array $args, ?string $content, SkrivLite $skriv): string
-	{
-		static $align_replace = ['gauche' => 'left', 'droite' => 'right', 'centre' => 'center'];
-
-		$name = $args[0] ?? null;
-		$align = $args[1] ?? null;
-		$caption = $args[2] ?? null;
-
-		$align = strtr((string)$align, $align_replace);
-
-		if (!$name || null === $this->current_path)
-		{
-			return $skriv->parseError('/!\ Tag image : aucun nom de fichier indiqué.');
-		}
-
-		$url = $this->resolveAttachment($name);
-		$size = $align == 'center' ? 500 : 200;
-		$svg = substr($name, -4) == '.svg';
-		$thumb_url = null;
-
-		if (!$svg) {
-			$thumb_url = sprintf('%s?%spx', $url, $size);
-		}
-
-		$out = sprintf('<a href="%s" class="internal-image" target="_image"><img src="%s" alt="%s" loading="lazy" style="max-width: %dpx; max-height: %4$dpx;" /></a>',
-			htmlspecialchars($url),
-			htmlspecialchars($thumb_url ?? $url),
-			htmlspecialchars($caption ?? ''),
-			$size
-		);
-
-		if (!empty($align))
-		{
-			if ($caption) {
-				$caption = sprintf('<figcaption>%s</figcaption>', htmlspecialchars($caption));
-			}
-
-			$out = sprintf('<figure class="image img-%s">%s%s</figure>', $align, $out, $caption);
-		}
-
-		return $out;
-	}
-
-	/**
-	 * Callback utilisé pour l'extension <<html>>: permet d'insérer du code HTML protégé contre le XSS
-	 * (enfin, au max de ce qui est possible…)
-	 */
-	public function SkrivHTML(array $args, ?string $content, SkrivLite $skriv): string
-	{
-		if (null == $this->g2x) {
-			$this->g2x = new Garbage2xhtml;
-			$this->g2x->secure = true;
-			$this->g2x->enclose_text = false;
-			$this->g2x->auto_br = false;
-		}
-
-		$out = $this->g2x->process($content);
-
-		return $out;
-	}
 }
