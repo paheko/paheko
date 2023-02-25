@@ -2,16 +2,13 @@
 
 namespace Garradin\Web\Render;
 
-use Garradin\Entities\Files\File;
-
-use Garradin\Plugin;
-use Garradin\Utils;
-use Garradin\Files\Files;
-
-use const Garradin\{ADMIN_URL, WWW_URL};
-
 class Markdown extends AbstractRender
 {
+	/**
+	 * Used by doc_md_to_html.php script
+	 */
+	public $toc = [];
+
 	public function render(?string $content = null): string
 	{
 		$parsedown = Parsedown::instance();
@@ -25,6 +22,7 @@ class Markdown extends AbstractRender
 		$parsedown->setExtensions($ext);
 
 		$str = $parsedown->text($str);
+		$this->toc = $parsedown->toc;
 		unset($parsedown);
 
 		$str = preg_replace_callback(';<a href="((?!https?://|\w+:|#).+?)">;i', function ($matches) {

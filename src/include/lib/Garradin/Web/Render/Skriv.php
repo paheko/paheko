@@ -3,14 +3,9 @@
 namespace Garradin\Web\Render;
 
 use Garradin\Entities\Files\File;
-
-use Garradin\Plugin;
 use Garradin\UserTemplate\CommonModifiers;
 
 use KD2\SkrivLite;
-use KD2\Garbage2xhtml;
-
-use const Garradin\{ADMIN_URL, WWW_URL};
 
 class Skriv extends AbstractRender
 {

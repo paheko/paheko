@@ -11,8 +11,7 @@
 
 .web-content p, .web-content h1, .web-content h2, .web-content h3, .web-content h4, .web-content h5, .web-content h6,
 .web-content ul, .web-content ol, .web-content table, .web-content blockquote, .web-content pre {
-    margin: 0;
-    margin-bottom: .8em;
+    margin: 1rem 0;
 }
 
 .web-content ul, .web-content ol, .web-content dd {
@@ -230,7 +229,7 @@ aside.file a {
 
 .web-content figure.image.img-center {
     max-width: 500px;
-    margin: 1em auto 1em auto;
+    margin: 1rem auto;
 }
 
 .web-content figure.image.img-left {
@@ -344,7 +343,7 @@ aside.file a {
     }
 }
 
-@media screen and (min-width: 60rem) {
+@media screen and (min-width: 800px) {
     .web-grid {
         /* Get template from variable, which is defined style attribute */
         grid-template: var(--grid-template);

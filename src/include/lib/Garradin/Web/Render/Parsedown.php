@@ -285,19 +285,21 @@ class Parsedown extends Parent_Parsedown
 		}
 
 		// Skip if not a tag
-		if (!preg_match('!(</?(\w+?))([^>]*)>!', $text, $match)) {
+		if (!preg_match('!</?(\w+)([^>]*)>!', $text, $match)) {
 			return null;
 		}
 
-		if (!array_key_exists($match[2], self::ALLOWED_INLINE_TAGS)) {
+		$name = $match[1];
+
+		if (!array_key_exists($name, self::ALLOWED_INLINE_TAGS)) {
 			return null;
 		}
 
-		$attributes = $this->_filterHTMLAttributes($match[2], self::ALLOWED_INLINE_TAGS[$match[2]], $match[3]);
+		$attributes = $this->_filterHTMLAttributes($name, self::ALLOWED_INLINE_TAGS[$name], $match[2]);
 
 		return [
 			'element' => [
-				'rawHtml' => $match[1] . '>',
+				'rawHtml' => '<' . $name . '>',
 				'allowRawHtmlInSafeMode' => true,
 				'attributes' => $attributes,
 			],
@@ -347,12 +349,33 @@ class Parsedown extends Parent_Parsedown
 		];
 	}
 
+	/**
+	 * Open external links in new page
+	 */
+    protected function inlineLink($Excerpt)
+    {
+    	$e = parent::inlineLink($Excerpt);
+
+    	if (strstr($e['element']['attributes']['href'], ':')) {
+    		$e['element']['attributes']['target'] = '_blank';
+    		$e['element']['attributes']['rel'] = 'nofollow,noreferrer';
+    	}
+
+    	return $e;
+    }
+
+    /**
+     * Add typo modifier to text
+     */
 	protected function inlineText($text)
 	{
 		$text = CommonModifiers::typo($text);
 		return parent::inlineText($text);
 	}
 
+	/**
+	 * Use headers to populate TOC
+	 */
 	protected function blockHeader($line): ?array
 	{
 		$block = parent::blockHeader($line);

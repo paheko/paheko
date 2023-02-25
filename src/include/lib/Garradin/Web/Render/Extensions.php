@@ -93,7 +93,7 @@ class Extensions
 
 	public function getTempTOC(bool $block, array $args): string
 	{
-		return sprintf('<<toc|%d|%d>>', $args['level'] ?? 0, array_key_exists('aside', $args));
+		return sprintf('<<toc|%d|%d>>', $args['level'] ?? 0, array_key_exists('aside', $args) && $args['aside'] !== false);
 	}
 
 	public function replaceTempTOC(string $out, array $toc): string
@@ -102,7 +102,8 @@ class Extensions
 			$types = array_unique($match[1] ?? []);
 
 			foreach ($types as $t) {
-				$str = $this->buildTOC(['level' => $t[0], 'aside' => $t[2]], $toc);
+				$args = ['level' => (int) $t[0], 'aside' => (bool) $t[2]];
+				$str = $this->buildTOC($args, $toc);
 				$out = str_replace(sprintf('<<toc|%s>>', $t), $str, $out);
 			}
 		}
@@ -149,7 +150,7 @@ class Extensions
 			$out .= str_repeat('</li></ol>', $level);
 		}
 
-		if (isset($args['aside'])) {
+		if (isset($args['aside']) && $args['aside'] !== false) {
 			$out = '<aside class="toc">' . $out . '</aside>';
 		}
 		else {
@@ -204,11 +205,10 @@ class Extensions
 			$thumb_url = sprintf('%s?%spx', $url, $size);
 		}
 
-		$out = sprintf('<a href="%s" class="internal-image" target="_image"><img src="%s" alt="%s" loading="lazy" style="max-width: %dpx; max-height: %4$dpx;" /></a>',
+		$out = sprintf('<a href="%s" class="internal-image" target="_image"><img src="%s" alt="%s" loading="lazy" /></a>',
 			htmlspecialchars($url),
 			htmlspecialchars($thumb_url ?? $url),
-			htmlspecialchars($caption ?? ''),
-			$size
+			htmlspecialchars($caption ?? '')
 		);
 
 		if (!empty($align)) {
@@ -281,6 +281,10 @@ class Extensions
 			$style .= 'grid-row: ' . htmlspecialchars($args['row']);
 		}
 
+		if (isset($args['align'])) {
+			$style .= 'align-self: ' . htmlspecialchars($args['align']);
+		}
+
 		return sprintf('<article class="web-block" style="%s">', $style);
 	}
 
@@ -315,8 +319,8 @@ class Extensions
 			$template = preg_replace('/[^!#]/', '', $template);
 			$l = strlen($template);
 			$fraction = ceil(100*(1/$l)) / 100;
-			$template = str_replace('!', sprintf('minmax(10px, %sfr) ', $fraction), $template);
-			$template = preg_replace_callback('/(#+)/', fn ($match) => sprintf('minmax(10px, %sfr) ', $fraction * strlen($match[1])), $template);
+			$template = str_replace('!', sprintf('minmax(0, %sfr) ', $fraction), $template);
+			$template = preg_replace_callback('/(#+)/', fn ($match) => sprintf('minmax(0, %sfr) ', $fraction * strlen($match[1])), $template);
 			$style .= 'none / ' . trim($template);
 		}
 		elseif (isset($args['template'])) {
