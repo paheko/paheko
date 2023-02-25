@@ -1,14 +1,25 @@
+[Syntaxe MarkDown](markdown.html) | [Syntaxe Skriv](skriv.html)
+
 # Raccourcis clavier
 
+Depuis l'édition du texte :
+
 | Raccourci | Action |
-| - | - |
-| Ctrl + G | Mettre en gras |
-| Ctrl + I | Mettre en italique |
-| Ctrl + T | Mettre en titre |
-| Ctrl + L | Transformer en lien |
-| Ctrl + Shift + I | Insérer un fichier ou une image |
-| Ctrl + P | Prévisualiser |
-| Ctrl + S | Enregistrer |
-| Echap | Fermer l'aide, la prévisualisation ou l'insertion de fichier |
-| F11 | Activer ou désactiver l'édition plein écran |
-| F1 | Afficher l'aide |
+| :- | :- |
+| <kbd>Ctrl</kbd> + <kbd>G</kbd> | Mettre en gras |
+| <kbd>Ctrl</kbd> + <kbd>I</kbd> | Mettre en italique |
+| <kbd>Ctrl</kbd> + <kbd>T</kbd> | Mettre en titre |
+| <kbd>Ctrl</kbd> + <kbd>L</kbd> | Transformer en lien |
+| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd> | Insérer un fichier ou une image |
+| <kbd>Ctrl</kbd> + <kbd>P</kbd> | Prévisualiser |
+| <kbd>Ctrl</kbd> + <kbd>S</kbd> | Enregistrer |
+| <kbd>F11</kbd> | Activer ou désactiver l'édition plein écran |
+| <kbd>F1</kbd> | Afficher l'aide |
+| <kbd>Echap</kbd> | Prévisualiser (rappuyer pour revenir à l'édition) |
+
+
+Depuis l'aide, la prévisualisation ou l'insertion de fichier :
+
+| Raccourci | Action |
+| :- | :- |
+| <kbd>Echap</kbd> | Fermer et revenir à l'édition |

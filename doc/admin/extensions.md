@@ -1,4 +1,4 @@
-[Raccourcis claviers](keyboard.html) | [Extensions Paheko](extensions.html)
+[Raccourcis claviers](keyboard.html) | [Syntaxe MarkDown](markdown.html) | [Syntaxe Skriv](skriv.html)
 
 <<toc aside>>
 

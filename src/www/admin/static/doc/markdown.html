@@ -79,7 +79,7 @@
 <p>Utiliser un symbole tilde pour barrer un texte :</p>
 <pre><code>Texte ~~complètement barré~~.</code></pre>
 <blockquote>
-<p>Texte <del>complètement barré</del>.</p>
+<p>Texte <span style="text-decoration: line-through">complètement barré</span>.</p>
 </blockquote>
 <h3 id="code">Code</h3>
 <p>Il est possible d'indiquer du code dans une ligne de texte avec un caractère <em>backtick</em> (accent grave en français, obtenu avec les touches <a href="https://superuser.com/questions/254076/how-do-i-type-the-tick-and-backtick-characters-on-windows" target="_blank" rel="nofollow,noreferrer">Alt Gr + 7</a>) :</p>
@@ -299,16 +299,65 @@ Paragraphe
 &lt;/div&gt;</code></pre>
 <h2 id="tags-html">Tags HTML</h2>
 <p>Certains tags HTML sont autorisés :</p>
-<ul>
-<li><code>&lt;kbd&gt;</code></li>
-<li><code>&lt;samp&gt;</code></li>
-<li><code>&lt;del&gt;</code></li>
-<li><code>&lt;ins&gt;</code></li>
-<li><code>&lt;sup&gt;</code></li>
-<li><code>&lt;sub&gt;</code></li>
-<li><code>&lt;mark&gt;</code></li>
-<li><code>&lt;var&gt;</code></li>
-<li><code>&lt;audio&gt;</code></li>
-<li><code>&lt;video&gt;</code></li>
-</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Tag</th>
+<th style="text-align: left;">Utilisation</th>
+<th style="text-align: left;">Exemple</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>&lt;kbd&gt;</code></td>
+<td style="text-align: left;">Touches de clavier</td>
+<td style="text-align: left;"><kbd>Ctrl</kbd> + <kbd>B</kbd></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&lt;samp&gt;</code></td>
+<td style="text-align: left;">Exemple de programme en console</td>
+<td style="text-align: left;"><samp>bohwaz@platypus ~ % sudo apt install paheko</samp></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&lt;var&gt;</code></td>
+<td style="text-align: left;">Variable dans un programme informatique</td>
+<td style="text-align: left;"><var>ab</var> + <var>cd</var> = 42</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&lt;del&gt;</code></td>
+<td style="text-align: left;">Texte supprimé</td>
+<td style="text-align: left;">Texte <del>supprimé</del></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&lt;ins&gt;</code></td>
+<td style="text-align: left;">Texte ajouté</td>
+<td style="text-align: left;">Texte <ins>ajouté</ins></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&lt;sup&gt;</code></td>
+<td style="text-align: left;">Texte en exposant</td>
+<td style="text-align: left;">Texte<sup>exposant</sup></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&lt;sub&gt;</code></td>
+<td style="text-align: left;">Texte en indice</td>
+<td style="text-align: left;">Texte<sub>indice</sub></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&lt;mark&gt;</code></td>
+<td style="text-align: left;">Texte surligné</td>
+<td style="text-align: left;">Texte <mark>surligné</mark></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&lt;audio&gt;</code></td>
+<td style="text-align: left;">Insérer un lecteur audio dans la page</td>
+<td style="text-align: left;"><code>&lt;audio src="mon_fichier.mp3"&gt;</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&lt;video&gt;</code></td>
+<td style="text-align: left;">Insérer une vidéo dans la page</td>
+<td style="text-align: left;"><code>&lt;video src="mon_fichier.webm"&gt;</code></td>
+</tr>
+</tbody>
+</table>
 <p>Mais leurs possibilités sont limitées, notamment sur les attributs autorisés.</p></div></body></html>

@@ -177,6 +177,7 @@
 			}
 			t.parent.className = t.parent.className.replace(/ iframe$/, '');
 			t.iframe.className = 'hidden';
+			t.textarea.focus();
 		};
 
 
@@ -318,8 +319,9 @@
 		t.shortcuts.push({ctrl: true, key: 't', callback: applyHeader });
 		t.shortcuts.push({ctrl: true, key: 'l', callback: insertURL});
 		t.shortcuts.push({ctrl: true, key: 's', callback: save});
-		t.shortcuts.push({ctrl: true, shift: true, key: 'p', callback: openPreview});
+		t.shortcuts.push({ctrl: true, key: 'p', callback: openPreview});
 		t.shortcuts.push({key: 'F1', callback: openSyntaxHelp});
+		t.shortcuts.push({key: 'Escape', callback: openPreview});
 
 		g.setParentDialogHeight('90%');
 	});

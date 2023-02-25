@@ -362,15 +362,17 @@ Créera le code HTML suivant :
 
 Certains tags HTML sont autorisés :
 
-* `<kbd>`
-* `<samp>`
-* `<del>`
-* `<ins>`
-* `<sup>`
-* `<sub>`
-* `<mark>`
-* `<var>`
-* `<audio>`
-* `<video>`
+| Tag | Utilisation | Exemple |
+| :- | :- | :- |
+| `<kbd>` | Touches de clavier | <kbd>Ctrl</kbd> + <kbd>B</kbd> |
+| `<samp>` | Exemple de programme en console | <samp>bohwaz@platypus ~ % sudo apt install paheko</samp> |
+| `<var>` | Variable dans un programme informatique | <var>ab</var> + <var>cd</var> = 42 |
+| `<del>` | Texte supprimé | Texte <del>supprimé</del> |
+| `<ins>` | Texte ajouté | Texte <ins>ajouté</ins> |
+| `<sup>` | Texte en exposant | Texte<sup>exposant</sup> |
+| `<sub>` | Texte en indice | Texte<sub>indice</sub> |
+| `<mark>` | Texte surligné | Texte <mark>surligné</mark> |
+| `<audio>` | Insérer un lecteur audio dans la page | `<audio src="mon_fichier.mp3">` |
+| `<video>` | Insérer une vidéo dans la page | `<video src="mon_fichier.webm">` |
 
 Mais leurs possibilités sont limitées, notamment sur les attributs autorisés.

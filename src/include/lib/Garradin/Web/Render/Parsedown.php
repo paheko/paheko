@@ -273,6 +273,30 @@ class Parsedown extends Parent_Parsedown
 	}
 
 	/**
+	 * Override default strikethrough, as it is incorrectly using <del>
+	 */
+	protected function inlineStrikethrough($Excerpt)
+	{
+		if (substr($Excerpt['text'], 1, 1) === '~' && preg_match('/^~~(?=\S)(.+?)(?<=\S)~~/', $Excerpt['text'], $matches))
+		{
+			return array(
+				'extent' => strlen($matches[0]),
+				'element' => array(
+					'name' => 'span',
+					'attributes' => ['style' => 'text-decoration: line-through'],
+					'handler' => array(
+						'function' => 'lineElements',
+						'argument' => $matches[1],
+						'destination' => 'elements',
+					)
+				),
+			);
+		}
+
+		return null;
+	}
+
+	/**
 	 * Allow simple inline markup tags
 	 */
 	protected function inlineMarkup($str)
@@ -285,11 +309,10 @@ class Parsedown extends Parent_Parsedown
 		}
 
 		// Skip if not a tag
-		if (!preg_match('!</?(\w+)([^>]*)>!', $text, $match)) {
+		if (!preg_match('!(</?)(\w+)([^>]*?)>!', $text, $match)) {
 			return null;
 		}
-
-		$name = $match[1];
+		$name = $match[2];
 
 		if (!array_key_exists($name, self::ALLOWED_INLINE_TAGS)) {
 			return null;
@@ -299,7 +322,7 @@ class Parsedown extends Parent_Parsedown
 
 		return [
 			'element' => [
-				'rawHtml' => '<' . $name . '>',
+				'rawHtml' => $match[1] . $name . '>',
 				'allowRawHtmlInSafeMode' => true,
 				'attributes' => $attributes,
 			],
@@ -352,21 +375,21 @@ class Parsedown extends Parent_Parsedown
 	/**
 	 * Open external links in new page
 	 */
-    protected function inlineLink($Excerpt)
-    {
-    	$e = parent::inlineLink($Excerpt);
+	protected function inlineLink($Excerpt)
+	{
+		$e = parent::inlineLink($Excerpt);
 
-    	if (strstr($e['element']['attributes']['href'], ':')) {
-    		$e['element']['attributes']['target'] = '_blank';
-    		$e['element']['attributes']['rel'] = 'nofollow,noreferrer';
-    	}
+		if (strstr($e['element']['attributes']['href'], ':')) {
+			$e['element']['attributes']['target'] = '_blank';
+			$e['element']['attributes']['rel'] = 'nofollow,noreferrer';
+		}
 
-    	return $e;
-    }
+		return $e;
+	}
 
-    /**
-     * Add typo modifier to text
-     */
+	/**
+	 * Add typo modifier to text
+	 */
 	protected function inlineText($text)
 	{
 		$text = CommonModifiers::typo($text);
