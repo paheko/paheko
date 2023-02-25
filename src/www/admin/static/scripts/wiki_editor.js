@@ -89,8 +89,8 @@
 
 		var openSyntaxHelp = function ()
 		{
-			let url = config.format == 'markdown' ? '_syntax_markdown.html' : '_syntax_skriv.html';
-			url = g.admin_url + 'web/' + url;
+			let url = config.format == 'markdown' ? 'markdown.html' : 'skriv.html';
+			url = g.admin_url + 'static/doc/' + url;
 
 			openIFrame(url);
 		};

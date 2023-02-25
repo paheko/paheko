@@ -27,7 +27,10 @@ psalm:
 	@-echo '{"require": {}}' > vendor/autoload.php
 	psalm.phar -c ../tests/psalm.xml
 
-release: test minify
+doc:
+	php ../tools/doc_md_to_html.php
+
+release: test minify doc
 	$(eval VERSION=$(shell cat VERSION))
 	rm -rf /tmp/paheko-build
 	mkdir -p /tmp/paheko-build

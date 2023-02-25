@@ -119,10 +119,9 @@ nav.te .preview {
 
 .textEditor iframe {
     border: none;
-    background: rgb(var(--gBgColor));
+    background: rgba(var(--gBgColor), 0.5);
     border-radius: .5em;
-    padding: 1%;
-    width: 98%;
+    width: 100%;
 }
 
 .textEditor iframe.hidden {

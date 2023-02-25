@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+	<html>
+	<head>
+		<title>Syntaxe SkrivML</title>
+		<meta charset="utf-8" />
+		<style type="text/css">
+		body, form, p, div, hr, fieldset, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6 {
+			margin: 0;
+			padding: 0;
+		}
+		body {
+			font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
+			padding: .8em;
+			background: #eee;
+		}
+		</style>
+		<link rel="stylesheet" type="text/css" href="../../../content.css" />
+	</head>
+	<body><div class="web-content"><p><a href="keyboard.html" target="_parent">Raccourcis claviers</a> | <a href="extensions.html" target="_parent">Extensions Paheko</a></p><aside class="toc">
+	<ol>
+		<li><a href="#syntaxe-skrivml">Syntaxe SkrivML</a>
+		<ol>
+			<li><a href="#styles-de-texte">Styles de texte</a></li>
+			<li><a href="#titres">Titres</a></li>
+			<li><a href="#listes">Listes</a></li>
+			<li><a href="#liens">Liens</a></li>
+			<li><a href="#tableaux">Tableaux</a></li>
+			<li><a href="#autres">Autres</a>
+		</ol></li>
+		<li><a href="#extensions-paheko">Extensions Paheko</a>
+</li></ol></aside><h1 id="syntaxe-skrivml">Syntaxe SkrivML</h1>
+<p>Paheko propose la syntaxe <a href="https://fossil.kd2.org/garradin/doc/trunk/doc/skrivml.html" target="_blank" rel="nofollow,noreferrer">SkrivML</a> pour le formatage du texte des pages du site web.</p>
+<p>Celle-ci est plus intuitive que la syntaxe MarkDown.</p>
+<h2 id="styles-de-texte">Styles de texte</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Style</th>
+<th style="text-align: left;">Syntaxe</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><em>Italique</em></td>
+<td style="text-align: left;"><code>Entourer le texte de ''deux apostrophes''</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Gras</strong></td>
+<td style="text-align: left;"><code>Entourer le texte de **deux astérisques**</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">Texte <ins>Souligné<ins></td>
+<td style="text-align: left;"><code>Entourer le texte de deux __tirets bas__.</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><del>Barré</del></td>
+<td style="text-align: left;"><code>Deux --tirets hauts-- pour barrer.</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">Texte <sup>Exposant<sup></td>
+<td style="text-align: left;"><code>XXI^^ème^^ siècle</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">Texte <sub>Indice<sub></td>
+<td style="text-align: left;"><code>CO,,2,,</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Attention :</strong> ces styles ne fonctionnent que si le code entoure des mots complets, ça ne fonctionne pas au milieu de mots.</p>
+<pre><code>Un **mot** en gras. Mais on ne peut pas cou**per** un mot avec du gras.</code></pre>
+<blockquote>
+<p>Un <strong>mot</strong> en gras. Mais on ne peut pas cou**per** un mot avec du gras.</p>
+</blockquote>
+<h2 id="titres">Titres</h2>
+<p>Doivent être précédé d'un ou plusieurs signe égal. Peuvent aussi être suivi du même nombre de signe égal.</p>
+<pre><code>= Titre niveau 1
+== Titre niveau 2
+=== Titre niveau 3 ===
+==== Titre de niveau 4 ====</code></pre>
+<h2 id="listes">Listes</h2>
+<p>Listes non ordonnées :</p>
+<pre><code>* Item 1
+* Item 2
+** Sous-item 2.1
+** Sous-item 2.2
+*** Sous-item 2.2.1</code></pre>
+<p>Listes ordonnées :</p>
+<pre><code># Item 1
+# Item 2
+## Sub-item 2.1
+## Sub-item 2.2
+### Sub-item 2.2.1</code></pre>
+<h2 id="liens">Liens</h2>
+<p>Lien interne :</p>
+<pre><code>Voir [[cette page|adresse-unique-autre-page]].</code></pre>
+<p>Lien externe :</p>
+<pre><code>[[https://paheko.cloud/]]</code></pre>
+<h2 id="tableaux">Tableaux</h2>
+<pre><code>!! Colonne 1 !! Colonne 2
+|| Cellule 1 || Cellule 2
+|| Cellule 3 || Cellule 4</code></pre>
+<h2 id="autres">Autres</h2>
+<p>Consulter la documentation de <a href="https://fossil.kd2.org/garradin/doc/trunk/doc/skrivml.html" target="_blank" rel="nofollow,noreferrer">SkrivML</a>.</p>
+<h1 id="extensions-paheko">Extensions Paheko</h1>
+<p>Paheko propose des extensions permettant :</p>
+<ul>
+<li>d'insérer des images et fichiers joints ;</li>
+<li>d'insérer une table des matières automatique ;</li>
+<li>d'aligner le texte au centre, à gauche, à droite ;</li>
+<li>de créer des mises en page complexes avec des colonnes et grilles ;</li>
+<li>de changer la couleur du texte ou du fond.</li>
+</ul>
+<p><a href="extensions.html" target="_parent">Cliquer ici pour lire la documentation des extensions Paheko</a></p></div></body></html>

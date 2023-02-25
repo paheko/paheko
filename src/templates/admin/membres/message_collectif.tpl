@@ -91,8 +91,7 @@
 			<dt><label for="f_render">Format de rendu</label></dt>
 			<dd>
 				{input type="select" name="render" options=$render_formats}
-				{linkbutton shape="help" href="!web/_syntax_skriv.html" target="_dialog" label="Aide syntaxe SkrivML"}
-				{linkbutton shape="help" href="!web/_syntax_markdown.html" target="_dialog" label="Aide syntaxe MarkDown"}
+				{linkbutton shape="help" href="!static/docs/markdown.html" target="_dialog" label="Aide syntaxe MarkDown"}
 			</dd>
 		</dl>
 	</fieldset>

@@ -24,7 +24,6 @@ class Emails
 {
 	const RENDER_FORMATS = [
 		null => 'Texte brut',
-		Render::FORMAT_SKRIV => 'SkrivML',
 		Render::FORMAT_MARKDOWN => 'MarkDown',
 	];
 
