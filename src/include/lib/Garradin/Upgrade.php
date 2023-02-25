@@ -493,6 +493,10 @@ class Upgrade
 				require ROOT . '/include/migrations/1.2/1.2.2.php';
 			}
 
+			if (version_compare($v, '1.2.7', '<')) {
+				require ROOT . '/include/migrations/1.2/1.2.7.php';
+			}
+
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();
 
