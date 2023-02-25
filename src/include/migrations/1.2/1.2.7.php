@@ -1,11 +1,13 @@
 <?php
 
 use Garradin\Web\Web;
+use Garradin\Files\Files;
 
 // Refresh pages
 Web::sync(true);
 
 $pages = $db->iterate('SELECT * FROM web_pages;');
+Files::disableQuota();
 
 foreach ($pages as $data) {
 	$page = new \Garradin\Entities\Web\Page;
@@ -18,3 +20,5 @@ foreach ($pages as $data) {
 	// Sync search
 	$page->syncSearch();
 }
+
+Files::enableQuota();
