@@ -170,7 +170,7 @@ class AssistedReconciliation
 
 		// Then add CSV lines on the right
 		foreach ($csv as $line) {
-			if (null == $line) {
+			if (null == $line || !isset($line->date)) {
 				continue;
 			}
 

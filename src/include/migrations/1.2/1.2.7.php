@@ -20,5 +20,3 @@ foreach ($pages as $data) {
 	// Sync search
 	$page->syncSearch();
 }
-
-Files::enableQuota();
