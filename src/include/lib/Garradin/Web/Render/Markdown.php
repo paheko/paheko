@@ -25,7 +25,7 @@ class Markdown extends AbstractRender
 		$this->toc = $parsedown->toc;
 		unset($parsedown);
 
-		$str = preg_replace_callback(';<a href="((?!https?://|\w+:|#).+?)">;i', function ($matches) {
+		$str = preg_replace_callback(';<a href="([\w_-]+?)">;i', function ($matches) {
 			return sprintf('<a href="%s" target="_parent">', htmlspecialchars($this->resolveLink(htmlspecialchars_decode($matches[1]))));
 		}, $str);
 

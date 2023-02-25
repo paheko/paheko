@@ -11,7 +11,7 @@
 
 .web-content p, .web-content h1, .web-content h2, .web-content h3, .web-content h4, .web-content h5, .web-content h6,
 .web-content ul, .web-content ol, .web-content table, .web-content blockquote, .web-content pre {
-    margin: 1rem 0;
+    margin-bottom: 1rem;
 }
 
 .web-content ul, .web-content ol, .web-content dd {
@@ -40,7 +40,6 @@
 .web-content blockquote {
     font-size: 1.1em;
     padding-left: 3rem;
-    margin: 1rem 0;
 }
 
 .web-content a.footnote-ref {
@@ -72,6 +71,7 @@
 .web-content hr {
     border: none;
     border-top: 2px solid rgba(0, 0, 0, 0.5);
+    margin: 1rem 0;
 }
 
 .web-content code, .web-content pre {
@@ -175,7 +175,7 @@ aside.file a {
 }
 
 .web-content iframe {
-    margin: 1em auto;
+    margin-bottom: 1rem auto;
     display: block;
 }
 
@@ -229,7 +229,7 @@ aside.file a {
 
 .web-content figure.image.img-center {
     max-width: 500px;
-    margin: 1rem auto;
+    margin: 0 auto 1rem auto;
 }
 
 .web-content figure.image.img-left {

@@ -219,7 +219,7 @@ Comme sur les [Skyblogs](https://decoblog.skyrock.com/), il est possible de mett
 
 Utiliser la syntaxe `<<color COULEUR>>...texte...<</color>>` pour changer la couleur du texte, ou `<<bgcolor COULEUR>>...texte...<</bgcolor>>` pour la couleur du fond.
 
-Il est possible d'indiquer plusieurs couleurs, séparées par des virgules, pour créer des dégradés.
+Il est possible d'indiquer plusieurs couleurs, séparées par des espaces, pour créer des dégradés.
 
 ```
 <<color red>>Rouge !<</color>>
