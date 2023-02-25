@@ -275,9 +275,9 @@ class Parsedown extends Parent_Parsedown
 	/**
 	 * Override default strikethrough, as it is incorrectly using <del>
 	 */
-	protected function inlineStrikethrough($Excerpt)
+	protected function inlineStrikethrough($e)
 	{
-		if (substr($Excerpt['text'], 1, 1) === '~' && preg_match('/^~~(?=\S)(.+?)(?<=\S)~~/', $Excerpt['text'], $matches))
+		if (substr($e['text'], 1, 1) === '~' && preg_match('/^~~(?=\S)(.+?)(?<=\S)~~/', $e['text'], $matches))
 		{
 			return array(
 				'extent' => strlen($matches[0]),
@@ -375,9 +375,9 @@ class Parsedown extends Parent_Parsedown
 	/**
 	 * Open external links in new page
 	 */
-	protected function inlineLink($Excerpt)
+	protected function inlineLink($e)
 	{
-		$e = parent::inlineLink($Excerpt);
+		$e = parent::inlineLink($e);
 
 		if (isset($e['element']['attributes']['href']) && strstr($e['element']['attributes']['href'], ':')) {
 			$e['element']['attributes']['target'] = '_blank';
@@ -548,9 +548,9 @@ class Parsedown extends Parent_Parsedown
 	}
 
 
-	protected function inlineFootnoteMarker($Excerpt)
+	protected function inlineFootnoteMarker($e)
 	{
-		if (preg_match('/^\[\^(.+?)\]/', $Excerpt['text'], $matches))
+		if (preg_match('/^\[\^(.+?)\]/', $e['text'], $matches))
 		{
 			$name = htmlspecialchars($matches[1]);
 
