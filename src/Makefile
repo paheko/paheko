@@ -1,5 +1,5 @@
 .PHONY: dev-server release deps publish check-dependencies test minify phpstan
-KD2_FILE := https://fossil.kd2.org/kd2fw/uv/KD2-7.2.zip
+KD2_FILE := https://fossil.kd2.org/kd2fw/uv/KD2-7.4.zip
 
 deps:
 	$(eval TMP_KD2=$(shell mktemp -d))
