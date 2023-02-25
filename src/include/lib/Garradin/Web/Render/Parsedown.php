@@ -379,7 +379,7 @@ class Parsedown extends Parent_Parsedown
 	{
 		$e = parent::inlineLink($Excerpt);
 
-		if (strstr($e['element']['attributes']['href'], ':')) {
+		if (isset($e['element']['attributes']['href']) && strstr($e['element']['attributes']['href'], ':')) {
 			$e['element']['attributes']['target'] = '_blank';
 			$e['element']['attributes']['rel'] = 'nofollow,noreferrer';
 		}
