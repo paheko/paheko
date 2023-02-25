@@ -49,7 +49,6 @@ class Page extends Entity
 	];
 
 	const FORMATS_LIST = [
-		//Render::FORMAT_BLOCKS => 'Blocs (beta)',
 		Render::FORMAT_MARKDOWN => 'MarkDown',
 		Render::FORMAT_SKRIV => 'SkrivML',
 		Render::FORMAT_ENCRYPTED => 'Chiffré',

@@ -13,6 +13,8 @@ class Extensions
 	protected array $list;
 	protected array $open_tags = [];
 
+	protected bool $in_grid = false;
+
 	static public function error(string $msg, bool $block = false)
 	{
 		$tag = $block ? 'p' : 'b';
@@ -36,6 +38,14 @@ class Extensions
 			'/color'   => [$this, 'colorClose'],
 			'/bgcolor' => [$this, 'colorClose'],
 			'toc'      => [$this, 'getTempTOC'],
+			'grid'     => [$this, 'grid'],
+			'/grid'    => [$this, 'gridClose'],
+			'center'   => [$this, 'align'],
+			'/center'  => [$this, 'alignClose'],
+			'left'     => [$this, 'align'],
+			'/left'    => [$this, 'alignClose'],
+			'right'    => [$this, 'align'],
+			'/right'   => [$this, 'alignClose'],
 		];
 
 		Plugin::fireSignal('render.extensions.init', ['extensions' => &$list]);
@@ -257,5 +267,107 @@ class Extensions
 		else {
 			return '</span>';
 		}
+	}
+
+	public function gridBlock(array $args): string
+	{
+		$style = '';
+
+		if (isset($args['column'])) {
+			$style .= 'grid-column: ' . htmlspecialchars($args['column']);
+		}
+
+		if (isset($args['row'])) {
+			$style .= 'grid-row: ' . htmlspecialchars($args['row']);
+		}
+
+		return sprintf('<article class="web-block" style="%s">', $style);
+	}
+
+	public function grid(bool $block, array $args, ?string $content, string $name): string
+	{
+		if (!$block) {
+			return '';
+		}
+
+		$out = '';
+
+		// Split grid in blocks
+		if (!isset($args[0]) && !isset($args['short']) && !isset($args['template'])) {
+			if (!$this->in_grid) {
+				return '';
+			}
+
+			return '</article>' . $this->gridBlock($args);
+		}
+
+		if ($this->in_grid) {
+			$out .= $this->gridClose($block);
+		}
+
+		$class = 'web-grid';
+		$style = 'grid-template: ';
+
+		// Automatic template from simple string:
+		// !! = 2 columns, #!! = 1 50% column, two 25% columns
+		if (isset($args[0]) || isset($args['short'])) {
+			$template = $args[0] ?? $args['short'];
+			$template = preg_replace('/[^!#]/', '', $template);
+			$l = strlen($template);
+			$fraction = ceil(100*(1/$l)) / 100;
+			$template = str_replace('!', sprintf('minmax(10px, %sfr) ', $fraction), $template);
+			$template = preg_replace_callback('/(#+)/', fn ($match) => sprintf('minmax(10px, %sfr) ', $fraction * strlen($match[1])), $template);
+			$style .= 'none / ' . trim($template);
+		}
+		elseif (isset($args['template'])) {
+			$style .= $args['template'];
+		}
+		else {
+			$style .= '1fr';
+		}
+
+		if (isset($args['gap'])) {
+			$style .= '; gap: ' . $args['gap'];
+		}
+
+		if (array_key_exists('debug', $args)) {
+			$class .= ' web-grid-debug';
+			//$out .= '<pre>' . htmlspecialchars($style) . '</pre>';
+		}
+
+		$out .= sprintf('<section class="%s" style="--%s">', $class, htmlspecialchars($style));
+		$out .= $this->gridBlock($args);
+		$this->in_grid = true;
+
+		return $out;
+	}
+
+	public function gridClose(bool $block): string
+	{
+		$out = '';
+
+		$out .= '</article>';
+		$out .= '</section>';
+
+		$this->in_grid = false;
+		return $out;
+	}
+
+	public function align(bool $block, array $args, ?string $content, string $name): string
+	{
+		if (!$block) {
+			return '';
+		}
+
+		return sprintf('<div style="text-align: %s">', $name);
+	}
+
+	public function alignClose(bool $block): string
+	{
+		if (!$block) {
+			return '';
+		}
+
+		return '</div>';
 	}
 }

@@ -319,11 +319,22 @@ aside.file a {
     --grid-template: none / repeat(auto-fit, minmax(100px, 1fr));
     grid-gap: 1rem;
     display: grid;
-    grid-template: var(--grid-template);
+    margin-bottom: 1rem;
 }
 
-.web-column {
-    margin-bottom: 1rem;
+.web-grid-debug {
+    grid-gap: 5px;
+    min-height: 10em;
+    width: 20em;
+    grid-template-rows: 6em;
+}
+
+.web-grid-debug .web-block {
+    background: #999;
+    overflow: hidden;
+    min-height: 6rem;
+    padding: 5px;
+    color: #333;
 }
 
 @media handheld, screen and (max-width: 980px) {
@@ -334,7 +345,7 @@ aside.file a {
 }
 
 @media screen and (min-width: 60rem) {
-    .web-columns {
+    .web-grid {
         /* Get template from variable, which is defined style attribute */
         grid-template: var(--grid-template);
     }

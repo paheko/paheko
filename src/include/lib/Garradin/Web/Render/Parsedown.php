@@ -184,6 +184,7 @@ class Parsedown extends Parent_Parsedown
 
 		if (strpos($line, '{{{') === 0) {
 			$classes = trim(substr($line, 3));
+			$classes = str_replace('.', '', $classes);
 
 			return [
 				'char'    => $line[0],
