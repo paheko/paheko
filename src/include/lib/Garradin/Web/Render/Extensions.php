@@ -269,6 +269,24 @@ class Extensions
 		}
 	}
 
+	protected function _filterStyleAttribute(string $str): ?string
+	{
+		$str = html_entity_decode($str);
+		$str = rawurldecode($str);
+		$str = str_replace([' ', "\t", "\n", "\r", "\0"], '', $str);
+
+		if (strstr($str, '/*')) {
+			return null;
+		}
+
+		if (preg_match('/url\s*\(|expression|script:|\\\\|@import/i', $str)) {
+			return null;
+		}
+
+		return $str;
+	}
+
+
 	public function gridBlock(array $args): string
 	{
 		$style = '';
@@ -284,6 +302,8 @@ class Extensions
 		if (isset($args['align'])) {
 			$style .= 'align-self: ' . htmlspecialchars($args['align']);
 		}
+
+		$style = $this->_filterStyleAttribute($style);
 
 		return sprintf('<article class="web-block" style="%s">', $style);
 	}
@@ -336,8 +356,9 @@ class Extensions
 
 		if (array_key_exists('debug', $args)) {
 			$class .= ' web-grid-debug';
-			//$out .= '<pre>' . htmlspecialchars($style) . '</pre>';
 		}
+
+		$style = $this->_filterStyleAttribute($style);
 
 		$out .= sprintf('<section class="%s" style="--%s">', $class, htmlspecialchars($style));
 		$out .= $this->gridBlock($args);

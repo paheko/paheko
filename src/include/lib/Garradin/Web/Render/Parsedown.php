@@ -35,6 +35,14 @@ class Parsedown extends Parent_Parsedown
 
 		'mark'   => null,
 		'var'    => null,
+
+		'span'   => null,
+		'strong' => null,
+		'em'     => null,
+		'i'      => null,
+		'b'      => null,
+		'small'  => null,
+		'a'      => ['href', 'target'],
 	];
 
 	/**
@@ -91,6 +99,30 @@ class Parsedown extends Parent_Parsedown
 		return $params;
 	}
 
+	protected function _filterURL(string $url): ?string
+	{
+		$url = html_entity_decode($url);
+
+		$check_url = rawurldecode($url);
+		$check_url = str_replace([' ', "\t", "\n", "\r", "\0"], '', $check_url);
+
+		if (stristr($check_url, 'script:')) {
+			return null;
+		}
+
+		if (strstr($check_url, '"') || strstr($check_url, '\'')) {
+			return null;
+		}
+
+		$scheme = parse_url($url, PHP_URL_SCHEME);
+
+		if ($scheme && $scheme != 'http' && $scheme != 'https') {
+			return null;
+		}
+
+		return $url;
+	}
+
 	/**
 	 * Filter attributes for a HTML tag
 	 */
@@ -124,6 +156,14 @@ class Parsedown extends Parent_Parsedown
 
 			$attributes['referrerpolicy'] = 'no-referrer';
 			$attributes['sandbox'] = 'allow-same-origin allow-scripts';
+		}
+
+		if (isset($attributes['src'])) {
+			$attributes['src'] = $this->_filterURL($attributes['src']);
+		}
+
+		if (isset($attributes['href'])) {
+			$attributes['href'] = $this->_filterURL($attributes['href']);
 		}
 
 		return $attributes;
@@ -312,19 +352,35 @@ class Parsedown extends Parent_Parsedown
 		if (!preg_match('!(</?)(\w+)([^>]*?)>!', $text, $match)) {
 			return null;
 		}
+
 		$name = $match[2];
 
 		if (!array_key_exists($name, self::ALLOWED_INLINE_TAGS)) {
 			return null;
 		}
 
-		$attributes = $this->_filterHTMLAttributes($name, self::ALLOWED_INLINE_TAGS[$name], $match[2]);
+		$attributes = $this->_filterHTMLAttributes($name, self::ALLOWED_INLINE_TAGS[$name], $match[3]);
+
+		if (null === $attributes) {
+			return null;
+		}
+
+		$attributes_string = '';
+
+		foreach ($attributes as $key => $value) {
+			if (null === $value) {
+				return null;
+			}
+
+			$attributes_string .= sprintf(' %s="%s"', htmlspecialchars($key), htmlspecialchars($value));
+		}
+
+		$tag = sprintf('%s%s%s>', $match[1], $name, $attributes_string);
 
 		return [
 			'element' => [
-				'rawHtml' => $match[1] . $name . '>',
+				'rawHtml' => $tag,
 				'allowRawHtmlInSafeMode' => true,
-				'attributes' => $attributes,
 			],
 			'extent' => strlen($match[0]),
 		];
