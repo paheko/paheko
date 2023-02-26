@@ -12,19 +12,15 @@
 			"type": "string",
 			"maxLength": 512
 		},
-		"recipient_customer": {
-			"description": "Membre enregistré",
-			"type": ["object", "null"],
-			"properties": {
-				"id": { "type": "integer" },
-				"numero": { "type": "string", "maxLength": 19 },
-				"name": { "type": "string", "maxLength": 128 },
-				"address": { "type": "string", "maxLength": 256 },
-				"zipcode": { "type": "string", "maxLength": 16 },
-				"city": { "type": "string", "maxLength": 128 },
-				"country": { "type": ["string", "null"], "maxLength": 128 }
-			},
-			"required": ["id", "name"]
+		"recipient_member_id": {
+			"description": "ID membre du client",
+			"type": ["integer", "null"],
+			"maxLength": 19
+		},
+		"recipient_member_numero": {
+			"description": "Numéro de membre du client",
+			"type": ["string", "null"],
+			"maxLength": 19
 		},
 		"subject": {
 			"description": "Objet",
@@ -88,5 +84,5 @@
 			"maxLength": 12
 		}
 	},
-	"required": [ "subject", "date", "status", "contact_info" ]
+	"required": [ "recipient_business_name", "recipient_address", "subject", "date", "status", "contact_info" ]
 }

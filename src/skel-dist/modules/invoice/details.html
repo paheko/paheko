@@ -80,17 +80,18 @@
 		
 		<fieldset>
 			<legend><h2>Destinataire</h2></legend>
-			{{if $recipient_business_name}}<p>{{$recipient_business_name}}</p>{{/if}}
-			{{if $recipient_address}}<p>{{$recipient_address}}</p>{{/if}}
-			{{if $recipient_customer}}
-				<p>Membre {{if $recipient_customer.numero}}n°{{$recipient_customer.numero}}{{/if}} - {{$recipient_customer.name}}</p>
-				{{if $recipient_customer.address}}
-					<p>
-						{{$recipient_customer.address}}<br />
-						{{$recipient_customer.zipcode}}
-						{{if $recipient_customer.country}}
-							- {{$recipient_customer.country}}
-						{{/if}}
+			<p class="infos">
+				{{$recipient_business_name}}<br />
+				{{$recipient_address}}
+			</p>
+			{{if $recipient_member_id}}
+				{{#users id=$recipient_member_id|intval}}{{:assign .='member'}}{{/users}}
+				{{if !$member}}
+					<p class="infos">Associé à l'ancien.ne membre {{if $recipient_member_numero}}n°{{$recipient_member_numero}}{{else}}#{{$recipient_member_id}}{{/if}} (compte supprimé).</p>
+				{{else}}
+					<p class="infos">
+						Associé au membre {{if $recipient_member_numero}}n°{{$recipient_member_numero}}{{/if}} : "{{:link href="details.php?id=%d"|args:$member.id label=$member.nom}}",
+						{{if $recipient_business_name !== $member.nom}} sous la désignation "{{$recipient_business_name}}".{{/if}}
 					</p>
 				{{/if}}
 			{{/if}}

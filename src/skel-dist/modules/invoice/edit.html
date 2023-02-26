@@ -39,28 +39,31 @@
 	{{/foreach}}
 	{{if $customer_id !== null}}
 		{{#users id=$customer_id}}
-			{{:assign var='customer.id' value=$id}}
-			{{:assign var='customer.numero' value=$numero|strtolower}} {{* Hack awaiting implementation of "|strval" *}}
-			{{:assign var='customer.name' value=$nom}}
-			{{* Awaiting resolution of #fcc655926a3e6995c3c6674f61c2a4e549e56790 *}}
-			{{if $adresse}}{{:assign var='customer.address' value=$adresse}}{{/if}}
-			{{if $code_postal}}{{:assign var='customer.zipcode' value=$code_postal}}{{/if}}
-			{{if $ville}}{{:assign var='customer.city' value=$ville}}{{/if}}
+			{{:assign recipient_member_id=$id}}
+			{{:assign recipient_member_numero=$numero|strtolower}} {{* Hack awaiting implementation of "|strval" *}}
+			{{:assign recipient_business_name=$nom}}
+			{{if $adresse}}{{:assign recipient_address=$adresse|cat:"\n":$code_postal:' ':$ville}}{{/if}}
 		{{/users}}
 	{{/if}}
 
-	{{if !$_POST.recipient_business_name && $customer_id === null}}
+	{{if $_POST.recipient_business_name}} {{* Manual input overrides member name *}}
+		{{:assign recipient_business_name=$_POST.recipient_business_name}}
+	{{/if}}
+	{{if !$recipient_business_name}}
 		{{:assign var='errors.' value='La raison sociale est obligatoire si vous ne sélectionnez pas de membre.'}}
 	{{/if}}
-	{{if $_POST.recipient_business_name|strlen > 128}}
+	{{if $recipient_business_name|strlen > 128}}
 		{{:assign length=$_POST.recipient_business_name|strlen}}
 		{{:assign var='errors.' value="Raison sociale trop longue. %d caractères sur les 128 autorisés."|args:$length}}
 	{{/if}}
-	{{if !$_POST.recipient_address && $customer && $customer.address === null}}
+	{{if $_POST.recipient_address}} {{* Manual input overrides member address *}}
+		{{:assign recipient_address=$_POST.recipient_address}}
+	{{/if}}
+	{{if !$recipient_address}}
 		{{:assign var='errors.' value="L'adresse est obligatoire si vous ne sélectionnez pas de membre ou si celui/celle-ci n'a pas d'adresse."}}
 	{{/if}}
-	{{if $_POST.recipient_address|strlen > 512}}
-		{{:assign length=$_POST.recipient_address|strlen}}
+	{{if $recipient_address|strlen > 512}}
+		{{:assign length=$recipient_address|strlen}}
 		{{:assign var='errors.' value="Adresse trop longue. %d caractères sur les 512 autorisés."|args:$length}}
 	{{/if}}
 
@@ -173,9 +176,10 @@
 			id=$id
 			key=$key
 			type='quotation'
-			recipient_business_name=$_POST.recipient_business_name
-			recipient_address=$_POST.recipient_address
-			recipient_customer=$customer
+			recipient_business_name=$recipient_business_name
+			recipient_address=$recipient_address
+			recipient_member_id=$recipient_member_id
+			recipient_member_numero=$recipient_member_numero
 			subject=$_POST.subject
 			date=$date
 			deadline=$deadline
@@ -202,16 +206,27 @@
 		<legend><h2>Destinataire</h2></legend>
 		<fieldset>
 			<legend>Membre enregistré.e</legend>
-			{{if $document.recipient_customer.id}}
-				{{:assign var='default_customer_selection.%s'|args:$document.recipient_customer.id value=$document.recipient_customer.name}}
+			{{if $document.recipient_member_id}}
+				{{#users id=$document.recipient_member_id|intval}}{{:assign .='user'}}{{/users}}
+				{{if $user}}
+					{{:assign var='default_customer_selection.%s'|args:$document.recipient_member_id value=$user.nom}}
+				{{/if}}
 			{{/if}}
 			{{:input type="list" name="customer" required=false label="Membre" target="!users/selector.php" default=$default_customer_selection can_delete=true}}
+			{{if $document.recipient_member_id && !$user}}
+				<p class="infos">
+					Attention : Ce devis est associé à l'ancien.ne membre
+					{{if $document.recipient_member_numero}}n°{{$document.recipient_member_numero}}{{else}}#{{$document.recipient_member_id}}{{/if}}
+					dont le compte est supprimé.<br />
+					Mettre à jour ce document des-associera cet ancien compte.
+				</p>
+			{{/if}}
 		</fieldset>
-		<p class="infos">Ou bien</p>
 		<fieldset>
-			<legend>Saisie manuelle</legend>
+			<legend>Saisie manuelle<label for="manual_input_priority_help">*</label></legend>
 			{{:input type="text" name="recipient_business_name" label="Raison sociale" source=$document placeholder="ex : SARL J'aime les deux vies"}}
 			{{:input type="textarea" name="recipient_address" label="Adresse" source=$document placeholder=""}}
+			<p class="infos" id="manual_input_priority_help">*Si un membre est associé au document, la saisie manuelle est prioritaire sur le nom et l'adresse.</p>
 		</fieldset>
 	</fieldset>
 	<fieldset>
