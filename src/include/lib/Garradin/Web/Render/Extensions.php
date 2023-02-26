@@ -4,7 +4,7 @@ namespace Garradin\Web\Render;
 
 use Garradin\Entities\Files\File;
 
-use Garradin\Plugin;
+use Garradin\Plugins;
 use KD2\SkrivLite;
 
 class Extensions
@@ -48,7 +48,7 @@ class Extensions
 			'/right'   => [$this, 'alignClose'],
 		];
 
-		Plugin::fireSignal('render.extensions.init', ['extensions' => &$list]);
+		Plugins::fireSignal('render.extensions.init', ['extensions' => &$list]);
 
 		return $list;
 	}
