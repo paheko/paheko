@@ -121,7 +121,7 @@ L2 C1
 &lt;&lt;grid&gt;&gt;
 L2 C2
 &lt;&lt;/grid&gt;&gt;</code></pre><section class="web-grid web-grid-debug" style="--grid-template: none / minmax(0, 0.5fr) minmax(0, 0.5fr)"><article class="web-block" style=""><p>L1 C1</p></article><article class="web-block" style=""><p>L1 C2</p></article><article class="web-block" style=""><p>L2 C1</p></article><article class="web-block" style=""><p>L2 C2</p></article></section><p>Enfin, il est possible d'utiliser la notation CSS <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/grid-row" target="_blank" rel="nofollow,noreferrer"><code>grid-row</code></a> et <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/grid-column" target="_blank" rel="nofollow,noreferrer"><code>grid-column</code></a> pour chaque bloc, permettant de déplacer les blocs, ou de faire en sorte qu'un bloc s'étende sur plusieurs colonnes ou plusieurs lignes. Pour cela il faut utiliser le paramètre <code>row</code> ou <code>column</code> qui précède le bloc :</p>
-<pre><code>&lt;&lt;grid #!! column="span 2"&gt;&gt;
+<pre><code>&lt;&lt;grid short="#!!" column="span 2"&gt;&gt;
 A
 &lt;&lt;grid row="span 2"&gt;&gt;
 B
@@ -129,7 +129,8 @@ B
 C
 &lt;&lt;grid&gt;&gt;
 D
-&lt;&lt;/grid&gt;&gt;</code></pre><section class="web-grid web-grid-debug" style="--grid-template: none / minmax(0, 0.34fr) minmax(0, 0.34fr) minmax(0, 0.34fr)"><article class="web-block" style="grid-column: span 2"><p>A</p></article><article class="web-block" style="grid-row: span 2"><p>B</p></article><article class="web-block" style=""><p>C</p></article><article class="web-block" style=""><p>D</p></article></section><p>Enfin, il est possible d'aligner un bloc verticalement par rapport aux autres en utilisant le paramètre <code>align</code> (équivalent de la propriété CSS <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/align-self" target="_blank" rel="nofollow,noreferrer"><code>align-self</code></a>).</p>
+&lt;&lt;/grid&gt;&gt;</code></pre><section class="web-grid web-grid-debug" style="--grid-template: none / minmax(0, 0.34fr) minmax(0, 0.34fr) minmax(0, 0.34fr)"><article class="web-block" style="grid-column: span 2"><p>A</p></article><article class="web-block" style="grid-row: span 2"><p>B</p></article><article class="web-block" style=""><p>C</p></article><article class="web-block" style=""><p>D</p></article></section><p>Noter que dans ce cas on doit utiliser la notation <code>short="…"</code> pour pouvoir utiliser les autres paramètres.</p>
+<p>Enfin, il est possible d'aligner un bloc verticalement par rapport aux autres en utilisant le paramètre <code>align</code> (équivalent de la propriété CSS <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/align-self" target="_blank" rel="nofollow,noreferrer"><code>align-self</code></a>).</p>
 <h2 id="alignement-du-texte">Alignement du texte</h2>
 <p>Il suffit de placer sur une ligne seule le code <code>&lt;&lt;center&gt;&gt;</code> pour centrer du texte :</p>
 <pre><code>&lt;&lt;center&gt;&gt;

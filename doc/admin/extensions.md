@@ -178,7 +178,7 @@ L2 C2
 Enfin, il est possible d'utiliser la notation CSS [`grid-row`](https://developer.mozilla.org/en-US/docs/Web/CSS/grid-row) et [`grid-column`](https://developer.mozilla.org/en-US/docs/Web/CSS/grid-column) pour chaque bloc, permettant de déplacer les blocs, ou de faire en sorte qu'un bloc s'étende sur plusieurs colonnes ou plusieurs lignes. Pour cela il faut utiliser le paramètre `row` ou `column` qui précède le bloc :
 
 ```
-<<grid #!! column="span 2">>
+<<grid short="#!!" column="span 2">>
 A
 <<grid row="span 2">>
 B
@@ -198,6 +198,8 @@ C
 <<grid>>
 D
 <</grid>>
+
+Noter que dans ce cas on doit utiliser la notation `short="…"` pour pouvoir utiliser les autres paramètres.
 
 Enfin, il est possible d'aligner un bloc verticalement par rapport aux autres en utilisant le paramètre `align` (équivalent de la propriété CSS [`align-self`](https://developer.mozilla.org/en-US/docs/Web/CSS/align-self)).
 

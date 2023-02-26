@@ -273,7 +273,7 @@ class Extensions
 	{
 		$str = html_entity_decode($str);
 		$str = rawurldecode($str);
-		$str = str_replace([' ', "\t", "\n", "\r", "\0"], '', $str);
+		$str = str_replace([' ', "\t", "\n", "\r", "\0"], ' ', $str);
 
 		if (strstr($str, '/*')) {
 			return null;

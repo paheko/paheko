@@ -361,12 +361,12 @@
     min-height: 10em;
     width: 20em;
     grid-template-rows: 6em;
+    grid-template: var(--grid-template);
 }
 
 .web-grid-debug .web-block {
     background: #999;
     overflow: hidden;
-    min-height: 6rem;
     padding: 5px;
     color: #333;
 }
