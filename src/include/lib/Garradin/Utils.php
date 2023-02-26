@@ -1226,6 +1226,7 @@ class Utils
 
             // Try to find a local executable
             $list = ['prince', 'chromium', 'wkhtmltopdf', 'weasyprint'];
+            $cmd = null;
 
             foreach ($list as $program) {
                 if (shell_exec('which ' . $program)) {

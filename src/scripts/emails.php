@@ -11,4 +11,8 @@ if (PHP_SAPI != 'cli') {
 require_once __DIR__ . '/../include/init.php';
 
 // Send messages in queue
-Emails::runQueue();
+$count = Emails::runQueue();
+
+if ($count && !empty($_SERVER['argv'][1]) && $_SERVER['argv'][1] == '-v') {
+	printf("%d messages sent\n", $count);
+}

@@ -269,6 +269,14 @@ class File extends Entity
 
 		Plugins::fireSignal('files.move', ['file' => $this, 'new_path' => $new_path]);
 
+		$escaped = strtr($this->path, ['%' => '!%', '_' => '!_', '!' => '!!']);
+
+		// Rename references in files_search
+		DB::getInstance()->preparedQuery('UPDATE files_search
+			SET path = ? || SUBSTR(path, 1+LENGTH(?))
+			WHERE path LIKE ?;',
+			$new_path . '/', $this->path . '/', $escaped . '%');
+
 		return $return;
 	}
 

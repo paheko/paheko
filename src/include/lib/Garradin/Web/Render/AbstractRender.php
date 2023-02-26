@@ -30,12 +30,17 @@ abstract class AbstractRender
 
 	abstract public function render(?string $content = null): string;
 
+	public function hasPath(): bool
+	{
+		return isset($this->current_path);
+	}
+
 	public function registerAttachment(string $uri)
 	{
 		Render::registerAttachment($this->file, $uri);
 	}
 
-	protected function resolveAttachment(string $uri)
+	public function resolveAttachment(string $uri)
 	{
 		$prefix = $this->current_path;
 		$pos = strpos($uri, '/');
@@ -54,7 +59,7 @@ abstract class AbstractRender
 		return WWW_URL . $uri;
 	}
 
-	protected function resolveLink(string $uri) {
+	public function resolveLink(string $uri) {
 		$first = substr($uri, 0, 1);
 		if ($first == '/' || $first == '!') {
 			return Utils::getLocalURL($uri);
