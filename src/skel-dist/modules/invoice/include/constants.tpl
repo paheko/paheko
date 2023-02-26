@@ -1,3 +1,5 @@
+{{:assign VERSION='0.2'}}
+
 {{:assign var='type_labels' quotation='Devis' invoice='Facture'}}
 {{:assign var='status_labels' draft="Brouillon" awaiting='En attente de validation' rejected='Rejeté' validated='Validé' misc='Autre'}}
 

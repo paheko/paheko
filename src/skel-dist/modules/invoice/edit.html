@@ -9,7 +9,7 @@
 	</aside>
 	{{:include file='./include/main_nav_tabs.html'}}
 </nav>
-{{:include file='./include/constants.tpl' keep='type_labels,status_labels,status_options'}}
+{{:include file='./include/constants.tpl' keep='type_labels, status_labels, status_options, VERSION'}}
 {{:include file='./include/style.tpl'}}
 
 {{if $_GET.id}}
@@ -164,6 +164,7 @@
 			contact_info=$_POST.contact_info
 			payment_detail=$_POST.payment_detail
 			extra_info=$_POST.extra_info
+			module_version=$VERSION
 		}}
 
 		{{if !$document}}
