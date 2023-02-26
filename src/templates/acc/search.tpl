@@ -23,6 +23,8 @@
 
 	<?php
 	$prev_id = null;
+	$debit = null;
+	$credit = null;
 	?>
 
 	{foreach from=$list->iterate() item="row"}
@@ -32,14 +34,19 @@
 				{if $prev_id == $row.id && !in_array($key, ['debit', 'credit', 'account_code', 'line_label', 'line_reference', 'project_code'])}
 					<td></td>
 				{elseif $key == 'id'}
-				<td class="num">
-					{link href="!acc/transactions/details.php?id=%d"|args:$value label="#%d"|args:$value}
-				</td>
+					<td class="num">
+						{link href="!acc/transactions/details.php?id=%d"|args:$value label="#%d"|args:$value}
+					</td>
+				{elseif $key == 'credit' || $key == 'debit'}
+					<td class="money">
+						<?php
+						${$key} += $value;
+						?>
+						{$value|raw|money:false}
+					</td>
 				{else}
 				<td>
-					{if $key == 'credit' || $key == 'debit'}
-						{$value|raw|money:false}
-					{elseif $key == 'date'}
+					{if $key == 'date'}
 						{$value|date_short}
 					{else}
 						{$value}
@@ -54,6 +61,35 @@
 		<?php $prev_id = $row->id; ?>
 	{/foreach}
 	</tbody>
+
+	{if $debit !== null || $credit !== null}
+	<?php
+	$span1 = 0;
+	foreach ($row as $key => $v) {
+		if ($key == 'credit' || $key == 'debit') {
+			break;
+		}
+		$span1++;
+	}
+	$span2 = count((array)$row) - $span1;
+	?>
+	<tfoot>
+		<tr>
+			{if $is_admin}<td></td>{/if}
+			<td colspan="{$span1}"><strong>Totaux de cette page</strong></td>
+			{foreach from=$row key="key" item="value"}
+				{if $key == 'credit' || $key == 'debit'}
+				<td class="money">
+					<?php $total = ${$key}; ?>
+					{$total|raw|money:false}
+				</td>
+				{/if}
+			{/foreach}
+			<td colspan="{$span2}"></td>
+		</tr>
+	</tfoot>
+	{/if}
+
 	</table>
 
 	{$list->getHTMLPagination(true)|raw}
