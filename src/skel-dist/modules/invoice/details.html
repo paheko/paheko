@@ -80,8 +80,20 @@
 		
 		<fieldset>
 			<legend><h2>Destinataire</h2></legend>
-			<p>{{$recipient_business_name}}</p>
-			<p>{{$recipient_address}}</p>
+			{{if $recipient_business_name}}<p>{{$recipient_business_name}}</p>{{/if}}
+			{{if $recipient_address}}<p>{{$recipient_address}}</p>{{/if}}
+			{{if $recipient_customer}}
+				<p>Membre {{if $recipient_customer.numero}}n°{{$recipient_customer.numero}}{{/if}} - {{$recipient_customer.name}}</p>
+				{{if $recipient_customer.address}}
+					<p>
+						{{$recipient_customer.address}}<br />
+						{{$recipient_customer.zipcode}}
+						{{if $recipient_customer.country}}
+							- {{$recipient_customer.country}}
+						{{/if}}
+					</p>
+				{{/if}}
+			{{/if}}
 		</fieldset>
 		
 		<fieldset>

@@ -54,7 +54,11 @@
 			<td><a href="details.html?id={{$id|intval}}">{{$key}}</a></td>
 			<td>{{$date|date_short}}</td>
 			<td>{{$deadline|date_short}}</td>
-			<td>{{$recipient_business_name}}</td>
+			<td>
+				{{if $recipient_business_name}}{{$recipient_business_name}}
+				{{elseif $recipient_customer.name}}{{$recipient_customer.name}}
+				{{/if}}
+			</td>
 			<td><a href="details.html?id={{$id|intval}}">{{$subject}}</a></td>
 			<td class="money">{{$total|money_currency}}</td>
 			<td>

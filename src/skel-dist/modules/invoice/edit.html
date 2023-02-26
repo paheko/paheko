@@ -30,20 +30,40 @@
 	{{:assign errors=null}}
 	{{:assign items=null}}
 
-	{{if !$_POST.recipient_business_name}}
-		{{:assign var='errors.' value='La raison sociale est obligatoire.'}}
+	{{* Hack to get the unique element sine "$my_array|keys" and "$my_array|first" do not exist *}}
+	{{#foreach from=$_POST.customer key='id' item='name'}}
+		{{if $id != $id|intval|strtolower}} {{* Hack to check the data is a number *}}
+			{{:assign var='errors.' value='Membre séléctionné invalide.'}}
+		{{/if}}
+		{{:assign customer_id=$id|intval}}
+	{{/foreach}}
+	{{if $customer_id !== null}}
+		{{#users id=$customer_id}}
+			{{:assign var='customer.id' value=$id}}
+			{{:assign var='customer.numero' value=$numero|strtolower}} {{* Hack awaiting implementation of "|strval" *}}
+			{{:assign var='customer.name' value=$nom}}
+			{{* Awaiting resolution of #fcc655926a3e6995c3c6674f61c2a4e549e56790 *}}
+			{{if $adresse}}{{:assign var='customer.address' value=$adresse}}{{/if}}
+			{{if $code_postal}}{{:assign var='customer.zipcode' value=$code_postal}}{{/if}}
+			{{if $ville}}{{:assign var='customer.city' value=$ville}}{{/if}}
+		{{/users}}
+	{{/if}}
+
+	{{if !$_POST.recipient_business_name && $customer_id === null}}
+		{{:assign var='errors.' value='La raison sociale est obligatoire si vous ne sélectionnez pas de membre.'}}
 	{{/if}}
 	{{if $_POST.recipient_business_name|strlen > 128}}
 		{{:assign length=$_POST.recipient_business_name|strlen}}
 		{{:assign var='errors.' value="Raison sociale trop longue. %d caractères sur les 128 autorisés."|args:$length}}
 	{{/if}}
-	{{if !$_POST.recipient_address}}
-		{{:assign var='errors.' value="L'adresse est obligatoire."}}
+	{{if !$_POST.recipient_address && $customer && $customer.address === null}}
+		{{:assign var='errors.' value="L'adresse est obligatoire si vous ne sélectionnez pas de membre ou si celui/celle-ci n'a pas d'adresse."}}
 	{{/if}}
 	{{if $_POST.recipient_address|strlen > 512}}
 		{{:assign length=$_POST.recipient_address|strlen}}
 		{{:assign var='errors.' value="Adresse trop longue. %d caractères sur les 512 autorisés."|args:$length}}
 	{{/if}}
+
 	{{if !$_POST.subject}}
 		{{:assign var='errors.' value="L'objet est obligatoire."}}
 	{{/if}}
@@ -155,6 +175,7 @@
 			type='quotation'
 			recipient_business_name=$_POST.recipient_business_name
 			recipient_address=$_POST.recipient_address
+			recipient_customer=$customer
 			subject=$_POST.subject
 			date=$date
 			deadline=$deadline
@@ -179,8 +200,19 @@
 <form method="POST" action="{{$request_url}}">
 	<fieldset>
 		<legend><h2>Destinataire</h2></legend>
-		{{:input type="text" name="recipient_business_name" label="Raison sociale" source=$document placeholder="ex : SARL J'aime les deux vies" required=true}}
-		{{:input type="textarea" name="recipient_address" label="Adresse" source=$document placeholder="" required=true}}
+		<fieldset>
+			<legend>Membre enregistré.e</legend>
+			{{if $document.recipient_customer.id}}
+				{{:assign var='default_customer_selection.%s'|args:$document.recipient_customer.id value=$document.recipient_customer.name}}
+			{{/if}}
+			{{:input type="list" name="customer" required=false label="Membre" target="!users/selector.php" default=$default_customer_selection can_delete=true}}
+		</fieldset>
+		<p class="infos">Ou bien</p>
+		<fieldset>
+			<legend>Saisie manuelle</legend>
+			{{:input type="text" name="recipient_business_name" label="Raison sociale" source=$document placeholder="ex : SARL J'aime les deux vies"}}
+			{{:input type="textarea" name="recipient_address" label="Adresse" source=$document placeholder=""}}
+		</fieldset>
 	</fieldset>
 	<fieldset>
 		<legend><h2>Objet</h2></legend>
