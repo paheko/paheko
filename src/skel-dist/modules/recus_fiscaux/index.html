@@ -65,7 +65,7 @@
 {{#list
 	select="id AS 'Numéro'; $$.nom AS 'Nom du bénéficiaire'; $$.date AS 'Date d''émission';  $$.montant AS 'Montant'"
 	where=$where
-	order=0 desc=true
+	order=1 desc=true
 	:year=$_GET.year
 	:date=$date
 	:id_search=$id

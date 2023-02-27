@@ -363,7 +363,7 @@ class Sections
 
 				$select = self::_moduleReplaceJSONExtract($select);
 
-				$columns['col' . $i] = compact('label', 'select');
+				$columns['col' . ($i + 1)] = compact('label', 'select');
 			}
 
 			if (isset($params['order'])) {
