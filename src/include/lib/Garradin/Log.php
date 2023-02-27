@@ -167,7 +167,7 @@ class Log
 			$row->details = $row->details ? json_decode($row->details) : null;
 			$row->type_label = self::ACTIONS[$row->type];
 
-			if (isset($row->details->entity) && constant('Garradin\Entities\\' . $row->details->entity . '::NAME')) {
+			if (isset($row->details->entity) && defined('Garradin\Entities\\' . $row->details->entity . '::NAME')) {
 				$row->entity_name = constant('Garradin\Entities\\' . $row->details->entity . '::NAME');
 			}
 
