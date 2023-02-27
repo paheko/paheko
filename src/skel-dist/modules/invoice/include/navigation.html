@@ -1,0 +1,14 @@
+<nav class="tabs">
+	<aside>
+		<form method="GET" action="./index.html" class="" id="invoice_module_search">
+			<p>
+				{{:input type="search" name="q" placeholder="N°, date, intitulé ou tiers" title="Rechercher un devis" default=$_GET.q}}
+				{{:button type="submit" label="" title="Lancer la recherche du devis" shape="search"}}
+			</p>
+		</form>
+		{{#restrict section="accounting" level="write"}}
+			{{:linkbutton href="edit.html" label="Nouveau devis" shape="plus"}}
+		{{/restrict}}
+	</aside>
+	{{:include file='./main_nav_tabs.html'}}
+</nav>

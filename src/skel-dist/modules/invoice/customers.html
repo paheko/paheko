@@ -3,13 +3,8 @@
 {{* ==================== Header ==================== *}}
 
 {{:admin_header title="Devis et factures" current="acc"}}
-<nav class="tabs">
-	<aside>
-		{{:linkbutton href="edit.html" label="Nouveau devis" shape="plus"}}
-	</aside>
-	{{:include file='./include/main_nav_tabs.html'}}
-</nav>
 {{:include file='./include/style.tpl'}}
+{{:include file='./include/navigation.html'}}
 
 {{* ==================== Listing ==================== *}}
 
@@ -54,7 +49,7 @@
 }}
 	{{if $recipient_business_name !== $previous_customer && $previous_customer !== '-1'}}
 		<tr>
-			<td>{{:link href="./customer.html?id=%s"|args:$previous.recipient_business_name label=$previous.recipient_business_name}}</td>
+			<td>{{:link href="./customer.html?show=customers&id=%s"|args:$previous.recipient_business_name label=$previous.recipient_business_name}}</td>
 			<td>{{$status_number.awaiting}}</td>
 			<td>{{$status_number.validated}}</td>
 			<td>{{$status_number.rejected}}</td>
@@ -71,7 +66,7 @@
 
 {{if $previous}}
 	<tr>
-		<td>{{:link href="./customer.html?id=%s"|args:$previous.recipient_business_name label=$previous.recipient_business_name}}</td>
+		<td>{{:link href="./customer.html?show=customers&id=%s"|args:$previous.recipient_business_name label=$previous.recipient_business_name}}</td>
 		<td>{{$status_number.awaiting}}</td>
 		<td>{{$status_number.validated}}</td>
 		<td>{{$status_number.rejected}}</td>

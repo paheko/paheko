@@ -3,14 +3,10 @@
 {{* ==================== Header ==================== *}}
 
 {{:admin_header title="Devis et factures" current="acc"}}
-<nav class="tabs">
-	<aside>
-		{{:linkbutton href="edit.html" label="Nouveau devis" shape="plus"}}
-	</aside>
-	{{:include file='./include/main_nav_tabs.html'}}
-</nav>
-{{:include file='./include/constants.tpl' keep='status_labels'}}
 {{:include file='./include/style.tpl'}}
+{{:include file='./include/navigation.html'}}
+
+{{:include file='./include/constants.tpl' keep='status_labels'}}
 
 {{* ==================== Listing ==================== *}}
 

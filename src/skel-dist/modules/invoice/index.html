@@ -3,15 +3,27 @@
 {{* ==================== Header ==================== *}}
 
 {{:admin_header title="Devis et factures" current="acc"}}
-<nav class="tabs">
-	<aside>
-		{{:linkbutton href="edit.html" label="Nouveau devis" shape="plus"}}
-	</aside>
-	{{:include file='./include/main_nav_tabs.html'}}
-</nav>
 {{:include file='./include/style.tpl'}}
+{{:include file='./include/navigation.html'}}
+
+{{* ==================== Search ==================== *}}
+
+{{if $_GET.q}}
+	{{if $_GET.q|regexp_match:'/(^\d+$)|(^D[0-9]{1,6}$)|(^F[0-9]{1,6}$)/'}}
+		{{:assign search_where="key LIKE :searched_id ESCAPE '!'" searched_id="%%%s%%"|args:$_GET.q}}
+	{{elseif $_GET.q|parse_date}}
+		{{:assign search_where="$$.date = :searched_date" searched_date=$_GET.q|parse_date}}
+	{{else}}
+		{{:assign searched_text=$_GET.q|trim|regexp_replace:'/[!%_]/':'!$0'}}
+		{{:assign search_where="(($$.subject LIKE :searched_text ESCAPE '!') OR ($$.recipient_business_name LIKE :searched_text ESCAPE '!'))" searched_text="%%%s%%"|args:$searched_text}}
+	{{/if}}
+{{/if}}
 
 {{* ==================== Listing ==================== *}}
+
+{{if $_GET.q}}
+	<h2 class="ruler">Résultat(s) de recherche pour "{{$_GET.q}}"</h2>
+{{/if}}
 
 {{if $_GET.show == 'quote'}}
 	{{:assign filter="json_extract(document, '$.type') = 'quotation'"}}
@@ -32,12 +44,17 @@
 
 
 {{:assign list_select="key; id AS 'Numéro'; datetime($$.date) AS 'Émission'; $$.deadline AS 'Échéance'; $$.recipient_business_name AS 'Tiers'; $$.subject AS 'Intitulé'; $$.total AS 'Montant'; $$.status AS 'Statut'"}}
+{{:assign list_where="$$.type IN ('quotation', 'invoice') AND %s"|args:$filter}}
 {{if !$_GET.show}}{{:assign list_select='$$.type AS "Type"; '|cat:$list_select}}{{/if}}
+{{if $_GET.q}}{{:assign list_where=$list_where|cat:' AND ':$search_where}}{{/if}}
 {{#list
 	schema='./quotation.schema.json'
 	select=$list_select
-	where="$$.type IN ('quotation', 'invoice') AND %s"|args:$filter
+	where=$list_where
 	order='id'
+	:searched_id=$searched_id
+	:searched_date=$searched_date
+	:searched_text=$searched_text
 }}
 	<tr>
 		{{if !$_GET.show}}
@@ -69,7 +86,7 @@
 		</td>
 	</tr>
 {{else}}
-	<tr><td colspan="6">Aucun document</td></tr>
+	<tr><td colspan="6">{{if !$_GET.q}}Aucun document.{{else}}Aucun résultat correspondant à "{{$_GET.q}}".{{/if}}</td></tr>
 {{/list}}
 
 {{:admin_footer}}

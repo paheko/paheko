@@ -3,14 +3,11 @@
 {{* ==================== Header ==================== *}}
 
 {{:admin_header title="Devis et factures" current="acc"}}
-<nav class="tabs">
-	<aside>
-		{{:linkbutton href="edit.html" label="Nouveau devis" shape="plus"}}
-	</aside>
-	{{:include file='./include/main_nav_tabs.html'}}
-</nav>
-{{:include file='./include/constants.tpl' keep='type_labels, status_labels, status_options, VERSION'}}
 {{:include file='./include/style.tpl'}}
+{{:include file='./include/navigation.html'}}
+
+{{:include file='./include/constants.tpl' keep='type_labels, status_labels, status_options, VERSION'}}
+
 
 {{if $_GET.id}}
 	{{#load id=$_GET.id}}
@@ -233,7 +230,7 @@
 		<legend><h2>Objet</h2></legend>
 		<ul>
 			<li>{{:input type="text" name="key" label="Numéro" source=$document help="Ce numéro doit être unique. Laisser vide pour générer un nouveau numéro."}}</li>
-			<li>{{:input type="text" name="subject" label="Objet" source=$document placeholder="ex : Devis pour une location de barnum" required=true}}</li>
+			<li>{{:input type="text" name="subject" label="Intitulé" source=$document placeholder="ex : Devis pour une location de barnum" required=true}}</li>
 			<li>{{:input type="date" name="date" label="Date du devis" source=$document placeholder="" required=true}}</li>
 			<li>{{:input type="date" name="deadline" label="Échéance pour validation" source=$document placeholder="" required=false}}</li>
 			<li>{{:input type="text" name="contact_info" label="Contact" source=$document default=$config.org_email required=true}}</li>
