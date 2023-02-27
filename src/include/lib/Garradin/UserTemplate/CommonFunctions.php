@@ -235,7 +235,7 @@ class CommonFunctions
 						continue;
 					}
 
-					$values .= sprintf('<span class="label"><input type="hidden" name="%s[%s]" value="%s" /> %3$s %s</span>', htmlspecialchars((string)$name), htmlspecialchars((string)$v), htmlspecialchars((string)$l), $multiple ? $delete_btn : '');
+					$values .= sprintf('<span class="label"><input type="hidden" name="%s[%s]" value="%s" /> %3$s %s</span>', htmlspecialchars((string)$name), htmlspecialchars((string)$v), htmlspecialchars((string)$l), $can_delete ? $delete_btn : '');
 				}
 			}
 
