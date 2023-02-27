@@ -1,9 +1,11 @@
 {{#restrict section="users" level="read"}}
 	{{:assign var="id" value=$_GET.id|intval}}
-{{elseif $logged_user.id}}
-	{{:assign var="id" value=$logged_user.id}}
 {{else}}
-	{{:error message="Vous n'avez pas accès à cette page."}}
+	{{if $logged_user.id}}
+		{{:assign var="id" value=$logged_user.id}}
+	{{else}}
+		{{:error message="Vous n'avez pas accès à cette page."}}
+	{{/if}}
 {{/restrict}}
 
 {{if !$id}}
