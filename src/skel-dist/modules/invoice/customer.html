@@ -1,0 +1,90 @@
+{{#restrict section="accounting" level="read"}}
+
+{{* ==================== Header ==================== *}}
+
+{{:admin_header title="Devis et factures" current="acc"}}
+<nav class="tabs">
+	<aside>
+		{{:linkbutton href="edit.html" label="Nouveau devis" shape="plus"}}
+	</aside>
+	{{:include file='./include/main_nav_tabs.html'}}
+</nav>
+{{:include file='./include/constants.tpl' keep='status_labels'}}
+{{:include file='./include/style.tpl'}}
+
+{{* ==================== Listing ==================== *}}
+
+<h2>Devis de "{{$_GET.id}}"</h2>
+
+{{#sql select='id' tables='module_data_invoice' where="json_extract(document, '$.recipient_business_name') = :business_name" :business_name=$_GET.id}}
+	{{:assign found=true}}
+{{/sql}}
+
+{{if !$found}}
+	<p class="error block">Aucun devis pour ce client.</p>
+	{{#restrict section="accounting" level="write"}}
+		<p class="infos">{{:linkbutton href="edit.html" label="Créer un devis" shape="plus"}}</p>
+	{{/restrict}}
+{{/if}}
+
+{{:assign previous_status='-1'}}
+{{#load
+	select="id, key, document AS json, datetime(json_extract(document, '$.date')) AS date"
+	where="$$.recipient_business_name = :business_name AND $$.type = 'quotation'"
+	order='$$.status, date DESC'
+	:business_name=$_GET.id
+}}
+	{{:assign var="label" from="status_labels.%s"|args:$status}}
+	{{if $status !== $previous_status && $previous_status !== '-1'}}
+			</tbody>
+		</table>
+	{{/if}}
+	{{if $status !== $previous_status || $previous_status === '-1'}}
+		<h3 class="ruler">{{$label}}</h3>
+		<table class="list">
+			<thead>
+				<tr>
+					<th>Numéro</th>
+					<td>Émission</td>
+					<td>Échéance</td>
+					<td>Intitulé</td>
+					<td class="money">Montant</td>
+					<td class="num">Membre</td>
+					<td></td>
+				</tr>
+			</thead>
+			<tbody>
+	{{/if}}
+				<tr>
+					<td><a href="details.html?id={{$id|intval}}">{{$key}}</a></td>
+					<td>{{$date|date_short}}</td>
+					<td>{{$deadline|date_short}}</td>
+					<td><a href="details.html?id={{$id|intval}}">{{$subject}}</a></td>
+					<td class="money">{{$total|money_currency}}</td>
+					<td class="num">
+						{{if $recipient_member_id}}
+							{{:link href="!users/details.php?id=%s"|args:$recipient_member_numero label=$recipient_member_numero}}
+						{{else}}
+						-
+						{{/if}}
+					</td>
+					<td class="actions">
+						{{#restrict section="accounting" level="write"}}
+							{{if !$archived && $status == 'draft'}}
+							{{:linkbutton shape="edit" label="Modifier" href="edit.html?id=%d"|args:$id}}
+							{{/if}}
+						{{/restrict}}
+					</td>
+				</tr>
+
+	{{:assign previous_status=$status}}
+{{/load}}
+
+	</tbody>
+</table>
+
+{{:admin_footer}}
+
+{{else}}
+	{{:error message="Seuls les membres avec accès en lecture à la comptabilité peuvent visualiser cette page."}}
+{{/restrict}}
