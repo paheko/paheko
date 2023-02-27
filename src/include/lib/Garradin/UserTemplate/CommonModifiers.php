@@ -39,6 +39,7 @@ class CommonModifiers
 		'boolval',
 		'intval',
 		'floatval',
+		'strval',
 		'substr',
 		'abs',
 		'base64_encode'
