@@ -30,56 +30,47 @@
 	<p class="block confirm">Devis modifié avec succès.</p>
 {{/if}}
 
-<table class="list">
-	<thead>
-		<tr>
-			{{if !$_GET.show}}<th>Type</th>{{/if}}
-			<th>Numéro</th>
-			<td>Émission</td>
-			<td>Échéance</td>
-			<td>Tiers</td>
-			<td>Intitulé</td>
-			<td class="money">Montant</td>
-			<td>Statut</td>
-			<td></td>
-		</tr>
-	</thead>
-	<tbody>
-{{#load where="$$.type IN ('quotation', 'invoice') AND %s"|args:$filter select="id, key, document AS json, datetime(json_extract(document, '$.date')) AS date" order="date DESC"}}
-		<tr>
-			{{if !$_GET.show}}
-				{{:assign var="label" from="type_labels.%s"|args:$type}}
-				<td>{{$label}}</td>
-			{{/if}}
-			<td><a href="details.html?id={{$id|intval}}">{{$key}}</a></td>
-			<td>{{$date|date_short}}</td>
-			<td>{{$deadline|date_short}}</td>
-			<td>{{$recipient_business_name}}</td>
-			<td><a href="details.html?id={{$id|intval}}">{{$subject}}</a></td>
-			<td class="money">{{$total|money_currency}}</td>
-			<td>
-				{{:assign var="label" from="status_labels.%s"|args:$status}}
-				{{$label}}
 
-				{{if $archived}}
-					<span title="Archivé">🗃</span>
-				{{elseif $date_paid}}
-					Payé le {{$date_paid|date_short}}
-				{{elseif $type == 'invoice'}}
-					En attente
-				{{/if}}
-			</td>
-			<td class="actions">
-				{{if !$archived && $status == 'draft'}}
-				{{:linkbutton shape="edit" label="Modifier" href="edit.html?id=%d"|args:$id}}
-				{{/if}}
-			</td>
-		</tr>
+{{:assign list_select="key; id AS 'Numéro'; datetime($$.date) AS 'Émission'; $$.deadline AS 'Échéance'; $$.recipient_business_name AS 'Tiers'; $$.subject AS 'Intitulé'; $$.total AS 'Montant'; $$.status AS 'Statut'"}}
+{{if !$_GET.show}}{{:assign list_select='$$.type AS "Type"; '|cat:$list_select}}{{/if}}
+{{#list
+	schema='./quotation.schema.json'
+	select=$list_select
+	where="$$.type IN ('quotation', 'invoice') AND %s"|args:$filter
+	order='id'
+}}
+	<tr>
+		{{if !$_GET.show}}
+			{{:assign var="label" from="type_labels.%s"|args:$type}}
+			<td>{{$label}}</td>
+		{{/if}}
+		<td><a href="details.html?id={{$id|intval}}">{{$key}}</a></td>
+		<td>{{$date|date_short}}</td>
+		<td>{{$deadline|date_short}}</td>
+		<td>{{$recipient_business_name}}</td>
+		<td><a href="details.html?id={{$id|intval}}">{{$subject}}</a></td>
+		<td class="money">{{$total|money_currency}}</td>
+		<td>
+			{{:assign var="label" from="status_labels.%s"|args:$status}}
+			{{$label}}
+
+			{{if $archived}}
+				<span title="Archivé">🗃</span>
+			{{elseif $date_paid}}
+				Payé le {{$date_paid|date_short}}
+			{{elseif $type == 'invoice'}}
+				En attente
+			{{/if}}
+		</td>
+		<td class="actions">
+			{{if !$archived && $status == 'draft'}}
+			{{:linkbutton shape="edit" label="Modifier" href="edit.html?id=%d"|args:$id}}
+			{{/if}}
+		</td>
+	</tr>
 {{else}}
-		<tr><td colspan="6">Aucun document</td></tr>
-{{/load}}
-</tbody>
-</table>
+	<tr><td colspan="6">Aucun document</td></tr>
+{{/list}}
 
 {{:admin_footer}}
 
