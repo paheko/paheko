@@ -136,7 +136,7 @@ class Sections
 			unset($params['search']);
 
 			$params['tables'] .= ' INNER JOIN files_search ON files_search.path = w.file_path';
-			$params['select'] .= ', rank(matchinfo(files_search), 0, 1.0, 1.0) AS points, snippet(files_search, \'<b>\', \'</b>\', \'…\', 2) AS snippet';
+			$params['select'] .= ', rank(matchinfo(files_search), 0, 1.0, 1.0) AS points, snippet(files_search, \'<mark>\', \'</mark>\', \'…\', 2) AS snippet';
 			$params['where'] .= ' AND files_search MATCH :search';
 
 			$params['order'] = 'points DESC';

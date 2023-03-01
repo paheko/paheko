@@ -117,7 +117,7 @@
 .web-content mark {
     background: #ffb;
     color: #000;
-    padding: 2px 4px;
+    padding: 1px 3px;
     display: inline-block;
     box-shadow: 0px 0px 3px 1px #990;
     border-radius: .2em;
