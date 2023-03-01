@@ -389,6 +389,7 @@ class DB extends SQLite3
             return false;
         }
 
+        $escape ??= '\\';
         $pattern = str_replace('’', '\'', $pattern); // Normalize French apostrophe
         $value = str_replace('’', '\'', $value);
 
