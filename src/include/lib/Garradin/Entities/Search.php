@@ -158,6 +158,7 @@ class Search extends Entity
 		$db = DB::getInstance();
 
 		try {
+			$db->toggleUnicodeLike(true);
 			$st = $db->protectSelect($allowed_tables, $sql);
 
 			$this->_result = $db->execute($st);
@@ -165,6 +166,9 @@ class Search extends Entity
 		}
 		catch (DB_Exception $e) {
 			throw new UserException('Erreur dans la requête : ' . $e->getMessage(), 0, $e);
+		}
+		finally {
+			$db->toggleUnicodeLike(false);
 		}
 	}
 
@@ -198,6 +202,7 @@ class Search extends Entity
 		$db = DB::getInstance();
 
 		try {
+			$db->toggleUnicodeLike(true);
 			$st = $db->protectSelect($allowed_tables, $sql);
 			$r = $db->execute($st);
 			$count = (int) $r->fetchArray(\SQLITE3_NUM)[0] ?? 0;
@@ -207,6 +212,9 @@ class Search extends Entity
 		}
 		catch (DB_Exception $e) {
 			throw new UserException('Erreur dans la requête : ' . $e->getMessage(), 0, $e);
+		}
+		finally {
+			$db->toggleUnicodeLike(false);
 		}
 	}
 
