@@ -43,7 +43,7 @@ test_required(
     'L\'algorithme de hashage de mot de passe Blowfish n\'est pas présent (pas installé ou pas compilé).'
 );
 
-test_requis(
+test_required(
     class_exists('\IntlDateFormatter') && function_exists('\idn_to_ascii'),
     'L\'extension "intl" n\'est pas installée mais est nécessaire (apt install php-intl).'
 );
