@@ -1,0 +1,135 @@
+{{#restrict section="accounting" level="read"}}
+
+{{if !$_GET.id}}
+	<p class="error block">Aucun document séléctionné.</p>
+{{/if}}
+
+{{#load id=$_GET.id}}
+
+{{:include file='./include/constants.tpl' keep='type_labels'}}
+{{:assign var="document_type_label" from="type_labels.%s"|args:$type}}
+
+{{:assign title='%s n°%s'|args:$document_type_label:$key}}
+
+{{:include
+	file='modules/_header.html'
+	page='A5'
+	title=$title|cat:' - ':$subject
+	hide_header=true
+	back_link='./'
+}}
+
+{{if $config.files.logo}}
+	<img src="{{$config.files.logo}}&150px" alt="Logo" style="float: left; min-width: 64px; min-height: 64px; margin: 0em 1em 1em 0em;" />
+{{/if}}
+
+<h2 style="margin-bottom: 0;">{{$config.org_name}}</h2>
+<ul style="list-style-type: none;">
+	{{if $vat_exemption === 'nonprofit'}}
+		<li>Association « loi 1901 » à but non lucratif{{if $siret}} — SIRET {{$siret}}{{/if}}</li>
+	{{/if}}
+	<li>{{$config.org_address|escape|nl2br}}</li>
+	{{if $config.org_web}}
+		<li>{{$config.org_web}}</li>
+	{{/if}}
+	<li>Contact : {{$contact_info}}</li>
+</ul>
+
+<ul style="text-align: right; list-style-type: none;">
+	<li>
+		<strong>{{$recipient_business_name|strtoupper}}</strong><br />
+		{{$recipient_address|escape|nl2br}}
+	</li>
+	{{if $recipient_member_numero || $recipient_member_id}}
+		<li>Réf. membre : {{if $recipient_member_numero}}{{$recipient_member_numero}}{{else}}#{{$recipient_member_id}}{{/if}}</li>
+	{{/if}}
+</ul>
+
+<h1>Objet : {{$title}}{{if $status === 'draft'}} - BROUILLON{{/if}}</h1>
+<ul style="list-style-type: none;">
+	<li>Date : {{$date|date_short}}</li>
+	<li>Référence : {{$key}}</li>
+	<li>Intitulé : {{$subject}}</li>
+	{{if !$introduction_text}}
+		<li>Montant : {{$total|money_currency}}</li>
+	{{/if}}
+</ul>
+
+{{if $introduction_text}}
+	<p>
+		{{$introduction_text|escape|nl2br}}
+	</p>
+{{/if}}
+
+<h2>Articles</h2>
+{{if $items}}
+	<table id="item_list" class="list">
+		<thead>
+			<tr>
+				<th>Réf.</th>
+				<th>Dénomination</th>
+				<th>Description</th>
+				<th style="text-align: right;">Prix unitaire</th>
+				<th style="text-align: right;">Quantité</th>
+			</tr>
+		</thead>
+		<tbody>
+		{{#foreach from=$items item='item'}}
+			<tr>
+				<td>{{$item.reference}}</td>
+				<td>{{$item.name}}</td>
+				<td>{{$item.description|escape|nl2br}}</td>
+				<td style="text-align: right;">{{$item.unit_price|intval|money_currency:false}}</td>
+				<td style="text-align: right;">{{$item.quantity}}</td>
+			</tr>
+		{{/foreach}}
+		</tbody>
+		<tfooter>
+			<tr>
+				<td colspan="4" style="font-weight: bold; text-align: right;">TOTAL</td>
+				<td style="font-weight: bold; text-align: right;">{{$total|intval|money_currency:false}}</td>
+			</tr>
+		</tfooter>
+	</table>
+	
+	<p>
+		{{if $vat_exemption === 'nonprofit' || $vat_exemption === null}}
+			Association exonérée des impôts commerciaux (art. 261-7-1 du CGI).
+		{{else}}
+			TVA non-applicable, article 293 B du CGI.
+		{{/if}}
+	</p>
+{{else}}
+	<p>Aucun article.</p>
+{{/if}}
+
+{{if $deadline}}
+<p>
+	<strong>Devis valable jusqu'au {{$deadline|date_short}}.</strong>
+</p>
+{{/if}}
+
+{{if $payment_detail || $extra_info}}
+	<h3>Informations</h3>
+	{{if $payment_detail}}<p>{{$payment_detail|escape|nl2br}}</p>{{/if}}
+	{{if $extra_info}}<p>{{$extra_info|escape|nl2br}}</p>{{/if}}
+{{/if}}
+
+<p>
+	<strong>Bon pour accord</strong> le {{$signing_date|date_short}},<br />
+	à {{$signing_place|strtoupper}}.
+</p>
+
+{{if $status !== 'draft' && $config.files.signature}}
+<figure>
+	<img src="{{$config.files.signature}}" alt="Signature association" />
+</figure>
+{{/if}}
+
+{{:include file="modules/_footer.html"}}
+
+{{/load}}
+
+{{else}}
+	{{:error message="Seuls les membres avec accès en lecture à la comptabilité peuvent visualiser cette page."}}
+{{/restrict}}
