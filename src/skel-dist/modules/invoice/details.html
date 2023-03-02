@@ -66,23 +66,37 @@
 		<fieldset>
 			<legend><h2>Statut</h2></legend>
 			{{#restrict section="accounting" level="write"}}
+			<div class="infos inline">
 				<label for="f_status">Statut en cours :</label>
 				<form method="POST" action="./details.html" style="display: inline;">
 					{{:input type="select" name="status" options=$status_options default=$status required=true}}
 					{{:input type="hidden" name="id" default=$id|intval}}
 					{{:button type="submit" name="status_update_button" label="Modifier"}}
 				</form>
+			</div>
 			{{else}}
 				{{:assign var="label" from="status_labels.%s"|args:$status}}
 				<p>{{$label}}</p>
 			{{/restrict}}
+			{{if $status !== 'draft'}}
+				<p>
+				{{if $status === 'validated'}}
+					{{$label}} validé et <strong>signé le {{$signing_date|date_short}} à {{$signing_place}}</strong>.
+				{{/if}}
+				{{:linkbutton label="PDF" href="preview.html?id=%s"|args:$id shape="document"}}
+				</p>
+			{{else}}
+				{{:linkbutton label="Voir l'aperçu" href="preview.html?id=%s"|args:$id shape="document"}}
+			{{/if}}
+
 		</fieldset>
-		
+
+
 		<fieldset>
 			<legend><h2>Destinataire</h2></legend>
 			<p class="infos">
-				{{$recipient_business_name}}<br />
-				{{$recipient_address}}
+				<strong>{{$recipient_business_name}}</strong><br />
+				{{$recipient_address|escape|nl2br}}
 			</p>
 			{{if $recipient_member_id}}
 				{{#users id=$recipient_member_id|intval}}{{:assign .='member'}}{{/users}}
@@ -100,9 +114,10 @@
 		<fieldset>
 			<legend><h2>Objet</h2></legend>
 			<ul>
-				<li>Objet : {{$subject}}</li>
+				<li>Intitulé : {{$subject}}</li>
 				<li>Date : {{$date|date_short}}</li>
 				{{if $deadline}}<li>Échéance : {{$deadline|date_short}}</li>{{/if}}
+				<li>Référence : {{$key}}</li>
 				<li>Total : {{$total|floatval|money_currency:false}}</li>
 			</ul>
 		</fieldset>
@@ -122,14 +137,12 @@
 						<tr>
 							<td>{{$item.reference}}</td>
 							<td>{{$item.name}}</td>
-							<td>{{$item.description}}</td>
+							<td>{{$item.description|escape|nl2br}}</td>
 							<td>{{$item.unit_price|intval|money:false}}</td>
 							<td>{{$item.quantity}}</td>
 						</tr>
 					{{/foreach}}
 				</table>
-
-				</ul>
 			{{else}}
 				<p>Aucun article.</p>
 			{{/if}}
@@ -138,7 +151,13 @@
 		<fieldset>
 			<legend><h2>Infos</h2></legend>
 			<ul>
-				<li>Contact : {{$contact_info}}</li>
+				<li class="infos">Contact : {{$contact_info}}</li>
+				{{if $introduction_text}}
+					<li>
+						Texte d'introduction :
+						<p>{{$introduction_text|escape|nl2br}}</p>
+					</li>
+				{{/if}}
 			</ul>
 		</fieldset>
 		

@@ -1,13 +1,23 @@
-{{:assign page_title="Configuration du module de devis et facture"}}
+{{:assign page_title="Configuration du module “Devis et factures”"}}
 {{:admin_header title=$page_title}}
+
+{{:include file='./include/constants.tpl' keep='vat_exemption_type'}}
 
 {{if $_POST.save}}
 	<!-- Todo: add a nice error check here -->
+	{{:assign var='allowed_type' from='vat_exemption_type.%s'|args:$_POST.vat_exemption}}
+	{{if !$allowed_type}}
+		{{:assign var='errors.' value="Type d'association invalide."}}
+	{{/if}}
 	{{if $error}}
 		<p class="error block">{{$error}}</p>
 	{{else}}
 		{{:save key="config"
 			validate_schema="./config.schema.json"
+			vat_exemption=$_POST.vat_exemption
+			siret=$_POST.siret
+			signing_place=$_POST.signing_place
+			introduction_text=$_POST.introduction_text
 			payment_detail=$_POST.payment_detail
 			quotation_extra_info=$_POST.quotation_extra_info
 		}}
@@ -17,38 +27,25 @@
 	<p class="block confirm">Configuration enregistrée.</p>
 {{/if}}
 
-<h1>{{$page_title}}</h1>
+<h1 class="ruler">{{$page_title}}</h1>
 <form method="POST" action="{{$self_url}}">
+	<p class="infos">
+		Conformement à la législation, le changement de ces informations n'impactera que les futurs devis/factures. Les devis et factures déjà rédigés ne tiennent pas compte de ces modifications.
+	</p>
 	<fieldset>
-		<legend></legend>
+		<legend>Caractéristiques de l'association</legend>
+		{{:input type="radio" name="vat_exemption" label="Association non-lucrative" value="nonprofit" help="art. 261-7-1 du CGI" required=true default=$module.config.vat_exemption}}
+		{{:input type="radio" name="vat_exemption" label="Association lucrative" value="profit" help="franchise en base de TVA, art. 293 B du CGI" required=true default=$module.config.vat_exemption}}
+		{{:input type="text" name="siret" label="Numéro SIRET" required=false default=$module.config.siret}}
+		{{:input type="text" name="signing_place" label="Ville de signature des devis" required=false default=$module.config.signing_place}}
+	</fieldset>
+	<fieldset>
+		<legend>Informations</legend>
+		{{:input required=false name="introduction_text" type="textarea" label="Texte d'introduction" source=$module.config default="Madame, Monsieur,\nSuite à votre demande, veuillez trouver ci-dessous notre proposition de devis." placeholder="ex : Formule de politesse." cols="50" rows="4"}}
 		{{:input required=false name="payment_detail" type="textarea" label="Instructions de paiement" default=$module.config.payment_detail placeholder="BIC :&#10;ABCDEFGH012&#10;FR9901234567890123456789012&#10;La banque eh! tic&#10;&#10;Paiement à réaliser sous 15 jours." cols="50" rows="5"}}
-		{{:input required=false name="quotation_extra_info" type="textarea" label="Informations complémentaires affichées en bas des devis" default=$module.config.quotation_extra_info placeholder="ex : Site officiel : https://www.mon-asso.fr" cols="50" rows="3"}}
+		{{:input required=false name="quotation_extra_info" type="textarea" label="Informations complémentaires affichées en bas des devis" default=$module.config.quotation_extra_info placeholder="ex : Formule de politesse." cols="50" rows="3"}}
 	</fieldset>
 	{{:button type="submit" name="save" label="Enregistrer la configuration" class="main"}}
 </form>
-
-<!--
-<form method="POST" action="{{$self_url}}">
-	<fieldset>
-		<legend>Création d'un devis</legend>
-		<ul>
-			<li>{{:input required=true name="subject" type="text" label="Objet" default="" placeholder="ex : Prêt d'un barnum pour festival"}}</li>
-			<li>{{:input required=true name="recepient" type="text" label="Destinataire" default="" placeholder="ex : Asso ejp92"}}</li>
-			<li>{{:input required=true name="date" type="date" label="Date" default=""}}</li>
-		</ul>
-	</fieldset>
-	<fieldset>
-		<legend>Article</legend>
-		<ul>
-			<li>{{:input required=true name="name" type="text" label="Nom" default="" placeholder="ex : Prêt d'un barnum 1/2 journée"}}</li>
-			<li>{{:input required=true name="description" type="textarea" label="Description" default="" placeholder="ex : Prêt pour une demi-journée"}}</li>
-			<li>{{:input required=true name="quantity" type="text" label="Quantité" default=""}}</li>
-			<li>{{:input required=true name="unit_price" type="text" label="Prix unitaire" default=""}}</li>
-			<li>{{:input required=true name="total" type="text" label="Total" default=""}}</li>
-		</ul>
-	</fieldset>
-	{{:button type="submit" name="save" label="Créer le devis"}}
-</form>
--->
 
 {{:admin_footer}}

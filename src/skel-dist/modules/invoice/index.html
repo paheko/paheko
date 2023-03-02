@@ -19,6 +19,19 @@
 	{{/if}}
 {{/if}}
 
+{{if !$config.org_name || !$config.org_address}}
+	<p class="error block">
+		Le nom et l'adresse postale de l'association doivent être renseignés pour pouvoir utiliser le module de devis.
+		<br />
+	{{#restrict section="config" level="write"}}
+		Vous pouvez saisir ses informations sur {{:link href='!config/' label='la page de configuration'}}.
+	{{else}}
+		Veuillez contactez votre administrateur pour qu'il saisisse ses informations.
+	{{/restrict}}
+	</p>
+	{{:error}}
+{{/if}}
+
 {{* ==================== Listing ==================== *}}
 
 {{if $_GET.q}}
@@ -48,7 +61,6 @@
 {{if !$_GET.show}}{{:assign list_select='$$.type AS "Type"; '|cat:$list_select}}{{/if}}
 {{if $_GET.q}}{{:assign list_where=$list_where|cat:' AND ':$search_where}}{{/if}}
 {{#list
-	schema='./quotation.schema.json'
 	select=$list_select
 	where=$list_where
 	order='id'
@@ -70,6 +82,7 @@
 		<td>
 			{{:assign var="label" from="status_labels.%s"|args:$status}}
 			{{$label}}
+			{{if $status === 'validated'}}- {{$signing_date|date_short}}{{/if}}
 
 			{{if $archived}}
 				<span title="Archivé">🗃</span>
@@ -82,6 +95,11 @@
 		<td class="actions">
 			{{if !$archived && $status == 'draft'}}
 			{{:linkbutton shape="edit" label="Modifier" href="edit.html?id=%d"|args:$id}}
+			{{/if}}
+			{{if $status !== 'draft'}}
+				{{:linkbutton label="PDF" href="preview.html?id=%s"|args:$id shape="document"}}
+			{{else}}
+				{{:linkbutton label="Aperçu" href="preview.html?id=%s"|args:$id shape="document"}}
 			{{/if}}
 		</td>
 	</tr>

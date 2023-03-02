@@ -2,6 +2,26 @@
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"type": "object",
 	"properties": {
+		"vat_exemption": {
+			"Description": "Mode d'exonération de la TVA",
+			"type": "string",
+			"enum": ["nonprofit", "profit"]
+		},
+		"siret": {
+			"Description": "Numéro SIRET",
+			"type": ["string", "null"],
+			"maxLength": 14
+		},
+		"signing_place": {
+			"description": "Ville de signature des devis",
+			"type": ["string", "null"],
+			"maxLength": 128
+		},
+		"introduction_text" : {
+			"description": "Texte d'introduction",
+			"type": ["string", "null"],
+			"maxLength": 256
+		},
 		"payment_detail": {
 			"description": "Instructions de paiement",
 			"type": "string"
@@ -11,5 +31,5 @@
 			"type": "string"
 		}
 	},
-	"required": []
+	"required": ["vat_exemption"]
 }
