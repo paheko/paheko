@@ -363,11 +363,15 @@ class Sections
 
 				$select = self::_moduleReplaceJSONExtract($select);
 
-				$columns['col' . $i] = compact('label', 'select');
+				$columns['col' . ($i + 1)] = compact('label', 'select');
 			}
 
-			if (!empty($params['order'])) {
-				$params['order'] = self::_moduleReplaceJSONExtract($params['order']);
+			if (isset($params['order'])) {
+				if (!is_int($params['order']) && !ctype_digit($params['order'])) {
+					throw new Brindille_Exception(sprintf('Line %d: "order" parameter must be the number of the column (starting from zero)', $line));
+				}
+
+				$params['order'] = 'col' . (int)$params['order'];
 			}
 		}
 		else {

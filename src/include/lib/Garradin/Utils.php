@@ -1184,7 +1184,7 @@ class Utils
         $str = self::appendCookieToURLs($str);
 
         // 3 seconds is plenty enough to fetch resources, right?
-        $cmd = 'prince --http-timeout=3 -o - -';
+        $cmd = 'prince --http-timeout=3 --pdf-profile="PDF/A-3b" -o - -';
 
         // Prince is fast, right? Fingers crossed
         self::exec($cmd, 10, fn () => $str, fn ($data) => print($data));
@@ -1226,6 +1226,7 @@ class Utils
 
             // Try to find a local executable
             $list = ['prince', 'chromium', 'wkhtmltopdf', 'weasyprint'];
+            $cmd = null;
 
             foreach ($list as $program) {
                 if (shell_exec('which ' . $program)) {
@@ -1245,7 +1246,7 @@ class Utils
         switch ($cmd) {
             case 'prince':
                 $timeout = 10;
-                $cmd = 'prince --http-timeout=3 -o %2$s %1$s';
+                $cmd = 'prince --http-timeout=3 --pdf-profile="PDF/A-3b" -o %2$s %1$s';
                 break;
             case 'chromium':
                 $cmd = 'chromium --headless --timeout=5000 --disable-gpu --run-all-compositor-stages-before-draw --print-to-pdf-no-header --print-to-pdf=%2$s %1$s';

@@ -62,6 +62,11 @@ class Modules
 				continue;
 			}
 
+			// Ignore test modules
+			if (file_exists($file . '/ignore')) {
+				continue;
+			}
+
 			$name = Utils::basename($file);
 			$list[$name] = $name;
 		}

@@ -58,12 +58,13 @@
 
 {{:assign list_select="key; id AS 'Numéro'; datetime($$.date) AS 'Émission'; $$.deadline AS 'Échéance'; $$.recipient_business_name AS 'Tiers'; $$.subject AS 'Intitulé'; $$.total AS 'Montant'; $$.status AS 'Statut'"}}
 {{:assign list_where="$$.type IN ('quotation', 'invoice') AND %s"|args:$filter}}
-{{if !$_GET.show}}{{:assign list_select='$$.type AS "Type"; '|cat:$list_select}}{{/if}}
+{{:assign list_order=2}}
+{{if !$_GET.show}}{{:assign list_select='$$.type AS "Type"; '|cat:$list_select}}{{:assign list_order=3}}{{/if}}
 {{if $_GET.q}}{{:assign list_where=$list_where|cat:' AND ':$search_where}}{{/if}}
 {{#list
 	select=$list_select
 	where=$list_where
-	order='id'
+	order=$list_order
 	:searched_id=$searched_id
 	:searched_date=$searched_date
 	:searched_text=$searched_text

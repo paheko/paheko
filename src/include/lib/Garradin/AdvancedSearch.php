@@ -74,6 +74,8 @@ abstract class AdvancedSearch
 			$order = $default_order;
 		}
 
+		DB::getInstance()->toggleUnicodeLike(true);
+
 		$list = new DynamicList($select_columns, $tables, $conditions->where);
 
 		$list->orderBy($order, $query->desc ?? $default_desc);

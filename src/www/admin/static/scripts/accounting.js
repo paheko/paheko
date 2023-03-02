@@ -12,10 +12,13 @@ function initTransactionForm(is_new) {
 				continue;
 			}
 
-			if (accounts.includes(a.value)
-				&& !window.confirm(`Attention, cette écriture affecte deux fois le même compte (${a.value}). Confirmer ?`)) {
-				e.preventDefault();
-				return false;
+			if (accounts.includes(a.value)) {
+				if (!window.confirm(`Attention, cette écriture affecte deux fois le même compte (${a.value}). Confirmer ?`)) {
+					e.preventDefault();
+					return false;
+				}
+
+				break;
 			}
 
 			accounts.push(a.value);

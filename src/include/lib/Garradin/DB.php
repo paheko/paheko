@@ -241,6 +241,18 @@ class DB extends SQLite3
         $db->createCollation('U_NOCASE', [Utils::class, 'unicodeCaseComparison']);
     }
 
+    public function toggleUnicodeLike(bool $enable): void
+    {
+        if ($enable) {
+            $this->createFunction('like', [$this, 'unicodeLike']);
+        }
+        else {
+            // We should revert LIKE to the default, but we can't currently (FIXME?)
+            // see https://github.com/php/php-src/issues/10726
+            //$db->createFunction('like', null);
+        }
+    }
+
     public function version(): ?string
     {
         if (-1 === $this->_version) {
