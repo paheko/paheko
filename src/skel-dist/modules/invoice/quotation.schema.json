@@ -78,7 +78,7 @@
 			"type": ["string", "null"],
 			"maxLength": 14
 		},
-		"contact_info": {
+		"org_contact": {
 			"description": "Contact",
 			"type": "string",
 			"maxLength": 256
@@ -109,5 +109,5 @@
 			"maxLength": 12
 		}
 	},
-	"required": [ "recipient_business_name", "recipient_address", "subject", "date", "status", "vat_exemption", "contact_info", "module_version" ]
+	"required": [ "recipient_business_name", "recipient_address", "subject", "date", "status", "vat_exemption", "org_contact", "module_version" ]
 }

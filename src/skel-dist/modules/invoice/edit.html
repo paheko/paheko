@@ -91,10 +91,10 @@
 		{{:assign var='check_errors.' value='Si vous choisissez le statut "validé", vous devez indiquer le lieu et la date de signature du devis.'}}
 	{{/if}}
 
-	{{if !$_POST.contact_info}}
+	{{if !$_POST.org_contact}}
 		{{:assign var='check_errors.' value="Le contact est obligatoire."}}
 	{{/if}}
-	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Contact trop long" check_value=$_POST.contact_info check_max=256}}
+	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Contact trop long" check_value=$_POST.org_contact check_max=256}}
 	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Instructions de paiement trop longues" check_value=$_POST.payment_detail check_max=512}}
 	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Informations complémentaires trop longues" check_value=$_POST.extra_info check_max=1024}}
 
@@ -178,7 +178,7 @@
 			total=$computed_total
 			vat_exemption=$vat_exemption
 			siret=$module.config.siret
-			contact_info=$_POST.contact_info
+			org_contact=$_POST.org_contact
 			signing_place=$_POST.signing_place
 			signing_date=$signing_date
 			payment_detail=$_POST.payment_detail
@@ -226,13 +226,13 @@
 
 	{{* Default values (only) for new documents *}}
 	{{if !$document}}
-		{{:assign contact_info_default=$config.org_email}}
+		{{:assign org_contact_default=$config.org_email}}
 		{{:assign introduction_text_helper='La valeur pré-remplie de ce texte est modifiable dans la configuration du module.'}}
 		{{:assign introduction_text_default=$module.config.introduction_text}}
 		{{:assign payment_detail_default=$module.config.payment_detail}}
 		{{:assign extra_info_default=$module.config.quotation_extra_info}}
 	{{else}}
-		{{:assign contact_info_default=null}}
+		{{:assign org_contact_default=null}}
 		{{:assign introduction_text_helper=null}}
 		{{:assign introduction_text_default=null}}
 		{{:assign payment_detail_default=null}}
@@ -246,7 +246,7 @@
 			<li>{{:input type="text" name="subject" label="Intitulé" source=$document placeholder="ex : Devis pour une location de barnum" required=true}}</li>
 			<li>{{:input type="date" name="date" label="Date du devis" source=$document placeholder="" required=true}}</li>
 			<li>{{:input type="date" name="deadline" label="Échéance pour validation" source=$document placeholder="" required=false}}</li>
-			<li>{{:input type="text" name="contact_info" label="Contact" source=$document default=$contact_info_default required=true}}</li>
+			<li>{{:input type="text" name="org_contact" label="Contact" source=$document default=$org_contact_default required=true}}</li>
 			<li>
 				<dt><label for="status">Statut</label></dt>
 				<dd>

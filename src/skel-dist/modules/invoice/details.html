@@ -29,7 +29,7 @@
 						status=$_POST.status
 						items=$items
 						total=$total
-						contact_info=$contact_info
+						org_contact=$org_contact
 						payment_detail=$payment_detail
 						extra_info=$extra_info
 					}}
@@ -149,7 +149,7 @@
 		<fieldset>
 			<legend><h2>Infos</h2></legend>
 			<ul>
-				<li class="infos">Contact : {{$contact_info}}</li>
+				<li class="infos">Contact : {{$org_contact}}</li>
 				{{if $introduction_text}}
 					<li>
 						Texte d'introduction :
