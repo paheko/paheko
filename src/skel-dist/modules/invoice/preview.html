@@ -6,6 +6,7 @@
 
 {{#load id=$_GET.id}}
 
+{{:include file='./include/preview_style.tpl'}}
 {{:include file='./include/constants.tpl' keep='DRAFT_STATUS, TYPE_LABELS, NONPROFIT_VAT_EXEMPTION_TYPE'}}
 {{:assign var="document_type_label" from="TYPE_LABELS.%s"|args:$type}}
 
@@ -23,9 +24,9 @@
 	<img src="{{$config.files.logo}}&150px" alt="Logo" style="float: left; min-width: 64px; min-height: 64px; margin: 0em 1em 1em 0em;" />
 {{/if}}
 
-<h2 style="margin-bottom: 0;">{{$config.org_name}}</h2>
-<ul style="list-style-type: none;">
-	{{if $vat_exemption === 'nonprofit'}}
+<h2 class="organization_name">{{$config.org_name}}</h2>
+<ul class="organization_details">
+	{{if $vat_exemption === $NONPROFIT_VAT_EXEMPTION_TYPE}}
 		<li>Association « loi 1901 » à but non lucratif{{if $siret}} — SIRET {{$siret}}{{/if}}</li>
 	{{/if}}
 	<li>{{$config.org_address|escape|nl2br}}</li>
@@ -35,7 +36,7 @@
 	<li>Contact : {{$org_contact}}</li>
 </ul>
 
-<ul style="text-align: right; list-style-type: none;">
+<ul class="customer_details">
 	<li>
 		<strong>{{$recipient_business_name|strtoupper}}</strong><br />
 		{{$recipient_address|escape|nl2br}}
@@ -46,7 +47,7 @@
 </ul>
 
 <h1>Objet : {{$title}}{{if $status === $DRAFT_STATUS}} - BROUILLON{{/if}}</h1>
-<ul style="list-style-type: none;">
+<ul class="document_details">
 	<li>Date : {{$date|date_short}}</li>
 	<li>Référence : {{$key}}</li>
 	<li>Intitulé : {{$subject}}</li>
@@ -79,15 +80,15 @@
 				<td>{{$item.reference}}</td>
 				<td>{{$item.name}}</td>
 				<td>{{$item.description|escape|nl2br}}</td>
-				<td style="text-align: right;">{{$item.unit_price|intval|money_currency:false}}</td>
-				<td style="text-align: right;">{{$item.quantity}}</td>
+				<td class="number">{{$item.unit_price|intval|money_currency:false}}</td>
+				<td class="number">{{$item.quantity}}</td>
 			</tr>
 		{{/foreach}}
 		</tbody>
 		<tfooter>
 			<tr>
-				<td colspan="4" style="font-weight: bold; text-align: right;">TOTAL</td>
-				<td style="font-weight: bold; text-align: right;">{{$total|intval|money_currency:false}}</td>
+				<td colspan="4" class="total">TOTAL</td>
+				<td class="total">{{$total|intval|money_currency:false}}</td>
 			</tr>
 		</tfooter>
 	</table>

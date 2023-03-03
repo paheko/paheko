@@ -284,7 +284,7 @@
 		{{else}}
 			{{:assign signed=false}}
 		{{/if}}
-		<p id="signing_confirmation_p" style="display: block;">
+		<p id="signing_confirmation_p">
 			{{* Duplicate {{:input}} awaiting #51c881285662a356968ba943b7ce7956adc3b865 resolution *}}
 			{{if $signed}}
 				{{:input type="checkbox" name="signing" id="debug" label="Signer le devis" value="" checked=true}}
