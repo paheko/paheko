@@ -8,7 +8,6 @@
 
 {{:include file='./include/constants.tpl' keep='type_labels, status_labels, status_options, VERSION'}}
 
-
 {{if $_GET.id}}
 	{{#load id=$_GET.id}}
 		{{:assign .="document"}}
@@ -24,13 +23,13 @@
 
 {{if $_POST.quotation_submit}}
 	{{:assign computed_total=0}}
-	{{:assign errors=null}}
+	{{:assign check_errors=null}}
 	{{:assign items=null}}
 
 	{{* Hack to get the unique element sine "$my_array|keys" and "$my_array|first" do not exist *}}
 	{{#foreach from=$_POST.customer key='id' item='name'}}
 		{{if $id != $id|intval|strtolower}} {{* Hack to check the data is a number *}}
-			{{:assign var='errors.' value='Membre séléctionné invalide.'}}
+			{{:assign var='check_errors.' value='Membre séléctionné invalide.'}}
 		{{/if}}
 		{{:assign customer_id=$id|intval}}
 	{{/foreach}}
@@ -47,101 +46,84 @@
 		{{:assign recipient_business_name=$_POST.recipient_business_name}}
 	{{/if}}
 	{{if !$recipient_business_name}}
-		{{:assign var='errors.' value='La raison sociale est obligatoire si vous ne sélectionnez pas de membre.'}}
+		{{:assign var='check_errors.' value='La raison sociale est obligatoire si vous ne sélectionnez pas de membre.'}}
 	{{/if}}
-	{{if $recipient_business_name|strlen > 128}}
-		{{:assign length=$_POST.recipient_business_name|strlen}}
-		{{:assign var='errors.' value="Raison sociale trop longue. %d caractères sur les 128 autorisés."|args:$length}}
-	{{/if}}
+	{{:assign check_label='Raison sociale trop longue' check_value=$recipient_business_name check_max=128}}
+	{{:include file='./include/check_max_length.tpl' keep='check_errors'}}
+
 	{{if $_POST.recipient_address}} {{* Manual input overrides member address *}}
 		{{:assign recipient_address=$_POST.recipient_address}}
 	{{/if}}
 	{{if !$recipient_address}}
-		{{:assign var='errors.' value="L'adresse est obligatoire si vous ne sélectionnez pas de membre ou si celui/celle-ci n'a pas d'adresse."}}
+		{{:assign var='check_errors.' value="L'adresse est obligatoire si vous ne sélectionnez pas de membre ou si celui/celle-ci n'a pas d'adresse."}}
 	{{/if}}
-	{{if $recipient_address|strlen > 512}}
-		{{:assign length=$recipient_address|strlen}}
-		{{:assign var='errors.' value="Adresse trop longue. %d caractères sur les 512 autorisés."|args:$length}}
-	{{/if}}
+	{{:assign check_label='Adresse trop longue' check_value=$recipient_address check_max=512}}
+	{{:include file='./include/check_max_length.tpl' keep='check_errors'}}
 
 	{{if !$_POST.subject}}
-		{{:assign var='errors.' value="L'objet est obligatoire."}}
+		{{:assign var='check_errors.' value="L'objet est obligatoire."}}
 	{{/if}}
-	{{if $_POST.subject|strlen > 256}}
-		{{:assign length=$_POST.subject|strlen}}
-		{{:assign var='errors.' value="Objet trop long. %d caractères sur les 256 autorisés."|args:$length}}
-	{{/if}}
-	{{if $_POST.introduction_text|strlen > 256}}
-		{{:assign length=$_POST.introduction_text|strlen}}
-		{{:assign var='errors.' value="Texte d'introduction trop long. %d caractères sur les 256 autorisés."|args:$length}}
-	{{/if}}
+	{{:assign check_label='Objet trop long' check_value=$_POST.subject check_max=256}}
+	{{:include file='./include/check_max_length.tpl' keep='check_errors'}}
+	{{:assign check_label="Texte d'introduction trop long" check_value=$_POST.introduction_text check_max=256}}
+	{{:include file='./include/check_max_length.tpl' keep='check_errors'}}
 
 	{{:assign date=$_POST.date|date:'Y-m-d'}}
 	{{:assign deadline=$_POST.deadline|date:'Y-m-d'}}
 
 	{{if !$_POST.date}}
-		{{:assign var='errors.' value="La date est obligatoire."}}
+		{{:assign var='check_errors.' value="La date est obligatoire."}}
 	{{/if}}
 	{{if $_POST.date|date_short === null}} {{* Means data is not a date *}}
-		{{:assign var='errors.' value="La date du devis doit être une date."}}
+		{{:assign var='check_errors.' value="La date du devis doit être une date."}}
 	{{/if}}
 	{{if $_POST.deadline && ($_POST.deadline|date_short === null)}}
-		{{:assign var='errors.' value="L'échéance doit être une date."}}
+		{{:assign var='check_errors.' value="L'échéance doit être une date."}}
 	{{/if}}
 	{{if $deadline && $deadline < $date}}
-		{{:assign var='errors.' value="L'échéance doit se situer après la date du devis (%s)."|args:$_POST.date}}
+		{{:assign var='check_errors.' value="L'échéance doit se situer après la date du devis (%s)."|args:$_POST.date}}
 	{{/if}}
 
 	{{if !$_POST.status}}
-		{{:assign var='errors.' value="Le statut est obligatoire."}}
+		{{:assign var='check_errors.' value="Le statut est obligatoire."}}
 	{{/if}}
 	{{:assign var='allowed_status' from='status_options.%s'|args:$_POST.status}}
 	{{if !$allowed_status}}
-		{{:assign var='errors.' value='Statut invalide.'}}
+		{{:assign var='check_errors.' value='Statut invalide.'}}
 	{{/if}}
 	{{if $_POST.status === 'validated' && (!$_POST.signing_place || !$_POST.signing_date)}}
-		{{:assign var='errors.' value='Si vous choisissez le statut "validé", vous devez indiquer le lieu et la date de signature du devis.'}}
+		{{:assign var='check_errors.' value='Si vous choisissez le statut "validé", vous devez indiquer le lieu et la date de signature du devis.'}}
 	{{/if}}
 
 	{{if !$_POST.contact_info}}
-		{{:assign var='errors.' value="Le contact est obligatoire."}}
+		{{:assign var='check_errors.' value="Le contact est obligatoire."}}
 	{{/if}}
-	{{if $_POST.contact_info|strlen > 256}}
-		{{:assign length=$_POST.contact_info|strlen}}
-		{{:assign var='errors.' value="Contact trop long. %d caractères sur les 256 autorisés."|args:$length}}
-	{{/if}}
-	{{if $_POST.payment_detail|strlen > 512}}
-		{{:assign length=$_POST.payment_detail|strlen}}
-		{{:assign var='errors.' value="Instructions de paiement trop longues. %d caractères sur les 512 autorisés."|args:$length}}
-	{{/if}}
-	{{if $_POST.extra_info|strlen > 1024}}
-		{{:assign length=$_POST.extra_info|strlen}}
-		{{:assign var='errors.' value="Informations complémentaires trop longues. %d caractères sur les 1024 autorisés."|args:$length}}
-	{{/if}}
+	{{:assign check_label="Contact trop long" check_value=$_POST.contact_info check_max=256}}
+	{{:include file='./include/check_max_length.tpl' keep='check_errors'}}
+	{{:assign check_label="Instructions de paiement trop longues" check_value=$_POST.payment_detail check_max=512}}
+	{{:include file='./include/check_max_length.tpl' keep='check_errors'}}
+	{{:assign check_label="Informations complémentaires trop longues" check_value=$_POST.extra_info check_max=1024}}
+	{{:include file='./include/check_max_length.tpl' keep='check_errors'}}
 
 	{{#foreach from=$_POST.items key='index' item='item'}}
-		{{if $item.name === ''}}{{:assign var='errors.' value="Le nom de l'article est requis."}}{{/if}}
+		{{if $item.name === ''}}{{:assign var='check_errors.' value="Le nom de l'article est requis."}}{{/if}}
 		{{:assign var='unit_price' value=$item.unit_price|replace:',':'.'}}
 		{{:assign var='quantity' value=$item.quantity|replace:',':'.'}}
 		{{if $unit_price < 0 || $unit_price != $unit_price|floatval|strtolower}} {{* Hack to check the data is a number *}}
-			{{:assign var='errors.' value='Le prix saisi pour "%s" est invalide.'|args:$item.name}}
+			{{:assign var='check_errors.' value='Le prix saisi pour "%s" est invalide.'|args:$item.name}}
 		{{/if}}
-		{{if $quantity < 0 || $quantity != $quantity|floatval|strtolower}}{{:assign var='errors.' value='La quantité saisie pour "%s" est invalide.'|args:$item.name}}{{/if}}
+		{{if $quantity < 0 || $quantity != $quantity|floatval|strtolower}}{{:assign var='check_errors.' value='La quantité saisie pour "%s" est invalide.'|args:$item.name}}{{/if}}
 
-		{{if $item.reference|strlen > 128}}
-			{{:assign length=$item.reference|strlen}}
-			{{:assign shorted=$item.reference|substr:0:16|cat:'...'}}
-			{{:assign var='errors.' value="Référence d'article '%s' trop longue. %d caractères sur les 128 autorisés."|args:$shorted:$length}}
-		{{/if}}
-		{{if $item.name|strlen > 128}}
-			{{:assign length=$item.name|strlen}}
-			{{:assign shorted=$item.name|substr:0:16|cat:'...'}}
-			{{:assign var='errors.' value="Nom d'article '%s' trop long. %d caractères sur les 128 autorisés."|args:$shorted:$length}}
-		{{/if}}
-		{{if $item.description|strlen > 512}}
-			{{:assign length=$item.description|strlen}}
-			{{:assign var='errors.' value="Description de l'article '%s' trop longue. %d caractères sur les 512 autorisés."|args:$item.name:$length}}
-		{{/if}}
+		{{:assign shorted=$item.reference|substr:0:16|cat:'...'}}
+		{{:assign check_label="Référence d'article '%s' trop longue"|args:$shorted check_value=$item.reference check_max=128}}
+		{{:include file='./include/check_max_length.tpl' keep='check_errors'}}
+
+		{{:assign shorted=$item.name|substr:0:16|cat:'...'}}
+		{{:assign check_label="Nom d'article '%s' trop long"|args:$shorted check_value=$item.name check_max=128}}
+		{{:include file='./include/check_max_length.tpl' keep='check_errors'}}
+
+		{{:assign check_label="Description de l'article '%s' trop longue"|args:$item.name check_value=$item.description check_max=512}}
+		{{:include file='./include/check_max_length.tpl' keep='check_errors'}}
 
 		{{:assign var='computed_item' value=$item}}
 		{{:assign var='computed_item.id' value=$index|intval}}
@@ -152,7 +134,7 @@
 	{{/foreach}}
 
 	{{if ($computed_total != $_POST.quotation_total|money_int) || ($computed_total < 0)}}
-		{{:assign var='errors.' value='Erreur de calcul du total. Enregistrement du devis refusé.'}}
+		{{:assign var='check_errors.' value='Erreur de calcul du total. Enregistrement du devis refusé.'}}
 	{{/if}}
 	{{if $module.config.vat_exemption}}
 		{{:assign vat_exemption=$module.config.vat_exemption}}
@@ -161,20 +143,18 @@
 	{{/if}}
 
 	{{if ($_POST.signing_place || $_POST.signing_date) && $_POST.status !== 'validated'}}
-		{{:assign var='errors.' value='Vous ne pouvez saisir le lieu et la date de signature du devis que si le statut est définit à "validé".'|cat:"\n":'Si vous ne souhaitez pas valider le devis maintenant, laissez vide le lieu et la date de signature.'}}
+		{{:assign var='check_errors.' value='Vous ne pouvez saisir le lieu et la date de signature du devis que si le statut est définit à "validé".'|cat:"\n":'Si vous ne souhaitez pas valider le devis maintenant, laissez vide le lieu et la date de signature.'}}
 	{{/if}}
 
-	{{if $_POST.signing_place|strlen > 128}}
-		{{:assign length=$_POST.signing_place|strlen}}
-		{{:assign var='errors.' value="Lieu de da signature trop long. %d caractères sur les 128 autorisés."|args:$length}}
-	{{/if}}
+	{{:assign check_label='Lieu de da signature trop long' check_value=$_POST.signing_place check_max=128}}
+	{{:include file='./include/check_max_length.tpl' keep='check_errors'}}
 	{{:assign signing_date=$_POST.signing_date|date:'Y-m-d'}}
 	{{if $signing_date && $signing_date < $date}}
-		{{:assign var='errors.' value="La date de signature doit se situer après la date du devis (%s)."|args:$_POST.date}}
+		{{:assign var='check_errors.' value="La date de signature doit se situer après la date du devis (%s)."|args:$_POST.date}}
 	{{/if}}
 
-	{{if $errors|count}}
-		{{#foreach from=$errors item='error'}}
+	{{if $check_errors|count}}
+		{{#foreach from=$check_errors item='error'}}
 			<p class="error block">{{$error}}</p>
 		{{/foreach}}
 	{{else}}
