@@ -17,23 +17,31 @@
 				{{:assign var='errors[]' value='Nouveau statut invalide : %s.'|args:$_POST.status}}
 			{{else}}
 				{{#load id=$_POST.id|intval}}
-					
 					{{:save id=$id
 						validate_schema="./quotation.schema.json"
+						key=$key
 						type=$type
 						recipient_business_name=$recipient_business_name
 						recipient_address=$recipient_address
+						recipient_member_id=$recipient_member_id
+						recipient_member_numero=$recipient_member_numero
+						introduction_text=$introduction_text
 						subject=$subject
 						date=$date
 						deadline=$deadline
 						status=$_POST.status
 						items=$items
 						total=$total
+						vat_exemption=$vat_exemption
+						siret=$siret
 						org_contact=$org_contact
+						signing_place=$signing_place
+						signing_date=$signing_date
 						payment_detail=$payment_detail
 						extra_info=$extra_info
+						module_version=$module_version
 					}}
-					
+
 					{{:http redirect="?id=%d&ok=1"|args:$id}}
 				{{/load}}
 			{{/if}}
