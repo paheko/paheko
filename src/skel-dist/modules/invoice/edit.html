@@ -26,7 +26,7 @@
 	{{:assign check_errors=null}}
 	{{:assign items=null}}
 
-	{{* Hack to get the unique element sine "$my_array|keys" and "$my_array|first" do not exist *}}
+	{{* Hack to get the unique element since "$my_array|keys" and "$my_array|first" do not exist *}}
 	{{#foreach from=$_POST.customer key='id' item='name'}}
 		{{if $id != $id|intval|strval}} {{* Hack to check the data is a number *}}
 			{{:assign var='check_errors.' value='Membre séléctionné invalide.'}}
@@ -161,7 +161,7 @@
 		{{/if}}
 
 		{{:save 
-			validate_schema="./quotation.schema.json"
+			validate_schema="./schema/quotation.json"
 			id=$id
 			key=$key
 			type='quotation'

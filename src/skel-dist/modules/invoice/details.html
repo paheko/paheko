@@ -18,7 +18,7 @@
 			{{else}}
 				{{#load id=$_POST.id|intval}}
 					{{:save id=$id
-						validate_schema="./quotation.schema.json"
+						validate_schema="./schema/quotation.json"
 						key=$key
 						type=$type
 						recipient_business_name=$recipient_business_name
