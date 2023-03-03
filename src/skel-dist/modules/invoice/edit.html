@@ -28,7 +28,7 @@
 
 	{{* Hack to get the unique element sine "$my_array|keys" and "$my_array|first" do not exist *}}
 	{{#foreach from=$_POST.customer key='id' item='name'}}
-		{{if $id != $id|intval|strtolower}} {{* Hack to check the data is a number *}}
+		{{if $id != $id|intval|strval}} {{* Hack to check the data is a number *}}
 			{{:assign var='check_errors.' value='Membre séléctionné invalide.'}}
 		{{/if}}
 		{{:assign customer_id=$id|intval}}
@@ -36,7 +36,7 @@
 	{{if $customer_id !== null}}
 		{{#users id=$customer_id}}
 			{{:assign recipient_member_id=$id}}
-			{{:assign recipient_member_numero=$numero|strtolower}} {{* Hack awaiting implementation of "|strval" *}}
+			{{:assign recipient_member_numero=$numero|strval}}
 			{{:assign recipient_business_name=$nom}}
 			{{if $adresse}}{{:assign recipient_address=$adresse|cat:"\n":$code_postal:' ':$ville}}{{/if}}
 		{{/users}}
@@ -102,10 +102,10 @@
 		{{if $item.name === ''}}{{:assign var='check_errors.' value="Le nom de l'article est requis."}}{{/if}}
 		{{:assign var='unit_price' value=$item.unit_price|replace:',':'.'}}
 		{{:assign var='quantity' value=$item.quantity|replace:',':'.'}}
-		{{if $unit_price < 0 || $unit_price != $unit_price|floatval|strtolower}} {{* Hack to check the data is a number *}}
+		{{if $unit_price < 0 || $unit_price != $unit_price|floatval|strval}} {{* Hack to check the data is a number *}}
 			{{:assign var='check_errors.' value='Le prix saisi pour "%s" est invalide.'|args:$item.name}}
 		{{/if}}
-		{{if $quantity < 0 || $quantity != $quantity|floatval|strtolower}}{{:assign var='check_errors.' value='La quantité saisie pour "%s" est invalide.'|args:$item.name}}{{/if}}
+		{{if $quantity < 0 || $quantity != $quantity|floatval|strval}}{{:assign var='check_errors.' value='La quantité saisie pour "%s" est invalide.'|args:$item.name}}{{/if}}
 
 		{{:assign shorted=$item.reference|substr:0:16|cat:'...'}}
 		{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Référence d'article '%s' trop longue"|args:$shorted check_value=$item.reference check_max=128}}
@@ -115,7 +115,7 @@
 
 		{{:assign var='computed_item' value=$item}}
 		{{:assign var='computed_item.id' value=$index|intval}}
-		{{:assign var='computed_item.unit_price' value=$unit_price|money_int}}
+		{{:assign var='computed_item.unit_price' value=$unit_price|floatval|money_int}}
 		{{:assign var='computed_item.quantity' value=$quantity|floatval}}
 		{{:assign var='items.' value=$computed_item}}
 		{{:assign var='computed_total' value="%d + %d * %F"|args:$computed_total:$computed_item.unit_price:$computed_item.quantity|math}}
