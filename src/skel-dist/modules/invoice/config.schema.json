@@ -24,11 +24,13 @@
 		},
 		"payment_detail": {
 			"description": "Instructions de paiement",
-			"type": "string"
+			"type": "string",
+			"maxLength": 512
 		},
 		"quotation_extra_info": {
 			"description": "Informations complémentaires affichées en bas des devis",
-			"type": "string"
+			"type": "string",
+			"maxLength": 512
 		}
 	},
 	"required": ["vat_exemption"]

@@ -4,14 +4,31 @@
 {{:include file='./include/constants.tpl' keep='vat_exemption_type'}}
 
 {{if $_POST.save}}
-	<!-- Todo: add a nice error check here -->
 	{{:assign var='allowed_type' from='vat_exemption_type.%s'|args:$_POST.vat_exemption}}
 	{{if !$allowed_type}}
 		{{:assign var='errors.' value="Type d'association invalide."}}
 	{{/if}}
-	{{if $error}}
-		<p class="error block">{{$error}}</p>
-	{{else}}
+	{{if $_POST.siret|strlen > 14}}
+		{{:assign length=$_POST.siret|strlen}}
+		{{:assign var='errors.' value="Numéro SIRET trop long. %d caractères sur les 14 autorisés."|args:$length}}
+	{{/if}}
+	{{if $_POST.signing_place|strlen > 128}}
+		{{:assign length=$_POST.signing_place|strlen}}
+		{{:assign var='errors.' value="Ville de signature des devis trop longue. %d caractères sur les 128 autorisés."|args:$length}}
+	{{/if}}
+	{{if $_POST.introduction_text|strlen > 256}}
+		{{:assign length=$_POST.introduction_text|strlen}}
+		{{:assign var='errors.' value="Texte d'introduction devis trop long. %d caractères sur les 256 autorisés."|args:$length}}
+	{{/if}}
+	{{if $_POST.payment_detail|strlen > 512}}
+		{{:assign length=$_POST.payment_detail|strlen}}
+		{{:assign var='errors.' value="Instructions de paiement devis trop longues. %d caractères sur les 512 autorisés."|args:$length}}
+	{{/if}}
+	{{if $_POST.quotation_extra_info|strlen > 512}}
+		{{:assign length=$_POST.quotation_extra_info|strlen}}
+		{{:assign var='errors.' value="Informations complémentaires trop longues. %d caractères sur les 512 autorisés."|args:$length}}
+	{{/if}}
+	{{if !$errors}}
 		{{:save key="config"
 			validate_schema="./config.schema.json"
 			vat_exemption=$_POST.vat_exemption
@@ -23,8 +40,6 @@
 		}}
 		{{:http redirect="?ok=1"}}
 	{{/if}}
-{{elseif $_GET.ok}}
-	<p class="block confirm">Configuration enregistrée.</p>
 {{/if}}
 
 <h1 class="ruler">{{$page_title}}</h1>
@@ -32,6 +47,15 @@
 	<p class="infos">
 		Conformement à la législation, le changement de ces informations n'impactera que les futurs devis/factures. Les devis et factures déjà rédigés ne tiennent pas compte de ces modifications.
 	</p>
+	{{if $errors}}
+		{{#foreach from=$errors item='error'}}
+			<p class="error block">{{$error}}</p>
+		{{/foreach}}
+	{{elseif $_GET.ok}}
+		<p class="block confirm">Configuration enregistrée. <br />
+		{{:link href="#" label="Retour à la page des extensions" onclick="window.parent.g.closeDialog()"}}<br />
+		</p>
+	{{/if}}
 	<fieldset>
 		<legend>Caractéristiques de l'association</legend>
 		{{:input type="radio" name="vat_exemption" label="Association non-lucrative" value="nonprofit" help="art. 261-7-1 du CGI" required=true default=$module.config.vat_exemption}}

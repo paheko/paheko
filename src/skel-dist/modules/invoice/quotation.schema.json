@@ -109,5 +109,5 @@
 			"maxLength": 12
 		}
 	},
-	"required": [ "recipient_business_name", "recipient_address", "subject", "date", "status", "contact_info", "module_version" ]
+	"required": [ "recipient_business_name", "recipient_address", "subject", "date", "status", "vat_exemption", "contact_info", "module_version" ]
 }
