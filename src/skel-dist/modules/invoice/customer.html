@@ -70,6 +70,11 @@
 							{{:linkbutton shape="edit" label="Modifier" href="edit.html?id=%d"|args:$id}}
 							{{/if}}
 						{{/restrict}}
+						{{if $status !== $DRAFT_STATUS}}
+							{{:linkbutton label="PDF" href="preview.html?id=%s"|args:$id shape="document"}}
+						{{else}}
+							{{:linkbutton label="Aperçu" href="preview.html?id=%s"|args:$id shape="document"}}
+						{{/if}}
 					</td>
 				</tr>
 
