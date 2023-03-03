@@ -47,7 +47,7 @@
 {{else}}
 	{{:assign filter="1"}}
 {{/if}}
-{{:include file='./include/constants.tpl' keep='type_labels,status_labels,status_options'}}
+{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, VALIDATED_STATUS, TYPE_LABELS, STATUS_LABELS'}}
 
 {{if $_GET.ok === '1'}}
 	<p class="block confirm">Devis enregistré.</p>
@@ -71,7 +71,7 @@
 }}
 	<tr>
 		{{if !$_GET.show}}
-			{{:assign var="label" from="type_labels.%s"|args:$type}}
+			{{:assign var="label" from="TYPE_LABELS.%s"|args:$type}}
 			<td>{{$label}}</td>
 		{{/if}}
 		<td><a href="details.html?id={{$id|intval}}">{{$key}}</a></td>
@@ -81,9 +81,9 @@
 		<td><a href="details.html?id={{$id|intval}}">{{$subject}}</a></td>
 		<td class="money">{{$total|money_currency}}</td>
 		<td>
-			{{:assign var="label" from="status_labels.%s"|args:$status}}
+			{{:assign var="label" from="STATUS_LABELS.%s"|args:$status}}
 			{{$label}}
-			{{if $status === 'validated'}}- {{$signing_date|date_short}}{{/if}}
+			{{if $status === $VALIDATED_STATUS}}- {{$signing_date|date_short}}{{/if}}
 
 			{{if $archived}}
 				<span title="Archivé">🗃</span>
@@ -94,10 +94,10 @@
 			{{/if}}
 		</td>
 		<td class="actions">
-			{{if !$archived && $status == 'draft'}}
+			{{if !$archived && $status == $DRAFT_STATUS}}
 			{{:linkbutton shape="edit" label="Modifier" href="edit.html?id=%d"|args:$id}}
 			{{/if}}
-			{{if $status !== 'draft'}}
+			{{if $status !== $DRAFT_STATUS}}
 				{{:linkbutton label="PDF" href="preview.html?id=%s"|args:$id shape="document"}}
 			{{else}}
 				{{:linkbutton label="Aperçu" href="preview.html?id=%s"|args:$id shape="document"}}

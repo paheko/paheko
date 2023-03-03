@@ -6,8 +6,8 @@
 
 {{#load id=$_GET.id}}
 
-{{:include file='./include/constants.tpl' keep='type_labels'}}
-{{:assign var="document_type_label" from="type_labels.%s"|args:$type}}
+{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, TYPE_LABELS, NONPROFIT_VAT_EXEMPTION_TYPE'}}
+{{:assign var="document_type_label" from="TYPE_LABELS.%s"|args:$type}}
 
 {{:assign title='%s n°%s'|args:$document_type_label:$key}}
 
@@ -45,7 +45,7 @@
 	{{/if}}
 </ul>
 
-<h1>Objet : {{$title}}{{if $status === 'draft'}} - BROUILLON{{/if}}</h1>
+<h1>Objet : {{$title}}{{if $status === $DRAFT_STATUS}} - BROUILLON{{/if}}</h1>
 <ul style="list-style-type: none;">
 	<li>Date : {{$date|date_short}}</li>
 	<li>Référence : {{$key}}</li>
@@ -93,7 +93,7 @@
 	</table>
 	
 	<p>
-		{{if $vat_exemption === 'nonprofit'}}
+		{{if $vat_exemption === $NONPROFIT_VAT_EXEMPTION_TYPE}}
 			Association exonérée des impôts commerciaux (art. 261-7-1 du CGI).
 		{{else}}
 			TVA non-applicable, article 293 B du CGI.
@@ -120,7 +120,7 @@
 	à {{$signing_place|strtoupper}}.
 </p>
 
-{{if $status !== 'draft' && $config.files.signature}}
+{{if $status !== $DRAFT_STATUS && $config.files.signature}}
 <figure>
 	<img src="{{$config.files.signature}}" alt="Signature association" />
 </figure>

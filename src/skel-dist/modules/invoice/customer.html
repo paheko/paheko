@@ -6,7 +6,7 @@
 {{:include file='./include/style.tpl'}}
 {{:include file='./include/navigation.html'}}
 
-{{:include file='./include/constants.tpl' keep='status_labels'}}
+{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, STATUS_LABELS'}}
 
 {{* ==================== Listing ==================== *}}
 
@@ -30,7 +30,7 @@
 	order='$$.status, date DESC'
 	:business_name=$_GET.id
 }}
-	{{:assign var="label" from="status_labels.%s"|args:$status}}
+	{{:assign var="label" from="STATUS_LABELS.%s"|args:$status}}
 	{{if $status !== $previous_status && $previous_status !== '-1'}}
 			</tbody>
 		</table>
@@ -66,7 +66,7 @@
 					</td>
 					<td class="actions">
 						{{#restrict section="accounting" level="write"}}
-							{{if !$archived && $status == 'draft'}}
+							{{if !$archived && $status == $DRAFT_STATUS}}
 							{{:linkbutton shape="edit" label="Modifier" href="edit.html?id=%d"|args:$id}}
 							{{/if}}
 						{{/restrict}}
