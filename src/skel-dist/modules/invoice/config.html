@@ -9,16 +9,11 @@
 		{{:assign var='check_errors.' value="Type d'association invalide."}}
 	{{/if}}
 
-	{{:assign check_label='Numéro SIRET trop long' check_value=$_POST.siret check_max=14}}
-	{{:include file='./include/check_max_length.tpl' keep='check_errors'}}
-	{{:assign check_label='Ville de signature des devis trop longue' check_value=$_POST.signing_place check_max=128}}
-	{{:include file='./include/check_max_length.tpl' keep='check_errors'}}
-	{{:assign check_label="Texte d'introduction devis trop long" check_value=$_POST.introduction_text check_max=256}}
-	{{:include file='./include/check_max_length.tpl' keep='check_errors'}}
-	{{:assign check_label='Instructions de paiement devis trop longues' check_value=$_POST.payment_detail check_max=512}}
-	{{:include file='./include/check_max_length.tpl' keep='check_errors'}}
-	{{:assign check_label='Informations complémentaires trop longues' check_value=$_POST.quotation_extra_info check_max=512}}
-	{{:include file='./include/check_max_length.tpl' keep='check_errors'}}
+	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Numéro SIRET trop long' check_value=$_POST.siret check_max=14}}
+	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Ville de signature des devis trop longue' check_value=$_POST.signing_place check_max=128}}
+	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Texte d'introduction trop long" check_value=$_POST.introduction_text check_max=256}}
+	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Instructions de paiement trop longues' check_value=$_POST.payment_detail check_max=512}}
+	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Informations complémentaires trop longues' check_value=$_POST.quotation_extra_info check_max=512}}
 
 	{{if !$check_errors}}
 		{{:save key="config"
