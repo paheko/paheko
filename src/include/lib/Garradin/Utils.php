@@ -256,13 +256,18 @@ class Utils
 
     static public function getLocalURL(string $url = '', ?string $default_prefix = null): string
     {
-        if ($url[0] == '!') {
+        if (substr($url, 0, 1) == '!') {
             return ADMIN_URL . substr($url, 1);
         }
         elseif (substr($url, 0, 7) == '/admin/') {
             return ADMIN_URL . substr($url, 7);
         }
-        elseif ($url[0] == '/' && ($pos = strpos($url, WWW_URI)) === 0) {
+        elseif (substr($url, 0, 2) == './') {
+        	$base = self::getSelfURL();
+        	$base = preg_replace('!/.*$!', '/', $base);
+        	return $base . substr($url, 2);
+        }
+        elseif (substr($url, 0, 1) == '/' && ($pos = strpos($url, WWW_URI)) === 0) {
             return WWW_URL . substr($url, strlen(WWW_URI));
         }
         elseif (substr($url, 0, 5) == 'http:' || substr($url, 0, 6) == 'https:') {
