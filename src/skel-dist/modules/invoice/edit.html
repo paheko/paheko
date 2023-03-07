@@ -6,7 +6,7 @@
 {{:include file='./include/style.tpl'}}
 {{:include file='./include/navigation.html'}}
 
-{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, VALIDATED_STATUS, STATUS_LABELS, VERSION'}}
+{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, VALIDATED_STATUS, STATUS_LABELS, VERSION, NONPROFIT_VAT_EXEMPTION_TYPE'}}
 
 {{if $_GET.id}}
 	{{#load id=$_GET.id}}
@@ -127,7 +127,7 @@
 	{{if $module.config.vat_exemption}}
 		{{:assign vat_exemption=$module.config.vat_exemption}}
 	{{else}}
-		{{:assign vat_exemption='nonprofit'}}
+		{{:assign vat_exemption=$NONPROFIT_VAT_EXEMPTION_TYPE}}
 	{{/if}}
 
 	{{if ($_POST.signing_place || $_POST.signing_date) && $_POST.status !== $VALIDATED_STATUS}}

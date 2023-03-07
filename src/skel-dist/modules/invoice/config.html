@@ -1,4 +1,8 @@
-{{:assign page_title="Configuration du module “Devis et factures”"}}
+{{if $dialog}}
+	{{:assign page_title="Configuration du module “Devis et factures”"}}
+{{else}}
+	{{:assign page_title="Devis et factures"}}
+{{/if}}
 {{:admin_header title=$page_title}}
 
 {{:include file='./include/constants.tpl' keep='NONPROFIT_VAT_EXEMPTION_TYPE, PROFIT_VAT_EXEMPTION_TYPE, VAT_EXEMPTION_TYPE_LABELS'}}
@@ -25,11 +29,19 @@
 			payment_detail=$_POST.payment_detail
 			quotation_extra_info=$_POST.quotation_extra_info
 		}}
-		{{:http redirect="?ok=1"}}
+		{{if $dialog}}
+			{{:http redirect="?ok=1"}}
+		{{else}}
+			{{:http redirect="?show=config&ok=1"}}
+		{{/if}}
 	{{/if}}
 {{/if}}
 
-<h1 class="ruler">{{$page_title}}</h1>
+{{if $dialog}}
+	<h1 class="ruler">{{$page_title}}</h1>
+{{else}}
+	{{:include file='./include/navigation.html'}}
+{{/if}}
 <form method="POST" action="{{$self_url}}">
 	<p class="infos">
 		Conformement à la législation, le changement de ces informations n'impactera que les futurs devis/factures. Les devis et factures déjà rédigés ne tiennent pas compte de ces modifications.
@@ -40,7 +52,9 @@
 		{{/foreach}}
 	{{elseif $_GET.ok}}
 		<p class="block confirm">Configuration enregistrée. <br />
-		{{:link href="#" label="Retour à la page des extensions" onclick="window.parent.g.closeDialog()"}}<br />
+		{{if $dialog}}
+			{{:link href="#" label="Retour à la page des extensions" onclick="window.parent.g.closeDialog()"}}
+		{{/if}}
 		</p>
 	{{/if}}
 	<fieldset>
