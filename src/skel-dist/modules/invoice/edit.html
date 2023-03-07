@@ -6,7 +6,7 @@
 {{:include file='./include/style.tpl'}}
 {{:include file='./include/navigation.html'}}
 
-{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, VALIDATED_STATUS, STATUS_LABELS, VERSION, NONPROFIT_VAT_EXEMPTION_TYPE'}}
+{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, VALIDATED_STATUS, STATUS_LABELS, VERSION, QUOTATION_TYPE, NONPROFIT_VAT_EXEMPTION_TYPE'}}
 
 {{if $_GET.id}}
 	{{#load id=$_GET.id}}
@@ -18,7 +18,7 @@
 {{/if}}
 
 {{if $document && $document.status !== $DRAFT_STATUS}}
-	{{:error message="Ce document n'est plus un brouillon et ne peut plus être modifié"}}
+	{{:error message="Ce document n'est plus un brouillon et ne peut plus être modifié."}}
 {{/if}}
 
 {{if $_POST.quotation_submit}}
@@ -80,15 +80,8 @@
 		{{:assign var='check_errors.' value="L'échéance doit se situer après la date du devis (%s)."|args:$_POST.date}}
 	{{/if}}
 
-	{{if !$_POST.status}}
-		{{:assign var='check_errors.' value="Le statut est obligatoire."}}
-	{{/if}}
-	{{:assign var='allowed_status' from='STATUS_LABELS.%s'|args:$_POST.status}}
-	{{if !$allowed_status}}
-		{{:assign var='check_errors.' value='Statut invalide.'}}
-	{{/if}}
-	{{if $_POST.status === $VALIDATED_STATUS && (!$_POST.signing_place || !$_POST.signing_date)}}
-		{{:assign var='check_errors.' value='Si vous choisissez le statut "validé", vous devez indiquer le lieu et la date de signature du devis.'}}
+	{{if $_POST.status}}
+		{{:assign var='check_errors.' value="Le statut ne peut pas être changé."}}
 	{{/if}}
 
 	{{if !$_POST.org_contact}}
@@ -130,8 +123,8 @@
 		{{:assign vat_exemption=$NONPROFIT_VAT_EXEMPTION_TYPE}}
 	{{/if}}
 
-	{{if ($_POST.signing_place || $_POST.signing_date) && $_POST.status !== $VALIDATED_STATUS}}
-		{{:assign var='check_errors.' value='Vous ne pouvez saisir le lieu et la date de signature du devis que si le statut est définit à "validé".'|cat:"\n":'Si vous ne souhaitez pas valider le devis maintenant, laissez vide le lieu et la date de signature.'}}
+	{{if $_POST.signing && (!$_POST.signing_place || !$_POST.signing_date)}}
+		{{:assign var='check_errors.' value='La date et le lieu de la signature du devis sont obligatoires si le devis est signé.'}}
 	{{/if}}
 
 	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Lieu de da signature trop long' check_value=$_POST.signing_place check_max=128}}
@@ -148,7 +141,7 @@
 		{{if $_POST.key}}
 			{{:assign key=$_POST.key}}
 		{{else}}
-			{{#load select="MAX(key) AS last" where="json_extract(document, '$.type') = :type" :type='quotation'}} 
+			{{#load select="MAX(key) AS last" where="json_extract(document, '$.type') = :type" :type=$QUOTATION_TYPE}} 
 				{{:assign last_numeric=$last|regexp_replace:'~\D~':''}}
 				{{:assign next_numeric='%d+1'|math:$last_numeric}}
 				{{:assign key="D%06d"|args:$next_numeric}}
@@ -160,11 +153,17 @@
 			{{:assign id=null}}
 		{{/if}}
 
+		{{if $_POST.signing}}
+			{{:assign status=$AWAITING_STATUS}}
+		{{else}}
+			{{:assign status=$DRAFT_STATUS}}
+		{{/if}}
+
 		{{:save 
 			validate_schema="./schema/quotation.json"
 			id=$id
 			key=$key
-			type='quotation'
+			type=$QUOTATION_TYPE
 			recipient_business_name=$recipient_business_name
 			recipient_address=$recipient_address
 			recipient_member_id=$recipient_member_id
@@ -173,12 +172,14 @@
 			subject=$_POST.subject
 			date=$date
 			deadline=$deadline
-			status=$_POST.status
+			status=$status
 			items=$items
 			total=$computed_total
 			vat_exemption=$vat_exemption
 			siret=$module.config.siret
 			org_contact=$_POST.org_contact
+			author_id=$logged_user.id|intval
+			last_modification_date=$now|atom_date
 			signing_place=$_POST.signing_place
 			signing_date=$signing_date
 			payment_detail=$_POST.payment_detail
@@ -248,12 +249,6 @@
 			<li>{{:input type="date" name="deadline" label="Échéance pour validation" source=$document placeholder="" required=false}}</li>
 			<li>{{:input type="text" name="org_contact" label="Contact" source=$document default=$org_contact_default required=true}}</li>
 			<li>
-				<dt><label for="status">Statut</label></dt>
-				<dd>
-					{{:input type="select" name="status" options=$STATUS_LABELS source=$document default=$status required=true}}
-				</dd>
-			</li>
-			<li>
 				{{:input type="textarea" name="introduction_text" label="Texte d'introduction" source=$document default=$introduction_text_default placeholder="ex : Formule de politesse." help=$introduction_text_helper required=false cols="50" rows="4"}}
 			</li>
 		</ul>
@@ -287,24 +282,25 @@
 		<p id="signing_confirmation_p">
 			{{* Duplicate {{:input}} awaiting #51c881285662a356968ba943b7ce7956adc3b865 resolution *}}
 			{{if $signed}}
-				{{:input type="checkbox" name="signing" id="debug" label="Signer le devis" value="" checked=true}}
+				{{:input type="checkbox" name="signing" id="debug" label="Signer le devis" value="1" checked=true}}
 			{{else}}
-				{{:input type="checkbox" name="signing" id="debug" label="Signer le devis" value=""}}
+				<p class="infos">Ce document restera un brouillon et sera modifiable tant que vous n'aurez pas signé le devis.</p>
+				{{:input type="checkbox" name="signing" id="debug" label="Signer le devis" value="1"}}
 			{{/if}}
 		</p>
 		<p id="signing_warning" class="infos">
-			À ne remplir que si vous souhaitez valider immédiatement le devis.<br />
-			Le <label for="f_status">statut du devis</label> doit donc être définit sur "Validé".
+			À ne remplir que si vous souhaitez valider immédiatement le devis.
 		</p>
 		<ul id="signing_inputs">
 			<li>{{:input type="text" name="signing_place" label="Lieu de la signature" placeholder="ex : Dijon" source=$document}}</li>
 			<li>{{:input type="date" name="signing_date" label="Date de la signature" source=$document}}</li>
+			<li class="error block">Signer le devis est définitif. Vous ne pourrez plus modifier son contenu par la suite.</li>
 		</ul>
 	</fieldset>
 
 	<p class="submit">
 		{{if !$document}}
-			{{:button type="submit" name="quotation_submit" label="Valider la création de devis" class="main"}}
+			{{:button type="submit" name="quotation_submit" label="Créer le devis" class="main"}}
 		{{else}}
 			{{:button type="submit" name="quotation_submit" label="Modifier le devis" class="main"}}
 		{{/if}}
@@ -328,7 +324,7 @@
 	{{if !$document || !$document.signing_date}}
 		target.value = '{{$now|date_short}}';
 	{{/if}}
-	document.getElementById('f_signing_').onclick = () => {
+	document.getElementById('f_signing_1').onclick = () => {
 		let target;
 		
 		target = document.getElementById('signing_inputs');
@@ -336,7 +332,6 @@
 		document.getElementById('f_signing_place').disabled = !document.getElementById('f_signing_place').disabled;
 		document.getElementById('f_signing_date').disabled = !document.getElementById('f_signing_date').disabled;
 		target = document.getElementById('f_status');
-		target.value = (target.value !== '{{$VALIDATED_STATUS}}' ? '{{$VALIDATED_STATUS}}' : '{{if !$document}}{{$DRAFT_STATUS}}{{else}}{{$document.status}}{{/if}}');
 	};
 </script>
 

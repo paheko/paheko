@@ -12,4 +12,35 @@
 	min-width: 5em;
 	width: 14em;
 }
+
+.irreversible, .irreversible:before, .irreversible > span {
+	color: red;
+	font-weight: bold;
+}
+
+.safe, .safe span {
+	font-weight: bold;
+}
+
+nav.tabs aside.menu ul {
+	border: 0;
+}
+
+nav.tabs aside.menu li {
+	margin: 0;
+}
+
+nav.tabs aside.menu li a {
+	background: none;
+	border-radius: 0;
+	padding: 0.2em 0.4em;
+}
+
+nav.tabs aside.menu li a:hover {
+	border: 1px solid rgba(var(--gMainColor), 0.5);
+}
+
+nav.tabs aside.menu li a.icn-btn {
+	margin: 0.2em 0.2em;
+}
 </style>

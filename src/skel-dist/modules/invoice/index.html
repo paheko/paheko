@@ -38,8 +38,10 @@
 	<h2 class="ruler">Résultat(s) de recherche pour "{{$_GET.q}}"</h2>
 {{/if}}
 
-{{if $_GET.show == 'quote'}}
-	{{:assign filter="json_extract(document, '$.type') = 'quotation'"}}
+{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, VALIDATED_STATUS, TYPE_LABELS, STATUS_LABELS, QUOTATION_TYPE, INVOICE_TYPE, INVOICE_STATUS_LABELS'}}
+
+{{if $_GET.show == $QUOTATION_TYPE}}
+	{{:assign filter="json_extract(document, '$.type') = '%s'"|args:$QUOTATION_TYPE}}
 {{elseif $_GET.show == 'paid'}}
 	{{:assign filter="json_extract(document, '$.type') = 'invoice' AND json_extract(document, '$.date_paid') IS NOT NULL"}}
 {{elseif $_GET.show == 'unpaid'}}
@@ -47,12 +49,13 @@
 {{else}}
 	{{:assign filter="1"}}
 {{/if}}
-{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, VALIDATED_STATUS, TYPE_LABELS, STATUS_LABELS'}}
 
 {{if $_GET.ok === '1'}}
 	<p class="block confirm">Devis enregistré.</p>
 {{elseif $_GET.ok === '2'}}
 	<p class="block confirm">Devis modifié avec succès.</p>
+{{elseif $_GET.ok === '4'}}
+	<p class="block confirm">Devis supprimé avec succès.</p>
 {{/if}}
 
 
@@ -74,23 +77,25 @@
 			{{:assign var="label" from="TYPE_LABELS.%s"|args:$type}}
 			<td>{{$label}}</td>
 		{{/if}}
-		<td><a href="details.html?id={{$id|intval}}">{{$key}}</a></td>
+		<td>{{:link href="details.html?id=%d&show=%s"|args:$id:$type label=$key}}</td>
 		<td>{{$date|date_short}}</td>
 		<td>{{$deadline|date_short}}</td>
 		<td>{{$recipient_business_name}}</td>
-		<td><a href="details.html?id={{$id|intval}}">{{$subject}}</a></td>
+		<td>{{:link href="details.html?id=%d&show=%s"|args:$id:$type label=$subject}}</td>
 		<td class="money">{{$total|money_currency}}</td>
 		<td>
-			{{:assign var="label" from="STATUS_LABELS.%s"|args:$status}}
+			{{if $type === $INVOICE_TYPE}}
+				{{:assign var="label" from="INVOICE_STATUS_LABELS.%s"|args:$status}}
+			{{else}}
+				{{:assign var="label" from="STATUS_LABELS.%s"|args:$status}}
+			{{/if}}
 			{{$label}}
-			{{if $status === $VALIDATED_STATUS}}- {{$signing_date|date_short}}{{/if}}
+			{{if $status === $VALIDATED_STATUS}}- {{$validation_date|date_short}}{{/if}}
 
 			{{if $archived}}
 				<span title="Archivé">🗃</span>
-			{{elseif $date_paid}}
-				Payé le {{$date_paid|date_short}}
-			{{elseif $type == 'invoice'}}
-				En attente
+			{{elseif $type === $INVOICE_TYPE && $payment_date}}
+				- Payé le {{$payment_date|date_short}}
 			{{/if}}
 		</td>
 		<td class="actions">

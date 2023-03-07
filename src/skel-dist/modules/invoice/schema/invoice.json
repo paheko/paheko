@@ -88,11 +88,6 @@
 			"type": "integer",
 			"maxLength": 19
 		},
-		"child_id": {
-			"description": "ID de la facture associée",
-			"type": ["integer", "null"],
-			"maxLength": 19
-		},
 		"signing_place": {
 			"description": "Lieu de signature du document",
 			"type": ["string", "null"],
@@ -108,6 +103,11 @@
 			"type": ["string", "null"],
 			"maxLength": 10
 		},
+		"payment_date": {
+			"description": "Date à laquelle le paiement a été effectué",
+			"type": ["string", "null"],
+			"maxLength": 10
+		},
 		"payment_detail": {
 			"description": "Instructions de paiement",
 			"type": ["string", "null"],
@@ -117,6 +117,11 @@
 			"description": "Informations complémentaires",
 			"type": ["string", "null"],
 			"maxLength": 1024
+		},
+		"parent_id": {
+			"description": "ID du devis original",
+			"type": ["integer", "null"],
+			"maxLength": 19
 		},
 		"last_modification_date": {
 			"description": "Date de la derniète modification",

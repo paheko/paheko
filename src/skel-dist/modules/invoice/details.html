@@ -3,18 +3,175 @@
 {{* ==================== Header ==================== *}}
 
 {{:admin_header title="Devis et factures" current="acc"}}
-{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, VALIDATED_STATUS, TYPE_LABELS, STATUS_LABELS'}}
+{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, VALIDATED_STATUS, REJECTED_STATUS, TYPE_LABELS, STATUS_LABELS, QUOTATION_TYPE, INVOICE_TYPE'}}
 
 {{:include file='./include/style.tpl'}}
 
-{{if $_POST.status_update_button}}
+{{if $_GET.action === 'sign' || $_POST.signing_submit || $_GET.action === 'delete'}}
+	{{#restrict block=true section="accounting" level="write"}}
+		{{if !$_GET.id}}
+			{{:assign var='check_errors.' value='Aucun devis sélectionné.'}}
+		{{else}}
+			{{#load id=$_GET.id|intval}}
+			{{if $status !== $DRAFT_STATUS}}
+				{{:assign var='check_errors.' value='Seuls les brouillons peuvent être signés ou supprimés.'}}
+			{{elseif $_POST.signing_submit}}
+			
+				{{if !$_POST.signing_place}}
+					{{:assign var='check_errors.' value='Lieu de la signature obligatoire.'}}
+				{{/if}}
+				{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Lieu de la signature trop long' check_value=$_POST.signing_place check_max=128}}
+				{{if !$_POST.signing_date}}
+					{{:assign var='check_errors.' value='Date de la signature obligatoire.'}}
+				{{/if}}
+				{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Date de la signature trop longue' check_value=$_POST.signing_date check_max=10}}
+				{{:assign signing_date=$_POST.signing_date|date:'Y-m-d'}}
+				{{if $_POST.signing_date|date_short === null}} {{* Means data is not a date *}}
+					{{:assign var='check_errors.' value="La date de signature doit être une date."}}
+				{{/if}}
+				{{if $signing_date < $date}}
+					{{:assign formated_date=$date|date_short}}
+					{{:assign var='check_errors.' value="La signature du devis doit se situer après la date du devis (%s)."|args:$formated_date}}
+				{{/if}}
+				{{if !$check_errors}}
+					{{:save id=$_GET.id|intval
+						validate_schema="./schema/quotation.json"
+						key=$key
+						type=$type
+						recipient_business_name=$recipient_business_name
+						recipient_address=$recipient_address
+						recipient_member_id=$recipient_member_id
+						recipient_member_numero=$recipient_member_numero
+						introduction_text=$introduction_text
+						subject=$subject
+						date=$date
+						deadline=$deadline
+						status=$AWAITING_STATUS
+						items=$items
+						total=$total
+						vat_exemption=$vat_exemption
+						siret=$siret
+						org_contact=$org_contact
+						author_id=$author_id
+						last_modification_date=$now|atom_date
+						signing_place=$_POST.signing_place
+						signing_date=$signing_date
+						payment_detail=$payment_detail
+						extra_info=$extra_info
+						module_version=$module_version
+					}}
+
+					{{:http redirect="?id=%d&ok=1"|args:$id}}
+				{{/if}}
+
+			{{elseif $_GET.action === 'delete'}}
+				{{* Awaiting {{:remove}} implementation #7de607eb3c7396d718da8575f61fd93951498936 *}}
+				{{:error message='Document deletion not yet implemented by brindille.'}}
+				
+				{{:http redirect="index.html?ok=3"}}
+			{{/if}}
+			{{/load}}
+		{{/if}}
+	{{/restrict}}
+{{elseif $_POST.reject_submit || $_POST.validate_submit}}
+	{{#restrict block=true section="accounting" level="write"}}
+		{{if !$_GET.id}}
+			{{:assign var='errors.' value='Aucun devis sélectionné.'}}
+		{{else}}
+			{{#load id=$_GET.id|intval}}
+			{{if $status !== $AWAITING_STATUS}}
+				{{:assign var='check_errors.' value='Seuls les devis en attente peuvent être validés ou refusés.'}}
+			{{/if}}
+			{{if $_POST.reject_submit}}
+				{{:assign new_status=$REJECTED_STATUS}}
+				{{:assign redirection_code=4}}
+			{{elseif $_POST.validate_submit}}
+				{{:assign new_status=$VALIDATED_STATUS}}
+				{{:assign validation_date=$now|date:'Y-m-d'}}
+				{{:assign redirection_code=5}}
+			{{/if}}
+			{{if !$check_errors}}
+				{{if $_POST.validate_submit && $_POST.invoice}}
+
+					{{#load select="MAX(key) AS last" where="json_extract(document, '$.type') = :type" :type=$INVOICE_TYPE}} 
+						{{:assign last_numeric=$last|regexp_replace:'~\D~':''}}
+						{{:assign next_numeric='%d+1'|math:$last_numeric}}
+						{{:assign invoice_key="F%06d"|args:$next_numeric}}
+					{{/load}}
+
+					{{:save assign_new_id='invoice_id'
+						validate_schema="./schema/invoice.json"
+						key=$invoice_key
+						type=$INVOICE_TYPE
+						recipient_business_name=$recipient_business_name
+						recipient_address=$recipient_address
+						recipient_member_id=$recipient_member_id
+						recipient_member_numero=$recipient_member_numero
+						introduction_text=null
+						subject=$subject
+						date=$now|date:'Y-m-d'
+						deadline=null
+						status=$AWAITING_STATUS
+						items=$items
+						total=$total
+						vat_exemption=$vat_exemption
+						siret=$siret
+						org_contact=$org_contact
+						author_id=$logged_user.id|intval
+						parent_id=$_GET.id|intval
+						last_modification_date=$now|atom_date
+						signing_place=null
+						signing_date=$now|date:'Y-m-d'
+						validation_date=null
+						payment_detail=null
+						extra_info=null
+						module_version=$module_version
+					}}
+				{{/if}}
+
+				{{:save id=$_GET.id|intval
+					validate_schema="./schema/quotation.json"
+					key=$key
+					type=$type
+					recipient_business_name=$recipient_business_name
+					recipient_address=$recipient_address
+					recipient_member_id=$recipient_member_id
+					recipient_member_numero=$recipient_member_numero
+					introduction_text=$introduction_text
+					subject=$subject
+					date=$date
+					deadline=$deadline
+					status=$new_status
+					items=$items
+					total=$total
+					vat_exemption=$vat_exemption
+					siret=$siret
+					org_contact=$org_contact
+					author_id=$author_id
+					child_id=$invoice_id|intval
+					last_modification_date=$now|atom_date
+					signing_place=$_POST.signing_place
+					signing_date=$signing_date
+					validation_date=$validation_date
+					payment_detail=$payment_detail
+					extra_info=$extra_info
+					module_version=$module_version
+				}}
+
+				{{:http redirect="?id=%d&ok=%d"|args:$id:$redirection_code}}
+			{{/if}}
+			{{/load}}
+		{{/if}}
+	{{/restrict}}
+{{/if}}
+{{if $_POST.status_update_button}} {{* Only for developers *}}
 	{{#restrict block=true section="accounting" level="write"}}
 		{{if !$_POST.id}}
-			{{:error message='Aucun devis sélectionné:'}}
+			{{:error message='Aucun devis sélectionné.'}}
 		{{else}}
 			{{:assign var='new_status_label' from='STATUS_LABELS.%s'|args:$_POST.status}}
 			{{if $new_status_label === null}}
-				{{:assign var='errors[]' value='Nouveau statut invalide : %s.'|args:$_POST.status}}
+				{{:assign var='check_errors.' value='Nouveau statut invalide : %s.'|args:$_POST.status}}
 			{{else}}
 				{{#load id=$_POST.id|intval}}
 					{{:save id=$id
@@ -35,6 +192,8 @@
 						vat_exemption=$vat_exemption
 						siret=$siret
 						org_contact=$org_contact
+						author_id=$author_id
+						last_modification_date=$now|atom_date
 						signing_place=$signing_place
 						signing_date=$signing_date
 						payment_detail=$payment_detail
@@ -42,10 +201,10 @@
 						module_version=$module_version
 					}}
 
-					{{:http redirect="?id=%d&ok=1"|args:$id}}
+					{{:http redirect="?id=%d&ok=2&show=quotation"|args:$id}}
 				{{/load}}
 			{{/if}}
-			{{#foreach from=$errors item='error'}}
+			{{#foreach from=$check_errors item='error'}}
 				<p class="error block">{{$error}}</p>
 			{{/foreach}}
 		{{/if}}
@@ -53,49 +212,164 @@
 {{elseif $_GET.id === null}}
 	<p class="error block">Aucun document séléctionné.</p>
 {{else}}
-	{{if $_GET.ok}}<p class="block confirm">Modification enregistrée.</p>{{/if}}
 	{{#load id=$_GET.id|intval}}
-
+		
+		{{* ======================= Menu =========================== *}}
+		
 		<nav class="tabs">
-			<aside>
-				{{:linkbutton href="edit.html" label="Nouveau devis" shape="plus"}}
-				{{if $status == $DRAFT_STATUS}}
-					{{:linkbutton href="./edit.html?id=%d"|args:$id label="Modifier le devis" shape="edit"}}
-				{{else}} {{* Hack awaiting #ac34cf8f45a5a79815b16ea505da08ffad2268cf implementation *}}
-					{{:button name="hack" title="Ce document n'est plus un brouillon et ne peut plus être modifié" label="Modifier le devis" disabled=true}}
-				{{/if}}
+			<aside class="menu">
+				<ul>
+					{{if $type === $QUOTATION_TYPE}}
+						<li>{{:linkbutton href="edit.html" label="Nouveau" shape="plus"}} |</li>
+					
+						{{if $status == $DRAFT_STATUS}}
+							<li>{{:linkbutton label="Aperçu papier" href="preview.html?id=%s"|args:$id shape="document"}}</li>
+							<li>{{:linkbutton href="./edit.html?id=%d"|args:$id label="Modifier" shape="edit"}}</li>
+							<li>{{:linkbutton href="%s&action=sign"|args:$request_url label="Signer le devis" shape="check"}}</li>
+							<li>{{:linkbutton href="%s&action=ask_deletion"|args:$request_url label="Supprimer" shape="delete" class="irreversible"}}</li>
+						{{else}}
+							<li>{{:linkbutton label="PDF" href="preview.html?id=%s"|args:$id shape="document"}}</li>
+							{{if $status == $AWAITING_STATUS}}
+								<li>{{:linkbutton href="#" label="Générer facture" shape="export"}}</li>
+								<li>{{:linkbutton href="#" label="Annuler le devis" shape="delete" class="irreversible"}}</li>
+							{{else}}
+								<li>{{:linkbutton href="#" label="Archiver" shape="archive"}}</li>
+							{{/if}}
+						{{/if}}
+					{{else}}
+						<li>{{:linkbutton href="edit.html" label="Nouveau devis" shape="plus"}} |</li>
+
+						{{if $status !== $DRAFT_STATUS}}
+							<li>{{:linkbutton label="PDF" href="preview.html?id=%s"|args:$id shape="document"}}</li>
+							{{if $status == $AWAITING_STATUS}}
+								<li>{{:linkbutton href="#" label="Annuler la facture" shape="delete" class="irreversible"}}</li>
+							{{else}}
+								<li>{{:linkbutton href="#" label="Archiver" shape="archive"}}</li>
+							{{/if}}
+						{{/if}}
+					{{/if}}
+				</ul>
 			</aside>
 			{{:include file='./include/main_nav_tabs.html'}}
 		</nav>
 
+		{{* ======================= Feedback =========================== *}}
+
+		{{if $_GET.ok === '1'}}
+			<p class="block confirm">Devis signé avec succès.</p>
+		{{elseif $_GET.ok === '2'}}
+			<p class="block confirm">Modification enregistrée.</p>
+		{{elseif $_GET.ok === '3'}}
+			<p class="block confirm">Brouillon conservé.</p>
+		{{elseif $_GET.ok === '4'}}
+			<p class="block confirm">Devis marqué avec succès comme refusé.</p>
+		{{elseif $_GET.ok === '5'}}
+			<p class="block confirm">Devis marqué avec succès comme validé.</p>
+		{{/if}}
+
+		{{* ======================= Title =========================== *}}
+
 		{{:assign var="label" from="TYPE_LABELS.%s"|args:$type}}
-		<h1>{{$label}} n° {{$key}}</h1>
-		
+		{{:assign var="status_label" from="STATUS_LABELS.%s"|args:$status}}
+		<h1>{{$label}} n° {{$key}} - {{$status_label}}</h1>
+
+		{{* ======================= Errors =========================== *}}
+
+		{{if $check_errors}}
+			{{#foreach from=$check_errors item='error'}}
+				<p class="error block">{{$error}}</p>
+			{{/foreach}}
+		{{/if}}
+
+		{{* ======== Confirmations (deletion/signing/reject/validation) ============= *}}
+
+		{{if $_GET.action === 'ask_deletion'}}
+			<h2 class="ruler irreversible">Action irreversible</h2>
+			<fieldset>
+				<legend>Suppression</legend>
+				<div class="block error">
+					<h3 class="infos">Vous allez supprimer définitivement le brouillon de devis n° {{$key}} : "{{$subject}}".</h3>
+					<p class="infos">Êtes-vous sûr de vouloir continuer ?</p>
+					<p>
+						{{:linkbutton href="details.html?id=%d&show=quotation&action=delete"|args:$_GET.id label="Supprimer le devis" shape="delete"}}
+						{{:linkbutton href="details.html?id=%d&show=quotation&ok=3"|args:$_GET.id label="Conserver le brouillon" shape="lock" class="safe"}}
+					</p>
+				</div>
+			</fieldset>
+			<h2 class="ruler">Rappel</h2>
+		{{elseif $_GET.action === 'sign'}}
+			<form method="POST" action="">
+				<fieldset>
+					<legend>Signature du devis</legend>
+					<ul id="signing_inputs">
+						<li>{{:input type="text" name="signing_place" label="Lieu de la signature" placeholder="ex : Dijon" default=$module.config.signing_place required=true}}</li>
+						<li>{{:input type="date" name="signing_date" label="Date de la signature" default=$now required=true}}</li>
+						{{if !$check_errors}}<li class="error block">Signer le devis est définitif. Vous ne pourrez plus modifier son contenu par la suite.</li>{{/if}}
+						<li>{{:button type="submit" name="signing_submit" label="Signer le devis" class="main"}}</li>
+					</ul>
+				</fieldset>
+			</form>
+			<h2 class="ruler">Rappel</h2>
+		{{elseif $_GET.action === 'ask_rejection'}}
+			<form method="POST" action="">
+				<fieldset>
+					<legend>Refus du devis par le/la client.e</legend>
+					{{if !$check_errors}}<p class="error block">Refuser le devis est définitif. Vous ne pourrez pas rétablir le devis comme "en attente de validation".<br />Il sera néanmoins possible d'annuler le devis.</p>{{/if}}
+					{{:button type="submit" name="reject_submit" label="Marquer comme refusé" class="main"}}
+				</fieldset>
+			</form>
+			<h2 class="ruler">Rappel</h2>
+		{{elseif $_GET.action === 'ask_validation'}}
+			<form method="POST" action="">
+				<fieldset>
+					<legend>Validation du devis par le/la client.e</legend>
+					{{if !$check_errors}}<p class="error block">Valider le devis est définitif. Vous ne pourrez pas rétablir le devis comme "en attente de validation".<br />Il sera néanmoins possible d'annuler le devis.</p>{{/if}}
+					<div class="infos">{{:input type="checkbox" name="invoice" value="1" label="Générer automatiquement une facture"}}</div>
+					{{:button type="submit" name="validate_submit" label="Marquer comme validé" shape="check" class="main"}}
+				</fieldset>
+			</form>
+			<h2 class="ruler">Rappel</h2>
+		{{/if}}
+
+		{{* ======================= Content =========================== *}}
+
 		<fieldset>
-			<legend><h2>Statut</h2></legend>
-			{{#restrict section="accounting" level="write"}}
-			<div class="infos inline">
-				<label for="f_status">Statut en cours :</label>
-				<form method="POST" action="./details.html" style="display: inline;">
-					{{:input type="select" name="status" options=$STATUS_LABELS default=$status required=true}}
-					{{:input type="hidden" name="id" default=$id|intval}}
-					{{:button type="submit" name="status_update_button" label="Modifier"}}
-				</form>
-			</div>
-			{{else}}
-				{{:assign var="label" from="STATUS_LABELS.%s"|args:$status}}
-				<p>{{$label}}</p>
-			{{/restrict}}
-			{{if $status !== $DRAFT_STATUS}}
-				<p>
-				{{if $status === $VALIDATED_STATUS}}
-					{{$label}} validé et <strong>signé le {{$signing_date|date_short}} à {{$signing_place}}</strong>.
+			<legend><h2>Informations</h2></legend>
+			{{if $status === $AWAITING_STATUS}}
+				<p class="infos">{{$label}} <strong>{{if $type === $QUOTATION_TYPE}}signé{{else}}signée{{/if}} le {{$signing_date|date_short}} à {{$signing_place}}</strong>.</p>
+				{{if $type === $INVOICE_TYPE && $parent_id}}
+					{{#load id=$parent_id}}{{:assign .='parent'}}{{/load}}
+					<p class="infos">Correspondant au {{:link href="details.html?id=%d&show=quotation"|args:$parent.id label="devis n°%s"|args:$parent.key}}.</p>
 				{{/if}}
-				{{:linkbutton label="PDF" href="preview.html?id=%s"|args:$id shape="document"}}
-				</p>
+				{{if $type === $QUOTATION_TYPE}}
+					<p class="">En attente de validation par le/la client.e.</p>
+					<p class="infos">
+						{{:linkbutton href="?id=%d&show=quotation&action=ask_validation"|args:$id label="Marquer comme validé et générer la facture" shape="check"}}
+						{{:linkbutton href="?id=%d&show=quotation&action=ask_rejection"|args:$id label="Marquer comme refusé" shape="alert"}}
+					</p>
+				{{else}}
+					<p class="">En attente de paiement.</p>
+					<p class="infos">
+						{{:linkbutton href="#"|args:$id label="Marquer comme payée (prochainement)" shape="check"}}
+						{{* {{:linkbutton href="?id=%d&show=quotation&action=ask_rejection"|args:$id label="Marquer comme abandonnée" shape="alert"}} *}}
+					</p>
+				{{/if}}
+			{{elseif $status === $VALIDATED_STATUS}}
+				<p class="infos">{{$label}} <strong>validé le {{$validation_date|date_short}}</strong> (signé par l'asso le {{$signing_date|date_short}}).</p>
+				{{if $type === $QUOTATION_TYPE}}
+					{{#load id=$child_id|intval}}{{:assign .='child'}}{{/load}}
+					<p class="infos">Facture correspondante : {{:link href="?id=%d&show=invoice"|args:$child.id label="n°%s"|args:$child.key}}.</p>
+				{{/if}}
 			{{else}}
-				{{:linkbutton label="Voir l'aperçu" href="preview.html?id=%s"|args:$id shape="document"}}
+				<p class="infos">Statut en cours : {{$status_label}}</p>
 			{{/if}}
+			{{#users id=$author_id|intval}}{{:assign .='author'}}{{/users}}
+			<p>
+				{{if $type === $QUOTATION_TYPE}}Rédigé{{else}}Rédigée{{/if}} par : {{:link href="!users/details.php?id=%d"|args:$author.id label=$author.nom}}.
+			</p>
+			<p>
+				Dernière modification : {{$last_modification_date}}.
+			</p>
 		</fieldset>
 
 		<fieldset>
@@ -110,13 +384,14 @@
 					<p class="infos">Associé à l'ancien.ne membre {{if $recipient_member_numero}}n°{{$recipient_member_numero}}{{else}}#{{$recipient_member_id}}{{/if}} (compte supprimé).</p>
 				{{else}}
 					<p class="infos">
-						Associé au membre {{if $recipient_member_numero}}n°{{$recipient_member_numero}}{{/if}} : "{{:link href="details.php?id=%d"|args:$member.id label=$member.nom}}",
-						{{if $recipient_business_name !== $member.nom}} sous la désignation "{{$recipient_business_name}}".{{/if}}
+						Associé au membre {{if $recipient_member_numero}}n°{{$recipient_member_numero}}{{/if}} : "{{:link href="!users/details.php?id=%d"|args:$member.id label=$member.nom}}",
+						{{if $recipient_business_name !== $member.nom}} sous la désignation "{{$recipient_business_name}}".{{/if}}<br />
+						{{:link href="customer.html?show=customers&id=%s"|args:$recipient_business_name label='Voir tous les devis de "%s".'|args:$recipient_business_name}}
 					</p>
 				{{/if}}
 			{{/if}}
 		</fieldset>
-		
+
 		<fieldset>
 			<legend><h2>Objet</h2></legend>
 			<ul>
@@ -174,6 +449,22 @@
 				{{if $extra_info}}<p>{{$extra_info|escape|nl2br}}</p>{{/if}}
 			</fieldset>
 		{{/if}}
+
+		{{#restrict section="config" level="admin"}}
+		<div style="background-color: black; color: limegreen; padding: 1em;">
+		<fieldset style="border-color: limegreen;">
+			<legend><h2 style="color: limegreen;">Outils développeur/euse</h2></legend>
+			<div class="infos inline">
+				<label for="f_status">Statut en cours :</label>
+				<form method="POST" action="./details.html" style="display: inline;">
+					{{:input type="select" name="status" options=$STATUS_LABELS default=$status required=true}}
+					{{:input type="hidden" name="id" default=$id|intval}}
+					{{:button type="submit" name="status_update_button" label="Modifier"}}
+				</form>
+			</div>
+		</fieldset>
+		</div>
+		{{/restrict}}
 
 	{{/load}}
 {{/if}}

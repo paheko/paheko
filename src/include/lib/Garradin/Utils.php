@@ -49,6 +49,7 @@ class Utils
         'unlock'          => '🔓',
         'folder'          => '🗀',
         'document'        => '🗅',
+        'archive'         => '🗃',
         'bold'            => 'B',
         'italic'          => 'I',
         'header'          => 'H',
