@@ -153,8 +153,8 @@ class CommonModifiers
 
 	static public function typo($str, $locale = 'fr')
 	{
-		$str = preg_replace('/[\h]*([?!:»])(\s+|$)/u', '&nbsp;\\1\\2', $str);
-		$str = preg_replace('/(^|\s+)([«])[\h]*/u', '\\1\\2&nbsp;', $str);
+		$str = preg_replace('/[\h]*([?!:»])(?=\s|$)/us', "\xc2\xa0\\1", $str);
+		$str = preg_replace('/(?=^|\s)([«])[\h]*/u', "\\1\xc2\xa0", $str);
 		return $str;
 	}
 

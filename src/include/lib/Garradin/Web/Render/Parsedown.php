@@ -5,11 +5,12 @@ namespace Garradin\Web\Render;
 use Parsedown as Parent_Parsedown;
 
 use Garradin\Entities\Files\File;
+use Garradin\UserTemplate\CommonModifiers;
 
 use Garradin\Utils;
 
 /**
- * Custom Parsedown extension to enable the use of Skriv extensions inside Markdown markup
+ * Custom Parsedown extension to enable the use of extensions inside Markdown markup
  *
  * Also adds support for footnotes and Table of Contents
  *
@@ -17,16 +18,59 @@ use Garradin\Utils;
  */
 class Parsedown extends Parent_Parsedown
 {
-	protected $skriv;
-	protected $toc = [];
+	protected $extensions;
+	public $toc = [];
 
-	function __construct(?File $file, ?string $user_prefix)
+	/**
+	 * Custom tags allowed inline
+	 */
+	const ALLOWED_INLINE_TAGS = [
+		'kbd'    => null,
+		'samp'   => null,
+
+		'del'    => null,
+		'ins'    => null,
+		'sup'    => null,
+		'sub'    => null,
+
+		'mark'   => null,
+		'var'    => null,
+
+		'span'   => null,
+		'strong' => null,
+		'em'     => null,
+		'i'      => null,
+		'b'      => null,
+		'small'  => null,
+		'a'      => ['href', 'target'],
+	];
+
+	/**
+	 * Custom tags allowed as blocks
+	 */
+	const ALLOWED_BLOCK_TAGS = [
+		'object' => ['type', 'width', 'height', 'data'],
+		'iframe' => ['src', 'width', 'height', 'frameborder', 'scrolling', 'allowfullscreen'],
+		'audio'  => ['src', 'controls', 'loop'],
+		'video'  => ['src', 'controls', 'width', 'height', 'poster'],
+	];
+
+	public function setExtensions(Extensions $ext)
 	{
-		$this->BlockTypes['<'][] = 'SkrivExtension';
+		$this->extensions = $ext;
+	}
+
+	function __construct()
+	{
+		array_unshift($this->BlockTypes['<'], 'Extension');
+		array_unshift($this->BlockTypes['<'], 'TOC');
+
 		$this->BlockTypes['['][]= 'TOC';
+		$this->BlockTypes['{'][]= 'TOC';
+		$this->BlockTypes['{'][]= 'Class';
 
 		// Make Skriv extensions also available inline, before anything else
-		array_unshift($this->InlineTypes['<'], 'SkrivExtension');
+		array_unshift($this->InlineTypes['<'], 'Extension');
 
 		# identify footnote definitions before reference definitions
 		array_unshift($this->BlockTypes['['], 'Footnote');
@@ -34,18 +78,108 @@ class Parsedown extends Parent_Parsedown
 		# identify footnote markers before before links
 		array_unshift($this->InlineTypes['['], 'FootnoteMarker');
 
-		$this->skriv = new Skriv($file, $user_prefix);
+		$this->InlineTypes['='][] = 'Highlight';
+
+		$this->inlineMarkerList .= '=';
 	}
 
-	protected function inlineSkrivExtension(array $str): ?array
+	/**
+	 * Parse attributes from a HTML tag
+	 */
+	protected function _parseAttributes(string $str): array
 	{
-		if (preg_match('/<<<?([a-z_]+)((?:(?!>>>?).)*?)>>>?/i', $str['text'], $match)) {
-			$text = $this->skriv->callExtension($match);
+		preg_match_all('/([[:alpha:]][[:alnum:]]*)(?:\s*=\s*(?:([\'"])(.*?)\2|([^>\s\'"]+)))?/i', $str, $match, PREG_SET_ORDER);
+		$params = [];
+
+		foreach ($match as $m)
+		{
+			$params[$m[1]] = isset($m[4]) ? $m[4] : (isset($m[3]) ? $m[3] : null);
+		}
+
+		return $params;
+	}
+
+	protected function _filterURL(string $url): ?string
+	{
+		$url = html_entity_decode($url);
+
+		$check_url = rawurldecode($url);
+		$check_url = str_replace([' ', "\t", "\n", "\r", "\0"], '', $check_url);
+
+		if (stristr($check_url, 'script:')) {
+			return null;
+		}
+
+		if (strstr($check_url, '"') || strstr($check_url, '\'')) {
+			return null;
+		}
+
+		$scheme = parse_url($url, PHP_URL_SCHEME);
+
+		if ($scheme && $scheme != 'http' && $scheme != 'https') {
+			return null;
+		}
+
+		return $url;
+	}
+
+	/**
+	 * Filter attributes for a HTML tag
+	 */
+	protected function _filterHTMLAttributes(string $name, ?array $allowed, string $str): ?array
+	{
+		$attributes = $this->_parseAttributes($str);
+
+		$allowed ??= [];
+		$allowed[] = 'class';
+		$allowed[] = 'lang';
+		$allowed[] = 'title';
+
+		foreach ($attributes as $key => $value) {
+			if (!in_array($key, $allowed)) {
+				unset($attributes[$key]);
+				continue;
+			}
+
+			$value = $value ? htmlspecialchars($value) : '';
+			$attributes[$key] = $value;
+		}
+
+		if ($name == 'iframe' || $name == 'video' || $name == 'audio') {
+			$attributes['loading'] = 'lazy';
+		}
+
+		if ($name == 'iframe' || $name == 'object') {
+			if (!isset($attributes['src']) || !preg_match('!^https?://!', $attributes['src'])) {
+				return null;
+			}
+
+			$attributes['referrerpolicy'] = 'no-referrer';
+			$attributes['sandbox'] = 'allow-same-origin allow-scripts';
+		}
+
+		if (isset($attributes['src'])) {
+			$attributes['src'] = $this->_filterURL($attributes['src']);
+		}
+
+		if (isset($attributes['href'])) {
+			$attributes['href'] = $this->_filterURL($attributes['href']);
+		}
+
+		return $attributes;
+	}
+
+	/**
+	 * Inline extensions: <<color red>>bla blabla<</color>>
+	 */
+	protected function inlineExtension(array $str): ?array
+	{
+		if (preg_match('/^<<<?(\/?[a-z_]+)((?:(?!>>>?).)*?)>>>?/i', $str['text'], $match)) {
+			$text = $this->extensions->call($this, $match[1], false, $match[2]);
 
 			return [
 				'extent'    => strlen($match[0]),
 				'element' => [
-					'name'                   => 'div',
 					'rawHtml'                => $text,
 					'allowRawHtmlInSafeMode' => true,
 				],
@@ -55,17 +189,19 @@ class Parsedown extends Parent_Parsedown
 		return null;
 	}
 
-	protected function blockSkrivExtension(array $line): ?array
+	/**
+	 * Block extensions
+	 */
+	protected function blockExtension(array $line): ?array
 	{
 		$line = $line['text'];
 
-		if (strpos($line, '<<') === 0 && preg_match('/^<<<?([a-z_]+)((?:(?!>>>?).)*?)(>>>?$|$)/i', trim($line), $match)) {
-			$text = $this->skriv->callExtension($match);
+		if (strpos($line, '<<') === 0 && preg_match('/^<<<?(\/?[a-z_]+)((?:(?!>>>?).)*?)(>>>?$|$)/is', trim($line), $match)) {
+			$text = $this->extensions->call($this, $match[1], true, $match[2]);
 
 			return [
 				'char'    => $line[0],
 				'element' => [
-					'name'                   => 'div',
 					'rawHtml'                => $text,
 					'allowRawHtmlInSafeMode' => true,
 				],
@@ -76,79 +212,331 @@ class Parsedown extends Parent_Parsedown
 		return null;
 	}
 
-	protected function blockHeader($line)
+	/**
+	 * Class block:
+	 * {{class1 class2
+	 * > My block
+	 * }}
+	 */
+	protected function blockClass(array $line): ?array
 	{
-		$block = parent::blockHeader($line);
+		$line = $line['text'];
 
-		if (is_array($block)) {
-			if (!isset($block['element']['attributes']['id'])) {
-				$block['element']['attributes']['id'] = Utils::transformTitleToURI($block['element']['text']);
-			}
+		if (strpos($line, '{{{') === 0) {
+			$classes = trim(substr($line, 3));
+			$classes = str_replace('.', '', $classes);
 
-			$level = substr($block['element']['name'], 1); // h1, h2... -> 1, 2...
-			$id = $block['element']['attributes']['id'];
-			$label = $block['element']['text'];
+			return [
+				'char'    => $line[0],
+				'element' => [
+					'name' => 'div',
+					'attributes' => ['class' => $classes],
+				],
+				'closed' => false,
+			];
+		}
 
-			$this->toc[] = compact('level', 'id', 'label');
+		return null;
+	}
+
+	protected function blockClassContinue(array $line, array $block): ?array
+	{
+		if (isset($block['closed'])) {
+			return null;
+		}
+
+		if (strpos($line['text'], '}}}') !== false) {
+			$block['closed'] = true;
 		}
 
 		return $block;
 	}
 
-	protected function blockTOC(array $line): ?array
+	/**
+	 * Remove HTML comments
+	 * @replaces parent::blockComment
+	 */
+	protected function blockComment($line): ?array
 	{
-		if (!preg_match('/^\[(?:toc|sommaire)\]$/', trim($line['text']))) {
+		if (strpos($line['text'], '<!--') === 0) {
+			$block = ['element' => ['rawHtml' => '']];
+
+			if (strpos($line['text'], '-->') !== false) {
+				$block['closed'] = true;
+			}
+
+			return $block;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Remove HTML comments
+	 * @replaces parent::blockComment
+	 */
+	protected function blockCommentContinue($line, array $block): ?array
+	{
+		if (isset($block['closed'])) {
 			return null;
 		}
+
+		if (strpos($line['text'], '-->') !== false) {
+			$block['closed'] = true;
+		}
+
+		return $block;
+	}
+
+	/**
+	 * Transform ==text== to <mark>text</mark>
+	 */
+	protected function inlineHighlight(array $str): ?array
+	{
+		if (substr($str['text'], 1, 1) === '='
+			&& preg_match('/^==(?=\S)(.+?)(?<=\S)==/', $str['text'], $matches))
+		{
+			return [
+				'extent' => strlen($matches[0]),
+				'element' => [
+					'name' => 'mark',
+					'handler' => [
+						'function' => 'lineElements',
+						'argument' => $matches[1],
+						'destination' => 'elements',
+					],
+				],
+			];
+		}
+
+		return null;
+	}
+
+	/**
+	 * Override default strikethrough, as it is incorrectly using <del>
+	 */
+	protected function inlineStrikethrough($e)
+	{
+		if (substr($e['text'], 1, 1) === '~' && preg_match('/^~~(?=\S)(.+?)(?<=\S)~~/', $e['text'], $matches))
+		{
+			return array(
+				'extent' => strlen($matches[0]),
+				'element' => array(
+					'name' => 'span',
+					'attributes' => ['style' => 'text-decoration: line-through'],
+					'handler' => array(
+						'function' => 'lineElements',
+						'argument' => $matches[1],
+						'destination' => 'elements',
+					)
+				),
+			);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Allow simple inline markup tags
+	 */
+	protected function inlineMarkup($str)
+	{
+		$text = $str['text'];
+
+		// Comments
+		if (preg_match('/<!--.*?-->/', $text, $match)) {
+			return ['element' => ['rawHtml' => ''], 'extent', strlen($match[0])];
+		}
+
+		// Skip if not a tag
+		if (!preg_match('!(</?)(\w+)([^>]*?)>!', $text, $match)) {
+			return null;
+		}
+
+		$name = $match[2];
+
+		if (!array_key_exists($name, self::ALLOWED_INLINE_TAGS)) {
+			return null;
+		}
+
+		$attributes = $this->_filterHTMLAttributes($name, self::ALLOWED_INLINE_TAGS[$name], $match[3]);
+
+		if (null === $attributes) {
+			return null;
+		}
+
+		$attributes_string = '';
+
+		foreach ($attributes as $key => $value) {
+			if (null === $value) {
+				return null;
+			}
+
+			$attributes_string .= sprintf(' %s="%s"', htmlspecialchars($key), htmlspecialchars($value));
+		}
+
+		$tag = sprintf('%s%s%s>', $match[1], $name, $attributes_string);
+
+		return [
+			'element' => [
+				'rawHtml' => $tag,
+				'allowRawHtmlInSafeMode' => true,
+			],
+			'extent' => strlen($match[0]),
+		];
+	}
+
+	/**
+	 * Allow some markup blocks, eg. iframe
+	 */
+	protected function blockMarkup($line): ?array
+	{
+		// Skip if not a tag
+		if (!preg_match('!<(/?)(\w+)([^>]*)>!', $line['text'], $match)) {
+			return null;
+		}
+
+		$name = $match[2];
+
+		if (!array_key_exists($name, self::ALLOWED_BLOCK_TAGS)) {
+			return null;
+		}
+
+		// Don't load youtube player, just display preview
+		if ($name == 'iframe' && preg_match('!https://www.youtube.com/embed/([^"]+)!', $line['text'], $m)) {
+			return [
+				'element' => [
+					'rawHtml' => sprintf('<figure class="video"><a href="https://www.youtube.com/watch?v=%s" target="_blank" title="Ouvrir la vidéo" rel="noreferrer"><img width=320 height=180 src="http://img.youtube.com/vi/%1$s/mqdefault.jpg" alt="Vidéo Youtube" loading="lazy" /></a></figure>', htmlspecialchars($m[1])),
+					'allowRawHtmlInSafeMode' => true,
+				],
+			];
+		}
+
+		$attributes = $this->_filterHTMLAttributes($name, self::ALLOWED_BLOCK_TAGS[$name], $match[3]);
+
+		if (null === $attributes) {
+			return null;
+		}
+
+		return [
+			'element' => [
+				'name' => $name,
+				'attributes' => $attributes,
+				'autobreak' => true,
+				'text' => '',
+			],
+		];
+	}
+
+	/**
+	 * Open external links in new page
+	 */
+	protected function inlineLink($e)
+	{
+		$e = parent::inlineLink($e);
+
+		if (isset($e['element']['attributes']['href']) && strstr($e['element']['attributes']['href'], ':')) {
+			$e['element']['attributes']['target'] = '_blank';
+			$e['element']['attributes']['rel'] = 'nofollow,noreferrer';
+		}
+
+		return $e;
+	}
+
+	/**
+	 * Add typo modifier to text
+	 */
+	protected function inlineText($text)
+	{
+		$text = CommonModifiers::typo($text);
+		return parent::inlineText($text);
+	}
+
+	/**
+	 * Use headers to populate TOC
+	 */
+	protected function blockHeader($line): ?array
+	{
+		$block = parent::blockHeader($line);
+
+		if (!is_array($block)) {
+			return $block;
+		}
+
+		$text =& $block['element']['handler']['argument'];
+
+		// Extract attributes: {#id} {.class-name}
+		if (preg_match('/(?!\\\\)[ #]*{((?:[#.][-\w]+[ ]*)+)}[ ]*$/', $text, $matches, PREG_OFFSET_CAPTURE)) {
+			$block['element']['attributes'] = $this->parseAttributeData($matches[1][0]);
+			$text = trim(substr($text, 0, $matches[0][1]));
+		}
+
+		if (strstr($block['element']['attributes']['class'] ?? '', 'no_toc')) {
+			return $block;
+		}
+
+		if (!isset($block['element']['attributes']['id'])) {
+			$block['element']['attributes']['id'] = strtolower(Utils::transformTitleToURI($text));
+		}
+
+		$level = substr($block['element']['name'], 1); // h1, h2... -> 1, 2...
+		$id = $block['element']['attributes']['id'];
+		$label = $text;
+		unset($text);
+
+		$this->toc[] = compact('level', 'id', 'label');
+
+		return $block;
+	}
+
+	protected function parseAttributeData(string $string): array
+	{
+		$data = [];
+		$classes = [];
+		$attributes = preg_split('/[ ]+/', $string, - 1, PREG_SPLIT_NO_EMPTY);
+
+		foreach ($attributes as $attribute) {
+			if ($attribute[0] === '#') {
+				$data['id'] = substr($attribute, 1);
+			}
+			else {
+				$classes[] = substr($attribute, 1);
+			}
+		}
+
+		if (count($classes))  {
+			$data['class'] = implode(' ', $classes);
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Replace [toc], <<toc>>, {:toc} and [[_TOC_]] with temporary TOC token
+	 * as we first need to process the headings to build the TOC
+	 */
+	protected function blockTOC(array $line): ?array
+	{
+		if (!preg_match('/^(?:\[toc\]|\{:toc\}|\[\[_TOC_\]\]|<<<?toc(?:\s+([^>]+?))?>>>?)$/', trim($line['text']), $match)) {
+			return null;
+		}
+
+		$level = 0;
+
+		if (!empty($match[1]) && false !== ($pos = strpos($match[1], 'level='))) {
+			$level = (int) trim(substr($match[1], 6 + $pos, 2), ' "');
+		}
+
+		$aside = (bool) strstr($match[1] ?? '', 'aside');
 
 		return [
 			'char'     => $line['text'][0],
 			'complete' => true,
 			'element'  => [
-				'name'                   => 'div',
-				'rawHtml'                => '<toc></toc>',
+				'rawHtml'                => $this->extensions->getTempTOC(false, compact('level', 'aside')),
 				'allowRawHtmlInSafeMode' => true,
 			],
 		];
-	}
-
-	public function buildTOC(): string
-	{
-		if (!count($this->toc)) {
-			return '';
-		}
-
-		$out = '<div class="toc">' . PHP_EOL;
-
-		$level = 0;
-
-		foreach ($this->toc as $k => $h) {
-			if ($h['level'] < $level) {
-				$out .= "\n" . str_repeat("\t", $level);
-				$out .= str_repeat("</ol></li>\n", $level - $h['level']);
-				$level = $h['level'];
-			}
-			elseif ($h['level'] > $level) {
-				$out .= "\n" . str_repeat("\t", $h['level']);
-				$out .= str_repeat("<ol>\n", $h['level'] - $level);
-				$level = $h['level'];
-			}
-			elseif ($k) {
-				$out .= "</li>\n";
-			}
-
-			$out .= str_repeat("\t", $level + 1);
-			$out .= sprintf('<li><a href="#%s">%s</a>', $h['id'], $h['label']);
-		}
-
-		if ($level > 0) {
-			$out .= "\n";
-			$out .= str_repeat('</li></ol>', $level);
-		}
-
-		$out .= '</div>';
-
-		return $out;
 	}
 
 	/**
@@ -199,10 +587,11 @@ class Parsedown extends Parent_Parsedown
 		$html = '';
 
 		foreach ($in['footnotes'] as $name => $value) {
-			$html .= sprintf('<dt id="fn-%s"><a href="#fn-ref-%1$s">%1$s</a></dt><dd>%s</dd>', htmlspecialchars($name), $this->text($value));
+			$html .= sprintf('<dt id="fn-%s"><a href="#fn-ref-%1$s">%1$s</a></dt><dd>%s</dd>', htmlspecialchars($name), $this->line($value));
 		}
 
 		$out = [
+			'complete' => true,
 			'element' => [
 				'name'                   => 'dl',
 				'attributes'             => ['class' => 'footnotes'],
@@ -215,21 +604,16 @@ class Parsedown extends Parent_Parsedown
 	}
 
 
-	protected function inlineFootnoteMarker($Excerpt)
+	protected function inlineFootnoteMarker($e)
 	{
-		if (preg_match('/^\[\^(.+?)\]/', $Excerpt['text'], $matches))
+		if (preg_match('/^\[\^(.+?)\]/', $e['text'], $matches))
 		{
 			$name = htmlspecialchars($matches[1]);
 
 			$Element = array(
-				'name' => 'sup',
-				'attributes' => ['id' => 'fn-ref-'.$name],
-				'handler' => 'element',
-				'text' => array(
-					'name' => 'a',
-					'attributes' => array('href' => '#fn-'.$name, 'class' => 'footnote-ref'),
-					'text' => $name,
-				),
+				'name' => 'a',
+				'attributes' => ['id' => 'fn-ref-'.$name, 'href' => '#fn-'.$name, 'class' => 'footnote-ref'],
+				'text' => $name,
 			);
 
 			return [
@@ -242,13 +626,11 @@ class Parsedown extends Parent_Parsedown
 
 	public function text($text)
 	{
+		$this->toc = [];
+
 		$out = parent::text($text);
 
-		if (false !== strpos($out, '<toc></toc>')) {
-			$toc = $this->buildTOC();
-			$out = str_replace('<toc></toc>', $toc, $out);
-		}
-
+		$out = $this->extensions->replaceTempTOC($out, $this->toc);
 		return $out;
 	}
 }

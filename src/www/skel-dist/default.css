@@ -187,7 +187,7 @@ nav.main ul li a:hover, .subcategories li a:hover {
 
 
 /* Formulaire de recherche */
-.search article p b, ::target-text {
+::target-text {
     background: #ff0;
     padding: .2em;
 }

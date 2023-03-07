@@ -78,7 +78,7 @@ $login = null;
 $login_regexp = '([a-z0-9_-]{1,63})';
 $domain_regexp = sprintf('/^%s\.%s$/', $login_regexp, preg_quote(FACTORY_DOMAIN, '/'));
 
-if (isset($_SERVER['SERVER_NAME']) && preg_match($regexp, $_SERVER['SERVER_NAME'], $match)) {
+if (isset($_SERVER['SERVER_NAME']) && preg_match($domain_regexp, $_SERVER['SERVER_NAME'], $match)) {
 	$login = $match[1];
 }
 elseif (PHP_SAPI == 'cli' && !empty($_SERVER['GARRADIN_FACTORY_USER']) && preg_match('/^' . $login_regexp . '$/', $_SERVER['GARRADIN_FACTORY_USER'])) {
@@ -101,5 +101,5 @@ if (!is_dir($user_data_dir)) {
 define('Garradin\DATA_ROOT', $user_data_dir);
 
 // Définir l'URL
-define('Garradin\WWW_URL', 'https://' . $login . FACTORY_USER_DIRECTORY . '/');
+define('Garradin\WWW_URL', 'https://' . $login . '.' . FACTORY_DOMAIN . '/');
 define('Garradin\WWW_URI', '/');

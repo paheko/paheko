@@ -1,5 +1,14 @@
 body.transparent {
     background: none;
+    padding: .5em;
+}
+
+body.transparent .header .menu {
+    display: none;
+}
+
+body.transparent main {
+    margin: 0;
 }
 
 html.dialog body {

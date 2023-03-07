@@ -9,7 +9,6 @@ class Render
 	const FORMAT_SKRIV = 'skriv';
 	const FORMAT_ENCRYPTED = 'skriv/encrypted';
 	const FORMAT_MARKDOWN = 'markdown';
-	const FORMAT_BLOCKS = 'blocks';
 
 	static protected $attachments = [];
 
@@ -28,9 +27,6 @@ class Render
 		}
 		else if ($format == self::FORMAT_MARKDOWN) {
 			return new Markdown($file, $link_prefix);
-		}
-		else if ($format == self::FORMAT_BLOCKS) {
-			return new Blocks($file, $link_prefix);
 		}
 		else {
 			throw new \LogicException('Invalid format: ' . $format);

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+	<html>
+	<head>
+		<title>Syntaxe MarkDown</title>
+		<meta charset="utf-8" />
+		<style type="text/css">
+		body, form, p, div, hr, fieldset, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6 {
+			margin: 0;
+			padding: 0;
+		}
+		body {
+			font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
+			padding: .8em;
+			background: #eee;
+		}
+		</style>
+		<link rel="stylesheet" type="text/css" href="../../../content.css" />
+	</head>
+	<body><div class="web-content"><p><a href="keyboard.html">Raccourcis claviers</a> | <a href="extensions.html">Extensions Paheko</a></p><aside class="toc">
+	<ol>
+		<li><a href="#syntaxe-markdown">Syntaxe MarkDown</a>
+		<ol>
+			<li><a href="#styles-de-texte">Styles de texte</a>
+			<ol>
+				<li><a href="#italique">Italique</a></li>
+				<li><a href="#gras">Gras</a></li>
+				<li><a href="#gras-et-italique">Gras et italique</a></li>
+				<li><a href="#barre">Barré</a></li>
+				<li><a href="#code">Code</a></li>
+				<li><a href="#avertissement-sur-les-styles-de-texte">Avertissement sur les styles de texte</a>
+			</ol></li>
+			<li><a href="#liens">Liens</a></li>
+			<li><a href="#blocs">Blocs</a>
+			<ol>
+				<li><a href="#paragraphes-et-retours-a-la-ligne">Paragraphes et retours à la ligne</a></li>
+				<li><a href="#titres-et-sous-titres">Titres et sous-titres</a></li>
+				<li><a href="#listes">Listes</a></li>
+				<li><a href="#citations">Citations</a></li>
+				<li><a href="#code">Code</a></li>
+				<li><a href="#tableaux">Tableaux</a></li>
+				<li><a href="#ligne-de-separation">Ligne de séparation</a></li>
+				<li><a href="#commentaires">Commentaires</a>
+			</ol></li>
+</ol></li>
+		<li><a href="#extensions-paheko">Extensions Paheko</a></li>
+		<li><a href="#extensions-markdown">Extensions MarkDown</a>
+		<ol>
+			<li><a href="#surligner-un-texte">Surligner un texte</a></li>
+			<li><a href="#notes-de-bas-de-page">Notes de bas de page</a></li>
+			<li><a href="#sommaire-table-des-matieres-automatique">Sommaire / table des matières automatique</a></li>
+			<li><a href="#insertion-de-videos-depuis-un-service-de-video">Insertion de vidéos depuis un service de vidéo</a></li>
+			<li><a href="#identifiant-et-classe-css-sur-les-titres">Identifiant et classe CSS sur les titres</a></li>
+			<li><a href="#classes-css">Classes CSS</a></li>
+			<li><a href="#tags-html">Tags HTML</a>
+</li></ol></li></ol></aside><h1 id="syntaxe-markdown">Syntaxe MarkDown</h1>
+<p>Paheko permet d'utiliser la syntaxe <a href="https://fr.wikipedia.org/wiki/Markdown" target="_blank" rel="nofollow,noreferrer">MarkDown</a> dans les pages du site web.</p>
+<p>Cette syntaxe est la plus répandue dans les outils d'édition de texte, si vous ne la connaissez pas encore, voici les règles qu'on peut utiliser pour formatter du texte avec MarkDown dans la plupart des outils (dont Paheko), ainsi que <a href="#extensions">les règles spécifiques supportées par Paheko</a>.</p>
+<h2 id="styles-de-texte">Styles de texte</h2>
+<h3 id="italique">Italique</h3>
+<p>Pour mettre un texte en italique il faut l'entourer de tirets bas ou d'astérisques :</p>
+<pre><code>Ce texte est en *italique, dingue !*</code></pre>
+<p>Donnera :</p>
+<blockquote>
+<p>Ce texte est en <em>italique, dingue !</em></p>
+</blockquote>
+<h3 id="gras">Gras</h3>
+<p>Pour le gras, procéder de la même manière, mais avec deux tirets bas ou deux astérisques :</p>
+<pre><code>Ce texte est **très gras**.</code></pre>
+<blockquote>
+<p>Ce texte est <strong>très gras</strong>.</p>
+</blockquote>
+<h3 id="gras-et-italique">Gras et italique</h3>
+<p>Pour combiner, utiliser trois tirets ou trois astérisques :</p>
+<pre><code>Ce texte est ***gras et italique***.</code></pre>
+<blockquote>
+<p>Ce texte est <strong><em>gras et italique</em></strong>.</p>
+</blockquote>
+<h3 id="barre">Barré</h3>
+<p>Utiliser un symbole tilde pour barrer un texte :</p>
+<pre><code>Texte ~~complètement barré~~.</code></pre>
+<blockquote>
+<p>Texte <span style="text-decoration: line-through">complètement barré</span>.</p>
+</blockquote>
+<h3 id="code">Code</h3>
+<p>Il est possible d'indiquer du code dans une ligne de texte avec un caractère <em>backtick</em> (accent grave en français, obtenu avec les touches <a href="https://superuser.com/questions/254076/how-do-i-type-the-tick-and-backtick-characters-on-windows" target="_blank" rel="nofollow,noreferrer">Alt Gr + 7</a>) :</p>
+<pre><code>Le code `&lt;html&gt;` c'est rigolo !</code></pre>
+<blockquote>
+<p>Le code <code>&lt;html&gt;</code> c'est rigolo !</p>
+</blockquote>
+<h3 id="avertissement-sur-les-styles-de-texte">Avertissement sur les styles de texte</h3>
+<p>Un style de texte ne s'applique que dans un même paragraphe, il n'est pas possible d'appliquer un style sur plusieurs paragraphes :</p>
+<p>Dans l'exemple suivant, les astérisques ne seront pas remplacées par du gras, elles resteront telles quelles :</p>
+<pre><code>Ce texte n'est pas très **gras.
+
+Et celui-ci encore moins**.</code></pre>
+<blockquote>
+<p>Ce texte n'est pas très **gras.</p>
+<p>Et celui-ci encore moins**.</p>
+</blockquote>
+<h2 id="liens">Liens</h2>
+<p>Créez un lien en mettant le texte désiré entre crochets et le lien associé entre parenthèses :</p>
+<pre><code>Je connais un super gestionnaire [d'association](https://paheko.cloud/) !</code></pre>
+<p>Donne :</p>
+<blockquote>
+<p>Je connais un super gestionnaire <a href="https://paheko.cloud/" target="_blank" rel="nofollow,noreferrer">d'association</a> !</p>
+</blockquote>
+<p>Il est possible de faire un lien vers une autre page du site web en utilisant son adresse unique : </p>
+<pre><code>N'oubliez pas de [vous inscrire à notre atelier](atelier-soudure).</code></pre>
+<p>Il est aussi possible de simplement inclure une adresse URL et elle sera automatiquement transformée en lien :</p>
+<pre><code>https://paheko.cloud/</code></pre>
+<h2 id="blocs">Blocs</h2>
+<h3 id="paragraphes-et-retours-a-la-ligne">Paragraphes et retours à la ligne</h3>
+<p>Une ligne vide indique un changement de paragraphe :</p>
+<pre><code>Ceci est un paragraphe.
+
+Ceci est est un autre.</code></pre>
+<p>Un retour à la ligne simple est traité comme tel :</p>
+<pre><code>Ceci est un
+paragraphe.</code></pre>
+<blockquote>
+<p>Ceci est un<br />
+paragraphe.</p>
+</blockquote>
+<h3 id="titres-et-sous-titres">Titres et sous-titres</h3>
+<p>Pour faire un titre, vous devez mettre un ou plusieurs caractères <em>hash</em> (<code>#</code>) au début de la ligne.</p>
+<p>Un titre avec un seul caractère est un titre principal (niveau 1), avec deux caractères c'est un sous-titre (niveau 2), etc. jusqu'au niveau 6.</p>
+<pre><code># Titre principal (niveau 1)
+## Sous-titre (niveau 2)
+### Sous-sous-titre (niveau 3)
+#### Niveau 4
+##### Niveau 5
+###### Dernier niveau de sous-titre (6)</code></pre>
+<p>Donnera :</p>
+<blockquote>
+<h1 class="no_toc">Titre principal (niveau 1)</h1>
+<h2 class="no_toc">Sous-titre (niveau 2)</h2>
+<h3 class="no_toc">Sous-sous-titre (niveau 3)</h3>
+<h4 class="no_toc">Niveau 4</h4>
+<h5 class="no_toc">Niveau 5</h5>
+<h6 class="no_toc">Dernier niveau de sous-titre (6)</h6>
+</blockquote>
+<h3 id="listes">Listes</h3>
+<p>Vous pouvez créer des listes avec les caractères astérisque (<code>*</code>) et tiret <code>-</code> en début de ligne pour des listes non ordonnées :</p>
+<pre><code>* une élément
+* un autre
+  - un sous élément
+  - un autre sous élément
+* un dernier élément</code></pre>
+<blockquote>
+<ul>
+<li>une élément</li>
+<li>un autre<ul>
+<li>un sous élément</li>
+<li>un autre sous élément</li>
+</ul>
+</li>
+<li>un dernier élément</li>
+</ul>
+</blockquote>
+<p>Ou avec des nombres pour des listes ordonnées :</p>
+<pre><code>1. élément un
+2. élément deux</code></pre>
+<blockquote>
+<ol>
+<li>élément un</li>
+<li>élément deux</li>
+</ol>
+</blockquote>
+<h3 id="citations">Citations</h3>
+<p>Les citations se font en ajoutant le signe <em>supérieur à</em> (<code>&gt;</code>) au début de la ligne :</p>
+<pre><code>&gt; Programming is not a science. Programming is a craft.</code></pre>
+<blockquote>
+<p>Programming is not a science. Programming is a craft.</p>
+</blockquote>
+<h3 id="code">Code</h3>
+<p>Créez un bloc de code en indentant chaque ligne avec quatre espaces, ou en mettant trois accents graves <code>`</code> (<em>backtick</em>, obtenu avec <a href="https://superuser.com/questions/254076/how-do-i-type-the-tick-and-backtick-characters-on-windows" target="_blank" rel="nofollow,noreferrer">Alt Gr + 7</a>) sur la ligne au dessus et en dessous de votre code :</p>
+<pre><code>```
+&lt;html&gt;...&lt;/html&gt;
+```</code></pre>
+<p>Résultat :</p>
+<pre><code>&lt;html&gt;...&lt;/html&gt;</code></pre>
+<h3 id="tableaux">Tableaux</h3>
+<p>Pour créer un tableau vous devez séparer les colonnes avec des barres verticales (<code>|</code>, obtenu avec les touches <a href="https://fr.wikipedia.org/wiki/Barre_verticale#Saisie" target="_blank" rel="nofollow,noreferrer">AltGr + 6</a>).</p>
+<p>La première ligne contient les noms des colonnes, la seconde ligne contient la ligne de séparation (chaque cellule doit contenir un ou plusieurs tirets), et les lignes suivantes représentent le contenu du tableau.</p>
+<pre><code>| Colonne 1 | Colonne 2 |
+| - | - | - |
+| AB | CD |</code></pre>
+<table>
+<thead>
+<tr>
+<th>Colonne 1</th>
+<th>Colonne 2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AB</td>
+<td>CD</td>
+</tr>
+</tbody>
+</table>
+<p>Par défaut les colonnes sont centrées. On peut aussi choisir l'alignement des colonnes à gauche ou à droite en mettant deux points après le ou les tirets de la ligne suivant l'entête :</p>
+<pre><code>| Aligné à gauche  | Centré          | Aligné à droite |
+| :--------------- |:---------------:| :--------------:|
+| Aligné à gauche  | ce texte        | Aligné à droite |
+| Aligné à gauche  | est             | Aligné à droite |
+| Aligné à gauche  | centré          | Aligné à droite |</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Aligné à gauche</th>
+<th style="text-align: center;">Centré</th>
+<th style="text-align: center;">Aligné à droite</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Aligné à gauche</td>
+<td style="text-align: center;">ce texte</td>
+<td style="text-align: center;">Aligné à droite</td>
+</tr>
+<tr>
+<td style="text-align: left;">Aligné à gauche</td>
+<td style="text-align: center;">est</td>
+<td style="text-align: center;">Aligné à droite</td>
+</tr>
+<tr>
+<td style="text-align: left;">Aligné à gauche</td>
+<td style="text-align: center;">centré</td>
+<td style="text-align: center;">Aligné à droite</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ligne-de-separation">Ligne de séparation</h3>
+<p>Il suffit de mettre au moins 3 tirets à la suite sur une ligne séparée pour ajouter une ligne de séparation :</p>
+<pre><code>---</code></pre>
+<p>Résultat :</p>
+<hr />
+<h3 id="commentaires">Commentaires</h3>
+<p>Pour ajouter un commentaire qui ne sera pas affiché dans le texte, utiliser la syntaxe suivante :</p>
+<pre><code>&lt;!-- Ceci est un commentaire --&gt;</code></pre>
+<h1 id="extensions-paheko">Extensions Paheko</h1>
+<p>Paheko propose des extensions permettant :</p>
+<ul>
+<li>d'insérer des images et fichiers joints ;</li>
+<li>d'insérer une table des matières automatique ;</li>
+<li>d'aligner le texte au centre, à gauche, à droite ;</li>
+<li>de créer des mises en page complexes avec des colonnes et grilles ;</li>
+<li>de changer la couleur du texte ou du fond.</li>
+</ul>
+<p><a href="extensions.html">Cliquer ici pour lire la documentation des extensions Paheko</a></p>
+<h1 id="extensions-markdown">Extensions MarkDown</h1>
+<h2 id="surligner-un-texte">Surligner un texte</h2>
+<p>Il est possible de marquer une phrase ou un mot comme surligné en l'entourant de deux signes égal :</p>
+<pre><code>Ce texte est ==surligné==.</code></pre>
+<blockquote>
+<p>Ce texte est <mark>surligné</mark>.</p>
+</blockquote>
+<h2 id="notes-de-bas-de-page">Notes de bas de page</h2>
+<p>Pour créer une note de base de page, il faut mettre entre crochets un signe circonflexe (obtenu en appuyant sur la touche circonflexe, puis sur espace) suivi du numéro ou du nom de la note. Enfin, à la fin du texte il faudra répéter les crochets, le signe circonflexe, suivi de deux points et de la définition.</p>
+<pre><code>Texte très intéressant[^1]. Approuvé par 100% des utilisateurs[^Source].
+
+[^1]: Ceci est une note de bas de page
+[^Source]: Enquête Paheko sur la base de 1 personne interrogée.</code></pre>
+<p>Donnera ceci :</p>
+<blockquote>
+<p>Texte très intéressant<a id="fn-ref-1" href="#fn-1" class="footnote-ref">1</a>. Approuvé par 100% des utilisateurs<a id="fn-ref-Source" href="#fn-Source" class="footnote-ref">Source</a>.</p>
+<dl class="footnotes"><dt id="fn-1"><a href="#fn-ref-1">1</a></dt><dd>Ceci est une note de bas de page</dd><dt id="fn-Source"><a href="#fn-ref-Source">Source</a></dt><dd>Enquête Paheko sur la base de 1 personne interrogée.</dd></dl>
+</blockquote>
+<h2 id="sommaire-table-des-matieres-automatique">Sommaire / table des matières automatique</h2>
+<p>En plus de la syntaxe <code>&lt;&lt;toc&gt;&gt;</code> documentée dans les extensions communes, Paheko supporte aussi les syntaxes suivantes par compatibilité avec <a href="https://alexharv074.github.io/2018/08/28/auto-generating-markdown-tables-of-contents.html" target="_blank" rel="nofollow,noreferrer">les autres moteurs de rendu MarkDown</a> : <code>{:toc}</code> <code>[[_TOC_]]</code> <code>[toc]</code>.</p>
+<p>Il est aussi possible d'indiquer qu'un titre ne doit pas être inclus dans le sommaire en utilisant la classe <code>no_toc</code> comme ceci :</p>
+<pre><code>## Sous-titre non-inclus {.no_toc}</code></pre>
+<h2 id="insertion-de-videos-depuis-un-service-de-video">Insertion de vidéos depuis un service de vidéo</h2>
+<p>Certains services vidéo comme les instances Peertube permettent l'intégration des vidéos.</p>
+<p>Pour cela il faut recopier le code d'intégration donné par le service vidéo. Voici un exemple :</p>
+<pre><code>&lt;iframe title="ENQUÊTE : Brûler la Forêt pour Sauver le Climat ? | EP 3 - Le bois énergie" width="560" height="315" src="https://peertube.stream/videos/embed/12c52265-e3b3-4bad-93f3-f2c1df5bbe4f" frameborder="0" allowfullscreen="" sandbox="allow-same-origin allow-scripts allow-popups"&gt;&lt;/iframe&gt;</code></pre>
+<p>Résultat :</p>
+<iframe title="ENQUÊTE : Brûler la Forêt pour Sauver le Climat ? | EP 3 - Le bois énergie" width="560" height="315" src="https://peertube.stream/videos/embed/12c52265-e3b3-4bad-93f3-f2c1df5bbe4f" frameborder="" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-same-origin allow-scripts"></iframe>
+<h2 id="identifiant-et-classe-css-sur-les-titres">Identifiant et classe CSS sur les titres</h2>
+<p>Il est possible de spécifier l'ID et la classe CSS d'un titre en les rajoutant à la fin du titre, entre accolades, comme ceci :</p>
+<pre><code>## Titre de niveau 2 {#titre2} {.text-center}</code></pre>
+<p>Le code HTML résultant sera comme ceci :</p>
+<pre><code>&lt;h2 id="titre2" class="text-center"&gt;Titre de niveau 2&lt;/h2&gt;</code></pre>
+<h2 id="classes-css">Classes CSS</h2>
+<p>Il est possible de donner une classe CSS parente à un ensemble d'éléments en les mettant au centre d'un bloc définissant cette classe :</p>
+<pre><code>{{{.custom-quote .custom-block
+
+Paragraphe
+
+&gt; Citation
+}}}</code></pre>
+<p>Créera le code HTML suivant :</p>
+<pre><code>&lt;div class="custom-quote custom-block"&gt;
+
+    &lt;p&gt;Paragraphe&lt;/p&gt;
+
+    &lt;blockquote&gt;&lt;p&gt;Citation&lt;/p&gt;&lt;/blockquote&gt;
+&lt;/div&gt;</code></pre>
+<h2 id="tags-html">Tags HTML</h2>
+<p>Certains tags HTML sont autorisés :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Tag</th>
+<th style="text-align: left;">Utilisation</th>
+<th style="text-align: left;">Exemple</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>&lt;kbd&gt;</code></td>
+<td style="text-align: left;">Touches de clavier</td>
+<td style="text-align: left;"><kbd>Ctrl</kbd> + <kbd>B</kbd></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&lt;samp&gt;</code></td>
+<td style="text-align: left;">Exemple de programme en console</td>
+<td style="text-align: left;"><samp>bohwaz@platypus ~ % sudo apt install paheko</samp></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&lt;var&gt;</code></td>
+<td style="text-align: left;">Variable dans un programme informatique</td>
+<td style="text-align: left;"><var>ab</var> + <var>cd</var> = 42</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&lt;del&gt;</code></td>
+<td style="text-align: left;">Texte supprimé</td>
+<td style="text-align: left;">Texte <del>supprimé</del></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&lt;ins&gt;</code></td>
+<td style="text-align: left;">Texte ajouté</td>
+<td style="text-align: left;">Texte <ins>ajouté</ins></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&lt;sup&gt;</code></td>
+<td style="text-align: left;">Texte en exposant</td>
+<td style="text-align: left;">Texte<sup>exposant</sup></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&lt;sub&gt;</code></td>
+<td style="text-align: left;">Texte en indice</td>
+<td style="text-align: left;">Texte<sub>indice</sub></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&lt;mark&gt;</code></td>
+<td style="text-align: left;">Texte surligné</td>
+<td style="text-align: left;">Texte <mark>surligné</mark></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&lt;audio&gt;</code></td>
+<td style="text-align: left;">Insérer un lecteur audio dans la page</td>
+<td style="text-align: left;"><code>&lt;audio src="mon_fichier.mp3"&gt;</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&lt;video&gt;</code></td>
+<td style="text-align: left;">Insérer une vidéo dans la page</td>
+<td style="text-align: left;"><code>&lt;video src="mon_fichier.webm"&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p>Mais leurs possibilités sont limitées, notamment sur les attributs autorisés.</p></div></body></html>

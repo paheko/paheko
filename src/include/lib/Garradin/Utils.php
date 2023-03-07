@@ -1022,7 +1022,7 @@ class Utils
             2 => ['pipe', 'w'], // stderr
         ];
 
-        $cmd = 'prince -o - -';
+        $cmd = 'prince --pdf-profile="PDF/A-3b" -o - -';
         $process = proc_open($cmd, $descriptorspec, $pipes);
 
         if (!is_resource($process)) {
@@ -1096,7 +1096,7 @@ class Utils
 
         switch ($cmd) {
             case 'prince':
-                $cmd = 'prince -o %2$s %1$s';
+                $cmd = 'prince --pdf-profile="PDF/A-3b" -o %2$s %1$s';
                 break;
             case 'chromium':
                 $cmd = 'chromium --headless --disable-gpu --run-all-compositor-stages-before-draw --print-to-pdf-no-header --print-to-pdf=%2$s %1$s';

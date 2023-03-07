@@ -44,6 +44,11 @@ test_requis(
 );
 
 test_requis(
+    class_exists('\IntlDateFormatter') && function_exists('\idn_to_ascii'),
+    'L\'extension "intl" n\'est pas installée mais est nécessaire (apt install php-intl).'
+);
+
+test_requis(
     class_exists('SQLite3'),
     'Le module de base de données SQLite3 n\'est pas disponible.'
 );

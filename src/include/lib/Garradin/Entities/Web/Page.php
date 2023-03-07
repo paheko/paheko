@@ -49,7 +49,6 @@ class Page extends Entity
 	];
 
 	const FORMATS_LIST = [
-		//Render::FORMAT_BLOCKS => 'Blocs (beta)',
 		Render::FORMAT_MARKDOWN => 'MarkDown',
 		Render::FORMAT_SKRIV => 'SkrivML',
 		Render::FORMAT_ENCRYPTED => 'Chiffré',
@@ -65,6 +64,11 @@ class Page extends Entity
 
 	const TYPE_CATEGORY = 1;
 	const TYPE_PAGE = 2;
+
+	const TYPES = [
+		self::TYPE_CATEGORY => 'Category',
+		self::TYPE_PAGE => 'Page',
+	];
 
 	const TEMPLATES = [
 		self::TYPE_PAGE => 'article.html',
@@ -161,8 +165,12 @@ class Page extends Entity
 		return $this->path;
 	}
 
-	public function syncFile(string $path): void
+	public function syncFile(?string $path = null): void
 	{
+		if (null === $path) {
+			$path = $this->file_path;
+		}
+
 		$export = $this->export();
 
 		$exists = Files::callStorage('exists', $path);
@@ -452,10 +460,12 @@ class Page extends Entity
 	public function export(): string
 	{
 		$meta = [
-			'Title' => str_replace("\n", '', trim($this->title)),
-			'Status' => $this->status,
+			'Title'     => str_replace("\n", '', trim($this->title)),
+			'Status'    => $this->status,
 			'Published' => $this->published->format('Y-m-d H:i:s'),
-			'Format' => $this->format,
+			'Modified'  => $this->modified->format('Y-m-d H:i:s'),
+			'Format'    => $this->format,
+			'Type'      => self::TYPES[$this->type],
 		];
 
 		$out = '';
@@ -493,6 +503,9 @@ class Page extends Entity
 			elseif ($key == 'published') {
 				$this->set('published', new \DateTime($value));
 			}
+			elseif ($key == 'modified') {
+				$this->set('modified', new \DateTime($value));
+			}
 			elseif ($key == 'format') {
 				$value = strtolower($value);
 
@@ -501,6 +514,21 @@ class Page extends Entity
 				}
 
 				$this->set('format', $value);
+			}
+			elseif ($key == 'type') {
+				$value = strtolower($value);
+
+				if ($value == strtolower(self::TYPES[self::TYPE_CATEGORY])) {
+					$value = self::TYPE_CATEGORY;
+				}
+				elseif ($value == strtolower(self::TYPES[self::TYPE_PAGE])) {
+					$value = self::TYPE_PAGE;
+				}
+				else {
+					throw new \LogicException('Unknown type: ' . $value);
+				}
+
+				$this->set('type', $value);
 			}
 			elseif ($key == 'status') {
 				$value = strtolower($value);
@@ -527,19 +555,25 @@ class Page extends Entity
 			throw new \LogicException('Invalid page content: ' . $file->parent);
 		}
 
-		$this->set('modified', $file->modified);
+		if (empty($this->modified)) {
+			$this->set('modified', $file->modified);
+		}
 
-		$this->set('type', $this->checkRealType());
+		if ($this->type != self::TYPE_CATEGORY) {
+			$this->set('type', $this->checkRealType());
+		}
 	}
 
 	public function checkRealType(): int
 	{
+		// Make sure this is actually not a category
 		foreach (Files::list(Utils::dirname($this->filepath())) as $subfile) {
 			if ($subfile->type == File::TYPE_DIRECTORY) {
 				return self::TYPE_CATEGORY;
 			}
 		}
 
+		// No subdirectory found: this is a single page
 		return self::TYPE_PAGE;
 	}
 

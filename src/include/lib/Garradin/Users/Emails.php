@@ -24,7 +24,6 @@ class Emails
 {
 	const RENDER_FORMATS = [
 		null => 'Texte brut',
-		Render::FORMAT_SKRIV => 'SkrivML',
 		Render::FORMAT_MARKDOWN => 'MarkDown',
 	];
 
@@ -89,7 +88,7 @@ class Emails
 			$content_html = null;
 
 			if ($template) {
-				$template->assignArray((array) $variables);
+				$template->assignArray((array) $variables, null, false);
 
 				// Disable HTML escaping for plaintext emails
 				$template->setEscapeDefault(null);
@@ -211,7 +210,7 @@ class Emails
 	/**
 	 * Run the queue of emails that are waiting to be sent
 	 */
-	static public function runQueue(?int $context = null): void
+	static public function runQueue(?int $context = null): ?int
 	{
 		$db = DB::getInstance();
 
@@ -220,7 +219,7 @@ class Emails
 
 		$save_sent = function () use (&$ids, $db) {
 			if (!count($ids)) {
-				return;
+				return null;
 			}
 
 			$db->exec(sprintf('UPDATE emails_queue SET sending = 2 WHERE %s;', $db->where('id', $ids)));
@@ -228,6 +227,7 @@ class Emails
 		};
 
 		$limit_time = strtotime('1 month ago');
+		$count = 0;
 
 		// listQueue nettoie déjà la queue
 		foreach ($queue as $row) {
@@ -267,6 +267,7 @@ class Emails
 			}
 
 			$ids[] = $row->id;
+			$count++;
 
 			// Mark messages as sent from time to time
 			// to avoid starting from the beginning if the queue is killed
@@ -286,6 +287,8 @@ class Emails
 				WHERE hash IN (SELECT recipient_hash FROM emails_queue WHERE sending = 2);
 			DELETE FROM emails_queue WHERE sending = 2;
 		END;', $db->where('id', $ids), Email::TABLE));
+
+		return $count;
 	}
 
 	/**
@@ -590,7 +593,7 @@ class Emails
 			$tpl = new UserTemplate;
 			$tpl->setCode($message);
 			$tpl->toggleSafeMode(true);
-			$tpl->assignArray((array)$list[$random]);
+			$tpl->assignArray((array)$list[$random], null, false);
 			$tpl->setEscapeDefault(null);
 
 			try {

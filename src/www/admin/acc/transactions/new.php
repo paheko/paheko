@@ -51,7 +51,7 @@ if (qg('l')) {
 
 // dt = date
 if (qg('dt')) {
-	$transaction->date = new Date(qg('d'));
+	$transaction->date = new Date(qg('dt'));
 }
 
 // t = type
@@ -166,6 +166,11 @@ $form->runIf('save', function () use ($transaction, $session, $current_year) {
 	}
 
 	$session->set('acc_last_date', $transaction->date->format('Y-m-d'));
+
+	if (array_key_exists('_dialog', $_GET)) {
+		Utils::reloadParentFrame();
+		return;
+	}
 
 	Utils::redirect(sprintf('!acc/transactions/details.php?id=%d&created', $transaction->id()));
 }, $csrf_key);

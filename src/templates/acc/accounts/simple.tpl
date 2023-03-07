@@ -46,6 +46,15 @@
 				<th>{$line.label}</th>
 				<td>{$line.line_reference}</td>
 				<td class="num">{foreach from=$line.projects item="code" key="id"}<a href="{$admin_url}acc/reports/statement.php?project={$id}&amp;year={$year.id}">{$code}</a> {/foreach}</td>
+				{if property_exists($line, 'status_label')}
+				<td>
+					{if $line.status & Entities\Accounting\Transaction::STATUS_WAITING}
+						<span class="alert">{$line.status_label}</span>
+					{else}
+						<span class="confirm">{$line.status_label}</span>
+					{/if}
+				</td>
+				{/if}
 				<td class="actions">
 					{if $line.type == Entities\Accounting\Transaction::TYPE_DEBT && ($line.status & Entities\Accounting\Transaction::STATUS_WAITING)}
 						{linkbutton shape="check" label="Régler cette dette" href="!acc/transactions/payoff.php?for=%d"|args:$line.id}
