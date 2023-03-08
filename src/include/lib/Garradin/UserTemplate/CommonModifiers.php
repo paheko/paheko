@@ -11,17 +11,12 @@ use Garradin\Utils;
 class CommonModifiers
 {
 	const PHP_MODIFIERS_LIST = [
-		'strtolower',
-		'strtoupper',
-		'ucfirst',
-		'ucwords',
 		'strtotime',
 		'htmlentities',
 		'htmlspecialchars',
 		'trim',
 		'ltrim',
 		'rtrim',
-		'lcfirst',
 		'md5',
 		'sha1',
 		'metaphone',
@@ -85,6 +80,11 @@ class CommonModifiers
 		'size_in_bytes' => [Utils::class, 'format_bytes'],
 		'typo',
 		'css_hex_to_rgb',
+		'toupper',
+		'tolower',
+		'ucwords',
+		'ucfirst',
+		'lcfirst',
 	];
 
 	static public function money($number, bool $hide_empty = true, bool $force_sign = false, bool $html = false): string
@@ -289,5 +289,30 @@ class CommonModifiers
 		}
 
 		return implode(', ', $hex);
+	}
+
+	static public function toupper($str): string
+	{
+		return function_exists('mb_strtoupper') ? mb_strtoupper($str) : strtoupper($str);
+	}
+
+	static public function tolower($str): string
+	{
+		return function_exists('mb_strtolower') ? mb_strtolower($str) : strtolower($str);
+	}
+
+	static public function ucwords($str): string
+	{
+		return function_exists('mb_convert_case') ? mb_convert_case($str, \MB_CASE_TITLE) : ucwords($str);
+	}
+
+	static public function ucfirst($str): string
+	{
+		return function_exists('mb_strtoupper') ? mb_strtoupper(mb_substr($str, 0, 1)) . mb_substr($str, 1) : ucfirst($str);
+	}
+
+	static public function lcfirst($str): string
+	{
+		return function_exists('mb_strtolower') ? mb_strtolower(mb_substr($str, 0, 1)) . mb_substr($str, 1) : ucfirst($str);
 	}
 }

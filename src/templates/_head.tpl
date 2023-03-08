@@ -18,6 +18,7 @@ if (!isset($current)) {
 		{/foreach}
 	{/if}
 	{if isset($custom_css)}
+		<?php $custom_css = is_array($custom_css) ? $custom_css : [$custom_css]; ?>
 		{foreach from=$custom_css item="css_url"}
 			<link rel="stylesheet" type="text/css" href="{$css_url|local_url:"!static/styles/"}?{$version_hash}" media="all" />
 		{/foreach}
