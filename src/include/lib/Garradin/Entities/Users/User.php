@@ -99,9 +99,16 @@ class User extends Entity
 		}
 
 		// Don't bother for type with generated columns
+		// also don't set it as modified as we don't save the value
 		if ($this->_types[$key] == 'dynamic') {
 			$this->$key = $value;
 			return;
+		}
+
+		// Filter double/triple spaces instead of double spaces,
+		// to help users who try to log in, see https://fossil.kd2.org/paheko/info/c3295fe0af72e4b3
+		if (is_string($value) && false !== strpos($value, '  ') && DynamicFields::get($key)->type == 'text') {
+			$value = preg_replace('![ ]{2,}!', ' ', $value);
 		}
 
 		return parent::set($key, $value, $loose, $check_for_changes);
