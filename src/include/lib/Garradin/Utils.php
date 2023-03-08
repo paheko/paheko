@@ -264,8 +264,9 @@ class Utils
         }
         elseif (substr($url, 0, 2) == './') {
         	$base = self::getSelfURL();
-        	$base = preg_replace('!/.*$!', '/', $base);
-        	return $base . substr($url, 2);
+        	$base = preg_replace('!/[^/]*$!', '/', $base);
+        	$base = trim($base, '/');
+        	return $base . '/' . substr($url, 2);
         }
         elseif (substr($url, 0, 1) == '/' && ($pos = strpos($url, WWW_URI)) === 0) {
             return WWW_URL . substr($url, strlen(WWW_URI));
@@ -303,7 +304,7 @@ class Utils
             $uri = substr($uri, strlen(WWW_URI . 'admin/'));
         }
 
-        return ADMIN_URL . $uri;
+        return ADMIN_URL . ltrim($uri, '/');
     }
 
     static public function getSelfURI($qs = true)
