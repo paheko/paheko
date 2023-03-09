@@ -316,7 +316,7 @@ class Session extends \KD2\UserSession
 		$sql = sprintf('SELECT u.id, u.%s AS email, u.password, u.pgp_key, c.perm_connect
 			FROM users u
 			INNER JOIN users_categories c ON c.id = u.id_category
-			WHERE u.%s = ? COLLATE NOCASE
+			WHERE u.%s = ? COLLATE U_NOCASE
 				AND u.%1$s IS NOT NULL
 			LIMIT 1;',
 			$db->quoteIdentifier($email_field),
