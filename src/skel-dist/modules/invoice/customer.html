@@ -6,7 +6,7 @@
 {{:include file='./include/style.tpl'}}
 {{:include file='./include/navigation.html'}}
 
-{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, STATUS_LABELS'}}
+{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, REJECTED_STATUS, VALIDATED_STATUS, MISC_STATUS, STATUS_LABELS, QUOTATION_TYPE'}}
 
 {{* ==================== Listing ==================== *}}
 
@@ -23,66 +23,14 @@
 	{{/restrict}}
 {{/if}}
 
-{{:assign previous_status='-1'}}
-{{#load
-	select="id, key, document AS json, datetime(json_extract(document, '$.date')) AS date"
-	where="$$.recipient_business_name = :business_name AND $$.type = 'quotation'"
-	order='$$.status, date DESC'
-	:business_name=$_GET.id
-}}
-	{{:assign var="label" from="STATUS_LABELS.%s"|args:$status}}
-	{{if $status !== $previous_status && $previous_status !== '-1'}}
-			</tbody>
-		</table>
-	{{/if}}
-	{{if $status !== $previous_status || $previous_status === '-1'}}
-		<h3 class="ruler">{{$label}}</h3>
-		<table class="list">
-			<thead>
-				<tr>
-					<th>Numéro</th>
-					<td>Émission</td>
-					<td>Échéance</td>
-					<td>Intitulé</td>
-					<td class="money">Montant</td>
-					<td class="num">Membre</td>
-					<td></td>
-				</tr>
-			</thead>
-			<tbody>
-	{{/if}}
-				<tr>
-					<td><a href="details.html?id={{$id|intval}}">{{$key}}</a></td>
-					<td>{{$date|date_short}}</td>
-					<td>{{$deadline|date_short}}</td>
-					<td><a href="details.html?id={{$id|intval}}">{{$subject}}</a></td>
-					<td class="money">{{$total|money_currency}}</td>
-					<td class="num">
-						{{if $recipient_member_id}}
-							{{:link href="!users/details.php?id=%s"|args:$recipient_member_numero label=$recipient_member_numero}}
-						{{else}}
-						-
-						{{/if}}
-					</td>
-					<td class="actions">
-						{{#restrict section="accounting" level="write"}}
-							{{if !$archived && $status == $DRAFT_STATUS}}
-							{{:linkbutton shape="edit" label="Modifier" href="edit.html?id=%d"|args:$id}}
-							{{/if}}
-						{{/restrict}}
-						{{if $status !== $DRAFT_STATUS}}
-							{{:linkbutton label="PDF" href="preview.html?id=%s"|args:$id shape="document"}}
-						{{else}}
-							{{:linkbutton label="Aperçu" href="preview.html?id=%s"|args:$id shape="document"}}
-						{{/if}}
-					</td>
-				</tr>
+{{:assign list_select="key; id AS 'Numéro'; datetime($$.date) AS 'Émission'; $$.deadline AS 'Échéance'; $$.subject AS 'Intitulé'; $$.total AS 'Montant'; $$.recipient_member_id AS 'Membre'; $$.recipient_member_numero; $$.status"}}
+{{:assign list_where="$$.recipient_business_name = :business_name AND $$.type = :type AND $$.status = :status"}}
+{{:assign list_order=8}}
 
-	{{:assign previous_status=$status}}
-{{/load}}
-
-	</tbody>
-</table>
+{{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where order=$list_order type=$QUOTATION_TYPE status=$AWAITING_STATUS STATUS_LABELS=$STATUS_LABELS}}
+{{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where order=$list_order type=$QUOTATION_TYPE status=$REJECTED_STATUS STATUS_LABELS=$STATUS_LABELS}}
+{{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where order=$list_order type=$QUOTATION_TYPE status=$VALIDATED_STATUS STATUS_LABELS=$STATUS_LABELS}}
+{{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where order=$list_order type=$QUOTATION_TYPE status=$MISC_STATUS STATUS_LABELS=$STATUS_LABELS}}
 
 {{:admin_footer}}
 
