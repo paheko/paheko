@@ -1,0 +1,36 @@
+<nav class="tabs">
+	<aside class="menu">
+		<ul>
+			{{if $type === $QUOTATION_TYPE}}
+				<li>{{:linkbutton href="edit.html" label="Nouveau" shape="plus"}} |</li>
+			
+				{{if $status == $DRAFT_STATUS}}
+					<li>{{:linkbutton href="preview.html?id=%s&source=details"|args:$id label="Aperçu papier" shape="document"}}</li>
+					<li>{{:linkbutton href="./edit.html?id=%d"|args:$id label="Modifier" shape="edit"}}</li>
+					<li>{{:linkbutton href="action.html?id=%d&action=sign&show=quotation"|args:$id label="Signer le devis" shape="check"}}</li>
+					<li>{{:linkbutton href="action.html?id=%d&action=ask_deletion&show=quotation"|args:$id label="Supprimer" shape="delete" class="irreversible"}}</li>
+				{{else}}
+					<li>{{:linkbutton label="PDF" href="preview.html?id=%s&source=details"|args:$id shape="document"}}</li>
+					{{if $status == $AWAITING_STATUS}}
+						<li>{{:linkbutton href="action.html?id=%d&show=quotation&action=ask_validation"|args:$id label="Générer facture" shape="export"}}</li>
+						<li>{{:linkbutton href="#" label="Annuler le devis" shape="delete" class="irreversible" title="prochainement"}}</li>
+					{{else}}
+						<li>{{:linkbutton href="#" label="Archiver" shape="archive" title="prochainement"}}</li>
+					{{/if}}
+				{{/if}}
+			{{else}}
+				<li>{{:linkbutton href="edit.html" label="Nouveau devis" shape="plus"}} |</li>
+
+				{{if $status !== $DRAFT_STATUS}}
+					<li>{{:linkbutton label="PDF" href="preview.html?id=%s&source=details"|args:$id shape="document"}}</li>
+					{{if $status == $AWAITING_STATUS}}
+						<li>{{:linkbutton href="#" label="Annuler la facture" shape="delete" class="irreversible" title="prochainement"}}</li>
+					{{else}}
+						<li>{{:linkbutton href="#" label="Archiver" shape="archive" title="prochainement"}}</li>
+					{{/if}}
+				{{/if}}
+			{{/if}}
+		</ul>
+	</aside>
+	{{:include file='./main_nav_tabs.html'}}
+</nav>

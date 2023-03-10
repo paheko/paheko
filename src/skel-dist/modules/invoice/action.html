@@ -1,0 +1,107 @@
+{{#restrict section="accounting" level="write"}}
+
+{{* ==================== Header ==================== *}}
+
+{{:admin_header title="Devis et factures" current="acc"}}
+{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, VALIDATED_STATUS, REJECTED_STATUS, PAID_STATUS, DOCUMENT_TYPES, TYPE_LABELS, STATUS_LABELS, INVOICE_STATUS_LABELS, QUOTATION_TYPE, INVOICE_TYPE, VERSION'}}
+
+{{:include file='./include/style.tpl'}}
+
+{{if $_GET.action === 'sign' || $_POST.signing_submit || $_GET.action === 'delete' || $_POST.reject_submit || $_POST.validate_submit || $_POST.mark_as_paid_submit || $_POST.status_update_button}}
+	{{:include file='./_modification_controller.tpl' keep='check_errors'}}
+{{elseif $_GET.id === null}}
+	<p class="error block">Aucun document séléctionné.</p>
+{{/if}}
+
+{{#load id=$_GET.id|intval}}
+
+	{{* ======================= Menu =========================== *}}
+	
+	{{:include file='./include/document_details_menu.html'}}
+
+	{{* ======================= Title =========================== *}}
+
+	{{:assign var="label" from="TYPE_LABELS.%s"|args:$type}}
+	{{if $type === $INVOICE_TYPE}}
+		{{:assign var="status_label" from="INVOICE_STATUS_LABELS.%s"|args:$status}}
+	{{else}}
+		{{:assign var="status_label" from="STATUS_LABELS.%s"|args:$status}}
+	{{/if}}
+	<h1>{{$label}} n° {{$key}} - {{$status_label}}</h1>
+
+	{{* ======================= Errors =========================== *}}
+
+	{{if $check_errors}}
+		{{#foreach from=$check_errors item='error'}}
+			<p class="error block">{{$error}}</p>
+		{{/foreach}}
+	{{/if}}
+
+	{{* ======== Forms (deletion/signing/reject/validation/payment) ============= *}}
+
+	{{if $_GET.action === 'ask_deletion'}}
+		<h2 class="ruler irreversible">Action irreversible</h2>
+		<fieldset>
+			<legend>Suppression</legend>
+			<div class="block error">
+				<h3 class="infos">Vous allez supprimer définitivement le brouillon de devis n° {{$key}} : "{{$subject}}".</h3>
+				<p class="infos">Êtes-vous sûr de vouloir continuer ?</p>
+				<p>
+					{{:linkbutton href="action.html?id=%d&show=quotation&action=delete"|args:$_GET.id label="Supprimer le devis" shape="delete"}}
+					{{:linkbutton href="details.html?id=%d&show=quotation&ok=3"|args:$_GET.id label="Conserver le brouillon" shape="lock" class="safe"}}
+				</p>
+			</div>
+		</fieldset>
+
+	{{elseif $_GET.action === 'sign'}}
+		<form method="POST" action="">
+			<fieldset>
+				<legend>Signature du devis</legend>
+				<ul id="signing_inputs">
+					<li>{{:input type="text" name="signing_place" label="Lieu de la signature" placeholder="ex : Dijon" default=$module.config.signing_place required=true}}</li>
+					<li>{{:input type="date" name="signing_date" label="Date de la signature" default=$now required=true}}</li>
+					{{if !$check_errors}}<li class="error block">Signer le devis est définitif. Vous ne pourrez plus modifier son contenu par la suite.</li>{{/if}}
+					<li>{{:button type="submit" name="signing_submit" label="Signer le devis" class="main"}}</li>
+				</ul>
+			</fieldset>
+		</form>
+
+	{{elseif $_GET.action === 'ask_rejection'}}
+		<form method="POST" action="">
+			<fieldset>
+				<legend>Refus du devis par le/la client.e</legend>
+				{{if !$check_errors}}<p class="error block">Refuser le devis est définitif. Vous ne pourrez pas rétablir le devis comme "en attente de validation".<br />Il sera néanmoins possible d'annuler le devis.</p>{{/if}}
+				{{:button type="submit" name="reject_submit" label="Marquer comme refusé" class="main"}}
+			</fieldset>
+		</form>
+
+	{{elseif $_GET.action === 'ask_validation'}}
+		<form method="POST" action="">
+			<fieldset>
+				<legend>Validation du devis par le/la client.e</legend>
+				{{if !$check_errors}}<p class="error block">Valider le devis est définitif. Vous ne pourrez pas rétablir le devis comme "en attente de validation".<br />Il sera néanmoins possible d'annuler le devis.</p>{{/if}}
+				<div class="infos">{{:input type="checkbox" name="invoice" value="1" label="Générer automatiquement une facture"}}</div>
+				{{:button type="submit" name="validate_submit" label="Marquer comme validé" shape="check" class="main"}}
+			</fieldset>
+		</form>
+
+	{{elseif $_GET.action === 'ask_mark_as_paid'}}
+		<form method="POST" action="">
+			<fieldset>
+				<legend>Marquer la facture comme payée</legend>
+				{{if !$check_errors}}<p class="error block">Marquer la facture comme payée est définitif. Vous ne pourrez pas rétablir la facture comme "en attente de paiement".<br />Il sera néanmoins possible d''annuler la facture.</p>{{/if}}
+				{{:input type="date" name="date" label="Date du paiement" default=$now required=true}}
+				{{:input type="textarea" name="comment" label="Remarque" required=false cols="50" rows="4"}}
+				{{:input type="list" name="transaction" label="Écriture correspondante" target="./transaction_selector.inc.tpl" can_delete=true required=false}}
+				{{:button type="submit" name="mark_as_paid_submit" label="Marquer comme payée" shape="check" class="main"}}
+			</fieldset>
+		</form>
+	{{/if}}
+
+{{/load}}
+
+{{:admin_footer}}
+
+{{else}}
+	{{:error message="Seuls les membres avec accès en écriture à la comptabilité peuvent visualiser cette page."}}
+{{/restrict}}

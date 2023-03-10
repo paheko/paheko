@@ -12,12 +12,17 @@
 
 {{:assign title='%s n°%s'|args:$document_type_label:$key}}
 
+{{if $_GET.source === 'details'}}
+	{{:assign back='details.html?id=%d&show=%s'|args:$id:$type}}
+{{else}}
+	{{:assign back='./'}}
+{{/if}}
 {{:include
 	file='modules/_header.html'
 	page='A5'
 	title=$title|cat:' - ':$subject
 	hide_header=true
-	back_link='./'
+	back_link=$back
 }}
 
 {{if $config.files.logo}}
