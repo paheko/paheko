@@ -38,7 +38,7 @@
 
 <ul class="customer_details">
 	<li>
-		<strong>{{$recipient_business_name|strtoupper}}</strong><br />
+		<strong class="business_name">{{$recipient_business_name}}</strong><br />
 		{{$recipient_address|escape|nl2br}}
 	</li>
 	{{if $recipient_member_numero || $recipient_member_id}}
@@ -118,7 +118,7 @@
 
 <p>
 	<strong>Bon pour accord</strong> le {{$signing_date|date_short}},<br />
-	à {{$signing_place|strtoupper}}.
+	à <span class="signing_place">{{$signing_place}}</span>.
 </p>
 
 {{if $status !== $DRAFT_STATUS && $config.files.signature}}

@@ -22,6 +22,10 @@
 	font-weight: bold;
 }
 
+.organization_name, .business_name, .signing_place {
+	text-transform: uppercase;
+}
+
 nav.tabs aside.menu ul {
 	border: 0;
 }

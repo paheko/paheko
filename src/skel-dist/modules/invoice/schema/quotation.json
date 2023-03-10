@@ -118,6 +118,11 @@
 			"type": ["string", "null"],
 			"maxLength": 1024
 		},
+		"parent_id": {
+			"description": "Identique à ID si facture générée (hack pour grouper facture et devis)",
+			"type": ["integer", "null"],
+			"maxLength": 19
+		},
 		"last_modification_date": {
 			"description": "Date de la derniète modification",
 			"type": "string",

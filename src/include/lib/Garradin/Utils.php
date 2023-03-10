@@ -305,6 +305,11 @@ class Utils
             $uri = substr($uri, strlen(WWW_URI . 'admin/'));
         }
 
+        // Quick-fix awaiting #227138842234710930f8c8d9bb9b7f9176ef3a0f resolution
+        if (strpos($uri, '/m/') === 0) {
+            return WWW_URL . ltrim($uri, '/');
+        }
+
         return ADMIN_URL . ltrim($uri, '/');
     }
 

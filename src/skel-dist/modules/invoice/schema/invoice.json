@@ -45,7 +45,7 @@
 		"status": {
 			"description": "Statut",
 			"type": "string",
-			"enum": ["draft", "awaiting", "rejected", "validated", "misc"]
+			"enum": ["draft", "awaiting", "rejected", "validated", "paid", "misc"]
 		},
 		"items": {
 			"description": "Articles",
@@ -107,6 +107,15 @@
 			"description": "Date à laquelle le paiement a été effectué",
 			"type": ["string", "null"],
 			"maxLength": 10
+		},
+		"payment_comment": {
+			"description": "Remarques sur le paiement",
+			"type": ["string", "null"],
+			"maxLength": 256
+		},
+		"transaction_id": {
+			"description": "Écriture liée",
+			"type": ["integer", "null"]
 		},
 		"payment_detail": {
 			"description": "Instructions de paiement",

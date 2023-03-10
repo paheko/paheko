@@ -1,8 +1,8 @@
 <ul>
 	<li{{if !$_GET.show}} class="current"{{/if}}>{{:link href="./" label="Tous les documents"}}</li>
 	<li{{if $_GET.show == 'quotation'}} class="current"{{/if}}>{{:link href="./?show=quotation" label="Devis"}}</li>
-	<li{{if $_GET.show == 'invoice'}} class="current"{{/if}}><a href="#" title="Prochainement" style="text-decoration: line-through;">Fact. en souff.</a></li>
-	<li{{if $_GET.show == 'paid'}} class="current"{{/if}}><a href="#" title="Prochainement" style="text-decoration: line-through;">Fact. réglées</a></li>
+	<li{{if $_GET.show == 'unpaid'}} class="current"{{/if}}>{{:link href="./?show=unpaid" label="Fact. en souff."}}</li>
+	<li{{if $_GET.show == 'paid'}} class="current"{{/if}}>{{:link href="./?show=paid" label="Fact. réglées"}}</li>
 	<li{{if $_GET.show == 'customers'}} class="current"{{/if}}>{{:link href="./customers.html?show=customers" label="Clients"}}</li>
 	{{#restrict section='config' level='admin'}}
 		<li{{if $_GET.show == 'config'}} class="current"{{/if}}>{{:link href="./config.html?show=config" label="Configuration"}}</li>

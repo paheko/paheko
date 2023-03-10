@@ -3,7 +3,7 @@
 {{* ==================== Header ==================== *}}
 
 {{:admin_header title="Devis et factures" current="acc"}}
-{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, VALIDATED_STATUS, REJECTED_STATUS, TYPE_LABELS, STATUS_LABELS, QUOTATION_TYPE, INVOICE_TYPE'}}
+{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, VALIDATED_STATUS, REJECTED_STATUS, PAID_STATUS, DOCUMENT_TYPES, TYPE_LABELS, STATUS_LABELS, INVOICE_STATUS_LABELS, QUOTATION_TYPE, INVOICE_TYPE, VERSION'}}
 
 {{:include file='./include/style.tpl'}}
 
@@ -58,7 +58,7 @@
 						signing_date=$signing_date
 						payment_detail=$payment_detail
 						extra_info=$extra_info
-						module_version=$module_version
+						module_version=$VERSION
 					}}
 
 					{{:http redirect="?id=%d&ok=1"|args:$id}}
@@ -120,12 +120,12 @@
 						author_id=$logged_user.id|intval
 						parent_id=$_GET.id|intval
 						last_modification_date=$now|atom_date
-						signing_place=null
+						signing_place=$signing_place
 						signing_date=$now|date:'Y-m-d'
 						validation_date=null
 						payment_detail=null
 						extra_info=null
-						module_version=$module_version
+						module_version=$VERSION
 					}}
 				{{/if}}
 
@@ -150,12 +150,13 @@
 					author_id=$author_id
 					child_id=$invoice_id|intval
 					last_modification_date=$now|atom_date
-					signing_place=$_POST.signing_place
+					signing_place=$signing_place
 					signing_date=$signing_date
 					validation_date=$validation_date
 					payment_detail=$payment_detail
 					extra_info=$extra_info
-					module_version=$module_version
+					parent_id=$_GET.id|intval
+					module_version=$VERSION
 				}}
 
 				{{:http redirect="?id=%d&ok=%d"|args:$id:$redirection_code}}
@@ -163,45 +164,118 @@
 			{{/load}}
 		{{/if}}
 	{{/restrict}}
+{{elseif $_POST.mark_as_paid_submit}}
+	{{#restrict block=true section="accounting" level="write"}}
+	{{#load id=$_GET.id|intval}}{{:assign .='invoice'}}{{/load}}
+	{{if $invoice.status !== $AWAITING_STATUS}}
+		{{:assign var='check_errors.' value='Seuls les factures "en attente de validation" peuvent être payées.'}}
+	{{/if}}
+
+	{{:assign date=$_POST.date|date:'Y-m-d'}}
+	{{if !$_POST.date}}
+		{{:assign var='check_errors.' value="La date est obligatoire."}}
+	{{/if}}
+	{{if $_POST.date|parse_date === null}} {{* Means data is not a date *}}
+		{{:assign var='check_errors.' value="La date du paiement doit être une date."}}
+	{{/if}}
+	{{if $date < $invoice.date}}
+		{{:assign formatted_invoice_date=$invoice.date|date_short}}
+		{{:assign var='check_errors.' value="Le paiement doit se situer après la date d'émission de la facture (%s)."|args:$formatted_invoice_date}}
+	{{/if}}
+	
+	{{:include file='./include/check_max_length.tpl' check_value=$_POST.comment check_max=256 check_label='Remarques trop longues' keep='check_errors'}}
+
+	{{:include file='./include/shim/array_last_num_key.tpl' keep='transaction_id, check_errors' array=$_POST.transaction name='transaction_id' error_message='Écriture séléctionnée invalide.'}}
+	{{#transactions id=$transaction_id|intval}}{{:assign .='transaction'}}{{/transactions}}
+	{{if $transaction_id && !$transaction}}
+		{{:assign var='check_errors.' value="Transaction sélectionnée invalide."}}
+	{{/if}}
+
+	{{if !$check_errors}}
+		{{:save id=$invoice.id|intval
+			validate_schema="./schema/invoice.json"
+			key=$invoice.key
+			type=$invoice.type
+			recipient_business_name=$invoice.recipient_business_name
+			recipient_address=$invoice.recipient_address
+			recipient_member_id=$invoice.recipient_member_id
+			recipient_member_numero=$invoice.recipient_member_numero
+			introduction_text=null
+			subject=$invoice.subject
+			date=$invoice.date
+			deadline=null
+			status=$PAID_STATUS
+			items=$invoice.items
+			total=$invoice.total
+			vat_exemption=$invoice.vat_exemption
+			siret=$invoice.siret
+			org_contact=$invoice.org_contact
+			author_id=$invoice.author_id
+			parent_id=$invoice.parent_id
+			last_modification_date=$now|atom_date
+			signing_place=null
+			signing_date=$invoice.signing_date
+			validation_date=null
+			payment_date=$date
+			payment_comment=$_POST.comment
+			transaction_id=$transaction.id|intval
+			payment_detail=null
+			extra_info=null
+			module_version=$VERSION
+		}}
+		{{:http redirect="?id=%d&ok=6&show=invoice"|args:$invoice.id}}
+	{{/if}}
+	{{/restrict}}
 {{/if}}
 {{if $_POST.status_update_button}} {{* Only for developers *}}
 	{{#restrict block=true section="accounting" level="write"}}
 		{{if !$_POST.id}}
 			{{:error message='Aucun devis sélectionné.'}}
 		{{else}}
-			{{:assign var='new_status_label' from='STATUS_LABELS.%s'|args:$_POST.status}}
+			{{:assign var='new_status_label' from='INVOICE_STATUS_LABELS.%s'|args:$_POST.status}}
 			{{if $new_status_label === null}}
 				{{:assign var='check_errors.' value='Nouveau statut invalide : %s.'|args:$_POST.status}}
 			{{else}}
 				{{#load id=$_POST.id|intval}}
-					{{:save id=$id
-						validate_schema="./schema/quotation.json"
-						key=$key
-						type=$type
-						recipient_business_name=$recipient_business_name
-						recipient_address=$recipient_address
-						recipient_member_id=$recipient_member_id
-						recipient_member_numero=$recipient_member_numero
-						introduction_text=$introduction_text
-						subject=$subject
-						date=$date
-						deadline=$deadline
-						status=$_POST.status
-						items=$items
-						total=$total
-						vat_exemption=$vat_exemption
-						siret=$siret
-						org_contact=$org_contact
-						author_id=$author_id
-						last_modification_date=$now|atom_date
-						signing_place=$signing_place
-						signing_date=$signing_date
-						payment_detail=$payment_detail
-						extra_info=$extra_info
-						module_version=$module_version
-					}}
+					{{:assign var='allowed_type' from='DOCUMENT_TYPES.%s'|args:$type}}
+					{{if !$allowed_type}}
+						{{:assign var='check_errors.' value='Type invalide : %s!'|args:$type}}
+					{{else}}
+						{{:save id=$id
+							validate_schema="./schema/%s.json"|args:$type
+							key=$key
+							type=$type
+							recipient_business_name=$recipient_business_name
+							recipient_address=$recipient_address
+							recipient_member_id=$recipient_member_id
+							recipient_member_numero=$recipient_member_numero
+							introduction_text=$introduction_text
+							subject=$subject
+							date=$date
+							deadline=$deadline
+							status=$_POST.status
+							items=$items
+							total=$total
+							vat_exemption=$vat_exemption
+							siret=$siret
+							org_contact=$org_contact
+							author_id=$author_id
+							parent_id=$parent_id
+							last_modification_date=$now|atom_date
+							signing_place=$signing_place
+							signing_date=$signing_date
+							validation_date=$validation_date
+							payment_date=$payment_date
+							payment_comment=$payment_comment
+							transaction_id=$transaction_id
+							payment_detail=$payment_detail
+							extra_info=$extra_info
+							parent_id=$parent_id
+							module_version=$VERSION
+						}}
 
-					{{:http redirect="?id=%d&ok=2&show=quotation"|args:$id}}
+						{{:http redirect="?id=%d&ok=2&show=quotation"|args:$id}}
+					{{/if}}
 				{{/load}}
 			{{/if}}
 			{{#foreach from=$check_errors item='error'}}
@@ -255,22 +329,32 @@
 
 		{{* ======================= Feedback =========================== *}}
 
-		{{if $_GET.ok === '1'}}
-			<p class="block confirm">Devis signé avec succès.</p>
-		{{elseif $_GET.ok === '2'}}
-			<p class="block confirm">Modification enregistrée.</p>
-		{{elseif $_GET.ok === '3'}}
-			<p class="block confirm">Brouillon conservé.</p>
-		{{elseif $_GET.ok === '4'}}
-			<p class="block confirm">Devis marqué avec succès comme refusé.</p>
-		{{elseif $_GET.ok === '5'}}
-			<p class="block confirm">Devis marqué avec succès comme validé.</p>
+		{{if $_GET.ok}}
+			<p class="block confirm">
+			{{if $_GET.ok === '1'}}
+				Devis signé avec succès.
+			{{elseif $_GET.ok === '2'}}
+				Modification enregistrée.
+			{{elseif $_GET.ok === '3'}}
+				Brouillon conservé.
+			{{elseif $_GET.ok === '4'}}
+				Devis marqué avec succès comme refusé.
+			{{elseif $_GET.ok === '5'}}
+				Devis marqué avec succès comme validé.
+			{{elseif $_GET.ok === '6'}}
+				Facture marquée avec succès comme payée.
+			{{/if}}
+			</p>
 		{{/if}}
 
 		{{* ======================= Title =========================== *}}
 
 		{{:assign var="label" from="TYPE_LABELS.%s"|args:$type}}
-		{{:assign var="status_label" from="STATUS_LABELS.%s"|args:$status}}
+		{{if $type === $INVOICE_TYPE}}
+			{{:assign var="status_label" from="INVOICE_STATUS_LABELS.%s"|args:$status}}
+		{{else}}
+			{{:assign var="status_label" from="STATUS_LABELS.%s"|args:$status}}
+		{{/if}}
 		<h1>{{$label}} n° {{$key}} - {{$status_label}}</h1>
 
 		{{* ======================= Errors =========================== *}}
@@ -329,18 +413,27 @@
 				</fieldset>
 			</form>
 			<h2 class="ruler">Rappel</h2>
+		{{elseif $_GET.action === 'ask_mark_as_paid'}}
+			<form method="POST" action="">
+				<fieldset>
+					<legend>Marquer la facture comme payée</legend>
+					{{if !$check_errors}}<p class="error block">Marquer la facture comme payée est définitif. Vous ne pourrez pas rétablir la facture comme "en attente de paiement".<br />Il sera néanmoins possible d''annuler la facture.</p>{{/if}}
+					{{:input type="date" name="date" label="Date du paiement" default=$now required=true}}
+					{{:input type="textarea" name="comment" label="Remarque" required=false cols="50" rows="4"}}
+					{{:input type="list" name="transaction" label="Écriture correspondante" target="./transaction_selector.inc.tpl" can_delete=true required=false}}
+					{{:button type="submit" name="mark_as_paid_submit" label="Marquer comme payée" shape="check" class="main"}}
+				</fieldset>
+			</form>
+			<h2 class="ruler">Rappel</h2>
 		{{/if}}
 
 		{{* ======================= Content =========================== *}}
 
 		<fieldset>
 			<legend><h2>Informations</h2></legend>
+			
 			{{if $status === $AWAITING_STATUS}}
-				<p class="infos">{{$label}} <strong>{{if $type === $QUOTATION_TYPE}}signé{{else}}signée{{/if}} le {{$signing_date|date_short}} à {{$signing_place}}</strong>.</p>
-				{{if $type === $INVOICE_TYPE && $parent_id}}
-					{{#load id=$parent_id}}{{:assign .='parent'}}{{/load}}
-					<p class="infos">Correspondant au {{:link href="details.html?id=%d&show=quotation"|args:$parent.id label="devis n°%s"|args:$parent.key}}.</p>
-				{{/if}}
+				<p class="infos">{{$label}} <strong>{{if $type === $QUOTATION_TYPE}}signé{{else}}émise{{/if}} le {{$signing_date|date_short}} à {{$signing_place}}</strong>.</p>
 				{{if $type === $QUOTATION_TYPE}}
 					<p class="">En attente de validation par le/la client.e.</p>
 					<p class="infos">
@@ -350,19 +443,41 @@
 				{{else}}
 					<p class="">En attente de paiement.</p>
 					<p class="infos">
-						{{:linkbutton href="#"|args:$id label="Marquer comme payée (prochainement)" shape="check"}}
+						{{:linkbutton href="?id=%d&show=invoice&action=ask_mark_as_paid"|args:$id label="Marquer comme payée" shape="check"}}
 						{{* {{:linkbutton href="?id=%d&show=quotation&action=ask_rejection"|args:$id label="Marquer comme abandonnée" shape="alert"}} *}}
 					</p>
 				{{/if}}
+
 			{{elseif $status === $VALIDATED_STATUS}}
 				<p class="infos">{{$label}} <strong>validé le {{$validation_date|date_short}}</strong> (signé par l'asso le {{$signing_date|date_short}}).</p>
-				{{if $type === $QUOTATION_TYPE}}
+				{{if $type === $QUOTATION_TYPE && $child_id}}
 					{{#load id=$child_id|intval}}{{:assign .='child'}}{{/load}}
 					<p class="infos">Facture correspondante : {{:link href="?id=%d&show=invoice"|args:$child.id label="n°%s"|args:$child.key}}.</p>
 				{{/if}}
+
+			{{elseif $status === $PAID_STATUS}}
+				<p class="infos">{{$label}} <strong>payée le {{$payment_date|date_short}}</strong> (émise par l'asso le {{$signing_date|date_short}}).</p>
+				{{if $payment_comment}}
+					<h4>Remarques :</h4>
+					<p class="infos">{{$payment_comment|escape|nl2br}}</p>
+				{{/if}}
+				{{if $transaction_id}}
+					{{#transactions id=$transaction_id|intval}}
+						<p class="infos">Écriture comptable correspondante : {{:link href='!acc/transactions/details.php?id=%d'|args:$id label='n°%d - %s'|args:$id:$label}}.</p>
+					{{/transactions}}
+				{{else}}
+					<p class="infos">Aucune écriture comptable correspondante. {{:linkbutton href="#" label="Associer (prochainement)" shape="right"}}</p>
+				{{/if}}
+
 			{{else}}
 				<p class="infos">Statut en cours : {{$status_label}}</p>
 			{{/if}}
+
+			{{if $type === $INVOICE_TYPE && $parent_id}}
+				{{#load id=$parent_id}}{{:assign .='parent'}}{{/load}}
+				<p class="infos">Correspondant au {{:link href="details.html?id=%d&show=quotation"|args:$parent.id label="devis n°%s"|args:$parent.key}}.</p>
+			{{/if}}
+
 			{{#users id=$author_id|intval}}{{:assign .='author'}}{{/users}}
 			<p>
 				{{if $type === $QUOTATION_TYPE}}Rédigé{{else}}Rédigée{{/if}} par : {{:link href="!users/details.php?id=%d"|args:$author.id label=$author.nom}}.
@@ -375,7 +490,7 @@
 		<fieldset>
 			<legend><h2>Destinataire</h2></legend>
 			<p class="infos">
-				<strong>{{$recipient_business_name}}</strong><br />
+				<strong class="business_name">{{$recipient_business_name}}</strong><br />
 				{{$recipient_address|escape|nl2br}}
 			</p>
 			{{if $recipient_member_id}}
@@ -457,7 +572,8 @@
 			<div class="infos inline">
 				<label for="f_status">Statut en cours :</label>
 				<form method="POST" action="./details.html" style="display: inline;">
-					{{:input type="select" name="status" options=$STATUS_LABELS default=$status required=true}}
+				{{if $type === $INVOICE_TYPE}}{{:assign options=$INVOICE_STATUS_LABELS}}{{else}}{{:assign options=$STATUS_LABELS}}{{/if}}
+					{{:input type="select" name="status" options=$options default=$status required=true}}
 					{{:input type="hidden" name="id" default=$id|intval}}
 					{{:button type="submit" name="status_update_button" label="Modifier"}}
 				</form>

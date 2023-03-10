@@ -38,14 +38,14 @@
 	<h2 class="ruler">Résultat(s) de recherche pour "{{$_GET.q}}"</h2>
 {{/if}}
 
-{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, VALIDATED_STATUS, TYPE_LABELS, STATUS_LABELS, QUOTATION_TYPE, INVOICE_TYPE, INVOICE_STATUS_LABELS'}}
+{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, VALIDATED_STATUS, PAID_STATUS, TYPE_LABELS, STATUS_LABELS, QUOTATION_TYPE, INVOICE_TYPE, INVOICE_STATUS_LABELS'}}
 
 {{if $_GET.show == $QUOTATION_TYPE}}
 	{{:assign filter="json_extract(document, '$.type') = '%s'"|args:$QUOTATION_TYPE}}
 {{elseif $_GET.show == 'paid'}}
-	{{:assign filter="json_extract(document, '$.type') = 'invoice' AND json_extract(document, '$.date_paid') IS NOT NULL"}}
+	{{:assign filter="$$.type = :type AND $$.status = :status" type_filter=$INVOICE_TYPE status_filter=$PAID_STATUS}}
 {{elseif $_GET.show == 'unpaid'}}
-	{{:assign filter="json_extract(document, '$.type') = 'invoice' AND json_extract(document, '$.date_paid') IS NULL"}}
+	{{:assign filter="$$.type = :type AND $$.status = :status" type_filter=$INVOICE_TYPE status_filter=$AWAITING_STATUS}}
 {{else}}
 	{{:assign filter="1"}}
 {{/if}}
@@ -61,21 +61,29 @@
 
 {{:assign list_select="key; id AS 'Numéro'; datetime($$.date) AS 'Émission'; $$.deadline AS 'Échéance'; $$.recipient_business_name AS 'Tiers'; $$.subject AS 'Intitulé'; $$.total AS 'Montant'; $$.status AS 'Statut'"}}
 {{:assign list_where="$$.type IN ('quotation', 'invoice') AND %s"|args:$filter}}
-{{:assign list_order=2}}
-{{if !$_GET.show}}{{:assign list_select='$$.type AS "Type"; '|cat:$list_select}}{{:assign list_order=3}}{{/if}}
+{{:assign list_order=1}}
+{{if !$_GET.show}}{{:assign list_select='$$.parent_id AS "↳"; $$.type AS "Type"; '|cat:$list_select}}{{:assign list_order=3}}{{/if}}
 {{if $_GET.q}}{{:assign list_where=$list_where|cat:' AND ':$search_where}}{{/if}}
 {{#list
 	select=$list_select
 	where=$list_where
 	order=$list_order
+	desc=true
 	:searched_id=$searched_id
 	:searched_date=$searched_date
 	:searched_text=$searched_text
+	:type=$type_filter
+	:status=$status_filter
 }}
 	<tr>
 		{{if !$_GET.show}}
 			{{:assign var="label" from="TYPE_LABELS.%s"|args:$type}}
-			<td>{{$label}}</td>
+			{{if $type === $INVOICE_TYPE && $parent_id}}
+				<td colspan="2" style="text-align:left;">{{$label}} <span title="Associée au devis suivant">↴</span></td>
+			{{else}}
+				<td></td>
+				<td>{{$label}}</td>
+			{{/if}}
 		{{/if}}
 		<td>{{:link href="details.html?id=%d&show=%s"|args:$id:$type label=$key}}</td>
 		<td>{{$date|date_short}}</td>
@@ -89,13 +97,14 @@
 			{{else}}
 				{{:assign var="label" from="STATUS_LABELS.%s"|args:$status}}
 			{{/if}}
+
 			{{$label}}
 			{{if $status === $VALIDATED_STATUS}}- {{$validation_date|date_short}}{{/if}}
 
 			{{if $archived}}
 				<span title="Archivé">🗃</span>
-			{{elseif $type === $INVOICE_TYPE && $payment_date}}
-				- Payé le {{$payment_date|date_short}}
+			{{elseif $type === $INVOICE_TYPE && $status === $PAID_STATUS}}
+				- {{$payment_date|date_short}}
 			{{/if}}
 		</td>
 		<td class="actions">
