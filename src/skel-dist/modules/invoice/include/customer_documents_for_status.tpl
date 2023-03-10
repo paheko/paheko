@@ -23,6 +23,8 @@
 		{{/if}}
 	</td>
 	<td class="actions">
+		{{:include file='./document_list_buttons.html'}}
+		{{*
 		{{#restrict section="accounting" level="write"}}
 			{{if !$archived && $status == $DRAFT_STATUS}}
 			{{:linkbutton shape="edit" label="Modifier" href="edit.html?id=%d"|args:$id}}
@@ -33,6 +35,7 @@
 		{{else}}
 			{{:linkbutton label="Aperçu" href="preview.html?id=%s"|args:$id shape="document"}}
 		{{/if}}
+		*}}
 	</td>
 </tr>
 

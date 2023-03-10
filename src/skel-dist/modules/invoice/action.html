@@ -42,7 +42,7 @@
 	{{if $_GET.action === 'ask_deletion'}}
 		<h2 class="ruler irreversible">Action irreversible</h2>
 		<fieldset>
-			<legend>Suppression</legend>
+			<legend><h2>Suppression</h2></legend>
 			<div class="block error">
 				<h3 class="infos">Vous allez supprimer définitivement le brouillon de devis n° {{$key}} : "{{$subject}}".</h3>
 				<p class="infos">Êtes-vous sûr de vouloir continuer ?</p>
@@ -56,7 +56,7 @@
 	{{elseif $_GET.action === 'sign'}}
 		<form method="POST" action="">
 			<fieldset>
-				<legend>Signature du devis</legend>
+				<legend><h2>Signature du devis</h2></legend>
 				<ul id="signing_inputs">
 					<li>{{:input type="text" name="signing_place" label="Lieu de la signature" placeholder="ex : Dijon" default=$module.config.signing_place required=true}}</li>
 					<li>{{:input type="date" name="signing_date" label="Date de la signature" default=$now required=true}}</li>
@@ -69,7 +69,7 @@
 	{{elseif $_GET.action === 'ask_rejection'}}
 		<form method="POST" action="">
 			<fieldset>
-				<legend>Refus du devis par le/la client.e</legend>
+				<legend><h2>Refus du devis par le/la client.e</h2></legend>
 				{{if !$check_errors}}<p class="error block">Refuser le devis est définitif. Vous ne pourrez pas rétablir le devis comme "en attente de validation".<br />Il sera néanmoins possible d'annuler le devis.</p>{{/if}}
 				{{:button type="submit" name="reject_submit" label="Marquer comme refusé" class="main"}}
 			</fieldset>
@@ -78,7 +78,7 @@
 	{{elseif $_GET.action === 'ask_validation'}}
 		<form method="POST" action="">
 			<fieldset>
-				<legend>Validation du devis par le/la client.e</legend>
+				<legend><h2>Validation du devis par le/la client.e</h2></legend>
 				{{if !$check_errors}}<p class="error block">Valider le devis est définitif. Vous ne pourrez pas rétablir le devis comme "en attente de validation".<br />Il sera néanmoins possible d'annuler le devis.</p>{{/if}}
 				<div class="infos">{{:input type="checkbox" name="invoice" value="1" label="Générer automatiquement une facture"}}</div>
 				{{:button type="submit" name="validate_submit" label="Marquer comme validé" shape="check" class="main"}}
@@ -88,7 +88,7 @@
 	{{elseif $_GET.action === 'ask_mark_as_paid'}}
 		<form method="POST" action="">
 			<fieldset>
-				<legend>Marquer la facture comme payée</legend>
+				<legend><h2>Marquer la facture comme payée</h2></legend>
 				{{if !$check_errors}}<p class="error block">Marquer la facture comme payée est définitif. Vous ne pourrez pas rétablir la facture comme "en attente de paiement".<br />Il sera néanmoins possible d''annuler la facture.</p>{{/if}}
 				{{:input type="date" name="date" label="Date du paiement" default=$now required=true}}
 				{{:input type="textarea" name="comment" label="Remarque" required=false cols="50" rows="4"}}

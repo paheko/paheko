@@ -26,25 +26,26 @@
 	text-transform: uppercase;
 }
 
-nav.tabs aside.menu ul {
+nav.tabs aside.menu ul, ul.list_action_buttons {
 	border: 0;
+	display: flex;
 }
 
-nav.tabs aside.menu li {
+nav.tabs aside.menu li, .list_action_buttons li {
 	margin: 0;
 }
 
-nav.tabs aside.menu li a {
+nav.tabs aside.menu li a, .list_action_buttons li a {
 	background: none;
 	border-radius: 0;
 	padding: 0.2em 0.4em;
 }
 
-nav.tabs aside.menu li a:hover {
+nav.tabs aside.menu li a:hover, .list_action_buttons li a:hover {
 	border: 1px solid rgba(var(--gMainColor), 0.5);
 }
 
-nav.tabs aside.menu li a.icn-btn {
+nav.tabs aside.menu li a.icn-btn, .list_action_buttons li a.icn-btn {
 	margin: 0.2em 0.2em;
 }
 </style>
