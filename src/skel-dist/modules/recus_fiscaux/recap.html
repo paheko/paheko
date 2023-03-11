@@ -21,7 +21,7 @@
 	<p>{{:linkbutton shape="right" target="_blank" label="Déclarer les dons auprès de l'administration" href="https://www.demarches-simplifiees.fr/commencer/declaration-des-dons"}}</p>
 </div>
 
-{{#list select="SUBSTR($$.date, 1, 4) AS 'Année'; SUM($$.montant) AS 'Montant cumulé'; COUNT(id) AS 'Nombre de reçus'" order="col0"}}
+{{#list select="SUBSTR($$.date, 1, 4) AS 'Année'; SUM($$.montant) AS 'Montant cumulé'; COUNT(id) AS 'Nombre de reçus'" order=1}}
 	<tr>
 		<th>{{$col0}}</th>
 		<td>{{$col1|raw|money_currency}}</td>
