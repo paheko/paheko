@@ -1,4 +1,10 @@
-[Syntaxe MarkDown](markdown.html) | [Syntaxe Skriv](skriv.html)
+Title: Raccourcis claviers dans l'édition de texte — Paheko
+
+{{{.nav
+* **[Raccourcis claviers](keyboard.html)**
+* [Syntaxe MarkDown complète](markdown.html)
+* [Référence rapide MarkDown](markdown_quickref.html)
+}}}
 
 # Raccourcis clavier
 

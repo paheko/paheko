@@ -28,14 +28,15 @@ class Skriv extends AbstractRender
 	{
 		$str = $content ?? $this->file->fetch();
 
+		// Old file URLs, FIXME/TODO remove
 		$str = preg_replace_callback('/#file:\[([^\]\h]+)\]/', function ($match) {
 			return $this->resolveAttachment($match[1]);
 		}, $str);
 
 		$str = CommonModifiers::typo($str);
 		$str = self::$skriv->render($str);
-		$str = $this->extensions->replaceTempTOC($str, self::$skriv->toc);
 
+		// Resolve internal links
 		$str = preg_replace_callback(';<a href="((?!https?://|\w+:).+?)">;i', function ($matches) {
 			return sprintf('<a href="%s">', htmlspecialchars($this->resolveLink(htmlspecialchars_decode($matches[1]))));
 		}, $str);

@@ -183,6 +183,18 @@ class Transactions
 		$columns['project_code']['select'] = 'GROUP_CONCAT(IFNULL(b.code, SUBSTR(b.label, 1, 10) || \'…\'), \',\')';
 		$columns['id_project']['select'] = 'GROUP_CONCAT(l.id_project, \',\')';
 
+		if ($type == Transaction::TYPE_CREDIT || $type == Transaction::TYPE_DEBT) {
+			$db = DB::getInstance();
+
+			$columns['status_label'] = [
+				'label' => 'Statut',
+				'select' => sprintf('CASE WHEN t.status & %d THEN %s WHEN t.status & %d THEN %s ELSE NULL END',
+					Transaction::STATUS_WAITING, $db->quote('En attente'),
+					Transaction::STATUS_PAID, $db->quote('Réglée')
+				),
+			];
+		}
+
 		if (!$type) {
 			$columns = ['type_label' => [
 					'select' => 't.type',

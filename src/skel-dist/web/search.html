@@ -18,7 +18,7 @@
 			<p class="alert">{{if $count == 1}}1 résultat trouvé{{else}}{{$count}} résultats trouvés{{/if}}.</p>
 
 			{{#pages search=$_GET.search future=false}}
-			<article>
+			<article class="web-content">
 				<h3><a href="{{$url_highlight}}">{{$title}}</a></h3>
 				<h5>{{$published|date_long}}</h5>
 				<p>{{$snippet|raw}}</p>

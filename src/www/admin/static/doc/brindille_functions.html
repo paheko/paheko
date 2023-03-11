@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+	<html>
+	<head>
+		<title>Référence des fonctions Brindille</title>
+		<meta charset="utf-8" />
+		<style type="text/css">
+		body, form, p, div, hr, fieldset, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6 {
+			margin: 0;
+			padding: 0;
+		}
+		body {
+			font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
+			padding: .8em;
+			background: #eee;
+		}
+		.web-content .nav ul {
+			list-style-type: none;
+			margin: -.8em;
+			margin-bottom: 1em;
+			padding: 1em;
+			background: #ddd;
+			border-bottom: 1px solid #999;
+			text-align: center;
+		}
+		.web-content .boutons ul {
+			list-style-type: none;
+			background: #ccc;
+			padding: .5em;
+			margin: 0;
+		}
+		.web-content .nav li, .web-content .boutons li {
+			display: inline-block;
+			margin: 0 1em;
+		}
+		.web-content .nav a, .web-content .boutons a {
+			display: inline-block;
+			background: #fff;
+			color: darkblue;
+			border-radius: .2em;
+			padding: .3em .5em;
+			font-size: 1.2em;
+		}
+		.web-content .nav strong a {
+			color: darkred;
+			box-shadow: 0px 0px 5px orange;
+		}
+		</style>
+		<link rel="stylesheet" type="text/css" href="../../../content.css" />
+	</head>
+	<body><div class="web-content"><div class="nav">
+<ul>
+<li><a href="brindille.html">Documentation Brindille</a></li>
+<li><strong><a href="brindille_functions.html">Fonctions</a></strong></li>
+<li><a href="brindille_sections.html">Sections</a></li>
+<li><a href="brindille_modifiers.html">Filtres</a></li>
+</ul>
+</div><aside class="toc">
+	<ol>
+		<li><a href="#assign">assign</a></li>
+		<li><a href="#debug">debug</a></li>
+		<li><a href="#http">http</a></li>
+		<li><a href="#include">include</a></li>
+		<li><a href="#mail">mail</a>
+</li></ol></aside><h1 id="assign">assign</h1>
+<p>Permet d'assigner une valeur dans une variable :</p>
+<pre><code>{{:assign blabla="Coucou"}}
+
+{{$blabla}}</code></pre>
+<p>Attention : certains noms de variables ne sont pas assignables : <code>value</code> et <code>var</code> (voir ci-dessous).</p>
+<p>Il est possible d'assigner toutes les variables d'une section dans une variable en utilisant la syntaxe <code>.</code> et en inversant (<code>.="nom_de_variable"</code>). Cela permet de capturer le contenu d'une section pour le réutiliser à un autre endroit.</p>
+<pre><code>{{#pages uri="Informations" limit=1}}
+{{:assign .="infos"}}
+{{/pages}}
+
+{{$infos.title}}</code></pre>
+<p>En utilisant le paramètre spécial <code>var</code>, tous les autres paramètres passés sont ajoutés à la variable donnée en valeur :</p>
+<pre><code>{{:assign var="tableau" label="Coucou" name="Pif le chien"}}
+{{$tableau.label}}
+{{$tableau.name}}</code></pre>
+<p>De la même manière on peut écraser une variable avec le paramètre spécial <code>value</code>:</p>
+<pre><code>{{:assign var="tableau" value=$infos}}</code></pre>
+<p>Il est également possible de créer des tableaux avec la syntaxe <code>[]</code> dans le nom de la variable :</p>
+<pre><code>{{:assign var="liste[comptes][530]" label="Caisse"}}
+{{:assign var="liste[comptes][512]" label="Banque"}}
+
+{{#foreach from=$liste.comptes}}
+{{$key}} = {{$value.label}}
+{{/foreach}}</code></pre>
+<h1 id="debug">debug</h1>
+<p>Cette fonction permet d'afficher le contenu d'une ou plusieurs variables :</p>
+<pre><code>{{:debug test=$title}}</code></pre>
+<p>Affichera :</p>
+<pre><code>array(1) {
+  ["test"] =&gt; string(6) "coucou"
+}</code></pre>
+<p>Si aucun paramètre n'est spécifié, alors toutes les variables définies sont renvoyées. Utile pour découvrir quelles sont les variables accessibles dans une section par exemple.</p>
+<h1 id="http">http</h1>
+<p>Permet de modifier les entêtes HTTP renvoyés par la page. Cette fonction doit être appelée au tout début du squelette, avant tout autre code ou ligne vide.</p>
+<table>
+<thead>
+<tr>
+<th>Paramètre</th>
+<th>Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>code</code></td>
+<td>Modifie le code HTTP renvoyé. <a href="https://fr.wikipedia.org/wiki/Liste_des_codes_HTTP" target="_blank" rel="nofollow,noreferrer">Liste des codes HTTP</a></td>
+</tr>
+<tr>
+<td><code>redirect</code></td>
+<td>Rediriger vers l'adresse URI indiquée en valeur. Seules les adresses internes sont acceptées, il n'est pas possible de rediriger vers une adresse extérieure.</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>Modifie le type MIME renvoyé</td>
+</tr>
+<tr>
+<td><code>download</code></td>
+<td>Force la page à être téléchargée sous le nom indiqué.</td>
+</tr>
+</tbody>
+</table>
+<p>Note : si le type <code>application/pdf</code> est indiqué, la page sera convertie en PDF à la volée. Il est possible de forcer le téléchargement du fichier en utilisant le paramètre <code>download</code>.</p>
+<p>Exemples :</p>
+<pre><code>{{:http code=404}}
+{{:http redirect="/Nos-Activites/"}}
+{{:http type="application/svg+xml"}}
+{{:http type="application/pdf" download="liste_membres_ca.pdf"}}</code></pre>
+<h1 id="include">include</h1>
+<p>Permet d'inclure un autre squelette.</p>
+<table>
+<thead>
+<tr>
+<th>Paramètre</th>
+<th>Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>file</code></td>
+<td>obligatoire</td>
+</tr>
+<tr>
+<td><code>keep</code></td>
+<td>optionnel</td>
+</tr>
+</tbody>
+</table>
+<pre><code>{{:include file="./navigation.html"}}
+=&gt; Affiche le contenu du squelette "navigation.html" dans le même répertoire que le squelette d'origine</code></pre>
+<p>Par défaut, les variables du squelette parent sont transmis au squelette inclus, mais les variables définies dans le squelette inclus ne sont pas transmises au squelette parent. Exemple :</p>
+<pre><code>{{* Squelette page.html *}}
+{{:assign title="Super titre !"}}
+{{:include file="./_head.html"}}
+{{$nav}}</code></pre>
+<pre><code>{{* Squelette _head.html *}}
+&lt;h1&gt;{{$title}}&lt;/h1&gt;
+{{:assign nav="Accueil &gt; %s"|args:$title}}</code></pre>
+<p>Dans ce cas, la dernière ligne du premier squelette (<code>{{$nav}}</code>) n'affichera rien, car la variable définie dans le second squelette n'en sortira pas. Pour indiquer qu'une variable doit être incluse dans le squelette parent, il faut utiliser le paramètre <code>keep</code>:</p>
+<pre><code>{{:include file="./_head.html" keep="nav"}}</code></pre>
+<p>On peut spécifier plusieurs noms de variables, séparés par des virgules, et utiliser la notation à points :</p>
+<pre><code>{{:include file="./_head.html" keep="nav,article.title,name"}}
+{{$nav}}
+{{$article.title}}
+{{$name}}</code></pre>
+<h1 id="mail">mail</h1>
+<p>Permet d'envoyer un e-mail à une adresse indiquée. Le message est toujours envoyé en format texte et l'expéditeur est l'adresse de l'association.</p>
+<p>Attention à l'utilisation de cette fonction il n'existe pas de limite d'envoi.</p>
+<p>Paramètres requis :</p>
+<table>
+<thead>
+<tr>
+<th>Paramètre</th>
+<th>Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>to</code></td>
+<td>Adresse email destinataire (seule l'adresse e-mail elle-même est acceptée, pas de nom)</td>
+</tr>
+<tr>
+<td><code>subject</code></td>
+<td>Sujet du message</td>
+</tr>
+<tr>
+<td><code>body</code></td>
+<td>Corps du message</td>
+</tr>
+</tbody>
+</table>
+<p>Exemple de formulaire de contact :</p>
+<pre><code>{{if !$_POST.email|check_email}}
+&lt;p class="alert"&gt;L'adresse e-mail indiquée est invalide.&lt;/p&gt;
+{{elseif $_POST.antispam != 42}}
+&lt;p class="alert"&gt;La réponse permettant de savoir si vous êtes un robot a échoué. Vous êtes donc un robot ?&lt;/p&gt;
+{{elseif $_POST.message|trim == ''}}
+&lt;p class="alert"&gt;Le message est vide&lt;/p&gt;
+{{elseif $_POST.send}}
+{{:mail to=$config.org_email subject="Formulaire de contact" body="%s a écrit : %s"|args:$_POST.email:$_POST.message}}
+&lt;p class="ok"&gt;Votre message nous a bien été transmis !&lt;/p&gt;
+{{/if}}
+
+&lt;form method="post" action=""&gt;
+&lt;dl&gt;
+  &lt;dt&gt;&lt;label&gt;Votre e-mail : &lt;input type="email" required name="email" /&gt;&lt;/label&gt;&lt;/dt&gt;
+  &lt;dt&gt;&lt;label&gt;Votre message : &lt;textarea required name="message" cols="50" rows="5"&gt;&lt;/textarea&gt;&lt;/label&gt;&lt;/dt&gt;
+  &lt;dt&gt;&lt;label&gt;Merci d'écrire "quarante-deux" en chiffres pour confirmer que vous n'êtes pas un robot : &lt;input type="text" name="antispam" required /&gt;&lt;/label&gt;&lt;/dt&gt;
+&lt;/dl&gt;
+&lt;p&gt;&lt;input type="submit" name="send" value="Envoyer !" /&gt;&lt;/p&gt;
+&lt;/form&gt;</code></pre></div></body></html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+	<html>
+	<head>
+		<title>Référence des sections Brindille</title>
+		<meta charset="utf-8" />
+		<style type="text/css">
+		body, form, p, div, hr, fieldset, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6 {
+			margin: 0;
+			padding: 0;
+		}
+		body {
+			font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
+			padding: .8em;
+			background: #eee;
+		}
+		.web-content .nav ul {
+			list-style-type: none;
+			margin: -.8em;
+			margin-bottom: 1em;
+			padding: 1em;
+			background: #ddd;
+			border-bottom: 1px solid #999;
+			text-align: center;
+		}
+		.web-content .boutons ul {
+			list-style-type: none;
+			background: #ccc;
+			padding: .5em;
+			margin: 0;
+		}
+		.web-content .nav li, .web-content .boutons li {
+			display: inline-block;
+			margin: 0 1em;
+		}
+		.web-content .nav a, .web-content .boutons a {
+			display: inline-block;
+			background: #fff;
+			color: darkblue;
+			border-radius: .2em;
+			padding: .3em .5em;
+			font-size: 1.2em;
+		}
+		.web-content .nav strong a {
+			color: darkred;
+			box-shadow: 0px 0px 5px orange;
+		}
+		</style>
+		<link rel="stylesheet" type="text/css" href="../../../content.css" />
+	</head>
+	<body><div class="web-content"><div class="nav">
+<ul>
+<li><a href="brindille.html">Documentation Brindille</a></li>
+<li><a href="brindille_functions.html">Fonctions</a></li>
+<li><strong><a href="brindille_sections.html">Sections</a></strong></li>
+<li><a href="brindille_modifiers.html">Filtres</a></li>
+</ul>
+</div><aside class="toc">
+	<ol>
+		<li><a href="#sections-generalistes">Sections généralistes</a>
+		<ol>
+			<li><a href="#foreach">foreach</a></li>
+			<li><a href="#restrict">restrict</a>
+		</ol></li>
+		<li><a href="#sections-sql">Sections SQL</a>
+		<ol>
+			<li><a href="#sql">sql</a></li>
+			<li><a href="#pages-articles-categories-heritent-de-sql">pages, articles, categories (héritent de sql)</a></li>
+			<li><a href="#files-documents-images-heritent-de-sql">files, documents, images (héritent de sql)</a></li>
+			<li><a href="#breadcrumbs">breadcrumbs</a>
+</li></ol></li></ol></aside><h1 id="sections-generalistes">Sections généralistes</h1>
+<h2 id="foreach">foreach</h2>
+<p>Permet d'itérer sur un tableau par exemple :</p>
+<pre><code>{{#foreach from=$variable key="key" item="value"}}
+{{$key}} = {{$value}}
+{{/foreach}}</code></pre>
+<h2 id="restrict">restrict</h2>
+<p>Permet de limiter (restreindre) une partie de la page aux membres qui sont connectés et/ou qui ont certains droits.</p>
+<p>Deux paramètres optionnels peuvent être utilisés ensemble (il n'est pas possible d'utiliser seulement un des deux) :</p>
+<table>
+<thead>
+<tr>
+<th>Paramètre</th>
+<th>Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>level</code></td>
+<td>Niveau d'accès : read, write, admin</td>
+</tr>
+<tr>
+<td><code>section</code></td>
+<td>Section où le niveau d'accès doit s'appliquer : users, accounting, web, documents, config</td>
+</tr>
+</tbody>
+</table>
+<pre><code>{{#restrict}}
+    Un membre est connecté, mais on ne sait pas avec quels droits.
+{{else}}
+    Aucun membre n'est connecté.
+{{/restrict}}</code></pre>
+<pre><code>{{#restrict section="users" level="admin"}}
+    Un membre est connecté, et il a le droit d'administrer les membres.
+{{else}}
+    Aucun membre n'est connecté, ou un membre est connecté mais n'est pas administrateur des membres.
+{{/if}}</code></pre>
+<pre><code>{{#restrict block=true section="accounting" level="write"}}
+{{/restrict}}
+Si le membre n'est pas connecté ou n'a pas le droit de modifier la compta, il aura une page d'erreur.</code></pre>
+<h1 id="sections-sql">Sections SQL</h1>
+<p>Dans toutes les sections héritées de <code>sql</code> suivantes il est possible d'utiliser les paramètres suivants :</p>
+<table>
+<thead>
+<tr>
+<th>Paramètre</th>
+<th>Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>where</code></td>
+<td>Condition de sélection des résultats</td>
+</tr>
+<tr>
+<td><code>begin</code></td>
+<td>Début des résultats, si vide une valeur de <code>0</code> sera utilisée.</td>
+</tr>
+<tr>
+<td><code>limit</code></td>
+<td>Limitation des résultats. Si vide, une valeur de <code>1000</code> sera utilisée.</td>
+</tr>
+<tr>
+<td><code>order</code></td>
+<td>Ordre de tri des résultats. Si vide le tri sera fait par ordre d'ajout dans la base de données.</td>
+</tr>
+<tr>
+<td><code>debug</code></td>
+<td>Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle.</td>
+</tr>
+</tbody>
+</table>
+<p>Il est également possible de passer des arguments dans les paramètres à l'aides des arguments nommés qui commencent par deux points <code>:</code> : <code>{{#articles where="title = :montitre" :montitre="Actualité"}}</code></p>
+<h2 id="sql">sql</h2>
+<p>Effectue une requête SQL de type <code>SELECT</code> dans la base de données.</p>
+<pre><code>{{#sql select="*, julianday(date) AS day" tables="membres" where="id_categorie = :id_categorie" :id_categorie=$_GET.id_categorie order="numero DESC" begin=":page*100" limit=100 :page=$_GET.page}}
+…
+{{/sql}}</code></pre>
+<h3 id="parametres-possibles">Paramètres possibles</h3>
+<table>
+<thead>
+<tr>
+<th>Paramètre</th>
+<th>Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tables</code></td>
+<td>Liste des tables à utiliser dans la requête. Ce paramètre est obligatoire.</td>
+</tr>
+<tr>
+<td><code>select</code></td>
+<td>Liste des colonnes à sélectionner, si non spécifié, toutes les colonnes (<code>*</code>) seront sélectionnées</td>
+</tr>
+<tr>
+<td><code>group</code></td>
+<td>Contenu de la clause <code>GROUP BY</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="pages-articles-categories-heritent-de-sql">pages, articles, categories (héritent de sql)</h2>
+<ul>
+<li><code>pages</code> renvoie une liste de pages, qu'elles soient des articles ou des catégories</li>
+<li><code>categories</code> ne renvoie que des catégories</li>
+<li><code>articles</code> ne renvoie que des articles</li>
+</ul>
+<p>À part cela les trois types de section se comportent de manière identique</p>
+<h3 id="parametres-possibles">Paramètres possibles</h3>
+<table>
+<thead>
+<tr>
+<th>Paramètre</th>
+<th>Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>search</code></td>
+<td>Renseigner ce paramètre avec un terme à rechercher dans le texte ou le titre. Dans ce cas par défaut le tri des résultats se fait sur la pertinence, sauf si le paramètre <code>order</code> est spécifié. Dans ce cas une variable <code>$snippet</code> sera disponible à l'intérieur de la boucle, contenant les termes trouvés.</td>
+</tr>
+<tr>
+<td><code>future</code></td>
+<td>Renseigner ce paramètre à <code>false</code> pour que les articles dont la date est dans le futur n'apparaissent pas, <code>true</code> pour ne renvoyer QUE les articles dans le futur, et <code>null</code> (ou ne pas utiliser ce paramètre) pour que tous les articles, passés et futur, apparaissent.</td>
+</tr>
+<tr>
+<td><code>parent</code></td>
+<td>Indiquer ici le chemin d'article ou de catégorie parente. Utile pour renvoyer par exemple la liste des articles d'une catégorie.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="files-documents-images-heritent-de-sql">files, documents, images (héritent de sql)</h2>
+<ul>
+<li><code>files</code> renvoie une liste de fichiers</li>
+<li><code>documents</code> renvoie une liste de fichiers qui ne sont pas des images</li>
+<li><code>images</code> renvoie une liste de fichiers qui sont des images</li>
+</ul>
+<p>À part cela les trois types de section se comportent de manière identique</p>
+<p>Note : seul les fichiers de la section site web sont accessibles, les fichiers de membres, de comptabilité, etc. ne sont pas disponibles.</p>
+<h3 id="parametres-possibles">Paramètres possibles</h3>
+<table>
+<thead>
+<tr>
+<th>Paramètre</th>
+<th>Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>parent</code> (obligatoire)</td>
+<td>Chemin (adresse unique) de l'article ou catégorie parente dont ont veut lister les fichiers</td>
+</tr>
+<tr>
+<td><code>except_in_text</code></td>
+<td>passer <code>true</code> à ce paramètre , et seuls les fichiers qui ne sont pas liés dans le texte de la page seront renvoyés</td>
+</tr>
+</tbody>
+</table>
+<h2 id="breadcrumbs">breadcrumbs</h2>
+<p>Permet de récupérer la liste des pages parentes d'une page afin de constituer un <a href="https://fr.wikipedia.org/wiki/Fil_d&#039;Ariane_(ergonomie)" target="_blank" rel="nofollow,noreferrer">fil d'ariane</a> permettant de remonter dans l'arborescence du site</p>
+<p>Un seul paramètre est possible :</p>
+<table>
+<thead>
+<tr>
+<th>Paramètre</th>
+<th>Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path</code> (obligatoire)</td>
+<td>Chemin (adresse unique) de la page parente</td>
+</tr>
+</tbody>
+</table>
+<p>Chaque itération renverra trois variables :</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Contenu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>$title</code></td>
+<td>Titre de la page ou catégorie</td>
+</tr>
+<tr>
+<td><code>$url</code></td>
+<td>Adresse HTTP de la page ou catégorie</td>
+</tr>
+<tr>
+<td><code>$path</code></td>
+<td>Chemin (adresse unique) de la page ou catégorie</td>
+</tr>
+</tbody>
+</table>
+<h3 id="exemple">Exemple</h3>
+<pre><code>{{#breadcrumbs path=$page.path}}
+&amp;rarr; &lt;a href="{{ $url }}"&gt;{{ $title }}&lt;/a&gt;&lt;br /&gt;
+{{/breadcrumbs}}</code></pre></div></body></html>

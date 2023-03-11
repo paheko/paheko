@@ -413,31 +413,45 @@ class DB extends SQLite3
             return false;
         }
 
+        $escape ??= '\\';
         $pattern = str_replace('’', '\'', $pattern); // Normalize French apostrophe
         $value = str_replace('’', '\'', $value);
 
         $id = md5($pattern . $escape);
 
+        // Build regexp
         if (!array_key_exists($id, self::$unicode_patterns_cache)) {
-            $escape = $escape ? '(?!' . preg_quote($escape, '/') . ')' : '';
-            preg_match_all('/('.$escape.'[%_])|(\pL+)|(.+?)/iu', $pattern, $parts, PREG_SET_ORDER);
+            // Match escaped special chars | special chars | unicode characters | other
+            $regexp = '/!([%_!])|([%_!])|(\pL+)|(.+?)/iu';
+            $regexp = str_replace('!', preg_quote($escape, '/'), $regexp);
+
+            preg_match_all($regexp, $pattern, $parts, PREG_SET_ORDER);
             $pattern = '';
 
             foreach ($parts as $part) {
-                if (isset($part[3])) {
+                // Append other characters
+                if (isset($part[4])) {
                     $pattern .= preg_quote(strtolower($part[0]), '/');
                 }
-                elseif (isset($part[2])) {
-                    $pattern .= preg_quote(Utils::unicodeCaseFold($part[2]), '/');
+                // Append unicode
+                elseif (isset($part[3])) {
+                    $pattern .= preg_quote(Utils::unicodeCaseFold($part[3]), '/');
                 }
-                elseif ($part[1] == '%') {
+                // Append .*
+                elseif (isset($part[2]) && $part[2] == '%') {
                     $pattern .= '.*';
                 }
-                elseif ($part[1] == '_') {
+                // Append .
+                elseif (isset($part[2]) && $part[2] == '_') {
                     $pattern .= '.';
+                }
+                // Append escaped special character
+                else {
+                    $pattern .= preg_quote($part[1], '/');
                 }
             }
 
+            // Store pattern in cache
             $pattern = '/^' . $pattern . '$/im';
             self::$unicode_patterns_cache[$id] = $pattern;
         }

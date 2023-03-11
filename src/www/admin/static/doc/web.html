@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+	<html>
+	<head>
+		<title>Squelettes du site web dans Paheko</title>
+		<meta charset="utf-8" />
+		<style type="text/css">
+		body, form, p, div, hr, fieldset, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6 {
+			margin: 0;
+			padding: 0;
+		}
+		body {
+			font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
+			padding: .8em;
+			background: #eee;
+		}
+		.web-content .nav ul {
+			list-style-type: none;
+			margin: -.8em;
+			margin-bottom: 1em;
+			padding: 1em;
+			background: #ddd;
+			border-bottom: 1px solid #999;
+			text-align: center;
+		}
+		.web-content .boutons ul {
+			list-style-type: none;
+			background: #ccc;
+			padding: .5em;
+			margin: 0;
+		}
+		.web-content .nav li, .web-content .boutons li {
+			display: inline-block;
+			margin: 0 1em;
+		}
+		.web-content .nav a, .web-content .boutons a {
+			display: inline-block;
+			background: #fff;
+			color: darkblue;
+			border-radius: .2em;
+			padding: .3em .5em;
+			font-size: 1.2em;
+		}
+		.web-content .nav strong a {
+			color: darkred;
+			box-shadow: 0px 0px 5px orange;
+		}
+		</style>
+		<link rel="stylesheet" type="text/css" href="../../../content.css" />
+	</head>
+	<body><div class="web-content"><div class="nav">
+<ul>
+<li><a href="brindille.html">Documentation Brindille</a></li>
+<li><a href="brindille_functions.html">Fonctions</a></li>
+<li><a href="brindille_sections.html">Sections</a></li>
+<li><a href="brindille_modifiers.html">Filtres</a></li>
+</ul>
+</div>
+<h1 id="les-squelettes-du-site-web">Les squelettes du site web</h1>
+<p>Les squelettes sont un ensemble de fichiers (code <em>Brindille</em>, CSS, etc.) qui permettent de modéliser l'apparence du site web selon ses préférences et besoins.</p>
+<p>La syntaxe utilisée dans les squelettes s'appelle <strong>Brindille</strong>.</p>
+<h2 id="exemples-de-sites-realises-avec-paheko">Exemples de sites réalisés avec Paheko</h2>
+<ul>
+<li><a href="https://asbm-mortagne.fr/" target="_blank" rel="nofollow,noreferrer">ASBM Mortagne</a></li>
+<li><a href="https://www.velocite63.fr/" target="_blank" rel="nofollow,noreferrer">Vélocité 63</a></li>
+<li><a href="https://larustine.org/" target="_blank" rel="nofollow,noreferrer">La rustine, Dijon</a></li>
+<li><a href="https://tauto-ecole.net/" target="_blank" rel="nofollow,noreferrer">Tauto école</a> <a href="https://gitlab.com/noizette/squelettes-garradin-tauto-ecole/" target="_blank" rel="nofollow,noreferrer">(les squelettes sont disponibles ici)</a></li>
+<li><a href="https://boiteavelos.chenove.net/" target="_blank" rel="nofollow,noreferrer">La boîte à vélos</a></li>
+<li><a href="https://jardindubonpasteur.fr" target="_blank" rel="nofollow,noreferrer">Jardin du bon pasteur</a></li>
+</ul>
+<h2 id="fonctionnement-des-squelettes">Fonctionnement des squelettes</h2>
+<p>Par défaut sont fournis plusieurs squelettes qui permettent d'avoir un site web basique mais fonctionnel : page d'accueil, menu avec les catégories de premier niveau, et pour afficher les pages, les catégories, les fichiers joints et images. Il y a également un squelette <code>atom.xml</code> permettant aux visiteurs d'accéder aux dernières pages publiées.</p>
+<p>Les squelettes peuvent être modifiés via l'onglet <strong>Configuration</strong> de la section <strong>Site web</strong> du menu principal.</p>
+<p>Une fois un squelette modifié, il apparaît dans la liste comme étant modifié, sinon il apparaît comme <em>défaut</em>. Si vous avez commis une erreur, il est possible de restaurer le squelette d'origine.</p>
+<p>Dans la gestion des squelettes, seuls les fichiers ayant une des extensions <code>tpl, btpl, html, htm, b, skel, xml</code> seront traités par Brindille. De même, les fichiers qui n'ont pas d'extension seront également traités par Brindille.</p>
+<p>Les autres types de fichiers seront renvoyés sans traitement, comme des fichiers "bruts". En d'autres termes, il n'est pas possible de mettre du code <em>Brindille</em> dans des fichiers non-texte.</p>
+<p>Ainsi, nous appelons ici <em>squelette</em> tout fichier situé dans l'onglet <strong>Configuration</strong>, mais seuls les fichiers traités par Brindille sont de "vrais" squelettes au sens code exécutable par <em>Brindille</em>. Les autres ne sont pas traités ni exécutés : ils ne peuvent pas contenir de code Brindille.</p>
+<h3 id="adresses-des-pages-du-site">Adresses des pages du site</h3>
+<p>Les squelettes sont appelés en fonction des règles suivantes (dans l'ordre) :</p>
+<table>
+<thead>
+<tr>
+<th>Adresse</th>
+<th>Squelette appelé</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/</code> (racine du site)</td>
+<td><code>index.html</code></td>
+</tr>
+<tr>
+<td>Toute autre adresse se terminant par un slash <code>/</code></td>
+<td><code>category.html</code></td>
+</tr>
+<tr>
+<td>Toute autre adresse, si un article existe avec cette URI</td>
+<td><code>article.html</code></td>
+</tr>
+<tr>
+<td>Toute autre adresse, si un squelette du même nom existe</td>
+<td>Squelettes du même nom</td>
+</tr>
+</tbody>
+</table>
+<p>Ainsi l'adresse <code>https://monsite.paheko.cloud/Actualite/</code> appellera le squelette <code>category.html</code>, mais l'adresse <code>https://monsite.paheko.cloud/Actualite</code> (sans slash à la fin) appellera le squelette <code>article.html</code> si un article avec l'URI <code>Actualite</code> existe. Sinon si un squelette <code>Actualite</code> (sans extension) existe, c'est lui qui sera appelé.</p>
+<p>Autre exemple : <code>https://monsite.paheko.cloud/atom.xml</code> appellera le squelette <code>atom.xml</code> vu qu'il existe.</p>
+<p>Ceci vous permet de créer de nouvelles pages dynamiques sur le site, par exemple pour notre atelier vélo nous avons une page <code>https://larustine.org/velos</code> qui appelle le squelette <code>velos</code> (sans extension), qui va afficher la liste des vélos actuellement en stock dans notre hangar.</p>
+<p>Le type de fichier étant déterminé selon l'extension (<code>.html, .css, etc.</code>) pour les fichiers traités par Brindille, un fichier sans extension sera considéré comme un fichier texte par le navigateur. Si on veut que le squelette <code>velos</code> (sans extension) s'affiche comme du HTML il faut forcer le type en mettant le code <code>{{:http type="text/html"}}</code> au début du squelette (première ligne).</p>
+<h3 id="squelette-content-css">Squelette content.css</h3>
+<p>Ce fichier est particulier, car il définit le style du contenu des pages et des catégories. Ainsi il est également utilisé quand vous éditez un contenu dans l'administration. Donc si vous souhaitez modifier le style d'un élément du texte, il vaux mieux modifier ce fichier, sinon le rendu sera différent entre l'administration et le site public.</p></div></body></html>
