@@ -1,6 +1,9 @@
 {include file="admin/_head.tpl" title="Configuration" current="web"}
 
 <nav class="tabs">
+	<aside>
+		{linkbutton shape="help" target="_dialog" href="!static/doc/web.html" label="Documentation"}
+	</aside>
 	<ul>
 		<li><a href="./">Gestion du site web</a></li>
 		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)}
