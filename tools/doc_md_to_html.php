@@ -44,8 +44,8 @@ foreach (glob(__DIR__ . '/../doc/admin/*.md') as $file) {
 
 	$t = file_get_contents($file);
 
-	if (preg_match('/^Title: (.*)\v/', $t, $match)) {
-		$t = substr($t, strlen($match[1]));
+	if (preg_match('/^Title: (.*)/', $t, $match)) {
+		$t = substr($t, strlen($match[0]));
 	}
 
 	$t = $md->text($t);
