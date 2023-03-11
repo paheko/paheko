@@ -263,10 +263,10 @@ class Utils
             return ADMIN_URL . substr($url, 7);
         }
         elseif (substr($url, 0, 2) == './') {
-        	$base = self::getSelfURL();
+        	$base = self::getSelfURI();
         	$base = preg_replace('!/[^/]*$!', '/', $base);
         	$base = trim($base, '/');
-        	return $base . '/' . substr($url, 2);
+        	return '/' . $base . '/' . substr($url, 2);
         }
         elseif (substr($url, 0, 1) == '/' && ($pos = strpos($url, WWW_URI)) === 0) {
             return WWW_URL . substr($url, strlen(WWW_URI));
@@ -299,8 +299,7 @@ class Utils
         $uri = self::getSelfURI($qs);
 
         // Make absolute URI relative to parent URI
-        if (strpos($uri, WWW_URI . 'admin/') === 0)
-        {
+        if (0 === strpos($uri, WWW_URI . 'admin/')) {
             $uri = substr($uri, strlen(WWW_URI . 'admin/'));
         }
 
