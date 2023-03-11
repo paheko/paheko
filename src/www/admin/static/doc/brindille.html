@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+	<html>
+	<head>
+		<title>/home/bohwaz/fossil/garradin.stable/tools/../doc/admin/brindille.md</title>
+		<meta charset="utf-8" />
+		<style type="text/css">
+		body, form, p, div, hr, fieldset, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6 {
+			margin: 0;
+			padding: 0;
+		}
+		body {
+			font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
+			padding: .8em;
+			background: #eee;
+		}
+		.web-content .nav ul {
+			list-style-type: none;
+			margin: -.8em;
+			margin-bottom: 1em;
+			padding: 1em;
+			background: #ddd;
+			border-bottom: 1px solid #999;
+			text-align: center;
+		}
+		.web-content .boutons ul {
+			list-style-type: none;
+			background: #ccc;
+			padding: .5em;
+			margin: 0;
+		}
+		.web-content .nav li, .web-content .boutons li {
+			display: inline-block;
+			margin: 0 1em;
+		}
+		.web-content .nav a, .web-content .boutons a {
+			display: inline-block;
+			background: #fff;
+			color: darkblue;
+			border-radius: .2em;
+			padding: .3em .5em;
+			font-size: 1.2em;
+		}
+		.web-content .nav strong a {
+			color: darkred;
+			box-shadow: 0px 0px 5px orange;
+		}
+		</style>
+		<link rel="stylesheet" type="text/css" href="../../../content.css" />
+	</head>
+	<body><div class="web-content"><div class="nav">
+<ul>
+<li><strong><a href="brindille.html">Documentation Brindille</a></strong></li>
+<li><a href="brindille_functions.html">Fonctions</a></li>
+<li><a href="brindille_sections.html">Sections</a></li>
+<li><a href="brindille_modifiers.html">Filtres</a></li>
+</ul>
+</div><aside class="toc">
+	<ol>
+		<li><a href="#syntaxe-de-base">Syntaxe de base</a>
+		<ol>
+			<li><a href="#affichage-de-variable">Affichage de variable</a>
+			<ol>
+				<li><a href="#ordre-de-recherche-des-variables">Ordre de recherche des variables</a></li>
+				<li><a href="#conflit-de-noms-de-variables">Conflit de noms de variables</a>
+			</ol></li>
+			<li><a href="#conditions">Conditions</a></li>
+			<li><a href="#fonctions">Fonctions</a></li>
+			<li><a href="#sections">Sections</a></li>
+			<li><a href="#sections-literales">Sections litérales</a>
+			<ol>
+				<li><a href="#commentaires">Commentaires</a>
+			</ol></li>
+			<li><a href="#reference-des-variables-definies-par-defaut">Référence des variables définies par défaut</a>
+</li></ol></li></ol></aside><p>La syntaxe utilisée dans Paheko pour les squelettes du site web s'appelle <strong>Brindille</strong>. Si vous avez déjà fait de la programmation, elle ressemble à un mélange de Mustache, Smarty, Twig et PHP.</p>
+<p>Son but est de permettre une grande flexibilité, sans avoir à utiliser un "vrai" langage de programmation, mais en s'en rapprochant suffisamment quand même.</p>
+<h1 id="syntaxe-de-base">Syntaxe de base</h1>
+<h2 id="affichage-de-variable">Affichage de variable</h2>
+<p>Une variable est affichée à l'aide de la syntaxe : <code>{{$date}}</code> affichera la valeur brute de la date par exemple : <code>2020-01-31 16:32:00</code>.</p>
+<p>La variable peut être modifiée à l'aide de filtres de modification, qui sont ajoutés avec le symbole de la barre verticale (pipe <code>|</code>) : <code>{{$date|date_long}}</code> affichera une date au format long : <code>jeudi 7 mars 2021</code>.</p>
+<p>Ces filtres peuvent accepter des paramètres, séparés par deux points <code>:</code>. Exemple : <code>{{$date|date:"%d/%m/%Y"}}</code> affichera <code>31/01/2020</code>.</p>
+<p>Par défaut la variable sera recherchée dans le contexte actuel de la section, si elle n'est pas trouvée elle sera recherchée dans le contexte parent (section parente), etc. jusqu'à trouver la variable.</p>
+<p>Il est possible de faire référence à une variable d'un contexte particulier avec la notation à points : <code>{{$article.date}}</code>.</p>
+<p>Il existe deux variables de contexte spécifiques : <code>$_POST</code> et <code>$_GET</code> qui permettent d'accéder aux données envoyées dans un formulaire et dans les paramètres de la page.</p>
+<p>Par défaut le filtre <code>escape</code> est appliqué à toutes les variables pour protéger les variables contre les injections de code HTML. Ce filtre est appliqué en dernier, après les autres filtres. Il est possible de contourner cet automatisme en rajoutant le filtre <code>escape</code> ou <code>raw</code> explicitement. <code>raw</code> désactive tout échappement, mais <code>escape</code> est utilisé pour changer l'ordre d'échappement. Exemple :</p>
+<pre><code>{{:assign text = "Coucou
+ça va ?" }}
+{{$text|escape|nl2br}}</code></pre>
+<p>Donnera bien <code>Coucou&lt;br /&gt;ça va ?</code>. Sans indiquer le filtre <code>escape</code> le résultat serait <code>Coucou&amp;lt;br /&amp;gt;ça va ?</code>.</p>
+<h3 id="ordre-de-recherche-des-variables">Ordre de recherche des variables</h3>
+<p>Par défaut les variables sont recherchées dans l'ordre inverse, c'est à dire que sont d'abord recherchées les variables avec le nom demandé dans la section courante. Si la variable n'existe pas dans la section courante, alors elle est recherchée dans la section parente, et ainsi de suite jusqu'à ce que la variable soit trouvée, où qu'il n'y ait plus de section parente.</p>
+<p>Prenons cet exemple :</p>
+<pre><code>{{#articles uri="Actualite"}}
+  &lt;h1&gt;{{$title}}&lt;/h1&gt;
+    {{#images parent=$path limit=1}}
+      &lt;img src="{{$thumb_url}}" alt="{{$title}}" /&gt;
+    {{/images}}
+{{/articles}}</code></pre>
+<p>Dans la section <code>articles</code>, <code>$title</code> est une variable de l'article, donc la variable est celle de l'article.</p>
+<p>Dans la section <code>images</code>, les images n'ayant pas de titre, la variable sera celle de l'article de la section parente, alors que <code>$thumb_url</code> sera lié à l'image.</p>
+<h3 id="conflit-de-noms-de-variables">Conflit de noms de variables</h3>
+<p>Imaginons que nous voulions mettre un lien vers l'article sur l'image de l'exemple précédent :</p>
+<pre><code>{{#articles uri="Actualite"}}
+  &lt;h1&gt;{{$title}}&lt;/h1&gt;
+    {{#images parent=$path limit=1}}
+      &lt;a href="{{$url}}"&gt;&lt;img src="{{$thumb_url}}" alt="{{$title}}" /&gt;&lt;/a&gt;
+    {{/images}}
+{{/articles}}</code></pre>
+<p>Problème, ici <code>$url</code> fera référence à l'URL de l'image elle-même, et non pas l'URL de l'article.</p>
+<p>La solution est d'ajouter un point au début du nom de variable : <code>{{$.url}}</code>.</p>
+<p>Un point au début d'un nom de variable signifie que la variable est recherchée à partir de la section précédente. Il est possible d'utiliser plusieurs points, chaque point correspond à un niveau à remonter. Ainsi <code>$.url</code> cherchera la variable dans la section parente (et ses sections parentes si elle n'existe pas, etc.). De même, <code>$..url</code> cherchera dans la section parente de la section parente.</p>
+<h2 id="conditions">Conditions</h2>
+<p>Il est possible d'utiliser des conditions de type "si" (<code>if</code>), "sinon si" (<code>elseif</code>) et "sinon" (<code>else</code>). Celles-ci sont terminées par un block "fin si" (<code>/if</code>).</p>
+<pre><code>{{if $date|date:"%Y" &gt; 2020}}
+    La date est en 2020
+{{elseif $article.status == 'draft'}}
+    La page est un brouillon
+{{else}}
+    Autre chose.
+{{/if}}</code></pre>
+<h2 id="fonctions">Fonctions</h2>
+<p>Une fonction va répondre à certains paramètres et renvoyer un résultat ou réaliser une action. Un bloc de fonction commence par le signe deux points <code>:</code> :</p>
+<pre><code>{{:http code=404}}</code></pre>
+<p>Contrairement aux autres types de blocs, et comme pour les variables, il n'y a pas de bloc fermant (avec un slash <code>/</code>).</p>
+<h2 id="sections">Sections</h2>
+<p>Une section est une partie de la page qui sera répétée une fois, plusieurs fois, ou zéro fois, selon ses paramètres et le résultat (c'est une "boucle"). Une section commence par un bloc avec un signe hash (<code>#</code>) et se termine par un bloc avec un slash (<code>/</code>).</p>
+<p>Un exemple simple avec une section qui n'aura qu'une seule répétition :</p>
+<pre><code>{{#categories uri=$_GET.uri}}
+    &lt;h1&gt;{{$title}}&lt;/h1&gt;
+{{/categories}}</code></pre>
+<p>Il est possible d'utiliser une condition <code>{{else}}</code> avant la fin du bloc pour avoir du contenu alternatif si la section ne se répète pas (dans ce cas si aucune catégorie ne correspond au critère).</p>
+<p>Un exemple de sous-section</p>
+<pre><code>{{#categories uri=$_GET.uri}}
+    &lt;h1&gt;{{$title}}&lt;/h1&gt;
+
+    {{#articles parent=$path order="published DESC" limit="10"}}
+        &lt;h2&gt;&lt;a href="{{$url}}"&gt;{{$title}}&lt;/a&gt;&lt;/h2&gt;
+        &lt;p&gt;{{$content|truncate:600:"..."}}&lt;/p&gt;
+    {{else}}
+        &lt;p&gt;Aucun article trouvé.&lt;/p&gt;
+    {{/articles}}
+
+{{/categories}}</code></pre>
+<p>Voir la référence des sections pour voir quelles sont les sections possibles et quel est leur comportement.</p>
+<h2 id="sections-literales">Sections litérales</h2>
+<p>Pour qu'une partie du code ne soit pas interprété, pour éviter les conflits avec certaines syntaxes, il est possible d'utiliser un bloc <code>literal</code> :</p>
+<pre><code>{{literal}}
+&lt;script&gt;
+// Ceci ne sera pas interprété
+function test (a) {{
+}}
+&lt;/script&gt;
+{{/literal}}</code></pre>
+<h3 id="commentaires">Commentaires</h3>
+<p>Les commentaires sont figurés dans des blocs qui commencent et se terminent par une étoile (<code>*</code>) :</p>
+<pre><code>{{* Ceci est un commentaire
+Il sera supprimé du résultat final
+Il peut contenir du code qui ne sera pas interprété :
+{{if $test}}
+OK
+{{/if}}
+*}}</code></pre>
+<h2 id="reference-des-variables-definies-par-defaut">Référence des variables définies par défaut</h2>
+<p>Ces variables sont définies tout le temps :</p>
+<table>
+<thead>
+<tr>
+<th>Nom</th>
+<th>Contenu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>$_GET</code></td>
+<td>Alias de la super-globale _GET de PHP.</td>
+</tr>
+<tr>
+<td><code>$_POST</code></td>
+<td>Alias de la super-globale _POST de PHP.</td>
+</tr>
+<tr>
+<td><code>$root_url</code></td>
+<td>Adresse racine du site web Paheko.</td>
+</tr>
+<tr>
+<td><code>$request_url</code></td>
+<td>Adresse de la page courante.</td>
+</tr>
+<tr>
+<td><code>$admin_url</code></td>
+<td>Adresse de la racine de l'administration Paheko.</td>
+</tr>
+<tr>
+<td><code>$visitor_lang</code></td>
+<td>Langue préférée du visiteur, sur 2 lettres (exemple : <code>fr</code>, <code>en</code>, etc.).</td>
+</tr>
+<tr>
+<td><code>$logged_user</code></td>
+<td>Informations sur le membre actuellement connecté dans l'administration (vide si non connecté).</td>
+</tr>
+<tr>
+<td><code>$config.org_name</code></td>
+<td>Nom de l'association</td>
+</tr>
+<tr>
+<td><code>$config.org_email</code></td>
+<td>Adresse e-mail de l'association</td>
+</tr>
+<tr>
+<td><code>$config.org_phone</code></td>
+<td>Numéro de téléphone de l'association</td>
+</tr>
+<tr>
+<td><code>$config.org_address</code></td>
+<td>Adresse postale de l'association</td>
+</tr>
+<tr>
+<td><code>$config.org_web</code></td>
+<td>Adresse du site web de l'association</td>
+</tr>
+<tr>
+<td><code>$config.files.logo</code></td>
+<td>Adresse du logo de l'association, si définit dans la personnalisation</td>
+</tr>
+<tr>
+<td><code>$config.files.favicon</code></td>
+<td>Adresse de l'icône de favoris de l'association, si définit dans la personnalisation</td>
+</tr>
+</tbody>
+</table></div></body></html>

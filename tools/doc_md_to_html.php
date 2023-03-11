@@ -1,16 +1,48 @@
 <?php
 
-namespace Garradin;
+use KD2\HTML\Markdown;
+use KD2\HTML\Markdown_Extensions;
 
-use Garradin\Web\Render\Markdown;
+require_once __DIR__ . '/../src/include/lib/KD2/HTML/Markdown.php';
+require_once __DIR__ . '/../src/include/lib/KD2/HTML/Markdown_Extensions.php';
 
-const INSTALL_PROCESS = true;
+$md = new Markdown;
 
-require __DIR__ . '/../src/include/init.php';
+// Allow extra tags for Markdown quickref
+$extra_tags = [
+	'blockquote' => null,
+	'pre' => null,
+	'br' => null,
+	'h1' => null,
+	'h2' => null,
+	'h3' => null,
+	'h4' => null,
+	'h5' => null,
+	'h6' => null,
+	'ul' => null,
+	'ol' => null,
+	'li' => null,
+	'table' => null,
+	'thead' => null,
+	'tbody' => null,
+	'tr' => null,
+	'th' => null,
+	'td' => null,
+	'hr' => null,
+	'div' => ['style'],
+];
+
+Markdown_Extensions::register($md);
 
 foreach (glob(__DIR__ . '/../doc/admin/*.md') as $file) {
-	$r = new Markdown;
-	$t = $r->render(file_get_contents($file));
+	if (basename($file) == 'markdown_quickref.md') {
+		$md->allowed_inline_tags = array_merge($md->allowed_inline_tags, $extra_tags);
+	}
+	else {
+		$md->allowed_inline_tags = $md::DEFAULT_INLINE_TAGS;
+	}
+
+	$t = $md->text(file_get_contents($file));
 
 	$title = $r->toc[0]['label'] ?? $file;
 
@@ -29,10 +61,41 @@ foreach (glob(__DIR__ . '/../doc/admin/*.md') as $file) {
 			padding: .8em;
 			background: #eee;
 		}
+		.web-content .nav ul {
+			list-style-type: none;
+			margin: -.8em;
+			margin-bottom: 1em;
+			padding: 1em;
+			background: #ddd;
+			border-bottom: 1px solid #999;
+			text-align: center;
+		}
+		.web-content .boutons ul {
+			list-style-type: none;
+			background: #ccc;
+			padding: .5em;
+			margin: 0;
+		}
+		.web-content .nav li, .web-content .boutons li {
+			display: inline-block;
+			margin: 0 1em;
+		}
+		.web-content .nav a, .web-content .boutons a {
+			display: inline-block;
+			background: #fff;
+			color: darkblue;
+			border-radius: .2em;
+			padding: .3em .5em;
+			font-size: 1.2em;
+		}
+		.web-content .nav strong a {
+			color: darkred;
+			box-shadow: 0px 0px 5px orange;
+		}
 		</style>
 		<link rel="stylesheet" type="text/css" href="../../../content.css" />
 	</head>
-	<body>' . $t . '</body></html>';
+	<body><div class="web-content">' . $t . '</div></body></html>';
 
 	$dest = __DIR__ . '/../src/www/admin/static/doc/' . str_replace('.md', '.html', basename($file));
 	file_put_contents($dest, $out);
