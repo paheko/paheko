@@ -1,3 +1,5 @@
+Title: Référence rapide SkrivML - Paheko
+
 <<toc aside>>
 
 # Syntaxe SkrivML

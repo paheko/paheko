@@ -42,9 +42,15 @@ foreach (glob(__DIR__ . '/../doc/admin/*.md') as $file) {
 		$md->allowed_inline_tags = $md::DEFAULT_INLINE_TAGS;
 	}
 
-	$t = $md->text(file_get_contents($file));
+	$t = file_get_contents($file);
 
-	$title = $r->toc[0]['label'] ?? $file;
+	if (preg_match('/^Title: (.*)\v/', $t, $match)) {
+		$t = substr($t, strlen($match[1]));
+	}
+
+	$t = $md->text($t);
+
+	$title = $match[1] ?? $file;
 
 	$out = '<!DOCTYPE html>
 	<html>

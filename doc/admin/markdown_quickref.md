@@ -1,3 +1,5 @@
+Title: Référence rapide MarkDown — Paheko
+
 {{{.nav
 * [Raccourcis claviers](keyboard.html)
 * [Syntaxe MarkDown complète](markdown.html)

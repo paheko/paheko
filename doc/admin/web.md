@@ -1,10 +1,10 @@
-{{{.nav
+Title: Squelettes du site web dans Paheko
 
+{{{.nav
 * [Documentation Brindille](brindille.html)
 * [Fonctions](brindille_functions.html)
 * [Sections](brindille_sections.html)
 * [Filtres](brindille_modifiers.html)
-
 }}}
 
 # Les squelettes du site web

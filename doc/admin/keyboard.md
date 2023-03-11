@@ -1,3 +1,5 @@
+Title: Raccourcis claviers dans l'édition de texte — Paheko
+
 {{{.nav
 * **[Raccourcis claviers](keyboard.html)**
 * [Syntaxe MarkDown complète](markdown.html)

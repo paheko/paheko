@@ -1,3 +1,5 @@
+Title: Référence des fonctions Brindille
+
 {{{.nav
 * [Documentation Brindille](brindille.html)
 * **[Fonctions](brindille_functions.html)**
