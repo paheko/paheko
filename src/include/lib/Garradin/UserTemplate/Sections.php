@@ -109,7 +109,7 @@ class Sections
 
 	static protected function _debug(string $str): void
 	{
-		echo sprintf('<pre style="padding: 5px; margin: 5px; background: yellow; white-space: pre-wrap;">%s</pre>', htmlspecialchars($str));
+		echo sprintf('<pre style="padding: 5px; margin: 5px; background: yellow; white-space: pre-wrap; color: #000">%s</pre>', htmlspecialchars($str));
 	}
 
 	static protected function _debugExplain(string $sql): void
