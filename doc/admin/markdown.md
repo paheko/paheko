@@ -1,4 +1,8 @@
-[Raccourcis claviers](keyboard.html) | [Extensions Paheko](extensions.html)
+{{{.nav
+* [Raccourcis claviers](keyboard.html)
+* **[Syntaxe MarkDown complète](markdown.html)**
+* [Référence rapide MarkDown](markdown_quickref.html)
+}}}
 
 <<toc aside>>
 
@@ -51,6 +55,17 @@ Texte ~~complètement barré~~.
 ```
 
 > Texte ~~complètement barré~~.
+
+### Surligné
+
+Il est possible de marquer une phrase ou un mot comme surligné en l'entourant de deux signes égal :
+
+```
+Ce texte est ==surligné==.
+```
+
+> Ce texte est ==surligné==.
+
 
 ### Code
 
@@ -177,6 +192,30 @@ Ou avec des nombres pour des listes ordonnées :
 > 1. élément un
 > 2. élément deux
 
+L'ordre des nombres n'est pas important, seul le premier nombre est utilisé pour déterminer à quel numéro commencer la liste.
+
+Exemple :
+
+```
+3. A
+5. B 
+4. C
+```
+
+> 3. A
+> 5. B 
+> 4. C
+
+Il est ainsi possible d'utiliser uniquement le même numéro pour ne pas avoir à numéroter sa liste :
+
+```
+1. Un
+1. Deux
+```
+
+> 1. Un
+> 1. Deux
+
 ### Citations
 
 Les citations se font en ajoutant le signe *supérieur à* (`>`) au début de la ligne :
@@ -217,7 +256,7 @@ La première ligne contient les noms des colonnes, la seconde ligne contient la 
 | - | - |
 | AB | CD |
 
-Par défaut les colonnes sont centrées. On peut aussi choisir l'alignement des colonnes à gauche ou à droite en mettant deux points après le ou les tirets de la ligne suivant l'entête :
+Par défaut les colonnes sont centrées. On peut aussi aligner le texte à gauche ou à droite en mettant deux points après le ou les tirets de la ligne suivant l'entête :
 
 ```
 | Aligné à gauche  | Centré          | Aligné à droite |
@@ -253,30 +292,6 @@ Pour ajouter un commentaire qui ne sera pas affiché dans le texte, utiliser la 
 <!-- Ceci est un commentaire -->
 ```
 
-# Extensions Paheko
-
-Paheko propose des extensions permettant :
-
-* d'insérer des images et fichiers joints ;
-* d'insérer une table des matières automatique ;
-* d'aligner le texte au centre, à gauche, à droite ;
-* de créer des mises en page complexes avec des colonnes et grilles ;
-* de changer la couleur du texte ou du fond.
-
-[Cliquer ici pour lire la documentation des extensions Paheko](extensions.html)
-
-# Extensions MarkDown
-
-## Surligner un texte
-
-Il est possible de marquer une phrase ou un mot comme surligné en l'entourant de deux signes égal :
-
-```
-Ce texte est ==surligné==.
-```
-
-> Ce texte est ==surligné==.
-
 ## Notes de bas de page
 
 Pour créer une note de base de page, il faut mettre entre crochets un signe circonflexe (obtenu en appuyant sur la touche circonflexe, puis sur espace) suivi du numéro ou du nom de la note. Enfin, à la fin du texte il faudra répéter les crochets, le signe circonflexe, suivi de deux points et de la définition.
@@ -295,16 +310,6 @@ Donnera ceci :
 > [^1]: Ceci est une note de bas de page
 > [^Source]: Enquête Paheko sur la base de 1 personne interrogée.
 
-
-## Sommaire / table des matières automatique
-
-En plus de la syntaxe `<<toc>>` documentée dans les extensions communes, Paheko supporte aussi les syntaxes suivantes par compatibilité avec [les autres moteurs de rendu MarkDown](https://alexharv074.github.io/2018/08/28/auto-generating-markdown-tables-of-contents.html) : `{:toc}` `[[_TOC_]]` `[toc]`.
-
-Il est aussi possible d'indiquer qu'un titre ne doit pas être inclus dans le sommaire en utilisant la classe `no_toc` comme ceci :
-
-```
-## Sous-titre non-inclus {.no_toc}
-```
 
 ## Insertion de vidéos depuis un service de vidéo
 
@@ -376,3 +381,275 @@ Certains tags HTML sont autorisés :
 | `<video>` | Insérer une vidéo dans la page | `<video src="mon_fichier.webm">` |
 
 Mais leurs possibilités sont limitées, notamment sur les attributs autorisés.
+
+# Extensions
+
+Paheko propose des extensions au langage MarkDown, qui n'existent pas dans les autres logiciels utilisant aussi MarkDown.
+
+Toutes ces extensions se présentent sous la forme d'un code situé entre deux signes **inférieur à** (`<<`) et deux signes **supérieur à** (`>>`), à ne pas confondre avec les guillements français (`«` et `»`).
+
+## Images jointes
+
+Il est possible d'intégrer une image jointe à la page web en plaçant le code suivant sur une ligne (sans autre texte) :
+
+```
+<<image|Nom_fichier.jpg|Alignement|Légende>>
+```
+
+* `Nom_fichier.jpg` : remplacer par le nom du fichier de l'image (parmi les images jointes à la page)
+* `Alignement` : remplacer par l'alignement :
+  * `gauche` ou `left` : l'image sera placée à gauche en petit (200 pixels), le texte remplira l'espace laissé sur la droite de l'image ;
+  * `droite` ou `right` : l'image sera placée à droite en petit, le texte remplira l'espace laissé sur la gauche de l'image ;
+  * `centre` ou `center` : l'image sera placée au centre en taille moyenne (500 pixels), le texte sera placé au dessus et en dessous.
+* Légende : indiquer ici une courte description de l'image.
+
+Exemple :
+
+```
+<<image|mon_image.png|center|Ceci est une belle image>>
+```
+
+Il est aussi possible d'utiliser la syntaxe avec des paramètres nommés :
+
+```
+<<image file="Nom_fichier.jpg" align="center" caption="Légende">>
+```
+
+Les images qui ne sont pas mentionnées dans le texte seront affichées après le texte sous forme de galerie.
+
+## Fichiers joints
+
+Pour créer un bouton permettant de voir ou télécharger un fichier joint à la page web, il suffit d'utiliser la syntaxe suivante :
+
+```
+<<file|Nom_fichier.ext|Libellé>>
+```
+
+* `Nom_fichier.ext` : remplacer par le nom du fichier  (parmi les fichiers joints à la page)
+* `Libellé` : indique le libellé du qui sera affiché sur le bouton, si aucun libellé n'est indiqué alors c'est le nom du fichier qui sera affiché
+
+## Sommaire / table des matières automatique
+
+Il est possible de placer le code `<<toc>>` pour générer un sommaire automatiquement à partir des titres et sous-titres :
+
+```
+<<toc>>
+```
+
+Affichera un sommaire comme celui-ci :
+
+<<toc>>
+
+Il est possible de limiter les niveaux en utilisant le paramètre `level` comme ceci :
+
+```
+<<toc level=1>>
+```
+
+N'affichera que les titres de niveau 1 (précédés d'un seul signe hash `#`), comme ceci :
+
+<<toc level=1>>
+
+Enfin il est possible de placer la table des matières sur le côté du texte, en utilisant le paramètre `aside` :
+
+```
+<<toc level=1 aside>>
+```
+
+Note : en plus de la syntaxe `<<toc>>`, Paheko supporte aussi les syntaxes suivantes par compatibilité avec [les autres moteurs de rendu MarkDown](https://alexharv074.github.io/2018/08/28/auto-generating-markdown-tables-of-contents.html) : `{:toc}` `[[_TOC_]]` `[toc]`.
+
+### Exclure un sous-titre du sommaire
+
+Il est aussi possible d'indiquer qu'un titre ne doit pas être inclus dans le sommaire en utilisant la classe `no_toc` comme ceci :
+
+```
+## Sous-titre non-inclus {.no_toc}
+```
+
+## Grilles et colonnes
+
+Pour une mise en page plus avancée, il est possible d'utiliser les *grilles*, adaptation des [grids en CSS](https://developer.mozilla.org/fr/docs/Web/CSS/CSS_Grid_Layout). Il faut utiliser la syntaxe `<<grid>>...Contenu...<</grid>>`.
+
+Attention, les blocs `<<grid>>` et `<</grid>>` doivent obligatoirement être placés sur des lignes qui ne contiennent rien d'autre.
+
+**Note :** sur petit écran (mobile ou tablette) les grilles et colonnes sont désactivées, tout sera affiché dans une seule colonne, comme si les grilles n'étaient pas utilisées.
+
+Pour spécifier le nombre de colonnes on peut utiliser un raccourci qui *mime* les colonnes, comme ceci :
+
+```
+<<grid !!>>
+```
+
+Ce code indique qu'on veut créer une grille de 2 colonnes de largeur identique.
+
+Dans les raccourcis, le point d'exclamation `!` indique une colonne simple, et le hash `#` indique une colonne qui prend le reste de la place selon le nombre de colonnes total.
+
+D'autres exemples de raccourcis :
+
+* `!!` : deux colonnes de largeur égale
+* `!!!` : trois colonnes de largeur égale
+* `!##` : deux colonnes, la première occupant un tiers de la largeur, la seconde occupant les deux tiers
+* `!##!` : 4 colonnes, la première occupant un quart de la largeur, la seconde occupant la moitié, la dernière occupant le quart
+
+Alternativement, pour plus de contrôle, ce bloc accepte les paramètres suivants :
+
+* `short` : notation courte décrite ci-dessus
+* `gap` : espacement entre les blocs de la grille
+* `template` : description CSS complète de la grille (propriété [`grid-template`](https://developer.mozilla.org/fr/docs/Web/CSS/grid-template))
+
+Après ce premier bloc `<<grid>>` qui définit la forme de la grille, on peut entrer le contenu de la première colonne.
+
+Pour créer la seconde colonne il faut simplement placer un nouveau bloc `<<grid>>` vide (aucun paramètre) sur une ligne.
+
+Enfin on termine en fermant la grille avec un block `<</grid>>`. Voici un exemple complet :
+
+```
+<<grid !!!>>
+Col. 1
+<<grid>>
+Col. 2
+<<grid>>
+Col. 3
+<</grid>>
+```
+
+<<grid short="!!!" debug>>
+Col. 1
+<<grid>>
+Col. 2
+<<grid>>
+Col. 3
+<</grid>>
+
+Exemple avec 3 colonnes, dont 2 petites et une large :
+
+```
+<<grid !##!>>
+Col. 1
+<<grid>>
+Colonne 2 large
+<<grid>>
+Col. 3
+<</grid>>
+```
+
+<<grid short="!##!" debug>>
+Col. 1
+<<grid>>
+Colonne 2 large
+<<grid>>
+Col. 3
+<</grid>>
+
+Il est possible de créer plus de blocs qu'il n'y a de colonnes, cela créera une nouvelle ligne avec le même motif :
+
+```
+<<grid !!>>
+L1 C1
+<<grid>>
+L1 C2
+<<grid>>
+L2 C1
+<<grid>>
+L2 C2
+<</grid>>
+```
+
+<<grid short="!!" debug>>
+L1 C1
+<<grid>>
+L1 C2
+<<grid>>
+L2 C1
+<<grid>>
+L2 C2
+<</grid>>
+
+Enfin, il est possible d'utiliser la notation CSS [`grid-row`](https://developer.mozilla.org/en-US/docs/Web/CSS/grid-row) et [`grid-column`](https://developer.mozilla.org/en-US/docs/Web/CSS/grid-column) pour chaque bloc, permettant de déplacer les blocs, ou de faire en sorte qu'un bloc s'étende sur plusieurs colonnes ou plusieurs lignes. Pour cela il faut utiliser le paramètre `row` ou `column` qui précède le bloc :
+
+```
+<<grid short="#!!" column="span 2">>
+A
+<<grid row="span 2">>
+B
+<<grid>>
+C
+<<grid>>
+D
+<</grid>>
+```
+
+<<grid short="#!!" debug column="span 2">>
+A
+<<grid row="span 2">>
+B
+<<grid>>
+C
+<<grid>>
+D
+<</grid>>
+
+Noter que dans ce cas on doit utiliser la notation `short="…"` pour pouvoir utiliser les autres paramètres.
+
+Enfin, il est possible d'aligner un bloc verticalement par rapport aux autres en utilisant le paramètre `align` (équivalent de la propriété CSS [`align-self`](https://developer.mozilla.org/en-US/docs/Web/CSS/align-self)).
+
+
+
+## Alignement du texte
+
+Il suffit de placer sur une ligne seule le code `<<center>>` pour centrer du texte :
+
+```
+<<center>>
+Texte centré
+<</center>>
+```
+
+On peut procéder de même avec `<<left>>` et `<<right>>` pour aligner à gauche ou à droite.
+
+## Couleurs
+
+Comme sur les [Skyblogs](https://decoblog.skyrock.com/), il est possible de mettre en couleur le texte et le fond, et même de créer des dégradés !
+
+Utiliser la syntaxe `<<color COULEUR>>...texte...<</color>>` pour changer la couleur du texte, ou `<<bgcolor COULEUR>>...texte...<</bgcolor>>` pour la couleur du fond.
+
+Il est possible d'indiquer plusieurs couleurs, séparées par des espaces, pour créer des dégradés.
+
+```
+<<color red>>Rouge !<</color>>
+<<bgcolor yellow>>Fond jaune pétant !<</bgcolor>>
+<<color cyan green salmon>>Dégradé de texte !<</color>>
+<<bgcolor chocolate khaki orange>>Dégradé du fond<</bgcolor>>
+
+<<bgcolor darkolivegreen darkseagreen >>
+<<color darkred>>
+
+## Il est aussi possible de faire des blocs colorés
+
+Avec des paragraphes
+
+> Et citations
+
+<</color>>
+<</bgcolor>>
+```
+
+> <<color red>>Rouge !<</color>>
+> <<bgcolor yellow>>Fond jaune pétant !<</bgcolor>>
+> <<color cyan green salmon>>Dégradé de texte !<</color>>
+> <<bgcolor chocolate khaki orange>>Dégradé du fond<</bgcolor>>
+>
+> <<bgcolor greenyellow indianred>>
+> <<color darkred darkgreen>>
+> ## Il est aussi possible de faire des blocs colorés {.no_toc}
+>
+> Avec des paragraphes
+>
+> > Et citations
+>
+> <</color>>
+> <</bgcolor>>
+
+Il est possible d'utiliser les couleurs avec [leur nom](https://developer.mozilla.org/en-US/docs/Web/CSS/named-color) ou leur code hexadécimal (exemple : `#ff0000` pour rouge).
+
+**Attention : cette fonctionnalité est rigolote mais doit être utilisé avec parcimonie, en effet cela risque de rendre le texte illisible, notamment pour les personnes daltoniennes.**
