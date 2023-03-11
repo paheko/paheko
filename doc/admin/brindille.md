@@ -17,6 +17,14 @@ Si vous avez déjà fait de la programmation, elle ressemble à un mélange de M
 
 Son but est de permettre une grande flexibilité, sans avoir à utiliser un "vrai" langage de programmation, mais en s'en rapprochant suffisamment quand même.
 
+## Fichiers
+
+Un fichier texte contenant du code Brindille est appelé un **squelette**.
+
+Seuls les fichiers ayant une des extensions `.tpl`, `.html`, `.htm`, `.skel` ou `.xml` seront traités par Brindille.
+De même, les fichiers qui n'ont pas d'extension seront également traités par Brindille.
+
+Les autres types de fichiers seront renvoyés sans traitement, comme des fichiers "bruts". En d'autres termes, il n'est pas possible de mettre du code *Brindille* dans des fichiers qui ne sont pas des fichiers textes.
 
 # Syntaxe de base
 
@@ -129,7 +137,7 @@ Il est possible de créer une variable dont une partie du nom est dynamique.
 {{$allowed_side}} => admin
 ```
 
-[Documentation complète de la fonction {{:assign}}](https://fossil.kd2.org/paheko/wiki?name=Documentation/Brindille/Fonctions#assign).
+[Documentation complète de la fonction {{:assign}}](brindille_functions.html#assign).
 
 ### Tableaux *(array)*
 

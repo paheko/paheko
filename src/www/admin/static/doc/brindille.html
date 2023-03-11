@@ -56,7 +56,10 @@
 </ul>
 </div><aside class="toc">
 	<ol>
-		<li><a href="#introduction">Introduction</a></li>
+		<li><a href="#introduction">Introduction</a>
+		<ol>
+			<li><a href="#fichiers">Fichiers</a>
+		</ol></li>
 		<li><a href="#syntaxe-de-base">Syntaxe de base</a>
 		<ol>
 			<li><a href="#affichage-de-variable">Affichage de variable</a>
@@ -84,9 +87,9 @@
 			</ol></li>
 			<li><a href="#sections">Sections</a></li>
 			<li><a href="#bloc-literal">Bloc litéral</a></li>
-			<li><a href="#commentaires">Commentaires</a></li>
-			<li><a href="#reference-des-variables-definies-par-defaut">Référence des variables définies par défaut</a>
+			<li><a href="#commentaires">Commentaires</a>
 		</ol></li>
+		<li><a href="#liste-des-variables-definies-par-defaut">Liste des variables définies par défaut</a></li>
 		<li><a href="#erreurs">Erreurs</a></li>
 		<li><a href="#avertissement-sur-la-securite-des-requetes-sql">Avertissement sur la sécurité des requêtes SQL</a>
 		<ol>
@@ -95,6 +98,11 @@
 <p>La syntaxe utilisée dans les squelettes du site web et des modules s'appelle <strong>Brindille</strong>.</p>
 <p>Si vous avez déjà fait de la programmation, elle ressemble à un mélange de Mustache, Smarty, Twig et PHP.</p>
 <p>Son but est de permettre une grande flexibilité, sans avoir à utiliser un "vrai" langage de programmation, mais en s'en rapprochant suffisamment quand même.</p>
+<h2 id="fichiers">Fichiers</h2>
+<p>Un fichier texte contenant du code Brindille est appelé un <strong>squelette</strong>.</p>
+<p>Seuls les fichiers ayant une des extensions <code>.tpl</code>, <code>.html</code>, <code>.htm</code>, <code>.skel</code> ou <code>.xml</code> seront traités par Brindille.<br />
+De même, les fichiers qui n'ont pas d'extension seront également traités par Brindille.</p>
+<p>Les autres types de fichiers seront renvoyés sans traitement, comme des fichiers "bruts". En d'autres termes, il n'est pas possible de mettre du code <em>Brindille</em> dans des fichiers qui ne sont pas des fichiers textes.</p>
 <h1 id="syntaxe-de-base">Syntaxe de base</h1>
 <h2 id="affichage-de-variable">Affichage de variable</h2>
 <p>Une variable est affichée à l'aide de la syntaxe : <code>{{$date}}</code> affichera la valeur brute de la date par exemple : <code>2020-01-31 16:32:00</code>.</p>
@@ -156,7 +164,7 @@ La même syntaxe est utilisée pour accéder aux membres d'un tableau : <code>{{
 
 {{$allowed_user}} =&gt; jeanne
 {{$allowed_side}} =&gt; admin</code></pre>
-<p><a href="https://fossil.kd2.org/paheko/wiki?name=Documentation/Brindille/Fonctions#assign" target="_blank" rel="nofollow,noreferrer">Documentation complète de la fonction {{:assign}}</a>.</p>
+<p><a href="brindille_functions.html#assign">Documentation complète de la fonction {{:assign}}</a>.</p>
 <h3 id="tableaux-array">Tableaux <em>(array)</em></h3>
 <p>Pour créer des tableaux, il suffit d'utiliser des points <code>.</code> dans le nom de la variable (ex : <code>colors.yellow</code>). Il n'y a pas besoin d'initialiser le tableau avant de le remplir.</p>
 <pre><code>{{:assign var='colors.admin' value='blue'}}
@@ -252,7 +260,7 @@ Il peut contenir du code qui ne sera pas interprété :
 OK
 {{/if}}
 *}}</code></pre>
-<h2 id="reference-des-variables-definies-par-defaut">Référence des variables définies par défaut</h2>
+<h1 id="liste-des-variables-definies-par-defaut">Liste des variables définies par défaut</h1>
 <p>Ces variables sont définies tout le temps :</p>
 <table>
 <thead>
