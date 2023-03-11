@@ -131,7 +131,7 @@
 </form>
 
 <p class="help">
-	La mention <em class="tag">Modifiable</em> indique que cette extension est un module que vous pouvez modifier. {linkbutton shape="help" label="Documentation des modules" href=$url_help_modules target="_dialog"}
+	La mention <em class="tag">Modifiable</em> indique que cette extension est un module que vous pouvez modifier. {linkbutton shape="help" label="Comment modifier et développer des modules" href="!static/doc/modules.html" target="_dialog"}
 </p>
 
 {include file="_foot.tpl"}

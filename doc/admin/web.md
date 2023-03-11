@@ -34,7 +34,7 @@ Une fois un squelette modifié, il apparaît dans la liste comme étant modifié
 Les squelettes sont appelés en fonction des règles suivantes (dans l'ordre) :
 
 | Adresse | Squelette appelé |
-| ---- | ---- |
+| :---- | :---- |
 | `/` (racine du site) | `index.html` |
 | Toute autre adresse se terminant par un slash `/` | `category.html` |
 | Toute autre adresse, si un article existe avec cette URI | `article.html` |
