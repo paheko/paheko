@@ -321,7 +321,7 @@ Exemple de formulaire de contact :
 
 Enregistre des données, sous la forme d'un document, dans la base de données, pour le module courant.
 
-Note : un appel de cette fonction depuis le code du site web provoquera une erreur, il ne peut être appelé que depuis un module.
+Note : un appel à cette fonction depuis le code du site web provoquera une erreur, elle ne peut être appelée que depuis un module.
 
 | Paramètre | Obligatoire ou optionnel ? | Fonction |
 | :- | :- | :- |
@@ -356,6 +356,25 @@ Exemple de récupération du nouvel ID :
 ```
 {{:save titre="Coucou !" assign_new_id="id"}}
 Le document n°{{$id}} a bien été enregistré.
+```
+
+## delete
+
+Supprime un document lié au module courant.
+
+Note : un appel à cette fonction depuis le code du site web provoquera une erreur, elle ne peut être appelée que depuis un module.
+
+| Paramètre | Obligatoire ou optionnel ? | Fonction |
+| :- | :- | :- |
+| `key` | optionnel | Clé unique du document |
+| `id` | optionnel | Numéro unique du document |
+
+Si ni `key` ni `id` ne sont indiqués, une erreur sera affichée.
+
+Exemple :
+
+```
+{{:delete key="facture_43"}}
 ```
 
 ## admin_header
