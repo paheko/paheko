@@ -79,7 +79,7 @@ class Functions
 
 	static public function save(array $params, Brindille $tpl, int $line): void
 	{
-		$name = strtok(Utils::dirname($tpl->_tpl_path), '/');
+		$name = explode('/', Utils::dirname($tpl->_tpl_path))[1] ?? null;
 
 		if (!$name) {
 			throw new Brindille_Exception('Module name could not be found');

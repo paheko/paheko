@@ -175,7 +175,7 @@ class Sections
 
 	static public function load(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		$name = $params['module'] ?? strtok(Utils::dirname($tpl->_tpl_path), '/');
+		$name = $params['module'] ?? (explode('/', Utils::dirname($tpl->_tpl_path))[1] ?? null);
 
 		if (!$name) {
 			throw new Brindille_Exception('Unique module name could not be found');
@@ -322,7 +322,7 @@ class Sections
 			throw new Brindille_Exception('Missing schema parameter');
 		}
 
-		$name = $params['module'] ?? strtok(Utils::dirname($tpl->_tpl_path), '/');
+		$name = $params['module'] ?? (explode('/', Utils::dirname($tpl->_tpl_path))[1] ?? null);
 
 		if (!$name) {
 			throw new Brindille_Exception('Unique module name could not be found');
@@ -427,6 +427,13 @@ class Sections
 			self::_debugExplain($list->SQL());
 		}
 
+		$i = $list->iterate();
+
+		// If there is nothing to iterate, just stop
+		if (!$i->valid()) {
+			return;
+		}
+
 		$tpl = Template::getInstance();
 
 		/*
@@ -440,7 +447,7 @@ class Sections
 		$tpl->assign('check', $params['check'] ?? false);
 		$tpl->display('common/dynamic_list_head.tpl');
 
-		yield from $list->iterate();
+		yield from $i;
 
 		echo '</tbody>';
 		echo '</table>';
