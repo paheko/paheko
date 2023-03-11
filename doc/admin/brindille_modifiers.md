@@ -1,8 +1,13 @@
-# Référence des filtres disponibles
+{{{.nav
+* [Documentation Brindille](brindille.html)
+* [Fonctions](brindille_functions.html)
+* [Sections](brindille_sections.html)
+* **[Filtres](brindille_modifiers.html)**
+}}}
 
 <<toc aside>>
 
-## Filtres PHP
+# Filtres PHP
 
 Ces filtres viennent directement de PHP et utilisent donc les mêmes paramètres :
 
@@ -27,6 +32,8 @@ Ces filtres viennent directement de PHP et utilisent donc les mêmes paramètres
 * wordwrap
 * strlen
 * abs
+
+# Filtres de texte
 
 ## truncate
 

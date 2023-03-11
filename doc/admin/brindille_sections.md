@@ -1,6 +1,13 @@
-# Référence des sections Brindille
+{{{.nav
+* [Documentation Brindille](brindille.html)
+* [Fonctions](brindille_functions.html)
+* **[Sections](brindille_sections.html)**
+* [Filtres](brindille_modifiers.html)
+}}}
 
-<<toc aside>>
+<<toc aside level=2>>
+
+# Sections généralistes
 
 ## foreach
 
@@ -45,7 +52,7 @@ Deux paramètres optionnels peuvent être utilisés ensemble (il n'est pas possi
 Si le membre n'est pas connecté ou n'a pas le droit de modifier la compta, il aura une page d'erreur.
 ```
 
-# Référence des sections SQL
+# Sections SQL
 
 Dans toutes les sections héritées de `sql` suivantes il est possible d'utiliser les paramètres suivants :
 

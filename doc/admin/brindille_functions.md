@@ -1,8 +1,13 @@
-# Référence des fonctions Brindille disponibles
+{{{.nav
+* [Documentation Brindille](brindille.html)
+* **[Fonctions](brindille_functions.html)**
+* [Sections](brindille_sections.html)
+* [Filtres](brindille_modifiers.html)
+}}}
 
 <<toc aside>>
 
-## assign
+# assign
 
 Permet d'assigner une valeur dans une variable :
 
@@ -49,7 +54,7 @@ Il est également possible de créer des tableaux avec la syntaxe `[]` dans le n
 {{/foreach}}
 ```
 
-## debug
+# debug
 
 Cette fonction permet d'afficher le contenu d'une ou plusieurs variables :
 
@@ -67,7 +72,7 @@ array(1) {
 
 Si aucun paramètre n'est spécifié, alors toutes les variables définies sont renvoyées. Utile pour découvrir quelles sont les variables accessibles dans une section par exemple.
 
-## http
+# http
 
 Permet de modifier les entêtes HTTP renvoyés par la page. Cette fonction doit être appelée au tout début du squelette, avant tout autre code ou ligne vide.
 
@@ -89,7 +94,7 @@ Exemples :
 {{:http type="application/pdf" download="liste_membres_ca.pdf"}}
 ```
 
-## include
+# include
 
 Permet d'inclure un autre squelette.
 
@@ -132,7 +137,7 @@ On peut spécifier plusieurs noms de variables, séparés par des virgules, et u
 {{$name}}
 ```
 
-## mail
+# mail
 
 Permet d'envoyer un e-mail à une adresse indiquée. Le message est toujours envoyé en format texte et l'expéditeur est l'adresse de l'association.
 
