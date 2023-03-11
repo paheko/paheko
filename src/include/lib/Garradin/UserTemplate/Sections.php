@@ -175,7 +175,7 @@ class Sections
 
 	static public function load(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		$name = $params['module'] ?? Utils::basename(Utils::dirname($tpl->_tpl_path));
+		$name = $params['module'] ?? strtok(Utils::dirname($tpl->_tpl_path), '/');
 
 		if (!$name) {
 			throw new Brindille_Exception('Unique module name could not be found');
@@ -322,7 +322,7 @@ class Sections
 			throw new Brindille_Exception('Missing schema parameter');
 		}
 
-		$name = $params['module'] ?? Utils::basename(Utils::dirname($tpl->_tpl_path));
+		$name = $params['module'] ?? strtok(Utils::dirname($tpl->_tpl_path), '/');
 
 		if (!$name) {
 			throw new Brindille_Exception('Unique module name could not be found');
