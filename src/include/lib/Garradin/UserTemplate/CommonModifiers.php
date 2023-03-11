@@ -19,12 +19,7 @@ class CommonModifiers
 		'rtrim',
 		'md5',
 		'sha1',
-		'metaphone',
 		'nl2br',
-		'soundex',
-		'str_split',
-		'str_word_count',
-		'strrev',
 		'strlen',
 		'strpos',
 		'strrpos',
@@ -37,7 +32,6 @@ class CommonModifiers
 		'strval',
 		'substr',
 		'abs',
-		'base64_encode'
 	];
 
 	/**
