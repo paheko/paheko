@@ -13,20 +13,41 @@ $check = f('check');
 $action = f('action');
 $parent = f('parent');
 
-$actions = ['move', 'delete', 'zip'];
+$actions = ['move', 'delete', 'zip', 'trash_restore', 'trash_delete'];
 
 if (!is_array($check) || !count($check) || !in_array($action, $actions)) {
-	throw new UserException('Action invalide');
+	throw new UserException('Action invalide: ' . $action);
 }
 
-$csrf_key = 'action_' . $action;
+if (substr($action, 0, 6) == 'trash_') {
+	$session->requireAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
+}
+
+$csrf_key = 'docs_action';
 
 $form->runIf('zip', function() use ($check, $session) {
 	Files::zip(null, $check, $session);
 	exit;
 }, $csrf_key);
 
+$form->runIf($action == 'trash_restore', function() use ($check, $session) {
+	foreach ($check as &$file) {
+		$file = Files::get($file);
+
+		if (!$file) {
+			throw new UserException('Impossible de restaurer un fichier qui n\'existe plus');
+		}
+	}
+
+	unset($file);
+
+	foreach ($check as $file) {
+		$file->restoreFromTrash();
+	}
+}, $csrf_key, '!docs/?path=' . $parent);
+
 $form->runIf('confirm_delete', function () use ($check, $session) {
+	$session->requireAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
 	foreach ($check as &$file) {
 		$file = Files::get($file);
 
@@ -39,6 +60,23 @@ $form->runIf('confirm_delete', function () use ($check, $session) {
 
 	foreach ($check as $file) {
 		$file->delete();
+	}
+}, $csrf_key, '!docs/?path=' . $parent);
+
+
+$form->runIf('delete', function () use ($check, $session) {
+	foreach ($check as &$file) {
+		$file = Files::get($file);
+
+		if (!$file || !$file->canDelete()) {
+			throw new UserException('Impossible de supprimer un fichier car vous n\'avez pas le droit de le supprimer');
+		}
+	}
+
+	unset($file);
+
+	foreach ($check as $file) {
+		$file->moveToTrash();
 	}
 }, $csrf_key, '!docs/?path=' . $parent);
 
@@ -67,6 +105,9 @@ $tpl->assign(compact('csrf_key', 'extra', 'action', 'count'));
 
 if ($action == 'delete') {
 	$tpl->display('docs/action_delete.tpl');
+}
+elseif ($action == 'trash_delete') {
+	$tpl->display('docs/action_trash_delete.tpl');
 }
 elseif ($action == 'zip') {
 	$size = 0;

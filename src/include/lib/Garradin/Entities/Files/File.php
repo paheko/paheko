@@ -87,6 +87,7 @@ class File extends Entity
 	const CONTEXT_CONFIG = 'config';
 	const CONTEXT_WEB = 'web';
 	const CONTEXT_SKELETON = 'skel';
+	const CONTEXT_TRASH = 'trash';
 
 	const CONTEXTS_NAMES = [
 		self::CONTEXT_DOCUMENTS => 'Documents',
@@ -95,6 +96,7 @@ class File extends Entity
 		self::CONTEXT_CONFIG => 'Configuration',
 		self::CONTEXT_WEB => 'Site web',
 		self::CONTEXT_SKELETON => 'Squelettes',
+		self::CONTEXT_TRASH => 'Corbeille',
 	];
 
 	const IMAGE_TYPES = [
@@ -191,6 +193,39 @@ class File extends Entity
 		}
 
 		return false;
+	}
+
+	public function moveToTrash(): void
+	{
+		if ($this->context() == self::CONTEXT_TRASH) {
+			return;
+		}
+
+		$this->touch();
+		$this->move(self::CONTEXT_TRASH . '/' . $this->parent);
+	}
+
+	public function restoreFromTrash(): ?string
+	{
+		if ($this->context() != self::CONTEXT_TRASH) {
+			return null;
+		}
+
+		$parent = substr($this->parent, strlen(self::CONTEXT_TRASH . '/'));
+
+		// Move to original parent path
+		if (Files::exists($parent)) {
+			$this->move($parent);
+		}
+		// Parent directory no longer exists, move file to documents root,
+		// but under a new name to make sure it doesn't overwrite an existing file
+		else {
+			$new_name = sprintf('Restauré de la corbeille - %s - %s', date('d-m-Y His'), $this->name);
+			$parent = self::CONTEXT_DOCUMENTS;
+			$this->rename($parent . '/' . $new_name);
+		}
+
+		return $parent;
 	}
 
 	public function delete(): bool

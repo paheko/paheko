@@ -349,7 +349,12 @@ class Storage extends AbstractStorage
 			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de supprimer ce fichier', 403);
 		}
 
-		$target->delete();
+		if ($file->context() == $file::CONTEXT_TRASH) {
+			$target->delete();
+		}
+		else {
+			$target->moveToTrash();
+		}
 	}
 
 	protected function copymove(bool $move, string $uri, string $destination): bool

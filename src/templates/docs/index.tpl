@@ -24,6 +24,9 @@ use Garradin\Entities\Files\File;
 		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)}
 			<li{if $context == File::CONTEXT_SKELETON} class="current"{/if}><a href="./?path=<?=File::CONTEXT_SKELETON?>">Squelettes du site web</a></li>
 		{/if}
+		{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
+			<li{if $context == File::CONTEXT_TRASH} class="current"{/if}><a href="./?path=<?=File::CONTEXT_TRASH?>">{icon shape="trash"} Fichiers supprimés</a></li>
+		{/if}
 	</ul>
 </nav>
 
@@ -69,11 +72,13 @@ use Garradin\Entities\Files\File;
 		{elseif $context == File::CONTEXT_SKELETON}
 			{if $context_ref == 'web'}
 				Code du site web
-			{elseif $context_ref == 'forms'}
-				Code des modèles et formulaires
+			{elseif $context_ref == 'modules'}
+				Code des modules
 			{else}
 				Code
 			{/if}
+		{elseif $context == File::CONTEXT_TRASH}
+			Fichiers supprimés
 		{elseif $context_ref}
 			{$parent->name}
 		{else}
@@ -109,7 +114,11 @@ use Garradin\Entities\Files\File;
 </nav>
 {/if}
 
-{if $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE) && !$parent->canCreateDirHere()}
+{if $context == File::CONTEXT_TRASH}
+<p class="help">
+	Les fichiers de la corbeille occupent actuellement <strong>{$trash_size|size_in_bytes}</strong>.
+</p>
+{elseif $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE) && !$parent->canCreateDirHere()}
 <p class="block alert">
 	Il n'est pas possible de créer de répertoire ici.
 	{if $context == File::CONTEXT_USER}
@@ -146,7 +155,7 @@ use Garradin\Entities\Files\File;
 				<tr class="folder">
 					{if $file->canDelete()}
 					<td class="check">
-						{input type="checkbox" name="check[]" value=$file->path_uri()}
+						{input type="checkbox" name="check[]" value=$file->path}
 					</td>
 					{/if}
 					<td class="icon"><a href="?path={$file->path_uri()}">{icon shape="folder"}</a></td>
@@ -158,7 +167,7 @@ use Garradin\Entities\Files\File;
 								{linkbutton href="!common/files/rename.php?p=%s"|args:$file->path_uri() label="Renommer" shape="minus" target="_dialog"}
 							{/if}
 							{if $file->canDelete()}
-								{linkbutton href="!common/files/delete.php?p=%s"|args:$file->path_uri() label="Supprimer" shape="delete" target="_dialog"}
+								{linkbutton href="!common/files/delete.php?p=%s"|args:$file->path_uri() label="Supprimer" shape="trash" target="_dialog"}
 							{/if}
 						{/linkmenu}
 					{/if}
@@ -168,7 +177,7 @@ use Garradin\Entities\Files\File;
 				<tr>
 				{if $file->canDelete()}
 					<td class="check">
-						{input type="checkbox" name="check[]" value=$file->path_uri()}
+						{input type="checkbox" name="check[]" value=$file->path}
 					</td>
 				{/if}
 				{if $gallery && $file->isImage()}
@@ -197,7 +206,7 @@ use Garradin\Entities\Files\File;
 									{linkbutton href="!common/files/rename.php?p=%s"|args:$file->path_uri() label="Renommer" shape="reload" target="_dialog"}
 								{/if}
 								{if $file->canDelete()}
-									{linkbutton href="!common/files/delete.php?p=%s"|args:$file->path_uri() label="Supprimer" shape="delete" target="_dialog"}
+									{linkbutton href="!common/files/delete.php?p=%s"|args:$file->path_uri() label="Supprimer" shape="trash" target="_dialog"}
 								{/if}
 							{/linkmenu}
 						{/if}
@@ -233,35 +242,62 @@ use Garradin\Entities\Files\File;
 		</table>
 	{elseif $list instanceof \Garradin\DynamicList}
 
-		{include file="common/dynamic_list_head.tpl" check=false}
+		{if $list->count()}
 
+			{include file="common/dynamic_list_head.tpl" check=$allow_check}
 
-		{foreach from=$list->iterate() item="item"}
-			<tr>
-				{if $context == File::CONTEXT_TRANSACTION}
-					<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$item.id}">#{$item.id}</a></td>
-					<th><a href="?path={$item.path}">{$item.label}</a></th>
-					<td>{$item.date|date_short}</td>
-					<td>{$item.reference}</td>
-					<td>{$item.year}</td>
-					<td class="actions">
-						{linkbutton href="!docs/?path=%s"|args:$item.path label="Fichiers" shape="menu"}
-						{linkbutton href="!acc/transactions/details.php?id=%d"|args:$item.id label="Écriture" shape="search"}
-					</td>
-				{else}
-					<td class="num"><a href="{$admin_url}users/details.php?id={$item.id}">#{$item.number}</a></td>
-					<th><a href="?path={$item.path}">{$item.identity}</a></th>
-					<td class="actions">
-						{linkbutton href="!docs/?path=%s"|args:$item.path label="Fichiers" shape="menu"}
-						{linkbutton href="!users/details.php?id=%d"|args:$item.id label="Fiche membre" shape="user"}
-					</td>
-				{/if}
-			</tr>
-		{/foreach}
-		</tbody>
-		</table>
+			{foreach from=$list->iterate() item="item"}
+				<tr>
+					{if $allow_check}
+						<td class="check">
+							{input type="checkbox" name="check[]" value=$item->path}
+						</td>
+					{/if}
+					{if $context == File::CONTEXT_TRANSACTION}
+						<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$item.id}">#{$item.id}</a></td>
+						<th><a href="?path={$item.path}">{$item.label}</a></th>
+						<td>{$item.date|date_short}</td>
+						<td>{$item.reference}</td>
+						<td>{$item.year}</td>
+						<td class="actions">
+							{linkbutton href="!docs/?path=%s"|args:$item.path label="Fichiers" shape="menu"}
+							{linkbutton href="!acc/transactions/details.php?id=%d"|args:$item.id label="Écriture" shape="search"}
+						</td>
+					{elseif $context == File::CONTEXT_TRASH}
+						<td>{$item.name}</td>
+						<td>{$item.parent}</td>
+						<td>{$item.modified|date_short:true}</td>
+						<td class="actions">
+						</td>
+					{else}
+						<td class="num"><a href="{$admin_url}users/details.php?id={$item.id}">#{$item.number}</a></td>
+						<th><a href="?path={$item.path}">{$item.identity}</a></th>
+						<td class="actions">
+							{linkbutton href="!docs/?path=%s"|args:$item.path label="Fichiers" shape="menu"}
+							{linkbutton href="!users/details.php?id=%d"|args:$item.id label="Fiche membre" shape="user"}
+						</td>
+					{/if}
+				</tr>
+			{/foreach}
+			</tbody>
+			</table>
 
-		{$list->getHTMLPagination()|raw}
+			{$list->getHTMLPagination()|raw}
+
+			{if $context == File::CONTEXT_TRASH}
+			<p class="submit">
+				{csrf_field key="docs_action"}
+				{button type="submit" name="action" value="trash_restore" label="Restaurer les fichiers sélectionnés" shape="reset"}
+				{button type="submit" name="action" value="trash_delete" label="Définitivement supprimer les fichiers sélectionnés" shape="delete"}
+			</p>
+			{/if}
+
+		{else}
+
+			<p class="alert block">Aucun fichier n'existe ici.</p>
+
+		{/if}
+
 
 	{/if}
 

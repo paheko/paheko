@@ -135,6 +135,17 @@ class Files
 			'share' => false,
 		];
 
+		// Trash
+		$p[File::CONTEXT_TRASH] = [
+			'mkdir' => false,
+			'move' => $is_admin,
+			'create' => false,
+			'read' => $is_admin,
+			'write' => false,
+			'delete' => $is_admin,
+			'share' => false,
+		];
+
 		$p[File::CONTEXT_WEB . '//'] = [
 			'mkdir' => false,
 			'move' => false,
