@@ -60,7 +60,7 @@
 					<small>{$item.description|escape|nl2br}</small><br />
 					<small class="help">
 						{if $item.author}
-							Par {link label=$item.author href=$item.url target="_blank"}
+							Par {link label=$item.author href=$item.author_url target="_blank"}
 						{/if}
 						{if $item.plugin && $item.plugin.version}— Version {$item.plugin.version}{/if}
 						{if $item.readme_url}
