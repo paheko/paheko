@@ -25,7 +25,7 @@ use Garradin\Entities\Files\File;
 			<li{if $context == File::CONTEXT_SKELETON} class="current"{/if}><a href="./?path=<?=File::CONTEXT_SKELETON?>">Squelettes du site web</a></li>
 		{/if}
 		{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
-			<li{if $context == File::CONTEXT_TRASH} class="current"{/if}><a href="./?path=<?=File::CONTEXT_TRASH?>">{icon shape="trash"} Fichiers supprimés</a></li>
+			<li><a href="trash.php">{icon shape="trash"} Fichiers supprimés</a></li>
 		{/if}
 	</ul>
 </nav>
@@ -77,8 +77,6 @@ use Garradin\Entities\Files\File;
 			{else}
 				Code
 			{/if}
-		{elseif $context == File::CONTEXT_TRASH}
-			Fichiers supprimés
 		{elseif $context_ref}
 			{$parent->name}
 		{else}
@@ -114,11 +112,7 @@ use Garradin\Entities\Files\File;
 </nav>
 {/if}
 
-{if $context == File::CONTEXT_TRASH}
-<p class="help">
-	Les fichiers de la corbeille occupent actuellement <strong>{$trash_size|size_in_bytes}</strong>.
-</p>
-{elseif $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE) && !$parent->canCreateDirHere()}
+{if $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE) && !$parent->canCreateDirHere()}
 <p class="block alert">
 	Il n'est pas possible de créer de répertoire ici.
 	{if $context == File::CONTEXT_USER}
@@ -244,15 +238,10 @@ use Garradin\Entities\Files\File;
 
 		{if $list->count()}
 
-			{include file="common/dynamic_list_head.tpl" check=$allow_check}
+			{include file="common/dynamic_list_head.tpl" check=false}
 
 			{foreach from=$list->iterate() item="item"}
 				<tr>
-					{if $allow_check}
-						<td class="check">
-							{input type="checkbox" name="check[]" value=$item->path}
-						</td>
-					{/if}
 					{if $context == File::CONTEXT_TRANSACTION}
 						<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$item.id}">#{$item.id}</a></td>
 						<th><a href="?path={$item.path}">{$item.label}</a></th>
@@ -262,12 +251,6 @@ use Garradin\Entities\Files\File;
 						<td class="actions">
 							{linkbutton href="!docs/?path=%s"|args:$item.path label="Fichiers" shape="menu"}
 							{linkbutton href="!acc/transactions/details.php?id=%d"|args:$item.id label="Écriture" shape="search"}
-						</td>
-					{elseif $context == File::CONTEXT_TRASH}
-						<td>{$item.name}</td>
-						<td>{$item.parent}</td>
-						<td>{$item.modified|date_short:true}</td>
-						<td class="actions">
 						</td>
 					{else}
 						<td class="num"><a href="{$admin_url}users/details.php?id={$item.id}">#{$item.number}</a></td>
@@ -283,14 +266,6 @@ use Garradin\Entities\Files\File;
 			</table>
 
 			{$list->getHTMLPagination()|raw}
-
-			{if $context == File::CONTEXT_TRASH}
-			<p class="submit">
-				{csrf_field key="docs_action"}
-				{button type="submit" name="action" value="trash_restore" label="Restaurer les fichiers sélectionnés" shape="reset"}
-				{button type="submit" name="action" value="trash_delete" label="Définitivement supprimer les fichiers sélectionnés" shape="delete"}
-			</p>
-			{/if}
 
 		{else}
 
