@@ -3,6 +3,7 @@
 namespace Garradin;
 
 use Garradin\Services\Reminders;
+use Garradin\Files\Trash;
 
 if (PHP_SAPI != 'cli' && !defined('\Garradin\ROOT')) {
 	die("Wrong call");
@@ -20,7 +21,10 @@ if ($config->backup_frequency && $config->backup_limit)
 	$s->auto();
 }
 
-// Exécution des rappels automatiques
+// Send pending reminders
 Reminders::sendPending();
+
+// Make sure we are cleaning the trash
+Trash::clean();
 
 Plugins::fireSignal('cron');

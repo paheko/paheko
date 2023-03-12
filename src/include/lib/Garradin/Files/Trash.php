@@ -65,11 +65,17 @@ class Trash
 	static public function clean(string $expiry = '-30 days'): void
 	{
 		$past = new \DateTime($expiry);
+		$deleted = false;
 
 		foreach (Files::listRecursive(File::CONTEXT_TRASH, null, true) as $file) {
 			if ($file->modified < $past) {
 				$file->delete();
+				$deleted = true;
 			}
+		}
+
+		if ($deleted) {
+			self::pruneEmptyDirectories();
 		}
 	}
 }
