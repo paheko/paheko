@@ -29,9 +29,9 @@
 		E-Mail : <a href="mailto:{$config.org_email}">{$config.org_email}</a>
 	</p>
 	{/if}
-	{if !empty($config.org_web)}
+	{if !empty($config.org_web) || !$config.site_disabled}
 	<p>
-		Web : <a href="{$config.org_web}" target="_blank">{$config.org_web}</a>
+		Web : <a href="{if $config.site_disabled}{else}{$config.org_web}{/if}" target="_blank">{if $config.site_disabled}{else}{$config.org_web}{/if}</a>
 	</p>
 	{/if}
 </aside>
