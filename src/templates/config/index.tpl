@@ -62,11 +62,27 @@
 			{input type="email" name="org_email" required=true source=$config label="Adresse e-mail de contact"}
 			{input type="textarea" name="org_address" source=$config label="Adresse postale"}
 			{input type="tel" name="org_phone" source=$config label="Numéro de téléphone"}
-			{if $config.site_disabled}
-			{input type="url" name="org_web" source=$config label="Site web"}
-			{/if}
 			{input type="textarea" cols="50" rows="2" name="org_infos" required=false source=$config label="Informations diverses" help="Ce champ sera utilisé sur les reçus. Il peut être utile de faire figurer ici le numéro de SIRET par exemple."}
 		</dl>
+	</fieldset>
+
+	<fieldset>
+		<legend>Site web</legend>
+		<p class="help">
+			Cette option permet d'activer ou désactiver la visibilité publique du site web intégré à Paheko.<br/>
+			En désactivant le site public, les visiteurs seront automatiquement redirigés vers la page de connexion.<br />
+			Vous pourrez toujours y publier des informations, mais celles-ci ne seront visibles que pour les membres connectés.
+		</p>
+		<dl>
+			{input type="radio" name="site_disabled" value=0 source=$config label="Activer le site web public"}
+			{input type="radio" name="site_disabled" value=1 source=$config label="Désactiver le site web"}
+		</dl>
+		<div class="external-web">
+			<p class="help">Si vous avez déjà un site web à une autre adresse, vous pouvez l'indiquer ici&nbsp;:</p>
+			<dl>
+				{input type="url" name="org_web" source=$config label="Site web externe"}
+			</dl>
+		</div>
 	</fieldset>
 
 	<fieldset>
@@ -84,10 +100,18 @@
 
 </form>
 
+<script type="text/javascript" async="async">
 {if ENABLE_TECH_DETAILS}
-	<script type="text/javascript" async="async">
 	fetch(g.admin_url + 'config/?check_version');
-	</script>
 {/if}
+{literal}
+function toggleWebInput() {
+	g.toggle('.external-web', $('#f_site_disabled_1').checked);
+}
+toggleWebInput();
+$('#f_site_disabled_0').onchange = toggleWebInput;
+$('#f_site_disabled_1').onchange = toggleWebInput;
+{/literal}
+</script>
 
 {include file="_foot.tpl"}
