@@ -1,12 +1,10 @@
-[Raccourcis claviers](keyboard.html) | [Extensions Paheko](extensions.html)
+Title: Référence rapide SkrivML - Paheko
 
 <<toc aside>>
 
 # Syntaxe SkrivML
 
 Paheko propose la syntaxe [SkrivML](https://fossil.kd2.org/garradin/doc/trunk/doc/skrivml.html) pour le formatage du texte des pages du site web.
-
-Celle-ci est plus intuitive que la syntaxe MarkDown.
 
 ## Styles de texte
 
@@ -83,16 +81,73 @@ Lien externe :
 
 ## Autres
 
-Consulter la documentation de [SkrivML](https://fossil.kd2.org/garradin/doc/trunk/doc/skrivml.html).
+Consulter la documentation complète de [SkrivML](https://fossil.kd2.org/garradin/doc/trunk/doc/skrivml.html).
 
-# Extensions Paheko
+# Extensions
 
-Paheko propose des extensions permettant :
+Toutes les extensions se présentent sous la forme d'un code situé entre deux signes **inférieur à** (`<<`) et deux signes **supérieur à** (`>>`), à ne pas confondre avec les guillements français (`«` et `»`).
 
-* d'insérer des images et fichiers joints ;
-* d'insérer une table des matières automatique ;
-* d'aligner le texte au centre, à gauche, à droite ;
-* de créer des mises en page complexes avec des colonnes et grilles ;
-* de changer la couleur du texte ou du fond.
+## Images jointes
 
-[Cliquer ici pour lire la documentation des extensions Paheko](extensions.html)
+Il est possible d'intégrer une image jointe à la page web en plaçant le code suivant sur une ligne (sans autre texte) :
+
+```
+<<image|Nom_fichier.jpg|Alignement|Légende>>
+```
+
+* `Nom_fichier.jpg` : remplacer par le nom du fichier de l'image (parmi les images jointes à la page)
+* `Alignement` : remplacer par l'alignement :
+  * `gauche` ou `left` : l'image sera placée à gauche en petit (200 pixels), le texte remplira l'espace laissé sur la droite de l'image ;
+  * `droite` ou `right` : l'image sera placée à droite en petit, le texte remplira l'espace laissé sur la gauche de l'image ;
+  * `centre` ou `center` : l'image sera placée au centre en taille moyenne (500 pixels), le texte sera placé au dessus et en dessous.
+* Légende : indiquer ici une courte description de l'image.
+
+Exemple :
+
+```
+<<image|mon_image.png|center|Ceci est une belle image>>
+```
+
+Il est aussi possible d'utiliser la syntaxe avec des paramètres nommés :
+
+```
+<<image file="Nom_fichier.jpg" align="center" caption="Légende">>
+```
+
+Les images qui ne sont pas mentionnées dans le texte seront affichées après le texte sous forme de galerie.
+
+## Fichiers joints
+
+Pour créer un bouton permettant de voir ou télécharger un fichier joint à la page web, il suffit d'utiliser la syntaxe suivante :
+
+```
+<<file|Nom_fichier.ext|Libellé>>
+```
+
+* `Nom_fichier.ext` : remplacer par le nom du fichier  (parmi les fichiers joints à la page)
+* `Libellé` : indique le libellé du qui sera affiché sur le bouton, si aucun libellé n'est indiqué alors c'est le nom du fichier qui sera affiché
+
+
+# Raccourcis clavier
+
+Depuis l'édition du texte :
+
+| Raccourci | Action |
+| :- | :- |
+| <kbd>Ctrl</kbd> + <kbd>G</kbd> | Mettre en gras |
+| <kbd>Ctrl</kbd> + <kbd>I</kbd> | Mettre en italique |
+| <kbd>Ctrl</kbd> + <kbd>T</kbd> | Mettre en titre |
+| <kbd>Ctrl</kbd> + <kbd>L</kbd> | Transformer en lien |
+| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd> | Insérer un fichier ou une image |
+| <kbd>Ctrl</kbd> + <kbd>P</kbd> | Prévisualiser |
+| <kbd>Ctrl</kbd> + <kbd>S</kbd> | Enregistrer |
+| <kbd>F11</kbd> | Activer ou désactiver l'édition plein écran |
+| <kbd>F1</kbd> | Afficher l'aide |
+| <kbd>Echap</kbd> | Prévisualiser (rappuyer pour revenir à l'édition) |
+
+
+Depuis l'aide, la prévisualisation ou l'insertion de fichier :
+
+| Raccourci | Action |
+| :- | :- |
+| <kbd>Echap</kbd> | Fermer et revenir à l'édition |

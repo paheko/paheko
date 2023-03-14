@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+	<html>
+	<head>
+		<title>Référence rapide MarkDown — Paheko</title>
+		<meta charset="utf-8" />
+		<style type="text/css">
+		body, form, p, div, hr, fieldset, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6 {
+			margin: 0;
+			padding: 0;
+		}
+		body {
+			font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
+			padding: .8em;
+			background: #eee;
+		}
+		.web-content .nav ul {
+			list-style-type: none;
+			margin: -.8em;
+			margin-bottom: 1em;
+			padding: 1em;
+			background: #ddd;
+			border-bottom: 1px solid #999;
+			text-align: center;
+		}
+		.web-content .boutons ul {
+			list-style-type: none;
+			background: #ccc;
+			padding: .5em;
+			margin: 0;
+		}
+		.web-content .nav li, .web-content .boutons li {
+			display: inline-block;
+			margin: 0 1em;
+		}
+		.web-content .nav a, .web-content .boutons a {
+			display: inline-block;
+			background: #fff;
+			color: darkblue;
+			border-radius: .2em;
+			padding: .3em .5em;
+			font-size: 1.2em;
+		}
+		.web-content .nav strong a {
+			color: darkred;
+			box-shadow: 0px 0px 5px orange;
+		}
+		</style>
+		<link rel="stylesheet" type="text/css" href="../../../content.css" />
+	</head>
+	<body><div class="web-content"><div class="nav">
+<ul>
+<li><a href="keyboard.html">Raccourcis claviers</a></li>
+<li><a href="markdown.html">Syntaxe MarkDown complète</a></li>
+<li><strong><a href="markdown_quickref.html">Référence rapide MarkDown</a></strong></li>
+</ul>
+</div>
+<h1 id="reference-rapide-markdown">Référence rapide MarkDown</h1>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Nom</th>
+<th style="text-align: left;">Syntaxe</th>
+<th style="text-align: left;">Rendu</th>
+<th style="text-align: left;">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Italique</td>
+<td style="text-align: left;"><code>*italique*</code></td>
+<td style="text-align: left;"><em>italique</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Gras</td>
+<td style="text-align: left;"><code>**gras**</code></td>
+<td style="text-align: left;"><strong>gras</strong></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Gras et italique</td>
+<td style="text-align: left;"><code>***gras et italique***</code></td>
+<td style="text-align: left;"><strong><em>gras et italique</em></strong></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Barré</td>
+<td style="text-align: left;"><code>~~barré~~</code></td>
+<td style="text-align: left;"><span style="text-decoration: line-through">barré</span></td>
+<td style="text-align: left;"><a id="fn-ref-P" href="#fn-P" class="footnote-ref">P</a></td>
+</tr>
+<tr>
+<td style="text-align: left;">Surligné</td>
+<td style="text-align: left;"><code>==surligné==</code></td>
+<td style="text-align: left;"><mark>surligné</mark></td>
+<td style="text-align: left;"><a id="fn-ref-P" href="#fn-P" class="footnote-ref">P</a></td>
+</tr>
+<tr>
+<td style="text-align: left;">Lien</td>
+<td style="text-align: left;"><code>[Libellé du lien](adresse)</code></td>
+<td style="text-align: left;"><a href="https://paheko.cloud/" target="_blank" rel="nofollow,noreferrer">Libellé du lien</a></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Titre niveau 1</td>
+<td style="text-align: left;"><code># Titre 1</code></td>
+<td style="text-align: left;"><h1>Titre 1</h1></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Titre niveau 2</td>
+<td style="text-align: left;"><code>## Titre 2</code></td>
+<td style="text-align: left;"><h2>Titre 2</h2></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Titre niveau 3</td>
+<td style="text-align: left;"><code>### Titre 3</code></td>
+<td style="text-align: left;"><h3>Titre 3</h3></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Titre niveau 4</td>
+<td style="text-align: left;"><code>#### Titre 4</code></td>
+<td style="text-align: left;"><h4>Titre 4</h4></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Titre niveau 5</td>
+<td style="text-align: left;"><code>##### Titre 5</code></td>
+<td style="text-align: left;"><h5>Titre 5</h5></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Titre niveau 6</td>
+<td style="text-align: left;"><code>###### Titre 6</code></td>
+<td style="text-align: left;"><h6>Titre 6</h6></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Liste</td>
+<td style="text-align: left;"><pre><code>* Liste 1<br>* Liste 2</code></pre></td>
+<td style="text-align: left;"><ul><li>Liste 1</li><li>Liste 2</li></ul></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Liste imbriquée</td>
+<td style="text-align: left;"><pre><code>* Liste 1<br>  * Sous-liste 1</code></pre></td>
+<td style="text-align: left;"><ul><li>Liste 1<ul><li>Sous-liste 1</li></ul></li></ul></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Liste numérotée</td>
+<td style="text-align: left;"><pre><code>1. Liste 1<br>2. Liste 2</code></pre></td>
+<td style="text-align: left;"><ol><li>Liste 1</li><li>Liste 2</li></ol></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Code dans du texte</td>
+<td style="text-align: left;">Voir ce <code>`code`</code></td>
+<td style="text-align: left;">Voir ce <code>code</code></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Bloc de code</td>
+<td style="text-align: left;"><pre><code>```<br>Bloc de code<br>```</code></pre></td>
+<td style="text-align: left;"><pre><code>Bloc de code</code></pre></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Citation</td>
+<td style="text-align: left;"><pre><code>&gt; Citation<br>&gt; Citation</code></pre></td>
+<td style="text-align: left;"><blockquote>Citation<br>Citation</blockquote></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Tableau</td>
+<td style="text-align: left;"><pre><code>| Colonne 1 | Colonne 2 |<br>| - | - |<br>| A | B |</code></pre></td>
+<td style="text-align: left;"><table><thead><tr><th>Colonne 1</th><th>Colonne 2</th></tr></thead><tbody><tr><td>A</td><td>B</td></tr></tbody></table></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Ligne horizontale</td>
+<td style="text-align: left;"><code>----</code></td>
+<td style="text-align: left;"><hr></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Référence à une note de bas de page</td>
+<td style="text-align: left;"><code>[^1]</code></td>
+<td style="text-align: left;"><a id="fn-ref-1" href="#fn-1" class="footnote-ref">1</a></td>
+<td style="text-align: left;"><a id="fn-ref-P" href="#fn-P" class="footnote-ref">P</a></td>
+</tr>
+<tr>
+<td style="text-align: left;">Définition d'une note de bas de page</td>
+<td style="text-align: left;"><pre><code>[^1]: Définition</code></pre></td>
+<td style="text-align: left;"><a id="fn-ref-1" href="#fn-1" class="footnote-ref">1</a></td>
+<td style="text-align: left;"><a id="fn-ref-P" href="#fn-P" class="footnote-ref">P</a></td>
+</tr>
+<tr>
+<td style="text-align: left;">Bloc avec classe CSS</td>
+<td style="text-align: left;"><pre><code>{{{.boutons<br>* <a href="https://paheko.cloud/" target="_blank" rel="nofollow,noreferrer">Paheko</a><br>}}}</code></pre></td>
+<td style="text-align: left;"><div class="boutons"><ul><li><a href="https://paheko.cloud/">Paheko</a></li></ul></div></td>
+<td style="text-align: left;"><a id="fn-ref-P" href="#fn-P" class="footnote-ref">P</a></td>
+</tr>
+<tr>
+<td style="text-align: left;">Sommaire / table des matières</td>
+<td style="text-align: left;"><code>&lt;&lt;toc&gt;&gt;</code></td>
+<td style="text-align: left;"><em>(ne peut être montré sur cette page)</em></td>
+<td style="text-align: left;"><a id="fn-ref-P" href="#fn-P" class="footnote-ref">P</a></td>
+</tr>
+<tr>
+<td style="text-align: left;">Image jointe</td>
+<td style="text-align: left;"><code>&lt;&lt;image|nom_image.jpg|center|Légende&gt;&gt;</code></td>
+<td style="text-align: left;"><em>(ne peut être montré sur cette page)</em></td>
+<td style="text-align: left;"><a id="fn-ref-P" href="#fn-P" class="footnote-ref">P</a></td>
+</tr>
+<tr>
+<td style="text-align: left;">Fichier joint</td>
+<td style="text-align: left;"><code>&lt;&lt;file|nom_fichier.pdf|Libellé&gt;&gt;</code></td>
+<td style="text-align: left;"><em>(ne peut être montré sur cette page)</em></td>
+<td style="text-align: left;"><a id="fn-ref-P" href="#fn-P" class="footnote-ref">P</a></td>
+</tr>
+<tr>
+<td style="text-align: left;">Grille à 2 colonnes</td>
+<td style="text-align: left;"><pre><code>&lt;&lt;grid !!&gt;&gt;<br>Colonne 1<br><br>&lt;&lt;grid&gt;&gt;<br>Colonne 2<br><br>&lt;&lt;/grid&gt;&gt;</code></pre></td>
+<td style="text-align: left;"><em>(ne peut être montré sur cette page)</em></td>
+<td style="text-align: left;"><a id="fn-ref-P" href="#fn-P" class="footnote-ref">P</a></td>
+</tr>
+<tr>
+<td style="text-align: left;">Texte centré</td>
+<td style="text-align: left;"><code>&lt;&lt;center&gt;&gt;Centre&lt;&lt;/center&gt;&gt;</code></td>
+<td style="text-align: left;"><div style="text-align: center;">Centre</div></td>
+<td style="text-align: left;"><a id="fn-ref-P" href="#fn-P" class="footnote-ref">P</a></td>
+</tr>
+<tr>
+<td style="text-align: left;">Texte aligné à droite</td>
+<td style="text-align: left;"><code>&lt;&lt;right&gt;&gt;Droite&lt;&lt;/right&gt;&gt;</code></td>
+<td style="text-align: left;"><div style="text-align: right;">Droite</div></td>
+<td style="text-align: left;"><a id="fn-ref-P" href="#fn-P" class="footnote-ref">P</a></td>
+</tr>
+<tr>
+<td style="text-align: left;">Texte coloré</td>
+<td style="text-align: left;"><code>&lt;&lt;color red&gt;&gt;Rouge&lt;&lt;/color&gt;&gt;</code></td>
+<td style="text-align: left;"><span style="display: inline; color: red">Rouge</span></td>
+<td style="text-align: left;"><a id="fn-ref-P" href="#fn-P" class="footnote-ref">P</a></td>
+</tr>
+<tr>
+<td style="text-align: left;">Fond coloré</td>
+<td style="text-align: left;"><code>&lt;&lt;bgcolor green&gt;&gt;Vert&lt;&lt;/color&gt;&gt;</code></td>
+<td style="text-align: left;"><span style="display: inline; background-color: green">Vert</span></td>
+<td style="text-align: left;"><a id="fn-ref-P" href="#fn-P" class="footnote-ref">P</a></td>
+</tr>
+<tr>
+<td style="text-align: left;">Dégradé de texte</td>
+<td style="text-align: left;"><code>&lt;&lt;color orange cyan&gt;&gt;Orange à cyan&lt;&lt;/color&gt;&gt;</code></td>
+<td style="text-align: left;"><span style="display: inline; background-size: 100%; background: linear-gradient(to right, orange, cyan); -webkit-background-clip: text; -webkit-text-fill-color: transparent; -moz-text-fill-color: transparent; -moz-background-clip: text;">Orange à cyan</span></td>
+<td style="text-align: left;"><a id="fn-ref-P" href="#fn-P" class="footnote-ref">P</a></td>
+</tr>
+<tr>
+<td style="text-align: left;">Dégradé de fond</td>
+<td style="text-align: left;"><code>&lt;&lt;bgcolor orange cyan&gt;&gt;Orange à cyan&lt;&lt;/color&gt;&gt;</code></td>
+<td style="text-align: left;"><span style="display: inline; background-size: 100%; background: linear-gradient(to right, orange, cyan); -webkit-background-clip: initial; -webkit-text-fill-color: initial; -moz-text-fill-color: initial; -moz-background-clip: initial;">Orange à cyan</span></td>
+<td style="text-align: left;"><a id="fn-ref-P" href="#fn-P" class="footnote-ref">P</a></td>
+</tr>
+<tr>
+<td style="text-align: left;">Clavier</td>
+<td style="text-align: left;"><code>&lt;kbd&gt;Ctrl&lt;/kbd&gt; + &lt;kbd&gt;C&lt;/kbd&gt;</code></td>
+<td style="text-align: left;"><kbd>Ctrl</kbd> + <kbd>C</kbd></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Exemple console</td>
+<td style="text-align: left;"><code>&lt;samp&gt;Exemple&lt;/samp&gt;</code></td>
+<td style="text-align: left;"><samp>Exemple</samp></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Variable maths</td>
+<td style="text-align: left;"><code>&lt;var&gt;ab&lt;/var&gt; + &lt;var&gt;cd&lt;/var&gt; = 42</code></td>
+<td style="text-align: left;"><var>ab</var> + <var>cd</var> = 42</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Texte supprimé</td>
+<td style="text-align: left;"><code>&lt;del&gt;supprimé&lt;/del&gt;</code></td>
+<td style="text-align: left;"><del>supprimé</del></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Texte ajouté</td>
+<td style="text-align: left;"><code>&lt;ins&gt;ajouté&lt;/ins&gt;</code></td>
+<td style="text-align: left;"><ins>ajouté</ins></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Exposant</td>
+<td style="text-align: left;"><code>Texte&lt;sup&gt;exposant&lt;/sup&gt;</code></td>
+<td style="text-align: left;">Texte<sup>exposant</sup></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Indice</td>
+<td style="text-align: left;"><code>Texte&lt;sub&gt;indice&lt;/sub&gt;</code></td>
+<td style="text-align: left;">Texte<sub>indice</sub></td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
+<dl class="footnotes"><dt id="fn-1"><a href="#fn-ref-1">1</a></dt><dd>Exemple de note de bas de page</dd><dt id="fn-P"><a href="#fn-ref-P">P</a></dt><dd>Indique une syntaxe qui ne fait pas partie du standard Markdown, mais est spécifique à Paheko.</dd></dl></div></body></html>

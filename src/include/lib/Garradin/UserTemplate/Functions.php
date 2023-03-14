@@ -31,6 +31,7 @@ class Functions
 		'error',
 		'read',
 		'save',
+		'delete',
 		'admin_header',
 		'admin_footer',
 		'signature',
@@ -79,7 +80,7 @@ class Functions
 
 	static public function save(array $params, Brindille $tpl, int $line): void
 	{
-		$name = Utils::basename(Utils::dirname($tpl->_tpl_path));
+		$name = explode('/', Utils::dirname($tpl->_tpl_path))[1] ?? null;
 
 		if (!$name) {
 			throw new Brindille_Exception('Module name could not be found');
@@ -169,6 +170,32 @@ class Functions
 		else {
 			$db->update($table, compact('document'), sprintf('%s = :match', $field), ['match' => $where_value]);
 		}
+	}
+
+	static public function delete(array $params, Brindille $tpl, int $line): void
+	{
+		$name = explode('/', Utils::dirname($tpl->_tpl_path))[1] ?? null;
+
+		if (!$name) {
+			throw new Brindille_Exception('Module name could not be found');
+		}
+
+		$table = 'module_data_' . $name;
+
+		if (!empty($params['key'])) {
+			$field = 'key';
+			$where_value = $params['key'];
+		}
+		elseif (!empty($params['id'])) {
+			$field = 'id';
+			$where_value = (int) $params['id'];
+		}
+		else {
+			throw new Brindille_Exception('No "id" or "key" parameter was passed');
+		}
+
+		$db = DB::getInstance();
+		$db->delete($table, sprintf('%s = ?', $field), $where_value);
 	}
 
 	static public function captcha(array $params, Brindille $tpl, int $line)

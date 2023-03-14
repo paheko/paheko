@@ -35,8 +35,6 @@ class Users
 
 		$tables = sprintf('%s f INNER JOIN users u ON u.id = f.name', Files::getVirtualTableName());
 
-		$sum = 0;
-
 		// Only fetch directories with an ID as the name
 		$conditions = sprintf('f.parent = \'%s\' AND f.type = %d AND printf("%%d", f.name) = name', File::CONTEXT_USER, File::TYPE_DIRECTORY);
 

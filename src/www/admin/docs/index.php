@@ -5,11 +5,12 @@ namespace Garradin;
 use Garradin\Files\Files;
 use Garradin\Files\Transactions;
 use Garradin\Files\Users as Users_Files;
+use Garradin\Files\Trash;
 use Garradin\Users\Users;
 use Garradin\Users\Session;
 use Garradin\Entities\Files\File;
 
-require_once __DIR__ . '/_inc.php';
+require_once __DIR__ . '/../_inc.php';
 
 $path = qg('path') ?: File::CONTEXT_DOCUMENTS;
 
@@ -32,17 +33,26 @@ $user_name = null;
 if (!$context_ref) {
 	if ($context == File::CONTEXT_TRANSACTION) {
 		$list = Transactions::list();
+		$allow_check = false;
 	}
 	elseif ($context == File::CONTEXT_USER) {
 		$list = Users_Files::list();
+		$allow_check = false;
+	}
+	elseif ($context == File::CONTEXT_TRASH) {
+		$trash = Files::get(File::CONTEXT_TRASH);
+		$tpl->assign('trash_size', $trash->getRecursiveSize());
+		$list = Trash::list();
+		$allow_check = true;
 	}
 }
 elseif ($context_ref && $context == File::CONTEXT_USER) {
 	$user_name = Users::getName($context_ref);
 }
 
-if (null == $list) {
+if (null === $list) {
 	$list = Files::list($path);
+	$allow_check = true;
 }
 elseif ($list instanceof DynamicList) {
 	$list->loadFromQueryString();
@@ -70,6 +80,6 @@ if ($gallery !== $pref) {
 
 $parent_path_uri = $parent->path_uri();
 
-$tpl->assign(compact('path', 'parent_path_uri', 'list', 'parent', 'context', 'context_ref', 'breadcrumbs', 'parent_path', 'quota_used', 'quota_max', 'quota_percent', 'quota_left', 'user_name', 'gallery'));
+$tpl->assign(compact('path', 'parent_path_uri', 'list', 'parent', 'context', 'context_ref', 'breadcrumbs', 'parent_path', 'quota_used', 'quota_max', 'quota_percent', 'quota_left', 'user_name', 'gallery', 'allow_check'));
 
 $tpl->display('docs/index.tpl');

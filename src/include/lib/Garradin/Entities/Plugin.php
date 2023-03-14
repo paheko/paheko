@@ -10,7 +10,7 @@ use Garradin\UserException;
 use Garradin\Files\Files;
 use Garradin\UserTemplate\UserTemplate;
 use Garradin\Users\Session;
-use Garradin\Web\Render\Parsedown;
+use \KD2\HTML\Markdown;
 
 use Garradin\Entities\Files\File;
 
@@ -344,13 +344,13 @@ class Plugin extends Entity
 			include $path;
 		}
 		elseif (substr($file, -3) === '.md' && $is_private) {
-			$p = new ParseDown(null, null);
+			$md = new Markdown;
 			header('Content-Type: text/html');
 
 			printf('<!DOCYPE html><head>
 				<style type="text/css">body { font-family: Verdana, sans-serif; padding: .5em; margin: 0; background: #fff; color: #000; }</style>
 				<link rel="stylesheet" type="text/css" href="%scss.php" /></head><body>', ADMIN_URL);
-			echo $p->text(file_get_contents($path));
+			echo $md->text(file_get_contents($path));
 		}
 		else {
 			// Récupération du type MIME à partir de l'extension

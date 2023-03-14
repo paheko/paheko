@@ -39,6 +39,8 @@ class Modifiers
 		'quote_sql',
 		'sql_where',
 		'urlencode',
+		'count_words',
+		'or',
 	];
 
 	const LEADING_NUMBER_REGEXP = '/^([\d.]+)\s*[.\)]\s*/';
@@ -303,5 +305,19 @@ class Modifiers
 	static public function urlencode($str): string
 	{
 		return rawurlencode($str ?? '');
+	}
+
+	static public function count_words($str): int
+	{
+		return preg_match_all('/\S+/u', $str);
+	}
+
+	static public function or($in, $else)
+	{
+		if (empty($in) || (is_string($in) && trim($in) === '')) {
+			return $else;
+		}
+
+		return $in;
 	}
 }

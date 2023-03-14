@@ -2,6 +2,23 @@
 
 namespace Garradin\Web\Render;
 
+use Garradin\UserTemplate\CommonModifiers;
+
+use KD2\HTML\Markdown as KD2_Markdown;
+use KD2\HTML\Markdown_Extensions;
+
+class Markdown_Parser extends KD2_Markdown
+{
+	/**
+	 * Add typo modifier to text
+	 */
+	protected function inlineText($text)
+	{
+		$text = CommonModifiers::typo($text);
+		return parent::inlineText($text);
+	}
+}
+
 class Markdown extends AbstractRender
 {
 	/**
@@ -11,19 +28,19 @@ class Markdown extends AbstractRender
 
 	public function render(?string $content = null): string
 	{
-		$parsedown = Parsedown::instance();
-		$parsedown->setBreaksEnabled(true);
-		$parsedown->setUrlsLinked(true);
-		$parsedown->setSafeMode(true);
+		$md = Markdown_Parser::instance();
+		Markdown_Extensions::register($md);
+
+		// Register Paheko extensions
+		$ext = new Extensions($this);
+
+		foreach ($ext->getList() as $name => $callback) {
+			$md->registerExtension($name, $callback);
+		}
 
 		$str = $content ?? $this->file->fetch();
-
-		$ext = new Extensions($this);
-		$parsedown->setExtensions($ext);
-
-		$str = $parsedown->text($str);
-		$this->toc = $parsedown->toc;
-		unset($parsedown);
+		$str = $md->text($str);
+		unset($md);
 
 		$str = preg_replace_callback(';<a href="([\w_-]+?)">;i', function ($matches) {
 			return sprintf('<a href="%s">', htmlspecialchars($this->resolveLink(htmlspecialchars_decode($matches[1]))));

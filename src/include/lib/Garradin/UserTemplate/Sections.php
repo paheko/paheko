@@ -109,7 +109,7 @@ class Sections
 
 	static protected function _debug(string $str): void
 	{
-		echo sprintf('<pre style="padding: 5px; margin: 5px; background: yellow; white-space: pre-wrap;">%s</pre>', htmlspecialchars($str));
+		echo sprintf('<pre style="padding: 5px; margin: 5px; background: yellow; white-space: pre-wrap; color: #000">%s</pre>', htmlspecialchars($str));
 	}
 
 	static protected function _debugExplain(string $sql): void
@@ -175,7 +175,7 @@ class Sections
 
 	static public function load(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		$name = $params['module'] ?? Utils::basename(Utils::dirname($tpl->_tpl_path));
+		$name = $params['module'] ?? (explode('/', Utils::dirname($tpl->_tpl_path))[1] ?? null);
 
 		if (!$name) {
 			throw new Brindille_Exception('Unique module name could not be found');
@@ -322,7 +322,7 @@ class Sections
 			throw new Brindille_Exception('Missing schema parameter');
 		}
 
-		$name = $params['module'] ?? Utils::basename(Utils::dirname($tpl->_tpl_path));
+		$name = $params['module'] ?? (explode('/', Utils::dirname($tpl->_tpl_path))[1] ?? null);
 
 		if (!$name) {
 			throw new Brindille_Exception('Unique module name could not be found');
@@ -427,6 +427,13 @@ class Sections
 			self::_debugExplain($list->SQL());
 		}
 
+		$i = $list->iterate();
+
+		// If there is nothing to iterate, just stop
+		if (!$i->valid()) {
+			return;
+		}
+
 		$tpl = Template::getInstance();
 
 		/*
@@ -440,7 +447,7 @@ class Sections
 		$tpl->assign('check', $params['check'] ?? false);
 		$tpl->display('common/dynamic_list_head.tpl');
 
-		yield from $list->iterate();
+		yield from $i;
 
 		echo '</tbody>';
 		echo '</table>';
@@ -770,7 +777,7 @@ class Sections
 			unset($params['search']);
 
 			$params['tables'] .= ' INNER JOIN files_search ON files_search.path = w.file_path';
-			$params['select'] .= ', rank(matchinfo(files_search), 0, 1.0, 1.0) AS points, snippet(files_search, \'<b>\', \'</b>\', \'…\', 2) AS snippet';
+			$params['select'] .= ', rank(matchinfo(files_search), 0, 1.0, 1.0) AS points, snippet(files_search, \'<mark>\', \'</mark>\', \'…\', 2) AS snippet';
 			$params['where'] .= ' AND files_search MATCH :search';
 
 			$params['order'] = 'points DESC';

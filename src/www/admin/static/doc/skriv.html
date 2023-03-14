@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 	<html>
 	<head>
-		<title>Syntaxe SkrivML</title>
+		<title>Référence rapide SkrivML - Paheko</title>
 		<meta charset="utf-8" />
 		<style type="text/css">
 		body, form, p, div, hr, fieldset, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6 {
@@ -13,10 +13,41 @@
 			padding: .8em;
 			background: #eee;
 		}
+		.web-content .nav ul {
+			list-style-type: none;
+			margin: -.8em;
+			margin-bottom: 1em;
+			padding: 1em;
+			background: #ddd;
+			border-bottom: 1px solid #999;
+			text-align: center;
+		}
+		.web-content .boutons ul {
+			list-style-type: none;
+			background: #ccc;
+			padding: .5em;
+			margin: 0;
+		}
+		.web-content .nav li, .web-content .boutons li {
+			display: inline-block;
+			margin: 0 1em;
+		}
+		.web-content .nav a, .web-content .boutons a {
+			display: inline-block;
+			background: #fff;
+			color: darkblue;
+			border-radius: .2em;
+			padding: .3em .5em;
+			font-size: 1.2em;
+		}
+		.web-content .nav strong a {
+			color: darkred;
+			box-shadow: 0px 0px 5px orange;
+		}
 		</style>
 		<link rel="stylesheet" type="text/css" href="../../../content.css" />
 	</head>
-	<body><div class="web-content"><p><a href="keyboard.html">Raccourcis claviers</a> | <a href="extensions.html">Extensions Paheko</a></p><aside class="toc">
+	<body><div class="web-content"><aside class="toc">
 	<ol>
 		<li><a href="#syntaxe-skrivml">Syntaxe SkrivML</a>
 		<ol>
@@ -27,10 +58,14 @@
 			<li><a href="#tableaux">Tableaux</a></li>
 			<li><a href="#autres">Autres</a>
 		</ol></li>
-		<li><a href="#extensions-paheko">Extensions Paheko</a>
+		<li><a href="#extensions">Extensions</a>
+		<ol>
+			<li><a href="#images-jointes">Images jointes</a></li>
+			<li><a href="#fichiers-joints">Fichiers joints</a>
+		</ol></li>
+		<li><a href="#raccourcis-clavier">Raccourcis clavier</a>
 </li></ol></aside><h1 id="syntaxe-skrivml">Syntaxe SkrivML</h1>
 <p>Paheko propose la syntaxe <a href="https://fossil.kd2.org/garradin/doc/trunk/doc/skrivml.html" target="_blank" rel="nofollow,noreferrer">SkrivML</a> pour le formatage du texte des pages du site web.</p>
-<p>Celle-ci est plus intuitive que la syntaxe MarkDown.</p>
 <h2 id="styles-de-texte">Styles de texte</h2>
 <table>
 <thead>
@@ -66,7 +101,7 @@
 </tr>
 </tbody>
 </table>
-<p><strong>Attention :</strong> ces styles ne fonctionnent que si le code entoure des mots complets, ça ne fonctionne pas au milieu de mots.</p>
+<p><strong>Attention :</strong> ces styles ne fonctionnent que si le code entoure des mots complets, ça ne fonctionne pas au milieu de mots.</p>
 <pre><code>Un **mot** en gras. Mais on ne peut pas cou**per** un mot avec du gras.</code></pre>
 <blockquote>
 <p>Un <strong>mot</strong> en gras. Mais on ne peut pas cou**per** un mot avec du gras.</p>
@@ -78,36 +113,120 @@
 === Titre niveau 3 ===
 ==== Titre de niveau 4 ====</code></pre>
 <h2 id="listes">Listes</h2>
-<p>Listes non ordonnées :</p>
+<p>Listes non ordonnées :</p>
 <pre><code>* Item 1
 * Item 2
 ** Sous-item 2.1
 ** Sous-item 2.2
 *** Sous-item 2.2.1</code></pre>
-<p>Listes ordonnées :</p>
+<p>Listes ordonnées :</p>
 <pre><code># Item 1
 # Item 2
 ## Sub-item 2.1
 ## Sub-item 2.2
 ### Sub-item 2.2.1</code></pre>
 <h2 id="liens">Liens</h2>
-<p>Lien interne :</p>
+<p>Lien interne :</p>
 <pre><code>Voir [[cette page|adresse-unique-autre-page]].</code></pre>
-<p>Lien externe :</p>
+<p>Lien externe :</p>
 <pre><code>[[https://paheko.cloud/]]</code></pre>
 <h2 id="tableaux">Tableaux</h2>
 <pre><code>!! Colonne 1 !! Colonne 2
 || Cellule 1 || Cellule 2
 || Cellule 3 || Cellule 4</code></pre>
 <h2 id="autres">Autres</h2>
-<p>Consulter la documentation de <a href="https://fossil.kd2.org/garradin/doc/trunk/doc/skrivml.html" target="_blank" rel="nofollow,noreferrer">SkrivML</a>.</p>
-<h1 id="extensions-paheko">Extensions Paheko</h1>
-<p>Paheko propose des extensions permettant :</p>
+<p>Consulter la documentation complète de <a href="https://fossil.kd2.org/garradin/doc/trunk/doc/skrivml.html" target="_blank" rel="nofollow,noreferrer">SkrivML</a>.</p>
+<h1 id="extensions">Extensions</h1>
+<p>Toutes les extensions se présentent sous la forme d'un code situé entre deux signes <strong>inférieur à</strong> (<code>&lt;&lt;</code>) et deux signes <strong>supérieur à</strong> (<code>&gt;&gt;</code>), à ne pas confondre avec les guillements français (<code>«</code> et <code>»</code>).</p>
+<h2 id="images-jointes">Images jointes</h2>
+<p>Il est possible d'intégrer une image jointe à la page web en plaçant le code suivant sur une ligne (sans autre texte) :</p>
+<pre><code>&lt;&lt;image|Nom_fichier.jpg|Alignement|Légende&gt;&gt;</code></pre>
 <ul>
-<li>d'insérer des images et fichiers joints ;</li>
-<li>d'insérer une table des matières automatique ;</li>
-<li>d'aligner le texte au centre, à gauche, à droite ;</li>
-<li>de créer des mises en page complexes avec des colonnes et grilles ;</li>
-<li>de changer la couleur du texte ou du fond.</li>
+<li><code>Nom_fichier.jpg</code> : remplacer par le nom du fichier de l'image (parmi les images jointes à la page)</li>
+<li><code>Alignement</code> : remplacer par l'alignement :<ul>
+<li><code>gauche</code> ou <code>left</code> : l'image sera placée à gauche en petit (200 pixels), le texte remplira l'espace laissé sur la droite de l'image ;</li>
+<li><code>droite</code> ou <code>right</code> : l'image sera placée à droite en petit, le texte remplira l'espace laissé sur la gauche de l'image ;</li>
+<li><code>centre</code> ou <code>center</code> : l'image sera placée au centre en taille moyenne (500 pixels), le texte sera placé au dessus et en dessous.</li>
 </ul>
-<p><a href="extensions.html">Cliquer ici pour lire la documentation des extensions Paheko</a></p></div></body></html>
+</li>
+<li>Légende : indiquer ici une courte description de l'image.</li>
+</ul>
+<p>Exemple :</p>
+<pre><code>&lt;&lt;image|mon_image.png|center|Ceci est une belle image&gt;&gt;</code></pre>
+<p>Il est aussi possible d'utiliser la syntaxe avec des paramètres nommés :</p>
+<pre><code>&lt;&lt;image file="Nom_fichier.jpg" align="center" caption="Légende"&gt;&gt;</code></pre>
+<p>Les images qui ne sont pas mentionnées dans le texte seront affichées après le texte sous forme de galerie.</p>
+<h2 id="fichiers-joints">Fichiers joints</h2>
+<p>Pour créer un bouton permettant de voir ou télécharger un fichier joint à la page web, il suffit d'utiliser la syntaxe suivante :</p>
+<pre><code>&lt;&lt;file|Nom_fichier.ext|Libellé&gt;&gt;</code></pre>
+<ul>
+<li><code>Nom_fichier.ext</code> : remplacer par le nom du fichier  (parmi les fichiers joints à la page)</li>
+<li><code>Libellé</code> : indique le libellé du qui sera affiché sur le bouton, si aucun libellé n'est indiqué alors c'est le nom du fichier qui sera affiché</li>
+</ul>
+<h1 id="raccourcis-clavier">Raccourcis clavier</h1>
+<p>Depuis l'édition du texte :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Raccourci</th>
+<th style="text-align: left;">Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><kbd>Ctrl</kbd> + <kbd>G</kbd></td>
+<td style="text-align: left;">Mettre en gras</td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>Ctrl</kbd> + <kbd>I</kbd></td>
+<td style="text-align: left;">Mettre en italique</td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>Ctrl</kbd> + <kbd>T</kbd></td>
+<td style="text-align: left;">Mettre en titre</td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>Ctrl</kbd> + <kbd>L</kbd></td>
+<td style="text-align: left;">Transformer en lien</td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd></td>
+<td style="text-align: left;">Insérer un fichier ou une image</td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>Ctrl</kbd> + <kbd>P</kbd></td>
+<td style="text-align: left;">Prévisualiser</td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>Ctrl</kbd> + <kbd>S</kbd></td>
+<td style="text-align: left;">Enregistrer</td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>F11</kbd></td>
+<td style="text-align: left;">Activer ou désactiver l'édition plein écran</td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>F1</kbd></td>
+<td style="text-align: left;">Afficher l'aide</td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>Echap</kbd></td>
+<td style="text-align: left;">Prévisualiser (rappuyer pour revenir à l'édition)</td>
+</tr>
+</tbody>
+</table>
+<p>Depuis l'aide, la prévisualisation ou l'insertion de fichier :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Raccourci</th>
+<th style="text-align: left;">Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><kbd>Echap</kbd></td>
+<td style="text-align: left;">Fermer et revenir à l'édition</td>
+</tr>
+</tbody>
+</table></div></body></html>

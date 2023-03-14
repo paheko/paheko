@@ -49,7 +49,6 @@ class Utils
         'unlock'          => '🔓',
         'folder'          => '🗀',
         'document'        => '🗅',
-        'archive'         => '🗃',
         'bold'            => 'B',
         'italic'          => 'I',
         'header'          => 'H',
@@ -76,6 +75,7 @@ class Utils
         'quote'           => '«',
         'money'           => '€',
         'pdf'             => 'P',
+        'trash'           => '🗑',
     ];
 
     const FRENCH_DATE_NAMES = [
@@ -264,10 +264,10 @@ class Utils
             return ADMIN_URL . substr($url, 7);
         }
         elseif (substr($url, 0, 2) == './') {
-        	$base = self::getSelfURL();
+        	$base = self::getSelfURI();
         	$base = preg_replace('!/[^/]*$!', '/', $base);
         	$base = trim($base, '/');
-        	return $base . '/' . substr($url, 2);
+        	return '/' . $base . '/' . substr($url, 2);
         }
         elseif (substr($url, 0, 1) == '/' && ($pos = strpos($url, WWW_URI)) === 0) {
             return WWW_URL . substr($url, strlen(WWW_URI));
@@ -300,14 +300,8 @@ class Utils
         $uri = self::getSelfURI($qs);
 
         // Make absolute URI relative to parent URI
-        if (strpos($uri, WWW_URI . 'admin/') === 0)
-        {
+        if (0 === strpos($uri, WWW_URI . 'admin/')) {
             $uri = substr($uri, strlen(WWW_URI . 'admin/'));
-        }
-
-        // Quick-fix awaiting #227138842234710930f8c8d9bb9b7f9176ef3a0f resolution
-        if (strpos($uri, '/m/') === 0) {
-            return WWW_URL . ltrim($uri, '/');
         }
 
         return ADMIN_URL . ltrim($uri, '/');

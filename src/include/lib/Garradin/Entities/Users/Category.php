@@ -79,7 +79,7 @@ class Category extends Entity
 				Session::ACCESS_NONE => 'Pas d\'accès',
 				Session::ACCESS_READ => 'Lecture uniquement (peut lire tous les fichiers)',
 				Session::ACCESS_WRITE => 'Lecture & écriture (peut ajouter, modifier et déplacer des fichiers, mais pas les supprimer)',
-				Session::ACCESS_ADMIN => 'Administration (peut tout faire)',
+				Session::ACCESS_ADMIN => 'Administration (peut tout faire, notamment mettre des fichiers dans la corbeille)',
 			],
 		],
 		'web' => [

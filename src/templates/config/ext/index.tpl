@@ -60,7 +60,7 @@
 					<small>{$item.description|escape|nl2br}</small><br />
 					<small class="help">
 						{if $item.author}
-							Par {link label=$item.author href=$item.url target="_blank"}
+							Par {link label=$item.author href=$item.author_url target="_blank"}
 						{/if}
 						{if $item.plugin && $item.plugin.version}— Version {$item.plugin.version}{/if}
 						{if $item.readme_url}
@@ -131,7 +131,7 @@
 </form>
 
 <p class="help">
-	La mention <em class="tag">Modifiable</em> indique que cette extension est un module que vous pouvez modifier. {linkbutton shape="help" label="Documentation des modules" href=$url_help_modules target="_dialog"}
+	La mention <em class="tag">Modifiable</em> indique que cette extension est un module que vous pouvez modifier. {linkbutton shape="help" label="Comment modifier et développer des modules" href="!static/doc/modules.html" target="_dialog"}
 </p>
 
 {include file="_foot.tpl"}

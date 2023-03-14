@@ -293,11 +293,11 @@ dd.help li {
 }
 
 .pagination li a {
-    color: #000;
+    color: rgb(var(--gTextColor));
 }
 
 .pagination li button {
-    color: #000;
+    color: rgb(var(--gTextColor));
     background: transparent;
     border: none;
     padding: 0;
@@ -632,7 +632,7 @@ dl.large dd {
     max-width: 90%;
     overflow: auto;
     margin: 1em auto;
-    background: #eee;
+    background: var(--gLightBackgroundColor);
     padding: .5em;
     white-space: pre-wrap;
 }

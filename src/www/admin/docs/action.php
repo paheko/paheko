@@ -5,6 +5,7 @@ namespace Garradin;
 use Garradin\Users\Session;
 
 use Garradin\Files\Files;
+use Garradin\Files\Trash;
 use Garradin\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
@@ -16,17 +17,17 @@ $parent = f('parent');
 $actions = ['move', 'delete', 'zip'];
 
 if (!is_array($check) || !count($check) || !in_array($action, $actions)) {
-	throw new UserException('Action invalide');
+	throw new UserException('Action invalide: ' . $action);
 }
 
-$csrf_key = 'action_' . $action;
+$csrf_key = 'docs_action_' . $action;
 
 $form->runIf('zip', function() use ($check, $session) {
 	Files::zip(null, $check, $session);
 	exit;
 }, $csrf_key);
 
-$form->runIf('confirm_delete', function () use ($check, $session) {
+$form->runIf('delete', function () use ($check, $session) {
 	foreach ($check as &$file) {
 		$file = Files::get($file);
 
@@ -38,7 +39,7 @@ $form->runIf('confirm_delete', function () use ($check, $session) {
 	unset($file);
 
 	foreach ($check as $file) {
-		$file->delete();
+		$file->moveToTrash();
 	}
 }, $csrf_key, '!docs/?path=' . $parent);
 
