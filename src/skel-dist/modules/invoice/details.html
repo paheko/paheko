@@ -54,7 +54,9 @@
 			<legend><h2>Informations</h2></legend>
 			
 			{{if $cancelled}}
-				<p class="infos">Statut en cours : <strong class="irreversible">{{$cancelled_label}}</strong>.<br />(dernier statut avant annulation : {{$status_label}})</p>
+				<p>Statut en cours : <strong class="irreversible">{{$cancelled_label}}</strong>.
+				{{if $cancellation_reason}}<p>Motif : {{$cancellation_reason|escape|nl2br}}</p>{{/if}}
+				<p class="infos">(dernier statut avant annulation : {{$status_label}})</p>
 			{{elseif $status === $AWAITING_STATUS}}
 				<p class="infos">{{$label}} <strong>{{if $type === $QUOTATION_TYPE}}signé{{else}}émise{{/if}} le {{$signing_date|date_short}} à {{$signing_place}}</strong>.</p>
 				{{if $type === $QUOTATION_TYPE}}

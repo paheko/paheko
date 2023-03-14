@@ -51,6 +51,11 @@
 			"description": "Défini si la facture est annnulée",
 			"type": "bool"
 		},
+		"cancellation_reason": {
+			"description": "Motif de l'annulation",
+			"type": ["string", "null"],
+			"maxLength": 256
+		},
 		"items": {
 			"description": "Articles",
 			"type": ["array", "null"],

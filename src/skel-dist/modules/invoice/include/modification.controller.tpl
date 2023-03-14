@@ -221,7 +221,9 @@
 {{elseif $_POST.cancel_submit}}
 	{{if !$_GET.id}}
 		{{:assign var='check_errors.' value='Aucun document sélectionné.'}}
-	{{else}}
+	{{/if}}
+	{{:include file='./check_max_length.tpl' check_value=$_POST.reason check_max=256 check_label='Motif trop long' keep='check_errors'}}
+	{{if !$check_errors}}
 		{{#load id=$_GET.id}}
 			{{if $status === $DRAFT_STATUS}}
 				{{:assign var='check_errors.' value='Les brouillons ne peuvent pas être annulés. Vous pouvez néanmoins les supprimer.'}}
@@ -244,6 +246,7 @@
 						deadline=$deadline
 						status=$status
 						cancelled=true
+						cancellation_reason=$_POST.reason
 						items=$items
 						total=$total
 						vat_exemption=$vat_exemption
@@ -277,6 +280,7 @@
 						deadline=$deadline
 						status=$status
 						cancelled=true
+						cancellation_reason=$_POST.reason
 						items=$items
 						total=$total
 						vat_exemption=$vat_exemption
