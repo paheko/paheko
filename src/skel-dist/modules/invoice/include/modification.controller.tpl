@@ -14,11 +14,11 @@
 			{{if !$_POST.signing_place}}
 				{{:assign var='check_errors.' value='Lieu de la signature obligatoire.'}}
 			{{/if}}
-			{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Lieu de la signature trop long' check_value=$_POST.signing_place check_max=128}}
+			{{:include file='./check_max_length.tpl' keep='check_errors' check_label='Lieu de la signature trop long' check_value=$_POST.signing_place check_max=128}}
 			{{if !$_POST.signing_date}}
 				{{:assign var='check_errors.' value='Date de la signature obligatoire.'}}
 			{{/if}}
-			{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Date de la signature trop longue' check_value=$_POST.signing_date check_max=10}}
+			{{:include file='./check_max_length.tpl' keep='check_errors' check_label='Date de la signature trop longue' check_value=$_POST.signing_date check_max=10}}
 			{{:assign signing_date=$_POST.signing_date|date:'Y-m-d'}}
 			{{if $_POST.signing_date|date_short === null}} {{* Means data is not a date *}}
 				{{:assign var='check_errors.' value="La date de signature doit être une date."}}
@@ -29,7 +29,7 @@
 			{{/if}}
 			{{if !$check_errors}}
 				{{:save id=$_GET.id|intval
-					validate_schema="./include/schema/quotation.json"
+					validate_schema="./schema/quotation.json"
 					key=$key
 					type=$type
 					recipient_business_name=$recipient_business_name
@@ -94,7 +94,7 @@
 				{{/load}}
 
 				{{:save assign_new_id='invoice_id'
-					validate_schema="./include/schema/invoice.json"
+					validate_schema="./schema/invoice.json"
 					key=$invoice_key
 					type=$INVOICE_TYPE
 					recipient_business_name=$recipient_business_name
@@ -125,7 +125,7 @@
 			{{/if}}
 
 			{{:save id=$_GET.id|intval
-				validate_schema="./include/schema/quotation.json"
+				validate_schema="./schema/quotation.json"
 				key=$key
 				type=$type
 				recipient_business_name=$recipient_business_name
@@ -180,9 +180,9 @@
 		{{:assign var='check_errors.' value="Le paiement doit se situer après la date d'émission de la facture (%s)."|args:$formatted_invoice_date}}
 	{{/if}}
 	
-	{{:include file='./include/check_max_length.tpl' check_value=$_POST.comment check_max=256 check_label='Remarques trop longues' keep='check_errors'}}
+	{{:include file='./check_max_length.tpl' check_value=$_POST.comment check_max=256 check_label='Remarques trop longues' keep='check_errors'}}
 
-	{{:include file='./include/shim/array_last_num_key.tpl' keep='transaction_id, check_errors' array=$_POST.transaction name='transaction_id' error_message='Écriture séléctionnée invalide.'}}
+	{{:include file='./shim/array_last_num_key.tpl' keep='transaction_id, check_errors' array=$_POST.transaction name='transaction_id' error_message='Écriture séléctionnée invalide.'}}
 	{{#transactions id=$transaction_id|intval}}{{:assign .='transaction'}}{{/transactions}}
 	{{if $transaction_id && !$transaction}}
 		{{:assign var='check_errors.' value="Transaction sélectionnée invalide."}}
@@ -190,7 +190,7 @@
 
 	{{if !$check_errors}}
 		{{:save id=$invoice.id|intval
-			validate_schema="./include/schema/invoice.json"
+			validate_schema="./schema/invoice.json"
 			key=$invoice.key
 			type=$invoice.type
 			recipient_business_name=$invoice.recipient_business_name
@@ -237,7 +237,7 @@
 			{{if !$check_errors}}
 				{{if $type === $INVOICE_TYPE}}
 					{{:save id=id|intval
-						validate_schema="./include/schema/invoice.json"
+						validate_schema="./schema/invoice.json"
 						key=$key
 						type=$type
 						recipient_business_name=$recipient_business_name
@@ -270,7 +270,7 @@
 					}}
 				{{else}}
 					{{:save id=$id|intval
-						validate_schema="./include/schema/quotation.json"
+						validate_schema="./schema/quotation.json"
 						key=$key
 						type=$type
 						recipient_business_name=$recipient_business_name
@@ -322,7 +322,7 @@
 				{{else}}
 					{{:assign cancelled=$_POST.cancelled|boolval}}
 					{{:save id=$id
-						validate_schema="./include/schema/%s.json"|args:$type
+						validate_schema="./schema/%s.json"|args:$type
 						key=$key
 						type=$type
 						recipient_business_name=$recipient_business_name

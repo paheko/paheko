@@ -8,7 +8,7 @@
 {{:include file='./include/style.tpl'}}
 
 {{if $_GET.action === 'sign' || $_POST.signing_submit || $_GET.action === 'delete' || $_POST.reject_submit || $_POST.validate_submit || $_POST.mark_as_paid_submit || $_POST.cancel_submit || $_POST.status_update_button}}
-	{{:include file='./_modification_controller.tpl' keep='check_errors'}}
+	{{:include file='./include/modification.controller.tpl' keep='check_errors'}}
 {{elseif $_GET.id === null}}
 	<p class="error block">Aucun document séléctionné.</p>
 {{/if}}
