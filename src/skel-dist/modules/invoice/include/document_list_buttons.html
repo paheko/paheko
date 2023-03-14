@@ -7,8 +7,8 @@
 	{{/restrict}}
 	<li>{{:linkbutton label="Aperçu" href="preview.html?id=%s"|args:$id shape="document"}}</li>
 	{{#restrict section="accounting" level="write"}}
-		<li><form method="POST" action="{{"edit.html?id=%d"|args:$id}}">
-			{{:button type="submit" title="Supprimer le devis (prochainement)" shape="delete" class="irreversible" name="delete_button" disabled=true}}
+		<li><form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_deletion"|args:$id:$type}}">
+			{{:button type="submit" title="Supprimer le brouillon" shape="delete" class="irreversible" name="delete_button"}}
 		</form></li>
 	{{/restrict}}
 {{else}}

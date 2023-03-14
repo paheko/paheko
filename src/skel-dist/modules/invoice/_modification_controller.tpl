@@ -60,9 +60,7 @@
 			{{/if}}
 
 		{{elseif $_GET.action === 'delete'}}
-			{{* Awaiting {{:remove}} implementation #7de607eb3c7396d718da8575f61fd93951498936 *}}
-			{{:error message='Document deletion not yet implemented by brindille.'}}
-			
+			{{:delete id=$_GET.id|intval}}
 			{{:http redirect="index.html?ok=3"}}
 		{{/if}}
 		{{/load}}

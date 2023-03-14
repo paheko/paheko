@@ -43,12 +43,13 @@
 		<h2 class="ruler irreversible">Action irreversible</h2>
 		<fieldset>
 			<legend><h2>Suppression</h2></legend>
+			{{:include file='./include/document_summary.html'}}
 			<div class="block error">
-				<h3 class="infos">Vous allez supprimer définitivement le brouillon de devis n° {{$key}} : "{{$subject}}".</h3>
+				<h3 class="infos">Vous allez supprimer définitivement le brouillon du devis n° {{$key}} : "{{$subject}}".</h3>
 				<p class="infos">Êtes-vous sûr de vouloir continuer ?</p>
 				<p>
 					{{:linkbutton href="action.html?id=%d&show=quotation&action=delete"|args:$_GET.id label="Supprimer le devis" shape="delete"}}
-					{{:linkbutton href="details.html?id=%d&show=quotation&ok=3"|args:$_GET.id label="Conserver le brouillon" shape="lock" class="safe"}}
+					{{:linkbutton href="details.html?id=%d&show=quotation&ok=3"|args:$_GET.id label="Conserver le brouillon" shape="lock" class="safe" class="main"}}
 				</p>
 			</div>
 		</fieldset>
@@ -101,16 +102,7 @@
 		<form method="POST" action="">
 			<fieldset>
 				<legend><h2 class="irreversible">Annuler {{if $type === $INVOICE_TYPE}}la{{else}}le{{/if}} {{$label}} n° {{$key}} ?</h2></legend>
-				<fieldset>
-					<legend>Résumé</legend>
-					<ul>
-						<li>Destinataire : <strong class="business_name">{{$recipient_business_name}}</strong></li>
-						<li>Intitulé : {{$subject}}</li>
-						<li>Date : {{$date|date_short}}</li>
-						<li>Total {{$total|money_currency}}</li>
-						<li>Statut en cours : {{$status_label}}</li>
-					</ul>
-				</fieldset>
+				{{:include file='./include/document_summary.html'}}
 				{{:button type="submit" name="cancel_submit" label="Confirmer l'annulation" shape="check" class="main"}}
 			</fieldset>
 		</form>

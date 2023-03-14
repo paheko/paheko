@@ -28,6 +28,7 @@
 			<th>Devis validés</th>
 			<th>Devis rejetés</th>
 			<th>Factures</th>
+			<th>Brouillons</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -36,6 +37,7 @@
 {{:assign var='status_number.%s'|args:$AWAITING_STATUS value=0}}
 {{:assign var='status_number.%s'|args:$VALIDATED_STATUS value=0}}
 {{:assign var='status_number.%s'|args:$REJECTED_STATUS value=0}}
+{{:assign var='status_number.%s'|args:$DRAFT_STATUS value=0}}
 {{#sql
 	select="
 		json_extract(document, '$.recipient_business_name') AS recipient_business_name,
@@ -44,10 +46,9 @@
 		COUNT(json_extract(document, '$.status')) AS document_status_quantity
 	"
 	tables='module_data_invoice'
-	where="status != :draft_status"
+	where=""
 	group='recipient_business_name, status'
 	order='recipient_business_name, status'
-	:draft_status=$DRAFT_STATUS
 }}
 	{{if $recipient_business_name !== $previous_customer && $previous_customer !== '-1'}}
 		<tr>
@@ -55,11 +56,13 @@
 			<td>{{:assign var='number' from='status_number.%s'|args:$AWAITING_STATUS}}{{$number}}</td>
 			<td>{{:assign var='number' from='status_number.%s'|args:$VALIDATED_STATUS}}{{$number}}</td>
 			<td>{{:assign var='number' from='status_number.%s'|args:$REJECTED_STATUS}}{{$number}}</td>
-			<td>-</td>
+			<td>[prochainement]</td>
+			<td>{{:assign var='number' from='status_number.%s'|args:$DRAFT_STATUS}}{{$number}}</td>
 		</tr>
 		{{:assign var='status_number.%s'|args:$AWAITING_STATUS value=0}}
 		{{:assign var='status_number.%s'|args:$VALIDATED_STATUS value=0}}
 		{{:assign var='status_number.%s'|args:$REJECTED_STATUS value=0}}
+		{{:assign var='status_number.%s'|args:$DRAFT_STATUS value=0}}
 	{{/if}}
 	{{:assign var='status_number.%s'|args:$status value=$document_status_quantity}}
 	{{:assign previous_customer=$recipient_business_name}}
@@ -72,7 +75,8 @@
 		<td>{{:assign var='number' from='status_number.%s'|args:$AWAITING_STATUS}}{{$number}}</td>
 		<td>{{:assign var='number' from='status_number.%s'|args:$VALIDATED_STATUS}}{{$number}}</td>
 		<td>{{:assign var='number' from='status_number.%s'|args:$REJECTED_STATUS}}{{$number}}</td>
-		<td>-</td>
+		<td>[prochainement]</td>
+		<td>{{:assign var='number' from='status_number.%s'|args:$DRAFT_STATUS}}{{$number}}</td>
 	</tr>
 {{/if}}
 

@@ -1,0 +1,10 @@
+<fieldset>
+	<legend>Résumé</legend>
+	<ul>
+		<li>Destinataire : <strong class="business_name">{{$recipient_business_name}}</strong></li>
+		<li>Intitulé : {{$subject}}</li>
+		<li>Date : {{$date|date_short}}</li>
+		<li>Total : {{$total|money_currency}}</li>
+		<li>Statut en cours : {{$status_label}}</li>
+	</ul>
+</fieldset>

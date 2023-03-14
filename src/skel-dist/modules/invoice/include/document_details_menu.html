@@ -4,14 +4,20 @@
 			{{if $type === $QUOTATION_TYPE}}
 				<li>{{:linkbutton href="edit.html" label="Nouveau" shape="plus"}} |</li>
 			
-				{{if $status == $DRAFT_STATUS}}
+				{{if $status === $DRAFT_STATUS}}
 					<li>{{:linkbutton href="preview.html?id=%s&source=details"|args:$id label="Aperçu papier" shape="document"}}</li>
 					<li>{{:linkbutton href="./edit.html?id=%d"|args:$id label="Modifier" shape="edit"}}</li>
 					<li>{{:linkbutton href="action.html?id=%d&action=sign&show=quotation"|args:$id label="Signer le devis" shape="check"}}</li>
-					<li>{{:linkbutton href="action.html?id=%d&action=ask_deletion&show=quotation"|args:$id label="Supprimer" shape="delete" class="irreversible"}}</li>
+					{{if $_GET.action !== 'ask_deletion'}}
+						<li>
+							<form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_deletion"|args:$id:$type}}">
+								{{:button type="submit" label="Supprimer" shape="delete" class="irreversible" name="delete_button"}}
+							</form>
+						</li>
+					{{/if}}
 				{{else}}
 					<li>{{:linkbutton label="PDF" href="preview.html?id=%s&source=details"|args:$id shape="document"}}</li>
-					{{if $status == $AWAITING_STATUS}}
+					{{if $status === $AWAITING_STATUS}}
 						<li>{{:linkbutton href="action.html?id=%d&show=quotation&action=ask_validation"|args:$id label="Générer facture" shape="export"}}</li>
 					{{/if}}
 				{{/if}}
@@ -22,19 +28,19 @@
 				{{/if}}
 			{{/if}}
 			
-			{{if $type === $QUOTATION_TYPE}}
-				{{:assign button_target_label='le devis'}}
-			{{else}}
-				{{:assign button_target_label='la facture'}}
-			{{/if}}
-			{{if !$cancelled && $_GET.action !== 'ask_cancelling'}}
+			{{if $status !== $DRAFT_STATUS && !$cancelled && $_GET.action !== 'ask_cancelling'}}
+				{{if $type === $QUOTATION_TYPE}}
+					{{:assign button_target_label='le devis'}}
+				{{else}}
+					{{:assign button_target_label='la facture'}}
+				{{/if}}
 				<li>
 					<form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_cancelling"|args:$id:$type}}">
 						{{:button type="submit" label="Annuler %s"|args:$button_target_label shape="delete" class="irreversible" name="cancel_button"}}
 					</form>
 				</li>
 			{{/if}}
-			{{if $status !== $AWAITING_STATUS}}
+			{{if $status !== $DRAFT_STATUS && $status !== $AWAITING_STATUS}}
 				<li>{{:button type="submit" href="#" label="[Archiver]" title="prochainement" disabled="disabled"}}</li>
 			{{/if}}
 		</ul>
