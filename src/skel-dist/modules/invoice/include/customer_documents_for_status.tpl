@@ -1,4 +1,9 @@
-{{:assign var="label" from="STATUS_LABELS.%s"|args:$status}}
+{{if $status}}
+	{{:assign var="label" from="STATUS_LABELS.%s"|args:$status}}
+{{else}}
+	{{:assign label=$CANCELLED_LABEL}}
+{{/if}}
+
 <h3 class="ruler">{{$label}}</h3>
 {{#list
 	select=$select
@@ -24,18 +29,6 @@
 	</td>
 	<td class="actions">
 		{{:include file='./document_list_buttons.html'}}
-		{{*
-		{{#restrict section="accounting" level="write"}}
-			{{if !$archived && $status == $DRAFT_STATUS}}
-			{{:linkbutton shape="edit" label="Modifier" href="edit.html?id=%d"|args:$id}}
-			{{/if}}
-		{{/restrict}}
-		{{if $status !== $DRAFT_STATUS}}
-			{{:linkbutton label="PDF" href="preview.html?id=%s"|args:$id shape="document"}}
-		{{else}}
-			{{:linkbutton label="Aperçu" href="preview.html?id=%s"|args:$id shape="document"}}
-		{{/if}}
-		*}}
 	</td>
 </tr>
 

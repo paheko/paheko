@@ -38,7 +38,7 @@
 	<h2 class="ruler">Résultat(s) de recherche pour "{{$_GET.q}}"</h2>
 {{/if}}
 
-{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, VALIDATED_STATUS, PAID_STATUS, TYPE_LABELS, STATUS_LABELS, QUOTATION_TYPE, INVOICE_TYPE, INVOICE_STATUS_LABELS'}}
+{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, VALIDATED_STATUS, PAID_STATUS, TYPE_LABELS, STATUS_LABELS, CANCELLED_LABEL, QUOTATION_TYPE, INVOICE_TYPE, INVOICE_STATUS_LABELS'}}
 
 {{if $_GET.show == $QUOTATION_TYPE}}
 	{{:assign filter="json_extract(document, '$.type') = '%s'"|args:$QUOTATION_TYPE}}
@@ -50,14 +50,19 @@
 	{{:assign filter="1"}}
 {{/if}}
 
-{{if $_GET.ok === '1'}}
-	<p class="block confirm">Devis enregistré.</p>
-{{elseif $_GET.ok === '2'}}
-	<p class="block confirm">Devis modifié avec succès.</p>
-{{elseif $_GET.ok === '4'}}
-	<p class="block confirm">Devis supprimé avec succès.</p>
+{{if $_GET.ok}}
+	<p class="block confirm">
+	{{if $_GET.ok === '1'}}
+		Devis enregistré.
+	{{elseif $_GET.ok === '2'}}
+		Devis modifié avec succès.
+	{{elseif $_GET.ok === '4'}}
+		Devis supprimé avec succès.
+	{{elseif $_GET.ok === '5'}}
+		Document annulé avec succès.
+	{{/if}}
+	</p>
 {{/if}}
-
 
 {{:assign list_select="key; id AS 'Numéro'; datetime($$.date) AS 'Émission'; $$.deadline AS 'Échéance'; $$.recipient_business_name AS 'Tiers'; $$.subject AS 'Intitulé'; $$.total AS 'Montant'; $$.status AS 'Statut'"}}
 {{:assign list_where="$$.type IN ('quotation', 'invoice') AND %s"|args:$filter}}
@@ -75,7 +80,7 @@
 	:type=$type_filter
 	:status=$status_filter
 }}
-	<tr>
+	<tr class="{{$status}}{{if $cancelled}} cancelled_document{{/if}}">
 		{{if !$_GET.show}}
 			{{:assign var="label" from="TYPE_LABELS.%s"|args:$type}}
 			{{if $type === $INVOICE_TYPE && $parent_id}}
@@ -98,13 +103,16 @@
 				{{:assign var="label" from="STATUS_LABELS.%s"|args:$status}}
 			{{/if}}
 
-			{{$label}}
-			{{if $status === $VALIDATED_STATUS}}- {{$validation_date|date_short}}{{/if}}
+			{{if !$cancelled}}
+				{{$label}}
+				{{if $status === $VALIDATED_STATUS}}- {{$validation_date|date_short}}
+				{{elseif $type === $INVOICE_TYPE && $status === $PAID_STATUS}}- {{$payment_date|date_short}}{{/if}}
+			{{else}}
+				{{$CANCELLED_LABEL}}
+			{{/if}}
 
 			{{if $archived}}
 				<span title="Archivé">🗃</span>
-			{{elseif $type === $INVOICE_TYPE && $status === $PAID_STATUS}}
-				- {{$payment_date|date_short}}
 			{{/if}}
 		</td>
 		<td class="actions">

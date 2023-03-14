@@ -19,6 +19,8 @@
 
 {{if $document && $document.status !== $DRAFT_STATUS}}
 	{{:error message="Ce document n'est plus un brouillon et ne peut plus être modifié."}}
+{{elseif $document && $document.cancelled}}
+	{{:error message="Les document annulés ne peuvent plus être modifié."}}
 {{/if}}
 
 {{if $_POST.quotation_submit}}
@@ -168,6 +170,7 @@
 			date=$date
 			deadline=$deadline
 			status=$status
+			cancelled=false
 			items=$items
 			total=$computed_total
 			vat_exemption=$vat_exemption

@@ -22,8 +22,13 @@
 	font-weight: bold;
 }
 
-.organization_name, .business_name, .signing_place {
+.organization_name, .business_name, .signing_place, .important_status {
 	text-transform: uppercase;
+}
+
+tr.cancelled_document, table.list tr.cancelled_document:nth-child(even) {
+	background-color: grey;
+	//color: black;
 }
 
 nav.tabs aside.menu ul, ul.list_action_buttons {

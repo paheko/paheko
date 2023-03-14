@@ -3,7 +3,7 @@ h2.organization_name {
 	margin-bottom: 0;
 }
 
-.organization_name, .business_name, .signing_place {
+.organization_name, .business_name, .signing_place, .important_status {
 	text-transform: uppercase;
 }
 

@@ -1,5 +1,6 @@
 {{:assign VERSION='0.2'}}
 {{:assign DRAFT_STATUS='draft' AWAITING_STATUS='awaiting' REJECTED_STATUS='rejected' VALIDATED_STATUS='validated' PAID_STATUS='paid' MISC_STATUS='misc'}}
+{{:assign CANCELLED_FLAG='cancelled'}}
 {{:assign QUOTATION_TYPE='quotation' INVOICE_TYPE='invoice'}}
 {{:assign var='DOCUMENT_TYPES.%s'|args:$QUOTATION_TYPE value='Devis'}}
 {{:assign var='DOCUMENT_TYPES.%s'|args:$INVOICE_TYPE value='Facture'}}
@@ -21,6 +22,8 @@
 {{:assign var='INVOICE_STATUS_LABELS.%s'|args:$VALIDATED_STATUS value='Validée'}}
 {{:assign var='INVOICE_STATUS_LABELS.%s'|args:$PAID_STATUS value='Payée'}}
 {{:assign var='INVOICE_STATUS_LABELS.%s'|args:$MISC_STATUS value='Autre'}}
+
+{{:assign CANCELLED_LABEL='Annulé'}}
 
 {{:assign var='VAT_EXEMPTION_TYPE_LABELS.%s'|args:$NONPROFIT_VAT_EXEMPTION_TYPE value='Non-lucratif'}}
 {{:assign var='VAT_EXEMPTION_TYPE_LABELS.%s'|args:$PROFIT_VAT_EXEMPTION_TYPE value='Lucratif'}}

@@ -7,7 +7,7 @@
 
 {{:include file='./include/style.tpl'}}
 
-{{if $_GET.action === 'sign' || $_POST.signing_submit || $_GET.action === 'delete' || $_POST.reject_submit || $_POST.validate_submit || $_POST.mark_as_paid_submit || $_POST.status_update_button}}
+{{if $_GET.action === 'sign' || $_POST.signing_submit || $_GET.action === 'delete' || $_POST.reject_submit || $_POST.validate_submit || $_POST.mark_as_paid_submit || $_POST.cancel_submit || $_POST.status_update_button}}
 	{{:include file='./_modification_controller.tpl' keep='check_errors'}}
 {{elseif $_GET.id === null}}
 	<p class="error block">Aucun document séléctionné.</p>
@@ -94,6 +94,24 @@
 				{{:input type="textarea" name="comment" label="Remarque" required=false cols="50" rows="4"}}
 				{{:input type="list" name="transaction" label="Écriture correspondante" target="./transaction_selector.inc.tpl" can_delete=true required=false}}
 				{{:button type="submit" name="mark_as_paid_submit" label="Marquer comme payée" shape="check" class="main"}}
+			</fieldset>
+		</form>
+
+	{{elseif $_GET.action === 'ask_cancelling'}}
+		<form method="POST" action="">
+			<fieldset>
+				<legend><h2 class="irreversible">Annuler {{if $type === $INVOICE_TYPE}}la{{else}}le{{/if}} {{$label}} n° {{$key}} ?</h2></legend>
+				<fieldset>
+					<legend>Résumé</legend>
+					<ul>
+						<li>Destinataire : <strong class="business_name">{{$recipient_business_name}}</strong></li>
+						<li>Intitulé : {{$subject}}</li>
+						<li>Date : {{$date|date_short}}</li>
+						<li>Total {{$total|money_currency}}</li>
+						<li>Statut en cours : {{$status_label}}</li>
+					</ul>
+				</fieldset>
+				{{:button type="submit" name="cancel_submit" label="Confirmer l'annulation" shape="check" class="main"}}
 			</fieldset>
 		</form>
 	{{/if}}

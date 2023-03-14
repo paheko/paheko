@@ -6,7 +6,7 @@
 {{:include file='./include/style.tpl'}}
 {{:include file='./include/navigation.html'}}
 
-{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, REJECTED_STATUS, VALIDATED_STATUS, MISC_STATUS, STATUS_LABELS, QUOTATION_TYPE'}}
+{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, REJECTED_STATUS, VALIDATED_STATUS, MISC_STATUS, STATUS_LABELS, CANCELLED_LABEL, QUOTATION_TYPE'}}
 
 {{* ==================== Listing ==================== *}}
 
@@ -24,13 +24,15 @@
 {{/if}}
 
 {{:assign list_select="key; id AS 'Numéro'; datetime($$.date) AS 'Émission'; $$.deadline AS 'Échéance'; $$.subject AS 'Intitulé'; $$.total AS 'Montant'; $$.recipient_member_id AS 'Membre'; $$.recipient_member_numero; $$.status"}}
-{{:assign list_where="$$.recipient_business_name = :business_name AND $$.type = :type AND $$.status = :status"}}
+{{:assign list_where="$$.cancelled = false AND $$.recipient_business_name = :business_name AND $$.type = :type AND $$.status = :status"}}
+{{:assign list_where_cancelled="$$.recipient_business_name = :business_name AND $$.type = :type AND $$.cancelled = true"}}
 {{:assign list_order=8}}
 
 {{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where order=$list_order type=$QUOTATION_TYPE status=$AWAITING_STATUS STATUS_LABELS=$STATUS_LABELS}}
 {{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where order=$list_order type=$QUOTATION_TYPE status=$REJECTED_STATUS STATUS_LABELS=$STATUS_LABELS}}
 {{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where order=$list_order type=$QUOTATION_TYPE status=$VALIDATED_STATUS STATUS_LABELS=$STATUS_LABELS}}
 {{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where order=$list_order type=$QUOTATION_TYPE status=$MISC_STATUS STATUS_LABELS=$STATUS_LABELS}}
+{{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where_cancelled order=$list_order type=$QUOTATION_TYPE STATUS_LABELS=$STATUS_LABELS}}
 
 {{:admin_footer}}
 

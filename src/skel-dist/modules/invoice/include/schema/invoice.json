@@ -47,6 +47,10 @@
 			"type": "string",
 			"enum": ["draft", "awaiting", "rejected", "validated", "paid", "misc"]
 		},
+		"cancelled": {
+			"description": "Défini si la facture est annnulée",
+			"type": "bool"
+		},
 		"items": {
 			"description": "Articles",
 			"type": ["array", "null"],
@@ -143,5 +147,5 @@
 			"maxLength": 12
 		}
 	},
-	"required": [ "recipient_business_name", "recipient_address", "subject", "date", "status", "vat_exemption", "author_id", "org_contact", "last_modification_date", "module_version" ]
+	"required": [ "recipient_business_name", "recipient_address", "subject", "date", "status", "cancelled", "vat_exemption", "author_id", "org_contact", "last_modification_date", "module_version" ]
 }

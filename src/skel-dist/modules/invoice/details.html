@@ -41,17 +41,21 @@
 		{{:assign var="label" from="TYPE_LABELS.%s"|args:$type}}
 		{{if $type === $INVOICE_TYPE}}
 			{{:assign var="status_label" from="INVOICE_STATUS_LABELS.%s"|args:$status}}
+			{{:assign cancelled_label='Annulée'}}
 		{{else}}
 			{{:assign var="status_label" from="STATUS_LABELS.%s"|args:$status}}
+			{{:assign cancelled_label='Annulé'}}
 		{{/if}}
-		<h1>{{$label}} n° {{$key}} - {{$status_label}}</h1>
+		<h1>{{$label}} n° {{$key}} - {{if !$cancelled}}{{$status_label}}{{else}}{{$cancelled_label}}{{/if}}</h1>
 
 		{{* ======================= Content =========================== *}}
 
 		<fieldset>
 			<legend><h2>Informations</h2></legend>
 			
-			{{if $status === $AWAITING_STATUS}}
+			{{if $cancelled}}
+				<p class="infos">Statut en cours : <strong class="irreversible">{{$cancelled_label}}</strong>.<br />(dernier statut avant annulation : {{$status_label}})</p>
+			{{elseif $status === $AWAITING_STATUS}}
 				<p class="infos">{{$label}} <strong>{{if $type === $QUOTATION_TYPE}}signé{{else}}émise{{/if}} le {{$signing_date|date_short}} à {{$signing_place}}</strong>.</p>
 				{{if $type === $QUOTATION_TYPE}}
 					<p class="">En attente de validation par le/la client.e.</p>
@@ -89,7 +93,7 @@
 				{{/if}}
 
 			{{else}}
-				<p class="infos">Statut en cours : {{$status_label}}</p>
+				<p class="infos">Statut en cours : {{$status_label}}.</p>
 			{{/if}}
 
 			{{if $type === $INVOICE_TYPE && $parent_id}}
@@ -185,20 +189,24 @@
 		{{/if}}
 
 		{{#restrict section="config" level="admin"}}
-		<div style="background-color: black; color: limegreen; padding: 1em;">
-		<fieldset style="border-color: limegreen;">
-			<legend><h2 style="color: limegreen;">Outils développeur/euse</h2></legend>
-			<div class="infos inline">
-				<label for="f_status">Statut en cours :</label>
-				<form method="POST" action="./action.html" style="display: inline;">
-				{{if $type === $INVOICE_TYPE}}{{:assign options=$INVOICE_STATUS_LABELS}}{{else}}{{:assign options=$STATUS_LABELS}}{{/if}}
-					{{:input type="select" name="status" options=$options default=$status required=true}}
-					{{:input type="hidden" name="id" default=$id|intval}}
-					{{:button type="submit" name="status_update_button" label="Modifier"}}
-				</form>
+			<div style="background-color: black; color: limegreen; padding: 1em;">
+				<fieldset style="border-color: limegreen;">
+					<legend><h2 style="color: limegreen;">Outils développeur/euse</h2></legend>
+					<div class="infos inline">
+						<label for="f_status">Statut en cours :</label>
+						<form method="POST" action="./action.html" style="display: inline;">
+							{{if $type === $INVOICE_TYPE}}{{:assign options=$INVOICE_STATUS_LABELS}}{{else}}{{:assign options=$STATUS_LABELS}}{{/if}}
+							{{:input type="select" name="status" options=$options default=$status required=true}}
+							{{* {{:input type="checkbox" name="cancelled" label="annulé" value='1' default=$cancelled style="display: inline;"}} *}}
+							<input type="checkbox"  name="cancelled" {{if $cancelled}}checked="checked"{{/if}} value="1" id="f_cancelled_1" style="display: inline;" />
+							<label id="cancel_checkbox_label" for="f_cancelled_1">annulé</label>
+							{{:input type="hidden" name="id" default=$id|intval}}
+							{{:button type="submit" name="status_update_button" label="Modifier"}}
+						</form>
+					</div>
+				</fieldset>
 			</div>
-		</fieldset>
-		</div>
+			<style>#cancel_checkbox_label::before { margin-right: 0; }</style>
 		{{/restrict}}
 
 	{{/load}}

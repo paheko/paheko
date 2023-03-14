@@ -7,6 +7,8 @@
 		{{#load id=$_GET.id|intval module=$module.name}}
 		{{if $status !== $DRAFT_STATUS}}
 			{{:assign var='check_errors.' value='Seuls les brouillons peuvent être signés ou supprimés.'}}
+		{{elseif $cancelled}}
+			{{:assign var='check_errors.' value='Les documents annulés ne peuvent pas être signés ou supprimés.'}}
 		{{elseif $_POST.signing_submit}}
 		
 			{{if !$_POST.signing_place}}
@@ -39,6 +41,7 @@
 					date=$date
 					deadline=$deadline
 					status=$AWAITING_STATUS
+					cancelled=$cancelled
 					items=$items
 					total=$total
 					vat_exemption=$vat_exemption
@@ -67,11 +70,13 @@
 
 {{elseif $_POST.reject_submit || $_POST.validate_submit}}
 	{{if !$_GET.id}}
-		{{:assign var='errors.' value='Aucun devis sélectionné.'}}
+		{{:assign var='check_errors.' value='Aucun devis sélectionné.'}}
 	{{else}}
 		{{#load id=$_GET.id|intval module=$module.name}}
 		{{if $status !== $AWAITING_STATUS}}
 			{{:assign var='check_errors.' value='Seuls les devis en attente peuvent être validés ou refusés.'}}
+		{{elseif $cancelled}}
+			{{:assign var='check_errors.' value='Les devis annulés ne peuvent pas être validés ou refusés.'}}
 		{{/if}}
 		{{if $_POST.reject_submit}}
 			{{:assign new_status=$REJECTED_STATUS}}
@@ -103,6 +108,7 @@
 					date=$now|date:'Y-m-d'
 					deadline=null
 					status=$AWAITING_STATUS
+					cancelled=false
 					items=$items
 					total=$total
 					vat_exemption=$vat_exemption
@@ -133,6 +139,7 @@
 				date=$date
 				deadline=$deadline
 				status=$new_status
+				cancelled=$cancelled
 				items=$items
 				total=$total
 				vat_exemption=$vat_exemption
@@ -159,6 +166,8 @@
 	{{#load id=$_GET.id|intval}}{{:assign .='invoice'}}{{/load}}
 	{{if $invoice.status !== $AWAITING_STATUS}}
 		{{:assign var='check_errors.' value='Seuls les factures "en attente de validation" peuvent être payées.'}}
+	{{elseif $invoice.cancelled}}
+			{{:assign var='check_errors.' value='Les factures annulées ne peuvent pas être marquées comme payées.'}}
 	{{/if}}
 
 	{{:assign date=$_POST.date|date:'Y-m-d'}}
@@ -195,6 +204,7 @@
 			date=$invoice.date
 			deadline=null
 			status=$PAID_STATUS
+			cancelled=$invoice.cancelled
 			items=$invoice.items
 			total=$invoice.total
 			vat_exemption=$invoice.vat_exemption
@@ -215,6 +225,87 @@
 		}}
 		{{:http redirect="details.html?id=%d&ok=6&show=invoice"|args:$invoice.id}}
 	{{/if}}
+
+{{elseif $_POST.cancel_submit}}
+	{{if !$_GET.id}}
+		{{:assign var='check_errors.' value='Aucun document sélectionné.'}}
+	{{else}}
+		{{#load id=$_GET.id}}
+			{{if $status === $DRAFT_STATUS}}
+				{{:assign var='check_errors.' value='Les brouillons ne peuvent pas être annulés. Vous pouvez néanmoins les supprimer.'}}
+			{{elseif $cancelled}}
+				{{:assign var='check_errors.' value='Le document est déjà annulé.'}}
+			{{/if}}
+			{{if !$check_errors}}
+				{{if $type === $INVOICE_TYPE}}
+					{{:save id=id|intval
+						validate_schema="./include/schema/invoice.json"
+						key=$key
+						type=$type
+						recipient_business_name=$recipient_business_name
+						recipient_address=$recipient_address
+						recipient_member_id=$recipient_member_id
+						recipient_member_numero=$recipient_member_numero
+						introduction_text=$introduction_text
+						subject=$subject
+						date=$date
+						deadline=$deadline
+						status=$status
+						cancelled=true
+						items=$items
+						total=$total
+						vat_exemption=$vat_exemption
+						siret=$siret
+						org_contact=$org_contact
+						author_id=$author_id
+						parent_id=$parent_id
+						last_modification_date=$now|atom_date
+						signing_place=$signing_place
+						signing_date=$signing_date
+						validation_date=$validation_date
+						payment_date=$payment_date
+						payment_comment=$comment
+						transaction_id=$transaction_id
+						payment_detail=$payment_detail
+						extra_info=$extra_info
+						module_version=$VERSION
+					}}
+				{{else}}
+					{{:save id=$id|intval
+						validate_schema="./include/schema/quotation.json"
+						key=$key
+						type=$type
+						recipient_business_name=$recipient_business_name
+						recipient_address=$recipient_address
+						recipient_member_id=$recipient_member_id
+						recipient_member_numero=$recipient_member_numero
+						introduction_text=$introduction_text
+						subject=$subject
+						date=$date
+						deadline=$deadline
+						status=$status
+						cancelled=true
+						items=$items
+						total=$total
+						vat_exemption=$vat_exemption
+						siret=$siret
+						org_contact=$org_contact
+						author_id=$author_id
+						child_id=$child_id
+						last_modification_date=$now|atom_date
+						signing_place=$signing_place
+						signing_date=$signing_date
+						validation_date=$validation_date
+						payment_detail=$payment_detail
+						extra_info=$extra_info
+						parent_id=$parent_id
+						module_version=$VERSION
+					}}
+				{{/if}}
+				{{:http redirect="index.html?id=%d&ok=5&show=%s"|args:$id:$type}}
+			{{/if}}
+		{{/load}}
+	{{/if}}
 {{/if}}
 
 {{if $_POST.status_update_button}} {{* Only for developers *}}
@@ -224,12 +315,14 @@
 		{{:assign var='new_status_label' from='INVOICE_STATUS_LABELS.%s'|args:$_POST.status}}
 		{{if $new_status_label === null}}
 			{{:assign var='check_errors.' value='Nouveau statut invalide : %s.'|args:$_POST.status}}
-		{{else}}
+		{{/if}}
+		{{if !$check_errors}}
 			{{#load id=$_POST.id|intval module=$module.name}}
 				{{:assign var='allowed_type' from='DOCUMENT_TYPES.%s'|args:$type}}
 				{{if !$allowed_type}}
 					{{:assign var='check_errors.' value='Type invalide : %s!'|args:$type}}
 				{{else}}
+					{{:assign cancelled=$_POST.cancelled|boolval}}
 					{{:save id=$id
 						validate_schema="./include/schema/%s.json"|args:$type
 						key=$key
@@ -243,6 +336,7 @@
 						date=$date
 						deadline=$deadline
 						status=$_POST.status
+						cancelled=$cancelled
 						items=$items
 						total=$total
 						vat_exemption=$vat_exemption
