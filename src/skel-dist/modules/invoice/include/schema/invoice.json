@@ -136,6 +136,11 @@
 			"type": ["integer", "null"],
 			"maxLength": 19
 		},
+		"duplicated_from_id": {
+			"description": "ID de la facture depuis laquelle celle-ci a été dupliquée",
+			"type": ["integer", "null"],
+			"maxLength": 19
+		},
 		"last_modification_date": {
 			"description": "Date de la derniète modification",
 			"type": "string",

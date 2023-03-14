@@ -86,12 +86,7 @@
 		{{/if}}
 		{{if !$check_errors}}
 			{{if $_POST.validate_submit && $_POST.invoice}}
-
-				{{#load select="MAX(key) AS last" where="json_extract(document, '$.type') = :type" :type=$INVOICE_TYPE module=$module.name}} 
-					{{:assign last_numeric=$last|regexp_replace:'~\D~':''}}
-					{{:assign next_numeric='%d+1'|math:$last_numeric}}
-					{{:assign invoice_key="F%06d"|args:$next_numeric}}
-				{{/load}}
+				{{:include file='./generate_next_key.tpl' type=$INVOICE_TYPE assign_to='invoice_key' keep='invoice_key'}}
 
 				{{:save assign_new_id='invoice_id'
 					validate_schema="./schema/invoice.json"
@@ -154,7 +149,6 @@
 				parent_id=$_GET.id|intval
 				module_version=$VERSION
 			}}
-
 			{{:http redirect="details.html?id=%d&ok=%d"|args:$id:$redirection_code}}
 		{{/if}}
 		{{/load}}
@@ -300,8 +294,84 @@
 						module_version=$VERSION
 					}}
 				{{/if}}
-				{{:http redirect="index.html?id=%d&ok=5&show=%s"|args:$id:$type}}
+				{{:http redirect="index.html?ok=5&show=%s"|args:$type}}
 			{{/if}}
+		{{/load}}
+	{{/if}}
+{{elseif $_POST.duplicate_submit}}
+	{{if !$_GET.id}}
+		{{:assign var='check_errors.' value='Aucun document sélectionné.'}}
+	{{else}}
+		{{#load id=$_GET.id}}
+			{{:include file='./generate_next_key.tpl' assign_to='new_key' keep='new_key'}}
+			{{if $type === $INVOICE_TYPE}}
+				{{:save
+					validate_schema="./schema/invoice.json"
+					key=$new_key
+					type=$type
+					recipient_business_name=$recipient_business_name
+					recipient_address=$recipient_address
+					recipient_member_id=$recipient_member_id
+					recipient_member_numero=$recipient_member_numero
+					introduction_text=$introduction_text
+					subject=$subject
+					date=$date
+					deadline=$deadline
+					status=$DRAFT_STATUS
+					cancelled=false
+					items=$items
+					total=$total
+					vat_exemption=$vat_exemption
+					siret=$siret
+					org_contact=$org_contact
+					author_id=$author_id
+					parent_id=$parent_id
+					duplicated_from_id=$id|intval
+					last_modification_date=$now|atom_date
+					signing_place=$signing_place
+					signing_date=$signing_date
+					validation_date=null
+					payment_date=null
+					payment_comment=null
+					transaction_id=null
+					payment_detail=$payment_detail
+					extra_info=$extra_info
+					module_version=$VERSION
+				}}
+			{{else}}
+				{{:save
+					validate_schema="./schema/quotation.json"
+					key=$new_key
+					type=$type
+					recipient_business_name=$recipient_business_name
+					recipient_address=$recipient_address
+					recipient_member_id=$recipient_member_id
+					recipient_member_numero=$recipient_member_numero
+					introduction_text=$introduction_text
+					subject=$subject
+					date=$date
+					deadline=$deadline
+					status=$DRAFT_STATUS
+					cancelled=false
+					items=$items
+					total=$total
+					vat_exemption=$vat_exemption
+					siret=$siret
+					org_contact=$org_contact
+					author_id=$author_id
+					child_id=null
+					last_modification_date=$now|atom_date
+					signing_place=$signing_place
+					signing_date=$signing_date
+					validation_date=null
+					payment_detail=$payment_detail
+					extra_info=$extra_info
+					parent_id=null
+					duplicated_from_id=$id|intval
+					module_version=$VERSION
+				}}
+			{{/if}}
+			{{:http redirect="index.html?ok=4"}}
 		{{/load}}
 	{{/if}}
 {{/if}}

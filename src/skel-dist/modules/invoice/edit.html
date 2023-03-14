@@ -138,11 +138,7 @@
 		{{if $_POST.key}}
 			{{:assign key=$_POST.key}}
 		{{else}}
-			{{#load select="MAX(key) AS last" where="json_extract(document, '$.type') = :type" :type=$QUOTATION_TYPE}} 
-				{{:assign last_numeric=$last|regexp_replace:'~\D~':''}}
-				{{:assign next_numeric='%d+1'|math:$last_numeric}}
-				{{:assign key="D%06d"|args:$next_numeric}}
-			{{/load}}
+			{{:include file='./include/generate_next_key.tpl' keep='key'}}
 		{{/if}}
 		{{if $document}}
 			{{:assign id=$document.id|intval}}

@@ -5,6 +5,13 @@
 		<li>Intitulé : {{$subject}}</li>
 		<li>Date : {{$date|date_short}}</li>
 		<li>Total : {{$total|money_currency}}</li>
-		<li>Statut en cours : {{$status_label}}</li>
+		<li>
+			Statut en cours :
+			{{if !$cancelled}}
+				{{$status_label}}
+			{{else}}
+				<strong>{{$CANCELLED_LABEL}}</strong>. <br />(dernier statut avant annulation : {{$status_label}})
+			{{/if}}
+		</li>
 	</ul>
 </fieldset>

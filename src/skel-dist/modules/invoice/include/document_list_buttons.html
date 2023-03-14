@@ -48,6 +48,11 @@
 	{{/if}}
 	
 	{{#restrict section="accounting" level="write"}}
+	<li>
+		<form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_duplication"|args:$id:$type}}">
+			{{:button type="submit" title="Dupliquer" shape="list-ol" name="duplicate_button"}}
+		</form>
+	</li>
 	{{if !$cancelled}}
 		{{if $type === $INVOICE_TYPE}}
 			{{:assign button_target_label='la facture'}}

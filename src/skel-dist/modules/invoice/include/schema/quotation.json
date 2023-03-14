@@ -127,6 +127,11 @@
 			"type": ["integer", "null"],
 			"maxLength": 19
 		},
+		"duplicated_from_id": {
+			"description": "ID du devis duquel celui-ci a été dupliqué",
+			"type": ["integer", "null"],
+			"maxLength": 19
+		},
 		"last_modification_date": {
 			"description": "Date de la derniète modification",
 			"type": "string",

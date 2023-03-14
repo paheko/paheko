@@ -45,7 +45,7 @@
 {{elseif $_GET.show == 'paid'}}
 	{{:assign filter="$$.type = :type AND $$.status = :status" type_filter=$INVOICE_TYPE status_filter=$PAID_STATUS}}
 {{elseif $_GET.show == 'unpaid'}}
-	{{:assign filter="$$.type = :type AND $$.status = :status" type_filter=$INVOICE_TYPE status_filter=$AWAITING_STATUS}}
+	{{:assign filter="$$.type = :type AND $$.status = :status AND $$.cancelled = false" type_filter=$INVOICE_TYPE status_filter=$AWAITING_STATUS}}
 {{else}}
 	{{:assign filter="1"}}
 {{/if}}
@@ -58,6 +58,8 @@
 		Devis modifié avec succès.
 	{{elseif $_GET.ok === '3'}}
 		Brouillon supprimé avec succès.
+	{{elseif $_GET.ok === '4'}}
+		Document dupliqué avec succès.
 	{{elseif $_GET.ok === '5'}}
 		Document annulé avec succès.
 	{{/if}}
