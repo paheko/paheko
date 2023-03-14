@@ -8,11 +8,11 @@
 	<li>{{:linkbutton label="Aperçu" href="preview.html?id=%s"|args:$id shape="document"}}</li>
 	{{#restrict section="accounting" level="write"}}
 		<li><form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_deletion"|args:$id:$type}}">
-			{{:button type="submit" title="Supprimer le brouillon" shape="delete" class="irreversible" name="delete_button"}}
+			|{{:button type="submit" title="Supprimer le brouillon" shape="delete" class="irreversible" name="delete_button"}}
 		</form></li>
 	{{/restrict}}
 {{else}}
-	<li>{{:linkbutton label="PDF" href="preview.html?id=%s"|args:$id shape="document"}}</li>
+	<li>{{:linkbutton label="⁣" href="preview.html?id=%s"|args:$id shape="pdf"}}</li>
 
 	{{if $status === $AWAITING_STATUS}}
 		{{if !$cancelled}}
@@ -36,7 +36,7 @@
 	{{elseif $status === $VALIDATED_STATUS}}
 		{{if $type === $QUOTATION_TYPE && $child_id}}
 			{{#load id=$child_id|intval}}{{:assign .='child'}}{{/load}}
-			<li>{{:linkbutton href="?id=%d&show=invoice"|args:$child.id title="Consulter la Facture" label="F" shape="document"}}</li>
+			<li>{{:linkbutton href="./details.html?id=%d&show=invoice"|args:$child.id title="Consulter la Facture correspondante" label="F#"}}</li>
 		{{/if}}
 
 	{{elseif $status === $PAID_STATUS}}
@@ -56,7 +56,7 @@
 		{{/if}}
 		<li>
 			<form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_cancelling"|args:$id:$type}}">
-				{{:button type="submit" title="Annuler %s"|args:$button_target_label shape="delete" class="irreversible" name="cancel_button"}}
+				|{{:button type="submit" title="Annuler %s"|args:$button_target_label shape="delete" class="irreversible" name="cancel_button"}}
 			</form>
 		</li>
 	{{/if}}
