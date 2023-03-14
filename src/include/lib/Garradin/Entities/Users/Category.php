@@ -88,7 +88,7 @@ class Category extends Entity
 			'options' => [
 				Session::ACCESS_NONE => 'Pas d\'accès',
 				Session::ACCESS_READ => 'Lecture uniquement (peut lire les pages)',
-				Session::ACCESS_WRITE => 'Lecture & écriture (peut ajouter, modifier et supprimer des pages et catégories, mais pas modifier la configuration)',
+				Session::ACCESS_WRITE => 'Lecture & écriture (peut ajouter et modifier des pages et catégories, mais pas les supprimer)',
 				Session::ACCESS_ADMIN => 'Administration (peut tout faire)',
 			],
 		],

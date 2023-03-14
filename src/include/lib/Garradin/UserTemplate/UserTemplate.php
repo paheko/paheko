@@ -25,7 +25,7 @@ use const Garradin\{WWW_URL, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_T
 
 class UserTemplate extends \KD2\Brindille
 {
-	const DIST_ROOT = ROOT . '/skel-dist/';
+	const DIST_ROOT = ROOT . '/modules/';
 
 	public $_tpl_path;
 	protected $content_type = null;
@@ -93,7 +93,7 @@ class UserTemplate extends \KD2\Brindille
 	{
 		$this->_tpl_path = $path;
 
-		if ($path && $file = Files::get(File::CONTEXT_SKELETON . '/' . $path)) {
+		if ($path && $file = Files::get(File::CONTEXT_MODULES . '/' . $path)) {
 			if ($file->type != $file::TYPE_FILE) {
 				throw new \LogicException('Cannot construct a UserTemplate with a directory');
 			}
@@ -336,15 +336,9 @@ class UserTemplate extends \KD2\Brindille
 		}
 	}
 
-	public function serve(?string $cache_as_uri = null): void
+	public function fetchWithType(): array
 	{
-		if (!self::isTemplate($this->path)) {
-			throw new \InvalidArgumentException('Not a valid template file extension: ' . $this->path);
-		}
-
 		$content = $this->fetch();
-		$type = null;
-
 		$type = 'text/html';
 
 		// When the header has already been defined by the template
@@ -355,30 +349,16 @@ class UserTemplate extends \KD2\Brindille
 			}
 		}
 
-		if ($this->file && strpos($this->file->path, 'skel/web/') === 0) {
-			$is_web = true;
-		}
-		elseif ($this->path && strpos($this->path, 'skel-dist/web') !== false) {
-			$is_web = true;
-		}
-		else {
-			$is_web = false;
+		return compact('content', 'type');
+	}
+
+	public function serve(): void
+	{
+		if (!self::isTemplate($this->path)) {
+			throw new \InvalidArgumentException('Not a valid template file extension: ' . $this->path);
 		}
 
-		if (!$is_web && $type != 'text/html' || !empty($this->_variables[0]['nocache'])) {
-			$cache_as_uri = null;
-		}
-
-		if ($is_web && $type == 'text/html') {
-			$scripts = [];
-			Plugins::fireSignal('usertemplate.appendscript', ['template' => $this, 'content' => $content], $scripts);
-
-			if (count($scripts)) {
-				$scripts = array_map(fn($a) => sprintf('<script type="text/javascript" defer src="%s"></script>', $a), $scripts);
-				$scripts = implode("\n", $scripts);
-				$content = str_ireplace('</body', $scripts . '</body', $content);
-			}
-		}
+		extract($this->fetchWithType());
 
 		header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
 
@@ -387,10 +367,6 @@ class UserTemplate extends \KD2\Brindille
 		}
 		else {
 			echo $content;
-		}
-
-		if (null !== $cache_as_uri) {
-			Web_Cache::store($cache_as_uri, $content);
 		}
 	}
 

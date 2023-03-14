@@ -80,7 +80,7 @@ class Functions
 
 	static public function save(array $params, Brindille $tpl, int $line): void
 	{
-		$name = explode('/', Utils::dirname($tpl->_tpl_path))[1] ?? null;
+		$name = strtok($tpl->_tpl_path, '/');
 
 		if (!$name) {
 			throw new Brindille_Exception('Module name could not be found');
@@ -174,7 +174,7 @@ class Functions
 
 	static public function delete(array $params, Brindille $tpl, int $line): void
 	{
-		$name = explode('/', Utils::dirname($tpl->_tpl_path))[1] ?? null;
+		$name = strtok($tpl->_tpl_path, '/');
 
 		if (!$name) {
 			throw new Brindille_Exception('Module name could not be found');
@@ -347,13 +347,13 @@ class Functions
 	{
 		$path = self::getFilePath($params, 'file', $ut, $line);
 
-		$file = Files::get(File::CONTEXT_SKELETON . '/' . $path);
+		$file = Files::get(File::CONTEXT_MODULES . '/' . $path);
 
 		if ($file) {
 			$content = $file->fetch();
 		}
 		else {
-			$content = file_get_contents(ROOT . '/skel-dist/' . $path);
+			$content = file_get_contents(ROOT . '/modules/' . $path);
 		}
 
 		if (!empty($params['base64'])) {

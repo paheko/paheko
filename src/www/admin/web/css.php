@@ -7,9 +7,8 @@
 
 namespace Garradin;
 
-use Garradin\Web\Skeleton;
+use Garradin\Web\Router;
 
 require_once __DIR__ . '/../_inc.php';
 
-$s = new Skeleton('web/content.css');
-$s->serve('/content.css');
+Router::route('/content.css');

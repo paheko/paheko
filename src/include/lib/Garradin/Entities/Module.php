@@ -4,9 +4,11 @@ namespace Garradin\Entities;
 
 use Garradin\Entity;
 use Garradin\DB;
+use Garradin\Plugins;
 use Garradin\Files\Files;
 use Garradin\UserTemplate\UserTemplate;
 use Garradin\Users\Session;
+use Garradin\Web\Cache;
 
 use Garradin\Entities\Files\File;
 
@@ -14,8 +16,8 @@ use const Garradin\{ROOT, WWW_URL};
 
 class Module extends Entity
 {
-	const ROOT = File::CONTEXT_SKELETON . '/modules';
-	const DIST_ROOT = ROOT . '/skel-dist/modules';
+	const ROOT = File::CONTEXT_MODULES;
+	const DIST_ROOT = ROOT . '/modules';
 	const META_FILE = 'module.ini';
 	const ICON_FILE = 'icon.svg';
 	const README_FILE = 'README.md';
@@ -52,6 +54,7 @@ class Module extends Entity
 	protected bool $menu;
 	protected ?\stdClass $config;
 	protected bool $enabled;
+	protected bool $web;
 
 	public function selfCheck(): void
 	{
@@ -90,6 +93,7 @@ class Module extends Entity
 		$this->set('description', $ini->description ?? null);
 		$this->set('author', $ini->author ?? null);
 		$this->set('author_url', $ini->author_url ?? null);
+		$this->set('web', !empty($ini->web));
 		$this->set('home_button', !empty($ini->home_button));
 		$this->set('menu', !empty($ini->menu));
 		$this->set('restrict_section', $ini->restrict_section ?? null);
@@ -143,15 +147,7 @@ class Module extends Entity
 
 	public function hasFile(string $file): bool
 	{
-		if (Files::exists($this->path($file))) {
-			return true;
-		}
-
-		if (file_exists($this->distPath($file))) {
-			return true;
-		}
-
-		return false;
+		return $this->hasLocalFile($file) || $this->hasDistFile($file);
 	}
 
 	public function hasDist(): bool
@@ -162,6 +158,16 @@ class Module extends Entity
 	public function hasLocal(): bool
 	{
 		return Files::exists($this->path());
+	}
+
+	public function hasLocalFile(string $path): bool
+	{
+		return Files::exists($this->path($path));
+	}
+
+	public function hasDistFile(string $path): bool
+	{
+		return file_exists($this->distPath($path));
 	}
 
 	public function hasConfig(): bool
@@ -201,9 +207,14 @@ class Module extends Entity
 		return sprintf('%sm/%s/%s%s', WWW_URL, $this->name, $file, $params);
 	}
 
-	public function validateFileName(string $file)
+	public function isValidPath(string $path): bool
 	{
-		if (!preg_match('!^(?:snippets/)?[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $file)) {
+		return (bool) preg_match('!^(?:[\w\d_-]+/)*[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $path);
+	}
+
+	public function validatePath(string $path): void
+	{
+		if (!$this->isValidPath($path)) {
 			throw new \InvalidArgumentException('Invalid skeleton name');
 		}
 	}
@@ -214,9 +225,9 @@ class Module extends Entity
 			Session::getInstance()->requireAccess(Session::SECTION_CONFIG, Session::ACCESS_ADMIN);
 		}
 
-		$this->validateFileName($file);
+		$this->validatePath($file);
 
-		$ut = new UserTemplate('modules/' . $this->name . '/' . $file);
+		$ut = new UserTemplate($this->name . '/' . $file);
 		$ut->assign('module', array_merge($this->asArray(false), ['url' => $this->url()]));
 
 		return $ut;
@@ -227,5 +238,132 @@ class Module extends Entity
 		$ut = $this->template($file);
 		$ut->assignArray($params);
 		return $ut->fetch();
+	}
+
+	public function serve(string $path, bool $has_local_file, array $params = []): void
+	{
+		if (UserTemplate::isTemplate($path)) {
+			if ($this->web) {
+				$this->serveWeb($path, $params);
+				return;
+			}
+			else {
+				$ut = $this->template($path);
+				$ut->serve($params);
+			}
+		}
+		// Serve a static file from a user module
+		elseif ($has_local_file) {
+			$file->serve();
+		}
+		// Serve a static file (from "modules" in original source code)
+		else {
+			$type = $this->getFileTypeFromExtension($path);
+			$real_path = $this->distPath($path);
+
+			// Create symlink to static file
+			Cache::link($path, $real_path);
+
+			http_response_code(200);
+			header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
+			readfile($real_path);
+			flush();
+		}
+	}
+
+	public function serveWeb(string $path, array $params): void
+	{
+		$uri = $params['uri'] ?? null;
+
+		// Fire signal before display of a web page
+		$plugin_params = ['path' => $path, 'uri' => $uri, 'module' => $this];
+
+		if (Plugins::fireSignal('web.request.before', $plugin_params)) {
+			return;
+		}
+
+		$type = null;
+
+		$ut = $this->template($path);
+		$ut->assignArray($params);
+		extract($ut->fetchWithType());
+
+		if ($uri && preg_match('!html|xml|text!', $type) && $ut->get('nocache')) {
+			$cache = true;
+		}
+		else {
+			$cache = false;
+		}
+
+		$plugin_params['type'] = $type;
+		$plugin_params['cache'] = $cache;
+
+		// Call plugins, allowing them to modify the content
+		if (Plugins::fireSignal('web.request', $plugin_params, $content)) {
+			return;
+		}
+
+		header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
+
+		if ($type == 'application/pdf') {
+			Utils::streamPDF($content);
+		}
+		else {
+			echo $content;
+		}
+
+		if ($cache) {
+			Web_Cache::store($uri, $content);
+		}
+
+		Plugins::fireSignal('web.request.after', $plugin_params, $content);
+	}
+
+	public function getFileTypeFromExtension(string $path): ?string
+	{
+		$dot = strrpos($path, '.');
+
+		// Templates with no extension are returned as HTML by default
+		// unless {{:http type=...}} is used
+		if ($dot === false) {
+			return 'text/html';
+		}
+
+		// Templates with no extension are returned as HTML by default
+		// unless {{:http type=...}} is used
+		if ($dot === false) {
+			return 'text/html';
+		}
+
+		$ext = substr($path, $dot+1);
+
+		// Common types
+		switch ($ext) {
+			case 'txt':
+				return 'text/plain';
+			case 'html':
+			case 'htm':
+			case 'tpl':
+			case 'btpl':
+			case 'skel':
+				return 'text/html';
+			case 'xml':
+				return 'text/xml';
+			case 'css':
+				return 'text/css';
+			case 'js':
+				return 'text/javascript';
+			case 'png':
+			case 'gif':
+			case 'webp':
+				return 'image/' . $ext;
+			case 'svg':
+				return 'image/svg+xml';
+			case 'jpeg':
+			case 'jpg':
+				return 'image/jpeg';
+			default:
+				return null;
+		}
 	}
 }

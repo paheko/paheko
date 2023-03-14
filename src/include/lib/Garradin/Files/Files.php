@@ -44,9 +44,8 @@ class Files
 			'Fichiers des membres' => File::CONTEXT_USER . '//',
 			'Fichiers des écritures comptables' => File::CONTEXT_TRANSACTION . '//',
 			'Fichiers du site web (contenu des pages, images, etc.)' => File::CONTEXT_WEB . '//',
-			'Squelettes du site web' => File::CONTEXT_SKELETON . '/web/',
 			'Fichiers de la configuration (logo, etc.)' => File::CONTEXT_CONFIG,
-			'Squelettes des formulaires' => File::CONTEXT_SKELETON,
+			'Code des modules' => File::CONTEXT_MODULES,
 		];
 
 		$out = [];
@@ -64,7 +63,6 @@ class Files
 	static public function buildUserPermissions(Session $s): array
 	{
 		$is_admin = $s->canAccess($s::SECTION_CONFIG, $s::ACCESS_ADMIN);
-		$is_web_admin = $is_admin || $s->canAccess($s::SECTION_WEB, $s::ACCESS_ADMIN);
 
 		$p = [];
 
@@ -113,19 +111,8 @@ class Files
 			'share' => false,
 		];
 
-		// Web skeletons
-		$p[File::CONTEXT_SKELETON . '/web/'] = [
-			'mkdir' => $is_web_admin,
-			'move' => $is_web_admin,
-			'create' => $is_web_admin,
-			'read' => $s->isLogged(),
-			'write' => $is_web_admin,
-			'delete' => $is_web_admin,
-			'share' => false,
-		];
-
-		// Other skeletons
-		$p[File::CONTEXT_SKELETON] = [
+		// Modules source code
+		$p[File::CONTEXT_MODULES] = [
 			'mkdir' => $is_admin,
 			'move' => $is_admin,
 			'create' => $is_admin,
@@ -528,6 +515,23 @@ class Files
 		}
 
 		return $context;
+	}
+
+	static public function isContextRoutable(string $path): bool
+	{
+		$context = self::getContext($path);
+
+		if (!$context) {
+			return false;
+		}
+
+		// Modules and trash files can never be served directly
+		if ($context == File::CONTEXT_MODULES
+			|| $context == File::CONTEXT_TRASH) {
+			return false;
+		}
+
+		return true;
 	}
 
 	static public function getContextRef(string $path): ?string

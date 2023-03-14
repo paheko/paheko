@@ -86,8 +86,13 @@ class File extends Entity
 	const CONTEXT_TRANSACTION = 'transaction';
 	const CONTEXT_CONFIG = 'config';
 	const CONTEXT_WEB = 'web';
-	const CONTEXT_SKELETON = 'skel';
+	const CONTEXT_MODULES = 'modules';
 	const CONTEXT_TRASH = 'trash';
+
+	/**
+	 * @deprecated
+	 */
+	const CONTEXT_SKELETON = 'skel';
 
 	const CONTEXTS_NAMES = [
 		self::CONTEXT_DOCUMENTS => 'Documents',
@@ -95,8 +100,9 @@ class File extends Entity
 		self::CONTEXT_TRANSACTION => 'Écriture comptable',
 		self::CONTEXT_CONFIG => 'Configuration',
 		self::CONTEXT_WEB => 'Site web',
-		self::CONTEXT_SKELETON => 'Squelettes',
+		self::CONTEXT_MODULES => 'Modules',
 		self::CONTEXT_TRASH => 'Corbeille',
+		self::CONTEXT_SKELETON => 'Squelettes',
 	];
 
 	const IMAGE_TYPES = [
@@ -580,7 +586,7 @@ class File extends Entity
 	 */
 	public function url(bool $download = false): string
 	{
-		$base = in_array($this->context(), [self::CONTEXT_WEB, self::CONTEXT_SKELETON, self::CONTEXT_CONFIG]) ? WWW_URL : BASE_URL;
+		$base = in_array($this->context(), [self::CONTEXT_WEB, self::CONTEXT_MODULES, self::CONTEXT_CONFIG]) ? WWW_URL : BASE_URL;
 		$url = $base . $this->uri();
 
 		if ($download) {
@@ -996,7 +1002,7 @@ class File extends Entity
 	{
 		$context = $this->context();
 
-		if ($context == self::CONTEXT_SKELETON || $context == self::CONTEXT_WEB) {
+		if ($context == self::CONTEXT_MODULES || $context == self::CONTEXT_WEB) {
 			return true;
 		}
 
@@ -1077,7 +1083,7 @@ class File extends Entity
 
 		$session ??= Session::getInstance();
 
-		if (0 === strpos($path, self::CONTEXT_SKELETON . '/web') && $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)) {
+		if (0 === strpos($path, self::CONTEXT_MODULES . '/web') && $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)) {
 			return;
 		}
 

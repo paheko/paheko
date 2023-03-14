@@ -6,7 +6,6 @@ use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 use Garradin\Files\WebDAV\Server as WebDAV_Server;
 
-use Garradin\Web\Skeleton;
 use Garradin\Web\Web;
 
 use Garradin\API;
@@ -14,6 +13,7 @@ use Garradin\Config;
 use Garradin\Plugins;
 use Garradin\UserException;
 use Garradin\Utils;
+use Garradin\UserTemplate\Modules;
 
 use Garradin\Users\Session;
 
@@ -31,9 +31,9 @@ class Router
 		'avatars',
 	];
 
-	static public function route(): void
+	static public function route(string $uri = null): void
 	{
-		$uri = !empty($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
+		$uri ??= !empty($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
 
 		$uri = parse_url($uri, \PHP_URL_PATH);
 
@@ -99,7 +99,7 @@ class Router
 			header('Location: /dav/documents/');
 			return;
 		}
-		elseif ((Files::getContext($uri) && ($file = Files::getFromURI($uri)))
+		elseif ((Files::isContextRoutable($uri) && ($file = Files::getFromURI($uri)))
 				|| ($file = Web::getAttachmentFromURI($uri))) {
 			$size = null;
 
@@ -131,7 +131,7 @@ class Router
 			return;
 		}
 
-		Skeleton::route($uri);
+		Modules::route($uri);
 	}
 
 	static public function log(string $message, ...$params)
