@@ -68,7 +68,11 @@
 		</ol></li>
 		<li><a href="#fonctions-relatives-aux-modules">Fonctions relatives aux Modules</a>
 		<ol>
-			<li><a href="#save">save</a></li>
+			<li><a href="#save">save</a>
+			<ol>
+				<li><a href="#validation-avec-un-schema-json">Validation avec un schéma JSON</a>
+			</ol></li>
+			<li><a href="#delete">delete</a></li>
 			<li><a href="#admin_header">admin_header</a></li>
 			<li><a href="#admin_footer">admin_footer</a></li>
 			<li><a href="#input">input</a>
@@ -433,7 +437,7 @@
 <h1 id="fonctions-relatives-aux-modules">Fonctions relatives aux Modules</h1>
 <h2 id="save">save</h2>
 <p>Enregistre des données, sous la forme d'un document, dans la base de données, pour le module courant.</p>
-<p>Note : un appel de cette fonction depuis le code du site web provoquera une erreur, il ne peut être appelé que depuis un module.</p>
+<p>Note : un appel à cette fonction depuis le code du site web provoquera une erreur, elle ne peut être appelée que depuis un module.</p>
 <table>
 <thead>
 <tr>
@@ -459,6 +463,11 @@
 <td style="text-align: left;">Fichier de schéma JSON à utiliser pour valider les données avant enregistrement</td>
 </tr>
 <tr>
+<td style="text-align: left;"><code>validate_only</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Liste des paramètres à valider (par exemple pour ne faire qu'une mise à jour partielle), séparés par des virgules.</td>
+</tr>
+<tr>
 <td style="text-align: left;"><code>assign_new_id</code></td>
 <td style="text-align: left;">optionnel</td>
 <td style="text-align: left;">Si renseigné, le nouveau numéro unique du document sera indiqué dans cette variable.</td>
@@ -480,6 +489,37 @@
 <p>Exemple de récupération du nouvel ID :</p>
 <pre><code>{{:save titre="Coucou !" assign_new_id="id"}}
 Le document n°{{$id}} a bien été enregistré.</code></pre>
+<h3 id="validation-avec-un-schema-json">Validation avec un schéma JSON</h3>
+<pre><code>{{:save titre="Coucou" texte="Très long" validate_schema="./document.schema.json"}}</code></pre>
+<p>Pour ne valider qu'une partie du schéma, par exemple si on veut faire une mise à jour du document :</p>
+<pre><code>{{:save key="test" titre="Coucou" validate_schema="./document.schema.json" validate_only="titre"}}</code></pre>
+<h2 id="delete">delete</h2>
+<p>Supprime un document lié au module courant.</p>
+<p>Note : un appel à cette fonction depuis le code du site web provoquera une erreur, elle ne peut être appelée que depuis un module.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Obligatoire ou optionnel ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>key</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Clé unique du document</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>id</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Numéro unique du document</td>
+</tr>
+</tbody>
+</table>
+<p>Si ni <code>key</code> ni <code>id</code> ne sont indiqués, une erreur sera affichée.</p>
+<p>Exemple :</p>
+<pre><code>{{:delete key="facture_43"}}</code></pre>
 <h2 id="admin_header">admin_header</h2>
 <p>Affiche l'entête de l'administration de l'association.</p>
 <table>
