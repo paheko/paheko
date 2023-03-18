@@ -1,16 +1,5 @@
-.textEditor {
-    border-radius: .5em;
-    background: var(--gLightBorderColor);
-    padding: 1%;
-    overflow: hidden;
-    position: relative;
-}
-
 .textEditor textarea {
-    border: none;
     margin: 0;
-    background: var(--gLightBackgroundColor);
-    border-radius: .5em;
     height: 96%;
     width: 98%;
 }
@@ -18,17 +7,6 @@
 nav.te {
     margin-bottom: .5em;
     height: 30px;
-}
-
-nav.te button {
-    text-decoration: none;
-    cursor: pointer;
-    background: var(--gLightBackgroundColor) no-repeat center center;
-    display: inline-block;
-    vertical-align: bottom;
-    transition: all .2s;
-    border: 1px solid var(--gBorderColor);
-    box-shadow: 2px 2px 5px var(--gBorderColor);
 }
 
 nav.te .bold, nav.te .italic, nav.te .title, nav.te .link {
@@ -39,43 +17,12 @@ nav.te .bold { font-weight: bold; }
 nav.te .italic { font-style: italic; }
 nav.te .link { text-decoration: underline; color: var(--gLinkColor); }
 
-nav.te .fullscreen {
-    text-indent: -70em;
-    width: 32px;
-    overflow: hidden;
-}
-
-nav.te .icnl {
-    font-size: 18px;
-}
-
-nav.te .ext.icnl {
-    width: 24px;
-    line-height: 5px;
-    overflow: hidden;
-}
-
 nav.te .file {
     margin-left: 2em;
 }
 
-nav.te .save {
-    float: right;
-    font-weight: bold;
-    margin-right: 2em;
-}
-
-nav.te .fullscreen {
-    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAADFBMVEUAAABMTFFOTlBOTlCQ1uMHAAAAA3RSTlMAOcKBmOr4AAAAQUlEQVQI12P4/4D7P8N/B0Yo8XsC23+GZw+4pzM4TmBzYsAGgBKODNcecM9m+D+B7T3DPwfG/Qz/G5iABlzg+g8ANzMax/3kkQoAAAAASUVORK5CYII=");
-    float: right;
-}
-
 nav.te .preview {
     margin-left: 2em;
-}
-
-.textEditor.fullscreen nav.te .fullscreen {
-    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAADFBMVEUAAABNTVFOTlBOTlBLB/faAAAAA3RSTlMAOsPdsomtAAAAQElEQVQI12NIEWCRZNi5gTePIe8D/08G6Q/8Txj0P/B/YVj/gf8fAzawHyQhD1ICJvI/8O9k2FnAl8eQosAiCQCgixb13aKGIwAAAABJRU5ErkJggg==");
 }
 
 .textEditor nav button.close {
@@ -87,51 +34,6 @@ nav.te .preview {
     display: none;
     float: left;
 }
-
-.textEditor.fullscreen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 98%;
-    height: 98%;
-    padding: 1%;
-    border-radius: 0;
-    z-index: 100000;
-}
-
-.textEditor.fullscreen textarea {
-    height: 90%;
-}
-
-.textEditor.iframe textarea {
-    display: none;
-}
-
-.textEditor.iframe nav button {
-    display: none;
-}
-
-.textEditor.iframe nav button.close, .textEditor.iframe nav button.reload {
-    display: inline-block;
-}
-
-.textEditor iframe {
-    border: none;
-    background: rgba(var(--gBgColor), 0.5);
-    border-radius: .5em;
-    width: 100%;
-}
-
-.textEditor iframe.hidden {
-    visibility: hidden;
-    width: 0px;
-    height: 0px;
-    position: absolute;
-    top: -1000px;
-}
-
 
 form .fileUpload .uploadHelper_progress {
     position: absolute;

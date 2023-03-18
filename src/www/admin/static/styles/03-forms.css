@@ -86,8 +86,8 @@ textarea, select, .input-list, .file-selector {
     transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
 
-textarea.full-width {
-    width: calc(100% - 1rem);
+textarea.full-width, input.full-width {
+    width: calc(100% - 1.2rem);
 }
 
 input:not(:placeholder-shown):focus:invalid, textarea:not(:placeholder-shown):focus:invalid {

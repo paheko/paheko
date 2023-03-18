@@ -50,7 +50,8 @@ $form->runIf('save', function () use ($page, $editing_started, &$show_diff) {
 	Utils::redirect('!web/page.php?p=' . $page->path);
 }, $csrf_key);
 
-$parent = $page->parent ? [$page->parent => Web::get($page->parent)->title] : ['' => 'Racine du site'];
+$parent_title = $page->parent ? Web::get($page->parent)->title : 'Racine du site';
+$parent = [$page->parent => $parent_title];
 $encrypted = f('encrypted') || $page->format == Render::FORMAT_ENCRYPTED;
 
 $old_content = f('content');
@@ -58,9 +59,9 @@ $new_content = $page->content;
 
 $formats = $page::FORMATS_LIST;
 
-$tpl->assign(compact('page', 'parent', 'editing_started', 'encrypted', 'csrf_key', 'old_content', 'new_content', 'show_diff', 'formats'));
+$tpl->assign(compact('page', 'parent', 'parent_title', 'editing_started', 'encrypted', 'csrf_key', 'old_content', 'new_content', 'show_diff', 'formats'));
 
-$tpl->assign('custom_js', ['wiki_editor.js', 'wiki-encryption.js']);
-$tpl->assign('custom_css', ['wiki.css']);
+$tpl->assign('custom_js', ['wiki_editor.js', 'block_editor.js', 'wiki-encryption.js']);
+$tpl->assign('custom_css', ['wiki.css', '!web/css.php']);
 
 $tpl->display('web/edit.tpl');

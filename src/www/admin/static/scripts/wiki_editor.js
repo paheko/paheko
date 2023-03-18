@@ -67,9 +67,9 @@
 			toggleFullscreen();
 		}
 
-		var openPreview = function ()
+		var openPreview = function (e)
 		{
-			openIFrame('');
+			g.openFrameDialog('');
 			var form = document.createElement('form');
 			form.appendChild(t.textarea.cloneNode(true));
 			form.firstChild.value = t.textarea.value;
@@ -78,7 +78,7 @@
 			f.name = 'format';
 			f.value = config.format;
 			form.appendChild(f);
-			form.target = 'editorFrame';
+			form.target = 'dialog';
 			form.action = config.preview_url;
 			form.style.display = 'none';
 			form.method = 'post';
@@ -92,7 +92,7 @@
 			let url = config.format == 'markdown' ? 'markdown.html' : 'skriv.html';
 			url = g.admin_url + 'static/doc/' + url;
 
-			openIFrame(url);
+			g.openFrameDialog(url);
 		};
 
 		var openFileInsert = function ()
@@ -127,59 +127,6 @@
 
 			g.closeDialog();
 		};
-
-		var EscapeEvent = function (e) {
-			if (e.key == 'Escape') {
-				closeIFrame();
-				e.preventDefault();
-				return false;
-			}
-		};
-
-		var openIFrame = function(url)
-		{
-			if (t.iframe && t.iframe.src == t.base_url + url)
-			{
-				t.iframe.className = '';
-				t.parent.className += ' iframe';
-				return true;
-			}
-			else if (t.iframe)
-			{
-				t.parent.removeChild(t.iframe);
-				t.iframe = null;
-			}
-
-			var w = t.textarea.offsetWidth,
-				h = t.textarea.offsetHeight;
-
-			var iframe = document.createElement('iframe');
-			iframe.width = w;
-			iframe.height = h;
-			iframe.src = url;
-			iframe.name = 'editorFrame';
-			iframe.frameborder = '0';
-			iframe.scrolling = 'yes';
-
-			t.parent.appendChild(iframe);
-			t.parent.className += ' iframe';
-			t.iframe = iframe;
-
-			document.addEventListener('keydown', EscapeEvent);
-		};
-
-		var closeIFrame = function ()
-		{
-			document.removeEventListener('keydown', EscapeEvent);
-
-			if (!t.iframe) {
-				return true;
-			}
-			t.parent.className = t.parent.className.replace(/ iframe$/, '');
-			t.iframe.className = 'hidden';
-			t.textarea.focus();
-		};
-
 
 		var appendButton = function (name, title, action, altTitle)
 		{
@@ -278,18 +225,12 @@
 				t.shortcuts.push({ctrl: true, shift: true, key: 'i', callback: openFileInsert});
 			}
 
-			if (!config.fullscreen) {
-				appendButton('ext fullscreen', 'Plein écran', toggleFullscreen, 'Plein écran');
-			}
-
 			if (config.savebtn == 1) {
 				appendButton('ext save', 'Enregistrer', save, 'Enregistrer');
 			}
 			else if (config.savebtn == 2) {
 				appendButton('ext save', '⇑', save, 'Enregistrer sans fermer');
 			}
-
-			appendButton('ext close', 'Fermer', closeIFrame);
 
 			t.parent.insertBefore(toolbar, t.parent.firstChild);
 		}

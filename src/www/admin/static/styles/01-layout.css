@@ -187,8 +187,16 @@ ul.gallery figcaption {
     overflow: hidden;
     text-align: center;
 }
+
 body.public, body.raw {
     background: none;
+}
+
+body.preview {
+    color: rgb(var(--gTextColor));
+    font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
+    background: rgb(var(--gBgColor));
+    padding: 1em;
 }
 
 body.raw main {
