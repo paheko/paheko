@@ -803,8 +803,8 @@ class Template extends Smartyer
 		elseif ($type == 'country')
 		{
 			$type = 'select';
-			$options = Utils::getCountryList();
-			$params['default'] = Config::getInstance()->get('pays');
+			$options = [null => '— Non renseigné —'] + Utils::getCountryList();
+			$params['default'] ??= Config::getInstance()->get('pays');
 		}
 		elseif ($type == 'date')
 		{
@@ -851,7 +851,7 @@ class Template extends Smartyer
 
 				$field .= '<option value="' . htmlspecialchars($k, ENT_QUOTES, 'UTF-8') . '"';
 
-				if ($value == $k || empty($value) && !empty($params['default']))
+				if ($value === $k || (empty($value) && !empty($params['default']) && $params['default'] === $value))
 					$field .= ' selected="selected"';
 
 				$field .= '>' . htmlspecialchars($v, ENT_QUOTES, 'UTF-8') . '</option>';
