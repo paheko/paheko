@@ -1,7 +1,7 @@
 (function () {
 	var aes_loaded = false;
 	var iteration = 0;
-	var self_path_match = /static\/scripts\/wiki-encryption\.js/;
+	var self_path_match = /static\/scripts\/web_encryption\.js/;
 	var www_url;
 	var encryptPassword = null;
 
@@ -69,7 +69,7 @@
 			}
 			else
 			{
-				// Local wiki link
+				// Local page link
 				url = '?' + url;
 			}
 
@@ -107,30 +107,12 @@
 		};
 
 		load_aes(function () {
-			askPassword();
+			askPassword(true);
 			document.getElementById('f_content').disabled = false;
 
 			if (do_decrypt) {
 				decrypt();
 			}
-
-			var hidden = true;
-			var d = document.getElementById('encryptPasswordDisplay');
-			d.innerHTML = '&bull;'.repeat(encryptPassword.length);
-			d.title = 'Cliquer pour voir le mot de passe';
-			d.onclick = function () {
-				if (hidden)
-				{
-					this.innerHTML = encryptPassword;
-					this.title = 'Cliquer pour cacher le mot de passe.';
-				}
-				else
-				{
-					this.innerHTML = '&bull;'.repeat(encryptPassword.length);
-					this.title = 'Cliquer pour voir le mot de passe';
-				}
-				hidden = !hidden;
-			};
 
 			form.onsubmit = function ()
 			{
@@ -152,10 +134,12 @@
 		});
 	};
 
-	let askPassword = () => {
+	let askPassword = (first) => {
 		load_aes();
 
-		encryptPassword = window.prompt('Mot de passe ?');
+		encryptPassword = window.prompt(first ? "Le mot de passe n'est ni transmis ni enregistré.\n"
+			+ "Il n'est pas possible de retrouver le contenu si vous perdez le mot de passe.\n"
+			+ "Merci d'indiquer ici le mot de passe :" : "Mot de passe :");
 
 		if (!encryptPassword)
 		{
@@ -202,17 +186,17 @@
 		}
 
 		if (edit) {
-			var content = document.getElementById('f_content');
+			var elm = document.getElementById('f_content');
 		}
 		else {
-		 	var content = document.getElementById('wikiEncryptedContent');
+		 	var elm = document.getElementById('web_encrypted_content');
 		}
 
-		var wikiContent = content.value || content.innerText;
-		wikiContent = wikiContent.replace(/\s+/g, '');
+		var content = elm.value || elm.innerText;
+		content = content.replace(/\s+/g, '');
 
 		try {
-			wikiContent = GibberishAES.dec(wikiContent, encryptPassword);
+			content = GibberishAES.dec(content, encryptPassword);
 		}
 		catch (e)
 		{
@@ -231,12 +215,12 @@
 		if (!edit)
 		{
 			content.style.display = 'block';
-			document.getElementById('wikiEncryptedMessage').style.display = 'none';
-			content.innerHTML = formatContent(wikiContent);
+			document.getElementById('web_encrypted_message').style.display = 'none';
+			content.innerHTML = formatContent(content);
 		}
 		else
 		{
-			content.value = wikiContent;
+			content.value = content;
 		}
 	};
 

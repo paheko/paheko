@@ -1,5 +1,5 @@
 (function () {
-	g.style('scripts/wiki_editor.css');
+	g.style('scripts/web_editor.css');
 
 	function showSaved() {
 		let c = document.createElement('p');
@@ -92,14 +92,14 @@
 			let url = config.format == 'markdown' ? 'markdown.html' : 'skriv.html';
 			url = g.admin_url + 'static/doc/' + url;
 
-			openIFrame(url);
+			g.openFrameDialog(url);
 		};
 
 		var openFileInsert = function ()
 		{
 			let args = new URLSearchParams(window.location.search);
-			var wiki_id = args.get('p');
-			g.openFrameDialog(g.admin_url + 'web/_attach.php?_dialog&p=' + wiki_id);
+			var uri = args.get('p');
+			g.openFrameDialog(g.admin_url + 'web/_attach.php?_dialog&p=' + uri);
 		};
 
 		window.te_insertFile = function (file)
@@ -289,14 +289,13 @@
 				appendButton('ext save', '⇑', save, 'Enregistrer sans fermer');
 			}
 
-			appendButton('ext close', 'Fermer', closeIFrame);
+			appendButton('ext close', 'Retour à l\'édition', closeIFrame);
 
 			t.parent.insertBefore(toolbar, t.parent.firstChild);
 		}
 
 		let toggleFormat = (format) => {
 			config.format = format;
-			g.toggle('.wikiEncrypt', format == 'skriv/encrypted');
 		};
 
 		if (config.format.substr(0, 1) == '#') {

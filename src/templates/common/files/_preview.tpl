@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title=$file.name custom_css=['/content.css'] transparent=true}
+{include file="admin/_head.tpl" title=$file.name custom_css=['!web/css.php'] layout="raw preview"}
 
 {$content|raw}
 

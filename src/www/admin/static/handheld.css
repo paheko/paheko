@@ -184,11 +184,6 @@ nav.tabs .sub {
 	float: none;
 }
 
-fieldset.wikiMain, fieldset.wikiRights, fieldset.wikiEncrypt {
-	float: none;
-	width: auto;
-}
-
 dl.describe {
 	margin: 0 .5em;
 }

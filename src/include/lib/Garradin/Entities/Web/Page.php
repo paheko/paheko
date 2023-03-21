@@ -317,6 +317,8 @@ class Page extends Entity
 			$this->set('format', Render::FORMAT_MARKDOWN);
 		}
 
+		$this->set('status', empty($source['draft']) ? self::STATUS_ONLINE : self::STATUS_DRAFT);
+
 		return parent::importForm($source);
 	}
 

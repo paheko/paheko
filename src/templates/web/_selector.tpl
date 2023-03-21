@@ -1,5 +1,7 @@
 {include file="admin/_head.tpl" title="Choisir la page parent" current="web"}
 
+<h2 class="ruler">Sélectionner la catégorie</h2>
+
 <table class="tree-selector list">
 	<tbody>
 		<tr{if !$parent} class="focused"{/if}>

@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Édition de fichier" custom_js=['wiki_editor.js']}
+{include file="admin/_head.tpl" title="Édition de fichier" custom_js=['web_editor.js']}
 
 <form method="post" action="{$self_url}">
 	<p class="textEditor">
