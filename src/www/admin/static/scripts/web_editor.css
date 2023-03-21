@@ -1,18 +1,18 @@
 .textEditor {
     background: var(--gLightBackgroundColor);
-    overflow: hidden;
     position: relative;
+    height: 100%;
 }
 
 .textEditor textarea {
     margin: 0;
-    height: 96%;
+    height: calc(100% - 3.5em);
     width: 98%;
 }
 
 nav.te {
     margin-bottom: .5em;
-    height: 30px;
+    height: 2em;
 }
 
 nav.te .bold, nav.te .italic, nav.te .title, nav.te .link {
@@ -29,25 +29,26 @@ nav.te .fullscreen {
     overflow: hidden;
 }
 
-nav.te .file {
+nav.te .image {
     margin-left: 2em;
 }
 
-nav.te .save {
+nav.te .save, nav.te .fullscreen, nav.te .help, nav.te .preview {
     float: right;
-    font-weight: bold;
-    margin-right: 2em;
 }
 
 nav.te .fullscreen {
     background-repeat: no-repeat;
     background-position: center center;
     background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAADFBMVEUAAABMTFFOTlBOTlCQ1uMHAAAAA3RSTlMAOcKBmOr4AAAAQUlEQVQI12P4/4D7P8N/B0Yo8XsC23+GZw+4pzM4TmBzYsAGgBKODNcecM9m+D+B7T3DPwfG/Qz/G5iABlzg+g8ANzMax/3kkQoAAAAASUVORK5CYII=");
-    float: right;
 }
 
-nav.te .preview {
+nav.te .help, nav.te .save {
     margin-left: 2em;
+}
+
+nav.te .save-label {
+    font-weight: bold;
 }
 
 .textEditor.fullscreen nav.te .fullscreen {
@@ -56,7 +57,6 @@ nav.te .preview {
 
 .textEditor nav button.close {
     display: none;
-    display: block;
     width: 95%;
 }
 
@@ -90,12 +90,14 @@ nav.te .preview {
 }
 
 .textEditor.iframe nav button.close {
-    display: inline-block;
+    display: block;
+    margin: 0 auto;
 }
 
 .textEditor iframe {
     border: none;
     background: rgba(var(--gLightBackgroundColor), 0.5);
+    border: 1px solid var(--gLightBorderColor);
     border-radius: .5em;
     width: 100%;
 }
@@ -184,8 +186,9 @@ form#insertImage .cancel input {
 
 #confirm_saved {
     position: absolute;
-    top: .5em;
-    right: 10em;
+    right: -.1em;
+    top: -.1em;
+    margin: 0;
     text-align: center;
-    transition: all .5s, opacity 2s;
+    transition: opacity .5s;
 }

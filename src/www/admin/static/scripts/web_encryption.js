@@ -97,21 +97,21 @@
 		content = content.replace(/\[([^\]]+?)\]\(([^\)]+?)\)/g, linkTag);
 
 		// Extensions
-		content = content.replace(/&lt;&lt;(\w+)([\| ]([^&]+))?&gt;&gt;/, (match, name, separator, params) => {
+		content = content.replace(/&lt;&lt;(\w+)([\| ]([^&]+))?&gt;&gt;/g, (match, name, separator, params) => {
 			params = params.split('|');
 			if (name == 'image') {
 				var src = params[0];
 				var align = params[1] || 'center';
-				var caption = params[2] || src;
-
+				var caption = 2 in params ? '<figcaption>' + params[2] + '</figcaption>' : '';
 				var size = align == 'center' ? '500px' : '200px';
-				return `<figure class="image img-${align}"><img src="${base_url + src}?${size}" alt="" /><figcaption>${caption}</figcaption></figure>`;
+
+				return `<figure class="image img-${align}"><a href="${base_url + src}" class="internal-image" target="_image"><img src="${base_url + src}?${size}" alt="" /></a>${caption}</figure>`;
 			}
 			else if (name == 'file') {
 				var src = params[0];
-				var ext = src.replace(/^.*\.([^\.]+)$/, '');
-				var caption = params[1] || src;
-				return `<aside class="file" data-type="${ext}"><a href="${base_url + src}" class="internal-file"><b>${caption}</b> <small>${ext}</small></a>`;
+				var ext = (a = src.lastIndexOf('.')) && a > 0 ? src.substr(a+1).toUpperCase() : '';
+				var caption = params[1] || src.replace(/\.[^\.]+$/, '');
+				return `<aside class="file" data-type="${ext}"><a href="${base_url + src}" class="internal-file"><b>${caption}</b> <small>${ext}</small></a></aside>`;
 			}
 			else {
 				return match;
@@ -251,7 +251,12 @@
 			elm.style.display = 'block';
 			document.getElementById('web_encrypted_message').style.display = 'none';
 			base_url = elm.dataset.url.replace(/\/$/, '') + '/';
-			elm.innerHTML = formatContent(content);
+			content = formatContent(content);
+			elm.innerHTML = content;
+
+			if (content.match(/<img/) && typeof window.enableImageGallery != 'undefined') {
+				enableImageGallery();
+			}
 		}
 		else
 		{

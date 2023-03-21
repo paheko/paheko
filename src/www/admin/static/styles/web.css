@@ -6,8 +6,8 @@
     height: 100vh;
 }
 
-.web-edit-text .content, .web-edit-text .block {
-    display: none;
+.web-edit .editor textarea[disabled] {
+    filter: blur(3px);
 }
 
 .web-edit-visual .editor {
@@ -21,6 +21,7 @@
 .web-edit .properties {
     display: flex;
     flex-direction: row;
+    font-size: .9em;
 }
 
 .web-edit nav ul {
@@ -40,6 +41,7 @@
 .web-edit .submit {
     grid-row: 3;
     grid-column: 2;
+    text-align: right;
 }
 
 fieldset.header {

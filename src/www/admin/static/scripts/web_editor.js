@@ -6,13 +6,13 @@
 		c.className = 'block confirm';
 		c.id = 'confirm_saved';
 		c.innerText = 'Enregistré';
-		c.style.right = '-10em';
+		c.style.opacity = 0;
 
 		document.querySelector('#f_content').parentNode.appendChild(c);
 
 		window.setTimeout(() => {
-			c.style.right = '';
-		}, 200);
+			c.style.opacity = 1;
+		}, 100);
 
 		window.setTimeout(() => {
 			c.style.opacity = 0;
@@ -20,7 +20,7 @@
 
 		window.setTimeout(() => {
 			c.remove();
-		}, 5000);
+		}, 3500);
 	}
 
 	g.script('scripts/lib/text_editor.min.js', function () {
@@ -69,6 +69,8 @@
 
 		var openPreview = function ()
 		{
+			var pos = t.textarea.scrollTop / t.textarea.scrollHeight;
+
 			openIFrame('');
 			var form = document.createElement('form');
 			form.appendChild(t.textarea.cloneNode(true));
@@ -83,7 +85,16 @@
 			form.style.display = 'none';
 			form.method = 'post';
 			document.body.appendChild(form);
+			t.iframe.style.opacity = .2;
 			form.submit();
+
+			// Sync scrolling
+			t.iframe.onload = () => {
+				t.iframe.style.opacity = 1;
+				var scroll = pos * t.iframe.contentWindow.document.body.scrollHeight;
+				t.iframe.contentWindow.scrollTo(0, scroll);
+			};
+
 			return true;
 		};
 
@@ -93,13 +104,23 @@
 			url = g.admin_url + 'static/doc/' + url;
 
 			g.openFrameDialog(url);
+			return true;
 		};
 
 		var openFileInsert = function ()
 		{
 			let args = new URLSearchParams(window.location.search);
 			var uri = args.get('p');
-			g.openFrameDialog(g.admin_url + 'web/_attach.php?_dialog&p=' + uri);
+			g.openFrameDialog(g.admin_url + 'web/_attach.php?files&_dialog&p=' + uri);
+			return true;
+		};
+
+		var openImageInsert = function ()
+		{
+			let args = new URLSearchParams(window.location.search);
+			var uri = args.get('p');
+			g.openFrameDialog(g.admin_url + 'web/_attach.php?images&_dialog&p=' + uri);
+			return true;
 		};
 
 		window.te_insertFile = function (file)
@@ -270,24 +291,27 @@
 			appendButton('italic', "Italique", applyItalic );
 			appendButton('link', "Lien", insertURL);
 
-			appendButton('ext preview', '👁', openPreview, 'Prévisualiser');
-			appendButton('ext help', '❓', openSyntaxHelp, 'Aide sur la syntaxe');
-
 			if (config.attachments) {
-				appendButton('file', "📎 Fichiers", openFileInsert, 'Insérer fichier / image');
+				appendButton('image', "🖻", openImageInsert, 'Insérer image');
+				appendButton('file', "📎", openFileInsert, 'Insérer fichier');
 				t.shortcuts.push({ctrl: true, shift: true, key: 'i', callback: openFileInsert});
 			}
+
+
+			if (config.savebtn == 1) {
+				appendButton('ext save save-label', 'Enregistrer', save, 'Enregistrer');
+			}
+			else if (config.savebtn == 2) {
+				appendButton('ext save', '⇑', save, 'Enregistrer sans fermer');
+			}
+
+			appendButton('ext preview', '👁', openPreview, 'Prévisualiser');
+			appendButton('ext help', '❓', openSyntaxHelp, 'Aide sur la syntaxe');
 
 			if (!config.fullscreen) {
 				appendButton('ext fullscreen', 'Plein écran', toggleFullscreen, 'Plein écran');
 			}
 
-			if (config.savebtn == 1) {
-				appendButton('ext save', 'Enregistrer', save, 'Enregistrer');
-			}
-			else if (config.savebtn == 2) {
-				appendButton('ext save', '⇑', save, 'Enregistrer sans fermer');
-			}
 
 			appendButton('ext close', 'Retour à l\'édition', closeIFrame);
 
