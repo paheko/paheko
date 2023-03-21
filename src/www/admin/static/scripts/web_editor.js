@@ -72,6 +72,16 @@
 			var pos = t.textarea.scrollTop / t.textarea.scrollHeight;
 
 			openIFrame('');
+
+			t.iframe.style.opacity = .2;
+
+			// Sync scrolling
+			t.iframe.onload = () => {
+				t.iframe.style.opacity = 1;
+				var scroll = pos * t.iframe.contentWindow.document.body.scrollHeight;
+				t.iframe.contentWindow.scrollTo(0, scroll);
+			};
+
 			var form = document.createElement('form');
 			form.appendChild(t.textarea.cloneNode(true));
 			form.firstChild.value = t.textarea.value;
@@ -85,15 +95,7 @@
 			form.style.display = 'none';
 			form.method = 'post';
 			document.body.appendChild(form);
-			t.iframe.style.opacity = .2;
 			form.submit();
-
-			// Sync scrolling
-			t.iframe.onload = () => {
-				t.iframe.style.opacity = 1;
-				var scroll = pos * t.iframe.contentWindow.document.body.scrollHeight;
-				t.iframe.contentWindow.scrollTo(0, scroll);
-			};
 
 			return true;
 		};
