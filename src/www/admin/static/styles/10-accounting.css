@@ -152,17 +152,16 @@ input[name=code_base] {
 .transaction-details {
     display: flex;
     flex-direction: row;
-    grid-gap: 1em;
     align-items: stretch;
     justify-content: center;
     margin: 1em 0;
-    max-width: 60em;
 }
 
 .transaction-details > div {
     justify-content: center;
     display: flex;
     flex-direction: column;
+    margin: 0 .5rem;
 }
 
 .transaction-details .account {
@@ -175,6 +174,14 @@ input[name=code_base] {
 .transaction-details .account h4 {
     font-weight: normal;
 }
+
+/*
+.transaction-details .account h5 {
+    font-weight: normal;
+    font-style: italic;
+    color: var(--gBorderColor);
+}
+*/
 
 .transaction-details .amount h3 {
     font-weight: normal;
@@ -196,14 +203,10 @@ input[name=code_base] {
     color: var(--gBorderColor);
 }
 
-.transaction-details .details h4 {
-    font-weight: normal;
-    text-align: center;
-    margin: .5em 0;
+.transaction-details-container {
+    max-width: 60rem;
 }
 
-.transaction-details .details h4 strong {
-    background-color: rgba(var(--gSecondColor), 0.3);
-    border-radius: .3em;
-    padding: .3em;
+.transaction-details-container nav {
+    text-align: center;
 }

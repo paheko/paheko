@@ -303,28 +303,42 @@ dl.list dd.desc {
 }
 
 dl.describe {
-    margin-bottom: 1rem;
-    display: grid;
-    grid-template: auto / 15rem 1fr;
+    margin: 1rem 0;
+    display: flex;
+    flex-flow: row;
+    flex-wrap: wrap;
+    align-items: start;
 }
 
 dl.describe > dt {
-    grid-column: 1;
-    margin: .2rem .5rem;
+    flex: 0 0 15rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
     text-align: right;
     color: var(--gBorderColor);
-    align-self: start;
+    margin: .2rem .5rem;
 }
 
 dl.describe > dd {
-    grid-column: 2;
+    flex: 0 0 calc(100% - 17rem);
+    margin-left: auto;
+    text-align: left;
     margin: .2rem .5rem;
-    align-self: center;
 }
 
 dl.describe ul {
     margin-left: 1.5em;
     list-style-type: disc;
+}
+
+dl.describe mark {
+    background-color: rgba(var(--gSecondColor), 0.3);
+    border-radius: .5em;
+    padding: .1rem .4rem;
+}
+
+dl.describe mark.variant-a {
+    background-color: rgba(var(--gMainColor), 0.2);
 }
 
 dl.cotisation {

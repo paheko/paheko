@@ -124,17 +124,6 @@ details summary::after {
     display: none;
 }
 
-dl.describe {
-    /* Prince does not support grids, yet */
-    display: block;
-    margin-bottom: 2em;
-}
-
-dl.describe dt, dl.describe dd {
-    text-align: left;
-}
-
-dl.describe dd {
-    margin-left: 2em;
-    margin-bottom: .8em;
+.transaction-details-container {
+    max-width: initial;
 }
