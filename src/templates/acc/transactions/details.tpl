@@ -8,19 +8,32 @@
 {/if}
 
 <nav class="tabs">
-{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$transaction->validated && !$tr_year->closed}
-	{linkbutton href="edit.php?id=%d"|args:$transaction.id shape="edit" label="Modifier cette écriture"}
-	{linkbutton href="delete.php?id=%d"|args:$transaction.id shape="delete" label="Supprimer cette écriture"}
-{/if}
-{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
-	{linkbutton href="new.php?copy=%d"|args:$transaction.id shape="plus" label="Dupliquer cette écriture"}
-{/if}
-{if PDF_COMMAND}
-	<aside>
-		{linkbutton href="?id=%d&_pdf"|args:$transaction.id shape="download" label="Télécharger en PDF"}
-	</aside>
-{/if}
+	{if PDF_COMMAND}
+		<aside>
+			{linkbutton href="?id=%d&_pdf"|args:$transaction.id shape="download" label="Télécharger en PDF"}
+		</aside>
+	{/if}
+
+	{if $transaction.type != $transaction::TYPE_ADVANCED}
+	<ul>
+		<li{if $simple} class="current"{/if}><a href="?id={$transaction.id}">Vue simplifiée</a></li>
+		<li{if !$simple} class="current"{/if}><a href="?id={$transaction.id}&amp;advanced">Vue comptable</a></li>
+	</ul>
+	{/if}
+
+	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$transaction->validated && !$tr_year->closed}
+		{linkbutton href="edit.php?id=%d"|args:$transaction.id shape="edit" label="Modifier cette écriture"}
+		{linkbutton href="delete.php?id=%d"|args:$transaction.id shape="delete" label="Supprimer cette écriture"}
+	{/if}
+	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
+		{linkbutton href="new.php?copy=%d"|args:$transaction.id shape="plus" label="Dupliquer cette écriture"}
+	{/if}
 </nav>
+
+<header class="summary print-only">
+	<h2>{$config.nom_asso}</h2>
+	<h3>{"Écriture n°%d"|args:$transaction.id}</h3>
+</header>
 
 {if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE) && $transaction.status & $transaction::STATUS_WAITING}
 <div class="block alert">
@@ -117,39 +130,74 @@
 	<dd>{if $transaction.notes}{$transaction.notes|escape|nl2br|linkify_transactions}{else}-{/if}</dd>
 </dl>
 
-<table class="list">
-	<thead>
-		<tr>
-			<td class="num">N° compte</td>
-			<th>Compte</th>
-			<td class="money">Débit</td>
-			<td class="money">Crédit</td>
-			<td>Libellé ligne</td>
-			<td>Référence ligne</td>
-			<td>Projet</td>
-		</tr>
-	</thead>
-	<tbody>
-		{foreach from=$transaction->getLinesWithAccounts() item="line"}
-		<tr>
-			<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$line.id_account}&amp;year={$transaction.id_year}">{$line.account_code}</a></td>
-			<td>{$line.account_label}</td>
-			<td class="money">{if $line.debit}{$line.debit|escape|money}{/if}</td>
-			<td class="money">{if $line.credit}{$line.credit|escape|money}{/if}</td>
-			<td>{$line.label}</td>
-			<td>{$line.reference}</td>
-			<td>
-				{if $line.id_project}
-					<a href="{$admin_url}acc/reports/statement.php?project={$line.id_project}">{$line.project_name}</a>
-				{/if}
-			</td>
-		</tr>
-		{/foreach}
-	</tbody>
-</table>
+{if $transaction.type != $transaction::TYPE_ADVANCED && $simple}
+	<div class="transaction-details">
+		<div class="amount">
+			<h3>{$transaction->getTypeName()}</h3>
+			<span>
+				{$transaction->getLinesCreditSum()|abs|escape|money_currency}
+			</span>
+		</div>
+		<div class="account">
+			<h4>{$details.left.label}</h4>
+			<h3>{link href="!acc/accounts/journal.php?id=%d"|args:$details.left.id label=$details.left.name}</h3>
+			{*<h5>({if $details.left.direction == 'credit'}Crédit{else}Débit{/if})</h5>*}
+		</div>
+		{if $transaction.type == $transaction::TYPE_TRANSFER}
+			<div class="amount"><span>{icon shape="right"}</span></div>
+		{/if}
+		<div class="account">
+			<h4>{$details.right.label}</h4>
+			<h3>{link href="!acc/accounts/journal.php?id=%d&year=%d"|args:$details.right.id,$transaction.id_year label=$details.right.name}</h3>
+			{*<h5>({if $details.right.direction == 'credit'}Crédit{else}Débit{/if})</h5>*}
+		</div>
+	</div>
+
+	<div class="transaction-details">
+		<div class="details">
+			{if $ref = $transaction->getPaymentReference()}
+				<h4>Référence de paiement : <strong>{$ref}</strong></h4>
+			{/if}
+			{if $project = $transaction->getProject()}
+				<h4>Projet : <strong>{link href="!acc/reports/statement.php?project=%d"|args:$project.id label=$project.name}</strong></h4>
+			{/if}
+		</div>
+	</div>
+{else}
+	<table class="list">
+		<thead>
+			<tr>
+				<td class="num">N° compte</td>
+				<th>Compte</th>
+				<td class="money">Débit</td>
+				<td class="money">Crédit</td>
+				<td>Libellé ligne</td>
+				<td>Référence ligne</td>
+				<td>Projet</td>
+			</tr>
+		</thead>
+		<tbody>
+			{foreach from=$transaction->getLinesWithAccounts() item="line"}
+			<tr>
+				<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$line.id_account}&amp;year={$transaction.id_year}">{$line.account_code}</a></td>
+				<td>{$line.account_label}</td>
+				<td class="money">{if $line.debit}{$line.debit|escape|money}{/if}</td>
+				<td class="money">{if $line.credit}{$line.credit|escape|money}{/if}</td>
+				<td>{$line.label}</td>
+				<td>{$line.reference}</td>
+				<td>
+					{if $line.id_project}
+						<a href="{$admin_url}acc/reports/statement.php?project={$line.id_project}">{$line.project_name}</a>
+					{/if}
+				</td>
+			</tr>
+			{/foreach}
+		</tbody>
+	</table>
+{/if}
 
 {if $files_edit || count($files)}
-<div class="attachments">
+<div class="attachments noprint">
 	<h3 class="ruler">Fichiers joints</h3>
 	{include file="common/files/_context_list.tpl" files=$files edit=$files_edit path=$file_parent}
 </div>

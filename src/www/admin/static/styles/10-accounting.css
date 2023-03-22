@@ -148,3 +148,62 @@ input[name=code_base] {
     text-align: right;
     color: rgb(var(--gTextColor));
 }
+
+.transaction-details {
+    display: flex;
+    flex-direction: row;
+    grid-gap: 1em;
+    align-items: stretch;
+    justify-content: center;
+    margin: 1em 0;
+    max-width: 60em;
+}
+
+.transaction-details > div {
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.transaction-details .account {
+    background-color: rgba(var(--gMainColor), 0.2);
+    border-radius: .5em;
+    padding: 1em;
+    text-align: center;
+}
+
+.transaction-details .account h4 {
+    font-weight: normal;
+}
+
+.transaction-details .amount h3 {
+    font-weight: normal;
+}
+
+.transaction-details .amount {
+    background-color: rgba(var(--gSecondColor), 0.3);
+    border-radius: .5em;
+    padding: 1em;
+    text-align: center;
+}
+
+.transaction-details .amount > span {
+    font-size: 2em;
+    white-space: nowrap;
+}
+
+.transaction-details .amount .icn {
+    color: var(--gBorderColor);
+}
+
+.transaction-details .details h4 {
+    font-weight: normal;
+    text-align: center;
+    margin: .5em 0;
+}
+
+.transaction-details .details h4 strong {
+    background-color: rgba(var(--gSecondColor), 0.3);
+    border-radius: .3em;
+    padding: .3em;
+}

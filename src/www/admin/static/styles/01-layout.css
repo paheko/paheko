@@ -220,3 +220,12 @@ body.public main p.block.error, body.public main p.block.alert {
     margin: 2em 0;
     font-size: 1.2em;
 }
+
+.print-only {
+    display: none;
+}
+
+header.summary {
+    margin-bottom: 1em;
+    border-bottom: 2px solid #999;
+}

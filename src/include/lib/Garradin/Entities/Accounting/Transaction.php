@@ -1179,12 +1179,29 @@ class Transaction extends Entity
 				if (empty($account->selector_value) && isset($this->_default_selector[$key][$account->direction])) {
 					$account->selector_value = $this->_default_selector[$key][$account->direction];
 				}
+
+				$account->id = isset($account->selector_value) ? key($account->selector_value) : null;
+				$account->name = isset($account->selector_value) ? current($account->selector_value) : null;
 			}
 		}
 
 		unset($account, $type);
 
 		return $details;
+	}
+
+	public function getDetails(): ?array
+	{
+		if ($this->type == self::TYPE_ADVANCED) {
+			return null;
+		}
+
+		$details = $this->getTypesDetails();
+
+		return [
+			'left' => $details[$this->type]->accounts[0],
+			'right' => $details[$this->type]->accounts[1],
+		];
 	}
 
 	public function payOffFrom(int $id): ?\stdClass
@@ -1362,5 +1379,28 @@ class Transaction extends Entity
 	public function url(): string
 	{
 		return Utils::getLocalURL('!acc/transactions/details.php?id=' . $this->id());
+	}
+
+	public function getProject(): ?array
+	{
+		$id = $this->getProjectId();
+
+		if (!$id) {
+			return null;
+		}
+
+		$name = Projects::getName($id);
+		return compact('id', 'name');
+	}
+
+	public function getPaymentReference(): ?string
+	{
+		foreach ($this->getLines() as $line) {
+			if ($line->reference) {
+				return $line->reference;
+			}
+		}
+
+		return null;
 	}
 }

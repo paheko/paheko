@@ -20,6 +20,8 @@ $form->runIf('mark_paid', function () use ($transaction) {
 
 $tpl->assign(compact('transaction', 'csrf_key'));
 
+$tpl->assign('simple', !isset($_GET['advanced']));
+$tpl->assign('details', $transaction->getDetails());
 $tpl->assign('files', $transaction->listFiles());
 $tpl->assign('tr_year', $transaction->year());
 $tpl->assign('creator_name', $transaction->id_creator ? (new Membres)->getNom($transaction->id_creator) : null);

@@ -90,6 +90,10 @@ table.list td {
     display: none;
 }
 
+.print-only {
+    display: block;
+}
+
 td.actions *, nav.tabs, .icn-btn, .pagination, a.icn {
     display: none !important;
 }
@@ -126,12 +130,11 @@ dl.describe {
     margin-bottom: 2em;
 }
 
-dl.describe dt {
-    width: 12em;
-    float: left;
-    clear: left;
+dl.describe dt, dl.describe dd {
+    text-align: left;
 }
 
 dl.describe dd {
-    float: left;
+    margin-left: 2em;
+    margin-bottom: .8em;
 }
