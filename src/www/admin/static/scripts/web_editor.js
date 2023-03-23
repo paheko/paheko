@@ -23,7 +23,7 @@
 		}, 3500);
 	}
 
-	g.script('scripts/lib/text_editor.min.js', function () {
+	function init() {
 		var t = new textEditor('f_content');
 		t.parent = t.textarea.parentNode;
 
@@ -349,5 +349,9 @@
 		t.shortcuts.push({key: 'Escape', callback: openPreview});
 
 		g.setParentDialogHeight('90%');
+	}
+
+	g.onload(() => {
+		g.script('scripts/lib/text_editor.min.js', init);
 	});
 }());
