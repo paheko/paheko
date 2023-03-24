@@ -298,8 +298,6 @@ fieldset[disabled] {
     background: none;
 }
 
-fieldset[disabled]  {
-
 input[disabled]:hover, input[readonly]:hover {
     background-color: unset;
     color: unset;
