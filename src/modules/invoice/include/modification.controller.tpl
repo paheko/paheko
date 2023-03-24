@@ -4,7 +4,7 @@
 	{{if !$_GET.id}}
 		{{:assign var='check_errors.' value='Aucun devis sélectionné.'}}
 	{{else}}
-		{{#load id=$_GET.id|intval module=$module.name}}
+		{{#load id=$_GET.id|intval}}
 		{{if $status !== $DRAFT_STATUS}}
 			{{:assign var='check_errors.' value='Seuls les brouillons peuvent être signés ou supprimés.'}}
 		{{elseif $cancelled}}
@@ -70,7 +70,7 @@
 	{{if !$_GET.id}}
 		{{:assign var='check_errors.' value='Aucun devis sélectionné.'}}
 	{{else}}
-		{{#load id=$_GET.id|intval module=$module.name}}
+		{{#load id=$_GET.id|intval}}
 		{{if $status !== $AWAITING_STATUS}}
 			{{:assign var='check_errors.' value='Seuls les devis en attente peuvent être validés ou refusés.'}}
 		{{elseif $cancelled}}
@@ -389,7 +389,7 @@
 			{{:assign var='check_errors.' value='Nouveau statut invalide : %s.'|args:$_POST.status}}
 		{{/if}}
 		{{if !$check_errors}}
-			{{#load id=$_POST.id|intval module=$module.name}}
+			{{#load id=$_POST.id|intval}}
 				{{:assign var='allowed_type' from='DOCUMENT_TYPES.%s'|args:$type}}
 				{{if !$allowed_type}}
 					{{:assign var='check_errors.' value='Type invalide : %s!'|args:$type}}

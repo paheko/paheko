@@ -12,7 +12,6 @@
 	:business_name=$_GET.id
 	:type=$type
 	:status=$status
-	module=$module.name
 }}
 <tr>
 	<td><a href="details.html?id={{$id|intval}}">{{$key}}</a></td>
