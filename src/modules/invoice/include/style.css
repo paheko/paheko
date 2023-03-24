@@ -1,7 +1,10 @@
-<style>
 #item_list .reference {
 	min-width: 0;
 	max-width: 7em;
+}
+
+h3.quotation_total {
+	padding: 1em 0em 0.5em 0em;
 }
 
 #invoice_module_search p {
@@ -53,4 +56,3 @@ nav.tabs aside.menu li a:hover, .list_action_buttons li a:hover {
 nav.tabs aside.menu li a.icn-btn, .list_action_buttons li a.icn-btn {
 	margin: 0.2em 0.2em;
 }
-</style>

@@ -67,8 +67,8 @@ function add_input_refresh_total_behavior() {
 
 <fieldset>
 	<legend><h2>Liste des articles</h2></legend>
-	<p id="item_list_no_item_message" style="display: {{if !$items}}block{{else}}none{{/if}};">Aucun article pour le moment.</p>
-	<table id="item_list" class="list" style="display: {{if $items}}block{{else}}none{{/if}};">
+	<p id="item_list_no_item_message" {{if $items}}class="hidden"{{/if}}>Aucun article pour le moment.</p>
+	<table id="item_list" class="list" {{if !$items}}class="hidden"{{/if}}>
 		<thead>
 			<tr>
 				<th>Réf.</th>
@@ -95,7 +95,7 @@ function add_input_refresh_total_behavior() {
 		</tbody>
 	</table>
 	<p>{{:linkbutton label="Ajouter un article" href="item_form.html" shape="plus" target="_dialog"}}</p>
-	<h3 style="padding: 1em 0em 0.5em 0em;">Total des articles</h3>
+	<h3 class="quotation_total">Total des articles</h3>
 	<p>
 		<span id="quotation_total">0 {{$config.currency|htmlspecialchars}}</span>
 		<input type="hidden" name="quotation_total" id="quotation_total_input" label="" value="" />
