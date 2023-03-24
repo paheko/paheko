@@ -13,8 +13,3 @@
 	{{:assign next_numeric='%d+1'|math:$last_numeric}}
 	{{:assign var=$assign_to value=$pattern|args:$next_numeric}}
 {{/load}}
-
-{{:debug type=$type}}
-{{:debug to=$assign_to}}
-{{:debug key=$key}}
-{{:debug invoice_key=$invoice_key}}

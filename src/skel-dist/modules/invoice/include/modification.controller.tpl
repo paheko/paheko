@@ -159,7 +159,7 @@
 	{{if $invoice.status !== $AWAITING_STATUS}}
 		{{:assign var='check_errors.' value='Seuls les factures "en attente de validation" peuvent être payées.'}}
 	{{elseif $invoice.cancelled}}
-			{{:assign var='check_errors.' value='Les factures annulées ne peuvent pas être marquées comme payées.'}}
+		{{:assign var='check_errors.' value='Les factures annulées ne peuvent pas être marquées comme payées.'}}
 	{{/if}}
 
 	{{:assign date=$_POST.date|date:'Y-m-d'}}

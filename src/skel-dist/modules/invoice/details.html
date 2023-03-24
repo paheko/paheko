@@ -226,6 +226,8 @@
 			<style>#cancel_checkbox_label::before { margin-right: 0; }</style>
 		{{/restrict}}
 
+	{{else}}
+		<p class="error block">Document introuvable (ID : #{{$_GET.id}}).</p>
 	{{/load}}
 {{/if}}
 
