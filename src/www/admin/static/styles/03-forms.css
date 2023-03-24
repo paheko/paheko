@@ -286,12 +286,19 @@ input.resetButton {
     margin-left: 1em;
 }
 
-input[readonly], input.disabled, input[disabled], textarea[disabled], select[disabled] {
+input[readonly], input.disabled, input[disabled], textarea[disabled], select[disabled],
+fieldset[disabled], fieldset[disabled] input, fieldset[disabled] textarea, fieldset[disabled] select {
     cursor: not-allowed;
     color: var(--gBorderColor);
     background-color: var(--gLightBackgroundColor);
     border-color: var(--gLightBorderColor);
 }
+
+fieldset[disabled] {
+    background: none;
+}
+
+fieldset[disabled]  {
 
 input[disabled]:hover, input[readonly]:hover {
     background-color: unset;
