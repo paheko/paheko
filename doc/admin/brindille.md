@@ -91,6 +91,49 @@ Il est possible d'utiliser des conditions de type "si" (`if`), "sinon si" (`else
 {{/if}}
 ```
 
+Une condition peut être évaluée comme *vraie*, dans ce cas la partie qui suit le bloc `{{if …}}` sera exécutée.
+
+Si la condition est évaluée comme *fausse*, alors la partie qui suit le bloc `{{if …}}` ne sera pas exécutée. Dans ce cas, soit une condition `{{elseif …}}` suivante est vraie et exécutée, mais sinon c'est le contenu du bloc `{{else}}` qui est exécuté et affiché.
+
+Dans une condition on peut utiliser :
+
+* une variable : `$nom_variable`
+* une variable avec des filtres : `$nom_variable|filtre1:parametre1`
+* une valeur (nombre, constante) : `42`, `-42`, `42.02` `null`, `true`, `false`
+* des opérateurs de comparaison
+* des opérateurs logiques
+
+Attention : on ne peut pas grouper les conditions avec des parenthèses.
+
+Les comparaisons supportées sont les suivantes :
+
+| Opérateur de comparaison | Explication |
+| :- | :- |
+| `==` | égalité faible, ne prend pas en compte le type : `1 == true` et `2 == 2.00` serons évalués comme vrais |
+| `===` | égalité forte, prend en compte le type : `1 === 1` sera vrai, mais `1 === true` sera faux |
+| `!=` | différent de, en comparaison faible |
+| `!==` | différent de, en comparaison forte |
+| `>` | supérieur à |
+| `>=` | supérieur ou égal à |
+| `<` | inférieur à |
+| `<=` | inférieur ou égal à |
+
+Il est aussi possible de précéder une variable de l'opérateur `!`, c'est un raccourci pour `$variable == false`.
+
+Voir [les opérateurs de comparaison PHP pour plus de détails](https://www.php.net/manual/fr/language.operators.comparison.php).
+
+Les opérateurs logiques supportés sont :
+
+| Opérateur | Explication |
+| :- | :- |
+| `&&` | Vrai si les conditions à gauche et à droite sont vraies |
+| `||` | Vrai si une des conditions à gauche ou à droite est vraie |
+
+Exemples :
+
+* `false && true` : sera évalué comme faux
+* `false || true` : sera évalué comme vrai
+
 ## Fonctions
 
 Une fonction va répondre à certains paramètres et renvoyer un résultat ou réaliser une action. Un bloc de fonction commence par le signe deux points `:` :
