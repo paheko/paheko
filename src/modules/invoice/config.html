@@ -16,8 +16,8 @@
 	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Numéro SIRET trop long' check_value=$_POST.siret check_max=14}}
 	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Ville de signature des devis trop longue' check_value=$_POST.signing_place check_max=128}}
 	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Texte d'introduction trop long" check_value=$_POST.introduction_text check_max=256}}
-	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Instructions de paiement trop longues' check_value=$_POST.payment_detail check_max=512}}
-	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Informations complémentaires trop longues' check_value=$_POST.quotation_extra_info check_max=512}}
+	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Instructions de paiement trop longues' check_value=$_POST.payment_text check_max=512}}
+	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Informations complémentaires trop longues' check_value=$_POST.extra_text check_max=512}}
 
 	{{if !$check_errors}}
 		{{:save key="config"
@@ -26,8 +26,8 @@
 			siret=$_POST.siret
 			signing_place=$_POST.signing_place
 			introduction_text=$_POST.introduction_text
-			payment_detail=$_POST.payment_detail
-			quotation_extra_info=$_POST.quotation_extra_info
+			payment_text=$_POST.payment_text
+			extra_text=$_POST.extra_text
 		}}
 		{{if $dialog}}
 			{{:http redirect="?ok=1"}}
@@ -67,8 +67,8 @@
 	<fieldset>
 		<legend>Informations</legend>
 		{{:input required=false name="introduction_text" type="textarea" label="Texte d'introduction" source=$module.config default="Madame, Monsieur,\nSuite à votre demande, veuillez trouver ci-dessous notre proposition de devis." placeholder="ex : Formule de politesse." cols="50" rows="4"}}
-		{{:input required=false name="payment_detail" type="textarea" label="Instructions de paiement" default=$module.config.payment_detail placeholder="BIC :&#10;ABCDEFGH012&#10;FR9901234567890123456789012&#10;La banque eh! tic&#10;&#10;Paiement à réaliser sous 15 jours." cols="50" rows="5"}}
-		{{:input required=false name="quotation_extra_info" type="textarea" label="Informations complémentaires affichées en bas des devis" default=$module.config.quotation_extra_info placeholder="ex : Formule de politesse." cols="50" rows="3"}}
+		{{:input required=false name="payment_text" type="textarea" label="Instructions de paiement" default=$module.config.payment_text placeholder="BIC :&#10;ABCDEFGH012&#10;FR9901234567890123456789012&#10;La banque eh! tic&#10;&#10;Paiement à réaliser sous 15 jours." cols="50" rows="5"}}
+		{{:input required=false name="extra_text" type="textarea" label="Informations complémentaires affichées en bas des devis" default=$module.config.extra_text placeholder="ex : Formule de politesse." cols="50" rows="3"}}
 	</fieldset>
 	{{:button type="submit" name="save" label="Enregistrer la configuration" class="main"}}
 </form>

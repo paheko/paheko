@@ -2,31 +2,41 @@
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"type": "object",
 	"properties": {
-		"recipient_business_name": {
-			"description": "Raison sociale",
+		"status": {
+			"description": "Statut",
 			"type": "string",
-			"maxLength": 128
+			"enum": ["draft", "awaiting", "rejected", "validated", "misc"]
 		},
-		"recipient_address": {
-			"description": "Adresse",
-			"type": "string",
-			"maxLength": 512
+		"cancelled": {
+			"description": "Défini si le devis est annnulé",
+			"type": "boolean"
 		},
-		"recipient_member_id": {
-			"description": "ID membre du client",
-			"type": ["integer", "null"],
-			"maxLength": 19
-		},
-		"recipient_member_number": {
-			"description": "Numéro de membre du client",
-			"type": ["string", "null"],
-			"maxLength": 19
-		},
-		"introduction_text" : {
-			"description": "Texte d'introduction",
+		"cancellation_reason": {
+			"description": "Motif de l'annulation",
 			"type": ["string", "null"],
 			"maxLength": 256
 		},
+		"author_id": {
+			"description": "ID membre du rédacteur du devis",
+			"type": "integer",
+			"maxLength": 19
+		},
+		"child_id": {
+			"description": "ID de la facture associée",
+			"type": ["integer", "null"],
+			"maxLength": 19
+		},
+		"parent_id": {
+			"description": "Identique à ID si facture générée (hack pour grouper facture et devis)",
+			"type": ["integer", "null"],
+			"maxLength": 19
+		},
+		"duplicated_from_id": {
+			"description": "ID du devis duquel celui-ci a été dupliqué",
+			"type": ["integer", "null"],
+			"maxLength": 19
+		},
+
 		"subject": {
 			"description": "Objet",
 			"type": "string",
@@ -42,19 +52,20 @@
 			"type": ["string", "null"],
 			"maxLength": 10
 		},
-		"status": {
-			"description": "Statut",
-			"type": "string",
-			"enum": ["draft", "awaiting", "rejected", "validated", "misc"]
-		},
-		"cancelled": {
-			"description": "Défini si la facture est annnulée",
-			"type": "boolean"
-		},
-		"cancellation_reason": {
-			"description": "Motif de l'annulation",
+		"signing_date": {
+			"description": "Date de signature du document",
 			"type": ["string", "null"],
-			"maxLength": 256
+			"maxLength": 10
+		},
+		"signing_place": {
+			"description": "Lieu de signature du document",
+			"type": ["string", "null"],
+			"maxLength": 128
+		},
+		"validation_date": {
+			"description": "Date de validation du devis",
+			"type": ["string", "null"],
+			"maxLength": 10
 		},
 		"items": {
 			"description": "Articles",
@@ -77,11 +88,7 @@
 			"type": ["number", "integer"],
 			"minimum": 0
 		},
-		"vat_exemption": {
-			"Description": "Mode d'exonération de la TVA",
-			"type": "string",
-			"enum": ["nonprofit", "profit"]
-		},
+
 		"siret": {
 			"Description": "Numéro SIRET",
 			"type": ["string", "null"],
@@ -92,50 +99,47 @@
 			"type": "string",
 			"maxLength": 256
 		},
-		"author_id": {
-			"description": "ID membre du rédacteur du devis",
-			"type": "integer",
-			"maxLength": 19
+
+		"recipient_business_name": {
+			"description": "Raison sociale",
+			"type": "string",
+			"maxLength": 128
 		},
-		"child_id": {
-			"description": "ID de la facture associée",
+		"recipient_address": {
+			"description": "Adresse",
+			"type": "string",
+			"maxLength": 512
+		},
+		"recipient_member_id": {
+			"description": "ID membre du client",
 			"type": ["integer", "null"],
 			"maxLength": 19
 		},
-		"signing_place": {
-			"description": "Lieu de signature du document",
+		"recipient_member_number": {
+			"description": "Numéro de membre du client",
 			"type": ["string", "null"],
-			"maxLength": 128
+			"maxLength": 19
 		},
-		"signing_date": {
-			"description": "Date de signature du document",
+
+		"introduction_text" : {
+			"description": "Texte d'introduction",
 			"type": ["string", "null"],
-			"maxLength": 10
+			"maxLength": 256
 		},
-		"validation_date": {
-			"description": "Date de validation du devis",
-			"type": ["string", "null"],
-			"maxLength": 10
-		},
-		"payment_detail": {
+		"payment_text": {
 			"description": "Instructions de paiement",
 			"type": ["string", "null"],
 			"maxLength": 512
 		},
-		"extra_info": {
+		"extra_text": {
 			"description": "Informations complémentaires",
 			"type": ["string", "null"],
 			"maxLength": 1024
 		},
-		"parent_id": {
-			"description": "Identique à ID si facture générée (hack pour grouper facture et devis)",
-			"type": ["integer", "null"],
-			"maxLength": 19
-		},
-		"duplicated_from_id": {
-			"description": "ID du devis duquel celui-ci a été dupliqué",
-			"type": ["integer", "null"],
-			"maxLength": 19
+		"vat_exemption": {
+			"Description": "Mode d'exonération de la TVA",
+			"type": "string",
+			"enum": ["nonprofit", "profit"]
 		},
 		"last_modification_date": {
 			"description": "Date de la derniète modification",
@@ -148,5 +152,5 @@
 			"maxLength": 12
 		}
 	},
-	"required": [ "recipient_business_name", "recipient_address", "subject", "date", "status", "cancelled", "vat_exemption", "author_id", "org_contact", "last_modification_date", "module_version" ]
+	"required": [ "status", "cancelled", "author_id", "subject", "date", "org_contact", "recipient_business_name", "recipient_address", "vat_exemption", "last_modification_date", "module_version" ]
 }

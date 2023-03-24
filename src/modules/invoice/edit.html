@@ -85,8 +85,8 @@
 		{{:assign var='check_errors.' value="Le contact est obligatoire."}}
 	{{/if}}
 	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Contact trop long" check_value=$_POST.org_contact check_max=256}}
-	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Instructions de paiement trop longues" check_value=$_POST.payment_detail check_max=512}}
-	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Informations complémentaires trop longues" check_value=$_POST.extra_info check_max=1024}}
+	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Instructions de paiement trop longues" check_value=$_POST.payment_text check_max=512}}
+	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Informations complémentaires trop longues" check_value=$_POST.extra_text check_max=1024}}
 
 	{{#foreach from=$_POST.items key='index' item='item'}}
 		{{if $item.name === ''}}{{:assign var='check_errors.' value="Le nom de l'article est requis."}}{{/if}}
@@ -188,8 +188,8 @@
 			last_modification_date=$now|atom_date
 			signing_place=$_POST.signing_place
 			signing_date=$signing_date
-			payment_detail=$_POST.payment_detail
-			extra_info=$_POST.extra_info
+			payment_text=$_POST.payment_text
+			extra_text=$_POST.extra_text
 			module_version=$VERSION
 		}}
 
@@ -236,14 +236,14 @@
 		{{:assign org_contact_default=$config.org_email}}
 		{{:assign introduction_text_helper='La valeur pré-remplie de ce texte est modifiable dans la configuration du module.'}}
 		{{:assign introduction_text_default=$module.config.introduction_text}}
-		{{:assign payment_detail_default=$module.config.payment_detail}}
-		{{:assign extra_info_default=$module.config.quotation_extra_info}}
+		{{:assign payment_text_default=$module.config.payment_text}}
+		{{:assign extra_text_default=$module.config.extra_text}}
 	{{else}}
 		{{:assign org_contact_default=null}}
 		{{:assign introduction_text_helper=null}}
 		{{:assign introduction_text_default=null}}
-		{{:assign payment_detail_default=null}}
-		{{:assign extra_info_default=null}}
+		{{:assign payment_text_default=null}}
+		{{:assign extra_text_default=null}}
 	{{/if}}
 
 	<fieldset>
@@ -263,15 +263,15 @@
 	{{:assign items=$document.items}}
 	{{:include file='./include/item_list.tpl'}}
 
-	{{if $module.config.payment_detail || $module.config.quotation_extra_info}}
+	{{if $module.config.payment_text || $module.config.extra_text}}
 		<fieldset>
 			<legend><h2>Informations complémentaires affichées en bas du devis</h2></legend>
 			<ul>
-			{{if $module.config.payment_detail}}
-				<li>{{:input type="textarea" name="payment_detail" label="Instructions de paiement" source=$document default=$payment_detail_default cols="50" rows="5"}}</li>
+			{{if $module.config.payment_text}}
+				<li>{{:input type="textarea" name="payment_text" label="Instructions de paiement" source=$document default=$payment_text_default cols="50" rows="5"}}</li>
 			{{/if}}
-			{{if $module.config.quotation_extra_info}}
-				<li>{{:input type="textarea" name="extra_info" label="Informations complémentaires" source=$document default=$extra_info_default cols="50" rows="2"}}</li>
+			{{if $module.config.extra_text}}
+				<li>{{:input type="textarea" name="extra_text" label="Informations complémentaires" source=$document default=$extra_text_default cols="50" rows="2"}}</li>
 			{{/if}}
 			</ul>
 		{{if !$document}}<p>(La valeur pré-remplie de ces informations est modifiable dans la configuration du module.)</p>{{/if}}

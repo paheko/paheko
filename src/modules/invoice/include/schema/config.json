@@ -22,12 +22,12 @@
 			"type": ["string", "null"],
 			"maxLength": 256
 		},
-		"payment_detail": {
+		"payment_text": {
 			"description": "Instructions de paiement",
 			"type": "string",
 			"maxLength": 512
 		},
-		"quotation_extra_info": {
+		"extra_text": {
 			"description": "Informations complémentaires affichées en bas des devis",
 			"type": "string",
 			"maxLength": 512

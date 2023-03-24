@@ -195,11 +195,11 @@
 			</ul>
 		</fieldset>
 		
-		{{if $payment_detail || $extra_info}}
+		{{if $payment_text || $extra_text}}
 			<fieldset>
 				<legend><h2>Infos complémentaires</h2></legend>
-				{{if $payment_detail}}<p>{{$payment_detail|escape|nl2br}}</p>{{/if}}
-				{{if $extra_info}}<p>{{$extra_info|escape|nl2br}}</p>{{/if}}
+				{{if $payment_text}}<p>{{$payment_text|escape|nl2br}}</p>{{/if}}
+				{{if $extra_text}}<p>{{$extra_text|escape|nl2br}}</p>{{/if}}
 			</fieldset>
 		{{/if}}
 
