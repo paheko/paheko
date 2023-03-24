@@ -93,6 +93,7 @@
 	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Contact trop long" check_value=$_POST.org_contact check_max=256}}
 	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Instructions de paiement trop longues" check_value=$_POST.payment_text check_max=512}}
 	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Informations complémentaires trop longues" check_value=$_POST.extra_text check_max=1024}}
+	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Remarques trop longues" check_value=$_POST.comment check_max=1024}}
 
 	{{#foreach from=$_POST.items key='index' item='item'}}
 		{{if $item.name === ''}}{{:assign var='check_errors.' value="Le nom de l'article est requis."}}{{/if}}
@@ -196,6 +197,7 @@
 			signing_date=$signing_date
 			payment_text=$_POST.payment_text
 			extra_text=$_POST.extra_text
+			comment=$_POST.comment
 			module_version=$VERSION
 		}}
 
@@ -263,6 +265,9 @@
 			<li>
 				{{:input type="textarea" name="introduction_text" label="Texte d'introduction" source=$document default=$introduction_text_default placeholder="ex : Formule de politesse." help=$introduction_text_helper required=false cols="50" rows="4"}}
 			</li>
+			<li>
+				{{:input type="textarea" name="comment" label="Remarques internes" source=$document help="Ne seront pas affichées sur le document." required=false cols="50" rows="4"}}
+			</li>
 		</ul>
 	</fieldset>
 
@@ -288,7 +293,7 @@
 		<legend><h2>Signature du devis</h2></legend>
 		<p id="signing_confirmation_p">
 			<p class="infos">Ce document restera un brouillon et sera modifiable tant que vous n'aurez pas signé le devis.</p>
-			{{:input type="checkbox" name="signing" id="debug" label="Signer le devis" value="1"}}
+			{{:input type="checkbox" name="signing" label="Signer le devis" value="1"}}
 		</p>
 		<p id="signing_warning" class="infos">
 			À ne remplir que si vous souhaitez valider immédiatement le devis.

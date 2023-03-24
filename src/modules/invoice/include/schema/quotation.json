@@ -137,6 +137,11 @@
 			"type": ["string", "null"],
 			"maxLength": 1024
 		},
+		"comment": {
+			"description": "Remarques (ne seront pas affichées sur le devis)",
+			"type": ["string", "null"],
+			"maxLength": 1024
+		},
 		"vat_exemption": {
 			"Description": "Mode d'exonération de la TVA",
 			"type": "string",

@@ -146,6 +146,11 @@
 			"type": ["string", "null"],
 			"maxLength": 1024
 		},
+		"comment": {
+			"description": "Remarques (ne seront pas affichées sur la facture)",
+			"type": ["string", "null"],
+			"maxLength": 1024
+		},
 		"vat_exemption": {
 			"Description": "Mode d'exonération de la TVA",
 			"type": "string",

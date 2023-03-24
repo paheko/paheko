@@ -35,7 +35,7 @@
 					recipient_business_name=$recipient_business_name
 					recipient_address=$recipient_address
 					recipient_member_id=$recipient_member_id
-					recipient_member_numero=$recipient_member_numero
+					recipient_member_number=$recipient_member_number
 					introduction_text=$introduction_text
 					subject=$subject
 					date=$date
@@ -53,6 +53,7 @@
 					signing_date=$signing_date
 					payment_detail=$payment_detail
 					extra_info=$extra_info
+					comment=$comment
 					module_version=$VERSION
 				}}
 
@@ -95,7 +96,7 @@
 					recipient_business_name=$recipient_business_name
 					recipient_address=$recipient_address
 					recipient_member_id=$recipient_member_id
-					recipient_member_numero=$recipient_member_numero
+					recipient_member_number=$recipient_member_number
 					introduction_text=null
 					subject=$subject
 					date=$now|date:'Y-m-d'
@@ -115,6 +116,7 @@
 					validation_date=null
 					payment_detail=null
 					extra_info=null
+					comment=$comment
 					module_version=$VERSION
 				}}
 			{{/if}}
@@ -126,7 +128,7 @@
 				recipient_business_name=$recipient_business_name
 				recipient_address=$recipient_address
 				recipient_member_id=$recipient_member_id
-				recipient_member_numero=$recipient_member_numero
+				recipient_member_number=$recipient_member_number
 				introduction_text=$introduction_text
 				subject=$subject
 				date=$date
@@ -146,6 +148,7 @@
 				validation_date=$validation_date
 				payment_detail=$payment_detail
 				extra_info=$extra_info
+				comment=$comment
 				parent_id=$_GET.id|intval
 				module_version=$VERSION
 			}}
@@ -174,7 +177,7 @@
 		{{:assign var='check_errors.' value="Le paiement doit se situer après la date d'émission de la facture (%s)."|args:$formatted_invoice_date}}
 	{{/if}}
 	
-	{{:include file='./check_max_length.tpl' check_value=$_POST.comment check_max=256 check_label='Remarques trop longues' keep='check_errors'}}
+	{{:include file='./check_max_length.tpl' check_value=$_POST.payment_comment check_max=256 check_label='Remarque trop longue' keep='check_errors'}}
 
 	{{:include file='./shim/array_last_num_key.tpl' keep='transaction_id, check_errors' array=$_POST.transaction name='transaction_id' error_message='Écriture séléctionnée invalide.'}}
 	{{#transactions id=$transaction_id|intval}}{{:assign .='transaction'}}{{/transactions}}
@@ -190,7 +193,7 @@
 			recipient_business_name=$invoice.recipient_business_name
 			recipient_address=$invoice.recipient_address
 			recipient_member_id=$invoice.recipient_member_id
-			recipient_member_numero=$invoice.recipient_member_numero
+			recipient_member_number=$invoice.recipient_member_number
 			introduction_text=null
 			subject=$invoice.subject
 			date=$invoice.date
@@ -209,10 +212,11 @@
 			signing_date=$invoice.signing_date
 			validation_date=null
 			payment_date=$date
-			payment_comment=$_POST.comment
+			payment_comment=$_POST.payment_comment
 			transaction_id=$transaction.id|intval
 			payment_detail=null
 			extra_info=null
+			comment=$invoice.comment
 			module_version=$VERSION
 		}}
 		{{:http redirect="details.html?id=%d&ok=6&show=invoice"|args:$invoice.id}}
@@ -239,7 +243,7 @@
 						recipient_business_name=$recipient_business_name
 						recipient_address=$recipient_address
 						recipient_member_id=$recipient_member_id
-						recipient_member_numero=$recipient_member_numero
+						recipient_member_number=$recipient_member_number
 						introduction_text=$introduction_text
 						subject=$subject
 						date=$date
@@ -259,10 +263,11 @@
 						signing_date=$signing_date
 						validation_date=$validation_date
 						payment_date=$payment_date
-						payment_comment=$comment
+						payment_comment=$payment_comment
 						transaction_id=$transaction_id
 						payment_detail=$payment_detail
 						extra_info=$extra_info
+						comment=$comment
 						module_version=$VERSION
 					}}
 				{{else}}
@@ -273,7 +278,7 @@
 						recipient_business_name=$recipient_business_name
 						recipient_address=$recipient_address
 						recipient_member_id=$recipient_member_id
-						recipient_member_numero=$recipient_member_numero
+						recipient_member_number=$recipient_member_number
 						introduction_text=$introduction_text
 						subject=$subject
 						date=$date
@@ -294,6 +299,7 @@
 						validation_date=$validation_date
 						payment_detail=$payment_detail
 						extra_info=$extra_info
+						comment=$comment
 						parent_id=$parent_id
 						module_version=$VERSION
 					}}
@@ -316,7 +322,7 @@
 					recipient_business_name=$recipient_business_name
 					recipient_address=$recipient_address
 					recipient_member_id=$recipient_member_id
-					recipient_member_numero=$recipient_member_numero
+					recipient_member_number=$recipient_member_number
 					introduction_text=$introduction_text
 					subject=$subject
 					date=$date
@@ -340,6 +346,7 @@
 					transaction_id=null
 					payment_detail=$payment_detail
 					extra_info=$extra_info
+					comment=$comment
 					module_version=$VERSION
 				}}
 			{{else}}
@@ -350,7 +357,7 @@
 					recipient_business_name=$recipient_business_name
 					recipient_address=$recipient_address
 					recipient_member_id=$recipient_member_id
-					recipient_member_numero=$recipient_member_numero
+					recipient_member_number=$recipient_member_number
 					introduction_text=$introduction_text
 					subject=$subject
 					date=$date
@@ -370,12 +377,92 @@
 					validation_date=null
 					payment_detail=$payment_detail
 					extra_info=$extra_info
+					comment=$comment
 					parent_id=null
 					duplicated_from_id=$id|intval
 					module_version=$VERSION
 				}}
 			{{/if}}
 			{{:http redirect="index.html?ok=4"}}
+		{{/load}}
+	{{/if}}
+{{elseif $_POST.edit_comment_submit}}
+	{{if !$_GET.id}}
+		{{:assign var='check_errors.' value='Aucun document sélectionné.'}}
+	{{/if}}
+	{{:include file='./check_max_length.tpl' check_value=$_POST.comment check_max=1024 check_label='Remarques trop longues' keep='check_errors'}}
+	{{if !$check_errors}}
+		{{#load id=$_GET.id}}
+			{{if $type === $INVOICE_TYPE}}
+				{{:save id=id|intval
+					validate_schema="./schema/invoice.json"
+					key=$key
+					type=$type
+					recipient_business_name=$recipient_business_name
+					recipient_address=$recipient_address
+					recipient_member_id=$recipient_member_id
+					recipient_member_number=$recipient_member_number
+					introduction_text=$introduction_text
+					subject=$subject
+					date=$date
+					deadline=$deadline
+					status=$status
+					cancelled=$cancelled
+					cancellation_reason=$cancellation_reason
+					items=$items
+					total=$total
+					vat_exemption=$vat_exemption
+					siret=$siret
+					org_contact=$org_contact
+					author_id=$author_id
+					parent_id=$parent_id
+					last_modification_date=$now|atom_date
+					signing_place=$signing_place
+					signing_date=$signing_date
+					validation_date=$validation_date
+					payment_date=$payment_date
+					payment_comment=$payment_comment
+					transaction_id=$transaction_id
+					payment_detail=$payment_detail
+					extra_info=$extra_info
+					comment=$_POST.comment
+					module_version=$VERSION
+				}}
+			{{else}}
+				{{:save id=$id|intval
+					validate_schema="./schema/quotation.json"
+					key=$key
+					type=$type
+					recipient_business_name=$recipient_business_name
+					recipient_address=$recipient_address
+					recipient_member_id=$recipient_member_id
+					recipient_member_number=$recipient_member_number
+					introduction_text=$introduction_text
+					subject=$subject
+					date=$date
+					deadline=$deadline
+					status=$status
+					cancelled=$cancelled
+					cancellation_reason=$cancellation_reason
+					items=$items
+					total=$total
+					vat_exemption=$vat_exemption
+					siret=$siret
+					org_contact=$org_contact
+					author_id=$author_id
+					child_id=$child_id
+					last_modification_date=$now|atom_date
+					signing_place=$signing_place
+					signing_date=$signing_date
+					validation_date=$validation_date
+					payment_detail=$payment_detail
+					extra_info=$extra_info
+					comment=$_POST.comment
+					parent_id=$parent_id
+					module_version=$VERSION
+				}}
+			{{/if}}
+			{{:http redirect="index.html?ok=6&show=%s"|args:$type}}
 		{{/load}}
 	{{/if}}
 {{/if}}
@@ -402,7 +489,7 @@
 						recipient_business_name=$recipient_business_name
 						recipient_address=$recipient_address
 						recipient_member_id=$recipient_member_id
-						recipient_member_numero=$recipient_member_numero
+						recipient_member_number=$recipient_member_number
 						introduction_text=$introduction_text
 						subject=$subject
 						date=$date

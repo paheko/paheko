@@ -194,7 +194,21 @@
 				{{/if}}
 			</ul>
 		</fieldset>
-		
+
+		<form method="POST" action="{{"action.html?id=%d&show=%s&action=edit_comment"|args:$id:$type}}">
+			<fieldset>
+				<legend>
+					<h2>Remarques internes{{if $comment}}{{:button type="submit" title="Éditer les remarques" shape="edit" name="edit_comment_button"}}{{/if}}</h2>
+				</legend>
+				{{if $comment}}
+					<p>{{$comment|escape|nl2br}}</p>
+				{{else}}
+					<p class="infos">Aucune.</p>
+					<p>{{:button type="submit" label="Ajouter des remarques" shape="plus" name="edit_comment_button"}}</p>
+				{{/if}}
+			</fieldset>
+		</form>
+
 		{{if $payment_text || $extra_text}}
 			<fieldset>
 				<legend><h2>Infos complémentaires</h2></legend>
