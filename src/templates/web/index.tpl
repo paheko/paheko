@@ -8,16 +8,12 @@
 		{linkbutton shape="plus" label="Nouvelle catégorie" target="_dialog" href="new.php?type=%d&parent=%s"|args:$type_category,$current_path}
 		{/if}
 	</aside>
+	{if !$config.site_disabled}
 	<ul>
 		<li class="current"><a href="./">Gestion du site web</a></li>
-		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)}
-			{*<li><a href="theme.php">Thèmes</a></li>*}
-			<li><a href="config.php">Configuration</a></li>
-		{/if}
-		{if !$config.site_disabled}
-			<li><a href="{if $cat}{$cat->url()}{else}{$www_url}{/if}" target="_blank">Voir le site en ligne</a></li>
-		{/if}
+		<li><a href="{if $cat}{$cat->url()}{else}{$www_url}{/if}" target="_blank">Voir le site en ligne</a></li>
 	</ul>
+	{/if}
 </nav>
 
 <nav class="breadcrumbs">
@@ -38,9 +34,9 @@
 
 </nav>
 
-{if $config.site_disabled && $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)}
+{if $config.site_disabled && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
 	<p class="block alert">
-		Le site public est désactivé. <a href="{"!web/config.php"|local_url}">Activer le site dans la configuration.</a>
+		Le site public est désactivé. <a href="{"!config/"|local_url}">Activer le site dans la configuration.</a>
 	</p>
 {/if}
 
@@ -74,6 +70,8 @@
 					{linkbutton shape="image" label="Prévisualiser" href="page.php?p=%s"|args:$p.path}
 					{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
 					{linkbutton shape="edit" label="Éditer" href="edit.php?p=%s"|args:$p.path}
+					{/if}
+					{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)}
 					{linkbutton shape="delete" label="Supprimer" target="_dialog" href="delete.php?p=%s"|args:$p.path}
 					{/if}
 				</td>
@@ -107,6 +105,8 @@
 					{linkbutton shape="image" label="Prévisualiser" href="page.php?p=%s"|args:$p.path}
 					{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
 					{linkbutton shape="edit" label="Éditer" href="edit.php?p=%s"|args:$p.path}
+					{/if}
+					{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)}
 					{linkbutton shape="delete" label="Supprimer" target="_dialog" href="delete.php?p=%s"|args:$p.path}
 					{/if}
 				</td>

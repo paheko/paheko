@@ -75,31 +75,35 @@
 <table>
 <thead>
 <tr>
-<th>Adresse</th>
-<th>Squelette appelé</th>
+<th style="text-align: left;">Squelette appelé</th>
+<th style="text-align: left;">Cas où le squelette est appelé</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>/</code> (racine du site)</td>
-<td><code>index.html</code></td>
+<td style="text-align: left;"><code>adresse</code></td>
+<td style="text-align: left;">Si l'adresse <code>adresse</code> est appelée, et qu'un squelette du même nom existe</td>
 </tr>
 <tr>
-<td>Toute autre adresse se terminant par un slash <code>/</code></td>
-<td><code>category.html</code></td>
+<td style="text-align: left;"><code>adresse/index.html</code></td>
+<td style="text-align: left;">Si l'adresse <code>adresse/</code> est appelée, et qu'un squelette <code>index.html</code> dans le répertoire du même nom existe</td>
 </tr>
 <tr>
-<td>Toute autre adresse, si un article existe avec cette URI</td>
-<td><code>article.html</code></td>
+<td style="text-align: left;"><code>category.html</code></td>
+<td style="text-align: left;">Toute autre adresse se terminant par un slash <code>/</code>, si une catégorie du même nom existe</td>
 </tr>
 <tr>
-<td>Toute autre adresse, si un squelette du même nom existe</td>
-<td>Squelettes du même nom</td>
+<td style="text-align: left;"><code>article.html</code></td>
+<td style="text-align: left;">Toute autre adresse, si une page du même nom existe</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>404.html</code></td>
+<td style="text-align: left;">Si aucune règle précédente n'a fonctionné</td>
 </tr>
 </tbody>
 </table>
-<p>Ainsi l'adresse <code>https://monsite.paheko.cloud/Actualite/</code> appellera le squelette <code>category.html</code>, mais l'adresse <code>https://monsite.paheko.cloud/Actualite</code> (sans slash à la fin) appellera le squelette <code>article.html</code> si un article avec l'URI <code>Actualite</code> existe. Sinon si un squelette <code>Actualite</code> (sans extension) existe, c'est lui qui sera appelé.</p>
-<p>Autre exemple : <code>https://monsite.paheko.cloud/atom.xml</code> appellera le squelette <code>atom.xml</code> vu qu'il existe.</p>
+<p>Ainsi l'adresse <code>https://monsite.paheko.cloud/Actualite/</code> appellera le squelette <code>category.html</code>, mais l'adresse <code>https://monsite.paheko.cloud/Actualite</code> (sans slash à la fin) appellera le squelette <code>article.html</code> si un article avec l'URI <code>Actualite</code> existe. Si un squelette <code>Actualite</code> (sans extension) existe, c'est lui qui sera appelé en priorité et ni <code>category.html</code> ni <code>article.html</code> ne seront appelés.</p>
+<p>Autre exemple : <code>https://monsite.paheko.cloud/atom.xml</code> appellera le squelette <code>atom.xml</code> s'il existe.</p>
 <p>Ceci vous permet de créer de nouvelles pages dynamiques sur le site, par exemple pour notre atelier vélo nous avons une page <code>https://larustine.org/velos</code> qui appelle le squelette <code>velos</code> (sans extension), qui va afficher la liste des vélos actuellement en stock dans notre hangar.</p>
 <p>Le type de fichier étant déterminé selon l'extension (<code>.html, .css, etc.</code>) pour les fichiers traités par Brindille, un fichier sans extension sera considéré comme un fichier texte par le navigateur. Si on veut que le squelette <code>velos</code> (sans extension) s'affiche comme du HTML il faut forcer le type en mettant le code <code>{{:http type="text/html"}}</code> au début du squelette (première ligne).</p>
 <h2 id="fichier-content-css">Fichier content.css</h2>

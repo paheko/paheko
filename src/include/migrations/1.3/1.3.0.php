@@ -66,21 +66,21 @@ $db->exec(sprintf('REPLACE INTO config (key, value) VALUES (\'files\', %s);', $d
 
 // Move skeletons from skel/ to skel/web/
 // Don't use Files::get to get around validatePath security
-$list = Files::list(File::CONTEXT_SKELETON);
+$list = Files::list('skel');
 
 foreach ($list as $file) {
 	if ($file->name == 'web') {
 		continue;
 	}
 
-	$file->move(File::CONTEXT_SKELETON . '/web');
+	$file->move(File::CONTEXT_MODULES . '/web');
 
 	if ($file->type == $file::TYPE_DIRECTORY) {
 		continue;
 	}
 
 	// Prepend "./" to includes functions file parameter
-	foreach (Files::list(File::CONTEXT_SKELETON . '/web') as $file) {
+	foreach (Files::list(File::CONTEXT_MODULES . '/web') as $file) {
 		if ($file->type != File::TYPE_FILE || !preg_match('/\.(?:txt|css|js|html|htm)$/', $file->name)) {
 			continue;
 		}

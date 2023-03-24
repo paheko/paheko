@@ -5,10 +5,12 @@ namespace Garradin\UserTemplate;
 use Garradin\Entities\Module;
 
 use Garradin\Files\Files;
+use Garradin\Config;
 use Garradin\DB;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\Users\Session;
+use Garradin\Web\Web;
 
 use const Garradin\ROOT;
 
@@ -26,7 +28,8 @@ class Modules
 	 */
 	static public function refresh(): void
 	{
-		$existing = DB::getInstance()->getAssoc(sprintf('SELECT id, name FROM %s;', Module::TABLE));
+		$db = DB::getInstance();
+		$existing = $db->getAssoc(sprintf('SELECT id, name FROM %s;', Module::TABLE));
 		$list = self::listRaw();
 
 		$create = array_diff($list, $existing);
@@ -46,6 +49,10 @@ class Modules
 			$f->updateFromINI();
 			$f->save();
 			$f->updateTemplates();
+		}
+
+		if (!$db->test(Module::TABLE, 'web = 1 AND enabled = 1')) {
+			$db->exec('UPDATE modules SET enabled = 1 WHERE id = (SELECT id FROM modules WHERE web = 1 LIMIT 1);');
 		}
 	}
 
@@ -163,5 +170,95 @@ class Modules
 	static public function isEnabled(string $name): bool
 	{
 		return (bool) EM::getInstance(Module::class)->col('SELECT 1 FROM @TABLE WHERE name = ? AND enabled = 1;', $name);
+	}
+
+	static public function getWeb(): Module
+	{
+		$module = EM::findOne(Module::class, 'SELECT * FROM @TABLE WHERE web = 1 AND enabled = 1 LIMIT 1;');
+
+		// Just in case
+		if (!$module) {
+			throw new \LogicException('No web module is enabled?!');
+		}
+
+		return $module;
+	}
+
+	static public function route(string $uri): void
+	{
+		$page = null;
+		$path = null;
+
+		// We are looking for a module
+		if (substr($uri, 0, 2) == 'm/') {
+			$path = substr($uri, 2);
+			$name = strtok($path, '/');
+			$path = strtok(false);
+			$module = self::get($name);
+
+			if (!$module) {
+				http_response_code(404);
+				throw new UserException('This page does not exist.');
+			}
+		}
+		// Or: we are looking for the "web" module
+		else {
+			// Redirect to ADMIN_URL if website is disabled
+			// (but not for content.css)
+			if (Config::getInstance()->site_disabled && $uri != 'content.css') {
+				Utils::redirect(ADMIN_URL);
+			}
+
+			$module = self::getWeb();
+		}
+
+		// If path ends with trailing slash, then ask for index.html
+		if (!$path || substr($path, -1) == '/') {
+			$path .= 'index.html';
+		}
+
+		// Find out web path
+		if ($module->web) {
+			if ($uri == '') {
+				$path = 'index.html';
+			}
+			elseif ($module->hasFile($uri)) {
+				$path = $uri;
+			}
+			elseif (($page = Web::getByURI($uri)) && $page->status == Page::STATUS_ONLINE) {
+				$path = $page->template();
+				$page = $page->asTemplateArray();
+			}
+			else {
+				$path = '404.html';
+			}
+		}
+		// 404 if module is not enabled, except for icon
+		elseif (!$module->enabled && $path != Module::ICON_FILE) {
+			http_response_code(404);
+			throw new UserException('This page is currently disabled.');
+		}
+
+		// Error if path is not valid
+		if (!$module->isValidPath($path)) {
+			if ($module->web) {
+				$path = '404.html';
+			}
+			else {
+				http_response_code(404);
+				throw new UserException('This address is invalid.');
+			}
+		}
+
+		$has_local_file = $module->hasLocalFile($path);
+		$has_dist_file = !$has_local_file && $module->hasDistFile($path);
+
+		// Check if the file actually exists in the module
+		if (!$has_local_file && !$has_dist_file) {
+			http_response_code(404);
+			throw new UserException('This page is not found, sorry.');
+		}
+
+		$module->serve($path, $has_local_file, compact('uri', 'page'));
 	}
 }

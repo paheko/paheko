@@ -33,16 +33,17 @@ Une fois un squelette modifié, il apparaît dans la liste comme étant modifié
 
 Les squelettes sont appelés en fonction des règles suivantes (dans l'ordre) :
 
-| Adresse | Squelette appelé |
+| Squelette appelé | Cas où le squelette est appelé |
 | :---- | :---- |
-| `/` (racine du site) | `index.html` |
-| Toute autre adresse se terminant par un slash `/` | `category.html` |
-| Toute autre adresse, si un article existe avec cette URI | `article.html` |
-| Toute autre adresse, si un squelette du même nom existe | Squelettes du même nom |
+| `adresse` | Si l'adresse `adresse` est appelée, et qu'un squelette du même nom existe |
+| `adresse/index.html` | Si l'adresse `adresse/` est appelée, et qu'un squelette `index.html` dans le répertoire du même nom existe |
+| `category.html` | Toute autre adresse se terminant par un slash `/`, si une catégorie du même nom existe |
+| `article.html` | Toute autre adresse, si une page du même nom existe | 
+| `404.html` | Si aucune règle précédente n'a fonctionné |
 
-Ainsi l'adresse `https://monsite.paheko.cloud/Actualite/` appellera le squelette `category.html`, mais l'adresse `https://monsite.paheko.cloud/Actualite` (sans slash à la fin) appellera le squelette `article.html` si un article avec l'URI `Actualite` existe. Sinon si un squelette `Actualite` (sans extension) existe, c'est lui qui sera appelé.
+Ainsi l'adresse `https://monsite.paheko.cloud/Actualite/` appellera le squelette `category.html`, mais l'adresse `https://monsite.paheko.cloud/Actualite` (sans slash à la fin) appellera le squelette `article.html` si un article avec l'URI `Actualite` existe. Si un squelette `Actualite` (sans extension) existe, c'est lui qui sera appelé en priorité et ni `category.html` ni `article.html` ne seront appelés.
 
-Autre exemple : `https://monsite.paheko.cloud/atom.xml` appellera le squelette `atom.xml` vu qu'il existe.
+Autre exemple : `https://monsite.paheko.cloud/atom.xml` appellera le squelette `atom.xml` s'il existe.
 
 Ceci vous permet de créer de nouvelles pages dynamiques sur le site, par exemple pour notre atelier vélo nous avons une page `https://larustine.org/velos` qui appelle le squelette `velos` (sans extension), qui va afficher la liste des vélos actuellement en stock dans notre hangar.
 

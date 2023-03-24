@@ -85,7 +85,7 @@
 						{/if}
 					</td>
 					<td>
-						{if $item.enabled && $item.url}
+						{if $item.enabled && $item.url && !$item.web}
 							{linkbutton shape="right" label="Ouvrir" href=$item.url}
 						{/if}
 					</td>
@@ -108,9 +108,9 @@
 					</td>
 					<td class="actions">
 						{if $item.module}
-							{if $item.enabled}
+							{if $item.enabled && !$item.web}
 								{button type="submit" label="Désactiver" shape="eye-off" name="disable_module" value=$item.name}
-							{else}
+							{elseif !$item.enabled}
 								{button type="submit" label="Activer" shape="eye" name="enable" value=$item.name}
 							{/if}
 						{else}

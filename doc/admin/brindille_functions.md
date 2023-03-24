@@ -328,6 +328,7 @@ Note : un appel à cette fonction depuis le code du site web provoquera une erre
 | `key` | optionnel | Clé unique du document |
 | `id` | optionnel | Numéro unique du document |
 | `validate_schema` | optionnel | Fichier de schéma JSON à utiliser pour valider les données avant enregistrement |
+| `validate_only` | optionnel | Liste des paramètres à valider (par exemple pour ne faire qu'une mise à jour partielle), séparés par des virgules. |
 | `assign_new_id` | optionnel | Si renseigné, le nouveau numéro unique du document sera indiqué dans cette variable. |
 | … | optionnel | Autres paramètres : traités comme des valeurs à enregistrer dans le document |
 
@@ -356,6 +357,18 @@ Exemple de récupération du nouvel ID :
 ```
 {{:save titre="Coucou !" assign_new_id="id"}}
 Le document n°{{$id}} a bien été enregistré.
+```
+
+### Validation avec un schéma JSON
+
+```
+{{:save titre="Coucou" texte="Très long" validate_schema="./document.schema.json"}}
+```
+
+Pour ne valider qu'une partie du schéma, par exemple si on veut faire une mise à jour du document :
+
+```
+{{:save key="test" titre="Coucou" validate_schema="./document.schema.json" validate_only="titre"}}
 ```
 
 ## delete

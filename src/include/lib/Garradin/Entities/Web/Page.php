@@ -545,8 +545,11 @@ class Page extends Entity
 			$this->set('modified', $file->modified);
 		}
 
-		if ($this->type != self::TYPE_CATEGORY) {
+		if (!isset($this->type) || $this->type != self::TYPE_CATEGORY) {
 			$this->set('type', $this->checkRealType());
+		}
+		else {
+			$this->set('type', self::TYPE_CATEGORY);
 		}
 	}
 

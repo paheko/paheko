@@ -80,7 +80,7 @@ class Functions
 
 	static public function save(array $params, Brindille $tpl, int $line): void
 	{
-		$name = explode('/', Utils::dirname($tpl->_tpl_path))[1] ?? null;
+		$name = strtok($tpl->_tpl_path, '/');
 
 		if (!$name) {
 			throw new Brindille_Exception('Module name could not be found');
@@ -108,8 +108,9 @@ class Functions
 		$id = $params['id'] ?? null;
 		$assign_new_id = $params['assign_new_id'] ?? null;
 		$validate = $params['validate_schema'] ?? null;
+		$validate_only = $params['validate_only'] ?? null;
 
-		unset($params['key'], $params['id'], $params['assign_new_id'], $params['validate_schema']);
+		unset($params['key'], $params['id'], $params['assign_new_id'], $params['validate_schema'], $params['validate_only']);
 
 		$db = DB::getInstance();
 
@@ -142,9 +143,23 @@ class Functions
 		if ($validate) {
 			$schema = self::read(['file' => $validate], $tpl, $line);
 
+			if ($validate_only && is_string($validate_only)) {
+				$validate_only = explode(',', $validate_only);
+				$validate_only = array_map('trim', $validate_only);
+			}
+			else {
+				$validate_only = null;
+			}
+
 			try {
 				$s = JSONSchema::fromString($schema);
-				$s->validate($params);
+
+				if ($validate_only) {
+					$s->validateOnly($params, $validate_only);
+				}
+				else {
+					$s->validate($params);
+				}
 			}
 			catch (\RuntimeException $e) {
 				throw new Brindille_Exception(sprintf("ligne %d: impossible de valider le schéma:\n%s\n\n%s",
@@ -174,7 +189,7 @@ class Functions
 
 	static public function delete(array $params, Brindille $tpl, int $line): void
 	{
-		$name = explode('/', Utils::dirname($tpl->_tpl_path))[1] ?? null;
+		$name = strtok($tpl->_tpl_path, '/');
 
 		if (!$name) {
 			throw new Brindille_Exception('Module name could not be found');
@@ -347,13 +362,13 @@ class Functions
 	{
 		$path = self::getFilePath($params, 'file', $ut, $line);
 
-		$file = Files::get(File::CONTEXT_SKELETON . '/' . $path);
+		$file = Files::get(File::CONTEXT_MODULES . '/' . $path);
 
 		if ($file) {
 			$content = $file->fetch();
 		}
 		else {
-			$content = file_get_contents(ROOT . '/skel-dist/' . $path);
+			$content = file_get_contents(ROOT . '/modules/' . $path);
 		}
 
 		if (!empty($params['base64'])) {

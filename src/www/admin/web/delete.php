@@ -6,7 +6,7 @@ use Garradin\Entities\Web\Page;
 
 require_once __DIR__ . '/_inc.php';
 
-$session->requireAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
+$session->requireAccess($session::SECTION_WEB, $session::ACCESS_ADMIN);
 
 $page = Web::get(qg('p'));
 

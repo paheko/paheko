@@ -180,6 +180,7 @@ class Plugins
 			$item['broken_message'] = isset($item['plugin']) ? $c->getBrokenMessage() : false;
 			$item['restrict_section'] = $c->restrict_section;
 			$item['restrict_level'] = $c->restrict_level;
+			$item['web'] = $c->web;
 
 			$item['url'] = null;
 
