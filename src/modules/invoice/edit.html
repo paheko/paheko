@@ -134,6 +134,15 @@
 		{{:assign var='check_errors.' value="La date de signature doit se situer après la date du devis (%s)."|args:$_POST.date}}
 	{{/if}}
 
+	{{if $_POST.key}}
+		{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Numéro trop long' check_value=$_POST.key check_max=32}}
+		{{#sql select='key' tables='module_data_invoice' where="key = :post_key" :post_key=$_POST.key}}
+			{{:assign found=true}}
+		{{/sql}}
+		{{if !$document && $found}}
+			{{:assign var='check_errors.' value='Un document existe déjà avec ce numéro (%s). Veuillez en saisir un différent.'|args:$_POST.key}}
+		{{/if}}
+	{{/if}}
 	{{if $check_errors|count}}
 		{{#foreach from=$check_errors item='error'}}
 			<p class="error block">{{$error}}</p>
