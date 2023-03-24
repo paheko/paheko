@@ -56,6 +56,11 @@ class Module extends Entity
 	protected bool $enabled;
 	protected bool $web;
 
+	/**
+	 * System modules are always available, disabling them only hides the links
+	 */
+	protected bool $system;
+
 	public function selfCheck(): void
 	{
 		$this->assert(preg_match('/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/', $this->name), 'Nom unique de module invalide: ' . $this->name);
@@ -69,9 +74,11 @@ class Module extends Entity
 	{
 		if ($use_local && ($file = Files::get($this->path(self::META_FILE)))) {
 			$ini = $file->fetch();
+			$from_dist = false;
 		}
 		elseif (file_exists($this->distPath(self::META_FILE))) {
 			$ini = file_get_contents($this->distPath(self::META_FILE));
+			$from_dist = true;
 		}
 		else {
 			return false;
@@ -98,6 +105,10 @@ class Module extends Entity
 		$this->set('menu', !empty($ini->menu));
 		$this->set('restrict_section', $ini->restrict_section ?? null);
 		$this->set('restrict_level', isset($ini->restrict_section, $ini->restrict_level, Session::ACCESS_WORDS[$ini->restrict_level]) ? Session::ACCESS_WORDS[$ini->restrict_level] : null);
+
+		if ($from_dist && !empty($ini->system)) {
+			$this->set('system', true);
+		}
 
 		return true;
 	}

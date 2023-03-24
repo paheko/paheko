@@ -234,7 +234,7 @@ class Modules
 			}
 		}
 		// 404 if module is not enabled, except for icon
-		elseif (!$module->enabled && $path != Module::ICON_FILE) {
+		elseif (!$module->enabled && !$module->system && $path != Module::ICON_FILE) {
 			http_response_code(404);
 			throw new UserException('This page is currently disabled.');
 		}
