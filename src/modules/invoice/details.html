@@ -134,10 +134,10 @@
 			{{if $recipient_member_id}}
 				{{#users id=$recipient_member_id|intval}}{{:assign .='member'}}{{/users}}
 				{{if !$member}}
-					<p class="infos">Associé à l'ancien.ne membre {{if $recipient_member_numero}}n°{{$recipient_member_numero}}{{else}}#{{$recipient_member_id}}{{/if}} (compte supprimé).</p>
+					<p class="infos">Associé à l'ancien.ne membre {{if $recipient_member_number}}n°{{$recipient_member_number}}{{else}}#{{$recipient_member_id}}{{/if}} (compte supprimé).</p>
 				{{else}}
 					<p class="infos">
-						Associé au membre {{if $recipient_member_numero}}n°{{$recipient_member_numero}}{{/if}} : "{{:link href="!users/details.php?id=%d"|args:$member.id label=$member.nom}}",
+						Associé au membre {{if $recipient_member_number}}n°{{$recipient_member_number}}{{/if}} : "{{:link href="!users/details.php?id=%d"|args:$member.id label=$member.nom}}",
 						{{if $recipient_business_name !== $member.nom}} sous la désignation "{{$recipient_business_name}}".{{/if}}<br />
 						{{:link href="customer.html?show=customers&id=%s"|args:$recipient_business_name label='Voir tous les devis de "%s".'|args:$recipient_business_name}}
 					</p>

@@ -17,7 +17,7 @@
 			"type": ["integer", "null"],
 			"maxLength": 19
 		},
-		"recipient_member_numero": {
+		"recipient_member_number": {
 			"description": "Numéro de membre du client",
 			"type": ["string", "null"],
 			"maxLength": 19

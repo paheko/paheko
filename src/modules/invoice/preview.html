@@ -46,8 +46,8 @@
 		<strong class="business_name">{{$recipient_business_name}}</strong><br />
 		{{$recipient_address|escape|nl2br}}
 	</li>
-	{{if $recipient_member_numero || $recipient_member_id}}
-		<li>Réf. membre : {{if $recipient_member_numero}}{{$recipient_member_numero}}{{else}}#{{$recipient_member_id}}{{/if}}</li>
+	{{if $recipient_member_number || $recipient_member_id}}
+		<li>Réf. membre : {{if $recipient_member_number}}{{$recipient_member_number}}{{else}}#{{$recipient_member_id}}{{/if}}</li>
 	{{/if}}
 </ul>
 

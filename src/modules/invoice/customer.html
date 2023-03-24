@@ -22,7 +22,7 @@
 	{{/restrict}}
 {{/if}}
 
-{{:assign list_select="key; id AS 'Numéro'; datetime($$.date) AS 'Émission'; $$.deadline AS 'Échéance'; $$.subject AS 'Intitulé'; $$.total AS 'Montant'; $$.recipient_member_id AS 'Membre'; $$.recipient_member_numero; $$.status"}}
+{{:assign list_select="key; id AS 'Numéro'; datetime($$.date) AS 'Émission'; $$.deadline AS 'Échéance'; $$.subject AS 'Intitulé'; $$.total AS 'Montant'; $$.recipient_member_id AS 'Membre'; $$.recipient_member_number; $$.status"}}
 {{:assign list_where="$$.cancelled = false AND $$.recipient_business_name = :business_name AND $$.type = :type AND $$.status = :status"}}
 {{:assign list_where_cancelled="$$.recipient_business_name = :business_name AND $$.type = :type AND $$.cancelled = true"}}
 {{:assign list_order=8}}

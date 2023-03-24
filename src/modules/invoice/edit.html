@@ -32,7 +32,7 @@
 	{{if $customer_id !== null}}
 		{{#users id=$customer_id}}
 			{{:assign recipient_member_id=$id}}
-			{{:assign recipient_member_numero=$numero|strval}}
+			{{:assign recipient_member_number=$numero|strval}}
 			{{:assign recipient_business_name=$nom}}
 			{{if $adresse}}{{:assign recipient_address=$adresse|cat:"\n":$code_postal:' ':$ville}}{{/if}}
 		{{/users}}
@@ -164,7 +164,7 @@
 			recipient_business_name=$recipient_business_name
 			recipient_address=$recipient_address
 			recipient_member_id=$recipient_member_id
-			recipient_member_numero=$recipient_member_numero
+			recipient_member_number=$recipient_member_number
 			introduction_text=$_POST.introduction_text
 			subject=$_POST.subject
 			date=$date
@@ -209,7 +209,7 @@
 			{{if $document.recipient_member_id && !$user}}
 				<p class="infos">
 					Attention : Ce devis est associé à l'ancien.ne membre
-					{{if $document.recipient_member_numero}}n°{{$document.recipient_member_numero}}{{else}}#{{$document.recipient_member_id}}{{/if}}
+					{{if $document.recipient_member_number}}n°{{$document.recipient_member_number}}{{else}}#{{$document.recipient_member_id}}{{/if}}
 					dont le compte est supprimé.<br />
 					Mettre à jour ce document des-associera cet ancien compte.
 				</p>
