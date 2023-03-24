@@ -51,7 +51,7 @@ class Modifiers
 			return strtr($str, $find);
 		}
 
-		return str_replace($find, $replace, $str);
+		return str_replace((string)$find, (string)$replace, (string)$str);
 	}
 
 	static public function regexp_replace($str, $pattern, $replace)
