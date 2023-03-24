@@ -2,10 +2,8 @@
 
 {{* ==================== Header ==================== *}}
 
-{{:admin_header title="Devis et factures" current="acc"}}
+{{:admin_header title="Devis et factures" current="acc" custom_css="./include/style.css"}}
 {{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, VALIDATED_STATUS, REJECTED_STATUS, PAID_STATUS, DOCUMENT_TYPES, CANCELLED_LABEL, TYPE_LABELS, STATUS_LABELS, INVOICE_STATUS_LABELS, QUOTATION_TYPE, INVOICE_TYPE, VERSION'}}
-
-{{:include file='./include/style.tpl'}}
 
 {{if $_GET.action === 'sign' || $_POST.signing_submit || $_GET.action === 'delete' || $_POST.reject_submit || $_POST.validate_submit || $_POST.mark_as_paid_submit || $_POST.cancel_submit || $_POST.duplicate_submit || $_POST.status_update_button}}
 	{{:include file='./include/modification.controller.tpl' keep='check_errors'}}
