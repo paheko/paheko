@@ -281,19 +281,9 @@
 
 	<fieldset>
 		<legend><h2>Signature du devis</h2></legend>
-		{{if $status === $VALIDATED_STATUS}}
-			{{:assign signed=true}}
-		{{else}}
-			{{:assign signed=false}}
-		{{/if}}
 		<p id="signing_confirmation_p">
-			{{* Duplicate {{:input}} awaiting #51c881285662a356968ba943b7ce7956adc3b865 resolution *}}
-			{{if $signed}}
-				{{:input type="checkbox" name="signing" id="debug" label="Signer le devis" value="1" checked=true}}
-			{{else}}
-				<p class="infos">Ce document restera un brouillon et sera modifiable tant que vous n'aurez pas signé le devis.</p>
-				{{:input type="checkbox" name="signing" id="debug" label="Signer le devis" value="1"}}
-			{{/if}}
+			<p class="infos">Ce document restera un brouillon et sera modifiable tant que vous n'aurez pas signé le devis.</p>
+			{{:input type="checkbox" name="signing" id="debug" label="Signer le devis" value="1"}}
 		</p>
 		<p id="signing_warning" class="infos">
 			À ne remplir que si vous souhaitez valider immédiatement le devis.
