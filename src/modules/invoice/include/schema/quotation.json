@@ -81,7 +81,8 @@
 					"quantity": { "type": "number", "minimum": 0 }
 				},
 				"required" : ["id", "name"]
-			}
+			},
+			"maxItems": 128
 		},
 		"total": {
 			"description": "Total",

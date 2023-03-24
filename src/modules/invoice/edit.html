@@ -156,7 +156,7 @@
 		{{if $_POST.key}}
 			{{:assign key=$_POST.key}}
 		{{else}}
-			{{:include file='./include/generate_next_key.tpl' keep='key'}}
+			{{:include file='./include/generate_next_key.tpl' keep='key' type=$QUOTATION_TYPE}}
 		{{/if}}
 		{{if $document}}
 			{{:assign id=$document.id|intval}}
