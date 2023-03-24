@@ -99,7 +99,6 @@ function add_input_refresh_total_behavior() {
 	<p>
 		<span id="quotation_total">0 {{$config.currency|htmlspecialchars}}</span>
 		<input type="hidden" name="quotation_total" id="quotation_total_input" label="" value="" />
-		{{:button name="refresh_total_button" label="Recalculer" shape="reload" onclick="refresh_total()"}}
 	</p>
 </fieldset>
 
