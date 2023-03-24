@@ -49,7 +49,7 @@
 		},
 		"cancelled": {
 			"description": "Défini si la facture est annnulée",
-			"type": "bool"
+			"type": "boolean"
 		},
 		"cancellation_reason": {
 			"description": "Motif de l'annulation",

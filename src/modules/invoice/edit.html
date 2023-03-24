@@ -70,9 +70,12 @@
 	{{if $_POST.date|date_short === null}} {{* Means data is not a date *}}
 		{{:assign var='check_errors.' value="La date du devis doit être une date."}}
 	{{/if}}
-	{{if $_POST.deadline && ($_POST.deadline|date_short === null)}}
+
+{{* Commented awaiting #e4fe4245c74000f542a0e8770dca9c54314fafc8 resolution
+	{{if ($_POST.deadline) && ($_POST.deadline|date_short === null)}}
 		{{:assign var='check_errors.' value="L'échéance doit être une date."}}
 	{{/if}}
+*}}
 	{{if $deadline && $deadline < $date}}
 		{{:assign var='check_errors.' value="L'échéance doit se situer après la date du devis (%s)."|args:$_POST.date}}
 	{{/if}}
@@ -111,19 +114,21 @@
 		{{:assign var='computed_total' value="%d + %d * %F"|args:$computed_total:$computed_item.unit_price:$computed_item.quantity|math}}
 	{{/foreach}}
 
+{{* Commented awaiting #e4fe4245c74000f542a0e8770dca9c54314fafc8 resolution
 	{{if ($computed_total != $_POST.quotation_total|money_int) || ($computed_total < 0)}}
 		{{:assign var='check_errors.' value='Erreur de calcul du total. Enregistrement du devis refusé.'}}
 	{{/if}}
+*}}
 	{{if $module.config.vat_exemption}}
 		{{:assign vat_exemption=$module.config.vat_exemption}}
 	{{else}}
 		{{:assign vat_exemption=$NONPROFIT_VAT_EXEMPTION_TYPE}}
 	{{/if}}
-
+{{* Commented awaiting #e4fe4245c74000f542a0e8770dca9c54314fafc8 resolution
 	{{if $_POST.signing && (!$_POST.signing_place || !$_POST.signing_date)}}
 		{{:assign var='check_errors.' value='La date et le lieu de la signature du devis sont obligatoires si le devis est signé.'}}
 	{{/if}}
-
+*}}
 	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Lieu de da signature trop long' check_value=$_POST.signing_place check_max=128}}
 	{{:assign signing_date=$_POST.signing_date|date:'Y-m-d'}}
 	{{if $signing_date && $signing_date < $date}}

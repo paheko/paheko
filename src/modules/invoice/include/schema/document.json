@@ -24,11 +24,11 @@
 		},
 		"archived": {
 			"description": "Archivé",
-			"type": "bool"
+			"type": "boolean"
 		},
 		"draft": {
 			"description": "Brouillon",
-			"type": "bool"
+			"type": "boolean"
 		},
 		"total": {
 			"description": "Montant total",
