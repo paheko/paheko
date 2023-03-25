@@ -27,14 +27,7 @@
 	{{:assign check_errors=null}}
 	{{:assign items=null}}
 
-	{{* Hack to get the unique element since "$my_array|keys" and "$my_array|first" do not exist *}}
-	{{#foreach from=$_POST.customer key='id' item='item'}}
-		{{if $id != $id|intval|strval}} {{* Hack to check the data is a number *}}
-			{{:assign var='check_errors.' value='Membre séléctionné invalide.'}}
-		{{/if}}
-		{{:assign customer_id=$id|intval}}
-	{{/foreach}}
-
+	{{:include file='./include/shim/array_last_num_key.tpl' keep='customer_id, check_errors' array=$_POST.customer name='customer_id' error_message='Membre séléctionné invalide.'}}
 	{{if $customer_id !== null}}
 		{{#users id=$customer_id}}
 			{{:assign recipient_member_id=$id}}

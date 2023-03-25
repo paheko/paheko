@@ -8,13 +8,7 @@
 					<li>{{:linkbutton href="preview.html?id=%s&source=details"|args:$id label="Aperçu papier" shape="document"}}</li>
 					<li>{{:linkbutton href="./edit.html?id=%d"|args:$id label="Modifier" shape="edit"}}</li>
 					<li>{{:linkbutton href="action.html?id=%d&action=sign&show=quotation"|args:$id label="Signer le devis" shape="check"}}</li>
-					{{if $_GET.action !== 'ask_deletion'}}
-						<li>
-							<form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_deletion"|args:$id:$type}}">
-								{{:button type="submit" label="Supprimer" shape="delete" class="irreversible" name="delete_button"}}
-							</form>
-						</li>
-					{{/if}}
+
 				{{else}}
 					<li>{{:linkbutton label="PDF" href="preview.html?id=%s&source=details"|args:$id shape="pdf"}}</li>
 					{{if $status === $AWAITING_STATUS}}
@@ -27,7 +21,15 @@
 					<li>{{:linkbutton label="PDF" href="preview.html?id=%s&source=details"|args:$id shape="pdf"}}</li>
 				{{/if}}
 			{{/if}}
-			
+			{{if $status === $DRAFT_STATUS}}
+				{{if $_GET.action !== 'ask_deletion'}}
+					<li>
+						<form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_deletion"|args:$id:$type}}">
+							{{:button type="submit" label="Supprimer" shape="delete" class="irreversible" name="delete_button"}}
+						</form>
+					</li>
+				{{/if}}
+			{{/if}}
 			{{if $status !== $DRAFT_STATUS && !$cancelled && $_GET.action !== 'ask_cancelling'}}
 				{{if $type === $QUOTATION_TYPE}}
 					{{:assign button_target_label='le devis'}}

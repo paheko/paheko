@@ -30,31 +30,11 @@
 			{{if !$check_errors}}
 				{{:save id=$_GET.id|intval
 					validate_schema="./schema/quotation.json"
-					key=$key
-					type=$type
-					recipient_business_name=$recipient_business_name
-					recipient_address=$recipient_address
-					recipient_member_id=$recipient_member_id
-					recipient_member_number=$recipient_member_number
-					introduction_text=$introduction_text
-					subject=$subject
-					date=$date
-					deadline=$deadline
+					validate_only="status, signing_place, signing_date, last_modification_date"
 					status=$AWAITING_STATUS
-					cancelled=$cancelled
-					items=$items
-					total=$total
-					vat_exemption=$vat_exemption
-					siret=$siret
-					org_contact=$org_contact
-					author_id=$author_id
-					last_modification_date=$now|atom_date
 					signing_place=$_POST.signing_place
 					signing_date=$signing_date
-					payment_detail=$payment_detail
-					extra_info=$extra_info
-					comment=$comment
-					module_version=$VERSION
+					last_modification_date=$now|atom_date
 				}}
 
 				{{:http redirect="details.html?id=%d&ok=1"|args:$id}}
@@ -93,64 +73,46 @@
 					validate_schema="./schema/invoice.json"
 					key=$invoice_key
 					type=$INVOICE_TYPE
+					status=$AWAITING_STATUS
+					cancelled=false
+					cancellation_reason=null
+					author_id=$logged_user.id|intval
+					parent_id=$_GET.id|intval
+					duplicated_from_id=null
+					transaction_id=null
+					subject=$subject
+					date=$now|date:'Y-m-d'
+					deadline=null
+					signing_date=$now|date:'Y-m-d'
+					signing_place=$signing_place
+					validation_date=null
+					payment_date=null
+					payment_comment=null
+					items=$items
+					total=$total
+					siret=$siret
+					org_contact=$org_contact
 					recipient_business_name=$recipient_business_name
 					recipient_address=$recipient_address
 					recipient_member_id=$recipient_member_id
 					recipient_member_number=$recipient_member_number
 					introduction_text=null
-					subject=$subject
-					date=$now|date:'Y-m-d'
-					deadline=null
-					status=$AWAITING_STATUS
-					cancelled=false
-					items=$items
-					total=$total
-					vat_exemption=$vat_exemption
-					siret=$siret
-					org_contact=$org_contact
-					author_id=$logged_user.id|intval
-					parent_id=$_GET.id|intval
-					last_modification_date=$now|atom_date
-					signing_place=$signing_place
-					signing_date=$now|date:'Y-m-d'
-					validation_date=null
-					payment_detail=null
-					extra_info=null
+					payment_text=null
+					extra_text=null
 					comment=$comment
+					vat_exemption=$vat_exemption
+					last_modification_date=$now|atom_date
 					module_version=$VERSION
 				}}
 			{{/if}}
 
 			{{:save id=$_GET.id|intval
 				validate_schema="./schema/quotation.json"
-				key=$key
-				type=$type
-				recipient_business_name=$recipient_business_name
-				recipient_address=$recipient_address
-				recipient_member_id=$recipient_member_id
-				recipient_member_number=$recipient_member_number
-				introduction_text=$introduction_text
-				subject=$subject
-				date=$date
-				deadline=$deadline
+				validate_only="status, child_id, parent_id, last_modification_date"
 				status=$new_status
-				cancelled=$cancelled
-				items=$items
-				total=$total
-				vat_exemption=$vat_exemption
-				siret=$siret
-				org_contact=$org_contact
-				author_id=$author_id
 				child_id=$invoice_id|intval
-				last_modification_date=$now|atom_date
-				signing_place=$signing_place
-				signing_date=$signing_date
-				validation_date=$validation_date
-				payment_detail=$payment_detail
-				extra_info=$extra_info
-				comment=$comment
 				parent_id=$_GET.id|intval
-				module_version=$VERSION
+				last_modification_date=$now|atom_date
 			}}
 			{{:http redirect="details.html?id=%d&ok=%d"|args:$id:$redirection_code}}
 		{{/if}}
@@ -188,36 +150,12 @@
 	{{if !$check_errors}}
 		{{:save id=$invoice.id|intval
 			validate_schema="./schema/invoice.json"
-			key=$invoice.key
-			type=$invoice.type
-			recipient_business_name=$invoice.recipient_business_name
-			recipient_address=$invoice.recipient_address
-			recipient_member_id=$invoice.recipient_member_id
-			recipient_member_number=$invoice.recipient_member_number
-			introduction_text=null
-			subject=$invoice.subject
-			date=$invoice.date
-			deadline=null
+			validate_only="status, transaction_id, payment_date, payment_comment, last_modification_date"
 			status=$PAID_STATUS
-			cancelled=$invoice.cancelled
-			items=$invoice.items
-			total=$invoice.total
-			vat_exemption=$invoice.vat_exemption
-			siret=$invoice.siret
-			org_contact=$invoice.org_contact
-			author_id=$invoice.author_id
-			parent_id=$invoice.parent_id
-			last_modification_date=$now|atom_date
-			signing_place=null
-			signing_date=$invoice.signing_date
-			validation_date=null
+			transaction_id=$transaction.id|intval
 			payment_date=$date
 			payment_comment=$_POST.payment_comment
-			transaction_id=$transaction.id|intval
-			payment_detail=null
-			extra_info=null
-			comment=$invoice.comment
-			module_version=$VERSION
+			last_modification_date=$now|atom_date
 		}}
 		{{:http redirect="details.html?id=%d&ok=6&show=invoice"|args:$invoice.id}}
 	{{/if}}
@@ -234,76 +172,18 @@
 			{{elseif $cancelled}}
 				{{:assign var='check_errors.' value='Le document est déjà annulé.'}}
 			{{/if}}
+			{{:assign var='allowed_type' from='DOCUMENT_TYPES.%s'|args:$type}}
+			{{if !$allowed_type}}
+				{{:assign var='check_errors.' value='Type invalide : %s!'|args:$type}}
+			{{/if}}
 			{{if !$check_errors}}
-				{{if $type === $INVOICE_TYPE}}
-					{{:save id=id|intval
-						validate_schema="./schema/invoice.json"
-						key=$key
-						type=$type
-						recipient_business_name=$recipient_business_name
-						recipient_address=$recipient_address
-						recipient_member_id=$recipient_member_id
-						recipient_member_number=$recipient_member_number
-						introduction_text=$introduction_text
-						subject=$subject
-						date=$date
-						deadline=$deadline
-						status=$status
-						cancelled=true
-						cancellation_reason=$_POST.reason
-						items=$items
-						total=$total
-						vat_exemption=$vat_exemption
-						siret=$siret
-						org_contact=$org_contact
-						author_id=$author_id
-						parent_id=$parent_id
-						last_modification_date=$now|atom_date
-						signing_place=$signing_place
-						signing_date=$signing_date
-						validation_date=$validation_date
-						payment_date=$payment_date
-						payment_comment=$payment_comment
-						transaction_id=$transaction_id
-						payment_detail=$payment_detail
-						extra_info=$extra_info
-						comment=$comment
-						module_version=$VERSION
-					}}
-				{{else}}
-					{{:save id=$id|intval
-						validate_schema="./schema/quotation.json"
-						key=$key
-						type=$type
-						recipient_business_name=$recipient_business_name
-						recipient_address=$recipient_address
-						recipient_member_id=$recipient_member_id
-						recipient_member_number=$recipient_member_number
-						introduction_text=$introduction_text
-						subject=$subject
-						date=$date
-						deadline=$deadline
-						status=$status
-						cancelled=true
-						cancellation_reason=$_POST.reason
-						items=$items
-						total=$total
-						vat_exemption=$vat_exemption
-						siret=$siret
-						org_contact=$org_contact
-						author_id=$author_id
-						child_id=$child_id
-						last_modification_date=$now|atom_date
-						signing_place=$signing_place
-						signing_date=$signing_date
-						validation_date=$validation_date
-						payment_detail=$payment_detail
-						extra_info=$extra_info
-						comment=$comment
-						parent_id=$parent_id
-						module_version=$VERSION
-					}}
-				{{/if}}
+				{{:save id=$id|intval
+					validate_schema="./schema/%s.json"|args:$type
+					validate_only="cancelled, cancellation_reason, last_modification_date"
+					cancelled=true
+					cancellation_reason=$_POST.reason
+					last_modification_date=$now|atom_date
+				}}
 				{{:http redirect="index.html?ok=5&show=%s"|args:$type}}
 			{{/if}}
 		{{/load}}
@@ -319,34 +199,35 @@
 					validate_schema="./schema/invoice.json"
 					key=$new_key
 					type=$type
+					status=$DRAFT_STATUS
+					cancelled=false
+					cancellation_reason=null
+					author_id=$author_id
+					parent_id=$parent_id
+					duplicated_from_id=$id|intval
+					transaction_id=null
+					subject=$subject
+					date=$date
+					deadline=$deadline
+					signing_date=$signing_date
+					signing_place=$signing_place
+					validation_date=null
+					payment_date=null
+					payment_comment=null
+					items=$items
+					total=$total
+					siret=$siret
+					org_contact=$org_contact
 					recipient_business_name=$recipient_business_name
 					recipient_address=$recipient_address
 					recipient_member_id=$recipient_member_id
 					recipient_member_number=$recipient_member_number
 					introduction_text=$introduction_text
-					subject=$subject
-					date=$date
-					deadline=$deadline
-					status=$DRAFT_STATUS
-					cancelled=false
-					items=$items
-					total=$total
-					vat_exemption=$vat_exemption
-					siret=$siret
-					org_contact=$org_contact
-					author_id=$author_id
-					parent_id=$parent_id
-					duplicated_from_id=$id|intval
-					last_modification_date=$now|atom_date
-					signing_place=$signing_place
-					signing_date=$signing_date
-					validation_date=null
-					payment_date=null
-					payment_comment=null
-					transaction_id=null
-					payment_detail=$payment_detail
-					extra_info=$extra_info
+					payment_text=$payment_text
+					extra_text=$extra_text
 					comment=$comment
+					vat_exemption=$vat_exemption
+					last_modification_date=$now|atom_date
 					module_version=$VERSION
 				}}
 			{{else}}
@@ -354,32 +235,33 @@
 					validate_schema="./schema/quotation.json"
 					key=$new_key
 					type=$type
+					status=$DRAFT_STATUS
+					cancelled=false
+					cancellation_reason=null
+					author_id=$author_id
+					child_id=null
+					parent_id=null
+					duplicated_from_id=$id|intval
+					subject=$subject
+					date=$date
+					deadline=$deadline
+					signing_date=$signing_date
+					signing_place=$signing_place
+					validation_date=null
+					items=$items
+					total=$total
+					siret=$siret
+					org_contact=$org_contact
 					recipient_business_name=$recipient_business_name
 					recipient_address=$recipient_address
 					recipient_member_id=$recipient_member_id
 					recipient_member_number=$recipient_member_number
 					introduction_text=$introduction_text
-					subject=$subject
-					date=$date
-					deadline=$deadline
-					status=$DRAFT_STATUS
-					cancelled=false
-					items=$items
-					total=$total
-					vat_exemption=$vat_exemption
-					siret=$siret
-					org_contact=$org_contact
-					author_id=$author_id
-					child_id=null
-					last_modification_date=$now|atom_date
-					signing_place=$signing_place
-					signing_date=$signing_date
-					validation_date=null
-					payment_detail=$payment_detail
-					extra_info=$extra_info
+					payment_text=$payment_text
+					extra_text=$extra_text
 					comment=$comment
-					parent_id=null
-					duplicated_from_id=$id|intval
+					vat_exemption=$vat_exemption
+					last_modification_date=$now|atom_date
 					module_version=$VERSION
 				}}
 			{{/if}}
@@ -393,76 +275,18 @@
 	{{:include file='./check_max_length.tpl' check_value=$_POST.comment check_max=1024 check_label='Remarques trop longues' keep='check_errors'}}
 	{{if !$check_errors}}
 		{{#load id=$_GET.id}}
-			{{if $type === $INVOICE_TYPE}}
-				{{:save id=id|intval
-					validate_schema="./schema/invoice.json"
-					key=$key
-					type=$type
-					recipient_business_name=$recipient_business_name
-					recipient_address=$recipient_address
-					recipient_member_id=$recipient_member_id
-					recipient_member_number=$recipient_member_number
-					introduction_text=$introduction_text
-					subject=$subject
-					date=$date
-					deadline=$deadline
-					status=$status
-					cancelled=$cancelled
-					cancellation_reason=$cancellation_reason
-					items=$items
-					total=$total
-					vat_exemption=$vat_exemption
-					siret=$siret
-					org_contact=$org_contact
-					author_id=$author_id
-					parent_id=$parent_id
-					last_modification_date=$now|atom_date
-					signing_place=$signing_place
-					signing_date=$signing_date
-					validation_date=$validation_date
-					payment_date=$payment_date
-					payment_comment=$payment_comment
-					transaction_id=$transaction_id
-					payment_detail=$payment_detail
-					extra_info=$extra_info
-					comment=$_POST.comment
-					module_version=$VERSION
-				}}
+			{{:assign var='allowed_type' from='DOCUMENT_TYPES.%s'|args:$type}}
+			{{if !$allowed_type}}
+				{{:assign var='check_errors.' value='Type invalide : %s!'|args:$type}}
 			{{else}}
 				{{:save id=$id|intval
-					validate_schema="./schema/quotation.json"
-					key=$key
-					type=$type
-					recipient_business_name=$recipient_business_name
-					recipient_address=$recipient_address
-					recipient_member_id=$recipient_member_id
-					recipient_member_number=$recipient_member_number
-					introduction_text=$introduction_text
-					subject=$subject
-					date=$date
-					deadline=$deadline
-					status=$status
-					cancelled=$cancelled
-					cancellation_reason=$cancellation_reason
-					items=$items
-					total=$total
-					vat_exemption=$vat_exemption
-					siret=$siret
-					org_contact=$org_contact
-					author_id=$author_id
-					child_id=$child_id
-					last_modification_date=$now|atom_date
-					signing_place=$signing_place
-					signing_date=$signing_date
-					validation_date=$validation_date
-					payment_detail=$payment_detail
-					extra_info=$extra_info
+					validate_schema="./schema/%s.json"|args:$type
+					validate_only="comment, last_modification_date"
 					comment=$_POST.comment
-					parent_id=$parent_id
-					module_version=$VERSION
+					last_modification_date=$now|atom_date
 				}}
+				{{:http redirect="index.html?ok=6&show=%s"|args:$type}}
 			{{/if}}
-			{{:http redirect="index.html?ok=6&show=%s"|args:$type}}
 		{{/load}}
 	{{/if}}
 {{/if}}
@@ -481,39 +305,12 @@
 				{{if !$allowed_type}}
 					{{:assign var='check_errors.' value='Type invalide : %s!'|args:$type}}
 				{{else}}
-					{{:assign cancelled=$_POST.cancelled|boolval}}
 					{{:save id=$id
 						validate_schema="./schema/%s.json"|args:$type
-						key=$key
-						type=$type
-						recipient_business_name=$recipient_business_name
-						recipient_address=$recipient_address
-						recipient_member_id=$recipient_member_id
-						recipient_member_number=$recipient_member_number
-						introduction_text=$introduction_text
-						subject=$subject
-						date=$date
-						deadline=$deadline
+						validate_only="status, cancelled, last_modification_date"
 						status=$_POST.status
-						cancelled=$cancelled
-						items=$items
-						total=$total
-						vat_exemption=$vat_exemption
-						siret=$siret
-						org_contact=$org_contact
-						author_id=$author_id
-						parent_id=$parent_id
+						cancelled=$_POST.cancelled|boolval
 						last_modification_date=$now|atom_date
-						signing_place=$signing_place
-						signing_date=$signing_date
-						validation_date=$validation_date
-						payment_date=$payment_date
-						payment_comment=$payment_comment
-						transaction_id=$transaction_id
-						payment_detail=$payment_detail
-						extra_info=$extra_info
-						parent_id=$parent_id
-						module_version=$VERSION
 					}}
 					{{:http redirect="details.html?id=%d&ok=2&show=%s"|args:$id:$type}}
 				{{/if}}

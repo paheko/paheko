@@ -81,7 +81,7 @@
 			{{elseif $status === $PAID_STATUS}}
 				<p class="infos">{{$label}} <strong>payée le {{$payment_date|date_short}}</strong> (émise par l'asso le {{$signing_date|date_short}}).</p>
 				{{if $payment_comment}}
-					<h4>Remarques :</h4>
+					<h4>Remarques sur le paiement :</h4>
 					<p class="infos">{{$payment_comment|escape|nl2br}}</p>
 				{{/if}}
 				{{if $transaction_id}}

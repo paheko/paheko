@@ -53,11 +53,6 @@
 			{{:button type="submit" title="Dupliquer" shape="list-ol" name="duplicate_button"}}
 		</form>
 	</li>
-	<li>
-		<form method="POST" action="{{"action.html?id=%d&show=%s&action=edit_comment"|args:$id:$type}}">
-			{{:button type="submit" title="Éditer les remarques" shape="paragraph" name="edit_comment_button"}}
-		</form>
-	</li>
 	{{if !$cancelled}}
 		{{if $type === $INVOICE_TYPE}}
 			{{:assign button_target_label='la facture'}}
