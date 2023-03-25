@@ -70,7 +70,8 @@ CREATE TABLE IF NOT EXISTS modules
     restrict_level INT NULL,
     config TEXT NULL,
     enabled INTEGER NOT NULL DEFAULT 0,
-    web INTEGER NOT NULL DEFAULT 0
+    web INTEGER NOT NULL DEFAULT 0,
+    system INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS modules_name ON modules (name);

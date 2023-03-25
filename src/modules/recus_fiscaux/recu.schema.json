@@ -4,7 +4,7 @@
 	"properties": {
 		"annule": {
 			"description": "Annulé",
-			"type": "bool"
+			"type": "boolean"
 		},
 		"date": {
 			"description": "Date d'émission",

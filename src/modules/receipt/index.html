@@ -2,13 +2,13 @@
 {{/restrict}}
 {{if !$_GET.id}}
 
-	{{:admin_header title="Reçu de don" current="acc"}}
+	{{:admin_header title="Reçu de paiement" current="acc"}}
 
 	<p class="error block">Aucun numéro d'écriture n'a été fourni.</p>
 
 	<form method="get" action="">
 		<fieldset>
-			<legend>Créer un reçu de don</legend>
+			<legend>Créer un reçu de paiement</legend>
 			<dl>
 				{{:input type="number" name="id" label="Numéro d'écriture" required=true}}
 			</dl>
@@ -23,20 +23,23 @@
 
 {{else}}
 	{{#transactions id=$_GET.id}}
-		{{:include file="receipt/_header.html" page_size="A5" title="Reçu de don %d - %s"|args:$id:$users_names}}
+		{{:include file="./_header.html" page_size="A5" title="Reçu de paiement %d - %s"|args:$id:$users_names}}
 
-			<h1>Reçu de don</h1>
+			<h1>Reçu de paiement</h1>
 
 			<h4>Référence n°{{$id}} — {{$date|date_short}}</h4>
 
 			<p>L'association «&nbsp;{{$config.nom_asso}}&nbsp;» atteste avoir reçu de la part de&nbsp;:</p>
 
-			<h3>{{$users_names}}</h3>
+			<h3 class="placeholder">{{$users_names}}</h3>
 
-			<p>un don d'un montant de&nbsp;:</p>
+			<p>un paiement d'un montant de&nbsp;:</p>
 
 			<h2>{{$credit|raw|money_currency:false}}</h2>
-			<h4>le {{$date|date_short}}</h4>
+
+			<p>pour le motif suivant&nbsp;:</p>
+
+			<h3>{{$label}}</h3>
 
 			<p>
 				<em>Ce reçu n'est pas un reçu fiscal et ne donne pas droit à une réduction d'impôt au bénéfice des dispositions des articles 200, 238 bis et 885-0 V bis A du code général des impôts.</em>
@@ -44,7 +47,7 @@
 
 			{{:signature}}
 
-		{{:include file="receipt/_footer.html"}}
+		{{:include file="./_footer.html"}}
 	{{else}}
 		{{:error message="Le numéro d'écriture fourni n'existe pas."}}
 	{{/transactions}}

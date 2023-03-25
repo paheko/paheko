@@ -165,22 +165,16 @@ class Plugins
 		}
 
 		foreach ($list as &$item) {
-			$c = isset($item['plugin']) ? $item['plugin'] : $item['module'];
+			$type = isset($item['plugin']) ? 'plugin' : 'module';
+			$c = $item[$type];
+			$item = $c->asArray();
+			$item[$type] = $c;
 			$item['icon_url'] = $c->icon_url();
-			$item['name'] = $c->name;
-			$item['label'] = $c->label;
-			$item['description'] = $c->description;
-			$item['author'] = $c->author;
-			$item['author_url'] = $c->author_url;
 			$item['config_url'] = $c->hasConfig() ? $c->url($c::CONFIG_FILE) : null;
 			$item['readme_url'] = $c->hasFile($c::README_FILE) ? $c->url($c::README_FILE) : null;
-			$item['enabled'] = $c->enabled;
-			$item['installed'] = isset($item['plugin']) ? $c->exists() : true;
-			$item['broken'] = isset($item['plugin']) ? !$c->hasCode() : false;
-			$item['broken_message'] = isset($item['plugin']) ? $c->getBrokenMessage() : false;
-			$item['restrict_section'] = $c->restrict_section;
-			$item['restrict_level'] = $c->restrict_level;
-			$item['web'] = $c->web;
+			$item['installed'] = $type == 'plugin' ? $c->exists() : true;
+			$item['broken'] = $type == 'plugin' ? !$c->hasCode() : false;
+			$item['broken_message'] = $type == 'plugin' ? $c->getBrokenMessage() : false;
 
 			$item['url'] = null;
 

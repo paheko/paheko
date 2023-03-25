@@ -6,7 +6,7 @@
 {{/if}}
 
 {{#load id=$_GET.id}}
-	{{:include file="modules/_header.html"
+	{{:include file="receipt/_header.html"
 		page_size="A5"
 		title="Reçu fiscal %06d - %s"|args:$id:$nom
 		hide_header=true
@@ -32,7 +32,7 @@
 		{{/if}}
 	</figure>
 
-	{{:include file="modules/_footer.html"}}
+	{{:include file="receipt/_footer.html"}}
 {{else}}
 	{{:error message="Le numéro de reçu fourni n'a pas été trouvé"}}
 {{/load}}

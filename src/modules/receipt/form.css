@@ -1,11 +1,11 @@
 @font-face {
     font-family: 'gicon';
-    src: url('../admin/static/font/garradin.eot');
-    src: url('../admin/static/font/garradin.eot#iefix') format('embedded-opentype'),
-        url('../admin/static/font/garradin.woff') format('woff'),
-        url('../admin/static/font/garradin.woff2') format('woff2'),
-        url('../admin/static/font/garradin.ttf') format('truetype'),
-        url('../admin/static/font/garradin.svg#garradin') format('svg');
+    src: url('../../admin/static/font/garradin.eot');
+    src: url('../../admin/static/font/garradin.eot#iefix') format('embedded-opentype'),
+        url('../../admin/static/font/garradin.woff') format('woff'),
+        url('../../admin/static/font/garradin.woff2') format('woff2'),
+        url('../../admin/static/font/garradin.ttf') format('truetype'),
+        url('../../admin/static/font/garradin.svg#garradin') format('svg');
     font-weight: normal;
     font-style: normal;
 }
@@ -49,10 +49,11 @@ body {
 
 header.organization {
 	border: 2px solid #999;
-	padding: 1em;
+	padding: .3em;
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	margin-bottom: 1em;
 }
 
 header.organization * {
@@ -62,7 +63,7 @@ header.organization * {
 
 header.organization .logo img {
 	margin-right: 1em;
-	max-height: 100px;
+	max-height: 80px;
 }
 
 header.organization h1, header.organization h2 {
@@ -168,4 +169,9 @@ figure.signature {
 
 figure.signature img {
 	max-height: 2.5cm;
+}
+
+.placeholder {
+	border-bottom: 1px dashed #666;
+	min-height: 1em;
 }
