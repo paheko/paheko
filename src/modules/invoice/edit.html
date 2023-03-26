@@ -19,7 +19,7 @@
 {{if $document && $document.status !== $DRAFT_STATUS}}
 	{{:error message="Ce document n'est plus un brouillon et ne peut plus être modifié."}}
 {{elseif $document && $document.cancelled}}
-	{{:error message="Les document annulés ne peuvent plus être modifié."}}
+	{{:error message="Les document annulés ne peuvent plus être modifiés."}}
 {{/if}}
 
 {{if $_POST.quotation_submit}}
@@ -207,14 +207,14 @@
 	<fieldset>
 		<legend><h2>Destinataire</h2></legend>
 		<fieldset>
-			<legend>Membre enregistré.e</legend>
+			<legend>Membre enregistré·e</legend>
 			{{if $document.recipient_member_id}}
 				{{#users id=$document.recipient_member_id|intval}}{{:assign .='user'}}{{/users}}
 				{{if $user}}
 					{{:assign var='default_customer_selection.%s'|args:$document.recipient_member_id value=$user.nom}}
 				{{/if}}
 			{{/if}}
-			{{:input type="list" name="customer" required=false label="Membre" target="!users/selector.php" default=$default_customer_selection can_delete=true}}
+			<dl>{{:input type="list" name="customer" required=false label="Membre" target="!users/selector.php" default=$default_customer_selection can_delete=true}}</dl>
 			{{if $document.recipient_member_id && !$user}}
 				<p class="infos">
 					Attention : Ce devis est associé à l'ancien.ne membre
@@ -226,8 +226,10 @@
 		</fieldset>
 		<fieldset>
 			<legend>Saisie manuelle<label for="manual_input_priority_help">*</label></legend>
-			{{:input type="text" name="recipient_business_name" label="Raison sociale" source=$document placeholder="ex : SARL J'aime les deux vies"}}
-			{{:input type="textarea" name="recipient_address" label="Adresse" source=$document placeholder=""}}
+			<dl>
+				{{:input type="text" name="recipient_business_name" label="Raison sociale" source=$document placeholder="ex : SARL J'aime les deux vies"}}
+				{{:input type="textarea" name="recipient_address" label="Adresse" source=$document placeholder=""}}
+			</dl>
 			<p class="infos" id="manual_input_priority_help">*Si un membre est associé au document, la saisie manuelle est prioritaire sur le nom et l'adresse.</p>
 		</fieldset>
 	</fieldset>
@@ -249,53 +251,45 @@
 
 	<fieldset>
 		<legend><h2>Objet</h2></legend>
-		<ul>
-			<li>{{:input type="text" name="key" label="Numéro" source=$document help="Ce numéro doit être unique. Laisser vide pour générer un nouveau numéro."}}</li>
-			<li>{{:input type="text" name="subject" label="Intitulé" source=$document placeholder="ex : Devis pour une location de barnum" required=true}}</li>
-			<li>{{:input type="date" name="date" label="Date du devis" source=$document placeholder="" required=true}}</li>
-			<li>{{:input type="date" name="deadline" label="Échéance pour validation" source=$document placeholder="" required=false}}</li>
-			<li>{{:input type="text" name="org_contact" label="Contact" source=$document default=$org_contact_default required=true}}</li>
-			<li>
-				{{:input type="textarea" name="introduction_text" label="Texte d'introduction" source=$document default=$introduction_text_default placeholder="ex : Formule de politesse." help=$introduction_text_helper required=false cols="50" rows="4"}}
-			</li>
-			<li>
-				{{:input type="textarea" name="comment" label="Remarques internes" source=$document help="Ne seront pas affichées sur le document." required=false cols="50" rows="4"}}
-			</li>
-		</ul>
+		<dl>
+			{{:input type="text" name="key" label="Numéro" source=$document help="Ce numéro doit être unique. Laisser vide pour générer un nouveau numéro."}}
+			{{:input type="text" name="subject" label="Intitulé" source=$document placeholder="ex : Devis pour une location de barnum" required=true}}
+			{{:input type="date" name="date" label="Date du devis" source=$document placeholder="" required=true}}
+			{{:input type="date" name="deadline" label="Échéance pour validation" source=$document placeholder="" required=false}}
+			{{:input type="text" name="org_contact" label="Contact" source=$document default=$org_contact_default required=true}}
+			{{:input type="textarea" name="introduction_text" label="Texte d'introduction" source=$document default=$introduction_text_default placeholder="ex : Formule de politesse." help=$introduction_text_helper required=false cols="50" rows="4"}}
+			{{:input type="textarea" name="comment" label="Remarques internes" source=$document help="Ne seront pas affichées sur le document." required=false cols="50" rows="4"}}
+		</dl>
 	</fieldset>
 
 	{{:assign items=$document.items}}
 	{{:include file='./include/item_list.tpl'}}
 
-	{{if $module.config.payment_text || $module.config.extra_text}}
-		<fieldset>
-			<legend><h2>Informations complémentaires affichées en bas du devis</h2></legend>
-			<ul>
-			{{if $module.config.payment_text}}
-				<li>{{:input type="textarea" name="payment_text" label="Instructions de paiement" source=$document default=$payment_text_default cols="50" rows="5"}}</li>
-			{{/if}}
-			{{if $module.config.extra_text}}
-				<li>{{:input type="textarea" name="extra_text" label="Informations complémentaires" source=$document default=$extra_text_default cols="50" rows="2"}}</li>
-			{{/if}}
-			</ul>
-		{{if !$document}}<p>(La valeur pré-remplie de ces informations est modifiable dans la configuration du module.)</p>{{/if}}
-		</fieldset>
-	{{/if}}
+	<fieldset>
+		<legend><h2>Pied de page</h2></legend>
+		<dl>
+			{{:input type="textarea" name="payment_text" label="Instructions de paiement" source=$document default=$payment_text_default cols="50" rows="5"}}
+			{{:input type="textarea" name="extra_text" label="Informations complémentaires" source=$document default=$extra_text_default cols="50" rows="2"}}
+		</dl>
+	{{if !$document}}<p>(La valeur pré-remplie de ces informations est modifiable dans la configuration du module.)</p>{{/if}}
+	</fieldset>
 
 	<fieldset>
 		<legend><h2>Signature du devis</h2></legend>
 		<p id="signing_confirmation_p">
 			<p class="infos">Ce document restera un brouillon et sera modifiable tant que vous n'aurez pas signé le devis.</p>
-			{{:input type="checkbox" name="signing" label="Signer le devis" value="1"}}
+			<dl>{{:input type="checkbox" name="signing" label="Signer le devis" value="1"}}</dl>
 		</p>
 		<p id="signing_warning" class="infos">
 			À ne remplir que si vous souhaitez valider immédiatement le devis.
 		</p>
-		<ul id="signing_inputs">
-			<li>{{:input type="text" name="signing_place" label="Lieu de la signature" placeholder="ex : Dijon" source=$document}}</li>
-			<li>{{:input type="date" name="signing_date" label="Date de la signature" source=$document}}</li>
-			<li class="error block">Signer le devis est définitif. Vous ne pourrez plus modifier son contenu par la suite.</li>
-		</ul>
+		<div id="signing_inputs">
+			<dl>
+				{{:input type="text" name="signing_place" label="Lieu de la signature" placeholder="ex : Dijon" source=$document}}
+				{{:input type="date" name="signing_date" label="Date de la signature" source=$document}}
+			</dl>
+			<p class="error block">Signer le devis est définitif. Vous ne pourrez plus modifier son contenu par la suite.</p>
+		</div>
 	</fieldset>
 
 	<p class="submit">

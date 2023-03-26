@@ -6,8 +6,10 @@
 			
 				{{if $status === $DRAFT_STATUS}}
 					<li>{{:linkbutton href="preview.html?id=%s&source=details"|args:$id label="Aperçu papier" shape="document"}}</li>
-					<li>{{:linkbutton href="./edit.html?id=%d"|args:$id label="Modifier" shape="edit"}}</li>
-					<li>{{:linkbutton href="action.html?id=%d&action=sign&show=quotation"|args:$id label="Signer le devis" shape="check"}}</li>
+					{{if !$cancelled}}
+						<li>{{:linkbutton href="./edit.html?id=%d"|args:$id label="Modifier" shape="edit"}}</li>
+						<li>{{:linkbutton href="action.html?id=%d&action=sign&show=quotation"|args:$id label="Signer le devis" shape="check"}}</li>
+					{{/if}}
 
 				{{else}}
 					<li>{{:linkbutton label="PDF" href="preview.html?id=%s&source=details"|args:$id shape="pdf"}}</li>

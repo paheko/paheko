@@ -34,6 +34,26 @@ tr.cancelled_document, table.list tr.cancelled_document:nth-child(even) {
 	//color: black;
 }
 
+dl.property_list dt, dl.property_list dd {
+	float: left;
+}
+
+dl.property_list dt {
+	clear: both;
+}
+
+dl.property_list dd {
+	padding: 0 0 0 0.2em;
+}
+
+dl.property_list dt.block {
+	float: none;
+}
+
+dl.property_list dd.details {
+	clear: both;
+}
+
 nav.tabs aside.menu ul, ul.list_action_buttons {
 	border: 0;
 	display: flex;
@@ -55,4 +75,8 @@ nav.tabs aside.menu li a:hover, .list_action_buttons li a:hover {
 
 nav.tabs aside.menu li a.icn-btn, .list_action_buttons li a.icn-btn {
 	margin: 0.2em 0.2em;
+}
+
+#cancel_checkbox_label::before {
+	margin-right: 0;
 }

@@ -12,7 +12,7 @@
 		</form></li>
 	{{/restrict}}
 {{else}}
-	<li>{{:linkbutton label="⁣" href="preview.html?id=%s"|args:$id shape="pdf"}}</li>
+	<li>{{:linkbutton label="⁣" title="PDF" href="preview.html?id=%s"|args:$id shape="pdf"}}</li>
 
 	{{if $status === $AWAITING_STATUS}}
 		{{if !$cancelled}}

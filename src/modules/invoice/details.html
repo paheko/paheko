@@ -58,7 +58,7 @@
 			{{elseif $status === $AWAITING_STATUS}}
 				<p class="infos">{{$label}} <strong>{{if $type === $QUOTATION_TYPE}}signé{{else}}émise{{/if}} le {{$signing_date|date_short}} à {{$signing_place}}</strong>.</p>
 				{{if $type === $QUOTATION_TYPE}}
-					<p class="">En attente de validation par le/la client.e.</p>
+					<p class="">En attente de validation par le/la client·e.</p>
 					<p class="infos">
 						{{:linkbutton href="action.html?id=%d&show=quotation&action=ask_validation"|args:$id label="Marquer comme validé et générer la facture" shape="check"}}
 						{{:linkbutton href="action.html?id=%d&show=quotation&action=ask_rejection"|args:$id label="Marquer comme refusé" shape="alert"}}
@@ -147,13 +147,20 @@
 
 		<fieldset>
 			<legend><h2>Objet</h2></legend>
-			<ul>
-				<li>Intitulé : {{$subject}}</li>
-				<li>Date : {{$date|date_short}}</li>
-				{{if $deadline}}<li>Échéance : {{$deadline|date_short}}</li>{{/if}}
-				<li>Référence : {{$key}}</li>
-				<li>Total : {{$total|floatval|money_currency:false}}</li>
-			</ul>
+			<dl class="property_list">
+				<dt>Intitulé :</dt>
+				<dd>{{$subject}}</dd>
+				<dt>Date :</dt>
+				<dd>{{$date|date_short}}</dd>
+				{{if $deadline}}
+					<dt>Échéance :</dt>
+					<dd>{{$deadline|date_short}}</dd>
+				{{/if}}
+				<dt>Référence :</dt>
+				<dd>{{$key}}</dd>
+				<dt>Total :</dt>
+				<dd>{{$total|floatval|money_currency:false}}</dd>
+			</dl>
 		</fieldset>
 		
 		<fieldset>
@@ -184,15 +191,14 @@
 		
 		<fieldset>
 			<legend><h2>Infos</h2></legend>
-			<ul>
-				<li class="infos">Contact : {{$org_contact}}</li>
+			<dl class="property_list">
+				<dt class="infos">Contact :</dt>
+				<dd>{{$org_contact}}</dd>
 				{{if $introduction_text}}
-					<li>
-						Texte d'introduction :
-						<p>{{$introduction_text|escape|nl2br}}</p>
-					</li>
+					<dt class="block">Texte d'introduction :</dt>
+					<dd><p>{{$introduction_text|escape|nl2br}}</p></dd>
 				{{/if}}
-			</ul>
+			</dl>
 		</fieldset>
 
 		<form method="POST" action="{{"action.html?id=%d&show=%s&action=edit_comment"|args:$id:$type}}">
@@ -211,7 +217,7 @@
 
 		{{if $payment_text || $extra_text}}
 			<fieldset>
-				<legend><h2>Infos complémentaires</h2></legend>
+				<legend><h2>Pied de page</h2></legend>
 				{{if $payment_text}}<p>{{$payment_text|escape|nl2br}}</p>{{/if}}
 				{{if $extra_text}}<p>{{$extra_text|escape|nl2br}}</p>{{/if}}
 			</fieldset>
@@ -225,17 +231,19 @@
 						<label for="f_status">Statut en cours :</label>
 						<form method="POST" action="./action.html" style="display: inline;">
 							{{if $type === $INVOICE_TYPE}}{{:assign options=$INVOICE_STATUS_LABELS}}{{else}}{{:assign options=$STATUS_LABELS}}{{/if}}
+							
 							{{:input type="select" name="status" options=$options default=$status required=true}}
-							{{* {{:input type="checkbox" name="cancelled" label="annulé" value='1' default=$cancelled style="display: inline;"}} *}}
+							
+							{{* {{:input type="checkbox" name="cancelled" label="annulé" value=$cancelled|intval style="display: inline;"}} *}}
 							<input type="checkbox"  name="cancelled" {{if $cancelled}}checked="checked"{{/if}} value="1" id="f_cancelled_1" style="display: inline;" />
 							<label id="cancel_checkbox_label" for="f_cancelled_1">annulé</label>
+							
 							{{:input type="hidden" name="id" default=$id|intval}}
 							{{:button type="submit" name="status_update_button" label="Modifier"}}
 						</form>
 					</div>
 				</fieldset>
 			</div>
-			<style>#cancel_checkbox_label::before { margin-right: 0; }</style>
 		{{/restrict}}
 
 	{{else}}

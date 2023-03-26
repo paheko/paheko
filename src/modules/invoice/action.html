@@ -56,12 +56,12 @@
 		<form method="POST" action="">
 			<fieldset>
 				<legend><h2>Signature du devis</h2></legend>
-				<ul id="signing_inputs">
-					<li>{{:input type="text" name="signing_place" label="Lieu de la signature" placeholder="ex : Dijon" default=$module.config.signing_place required=true}}</li>
-					<li>{{:input type="date" name="signing_date" label="Date de la signature" default=$now required=true}}</li>
-					{{if !$check_errors}}<li class="error block">Signer le devis est définitif. Vous ne pourrez plus modifier son contenu par la suite.</li>{{/if}}
-					<li>{{:button type="submit" name="signing_submit" label="Signer le devis" class="main"}}</li>
-				</ul>
+				<dl>
+					{{:input type="text" name="signing_place" label="Lieu de la signature" placeholder="ex : Dijon" default=$module.config.signing_place required=true}}
+					{{:input type="date" name="signing_date" label="Date de la signature" default=$now required=true}}
+				</dl>
+				{{if !$check_errors}}<p class="error block">Signer le devis est définitif. Vous ne pourrez plus modifier son contenu par la suite.</p>{{/if}}
+				{{:button type="submit" name="signing_submit" label="Signer le devis" shape="check" class="main"}}
 			</fieldset>
 		</form>
 

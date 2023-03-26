@@ -11,7 +11,7 @@ function compute_total() {
 		if (!isNaN(unit_price) && !isNaN(quantity) && unit_price > 0)
 			total += parseFloat(unit_price) * parseFloat(quantity);
 	}
-	return total;
+	return Math.round((total + Number.EPSILON) * 100) / 100;
 }
 
 function refresh_total() {
@@ -68,7 +68,7 @@ function add_input_refresh_total_behavior() {
 <fieldset>
 	<legend><h2>Liste des articles</h2></legend>
 	<p id="item_list_no_item_message" {{if $items}}class="hidden"{{/if}}>Aucun article pour le moment.</p>
-	<table id="item_list" class="list" {{if !$items}}class="hidden"{{/if}}>
+	<table id="item_list" class="list{{if !$items}} hidden{{/if}}">
 		<thead>
 			<tr>
 				<th>Réf.</th>
@@ -87,7 +87,7 @@ function add_input_refresh_total_behavior() {
 				<td>{{:input type="text" name="items[%d][name]"|args:$key default=$item.name}}</td>
 				<td>{{:input type="textarea" cols="50" rows="2" name="items[%s][description]"|args:$key default=$item.description class="full-width"}}</td>
 				<td>{{:input type="money" name="items[%d][unit_price]"|args:$key default=$item.unit_price class="impact_total"}}</td>
-				<td>{{:input type="number" name="items[%d][quantity]"|args:$key default=$item.quantity class="impact_total"}}</td>
+				<td>{{:input type="number" name="items[%d][quantity]"|args:$key default=$item.quantity class="impact_total" min="0" max="9999"}}</td>
 				<td>{{:button name="item_%d_delete_button" label="" shape="delete" onclick="remove_item(%d)"|args:$key}}</td>
 			</tr>
 		{{/foreach}}

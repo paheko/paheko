@@ -18,7 +18,7 @@ function generate_item_input(type, name, index) {
 			input.pattern = '-?[0-9]+([.,][0-9]{1,2})?';
 			input.inputmode = 'decimal';
 			input.size = 8;
-			input.class = 'money';
+			input.classList.add('money');
 			input.autocomplete = 'off';
 		}
 	}
@@ -26,6 +26,10 @@ function generate_item_input(type, name, index) {
 		input.classList.add('impact_total');
 	if (name === 'reference')
 		input.classList.add('reference');
+	if (name === 'quantity') {
+		input.min = 0;
+		input.max = 9999;
+	}
 	input.name = 'items[' + index + '][' + name + ']';
 	input.id = 'item_' + name + '_' + index;
 	return (input);
@@ -77,17 +81,18 @@ function add_item() {
 
 <form method="POST" action="" id="item_creation_form" onsubmit="add_item()">
 	<fieldset>
-		<legend>Ajouter un article</legend>
-		<ul>
-			<li>{{:input type="text" name="item_reference" label="Référence" placeholder="ex : S-812"}}</li>
-			<li>{{:input type="text" name="item_name" label="Dénomination" placeholder="ex : Location vélo - Forfait six jours"}}</li>
-			<li>{{:input type="textarea" name="item_description" label="Description"}}</li>
-			<li>
-				<label for="item_unit_price">Prix unitaire</label><input type="text" name="item_unit_price" id="f_item_unit_price" label="" placeholder="" value="0" />
-				{{* Awaiting #eeb7d3e36ef4e3d7f2e8bc49c18c3c6b672f2e18 resolution {{:input type="money" name="item_unit_price" id="item_unit_price" label="Prix unitaire" default="0"}} *}}
-			</li>
-			<li>{{:input type="number" name="item_quantity" label="Quantité" default="1"}}</li>
-		</ul>
+		<legend><h2>Ajouter un article</h2></legend>
+		<dl>
+			{{:input type="text" name="item_reference" label="Référence" placeholder="ex : S-812"}}
+			{{:input type="text" name="item_name" label="Dénomination" placeholder="ex : Location vélo - Forfait six jours"}}
+			{{:input type="textarea" name="item_description" label="Description"}}
+
+			<dt><label for="f_item_unit_price">Prix unitaire</label><i>(facultatif)</i></dt>
+			<dd><input type="text" name="item_unit_price" id="f_item_unit_price" value="0" pattern="-?[0-9]+([.,][0-9]{1,2})?" inputmode="decimal" size="8" autocomplete="off" class="money" /></dd>
+			{{* Awaiting #eeb7d3e36ef4e3d7f2e8bc49c18c3c6b672f2e18 resolution {{:input type="money" name="item_unit_price" id="item_unit_price" label="Prix unitaire" default="0"}} *}}
+
+			{{:input type="number" name="item_quantity" label="Quantité" default="1" min="0" max ="9999"}}
+		</dl>
 		<input type="submit" name="" id="item_addition_button" value="Ajouter l'article au devis" />
 	</fieldset>
 </form>

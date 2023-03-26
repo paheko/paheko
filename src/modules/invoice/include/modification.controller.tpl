@@ -108,10 +108,11 @@
 
 			{{:save id=$_GET.id|intval
 				validate_schema="./schema/quotation.json"
-				validate_only="status, child_id, parent_id, last_modification_date"
+				validate_only="status, child_id, parent_id, validation_date, last_modification_date"
 				status=$new_status
 				child_id=$invoice_id|intval
 				parent_id=$_GET.id|intval
+				validation_date=$validation_date
 				last_modification_date=$now|atom_date
 			}}
 			{{:http redirect="details.html?id=%d&ok=%d"|args:$id:$redirection_code}}
