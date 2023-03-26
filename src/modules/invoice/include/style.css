@@ -1,6 +1,24 @@
+:root {
+	--mHoverBgColor: lightblue;
+	--mDarkBgColor: gainsboro;
+	--mGreen: green;
+	--mRed: firebrick;
+}
+
+html.dark {
+	--mHoverBgColor: dimgrey;
+	--mDarkBgColor: midnightblue;
+	--mGreen: greenyellow;
+	--mRed: red;
+}
+
 #item_list .reference {
 	min-width: 0;
 	max-width: 7em;
+}
+
+table.list tbody tr:hover, table.list tr:nth-child(even):hover, table.list tr.cancelled_document:nth-child(even):hover {
+	background-color: var(--mHoverBgColor);
 }
 
 h3.quotation_total {
@@ -17,7 +35,7 @@ h3.quotation_total {
 }
 
 .irreversible, .irreversible:before, .irreversible > span {
-	color: red;
+	color: var(--mRed);
 	font-weight: bold;
 }
 
@@ -25,13 +43,25 @@ h3.quotation_total {
 	font-weight: bold;
 }
 
+strong.archived {
+	font-weight: bold;
+	color: var(--mGreen);
+}
+
+.archived::after {
+	content: ' 🗃';
+}
+
+strong.archived::after {
+	font-weight: normal;
+}
+
 .organization_name, .business_name, .signing_place, .important_status {
 	text-transform: uppercase;
 }
 
 tr.cancelled_document, table.list tr.cancelled_document:nth-child(even) {
-	background-color: grey;
-	//color: black;
+	background-color: var(--mDarkBgColor);
 }
 
 dl.property_list dt, dl.property_list dd {
@@ -77,6 +107,6 @@ nav.tabs aside.menu li a.icn-btn, .list_action_buttons li a.icn-btn {
 	margin: 0.2em 0.2em;
 }
 
-#cancel_checkbox_label::before {
+#cancel_checkbox_label::before, #archive_checkbox_label::before {
 	margin-right: 0;
 }

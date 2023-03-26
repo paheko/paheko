@@ -5,7 +5,7 @@
 {{:admin_header title="Devis et factures" current="acc" custom_css="./include/style.css"}}
 {{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, VALIDATED_STATUS, REJECTED_STATUS, PAID_STATUS, DOCUMENT_TYPES, CANCELLED_LABEL, TYPE_LABELS, STATUS_LABELS, INVOICE_STATUS_LABELS, QUOTATION_TYPE, INVOICE_TYPE, VERSION'}}
 
-{{if $_GET.action === 'sign' || $_POST.signing_submit || $_GET.action === 'delete' || $_POST.reject_submit || $_POST.validate_submit || $_POST.mark_as_paid_submit || $_POST.cancel_submit || $_POST.duplicate_submit || $_POST.edit_comment_submit || $_POST.status_update_button}}
+{{if $_GET.action === 'sign' || $_POST.signing_submit || $_GET.action === 'delete' || $_POST.reject_submit || $_POST.validate_submit || $_POST.mark_as_paid_submit || $_POST.cancel_submit || $_POST.archive_submit || $_POST.unarchive_submit || $_POST.duplicate_submit || $_POST.edit_comment_submit || $_POST.status_update_button}}
 	{{:include file='./include/modification.controller.tpl' keep='check_errors'}}
 {{elseif $_GET.id === null}}
 	<p class="error block">Aucun document séléctionné.</p>
@@ -31,7 +31,7 @@
 
 	{{if $check_errors}}
 		{{#foreach from=$check_errors item='error'}}
-			<p class="error block">{{$error}}</p>
+			<p class="error block">{{$error|raw}}</p>
 		{{/foreach}}
 	{{/if}}
 
@@ -103,6 +103,24 @@
 				{{:include file='./include/document_summary.html'}}
 				{{:input type="textarea" name="reason" label="Motif" required=false cols="50" rows="4"}}
 				{{:button type="submit" name="cancel_submit" label="Confirmer l'annulation" shape="check" class="main"}}
+			</fieldset>
+		</form>
+
+	{{elseif $_GET.action === 'ask_archiving'}}
+		<form method="POST" action="">
+			<fieldset>
+				<legend><h2>Archiver {{if $type === $INVOICE_TYPE}}la{{else}}le{{/if}} {{$label}} n° {{$key}} ?</h2></legend>
+				{{:include file='./include/document_summary.html'}}
+				{{:button type="submit" name="archive_submit" label="Confirmer l'archivage" shape="check" class="main"}}
+			</fieldset>
+		</form>
+
+	{{elseif $_GET.action === 'ask_unarchiving'}}
+		<form method="POST" action="">
+			<fieldset>
+				<legend><h2>Sortir des archives {{if $type === $INVOICE_TYPE}}la{{else}}le{{/if}} {{$label}} n° {{$key}} ?</h2></legend>
+				{{:include file='./include/document_summary.html'}}
+				{{:button type="submit" name="unarchive_submit" label="Confirmer la sortie des archives" shape="unlock" class="main"}}
 			</fieldset>
 		</form>
 

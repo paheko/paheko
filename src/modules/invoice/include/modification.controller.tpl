@@ -172,6 +172,9 @@
 				{{:assign var='check_errors.' value='Les brouillons ne peuvent pas être annulés. Vous pouvez néanmoins les supprimer.'}}
 			{{elseif $cancelled}}
 				{{:assign var='check_errors.' value='Le document est déjà annulé.'}}
+			{{elseif $archived}}
+				{{:assign link='<a href="action.html?id=%d&show=%s&action=ask_unarchiving">Sortir le document des archives</a>'|args:$id:$type}}
+				{{:assign var='check_errors.' value='Un document archivé ne peut pas être annulé. %s.'|args:$link}}
 			{{/if}}
 			{{:assign var='allowed_type' from='DOCUMENT_TYPES.%s'|args:$type}}
 			{{if !$allowed_type}}
@@ -189,6 +192,48 @@
 			{{/if}}
 		{{/load}}
 	{{/if}}
+
+{{elseif $_POST.archive_submit || $_POST.unarchive_submit}}
+	{{if !$_GET.id}}
+		{{:assign var='check_errors.' value='Aucun document sélectionné.'}}
+	{{/if}}
+	{{if !$check_errors}}
+		{{#load id=$_GET.id}}
+			{{if $status === $DRAFT_STATUS}}
+				{{:assign var='check_errors.' value='Les brouillons ne peuvent pas être archivés.'}}
+			{{/if}}
+			{{if $archived && $_POST.archive_submit}}
+				{{:assign var='check_errors.' value='Le document est déjà archivé.'}}
+			{{elseif !$archived && $_POST.unarchive_submit}}
+				{{:assign var='check_errors.' value='Le document est déjà sorti des archives.'}}
+			{{/if}}
+			{{if $status === $AWAITING_STATUS}}
+				{{if $type === $INVOICE_TYPE}}
+					{{:assign var='check_errors.' value='Les factures doivent être soit payées soit annulées pour pouvoir être archivées.'}}
+				{{else}}
+					{{:assign var='check_errors.' value='Les devis doivent être soit validés ou soit refusés pour pouvoir être archivés.'}}
+				{{/if}}
+			{{/if}}
+			{{:assign var='allowed_type' from='DOCUMENT_TYPES.%s'|args:$type}}
+			{{if !$allowed_type}}
+				{{:assign var='check_errors.' value='Type invalide : %s!'|args:$type}}
+			{{/if}}
+			{{if !$check_errors}}
+				{{:save id=$id|intval
+					validate_schema="./schema/%s.json"|args:$type
+					validate_only="archived, last_modification_date"
+					archived=$_POST.archive_submit|boolval
+					last_modification_date=$now|atom_date
+				}}
+				{{if $_POST.archive_submit}}
+					{{:http redirect="details.html?id=%d&ok=7&show=%s"|args:$id:$type}}
+				{{else}}
+					{{:http redirect="details.html?id=%d&ok=8&show=%s"|args:$id:$type}}
+				{{/if}}
+			{{/if}}
+		{{/load}}
+	{{/if}}
+
 {{elseif $_POST.duplicate_submit}}
 	{{if !$_GET.id}}
 		{{:assign var='check_errors.' value='Aucun document sélectionné.'}}
@@ -308,9 +353,10 @@
 				{{else}}
 					{{:save id=$id
 						validate_schema="./schema/%s.json"|args:$type
-						validate_only="status, cancelled, last_modification_date"
+						validate_only="status, cancelled, archived, last_modification_date"
 						status=$_POST.status
 						cancelled=$_POST.cancelled|boolval
+						archived=$_POST.archived|boolval
 						last_modification_date=$now|atom_date
 					}}
 					{{:http redirect="details.html?id=%d&ok=2&show=%s"|args:$id:$type}}

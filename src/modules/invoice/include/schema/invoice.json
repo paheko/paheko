@@ -16,6 +16,10 @@
 			"type": ["string", "null"],
 			"maxLength": 256
 		},
+		"archived": {
+			"description": "Défini si le devis est archivé",
+			"type": "boolean"
+		},
 		"author_id": {
 			"description": "ID membre du rédacteur du devis",
 			"type": "integer",

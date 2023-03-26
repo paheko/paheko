@@ -53,7 +53,7 @@
 			{{:button type="submit" title="Dupliquer" shape="list-ol" name="duplicate_button"}}
 		</form>
 	</li>
-	{{if !$cancelled}}
+	{{if !$cancelled && !$archived}}
 		{{if $type === $INVOICE_TYPE}}
 			{{:assign button_target_label='la facture'}}
 		{{else}}

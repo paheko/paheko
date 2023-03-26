@@ -23,6 +23,8 @@
 					<li>{{:linkbutton label="PDF" href="preview.html?id=%s&source=details"|args:$id shape="pdf"}}</li>
 				{{/if}}
 			{{/if}}
+			
+			{{* Deletion *}}
 			{{if $status === $DRAFT_STATUS}}
 				{{if $_GET.action !== 'ask_deletion'}}
 					<li>
@@ -32,7 +34,9 @@
 					</li>
 				{{/if}}
 			{{/if}}
-			{{if $status !== $DRAFT_STATUS && !$cancelled && $_GET.action !== 'ask_cancelling'}}
+			
+			{{* Cancellation *}}
+			{{if $status !== $DRAFT_STATUS && !$cancelled && !$archived && $_GET.action !== 'ask_cancelling'}}
 				{{if $type === $QUOTATION_TYPE}}
 					{{:assign button_target_label='le devis'}}
 				{{else}}
@@ -44,8 +48,20 @@
 					</form>
 				</li>
 			{{/if}}
+			
+			{{* Archiving *}}
 			{{if $status !== $DRAFT_STATUS && $status !== $AWAITING_STATUS}}
-				<li>{{:button type="submit" href="#" label="[Archiver]" title="prochainement" disabled="disabled"}}</li>
+				<li>
+					{{if !$archived && $_GET.action !== 'ask_archiving'}}
+						<form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_archiving"|args:$id:$type}}">
+							{{:button type="submit" label="Archiver" shape="lock" name="archive_button"}}
+						</form>
+					{{elseif $archived && $_GET.action !== 'ask_unarchiving'}}
+						<form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_unarchiving"|args:$id:$type}}">
+							{{:button type="submit" label="" title="Sortir le document des archives" shape="unlock" name="archive_button"}}
+						</form>
+					{{/if}}
+				</li>
 			{{/if}}
 		</ul>
 	</aside>

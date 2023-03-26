@@ -16,6 +16,10 @@
 			"type": ["string", "null"],
 			"maxLength": 256
 		},
+		"archived": {
+			"description": "Défini si le devis est archivé",
+			"type": "boolean"
+		},
 		"author_id": {
 			"description": "ID membre du rédacteur du devis",
 			"type": "integer",
@@ -158,5 +162,5 @@
 			"maxLength": 12
 		}
 	},
-	"required": [ "status", "cancelled", "author_id", "subject", "date", "org_contact", "recipient_business_name", "recipient_address", "vat_exemption", "last_modification_date", "module_version" ]
+	"required": [ "status", "cancelled", "archived", "author_id", "subject", "date", "org_contact", "recipient_business_name", "recipient_address", "vat_exemption", "last_modification_date", "module_version" ]
 }

@@ -30,6 +30,10 @@
 				Devis marqué avec succès comme validé.
 			{{elseif $_GET.ok === '6'}}
 				Facture marquée avec succès comme payée.
+			{{elseif $_GET.ok === '7'}}
+				Document archivé avec succès.
+			{{elseif $_GET.ok === '8'}}
+				Document sorti des archives avec succès.
 			{{/if}}
 			</p>
 		{{/if}}
@@ -40,11 +44,13 @@
 		{{if $type === $INVOICE_TYPE}}
 			{{:assign var="status_label" from="INVOICE_STATUS_LABELS.%s"|args:$status}}
 			{{:assign cancelled_label='Annulée'}}
+			{{:assign archived_label='Archivée'}}
 		{{else}}
 			{{:assign var="status_label" from="STATUS_LABELS.%s"|args:$status}}
 			{{:assign cancelled_label='Annulé'}}
+			{{:assign archived_label='Archivé'}}
 		{{/if}}
-		<h1>{{$label}} n° {{$key}} - {{if !$cancelled}}{{$status_label}}{{else}}{{$cancelled_label}}{{/if}}</h1>
+		<h1>{{$label}} n° {{$key}} - {{if !$cancelled && !$archived}}{{$status_label}}{{elseif $cancelled}}{{$cancelled_label}}{{else}}<span class="archived">{{$archived_label}}</span>{{/if}}</h1>
 
 		{{* ======================= Content =========================== *}}
 
@@ -55,6 +61,9 @@
 				<p>Statut en cours : <strong class="irreversible">{{$cancelled_label}}</strong>.
 				{{if $cancellation_reason}}<p>Motif : {{$cancellation_reason|escape|nl2br}}</p>{{/if}}
 				<p class="infos">(dernier statut avant annulation : {{$status_label}})</p>
+			{{elseif $archived}}
+				<p>Statut en cours : <strong class="archived">{{$archived_label}}</strong>.
+				<p class="infos">(dernier statut avant archivage : {{$status_label}})</p>
 			{{elseif $status === $AWAITING_STATUS}}
 				<p class="infos">{{$label}} <strong>{{if $type === $QUOTATION_TYPE}}signé{{else}}émise{{/if}} le {{$signing_date|date_short}} à {{$signing_place}}</strong>.</p>
 				{{if $type === $QUOTATION_TYPE}}
@@ -237,6 +246,8 @@
 							{{* {{:input type="checkbox" name="cancelled" label="annulé" value=$cancelled|intval style="display: inline;"}} *}}
 							<input type="checkbox"  name="cancelled" {{if $cancelled}}checked="checked"{{/if}} value="1" id="f_cancelled_1" style="display: inline;" />
 							<label id="cancel_checkbox_label" for="f_cancelled_1">annulé</label>
+							<input type="checkbox"  name="archived" {{if $archived}}checked="checked"{{/if}} value="1" id="f_archived_1" style="display: inline;" />
+							<label id="archive_checkbox_label" for="f_archived_1">archivé</label>
 							
 							{{:input type="hidden" name="id" default=$id|intval}}
 							{{:button type="submit" name="status_update_button" label="Modifier"}}

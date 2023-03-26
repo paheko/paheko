@@ -38,14 +38,16 @@
 
 {{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, VALIDATED_STATUS, PAID_STATUS, TYPE_LABELS, STATUS_LABELS, CANCELLED_LABEL, QUOTATION_TYPE, INVOICE_TYPE, INVOICE_STATUS_LABELS'}}
 
-{{if $_GET.show == $QUOTATION_TYPE}}
-	{{:assign filter="json_extract(document, '$.type') = '%s'"|args:$QUOTATION_TYPE}}
-{{elseif $_GET.show == 'paid'}}
-	{{:assign filter="$$.type = :type AND $$.status = :status" type_filter=$INVOICE_TYPE status_filter=$PAID_STATUS}}
-{{elseif $_GET.show == 'unpaid'}}
-	{{:assign filter="$$.type = :type AND $$.status = :status AND $$.cancelled = false" type_filter=$INVOICE_TYPE status_filter=$AWAITING_STATUS}}
+{{if $_GET.show === $QUOTATION_TYPE}}
+	{{:assign filter="$$.type = :type AND $$.archived = false" type_filter=$QUOTATION_TYPE}}
+{{elseif $_GET.show === 'paid'}}
+	{{:assign filter="$$.type = :type AND $$.status = :status AND $$.archived = false" type_filter=$INVOICE_TYPE status_filter=$PAID_STATUS}}
+{{elseif $_GET.show === 'unpaid'}}
+	{{:assign filter="$$.type = :type AND $$.status = :status AND $$.cancelled = false AND $$.archived = false" type_filter=$INVOICE_TYPE status_filter=$AWAITING_STATUS}}
+{{elseif $_GET.show === 'archive'}}
+	{{:assign filter="$$.archived = true"}}
 {{else}}
-	{{:assign filter="1"}}
+	{{:assign filter="$$.archived = false"}}
 {{/if}}
 
 {{if $_GET.ok}}
@@ -70,6 +72,7 @@
 {{:assign list_where="$$.type IN ('quotation', 'invoice') AND %s"|args:$filter}}
 {{:assign list_order=1}}
 {{if !$_GET.show}}{{:assign list_select='$$.parent_id AS "↳"; $$.type AS "Type"; '|cat:$list_select}}{{:assign list_order=3}}{{/if}}
+{{if $_GET.show === 'archive'}}{{:assign list_select='$$.type AS "Type"; '|cat:$list_select}}{{:assign list_order=2}}{{/if}}
 {{if $_GET.q}}{{:assign list_where=$list_where|cat:' AND ':$search_where}}{{/if}}
 {{#list
 	select=$list_select
@@ -83,14 +86,16 @@
 	:status=$status_filter
 }}
 	<tr class="{{$status}}{{if $cancelled}} cancelled_document{{/if}}">
+		{{:assign var="label" from="TYPE_LABELS.%s"|args:$type}}
 		{{if !$_GET.show}}
-			{{:assign var="label" from="TYPE_LABELS.%s"|args:$type}}
 			{{if $type === $INVOICE_TYPE && $parent_id}}
 				<td colspan="2" style="text-align:left;">{{$label}} <span title="Associée au devis suivant">↴</span></td>
 			{{else}}
 				<td></td>
 				<td>{{$label}}</td>
 			{{/if}}
+		{{elseif $_GET.show === 'archive'}}
+			<td>{{$label}}</td>
 		{{/if}}
 		<td>{{:link href="details.html?id=%d&show=%s"|args:$id:$type label=$key}}</td>
 		<td>{{$date|date_short}}</td>
@@ -112,10 +117,6 @@
 			{{else}}
 				{{$CANCELLED_LABEL}}
 			{{/if}}
-
-			{{if $archived}}
-				<span title="Archivé">🗃</span>
-			{{/if}}
 		</td>
 		<td class="actions">
 			{{:include file='./include/document_list_buttons.html'}}
@@ -124,6 +125,10 @@
 {{else}}
 	<tr><td colspan="6">{{if !$_GET.q}}Aucun document.{{else}}Aucun résultat correspondant à "{{$_GET.q}}".{{/if}}</td></tr>
 {{/list}}
+
+{{if $_GET.show !== 'archive'}}
+	<p>Les documents archivés ne sont pas affichés ici.<br />Vous pouvez les consulter dans l'{{:link label="onglet Archives" href="?show=archive"}}.</p>
+{{/if}}
 
 {{:admin_footer}}
 
