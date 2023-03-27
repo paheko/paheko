@@ -3,6 +3,7 @@ $colspan = empty($year2) ? 3 : 5;
 $max = max(count($statement->body_left), count($statement->body_right));
 ?>
 <table class="statement">
+	{if !empty($caption)}<caption>{$caption}</caption>{/if}
 	<thead>
 		<tr>
 			<th colspan="{$colspan}" class="colspan">{$statement.caption_left}</th>
