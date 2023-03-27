@@ -4,6 +4,8 @@ namespace Garradin;
 
 use KD2\Office\Calc\Writer as ODSWriter;
 
+use KD2\HTML\TableExport;
+
 class CSV
 {
 	/**
@@ -211,6 +213,12 @@ class CSV
 		else {
 			throw new \InvalidArgumentException('Unknown export format');
 		}
+	}
+
+	static public function exportHTML(string $format, string $html, string $name = 'Export'): void
+	{
+		$css = file_get_contents(ROOT . '/www/admin/static/styles/06-tables-export.css');
+		TableExport::download($format, $name, $html, $css);
 	}
 
 	static protected function rowToArray($row, ?callable $row_map_callback)

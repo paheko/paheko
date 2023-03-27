@@ -315,7 +315,7 @@ class Template extends Smartyer
 			htmlspecialchars($params['class'] ?? ''),
 			$this->widgetLinkButton(['href' => $params['href'] . 'csv', 'label' => 'Export CSV', 'shape' => 'export']),
 			$this->widgetLinkButton(['href' => $params['href'] . 'ods', 'label' => 'Export LibreOffice', 'shape' => 'export']),
-			CALC_CONVERT_COMMAND ? $this->widgetLinkButton(['href' => $params['href'] . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']) : ''
+			CALC_CONVERT_COMMAND && ($params['xlsx'] ?? null) !== false ? $this->widgetLinkButton(['href' => $params['href'] . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']) : ''
 		);
 	}
 
