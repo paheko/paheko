@@ -219,6 +219,7 @@ class CSV
 	{
 		$css = file_get_contents(ROOT . '/www/admin/static/styles/06-tables-export.css');
 		TableExport::download($format, $name, $html, $css);
+		exit;
 	}
 
 	static protected function rowToArray($row, ?callable $row_map_callback)

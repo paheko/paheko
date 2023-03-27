@@ -307,15 +307,27 @@ class Template extends Smartyer
 
 	protected function widgetExportMenu(array $params): string
 	{
+		$url = $params['href'] ?? Utils::getSelfURL();
+		$suffix = $params['suffix'] ?? 'export=';
+
+		if (false !== strpos($url, '?')) {
+			$url .= '&';
+		}
+		else {
+			$url .= '?';
+		}
+
+		$url .= $suffix;
+
 		return sprintf('
 			<span class="menu-btn %s">
 				<b data-icon="↷" class="btn">Export</b>
 				<span>%s %s %s</span>
 			</span>',
 			htmlspecialchars($params['class'] ?? ''),
-			$this->widgetLinkButton(['href' => $params['href'] . 'csv', 'label' => 'Export CSV', 'shape' => 'export']),
-			$this->widgetLinkButton(['href' => $params['href'] . 'ods', 'label' => 'Export LibreOffice', 'shape' => 'export']),
-			CALC_CONVERT_COMMAND && ($params['xlsx'] ?? null) !== false ? $this->widgetLinkButton(['href' => $params['href'] . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']) : ''
+			$this->widgetLinkButton(['href' => $url . 'csv', 'label' => 'Export CSV', 'shape' => 'export']),
+			$this->widgetLinkButton(['href' => $url . 'ods', 'label' => 'Export LibreOffice', 'shape' => 'export']),
+			CALC_CONVERT_COMMAND && ($params['xlsx'] ?? null) !== false ? $this->widgetLinkButton(['href' => $url . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']) : ''
 		);
 	}
 

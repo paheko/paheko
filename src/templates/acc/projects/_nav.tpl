@@ -6,11 +6,16 @@
 		<li><a href="{$admin_url}acc/charts/">Plans comptables</a></li>
 	</ul>
 
-	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 	<aside>
+	{if $current == 'index'}
+		{exportmenu class="menu-btn-right" xlsx=false}
+	{/if}
+	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 		{linkbutton label="Créer un nouveau projet" href="edit.php" shape="plus" target="_dialog"}
+	{/if}
 	</aside>
 
+	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 	<ul class="sub">
 		<li{if $current != 'config'} class="current"{/if}>{link href="!acc/projects/" label="Liste des projets"}</li>
 		<li{if $current == 'config'} class="current"{/if}>{link href="!acc/projects/config.php" label="Configuration"}</li>
