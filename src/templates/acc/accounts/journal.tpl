@@ -51,7 +51,7 @@
 	<nav class="tabs">
 		<aside>
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-			{exportmenu href="%s&export="|args:$self_url}
+			{exportmenu}
 		{/if}
 			{linkbutton shape="search" href="!acc/search.php?year=%d&account=%s"|args:$year.id,$account.code label="Recherche"}
 		{if $year.id == CURRENT_YEAR_ID}

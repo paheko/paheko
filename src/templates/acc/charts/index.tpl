@@ -42,7 +42,7 @@
 								{linkbutton shape="delete" label="Supprimer" href="!acc/charts/delete.php?id=%d"|args:$item.id target="_dialog"}
 							{/if}
 						{/if}
-						{exportmenu class="menu-btn-right" href="export.php?id=%d&format="|args:$item.id}
+						{exportmenu class="menu-btn-right" href="export.php?id=%d"|args:$item.id suffix="format="}
 					</td>
 				</tr>
 			{/foreach}
