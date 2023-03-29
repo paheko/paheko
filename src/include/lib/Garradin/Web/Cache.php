@@ -170,7 +170,8 @@ class Cache
 						document.close();
 					});
 				});
-				</script></body', $expire);
+				</script>
+				<!-- Cache generated on: %s --></body', $expire, date('Y-m-d H:i:s'));
 
 			$html = str_ireplace('</body', $close, $html);
 		}
