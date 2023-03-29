@@ -1,10 +1,8 @@
-{include file="_head.tpl" title="Fichiers supprimés" current="docs"}
+{include file="_head.tpl" title="Fichiers supprimés" current="docs" hide_title=true}
 
 <nav class="tabs">
-
-	<p>
-		{linkbutton shape="left" label="Documents" href="./"}
-	</p>
+	{include file="./_nav.tpl"}
+	<h2>Fichiers supprimés</h2>
 </nav>
 
 <p class="help">

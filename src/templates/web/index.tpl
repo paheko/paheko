@@ -3,17 +3,20 @@
 <nav class="tabs">
 	<aside>
 		{linkbutton shape="search" label="Rechercher" target="_dialog" href="search.php"}
+		{if !$config.site_disabled}
+			{if $cat}
+				{linkbutton shape="eye" label="Voir sur le site" target="_dialog" href=$cat->url()}
+			{else}
+				{linkbutton shape="eye" label="Voir sur le site" target="_dialog" href=$www_url}
+			{/if}
+		{/if}
 		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
-		{linkbutton shape="plus" label="Nouvelle page" target="_dialog" href="new.php?type=%d&parent=%s"|args:$type_page,$current_path}
-		{linkbutton shape="plus" label="Nouvelle catégorie" target="_dialog" href="new.php?type=%d&parent=%s"|args:$type_category,$current_path}
+			{linkmenu label="Nouvelle…" shape="plus" class="menu-btn-right"}
+				{linkbutton shape="plus" label="Nouvelle page" target="_dialog" href="new.php?type=%d&parent=%s"|args:$type_page,$current_path}
+				{linkbutton shape="plus" label="Nouvelle catégorie" target="_dialog" href="new.php?type=%d&parent=%s"|args:$type_category,$current_path}
+			{/linkmenu}
 		{/if}
 	</aside>
-	{if !$config.site_disabled}
-	<ul>
-		<li class="current"><a href="./">Gestion du site web</a></li>
-		<li><a href="{if $cat}{$cat->url()}{else}{$www_url}{/if}" target="_blank">Voir le site en ligne</a></li>
-	</ul>
-	{/if}
 </nav>
 
 <nav class="breadcrumbs">

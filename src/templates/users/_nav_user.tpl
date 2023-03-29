@@ -1,7 +1,6 @@
 <nav class="tabs">
 	<aside>
 	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-		{linkbutton href="!services/user/subscribe.php?user=%d"|args:$id label="Inscrire à une activité" shape="plus"}
 		{linkbutton href="edit.php?id=%d"|args:$id shape="edit" label="Modifier"}
 	{/if}
 	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && $logged_user.id != $id}

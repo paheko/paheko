@@ -63,11 +63,13 @@ if (f('delete')) {
 else {
 	Trash::clean();
 
-	$trash = Files::get(File::CONTEXT_TRASH);
+	$context = File::CONTEXT_TRASH;
+
+	$trash = Files::get($context);
 	$tpl->assign('trash_size', $trash->getRecursiveSize());
 	$list = Trash::list();
 
-	$tpl->assign(compact('list'));
+	$tpl->assign(compact('list', 'context'));
 
 	$tpl->display('docs/trash.tpl');
 }

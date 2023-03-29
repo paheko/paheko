@@ -11,6 +11,7 @@ use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\Users\Session;
 use Garradin\Web\Web;
+use Garradin\Entities\Web\Page;
 
 use const Garradin\ROOT;
 
