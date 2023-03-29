@@ -267,7 +267,7 @@ class Module extends Entity
 		elseif ($has_local_file) {
 			$file->serve();
 		}
-		// Serve a static file (from "modules" in original source code)
+		// Serve a static file
 		else {
 			$type = $this->getFileTypeFromExtension($path);
 			$real_path = $this->distPath($path);
@@ -299,7 +299,7 @@ class Module extends Entity
 		$ut->assignArray($params);
 		extract($ut->fetchWithType());
 
-		if ($uri && preg_match('!html|xml|text!', $type) && $ut->get('nocache')) {
+		if ($uri !== null && preg_match('!html|xml|text!', $type) && !$ut->get('nocache')) {
 			$cache = true;
 		}
 		else {
@@ -324,7 +324,7 @@ class Module extends Entity
 		}
 
 		if ($cache) {
-			Web_Cache::store($uri, $content);
+			Cache::store($uri, $content);
 		}
 
 		Plugins::fireSignal('web.request.after', $plugin_params, $content);

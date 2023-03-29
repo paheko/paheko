@@ -42,6 +42,12 @@ DirectoryIndex index.php
 	# Store MD5 hashes in environment variables
 	RewriteCond %{REQUEST_URI} ^(.+)(?:\?|$)
 	RewriteRule ^ "-" [E=CACHE_URI:%1]
+	# Extract file extension (required for Apache to serve the correct mimetype)
+	RewriteCond %{REQUEST_URI} (\.[a-z0-9]+)(?:\?|$)
+	RewriteRule ^ "-" [E=CACHE_EXT:%1]
+	# If no extension, default to .html
+	RewriteCond %{REQUEST_URI} !\.[a-z0-9]+(?:\?|$)
+	RewriteRule ^ "-" [E=CACHE_EXT:.html]
 	RewriteCond expr "md5(%{ENV:CACHE_URI}) =~ /^(.+)$/"
 	RewriteRule ^ "-" [E=CACHE_URI_MD5:%1]
 	RewriteCond expr "md5(tolower(%{HTTP_HOST})) =~ /^((.{2}).+)$/"
@@ -51,22 +57,22 @@ DirectoryIndex index.php
 
 	# Serve static file for resized images
 	RewriteCond %{QUERY_STRING} (?:^|&)(\d+px(?:-[a-z]+)?)
-	RewriteCond %{DOCUMENT_ROOT}%{ENV:CACHE_PATH}_%1 -l
-	RewriteRule ^ %{ENV:CACHE_PATH}_%1 [END]
+	RewriteCond %{DOCUMENT_ROOT}%{ENV:CACHE_PATH}_%1%{ENV:CACHE_EXT} -l
+	RewriteRule ^ %{ENV:CACHE_PATH}_%1%{ENV:CACHE_EXT} [END]
 
 	# Serve linked files for other URIs
 	RewriteCond %{QUERY_STRING} ="" [OR]
 	RewriteCond %{QUERY_STRING} ^h=[a-f0-9]+$
-	RewriteCond %{DOCUMENT_ROOT}%{ENV:CACHE_PATH} -l
-	RewriteRule ^ %{ENV:CACHE_PATH} [END]
+	RewriteCond %{DOCUMENT_ROOT}%{ENV:CACHE_PATH}%{ENV:CACHE_EXT} -l
+	RewriteRule ^ %{ENV:CACHE_PATH}%{ENV:CACHE_EXT} [END]
 
 	# Do not try cache for pages if user is logged-in
 	RewriteCond %{HTTP_COOKIE} !pko
 	# Serve static HTML pages
 	RewriteCond %{QUERY_STRING} =""
-	RewriteCond %{DOCUMENT_ROOT}%{ENV:CACHE_PATH} -f
-	RewriteCond %{DOCUMENT_ROOT}%{ENV:CACHE_PATH} !-l
-	RewriteRule ^ %{ENV:CACHE_PATH} [END]
+	RewriteCond %{DOCUMENT_ROOT}%{ENV:CACHE_PATH}%{ENV:CACHE_EXT} -f
+	RewriteCond %{DOCUMENT_ROOT}%{ENV:CACHE_PATH}%{ENV:CACHE_EXT} !-l
+	RewriteRule ^ %{ENV:CACHE_PATH}%{ENV:CACHE_EXT} [END]
 
 	# Redirect to router
 	RewriteCond %{REQUEST_FILENAME} !-d
