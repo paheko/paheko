@@ -43,7 +43,7 @@ $links_errors = $page->checkInternalLinks();
 
 $tpl->assign(compact('page', 'images', 'files', 'content', 'type_page', 'type_category', 'links_errors'));
 
-$tpl->assign('custom_js', ['wiki_gallery.js']);
-$tpl->assign('custom_css', ['wiki.css', '!web/css.php']);
+$tpl->assign('custom_js', ['web_gallery.js']);
+$tpl->assign('custom_css', ['web.css', '!web/css.php']);
 
 $tpl->display('web/page.tpl');

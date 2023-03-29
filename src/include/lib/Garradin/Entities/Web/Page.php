@@ -39,8 +39,8 @@ class Page extends Entity
 
 	const FORMATS_LIST = [
 		Render::FORMAT_MARKDOWN => 'MarkDown',
-		Render::FORMAT_SKRIV => 'SkrivML',
 		Render::FORMAT_ENCRYPTED => 'Chiffré',
+		Render::FORMAT_SKRIV => 'SkrivML',
 	];
 
 	const STATUS_ONLINE = 'online';
@@ -302,6 +302,8 @@ class Page extends Entity
 		elseif (empty($source['format'])) {
 			$this->set('format', Render::FORMAT_MARKDOWN);
 		}
+
+		$this->set('status', empty($source['status']) ? self::STATUS_ONLINE : $source['status']);
 
 		return parent::importForm($source);
 	}

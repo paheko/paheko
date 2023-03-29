@@ -36,13 +36,22 @@ $form->runIf('upload', function () use ($page) {
 	$new_file = Files::uploadMultiple(Utils::dirname($page->file_path), 'file');
 }, $csrf_key);
 
-$files = $page->getAttachmentsGallery(true);
-$images = $page->getImageGallery(true);
+$files = null;
+$images = null;
+
+if (isset($_GET['files'])) {
+	$files = $page->getAttachmentsGallery(true);
+}
+
+if (isset($_GET['images'])) {
+	$images = $page->getImageGallery(true);
+}
+
 $max_size = Utils::getMaxUploadSize();
 
 $tpl->assign(compact('page', 'files', 'images', 'max_size', 'csrf_key'));
 
-$tpl->assign('custom_js', ['wiki_fichiers.js']);
-$tpl->assign('custom_css', ['!static/scripts/wiki_editor.css']);
+$tpl->assign('custom_js', ['web_files.js']);
+$tpl->assign('custom_css', ['!static/scripts/web_editor.css']);
 
 $tpl->display('web/_attach.tpl');

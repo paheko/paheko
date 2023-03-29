@@ -8,11 +8,21 @@ use Garradin\Entities\Accounting\Account;
 
 require_once __DIR__ . '/_inc.php';
 
-$tpl->assign('balance', Reports::getBalanceSheet($criterias));
+$balance = Reports::getBalanceSheet($criterias);
+$tpl->assign('balance', $balance);
 
 if (!empty($criterias['year'])) {
 	$years = Years::listAssocExcept($criterias['year']);
 	$tpl->assign('other_years', count($years) ? [null => '-- Ne pas comparer'] + $years : $years);
+}
+
+if ($f = qg('export')) {
+	$tpl->assign('statement', $balance);
+	$tpl->assign('caption', 'Bilan');
+	$table = $tpl->fetch('acc/reports/_statement.tpl');
+
+	CSV::exportHTML($f, $table, 'Bilan');
+	return;
 }
 
 $tpl->display('acc/reports/balance_sheet.tpl');

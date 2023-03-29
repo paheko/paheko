@@ -66,7 +66,7 @@ class Export
 		],
 		self::FEC => [
 			'JournalCode'   => null,
-			'JournalLib'    => 'type',
+			'JournalLib'    => null,
 			'EcritureNum'   => 'id',
 			'EcritureDate'  => 'date',
 			'CompteNum'     => 'account',

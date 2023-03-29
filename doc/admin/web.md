@@ -15,6 +15,7 @@ La syntaxe utilisée dans les squelettes s'appelle **[Brindille](brindille.html)
 
 # Exemples de sites réalisés avec Paheko
 
+* [Faidherbe Alumni](https://www.alumni-faidherbe.fr/)
 * [ASBM Mortagne](https://asbm-mortagne.fr/)
 * [Vélocité 63](https://www.velocite63.fr/)
 * [La rustine, Dijon](https://larustine.org/)

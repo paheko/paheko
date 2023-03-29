@@ -54,7 +54,7 @@
 	{$content|raw}
 
 	{if count($images) || count($files)}
-	<div class="wikiFiles">
+	<div class="web-files">
 		<h3>Fichiers liés à cette page</h3>
 
 		{if count($images)}
@@ -82,7 +82,7 @@
 	</div>
 	{/if}
 
-	<p class="wikiFooter">
+	<p class="web-footer">
 		Dernière modification le {$page.modified|date_long:true}
 	</p>
 {/if}

@@ -8,7 +8,7 @@
 		{$list->count()}
 		<em class="help">(N'apparaît ici que l'inscription la plus récente de chaque membre.)</em>
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
-			{exportmenu href="%s&export="|args:$self_url}
+			{exportmenu}
 		{/if}
 	</dd>
 </dl>

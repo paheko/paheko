@@ -44,32 +44,6 @@ nav.acc-year h4 {
     font-weight: normal;
 }
 
-table.statement, table.statement table {
-    width: 100%;
-}
-
-table.statement td, table.statement th {
-    padding: .5rem;
-    vertical-align: top;
-}
-
-table.statement table.list td, table.statement table.list th {
-    padding: .2rem .5rem;
-}
-
-table.statement table {
-    border: 1px solid rgba(var(--gSecondColor), 0.5);
-}
-
-td.money, th.money {
-    text-align: right;
-}
-
-.statement table tfoot tr {
-    background: rgba(var(--gSecondColor), 0.1);
-    color: rgb(var(--gMainColor));
-}
-
 .year-header {
     text-align: center;
     margin-bottom: .8em;
@@ -152,4 +126,77 @@ table.projects .archived {
 input[name=code_base] {
     text-align: right;
     color: rgb(var(--gTextColor));
+}
+.transaction-details {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: center;
+    margin: 1em 0;
+}
+
+.transaction-details > div {
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    margin: 0 .5rem;
+}
+
+.transaction-details .account {
+    background-color: rgba(var(--gMainColor), 0.2);
+    border-radius: .5em;
+    padding: 1em;
+    text-align: center;
+}
+
+.transaction-details .account h4 {
+    font-weight: normal;
+}
+
+/*
+.transaction-details .account h5 {
+    font-weight: normal;
+    font-style: italic;
+    color: var(--gBorderColor);
+}
+*/
+
+.transaction-details .amount h3 {
+    font-weight: normal;
+}
+
+.transaction-details .amount {
+    background-color: rgba(var(--gSecondColor), 0.3);
+    border-radius: .5em;
+    padding: 1em;
+    text-align: center;
+}
+
+.transaction-details .amount > span {
+    font-size: 2em;
+    white-space: nowrap;
+}
+
+.transaction-details .amount .icn {
+    color: var(--gBorderColor);
+}
+
+.transaction-details-container {
+    max-width: 60rem;
+}
+
+.transaction-details-container nav {
+    text-align: center;
+}
+
+table.statement td, table.statement th {
+    border: 1px solid rgba(var(--gSecondColor), 0.5);
+}
+
+table.statement tbody tr.even td, table.statement tbody tr.even th {
+    background: rgba(var(--gSecondColor), 0.1);
+}
+
+table.statement tfoot td, table.statement tfoot th {
+    background: rgba(var(--gSecondColor), 0.2);
 }

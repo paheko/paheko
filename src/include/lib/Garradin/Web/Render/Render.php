@@ -23,7 +23,7 @@ class Render
 			return new Skriv($file, $link_prefix);
 		}
 		else if ($format == self::FORMAT_ENCRYPTED) {
-			return new EncryptedSkriv($file, $link_prefix);
+			return new Encrypted($file, $link_prefix);
 		}
 		else if ($format == self::FORMAT_MARKDOWN) {
 			return new Markdown($file, $link_prefix);

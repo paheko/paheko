@@ -17,10 +17,14 @@
 	<summary><h2 class="ruler">
 		{if !empty($criterias.projects_only)}
 			<?php $link = sprintf('%sacc/reports/trial_balance.php?project=%d&year=%d', $admin_url, $account->id, $account->id_year); ?>
-		{else}
+		{elseif !$criterias.project}
 			<?php $link = sprintf('%sacc/accounts/journal.php?id=%d&year=%d', $admin_url, $account->id, $account->id_year); ?>
+		{else}
+			<?php $link = null; ?>
 		{/if}
-			<a href="{$link}">{if $account.code}{$account.code} — {/if}{$account.label}</a>
+		{if $link}<a href="{$link}">{/if}
+			{if $account.code}{$account.code} — {/if}{$account.label}
+		{if $link}</a>{/if}
 	</h2></summary>
 
 	<table class="list">

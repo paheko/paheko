@@ -216,6 +216,86 @@ On peut donc tester l'existence d'une variable en la comparant à <code>null</co
 {{else}}
   Session inexistante.
 {{/if}}</code></pre>
+<p>Une condition peut être évaluée comme <em>vraie</em>, dans ce cas la partie qui suit le bloc <code>{{if …}}</code> sera exécutée.</p>
+<p>Si la condition est évaluée comme <em>fausse</em>, alors la partie qui suit le bloc <code>{{if …}}</code> ne sera pas exécutée. Dans ce cas, soit une condition <code>{{elseif …}}</code> suivante est vraie et exécutée, mais sinon c'est le contenu du bloc <code>{{else}}</code> qui est exécuté et affiché.</p>
+<p>Dans une condition on peut utiliser :</p>
+<ul>
+<li>une variable : <code>$nom_variable</code></li>
+<li>une variable avec des filtres : <code>$nom_variable|filtre1:parametre1</code></li>
+<li>une valeur (nombre, constante) : <code>42</code>, <code>-42</code>, <code>42.02</code> <code>null</code>, <code>true</code>, <code>false</code></li>
+<li>des opérateurs de comparaison</li>
+<li>des opérateurs logiques</li>
+</ul>
+<p>Attention : on ne peut pas grouper les conditions avec des parenthèses.</p>
+<p>Les comparaisons supportées sont les suivantes :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Opérateur de comparaison</th>
+<th style="text-align: left;">Explication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>==</code></td>
+<td style="text-align: left;">égalité faible, ne prend pas en compte le type : <code>1 == true</code> et <code>2 == 2.00</code> serons évalués comme vrais</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>===</code></td>
+<td style="text-align: left;">égalité forte, prend en compte le type : <code>1 === 1</code> sera vrai, mais <code>1 === true</code> sera faux</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>!=</code></td>
+<td style="text-align: left;">différent de, en comparaison faible</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>!==</code></td>
+<td style="text-align: left;">différent de, en comparaison forte</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&gt;</code></td>
+<td style="text-align: left;">supérieur à</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&gt;=</code></td>
+<td style="text-align: left;">supérieur ou égal à</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&lt;</code></td>
+<td style="text-align: left;">inférieur à</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>&lt;=</code></td>
+<td style="text-align: left;">inférieur ou égal à</td>
+</tr>
+</tbody>
+</table>
+<p>Il est aussi possible de précéder une variable de l'opérateur <code>!</code>, c'est un raccourci pour <code>$variable == false</code>.</p>
+<p>Voir <a href="https://www.php.net/manual/fr/language.operators.comparison.php" target="_blank" rel="nofollow,noreferrer">les opérateurs de comparaison PHP pour plus de détails</a>.</p>
+<p>Les opérateurs logiques supportés sont :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Opérateur</th>
+<th style="text-align: left;">Explication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>&amp;&amp;</code></td>
+<td style="text-align: left;">Vrai si les conditions à gauche et à droite sont vraies</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>||</code></td>
+<td style="text-align: left;">Vrai si une des conditions à gauche ou à droite est vraie</td>
+</tr>
+</tbody>
+</table>
+<p>Exemples :</p>
+<ul>
+<li><code>false &amp;&amp; true</code> : sera évalué comme faux</li>
+<li><code>false || true</code> : sera évalué comme vrai</li>
+</ul>
 <h2 id="fonctions">Fonctions</h2>
 <h3 id="fonctions-natives">Fonctions natives</h3>
 <p>Une fonction va répondre à certains paramètres et renvoyer un résultat ou réaliser une action.</p>

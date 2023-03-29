@@ -8,14 +8,26 @@ use Garradin\Entities\Accounting\Account;
 
 require_once __DIR__ . '/_inc.php';
 
+$general = Reports::getStatement($criterias + ['exclude_type' => [Account::TYPE_VOLUNTEERING_REVENUE, Account::TYPE_VOLUNTEERING_EXPENSE]]);
+$volunteering = Reports::getVolunteeringStatement($criterias, $general);
+
 if ($f = qg('export')) {
-	Reports::exportStatement($f, $criterias);
+	$tpl->assign('statement', $general);
+	$tpl->assign('caption', 'Compte de résultat');
+	$table = $tpl->fetch('acc/reports/_statement.tpl');
+
+	if (!empty($volunteering->body_left) || !empty($volunteering->body_right)) {
+		$tpl->assign('statement', $volunteering);
+		$tpl->assign('caption', 'Contributions bénévoles');
+		$table .= $tpl->fetch('acc/reports/_statement.tpl');
+	}
+
+	CSV::exportHTML($f, $table, 'Compte de résultat');
+
 	return;
 }
 
-$general = Reports::getStatement($criterias + ['exclude_type' => [Account::TYPE_VOLUNTEERING_REVENUE, Account::TYPE_VOLUNTEERING_EXPENSE]]);
-$tpl->assign('general', $general);
-$tpl->assign('volunteering', Reports::getVolunteeringStatement($criterias, $general));
+$tpl->assign(compact('general', 'volunteering'));
 
 if (!empty($criterias['year'])) {
 	$years = Years::listAssocExcept($criterias['year']);

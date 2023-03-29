@@ -15,6 +15,10 @@ KD2/Graphics/SVG/Pie.php
 KD2/Graphics/SVG/Plot.php
 KD2/Graphics/SVG/Bar.php
 KD2/JSONSchema.php
+KD2/HTML/CSSParser.php
+KD2/HTML/TableExport.php
+KD2/HTML/TableToCSV.php
+KD2/HTML/TableToODS.php
 KD2/HTTP.php
 KD2/Mail_Message.php
 KD2/Office/Calc/Writer.php

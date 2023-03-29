@@ -50,7 +50,7 @@
 			{linkbutton shape="search" href="?start=1" label="Filtrer" onclick="g.toggle('#filterForm', true); this.remove(); return false;"}
 		{/if}
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-			{exportmenu href="%s&export="|args:$self_url}
+			{exportmenu}
 		{/if}
 			{linkbutton shape="search" href="!acc/search.php?year=%d&account=%s"|args:$year.id,$account.code label="Recherche"}
 		{if $year.id == CURRENT_YEAR_ID}

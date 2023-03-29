@@ -2,7 +2,7 @@
 
 <nav class="tabs">
 	<aside>
-		{exportmenu href="?export="}
+		{exportmenu}
 		{linkbutton shape="search" href="!acc/search.php" label="Recherche"}
 	</aside>
 </nav>
