@@ -94,7 +94,7 @@
 							{if $item.module->hasLocal() && $item.module->hasDist()}
 								{linkbutton label="Remettre à zéro" href="delete.php?module=%s"|args:$item.name shape="reset" target="_dialog"}
 							{/if}
-							{*FIXME{linkbutton label="Modifier" href="edit.php?module=%s"|args:$item.name shape="edit" target="_dialog"}*}
+							{linkbutton label="Modifier" href="edit.php?module=%s"|args:$item.name shape="edit"}
 						{elseif $item.module && !$item.enabled && $item.module->canDelete()}
 							{linkbutton label="Supprimer" href="delete.php?module=%s"|args:$item.name shape="delete" target="_dialog"}
 						{elseif $item.plugin && !$item.enabled && $item.installed}

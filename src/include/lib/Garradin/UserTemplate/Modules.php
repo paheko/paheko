@@ -218,7 +218,9 @@ class Modules
 		}
 
 		// Find out web path
-		if ($module->web) {
+		if ($module->web && $module->enabled) {
+			$uri = rawurldecode($uri);
+
 			if ($uri == '') {
 				$path = 'index.html';
 			}

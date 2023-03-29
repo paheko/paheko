@@ -5,6 +5,7 @@ namespace Garradin\Entities;
 use Garradin\Entity;
 use Garradin\DB;
 use Garradin\Plugins;
+use Garradin\UserException;
 use Garradin\Files\Files;
 use Garradin\UserTemplate\UserTemplate;
 use Garradin\Users\Session;
@@ -196,6 +197,82 @@ class Module extends Entity
 		return !empty($this->config) || $this->hasLocal() || $this->hasData();
 	}
 
+	public function listFiles(?string $path = null): array
+	{
+		$out = [];
+		$base = File::CONTEXT_MODULES . '/' . $this->name;
+
+		if ($path && false !== strpos($path, '..')) {
+			return [];
+		}
+
+		$path = $path ? '/' . $path : '';
+
+		foreach (Files::listForContext(File::CONTEXT_MODULES, $this->name . $path) as $file) {
+			$_path = substr($file->path, strlen($base . '/'));
+
+			$out[$file->name] = [
+				'name'      => $file->name,
+				'dir'       => $file->isDir(),
+				'path'      => $_path,
+				'file_path' => $file->path,
+				'type'      => $file->type,
+				'local'     => true,
+			];
+		}
+
+		$dist_path = $this->distPath(trim($path, '/'));
+
+		if (is_dir($dist_path)) {
+			foreach (scandir($dist_path) as $file) {
+				if (substr($file, 0, 1) == '.') {
+					continue;
+				}
+
+				if (isset($out[$file])) {
+					$out[$file]['dist'] = true;
+					continue;
+				}
+
+				$out[$file] = [
+					'name'      => $file,
+					'type'      => mime_content_type($dist_path . '/' . $file),
+					'dir'       => is_dir($dist_path . '/' . $file),
+					'path'      => $path . $file,
+					'local'     => false,
+					'dist'      => true,
+					'file_path' => $base . '/' . $path . $file,
+				];
+			}
+		}
+
+		foreach ($out as &$file) {
+			$file['editable'] = UserTemplate::isTemplate($file['path'])
+				|| substr($file['type'], 0, 5) === 'text/'
+				|| preg_match('/\.(?:json|md|skriv|html|css|js)$/', $file['name']);
+			$file['open_url'] = $this->url($file['path']);
+			$file['edit_url'] = '!common/files/edit.php?p=' . rawurlencode($file['file_path']);
+			$file['delete_url'] = '!common/files/delete.php?p=' . rawurlencode($file['file_path']);
+		}
+
+		unset($file);
+
+		uasort($out, function ($a, $b) {
+			if ($a['dir'] == $b['dir']) {
+				return strnatcasecmp($a['name'], $b['name']);
+			}
+			elseif ($a['dir'] && !$b['dir']) {
+				return -1;
+			}
+			else {
+				return 1;
+			}
+		});
+
+
+		return $out;
+	}
+
 	public function delete(): bool
 	{
 		$dir = $this->dir();
@@ -213,6 +290,10 @@ class Module extends Entity
 	{
 		if (null !== $params) {
 			$params = '?' . http_build_query($params);
+		}
+
+		if ($this->web && $this->enabled) {
+			return WWW_URL . $file . $params;
 		}
 
 		return sprintf('%sm/%s/%s%s', WWW_URL, $this->name, $file, $params);
@@ -265,6 +346,12 @@ class Module extends Entity
 		}
 		// Serve a static file from a user module
 		elseif ($has_local_file) {
+			$file = Files::get(File::CONTEXT_MODULES . '/' . $this->name . '/' . $path);
+
+			if (!$file) {
+				throw new UserException('Invalid path');
+			}
+
 			$file->serve();
 		}
 		// Serve a static file

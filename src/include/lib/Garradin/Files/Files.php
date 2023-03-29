@@ -565,9 +565,8 @@ class Files
 			return false;
 		}
 
-		// Modules and trash files can never be served directly
-		if ($context == File::CONTEXT_MODULES
-			|| $context == File::CONTEXT_TRASH) {
+		// Trash files can never be served directly
+		if ($context == File::CONTEXT_TRASH) {
 			return false;
 		}
 
