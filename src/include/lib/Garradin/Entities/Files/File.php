@@ -625,7 +625,10 @@ class File extends Entity
 		return sprintf('%s?%dpx', $this->url(), $size);
 	}
 
-	public function link(Session $session, ?string $thumb = null, bool $allow_edit = false)
+	/**
+	 * Return a HTML link to the file
+	 */
+	public function link(Session $session, ?string $thumb = null, bool $allow_edit = false, ?string $url = null)
 	{
 		if ($thumb == 'auto') {
 			if ($this->isImage()) {
@@ -646,7 +649,10 @@ class File extends Entity
 			$label = preg_replace('/[_.-]/', '&shy;$0', htmlspecialchars($this->name));
 		}
 
-		if ($allow_edit && $this->canWrite($session) && $this->editorType()) {
+		if ($url) {
+			$attrs = sprintf('href="%s"', Utils::getLocalURL($url));
+		}
+		elseif ($allow_edit && $this->canWrite($session) && $this->editorType()) {
 			$attrs = sprintf('href="%s" target="_dialog" data-dialog-class="fullscreen"',
 				Utils::getLocalURL('!common/files/edit.php?p=') . rawurlencode($this->path));
 		}

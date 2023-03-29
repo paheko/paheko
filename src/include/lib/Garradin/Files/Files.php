@@ -9,6 +9,7 @@ use Garradin\Plugins;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\ValidationException;
+use Garradin\Users\DynamicFields;
 use Garradin\Users\Session;
 use Garradin\Entities\Files\File;
 use Garradin\Entities\Web\Page;
@@ -67,6 +68,25 @@ class Files
 		$p = [];
 
 		if ($s->isLogged() && $id = $s::getUserId()) {
+			$list = DynamicFields::getInstance()->fieldsByType('file');
+
+			// Add permissions for each field
+			foreach ($list as $name => $field) {
+				if (!$field->write_access) {
+					continue;
+				}
+
+				$p[File::CONTEXT_USER . '/' . $s::getUserId() . '/' . $name . '/'] = [
+					'mkdir' => false,
+					'move' => false,
+					'create' => true,
+					'read' => true,
+					'write' => true,
+					'delete' => false,
+					'share' => false,
+				];
+			}
+
 			// The user can always access his own profile files
 			$p[File::CONTEXT_USER . '/' . $s::getUserId() . '/'] = [
 				'mkdir' => false,
@@ -262,6 +282,26 @@ class Files
 
 		// Update this path
 		return self::callStorage('list', $parent);
+	}
+
+
+	static public function listForUser(int $id, string $field_name = null): array
+	{
+		$files = [];
+		$path = (string) $id;
+
+		if ($field_name) {
+			$path .= '/' . $field_name;
+			return self::listForContext(File::CONTEXT_USER, $path);
+		}
+
+		foreach (self::listForContext(File::CONTEXT_USER, $path) as $dir) {
+			foreach (Files::list($dir->path) as $file) {
+				$files[] = $file;
+			}
+		}
+
+		return $files;
 	}
 
 	/**

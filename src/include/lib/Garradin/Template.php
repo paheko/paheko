@@ -335,6 +335,17 @@ class Template extends Smartyer
 		if ($field->type == 'checkbox') {
 			return $v ? 'Oui' : 'Non';
 		}
+		elseif ($field->type == 'file' && isset($params['thumb_url'])) {
+			$session = Session::getInstance();
+
+			foreach (Files::listForUser($params['user_id'], $field->name) as $file) {
+				return '<aside class="file">'
+					. $file->link($session, 'auto', false, $params['thumb_url'])
+					. '</aside>';
+			}
+
+			return '';
+		}
 
 		if (empty($v)) {
 			return '';

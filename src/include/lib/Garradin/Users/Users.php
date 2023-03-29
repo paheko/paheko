@@ -108,6 +108,9 @@ class Users
 			'_user_id' => [
 				'select' => 'id',
 			],
+		];
+
+		$default_columns = [
 			'number' => [
 				'label' => 'Num.',
 				'select' => $df->getNumberField(),
@@ -121,13 +124,20 @@ class Users
 		$fields = $df->getListedFields();
 
 		foreach ($fields as $key => $config) {
-			if (isset($columns[$key])) {
+			if (isset($default_columns[$key])) {
+				$columns[$key] = $default_columns[$key];
 				continue;
 			}
 
 			$columns[$key] = [
 				'label' => $config->label,
 			];
+		}
+
+		foreach ($default_columns as $key => $config) {
+			if (!isset($columns[$key])) {
+				$columns[$key] = $config;
+			}
 		}
 
 		$tables = User::TABLE;

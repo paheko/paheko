@@ -28,7 +28,7 @@
 	</fieldset>
 </form>
 
-<form method="post" action="action.php" class="memberList">
+<form method="post" action="action.php" class="users-list">
 
 {if $list->count()}
 	{$list->getHTMLPagination()|raw}
@@ -50,7 +50,7 @@
 					<th>{link href="details.php?id=%d"|args:$row._user_id label=$value}</th>
 				{else}
 					<td>
-						{display_dynamic_field key=$key value=$value}
+						{display_dynamic_field key=$key value=$value user_id=$row._user_id thumb_url="details.php?id=%d"|args:$row._user_id}
 					</td>
 				{/if}
 			{/foreach}

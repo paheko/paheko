@@ -2,7 +2,7 @@
 use Garradin\Users\DynamicFields as DF;
 assert(isset($user, $show_message_button));
 
-$user_files_path = $user->attachementsDirectory();
+$user_files_path = $user->attachmentsDirectory();
 
 $id_fields = DF::getNameFields();
 $email_button = 0;
@@ -51,7 +51,7 @@ $fields = DF::getInstance()->all();
 			{/foreach}
 			</ul>
 		{else}
-			{display_dynamic_field field=$field value=$value}
+			{display_dynamic_field field=$field value=$value user_id=$user.id}
 		{/if}
 	</dd>
 		{if $field.type == 'email' && $value && ($email = Email\Emails::getEmail($value))}

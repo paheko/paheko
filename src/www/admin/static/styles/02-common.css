@@ -272,8 +272,12 @@ dd.help li {
     text-align: center;
 }
 
-.memberList {
+.users-list {
     clear: both;
+}
+
+.users-list td .file img {
+    max-height: 80px;
 }
 
 .pagination {
