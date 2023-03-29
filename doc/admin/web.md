@@ -54,3 +54,42 @@ Le type de fichier étant déterminé selon l'extension (`.html, .css, etc.`) po
 Ce fichier est particulier, car il définit le style du contenu des pages et des catégories.
 
 Ainsi il est également utilisé quand vous éditez un contenu dans l'administration. Donc si vous souhaitez modifier le style d'un élément du texte, il vaux mieux modifier ce fichier, sinon le rendu sera différent entre l'administration et le site public.
+
+# Cache
+
+Depuis la version 1.3, Paheko dispose d'un cache statique du site web.
+
+Cela veut dire que les pages du site web sont enregistrées sous la forme de fichiers HTML statiques, et le serveur web renvoie directement ce fichier sans faire appel à Paheko et son code PHP.
+
+Les fichiers liés aux pages web sont également mis en cache de cette manière, en utilisant des liens symboliques.
+
+Ce cache permet d'avoir un site web très rapide, même s'il reçoit des millions de visites.
+
+## Désactiver le cache
+
+Le seul inconvénient c'est qu'une page mise en cache étant statique, si vous utilisez du contenu dynamique (par exemple afficher un texte différent selon la langue du visiteur) dans le squelette Brindille, alors cela ne fonctionnera plus.
+
+Dans ce cas-là, vous pouvez assigner la variable `nocache` dans le squelette pour désactiver le cache pour cette page :
+
+```
+{{:assign nocache=true}}
+```
+
+Pour permettre des usages du type "affichage en temps presque réel des horaires d'ouverture", le cache d'une page HTML est effacé et remis à jour au bout d'une heure.
+
+## Exceptions
+
+Il est à noter que le cache n'est pas appelé dans les cas suivants :
+
+* si la requête vers la page est d'un autre type que `GET` ou `HEAD`, ainsi par exemple l'envoi d'un formulaire (`POST`) ne sera jamais mis en cache ;
+* si la requête vers la page contient des paramètres dans l'adresse (par exemple `velos.html?list=1` : cette page ne sera pas mise en cache) ;
+* si le visiteur est connecté à l'administration de l'association. Ainsi si vous avez des parties du squelette qui varient en fonction de si la personne est connectée, le cache ne posera pas de problème.
+
+Le cache est intégralement effacé à chaque modification du site web.
+
+Le cache ne concerne que les pages et fichiers du site web public. Il ne concerne pas les modules, les extensions, ou l'administration.
+
+Attention :
+
+* avec un serveur sous Windows, le cache est désactivé car Windows ne sait pas gérer les liens symboliques ;
+* seul Apache sait gérer le cache statique, le cache est désactivé avec les autres serveurs web (nginx, etc.).
