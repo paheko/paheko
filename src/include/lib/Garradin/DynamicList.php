@@ -84,7 +84,7 @@ class DynamicList implements \Countable
 	{
 		if (null === $this->count_result) {
 			$sql = sprintf('SELECT %s FROM %s WHERE %s;', $this->count, $this->tables, $this->conditions);
-			$this->count_result = DB::getInstance()->firstColumn($sql);
+			$this->count_result = DB::getInstance()->firstColumn($sql, $this->parameters);
 		}
 
 		return (int) $this->count_result;

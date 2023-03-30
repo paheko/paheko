@@ -1,126 +1,114 @@
-{include file="_head.tpl" title=$title current="web"}
+{include file="_head.tpl" title=$title current="web" hide_title=true}
 
 <nav class="tabs">
 	<aside>
 		{linkbutton shape="search" label="Rechercher" target="_dialog" href="search.php"}
 		{if !$config.site_disabled}
-			{if $cat}
-				{linkbutton shape="eye" label="Voir sur le site" target="_dialog" href=$cat->url()}
-			{else}
-				{linkbutton shape="eye" label="Voir sur le site" target="_dialog" href=$www_url}
+			{if $page && $page->isOnline()}
+				{linkbutton shape="eye" label="Voir sur le site" target="_blank" href=$page->url()}
+			{elseif !$page}
+				{linkbutton shape="eye" label="Voir sur le site" target="_blank" href=$www_url}
 			{/if}
-		{/if}
-		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
-			{linkmenu label="Nouvelle…" shape="plus" class="menu-btn-right"}
-				{linkbutton shape="plus" label="Nouvelle page" target="_dialog" href="new.php?type=%d&parent=%s"|args:$type_page,$current_path}
-				{linkbutton shape="plus" label="Nouvelle catégorie" target="_dialog" href="new.php?type=%d&parent=%s"|args:$type_category,$current_path}
-			{/linkmenu}
 		{/if}
 	</aside>
 </nav>
 
-<nav class="breadcrumbs">
+<nav class="web breadcrumbs no-clear">
 	<ul>
-		<li><a href="?p=">Racine du site</a></li>
+		<li><a href="?p=">Site web</a></li>
 		{foreach from=$breadcrumbs key="id" item="title"}
 			<li><a href="?p={$id}">{$title}</a></li>
 		{/foreach}
 	</ul>
-
-	{if $current_path}
-		{linkbutton href="?p=%s"|args:$parent label="Retour à la catégorie parente" shape="left"}
-		{linkbutton href="page.php?p=%s"|args:$current_path label="Prévisualiser cette catégorie" shape="image"}
-		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
-		{linkbutton href="edit.php?p=%s"|args:$current_path label="Éditer cette catégorie" shape="edit"}
-		{/if}
+	{if $page}
+		<small>{linkbutton href="?p=%s"|args:$page.parent shape="left" label="Retour à la catégorie parent"}</small>
 	{/if}
-
 </nav>
+
 
 {if $config.site_disabled && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
 	<p class="block alert">
-		Le site public est désactivé. <a href="{"!config/"|local_url}">Activer le site dans la configuration.</a>
+		Le site public est désactivé.<br />
+		{linkbutton shape="settings" href="!config/" label="Activer le site dans la configuration"}
 	</p>
 {/if}
 
-{if count($links_errors)}
-<div class="block alert">
-	Des pages contiennent des liens qui mènent à des pages qui n'existent pas&nbsp;:
-	<ul>
-		{foreach from=$links_errors item="page"}
-		<li>{link href="page.php?p=%s"|args:$page.path label=$page.title}</li>
-		{/foreach}
-	</ul>
-</div>
+{if count($links_errors) && !$page}
+	<div class="block alert">
+		Des pages contiennent des liens qui mènent à des pages qui n'existent pas&nbsp;:
+		<ul>
+			{foreach from=$links_errors item="p"}
+			<li>{link href="?p=%s"|args:$p.path label=$p.title}</li>
+			{/foreach}
+		</ul>
+	</div>
+{elseif count($links_errors)}
+	<div class="block alert">
+		Cette page contient des liens qui mènent à des pages qui n'existent pas ou ont été renommées&nbsp;:
+		<ul>
+			{foreach from=$links_errors item="link"}
+			<li>{$link}</li>
+			{/foreach}
+		</ul>
+		Il est conseillé de modifier la page pour corriger les liens.
+	</div>
 {/if}
-
 
 {form_errors}
 
-{if count($categories)}
-	<h2 class="ruler">Catégories</h2>
-	<table class="list">
-		<tbody>
-			{foreach from=$categories item="p"}
-			<tr>
-				<th><a href="?p={$p.path}">{$p.title}</a></th>
-				<td>{if $p.status == $p::STATUS_ONLINE}En ligne{else}<em>Brouillon</em>{/if}</td>
-				<td class="actions">
-					{if $p.status == $p::STATUS_ONLINE && !$config.site_disabled}
-						{linkbutton shape="eye" label="Voir sur le site" href=$p->url() target="_blank"}
-					{/if}
-					{linkbutton shape="menu" label="Sous-catégories et pages" href="?p=%s"|args:$p.path}
-					{linkbutton shape="image" label="Prévisualiser" href="page.php?p=%s"|args:$p.path}
-					{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
-					{linkbutton shape="edit" label="Éditer" href="edit.php?p=%s"|args:$p.path}
-					{/if}
-					{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)}
-					{linkbutton shape="delete" label="Supprimer" target="_dialog" href="delete.php?p=%s"|args:$p.path}
-					{/if}
-				</td>
-			</tr>
-			{/foreach}
-		</tbody>
-	</table>
+{if $page}
+	{include file="./_page.tpl" excerpt=$page->isCategory()}
 {/if}
 
-{if count($pages)}
-	<h2 class="ruler">Pages</h2>
-	<p>
-		{if !$order_date}
-			{linkbutton shape="down" label="Trier par date" href="?p=%s&order_date"|args:$current_path}
-		{else}
-			{linkbutton shape="up" label="Trier par titre" href="?p=%s"|args:$current_path}
+{if !$page || $page->isCategory()}
+	<div class="web header">
+		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
+		<p class="actions">
+			{if $page}
+				{assign var="parent" value=$page.path}
+				{assign var="label" value="Nouvelle sous-catégorie"}
+			{else}
+				{assign var="parent" value=""}
+				{assign var="label" value="Nouvelle catégorie"}
+			{/if}
+			{linkbutton shape="plus" label=$label target="_dialog" href="new.php?type=%d&parent=%s"|args:$type_page,$page.path}
+		</p>
 		{/if}
-	</p>
-	<table class="list">
-		<tbody>
-			{foreach from=$pages item="p"}
-			<tr>
-				<th>{$p.title}</th>
-				<td>{if $p.status == $p::STATUS_ONLINE}En ligne{else}<em>Brouillon</em>{/if}</td>
-				<td>{$p.created|date_short}</td>
-				<td>Modifié {$p.modified|relative_date:true}</td>
-				<td class="actions">
-					{if $p.status == $p::STATUS_ONLINE && !$config.site_disabled}
-						{linkbutton shape="eye" label="Voir sur le site" href=$p->url() target="_blank"}
-					{/if}
-					{linkbutton shape="image" label="Prévisualiser" href="page.php?p=%s"|args:$p.path}
-					{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
-					{linkbutton shape="edit" label="Éditer" href="edit.php?p=%s"|args:$p.path}
-					{/if}
-					{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)}
-					{linkbutton shape="delete" label="Supprimer" target="_dialog" href="delete.php?p=%s"|args:$p.path}
-					{/if}
-				</td>
-			</tr>
-			{/foreach}
-		</tbody>
-	</table>
-{/if}
+		<h2 class="ruler">{if $page}Sous-catégories{else}Catégories{/if}</h2>
+	</div>
 
-{if !count($categories) && !count($pages)}
-	<p class="alert block">Il n'y a aucune page ou sous-catégorie dans cette catégorie.</p>
+	{if count($categories)}
+		<nav class="web category-list">
+			<ul>
+			{foreach from=$categories item="p"}
+				<li{if !$p->isOnline()} class="draft"{/if}><a href="?p={$p.path}">{icon shape="folder"}{$p.title}</a></li>
+			{/foreach}
+			</ul>
+		</nav>
+	{elseif $page}
+		<p class="help">Il n'y a aucune sous-catégorie dans cette catégorie.</p>
+	{else}
+		<p class="help">Il n'y a aucune catégorie.</p>
+	{/if}
+
+	{if $drafts->count()}
+		<h2 class="ruler">Brouillons</h2>
+		{include file="./_list.tpl" list=$drafts}
+	{/if}
+
+	<div class="web header">
+		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
+		<p class="actions">
+			{linkbutton shape="plus" label="Nouvelle page" target="_dialog" href="new.php?type=%d&parent=%s"|args:$type_page,$page.path}
+		</p>
+		{/if}
+		<h2 class="ruler">Pages</h2>
+	</div>
+	{if $pages->count()}
+		{include file="./_list.tpl" list=$pages}
+	{else}
+		<p class="help">Il n'y a aucune page dans cette catégorie.</p>
+	{/if}
 {/if}
 
 

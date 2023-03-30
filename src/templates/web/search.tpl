@@ -18,12 +18,12 @@
 	<section class="search-results">
 	{foreach from=$results item="result"}
 		<article>
-			<h3><a href="{"!web/page.php?p=%s"|local_url|args:$result.path}" target="_parent">{$result.title}</a></h3>
+			<h3><a href="{"!web/?p=%s"|local_url|args:$result.path}" target="_parent">{$result.title}</a></h3>
 			<h4>
 				<nav class="breadcrumbs">
 					<ul>
 						{foreach from=$result.breadcrumbs key="id" item="title"}
-							<li><a href="{"!web/page.php?p=%s"|local_url|args:$id}" target="_parent">{$title}</a></li>
+							<li><a href="{"!web/?p=%s"|local_url|args:$id}" target="_parent">{$title}</a></li>
 						{/foreach}
 					</ul>
 				</nav>

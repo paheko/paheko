@@ -6,6 +6,7 @@ use Garradin\Entities\Web\Page;
 use Garradin\Entities\Files\File;
 use Garradin\Files\Files;
 use Garradin\DB;
+use Garradin\DynamicList;
 use Garradin\Utils;
 use Garradin\ValidationException;
 
@@ -125,6 +126,42 @@ class Web
 	{
 		$sql = 'SELECT * FROM @TABLE WHERE parent = ? ORDER BY title COLLATE U_NOCASE;';
 		return EM::getInstance(Page::class)->all($sql, $parent);
+	}
+
+	static public function getDraftsList(string $parent): DynamicList
+	{
+		$list = self::getPagesList($parent);
+		$list->setParameter('status', Page::STATUS_DRAFT);
+		$list->setPageSize(1000);
+		return $list;
+	}
+
+	static public function getPagesList(string $parent): DynamicList
+	{
+		$columns = [
+			'path' => [
+			],
+			'title' => [
+				'label' => 'Titre',
+				'order' => 'title COLLATE U_NOCASE %s',
+			],
+			'published' => [
+				'label' => 'Publication',
+			],
+			'modified' => [
+				'label' => 'Modification',
+			],
+		];
+
+		$tables = Page::TABLE;
+		$conditions = 'parent = :parent AND type = :type AND status = :status';
+
+		$list = new DynamicList($columns, $tables, $conditions);
+		$list->setParameter('parent', $parent);
+		$list->setParameter('type', Page::TYPE_PAGE);
+		$list->setParameter('status', Page::STATUS_ONLINE);
+		$list->orderBy('title', false);
+		return $list;
 	}
 
 	static public function get(string $path): ?Page

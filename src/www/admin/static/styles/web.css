@@ -228,3 +228,94 @@ form#f_upload fieldset {
     text-shadow: 1px 1px 1px #ccc;
     color: #666;
 }
+
+.web.header {
+    clear: both;
+}
+
+.web.header .actions {
+    margin: 0;
+}
+
+.web.category-list ul {
+    display: flex;
+    flex-direction: row;
+    clear: both;
+    flex-wrap: wrap;
+}
+
+.web.category-list li {
+    display: block;
+    width: 32%;
+    margin: 0.5%;
+}
+
+.web.category-list li a {
+    background: rgba(var(--gSecondColor), 0.3);
+    padding: 1em;
+    border-radius: .5em;
+    display: block;
+    font-size: 1.1em;
+    height: calc(100% - 2em);
+    color: rgba(var(--gTextColor), .8);
+    text-decoration-color: rgba(var(--gMainColor), 0.5);
+}
+
+.web.category-list li a span {
+    float: right;
+    color: rgba(var(--gMainColor), 0.5);
+    transition: color .2s;
+}
+
+.web.category-list li a:hover, .web.category-list li a:hover span {
+    color: rgb(var(--gHoverLinkColor));
+    text-decoration-color: rgba(var(--gHoverLinkColor), 0.5);
+}
+
+.web.category-list .draft a {
+    background: var(--gLightBackgroundColor);
+    color: var(--gBorderColor);
+    text-decoration-color: unset;
+}
+
+.web.breadcrumbs {
+    font-size: 1.1em;
+    padding-top: .4em;
+}
+
+.web.preview header .actions {
+    float: none;
+    text-align: center;
+    font-size: 1.2em;
+}
+
+.web.preview .describe {
+    margin: 1em 0;
+    text-align: center;
+}
+
+.web.preview .describe > * {
+    padding: .2em .4em;
+    display: inline-block;
+    background: var(--gLightBackgroundColor);
+    border-radius: .3em;
+    margin: .2em .5em;
+}
+
+.web.preview .describe > tt a span {
+    font-size: .9em;
+}
+
+.web.preview article {
+    margin: 1em auto;
+    background: var(--gLightBackgroundColor);
+    padding: 1em;
+    max-width: 50em;
+    border-radius: .5em;
+}
+
+.web.preview article .actions {
+    float: none;
+    text-align: left;
+    margin: 0;
+}

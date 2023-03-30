@@ -141,6 +141,16 @@ class Page extends Entity
 		return Render::render($this->format, $this->file(), $this->content, $user_prefix);
 	}
 
+	public function excerpt(int $length = 600): string
+	{
+		return $this->preview(mb_substr($this->content, 0, $length) . "\n\n…");
+	}
+
+	public function requiresExcerpt(int $length = 600): bool
+	{
+		return mb_strlen($this->content) > $length;
+	}
+
 	public function preview(string $content): string
 	{
 		return Render::render($this->format, $this->file(), $content, '#');
@@ -581,6 +591,16 @@ class Page extends Entity
 		else {
 			$this->set('type', self::TYPE_CATEGORY);
 		}
+	}
+
+	public function isCategory(): bool
+	{
+		return $this->type == self::TYPE_CATEGORY;
+	}
+
+	public function isOnline(): bool
+	{
+		return $this->status == self::STATUS_ONLINE;
 	}
 
 	static public function fromFile(File $file): self

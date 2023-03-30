@@ -36,7 +36,7 @@ else {
 	throw new UserException('Fichier inconnu');
 }
 
-$prefix = $page ? 'web/page.php?uri=' : 'common/files/_preview.php?p=';
+$prefix = $page ? 'web/?uri=' : 'common/files/_preview.php?p=';
 
 $content = Render::render(f('format'), $file, f('content'), ADMIN_URL . $prefix);
 
