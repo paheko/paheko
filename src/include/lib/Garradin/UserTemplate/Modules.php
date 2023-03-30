@@ -14,6 +14,7 @@ use Garradin\Web\Web;
 use Garradin\Entities\Web\Page;
 
 use const Garradin\ROOT;
+use const Garradin\ADMIN_URL;
 
 use \KD2\DB\EntityManager as EM;
 

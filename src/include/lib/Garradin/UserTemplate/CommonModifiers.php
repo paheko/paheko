@@ -116,7 +116,7 @@ class CommonModifiers
 
 	static public function html_money($number, bool $hide_empty = true, bool $force_sign = false): string
 	{
-		return self::money($number, $hide_empty, $force_sign, false);
+		return self::money($number, $hide_empty, $force_sign, true);
 	}
 
 	static public function html_money_currency($number, bool $hide_empty = true, bool $force_sign = false): string
