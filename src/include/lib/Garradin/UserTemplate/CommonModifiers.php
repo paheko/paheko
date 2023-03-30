@@ -204,7 +204,7 @@ class CommonModifiers
 		{
 			$day = 'demain';
 		}
-		elseif ($date->getTimestamp() > time() - 3600*24*7) {
+		elseif ($date->getTimestamp() > time() - 3600*24*7 && $date->getTimestamp() < time()) {
 			$day = sprintf('il y a %d jours', round((time() - $date->getTimestamp()) / (3600*24)));
 		}
 		elseif ($date->format('Y') == date('Y'))
