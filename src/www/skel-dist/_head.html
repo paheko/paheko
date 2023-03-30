@@ -40,7 +40,7 @@
 		</a>
 	</h1>
 
-	{{if ($config.adresse_asso || $config.telephone_asso || $config.email_asso)}}
+	{{if $config.adresse_asso || $config.telephone_asso || $config.email_asso}}
 		<article class="contacts">
 			{{if $config.files.logo}}
 			<h3>{{$config.nom_asso}}</h3>
