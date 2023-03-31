@@ -27,9 +27,9 @@
 		<p class="describe">
 			<span>
 				{if $page->isCategory()}
-					Catégorie
+					{icon shape="folder"} Catégorie
 				{else}
-					Page
+					{icon shape="document"} Page
 				{/if}
 			</span>
 			{if $page.status == $page::STATUS_ONLINE}
@@ -45,7 +45,7 @@
 		</p>
 	</header>
 
-	{if $page.content}
+	{if trim($page.content)}
 	<article>
 		{$text|raw}
 		{if $excerpt && $long}
@@ -54,36 +54,38 @@
 	</article>
 	{/if}
 
-	{assign var="images" value=$page->getImageGallery(true)}
-	{assign var="files" value=$page->getAttachmentsGallery(true)}
+	{if !($excerpt && $long)}
+		{assign var="images" value=$page->getImageGallery(true)}
+		{assign var="files" value=$page->getAttachmentsGallery(true)}
 
-	{if count($images) || count($files)}
-	<div class="web-files">
-		<h3>Fichiers liés à cette page</h3>
+		{if count($images) || count($files)}
+		<div class="web-files">
+			<h3 class="ruler">Fichiers joints à cette page</h3>
 
-		{if count($images)}
-		<ul class="gallery">
-			{foreach from=$images item="file"}
-				<li>
-					<figure>
-						<a class="internal-image" href="{$file->url()}"><img src="{$file->thumb_url()}" alt="" title="{$file.name}" /></a>
-					</figure>
-				</li>
-			{/foreach}
-		</ul>
+			{if count($images)}
+			<ul class="gallery">
+				{foreach from=$images item="file"}
+					<li>
+						<figure>
+							<a class="internal-image" href="{$file->url()}"><img src="{$file->thumb_url()}" alt="" title="{$file.name}" /></a>
+						</figure>
+					</li>
+				{/foreach}
+			</ul>
+			{/if}
+
+			{if count($files)}
+			<ul class="files">
+				{foreach from=$files item="file"}
+					<li>
+						<aside class="fichier" class="internal-file"><a href="{$file->url()}">{$file.name}</a>
+						<small>({$file.mime}, {$file.size|size_in_bytes})</small></aside>
+				   </li>
+				{/foreach}
+			</ul>
+			{/if}
+		</div>
 		{/if}
-
-		{if count($files)}
-		<ul class="files">
-			{foreach from=$files item="file"}
-				<li>
-					<aside class="fichier" class="internal-file"><a href="{$file->url()}">{$file.name}</a>
-					<small>({$file.mime}, {$file.size|size_in_bytes})</small></aside>
-			   </li>
-			{/foreach}
-		</ul>
-		{/if}
-	</div>
 	{/if}
 
 </section>

@@ -158,12 +158,6 @@ web-edit dd.help {
 
 .web-files {
     text-align: center;
-}
-
-.web-footer, .web-files {
-    font-size: 0.8em;
-    color: var(--gBorderColor);
-    border-top: 0.1em solid var(--gLightBorderColor);
     clear: both;
 }
 
@@ -300,6 +294,11 @@ form#f_upload fieldset {
     background: var(--gLightBackgroundColor);
     border-radius: .3em;
     margin: .2em .5em;
+}
+
+.web.preview .describe > * > span {
+    color: rgba(var(--gMainColor), 0.9);
+    margin-right: .3em;
 }
 
 .web.preview .describe > tt a span {
