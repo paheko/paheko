@@ -64,7 +64,15 @@ class API
 		}
 
 		try {
-			return ['results' => Recherche::rawSQL($body)];
+			$r = Recherche::rawSQL($body);
+
+			if (isset($_GET['format']) && in_array($_GET['format'], ['xlsx', 'ods', 'csv'])) {
+				CSV::export($_GET['format'], 'sql', $r);
+				return null;
+			}
+			else {
+				return ['results' => $r];
+			}
 		}
 		catch (\Exception $e) {
 			http_response_code(400);
@@ -80,6 +88,12 @@ class API
 		if ($fn == 'import') {
 			if ($this->method != 'PUT') {
 				throw new APIException('Wrong request method', 400);
+			}
+
+			$mode = $_GET['mode'] ?? 'auto';
+
+			if (!in_array($mode, ['auto', 'create', 'update'])) {
+				throw new APIException('Unknown mode. Only "auto", "create" and "update" are accepted.');
 			}
 
 			$this->requireAccess(Session::ACCESS_ADMIN);
@@ -100,7 +114,7 @@ class API
 				}
 
 				$import = new Membres\Import;
-				$import->fromGarradinCSV($file, $admin_user_id);
+				$import->fromGarradinCSV($file, $admin_user_id, $mode);
 			}
 			finally {
 				Utils::safe_unlink($file);
