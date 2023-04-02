@@ -30,6 +30,9 @@ psalm:
 doc:
 	php ../tools/doc_md_to_html.php
 
+www/.htaccess:
+	cat apache-vhost.conf apache-htaccess.conf > www/.htaccess
+
 release: test minify doc
 	$(eval VERSION=$(shell cat VERSION))
 	rm -rf /tmp/paheko-build
@@ -39,6 +42,8 @@ release: test minify doc
 	cd include/lib; \
 		rsync --files-from=dependencies.list -r ./ /tmp/paheko-build/paheko/src/include/lib/
 	mv www/admin/static/mini.css /tmp/paheko-build/paheko/src/www/admin/static/admin.css
+	# Generate .htaccess file
+	cd /tmp/paheko-build/paheko/src && make www/.htaccess
 	cd /tmp/paheko-build/paheko/src/www/admin/static; \
 		rm -f styles/[0-9]*.css; \
 		rm -f font/*.css font/*.json
