@@ -18,13 +18,13 @@ use Garradin\Entities\Files\File;
 
 <nav class="tabs">
 	<aside>
-	{if $parent->canCreateDirHere() || $parent->canCreateHere()}
-		{if $gallery}
-			{linkbutton shape="menu" label="Afficher en liste" href="?path=%s&gallery=0"|args:$parent_path_uri}
-		{else}
-			{linkbutton shape="gallery" label="Afficher en galerie" href="?path=%s&gallery=1"|args:$parent_path_uri}
-		{/if}
 		{linkbutton shape="search" label="Rechercher" href="search.php" target="_dialog"}
+	{if $gallery}
+		{linkbutton shape="menu" label="Afficher en liste" href="?path=%s&gallery=0"|args:$parent_path_uri}
+	{else}
+		{linkbutton shape="gallery" label="Afficher en galerie" href="?path=%s&gallery=1"|args:$parent_path_uri}
+	{/if}
+	{if $parent->canCreateDirHere() || $parent->canCreateHere()}
 		{linkmenu label="Ajouter…" shape="plus" right=true}
 			{if $parent->canCreateHere()}
 				{linkbutton shape="upload" label="Depuis mon ordinateur" target="_dialog" href="!common/files/upload.php?p=%s"|args:$parent_path_uri}
@@ -100,11 +100,11 @@ use Garradin\Entities\Files\File;
 </nav>
 {/if}
 
-{if $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE) && !$parent->canCreateDirHere()}
+{if $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE) && !$parent->canCreateDirHere() && !$context_ref}
 <p class="block alert">
 	Il n'est pas possible de créer de répertoire ici.
 	{if $context == File::CONTEXT_USER}
-		Utiliser le <a href="{"!users/new.php"|local_url}">formulaire de création</a> pour enregistrer un membre.
+		Utiliser le <a href="{"!users/new.php"|local_url}">formulaire de nouveau membre</a>.
 	{elseif $context == File::CONTEXT_TRANSACTION}
 		Utiliser le <a href="{"!acc/transactions/new.php"|local_url}">formulaire de saisie</a> pour créer une nouvelle écriture.
 	{/if}

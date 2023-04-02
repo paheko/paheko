@@ -9,6 +9,8 @@
 	Les fichiers supprimés occupent actuellement <strong>{$trash_size|size_in_bytes}</strong>.
 </p>
 
+{form_errors}
+
 <form method="post" action="">
 {if $list->count()}
 	{include file="common/dynamic_list_head.tpl" check=true}
@@ -31,7 +33,9 @@
 	<p class="submit">
 		{csrf_field key=$csrf_key}
 		{button type="submit" name="restore" label="Restaurer les fichiers sélectionnés" shape="reset"}
-		{button type="submit" name="delete" label="Définitivement supprimer les fichiers sélectionnés" shape="delete"}
+		{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
+			{button type="submit" name="delete" label="Supprimer définitivement les fichiers sélectionnés" shape="delete"}
+		{/if}
 	</p>
 
 	{$list->getHTMLPagination()|raw}

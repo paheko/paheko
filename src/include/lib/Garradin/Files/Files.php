@@ -132,13 +132,24 @@ class Files
 		];
 
 		// Modules source code
-		$p[File::CONTEXT_MODULES] = [
+		$p[File::CONTEXT_MODULES . '/'] = [
 			'mkdir' => $is_admin,
 			'move' => $is_admin,
 			'create' => $is_admin,
 			'read' => $s->isLogged(),
 			'write' => $is_admin,
 			'delete' => $is_admin,
+			'share' => false,
+		];
+
+		// Modules source code
+		$p[File::CONTEXT_MODULES . '/'] = [
+			'mkdir' => false,
+			'move' => false,
+			'create' => false,
+			'read' => $s->isLogged(),
+			'write' => false,
+			'delete' => false,
 			'share' => false,
 		];
 

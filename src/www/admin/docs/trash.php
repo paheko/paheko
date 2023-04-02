@@ -10,7 +10,7 @@ use Garradin\Entities\Files\File;
 require_once __DIR__ . '/../_inc.php';
 
 $session = Session::getInstance();
-$session->requireAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
+$session->requireAccess($session::SECTION_DOCUMENTS, $session::ACCESS_ADMIN);
 
 
 $csrf_key = 'trash_action';
@@ -22,10 +22,19 @@ $tpl->assign(compact('csrf_key', 'extra', 'count'));
 
 $form->runIf('confirm_delete', function () use ($check, $session) {
 	$session->requireAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
+
+	if (empty($check)) {
+		throw new UserException('Aucun fichier sélectionné');
+	}
+
 	foreach ($check as &$file) {
 		$file = Files::get($file);
 
-		if (!$file || !$file->canDelete()) {
+		if (!$file) {
+			continue;
+		}
+
+		if (!$file->canDelete()) {
 			throw new UserException('Impossible de supprimer un fichier car vous n\'avez pas le droit de le supprimer');
 		}
 	}
@@ -33,6 +42,10 @@ $form->runIf('confirm_delete', function () use ($check, $session) {
 	unset($file);
 
 	foreach ($check as $file) {
+		if ($file === null) {
+			continue;
+		}
+
 		$file->delete();
 	}
 
@@ -40,6 +53,11 @@ $form->runIf('confirm_delete', function () use ($check, $session) {
 }, $csrf_key, '!docs/trash.php');
 
 $form->runIf('restore', function() use ($check, $session) {
+	if (empty($check)) {
+		throw new UserException('Aucun fichier sélectionné');
+	}
+
+
 	foreach ($check as &$file) {
 		$file = Files::get($file);
 
@@ -54,7 +72,7 @@ $form->runIf('restore', function() use ($check, $session) {
 		$file->restoreFromTrash();
 	}
 
-	Trash::pruneEmptyDirectories();
+	//Trash::pruneEmptyDirectories();
 }, $csrf_key, '!docs/trash.php');
 
 if (f('delete')) {

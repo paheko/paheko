@@ -44,7 +44,9 @@ class Trash
 
 		foreach (Files::listRecursive(File::CONTEXT_TRASH, null, true) as $file) {
 			if ($file->isDir()) {
-				$paths[$file->path] = 0;
+				if (!isset($paths[$file->path])) {
+					$paths[$file->path] = 0;
+				}
 			}
 			else {
 				if (!isset($paths[$file->parent])) {
