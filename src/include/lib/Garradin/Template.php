@@ -275,7 +275,7 @@ class Template extends Smartyer
 
 		$out = sprintf('
 			<span class="menu-btn %s">
-				<b data-icon="%s" class="btn">%s</b>
+				<b data-icon="%s" class="btn" ondblclick="this.parentNode.querySelector(\'a, button\').click();">%s</b>
 				<span><span>',
 			htmlspecialchars($params['class'] ?? ''),
 			Utils::iconUnicode($params['shape']),
