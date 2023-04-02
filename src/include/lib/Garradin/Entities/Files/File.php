@@ -1250,6 +1250,11 @@ class File extends Entity
 
 		$hash = strtok($str, ':');
 		$expiry = strtok(false);
+
+		if (!ctype_alnum($expiry)) {
+			return false;
+		}
+
 		$expiry = (int)base_convert($expiry, 36, 10);
 		$expiry += intval(gmmktime(0, 0, 0, 8, 1, 2022) / 3600);
 
