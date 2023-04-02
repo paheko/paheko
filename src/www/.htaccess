@@ -8,15 +8,29 @@ FallbackResource /_route.php
 # Si FallbackResource ne fonctionne pas, utiliser ceci :
 #ErrorDocument 404 /_route.php
 
-# Explication : FallbackResource n'est dispo que depuis Apache 2.2.16, soit Debian Wheezy (2013)
-# Mais bugue avant Apache 2.4.15, il faut donc bien désactiver le DirectoryIndex
-# cf. https://bz.apache.org/bugzilla/show_bug.cgi?id=58292
-# et https://serverfault.com/questions/559067/apache-hangs-for-five-seconds-with-fallbackresource-when-accessing
+<IfModule mod_php.c>
+	Define PHP_MODULE
+</IfModule>
 
-# Un peu de sécurité
+<IfModule mod_php7.c>
+	Define PHP_MODULE
+</IfModule>
+
+# Some security
 <IfModule mod_alias.c>
 	RedirectMatch 404 _inc\.php
 </IfModule>
+
+# Recommended, if you have xsendfile module
+# see https://tn123.org/mod_xsendfile/
+# Also enable X-SendFile in config.local.php
+#
+#<IfModule mod_xsendfile.c>
+#	<Files *.php>
+#		XSendFile On
+#		XSendFilePath /home/paheko/
+#	</Files>
+#</IfModule>
 
 # This is to avoid caching mismatch when using mod_deflate
 # see https://github.com/symfony/symfony-docs/issues/12644
@@ -24,10 +38,19 @@ FallbackResource /_route.php
 	FileETag None
 </IfModule>
 
-# Décommenter les lignes suivantes pour autoriser l'envoi de gros fichier
-# (documents et sauvegardes)
-#
-#<If "%{REQUEST_URI} =~ m!^/admin/(common/files|config/backup)/! && -n %{HTTP_COOKIE}">
-#	php_value post_max_size 256M
-#	php_value upload_max_filesize 256M
-#</If>
+# Allow uploads up to 256 MB where it's required
+<If "%{REQUEST_URI} =~ m!^/admin/(?:common/files|config/backup)/! && -n %{HTTP_COOKIE}">
+	# For mod_php
+	<IfDefine PHP_MODULE>
+		php_value post_max_size 256M
+		php_value upload_max_filesize 256M
+	</IfDefine>
+
+	# For FPM
+	<IfDefine !PHP_MODULE>
+		SetEnv PHP_VALUE "post_max_size=256M"
+		# There is no way to pass multiple PHP ini settings via PHP_VALUE :-(
+		# so we use PHP_ADMIN_VALUE here. It works unless we have more than 2 settings to change.
+		SetEnv PHP_ADMIN_VALUE "upload_max_filesize=256M"
+	</IfDefine>
+</If>
