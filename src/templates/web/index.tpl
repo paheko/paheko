@@ -2,7 +2,10 @@
 
 <nav class="tabs">
 	<aside>
-		{linkbutton shape="search" label="Rechercher" target="_dialog" href="search.php"}
+		<form method="post" action="search.php">
+			{input type="search" name="q" size=25 placeholder="Rechercher dans le site" title="Rechercher dans le site"}
+			{button shape="search" type="submit" title="Rechercher"}
+		</form>
 		{if !$config.site_disabled}
 			{if $page && $page->isOnline()}
 				{linkbutton shape="eye" label="Voir sur le site" target="_blank" href=$page->url()}
@@ -26,9 +29,9 @@
 </nav>
 
 
-{if $config.site_disabled && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
+{if !$page && $config.site_disabled && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
 	<p class="block alert">
-		Le site public est désactivé.<br />
+		Le site public est désactivé.
 		{linkbutton shape="settings" href="!config/" label="Activer le site dans la configuration"}
 	</p>
 {/if}

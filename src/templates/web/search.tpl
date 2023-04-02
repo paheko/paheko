@@ -1,6 +1,6 @@
 {include file="_head.tpl" title="Rechercher dans le site web" current="web"}
 
-<form method="post" action="{$self_url}" data-focus="1">
+<form method="post" action="{$self_url}">
 	<fieldset>
 		<legend>Rechercher une page ou catégorie</legend>
 		<p class="submit">
@@ -11,8 +11,8 @@
 </form>
 
 {if $query}
-	<p class="block alert">
-		<strong>{$results_count}</strong> pages trouvées pour «&nbsp;{$query}&nbsp;»
+	<p class="help">
+		{{%n résultat trouvé.}{%n résultats trouvés.} n=$results_count}
 	</p>
 
 	<section class="search-results">
@@ -28,7 +28,7 @@
 					</ul>
 				</nav>
 			</h4>
-			<p>{$result.snippet|escape|clean_snippet}</p>
+			<p>{$result.snippet|escape|restore_snippet_markup}</p>
 		</article>
 	{/foreach}
 	</section>

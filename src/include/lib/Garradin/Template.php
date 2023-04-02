@@ -157,6 +157,11 @@ class Template extends Smartyer
 			}, $str);
 		});
 
+
+		$this->register_modifier('restore_snippet_markup', function ($str) {
+			return preg_replace('!&lt;(/?mark)&gt;!', '<$1>', $str);
+		});
+
 		$this->register_modifier('format_skriv', function ($str) {
 			$skriv = new Skriv;
 			return $skriv->render((string) $str);

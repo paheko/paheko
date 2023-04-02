@@ -20,7 +20,7 @@
 		<article>
 			<h4><a href="{"!docs/?parent=%s"|local_url|args:$result.parent}" target="_parent">{$result.path}</a></h4>
 			<h3><a href="{"!docs/?parent=%s"|local_url|args:$result.parent}" target="_parent">{$result.title}</a></h3>
-			<p>{$result.snippet|escape|clean_snippet}</p>
+			<p>{$result.snippet|escape|restore_snippet_markup}</p>
 		</article>
 	{/foreach}
 	</section>

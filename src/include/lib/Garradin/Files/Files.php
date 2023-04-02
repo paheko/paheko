@@ -236,7 +236,7 @@ class Files
 		$query = sprintf('SELECT
 			*,
 			dirname(path) AS parent,
-			snippet(files_search, \'<b>\', \'</b>\', \'…\', 2, -30) AS snippet,
+			snippet(files_search, \'<mark>\', \'</mark>\', \'…\', 2, -30) AS snippet,
 			rank(matchinfo(files_search), 0, 1.0, 1.0) AS points
 			FROM files_search
 			WHERE files_search MATCH ? %s
