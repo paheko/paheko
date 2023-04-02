@@ -22,6 +22,7 @@ KD2/HTML/TableToODS.php
 KD2/HTTP.php
 KD2/Mail_Message.php
 KD2/Office/Calc/Writer.php
+KD2/Office/ToText.php
 KD2/Security.php
 KD2/Security_OTP.php
 KD2/SimpleDiff.php

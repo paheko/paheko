@@ -209,7 +209,7 @@ class Page extends Entity
 		}
 		else {
 			$content = $this->render();
-			$this->file()->indexForSearch($content, $this->title, 'text/html');
+			$this->file()->indexForSearch(compact('content'), $this->title, 'text/html');
 		}
 	}
 
