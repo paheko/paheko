@@ -8,6 +8,7 @@ use KD2\DB\EntityManager as EM;
 use KD2\Security;
 use KD2\WebDAV\WOPI;
 use KD2\Office\ToText;
+use KD2\Office\PDFToText;
 
 use Garradin\Config;
 use Garradin\DB;
@@ -27,7 +28,7 @@ use Garradin\Files\WebDAV\Storage;
 
 use Garradin\Files\Files;
 
-use const Garradin\{WWW_URL, BASE_URL, ENABLE_XSENDFILE, SECRET_KEY, WOPI_DISCOVERY_URL, SHARED_CACHE_ROOT};
+use const Garradin\{WWW_URL, BASE_URL, ENABLE_XSENDFILE, SECRET_KEY, WOPI_DISCOVERY_URL, SHARED_CACHE_ROOT, PDFTOTEXT_COMMAND};
 
 /**
  * This is a virtual entity, it cannot be saved to a SQL table
@@ -35,6 +36,7 @@ use const Garradin\{WWW_URL, BASE_URL, ENABLE_XSENDFILE, SECRET_KEY, WOPI_DISCOV
 class File extends Entity
 {
 	const TABLE = 'files';
+	const EXTENSIONS_TEXT_CONVERT = ['ods', 'odt', 'odp', 'pptx', 'xlsx', 'docx', 'pdf'];
 
 	protected ?int $id;
 
@@ -490,7 +492,27 @@ class File extends Entity
 				$content = htmlspecialchars_decode(strip_tags($content));
 			}
 		}
-		elseif ($ext === 'ods' || $ext === 'odp' || $ext === 'odt') {
+		elseif ($ext == 'pdf' && PDFTOTEXT_COMMAND === 'pdftotext') {
+			$cmd = escapeshellcmd(PDFTOTEXT_COMMAND) . ' -nopgbrk - -';
+
+			if (isset($source['content'])) {
+				Utils::exec($cmd, 2, fn() => $source['content'], fn($out) => $content = $out);
+			}
+			elseif (isset($source['pointer'])) {
+				fseek($source['pointer'], 0, SEEK_END);
+				$size = ftell($source['pointer']);
+				rewind($source['pointer']);
+
+				Utils::exec($cmd, 2, fn() => fread($source['pointer'], $size), fn($out) => $content = $out);
+			}
+			else {
+				$cmd = sprintf('%s -nopgbrk %s -', escapeshellcmd(PDFTOTEXT_COMMAND), escapeshellarg($source['path']));
+				$content = '';
+				Utils::exec($cmd, 2, null, function($out) use (&$content) { $content .= $out; });
+				$content = $content ?: null;
+			}
+		}
+		elseif (in_array($ext, self::EXTENSIONS_TEXT_CONVERT)) {
 			$content = ToText::from($source);
 		}
 		else {
@@ -499,7 +521,7 @@ class File extends Entity
 
 		// Only index valid UTF-8
 		if (isset($content) && preg_match('//u', $content)) {
-			// Truncate content at 150KB
+			// Truncate text at 150KB
 			$content = substr(trim($content), 0, 150*1024);
 		}
 		else {

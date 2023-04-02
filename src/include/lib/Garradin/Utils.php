@@ -1273,7 +1273,7 @@ class Utils
         $output = '';
 
         try {
-            self::exec($cmd, $timeout, null, fn ($data) => $output .= $data);
+            self::exec($cmd, $timeout, null, function($data) use (&$output) { $output .= $data; });
         }
         finally {
             Utils::safe_unlink($source);
