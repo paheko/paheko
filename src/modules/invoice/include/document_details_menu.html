@@ -14,7 +14,18 @@
 				{{else}}
 					<li>{{:linkbutton label="PDF" href="preview.html?id=%s&source=details"|args:$id shape="pdf"}}</li>
 					{{if $status === $AWAITING_STATUS}}
-						<li>{{:linkbutton href="action.html?id=%d&show=quotation&action=ask_validation"|args:$id label="Générer facture" shape="export"}}</li>
+						<li>
+							<form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_validation"|args:$id:$type}}">
+								{{:button type="submit" label="Générer facture" shape="export" name="validation_button"}}
+							</form>
+						</li>
+					{{/if}}
+					{{if $status === $VALIDATED_STATUS}}
+						<li>
+							<form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_invoice_generation"|args:$id:$type}}">
+								{{:button type="submit" label="Générer facture" shape="export" name="invoice_generation_button"}}
+							</form>
+						</li>
 					{{/if}}
 				{{/if}}
 			{{else}}

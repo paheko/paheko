@@ -23,7 +23,10 @@
 {{:assign var='INVOICE_STATUS_LABELS.%s'|args:$PAID_STATUS value='Payée'}}
 {{:assign var='INVOICE_STATUS_LABELS.%s'|args:$MISC_STATUS value='Autre'}}
 
-{{:assign CANCELLED_LABEL='Annulé'}}
+{{:assign QUOTATION_CANCELLED_LABEL='Annulé'}}
+{{:assign INVOICE_CANCELLED_LABEL='Annulée'}}
+{{:assign QUOTATION_ARCHIVED_LABEL='Archivé'}}
+{{:assign INVOICE_ARCHIVED_LABEL='Archivée'}}
 
 {{:assign var='VAT_EXEMPTION_TYPE_LABELS.%s'|args:$NONPROFIT_VAT_EXEMPTION_TYPE value='Non-lucratif'}}
 {{:assign var='VAT_EXEMPTION_TYPE_LABELS.%s'|args:$PROFIT_VAT_EXEMPTION_TYPE value='Lucratif'}}

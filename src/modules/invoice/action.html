@@ -3,9 +3,9 @@
 {{* ==================== Header ==================== *}}
 
 {{:admin_header title="Devis et factures" current="acc" custom_css="./include/style.css"}}
-{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, VALIDATED_STATUS, REJECTED_STATUS, PAID_STATUS, DOCUMENT_TYPES, CANCELLED_LABEL, TYPE_LABELS, STATUS_LABELS, INVOICE_STATUS_LABELS, QUOTATION_TYPE, INVOICE_TYPE, VERSION'}}
+{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, VALIDATED_STATUS, REJECTED_STATUS, PAID_STATUS, DOCUMENT_TYPES, INVOICE_CANCELLED_LABEL, INVOICE_ARCHIVED_LABEL, TYPE_LABELS, STATUS_LABELS, INVOICE_STATUS_LABELS, QUOTATION_TYPE, INVOICE_TYPE, VERSION'}}
 
-{{if $_GET.action === 'sign' || $_POST.signing_submit || $_GET.action === 'delete' || $_POST.reject_submit || $_POST.validate_submit || $_POST.mark_as_paid_submit || $_POST.cancel_submit || $_POST.archive_submit || $_POST.unarchive_submit || $_POST.duplicate_submit || $_POST.edit_comment_submit || $_POST.status_update_button}}
+{{if $_GET.action === 'sign' || $_POST.signing_submit || $_GET.action === 'delete' || $_POST.reject_submit || $_POST.validate_submit || $_POST.invoice_generation_submit || $_POST.mark_as_paid_submit || $_POST.cancel_submit || $_POST.archive_submit || $_POST.unarchive_submit || $_POST.duplicate_submit || $_POST.edit_comment_submit || $_POST.status_update_button}}
 	{{:include file='./include/modification.controller.tpl' keep='check_errors'}}
 {{elseif $_GET.id === null}}
 	<p class="error block">Aucun document séléctionné.</p>
@@ -22,10 +22,12 @@
 	{{:assign var="label" from="TYPE_LABELS.%s"|args:$type}}
 	{{if $type === $INVOICE_TYPE}}
 		{{:assign var="status_label" from="INVOICE_STATUS_LABELS.%s"|args:$status}}
+		{{:assign cancelled_label=$INVOICE_CANCELLED_LABEL}}
 	{{else}}
 		{{:assign var="status_label" from="STATUS_LABELS.%s"|args:$status}}
+		{{:assign cancelled_label=$QUOTATION_CANCELLED_LABEL}}
 	{{/if}}
-	<h1>{{$label}} n° {{$key}} - {{if !$cancelled}}{{$status_label}}{{else}}{{$CANCELLED_LABEL}}{{/if}}</h1>
+	<h1>{{$label}} n° {{$key}} - {{if !$cancelled}}{{$status_label}}{{else}}{{$cancelled_label}}{{/if}}</h1>
 
 	{{* ======================= Errors =========================== *}}
 
@@ -79,8 +81,35 @@
 			<fieldset>
 				<legend><h2>Validation du devis par le/la client.e</h2></legend>
 				{{if !$check_errors}}<p class="error block">Valider le devis est définitif. Vous ne pourrez pas rétablir le devis comme "en attente de validation".<br />Il sera néanmoins possible d'annuler le devis.</p>{{/if}}
-				<div class="infos">{{:input type="checkbox" name="invoice" value="1" label="Générer automatiquement une facture"}}</div>
+				<div class="infos">{{:input type="checkbox" name="invoice" value="1" label="Générer automatiquement une facture" help="Il sera toujours possible de le faire ultérieurement."}}</div>
 				{{:button type="submit" name="validate_submit" label="Marquer comme validé" shape="check" class="main"}}
+			</fieldset>
+		</form>
+
+	{{elseif $_GET.action === 'ask_invoice_generation'}}
+		<form method="POST" action="">
+			<fieldset>
+				<legend><h2>Génération d'une facture</h2></legend>
+				{{:include file='./include/document_summary.html'}}
+				{{#sql select='COUNT(id) AS total' tables='module_data_invoice' where="json_extract(document, '$.parent_id') = :id AND id != :id" :id=$id|intval}}{{:assign children_number=$total}}{{/sql}}
+				{{if $children_number}}
+					<div class="error block">
+						{{if $children_number === 1}}La facture suivante est déjà associée{{else}}Les factures suivantes sont déjà associées{{/if}} à ce devis, êtes-vous sûr de vouloir créer une facture supplémentaire ?
+						<ul>
+							{{#load where="$$.parent_id = :parent_id AND id != :parent_id" :parent_id=$id}}
+								{{:assign .='child'}}
+								{{:assign var="child_status_label" from="INVOICE_STATUS_LABELS.%s"|args:$child.status}}
+								<li>
+									{{:link href="details.html?id=%d&show=invoice"|args:$child.id label=$child.key}}
+									({{if $child.cancelled}}{{$INVOICE_CANCELLED_LABEL}}{{if $child.cancellation_reason}} ({{$child.cancellation_reason|truncate:48:"..."}}){{/if}}{{else}}{{$child_status_label}}{{/if}}{{if $child.archived}} et {{$INVOICE_ARCHIVED_LABEL}}{{/if}})
+								</li>
+							{{/load}}
+						</ul>
+					</div>
+					{{:button type="submit" name="invoice_generation_submit" label="Générer une nouvelle facture" shape="document" class="main"}}
+				{{else}}
+					{{:button type="submit" name="invoice_generation_submit" label="Générer la facture" shape="document" class="main"}}
+				{{/if}}
 			</fieldset>
 		</form>
 

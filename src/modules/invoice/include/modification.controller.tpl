@@ -47,26 +47,41 @@
 		{{/load}}
 	{{/if}}
 
-{{elseif $_POST.reject_submit || $_POST.validate_submit}}
+{{elseif $_POST.reject_submit || $_POST.validate_submit || $_POST.invoice_generation_submit}}
 	{{if !$_GET.id}}
 		{{:assign var='check_errors.' value='Aucun devis sélectionné.'}}
 	{{else}}
 		{{#load id=$_GET.id|intval}}
-		{{if $status !== $AWAITING_STATUS}}
-			{{:assign var='check_errors.' value='Seuls les devis en attente peuvent être validés ou refusés.'}}
-		{{elseif $cancelled}}
-			{{:assign var='check_errors.' value='Les devis annulés ne peuvent pas être validés ou refusés.'}}
+		{{if $_POST.reject_submit || $_POST.validate_submit}}
+			{{if $status !== $AWAITING_STATUS}}
+				{{:assign var='check_errors.' value='Seuls les devis en attente peuvent être validés ou refusés.'}}
+			{{/if}}
 		{{/if}}
+		{{if $_POST.invoice_generation_submit && $status !== $VALIDATED_STATUS}}
+			{{:assign var='check_errors.' value='Une facture ne peut-être générée que pour un devis validé.'}}
+		{{/if}}
+		{{if $cancelled}}
+			{{:assign var='check_errors.' value='Les devis annulés ne peuvent pas être validés, refusés, ou générer de factures.'}}
+		{{/if}}
+
 		{{if $_POST.reject_submit}}
 			{{:assign new_status=$REJECTED_STATUS}}
 			{{:assign redirection_code=4}}
 		{{elseif $_POST.validate_submit}}
 			{{:assign new_status=$VALIDATED_STATUS}}
 			{{:assign validation_date=$now|date:'Y-m-d'}}
+			{{:assign signing_date=$validation_date}}
 			{{:assign redirection_code=5}}
+		{{elseif $_POST.invoice_generation_submit}}
+			{{:assign new_status=$status}}
+			{{:assign signing_date=$validation_date}}
+			{{:assign redirection_code=9}}
 		{{/if}}
+		
 		{{if !$check_errors}}
-			{{if $_POST.validate_submit && $_POST.invoice}}
+			{{* Hack since brindille does not allow to mix && and || operators (brackets are not supported #e4fe4245c74000f542a0e8770dca9c54314fafc8) *}}
+			{{:assign var='validate_and_generate' value="%d + %d"|math:$_POST.validate_submit:$_POST.invoice}}
+			{{if $validate_and_generate === 2 || $_POST.invoice_generation_submit}}
 				{{:include file='./generate_next_key.tpl' type=$INVOICE_TYPE assign_to='invoice_key' keep='invoice_key'}}
 
 				{{:save assign_new_id='invoice_id'
@@ -76,6 +91,7 @@
 					status=$AWAITING_STATUS
 					cancelled=false
 					cancellation_reason=null
+					archived=false
 					author_id=$logged_user.id|intval
 					parent_id=$_GET.id|intval
 					duplicated_from_id=null
@@ -83,7 +99,7 @@
 					subject=$subject
 					date=$now|date:'Y-m-d'
 					deadline=null
-					signing_date=$now|date:'Y-m-d'
+					signing_date=$signing_date
 					signing_place=$signing_place
 					validation_date=null
 					payment_date=null

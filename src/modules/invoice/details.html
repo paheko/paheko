@@ -3,7 +3,7 @@
 {{* ==================== Header ==================== *}}
 
 {{:admin_header title="Devis et factures" current="acc" custom_css="./include/style.css"}}
-{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, VALIDATED_STATUS, REJECTED_STATUS, PAID_STATUS, DOCUMENT_TYPES, TYPE_LABELS, STATUS_LABELS, INVOICE_STATUS_LABELS, CANCELLED_LABEL, QUOTATION_TYPE, INVOICE_TYPE, VERSION'}}
+{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, VALIDATED_STATUS, REJECTED_STATUS, PAID_STATUS, DOCUMENT_TYPES, TYPE_LABELS, STATUS_LABELS, INVOICE_STATUS_LABELS, INVOICE_CANCELLED_LABEL, QUOTATION_TYPE, INVOICE_TYPE, VERSION'}}
 
 {{if $_GET.id === null}}
 	<p class="error block">Aucun document séléctionné.</p>
@@ -34,6 +34,8 @@
 				Document archivé avec succès.
 			{{elseif $_GET.ok === '8'}}
 				Document sorti des archives avec succès.
+			{{elseif $_GET.ok === '9'}}
+				Facture générée avec succès.
 			{{/if}}
 			</p>
 		{{/if}}
@@ -128,7 +130,7 @@
 					<p>
 						Dupliqué depuis {{if $type === $INVOICE_TYPE}}la{{else}}le{{/if}}
 						{{:link href="details.html?id=%d&show=quotation"|args:$parent.id label=$duplicate_label|args:$parent.key}}
-						({{if $parent.cancelled}}{{$CANCELLED_LABEL}}{{else}}{{:assign var='parent_status_label' from="INVOICE_STATUS_LABELS.%s"|args:$parent.status}}{{$parent_status_label}}{{/if}}).
+						({{if $parent.cancelled}}{{$INVOICE_CANCELLED_LABEL}}{{else}}{{:assign var='parent_status_label' from="INVOICE_STATUS_LABELS.%s"|args:$parent.status}}{{$parent_status_label}}{{/if}}).
 					</p>
 				{{/if}}
 			{{/if}}
