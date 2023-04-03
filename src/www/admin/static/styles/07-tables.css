@@ -255,6 +255,11 @@ table.files.gallery .preview {
     height: 150px;
 }
 
+table.files.gallery .preview img {
+    max-height: 150px;
+    max-width: 150px;
+}
+
 table.files.gallery .icon a:hover span::before {
     color: rgba(var(--gMainColor), 1);
 }

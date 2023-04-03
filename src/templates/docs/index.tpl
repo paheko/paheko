@@ -18,7 +18,10 @@ use Garradin\Entities\Files\File;
 
 <nav class="tabs">
 	<aside>
-		{linkbutton shape="search" label="Rechercher" href="search.php" target="_dialog"}
+		<form method="post" action="search.php" target="_dialog" data-disable-progress="1">
+			{input type="text" name="q" size=25 placeholder="Rechercher un document" title="Rechercher dans les documents"}
+			{button shape="search" type="submit" title="Rechercher"}
+		</form>
 	{if $gallery}
 		{linkbutton shape="menu" label="Afficher en liste" href="?path=%s&gallery=0"|args:$parent_path_uri}
 	{else}
@@ -78,7 +81,7 @@ use Garradin\Entities\Files\File;
 <nav class="breadcrumbs">
 	<aside>
 	{if count($breadcrumbs) > 1}
-		{linkbutton href="?path=%s"|args:$parent_path label="Retour au répertoire parent" shape="left"}
+		{linkbutton href="?path=%s"|args:$parent_path_uri label="Retour au répertoire parent" shape="left"}
 	{/if}
 </aside>
 
@@ -156,7 +159,7 @@ use Garradin\Entities\Files\File;
 					</td>
 				</tr>
 				{else}
-				<tr>
+				<tr{if $highlight == $file->name} class="highlight"{/if}>
 				{if $file->canDelete()}
 					<td class="check">
 						{input type="checkbox" name="check[]" value=$file->path}

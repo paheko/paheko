@@ -93,6 +93,10 @@ nav.tabs aside {
     clear: right;
 }
 
+nav.tabs aside form {
+    display: inline-flex;
+}
+
 .menu-btn > b {
     font-weight: normal;
 }
