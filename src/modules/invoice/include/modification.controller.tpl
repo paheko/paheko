@@ -136,27 +136,41 @@
 		{{/load}}
 	{{/if}}
 
-{{elseif $_POST.mark_as_paid_submit}}
+{{elseif $_POST.mark_as_paid_submit || $_POST.bind_to_transaction_submit}}
 	{{#load id=$_GET.id|intval}}{{:assign .='invoice'}}{{/load}}
-	{{if $invoice.status !== $AWAITING_STATUS}}
-		{{:assign var='check_errors.' value='Seuls les factures "en attente de validation" peuvent être payées.'}}
-	{{elseif $invoice.cancelled}}
-		{{:assign var='check_errors.' value='Les factures annulées ne peuvent pas être marquées comme payées.'}}
-	{{/if}}
+	{{if $_POST.mark_as_paid_submit}}
+		{{if $invoice.status !== $AWAITING_STATUS}}
+			{{:assign var='check_errors.' value='Seuls les factures "en attente de validation" peuvent être payées.'}}
+		{{elseif $invoice.cancelled}}
+			{{:assign var='check_errors.' value='Les factures annulées ne peuvent pas être marquées comme payées.'}}
+		{{/if}}
 
-	{{:assign date=$_POST.date|date:'Y-m-d'}}
-	{{if !$_POST.date}}
-		{{:assign var='check_errors.' value="La date est obligatoire."}}
+		{{:assign payment_date=$_POST.date|date:'Y-m-d'}}
+		{{if !$_POST.date}}
+			{{:assign var='check_errors.' value="La date est obligatoire."}}
+		{{/if}}
+		{{if $_POST.date|parse_date === null}} {{* Means data is not a date *}}
+			{{:assign var='check_errors.' value="La date du paiement doit être une date."}}
+		{{/if}}
+		{{if $payment_date < $invoice.date}}
+			{{:assign formatted_invoice_date=$invoice.date|date_short}}
+			{{:assign var='check_errors.' value="Le paiement doit se situer après la date d'émission de la facture (%s)."|args:$formatted_invoice_date}}
+		{{/if}}
+		
+		{{:include file='./check_max_length.tpl' check_value=$_POST.payment_comment check_max=256 check_label='Remarque trop longue' keep='check_errors'}}
+		{{:assign payment_comment=$_POST.payment_comment}}
+		{{:assign redirection_code=6}}
+
+	{{elseif $_POST.bind_to_transaction_submit}}
+		{{if $invoice.status !== $PAID_STATUS}}
+			{{:assign var='check_errors.' value='Seuls les factures payées peuvent être associées à une écriture comptable.'}}
+		{{elseif $invoice.cancelled}}
+			{{:assign var='check_errors.' value='Les factures annulées ne peuvent pas être associées à une écriture comptable.'}}
+		{{/if}}
+		{{:assign payment_date=$invoice.payment_date}}
+		{{:assign payment_comment=$invoice.payment_comment}}
+		{{:assign redirection_code=10}}
 	{{/if}}
-	{{if $_POST.date|parse_date === null}} {{* Means data is not a date *}}
-		{{:assign var='check_errors.' value="La date du paiement doit être une date."}}
-	{{/if}}
-	{{if $date < $invoice.date}}
-		{{:assign formatted_invoice_date=$invoice.date|date_short}}
-		{{:assign var='check_errors.' value="Le paiement doit se situer après la date d'émission de la facture (%s)."|args:$formatted_invoice_date}}
-	{{/if}}
-	
-	{{:include file='./check_max_length.tpl' check_value=$_POST.payment_comment check_max=256 check_label='Remarque trop longue' keep='check_errors'}}
 
 	{{:include file='./shim/array_last_num_key.tpl' keep='transaction_id, check_errors' array=$_POST.transaction name='transaction_id' error_message='Écriture séléctionnée invalide.'}}
 	{{#transactions id=$transaction_id|intval}}{{:assign .='transaction'}}{{/transactions}}
@@ -170,11 +184,11 @@
 			validate_only="status, transaction_id, payment_date, payment_comment, last_modification_date"
 			status=$PAID_STATUS
 			transaction_id=$transaction.id|intval
-			payment_date=$date
-			payment_comment=$_POST.payment_comment
+			payment_date=$payment_date
+			payment_comment=$payment_comment
 			last_modification_date=$now|atom_date
 		}}
-		{{:http redirect="details.html?id=%d&ok=6&show=invoice"|args:$invoice.id}}
+		{{:http redirect="details.html?id=%d&ok=%d&show=invoice"|args:$invoice.id:$redirection_code}}
 	{{/if}}
 
 {{elseif $_POST.cancel_submit}}
@@ -264,6 +278,7 @@
 					status=$DRAFT_STATUS
 					cancelled=false
 					cancellation_reason=null
+					archived=false
 					author_id=$author_id
 					parent_id=$parent_id
 					duplicated_from_id=$id|intval
@@ -300,6 +315,7 @@
 					status=$DRAFT_STATUS
 					cancelled=false
 					cancellation_reason=null
+					archived=false
 					author_id=$author_id
 					child_id=null
 					parent_id=null

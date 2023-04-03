@@ -36,6 +36,8 @@
 				Document sorti des archives avec succès.
 			{{elseif $_GET.ok === '9'}}
 				Facture générée avec succès.
+			{{elseif $_GET.ok === '10'}}
+				Écriture comptable associée avec succès.
 			{{/if}}
 			</p>
 		{{/if}}
@@ -100,7 +102,12 @@
 						<p class="infos">Écriture comptable correspondante : {{:link href='!acc/transactions/details.php?id=%d'|args:$id label='n°%d - %s'|args:$id:$label}}.</p>
 					{{/transactions}}
 				{{else}}
-					<p class="infos">Aucune écriture comptable correspondante. {{:linkbutton href="#" label="Associer (prochainement)" shape="right"}}</p>
+					<p>
+						Aucune écriture comptable correspondante.
+					</p>
+					<form method="POST" action="{{"action.html?id=%d&show=invoice&action=ask_bind_to_transaction"|args:$id}}" class="infos">
+						{{:button type="submit" label='📖 Associer une écriture' name="bind_to_transaction_button"}}
+					</form>
 				{{/if}}
 
 			{{else}}

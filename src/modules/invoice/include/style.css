@@ -17,6 +17,15 @@ html.dark {
 	max-width: 7em;
 }
 
+li.followed_by_separator form {
+	display: inline;
+}
+
+li.followed_by_separator::after {
+	content: '|';
+	padding-right: 0.2em;
+}
+
 table.list tbody tr:hover, table.list tr:nth-child(even):hover, table.list tr.cancelled_document:nth-child(even):hover {
 	background-color: var(--mHoverBgColor);
 }
@@ -32,6 +41,19 @@ h3.quotation_total {
 #invoice_module_search input[type=search] {
 	min-width: 5em;
 	width: 14em;
+}
+
+button.main_action {
+	margin: 0.2em 0.1em 0.2em 0.1em;
+	padding: 0.25em 0.3em 0.25em 0.3em;
+}
+
+a.plain {
+	color: var(--gTextColor);
+}
+
+a.plain span:hover {
+	text-decoration: underline;
 }
 
 .irreversible, .irreversible:before, .irreversible > span {
@@ -96,7 +118,8 @@ nav.tabs aside.menu li, .list_action_buttons li {
 nav.tabs aside.menu li a, .list_action_buttons li a {
 	background: none;
 	border-radius: 0;
-	padding: 0.2em 0.4em;
+	/*padding: 0.2em 0.4em;*/
+	padding: 0.25em 0.3em 0.25em 0.3em;
 }
 
 nav.tabs aside.menu li a:hover, .list_action_buttons li a:hover {
@@ -104,7 +127,12 @@ nav.tabs aside.menu li a:hover, .list_action_buttons li a:hover {
 }
 
 nav.tabs aside.menu li a.icn-btn, .list_action_buttons li a.icn-btn {
-	margin: 0.2em 0.2em;
+	/*margin: 0.2em 0.2em;*/
+	margin: 0.2em 0.1em 0.2em 0.1em;
+}
+
+nav.tabs aside form {
+	display: inline;
 }
 
 #cancel_checkbox_label::before, #archive_checkbox_label::before {
