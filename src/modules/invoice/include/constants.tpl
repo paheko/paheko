@@ -6,6 +6,8 @@
 {{:assign var='DOCUMENT_TYPES.%s'|args:$INVOICE_TYPE value='Facture'}}
 {{:assign NONPROFIT_VAT_EXEMPTION_TYPE='nonprofit' PROFIT_VAT_EXEMPTION_TYPE='profit'}}
 
+{{:include file='./config.tpl' keep='DEV_MODE'}}
+
 {{* Labels *}}
 {{:assign var='TYPE_LABELS.%s'|args:$QUOTATION_TYPE value='Devis'}}
 {{:assign var='TYPE_LABELS.%s'|args:$INVOICE_TYPE value='Facture'}}
