@@ -1073,11 +1073,11 @@ class File extends Entity
 
 	static public function validateFileName(string $name): void
 	{
-		if (0 === strpos($name, '.ht')) {
+		if (0 === strpos($name, '.ht') || $name == '.user.ini') {
 			throw new ValidationException('Nom de fichier interdit');
 		}
 
-		if (strpos($name, "\0") !== false || $name == '.user.ini') {
+		if (strpos($name, "\0") !== false) {
 			throw new ValidationException('Nom de fichier invalide');
 		}
 

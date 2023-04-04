@@ -10,9 +10,6 @@ use Garradin\Entities\Files\File;
 		<li{if $context == File::CONTEXT_USER} class="current"{/if}><a href="./?path=<?=File::CONTEXT_USER?>">{icon shape="users"} Fichiers des membres</a></li>
 	{/if}
 	{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
-		<li{if $context == File::CONTEXT_MODULES} class="current"{/if}><a href="./?path=<?=File::CONTEXT_MODULES?>">{icon shape="code"} Code des modules</a></li>
-	{/if}
-	{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
 		<li{if $context == File::CONTEXT_TRASH} class="current"{/if}><a href="trash.php">{icon shape="trash"} Fichiers supprimés</a></li>
 	{/if}
 </ul>

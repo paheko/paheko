@@ -23,14 +23,6 @@
 {form_errors}
 
 <table class="list">
-	<thead>
-		<td class="icon"></td>
-		<th>Nom du fichier</th>
-		<td></td>
-		<td></td>
-		<td></td>
-		<td></td>
-	</thead>
 	<tbody>
 		{if $path}
 		<tr>
@@ -78,8 +70,10 @@
 			<td class="single-action">
 				{if $file.local && $file.dist}
 					{linkbutton label="Supprimer les modifications" href=$file.delete_url shape="trash" target="_dialog"}
+				{elseif $file.local && $file.dir}
+					{linkbutton label="Supprimer ce répertoire" href=$file.delete_url shape="trash" target="_dialog"}
 				{elseif $file.local}
-					{linkbutton label="Supprimer" href=$file.delete_url shape="trash" target="_dialog"}
+					{linkbutton label="Supprimer ce fichier" href=$file.delete_url shape="trash" target="_dialog"}
 				{/if}
 			</td>
 		</tr>

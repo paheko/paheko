@@ -8,6 +8,7 @@ use Garradin\Files\Files;
 use Garradin\Config;
 use Garradin\DB;
 use Garradin\Utils;
+use Garradin\ValidationException;
 use Garradin\UserException;
 use Garradin\Users\Session;
 use Garradin\Web\Web;
@@ -338,6 +339,16 @@ class Modules
 			}
 
 			return $module;
+		}
+		catch (ValidationException $e) {
+			$dir = Files::get($base);
+
+			// Delete any extracted files so far
+			if ($dir) {
+				$dir->delete();
+			}
+
+			throw new \InvalidArgumentException('Invalid file: ' . $e->getMessage(), 0, $e);
 		}
 		catch (\Exception $e) {
 			$dir = Files::get($base);

@@ -17,7 +17,12 @@ $form->runIf('import', function () {
 		throw new UserException('Aucun fichier reçu.');
 	}
 
-	$m = Modules::import($_FILES['zip']['tmp_name']);
+	try {
+		$m = Modules::import($_FILES['zip']['tmp_name']);
+	}
+	catch (\InvalidArgumentException $e) {
+		throw new UserException($e->getMessage(), 0, $e);
+	}
 
 	if (!$m) {
 		throw new UserException('Un module avec ce nom unique existe déjà. Pour importer ce module, merci de supprimer ou remettre à zéro le module existant.');

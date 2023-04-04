@@ -58,16 +58,6 @@ use Garradin\Entities\Files\File;
 			{else}
 				Fichiers joints aux fiches des membres
 			{/if}
-		{elseif $context == File::CONTEXT_SKELETON}
-			{if $context_ref == 'web'}
-				Code du site web
-			{elseif $context_ref == 'modules'}
-				Code des modules
-			{else}
-				Code
-			{/if}
-		{elseif $context == File::CONTEXT_MODULES}
-			Code des modules
 		{elseif $context_ref}
 			{$parent->name}
 		{else}
