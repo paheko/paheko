@@ -36,7 +36,7 @@
 	<h2 class="ruler">Résultat(s) de recherche pour "{{$_GET.q}}"</h2>
 {{/if}}
 
-{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, VALIDATED_STATUS, PAID_STATUS, TYPE_LABELS, STATUS_LABELS, CANCELLED_LABEL, QUOTATION_TYPE, INVOICE_TYPE, INVOICE_STATUS_LABELS'}}
+{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, VALIDATED_STATUS, PAID_STATUS, TYPE_LABELS, STATUS_LABELS, QUOTATION_CANCELLED_LABEL, INVOICE_CANCELLED_LABEL, QUOTATION_TYPE, INVOICE_TYPE, INVOICE_STATUS_LABELS'}}
 
 {{if $_GET.show === $QUOTATION_TYPE}}
 	{{:assign filter="$$.type = :type AND $$.archived = false" type_filter=$QUOTATION_TYPE}}
@@ -106,8 +106,10 @@
 		<td>
 			{{if $type === $INVOICE_TYPE}}
 				{{:assign var="label" from="INVOICE_STATUS_LABELS.%s"|args:$status}}
+				{{:assign cancelled_label=$INVOICE_CANCELLED_LABEL}}
 			{{else}}
 				{{:assign var="label" from="STATUS_LABELS.%s"|args:$status}}
+				{{:assign cancelled_label=$QUOTATION_CANCELLED_LABEL}}
 			{{/if}}
 
 			{{if !$cancelled}}
@@ -115,7 +117,7 @@
 				{{if $status === $VALIDATED_STATUS}}- {{$validation_date|date_short}}
 				{{elseif $type === $INVOICE_TYPE && $status === $PAID_STATUS}}- {{$payment_date|date_short}}{{/if}}
 			{{else}}
-				{{$CANCELLED_LABEL}}
+				{{$cancelled_label}}
 			{{/if}}
 		</td>
 		<td class="actions">
