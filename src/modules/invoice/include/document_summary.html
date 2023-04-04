@@ -13,7 +13,13 @@
 		{{if !$cancelled}}
 			<dd>{{$status_label}}</dd>
 		{{else}}
-			<dd><strong>{{$CANCELLED_LABEL}}</strong>.</dd><dd class="details">(dernier statut avant annulation : {{$status_label}})</dd>
+			<dd>
+				<strong class="irreversible">{{if $type === $INVOICE_TYPE}}{{$INVOICE_CANCELLED_LABEL}}{{else}}{{$QUOTATION_CANCELLED_LABEL}}{{/if}}</strong>
+				{{if $archived}}
+					et <span class="archived">{{if $type === $INVOICE_TYPE}}Archivée{{else}}Archivé{{/if}}</span>
+				{{/if}}.
+			</dd>
+			<dd class="details">(dernier statut avant annulation : {{$status_label}})</dd>
 		{{/if}}
 	</dl>
 </fieldset>

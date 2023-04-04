@@ -238,9 +238,9 @@
 				{{:assign var='check_errors.' value='Le document est déjà sorti des archives.'}}
 			{{/if}}
 			{{if $status === $AWAITING_STATUS}}
-				{{if $type === $INVOICE_TYPE}}
+				{{if $type === $INVOICE_TYPE && !$cancelled}}
 					{{:assign var='check_errors.' value='Les factures doivent être soit payées soit annulées pour pouvoir être archivées.'}}
-				{{else}}
+				{{elseif $type === $QUOTATION_TYPE}}
 					{{:assign var='check_errors.' value='Les devis doivent être soit validés ou soit refusés pour pouvoir être archivés.'}}
 				{{/if}}
 			{{/if}}

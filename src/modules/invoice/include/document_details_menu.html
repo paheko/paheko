@@ -84,18 +84,29 @@
 			{{/if}}
 			
 			{{* Archiving *}}
-			{{if $status !== $DRAFT_STATUS && $status !== $AWAITING_STATUS}}
-				<li>
-					{{if !$archived && $_GET.action !== 'ask_archiving'}}
-						<form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_archiving"|args:$id:$type}}">
-							{{:button type="submit" label="Archiver" shape="lock" name="archive_button" class="main_action"}}
-						</form>
-					{{elseif $archived && $_GET.action !== 'ask_unarchiving'}}
-						<form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_unarchiving"|args:$id:$type}}">
-							{{:button type="submit" label="" title="Sortir le document des archives" shape="unlock" name="archive_button" class="main_action"}}
-						</form>
-					{{/if}}
-				</li>
+			{{if $status !== $DRAFT_STATUS}}
+				{{if $type === $INVOICE_TYPE && $status !== $AWAITING_STATUS}}
+					{{:assign invoice_and_not_awaiting_payment=true}}
+				{{/if}}
+				{{if $type === $QUOTATION_TYPE && $status !== $AWAITING_STATUS}}
+					{{:assign quotation_and_archivable=true}}
+				{{/if}}
+				{{if $type === $INVOICE_TYPE && $status === $AWAITING_STATUS && $cancelled}}
+					{{:assign invoice_and_not_paid_and_cancelled=true}}
+				{{/if}}
+				{{if $invoice_and_not_awaiting_payment || $quotation_and_archivable || $invoice_and_not_paid_and_cancelled}}
+					<li>
+						{{if !$archived && $_GET.action !== 'ask_archiving'}}
+							<form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_archiving"|args:$id:$type}}">
+								{{:button type="submit" label="Archiver" shape="lock" name="archive_button" class="main_action"}}
+							</form>
+						{{elseif $archived && $_GET.action !== 'ask_unarchiving'}}
+							<form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_unarchiving"|args:$id:$type}}">
+								{{:button type="submit" label="" title="Sortir le document des archives" shape="unlock" name="archive_button" class="main_action"}}
+							</form>
+						{{/if}}
+					</li>
+				{{/if}}
 			{{/if}}
 		</ul>
 	</aside>

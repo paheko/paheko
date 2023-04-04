@@ -63,8 +63,11 @@
 			<legend><h2>Informations</h2></legend>
 			
 			{{if $cancelled}}
-				<p>Statut en cours : <strong class="irreversible">{{$cancelled_label}}</strong>.
-				{{if $cancellation_reason}}<p>Motif : {{$cancellation_reason|escape|nl2br}}</p>{{/if}}
+				<p>
+					Statut en cours : <strong class="irreversible">{{$cancelled_label}}</strong>
+					{{if $archived}}et <span class="archived">{{$archived_label}}</span>{{/if}}.
+					{{if $cancellation_reason}}<p>Motif : {{$cancellation_reason|escape|nl2br}}</p>{{/if}}
+				</p>
 				<p class="infos">(dernier statut avant annulation : {{$status_label}})</p>
 			{{elseif $archived}}
 				<p>Statut en cours : <strong class="archived">{{$archived_label}}</strong>.
