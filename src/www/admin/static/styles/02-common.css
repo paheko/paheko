@@ -674,7 +674,7 @@ strong.tag {
     transition: all .5s, opacity 2s;
 }
 
-#frameDialog html {
+#frameDialog {
 	color: rgb(var(--gTextColor));
 	background-color: rgb(var(--gBgColor));
 }
