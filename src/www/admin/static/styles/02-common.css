@@ -640,7 +640,7 @@ dl.large dd {
 }
 
 .diff ins { background: #cfc; color: #000; text-decoration: none; }
-.diff del { background: #fcc; color: #000; }
+.diff del { background: #fcc; color: #000; text-decoration-color: rgba(0, 0, 0, .3); }
 
 .center-block {
     margin: 1em auto;
@@ -695,3 +695,54 @@ strong.tag {
     border: 0;
     transition: all .5s, opacity 2s;
 }
+
+.diff {
+    font-family: monospace;
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.9em;
+}
+
+.diff tr {
+    border: 1px solid #ccc;
+    vertical-align: top;
+}
+
+.diff .ins {
+    background: #efe;
+    color: #000;
+    width: 45%;
+}
+
+.diff .del {
+    background: #fee;
+    color: #000;
+    width: 45%;
+}
+
+.diff .line {
+    width: 2%;
+    padding: 0.2em;
+    text-align: right;
+    font-size: 90%;
+    color: #666;
+}
+
+.diff .leftChange, .diff .rightChange {
+    text-align: center;
+    vertical-align: middle;
+    color: #ccc;
+}
+
+.diff hr {
+    background: none;
+    border: none;
+    border-top: 5px dotted #fff;
+    color: #fff;
+    margin: .2em .4em;
+}
+
+.diff .separator {
+    background: #ccc;
+}
+

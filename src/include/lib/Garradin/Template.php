@@ -560,14 +560,14 @@ class Template extends Smartyer
 			if ($type == \KD2\SimpleDiff::INS)
 			{
 				$class2 = 'ins';
-				$t2 = '<span data-icn="➕"></span>';
+				$t2 = '<span data-icon="➕"></span>';
 				$old = htmlspecialchars($old, ENT_QUOTES, 'UTF-8');
 				$new = htmlspecialchars($new, ENT_QUOTES, 'UTF-8');
 			}
 			elseif ($type == \KD2\SimpleDiff::DEL)
 			{
 				$class1 = 'del';
-				$t1 = '<span data-icn="➖"></span>';
+				$t1 = '<span data-icon="➖"></span>';
 				$old = htmlspecialchars($old, ENT_QUOTES, 'UTF-8');
 				$new = htmlspecialchars($new, ENT_QUOTES, 'UTF-8');
 			}
@@ -575,8 +575,8 @@ class Template extends Smartyer
 			{
 				$class1 = 'del';
 				$class2 = 'ins';
-				$t1 = '<span data-icn="➖"></span>';
-				$t2 = '<span data-icn="➕"></span>';
+				$t1 = '<span data-icon="➖"></span>';
+				$t2 = '<span data-icon="➕"></span>';
 
 				$lineDiff = \KD2\SimpleDiff::wdiff($old, $new);
 				$lineDiff = htmlspecialchars($lineDiff, ENT_QUOTES, 'UTF-8');

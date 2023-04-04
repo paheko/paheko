@@ -143,7 +143,7 @@ class Files
 		];
 
 		// Modules source code
-		$p[File::CONTEXT_MODULES . '/'] = [
+		$p[File::CONTEXT_MODULES] = [
 			'mkdir' => false,
 			'move' => false,
 			'create' => false,

@@ -182,6 +182,17 @@ class Module extends Entity
 		return file_exists($this->distPath($path));
 	}
 
+	public function fetchLocalFile(string $path): ?string
+	{
+		$file = Files::get($this->path($path));
+		return !$file ? null : $file->fetch();
+	}
+
+	public function fetchDistFile(string $path): ?string
+	{
+		return @file_get_contents($this->distPath($path)) ?: null;
+	}
+
 	public function hasConfig(): bool
 	{
 		return DB::getInstance()->test('modules_templates', 'id_module = ? AND name = ?', $this->id(), self::CONFIG_FILE);
@@ -216,7 +227,7 @@ class Module extends Entity
 				'dir'       => $file->isDir(),
 				'path'      => $_path,
 				'file_path' => $file->path,
-				'type'      => $file->type,
+				'type'      => $file->mime,
 				'local'     => true,
 			];
 		}
@@ -250,7 +261,7 @@ class Module extends Entity
 			$file['editable'] = UserTemplate::isTemplate($file['path'])
 				|| substr($file['type'], 0, 5) === 'text/'
 				|| preg_match('/\.(?:json|md|skriv|html|css|js)$/', $file['name']);
-			$file['open_url'] = $this->url($file['path']);
+			$file['open_url'] = '!common/files/preview.php?p=' . rawurlencode($file['file_path']);
 			$file['edit_url'] = '!common/files/edit.php?p=' . rawurlencode($file['file_path']);
 			$file['delete_url'] = '!common/files/delete.php?p=' . rawurlencode($file['file_path']);
 		}
@@ -292,8 +303,8 @@ class Module extends Entity
 			$params = '?' . http_build_query($params);
 		}
 
-		if ($this->web && $this->enabled) {
-			return WWW_URL . $file . $params;
+		if ($this->web && $this->enabled && !$file) {
+			return WWW_URL;
 		}
 
 		return sprintf('%sm/%s/%s%s', WWW_URL, $this->name, $file, $params);
@@ -335,6 +346,18 @@ class Module extends Entity
 	public function serve(string $path, bool $has_local_file, array $params = []): void
 	{
 		if (UserTemplate::isTemplate($path)) {
+			// Error if path is not valid
+			// we allow any path for static files, but not for skeletons
+			if (!$this->isValidPath($path)) {
+				if ($this->web) {
+					$path = '404.html';
+				}
+				else {
+					http_response_code(404);
+					throw new UserException('This address is invalid.');
+				}
+			}
+
 			if ($this->web) {
 				$this->serveWeb($path, $params);
 				return;
@@ -354,7 +377,7 @@ class Module extends Entity
 
 			$file->serve();
 		}
-		// Serve a static file
+		// Serve a static file from dist path
 		else {
 			$type = $this->getFileTypeFromExtension($path);
 			$real_path = $this->distPath($path);

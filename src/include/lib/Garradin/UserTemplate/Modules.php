@@ -190,6 +190,7 @@ class Modules
 	{
 		$page = null;
 		$path = null;
+		$has_local_file = null;
 
 		// We are looking for a module
 		if (substr($uri, 0, 2) == 'm/') {
@@ -220,14 +221,15 @@ class Modules
 		}
 
 		// Find out web path
-		if ($module->web && $module->enabled) {
+		if ($module->web && $module->enabled && substr($uri, 0, 2) !== 'm/') {
 			$uri = rawurldecode($uri);
 
 			if ($uri == '') {
 				$path = 'index.html';
 			}
-			elseif ($module->hasFile($uri)) {
+			elseif ($module->hasLocalFile($uri)) {
 				$path = $uri;
+				$has_local_file = true;
 			}
 			elseif (($page = Web::getByURI($uri)) && $page->status == Page::STATUS_ONLINE) {
 				$path = $page->template();
@@ -243,18 +245,7 @@ class Modules
 			throw new UserException('This page is currently disabled.');
 		}
 
-		// Error if path is not valid
-		if (!$module->isValidPath($path)) {
-			if ($module->web) {
-				$path = '404.html';
-			}
-			else {
-				http_response_code(404);
-				throw new UserException('This address is invalid.');
-			}
-		}
-
-		$has_local_file = $module->hasLocalFile($path);
+		$has_local_file ??= $module->hasLocalFile($path);
 		$has_dist_file = !$has_local_file && $module->hasDistFile($path);
 
 		// Check if the file actually exists in the module

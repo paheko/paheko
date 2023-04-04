@@ -64,7 +64,7 @@ nav.tabs li:first-child::before, nav.tabs li:last-child::after {
     vertical-align: bottom;
 }
 
-nav.tabs li.title:first-child::before {
+nav.tabs li.title:first-child::before, nav.tabs li.title:last-child::after {
     display: none;
 }
 
