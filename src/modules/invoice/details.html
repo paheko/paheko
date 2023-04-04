@@ -161,7 +161,7 @@
 					<p class="infos">
 						Associé au membre {{if $recipient_member_number}}n°{{$recipient_member_number}}{{/if}} : "{{:link href="!users/details.php?id=%d"|args:$member.id label=$member.nom}}",
 						{{if $recipient_business_name !== $member.nom}} sous la désignation "{{$recipient_business_name}}".{{/if}}<br />
-						{{:link href="customer.html?show=customers&id=%s"|args:$recipient_business_name label='Voir tous les devis de "%s".'|args:$recipient_business_name}}
+						{{:link href="customer.html?show=customers&id=%s"|args:$recipient_business_name label='Voir tous les devis et factures de "%s".'|args:$recipient_business_name}}
 					</p>
 				{{/if}}
 			{{/if}}
