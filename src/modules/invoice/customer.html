@@ -5,13 +5,21 @@
 {{:admin_header title="Devis et factures" current="acc" custom_css="./include/style.css"}}
 {{:include file='./include/navigation.html'}}
 
-{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, REJECTED_STATUS, VALIDATED_STATUS, MISC_STATUS, STATUS_LABELS, CANCELLED_LABEL, QUOTATION_TYPE'}}
+{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, REJECTED_STATUS, VALIDATED_STATUS, MISC_STATUS, STATUS_LABELS, INVOICE_STATUS_LABELS, TYPE_LABELS, QUOTATION_CANCELLED_LABEL, INVOICE_CANCELLED_LABEL, QUOTATION_TYPE, INVOICE_TYPE'}}
 
 {{* ==================== Listing ==================== *}}
 
-<h2>Devis de "{{$_GET.id}}"</h2>
+{{:assign list_select="key; id AS 'Numéro'; datetime($$.date) AS 'Émission'; $$.deadline AS 'Échéance'; $$.subject AS 'Intitulé'; $$.total AS 'Montant'; $$.recipient_member_id AS 'Membre'; $$.recipient_member_number; $$.status"}}
+{{:assign list_where="$$.cancelled = false AND $$.recipient_business_name = :business_name AND $$.type = :type AND $$.status = :status"}}
+{{:assign list_where_cancelled="$$.recipient_business_name = :business_name AND $$.type = :type AND $$.cancelled = true"}}
+{{:assign list_order=8}}
 
-{{#sql select='id' tables='module_data_invoice' where="json_extract(document, '$.recipient_business_name') = :business_name" :business_name=$_GET.id}}
+
+<h2>Devis et factures de "{{$_GET.id}}"</h2>
+
+<h3 class="ruler">Devis</h3>
+
+{{#sql select='id' tables='module_data_invoice' where="json_extract(document, '$.recipient_business_name') = :business_name AND json_extract(document, '$.type') = :type" :business_name=$_GET.id :type=$QUOTATION_TYPE}}
 	{{:assign found=true}}
 {{/sql}}
 
@@ -22,16 +30,33 @@
 	{{/restrict}}
 {{/if}}
 
-{{:assign list_select="key; id AS 'Numéro'; datetime($$.date) AS 'Émission'; $$.deadline AS 'Échéance'; $$.subject AS 'Intitulé'; $$.total AS 'Montant'; $$.recipient_member_id AS 'Membre'; $$.recipient_member_number; $$.status"}}
-{{:assign list_where="$$.cancelled = false AND $$.recipient_business_name = :business_name AND $$.type = :type AND $$.status = :status"}}
-{{:assign list_where_cancelled="$$.recipient_business_name = :business_name AND $$.type = :type AND $$.cancelled = true"}}
-{{:assign list_order=8}}
-
 {{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where order=$list_order type=$QUOTATION_TYPE status=$AWAITING_STATUS STATUS_LABELS=$STATUS_LABELS}}
 {{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where order=$list_order type=$QUOTATION_TYPE status=$REJECTED_STATUS STATUS_LABELS=$STATUS_LABELS}}
 {{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where order=$list_order type=$QUOTATION_TYPE status=$VALIDATED_STATUS STATUS_LABELS=$STATUS_LABELS}}
 {{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where_cancelled order=$list_order type=$QUOTATION_TYPE STATUS_LABELS=$STATUS_LABELS}}
 {{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where order=$list_order type=$QUOTATION_TYPE status=$DRAFT_STATUS STATUS_LABELS=$STATUS_LABELS}}
+
+
+
+<h3 class="ruler" style="padding-top: 1em;">Factures</h3>
+
+{{:assign found=null}}
+{{#sql select='id' tables='module_data_invoice' where="json_extract(document, '$.recipient_business_name') = :business_name AND json_extract(document, '$.type') = :type" :business_name=$_GET.id :type=$INVOICE_TYPE}}
+	{{:assign found=true}}
+{{/sql}}
+
+{{if !$found}}
+	<p class="error block">Aucune facture pour ce client.</p>
+	{{#restrict section="accounting" level="write"}}
+		<p class="infos">{{:linkbutton href="edit.html" label="Créer un devis" shape="plus"}}</p>
+	{{/restrict}}
+{{/if}}
+
+{{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where order=$list_order type=$INVOICE_TYPE status=$AWAITING_STATUS STATUS_LABELS=$INVOICE_STATUS_LABELS}}
+{{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where order=$list_order type=$INVOICE_TYPE status=$REJECTED_STATUS STATUS_LABELS=$INVOICE_STATUS_LABELS}}
+{{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where order=$list_order type=$INVOICE_TYPE status=$VALIDATED_STATUS STATUS_LABELS=$INVOICE_STATUS_LABELS}}
+{{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where_cancelled order=$list_order type=$INVOICE_TYPE STATUS_LABELS=$INVOICE_STATUS_LABELS}}
+{{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where order=$list_order type=$INVOICE_TYPE status=$DRAFT_STATUS STATUS_LABELS=$INVOICE_STATUS_LABELS}}
 
 {{:admin_footer}}
 
