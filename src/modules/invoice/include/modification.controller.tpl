@@ -275,7 +275,7 @@
 					validate_schema="./schema/invoice.json"
 					key=$new_key
 					type=$type
-					status=$DRAFT_STATUS
+					status=$AWAITING_STATUS
 					cancelled=false
 					cancellation_reason=null
 					archived=false
