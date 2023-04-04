@@ -64,6 +64,11 @@
 				{/if}
 			</td>
 			<td class="single-action">
+				{if $file.editable}
+					{linkbutton label="Éditer" shape="edit" target="_dialog" href=$file.edit_url}
+				{/if}
+			</td>
+			<td class="single-action">
 				{if $file.local && $file.dist && $file.editable}
 					{linkbutton label="Différences" href="diff.php?module=%s&p=%s"|args:$module.name,$file.path shape="menu" target="_dialog"}
 				{/if}
@@ -73,11 +78,6 @@
 					{linkbutton label="Supprimer les modifications" href=$file.delete_url shape="trash" target="_dialog"}
 				{elseif $file.local}
 					{linkbutton label="Supprimer" href=$file.delete_url shape="trash" target="_dialog"}
-				{/if}
-			</td>
-			<td class="single-action">
-				{if $file.editable}
-					{linkbutton label="Éditer" shape="edit" target="_dialog" href=$file.edit_url}
 				{/if}
 			</td>
 		</tr>

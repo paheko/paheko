@@ -25,6 +25,19 @@ class Modules
 	const SNIPPET_USER = Module::SNIPPET_USER;
 	const SNIPPET_HOME_BUTTON = Module::SNIPPET_HOME_BUTTON;
 
+	static public function fetchDistFile(string $path): ?string
+	{
+		if (substr($path, 0, strlen('modules/')) === 'modules/') {
+			$path = substr($path, strlen('modules/'));
+		}
+
+		if (false !== strpos($path, '..')) {
+			return null;
+		}
+
+		return @file_get_contents(Module::DIST_ROOT . '/' . $path) ?: null;
+	}
+
 	/**
 	 * Lists all modules from files and stores a cache
 	 */

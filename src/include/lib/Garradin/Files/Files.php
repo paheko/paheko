@@ -684,18 +684,8 @@ class Files
 		$db->commit();
 	}
 
-	static protected function create(string $parent, string $name, array $source): File
+	static protected function create(string $parent, string $name, array $source = []): File
 	{
-		if (!isset($source['path']) && !isset($source['content']) && !isset($source['pointer'])) {
-			throw new \InvalidArgumentException('Unknown source type');
-		}
-		elseif (count($source) != 1) {
-			throw new \InvalidArgumentException('Invalid source type');
-		}
-
-		$pointer = $path = $content = null;
-		extract($source);
-
 		File::validateFileName($name);
 		File::validatePath($parent);
 
@@ -714,23 +704,27 @@ class Files
 		$file->parent = $parent;
 		$file->name = $name;
 
-		if ($pointer) {
-			if (0 !== fseek($pointer, 0, SEEK_END)) {
+		if (isset($source['pointer'])) {
+			if (0 !== fseek($source['pointer'], 0, SEEK_END)) {
 				throw new \RuntimeException('Stream is not seekable');
 			}
 
-			$file->set('size', ftell($pointer));
+			$file->set('size', ftell($source['pointer']));
 			fseek($pointer, 0, SEEK_SET);
-			$file->set('mime', mime_content_type($pointer));
+			$file->set('mime', mime_content_type($source['pointer']));
 		}
-		elseif ($path) {
-			$file->set('mime', finfo_file($finfo, $path));
-			$file->set('size', filesize($path));
-			$file->set('modified', new \DateTime('@' . filemtime($path)));
+		elseif (isset($source['path'])) {
+			$file->set('mime', finfo_file($finfo, $source['path']));
+			$file->set('size', filesize($source['path']));
+			$file->set('modified', new \DateTime('@' . filemtime($source['path'])));
+		}
+		elseif (isset($source['content'])) {
+			$file->set('size', strlen($source['content']));
+			$file->set('mime', finfo_buffer($finfo, $source['content']));
 		}
 		else {
-			$file->set('size', strlen($content));
-			$file->set('mime', finfo_buffer($finfo, $content));
+			$file->set('size', 0);
+			$file->set('mime', 'text/plain');
 		}
 
 		$file->set('image', in_array($file->mime, $file::IMAGE_TYPES));
@@ -759,6 +753,13 @@ class Files
 		}
 
 		return Files::createFromString($parent . '/' . $name . '.' . $extension, base64_decode($tpl));
+	}
+
+	static public function createObject(string $target)
+	{
+		$parent = Utils::dirname($target);
+		$name = Utils::basename($target);
+		return self::create($parent, $name);
 	}
 
 	static protected function createFrom(string $target, array $source): File

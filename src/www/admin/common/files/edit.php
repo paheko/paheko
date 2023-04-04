@@ -3,12 +3,19 @@ namespace Garradin;
 
 use Garradin\Entities\Files\File;
 use Garradin\Files\Files;
+use Garradin\UserTemplate\Modules;
 
 require __DIR__ . '/../../_inc.php';
 
-$file = Files::get(qg('p'));
+$path = qg('p');
+$file = Files::get($path);
+$content = null;
 
-if (!$file) {
+if (!$file && Files::getContext($path) == File::CONTEXT_MODULES && File::canCreate($path)
+	&& ($content = Modules::fetchDistFile($path)) && null !== $content) {
+	$file = Files::createObject($path);
+}
+elseif (!$file) {
 	throw new UserException('Fichier inconnu');
 }
 
@@ -36,7 +43,7 @@ elseif ($editor == 'wopi') {
 	echo $file->editorHTML();
 }
 else {
-	$content = $file->fetch();
+	$content ??= $file->fetch();
 	$path = $file->path;
 	$format = $file->renderFormat();
 	$tpl->assign(compact('csrf_key', 'content', 'path', 'format'));

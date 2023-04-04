@@ -737,12 +737,15 @@ strong.tag {
 .diff hr {
     background: none;
     border: none;
-    border-top: 5px dotted #fff;
-    color: #fff;
-    margin: .2em .4em;
+    border-top: 5px dotted #ccc;
+    color: #999;
 }
 
 .diff .separator {
-    background: #ccc;
+    background: #fff;
+    border: none;
 }
 
+.diff .separator td {
+    padding: .5em;
+}

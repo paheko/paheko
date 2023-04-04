@@ -549,7 +549,7 @@ class Template extends Smartyer
 		{
 			if ($i > $prev + 1)
 			{
-				$out .= '<tr><td colspan="5" class="separator"><hr /></td></tr>';
+				$out .= '<tr class="separator"><td colspan="5"><hr /></td></tr>';
 			}
 
 			list($type, $old, $new) = $line;
