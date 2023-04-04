@@ -487,4 +487,9 @@ class Module extends Entity
 				return null;
 		}
 	}
+
+	public function export(Session $session): void
+	{
+		Files::zip(null, [$this->path() . '/'], $session, 'module_' . $this->name);
+	}
 }

@@ -2,6 +2,7 @@
 namespace Garradin;
 
 use Garradin\UserTemplate\Modules;
+use Garradin\Users\Session;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -9,6 +10,10 @@ $module = Modules::get(qg('module'));
 
 if (!$module) {
 	throw new UserException('Module inconnu');
+}
+
+if (null !== qg('export')) {
+	$module->export(Session::getInstance());
 }
 
 $path = qg('p');

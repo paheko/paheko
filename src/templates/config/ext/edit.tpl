@@ -6,6 +6,8 @@
 	<aside>
 		{linkbutton shape="help" label="Comment modifier et développer des modules" href="!static/doc/modules.html" target="_dialog"}
 
+		{linkbutton shape="export" label="Exporter ce module" href="?module=%s&export"|args:$module.name}
+
 		{linkmenu label="Ajouter…" shape="plus" right=true}
 			{linkbutton shape="upload" label="Depuis mon ordinateur" target="_dialog" href="!common/files/upload.php?p=%s"|args:$parent_path_uri}
 			{linkbutton shape="folder" label="Répertoire" target="_dialog" href="!docs/new_dir.php?path=%s&no_redir"|args:$parent_path_uri}
