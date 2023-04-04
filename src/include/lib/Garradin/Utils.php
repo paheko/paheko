@@ -329,6 +329,16 @@ class Utils
         return HTTP::mergeURLs(self::getSelfURL(), $new);
     }
 
+    static public function redirectDialog(?string $destination = null): void
+    {
+        if (isset($_GET['_dialog'])) {
+            self::reloadParentFrame($destination);
+        }
+        else {
+            self::redirect($destination);
+        }
+    }
+
     static public function reloadParentFrame(?string $destination = null): void
     {
         $url = self::getLocalURL($destination ?? '!');

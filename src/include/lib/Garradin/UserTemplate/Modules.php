@@ -11,12 +11,14 @@ use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\Users\Session;
 use Garradin\Web\Web;
+use Garradin\Entities\Files\File;
 use Garradin\Entities\Web\Page;
 
 use const Garradin\ROOT;
 use const Garradin\ADMIN_URL;
 
-use \KD2\DB\EntityManager as EM;
+use KD2\DB\EntityManager as EM;
+use KD2\ZipReader;
 
 class Modules
 {
@@ -268,5 +270,87 @@ class Modules
 		}
 
 		$module->serve($path, $has_local_file, compact('uri', 'page'));
+	}
+
+	static public function import(string $path): ?Module
+	{
+		$zip = new ZipReader;
+
+		try {
+			$zip->open($path);
+		}
+		catch (\OutOfBoundsException $e) {
+			throw new \InvalidArgumentException('Invalid ZIP file: ' . $e->getMessage(), 0, $e);
+		}
+
+		$module_name = null;
+		$files = [];
+
+		foreach ($zip->iterate() as $name => $file) {
+			if ($name == 'modules' || $file['dir']) {
+				continue;
+			}
+
+			if (strpos($name, 'modules/') !== 0) {
+				throw new \InvalidArgumentException('Invalid ZIP file: invalid path:' . $name);
+			}
+
+			$_mod = strtok(substr($name, strlen('modules/')), '/');
+
+			if (!$module_name) {
+				if (!$_mod || !preg_match(Module::VALID_NAME_REGEXP, $_mod)) {
+					throw new \InvalidArgumentException('Invalid module name (allowed: [a-z][a-z0-9]*(_[a-z0-9])*): ' . $_mod);
+				}
+
+				$module_name = $_mod;
+			}
+			elseif ($module_name !== $_mod) {
+				throw new \InvalidArgumentException('Two different modules names found.');
+			}
+
+			$_name = strtok(false);
+			$files[$_name] = $name;
+		}
+
+		if (!$module_name || !count($files)) {
+			throw new \InvalidArgumentException('No module found in archive');
+		}
+
+		$base = File::CONTEXT_MODULES . '/' . $module_name;
+
+		if (Files::exists($base)) {
+			return null;
+		}
+
+		try {
+			foreach ($files as $local_name => $source) {
+				$f = Files::createObject($base . '/' . $local_name);
+				$fp = fopen('php://temp', 'wb');
+				$zip->extractToPointer($fp, $source);
+				rewind($fp);
+				$f->store(['pointer' => $fp]);
+			}
+
+			$module = self::get($module_name) ?? self::create($module_name);
+
+			if (!$module) {
+				throw new \InvalidArgumentException('Invalid module information');
+			}
+
+			return $module;
+		}
+		catch (\Exception $e) {
+			$dir = Files::get($base);
+
+			// Delete any extracted files so far
+			if ($dir) {
+				$dir->delete();
+			}
+
+			throw $e;
+		}
+		finally {
+			unset($zip);
+		}
 	}
 }

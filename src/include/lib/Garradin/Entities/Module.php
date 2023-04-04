@@ -36,6 +36,8 @@ class Module extends Entity
 		self::SNIPPET_TRANSACTION => 'En bas de la fiche d\'une écriture',
 	];
 
+	const VALID_NAME_REGEXP = '/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/';
+
 	const TABLE = 'modules';
 
 	protected ?int $id;
@@ -64,7 +66,7 @@ class Module extends Entity
 
 	public function selfCheck(): void
 	{
-		$this->assert(preg_match('/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/', $this->name), 'Nom unique de module invalide: ' . $this->name);
+		$this->assert(preg_match(self::VALID_NAME_REGEXP, $this->name), 'Nom unique de module invalide: ' . $this->name);
 		$this->assert(trim($this->label) !== '', 'Le libellé ne peut rester vide');
 	}
 
@@ -154,7 +156,7 @@ class Module extends Entity
 
 	public function dir(): ?File
 	{
-		return Files::get(self::ROOT . $this->name);
+		return Files::get($this->path());
 	}
 
 	public function hasFile(string $file): bool

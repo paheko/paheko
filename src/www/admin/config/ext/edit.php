@@ -14,6 +14,7 @@ if (!$module) {
 
 if (null !== qg('export')) {
 	$module->export(Session::getInstance());
+	return;
 }
 
 $path = qg('p');
