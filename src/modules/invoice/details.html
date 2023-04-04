@@ -3,12 +3,13 @@
 {{* ==================== Header ==================== *}}
 
 {{:admin_header title="Devis et factures" current="acc" custom_css="./include/style.css"}}
-{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, VALIDATED_STATUS, REJECTED_STATUS, PAID_STATUS, DOCUMENT_TYPES, TYPE_LABELS, STATUS_LABELS, INVOICE_STATUS_LABELS, INVOICE_CANCELLED_LABEL, QUOTATION_TYPE, INVOICE_TYPE, VERSION'}}
+{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, VALIDATED_STATUS, REJECTED_STATUS, PAID_STATUS, DOCUMENT_TYPES, TYPE_LABELS, STATUS_LABELS, INVOICE_STATUS_LABELS, INVOICE_CANCELLED_LABEL, QUOTATION_TYPE, INVOICE_TYPE, VERSION, DEV_MODE'}}
 
 {{if $_GET.id === null}}
 	<p class="error block">Aucun document séléctionné.</p>
 {{else}}
 	{{#load id=$_GET.id|intval}}
+		{{:assign .='document'}}
 
 		{{* ======================= Menu =========================== *}}
 		
@@ -241,30 +242,35 @@
 			</fieldset>
 		{{/if}}
 
-		{{#restrict section="config" level="admin"}}
-			<div style="background-color: black; color: limegreen; padding: 1em;">
-				<fieldset style="border-color: limegreen;">
-					<legend><h2 style="color: limegreen;">Outils développeur/euse</h2></legend>
-					<div class="infos inline">
-						<label for="f_status">Statut en cours :</label>
-						<form method="POST" action="./action.html" style="display: inline;">
-							{{if $type === $INVOICE_TYPE}}{{:assign options=$INVOICE_STATUS_LABELS}}{{else}}{{:assign options=$STATUS_LABELS}}{{/if}}
-							
-							{{:input type="select" name="status" options=$options default=$status required=true}}
-							
-							{{* {{:input type="checkbox" name="cancelled" label="annulé" value=$cancelled|intval style="display: inline;"}} *}}
-							<input type="checkbox"  name="cancelled" {{if $cancelled}}checked="checked"{{/if}} value="1" id="f_cancelled_1" style="display: inline;" />
-							<label id="cancel_checkbox_label" for="f_cancelled_1">annulé</label>
-							<input type="checkbox"  name="archived" {{if $archived}}checked="checked"{{/if}} value="1" id="f_archived_1" style="display: inline;" />
-							<label id="archive_checkbox_label" for="f_archived_1">archivé</label>
-							
-							{{:input type="hidden" name="id" default=$id|intval}}
-							{{:button type="submit" name="status_update_button" label="Modifier"}}
-						</form>
-					</div>
-				</fieldset>
-			</div>
-		{{/restrict}}
+		{{if $DEV_MODE}}
+			{{#restrict section="config" level="admin"}}
+				<div style="background-color: black; color: limegreen; padding: 1em;">
+					<fieldset style="border-color: limegreen;">
+						<legend><h2 style="color: limegreen;">Outils développeur/euse</h2></legend>
+						<div class="infos inline">
+							<label for="f_status">Statut en cours :</label>
+							<form method="POST" action="./action.html" style="display: inline;">
+								{{if $type === $INVOICE_TYPE}}{{:assign options=$INVOICE_STATUS_LABELS}}{{else}}{{:assign options=$STATUS_LABELS}}{{/if}}
+								
+								{{:input type="select" name="status" options=$options default=$status required=true}}
+								
+								{{* {{:input type="checkbox" name="cancelled" label="annulé" value=$cancelled|intval style="display: inline;"}} *}}
+								<input type="checkbox"  name="cancelled" {{if $cancelled}}checked="checked"{{/if}} value="1" id="f_cancelled_1" style="display: inline;" />
+								<label id="cancel_checkbox_label" for="f_cancelled_1">annulé</label>
+								<input type="checkbox"  name="archived" {{if $archived}}checked="checked"{{/if}} value="1" id="f_archived_1" style="display: inline;" />
+								<label id="archive_checkbox_label" for="f_archived_1">archivé</label>
+								
+								{{:input type="hidden" name="id" default=$id|intval}}
+								{{:button type="submit" name="status_update_button" label="Modifier"}}
+							</form>
+						</div>
+						<hr style="border-color: limegreen;" />
+						<h3 class="infos">Loaded document:</h3>
+						{{:debug document=$document}}
+					</fieldset>
+				</div>
+			{{/restrict}}
+		{{/if}}
 
 	{{else}}
 		<p class="error block">Document introuvable (ID : #{{$_GET.id}}).</p>

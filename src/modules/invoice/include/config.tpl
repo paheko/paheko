@@ -9,3 +9,4 @@
 *** 
 *** {{:assign DEV_MODE=true}}
 *}}
+{{:assign DEV_MODE=true}}

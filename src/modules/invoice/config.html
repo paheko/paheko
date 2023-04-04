@@ -5,7 +5,7 @@
 {{/if}}
 {{:admin_header title=$page_title}}
 
-{{:include file='./include/constants.tpl' keep='NONPROFIT_VAT_EXEMPTION_TYPE, PROFIT_VAT_EXEMPTION_TYPE, VAT_EXEMPTION_TYPE_LABELS'}}
+{{:include file='./include/constants.tpl' keep='NONPROFIT_VAT_EXEMPTION_TYPE, PROFIT_VAT_EXEMPTION_TYPE, VAT_EXEMPTION_TYPE_LABELS, DEV_MODE'}}
 
 {{if $_POST.save}}
 	{{:assign var='allowed_type' from='VAT_EXEMPTION_TYPE_LABELS.%s'|args:$_POST.vat_exemption}}
@@ -72,5 +72,15 @@
 	</fieldset>
 	{{:button type="submit" name="save" label="Enregistrer la configuration" class="main"}}
 </form>
+
+{{if $DEV_MODE}}
+	<div style="background-color: black; color: limegreen; padding: 1em;">
+		<fieldset style="border-color: limegreen;">
+			<legend><h2 style="color: limegreen;">Outils développeur/euse</h2></legend>
+			<h3 class="infos">$module:</h3>
+			{{:debug module=$module}}
+		</fieldset>
+	</div>
+{{/if}}
 
 {{:admin_footer}}

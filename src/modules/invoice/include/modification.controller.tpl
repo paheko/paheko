@@ -369,7 +369,7 @@
 	{{/if}}
 {{/if}}
 
-{{if $_POST.status_update_button}} {{* Only for developers *}}
+{{if $DEV_MODE && $_POST.status_update_button}} {{* Only for developers *}}
 	{{if !$_POST.id}}
 		{{:error message='Aucun devis sélectionné.'}}
 	{{else}}
