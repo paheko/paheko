@@ -1,10 +1,10 @@
-<table class="list multi">
+<table class="list multi statement">
 	<thead>
 		<tr>
 			<td class="num">N°</td>
 			<td>Pièce comptable</td>
 			<td>Date</td>
-			<th>Libellé</th>
+			<td>Libellé</td>
 			{if !empty($with_linked_users)}<td>Membres associés</td>{/if}
 			<td>Comptes</td>
 			<td class="money">Débit</td>
@@ -17,26 +17,25 @@
 	{foreach from=$journal item="transaction"}
 	<tbody>
 		<tr>
-			<td rowspan="{$transaction.lines|count}" class="num">{if $transaction.id}<a href="{$admin_url}acc/transactions/details.php?id={$transaction.id}">#{$transaction.id}</a>{/if}</td>
-			<td rowspan="{$transaction.lines|count}">{$transaction.reference}</td>
-			<td rowspan="{$transaction.lines|count}">{$transaction.date|date_short}</td>
-			<th rowspan="{$transaction.lines|count}">{$transaction.label}</th>
+			<td rowspan="{$transaction.lines|count}" class="num" data-spreadsheet-type="string">{if $transaction.id}<a href="{$admin_url}acc/transactions/details.php?id={$transaction.id}">#{$transaction.id}</a>{/if}</td>
+			<td rowspan="{$transaction.lines|count}" data-spreadsheet-type="string">{$transaction.reference}</td>
+			<td rowspan="{$transaction.lines|count}" data-spreadsheet-type="date" data-spreadsheet-value="{$transaction.date|date:'Y-m-d'}">{$transaction.date|date_short}</td>
+			<th rowspan="{$transaction.lines|count}" data-spreadsheet-type="string">{$transaction.label}</th>
 			{if !empty($with_linked_users)}<td rowspan="{$transaction.lines|count}">{$transaction.linked_users}</td>{/if}
 		{foreach from=$transaction.lines key="k" item="line"}
-			<td>{$line.account_code} - {$line.account_label}</td>
+			{if $k > 0}<tr>{/if}
+			<td data-spreadsheet-type="string">{$line.account_code} - {$line.account_label}</td>
 			<td class="money">{$line.debit|raw|money}</td>
 			<td class="money">{$line.credit|raw|money}</td>
-			<td>{$line.label}</td>
-			<td>{$line.reference}</td>
+			<td data-spreadsheet-type="string">{$line.label}</td>
+			<td data-spreadsheet-type="string">{$line.reference}</td>
 			{if !empty($action) && $k == 0}
 			<td class="actions" rowspan="{$transaction.lines|count}">
 				{linkbutton href=$action.href|args:$transaction.id shape=$action.shape label=$action.label}
 			</td>
 			{/if}
 		</tr>
-		<tr>
 		{/foreach}
-		</tr>
 	</tbody>
 	{/foreach}
 </table>
