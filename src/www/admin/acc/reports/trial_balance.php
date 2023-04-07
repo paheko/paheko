@@ -11,10 +11,4 @@ $balance = Reports::getTrialBalance($criterias, (bool) $simple);
 
 $tpl->assign(compact('simple', 'balance'));
 
-if ($f = qg('export')) {
-	$table = $tpl->fetch('acc/reports/trial_balance.tpl');
-	CSV::exportHTML($f, $table, 'Balance générale');
-	return;
-}
-
 $tpl->display('acc/reports/trial_balance.tpl');

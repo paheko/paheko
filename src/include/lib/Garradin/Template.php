@@ -25,8 +25,27 @@ class Template extends Smartyer
 
 	public function display($template = null)
 	{
-		if (isset($_GET['_pdf'])) {
-			return $this->PDF($template);
+		$session = Session::getInstance();
+
+		if ($session->isLogged(true)) {
+			if (isset($_GET['_pdf'])) {
+				return $this->PDF($template);
+			}
+			elseif (isset($_GET['_export'])) {
+				$html = $this->fetch($template);
+
+				if (!stripos($html, '<table')) {
+					throw new UserException('Nothing to export: no table found');
+				}
+
+				$title = 'Export';
+
+				if (preg_match('!<title>([^<]+)</title>!', $html, $match)) {
+					$title = html_entity_decode(trim($match[1]));
+				}
+
+				return CSV::exportHTML($_GET['_export'], $html, $title);
+			}
 		}
 
 		return parent::display($template);
