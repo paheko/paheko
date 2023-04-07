@@ -2,7 +2,7 @@
 	<nav class="tabs noprint">
 		{if !empty($year)}
 		<aside>
-			{if $current == 'statement' || $current == 'balance_sheet' || $current == 'trial_balance'}
+			{if $current !== 'graphs'}
 				{exportmenu class="menu-btn-right" xlsx=false suffix="_export="}
 			{/if}
 			{if !$criterias.before && !$criterias.compare_year && !empty($allow_compare) && !empty($other_years)}
