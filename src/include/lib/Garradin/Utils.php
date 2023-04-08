@@ -339,6 +339,15 @@ class Utils
         }
     }
 
+    static public function reloadParentFrameIfDialog(?string $destination = null): void
+    {
+        if (!isset($_GET['_dialog'])) {
+            return;
+        }
+
+        self::reloadParentFrame($destination);
+    }
+
     static public function reloadParentFrame(?string $destination = null): void
     {
         $url = self::getLocalURL($destination ?? '!');

@@ -28,7 +28,7 @@
 	<dd>
 		{$list->count()}
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
-			{exportmenu href="?id=%d"|args:$user.id}
+			{exportmenu href="?id=%d"|args:$user_id}
 		{/if}
 	</dd>
 	{/if}
