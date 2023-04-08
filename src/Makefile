@@ -40,7 +40,6 @@ release: test minify doc
 		rsync --files-from=dependencies.list -r ./ /tmp/paheko-build/paheko/src/include/lib/
 	mv www/admin/static/mini.css /tmp/paheko-build/paheko/src/www/admin/static/admin.css
 	cd /tmp/paheko-build/paheko/src/www/admin/static; \
-		rm -f styles/[0-9]*.css; \
 		rm -f font/*.css font/*.json
 	cd /tmp/paheko-build/paheko/src; \
 		rm -f Makefile include/lib/KD2/data/countries.en.json
