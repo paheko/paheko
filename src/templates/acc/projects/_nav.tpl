@@ -8,7 +8,7 @@
 
 	<aside>
 	{if $current == 'index'}
-		{exportmenu class="menu-btn-right" suffix="_export="}
+		{exportmenu class="menu-btn-right" xlsx=true suffix="_export="}
 	{/if}
 	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 		{linkbutton label="Créer un nouveau projet" href="edit.php" shape="plus" target="_dialog"}

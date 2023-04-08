@@ -345,6 +345,12 @@ class Template extends Smartyer
 
 		$url .= $suffix;
 
+		$xlsx = $params['xlsx'] ?? null;
+
+		if (null === $xlsx) {
+			$xlsx = !empty(CALC_CONVERT_COMMAND);
+		}
+
 		return sprintf('
 			<span class="menu-btn %s">
 				<b data-icon="↷" class="btn">Export</b>
@@ -353,7 +359,7 @@ class Template extends Smartyer
 			htmlspecialchars($params['class'] ?? ''),
 			$this->widgetLinkButton(['href' => $url . 'csv', 'label' => 'Export CSV', 'shape' => 'export']),
 			$this->widgetLinkButton(['href' => $url . 'ods', 'label' => 'Export LibreOffice', 'shape' => 'export']),
-			CALC_CONVERT_COMMAND && ($params['xlsx'] ?? null) !== false ? $this->widgetLinkButton(['href' => $url . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']) : ''
+			$xlsx ? $this->widgetLinkButton(['href' => $url . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']) : ''
 		);
 	}
 
