@@ -25,7 +25,7 @@
 				{else}{$account.code}
 				{/if}
 			</td>
-			<th>{$account.label}</th>
+			<th data-spreadsheet-type="string">{$account.label}</th>
 			<td class="money{if !$account.debit} disabled{/if}">{$account.debit|raw|money:false}</td>
 			<td class="money{if !$account.credit} disabled{/if}">{$account.credit|raw|money:false}</td>
 			{if !$simple}

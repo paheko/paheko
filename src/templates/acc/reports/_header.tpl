@@ -3,7 +3,7 @@
 		{if !empty($year)}
 		<aside>
 			{if $current !== 'graphs'}
-				{exportmenu class="menu-btn-right" xlsx=false suffix="_export="}
+				{exportmenu class="menu-btn-right" suffix="_export="}
 			{/if}
 			{if !$criterias.before && !$criterias.compare_year && !empty($allow_compare) && !empty($other_years)}
 				{linkbutton shape="list-ol" href="#" id="compareFormButton" label="Comparer" onclick="var a = $('#compareForm'); a.disabled = false; g.toggle(a, true); this.remove(); var a = $('#filterFormButton'); a ? a.remove() : null; return false;"}
