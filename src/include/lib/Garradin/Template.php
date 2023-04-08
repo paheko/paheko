@@ -27,8 +27,34 @@ class Template extends Smartyer
 
 	public function display($template = null)
 	{
-		if (isset($_GET['_pdf'])) {
-			return $this->PDF($template);
+		$session = Session::getInstance();
+		$this->assign('table_export', false);
+		$this->assign('pdf_export', false);
+
+		if ($session->isLogged(true)) {
+			if (isset($_GET['_pdf'])) {
+				$this->assign('pdf_export', true);
+				return $this->PDF($template);
+			}
+			elseif (isset($_GET['_export']) && $_GET['_export'] == 'test') {
+				$this->assign('table_export', true);
+			}
+			elseif (isset($_GET['_export'])) {
+				$this->assign('table_export', true);
+				$html = $this->fetch($template);
+
+				if (!stripos($html, '<table')) {
+					throw new UserException('Nothing to export: no table found');
+				}
+
+				$title = 'Export';
+
+				if (preg_match('!<title>([^<]+)</title>!', $html, $match)) {
+					$title = html_entity_decode(trim($match[1]));
+				}
+
+				return CSV::exportHTML($_GET['_export'], $html, $title);
+			}
 		}
 
 		return parent::display($template);
@@ -241,12 +267,18 @@ class Template extends Smartyer
 
 		$url .= $suffix;
 
+		$xlsx = $params['xlsx'] ?? null;
+
+		if (null === $xlsx) {
+			$xlsx = !empty(CALC_CONVERT_COMMAND);
+		}
+
 		if (!empty($params['form'])) {
 			$name = $params['name'] ?? 'export';
 			$out = CommonFunctions::button(['value' => 'csv', 'shape' => 'export', 'label' => 'Export CSV', 'name' => $name, 'type' => 'submit']);
 			$out .= CommonFunctions::button(['value' => 'ods', 'shape' => 'export', 'label' => 'Export LibreOffice', 'name' => $name, 'type' => 'submit']);
 
-			if (CALC_CONVERT_COMMAND) {
+			if ($xlsx) {
 				$out .= CommonFunctions::button(['value' => 'xlsx', 'shape' => 'export', 'label' => 'Export Excel', 'name' => $name, 'type' => 'submit']);
 			}
 		}
@@ -254,7 +286,7 @@ class Template extends Smartyer
 			$out  = CommonFunctions::linkButton(['href' => $url . 'csv', 'label' => 'Export CSV', 'shape' => 'export']);
 			$out .= ' ' . CommonFunctions::linkButton(['href' => $url . 'ods', 'label' => 'Export LibreOffice', 'shape' => 'export']);
 
-			if (CALC_CONVERT_COMMAND && ($params['xlsx'] ?? null) !== false) {
+			if ($xlsx !== false) {
 				$out .= ' ' . CommonFunctions::linkButton(['href' => $url . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']);
 			}
 		}

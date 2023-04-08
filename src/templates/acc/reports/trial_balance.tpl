@@ -2,11 +2,11 @@
 
 {include file="acc/reports/_header.tpl" current="trial_balance" title="Balance générale" allow_filter=true}
 
-<table class="list">
+<table class="list statement">
 	<thead>
 		<tr>
 			<td>Numéro</td>
-			<th>Compte</th>
+			<td>Compte</td>
 			<td class="money">Total des débits</td>
 			<td class="money">Total des crédits</td>
 			{if !$simple}
@@ -20,12 +20,12 @@
 	<tbody>
 	{foreach from=$balance item="account"}
 		<tr class="{if $account.balance === 0}disabled{/if}">
-			<td class="num">
+			<td class="num" data-spreadsheet-type="string">
 				{if !empty($year) && !$criterias.project}<a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$year.id}">{$account.code}</a>
 				{else}{$account.code}
 				{/if}
 			</td>
-			<th>{$account.label}</th>
+			<th data-spreadsheet-type="string">{$account.label}</th>
 			<td class="money{if !$account.debit} disabled{/if}">{$account.debit|raw|money:false}</td>
 			<td class="money{if !$account.credit} disabled{/if}">{$account.credit|raw|money:false}</td>
 			{if !$simple}

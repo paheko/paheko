@@ -72,8 +72,8 @@
 						{linkbutton shape="check" label="Marquer comme payé" href="?id=%d&su_id=%d&paid=1"|args:$user_id,$row.id}
 					{/if}
 					<br />
-					{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$row.id}
-					{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$row.id}
+					{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$row.id target="_dialog"}
+					{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$row.id target="_dialog"}
 				{/if}
 			</td>
 		</tr>

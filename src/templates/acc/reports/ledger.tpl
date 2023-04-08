@@ -11,48 +11,75 @@
 	<button type="button" data-icon="↑" class="icn-btn" id="close_details">Replier tous les comptes</button>
 </div>
 
-{foreach from=$ledger item="account"}
-
-<details open="open">
-	<summary><h2 class="ruler">
-		{if !empty($criterias.projects_only)}
-			<?php $link = sprintf('%sacc/reports/trial_balance.php?project=%d&year=%d', $admin_url, $account->id, $account->id_year); ?>
-		{elseif !$criterias.project}
-			<?php $link = sprintf('%sacc/accounts/journal.php?id=%d&year=%d', $admin_url, $account->id, $account->id_year); ?>
-		{else}
-			<?php $link = null; ?>
-		{/if}
-		{if $link}<a href="{$link}">{/if}
-			{if $account.code}{$account.code} — {/if}{$account.label}
-		{if $link}</a>{/if}
-	</h2></summary>
-
-	<table class="list">
+{if $table_export}
+	<table class="list statement">
 		<thead>
 			<tr>
 				<td></td>
 				<td>N° pièce</td>
 				<td>Réf. ligne</td>
 				<td>Date</td>
-				<th>Intitulé</th>
+				<td>Intitulé</td>
 				<td class="money">Débit</td>
 				<td class="money">Crédit</td>
 				<td class="money">Solde</td>
 			</tr>
 		</thead>
+{/if}
+
+{foreach from=$ledger item="account"}
+
+	{if $table_export}
+		<thead>
+			<tr>
+				<th colspan="8"><h2 class="ruler">{if $account.code}{$account.code} — {/if}{$account.label}</h2></th>
+			</tr>
+		</thead>
+	{else}
+		<details open="open">
+			<summary><h2 class="ruler">
+				{if !empty($criterias.projects_only)}
+					<?php $link = sprintf('%sacc/reports/trial_balance.php?project=%d&year=%d', $admin_url, $account->id, $account->id_year); ?>
+				{elseif !$criterias.project}
+					<?php $link = sprintf('%sacc/accounts/journal.php?id=%d&year=%d', $admin_url, $account->id, $account->id_year); ?>
+				{else}
+					<?php $link = null; ?>
+				{/if}
+				{if $link}<a href="{$link}">{/if}
+					{if $account.code}{$account.code} — {/if}{$account.label}
+				{if $link}</a>{/if}
+			</h2></summary>
+
+			<table class="list">
+				<thead>
+					<tr>
+						<td></td>
+						<td>N° pièce</td>
+						<td>Réf. ligne</td>
+						<td>Date</td>
+						<th>Intitulé</th>
+						<td class="money">Débit</td>
+						<td class="money">Crédit</td>
+						<td class="money">Solde</td>
+					</tr>
+				</thead>
+	{/if}
+
 		<tbody>
+
 		{foreach from=$account.lines item="line"}
 			<tr>
 				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
-				<td>{$line.reference}</td>
-				<td>{$line.line_reference}</td>
-				<td>{$line.date|date_short}</td>
-				<th>{$line.label}{if $line.line_label} <em>({$line.line_label})</em>{/if}</th>
+				<td data-spreadsheet-type="string">{$line.reference}</td>
+				<td data-spreadsheet-type="string">{$line.line_reference}</td>
+				<td data-spreadsheet-type="date" data-spreadsheet-value="{$line.date|date:'Y-m-d'}">{$line.date|date_short}</td>
+				<th data-spreadsheet-type="string">{$line.label}{if $line.line_label} <em>({$line.line_label})</em>{/if}</th>
 				<td class="money">{$line.debit|raw|money}</td>
 				<td class="money">{$line.credit|raw|money}</td>
 				<td class="money">{$line.running_sum|raw|money:false}</td>
 			</tr>
 		{/foreach}
+
 		</tbody>
 		<tfoot>
 			<tr>
@@ -62,31 +89,49 @@
 				<td class="money">{$account.credit|raw|money}</td>
 				<td class="money">{$account.sum|raw|money:false}</td>
 			</tr>
-		</tfoot>
-	</table>
 
-</details>
-
-{if isset($account->all_debit)}
-	<table class="list">
-		<colgroup>
-			<col width="85%" />
-			<col width="5%" />
-			<col width="5%" />
-			<col width="5%" />
-		</colgroup>
-		<tfoot>
+			{if $table_export && isset($account->all_debit)}
 			<tr>
-				<td><strong>Totaux</strong></td>
+				<td colspan="4"></td>
+				<th><strong>Totaux</strong></th>
 				<td class="money">{$account.all_debit|raw|money:false}</td>
 				<td class="money">{$account.all_credit|raw|money:false}</td>
 				<td></td>
 			</tr>
+			{/if}
+
 		</tfoot>
-	</table>
-{/if}
+
+	{if !$table_export}
+		</table>
+
+	</details>
+	{/if}
+
+	{if !$table_export && isset($account->all_debit)}
+		<table class="list">
+			<colgroup>
+				<col width="70%" />
+				<col width="10%" />
+				<col width="10%" />
+				<col width="10%" />
+			</colgroup>
+			<tfoot>
+				<tr>
+					<td><strong>Totaux</strong></td>
+					<td class="money">{$account.all_debit|raw|money:false}</td>
+					<td class="money">{$account.all_credit|raw|money:false}</td>
+					<td></td>
+				</tr>
+			</tfoot>
+		</table>
+	{/if}
 
 {/foreach}
+
+{if $table_export}
+	</table>
+{/if}
 
 {literal}
 <script type="text/javascript">

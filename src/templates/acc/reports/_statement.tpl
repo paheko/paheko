@@ -6,9 +6,9 @@ $max = max(count($statement->body_left), count($statement->body_right));
 	{if !empty($caption)}<caption>{$caption}</caption>{/if}
 	<thead>
 		<tr>
-			<th colspan="{$colspan}" class="colspan">{$statement.caption_left}</th>
+			<th colspan="{$colspan}" class="colspan" width="49%">{$statement.caption_left}</th>
 			<td class="spacer"></td>
-			<th colspan="{$colspan}" class="colspan">{$statement.caption_right}</th>
+			<th colspan="{$colspan}" class="colspan" width="49%">{$statement.caption_right}</th>
 		</tr>
 	{if !empty($year2)}
 		<tr>

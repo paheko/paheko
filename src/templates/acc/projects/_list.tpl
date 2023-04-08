@@ -17,13 +17,13 @@
 					<th colspan="7">
 						<h2 class="ruler">{$parent.label}{if $parent.archived} <em>(archivé)</em>{/if}</h2>
 						{if $parent.description}<p class="help">{$parent.description|escape|nl2br}</p>{/if}
-					{if !$export && !$by_year && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
+					{if !$table_export && !$by_year && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 					<p class="actions">
 						{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$parent.id target="_dialog"}
 						{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$parent.id target="_dialog"}
 					</p>
 					{/if}
-					{if !$export && $by_year}
+					{if !$table_export && $by_year}
 					<p class="actions">
 						{linkbutton href="!acc/reports/ledger.php?projects_only=1&year=%d"|args:$parent.id_year label="Grand livre analytique"}
 					</p>
@@ -34,7 +34,7 @@
 				<tr class="{if $item.label == 'Total'}total{/if} {if $item.archived}archived{/if}">
 					<th>{$item.label}{if $item.archived} <em>(archivé)</em>{/if}</th>
 					<td>
-					{if !$export}
+					{if !$table_export}
 					<span class="noprint">
 						<a href="{$admin_url}acc/reports/graphs.php?project={$item.id_project}&amp;year={$item.id_year}">Graphiques</a>
 						| <a href="{$admin_url}acc/reports/trial_balance.php?project={$item.id_project}&amp;year={$item.id_year}">Balance générale</a>

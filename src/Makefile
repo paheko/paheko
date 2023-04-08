@@ -45,7 +45,6 @@ release: test minify doc
 	# Generate .htaccess file
 	cd /tmp/paheko-build/paheko/src && make www/.htaccess
 	cd /tmp/paheko-build/paheko/src/www/admin/static; \
-		rm -f styles/[0-9]*.css; \
 		rm -f font/*.css font/*.json
 	cd /tmp/paheko-build/paheko/src; \
 		rm -f Makefile include/lib/KD2/data/countries.en.json
