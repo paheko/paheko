@@ -45,7 +45,7 @@
 		COUNT(json_extract(document, '$.status')) AS document_status_quantity
 	"
 	tables='module_data_invoice'
-	where=""
+	where="json_extract(document, '$.type') = 'quotation'"
 	group='recipient_business_name, status'
 	order='recipient_business_name, status'
 }}
