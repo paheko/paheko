@@ -64,6 +64,8 @@ $form->runIf('save', function () use ($session, $users, $copy_service, $copy_fee
 
 	$su = Service_User::createFromForm($users, $session->getUser()->id, $copy_service ? true : false);
 
+	Utils::reloadParentFrameIfDialog();
+
 	if (count($users) > 1) {
 		$url = ADMIN_URL . 'services/details.php?id=' . $su->id_service;
 	}

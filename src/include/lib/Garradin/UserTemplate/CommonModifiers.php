@@ -116,12 +116,12 @@ class CommonModifiers
 
 	static public function html_money($number, bool $hide_empty = true, bool $force_sign = false): string
 	{
-		return self::money($number, $hide_empty, $force_sign, false);
+		return '<nobr>' . self::money($number, $hide_empty, $force_sign, true) . '</nobr>';
 	}
 
 	static public function html_money_currency($number, bool $hide_empty = true, bool $force_sign = false): string
 	{
-		return self::money_currency($number, $hide_empty, $force_sign, false);
+		return '<nobr>' . self::money_currency($number, $hide_empty, $force_sign, true) . '</nobr>';
 	}
 
 	static public function date_long($ts, bool $with_hour = false): ?string
@@ -204,7 +204,7 @@ class CommonModifiers
 		{
 			$day = 'demain';
 		}
-		elseif ($date->getTimestamp() > time() - 3600*24*7) {
+		elseif ($date->getTimestamp() > time() - 3600*24*7 && $date->getTimestamp() < time()) {
 			$day = sprintf('il y a %d jours', round((time() - $date->getTimestamp()) / (3600*24)));
 		}
 		elseif ($date->format('Y') == date('Y'))

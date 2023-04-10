@@ -272,8 +272,12 @@ dd.help li {
     text-align: center;
 }
 
-.memberList {
+.users-list {
     clear: both;
+}
+
+.users-list td .file img {
+    max-height: 80px;
 }
 
 .pagination {
@@ -325,28 +329,42 @@ dl.list dd.desc {
 }
 
 dl.describe {
-    margin-bottom: 1rem;
-    display: grid;
-    grid-template: auto / 15rem 1fr;
+    margin: 1rem 0;
+    display: flex;
+    flex-flow: row;
+    flex-wrap: wrap;
+    align-items: start;
 }
 
 dl.describe > dt {
-    grid-column: 1;
-    margin: .2rem .5rem;
+    flex: 0 0 15rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
     text-align: right;
     color: var(--gBorderColor);
-    align-self: start;
+    margin: .2rem .5rem;
 }
 
 dl.describe > dd {
-    grid-column: 2;
+    flex: 0 0 calc(100% - 17rem);
+    margin-left: auto;
+    text-align: left;
     margin: .2rem .5rem;
-    align-self: center;
 }
 
 dl.describe ul {
     margin-left: 1.5em;
     list-style-type: disc;
+}
+
+dl.describe mark {
+    background-color: rgba(var(--gSecondColor), 0.3);
+    border-radius: .5em;
+    padding: .1rem .4rem;
+}
+
+dl.describe mark.variant-a {
+    background-color: rgba(var(--gMainColor), 0.2);
 }
 
 dl.cotisation {
@@ -513,6 +531,10 @@ nav.breadcrumbs {
     color: var(--gLightBorderColor);
 }
 
+nav.breadcrumbs.no-clear {
+    clear: none;
+}
+
 nav.breadcrumbs a {
     color: var(--gBorderColor);
 }
@@ -550,7 +572,7 @@ aside.quota {
     background-image: linear-gradient(90deg, rgba(var(--gMainColor), 0.3) calc(var(--quota-percent) * 1%), var(--gLightBackgroundColor) calc(var(--quota-percent) * 1% + 2%));
     border-radius: .3em;
     border: 1px solid rgb(var(--gMainColor));
-    height: 1.5em;
+    height: 1.5rem;
     width: 15em;
     display: inline-flex;
     justify-content: center;
@@ -565,15 +587,15 @@ aside.quota {
     display: none;
     left: 0;
     right: 0;
+    top: 0;
+    bottom: 0;
     text-align: center;
-    margin-top: .2em;
     font-size: .9em;
     background: var(--gLightBackgroundColor);
     white-space: nowrap;
     border-radius: .3em;
     padding: .3em .5em;
     z-index: 1000;
-    box-shadow: 2px 2px 5px var(--gBorderColor);
 }
 
 .quota .meter:active span.more, .quota .meter:hover span.more {
@@ -618,7 +640,7 @@ dl.large dd {
 }
 
 .diff ins { background: #cfc; color: #000; text-decoration: none; }
-.diff del { background: #fcc; color: #000; }
+.diff del { background: #fcc; color: #000; text-decoration-color: rgba(0, 0, 0, .3); }
 
 .center-block {
     margin: 1em auto;
@@ -677,4 +699,58 @@ strong.tag {
 #frameDialog {
 	color: rgb(var(--gTextColor));
 	background-color: rgb(var(--gBgColor));
+}
+
+.diff {
+    font-family: monospace;
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.9em;
+}
+
+.diff tr {
+    border: 1px solid #ccc;
+    vertical-align: top;
+}
+
+.diff .ins {
+    background: #efe;
+    color: #000;
+    width: 45%;
+}
+
+.diff .del {
+    background: #fee;
+    color: #000;
+    width: 45%;
+}
+
+.diff .line {
+    width: 2%;
+    padding: 0.2em;
+    text-align: right;
+    font-size: 90%;
+    color: #666;
+}
+
+.diff .leftChange, .diff .rightChange {
+    text-align: center;
+    vertical-align: middle;
+    color: #ccc;
+}
+
+.diff hr {
+    background: none;
+    border: none;
+    border-top: 5px dotted #ccc;
+    color: #999;
+}
+
+.diff .separator {
+    background: #fff;
+    border: none;
+}
+
+.diff .separator td {
+    padding: .5em;
 }

@@ -724,6 +724,23 @@ namespace Garradin;
 //const CALC_CONVERT_COMMAND = 'unoconvert --interface localhost --port 2022';
 
 /**
+ * PDFTOTEXT_COMMAND
+ * Outil de conversion de PDF au format texte.
+ *
+ * Utilisé pour indexer un fichier PDF pour pouvoir rechercher dans son contenu
+ * parmi les documents.
+ *
+ * Il est possible de spécifier ici 'pdftotext' si cet outil est installé
+ * (à installer avec : apt install poppler-utils).
+ *
+ * Pour le moment c'est la seule commande supportée, toute autre commande
+ * sera ignorée.
+ *
+ * Défaut : null (= fonctionnalité désactivée)
+ */
+//const PDFTOTEXT_COMMAND = 'pdftotext';
+
+/**
  * API_USER et API_PASSWORD
  * Login et mot de passe système de l'API
  *

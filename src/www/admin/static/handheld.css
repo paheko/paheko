@@ -171,29 +171,31 @@ nav.tabs ul {
 	justify-content: center;
 }
 
-nav.tabs ul li a, nav.tabs ul li label {
-	margin: .2em;
-	border-radius: .5em;
-}
-
 nav.tabs ul li a {
 	padding: .4rem .6rem;
+}
+
+nav.tabs ul li.current a {
+	font-size: 1em;
+}
+
+nav.tabs li:first-child::before, nav.tabs li:last-child::after {
+	display: none;
 }
 
 nav.tabs .sub {
 	margin: 1em 0;
 	border: none;
-	border-top: .2rem dashed rgb(var(--gSecondColor));
+	border-top: .2rem dashed rgba(var(--gMainColor), .5);
+}
+
+nav.tabs h2 {
+	text-align: center;
 }
 
 .filterCategory, .searchMember {
 	width: auto;
 	float: none;
-}
-
-fieldset.wikiMain, fieldset.wikiRights, fieldset.wikiEncrypt {
-	float: none;
-	width: auto;
 }
 
 dl.describe {
@@ -241,6 +243,10 @@ table.list th {
 
 .datepicker tbody td {
 	font-size: 1.2em;
+}
+
+table.files.gallery tbody {
+	justify-content: center;
 }
 
 /* Petits écrans (smartphones) */

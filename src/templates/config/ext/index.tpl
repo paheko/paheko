@@ -3,7 +3,6 @@
 {include file="config/_menu.tpl" current="ext"}
 
 <nav class="tabs">
-
 	<ul class="sub">
 		<li{if !$installable} class="current"{/if}><a href="./">Activées</a></li>
 		<li{if $installable} class="current"{/if}><a href="./?install=1">Inactives</a></li>
@@ -91,12 +90,12 @@
 					</td>
 					<td class="actions">
 						{if $item.module && $item.enabled}
-							{if $item.module->hasLocal() && $item.module->hasDist()}
-								{linkbutton label="Remettre à zéro" href="delete.php?module=%s"|args:$item.name shape="reset" target="_dialog"}
-							{/if}
-							{*FIXME{linkbutton label="Modifier" href="edit.php?module=%s"|args:$item.name shape="edit" target="_dialog"}*}
+							{*if $item.module->hasLocal() && $item.module->hasDist()}
+								{linkbutton label="Supprimer mes modifications" href="delete.php?module=%s"|args:$item.name shape="delete" target="_dialog"}
+							{/if*}
+							{linkbutton label="Modifier" href="edit.php?module=%s"|args:$item.name shape="edit"}
 						{elseif $item.module && !$item.enabled && $item.module->canDelete()}
-							{linkbutton label="Supprimer" href="delete.php?module=%s"|args:$item.name shape="delete" target="_dialog"}
+							{linkbutton label="Supprimer données et modifications" href="delete.php?module=%s"|args:$item.name shape="delete" target="_dialog"}
 						{elseif $item.plugin && !$item.enabled && $item.installed}
 							{linkbutton label="Supprimer" href="delete.php?plugin=%s"|args:$item.name shape="delete" target="_dialog"}
 						{/if}
@@ -131,7 +130,14 @@
 </form>
 
 <p class="help">
-	La mention <em class="tag">Modifiable</em> indique que cette extension est un module que vous pouvez modifier. {linkbutton shape="help" label="Comment modifier et développer des modules" href="!static/doc/modules.html" target="_dialog"}
+	La mention <em class="tag">Modifiable</em> indique que cette extension est un module que vous pouvez modifier.
 </p>
+
+<p>
+	{linkbutton shape="help" label="Comment modifier et développer des modules" href="!static/doc/modules.html" target="_dialog"}
+	{linkbutton shape="plus" label="Créer un module" href="new.php"}
+	{linkbutton shape="import" label="Importer un module" href="import.php" target="_dialog"}
+</p>
+
 
 {include file="_foot.tpl"}

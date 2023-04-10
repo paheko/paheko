@@ -8,7 +8,8 @@ use Garradin\Entities\Accounting\Account;
 
 require_once __DIR__ . '/_inc.php';
 
-$tpl->assign('balance', Reports::getBalanceSheet($criterias));
+$balance = Reports::getBalanceSheet($criterias);
+$tpl->assign('balance', $balance);
 
 if (!empty($criterias['year'])) {
 	$years = Years::listAssocExcept($criterias['year']);

@@ -5,6 +5,7 @@ namespace Garradin\Entities;
 use Garradin\Entity;
 use Garradin\DB;
 use Garradin\Plugins;
+use Garradin\UserException;
 use Garradin\Files\Files;
 use Garradin\UserTemplate\UserTemplate;
 use Garradin\Users\Session;
@@ -35,6 +36,8 @@ class Module extends Entity
 		self::SNIPPET_TRANSACTION => 'En bas de la fiche d\'une écriture',
 	];
 
+	const VALID_NAME_REGEXP = '/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/';
+
 	const TABLE = 'modules';
 
 	protected ?int $id;
@@ -63,7 +66,7 @@ class Module extends Entity
 
 	public function selfCheck(): void
 	{
-		$this->assert(preg_match('/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/', $this->name), 'Nom unique de module invalide: ' . $this->name);
+		$this->assert(preg_match(self::VALID_NAME_REGEXP, $this->name), 'Nom unique de module invalide: ' . $this->name);
 		$this->assert(trim($this->label) !== '', 'Le libellé ne peut rester vide');
 	}
 
@@ -153,7 +156,7 @@ class Module extends Entity
 
 	public function dir(): ?File
 	{
-		return Files::get(self::ROOT . $this->name);
+		return Files::get($this->path());
 	}
 
 	public function hasFile(string $file): bool
@@ -181,6 +184,17 @@ class Module extends Entity
 		return file_exists($this->distPath($path));
 	}
 
+	public function fetchLocalFile(string $path): ?string
+	{
+		$file = Files::get($this->path($path));
+		return !$file ? null : $file->fetch();
+	}
+
+	public function fetchDistFile(string $path): ?string
+	{
+		return @file_get_contents($this->distPath($path)) ?: null;
+	}
+
 	public function hasConfig(): bool
 	{
 		return DB::getInstance()->test('modules_templates', 'id_module = ? AND name = ?', $this->id(), self::CONFIG_FILE);
@@ -194,6 +208,82 @@ class Module extends Entity
 	public function canDelete(): bool
 	{
 		return !empty($this->config) || $this->hasLocal() || $this->hasData();
+	}
+
+	public function listFiles(?string $path = null): array
+	{
+		$out = [];
+		$base = File::CONTEXT_MODULES . '/' . $this->name;
+
+		if ($path && false !== strpos($path, '..')) {
+			return [];
+		}
+
+		$path = $path ? '/' . $path : '';
+
+		foreach (Files::listForContext(File::CONTEXT_MODULES, $this->name . $path) as $file) {
+			$_path = substr($file->path, strlen($base . '/'));
+
+			$out[$file->name] = [
+				'name'      => $file->name,
+				'dir'       => $file->isDir(),
+				'path'      => $_path,
+				'file_path' => $file->path,
+				'type'      => $file->mime,
+				'local'     => true,
+			];
+		}
+
+		$dist_path = $this->distPath(trim($path, '/'));
+
+		if (is_dir($dist_path)) {
+			foreach (scandir($dist_path) as $file) {
+				if (substr($file, 0, 1) == '.') {
+					continue;
+				}
+
+				if (isset($out[$file])) {
+					$out[$file]['dist'] = true;
+					continue;
+				}
+
+				$out[$file] = [
+					'name'      => $file,
+					'type'      => mime_content_type($dist_path . '/' . $file),
+					'dir'       => is_dir($dist_path . '/' . $file),
+					'path'      => $path . $file,
+					'local'     => false,
+					'dist'      => true,
+					'file_path' => $base . '/' . $path . $file,
+				];
+			}
+		}
+
+		foreach ($out as &$file) {
+			$file['editable'] = UserTemplate::isTemplate($file['path'])
+				|| substr($file['type'], 0, 5) === 'text/'
+				|| preg_match('/\.(?:json|md|skriv|html|css|js)$/', $file['name']);
+			$file['open_url'] = '!common/files/preview.php?p=' . rawurlencode($file['file_path']);
+			$file['edit_url'] = '!common/files/edit.php?p=' . rawurlencode($file['file_path']);
+			$file['delete_url'] = '!common/files/delete.php?p=' . rawurlencode($file['file_path']);
+		}
+
+		unset($file);
+
+		uasort($out, function ($a, $b) {
+			if ($a['dir'] == $b['dir']) {
+				return strnatcasecmp($a['name'], $b['name']);
+			}
+			elseif ($a['dir'] && !$b['dir']) {
+				return -1;
+			}
+			else {
+				return 1;
+			}
+		});
+
+
+		return $out;
 	}
 
 	public function delete(): bool
@@ -213,6 +303,10 @@ class Module extends Entity
 	{
 		if (null !== $params) {
 			$params = '?' . http_build_query($params);
+		}
+
+		if ($this->web && $this->enabled && !$file) {
+			return WWW_URL;
 		}
 
 		return sprintf('%sm/%s/%s%s', WWW_URL, $this->name, $file, $params);
@@ -254,6 +348,18 @@ class Module extends Entity
 	public function serve(string $path, bool $has_local_file, array $params = []): void
 	{
 		if (UserTemplate::isTemplate($path)) {
+			// Error if path is not valid
+			// we allow any path for static files, but not for skeletons
+			if (!$this->isValidPath($path)) {
+				if ($this->web) {
+					$path = '404.html';
+				}
+				else {
+					http_response_code(404);
+					throw new UserException('This address is invalid.');
+				}
+			}
+
 			if ($this->web) {
 				$this->serveWeb($path, $params);
 				return;
@@ -265,9 +371,15 @@ class Module extends Entity
 		}
 		// Serve a static file from a user module
 		elseif ($has_local_file) {
+			$file = Files::get(File::CONTEXT_MODULES . '/' . $this->name . '/' . $path);
+
+			if (!$file) {
+				throw new UserException('Invalid path');
+			}
+
 			$file->serve();
 		}
-		// Serve a static file (from "modules" in original source code)
+		// Serve a static file from dist path
 		else {
 			$type = $this->getFileTypeFromExtension($path);
 			$real_path = $this->distPath($path);
@@ -299,7 +411,7 @@ class Module extends Entity
 		$ut->assignArray($params);
 		extract($ut->fetchWithType());
 
-		if ($uri && preg_match('!html|xml|text!', $type) && $ut->get('nocache')) {
+		if ($uri !== null && preg_match('!html|xml|text!', $type) && !$ut->get('nocache')) {
 			$cache = true;
 		}
 		else {
@@ -324,7 +436,7 @@ class Module extends Entity
 		}
 
 		if ($cache) {
-			Web_Cache::store($uri, $content);
+			Cache::store($uri, $content);
 		}
 
 		Plugins::fireSignal('web.request.after', $plugin_params, $content);
@@ -376,5 +488,10 @@ class Module extends Entity
 			default:
 				return null;
 		}
+	}
+
+	public function export(Session $session): void
+	{
+		Files::zip(null, [$this->path() . '/'], $session, 'module_' . $this->name);
 	}
 }

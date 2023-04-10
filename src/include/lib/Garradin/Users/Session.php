@@ -485,7 +485,7 @@ class Session extends \KD2\UserSession
 	public function checkFilePermission(string $path, string $permission): bool
 	{
 		$path_level = preg_replace('!/[^/]+!', '/', $path);
-		$path = trim($path, '/');
+		$path = ltrim($path, '/');
 
 		if (!isset($this->_files_permissions)) {
 			$this->_files_permissions = Files::buildUserPermissions($this);

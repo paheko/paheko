@@ -376,8 +376,10 @@ class UserTemplate extends \KD2\Brindille
 		$header = preg_replace('!<if\((sent|logged|report|email|log)\)>(.*?)</if>!is', '', $header);
 		echo $header;
 
+		$name = strtok($this->_tpl_path, '/');
+
 		$path = $this->file->name ?? $this->path;
-		$location = false !== strpos($path, '/web/') ? 'Dans un squelette du site web' : 'Dans le code d\'un formulaire';
+		$location = sprintf('Dans le code du module "%s"', $name);
 
 		printf('<section><header><h1>%s</h1><h2>%s</h2></header>',
 			$location, nl2br(htmlspecialchars($message)));
@@ -388,7 +390,13 @@ class UserTemplate extends \KD2\Brindille
 
 		$line = $match[1] - 1;
 
-		$file = file($path);
+		if ($this->file) {
+			$file = explode("\n", $this->file->fetch());
+		}
+		else {
+			$file = file($path);
+		}
+
 		$start = max(0, $line - 5);
 		$max = min(count($file), $line + 6);
 
@@ -405,5 +413,6 @@ class UserTemplate extends \KD2\Brindille
 		}
 
 		echo '</code></pre>';
+		exit;
 	}
 }

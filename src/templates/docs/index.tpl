@@ -13,32 +13,21 @@ use Garradin\Entities\Files\File;
 			</span>
 		</span>
 	</aside>
-	<ul>
-		<li{if $context == File::CONTEXT_DOCUMENTS} class="current"{/if}><a href="./">Documents</a></li>
-		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
-			<li{if $context == File::CONTEXT_TRANSACTION} class="current"{/if}><a href="./?path=<?=File::CONTEXT_TRANSACTION?>">Fichiers des écritures</a></li>
-		{/if}
-		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)}
-			<li{if $context == File::CONTEXT_USER} class="current"{/if}><a href="./?path=<?=File::CONTEXT_USER?>">Fichiers des membres</a></li>
-		{/if}
-		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)}
-			<li{if $context == File::CONTEXT_SKELETON} class="current"{/if}><a href="./?path=<?=File::CONTEXT_SKELETON?>">Squelettes du site web</a></li>
-		{/if}
-		{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
-			<li><a href="trash.php">{icon shape="trash"} Fichiers supprimés</a></li>
-		{/if}
-	</ul>
+	{include file="./_nav.tpl"}
 </nav>
 
 <nav class="tabs">
 	<aside>
+		<form method="post" action="search.php" target="_dialog" data-disable-progress="1">
+			{input type="text" name="q" size=25 placeholder="Rechercher un document" title="Rechercher dans les documents"}
+			{button shape="search" type="submit" title="Rechercher"}
+		</form>
+	{if $gallery}
+		{linkbutton shape="menu" label="Afficher en liste" href="?path=%s&gallery=0"|args:$parent_path_uri}
+	{else}
+		{linkbutton shape="gallery" label="Afficher en galerie" href="?path=%s&gallery=1"|args:$parent_path_uri}
+	{/if}
 	{if $parent->canCreateDirHere() || $parent->canCreateHere()}
-		{if $gallery}
-			{linkbutton shape="menu" label="Afficher en liste" href="?path=%s&gallery=0"|args:$parent_path_uri}
-		{else}
-			{linkbutton shape="gallery" label="Afficher en galerie" href="?path=%s&gallery=1"|args:$parent_path_uri}
-		{/if}
-		{linkbutton shape="search" label="Rechercher" href="search.php" target="_dialog"}
 		{linkmenu label="Ajouter…" shape="plus" right=true}
 			{if $parent->canCreateHere()}
 				{linkbutton shape="upload" label="Depuis mon ordinateur" target="_dialog" href="!common/files/upload.php?p=%s"|args:$parent_path_uri}
@@ -69,14 +58,6 @@ use Garradin\Entities\Files\File;
 			{else}
 				Fichiers joints aux fiches des membres
 			{/if}
-		{elseif $context == File::CONTEXT_SKELETON}
-			{if $context_ref == 'web'}
-				Code du site web
-			{elseif $context_ref == 'modules'}
-				Code des modules
-			{else}
-				Code
-			{/if}
 		{elseif $context_ref}
 			{$parent->name}
 		{else}
@@ -90,7 +71,7 @@ use Garradin\Entities\Files\File;
 <nav class="breadcrumbs">
 	<aside>
 	{if count($breadcrumbs) > 1}
-		{linkbutton href="?path=%s"|args:$parent_path label="Retour au répertoire parent" shape="left"}
+		{linkbutton href="?path=%s"|args:$parent_path_uri label="Retour au répertoire parent" shape="left"}
 	{/if}
 </aside>
 
@@ -112,11 +93,11 @@ use Garradin\Entities\Files\File;
 </nav>
 {/if}
 
-{if $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE) && !$parent->canCreateDirHere()}
+{if $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE) && !$parent->canCreateDirHere() && !$context_ref}
 <p class="block alert">
 	Il n'est pas possible de créer de répertoire ici.
 	{if $context == File::CONTEXT_USER}
-		Utiliser le <a href="{"!users/new.php"|local_url}">formulaire de création</a> pour enregistrer un membre.
+		Utiliser le <a href="{"!users/new.php"|local_url}">formulaire de nouveau membre</a>.
 	{elseif $context == File::CONTEXT_TRANSACTION}
 		Utiliser le <a href="{"!acc/transactions/new.php"|local_url}">formulaire de saisie</a> pour créer une nouvelle écriture.
 	{/if}
@@ -168,7 +149,7 @@ use Garradin\Entities\Files\File;
 					</td>
 				</tr>
 				{else}
-				<tr>
+				<tr{if $highlight == $file->name} class="highlight"{/if}>
 				{if $file->canDelete()}
 					<td class="check">
 						{input type="checkbox" name="check[]" value=$file->path}

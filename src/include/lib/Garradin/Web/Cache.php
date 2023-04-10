@@ -7,11 +7,14 @@ use Garradin\UserException;
 
 use const Garradin\{DATA_ROOT, ROOT, WEB_CACHE_ROOT, WWW_URL};
 
+/**
+ * Create static cache as symlinks or static files for the website
+ */
 class Cache
 {
 	static protected ?string $root = null;
 
-	static public function getPath(): ?string
+	static public function getRoot(): ?string
 	{
 		$host = parse_url(WWW_URL, \PHP_URL_HOST);
 
@@ -28,6 +31,32 @@ class Cache
 		]);
 
 		return $path;
+	}
+
+	static public function getPath(string $uri, ?string $suffix = null): string
+	{
+		$uri = rawurldecode($uri);
+		$uri = '/' . ltrim($uri, '/');
+
+		$target = self::$root . '/' . md5($uri);
+
+		if ($suffix) {
+			$target .= '_' . $suffix;
+		}
+
+		$ext = self::getFileExtension($uri) ?? '.html';
+		$target .= $ext;
+
+		return $target;
+	}
+
+	static public function getFileExtension(string $name): ?string
+	{
+		if (preg_match('/\.[a-z0-9]{1,10}$/', $name, $match)) {
+			return $match[0];
+		}
+
+		return null;
 	}
 
 	static public function clear(): void
@@ -48,7 +77,7 @@ class Cache
 		$uri = rawurldecode($uri);
 		$uri = '/' . ltrim($uri, '/');
 
-		$target = self::$root . '/' . md5($uri);
+		$target = self::getPath($uri);
 
 		foreach (glob($target . '*') as $file) {
 			Utils::safe_unlink($file);
@@ -75,7 +104,7 @@ class Cache
 			return true;
 		}
 
-		self::$root = rtrim(self::getPath(), '/');
+		self::$root = rtrim(self::getRoot(), '/');
 
 		if (!file_exists(self::$root)) {
 			Utils::safe_mkdir(self::$root, 0777, true);
@@ -98,14 +127,7 @@ class Cache
 			return;
 		}
 
-		$uri = rawurldecode($uri);
-		$uri = '/' . ltrim($uri, '/');
-
-		$target = self::$root . '/' . md5($uri);
-
-		if ($suffix) {
-			$target .= '_' . $suffix;
-		}
+		$target = self::getPath($uri, $suffix);
 
 		@unlink($target);
 		symlink($destination, $target);
@@ -122,12 +144,17 @@ class Cache
 			return;
 		}
 
-		$uri = rawurldecode($uri);
-		$uri = '/' . ltrim($uri, '/');
+		$ext = self::getFileExtension($uri);
+		$is_html = false !== stripos($html, '<html');
+		$target = self::getPath($uri);
 
-		$target = self::$root . '/' . md5($uri);
+		// Do not store in cache if URI doesn't have an extension
+		// and is not HTML, this is to avoid serving eg. XML files as HTML
+		if (!$ext && !$is_html) {
+			return;
+		}
 
-		if (false !== stripos($html, '<html')) {
+		if ($is_html) {
 			$expire = time() + 3600;
 
 			$close = sprintf('<script type="text/javascript">
@@ -137,15 +164,14 @@ class Cache
 						return;
 					}
 
-					console.log(\'reloading\', now, %1$d);
-
 					fetch(location.href + \'?__reload\').then(r => r.text()).then(r => {
 						document.open();
 						document.write(r);
 						document.close();
 					});
 				});
-				</script></body', $expire);
+				</script>
+				<!-- Cache generated on: %s --></body', $expire, date('Y-m-d H:i:s'));
 
 			$html = str_ireplace('</body', $close, $html);
 		}

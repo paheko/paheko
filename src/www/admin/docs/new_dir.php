@@ -22,7 +22,7 @@ $form->runIf('create', function () use ($parent) {
 	$url = '!docs/?path=' . $f->path;
 
 	if (null !== qg('_dialog')) {
-		Utils::reloadParentFrame($url);
+		Utils::reloadParentFrame(null === qg('no_redir') ? $url : null);
 	}
 
 	Utils::redirect($url);

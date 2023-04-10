@@ -1,0 +1,83 @@
+td {
+	-spreadsheet-cell-type: string;
+}
+
+td.money {
+	-spreadsheet-cell-type: currency;
+}
+
+table.statement {
+	width: 100%;
+}
+
+table.statement td, table.statement th {
+	border: 1pt solid #666666;
+	padding: 4pt;
+	vertical-align: top;
+}
+
+table.statement thead td, table.statement thead th {
+	border: none;
+}
+
+table.statement tbody tr.even td, table.statement tbody tr.even th {
+	background: #eeeeee;
+}
+
+table.statement .money {
+	border-left: none;
+}
+
+table.statement .num {
+	width: 80pt;
+	border-right: none;
+}
+
+table.statement tbody th {
+	border-left: none;
+	border-right: none;
+}
+
+table.statement tfoot th {
+	border-right: none;
+}
+
+table.statement tfoot th, table.statement tfoot td {
+	padding: 6pt;
+}
+
+table.statement thead th {
+	text-align: center;
+	font-size: 20pt;
+	font-weight: bold;
+}
+
+table.statement td.spacer {
+	border: none;
+	padding: 0;
+	width: 10pt;
+}
+
+table.statement tr td.colspan, table.statement tr td.spacer {
+	border: none;
+	background: none !important;
+}
+
+td.money, th.money {
+	text-align: right;
+	width: 2em;
+}
+
+table.statement tfoot td, table.statement tfoot th {
+	background: #dddddd;
+}
+
+table.statement tr.spacer td {
+	height: 10pt;
+	border: none;
+	background: none;
+}
+
+table caption {
+	display: none;
+}

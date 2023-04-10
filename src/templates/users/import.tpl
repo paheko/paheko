@@ -32,10 +32,10 @@
             <dt><label for="f_type">Type de fichier</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>
                 <input type="radio" name="type" id="f_type" value="garradin" {form_field name=type checked="garradin" default="garradin"} />
-                <label for="f_type">Fichier CSV de Garradin</label>
+                <label for="f_type">Fichier CSV de Paheko</label>
             </dd>
             <dd class="help">
-                Export de la liste des membres au format CSV provenant de Garradin.
+                Export de la liste des membres au format CSV provenant de Paheko.
                 Les lignes comportant un numéro de membre mettront à jour les fiches des membres ayant ce numéro (si le numéro existe),
                 les lignes sans numéro ou avec un numéro inexistant créeront de nouveaux membres.
             </dd>

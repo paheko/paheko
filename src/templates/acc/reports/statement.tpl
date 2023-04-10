@@ -4,7 +4,7 @@
 
 <p class="help noprint">Le compte de résultat indique les recettes (produits) et dépenses (charges), ainsi que le résultat réalisé.</p>
 
-{include file="acc/reports/_statement.tpl" statement=$general caption1="Charges" caption2="Produits"}
+{include file="acc/reports/_statement.tpl" statement=$general}
 
 {if !empty($volunteering.body_left) || !empty($volunteering.body_right)}
 	<h2 class="ruler">Contributions bénévoles en nature</h2>

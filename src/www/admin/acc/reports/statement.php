@@ -8,14 +8,10 @@ use Garradin\Entities\Accounting\Account;
 
 require_once __DIR__ . '/_inc.php';
 
-if ($f = qg('export')) {
-	Reports::exportStatement($f, $criterias);
-	return;
-}
-
 $general = Reports::getStatement($criterias + ['exclude_type' => [Account::TYPE_VOLUNTEERING_REVENUE, Account::TYPE_VOLUNTEERING_EXPENSE]]);
-$tpl->assign('general', $general);
-$tpl->assign('volunteering', Reports::getVolunteeringStatement($criterias, $general));
+$volunteering = Reports::getVolunteeringStatement($criterias, $general);
+
+$tpl->assign(compact('general', 'volunteering'));
 
 if (!empty($criterias['year'])) {
 	$years = Years::listAssocExcept($criterias['year']);

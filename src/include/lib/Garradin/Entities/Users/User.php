@@ -181,7 +181,7 @@ class User extends Entity
 			}
 		}
 
-		Files::delete($this->attachementsDirectory());
+		Files::delete($this->attachmentsDirectory());
 
 		return parent::delete();
 	}
@@ -246,22 +246,14 @@ class User extends Entity
 		return Categories::get($this->id_category);
 	}
 
-	public function attachementsDirectory(): string
+	public function attachmentsDirectory(): string
 	{
 		return File::CONTEXT_USER . '/' . $this->id();
 	}
 
-	public function listFiles(): array
+	public function listFiles(string $field_name = null): array
 	{
-		$files = [];
-
-		foreach (Files::listForContext(File::CONTEXT_USER, (string) $this->id()) as $dir) {
-			foreach (Files::list($dir->path) as $file) {
-				$files[] = $file;
-			}
-		}
-
-		return $files;
+		return Files::listForUser($this->id, $field_name);
 	}
 
 	public function number(): ?string

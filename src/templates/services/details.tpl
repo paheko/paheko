@@ -8,7 +8,7 @@
 		{$list->count()}
 		<em class="help">(N'apparaît ici que l'inscription la plus récente de chaque membre.)</em>
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
-			{exportmenu href="%s&export="|args:$self_url}
+			{exportmenu}
 		{/if}
 	</dd>
 </dl>
@@ -21,7 +21,10 @@ $can_action = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMI
 	<form method="post" action="{"!users/action.php"|local_url}">
 {/if}
 
-{include file="common/dynamic_list_head.tpl" check=$can_action}
+{if !$list->count()}
+	<p class="alert block">Il n'y a aucun résultat.</p>
+{else}
+	{include file="common/dynamic_list_head.tpl" check=$can_action}
 
 	{foreach from=$list->iterate() item="row"}
 		<tr>
@@ -59,13 +62,13 @@ $can_action = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMI
 		{include file="users/_list_actions.tpl" colspan=7 export=false hide_delete=true}
 	{/if}
 
-</table>
+	</table>
+
+	{$list->getHTMLPagination()|raw}
+{/if}
 
 {if $can_action}
 </form>
 {/if}
-
-{$list->getHTMLPagination()|raw}
-
 
 {include file="_foot.tpl"}

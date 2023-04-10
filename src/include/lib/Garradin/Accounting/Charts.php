@@ -17,9 +17,10 @@ class Charts
 	const BUNDLED_CHARTS = [
 		'fr_pca_1999' => 'Plan comptable associatif 1999',
 		'fr_pca_2018' => 'Plan comptable associatif 2020 (Règlement ANC n°2018-06)',
-		'fr_pcg_2014' => 'Plan comptable général, pour entreprises (Règlement ANC n° 2014-03, consolidé 1er janvier 2019)',
-		'fr_cse_2015' => 'Plan comptable des CSE (Comité Social et Économique) (Règlement ANC n°2015-01)',
 		'fr_pcc_2020' => 'Plan comptable des copropriétés (2005 révisé en 2020)',
+		'fr_cse_2015' => 'Plan comptable des CSE (Comité Social et Économique) (Règlement ANC n°2015-01)',
+		'fr_pcg_2014' => 'Plan comptable général, pour entreprises (Règlement ANC n° 2014-03, consolidé 1er janvier 2019)',
+		'fr_pcs_2018' => 'Plan comptable des syndicats (2018)',
 		'be_pcmn_2019' => 'Plan comptable minimum normalisé des associations et fondations 2019',
 		'ch_asso' => 'Plan comptable associatif',
 	];

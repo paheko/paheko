@@ -91,7 +91,7 @@ table.list td {
 }
 
 .print-only {
-    display: unset;
+    display: block;
 }
 
 td.actions *, nav.tabs, .icn-btn, .pagination, a.icn {
@@ -124,18 +124,6 @@ details summary::after {
     display: none;
 }
 
-dl.describe {
-    /* Prince does not support grids, yet */
-    display: block;
-    margin-bottom: 2em;
-}
-
-dl.describe dt {
-    width: 12em;
-    float: left;
-    clear: left;
-}
-
-dl.describe dd {
-    float: left;
+.transaction-details-container {
+    max-width: initial;
 }

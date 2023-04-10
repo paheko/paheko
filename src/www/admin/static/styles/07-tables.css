@@ -153,6 +153,10 @@ table.list .actions {
     text-align: right;
 }
 
+table.list .single-action {
+    text-align: center;
+}
+
 table.list .separator {
     border-left: 2px dashed #999;
 }
@@ -191,6 +195,11 @@ table.list.files .folder th {
     font-weight: bold;
 }
 
+table.list .icon {
+    width: 2%;
+    text-align: center;
+}
+
 table.list .icon span::before {
     width: 1.5em;
     color: rgba(var(--gMainColor), 0.5);
@@ -223,9 +232,9 @@ table.files.gallery tfoot {
 
 table.files.gallery tbody {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(15em, .9fr));
+    grid-template-columns: repeat(auto-fit, 15em);
     grid-gap: .5em;
-    justify-content: center;
+    justify-content: start;
 }
 
 table.files.gallery tbody tr {
@@ -250,6 +259,11 @@ table.files.gallery .preview {
     height: 150px;
 }
 
+table.files.gallery .preview img {
+    max-height: 150px;
+    max-width: 150px;
+}
+
 table.files.gallery .icon a:hover span::before {
     color: rgba(var(--gMainColor), 1);
 }
@@ -259,6 +273,7 @@ table.files.gallery tbody .check {
 }
 
 table.files.gallery .icon, table.files.gallery .preview {
+    width: auto;
     grid-column: span 2;
     font-size: 4em;
     line-height: .6em;

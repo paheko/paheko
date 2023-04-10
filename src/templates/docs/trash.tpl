@@ -1,15 +1,15 @@
-{include file="_head.tpl" title="Fichiers supprimés" current="docs"}
+{include file="_head.tpl" title="Fichiers supprimés" current="docs" hide_title=true}
 
 <nav class="tabs">
-
-	<p>
-		{linkbutton shape="left" label="Documents" href="./"}
-	</p>
+	{include file="./_nav.tpl"}
+	<h2>Fichiers supprimés</h2>
 </nav>
 
 <p class="help">
 	Les fichiers supprimés occupent actuellement <strong>{$trash_size|size_in_bytes}</strong>.
 </p>
+
+{form_errors}
 
 <form method="post" action="">
 {if $list->count()}
@@ -33,7 +33,9 @@
 	<p class="submit">
 		{csrf_field key=$csrf_key}
 		{button type="submit" name="restore" label="Restaurer les fichiers sélectionnés" shape="reset"}
-		{button type="submit" name="delete" label="Définitivement supprimer les fichiers sélectionnés" shape="delete"}
+		{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
+			{button type="submit" name="delete" label="Supprimer définitivement les fichiers sélectionnés" shape="delete"}
+		{/if}
 	</p>
 
 	{$list->getHTMLPagination()|raw}

@@ -7,7 +7,6 @@ KD2/Brindille.php
 KD2/ErrorManager.php
 KD2/Form.php
 KD2/FossilInstaller.php
-KD2/Garbage2xhtml.php
 KD2/Graphics/Blob.php
 KD2/Graphics/Image.php
 KD2/Graphics/QRCode.php
@@ -15,9 +14,17 @@ KD2/Graphics/SVG/Pie.php
 KD2/Graphics/SVG/Plot.php
 KD2/Graphics/SVG/Bar.php
 KD2/JSONSchema.php
+KD2/HTML/CSSParser.php
+KD2/HTML/TableExport.php
+KD2/HTML/TableToCSV.php
+KD2/HTML/TableToODS.php
+KD2/HTML/TableToXLSX.php
+KD2/HTML/Markdown.php
+KD2/HTML/Markdown_Extensions.php
 KD2/HTTP.php
 KD2/Mail_Message.php
 KD2/Office/Calc/Writer.php
+KD2/Office/ToText.php
 KD2/Security.php
 KD2/Security_OTP.php
 KD2/SimpleDiff.php
@@ -26,6 +33,9 @@ KD2/Smartyer.php
 KD2/SMTP.php
 KD2/Translate.php
 KD2/UserSession.php
-KD2/WebDAV.php
+KD2/WebDAV/AbstractStorage.php
+KD2/WebDAV/NextCloud.php
+KD2/WebDAV/Server.php
+KD2/WebDAV/WOPI.php
+KD2/ZipReader.php
 KD2/ZipWriter.php
-Parsedown.php

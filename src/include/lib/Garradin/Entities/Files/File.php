@@ -6,6 +6,9 @@ use KD2\Graphics\Image;
 use KD2\Graphics\Blob;
 use KD2\DB\EntityManager as EM;
 use KD2\Security;
+use KD2\WebDAV\WOPI;
+use KD2\Office\ToText;
+use KD2\Office\PDFToText;
 
 use Garradin\Config;
 use Garradin\DB;
@@ -21,12 +24,11 @@ use Garradin\Entities\Web\Page;
 use Garradin\Web\Render\Render;
 use Garradin\Web\Router;
 use Garradin\Web\Cache as Web_Cache;
-use KD2\WebDAV\WOPI;
 use Garradin\Files\WebDAV\Storage;
 
 use Garradin\Files\Files;
 
-use const Garradin\{WWW_URL, BASE_URL, ENABLE_XSENDFILE, SECRET_KEY, WOPI_DISCOVERY_URL, SHARED_CACHE_ROOT};
+use const Garradin\{WWW_URL, BASE_URL, ENABLE_XSENDFILE, SECRET_KEY, WOPI_DISCOVERY_URL, SHARED_CACHE_ROOT, PDFTOTEXT_COMMAND};
 
 /**
  * This is a virtual entity, it cannot be saved to a SQL table
@@ -34,6 +36,7 @@ use const Garradin\{WWW_URL, BASE_URL, ENABLE_XSENDFILE, SECRET_KEY, WOPI_DISCOV
 class File extends Entity
 {
 	const TABLE = 'files';
+	const EXTENSIONS_TEXT_CONVERT = ['ods', 'odt', 'odp', 'pptx', 'xlsx', 'docx', 'pdf'];
 
 	protected ?int $id;
 
@@ -430,63 +433,87 @@ class File extends Entity
 
 		Files::callStorage('checkLock');
 
-		// If a file of the same name already exists, define a new name
-		if (Files::callStorage('exists', $this->path) && !$this->exists()) {
-			$pos = strrpos($this->name, '.');
-			$new_name = substr($this->name, 0, $pos) . '.' . substr(sha1(random_bytes(16)), 0, 10) . substr($this->name, $pos);
-			$this->set('name', $new_name);
-		}
-
 		if (!isset($this->modified)) {
 			$this->set('modified', new \DateTime);
 		}
 
-		if (null !== $path) {
-			$return = Files::callStorage('storePath', $this, $path);
-		}
-		elseif (null !== $content) {
-			$return = Files::callStorage('storeContent', $this, $content);
-		}
-		else {
-			$return = Files::callStorage('storePointer', $this, $pointer);
-			fclose($pointer);
-		}
+		try {
+			if (null !== $path) {
+				$return = Files::callStorage('storePath', $this, $path);
+			}
+			elseif (null !== $content) {
+				$return = Files::callStorage('storeContent', $this, $content);
+			}
+			else {
+				$return = Files::callStorage('storePointer', $this, $pointer);
+			}
 
-		if (!$return) {
-			throw new UserException('Le fichier n\'a pas pu être enregistré.');
-		}
+			if (!$return) {
+				throw new UserException('Le fichier n\'a pas pu être enregistré.');
+			}
 
-		Plugins::fireSignal('files.store', ['file' => $this]);
+			Plugins::fireSignal('files.store', ['file' => $this]);
 
-		if ($index_search && $content) {
-			$this->indexForSearch($content);
-		}
-		else {
-			$this->removeFromSearch();
-		}
+			if ($index_search) {
+				$this->indexForSearch(compact('content', 'path', 'pointer'));
+			}
+			else {
+				$this->removeFromSearch();
+			}
 
-		// clean up thumbnails
-		foreach (self::ALLOWED_THUMB_SIZES as $key => $operations)
-		{
-			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->pathHash(), $key));
-		}
+			// clean up thumbnails
+			foreach (self::ALLOWED_THUMB_SIZES as $key => $operations)
+			{
+				Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->pathHash(), $key));
+			}
 
-		Web_Cache::delete($this->uri());
+			Web_Cache::delete($this->uri());
+		}
+		finally {
+			if (null !== $pointer) {
+				fclose($pointer);
+			}
+		}
 
 		return $this;
 	}
 
-	public function indexForSearch(?string $source_content, ?string $title = null, ?string $forced_mime = null): void
+	public function indexForSearch(?array $source, ?string $title = null, ?string $forced_mime = null): void
 	{
 		$mime = $forced_mime ?? $this->mime;
+		$ext = $this->extension();
+		$content = null;
 
 		// Store content in search table
 		if (substr($mime, 0, 5) == 'text/') {
-			$content = $source_content ?? Files::callStorage('fetch', $this);
+			$content = $source['content'] ?? Files::callStorage('fetch', $this);
 
 			if ($mime === 'text/html' || $mime == 'text/xml') {
 				$content = htmlspecialchars_decode(strip_tags($content));
 			}
+		}
+		elseif ($ext == 'pdf' && PDFTOTEXT_COMMAND === 'pdftotext') {
+			$cmd = escapeshellcmd(PDFTOTEXT_COMMAND) . ' -nopgbrk - -';
+
+			if (isset($source['content'])) {
+				Utils::exec($cmd, 2, fn() => $source['content'], fn($out) => $content = $out);
+			}
+			elseif (isset($source['pointer'])) {
+				fseek($source['pointer'], 0, SEEK_END);
+				$size = ftell($source['pointer']);
+				rewind($source['pointer']);
+
+				Utils::exec($cmd, 2, fn() => fread($source['pointer'], $size), fn($out) => $content = $out);
+			}
+			else {
+				$cmd = sprintf('%s -nopgbrk %s -', escapeshellcmd(PDFTOTEXT_COMMAND), escapeshellarg($source['path']));
+				$content = '';
+				Utils::exec($cmd, 2, null, function($out) use (&$content) { $content .= $out; });
+				$content = $content ?: null;
+			}
+		}
+		elseif (in_array($ext, self::EXTENSIONS_TEXT_CONVERT)) {
+			$content = ToText::from($source);
 		}
 		else {
 			$content = null;
@@ -494,7 +521,7 @@ class File extends Entity
 
 		// Only index valid UTF-8
 		if (isset($content) && preg_match('//u', $content)) {
-			// Truncate content at 150KB
+			// Truncate text at 150KB
 			$content = substr(trim($content), 0, 150*1024);
 		}
 		else {
@@ -625,7 +652,10 @@ class File extends Entity
 		return sprintf('%s?%dpx', $this->url(), $size);
 	}
 
-	public function link(Session $session, ?string $thumb = null, bool $allow_edit = false)
+	/**
+	 * Return a HTML link to the file
+	 */
+	public function link(Session $session, ?string $thumb = null, bool $allow_edit = false, ?string $url = null)
 	{
 		if ($thumb == 'auto') {
 			if ($this->isImage()) {
@@ -646,7 +676,10 @@ class File extends Entity
 			$label = preg_replace('/[_.-]/', '&shy;$0', htmlspecialchars($this->name));
 		}
 
-		if ($allow_edit && $this->canWrite($session) && $this->editorType()) {
+		if ($url) {
+			$attrs = sprintf('href="%s"', Utils::getLocalURL($url));
+		}
+		elseif ($allow_edit && $this->canWrite($session) && $this->editorType()) {
 			$attrs = sprintf('href="%s" target="_dialog" data-dialog-class="fullscreen"',
 				Utils::getLocalURL('!common/files/edit.php?p=') . rawurlencode($this->path));
 		}
@@ -1022,6 +1055,17 @@ class File extends Entity
 		return rawurlencode($this->path);
 	}
 
+	public function extension(): ?string
+	{
+		$pos = strrpos($this->name, '.');
+
+		if (false === $pos) {
+			return null;
+		}
+
+		return strtolower(substr($this->name, $pos+1));
+	}
+
 	static public function filterName(string $name): string
 	{
 		return preg_replace('/[^\w\d\p{L}_. -]+/iu', '-', trim($name));
@@ -1029,7 +1073,7 @@ class File extends Entity
 
 	static public function validateFileName(string $name): void
 	{
-		if (0 === strpos($name, '.ht')) {
+		if (0 === strpos($name, '.ht') || $name == '.user.ini') {
 			throw new ValidationException('Nom de fichier interdit');
 		}
 
@@ -1116,7 +1160,7 @@ class File extends Entity
 	{
 		static $text_extensions = ['css', 'txt', 'xml', 'html', 'htm', 'tpl'];
 
-		$ext = substr($this->name, strrpos($this->name, '.') + 1);
+		$ext = $this->extension();
 
 		$format = $this->renderFormat();
 
@@ -1163,7 +1207,7 @@ class File extends Entity
 			}
 		}
 
-		$ext = substr($this->name, strrpos($this->name, '.') + 1);
+		$ext = $this->extension();
 		$url = null;
 
 		if (isset($data['extensions'][$ext]['edit'])) {
@@ -1244,6 +1288,11 @@ class File extends Entity
 
 		$hash = strtok($str, ':');
 		$expiry = strtok(false);
+
+		if (!ctype_alnum($expiry)) {
+			return false;
+		}
+
 		$expiry = (int)base_convert($expiry, 36, 10);
 		$expiry += intval(gmmktime(0, 0, 0, 8, 1, 2022) / 3600);
 

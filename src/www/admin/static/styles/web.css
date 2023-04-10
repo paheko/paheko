@@ -1,0 +1,262 @@
+.web-edit {
+    display: grid;
+    grid-template-columns: 1fr 30%;
+    grid-template-rows: .1fr 1fr .1fr;
+    grid-gap: 1em;
+    height: 100vh;
+}
+
+.web-edit .editor textarea[disabled] {
+    filter: blur(3px);
+}
+
+.web-edit-visual .editor {
+    display: none;
+}
+
+.web-edit nav ul {
+    border: none;
+}
+
+.web-edit .properties {
+    display: flex;
+    flex-direction: row;
+    font-size: .9em;
+}
+
+.web-edit nav ul {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
+.web-edit nav ul li a {
+    border-radius: 0 0 .5em .5em;
+}
+
+.web-edit fieldset {
+    margin: 0;
+}
+
+.web-edit .submit {
+    grid-row: 3;
+    grid-column: 2;
+    text-align: right;
+}
+
+fieldset.header {
+    grid-column: span 2;
+    margin-top: 1em;
+}
+
+.web-edit fieldset.header legend {
+    font-size: 1.5em;
+    text-align: center;
+}
+
+fieldset.header p input {
+    font-size: 1.5em;
+}
+
+fieldset.header div {
+    display: flex;
+    flex-direction: row;
+    margin-top: .5em;
+    grid-gap: 1em;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+fieldset.header div dl {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--gLightBackgroundColor);
+    padding: .4em .6em;
+    border-radius: .5em;
+}
+
+fieldset.header div dd {
+    padding: 0;
+}
+
+fieldset.header div select {
+    max-width: unset;
+}
+
+fieldset.header div dt {
+    margin-right: 1em;
+    display: none;
+}
+
+fieldset.header div dt label {
+    font-weight: normal;
+    color: var(--gBorderColor);
+}
+
+fieldset.header div dt b {
+    display: none;
+}
+
+fieldset.header tt {
+    white-space: nowrap;
+}
+
+fieldset.content {
+    border: none;
+    padding: 0;
+    grid-row: 2 / span 2;
+    grid-column: 1;
+}
+
+.web-content.content-edit * {
+    cursor: unset !important;
+}
+
+.content-edit {
+    overflow: auto;
+    padding: 1em;
+    border: 1px solid #999;
+    height: 97%;
+}
+
+.content-edit .block:hover {
+    background: rgba(var(--gHoverLinkColor), 0.2);
+    box-shadow: 0px 0px .2em rgba(var(--gHoverLinkColor), 1);
+    cursor: pointer !important;
+    border-radius: .2em;
+}
+
+.content-edit .selected {
+    border-radius: .2em;
+    outline: .3em dashed rgba(var(--gHoverLinkColor), 0.5);
+}
+
+.web-edit input[type=text] {
+    min-width: 0;
+}
+
+.web-edit .editor {
+    grid-column: 1 / span 2;
+    background: var(--gLightBackgroundColor);
+}
+
+@media screen and (max-width: 980px) {
+    .web-edit {
+        display: block;
+    }
+}
+
+#encryptPasswordDisplay {
+    cursor: help;
+    background: var(--gLightBackgroundColor);
+}
+
+web-edit dd.help {
+    font-size: .9em;
+}
+
+.web-files {
+    text-align: center;
+    clear: both;
+}
+
+form#f_upload fieldset {
+    position: relative;
+}
+
+.web.header {
+    clear: both;
+}
+
+.web.header .actions {
+    margin: 0;
+}
+
+.web.category-list ul {
+    display: flex;
+    flex-direction: row;
+    clear: both;
+    flex-wrap: wrap;
+}
+
+.web.category-list li {
+    display: block;
+    width: 32%;
+    margin: 0.5%;
+}
+
+.web.category-list li a {
+    background: rgba(var(--gSecondColor), 0.3);
+    padding: 1em;
+    border-radius: .5em;
+    display: block;
+    font-size: 1.1em;
+    height: calc(100% - 2em);
+    color: rgba(var(--gTextColor), .8);
+    text-decoration-color: rgba(var(--gMainColor), 0.5);
+}
+
+.web.category-list li a span {
+    float: right;
+    color: rgba(var(--gMainColor), 0.5);
+    transition: color .2s;
+}
+
+.web.category-list li a:hover, .web.category-list li a:hover span {
+    color: rgb(var(--gHoverLinkColor));
+    text-decoration-color: rgba(var(--gHoverLinkColor), 0.5);
+}
+
+.web.category-list .draft a {
+    background: var(--gLightBackgroundColor);
+    color: var(--gBorderColor);
+    text-decoration-color: unset;
+}
+
+.web.breadcrumbs {
+    font-size: 1.1em;
+    padding-top: .4em;
+}
+
+.web.preview header .actions {
+    float: none;
+    text-align: center;
+    font-size: 1.2em;
+}
+
+.web.preview .describe {
+    margin: 1em 0;
+    text-align: center;
+}
+
+.web.preview .describe > * {
+    padding: .2em .4em;
+    display: inline-block;
+    background: var(--gLightBackgroundColor);
+    border-radius: .3em;
+    margin: .2em .5em;
+}
+
+.web.preview .describe > * > span {
+    color: rgba(var(--gMainColor), 0.9);
+    margin-right: .3em;
+}
+
+.web.preview .describe > tt a span {
+    font-size: .9em;
+}
+
+.web.preview article {
+    margin: 1em auto;
+    background: var(--gLightBackgroundColor);
+    padding: 1em;
+    max-width: 50em;
+    border-radius: .5em;
+}
+
+.web.preview article .actions {
+    float: none;
+    text-align: left;
+    margin: 0;
+}

@@ -9,6 +9,7 @@ use Garradin\Plugins;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\ValidationException;
+use Garradin\Users\DynamicFields;
 use Garradin\Users\Session;
 use Garradin\Entities\Files\File;
 use Garradin\Entities\Web\Page;
@@ -67,6 +68,25 @@ class Files
 		$p = [];
 
 		if ($s->isLogged() && $id = $s::getUserId()) {
+			$list = DynamicFields::getInstance()->fieldsByType('file');
+
+			// Add permissions for each field
+			foreach ($list as $name => $field) {
+				if (!$field->write_access) {
+					continue;
+				}
+
+				$p[File::CONTEXT_USER . '/' . $s::getUserId() . '/' . $name . '/'] = [
+					'mkdir' => false,
+					'move' => false,
+					'create' => true,
+					'read' => true,
+					'write' => true,
+					'delete' => false,
+					'share' => false,
+				];
+			}
+
 			// The user can always access his own profile files
 			$p[File::CONTEXT_USER . '/' . $s::getUserId() . '/'] = [
 				'mkdir' => false,
@@ -112,13 +132,24 @@ class Files
 		];
 
 		// Modules source code
-		$p[File::CONTEXT_MODULES] = [
+		$p[File::CONTEXT_MODULES . '/'] = [
 			'mkdir' => $is_admin,
 			'move' => $is_admin,
 			'create' => $is_admin,
 			'read' => $s->isLogged(),
 			'write' => $is_admin,
 			'delete' => $is_admin,
+			'share' => false,
+		];
+
+		// Modules source code
+		$p[File::CONTEXT_MODULES] = [
+			'mkdir' => false,
+			'move' => false,
+			'create' => false,
+			'read' => $s->isLogged(),
+			'write' => false,
+			'delete' => false,
 			'share' => false,
 		];
 
@@ -216,7 +247,7 @@ class Files
 		$query = sprintf('SELECT
 			*,
 			dirname(path) AS parent,
-			snippet(files_search, \'<b>\', \'</b>\', \'…\', 2, -30) AS snippet,
+			snippet(files_search, \'<mark>\', \'</mark>\', \'…\', 2, -30) AS snippet,
 			rank(matchinfo(files_search), 0, 1.0, 1.0) AS points
 			FROM files_search
 			WHERE files_search MATCH ? %s
@@ -262,6 +293,26 @@ class Files
 
 		// Update this path
 		return self::callStorage('list', $parent);
+	}
+
+
+	static public function listForUser(int $id, string $field_name = null): array
+	{
+		$files = [];
+		$path = (string) $id;
+
+		if ($field_name) {
+			$path .= '/' . $field_name;
+			return self::listForContext(File::CONTEXT_USER, $path);
+		}
+
+		foreach (self::listForContext(File::CONTEXT_USER, $path) as $dir) {
+			foreach (Files::list($dir->path) as $file) {
+				$files[] = $file;
+			}
+		}
+
+		return $files;
 	}
 
 	/**
@@ -525,9 +576,8 @@ class Files
 			return false;
 		}
 
-		// Modules and trash files can never be served directly
-		if ($context == File::CONTEXT_MODULES
-			|| $context == File::CONTEXT_TRASH) {
+		// Trash files can never be served directly
+		if ($context == File::CONTEXT_TRASH) {
 			return false;
 		}
 
@@ -634,18 +684,8 @@ class Files
 		$db->commit();
 	}
 
-	static protected function create(string $parent, string $name, array $source): File
+	static protected function create(string $parent, string $name, array $source = []): File
 	{
-		if (!isset($source['path']) && !isset($source['content']) && !isset($source['pointer'])) {
-			throw new \InvalidArgumentException('Unknown source type');
-		}
-		elseif (count($source) != 1) {
-			throw new \InvalidArgumentException('Invalid source type');
-		}
-
-		$pointer = $path = $content = null;
-		extract($source);
-
 		File::validateFileName($name);
 		File::validatePath($parent);
 
@@ -664,23 +704,27 @@ class Files
 		$file->parent = $parent;
 		$file->name = $name;
 
-		if ($pointer) {
-			if (0 !== fseek($pointer, 0, SEEK_END)) {
+		if (isset($source['pointer'])) {
+			if (0 !== fseek($source['pointer'], 0, SEEK_END)) {
 				throw new \RuntimeException('Stream is not seekable');
 			}
 
-			$file->set('size', ftell($pointer));
+			$file->set('size', ftell($source['pointer']));
 			fseek($pointer, 0, SEEK_SET);
-			$file->set('mime', mime_content_type($pointer));
+			$file->set('mime', mime_content_type($source['pointer']));
 		}
-		elseif ($path) {
-			$file->set('mime', finfo_file($finfo, $path));
-			$file->set('size', filesize($path));
-			$file->set('modified', new \DateTime('@' . filemtime($path)));
+		elseif (isset($source['path'])) {
+			$file->set('mime', finfo_file($finfo, $source['path']));
+			$file->set('size', filesize($source['path']));
+			$file->set('modified', new \DateTime('@' . filemtime($source['path'])));
+		}
+		elseif (isset($source['content'])) {
+			$file->set('size', strlen($source['content']));
+			$file->set('mime', finfo_buffer($finfo, $source['content']));
 		}
 		else {
-			$file->set('size', strlen($content));
-			$file->set('mime', finfo_buffer($finfo, $content));
+			$file->set('size', 0);
+			$file->set('mime', 'text/plain');
 		}
 
 		$file->set('image', in_array($file->mime, $file::IMAGE_TYPES));
@@ -709,6 +753,13 @@ class Files
 		}
 
 		return Files::createFromString($parent . '/' . $name . '.' . $extension, base64_decode($tpl));
+	}
+
+	static public function createObject(string $target)
+	{
+		$parent = Utils::dirname($target);
+		$name = Utils::basename($target);
+		return self::create($parent, $name);
 	}
 
 	static protected function createFrom(string $target, array $source): File

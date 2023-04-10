@@ -69,11 +69,15 @@ class Import
 	 * @param  int    $current_user_id
 	 * @return boolean          TRUE en cas de succès
 	 */
-	public function fromGarradinCSV($path, $current_user_id)
+	public function fromGarradinCSV($path, $current_user_id, string $mode = 'auto')
 	{
 		if (!file_exists($path) || !is_readable($path))
 		{
 			throw new \RuntimeException('Fichier inconnu : '.$path);
+		}
+
+		if (!in_array($mode, ['auto', 'create', 'update'])) {
+			throw new \RuntimeException('Unknown mode. Only "auto", "create" and "update" are accepted.');
 		}
 
 		$fp = CSV::open($path);
@@ -181,7 +185,7 @@ class Import
 			}
 
 			try {
-				if ($numero && ($id = $membres->getIDWithNumero($numero)))
+				if ($mode != 'create' && $numero && ($id = $membres->getIDWithNumero($numero)))
 				{
 					if ($id === $current_user_id)
 					{
@@ -190,6 +194,9 @@ class Import
 					}
 
 					$membres->edit($id, $data);
+				}
+				elseif ($mode == 'update') {
+					throw new UserException(sprintf('Le numéro de membre "%s" ne correspond à aucun membre existant.', $numero));
 				}
 				else
 				{

@@ -23,6 +23,8 @@
         }
     };
 
+    window.enableImageGallery = enableGallery;
+
     function openImageBrowser(items, pos)
     {
         div = document.createElement('div');

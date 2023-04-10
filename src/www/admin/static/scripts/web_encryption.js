@@ -1,9 +1,11 @@
 (function () {
 	var aes_loaded = false;
 	var iteration = 0;
-	var self_path_match = /static\/scripts\/wiki-encryption\.js/;
+	var self_path_match = /static\/scripts\/web_encryption\.js/;
 	var www_url;
 	var encryptPassword = null;
+	var base_url;
+	var init = false;
 
 	var scripts = document.getElementsByTagName('script');
 
@@ -43,21 +45,33 @@
 		content = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 			.replace(/'/g, '&#039;').replace(/"/g, '&quot');
 
-		// Intertitres
-		content = content.replace(/(=+)\s*([^\n=]*)\s*(\1\s*)*/g, function (match, h, content) {
+		// Titles
+		content = content.replace(/^(=+)\s*([^\n=]*)\s*(\1\s*)*/gm, function (match, h, content) {
 			h = h.length;
 			return '<h'+h+'>'+content+'</h'+h+'>';
 		});
 
-		// Gras
+		content = content.replace(/^(#+)\s*([^\n]+)/gm, function (match, h, content) {
+			h = h.length;
+			return '<h'+h+'>'+content+'</h'+h+'>';
+		});
+
+		// Horizontal line
+		content = content.replace(/^(--+|==+)$/gm, '<hr />');
+
+		// Strikethrough
+		content = content.replace(/(--|~~)([^\n]+?)\1/g, '<s>$2</s>');
+
+		// Bold
 		content = content.replace(/\*{2}([^\n]*)\*{2}/g, '<strong>$1</strong>');
 
-		// Italique
+		// Italic
 		content = content.replace(/''([^\n]*)''/g, '<em>$1</em>');
+		content = content.replace(/\*([^\n]*)\*/g, '<em>$1</em>');
 
-		// Espaces typograhiques
-		content = content.replace(/\h*([?!;:»])(\s+|$)/g, '&nbsp;$1$2');
-		content = content.replace(/(^|\s+)([«])\h*/g, '$1$2&nbsp;');
+		// Typo spaces in French
+		//content = content.replace(/\h*([?!;:»])(\s+|$)/g, '&nbsp;$1$2');
+		//content = content.replace(/(^|\s+)([«])\h*/g, '$1$2&nbsp;');
 
 		function linkTag(match, url, label) {
 			if (url.match(/^https?:/))
@@ -69,16 +83,40 @@
 			}
 			else
 			{
-				// Local wiki link
+				// Local page link
 				url = '?' + url;
 			}
 
 			return '<a href="' + url + '">' + label + '</a>';
 		}
 
-		// Liens
+		// Links
 		content = content.replace(/\[{2}([^\|\]\n]+?)\|([^\]\n]+?)\]{2}/g, linkTag);
 		content = content.replace(/\[{2}(([^\]]+?))\]{2}/g, linkTag);
+		content = content.replace(/<(((?:https?|mailto):[^>]+?))>/g, linkTag);
+		content = content.replace(/\[([^\]]+?)\]\(([^\)]+?)\)/g, linkTag);
+
+		// Extensions
+		content = content.replace(/&lt;&lt;(\w+)([\| ]([^&]+))?&gt;&gt;/g, (match, name, separator, params) => {
+			params = params.split('|');
+			if (name == 'image') {
+				var src = params[0];
+				var align = params[1] || 'center';
+				var caption = 2 in params ? '<figcaption>' + params[2] + '</figcaption>' : '';
+				var size = align == 'center' ? '500px' : '200px';
+
+				return `<figure class="image img-${align}"><a href="${base_url + src}" class="internal-image" target="_image"><img src="${base_url + src}?${size}" alt="" /></a>${caption}</figure>`;
+			}
+			else if (name == 'file') {
+				var src = params[0];
+				var ext = (a = src.lastIndexOf('.')) && a > 0 ? src.substr(a+1).toUpperCase() : '';
+				var caption = params[1] || src.replace(/\.[^\.]+$/, '');
+				return `<aside class="file" data-type="${ext}"><a href="${base_url + src}" class="internal-file"><b>${caption}</b> <small>${ext}</small></a></aside>`;
+			}
+			else {
+				return match;
+			}
+		});
 
 		// nl2br
 		content = content.replace(/\r/g, '').replace(/\n/g, '<br />');
@@ -101,36 +139,13 @@
 	let enableEncryption = (form, do_decrypt) => {
 		document.getElementById('f_content').disabled = true;
 
-		String.prototype.repeat = function(num)
-		{
-			return new Array(num + 1).join(this);
-		};
-
 		load_aes(function () {
-			askPassword();
+			askPassword(!do_decrypt);
 			document.getElementById('f_content').disabled = false;
 
 			if (do_decrypt) {
 				decrypt();
 			}
-
-			var hidden = true;
-			var d = document.getElementById('encryptPasswordDisplay');
-			d.innerHTML = '&bull;'.repeat(encryptPassword.length);
-			d.title = 'Cliquer pour voir le mot de passe';
-			d.onclick = function () {
-				if (hidden)
-				{
-					this.innerHTML = encryptPassword;
-					this.title = 'Cliquer pour cacher le mot de passe.';
-				}
-				else
-				{
-					this.innerHTML = '&bull;'.repeat(encryptPassword.length);
-					this.title = 'Cliquer pour voir le mot de passe';
-				}
-				hidden = !hidden;
-			};
 
 			form.onsubmit = function ()
 			{
@@ -152,10 +167,10 @@
 		});
 	};
 
-	let askPassword = () => {
-		load_aes();
-
-		encryptPassword = window.prompt('Mot de passe ?');
+	let askPassword = (first) => {
+		encryptPassword = window.prompt(first ? "Le mot de passe n'est ni transmis ni enregistré.\n"
+			+ "Il n'est pas possible de retrouver le contenu si vous perdez le mot de passe.\n"
+			+ "Merci d'indiquer ici le mot de passe :" : "Mot de passe :");
 
 		if (!encryptPassword)
 		{
@@ -175,9 +190,12 @@
 		iteration = 0;
 	};
 
+	// Used in _file_render_encrypted.tpl
 	window.pleaseDecrypt = () => {
-		askPassword();
-		decrypt();
+		load_aes(() => {
+			askPassword();
+			decrypt();
+		});
 	};
 
 	var decrypt = function ()
@@ -188,7 +206,7 @@
 
 		if (typeof GibberishAES == 'undefined')
 		{
-			if (iteration >= 10)
+			if (iteration >= 5)
 			{
 				iteration = 0;
 				encryptPassword = null;
@@ -202,17 +220,17 @@
 		}
 
 		if (edit) {
-			var content = document.getElementById('f_content');
+			var elm = document.getElementById('f_content');
 		}
 		else {
-		 	var content = document.getElementById('wikiEncryptedContent');
+		 	var elm = document.getElementById('web_encrypted_content');
 		}
 
-		var wikiContent = content.value || content.innerText;
-		wikiContent = wikiContent.replace(/\s+/g, '');
+		var content = elm.value || elm.innerText;
+		content = content.replace(/\s+/g, '');
 
 		try {
-			wikiContent = GibberishAES.dec(wikiContent, encryptPassword);
+			content = GibberishAES.dec(content, encryptPassword);
 		}
 		catch (e)
 		{
@@ -230,23 +248,28 @@
 
 		if (!edit)
 		{
-			content.style.display = 'block';
-			document.getElementById('wikiEncryptedMessage').style.display = 'none';
-			content.innerHTML = formatContent(wikiContent);
+			elm.style.display = 'block';
+			document.getElementById('web_encrypted_message').style.display = 'none';
+			base_url = elm.dataset.url.replace(/\/$/, '') + '/';
+			content = formatContent(content);
+			elm.innerHTML = content;
+
+			if (content.match(/<img/) && typeof window.enableImageGallery != 'undefined') {
+				enableImageGallery();
+			}
 		}
 		else
 		{
-			content.value = wikiContent;
+			elm.value = content;
 		}
 	};
 
 	document.addEventListener('DOMContentLoaded', () => {
+		if (init) return;
+		init = true;
+
 		if (e = document.getElementById('f_format')) {
 			edit = true;
-
-			if (e.value == "skriv/encrypted") {
-				enableEncryption(e.form, true);
-			}
 
 			e.addEventListener('change', () => {
 				if (e.value == 'skriv/encrypted') {
@@ -255,7 +278,11 @@
 				else if (encryptPassword) {
 					disableEncryption(false);
 				}
-			})
+			});
+
+			if (e.value == "skriv/encrypted") {
+				enableEncryption(e.form, true);
+			}
 		}
 	});
 } ());

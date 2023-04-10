@@ -12,7 +12,16 @@ use Garradin\Entities\Files\File;
 
 require_once __DIR__ . '/../_inc.php';
 
-$path = qg('path') ?: File::CONTEXT_DOCUMENTS;
+$highlight = null;
+
+if (qg('f')) {
+	$pos = strrpos(qg('f'), '/');
+	$path = substr(qg('f'), 0, $pos);
+	$highlight = substr(qg('f'), $pos + 1);
+}
+else {
+	$path = qg('path') ?: File::CONTEXT_DOCUMENTS;
+}
 
 $parent = Files::get($path);
 
@@ -60,8 +69,6 @@ elseif ($list instanceof DynamicList) {
 
 $breadcrumbs = Files::getBreadcrumbs($path);
 
-$parent_path = Utils::dirname($path);
-
 $quota_used = Files::getUsedQuota();
 $quota_max = Files::getQuota();
 $quota_left = Files::getRemainingQuota();
@@ -80,6 +87,8 @@ if ($gallery !== $pref) {
 
 $parent_path_uri = $parent->path_uri();
 
-$tpl->assign(compact('path', 'parent_path_uri', 'list', 'parent', 'context', 'context_ref', 'breadcrumbs', 'parent_path', 'quota_used', 'quota_max', 'quota_percent', 'quota_left', 'user_name', 'gallery', 'allow_check'));
+$tpl->assign(compact('list', 'parent_path_uri', 'parent', 'context', 'context_ref',
+	'breadcrumbs', 'quota_used', 'quota_max', 'quota_percent', 'quota_left',
+	'highlight', 'user_name', 'gallery', 'allow_check'));
 
 $tpl->display('docs/index.tpl');

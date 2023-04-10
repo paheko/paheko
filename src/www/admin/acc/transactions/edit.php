@@ -65,4 +65,4 @@ $tpl->assign('chart_id', $chart->id());
 $tpl->assign('projects', Projects::listAssocWithEmpty());
 $tpl->assign('linked_users', $transaction->listLinkedUsersAssoc());
 
-$tpl->display('acc/transactions/new.tpl');
+$tpl->display('acc/transactions/edit.tpl');

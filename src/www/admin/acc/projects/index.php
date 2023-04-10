@@ -9,8 +9,10 @@ $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ);
 
 $by_year = (bool)qg('by_year');
 
-$tpl->assign(compact('by_year'));
-$tpl->assign('list', Projects::getBalances($by_year));
+$list = Projects::getBalances($by_year);
+
+$tpl->assign(compact('by_year', 'list'));
+$tpl->assign('export', false);
 
 $tpl->assign('projects_count', Projects::count());
 

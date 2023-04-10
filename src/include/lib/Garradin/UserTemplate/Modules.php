@@ -8,13 +8,18 @@ use Garradin\Files\Files;
 use Garradin\Config;
 use Garradin\DB;
 use Garradin\Utils;
+use Garradin\ValidationException;
 use Garradin\UserException;
 use Garradin\Users\Session;
 use Garradin\Web\Web;
+use Garradin\Entities\Files\File;
+use Garradin\Entities\Web\Page;
 
 use const Garradin\ROOT;
+use const Garradin\ADMIN_URL;
 
-use \KD2\DB\EntityManager as EM;
+use KD2\DB\EntityManager as EM;
+use KD2\ZipReader;
 
 class Modules
 {
@@ -22,6 +27,19 @@ class Modules
 	const SNIPPET_TRANSACTION = Module::SNIPPET_TRANSACTION;
 	const SNIPPET_USER = Module::SNIPPET_USER;
 	const SNIPPET_HOME_BUTTON = Module::SNIPPET_HOME_BUTTON;
+
+	static public function fetchDistFile(string $path): ?string
+	{
+		if (substr($path, 0, strlen('modules/')) === 'modules/') {
+			$path = substr($path, strlen('modules/'));
+		}
+
+		if (false !== strpos($path, '..')) {
+			return null;
+		}
+
+		return @file_get_contents(Module::DIST_ROOT . '/' . $path) ?: null;
+	}
 
 	/**
 	 * Lists all modules from files and stores a cache
@@ -188,6 +206,7 @@ class Modules
 	{
 		$page = null;
 		$path = null;
+		$has_local_file = null;
 
 		// We are looking for a module
 		if (substr($uri, 0, 2) == 'm/') {
@@ -218,12 +237,15 @@ class Modules
 		}
 
 		// Find out web path
-		if ($module->web) {
+		if ($module->web && $module->enabled && substr($uri, 0, 2) !== 'm/') {
+			$uri = rawurldecode($uri);
+
 			if ($uri == '') {
 				$path = 'index.html';
 			}
-			elseif ($module->hasFile($uri)) {
+			elseif ($module->hasLocalFile($uri)) {
 				$path = $uri;
+				$has_local_file = true;
 			}
 			elseif (($page = Web::getByURI($uri)) && $page->status == Page::STATUS_ONLINE) {
 				$path = $page->template();
@@ -239,18 +261,7 @@ class Modules
 			throw new UserException('This page is currently disabled.');
 		}
 
-		// Error if path is not valid
-		if (!$module->isValidPath($path)) {
-			if ($module->web) {
-				$path = '404.html';
-			}
-			else {
-				http_response_code(404);
-				throw new UserException('This address is invalid.');
-			}
-		}
-
-		$has_local_file = $module->hasLocalFile($path);
+		$has_local_file ??= $module->hasLocalFile($path);
 		$has_dist_file = !$has_local_file && $module->hasDistFile($path);
 
 		// Check if the file actually exists in the module
@@ -260,5 +271,97 @@ class Modules
 		}
 
 		$module->serve($path, $has_local_file, compact('uri', 'page'));
+	}
+
+	static public function import(string $path): ?Module
+	{
+		$zip = new ZipReader;
+
+		try {
+			$zip->open($path);
+		}
+		catch (\OutOfBoundsException $e) {
+			throw new \InvalidArgumentException('Invalid ZIP file: ' . $e->getMessage(), 0, $e);
+		}
+
+		$module_name = null;
+		$files = [];
+
+		foreach ($zip->iterate() as $name => $file) {
+			if ($name == 'modules' || $file['dir']) {
+				continue;
+			}
+
+			if (strpos($name, 'modules/') !== 0) {
+				throw new \InvalidArgumentException('Invalid ZIP file: invalid path:' . $name);
+			}
+
+			$_mod = strtok(substr($name, strlen('modules/')), '/');
+
+			if (!$module_name) {
+				if (!$_mod || !preg_match(Module::VALID_NAME_REGEXP, $_mod)) {
+					throw new \InvalidArgumentException('Invalid module name (allowed: [a-z][a-z0-9]*(_[a-z0-9])*): ' . $_mod);
+				}
+
+				$module_name = $_mod;
+			}
+			elseif ($module_name !== $_mod) {
+				throw new \InvalidArgumentException('Two different modules names found.');
+			}
+
+			$_name = strtok(false);
+			$files[$_name] = $name;
+		}
+
+		if (!$module_name || !count($files)) {
+			throw new \InvalidArgumentException('No module found in archive');
+		}
+
+		$base = File::CONTEXT_MODULES . '/' . $module_name;
+
+		if (Files::exists($base)) {
+			return null;
+		}
+
+		try {
+			foreach ($files as $local_name => $source) {
+				$f = Files::createObject($base . '/' . $local_name);
+				$fp = fopen('php://temp', 'wb');
+				$zip->extractToPointer($fp, $source);
+				rewind($fp);
+				$f->store(['pointer' => $fp]);
+			}
+
+			$module = self::get($module_name) ?? self::create($module_name);
+
+			if (!$module) {
+				throw new \InvalidArgumentException('Invalid module information');
+			}
+
+			return $module;
+		}
+		catch (ValidationException $e) {
+			$dir = Files::get($base);
+
+			// Delete any extracted files so far
+			if ($dir) {
+				$dir->delete();
+			}
+
+			throw new \InvalidArgumentException('Invalid file: ' . $e->getMessage(), 0, $e);
+		}
+		catch (\Exception $e) {
+			$dir = Files::get($base);
+
+			// Delete any extracted files so far
+			if ($dir) {
+				$dir->delete();
+			}
+
+			throw $e;
+		}
+		finally {
+			unset($zip);
+		}
 	}
 }

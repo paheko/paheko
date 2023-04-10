@@ -7,35 +7,59 @@ use Garradin\Entities\Web\Page;
 
 require_once __DIR__ . '/_inc.php';
 
-$current_path = qg('p') ?: '';
-$cat = null;
+$page = null;
 
-if ($current_path) {
-	$cat = Web::get($current_path);
+if (qg('p')) {
+	$page = Web::get(qg('p'));
 
-	if (!$cat) {
-		throw new UserException('Catégorie inconnue');
+	if (!$page) {
+		throw new UserException('Page inconnue : inexistante ou supprimée');
+	}
+}
+elseif (qg('uri')) {
+	$page = Web::getByURI(qg('uri'));
+
+	if (!$page) {
+		throw new UserException('Page inconnue : inexistante ou supprimée');
+	}
+}
+
+if ($page) {
+	$links_errors = $page->checkInternalLinks();
+
+	if (qg('toggle_type') !== null && $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)) {
+		$page->toggleType();
+		$page->save();
+		Utils::redirect('!web/?p=' . $page->path);
 	}
 }
 else {
 	foreach (Web::sync() as $error) {
 		$form->addError($error);
 	}
+
+	$links_errors = Web::checkAllInternalLinks();
 }
 
-$order_date = qg('order_date') !== null;
+$cat = $page && $page->isCategory() ? $page : null;
 
 $categories = Web::listCategories($cat ? $cat->path : '');
-$pages = Web::listPages($cat ? $cat->path : '', $order_date);
-$title = $cat ? sprintf('Gestion du site web : %s', $cat->title) : 'Gestion du site web';
+$pages = Web::getPagesList($cat ? $cat->path : '');
+$drafts = Web::getDraftsList($cat ? $cat->path : '');
+
+$pages->loadFromQueryString();
+$drafts->loadFromQueryString();
+
+$title = $page ? sprintf('%s — Gestion du site web', $page->title) : 'Gestion du site web';
+
 $type_page = Page::TYPE_PAGE;
 $type_category = Page::TYPE_CATEGORY;
-$breadcrumbs = $cat ? $cat->getBreadcrumbs() : [];
+$breadcrumbs = $page ? $page->getBreadcrumbs() : [];
 
-$parent = $cat ? $cat->parent : null;
 
-$links_errors = $cat !== null ? [] : Web::checkAllInternalLinks();
+$tpl->assign('custom_js', ['web_gallery.js']);
+$tpl->assign('custom_css', ['web.css', '!web/css.php']);
 
-$tpl->assign(compact('categories', 'pages', 'title', 'current_path', 'parent', 'type_page', 'type_category', 'order_date', 'breadcrumbs', 'cat', 'links_errors'));
+$tpl->assign(compact('categories', 'pages', 'drafts', 'title', 'type_page', 'type_category', 'breadcrumbs', 'page', 'links_errors'));
 
 $tpl->display('web/index.tpl');

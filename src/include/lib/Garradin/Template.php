@@ -27,8 +27,34 @@ class Template extends Smartyer
 
 	public function display($template = null)
 	{
-		if (isset($_GET['_pdf'])) {
-			return $this->PDF($template);
+		$session = Session::getInstance();
+		$this->assign('table_export', false);
+		$this->assign('pdf_export', false);
+
+		if ($session->isLogged(true)) {
+			if (isset($_GET['_pdf'])) {
+				$this->assign('pdf_export', true);
+				return $this->PDF($template);
+			}
+			elseif (isset($_GET['_export']) && $_GET['_export'] == 'test') {
+				$this->assign('table_export', true);
+			}
+			elseif (isset($_GET['_export'])) {
+				$this->assign('table_export', true);
+				$html = $this->fetch($template);
+
+				if (!stripos($html, '<table')) {
+					throw new UserException('Nothing to export: no table found');
+				}
+
+				$title = 'Export';
+
+				if (preg_match('!<title>([^<]+)</title>!', $html, $match)) {
+					$title = html_entity_decode(trim($match[1]));
+				}
+
+				return CSV::exportHTML($_GET['_export'], $html, $title);
+			}
 		}
 
 		return parent::display($template);
@@ -157,6 +183,11 @@ class Template extends Smartyer
 			}, $str);
 		});
 
+
+		$this->register_modifier('restore_snippet_markup', function ($str) {
+			return preg_replace('!&lt;(/?mark)&gt;!', '<$1>', $str);
+		});
+
 		$this->register_modifier('format_skriv', function ($str) {
 			$skriv = new Skriv;
 			return $skriv->render((string) $str);
@@ -224,21 +255,39 @@ class Template extends Smartyer
 
 	public function widgetExportMenu(array $params): string
 	{
+		$url = $params['href'] ?? Utils::getSelfURL();
+		$suffix = $params['suffix'] ?? 'export=';
+
+		if (false !== strpos($url, '?')) {
+			$url .= '&';
+		}
+		else {
+			$url .= '?';
+		}
+
+		$url .= $suffix;
+
+		$xlsx = $params['xlsx'] ?? null;
+
+		if (null === $xlsx) {
+			$xlsx = !empty(CALC_CONVERT_COMMAND);
+		}
+
 		if (!empty($params['form'])) {
 			$name = $params['name'] ?? 'export';
 			$out = CommonFunctions::button(['value' => 'csv', 'shape' => 'export', 'label' => 'Export CSV', 'name' => $name, 'type' => 'submit']);
 			$out .= CommonFunctions::button(['value' => 'ods', 'shape' => 'export', 'label' => 'Export LibreOffice', 'name' => $name, 'type' => 'submit']);
 
-			if (CALC_CONVERT_COMMAND) {
+			if ($xlsx) {
 				$out .= CommonFunctions::button(['value' => 'xlsx', 'shape' => 'export', 'label' => 'Export Excel', 'name' => $name, 'type' => 'submit']);
 			}
 		}
 		else {
-			$out  = CommonFunctions::linkButton(['href' => $params['href'] . 'csv', 'label' => 'Export CSV', 'shape' => 'export']);
-			$out .= ' ' . CommonFunctions::linkButton(['href' => $params['href'] . 'ods', 'label' => 'Export LibreOffice', 'shape' => 'export']);
+			$out  = CommonFunctions::linkButton(['href' => $url . 'csv', 'label' => 'Export CSV', 'shape' => 'export']);
+			$out .= ' ' . CommonFunctions::linkButton(['href' => $url . 'ods', 'label' => 'Export LibreOffice', 'shape' => 'export']);
 
-			if (CALC_CONVERT_COMMAND) {
-				$out .= ' ' . CommonFunctions::linkButton(['href' => $params['href'] . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']);
+			if ($xlsx !== false) {
+				$out .= ' ' . CommonFunctions::linkButton(['href' => $url . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']);
 			}
 		}
 
@@ -258,7 +307,7 @@ class Template extends Smartyer
 
 		$out = sprintf('
 			<span class="menu-btn %s">
-				<b data-icon="%s" class="btn">%s</b>
+				<b data-icon="%s" class="btn" ondblclick="this.parentNode.querySelector(\'a, button\').click();">%s</b>
 				<span><span>',
 			htmlspecialchars($params['class'] ?? ''),
 			Utils::iconUnicode($params['shape']),
@@ -334,6 +383,17 @@ class Template extends Smartyer
 
 		if ($field->type == 'checkbox') {
 			return $v ? 'Oui' : 'Non';
+		}
+		elseif ($field->type == 'file' && isset($params['thumb_url'])) {
+			$session = Session::getInstance();
+
+			foreach (Files::listForUser($params['user_id'], $field->name) as $file) {
+				return '<aside class="file">'
+					. $file->link($session, 'auto', false, $params['thumb_url'])
+					. '</aside>';
+			}
+
+			return '';
 		}
 
 		if (empty($v)) {
@@ -521,7 +581,7 @@ class Template extends Smartyer
 		{
 			if ($i > $prev + 1)
 			{
-				$out .= '<tr><td colspan="5" class="separator"><hr /></td></tr>';
+				$out .= '<tr class="separator"><td colspan="5"><hr /></td></tr>';
 			}
 
 			list($type, $old, $new) = $line;
@@ -532,14 +592,14 @@ class Template extends Smartyer
 			if ($type == \KD2\SimpleDiff::INS)
 			{
 				$class2 = 'ins';
-				$t2 = '<span data-icn="➕"></span>';
+				$t2 = '<span data-icon="➕"></span>';
 				$old = htmlspecialchars($old, ENT_QUOTES, 'UTF-8');
 				$new = htmlspecialchars($new, ENT_QUOTES, 'UTF-8');
 			}
 			elseif ($type == \KD2\SimpleDiff::DEL)
 			{
 				$class1 = 'del';
-				$t1 = '<span data-icn="➖"></span>';
+				$t1 = '<span data-icon="➖"></span>';
 				$old = htmlspecialchars($old, ENT_QUOTES, 'UTF-8');
 				$new = htmlspecialchars($new, ENT_QUOTES, 'UTF-8');
 			}
@@ -547,8 +607,8 @@ class Template extends Smartyer
 			{
 				$class1 = 'del';
 				$class2 = 'ins';
-				$t1 = '<span data-icn="➖"></span>';
-				$t2 = '<span data-icn="➕"></span>';
+				$t1 = '<span data-icon="➖"></span>';
+				$t2 = '<span data-icon="➕"></span>';
 
 				$lineDiff = \KD2\SimpleDiff::wdiff($old, $new);
 				$lineDiff = htmlspecialchars($lineDiff, ENT_QUOTES, 'UTF-8');

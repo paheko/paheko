@@ -23,12 +23,6 @@
 			{/if}
 			</dl>
 		</fieldset>
-
-		{if $user.id != $logged_user.id}
-		<p>
-			{linkbutton shape="settings" label="Modifier le mot de passe" href="edit_security.php?id=%d"|args:$user.id target="_dialog"}
-		</p>
-		{/if}
 	</aside>
 
 	<fieldset class="main">

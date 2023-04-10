@@ -39,8 +39,8 @@ class Page extends Entity
 
 	const FORMATS_LIST = [
 		Render::FORMAT_MARKDOWN => 'MarkDown',
-		Render::FORMAT_SKRIV => 'SkrivML',
 		Render::FORMAT_ENCRYPTED => 'Chiffré',
+		Render::FORMAT_SKRIV => 'SkrivML',
 	];
 
 	const STATUS_ONLINE = 'online';
@@ -141,6 +141,16 @@ class Page extends Entity
 		return Render::render($this->format, $this->file(), $this->content, $user_prefix);
 	}
 
+	public function excerpt(int $length = 600): string
+	{
+		return $this->preview(mb_substr($this->content, 0, $length) . "\n\n…");
+	}
+
+	public function requiresExcerpt(int $length = 600): bool
+	{
+		return mb_strlen($this->content) > $length;
+	}
+
 	public function preview(string $content): string
 	{
 		return Render::render($this->format, $this->file(), $content, '#');
@@ -199,7 +209,7 @@ class Page extends Entity
 		}
 		else {
 			$content = $this->render();
-			$this->file()->indexForSearch($content, $this->title, 'text/html');
+			$this->file()->indexForSearch(compact('content'), $this->title, 'text/html');
 		}
 	}
 
@@ -302,6 +312,8 @@ class Page extends Entity
 		elseif (empty($source['format'])) {
 			$this->set('format', Render::FORMAT_MARKDOWN);
 		}
+
+		$this->set('status', empty($source['status']) ? self::STATUS_ONLINE : $source['status']);
 
 		return parent::importForm($source);
 	}
@@ -579,6 +591,16 @@ class Page extends Entity
 		else {
 			$this->set('type', self::TYPE_CATEGORY);
 		}
+	}
+
+	public function isCategory(): bool
+	{
+		return $this->type == self::TYPE_CATEGORY;
+	}
+
+	public function isOnline(): bool
+	{
+		return $this->status == self::STATUS_ONLINE;
 	}
 
 	static public function fromFile(File $file): self
