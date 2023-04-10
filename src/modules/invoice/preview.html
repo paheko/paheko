@@ -7,7 +7,7 @@
 {{#load id=$_GET.id}}
 
 {{:include file='./include/preview_style.tpl'}}
-{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, TYPE_LABELS, STATUS_LABELS, CANCELLED_LABEL, NONPROFIT_VAT_EXEMPTION_TYPE'}}
+{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, TYPE_LABELS, STATUS_LABELS, QUOTATION_CANCELLED_LABEL, INVOICE_CANCELLED_LABEL, NONPROFIT_VAT_EXEMPTION_TYPE'}}
 {{:assign var="document_type_label" from="TYPE_LABELS.%s"|args:$type}}
 {{:assign var='DRAFT_LABEL' from='STATUS_LABELS.%s'|args:$DRAFT_STATUS}}
 
@@ -54,9 +54,8 @@
 
 <h1>
 	Objet : {{$title}}
-	{{if $status === $DRAFT_STATUS}} - <span class="important_status">{{$DRAFT_LABEL}}</span>
-	{{elseif $cancelled}} - <span class="important_status">{{$CANCELLED_LABEL}}</span>
-	{{/if}}
+	{{if $cancelled}} - <span class="important_status">{{if $type === $INVOICE_TYPE}}{{$INVOICE_CANCELLED_LABEL}}{{else}}{{$QUOTATION_CANCELLED_LABEL}}{{/if}}</span>{{/if}}
+	{{if $status === $DRAFT_STATUS}} - <span class="important_status">{{$DRAFT_LABEL}}</span>{{/if}}
 </h1>
 <ul class="document_details">
 	<li>Date : {{$date|date_short}}</li>

@@ -1,10 +1,12 @@
 <ul class="list_action_buttons">
 {{if $status == $DRAFT_STATUS}}
-	{{#restrict section="accounting" level="write"}}
-		<li><form method="POST" action="{{"edit.html?id=%d"|args:$id}}">
-			{{:button type="submit" label="Modifier" shape="edit" name="edit_button"}}
-		</form></li>
-	{{/restrict}}
+	{{if !$cancelled}}
+		{{#restrict section="accounting" level="write"}}
+			<li><form method="POST" action="{{"edit.html?id=%d"|args:$id}}">
+				{{:button type="submit" label="Modifier" shape="edit" name="edit_button"}}
+			</form></li>
+		{{/restrict}}
+	{{/if}}
 	<li>{{:linkbutton label="Aperçu" href="preview.html?id=%s"|args:$id shape="document"}}</li>
 	{{#restrict section="accounting" level="write"}}
 		<li><form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_deletion"|args:$id:$type}}">
