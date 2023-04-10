@@ -4,7 +4,7 @@
 
 {{:admin_header title="Devis et factures" current="acc" custom_css="./include/style.css"}}
 {{:include file='./include/navigation.html'}}
-{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, VALIDATED_STATUS, REJECTED_STATUS'}}
+{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, VALIDATED_STATUS, REJECTED_STATUS, PAID_STATUS, QUOTATION_TYPE, INVOICE_TYPE'}}
 
 {{* ==================== Listing ==================== *}}
 
@@ -23,47 +23,59 @@
 	<thead>
 		<tr>
 			<th>Nom</th>
-			<th>Devis en attente</th>
-			<th>Devis validés</th>
-			<th>Devis rejetés</th>
-			<th>Factures</th>
-			<th>Brouillons</th>
+			<th class="num">Devis en attente</th>
+			<th class="num">Devis validés</th>
+			<th class="num">Devis rejetés</th>
+			<th class="num">Fact. en souffr.</th>
+			<th class="num">Fact. réglées</th>
+			<th class="num">Brouillons</th>
 		</tr>
 	</thead>
 	<tbody>
 {{:assign previous_customer='-1'}}
 {{:assign previous=null}}
-{{:assign var='status_number.%s'|args:$AWAITING_STATUS value=0}}
-{{:assign var='status_number.%s'|args:$VALIDATED_STATUS value=0}}
-{{:assign var='status_number.%s'|args:$REJECTED_STATUS value=0}}
-{{:assign var='status_number.%s'|args:$DRAFT_STATUS value=0}}
+{{:assign var='status_number.%s.%s'|args:$QUOTATION_TYPE:$AWAITING_STATUS value=0}}
+{{:assign var='status_number.%s.%s'|args:$QUOTATION_TYPE:$VALIDATED_STATUS value=0}}
+{{:assign var='status_number.%s.%s'|args:$QUOTATION_TYPE:$REJECTED_STATUS value=0}}
+{{:assign var='status_number.%s.%s'|args:$QUOTATION_TYPE:$DRAFT_STATUS value=0}}
+{{:assign var='status_number.%s.%s'|args:$INVOICE_TYPE:$AWAITING_STATUS value=0}}
+{{:assign var='status_number.%s.%s'|args:$INVOICE_TYPE:$PAID_STATUS value=0}}
+
+{{:assign where="json_extract(document, '$.cancelled') = false"}}
+{{if !$_GET.count_archived}}
+	{{:assign where=$where|cat:" AND json_extract(document, '$.archived') = false"}}
+{{/if}}
 {{#sql
 	select="
 		json_extract(document, '$.recipient_business_name') AS recipient_business_name,
 		json_extract(document, '$.recipient_member_id') AS customer_id,
 		json_extract(document, '$.status') AS status,
+		json_extract(document, '$.type') AS type,
 		COUNT(json_extract(document, '$.status')) AS document_status_quantity
 	"
 	tables='module_data_invoice'
-	where="json_extract(document, '$.type') = 'quotation'"
-	group='recipient_business_name, status'
-	order='recipient_business_name, status'
+	where=$where
+	group='recipient_business_name, type, status'
+	order='recipient_business_name, type, status'
 }}
 	{{if $recipient_business_name !== $previous_customer && $previous_customer !== '-1'}}
 		<tr>
 			<td>{{:link href="./customer.html?show=customers&id=%s"|args:$previous.recipient_business_name label=$previous.recipient_business_name}}</td>
-			<td>{{:assign var='number' from='status_number.%s'|args:$AWAITING_STATUS}}{{$number}}</td>
-			<td>{{:assign var='number' from='status_number.%s'|args:$VALIDATED_STATUS}}{{$number}}</td>
-			<td>{{:assign var='number' from='status_number.%s'|args:$REJECTED_STATUS}}{{$number}}</td>
-			<td>[prochainement]</td>
-			<td>{{:assign var='number' from='status_number.%s'|args:$DRAFT_STATUS}}{{$number}}</td>
+			<td class="num">{{:assign var='number' from='status_number.%s.%s'|args:$QUOTATION_TYPE:$AWAITING_STATUS}}{{$number}}</td>
+			<td class="num">{{:assign var='number' from='status_number.%s.%s'|args:$QUOTATION_TYPE:$VALIDATED_STATUS}}{{$number}}</td>
+			<td class="num">{{:assign var='number' from='status_number.%s.%s'|args:$QUOTATION_TYPE:$REJECTED_STATUS}}{{$number}}</td>
+			<td class="num">{{:assign var='number' from='status_number.%s.%s'|args:$INVOICE_TYPE:$AWAITING_STATUS}}{{$number}}</td>
+			<td class="num">{{:assign var='number' from='status_number.%s.%s'|args:$INVOICE_TYPE:$PAID_STATUS}}{{$number}}</td>
+			<td class="num">{{:assign var='number' from='status_number.%s.%s'|args:$QUOTATION_TYPE:$DRAFT_STATUS}}{{$number}}</td>
 		</tr>
-		{{:assign var='status_number.%s'|args:$AWAITING_STATUS value=0}}
-		{{:assign var='status_number.%s'|args:$VALIDATED_STATUS value=0}}
-		{{:assign var='status_number.%s'|args:$REJECTED_STATUS value=0}}
-		{{:assign var='status_number.%s'|args:$DRAFT_STATUS value=0}}
+		{{:assign var='status_number.%s.%s'|args:$QUOTATION_TYPE:$AWAITING_STATUS value=0}}
+		{{:assign var='status_number.%s.%s'|args:$QUOTATION_TYPE:$VALIDATED_STATUS value=0}}
+		{{:assign var='status_number.%s.%s'|args:$QUOTATION_TYPE:$REJECTED_STATUS value=0}}
+		{{:assign var='status_number.%s.%s'|args:$QUOTATION_TYPE:$DRAFT_STATUS value=0}}
+		{{:assign var='status_number.%s.%s'|args:$INVOICE_TYPE:$AWAITING_STATUS value=0}}
+		{{:assign var='status_number.%s.%s'|args:$INVOICE_TYPE:$PAID_STATUS value=0}}
 	{{/if}}
-	{{:assign var='status_number.%s'|args:$status value=$document_status_quantity}}
+	{{:assign var='status_number.%s.%s'|args:$type:$status value=$document_status_quantity}}
 	{{:assign previous_customer=$recipient_business_name}}
 	{{:assign .='previous'}}
 {{/sql}}
@@ -71,16 +83,29 @@
 {{if $previous}}
 	<tr>
 		<td>{{:link href="./customer.html?show=customers&id=%s"|args:$previous.recipient_business_name label=$previous.recipient_business_name}}</td>
-		<td>{{:assign var='number' from='status_number.%s'|args:$AWAITING_STATUS}}{{$number}}</td>
-		<td>{{:assign var='number' from='status_number.%s'|args:$VALIDATED_STATUS}}{{$number}}</td>
-		<td>{{:assign var='number' from='status_number.%s'|args:$REJECTED_STATUS}}{{$number}}</td>
-		<td>[prochainement]</td>
-		<td>{{:assign var='number' from='status_number.%s'|args:$DRAFT_STATUS}}{{$number}}</td>
+		<td class="num">{{:assign var='number' from='status_number.%s.%s'|args:$QUOTATION_TYPE:$AWAITING_STATUS}}{{$number}}</td>
+		<td class="num">{{:assign var='number' from='status_number.%s.%s'|args:$QUOTATION_TYPE:$VALIDATED_STATUS}}{{$number}}</td>
+		<td class="num">{{:assign var='number' from='status_number.%s.%s'|args:$QUOTATION_TYPE:$REJECTED_STATUS}}{{$number}}</td>
+		<td class="num">{{:assign var='number' from='status_number.%s.%s'|args:$INVOICE_TYPE:$AWAITING_STATUS}}{{$number}}</td>
+		<td class="num">{{:assign var='number' from='status_number.%s.%s'|args:$INVOICE_TYPE:$PAID_STATUS}}{{$number}}</td>
+		<td class="num">{{:assign var='number' from='status_number.%s.%s'|args:$QUOTATION_TYPE:$DRAFT_STATUS}}{{$number}}</td>
 	</tr>
 {{/if}}
 
 	</tbody>
 </table>
+
+{{if !$_GET.count_archived}}
+	<p>
+		Les documents archivés ne sont pas comptabilisés ici.<br />
+		{{:link href="./customers.html?show=customers&count_archived=true" label="Recalculer en comptabilisant les documents archivés"}}.
+	</p>
+{{else}}
+	<p>
+		Cette liste comprend les documents archivés 🗃.<br />
+		{{:link href="./customers.html?show=customers" label="Retirer les documents archivés du décompte"}}.
+	</p>
+{{/if}}
 
 {{:admin_footer}}
 

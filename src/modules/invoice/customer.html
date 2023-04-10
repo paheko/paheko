@@ -5,7 +5,7 @@
 {{:admin_header title="Devis et factures" current="acc" custom_css="./include/style.css"}}
 {{:include file='./include/navigation.html'}}
 
-{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, REJECTED_STATUS, VALIDATED_STATUS, MISC_STATUS, STATUS_LABELS, INVOICE_STATUS_LABELS, TYPE_LABELS, QUOTATION_CANCELLED_LABEL, INVOICE_CANCELLED_LABEL, QUOTATION_TYPE, INVOICE_TYPE'}}
+{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, REJECTED_STATUS, VALIDATED_STATUS, PAID_STATUS, MISC_STATUS, STATUS_LABELS, INVOICE_STATUS_LABELS, TYPE_LABELS, QUOTATION_CANCELLED_LABEL, INVOICE_CANCELLED_LABEL, QUOTATION_TYPE, INVOICE_TYPE'}}
 
 {{* ==================== Listing ==================== *}}
 
@@ -55,6 +55,7 @@
 {{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where order=$list_order type=$INVOICE_TYPE status=$AWAITING_STATUS STATUS_LABELS=$INVOICE_STATUS_LABELS}}
 {{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where order=$list_order type=$INVOICE_TYPE status=$REJECTED_STATUS STATUS_LABELS=$INVOICE_STATUS_LABELS}}
 {{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where order=$list_order type=$INVOICE_TYPE status=$VALIDATED_STATUS STATUS_LABELS=$INVOICE_STATUS_LABELS}}
+{{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where order=$list_order type=$INVOICE_TYPE status=$PAID_STATUS STATUS_LABELS=$INVOICE_STATUS_LABELS}}
 {{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where_cancelled order=$list_order type=$INVOICE_TYPE STATUS_LABELS=$INVOICE_STATUS_LABELS}}
 {{:include file='./include/customer_documents_for_status.tpl' select=$list_select where=$list_where order=$list_order type=$INVOICE_TYPE status=$DRAFT_STATUS STATUS_LABELS=$INVOICE_STATUS_LABELS}}
 
