@@ -67,8 +67,8 @@
 	<fieldset>
 		<legend>Informations</legend>
 		{{:input required=false name="introduction_text" type="textarea" label="Texte d'introduction" source=$module.config default="Madame, Monsieur,\nSuite à votre demande, veuillez trouver ci-dessous notre proposition de devis." placeholder="ex : Formule de politesse." cols="50" rows="4"}}
-		{{:input required=false name="payment_text" type="textarea" label="Instructions de paiement" default=$module.config.payment_text placeholder="BIC :&#10;ABCDEFGH012&#10;FR9901234567890123456789012&#10;La banque eh! tic&#10;&#10;Paiement à réaliser sous 15 jours." cols="50" rows="5"}}
-		{{:input required=false name="extra_text" type="textarea" label="Informations complémentaires affichées en bas des devis" default=$module.config.extra_text placeholder="ex : Formule de politesse." cols="50" rows="3"}}
+		{{:input required=false name="payment_text" type="textarea" label="Instructions de paiement" source=$module.config placeholder="BIC :&#10;ABCDEFGH012&#10;FR9901234567890123456789012&#10;La banque eh! tic&#10;&#10;Paiement à réaliser sous 15 jours." cols="50" rows="5"}}
+		{{:input required=false name="extra_text" type="textarea" label="Informations complémentaires affichées en bas des devis" source=$module.config placeholder="ex : Formule de politesse." cols="50" rows="3"}}
 	</fieldset>
 	{{:button type="submit" name="save" label="Enregistrer la configuration" class="main"}}
 </form>

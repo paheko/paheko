@@ -9,7 +9,7 @@
 
 {{* ==================== Listing ==================== *}}
 
-{{:assign list_select="key; id AS 'Numéro'; datetime($$.date) AS 'Émission'; $$.deadline AS 'Échéance'; $$.subject AS 'Intitulé'; $$.total AS 'Montant'; $$.recipient_member_id AS 'Membre'; $$.recipient_member_number; $$.status"}}
+{{:assign list_select="key; id AS 'Numéro'; datetime($$.date) AS 'Émission'; $$.deadline AS 'Échéance'; $$.archived AS '🗃'; $$.subject AS 'Intitulé'; $$.total AS 'Montant'; $$.recipient_member_id AS 'Membre'; $$.recipient_member_number; $$.status"}}
 {{:assign list_where="$$.cancelled = false AND $$.recipient_business_name = :business_name AND $$.type = :type AND $$.status = :status"}}
 {{:assign list_where_cancelled="$$.recipient_business_name = :business_name AND $$.type = :type AND $$.cancelled = true"}}
 {{:assign list_order=8}}
@@ -24,7 +24,7 @@
 {{/sql}}
 
 {{if !$found}}
-	<p class="error block">Aucun devis pour ce client.</p>
+	<p class="error block">Aucun devis pour ce·tte client·e.</p>
 	{{#restrict section="accounting" level="write"}}
 		<p class="infos">{{:linkbutton href="edit.html" label="Créer un devis" shape="plus"}}</p>
 	{{/restrict}}
@@ -46,7 +46,7 @@
 {{/sql}}
 
 {{if !$found}}
-	<p class="error block">Aucune facture pour ce client.</p>
+	<p class="error block">Aucune facture pour ce·tte client·e.</p>
 	{{#restrict section="accounting" level="write"}}
 		<p class="infos">{{:linkbutton href="edit.html" label="Créer un devis" shape="plus"}}</p>
 	{{/restrict}}

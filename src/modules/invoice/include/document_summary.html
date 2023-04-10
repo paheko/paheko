@@ -7,8 +7,12 @@
 		<dd>{{$subject}}</dd>
 		<dt>Date :</dt>
 		<dd>{{$date|date_short}}</dd>
-		<dt>Total :</dt>
-		<dd>{{$total|money_currency}}</dd>
+		{{if $items}}
+			<dt>Total :</dt>
+			<dd>{{$total|money_currency:false}}</dd>
+		{{else}}
+			<dt>Aucun article</dt>
+		{{/if}}
 		<dt>Statut en cours :</dt>
 		{{if !$cancelled}}
 			<dd>{{$status_label}}</dd>

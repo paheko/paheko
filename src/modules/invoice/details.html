@@ -139,7 +139,7 @@
 				{{#load id=$duplicated_from_id}}{{:assign .='parent'}}{{/load}}
 				{{if $parent}} {{* if the parent was a draft it may have been deleted since the duplication *}}
 					<p>
-						Dupliqué depuis {{if $type === $INVOICE_TYPE}}la{{else}}le{{/if}}
+						Dupliqué·e depuis {{if $type === $INVOICE_TYPE}}la{{else}}le{{/if}}
 						{{:link href="details.html?id=%d&show=quotation"|args:$parent.id label=$duplicate_label|args:$parent.key}}
 						({{if $parent.cancelled}}{{$INVOICE_CANCELLED_LABEL}}{{else}}{{:assign var='parent_status_label' from="INVOICE_STATUS_LABELS.%s"|args:$parent.status}}{{$parent_status_label}}{{/if}}).
 					</p>
@@ -156,10 +156,10 @@
 			{{if $recipient_member_id}}
 				{{#users id=$recipient_member_id|intval}}{{:assign .='member'}}{{/users}}
 				{{if !$member}}
-					<p class="infos">Associé à l'ancien.ne membre {{if $recipient_member_number}}n°{{$recipient_member_number}}{{else}}#{{$recipient_member_id}}{{/if}} (compte supprimé).</p>
+					<p class="infos">Associé·e à l'ancien·ne membre {{if $recipient_member_number}}n°{{$recipient_member_number}}{{else}}#{{$recipient_member_id}}{{/if}} (compte supprimé).</p>
 				{{else}}
 					<p class="infos">
-						Associé au membre {{if $recipient_member_number}}n°{{$recipient_member_number}}{{/if}} : "{{:link href="!users/details.php?id=%d"|args:$member.id label=$member.nom}}",
+						Associé·e au membre {{if $recipient_member_number}}n°{{$recipient_member_number}}{{/if}} : "{{:link href="!users/details.php?id=%d"|args:$member.id label=$member.nom}}",
 						{{if $recipient_business_name !== $member.nom}} sous la désignation "{{$recipient_business_name}}".{{/if}}<br />
 						{{:link href="customer.html?show=customers&id=%s"|args:$recipient_business_name label='Voir tous les devis et factures de "%s".'|args:$recipient_business_name}}
 					</p>
@@ -181,7 +181,7 @@
 				<dt>Référence :</dt>
 				<dd>{{$key}}</dd>
 				<dt>Total :</dt>
-				<dd>{{$total|floatval|money_currency:false}}</dd>
+				<dd>{{$total|intval|money_currency:false}}</dd>
 			</dl>
 		</fieldset>
 		

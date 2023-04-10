@@ -18,10 +18,11 @@
 	:status=$status
 }}
 <tr>
-	<td><a href="details.html?id={{$id|intval}}">{{$key}}</a></td>
+	<td>{{:link href="details.html?id=%d"|args:$id label=$key}}</td>
 	<td>{{$date|date_short}}</td>
 	<td>{{$deadline|date_short}}</td>
-	<td><a href="details.html?id={{$id|intval}}">{{$subject}}</a></td>
+	<td class="check">{{if $archived}}<span title="Archivé">🗃</span>{{/if}}</td>
+	<td>{{:link href="details.html?id=%d"|args:$id label=$subject}}</td>
 	<td class="money">{{$total|money_currency}}</td>
 	<td class="num">
 		{{if $recipient_member_id}}

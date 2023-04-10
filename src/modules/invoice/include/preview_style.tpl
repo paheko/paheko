@@ -15,7 +15,7 @@ ul.customer_details {
 	text-align: right;
 }
 
-td.number {
+th.number, td.number {
 	text-align: right;
 }
 

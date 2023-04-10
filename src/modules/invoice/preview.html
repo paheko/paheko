@@ -7,8 +7,9 @@
 {{#load id=$_GET.id}}
 
 {{:include file='./include/preview_style.tpl'}}
-{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, TYPE_LABELS, CANCELLED_LABEL, NONPROFIT_VAT_EXEMPTION_TYPE'}}
+{{:include file='./include/constants.tpl' keep='DRAFT_STATUS, TYPE_LABELS, STATUS_LABELS, CANCELLED_LABEL, NONPROFIT_VAT_EXEMPTION_TYPE'}}
 {{:assign var="document_type_label" from="TYPE_LABELS.%s"|args:$type}}
+{{:assign var='DRAFT_LABEL' from='STATUS_LABELS.%s'|args:$DRAFT_STATUS}}
 
 {{:assign title='%s n°%s'|args:$document_type_label:$key}}
 
@@ -53,7 +54,7 @@
 
 <h1>
 	Objet : {{$title}}
-	{{if $status === $DRAFT_STATUS}} - <span class="important_status">BROUILLON</span>
+	{{if $status === $DRAFT_STATUS}} - <span class="important_status">{{$DRAFT_LABEL}}</span>
 	{{elseif $cancelled}} - <span class="important_status">{{$CANCELLED_LABEL}}</span>
 	{{/if}}
 </h1>
@@ -80,8 +81,8 @@
 				<th>Réf.</th>
 				<th>Dénomination</th>
 				<th>Description</th>
-				<th style="text-align: right;">Prix unitaire</th>
-				<th style="text-align: right;">Quantité</th>
+				<th class="number">Prix unitaire</th>
+				<th class="number">Quantité</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -91,7 +92,7 @@
 				<td>{{$item.name}}</td>
 				<td>{{$item.description|escape|nl2br}}</td>
 				<td class="number">{{$item.unit_price|intval|money_currency:false}}</td>
-				<td class="number">{{$item.quantity}}</td>
+				<td class="number">{{$item.quantity|floatval}}</td>
 			</tr>
 		{{/foreach}}
 		</tbody>
@@ -124,6 +125,10 @@
 	<h3>Informations</h3>
 	{{if $payment_text}}<p>{{$payment_text|escape|nl2br}}</p>{{/if}}
 	{{if $extra_text}}<p>{{$extra_text|escape|nl2br}}</p>{{/if}}
+{{/if}}
+
+{{if $status === $DRAFT_STATUS}}
+	{{:assign signing_date='0001-01-01' signing_place='XXXXXX'}}
 {{/if}}
 
 <p>

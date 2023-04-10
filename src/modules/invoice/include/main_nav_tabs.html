@@ -4,7 +4,7 @@
 	<li{{if $_GET.show == 'unpaid'}} class="current"{{/if}}>{{:link href="./?show=unpaid" label="Fact. en souff."}}</li>
 	<li{{if $_GET.show == 'paid'}} class="current"{{/if}}>{{:link href="./?show=paid" label="Fact. réglées"}}</li>
 	<li{{if $_GET.show == 'archive'}} class="current"{{/if}}>{{:link href="./?show=archive" label="Archives"}}</li>
-	<li{{if $_GET.show == 'customers'}} class="current"{{/if}}>{{:link href="./customers.html?show=customers" label="Clients"}}</li>
+	<li{{if $_GET.show == 'customers'}} class="current"{{/if}}>{{:link href="./customers.html?show=customers" label="Client·e·s"}}</li>
 	{{#restrict section='config' level='admin'}}
 		<li{{if $_GET.show == 'config'}} class="current"{{/if}}>{{:link href="./config.html?show=config" label="Configuration"}}</li>
 	{{/restrict}}

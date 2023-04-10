@@ -82,7 +82,7 @@ function add_input_refresh_total_behavior() {
 		<tbody>
 
 		{{#foreach from=$items key='key' item='item'}}
-			<tr id={{"item_%d_row"|args:$key}} class="item" data-item-id="{{$key}}">
+			<tr id="{{'item_%d_row'|args:$key}}" class="item" data-item-id="{{$key}}">
 				<td>{{:input type="text" name="items[%d][reference]"|args:$key default=$item.reference class="reference"}}</td>
 				<td>{{:input type="text" name="items[%d][name]"|args:$key default=$item.name}}</td>
 				<td>{{:input type="textarea" cols="50" rows="2" name="items[%s][description]"|args:$key default=$item.description class="full-width"}}</td>
@@ -97,7 +97,7 @@ function add_input_refresh_total_behavior() {
 	<p>{{:linkbutton label="Ajouter un article" href="item_form.html" shape="plus" target="_dialog"}}</p>
 	<h3 class="quotation_total">Total des articles</h3>
 	<p>
-		<span id="quotation_total">0 {{$config.currency|htmlspecialchars}}</span>
+		<span id="quotation_total">{{$document.total|intval|money_currency:false}}</span>
 		<input type="hidden" name="quotation_total" id="quotation_total_input" label="" value="" />
 	</p>
 </fieldset>

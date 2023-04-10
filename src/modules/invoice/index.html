@@ -25,7 +25,7 @@
 	{{#restrict section="config" level="write"}}
 		Vous pouvez saisir ses informations sur {{:link href='!config/' label='la page de configuration'}}.
 	{{else}}
-		Veuillez contactez votre administrateur pour qu'il saisisse ses informations.
+		Veuillez contactez votre administrateur/trice pour qu'il/elle saisisse ses informations.
 	{{/restrict}}
 	</p>
 {{/if}}
@@ -69,7 +69,7 @@
 {{/if}}
 
 {{:assign list_select="key; id AS 'Numéro'; datetime($$.date) AS 'Émission'; $$.deadline AS 'Échéance'; $$.recipient_business_name AS 'Tiers'; $$.subject AS 'Intitulé'; $$.total AS 'Montant'; $$.status AS 'Statut'"}}
-{{:assign list_where="$$.type IN ('quotation', 'invoice') AND %s"|args:$filter}}
+{{:assign list_where=$filter}}
 {{:assign list_order=1}}
 {{if !$_GET.show}}{{:assign list_select='$$.parent_id AS "↳"; $$.type AS "Type"; '|cat:$list_select}}{{:assign list_order=3}}{{/if}}
 {{if $_GET.show === 'archive'}}{{:assign list_select='$$.type AS "Type"; '|cat:$list_select}}{{:assign list_order=2}}{{/if}}

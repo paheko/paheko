@@ -30,6 +30,10 @@ table.list tbody tr:hover, table.list tr:nth-child(even):hover, table.list tr.ca
 	background-color: var(--mHoverBgColor);
 }
 
+table.list td {
+	padding: 0.2em 0.2em;
+}
+
 h3.quotation_total {
 	padding: 1em 0em 0.5em 0em;
 }

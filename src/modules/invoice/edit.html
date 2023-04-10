@@ -8,7 +8,7 @@
 {{:include file='./include/constants.tpl' keep='DRAFT_STATUS, AWAITING_STATUS, VALIDATED_STATUS, STATUS_LABELS, VERSION, QUOTATION_TYPE, NONPROFIT_VAT_EXEMPTION_TYPE'}}
 
 {{if $_GET.id}}
-	{{#load id=$_GET.id}}
+	{{#load id=$_GET.id|intval}}
 		{{:assign .="document"}}
 	{{/load}}
 	<h1>Édition du devis n°{{$document.key}} "{{$document.subject}}"</h1>
@@ -30,7 +30,7 @@
 	{{:include file='./include/shim/array_last_num_key.tpl' keep='customer_id, check_errors' array=$_POST.customer name='customer_id' error_message='Membre séléctionné invalide.'}}
 	{{if $customer_id !== null}}
 		{{#users id=$customer_id}}
-			{{:assign recipient_member_id=$id}}
+			{{:assign recipient_member_id=$id|intval}}
 			{{:assign recipient_member_number=$numero|strval}}
 			{{:assign recipient_business_name=$nom}}
 			{{if $adresse}}{{:assign recipient_address=$adresse|cat:"\n":$code_postal:' ':$ville}}{{/if}}
@@ -142,6 +142,7 @@
 			{{:assign var='check_errors.' value='Un document existe déjà avec ce numéro (%s). Veuillez en saisir un différent.'|args:$_POST.key}}
 		{{/if}}
 	{{/if}}
+
 	{{if $check_errors|count}}
 		{{#foreach from=$check_errors item='error'}}
 			<p class="error block">{{$error}}</p>
@@ -223,7 +224,7 @@
 			<dl>{{:input type="list" name="customer" required=false label="Membre" target="!users/selector.php" default=$default_customer_selection can_delete=true}}</dl>
 			{{if $document.recipient_member_id && !$user}}
 				<p class="infos">
-					Attention : Ce devis est associé à l'ancien.ne membre
+					Attention : Ce devis est associé à l'ancien·ne membre
 					{{if $document.recipient_member_number}}n°{{$document.recipient_member_number}}{{else}}#{{$document.recipient_member_id}}{{/if}}
 					dont le compte est supprimé.<br />
 					Mettre à jour ce document des-associera cet ancien compte.
@@ -236,7 +237,7 @@
 				{{:input type="text" name="recipient_business_name" label="Raison sociale" source=$document placeholder="ex : SARL J'aime les deux vies"}}
 				{{:input type="textarea" name="recipient_address" label="Adresse" source=$document placeholder=""}}
 			</dl>
-			<p class="infos" id="manual_input_priority_help">*Si un membre est associé au document, la saisie manuelle est prioritaire sur le nom et l'adresse.</p>
+			<p class="infos" id="manual_input_priority_help">*Si un·e membre est associé·e au document, la saisie manuelle est prioritaire sur le nom et l'adresse.</p>
 		</fieldset>
 	</fieldset>
 
@@ -260,8 +261,8 @@
 		<dl>
 			{{:input type="text" name="key" label="Numéro" source=$document help="Ce numéro doit être unique. Laisser vide pour générer un nouveau numéro."}}
 			{{:input type="text" name="subject" label="Intitulé" source=$document placeholder="ex : Devis pour une location de barnum" required=true}}
-			{{:input type="date" name="date" label="Date du devis" source=$document placeholder="" required=true}}
-			{{:input type="date" name="deadline" label="Échéance pour validation" source=$document placeholder="" required=false}}
+			{{:input type="date" name="date" label="Date du devis" source=$document required=true}}
+			{{:input type="date" name="deadline" label="Échéance pour validation" source=$document required=false}}
 			{{:input type="text" name="org_contact" label="Contact" source=$document default=$org_contact_default required=true}}
 			{{:input type="textarea" name="introduction_text" label="Texte d'introduction" source=$document default=$introduction_text_default placeholder="ex : Formule de politesse." help=$introduction_text_helper required=false cols="50" rows="4"}}
 			{{:input type="textarea" name="comment" label="Remarques internes" source=$document help="Ne seront pas affichées sur le document." required=false cols="50" rows="4"}}
@@ -300,10 +301,11 @@
 
 	<p class="submit">
 		{{if !$document}}
-			{{:button type="submit" name="quotation_submit" label="Créer le devis" class="main"}}
+			{{:assign button_label='Créer le devis'}}
 		{{else}}
-			{{:button type="submit" name="quotation_submit" label="Modifier le devis" class="main"}}
+			{{:assign button_label='Modifier le devis'}}
 		{{/if}}
+		{{:button type="submit" name="quotation_submit" label=$button_label class="main"}}
 	</p>
 </form>
 
