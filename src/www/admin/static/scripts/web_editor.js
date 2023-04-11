@@ -35,6 +35,17 @@
 			format: t.textarea.getAttribute('data-format')
 		};
 
+		// Warn before closing window if content was changed
+		window.addEventListener('beforeunload', (e) => {
+			if (t.textarea.value == t.textarea.defaultValue) {
+				return;
+			}
+
+			e.preventDefault();
+			e.returnValue = '';
+			return true;
+		}, { capture: true });
+
 		// Cancel Escape to close.value
 		if (window.parent && window.parent.g.dialog) {
 			// Always fullscreen in dialogs

@@ -30,6 +30,17 @@
 			this.textarea.form.reset();
 		};
 
+		// Warn before closing window if content was changed
+		window.addEventListener('beforeunload', (e) => {
+			if (code.textarea.value == code.textarea.defaultValue) {
+				return;
+			}
+
+			e.preventDefault();
+			e.returnValue = '';
+			return true;
+		}, { capture: true });
+
 		var help = document.createElement('div');
 		help.className = 'sk_help';
 
