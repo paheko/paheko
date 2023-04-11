@@ -68,6 +68,14 @@ class Module extends Entity
 	{
 		$this->assert(preg_match(self::VALID_NAME_REGEXP, $this->name), 'Nom unique de module invalide: ' . $this->name);
 		$this->assert(trim($this->label) !== '', 'Le libellé ne peut rester vide');
+		$this->assert(!isset($this->author_url) || preg_match('!^(?:https?://|mailto:)!', $this->author_url), 'L\'adresse du site de l\'auteur est invalide');
+		$this->assert(!isset($this->restrict_section) || in_array($this->restrict_section, Session::SECTIONS, true), 'Restriction de section invalide');
+		$this->assert(!isset($this->restrict_level) || in_array($this->restrict_level, Session::ACCESS_LEVELS, true), 'Restriction de niveau invalide');
+
+		if (!$this->exists()) {
+			$this->assert(!DB::getInstance()->test(self::TABLE, 'name = ?', $this->name), 'Un module existe déjà avec ce nom unique');
+			$this->assert(!Files::exists(self::ROOT . '/' . $this->name), 'Un module existe déjà avec ce nom unique');
+		}
 	}
 
 	/**
@@ -99,6 +107,16 @@ class Module extends Entity
 			return false;
 		}
 
+		$restrict_section = null;
+		$restrict_level = null;
+
+		if (isset($ini->restrict_section, $ini->restrict_level)
+			&& array_key_exists($ini->restrict_level, Session::ACCESS_LEVELS)
+			&& in_array($ini->restrict_section, Session::SECTIONS)) {
+			$restrict_section = $ini->restrict_section;
+			$restrict_level = Session::ACCESS_LEVELS[$ini->restrict_level];
+		}
+
 		$this->set('label', $ini->name);
 		$this->set('description', $ini->description ?? null);
 		$this->set('author', $ini->author ?? null);
@@ -106,14 +124,45 @@ class Module extends Entity
 		$this->set('web', !empty($ini->web));
 		$this->set('home_button', !empty($ini->home_button));
 		$this->set('menu', !empty($ini->menu));
-		$this->set('restrict_section', $ini->restrict_section ?? null);
-		$this->set('restrict_level', isset($ini->restrict_section, $ini->restrict_level, Session::ACCESS_WORDS[$ini->restrict_level]) ? Session::ACCESS_WORDS[$ini->restrict_level] : null);
+		$this->set('restrict_section', $restrict_section);
+		$this->set('restrict_level', $restrict_level);
 
 		if ($from_dist && !empty($ini->system)) {
 			$this->set('system', true);
 		}
 
 		return true;
+	}
+
+	public function exportToIni(): void
+	{
+		$ini = '';
+
+		foreach ($this->asArray() as $key => $value) {
+			if ($key == 'name' || $key == 'ini') {
+				continue;
+			}
+
+			if ($key == 'label') {
+				$key = 'name';
+			}
+
+			if ($key == 'restrict_level') {
+				$value = array_search($value, Session::ACCESS_LEVELS);
+			}
+
+			if (trim($value) === '') {
+				$value = 'null';
+			}
+			elseif (is_string($value)) {
+				$value = strtr($value, ['"' => '\\"', "'" => "\\'", '$' => '\\$']);
+				$value = '"' . $value . '"';
+			}
+
+			$ini .= sprintf("%s = %s\n", $key, $value);
+		}
+
+		Files::createFromString($this->path('module.ini'), $ini);
 	}
 
 	public function updateTemplates(): void
@@ -262,7 +311,7 @@ class Module extends Entity
 		foreach ($out as &$file) {
 			$file['editable'] = UserTemplate::isTemplate($file['path'])
 				|| substr($file['type'], 0, 5) === 'text/'
-				|| preg_match('/\.(?:json|md|skriv|html|css|js)$/', $file['name']);
+				|| preg_match('/\.(?:json|md|skriv|html|css|js|ini)$/', $file['name']);
 			$file['open_url'] = '!common/files/preview.php?p=' . rawurlencode($file['file_path']);
 			$file['edit_url'] = '!common/files/edit.php?p=' . rawurlencode($file['file_path']);
 			$file['delete_url'] = '!common/files/delete.php?p=' . rawurlencode($file['file_path']);

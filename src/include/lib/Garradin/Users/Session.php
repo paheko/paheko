@@ -39,12 +39,21 @@ class Session extends \KD2\UserSession
 	const SECTION_CONFIG = 'config';
 	const SECTION_SUBSCRIBE = 'subscribe';
 
+	const SECTIONS = [
+		self::SECTION_WEB,
+		self::SECTION_DOCUMENTS,
+		self::SECTION_USERS,
+		self::SECTION_ACCOUNTING,
+		self::SECTION_CONNECT,
+		self::SECTION_CONFIG,
+	];
+
 	const ACCESS_NONE = 0;
 	const ACCESS_READ = 1;
 	const ACCESS_WRITE = 2;
 	const ACCESS_ADMIN = 9;
 
-	const ACCESS_WORDS = [
+	const ACCESS_LEVELS = [
 		'none' => self::ACCESS_NONE,
 		'read' => self::ACCESS_READ,
 		'write' => self::ACCESS_WRITE,

@@ -94,6 +94,9 @@ class Plugin extends Entity
 			$this->assert(!$this->home_button || $this->hasFile(self::INDEX_FILE), 'Le fichier admin/index.php n\'existe pas alors que la directive "home_button" est activée.');
 			$this->assert(!$this->home_button || $this->hasFile(self::ICON_FILE), 'Le fichier admin/icon.svg n\'existe pas alors que la directive "home_button" est activée.');
 		}
+
+		$this->assert(!isset($this->restrict_section) || in_array($this->restrict_section, Session::SECTIONS, true), 'Restriction de section invalide');
+		$this->assert(!isset($this->restrict_level) || in_array($this->restrict_level, Session::ACCESS_LEVELS, true), 'Restriction de niveau invalide');
 	}
 
 	public function setBrokenMessage(string $str)
@@ -125,6 +128,16 @@ class Plugin extends Entity
 
 		$this->assert(empty($ini->min_version) || version_compare(\Garradin\garradin_version(), $ini->min_version, '>='), sprintf('L\'extension "%s" nécessite Paheko version %s ou supérieure.', $this->name, $ini->min_version));
 
+		$restrict_section = null;
+		$restrict_level = null;
+
+		if (isset($ini->restrict_section, $ini->restrict_level)
+			&& array_key_exists($ini->restrict_level, Session::ACCESS_LEVELS)
+			&& in_array($ini->restrict_section, Session::SECTIONS)) {
+			$restrict_section = $ini->restrict_section;
+			$restrict_level = Session::ACCESS_LEVELS[$ini->restrict_level];
+		}
+
 		$this->set('label', $ini->name);
 		$this->set('version', $ini->version);
 		$this->set('description', $ini->description ?? null);
@@ -132,8 +145,8 @@ class Plugin extends Entity
 		$this->set('author_url', $ini->author_url ?? null);
 		$this->set('home_button', !empty($ini->home_button));
 		$this->set('menu', !empty($ini->menu));
-		$this->set('restrict_section', $ini->restrict_section ?? null);
-		$this->set('restrict_level', isset($ini->restrict_section, $ini->restrict_level, Session::ACCESS_WORDS[$ini->restrict_level]) ? Session::ACCESS_WORDS[$ini->restrict_level] : null);
+		$this->set('restrict_section', $restrict_section);
+		$this->set('restrict_level', $restrict_level);
 
 		return true;
 	}

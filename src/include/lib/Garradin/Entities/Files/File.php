@@ -1158,7 +1158,7 @@ class File extends Entity
 
 	public function editorType(): ?string
 	{
-		static $text_extensions = ['css', 'txt', 'xml', 'html', 'htm', 'tpl'];
+		static $text_extensions = ['css', 'txt', 'xml', 'html', 'htm', 'tpl', 'ini'];
 
 		$ext = $this->extension();
 

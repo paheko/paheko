@@ -89,13 +89,13 @@
 						{/if}
 					</td>
 					<td class="actions">
-						{if $item.module && $item.enabled}
-							{*if $item.module->hasLocal() && $item.module->hasDist()}
-								{linkbutton label="Supprimer mes modifications" href="delete.php?module=%s"|args:$item.name shape="delete" target="_dialog"}
-							{/if*}
+						{if $item.module}
+							{if !$item.module->hasDist()}
+								{linkbutton label="Supprimer" href="delete.php?module=%s"|args:$item.name shape="delete" target="_dialog"}
+							{elseif $item.module->canDelete()}
+								{linkbutton label="Supprimer données et modifications" href="delete.php?module=%s"|args:$item.name shape="delete" target="_dialog"}
+							{/if}
 							{linkbutton label="Modifier" href="edit.php?module=%s"|args:$item.name shape="edit"}
-						{elseif $item.module && !$item.enabled && $item.module->canDelete()}
-							{linkbutton label="Supprimer données et modifications" href="delete.php?module=%s"|args:$item.name shape="delete" target="_dialog"}
 						{elseif $item.plugin && !$item.enabled && $item.installed}
 							{linkbutton label="Supprimer" href="delete.php?plugin=%s"|args:$item.name shape="delete" target="_dialog"}
 						{/if}

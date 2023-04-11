@@ -37,7 +37,7 @@ $form->runIf('content', function () use ($file) {
 $tpl->assign('file', $file);
 
 if (!$editor) {
-	$tpl->display('common/file_upload.tpl');
+	$tpl->display('common/files/upload.tpl');
 }
 elseif ($editor == 'wopi') {
 	echo $file->editorHTML();
