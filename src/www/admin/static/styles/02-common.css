@@ -683,6 +683,10 @@ strong.tag {
     color: rgb(var(--gBgColor));
 }
 
+.tag [data-icon]::before {
+    text-shadow: none;
+}
+
 #confirm_saved {
     position: absolute;
     top: 0;

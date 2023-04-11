@@ -78,6 +78,19 @@ class Module extends Entity
 		}
 	}
 
+	public function importForm(array $source = null)
+	{
+		if (null === $source) {
+			$source = $_POST;
+		}
+
+		if (isset($source['restrict'])) {
+			$this->set('restrict_section', strtok($source['restrict'], '_'));
+			$this->set('restrict_level', (int)strtok(false));
+		}
+
+		parent::importForm($source);
+	}
 	/**
 	 * Fills information from module.ini file
 	 */
@@ -139,7 +152,7 @@ class Module extends Entity
 		$ini = '';
 
 		foreach ($this->asArray() as $key => $value) {
-			if ($key == 'name' || $key == 'ini') {
+			if ($key == 'name' || $key == 'id') {
 				continue;
 			}
 
@@ -151,7 +164,7 @@ class Module extends Entity
 				$value = array_search($value, Session::ACCESS_LEVELS);
 			}
 
-			if (trim($value) === '') {
+			if (null === $value || trim($value) === '') {
 				$value = 'null';
 			}
 			elseif (is_string($value)) {

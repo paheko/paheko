@@ -51,15 +51,17 @@
 				<td>
 					<h3>{if $item.label}{$item.label}{else}{$item.name}{/if}
 						{if $item.module && $item.module->canDelete()}
-							<strong class="tag">Modifiée</strong>
+							<strong class="tag">{icon shape="edit"} Modifiée</strong>
 						{elseif $item.module}
 							<span class="tag">Modifiable</span>
 						{/if}
 					</h3>
 					<small>{$item.description|escape|nl2br}</small><br />
 					<small class="help">
-						{if $item.author}
+						{if $item.author && $item.author_url}
 							Par {link label=$item.author href=$item.author_url target="_blank"}
+						{elseif $item.author}
+							Par <em>{$item.author}</em>
 						{/if}
 						{if $item.plugin && $item.plugin.version}— Version {$item.plugin.version}{/if}
 						{if $item.readme_url}
@@ -135,7 +137,7 @@
 
 <p>
 	{linkbutton shape="help" label="Comment modifier et développer des modules" href="!static/doc/modules.html" target="_dialog"}
-	{linkbutton shape="plus" label="Créer un module" href="new.php"}
+	{linkbutton shape="plus" label="Créer un module" href="new.php" target="_dialog"}
 	{linkbutton shape="import" label="Importer un module" href="import.php" target="_dialog"}
 </p>
 
