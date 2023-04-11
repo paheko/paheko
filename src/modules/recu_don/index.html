@@ -23,7 +23,7 @@
 
 {{else}}
 	{{#transactions id=$_GET.id}}
-		{{:include file="receipt/_header.html" page_size="A5" title="Reçu de don %d - %s"|args:$id:$users_names}}
+		{{:include file="/receipt/_header.html" page_size="A5" title="Reçu de don %d - %s"|args:$id:$users_names}}
 
 			<h1>Reçu de don</h1>
 
@@ -44,7 +44,7 @@
 
 			{{:signature}}
 
-		{{:include file="receipt/_footer.html"}}
+		{{:include file="/receipt/_footer.html"}}
 	{{else}}
 		{{:error message="Le numéro d'écriture fourni n'existe pas."}}
 	{{/transactions}}

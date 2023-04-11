@@ -7,7 +7,7 @@
 {{else}}
 	{{#transactions id=$_GET.id}}
 		{{:assign date_short=$date|date_format:"%d-%m-%Y"}}
-		{{:include file="receipt/_header.html" page_size="A5" title="Bordereau chèques - %d - %s"|args:$id:$date_short}}
+		{{:include file="/receipt/_header.html" page_size="A5" title="Bordereau chèques - %d - %s"|args:$id:$date_short}}
 
 			<h1>Bordereau de remise de chèques</h1>
 
@@ -39,7 +39,7 @@
 
 			<h3>Total : {{$credit|raw|money_currency}}</h3>
 
-		{{:include file="receipt/_footer.html"}}
+		{{:include file="/receipt/_footer.html"}}
 	{{else}}
 		{{:error message="Le numéro d'écriture fourni n'existe pas."}}
 	{{/transactions}}

@@ -354,8 +354,25 @@ class Functions
 		if (substr($path, 0, 2) == './') {
 			$path = Utils::dirname($ut->_tpl_path) . substr($path, 1);
 		}
+		elseif (substr($path, 0, 1) != '/') {
+			$path = Utils::dirname($ut->_tpl_path) . '/' . $path;
+		}
 
-		return $path;
+		$parts = explode('/', $path);
+		$out = [];
+
+		foreach ($parts as $part) {
+			if ($part == '..') {
+				array_pop($out);
+			}
+			else {
+				$out[] = $part;
+			}
+		}
+
+		$out = implode('/', $out);
+
+		return $out;
 	}
 
 	static public function read(array $params, UserTemplate $ut, int $line): string
