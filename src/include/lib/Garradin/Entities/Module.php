@@ -74,7 +74,6 @@ class Module extends Entity
 
 		if (!$this->exists()) {
 			$this->assert(!DB::getInstance()->test(self::TABLE, 'name = ?', $this->name), 'Un module existe déjà avec ce nom unique');
-			$this->assert(!Files::exists(self::ROOT . '/' . $this->name), 'Un module existe déjà avec ce nom unique');
 		}
 	}
 
