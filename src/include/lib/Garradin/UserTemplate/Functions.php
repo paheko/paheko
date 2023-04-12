@@ -298,7 +298,7 @@ class Functions
 		}
 
 		if (($internal_count + $internal) > 10) {
-			throw new Brindille_Exception(sprintf('Ligne %d: l\'envoi d\'email à une adresse interne est limité à un envoi par page', $line));
+			throw new Brindille_Exception(sprintf('Ligne %d: l\'envoi d\'email à une adresse interne est limité à 10 envois par page', $line));
 		}
 
 		if ($external_count && preg_match_all('!(https?://.*?)(?=\s|$)!', $params['subject'] . ' ' . $params['body'], $match, PREG_PATTERN_ORDER)) {

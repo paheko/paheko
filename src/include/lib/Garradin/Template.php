@@ -208,8 +208,8 @@ class Template extends Smartyer
 		$this->register_modifier('local_url', [Utils::class, 'getLocalURL']);
 
 		// Overwrite default money modifiers
-		$this->register_modifier('money', [CommonModifiers::class, 'html_money']);
-		$this->register_modifier('money_currency', [CommonModifiers::class, 'html_money_currency']);
+		$this->register_modifier('money', [CommonModifiers::class, 'money_html']);
+		$this->register_modifier('money_currency', [CommonModifiers::class, 'money_currency_html']);
 	}
 
 

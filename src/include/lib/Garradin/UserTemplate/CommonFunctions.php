@@ -260,7 +260,7 @@ class CommonFunctions
 				$current_value = '';
 			}
 
-			$currency = Config::getInstance()->get('monnaie');
+			$currency = Config::getInstance()->currency;
 			$input = sprintf('<nobr><input type="text" pattern="-?[0-9]+([.,][0-9]{1,2})?" inputmode="decimal" size="8" %s value="%s" /><b>%s</b></nobr>', $attributes_string, htmlspecialchars((string) $current_value), $currency);
 		}
 		else {

@@ -114,12 +114,12 @@ class CommonModifiers
 		return $out;
 	}
 
-	static public function html_money($number, bool $hide_empty = true, bool $force_sign = false): string
+	static public function money_html($number, bool $hide_empty = true, bool $force_sign = false): string
 	{
-		return '<nobr>' . self::money($number, $hide_empty, $force_sign, true) . '</nobr>';
+		return self::money($number, $hide_empty, $force_sign, true);
 	}
 
-	static public function html_money_currency($number, bool $hide_empty = true, bool $force_sign = false): string
+	static public function money_currency_html($number, bool $hide_empty = true, bool $force_sign = false): string
 	{
 		return '<nobr>' . self::money_currency($number, $hide_empty, $force_sign, true) . '</nobr>';
 	}
