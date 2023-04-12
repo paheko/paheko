@@ -1,7 +1,7 @@
 {{#restrict block=true section="accounting" level="read"}}
 {{/restrict}}
 
-{{:include file="./_config_default.tpl"}}
+{{:include file="./_config_default.tpl" keep="module.config"}}
 
 {{:admin_header title="Reçus fiscaux" current="acc"}}
 
@@ -73,7 +73,7 @@
 }}
 	<tr class="{{if $annule}}disabled crossed{{/if}}">
 		<td class="num">
-			{{:link href="voir.html?id=%d"|args:$id label=$id target="_dialog"}}
+			{{:link href="recu.html?id=%d"|args:$id label=$id target="_dialog"}}
 		</td>
 		<th>
 			{{if $linked_user}}
@@ -90,9 +90,9 @@
 		</td>
 		<td class="actions">
 			{{if !$annule}}
-				{{:linkbutton shape="delete" label="Annuler" href="./annuler.html?id=%d"|args:$id target="_dialog"}}
+				{{:linkbutton shape="delete" label="Annuler" href="annuler.html?id=%d"|args:$id target="_dialog"}}
 			{{/if}}
-			{{:linkbutton shape="eye" label="Ouvrir" href="./voir.html?id=%d"|args:$id target="_dialog"}}
+			{{:linkbutton shape="eye" label="Ouvrir" href="recu.html?id=%d"|args:$id target="_dialog"}}
 		</td>
 	</tr>
 {{else}}

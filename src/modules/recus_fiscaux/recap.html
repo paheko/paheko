@@ -23,9 +23,9 @@
 
 {{#list select="SUBSTR($$.date, 1, 4) AS 'Année'; SUM($$.montant) AS 'Montant cumulé'; COUNT(id) AS 'Nombre de reçus'" order=1}}
 	<tr>
-		<th>{{$col0}}</th>
-		<td>{{$col1|raw|money_currency}}</td>
-		<td>{{$col2}}</td>
+		<th>{{$col1}}</th>
+		<td>{{$col2|raw|money_currency}}</td>
+		<td>{{$col3}}</td>
 	</tr>
 {{else}}
 	<p class="block alert">

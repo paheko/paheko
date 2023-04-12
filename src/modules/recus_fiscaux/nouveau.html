@@ -1,6 +1,7 @@
 {{#restrict block=true section="accounting" level="write"}}
 {{/restrict}}
-{{:include file="./_config_default.tpl" keep="module"}}
+
+{{:include file="./_config_default.tpl" keep="module.config"}}
 
 {{if $_GET.user}}
 	{{#foreach from=$_GET.user key="id" item="user"}}
@@ -17,9 +18,9 @@
 		{{:assign error="Le nom du donateur ne peut être laissé vide."}}
 	{{elseif !$_POST.adresse|trim}}
 		{{:assign error="L'adresse du donateur ne peut être laissée vide."}}
-	{{elseif !$_POST.type}}
+	{{elseif !$_POST.numeraire && !$_POST.nature}}
 		{{:assign error="Le type de don n'a pas été sélectionné."}}
-	{{elseif $_POST.type == 'numeraire' && !$_POST.moyens|count}}
+	{{elseif $_POST.numeraire && !$_POST.moyens|count}}
 		{{:assign error="Aucun moyen de paiement n'a été coché."}}
 	{{elseif !$_POST.montant|trim || $_POST.montant < 0}}
 		{{:assign error="Le montant du don ne peut être laissé vide."}}
@@ -52,29 +53,35 @@
 		{{:error message="Ce membre n'existe pas."}}
 	{{/users}}
 
+	{{:assign var="codes_don" value=$module.config.comptes_don|keys}}
+	{{:assign var="codes_don_nature" value=$module.config.comptes_don_nature|keys}}
+
 	{{* Récupération des comptes et soldes *}}
 	{{#select
-		SUM(l.credit) AS total, strftime('%Y', t.date) AS year, a.code AS account
+		SUM(l1.credit) AS total, strftime('%Y', t.date) AS year, a1.code AS account, a2.code AS payment_account
 		FROM acc_transactions t
-		INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
-		INNER JOIN acc_transactions_users tu ON tu.id_transaction = t.id
-		INNER JOIN acc_accounts a ON a.id = l.id_account AND a.!code_don
-		WHERE tu.id_user = {$id_user}
-		GROUP BY strftime('%Y', t.date), a.code;
-		!code_don="code"|sql_where:"IN":$module.config.comptes_don
+		INNER JOIN acc_transactions_users tu ON tu.id_transaction = t.id AND tu.id_user = {$id_user}
+		INNER JOIN acc_transactions_lines l1 ON l1.id_transaction = t.id AND l1.debit = 0
+		INNER JOIN acc_transactions_lines l2 ON l2.id_transaction = t.id AND l2.credit = 0
+		INNER JOIN acc_accounts a1 ON a1.id = l1.id_account AND (a1.!code_don_nature OR a1.!code_don)
+		INNER JOIN acc_accounts a2 ON a2.id = l2.id_account
+		GROUP BY strftime('%Y', t.date), a1.code, a2.code;
+		!code_don_nature="code"|sql_where:"IN":$codes_don_nature
+		!code_don="code"|sql_where:"IN":$codes_don
 	}}
+		{{:assign .="user_years.%d.accounts."|args:$year}}
 		{{:assign var="year_total" from="user_years.%d.total"|args:$year}}
-		{{:assign .="user_years.%d"|args:$year}}
 		{{:assign var="user_years.%d.total"|args:$year value="%d+%d"|math:$total:$year_total}}
 	{{/select}}
 
-	{{#foreach from=$user_years item="year"}}
-		{{:assign total_money=$year.total|money_currency}}
-		{{:assign var="user_select.%d"|args:$year.year value="%d (%s)"|args:$year.year:$total_money}}
+	{{#foreach from=$user_years key="year" item="data"}}
+		{{:assign total_money=$data.total|money_currency}}
+		{{:assign var="user_select.%d"|args:$year value="%d (%s)"|args:$year:$total_money}}
 	{{/foreach}}
 
 	<script type="text/javascript">
-	var user_years = {{$user_years|json_encode}};
+	var user_years = {{$user_years|json_encode|raw}};
+	var config = {{$module.config|json_encode|raw}};
 	</script>
 {{elseif $_GET.id_transaction}}
 {{/if}}
@@ -144,8 +151,8 @@
 				{{:input type="money" name="montant" required=true label="Montant des dons" default=$user.total}}
 
 				<dt>Type de don</dt>
-				{{:input type="radio" name="type" value="numeraire" label="Don en numéraire (en euros)" default=$user.}}
-				{{:input type="radio" name="type" value="nature" label="Don en nature" help="Par exemple abandon de frais par les bénévoles"}}
+				{{:input type="checkbox" name="numeraire" value="1" label="Don en numéraire (en euros)" default=$user.}}
+				{{:input type="checkbox" name="nature" value="1" label="Don en nature" help="Par exemple abandon de frais par les bénévoles"}}
 			</dl>
 			<dl class="hidden type-numeraire">
 				<dt>Moyens de paiement</dt>
@@ -166,26 +173,58 @@
 	</form>
 
 	<script type="text/javascript">
-	$('[name="type"]').forEach((i) => {
+	$('#f_numeraire_1, #f_nature_1').forEach((i) => {
 		i.onchange = selectType;
 	});
 
 	function selectType() {
-		let a = $('[name="type"]:checked')[0];
-		if (!a) return;
-		var type = a.value;
-
-		g.toggle('.type-numeraire', type == 'numeraire');
-		g.toggle('.type-nature', type == 'nature');
-		g.toggle('.submit', true);
+		g.toggle('.type-numeraire', $('#f_numeraire_1').checked);
+		g.toggle('.submit', $('#f_numeraire_1').checked || $('#f_nature_1').checked);
 	}
 
 	selectType();
 
+	var y = $('#f_annees');
+
+	if (y) {
+		function selectYear() {
+			$('#f_nature_1').checked = $('#f_numeraire_1').checked
+				= $('#f_moyensespeces_1').checked
+				= $('#f_moyenscheques_1').checked
+				= $('#f_moyensautres_1').checked = false;
+
+			let year = y.value;
+			$('#f_montant').value = g.formatMoney(user_years[year].total);
+
+			user_years[year].accounts.forEach((a) => {
+				if (a.account in config.comptes_don_nature) {
+					$('#f_nature_1').checked = true;
+				}
+				else {
+					$('#f_numeraire_1').checked = true;
+
+					if (a.payment_account in config.comptes_especes) {
+						$('#f_moyensespeces_1').checked = true;
+					}
+					else if (a.payment_account in config.comptes_cheques) {
+						$('#f_moyenscheques_1').checked = true;
+					}
+					else {
+						$('#f_moyensautres_1').checked = true;
+					}
+				}
+			});
+
+			selectType();
+		}
+
+		y.onchange = selectYear;
+		selectYear();
+	}
+
 	let p = $('[name=preview]')[0];
 
 	p.addEventListener('click', (e) => {
-		console.log('ok');
 		let form = e.target.form;
 		form.action = "previsualiser.html";
 		form.target = "dialog";

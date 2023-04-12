@@ -1,5 +1,7 @@
 {{:admin_header title="Configuration des reçus fiscaux"}}
 
+{{:include file="./_config_default.tpl" keep="module.config"}}
+
 {{if $_POST.save}}
 	{{if $_POST.objet_asso|trim == ''}}
 		{{:assign error="L'objet de l'association n'a pas été renseigné."}}
@@ -40,6 +42,8 @@
 
 <form method="post" action="">
 
+<p class="help">Toute modification ne s'appliquera qu'aux reçus créés, pas aux reçus existants, qui ne peuvent être modifiés pour des raisons légales.</p>
+
 <fieldset>
 	<legend>Configuration du modèle de reçu fiscal</legend>
 	<dl>
@@ -48,15 +52,15 @@
 		{{:input type="checkbox" name="envoi_auto" value=1 label="Envoyer automatiquement le reçu par e-mail"}}
 		<dd class="help">Si cette case est cochée, chaque reçu créé sera automatiquement envoyé par e-mail au membre</dd>
 *}}
-		{{:input type="list" required=true name="comptes_don" label="Comptes éligibles aux reçus" source=$module.config target="!acc/charts/accounts/selector.php?targets=6" multiple=true}}
+		{{:input type="list" required=true name="comptes_don" label="Comptes éligibles aux reçus" source=$module.config target="!acc/charts/accounts/selector.php?targets=6&key=code" multiple=true}}
 		<dd class="help">
 			Pour chaque compte indiqué dans ce champ, le reçu de don sera proposé (en dessous de la fiche de l'écriture).
 		</dd>
-		{{:input required=true name="comptes_especes" type="list" multiple=true label="Compte de caisse" source=$module.config target="!acc/charts/accounts/selector.php?targets=2"}}
+		{{:input required=true name="comptes_especes" type="list" multiple=true label="Comptes de caisse" source=$module.config target="!acc/charts/accounts/selector.php?targets=2&key=code"}}
 		<dd class="help">
 			Par exemple <tt>530</tt>. Utilisé pour cocher automatiquement la bonne case dans le reçu.
 		</dd>
-		{{:input required=true name="comptes_cheques" type="list" multiple=true label="Comptes pour les chèques" source=$module.config target="!acc/charts/accounts/selector.php?targets=3"}}
+		{{:input required=true name="comptes_cheques" type="list" multiple=true label="Comptes pour les chèques" source=$module.config target="!acc/charts/accounts/selector.php?targets=3&key=code"}}
 		<dd class="help">
 			Par exemple <tt>5112</tt>. Utilisé pour cocher automatiquement la bonne case dans le reçu.
 		</dd>
@@ -64,6 +68,11 @@
 		{{:input type="checkbox" name="art200" value="1" source=$module.config label="Article 200"}}
 		{{:input type="checkbox" name="art238" value="1" source=$module.config label="Article 238 bis"}}
 		{{:input type="checkbox" name="art885" value="1" source=$module.config label="Article 885-0V bis A"}}
+		<dt>Champs à utiliser pour l'adresse du reçu&nbsp;:</dt>
+		{{#select name, label FROM config_users_fields WHERE type IN ('text', 'country', 'textarea') ORDER BY sort_order}}
+			{{:assign var="checked" from="module.config.champs_adresse.%s"|args:$name}}
+			<dd>{{:input type="checkbox" name="champs_adresse[%s]"|args:$name value=$name label=$label source=$module.config default=$checked}}</dd>
+		{{/select}}
 	</dl>
 </fieldset>
 

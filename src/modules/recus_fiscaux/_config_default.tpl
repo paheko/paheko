@@ -7,13 +7,13 @@
 		art238=false
 		art978=false
 	}}
-	{{:assign var="module.config.comptes_don." value="754"}}
-	{{:assign var="module.config.comptes_don_nature." value="75412"}}
-	{{:assign var="module.config.comptes_especes." value="530"}}
-	{{:assign var="module.config.comptes_cheques." value="5112"}}
+	{{:assign var="module.config.comptes_don.754" value="754 — Ressources liées à la générosité du public"}}
+	{{:assign var="module.config.comptes_don_nature.75412" value="75412 — Abandons de frais par les bénévoles"}}
+	{{:assign var="module.config.comptes_especes.530" value="530 — Caisse"}}
+	{{:assign var="module.config.comptes_cheques.5112" value="5112 — Chèques à encaisser"}}
 	{{:assign var="module.config.champs_adresse"
-		0="adresse"
-		1="code_postal"
-		2="ville"
+		adresse="adresse"
+		code_postal="code_postal"
+		ville="ville"
 	}}
 {{/if}}

@@ -66,9 +66,13 @@
 	</tr>
 	<tr>
 		<th>Nature du don&nbsp;:</th>
-		<td>{{if $r.type == 'nature'}}Autres{{else}}Numéraire{{/if}}</td>
+		<td>
+			{{if $r.nature}}Autres{{/if}}
+			{{if $r.nature && $r.numeraire}} — {{/if}}
+			{{if $r.numeraire}}Numéraire{{/if}}
+		</td>
 	</tr>
-	{{if $r.type == 'numeraire'}}
+	{{if $r.numeraire}}
 	<tr>
 		<th>Mode de versement&nbsp;:</th>
 		<td>
