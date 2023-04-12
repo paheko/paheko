@@ -56,6 +56,22 @@ Crée un lien protégé pour une adresse email, pour éviter que l'adresse ne so
 
 # Filtres de tableaux
 
+## keys
+
+Renvoie les clés du tableau, sous forme de tableau.
+
+```
+{{:assign var="table" a="bleu" b="orange"}}
+{{:assign var="cles" value=$table|keys}}
+{{$cles|implode:","}}
+```
+
+Donnera :
+
+```
+a,b
+```
+
 ## count
 
 Compte le nombre d'entrées dans un tableau.

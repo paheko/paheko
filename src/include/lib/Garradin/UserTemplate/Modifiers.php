@@ -35,7 +35,7 @@ class Modifiers
 		'array_transpose' => [Utils::class, 'array_transpose'],
 		'check_email',
 		'implode',
-		'array_keys',
+		'keys',
 		'quote_sql_identifier',
 		'quote_sql',
 		'sql_where',
@@ -268,13 +268,9 @@ class Modifiers
 		return implode($separator, $array);
 	}
 
-	static public function array_keys($array)
+	static public function keys($array)
 	{
-		if (!is_array($array)) {
-			throw new Brindille_Exception('Supplied argument is not an array');
-		}
-
-		return array_keys($array);
+		return array_keys((array)$array);
 	}
 
 	static public function quote_sql_identifier($in)
