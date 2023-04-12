@@ -41,7 +41,8 @@
 					<th>{$account.label}</th>
 					<td class="desc">{$account.description}</td>
 					<td class="actions">
-						{button shape="right" value=$account.id data-label="%s — %s"|args:$account.code,$account.label label="Sélectionner"}
+						<?php $v = ($_GET['key'] ?? null) == 'code' ? $account->code : $account->id; ?>
+						{button shape="right" value=$v data-label="%s — %s"|args:$account.code,$account.label label="Sélectionner"}
 					</td>
 				</tr>
 				<?php $index++; ?>
@@ -69,7 +70,8 @@
 				<td class="num">{$account.code}</td>
 				<th>{$account.label}</th>
 				<td class="actions">
-					{button shape="right" value=$account.id data-label="%s — %s"|args:$account.code,$account.label label="Sélectionner"}
+					<?php $v = ($_GET['key'] ?? null) == 'code' ? $account->code : $account->id; ?>
+					{button shape="right" value=$v data-label="%s — %s"|args:$account.code,$account.label label="Sélectionner"}
 				</td>
 			</tr>
 		{/foreach}
