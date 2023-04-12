@@ -33,12 +33,16 @@
 			adresse=$_POST.adresse|trim
 			date=$_POST.date|parse_date
 			montant=$_POST.montant|money_int
-			linked_user=$_POST.id_user
+			linked_user=$id_user
 			linked_transactions=$_POST.transactions
 			annule=false
 			recu=$recu
 		}}
-		{{:http redirect="voir.html?id=%d"|args:$new_id}}
+		{{if !$dialog}}
+			{{:http redirect="voir.html?id=%d"|args:$new_id}}
+		{{else}}
+			{{:http redirect="recu.html?id=%d"|args:$new_id}}
+		{{/if}}
 	{{/if}}
 {{/if}}
 
@@ -86,9 +90,11 @@
 {{elseif $_GET.id_transaction}}
 {{/if}}
 
+{{if !$dialog}}
 <nav class="tabs">
 	{{:linkbutton href="./" label="Retour à la liste des reçus" shape="left"}}
 </nav>
+{{/if}}
 
 {{if $error}}
 	<p class="error block">{{$error}}</p>
@@ -197,16 +203,16 @@
 			$('#f_montant').value = g.formatMoney(user_years[year].total);
 
 			user_years[year].accounts.forEach((a) => {
-				if (a.account in config.comptes_don_nature) {
+				if (config.comptes_don_nature && a.account in config.comptes_don_nature) {
 					$('#f_nature_1').checked = true;
 				}
 				else {
 					$('#f_numeraire_1').checked = true;
 
-					if (a.payment_account in config.comptes_especes) {
+					if (config.comptes_especes && a.payment_account in config.comptes_especes) {
 						$('#f_moyensespeces_1').checked = true;
 					}
-					else if (a.payment_account in config.comptes_cheques) {
+					else if (config.comptes_cheques && a.payment_account in config.comptes_cheques) {
 						$('#f_moyenscheques_1').checked = true;
 					}
 					else {

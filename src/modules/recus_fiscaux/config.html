@@ -56,6 +56,10 @@
 		<dd class="help">
 			Pour chaque compte indiqué dans ce champ, le reçu de don sera proposé (en dessous de la fiche de l'écriture).
 		</dd>
+		{{:input type="list" required=true name="comptes_don_nature" label="Comptes de don en nature" source=$module.config target="!acc/charts/accounts/selector.php?targets=6&key=code" multiple=true}}
+		<dd class="help">
+			Par exemple <tt>75412</tt> pour les abandons de frais par les bénévoles. Utilisé pour cocher automatiquement la bonne case dans le reçu.
+		</dd>
 		{{:input required=true name="comptes_especes" type="list" multiple=true label="Comptes de caisse" source=$module.config target="!acc/charts/accounts/selector.php?targets=2&key=code"}}
 		<dd class="help">
 			Par exemple <tt>530</tt>. Utilisé pour cocher automatiquement la bonne case dans le reçu.

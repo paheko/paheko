@@ -4,6 +4,10 @@
     font-feature-settings: "tnum";
 }
 
+.crossed .money {
+    text-decoration: line-through;
+}
+
 span.money {
     font-weight: inherit;
     white-space: pre;
