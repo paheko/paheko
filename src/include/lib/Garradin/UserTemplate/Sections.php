@@ -368,7 +368,7 @@ class Sections
 
 			if (isset($params['order'])) {
 				if (!is_int($params['order']) && !ctype_digit($params['order'])) {
-					throw new Brindille_Exception(sprintf('Line %d: "order" parameter must be the number of the column (starting from zero)', $line));
+					throw new Brindille_Exception(sprintf('Line %d: "order" parameter must be the number of the column (starting from 1)', $line));
 				}
 
 				$params['order'] = 'col' . (int)$params['order'];
