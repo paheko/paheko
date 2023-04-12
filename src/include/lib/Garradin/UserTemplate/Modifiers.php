@@ -281,8 +281,8 @@ class Modifiers
 
 		$db = DB::getInstance();
 
-		if (is_array($in)) {
-			return array_map([$db, 'quoteIdentifier'], $in);
+		if (is_array($in) || is_object($in)) {
+			return array_map([$db, 'quoteIdentifier'], (array) $in);
 		}
 
 		return $db->quoteIdentifier($in);
@@ -296,8 +296,8 @@ class Modifiers
 
 		$db = DB::getInstance();
 
-		if (is_array($in)) {
-			return array_map([$db, 'quote'], $in);
+		if (is_array($in) || is_object($in)) {
+			return array_map([$db, 'quote'], (array) $in);
 		}
 
 		return $db->quote($in);
