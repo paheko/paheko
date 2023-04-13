@@ -41,7 +41,7 @@ if ($edit
 	</aside>
 {foreachelse}
 	{if !$can_upload}
-		<em>--</em>
+		<em>—</em>
 	{/if}
 {/foreach}
 </div>
