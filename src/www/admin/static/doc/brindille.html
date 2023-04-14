@@ -79,7 +79,7 @@
 </ol></li>
 			<li><a href="#conditions">Conditions</a>
 			<ol>
-				<li><a href="#test-d-existence">Test d'existence</a>
+				<li><a href="#tester-si-une-variable-existe">Tester si une variable existe</a>
 			</ol></li>
 			<li><a href="#fonctions">Fonctions</a>
 			<ol>
@@ -208,14 +208,6 @@ La même syntaxe est utilisée pour accéder aux membres d'un tableau : <code>{{
 {{else}}
     Autre chose.
 {{/if}}</code></pre>
-<h3 id="test-d-existence">Test d'existence</h3>
-<p>Brindille ne fait pas de différences entre une variable qui n'existe pas, et une variable définie à <code>null</code>.<br />
-On peut donc tester l'existence d'une variable en la comparant à <code>null</code> comme ceci :</p>
-<pre><code>{{if $session !== null}}
-  Session en cours pour l'utilisateur/trice {{$session-&gt;user-&gt;name}}.
-{{else}}
-  Session inexistante.
-{{/if}}</code></pre>
 <p>Une condition peut être évaluée comme <em>vraie</em>, dans ce cas la partie qui suit le bloc <code>{{if …}}</code> sera exécutée.</p>
 <p>Si la condition est évaluée comme <em>fausse</em>, alors la partie qui suit le bloc <code>{{if …}}</code> ne sera pas exécutée. Dans ce cas, soit une condition <code>{{elseif …}}</code> suivante est vraie et exécutée, mais sinon c'est le contenu du bloc <code>{{else}}</code> qui est exécuté et affiché.</p>
 <p>Dans une condition on peut utiliser :</p>
@@ -296,6 +288,14 @@ On peut donc tester l'existence d'une variable en la comparant à <code>null</co
 <li><code>false &amp;&amp; true</code> : sera évalué comme faux</li>
 <li><code>false || true</code> : sera évalué comme vrai</li>
 </ul>
+<h3 id="tester-si-une-variable-existe">Tester si une variable existe</h3>
+<p>Brindille ne fait pas de différences entre une variable qui n'existe pas, et une variable définie à <code>null</code>.<br />
+On peut donc tester l'existence d'une variable en la comparant à <code>null</code> comme ceci :</p>
+<pre><code>{{if $session !== null}}
+  Session en cours pour l'utilisateur/trice {{$session.user.name}}.
+{{else}}
+  Session inexistante.
+{{/if}}</code></pre>
 <h2 id="fonctions">Fonctions</h2>
 <h3 id="fonctions-natives">Fonctions natives</h3>
 <p>Une fonction va répondre à certains paramètres et renvoyer un résultat ou réaliser une action.</p>

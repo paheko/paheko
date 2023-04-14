@@ -13,19 +13,22 @@ use KD2\SMTP;
 use KD2\Brindille;
 use KD2\Brindille_Exception;
 
+use Garradin\Web\Render\Markdown;
+
 class Modifiers
 {
 	const MODIFIERS_LIST = [
+		'markdown',
+		'replace',
+		'regexp_replace',
+		'regexp_match',
+		'match',
 		'truncate',
 		'excerpt',
 		'protect_contact',
 		'atom_date',
 		'xml_escape',
 		'json_encode',
-		'replace',
-		'regexp_replace',
-		'regexp_match',
-		'match',
 		'remove_leading_number',
 		'get_leading_number',
 		'spell_out_number',
@@ -36,6 +39,7 @@ class Modifiers
 		'check_email',
 		'implode',
 		'keys',
+		'has',
 		'quote_sql_identifier',
 		'quote_sql',
 		'sql_where',
@@ -45,6 +49,12 @@ class Modifiers
 	];
 
 	const LEADING_NUMBER_REGEXP = '/^([\d.]+)\s*[.\)]\s*/';
+
+	static public function markdown($str): string
+	{
+		$md = new Markdown;
+		return $md->render($str);
+	}
 
 	static public function replace($str, $find, $replace = null): string
 	{
@@ -271,6 +281,11 @@ class Modifiers
 	static public function keys($array)
 	{
 		return array_keys((array)$array);
+	}
+
+	static public function has($in, $value, $strict = false)
+	{
+		return in_array($value, (array)$in, $strict);
 	}
 
 	static public function quote_sql_identifier($in)

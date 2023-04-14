@@ -56,6 +56,17 @@ Crée un lien protégé pour une adresse email, pour éviter que l'adresse ne so
 
 # Filtres de tableaux
 
+## has
+
+Renvoi vrai si le tableau contient l'élément passé en paramètre.
+
+```
+{{:assign var="table" a="bleu" b="orange"}}
+{{if $table|has:"bleu"}}
+	Oui, il y a du bleu
+{{/if}}
+```
+
 ## keys
 
 Renvoie les clés du tableau, sous forme de tableau.
@@ -153,6 +164,16 @@ Affichera :
 
 ```
 02
+```
+
+## markdown
+
+Transforme un texte en HTML en utilisant la syntaxe Markdown.
+
+Il est conseillé de rajouter le filtre `|raw` pour ne pas échapper le HTML produit, si on veut afficher le texte formatté dans une page HTML.
+
+```
+{{$texte|markdown|raw}}
 ```
 
 ## raw

@@ -64,6 +64,8 @@
 		</ol></li>
 		<li><a href="#filtres-de-tableaux">Filtres de tableaux</a>
 		<ol>
+			<li><a href="#has">has</a></li>
+			<li><a href="#keys">keys</a></li>
 			<li><a href="#count">count</a></li>
 			<li><a href="#implode">implode</a>
 		</ol></li>
@@ -75,6 +77,7 @@
 			<li><a href="#escape">escape</a></li>
 			<li><a href="#excerpt">excerpt</a></li>
 			<li><a href="#extract_leading_number">extract_leading_number</a></li>
+			<li><a href="#markdown">markdown</a></li>
 			<li><a href="#raw">raw</a></li>
 			<li><a href="#replace">replace</a></li>
 			<li><a href="#regexp_replace">regexp_replace</a></li>
@@ -224,6 +227,19 @@
 <h2 id="protect_contact">protect_contact</h2>
 <p>Crée un lien protégé pour une adresse email, pour éviter que l'adresse ne soit recueillie par les robots spammeurs (empêche également le copier-coller et le lien ne fonctionnera pas avec javascript désactivé).</p>
 <h1 id="filtres-de-tableaux">Filtres de tableaux</h1>
+<h2 id="has">has</h2>
+<p>Renvoi vrai si le tableau contient l'élément passé en paramètre.</p>
+<pre><code>{{:assign var="table" a="bleu" b="orange"}}
+{{if $table|has:"bleu"}}
+    Oui, il y a du bleu
+{{/if}}</code></pre>
+<h2 id="keys">keys</h2>
+<p>Renvoie les clés du tableau, sous forme de tableau.</p>
+<pre><code>{{:assign var="table" a="bleu" b="orange"}}
+{{:assign var="cles" value=$table|keys}}
+{{$cles|implode:","}}</code></pre>
+<p>Donnera :</p>
+<pre><code>a,b</code></pre>
 <h2 id="count">count</h2>
 <p>Compte le nombre d'entrées dans un tableau.</p>
 <pre><code>{{$products|count}}
@@ -261,6 +277,10 @@ bleu - orange</code></pre>
 {{$title|extract_leading_number}}</code></pre>
 <p>Affichera :</p>
 <pre><code>02</code></pre>
+<h2 id="markdown">markdown</h2>
+<p>Transforme un texte en HTML en utilisant la syntaxe Markdown.</p>
+<p>Il est conseillé de rajouter le filtre <code>|raw</code> pour ne pas échapper le HTML produit, si on veut afficher le texte formatté dans une page HTML.</p>
+<pre><code>{{$texte|markdown|raw}}</code></pre>
 <h2 id="raw">raw</h2>
 <p>Passer ce filtre désactive la protection automatique contre le HTML (échappement) dans le texte. À utiliser en connaissance de cause avec les contenus qui contiennent du HTML et sont déjà filtrés !</p>
 <pre><code>{{"&lt;b&gt;Test"}} = &amp;lt;b&amp;gt;Test
