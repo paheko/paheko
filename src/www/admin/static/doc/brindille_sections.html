@@ -225,6 +225,10 @@ orange</code></pre>
 <td style="text-align: left;"><code>assign</code></td>
 <td style="text-align: left;">Si renseigné, une variable de ce nom sera créée, et le contenu de la dernière ligne du résultat y sera assigné.</td>
 </tr>
+<tr>
+<td style="text-align: left;"><code>assign_assoc</code></td>
+<td style="text-align: left;">Si renseigné, le tableau dans la variable de ce nom sera rempli, avec pour chaque ligne une entrée, et comme clé la première colonne, et : s'il y a plus de 2 colonnes sélectionnées, le tableau complet comme valeur, sinon la seconde colonne.</td>
+</tr>
 </tbody>
 </table>
 <p>Exemple avec <code>debug</code> :</p>
@@ -638,4 +642,5 @@ orange</code></pre>
 <p>Liste les inscriptions à une ou des activités.</p>
 <p>Paramètres possibles :</p>
 <p>| <code>user</code> | optionnel | Identifiant unique du membre |<br />
-| <code>active</code> | optionnel | Si <code>TRUE</code>, seules les inscriptions à jour sont listées |</p></div></body></html>
+| <code>active</code> | optionnel | Si <code>TRUE</code>, seules les inscriptions à jour sont listées |<br />
+| <code>id_service</code> | optionnel | Ne renvoie que les inscriptions à l'activité correspondant à cet ID. |</p></div></body></html>

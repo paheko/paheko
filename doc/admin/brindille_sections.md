@@ -171,6 +171,7 @@ Il est aussi possible d'utiliser les paramètres suivants :
 | `debug` | Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle. |
 | `explain` | Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle. | 
 | `assign` | Si renseigné, une variable de ce nom sera créée, et le contenu de la dernière ligne du résultat y sera assigné. | 
+| `assign_assoc` | Si renseigné, le tableau dans la variable de ce nom sera rempli, avec pour chaque ligne une entrée, et comme clé la première colonne, et : s'il y a plus de 2 colonnes sélectionnées, le tableau complet comme valeur, sinon la seconde colonne. | 
 
 Exemple avec `debug` :
 
@@ -480,3 +481,4 @@ Paramètres possibles :
 
 | `user` | optionnel | Identifiant unique du membre |
 | `active` | optionnel | Si `TRUE`, seules les inscriptions à jour sont listées |
+| `id_service` | optionnel | Ne renvoie que les inscriptions à l'activité correspondant à cet ID. |

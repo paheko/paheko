@@ -583,6 +583,12 @@ class Sections
 			unset($params['user']);
 		}
 
+		if (isset($params['id_service'])) {
+			$params['where'] .= ' AND su.id_service = :id_service';
+			$params[':id_service'] = (int) $params['id_service'];
+			unset($params['id_service']);
+		}
+
 		if (!empty($params['active'])) {
 			$params['having'] = 'MAX(su.expiry_date) >= date()';
 			unset($params['active']);
@@ -1060,6 +1066,13 @@ class Sections
 		{
 			if (isset($params['assign'])) {
 				$tpl->assign($params['assign'], $row, 0);
+			}
+			elseif (isset($params['assign_assoc'])) {
+				if (!isset($tpl->_variables[0][$params['assign_assoc']])) {
+					$tpl->assign($params['assign_assoc'], [], 0);
+				}
+
+				$tpl->_variables[0][$params['assign_assoc']][current($row)] = count($row) == 2 ? next($row) : $row;
 			}
 
 			yield $row;
