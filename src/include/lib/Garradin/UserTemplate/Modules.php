@@ -271,8 +271,9 @@ class Modules
 
 		// Check if the file actually exists in the module
 		if (!$has_local_file && !$has_dist_file) {
+
 			http_response_code(404);
-			throw new UserException('This page is not found, sorry.');
+			throw new UserException('This path does not exist, sorry.');
 		}
 
 		$module->serve($path, $has_local_file, compact('uri', 'page'));

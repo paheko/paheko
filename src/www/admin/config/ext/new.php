@@ -12,6 +12,7 @@ $csrf_key = 'module_new';
 $form->runIf('create', function () {
 	$module = new Module;
 	$module->importForm();
+	$module->set('web', false);
 	$module->save();
 	$module->exportToIni();
 

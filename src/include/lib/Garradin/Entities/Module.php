@@ -84,8 +84,8 @@ class Module extends Entity
 		}
 
 		if (isset($source['restrict'])) {
-			$this->set('restrict_section', strtok($source['restrict'], '_'));
-			$this->set('restrict_level', (int)strtok(false));
+			$this->set('restrict_section', strtok($source['restrict'], '_') ?: null);
+			$this->set('restrict_level', (int)strtok(false) ?: null);
 		}
 
 		parent::importForm($source);
@@ -163,7 +163,10 @@ class Module extends Entity
 				$value = array_search($value, Session::ACCESS_LEVELS);
 			}
 
-			if (null === $value || trim($value) === '') {
+			if (is_bool($value)) {
+				$value = $value ? 'true' : 'false';
+			}
+			elseif (null === $value || trim($value) === '') {
 				$value = 'null';
 			}
 			elseif (is_string($value)) {
@@ -554,5 +557,17 @@ class Module extends Entity
 	public function export(Session $session): void
 	{
 		Files::zip(null, [$this->path() . '/'], $session, 'module_' . $this->name);
+	}
+
+	public function save(bool $selfcheck = true): bool
+	{
+		$enabled_web = isset($this->_modified['enabled']) && $this->enabled && $this->web;
+		$r = parent::save($selfcheck);
+
+		if ($r && $enabled_web) {
+			DB::getInstance()->preparedQuery('UPDATE modules SET enabled = 0 WHERE web = 1 AND enabled = 1 AND name != ?;', $this->name);
+		}
+
+		return $r;
 	}
 }

@@ -24,7 +24,7 @@
 	<dl>
 		{input type="checkbox" name="menu" label="Afficher dans le menu" value=1}
 		{input type="checkbox" name="home_button" label="Afficher un bouton sur l'accueil" value=1}
-		{input type="select" name="web" label="Type de module" options=$types required=true}
+		{*input type="select" name="web" label="Type de module" options=$types required=true*}
 		{input type="select_groups" name="restrict" options=$sections label="Restreindre l'accès aux membres ayant accès à…"}
 	</dl>
 </fieldset>
