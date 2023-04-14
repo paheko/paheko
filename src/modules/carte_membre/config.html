@@ -1,0 +1,67 @@
+{{:admin_header title="Configuration des cartes de membres"}}
+
+{{if $_POST.save}}
+	{{:save key="config"
+		validate_schema="./config.schema.json"
+		header=$_POST.header|trim|or:null
+		logo=$_POST.logo|intval
+		fields=$_POST.fields|or:null
+		photo=$_POST.photo|or:null
+		id_service=$_POST.id_service|intval|or:null
+	}}
+	{{:http redirect="?ok=1"}}
+{{/if}}
+
+{{if $_GET.ok}}
+	<p class="block confirm">Configuration enregistrée.</p>
+{{/if}}
+
+<form method="post" action="">
+
+<fieldset>
+	<legend>Configuration du modèle de carte de membre</legend>
+	<dl>
+		{{:input type="textarea" cols="30" rows="4" name="header" required=false source=$module.config label="En-tête, à afficher en haut de la carte" default="**%s**\n%s"|args:$config.org_name:$config.org_address}}
+		<dd class="help">Syntaxe Markdown acceptée.
+			{{:linkbutton shape="help" label="Aide de la syntaxe Markdown" href="!static/doc/markdown.html"}}
+		</dd>
+
+		<dt><label for="f_logo_0">Affichage du logo de l'association</label></dt>
+		{{:input type="radio" name="logo" value=0 source=$module.config label="Ne pas afficher" default=1}}
+		{{:input type="radio" name="logo" value=1 source=$module.config label="En petit en bas à droite" default=1}}
+		{{:input type="radio" name="logo" value=2 source=$module.config label="En filigrane (fond)"}}
+
+		<dt>Champs des fiches membre à afficher sur la carte de membre</dt>
+		<dd class="help"><em>(Le nom du membre est toujours affiché.)</em></dd>
+
+		{{#select * FROM config_users_fields WHERE type != 'file' AND system & (1 << 4) = 0 ORDER BY sort_order}}
+			{{if $module.config.fields|has:$name}}
+				{{:assign var="checked" value=$name}}
+			{{else}}
+				{{:assign var="checked" value=null}}
+			{{/if}}
+			{{:input type="checkbox" name="fields[]" value=$name label=$label default=$checked}}
+		{{/select}}
+
+		{{:assign var="file_fields." value="— Aucun, ne pas afficher de photo —"}}
+		{{#select name, label FROM config_users_fields WHERE type = 'file' ORDER BY sort_order; assign_assoc="file_fields"}}{{/select}}
+
+		{{if $file_fields|count > 1}}
+			{{:input type="select" name="photo" label="Champ utilisé pour la photo du membre" options=$file_fields required=true source=$module.config}}
+		{{/if}}
+
+		{{:assign var="services." value="— Aucune, ne pas afficher d'activité —"}}
+		{{#select id, label FROM services WHERE end_date IS NULL OR end_date >= date() ORDER BY label COLLATE U_NOCASE; assign_assoc="services"}}{{/select}}
+		{{if $services|count}}
+			{{:input type="select" name="id_service" label="Activité à afficher" options=$services required=true help="Utile pour afficher par exemple la date d'expiration de la cotisation annuelle." source=$module.config}}
+		{{/if}}
+	</dl>
+</fieldset>
+
+<p class="submit">
+	{{:button type="submit" name="save" label="Enregistrer" shape="right" class="main"}}
+</p>
+
+</form>
+
+{{:admin_footer}}

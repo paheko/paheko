@@ -1,0 +1,31 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"type": "object",
+	"properties": {
+		"header": {
+			"description": "En-tête",
+			"type": ["string", "null"]
+		},
+		"logo": {
+			"description": "Affichage du logo",
+			"type": "integer",
+			"enum": [0, 1, 2]
+		},
+		"fields": {
+			"description": "Champs à afficher",
+			"type": ["null", "array"],
+			"items": {
+				"type": "string"
+			}
+		},
+		"photo": {
+			"description": "Champ pour la photo",
+			"type": ["string", "null"]
+		},
+		"id_service": {
+			"description": "Activité",
+			"type": ["integer", "null"]
+		}
+	},
+	"required": [ "header", "logo", "fields", "photo", "id_service" ]
+}
