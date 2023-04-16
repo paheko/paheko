@@ -9,8 +9,8 @@
 
 	<fieldset>
 		<legend>{if $user.password}Changer le mot de passe{else}Définir un mot de passe{/if}</legend>
-		<dl>
 		{include file="users/_password_form.tpl"}
+		<dl>
 		{if $user.password}
 			{input type="checkbox" name="password_delete" label="Supprimer le mot de passe de ce membre" value=1}
 		{/if}

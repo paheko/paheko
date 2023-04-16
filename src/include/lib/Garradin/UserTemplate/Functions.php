@@ -34,6 +34,7 @@ class Functions
 		'delete',
 		'admin_header',
 		'admin_footer',
+		'password_input',
 		'signature',
 		'captcha',
 		'mail',
@@ -76,6 +77,12 @@ class Functions
 		$tpl = Template::getInstance();
 		$tpl->assign($params);
 		return $tpl->fetch('_foot.tpl');
+	}
+
+	static public function password_input(): string
+	{
+		$tpl = Template::getInstance();
+		return $tpl->fetch('users/_password_form.tpl');
 	}
 
 	static public function save(array $params, Brindille $tpl, int $line): void

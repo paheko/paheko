@@ -16,7 +16,7 @@ span.alert, b.alert {
     color: #990;
 }
 
-.alert p, .error p, .confirm p {
+.alert p, .error p, .confirm p, .block p {
     margin-bottom: .8em;
 }
 

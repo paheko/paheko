@@ -22,8 +22,8 @@
 	<dl>
 		{input type="text" label="Nom et prénom" required=true name="user_name"}
 		{input type="email" label="Adresse E-Mail" required=true name="user_email"}
-		{include file="users/_password_form.tpl" field="password" required=true}
 	</dl>
+	{include file="users/_password_form.tpl" field="password" required=true}
 </fieldset>
 
 {if count($installable)}

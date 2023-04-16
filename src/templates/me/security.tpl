@@ -16,9 +16,7 @@
 	{if $edit == 'password'}
 		<fieldset>
 			<legend>Changer mon mot de passe</legend>
-			<dl>
-				{include file="users/_password_form.tpl" required=true}
-			</dl>
+			{include file="users/_password_form.tpl" required=true}
 		</fieldset>
 	{elseif $edit == 'otp'}
 		<p class="block alert">

@@ -44,8 +44,16 @@
 
 		pw_elm.form.addEventListener('submit', function (e) {
 			if (pw_elm.value == '') return true;
-			if (scorePassword(pw_elm.value) <= 30 && !window.confirm("Êtes-vous sûr de vouloir utiliser un mot de passe aussi mauvais que ça ?"))
-			{
+			var c = true;
+			if (!checkPasswordMatch()) {
+				c = false;
+			}
+			else if (scorePassword(pw_elm.value) <= 30
+				&& !window.confirm("Êtes-vous sûr de vouloir utiliser un mot de passe aussi mauvais que ça ?")) {
+				c = false;
+			}
+
+			if (!c) {
 				e = e || window.event;
 				if(e.preventDefault)
 					e.preventDefault();
@@ -177,11 +185,13 @@
 		{
 			match_elm.className = strength_elm.className.split(' ')[0] + ' fail';
 			match_elm.innerHTML = 'Ne correspond pas au mot de passe entré.';
+			return false;
 		}
 		else
 		{
 			match_elm.className = strength_elm.className.split(' ')[0] + ' ok';
 			match_elm.innerHTML = '&#10003;';
 		}
+		return true;
 	}
 }());

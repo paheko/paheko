@@ -7,9 +7,7 @@
 
 	<fieldset>
 		<legend>Choisir un nouveau mot de passe</legend>
-		<dl>
-			{include file="users/_password_form.tpl" required=true}
-		</dl>
+		{include file="users/_password_form.tpl" required=true}
 	</fieldset>
 
 	<p class="submit">
