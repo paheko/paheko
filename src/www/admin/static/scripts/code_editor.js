@@ -31,7 +31,7 @@
 		};
 
 		// Warn before closing window if content was changed
-		window.addEventListener('beforeunload', (e) => {
+		var preventClose = (e) => {
 			if (code.textarea.value == code.textarea.defaultValue) {
 				return;
 			}
@@ -39,7 +39,13 @@
 			e.preventDefault();
 			e.returnValue = '';
 			return true;
-		}, { capture: true });
+		};
+
+		window.addEventListener('beforeunload', preventClose, { capture: true });
+
+		code.textarea.form.addEventListener('submit', () => {
+			window.removeEventListener('beforeunload', preventClose, {capture: true});
+		});
 
 		var help = document.createElement('div');
 		help.className = 'sk_help';
@@ -91,7 +97,7 @@
 					return false;
 				}
 
-				if (window.confirm('Sauvegarder avant de fermer ?')) {
+				if (window.confirm("Le contenu a été modifié.\nSauvegarder avant de fermer ?")) {
 					code.saveFile();
 				}
 

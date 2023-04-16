@@ -19,7 +19,7 @@ if (null == $content) {
 if ($path = qg('f')) {
 	$file = Files::get($path);
 
-	if (!$file || !$file->checkReadAccess($session)) {
+	if ($file && !$file->checkReadAccess($session)) {
 		throw new UserException('Vous n\'avez pas le droit de lire ce fichier.');
 	}
 }

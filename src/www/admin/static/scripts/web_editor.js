@@ -50,7 +50,7 @@
 
 		t.textarea.form.addEventListener('submit', () => {
 			window.removeEventListener('beforeunload', preventClose, {capture: true});
-		})
+		});
 
 		// Cancel Escape to close.value
 		if (window.parent && window.parent.g.dialog) {
