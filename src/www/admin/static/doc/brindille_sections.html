@@ -633,11 +633,13 @@ orange</code></pre>
 <h2 id="users">users</h2>
 <p>Liste les membres.</p>
 <p>Paramètres possibles :</p>
-<p>| <code>id</code> | optionnel | Identifiant unique du membre |</p>
+<p>| <code>id</code> | optionnel | Identifiant unique du membre |<br />
+| <code>search_name</code> | optionnel | Ne lister que les membres dont le nom correspond au texte passé en paramètre. |</p>
 <p>Chaque itération renverra la fiche du membre, ainsi que ces variables :</p>
 <p>| <code>$id</code> | Identifiant unique du membre |<br />
-| <code>$user_name</code> | Nom du membre, tel que défini dans la configuration |<br />
-| <code>$user_login</code> | Identifiant de connexion du membre, tel que défini dans la configuration |</p>
+| <code>$_name</code> | Nom du membre, tel que défini dans la configuration |<br />
+| <code>$_login</code> | Identifiant de connexion du membre, tel que défini dans la configuration |<br />
+| <code>$_number</code> | Numéro du membre, tel que défini dans la configuration |</p>
 <h2 id="subscriptions">subscriptions</h2>
 <p>Liste les inscriptions à une ou des activités.</p>
 <p>Paramètres possibles :</p>
