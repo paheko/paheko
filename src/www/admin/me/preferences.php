@@ -37,6 +37,11 @@ $themes_options = [
 	true => 'Thème sombre',
 ];
 
-$tpl->assign(compact('preferences', 'ok', 'csrf_key', 'folders_options', 'page_size_options', 'themes_options'));
+$handheld_options = [
+	false => 'S\'adapter automatiquement à la taille de l\'écran',
+	true => 'Toujours utiliser la disposition pour petit écran',
+];
+
+$tpl->assign(compact('preferences', 'ok', 'csrf_key', 'folders_options', 'page_size_options', 'themes_options', 'handheld_options'));
 
 $tpl->display('me/preferences.tpl');

@@ -50,6 +50,7 @@ class User extends Entity
 		'page_size'         => 100,
 		'accounting_expert' => false,
 		'dark_theme'        => false,
+		'force_handheld'	=> false,
 	];
 
 	protected bool $_loading = false;

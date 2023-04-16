@@ -14,6 +14,7 @@
 		<legend>Mes préférences</legend>
 		<dl>
 			{input type="select" name="dark_theme" label="Thème" required=true source=$preferences options=$themes_options default=false}
+			{input type="select" name="force_handheld" label="Taille d'écran" required=true source=$preferences options=$handheld_options default=false}
 			{input type="select" name="page_size" label="Nombre d'éléments par page dans les listes" required=true source=$preferences options=$page_size_options default=100 help="Par exemple dans la liste des membres."}
 			{if $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_READ)}
 			{input type="select" name="folders_gallery" label="Affichage des listes de documents" required=true source=$preferences options=$folders_options default=true}
