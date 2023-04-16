@@ -465,12 +465,14 @@ Liste les membres.
 Paramètres possibles :
 
 | `id` | optionnel | Identifiant unique du membre |
+| `search_name` | optionnel | Ne lister que les membres dont le nom correspond au texte passé en paramètre. |
 
 Chaque itération renverra la fiche du membre, ainsi que ces variables :
 
 | `$id` | Identifiant unique du membre |
-| `$user_name` | Nom du membre, tel que défini dans la configuration |
-| `$user_login` | Identifiant de connexion du membre, tel que défini dans la configuration |
+| `$_name` | Nom du membre, tel que défini dans la configuration |
+| `$_login` | Identifiant de connexion du membre, tel que défini dans la configuration |
+| `$_number` | Numéro du membre, tel que défini dans la configuration |
 
 
 ## subscriptions

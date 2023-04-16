@@ -529,26 +529,34 @@ class Sections
 			$params['where'] = '';
 		}
 
-		$id_field = DynamicFields::getNameFieldsSQL();
+		$id_field = DynamicFields::getNameFieldsSQL('users');
 		$login_field = DynamicFields::getLoginField();
 		$number_field = DynamicFields::getNumberField();
 
 		if (empty($params['select'])) {
-			$params['select'] = '*';
+			$params['select'] = 'users.*';
 		}
 
-		$params['select'] .= sprintf(', %s AS _name, %s AS _login, %s AS _number',
+		$params['select'] .= sprintf(', users.id AS id, %s AS _name, users.%s AS _login, users.%s AS _number',
 			$id_field, $login_field, $number_field);
 		$params['tables'] = 'users';
 
 		if (isset($params['id'])) {
-			$params['where'] .= ' AND id = :id';
+			$params['where'] .= ' AND users.id = :id';
 			$params[':id'] = (int) $params['id'];
 			unset($params['id']);
 		}
 
+		if (!empty($params['search_name'])) {
+
+			$params['tables'] .= sprintf(' INNER JOIN users_search AS us ON us.id = users.id AND %s LIKE :search_name ESCAPE \'\\\' COLLATE NOCASE',
+				DynamicFields::getNameFieldsSQL('us'));
+			$params[':search_name'] = '%' . Utils::unicodeTransliterate($params['search_name']) . '%';
+			unset($params['search_name']);
+		}
+
 		if (empty($params['order'])) {
-			$params['order'] = 'id';
+			$params['order'] = 'users.id';
 		}
 
 		$files_fields = array_keys(DynamicFields::getInstance()->fieldsByType('file'));
