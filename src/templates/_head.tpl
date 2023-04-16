@@ -13,12 +13,13 @@ if (!isset($current)) {
 	<link rel="stylesheet" type="text/css" href="{$admin_url}static/admin.css?{$version_hash}" media="all" />
 	<script type="text/javascript" src="{$admin_url}static/scripts/global.js?{$version_hash}"></script>
 	{if isset($custom_js)}
-		{foreach from=$custom_js item="js"}
-			<script type="text/javascript" src="{$admin_url}static/scripts/{$js}?{$version_hash}"></script>
+		<?php $custom_js = (array)$custom_js; ?>
+		{foreach from=$custom_js item="js_url"}
+			<script type="text/javascript" src="{$js_url|local_url:"!static/scripts/"}?{$version_hash}"></script>
 		{/foreach}
 	{/if}
 	{if isset($custom_css)}
-		<?php $custom_css = is_array($custom_css) ? $custom_css : [$custom_css]; ?>
+		<?php $custom_css = (array)$custom_css; ?>
 		{foreach from=$custom_css item="css_url"}
 			<link rel="stylesheet" type="text/css" href="{$css_url|local_url:"!static/styles/"}?{$version_hash}" media="all" />
 		{/foreach}
@@ -34,7 +35,11 @@ if (!isset($current)) {
 		{/foreach}
 	{/if}
 	<link rel="stylesheet" type="text/css" href="{$admin_url}static/print.css?{$version_hash}" media="print" />
-	<link rel="stylesheet" type="text/css" href="{$admin_url}static/handheld.css?{$version_hash}" media="handheld,screen and (max-width:981px)" />
+	{if isset($logged_user) && $logged_user.preferences.force_handheld}
+		<link rel="stylesheet" type="text/css" href="{$admin_url}static/handheld.css?{$version_hash}" media="handheld,screen" />
+	{else}
+		<link rel="stylesheet" type="text/css" href="{$admin_url}static/handheld.css?{$version_hash}" media="handheld,screen and (max-width:981px)" />
+	{/if}
 	<link rel="manifest" href="{$admin_url}manifest.php" />
 	{if isset($config)}
 		<link rel="icon" type="image/png" href="{$config->fileURL('favicon')}" />
