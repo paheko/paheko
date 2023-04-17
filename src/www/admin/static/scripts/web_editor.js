@@ -300,7 +300,7 @@
 				body: data,
 			}).then((response) => response.json())
 			.then(data => callback(data))
-			.catch(e => { console.log(e); });
+			.catch(e => { console.log(e); t.textarea.form.querySelector('[type=submit]').click(); });
 			return true;
 		};
 

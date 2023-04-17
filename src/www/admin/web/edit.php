@@ -2,6 +2,7 @@
 
 namespace Garradin;
 
+use Garradin\UserException;
 use Garradin\Web\Web;
 use Garradin\Web\Render\Render;
 use Garradin\Entities\Web\Page;
@@ -43,8 +44,18 @@ $form->runIf('save', function () use ($page, $editing_started, &$show_diff, &$ne
 		throw new UserException('La page a été modifiée par quelqu\'un d\'autre pendant que vous éditiez le contenu.');
 	}
 
-	$page->importForm();
-	$page->save();
+	try {
+		$page->importForm();
+		$page->save();
+	}
+	catch (UserException $e) {
+		if (qg('js') !== null) {
+			http_response_code(400);
+			die(json_encode(['error' => $e->getMessage()]));
+		}
+
+		throw $e;
+	}
 
 	if (qg('js') !== null) {
 		$url = Utils::getLocalURL('!web/page.php?p=' . $page->path);
