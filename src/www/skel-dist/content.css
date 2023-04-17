@@ -289,7 +289,7 @@
     cursor: zoom-in;
 }
 
-.web-content img {
+.web-content img, .web-content object {
     max-width: 100%;
 }
 
