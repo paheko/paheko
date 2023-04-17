@@ -97,11 +97,14 @@
 	};
 
 	g.dialog = null;
+	g.focus_before_dialog = null;
 
 	g.openDialog = function (content) {
 		if (null !== g.dialog) {
 			g.closeDialog();
 		}
+
+		g.focus_before_dialog = document.activeElement;
 
 		g.dialog = document.createElement('dialog');
 		g.dialog.id = 'dialog';
@@ -233,6 +236,10 @@
 		window.onkeyup = g.dialog = null;
 
 		window.setTimeout(() => { d.parentNode.removeChild(d); }, 500);
+
+		if (g.focus_before_dialog) {
+			g.focus_before_dialog.focus();
+		}
 	};
 
 	g.checkUncheck = function()

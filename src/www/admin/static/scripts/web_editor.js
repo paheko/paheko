@@ -149,6 +149,7 @@
 			t.insertAtPosition(t.getSelection().start, tag);
 
 			g.closeDialog();
+			t.textarea.focus();
 		};
 
 		window.te_insertImage = function (file, position, caption)
@@ -166,10 +167,11 @@
 			t.insertAtPosition(t.getSelection().start, tag);
 
 			g.closeDialog();
+			t.textarea.focus();
 		};
 
 		var EscapeEvent = function (e) {
-			if (e.key == 'Escape') {
+			if (e.ctrlKey && e.key.toLowerCase() == 'p') {
 				closeIFrame();
 				e.preventDefault();
 				return false;
@@ -313,7 +315,8 @@
 			if (config.attachments) {
 				appendButton('image', "🖻", openImageInsert, 'Insérer image');
 				appendButton('file', "📎", openFileInsert, 'Insérer fichier');
-				t.shortcuts.push({ctrl: true, shift: true, key: 'i', callback: openFileInsert});
+				t.shortcuts.push({ctrl: true, shift: true, key: 'i', callback: openImageInsert});
+				t.shortcuts.push({ctrl: true, shift: true, key: 'f', callback: openFileInsert});
 			}
 
 
@@ -363,7 +366,6 @@
 		t.shortcuts.push({ctrl: true, key: 's', callback: save});
 		t.shortcuts.push({ctrl: true, key: 'p', callback: openPreview});
 		t.shortcuts.push({key: 'F1', callback: openSyntaxHelp});
-		t.shortcuts.push({key: 'Escape', callback: openPreview});
 
 		g.setParentDialogHeight('90%');
 	}
