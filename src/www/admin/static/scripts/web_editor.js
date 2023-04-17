@@ -41,7 +41,7 @@
 		var backup_key = 'backup_' + location.path;
 
 		var preventClose = (e) => {
-			if (t.textarea.value == t.textarea.defaultValue) {
+			if (t.textarea.value.trim() == t.textarea.defaultValue.trim()) {
 				return;
 			}
 
@@ -65,7 +65,7 @@
 			config.fullscreen = true;
 
 			window.parent.g.dialog.preventClose = () => {
-				if (t.textarea.value == t.textarea.defaultValue) {
+				if (t.textarea.value.trim() == t.textarea.defaultValue.trim()) {
 					return false;
 				}
 
@@ -300,7 +300,7 @@
 				body: data,
 			}).then((response) => response.json())
 			.then(data => callback(data))
-			.catch(e => { console.log(e);  } );
+			.catch(e => { console.log(e); });
 			return true;
 		};
 
@@ -479,13 +479,13 @@
 		}
 
 		window.setTimeout(() => {
-			if ((v = localStorage.getItem(backup_key)) && window.confirm(msg_restore)) {
+			if ((v = localStorage.getItem(backup_key)) && v.trim() !== t.textarea.value.trim() && window.confirm(msg_restore)) {
 				t.textarea.value = v;
 			}
 		}, 50);
 
 		window.setInterval(() => {
-			if (t.textarea.value === t.textarea.defaultValue) {
+			if (t.textarea.value.trim() === t.textarea.defaultValue.trim()) {
 				return;
 			}
 
