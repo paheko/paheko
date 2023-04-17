@@ -99,7 +99,7 @@
 	g.dialog = null;
 	g.focus_before_dialog = null;
 
-	g.openDialog = function (content) {
+	g.openDialog = function (content, callback) {
 		if (null !== g.dialog) {
 			g.closeDialog();
 		}
@@ -146,6 +146,10 @@
 
 		if (event) {
 			content.addEventListener(event, () => { if (g.dialog) g.dialog.classList.add('loaded'); });
+
+			if (event && callback) {
+				content.addEventListener(event, callback);
+			}
 		}
 		else {
 			g.dialog.classList.add('loaded');

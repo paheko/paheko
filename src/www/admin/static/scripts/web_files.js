@@ -9,6 +9,7 @@
 
             var f = document.getElementById('insertImage');
             f.style.display = 'block';
+            f.onsubmit = () => { window.parent.te_insertImage(file.name, 'center', f.f_caption.value); return false; }
 
             var inputs = f.querySelectorAll('input[type=button]');
 
@@ -24,6 +25,8 @@
             img.src = file.thumb;
             img.alt = '';
             f.querySelector('dd.image').appendChild(img);
+
+            f.f_caption.focus();
 
             f.querySelector('dd.cancel [type=reset]').onclick = function() {
                 f.style.display = 'none';

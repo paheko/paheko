@@ -126,19 +126,19 @@
 			return true;
 		};
 
-		var openFileInsert = function ()
+		var openFileInsert = function (callback)
 		{
 			let args = new URLSearchParams(window.location.search);
 			var uri = args.get('p');
-			g.openFrameDialog(g.admin_url + 'web/_attach.php?files&_dialog&p=' + uri);
+			g.openFrameDialog(g.admin_url + 'web/_attach.php?files&_dialog&p=' + uri, null, callback);
 			return true;
 		};
 
-		var openImageInsert = function ()
+		var openImageInsert = function (callback)
 		{
 			let args = new URLSearchParams(window.location.search);
 			var uri = args.get('p');
-			g.openFrameDialog(g.admin_url + 'web/_attach.php?images&_dialog&p=' + uri);
+			g.openFrameDialog(g.admin_url + 'web/_attach.php?images&_dialog&p=' + uri, null, callback);
 			return true;
 		};
 
@@ -368,6 +368,102 @@
 		t.shortcuts.push({key: 'F1', callback: openSyntaxHelp});
 
 		g.setParentDialogHeight('90%');
+
+		const uploadFiles = (files) => {
+			var image = false;
+			var insert = null;
+			const IMAGE_MIME_REGEX = /^image\/(p?jpeg|gif|png)$/i;
+
+			for (var i = 0; i < files.length; i++) {
+				if (files[i].type.match(IMAGE_MIME_REGEX)) {
+					image = true;
+					break;
+				}
+			}
+
+			var callback = () => {
+				var frame = g.dialog.querySelector('iframe').contentWindow;
+
+				if (files === null) {
+					if (insert) {
+						var thumb = null;
+
+						if (image) {
+							frame.document.querySelectorAll('a[data-thumb]').forEach((a) => {
+								if (a.dataset.name == insert) {
+									thumb = a.dataset.thumb;
+								}
+							});
+						}
+
+						frame.insertHelper({name: insert, image, thumb});
+						insert = null;
+					}
+
+					return;
+				}
+
+				// Add items to upload
+				var input = frame.document.querySelector('input[type=file]');
+				for (var i = 0; i < files.length; i++) {
+					input.addItem(files[i]);
+				}
+
+				// Only one file? Just upload directly and then insert
+				if (files.length == 1) {
+					insert = files[0].name;
+					input.form.querySelector('[type=submit]').click();
+				}
+
+				files = null;
+			};
+
+			if (image) {
+				openImageInsert(callback);
+			}
+			else {
+				openFileInsert(callback);
+			}
+		};
+
+		if (config.attachments) {
+			// Paste images
+			t.textarea.addEventListener('paste', (e) => {
+				let items = e.clipboardData.items;
+				let files = [];
+
+				for (var i = 0; i < items.length; i++) {
+					if (items[i].kind != 'file') {
+						continue;
+					}
+
+					let f = items[i].getAsFile();
+					let name = f.name == 'image.png' ? f.name.replace(/\./, '-' + (+(new Date)) + '.') : f.name;
+
+					files.push(new File([f], name, {type: f.type}));
+				}
+
+				if (!files.length) {
+					return true;
+				}
+
+				e.preventDefault();
+				uploadFiles(files);
+				return false;
+			});
+
+			// Drag and drop images
+			t.textarea.form.addEventListener('drop', (e) => {
+				const files = [...e.dataTransfer.items].filter(item => item.kind == 'file').map(item => item.getAsFile());
+
+				if (!files.length) return;
+
+				e.preventDefault();
+				e.stopPropagation();
+
+				uploadFiles(files);
+			});
+		}
 	}
 
 	g.onload(() => {

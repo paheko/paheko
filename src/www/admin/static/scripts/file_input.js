@@ -186,6 +186,7 @@
 		}, false);
 
 		input.addEventListener('change', handleChange);
+		input.addItem = addItem;
 
 		input.parentNode.insertBefore(container, input.nextSibling);
 
