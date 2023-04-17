@@ -38,13 +38,13 @@ $new_content = null;
 $form->runIf('save', function () use ($page, $editing_started, &$show_diff, &$new_content, $current_content) {
 	$new_content = trim(preg_replace("/\r\n?/", "\n", (string)f('content')));
 
-	if ($new_content !== $current_content && $editing_started < $page->modified->getTimestamp()) {
-		$show_diff = true;
-		http_response_code(400);
-		throw new UserException('La page a été modifiée par quelqu\'un d\'autre pendant que vous éditiez le contenu.');
-	}
-
 	try {
+		if ($new_content !== $current_content && $editing_started < $page->modified->getTimestamp()) {
+			$show_diff = true;
+			http_response_code(400);
+			throw new UserException('La page a été modifiée par quelqu\'un d\'autre pendant que vous éditiez le contenu.');
+		}
+
 		$page->importForm();
 		$page->save();
 	}

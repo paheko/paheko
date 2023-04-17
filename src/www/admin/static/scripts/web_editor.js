@@ -298,7 +298,14 @@
 			fetch(t.textarea.form.action + '&js', {
 				method: 'post',
 				body: data,
-			}).then((response) => response.json())
+			}).then((response) => {
+				if (!response.ok) {
+					throw Error(response.status);
+				}
+				else {
+					return response.json();
+				}
+			})
 			.then(data => callback(data))
 			.catch(e => { console.log(e); t.textarea.form.querySelector('[type=submit]').click(); });
 			return true;
