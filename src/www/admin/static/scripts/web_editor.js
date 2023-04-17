@@ -38,7 +38,7 @@
 		};
 
 		// Use localStorage backup, per path
-		var backup_key = 'backup_' + location.path;
+		var backup_key = 'backup_' + location.search;
 
 		var preventClose = (e) => {
 			if (t.textarea.value.trim() == t.textarea.defaultValue.trim()) {
