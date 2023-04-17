@@ -1,6 +1,8 @@
 (function () {
 	g.style('scripts/web_editor.css');
 
+	const msg_restore = "Il semble que les dernières modifications n'aient pas été enregistrées.\nUne sauvegarde locale a été trouvée.\nFaut-il restaurer la sauvegarde locale ?";
+
 	function showSaved() {
 		let c = document.createElement('p');
 		c.className = 'block confirm';
@@ -35,6 +37,9 @@
 			format: t.textarea.getAttribute('data-format')
 		};
 
+		// Use localStorage backup, per path
+		var backup_key = 'backup_' + location.path;
+
 		var preventClose = (e) => {
 			if (t.textarea.value == t.textarea.defaultValue) {
 				return;
@@ -50,6 +55,8 @@
 
 		t.textarea.form.addEventListener('submit', () => {
 			window.removeEventListener('beforeunload', preventClose, {capture: true});
+			save((data) => { location.href = data.redirect; });
+			return false;
 		});
 
 		// Cancel Escape to close.value
@@ -63,7 +70,7 @@
 				}
 
 				if (window.confirm('Sauvegarder avant de fermer ?')) {
-					save();
+					quicksave();
 				}
 
 				return false;
@@ -279,7 +286,7 @@
 			}
 		};
 
-		let save = function () {
+		let save = function (callback) {
 			const data = new URLSearchParams();
 
 			for (const pair of new FormData(t.textarea.form)) {
@@ -292,17 +299,23 @@
 				method: 'post',
 				body: data,
 			}).then((response) => response.json())
-			.then(data => {
+			.then(data => callback(data))
+			.catch(e => { console.log(e);  } );
+			return true;
+		};
+
+		const quicksave = () => {
+			save((data) => {
 				showSaved();
 				t.textarea.defaultValue = t.textarea.value;
+				localStorage.removeItem(backup_key);
 
 				let e = t.textarea.form.querySelector('input[name=editing_started]');
 
 				if (e) {
 					e.value = data.modified;
 				}
-
-			}).catch(e => { console.log(e); t.textarea.form.querySelector('[type=submit]').click(); } );
+			});
 			return true;
 		};
 
@@ -321,10 +334,10 @@
 
 
 			if (config.savebtn == 1) {
-				appendButton('ext save save-label', 'Enregistrer', save, 'Enregistrer');
+				appendButton('ext save save-label', 'Enregistrer', quicksave, 'Enregistrer');
 			}
 			else if (config.savebtn == 2) {
-				appendButton('ext save', '⇑', save, 'Enregistrer sans fermer');
+				appendButton('ext save', '⇑', quicksave, 'Enregistrer sans fermer');
 			}
 
 			appendButton('ext preview', '👁', openPreview, 'Prévisualiser');
@@ -363,7 +376,7 @@
 		t.shortcuts.push({ctrl: true, key: 'i', callback: applyItalic });
 		t.shortcuts.push({ctrl: true, key: 't', callback: applyHeader });
 		t.shortcuts.push({ctrl: true, key: 'l', callback: insertURL});
-		t.shortcuts.push({ctrl: true, key: 's', callback: save});
+		t.shortcuts.push({ctrl: true, key: 's', callback: quicksave});
 		t.shortcuts.push({ctrl: true, key: 'p', callback: openPreview});
 		t.shortcuts.push({key: 'F1', callback: openSyntaxHelp});
 
@@ -464,6 +477,21 @@
 				uploadFiles(files);
 			});
 		}
+
+		window.setTimeout(() => {
+			if ((v = localStorage.getItem(backup_key)) && window.confirm(msg_restore)) {
+				t.textarea.value = v;
+			}
+		}, 50);
+
+		window.setInterval(() => {
+			if (t.textarea.value === t.textarea.defaultValue) {
+				return;
+			}
+
+			localStorage.setItem(backup_key, t.textarea.value);
+		}, 10000);
+
 	}
 
 	g.onload(() => {
