@@ -1,11 +1,20 @@
 <ul>
 	<li{{if !$_GET.show}} class="current"{{/if}}>{{:link href="./" label="Tous les documents"}}</li>
 	<li{{if $_GET.show == 'quotation'}} class="current"{{/if}}>{{:link href="./?show=quotation" label="Devis"}}</li>
-	<li{{if $_GET.show == 'unpaid'}} class="current"{{/if}}>{{:link href="./?show=unpaid" label="Fact. en souff."}}</li>
-	<li{{if $_GET.show == 'paid'}} class="current"{{/if}}>{{:link href="./?show=paid" label="Fact. réglées"}}</li>
+	<li{{if $_GET.show == 'invoice' || $_GET.show == 'unpaid' || $_GET.show == 'paid'}} class="current"{{/if}}>{{:link href="./?show=invoice" label="Factures"}}</li>
 	<li{{if $_GET.show == 'archive'}} class="current"{{/if}}>{{:link href="./?show=archive" label="Archives"}}</li>
 	<li{{if $_GET.show == 'customers'}} class="current"{{/if}}>{{:link href="./customers.html?show=customers" label="Client·e·s"}}</li>
 	{{#restrict section='config' level='admin'}}
 		<li{{if $_GET.show == 'config'}} class="current"{{/if}}>{{:link href="./config.html?show=config" label="Configuration"}}</li>
 	{{/restrict}}
 </ul>
+
+{{if $subtabs}}
+	{{if $_GET.show === 'invoice' || $_GET.show == 'unpaid' || $_GET.show == 'paid'}}
+		<ul>
+			<li{{if $_GET.show === 'invoice'}} class="current"{{/if}}>{{:link href="./?show=invoice" label="Toutes"}}</li>
+			<li{{if $_GET.show == 'unpaid'}} class="current"{{/if}}>{{:link href="./?show=unpaid" label="Impayées"}}</li>
+			<li{{if $_GET.show == 'paid'}} class="current"{{/if}}>{{:link href="./?show=paid" label="Réglées"}}</li>
+		</ul>
+	{{/if}}
+{{/if}}

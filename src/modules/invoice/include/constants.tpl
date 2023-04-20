@@ -1,4 +1,4 @@
-{{:assign VERSION='0.2'}}
+{{:assign VERSION='0.3'}}
 {{:assign DRAFT_STATUS='draft' AWAITING_STATUS='awaiting' REJECTED_STATUS='rejected' VALIDATED_STATUS='validated' PAID_STATUS='paid' MISC_STATUS='misc'}}
 {{:assign CANCELLED_FLAG='cancelled'}}
 {{:assign QUOTATION_TYPE='quotation' INVOICE_TYPE='invoice'}}

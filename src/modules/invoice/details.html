@@ -103,16 +103,18 @@
 				{{/if}}
 				{{if $transaction_id}}
 					{{#transactions id=$transaction_id|intval}}
-						<p class="infos">Écriture comptable correspondante : {{:link href='!acc/transactions/details.php?id=%d'|args:$id label='n°%d - %s'|args:$id:$label}}.</p>
+						<p>Écriture comptable correspondante : {{:link href='!acc/transactions/details.php?id=%d'|args:$id label='n°%d - %s'|args:$id:$label}}.</p>
 					{{/transactions}}
+					{{:assign transaction_button_label='📖 Associer à une autre écriture'}}
 				{{else}}
 					<p>
 						Aucune écriture comptable correspondante.
 					</p>
-					<form method="POST" action="{{"action.html?id=%d&show=invoice&action=ask_bind_to_transaction"|args:$id}}" class="infos">
-						{{:button type="submit" label='📖 Associer une écriture' name="bind_to_transaction_button"}}
-					</form>
+					{{:assign transaction_button_label='📖 Associer une écriture'}}
 				{{/if}}
+				<form method="POST" action="{{"action.html?id=%d&show=invoice&action=ask_bind_to_transaction"|args:$id}}" class="infos">
+					{{:button type="submit" label=$transaction_button_label name="bind_to_transaction_button"}}
+				</form>
 
 			{{else}}
 				<p class="infos">Statut en cours : {{$status_label}}.</p>
@@ -244,6 +246,20 @@
 				{{if $extra_text}}<p>{{$extra_text|escape|nl2br}}</p>{{/if}}
 			</fieldset>
 		{{/if}}
+
+		{{#restrict section="accounting" level="write"}}
+		<fieldset>
+			<legend><h2>Options avancées</h2></legend>
+			{{if $type === $QUOTATION_TYPE}}
+				{{:assign button_target_label='le devis'}}
+			{{else}}
+				{{:assign button_target_label='la facture'}}
+			{{/if}}
+			<form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_duplication"|args:$id:$type}}">
+				{{:button type="submit" label="Dupliquer %s"|args:$button_target_label shape="list-ol" name="duplicate_button"}}
+			</form>
+		</fieldset>
+		{{/restrict}}
 
 		{{if $DEV_MODE}}
 			{{#restrict section="config" level="admin"}}

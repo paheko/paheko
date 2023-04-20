@@ -1,74 +1,8 @@
-<script type="text/javascript">
-function compute_total() {
-	let items = document.getElementById('item_list').getElementsByClassName('item');
-	let total = 0.0;
-	let unit_price;
-	let quantity;
-
-	for (let i = 0; i < items.length; ++i) {
-		unit_price = items[i].children[3].firstChild.firstChild.value.replace(',', '.');
-		quantity = items[i].children[4].firstChild.value.replace(',', '.');
-		if (!isNaN(unit_price) && !isNaN(quantity) && unit_price > 0)
-			total += parseFloat(unit_price) * parseFloat(quantity);
-	}
-	return Math.round((total + Number.EPSILON) * 100) / 100;
-}
-
-function refresh_total() {
-	const DEVISE = '{{$config.currency|htmlspecialchars|args:ENT_QUOTES}}';
-	let total;
-	
-	total = compute_total();
-	document.getElementById('quotation_total').textContent = parseFloat(total) + ' ' + DEVISE;
-	document.getElementById('quotation_total_input').value = parseFloat(total);
-}
-
-function remove_item(id) {
-	let items;
-
-	document.getElementById('item_' + parseInt(id) + '_row').remove();
-	items = document.getElementById('item_list').getElementsByClassName('item');
-	if (items === 'undefined' || items.length === 0) {
-		document.getElementById('item_list_no_item_message').style.display = 'block';
-		document.getElementById('item_list').style.display = 'none';
-	}
-	refresh_total();
-}
-
-function add_delete_buttons() {
-	let button;
-	let td;
-
-	$('tr.need_delete_button').forEach((row) => {
-		button = document.createElement('button');
-		button.type = 'button';
-		button.name = 'item_delete_button';
-		button.setAttribute('data-icon', '✘');
-		button.setAttribute('data-item-id', 17);
-		button.class = ' icn-btn';
-		button.onclick = (event) => {
-			remove_item(event.target.parentNode.parentNode.getAttribute('data-item-id'));
-			refresh_total();
-		};
-		td = document.createElement('td');
-		td.classList.add('item_actions');
-		td.appendChild(button);
-		row.appendChild(td);
-		row.classList.remove('need_delete_button');
-	});
-}
-
-function add_input_refresh_total_behavior() {
-	$('input.impact_total').forEach((input) => {
-		input.onchange = refresh_total;
-	});
-}
-</script>
+<script src="./include/item_list.js"></script>
 
 <fieldset>
 	<legend><h2>Liste des articles</h2></legend>
-	<p id="item_list_no_item_message" {{if $items}}class="hidden"{{/if}}>Aucun article pour le moment.</p>
-	<table id="item_list" class="list{{if !$items}} hidden{{/if}}">
+	<table id="item_list" class="list">
 		<thead>
 			<tr>
 				<th>Réf.</th>
@@ -79,27 +13,49 @@ function add_input_refresh_total_behavior() {
 				<th></th>
 			</tr>
 		</thead>
+
 		<tbody>
 
-		{{#foreach from=$items key='key' item='item'}}
-			<tr id="{{'item_%d_row'|args:$key}}" class="item" data-item-id="{{$key}}">
-				<td>{{:input type="text" name="items[%d][reference]"|args:$key default=$item.reference class="reference"}}</td>
-				<td>{{:input type="text" name="items[%d][name]"|args:$key default=$item.name}}</td>
-				<td>{{:input type="textarea" cols="50" rows="2" name="items[%s][description]"|args:$key default=$item.description class="full-width"}}</td>
-				<td>{{:input type="money" name="items[%d][unit_price]"|args:$key default=$item.unit_price class="impact_total"}}</td>
-				<td>{{:input type="number" name="items[%d][quantity]"|args:$key default=$item.quantity class="impact_total" min="0" max="9999"}}</td>
-				<td>{{:button name="item_%d_delete_button" label="" shape="delete" onclick="remove_item(%d)"|args:$key}}</td>
-			</tr>
+		{{* Items *}}
+		{{:assign items_source=$_POST.items|or:$items}}
+		{{#foreach from=$items_source key='key' item='item'}}
+			{{if $item.unit_price || $item.quantity}} {{* Ignore default empty line *}}
+				<tr id="{{'item_%d_row'|args:$key}}" class="item" data-item-id="{{$key}}">
+					<td>{{:input type="text" name="items[%d][reference]"|args:$key default=$item.reference class="reference"}}</td>
+					<td>{{:input type="text" name="items[%d][name]"|args:$key default=$item.name}}</td>
+					<td>{{:input type="textarea" cols="50" rows="2" name="items[%s][description]"|args:$key default=$item.description class="full-width"}}</td>
+					<td>{{if $_POST.items}}{{:assign unit_price=$item.unit_price|money_int}}{{else}}{{:assign unit_price=$item.unit_price}}{{/if}}{{:input type="money" name="items[%d][unit_price]"|args:$key default=$unit_price class="impact_total"}}</td>
+					<td>{{:input type="number" name="items[%d][quantity]"|args:$key default=$item.quantity class="impact_total" min="0" max="9999"}}</td>
+					<td>{{:button name="item_%d_delete_button" label="Enlever" shape="minus" onclick="remove_item(%d)"|args:$key}}</td>
+				</tr>
+				{{:assign last_key=$key}} {{* $key is local and we need its value right after the foreach *}}
+			{{/if}}
 		{{/foreach}}
 
+		{{* Empty line for user input *}}
+		{{:assign var='key' value="%d + 1"|math:$last_key}}
+		<tr id="{{'item_%d_row'|args:$key}}" class="item" data-item-id="{{$key}}">
+			<td>{{:input type="text" name="items[%d][reference]"|args:$key class="reference" placeholder="ex : S-812"}}</td>
+			<td>{{:input type="text" name="items[%d][name]"|args:$key placeholder="ex : Location vélo - Forfait six jours"}}</td>
+			<td>{{:input type="textarea" cols="50" rows="2" name="items[%s][description]"|args:$key class="full-width"}}</td>
+			{{* Awaiting #eeb7d3e36ef4e3d7f2e8bc49c18c3c6b672f2e18 resolution {{:input type="money" name="item_unit_price" id="item_unit_price" label="Prix unitaire" default="0"}} *}}
+			<td><nobr><input type="text" name="{{"items[%d][unit_price]"|args:$key}}" id="{{"f_items%dunit_price"|args:$key}}" value="0" class="money impact_total" pattern="-?[0-9]+([.,][0-9]{1,2})?" inputmode="decimal" size="8" autocomplete="off" class="money" /></nobr></td>
+			{{*<td>{{:input type="money" name="items[%d][unit_price]"|args:$key class="impact_total" default="0" required="false"}}</td>*}}
+			<td>{{:input type="number" name="items[%d][quantity]"|args:$key class="impact_total" min="0" max="9999" default="0"}}</td>
+			<td>{{:button name="item_%d_delete_button"|args:$key label="Enlever" shape="minus" onclick="remove_item(%d)"|args:$key}}</td>
+		</tr>
+
 		</tbody>
+
+		<tfoot>
+			<tr>
+				<td colspan="5"></td>
+				<td>{{:button name="item_%d_delete_button" label="Ajouter" shape="plus" onclick="add_item()"}}</td>
+			</tr>
+		</tfoot>
 	</table>
-	<p>{{:linkbutton label="Ajouter un article" href="item_form.html" shape="plus" target="_dialog"}}</p>
-	<h3 class="quotation_total">Total des articles</h3>
-	<p>
-		<span id="quotation_total">{{$document.total|intval|money_currency:false}}</span>
-		<input type="hidden" name="quotation_total" id="quotation_total_input" label="" value="" />
-	</p>
+	<h3 class="quotation_total">Total des articles : <span id="quotation_total">{{$document.total|intval|money:false}}</span> €</h3>
+	<input type="hidden" name="quotation_total" id="quotation_total_input" label="" value="" />
 </fieldset>
 
 <script type="text/javascript">

@@ -1,7 +1,61 @@
-{{:admin_header title="Ajouter un article au devis"}}
+function compute_total() {
+	let items = document.getElementById('item_list').getElementsByClassName('item');
+	let total = 0.0;
+	let unit_price;
+	let quantity;
 
-<script type="text/javascript">
-{{* Reproduce brindille {{:input}} partial behavior *}}
+	for (let i = 0; i < items.length; ++i) {
+		unit_price = items[i].children[3].firstChild.firstChild.value.replace(',', '.');
+		quantity = items[i].children[4].firstChild.value.replace(',', '.');
+		if (!isNaN(unit_price) && !isNaN(quantity) && unit_price > 0)
+			total += parseFloat(unit_price) * parseFloat(quantity);
+	}
+	return Math.round((total + Number.EPSILON) * 100) / 100;
+}
+
+function refresh_total() {
+	let total;
+	
+	total = compute_total();
+	document.getElementById('quotation_total').textContent = parseFloat(total);
+	document.getElementById('quotation_total_input').value = parseFloat(total);
+}
+
+function add_input_refresh_total_behavior() {
+	$('input.impact_total').forEach((input) => {
+		input.onchange = refresh_total;
+	});
+}
+
+function remove_item(id) {
+	document.getElementById('item_' + parseInt(id) + '_row').remove();
+	refresh_total();
+}
+
+function add_delete_buttons() {
+	let button;
+	let td;
+
+	$('tr.need_delete_button').forEach((row) => {
+		button = document.createElement('button');
+		button.type = 'button';
+		button.name = 'item_delete_button';
+		button.setAttribute('data-icon', '➖');
+		button.setAttribute('data-item-id', 17);
+		button.class = ' icn-btn';
+		button.innerText = 'Enlever';
+		button.onclick = (event) => {
+			remove_item(event.target.parentNode.parentNode.getAttribute('data-item-id'));
+			refresh_total();
+		};
+		td = document.createElement('td');
+		td.classList.add('item_actions');
+		td.appendChild(button);
+		row.appendChild(td);
+		row.classList.remove('need_delete_button');
+	});
+}
+
 function generate_item_input(type, name, index) {
 	let input;
 
@@ -60,7 +114,6 @@ function add_item() {
 		td = document.createElement('td');
 		td.classList.add('item_' + item_properties[i][0]);
 		input = generate_item_input(item_properties[i][1], item_properties[i][0], row_line.id);
-		input.value = document.getElementById('f_item_' + item_properties[i][0]).value;
 		if (item_properties[i][1] === 'money') {
 			nobr = document.createElement('nobr');
 			nobr.appendChild(input);
@@ -69,32 +122,8 @@ function add_item() {
 		td.appendChild(input);
 		row_line.appendChild(td);
 	}
-	window.parent.document.getElementById('item_list_no_item_message').style.display = 'none';
-	window.parent.document.getElementById('item_list').style.display = 'block';
-	window.parent.document.getElementById('item_list').getElementsByTagName('tbody')[0].appendChild(row_line);
-	window.parent.refresh_total();
-	window.parent.add_delete_buttons();
-	window.parent.add_input_refresh_total_behavior();
-	window.parent.g.closeDialog();
+	document.getElementById('item_list').getElementsByTagName('tbody')[0].appendChild(row_line);
+	refresh_total();
+	add_delete_buttons();
+	add_input_refresh_total_behavior();
 }
-</script>
-
-<form method="POST" action="" id="item_creation_form" onsubmit="add_item()">
-	<fieldset>
-		<legend><h2>Ajouter un article</h2></legend>
-		<dl>
-			{{:input type="text" name="item_reference" label="Référence" placeholder="ex : S-812"}}
-			{{:input type="text" name="item_name" label="Dénomination" placeholder="ex : Location vélo - Forfait six jours"}}
-			{{:input type="textarea" name="item_description" label="Description"}}
-
-			<dt><label for="f_item_unit_price">Prix unitaire</label><i>(facultatif)</i></dt>
-			<dd><input type="text" name="item_unit_price" id="f_item_unit_price" value="0" pattern="-?[0-9]+([.,][0-9]{1,2})?" inputmode="decimal" size="8" autocomplete="off" class="money" /></dd>
-			{{* Awaiting #eeb7d3e36ef4e3d7f2e8bc49c18c3c6b672f2e18 resolution {{:input type="money" name="item_unit_price" id="item_unit_price" label="Prix unitaire" default="0"}} *}}
-
-			{{:input type="number" name="item_quantity" label="Quantité" default="1" min="0" max="9999"}}
-		</dl>
-		<input type="submit" name="" id="item_addition_button" value="Ajouter l'article au devis" />
-	</fieldset>
-</form>
-
-{{:admin_footer}}

@@ -22,320 +22,239 @@
 	{{:error message="Les document annulés ne peuvent plus être modifiés."}}
 {{/if}}
 
-{{if $_POST.quotation_submit}}
-	{{:assign computed_total=0}}
-	{{:assign check_errors=null}}
-	{{:assign items=null}}
+{{:assign check_errors=null}}
+
+{{if $_POST.quotation_submit || $_POST.save_as_draft}}
 
 	{{:include file='./include/shim/array_last_num_key.tpl' keep='customer_id, check_errors' array=$_POST.customer name='customer_id' error_message='Membre séléctionné invalide.'}}
-	{{if $customer_id !== null}}
-		{{#users id=$customer_id}}
-			{{:assign recipient_member_id=$id|intval}}
-			{{:assign recipient_member_number=$numero|strval}}
-			{{:assign recipient_business_name=$nom}}
-			{{if $adresse}}{{:assign recipient_address=$adresse|cat:"\n":$code_postal:' ':$ville}}{{/if}}
-		{{/users}}
-	{{/if}}
 
-	{{if $_POST.recipient_business_name}} {{* Manual input overrides member name *}}
-		{{:assign recipient_business_name=$_POST.recipient_business_name}}
-	{{/if}}
-	{{if !$recipient_business_name}}
-		{{:assign var='check_errors.' value='La raison sociale est obligatoire si vous ne sélectionnez pas de membre.'}}
-	{{/if}}
-	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Raison sociale trop longue' check_value=$recipient_business_name check_max=128}}
-
-	{{if $_POST.recipient_address}} {{* Manual input overrides member address *}}
-		{{:assign recipient_address=$_POST.recipient_address}}
-	{{/if}}
-	{{if !$recipient_address}}
-		{{:assign var='check_errors.' value="L'adresse est obligatoire si vous ne sélectionnez pas de membre ou si celui/celle-ci n'a pas d'adresse."}}
-	{{/if}}
-	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Adresse trop longue' check_value=$recipient_address check_max=512}}
-
-	{{if !$_POST.subject}}
-		{{:assign var='check_errors.' value="L'objet est obligatoire."}}
-	{{/if}}
-	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Objet trop long' check_value=$_POST.subject check_max=256}}
-	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Texte d'introduction trop long" check_value=$_POST.introduction_text check_max=256}}
-
-	{{:assign date=$_POST.date|date:'Y-m-d'}}
-	{{:assign deadline=$_POST.deadline|date:'Y-m-d'}}
-
-	{{if !$_POST.date}}
-		{{:assign var='check_errors.' value="La date est obligatoire."}}
-	{{/if}}
-	{{if $_POST.date|date_short === null}} {{* Means data is not a date *}}
-		{{:assign var='check_errors.' value="La date du devis doit être une date."}}
-	{{/if}}
-
-	{{if $_POST.deadline && $_POST.deadline|date_short === null}}
-		{{:assign var='check_errors.' value="L'échéance doit être une date."}}
-	{{/if}}
-	{{if $deadline && $deadline < $date}}
-		{{:assign var='check_errors.' value="L'échéance doit se situer après la date du devis (%s)."|args:$_POST.date}}
-	{{/if}}
-
-	{{if $_POST.status}}
-		{{:assign var='check_errors.' value="Le statut ne peut pas être changé."}}
-	{{/if}}
-
-	{{if !$_POST.org_contact}}
-		{{:assign var='check_errors.' value="Le contact est obligatoire."}}
-	{{/if}}
-	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Contact trop long" check_value=$_POST.org_contact check_max=256}}
-	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Instructions de paiement trop longues" check_value=$_POST.payment_text check_max=512}}
-	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Informations complémentaires trop longues" check_value=$_POST.extra_text check_max=1024}}
-	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Remarques trop longues" check_value=$_POST.comment check_max=1024}}
-
-	{{#foreach from=$_POST.items key='index' item='item'}}
-		{{if $item.name === ''}}{{:assign var='check_errors.' value="Le nom de l'article est requis."}}{{/if}}
-		{{:assign var='unit_price' value=$item.unit_price|replace:',':'.'}}
-		{{:assign var='quantity' value=$item.quantity|replace:',':'.'}}
-		{{if $unit_price < 0 || $unit_price != $unit_price|floatval|strval}} {{* Hack to check the data is a number *}}
-			{{:assign var='check_errors.' value='Le prix saisi pour "%s" est invalide.'|args:$item.name}}
+	{{if $_GET.step === 'recipient' || $_GET.step === 'final'}}
+	
+		{{if $customer_id !== null}}
+			{{#users id=$customer_id}}
+				{{:assign .='customer'}}
+				{{:assign recipient_member_id=$id|intval}}
+				{{:assign recipient_member_number=$numero|strval}}
+				{{:assign recipient_business_name=$nom}}
+				{{if $adresse}}
+					{{:assign recipient_address=$adresse|cat:"\n":$code_postal:' ':$ville}}
+				{{elseif !$_POST.recipient_address}}
+					{{:assign var='check_errors.' value="Le/la membre séléctionné·e n'a pas d'adresse. Merci de faire une saisie manuelle (ou bien de mettre à jour sa fiche puis de recommencer)."}}
+				{{/if}}
+			{{/users}}
 		{{/if}}
-		{{if $quantity < 0 || $quantity != $quantity|floatval|strval}}{{:assign var='check_errors.' value='La quantité saisie pour "%s" est invalide.'|args:$item.name}}{{/if}}
 
-		{{:assign shorted=$item.reference|substr:0:16|cat:'...'}}
-		{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Référence d'article '%s' trop longue"|args:$shorted check_value=$item.reference check_max=128}}
-		{{:assign shorted=$item.name|substr:0:16|cat:'...'}}
-		{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Nom d'article '%s' trop long"|args:$shorted check_value=$item.name check_max=128}}
-		{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Description de l'article '%s' trop longue"|args:$item.name check_value=$item.description check_max=512}}
-
-		{{:assign var='computed_item' value=$item}}
-		{{:assign var='computed_item.id' value=$index|intval}}
-		{{:assign var='computed_item.unit_price' value=$unit_price|floatval|money_int}}
-		{{:assign var='computed_item.quantity' value=$quantity|floatval}}
-		{{:assign var='items.' value=$computed_item}}
-		{{:assign var='computed_total' value="%d + %d * %F"|args:$computed_total:$computed_item.unit_price:$computed_item.quantity|math}}
-	{{/foreach}}
-
-	{{if $computed_total != $_POST.quotation_total|money_int || $computed_total < 0}}
-		{{:assign var='check_errors.' value='Erreur de calcul du total. Enregistrement du devis refusé.'}}
-	{{/if}}
-
-	{{if $module.config.vat_exemption}}
-		{{:assign vat_exemption=$module.config.vat_exemption}}
-	{{else}}
-		{{:assign vat_exemption=$NONPROFIT_VAT_EXEMPTION_TYPE}}
-	{{/if}}
-
-	{{if $_POST.signing}}
-		{{if !$_POST.signing_place || !$_POST.signing_date}}
-			{{:assign var='check_errors.' value='La date et le lieu de la signature du devis sont obligatoires si le devis est signé.'}}
+		{{if $_POST.recipient_business_name}} {{* Manual input overrides member name *}}
+			{{:assign recipient_business_name=$_POST.recipient_business_name}}
 		{{/if}}
-	{{/if}}
-
-	{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Lieu de da signature trop long' check_value=$_POST.signing_place check_max=128}}
-	{{:assign signing_date=$_POST.signing_date|date:'Y-m-d'}}
-	{{if $signing_date && $signing_date < $date}}
-		{{:assign var='check_errors.' value="La date de signature doit se situer après la date du devis (%s)."|args:$_POST.date}}
-	{{/if}}
-
-	{{if $_POST.key}}
-		{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Numéro trop long' check_value=$_POST.key check_max=32}}
-		{{#sql select='key' tables='module_data_invoice' where="key = :post_key" :post_key=$_POST.key}}
-			{{:assign found=true}}
-		{{/sql}}
-		{{if !$document && $found}}
-			{{:assign var='check_errors.' value='Un document existe déjà avec ce numéro (%s). Veuillez en saisir un différent.'|args:$_POST.key}}
+		{{if !$recipient_business_name}}
+			{{:assign var='check_errors.' value="La saisie manuelle d'une raison sociale est obligatoire si vous ne sélectionnez pas de membre."}}
 		{{/if}}
+		{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Raison sociale trop longue' check_value=$recipient_business_name check_max=128}}
+
+		{{if $_POST.recipient_address}} {{* Manual input overrides member address *}}
+			{{:assign recipient_address=$_POST.recipient_address}}
+		{{/if}}
+		{{if !$customer && !$_POST.recipient_address}}
+			{{:assign var='check_errors.' value="La saisie d'une adresse est obligatoire."}}
+		{{/if}}
+		{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Adresse trop longue' check_value=$recipient_address check_max=512}}
+
 	{{/if}}
 
-	{{if $check_errors|count}}
-		{{#foreach from=$check_errors item='error'}}
-			<p class="error block">{{$error}}</p>
-		{{/foreach}}
-	{{else}}
+	{{if $_GET.step === 'main' || $_GET.step === 'final'}}
+
 		{{if $_POST.key}}
-			{{:assign key=$_POST.key}}
-		{{else}}
-			{{:include file='./include/generate_next_key.tpl' keep='key' type=$QUOTATION_TYPE}}
-		{{/if}}
-		{{if $document}}
-			{{:assign id=$document.id|intval}}
-		{{else}}
-			{{:assign id=null}}
-		{{/if}}
-
-		{{if $_POST.signing}}
-			{{:assign status=$AWAITING_STATUS}}
-		{{else}}
-			{{:assign status=$DRAFT_STATUS}}
+			{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Numéro trop long' check_value=$_POST.key check_max=32}}
+			{{#sql select='key' tables='module_data_invoice' where="key = :post_key" :post_key=$_POST.key}}
+				{{:assign found=true}}
+			{{/sql}}
+			{{if !$document && $found}}
+				{{:assign var='check_errors.' value='Un document existe déjà avec ce numéro (%s). Veuillez en saisir un différent.'|args:$_POST.key}}
+			{{/if}}
 		{{/if}}
 
-		{{:save 
-			validate_schema="./include/schema/quotation.json"
-			id=$id
-			key=$key
-			type=$QUOTATION_TYPE
-			status=$status
-			cancelled=false
-			cancellation_reason=null
-			archived=false
-			author_id=$logged_user.id|intval
-			child_id=null
-			parent_id=null
-			duplicated_from_id=null
-			subject=$_POST.subject
-			date=$date
-			deadline=$deadline
-			signing_date=$signing_date
-			signing_place=$_POST.signing_place
-			validation_date=null
-			items=$items
-			total=$computed_total
-			siret=$module.config.siret
-			org_contact=$_POST.org_contact
-			recipient_business_name=$recipient_business_name
-			recipient_address=$recipient_address
-			recipient_member_id=$recipient_member_id
-			recipient_member_number=$recipient_member_number
-			introduction_text=$_POST.introduction_text
-			payment_text=$_POST.payment_text
-			extra_text=$_POST.extra_text
-			comment=$_POST.comment
-			vat_exemption=$vat_exemption
-			last_modification_date=$now|atom_date
-			module_version=$VERSION
-		}}
+		{{if !$_POST.subject}}
+			{{:assign var='check_errors.' value="L'objet est obligatoire."}}
+		{{/if}}
+		{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Intitulé trop long' check_value=$_POST.subject check_max=256}}
+		{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Texte d'introduction trop long" check_value=$_POST.introduction_text check_max=256}}
 
-		{{if !$document}}
-			{{:http redirect="./index.html?ok=1"}}
-		{{else}}
-			{{:http redirect="./index.html?ok=2"}}
+		{{:assign date=$_POST.date|date:'Y-m-d'}}
+		{{:assign deadline=$_POST.deadline|date:'Y-m-d'}}
+
+		{{if !$_POST.date}}
+			{{:assign var='check_errors.' value="La date est obligatoire."}}
+		{{/if}}
+		{{if $_POST.date|date_short === null}} {{* Means data is not a date *}}
+			{{:assign var='check_errors.' value="La date du devis doit être une date."}}
 		{{/if}}
 
+		{{if $_POST.deadline && $_POST.deadline|date_short === null}}
+			{{:assign var='check_errors.' value="L'échéance doit être une date."}}
+		{{/if}}
+		{{if $deadline && $deadline < $date}}
+			{{:assign var='check_errors.' value="L'échéance doit se situer après la date du devis (%s)."|args:$_POST.date}}
+		{{/if}}
+
+		{{if $_POST.status}}
+			{{:assign var='check_errors.' value="Le statut ne peut pas être changé."}}
+		{{/if}}
+
+		{{if !$_POST.org_contact}}
+			{{:assign var='check_errors.' value="Le contact est obligatoire."}}
+		{{/if}}
+		{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Contact trop long" check_value=$_POST.org_contact check_max=256}}
+	
+	{{/if}}
+	
+	{{if $_GET.step === 'items' || $_GET.step === 'final'}}
+
+		{{:assign computed_total=0}}
+		{{:assign items=null}}
+
+		{{#foreach from=$_POST.items key='index' item='item'}}
+			{{if $item.unit_price || $item.quantity}} {{* Ignore default empty line *}}
+				{{if $item.name === ''}}{{:assign var='check_errors.' value="Le nom de l'article est requis."}}{{/if}}
+				{{:assign var='unit_price' value=$item.unit_price|replace:',':'.'}}
+				{{:assign var='quantity' value=$item.quantity|replace:',':'.'}}
+				{{if $unit_price < 0 || $unit_price != $unit_price|floatval|strval}} {{* Hack to check the data is a number *}}
+					{{:assign var='check_errors.' value='Le prix saisi pour "%s" est invalide.'|args:$item.name}}
+				{{/if}}
+				{{if $quantity < 0 || $quantity != $quantity|floatval|strval}}{{:assign var='check_errors.' value='La quantité saisie pour "%s" est invalide.'|args:$item.name}}{{/if}}
+
+				{{:assign shorted=$item.reference|substr:0:16|cat:'...'}}
+				{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Référence d'article '%s' trop longue"|args:$shorted check_value=$item.reference check_max=128}}
+				{{:assign shorted=$item.name|substr:0:16|cat:'...'}}
+				{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Nom d'article '%s' trop long"|args:$shorted check_value=$item.name check_max=128}}
+				{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Description de l'article '%s' trop longue"|args:$item.name check_value=$item.description check_max=512}}
+
+				{{:assign var='computed_item' value=$item}}
+				{{:assign var='computed_item.id' value=$index|intval}}
+				{{:assign var='computed_item.unit_price' value=$unit_price|floatval|money_int}}
+				{{:assign var='computed_item.quantity' value=$quantity|floatval}}
+				{{:assign var='items.' value=$computed_item}}
+				{{:assign var='computed_total' value="%d + %d * %F"|args:$computed_total:$computed_item.unit_price:$computed_item.quantity|math}}
+			{{/if}}
+		{{/foreach}}
+
+		{{if $computed_total != $_POST.quotation_total|money_int || $computed_total < 0}}
+			{{:assign var='check_errors.' value='Erreur de calcul du total. Enregistrement du devis refusé.'}}
+		{{/if}}
+
+	{{/if}}
+
+	{{if $_GET.step === 'final' && !$_POST.ask_validation}}
+		{{if !$_POST.save_as_draft}}
+			{{if !$_POST.signing_place || !$_POST.signing_date}}
+				{{:assign var='check_errors.' value='La date et le lieu de la signature du devis sont obligatoires pour valider le devis.'}}
+			{{/if}}
+
+			{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label='Lieu de da signature trop long' check_value=$_POST.signing_place check_max=128}}
+			{{:assign signing_date=$_POST.signing_date|date:'Y-m-d'}}
+			{{if $signing_date && $signing_date < $date}}
+				{{:assign var='check_errors.' value="La date de signature doit se situer après la date du devis (%s)."|args:$_POST.date}}
+			{{/if}}
+		{{/if}}
+		{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Instructions de paiement trop longues" check_value=$_POST.payment_text check_max=512}}
+		{{:include file='./include/check_max_length.tpl' keep='check_errors' check_label="Informations complémentaires trop longues" check_value=$_POST.extra_text check_max=1024}}
+
+		{{if $module.config.vat_exemption}}
+			{{:assign vat_exemption=$module.config.vat_exemption}}
+		{{else}}
+			{{:assign vat_exemption=$NONPROFIT_VAT_EXEMPTION_TYPE}}
+		{{/if}}
+
+		{{if !$check_errors}}
+			{{if $_POST.key}}
+				{{:assign key=$_POST.key}}
+			{{else}}
+				{{:include file='./include/generate_next_key.tpl' keep='key' type=$QUOTATION_TYPE}}
+			{{/if}}
+			{{if $document}}
+				{{:assign id=$document.id|intval}}
+			{{else}}
+				{{:assign id=null}}
+			{{/if}}
+
+			{{if $_POST.save_as_draft}}
+				{{:assign status=$DRAFT_STATUS}}
+			{{else}}
+				{{:assign status=$AWAITING_STATUS}}
+			{{/if}}
+
+			{{:save 
+				validate_schema="./include/schema/quotation.json"
+				id=$id
+				key=$key
+				type=$QUOTATION_TYPE
+				status=$status
+				cancelled=false
+				cancellation_reason=null
+				archived=false
+				author_id=$logged_user.id|intval
+				child_id=null
+				parent_id=null
+				duplicated_from_id=null
+				subject=$_POST.subject
+				date=$date
+				deadline=$deadline
+				signing_date=$signing_date
+				signing_place=$_POST.signing_place
+				validation_date=null
+				items=$items
+				total=$computed_total
+				siret=$module.config.siret
+				org_contact=$_POST.org_contact
+				recipient_business_name=$recipient_business_name
+				recipient_address=$recipient_address
+				recipient_member_id=$recipient_member_id
+				recipient_member_number=$recipient_member_number
+				introduction_text=$_POST.introduction_text
+				payment_text=$_POST.payment_text
+				extra_text=$_POST.extra_text
+				comment=null
+				vat_exemption=$vat_exemption
+				last_modification_date=$now|atom_date
+				module_version=$VERSION
+			}}
+
+			{{if !$document}}
+				{{:http redirect="./index.html?ok=1"}}
+			{{else}}
+				{{:http redirect="./index.html?ok=2"}}
+			{{/if}}
+
+		{{/if}}
+	
 	{{/if}}
 {{/if}}
 
-<form method="POST" action="{{$request_url}}">
-	<fieldset>
-		<legend><h2>Destinataire</h2></legend>
-		<fieldset>
-			<legend>Membre enregistré·e</legend>
-			{{if $document.recipient_member_id}}
-				{{#users id=$document.recipient_member_id|intval}}{{:assign .='user'}}{{/users}}
-				{{if $user}}
-					{{:assign var='default_customer_selection.%s'|args:$document.recipient_member_id value=$user.nom}}
-				{{/if}}
-			{{/if}}
-			<dl>{{:input type="list" name="customer" required=false label="Membre" target="!users/selector.php" default=$default_customer_selection can_delete=true}}</dl>
-			{{if $document.recipient_member_id && !$user}}
-				<p class="infos">
-					Attention : Ce devis est associé à l'ancien·ne membre
-					{{if $document.recipient_member_number}}n°{{$document.recipient_member_number}}{{else}}#{{$document.recipient_member_id}}{{/if}}
-					dont le compte est supprimé.<br />
-					Mettre à jour ce document des-associera cet ancien compte.
-				</p>
-			{{/if}}
-		</fieldset>
-		<fieldset>
-			<legend>Saisie manuelle<label for="manual_input_priority_help">*</label></legend>
-			<dl>
-				{{:input type="text" name="recipient_business_name" label="Raison sociale" source=$document placeholder="ex : SARL J'aime les deux vies"}}
-				{{:input type="textarea" name="recipient_address" label="Adresse" source=$document placeholder=""}}
-			</dl>
-			<p class="infos" id="manual_input_priority_help">*Si un·e membre est associé·e au document, la saisie manuelle est prioritaire sur le nom et l'adresse.</p>
-		</fieldset>
-	</fieldset>
+{{if $check_errors}}
+	{{#foreach from=$check_errors item='error'}}
+		<p class="error block">{{$error}}</p>
+	{{/foreach}}
+	{{:assign error_step=$_GET.last_step}}
+{{/if}}
 
-	{{* Default values (only) for new documents *}}
-	{{if !$document}}
-		{{:assign org_contact_default=$config.org_email}}
-		{{:assign introduction_text_helper='La valeur pré-remplie de ce texte est modifiable dans la configuration du module.'}}
-		{{:assign introduction_text_default=$module.config.introduction_text}}
-		{{:assign payment_text_default=$module.config.payment_text}}
-		{{:assign extra_text_default=$module.config.extra_text}}
-	{{else}}
-		{{:assign org_contact_default=null}}
-		{{:assign introduction_text_helper=null}}
-		{{:assign introduction_text_default=null}}
-		{{:assign payment_text_default=null}}
-		{{:assign extra_text_default=null}}
-	{{/if}}
+{{if $_GET.step === 'start' || $error_step === 'start'}}
+	{{:include file='./include/edit_recipient.tpl'}}
+	
+{{elseif $_GET.step === 'recipient' || $error_step === 'recipient'}}
+	{{:include file='./include/edit_main.tpl'}}
+	
+{{elseif $_GET.step === 'main' || $error_step === 'main'}}
+	{{:include file='./include/edit_items.tpl'}}
 
-	<fieldset>
-		<legend><h2>Objet</h2></legend>
-		<dl>
-			{{:input type="text" name="key" label="Numéro" source=$document help="Ce numéro doit être unique. Laisser vide pour générer un nouveau numéro."}}
-			{{:input type="text" name="subject" label="Intitulé" source=$document placeholder="ex : Devis pour une location de barnum" required=true}}
-			{{:input type="date" name="date" label="Date du devis" source=$document required=true}}
-			{{:input type="date" name="deadline" label="Échéance pour validation" source=$document required=false}}
-			{{:input type="text" name="org_contact" label="Contact" source=$document default=$org_contact_default required=true}}
-			{{:input type="textarea" name="introduction_text" label="Texte d'introduction" source=$document default=$introduction_text_default placeholder="ex : Formule de politesse." help=$introduction_text_helper required=false cols="50" rows="4"}}
-			{{:input type="textarea" name="comment" label="Remarques internes" source=$document help="Ne seront pas affichées sur le document." required=false cols="50" rows="4"}}
-		</dl>
-	</fieldset>
+{{elseif $_GET.step === 'items' || $error_step === 'items'}}
+	{{:include file='./include/edit_summary.tpl'}}
 
-	{{:assign items=$document.items}}
-	{{:include file='./include/item_list.tpl'}}
+{{elseif $_GET.step === 'final' || $error_step === 'final'}}
+	{{:include file='./include/edit_final.tpl'}}
 
-	<fieldset>
-		<legend><h2>Pied de page</h2></legend>
-		<dl>
-			{{:input type="textarea" name="payment_text" label="Instructions de paiement" source=$document default=$payment_text_default cols="50" rows="5"}}
-			{{:input type="textarea" name="extra_text" label="Informations complémentaires" source=$document default=$extra_text_default cols="50" rows="2"}}
-		</dl>
-	{{if !$document}}<p>(La valeur pré-remplie de ces informations est modifiable dans la configuration du module.)</p>{{/if}}
-	</fieldset>
-
-	<fieldset>
-		<legend><h2>Signature du devis</h2></legend>
-		<p id="signing_confirmation_p">
-			<p class="infos">Ce document restera un brouillon et sera modifiable tant que vous n'aurez pas signé le devis.</p>
-			<dl>{{:input type="checkbox" name="signing" label="Signer le devis" value="1"}}</dl>
-		</p>
-		<p id="signing_warning" class="infos">
-			À ne remplir que si vous souhaitez valider immédiatement le devis.
-		</p>
-		<div id="signing_inputs">
-			<dl>
-				{{:input type="text" name="signing_place" label="Lieu de la signature" placeholder="ex : Dijon" source=$document}}
-				{{:input type="date" name="signing_date" label="Date de la signature" source=$document}}
-			</dl>
-			<p class="error block">Signer le devis est définitif. Vous ne pourrez plus modifier son contenu par la suite.</p>
-		</div>
-	</fieldset>
-
-	<p class="submit">
-		{{if !$document}}
-			{{:assign button_label='Créer le devis'}}
-		{{else}}
-			{{:assign button_label='Modifier le devis'}}
-		{{/if}}
-		{{:button type="submit" name="quotation_submit" label=$button_label class="main"}}
-	</p>
-</form>
+{{/if}}
 
 {{:admin_footer}}
-
-<script type="text/javascript">
-	let target;
-
-	document.getElementById('signing_warning').style.display = 'none';
-	document.getElementById('signing_inputs').style.display = 'none';
-	target = document.getElementById('f_signing_place');
-	target.disabled = 'disabled';
-	{{if !$document || !$document.signing_place}}
-		target.value = '{{$module.config.signing_place}}';
-	{{/if}}
-	target = document.getElementById('f_signing_date');
-	target.disabled = 'disabled';
-	{{if !$document || !$document.signing_date}}
-		target.value = '{{$now|date_short}}';
-	{{/if}}
-	document.getElementById('f_signing_1').onclick = () => {
-		let target;
-		
-		target = document.getElementById('signing_inputs');
-		target.style.display = (target.style.display === 'none' ? 'block' : 'none');
-		document.getElementById('f_signing_place').disabled = !document.getElementById('f_signing_place').disabled;
-		document.getElementById('f_signing_date').disabled = !document.getElementById('f_signing_date').disabled;
-		target = document.getElementById('f_status');
-	};
-</script>
 
 {{else}}
 	{{:error message="Seuls les membres avec accès en écriture à la comptabilité peuvent générer ce document."}}

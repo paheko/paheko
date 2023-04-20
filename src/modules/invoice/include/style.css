@@ -106,8 +106,12 @@ dl.property_list dd {
 	padding: 0 0 0 0.2em;
 }
 
-dl.property_list dt.block {
+dl.property_list dt.block, dl.property_list dd.block {
 	float: none;
+}
+
+dl.property_list dd.block {
+	clear: left;
 }
 
 dl.property_list dd.details {
@@ -125,13 +129,12 @@ nav.tabs aside.menu li, .list_action_buttons li {
 
 nav.tabs aside.menu li a, .list_action_buttons li a {
 	background: none;
-	border-radius: 0;
 	/*padding: 0.2em 0.4em;*/
 	padding: 0.25em 0.3em 0.25em 0.3em;
 }
 
 nav.tabs aside.menu li a:hover, .list_action_buttons li a:hover {
-	border: 1px solid rgba(var(--gMainColor), 0.5);
+	/*border: 1px solid rgba(var(--gMainColor), 0.5);*/
 }
 
 nav.tabs aside.menu li a.icn-btn, .list_action_buttons li a.icn-btn {
@@ -145,4 +148,24 @@ nav.tabs aside form {
 
 #cancel_checkbox_label::before, #archive_checkbox_label::before {
 	margin-right: 0;
+}
+
+ul.breadcrumb {
+	list-style: none;
+	margin-top: 0.2em;
+	margin-bottom: 0.4em;
+}
+
+ul.breadcrumb li {
+	display: inline;
+	color: var(--gBorderColor);
+}
+
+ul.breadcrumb li+li:before {
+	content: '→';
+	padding: 0em 0.3em 0em 0.3em;
+}
+
+ul.breadcrumb li.current {
+	color: var(--gTextColor);
 }

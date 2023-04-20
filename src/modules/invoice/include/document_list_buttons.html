@@ -1,72 +1,13 @@
 <ul class="list_action_buttons">
-{{if $status == $DRAFT_STATUS}}
-	{{if !$cancelled}}
-		{{#restrict section="accounting" level="write"}}
-			<li><form method="POST" action="{{"edit.html?id=%d"|args:$id}}">
-				{{:button type="submit" label="Modifier" shape="edit" name="edit_button"}}
-			</form></li>
-		{{/restrict}}
-	{{/if}}
-	<li>{{:linkbutton label="Aperçu" href="preview.html?id=%s"|args:$id shape="document"}}</li>
-	{{#restrict section="accounting" level="write"}}
-		<li><form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_deletion"|args:$id:$type}}">
-			|{{:button type="submit" title="Supprimer le brouillon" shape="delete" class="irreversible" name="delete_button"}}
-		</form></li>
-	{{/restrict}}
-{{else}}
-	<li>{{:linkbutton label="⁣" title="PDF" href="preview.html?id=%s"|args:$id shape="pdf"}}</li>
-
-	{{if $status === $AWAITING_STATUS}}
+	{{if $status == $DRAFT_STATUS}}
 		{{if !$cancelled}}
 			{{#restrict section="accounting" level="write"}}
-			{{if $type === $QUOTATION_TYPE}}
-				<li><form method="POST" action="{{"action.html?id=%d&show=quotation&action=ask_validation"|args:$id}}">
-					{{:button type="submit" title="Marquer comme validé et générer la facture" shape="check" name="validation_button"}}
+				<li><form method="POST" action="{{"edit.html?id=%d&step=start"|args:$id}}">
+					{{:button type="submit" label="Modifier" shape="edit" name="edit_button"}}
 				</form></li>
-				<li><form method="POST" action="{{"action.html?id=%d&show=quotation&action=ask_rejection"|args:$id}}">
-					{{:button type="submit" title="Marquer comme refusé" shape="alert" name="rejection_button"}}
-				</form></li>
-			{{else}}
-				<li><form method="POST" action="{{"action.html?id=%d&show=invoice&action=ask_mark_as_paid"|args:$id}}">
-					{{:button type="submit" title="Marquer comme payée" shape="check" name="mark_as_paid_button"}}
-				</form></li>
-				{{* <li>{{:linkbutton href="action.html?id=%d&show=quotation&action=ask_rejection"|args:$id title="Marquer comme abandonnée" shape="alert"}}</li> *}}
-			{{/if}}
 			{{/restrict}}
 		{{/if}}
-
-	{{elseif $status === $VALIDATED_STATUS}}
-		{{if $type === $QUOTATION_TYPE && $child_id}}
-			{{#load id=$child_id|intval}}{{:assign .='child'}}{{/load}}
-			<li>{{:linkbutton href="./details.html?id=%d&show=invoice"|args:$child.id title="Consulter la Facture correspondante" label="F#"}}</li>
-		{{/if}}
-
-	{{elseif $status === $PAID_STATUS}}
-		{{if $transaction_id}}
-			{{#transactions id=$transaction_id|intval}}
-				<li>{{:linkbutton href='!acc/transactions/details.php?id=%d'|args:$id title="Écriture comptable" label='📖'}}</li>
-			{{/transactions}}
-		{{/if}}
+	{{else}}
+		<li>{{:linkbutton label="PDF" title="PDF" href="preview.html?id=%s"|args:$id shape="pdf"}}</li>
 	{{/if}}
-	
-	{{#restrict section="accounting" level="write"}}
-	<li>
-		<form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_duplication"|args:$id:$type}}">
-			{{:button type="submit" title="Dupliquer" shape="list-ol" name="duplicate_button"}}
-		</form>
-	</li>
-	{{if !$cancelled && !$archived}}
-		{{if $type === $INVOICE_TYPE}}
-			{{:assign button_target_label='la facture'}}
-		{{else}}
-			{{:assign button_target_label='le devis'}}
-		{{/if}}
-		<li>
-			<form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_cancelling"|args:$id:$type}}">
-				|{{:button type="submit" title="Annuler %s"|args:$button_target_label shape="delete" class="irreversible" name="cancel_button"}}
-			</form>
-		</li>
-	{{/if}}
-	{{/restrict}}
-{{/if}}
 </ul>

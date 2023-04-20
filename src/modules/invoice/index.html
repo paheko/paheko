@@ -3,7 +3,7 @@
 {{* ==================== Header ==================== *}}
 
 {{:admin_header title="Devis et factures" current="acc" custom_css="./include/style.css"}}
-{{:include file='./include/navigation.html'}}
+{{:include file='./include/navigation.html' subtabs=true}}
 
 {{* ==================== Search ==================== *}}
 
@@ -40,6 +40,8 @@
 
 {{if $_GET.show === $QUOTATION_TYPE}}
 	{{:assign filter="$$.type = :type AND $$.archived = false" type_filter=$QUOTATION_TYPE}}
+{{elseif $_GET.show === $INVOICE_TYPE}}
+	{{:assign filter="$$.type = :type AND $$.archived = false" type_filter=$INVOICE_TYPE}}
 {{elseif $_GET.show === 'paid'}}
 	{{:assign filter="$$.type = :type AND $$.status = :status AND $$.archived = false" type_filter=$INVOICE_TYPE status_filter=$PAID_STATUS}}
 {{elseif $_GET.show === 'unpaid'}}

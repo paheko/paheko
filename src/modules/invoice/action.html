@@ -57,14 +57,14 @@
 	{{elseif $_GET.action === 'sign'}}
 		<form method="POST" action="">
 			<fieldset>
-				<legend><h2>Signature du devis</h2></legend>
+				<legend><h2>Finalisation du devis</h2></legend>
 				{{:include file='./include/document_summary.html'}}
 				<dl>
 					{{:input type="text" name="signing_place" label="Lieu de la signature" placeholder="ex : Dijon" default=$module.config.signing_place required=true}}
 					{{:input type="date" name="signing_date" label="Date de la signature" default=$now required=true}}
 				</dl>
-				{{if !$check_errors}}<p class="error block">Signer le devis est définitif. Vous ne pourrez plus modifier son contenu par la suite.</p>{{/if}}
-				{{:button type="submit" name="signing_submit" label="Signer le devis" shape="check" class="main"}}
+				{{if !$check_errors}}<p class="error block">Finaliser le devis est définitif. Vous ne pourrez plus modifier son contenu par la suite.</p>{{/if}}
+				{{:button type="submit" name="signing_submit" label="Finaliser le devis" shape="check" class="main"}}
 			</fieldset>
 		</form>
 
@@ -151,9 +151,15 @@
 	{{elseif $_GET.action === 'ask_cancelling'}}
 		<form method="POST" action="">
 			<fieldset>
-				<legend><h2 class="irreversible">Annuler {{if $type === $INVOICE_TYPE}}la{{else}}le{{/if}} {{$label}} n° {{$key}} ?</h2></legend>
+				{{if $type === $INVOICE_TYPE}}
+					{{:assign label_with_article='la '|cat:$label}}
+				{{else}}
+					{{:assign label_with_article='le '|cat:$label}}
+				{{/if}}
+				<legend><h2 class="irreversible">Annuler {{$label_with_article}} n° {{$key}} ?</h2></legend>
 				{{:include file='./include/document_summary.html'}}
 				{{:input type="textarea" name="reason" label="Motif" required=false cols="50" rows="4"}}
+				{{if !$check_errors}}<p class="error block">Annuler {{$label_with_article}} est définitif !</p>{{/if}}
 				{{:button type="submit" name="cancel_submit" label="Confirmer l'annulation" shape="check" class="main"}}
 			</fieldset>
 		</form>

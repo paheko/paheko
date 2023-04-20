@@ -3,7 +3,7 @@
 		<ul>
 			{{if $type === $QUOTATION_TYPE}}
 				<li class="followed_by_separator">
-					<form method="POST" action="edit.html?show=quotation">
+					<form method="POST" action="edit.html?show=quotation&step=start">
 						{{:button type="submit" label="Nouveau" shape="plus" name="new_button" class="main_action"}}
 					</form>
 				</li>
@@ -12,15 +12,17 @@
 					<li>{{:linkbutton href="preview.html?id=%s&source=details"|args:$id label="Aperçu papier" shape="document"}}</li>
 					{{if !$cancelled}}
 						<li>
-							<form method="POST" action="{{"./edit.html?id=%d"|args:$id}}">
+							<form method="POST" action="{{"./edit.html?show=quotation&id=%d&step=start"|args:$id}}">
 								{{:button type="submit" label="Modifier" shape="edit" name="edit_button" class="main_action"}}
 							</form>
 						</li>
-						<li>
-							<form method="POST" action="{{"action.html?id=%d&show=quotation&action=sign"|args:$id}}">
-								{{:button type="submit" label="Signer le devis" shape="check" name="signing_button" class="main_action"}}
-							</form>
-						</li>
+						{{if $_GET.action !== 'sign'}}
+							<li>
+								<form method="POST" action="{{"action.html?id=%d&show=quotation&action=sign"|args:$id}}">
+									{{:button type="submit" label="Finaliser" shape="check" name="signing_button" class="main_action"}}
+								</form>
+							</li>
+						{{/if}}
 					{{/if}}
 
 				{{else}}
@@ -49,13 +51,6 @@
 				{{if $status !== $DRAFT_STATUS}}
 					<li>{{:linkbutton label="PDF" href="preview.html?id=%s&source=details"|args:$id shape="pdf"}}</li>
 				{{/if}}
-				{{if $status === $PAID_STATUS}}
-					<li>
-						<form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_bind_to_transaction"|args:$id:$type}}">
-							{{:button type="submit" title="Associer une écriture comptable" label='📖' name="bind_to_transaction_button" class="main_action"}}
-						</form>
-					</li>
-				{{/if}}
 			{{/if}}
 			
 			{{* Deletion *}}
@@ -63,7 +58,7 @@
 				{{if $_GET.action !== 'ask_deletion'}}
 					<li>
 						<form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_deletion"|args:$id:$type}}">
-							{{:button type="submit" label="Supprimer" shape="delete" class="irreversible main_action" name="delete_button"}}
+							{{:button type="submit" label="Supprimer" shape="delete" class="main_action" name="delete_button"}}
 						</form>
 					</li>
 				{{/if}}
@@ -78,7 +73,7 @@
 				{{/if}}
 				<li>
 					<form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_cancelling"|args:$id:$type}}">
-						{{:button type="submit" label="Annuler %s"|args:$button_target_label shape="delete" class="irreversible main_action" name="cancel_button"}}
+						{{:button type="submit" label="Annuler %s"|args:$button_target_label shape="delete" class="main_action" name="cancel_button"}}
 					</form>
 				</li>
 			{{/if}}
@@ -88,8 +83,10 @@
 				{{if $type === $INVOICE_TYPE && $status !== $AWAITING_STATUS}}
 					{{:assign invoice_and_not_awaiting_payment=true}}
 				{{/if}}
-				{{if $type === $QUOTATION_TYPE && $status !== $AWAITING_STATUS}}
-					{{:assign quotation_and_archivable=true}}
+				{{if $type === $QUOTATION_TYPE}}
+					{{if $cancelled || $status !== $AWAITING_STATUS}}
+						{{:assign quotation_and_archivable=true}}
+					{{/if}}
 				{{/if}}
 				{{if $type === $INVOICE_TYPE && $status === $AWAITING_STATUS && $cancelled}}
 					{{:assign invoice_and_not_paid_and_cancelled=true}}
@@ -102,7 +99,7 @@
 							</form>
 						{{elseif $archived && $_GET.action !== 'ask_unarchiving'}}
 							<form method="POST" action="{{"action.html?id=%d&show=%s&action=ask_unarchiving"|args:$id:$type}}">
-								{{:button type="submit" label="" title="Sortir le document des archives" shape="unlock" name="archive_button" class="main_action"}}
+								{{:button type="submit" label="Dés-archiver" title="Sortir le document des archives" shape="unlock" name="archive_button" class="main_action"}}
 							</form>
 						{{/if}}
 					</li>

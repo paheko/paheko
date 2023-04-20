@@ -240,7 +240,7 @@
 			{{if $status === $AWAITING_STATUS}}
 				{{if $type === $INVOICE_TYPE && !$cancelled}}
 					{{:assign var='check_errors.' value='Les factures doivent être soit payées soit annulées pour pouvoir être archivées.'}}
-				{{elseif $type === $QUOTATION_TYPE}}
+				{{elseif $type === $QUOTATION_TYPE && !$cancelled}}
 					{{:assign var='check_errors.' value='Les devis doivent être soit validés ou soit refusés pour pouvoir être archivés.'}}
 				{{/if}}
 			{{/if}}
