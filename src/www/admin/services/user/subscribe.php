@@ -79,8 +79,9 @@ $types_details = $t->getTypesDetails();
 $account_targets = $types_details[Transaction::TYPE_REVENUE]->accounts[1]->targets_string;
 
 $service_user = null;
+$current_only = false;
 
-$tpl->assign(compact('csrf_key', 'users', 'account_targets', 'service_user', 'allow_users_edit', 'copy_service', 'copy_fee', 'copy_only_paid'));
+$tpl->assign(compact('csrf_key', 'users', 'account_targets', 'service_user', 'allow_users_edit', 'copy_service', 'copy_fee', 'copy_only_paid', 'current_only'));
 $tpl->assign('projects', Projects::listAssocWithEmpty());
 
 $tpl->display('services/user/subscribe.tpl');
