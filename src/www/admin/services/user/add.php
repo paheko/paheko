@@ -2,6 +2,7 @@
 namespace Garradin;
 
 use Garradin\Services\Services;
+use Garradin\Users\Categories;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -18,7 +19,17 @@ if (!$count_all) {
 }
 
 $services = Services::listAssocWithFees();
+$categories = Categories::listSimple();
+$rawSearch = (new Recherche())->getList($user->id, 'membres');
+$recherches = [];
+foreach ($rawSearch as $search){
+    $recherches[$search->id] = $search->intitule;
+}
+
+
 
 $tpl->assign(compact('services'));
+$tpl->assign(compact('categories'));
+$tpl->assign(compact('recherches'));
 
 $tpl->display('services/user/add.tpl');

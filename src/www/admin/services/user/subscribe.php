@@ -7,6 +7,9 @@ use Garradin\Accounting\Projects;
 use Garradin\Entities\Services\Service_User;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
+use Garradin\Recherche;
+use Garradin\Users\Categories;
+use Garradin\Membres;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -41,6 +44,37 @@ elseif (f('users') && is_array(f('users')) && count(f('users'))) {
 elseif (($copy == 's' && ($copy_service = Services::get($copy_id)))
 	|| ($copy == 'f' && ($copy_fee = Fees::get($copy_id)))) {
 	$copy_only_paid = (bool) f('copy_only_paid');
+}
+elseif(f('category')){
+    $categoryId = f('category');
+    $category = Categories::get($categoryId);
+
+    // Deny access to hidden categories to users that are not admins
+    if (!$category || !$session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && array_key_exists($categoryId, Categories::listHidden())) {
+        throw new UserException('Category inconnue ou invalide');
+    }
+
+    $membres = new Membres();
+    $list = $membres->listByCategory($categoryId);
+    $users = [];
+    foreach ($list->iterate() as $member){
+        $users[$member->numero] = $member->nom;
+    }
+}
+elseif(f('recherche')){
+    $searchId = f('recherche');
+    $recherche = new Recherche();
+    $search = $recherche->get($searchId);
+
+    if (!$search) {
+        throw new UserException('Recherche inconnue ou invalide');
+    }
+
+    $results = $recherche->search($searchId, ['id', 'nom'], true);
+    $users = [];
+    foreach ($results as $result){
+        $users[$result->id] = $result->nom;
+    }
 }
 else {
 	throw new UserException('Aucun membre n\'a été sélectionné');
