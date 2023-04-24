@@ -163,7 +163,7 @@
 		return content;
 	}
 
-	g.openFrameDialog = function (url, height = '90%', callback) {
+	g.openFrameDialog = function (url, height = 'auto', callback) {
 		var iframe = document.createElement('iframe');
 		iframe.src = url;
 		iframe.name = 'dialog';
