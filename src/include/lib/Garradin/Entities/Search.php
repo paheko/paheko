@@ -114,7 +114,7 @@ class Search extends Entity
 		$this->set('type', self::TYPE_SQL);
 	}
 
-	public function SQL(?int $force_limit = 100, ?array $force_select = null): string
+	public function SQL(array $options = []): string
 	{
 		if ($this->type == self::TYPE_JSON) {
 			$sql = $this->getDynamicList()->SQL();
@@ -126,16 +126,19 @@ class Search extends Entity
 		$has_limit = preg_match('/LIMIT\s+\d+/i', $sql);
 
 		// force LIMIT
-		if ($force_limit && !$has_limit) {
-			$sql = preg_replace('/;?\s*$/', '', $sql);
-			$sql .= ' LIMIT ' . (int) $force_limit;
+		if (!empty($options['limit'])) {
+			$sql = preg_replace($has_limit ? '/LIMIT\s+.*;?\s*$/' : '/;?\s*$/', '', $sql);
+			$sql .= ' LIMIT ' . (int) $options['force_limit'];
 		}
-		elseif (!$force_limit && $has_limit) {
+		elseif (!empty($options['no_limit']) && $has_limit) {
 			$sql = preg_replace('/LIMIT\s+.*;?\s*$/', '', $sql);
 		}
 
-		if ($force_select) {
-			$sql = preg_replace('/^\s*SELECT\s+(.*?)\s+FROM\s+/Uis', 'SELECT $1, ' . implode(', ', $force_select) . ' FROM ', $sql);
+		if (!empty($options['select_also'])) {
+			$sql = preg_replace('/^\s*SELECT\s+(.*?)\s+FROM\s+/Uis', 'SELECT $1, ' . implode(', ', (array)$options['select_also']) . ' FROM ', $sql);
+		}
+		elseif (!empty($options['select'])) {
+			$sql = preg_replace('/^\s*SELECT\s+(.*?)\s+FROM\s+/Uis', 'SELECT ' . implode(', ', (array)$options['select']) . ' FROM ', $sql);
 		}
 
 		$sql = trim($sql, "\n\r\t; ");
@@ -146,13 +149,13 @@ class Search extends Entity
 	/**
 	 * Returns a SQLite3Result for the current search
 	 */
-	public function query(?int $force_limit = 100, ?string $force_select = null): \SQLite3Result
+	public function query(array $options = []): \SQLite3Result
 	{
 		if (null !== $this->_result) {
 			return $this->_result;
 		}
 
-		$sql = $this->SQL($force_limit, $force_select);
+		$sql = $this->SQL($options);
 
 		$allowed_tables = $this->getProtectedTables();
 		$db = DB::getInstance();

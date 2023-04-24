@@ -13,7 +13,7 @@ class Categories
 		return EM::findOneById(Category::class, $id);
 	}
 
-	static public function listSimple(): array
+	static public function listAssoc(): array
 	{
 		return DB::getInstance()->getAssoc(sprintf('SELECT id, name FROM %s ORDER BY name COLLATE U_NOCASE;', Category::TABLE));
 	}

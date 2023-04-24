@@ -2,6 +2,8 @@
 namespace Garradin;
 
 use Garradin\Services\Services;
+use Garradin\Users\Categories;
+use Garradin\Users\Session;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -18,7 +20,8 @@ if (!$count_all) {
 }
 
 $services = Services::listAssocWithFees();
+$categories = Categories::listAssoc();
 
-$tpl->assign(compact('services'));
+$tpl->assign(compact('services', 'categories'));
 
 $tpl->display('services/user/add.tpl');

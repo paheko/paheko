@@ -251,6 +251,10 @@ class Sections
 				}
 			}
 
+			if (isset($params['assign'])) {
+				$tpl->assign($params['assign'], $row, 0);
+			}
+
 			yield $row;
 		}
 	}

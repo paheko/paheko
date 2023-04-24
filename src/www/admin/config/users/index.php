@@ -27,7 +27,7 @@ $names = $df->listAssocNames();
 $name_fields = array_intersect_key($names, array_flip(DynamicFields::getNameFields()));
 
 $tpl->assign([
-	'users_categories' => Categories::listSimple(),
+	'users_categories' => Categories::listAssoc(),
 	'fields_list'      => $names,
 	'login_field'      => DynamicFields::getLoginField(),
 	'login_fields_list' => $df->listEligibleLoginFields(),

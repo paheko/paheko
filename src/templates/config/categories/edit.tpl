@@ -11,7 +11,7 @@
 		<dl>
 			{input type="text" name="name" label="Nom" required=true source=$cat}
 			<dt>Configuration</dt>
-			{input type="checkbox" name="hidden" label="Catégorie cachée" source=$cat value=1 help="Si coché cette catégorie ne sera visible qu'aux administrateurs et ne recevra pas de messages collectifs ou de rappels"}
+			{input type="checkbox" name="hidden" label="Catégorie cachée" source=$cat value=1 help="Si coché cette catégorie ne sera visible qu'aux administrateurs, et ne recevra ni messages collectifs ni rappels."}
 		</dl>
 	</fieldset>
 

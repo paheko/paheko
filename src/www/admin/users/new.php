@@ -38,7 +38,7 @@ $tpl->assign('id_field_name', DynamicFields::getLoginField());
 $tpl->assign('passphrase', Utils::suggestPassword());
 $tpl->assign('fields', DynamicFields::getInstance()->all());
 
-$tpl->assign('categories', Categories::listSimple());
+$tpl->assign('categories', Categories::listAssoc());
 $tpl->assign('current_cat', f('id_category') ?: $default_category);
 
 $tpl->assign(compact('user', 'default_category', 'csrf_key', 'is_duplicate'));

@@ -83,7 +83,7 @@ $tpl->assign('nb_selected', count($list));
 
 if ($action == 'move')
 {
-    $tpl->assign('membres_cats', Categories::listSimple());
+    $tpl->assign('membres_cats', Categories::listAssoc());
 }
 
 $tpl->assign('action', $action);

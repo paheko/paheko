@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Inscrire à une activité" current="users/services"}
+{include file="_head.tpl" title="Inscrire à une activité" current="membres/services"}
 
 {include file="services/_nav.tpl" current="save" fee=null service=null}
 
@@ -11,6 +11,7 @@
 		<dl>
 			{input type="radio-btn" name="choice" value="1" label="Sélectionner des membres" default=1}
 			{input type="radio-btn" name="choice" value="2" label="Recopier depuis une activité" help="Utile si vous avez une cotisation par année civile par exemple : copie les membres inscrits l'année précédente dans la nouvelle année."}
+			{input type="radio-btn" name="choice" value="3" label="Tous les membres d'une catégorie"}
 		</dl>
 	</fieldset>
 
@@ -29,6 +30,13 @@
 		</dl>
 	</fieldset>
 
+	<fieldset class="c3">
+		<legend>Tous les membres d'une catégorie</legend>
+		<dl>
+			{input type="select" name="category" label="Catégorie à inscrire" options=$categories required=true}
+		</dl>
+	</fieldset>
+
 	<p class="submit">
 		<input type="hidden" name="paid" value="1" />
 		{button type="submit" name="next" label="Continuer" shape="right" class="main"}
@@ -41,11 +49,13 @@ function selectChoice() {
 	let choice = $('#f_choice_1').form.choice.value;
 	g.toggle('.c1', choice == 1);
 	g.toggle('.c2', choice == 2);
+	g.toggle('.c3', choice == 3);
 }
 
-selectChoice();
 $('#f_choice_1').onchange = selectChoice;
 $('#f_choice_2').onchange = selectChoice;
+$('#f_choice_3').onchange = selectChoice;
+selectChoice();
 {/literal}
 </script>
 

@@ -41,7 +41,7 @@ $form->runIf('save', function () use ($user, $session) {
 	$user->save();
 }, $csrf_key, '!users/details.php?id=' . $user->id);
 
-$categories = Categories::listSimple();
+$categories = Categories::listAssoc();
 
 $fields = DF::getInstance()->all();
 

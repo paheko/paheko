@@ -16,7 +16,7 @@ if (!$session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)) {
 }
 else {
 	$categories[-1] = '— Toutes (même cachées) —';
-	$categories = array_merge($categories, Categories::listSimple());
+	$categories = array_merge($categories, Categories::listAssoc());
 }
 
 // Deny access to hidden categories to users that are not admins

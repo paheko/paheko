@@ -3,6 +3,7 @@ namespace Garradin;
 
 use Garradin\Services\Fees;
 use Garradin\Services\Services;
+use Garradin\Users\Categories;
 use Garradin\Users\Users;
 use Garradin\Accounting\Projects;
 use Garradin\Entities\Services\Service_User;
@@ -42,6 +43,15 @@ elseif (f('users') && is_array(f('users')) && count(f('users'))) {
 elseif (($copy == 's' && ($copy_service = Services::get($copy_id)))
 	|| ($copy == 'f' && ($copy_fee = Fees::get($copy_id)))) {
 	$copy_only_paid = (bool) f('copy_only_paid');
+}
+elseif (f('category')) {
+	$category = Categories::get((int)f('category'));
+
+	if (!$category) {
+		throw new UserException('Catégorie inconnue.');
+	}
+
+	$users = iterator_to_array(Users::iterateAssocByCategory($category->id));
 }
 else {
 	throw new UserException('Aucun membre n\'a été sélectionné');

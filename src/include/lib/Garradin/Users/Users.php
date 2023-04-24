@@ -16,6 +16,19 @@ use KD2\DB\EntityManager as EM;
 
 class Users
 {
+	static public function iterateAssocByCategory(?int $id_category = null): iterable
+	{
+		$where = $id_category ? sprintf('id_category = %d', $id_category) : 'id_category IN (SELECT id FROM users_categories WHERE hidden = 0)';
+
+		$sql = sprintf('SELECT id, %s AS name FROM users WHERE %s ORDER BY name COLLATE U_NOCASE;',
+			DynamicFields::getNameFieldsSQL(),
+			$where);
+
+		foreach (DB::getInstance()->iterate($sql) as $row) {
+			yield $row->id => $row->name;
+		}
+	}
+
 	/**
 	 * Return a list for all emails by category
 	 * @param  int|null $id_category If NULL, then all categories except hidden ones will be returned
@@ -70,7 +83,7 @@ class Users
 
 		$s = Search::get($id_search);
 		// Make sure the query is protected and safe, by doing a protectSelect
-		$s->query(1);
+		$s->query(['limit' => 1]);
 
 		$header = $s->getHeader();
 		$id_column = null;
