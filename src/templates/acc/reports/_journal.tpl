@@ -11,6 +11,7 @@
 			<td class="money">Crédit</td>
 			<td>Libellé ligne</td>
 			<td>Réf. ligne</td>
+			{if $criterias.project}<td>Cumul</td>{/if}
 			{if !empty($action)}<td></td>{/if}
 		</tr>
 	</thead>
@@ -29,6 +30,10 @@
 			<td class="money">{$line.credit|raw|money}</td>
 			<td data-spreadsheet-type="string">{$line.label}</td>
 			<td data-spreadsheet-type="string">{$line.reference}</td>
+			{if $criterias.project}
+				<?php $running_sum = ($running_sum ?? 0) - $line->debit + $line->credit; ?>
+				<td>{$running_sum|raw|money:false}</td>
+			{/if}
 			{if !empty($action) && $k == 0}
 			<td class="actions" rowspan="{$transaction.lines|count}">
 				{linkbutton href=$action.href|args:$transaction.id shape=$action.shape label=$action.label}
