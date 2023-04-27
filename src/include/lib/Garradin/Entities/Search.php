@@ -128,7 +128,7 @@ class Search extends Entity
 		// force LIMIT
 		if (!empty($options['limit'])) {
 			$sql = preg_replace($has_limit ? '/LIMIT\s+.*;?\s*$/' : '/;?\s*$/', '', $sql);
-			$sql .= ' LIMIT ' . (int) $options['force_limit'];
+			$sql .= ' LIMIT ' . (int) $options['limit'];
 		}
 		elseif (!empty($options['no_limit']) && $has_limit) {
 			$sql = preg_replace('/LIMIT\s+.*;?\s*$/', '', $sql);

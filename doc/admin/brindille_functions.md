@@ -332,7 +332,7 @@ Note : un appel à cette fonction depuis le code du site web provoquera une erre
 | `assign_new_id` | optionnel | Si renseigné, le nouveau numéro unique du document sera indiqué dans cette variable. |
 | … | optionnel | Autres paramètres : traités comme des valeurs à enregistrer dans le document |
 
-Si ni `key` ni `id` ne sont indiqués, un nouveau document sera créé avec un nouveau numéro unique.
+Si ni `key` ni `id` ne sont indiqués, un nouveau document sera créé avec un nouveau numéro (ID) unique.
 
 Si le document indiqué existe déjà, il sera mis à jour. Les valeurs nulles (`NULL`) seront effacées.
 

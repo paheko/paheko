@@ -6,6 +6,7 @@ use KD2\Brindille;
 use KD2\Brindille_Exception;
 use KD2\ErrorManager;
 use KD2\JSONSchema;
+use KD2\Security;
 
 use Garradin\Config;
 use Garradin\DB;
@@ -17,10 +18,11 @@ use Garradin\Email\Emails;
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 use Garradin\Entities\Module;
-use Garradin\Entities\User\Email;
+use Garradin\Entities\Email\Email;
+use Garradin\Users\DynamicFields;
 use Garradin\Users\Session;
 
-use const Garradin\{ROOT, WWW_URL};
+use const Garradin\{ROOT, WWW_URL, SECRET_KEY};
 
 class Functions
 {
@@ -297,6 +299,7 @@ class Functions
 		unset($to);
 
 		$db = DB::getInstance();
+		$email_field = DynamicFields::getFirstEmailField();
 		$internal_count = $db->count('users', $db->where($email_field, 'IN', $params['to']));
 		$external_count = count($params['to']) - $internal_count;
 

@@ -10,6 +10,7 @@ use Garradin\DB;
 use Garradin\DynamicList;
 use Garradin\Search;
 use Garradin\Utils;
+use Garradin\UserException;
 
 use KD2\SMTP;
 use KD2\DB\EntityManager as EM;
@@ -100,7 +101,7 @@ class Users
 
 		// We only need the user id, store it in a temporary table for now
 		$db->exec('DROP TABLE IF EXISTS users_tmp_search; CREATE TEMPORARY TABLE IF NOT EXISTS users_tmp_search (id);');
-		$db->exec(sprintf('INSERT INTO users_tmp_search SELECT %s FROM (%s)', $id_column, $s->SQL(null)));
+		$db->exec(sprintf('INSERT INTO users_tmp_search SELECT %s FROM (%s)', $id_column, $s->SQL()));
 
 		$fields = DynamicFields::getEmailFields();
 

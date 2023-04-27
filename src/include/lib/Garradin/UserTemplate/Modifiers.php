@@ -6,7 +6,7 @@ use Garradin\DB;
 use Garradin\Utils;
 use Garradin\UserException;
 
-use Garradin\Entities\Users\Email;
+use Garradin\Entities\Email\Email;
 
 use KD2\SMTP;
 
