@@ -8,32 +8,39 @@ use KD2\DB\EntityManager as EM;
 
 class Categories
 {
+	const HIDDEN_ONLY = 1;
+	const WITHOUT_HIDDEN = 0;
+
 	static public function get(int $id): ?Category
 	{
 		return EM::findOneById(Category::class, $id);
 	}
 
-	static public function listAssoc(): array
+	static protected function getHiddenClause(?int $hidden = null): string
 	{
-		return DB::getInstance()->getAssoc(sprintf('SELECT id, name FROM %s ORDER BY name COLLATE U_NOCASE;', Category::TABLE));
+		if (self::HIDDEN_ONLY === $hidden) {
+			return 'AND hidden = 1';
+		}
+		elseif (self::WITHOUT_HIDDEN === $hidden) {
+			return 'AND hidden = 0';
+		}
+
+		return '';
 	}
 
-	static public function listWithStats(): array
+	static public function listAssoc(?int $hidden = null): array
+	{
+		return DB::getInstance()->getAssoc(sprintf('SELECT id, name FROM %s WHERE 1 %s ORDER BY name COLLATE U_NOCASE;',
+			Category::TABLE, self::getHiddenClause($hidden)
+		));
+	}
+
+	static public function listWithStats(?int $hidden = null): array
 	{
 		return DB::getInstance()->getGrouped(sprintf('SELECT c.id, c.*,
 			(SELECT COUNT(*) FROM users WHERE id_category = c.id) AS count
-			FROM %s c ORDER BY c.name COLLATE U_NOCASE;', Category::TABLE));
-	}
-
-	static public function listHidden(): array
-	{
-		return DB::getInstance()->getAssoc(sprintf('SELECT id, name FROM %s WHERE hidden = 1
-			ORDER BY name COLLATE U_NOCASE;', Category::TABLE));
-	}
-
-	static public function listNotHidden(): array
-	{
-		return DB::getInstance()->getAssoc(sprintf('SELECT id, name FROM %s WHERE hidden = 0
-			ORDER BY name COLLATE U_NOCASE;', Category::TABLE));
+			FROM %s c WHERE 1 %s ORDER BY c.name COLLATE U_NOCASE;',
+			Category::TABLE, self::getHiddenClause($hidden)
+		));
 	}
 }

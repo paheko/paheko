@@ -81,7 +81,7 @@ class Services
 	static public function listWithStats(bool $current_only = true): DynamicList
 	{
 		$db = DB::getInstance();
-		$hidden_cats = array_keys(Categories::listHidden());
+		$hidden_cats = array_keys(Categories::listAssoc(Categories::HIDDEN_ONLY));
 
 		$sql = sprintf('DROP TABLE IF EXISTS services_list_stats;
 			CREATE TEMP TABLE IF NOT EXISTS services_list_stats (id_service, id_user, ok, expired, paid);

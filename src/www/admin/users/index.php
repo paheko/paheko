@@ -12,7 +12,7 @@ $categories = [0 => '— Toutes (sauf cachées) —'];
 
 // Remove hidden categories
 if (!$session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)) {
-	$categories = array_merge($categories, Categories::listNotHidden());
+	$categories = array_merge($categories, Categories::listAssoc(Categories::WITHOUT_HIDDEN));
 }
 else {
 	$categories[-1] = '— Toutes (même cachées) —';
