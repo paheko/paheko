@@ -13,7 +13,7 @@
 
 	<fieldset class="textEditor">
 			{input type="textarea" name="content" cols=35 rows=25 required=true class="full-width"
-				data-attachments=0 data-savebtn=0 data-preview-url="!users/mailing/_preview.php?id=%s"|local_url|args:$mailing.id data-format="markdown" placeholder="Contenu du message…" default=$mailing.body}
+				data-attachments=0 data-savebtn=0 data-preview-url="!users/mailing/write.php?id=%s&preview"|local_url|args:$mailing.id data-format="markdown" placeholder="Contenu du message…" default=$mailing.body}
 	</fieldset>
 
 	<p class="submit">

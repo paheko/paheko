@@ -30,10 +30,10 @@ class UserTemplate extends \KD2\Brindille
 	public $_tpl_path;
 	protected $content_type = null;
 	protected $modified;
-	protected $file = null;
-	protected $code = null;
+	protected ?string $file = null;
+	protected ?string $code = null;
 	protected $cache_path = USER_TEMPLATES_CACHE_ROOT;
-	protected string $path;
+	protected ?string $path;
 
 	protected $escape_default = 'html';
 
@@ -45,7 +45,7 @@ class UserTemplate extends \KD2\Brindille
 			return self::$root_variables;
 		}
 
-		static $keys = ['color1', 'color2', 'org_name', 'org_address', 'org_email', 'org_phone', 'org_web', 'org_infos', 'currency', 'country', 'files'];
+		static $keys = ['color1', 'color2', 'site_disabled', 'org_name', 'org_address', 'org_email', 'org_phone', 'org_web', 'org_infos', 'currency', 'country', 'files'];
 
 		$config = Config::getInstance();
 
@@ -75,6 +75,7 @@ class UserTemplate extends \KD2\Brindille
 			'root_url'     => WWW_URL,
 			'request_url'  => Utils::getRequestURI(),
 			'admin_url'    => ADMIN_URL,
+			'site_url'     => $config['site_disabled'] && $config['org_web'] ? $config['org_web'] : WWW_URL,
 			'_GET'         => &$_GET,
 			'_POST'        => &$_POST,
 			'visitor_lang' => Translate::getHttpLang(),

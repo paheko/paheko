@@ -190,29 +190,45 @@ class Mailing extends Entity
 		return sprintf('"%s" <%s>', $config->org_name, $config->org_email);
 	}
 
-	public function preview(string $address = null): string
+	/**
+	 * @return UserTemplate|string
+	 */
+	public function getBody()
 	{
-		if (!$address) {
-			$address = array_rand($this->recipients);
+		if (false !== strpos($this->body, '{{')) {
+			$tpl = new UserTemplate(null);
+			$tpl->setCode($this->body);
+			$tpl->toggleSafeMode(true);
+			$tpl->setEscapeDefault(null);
+			return $tpl;
 		}
 
-		if (!array_key_exists($address, $this->recipients)) {
+		return $this->body;
+	}
+
+	public function getPreview(string $address = null): string
+	{
+		$db = DB::getInstance();
+
+		$where = $address ? 'email = ?' : '1 ORDER BY RANDOM()';
+		$sql = sprintf('SELECT extra_data FROM mailings_recipients WHERE %s LIMIT 1;', $where);
+		$args = $address ? (array)$address : [];
+
+		$r = $db->firstColumn($sql, ...$args);
+
+		if (!$r) {
 			throw new UserException('Cette adresse ne fait pas partie des destinataires: ' . $address);
 		}
 
-		$r = (array) $this->recipients[$address];
+		$r = json_decode($r, true);
 
-		$message = $this->body;
+		$body = $this->getBody();
 
-		if (false !== strpos($message, '{{')) {
-			$tpl = new UserTemplate;
-			$tpl->setCode($message);
-			$tpl->toggleSafeMode(true);
-			$tpl->assignArray($r);
-			$tpl->setEscapeDefault(null);
+		if ($body instanceof UserTemplate) {
+			$body->assignArray($r);
 
 			try {
-				$html = $tpl->fetch();
+				$body = $body->fetch();
 			}
 			catch (\KD2\Brindille_Exception $e) {
 				throw new UserException('Erreur de syntaxe dans le corps du message :' . PHP_EOL . $e->getPrevious()->getMessage(), 0, $e);
@@ -220,7 +236,16 @@ class Mailing extends Entity
 		}
 
 		$render = Render::FORMAT_MARKDOWN;
-		return Render::render($render, null, $html);
+		return Render::render($render, null, $body);
+	}
+
+	public function getHTMLPreview(string $address = null): string
+	{
+		$html = $this->getPreview($address);
+		$tpl = new UserTemplate('email.html');
+		$tpl->assignArray(compact('html'));
+
+		return $tpl->fetch();
 	}
 
 	public function send(): void
@@ -235,11 +260,11 @@ class Mailing extends Entity
 			$this->listRecipients(),
 			null, // Default sender
 			$this->subject,
-			$this->body,
+			$this->getBody(),
 			Render::FORMAT_MARKDOWN
 		);
 
-		$this->sent = new DateTime;
+		$this->set('sent', new DateTime);
 
 		$this->save();
 	}

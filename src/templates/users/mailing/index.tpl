@@ -21,13 +21,13 @@
 		<tr>
 			<th>{link href="details.php?id=%d"|args:$row.id label=$row.subject}</th>
 			<td>{$row.nb_recipients}</td>
-			<td>{if $row.sent}{$row.sent|date_short}{else}Brouillon{/if}</td>
+			<td>{if $row.sent}{$row.sent|relative_date:true}{else}Brouillon{/if}</td>
 			<td class="actions">
 				{linkbutton shape="eye" label="Ouvrir" href="details.php?id=%d"|args:$row.id}
 				{if !$row.sent}
 					{linkbutton shape="edit" label="Modifier" href="write.php?id=%d"|args:$row.id}
-					{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$row.id target="_dialog"}
 				{/if}
+				{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$row.id target="_dialog"}
 			</td>
 		</tr>
 	{/foreach}

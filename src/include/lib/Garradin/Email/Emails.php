@@ -12,7 +12,6 @@ use Garradin\Entities\Users\User;
 use Garradin\Users\DynamicFields;
 use Garradin\UserTemplate\UserTemplate;
 use Garradin\Web\Render\Render;
-use Garradin\Web\Skeleton;
 
 use const Garradin\{USE_CRON, MAIL_RETURN_PATH, DISABLE_EMAIL};
 use const Garradin\{SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURITY};
@@ -51,7 +50,7 @@ class Emails
 	 * @param  UserTemplate|string $content
 	 * @return void
 	 */
-	static public function queue(int $context, array $recipients, ?string $sender, string $subject, $content, ?string $render = null): void
+	static public function queue(int $context, iterable $recipients, ?string $sender, string $subject, $content, ?string $render = null): void
 	{
 		if (DISABLE_EMAIL) {
 			return;
@@ -127,7 +126,6 @@ class Emails
 		}
 
 		$template = ($content instanceof UserTemplate) ? $content : null;
-		$skel = null;
 		$content_html = null;
 
 		if ($template) {
@@ -140,7 +138,7 @@ class Emails
 			VALUES (:sender, :subject, :recipient, :recipient_hash, :recipient_pgp_key, :content, :content_html, :context);');
 
 		if ($render) {
-			$skel = new Skeleton('email.html');
+			$main_tpl = new UserTemplate('email.html');
 		}
 
 		foreach ($recipients as $to => $data) {
@@ -170,13 +168,14 @@ class Emails
 
 			if ($content_html) {
 				// Wrap HTML content in the email skeleton
-				$content_html = $skel->fetch([
+				$main_tpl->assignArray([
 					'html'      => $content_html,
 					'recipient' => $to,
 					'data'      => $variables,
 					'context'   => $context,
 					'from'      => $sender,
 				]);
+				$content_html = $main_tpl->fetch();
 			}
 
 			if (Plugins::fireSignal('email.queue.insert', compact('context', 'to', 'sender', 'subject', 'content', 'render', 'hash', 'content_html') + ['pgp_key' => $data['pgp_key'] ?? null])) {

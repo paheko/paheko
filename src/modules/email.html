@@ -5,8 +5,9 @@
 <style type="text/css">
 	* { margin: 0; padding: 0; }
 	body {
-		background: #eee;
+		background: rgba({{if $config.color1}}{{$config.color1|css_hex_to_rgb}}{{else}}200, 200, 200{{/if}}, 0.2);
 		color: #000;
+		font-family: sans-serif;
 	}
 	a {
 		color: #009;
@@ -20,14 +21,14 @@
 		border-radius: 5px;
 	}
 	.footer {
-		background: #ddd;
+		background: rgba({{if $config.color2}}{{$config.color2|css_hex_to_rgb}}{{else}}100, 100, 100{{/if}}, 0.5);
 	}
 	.footer h3, .footer h4, .footer h5 {
 		text-align: center;
 		margin: 5px 0;
 	}
 	{{* Inclure le contenu de content.css pour s'assurer que le style du texte Markdown/Skriv est correct *}}
-	{{:include file="content.css"}}
+	{{:include file="web/content.css"}}
 </style>
 </head>
 <body>
@@ -43,12 +44,12 @@
 *}}
 
 <div class="footer">
-	<h3><a href="{{$config.site_asso}}">{{$config.nom_asso}}</a></h3>
-	{{if $config.adresse_asso}}
-		<h4>{{$config.adresse_asso}}</h4>
+	<h3><a href="{{$site_url}}">{{$config.org_name}}</a></h3>
+	{{if $config.org_address}}
+		<h4>{{$config.org_address}}</h4>
 	{{/if}}
-	{{if $config.telephone_asso}}
-		<h5><a href="tel:{{$config.telephone_asso}}">{{$config.telephone_asso|raw}}</a></h5>
+	{{if $config.org_phone}}
+		<h5><a href="tel:{{$config.org_phone}}">{{$config.org_phone|raw}}</a></h5>
 	{{/if}}
 </div>
 

@@ -20,7 +20,7 @@
 	<dl class="describe">
 		{if $mailing.sent}
 			<dt>Envoyé le</dt>
-			<dd>{$mailing.sent|date_short}</dd>
+			<dd>{$mailing.sent|date_long:true}</dd>
 		{else}
 			<dt>Statut</dt>
 			<dd>
