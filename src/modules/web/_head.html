@@ -6,8 +6,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, target-densitydpi=device-dpi" />
 	<style type="text/css">
 	:root {
-		--first-color: {{if $config.couleur1}}{{$config.couleur1|css_hex_to_rgb}}{{else}}120, 120, 120{{/if}};
-		--second-color: {{if $config.couleur2}}{{$config.couleur2|css_hex_to_rgb}}{{else}}30, 30, 30{{/if}};
+		--first-color: {{if $config.color1}}{{$config.color1|css_hex_to_rgb}}{{else}}120, 120, 120{{/if}};
+		--second-color: {{if $config.color2}}{{$config.color2|css_hex_to_rgb}}{{else}}30, 30, 30{{/if}};
 	}
 	</style>
 	<link rel="stylesheet" type="text/css" href="{{$root_url}}default.css?h={{$version_hash}}" media="screen,projection,handheld" />
