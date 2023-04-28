@@ -16,6 +16,8 @@ class Email extends Entity
 {
 	const TABLE = 'emails';
 
+	const RESEND_VERIFICATION_DELAY = '1 month ago';
+
 	/**
 	 * Antispam services that require to do a manual action to accept emails
 	 */
@@ -74,6 +76,12 @@ class Email extends Entity
 		EmailsTemplates::verifyAddress($email, $verify_url);
 	}
 
+	public function canSendVerificationAfterFail(): bool
+	{
+		$limit_date = new \DateTime(self::RESEND_VERIFICATION_DELAY);
+		return $this->last_sent > $limit_date && ($this->hasReachedFailLimit() || $email->invalid);
+	}
+
 	public function verify(string $code): bool
 	{
 		if ($code !== $this->getVerificationCode()) {
@@ -98,14 +106,19 @@ class Email extends Entity
 			self::validateAddress($email);
 		}
 		catch (UserException $e) {
-			$this->hasFailed(['type' => 'permanent', 'message' => $e->getMessage()]);
+			$this->setFailedValidation($e->getMessage());
 			return false;
 		}
 
 		return true;
 	}
 
-	static public function validateAddress(string $email): void
+	public function setFailedValidation(string $message): void
+	{
+		$this->hasFailed(['type' => 'permanent', 'message' => $message]);
+	}
+
+	static public function validateAddress(string $email, bool $mx_check = true): void
 	{
 		$pos = strrpos($email, '@');
 
@@ -142,6 +155,15 @@ class Email extends Entity
 		}
 
 		// Windows does not support MX lookups
+		if (PHP_OS_FAMILY == 'Windows' || !$mx_check) {
+			return;
+		}
+
+		self::checkMX($host);
+	}
+
+	static public function checkMX(string $host)
+	{
 		if (PHP_OS_FAMILY == 'Windows') {
 			return;
 		}

@@ -159,6 +159,26 @@ CREATE TABLE IF NOT EXISTS emails_queue (
     context INTEGER NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS mailings (
+    id INTEGER NOT NULL PRIMARY KEY,
+    subject TEXT NOT NULL,
+    body TEXT NULL,
+    sent TEXT NULL CHECK (datetime(sent) IS NULL OR datetime(sent) = sent),
+    anonymous INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX mailings_sent ON mailings (sent);
+
+CREATE TABLE IF NOT EXISTS mailings_recipients (
+    id INTEGER NOT NULL PRIMARY KEY,
+    id_mailing INTEGER NOT NULL REFERENCES mailings (id) ON DELETE CASCADE,
+    email TEXT NULL,
+    id_email TEXT NULL REFERENCES emails (id) ON DELETE CASCADE,
+    extra_data TEXT NULL
+);
+
+CREATE INDEX mailings_recipients_id ON mailings_recipients (id);
+
 ---
 --- Users
 ---

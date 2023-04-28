@@ -2,8 +2,8 @@
 
 <nav class="tabs">
 	<ul>
-		<li><a href="message_collectif.php">Rédaction de message</a></li>
-		<li class="current"><a href="emails.php">Adresses rejetées</a></li>
+		<li><a href="./">Messages collectifs</a></li>
+		<li class="current"><a href="rejected.php">Adresses rejetées</a></li>
 	</ul>
 </nav>
 
@@ -36,8 +36,8 @@
 	{include file="common/dynamic_list_head.tpl"}
 
 		{foreach from=$list->iterate() item="row"}
-		<tr>
-			<th><a href="details.php?id={$row.user_id}">{$row.identity}</a></th>
+		<tr{if $_GET.hl == $row.id} class="highlight"{/if} id="e_{$row.id}">
+			<th>{link href="!users/details.php?id=%d"|args:$row.user_id label=$row.identity}</th>
 			<td>{$row.email}</td>
 			<td>{$row.status}</td>
 			<td class="num">{$row.sent_count}</td>
@@ -45,7 +45,7 @@
 			<td>{$row.last_sent|date}</td>
 			<td>
 				{if $row.email && ($row.optout || $row.last_sent < $limit_date)}
-					{linkbutton target="_dialog" label="Rétablir" href="?verify=%s"|args:$row.email shape="check"}
+					{linkbutton target="_dialog" label="Rétablir" href="!mailing/verify.php?address=%s"|args:$row.email shape="check"}
 				{/if}
 			</td>
 		</tr>

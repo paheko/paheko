@@ -151,7 +151,7 @@ class Search extends Entity
 	 */
 	public function query(array $options = []): \SQLite3Result
 	{
-		if (null !== $this->_result) {
+		if (null !== $this->_result && empty($options['no_cache'])) {
 			return $this->_result;
 		}
 
@@ -164,8 +164,13 @@ class Search extends Entity
 			$db->toggleUnicodeLike(true);
 			$st = $db->protectSelect($allowed_tables, $sql);
 
-			$this->_result = $db->execute($st);
-			return $this->_result;
+			$result = $db->execute($st);
+
+			if (empty($options['no_cache'])) {
+				$this->_result = $result;
+			}
+
+			return $result;
 		}
 		catch (DB_Exception $e) {
 			throw new UserException('Erreur dans la requête : ' . $e->getMessage(), 0, $e);
@@ -175,9 +180,9 @@ class Search extends Entity
 		}
 	}
 
-	public function getHeader(): array
+	public function getHeader(array $options = []): array
 	{
-		$r = $this->query();
+		$r = $this->query($options);
 		$columns = [];
 
 		for ($i = 0; $i < $r->numColumns(); $i++) {
@@ -196,10 +201,27 @@ class Search extends Entity
 		}
 	}
 
+	public function hasUserId(): bool
+	{
+		$sql = $this->SQL();
+
+		if (!preg_match('/(?:FROM|JOIN)\s+users/i', $sql)) {
+			return false;
+		}
+
+		$header = $this->getHeader(['limit' => 1, 'ignore_cache' => true]);
+
+		if (!in_array('id', $header) && !in_array('_user_id', $header)) {
+			return false;
+		}
+
+		return true;
+	}
+
 	public function countResults(): int
 	{
 		$sql = $this->SQL();
-		$sql = preg_replace('/^\s*SELECT\s+(.*?)\s+FROM\s+/Uis', 'SELECT COUNT(*) FROM ', $sql);
+		$sql = 'SELECT COUNT(*) FROM (' . $sql . ')';
 
 		$allowed_tables = $this->getProtectedTables();
 		$db = DB::getInstance();
@@ -214,6 +236,7 @@ class Search extends Entity
 			return $count;
 		}
 		catch (DB_Exception $e) {
+			throw $e;
 			throw new UserException('Erreur dans la requête : ' . $e->getMessage(), 0, $e);
 		}
 		finally {

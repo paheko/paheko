@@ -12,6 +12,20 @@ fieldset legend {
     color: rgb(var(--gTextColor));
 }
 
+fieldset.header {
+    grid-column: span 2;
+    margin-top: 1em;
+}
+
+fieldset.header legend {
+    font-size: 1.5em;
+    text-align: center;
+}
+
+fieldset.header p input {
+    font-size: 1.5em;
+}
+
 /* Override selector in 06-tables.css */
 table tr.clickable:hover, table tr.clickable:nth-child(even):hover {
     cursor: pointer;
@@ -563,20 +577,9 @@ dialog.datepicker {
     color: darkred;
 }
 
-fieldset.mailing {
-    max-width: 40em;
-}
-
-fieldset.mailing dd.preview > * {
-    border-radius: .5em;
-    background: var(--gLightBackgroundColor);
-    padding: 1em;
-}
-
-#queryBuilderForm textarea, fieldset.mailing textarea, fieldset.mailing #f_subject, fieldset.mailing #f_target {
+#queryBuilderForm textarea {
     width: calc(100% - 2em);
 }
-
 
 #queryBuilder .column select, #queryBuilderForm .actions select {
     max-width: 15em;

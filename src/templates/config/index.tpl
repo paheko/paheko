@@ -59,7 +59,7 @@
 		<legend>Informations sur l'association</legend>
 		<dl>
 			{input type="text" name="org_name" required=true source=$config label="Nom"}
-			{input type="email" name="org_email" required=true source=$config label="Adresse e-mail de contact"}
+			{input type="email" name="org_email" required=true source=$config label="Adresse e-mail de contact" help="Cette adresse est aussi utilisée comme adresse d'expédition des messages collectifs."}
 			{input type="textarea" name="org_address" source=$config label="Adresse postale"}
 			{input type="tel" name="org_phone" source=$config label="Numéro de téléphone"}
 			{input type="textarea" cols="50" rows="2" name="org_infos" required=false source=$config label="Informations diverses" help="Ce champ sera utilisé sur les reçus. Il peut être utile de faire figurer ici le numéro de SIRET par exemple."}

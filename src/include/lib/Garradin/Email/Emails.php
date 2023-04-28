@@ -263,13 +263,19 @@ class Emails
 		$e = self::getEmail($address);
 
 		if (!$e) {
-			$e = new Email;
-			$e->added = new \DateTime;
-			$e->hash = $e::getHash($address);
-			$e->validate($address);
-			$e->save();
+			$e = self::createEmail($address);
 		}
 
+		return $e;
+	}
+
+	static public function createEmail(string $address): Email
+	{
+		$e = new Email;
+		$e->added = new \DateTime;
+		$e->hash = $e::getHash($address);
+		$e->validate($address);
+		$e->save();
 		return $e;
 	}
 
@@ -445,11 +451,27 @@ class Emails
 		return DB::getInstance()->delete('emails_queue', 'id = ?', (int)$id);
 	}
 
+	static public function getRejectionStatusClause(string $prefix): string
+	{
+		$prefix .= '.';
+
+		return sprintf('CASE
+			WHEN %1$soptout = 1 THEN \'Désinscription\'
+			WHEN %1$sinvalid = 1 THEN \'Invalide\'
+			WHEN %1$sfail_count >= %d THEN \'Trop d\'\'erreurs\'
+			WHEN %1$sverified = 1 THEN \'Vérifiée\'
+			ELSE \'\'
+		END', $prefix, self::FAIL_LIMIT);
+	}
+
 	static public function listRejectedUsers(): DynamicList
 	{
 		$db = DB::getInstance();
 
 		$columns = [
+			'id' => [
+				'select' => 'e.id',
+			],
 			'identity' => [
 				'label' => 'Membre',
 				'select' => DynamicFields::getNameFieldsSQL('u'),
@@ -465,13 +487,7 @@ class Emails
 			],
 			'status' => [
 				'label' => 'Statut',
-				'select' => sprintf('CASE
-					WHEN e.optout = 1 THEN \'Désinscription\'
-					WHEN e.invalid = 1 THEN \'Invalide\'
-					WHEN e.fail_count >= %d THEN \'Trop d\'\'erreurs\'
-					WHEN e.verified = 1 THEN \'Vérifiée\'
-					ELSE \'\'
-					END', self::FAIL_LIMIT),
+				'select' => self::getRejectionStatusClause('e'),
 			],
 			'sent_count' => [
 				'label' => 'Messages envoyés',

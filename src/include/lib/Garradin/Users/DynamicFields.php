@@ -80,6 +80,22 @@ class DynamicFields
 		return array_keys(self::getInstance()->fieldsBySystemUse('name'));
 	}
 
+	static public function getNameFromArray($in): ?string
+	{
+		$out = [];
+
+		foreach (array_keys(self::getInstance()->fieldsBySystemUse('name')) as $f) {
+			if (is_array($in) && array_key_exists($f, $in)) {
+				$out[] = $in[$f];
+			}
+			elseif (is_object($in) && property_exists($in, $f)) {
+				$out[] = $in->$f;
+			}
+		}
+
+		return implode(' ', $out) ?: null;
+	}
+
 	static public function getNameLabel(): string
 	{
 		$list = self::getInstance()->fieldsBySystemUse('name');

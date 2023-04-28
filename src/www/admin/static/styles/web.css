@@ -44,20 +44,6 @@
     text-align: right;
 }
 
-fieldset.header {
-    grid-column: span 2;
-    margin-top: 1em;
-}
-
-.web-edit fieldset.header legend {
-    font-size: 1.5em;
-    text-align: center;
-}
-
-fieldset.header p input {
-    font-size: 1.5em;
-}
-
 fieldset.header div {
     display: flex;
     flex-direction: row;
@@ -85,7 +71,6 @@ fieldset.header div select {
 }
 
 fieldset.header div dt {
-    margin-right: 1em;
     display: none;
 }
 

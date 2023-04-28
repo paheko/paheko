@@ -149,4 +149,9 @@ class Category extends Entity
 
 		return $out;
 	}
+
+	public function count(): int
+	{
+		return DB::getInstance()->count(self::TABLE, 'id = ?', $this->id);
+	}
 }
