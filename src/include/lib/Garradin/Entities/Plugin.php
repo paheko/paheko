@@ -73,7 +73,7 @@ class Plugin extends Entity
 	protected ?string $restrict_section;
 	protected ?int $restrict_level;
 
-	protected ?\stdClass $config;
+	protected ?\stdClass $config = null;
 	protected bool $enabled;
 
 	protected ?string $_broken_message = null;
