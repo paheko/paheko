@@ -198,7 +198,7 @@ class Plugin extends Entity
 			return $this->config;
 		}
 
-		if (property_exists($this->config, $key)) {
+		if ($this->config && property_exists($this->config, $key)) {
 			return $this->config->$key;
 		}
 
