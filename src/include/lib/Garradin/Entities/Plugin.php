@@ -7,6 +7,7 @@ use Garradin\DB;
 use Garradin\Plugins;
 use Garradin\Template;
 use Garradin\UserException;
+use Garradin\Utils;
 use Garradin\Files\Files;
 use Garradin\UserTemplate\UserTemplate;
 use Garradin\Users\Session;
