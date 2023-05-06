@@ -480,12 +480,12 @@ class Transaction extends Entity
 
 		// Allow only status to be modified
 		if (!(count($this->_modified) === 1 && array_key_exists('status', $this->_modified))) {
-			if ($this->validated && !(isset($this->_modified['validated']) && $this->_modified['validated'] === 0)) {
+			if (!empty($this->validated) && !(isset($this->_modified['validated']) && $this->_modified['validated'] === 0)) {
 				throw new ValidationException('Il n\'est pas possible de modifier une écriture qui a été validée');
 			}
 
 
-			if ($db->test(Year::TABLE, 'id = ? AND closed = 1', $this->id_year)) {
+			if (isset($this->id_year) && $db->test(Year::TABLE, 'id = ? AND closed = 1', $this->id_year)) {
 				throw new ValidationException('Il n\'est pas possible de créer ou modifier une écriture dans un exercice clôturé');
 			}
 		}
