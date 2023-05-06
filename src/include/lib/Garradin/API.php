@@ -180,10 +180,11 @@ class API
 	protected function accounting(string $uri): ?array
 	{
 		$fn = strtok($uri, '/');
-		$param = strtok('');
+		$p1 = strtok('/');
+		$p2 = strtok(false);
 
 		if ($fn == 'transaction') {
-			if ($param == '') {
+			if (!$p1) {
 				if ($this->method != 'POST') {
 					throw new APIException('Wrong request method', 400);
 				}
@@ -194,11 +195,36 @@ class API
 				$transaction->save();
 				return $transaction->asJournalArray();
 			}
-			elseif (is_numeric($param)) {
-				$transaction = Transactions::get((int)$param);
+			// Return or edit linked users
+			elseif (ctype_digit($p1) && $p2 == 'users') {
+				$transaction = Transactions::get((int)$p1);
 
 				if (!$transaction) {
-					throw new APIException(sprintf('Transaction #%d not found', $param), 404);
+					throw new APIException(sprintf('Transaction #%d not found', $p1), 404);
+				}
+
+				if ($this->method === 'POST') {
+					$this->requireAccess(Session::ACCESS_WRITE);
+					$transaction->updateLinkedUsers((array)($_POST['users'] ?? null));
+					return ['success' => true];
+				}
+				elseif ($this->method === 'DELETE') {
+					$this->requireAccess(Session::ACCESS_WRITE);
+					$transaction->updateLinkedUsers([]);
+					return ['success' => true];
+				}
+				elseif ($this->method === 'GET') {
+					return $transaction->listLinkedUsers();
+				}
+				else {
+					throw new APIException('Wrong request method', 400);
+				}
+			}
+			elseif (ctype_digit($p1) && !$p2) {
+				$transaction = Transactions::get((int)$p1);
+
+				if (!$transaction) {
+					throw new APIException(sprintf('Transaction #%d not found', $p1), 404);
 				}
 
 				if ($this->method == 'GET') {
@@ -215,7 +241,7 @@ class API
 				}
 			}
 			else {
-				throw new APIException('Unknown transactions action', 404);
+				throw new APIException('Unknown transactions route', 404);
 			}
 		}
 		elseif ($fn == 'years') {
@@ -223,8 +249,8 @@ class API
 				throw new APIException('Wrong request method', 400);
 			}
 
-			if (preg_match('!^(\d+|current)/(journal|account/journal)!', $param, $match)) {
-				if ($match[1] == 'current') {
+			if (($p1 === 'current' || ctype_digit($p1)) && ($p2 === 'journal' || $p2 === 'account/journal')) {
+				if ($p1 === 'current') {
 					$id_year = Years::getCurrentOpenYearId();
 
 					if (!$id_year) {
@@ -235,7 +261,7 @@ class API
 					$id_year = (int)$match[1];
 				}
 
-				if ($match[2] == 'journal') {
+				if ($p2 == 'journal') {
 					try {
 						return iterator_to_array(Reports::getJournal(['year' => $id_year]));
 					}
@@ -271,7 +297,7 @@ class API
 					return iterator_to_array($list->iterate());
 				}
 			}
-			elseif ($param == '') {
+			elseif (!$p1 && !$p2) {
 				return Years::list();
 			}
 			else {
@@ -283,11 +309,11 @@ class API
 				throw new APIException('Wrong request method', 400);
 			}
 
-			if (preg_match('!^(\d+)/accounts$!', $param, $match)) {
-				$a = new Accounts((int)$match[1]);
+			if (ctype_digit($p1) && $p2 === 'accounts') {
+				$a = new Accounts((int)$p1);
 				return array_map(fn($c) => $c->asArray(), $a->listAll());
 			}
-			elseif ($param == '') {
+			elseif (!$p1 && !$p2) {
 				return array_map(fn($c) => $c->asArray(), Charts::list());
 			}
 			else {
