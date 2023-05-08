@@ -24,9 +24,23 @@ class Mailing extends Entity
 	protected ?int $id = null;
 	protected string $subject;
 	protected ?string $body;
-	protected ?DateTime $sent;
-	protected bool $anonymous = false;
 
+	/**
+	 * Leave sender name and email NULL to use org name + email
+	 */
+	protected ?string $sender_name;
+	protected ?string $sender_email;
+
+	/**
+	 * NULL when the mailing has not been sent yet
+	 */
+	protected ?DateTime $sent;
+
+	/**
+	 * TRUE when the list of recipients has been anonymized
+	 * @var boolean
+	 */
+	protected bool $anonymous = false;
 
 	public function selfCheck(): void
 	{
@@ -34,6 +48,12 @@ class Mailing extends Entity
 
 		$this->assert(trim($this->subject) !== '', 'Le sujet ne peut rester vide.');
 		$this->assert(!isset($this->body) || trim($this->body) !== '', 'Le corps du message ne peut rester vide.');
+
+		if (isset($this->sender_name) || isset($this->sender_email)) {
+			$this->assert(trim($this->sender_name) !== '', 'Le nom d\'expéditeur est vide.');
+			$this->assert(trim($this->sender_email) !== '', 'L\'adresse e-mail de l\'expéditeur est manquante.');
+			$this->assert(Email::isAddressValid($this->sender_email), 'L\'adresse e-mail de l\'expéditeur est invalide.');
+		}
 	}
 
 	public function populate(string $target, ?int $target_id = null): void
@@ -187,7 +207,7 @@ class Mailing extends Entity
 	public function getFrom(): string
 	{
 		$config = Config::getInstance();
-		return sprintf('"%s" <%s>', $config->org_name, $config->org_email);
+		return sprintf('"%s" <%s>', $this->sender_name ?? $config->org_name, $this->sender_email ?? $config->org_email);
 	}
 
 	/**
@@ -239,13 +259,19 @@ class Mailing extends Entity
 		return Render::render($render, null, $body);
 	}
 
-	public function getHTMLPreview(string $address = null): string
+	public function getHTMLPreview(string $address = null, bool $append_footer = false): string
 	{
 		$html = $this->getPreview($address);
 		$tpl = new UserTemplate('email.html');
 		$tpl->assignArray(compact('html'));
 
-		return $tpl->fetch();
+		$out = $tpl->fetch();
+
+		if ($append_footer) {
+			$out = Emails::appendHTMLOptoutFooter($out, 'javascript:alert(\'--\');');
+		}
+
+		return $out;
 	}
 
 	public function send(): void
@@ -256,9 +282,15 @@ class Mailing extends Entity
 			throw new UserException('Le corps du message est vide.');
 		}
 
+		$sender = null;
+
+		if (isset($this->sender_name, $this->sender_email)) {
+			$sender = Emails::getFromHeader($this->sender_name, $this->sender_email);
+		}
+
 		Emails::queue(Emails::CONTEXT_BULK,
 			$this->listRecipients(),
-			null, // Default sender
+			$sender,
 			$this->subject,
 			$this->getBody(),
 			Render::FORMAT_MARKDOWN

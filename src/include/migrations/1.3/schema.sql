@@ -163,6 +163,8 @@ CREATE TABLE IF NOT EXISTS mailings (
     id INTEGER NOT NULL PRIMARY KEY,
     subject TEXT NOT NULL,
     body TEXT NULL,
+    sender_name TEXT NULL,
+    sender_email TEXT NULL,
     sent TEXT NULL CHECK (datetime(sent) IS NULL OR datetime(sent) = sent),
     anonymous INTEGER NOT NULL DEFAULT 0
 );

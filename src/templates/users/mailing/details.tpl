@@ -34,18 +34,20 @@
 			<dt>Expéditeur</dt>
 			<dd>
 				{$mailing->getFrom()}<br/>
-				<span class="help">Cette adresse peut être modifiée dans la {link label="configuration" href="!config/"}.</span>
 			</dd>
 		{/if}
 		<dt>Destinataires</dt>
 		<dd>
-			{{%n destinataire}{%n destinataires} n=$mailing->countRecipients()}<br />
+			{{%n destinataire}{%n destinataires} n=$mailing->countRecipients()}
 			{linkbutton shape="users" label="Voir la liste des destinataires" href="recipients.php?id=%d"|args:$mailing.id}
 		</dd>
 		<dt>Sujet</dt>
 		<dd><strong>{$mailing.subject}</strong></dd>
 		<dt>Message</dt>
-		<dd><pre>{$mailing.body}</pre></dd>
+		<dd><pre><code>{$mailing.body}</code></pre></dd>
+		<dt>Prévisualisation</dt>
+		<dd>{linkbutton shape="eye" label="Prévisualiser le message" href="?id=%d&preview"|args:$mailing.id target="_dialog"}<br />
+		 <small class="help">(Un destinataire sera choisi au hasard.)</small></dd>
 	</dl>
 	{csrf_field key=$csrf_key}
 </form>

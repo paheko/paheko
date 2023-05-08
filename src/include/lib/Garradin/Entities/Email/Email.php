@@ -118,6 +118,17 @@ class Email extends Entity
 		$this->hasFailed(['type' => 'permanent', 'message' => $message]);
 	}
 
+	static public function isAddressValid(string $email, bool $mx_check = true): bool
+	{
+		try {
+			self::validateAddress($email);
+			return true;
+		}
+		catch (UserException $e) {
+			return false;
+		}
+	}
+
 	static public function validateAddress(string $email, bool $mx_check = true): void
 	{
 		$pos = strrpos($email, '@');

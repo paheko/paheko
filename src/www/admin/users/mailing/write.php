@@ -20,11 +20,13 @@ $form->runIf('save', function () use ($mailing) {
 	$mailing->save();
 }, $csrf_key, '!users/mailing/details.php?id=' . $mailing->id);
 
-$form->runIf('content', function() use ($mailing) {
-	$mailing->set('body', trim(f('content') ?? ''));
-	echo $mailing->getHTMLPreview();
-	exit;
-});
+if (!$form->hasErrors()) {
+	$form->runIf('content', function() use ($mailing) {
+		$mailing->set('body', trim(f('content') ?? ''));
+		echo $mailing->getHTMLPreview(null, true);
+		exit;
+	});
+}
 
 $tpl->assign(compact('mailing', 'csrf_key'));
 

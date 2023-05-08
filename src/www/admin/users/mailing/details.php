@@ -12,6 +12,11 @@ if (!$mailing) {
 	throw new UserException('Invalid mailing ID');
 }
 
+if (qg('preview') !== null) {
+	echo $mailing->getHTMLPreview(qg('preview') ?: null, true);
+	return;
+}
+
 $csrf_key = 'mailing_details';
 
 $form->runIf('send', function() use ($mailing) {

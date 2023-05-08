@@ -426,7 +426,7 @@ aside.describe dd a.icn-btn, aside.secondary a.icn-btn, aside.secondary button, 
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 img.qrcode {
@@ -752,4 +752,11 @@ strong.tag {
 
 .diff .separator td {
     padding: .5em;
+}
+
+pre code {
+    background: var(--gLightBackgroundColor);
+    display: block;
+    padding: .5em;
+    border-radius: .3em;
 }

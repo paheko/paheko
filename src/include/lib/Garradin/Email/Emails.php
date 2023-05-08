@@ -322,8 +322,8 @@ class Emails
 			}
 
 			$headers = [
-				'From' => $row->sender,
-				'To' => $row->recipient,
+				'From'    => $row->sender,
+				'To'      => $row->recipient,
 				'Subject' => $row->subject,
 			];
 
@@ -514,6 +514,27 @@ class Emails
 		return $list;
 	}
 
+	static public function getOptoutText(): string
+	{
+		return "Vous recevez ce message car vous êtes dans nos contacts.\n"
+			. "Pour ne plus jamais recevoir de message de notre part cliquez ici :\n";
+	}
+
+	static public function appendHTMLOptoutFooter(string $html, string $url): string
+	{
+		$footer = '<hr style="border-top: 2px solid #999; background: none;" /><p style="color: #666; background: #fff; padding: 10px; text-align: center; font-size: 9pt">' . nl2br(htmlspecialchars(self::getOptoutText()));
+		$footer .= sprintf('<br /><a href="%s" style="color: #009; text-decoration: underline; padding: 5px 10px; border-radius: 5px; background: #ddd; border: 1px outset #999;">Me désinscrire</a></p>', $url);
+
+		if (stripos($html, '</body>') !== false) {
+			$html = str_ireplace('</body>', $footer . '</body>', $html);
+		}
+		else {
+			$html .= $footer;
+		}
+
+		return $html;
+	}
+
 	static protected function send(int $context, string $recipient_hash, array $headers, string $content, ?string $content_html, ?string $pgp_key = null): void
 	{
 		$message = new Mail_Message;
@@ -533,21 +554,10 @@ class Emails
 			$message->setHeader('List-Unsubscribe', sprintf('<%s>', $url));
 			$message->setHeader('List-Unsubscribe-Post', 'Unsubscribe=Yes');
 
-			$optout_text = "Vous recevez ce message car vous êtes dans nos contacts.\n"
-				. "Pour ne plus jamais recevoir de message de notre part cliquez ici :\n";
-
-			$content .= "\n\n-- \n" . $optout_text . $url;
+			$content .= "\n\n-- \n" . self::getOptoutText() . $url;
 
 			if (null !== $content_html) {
-				$optout_text = '<hr style="border-top: 2px solid #999; background: none;" /><p style="color: #000; background: #fff; padding: 10px; text-align: center; font-size: 9pt">' . nl2br(htmlspecialchars($optout_text));
-				$optout_text.= sprintf('<br /><a href="%s" style="color: blue; text-decoration: underline; padding: 5px; border-radius: 5px; background: #ddd;">Me désinscrire</a></p>', $url);
-
-				if (stripos($content_html, '</body>') !== false) {
-					$content_html = str_ireplace('</body>', $optout_text . '</body>', $content_html);
-				}
-				else {
-					$content_html .= $optout_text;
-				}
+				$content_html = self::appendHTMLOptoutFooter($content_html, $url);
 			}
 		}
 

@@ -41,6 +41,9 @@
 				{if !$mailing.sent}
 					{button shape="delete" label="Supprimer" name="delete" value=$r.id type="submit"}
 				{/if}
+				{if !$mailing.anonymous && $r.email}
+					{linkbutton href="details.php?id=%d&preview=%s"|args:$mailing.id:$r.email label="Prévisualiser" shape="eye" target="_dialog"}
+				{/if}
 				{if $r.status}
 					{linkbutton href="rejected.php?hl=%d#e_%1\$d"|args:$r.id_email label="Détails de l'erreur" shape="help"}
 				{/if}
