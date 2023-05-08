@@ -949,7 +949,7 @@ class Transaction extends Entity
 		$users = array_values($users);
 
 		foreach ($users as $i => $user) {
-			if (!ctype_digit($user)) {
+			if (!(is_int($user) || (is_string($user) && ctype_digit($user)))) {
 				throw new ValidationException(sprintf('Array item #%d: "%s" is not a valid user ID', $i, $user));
 			}
 		}
