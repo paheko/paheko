@@ -84,7 +84,7 @@
 		<p>Exercice&nbsp;: {$year.label} ({if $year.closed}clôturé{else}<strong>en cours</strong>{/if})
 			— du {$year.start_date|date_short}
 			— au {$year.end_date|date_short}<br />
-			<em>Document généré le {$now|date_short}</em>
+			<small><em>Document généré le {$now|date_short}</em></small>
 		</p>
 	{/if}
 
