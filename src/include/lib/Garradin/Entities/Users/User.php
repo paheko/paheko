@@ -431,10 +431,10 @@ class User extends Entity
 
 		$from = $from ? $from->getNameAndEmail() : null;
 
-		Emails::queue(Emails::CONTEXT_PRIVATE, [['email' => $this->{$email_field}, 'pgp_key' => $this->pgp_key]], $from, $subject, $message);
+		Emails::queue(Emails::CONTEXT_PRIVATE, [$this->{$email_field} => ['pgp_key' => $this->pgp_key]], $from, $subject, $message);
 
 		if ($send_copy) {
-			Emails::queue(Emails::CONTEXT_PRIVATE, [['email' => $config->org_email, 'pgp_key' => $from->pgp_key]], null, $subject, $message);
+			Emails::queue(Emails::CONTEXT_PRIVATE, [$config->org_email], null, $subject, $message);
 		}
 	}
 

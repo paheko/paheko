@@ -24,7 +24,7 @@ class Templates
 			throw new \LogicException('Template did not define a subject');
 		}
 
-		Emails::queue(Emails::CONTEXT_SYSTEM, [$to], null, $subject, $body);
+		Emails::queue(Emails::CONTEXT_SYSTEM, $to, null, $subject, $body);
 	}
 
 	static public function loginChanged(User $user): void
@@ -35,7 +35,7 @@ class Templates
 
 	static public function passwordRecovery(string $email, string $recovery_url, ?string $pgp_key): void
 	{
-		self::send(compact('email', 'pgp_key'), 'password_recovery.tpl', compact('recovery_url'));
+		self::send([$email => compact('pgp_key')], 'password_recovery.tpl', compact('recovery_url'));
 	}
 
 	static public function passwordChanged(User $user): void

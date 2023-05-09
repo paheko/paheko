@@ -43,59 +43,73 @@ class Emails
 	/**
 	 * Add a message to the sending queue using templates
 	 * @param  int          $context
-	 * @param  array        $recipients List of recipients, which can be a list of email addresses, or a list of User entities, or a list of:
-	 * ['variables' => [...], 'user' => User]
+	 * @param  array        $recipients List of recipients, this accepts a wide range of types:
+	 * - a single e-mail address
+	 * - array of e-mail addresses as values ['a@b.c', 'd@e.f']
+	 * - array of user entities
+	 * - array where each key is the email address, and the value is an array or a \stdClass containing
+	 *   pgp_key, data and user items
 	 * @param  string       $sender
 	 * @param  string       $subject
 	 * @param  UserTemplate|string $content
 	 * @return void
 	 */
-	static public function queue(int $context, iterable $recipients, ?string $sender, string $subject, $content, ?string $render = null): void
+	static public function queue(int $context, $recipients, ?string $sender, string $subject, $content, ?string $render = null): void
 	{
 		if (DISABLE_EMAIL) {
 			return;
 		}
 
+		if (is_string($recipients)) {
+			$recipients = [$recipients];
+		}
+		elseif (!is_iterable($recipients)) {
+			throw new \InvalidArgumentException('Invalid recipients argument');
+		}
+
 		$list = [];
 
 		// Build email list
-		foreach ($recipients as $r) {
-			$variables = [];
+		foreach ($recipients as $key => $r) {
+			$data = [];
+			$emails = [];
 			$user = null;
 			$pgp_key = null;
-			$emails = [];
 
-			if (is_array($r) && isset($r['user'])) {
-				$user = $r['user'];
+			if (is_array($r)) {
+				$user = $r['user'] ?? null;
+				$data = $r['data'] ?? null;
+				$pgp_key = $r['pgp_key'] ?? null;
+			}
+			elseif (is_object($r) && $r instanceof User) {
+				$user = $r;
+				$data = $r->asArray();
+				$pgp_key = $user->pgp_key ?? null;
 			}
 			elseif (is_object($r)) {
-				$user = $r;
+				$user = $r->user ?? null;
+				$data = $r->data ?? null;
+				$pgp_key = $user->pgp_key ?? ($r->pgp_key ?? null);
 			}
 
-			if (isset($user->pgp_key)) {
-				$pgp_key = $user->pgp_key;
+			// Get e-mail address from key
+			if (is_string($key) && false !== strpos($key, '@')) {
+				$emails[] = $key;
 			}
-
-			if (!is_object($r)) {
-				$pgp_key ??= $r['pgp_key'] ?? null;
-				$variables = $r['variables'] ?? [];
+			// Get e-mail address from value
+			elseif (is_string($r) && false !== strpos($r, '@')) {
+				$emails[] = $r;
 			}
-
-			if (is_string($r) || (is_array($r) && isset($r['email']))) {
-				$emails[] = strtolower($r['email'] ?? $r);
-			}
-			// From Users::iterateEmailsBy...
-			elseif (is_object($r) && isset($r->_email)) {
-				$emails[] = strtolower($r->_email);
-			}
-			elseif ($user && $user instanceof User) {
+			// Get email list from user object
+			elseif ($user) {
 				$emails = $user->getEmails();
 			}
 			else {
+				// E-mail not found
 				continue;
 			}
 
-			// Ignore invalid addresses
+			// Filter out invalid addresses
 			foreach ($emails as $key => $value) {
 				if (!preg_match('/.+@.+\..+$/', $value)) {
 					unset($emails[$key]);
@@ -106,7 +120,7 @@ class Emails
 				continue;
 			}
 
-			$data = compact('user', 'variables', 'pgp_key');
+			$data = compact('user', 'data', 'pgp_key');
 
 			foreach ($emails as $value) {
 				$list[$value] = $data;
@@ -141,17 +155,18 @@ class Emails
 			$main_tpl = new UserTemplate('email.html');
 		}
 
-		foreach ($recipients as $to => $data) {
-			$variables = (array)$data['variables'];
+		foreach ($recipients as $address => $recipient) {
+			$data = $recipient['data'];
 
 			// We won't try to reject invalid/optout recipients here,
 			// it's done in the queue clearing (more efficient)
-			$hash = Email::getHash($to);
+			$hash = Email::getHash($address);
 
 			$content_html = null;
 
+			// Replace placeholders: {{$name}}, etc.
 			if ($template) {
-				$template->assignArray((array) $variables, null, false);
+				$template->assignArray((array) $data, null, false);
 
 				// Disable HTML escaping for plaintext emails
 				$template->setEscapeDefault(null);
@@ -162,6 +177,7 @@ class Emails
 				}
 			}
 
+			// Add Markdown rendering
 			if ($render) {
 				$content_html = Render::render($render, null, $content_html ?? $content);
 			}
@@ -170,15 +186,18 @@ class Emails
 				// Wrap HTML content in the email skeleton
 				$main_tpl->assignArray([
 					'html'      => $content_html,
-					'recipient' => $to,
-					'data'      => $variables,
+					'address'   => $address,
+					'data'      => $data,
 					'context'   => $context,
 					'from'      => $sender,
 				]);
+
 				$content_html = $main_tpl->fetch();
 			}
 
-			if (Plugins::fireSignal('email.queue.insert', compact('context', 'to', 'sender', 'subject', 'content', 'render', 'hash', 'content_html') + ['pgp_key' => $data['pgp_key'] ?? null])) {
+			$recipient['email'] = $address;
+
+			if (Plugins::fireSignal('email.queue.insert', compact('context', 'recipient', 'sender', 'subject', 'content', 'render', 'hash', 'content_html'))) {
 				// queue insert was done by a plugin
 				continue;
 			}
@@ -186,8 +205,8 @@ class Emails
 			$st->bindValue(':sender', $sender);
 			$st->bindValue(':subject', $subject);
 			$st->bindValue(':context', $context);
-			$st->bindValue(':recipient', $to);
-			$st->bindValue(':recipient_pgp_key', $variables['pgp_key'] ?? null);
+			$st->bindValue(':recipient', $address);
+			$st->bindValue(':recipient_pgp_key', $recipient['pgp_key']);
 			$st->bindValue(':recipient_hash', $hash);
 			$st->bindValue(':content', $content);
 			$st->bindValue(':content_html', $content_html);

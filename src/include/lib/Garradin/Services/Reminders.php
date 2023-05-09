@@ -117,7 +117,7 @@ class Reminders
 		$text = self::replaceTagsInContent($reminder->body, $replace);
 
 		// Envoi du mail
-		Emails::queue(Emails::CONTEXT_PRIVATE, [['email' => $reminder->email, 'variables' => $reminder]], null, $subject, $text);
+		Emails::queue(Emails::CONTEXT_PRIVATE, [$reminder->email => ['data' => $reminder->asArray()]], null, $subject, $text);
 
 		$db = DB::getInstance();
 		$db->insert('services_reminders_sent', [

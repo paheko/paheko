@@ -10,6 +10,10 @@
 	</ul>
 </nav>
 
+{if $_GET.msg == 'DELETE'}
+	<p class="confirm block">Le message a bien été supprimé.</p>
+{/if}
+
 {if !$list->count()}
 	<p class="alert block">Aucun message collectif n'a été écrit.<br />
 		{linkbutton shape="plus" label="Écrire un nouveau message" href="new.php" target="_dialog"}

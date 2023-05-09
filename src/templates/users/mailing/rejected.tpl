@@ -1,6 +1,9 @@
 {include file="_head.tpl" title="Adresses rejetées" current="users/mailing"}
 
 <nav class="tabs">
+	<aside>
+		{exportmenu}
+	</aside>
 	<ul>
 		<li><a href="./">Messages collectifs</a></li>
 		<li class="current"><a href="rejected.php">Adresses rejetées</a></li>

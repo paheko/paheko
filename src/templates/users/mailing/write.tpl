@@ -10,11 +10,11 @@
 			{input type="text" name="subject" required=true class="full-width" placeholder="Sujet du message…" source=$mailing}
 		</p>
 		<div>
-			<p class="sender_default{if $mailing.sender_name !== null} hidden{/if}">
+			<p class="sender_default {if $mailing.sender_name}hidden{/if}">
 				<strong>Expéditeur&nbsp;:</strong> {$config.org_name} &lt;{$config.org_email}&gt;
-				{button label="Modifier" shape="edit" onclick="this.parentNode.remove(); g.toggle('#custom_sender', true);"}
+				{button label="Modifier" shape="edit" id="f_edit_sender"}
 			</p>
-			<dl id="custom_sender" {if !$mailing.sender_name} class="hidden"{/if}>
+			<dl class="sender_custom {if !$mailing.sender_name}hidden{/if}">
 				{input type="text" required=true name="sender_name" source=$mailing label="Nom de l'expéditeur" placeholder="Nom de l'expéditeur"} &nbsp;
 				{input type="email" required=true name="sender_email" source=$mailing label="Adresse e-mail de l'expéditeur" placeholder="Adresse e-mail de l'expéditeur"}
 			</dl>
@@ -32,6 +32,18 @@
 	</p>
 
 </form>
+
+<script type="text/javascript">
+{literal}
+$('#f_edit_sender').onclick = () => {
+	g.toggle('.sender_default', false);
+	g.toggle('.sender_custom', true);
+}
+{/literal}
+{if !$mailing.sender_name}
+g.toggle('.sender_custom', false);
+{/if}
+</script>
 
 
 {include file="_foot.tpl"}

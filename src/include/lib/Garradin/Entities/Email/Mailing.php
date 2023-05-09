@@ -134,8 +134,9 @@ class Mailing extends Entity
 	{
 		$db = DB::getInstance();
 
-		foreach ($db->iterate('SELECT * FROM mailings_recipients WHERE id_mailing = ? ORDER BY id;', $this->id) as $row) {
-			yield $row->email => ($row->extra_data ? json_decode($row->extra_data) : null);
+		foreach ($db->iterate('SELECT email, extra_data AS data FROM mailings_recipients WHERE id_mailing = ? ORDER BY id;', $this->id) as $row) {
+			$data = $row->data ? json_decode($row->data) : null;
+			yield $row->email => ['data' => $data, 'pgp_key' => $data->pgp_key ?? null];
 		}
 	}
 
