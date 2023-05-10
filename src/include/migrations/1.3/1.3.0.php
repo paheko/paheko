@@ -4,6 +4,7 @@ namespace Garradin;
 
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
+use Garradin\UserTemplate\Modules;
 
 $db->beginSchemaUpdate();
 
@@ -99,3 +100,5 @@ foreach ($list as $file) {
 }
 
 $db->commitSchemaUpdate();
+
+Modules::refresh();

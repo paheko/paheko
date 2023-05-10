@@ -70,7 +70,7 @@ class Modules
 		}
 
 		if (!$db->test(Module::TABLE, 'web = 1 AND enabled = 1')) {
-			$db->exec('UPDATE modules SET enabled = 1 WHERE id = (SELECT id FROM modules WHERE web = 1 LIMIT 1);');
+			$db->exec('UPDATE modules SET enabled = 1 WHERE id = (SELECT id FROM modules WHERE web = 1 ORDER BY system DESC LIMIT 1);');
 		}
 	}
 
