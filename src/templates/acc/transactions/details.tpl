@@ -90,9 +90,13 @@
 
 		{if count($related_transactions)}
 			<dt>Écritures liées</dt>
-			{foreach from=$related_transactions item="related"}
-				<dd><a href="?id={$related.id}" class="num">#{$related.id}</a> — {$related.label} — {$related.date|date_short}</dd>
-			{/foreach}
+			<dd>
+				<ul class="flat">
+				{foreach from=$related_transactions item="related"}
+					<li><a href="?id={$related.id}" class="num">#{$related.id}</a> — {$related.label} — {$related.date|date_short}</li>
+				{/foreach}
+				</ul>
+			</dd>
 		{/if}
 
 		<dt>Date</dt>
@@ -135,12 +139,16 @@
 		{if empty($related_users)}
 			<dd><em>Aucun membre n'est lié à cette écriture.</em></dd>
 		{else}
+		<dd>
+			<ul class="flat">
 			{foreach from=$related_users item="u"}
-				<dd>
+				<li>
 					<a href="{$admin_url}users/details.php?id={$u.id}">{$u.identity}</a>
 					{if $u.id_service_user}— en règlement d'une <a href="{$admin_url}services/user/?id={$u.id}&amp;only={$u.id_service_user}">activité</a>{/if}
-				</dd>
+				</li>
 			{/foreach}
+			</ul>
+		</dd>
 		{/if}
 
 		<dt>Remarques</dt>

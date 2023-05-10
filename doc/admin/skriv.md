@@ -138,7 +138,8 @@ Depuis l'édition du texte :
 | <kbd>Ctrl</kbd> + <kbd>I</kbd> | Mettre en italique |
 | <kbd>Ctrl</kbd> + <kbd>T</kbd> | Mettre en titre |
 | <kbd>Ctrl</kbd> + <kbd>L</kbd> | Transformer en lien |
-| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd> | Insérer un fichier ou une image |
+| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd> | Insérer une image |
+| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd> | Insérer un fichier |
 | <kbd>Ctrl</kbd> + <kbd>P</kbd> | Prévisualiser |
 | <kbd>Ctrl</kbd> + <kbd>S</kbd> | Enregistrer |
 | <kbd>F11</kbd> | Activer ou désactiver l'édition plein écran |
@@ -146,7 +147,13 @@ Depuis l'édition du texte :
 | <kbd>Echap</kbd> | Prévisualiser (rappuyer pour revenir à l'édition) |
 
 
-Depuis l'aide, la prévisualisation ou l'insertion de fichier :
+Depuis la prévisualisation :
+
+| Raccourci | Action |
+| :- | :- |
+| <kbd>Ctrl</kbd> + <kbd>P</kbd> | Retour à l'édition |
+
+Depuis l'aide ou l'insertion de fichier :
 
 | Raccourci | Action |
 | :- | :- |

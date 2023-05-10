@@ -1,6 +1,8 @@
 (function () {
 	g.style('scripts/web_editor.css');
 
+	const msg_restore = "Il semble que les dernières modifications n'aient pas été enregistrées.\nUne sauvegarde locale a été trouvée.\nFaut-il restaurer la sauvegarde locale ?";
+
 	function showSaved() {
 		let c = document.createElement('p');
 		c.className = 'block confirm';
@@ -35,18 +37,40 @@
 			format: t.textarea.getAttribute('data-format')
 		};
 
+		// Use localStorage backup, per path
+		var backup_key = 'backup_' + location.search;
+
+		var preventClose = (e) => {
+			if (t.textarea.value.trim() == t.textarea.defaultValue.trim()) {
+				return;
+			}
+
+			e.preventDefault();
+			e.returnValue = '';
+			return true;
+		};
+
+		// Warn before closing window if content was changed
+		window.addEventListener('beforeunload', preventClose, { capture: true });
+
+		t.textarea.form.addEventListener('submit', () => {
+			window.removeEventListener('beforeunload', preventClose, {capture: true});
+			save((data) => { location.href = data.redirect; });
+			return false;
+		});
+
 		// Cancel Escape to close.value
 		if (window.parent && window.parent.g.dialog) {
 			// Always fullscreen in dialogs
 			config.fullscreen = true;
 
 			window.parent.g.dialog.preventClose = () => {
-				if (t.textarea.value == t.textarea.defaultValue) {
+				if (t.textarea.value.trim() == t.textarea.defaultValue.trim()) {
 					return false;
 				}
 
 				if (window.confirm('Sauvegarder avant de fermer ?')) {
-					save();
+					quicksave();
 				}
 
 				return false;
@@ -109,19 +133,19 @@
 			return true;
 		};
 
-		var openFileInsert = function ()
+		var openFileInsert = function (callback)
 		{
 			let args = new URLSearchParams(window.location.search);
 			var uri = args.get('p');
-			g.openFrameDialog(g.admin_url + 'web/_attach.php?files&_dialog&p=' + uri);
+			g.openFrameDialog(g.admin_url + 'web/_attach.php?files&_dialog&p=' + uri, null, callback);
 			return true;
 		};
 
-		var openImageInsert = function ()
+		var openImageInsert = function (callback)
 		{
 			let args = new URLSearchParams(window.location.search);
 			var uri = args.get('p');
-			g.openFrameDialog(g.admin_url + 'web/_attach.php?images&_dialog&p=' + uri);
+			g.openFrameDialog(g.admin_url + 'web/_attach.php?images&_dialog&p=' + uri, null, callback);
 			return true;
 		};
 
@@ -132,6 +156,7 @@
 			t.insertAtPosition(t.getSelection().start, tag);
 
 			g.closeDialog();
+			t.textarea.focus();
 		};
 
 		window.te_insertImage = function (file, position, caption)
@@ -149,10 +174,11 @@
 			t.insertAtPosition(t.getSelection().start, tag);
 
 			g.closeDialog();
+			t.textarea.focus();
 		};
 
 		var EscapeEvent = function (e) {
-			if (e.key == 'Escape') {
+			if (e.ctrlKey && e.key.toLowerCase() == 'p') {
 				closeIFrame();
 				e.preventDefault();
 				return false;
@@ -260,7 +286,7 @@
 			}
 		};
 
-		let save = function () {
+		let save = function (callback) {
 			const data = new URLSearchParams();
 
 			for (const pair of new FormData(t.textarea.form)) {
@@ -272,18 +298,31 @@
 			fetch(t.textarea.form.action + '&js', {
 				method: 'post',
 				body: data,
-			}).then((response) => response.json())
-			.then(data => {
+			}).then((response) => {
+				if (!response.ok) {
+					throw Error(response.status);
+				}
+				else {
+					return response.json();
+				}
+			})
+			.then(data => callback(data))
+			.catch(e => { console.log(e); t.textarea.form.querySelector('[type=submit]').click(); });
+			return true;
+		};
+
+		const quicksave = () => {
+			save((data) => {
 				showSaved();
 				t.textarea.defaultValue = t.textarea.value;
+				localStorage.removeItem(backup_key);
 
 				let e = t.textarea.form.querySelector('input[name=editing_started]');
 
 				if (e) {
 					e.value = data.modified;
 				}
-
-			}).catch(e => { console.log(e); t.textarea.form.querySelector('[type=submit]').click(); } );
+			});
 			return true;
 		};
 
@@ -296,15 +335,16 @@
 			if (config.attachments) {
 				appendButton('image', "🖻", openImageInsert, 'Insérer image');
 				appendButton('file', "📎", openFileInsert, 'Insérer fichier');
-				t.shortcuts.push({ctrl: true, shift: true, key: 'i', callback: openFileInsert});
+				t.shortcuts.push({ctrl: true, shift: true, key: 'i', callback: openImageInsert});
+				t.shortcuts.push({ctrl: true, shift: true, key: 'f', callback: openFileInsert});
 			}
 
 
 			if (config.savebtn == 1) {
-				appendButton('ext save save-label', 'Enregistrer', save, 'Enregistrer');
+				appendButton('ext save save-label', 'Enregistrer', quicksave, 'Enregistrer');
 			}
 			else if (config.savebtn == 2) {
-				appendButton('ext save', '⇑', save, 'Enregistrer sans fermer');
+				appendButton('ext save', '⇑', quicksave, 'Enregistrer sans fermer');
 			}
 
 			appendButton('ext preview', '👁', openPreview, 'Prévisualiser');
@@ -343,12 +383,122 @@
 		t.shortcuts.push({ctrl: true, key: 'i', callback: applyItalic });
 		t.shortcuts.push({ctrl: true, key: 't', callback: applyHeader });
 		t.shortcuts.push({ctrl: true, key: 'l', callback: insertURL});
-		t.shortcuts.push({ctrl: true, key: 's', callback: save});
+		t.shortcuts.push({ctrl: true, key: 's', callback: quicksave});
 		t.shortcuts.push({ctrl: true, key: 'p', callback: openPreview});
 		t.shortcuts.push({key: 'F1', callback: openSyntaxHelp});
-		t.shortcuts.push({key: 'Escape', callback: openPreview});
 
 		g.setParentDialogHeight('90%');
+
+		const uploadFiles = (files) => {
+			var image = false;
+			var insert = null;
+			const IMAGE_MIME_REGEX = /^image\/(p?jpeg|gif|png)$/i;
+
+			for (var i = 0; i < files.length; i++) {
+				if (files[i].type.match(IMAGE_MIME_REGEX)) {
+					image = true;
+					break;
+				}
+			}
+
+			var callback = () => {
+				var frame = g.dialog.querySelector('iframe').contentWindow;
+
+				if (files === null) {
+					if (insert) {
+						var thumb = null;
+
+						if (image) {
+							frame.document.querySelectorAll('a[data-thumb]').forEach((a) => {
+								if (a.dataset.name == insert) {
+									thumb = a.dataset.thumb;
+								}
+							});
+						}
+
+						frame.insertHelper({name: insert, image, thumb});
+						insert = null;
+					}
+
+					return;
+				}
+
+				// Add items to upload
+				var input = frame.document.querySelector('input[type=file]');
+				for (var i = 0; i < files.length; i++) {
+					input.addItem(files[i]);
+				}
+
+				// Only one file? Just upload directly and then insert
+				if (files.length == 1) {
+					insert = files[0].name;
+					input.form.querySelector('[type=submit]').click();
+				}
+
+				files = null;
+			};
+
+			if (image) {
+				openImageInsert(callback);
+			}
+			else {
+				openFileInsert(callback);
+			}
+		};
+
+		if (config.attachments) {
+			// Paste images
+			t.textarea.addEventListener('paste', (e) => {
+				let items = e.clipboardData.items;
+				let files = [];
+
+				for (var i = 0; i < items.length; i++) {
+					if (items[i].kind != 'file') {
+						continue;
+					}
+
+					let f = items[i].getAsFile();
+					let name = f.name == 'image.png' ? f.name.replace(/\./, '-' + (+(new Date)) + '.') : f.name;
+
+					files.push(new File([f], name, {type: f.type}));
+				}
+
+				if (!files.length) {
+					return true;
+				}
+
+				e.preventDefault();
+				uploadFiles(files);
+				return false;
+			});
+
+			// Drag and drop images
+			t.textarea.form.addEventListener('drop', (e) => {
+				const files = [...e.dataTransfer.items].filter(item => item.kind == 'file').map(item => item.getAsFile());
+
+				if (!files.length) return;
+
+				e.preventDefault();
+				e.stopPropagation();
+
+				uploadFiles(files);
+			});
+		}
+
+		window.setTimeout(() => {
+			if ((v = localStorage.getItem(backup_key)) && v.trim() !== t.textarea.value.trim() && window.confirm(msg_restore)) {
+				t.textarea.value = v;
+			}
+		}, 50);
+
+		window.setInterval(() => {
+			if (t.textarea.value.trim() === t.textarea.defaultValue.trim()) {
+				return;
+			}
+
+			localStorage.setItem(backup_key, t.textarea.value);
+		}, 10000);
+
 	}
 
 	g.onload(() => {

@@ -1021,6 +1021,14 @@ class Transaction extends Entity
 
 	public function updateLinkedUsers(array $users): void
 	{
+		$users = array_values($users);
+
+		foreach ($users as $i => $user) {
+			if (!(is_int($user) || (is_string($user) && ctype_digit($user)))) {
+				throw new ValidationException(sprintf('Array item #%d: "%s" is not a valid user ID', $i, $user));
+			}
+		}
+
 		$db = EntityManager::getInstance(self::class)->DB();
 
 		if (!$this->checkLinkedUsersChange($users)) {
@@ -1033,7 +1041,7 @@ class Transaction extends Entity
 		$db->preparedQuery($sql, $this->id());
 
 		foreach ($users as $id) {
-			$db->preparedQuery('INSERT OR IGNORE INTO acc_transactions_users (id_transaction, id_user, id_service_user) VALUES (?, ?, NULL);', $this->id(), $id);
+			$db->preparedQuery('INSERT OR IGNORE INTO acc_transactions_users (id_transaction, id_user, id_service_user) VALUES (?, ?, NULL);', $this->id(), (int)$id);
 		}
 
 		$db->commit();

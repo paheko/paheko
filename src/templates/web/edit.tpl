@@ -4,7 +4,7 @@
 
 {if $show_diff}
 	<h3>Modifications entre votre version et la nouvelle version</h3>
-	{diff old=$old_content new=$new_content}
+	{diff old=$new_content new=$current_content}
 {/if}
 
 <form method="post" action="{$self_url}" class="web-edit" data-focus="#f_content">
@@ -21,7 +21,7 @@
 
 	<fieldset class="editor">
 		<div class="textEditor">
-			{input type="textarea" name="content" cols="70" rows="20" default=$new_content data-attachments=1 data-savebtn=2 data-preview-url="!common/files/_preview.php?w=%s"|local_url|args:$page.path data-format="#f_format"}
+			{input type="textarea" name="content" cols="70" rows="20" default=$current_content data-attachments=1 data-savebtn=2 data-preview-url="!common/files/_preview.php?w=%s"|local_url|args:$page.path data-format="#f_format"}
 		</div>
 	</fieldset>
 

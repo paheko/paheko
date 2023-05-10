@@ -30,6 +30,7 @@ $form->runIf('close', function () use ($year, $user, $session) {
 	if ($user->getPreference('accounting_year') == $year->id()) {
 		$user->setPreference('accounting_year', null);
 	}
+	$session->save();
 }, $csrf_key, ADMIN_URL . 'acc/years/new.php?from=' . $year->id());
 
 $tpl->assign(compact('year', 'csrf_key'));

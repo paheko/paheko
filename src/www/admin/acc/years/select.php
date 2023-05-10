@@ -18,6 +18,7 @@ if (f('change')) {
 	$user = Session::getLoggedUser();
 	$user->setPreference('accounting_year', $year->id());
 
+	$session->save();
 	Utils::redirect(f('from') ?: ADMIN_URL . 'acc/years/');
 }
 
