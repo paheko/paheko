@@ -166,6 +166,7 @@
 		iframe.scrolling = 'yes';
 		iframe.width = iframe.height = 0;
 		iframe.setAttribute('data-height', height);
+
 		iframe.addEventListener('load', () => {
 			iframe.contentWindow.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
 
@@ -176,7 +177,7 @@
 			// We need to wait a bit for the height to be correct, not sure why
 			window.setTimeout(() => {
 				iframe.style.height = iframe.dataset.height == 'auto' ? iframe.contentWindow.document.body.offsetHeight + 'px' : iframe.dataset.height;
-			}, 100);
+			}, 200);
 		});
 
 		g.openDialog(iframe, classname);
@@ -541,6 +542,8 @@
 
 		$('form[target="_dialog"]').forEach((e) => {
 			e.addEventListener('submit', () => {
+				if (e.target != '_dialog') return;
+
 				let url = e.getAttribute('action');
 				url = url + (url.indexOf('?') > 0 ? '&' : '?') + '_dialog';
 				e.setAttribute('action', url);
@@ -596,6 +599,10 @@
 				{
 					this.selectedIndex = 0;
 					return !window.alert("Aucune ligne sélectionnée !");
+				}
+
+				if (this.options[this.selectedIndex].hasAttribute('data-no-dialog')) {
+					this.form.target = '';
 				}
 
 				this.form.dispatchEvent(new Event('submit'));

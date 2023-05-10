@@ -1,15 +1,11 @@
 {include file="_head.tpl" title="Action collective sur les membres" current="membres"}
 
-<p class="block alert">
-	{{%n membre sélectionné.}{%n membres sélectionnés} n=$count}
-</p>
-
 {form_errors}
 
 {if $action == 'delete'}
 	{include file="common/delete_form.tpl"
 		legend="Supprimer %d membres ?"|args:$count
-		warning="Êtes-vous sûr de vouloir supprimer l'activité « %s » ?"|args:$service.label
+		warning="Êtes-vous sûr de vouloir supprimer ces membres ?"
 		alert="Cette action est irréversible et effacera toutes les données personnelles et les inscriptions aux activités de ces membres."
 		extra=$extra
 		info="Alternativement, il est aussi possible de déplacer les membres qui ne font plus partie de l'association dans une catégorie (par exemple \"Anciens membres\"), plutôt que de les supprimer."}
@@ -18,6 +14,10 @@
 		{foreach from=$list item="id"}
 			<input type="hidden" name="selected[]" value="{$id}" />
 		{/foreach}
+
+		<p class="block alert">
+			{{%n membre sélectionné.}{%n membres sélectionnés} n=$count}
+		</p>
 
 		{if $action == 'move'}
 

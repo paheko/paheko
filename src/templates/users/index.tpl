@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Liste des membres" current="users"}
+{include file="_head.tpl" current="users"}
 
 {include file="users/_nav.tpl" current="index"}
 
@@ -16,7 +16,7 @@
 <form method="get" action="{$self_url}" class="shortFormRight">
 	<fieldset>
 		<legend>Filtrer par catégorie</legend>
-		{input type="select" name="cat" onchange="this.form.submit();" options=$categories}
+		{input type="select" name="cat" onchange="this.form.submit();" options=$categories default=$current_cat required=true}
 		<noscript>{button type="submit" name="" label="Filtrer" shape="right"}</noscript>
 	</fieldset>
 </form>

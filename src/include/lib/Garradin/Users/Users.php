@@ -6,6 +6,9 @@ namespace Garradin\Users;
 use Garradin\Entities\Users\Category;
 use Garradin\Entities\Users\User;
 
+use Garradin\Files\Files;
+use Garradin\Entities\Files\File;
+
 use Garradin\Config;
 use Garradin\CSV;
 use Garradin\DB;
@@ -213,28 +216,22 @@ class Users
 
 	static public function deleteSelected(array $ids): void
 	{
-		$session = Session::getInstance();
+		$ids = array_map('intval', $ids);
 
-		if ($session->isLogged()) {
-			$user = $session->getUser();
-
-			foreach ($ids as $id) {
-				if ($user->id == $id) {
-					throw new UserException('Il n\'est pas possible de supprimer son propre compte.');
-				}
+		if ($logged_user_id = Session::getUserId()) {
+			if (in_array($logged_user_id, $ids)) {
+				throw new UserException('Il n\'est pas possible de supprimer son propre compte.');
 			}
 		}
 
-		foreach ($ids as &$id)
-		{
-			$id = (int) $id;
+		foreach ($ids as $id) {
 			Files::delete(File::CONTEXT_USER . '/' . $id);
 		}
 
 		$db = DB::getInstance();
 
 		// Suppression du membre
-		$db->delete(User::TABLE, $db->where('id', $membres));
+		$db->delete(User::TABLE, $db->where('id', $ids));
 	}
 
 	static public function changeCategorySelected(int $category_id, array $ids): void
@@ -245,27 +242,11 @@ class Users
 			throw new \InvalidArgumentException('Invalid category ID: ' . $category_id);
 		}
 
-		$session = Session::getInstance();
-		$user_id = null;
+		$ids = array_map('intval', $ids);
 
-		if ($session->isLogged()) {
-			$user_id = $session->getUser()->id;
-		}
-
-		foreach ($ids as &$id) {
-			$id = (int) $id;
-
-			// Don't allow current user ID to change his/her category
-			// as that means he/she could be logged out
-			if ($id == $user_id) {
-				$id = null;
-			}
-		}
-
-		unset($id);
-
-		// Remove logged-in user ID
-		$ids = array_filter($ids);
+		// Don't allow current user ID to change his/her category
+		$logged_user_id = Session::getUserId();
+		$ids = array_filter($ids, fn($a) => $a != $logged_user_id);
 
 		$db->update(User::TABLE,
 			['id_category' => $category_id],

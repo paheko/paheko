@@ -13,10 +13,10 @@
 						{/if}
 						{if !isset($export) || $export != false}
 						<optgroup label="Exporter au format…">
-							<option value="csv">CSV</option>
-							<option value="ods">LibreOffice</option>
+							<option value="csv" data-no-dialog="true">CSV</option>
+							<option value="ods" data-no-dialog="true">LibreOffice</option>
 							{if CALC_CONVERT_COMMAND}
-								<option value="xlsx">Excel</option>
+								<option value="xlsx" data-no-dialog="true">Excel</option>
 							{/if}
 						</optgroup>
 						{/if}

@@ -41,8 +41,8 @@ if ($action == 'move') {
 	$tpl->assign('categories', Categories::listAssoc());
 }
 elseif ($action == 'delete') {
-	$form->runIf('confirm', function () use ($list) {
-		$membres->deleteSelected($list);
+	$form->runIf('delete', function () use ($list) {
+		Users::deleteSelected($list);
 	}, $csrf_key, '!users/?msg=CATEGORY_CHANGED');
 
 	$tpl->assign('extra', ['selected' => $list, 'action' => $action]);

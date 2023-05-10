@@ -29,6 +29,16 @@ $can_edit = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)
 $list = Users::listByCategory($current_cat);
 $list->loadFromQueryString();
 
-$tpl->assign(compact('can_edit', 'list', 'current_cat', 'categories'));
+if (!$current_cat) {
+	$title = 'Liste des membres';
+}
+elseif ($current_cat == -1) {
+	$title = 'Tous les membres';
+}
+else {
+	$title = sprintf('Liste des membres — %s', $categories[$current_cat] ?? '');
+}
+
+$tpl->assign(compact('can_edit', 'list', 'current_cat', 'categories', 'title'));
 
 $tpl->display('users/index.tpl');
