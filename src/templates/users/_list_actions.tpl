@@ -8,12 +8,17 @@
 						<option value="">— Choisir une action à effectuer —</option>
 						<option value="move">Changer de catégorie</option>
 						<option value="template">Générer des documents</option>
-						{if !isset($export) || $export != false}
-						<option value="csv">Exporter en tableau CSV</option>
-						<option value="ods">Exporter en classeur Office</option>
-						{/if}
 						{if empty($hide_delete)}
-						<option value="delete">Supprimer le membre</option>
+							<option value="delete">Supprimer le membre</option>
+						{/if}
+						{if !isset($export) || $export != false}
+						<optgroup label="Exporter au format…">
+							<option value="csv">CSV</option>
+							<option value="ods">LibreOffice</option>
+							{if CALC_CONVERT_COMMAND}
+								<option value="xlsx">Excel</option>
+							{/if}
+						</optgroup>
 						{/if}
 					</select>
 					<noscript>

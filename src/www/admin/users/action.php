@@ -2,40 +2,26 @@
 namespace Garradin;
 
 use Garradin\Users\Categories;
-
-die('en cours'); // FIXME
+use Garradin\Users\Users;
 
 require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
 
-if (!f('selected') || !is_array(f('selected')) || !count(f('selected')))
-{
+if (!f('selected') || !is_array(f('selected')) || !count(f('selected'))) {
     throw new UserException("Aucun membre sélectionné.");
 }
 
 $action = f('action');
 $list = f('selected');
 
-if (!$action)
-{
+if (!$action) {
     throw new UserException('Aucune action sélectionnée.');
 }
 
-if ($action == 'ods' || $action == 'csv')
-{
-    $import = new Membres\Import;
-
-    if ($action == 'ods')
-    {
-        $import->toODS($list);
-    }
-    else
-    {
-        $import->toCSV($list);
-    }
-
-    exit;
+if ($action == 'ods' || $action == 'csv' || $action == 'xlsx') {
+    Users::exportSelected($action, $list);
+    return;
 }
 elseif ($action == 'move' || $action == 'delete')
 {

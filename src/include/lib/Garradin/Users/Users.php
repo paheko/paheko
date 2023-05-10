@@ -6,6 +6,7 @@ namespace Garradin\Users;
 use Garradin\Entities\Users\User;
 
 use Garradin\Config;
+use Garradin\CSV;
 use Garradin\DB;
 use Garradin\DynamicList;
 use Garradin\Search;
@@ -235,7 +236,7 @@ class Users
 		$db->delete(User::TABLE, $db->where('id', $membres));
 	}
 
-	static public function changeCategory(int $category_id, array $ids)
+	static public function changeCategory(int $category_id, array $ids): void
 	{
 		$session = Session::getInstance();
 		$user_id = null;
@@ -260,9 +261,52 @@ class Users
 		$ids = array_filter($ids);
 
 		$db = DB::getInstance();
-		return $db->update(User::TABLE,
+		$db->update(User::TABLE,
 			['id_category' => $category_id],
 			$db->where('id', $ids)
 		);
+	}
+
+	static public function exportSelected(string $format, array $ids): void
+	{
+		$db = DB::getInstance();
+
+		$ids = array_map('intval', $ids);
+		$where = $db->where('id', $ids);
+		$name = sprintf('Liste de %d membres', count($ids));
+		self::exportWhere($format, $name, $where);
+	}
+
+	static public function export(string $format): void
+	{
+		self::exportWhere($format, 'Tous les membres', '1');
+	}
+
+	static protected function exportWhere(string $format, string $name, string $where): void
+	{
+		$df = DynamicFields::getInstance();
+		$db = DB::getInstance();
+
+		$header = $df->listAssocNames();
+		$columns = array_keys($header);
+		$columns = array_map([$db, 'quoteIdentifier'], $columns);
+		$columns = implode(', ', $columns);
+
+		$i = $db->iterate(sprintf('SELECT %s FROM users WHERE %s;', $columns, $where));
+
+		$callback = function (&$row) use ($df) {
+			foreach ($df->fieldsByType('date') as $f) {
+				if (isset($row->{$f->name})) {
+					$row->{$f->name} = \DateTime::createFromFormat('!Y-m-d', $row->{$f->name});
+				}
+			}
+			foreach ($df->fieldsByType('datetime') as $f) {
+				if (isset($row->{$f->name})) {
+					$row->{$f->name} = \DateTime::createFromFormat('!Y-m-d H:i:s', $row->{$f->name});
+				}
+			}
+		};
+
+		CSV::export($format, $name, $i, $header, $callback);
 	}
 }
