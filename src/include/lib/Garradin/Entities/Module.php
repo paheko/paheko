@@ -318,7 +318,7 @@ class Module extends Entity
 					'path'      => $path . $file,
 					'local'     => false,
 					'dist'      => true,
-					'file_path' => $base . '/' . $path . $file,
+					'file_path' => $base . $path . '/' . $file,
 				];
 			}
 		}
