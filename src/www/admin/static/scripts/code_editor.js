@@ -3,7 +3,7 @@
 	g.script('scripts/lib/text_editor.min.js', () => {
 	g.script('scripts/lib/code_editor.min.js', function ()
 	{
-		const doc_url = g.admin_url + '/static/doc/';
+		const doc_url = g.admin_url + 'static/doc/';
 		var save_btn = document.querySelector('[name=save]');
 		var code = new codeEditor('f_content');
 
