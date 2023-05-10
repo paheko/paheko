@@ -41,7 +41,18 @@ class Entity extends AbstractEntity
 		}
 
 		if (preg_match('!^\d{2}/\d{2}/\d{2}$!', $value)) {
-			return Date::createFromFormat('d/m/y', $value);
+			$year = substr($value, -2);
+
+			// Make sure recent years are in the 21st century
+			if ($year < date('y') + 10) {
+				$year = sprintf('20%02d', $year);
+			}
+			// while old dates remain in the old one
+			else {
+				$year = sprintf('19%02d', $year);
+			}
+
+			return Date::createFromFormat('d/m/Y', substr($value, 0, -2) . $year);
 		}
 		elseif (preg_match('!^\d{2}/\d{2}/\d{4}$!', $value)) {
 			return Date::createFromFormat('d/m/Y', $value);
