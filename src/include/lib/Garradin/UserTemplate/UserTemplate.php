@@ -30,7 +30,7 @@ class UserTemplate extends \KD2\Brindille
 	public $_tpl_path;
 	protected $content_type = null;
 	protected $modified;
-	protected ?string $file = null;
+	protected ?File $file = null;
 	protected ?string $code = null;
 	protected $cache_path = USER_TEMPLATES_CACHE_ROOT;
 	protected ?string $path;
