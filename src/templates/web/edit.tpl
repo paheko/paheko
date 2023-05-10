@@ -10,7 +10,7 @@
 <form method="post" action="{$self_url}" class="web-edit" data-focus="#f_content">
 	<fieldset class="header">
 		<legend>Modification : {$page.title}</legend>
-		<p>{input type="text" name="title" source=$page required=true class="full-width" placeholder="Titre" title="Modifier le titre"}</p>
+		<p>{input type="text" name="title" source=$page required=true class="full-width" placeholder="Titre" title="Modifier le titre" maxlength=200}</p>
 		<div>
 			<dl>{input type="list" name="parent" label="Catégorie" default=$parent target="!web/_selector.php?current=%s&parent=%s"|args:$page.path,$page.parent required=true}</dl>
 			<dl>{input type="datetime" name="date" label="Date" required=true default=$page.published}</dl>
@@ -49,7 +49,7 @@
 		*}
 
 		<dl>
-			{input type="text" label="Identifiant unique de la page" name="uri" default=$page.uri required=true help="Utilisé pour désigner l'adresse de la page sur le site. Ne peut comporter que des lettres, chiffres et tirets." pattern="[A-Za-z0-9_-]+" class="full-width"}
+			{input type="text" label="Identifiant unique de la page" name="uri" default=$page.uri required=true help="Utilisé pour désigner l'adresse de la page sur le site. Ne peut comporter que des lettres, chiffres et tirets." pattern="[A-Za-z0-9_-]+" class="full-width" maxlength=150}
 		</dl>
 	</fieldset>
 

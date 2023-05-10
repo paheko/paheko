@@ -58,7 +58,7 @@ $form->runIf('save', function () use ($page, $editing_started, &$show_diff, &$ne
 	}
 
 	if (qg('js') !== null) {
-		$url = Utils::getLocalURL('!web/page.php?p=' . $page->path);
+		$url = Utils::getLocalURL('!web/?p=' . $page->path);
 		die(json_encode(['success' => true, 'modified' => $page->modified->getTimestamp(), 'redirect' => $url]));
 	}
 

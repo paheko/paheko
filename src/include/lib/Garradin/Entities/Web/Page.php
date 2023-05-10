@@ -263,9 +263,11 @@ class Page extends Entity
 		$this->assert(array_key_exists($this->status, self::STATUS_LIST), 'Unknown page status');
 		$this->assert(array_key_exists($this->format, self::FORMATS_LIST), 'Unknown page format');
 		$this->assert(trim($this->title) !== '', 'Le titre ne peut rester vide');
+		$this->assert(mb_strlen($this->title) <= 200, 'Le titre ne peut faire plus de 200 caractères');
 		$this->assert(trim($this->file_path) !== '', 'Le chemin de fichier ne peut rester vide');
 		$this->assert(trim($this->path) !== '', 'Le chemin ne peut rester vide');
 		$this->assert(trim($this->uri) !== '', 'L\'URI ne peut rester vide');
+		$this->assert(strlen($this->uri) <= 150, 'L\'URI ne peut faire plus de 150 caractères');
 		$this->assert($this->path !== $this->parent, 'Invalid parent page');
 		$this->assert($this->parent === '' || $db->test(self::TABLE, 'path = ?', $this->parent), 'Page parent inexistante');
 

@@ -20,7 +20,7 @@
 	<ul>
 		<li><a href="?p=">Site web</a></li>
 		{foreach from=$breadcrumbs key="id" item="title"}
-			<li><a href="?p={$id}">{$title}</a></li>
+			<li><a href="?p={$id}">{$title|truncate:40}</a></li>
 		{/foreach}
 	</ul>
 	{if $page}
