@@ -13,6 +13,7 @@ if (!defined('Garradin\ALLOW_ACCOUNTS_ACCESS') || !ALLOW_ACCOUNTS_ACCESS) {
 
 if (!empty($_GET['set_year'])) {
 	$session->set('acc_year', (int)$_GET['set_year']);
+	$session->save();
 }
 
 $current_year_id = $session->get('acc_year');
@@ -25,6 +26,7 @@ if ($current_year_id) {
 	if (!$current_year || $current_year->closed) {
 		$current_year_id = null;
 		$session->set('acc_year', null);
+		$session->save();
 	}
 }
 
@@ -34,6 +36,7 @@ if (!$current_year_id) {
 	if ($current_year) {
 		$current_year_id = $current_year->id();
 		$session->set('acc_year', $current_year_id);
+		$session->save();
 	}
 }
 

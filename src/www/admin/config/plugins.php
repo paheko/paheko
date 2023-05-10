@@ -15,6 +15,7 @@ if (f('install'))
         try {
             Plugin::install(f('plugin'), false);
             $session->set('plugins_menu', null);
+            $session->save();
             Utils::redirect(ADMIN_URL . 'config/plugins.php');
         }
         catch (UserException $e)
@@ -34,6 +35,7 @@ if (f('delete'))
             $plugin = new Plugin(qg('delete'));
             $plugin->uninstall();
             $session->set('plugins_menu', null);
+            $session->save();
 
             Utils::redirect(ADMIN_URL . 'config/plugins.php');
         }

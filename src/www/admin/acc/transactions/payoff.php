@@ -60,6 +60,7 @@ $form->runIf('save', function () use ($transaction, $session, $current_year) {
 	}
 
 	$session->set('acc_last_date', $transaction->date->format('Y-m-d'));
+	$session->save();
 
 	Utils::redirect('!acc/transactions/details.php?created&id=' . $transaction->id());
 }, 'acc_transaction_new');

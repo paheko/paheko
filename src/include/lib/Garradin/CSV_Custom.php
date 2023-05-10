@@ -45,6 +45,7 @@ class CSV_Custom
 		}
 
 		$this->session->set($this->key, $csv);
+		$this->session->save();
 
 		@unlink($path);
 	}
@@ -183,6 +184,7 @@ class CSV_Custom
 		$this->translation = $translation;
 
 		$this->session->set($this->key . '_translation', $this->translation);
+		$this->session->save();
 	}
 
 	public function clear(): void
@@ -190,6 +192,7 @@ class CSV_Custom
 		$this->session->set($this->key, null);
 		$this->session->set($this->key . '_translation', null);
 		$this->session->set($this->key . '_skip', null);
+		$this->session->save();
 		$this->csv = null;
 		$this->translation = null;
 	}

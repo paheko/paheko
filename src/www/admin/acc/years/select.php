@@ -15,6 +15,7 @@ if (f('change')) {
 	}
 
 	$session->set('acc_year', $year->id());
+	$session->save();
 	Utils::redirect(f('from') ?: ADMIN_URL . 'acc/years/');
 }
 

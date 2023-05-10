@@ -166,6 +166,7 @@ $form->runIf('save', function () use ($transaction, $session, $current_year) {
 	}
 
 	$session->set('acc_last_date', $transaction->date->format('Y-m-d'));
+	$session->save();
 
 	if (array_key_exists('_dialog', $_GET)) {
 		Utils::reloadParentFrame();

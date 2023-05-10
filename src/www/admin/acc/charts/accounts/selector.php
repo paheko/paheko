@@ -37,6 +37,7 @@ if (null !== $filter) {
 	}
 
 	$session->set('account_selector_filter', $filter);
+	$session->save();
 }
 
 $filter = $session->get('account_selector_filter') ?? 'usual';

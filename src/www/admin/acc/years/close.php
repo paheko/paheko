@@ -23,6 +23,7 @@ $form->runIf('close', function () use ($year, $user, $session) {
 	$year->close($user->id);
 	$year->save();
 	$session->set('acc_year', null);
+	$session->save();
 }, $csrf_key, ADMIN_URL . 'acc/years/new.php?from=' . $year->id());
 
 $tpl->assign(compact('year', 'csrf_key'));
