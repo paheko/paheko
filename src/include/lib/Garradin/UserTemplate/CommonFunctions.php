@@ -186,8 +186,8 @@ class CommonFunctions
 		if ($type == 'select') {
 			$input = sprintf('<select %s>', $attributes_string);
 
-			if (empty($attributes['required'])) {
-				$input .= '<option value=""></option>';
+			if (empty($attributes['required']) || isset($attributes['default_empty'])) {
+				$input .= sprintf('<option value="">%s</option>', $attributes['default_empty'] ?? '');
 			}
 
 			foreach ($options as $_key => $_value) {

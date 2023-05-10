@@ -12,11 +12,11 @@ $categories = [0 => '— Toutes (sauf cachées) —'];
 
 // Remove hidden categories
 if (!$session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)) {
-	$categories = array_merge($categories, Categories::listAssoc(Categories::WITHOUT_HIDDEN));
+	$categories = $categories + Categories::listAssoc(Categories::WITHOUT_HIDDEN);
 }
 else {
 	$categories[-1] = '— Toutes (même cachées) —';
-	$categories = array_merge($categories, Categories::listAssoc());
+	$categories = $categories + Categories::listAssoc();
 }
 
 // Deny access to hidden categories to users that are not admins

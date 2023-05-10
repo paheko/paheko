@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Garradin\Users;
 
+use Garradin\Entities\Users\Category;
 use Garradin\Entities\Users\User;
 
 use Garradin\Config;
@@ -210,7 +211,7 @@ class Users
 		return EM::getInstance(User::class)->col(sprintf('SELECT %s FROM @TABLE WHERE %s = ?;', $name, $field), $number);
 	}
 
-	static public function deleteMultiple(array $ids): void
+	static public function deleteSelected(array $ids): void
 	{
 		$session = Session::getInstance();
 
@@ -236,8 +237,14 @@ class Users
 		$db->delete(User::TABLE, $db->where('id', $membres));
 	}
 
-	static public function changeCategory(int $category_id, array $ids): void
+	static public function changeCategorySelected(int $category_id, array $ids): void
 	{
+		$db = DB::getInstance();
+
+		if (!$db->test(Category::TABLE, 'id = ?', $category_id)) {
+			throw new \InvalidArgumentException('Invalid category ID: ' . $category_id);
+		}
+
 		$session = Session::getInstance();
 		$user_id = null;
 
@@ -260,7 +267,6 @@ class Users
 		// Remove logged-in user ID
 		$ids = array_filter($ids);
 
-		$db = DB::getInstance();
 		$db->update(User::TABLE,
 			['id_category' => $category_id],
 			$db->where('id', $ids)

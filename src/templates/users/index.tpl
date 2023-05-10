@@ -8,6 +8,8 @@
 
 {if $_GET.msg == 'DELETE'}
 	<p class="block confirm">Le membre a été supprimé.</p>
+{elseif $_GET.msg == 'CATEGORY_CHANGED'}
+	<p class="block confirm">Les membres sélectionnés ont bien été changés de catégorie.</p>
 {/if}
 
 {if !empty($categories)}
@@ -28,7 +30,7 @@
 	</fieldset>
 </form>
 
-<form method="post" action="action.php" class="users-list">
+<form method="post" action="action.php" class="users-list" target="_dialog">
 
 {if $list->count()}
 	{$list->getHTMLPagination()|raw}

@@ -3,75 +3,52 @@ namespace Garradin;
 
 use Garradin\Users\Categories;
 use Garradin\Users\Users;
+use Garradin\Users\Session;
 
 require_once __DIR__ . '/_inc.php';
 
-$session->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
+Session::getInstance()->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
 
 if (!f('selected') || !is_array(f('selected')) || !count(f('selected'))) {
-    throw new UserException("Aucun membre sélectionné.");
+	throw new UserException("Aucun membre sélectionné.");
 }
 
 $action = f('action');
 $list = f('selected');
-
-if (!$action) {
-    throw new UserException('Aucune action sélectionnée.');
-}
+$list = array_map('intval', $list);
+$csrf_key = 'users_actions';
 
 if ($action == 'ods' || $action == 'csv' || $action == 'xlsx') {
-    Users::exportSelected($action, $list);
-    return;
+	Users::exportSelected($action, $list);
+	return;
 }
-elseif ($action == 'move' || $action == 'delete')
-{
-    foreach (f('selected') as &$id)
-    {
-        $id = (int) $id;
+elseif ($action == 'move' || $action == 'delete') {
+	$logged_user_id = Session::getUserId();
 
-        // On ne permet pas d'action collective sur l'utilisateur courant pour éviter les risques
-        // d'erreur genre "oh je me suis supprimé du coup j'ai plus accès à rien"
-        if ($id == $user->id)
-        {
-            throw new UserException("Il n'est pas possible de se modifier ou supprimer soi-même.");
-        }
-    }
+	// Don't allow to change or delete the currently logged-in user
+	// to avoid shooting yourself in the foot
+	$list = array_filter($list, fn ($a) => $a != $logged_user_id);
+}
+else {
+	throw new UserException('Action invalide');
 }
 
-if ($action == 'move' && f('confirm'))
-{
-    $form->check('membres_action', [
-        'selected' => 'required|array',
-        'id_category' => 'required|numeric',
-    ]);
+if ($action == 'move') {
+	$form->runIf('confirm', function () use ($list) {
+		Users::changeCategorySelected((int)f('new_category_id'), $list);
+	}, $csrf_key, '!users/?msg=CATEGORY_CHANGED');
 
-    if (!$form->hasErrors())
-    {
-        $membres->changeCategorie(f('id_category'), f('selected'));
-        Utils::redirect(ADMIN_URL . 'membres/');
-    }
+	$tpl->assign('categories', Categories::listAssoc());
 }
-elseif ($action == 'delete' && f('confirm'))
-{
-    $form->check('membres_action', [
-        'selected' => 'required|array',
-    ]);
+elseif ($action == 'delete') {
+	$form->runIf('confirm', function () use ($list) {
+		$membres->deleteSelected($list);
+	}, $csrf_key, '!users/?msg=CATEGORY_CHANGED');
 
-    if (!$form->hasErrors())
-    {
-        $membres->delete(f('selected'));
-        Utils::redirect(ADMIN_URL . 'membres/');
-    }
+	$tpl->assign('extra', ['selected' => $list, 'action' => $action]);
 }
 
-$tpl->assign('selected', $list);
-$tpl->assign('nb_selected', count($list));
+$count = count($list);
+$tpl->assign(compact('list', 'count', 'action', 'csrf_key'));
 
-if ($action == 'move')
-{
-    $tpl->assign('membres_cats', Categories::listAssoc());
-}
-
-$tpl->assign('action', $action);
-
-$tpl->display('admin/users/action.tpl');
+$tpl->display('users/action.tpl');
