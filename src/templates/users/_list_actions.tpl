@@ -7,7 +7,6 @@
 					<select name="action">
 						<option value="">— Choisir une action à effectuer —</option>
 						<option value="move">Changer de catégorie</option>
-						<option value="template">Générer des documents</option>
 						{if empty($hide_delete)}
 							<option value="delete">Supprimer le membre</option>
 						{/if}

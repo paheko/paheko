@@ -6,12 +6,12 @@ use KD2\UserSession;
 
 class CSV_Custom
 {
-	protected $session;
-	protected $key;
-	protected $csv;
-	protected $translation;
-	protected $columns;
-	protected $columns_defaults;
+	protected UserSession $session;
+	protected string $key;
+	protected ?array $csv;
+	protected ?array $translation = null;
+	protected array $columns;
+	protected array $columns_defaults;
 	protected array $mandatory_columns = [];
 	protected int $skip = 1;
 	protected $modifier = null;
@@ -22,7 +22,7 @@ class CSV_Custom
 		$this->session = $session;
 		$this->key = $key;
 		$this->csv = $this->session->get($this->key);
-		$this->translation = $this->session->get($this->key . '_translation') ?: [];
+		$this->translation = $this->session->get($this->key . '_translation');
 		$this->skip = $this->session->get($this->key . '_skip') ?? 1;
 	}
 
@@ -192,6 +192,7 @@ class CSV_Custom
 		$this->session->set($this->key . '_skip', null);
 		$this->csv = null;
 		$this->translation = null;
+		$this->skip = 1;
 	}
 
 	public function loaded(): bool
@@ -253,6 +254,11 @@ class CSV_Custom
 	public function getColumns(): array
 	{
 		return $this->columns;
+	}
+
+	public function getColumnLabel(string $key): ?string
+	{
+		return $this->columns[$key] ?? null;
 	}
 
 	public function getColumnsWithDefaults(): array

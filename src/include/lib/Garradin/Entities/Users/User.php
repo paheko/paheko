@@ -108,6 +108,7 @@ class User extends Entity
 
 		// Filter double/triple spaces instead of double spaces,
 		// to help users who try to log in, see https://fossil.kd2.org/paheko/info/c3295fe0af72e4b3
+		// Only when setting a new value
 		if (is_string($value) && false !== strpos($value, '  ') && DynamicFields::get($key)->type == 'text') {
 			$value = preg_replace('![ ]{2,}!', ' ', $value);
 		}
@@ -205,6 +206,17 @@ class User extends Entity
 		return $out;
 	}
 
+	public function asDetailsArray(): array
+	{
+		$list = DynamicFields::getInstance()->listAssocNames();
+
+		foreach ($list as $key => $label) {
+			$out[$key] = $this->$key;
+		}
+
+		return $out;
+	}
+
 	public function save(bool $selfcheck = true): bool
 	{
 		if (!count($this->_modified) && $this->exists()) {
@@ -260,14 +272,14 @@ class User extends Entity
 	public function number(): ?string
 	{
 		$field = DynamicFields::getNumberField();
-		return $this->$field;
+		return (string)$this->$field;
 	}
 
 	public function setNumberIfEmpty(): void
 	{
 		$field = DynamicFields::getNumberField();
 
-		if ($this->$field) {
+		if (!empty($this->$field)) {
 			return;
 		}
 
@@ -509,5 +521,20 @@ class User extends Entity
 
 		DB::getInstance()->update(self::TABLE, ['preferences' => json_encode($this->preferences)], 'id = ' . $this->id());
 		$this->clearModifiedProperties(['preferences']);
+	}
+
+	public function diff(): array
+	{
+		$out = $this->asDetailsArray();
+
+		foreach ($this->_modified as $key => $old) {
+			if (!array_key_exists($key, $out)) {
+				continue;
+			}
+
+			$out[$key] = [$old, $this->$key];
+		}
+
+		return $out;
 	}
 }

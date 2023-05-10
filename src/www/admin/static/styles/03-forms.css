@@ -331,6 +331,11 @@ select {
     max-width: calc(100% - 1.5em);
 }
 
+select option[value=""] {
+    color: var(--gBorderColor);
+    background-color: var(--gLightBackgroundColor);
+}
+
 input.otp {
     font-family: monospace;
     font-size: 30px;

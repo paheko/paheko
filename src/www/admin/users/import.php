@@ -1,67 +1,71 @@
 <?php
+
 namespace Garradin;
 
-die('En cours');
+use Garradin\Users\DynamicFields;
+use Garradin\Users\Session;
+use Garradin\Users\Users;
 
 require_once __DIR__ . '/_inc.php';
 
-$session->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
+Session::getInstance()->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
 
-$import = new Membres\Import;
-
-$tpl->assign('tab', null !== qg('export') ? 'export' : 'import');
-
-if (qg('export') == 'csv')
-{
-    $import->toCSV();
-    exit;
-}
-elseif (qg('export') == 'ods')
-{
-    $import->toODS();
-    exit;
+if ($format = qg('export')) {
+	Users::export($format);
+	return;
 }
 
+$csrf_key = 'user_import';
 $csv = new CSV_Custom($session, 'users_import');
-$champs = $config->get('champs_membres')->getAll();
-$csrf_key = 'membres_import';
+$ignore_ids = (bool) (f('ignore_ids') ?? qg('ignore_ids'));
+$report = [];
 
-$columns = [];
+$df = DynamicFields::getInstance();
 
-foreach ($champs as $key => $config) {
-    if (!isset($config->title)) {
-        continue;
-    }
+$params = compact('ignore_ids');
 
-    $columns[$key] = $config->title;
+$csv->setColumns($df->listImportAssocNames());
+$csv->setMandatoryColumns(array_keys($df->listImportRequiredAssocNames()));
+
+$form->runIf('cancel', function() use ($csv) {
+	$csv->clear();
+}, $csrf_key, Utils::getSelfURI());
+
+$form->runIf(f('load') && isset($_FILES['file']['tmp_name']), function () use ($csv, $params) {
+	$csv->load($_FILES['file']);
+	Utils::redirect(Utils::getSelfURI($params));
+}, $csrf_key);
+
+$form->runIf(f('preview') && $csv->loaded(), function () use (&$csv) {
+	$csv->skip((int)f('skip_first_line'));
+	$csv->setTranslationTable(f('translation_table'));
+}, $csrf_key);
+
+if (!f('import') && $csv->ready()) {
+	try {
+		$report = Users::importReport($csv, $ignore_ids, Session::getUserId());
+	}
+	catch (UserException $e) {
+		$csv->clear();
+		$form->addError($e);
+	}
 }
 
-$csv->setColumns($columns);
+$form->runIf('import', function () use ($csv, $ignore_ids) {
+	try {
+		if (!$csv->ready()) {
+			$csv->clear();
+			//var_dump(Session::getInstance()); exit;
+			throw new UserException('Erreur dans le chargement du CSV');
+		}
 
-if (f('cancel')) {
-    $csv->clear();
-    Utils::redirect(Utils::getSelfURI(false));
-}
+		Users::import($csv, $ignore_ids, Session::getUserId());
+	}
+	finally {
+		$csv->clear();
+	}
+}, $csrf_key, '!users/import.php?msg=OK');
 
-$form->runIf(f('import') && $csv->loaded(), function () use ($csv, $import, $user) {
-    $csv->setTranslationTable(f('translation_table') ?? []);
-    $csv->skip((int)f('skip_first_line'));
-    $import->fromCustomCSV($csv, $user->id);
-    $csv->clear();
-}, $csrf_key, ADMIN_URL . 'membres/import.php?ok');
+$tpl->assign(compact('csv', 'csrf_key', 'report'));
 
-$form->runIf(f('import') && f('type') == 'garradin' && !empty($_FILES['upload']['tmp_name']), function () use ($import, $user) {
-    $import->fromGarradinCSV($_FILES['upload']['tmp_name'], $user->id);
-}, $csrf_key, ADMIN_URL . 'membres/import.php?ok');
-
-$form->runIf(f('import') && f('type') == 'custom' && !empty($_FILES['upload']['tmp_name']), function () use ($csv) {
-    $csv->load($_FILES['upload']);
-}, $csrf_key, ADMIN_URL . 'membres/import.php');
-
-$tpl->assign('ok', null !== qg('ok') ? true : false);
-
-$tpl->assign(compact('csv', 'csrf_key'));
-
-$tpl->assign('max_upload_size', Utils::getMaxUploadSize());
-
-$tpl->display('admin/membres/import.tpl');
+$tpl->display('users/import.tpl');

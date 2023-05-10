@@ -639,8 +639,8 @@ dl.large dd {
     padding-left: 2rem;
 }
 
-.diff ins { background: #cfc; color: #000; text-decoration: none; }
-.diff del { background: #fcc; color: #000; text-decoration-color: rgba(0, 0, 0, .3); }
+ins { background: #cfc; color: #000; text-decoration: none; }
+del { background: #fcc; color: #000; text-decoration-color: rgba(0, 0, 0, .3); }
 
 .center-block {
     margin: 1em auto;

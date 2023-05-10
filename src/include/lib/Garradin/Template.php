@@ -291,7 +291,7 @@ class Template extends Smartyer
 			}
 		}
 
-		$params = array_merge($params, ['shape' => 'export', 'label' => 'Export…']);
+		$params = array_merge($params, ['shape' => 'export', 'label' => $params['label'] ?? 'Export…']);
 		return $this->widgetLinkMenu($params, $out);
 	}
 

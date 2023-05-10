@@ -2,11 +2,18 @@
 namespace Garradin;
 
 use Garradin\Users\Categories;
+use Garradin\Users\Session;
 use Garradin\Users\Users;
 
 require_once __DIR__ . '/_inc.php';
 
-$current_cat = (int) qg('cat') ?: null;
+$current_cat = (int) qg('cat');
+
+if ($format = qg('export')) {
+	Session::getInstance()->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
+	Users::exportCategory($format, $current_cat);
+	return;
+}
 
 $categories = [0 => '— Toutes (sauf cachées) —'];
 

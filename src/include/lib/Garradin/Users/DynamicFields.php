@@ -483,6 +483,50 @@ class DynamicFields
 		return $out;
 	}
 
+	public function listImportAssocNames()
+	{
+		$out = [];
+
+		foreach ($this->_fields as $key => $field) {
+			if ($field->system & $field::PASSWORD) {
+				continue;
+			}
+
+			// Skip fields where the value cannot be imported
+			if ($field->type == 'file' || $field->type == 'generated') {
+				continue;
+			}
+
+			$out[$key] = $field->label;
+		}
+
+		return $out;
+	}
+
+	public function listImportRequiredAssocNames()
+	{
+		$out = [];
+
+		foreach ($this->_fields as $key => $field) {
+			if ($field->system & $field::PASSWORD) {
+				continue;
+			}
+
+			// Skip fields where the value cannot be imported
+			if ($field->type == 'file' || $field->type == 'generated') {
+				continue;
+			}
+
+			if (!$field->required) {
+				continue;
+			}
+
+			$out[$key] = $field->label;
+		}
+
+		return $out;
+	}
+
 	public function getMultiples()
 	{
 		return array_filter($this->_fields, function ($a) {

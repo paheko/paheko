@@ -1,62 +1,117 @@
-{include file="_head.tpl" title="Import & export des membres" current="users"}
+{include file="_head.tpl" title="Importer des membres" current="users"}
 
 {include file="users/_nav.tpl" current="import"}
 
-<p>
-    {linkbutton shape="export" href="?export=csv" label="Exporter en CSV"}
-    {linkbutton shape="export" href="?export=ods" label="Exporter en classeur LibreOffice/Office"}
-</p>
-
 {form_errors}
 
-{if $ok}
-    <p class="block confirm">
-        L'import s'est bien déroulé.
-    </p>
+{if $_GET.msg == 'OK'}
+	<p class="block confirm">
+		L'import s'est bien déroulé.
+	</p>
 {/if}
 
 <form method="post" action="{$self_url}" enctype="multipart/form-data">
 
-    {if $csv->loaded()}
+{if $csv->ready()}
+	{if $report.has_logged_user}
+	<p class="alert block">
+		Ce fichier comporte une modification de votre profil de membre.
+		Celle-ci a été ignorée afin d'empêcher que vous ne puissiez plus vous connecter.<br />
+		Pour modifier vos informations de membre, utilisez la page {linkbutton shape="user" label="Mes informations personnelles" href="!me/"} ou demandez à un autre administrateur de modifier votre fiche.
+	</p>
+	{/if}
 
-        {include file="common/_csv_match_columns.tpl"}
+	<p class="help block">
+		Aucun problème n'a été détecté.<br />
+		Voici un résumé des changements qui seront apportés par cet import&nbsp;:
+	</p>
 
-    {else}
+	{if count($report.created)}
+	<details>
+		<summary>
+			<h2>{{%n membre sera créé}{%n membres seront créés} n=$report.created|count}</h2>
+		</summary>
+		<p class="help">Les membres suivants mentionnés dans le fichier seront ajoutés.</p>
+		{include file="users/_import_list.tpl" list=$report.created}
+	</details>
+	{/if}
 
-    <fieldset>
-        <legend>Importer depuis un fichier</legend>
-        <dl>
-            <dt><label for="f_file">Fichier à importer</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd class="help">La taille maximale du fichier est de {$max_upload_size|size_in_bytes}.</dd>
-            <dd><input type="file" name="upload" id="f_file" required="required" /></dd>
-            <dt><label for="f_type">Type de fichier</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd>
-                <input type="radio" name="type" id="f_type" value="garradin" {form_field name=type checked="garradin" default="garradin"} />
-                <label for="f_type">Fichier CSV de Paheko</label>
-            </dd>
-            <dd class="help">
-                Export de la liste des membres au format CSV provenant de Paheko.
-                Les lignes comportant un numéro de membre mettront à jour les fiches des membres ayant ce numéro (si le numéro existe),
-                les lignes sans numéro ou avec un numéro inexistant créeront de nouveaux membres.
-            </dd>
-            <dd>
-                <input type="radio" name="type" id="f_type_csv" value="custom" {form_field name=type checked="csv"} />
-                <label for="f_type_csv">Fichier CSV générique</label>
-            </dd>
-            <dd class="help">
-                Vous pourrez choisir la correspondance entre colonnes du CSV et champs des fiches membres
-                dans le prochain écran.
-            </dd>
-        </dl>
-    </fieldset>
+	{if count($report.modified)}
+	<details>
+		<summary>
+			<h2>{{%n membre sera modifié}{%n membres seront modifiés} n=$report.modified|count}</h2>
+		</summary>
+		<p class="help">Les membres suivants mentionnés dans le fichier seront modifiés.<br />
+			En rouge ce qui sera supprimé, en vert ce qui sera ajouté.</p>
+		{include file="users/_import_list.tpl" list=$report.modified}
+	</details>
+	{/if}
 
-    {/if}
+	{if count($report.unchanged)}
+		<h3>{{%n membre ne sera pas modifié}{%n membres ne seront pas modifiés} n=$report.unchanged|count}</h3>
+	{/if}
 
-    <p class="submit">
-        {csrf_field key=$csrf_key}
-        {if $csv->loaded()}{button type="submit" name="cancel" value="1" label="Annuler" shape="left"}{/if}
-        {button type="submit" name="import" label="Importer" shape="upload" class="main"}
-    </p>
+	{if !count($report.modified) && !count($report.created)}
+	<p class="error block">
+		Aucune modification ne serait apportée par ce fichier à importer. Il n'est donc pas possible de terminer l'import.
+	</p>
+	{else}
+	<p class="help">
+		En validant ce formulaire, ces changements seront appliqués.
+	</p>
+	{/if}
+
+	<p class="submit">
+		{csrf_field key=$csrf_key}
+		{button type="submit" name="cancel" value="1" label="Annuler" shape="left"}
+		{if count($report.modified) || count($report.created)}
+		{button type="submit" name="import" label="Importer" class="main" shape="right"}
+		{/if}
+	</p>
+{elseif $csv->loaded()}
+
+	{include file="common/_csv_match_columns.tpl"}
+
+	<p class="submit">
+		{csrf_field key=$csrf_key}
+		{button type="submit" name="cancel" value="1" label="Annuler" shape="left"}
+		{button type="submit" name="preview" label="Prévisualiser" shape="right" class="main"}
+	</p>
+
+{else}
+
+	<fieldset>
+		<legend>Importer depuis un fichier</legend>
+		<dl>
+			{input type="file" name="file" label="Fichier à importer" required=true accept="csv"}
+			{include file="common/_csv_help.tpl" csv=$csv}
+		</dl>
+	</fieldset>
+
+	<fieldset>
+		<legend>Configuration de l'import</legend>
+		<dl>
+			<dt><label for="f_ignore_ids_1">Mode d'import</label> <b>(obligatoire)</b></dt>
+
+			{input type="radio" name="ignore_ids" value="1" label="Créer tous les membres" required=true}
+			<dd class="help">Tous les membres trouvés dans le fichier seront créés.<br />Cela peut amener à avoir des membres en doublon si on réalise plusieurs imports du même fichier.</dd>
+
+			{input type="radio" name="ignore_ids" value="0" label="Mettre à jour en utilisant le numéro de membre" required=true}
+			<dd class="help">
+				Les membres présents dans le fichier qui mentionnent un numéro de membre seront mis à jour en utilisant ce numéro.<br/>
+				Si une ligne du fichier mentionne un numéro de membre qui n'existe pas, l'import échouera.<br />
+				Les lignes qui ne mentionnent pas de numéro de membre amèneront à la création d'un nouveau membre.
+			</dd>
+
+		</dl>
+	</fieldset>
+
+	<p class="submit">
+		{csrf_field key=$csrf_key}
+		{button type="submit" name="load" label="Charger le fichier" shape="right" class="main"}
+	</p>
+{/if}
+
 
 </form>
 

@@ -11,6 +11,7 @@ use Garradin\Entities\Files\File;
 
 use Garradin\Config;
 use Garradin\CSV;
+use Garradin\CSV_Custom;
 use Garradin\DB;
 use Garradin\DynamicList;
 use Garradin\Search;
@@ -22,6 +23,14 @@ use KD2\DB\EntityManager as EM;
 
 class Users
 {
+	static public function create(): User
+	{
+		$default_category = Config::getInstance()->default_category;
+		$user = new User;
+		$user->set('id_category', $default_category);
+		return $user;
+	}
+
 	static public function iterateAssocByCategory(?int $id_category = null): iterable
 	{
 		$where = $id_category ? sprintf('id_category = %d', $id_category) : 'id_category IN (SELECT id FROM users_categories WHERE hidden = 0)';
@@ -264,6 +273,25 @@ class Users
 		self::exportWhere($format, $name, $where);
 	}
 
+	static public function exportCategory(string $format, int $id_category): void
+	{
+		if ($id_category == -1) {
+			$name = 'Tous les membres';
+			$where = '1';
+		}
+		elseif (!$id_category) {
+			$name = 'Membres sauf catégories cachées';
+			$where = 'id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)';
+		}
+		else {
+			$cat = Categories::get($id_category);
+			$name = sprintf('Membres - %s', $cat->name);
+			$where = sprintf('id_category = %d', $id_category);
+		}
+
+		self::exportWhere($format, $name, $where);
+	}
+
 	static public function export(string $format): void
 	{
 		self::exportWhere($format, 'Tous les membres', '1');
@@ -295,5 +323,73 @@ class Users
 		};
 
 		CSV::export($format, $name, $i, $header, $callback);
+	}
+
+	static public function importReport(CSV_Custom $csv, bool $ignore_ids, int $logged_user_id): array
+	{
+		$report = ['created' => [], 'modified' => [], 'unchanged' => [], 'has_logged_user' => false];
+
+		foreach (self::iterateImport($csv, $ignore_ids) as $line => $user) {
+			if ($user->id == $logged_user_id) {
+				$report['has_logged_user'] = true;
+				continue;
+			}
+
+			try {
+				$user->selfCheck();
+			}
+			catch (UserException $e) {
+				throw new UserException(sprintf('Ligne %d (%s) : %s', $line, $user->name(), $e->getMessage()));
+			}
+
+			if (!$user->exists()) {
+				$report['created'][] = $user;
+			}
+			elseif ($user->isModified()) {
+				$report['modified'][] = $user;
+			}
+			else {
+				$report['unchanged'][] = $user;
+			}
+		}
+
+		return $report;
+	}
+
+	static public function import(CSV_Custom $csv, bool $ignore_ids, int $logged_user_id): void
+	{
+		$db = DB::getInstance();
+		$db->begin();
+
+		foreach (self::iterateImport($csv, $ignore_ids) as $user) {
+			if ($user->id == $logged_user_id) {
+				continue;
+			}
+
+			$user->save();
+		}
+
+		$db->commit();
+	}
+
+	static public function iterateImport(CSV_Custom $csv, bool $ignore_ids): \Generator
+	{
+		$number_field = DynamicFields::getNumberField();
+
+		foreach ($csv->iterate() as $i => $row) {
+			if ($ignore_ids || !isset($row->$number_field)) {
+				$user = self::create();
+				$user->$number_field = null;
+				$user->setNumberIfEmpty();
+				unset($row->$number_field);
+			}
+			else {
+				$user = self::getFromNumber($row->$number_field);
+			}
+
+			$user->importForm((array)$row);
+
+			yield $i => $user;
+		}
 	}
 }

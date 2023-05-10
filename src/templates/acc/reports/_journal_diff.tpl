@@ -1,4 +1,4 @@
-<table class="list multi diff">
+<table class="list multi">
 	<thead>
 		<tr>
 			<td class="num">N°</td>
