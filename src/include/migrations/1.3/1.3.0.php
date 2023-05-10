@@ -33,6 +33,15 @@ CREATE TABLE IF NOT EXISTS config_users_fields (
 $df = \Garradin\Users\DynamicFields::fromOldINI($config->champs_membres, $config->champ_identifiant, $config->champ_identite, 'numero');
 $df->save(false);
 
+// Normalize line breaks in user fields, and trim
+foreach ($df->all() as $name => $field) {
+	if (!$df->isText($name)) {
+		continue;
+	}
+
+	$db->exec(sprintf("UPDATE users SET %s = TRIM(REPLACE(REPLACE(%1\$s, X'0D' || X'0A', X'0A'), X'0D', X'0A'), ' ' || X'0D' || X'0A');", $name));
+}
+
 // Migrate other stuff
 $db->import(ROOT . '/include/migrations/1.3/1.3.0.sql');
 
