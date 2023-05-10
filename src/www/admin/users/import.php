@@ -55,7 +55,6 @@ $form->runIf('import', function () use ($csv, $ignore_ids) {
 	try {
 		if (!$csv->ready()) {
 			$csv->clear();
-			//var_dump(Session::getInstance()); exit;
 			throw new UserException('Erreur dans le chargement du CSV');
 		}
 
