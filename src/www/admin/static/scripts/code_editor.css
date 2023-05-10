@@ -70,6 +70,12 @@
 	display: block;
 }
 
+.codeEditor textarea, .codeEditor .lineCount {
+	font-family: "Andale Mono", "Monaco", "Lucida", "Courier New", monospace;
+	font-size: 13pt;
+	line-height: 16pt;
+}
+
 .codeEditor .lineCount {
 	position: absolute;
 	top: 0;

@@ -3,7 +3,7 @@
 	g.script('scripts/lib/text_editor.min.js', () => {
 	g.script('scripts/lib/code_editor.min.js', function ()
 	{
-		const doc_url = 'https://fossil.kd2.org/paheko/wiki?name=Documentation/';
+		const doc_url = g.admin_url + '/static/doc/';
 		var save_btn = document.querySelector('[name=save]');
 		var code = new codeEditor('f_content');
 
@@ -30,23 +30,23 @@
 			}
 
 			var line = this.getLine(this.current_line);
-			var doc = [{link: 'Brindille', title: 'Brindille'}];
+			var doc = [{link: 'brindille.html', title: 'Brindille'}];
 
 			if (match = line.match(/\{\{:(\w+)/)) {
-				doc.push({link: 'Brindille/Fonctions', title: 'Fonction'});
-				doc.push({link: 'Brindille/Fonctions#'+match[1], title: match[1]});
+				doc.push({link: 'brindille_functions.html', title: 'Fonction'});
+				doc.push({link: 'brindille_functions.html#'+match[1], title: match[1]});
 			}
 			else if (match = line.match(/\{\{#(\w+)/)) {
-				doc.push({link: 'Brindille/Sections', title: 'Section'});
-				doc.push({link: 'Brindille/Sections#'+match[1], title: match[1]});
+				doc.push({link: 'brindille_sections.html', title: 'Section'});
+				doc.push({link: 'brindille_sections.html#'+match[1], title: match[1]});
 			}
 			else if (match = line.match(/\{\{(select)/)) {
-				doc.push({link: 'Brindille/Sections', title: 'Section'});
-				doc.push({link: 'Brindille/Sections#'+match[1], title: match[1]});
+				doc.push({link: 'brindille_sections.html', title: 'Section'});
+				doc.push({link: 'brindille_sections.html#'+match[1], title: match[1]});
 			}
 			else if (match = line.match(/\|(\w+)/)) {
-				doc.push({link: 'Brindille/Filtres', title: 'Filtre'});
-				doc.push({link: 'Brindille/Filtres#'+match[1], title: match[1]});
+				doc.push({link: 'brindille_modifiers.html', title: 'Filtre'});
+				doc.push({link: 'brindille_modifiers.html#'+match[1], title: match[1]});
 			}
 
 			help.innerHTML = 'Documentation';
@@ -56,7 +56,7 @@
 				help.innerHTML += ' &gt; ';
 
 				if (doc[i].link)
-					help.innerHTML += '<a href="' + doc_url + doc[i].link + '" onclick="return !window.open(this.href);">' + doc[i].title + '</a>';
+					help.innerHTML += '<a href="' + doc_url + doc[i].link + '" onclick="g.openFrameDialog(this.href); return false;">' + doc[i].title + '</a>';
 				else if (doc[i].tag)
 					help.innerHTML += '<' + tag + '>' + doc[i].title + '</' + tag + '>';
 				else

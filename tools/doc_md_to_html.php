@@ -99,7 +99,7 @@ foreach (glob(__DIR__ . '/../doc/admin/*.md') as $file) {
 			box-shadow: 0px 0px 5px orange;
 		}
 		</style>
-		<link rel="stylesheet" type="text/css" href="../../../content.css" />
+		<link rel="stylesheet" type="text/css" href="../../../../content.css" />
 	</head>
 	<body><div class="web-content">' . $t . '</div></body></html>';
 
