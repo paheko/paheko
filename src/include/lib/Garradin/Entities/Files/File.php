@@ -82,7 +82,7 @@ class File extends Entity
 		'crop-256px' => [['cropResize', 256, 256]],
 	];
 
-	const THUMB_CACHE_ID = 'file.thumb.%s.%d';
+	const THUMB_CACHE_ID = 'file.thumb.%s.%s';
 
 	const THUMB_SIZE_TINY = '200px';
 	const THUMB_SIZE_SMALL = '500px';
