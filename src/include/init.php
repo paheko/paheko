@@ -229,6 +229,7 @@ static $default_config = [
 	'API_PASSWORD'          => null,
 	'PDF_COMMAND'           => 'auto',
 	'PDF_USAGE_LOG'         => null,
+	'PDFTOTEXT_COMMAND'     => null,
 	'CALC_CONVERT_COMMAND'  => null,
 	'CONTRIBUTOR_LICENSE'   => null,
 	'SQL_DEBUG'             => null,

@@ -8,7 +8,6 @@ use KD2\DB\EntityManager as EM;
 use KD2\Security;
 use KD2\WebDAV\WOPI;
 use KD2\Office\ToText;
-use KD2\Office\PDFToText;
 
 use Garradin\Config;
 use Garradin\DB;
