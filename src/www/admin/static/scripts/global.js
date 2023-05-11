@@ -187,7 +187,7 @@
 			}, 200);
 		});
 
-		g.openDialog(iframe, classname);
+		g.openDialog(iframe, callback, classname);
 		return iframe;
 	};
 
