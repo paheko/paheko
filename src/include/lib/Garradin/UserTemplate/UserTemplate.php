@@ -416,4 +416,17 @@ class UserTemplate extends \KD2\Brindille
 		echo '</code></pre>';
 		exit;
 	}
+
+	public function _callFunction(string $name, array $params, int $line) {
+		try {
+			return call_user_func($this->_functions[$name], $params, $this, $line);
+		}
+		catch (UserException $e) {
+			throw $e;
+		}
+		catch (\Exception $e) {
+			throw new Brindille_Exception(sprintf("line %d: function '%s' has returned an error: %s\nParameters: %s", $line, $name, $e->getMessage(), json_encode($params)));
+		}
+	}
+
 }
