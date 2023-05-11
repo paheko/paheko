@@ -10,11 +10,15 @@
 	</ul>
 
 	{if $current == 'users'}
-	<ul class="sub">
-		<li{if !$sub_current} class="current"{/if}><a href="{$admin_url}config/users/">Préférences</a></li>
-		<li{if $sub_current == 'fields'} class="current"{/if}><a href="{$admin_url}config/fields/">Fiche des membres</a></li>
-		<li{if $sub_current == 'categories'} class="current"{/if}><a href="{$admin_url}config/categories/">Catégories &amp; droits des membres</a></li>
-	</ul>
+		{if $sub_current == 'fields'}
+			<aside>{linkbutton shape="plus" label="Ajouter un champ" href="new.php"}</aside>
+		{/if}
+
+		<ul class="sub">
+			<li{if !$sub_current} class="current"{/if}><a href="{$admin_url}config/users/">Préférences</a></li>
+			<li{if $sub_current == 'fields'} class="current"{/if}><a href="{$admin_url}config/fields/">Fiche des membres</a></li>
+			<li{if $sub_current == 'categories'} class="current"{/if}><a href="{$admin_url}config/categories/">Catégories &amp; droits des membres</a></li>
+		</ul>
 	{/if}
 
 	{if $current == 'advanced'}
