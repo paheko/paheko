@@ -135,11 +135,6 @@ if (!defined('Garradin\ROOT'))
 }, true);
 
 if (!defined('Garradin\DATA_ROOT')) {
-	// Migrate plugins, cache and SQLite to data/ subdirectory (version 1.1)
-	if (!file_exists(ROOT . '/data/association.sqlite') && file_exists(ROOT . '/association.sqlite')) {
-		Upgrade::moveDataRoot();
-	}
-
 	define('Garradin\DATA_ROOT', ROOT . '/data');
 }
 
