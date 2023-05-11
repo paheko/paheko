@@ -224,7 +224,7 @@ class Modifiers
 			'open'      => '\(',
 			'close'     => '\)',
 			'number'    => '-?\d+(?:[,\.]\d+)?',
-			'sign'      => '[+\-\*\/]',
+			'sign'      => '[+\-\*\/%]',
 			'separator' => ',',
 		];
 
