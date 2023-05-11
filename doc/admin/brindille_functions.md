@@ -141,8 +141,9 @@ Permet de modifier les entêtes HTTP renvoyés par la page. Cette fonction doit 
 | `redirect` | *optionnel* | Rediriger vers l'adresse URI indiquée en valeur. Seules les adresses internes sont acceptées, il n'est pas possible de rediriger vers une adresse extérieure. |
 | `type` | *optionnel* | Modifie le type MIME renvoyé |
 | `download` | *optionnel* | Force la page à être téléchargée sous le nom indiqué. |
+| `inline` | *optionnel* | Force la page à être affichée, et peut ensuite être téléchargée sous le nom indiqué (utile pour la généraion de PDF : permet d'afficher le PDF dans le navigateur avant de le télécharger). |
 
-Note : si le type `application/pdf` est indiqué, la page sera convertie en PDF à la volée. Il est possible de forcer le téléchargement du fichier en utilisant le paramètre `download`.
+Note : si le type `application/pdf` est indiqué (ou juste `pdf`), la page sera convertie en PDF à la volée. Il est possible de forcer le téléchargement du fichier en utilisant le paramètre `download`.
 
 Exemples :
 
@@ -150,7 +151,7 @@ Exemples :
 {{:http code=404}}
 {{:http redirect="/Nos-Activites/"}}
 {{:http type="application/svg+xml"}}
-{{:http type="application/pdf" download="liste_membres_ca.pdf"}}
+{{:http type="pdf" download="liste_membres_ca.pdf"}}
 ```
 
 ## include

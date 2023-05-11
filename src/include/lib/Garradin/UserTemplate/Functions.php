@@ -551,5 +551,8 @@ class Functions
 		if (isset($params['download'])) {
 			header(sprintf('Content-Disposition: attachment; filename="%s"', Utils::safeFileName($params['download'])), true);
 		}
+		elseif (isset($params['inline'])) {
+			header(sprintf('Content-Disposition: inline; filename="%s"', Utils::safeFileName($params['inline'])), true);
+		}
 	}
 }
