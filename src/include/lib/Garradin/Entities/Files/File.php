@@ -750,8 +750,11 @@ class File extends Entity
 					throw new \RuntimeException('Unable to fetch file');
 				}
 
+				// Always autorotate first
+				$i->autoRotate();
+
 				$operations = self::ALLOWED_THUMB_SIZES[$size];
-				$allowed_operations = ['resize', 'cropResize', 'flip', 'rotate', 'autoRotate', 'crop'];
+				$allowed_operations = ['resize', 'cropResize', 'flip', 'rotate', 'crop'];
 
 				foreach ($operations as $operation) {
 					$arguments = array_slice($operation, 1);
