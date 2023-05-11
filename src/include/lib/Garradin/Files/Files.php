@@ -710,7 +710,7 @@ class Files
 			}
 
 			$file->set('size', ftell($source['pointer']));
-			fseek($pointer, 0, SEEK_SET);
+			fseek($source['pointer'], 0, SEEK_SET);
 			$file->set('mime', mime_content_type($source['pointer']));
 		}
 		elseif (isset($source['path'])) {

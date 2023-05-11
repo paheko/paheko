@@ -241,6 +241,7 @@ class File extends Entity
 	{
 		Files::callStorage('checkLock');
 
+		// This also deletes thumbnails
 		Web_Cache::delete($this->uri());
 
 		// Delete actual file content
