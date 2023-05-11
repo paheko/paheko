@@ -2,6 +2,7 @@
 
 namespace Garradin;
 
+use Garradin\Backup;
 use Garradin\Users\Session;
 use Garradin\Web\Web;
 use Garradin\Accounting\Accounts;
@@ -47,7 +48,7 @@ class API
 			throw new APIException('Wrong request method', 400);
 		}
 
-		(new Sauvegarde)->dump();
+		Backup::dump();
 		return null;
 	}
 

@@ -1,22 +1,23 @@
 <?php
 namespace Garradin;
 
+use Garradin\Backup;
 use Garradin\Files\Files;
 
 require_once __DIR__ . '/../_inc.php';
 
-$s = new Sauvegarde;
+$csrf_key = 'backup_save';
 
 // Download database
-$form->runIf('download', function () use ($s) {
-	$s->dump();
+$form->runIf('download', function () {
+	Backup::dump();
 	exit;
-}, 'backup_download');
+}, $csrf_key);
 
 // Create local backup
-$form->runIf('create', function () use ($s) {
-	$s->create();
-}, 'backup_create', Utils::getSelfURI(['ok' => 'create']));
+$form->runIf('create', function () {
+	Backup::create();
+}, $csrf_key, Utils::getSelfURI(['ok' => 'create']));
 
 $form->runIf('config', function () {
 	$frequency = (int) f('backup_frequency');
@@ -35,9 +36,9 @@ $form->runIf('config', function () {
 	$config->set('backup_frequency', $frequency);
 	$config->set('backup_limit', $number);
 	$config->save();
-}, 'backup_config', Utils::getSelfURI(['ok' => 'config']));
+}, $csrf_key, Utils::getSelfURI(['ok' => 'config']));
 
-$db_size = $s->getDBSize();
+$db_size = Backup::getDBSize();
 $files_size = (FILE_STORAGE_BACKEND == 'SQLite') ? Files::getUsedQuota() : null;
 
 $ok = qg('ok'); // return message
@@ -52,6 +53,6 @@ $frequencies = [
 	365 => 'Annuelle',
 ];
 
-$tpl->assign(compact('ok', 'db_size', 'files_size', 'frequencies'));
+$tpl->assign(compact('ok', 'db_size', 'files_size', 'frequencies', 'csrf_key'));
 
 $tpl->display('config/backup/save.tpl');

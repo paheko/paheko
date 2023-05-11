@@ -23,7 +23,7 @@
 		{if FILE_STORAGE_BACKEND == 'SQLite'} (Dont {$files_size|size_in_bytes} pour les documents.){/if}
 	</p>
 	<p class="submit">
-		{csrf_field key="backup_download"}
+		{csrf_field key=$csrf_key}
 		{button type="submit" name="download" label="Télécharger une copie de la base de données sur mon ordinateur" shape="download" class="main"}
 	</p>
 </fieldset>
@@ -39,7 +39,7 @@
 		Cette sauvegarde ne concerne que la base de données, mais pas les documents, fichiers joints aux écritures ou aux membres, ni le contenu du site web.
 	</p>
 	<p class="submit">
-		{csrf_field key="backup_create"}
+		{csrf_field key=$csrf_key}
 		{button type="submit" name="create" label="Créer une nouvelle sauvegarde" shape="right" class="main"}
 	</p>
 </fieldset>
@@ -70,7 +70,7 @@
 		</dd>
 	</dl>
 	<p class="submit">
-		{csrf_field key="backup_config"}
+		{csrf_field key=$csrf_key}
 		{button type="submit" name="config" label="Enregistrer" shape="right" class="main"}
 	</p>
 </fieldset>

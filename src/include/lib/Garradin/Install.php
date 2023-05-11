@@ -100,13 +100,12 @@ class Install
 
 		$name = date('Y-m-d-His-') . 'avant-remise-a-zero';
 
-		$s = new Sauvegarde;
-		$s->create($name);
+		Backup::create($name);
 
 		// Keep a backup file of files
 		if (FILE_STORAGE_BACKEND == 'FileSystem') {
 			$name = 'documents_' . $name . '.zip';
-			$s->dumpFilesZip(CACHE_ROOT . '/' . $name);
+			Files::zipAll(CACHE_ROOT . '/' . $name);
 			Files::callStorage('truncate');
 			@mkdir(FILE_STORAGE_CONFIG . '/documents');
 			@rename(CACHE_ROOT . '/' . $name, FILE_STORAGE_CONFIG . '/documents/' . $name);

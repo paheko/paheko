@@ -324,6 +324,11 @@ class Files
 		return self::callStorage('glob', $pattern);
 	}
 
+	static public function zipAll(?string $target = null): void
+	{
+		Files::zip($target, array_keys(File::CONTEXTS_NAMES), null);
+	}
+
 	/**
 	 * Creates a ZIP file archive from multiple paths
 	 * @param null|string $target Target file name, if left NULL, then will be sent to browser

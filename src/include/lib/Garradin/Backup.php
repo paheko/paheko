@@ -9,7 +9,7 @@ use Garradin\Entities\Files\File;
 use KD2\ZipWriter;
 use KD2\ErrorManager;
 
-class Sauvegarde
+class Backup
 {
 	const NEED_UPGRADE = 0x01 << 2;
 	const NOT_AN_ADMIN = 0x01 << 3;
@@ -20,11 +20,11 @@ class Sauvegarde
 	const NO_APP_ID = 43;
 
 	/**
-	 * Renvoie la liste des fichiers SQLite sauvegardés
-	 * @param  boolean $auto Si true ne renvoie que la liste des sauvegardes automatiques
-	 * @return array 		 Liste des fichiers
+	 * Returns the list of SQLite backups
+	 * @param  boolean $auto If true only automatic backups will be returned
+	 * @return array
 	 */
-	public function getList(bool $auto_only = false): array
+	static public function list(bool $auto_only = false): array
 	{
 		$ext = $auto_only ? 'auto\.\d+\.sqlite' : 'sqlite';
 
@@ -101,23 +101,26 @@ class Sauvegarde
 	}
 
 	/**
-	 * Crée une nouvelle sauvegarde
-	 * @param  boolean $auto Si true le nom de fichier sera celui de la sauvegarde automatique courante,
-	 * sinon le nom sera basé sur la date (sauvegarde manuelle)
-	 * @return string Le nom de fichier de la sauvegarde ainsi créée
+	 * Create a new backup
+	 * @param  boolean $auto If TRUE, the file name will be based on automatic backups,
+	 * if FALSE a file name containing the date will be used (manual backup).
+	 * @return string Backup file name
 	 */
-	public function create(bool $auto = false, ?string $name = null): string
+	static public function create(bool $auto = false, ?string $name = null): string
 	{
 		$suffix = $name ?? ($auto ? 'auto.1' : date('Y-m-d-His'));
 
 		$backup = str_replace('.sqlite', sprintf('.%s.sqlite', $suffix), DB_FILE);
 
-		$this->make($backup);
+		self::make($backup);
 
 		return basename($backup);
 	}
 
-	public function make(string $dest)
+	/**
+	 * Actually create a backup
+	 */
+	static public function make(string $dest): void
 	{
 		// Acquire lock
 		$version = \SQLite3::version();
@@ -143,15 +146,17 @@ class Sauvegarde
 	}
 
 	/**
-	 * Effectue une rotation des sauvegardes automatiques
-	 * association.auto.1.sqlite deviendra association.auto.2.sqlite par exemple
+	 * Rotate automatic backups
+	 * association.auto.2.sqlite -> association.auto.3.sqlite
+	 * association.auto.1.sqlite -> association.auto.2.sqlite
+	 * etc.
 	 */
-	public function rotate(): void
+	static public function rotate(): void
 	{
 		$config = Config::getInstance();
 		$nb = $config->get('backup_limit');
 
-		$list = $this->getList(true);
+		$list = self::getList(true);
 
 		// Sort backups from oldest to newest
 		usort($list, function ($a, $b) {
@@ -163,7 +168,7 @@ class Sauvegarde
 
 		for ($i = 0; $i < $delete; $i++) {
 			$backup = array_shift($list);
-			$this->remove($backup->filename);
+			self::remove($backup->filename);
 		}
 
 		$i = count($list) + 1;
@@ -180,66 +185,58 @@ class Sauvegarde
 	}
 
 	/**
-	 * Crée une sauvegarde automatique si besoin est
-	 * @return boolean true
+	 * Create a new automatic backup, if required
 	 */
-	public function auto()
+	static public function auto(): void
 	{
 		$config = Config::getInstance();
 
 		// Pas besoin d'aller plus loin si on ne fait pas de sauvegarde auto
-		if ($config->get('backup_frequency') == 0 || $config->get('backup_limit') == 0)
-			return true;
+		if ($config->get('backup_frequency') == 0 || $config->get('backup_limit') == 0) {
+			return;
+		}
 
-		$list = $this->getList(true);
+		$list = self::getList(true);
 
-		if (count($list))
-		{
+		if (count($list)) {
 			$last = current($list)->date;
 		}
-		else
-		{
+		else {
 			$last = false;
 		}
 
 		// Test de la date de création de la dernière sauvegarde
-		if ($last >= (time() - ($config->get('backup_frequency') * 3600 * 24)))
-		{
-			return true;
+		if ($last >= (time() - ($config->get('backup_frequency') * 3600 * 24))) {
+			return;
 		}
 
 		// Si pas de modif depuis la dernière sauvegarde, ça sert à rien d'en faire
-		if ($last >= filemtime(DB_FILE))
-		{
-			return true;
+		if ($last >= filemtime(DB_FILE)) {
+			return;
 		}
 
-		$this->rotate();
-		$this->create(true);
-
-		return true;
+		self::rotate();
+		self::create(true);
 	}
 
 	/**
-	 * Efface une sauvegarde locale
-	 * @param  string $file Nom du fichier à supprimer
-	 * @return boolean		true si le fichier a bien été supprimé, false sinon
+	 * Delete a local backup
 	 */
-	public function remove($file)
+	static public function remove(string $file): void
 	{
-		if (preg_match('!\.\.+!', $file) || !preg_match('!^[\w\d._-]+\.sqlite$!i', $file) 
-			|| $file == basename(DB_FILE))
-		{
+		if (preg_match('!\.\.+!', $file)
+			|| !preg_match('!^[\w\d._-]+\.sqlite$!i', $file)
+			|| $file == basename(DB_FILE)) {
 			throw new UserException('Nom de fichier non valide.');
 		}
 
-		return Utils::safe_unlink(DATA_ROOT . '/' . $file);
+		Utils::safe_unlink(DATA_ROOT . '/' . $file);
 	}
 
 	/**
-	 * Renvoie sur la sortie courante le contenu du fichier de base de données sélectionné ou courant
+	 * Download a backup file in the browser. If $file is NULL, then the current database will be dumped.
 	 */
-	public function dump(?string $file = null): void
+	static public function dump(?string $file = null): void
 	{
 		$config = Config::getInstance();
 		$tmp_file = null;
@@ -249,12 +246,12 @@ class Sauvegarde
 			$name = sprintf('%s - Sauvegarde données - %s.sqlite', $config->get('org_name'), date('Y-m-d'));
 
 			$tmp_file = tempnam(sys_get_temp_dir(), 'gdin');
-			$this->make($tmp_file);
+			self::make($tmp_file);
 
 			$file = $tmp_file;
 		}
 		else {
-			if (preg_match('!\.\.+!', $file) || !preg_match('!^[\w\d._ -]+$!iu', $file)) {
+			if (preg_match('!\.\.+!', $file) || !preg_match('!^[\w\d._ -]+\.sqlite$!iu', $file)) {
 				throw new UserException('Nom de fichier non valide.');
 			}
 
@@ -274,7 +271,7 @@ class Sauvegarde
 
 		readfile($file);
 
-		// Add integrity hash
+		// Append integrity hash
 		echo sha1_file($file);
 
 		if (null !== $tmp_file) {
@@ -283,56 +280,48 @@ class Sauvegarde
 	}
 
 	/**
-	 * Restaure une sauvegarde locale
-	 * @param  string $file Le nom de fichier à utiliser comme point de restauration
-	 * @return boolean true si la restauration a fonctionné, false sinon
+	 * Restore from a local backup
 	 */
-	public function restoreFromLocal(string $file)
+	static public function restoreFromLocal(string $file, ?Session $session): int
 	{
-		if (preg_match('!\.\.+!', $file) || !preg_match('!^[\w\d._ -]+$!iu', $file))
-		{
+		if (preg_match('!\.\.+!', $file) || !preg_match('!^[\w\d._ -]+\.sqlite$!iu', $file)) {
 			throw new UserException('Nom de fichier non valide.');
 		}
 
-		if (!file_exists(DATA_ROOT . '/' . $file))
-		{
+		if (!file_exists(DATA_ROOT . '/' . $file)) {
 			throw new UserException('Le fichier fourni n\'existe pas.');
 		}
 
-		return $this->restoreDB(DATA_ROOT . '/' . $file, false);
+		return self::restoreDB(DATA_ROOT . '/' . $file, $session, false);
 	}
 
 	/**
-	 * Restaure une copie distante (fichier envoyé)
-	 * @param  array   $file    Tableau provenant de $_FILES
-	 * @param  boolean $check_integrity Vérifier l'intégrité de la sauvegarde avant de restaurer
-	 * @return boolean true
+	 * Restore from an uploaded file
+	 * @param  array   $file    Array provided by $_FILES
+	 * @param  Session   $session
+	 * @param  boolean $check_integrity Validate checksum before restore
+	 * @return int
 	 */
-	public function restoreFromUpload($file, $check_integrity = true)
+	static public function restoreFromUpload(array $file, ?Session $session, bool $check_integrity = true): int
 	{
-		if (empty($file['size']) || empty($file['tmp_name']) || !empty($file['error']))
-		{
+		if (empty($file['size']) || empty($file['tmp_name']) || !empty($file['error'])) {
 			throw new UserException('Le fichier n\'a pas été correctement envoyé. Essayer de le renvoyer à nouveau.');
 		}
 
-		if ($check_integrity)
-		{
-			$integrity = $this->checkIntegrity($file['tmp_name']);
+		if ($check_integrity) {
+			$integrity = self::checkIntegrity($file['tmp_name']);
 
-			if ($integrity === null)
-			{
+			if ($integrity === null) {
 				throw new UserException('Le fichier fourni n\'est pas une base de donnée SQLite3.', self::NOT_A_DB);
 			}
-			elseif ($integrity === false)
-			{
+			elseif ($integrity === false) {
 				throw new UserException('Le fichier fourni a été modifié par un programme externe.', self::INTEGRITY_FAIL);
 			}
 		}
 
-		$r = $this->restoreDB($file['tmp_name'], true);
+		$r = self::restoreDB($file['tmp_name'], $session, true);
 
-		if ($r)
-		{
+		if ($r) {
 			Utils::safe_unlink($file['tmp_name']);
 		}
 
@@ -340,11 +329,10 @@ class Sauvegarde
 	}
 
 	/**
-	 * Vérifie l'intégrité d'une sauvegarde Garradin
-	 * @param  string $file_path Chemin absolu vers la base de donnée
-	 * @return boolean|null
+	 * Verify if a file is a valid SQLite3 backup and its contents match the appended SHA1 hash
+	 * @return null|bool NULL if file is not a SQLite3 database. FALSE if the hash does not match.
 	 */
-	protected function checkIntegrity($file_path, $remove_hash = true)
+	static protected function checkIntegrity(string $file_path, bool $remove_hash = true): ?bool
 	{
 		$size = filesize($file_path);
 		$fp = fopen($file_path, 'r+');
@@ -352,8 +340,7 @@ class Sauvegarde
 		$header = fread($fp, 16);
 
 		// Vérifie que le fichier est bien une base SQLite3
-		if ($header !== "SQLite format 3\000")
-		{
+		if ($header !== "SQLite format 3\000") {
 			fclose($fp);
 			return null;
 		}
@@ -363,8 +350,7 @@ class Sauvegarde
 		$hash = fread($fp, 40);
 
 		// Ne ressemble pas à un hash sha1
-		if (!preg_match('/[a-f0-9]{40}/', $hash))
-		{
+		if (!preg_match('/[a-f0-9]{40}/', $hash)) {
 			fclose($fp);
 			return false;
 		}
@@ -372,8 +358,7 @@ class Sauvegarde
 		$max = $size - 40;
 
 		// Suppression du hash
-		if ($remove_hash)
-		{
+		if ($remove_hash) {
 			ftruncate($fp, $max);
 		}
 
@@ -386,21 +371,25 @@ class Sauvegarde
 	}
 
 	/**
-	 * Restauration de base de données, la fonction qui le fait vraiment
-	 * @param  string $file Chemin absolu vers la base de données à utiliser
-	 * @return mixed 		true si rien ne va plus, ou self::NEED_UPGRADE si la version de la DB
-	 * ne correspond pas à la version de Garradin (mise à jour nécessaire).
+	 * Restore a database
+	 * @param  string $file Absolute path
+	 * @param  int $logged_user_id
+	 * @param  bool $check_foreign_keys
+	 * @return integer:
+	 * - 1 if everything is OK
+	 * - & self::NEED_UPGRADE if database version is older and requires an upgrade
+	 * - & self::NOT_AN_ADMIN if in the restored database the logged user ID passed is not a config admin
+	 * - & self::
 	 */
-	protected function restoreDB($file, $check_foreign_keys = false)
+	static protected function restoreDB(string $file, ?Session $session, bool $check_foreign_keys = false): int
 	{
 		$return = 1;
 
-		// Essayons déjà d'ouvrir la base de données à restaurer en lecture
+		// First try to open database
 		try {
 			$db = new \SQLite3($file, \SQLITE3_OPEN_READONLY);
 		}
-		catch (\Exception $e)
-		{
+		catch (\Exception $e) {
 			throw new UserException('Le fichier fourni n\'est pas une base de données valide. ' .
 				'Message d\'erreur de SQLite : ' . $e->getMessage(), self::NOT_A_DB);
 		}
@@ -408,63 +397,53 @@ class Sauvegarde
 		DB::registerCustomFunctions($db);
 
 		try {
-			// Regardons ensuite si la base de données n'est pas corrompue
+			// Now let's check integrity
 			$check = $db->querySingle('PRAGMA integrity_check;', false);
 		}
-		catch (\Exception $e)
-		{
-			// Ici SQLite peut rejeter un message type "file is encrypted or is not a db"
+		catch (\Exception $e) {
+			// SQLite can throw an error like: "file is encrypted or is not a db"
 			throw new UserException('Le fichier fourni n\'est pas une base de données valide. ' .
 				'Message d\'erreur de SQLite : ' . $e->getMessage(), self::NOT_A_DB);
 		}
 
-		if (strtolower(trim($check)) != 'ok')
-		{
+		if (strtolower(trim($check)) != 'ok') {
 			throw new UserException('Le fichier fourni est corrompu. Erreur SQLite : ' . $check);
 		}
 
-		if ($check_foreign_keys)
-		{
+		if ($check_foreign_keys) {
 			$check = $db->querySingle('PRAGMA foreign_key_check;');
 
-			if ($check)
-			{
+			if ($check) {
 				throw new UserException('Le fichier fourni est corrompu. Certaines clés étrangères référencent des lignes qui n\'existent pas.');
 			}
 		}
 
-		// On ne peut pas faire de vérifications très poussées sur la structure de la base de données,
-		// celle-ci pouvant changer d'une version à l'autre et on peut vouloir importer une base
-		// un peu vieille, mais on vérifie quand même que ça ressemble un minimum à une base garradin
+		// We can't really check if the schema is exactly the one we are expecting
+		// as we allow to restore from old versions, and that would mean storing
+		// all possible old schemas. But we can still see if it looks like a schema
+		// coming from Paheko by looking for the config table.
 		$table = $db->querySingle('SELECT 1 FROM sqlite_master WHERE type=\'table\' AND tbl_name=\'config\';');
 
-		if (!$table)
-		{
-			throw new UserException('Le fichier fourni ne semble pas contenir de données liées à Garradin.');
+		if (!$table) {
+			throw new UserException('Le fichier fourni ne semble pas contenir de données liées à Paheko.');
 		}
 
-		// On récupère la version
 		$version = DB::getVersion($db);
 
-		// On ne permet pas de restaurer une vieille version
-		if (version_compare($version, Upgrade::MIN_REQUIRED_VERSION, '<'))
-		{
+		// We can't possibly handle any old version
+		if (version_compare($version, Upgrade::MIN_REQUIRED_VERSION, '<')) {
 			throw new UserException(sprintf('Ce fichier a été créé avec une version trop ancienne (%s), il n\'est pas possible de le restaurer.', $version));
 		}
 
-		// Vérification de l'AppID
+		// Check for AppID
 		$appid = $db->querySingle('PRAGMA application_id;', false);
 
-		if ($appid !== DB::APPID)
-		{
-			throw new UserException('Ce fichier n\'est pas une sauvegarde Garradin (application_id ne correspond pas).', self::NO_APP_ID);
+		if ($appid !== DB::APPID) {
+			throw new UserException('Ce fichier n\'est pas une sauvegarde Paheko (application_id ne correspond pas).', self::NO_APP_ID);
 		}
 
-		$session = Session::getInstance();
-
-		// Empêchons l'admin de se tirer une balle dans le pied
-		if ($session->isLogged(true))
-		{
+		// Try to handle case where the admin performing the restore is no longer an admin in the restored database
+		if ($session && $session->isLogged(true)) {
 			if (version_compare($version, '1.3.0-alpha1', '<')) { // FIXME remove in 1.4
 				$sql = 'SELECT 1 FROM users_categories WHERE id = (SELECT id_category FROM membres WHERE id = %d) AND perm_connect >= %d AND perm_config >= %d';
 			}
@@ -475,12 +454,10 @@ class Sauvegarde
 			$sql = sprintf($sql, $session->getUser()->id, Session::ACCESS_READ, Session::ACCESS_ADMIN);
 			$is_still_admin = $db->querySingle($sql);
 
-			if (!$is_still_admin)
-			{
+			if (!$is_still_admin) {
 				$return |= self::NOT_AN_ADMIN;
 			}
 		}
-
 
 		$db->close();
 
@@ -488,45 +465,33 @@ class Sauvegarde
 
 		DB::getInstance()->close();
 
-		if (!rename(DB_FILE, $backup))
-		{
+		if (!rename(DB_FILE, $backup)) {
 			throw new \RuntimeException('Unable to backup current DB file.');
 		}
 
-		if (!copy($file, DB_FILE))
-		{
+		if (!copy($file, DB_FILE)) {
 			rename($backup, DB_FILE);
 			throw new \RuntimeException('Unable to copy backup DB to main location.');
 		}
 
 		unlink($backup);
 
-		if (($return & self::NOT_AN_ADMIN) && version_compare($version, '1.1.0', '>='))
-		{
-			// Forcer toutes les catégories à pouvoir gérer les droits
+		// Force all categories to be able to manage users
+		if (($return & self::NOT_AN_ADMIN) && version_compare($version, '1.1.0', '>=')) {
 			$db = DB::getInstance();
-			$db->update('users_categories', [
-				'perm_users' => Session::ACCESS_ADMIN,
-				'perm_connect' => Session::ACCESS_READ
-			]);
+			$db->exec(sprintf('UPDATE users_categories SET perm_config = %d, perm_connect = %d;', Session::ACCESS_ADMIN, Session::ACCESS_READ));
 		}
 
-		if (version_compare($version, '1.1.0', '>=') && $session->isLogged(true) && !$session->refresh()) {
+		// Force user to be re-logged as the first admin
+		if ($session && version_compare($version, '1.1.0', '>=') && $session->isLogged(true) && !$session->refresh()) {
 			$session->forceLogin(-1);
 			$return |= self::CHANGED_USER;
 		}
 
-		if ($version != garradin_version())
-		{
+		if ($version != garradin_version()) {
 			$return |= self::NEED_UPGRADE;
 		}
 		else {
-			// If logged-in user no longer exists, then login to first admin account
-			if (!$session->refresh()) {
-				$session->forceLogin(-1);
-				$return |= self::CHANGED_USER;
-			}
-
 			// Check and upgrade plugins, if a software upgrade is necessary, plugins will be upgraded after the upgrade
 			Plugins::upgradeAllIfRequired();
 		}
@@ -534,21 +499,17 @@ class Sauvegarde
 		return $return;
 	}
 
-	public function restore(string $file)
-	{
-		DB::getInstance()->close();
-		return copy($file, DB_FILE);
-	}
-
 	/**
-	 * Taille de la base de données actuelle
-	 * @return integer Taille en octets du fichier SQLite
+	 * returns current database size in bytes
 	 */
-	public function getDBSize($signed = false)
+	static public function getDBSize(bool $signed = false): int
 	{
 		return filesize(DB_FILE) + ($signed ? 40 : 0);
 	}
 
+	/**
+	 * Returns size of all backups
+	 */
 	static public function getAllBackupsTotalSize(): int
 	{
 		$size = 0;
@@ -561,10 +522,9 @@ class Sauvegarde
 	}
 
 	/**
-	 * Taille occupée par les fichiers dans la base de données
-	 * @return integer Taille en octets
+	 * Return size of all files in database
 	 */
-	public function getDBFilesSize()
+	static public function getDBFilesSize(): int
 	{
 		$db = DB::getInstance();
 		return (int) $db->firstColumn('SELECT SUM(size) FROM files;');

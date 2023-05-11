@@ -50,7 +50,6 @@ class Upgrade
 	static public function upgrade()
 	{
 		$db = DB::getInstance();
-		$backup = new Sauvegarde;
 		$v = $db->version();
 
 		Plugins::toggleSignals(false);
@@ -59,7 +58,7 @@ class Upgrade
 
 		// Créer une sauvegarde automatique
 		$backup_file = sprintf(DATA_ROOT . '/association.pre_upgrade-%s.sqlite', garradin_version());
-		$backup->make($backup_file);
+		Backup::make($backup_file);
 
 		try {
 			if (version_compare($v, '1.1.21', '<')) {
