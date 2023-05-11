@@ -553,7 +553,7 @@
 
 		$('form[target="_dialog"]').forEach((e) => {
 			e.addEventListener('submit', () => {
-				if (e.target != '_dialog') return;
+				if (e.target != '_dialog' && e.target != 'dialog') return;
 
 				let url = e.getAttribute('action');
 				url = url + (url.indexOf('?') > 0 ? '&' : '?') + '_dialog';
