@@ -19,7 +19,7 @@ if ($exists && !filesize(DB_FILE)) {
 }
 
 if ($exists) {
-	throw new UserException('Garradin est déjà installé');
+	throw new UserException('Paheko est déjà installé');
 }
 
 Install::checkAndCreateDirectories();
@@ -39,11 +39,12 @@ $tpl->assign('admin_url', ADMIN_URL);
 
 $form = new Form;
 $tpl->assign_by_ref('form', $form);
+$csrf_key = 'install';
 
 $form->runIf('save', function () {
 	Install::installFromForm();
 	Session::getInstance()->forceLogin(1);
-}, 'install', ADMIN_URL);
+}, $csrf_key, ADMIN_URL);
 
 $tpl->assign('countries', Chart::COUNTRY_LIST);
 
@@ -66,6 +67,6 @@ foreach (Install::DEFAULT_MODULES as $module) {
 
 ksort($installable);
 
-$tpl->assign('installable', $installable);
+$tpl->assign(compact('csrf_key', 'installable'));
 
 $tpl->display('install.tpl');

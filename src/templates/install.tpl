@@ -63,7 +63,7 @@
 {/if}
 
 <p class="submit">
-	{csrf_field key="install"}
+	{csrf_field key=$csrf_key}
 	{button type="submit" name="save" label="Terminer l'installation" shape="right" class="main"}
 </p>
 
