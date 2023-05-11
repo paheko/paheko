@@ -13,9 +13,8 @@ error_reporting(-1);
 const CONFIG_FILE = 'config.local.php';
 
 /*
- * Version de Garradin
+ * Version de Paheko
  */
-
 function garradin_version()
 {
 	if (defined('Garradin\VERSION'))

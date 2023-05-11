@@ -33,7 +33,7 @@ class Upgrade
 
 		if (!$v || version_compare($v, self::MIN_REQUIRED_VERSION, '<'))
 		{
-			throw new UserException(sprintf("Votre version de Garradin est trop ancienne pour être mise à jour. Mettez à jour vers Garradin %s avant de faire la mise à jour vers cette version.", self::MIN_REQUIRED_VERSION));
+			throw new UserException(sprintf("Votre version de Paheko est trop ancienne pour être mise à jour. Mettez à jour vers Paheko %s avant de faire la mise à jour vers cette version.", self::MIN_REQUIRED_VERSION));
 		}
 
 		if (Static_Cache::exists('upgrade'))

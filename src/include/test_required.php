@@ -17,17 +17,17 @@ function test_required($condition, $message)
 		echo "<!DOCTYPE html>\n<html>\n<head>\n<title>Erreur</title>\n<meta charset=\"utf-8\" />\n";
 		echo '<style type="text/css">body { font-family: sans-serif; } ';
 		echo '.error { color: darkred; padding: .5em; margin: 1em; border: 3px double red; background: yellow; }</style>';
-		echo "\n</head>\n<body>\n<h2>Erreur</h2>\n<h3>Le problème suivant empêche Garradin de fonctionner :</h3>\n";
+		echo "\n</head>\n<body>\n<h2>Erreur</h2>\n<h3>Le problème suivant empêche Paheko de fonctionner :</h3>\n";
 		echo '<p class="error">' . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . '</p>';
 		echo '<hr /><p>Pour plus d\'informations consulter ';
-		echo '<a href="http://fossil.kd2.org/garradin/wiki?name=Probl%C3%A8mes%20fr%C3%A9quents">l\'aide sur les problèmes à l\'installation</a>.</p>';
+		echo '<a href="http://fossil.kd2.org/paheko/wiki?name=Probl%C3%A8mes%20fr%C3%A9quents">l\'aide sur les problèmes à l\'installation</a>.</p>';
 		echo "\n</body>\n</html>";
 	}
 	else
 	{
-		echo "[ERREUR] Le problème suivant empêche Garradin de fonctionner :\n";
+		echo "[ERREUR] Le problème suivant empêche Paheko de fonctionner :\n";
 		echo $message . "\n";
-		echo "Pour plus d'informations consulter http://fossil.kd2.org/garradin/wiki?name=Probl%C3%A8mes%20fr%C3%A9quents\n";
+		echo "Pour plus d'informations consulter http://fossil.kd2.org/paheko/wiki?name=Probl%C3%A8mes%20fr%C3%A9quents\n";
 	}
 
 	exit;

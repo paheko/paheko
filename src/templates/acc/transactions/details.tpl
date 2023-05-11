@@ -42,7 +42,7 @@
 {if $transaction.status & $transaction::STATUS_ERROR}
 <div class="error block">
 	<p>Cette écriture est erronée suite à un bug. Il est conseillé de la modifier pour remettre les comptes manquants, ou la supprimer et la re-créer.
-	Voir <a href="https://fossil.kd2.org/garradin/wiki?name=Changelog#1_0_1" target="_blank">cette page pour plus d'explications</a></p>
+	Voir <a href="https://fossil.kd2.org/paheko/wiki?name=Changelog#1_0_1" target="_blank">cette page pour plus d'explications</a></p>
 	<p>Les lignes erronées sont affichées en bas de cette page.</p>
 	<p><em>(Ce message disparaîtra si vous modifiez l'écriture pour la corriger.)</em></p>
 </div>

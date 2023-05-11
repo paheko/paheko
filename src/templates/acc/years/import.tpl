@@ -137,7 +137,7 @@ use Garradin\Accounting\Export;
 	<fieldset>
 		<legend>Import d'écritures</legend>
 		<dl>
-			<dt><label for="f_type_garradin">Type de fichier à importer</label></dt>
+			<dt><label for="f_type_grouped">Type de fichier à importer</label></dt>
 			{foreach from=$types key="type" item="info"}
 			{input type="radio-btn" name="type" value=$type label=$info.label help=$info.help default="full"}
 			<dd class="help example">

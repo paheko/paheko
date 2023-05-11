@@ -1262,7 +1262,7 @@ class Utils
 
 			// We still haven't found anything
 			if (!$cmd) {
-				throw new \LogicException('Aucun programme de création de PDF trouvé, merci d\'en installer un : https://fossil.kd2.org/garradin/wiki?name=Configuration');
+				throw new \LogicException('Aucun programme de création de PDF trouvé, merci d\'en installer un : https://fossil.kd2.org/paheko/wiki?name=Configuration');
 			}
 		}
 
@@ -1349,7 +1349,7 @@ class Utils
 	 *
 	 * On ne peut pas utiliser la version directement comme query string
 	 * pour les éléments statiques (genre /admin/static/admin.css?v0.9.0)
-	 * car cela dévoilerait la version de Garradin utilisée, posant un souci
+	 * car cela dévoilerait la version de Paheko utilisée, posant un souci
 	 * en cas de faille, on cache donc la version utilisée, chaque instance
 	 * aura sa propre version
 	 */
