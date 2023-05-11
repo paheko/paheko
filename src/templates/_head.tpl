@@ -93,6 +93,7 @@ if (!isset($current)) {
 				<li class="{if $current == 'acc/accounts'} current{/if}"><a href="{$admin_url}acc/accounts/">Comptes</a></li>
 				<li class="{if $current == 'acc/simple'} current{/if}"><a href="{$admin_url}acc/accounts/simple.php">Suivi des écritures</a></li>
 				<li class="{if $current == 'acc/years'} current{/if}"><a href="{$admin_url}acc/years/">Exercices &amp; rapports</a></li>
+				<li class="{if $current == 'payments'} current{/if}"><a href="{$admin_url}payments.php">Paiements</a></li>
 			</ul>
 			</li>
 		{/if}
