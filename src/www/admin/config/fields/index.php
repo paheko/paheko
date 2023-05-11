@@ -9,8 +9,8 @@ $csrf_key = 'change_fields_order';
 $fields = DynamicFields::getInstance();
 
 $form->runIf('save', function () use ($fields) {
-    $fields->setOrderAll(f('sort_order'));
-    $fields->save();
+	$fields->setOrderAll(f('sort_order'));
+	$fields->save();
 }, $csrf_key, '!config/fields/?msg=SAVED_ORDER');
 
 $tpl->assign('fields', $fields->all());

@@ -12,12 +12,12 @@ if (!Upgrade::preCheck()) {
 }
 
 if (isset($_GET['next'])) {
-    Upgrade::upgrade();
+	Upgrade::upgrade();
 
-    Install::showProgressSpinner('!', 'Mise à jour terminée');
+	Install::showProgressSpinner('!', 'Mise à jour terminée');
 }
 else {
-    Install::showProgressSpinner('!upgrade.php?next',
-        sprintf("Mise à jour de version :\n%s → %s", DB::getInstance()->version(), garradin_version())
-    );
+	Install::showProgressSpinner('!upgrade.php?next',
+		sprintf("Mise à jour de version :\n%s → %s", DB::getInstance()->version(), garradin_version())
+	);
 }

@@ -13,7 +13,7 @@ if (!$file) {
 }
 
 if (!$file->canDelete()) {
-    throw new UserException('Vous n\'avez pas le droit de supprimer ce fichier.');
+	throw new UserException('Vous n\'avez pas le droit de supprimer ce fichier.');
 }
 
 $csrf_key = 'file_delete_' . $file->pathHash();

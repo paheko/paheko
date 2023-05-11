@@ -11,9 +11,9 @@ $session->requireAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 $limit_date = new \DateTime(Email::RESEND_VERIFICATION_DELAY);
 
 $form->runIf(f('force_queue') && !USE_CRON, function () use ($session) {
-    $session->requireAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
+	$session->requireAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
 
-    Emails::runQueue();
+	Emails::runQueue();
 }, null, '!membres/emails.php?forced');
 
 $list = Emails::listRejectedUsers();

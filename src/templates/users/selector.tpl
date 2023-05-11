@@ -10,12 +10,12 @@
 {if $list}
 <table class="list">
 	<tbody>
-    {foreach from=$list->iterate() item="row"}
-        <tr>
-            <th>
-                {$row.identity}
-            </th>
-            <td class="actions">
+	{foreach from=$list->iterate() item="row"}
+		<tr>
+			<th>
+				{$row.identity}
+			</th>
+			<td class="actions">
 				<button class="icn-btn" value="{$row.id}" data-label="{$row.identity}" data-icon="&rarr;">Sélectionner</button>
 			</td>
 		</tr>

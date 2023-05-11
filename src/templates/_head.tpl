@@ -1,6 +1,6 @@
 <?php
 if (!isset($current)) {
-    $current = '';
+	$current = '';
 }
 ?>
 <!DOCTYPE html>
@@ -130,9 +130,9 @@ if (!isset($current)) {
 		{/if}
 
 	{elseif !defined('Garradin\INSTALL_PROCESS')}
-        {if $config.org_web || !$config.site_disabled}
+		{if $config.org_web || !$config.site_disabled}
 		<li><h3><a href="{if $config.site_disabled && $config.org_web}{$config.org_web}{else}{$www_url}{/if}">{icon shape="left"}<b>Retour au site</b></a></h3></li>
-        {/if}
+		{/if}
 		<li{if $current == 'login'} class="current"{/if}><h3><a href="{$admin_url}">{icon shape="login"}<b>Connexion</b></a></h3></li>
 	{/if}
 	</ul>

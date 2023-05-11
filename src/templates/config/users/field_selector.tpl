@@ -2,12 +2,12 @@
 
 <table class="list">
 	<tbody>
-    {foreach from=$list item="label" key="key"}
-        <tr>
-            <th>
-                {$label}
-            </th>
-            <td class="actions">
+	{foreach from=$list item="label" key="key"}
+		<tr>
+			<th>
+				{$label}
+			</th>
+			<td class="actions">
 				<button class="icn-btn" value="{$key}" data-label="{$label}" data-icon="&rarr;">Sélectionner</button>
 			</td>
 		</tr>
