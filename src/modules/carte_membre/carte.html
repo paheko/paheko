@@ -37,73 +37,32 @@
 	<html>
 	<head>
 		<title>{{$title}}</title>
-		<link rel="stylesheet" type="text/css" href="carte.css" />
+		<link rel="stylesheet" type="text/css" href="{{$module.url}}carte.css" />
 	</head>
 
 	<body>
 
 	{{if $_GET.mode == 'print'}}
-		<main class="sheet">
+		<main class="single">
 	{{elseif $_GET.mode == 'preview'}}
 		<main class="preview">
 	{{/if}}
 
-	{{if $module.config.photo}}
-		{{:assign var="_photo" from="%s.0"|args:$module.config.photo}}
-	{{/if}}
-
-	<article{{if $module.config.logo == 1 || $_photo}} class="with-images"{{/if}}>
-		{{if $module.config.logo == 1 && $config.files.logo}}
-			<img src="{{$config.files.logo}}?150px" alt="" class="logo" />
-		{{elseif $module.config.logo == 2 && $config.files.logo}}
-			<img src="{{$config.files.logo}}?500px" alt="" class="bglogo" />
-		{{/if}}
-
-		{{if $_photo}}
-			<img src="{{$_photo.url}}?150px" alt="" class="photo" />
-		{{/if}}
-
-		<div>
-			{{if $module.config.fields|has:$number_field}}
-				<div class="number"><span>N°</span><span>{{$_number}}</span></div>
-			{{/if}}
-
-			{{if $module.config.header}}
-			<div class="content">
-				{{$module.config.header|markdown|raw}}
-			</div>
-			{{/if}}
-
-			<h1>{{$_name}}</h1>
-
-			{{if $module.config.fields}}
-			<ul class="fields">
-				{{#foreach from=$module.config.fields item="key"}}
-					{{:assign var="value" from=$key}}
-					{{if $value && $key != $number_field}}
-						<li>{{$value}}</li>
-					{{/if}}
-				{{/foreach}}
-			</ul>
-			{{/if}}
-
-			{{if $module.config.id_service}}
-				{{#subscriptions user=$id id_service=$module.config.id_service active=true}}
-					<h3>Jusqu'au <strong>{{$expiry_date|date_short}}</strong></h3>
-				{{else}}
-					<h3>Expiré</h3>
-				{{/subscriptions}}
-			{{/if}}
-
-		</div>
-	</article>
+	{{:include file="./_carte.html"}}
 
 	{{if $_GET.mode != 'embed'}}
 		</main>
 	{{/if}}
 
+	{{if $_GET.print == 'yes'}}
+	<script type="text/javascript">
+	window.onafterprint = window.close;
+	window.print();
+	</script>
+	{{/if}}
 
-	{{:include file="/receipt/_footer.html"}}
+	</body>
+	</html>
 {{else}}
 	{{:error message="Le numéro de membre fourni n'existe pas."}}
 {{/users}}
