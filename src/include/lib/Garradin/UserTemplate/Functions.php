@@ -471,7 +471,7 @@ class Functions
 		}
 
 		if (isset($params['redirect'])) {
-			Utils::redirect($params['redirect']);
+			Utils::redirectDialog($params['redirect']);
 		}
 
 		if (isset($params['code'])) {
