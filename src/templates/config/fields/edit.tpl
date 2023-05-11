@@ -51,9 +51,11 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 	<p class="alert block type-multiple">Attention changer l'ordre des options peut avoir des effets indésirables.</p>
 
 	<dl class="type-multiple type-select options">
-		{foreach from=$field.options item="option"}
-		<dd>{input type="text" name="options[]" default=$option}</dd>
-		{/foreach}
+		{if $field.options}
+			{foreach from=$field.options item="option"}
+			<dd>{input type="text" name="options[]" default=$option}</dd>
+			{/foreach}
+		{/if}
 		<dd>{input type="text" name="options[]"}</dd>
 	</dl>
 </fieldset>
