@@ -264,7 +264,9 @@ class DynamicField extends Entity
 			$this->assert($this->type == 'password', 'Le champ mot de passe ne peut être d\'un type différent de mot de passe.');
 		}
 
-		$this->assert(!($this->type == 'multiple' || $this->type == 'select') || !empty($this->options), 'Le champ nécessite de comporter au moins une option possible.');
+		if ($this->type == 'multiple' || $this->type == 'select') {
+			$this->assert(is_array($this->options) && count($this->options) >= 1, 'Le champ nécessite de comporter au moins une option possible: ' . $this->name);
+		}
 
 		$db = DB::getInstance();
 

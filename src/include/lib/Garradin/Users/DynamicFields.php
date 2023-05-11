@@ -426,6 +426,7 @@ class DynamicFields
 			$field->set('required', (bool) $data['mandatory']);
 			$field->set('list_table', (bool) $data['list_row']);
 			$field->set('sort_order', $i++);
+			$field->set('options', $data['options'] ?? null);
 			$self->add($field);
 		}
 
