@@ -3,7 +3,7 @@
 
 <nav class="tabs">
 	<aside>
-		{{:linkbutton target="_dialog" href="edit.html" label="Nouveau modèle" shape="plus"}}
+		{{:linkbutton href="edit.html" label="Nouveau modèle" shape="plus"}}
 	</aside>
 </nav>
 
@@ -18,7 +18,7 @@
 		<th>{{:link href=$url label=$name}}</th>
 		<td class="actions">
 			{{:linkbutton href=$url label="Saisir cette écriture" shape="plus"}}
-			{{:linkbutton target="_dialog" href="edit.html?id=%d"|args:$id label="Modifier" shape="edit"}}
+			{{:linkbutton href="edit.html?id=%d"|args:$id label="Modifier" shape="edit"}}
 			{{:linkbutton target="_dialog" href="delete.html?id=%d"|args:$id label="Supprimer" shape="delete"}}
 		</td>
 	</tr>
