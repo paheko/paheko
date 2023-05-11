@@ -1323,4 +1323,9 @@ class File extends Entity
 
 		return Files::callStorage('getDirectorySize', $this->path);
 	}
+
+	public function webdav_root_url(): string
+	{
+		return BASE_URL . 'dav/' . $this->context() . '/';
+	}
 }

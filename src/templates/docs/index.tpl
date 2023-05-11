@@ -262,4 +262,16 @@ use Garradin\Entities\Files\File;
 	<p class="alert block">Il n'y a aucun fichier dans ce répertoire.</p>
 {/if}
 
+{if $parent->path == $parent->context()}
+<div class="help flex">
+	<p>
+		Adresse WebDAV&nbsp;:
+		{copy_button label=$parent->webdav_root_url()}
+	</p>
+	<p>
+		{linkbutton shape="help" href=HELP_PATTERN_URL|args:"webdav" label="Accéder aux documents avec WebDAV" target="_dialog"}
+	</p>
+</div>
+{/if}
+
 {include file="_foot.tpl"}

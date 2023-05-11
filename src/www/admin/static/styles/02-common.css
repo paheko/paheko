@@ -103,6 +103,12 @@ p.help:not(.block) {
     margin: 1em;
 }
 
+div.help.flex {
+    margin: .5em;
+    display: flex;
+    justify-content: space-between;
+}
+
 .help ul li {
     list-style-type: disc;
     margin: .5em;

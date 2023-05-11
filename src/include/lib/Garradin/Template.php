@@ -149,6 +149,7 @@ class Template extends Smartyer
 
 		$this->register_function('form_errors', [$this, 'formErrors']);
 
+		$this->register_function('copy_button', [$this, 'copyButton']);
 		$this->register_function('custom_colors', [$this, 'customColors']);
 		$this->register_function('plugin_url', ['Garradin\Utils', 'plugin_url']);
 		$this->register_function('diff', [$this, 'diff']);
@@ -666,5 +667,10 @@ class Template extends Smartyer
 		}
 
 		return implode(' ', $out);
+	}
+
+	protected function copyButton(array $params): string
+	{
+		return sprintf('<samp class="copy" onclick="this.nextSibling.click();" title="Cliquer pour copier dans le presse-papier">%s</samp><input type="button" onclick="var a = this.previousSibling; a.focus(); navigator.clipboard.writeText(a.innerText); this.value = \'Copié !\'; this.focus(); return false;" onblur="this.value = \'Copier\';" value="Copier" title="Copier dans le presse-papier" />', htmlspecialchars($params['label']));
 	}
 }
