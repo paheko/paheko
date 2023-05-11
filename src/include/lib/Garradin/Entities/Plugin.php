@@ -127,7 +127,7 @@ class Plugin extends Entity
 			return false;
 		}
 
-		$this->assert(empty($ini->min_version) || version_compare(\Garradin\garradin_version(), $ini->min_version, '>='), sprintf('L\'extension "%s" nécessite Paheko version %s ou supérieure.', $this->name, $ini->min_version));
+		$this->assert(empty($ini->min_version) || version_compare(\Garradin\paheko_version(), $ini->min_version, '>='), sprintf('L\'extension "%s" nécessite Paheko version %s ou supérieure.', $this->name, $ini->min_version));
 
 		$restrict_section = null;
 		$restrict_level = null;

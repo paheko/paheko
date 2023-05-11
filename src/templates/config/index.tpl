@@ -16,7 +16,7 @@
 		<legend>Informations</legend>
 		<dl>
 			<dt>Version installée</dt>
-			<dd>Paheko {$garradin_version}</dd>
+			<dd>Paheko {$paheko_version}</dd>
 			{if CONTRIBUTOR_LICENSE === null}
 			<dd class="help">
 				Le développement et le support de Paheko ne sont possibles que grâce à votre soutien&nbsp;!<br />

@@ -15,7 +15,7 @@ const CONFIG_FILE = 'config.local.php';
 /*
  * Version de Paheko
  */
-function garradin_version()
+function paheko_version()
 {
 	if (defined('Garradin\VERSION'))
 	{
@@ -37,7 +37,7 @@ function garradin_version()
 	return $version;
 }
 
-function garradin_manifest()
+function paheko_manifest()
 {
 	$file = __DIR__ . '/../../manifest.uuid';
 
@@ -50,10 +50,10 @@ function garradin_manifest()
 }
 
 /**
- * Le code de Garradin ne s'écrit pas tout seul comme par magie,
+ * Le code de Paheko ne s'écrit pas tout seul comme par magie,
  * merci de soutenir notre travail en faisant une contribution :)
  */
-function garradin_contributor_license(): ?int
+function paheko_contributor_license(): ?int
 {
 	static $level = null;
 
@@ -309,9 +309,9 @@ if (MAIL_ERRORS)
 }
 
 ErrorManager::setContext([
-	'root_directory'      => ROOT,
-	'garradin_data_root' => DATA_ROOT,
-	'garradin_version'   => garradin_version(),
+	'root_directory'   => ROOT,
+	'paheko_data_root' => DATA_ROOT,
+	'paheko_version'   => paheko_version(),
 ]);
 
 if (ERRORS_REPORT_URL)
@@ -421,7 +421,7 @@ if (!defined('Garradin\INSTALL_PROCESS'))
 
 	$v = DB::getInstance()->version();
 
-	if (version_compare($v, garradin_version(), '<'))
+	if (version_compare($v, paheko_version(), '<'))
 	{
 		Utils::redirect(ADMIN_URL . 'upgrade.php');
 	}

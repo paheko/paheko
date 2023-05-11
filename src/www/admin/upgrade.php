@@ -18,6 +18,6 @@ if (isset($_GET['next'])) {
 }
 else {
 	Install::showProgressSpinner('!upgrade.php?next',
-		sprintf("Mise à jour de version :\n%s → %s", DB::getInstance()->version(), garradin_version())
+		sprintf("Mise à jour de version :\n%s → %s", DB::getInstance()->version(), paheko_version())
 	);
 }

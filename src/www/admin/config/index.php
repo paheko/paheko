@@ -28,7 +28,7 @@ if (null !== $latest) {
 }
 
 $tpl->assign([
-	'garradin_version' => garradin_version() . ' [' . (garradin_manifest() ?: 'release') . ']',
+	'paheko_version'   => paheko_version() . ' [' . (paheko_manifest() ?: 'release') . ']',
 	'new_version'      => $latest,
 	'php_version'      => phpversion(),
 	'has_gpg_support'  => \KD2\Security::canUseEncryption(),

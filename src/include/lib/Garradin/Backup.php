@@ -488,7 +488,7 @@ class Backup
 			$return |= self::CHANGED_USER;
 		}
 
-		if ($version != garradin_version()) {
+		if ($version != paheko_version()) {
 			$return |= self::NEED_UPGRADE;
 		}
 		else {

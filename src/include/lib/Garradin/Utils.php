@@ -1355,7 +1355,7 @@ class Utils
 	 */
 	static public function getVersionHash(): string
 	{
-		return substr(sha1(garradin_version() . garradin_manifest() . ROOT . SECRET_KEY), 0, 10);
+		return substr(sha1(paheko_version() . paheko_manifest() . ROOT . SECRET_KEY), 0, 10);
 	}
 
 	/**
