@@ -464,7 +464,7 @@ Liste les membres.
 
 Paramètres possibles :
 
-| `id` | optionnel | Identifiant unique du membre |
+| `id` | optionnel | Identifiant unique du membre, ou tableau contenant une liste d'identifiants. |
 | `search_name` | optionnel | Ne lister que les membres dont le nom correspond au texte passé en paramètre. |
 
 Chaque itération renverra la fiche du membre, ainsi que ces variables :

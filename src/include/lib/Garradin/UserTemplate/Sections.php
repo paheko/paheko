@@ -545,14 +545,20 @@ class Sections
 			$id_field, $login_field, $number_field);
 		$params['tables'] = 'users';
 
-		if (isset($params['id'])) {
+		$db = DB::getInstance();
+
+		if (isset($params['id']) && is_array($params['id'])) {
+			$params['id'] = array_map('intval', $params['id']);
+			$params['where'] .= ' AND users.' . $db->where('id', $params['id']);
+			unset($params['id']);
+		}
+		elseif (isset($params['id'])) {
 			$params['where'] .= ' AND users.id = :id';
 			$params[':id'] = (int) $params['id'];
 			unset($params['id']);
 		}
 
 		if (!empty($params['search_name'])) {
-
 			$params['tables'] .= sprintf(' INNER JOIN users_search AS us ON us.id = users.id AND %s LIKE :search_name ESCAPE \'\\\' COLLATE NOCASE',
 				DynamicFields::getNameFieldsSQL('us'));
 			$params[':search_name'] = '%' . Utils::unicodeTransliterate($params['search_name']) . '%';
