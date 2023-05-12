@@ -492,7 +492,7 @@ CREATE INDEX IF NOT EXISTS acc_transactions_users_service ON acc_transactions_us
 CREATE TABLE IF NOT EXISTS payment
 (
     id INTEGER NOT NULL PRIMARY KEY,
-    reference TEXT NOT NULL,
+    reference TEXT NULL,
     id_author INTEGER REFERENCES users (id),
     author_name TEXT NOT NULL,
     provider TEXT NOT NULL,

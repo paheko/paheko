@@ -8,13 +8,28 @@
 {/foreach}
 </ul>
 
-<h2>Payments</h2>
+<h2>Liste des paiements</h2>
 
-<ul>
-{foreach from=$payments item='payment'}
-	<li>{$payment->label} - {$payment.status}: {$payment->amount|escape|money_currency}</li>
-{/foreach}
-</ul>
+<table class="list">
+	<thead>
+		<tr>
+			<td class="{if $list->order === 'label'}cur{/if}">Libellé</td>
+			<td class="{if $list->order === 'status'}cur{/if}">Statut</td>
+			<td class="{if $list->order === 'amount'}cur{/if}">Montant</td>
+		</tr>
+	</thead>
+	<tbody>
+
+	{foreach from=$payments item='payment'}
+	<tr>
+		<td><a href="{$admin_url}payments.php?id={$payment->id}">{$payment->label}</a></td>
+		<td>{$payment.status}</td>
+		<td>{$payment->amount|escape|money_currency}</td>
+	</tr>
+	{/foreach}
+
+	</tbody>
+</table>
 
 {if $_GET.ok}
 	<p class="confirm block">Paiement enregistré avec succès</p>

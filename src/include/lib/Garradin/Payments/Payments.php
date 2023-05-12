@@ -12,7 +12,7 @@ class Payments
 {
 	const CREATION_LOG_LABEL = 'Paiement créé';
 
-	static public function createPayment(string $type, string $method, string $status, string $provider_name, int $author_id, ?string $author_name, string $reference, string $label, int $amount, ?string $extra_data = null): ?Payment
+	static public function createPayment(string $type, string $method, string $status, string $provider_name, int $author_id, ?string $author_name, ?string $reference, string $label, int $amount, ?\stdClass $extra_data = null): ?Payment
 	{
 		$payment = new Payment();
 
@@ -53,10 +53,16 @@ class Payments
 		$payment->amount = $amount;
 		$payment->date = new \DateTime();
 		$payment->history = $payment->date->format('Y-m-d H:i:s') . ' - '. self::CREATION_LOG_LABEL;
-		$payment->extra_data = $extra_data;
+		$payment->set('extra_data', $extra_data);
 		
-		if (!$payment->save())
-			return false;
+		if (!$payment->save()) {
+			throw new \RuntimeException(sprintf('Payment recording failed (provider: %s, ID: %s)', $payment->provider, $payment->reference));
+		}
 		return $payment;
+	}
+	
+	static public function getByReference(string $provider_name, string $reference): ?Payment
+	{
+		return EntityManager::findOne(Payment::class, 'SELECT * FROM @TABLE WHERE provider = :provider AND reference = :reference', $provider_name, $reference);
 	}
 }
