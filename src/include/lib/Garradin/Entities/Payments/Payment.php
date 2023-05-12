@@ -60,7 +60,7 @@ class Payment extends Entity
 	{
 		// ToDo: implements $loose option
 		// ToDo: implements getAsString() as in AbstractEntity::set()
-		$original_value = (null !== $this->extra_data->$key) ? $this->extra_data->$key : null;
+		$original_value = isset($this->extra_data->$key) ? $this->extra_data->$key : null;
 		
 		$this->extra_data->$key = $value;
 		
