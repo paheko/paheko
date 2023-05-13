@@ -44,7 +44,7 @@
 				<td class="money">{$line.change|abs|raw|money}</td>
 				<td>{$line.reference}</td>
 				<th>{$line.label}</th>
-				<td>{$line.line_reference}</td>
+				<td class="num">{if $line.line_reference}<a href="{$admin_url}payments.php?id={$line.line_reference|intval}">#{$line.line_reference}</a>{/if}</td>
 				<td class="num">{foreach from=$line.projects item="code" key="id"}<a href="{$admin_url}acc/reports/statement.php?project={$id}&amp;year={$year.id}">{$code}</a> {/foreach}</td>
 				<td>{if $line.locked}{icon title="Écriture verrouillée" shape="lock"}{/if}</td>
 				{if property_exists($line, 'status_label')}

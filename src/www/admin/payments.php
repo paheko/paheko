@@ -6,6 +6,7 @@ use Garradin\Payments\Payments;
 use Garradin\Payments\Providers;
 use Garradin\Entities\Payments\Payment;
 use Garradin\Entities\Users\User;
+use Garradin\Accounting\Years;
 
 use KD2\DB\EntityManager;
 use Garradin\UserException;
@@ -27,6 +28,7 @@ if (array_key_exists('id', $_GET)) {
 	$tpl->assign('payment', $payment);
 	$tpl->assign('provider', $provider);
 	$tpl->assign('author', $author);
+	$tpl->assign('TECH_DETAILS', SHOW_ERRORS && ENABLE_TECH_DETAILS);
 
 	$tpl->display('payment.tpl');
 }
@@ -39,6 +41,8 @@ else {
 	$tpl->assign('providers', $providers);
 	$tpl->assign('provider_options', $provider_options);
 	$tpl->assign('payments', EntityManager::getInstance(Payment::class)->all('SELECT * FROM @TABLE'));
+	
+	$tpl->assign('years', Years::listOpen());
 
 	// Not yet implemented
 	$list = new \stdClass();
@@ -48,7 +52,8 @@ else {
 	$payment = new Payment();
 	$form->runIf('save', function () use ($payment) {
 		// ToDo: add a nice form check
-		Payments::createPayment($_POST['type'], $_POST['method'], Payment::AWAITING_STATUS, $_POST['provider'], array_keys($_POST['author'])[0], null, (!empty($_POST['reference']) ? $_POST['reference'] : null), $_POST['label'], $_POST['amount'] * 100);
+		$accounts = array_key_exists('accounting', $_POST) ? [array_keys($_POST['credit'])[0], array_keys($_POST['debit'])[0]] : null;
+		Payments::createPayment($_POST['type'], $_POST['method'], Payment::AWAITING_STATUS, $_POST['provider'], $accounts, array_keys($_POST['author'])[0], null, (!empty($_POST['reference']) ? $_POST['reference'] : null), $_POST['label'], $_POST['amount'] * 100, null, $_POST['notes']);
 		Utils::redirect('!payments.php?ok=1');
 	});
 

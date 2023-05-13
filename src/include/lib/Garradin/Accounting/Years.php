@@ -27,6 +27,11 @@ class Years
 		return EntityManager::getInstance(Year::class)->col('SELECT id FROM @TABLE WHERE closed = 0 ORDER BY start_date LIMIT 1;');
 	}
 
+	static public function getOpenYearIdMatchingDate(\DateTime $date): int
+	{
+		return (int)EntityManager::getInstance(Year::class)->col('SELECT id FROM @TABLE WHERE closed = 0 AND :date >= start_date AND :date <= end_date ORDER BY start_date LIMIT 1;', $date->format('Y-m-d'));
+	}
+
 	static public function listOpen($with_stats = false)
 	{
 		$db = EntityManager::getInstance(Year::class)->DB();

@@ -17,8 +17,15 @@
 	<dd>{$payment->type}</dd>
 	<dt>Auteur/trice</dt>
 	<dd>{if $author}<a href="{$admin_url}users/details.php?id={$author->id}">{$author->nom}</a>{else}{$payment->author_name}{/if}</dd>
-	<dt>extra_data</dt>
-	<dd><pre>{$payment->extra_data|dump}</pre></dd>
+	<dt>Écriture comptable</dt>
+	<dd>{if $payment->id_transaction}<mark><a href="{$admin_url}acc/transactions/details.php?id={$payment->id_transaction}">{$payment->id_transaction}</a></mark>{else}-{/if}</dd>
 </dl>
+
+{if $TECH_DETAILS}
+	<dl style="background-color: black; color: limegreen; padding-top: 0.8em;" class="describe">
+		<dt style="color: limegreen;">extra_data</dt>
+		<dd><pre>{$payment->extra_data|dump}</pre></dd>
+	</dl>
+{/if}
 
 {include file="_foot.tpl"}

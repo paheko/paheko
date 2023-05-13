@@ -7,12 +7,15 @@ use Garradin\Entities\Payments\Provider;
 use Garradin\Entities\Users\User;
 use Garradin\Payments\Providers;
 use KD2\DB\EntityManager;
+use Garradin\Entities\Accounting\Transaction;
+use Garradin\Accounting\Years;
 
 class Payments
 {
 	const CREATION_LOG_LABEL = 'Paiement créé';
+	const TRANSACTION_PREFIX = 'Paiement';
 
-	static public function createPayment(string $type, string $method, string $status, string $provider_name, int $author_id, ?string $author_name, ?string $reference, string $label, int $amount, ?\stdClass $extra_data = null): ?Payment
+	static public function createPayment(string $type, string $method, string $status, string $provider_name, ?array $accounts, int $author_id, ?string $author_name, ?string $reference, string $label, int $amount, ?\stdClass $extra_data = null, ?string $transaction_notes = null): ?Payment
 	{
 		$payment = new Payment();
 
@@ -58,9 +61,48 @@ class Payments
 		if (!$payment->save()) {
 			throw new \RuntimeException(sprintf('Payment recording failed (provider: %s, ID: %s)', $payment->provider, $payment->reference));
 		}
+		if ($accounts) {
+			$transaction = self::createTransaction($payment, $accounts, $transaction_notes);
+			$payment->id_transaction = (int)$transaction->id;
+			$payment->save();
+		}
 		return $payment;
 	}
-	
+
+	static public function createTransaction(Payment $payment, array $accounts, ?string $notes = null): Transaction
+	{
+		if (!$id_year = Years::getOpenYearIdMatchingDate($payment->date)) {
+			throw new \RuntimeException(sprintf('No opened accounting year matching the payment date "%s"!', $payment->date->format('Y-m-d')));
+		}
+		// ToDo: check accounts validity (right number for the Transaction type)
+
+		$transaction = new Transaction();
+		$transaction->type = Transaction::TYPE_REVENUE;
+
+		$source = [
+			'status' => Transaction::STATUS_PAID,
+			'label' => self::TRANSACTION_PREFIX . ' - ' . $payment->label,
+			'notes' => $notes,
+			'payment_reference' => $payment->id,
+			'date' => \KD2\DB\Date::createFromInterface($payment->date),
+			'id_year' => (int)$id_year,
+			'amount' => $payment->amount / 100,
+			'simple' => [
+				Transaction::TYPE_REVENUE => [
+					'credit' => [ (int)$accounts[0] => null ],
+					'debit' => [ (int)$accounts[1] => null ]
+			]]
+			// , 'id_user'/'id_creator' => ...
+		];
+
+		$transaction->importForm($source);
+
+		if (!$transaction->save()) {
+			throw new \RuntimeException(sprintf('Cannot record payment transaction. Payment ID: %d.', $payment->id));
+		}
+		return $transaction;
+	}
+
 	static public function getByReference(string $provider_name, string $reference): ?Payment
 	{
 		return EntityManager::findOne(Payment::class, 'SELECT * FROM @TABLE WHERE provider = :provider AND reference = :reference', $provider_name, $reference);

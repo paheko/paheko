@@ -489,23 +489,24 @@ CREATE INDEX IF NOT EXISTS acc_transactions_users_service ON acc_transactions_us
 
 ---------- PAYMENTS ----------------
 
-CREATE TABLE IF NOT EXISTS payment
+CREATE TABLE IF NOT EXISTS payments
 (
     id INTEGER NOT NULL PRIMARY KEY,
     reference TEXT NULL,
+    id_transaction INTEGER NULL REFERENCES acc_transactions (id),
     id_author INTEGER REFERENCES users (id),
     author_name TEXT NOT NULL,
     provider TEXT NOT NULL,
-    type TEXT CHECK( type IN ('unique', 'tif', 'monthly', 'other') ) NOT NULL,
-    status TEXT CHECK( status IN ('planned', 'awaiting', 'validated', 'cancelled') ) NOT NULL,
+    type TEXT NOT NULL CHECK( type IN ('unique', 'tif', 'monthly', 'other') ),
+    status TEXT NOT NULL CHECK( status IN ('planned', 'awaiting', 'validated', 'cancelled') ),
     label TEXT NOT NULL,
     amount UNSIGNED INTEGER NOT NULL,
     `date` TEXT NOT NULL CHECK (datetime(`date`) IS NOT NULL AND datetime(`date`) = `date`),
-    method TEXT CHECK (method IN ('cash', 'cheque', 'bank_card', 'bank_wire', 'other') ) NOT NULL,
+    method TEXT NOT NULL CHECK (method IN ('cash', 'cheque', 'bank_card', 'bank_wire', 'other') ),
     history TEXT NOT NULL,
     extra_data TEXT
 );
-CREATE UNIQUE INDEX IF NOT EXISTS payment_reference ON payment (reference, provider);
+CREATE UNIQUE INDEX IF NOT EXISTS payment_reference ON payments (reference, provider);
 
 CREATE TABLE IF NOT EXISTS payment_provider
 (

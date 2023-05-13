@@ -26,10 +26,11 @@ class Payment extends Entity
 	const STATUSES = [ self::PLANNED_STATUS => 'planifié', self::AWAITING_STATUS => 'en attente', self::VALIDATED_STATUS => 'validé', self::CANCELLED_STATUS => 'annulé' ];
 	const METHODS = [ self::CASH_METHOD => 'espèces', self::CHEQUE_METHOD => 'chèque', self::BANK_CARD_METHOD => 'carte bancaire', self::BANK_WIRE_METHOD => 'virement', self::OTHER_METHOD => 'autre'];
 	
-	const TABLE = 'payment';
+	const TABLE = 'payments';
 
 	protected int			$id;
 	protected ?string		$reference;
+	protected ?int			$id_transaction;
 	protected ?int			$id_author;
 	protected string		$author_name;
 	protected string		$provider;
@@ -50,10 +51,14 @@ class Payment extends Entity
 		if (property_exists($this, $key)) {
 			return $this->$key;
 		}
-		if (!property_exists($this->extra_data, $key)) {
-			throw new \InvalidArgumentException(sprintf('%s property does not exist neither in %s not in its extra_data member.', $key, self::class));
+		if ($this->extra_data) // extra_data may be null
+		{
+			if (!property_exists($this->extra_data, $key)) {
+				throw new \InvalidArgumentException(sprintf('%s property does not exist neither in %s not in its extra_data member.', $key, self::class));
+			}
+			return $this->extra_data->$key;
 		}
-		return $this->extra_data->$key;
+		return null;
 	}
 
 	public function setExtraData(string $key, $value, bool $loose = false, bool $check_for_changes = true)
