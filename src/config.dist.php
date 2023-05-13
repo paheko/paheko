@@ -191,9 +191,9 @@ namespace Garradin;
  * Si "true" alors un message expliquant l'erreur et comment rapporter le bug s'affiche
  * en cas d'erreur. Sinon rien ne sera affiché.
  *
- * Défaut : false
+ * Défaut : TRUE (pour aider le debug de l'auto-hébergement)
  *
- * Il est fortement conseillé de mettre cette valeur à false en production !
+ * Il est fortement conseillé de mettre cette valeur à FALSE en production !
  */
 
 //const SHOW_ERRORS = false;
