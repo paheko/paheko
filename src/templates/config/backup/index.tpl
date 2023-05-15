@@ -27,8 +27,8 @@
 	<dl>
 		<dt><strong>Membres</strong></dt>
 		<dd><a href="{$admin_url}users/import.php">Import de la liste des membres</a></dd>
-		<dd><a href="{$admin_url}users/import.php?export=ods">Export de la liste des membres au format tableur LibreOffice Calc / Excel</a></dd>
-		<dd><a href="{$admin_url}users/import.php?export=csv">Export de la liste des membres au format CSV</a></dd>
+		<dd><a href="{$admin_url}users/?export=ods">Export de la liste des membres au format tableur LibreOffice Calc / Excel</a></dd>
+		<dd><a href="{$admin_url}users/?export=csv">Export de la liste des membres au format CSV</a></dd>
 		<dt><strong>Comptabilité</strong> (pour l'exercice courant)</dt>
 		<dd><a href="{$admin_url}acc/years/import.php">Import des données comptables</a></dd>
 		<dd><a href="{$admin_url}acc/years/export.php">Export des données comptables</a></dd>
