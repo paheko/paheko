@@ -6,14 +6,14 @@
 {{/if}}
 
 {{:assign var="r" value=$_POST}}
-{{:assign var="montant" value="%d*100"|math:$r.montant}}
+{{:assign var="montant" value=$r.montant|money_int}}
 
 {{:include file="./_config_default.tpl"}}
 
 <h1>Reçu au titre des dons à certains organismes d’intérêt général</h1>
 <p><em>Article 200, 238 bis et 978 du code général des impôts (CGI)</em></p>
 
-<h4>Numéro d'ordre du reçu&nbsp;: {{if $preview}}(Brouillon){{else}}%ID%{{/if}}</h4>
+<h4>Numéro d'ordre du reçu&nbsp;: {{if $preview}}(Brouillon){{else}}N°{{$r.id}}{{/if}}</h4>
 
 
 <h3>Bénéficiaire des versements</h3>
@@ -49,7 +49,7 @@
 </table>
 
 <p>Le bénéficiaire reconnaît avoir reçu au titre des dons et versements ouvrant droit à réduction d’impôt, la somme de&nbsp;:
-	{{$montant|money_raw|spell_out_number}} euros (***<strong>{{$montant|raw|money_currency:true}}</strong>***).</p>
+	{{$montant|money_raw|spell_out_number:'fr_FR':'euros'}} (***<strong>{{$montant|raw|money_currency:true}}</strong>***).</p>
 
 <p>Date du versement ou du don&nbsp;: {{$r.date|date_short}}</p>
 
