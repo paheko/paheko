@@ -228,6 +228,63 @@ Il est également possible de passer des arguments dans les paramètres à l'aid
 {{#articles where="title = :montitre" :montitre="Actualité"}}
 ```
 
+# Membres
+
+## users
+
+Liste les membres.
+
+Paramètres possibles :
+
+| `id` | optionnel | Identifiant unique du membre, ou tableau contenant une liste d'identifiants. |
+| `search_name` | optionnel | Ne lister que les membres dont le nom correspond au texte passé en paramètre. |
+
+Chaque itération renverra la fiche du membre, ainsi que ces variables :
+
+| `$id` | Identifiant unique du membre |
+| `$_name` | Nom du membre, tel que défini dans la configuration |
+| `$_login` | Identifiant de connexion du membre, tel que défini dans la configuration |
+| `$_number` | Numéro du membre, tel que défini dans la configuration |
+
+
+## subscriptions
+
+Liste les inscriptions à une ou des activités.
+
+Paramètres possibles :
+
+| `user` | optionnel | Identifiant unique du membre |
+| `active` | optionnel | Si `TRUE`, seules les inscriptions à jour sont listées |
+| `id_service` | optionnel | Ne renvoie que les inscriptions à l'activité correspondant à cet ID. |
+
+# Comptabilité
+
+## accounts
+
+Liste les comptes d'un plan comptable.
+
+| Paramètre | Fonction |
+| :- | :- |
+| `codes` (optionel) | Ne renvoyer que les comptes ayant ces codes (séparer par des virgules). |
+| `id` (optionel) | Ne renvoyer que le compte ayant cet ID. |
+
+## balances
+
+Renvoie la balance des comptes.
+
+| Paramètre | Fonction |
+| :- | :- |
+| `codes` (optionel) | Ne renvoyer que les balances des comptes ayant ces codes (séparer par des virgules). |
+| `year` (optionel) | Ne renvoyer que les balances des comptes utilisés sur l'année (indiquer ici un ID de year). |
+
+## years
+
+Liste les exercices comptables
+
+| Paramètre | Fonction |
+| :- | :- |
+| `closed` (optionel) | Mettre `closed=true` pour ne lister que les exercices clôturés, ou `closed=false` pour ne lister que les exercices ouverts. |
+
 # Pour le site web
 
 ## breadcrumbs
@@ -457,30 +514,3 @@ On peut utiliser le nom des clés du document JSON, mais sinon pour faire réfé
 
 Noter aussi l'utilisation du numéro de la colonne de l'année (`2`) pour le paramètre `order`, qui avec `select` doit indiquer le numéro de la colonne à utiliser pour l'ordre.
 
-
-## users
-
-Liste les membres.
-
-Paramètres possibles :
-
-| `id` | optionnel | Identifiant unique du membre, ou tableau contenant une liste d'identifiants. |
-| `search_name` | optionnel | Ne lister que les membres dont le nom correspond au texte passé en paramètre. |
-
-Chaque itération renverra la fiche du membre, ainsi que ces variables :
-
-| `$id` | Identifiant unique du membre |
-| `$_name` | Nom du membre, tel que défini dans la configuration |
-| `$_login` | Identifiant de connexion du membre, tel que défini dans la configuration |
-| `$_number` | Numéro du membre, tel que défini dans la configuration |
-
-
-## subscriptions
-
-Liste les inscriptions à une ou des activités.
-
-Paramètres possibles :
-
-| `user` | optionnel | Identifiant unique du membre |
-| `active` | optionnel | Si `TRUE`, seules les inscriptions à jour sont listées |
-| `id_service` | optionnel | Ne renvoie que les inscriptions à l'activité correspondant à cet ID. |

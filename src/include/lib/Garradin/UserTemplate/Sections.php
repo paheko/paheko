@@ -36,6 +36,7 @@ class Sections
 		'transaction_users',
 		'accounts',
 		'balances',
+		'years',
 		'sql',
 		'restrict',
 		'module',
@@ -464,14 +465,13 @@ class Sections
 	{
 		$db = DB::getInstance();
 
-		if (!array_key_exists('where', $params)) {
-			$params['where'] = '';
-		}
-
+		$params['where'] ??= '';
 		$params['tables'] = 'acc_accounts_balances';
 
 		if (isset($params['codes'])) {
-			$params['codes'] = explode(',', $params['codes']);
+			if (!is_array($params['codes'])) {
+				$params['codes'] = explode(',', $params['codes']);
+			}
 
 			foreach ($params['codes'] as &$code) {
 				$code = 'code LIKE ' . $db->quote($code);
@@ -490,19 +490,14 @@ class Sections
 
 		$params['select'] = $params['select'] ?? 'SUM(credit) AS credit, SUM(debit) AS debit, SUM(balance) AS balance, label, code';
 
-		foreach (self::sql($params, $tpl, $line) as $row) {
-			yield $row;
-		}
+		return self::sql($params, $tpl, $line);
 	}
 
 	static public function accounts(array $params, UserTemplate $tpl, int $line): \Generator
 	{
 		$db = DB::getInstance();
 
-		if (!array_key_exists('where', $params)) {
-			$params['where'] = '';
-		}
-
+		$params['where'] ??= '';
 		$params['tables'] = 'acc_accounts';
 
 		if (isset($params['codes'])) {
@@ -522,16 +517,26 @@ class Sections
 			unset($params['id']);
 		}
 
-		foreach (self::sql($params, $tpl, $line) as $row) {
-			yield $row;
+		return self::sql($params, $tpl, $line);
+	}
+
+	static public function years(array $params, UserTemplate $tpl, int $line): \Generator
+	{
+		$params['tables'] = 'acc_years';
+
+		$params['where'] ??= '';
+
+		if (isset($params['closed'])) {
+			$params['where'] .= sprintf(' AND closed = %d', $params['closed']);
+			unset($params['closed']);
 		}
+
+		return self::sql($params, $tpl, $line);
 	}
 
 	static public function users(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		if (!array_key_exists('where', $params)) {
-			$params['where'] = '';
-		}
+		$params['where'] ??= '';
 
 		$id_field = DynamicFields::getNameFieldsSQL('users');
 		$login_field = DynamicFields::getLoginField();
@@ -586,9 +591,7 @@ class Sections
 
 	static public function subscriptions(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		if (!array_key_exists('where', $params)) {
-			$params['where'] = '';
-		}
+		$params['where'] ??= '';
 
 		$number_field = DynamicFields::getNumberField();
 
@@ -623,9 +626,7 @@ class Sections
 
 	static public function transactions(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		if (!array_key_exists('where', $params)) {
-			$params['where'] = '';
-		}
+		$params['where'] ??= '';
 
 		if (isset($params['id'])) {
 			$params['where'] .= ' AND t.id = :id';
@@ -648,9 +649,7 @@ class Sections
 
 	static public function transaction_lines(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		if (!array_key_exists('where', $params)) {
-			$params['where'] = '';
-		}
+		$params['where'] ??= '';
 
 		if (isset($params['transaction'])) {
 			$params['where'] .= ' AND l.id_transaction = :transaction';
@@ -669,9 +668,7 @@ class Sections
 
 	static public function transaction_users(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		if (!array_key_exists('where', $params)) {
-			$params['where'] = '';
-		}
+		$params['where'] ??= '';
 
 		if (isset($params['id_transaction'])) {
 			$params['where'] = ' AND tu.id_transaction = :id_transaction';
@@ -763,30 +760,21 @@ class Sections
 
 	static public function categories(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		if (!array_key_exists('where', $params)) {
-			$params['where'] = '';
-		}
-
+		$params['where'] ??= '';
 		$params['where'] .= ' AND w.type = ' . Page::TYPE_CATEGORY;
 		return self::pages($params, $tpl, $line);
 	}
 
 	static public function articles(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		if (!array_key_exists('where', $params)) {
-			$params['where'] = '';
-		}
-
+		$params['where'] ??= '';
 		$params['where'] .= ' AND w.type = ' . Page::TYPE_PAGE;
 		return self::pages($params, $tpl, $line);
 	}
 
 	static public function pages(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		if (!array_key_exists('where', $params)) {
-			$params['where'] = '';
-		}
-
+		$params['where'] ??= '';
 		$params['select'] = 'w.*';
 		$params['tables'] = 'web_pages w';
 		$params['where'] .= ' AND status = :status';
@@ -866,29 +854,21 @@ class Sections
 
 	static public function images(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		if (!array_key_exists('where', $params)) {
-			$params['where'] = '';
-		}
-
+		$params['where'] ??= '';
 		$params['where'] .= ' AND image = 1';
 		return self::files($params, $tpl, $line);
 	}
 
 	static public function documents(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		if (!array_key_exists('where', $params)) {
-			$params['where'] = '';
-		}
-
+		$params['where'] ??= '';
 		$params['where'] .= ' AND image = 0';
 		return self::files($params, $tpl, $line);
 	}
 
 	static public function files(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		if (!array_key_exists('where', $params)) {
-			$params['where'] = '';
-		}
+		$params['where'] ??= '';
 
 		if (empty($params['parent'])) {
 			throw new Brindille_Exception('La section "files" doit obligatoirement comporter un paramètre "parent"');
@@ -1012,7 +992,7 @@ class Sections
 			foreach ($params as $k => $v) {
 				if (substr($k, 0, 1) == '!') {
 					$r = '/' . preg_quote($k, '/') . '\b/';
-					$sql = preg_replace($r, $v, $sql);
+					$sql = preg_replace($r, (string)$v, $sql);
 				}
 			}
 		}
