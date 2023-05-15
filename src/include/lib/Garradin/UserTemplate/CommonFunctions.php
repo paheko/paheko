@@ -349,10 +349,6 @@ class CommonFunctions
 		$label = $params['label'];
 		$prefix = $params['prefix'] ?? '';
 
-		if (!$href || !$label) {
-			return '';
-		}
-
 		// href can be prefixed with '!' to make the URL relative to ADMIN_URL
 		if (substr($href, 0, 1) == '!') {
 			$href = ADMIN_URL . substr($params['href'], 1);
@@ -375,7 +371,9 @@ class CommonFunctions
 
 		$params = implode(' ', $params);
 
-		return sprintf('<a href="%s" %s>%s<span>%s</span></a>', htmlspecialchars($href), $params, $prefix, htmlspecialchars($label));
+		$label = $label ? sprintf('<span>%s</span>', htmlspecialchars($label)) : '';
+
+		return sprintf('<a href="%s" %s>%s%s</a>', htmlspecialchars($href), $params, $prefix, $label);
 	}
 
 	static public function button(array $params): string
