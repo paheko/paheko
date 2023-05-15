@@ -10,6 +10,7 @@ use Garradin\Config;
 use Garradin\Plugins;
 use Garradin\Utils;
 use Garradin\UserException;
+use Garradin\Users\DynamicFields;
 use Garradin\Users\Session;
 
 use Garradin\Entities\Files\File;
@@ -66,6 +67,12 @@ class UserTemplate extends \KD2\Brindille
 		$config['email_asso'] = $config['org_email'];
 		$config['telephone_asso'] = $config['org_phone'];
 		$config['site_asso'] = $config['org_web'];
+		$config['user_fields'] = [
+			'number' => DynamicFields::getNumberField(),
+			'login'  => DynamicFields::getLoginField(),
+			'email'  => DynamicFields::getEmailFields(),
+			'name'   => DynamicFields::getNameFields(),
+		];
 
 		$session = Session::getInstance();
 		$is_logged = $session->isLogged();
