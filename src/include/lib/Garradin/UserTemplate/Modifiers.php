@@ -203,7 +203,7 @@ class Modifiers
 		$out = numfmt_create($locale, \NumberFormatter::SPELLOUT)->format((float) $number);
 		$out .= ' ' . $currency;
 
-		if ($decimals) {
+		if ($decimals > 0) {
 			$out .= sprintf(' et %s cents', numfmt_create($locale, \NumberFormatter::SPELLOUT)->format((float) $decimals));
 		}
 
