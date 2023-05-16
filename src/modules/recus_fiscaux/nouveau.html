@@ -11,6 +11,8 @@
 	{{:assign id_user=$_GET.id_user|intval}}
 {{/if}}
 
+{{:assign var="default.date" value=$now}}
+
 {{if $_POST}}
 	{{if !$_POST.date|trim|parse_date}}
 		{{:assign error="Date d'émission invalide ou vide."}}
@@ -33,8 +35,9 @@
 			adresse=$_POST.adresse|trim
 			date=$_POST.date|parse_date
 			montant=$_POST.montant|money_int
-			linked_user=$id_user
-			linked_transactions=$_POST.transactions
+			linked_user=$_POST.id_user|intval|or:null
+			linked_transactions=$_POST.id_transaction|intval|or:null
+			id_year=$_POST.id_year
 			annule=false
 			recu=$recu
 		}}
@@ -48,17 +51,24 @@
 
 {{:admin_header title="Créer un nouveau reçu fiscal" current="acc"}}
 
-{{if $id_user}}
-	{{:assign var="champs_adresse" value=$module.config.champs_adresse|quote_sql_identifier|implode:" || ' — ' || "}}
+{{:assign var="champs_adresse" value=$module.config.champs_adresse|quote_sql_identifier:"u"|implode:" || ' — ' || "}}
+{{:assign var="champs_nom" value=$config.user_fields.name|quote_sql_identifier:"u"|implode:" || ' ' || "}}
 
-	{{#users id=$id_user select="%s AS _adresse"|args:$champs_adresse}}
-		{{:assign .="user"}}
+{{:assign var="codes_don" value=$module.config.comptes_don|keys}}
+{{:assign var="codes_don_nature" value=$module.config.comptes_don_nature|keys}}
+{{:assign var="codes_especes" value=$module.config.comptes_especes|keys}}
+{{:assign var="codes_cheques" value=$module.config.comptes_cheques|keys}}
+
+{{if $id_user}}
+	{{#select !champs_adresse AS adresse, !champs_nom AS nom FROM users u WHERE id = {$id_user|intval};
+		!champs_adresse=$champs_adresse
+		!champs_nom=$champs_nom
+	}}
+		{{:assign var="default.address" value=$adresse}}
+		{{:assign var="default.name" value=$nom}}
 	{{else}}
 		{{:error message="Ce membre n'existe pas."}}
-	{{/users}}
-
-	{{:assign var="codes_don" value=$module.config.comptes_don|keys}}
-	{{:assign var="codes_don_nature" value=$module.config.comptes_don_nature|keys}}
+	{{/select}}
 
 	{{* Récupération des comptes et soldes *}}
 	{{#select
@@ -88,6 +98,49 @@
 	var config = {{$module.config|json_encode|raw}};
 	</script>
 {{elseif $_GET.id_transaction}}
+	{{#select
+		u.id AS id_user,
+		t.id AS id_transactions,
+		SUM(l1.credit) AS total,
+		date() AS date,
+		!champs_nom AS name,
+		!champs_adresse AS address,
+		-- Paiements en espèces?
+		(SELECT 1 FROM acc_transactions_lines l2
+			INNER JOIN acc_accounts a2 ON a2.id = l2.id_account AND a2.!code_especes
+			WHERE l2.credit = 0 AND l2.id_transaction = id_transaction LIMIT 1) AS especes,
+		-- Paiements en chèques?
+		(SELECT 1 FROM acc_transactions_lines l2
+			INNER JOIN acc_accounts a2 ON a2.id = l2.id_account AND a2.!code_cheques
+			WHERE l2.credit = 0 AND l2.id_transaction = id_transaction LIMIT 1) AS cheques,
+		-- Dons en nature ?
+		(SELECT 1 FROM acc_transactions_lines l2
+			INNER JOIN acc_accounts a2 ON a2.id = l2.id_account AND a2.!code_don_nature
+			WHERE l2.debit = 0 AND l2.id_transaction = id_transaction) AS nature,
+		-- Dons en numeraire ?
+		(SELECT 1 FROM acc_transactions_lines l2
+			INNER JOIN acc_accounts a2 ON a2.id = l2.id_account AND a2.!code_don
+			WHERE l2.debit = 0 AND l2.id_transaction = id_transaction) AS numeraire
+		FROM acc_transactions t
+		INNER JOIN acc_transactions_users tu ON tu.id_transaction = t.id
+		INNER JOIN users u ON u.id = tu.id_user
+		INNER JOIN acc_transactions_lines l1 ON l1.id_transaction = t.id AND l1.debit = 0
+		INNER JOIN acc_transactions_lines l2 ON l2.id_transaction = t.id AND l2.credit = 0
+		INNER JOIN acc_accounts a1 ON a1.id = l1.id_account AND (a1.!code_don_nature OR a1.!code_don)
+		INNER JOIN acc_accounts a2 ON a2.id = l2.id_account
+		WHERE t.id = {$_GET.id_transaction|intval};
+		!champs_nom=$champs_nom
+		!champs_adresse=$champs_adresse
+		!code_don_nature="code"|sql_where:"IN":$codes_don_nature
+		!code_don="code"|sql_where:"IN":$codes_don
+		!code_especes="code"|sql_where:"IN":$codes_especes
+		!code_cheques="code"|sql_where:"IN":$codes_cheques
+
+		assign="default"
+	}}
+	{{else}}
+		{{:error message="Numéro d'écriture inconnu"}}
+	{{/select}}
 {{/if}}
 
 {{if !$dialog}}
@@ -147,24 +200,24 @@
 		<fieldset>
 			<legend>Nouveau reçu</legend>
 			<dl>
-				{{:input type="text" name="nom" label="Nom du bénéficiaire" required=true default=$user._name}}
-				{{:input type="textarea" cols="50" rows="3" name="adresse" label="Adresse du bénéficiaire" required=true default=$user._adresse}}
+				{{:input type="text" name="nom" label="Nom du bénéficiaire" required=true default=$default.name}}
+				{{:input type="textarea" cols="50" rows="3" name="adresse" label="Adresse du bénéficiaire" required=true default=$default.address}}
 				{{if $user_select}}
 					{{:input type="select" name="annees" label="Pour quelle année le reçu doit-il être généré ?" required=true options=$user_select}}
 				{{/if}}
 
-				{{:input type="date" name="date" required=true label="Date du reçu" default=$now}}
-				{{:input type="money" name="montant" required=true label="Montant des dons" default=$user.total}}
+				{{:input type="date" name="date" required=true label="Date du reçu" default=$default.date}}
+				{{:input type="money" name="montant" required=true label="Montant des dons" default=$default.total}}
 
 				<dt>Type de don</dt>
-				{{:input type="checkbox" name="numeraire" value="1" label="Don en numéraire (en euros)" default=$user.}}
-				{{:input type="checkbox" name="nature" value="1" label="Don en nature" help="Par exemple abandon de frais par les bénévoles"}}
+				{{:input type="checkbox" name="numeraire" value="1" label="Don en numéraire (en euros)" default=$default.numeraire}}
+				{{:input type="checkbox" name="nature" value="1" label="Don en nature" help="Par exemple abandon de frais par les bénévoles" default=$defaut.nature}}
 			</dl>
 			<dl class="hidden type-numeraire">
 				<dt>Moyens de paiement</dt>
-				{{:input type="checkbox" name="moyens[especes]" value=1 label="Paiement en espèces"}}
-				{{:input type="checkbox" name="moyens[cheques]" value=1 label="Paiement en chèques"}}
-				{{:input type="checkbox" name="moyens[autres]" value=1 label="Paiement par virement, prélèvement, carte bancaire, ou autre"}}
+				{{:input type="checkbox" name="moyens[especes]" value=1 label="Paiement en espèces" default=$default.especes}}
+				{{:input type="checkbox" name="moyens[cheques]" value=1 label="Paiement en chèques" default=$default.cheques}}
+				{{:input type="checkbox" name="moyens[autres]" value=1 label="Paiement par virement, prélèvement, carte bancaire, ou autre" default=$default.autres}}
 			</dl>
 		</fieldset>
 
@@ -173,6 +226,8 @@
 		</p>
 
 		<p class="submit hidden">
+			<input type="hidden" name="id_user" value="{{$default.id_user}}" />
+			<input type="hidden" name="id_transactions" value="{{$default.id_transactions}}" />
 			{{:button type="button" name="preview" shape="eye" label="Prévisualiser"}}
 			{{:button type="submit" name="create" shape="right" label="Créer ce reçu" class="main"}}
 		</p>
