@@ -27,11 +27,14 @@
 		<h1>{{$_name}}</h1>
 
 		{{if $module.config.fields}}
+		{{#select name, label FROM config_users_fields}}
+			{{:assign var="fields.%s"|args:$name value=$label}}
+		{{/select}}
 		<ul class="fields">
 			{{#foreach from=$module.config.fields item="key"}}
 				{{:assign var="value" from=$key}}
 				{{if $value && $key != $number_field}}
-					<li>{{$value}}</li>
+					<li>{{if $module.config.show_fields_names}}{{:assign var="label" from="fields.%s"|args:$key}}{{$label}}&nbsp;: {{/if}}{{$value}}</li>
 				{{/if}}
 			{{/foreach}}
 		</ul>

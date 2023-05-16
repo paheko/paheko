@@ -1,6 +1,10 @@
 {{#restrict section="users" level="read"}}
 	{{:admin_header title="Cartes de membres"}}
 
+	<nav class="tabs">
+		{{:linkbutton shape="settings" href="config.html" target="_dialog" label="Configuration"}}
+	</nav>
+
 	<form method="post" action="planche.html" data-disable-progress="1" target="_dialog">
 		<fieldset>
 			<legend>Créer une planche de cartes de membres</legend>

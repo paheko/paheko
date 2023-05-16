@@ -18,6 +18,9 @@
 				"type": "string"
 			}
 		},
+		"show_fields_names": {
+			"type": ["boolean"]
+		},
 		"photo": {
 			"description": "Champ pour la photo",
 			"type": ["string", "null"]
@@ -27,5 +30,5 @@
 			"type": ["integer", "null"]
 		}
 	},
-	"required": [ "header", "logo", "fields", "photo", "id_service" ]
+	"required": [ "header", "logo", "fields", "show_fields_names", "photo", "id_service" ]
 }

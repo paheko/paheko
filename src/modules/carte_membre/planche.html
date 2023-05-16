@@ -13,6 +13,10 @@
 
 <body>
 
+{{#select name FROM config_users_fields WHERE system & (1 << 3) LIMIT 1}}
+	{{:assign var="number_field" value=$name}}
+{{/select}}
+
 <main class="sheet">
 
 	<table>
