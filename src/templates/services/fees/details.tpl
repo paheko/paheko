@@ -30,7 +30,7 @@ $can_action = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMI
 			{/if}
 			<th>{link href="!users/details.php?id=%d"|args:$row.id_user label=$row.identity}</th>
 			<td>{if $row.paid}<b class="confirm">Oui</b>{else}<b class="error">Non</b>{/if}</td>
-			<td class="money">{$row.paid_amount|raw|money_currency}</td>
+			<td class="money">{if null === $row.paid_amount}{icon shape="delete" title="Aucune écriture n'est liée à cette inscription"}{else}{$row.paid_amount|raw|money_currency}{/if}</td>
 			<td>{$row.date|date_short}</td>
 			<td class="actions">
 				{linkbutton shape="user" label="Toutes les activités de ce membre" href="!services/user/?id=%d"|args:$row.id_user}
@@ -52,6 +52,10 @@ $can_action = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMI
 {/if}
 
 {$list->getHTMLPagination()|raw}
+
+<p class="help">
+	Les lignes indiquant {icon shape="delete" title="Aucune écriture n'est liée à cette inscription"} comme montant payé signifient qu'aucune écriture comptable n'a été associée à cette inscription. De ce fait, le montant restant à payer ne peut être calculé.
+</p>
 
 
 {include file="_foot.tpl"}
