@@ -13,6 +13,7 @@ use Garradin\Accounting\Years;
 class Payments
 {
 	const CREATION_LOG_LABEL = 'Paiement créé';
+	const TRANSACTION_CREATION_LOG_LABEL = 'Écriture comptable ajoutée';
 	const TRANSACTION_PREFIX = 'Paiement';
 
 	static public function createPayment(string $type, string $method, string $status, string $provider_name, ?array $accounts, int $author_id, ?string $author_name, ?string $reference, string $label, int $amount, ?\stdClass $extra_data = null, ?string $transaction_notes = null): ?Payment
@@ -55,7 +56,7 @@ class Payments
 		$payment->label = $label;
 		$payment->amount = $amount;
 		$payment->date = new \DateTime();
-		$payment->history = $payment->date->format('Y-m-d H:i:s') . ' - '. self::CREATION_LOG_LABEL;
+		$payment->addLog(self::CREATION_LOG_LABEL, $payment->date);
 		$payment->set('extra_data', $extra_data);
 		
 		if (!$payment->save()) {
@@ -63,7 +64,8 @@ class Payments
 		}
 		if ($accounts) {
 			$transaction = self::createTransaction($payment, $accounts, $transaction_notes);
-			$payment->id_transaction = (int)$transaction->id;
+			$payment->set('id_transaction', (int)$transaction->id);
+			$payment->addLog(self::TRANSACTION_CREATION_LOG_LABEL);
 			$payment->save();
 		}
 		return $payment;

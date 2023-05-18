@@ -40,7 +40,7 @@ class Payment extends Entity
 	protected int			$amount;
 	protected \DateTime		$date;
 	protected string		$method;
-	protected string		$history;
+	protected string		$history = '';
 	// Warning: do NOT directly set $extra_data properties (e.g., $payment->extra_data->dummy = 17) or the value will not be updated into the database while using $payment->save()
 	// Instead you must use the setExtraData() method (e.g., $payment->setExtraData('dummy', 17) to enable the update trigger
 	protected ?\stdClass	$extra_data;
@@ -54,7 +54,7 @@ class Payment extends Entity
 		if ($this->extra_data) // extra_data may be null
 		{
 			if (!property_exists($this->extra_data, $key)) {
-				throw new \InvalidArgumentException(sprintf('%s property does not exist neither in %s not in its extra_data member.', $key, self::class));
+				throw new \InvalidArgumentException(sprintf('%s property does not exist neither in %s nor in its extra_data member.', $key, self::class));
 			}
 			return $this->extra_data->$key;
 		}
@@ -72,5 +72,21 @@ class Payment extends Entity
 		if ($check_for_changes && $original_value !== $this->extra_data->$key) {
 			$this->_modified['extra_data'] = clone $this->extra_data;
 		}
+	}
+
+	public function selfCheck(): void
+	{
+		parent::selfCheck();
+		$this->assert(array_key_exists($this->type, self::TYPES), sprintf('Unknown type: %s. Allowed types are: %s.', $this->type, implode(', ', array_keys(self::TYPES))));
+		$this->assert(array_key_exists($this->status, self::STATUSES), sprintf('Unknown status: %s. Allowed statuses are: %s.', $this->status, implode(', ', array_keys(self::STATUSES))));
+		$this->assert(array_key_exists($this->method, self::METHODS), sprintf('Unknown type: %s. Allowed types are: %s.', $this->method, implode(', ', array_keys(self::METHODS))));
+	}
+	
+	public function addLog(string $message, ?\Datetime $date = null): void
+	{
+		if (null === $date) {
+			$date = new \DateTime();
+		}
+		$this->set('history', $date->format('Y-m-d H:i:s') . ' - ' . $message . "\n" . $this->history);
 	}
 }
