@@ -171,7 +171,7 @@ class Log
 				$row->entity_name = constant('Garradin\Entities\\' . $row->details->entity . '::NAME');
 			}
 
-			if (isset($row->details->id, $row->details->entity) && constant('Garradin\Entities\\' . $row->details->entity . '::PRIVATE_URL')) {
+			if (isset($row->details->id, $row->details->entity) && defined('Garradin\Entities\\' . $row->details->entity . '::PRIVATE_URL')) {
 				$row->entity_url = sprintf(constant('Garradin\Entities\\' . $row->details->entity . '::PRIVATE_URL'), $row->details->id);
 			}
 		});
