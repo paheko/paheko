@@ -537,18 +537,9 @@ class DynamicFields
 
 	public function getListedFields(): array
 	{
-		$name_fields = self::getNameFields();
-		$name_fields[] = self::getNumberField();
-
 		$fields = array_filter(
 			$this->_fields,
-			function ($a, $b) use ($name_fields) {
-				if (in_array($b, $name_fields)) {
-					return false;
-				}
-
-				return empty($a->list_table) ? false : true;
-			},
+			fn ($a, $b) => empty($a->list_table) ? false : true,
 			ARRAY_FILTER_USE_BOTH
 		);
 

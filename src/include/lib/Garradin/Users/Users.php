@@ -138,6 +138,8 @@ class Users
 	static public function listByCategory(?int $id_category = null): DynamicList
 	{
 		$df = DynamicFields::getInstance();
+		$number_field = $df->getNumberField();
+		$name_fields = $df->getNameFields();
 
 		$columns = [
 			'_user_id' => [
@@ -145,22 +147,35 @@ class Users
 			],
 		];
 
-		$default_columns = [
-			'number' => [
-				'label' => 'Num.',
-				'select' => $df->getNumberField(),
-			],
-			'identity' => [
-				'label' => $df->getNameLabel(),
-				'select' => $df->getNameFieldsSQL(),
-			]
+		$number_column = [
+			'label' => 'Num.',
+			'select' => $number_field,
+		];
+
+		$identity_column = [
+			'label' => $df->getNameLabel(),
+			'select' => $df->getNameFieldsSQL(),
 		];
 
 		$fields = $df->getListedFields();
 
 		foreach ($fields as $key => $config) {
-			if (isset($default_columns[$key])) {
-				$columns[$key] = $default_columns[$key];
+			// Skip number field
+			if ($key === $number_field) {
+				if (null !== $number_column) {
+					$columns['number'] = $number_column;
+					$number_column = null;
+				}
+
+				continue;
+			}
+			// Skip name fields
+			elseif (in_array($key, $name_fields)) {
+				if (null !== $identity_column) {
+					$columns['identity'] = $identity_column;
+					$identity_column = null;
+				}
+
 				continue;
 			}
 
@@ -169,10 +184,8 @@ class Users
 			];
 		}
 
-		foreach ($default_columns as $key => $config) {
-			if (!isset($columns[$key])) {
-				$columns[$key] = $config;
-			}
+		if (null !== $identity_column) {
+			$columns['identity'] = $identity_column;
 		}
 
 		$tables = User::TABLE;
