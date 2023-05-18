@@ -13,19 +13,21 @@ function initLine(row)
 	};
 }
 
-$('tbody tr').forEach(initLine);
+if ($('table').length) {
+	$('tbody tr').forEach(initLine);
 
-// Add row "plus" button
-$('tfoot button')[0].onclick = () => {
-	let lines = $('tbody tr');
-	var line = lines[lines.length - 1];
-	var n = line.cloneNode(true);
+	// Add row "plus" button
+	$('tfoot button')[0].onclick = () => {
+		let lines = $('tbody tr');
+		var line = lines[lines.length - 1];
+		var n = line.cloneNode(true);
 
-	// Reset label and reference
-	n.querySelectorAll('input').forEach((i) => {
-		i.value = '';
-	})
+		// Reset label and reference
+		n.querySelectorAll('input').forEach((i) => {
+			i.value = '';
+		})
 
-	line.parentNode.appendChild(n);
-	initLine(n);
-};
+		line.parentNode.appendChild(n);
+		initLine(n);
+	};
+}
