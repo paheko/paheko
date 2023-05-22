@@ -63,6 +63,10 @@ class Entity extends AbstractEntity
 
 			$d = self::filterUserDateValue($value);
 
+			if (!$d) {
+				return $d;
+			}
+
 			$y = $d->format('Y');
 			if ($y < 1900 || $y > 2100) {
 				throw new ValidationException('Date invalide: doit être entre 1900 et 2100');
