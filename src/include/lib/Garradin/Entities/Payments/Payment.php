@@ -67,6 +67,9 @@ class Payment extends Entity
 		// ToDo: implements getAsString() as in AbstractEntity::set()
 		$original_value = isset($this->extra_data->$key) ? $this->extra_data->$key : null;
 		
+		if (null === $this->extra_data) {
+			$this->extra_data = new \stdClass();
+		}
 		$this->extra_data->$key = $value;
 		
 		if ($check_for_changes && $original_value !== $this->extra_data->$key) {
@@ -88,5 +91,33 @@ class Payment extends Entity
 			$date = new \DateTime();
 		}
 		$this->set('history', $date->format('Y-m-d H:i:s') . ' - ' . $message . "\n" . $this->history);
+	}
+	
+	public function validate(int $amount, ?string $receipt_url = null): bool
+	{
+		if ($amount != $this->amount) {
+			throw new \LogicException(sprintf('Amount mismatch: paid %f != %f asked', $amount / 100, $this->amount / 100));
+		}
+
+		if (null !== $receipt_url) {
+			$message = sprintf("Paiement validé (Reçu de paiement : %s).", $receipt_url);
+		}
+		else {
+			$message = 'Paiement validé.';
+		}
+
+		return $this->updateStatus(self::VALIDATED_STATUS, $message);
+	}
+	
+	public function updateStatus(string $status, string $message): bool
+	{
+		if ($status === $this->status) {
+			return true;
+		}
+
+		$this->addLog($message);
+		$this->set('status', $status);
+
+		return $this->save();
 	}
 }
