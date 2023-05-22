@@ -6,6 +6,7 @@
 				<td></td>
 				<td class="money">Charges</td>
 				<td class="money">Produits</td>
+				<td class="money">Résultat</td>
 				<td class="money">Débits</td>
 				<td class="money">Crédits</td>
 				<td class="money">Solde</td>
@@ -31,6 +32,7 @@
 					</th>
 				</tr>
 			{foreach from=$parent.items item="item"}
+				<?php $result = $item->sum_revenue - $item->sum_expense; ?>
 				<tr class="{if $item.label == 'Total'}total{/if} {if $item.archived}archived{/if}">
 					<th>{$item.label}{if $item.archived} <em>(archivé)</em>{/if}</th>
 					<td>
@@ -47,6 +49,7 @@
 					</td>
 					<td class="money">{$item.sum_expense|raw|money}</td>
 					<td class="money">{$item.sum_revenue|raw|money}</td>
+					<td class="money">{$result|raw|money:true:true}</td>
 					<td class="money">{$item.debit|raw|money:false}</td>
 					<td class="money">{$item.credit|raw|money:false}</td>
 					<td class="money">{$item.sum|raw|money:false}</td>
