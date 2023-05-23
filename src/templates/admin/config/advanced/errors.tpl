@@ -49,8 +49,7 @@
 	</section>
 {elseif isset($errors)}
 	<p class="help">
-		Liste des erreurs système et de code rencontrées par Garradin.
-		Cliquer sur un des bugs pour le rapporter aux développeur⋅euses de Garradin.
+		Liste des erreurs système et de code rencontrées par Paheko.
 	</p>
 
 	{if !count($errors)}
