@@ -45,6 +45,9 @@ class Sections
 	const COMPILE_SECTIONS_LIST = [
 		'#select' => [self::class, 'selectStart'],
 		'/select' => [self::class, 'selectEnd'],
+		'#form'    => [self::class, 'formStart'],
+		'/form'    => [self::class, 'formEnd'],
+		'else:form'    => [self::class, 'formElse'],
 	];
 
 	/**
@@ -106,6 +109,69 @@ class Sections
 	static public function selectEnd(string $name, string $params, UserTemplate $tpl, int $line): string
 	{
 		return $tpl->_close('sql', '{{/select}}');
+	}
+
+	static public function formStart(string $name, string $params_str, UserTemplate $tpl, int $line): string
+	{
+		$tpl->_push($tpl::SECTION, 'form');
+
+		$params = $tpl->_parseArguments($params_str, $line);
+
+		if (isset($params['on'])
+			&& ($on = $tpl->getValueFromArgument($params['on']))
+			&& preg_match('/^[a-z0-9-]+$/i', $on)) {
+			$if = sprintf('$_POST[%s]', var_export($on, true));
+		}
+		else {
+			$if = '$_POST';
+		}
+
+		unset($params['on']);
+		$params = $tpl->_exportArguments($params);
+
+		return sprintf('<?php if (!empty(%s)): ', $if)
+			. 'try { '
+			. '$hash = md5(\Garradin\Utils::getSelfURI(false)); '
+			. 'if (!\KD2\Form::tokenCheck(\'form_\' . $hash)) { '
+			. 'throw new \Garradin\ValidationException(\'Une erreur est survenue, merci de bien vouloir renvoyer le formulaire.\'); '
+			. '} ?>';
+		/*
+			. sprintf('$params = %s; ', $params)
+			. '$form_errors = []; '
+			. 'if (!\KD2\Form::check(\'form_\' . $hash, $rules, $form_errors)) { '
+			. '$this->assign(\'form_errors\', \KD2\Form::getErrorMessages($form_errors, \'fr\')); '
+			. '} ?>';
+		*/
+	}
+
+	static public function formElse(string $name, string $params_str, UserTemplate $tpl, int $line): string
+	{
+		return '<?php '
+			. '} catch (\Garradin\UserException $e) { '
+			. '$this->assign(\'form_errors\', [$e->getMessage()]); '
+			. '?>';
+	}
+
+	static public function formEnd(string $name, string $params_str, UserTemplate $tpl, int $line): string
+	{
+		if ($tpl->_lastName() !== 'form') {
+			throw new Brindille_Exception(sprintf('"%s": block closing does not match last block "%s" opened', $name . $params, $tpl->_lastName()));
+		}
+
+		$type = $tpl->_lastType();
+		$tpl->_pop();
+
+		$out = '';
+
+		if ($type === $tpl::SECTION) {
+			$out .= self::formElse($name, $params_str, $tpl, $line);
+		}
+
+		$out .= '<?php } endif; ?>';
+
+		$out = str_replace(' ?><?php ', ' ', $out);
+
+		return $out;
 	}
 
 	static protected function _debug(string $str): void
@@ -182,14 +248,25 @@ class Sections
 			throw new Brindille_Exception('Unique module name could not be found');
 		}
 
-		$params['tables'] = 'module_data_' . $name;
+		$table = 'module_data_' . $name;
+		$params['tables'] = $table;
 
 		$db = DB::getInstance();
-		$has_table = $db->test('sqlite_master', 'type = \'table\' AND name = ?', $params['tables']);
+		$has_table = $db->test('sqlite_master', 'type = \'table\' AND name = ?', $table);
 
 		if (!$has_table) {
 			return;
 		}
+
+		/*
+		// Cannot use json_each with authorizer before SQLite 3.41.0
+		// @see https://sqlite.org/forum/forumpost/d28110be11
+		if (isset($params['each'])) {
+			$params['each'] = $db->quote('$.' . trim($params['each']));
+			$params['tables'] .= sprintf(' AS a, json_each(a.document, %s)', $params['each']);
+			unset($params['each']);
+		}
+		*/
 
 		if (!isset($params['where'])) {
 			$params['where'] = '1';
@@ -238,7 +315,7 @@ class Sections
 		}
 
 		// Try to create an index if required
-		self::_createModuleIndexes($params['tables'], $params['where']);
+		self::_createModuleIndexes($table, $params['where']);
 
 		$query = self::sql($params, $tpl, $line);
 

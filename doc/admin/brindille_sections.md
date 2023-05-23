@@ -275,7 +275,7 @@ Renvoie la balance des comptes.
 | Paramètre | Fonction |
 | :- | :- |
 | `codes` (optionel) | Ne renvoyer que les balances des comptes ayant ces codes (séparer par des virgules). |
-| `year` (optionel) | Ne renvoyer que les balances des comptes utilisés sur l'année (indiquer ici un ID de year). |
+| `year` (optionel) | Ne renvoyer que les balances des comptes utilisés sur l'année (indiquer ici un ID de year)<. |
 
 ## years
 
@@ -349,6 +349,146 @@ Note : seul les fichiers de la section site web sont accessibles, les fichiers d
 | `except_in_text` | *optionnel* | passer `true` à ce paramètre , et seuls les fichiers qui ne sont pas liés dans le texte de la page seront renvoyés |
 
 # Sections relatives aux modules
+
+## form
+
+Permet de gérer la soumission d'un formulaire (`<form method="post"…>` en HTML).
+
+Si l'élément dont le nom spécifié dans le paramètre `on` a été envoyé en `POST`, alors le code à l'intérieur de la section est exécuté.
+
+Toute erreur à l'intérieur de la section arrêtera son exécution, et le message sera ajouté aux erreurs du formulaire.
+
+Une vérification de sécurité [anti-CSRF](https://fr.wikipedia.org/wiki/Cross-site_request_forgery) est également appliquée. Si cette vérification échoue, le message d'erreur "Merci de bien vouloir renvoyer le formulaire." sera renvoyé. Pour que cela marche il faut que le formulaire dispose d'un bouton de type "submit", généré à l'aide de la fonction `button`. Exemple : `{{:button type="submit" name="save" label="Enregistrer"}}`.
+
+En cas d'erreurs, le reste du contenu de la section ne sera pas exécuté. Les messages d'erreurs seront placés dans un tableau dans la variable `$form_errors`.
+
+Il est aussi possible de les afficher simplement avec la fonction `{{:form_errors}}`. Cela revient à faire une boucle sur la variable `$form_errors`.
+
+```
+{{#form on="save"}}
+	{{if $_POST.titre|trim === ''}}
+		{{:error message="Le titre est vide."}}
+	{{/if}}
+	{{* La ligne suivante ne sera pas exécutée si le titre est vide. *}}
+	{{:save title=$_POST.titre|trim}}
+{{else}}
+	{{:form_errors}}
+{{/form}}
+```
+
+Il est possible d'utiliser `{{:form_errors}}` en dehors du bloc `{{else}}` :
+
+```
+{{#form on="save"}}
+	…
+{{/form}}
+…
+{{:form_errors}}
+```
+
+<!--
+NOTE (bohwaz, 24/05/2023) : l'utilisation des règles de validation de Laravel me semble donner du code peu lisible, ce n'est donc pas documenté/complètement implémenté pour le moment.
+
+Si l'élément dont le nom spécifié dans le paramètre `on` a été envoyé en `POST`, alors le formulaire est vérifié selon les autres paramètres. Une vérification de sécurité anti-CSRF est également appliquée. Si cette vérification échoue, le message d'erreur "Merci de bien vouloir renvoyer le formulaire." sera renvoyé.
+
+Chaque paramètre supplémentaire indique un champ du formulaire qui doit être récupéré et validé. Le nom du paramètre doit correspondre au nom du champ dans le formulaire. La valeur du paramètre doit contenir une liste de règles de validations, séparées par des virgules `,`. Chaque règle peut prendre des paramètres, après deux points `:`.
+
+Exemple pour un champ de formulaire nommé `titre` dont on veut qu'il soit présent et fasse entre 5 et 100 caractères : `titre="required,min:5,max:100"`
+
+Si le titre fait moins de 5 caractères, le message d'erreur suivant sera renvoyé : `Le champ "titre" fait moins de 5 caractères.`
+
+On peut spécifier une règle spéciale nommée `label` pour changer le nom du champ : `titre="required,min:5,max:100,label:Titre du texte"`. Cela modifiera le message d'erreur : `Le champ "Titre du texte" fait moins de 5 caractères.`
+
+Chacun de ces paramètres sera disponible à l'intérieur de la section sous la forme d'une variable :
+
+```
+{{#form titre="required,min:5"}}
+	{{:save title=$titre}}
+{{/form}}
+```
+
+
+Toute erreur dans le corps de la section `{{#form}}…{{/form}}` fera arrêter l'exécution, et le message d'erreur sera ajouté à la liste des erreurs du formulaire :
+
+```
+{{#form on="save"}}
+	{{if !$_POST.titre|trim}}
+		{{:error message="Pas de titre !"}}
+	{{/if}}
+	{{* La ligne suivante ne sera pas exécutée si le titre est vide. *}}
+	{{:save title=$_POST.titre}}
+{{/form}}
+```
+
+### Transformation des variables
+
+Certaines règles de validation ont un effet de transformation sur les variables présentes dans le corps de la section :
+
+* `string` s'assure que la variable est une chaîne de texte
+* `int` transforme la variable en nombre entier
+* `float` transforme la variable en nombre flottant
+* `bool` transforme la variable en booléen
+* `date` ou `date_format` transforment la variable en date
+
+### Exemple
+
+Considérons ce formulaire par exemple :
+
+```
+<form method="post" action="">
+	<fieldset>
+		<legend>Enregistrer un paiement</legend>
+		<dl>
+			{{:input type="text" required=true name="titre" label="Titre"}}
+			{{:input type="money" required=true name="montant" label="Montant"}}
+		</dl>
+		<p class="submit">
+			{{:button type="submit" label="Enregistrer" name="save"}}
+		</p>
+	</fieldset>
+</form>
+```
+
+On pourrait l'enregistrer comme ceci :
+
+```
+{{if $_POST.save}}
+	{{if $_POST.titre|trim === ''}}
+		{{:assign error="Le titre est vide"}}
+	{{elseif $_POST.montant|trim === '' || $_POST.montant|money_int < 0}}
+		{{:assign error="Le montant est vide ou négatif"}}
+	{{else}}
+		{{:save title=$_POST.titre|trim amount=$_POST.montant|money_int}}
+	{{/if}}
+{{/if}}
+
+{{if $error}}
+	<p class="error block">{{$error}}</p>
+{{/if}}
+```
+
+Mais alors dans ce cas il faut multiplier les conditions pour les champs.
+
+La section `{{#form …}}` permet de simplifier ces tests, et s'assurer qu'aucune attaque CSRF n'a lieu :
+
+```
+{{#form on="save"
+	titre="required,string,min:1,label:Titre"
+	montant="required,money,min:0,label:Montant du paiement"
+}}
+	{{:save title=$titre amount=$montant}}
+{{else}}
+	{{:form_errors}}
+{{/form}}
+
+```
+
+### Règles de validation
+
+| Nom de la règle | Description | Paramètres |
+| :- | :- | :- |
+| `required` | ...
+-->
 
 ## load <sup>(sql)</sup>
 
