@@ -93,17 +93,6 @@ use Garradin\Entities\Files\File;
 </nav>
 {/if}
 
-{if $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE) && !$parent->canCreateDirHere() && !$context_ref}
-<p class="block alert">
-	Il n'est pas possible de créer de répertoire ici.
-	{if $context == File::CONTEXT_USER}
-		Utiliser le <a href="{"!users/new.php"|local_url}">formulaire de nouveau membre</a>.
-	{elseif $context == File::CONTEXT_TRANSACTION}
-		Utiliser le <a href="{"!acc/transactions/new.php"|local_url}">formulaire de saisie</a> pour créer une nouvelle écriture.
-	{/if}
-</p>
-{/if}
-
 {if count($list)}
 <form method="post" action="{"!docs/action.php"|local_url}" target="_dialog">
 
