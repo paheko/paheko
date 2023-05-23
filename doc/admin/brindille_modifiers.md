@@ -129,6 +129,26 @@ bleuorange
 bleu - orange
 ```
 
+## map
+
+Applique un filtre sur chaque élément du tableau.
+
+Le premier paramètre doit être le nom du filtre. Les autres paramètres seront passés au filtre.
+
+```
+{{:assign var="table" a="01" b="02"}}
+{{:assign var="table" value=$table|map:intval}}
+- {{$table.a}}
+- {{$table.b}}
+```
+
+Affichera :
+
+```
+- 1
+- 2
+```
+
 # Filtres de texte
 
 ## args

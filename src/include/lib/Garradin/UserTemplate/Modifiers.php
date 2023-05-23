@@ -38,9 +38,11 @@ class Modifiers
 		'money_int' => [Utils::class, 'moneyToInteger'],
 		'array_transpose' => [Utils::class, 'array_transpose'],
 		'check_email',
+		'explode',
 		'implode',
 		'keys',
 		'has',
+		'map',
 		'quote_sql_identifier',
 		'quote_sql',
 		'sql_where',
@@ -286,6 +288,41 @@ class Modifiers
 		return @eval('return ' . $expression . ';') ?: 0;
 	}
 
+	static public function map($array, string $modifier, ...$params): array
+	{
+		if (!is_array($array)) {
+			throw new Brindille_Exception('Supplied argument is not an array');
+		}
+
+		$callback = null;
+
+		if (in_array($modifier, CommonModifiers::PHP_MODIFIERS_LIST)) {
+			$callback = $modifier;
+		}
+		elseif (in_array($modifier, CommonModifiers::MODIFIERS_LIST)) {
+			$callback = [CommonModifiers::class, $modifier];
+		}
+		elseif (in_array($modifier, self::MODIFIERS_LIST)) {
+			$callback = [self::class, $modifier];
+		}
+		else {
+			throw new Brindille_Exception('Unknown modifier: ' . $modifier);
+		}
+
+		$out = [];
+
+		foreach ($array as $key => $value) {
+			$out[$key] = call_user_func($callback, $value, ...$params);
+		}
+
+		return $out;
+	}
+
+	static public function explode($string, string $separator): array
+	{
+		return explode($separator, (string)$string);
+	}
+
 	static public function implode($array, string $separator): string
 	{
 		if (!is_array($array)) {
@@ -293,11 +330,6 @@ class Modifiers
 		}
 
 		return implode($separator, $array);
-	}
-
-	static public function explode($string, string $separator): array
-	{
-		return explode($separator, (string)$string);
 	}
 
 	static public function keys($array)
