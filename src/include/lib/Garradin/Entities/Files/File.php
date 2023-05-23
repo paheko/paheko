@@ -767,7 +767,13 @@ class File extends Entity
 					call_user_func_array([$i, $operation], $arguments);
 				}
 
-				$i->save($destination);
+				$format = null;
+
+				if ($i->format() !== 'gif') {
+					$format = ['webp', null];
+				}
+
+				$i->save($destination, $format);
 			}
 			catch (\RuntimeException $e) {
 				throw new UserException('Impossible de créer la miniature');
