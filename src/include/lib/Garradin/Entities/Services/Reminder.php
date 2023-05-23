@@ -68,6 +68,9 @@ class Reminder extends Entity
 	public function sentList(): DynamicList
 	{
 		$id_field = DynamicFields::getNameFieldsSQL('u');
+		$email_field = DynamicFields::getFirstEmailField();
+		$db = DB::getInstance();
+
 		$columns = [
 			'id_user' => [
 				'select' => 'srs.id_user',
@@ -78,7 +81,7 @@ class Reminder extends Entity
 			],
 			'email' => [
 				'label' => 'Adresse e-mail',
-				'select' => 'm.email',
+				'select' => 'u.' . $db->quoteIdentifier($email_field),
 			],
 			'date' => [
 				'label' => 'Date d\'envoi',
