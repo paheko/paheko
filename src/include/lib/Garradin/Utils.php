@@ -329,13 +329,13 @@ class Utils
 		return HTTP::mergeURLs(self::getSelfURL(), $new);
 	}
 
-	static public function redirectDialog(?string $destination = null): void
+	static public function redirectDialog(?string $destination = null, bool $exit = true): void
 	{
 		if (isset($_GET['_dialog'])) {
-			self::reloadParentFrame($destination);
+			self::reloadParentFrame($destination, $exit);
 		}
 		else {
-			self::redirect($destination);
+			self::redirect($destination, $exit);
 		}
 	}
 
@@ -348,7 +348,7 @@ class Utils
 		self::reloadParentFrame($destination);
 	}
 
-	static public function reloadParentFrame(?string $destination = null): void
+	static public function reloadParentFrame(?string $destination = null, bool $exit = true): void
 	{
 		$url = self::getLocalURL($destination ?? '!');
 
@@ -378,11 +378,14 @@ class Utils
 			</body>
 			</html>';
 
-		exit;
+		if ($exit) {
+			exit;
+		}
 	}
 
-	public static function redirect($destination = '', $exit=true)
+	public static function redirect(?string $destination = null, bool $exit = true)
 	{
+		$destination ??= '';
 		$destination = self::getLocalURL($destination);
 
 		if (isset($_GET['_dialog'])) {
@@ -422,8 +425,9 @@ class Utils
 
 		header("Location: " . $destination);
 
-		if ($exit)
-		  exit();
+		if ($exit) {
+			exit;
+		}
 	}
 
 	static public function getIP()
