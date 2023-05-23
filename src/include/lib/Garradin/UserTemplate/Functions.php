@@ -40,6 +40,8 @@ class Functions
 		'signature',
 		'captcha',
 		'mail',
+		'button',
+		'form_errors',
 	];
 
 	const COMPILE_FUNCTIONS_LIST = [
@@ -554,5 +556,28 @@ class Functions
 		elseif (isset($params['inline'])) {
 			header(sprintf('Content-Disposition: inline; filename="%s"', Utils::safeFileName($params['inline'])), true);
 		}
+	}
+
+	static public function button(array $params): string
+	{
+		static $forms = [];
+
+		$hash = md5(Utils::getSelfURI(false));
+
+		// Always add CSRF protection when a submit button is present in the form
+		if (isset($params['type']) && $params['type'] == 'submit' && !in_array($hash, $forms)) {
+			$params['csrf_key'] = 'form_' . $hash;
+		}
+
+		return CommonFunctions::button($params);
+	}
+
+	static public function form_errors(array $params, UserTemplate $tpl): string
+	{
+		if (($e = $tpl->get('form_errors')) && is_array($e)) {
+			return sprintf('<p class="error block">%s</p>', nl2br(htmlspecialchars(implode("\n", $e))));
+		}
+
+		return '';
 	}
 }

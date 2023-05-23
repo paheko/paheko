@@ -5,6 +5,8 @@ namespace Garradin\UserTemplate;
 use Garradin\Config;
 use Garradin\Utils;
 
+use KD2\Form;
+
 use const Garradin\{ADMIN_URL, CALC_CONVERT_COMMAND};
 
 /**
@@ -396,10 +398,16 @@ class CommonFunctions
 		}
 
 		$prefix = '';
+		$suffix = '';
 
 		if (isset($params['icon'])) {
 			$prefix = self::getIconHTML($params);
 			unset($params['icon'], $params['icon_html']);
+		}
+
+		if (isset($params['csrf_key'])) {
+			$suffix .= Form::tokenHTML($params['csrf_key']);
+			unset($params['csrf_key']);
 		}
 
 		$params['class'] .= ' icn-btn';
@@ -413,7 +421,7 @@ class CommonFunctions
 
 		$params = implode(' ', $params);
 
-		return sprintf('<button %s>%s%s</button>', $params, $prefix, $label);
+		return sprintf('<button %s>%s%s</button>%s', $params, $prefix, $label, $suffix);
 	}
 
 	static public function linkbutton(array $params): string
