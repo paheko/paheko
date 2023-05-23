@@ -139,6 +139,7 @@ class UserTemplate extends \KD2\Brindille
 		if ($safe_mode) {
 			$this->_functions = [];
 			$this->_sections = [];
+			$this->_blocks = [];
 
 			// Register default Brindille modifiers
 			$this->registerDefaults();
