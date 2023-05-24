@@ -112,13 +112,13 @@ class CommonFunctions
 		}
 
 		if ($type == 'radio' || $type == 'checkbox') {
-			$attributes['id'] .= '_' . $value;
+			$attributes['id'] .= '_' . (strlen($value) > 30 ? md5($value) : $value);
 
 			if ($current_value == $value && $current_value !== null) {
 				$attributes['checked'] = 'checked';
 			}
 
-			$attributes['value'] = $value;
+			$attributes['value'] = htmlspecialchars($value);
 		}
 		elseif ($type == 'date') {
 			$type = 'text';
