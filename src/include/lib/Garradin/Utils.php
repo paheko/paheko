@@ -224,7 +224,7 @@ class Utils
 
 	static public function moneyToInteger($value)
 	{
-		if (trim($value) === '') {
+		if (null === $value || trim($value) === '') {
 			return 0;
 		}
 
