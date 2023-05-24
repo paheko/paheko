@@ -59,11 +59,24 @@ Crée un lien protégé pour une adresse email, pour éviter que l'adresse ne so
 
 ## has
 
-Renvoi vrai si le tableau contient l'élément passé en paramètre.
+Renvoie vrai si le tableau contient l'élément passé en paramètre.
 
 ```
 {{:assign var="table" a="bleu" b="orange"}}
 {{if $table|has:"bleu"}}
+	Oui, il y a du bleu
+{{/if}}
+```
+
+## in
+
+Renvoie vrai si l'élément fait partie du tableau passé en paramètre.
+
+C'est exactement la même chose que `has`, mais exprimé à l'envers.
+
+```
+{{:assign var="table" a="bleu" b="orange"}}
+{{if "bleu"|in:$table}}
 	Oui, il y a du bleu
 {{/if}}
 ```

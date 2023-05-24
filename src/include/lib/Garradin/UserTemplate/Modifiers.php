@@ -42,6 +42,7 @@ class Modifiers
 		'implode',
 		'keys',
 		'has',
+		'in',
 		'map',
 		'quote_sql_identifier',
 		'quote_sql',
@@ -340,6 +341,11 @@ class Modifiers
 	static public function has($in, $value, $strict = false)
 	{
 		return in_array($value, (array)$in, $strict);
+	}
+
+	static public function in($value, $array, $strict = false)
+	{
+		return in_array($value, (array)$array, $strict);
 	}
 
 	static public function quote_sql_identifier($in, string $prefix = '')
