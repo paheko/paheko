@@ -5,8 +5,11 @@
 	{{:error message="Aucune donnée fournie"}}
 {{/if}}
 
-{{:assign var="r" value=$_POST}}
-{{:assign var="montant" value=$r.montant|money_int}}
+{{if null === $r}}
+	{{:assign var="r" value=$_POST}}
+	{{:assign var="r.montant" value=$r.montant|money_int}}
+{{/if}}
+
 
 {{:include file="./_config_default.tpl"}}
 
@@ -49,7 +52,7 @@
 </table>
 
 <p>Le bénéficiaire reconnaît avoir reçu au titre des dons et versements ouvrant droit à réduction d’impôt, la somme de&nbsp;:
-	{{$montant|money_raw|spell_out_number:'fr_FR':'euros'}} (***<strong>{{$montant|raw|money_currency:true}}</strong>***).</p>
+	{{$r.montant|money_raw|spell_out_number:'fr_FR':'euros'}} (***<strong>{{$r.montant|raw|money_currency:true}}</strong>***).</p>
 
 <p>Date du versement ou du don&nbsp;: {{$r.date|date_short}}</p>
 

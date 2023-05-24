@@ -94,7 +94,7 @@ table.list tr.disabled, table.list td.disabled, table.list th.disabled {
     color: var(--gBorderColor);
 }
 
-table.list tr.crossed th, table.list tr.crossed td {
+table.list tr.crossed th, table.list tr.crossed td, table.list .crossed a {
     text-decoration: line-through;
 }
 
