@@ -42,10 +42,12 @@ class Functions
 		'mail',
 		'button',
 		'form_errors',
+		'redirect',
 	];
 
 	const COMPILE_FUNCTIONS_LIST = [
 		':break' => [self::class, 'break'],
+		':continue' => [self::class, 'continue'],
 	];
 
 	/**
@@ -66,6 +68,26 @@ class Functions
 		}
 
 		return '<?php break; ?>';
+	}
+
+	/**
+	 * Compile function to continue inside a loop
+	 */
+	static public function continue(string $name, string $params, Brindille $tpl, int $line)
+	{
+		$in_loop = false;
+		foreach ($tpl->_stack as $element) {
+			if ($element[0] == $tpl::SECTION) {
+				$in_loop = true;
+				break;
+			}
+		}
+
+		if (!$in_loop) {
+			throw new Brindille_Exception(sprintf('Error on line %d: continue can only be used inside a section', $line));
+		}
+
+		return '<?php continue; ?>';
 	}
 
 	static public function admin_header(array $params): string
@@ -579,5 +601,10 @@ class Functions
 		}
 
 		return '';
+	}
+
+	static public function redirect(array $params): void
+	{
+		Utils::redirectDialog($params['to'] ?? null);
 	}
 }
