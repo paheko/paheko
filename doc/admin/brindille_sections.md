@@ -501,6 +501,7 @@ Charge un ou des documents pour le module courant.
 | `module` | optionnel | Nom unique du module lié (par exemple : `recu_don`). Si non spécifié, alors le nom du module courant sera utilisé. |
 | `key` | optionnel | Clé unique du document |
 | `id` | optionnel | Numéro unique du document |
+| `each` | optionnel | Traiter une clé du document comme un tableau |
 
 Il est possible d'utiliser un paramètre commençant par un dollar : `$.cle="valeur"`. Cela va comparer `"valeur"` avec la valeur de la clé `cle` dans le document JSON. C'est l'équivalent d'écrire `where="json_extract(document, '$.cle') = 'valeur'"`.
 
@@ -535,6 +536,36 @@ Afficher la liste des devis du module `invoice` depuis un autre module par exemp
 {{#load module="invoice" $.type="quote"}}
 <h1>Titre du devis : {{$subject}}</h1>
 <h2>Montant : {{$total}}</h2>
+{{/load}}
+```
+
+### Utilisation du paramètre `each`
+
+Le paramètre `each` est utile pour faire une boucle sur un tableau contenu dans le document. Ce paramètre doit contenir un chemin JSON valide. Par exemple `membres[1].noms` pour boucler sur le tableau `noms`, du premier élément du tableau `membres`. Voir la documentation [de la fonction json_each de SQLite pour plus de détails](https://www.sqlite.org/json1.html#jeach).
+
+Pour chaque itération de la section, la variable `{{$value}}` contiendra l'élément recherché dans le critère `each`.
+
+Par exemple nous pouvons avoir un élément `membres` dans notre document JSON qui contient un tableau de noms de membres :
+
+```
+{{:assign var="membres." value="Greta Thunberg}}
+{{:assign var="membres." value="Valérie Masson-Delmotte"}}
+{{:save membres=$membres}}
+```
+
+Nous pouvons utiliser `each` pour faire une liste :
+
+```
+{{:load each="membres"}}
+- {{$value}}
+{{/load}}
+```
+
+Ou pour récupérer les documents qui correspondent à un critère :
+
+```
+{{:load each="membres" where="value = 'Greta Thunberg'"}}
+Le document n°{{$id}} est celui qui parle de Greta.
 {{/load}}
 ```
 

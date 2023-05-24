@@ -134,7 +134,7 @@ class Sections
 			. '$hash = md5(\Garradin\Utils::getSelfURI(false)); '
 			. 'if (!\KD2\Form::tokenCheck(\'form_\' . $hash)) { '
 			. 'throw new \Garradin\ValidationException(\'Une erreur est survenue, merci de bien vouloir renvoyer le formulaire.\'); '
-			. '} ?>';
+			. '} foreach ([null] as $_): ?>';
 		/*
 			. sprintf('$params = %s; ', $params)
 			. '$form_errors = []; '
@@ -147,7 +147,7 @@ class Sections
 	static public function formElse(string $name, string $params_str, UserTemplate $tpl, int $line): string
 	{
 		return '<?php '
-			. '} catch (\Garradin\UserException $e) { '
+			. 'endforeach; } catch (\Garradin\UserException $e) { '
 			. '$this->assign(\'form_errors\', [$e->getMessage()]); '
 			. '?>';
 	}
@@ -258,15 +258,27 @@ class Sections
 			return;
 		}
 
-		/*
+		$delete_table = null;
+
 		// Cannot use json_each with authorizer before SQLite 3.41.0
 		// @see https://sqlite.org/forum/forumpost/d28110be11
-		if (isset($params['each'])) {
-			$params['each'] = $db->quote('$.' . trim($params['each']));
-			$params['tables'] .= sprintf(' AS a, json_each(a.document, %s)', $params['each']);
+		if (isset($params['each']) && !$db->hasFeatures('json_each_readonly')) {
+			$t = 'module_tmp_each' . md5($params['each']);
+
+			// We create a temporary table, to get around authorizer issues in SQLite
+			$db->exec(sprintf('DROP TABLE IF EXISTS %s; CREATE TEMP TABLE IF NOT EXISTS %1$s (id, key, value, document);', $t));
+			$db->exec(sprintf('INSERT INTO %s SELECT a.id, a.key, value, a.document FROM %s AS a, json_each(a.document, %s);',
+				$t, $table, $db->quote('$.' . trim($params['each']))
+			));
+
+			$params['tables'] = $t;
+			$params['select'] = 'value';
 			unset($params['each']);
 		}
-		*/
+		elseif (isset($params['each'])) {
+			$params['tables'] = sprintf('%s AS a, json_each(a.document, %s)', $table, $db->quote('$.' . trim($params['each'])));
+			unset($params['each']);
+		}
 
 		if (!isset($params['where'])) {
 			$params['where'] = '1';
@@ -300,7 +312,14 @@ class Sections
 			unset($params[$key]);
 		}
 
-		$params['select'] = isset($params['select']) ? self::_moduleReplaceJSONExtract($params['select']) : 'id, key, document AS json';
+		$s = 'id, key, document AS json';
+
+		if (isset($params['select'])) {
+			$params['select'] = $s . ', ' . self::_moduleReplaceJSONExtract($params['select']);
+		}
+		else {
+			$params['select'] = $s;
+		}
 
 		if (isset($params['group'])) {
 			$params['group'] = self::_moduleReplaceJSONExtract($params['group']);
