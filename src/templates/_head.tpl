@@ -50,14 +50,14 @@ if (!isset($current)) {
 <?php
 $class = $layout ?? '';
 
-if (ALERT_MESSAGE) {
+if (ALERT_MESSAGE && !$dialog) {
 	$class .= ' sticky';
 }
 ?>
 
 <body{if !empty($class)} class="{$class}"{/if}>
 
-{if ALERT_MESSAGE}
+{if ALERT_MESSAGE && !$dialog}
 	<div id="sticky-alert"><?=ALERT_MESSAGE?></div>
 {/if}
 
