@@ -230,6 +230,7 @@ static $default_config = [
 	'SYSTEM_SIGNALS'        => [],
 	'LOCAL_LOGIN'           => null,
 	'LEGAL_LINE'            => 'Hébergé par <strong>%1$s</strong>, %2$s',
+	'ALERT_MESSAGE'         => null,
 	'DISABLE_INSTALL_PING'  => false,
 	'WOPI_DISCOVERY_URL'    => null,
 	'SQLITE_JOURNAL_MODE'   => 'TRUNCATE',

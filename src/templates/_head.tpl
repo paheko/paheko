@@ -47,7 +47,19 @@ if (!isset($current)) {
 	{custom_colors config=$config}
 </head>
 
-<body{if !empty($layout)} class="{$layout}"{/if}>
+<?php
+$class = $layout ?? '';
+
+if (ALERT_MESSAGE) {
+	$class .= ' sticky';
+}
+?>
+
+<body{if !empty($class)} class="{$class}"{/if}>
+
+{if ALERT_MESSAGE}
+	<div id="sticky-alert"><?=ALERT_MESSAGE?></div>
+{/if}
 
 {if !array_key_exists('_dialog', $_GET) && empty($layout)}
 <header class="header">

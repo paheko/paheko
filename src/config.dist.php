@@ -808,3 +808,17 @@ namespace Garradin;
  * Défaut : "Hébergé par nom_association, adresse_association"
  */
 //const LEGAL_LINE = 'Hébergé par <strong>%1$s</strong>, %2$s';
+
+/**
+ * Message d'avertissement
+ *
+ * Sera affiché en haut de toutes les pages de l'administration.
+ *
+ * Code HTML autorisé.
+ * Utiliser NULL pour désactiver le message.
+ *
+ * Défaut : null
+ *
+ * @var null|string
+ */
+//const ALERT_MESSAGE = 'Ceci est un compte de test.';
