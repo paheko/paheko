@@ -156,7 +156,7 @@ class Backup
 		$config = Config::getInstance();
 		$nb = $config->get('backup_limit');
 
-		$list = self::getList(true);
+		$list = self::list(true);
 
 		// Sort backups from oldest to newest
 		usort($list, function ($a, $b) {
@@ -196,7 +196,7 @@ class Backup
 			return;
 		}
 
-		$list = self::getList(true);
+		$list = self::list(true);
 
 		if (count($list)) {
 			$last = current($list)->date;
