@@ -19,7 +19,12 @@ $form->runIf('create', function () use ($parent) {
 	$page = Page::create((int) qg('type'), $parent, f('title'), Page::STATUS_DRAFT);
 	$page->save();
 
-	$url = ADMIN_URL . 'web/edit.php?new&p=' . $page->path;
+	if ($page->type == Page::TYPE_CATEGORY) {
+		$url = '!web/?p=' . $page->path;
+	}
+	else {
+		$url = ADMIN_URL . 'web/edit.php?new&p=' . $page->path;
+	}
 
 	if (null !== qg('_dialog')) {
 		Utils::reloadParentFrame($url);

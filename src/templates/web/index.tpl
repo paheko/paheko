@@ -74,7 +74,7 @@
 				{assign var="parent" value=""}
 				{assign var="label" value="Nouvelle catégorie"}
 			{/if}
-			{linkbutton shape="plus" label=$label target="_dialog" href="new.php?type=%d&parent=%s"|args:$type_page,$page.path}
+			{linkbutton shape="plus" label=$label target="_dialog" href="new.php?type=%d&parent=%s"|args:$type_category,$page.path}
 		</p>
 		{/if}
 		<h2 class="ruler">{if $page}Sous-catégories{else}Catégories{/if}</h2>
