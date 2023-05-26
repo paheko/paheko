@@ -534,20 +534,22 @@ class Reports
 
 		if (!empty($criterias['projects_only'])) {
 			$join = 'acc_projects a ON a.id = l.id_project';
+			$type = '0 AS account_type';
 		}
 		else {
 			$join = 'acc_accounts a ON a.id = l.id_account';
+			$type = 'a.type AS account_type';
 		}
 
 		$sql = sprintf('SELECT
 			t.id_year, a.id AS id_account, t.id, t.date, t.reference,
 			l.debit, l.credit, l.reference AS line_reference, t.label, l.label AS line_label,
-			a.label AS account_label, a.code AS account_code, a.type AS account_type
+			a.label AS account_label, a.code AS account_code, %s
 			FROM acc_transactions t
 			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
 			INNER JOIN %s
 			WHERE %s
-			ORDER BY a.code COLLATE U_NOCASE, t.date, t.id;', $join, $where);
+			ORDER BY a.code COLLATE U_NOCASE, t.date, t.id;', $type, $join, $where);
 
 		$account = null;
 		$debit = $credit = 0;
