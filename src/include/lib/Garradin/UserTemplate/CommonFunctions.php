@@ -193,7 +193,8 @@ class CommonFunctions
 			}
 
 			foreach ($options as $_key => $_value) {
-				$input .= sprintf('<option value="%s"%s>%s</option>', $_key, $current_value == $_key ? ' selected="selected"' : '', htmlspecialchars((string)$_value));
+				$selected = null !== $current_value && ($current_value == $_key);
+				$input .= sprintf('<option value="%s"%s>%s</option>', $_key, $selected ? ' selected="selected"' : '', htmlspecialchars((string)$_value));
 			}
 
 			$input .= '</select>';

@@ -504,28 +504,39 @@ class Template extends Smartyer
 
 			// Forcer la valeur à être un entier (depuis PHP 7.1)
 			$value = (int)$value;
-			$params['required'] = false;
-			$out  = '';
 
-			foreach ($options as $k=>$v)
+			if ($field->required) {
+				$required_label =  ' <b title="Champ obligatoire">(obligatoire)</b>';
+			}
+			else {
+				$required_label =  ' <i>(facultatif)</i>';
+			}
+
+			$out  = sprintf('<dt><label for="f_%s_0">%s</label>%s<input type="hidden" name="%s_present" value="1" /></dt>', $key, htmlspecialchars($field->label), $required_label, $key);
+
+			if ($field->help) {
+				$out .= sprintf('<dd class="help">%s</dd>', htmlspecialchars($help));
+			}
+
+			foreach ($options as $k => $v)
 			{
 				$b = 0x01 << (int)$k;
 
-				$params['name'] = sprintf('%s[%d]', $key, $k);
-				$params['value'] = 1;
-				$params['default'] = $value & $b;
+				$p = [
+					'type'    => 'checkbox',
+					'label'   => $v,
+					'value'   => 1,
+					'default' => ($value & $b) ? 1 : 0,
+					'name'    => sprintf('%s[%d]', $key, $k),
+				];
 
-				if ($k > 0) {
-					unset($params['label']);
-				}
-
-				$out .= CommonFunctions::input($params);
+				$out .= CommonFunctions::input($p);
 			}
 
 			return $out;
 		}
 		elseif ($type == 'select') {
-			$params['options'] = (array) $config->options;
+			$params['options'] = array_combine($field->options, $field->options);
 		}
 		elseif ($type == 'country') {
 			$params['type'] = 'select';
