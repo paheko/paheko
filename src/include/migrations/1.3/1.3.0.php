@@ -8,6 +8,8 @@ use Garradin\UserTemplate\Modules;
 
 $db->beginSchemaUpdate();
 
+Files::disableQuota();
+
 // Get old keys
 $config = (object) $db->getAssoc('SELECT key, value FROM config WHERE key IN (\'champs_membres\', \'champ_identifiant\', \'champ_identite\');');
 
