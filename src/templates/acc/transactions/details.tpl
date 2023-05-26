@@ -106,7 +106,7 @@
 
 		{if $transaction.type != $transaction::TYPE_ADVANCED}
 			<dt>Référence de paiement</dt>
-			<dd>{if $ref = $transaction->getPaymentReference()}<mark><a href="{$admin_url}payments.php?id={$ref|intval}">{$ref}</a></mark>{else}—{/if}</dd>
+			<dd>{if $ref = $transaction->getPaymentReference()}<mark><a href="{$admin_url}payments.php?id={$transaction->reference|intval}">{$ref}</a></mark>{else}—{/if}</dd>
 			<dt>Projet</dt>
 			<dd>
 			{if $project = $transaction->getProject()}
