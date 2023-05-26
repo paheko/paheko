@@ -280,9 +280,9 @@ class File extends Entity
 	 * @param  string $target New directory path
 	 * @return bool
 	 */
-	public function move(string $target): bool
+	public function move(string $target, bool $check_session = true): bool
 	{
-		return $this->rename($target . '/' . $this->name);
+		return $this->rename($target . '/' . $this->name, $check_session);
 	}
 
 	/**
@@ -290,13 +290,16 @@ class File extends Entity
 	 * @param  string $new_path Target path
 	 * @return bool
 	 */
-	public function rename(string $new_path): bool
+	public function rename(string $new_path, bool $check_session = true): bool
 	{
 		$name = Utils::basename($new_path);
 
 		self::validatePath($new_path);
 		self::validateFileName($name);
-		self::validateCanHTML($name, $new_path);
+
+		if ($check_session) {
+			self::validateCanHTML($name, $new_path);
+		}
 
 		if ($new_path == $this->path) {
 			throw new UserException(sprintf('Impossible de renommer "%s" lui-même', $this->path));

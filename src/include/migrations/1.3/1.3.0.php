@@ -83,7 +83,7 @@ foreach ($list as $file) {
 		continue;
 	}
 
-	$file->move(File::CONTEXT_MODULES . '/web');
+	$file->move(File::CONTEXT_MODULES . '/web', false);
 
 	if ($file->type == $file::TYPE_DIRECTORY) {
 		continue;
