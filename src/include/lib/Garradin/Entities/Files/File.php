@@ -8,7 +8,6 @@ use KD2\DB\EntityManager as EM;
 use KD2\Security;
 use KD2\WebDAV\WOPI;
 use KD2\Office\ToText;
-use KD2\Office\PDFToText;
 
 use Garradin\Config;
 use Garradin\DB;
@@ -241,6 +240,7 @@ class File extends Entity
 	{
 		Files::callStorage('checkLock');
 
+		// This also deletes thumbnails
 		Web_Cache::delete($this->uri());
 
 		// Delete actual file content
@@ -280,9 +280,9 @@ class File extends Entity
 	 * @param  string $target New directory path
 	 * @return bool
 	 */
-	public function move(string $target): bool
+	public function move(string $target, bool $check_session = true): bool
 	{
-		return $this->rename($target . '/' . $this->name);
+		return $this->rename($target . '/' . $this->name, $check_session);
 	}
 
 	/**
@@ -290,13 +290,16 @@ class File extends Entity
 	 * @param  string $new_path Target path
 	 * @return bool
 	 */
-	public function rename(string $new_path): bool
+	public function rename(string $new_path, bool $check_session = true): bool
 	{
 		$name = Utils::basename($new_path);
 
 		self::validatePath($new_path);
 		self::validateFileName($name);
-		self::validateCanHTML($name, $new_path);
+
+		if ($check_session) {
+			self::validateCanHTML($name, $new_path);
+		}
 
 		if ($new_path == $this->path) {
 			throw new UserException(sprintf('Impossible de renommer "%s" lui-même', $this->path));
@@ -1322,5 +1325,10 @@ class File extends Entity
 		}
 
 		return Files::callStorage('getDirectorySize', $this->path);
+	}
+
+	public function webdav_root_url(): string
+	{
+		return BASE_URL . 'dav/' . $this->context() . '/';
 	}
 }

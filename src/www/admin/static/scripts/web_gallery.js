@@ -1,85 +1,85 @@
 (function () {
-    var div, fig;
+	var div, fig;
 
-    document.addEventListener('DOMContentLoaded', enableGallery, false);
+	document.addEventListener('DOMContentLoaded', enableGallery, false);
 
-    function enableGallery()
-    {
-        if (!document.querySelectorAll) {
-            return false;
-        }
+	function enableGallery()
+	{
+		if (!document.querySelectorAll) {
+			return false;
+		}
 
-        var items = document.querySelectorAll('a.internal-image');
+		var items = document.querySelectorAll('a.internal-image');
 
-        for (var i = 0; i < items.length; i++)
-        {
-            var a = items[i];
-            a.setAttribute('data-pos', i);
-            a.onclick = function (e) {
-                e.preventDefault();
-                openImageBrowser(items, this.getAttribute('data-pos'));
-                return false;
-            };
-        }
-    };
+		for (var i = 0; i < items.length; i++)
+		{
+			var a = items[i];
+			a.setAttribute('data-pos', i);
+			a.onclick = function (e) {
+				e.preventDefault();
+				openImageBrowser(items, this.getAttribute('data-pos'));
+				return false;
+			};
+		}
+	};
 
-    window.enableImageGallery = enableGallery;
+	window.enableImageGallery = enableGallery;
 
-    function openImageBrowser(items, pos)
-    {
-        div = document.createElement('div');
-        div.className = 'imageBrowser';
+	function openImageBrowser(items, pos)
+	{
+		div = document.createElement('div');
+		div.className = 'imageBrowser';
 
-        var fig = document.createElement('figure');
+		var fig = document.createElement('figure');
 
-        div.onclick = function (e) {
-            div.style.opacity = 0;
-            window.setTimeout(function() { div.parentNode.removeChild(div); }, 500);
-        };
+		div.onclick = function (e) {
+			div.style.opacity = 0;
+			window.setTimeout(function() { div.parentNode.removeChild(div); }, 500);
+		};
 
-        var img = document.createElement('img');
-        img.title = 'Cliquer sur l\'image pour aller à la suivante, ou à côté pour fermer';
-        img.pos = pos || 0;
+		var img = document.createElement('img');
+		img.title = 'Cliquer sur l\'image pour aller à la suivante, ou à côté pour fermer';
+		img.pos = pos || 0;
 
-        img.onload = function () {
-            fig.classList.remove('loading');
-            img.style.width = 'initial';
-            img.style.height = 'initial';
-        };
+		img.onload = function () {
+			fig.classList.remove('loading');
+			img.style.width = 'initial';
+			img.style.height = 'initial';
+		};
 
-        img.onclick = function (e) {
-            e.stopPropagation();
-            img.pos++;
-            openImage(img, items);
-        };
+		img.onclick = function (e) {
+			e.stopPropagation();
+			img.pos++;
+			openImage(img, items);
+		};
 
-        fig.appendChild(img);
-        div.appendChild(fig);
-        document.body.appendChild(div);
+		fig.appendChild(img);
+		div.appendChild(fig);
+		document.body.appendChild(div);
 
-        openImage(img, items, div);
-    }
+		openImage(img, items, div);
+	}
 
-    function openImage(img, items)
-    {
-        // Pour animation
-        var fig = img.parentNode;
-        fig.classList.add('loading');
+	function openImage(img, items)
+	{
+		// Pour animation
+		var fig = img.parentNode;
+		fig.classList.add('loading');
 
-        var pos = img.pos;
+		var pos = img.pos;
 
-        if (pos >= items.length)
-        {
-            var div = img.parentNode.parentNode;
-            div.style.opacity = 0;
-            window.setTimeout(function() { div.parentNode.removeChild(div); }, 500);
-            return;
-        }
+		if (pos >= items.length)
+		{
+			var div = img.parentNode.parentNode;
+			div.style.opacity = 0;
+			window.setTimeout(function() { div.parentNode.removeChild(div); }, 500);
+			return;
+		}
 
-        img.style.width = 0;
-        img.style.height = 0;
-        img.src = items[pos].href;
-        img.pos = pos;
-    }
+		img.style.width = 0;
+		img.style.height = 0;
+		img.src = items[pos].href;
+		img.pos = pos;
+	}
 
 }());

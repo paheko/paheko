@@ -4,7 +4,7 @@ namespace Garradin;
 use Garradin\Users\Categories;
 use Garradin\Users\DynamicFields;
 use Garradin\Files\Files;
-use Garradin\Sauvegarde;
+use Garradin\Backup;
 use Garradin\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
@@ -28,7 +28,7 @@ if (null !== $latest) {
 }
 
 $tpl->assign([
-	'garradin_version' => garradin_version() . ' [' . (garradin_manifest() ?: 'release') . ']',
+	'paheko_version'   => paheko_version() . ' [' . (paheko_manifest() ?: 'release') . ']',
 	'new_version'      => $latest,
 	'php_version'      => phpversion(),
 	'has_gpg_support'  => \KD2\Security::canUseEncryption(),
@@ -39,7 +39,7 @@ $tpl->assign([
 	'quota_used'       => Files::getUsedQuota(),
 	'quota_max'        => Files::getQuota(),
 	'quota_left'       => Files::getRemainingQuota(),
-	'backups_size'     => Sauvegarde::getAllBackupsTotalSize(),
+	'backups_size'     => Backup::getAllBackupsTotalSize(),
 ]);
 
 $tpl->display('config/index.tpl');

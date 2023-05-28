@@ -12,15 +12,13 @@
 		hide_header=true
 	}}
 
-	{{:assign var="numero" value="%06d"|args:$id}}
-	{{:assign var="recu" value=$recu|replace:'%ID%':$numero}}
-
 	{{if $annule}}
 	<div class="watermark watermark-red">
 		<div>Annulé</div>
 	</div>
 	{{/if}}
 
+	{{:assign var="recu" value=$recu|replace:'%ID%':$id}}
 	{{$recu|raw}}
 
 	<figure class="signature">

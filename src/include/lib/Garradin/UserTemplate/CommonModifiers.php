@@ -32,6 +32,7 @@ class CommonModifiers
 		'strval',
 		'substr',
 		'abs',
+		'http_build_query',
 	];
 
 	/**

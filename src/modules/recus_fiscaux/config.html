@@ -2,41 +2,41 @@
 
 {{:include file="./_config_default.tpl" keep="module.config"}}
 
-{{if $_POST.save}}
+{{#form on="save"}}
 	{{if $_POST.objet_asso|trim == ''}}
-		{{:assign error="L'objet de l'association n'a pas été renseigné."}}
+		{{:error message="L'objet de l'association n'a pas été renseigné."}}
 	{{elseif !$_POST.comptes_don|count}}
-		{{:assign error="Aucun compte de don éligible aux reçus n'a été renseigné."}}
+		{{:error message="Aucun compte de don éligible aux reçus n'a été renseigné."}}
 	{{elseif !$_POST.comptes_especes|count}}
-		{{:assign error="Aucun compte d'espèces n'a été renseigné."}}
+		{{:error message="Aucun compte d'espèces n'a été renseigné."}}
 	{{elseif !$_POST.comptes_cheques|count}}
-		{{:assign error="Aucun compte de chèques n'a été renseigné."}}
-	{{else}}
-		{{:save key="config"
-			objet_asso=$_POST.objet_asso
-			type_asso=$_POST.type_asso
-			comptes_don=$_POST.comptes_don
-			comptes_don_nature=$_POST.comptes_don_nature
-			comptes_especes=$_POST.comptes_especes
-			comptes_cheques=$_POST.comptes_cheques
-			art200=$_POST.art200
-			art238=$_POST.art238
-			art885=$_POST.art885
-			champs_adresse=$_POST.champs_adresse
-		}}
-		{{:http redirect="?ok=1"}}
+		{{:error message="Aucun compte de chèques n'a été renseigné."}}
 	{{/if}}
-{{/if}}
+
+	{{:save key="config"
+		objet_asso=$_POST.objet_asso
+		type_asso=$_POST.type_asso
+		comptes_don=$_POST.comptes_don
+		comptes_don_nature=$_POST.comptes_don_nature
+		comptes_especes=$_POST.comptes_especes
+		comptes_cheques=$_POST.comptes_cheques
+		art200=$_POST.art200
+		art238=$_POST.art238
+		art885=$_POST.art885
+		champs_adresse=$_POST.champs_adresse
+	}}
+	{{:redirect to="?ok=1"}}
+{{/form}}
 
 {{if !$dialog}}
-<nav class="tabs">
-	{{:linkbutton shape="left" href="./" label="Gestion des reçus"}}
-</nav>
+	<nav class="tabs">
+		{{:linkbutton shape="left" href="./" label="Gestion des reçus"}}
+	</nav>
 {{/if}}
 
-{{if $error}}
-	<p class="error block">{{$error}}</p>
-{{elseif $_GET.ok}}
+{{:form_errors}}
+
+{{if $_GET.ok}}
 	<p class="block confirm">Configuration enregistrée.</p>
 {{/if}}
 

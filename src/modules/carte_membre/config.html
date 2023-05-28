@@ -8,6 +8,7 @@
 		fields=$_POST.fields|or:null
 		photo=$_POST.photo|or:null
 		id_service=$_POST.id_service|intval|or:null
+		show_fields_names=$_POST.show_fields_names|boolval
 	}}
 	{{:http redirect="?ok=1"}}
 {{/if}}
@@ -34,7 +35,7 @@
 		<dt>Champs des fiches membre à afficher sur la carte de membre</dt>
 		<dd class="help"><em>(Le nom du membre est toujours affiché.)</em></dd>
 
-		{{#select * FROM config_users_fields WHERE type != 'file' AND system & (1 << 4) = 0 ORDER BY sort_order}}
+		{{#select * FROM config_users_fields WHERE type NOT IN ('file', 'password', 'generated', 'multiple', 'checkbox', 'date', 'datetime') AND system & (1 << 4) = 0 ORDER BY sort_order}}
 			{{if $module.config.fields|has:$name}}
 				{{:assign var="checked" value=$name}}
 			{{else}}
@@ -42,6 +43,13 @@
 			{{/if}}
 			{{:input type="checkbox" name="fields[]" value=$name label=$label default=$checked}}
 		{{/select}}
+
+		<dt>Nom des champs</dt>
+		{{:input type="checkbox" name="show_fields_names" value=1 label="Afficher le nom des champs" source=$module.config}}
+		<dd class="help">
+			Si coché, le nom du champ sera affiché avant sa valeur.
+			Exemple : <samp>Nom&nbsp;: Elsa Triolet</samp>
+		</dd>
 
 		{{:assign var="file_fields." value="— Aucun, ne pas afficher de photo —"}}
 		{{#select name, label FROM config_users_fields WHERE type = 'file' ORDER BY sort_order; assign_assoc="file_fields"}}{{/select}}

@@ -65,9 +65,12 @@
 		<li><a href="#filtres-de-tableaux">Filtres de tableaux</a>
 		<ol>
 			<li><a href="#has">has</a></li>
+			<li><a href="#in">in</a></li>
 			<li><a href="#keys">keys</a></li>
 			<li><a href="#count">count</a></li>
-			<li><a href="#implode">implode</a>
+			<li><a href="#explode">explode</a></li>
+			<li><a href="#implode">implode</a></li>
+			<li><a href="#map">map</a>
 		</ol></li>
 		<li><a href="#filtres-de-texte">Filtres de texte</a>
 		<ol>
@@ -212,6 +215,10 @@
 <td style="text-align: left;">Transforme une valeur en chaîne de texte</td>
 </tr>
 <tr>
+<td style="text-align: left;"><code>json_decode</code></td>
+<td style="text-align: left;">Transforme une chaîne JSON en tableau</td>
+</tr>
+<tr>
 <td style="text-align: left;"><code>json_encode</code></td>
 <td style="text-align: left;">Transforme une valeur en chaîne JSON</td>
 </tr>
@@ -228,9 +235,16 @@
 <p>Crée un lien protégé pour une adresse email, pour éviter que l'adresse ne soit recueillie par les robots spammeurs (empêche également le copier-coller et le lien ne fonctionnera pas avec javascript désactivé).</p>
 <h1 id="filtres-de-tableaux">Filtres de tableaux</h1>
 <h2 id="has">has</h2>
-<p>Renvoi vrai si le tableau contient l'élément passé en paramètre.</p>
+<p>Renvoie vrai si le tableau contient l'élément passé en paramètre.</p>
 <pre><code>{{:assign var="table" a="bleu" b="orange"}}
 {{if $table|has:"bleu"}}
+    Oui, il y a du bleu
+{{/if}}</code></pre>
+<h2 id="in">in</h2>
+<p>Renvoie vrai si l'élément fait partie du tableau passé en paramètre.</p>
+<p>C'est exactement la même chose que <code>has</code>, mais exprimé à l'envers.</p>
+<pre><code>{{:assign var="table" a="bleu" b="orange"}}
+{{if "bleu"|in:$table}}
     Oui, il y a du bleu
 {{/if}}</code></pre>
 <h2 id="keys">keys</h2>
@@ -244,6 +258,16 @@
 <p>Compte le nombre d'entrées dans un tableau.</p>
 <pre><code>{{$products|count}}
 = 5</code></pre>
+<h2 id="explode">explode</h2>
+<p>Sépare une chaîne de texte en tableau à partir d'une chaîne de séparation.</p>
+<pre><code>{{:assign var="table" value="a,b,c"|explode:","}}
+- {{$table.0}}
+- {{$table.1}}
+- {{$table.2}}</code></pre>
+<p>Affichera :</p>
+<pre><code>- a
+- b
+- c</code></pre>
 <h2 id="implode">implode</h2>
 <p>Réunit un tableau sous forme de chaîne de texte en utilisant éventuellement une chaîne de liaison entre chaque élément du tableau.</p>
 <pre><code>{{:assign var="table" a="bleu" b="orange"}}
@@ -252,6 +276,16 @@
 <p>Affichera :</p>
 <pre><code>bleuorange
 bleu - orange</code></pre>
+<h2 id="map">map</h2>
+<p>Applique un filtre sur chaque élément du tableau.</p>
+<p>Le premier paramètre doit être le nom du filtre. Les autres paramètres seront passés au filtre.</p>
+<pre><code>{{:assign var="table" a="01" b="02"}}
+{{:assign var="table" value=$table|map:intval}}
+- {{$table.a}}
+- {{$table.b}}</code></pre>
+<p>Affichera :</p>
+<pre><code>- 1
+- 2</code></pre>
 <h1 id="filtres-de-texte">Filtres de texte</h1>
 <h2 id="args">args</h2>
 <p>Remplace des arguments dans le texte selon le schéma utilisé par <a href="https://www.php.net/sprintf" target="_blank" rel="nofollow,noreferrer">sprintf</a>.</p>
@@ -397,6 +431,9 @@ Ceci n'est pas un t</code></pre>
 <p>Exemple :</p>
 <pre><code>{{:assign colonne=$_GET.colonne|quote_sql_identifier}}
 {{#sql select="id, %s"|args:$colonne tables="users"}}</code></pre>
+<p>Il est possible d'utiliser un préfixe en argument, utile par exemple quand on a plusieurs tables avec le même nom de colonne :</p>
+<pre><code>{{:assign colonne=$_GET.colonne|quote_sql_identifier:"u1"}}
+{{#sql select="u1.id, %s"|args:$colonne tables="users AS u1 INNER JOIN users AS u2 ON u2.id_parent = u1.id"}}</code></pre>
 <h2 id="sql_where">sql_where</h2>
 <p>Permet de créer une partie d'une clause SQL <code>WHERE</code> complexe.</p>
 <p>Le premier paramètre est le nom de la colonne (sans préfixe).</p>

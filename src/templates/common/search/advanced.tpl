@@ -98,12 +98,14 @@ var translations = {
 	"Matches ALL of the following conditions:": "Correspond à TOUS les critères suivants :",
 	"Matches ANY of the following conditions:": "Correspond à UN des critères suivants :",
 	"Add a new set of conditions below this one": "— Ajouter un groupe de critères",
-	"Remove this set of conditions": "— Supprimer ce groupe de critères"
+	"Remove this set of conditions": "— Supprimer ce groupe de critères",
+	"AND": "ET",
+	"OR": "OU"
 };
 
 var q = new SQLQueryBuilder(columns);
 q.__ = function (str) {
-	return translations[str];
+	return translations[str] ?? str;
 };
 q.loadDefaultOperators();
 q.default_operator = "1";

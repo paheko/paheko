@@ -1,0 +1,137 @@
+{{#restrict section="accounting" level="write" block=true}}{{/restrict}}
+{{:admin_header title="Écriture"}}
+
+{{:assign var="types" 0="Avancé" 1="Recette" 2="Dépense" 3="Virement" 4="Dette" 5="Créance"}}
+
+{{if $_GET.id}}
+	{{#load assign="tpl" id=$_GET.id|intval}}{{/load}}
+{{/if}}
+
+{{if !$tpl}}
+	{{* 2 empty lines by default *}}
+	{{:assign var="tpl.ll.0" l=""}}
+	{{:assign var="tpl.ll.1" l=""}}
+{{/if}}
+
+{{if $_POST.save}}
+	{{:save id=$tpl.id
+		name=$_POST.name|strval|trim
+		t=$_POST.t|intval
+		l=$_POST.l|strval|trim|or:null
+		dt=$_POST.dt|strval|trim|or:null
+		r=$_POST.r|strval|trim|or:null
+		a00=$_POST.a00|money_int
+		ar=$_POST.ar|strval|trim|or:null
+		ae=$_POST.ae|strval|trim|or:null
+		ab=$_POST.ab|strval|trim|or:null
+		at=$_POST.at|strval|trim|or:null
+		a3=$_POST.a3|strval|trim|or:null
+		ll=$_POST.ll|array_transpose
+	}}
+	{{:http redirect="./"}}
+{{/if}}
+
+<form method="post" action="">
+<fieldset>
+	<legend>{{if !$tpl}}Nouveau modèle{{else}}Modifier le modèle{{/if}}</legend>
+	<dl>
+		{{:input type="text" required=true name="name" label="Nom du modèle" source=$tpl}}
+		{{:input type="select" name="t" label="Type" options=$types required=true source=$tpl}}
+		{{:input type="text" name="l" label="Libellé" source=$tpl}}
+		{{:input type="date" name="dt" label="Date" source=$tpl}}
+		{{:input type="text" name="r" label="Numéro de pièce comptable" source=$tpl}}
+	</dl>
+	<dl class="t1 t2 t3 t4 t5">
+		{{:input type="money" name="a00" label="Montant" source=$tpl}}
+	</dl>
+	<dl class="t1 t5">
+		{{:input type="text" name="ar" label="Code du compte de recette" source=$tpl}}
+	</dl>
+	<dl class="t2 t4">
+		{{:input type="text" name="ae" label="Code du compte de dépense" source=$tpl}}
+	</dl>
+	<dl class="t1 t2 t3">
+		{{:input type="text" name="ab" label="Code du compte de caisse ou de banque" source=$tpl}}
+	</dl>
+	<dl class="t3">
+		{{:input type="text" name="at" label="Code du compte de caisse ou de banque destinataire" source=$tpl}}
+	</dl>
+	<dl class="t4 t5">
+		{{:input type="text" name="a3" label="Code du compte de tiers" source=$tpl}}
+	</dl>
+</fieldset>
+
+<fieldset class="t0">
+	<legend>Lignes de l'écriture</legend>
+	<table class="list transaction-lines auto">
+		<thead>
+			<tr>
+				<td>Code du compte</td>
+				<td>Débit</td>
+				<td>Crédit</td>
+				<td>Libellé ligne</td>
+				<td>Réf. ligne</td>
+				<td></td>
+			</tr>
+		</thead>
+		<tbody>
+		{{#foreach from=$tpl.ll key="k" item="line"}}
+			<tr>
+				<td class="account">
+					{{:input type="text" name="ll[a][]" default=$line.a}}
+				</td>
+				<td class="money">{{:input type="text" name="ll[d][]" default=$line.d size=5}}</td>
+				<td class="money">{{:input type="text" name="ll[c][]" default=$line.c size=5}}</td>
+				<td>{{:input type="text" name="ll[l][]" default=$line.l}}</td>
+				<td>{{:input type="text" name="ll[r][]" default=$line.r size=10}}</td>
+				<td>{{:button label="Enlever" title="Enlever la ligne" shape="minus" class="line_del"}}</td>
+			</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+	{{:button label="Ajouter une ligne" shape="plus" class="line_add"}}
+</fieldset>
+
+<p class="submit">
+	{{:button type="submit" shape="right" label="Enregistrer" name="save" class="main"}}
+</p>
+</form>
+
+<script type="text/javascript">
+function toggleType()
+{
+	for (var i = 0; i <= 5; i++) {
+		g.toggle('.t' + i, false);
+	}
+
+	g.toggle('.t' + s.value, true);
+}
+
+var s = $('#f_t');
+s.onchange = toggleType;
+
+toggleType();
+
+var t = $('table.transaction-lines tbody')[0];
+
+function deleteLine()
+{
+	if (t.querySelectorAll('tr').length <= 2) {
+		return;
+	}
+
+	this.parentNode.parentNode.remove();
+}
+
+function addLine()
+{
+	var n = t.lastElementChild.cloneNode(true);
+	t.appendChild(n);
+	n.querySelector('.line_del').onclick = deleteLine;
+}
+
+document.querySelectorAll('.line_del').forEach(e => e.onclick = deleteLine);
+$('.line_add')[0].onclick = addLine;
+</script>
+
+{{:admin_footer}}

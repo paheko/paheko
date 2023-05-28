@@ -5,6 +5,8 @@ namespace Garradin\UserTemplate;
 use Garradin\Config;
 use Garradin\Utils;
 
+use KD2\Form;
+
 use const Garradin\{ADMIN_URL, CALC_CONVERT_COMMAND};
 
 /**
@@ -110,13 +112,13 @@ class CommonFunctions
 		}
 
 		if ($type == 'radio' || $type == 'checkbox') {
-			$attributes['id'] .= '_' . $value;
+			$attributes['id'] .= '_' . (strlen($value) > 30 ? md5($value) : $value);
 
 			if ($current_value == $value && $current_value !== null) {
 				$attributes['checked'] = 'checked';
 			}
 
-			$attributes['value'] = $value;
+			$attributes['value'] = htmlspecialchars($value);
 		}
 		elseif ($type == 'date') {
 			$type = 'text';
@@ -191,7 +193,8 @@ class CommonFunctions
 			}
 
 			foreach ($options as $_key => $_value) {
-				$input .= sprintf('<option value="%s"%s>%s</option>', $_key, $current_value == $_key ? ' selected="selected"' : '', htmlspecialchars((string)$_value));
+				$selected = null !== $current_value && ($current_value == $_key);
+				$input .= sprintf('<option value="%s"%s>%s</option>', $_key, $selected ? ' selected="selected"' : '', htmlspecialchars((string)$_value));
 			}
 
 			$input .= '</select>';
@@ -349,10 +352,6 @@ class CommonFunctions
 		$label = $params['label'];
 		$prefix = $params['prefix'] ?? '';
 
-		if (!$href || !$label) {
-			return '';
-		}
-
 		// href can be prefixed with '!' to make the URL relative to ADMIN_URL
 		if (substr($href, 0, 1) == '!') {
 			$href = ADMIN_URL . substr($params['href'], 1);
@@ -375,7 +374,9 @@ class CommonFunctions
 
 		$params = implode(' ', $params);
 
-		return sprintf('<a href="%s" %s>%s<span>%s</span></a>', htmlspecialchars($href), $params, $prefix, htmlspecialchars($label));
+		$label = $label ? sprintf('<span>%s</span>', htmlspecialchars($label)) : '';
+
+		return sprintf('<a href="%s" %s>%s%s</a>', htmlspecialchars($href), $params, $prefix, $label);
 	}
 
 	static public function button(array $params): string
@@ -398,10 +399,16 @@ class CommonFunctions
 		}
 
 		$prefix = '';
+		$suffix = '';
 
 		if (isset($params['icon'])) {
 			$prefix = self::getIconHTML($params);
 			unset($params['icon'], $params['icon_html']);
+		}
+
+		if (isset($params['csrf_key'])) {
+			$suffix .= Form::tokenHTML($params['csrf_key']);
+			unset($params['csrf_key']);
 		}
 
 		$params['class'] .= ' icn-btn';
@@ -415,7 +422,7 @@ class CommonFunctions
 
 		$params = implode(' ', $params);
 
-		return sprintf('<button %s>%s%s</button>', $params, $prefix, $label);
+		return sprintf('<button %s>%s%s</button>%s', $params, $prefix, $label, $suffix);
 	}
 
 	static public function linkbutton(array $params): string

@@ -1,15 +1,25 @@
 window.enableTableDragAndDrop = function (table) {
+	table.classList.add('drag');
 	var items = table.querySelectorAll('tbody tr');
 
 	items.forEach(function (row) {
 		row.draggable = true;
-		addDragEvents(row);
+		addEvents(row);
 	});
+
+	function swapNodes(node1, node2) {
+		const afterNode2 = node2.nextElementSibling;
+		const parent = node2.parentNode;
+		node1.replaceWith(node2);
+		parent.insertBefore(node1, afterNode2);
+	}
 
 	var dragSrcEl = null;
 	var dragTargetEl = null;
 
-	function addDragEvents(row) {
+	function addEvents(row) {
+		row.querySelector('.up').onclick = () => swapNodes(row.previousElementSibling, row);
+		row.querySelector('.down').onclick = () => swapNodes(row, row.nextElementSibling);
 		row.addEventListener('dragstart', handleDragStart, false);
 		row.addEventListener('dragenter', handleDragEnter, false);
 		row.addEventListener('dragover', handleDragOver, false);
@@ -49,10 +59,18 @@ window.enableTableDragAndDrop = function (table) {
 			return;
 		}
 
+		if (!table.contains(this)) {
+			return;
+		}
+
 		this.classList.add('placeholder');
 	}
 
 	function handleDragLeave(e) {
+		if (!table.contains(this)) {
+			return;
+		}
+
 		this.classList.remove('placeholder');
 
 		if (this == dragSrcEl) {
@@ -77,15 +95,7 @@ window.enableTableDragAndDrop = function (table) {
 		this.parentNode.parentNode.classList.remove('dragging');
 
 		if (dragTargetEl) {
-			// Clone source row
-			var new_row = dragSrcEl.cloneNode(true);
-			// Remove source row
-			this.remove();
-			// Re-add events
-			addDragEvents(new_row);
-
-			// Insert new cloned row where it's supposed to go
-			dragTargetEl.parentNode.insertBefore(new_row, dragTargetEl.nextSibling);
+			this.parentNode.insertBefore(dragSrcEl, dragTargetEl.nextElementSibling);
 		}
 
 		// Items list has changed

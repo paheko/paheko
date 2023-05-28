@@ -6,7 +6,7 @@
 
 {form_errors}
 
-{if $code == Sauvegarde::INTEGRITY_FAIL && ALLOW_MODIFIED_IMPORT}
+{if $code == Backup::INTEGRITY_FAIL && ALLOW_MODIFIED_IMPORT}
 	<p class="block alert">Pour passer outre, renvoyez le fichier en cochant la case «&nbsp;Ignorer les erreurs&nbsp;».
 	Attention, si vous avez effectué des modifications dans la base de données, cela peut créer des bugs&nbsp;!</p>
 {/if}
@@ -14,12 +14,12 @@
 {if $ok}
 	<p class="block confirm">
 		{if $ok == 'restore'}La restauration a bien été effectuée.
-			{if $ok_code & Sauvegarde::NOT_AN_ADMIN}
+			{if $ok_code & Backup::NOT_AN_ADMIN}
 			</p>
 			<p class="block alert">
 				<strong>Vous n'êtes pas administrateur dans cette sauvegarde.</strong> Paheko a donné les droits d'administration à toutes les catégories afin d'empêcher de ne plus pouvoir se connecter.
 				Merci de corriger les droits des catégories maintenant.
-			{elseif $ok_code & Sauvegarde::CHANGED_USER}
+			{elseif $ok_code & Backup::CHANGED_USER}
 			</p>
 			<p class="block alert">
 				<strong>Votre compte membre n'existait pas dans la sauvegarde qui a été restaurée, vous êtes désormais connecté avec le premier compte administrateur.</strong>
@@ -50,7 +50,7 @@
 		{csrf_field key="backup_restore"}
 		{button type="submit" name="restore_file" label="Restaurer depuis le fichier sélectionné" shape="upload" class="main"}
 	</p>
-	{if $code && ($code == Sauvegarde::INTEGRITY_FAIL && ALLOW_MODIFIED_IMPORT)}
+	{if $code && ($code == Backup::INTEGRITY_FAIL && ALLOW_MODIFIED_IMPORT)}
 	<p>
 		{input type="checkbox" name="force_import" value="1" label="Ignorer les erreurs, je sais ce que je fait"}
 	</p>

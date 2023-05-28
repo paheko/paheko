@@ -157,7 +157,7 @@ class Fee extends Entity
 			],
 			'paid_amount' => [
 				'label' => 'Montant payé',
-				'select' => 'SUM(l.credit)',
+				'select' => 'CASE WHEN tu.id_service_user IS NOT NULL THEN SUM(l.credit) ELSE NULL END',
 			],
 			'date' => [
 				'label' => 'Date',

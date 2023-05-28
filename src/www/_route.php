@@ -27,7 +27,7 @@ if (file_exists(__DIR__ . $uri))
 {
 	if (PHP_SAPI != 'cli-server') {
 		http_response_code(500);
-		die('Erreur de configuration du serveur web: cette URL ne devrait pas être traitée par Garradin');
+		die('Erreur de configuration du serveur web: cette URL ne devrait pas être traitée par Paheko');
 	}
 
 	return false;

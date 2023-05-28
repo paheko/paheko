@@ -24,7 +24,7 @@ class Upgrade
 
 		$v = DB::getInstance()->version();
 
-		if (version_compare($v, garradin_version(), '>='))
+		if (version_compare($v, paheko_version(), '>='))
 		{
 			return false;
 		}
@@ -33,7 +33,7 @@ class Upgrade
 
 		if (!$v || version_compare($v, self::MIN_REQUIRED_VERSION, '<'))
 		{
-			throw new UserException(sprintf("Votre version de Garradin est trop ancienne pour être mise à jour. Mettez à jour vers Garradin %s avant de faire la mise à jour vers cette version.", self::MIN_REQUIRED_VERSION));
+			throw new UserException(sprintf("Votre version de Paheko est trop ancienne pour être mise à jour. Mettez à jour vers Paheko %s avant de faire la mise à jour vers cette version.", self::MIN_REQUIRED_VERSION));
 		}
 
 		if (Static_Cache::exists('upgrade'))
@@ -50,7 +50,6 @@ class Upgrade
 	static public function upgrade()
 	{
 		$db = DB::getInstance();
-		$backup = new Sauvegarde;
 		$v = $db->version();
 
 		Plugins::toggleSignals(false);
@@ -58,8 +57,8 @@ class Upgrade
 		Static_Cache::store('upgrade', 'Updating');
 
 		// Créer une sauvegarde automatique
-		$backup_file = sprintf(DATA_ROOT . '/association.pre_upgrade-%s.sqlite', garradin_version());
-		$backup->make($backup_file);
+		$backup_file = sprintf(DATA_ROOT . '/association.pre_upgrade-%s.sqlite', paheko_version());
+		Backup::make($backup_file);
 
 		try {
 			if (version_compare($v, '1.1.21', '<')) {
@@ -169,12 +168,12 @@ class Upgrade
 			$cache_version = file_exists($cache_version_file) ? trim(file_get_contents($cache_version_file)) : null;
 
 			// Only delete system cache when it's required
-			if (garradin_version() !== $cache_version) {
+			if (paheko_version() !== $cache_version) {
 				Utils::resetCache(SMARTYER_CACHE_ROOT);
 			}
 
-			file_put_contents($cache_version_file, garradin_version());
-			$db->setVersion(garradin_version());
+			file_put_contents($cache_version_file, paheko_version());
+			$db->setVersion(paheko_version());
 
 			// reset last version check
 			$db->exec('UPDATE config SET value = NULL WHERE key = \'last_version_check\';');
@@ -244,7 +243,7 @@ class Upgrade
 			return $last;
 		}
 
-		$current_version = garradin_version();
+		$current_version = paheko_version();
 		$last = (object) ['time' => time(), 'version' => null];
 		$config->set('last_version_check', json_encode($last));
 		$config->save();

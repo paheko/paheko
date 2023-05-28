@@ -1,8 +1,10 @@
 {include file="_head.tpl" title="Écritures liées à %s"|args:$transaction_user.identite current="acc/accounts"}
 
+{if !$dialog}
 <p>
 	{linkbutton href="!users/details.php?id=%d"|args:$transaction_user.id label="Retour à la fiche membre" shape="user"}
 </p>
+{/if}
 
 {include file="acc/reports/_journal.tpl"}
 

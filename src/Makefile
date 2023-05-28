@@ -1,4 +1,4 @@
-.PHONY: dev-server release deps publish check-dependencies test minify phpstan
+.PHONY: dev-server release deps publish check-dependencies test minify phpstan www htaccess
 KD2_FILE := https://fossil.kd2.org/kd2fw/uv/KD2-7.4.zip
 
 deps:
@@ -30,7 +30,7 @@ psalm:
 doc:
 	php ../tools/doc_md_to_html.php
 
-www/.htaccess:
+htaccess:
 	cat apache-vhost.conf apache-htaccess.conf > www/.htaccess
 
 release: test minify doc
@@ -43,7 +43,7 @@ release: test minify doc
 		rsync --files-from=dependencies.list -r ./ /tmp/paheko-build/paheko/src/include/lib/
 	mv www/admin/static/mini.css /tmp/paheko-build/paheko/src/www/admin/static/admin.css
 	# Generate .htaccess file
-	cd /tmp/paheko-build/paheko/src && make www/.htaccess
+	cd /tmp/paheko-build/paheko/src && make htaccess
 	cd /tmp/paheko-build/paheko/src/www/admin/static; \
 		rm -f font/*.css font/*.json
 	cd /tmp/paheko-build/paheko/src; \

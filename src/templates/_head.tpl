@@ -1,6 +1,6 @@
 <?php
 if (!isset($current)) {
-    $current = '';
+	$current = '';
 }
 ?>
 <!DOCTYPE html>
@@ -47,7 +47,19 @@ if (!isset($current)) {
 	{custom_colors config=$config}
 </head>
 
-<body{if !empty($layout)} class="{$layout}"{/if}>
+<?php
+$class = $layout ?? '';
+
+if (ALERT_MESSAGE && !$dialog) {
+	$class .= ' sticky';
+}
+?>
+
+<body{if !empty($class)} class="{$class}"{/if}>
+
+{if ALERT_MESSAGE && !$dialog}
+	<div id="sticky-alert"><?=ALERT_MESSAGE?></div>
+{/if}
 
 {if !array_key_exists('_dialog', $_GET) && empty($layout)}
 <header class="header">
@@ -131,9 +143,9 @@ if (!isset($current)) {
 		{/if}
 
 	{elseif !defined('Garradin\INSTALL_PROCESS')}
-        {if $config.org_web || !$config.site_disabled}
+		{if $config.org_web || !$config.site_disabled}
 		<li><h3><a href="{if $config.site_disabled && $config.org_web}{$config.org_web}{else}{$www_url}{/if}">{icon shape="left"}<b>Retour au site</b></a></h3></li>
-        {/if}
+		{/if}
 		<li{if $current == 'login'} class="current"{/if}><h3><a href="{$admin_url}">{icon shape="login"}<b>Connexion</b></a></h3></li>
 	{/if}
 	</ul>

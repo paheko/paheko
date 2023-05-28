@@ -94,7 +94,7 @@ table.list tr.disabled, table.list td.disabled, table.list th.disabled {
     color: var(--gBorderColor);
 }
 
-table.list tr.crossed th, table.list tr.crossed td {
+table.list tr.crossed th, table.list tr.crossed td, table.list .crossed a {
     text-decoration: line-through;
 }
 
@@ -314,6 +314,11 @@ table.files.gallery tbody .actions > a span {
     display: none;
 }
 
+table.drag tbody tr:nth-child(1) .up,
+table.drag tbody tr:last-child .down {
+    visibility: hidden;
+}
+
 /* We need a container here or the cursor won't change because of pointer-events: none */
 table .draggable {
     cursor: move;
@@ -338,14 +343,17 @@ table .draggable button::after {
     cursor: move;
 }
 
-table tr.placeholder {
-    box-shadow: 0 10px 0px rgb(var(--gSecondColor));
+table.dragging tr.placeholder {
+    box-shadow: 0 10px 0 rgba(var(--gHoverLinkColor), 0.5);
 }
 
-
 table tr.dragging {
-    opacity: 0.5;
-    outline: 4px solid var(--gBorderColor) !important;
+    background: rgba(var(--gHoverLinkColor), 0.1);
+    box-shadow: 0 0 5px 5px rgba(var(--gHoverLinkColor), 0.3) !important;
+}
+
+table.dragging tr td * {
+    pointer-events: none;
 }
 
 table.dragging td {

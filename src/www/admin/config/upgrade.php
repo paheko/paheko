@@ -15,7 +15,7 @@ $i = Upgrade::getInstaller();
 
 $csrf_key = 'upgrade_' . sha1(SECRET_KEY);
 $releases = $i->listReleases();
-$v = garradin_version();
+$v = paheko_version();
 
 // Remove releases that are in the past
 foreach ($releases as $rv => $release) {

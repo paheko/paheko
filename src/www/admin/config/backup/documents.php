@@ -27,7 +27,7 @@ $form->runIf('restore', function () {
 
 // Download all files as ZIP
 $form->runIf('download_files', function () {
-	Files::zip(null, array_keys(File::CONTEXTS_NAMES), null);
+	Files::zipAll();
 	exit;
 }, 'files_download');
 

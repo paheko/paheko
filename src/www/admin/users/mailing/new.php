@@ -15,7 +15,14 @@ $csrf_key = 'create_mailing';
 $target = f('target');
 
 $form->runIf($target == 'all' || f('step3'), function () {
-	$m = Mailings::create(f('subject'), f('target'), f('target_id'));
+	$target = f('target');
+	$target_id = f('target_id');
+
+	if ($target !== 'all' && empty($target_id)) {
+		throw new UserException('Aucune cible n\'a été sélectionnée.');
+	}
+
+	$m = Mailings::create(f('subject'), $target, $target_id);
 	Utils::redirectDialog('!users/mailing/write.php?id=' . $m->id());
 }, $csrf_key);
 

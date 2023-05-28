@@ -102,7 +102,7 @@ abstract class AdvancedSearch
 
 		$select_columns = [];
 		$query_columns = [];
-		$query_groups = [];
+		$query_groups = '';
 
 		foreach ($groups as $group)
 		{
@@ -111,6 +111,10 @@ abstract class AdvancedSearch
 				|| ($group['operator'] != 'AND' && $group['operator'] != 'OR'))
 			{
 				// Ignorer les groupes de conditions invalides
+				continue;
+			}
+
+			if (isset($group['join_operator']) && $group['join_operator'] != 'AND' && $group['join_operator'] != 'OR') {
 				continue;
 			}
 
@@ -214,17 +218,23 @@ abstract class AdvancedSearch
 
 			if (count($query_group_conditions))
 			{
-				$query_groups[] = implode(' ' . $group['operator'] . ' ', $query_group_conditions);
+				if ($query_groups !== '') {
+					$query_groups .= ' ' . ($group['join_operator'] ?? 'AND') . ' ';
+				}
+
+				$query_groups.= '(' . implode(' ' . $group['operator'] . ' ', $query_group_conditions) . ')';
 			}
 		}
 
-		if (!count($query_groups) && count($groups) && $invalid) {
+		//var_dump($query_groups, $groups); exit;
+
+		if (!strlen($query_groups) && count($groups) && $invalid) {
 			throw new UserException('Cette recherche faisait référence à des champs qui n\'existent plus.' . "\n" . 'Elle ne comporte aucun critère valide. Il vaudrait mieux la supprimer.');
 		}
 
 		return (object) [
 			'select' => $select_columns,
-			'where' => count($query_groups) ? '(' . implode(') AND (', $query_groups) . ')' : '1'
+			'where' => $query_groups ?: '1',
 		];
 	}
 }

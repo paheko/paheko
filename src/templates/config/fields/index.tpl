@@ -2,10 +2,6 @@
 
 {include file="config/_menu.tpl" current="users" sub_current="fields"}
 
-<nav class="tabs">
-	{linkbutton shape="plus" label="Ajouter un champ" href="new.php"}
-</nav>
-
 {if $_GET.msg == 'SAVED_ORDER'}
 	<p class="block confirm">
 		L'ordre a bien été enregistré.
@@ -52,6 +48,8 @@
 						{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$field.id target="_dialog"}
 					{/if}
 					{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$field.id target="_dialog"}
+					{button shape="up" title="Déplacer vers le haut" class="up"}
+					{button shape="down" title="Déplacer vers le bas" class="down"}
 				</td>
 			</tr>
 		{/foreach}

@@ -11,16 +11,18 @@
 	{{:error message="Le numéro de reçu fourni n'a pas été trouvé"}}
 {{/load}}
 
-{{if $_POST.annuler}}
+{{#form on="annuler"}}
 	{{:save
 		validate_schema="./recu.schema.json"
 		id=$recu.id
 		annule=true
 	}}
-	{{:http redirect="voir.html?id=%d"|args:$recu.id}}
-{{/if}}
+	{{:redirect to="voir.html?id=%d"|args:$recu.id}}
+{{/form}}
 
 {{:admin_header title="Annuler un reçu fiscal" current="acc"}}
+
+{{:form_errors}}
 
 <form method="post" action="">
 	<fieldset>

@@ -34,6 +34,7 @@ Ces filtres viennent directement de PHP et utilisent donc les mêmes paramètres
 | `boolval` | Transforme une valeur en booléen (true ou false) |
 | `floatval` | Transforme une valeur en nombre flottant (à virgule) |
 | `strval` | Transforme une valeur en chaîne de texte |
+| `json_decode` | Transforme une chaîne JSON en tableau |
 | `json_encode` | Transforme une valeur en chaîne JSON |
 
 # Filtres utiles pour les e-mails
@@ -58,11 +59,24 @@ Crée un lien protégé pour une adresse email, pour éviter que l'adresse ne so
 
 ## has
 
-Renvoi vrai si le tableau contient l'élément passé en paramètre.
+Renvoie vrai si le tableau contient l'élément passé en paramètre.
 
 ```
 {{:assign var="table" a="bleu" b="orange"}}
 {{if $table|has:"bleu"}}
+	Oui, il y a du bleu
+{{/if}}
+```
+
+## in
+
+Renvoie vrai si l'élément fait partie du tableau passé en paramètre.
+
+C'est exactement la même chose que `has`, mais exprimé à l'envers.
+
+```
+{{:assign var="table" a="bleu" b="orange"}}
+{{if "bleu"|in:$table}}
 	Oui, il y a du bleu
 {{/if}}
 ```
@@ -92,6 +106,25 @@ Compte le nombre d'entrées dans un tableau.
 = 5
 ```
 
+## explode
+
+Sépare une chaîne de texte en tableau à partir d'une chaîne de séparation.
+
+```
+{{:assign var="table" value="a,b,c"|explode:","}}
+- {{$table.0}}
+- {{$table.1}}
+- {{$table.2}}
+```
+
+Affichera :
+
+```
+- a
+- b
+- c
+```
+
 ## implode
 
 Réunit un tableau sous forme de chaîne de texte en utilisant éventuellement une chaîne de liaison entre chaque élément du tableau.
@@ -107,6 +140,26 @@ Affichera :
 ```
 bleuorange
 bleu - orange
+```
+
+## map
+
+Applique un filtre sur chaque élément du tableau.
+
+Le premier paramètre doit être le nom du filtre. Les autres paramètres seront passés au filtre.
+
+```
+{{:assign var="table" a="01" b="02"}}
+{{:assign var="table" value=$table|map:intval}}
+- {{$table.a}}
+- {{$table.b}}
+```
+
+Affichera :
+
+```
+- 1
+- 2
 ```
 
 # Filtres de texte
@@ -357,6 +410,13 @@ Exemple :
 ```
 {{:assign colonne=$_GET.colonne|quote_sql_identifier}}
 {{#sql select="id, %s"|args:$colonne tables="users"}}
+```
+
+Il est possible d'utiliser un préfixe en argument, utile par exemple quand on a plusieurs tables avec le même nom de colonne :
+
+```
+{{:assign colonne=$_GET.colonne|quote_sql_identifier:"u1"}}
+{{#sql select="u1.id, %s"|args:$colonne tables="users AS u1 INNER JOIN users AS u2 ON u2.id_parent = u1.id"}}
 ```
 
 ## sql_where

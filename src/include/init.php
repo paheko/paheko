@@ -13,10 +13,9 @@ error_reporting(-1);
 const CONFIG_FILE = 'config.local.php';
 
 /*
- * Version de Garradin
+ * Version de Paheko
  */
-
-function garradin_version()
+function paheko_version()
 {
 	if (defined('Garradin\VERSION'))
 	{
@@ -38,7 +37,7 @@ function garradin_version()
 	return $version;
 }
 
-function garradin_manifest()
+function paheko_manifest()
 {
 	$file = __DIR__ . '/../../manifest.uuid';
 
@@ -51,10 +50,10 @@ function garradin_manifest()
 }
 
 /**
- * Le code de Garradin ne s'écrit pas tout seul comme par magie,
+ * Le code de Paheko ne s'écrit pas tout seul comme par magie,
  * merci de soutenir notre travail en faisant une contribution :)
  */
-function garradin_contributor_license(): ?int
+function paheko_contributor_license(): ?int
 {
 	static $level = null;
 
@@ -136,11 +135,6 @@ if (!defined('Garradin\ROOT'))
 }, true);
 
 if (!defined('Garradin\DATA_ROOT')) {
-	// Migrate plugins, cache and SQLite to data/ subdirectory (version 1.1)
-	if (!file_exists(ROOT . '/data/association.sqlite') && file_exists(ROOT . '/association.sqlite')) {
-		Upgrade::moveDataRoot();
-	}
-
 	define('Garradin\DATA_ROOT', ROOT . '/data');
 }
 
@@ -229,12 +223,14 @@ static $default_config = [
 	'API_PASSWORD'          => null,
 	'PDF_COMMAND'           => 'auto',
 	'PDF_USAGE_LOG'         => null,
+	'PDFTOTEXT_COMMAND'     => null,
 	'CALC_CONVERT_COMMAND'  => null,
 	'CONTRIBUTOR_LICENSE'   => null,
 	'SQL_DEBUG'             => null,
 	'SYSTEM_SIGNALS'        => [],
 	'LOCAL_LOGIN'           => null,
 	'LEGAL_LINE'            => 'Hébergé par <strong>%1$s</strong>, %2$s',
+	'ALERT_MESSAGE'         => null,
 	'DISABLE_INSTALL_PING'  => false,
 	'WOPI_DISCOVERY_URL'    => null,
 	'SQLITE_JOURNAL_MODE'   => 'TRUNCATE',
@@ -309,9 +305,9 @@ if (MAIL_ERRORS)
 }
 
 ErrorManager::setContext([
-	'root_directory'      => ROOT,
-	'garradin_data_root' => DATA_ROOT,
-	'garradin_version'   => garradin_version(),
+	'root_directory'   => ROOT,
+	'paheko_data_root' => DATA_ROOT,
+	'paheko_version'   => paheko_version(),
 ]);
 
 if (ERRORS_REPORT_URL)
@@ -421,7 +417,7 @@ if (!defined('Garradin\INSTALL_PROCESS'))
 
 	$v = DB::getInstance()->version();
 
-	if (version_compare($v, garradin_version(), '<'))
+	if (version_compare($v, paheko_version(), '<'))
 	{
 		Utils::redirect(ADMIN_URL . 'upgrade.php');
 	}

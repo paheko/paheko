@@ -28,6 +28,7 @@ class Modifiers
 		'protect_contact',
 		'atom_date',
 		'xml_escape',
+		'json_decode',
 		'json_encode',
 		'remove_leading_number',
 		'get_leading_number',
@@ -37,9 +38,12 @@ class Modifiers
 		'money_int' => [Utils::class, 'moneyToInteger'],
 		'array_transpose' => [Utils::class, 'array_transpose'],
 		'check_email',
+		'explode',
 		'implode',
 		'keys',
 		'has',
+		'in',
+		'map',
 		'quote_sql_identifier',
 		'quote_sql',
 		'sql_where',
@@ -172,9 +176,14 @@ class Modifiers
 		return htmlspecialchars($str, ENT_XML1 | ENT_QUOTES);
 	}
 
-	static public function json_encode($str)
+	static public function json_decode($str)
 	{
-		return json_encode($str, JSON_PRETTY_PRINT);
+		return json_decode($str, true);
+	}
+
+	static public function json_encode($obj)
+	{
+		return json_encode($obj, JSON_PRETTY_PRINT);
 	}
 
 	static public function remove_leading_number($str): string
@@ -188,9 +197,20 @@ class Modifiers
 		return $match[1] ?? null;
 	}
 
-	static public function spell_out_number($number, string $locale = 'fr_FR'): string
+	static public function spell_out_number($number, string $locale = 'fr_FR', string $currency = 'euros'): string
 	{
-		return numfmt_create($locale, \NumberFormatter::SPELLOUT)->format((float) $number);
+		$number = str_replace(',', '.', $number);
+		$number = strtok($number, '.');
+		$decimals = strtok(false);
+
+		$out = numfmt_create($locale, \NumberFormatter::SPELLOUT)->format((float) $number);
+		$out .= ' ' . $currency;
+
+		if ($decimals > 0) {
+			$out .= sprintf(' et %s cents', numfmt_create($locale, \NumberFormatter::SPELLOUT)->format((float) $decimals));
+		}
+
+		return trim($out);
 	}
 
 	static public function parse_date($value)
@@ -224,7 +244,7 @@ class Modifiers
 			'open'      => '\(',
 			'close'     => '\)',
 			'number'    => '-?\d+(?:[,\.]\d+)?',
-			'sign'      => '[+\-\*\/]',
+			'sign'      => '[+\-\*\/%]',
 			'separator' => ',',
 		];
 
@@ -269,6 +289,41 @@ class Modifiers
 		return @eval('return ' . $expression . ';') ?: 0;
 	}
 
+	static public function map($array, string $modifier, ...$params): array
+	{
+		if (!is_array($array)) {
+			throw new Brindille_Exception('Supplied argument is not an array');
+		}
+
+		$callback = null;
+
+		if (in_array($modifier, CommonModifiers::PHP_MODIFIERS_LIST)) {
+			$callback = $modifier;
+		}
+		elseif (in_array($modifier, CommonModifiers::MODIFIERS_LIST)) {
+			$callback = [CommonModifiers::class, $modifier];
+		}
+		elseif (in_array($modifier, self::MODIFIERS_LIST)) {
+			$callback = [self::class, $modifier];
+		}
+		else {
+			throw new Brindille_Exception('Unknown modifier: ' . $modifier);
+		}
+
+		$out = [];
+
+		foreach ($array as $key => $value) {
+			$out[$key] = call_user_func($callback, $value, ...$params);
+		}
+
+		return $out;
+	}
+
+	static public function explode($string, string $separator): array
+	{
+		return explode($separator, (string)$string);
+	}
+
 	static public function implode($array, string $separator): string
 	{
 		if (!is_array($array)) {
@@ -288,7 +343,12 @@ class Modifiers
 		return in_array($value, (array)$in, $strict);
 	}
 
-	static public function quote_sql_identifier($in)
+	static public function in($value, $array, $strict = false)
+	{
+		return in_array($value, (array)$array, $strict);
+	}
+
+	static public function quote_sql_identifier($in, string $prefix = '')
 	{
 		if (null === $in) {
 			return '';
@@ -296,11 +356,15 @@ class Modifiers
 
 		$db = DB::getInstance();
 
-		if (is_array($in) || is_object($in)) {
-			return array_map([$db, 'quoteIdentifier'], (array) $in);
+		if ($prefix) {
+			$prefix = $db->quoteIdentifier($prefix) . '.';
 		}
 
-		return $db->quoteIdentifier($in);
+		if (is_array($in) || is_object($in)) {
+			return array_map(fn($a) => $prefix . $db->quoteIdentifier($a), (array) $in);
+		}
+
+		return $prefix . $db->quoteIdentifier($in);
 	}
 
 	static public function quote_sql($in)

@@ -311,6 +311,21 @@ class User extends Entity
 			$source['id_parent'] = Form::getSelectorValue($source['id_parent']);
 		}
 
+		foreach (DynamicFields::getInstance()->fieldsByType('multiple') as $f) {
+			if (!isset($source[$f->name . '_present'])) {
+				continue;
+			}
+
+			$v = 0;
+
+			foreach (array_keys($source[$f->name] ?? []) as $k) {
+				$k = 0x01 << $k;
+				$v |= $k;
+			}
+
+			$source[$f->name] = $v;
+		}
+
 		return parent::importForm($source);
 	}
 

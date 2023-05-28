@@ -96,6 +96,14 @@ Enfin, il est possible de faire référence à une variable de manière dynamiqu
 {{$titre}} -> Affichera "Test !", soit la valeur de {{$tableau.b}}
 ```
 
+## break
+
+Interrompt une section.
+
+## continue
+
+Passe à l'itération suivante d'une section.
+
 ## debug
 
 Cette fonction permet d'afficher le contenu d'une ou plusieurs variables :
@@ -131,6 +139,10 @@ Exemple :
 {{/if}}
 ```
 
+## form_errors
+
+Affiche les erreurs du formulaire courant (au format HTML).
+
 ## http
 
 Permet de modifier les entêtes HTTP renvoyés par la page. Cette fonction doit être appelée au tout début du squelette, avant tout autre code ou ligne vide.
@@ -138,11 +150,12 @@ Permet de modifier les entêtes HTTP renvoyés par la page. Cette fonction doit 
 | Paramètre | Optionnel / obligatoire ? | Fonction |
 | :- | :- | :- |
 | `code` | *optionnel* | Modifie le code HTTP renvoyé. [Liste des codes HTTP](https://fr.wikipedia.org/wiki/Liste_des_codes_HTTP) |
-| `redirect` | *optionnel* | Rediriger vers l'adresse URI indiquée en valeur. Seules les adresses internes sont acceptées, il n'est pas possible de rediriger vers une adresse extérieure. |
+| `redirect` | *optionnel* | Rediriger vers l'adresse URI indiquée en valeur. |
 | `type` | *optionnel* | Modifie le type MIME renvoyé |
 | `download` | *optionnel* | Force la page à être téléchargée sous le nom indiqué. |
+| `inline` | *optionnel* | Force la page à être affichée, et peut ensuite être téléchargée sous le nom indiqué (utile pour la généraion de PDF : permet d'afficher le PDF dans le navigateur avant de le télécharger). |
 
-Note : si le type `application/pdf` est indiqué, la page sera convertie en PDF à la volée. Il est possible de forcer le téléchargement du fichier en utilisant le paramètre `download`.
+Note : si le type `application/pdf` est indiqué (ou juste `pdf`), la page sera convertie en PDF à la volée. Il est possible de forcer le téléchargement du fichier en utilisant le paramètre `download`.
 
 Exemples :
 
@@ -150,7 +163,7 @@ Exemples :
 {{:http code=404}}
 {{:http redirect="/Nos-Activites/"}}
 {{:http type="application/svg+xml"}}
-{{:http type="application/pdf" download="liste_membres_ca.pdf"}}
+{{:http type="pdf" download="liste_membres_ca.pdf"}}
 ```
 
 ## include
@@ -314,6 +327,20 @@ Exemple de formulaire de contact :
 <p><input type="submit" name="send" value="Envoyer !" /></p>
 </form>
 ```
+
+## redirect
+
+Redirige vers une nouvelle page.
+
+Si la page actuelle est ouverte dans une fenêtre modal (grâce à la cible `_dialog`), alors la fenêtre modale est fermée, et la redirection se passe dans la page parente.
+
+Seules les adresses internes sont acceptées, il n'est pas possible de rediriger vers une adresse extérieure.
+
+| Paramètre | Obligatoire ou optionnel ? | Fonction |
+| :- | :- | :- |
+| `to` | optionnel | Adresse de redirection |
+
+Si `to=null` est utilisé, alors la fenêtre modale sera fermée. Ou, si la page n'est pas dans une fenêtre modale, la page courante sera rechargée.
 
 # Fonctions relatives aux Modules
 

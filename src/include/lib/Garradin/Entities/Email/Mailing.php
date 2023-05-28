@@ -58,6 +58,10 @@ class Mailing extends Entity
 
 	public function populate(string $target, ?int $target_id = null): void
 	{
+		if ($target !== 'all' && empty($target_id)) {
+			throw new \InvalidArgumentException('Missing target ID');
+		}
+
 		if ($target == 'all') {
 			$recipients = Users::iterateEmailsByCategory(null);
 		}

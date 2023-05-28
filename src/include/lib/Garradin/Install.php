@@ -66,7 +66,7 @@ class Install
 
 		(new HTTP)->POST(PING_URL, [
 			'id'      => sha1(WWW_URL . SECRET_KEY . ROOT),
-			'version' => garradin_version(),
+			'version' => paheko_version(),
 			'sqlite'  => \SQLite3::version()['versionString'],
 			'php'     => PHP_VERSION,
 			'sqlite_options' => trim($options, ', '),
@@ -100,13 +100,12 @@ class Install
 
 		$name = date('Y-m-d-His-') . 'avant-remise-a-zero';
 
-		$s = new Sauvegarde;
-		$s->create($name);
+		Backup::create($name);
 
 		// Keep a backup file of files
 		if (FILE_STORAGE_BACKEND == 'FileSystem') {
 			$name = 'documents_' . $name . '.zip';
-			$s->dumpFilesZip(CACHE_ROOT . '/' . $name);
+			Files::zipAll(CACHE_ROOT . '/' . $name);
 			Files::callStorage('truncate');
 			@mkdir(FILE_STORAGE_CONFIG . '/documents');
 			@rename(CACHE_ROOT . '/' . $name, FILE_STORAGE_CONFIG . '/documents/' . $name);
@@ -220,11 +219,11 @@ class Install
 		// Création de la base de données
 		$db->begin();
 		$db->exec('PRAGMA application_id = ' . DB::APPID . ';');
-		$db->setVersion(garradin_version());
+		$db->setVersion(paheko_version());
 		$db->exec(file_get_contents(DB_SCHEMA));
 		$db->commit();
 
-		file_put_contents(SHARED_CACHE_ROOT . '/version', garradin_version());
+		file_put_contents(SHARED_CACHE_ROOT . '/version', paheko_version());
 
 		$currency = $country_code == 'CH' ? 'CHF' : '€';
 

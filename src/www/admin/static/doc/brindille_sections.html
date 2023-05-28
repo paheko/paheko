@@ -66,6 +66,17 @@
 			<li><a href="#select">select</a></li>
 			<li><a href="#sql">sql</a>
 		</ol></li>
+		<li><a href="#membres">Membres</a>
+		<ol>
+			<li><a href="#users">users</a></li>
+			<li><a href="#subscriptions">subscriptions</a>
+		</ol></li>
+		<li><a href="#comptabilite">Comptabilité</a>
+		<ol>
+			<li><a href="#accounts">accounts</a></li>
+			<li><a href="#balances">balances</a></li>
+			<li><a href="#years">years</a>
+		</ol></li>
 		<li><a href="#pour-le-site-web">Pour le site web</a>
 		<ol>
 			<li><a href="#breadcrumbs">breadcrumbs</a></li>
@@ -74,10 +85,9 @@
 		</ol></li>
 		<li><a href="#sections-relatives-aux-modules">Sections relatives aux modules</a>
 		<ol>
+			<li><a href="#form">form</a></li>
 			<li><a href="#load-sup-sql-sup">load <sup>(sql)</sup></a></li>
-			<li><a href="#list">list</a></li>
-			<li><a href="#users">users</a></li>
-			<li><a href="#subscriptions">subscriptions</a>
+			<li><a href="#list">list</a>
 </li></ol></li></ol></aside><h1 id="sections-generalistes">Sections généralistes</h1>
 <h2 id="foreach">foreach</h2>
 <p>Permet d'itérer sur un tableau par exemple. Ainsi chaque élément du tableau exécutera une fois le contenu de la section.</p>
@@ -312,6 +322,80 @@ orange</code></pre>
 </table>
 <p>Il est également possible de passer des arguments dans les paramètres à l'aides des arguments nommés qui commencent par deux points <code>:</code> :</p>
 <pre><code>{{#articles where="title = :montitre" :montitre="Actualité"}}</code></pre>
+<h1 id="membres">Membres</h1>
+<h2 id="users">users</h2>
+<p>Liste les membres.</p>
+<p>Paramètres possibles :</p>
+<p>| <code>id</code> | optionnel | Identifiant unique du membre, ou tableau contenant une liste d'identifiants. |<br />
+| <code>search_name</code> | optionnel | Ne lister que les membres dont le nom correspond au texte passé en paramètre. |</p>
+<p>Chaque itération renverra la fiche du membre, ainsi que ces variables :</p>
+<p>| <code>$id</code> | Identifiant unique du membre |<br />
+| <code>$_name</code> | Nom du membre, tel que défini dans la configuration |<br />
+| <code>$_login</code> | Identifiant de connexion du membre, tel que défini dans la configuration |<br />
+| <code>$_number</code> | Numéro du membre, tel que défini dans la configuration |</p>
+<h2 id="subscriptions">subscriptions</h2>
+<p>Liste les inscriptions à une ou des activités.</p>
+<p>Paramètres possibles :</p>
+<p>| <code>user</code> | optionnel | Identifiant unique du membre |<br />
+| <code>active</code> | optionnel | Si <code>TRUE</code>, seules les inscriptions à jour sont listées |<br />
+| <code>id_service</code> | optionnel | Ne renvoie que les inscriptions à l'activité correspondant à cet ID. |</p>
+<h1 id="comptabilite">Comptabilité</h1>
+<h2 id="accounts">accounts</h2>
+<p>Liste les comptes d'un plan comptable.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>codes</code> (optionel)</td>
+<td style="text-align: left;">Ne renvoyer que les comptes ayant ces codes (séparer par des virgules).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>id</code> (optionel)</td>
+<td style="text-align: left;">Ne renvoyer que le compte ayant cet ID.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="balances">balances</h2>
+<p>Renvoie la balance des comptes.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>codes</code> (optionel)</td>
+<td style="text-align: left;">Ne renvoyer que les balances des comptes ayant ces codes (séparer par des virgules).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>year</code> (optionel)</td>
+<td style="text-align: left;">Ne renvoyer que les balances des comptes utilisés sur l'année (indiquer ici un ID de year)&lt;.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="years">years</h2>
+<p>Liste les exercices comptables</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>closed</code> (optionel)</td>
+<td style="text-align: left;">Mettre <code>closed=true</code> pour ne lister que les exercices clôturés, ou <code>closed=false</code> pour ne lister que les exercices ouverts.</td>
+</tr>
+</tbody>
+</table>
 <h1 id="pour-le-site-web">Pour le site web</h1>
 <h2 id="breadcrumbs">breadcrumbs</h2>
 <p>Permet de récupérer la liste des pages parentes d'une page afin de constituer un <a href="https://fr.wikipedia.org/wiki/Fil_d&#039;Ariane_(ergonomie)" target="_blank" rel="nofollow,noreferrer">fil d'ariane</a> permettant de remonter dans l'arborescence du site</p>
@@ -420,7 +504,28 @@ orange</code></pre>
 </tbody>
 </table>
 <h1 id="sections-relatives-aux-modules">Sections relatives aux modules</h1>
-<h2 id="load-sup-sql-sup">load <sup>(sql)</sup></h2>
+<h2 id="form">form</h2>
+<p>Permet de gérer la soumission d'un formulaire (<code>&lt;form method="post"…&gt;</code> en HTML).</p>
+<p>Si l'élément dont le nom spécifié dans le paramètre <code>on</code> a été envoyé en <code>POST</code>, alors le code à l'intérieur de la section est exécuté.</p>
+<p>Toute erreur à l'intérieur de la section arrêtera son exécution, et le message sera ajouté aux erreurs du formulaire.</p>
+<p>Une vérification de sécurité <a href="https://fr.wikipedia.org/wiki/Cross-site_request_forgery" target="_blank" rel="nofollow,noreferrer">anti-CSRF</a> est également appliquée. Si cette vérification échoue, le message d'erreur "Merci de bien vouloir renvoyer le formulaire." sera renvoyé. Pour que cela marche il faut que le formulaire dispose d'un bouton de type "submit", généré à l'aide de la fonction <code>button</code>. Exemple : <code>{{:button type="submit" name="save" label="Enregistrer"}}</code>.</p>
+<p>En cas d'erreurs, le reste du contenu de la section ne sera pas exécuté. Les messages d'erreurs seront placés dans un tableau dans la variable <code>$form_errors</code>.</p>
+<p>Il est aussi possible de les afficher simplement avec la fonction <code>{{:form_errors}}</code>. Cela revient à faire une boucle sur la variable <code>$form_errors</code>.</p>
+<pre><code>{{#form on="save"}}
+    {{if $_POST.titre|trim === ''}}
+        {{:error message="Le titre est vide."}}
+    {{/if}}
+    {{* La ligne suivante ne sera pas exécutée si le titre est vide. *}}
+    {{:save title=$_POST.titre|trim}}
+{{else}}
+    {{:form_errors}}
+{{/form}}</code></pre>
+<p>Il est possible d'utiliser <code>{{:form_errors}}</code> en dehors du bloc <code>{{else}}</code> :</p>
+<pre><code>{{#form on="save"}}
+    …
+{{/form}}
+…
+{{:form_errors}}</code></pre><h2 id="load-sup-sql-sup">load <sup>(sql)</sup></h2>
 <p>Note : cette section hérite de <code>sql</code> (voir plus haut).</p>
 <p>Charge un ou des documents pour le module courant.</p>
 <table>
@@ -446,6 +551,11 @@ orange</code></pre>
 <td style="text-align: left;"><code>id</code></td>
 <td style="text-align: left;">optionnel</td>
 <td style="text-align: left;">Numéro unique du document</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>each</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Traiter une clé du document comme un tableau</td>
 </tr>
 </tbody>
 </table>
@@ -482,6 +592,21 @@ orange</code></pre>
 <pre><code>{{#load module="invoice" $.type="quote"}}
 &lt;h1&gt;Titre du devis : {{$subject}}&lt;/h1&gt;
 &lt;h2&gt;Montant : {{$total}}&lt;/h2&gt;
+{{/load}}</code></pre>
+<h3 id="utilisation-du-parametre-each">Utilisation du paramètre <code>each</code></h3>
+<p>Le paramètre <code>each</code> est utile pour faire une boucle sur un tableau contenu dans le document. Ce paramètre doit contenir un chemin JSON valide. Par exemple <code>membres[1].noms</code> pour boucler sur le tableau <code>noms</code>, du premier élément du tableau <code>membres</code>. Voir la documentation <a href="https://www.sqlite.org/json1.html#jeach" target="_blank" rel="nofollow,noreferrer">de la fonction json_each de SQLite pour plus de détails</a>.</p>
+<p>Pour chaque itération de la section, la variable <code>{{$value}}</code> contiendra l'élément recherché dans le critère <code>each</code>.</p>
+<p>Par exemple nous pouvons avoir un élément <code>membres</code> dans notre document JSON qui contient un tableau de noms de membres :</p>
+<pre><code>{{:assign var="membres." value="Greta Thunberg}}
+{{:assign var="membres." value="Valérie Masson-Delmotte"}}
+{{:save membres=$membres}}</code></pre>
+<p>Nous pouvons utiliser <code>each</code> pour faire une liste :</p>
+<pre><code>{{:load each="membres"}}
+- {{$value}}
+{{/load}}</code></pre>
+<p>Ou pour récupérer les documents qui correspondent à un critère :</p>
+<pre><code>{{:load each="membres" where="value = 'Greta Thunberg'"}}
+Le document n°{{$id}} est celui qui parle de Greta.
 {{/load}}</code></pre>
 <h2 id="list">list</h2>
 <p>Attention : cette section n'hérite <strong>PAS de <code>sql</code></strong>.</p>
@@ -629,20 +754,4 @@ orange</code></pre>
     &lt;p class="alert block"&gt;Aucun reçu n'a été trouvé.&lt;/p&gt;
 {{/list}}</code></pre>
 <p>On peut utiliser le nom des clés du document JSON, mais sinon pour faire référence à la valeur d'une colonne spécifique dans la boucle, il faut utiliser son numéro d'ordre (qui commence à <code>1</code>, pas zéro). Ici on veut afficher l'année, donc la seconde colonne, donc <code>$col1</code>.</p>
-<p>Noter aussi l'utilisation du numéro de la colonne de l'année (<code>2</code>) pour le paramètre <code>order</code>, qui avec <code>select</code> doit indiquer le numéro de la colonne à utiliser pour l'ordre.</p>
-<h2 id="users">users</h2>
-<p>Liste les membres.</p>
-<p>Paramètres possibles :</p>
-<p>| <code>id</code> | optionnel | Identifiant unique du membre |<br />
-| <code>search_name</code> | optionnel | Ne lister que les membres dont le nom correspond au texte passé en paramètre. |</p>
-<p>Chaque itération renverra la fiche du membre, ainsi que ces variables :</p>
-<p>| <code>$id</code> | Identifiant unique du membre |<br />
-| <code>$_name</code> | Nom du membre, tel que défini dans la configuration |<br />
-| <code>$_login</code> | Identifiant de connexion du membre, tel que défini dans la configuration |<br />
-| <code>$_number</code> | Numéro du membre, tel que défini dans la configuration |</p>
-<h2 id="subscriptions">subscriptions</h2>
-<p>Liste les inscriptions à une ou des activités.</p>
-<p>Paramètres possibles :</p>
-<p>| <code>user</code> | optionnel | Identifiant unique du membre |<br />
-| <code>active</code> | optionnel | Si <code>TRUE</code>, seules les inscriptions à jour sont listées |<br />
-| <code>id_service</code> | optionnel | Ne renvoie que les inscriptions à l'activité correspondant à cet ID. |</p></div></body></html>
+<p>Noter aussi l'utilisation du numéro de la colonne de l'année (<code>2</code>) pour le paramètre <code>order</code>, qui avec <code>select</code> doit indiquer le numéro de la colonne à utiliser pour l'ordre.</p></div></body></html>

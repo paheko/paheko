@@ -35,7 +35,10 @@
 		},
 		"recu": {
 			"type": "string"
+		},
+		"id_year": {
+			"type": ["null", "integer"]
 		}
 	},
-	"required": [ "annule", "date", "nom", "adresse", "montant", "recu", "linked_user", "linked_transactions"]
+	"required": [ "annule", "date", "nom", "adresse", "montant", "recu", "linked_user", "linked_transactions", "id_year"]
 }

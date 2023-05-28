@@ -11,7 +11,7 @@
 		{{#restrict section="accounting" level="admin"}}
 			{{:linkbutton href="config.html" label="Configuration" shape="settings" target="_dialog"}}
 		{{/restrict}}
-		{{*{{:linkbutton href="generer.html" label="Générer des reçus" shape="check"}}*}}
+		{{:linkbutton href="generer.html" label="Générer des reçus" shape="check"}}
 		{{:linkbutton href="nouveau.html" label="Nouveau reçu" shape="plus"}}
 	</aside>
 	{{/restrict}}
@@ -63,7 +63,8 @@
 {{/if}}
 
 {{#list
-	select="id AS 'Numéro'; $$.nom AS 'Nom du bénéficiaire'; $$.date AS 'Date d''émission';  $$.montant AS 'Montant'"
+	select="id AS 'Numéro'; $$.nom AS 'Nom du bénéficiaire'; $$.date AS 'Date d''émission'; $$.montant AS 'Montant';
+		CASE WHEN $$.annule = 1 THEN 'Annulé' ELSE '' END AS 'Annulé ?'"
 	where=$where
 	order=1 desc=true
 	:year=$_GET.year
@@ -87,6 +88,9 @@
 		</td>
 		<td>
 			{{$montant|raw|money_currency}}
+		</td>
+		<td>
+			{{if $annule}}<span class="alert">Annulé</span>{{/if}}
 		</td>
 		<td class="actions">
 			{{if !$annule}}

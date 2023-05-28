@@ -2,7 +2,7 @@
 
 {form_errors}
 
-<form method="post" action="{$self_url}" data-focus="1">
+<form method="post" action="{$self_url}">
 	<fieldset>
 		<legend>Renommer</legend>
 		<dl>
@@ -16,5 +16,14 @@
 		</p>
 	</fieldset>
 </form>
+
+<script type="text/javascript">
+{literal}
+var t = $('#f_new_name');
+t.focus();
+t.selectionStart = 0;
+t.selectionEnd = t.value.lastIndexOf('.');
+{/literal}
+</script>
 
 {include file="_foot.tpl"}

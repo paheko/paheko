@@ -8,18 +8,6 @@ class Form
 
 	public function __construct()
 	{
-		// Valide un montant de monnaie valide (deux décimales, ne peut être négatif)
-		\KD2\Form::registerValidationRule('money', function ($name, $params, $value) {
-			return preg_match('/^\d+(?:[.,]\d{1,2})?$/', $value) && $value >= 0;
-		});
-
-		// Test si la valeur existe dans cette table
-		// in_table:compta_categories,id
-		\KD2\Form::registerValidationRule('in_table', function ($name, $params, $value) {
-			$db = DB::getInstance();
-			return $db->test($params[0], $db->where($params[1], $value));
-		});
-
 		// Catch file size https://stackoverflow.com/questions/2133652/how-to-gracefully-handle-files-that-exceed-phps-post-max-size
 		if (empty($_FILES) && empty($_POST)
 			&& isset($_SERVER['REQUEST_METHOD'])

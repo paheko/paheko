@@ -40,10 +40,14 @@ class Functions
 		'signature',
 		'captcha',
 		'mail',
+		'button',
+		'form_errors',
+		'redirect',
 	];
 
 	const COMPILE_FUNCTIONS_LIST = [
 		':break' => [self::class, 'break'],
+		':continue' => [self::class, 'continue'],
 	];
 
 	/**
@@ -64,6 +68,26 @@ class Functions
 		}
 
 		return '<?php break; ?>';
+	}
+
+	/**
+	 * Compile function to continue inside a loop
+	 */
+	static public function continue(string $name, string $params, Brindille $tpl, int $line)
+	{
+		$in_loop = false;
+		foreach ($tpl->_stack as $element) {
+			if ($element[0] == $tpl::SECTION) {
+				$in_loop = true;
+				break;
+			}
+		}
+
+		if (!$in_loop) {
+			throw new Brindille_Exception(sprintf('Error on line %d: continue can only be used inside a section', $line));
+		}
+
+		return '<?php continue; ?>';
 	}
 
 	static public function admin_header(array $params): string
@@ -471,7 +495,7 @@ class Functions
 		}
 
 		if (isset($params['redirect'])) {
-			Utils::redirect($params['redirect']);
+			Utils::redirectDialog($params['redirect']);
 		}
 
 		if (isset($params['code'])) {
@@ -551,5 +575,36 @@ class Functions
 		if (isset($params['download'])) {
 			header(sprintf('Content-Disposition: attachment; filename="%s"', Utils::safeFileName($params['download'])), true);
 		}
+		elseif (isset($params['inline'])) {
+			header(sprintf('Content-Disposition: inline; filename="%s"', Utils::safeFileName($params['inline'])), true);
+		}
+	}
+
+	static public function button(array $params): string
+	{
+		static $forms = [];
+
+		$hash = md5(Utils::getSelfURI(false));
+
+		// Always add CSRF protection when a submit button is present in the form
+		if (isset($params['type']) && $params['type'] == 'submit' && !in_array($hash, $forms)) {
+			$params['csrf_key'] = 'form_' . $hash;
+		}
+
+		return CommonFunctions::button($params);
+	}
+
+	static public function form_errors(array $params, UserTemplate $tpl): string
+	{
+		if (($e = $tpl->get('form_errors')) && is_array($e)) {
+			return sprintf('<p class="error block">%s</p>', nl2br(htmlspecialchars(implode("\n", $e))));
+		}
+
+		return '';
+	}
+
+	static public function redirect(array $params): void
+	{
+		Utils::redirectDialog($params['to'] ?? null);
 	}
 }

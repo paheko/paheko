@@ -1,0 +1,31 @@
+{{#restrict section="accounting" level="write" block=true}}{{/restrict}}
+{{:admin_header title="Modèles d'écritures"}}
+
+<nav class="tabs">
+	<aside>
+		{{:linkbutton href="edit.html" label="Nouveau modèle" shape="plus"}}
+	</aside>
+</nav>
+
+{{#list
+	select="$$.name AS 'Nom'"
+	order=1 desc=false
+}}
+	{{:assign .="qs"}}
+	{{:assign qs=$qs|http_build_query}}
+	{{:assign url="!acc/transactions/new.php?%s"|args:$qs}}
+	<tr>
+		<th>{{:link href=$url label=$name}}</th>
+		<td class="actions">
+			{{:linkbutton href=$url label="Saisir cette écriture" shape="plus"}}
+			{{:linkbutton href="edit.html?id=%d"|args:$id label="Modifier" shape="edit"}}
+			{{:linkbutton target="_dialog" href="delete.html?id=%d"|args:$id label="Supprimer" shape="delete"}}
+		</td>
+	</tr>
+{{else}}
+	<p class="alert block">
+		Aucun modèle d'écriture.
+	</p>
+{{/list}}
+
+{{:admin_footer}}

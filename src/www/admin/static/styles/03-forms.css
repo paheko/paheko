@@ -780,6 +780,20 @@ h2.quick-search button[type=reset] {
     width: auto;
 }
 
+samp.copy {
+    font-family: monospace;
+    background: var(--gLightBorderColor);
+    color: var(--gBorderColor);
+    cursor: pointer;
+    padding: .5em;
+    border-radius: .5em;
+}
+
+samp.copy:hover {
+    color: rgb(var(--gTextColor));
+    box-shadow: 0px 0px 5px var(--gBorderColor);
+}
+
 @media screen and (max-width: 1279px) {
     #queryBuilder table tr {
         display: flex;

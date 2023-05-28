@@ -191,9 +191,9 @@ namespace Garradin;
  * Si "true" alors un message expliquant l'erreur et comment rapporter le bug s'affiche
  * en cas d'erreur. Sinon rien ne sera affiché.
  *
- * Défaut : false
+ * Défaut : TRUE (pour aider le debug de l'auto-hébergement)
  *
- * Il est fortement conseillé de mettre cette valeur à false en production !
+ * Il est fortement conseillé de mettre cette valeur à FALSE en production !
  */
 
 //const SHOW_ERRORS = false;
@@ -808,3 +808,17 @@ namespace Garradin;
  * Défaut : "Hébergé par nom_association, adresse_association"
  */
 //const LEGAL_LINE = 'Hébergé par <strong>%1$s</strong>, %2$s';
+
+/**
+ * Message d'avertissement
+ *
+ * Sera affiché en haut de toutes les pages de l'administration.
+ *
+ * Code HTML autorisé.
+ * Utiliser NULL pour désactiver le message.
+ *
+ * Défaut : null
+ *
+ * @var null|string
+ */
+//const ALERT_MESSAGE = 'Ceci est un compte de test.';

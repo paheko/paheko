@@ -127,7 +127,7 @@ class Plugin extends Entity
 			return false;
 		}
 
-		$this->assert(empty($ini->min_version) || version_compare(\Garradin\garradin_version(), $ini->min_version, '>='), sprintf('L\'extension "%s" nécessite Paheko version %s ou supérieure.', $this->name, $ini->min_version));
+		$this->assert(empty($ini->min_version) || version_compare(\Garradin\paheko_version(), $ini->min_version, '>='), sprintf('L\'extension "%s" nécessite Paheko version %s ou supérieure.', $this->name, $ini->min_version));
 
 		$restrict_section = null;
 		$restrict_level = null;
@@ -161,14 +161,26 @@ class Plugin extends Entity
 		return $this->url(self::ICON_FILE);
 	}
 
-	public function path(string $file = null): string
+	public function path(string $file = null): ?string
 	{
-		return Plugins::getPath($this->name) . ($file ? '/' . $file : '');
+		$path = Plugins::getPath($this->name);
+
+		if (!$path) {
+			return null;
+		}
+
+		return $path . ($file ? '/' . $file : '');
 	}
 
 	public function hasFile(string $file): bool
 	{
-		return file_exists($this->path($file));
+		$path = $this->path($file);
+
+		if (!$path) {
+			return false;
+		}
+
+		return file_exists($path);
 	}
 
 	public function hasConfig(): bool

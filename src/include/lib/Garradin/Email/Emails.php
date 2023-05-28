@@ -43,7 +43,7 @@ class Emails
 	/**
 	 * Add a message to the sending queue using templates
 	 * @param  int          $context
-	 * @param  array        $recipients List of recipients, this accepts a wide range of types:
+	 * @param  iterable        $recipients List of recipients, this accepts a wide range of types:
 	 * - a single e-mail address
 	 * - array of e-mail addresses as values ['a@b.c', 'd@e.f']
 	 * - array of user entities
@@ -54,17 +54,10 @@ class Emails
 	 * @param  UserTemplate|string $content
 	 * @return void
 	 */
-	static public function queue(int $context, $recipients, ?string $sender, string $subject, $content, ?string $render = null): void
+	static public function queue(int $context, iterable $recipients, ?string $sender, string $subject, $content, ?string $render = null): void
 	{
 		if (DISABLE_EMAIL) {
 			return;
-		}
-
-		if (is_string($recipients)) {
-			$recipients = [$recipients];
-		}
-		elseif (!is_iterable($recipients)) {
-			throw new \InvalidArgumentException('Invalid recipients argument');
 		}
 
 		$list = [];

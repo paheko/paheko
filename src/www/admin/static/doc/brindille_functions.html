@@ -59,12 +59,16 @@
 		<li><a href="#fonctions-generalistes">Fonctions généralistes</a>
 		<ol>
 			<li><a href="#assign">assign</a></li>
+			<li><a href="#break">break</a></li>
+			<li><a href="#continue">continue</a></li>
 			<li><a href="#debug">debug</a></li>
 			<li><a href="#error">error</a></li>
+			<li><a href="#form_errors">form_errors</a></li>
 			<li><a href="#http">http</a></li>
 			<li><a href="#include">include</a></li>
 			<li><a href="#captcha">captcha</a></li>
-			<li><a href="#mail">mail</a>
+			<li><a href="#mail">mail</a></li>
+			<li><a href="#redirect">redirect</a>
 		</ol></li>
 		<li><a href="#fonctions-relatives-aux-modules">Fonctions relatives aux Modules</a>
 		<ol>
@@ -161,6 +165,10 @@
 <pre><code>{{:assign var="tableau" a="Coucou" b="Test !"}}
 {{:assign var="titre" from="tableau.%s"|args:"b"}}
 {{$titre}} -&gt; Affichera "Test !", soit la valeur de {{$tableau.b}}</code></pre>
+<h2 id="break">break</h2>
+<p>Interrompt une section.</p>
+<h2 id="continue">continue</h2>
+<p>Passe à l'itération suivante d'une section.</p>
 <h2 id="debug">debug</h2>
 <p>Cette fonction permet d'afficher le contenu d'une ou plusieurs variables :</p>
 <pre><code>{{:debug test=$title}}</code></pre>
@@ -191,6 +199,8 @@
 <pre><code>{{if $_POST.nombre != 42}}
     {{:error message="Le nombre indiqué n'est pas 42"}}
 {{/if}}</code></pre>
+<h2 id="form_errors">form_errors</h2>
+<p>Affiche les erreurs du formulaire courant (au format HTML).</p>
 <h2 id="http">http</h2>
 <p>Permet de modifier les entêtes HTTP renvoyés par la page. Cette fonction doit être appelée au tout début du squelette, avant tout autre code ou ligne vide.</p>
 <table>
@@ -210,7 +220,7 @@
 <tr>
 <td style="text-align: left;"><code>redirect</code></td>
 <td style="text-align: left;"><em>optionnel</em></td>
-<td style="text-align: left;">Rediriger vers l'adresse URI indiquée en valeur. Seules les adresses internes sont acceptées, il n'est pas possible de rediriger vers une adresse extérieure.</td>
+<td style="text-align: left;">Rediriger vers l'adresse URI indiquée en valeur.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>type</code></td>
@@ -222,14 +232,19 @@
 <td style="text-align: left;"><em>optionnel</em></td>
 <td style="text-align: left;">Force la page à être téléchargée sous le nom indiqué.</td>
 </tr>
+<tr>
+<td style="text-align: left;"><code>inline</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Force la page à être affichée, et peut ensuite être téléchargée sous le nom indiqué (utile pour la généraion de PDF : permet d'afficher le PDF dans le navigateur avant de le télécharger).</td>
+</tr>
 </tbody>
 </table>
-<p>Note : si le type <code>application/pdf</code> est indiqué, la page sera convertie en PDF à la volée. Il est possible de forcer le téléchargement du fichier en utilisant le paramètre <code>download</code>.</p>
+<p>Note : si le type <code>application/pdf</code> est indiqué (ou juste <code>pdf</code>), la page sera convertie en PDF à la volée. Il est possible de forcer le téléchargement du fichier en utilisant le paramètre <code>download</code>.</p>
 <p>Exemples :</p>
 <pre><code>{{:http code=404}}
 {{:http redirect="/Nos-Activites/"}}
 {{:http type="application/svg+xml"}}
-{{:http type="application/pdf" download="liste_membres_ca.pdf"}}</code></pre>
+{{:http type="pdf" download="liste_membres_ca.pdf"}}</code></pre>
 <h2 id="include">include</h2>
 <p>Permet d'inclure un autre squelette.</p>
 <p>Paramètres :</p>
@@ -434,6 +449,27 @@
 &lt;/dl&gt;
 &lt;p&gt;&lt;input type="submit" name="send" value="Envoyer !" /&gt;&lt;/p&gt;
 &lt;/form&gt;</code></pre>
+<h2 id="redirect">redirect</h2>
+<p>Redirige vers une nouvelle page.</p>
+<p>Si la page actuelle est ouverte dans une fenêtre modal (grâce à la cible <code>_dialog</code>), alors la fenêtre modale est fermée, et la redirection se passe dans la page parente.</p>
+<p>Seules les adresses internes sont acceptées, il n'est pas possible de rediriger vers une adresse extérieure.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Obligatoire ou optionnel ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>to</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Adresse de redirection</td>
+</tr>
+</tbody>
+</table>
+<p>Si <code>to=null</code> est utilisé, alors la fenêtre modale sera fermée. Ou, si la page n'est pas dans une fenêtre modale, la page courante sera rechargée.</p>
 <h1 id="fonctions-relatives-aux-modules">Fonctions relatives aux Modules</h1>
 <h2 id="save">save</h2>
 <p>Enregistre des données, sous la forme d'un document, dans la base de données, pour le module courant.</p>

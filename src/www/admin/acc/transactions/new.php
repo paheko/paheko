@@ -1,9 +1,11 @@
 <?php
 namespace Garradin;
 
+use Garradin\Entity;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Files\File;
+use Garradin\Accounting\Accounts;
 use Garradin\Accounting\Projects;
 use Garradin\Accounting\Transactions;
 use Garradin\Accounting\Years;
@@ -29,19 +31,16 @@ $id_project = null;
 $linked_users = null;
 
 $lines = [[], []];
-$form->runIf(f('lines') !== null, function () use (&$lines) {
-	$lines = Transaction::getFormLines();
-});
 
 // Quick-fill transaction from query parameters
-// 0 = amount, in single currency units
-if (qg('0')) {
-	$amount = Utils::moneyToInteger(qg('0'));
+// a = amount, in single currency units
+if (qg('a')) {
+	$amount = Utils::moneyToInteger(qg('a'));
 }
 
-// 00 = Amount, in cents
-if (qg('00')) {
-	$amount = (int)qg('00');
+// a0 = Amount, in cents
+if (qg('a0')) {
+	$amount = (int)qg('a0');
 }
 
 // l = label
@@ -49,13 +48,18 @@ if (qg('l')) {
 	$transaction->label = qg('l');
 }
 
+// r = reference
+if (qg('r')) {
+	$transaction->reference = qg('r');
+}
+
 // dt = date
 if (qg('dt')) {
-	$transaction->date = new Date(qg('dt'));
+	$transaction->date = Entity::filterUserDateValue(qg('dt'));
 }
 
 // t = type
-if (qg('t')) {
+if (null !== qg('t')) {
 	$transaction->type = (int) qg('t');
 }
 
@@ -76,7 +80,7 @@ if (qg('ar') && ($a = $accounts->getWithCode(qg('ar')))
 
 // ae = Expense account
 if (qg('ae') && ($a = $accounts->getWithCode(qg('ae')))
-	&& $a->type == $a::TYPE_REVENUE) {
+	&& $a->type == $a::TYPE_EXPENSE) {
 	$transaction->setDefaultAccount($transaction::TYPE_EXPENSE, 'debit', $a->id);
 	$transaction->setDefaultAccount($transaction::TYPE_DEBT, 'debit', $a->id);
 }
@@ -89,11 +93,31 @@ if (qg('at') && ($a = $accounts->getWithCode(qg('at')))
 
 // a3 = Third-party account
 if (qg('a3') && ($a = $accounts->getWithCode(qg('a3')))
-	&& $a->type == $a::TYPE_BANK) {
+	&& $a->type == $a::TYPE_THIRD_PARTY) {
 	$transaction->setDefaultAccount($transaction::TYPE_CREDIT, 'debit', $a->id);
 	$transaction->setDefaultAccount($transaction::TYPE_DEBT, 'credit', $a->id);
 }
 
+// Pre-fill from lllines
+if (($ll = qg('ll')) && is_array($ll)) {
+	$lines = [];
+	foreach ($ll as $l) {
+		$lines[] = [
+			'debit'            => $l['d0'] ?? Utils::moneyToInteger($l['d'] ?? ''),
+			'credit'           => $l['c0'] ?? Utils::moneyToInteger($l['c'] ?? ''),
+			'account_selector' => Accounts::getSelectorFromCode($l['a'] ?? null),
+			'label'            => $l['l'] ?? null,
+			'reference'        => $l['r'] ?? null,
+		];
+	}
+
+	// Make sure we have at least two lines
+	$lines = array_merge($lines, array_fill(0, max(0, 2 - count($lines)), []));
+}
+
+$form->runIf(f('lines') !== null, function () use (&$lines) {
+	$lines = Transaction::getFormLines();
+});
 
 $types_details = $transaction->getTypesDetails();
 

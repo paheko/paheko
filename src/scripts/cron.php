@@ -15,10 +15,8 @@ require_once __DIR__ . '/../include/init.php';
 
 $config = Config::getInstance();
 
-if ($config->backup_frequency && $config->backup_limit)
-{
-	$s = new Sauvegarde;
-	$s->auto();
+if ($config->backup_frequency && $config->backup_limit) {
+	Backup::auto();
 }
 
 // Send pending reminders
