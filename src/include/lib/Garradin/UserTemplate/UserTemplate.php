@@ -22,7 +22,7 @@ use Garradin\UserTemplate\Sections;
 
 use Garradin\Web\Cache as Web_Cache;
 
-use const Garradin\{WWW_URL, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT, ROOT, LEGAL_LINE, ROOT};
+use const Garradin\{WWW_URL, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT, ROOT, LEGAL_LINE};
 
 class UserTemplate extends \KD2\Brindille
 {
@@ -433,7 +433,7 @@ class UserTemplate extends \KD2\Brindille
 			throw $e;
 		}
 		catch (\Exception $e) {
-			throw new Brindille_Exception(sprintf("line %d: function '%s' has returned an error: %s\nParameters: %s", $line, $name, $e->getMessage(), json_encode($params)));
+			throw new Brindille_Exception(sprintf("line %d: function '%s' has returned an error: %s\nParameters: %s", $line, $name, $e->getMessage(), substr(var_export($params, true), 6)), 0, $e);
 		}
 	}
 
