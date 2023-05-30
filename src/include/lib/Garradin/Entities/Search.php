@@ -60,7 +60,7 @@ class Search extends Entity
 		$db = DB::getInstance();
 
 		if ($this->id_user !== null) {
-			$this->assert($db->test('users', 'id = ?', $data['id_user']), 'Numéro de membre inconnu');
+			$this->assert($db->test('users', 'id = ?', $this->id_user), 'Numéro de membre inconnu');
 		}
 
 		$this->assert(array_key_exists($this->type, self::TYPES));
