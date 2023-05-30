@@ -28,6 +28,14 @@ class Markdown extends AbstractRender
 
 	public function render(?string $content = null): string
 	{
+		if (null === $content && $this->file) {
+			$content = $this->file->fetch();
+		}
+
+		if (empty($content)) {
+			return $content;
+		}
+
 		$md = Markdown_Parser::instance();
 		Markdown_Extensions::register($md);
 
@@ -36,10 +44,6 @@ class Markdown extends AbstractRender
 
 		foreach ($ext->getList() as $name => $callback) {
 			$md->registerExtension($name, $callback);
-		}
-
-		if (null === $content && $this->file) {
-			$content = $this->file->fetch();
 		}
 
 		$content = $md->text($content);
