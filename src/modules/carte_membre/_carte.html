@@ -10,12 +10,12 @@
 	{{/if}}
 
 	{{if $_photo}}
-		<img src="{{$_photo.url}}?150px" alt="" class="photo" />
+		<img src="{{$_photo.url}}?crop-256px" alt="" class="photo" />
 	{{/if}}
 
 	<div>
 		{{if $module.config.fields|has:$number_field}}
-			<div class="number"><span>N°</span><span>{{$_number}}</span></div>
+			<div class="number{{if $_photo}} with-photo{{/if}}{{if $module.config.logo == 1}} with-logo{{/if}}"><span>N°</span><span>{{$_number}}</span></div>
 		{{/if}}
 
 		{{if $module.config.header}}
