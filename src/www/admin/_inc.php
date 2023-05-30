@@ -11,22 +11,6 @@ function f($key)
 	return \KD2\Form::get($key);
 }
 
-// Query-Validate: valider les éléments passés en GET
-function qv(Array $rules)
-{
-	if (\KD2\Form::validate($rules, $errors, $_GET))
-	{
-		return true;
-	}
-
-	foreach ($errors as &$error)
-	{
-		$error = sprintf('%s: %s', $error['name'], $error['rule']);
-	}
-
-	throw new UserException(sprintf('Paramètres invalides (%s).', implode(', ',  $errors)));
-}
-
 function qg($key)
 {
 	return isset($_GET[$key]) ? $_GET[$key] : null;

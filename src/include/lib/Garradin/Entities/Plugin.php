@@ -115,6 +115,10 @@ class Plugin extends Entity
 	 */
 	public function updateFromINI(): bool
 	{
+		if (!$this->hasFile(self::META_FILE)) {
+			return false;
+		}
+
 		$ini = parse_ini_file($this->path(self::META_FILE), false, \INI_SCANNER_TYPED);
 
 		if (empty($ini)) {

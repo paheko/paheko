@@ -83,7 +83,19 @@ class Entity extends AbstractEntity
 				return Date::createFromInterface($value);
 			}
 
-			return self::filterUserDateValue($value);
+			$d = self::filterUserDateValue($value);
+
+			if (!$d) {
+				return $d;
+			}
+
+			$y = $d->format('Y');
+			if ($y < 1900 || $y > 2100) {
+				throw new ValidationException('Date invalide: doit être entre 1900 et 2100');
+			}
+
+			return $d;
+
 		}
 		elseif ($type == 'DateTime' && is_string($value)) {
 			if (preg_match('!^\d{2}/\d{2}/\d{4}\s\d{1,2}:\d{2}$!', $value)) {

@@ -78,7 +78,7 @@ class File extends Entity
 		'crop-256px' => [['cropResize', 256, 256]],
 	];
 
-	const THUMB_CACHE_ID = 'file.thumb.%s.%d';
+	const THUMB_CACHE_ID = 'file.thumb.%s.%s';
 
 	const THUMB_SIZE_TINY = '200px';
 	const THUMB_SIZE_SMALL = '500px';
@@ -787,8 +787,11 @@ class File extends Entity
 					throw new \RuntimeException('Unable to fetch file');
 				}
 
+				// Always autorotate first
+				$i->autoRotate();
+
 				$operations = self::ALLOWED_THUMB_SIZES[$size];
-				$allowed_operations = ['resize', 'cropResize', 'flip', 'rotate', 'autoRotate', 'crop'];
+				$allowed_operations = ['resize', 'cropResize', 'flip', 'rotate', 'crop'];
 
 				foreach ($operations as $operation) {
 					$arguments = array_slice($operation, 1);
@@ -801,7 +804,13 @@ class File extends Entity
 					call_user_func_array([$i, $operation], $arguments);
 				}
 
-				$i->save($destination);
+				$format = null;
+
+				if ($i->format() !== 'gif') {
+					$format = ['webp', null];
+				}
+
+				$i->save($destination, $format);
 			}
 			catch (\RuntimeException $e) {
 				throw new UserException('Impossible de créer la miniature');
