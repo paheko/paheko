@@ -79,6 +79,7 @@ abstract class AdvancedSearch
 		$list = new DynamicList($select_columns, $tables, $conditions->where);
 
 		$list->orderBy($order, $query->desc ?? $default_desc);
+		$list->setTitle('Recherche');
 		return $list;
 	}
 
