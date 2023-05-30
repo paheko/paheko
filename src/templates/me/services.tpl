@@ -77,4 +77,6 @@ use Garradin\Entities\Accounting\Account;
 	{$list->getHTMLPagination()|raw}
 {/if}
 
+{$snippets|raw}
+
 {include file="_foot.tpl"}

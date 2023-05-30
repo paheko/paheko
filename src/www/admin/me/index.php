@@ -11,7 +11,7 @@ $parent_name = $user->getParentName();
 $children = $user->listChildren();
 
 $variables = compact('user', 'parent_name', 'children', 'ok');
-$tpl->assign('snippets', Modules::snippetsAsString(Modules::SNIPPET_USER, $variables));
+$tpl->assign('snippets', Modules::snippetsAsString(Modules::SNIPPET_MY_DETAILS, $variables));
 
 $tpl->assign($variables);
 

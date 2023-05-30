@@ -1,6 +1,20 @@
-{{#restrict block=true section="accounting" level="read"}}
-{{/restrict}}
-{{if !$_GET.id}}
+{{if $_GET.me}}
+	{{#transactions user=$logged_user.id}}
+		{{if $id == $_GET.me}}
+			{{:assign id=$id}}
+			{{:break}}
+		{{/if}}
+	{{/transactions}}
+	{{if !$id}}
+		{{:error message="Ce reçu n'existe pas"}}
+	{{/if}}
+{{else}}
+	{{#restrict block=true section="accounting" level="read"}}
+	{{/restrict}}
+	{{:assign id=$_GET.id}}
+{{/if}}
+
+{{if !$id}}
 
 	{{:admin_header title="Reçu de paiement" current="acc"}}
 
@@ -22,7 +36,7 @@
 	{{:admin_footer}}
 
 {{else}}
-	{{#transactions id=$_GET.id}}
+	{{#transactions id=$id}}
 		{{:include file="./_header.html" page_size="A5" title="Reçu de paiement %d - %s"|args:$id:$users_names}}
 
 			<h1>Reçu de paiement</h1>

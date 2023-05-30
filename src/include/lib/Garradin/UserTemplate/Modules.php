@@ -27,6 +27,8 @@ class Modules
 	const SNIPPET_TRANSACTION = Module::SNIPPET_TRANSACTION;
 	const SNIPPET_USER = Module::SNIPPET_USER;
 	const SNIPPET_HOME_BUTTON = Module::SNIPPET_HOME_BUTTON;
+	const SNIPPET_MY_SERVICES = Module::SNIPPET_MY_SERVICES;
+	const SNIPPET_MY_DETAILS = Module::SNIPPET_MY_DETAILS;
 
 	static public function fetchDistFile(string $path): ?string
 	{

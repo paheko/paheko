@@ -29,11 +29,15 @@ class Module extends Entity
 	const SNIPPET_TRANSACTION = 'snippets/transaction_details.html';
 	const SNIPPET_USER = 'snippets/user_details.html';
 	const SNIPPET_HOME_BUTTON = 'snippets/home_button.html';
+	const SNIPPET_MY_SERVICES = 'snippets/my_services.html';
+	const SNIPPET_MY_DETAILS = 'snippets/my_details.html';
 
 	const SNIPPETS = [
 		self::SNIPPET_HOME_BUTTON => 'Icône sur la page d\'accueil',
 		self::SNIPPET_USER => 'En bas de la fiche d\'un membre',
 		self::SNIPPET_TRANSACTION => 'En bas de la fiche d\'une écriture',
+		self::SNIPPET_MY_SERVICES => 'Page "Mes activités"',
+		self::SNIPPET_MY_DETAILS => 'Page "Mes infos personnelles"',
 	];
 
 	const VALID_NAME_REGEXP = '/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/';

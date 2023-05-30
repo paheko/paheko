@@ -557,6 +557,23 @@ class Sections
 		echo $list->getHTMLPagination();
 	}
 
+	static protected function getAccountCodeCondition($codes, string $column = 'code')
+	{
+		if (!is_array($codes)) {
+			$codes = explode(',', $codes);
+		}
+
+		$db = DB::getInstance();
+
+		foreach ($codes as &$code) {
+			$code = $column . ' LIKE ' . $db->quote($code);
+		}
+
+		unset($code);
+
+		return implode(' OR ', $codes);
+	}
+
 	static public function balances(array $params, UserTemplate $tpl, int $line): \Generator
 	{
 		$db = DB::getInstance();
@@ -565,17 +582,8 @@ class Sections
 		$params['tables'] = 'acc_accounts_balances';
 
 		if (isset($params['codes'])) {
-			if (!is_array($params['codes'])) {
-				$params['codes'] = explode(',', $params['codes']);
-			}
-
-			foreach ($params['codes'] as &$code) {
-				$code = 'code LIKE ' . $db->quote($code);
-			}
-
-			$params['where'] .= sprintf(' AND (%s)', implode(' OR ', $params['codes']));
-
-			unset($code, $params['codes']);
+			$params['where'] .= sprintf(' AND (%s)', self::getAccountCodeCondition($params['codes']));
+			unset($params['codes']);
 		}
 
 		if (isset($params['year'])) {
@@ -724,12 +732,6 @@ class Sections
 	{
 		$params['where'] ??= '';
 
-		if (isset($params['id'])) {
-			$params['where'] .= ' AND t.id = :id';
-			$params[':id'] = (int) $params['id'];
-			unset($params['id']);
-		}
-
 		$id_field = DynamicFields::getNameFieldsSQL();
 
 		$params['select'] = sprintf('t.*, SUM(l.credit) AS credit, SUM(l.debit) AS debit,
@@ -739,6 +741,32 @@ class Sections
 			INNER JOIN acc_transactions_lines AS l ON l.id_transaction = t.id
 			INNER JOIN acc_accounts AS a ON l.id_account = a.id';
 		$params['group'] = 't.id';
+
+		if (isset($params['id'])) {
+			$params['where'] .= ' AND t.id = :id';
+			$params[':id'] = (int) $params['id'];
+			unset($params['id']);
+		}
+		elseif (isset($params['user'])) {
+			$params['where'] .= ' AND tu.id_user = :id_user';
+			$params[':id_user'] = (int) $params['user'];
+			unset($params['user']);
+
+			$params['tables'] .= ' INNER JOIN acc_transactions_users AS tu ON tu.id_transaction = t.id';
+		}
+
+		if (isset($params['debit_codes'])) {
+			$params['where'] .= sprintf(' AND l.debit > 0 AND (%s)', self::getAccountCodeCondition($params['debit_codes'], 'a.code'));
+		}
+		elseif (isset($params['credit_codes'])) {
+			$params['where'] .= sprintf(' AND l.debit > 0 AND (%s)', self::getAccountCodeCondition($params['credit_codes'], 'a.code'));
+		}
+
+		unset($params['debit_codes'], $params['credit_codes']);
+
+		if (isset($params['order']) && ctype_alpha(substr((string) $params['order'], 0, 1))) {
+			$params['order'] = 't.' . $params['order'];
+		}
 
 		return self::sql($params, $tpl, $line);
 	}
