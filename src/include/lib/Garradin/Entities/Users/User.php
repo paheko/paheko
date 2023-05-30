@@ -323,7 +323,7 @@ class User extends Entity
 				$v |= $k;
 			}
 
-			$source[$f->name] = $v;
+			$source[$f->name] = $v ?: null;
 		}
 
 		return parent::importForm($source);
