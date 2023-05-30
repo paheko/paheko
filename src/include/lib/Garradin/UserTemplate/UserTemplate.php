@@ -22,7 +22,7 @@ use Garradin\UserTemplate\Sections;
 
 use Garradin\Web\Cache as Web_Cache;
 
-use const Garradin\{WWW_URL, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT, ROOT, LEGAL_LINE};
+use const Garradin\{WWW_URL, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT, ROOT, LEGAL_LINE, ROOT};
 
 class UserTemplate extends \KD2\Brindille
 {
@@ -262,7 +262,7 @@ class UserTemplate extends \KD2\Brindille
 			require $tmp_path;
 		}
 		catch (Brindille_Exception $e) {
-			$path = $this->file ? $this->file->name : ($this->code ? 'code' : Utils::basename($this->path));
+			$path = $this->file ? $this->file->path : ($this->code ? 'code' : str_replace(ROOT, '…', $this->path));
 
 			$message = sprintf("Erreur dans '%s' :\n%s", $path, $e->getMessage());
 
