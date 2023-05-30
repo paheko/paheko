@@ -10,8 +10,6 @@ if (empty($user->email))
     throw new UserException("Vous devez renseigner l'adresse e-mail dans vos informations pour pouvoir contacter les autres membres.");
 }
 
-qv(['id' => 'required|numeric']);
-
 $id = (int) qg('id');
 
 $membre = $membres->get($id);

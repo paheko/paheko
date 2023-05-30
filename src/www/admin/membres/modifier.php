@@ -7,8 +7,6 @@ require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 
-qv(['id' => 'required|numeric']);
-
 $id = (int) qg('id');
 
 $membre = $membres->get($id);
