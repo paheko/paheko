@@ -50,6 +50,18 @@
 					</td>
 				{elseif $key == 'identity'}
 					<th>{link href="details.php?id=%d"|args:$row._user_id label=$value}</th>
+				{elseif $key == 'id_parent'}
+					<td>
+						{if $value}
+							{link href="details.php?id=%d"|args:$value label=$row._parent_name}
+						{/if}
+					</td>
+				{elseif $key == 'is_parent'}
+					<td>
+						{if $value}
+							Oui
+						{/if}
+					</td>
 				{else}
 					<td>
 						{display_dynamic_field key=$key value=$value user_id=$row._user_id thumb_url="details.php?id=%d"|args:$row._user_id}
