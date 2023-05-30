@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Dettes et créances non réglées sur les exercices clos" current="acc/simple"}
+{include file="_head.tpl" title="Dettes et créances non réglées sur les exercices clos" current="acc/simple"}
 
 <nav class="tabs">
 	<aside>
@@ -42,4 +42,4 @@
 	{pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count()}
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}
