@@ -38,14 +38,17 @@ class Markdown extends AbstractRender
 			$md->registerExtension($name, $callback);
 		}
 
-		$str = $content ?? $this->file->fetch();
-		$str = $md->text($str);
+		if (null === $content && $this->file) {
+			$content = $this->file->fetch();
+		}
+
+		$content = $md->text($content);
 		unset($md);
 
-		$str = preg_replace_callback(';<a href="([\w_-]+?)">;i', function ($matches) {
+		$content = preg_replace_callback(';<a href="([\w_-]+?)">;i', function ($matches) {
 			return sprintf('<a href="%s">', htmlspecialchars($this->resolveLink(htmlspecialchars_decode($matches[1]))));
-		}, $str);
+		}, $content);
 
-		return sprintf('<div class="web-content">%s</div>', $str);
+		return sprintf('<div class="web-content">%s</div>', $content);
 	}
 }
