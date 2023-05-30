@@ -7,8 +7,6 @@ use Garradin\Users\Categories;
 
 require_once __DIR__ . '/_inc.php';
 
-qv(['id' => 'required|numeric']);
-
 $id = (int) qg('id');
 
 $membre = $membres->get($id);
