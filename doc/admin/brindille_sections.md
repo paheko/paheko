@@ -238,6 +238,7 @@ Paramètres possibles :
 
 | `id` | optionnel | Identifiant unique du membre, ou tableau contenant une liste d'identifiants. |
 | `search_name` | optionnel | Ne lister que les membres dont le nom correspond au texte passé en paramètre. |
+| `id_parent` | optionnel | Ne lister que les membres rattachés à l'identifiant unique du membre responsable indiqué. |
 
 Chaque itération renverra la fiche du membre, ainsi que ces variables :
 

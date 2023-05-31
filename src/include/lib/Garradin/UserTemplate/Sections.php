@@ -666,6 +666,11 @@ class Sections
 			$params[':id'] = (int) $params['id'];
 			unset($params['id']);
 		}
+		elseif (isset($params['id_parent'])) {
+			$params['where'] .= ' AND users.id_parent = :id_parent';
+			$params[':id_parent'] = (int) $params['id_parent'];
+			unset($params['id_parent']);
+		}
 
 		if (!empty($params['search_name'])) {
 			$params['tables'] .= sprintf(' INNER JOIN users_search AS us ON us.id = users.id AND %s LIKE :search_name ESCAPE \'\\\' COLLATE NOCASE',
