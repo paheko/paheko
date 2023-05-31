@@ -261,6 +261,11 @@
     opacity: 0.7;
 }
 
+.web-content video {
+    margin: .8em auto;
+    display: block;
+}
+
 .web-content figure.image figcaption {
     font-style: italic;
     color: #666;

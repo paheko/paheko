@@ -32,6 +32,7 @@ class Extensions
 			'fichier'  => [$this, 'file'],
 			'image'    => [$this, 'image'],
 			'gallery'  => [$this, 'gallery'],
+			'video'    => [$this, 'video'],
 		];
 
 		Plugins::fireSignal('render.extensions.init', ['extensions' => &$list]);
@@ -103,6 +104,46 @@ class Extensions
 		return sprintf(
 			'<aside class="file" data-type="%s"><a href="%s" class="internal-file"><b>%s</b> <small>(%s)</small></a></aside>',
 			htmlspecialchars($ext), htmlspecialchars($url), htmlspecialchars($caption), htmlspecialchars(strtoupper($ext))
+		);
+	}
+
+	public function video(bool $block, array $args): string
+	{
+		$name = $args['file'] ?? ($args[0] ?? null);
+
+		if (!$name || !$this->renderer->hasPath()) {
+			return self::error('Tag image : aucun nom de fichier indiqué.');
+		}
+
+		$poster = $args['poster'] ?? ($args[1] ?? null);
+		$subs = $args['subtitles'] ?? ($args[2] ?? null);
+		$url = $this->renderer->resolveAttachment($name);
+
+		if ($poster) {
+			$poster = $this->renderer->resolveAttachment($poster);
+		}
+
+		if ($subs) {
+			$subs = $this->renderer->resolveAttachment($subs);
+			$subs = sprintf('<track kind="subtitles" default="true" src="%s" />', htmlspecialchars($subs));
+		}
+
+		$params = '';
+
+		if (isset($args['width'])) {
+			$params .= sprintf(' width="%d"', $args['width']);
+		}
+
+		if (isset($args['height'])) {
+			$params .= sprintf(' height="%d"', $args['height']);
+		}
+
+		return sprintf('<video controls="true" preload="%s" poster="%s" src="%s"%s>%s</video>',
+			$poster ? 'metadata' : 'none',
+			htmlspecialchars($poster),
+			htmlspecialchars($url),
+			$params,
+			$subs
 		);
 	}
 
