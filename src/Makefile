@@ -48,14 +48,14 @@ release: test minify doc
 		rm -f font/*.css font/*.json
 	cd /tmp/paheko-build/paheko/src; \
 		rm -f Makefile include/lib/KD2/data/countries.en.json
-	cd /tmp/paheko-build/paheko/src/data; mkdir plugins && cd plugins; \
-		wget https://fossil.kd2.org/paheko-plugins/uv/welcome.tar.gz \
-		&& wget https://fossil.kd2.org/paheko-plugins/uv/caisse.tar.gz \
-		&& wget https://fossil.kd2.org/paheko-plugins/uv/taima.tar.gz \
-		&& wget https://fossil.kd2.org/paheko-plugins/uv/dompdf.tar.gz \
-		&& wget https://fossil.kd2.org/paheko-plugins/uv/reservations.tar.gz \
-		&& wget https://fossil.kd2.org/paheko-plugins/uv/webstats.tar.gz \
-		&& wget https://fossil.kd2.org/paheko-plugins/uv/stock_velos.tar.gz
+	#cd /tmp/paheko-build/paheko/src/data; mkdir plugins && cd plugins; \
+	#	wget https://fossil.kd2.org/paheko-plugins/uv/welcome.tar.gz \
+	#	&& wget https://fossil.kd2.org/paheko-plugins/uv/caisse.tar.gz \
+	#	&& wget https://fossil.kd2.org/paheko-plugins/uv/taima.tar.gz \
+	#	&& wget https://fossil.kd2.org/paheko-plugins/uv/dompdf.tar.gz \
+	#	&& wget https://fossil.kd2.org/paheko-plugins/uv/reservations.tar.gz \
+	#	&& wget https://fossil.kd2.org/paheko-plugins/uv/webstats.tar.gz \
+	#	&& wget https://fossil.kd2.org/paheko-plugins/uv/stock_velos.tar.gz
 	mv /tmp/paheko-build/paheko/src /tmp/paheko-build/paheko-${VERSION}
 	@#cd /tmp/paheko-build/; zip -r -9 paheko-${VERSION}.zip paheko-${VERSION};
 	@#mv -f /tmp/paheko-build/paheko-${VERSION}.zip ./
