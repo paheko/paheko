@@ -31,11 +31,57 @@ class Extensions
 			'file'     => [$this, 'file'],
 			'fichier'  => [$this, 'file'],
 			'image'    => [$this, 'image'],
+			'gallery'  => [$this, 'gallery'],
 		];
 
 		Plugins::fireSignal('render.extensions.init', ['extensions' => &$list]);
 
 		return $list;
+	}
+
+	public function gallery(bool $block, array $args, ?string $content): string
+	{
+		$type = 'gallery';
+
+		if (isset($args['type'])) {
+			$type = $args['type'];
+		}
+		elseif (isset($args[0])) {
+			$type = $args[0];
+		}
+
+		if (!in_array($type, ['gallery', 'slideshow'])) {
+			$type = 'gallery';
+		}
+
+		$out = sprintf('<div class="%s"><div class="images">', $type);
+		$index = '';
+
+		if (trim((string)$content) === '') {
+			$images = $this->renderer->listImages();
+		}
+		else {
+			$images = explode("\n", $content);
+		}
+
+		$i = 1;
+
+		foreach ($images as $line) {
+			$line = trim($line);
+
+			if ($line === '') {
+				continue;
+			}
+
+			$img = strtok($line, '|');
+			$label = strtok(false);
+			$size = $type == 'slideshow' ? 500 : 200;
+
+			$out .= sprintf('<figure>%s</figure>', $this->img($img, $size, $label ?: null));
+		}
+
+		$out .= '</div></div>';
+		return $out;
 	}
 
 	public function file(bool $block, array $args): string
@@ -74,20 +120,8 @@ class Extensions
 			return self::error('Tag image : aucun nom de fichier indiqué.');
 		}
 
-		$url = $this->renderer->resolveAttachment($name);
 		$size = $align == 'center' ? 500 : 200;
-		$svg = substr($name, -4) == '.svg';
-		$thumb_url = null;
-
-		if (!$svg) {
-			$thumb_url = sprintf('%s?%spx', $url, $size);
-		}
-
-		$out = sprintf('<a href="%s" class="internal-image" target="_image"><img src="%s" alt="%s" loading="lazy" /></a>',
-			htmlspecialchars($url),
-			htmlspecialchars($thumb_url ?? $url),
-			htmlspecialchars($caption ?? '')
-		);
+		$out = $this->img($name, $size, $caption);
 
 		if (!empty($align)) {
 			if ($caption) {
@@ -98,5 +132,22 @@ class Extensions
 		}
 
 		return $out;
+	}
+
+	protected function img(string $name, ?int $thumb_size = 200, ?string $caption = null): string
+	{
+		$url = $this->renderer->resolveAttachment($name);
+		$svg = substr($name, -4) == '.svg';
+		$thumb_url = null;
+
+		if (!$svg) {
+			$thumb_url = sprintf('%s?%spx', $url, $thumb_size);
+		}
+
+		return sprintf('<a href="%s" class="internal-image" target="_image"><img src="%s" alt="%s" loading="lazy" /></a>',
+			htmlspecialchars($url),
+			htmlspecialchars($thumb_url ?? $url),
+			htmlspecialchars($caption ?? '')
+		);
 	}
 }
