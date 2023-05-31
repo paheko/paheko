@@ -9,6 +9,11 @@
     content: attr(data-a) "\0040" attr(data-b) "." attr(data-c);
 }
 
+.web-content figure {
+    margin: 0;
+    padding: 0;
+}
+
 .web-content p, .web-content h1, .web-content h2, .web-content h3, .web-content h4, .web-content h5, .web-content h6,
 .web-content ul, .web-content ol, .web-content table, .web-content blockquote, .web-content pre {
     margin-bottom: 1rem;
@@ -306,7 +311,7 @@
 
 .web-content .gallery figure {
     flex: 1 1 auto;
-    max-height: 200px;
+    max-height: 180px;
 }
 
 .web-content .gallery img {
@@ -337,14 +342,13 @@
     height: 400px;
     width: 500px;
     white-space: nowrap;
-    z-index: 100;
 }
 
 .web-content .slideshow .index {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    flex-wrap: wrap;
 }
 
 .web-content .slideshow button {
@@ -354,10 +358,11 @@
     color: #000;
     font-weight: bold;
     font-size: 12pt;
-    width: 3ch;
+    min-width: 3ch;
     height: 3ch;
-    margin: 0 .2em;
+    margin: .2em;
     cursor: pointer;
+    text-align: center;
 }
 
 .web-content .slideshow button:hover {

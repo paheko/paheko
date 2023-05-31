@@ -419,6 +419,36 @@ Il est aussi possible d'utiliser la syntaxe avec des paramètres nommés :
 
 Les images qui ne sont pas mentionnées dans le texte seront affichées après le texte sous forme de galerie.
 
+## Galerie d'images
+
+Il est possible d'afficher une galerie d'images (sous forme d'images miniatures) avec la balise `<<gallery` qui contient la liste des images à mettre dans la galerie :
+
+```
+<<gallery
+Nom_fichier.jpg
+Nom_fichier_2.jpg
+>>
+```
+
+Si aucun nom de fichier n'est indiqué, alors toutes les images jointes à la page seront affichées :
+
+```
+<<gallery>>
+```
+
+### Diaporama d'images
+
+On peut également afficher cette galerie sous forme de diaporama. Dans ce cas une seule image est affichée, et on peut passer de l'une à l'autre.
+
+La syntaxe est la même, mais on ajoute le mot `slideshow` après le mot `gallery` :
+
+```
+<<gallery slideshow
+Nom_fichier.jpg
+Nom_fichier_2.jpg
+>>
+```
+
 ## Fichiers joints
 
 Pour créer un bouton permettant de voir ou télécharger un fichier joint à la page web, il suffit d'utiliser la syntaxe suivante :
