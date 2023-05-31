@@ -112,7 +112,7 @@ class Fee extends Entity
 
 	protected function getFormulaSQL()
 	{
-		return sprintf('SELECT %s FROM users WHERE id = ?;', $this->formula);
+		return sprintf('SELECT (%s) FROM users WHERE id = ?;', $this->formula);
 	}
 
 	protected function checkFormula(): ?string
