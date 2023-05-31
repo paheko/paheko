@@ -3,6 +3,7 @@
 namespace Garradin\Entities\Services;
 
 use Garradin\DynamicList;
+use Garradin\DB;
 use Garradin\Entity;
 use Garradin\ValidationException;
 use Garradin\Users\DynamicFields;
