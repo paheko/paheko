@@ -67,8 +67,8 @@ class Page extends Entity
 	const DUPLICATE_URI_ERROR = 42;
 
 	protected ?File $_file = null;
-	protected array $_attachments = [];
-	protected array $_tagged_attachments = [];
+	protected ?array $_attachments = null;
+	protected ?array $_tagged_attachments = null;
 	protected ?string $_html = null;
 	protected ?\DateTime $_html_modified = null;
 
