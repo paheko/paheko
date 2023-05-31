@@ -961,6 +961,7 @@ class DynamicFields
 
 		// Regenerate login index
 		$db->exec('DROP INDEX IF EXISTS users_id_field;');
+		$this->_fields_by_system_use['login'] = [ $new_field => $this->_fields[$new_field] ];
 		$this->createIndexes();
 
 		$this->reload();
