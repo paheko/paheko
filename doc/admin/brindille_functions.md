@@ -150,7 +150,7 @@ Permet de modifier les entêtes HTTP renvoyés par la page. Cette fonction doit 
 | Paramètre | Optionnel / obligatoire ? | Fonction |
 | :- | :- | :- |
 | `code` | *optionnel* | Modifie le code HTTP renvoyé. [Liste des codes HTTP](https://fr.wikipedia.org/wiki/Liste_des_codes_HTTP) |
-| `redirect` | *optionnel* | Rediriger vers l'adresse URI indiquée en valeur. |
+| `redirect` | *optionnel* | Rediriger vers l'adresse URL indiquée en valeur. |
 | `type` | *optionnel* | Modifie le type MIME renvoyé |
 | `download` | *optionnel* | Force la page à être téléchargée sous le nom indiqué. |
 | `inline` | *optionnel* | Force la page à être affichée, et peut ensuite être téléchargée sous le nom indiqué (utile pour la généraion de PDF : permet d'afficher le PDF dans le navigateur avant de le télécharger). |
@@ -162,6 +162,7 @@ Exemples :
 ```
 {{:http code=404}}
 {{:http redirect="/Nos-Activites/"}}
+{{:http redirect="https://mon-site-web.tld/"}}
 {{:http type="application/svg+xml"}}
 {{:http type="pdf" download="liste_membres_ca.pdf"}}
 ```
@@ -332,13 +333,16 @@ Exemple de formulaire de contact :
 
 Redirige vers une nouvelle page.
 
-Si la page actuelle est ouverte dans une fenêtre modal (grâce à la cible `_dialog`), alors la fenêtre modale est fermée, et la redirection se passe dans la page parente.
+Avec le paramètre `force`, si la page actuelle est ouverte dans une fenêtre modale (grâce à la cible `_dialog`), alors la fenêtre modale est fermée, et la redirection se passe dans la page parente.
+
+Avec le paramètre `to`, si la page actuelle est ouverte dans une fenêtre modal (grâce à la cible `_dialog`), alors la fenêtre modale est fermée, et  la page parente est rechargée. Si la page n'est pas ouvertre dans dans une fenêtre modale, la redirection est effectuée.
 
 Seules les adresses internes sont acceptées, il n'est pas possible de rediriger vers une adresse extérieure.
 
 | Paramètre | Obligatoire ou optionnel ? | Fonction |
 | :- | :- | :- |
-| `to` | optionnel | Adresse de redirection |
+| `force` | optionnel | Adresse de redirection forcée |
+| `to` | optionnel | Adresse de redirection si pas dans une fenêtre modale |
 
 Si `to=null` est utilisé, alors la fenêtre modale sera fermée. Ou, si la page n'est pas dans une fenêtre modale, la page courante sera rechargée.
 

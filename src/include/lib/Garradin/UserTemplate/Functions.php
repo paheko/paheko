@@ -605,6 +605,14 @@ class Functions
 
 	static public function redirect(array $params): void
 	{
-		Utils::redirectDialog($params['to'] ?? null);
+		if (isset($params['force'])) {
+			Utils::redirectDialog($params['force']);
+		}
+		elseif (isset($_GET['_dialog'])) {
+			Utils::reloadParentFrame();
+		}
+		else {
+			Utils::redirectDialog($params['to'] ?? null);
+		}
 	}
 }
