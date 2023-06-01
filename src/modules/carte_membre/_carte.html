@@ -31,10 +31,21 @@
 			{{:assign var="fields.%s"|args:$name value=$label}}
 		{{/select}}
 		<ul class="fields">
+			{{if $module.config.fields|has:"_category"}}
+				<li>
+					{{if $module.config.show_fields_names}}Catégorie&nbsp;:{{/if}}
+					{{#select name FROM users_categories WHERE id = {$id_category|intval};}}
+					{{$name}}
+					{{/select}}
+				</li>
+			{{/if}}
 			{{#foreach from=$module.config.fields item="key"}}
 				{{:assign var="value" from=$key}}
 				{{if $value && $key != $number_field}}
-					<li>{{if $module.config.show_fields_names}}{{:assign var="label" from="fields.%s"|args:$key}}{{$label}}&nbsp;: {{/if}}{{$value}}</li>
+					<li>
+						{{if $module.config.show_fields_names}}{{:assign var="label" from="fields.%s"|args:$key}}{{$label}}&nbsp;:{{/if}}
+						{{$value}}
+					</li>
 				{{/if}}
 			{{/foreach}}
 		</ul>
