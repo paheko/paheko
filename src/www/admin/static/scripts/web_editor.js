@@ -137,7 +137,7 @@
 		{
 			let args = new URLSearchParams(window.location.search);
 			var uri = args.get('p');
-			g.openFrameDialog(g.admin_url + 'web/_attach.php?files&_dialog&p=' + uri, null, callback);
+			g.openFrameDialog(g.admin_url + 'web/_attach.php?files&_dialog&p=' + uri, {callback});
 			return true;
 		};
 
@@ -145,7 +145,7 @@
 		{
 			let args = new URLSearchParams(window.location.search);
 			var uri = args.get('p');
-			g.openFrameDialog(g.admin_url + 'web/_attach.php?images&_dialog&p=' + uri, null, callback);
+			g.openFrameDialog(g.admin_url + 'web/_attach.php?images&_dialog&p=' + uri, {callback});
 			return true;
 		};
 

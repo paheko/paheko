@@ -321,7 +321,7 @@
 		let form = e.target.form;
 		form.action = "previsualiser.html";
 		form.target = "dialog";
-		g.openFrameDialog('about:blank', 'auto');
+		g.openFrameDialog('about:blank', {height: 'auto'});
 		form.submit();
 		form.action = "";
 		form.target = "";

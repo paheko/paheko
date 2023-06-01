@@ -99,16 +99,15 @@
 	g.dialog = null;
 	g.focus_before_dialog = null;
 
-	g.openDialog = function (content, callback_or_options, classname) {
-		var close = true;
+	g.openDialog = function (content, options) {
+		var close = true,
+			callback = null,
+			classname = null;
 
-		if (typeof callback_or_options == 'function') {
-			callback = callback_or_options;
-		}
-		else if (typeof callback_or_options === "object" && callback_or_options !== null) {
-			callback = callback_or_options.callback ?? null;
-			classname = callback_or_options.classname ?? null;
-			close = callback_or_options.close ?? true;
+		if (typeof options === "object" && options !== null) {
+			callback = options.callback ?? null;
+			classname = options.classname ?? null;
+			close = options.close ?? true;
 		}
 
 		if (null !== g.dialog) {
@@ -178,7 +177,12 @@
 		return content;
 	}
 
-	g.openFrameDialog = function (url, height = '90%', callback, classname) {
+	g.openFrameDialog = function (url, options) {
+		options ??= {};
+		var height = options.height || '90%';
+		var callback = options.callback || null;
+		var classname = options.classname || null;
+
 		var iframe = document.createElement('iframe');
 		iframe.src = url;
 		iframe.name = 'dialog';
@@ -201,7 +205,7 @@
 			}, 200);
 		});
 
-		g.openDialog(iframe, callback, classname);
+		g.openDialog(iframe, {callback, classname});
 		return iframe;
 	};
 
@@ -533,7 +537,7 @@
 						return false;
 					}
 
-					g.openFrameDialog(url, e.getAttribute('data-dialog-height') || 'auto', null, e.getAttribute('data-dialog-class'));
+					g.openFrameDialog(url, {'height': e.getAttribute('data-dialog-height') || 'auto', 'classname': e.getAttribute('data-dialog-class')});
 					return false;
 				}
 
@@ -555,7 +559,7 @@
 				}
 				else {
 					let url = e.href + (e.href.indexOf('?') > 0 ? '&' : '?') + '_dialog';
-					g.openFrameDialog(url, '90%');
+					g.openFrameDialog(url, {height: '90%'});
 					return false;
 				}
 
@@ -574,7 +578,7 @@
 				e.setAttribute('action', url);
 				e.target = 'dialog';
 
-				g.openFrameDialog('about:blank', e.getAttribute('data-dialog-height') ? 90 : 'auto');
+				g.openFrameDialog('about:blank', {height: e.getAttribute('data-dialog-height') ? 90 : 'auto'});
 				e.submit();
 				return false;
 			});
