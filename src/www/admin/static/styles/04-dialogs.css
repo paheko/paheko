@@ -56,9 +56,14 @@ html.dialog main {
     height: initial;
 }
 
-#dialog > iframe {
+#dialog > iframe, #dialog > div {
     border-radius: .5em;
     box-shadow: 0px 0px 5px #000;
+    background: #fff;
+}
+
+#dialog > div {
+    padding: 1em;
 }
 
 #dialog.loaded > iframe {

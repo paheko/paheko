@@ -99,7 +99,18 @@
 	g.dialog = null;
 	g.focus_before_dialog = null;
 
-	g.openDialog = function (content, callback, classname) {
+	g.openDialog = function (content, callback_or_options, classname) {
+		var close = true;
+
+		if (typeof callback_or_options == 'function') {
+			callback = callback_or_options;
+		}
+		else if (typeof callback_or_options === "object" && callback_or_options !== null) {
+			callback = callback_or_options.callback ?? null;
+			classname = callback_or_options.classname ?? null;
+			close = callback_or_options.close ?? true;
+		}
+
 		if (null !== g.dialog) {
 			g.closeDialog();
 		}
@@ -111,13 +122,18 @@
 		g.dialog.open = true;
 		g.dialog.className = classname || '';
 
-		var btn = document.createElement('button');
-		btn.className = 'icn-btn closeBtn';
-		btn.setAttribute('data-icon', '✘');
-		btn.type = 'button';
-		btn.innerHTML = 'Fermer';
-		btn.onclick = g.closeDialog;
-		g.dialog.appendChild(btn);
+		if (close) {
+			var btn = document.createElement('button');
+			btn.className = 'icn-btn closeBtn';
+			btn.setAttribute('data-icon', '✘');
+			btn.type = 'button';
+			btn.innerHTML = 'Fermer';
+			btn.onclick = g.closeDialog;
+			g.dialog.appendChild(btn);
+
+			g.dialog.onclick = (e) => { if (e.target == g.dialog) g.closeDialog(); };
+			window.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
+		}
 
 		if (typeof content == 'string') {
 			var container = document.createElement('div');
@@ -133,8 +149,6 @@
 		g.dialog.appendChild(content);
 
 		g.dialog.style.opacity = 0;
-		g.dialog.onclick = (e) => { if (e.target == g.dialog) g.closeDialog(); };
-		window.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
 
 		let tag = content.tagName.toLowerCase();
 

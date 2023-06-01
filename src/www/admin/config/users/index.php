@@ -41,6 +41,16 @@ $tpl->assign([
 		365 => 'Un an',
 		720 => 'Deux ans',
 	],
+	'logout_delay_options' => [
+		0 => 'Pas de déconnexion automatique',
+		1 => '1 minute',
+		15 => '15 minutes',
+		30 => '30 minutes',
+		60 => '1 heure',
+		2*60 => '2 heures',
+		3*60 => '3 heures',
+		6*60 => '6 heures',
+	],
 ]);
 
 $tpl->assign(compact('csrf_key', 'config'));
