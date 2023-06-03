@@ -16,7 +16,7 @@ if (!$u) {
 
 $criterias = ['creator' => $u->id];
 
-$tpl->assign('journal', Reports::getJournal($criterias));
+$tpl->assign('journal', Reports::getJournal($criterias, true));
 $tpl->assign('transaction_creator', $u);
 
 $tpl->display('acc/transactions/creator.tpl');
