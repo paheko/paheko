@@ -7,6 +7,7 @@ use Garradin\CSV;
 use Garradin\DB;
 use Garradin\DynamicList;
 use Garradin\Entity;
+use Garradin\Log;
 use Garradin\UserException;
 use Garradin\Email\Emails;
 use Garradin\Users\DynamicFields;
@@ -20,6 +21,8 @@ use stdClass;
 class Mailing extends Entity
 {
 	const TABLE = 'mailings';
+	const NAME = 'Message collectif';
+	const PRIVATE_URL = '!users/mailing/details.php?id=%d';
 
 	protected ?int $id = null;
 	protected string $subject;
@@ -304,6 +307,8 @@ class Mailing extends Entity
 		$this->set('sent', new DateTime);
 
 		$this->save();
+
+		Log::add(Log::SENT, ['entity' => $this::class, 'id' => $this->id()]);
 	}
 
 	public function export(string $format): void

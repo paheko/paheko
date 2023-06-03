@@ -10,6 +10,7 @@ use Garradin\Entity;
  */
 class Project extends Entity
 {
+	const NAME = 'Projet analytique';
 	const TABLE = 'acc_projects';
 
 	protected ?int $id;

@@ -153,8 +153,7 @@ class Entity extends AbstractEntity
 
 		// Log creation/edit, but don't record stuff that doesn't change anything
 		if ($this::NAME && ($new || $modified)) {
-			$type = str_replace('Garradin\Entities\\', '', get_class($this));
-			Log::add($new ? Log::CREATE : Log::EDIT, ['entity' => $type, 'id' => $this->id()]);
+			Log::add($new ? Log::CREATE : Log::EDIT, ['entity' => $this::class, 'id' => $this->id()]);
 		}
 
 		Plugins::fireSignal($name . '.after', ['entity' => $this, 'success' => $return, 'new' => $new]);
@@ -184,7 +183,7 @@ class Entity extends AbstractEntity
 		$return = parent::delete();
 
 		if ($this::NAME) {
-			Log::add(Log::DELETE, ['entity' => $name, 'id' => $id]);
+			Log::add(Log::DELETE, ['entity' => $this::class, 'id' => $id]);
 		}
 
 		Plugins::fireSignal($name . '.after', ['entity' => $this, 'success' => $return, 'id' => $id]);

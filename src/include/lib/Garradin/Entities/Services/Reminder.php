@@ -12,6 +12,8 @@ use KD2\DB\EntityManager;
 
 class Reminder extends Entity
 {
+	const NAME = 'Rappel';
+
 	const TABLE = 'services_reminders';
 
 	protected $id;
