@@ -27,7 +27,7 @@ if (qg('edit') || qg('delete'))
 		throw new UserException('Recherche non trouvée');
 	}
 
-	if ($s->id_user !== null && $r->id_user != Session::getInstance()->getUser()->id) {
+	if ($s->id_user !== null && $s->id_user != Session::getInstance()->getUser()->id) {
 		throw new UserException('Recherche privée appartenant à un autre membre.');
 	}
 
