@@ -21,7 +21,6 @@ class Module extends Entity
 	const DIST_ROOT = ROOT . '/modules';
 	const META_FILE = 'module.ini';
 	const ICON_FILE = 'icon.svg';
-	const README_FILE = 'README.md';
 	const CONFIG_FILE = 'config.html';
 	const INDEX_FILE = 'index.html';
 

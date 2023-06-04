@@ -26,7 +26,6 @@ class Plugin extends Entity
 	const INSTALL_FILE = 'install.php';
 	const UPGRADE_FILE = 'upgrade.php';
 	const UNINSTALL_FILE = 'uninstall.php';
-	const README_FILE = 'admin/README.md';
 
 	const PROTECTED_FILES = [
 		self::META_FILE,
@@ -372,15 +371,6 @@ class Plugin extends Entity
 			$plugin = $this;
 
 			include $path;
-		}
-		elseif (substr($file, -3) === '.md' && $is_private) {
-			$md = new Markdown;
-			header('Content-Type: text/html');
-
-			printf('<!DOCYPE html><head>
-				<style type="text/css">body { font-family: Verdana, sans-serif; padding: .5em; margin: 0; background: #fff; color: #000; }</style>
-				<link rel="stylesheet" type="text/css" href="%scss.php" /></head><body>', ADMIN_URL);
-			echo $md->text(file_get_contents($path));
 		}
 		else {
 			// Récupération du type MIME à partir de l'extension
