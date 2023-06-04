@@ -15,16 +15,8 @@ if ($format = qg('export')) {
 	return;
 }
 
-$categories = [0 => '— Toutes (sauf cachées) —'];
-
-// Remove hidden categories
-if (!$session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)) {
-	$categories = $categories + Categories::listAssoc(Categories::WITHOUT_HIDDEN);
-}
-else {
-	$categories[-1] = '— Toutes (même cachées) —';
-	$categories = $categories + Categories::listAssoc();
-}
+$is_manager = $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
+$categories = Categories::listAssocWithStats($is_manager ? null : Categories::WITHOUT_HIDDEN);
 
 // Deny access to hidden categories to users that are not admins
 if (!array_key_exists($current_cat, $categories)) {
@@ -43,7 +35,7 @@ elseif ($current_cat == -1) {
 	$title = 'Tous les membres';
 }
 else {
-	$title = sprintf('Liste des membres — %s', $categories[$current_cat] ?? '');
+	$title = sprintf('Liste des membres — %s', $categories[$current_cat]->label ?? '');
 }
 
 $tpl->assign(compact('can_edit', 'list', 'current_cat', 'categories', 'title'));

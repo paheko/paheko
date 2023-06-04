@@ -93,10 +93,10 @@ textarea, select, .input-list, .file-selector {
     min-width: 20em;
     max-width: 100%;
     border: 1px solid rgb(var(--gMainColor));
+    border-radius: .25rem;
     font-size: inherit;
     background: rgb(var(--gBgColor));
     color: rgb(var(--gTextColor));
-    border-radius: .25rem;
     transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
 
