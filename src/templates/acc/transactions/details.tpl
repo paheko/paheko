@@ -110,7 +110,7 @@
 			<dt>Projet</dt>
 			<dd>
 			{if $project = $transaction->getProject()}
-				<mark class="variant-a">{link href="!acc/reports/statement.php?project=%d"|args:$project.id label=$project.name}</mark>
+				<mark class="variant-a">{link href="!acc/reports/statement.php?project=%d&year=%d"|args:$project.id:$transaction.id_year label=$project.name}</mark>
 			{else}
 				—
 			{/if}
@@ -210,7 +210,7 @@
 					<td>{$line.reference}</td>
 					<td>
 						{if $line.id_project}
-							<a href="{$admin_url}acc/reports/statement.php?project={$line.id_project}">{$line.project_name}</a>
+							{link href="!acc/reports/statement.php?project=%d&year=%d"|args:$line.id_project:$transaction.id_year label=$line.project_name}
 						{/if}
 					</td>
 				</tr>
