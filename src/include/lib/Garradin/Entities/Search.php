@@ -127,7 +127,7 @@ class Search extends Entity
 
 		// force LIMIT
 		if (!empty($options['limit'])) {
-			$sql = preg_replace($has_limit ? '/LIMIT\s+.*;?\s*$/' : '/;?\s*$/', '', $sql);
+			$sql = preg_replace($has_limit ? '/LIMIT\s+.*$/is' : '/;.*$/s', '', trim($sql));
 			$sql .= ' LIMIT ' . (int) $options['limit'];
 		}
 		elseif (!empty($options['no_limit']) && $has_limit) {
@@ -173,6 +173,7 @@ class Search extends Entity
 			return $result;
 		}
 		catch (DB_Exception $e) {
+			throw $e;
 			throw new UserException('Erreur dans la requête : ' . $e->getMessage(), 0, $e);
 		}
 		finally {
@@ -209,7 +210,7 @@ class Search extends Entity
 			return false;
 		}
 
-		$header = $this->getHeader(['limit' => 1, 'ignore_cache' => true]);
+		$header = $this->getHeader(['limit' => 1, 'no_cache' => true]);
 
 		if (!in_array('id', $header) && !in_array('_user_id', $header)) {
 			return false;
