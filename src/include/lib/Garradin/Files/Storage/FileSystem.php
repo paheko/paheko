@@ -109,7 +109,7 @@ class FileSystem implements StorageInterface
 			$date = $date->getTimestamp();
 		}
 
-		return touch(self::_getRealPath($path), $date ?: null);
+		return touch(self::_getRealPath($path), $date ?? time());
 	}
 
 	static protected function _getRealPath(string $path): ?string
