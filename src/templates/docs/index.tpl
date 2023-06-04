@@ -22,10 +22,12 @@ use Garradin\Entities\Files\File;
 			{input type="text" name="q" size=25 placeholder="Rechercher un document" title="Rechercher dans les documents"}
 			{button shape="search" type="submit" title="Rechercher"}
 		</form>
-	{if $gallery}
-		{linkbutton shape="menu" label="Afficher en liste" href="?path=%s&gallery=0"|args:$parent_path_uri}
-	{else}
-		{linkbutton shape="gallery" label="Afficher en galerie" href="?path=%s&gallery=1"|args:$parent_path_uri}
+	{if !$list || !($list instanceof \Garradin\DynamicList)}
+		{if $gallery}
+			{linkbutton shape="menu" label="Afficher en liste" href="?path=%s&gallery=0"|args:$parent_path_uri}
+		{else}
+			{linkbutton shape="gallery" label="Afficher en galerie" href="?path=%s&gallery=1"|args:$parent_path_uri}
+		{/if}
 	{/if}
 	{if $parent->canCreateDirHere() || $parent->canCreateHere()}
 		{linkmenu label="Ajouter…" shape="plus" right=true}
