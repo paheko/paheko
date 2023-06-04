@@ -29,7 +29,7 @@ html.dark {
     --gHoverLinkColor: 250, 127, 127;
 }
 
-html.dark .header .menu, html.dark .header .menu a, html.dark .header .menu li.current h3 span[data-icon]::before {
+html.dark .header .menu, html.dark .header .menu a, html.dark .header .menu li.current h3 span[data-icon]::before, html.dark nav.tabs .current a {
     color: rgb(var(--gTextColor)) !important;
     text-shadow: 0px 0px 5px rgb(var(--gBgColor)) !important;
 }
