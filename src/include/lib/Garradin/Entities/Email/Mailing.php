@@ -308,7 +308,7 @@ class Mailing extends Entity
 
 		$this->save();
 
-		Log::add(Log::SENT, ['entity' => $this::class, 'id' => $this->id()]);
+		Log::add(Log::SENT, ['entity' => get_class($this), 'id' => $this->id()]);
 	}
 
 	public function export(string $format): void
