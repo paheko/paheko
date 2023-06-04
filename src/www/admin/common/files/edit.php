@@ -34,7 +34,13 @@ $form->runIf('content', function () use ($file) {
 	}
 }, $csrf_key, Utils::getSelfURI());
 
-$tpl->assign('file', $file);
+$tpl->assign(compact('csrf_key', 'file'));
+
+$fallback = qg('fallback');
+
+if (!$editor && $fallback) {
+	$editor = $fallback;
+}
 
 if (!$editor) {
 	$tpl->display('common/files/upload.tpl');
