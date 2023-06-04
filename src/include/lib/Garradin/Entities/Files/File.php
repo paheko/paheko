@@ -209,8 +209,8 @@ class File extends Entity
 			return;
 		}
 
-		$this->touch();
 		$this->move(self::CONTEXT_TRASH . '/' . $this->parent);
+		$this->touch();
 	}
 
 	public function restoreFromTrash(): ?string
@@ -323,6 +323,8 @@ class File extends Entity
 			SET path = ? || SUBSTR(path, 1+LENGTH(?))
 			WHERE path LIKE ?;',
 			$new_path . '/', $this->path . '/', $escaped . '%');
+
+		$this->set('path', $new_path);
 
 		return $return;
 	}
