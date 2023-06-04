@@ -209,8 +209,8 @@ class File extends Entity
 			return;
 		}
 
-		$this->move(self::CONTEXT_TRASH . '/' . $this->parent);
 		$this->touch();
+		$this->move(self::CONTEXT_TRASH . '/' . $this->parent);
 	}
 
 	public function restoreFromTrash(): ?string
@@ -324,6 +324,7 @@ class File extends Entity
 			WHERE path LIKE ?;',
 			$new_path . '/', $this->path . '/', $escaped . '%');
 
+		$this->set('parent', Utils::dirname($new_path));
 		$this->set('path', $new_path);
 
 		return $return;
