@@ -11,7 +11,7 @@ use Garradin\Utils;
 use Garradin\Files\Files;
 use Garradin\UserTemplate\UserTemplate;
 use Garradin\Users\Session;
-use \KD2\HTML\Markdown;
+use Garradin\Web\Router;
 
 use Garradin\Entities\Files\File;
 
@@ -26,6 +26,7 @@ class Plugin extends Entity
 	const INSTALL_FILE = 'install.php';
 	const UPGRADE_FILE = 'upgrade.php';
 	const UNINSTALL_FILE = 'uninstall.php';
+	const README_FILE = 'admin/README.md';
 
 	const PROTECTED_FILES = [
 		self::META_FILE,
@@ -371,6 +372,9 @@ class Plugin extends Entity
 			$plugin = $this;
 
 			include $path;
+		}
+		elseif (substr($file, -3) === '.md') {
+			Router::markdown(file_get_contents($path));
 		}
 		else {
 			// Récupération du type MIME à partir de l'extension

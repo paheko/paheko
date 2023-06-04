@@ -10,6 +10,7 @@ use Garradin\Files\Files;
 use Garradin\UserTemplate\UserTemplate;
 use Garradin\Users\Session;
 use Garradin\Web\Cache;
+use Garradin\Web\Router;
 
 use Garradin\Entities\Files\File;
 
@@ -23,6 +24,7 @@ class Module extends Entity
 	const ICON_FILE = 'icon.svg';
 	const CONFIG_FILE = 'config.html';
 	const INDEX_FILE = 'index.html';
+	const README_FILE = 'README.md';
 
 	// Snippets, don't forget to create alias constant in UserTemplate\Modules class
 	const SNIPPET_TRANSACTION = 'snippets/transaction_details.html';
@@ -435,6 +437,25 @@ class Module extends Entity
 				$ut = $this->template($path);
 				$ut->serve($params);
 			}
+
+			return;
+		}
+		// Render a markdown file
+		elseif (substr($path, -3) === '.md') {
+			if ($has_local_file) {
+				$file = Files::get(File::CONTEXT_MODULES . '/' . $this->name . '/' . $path);
+
+				if (!$file) {
+					throw new UserException('Invalid path');
+				}
+
+				$text = $file->fetch();
+			}
+			else {
+				$text = @file_get_contents($this->distPath($path));
+			}
+
+			Router::markdown($text);
 		}
 		// Serve a static file from a user module
 		elseif ($has_local_file) {
