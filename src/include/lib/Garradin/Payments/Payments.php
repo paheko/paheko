@@ -16,7 +16,7 @@ class Payments
 	const TRANSACTION_CREATION_LOG_LABEL = 'Écriture comptable ajoutée';
 	const TRANSACTION_PREFIX = 'Paiement';
 
-	static public function createPayment(string $type, string $method, string $status, string $provider_name, ?array $accounts, int $author_id, ?string $author_name, ?string $reference, string $label, int $amount, ?\stdClass $extra_data = null, ?string $transaction_notes = null): ?Payment
+	static public function createPayment(string $type, string $method, string $status, string $provider_name, ?array $accounts, ?int $author_id, ?string $author_name, ?string $reference, string $label, int $amount, ?\stdClass $extra_data = null, ?string $transaction_notes = null): ?Payment
 	{
 		$payment = new Payment();
 
