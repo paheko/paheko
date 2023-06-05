@@ -66,9 +66,11 @@ class Page extends Entity
 
 	const DUPLICATE_URI_ERROR = 42;
 
-	protected $_file;
-	protected $_attachments;
-	protected $_tagged_attachments;
+	protected ?File $_file = null;
+	protected ?array $_attachments = null;
+	protected ?array $_tagged_attachments = null;
+	protected ?string $_html = null;
+	protected ?\DateTime $_html_modified = null;
 
 	static public function create(int $type, ?string $parent, string $title, string $status = self::STATUS_ONLINE): self
 	{
@@ -138,7 +140,14 @@ class Page extends Entity
 			throw new \LogicException('File does not exist: '  . $this->file_path);
 		}
 
-		return Render::render($this->format, $this->file(), $this->content, $user_prefix);
+		if ($this->_html_modified != $this->file()->modified) {
+			$this->_html_modified = $this->_html = null;
+		}
+
+		$this->_html ??= Render::render($this->format, $this->file(), $this->content, $user_prefix);
+		$this->_html_modified ??= $this->file()->modified;
+
+		return $this->_html;
 	}
 
 	public function excerpt(int $length = 600): string

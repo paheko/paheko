@@ -2,7 +2,7 @@ if (!open_data) {
 	open_data = {
 		'closed': [{'close_day': '25', 'close_month': 'december', 'reopen_day': '2', 'reopen_month': 'january'}],
 		'open': [{
-			'frequency': '',
+			'frequency': 'this',
 			'day': 'saturday',
 			'open': '15:00',
 			'close': '19:00'

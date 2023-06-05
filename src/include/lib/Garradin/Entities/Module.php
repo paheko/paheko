@@ -10,6 +10,7 @@ use Garradin\Files\Files;
 use Garradin\UserTemplate\UserTemplate;
 use Garradin\Users\Session;
 use Garradin\Web\Cache;
+use Garradin\Web\Router;
 
 use Garradin\Entities\Files\File;
 
@@ -21,19 +22,23 @@ class Module extends Entity
 	const DIST_ROOT = ROOT . '/modules';
 	const META_FILE = 'module.ini';
 	const ICON_FILE = 'icon.svg';
-	const README_FILE = 'README.md';
 	const CONFIG_FILE = 'config.html';
 	const INDEX_FILE = 'index.html';
+	const README_FILE = 'README.md';
 
 	// Snippets, don't forget to create alias constant in UserTemplate\Modules class
 	const SNIPPET_TRANSACTION = 'snippets/transaction_details.html';
 	const SNIPPET_USER = 'snippets/user_details.html';
 	const SNIPPET_HOME_BUTTON = 'snippets/home_button.html';
+	const SNIPPET_MY_SERVICES = 'snippets/my_services.html';
+	const SNIPPET_MY_DETAILS = 'snippets/my_details.html';
 
 	const SNIPPETS = [
 		self::SNIPPET_HOME_BUTTON => 'Icône sur la page d\'accueil',
 		self::SNIPPET_USER => 'En bas de la fiche d\'un membre',
 		self::SNIPPET_TRANSACTION => 'En bas de la fiche d\'une écriture',
+		self::SNIPPET_MY_SERVICES => 'Page "Mes activités"',
+		self::SNIPPET_MY_DETAILS => 'Page "Mes infos personnelles"',
 	];
 
 	const VALID_NAME_REGEXP = '/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/';
@@ -324,9 +329,9 @@ class Module extends Entity
 		}
 
 		foreach ($out as &$file) {
-			$file['editable'] = UserTemplate::isTemplate($file['path'])
+			$file['editable'] = !$file['dir'] && (UserTemplate::isTemplate($file['path'])
 				|| substr($file['type'], 0, 5) === 'text/'
-				|| preg_match('/\.(?:json|md|skriv|html|css|js|ini)$/', $file['name']);
+				|| preg_match('/\.(?:json|md|skriv|html|css|js|ini)$/', $file['name']));
 			$file['open_url'] = '!common/files/preview.php?p=' . rawurlencode($file['file_path']);
 			$file['edit_url'] = '!common/files/edit.php?p=' . rawurlencode($file['file_path']);
 			$file['delete_url'] = '!common/files/delete.php?p=' . rawurlencode($file['file_path']);
@@ -432,6 +437,25 @@ class Module extends Entity
 				$ut = $this->template($path);
 				$ut->serve($params);
 			}
+
+			return;
+		}
+		// Render a markdown file
+		elseif (substr($path, -3) === '.md') {
+			if ($has_local_file) {
+				$file = Files::get(File::CONTEXT_MODULES . '/' . $this->name . '/' . $path);
+
+				if (!$file) {
+					throw new UserException('Invalid path');
+				}
+
+				$text = $file->fetch();
+			}
+			else {
+				$text = @file_get_contents($this->distPath($path));
+			}
+
+			Router::markdown($text);
 		}
 		// Serve a static file from a user module
 		elseif ($has_local_file) {

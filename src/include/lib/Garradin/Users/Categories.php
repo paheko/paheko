@@ -4,6 +4,7 @@ namespace Garradin\Users;
 
 use Garradin\DB;
 use Garradin\Entities\Users\Category;
+use Garradin\Entities\Users\User;
 use KD2\DB\EntityManager as EM;
 
 class Categories
@@ -32,6 +33,35 @@ class Categories
 	{
 		return DB::getInstance()->getAssoc(sprintf('SELECT id, name FROM %s WHERE 1 %s ORDER BY name COLLATE U_NOCASE;',
 			Category::TABLE, self::getHiddenClause($hidden)
+		));
+	}
+
+	static public function listAssocWithStats(?int $hidden = null): array
+	{
+		$db = DB::getInstance();
+
+		$categories = [0 => (object) [
+			'label' => 'Toutes, sauf cachées',
+			'count' => $db->count(User::TABLE, 'id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)'),
+		]];
+
+		if ($hidden !== self::WITHOUT_HIDDEN) {
+			$categories[-1] = (object) [
+				'label' => 'Toutes, même cachées',
+				'count' => $db->count(User::TABLE),
+			];
+		}
+
+		$format = '%s (%d membres)';
+
+		return $categories + $db->getGrouped(sprintf(
+			'SELECT id, name AS label, (SELECT COUNT(*) FROM %s WHERE %1$s.id_category = %s.id) AS count
+			FROM %2$s
+			WHERE 1 %s
+			ORDER BY name COLLATE U_NOCASE;',
+			User::TABLE,
+			Category::TABLE,
+			self::getHiddenClause($hidden)
 		));
 	}
 

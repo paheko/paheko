@@ -112,7 +112,7 @@ class Fee extends Entity
 
 	protected function getFormulaSQL()
 	{
-		return sprintf('SELECT %s FROM users WHERE id = ?;', $this->formula);
+		return sprintf('SELECT (%s) FROM users WHERE id = ?;', $this->formula);
 	}
 
 	protected function checkFormula(): ?string
@@ -120,7 +120,7 @@ class Fee extends Entity
 		try {
 			$db = DB::getInstance();
 			$sql = $this->getFormulaSQL();
-			$db->protectSelect(['users' => null], $sql);
+			$db->protectSelect(['users' => null, 'services_users' => null, 'services' => null, 'services_fees' => null], $sql);
 			return null;
 		}
 		catch (DB_Exception $e) {

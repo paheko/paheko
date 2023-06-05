@@ -13,20 +13,29 @@
 {/if}
 
 {if !empty($categories)}
-<form method="get" action="{$self_url}" class="shortFormRight">
-	<fieldset>
+	<fieldset class="shortFormRight">
 		<legend>Filtrer par catégorie</legend>
-		{input type="select" name="cat" onchange="this.form.submit();" options=$categories default=$current_cat required=true}
-		<noscript>{button type="submit" name="" label="Filtrer" shape="right"}</noscript>
+		<nav class="dropdown">
+			<ul>
+				<li><a></a></li>
+			{foreach from=$categories key="c" item="category"}
+			<li class="{if $c === $current_cat}selected{/if}">
+				<a href="?cat={$c}">
+					<strong>{$category.label}</strong>
+					<small>{{%n membre}{%n membres} n=$category.count}</small>
+				</a>
+			</li>
+			{/foreach}
+			</ul>
+		</nav>
 	</fieldset>
-</form>
 {/if}
 
 <form method="get" action="search.php" class="shortFormLeft" data-focus="1">
 	<fieldset>
 		<legend>Rechercher un membre</legend>
 		<input type="text" name="qt" value="" placeholder="Nom, numéro, ou adresse e-mail" />
-		{button type="submit" name="" label="Chercher" shape="search"}
+		{button type="submit" name="" title="Chercher" shape="search"}
 	</fieldset>
 </form>
 
@@ -50,6 +59,18 @@
 					</td>
 				{elseif $key == 'identity'}
 					<th>{link href="details.php?id=%d"|args:$row._user_id label=$value}</th>
+				{elseif $key == 'id_parent'}
+					<td>
+						{if $value}
+							{link href="details.php?id=%d"|args:$value label=$row._parent_name}
+						{/if}
+					</td>
+				{elseif $key == 'is_parent'}
+					<td>
+						{if $value}
+							Oui
+						{/if}
+					</td>
 				{else}
 					<td>
 						{display_dynamic_field key=$key value=$value user_id=$row._user_id thumb_url="details.php?id=%d"|args:$row._user_id}

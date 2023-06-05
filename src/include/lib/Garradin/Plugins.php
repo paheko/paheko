@@ -171,7 +171,7 @@ class Plugins
 			$item[$type] = $c;
 			$item['icon_url'] = $c->icon_url();
 			$item['config_url'] = $c->hasConfig() ? $c->url($c::CONFIG_FILE) : null;
-			$item['readme_url'] = $c->hasFile($c::README_FILE) ? $c->url($c::README_FILE) : null;
+			$item['readme_url'] = $c->enabled && $c->hasFile($c::README_FILE) ? $c->url($c::README_FILE) : null;
 			$item['installed'] = $type == 'plugin' ? $c->exists() : true;
 			$item['broken'] = $type == 'plugin' ? !$c->hasCode() : false;
 			$item['broken_message'] = $type == 'plugin' ? $c->getBrokenMessage() : false;

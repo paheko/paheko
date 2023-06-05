@@ -185,3 +185,99 @@ nav.home ul li a::before, nav.home ul li a .icon {
     text-shadow: none;
 }
 
+/**
+ * Dropdown, eg. interactive <select>
+ */
+nav.dropdown {
+    position: relative;
+    height: 2.3rem;
+    border: 1px solid rgb(var(--gMainColor));
+    border-radius: .25rem;
+}
+
+nav.dropdown ul {
+    background-color: rgb(var(--gBgColor));
+    top: 0;
+    left: 0;
+    right: 0;
+    position: absolute;
+    border-radius: .5em;
+}
+
+nav.dropdown ul::after {
+    position: absolute;
+    right: 0;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5em;
+    height: 1.5em;
+    font-size: 1.5em;
+    content: "↓";
+    font-family: "gicon";
+}
+
+nav.dropdown li {
+    display: none;
+}
+
+nav.dropdown li.selected, nav.dropdown:hover li {
+    display: block;
+}
+
+nav.dropdown li a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .4rem .6rem;
+    text-decoration: none;
+    height: 1.5em;
+    color: unset;
+}
+
+nav.dropdown li a strong {
+    font-weight: normal;
+}
+
+nav.dropdown li a small {
+    color: var(--gBorderColor);
+    margin-right: 2em;
+}
+
+nav.dropdown li:nth-child(1) {
+    display: none;
+}
+
+nav.dropdown:hover {
+    border-color: transparent;
+}
+
+nav.dropdown:hover li:nth-child(even) a {
+    background: rgba(var(--gSecondColor), 0.2);
+}
+
+nav.dropdown:hover ul {
+    box-shadow: 0 0 5px .2rem rgba(var(--gMainColor), 0.5);
+    border-radius: .25rem;
+}
+
+nav.dropdown:hover .selected a {
+    box-shadow: 0 0 5px .2rem rgba(var(--gMainColor), 0.5);
+    color: rgb(var(--gHoverLinkColor));
+}
+
+nav.dropdown:hover li a strong {
+    font-weight: bold;
+}
+
+nav.dropdown:hover li a:hover {
+    background: rgba(var(--gMainColor), 0.2);
+    color: rgb(var(--gHoverLinkColor));
+}
+
+@media handheld, screen and (max-width:981px) {
+    nav.dropdown:hover li:nth-child(1) {
+        display: block;
+    }
+}

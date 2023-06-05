@@ -99,7 +99,17 @@
 	g.dialog = null;
 	g.focus_before_dialog = null;
 
-	g.openDialog = function (content, callback, classname) {
+	g.openDialog = function (content, options) {
+		var close = true,
+			callback = null,
+			classname = null;
+
+		if (typeof options === "object" && options !== null) {
+			callback = options.callback ?? null;
+			classname = options.classname ?? null;
+			close = options.close ?? true;
+		}
+
 		if (null !== g.dialog) {
 			g.closeDialog();
 		}
@@ -111,13 +121,18 @@
 		g.dialog.open = true;
 		g.dialog.className = classname || '';
 
-		var btn = document.createElement('button');
-		btn.className = 'icn-btn closeBtn';
-		btn.setAttribute('data-icon', '✘');
-		btn.type = 'button';
-		btn.innerHTML = 'Fermer';
-		btn.onclick = g.closeDialog;
-		g.dialog.appendChild(btn);
+		if (close) {
+			var btn = document.createElement('button');
+			btn.className = 'icn-btn closeBtn';
+			btn.setAttribute('data-icon', '✘');
+			btn.type = 'button';
+			btn.innerHTML = 'Fermer';
+			btn.onclick = g.closeDialog;
+			g.dialog.appendChild(btn);
+
+			g.dialog.onclick = (e) => { if (e.target == g.dialog) g.closeDialog(); };
+			window.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
+		}
 
 		if (typeof content == 'string') {
 			var container = document.createElement('div');
@@ -133,8 +148,6 @@
 		g.dialog.appendChild(content);
 
 		g.dialog.style.opacity = 0;
-		g.dialog.onclick = (e) => { if (e.target == g.dialog) g.closeDialog(); };
-		window.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
 
 		let tag = content.tagName.toLowerCase();
 
@@ -164,7 +177,12 @@
 		return content;
 	}
 
-	g.openFrameDialog = function (url, height = '90%', callback, classname) {
+	g.openFrameDialog = function (url, options) {
+		options ??= {};
+		var height = options.height || '90%';
+		var callback = options.callback || null;
+		var classname = options.classname || null;
+
 		var iframe = document.createElement('iframe');
 		iframe.src = url;
 		iframe.name = 'dialog';
@@ -187,7 +205,7 @@
 			}, 200);
 		});
 
-		g.openDialog(iframe, callback, classname);
+		g.openDialog(iframe, {callback, classname});
 		return iframe;
 	};
 
@@ -519,7 +537,7 @@
 						return false;
 					}
 
-					g.openFrameDialog(url, e.getAttribute('data-dialog-height') || 'auto', null, e.getAttribute('data-dialog-class'));
+					g.openFrameDialog(url, {'height': e.getAttribute('data-dialog-height') || 'auto', 'classname': e.getAttribute('data-dialog-class')});
 					return false;
 				}
 
@@ -541,7 +559,7 @@
 				}
 				else {
 					let url = e.href + (e.href.indexOf('?') > 0 ? '&' : '?') + '_dialog';
-					g.openFrameDialog(url, '90%');
+					g.openFrameDialog(url, {height: '90%'});
 					return false;
 				}
 
@@ -560,7 +578,7 @@
 				e.setAttribute('action', url);
 				e.target = 'dialog';
 
-				g.openFrameDialog('about:blank', e.getAttribute('data-dialog-height') ? 90 : 'auto');
+				g.openFrameDialog('about:blank', {height: e.getAttribute('data-dialog-height') ? 90 : 'auto'});
 				e.submit();
 				return false;
 			});

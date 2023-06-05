@@ -1,6 +1,6 @@
 {{:admin_header title="Configuration des cartes de membres"}}
 
-{{if $_POST.save}}
+{{#form on="save"}}
 	{{:save key="config"
 		validate_schema="./config.schema.json"
 		header=$_POST.header|trim|or:null
@@ -10,8 +10,8 @@
 		id_service=$_POST.id_service|intval|or:null
 		show_fields_names=$_POST.show_fields_names|boolval
 	}}
-	{{:http redirect="?ok=1"}}
-{{/if}}
+	{{:redirect to="?ok=1"}}
+{{/form}}
 
 {{if $_GET.ok}}
 	<p class="block confirm">Configuration enregistrée.</p>
@@ -34,6 +34,13 @@
 
 		<dt>Champs des fiches membre à afficher sur la carte de membre</dt>
 		<dd class="help"><em>(Le nom du membre est toujours affiché.)</em></dd>
+		{{if $module.config.fields|has:"_category"}}
+			{{:assign var="checked" value="_category"}}
+		{{else}}
+			{{:assign var="checked" value=null}}
+		{{/if}}
+
+		{{:input type="checkbox" name="fields[]" value="_category" label="Catégorie" default=$checked}}
 
 		{{#select * FROM config_users_fields WHERE type NOT IN ('file', 'password', 'generated', 'multiple', 'checkbox', 'date', 'datetime') AND system & (1 << 4) = 0 ORDER BY sort_order}}
 			{{if $module.config.fields|has:$name}}

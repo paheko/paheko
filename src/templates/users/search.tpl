@@ -2,13 +2,9 @@
 
 {include file="users/_nav.tpl" current="search"}
 
-<form method="post" action="{$self_url}" id="queryBuilderForm" data-disable-progress="1">
+<form method="post" action="{$self_url_no_qs}" id="queryBuilderForm" data-disable-progress="1">
 
 {include file="common/search/advanced.tpl"}
-
-</form>
-
-<form method="post" action="action.php" target="_dialog">
 
 {if $list !== null}
 	<p class="help">{$list->count()} membres trouvés pour cette recherche.</p>
@@ -16,6 +12,9 @@
 	{if $list->count() > 0}
 	<p class="actions">{exportmenu form=true name="_dl_export" class="menu-btn-right"}</p>
 	{/if}
+
+	</form>
+	<form method="post" action="action.php" target="_dialog">
 
 	{include file="common/dynamic_list_head.tpl" check=$is_admin use_buttons=true}
 
@@ -43,6 +42,8 @@
 	{/if}
 	</table>
 
+	</form>
+
 	{$list->getHTMLPagination(true)|raw}
 
 {elseif $results}
@@ -58,6 +59,9 @@
 
 	$header_count = count($header);
 	?>
+
+	</form>
+	<form method="post" action="action.php" target="_dialog">
 
 	<table class="list">
 		<thead>
@@ -91,6 +95,8 @@
 			{include file="users/_list_actions.tpl" colspan=$header_count+1}
 		{/if}
 	</table>
+
+	</form>
 
 {/if}
 

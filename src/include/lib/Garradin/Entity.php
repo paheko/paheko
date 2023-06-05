@@ -83,7 +83,19 @@ class Entity extends AbstractEntity
 				return Date::createFromInterface($value);
 			}
 
-			return self::filterUserDateValue($value);
+			$d = self::filterUserDateValue($value);
+
+			if (!$d) {
+				return $d;
+			}
+
+			$y = $d->format('Y');
+			if ($y < 1900 || $y > 2100) {
+				throw new ValidationException('Date invalide: doit être entre 1900 et 2100');
+			}
+
+			return $d;
+
 		}
 		elseif ($type == 'DateTime' && is_string($value)) {
 			if (preg_match('!^\d{2}/\d{2}/\d{4}\s\d{1,2}:\d{2}$!', $value)) {
@@ -141,8 +153,7 @@ class Entity extends AbstractEntity
 
 		// Log creation/edit, but don't record stuff that doesn't change anything
 		if ($this::NAME && ($new || $modified)) {
-			$type = str_replace('Garradin\Entities\\', '', get_class($this));
-			Log::add($new ? Log::CREATE : Log::EDIT, ['entity' => $type, 'id' => $this->id()]);
+			Log::add($new ? Log::CREATE : Log::EDIT, ['entity' => get_class($this), 'id' => $this->id()]);
 		}
 
 		Plugins::fireSignal($name . '.after', ['entity' => $this, 'success' => $return, 'new' => $new]);
@@ -172,7 +183,7 @@ class Entity extends AbstractEntity
 		$return = parent::delete();
 
 		if ($this::NAME) {
-			Log::add(Log::DELETE, ['entity' => $name, 'id' => $id]);
+			Log::add(Log::DELETE, ['entity' => get_class($this), 'id' => $id]);
 		}
 
 		Plugins::fireSignal($name . '.after', ['entity' => $this, 'success' => $return, 'id' => $id]);

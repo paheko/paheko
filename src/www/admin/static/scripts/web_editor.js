@@ -55,7 +55,7 @@
 
 		t.textarea.form.addEventListener('submit', () => {
 			window.removeEventListener('beforeunload', preventClose, {capture: true});
-			save((data) => { location.href = data.redirect; });
+			save((data) => { localStorage.removeItem(backup_key); location.href = data.redirect; });
 			return false;
 		});
 
@@ -137,7 +137,7 @@
 		{
 			let args = new URLSearchParams(window.location.search);
 			var uri = args.get('p');
-			g.openFrameDialog(g.admin_url + 'web/_attach.php?files&_dialog&p=' + uri, null, callback);
+			g.openFrameDialog(g.admin_url + 'web/_attach.php?files&_dialog&p=' + uri, {callback});
 			return true;
 		};
 
@@ -145,7 +145,7 @@
 		{
 			let args = new URLSearchParams(window.location.search);
 			var uri = args.get('p');
-			g.openFrameDialog(g.admin_url + 'web/_attach.php?images&_dialog&p=' + uri, null, callback);
+			g.openFrameDialog(g.admin_url + 'web/_attach.php?images&_dialog&p=' + uri, {callback});
 			return true;
 		};
 
@@ -489,6 +489,9 @@
 			if ((v = localStorage.getItem(backup_key)) && v.trim() !== t.textarea.value.trim() && window.confirm(msg_restore)) {
 				t.textarea.value = v;
 			}
+			else {
+				localStorage.removeItem(backup_key);
+			}
 		}, 50);
 
 		window.setInterval(() => {
@@ -496,7 +499,14 @@
 				return;
 			}
 
+			var v = localStorage.getItem(backup_key);
+
+			if (v && v.trim() === t.textarea.value.trim()) {
+				return;
+			}
+
 			localStorage.setItem(backup_key, t.textarea.value);
+			console.log('Saved');
 		}, 10000);
 
 	}

@@ -603,7 +603,7 @@ class Reports
 		yield $account;
 	}
 
-	static public function getJournal(array $criterias): \Generator
+	static public function getJournal(array $criterias, bool $reverse_order = false): \Generator
 	{
 		$where = self::getWhereClause($criterias, 't', 'l', 'a');
 
@@ -614,7 +614,7 @@ class Reports
 			FROM acc_transactions t
 			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
 			INNER JOIN acc_accounts a ON l.id_account = a.id
-			WHERE %s ORDER BY t.date, t.id;', $where);
+			WHERE %s ORDER BY t.date %s, t.id %2$s;', $where, $reverse_order ? 'DESC' : 'ASC');
 
 		$transaction = null;
 		$db = DB::getInstance();

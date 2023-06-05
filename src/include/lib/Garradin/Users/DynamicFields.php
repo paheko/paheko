@@ -601,7 +601,19 @@ class DynamicFields
 	{
 		$db = DB::getInstance();
 		unset($fields['id']);
-		$source = array_map([$db, 'quoteIdentifier'], array_keys($fields));
+
+		$source = [];
+
+		foreach ($fields as $src_key => $dst_key) {
+			$field = $this->get($dst_key);
+
+			if ($field) {
+				$source[] = sprintf('CAST(%s AS %s)', $db->quoteIdentifier($src_key), $field->sql_type());
+			}
+			else {
+				$source[] = $src_key;
+			}
+		}
 
 		if ($function) {
 			$source = array_map(fn($a) => $function . '(' . $a . ')', $source);
@@ -950,6 +962,7 @@ class DynamicFields
 			throw new UserException(sprintf('Le champ "%s" comporte des doublons et ne peut donc pas servir comme identifiant unique de connexion.', $this->_fields[$new_field]->label));
 		}
 
+		// Change login field in fields config table
 		$sql = sprintf('UPDATE %s SET system = system & ~%d WHERE system & %2$d;
 			UPDATE %1$s SET system = system | %2$d WHERE name = %s;',
 			self::TABLE,
@@ -959,11 +972,12 @@ class DynamicFields
 
 		$db->exec($sql);
 
+		// Reload dynamic fields cache
+		$this->reload();
+
 		// Regenerate login index
 		$db->exec('DROP INDEX IF EXISTS users_id_field;');
 		$this->createIndexes();
-
-		$this->reload();
 	}
 
 	public function listEligibleNameFields(): array

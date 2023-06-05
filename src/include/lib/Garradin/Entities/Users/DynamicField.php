@@ -116,7 +116,7 @@ class DynamicField extends Entity
 		'number'   => '?int|float',
 		'tel'      => '?string',
 		'select'   => '?string',
-		'multiple' => 'int',
+		'multiple' => '?int',
 		'country'  => '?string',
 		'text'     => '?string',
 		'textarea' => '?string',
@@ -136,7 +136,7 @@ class DynamicField extends Entity
 		'number'   => 'INTEGER',
 		'tel'      => 'TEXT',
 		'select'   => 'TEXT',
-		'multiple' => 'INTEGER NOT NULL DEFAULT 0',
+		'multiple' => 'INTEGER',
 		'country'  => 'TEXT',
 		'text'     => 'TEXT',
 		'textarea' => 'TEXT',
@@ -196,6 +196,15 @@ class DynamicField extends Entity
 		'is_parent INTEGER NOT NULL DEFAULT 0,',
 		'preferences TEXT NULL,'
 	];
+
+	public function sql_type(): string
+	{
+		if ($this->type == 'checkbox') {
+			return 'INTEGER';
+		}
+
+		return self::SQL_TYPES[$this->type];
+	}
 
 	public function delete(): bool
 	{

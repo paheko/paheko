@@ -3,6 +3,7 @@
 namespace Garradin\Web\Render;
 
 use Garradin\Entities\Files\File;
+use Garradin\Files\Files;
 use Garradin\Utils;
 
 use const Garradin\{WWW_URL, ADMIN_URL};
@@ -38,6 +39,26 @@ abstract class AbstractRender
 	public function registerAttachment(string $uri)
 	{
 		Render::registerAttachment($this->file, $uri);
+	}
+
+	public function listImages(): array
+	{
+		if (!$this->file) {
+			return [];
+		}
+
+		$out = [];
+		$list = Files::list(Utils::dirname($this->file->path));
+
+		foreach ($list as $file) {
+			if (!$file->image) {
+				continue;
+			}
+
+			$out[] = $file->name;
+		}
+
+		return $out;
 	}
 
 	public function resolveAttachment(string $uri)

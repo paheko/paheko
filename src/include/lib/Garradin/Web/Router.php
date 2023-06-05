@@ -17,6 +17,8 @@ use Garradin\UserTemplate\Modules;
 
 use Garradin\Users\Session;
 
+use \KD2\HTML\Markdown;
+
 use const Garradin\{WWW_URI, ADMIN_URL, ROOT, HTTP_LOG_FILE, ENABLE_XSENDFILE};
 
 class Router
@@ -132,6 +134,26 @@ class Router
 		}
 
 		Modules::route($uri);
+	}
+
+	static public function markdown(string $text)
+	{
+		$md = new Markdown;
+		header('Content-Type: text/html');
+
+		$text = $md->text($text);
+		$title = '';
+
+		if (preg_match('!<h1[^>]*>(.*?)</h1>!is', $text, $match)) {
+			$title = strip_tags($match[1]);
+		}
+
+		printf('<!DOCYPE html><head><title>%s</title>
+			<style type="text/css">body { font-family: Verdana, sans-serif; padding: .5em; margin: 0; background: #fff; color: #000; }</style>
+			<link rel="stylesheet" type="text/css" href="%scss.php" /></head><body>', $title, ADMIN_URL);
+
+		echo $text;
+
 	}
 
 	static public function log(string $message, ...$params)

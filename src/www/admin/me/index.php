@@ -7,9 +7,12 @@ require_once __DIR__ . '/_inc.php';
 
 $ok = qg('ok');
 
-$tpl->assign(compact('user', 'ok'));
+$parent_name = $user->getParentName();
+$children = $user->listChildren();
 
-$variables = compact('user');
-$tpl->assign('snippets', Modules::snippetsAsString(Modules::SNIPPET_USER, $variables));
+$variables = compact('user', 'parent_name', 'children', 'ok');
+$tpl->assign('snippets', Modules::snippetsAsString(Modules::SNIPPET_MY_DETAILS, $variables));
+
+$tpl->assign($variables);
 
 $tpl->display('me/index.tpl');

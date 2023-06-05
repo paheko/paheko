@@ -41,6 +41,17 @@
 		</dl>
 	</fieldset>
 
+	<fieldset>
+		<legend>Sécurité</legend>
+		<dl>
+			{input type="select" name="auto_logout" source=$config required=true label="Déconnecter automatiquement les membres inactifs après…" options=$logout_delay_options}
+			<dd class="help">
+				Permet de déconnecter automatiquement un membre s'il garde la gestion de l'association ouverte, sans interagir.<br />
+				Utile par exemple pour éviter de laisser une session ouverte sur un ordinateur partagé.<br />Ce réglage ne s'applique pas aux membres ayant coché la case "Rester connecté⋅e".
+			</dd>
+		</dl>
+	</fieldset>
+
 	<p class="submit">
 		{csrf_field key=$csrf_key}
 		{button type="submit" name="save" label="Enregistrer" shape="right" class="main"}

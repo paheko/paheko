@@ -33,6 +33,7 @@ class Log
 	const CREATE = 10;
 	const DELETE = 11;
 	const EDIT = 12;
+	const SENT = 13;
 
 	const ACTIONS = [
 		self::LOGIN_FAIL => 'Connexion refusée',
@@ -45,6 +46,7 @@ class Log
 		self::CREATE => 'Création',
 		self::DELETE => 'Suppression',
 		self::EDIT => 'Modification',
+		self::SENT => 'Envoi',
 	];
 
 	static public function add(int $type, ?array $details = null, int $id_user = null): void
@@ -60,6 +62,10 @@ class Log
 			if ($keep == 0) {
 				return;
 			}
+		}
+
+		if (isset($details['entity'])) {
+			$details['entity'] = str_replace('Garradin\Entities\\', '', $details['entity']);
 		}
 
 		$ip = Utils::getIP();
@@ -167,12 +173,20 @@ class Log
 			$row->details = $row->details ? json_decode($row->details) : null;
 			$row->type_label = self::ACTIONS[$row->type];
 
-			if (isset($row->details->entity) && defined('Garradin\Entities\\' . $row->details->entity . '::NAME')) {
-				$row->entity_name = constant('Garradin\Entities\\' . $row->details->entity . '::NAME');
+			$const = 'Garradin\Entities\\' . $row->details->entity . '::NAME';
+
+			if (isset($row->details->entity)
+				&& defined($const)
+				&& ($value = constant($const))) {
+				$row->entity_name = $value;
 			}
 
-			if (isset($row->details->id, $row->details->entity) && defined('Garradin\Entities\\' . $row->details->entity . '::PRIVATE_URL')) {
-				$row->entity_url = sprintf(constant('Garradin\Entities\\' . $row->details->entity . '::PRIVATE_URL'), $row->details->id);
+			$const = 'Garradin\Entities\\' . $row->details->entity . '::PRIVATE_URL';
+
+			if (isset($row->details->id, $row->details->entity)
+				&& defined($const)
+				&& ($value = constant($const))) {
+				$row->entity_url = sprintf($value, $row->details->id);
 			}
 		});
 

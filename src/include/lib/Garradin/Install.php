@@ -237,6 +237,7 @@ class Install
 			'country'       => $country_code,
 			'site_disabled' => true,
 			'log_retention' => 365,
+			'auto_logout'   => 2*60,
 			'analytical_set_all' => true,
 		]);
 

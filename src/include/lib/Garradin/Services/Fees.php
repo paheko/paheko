@@ -59,7 +59,7 @@ class Fees
 			}
 
 			try {
-				$sql = sprintf('SELECT %s FROM users WHERE id = %d;', $row->formula, $user_id);
+				$sql = sprintf('SELECT (%s) FROM users WHERE id = %d;', $row->formula, $user_id);
 				$row->user_amount = $db->firstColumn($sql);
 			}
 			catch (DB_Exception $e) {

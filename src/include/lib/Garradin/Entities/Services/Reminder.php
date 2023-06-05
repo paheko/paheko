@@ -3,6 +3,7 @@
 namespace Garradin\Entities\Services;
 
 use Garradin\DynamicList;
+use Garradin\DB;
 use Garradin\Entity;
 use Garradin\ValidationException;
 use Garradin\Users\DynamicFields;
@@ -11,6 +12,8 @@ use KD2\DB\EntityManager;
 
 class Reminder extends Entity
 {
+	const NAME = 'Rappel';
+
 	const TABLE = 'services_reminders';
 
 	protected $id;

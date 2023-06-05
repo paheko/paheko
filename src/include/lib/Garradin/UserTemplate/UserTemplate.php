@@ -262,7 +262,7 @@ class UserTemplate extends \KD2\Brindille
 			require $tmp_path;
 		}
 		catch (Brindille_Exception $e) {
-			$path = $this->file ? $this->file->name : ($this->code ? 'code' : Utils::basename($this->path));
+			$path = $this->file ? $this->file->path : ($this->code ? 'code' : str_replace(ROOT, '…', $this->path));
 
 			$message = sprintf("Erreur dans '%s' :\n%s", $path, $e->getMessage());
 
@@ -433,7 +433,7 @@ class UserTemplate extends \KD2\Brindille
 			throw $e;
 		}
 		catch (\Exception $e) {
-			throw new Brindille_Exception(sprintf("line %d: function '%s' has returned an error: %s\nParameters: %s", $line, $name, $e->getMessage(), json_encode($params)));
+			throw new Brindille_Exception(sprintf("line %d: function '%s' has returned an error: %s\nParameters: %s", $line, $name, $e->getMessage(), substr(var_export($params, true), 6)), 0, $e);
 		}
 	}
 

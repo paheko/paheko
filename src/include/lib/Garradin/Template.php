@@ -514,8 +514,8 @@ class Template extends Smartyer
 
 			$out  = sprintf('<dt><label for="f_%s_0">%s</label>%s<input type="hidden" name="%s_present" value="1" /></dt>', $key, htmlspecialchars($field->label), $required_label, $key);
 
-			if ($field->help) {
-				$out .= sprintf('<dd class="help">%s</dd>', htmlspecialchars($help));
+			if ($field->help ?? null) {
+				$out .= sprintf('<dd class="help">%s</dd>', htmlspecialchars($field->help));
 			}
 
 			foreach ($options as $k => $v)

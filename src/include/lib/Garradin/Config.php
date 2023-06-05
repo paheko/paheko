@@ -63,6 +63,8 @@ class Config extends Entity
 	protected int $log_retention;
 	protected bool $analytical_set_all;
 
+	protected ?int $auto_logout = 0;
+
 	static protected $_instance = null;
 
 	static public function getInstance()

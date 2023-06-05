@@ -238,6 +238,7 @@ Paramètres possibles :
 
 | `id` | optionnel | Identifiant unique du membre, ou tableau contenant une liste d'identifiants. |
 | `search_name` | optionnel | Ne lister que les membres dont le nom correspond au texte passé en paramètre. |
+| `id_parent` | optionnel | Ne lister que les membres rattachés à l'identifiant unique du membre responsable indiqué. |
 
 Chaque itération renverra la fiche du membre, ainsi que ces variables :
 
@@ -253,6 +254,8 @@ Liste les inscriptions à une ou des activités.
 
 Paramètres possibles :
 
+| Paramètre | | Fonction |
+| :- | :- | :- |
 | `user` | optionnel | Identifiant unique du membre |
 | `active` | optionnel | Si `TRUE`, seules les inscriptions à jour sont listées |
 | `id_service` | optionnel | Ne renvoie que les inscriptions à l'activité correspondant à cet ID. |
@@ -275,7 +278,16 @@ Renvoie la balance des comptes.
 | Paramètre | Fonction |
 | :- | :- |
 | `codes` (optionel) | Ne renvoyer que les balances des comptes ayant ces codes (séparer par des virgules). |
-| `year` (optionel) | Ne renvoyer que les balances des comptes utilisés sur l'année (indiquer ici un ID de year)<. |
+| `year` (optionel) | Ne renvoyer que les balances des comptes utilisés sur l'année (indiquer ici un ID de year). |
+
+## transactions
+
+Renvoie des écritures.
+
+| Paramètre | | Fonction |
+| :- | :- | :- |
+| `id` | optionnel | Indiquer un ID d'écriture pour récupérer ses informations. |
+| `user` | optionnel | Indiquer ici un ID utilisateur pour lister les écritures liées à un membre. |
 
 ## years
 

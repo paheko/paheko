@@ -7,7 +7,7 @@
 	</ul>
 </nav>
 
-<form method="post" action="{$self_url}" id="queryBuilderForm" data-disable-progress="1">
+<form method="post" action="{$self_url_no_qs}" id="queryBuilderForm" data-disable-progress="1">
 
 {include file="common/search/advanced.tpl"}
 

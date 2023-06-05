@@ -22,7 +22,7 @@ $year = (int)qg('year') ?: key($years);
 $criterias = ['user' => $u->id];
 
 $tpl->assign('balance', Reports::getAccountsBalances($criterias + ['year' => $year], null, false));
-$tpl->assign('journal', Reports::getJournal($criterias));
+$tpl->assign('journal', Reports::getJournal($criterias, true));
 $tpl->assign(compact('years', 'year'));
 $tpl->assign('transaction_user', $u);
 
