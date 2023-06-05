@@ -601,7 +601,19 @@ class DynamicFields
 	{
 		$db = DB::getInstance();
 		unset($fields['id']);
-		$source = array_map([$db, 'quoteIdentifier'], array_keys($fields));
+
+		$source = [];
+
+		foreach ($fields as $src_key => $dst_key) {
+			$field = $this->get($dst_key);
+
+			if ($field) {
+				$source[] = sprintf('CAST(%s AS %s)', $db->quoteIdentifier($src_key), $field->sql_type());
+			}
+			else {
+				$source[] = $src_key;
+			}
+		}
 
 		if ($function) {
 			$source = array_map(fn($a) => $function . '(' . $a . ')', $source);

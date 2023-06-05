@@ -197,6 +197,15 @@ class DynamicField extends Entity
 		'preferences TEXT NULL,'
 	];
 
+	public function sql_type(): string
+	{
+		if ($this->type == 'checkbox') {
+			return 'INTEGER';
+		}
+
+		return self::SQL_TYPES[$this->type];
+	}
+
 	public function delete(): bool
 	{
 		if (!$this->canDelete()) {
