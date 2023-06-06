@@ -31,7 +31,7 @@
 
 </form>
 
-<form method="post" action="{$self_url_no_qs}" id="restoreDocuments" style="display: none;" enctype="multipart/form-data">
+<form method="post" action="{$self_url_no_qs}" id="restoreDocuments" style="display: none;" enctype="multipart/form-data" data-disable-progress="1">
 
 <fieldset>
 	<legend>Restaurer les documents</legend>
@@ -48,7 +48,6 @@
 		{csrf_field key="files_restore"}
 		{button type="submit" name="restore" label="Restaurer cette sauvegarde des documents" shape="upload" class="main"}
 	</p>
-	<span class="progress-status"></span>
 </fieldset>
 
 </form>

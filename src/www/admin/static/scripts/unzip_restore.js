@@ -5,7 +5,7 @@
 	const MAX_UNCOMPRESSED_SIZE = 1024*1024*1024*10; // 10 GB
 	const MAX_FILE_SIZE = form.querySelector('input[name="MAX_FILE_SIZE"]').value - 250;
 
-	let status = document.querySelector('#' + form.id + ' .progress-status');
+	let status = null;
 
 	let input = document.getElementById('f_file');
 
@@ -17,8 +17,10 @@
 	form.addEventListener('submit', processZip);
 
 	async function processZip(e) {
-		form.firstElementChild.classList.add('progressing');
-		form.firstElementChild.disabled = true;
+		g.openDialog('<div class="progressing block"><span class="progress-status"></span></div><p style="width: 400px; height: 1.5em; text-align: center; overflow: hidden; text-overflow: ellipsis;" id="unzip-status-update"></p>', {close: false});
+		status = document.querySelector('#unzip-status-update');
+
+		form.disabled = true;
 		e.preventDefault();
 
 		if (!input.files.length) {
