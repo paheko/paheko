@@ -370,6 +370,10 @@ class Users
 		$report = ['created' => [], 'modified' => [], 'unchanged' => [], 'has_logged_user' => false];
 
 		foreach (self::iterateImport($csv, $ignore_ids) as $line => $user) {
+			if (!$user) {
+				throw new UserException(sprintf('Ligne %d : le numéro de membre indiqué n\'existe pas', $line));
+			}
+
 			if ($user->id == $logged_user_id) {
 				$report['has_logged_user'] = true;
 				continue;
@@ -402,6 +406,10 @@ class Users
 		$db->begin();
 
 		foreach (self::iterateImport($csv, $ignore_ids) as $user) {
+			if (!$user) {
+				continue;
+			}
+
 			if ($user->id == $logged_user_id) {
 				continue;
 			}
@@ -427,7 +435,9 @@ class Users
 				$user = self::getFromNumber($row->$number_field);
 			}
 
-			$user->importForm((array)$row);
+			if ($user) {
+				$user->importForm((array)$row);
+			}
 
 			yield $i => $user;
 		}
