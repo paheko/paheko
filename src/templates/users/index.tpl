@@ -8,6 +8,10 @@
 
 {if $_GET.msg == 'DELETE'}
 	<p class="block confirm">Le membre a été supprimé.</p>
+{elseif $_GET.msg == 'DELETE_MULTI'}
+	<p class="block confirm">Les membres sélectionnés ont été supprimés.</p>
+{elseif $_GET.msg == 'DELETE_FILES'}
+	<p class="block confirm">Les fichiers des membres sélectionnés ont été supprimés.</p>
 {elseif $_GET.msg == 'CATEGORY_CHANGED'}
 	<p class="block confirm">Les membres sélectionnés ont bien été changés de catégorie.</p>
 {/if}

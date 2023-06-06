@@ -283,6 +283,15 @@ class Users
 		$db->delete(User::TABLE, $db->where('id', $ids));
 	}
 
+	static public function deleteFilesSelected(array $ids): void
+	{
+		$ids = array_map('intval', $ids);
+
+		foreach ($ids as $id) {
+			Files::delete(File::CONTEXT_USER . '/' . $id);
+		}
+	}
+
 	static public function changeCategorySelected(int $category_id, array $ids): void
 	{
 		$db = DB::getInstance();

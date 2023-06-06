@@ -96,9 +96,8 @@ use Garradin\Entities\Files\File;
 {/if}
 
 {if count($list)}
-<form method="post" action="{"!docs/action.php"|local_url}" target="_dialog">
-
 	{if is_array($list)}
+	<form method="post" action="{"!docs/action.php"|local_url}" target="_dialog">
 
 		<table class="list files{if $gallery} gallery{/if}">
 			<thead>
@@ -206,11 +205,19 @@ use Garradin\Entities\Files\File;
 			</tfoot>
 			{/if}
 		</table>
+	</form>
+
 	{elseif $list instanceof \Garradin\DynamicList}
 
 		{if $list->count()}
 
-			{include file="common/dynamic_list_head.tpl" check=false}
+			<?php $is_user_admin = $context === File::CONTEXT_USER && $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN); ?>
+
+			{if $is_user_admin}
+			<form method="post" action="{$admin_url}users/action.php" target="_dialog">
+			{/if}
+
+			{include file="common/dynamic_list_head.tpl" check=$is_user_admin}
 
 			{foreach from=$list->iterate() item="item"}
 				<tr>
@@ -225,7 +232,10 @@ use Garradin\Entities\Files\File;
 							{linkbutton href="!acc/transactions/details.php?id=%d"|args:$item.id label="Écriture" shape="search"}
 						</td>
 					{else}
-						<td class="num"><a href="{$admin_url}users/details.php?id={$item.id}">#{$item.number}</a></td>
+						{if $is_user_admin}
+						<td class="check">{input type="checkbox" name="selected[]" value=$item.id}</td>
+						{/if}
+						<td class="num"><a href="{$admin_url}users/details.php?id={$item.id}">{$item.number}</a></td>
 						<th><a href="?path={$item.path}">{$item.identity}</a></th>
 						<td class="actions">
 							{linkbutton href="!docs/?path=%s"|args:$item.path label="Fichiers" shape="menu"}
@@ -235,7 +245,16 @@ use Garradin\Entities\Files\File;
 				</tr>
 			{/foreach}
 			</tbody>
+
+			{if $is_user_admin}
+				{include file="users/_list_actions.tpl" colspan=count($list->getHeaderColumns())+1}
+			{/if}
+
 			</table>
+
+			{if $is_user_admin}
+			</form>
+			{/if}
 
 			{$list->getHTMLPagination()|raw}
 
@@ -247,8 +266,6 @@ use Garradin\Entities\Files\File;
 
 
 	{/if}
-
-</form>
 {else}
 	<p class="alert block">Il n'y a aucun fichier dans ce répertoire.</p>
 {/if}

@@ -22,7 +22,7 @@ if ($action == 'ods' || $action == 'csv' || $action == 'xlsx') {
 	Users::exportSelected($action, $list);
 	return;
 }
-elseif ($action == 'move' || $action == 'delete') {
+elseif ($action == 'move' || $action == 'delete' || $action == 'delete_files') {
 	$logged_user_id = Session::getUserId();
 
 	// Don't allow to change or delete the currently logged-in user
@@ -43,7 +43,14 @@ if ($action == 'move') {
 elseif ($action == 'delete') {
 	$form->runIf('delete', function () use ($list) {
 		Users::deleteSelected($list);
-	}, $csrf_key, '!users/?msg=CATEGORY_CHANGED');
+	}, $csrf_key, '!users/?msg=DELETE_MULTI');
+
+	$tpl->assign('extra', ['selected' => $list, 'action' => $action]);
+}
+elseif ($action == 'delete_files') {
+	$form->runIf('delete', function () use ($list) {
+		Users::deleteFilesSelected($list);
+	}, $csrf_key, '!users/?msg=DELETE_FILES');
 
 	$tpl->assign('extra', ['selected' => $list, 'action' => $action]);
 }

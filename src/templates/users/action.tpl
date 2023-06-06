@@ -9,6 +9,12 @@
 		alert="Cette action est irréversible et effacera toutes les données personnelles et les inscriptions aux activités de ces membres."
 		extra=$extra
 		info="Alternativement, il est aussi possible de déplacer les membres qui ne font plus partie de l'association dans une catégorie (par exemple \"Anciens membres\"), plutôt que de les supprimer."}
+{elseif $action == 'delete_files'}
+	{include file="common/delete_form.tpl"
+		legend="Supprimer les fichiers de %d membres ?"|args:$count
+		warning="Êtes-vous sûr de vouloir supprimer les fichiers de ces %d membres ?"|args:$count
+		alert="Cette action est irréversible."
+		extra=$extra}
 {else}
 	<form method="post" action="{$self_url}">
 		{foreach from=$list item="id"}

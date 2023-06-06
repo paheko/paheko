@@ -9,6 +9,7 @@
 						<option value="move">Changer de catégorie</option>
 						{if empty($hide_delete)}
 							<option value="delete">Supprimer le membre</option>
+							<option value="delete_files">Supprimer les fichiers du membre</option>
 						{/if}
 						{if !isset($export) || $export != false}
 						<optgroup label="Exporter au format…">
