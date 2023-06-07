@@ -8,7 +8,7 @@
 
 {if !empty($volunteering.body_left) || !empty($volunteering.body_right)}
 	<h2 class="ruler">Contributions bénévoles en nature</h2>
-	{include file="acc/reports/_statement.tpl" statement=$volunteering header=false caption1="Emplois des contributions volontaires en nature" caption2="Contributions volontaires en nature"}
+	{include file="acc/reports/_statement.tpl" statement=$volunteering header=false caption1="Emplois des contributions volontaires en nature" caption2="Contributions volontaires en nature" caption="Contributions bénévoles en nature"}
 {/if}
 
 <p class="help">Toutes les écritures sont libellées en {$config.monnaie}.</p>
