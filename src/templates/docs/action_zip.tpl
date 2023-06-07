@@ -30,4 +30,8 @@
 
 </form>
 
+<script type="text/javascript">
+document.forms[0].onsubmit = () => window.parent.g.closeDialog();
+</script>
+
 {include file="_foot.tpl"}
