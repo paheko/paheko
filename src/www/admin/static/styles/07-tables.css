@@ -189,6 +189,9 @@ table.list.files th {
 
 table.list.files th a {
     display: block;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 40em;
 }
 
 table.list.files .folder th {
