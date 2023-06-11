@@ -190,6 +190,7 @@ class Storage extends AbstractStorage
 			case Nextcloud::PROP_NC_RICH_WORKSPACE:
 				return '';
 			case NextCloud::PROP_OC_ID:
+				// fileId is required by NextCloud desktop client
 				return $this->nextcloud::getFileId($uri, '');
 			case NextCloud::PROP_OC_PERMISSIONS:
 				$permissions = [

@@ -1113,7 +1113,7 @@ class File extends Entity
 			throw new ValidationException('Chemin invalide: ' . $path);
 		}
 
-		$parts = explode('/', $path);
+		$parts = explode('/', trim($path, '/'));
 
 		if (count($parts) < 1) {
 			throw new ValidationException('Chemin invalide: ' . $path);
