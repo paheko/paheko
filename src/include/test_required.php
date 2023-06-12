@@ -75,7 +75,7 @@ while ($row = $r->fetchArray(\SQLITE3_NUM)) {
 }
 
 test_required(
-	in_array('ENABLE_FTS4', $options),
+	in_array('ENABLE_FTS4', $options) || in_array('ENABLE_FTS3', $options),
 	'Le module SQLite3 FTS4 (permettant de faire des recherches) n\'est pas installé ou activé.'
 );
 
