@@ -173,7 +173,6 @@ class Search extends Entity
 			return $result;
 		}
 		catch (DB_Exception $e) {
-			throw $e;
 			throw new UserException('Erreur dans la requête : ' . $e->getMessage(), 0, $e);
 		}
 		finally {
