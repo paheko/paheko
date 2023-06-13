@@ -387,7 +387,7 @@ class User extends Entity
 		$out = [];
 
 		foreach (DynamicFields::getEmailFields() as $f) {
-			if (trim($this->$f)) {
+			if (isset($this->$f) && trim($this->$f)) {
 				$out[] = strtolower($this->$f);
 			}
 		}
