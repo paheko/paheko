@@ -38,6 +38,7 @@ class Modifiers
 		'money_int' => [Utils::class, 'moneyToInteger'],
 		'array_transpose' => [Utils::class, 'array_transpose'],
 		'check_email',
+		'arrayval',
 		'explode',
 		'implode',
 		'keys',
@@ -317,6 +318,11 @@ class Modifiers
 		}
 
 		return $out;
+	}
+
+	static public function arrayval($v): array
+	{
+		return (array) $v;
 	}
 
 	static public function explode($string, string $separator): array
