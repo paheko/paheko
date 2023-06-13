@@ -2,7 +2,7 @@
 	{{* Valeurs par défaut *}}
 	{{:assign var="module.config"
 		objet_asso=""
-		type_asso=""
+		type_asso="defaut"
 		art200=false
 		art238=false
 		art978=false
@@ -17,3 +17,9 @@
 		ville="ville"
 	}}
 {{/if}}
+
+{{:assign var="types_asso"
+	defaut="Organisme d'intérêt général ou reconnu d'utilité publique"
+	personnes="Association fournissant gratuitement une aide alimentaire ou des soins médicaux à des personnes en difficultés ou favorisant leur logement"
+	cultuelle="Association cultuelle ou de bienfaisance et établissement public reconnus d’Alsace-Moselle"
+}}

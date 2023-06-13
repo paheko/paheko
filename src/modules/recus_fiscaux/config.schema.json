@@ -1,0 +1,40 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"type": "object",
+	"properties": {
+		"objet_asso": {
+			"description": "Objet de l'association",
+			"type": "string"
+		},
+		"type_asso": {
+			"description": "Type de l'association",
+			"type": "string",
+			"enum": ["defaut", "personnes" , "cultuelle"]
+		},
+		"art200": {
+			"type": "boolean"
+		},
+		"art238bis": {
+			"type": "boolean"
+		},
+		"art978": {
+			"type": "boolean"
+		},
+		"comptes_don": {
+			"type": "object"
+		},
+		"comptes_don_nature": {
+			"type": "object"
+		},
+		"comptes_especes": {
+			"type": "object"
+		},
+		"comptes_cheques": {
+			"type": "object"
+		},
+		"champs_adresse": {
+			"type": "object"
+		}
+	},
+	"required": [ "objet_asso", "type_asso", "art200", "art238bis", "art978", "comptes_don", "comptes_don_nature", "comptes_especes", "comptes_cheques", "champs_adresse" ]
+}

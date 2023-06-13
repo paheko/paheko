@@ -38,7 +38,7 @@ h5  { font-size: 0.9em; }
 h6  { font-size: 0.8em; }
 
 dl, ul, ol, h1, h2, h3, h4, h5, h6, pre, p, blockquote, figure, table {
-	margin-bottom: 1rem;
+	margin-bottom: .75rem;
 }
 
 body {
@@ -48,12 +48,15 @@ body {
 }
 
 header.organization {
-	border: 2px solid #999;
-	padding: .3em;
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	margin-bottom: 1em;
+	margin-bottom: 1rem;
+}
+
+header.organization + main h1:first-child {
+	border-top: 2px solid #999;
+	padding-top: 1rem;
 }
 
 header.organization * {
@@ -80,6 +83,15 @@ header.organization h2 {
 header.organization h3 {
 	font-size: .8rem;
 	font-weight: normal;
+}
+header.organization h4 {
+	font-size: .8rem;
+	font-weight: normal;
+	display: flex;
+}
+header.organization h4 a {
+	display: block;
+	margin-right: 1rem;
 }
 
 #buttons {
@@ -174,4 +186,24 @@ figure.signature img {
 .placeholder {
 	border-bottom: 1px dashed #666;
 	min-height: 1em;
+}
+
+.info.block {
+	border: 1px solid black;
+	padding: .5em;
+	margin: 1rem 0;
+}
+
+.info.block h2 {
+	border-bottom: 2px solid #000;
+}
+
+.info.block *:last-child {
+	margin-bottom: 0;
+}
+
+.info.block h4 strong {
+	background: yellow;
+	border: 1px solid #999;
+	padding: .2rem;
 }
