@@ -1070,6 +1070,11 @@ class File extends Entity
 		return rawurlencode($this->path);
 	}
 
+	public function parent_uri(): string
+	{
+		return $this->parent ? rawurlencode($this->parent) : '';
+	}
+
 	public function extension(): ?string
 	{
 		$pos = strrpos($this->name, '.');
