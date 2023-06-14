@@ -19,7 +19,9 @@
 						{icon shape="up" class="up"}
 					{/if}
 
-					{if empty($column.hide_header_label)}
+					{if $column.header_icon}
+						{icon shape=$column.header_icon title=$column.label}
+					{else}
 						{$column.label}
 					{/if}
 

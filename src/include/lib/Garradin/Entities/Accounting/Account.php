@@ -256,7 +256,7 @@ class Account extends Entity
 		],
 		'locked' => [
 			'label' => 'Verrouillée',
-			'hide_header_label' => true,
+			'header_icon' => 'lock',
 			'select' => 'CASE WHEN t.hash IS NOT NULL THEN \'Oui\' ELSE NULL END',
 		],
 		'status' => [
