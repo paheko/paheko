@@ -21,8 +21,6 @@ use \KD2\HTML\Markdown;
 
 use const Garradin\{WWW_URI, ADMIN_URL, ROOT, HTTP_LOG_FILE, ENABLE_XSENDFILE};
 
-//die('ok');
-
 class Router
 {
 	const DAV_ROUTES = [
