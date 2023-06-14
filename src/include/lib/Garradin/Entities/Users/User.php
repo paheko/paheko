@@ -123,17 +123,27 @@ class User extends Entity
 		$df = DynamicFields::getInstance();
 
 		foreach ($df->all() as $field) {
-			if (!$field->required) {
+			$value = $this->{$field->name};
+
+			if (!$field->required && null === $value) {
 				continue;
 			}
 
-			$this->assert(null !== $this->{$field->name}, sprintf('"%s" : ce champ est requis', $field->label));
-			$this->assert('' !== trim((string)$this->{$field->name}), sprintf('"%s" : ce champ ne peut être vide', $field->label));
-		}
+			$this->assert(null !== $value, sprintf('"%s" : ce champ est requis', $field->label));
 
-		// Check email addresses
-		foreach (DynamicFields::getEmailFields() as $field) {
-			$this->assert($this->$field === null || SMTP::checkEmailIsValid($this->$field, false), 'Cette adresse email n\'est pas valide.');
+			if (is_bool($value) && $field->required) {
+				$this->assert($value === true, sprintf('"%s" : ce champ doit être coché', $field->label));
+			}
+			elseif (!is_array($value) && !is_object($value) && !is_bool($value)) {
+				$this->assert('' !== trim((string)$value), sprintf('"%s" : ce champ ne peut être vide', $field->label));
+			}
+
+			if ($field->type === 'email') {
+				$this->assert($value === null || SMTP::checkEmailIsValid($value, false), sprintf('"%s" : cette adresse email n\'est pas valide.', $field->label));
+			}
+			elseif ($field->type === 'checkbox') {
+				$this->assert($value === false || $value === true, sprintf('"%s" : la valeur de ce champ n\'est pas valide.', $field->label));
+			}
 		}
 
 		// check user number
@@ -312,7 +322,7 @@ class User extends Entity
 		}
 
 		foreach (DynamicFields::getInstance()->fieldsByType('multiple') as $f) {
-			if (!isset($source[$f->name . '_present'])) {
+			if (!isset($source[$f->name . '_present']) && !isset($source[$f->name])) {
 				continue;
 			}
 
@@ -324,6 +334,15 @@ class User extends Entity
 			}
 
 			$source[$f->name] = $v ?: null;
+		}
+
+		// Handle unchecked checkbox in HTML form: no value returned
+		foreach (DynamicFields::getInstance()->fieldsByType('checkbox') as $f) {
+			if (!isset($source[$f->name . '_present']) && !isset($source[$f->name])) {
+				continue;
+			}
+
+			$source[$f->name] = !empty($source[$f->name]);
 		}
 
 		return parent::importForm($source);
