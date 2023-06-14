@@ -147,7 +147,7 @@
 				<td colspan="4"></td>
 			{/if}
 			{if !$simple}<td></td>{/if}
-			<td class="actions" colspan="5">
+			<td class="actions" colspan="6">
 				{if $can_edit}
 					<em>Pour les écritures cochées :</em>
 					<input type="hidden" name="from" value="{$self_url}" />

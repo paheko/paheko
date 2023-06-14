@@ -19,7 +19,9 @@
 						{icon shape="up" class="up"}
 					{/if}
 
-					{$column.label}
+					{if empty($column.hide_header_label)}
+						{$column.label}
+					{/if}
 
 					{if !empty($use_buttons)}
 						</button>

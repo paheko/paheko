@@ -255,8 +255,9 @@ class Account extends Entity
 			'label' => 'Projet',
 		],
 		'locked' => [
-			'label' => '',
-			'select' => 't.hash IS NOT NULL',
+			'label' => 'Verrouillée',
+			'hide_header_label' => true,
+			'select' => 'CASE WHEN t.hash IS NOT NULL THEN \'Oui\' ELSE NULL END',
 		],
 		'status' => [
 			'select' => 't.status',
