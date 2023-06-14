@@ -91,20 +91,21 @@
 						{/if}
 					</td>
 					<td class="actions">
-						{if $item.module}
-							{if !$item.module->hasDist()}
-								{linkbutton label="Supprimer" href="delete.php?module=%s"|args:$item.name shape="delete" target="_dialog"}
-							{elseif $item.module->canDelete() && $item.enabled}
-								{linkbutton label="Supprimer données et modifications" href="delete.php?module=%s"|args:$item.name shape="delete" target="_dialog"}
-							{/if}
-							{linkbutton label="Modifier" href="edit.php?module=%s"|args:$item.name shape="edit"}
-						{elseif $item.plugin && !$item.enabled && $item.installed}
-							{linkbutton label="Supprimer" href="delete.php?plugin=%s"|args:$item.name shape="delete" target="_dialog"}
+						{if $item.config_url && $item.enabled}
+							{linkbutton label="Configurer" href=$item.config_url shape="settings" target="_dialog"}
 						{/if}
 					</td>
 					<td class="actions">
-						{if $item.config_url && $item.enabled}
-							{linkbutton label="Configurer" href=$item.config_url shape="settings" target="_dialog"}
+						{if $item.module}
+							{if !$item.enabled && $item.module->canDelete()}
+								{linkbutton label="Supprimer" href="delete.php?module=%s&mode=delete"|args:$item.name shape="delete" target="_dialog"}<br />
+							{/if}
+							{if $item.module->canDeleteData()}
+								{linkbutton label="Supprimer les données" href="delete.php?module=%s&mode=data"|args:$item.name shape="delete" target="_dialog"}<br />
+							{/if}
+							{linkbutton label="Modifier" href="edit.php?module=%s"|args:$item.name shape="edit"}
+						{elseif $item.plugin && !$item.enabled && $item.installed}
+							{linkbutton label="Supprimer données" href="delete.php?plugin=%s"|args:$item.name shape="delete" target="_dialog"}
 						{/if}
 					</td>
 					<td class="actions">

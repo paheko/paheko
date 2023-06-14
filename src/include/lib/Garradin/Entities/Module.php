@@ -276,7 +276,17 @@ class Module extends Entity
 
 	public function canDelete(): bool
 	{
-		return !empty($this->config) || $this->hasLocal() || $this->hasData();
+		return $this->hasLocal() && !$this->hasDist();
+	}
+
+	public function canReset(): bool
+	{
+		return $this->hasLocal() && $this->hasDist();
+	}
+
+	public function canDeleteData(): bool
+	{
+		return !empty($this->config) || $this->hasData();
 	}
 
 	public function listFiles(?string $path = null): array
@@ -363,9 +373,14 @@ class Module extends Entity
 			$dir->delete();
 		}
 
-		DB::getInstance()->exec(sprintf('DROP TABLE IF EXISTS modules_data_%s', $this->name));
+		$this->deleteData();
 
 		return parent::delete();
+	}
+
+	public function deleteData(): void
+	{
+		DB::getInstance()->exec(sprintf('DROP TABLE IF EXISTS modules_data_%s; UPDATE modules SET config = NULL WHERE name = \'%1$s\';', $this->name));
 	}
 
 	public function url(string $file = '', array $params = null)
