@@ -11,7 +11,7 @@
 		}}
 	{{/if}}
 	{{if $now >= $start && $now <= $end}}
-		<h3 class="closed">Actuellement fermé jusqu'au {{$end|date_long}} inclus.</h3>
+		<h3 class="closed">Actuellement fermé jusqu'au {{$end|date_long}} inclus</h3>
 		{{:assign stop=1 closed=1}}
 		{{:break}}
 	{{/if}}
