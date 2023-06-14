@@ -79,13 +79,28 @@ class Router
 			Utils::redirect('/' . $uri . '/');
 		}
 		elseif (preg_match('!^(admin/p|p)/(' . Plugins::NAME_REGEXP . ')/(.*)$!', $uri, $match)
-			&& ($plugin = Plugins::get($match[2])) && ($plugin->enabled || $match[3] == 'icon.svg' || substr($match[3], -3) == '.md')) {
-			$uri = ($match[1] == 'admin/p' ? 'admin/' : '') . $match[3];
-			$plugin->route($uri);
-			return;
+			&& Plugins::exists($match[2])) {
+			$uri = ($match[1] == 'admin/p' ? 'admin/' : 'public/') . $match[3];
+
+			if ($match[3] === 'icon.svg' || substr($uri, -3) === '.md') {
+				$r = Plugins::routeStatic($match[2], $uri);
+
+				if ($r) {
+					return;
+				}
+			}
+			else {
+				$plugin = Plugins::get($match[2]);
+
+				if ($plugin && $plugin->enabled) {
+					$plugin->route($uri);
+					return;
+				}
+			}
 		}
+
 		// Other admin/plugin routes are not found
-		elseif ($first === 'admin' || $first === 'p') {
+		if ($first === 'admin' || $first === 'p') {
 			http_response_code(404);
 			throw new UserException('Cette page n\'existe pas.');
 		}
