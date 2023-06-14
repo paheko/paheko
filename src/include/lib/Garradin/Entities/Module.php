@@ -487,8 +487,10 @@ class Module extends Entity
 			$type = $this->getFileTypeFromExtension($path);
 			$real_path = $this->distPath($path);
 
-			// Create symlink to static file
-			Cache::link($path, $real_path);
+			if ($this->web) {
+				// Create symlink to static file
+				Cache::link($path, $real_path);
+			}
 
 			http_response_code(200);
 			header(sprintf('Content-Type: %s;charset=utf-8', $type), true);

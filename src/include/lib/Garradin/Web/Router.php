@@ -21,6 +21,8 @@ use \KD2\HTML\Markdown;
 
 use const Garradin\{WWW_URI, ADMIN_URL, ROOT, HTTP_LOG_FILE, ENABLE_XSENDFILE};
 
+//die('ok');
+
 class Router
 {
 	const DAV_ROUTES = [
@@ -79,7 +81,7 @@ class Router
 			Utils::redirect('/' . $uri . '/');
 		}
 		elseif (preg_match('!^(admin/p|p)/(' . Plugins::NAME_REGEXP . ')/(.*)$!', $uri, $match)
-			&& ($plugin = Plugins::get($match[2])) && $plugin->enabled) {
+			&& ($plugin = Plugins::get($match[2])) && ($plugin->enabled || $match[3] == 'icon.svg' || substr($match[3], -3) == '.md')) {
 			$uri = ($match[1] == 'admin/p' ? 'admin/' : '') . $match[3];
 			$plugin->route($uri);
 			return;

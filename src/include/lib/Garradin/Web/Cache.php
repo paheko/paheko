@@ -132,7 +132,7 @@ class Cache
 		$target = self::getPath($uri, $suffix);
 
 		@unlink($target);
-		symlink($destination, $target);
+		@symlink($destination, $target);
 	}
 
 	static public function store(string $uri, string $html): void
