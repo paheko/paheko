@@ -1065,6 +1065,7 @@ class Utils
 	static public function appendCookieToURLs(string $str): string
 	{
 		$cookie = Session::getCookie();
+		$secret = Session::getCookieSecret();
 
 		if (!$cookie) {
 			return $str;
@@ -1073,7 +1074,7 @@ class Utils
 		// Append session cookie to URLs, so that <img> tags and others work
 		$r = preg_quote(WWW_URL, '!');
 		$r = '!(?<=["\'])(' . $r . '.*?)(?=["\'])!';
-		$str = preg_replace_callback($r, function ($match) use ($cookie): string {
+		$str = preg_replace_callback($r, function ($match) use ($cookie, $secret): string {
 			if (false !== strpos($match[1], '?')) {
 				$separator = '&amp;';
 			}
@@ -1081,7 +1082,7 @@ class Utils
 				$separator = '?';
 			}
 
-			return $match[1] . $separator . $cookie;
+			return $match[1] . $separator . $cookie . htmlspecialchars($secret);
 		}, $str);
 
 		return $str;
