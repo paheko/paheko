@@ -293,6 +293,8 @@ class DynamicField extends Entity
 		}
 
 		if (self::SQL_TYPES[$this->type] == 'GENERATED') {
+			$this->assert(null !== $this->sql && strlen(trim($this->sql)), 'Le code SQL est manquant');
+
 			try {
 				$db->protectSelect(['users' => []], sprintf('SELECT (%s) FROM users;', $this->sql));
 			}
