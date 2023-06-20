@@ -6,6 +6,7 @@ use Garradin\DB;
 use Garradin\DynamicList;
 use Garradin\Utils;
 use Garradin\Entities\Services\Service_User;
+use Garradin\Entities\Users\User;
 use KD2\DB\EntityManager;
 
 class Services_User
@@ -98,5 +99,23 @@ class Services_User
 		$list->groupBy('su.id');
 		$list->setCount('COUNT(DISTINCT su.id)');
 		return $list;
+	}
+
+	static public function exists(int $id_user, ?int $id_service = null, ?int $id_fee = null): bool
+	{
+		if (null === $id_service && null === $id_fee) {
+			throw new \InvalidArgumentException('Services_User::exists() requires $id_service or $id_fee to be provided.');
+		}
+		$params = [ $id_user, $id_service, $id_fee ];
+		if (null === $id_service) {
+			unset($params[1]);
+		}
+		if (null === $id_fee) {
+			unset($params[2]);
+		}
+		return (bool)DB::getInstance()->firstColumn(sprintf('
+				SELECT id FROM %s
+				WHERE id_user = :id_user' . ($id_service ? ' AND id_service = :id_service' : '') . ($id_fee ? ' AND id_fee = :id_fee' : '')
+			, Service_User::TABLE), ...$params);
 	}
 }

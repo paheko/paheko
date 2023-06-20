@@ -432,4 +432,9 @@ class Users
 			yield $i => $user;
 		}
 	}
+
+	static public function idExists(int $id_user): bool
+	{
+		return (bool)DB::getInstance()->firstColumn(sprintf('SELECT id FROM %s WHERE id = :id;', User::TABLE), (int)$id_user);
+	}
 }
