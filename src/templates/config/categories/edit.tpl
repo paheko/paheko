@@ -11,7 +11,15 @@
 		<dl>
 			{input type="text" name="name" label="Nom" required=true source=$cat}
 			<dt>Configuration</dt>
-			{input type="checkbox" name="hidden" label="Catégorie cachée" source=$cat value=1 help="Si coché cette catégorie ne sera visible qu'aux administrateurs, et ne recevra ni messages collectifs ni rappels."}
+			{input type="checkbox" name="hidden" label="Catégorie cachée" source=$cat value=1}
+			<dd class="help">
+				Si coché, les membres de cette catégorie&nbsp;:<br />
+				- ne seront visibles que par les membres ayant le droit d'administration&nbsp;;<br />
+				- ne recevront pas de messages collectifs&nbsp;;<br />
+				- ne recevront pas de rappels de cotisation&nbsp;;<br />
+				- leurs inscriptions aux activités seront cachées.<br />
+				<em>Utile par exemple pour archiver les membres qui n'ont pas renouvelé leur cotisation, avant suppression.</em>
+			</dd>
 		</dl>
 	</fieldset>
 
