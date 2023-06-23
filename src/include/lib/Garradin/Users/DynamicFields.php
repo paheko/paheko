@@ -326,6 +326,8 @@ class DynamicFields
 			}
 		});
 
+		usort($list, fn($a, $b) => strnatcasecmp($a->label, $b->label));
+
 		return $list;
 	}
 
