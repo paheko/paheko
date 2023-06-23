@@ -216,8 +216,8 @@ class Fee extends Entity
 	public function getUsers(bool $paid_only = false): array
 	{
 		$where = $paid_only ? 'AND paid = 1' : '';
-		$id_field = Config::getInstance()->champ_identite;
-		$sql = sprintf('SELECT su.id_user, u.%s FROM services_users su INNER JOIN membres u ON u.id = su.id_user WHERE su.id_fee = ? %s;', $id_field, $where);
+		$id_field = DynamicFields::getNameFieldsSQL('u');
+		$sql = sprintf('SELECT su.id_user, %s FROM services_users su INNER JOIN users u ON u.id = su.id_user WHERE su.id_fee = ? %s;', $id_field, $where);
 		return DB::getInstance()->getAssoc($sql, $this->id());
 	}
 }

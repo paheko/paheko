@@ -6,7 +6,7 @@ use Garradin\Entities\Accounting\Line;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Accounting\Year;
 use Garradin\CSV_Custom;
-use Garradin\Config;
+use Garradin\Users\DynamicFields;
 use Garradin\DB;
 use Garradin\UserException;
 
@@ -32,9 +32,11 @@ class Import
 			}
 
 			if (count($found_users) != count($linked_users)) {
-				$id_field = Config::getInstance()->champ_identite;
+				$id_field = DynamicFields::getNameFieldsSQL();
+				$linked_users_sql = array_map([$db, 'quote'], $linked_users);
+				$linked_users_sql = implode(',', $linked_users_sql);
 				$db = DB::getInstance();
-				$sql = sprintf('SELECT %s AS name, id FROM membres WHERE %s;', $db->quoteIdentifier($id_field), $db->where($id_field, $linked_users));
+				$sql = sprintf('SELECT %s AS name, id FROM users WHERE %1$s IN (%s);', $id_field, $linked_users_sql);
 
 				foreach ($db->iterate($sql) as $row) {
 					$found_users[$row->name] = $row->id;
