@@ -5,9 +5,7 @@ use Garradin\Accounting\Reports;
 use Garradin\Accounting\Years;
 use Garradin\Users\Users;
 
-require_once __DIR__ . '/../../_inc.php';
-
-$session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ);
+require_once __DIR__ . '/../_inc.php';
 
 $u = Users::get((int)qg('id'));
 
@@ -17,7 +15,7 @@ if (!$u) {
 
 $years = Years::listAssoc();
 end($years);
-$year = (int)qg('year') ?: key($years);
+$year = (int)qg('year') ?: CURRENT_YEAR_ID;
 
 $criterias = ['user' => $u->id];
 
