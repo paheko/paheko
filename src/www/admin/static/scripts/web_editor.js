@@ -53,10 +53,20 @@
 		// Warn before closing window if content was changed
 		window.addEventListener('beforeunload', preventClose, { capture: true });
 
-		t.textarea.form.addEventListener('submit', () => {
+		var submitted = false;
+
+		t.textarea.form.addEventListener('submit', (e) => {
 			window.removeEventListener('beforeunload', preventClose, {capture: true});
-			save((data) => { localStorage.removeItem(backup_key); location.href = data.redirect; });
-			return false;
+
+			if (!submitted) {
+				// Just in case fetch() fails, then save() will trigger a regular form submit
+				submitted = true;
+
+				save((data) => { localStorage.removeItem(backup_key); location.href = data.redirect; });
+				e.preventDefault();
+				return false;
+			}
+
 		});
 
 		// Cancel Escape to close.value
@@ -306,7 +316,12 @@
 					return response.json();
 				}
 			})
-			.then(data => callback(data))
+			.then((data) => {
+				if (!data.success) {
+					throw Error('Invalid response');
+				}
+				callback(data);
+			})
 			.catch(e => { console.log(e); t.textarea.form.querySelector('[type=submit]').click(); });
 			return true;
 		};

@@ -73,7 +73,11 @@ $formats = $page::FORMATS_LIST;
 
 $tpl->assign(compact('page', 'parent', 'parent_title', 'editing_started', 'encrypted', 'csrf_key', 'current_content', 'new_content', 'show_diff', 'formats'));
 
-$tpl->assign('custom_js', ['web_editor.js', 'block_editor.js', 'web_encryption.js']);
+$tpl->assign('custom_js', [
+	'web_editor.js',
+	'web_encryption.js',
+	//'block_editor.js',
+]);
 $tpl->assign('custom_css', ['web.css', '!web/css.php']);
 
 $tpl->display('web/edit.tpl');
