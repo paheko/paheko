@@ -549,6 +549,7 @@ class Emails
 
 	static protected function send(int $context, string $recipient_hash, array $headers, string $content, ?string $content_html, ?string $pgp_key = null): void
 	{
+		$config = Config::getInstance();
 		$message = new Mail_Message;
 		$message->setHeaders($headers);
 
@@ -566,7 +567,7 @@ class Emails
 			$message->setHeader('List-Unsubscribe', sprintf('<%s>', $url));
 			$message->setHeader('List-Unsubscribe-Post', 'Unsubscribe=Yes');
 
-			$content .= "\n\n-- \n" . self::getOptoutText() . $url;
+			$content .= sprintf("\n\n-- \n%s\n\n%s\n%s", $config->org_name, self::getOptoutText(), $url);
 
 			if (null !== $content_html) {
 				$content_html = self::appendHTMLOptoutFooter($content_html, $url);
@@ -579,7 +580,6 @@ class Emails
 			$message->addPart('text/html', $content_html);
 		}
 
-		$config = Config::getInstance();
 		$message->setHeader('Return-Path', MAIL_RETURN_PATH ?? $config->org_email);
 		$message->setHeader('X-Auto-Response-Suppress', 'All'); // This is to avoid getting auto-replies from Exchange servers
 
