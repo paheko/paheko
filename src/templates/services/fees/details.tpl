@@ -2,20 +2,30 @@
 
 {include file="services/_nav.tpl" current="index" current_service=$service service_page="index" current_fee=$fee fee_page=$type}
 
-<dl class="cotisation">
-	<dt>Nombre de membres trouvés</dt>
-	<dd>
-		{$list->count()}
-		<em class="help">(N'apparaît ici que l'inscription la plus récente de chaque membre.)</em>
-		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
-			{exportmenu}
-		{/if}
-	</dd>
-</dl>
-
 <?php
 $can_action = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
 ?>
+
+<form method="get" action="">
+	<input type="hidden" name="id" value="{$service.id}" />
+	<input type="hidden" name="type" value="{$type}" />
+
+	<dl class="cotisation">
+		<dt>Nombre de membres trouvés</dt>
+		<dd>
+			{$list->count()}
+			<em class="help">(N'apparaît ici que l'inscription la plus récente de chaque membre.)</em>
+			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
+				{exportmenu}
+			{/if}
+		</dd>
+
+		{if $can_action}
+		<dt>Membres des catégories cachées</dt>
+		{input type="checkbox" label="Afficher aussi les inscriptions des membres appartenant à des catégories cachées" name="hidden" value="1" onchange="this.form.submit()" default=$include_hidden_categories role="button"}
+		{/if}
+	</dl>
+</form>
 
 {if $can_action}
 	<form method="post" action="{"!users/action.php"|local_url}">

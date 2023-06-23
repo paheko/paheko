@@ -13,7 +13,7 @@ if (!$service) {
 }
 
 $type = qg('type');
-$include_hidden_categories = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
+$include_hidden_categories = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && qg('hidden');
 
 if ('unpaid' == $type) {
 	$list = $service->unpaidUsersList($include_hidden_categories);
@@ -31,6 +31,6 @@ else {
 
 $list->loadFromQueryString();
 
-$tpl->assign(compact('list', 'service', 'type'));
+$tpl->assign(compact('list', 'service', 'type', 'include_hidden_categories'));
 
 $tpl->display('services/details.tpl');
