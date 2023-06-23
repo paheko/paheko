@@ -384,11 +384,11 @@ class DynamicFields
 
 			if ($data['type'] == 'checkbox' || $data['type'] == 'multiple') {
 				// A checkbox/multiple checkbox can either be 0 or 1, not NULL
-				$db->exec(sprintf('UPDATE membres SET %s = 0 WHERE %1$s IS NULL OR %1$s = \'\';', $name));
+				$db->exec(sprintf('UPDATE membres SET %s = 0 WHERE %1$s IS NULL OR %1$s = \'\';', $db->quoteIdentifier($name)));
 			}
 			else {
 				// Make sure data is NULL if empty
-				$db->exec(sprintf('UPDATE membres SET %s = NULL WHERE %1$s = \'\';', $name));
+				$db->exec(sprintf('UPDATE membres SET %s = NULL WHERE %1$s = \'\';', $db->quoteIdentifier($name)));
 			}
 
 			if ($name == 'passe') {
