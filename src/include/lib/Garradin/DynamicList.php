@@ -310,7 +310,7 @@ class DynamicList implements \Countable
 			return '';
 		}
 
-		$url = Utils::getModifiedURL('?p=%d');
+		$url = Utils::getModifiedURL('?p=DDD');
 
 		$out = '<ul class="pagination">';
 
@@ -323,7 +323,7 @@ class DynamicList implements \Countable
 			else {
 				$out .= sprintf('<a accesskey="%s" href="%s">%s</a>',
 					$page['accesskey'] ?? '',
-					str_replace('%d', $page['id'], $url),
+					str_replace('DDD', $page['id'], $url),
 					htmlspecialchars($page['label'])
 				);
 			}
