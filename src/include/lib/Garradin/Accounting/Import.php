@@ -226,7 +226,7 @@ class Import
 					}
 
 					if (isset($row->type) && !isset($types[$row->type])) {
-						throw new UserException(sprintf('le type "%s" est inconnu', $row->type));
+						throw new UserException(sprintf('le type "%s" est inconnu. Les types reconnus sont : %s.', $row->type, implode(', ', array_keys($types))));
 					}
 
 					// FEC does not define type, so don't change it
