@@ -49,7 +49,7 @@ $form->runIf(f('move') && f('select'), function () use ($check, $session) {
 	foreach ($check as &$file) {
 		$file = Files::get($file);
 
-		if (!$file || !$file->canMove($target)) {
+		if (!$file || !$file->canMoveTo($target)) {
 			throw new UserException('Impossible de déplacer un fichier car vous n\'avez pas le droit de le déplacer à cet endroit');
 		}
 	}
