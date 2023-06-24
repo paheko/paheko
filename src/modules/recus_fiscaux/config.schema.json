@@ -34,7 +34,15 @@
 		},
 		"champs_adresse": {
 			"type": "object"
+		},
+		"email_subject": {
+			"type": "string"
+		},
+		"email_body": {
+			"type": "string"
 		}
 	},
-	"required": [ "objet_asso", "type_asso", "art200", "art238bis", "art978", "comptes_don", "comptes_don_nature", "comptes_especes", "comptes_cheques", "champs_adresse" ]
+	"required": [ "objet_asso", "type_asso", "art200", "art238bis", "art978", "comptes_don",
+		"comptes_don_nature", "comptes_especes", "comptes_cheques", "champs_adresse",
+		"email_subject", "email_body" ]
 }

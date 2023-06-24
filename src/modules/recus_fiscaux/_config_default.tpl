@@ -6,6 +6,8 @@
 		art200=false
 		art238=false
 		art978=false
+		email_subject="Votre reçu de don"
+		email_body="Bonjour !\n\nVeuillez trouver ci-joint votre reçu de don au format PDF."
 	}}
 	{{:assign var="module.config.comptes_don.754" value="754 — Ressources liées à la générosité du public"}}
 	{{:assign var="module.config.comptes_don_nature.75412" value="75412 — Abandons de frais par les bénévoles"}}

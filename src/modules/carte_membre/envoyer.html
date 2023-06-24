@@ -1,0 +1,49 @@
+{{#restrict section="users" level="read" block=true}}{{/restrict}}
+
+{{#users id=$_GET.id assign="user"}}
+{{else}}
+	{{:error message="Ce membre n'existe pas"}}
+{{/users}}
+
+{{if !$user._email}}
+	{{:error message="Ce membre ne dispose pas d'adresse e-mail"}}
+{{/if}}
+
+{{:admin_header title="Envoyer une carte de membre"}}
+
+{{#form on="send"}}
+	{{:mail
+		to=$user._email
+		subject=$_POST.email_subject|trim
+		body=$_POST.email_body|trim
+		attach_from="./carte.html?id=%d&print=pdf&mode=print"|args:$user.id
+	}}
+	{{:redirect to="envoyer.html?id=%d&sent"|args:$user.id}}
+{{/form}}
+
+{{if $_GET.sent}}
+	<p class="block confirm">La carte a bien été envoyée par e-mail.</p>
+{{/if}}
+
+{{:form_errors}}
+
+<form method="post" action="">
+	<fieldset>
+		<legend>Envoyer une carte de membre</legend>
+		<div style="width: 85mm; height: 55mm; box-shadow: 2px 2px 10px #000; border: 1px solid #000; overflow: hidden; float: right;" >
+			<iframe src="{{"%scarte.html?id=%d&mode=embed"|args:$module.url:$user.id}}" scrolling="no" frameborder="0" width="100%" height="100%"></iframe>
+		</div>
+		<dl>
+			<dt>Destinataire</dt>
+			<dd>{{$user._name}}</dd>
+			{{:input name="email_subject" type="text" source=$module.config default="Votre carte de membre" label="Sujet du message" required=true}}
+			{{:input name="email_body" type="textarea" cols="70" rows=7 source=$module.config default="Bonjour !\n\nVeuillez trouver ci-joint votre carte de membre au format PDF." label="Corps du message" required=true}}
+		</dl>
+	</fieldset>
+	<p class="submit">
+		{{:button type="submit" label="Envoyer" name="send" shape="right" class="main"}}
+	</p>
+</form>
+
+
+{{:admin_footer}}

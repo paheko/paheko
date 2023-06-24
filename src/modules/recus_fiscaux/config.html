@@ -25,6 +25,8 @@
 		art238bis=$_POST.art238bis|boolval
 		art978=$_POST.art978|boolval
 		champs_adresse=$_POST.champs_adresse|arrayval
+		email_subject=$_POST.email_subject|trim
+		email_body=$_POST.email_body|trim
 	}}
 	{{:redirect to="?ok=1"}}
 {{/form}}
@@ -81,6 +83,15 @@
 		{{/select}}
 	</dl>
 </fieldset>
+
+<fieldset>
+	<legend>Message par défaut lors de l'envoi du reçu par e-mail</legend>
+	<dl>
+		{{:input name="email_subject" type="text" label="Sujet du message" required=true source=$module.config}}
+		{{:input name="email_body" type="textarea" label="Corps du message" cols="70" rows="7" required=true source=$module.config}}
+	</dl>
+</fieldset>
+
 
 <p class="submit">
 	{{:button type="submit" name="save" label="Enregistrer" shape="right" class="main"}}

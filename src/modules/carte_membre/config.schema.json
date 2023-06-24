@@ -28,7 +28,13 @@
 		"id_service": {
 			"description": "Activité",
 			"type": ["integer", "null"]
+		},
+		"email_subject": {
+			"type": "string"
+		},
+		"email_body": {
+			"type": "string"
 		}
 	},
-	"required": [ "header", "logo", "fields", "show_fields_names", "photo", "id_service" ]
+	"required": [ "header", "logo", "fields", "show_fields_names", "photo", "id_service", "email_subject", "email_body" ]
 }

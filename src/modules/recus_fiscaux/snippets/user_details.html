@@ -12,7 +12,10 @@
 	<td class="num">{{:link href="%srecu.html?id=%d"|args:$module.url:$id target="_dialog" label=$id}}</td>
 	<td>{{$date|date_short}}</td>
 	<td class="money">{{$montant|raw|money_currency_html}}</td>
-	<td class="actions">{{:linkbutton shape="eye" label="Ouvrir" href="%srecu.html?id=%d"|args:$module.url:$id target="_dialog"}}</td>
+	<td class="actions">
+		{{:linkbutton shape="eye" label="Ouvrir" href="%srecu.html?id=%d"|args:$module.url:$id target="_dialog"}}
+		{{:linkbutton shape="mail" label="Envoyer au membre" href="%senvoyer.html?id=%d"|args:$module.url:$id target="_dialog"}}
+	</td>
 </tr>
 {{/load}}
 </table>
