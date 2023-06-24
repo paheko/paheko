@@ -162,14 +162,16 @@ class Cache
 			$close = sprintf('<script type="text/javascript">
 				document.addEventListener(\'DOMContentLoaded\', () => {
 					var now = +(new Date) / 1000;
-					if (now < %d) {
+					if (now < %d || location.hash) {
 						return;
 					}
 
 					fetch(location.href + \'?__reload\').then(r => r.text()).then(r => {
+						var x = window.pageX, y = window.pageY;
 						document.open();
 						document.write(r);
 						document.close();
+						window.scrollTo(x, y);
 					});
 				});
 				</script>
