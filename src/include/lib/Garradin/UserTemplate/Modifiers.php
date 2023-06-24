@@ -332,11 +332,11 @@ class Modifiers
 
 	static public function implode($array, string $separator): string
 	{
-		if (!is_array($array)) {
-			throw new Brindille_Exception('Supplied argument is not an array');
+		if (!is_array($array) && !is_object($array)) {
+			return $array;
 		}
 
-		return implode($separator, $array);
+		return implode($separator, (array) $array);
 	}
 
 	static public function keys($array)
