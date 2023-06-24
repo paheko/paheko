@@ -15,4 +15,18 @@
 	</fieldset>
 </form>
 
+<script type="text/javascript">
+{literal}
+var f = document.forms[0];
+f.addEventListener('submit', () => {
+	if (!window.parent.g.dialog) {
+		return;
+	}
+
+	var ext = f['name'].value.lastIndexOf('.') === -1 ? '.md' : '';
+	window.parent.g.dialog_on_close = "!docs/?f=" + encodeURIComponent('documents/' + f['name'].value + ext);
+});
+{/literal}
+</script>
+
 {include file="_foot.tpl"}

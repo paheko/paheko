@@ -38,9 +38,9 @@ use Garradin\Entities\Files\File;
 			{/if}
 				{linkbutton shape="text" label="Fichier texte" target="_dialog" href="!docs/new_file.php?path=%s"|args:$dir_uri}
 				{if WOPI_DISCOVERY_URL}
-					{linkbutton shape="document" label="Document" target="_dialog" data-dialog-class="fullscreen" href="!docs/new_doc.php?ext=odt&path=%s"|args:$dir_uri}
-					{linkbutton shape="table" label="Tableur" target="_dialog" data-dialog-class="fullscreen" href="!docs/new_doc.php?ext=ods&path=%s"|args:$dir_uri}
-					{linkbutton shape="gallery" label="Présentation" target="_dialog" data-dialog-class="fullscreen" href="!docs/new_doc.php?ext=odp&path=%s"|args:$dir_uri}
+					{linkbutton shape="document" label="Document" target="_dialog" href="!docs/new_doc.php?ext=odt&path=%s"|args:$dir_uri}
+					{linkbutton shape="table" label="Tableur" target="_dialog" href="!docs/new_doc.php?ext=ods&path=%s"|args:$dir_uri}
+					{linkbutton shape="gallery" label="Présentation" target="_dialog" href="!docs/new_doc.php?ext=odp&path=%s"|args:$dir_uri}
 				{/if}
 			{/if}
 		{/linkmenu}

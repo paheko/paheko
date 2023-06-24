@@ -1261,7 +1261,7 @@ class File extends Entity
 			'permission' => $readonly || !$this->canWrite() ? 'readonly' : '',
 		]);
 		$wopi->setStorage(new Storage(Session::getInstance()));
-		return $wopi->getEditorHTML($url, $this->path);
+		return $wopi->getEditorHTML($url, $this->path, $this->name);
 	}
 
 	public function export(): array

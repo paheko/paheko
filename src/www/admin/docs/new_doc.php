@@ -37,6 +37,6 @@ else {
 	$submit_name = 'Créer le document';
 }
 
-$tpl->assign(compact('csrf_key', 'submit_name'));
+$tpl->assign(compact('csrf_key', 'submit_name', 'ext'));
 
 $tpl->display('docs/new_doc.tpl');
