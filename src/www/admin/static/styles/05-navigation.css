@@ -125,11 +125,11 @@ nav.tabs aside form {
     text-align: left;
 }
 
-.menu-btn:hover b, .menu-btn:active b {
+.menu-btn:hover b, .menu-btn:active b, .menu-btn.active b,  {
     background-color: rgba(var(--gSecondColor), .7);
 }
 
-.menu-btn:hover > span, .menu-btn:active > span {
+.menu-btn:hover > span, .menu-btn:active > span, .menu-btn.active > span {
     display: block;
 }
 
@@ -238,11 +238,14 @@ nav.dropdown li a {
 
 nav.dropdown li a strong {
     font-weight: normal;
+    text-align: left;
 }
 
 nav.dropdown li a small {
     color: var(--gBorderColor);
     margin-right: 2em;
+    text-align: right;
+    white-space: pre;
 }
 
 nav.dropdown li:nth-child(1) {
@@ -279,5 +282,9 @@ nav.dropdown:hover li a:hover {
 @media handheld, screen and (max-width:981px) {
     nav.dropdown:hover li:nth-child(1) {
         display: block;
+    }
+
+    nav.home ul {
+        justify-content: center;
     }
 }

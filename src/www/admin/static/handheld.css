@@ -225,7 +225,7 @@ table.list tfoot .actions[colspan] {
 }
 
 table.list tbody .actions {
-	text-align: left;
+	text-align: center;
 	display: flex;
 	flex-wrap: wrap;
 	flex-direction: row;
@@ -233,8 +233,8 @@ table.list tbody .actions {
 	border: none;
 }
 
-table.list tbody .actions a {
-	align-self: flex-end;
+table.list tbody td.actions > a {
+	align-self: center;
 }
 
 table.list th {
@@ -251,14 +251,61 @@ table.files.gallery tbody {
 
 /* Petits écrans (smartphones) */
 @media screen and (max-width:600px) {
+	.transaction-details {
+		flex-direction: column;
+	}
+
+	div.help.flex {
+		flex-direction: column;
+	}
+
+	samp.copy {
+		display: inline-block;
+		text-overflow: ellipsis;
+		max-width: 95%;
+		overflow: hidden;
+	}
+
 	table.list tr {
 		display: block;
 	}
 
-	table.list td, table.list th {
+	table.list tbody td.check {
+		float: left;
+	}
+
+	table.list tbody td.icon, table.list tbody td.bookmark {
+		float: right;
+	}
+
+	table.list thead td.check label, table.list tfoot td.check label {
+		background: rgba(255, 255, 255, 0.5);
+		padding: .3em .5em;
+		border-radius: .5em;
 		display: inline-block;
-		border-left: 2px dashed #999;
+	}
+
+	table.list thead td.check label::after, table.list tfoot td.check label::after {
+		content: attr(title);
+	}
+
+	table.list td, table.list th {
+		display: block;
+		text-align: center !important;
 		width: auto !important;
+		height: auto !important;
+	}
+
+	table.list tbody .actions {
+		justify-content: center;
+	}
+
+	table.list.gallery td, table.list.gallery th {
+		border-left: none;
+	}
+
+	table.files.gallery tbody {
+		    grid-template-columns: repeat(auto-fit, 95%);
 	}
 
 	colgroup {
@@ -293,7 +340,7 @@ table.files.gallery tbody {
 	}
 
 	#dialog {
-		background: #222;
+		background: #333;
 	}
 
 	#dialog > iframe {
@@ -302,13 +349,12 @@ table.files.gallery tbody {
 		margin: 0;
 		max-width: 100%;
 		border-radius: 0;
-		box-shadow: none;
-		border-top: 10px solid rgb(var(--gSecondColor));
-		border-bottom: 10px solid rgb(var(--gSecondColor));
+		box-shadow: 0px 0px 5px 10px #fff;
 	}
 
 	#dialog > button.closeBtn {
 		color: var(--gLightBackgroundColor);
+		margin-bottom: .5em;
 	}
 
 	#dialog.loaded > iframe {

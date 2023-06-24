@@ -245,3 +245,10 @@ form#f_upload fieldset {
     text-align: left;
     margin: 0;
 }
+
+@media screen and (max-width:600px) {
+    .web.category-list li {
+        width: 95%;
+        margin: .2em auto;
+    }
+}
