@@ -7,11 +7,15 @@ use Garradin\DB;
 use Garradin\DynamicList;
 use Garradin\Plugins;
 use Garradin\UserException;
+use Garradin\Utils;
 use Garradin\Entities\Email\Email;
+use Garradin\Entities\Files\File;
 use Garradin\Entities\Users\User;
 use Garradin\Users\DynamicFields;
 use Garradin\UserTemplate\UserTemplate;
 use Garradin\Web\Render\Render;
+
+use Garradin\Files\Files;
 
 use const Garradin\{USE_CRON, MAIL_RETURN_PATH, DISABLE_EMAIL};
 use const Garradin\{SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURITY};
@@ -54,10 +58,16 @@ class Emails
 	 * @param  UserTemplate|string $content
 	 * @return void
 	 */
-	static public function queue(int $context, iterable $recipients, ?string $sender, string $subject, $content, ?string $render = null): void
+	static public function queue(int $context, iterable $recipients, ?string $sender, string $subject, $content, array $attachments = []): void
 	{
 		if (DISABLE_EMAIL) {
 			return;
+		}
+
+		foreach ($attachments as $i => $file) {
+			if (!is_object($file) || !($file instanceof File) || $file->context() != $file::CONTEXT_ATTACHMENTS) {
+				throw new \InvalidArgumentException(sprintf('Attachment #%d is not a valid file', $i));
+			}
 		}
 
 		$list = [];
@@ -127,59 +137,57 @@ class Emails
 		$recipients = $list;
 		unset($list);
 
-		if (Plugins::fireSignal('email.queue.before', compact('context', 'recipients', 'sender', 'subject', 'content', 'render'))) {
-			// queue handling was done by a plugin
-			return;
-		}
-
-		$template = ($content instanceof UserTemplate) ? $content : null;
+		$is_system = $context != self::CONTEXT_SYSTEM;
+		$template = (!$is_system && $content instanceof UserTemplate) ? $content : null;
 		$content_html = null;
 
 		if ($template) {
 			$template->toggleSafeMode(true);
 		}
+		elseif (!$is_system) {
+			// Render markdown for HTML email
+			$content_html = Render::render(Render::FORMAT_MARKDOWN, null, $content);
+		}
+
+		if (Plugins::fireSignal('email.queue.before', compact('context', 'recipients', 'sender', 'subject', 'content', 'content_html', 'attachments'))) {
+			// queue handling was done by a plugin
+			return;
+		}
 
 		$db = DB::getInstance();
 		$db->begin();
-		$st = $db->prepare('INSERT INTO emails_queue (sender, subject, recipient, recipient_hash, recipient_pgp_key, content, content_html, context)
-			VALUES (:sender, :subject, :recipient, :recipient_hash, :recipient_pgp_key, :content, :content_html, :context);');
 
-		if ($render) {
+		// Apart from SYSTEM emails, all others should be wrapped in the email.html template
+		if (!$is_system) {
 			$main_tpl = new UserTemplate('email.html');
 		}
 
-		foreach ($recipients as $address => $recipient) {
-			$data = $recipient['data'];
+		foreach ($recipients as $recipient => $r) {
+			$data = $r['data'];
+			$recipient_pgp_key = $r['pgp_key'];
 
 			// We won't try to reject invalid/optout recipients here,
 			// it's done in the queue clearing (more efficient)
-			$hash = Email::getHash($address);
-
-			$content_html = null;
+			$recipient_hash = Email::getHash($recipient);
 
 			// Replace placeholders: {{$name}}, etc.
 			if ($template) {
+				$content_html = null;
 				$template->assignArray((array) $data, null, false);
 
 				// Disable HTML escaping for plaintext emails
 				$template->setEscapeDefault(null);
 				$content = $template->fetch();
 
-				if ($render) {
-					$content_html = $template->fetch();
-				}
+				// Add Markdown rendering
+				$content_html = Render::render(Render::FORMAT_MARKDOWN, null, $content);
 			}
 
-			// Add Markdown rendering
-			if ($render) {
-				$content_html = Render::render($render, null, $content_html ?? $content);
-			}
-
-			if ($content_html) {
+			if (!$is_system) {
 				// Wrap HTML content in the email skeleton
 				$main_tpl->assignArray([
 					'html'      => $content_html,
-					'address'   => $address,
+					'address'   => $recipient,
 					'data'      => $data,
 					'context'   => $context,
 					'from'      => $sender,
@@ -188,30 +196,23 @@ class Emails
 				$content_html = $main_tpl->fetch();
 			}
 
-			$recipient['email'] = $address;
-
-			if (Plugins::fireSignal('email.queue.insert', compact('context', 'recipient', 'sender', 'subject', 'content', 'render', 'hash', 'content_html'))) {
-				// queue insert was done by a plugin
+			if (Plugins::fireSignal('email.queue.insert', compact('context', 'recipient', 'sender', 'subject', 'content', 'recipient_hash', 'recipient_pgp_key', 'content_html', 'attachments'))) {
+				// queue insert was done by a plugin, stop here
 				continue;
 			}
 
-			$st->bindValue(':sender', $sender);
-			$st->bindValue(':subject', $subject);
-			$st->bindValue(':context', $context);
-			$st->bindValue(':recipient', $address);
-			$st->bindValue(':recipient_pgp_key', $recipient['pgp_key']);
-			$st->bindValue(':recipient_hash', $hash);
-			$st->bindValue(':content', $content);
-			$st->bindValue(':content_html', $content_html);
-			$st->execute();
+			$db->insert('emails_queue', compact('sender', 'subject', 'context', 'recipient', 'recipient_pgp_key', 'recipient_hash', 'content', 'content_html'));
 
-			$st->reset();
-			$st->clear();
+			$id = $db->lastInsertId();
+
+			foreach ($attachments as $file) {
+				$db->insert('emails_queue_attachments', ['id_queue' => $id, 'path' => $file->path]);
+			}
 		}
 
 		$db->commit();
 
-		if (Plugins::fireSignal('email.queue.after', compact('context', 'recipients', 'sender', 'subject', 'content', 'render'))) {
+		if (Plugins::fireSignal('email.queue.after', compact('context', 'recipients', 'sender', 'subject', 'content', 'content_html', 'attachments'))) {
 			return;
 		}
 
@@ -220,7 +221,7 @@ class Emails
 			self::runQueue();
 		}
 		// Always send system emails right away
-		elseif ($context == self::CONTEXT_SYSTEM) {
+		elseif ($is_system) {
 			self::runQueue(self::CONTEXT_SYSTEM);
 		}
 	}
@@ -311,6 +312,7 @@ class Emails
 
 		$limit_time = strtotime('1 month ago');
 		$count = 0;
+		$all_attachments = [];
 
 		// listQueue nettoie déjà la queue
 		foreach ($queue as $row) {
@@ -340,7 +342,9 @@ class Emails
 			];
 
 			try {
-				self::send($row->context, $row->recipient_hash, $headers, $row->content, $row->content_html, $row->recipient_pgp_key);
+				$attachments = $db->getAssoc('SELECT id, path FROM emails_queue_attachments WHERE id_queue = ?;', $row->id);
+				$all_attachments = array_merge($all_attachments, $attachments);
+				self::send($row->context, $row->recipient_hash, $headers, $row->content, $row->content_html, $row->recipient_pgp_key, $attachments);
 			}
 			catch (\Exception $e) {
 				// If sending fails, at least save what has been sent so far
@@ -370,6 +374,13 @@ class Emails
 				WHERE hash IN (SELECT recipient_hash FROM emails_queue WHERE sending = 2);
 			DELETE FROM emails_queue WHERE sending = 2;
 		END;', $db->where('id', $ids), Email::TABLE));
+
+		$unused_attachments = array_diff($all_attachments, $db->getAssoc('SELECT id, path FROM emails_queue_attachments;'));
+
+		foreach ($unused_attachments as $path) {
+			$file = Files::get(Utils::dirname($path));
+			$file->delete();
+		}
 
 		return $count;
 	}
@@ -547,7 +558,7 @@ class Emails
 		return $html;
 	}
 
-	static protected function send(int $context, string $recipient_hash, array $headers, string $content, ?string $content_html, ?string $pgp_key = null): void
+	static protected function send(int $context, string $recipient_hash, array $headers, string $content, ?string $content_html, ?string $pgp_key = null, array $attachments = []): void
 	{
 		$config = Config::getInstance();
 		$message = new Mail_Message;
@@ -582,6 +593,16 @@ class Emails
 
 		$message->setHeader('Return-Path', MAIL_RETURN_PATH ?? $config->org_email);
 		$message->setHeader('X-Auto-Response-Suppress', 'All'); // This is to avoid getting auto-replies from Exchange servers
+
+		foreach ($attachments as $path) {
+			$file = Files::get($path);
+
+			if (!$file) {
+				continue;
+			}
+
+			$message->addPart($file->mime, $file->fetch(), $file->name);
+		}
 
 		static $can_use_encryption = null;
 

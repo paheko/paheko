@@ -16,6 +16,8 @@ use Garradin\Users\Session;
 use Garradin\Entities\Files\File;
 use Garradin\Files\Files;
 
+use Garradin\Entities\Module;
+
 use Garradin\UserTemplate\Modifiers;
 use Garradin\UserTemplate\Functions;
 use Garradin\UserTemplate\Sections;
@@ -35,6 +37,9 @@ class UserTemplate extends \KD2\Brindille
 	protected ?string $code = null;
 	protected $cache_path = USER_TEMPLATES_CACHE_ROOT;
 	protected ?string $path;
+	protected ?UserTemplate $parent = null;
+	public ?Module $module;
+	protected array $headers = [];
 
 	protected $escape_default = 'html';
 
@@ -299,24 +304,32 @@ class UserTemplate extends \KD2\Brindille
 		return ob_get_clean();
 	}
 
-	public function displayPDF(?string $filename = null): void
+	public function fetchToAttachment(string $uri): File
 	{
-		$html = $this->fetch();
+		$parts = explode('?', $uri, 2);
+		$path = $parts[0] ?? '';
+		$query = $parts[1] ?? '';
+		parse_str($query, $qs);
 
-		if (!$filename && preg_match('!<title>([^<]+)</title>!', $html, $match)) {
-			$title = trim(strip_tags(html_entity_decode($match[1])));
+		$ut = new UserTemplate($path);
+		$ut->setModule($this->module);
+		$ut->assignArray(['_POST' => [], '_GET' => $qs]);
 
-			if ($title !== '') {
-				$filename = $title . '.pdf';
-			}
+		$content = $ut->fetch();
+		$type = $ut->getContentType();
+		$name = $ut->getHeader('filename') ?? 'document';
+		$target = File::CONTEXT_ATTACHMENTS . '/' . md5($content) . '/' . $name;
+
+		if ($type == 'application/pdf') {
+			$tmp = Utils::filePDF($content);
+			$file = Files::createFromPath($target, $tmp);
+			Utils::safe_unlink($tmp);
+		}
+		else {
+			$file = Files::createFromString($target, $content);
 		}
 
-		if ($filename) {
-			header(sprintf('Content-Disposition: attachment; filename="%s"', Utils::safeFileName($filename)));
-		}
-
-		header('Content-type: application/pdf');
-		Utils::streamPDF($html);
+		return $file;
 	}
 
 	static public function isTemplate(string $filename): bool
@@ -345,20 +358,9 @@ class UserTemplate extends \KD2\Brindille
 		}
 	}
 
-	public function fetchWithType(): array
+	public function getContentType(): string
 	{
-		$content = $this->fetch();
-		$type = 'text/html';
-
-		// When the header has already been defined by the template
-		foreach (headers_list() as $header) {
-			if (preg_match('/^Content-Type: ([\w-]+\/[\w-]+)$/', $header, $match)) {
-				$type = $match[1];
-				break;
-			}
-		}
-
-		return compact('content', 'type');
+		return $this->headers['type'] ?? 'text/html';
 	}
 
 	public function serve(): void
@@ -367,11 +369,11 @@ class UserTemplate extends \KD2\Brindille
 			throw new \InvalidArgumentException('Not a valid template file extension: ' . $this->path);
 		}
 
-		extract($this->fetchWithType());
+		$content = $this->fetch();
 
-		header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
+		$this->dumpHeaders();
 
-		if ($type == 'application/pdf') {
+		if ($this->getContentType() == 'application/pdf') {
 			Utils::streamPDF($content);
 		}
 		else {
@@ -425,6 +427,105 @@ class UserTemplate extends \KD2\Brindille
 		exit;
 	}
 
+	public function setHeader(string $name, string $value): void
+	{
+		if ($this->parent) {
+			// Setting headers on included template does not make sense,
+			// instead pass this to parent template
+			$this->parent->setHeader($name, $value);
+		}
+		else {
+			$this->headers[$name] = $value;
+		}
+	}
+
+	public function getHeader(string $name): ?string
+	{
+		return $this->headers[$name] ?? null;
+	}
+
+	public function dumpHeaders(): void
+	{
+		if (isset($this->headers['code'])) {
+			$code = $this->headers['code'];
+
+			static $codes = [
+				100 => 'Continue',
+				101 => 'Switching Protocols',
+				102 => 'Processing',
+				200 => 'OK',
+				201 => 'Created',
+				202 => 'Accepted',
+				203 => 'Non-Authoritative Information',
+				204 => 'No Content',
+				205 => 'Reset Content',
+				206 => 'Partial Content',
+				207 => 'Multi-Status',
+				300 => 'Multiple Choices',
+				301 => 'Moved Permanently',
+				302 => 'Found',
+				303 => 'See Other',
+				304 => 'Not Modified',
+				305 => 'Use Proxy',
+				306 => 'Switch Proxy',
+				307 => 'Temporary Redirect',
+				400 => 'Bad Request',
+				401 => 'Unauthorized',
+				402 => 'Payment Required',
+				403 => 'Forbidden',
+				404 => 'Not Found',
+				405 => 'Method Not Allowed',
+				406 => 'Not Acceptable',
+				407 => 'Proxy Authentication Required',
+				408 => 'Request Timeout',
+				409 => 'Conflict',
+				410 => 'Gone',
+				411 => 'Length Required',
+				412 => 'Precondition Failed',
+				413 => 'Request Entity Too Large',
+				414 => 'Request-URI Too Long',
+				415 => 'Unsupported Media Type',
+				416 => 'Requested Range Not Satisfiable',
+				417 => 'Expectation Failed',
+				418 => 'I\'m a teapot',
+				422 => 'Unprocessable Entity',
+				423 => 'Locked',
+				424 => 'Failed Dependency',
+				425 => 'Unordered Collection',
+				426 => 'Upgrade Required',
+				449 => 'Retry With',
+				450 => 'Blocked by Windows Parental Controls',
+				500 => 'Internal Server Error',
+				501 => 'Not Implemented',
+				502 => 'Bad Gateway',
+				503 => 'Service Unavailable',
+				504 => 'Gateway Timeout',
+				505 => 'HTTP Version Not Supported',
+				506 => 'Variant Also Negotiates',
+				507 => 'Insufficient Storage',
+				509 => 'Bandwidth Limit Exceeded',
+				510 => 'Not Extended',
+			];
+
+			if (!isset($codes[$code])) {
+				throw new Brindille_Exception('Code HTTP inconnu: ' . $code);
+			}
+
+			header(sprintf('HTTP/1.1 %d %s', $code, $codes[$code]), true);
+		}
+
+		if (isset($this->headers['type'])) {
+			header(sprintf('Content-Type: %s; charset=utf-8', $this->headers['type']), true);
+		}
+
+		if (isset($this->headers['disposition'])) {
+			header(sprintf('Content-Disposition: %s; filename="%s"',
+				$this->headers['disposition'],
+				Utils::safeFileName($this->headers['filename'])
+			), true);
+		}
+	}
+
 	public function _callFunction(string $name, array $params, int $line) {
 		try {
 			return call_user_func($this->_functions[$name], $params, $this, $line);
@@ -437,4 +538,19 @@ class UserTemplate extends \KD2\Brindille
 		}
 	}
 
+	public function setParent(UserTemplate $tpl)
+	{
+		$this->parent = $tpl;
+		$this->setModule($tpl->module);
+	}
+
+	public function setModule(?Module $module): void
+	{
+		if (!$module) {
+			return;
+		}
+
+		$this->module = $module;
+		$this->assign('module', array_merge($module->asArray(false), ['url' => $module->url()]));
+	}
 }

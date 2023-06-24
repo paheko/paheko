@@ -90,6 +90,7 @@ class File extends Entity
 	const CONTEXT_WEB = 'web';
 	const CONTEXT_MODULES = 'modules';
 	const CONTEXT_TRASH = 'trash';
+	const CONTEXT_ATTACHMENTS = 'attachments';
 
 	/**
 	 * @deprecated
@@ -105,6 +106,7 @@ class File extends Entity
 		self::CONTEXT_MODULES => 'Modules',
 		self::CONTEXT_TRASH => 'Corbeille',
 		self::CONTEXT_SKELETON => 'Squelettes',
+		self::CONTEXT_ATTACHMENTS => 'Fichiers joints aux messages',
 	];
 
 	const IMAGE_TYPES = [

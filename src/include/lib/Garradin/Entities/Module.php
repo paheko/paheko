@@ -417,7 +417,7 @@ class Module extends Entity
 		$this->validatePath($file);
 
 		$ut = new UserTemplate($this->name . '/' . $file);
-		$ut->assign('module', array_merge($this->asArray(false), ['url' => $this->url()]));
+		$ut->setModule($this);
 
 		return $ut;
 	}
@@ -514,7 +514,8 @@ class Module extends Entity
 
 		$ut = $this->template($path);
 		$ut->assignArray($params);
-		extract($ut->fetchWithType());
+		$content = $ut->fetch();
+		$type = $ut->getContentType();
 
 		if ($uri !== null && preg_match('!html|xml|text!', $type) && !$ut->get('nocache')) {
 			$cache = true;

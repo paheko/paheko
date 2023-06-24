@@ -216,6 +216,16 @@ class User extends Entity
 		return $out;
 	}
 
+	public function asModuleArray(): array
+	{
+		$out = $this->asArray();
+		$out['_name'] = $this->name();
+		$out['_email'] = $this->email();
+		$out['_number'] = $this->number();
+		$out['_login'] = $this->login();
+		return $out;
+	}
+
 	public function asDetailsArray(): array
 	{
 		$list = DynamicFields::getInstance()->listAssocNames();
@@ -279,10 +289,16 @@ class User extends Entity
 		return Files::listForUser($this->id, $field_name);
 	}
 
+	public function login(): ?string
+	{
+		$field = DynamicFields::getLoginField();
+		return (string)$this->$field ?: null;
+	}
+
 	public function number(): ?string
 	{
 		$field = DynamicFields::getNumberField();
-		return (string)$this->$field;
+		return (string)$this->$field ?: null;
 	}
 
 	public function setNumberIfEmpty(): void
@@ -306,6 +322,12 @@ class User extends Entity
 		}
 
 		return implode(' ', $out);
+	}
+
+	public function email(): ?string
+	{
+		$field = DynamicFields::getFirstEmailField();
+		return (string)$this->$field ?: null;
 	}
 
 	public function importForm(array $source = null)

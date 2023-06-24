@@ -242,7 +242,7 @@ class Sections
 
 	static public function load(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		$name = $params['module'] ?? strtok($tpl->_tpl_path, '/');
+		$name = $params['module'] ?? ($tpl->module->name ?? null);
 
 		if (!$name) {
 			throw new Brindille_Exception('Unique module name could not be found');
@@ -423,7 +423,7 @@ class Sections
 			throw new Brindille_Exception('Missing schema parameter');
 		}
 
-		$name = $params['module'] ?? strtok($tpl->_tpl_path, '/');
+		$name = $params['module'] ?? ($tpl->module->name ?? null);
 
 		if (!$name) {
 			throw new Brindille_Exception('Unique module name could not be found');
@@ -642,19 +642,25 @@ class Sections
 	{
 		$params['where'] ??= '';
 
+		$db = DB::getInstance();
+
 		$id_field = DynamicFields::getNameFieldsSQL('users');
 		$login_field = DynamicFields::getLoginField();
 		$number_field = DynamicFields::getNumberField();
+		$email_field = DynamicFields::getFirstEmailField();
 
 		if (empty($params['select'])) {
 			$params['select'] = 'users.*';
 		}
 
-		$params['select'] .= sprintf(', users.id AS id, %s AS _name, users.%s AS _login, users.%s AS _number',
-			$id_field, $login_field, $number_field);
-		$params['tables'] = 'users';
+		$params['select'] .= sprintf(', users.id AS id, %s AS _name, users.%s AS _login, users.%s AS _number, users.%s AS _email',
+			$id_field,
+			$db->quoteIdentifier($login_field),
+			$db->quoteIdentifier($number_field),
+			$db->quoteIdentifier($email_field)
+		);
 
-		$db = DB::getInstance();
+		$params['tables'] = 'users';
 
 		if (isset($params['id']) && is_array($params['id'])) {
 			$params['id'] = array_map('intval', $params['id']);
