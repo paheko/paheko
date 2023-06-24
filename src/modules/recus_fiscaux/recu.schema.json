@@ -15,10 +15,6 @@
 			"description": "Nom du bénéficiaire",
 			"type": "string"
 		},
-		"adresse": {
-			"description": "Adresse du bénéficiaire",
-			"type": "string"
-		},
 		"montant": {
 			"description": "Montant",
 			"type": "integer",
@@ -40,5 +36,5 @@
 			"type": ["null", "integer"]
 		}
 	},
-	"required": [ "annule", "date", "nom", "adresse", "montant", "recu", "linked_user", "linked_transactions", "id_year"]
+	"required": [ "annule", "date", "nom", "montant", "recu", "linked_user", "linked_transactions", "id_year"]
 }

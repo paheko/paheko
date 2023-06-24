@@ -43,7 +43,6 @@
 		validate_schema="./recu.schema.json"
 		assign_new_id="new_id"
 		nom=$_POST.nom|trim
-		adresse=$_POST.adresse|trim
 		date=$_POST.date|parse_date
 		montant=$_POST.montant|money_int
 		linked_user=$_POST.id_user|intval|or:null
