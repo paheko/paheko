@@ -49,6 +49,11 @@ test_required(
 );
 
 test_required(
+	function_exists('\mb_strlen'),
+	'L\'extension "mbstring" n\'est pas installée mais est nécessaire (apt install php-mbstring).'
+);
+
+test_required(
 	class_exists('SQLite3'),
 	'Le module de base de données SQLite3 n\'est pas disponible.'
 );
