@@ -14,7 +14,7 @@
 	<td class="money">{{$montant|raw|money_currency_html}}</td>
 	<td class="actions">
 		{{:linkbutton shape="eye" label="Ouvrir" href="%srecu.html?id=%d"|args:$module.url:$id target="_dialog"}}
-		{{:linkbutton shape="mail" label="Envoyer au membre" href="%senvoyer.html?id=%d"|args:$module.url:$id target="_dialog"}}
+		{{:linkbutton shape="mail" label="Envoyer" href="%senvoyer.html?id=%d"|args:$module.url:$id target="_dialog"}}
 	</td>
 </tr>
 {{/load}}

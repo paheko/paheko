@@ -8,7 +8,7 @@
 		{{:linkbutton href="%scarte.html?id=%d&print=pdf&mode=print"|args:$module.url:$user.id label="Télécharger en PDF" shape="download"}}
 		{{:linkbutton href="%scarte.html?id=%d&print=yes&mode=print"|args:$module.url:$user.id target="_blank" label="Imprimer" shape="print"}}
 		{{if $user._email}}
-			{{:linkbutton href="%senvoyer.html?id=%d"|args:$module.url:$user.id target="_dialog" label="Envoyer au membre" shape="mail"}}
+			{{:linkbutton href="%senvoyer.html?id=%d"|args:$module.url:$user.id target="_dialog" label="Envoyer" shape="mail"}}
 		{{/if}}
 	</p>
 </div>
