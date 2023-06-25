@@ -950,6 +950,7 @@ class Files
 	static public function ensureDirectoryExists(string $path): void
 	{
 		$parts = explode('/', $path);
+		$parts = array_filter($parts);
 		$tree = '';
 
 		foreach ($parts as $part) {

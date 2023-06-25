@@ -42,7 +42,7 @@ class File extends Entity
 	/**
 	 * Parent directory of file
 	 */
-	protected ?string $parent = null;
+	protected string $parent = '';
 
 	/**
 	 * File name
