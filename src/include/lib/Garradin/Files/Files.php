@@ -918,9 +918,10 @@ class Files
 		$name = Utils::basename($path);
 
 		$name = File::filterName($name);
-		$path = $parent . '/' . $name;
+		$path = trim($parent . '/' . $name, '/');
 
-		$path = implode('/', File::validatePath($path));
+		File::validatePath($path);
+
 		Files::checkQuota();
 
 		if (self::exists($path)) {
@@ -949,14 +950,14 @@ class Files
 
 	static public function ensureDirectoryExists(string $path): void
 	{
-		$parts = explode('/', $path);
+		$parts = explode('/', trim($path, '/'));
 		$parts = array_filter($parts);
 		$tree = '';
 
 		foreach ($parts as $part) {
 			$tree = trim($tree . '/' . $part, '/');
 
-			if (!Files::callStorage('exists', $tree)) {
+			if (!self::exists($tree)) {
 				self::mkdir($tree);
 			}
 		}
