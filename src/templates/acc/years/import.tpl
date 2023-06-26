@@ -139,7 +139,7 @@ use Garradin\Accounting\Export;
 		<dl>
 			<dt><label for="f_type_grouped">Type de fichier à importer</label></dt>
 			{foreach from=$types key="type" item="info"}
-			{input type="radio-btn" name="type" value=$type label=$info.label help=$info.help default="full"}
+			{input type="radio-btn" name="type" value=$type label=$info.label help=$info.help default="simple"}
 			<dd class="help example">
 				Exemple :
 				<table class="list auto">

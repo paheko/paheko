@@ -87,6 +87,15 @@ class Export
 	];
 
 	const MANDATORY_COLUMNS = [
+		self::FULL => [
+			'id',
+			'type',
+			'label',
+			'date',
+			'account',
+			'credit',
+			'debit',
+		],
 		self::GROUPED => [
 			'type',
 			'label',
