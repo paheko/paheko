@@ -1,6 +1,7 @@
 Title: Documentation du langage Brindille dans Paheko
 
 {{{.nav
+* [Modules](modules.html)
 * **[Documentation Brindille](brindille.html)**
 * [Fonctions](brindille_functions.html)
 * [Sections](brindille_sections.html)

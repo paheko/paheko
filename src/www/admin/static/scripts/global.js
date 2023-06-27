@@ -98,6 +98,7 @@
 
 	g.dialog = null;
 	g.focus_before_dialog = null;
+	g.dialog_on_close = false;
 
 	g.openDialog = function (content, options) {
 		var close = true,
@@ -108,6 +109,7 @@
 			callback = options.callback ?? null;
 			classname = options.classname ?? null;
 			close = options.close ?? true;
+			g.dialog_on_close = options.on_close || false;
 		}
 
 		if (null !== g.dialog) {
@@ -179,9 +181,9 @@
 
 	g.openFrameDialog = function (url, options) {
 		options ??= {};
-		var height = options.height || '90%';
-		var callback = options.callback || null;
-		var classname = options.classname || null;
+		options.height = options.height || '90%';
+		options.callback = options.callback || null;
+		options.classname = options.classname || null;
 
 		var iframe = document.createElement('iframe');
 		iframe.src = url;
@@ -190,7 +192,7 @@
 		iframe.frameborder = '0';
 		iframe.scrolling = 'yes';
 		iframe.width = iframe.height = 0;
-		iframe.setAttribute('data-height', height);
+		iframe.setAttribute('data-height', options.height);
 
 		iframe.addEventListener('load', () => {
 			iframe.contentWindow.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
@@ -205,24 +207,8 @@
 			}, 200);
 		});
 
-		g.openDialog(iframe, {callback, classname});
+		g.openDialog(iframe, options);
 		return iframe;
-	};
-
-	g.reloadParentDialog = () => {
-		if (!window.parent.g.dialog) {
-			return;
-		}
-
-		location.href = window.parent.g.dialog.querySelector('iframe').getAttribute('src');
-	};
-
-	g.reloadParentDialog = () => {
-		if (!window.parent.g.dialog) {
-			return;
-		}
-
-		location.href = window.parent.g.dialog.querySelector('iframe').getAttribute('src');
 	};
 
 	g.reloadParentDialog = () => {
@@ -240,6 +226,11 @@
 
 		window.parent.g.dialog.querySelector('iframe').setAttribute('data-height', height);
 		g.resizeParentDialog(height);
+	};
+
+	g.toggleDialogFullscreen = () => {
+		g.dialog.classList.add('fullscreen')
+		g.dialog.childNodes[1].style.height = null;
 	};
 
 	g.resizeParentDialog = (forced_height) => {
@@ -274,6 +265,11 @@
 
 		if (g.dialog.preventClose && g.dialog.preventClose()) {
 			return false;
+		}
+
+		if (g.dialog_on_close) {
+			location.href = g.dialog_on_close == true ? location.href : g.dialog_on_close.replace(/!/, g.admin_url);
+			return;
 		}
 
 		var d = g.dialog;
@@ -537,7 +533,11 @@
 						return false;
 					}
 
-					g.openFrameDialog(url, {'height': e.getAttribute('data-dialog-height') || 'auto', 'classname': e.getAttribute('data-dialog-class')});
+					g.openFrameDialog(url, {
+						'height': e.getAttribute('data-dialog-height') || 'auto',
+						'classname': e.getAttribute('data-dialog-class'),
+						'on_close': e.getAttribute('data-dialog-on-close') == 1
+					});
 					return false;
 				}
 

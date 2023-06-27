@@ -173,7 +173,6 @@ class Search extends Entity
 			return $result;
 		}
 		catch (DB_Exception $e) {
-			throw $e;
 			throw new UserException('Erreur dans la requête : ' . $e->getMessage(), 0, $e);
 		}
 		finally {
@@ -210,7 +209,12 @@ class Search extends Entity
 			return false;
 		}
 
-		$header = $this->getHeader(['limit' => 1, 'no_cache' => true]);
+		try {
+			$header = $this->getHeader(['limit' => 1, 'no_cache' => true]);
+		}
+		catch (UserException $e) {
+			return false;
+		}
 
 		if (!in_array('id', $header) && !in_array('_user_id', $header)) {
 			return false;

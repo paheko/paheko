@@ -27,7 +27,11 @@ $fields = DF::getInstance()->all();
 	<dt>{$field.label}</dt>
 	<dd>
 		{if $field.type == 'checkbox'}
-			{if $value}Oui{else}Non{/if}
+			{if $value}
+				{icon shape="check"} Oui
+			{else}
+				Non
+			{/if}
 		{elseif $field.type == 'file'}
 			<?php
 			$edit = ($field->write_access || $mode == 'edit');

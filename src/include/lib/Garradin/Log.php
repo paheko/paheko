@@ -173,20 +173,21 @@ class Log
 			$row->details = $row->details ? json_decode($row->details) : null;
 			$row->type_label = self::ACTIONS[$row->type];
 
-			$const = 'Garradin\Entities\\' . $row->details->entity . '::NAME';
+			if (isset($row->details->entity)) {
+				$const = 'Garradin\Entities\\' . $row->details->entity . '::NAME';
 
-			if (isset($row->details->entity)
-				&& defined($const)
-				&& ($value = constant($const))) {
-				$row->entity_name = $value;
-			}
+				if (defined($const)
+					&& ($value = constant($const))) {
+					$row->entity_name = $value;
+				}
 
-			$const = 'Garradin\Entities\\' . $row->details->entity . '::PRIVATE_URL';
+				$const = 'Garradin\Entities\\' . $row->details->entity . '::PRIVATE_URL';
 
-			if (isset($row->details->id, $row->details->entity)
-				&& defined($const)
-				&& ($value = constant($const))) {
-				$row->entity_url = sprintf($value, $row->details->id);
+				if (isset($row->details->id, $row->details->entity)
+					&& defined($const)
+					&& ($value = constant($const))) {
+					$row->entity_url = sprintf($value, $row->details->id);
+				}
 			}
 		});
 

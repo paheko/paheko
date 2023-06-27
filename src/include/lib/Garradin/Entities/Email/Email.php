@@ -79,7 +79,7 @@ class Email extends Entity
 	public function canSendVerificationAfterFail(): bool
 	{
 		$limit_date = new \DateTime(self::RESEND_VERIFICATION_DELAY);
-		return $this->last_sent > $limit_date && ($this->hasReachedFailLimit() || $email->invalid);
+		return $this->last_sent > $limit_date && ($this->invalid || $this->hasReachedFailLimit());
 	}
 
 	public function verify(string $code): bool

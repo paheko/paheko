@@ -1,6 +1,6 @@
 {{:admin_header title="Configuration des reçus fiscaux"}}
 
-{{:include file="./_config_default.tpl" keep="module.config"}}
+{{:include file="./_config_default.tpl" keep="module.config,types_asso"}}
 
 {{#form on="save"}}
 	{{if $_POST.objet_asso|trim == ''}}
@@ -14,16 +14,19 @@
 	{{/if}}
 
 	{{:save key="config"
-		objet_asso=$_POST.objet_asso
-		type_asso=$_POST.type_asso
-		comptes_don=$_POST.comptes_don
-		comptes_don_nature=$_POST.comptes_don_nature
-		comptes_especes=$_POST.comptes_especes
-		comptes_cheques=$_POST.comptes_cheques
-		art200=$_POST.art200
-		art238=$_POST.art238
-		art885=$_POST.art885
-		champs_adresse=$_POST.champs_adresse
+		validate_schema="./config.schema.json"
+		objet_asso=$_POST.objet_asso|strval|trim
+		type_asso=$_POST.type_asso|strval|trim
+		comptes_don=$_POST.comptes_don|arrayval
+		comptes_don_nature=$_POST.comptes_don_nature|arrayval
+		comptes_especes=$_POST.comptes_especes|arrayval
+		comptes_cheques=$_POST.comptes_cheques|arrayval
+		art200=$_POST.art200|boolval
+		art238bis=$_POST.art238bis|boolval
+		art978=$_POST.art978|boolval
+		champs_adresse=$_POST.champs_adresse|arrayval
+		email_subject=$_POST.email_subject|trim
+		email_body=$_POST.email_body|trim
 	}}
 	{{:redirect to="?ok=1"}}
 {{/form}}
@@ -47,6 +50,7 @@
 <fieldset>
 	<legend>Configuration du modèle de reçu fiscal</legend>
 	<dl>
+		{{:input type="select" required=true name="type_asso" options=$types_asso label="Type d'organisme"}}
 		{{:input required=true name="objet_asso" type="textarea" label="Objet de l'association" source=$module.config cols="70" rows="4" help="Inscrire ici l'objet de l'association, conformément aux statuts."}}
 {{*
 		{{:input type="checkbox" name="envoi_auto" value=1 label="Envoyer automatiquement le reçu par e-mail"}}
@@ -79,6 +83,15 @@
 		{{/select}}
 	</dl>
 </fieldset>
+
+<fieldset>
+	<legend>Message par défaut lors de l'envoi du reçu par e-mail</legend>
+	<dl>
+		{{:input name="email_subject" type="text" label="Sujet du message" required=true source=$module.config}}
+		{{:input name="email_body" type="textarea" label="Corps du message" cols="70" rows="7" required=true source=$module.config}}
+	</dl>
+</fieldset>
+
 
 <p class="submit">
 	{{:button type="submit" name="save" label="Enregistrer" shape="right" class="main"}}

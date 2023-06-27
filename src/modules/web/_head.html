@@ -66,16 +66,20 @@
 		</p>
 	</form>
 
-	{{#module name="ouvertures"}}
-		{{:include file="%s/_next_opening.html"|args:$path}}
-		{{:include file="%s/_all.html"|args:$path}}
-	{{/module}}
-
-	<ul>
+	<ul class="subcategories">
 	{{#categories parent=null order="title"}}
 		<li><a href="{{$url}}" {{if $url == $.url}}class="current"{{/if}}>{{ $title }}</a></li>
 	{{/categories}}
 	</ul>
+
+
+	{{#module name="ouvertures"}}
+	<article class="opening-hours">
+		{{:include file="/ouvertures/_all.html"}}
+	</article>
+	{{/module}}
+
+
 </nav>
 
 <section class="page">

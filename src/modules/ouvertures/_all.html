@@ -2,27 +2,32 @@
 
 
 {{if $config.open|count}}
-	<h3>Nous sommes ouverts</h3>
+<div class="list">
+	<h4>Horaires d'ouverture&nbsp;</h4>
 
-	<ul>
+	<table>
 	{{#foreach from=$config.open item="slot"}}
-		<li>
+		<tr>
+			<th>
 			{{if $slot.frequency != "this"}}
 				{{$slot.frequency|replace:$frequencies}}
 				{{$slot.day|replace:$days}}
-				du mois&nbsp;:
+				du mois
 			{{else}}
-				{{$slot.day|replace:$days}}&nbsp;:
+				{{$slot.day|replace:$days}}
 			{{/if}}
-			{{$slot.open}} — {{$slot.close}}
-		</li>
+			</th>
+			<td>{{$slot.open}} — {{$slot.close}}</td>
+		</tr>
 	{{/foreach}}
-	</ul>
+	</table>
+</div>
 {{/if}}
 
 
 {{if $config.closed|count}}
-	<h3>Fermetures</h3>
+<div class="list">
+	<h4>Fermetures</h4>
 
 	<ul>
 	{{#foreach from=$config.closed item="slot"}}
@@ -31,4 +36,5 @@
 		</li>
 	{{/foreach}}
 	</ul>
+</div>
 {{/if}}

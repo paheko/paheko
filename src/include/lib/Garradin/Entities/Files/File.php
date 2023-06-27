@@ -42,7 +42,7 @@ class File extends Entity
 	/**
 	 * Parent directory of file
 	 */
-	protected ?string $parent = null;
+	protected string $parent = '';
 
 	/**
 	 * File name
@@ -90,6 +90,7 @@ class File extends Entity
 	const CONTEXT_WEB = 'web';
 	const CONTEXT_MODULES = 'modules';
 	const CONTEXT_TRASH = 'trash';
+	const CONTEXT_ATTACHMENTS = 'attachments';
 
 	/**
 	 * @deprecated
@@ -105,6 +106,7 @@ class File extends Entity
 		self::CONTEXT_MODULES => 'Modules',
 		self::CONTEXT_TRASH => 'Corbeille',
 		self::CONTEXT_SKELETON => 'Squelettes',
+		self::CONTEXT_ATTACHMENTS => 'Fichiers joints aux messages',
 	];
 
 	const IMAGE_TYPES = [
@@ -1070,6 +1072,11 @@ class File extends Entity
 		return rawurlencode($this->path);
 	}
 
+	public function parent_uri(): string
+	{
+		return $this->parent ? rawurlencode($this->parent) : '';
+	}
+
 	public function extension(): ?string
 	{
 		$pos = strrpos($this->name, '.');
@@ -1113,7 +1120,7 @@ class File extends Entity
 			throw new ValidationException('Chemin invalide: ' . $path);
 		}
 
-		$parts = explode('/', $path);
+		$parts = explode('/', trim($path, '/'));
 
 		if (count($parts) < 1) {
 			throw new ValidationException('Chemin invalide: ' . $path);
@@ -1254,7 +1261,7 @@ class File extends Entity
 			'permission' => $readonly || !$this->canWrite() ? 'readonly' : '',
 		]);
 		$wopi->setStorage(new Storage(Session::getInstance()));
-		return $wopi->getEditorHTML($url, $this->path);
+		return $wopi->getEditorHTML($url, $this->path, $this->name);
 	}
 
 	public function export(): array

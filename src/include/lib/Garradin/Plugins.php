@@ -18,6 +18,24 @@ class Plugins
 {
 	const NAME_REGEXP = '[a-z][a-z0-9]*(?:_[a-z0-9]+)*';
 
+	const MIME_TYPES = [
+		'css'  => 'text/css',
+		'gif'  => 'image/gif',
+		'htm'  => 'text/html',
+		'html' => 'text/html',
+		'ico'  => 'image/x-ico',
+		'jpe'  => 'image/jpeg',
+		'jpg'  => 'image/jpeg',
+		'jpeg' => 'image/jpeg',
+		'js'   => 'application/javascript',
+		'pdf'  => 'application/pdf',
+		'png'  => 'image/png',
+		'xml'  => 'text/xml',
+		'svg'  => 'image/svg+xml',
+		'webp' => 'image/webp',
+		'md'   => 'text/x-markdown',
+	];
+
 	/**
 	 * Set to false to disable signal firing
 	 * @var boolean
@@ -49,6 +67,45 @@ class Plugins
 		}
 
 		return null;
+	}
+
+	static public function routeStatic(string $name, string $uri): bool
+	{
+		$path = self::getPath($name);
+
+		if (!$path) {
+			throw new \RuntimeException('Invalid plugin: ' . $name);
+		}
+
+		if (!preg_match('!^(?:public/|admin/)!', $uri) || false !== strpos($uri, '..')) {
+			return false;
+		}
+
+		$path .= '/' . $uri;
+
+		if (!file_exists($path)) {
+			return false;
+		}
+
+		if (substr($uri, -3) === '.md') {
+			Router::markdown(file_get_contents($path));
+			return true;
+		}
+		else {
+			// Récupération du type MIME à partir de l'extension
+			$pos = strrpos($path, '.');
+			$ext = substr($path, $pos+1);
+
+			$mime = self::MIME_TYPES[$ext] ?? 'text/plain';
+
+			header('Content-Type: ' .$mime);
+			header('Content-Length: ' . filesize($path));
+			header('Cache-Control: public, max-age=3600');
+			header('Last-Modified: ' . date(DATE_RFC7231, filemtime($path)));
+
+			readfile($path);
+			return true;
+		}
 	}
 
 	static public function exists(string $name): bool

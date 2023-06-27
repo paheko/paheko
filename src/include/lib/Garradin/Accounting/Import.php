@@ -6,7 +6,7 @@ use Garradin\Entities\Accounting\Line;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Accounting\Year;
 use Garradin\CSV_Custom;
-use Garradin\Config;
+use Garradin\Users\DynamicFields;
 use Garradin\DB;
 use Garradin\UserException;
 
@@ -32,9 +32,11 @@ class Import
 			}
 
 			if (count($found_users) != count($linked_users)) {
-				$id_field = Config::getInstance()->champ_identite;
 				$db = DB::getInstance();
-				$sql = sprintf('SELECT %s AS name, id FROM membres WHERE %s;', $db->quoteIdentifier($id_field), $db->where($id_field, $linked_users));
+				$id_field = DynamicFields::getNameFieldsSQL();
+				$linked_users_sql = array_map([$db, 'quote'], $linked_users);
+				$linked_users_sql = implode(',', $linked_users_sql);
+				$sql = sprintf('SELECT %s AS name, id FROM users WHERE %1$s IN (%s);', $id_field, $linked_users_sql);
 
 				foreach ($db->iterate($sql) as $row) {
 					$found_users[$row->name] = $row->id;
@@ -130,7 +132,7 @@ class Import
 
 		$dry_run = $o->dry_run;
 
-		if ($type != Export::GROUPED && $type != Export::SIMPLE && $type != Export::FEC) {
+		if (!array_key_exists($type, Export::MANDATORY_COLUMNS)) {
 			throw new \InvalidArgumentException('Invalid type value');
 		}
 
@@ -224,7 +226,7 @@ class Import
 					}
 
 					if (isset($row->type) && !isset($types[$row->type])) {
-						throw new UserException(sprintf('le type "%s" est inconnu', $row->type));
+						throw new UserException(sprintf('le type "%s" est inconnu. Les types reconnus sont : %s.', $row->type, implode(', ', array_keys($types))));
 					}
 
 					// FEC does not define type, so don't change it

@@ -308,7 +308,7 @@ class Template extends Smartyer
 
 		$out = sprintf('
 			<span class="menu-btn %s">
-				<b data-icon="%s" class="btn" ondblclick="this.parentNode.querySelector(\'a, button\').click();">%s</b>
+				<b data-icon="%s" class="btn" ondblclick="this.parentNode.querySelector(\'a, button\').click();" onclick="this.parentNode.classList.toggle(\'active\');">%s</b>
 				<span><span>',
 			htmlspecialchars($params['class'] ?? ''),
 			Utils::iconUnicode($params['shape']),
@@ -544,10 +544,17 @@ class Template extends Smartyer
 			$params['default'] = Config::getInstance()->get('country');
 		}
 		elseif ($type == 'checkbox') {
-			$params['required'] = false;
 			$params['value'] = 1;
-			unset($params['label']);
-			return sprintf('<dt><label>%s %s</label></dt>', CommonFunctions::input($params), htmlspecialchars($field->label));
+			$params['label'] = 'Oui';
+
+			if ($field->required) {
+				$required_label =  ' <b title="Champ obligatoire">(obligatoire)</b>';
+			}
+			else {
+				$required_label =  ' <i>(facultatif)</i>';
+			}
+
+			return sprintf('<dt><label for="f_%s_1">%s %s</label><input type="hidden" name="%1$s_present" value="1" /></dt>%s', $field->name, htmlspecialchars($field->label), $required_label, CommonFunctions::input($params));
 		}
 		elseif ($field->system & $field::NUMBER && $context == 'new') {
 			$params['default'] = DB::getInstance()->firstColumn(sprintf('SELECT MAX(%s) + 1 FROM %s;', $key, User::TABLE));

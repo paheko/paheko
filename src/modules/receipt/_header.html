@@ -69,10 +69,12 @@
 	<section>
 		<h1>{{$config.org_name}}</h1>
 		{{if $config.org_infos}}<h2>{{$config.org_infos|escape|nl2br}}</h2>{{/if}}
-		<h3>{{$config.org_address}}
-			{{if $config.org_phone}} — {{$config.org_phone}}{{/if}}
-			{{if $config.org_email}} — {{$config.org_email}}{{/if}}
-			{{if $config.org_web}} — {{$config.org_web}}{{/if}}</h3>
+		<h3>{{$config.org_address|replace:"\n":" — "}}</h3>
+		<h4>
+			{{if $config.org_phone}}<a href="tel:{{$config.org_phone}}">{{$config.org_phone}}</a>{{/if}}
+			{{if $config.org_email}}<a href="mailto:{{$config.org_email}}">{{$config.org_email}}</a>{{/if}}
+			{{if $config.org_web}}<a target="_blank" href="{{$config.org_web}}">{{$config.org_web}}</a>{{/if}}
+		</h4>
 	</section>
 </header>
 {{/if}}

@@ -1,6 +1,7 @@
 Title: Référence des filtres Brindille
 
 {{{.nav
+* [Modules](modules.html)
 * [Documentation Brindille](brindille.html)
 * [Fonctions](brindille_functions.html)
 * [Sections](brindille_sections.html)
@@ -34,6 +35,7 @@ Ces filtres viennent directement de PHP et utilisent donc les mêmes paramètres
 | `boolval` | Transforme une valeur en booléen (true ou false) |
 | `floatval` | Transforme une valeur en nombre flottant (à virgule) |
 | `strval` | Transforme une valeur en chaîne de texte |
+| `arrayval` | Transforme une valeur en tableau |
 | `json_decode` | Transforme une chaîne JSON en tableau |
 | `json_encode` | Transforme une valeur en chaîne JSON |
 

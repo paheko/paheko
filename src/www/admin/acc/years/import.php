@@ -100,6 +100,10 @@ $types = [
 		'label' => 'Simplifié (comptabilité de trésorerie)',
 		'help' => 'Chaque ligne représente une écriture, comme dans un cahier. Les écritures avancées ne peuvent pas être importées dans ce format.',
 	],
+	Export::FULL => [
+		'label' => 'Complet (comptabilité d\'engagement)',
+		'help' => 'Permet d\'avoir des écritures avancées. Les écritures sont groupées en utilisant leur numéro.',
+	],
 	Export::GROUPED => [
 		'label' => 'Complet groupé (comptabilité d\'engagement)',
 		'help' => 'Permet d\'avoir des écritures avancées. Les 7 premières colonnes de chaque ligne sont vides pour indiquer les lignes suivantes de l\'écriture.',

@@ -35,24 +35,6 @@ class Plugin extends Entity
 		self::UNINSTALL_FILE,
 	];
 
-	const MIME_TYPES = [
-		'css'  => 'text/css',
-		'gif'  => 'image/gif',
-		'htm'  => 'text/html',
-		'html' => 'text/html',
-		'ico'  => 'image/x-ico',
-		'jpe'  => 'image/jpeg',
-		'jpg'  => 'image/jpeg',
-		'jpeg' => 'image/jpeg',
-		'js'   => 'application/javascript',
-		'pdf'  => 'application/pdf',
-		'png'  => 'image/png',
-		'xml'  => 'text/xml',
-		'svg'  => 'image/svg+xml',
-		'webp' => 'image/webp',
-		'md'   => 'text/x-markdown',
-	];
-
 	const TABLE = 'plugins';
 
 	protected ?int $id;
@@ -373,22 +355,8 @@ class Plugin extends Entity
 
 			include $path;
 		}
-		elseif (substr($file, -3) === '.md') {
-			Router::markdown(file_get_contents($path));
-		}
 		else {
-			// Récupération du type MIME à partir de l'extension
-			$pos = strrpos($path, '.');
-			$ext = substr($path, $pos+1);
-
-			$mime = self::MIME_TYPES[$ext] ?? 'text/plain';
-
-			header('Content-Type: ' .$mime);
-			header('Content-Length: ' . filesize($path));
-			header('Cache-Control: public, max-age=3600');
-			header('Last-Modified: ' . date(DATE_RFC7231, filemtime($path)));
-
-			readfile($path);
+			Plugins::routeStatic($this->name, $file);
 		}
 	}
 

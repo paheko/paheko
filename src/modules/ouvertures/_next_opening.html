@@ -11,7 +11,7 @@
 		}}
 	{{/if}}
 	{{if $now >= $start && $now <= $end}}
-		<strong class="closed">Actuellement fermé jusqu'au {{$end|date_long}} inclus.</strong>
+		<h3 class="closed">Actuellement fermé jusqu'au {{$end|date_long}} inclus</h3>
 		{{:assign stop=1 closed=1}}
 		{{:break}}
 	{{/if}}
@@ -38,7 +38,7 @@
 			}}
 		{{/if}}
 		{{if $now >= $start && $now <= $end}}
-			<em class="open">Ouvert aujourd'hui jusqu'à {{$slot.close}}</em>
+			<h3 class="open">Ouvert aujourd'hui jusqu'à {{$slot.close}}</h3>
 			{{:assign stop=1}}
 			{{:break}}
 		{{/if}}
@@ -51,8 +51,8 @@
 
 {{if !$stop && $closest}}
 	{{if $closest_date|date:'Ymd' == "tomorrow"|strtotime|date:'Ymd'}}
-		<em class="next">Prochaine ouverture demain à {{$closest_slot.open}}</em>
+		<h3 class="next">Prochaine ouverture demain à {{$closest_slot.open}}</h3>
 	{{else}}
-		<em class="next">Prochaine ouverture le {{$closest_date|strftime:"%A %e %B"}} à {{$closest_slot.open}}</em>
+		<h3 class="next">Prochaine ouverture le {{$closest_date|strftime:"%A %e %B"}} à {{$closest_slot.open}}</h3>
 	{{/if}}
 {{/if}}

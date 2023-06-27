@@ -13,6 +13,7 @@ use Garradin\UserException;
 use Garradin\Users\Session;
 use Garradin\Web\Web;
 use Garradin\Entities\Files\File;
+use Garradin\Entities\Users\User;
 use Garradin\Entities\Web\Page;
 
 use const Garradin\ROOT;
@@ -166,6 +167,14 @@ class Modules
 	static public function snippets(string $snippet, array $variables = []): array
 	{
 		$out = [];
+
+		foreach ($variables as &$var) {
+			if (is_object($var) && $var instanceof User) {
+				$var = $var->asModuleArray();
+			}
+		}
+
+		unset($var);
 
 		foreach (self::listForSnippet($snippet) as $module) {
 			$out[$module->name] = $module->fetch($snippet, $variables);

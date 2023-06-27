@@ -7,6 +7,7 @@ use Garradin\Config;
 use Garradin\DB;
 use Garradin\Entity;
 use Garradin\Utils;
+use Garradin\ValidationException;
 use Garradin\Entities\Files\File;
 use Garradin\Files\Files;
 use Garradin\Users\DynamicFields;
@@ -292,11 +293,26 @@ class DynamicField extends Entity
 		}
 
 		if (self::SQL_TYPES[$this->type] == 'GENERATED') {
+			$this->assert(null !== $this->sql && strlen(trim($this->sql)), 'Le code SQL est manquant');
+
 			try {
-				$db->protectSelect(['users' => []], sprintf('SELECT %s FROM users;', $this->sql));
+				$db->protectSelect(['users' => []], sprintf('SELECT (%s) FROM users;', $this->sql));
 			}
-			catch (\KD2\DB_Exception $e) {
+			catch (\KD2\DB\DB_Exception $e) {
 				throw new ValidationException('Le code SQL du champ calculé est invalide: ' . $e->getMessage(), 0, $e);
+			}
+
+			try {
+				$fields = DynamicFields::getInstance()->getKeys();
+				$fields = array_map([DB::getInstance(), 'quoteIdentifier'], $fields);
+				$fields = implode(', ', $fields);
+				$db->exec(sprintf('DROP TABLE IF EXISTS test_generated_column;
+					CREATE TEMP TABLE test_generated_column (%s, a GENERATED ALWAYS AS (%s) VIRTUAL);
+					SELECT 1 FROM test_generated_column;
+					DROP TABLE IF EXISTS test_generated_column;', $fields, $this->sql));
+			}
+			catch (\KD2\DB\DB_Exception $e) {
+				throw new ValidationException('Le code SQL du champ calculé est invalide 2: ' . $e->getMessage(), 0, $e);
 			}
 		}
 	}

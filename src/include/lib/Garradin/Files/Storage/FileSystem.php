@@ -100,7 +100,7 @@ class FileSystem implements StorageInterface
 
 	static public function mkdir(File $file): bool
 	{
-		return Utils::safe_mkdir(self::getFullPath($file));
+		return Utils::safe_mkdir(self::getFullPath($file), 0777, true);
 	}
 
 	static public function touch(string $path, $date = null): bool

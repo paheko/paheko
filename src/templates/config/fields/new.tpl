@@ -13,12 +13,16 @@
 	<legend>Ajouter un nouveau champ</legend>
 
 	<dl>
+		{input type="radio-btn" name="preset" value="" label="Champ personnalisé" required=true help="Permet de créer n'importe quel type de champ : texte, nombre, choix multiple, case à cocher, fichier, etc." default=""}
+	</dl>
+
+	<h3>Champs prédéfinis&nbsp;:</h3>
+	<dl>
 		{foreach from=$presets key="key" item="preset"}
 			{if !$preset.disabled}
-			{input type="radio" name="preset" value=$key label=$preset.label required=true disabled=$preset.disabled help=$preset.install_help}
+			{input type="radio-btn" name="preset" value=$key label=$preset.label required=true disabled=$preset.disabled help=$preset.install_help}
 			{/if}
 		{/foreach}
-		{input type="radio" name="preset" value="" label="Champ personnalisé" required=true}
 	</dl>
 </fieldset>
 

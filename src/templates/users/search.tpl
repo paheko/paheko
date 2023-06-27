@@ -7,11 +7,13 @@
 {include file="common/search/advanced.tpl"}
 
 {if $list !== null}
-	<p class="help">{$list->count()} membres trouvés pour cette recherche.</p>
+	{$list->getHTMLPagination(true)|raw}
 
 	{if $list->count() > 0}
 	<p class="actions">{exportmenu form=true name="_dl_export" class="menu-btn-right"}</p>
 	{/if}
+
+	<p class="help">{$list->count()} membres trouvés pour cette recherche.</p>
 
 	</form>
 	<form method="post" action="action.php" target="_dialog">
@@ -44,8 +46,6 @@
 
 	</form>
 
-	{$list->getHTMLPagination(true)|raw}
-
 {elseif $results}
 
 	<p class="actions">{exportmenu form=true name="_export" class="menu-btn-right"}</p>
@@ -60,7 +60,6 @@
 	$header_count = count($header);
 	?>
 
-	</form>
 	<form method="post" action="action.php" target="_dialog">
 
 	<table class="list">

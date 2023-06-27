@@ -276,7 +276,17 @@ class Module extends Entity
 
 	public function canDelete(): bool
 	{
-		return !empty($this->config) || $this->hasLocal() || $this->hasData();
+		return $this->hasLocal() && !$this->hasDist();
+	}
+
+	public function canReset(): bool
+	{
+		return $this->hasLocal() && $this->hasDist();
+	}
+
+	public function canDeleteData(): bool
+	{
+		return !empty($this->config) || $this->hasData();
 	}
 
 	public function listFiles(?string $path = null): array
@@ -363,9 +373,14 @@ class Module extends Entity
 			$dir->delete();
 		}
 
-		DB::getInstance()->exec(sprintf('DROP TABLE IF EXISTS modules_data_%s', $this->name));
+		$this->deleteData();
 
 		return parent::delete();
+	}
+
+	public function deleteData(): void
+	{
+		DB::getInstance()->exec(sprintf('DROP TABLE IF EXISTS modules_data_%s; UPDATE modules SET config = NULL WHERE name = \'%1$s\';', $this->name));
 	}
 
 	public function url(string $file = '', array $params = null)
@@ -402,7 +417,7 @@ class Module extends Entity
 		$this->validatePath($file);
 
 		$ut = new UserTemplate($this->name . '/' . $file);
-		$ut->assign('module', array_merge($this->asArray(false), ['url' => $this->url()]));
+		$ut->setModule($this);
 
 		return $ut;
 	}
@@ -472,8 +487,10 @@ class Module extends Entity
 			$type = $this->getFileTypeFromExtension($path);
 			$real_path = $this->distPath($path);
 
-			// Create symlink to static file
-			Cache::link($path, $real_path);
+			if ($this->web) {
+				// Create symlink to static file
+				Cache::link($path, $real_path);
+			}
 
 			http_response_code(200);
 			header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
@@ -497,7 +514,8 @@ class Module extends Entity
 
 		$ut = $this->template($path);
 		$ut->assignArray($params);
-		extract($ut->fetchWithType());
+		$content = $ut->fetch();
+		$type = $ut->getContentType();
 
 		if ($uri !== null && preg_match('!html|xml|text!', $type) && !$ut->get('nocache')) {
 			$cache = true;

@@ -89,7 +89,7 @@
 			<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
 			<td>{$line.date|date_short}</td>
 			{if $simple}
-			<td class="money">{if $line.change > 0}+{else}-{/if}{$line.change|abs|raw|money}</td>
+			<td class="money"><nobr>{if $line.change > 0}+{else}-{/if}{$line.change|abs|raw|money}</nobr></td>
 			{else}
 			<td class="money">{$line.debit|raw|money}</td>
 			<td class="money">{$line.credit|raw|money}</td>
@@ -147,7 +147,7 @@
 				<td colspan="4"></td>
 			{/if}
 			{if !$simple}<td></td>{/if}
-			<td class="actions" colspan="5">
+			<td class="actions" colspan="6">
 				{if $can_edit}
 					<em>Pour les écritures cochées :</em>
 					<input type="hidden" name="from" value="{$self_url}" />

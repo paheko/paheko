@@ -38,6 +38,7 @@ class Modifiers
 		'money_int' => [Utils::class, 'moneyToInteger'],
 		'array_transpose' => [Utils::class, 'array_transpose'],
 		'check_email',
+		'arrayval',
 		'explode',
 		'implode',
 		'keys',
@@ -319,6 +320,11 @@ class Modifiers
 		return $out;
 	}
 
+	static public function arrayval($v): array
+	{
+		return (array) $v;
+	}
+
 	static public function explode($string, string $separator): array
 	{
 		return explode($separator, (string)$string);
@@ -326,11 +332,11 @@ class Modifiers
 
 	static public function implode($array, string $separator): string
 	{
-		if (!is_array($array)) {
-			throw new Brindille_Exception('Supplied argument is not an array');
+		if (!is_array($array) && !is_object($array)) {
+			return $array;
 		}
 
-		return implode($separator, $array);
+		return implode($separator, (array) $array);
 	}
 
 	static public function keys($array)

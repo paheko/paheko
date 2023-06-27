@@ -33,7 +33,7 @@ class Markdown extends AbstractRender
 		}
 
 		if (empty($content)) {
-			return $content;
+			return '';
 		}
 
 		$md = Markdown_Parser::instance();

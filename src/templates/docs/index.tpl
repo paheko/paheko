@@ -24,23 +24,23 @@ use Garradin\Entities\Files\File;
 		</form>
 	{if !$list || !($list instanceof \Garradin\DynamicList)}
 		{if $gallery}
-			{linkbutton shape="menu" label="Afficher en liste" href="?path=%s&gallery=0"|args:$parent_path_uri}
+			{linkbutton shape="menu" label="Afficher en liste" href="?path=%s&gallery=0"|args:$dir_uri}
 		{else}
-			{linkbutton shape="gallery" label="Afficher en galerie" href="?path=%s&gallery=1"|args:$parent_path_uri}
+			{linkbutton shape="gallery" label="Afficher en galerie" href="?path=%s&gallery=1"|args:$dir_uri}
 		{/if}
 	{/if}
-	{if $parent->canCreateDirHere() || $parent->canCreateHere()}
+	{if $dir->canCreateDirHere() || $dir->canCreateHere()}
 		{linkmenu label="Ajouter…" shape="plus" right=true}
-			{if $parent->canCreateHere()}
-				{linkbutton shape="upload" label="Depuis mon ordinateur" target="_dialog" href="!common/files/upload.php?p=%s"|args:$parent_path_uri}
-			{if $parent->canCreateDirHere()}
-				{linkbutton shape="folder" label="Répertoire" target="_dialog" href="!docs/new_dir.php?path=%s"|args:$parent_path_uri}
+			{if $dir->canCreateHere()}
+				{linkbutton shape="upload" label="Depuis mon ordinateur" target="_dialog" href="!common/files/upload.php?p=%s"|args:$dir_uri}
+			{if $dir->canCreateDirHere()}
+				{linkbutton shape="folder" label="Répertoire" target="_dialog" href="!docs/new_dir.php?path=%s"|args:$dir_uri}
 			{/if}
-				{linkbutton shape="text" label="Fichier texte" target="_dialog" href="!docs/new_file.php?path=%s"|args:$parent_path_uri}
+				{linkbutton shape="text" label="Fichier texte" target="_dialog" href="!docs/new_file.php?path=%s"|args:$dir_uri}
 				{if WOPI_DISCOVERY_URL}
-					{linkbutton shape="document" label="Document" target="_dialog" data-dialog-class="fullscreen" href="!docs/new_doc.php?ext=odt&path=%s"|args:$parent_path_uri}
-					{linkbutton shape="table" label="Tableur" target="_dialog" data-dialog-class="fullscreen" href="!docs/new_doc.php?ext=ods&path=%s"|args:$parent_path_uri}
-					{linkbutton shape="gallery" label="Présentation" target="_dialog" data-dialog-class="fullscreen" href="!docs/new_doc.php?ext=odp&path=%s"|args:$parent_path_uri}
+					{linkbutton shape="document" label="Document" target="_dialog" href="!docs/new_doc.php?ext=odt&path=%s"|args:$dir_uri}
+					{linkbutton shape="table" label="Tableur" target="_dialog" href="!docs/new_doc.php?ext=ods&path=%s"|args:$dir_uri}
+					{linkbutton shape="gallery" label="Présentation" target="_dialog" href="!docs/new_doc.php?ext=odp&path=%s"|args:$dir_uri}
 				{/if}
 			{/if}
 		{/linkmenu}
@@ -61,7 +61,7 @@ use Garradin\Entities\Files\File;
 				Fichiers joints aux fiches des membres
 			{/if}
 		{elseif $context_ref}
-			{$parent->name}
+			{$dir->name}
 		{else}
 			Documents
 		{/if}
@@ -71,12 +71,6 @@ use Garradin\Entities\Files\File;
 
 {if $context_ref}
 <nav class="breadcrumbs">
-	<aside>
-	{if count($breadcrumbs) > 1}
-		{linkbutton href="?path=%s"|args:$parent_path_uri label="Retour au répertoire parent" shape="left"}
-	{/if}
-</aside>
-
 {if $context == File::CONTEXT_TRANSACTION}
 	{if $context_ref}
 		{linkbutton href="!acc/transactions/details.php?id=%d"|args:$context_ref|local_url label="Détails de l'écriture" shape="menu"}
@@ -91,20 +85,23 @@ use Garradin\Entities\Files\File;
 		<li><a href="?path={$bc_path}">{$name}</a></li>
 	{/foreach}
 	</ul>
+	{if count($breadcrumbs) > 1}
+		{linkbutton href="?path=%s"|args:$parent_uri label="Retour au répertoire parent" shape="left"}
+	{/if}
+
 {/if}
 </nav>
 {/if}
 
 {if count($list)}
-<form method="post" action="{"!docs/action.php"|local_url}" target="_dialog">
-
 	{if is_array($list)}
+	<form method="post" action="{"!docs/action.php"|local_url}" target="_dialog">
 
 		<table class="list files{if $gallery} gallery{/if}">
 			<thead>
 				<tr>
 					{if $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE)}
-					<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>
+					<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all" /><label title="Tout cocher / décocher" for="f_all"></label></td>
 					{/if}
 					<td></td>
 					<th>Nom</th>
@@ -127,7 +124,7 @@ use Garradin\Entities\Files\File;
 					<td class="icon"><a href="?path={$file->path_uri()}">{icon shape="folder"}</a></td>
 					<th colspan="3"><a href="?path={$file->path_uri()}">{$file.name}</a></th>
 					<td class="actions">
-					{if $parent->canCreateHere() || $file->canDelete()}
+					{if $dir->canCreateHere() || $file->canDelete()}
 						{linkmenu label="Modifier…" shape="edit"}
 							{if $file->canRename()}
 								{linkbutton href="!common/files/rename.php?p=%s"|args:$file->path_uri() label="Renommer" shape="minus" target="_dialog"}
@@ -186,10 +183,10 @@ use Garradin\Entities\Files\File;
 			{if $file->canDelete()}
 			<tfoot>
 				<tr>
-					<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all2" /><label for="f_all2"></label></td>
+					<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all2" /><label title="Tout cocher / décocher" for="f_all2"></label></td>
 					<td class="actions" colspan="6">
 						<em>Pour les fichiers sélectionnés&nbsp;:</em>
-							<input type="hidden" name="parent" value="{$parent_path_uri}" />
+							<input type="hidden" name="parent" value="{$dir_uri}" />
 							<select name="action">
 								<option value="">— Choisir une action à effectuer —</option>
 								{if $context == File::CONTEXT_DOCUMENTS}
@@ -206,11 +203,19 @@ use Garradin\Entities\Files\File;
 			</tfoot>
 			{/if}
 		</table>
+	</form>
+
 	{elseif $list instanceof \Garradin\DynamicList}
 
 		{if $list->count()}
 
-			{include file="common/dynamic_list_head.tpl" check=false}
+			<?php $is_user_admin = $context === File::CONTEXT_USER && $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN); ?>
+
+			{if $is_user_admin}
+			<form method="post" action="{$admin_url}users/action.php" target="_dialog">
+			{/if}
+
+			{include file="common/dynamic_list_head.tpl" check=$is_user_admin}
 
 			{foreach from=$list->iterate() item="item"}
 				<tr>
@@ -225,7 +230,10 @@ use Garradin\Entities\Files\File;
 							{linkbutton href="!acc/transactions/details.php?id=%d"|args:$item.id label="Écriture" shape="search"}
 						</td>
 					{else}
-						<td class="num"><a href="{$admin_url}users/details.php?id={$item.id}">#{$item.number}</a></td>
+						{if $is_user_admin}
+						<td class="check">{input type="checkbox" name="selected[]" value=$item.id}</td>
+						{/if}
+						<td class="num"><a href="{$admin_url}users/details.php?id={$item.id}">{$item.number}</a></td>
 						<th><a href="?path={$item.path}">{$item.identity}</a></th>
 						<td class="actions">
 							{linkbutton href="!docs/?path=%s"|args:$item.path label="Fichiers" shape="menu"}
@@ -235,7 +243,16 @@ use Garradin\Entities\Files\File;
 				</tr>
 			{/foreach}
 			</tbody>
+
+			{if $is_user_admin}
+				{include file="users/_list_actions.tpl" colspan=count($list->getHeaderColumns())+1}
+			{/if}
+
 			</table>
+
+			{if $is_user_admin}
+			</form>
+			{/if}
 
 			{$list->getHTMLPagination()|raw}
 
@@ -247,17 +264,15 @@ use Garradin\Entities\Files\File;
 
 
 	{/if}
-
-</form>
 {else}
 	<p class="alert block">Il n'y a aucun fichier dans ce répertoire.</p>
 {/if}
 
-{if $parent->path == $parent->context()}
+{if $dir->path == $dir->context()}
 <div class="help flex">
 	<p>
 		Adresse WebDAV&nbsp;:
-		{copy_button label=$parent->webdav_root_url()}
+		{copy_button label=$dir->webdav_root_url()}
 	</p>
 	<p>
 		{linkbutton shape="help" href=HELP_PATTERN_URL|args:"webdav" label="Accéder aux documents avec WebDAV" target="_dialog"}

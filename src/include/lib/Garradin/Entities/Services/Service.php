@@ -72,7 +72,7 @@ class Service extends Entity
 		return new Fees($this->id());
 	}
 
-	public function allUsersList(): DynamicList
+	public function allUsersList(bool $include_hidden_categories = false): DynamicList
 	{
 		$id_field = DynamicFields::getNameFieldsSQL('u');
 		$columns = [
@@ -117,8 +117,11 @@ class Service extends Entity
 			INNER JOIN services s ON s.id = su.id_service
 			LEFT JOIN services_fees sf ON sf.id = su.id_fee
 			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_service) AS su2 ON su2.id = su.id';
-		$conditions = sprintf('su.id_service = %d
-			AND u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
+		$conditions = sprintf('su.id_service = %d', $this->id());
+
+		if (!$include_hidden_categories) {
+			$conditions .= ' AND u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)';
+		}
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->groupBy('su.id_user');
@@ -127,28 +130,42 @@ class Service extends Entity
 		return $list;
 	}
 
-	public function activeUsersList(): DynamicList
+	public function activeUsersList(bool $include_hidden_categories = false): DynamicList
 	{
 		$list = $this->allUsersList();
 		$conditions = sprintf('su.id_service = %d AND (su.expiry_date >= date() OR su.expiry_date IS NULL)
-			AND su.paid = 1
-			AND u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
+			AND su.paid = 1', $this->id());
+
+		if (!$include_hidden_categories) {
+			$conditions .= ' AND u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)';
+		}
+
 		$list->setConditions($conditions);
 		return $list;
 	}
 
-	public function unpaidUsersList(): DynamicList
+	public function unpaidUsersList(bool $include_hidden_categories = false): DynamicList
 	{
 		$list = $this->allUsersList();
-		$conditions = sprintf('su.id_service = %d AND su.paid = 0 AND u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
+		$conditions = sprintf('su.id_service = %d AND su.paid = 0', $this->id());
+
+		if (!$include_hidden_categories) {
+			$conditions .= ' AND u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)';
+		}
+
 		$list->setConditions($conditions);
 		return $list;
 	}
 
-	public function expiredUsersList(): DynamicList
+	public function expiredUsersList(bool $include_hidden_categories = false): DynamicList
 	{
 		$list = $this->allUsersList();
-		$conditions = sprintf('su.id_service = %d AND su.expiry_date < date() AND u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
+		$conditions = sprintf('su.id_service = %d AND su.expiry_date < date()', $this->id());
+
+		if (!$include_hidden_categories) {
+			$conditions .= ' AND u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)';
+		}
+
 		$list->setConditions($conditions);
 		return $list;
 	}

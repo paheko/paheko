@@ -1,6 +1,7 @@
 Title: Référence des fonctions Brindille
 
 {{{.nav
+* [Modules](modules.html)
 * [Documentation Brindille](brindille.html)
 * **[Fonctions](brindille_functions.html)**
 * [Sections](brindille_sections.html)
@@ -297,6 +298,8 @@ Note : il est également conseillé d'utiliser la fonction `captcha` pour empêc
 | `subject` | **obligatoire** | Sujet du message |
 | `body` | **obligatoire** | Corps du message |
 | `block_urls` | *optionnel* | (`true` ou `false`) Permet de bloquer l'envoi si le message contient une adresse `https://…` |
+| `attach_file` | *optionnel* | Chemin vers un ou plusieurs documents à joindre au message (situé dans les documents) |
+| `attach_from` | *optionnel* | Chemin vers un ou plusieurs squelettes à joindre au message (par exemple pour joindre un document généré) |
 
 Pour le destinataire, il est possible de spécifier un tableau :
 

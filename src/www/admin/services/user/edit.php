@@ -23,6 +23,7 @@ require __DIR__ . '/_form.php';
 
 $form->runIf('save', function () use ($su) {
 	$su->importForm();
+	$su->importForm(['paid' => (bool)f('paid')]);
 	$su->updateExpectedAmount();
 	$su->save();
 }, $csrf_key, ADMIN_URL . 'services/user/?id=' . $su->id_user);

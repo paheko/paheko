@@ -5,6 +5,7 @@ namespace Garradin;
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 use Garradin\UserTemplate\Modules;
+use KD2\DB\DB_Exception;
 
 $db->beginSchemaUpdate();
 
@@ -36,13 +37,30 @@ CREATE TABLE IF NOT EXISTS config_users_fields (
 $df = \Garradin\Users\DynamicFields::fromOldINI($config->champs_membres, $config->champ_identifiant, $config->champ_identite, 'numero');
 $df->save(false);
 
+$trim_field = function (string $name) use ($db) {
+	$db->exec(sprintf("UPDATE users SET %s = TRIM(REPLACE(REPLACE(%1\$s, X'0D' || X'0A', X'0A'), X'0D', X'0A'), ' ' || X'0D' || X'0A') WHERE %1\$s IS NOT NULL AND %1\$s != '';", $db->quoteIdentifier($name)));
+};
+
 // Normalize line breaks in user fields, and trim
 foreach ($df->all() as $name => $field) {
 	if (!$df->isText($name)) {
 		continue;
 	}
 
-	$db->exec(sprintf("UPDATE users SET %s = TRIM(REPLACE(REPLACE(%1\$s, X'0D' || X'0A', X'0A'), X'0D', X'0A'), ' ' || X'0D' || X'0A');", $name));
+	try {
+		$trim_field($name);
+	}
+	catch (DB_Exception $e) {
+		if (false === strpos($e->getMessage(), 'UNIQUE constraint failed')
+			|| $name !== $config->champ_identifiant
+			|| !$df->get('numero')) {
+			throw $e;
+		}
+
+		// Change login field if current login field is not unique after trim
+		$df->changeLoginField('numero');
+		$trim_field($name);
+	}
 }
 
 // Migrate other stuff

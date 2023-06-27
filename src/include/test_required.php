@@ -49,6 +49,11 @@ test_required(
 );
 
 test_required(
+	function_exists('\mb_strlen'),
+	'L\'extension "mbstring" n\'est pas installée mais est nécessaire (apt install php-mbstring).'
+);
+
+test_required(
 	class_exists('SQLite3'),
 	'Le module de base de données SQLite3 n\'est pas disponible.'
 );
@@ -75,7 +80,7 @@ while ($row = $r->fetchArray(\SQLITE3_NUM)) {
 }
 
 test_required(
-	in_array('ENABLE_FTS4', $options),
+	in_array('ENABLE_FTS4', $options) || in_array('ENABLE_FTS3', $options),
 	'Le module SQLite3 FTS4 (permettant de faire des recherches) n\'est pas installé ou activé.'
 );
 

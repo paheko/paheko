@@ -33,7 +33,7 @@
 					{{:assign var="years.%d"|args:$year value=$year}}
 				{{/load}}
 
-				{{:input type="select" name="year" options=$years default=$_GET.year onchange="this.form.submit();"}}
+				{{:input type="select" name="year" options=$years default=$_GET.year|or:0 required=true onchange="this.form.submit();"}}
 			</p>
 		</fieldset>
 	</form>
@@ -97,6 +97,7 @@
 				{{:linkbutton shape="delete" label="Annuler" href="annuler.html?id=%d"|args:$id target="_dialog"}}
 			{{/if}}
 			{{:linkbutton shape="eye" label="Ouvrir" href="recu.html?id=%d"|args:$id target="_dialog"}}
+			{{:linkbutton shape="mail" label="Envoyer" href="envoyer.html?id=%d"|args:$id target="_dialog"}}
 		</td>
 	</tr>
 {{else}}

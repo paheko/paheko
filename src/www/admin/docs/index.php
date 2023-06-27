@@ -23,13 +23,13 @@ else {
 	$path = qg('path') ?: File::CONTEXT_DOCUMENTS;
 }
 
-$parent = Files::get($path);
+$dir = Files::get($path);
 
-if (!$parent || !$parent->isDir()) {
+if (!$dir || !$dir->isDir()) {
 	throw new UserException('Ce répertoire n\'existe pas.');
 }
 
-if (!$parent->canRead()) {
+if (!$dir->canRead()) {
 	throw new UserException('Vous n\'avez pas accès à ce répertoire');
 }
 
@@ -85,9 +85,10 @@ if ($gallery !== $pref) {
 	Session::getLoggedUser()->setPreference('folders_gallery', $gallery);
 }
 
-$parent_path_uri = $parent->path_uri();
+$dir_uri = $dir->path_uri();
+$parent_uri = $dir->parent_uri();
 
-$tpl->assign(compact('list', 'parent_path_uri', 'parent', 'context', 'context_ref',
+$tpl->assign(compact('list', 'dir_uri', 'parent_uri', 'dir', 'context', 'context_ref',
 	'breadcrumbs', 'quota_used', 'quota_max', 'quota_percent', 'quota_left',
 	'highlight', 'user_name', 'gallery', 'allow_check'));
 

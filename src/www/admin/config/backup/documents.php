@@ -10,7 +10,7 @@ require_once __DIR__ . '/../_inc.php';
 $form->runIf('restore', function () {
 	try {
 		// Decompress (inflate) raw data
-		if (isset($_FILES['file1']['tmp_name']) && f('compressed')) {
+		if (empty($_FILES['file1']['error']) && !empty($_FILES['file1']['tmp_name']) && f('compressed')) {
 			$f = $_FILES['file1']['tmp_name'];
 			file_put_contents($f, gzinflate(file_get_contents($f), 1024*1024*1024));
 		}

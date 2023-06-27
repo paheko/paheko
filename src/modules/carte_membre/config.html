@@ -9,6 +9,8 @@
 		photo=$_POST.photo|or:null
 		id_service=$_POST.id_service|intval|or:null
 		show_fields_names=$_POST.show_fields_names|boolval
+		email_subject=$_POST.email_subject|trim
+		email_body=$_POST.email_body|trim
 	}}
 	{{:redirect to="?ok=1"}}
 {{/form}}
@@ -70,6 +72,14 @@
 		{{if $services|count}}
 			{{:input type="select" name="id_service" label="Activité à afficher" options=$services required=true help="Utile pour afficher par exemple la date d'expiration de la cotisation annuelle." source=$module.config}}
 		{{/if}}
+	</dl>
+</fieldset>
+
+<fieldset>
+	<legend>Message par défaut lors de l'envoi de la carte par e-mail</legend>
+	<dl>
+		{{:input name="email_subject" type="text" label="Sujet du message" required=true source=$module.config default="Votre carte de membre"}}
+		{{:input name="email_body" type="textarea" label="Corps du message" cols="70" rows="7" required=true source=$module.config default="Bonjour !\n\nVeuillez trouver ci-joint votre carte de membre au format PDF."}}
 	</dl>
 </fieldset>
 

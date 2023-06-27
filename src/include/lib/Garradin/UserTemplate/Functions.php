@@ -113,13 +113,11 @@ class Functions
 
 	static public function save(array $params, Brindille $tpl, int $line): void
 	{
-		$name = strtok($tpl->_tpl_path, '/');
-
-		if (!$name) {
+		if (!$tpl->module) {
 			throw new Brindille_Exception('Module name could not be found');
 		}
 
-		$table = 'module_data_' . $name;
+		$table = 'module_data_' . $tpl->module->name;
 
 		if (!empty($params['key'])) {
 			if ($params['key'] == 'uuid') {
@@ -148,7 +146,7 @@ class Functions
 		$db = DB::getInstance();
 
 		if ($key == 'config') {
-			$result = $db->firstColumn(sprintf('SELECT config FROM %s WHERE name = ?;', Module::TABLE), $name);
+			$result = $db->firstColumn(sprintf('SELECT config FROM %s WHERE name = ?;', Module::TABLE), $tpl->module->name);
 		}
 		else {
 			$db->exec(sprintf('
@@ -203,7 +201,7 @@ class Functions
 		$value = json_encode($params);
 
 		if ($key == 'config') {
-			$db->update(Module::TABLE, ['config' => $value], 'name = :name', compact('name'));
+			$db->update(Module::TABLE, ['config' => $value], 'name = :name', ['name' => $tpl->module->name]);
 			return;
 		}
 
@@ -222,13 +220,11 @@ class Functions
 
 	static public function delete(array $params, Brindille $tpl, int $line): void
 	{
-		$name = strtok($tpl->_tpl_path, '/');
-
-		if (!$name) {
+		if (!$tpl->module) {
 			throw new Brindille_Exception('Module name could not be found');
 		}
 
-		$table = 'module_data_' . $name;
+		$table = 'module_data_' . $tpl->module->name;
 
 		if (!empty($params['key'])) {
 			$field = 'key';
@@ -286,7 +282,7 @@ class Functions
 		}
 	}
 
-	static public function mail(array $params, Brindille $tpl, int $line)
+	static public function mail(array $params, UserTemplate $ut, int $line)
 	{
 		if (empty($params['to'])) {
 			throw new Brindille_Exception(sprintf('Ligne %d: argument "to" manquant pour la fonction "mail"', $line));
@@ -302,6 +298,42 @@ class Functions
 
 		if (!empty($params['block_urls']) && preg_match('!https?://!', $params['subject'] . $params['body'])) {
 			throw new UserException('Merci de ne pas inclure d\'adresse web (http:…) dans le message');
+		}
+
+		$attachments = [];
+
+		if (!empty($params['attach_file'])) {
+			$attachments = (array) $params['attach_file'];
+
+			foreach ($attachments as &$file) {
+				$f = Files::get($file);
+
+				if (!$f) {
+					throw new UserException(sprintf('Le fichier à joindre "%s" n\'existe pas', $file));
+				}
+
+				if (!$f->canRead()) {
+					throw new UserException(sprintf('Vous n\'avez pas le droit d\'accéder au fichier à joindre "%s"', $file));
+				}
+
+				$file = $f;
+			}
+
+			unset($file);
+		}
+		elseif (!empty($params['attach_from'])) {
+			if (empty($ut->module)) {
+				throw new UserException('"attach_from" can only be called from within a module');
+			}
+
+			$attachments = (array) $params['attach_from'];
+
+			foreach ($attachments as &$file) {
+				$file = self::getFilePath($file, 'attach_from', $ut, $line);
+				$file = $ut->fetchToAttachment($file);
+			}
+
+			unset($file);
 		}
 
 		static $external = 0;
@@ -344,7 +376,7 @@ class Functions
 		}
 
 		$context = count($params['to']) == 1 ? Emails::CONTEXT_PRIVATE : Emails::CONTEXT_BULK;
-		Emails::queue($context, $params['to'], null, $params['subject'], $params['body']);
+		Emails::queue($context, $params['to'], null, $params['subject'], $params['body'], $attachments);
 
 		$internal += $internal_count;
 		$external_count += $external_count;
@@ -373,17 +405,15 @@ class Functions
 		throw new UserException($params['message'] ?? 'Erreur du module');
 	}
 
-	static protected function getFilePath(array $params, string $arg_name, UserTemplate $ut, int $line)
+	static protected function getFilePath(?string $path, string $arg_name, UserTemplate $ut, int $line)
 	{
-		if (empty($params[$arg_name])) {
+		if (empty($path)) {
 			throw new Brindille_Exception(sprintf('Ligne %d: argument "%s" manquant', $arg_name, $line));
 		}
 
-		if (strpos($params[$arg_name], '..') !== false) {
+		if (strpos($path, '..') !== false) {
 			throw new Brindille_Exception(sprintf('Ligne %d: argument "%s" invalide', $line, $arg_name));
 		}
-
-		$path = $params[$arg_name];
 
 		if (substr($path, 0, 2) == './') {
 			$path = Utils::dirname($ut->_tpl_path) . substr($path, 1);
@@ -411,7 +441,7 @@ class Functions
 
 	static public function read(array $params, UserTemplate $ut, int $line): string
 	{
-		$path = self::getFilePath($params, 'file', $ut, $line);
+		$path = self::getFilePath($params['file'] ?? null, 'file', $ut, $line);
 
 		$file = Files::get(File::CONTEXT_MODULES . '/' . $path);
 
@@ -445,7 +475,7 @@ class Functions
 
 	static public function include(array $params, UserTemplate $ut, int $line): void
 	{
-		$path = self::getFilePath($params, 'file', $ut, $line);
+		$path = self::getFilePath($params['file'] ?? null, 'file', $ut, $line);
 
 		// Avoid recursive loops
 		$from = $ut->get('included_from') ?? [];
@@ -456,6 +486,7 @@ class Functions
 
 		try {
 			$include = new UserTemplate($path);
+			$include->setParent($ut);
 		}
 		catch (\InvalidArgumentException $e) {
 			throw new Brindille_Exception(sprintf('Ligne %d : fonction "include" : le fichier à inclure "%s" n\'existe pas', $line, $path));
@@ -499,69 +530,7 @@ class Functions
 		}
 
 		if (isset($params['code'])) {
-			static $codes = [
-				100 => 'Continue',
-				101 => 'Switching Protocols',
-				102 => 'Processing',
-				200 => 'OK',
-				201 => 'Created',
-				202 => 'Accepted',
-				203 => 'Non-Authoritative Information',
-				204 => 'No Content',
-				205 => 'Reset Content',
-				206 => 'Partial Content',
-				207 => 'Multi-Status',
-				300 => 'Multiple Choices',
-				301 => 'Moved Permanently',
-				302 => 'Found',
-				303 => 'See Other',
-				304 => 'Not Modified',
-				305 => 'Use Proxy',
-				306 => 'Switch Proxy',
-				307 => 'Temporary Redirect',
-				400 => 'Bad Request',
-				401 => 'Unauthorized',
-				402 => 'Payment Required',
-				403 => 'Forbidden',
-				404 => 'Not Found',
-				405 => 'Method Not Allowed',
-				406 => 'Not Acceptable',
-				407 => 'Proxy Authentication Required',
-				408 => 'Request Timeout',
-				409 => 'Conflict',
-				410 => 'Gone',
-				411 => 'Length Required',
-				412 => 'Precondition Failed',
-				413 => 'Request Entity Too Large',
-				414 => 'Request-URI Too Long',
-				415 => 'Unsupported Media Type',
-				416 => 'Requested Range Not Satisfiable',
-				417 => 'Expectation Failed',
-				418 => 'I\'m a teapot',
-				422 => 'Unprocessable Entity',
-				423 => 'Locked',
-				424 => 'Failed Dependency',
-				425 => 'Unordered Collection',
-				426 => 'Upgrade Required',
-				449 => 'Retry With',
-				450 => 'Blocked by Windows Parental Controls',
-				500 => 'Internal Server Error',
-				501 => 'Not Implemented',
-				502 => 'Bad Gateway',
-				503 => 'Service Unavailable',
-				504 => 'Gateway Timeout',
-				505 => 'HTTP Version Not Supported',
-				506 => 'Variant Also Negotiates',
-				507 => 'Insufficient Storage',
-				509 => 'Bandwidth Limit Exceeded',
-				510 => 'Not Extended',
-			];
-
-			if (!isset($codes[$params['code']])) {
-				throw new Brindille_Exception('Code HTTP inconnu');
-			}
-
-			header(sprintf('HTTP/1.1 %d %s', $params['code'], $codes[$params['code']]), true);
+			$tpl->setHeader('code', $params['code']);
 		}
 
 		if (!empty($params['type'])) {
@@ -569,14 +538,16 @@ class Functions
 				$params['type'] = 'application/pdf';
 			}
 
-			header('Content-Type: ' . $params['type'], true);
+			$tpl->setHeader('type', $params['type']);
 		}
 
 		if (isset($params['download'])) {
-			header(sprintf('Content-Disposition: attachment; filename="%s"', Utils::safeFileName($params['download'])), true);
+			$tpl->setHeader('disposition', 'attachment');
+			$tpl->setHeader('filename', $params['download']);
 		}
 		elseif (isset($params['inline'])) {
-			header(sprintf('Content-Disposition: inline; filename="%s"', Utils::safeFileName($params['inline'])), true);
+			$tpl->setHeader('disposition', 'inline');
+			$tpl->setHeader('filename', $params['inline']);
 		}
 	}
 

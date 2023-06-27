@@ -550,7 +550,7 @@ nav.breadcrumbs.no-clear {
     clear: none;
 }
 
-nav.breadcrumbs a {
+nav.breadcrumbs li a {
     color: var(--gBorderColor);
 }
 

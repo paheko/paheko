@@ -49,6 +49,7 @@
 	</head>
 	<body><div class="web-content"><div class="nav">
 <ul>
+<li><a href="modules.html">Modules</a></li>
 <li><a href="brindille.html">Documentation Brindille</a></li>
 <li><strong><a href="brindille_functions.html">Fonctions</a></strong></li>
 <li><a href="brindille_sections.html">Sections</a></li>
@@ -220,7 +221,7 @@
 <tr>
 <td style="text-align: left;"><code>redirect</code></td>
 <td style="text-align: left;"><em>optionnel</em></td>
-<td style="text-align: left;">Rediriger vers l'adresse URI indiquée en valeur.</td>
+<td style="text-align: left;">Rediriger vers l'adresse URL indiquée en valeur.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>type</code></td>
@@ -243,6 +244,7 @@
 <p>Exemples :</p>
 <pre><code>{{:http code=404}}
 {{:http redirect="/Nos-Activites/"}}
+{{:http redirect="https://mon-site-web.tld/"}}
 {{:http type="application/svg+xml"}}
 {{:http type="pdf" download="liste_membres_ca.pdf"}}</code></pre>
 <h2 id="include">include</h2>
@@ -424,6 +426,16 @@
 <td style="text-align: left;"><em>optionnel</em></td>
 <td style="text-align: left;">(<code>true</code> ou <code>false</code>) Permet de bloquer l'envoi si le message contient une adresse <code>https://…</code></td>
 </tr>
+<tr>
+<td style="text-align: left;"><code>attach_file</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Chemin vers un ou plusieurs documents à joindre au message (situé dans les documents)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>attach_from</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Chemin vers un ou plusieurs squelettes à joindre au message (par exemple pour joindre un document généré)</td>
+</tr>
 </tbody>
 </table>
 <p>Pour le destinataire, il est possible de spécifier un tableau :</p>
@@ -451,7 +463,8 @@
 &lt;/form&gt;</code></pre>
 <h2 id="redirect">redirect</h2>
 <p>Redirige vers une nouvelle page.</p>
-<p>Si la page actuelle est ouverte dans une fenêtre modal (grâce à la cible <code>_dialog</code>), alors la fenêtre modale est fermée, et la redirection se passe dans la page parente.</p>
+<p>Avec le paramètre <code>force</code>, si la page actuelle est ouverte dans une fenêtre modale (grâce à la cible <code>_dialog</code>), alors la fenêtre modale est fermée, et la redirection se passe dans la page parente.</p>
+<p>Avec le paramètre <code>to</code>, si la page actuelle est ouverte dans une fenêtre modal (grâce à la cible <code>_dialog</code>), alors la fenêtre modale est fermée, et  la page parente est rechargée. Si la page n'est pas ouvertre dans dans une fenêtre modale, la redirection est effectuée.</p>
 <p>Seules les adresses internes sont acceptées, il n'est pas possible de rediriger vers une adresse extérieure.</p>
 <table>
 <thead>
@@ -463,9 +476,14 @@
 </thead>
 <tbody>
 <tr>
+<td style="text-align: left;"><code>force</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Adresse de redirection forcée</td>
+</tr>
+<tr>
 <td style="text-align: left;"><code>to</code></td>
 <td style="text-align: left;">optionnel</td>
-<td style="text-align: left;">Adresse de redirection</td>
+<td style="text-align: left;">Adresse de redirection si pas dans une fenêtre modale</td>
 </tr>
 </tbody>
 </table>

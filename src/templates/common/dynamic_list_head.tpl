@@ -2,7 +2,7 @@
 	<thead class="userOrder">
 		<tr>
 			{if !empty($check)}
-			<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>
+			<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all" /><label for="f_all" title="Tout cocher / décocher"></label></td>
 			{/if}
 			{foreach from=$list->getHeaderColumns() key="key" item="column"}
 			<td class="{if $list->order == $key}cur{/if}">
@@ -19,7 +19,11 @@
 						{icon shape="up" class="up"}
 					{/if}
 
-					{$column.label}
+					{if $column.header_icon}
+						{icon shape=$column.header_icon title=$column.label}
+					{else}
+						{$column.label}
+					{/if}
 
 					{if !empty($use_buttons)}
 						</button>

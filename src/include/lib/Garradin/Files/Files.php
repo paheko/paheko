@@ -918,9 +918,10 @@ class Files
 		$name = Utils::basename($path);
 
 		$name = File::filterName($name);
-		$path = $parent . '/' . $name;
+		$path = trim($parent . '/' . $name, '/');
 
 		File::validatePath($path);
+
 		Files::checkQuota();
 
 		if (self::exists($path)) {
@@ -949,21 +950,15 @@ class Files
 
 	static public function ensureDirectoryExists(string $path): void
 	{
-		$db = DB::getInstance();
-		$parts = explode('/', $path);
+		$parts = explode('/', trim($path, '/'));
+		$parts = array_filter($parts);
 		$tree = '';
 
 		foreach ($parts as $part) {
 			$tree = trim($tree . '/' . $part, '/');
-			$exists = $db->test(File::TABLE, 'type = ? AND path = ?', File::TYPE_DIRECTORY, $tree);
 
-			if (!$exists) {
-				try {
-					self::mkdir($tree, false);
-				}
-				catch (ValidationException $e) {
-					// Ignore when directory already exists
-				}
+			if (!self::exists($tree)) {
+				self::mkdir($tree);
 			}
 		}
 	}

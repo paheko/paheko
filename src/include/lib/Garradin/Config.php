@@ -31,8 +31,11 @@ class Config extends Entity
 		'signature'        => 'image',
 	];
 
+	/**
+	 * List of config files that should be public no matter what
+	 */
 	const FILES_PUBLIC = [
-		'logo', 'icon', 'favicon',
+		'logo', 'icon', 'favicon', 'admin_background', 'admin_css',
 	];
 
 	protected string $org_name;

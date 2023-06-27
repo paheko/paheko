@@ -96,6 +96,8 @@ class Session extends \KD2\UserSession
 			'cookie_path'   => preg_replace('!/admin/$!', '/', $url['path']),
 			'cookie_secure' => HTTP::getScheme() == 'https' ? true : false,
 		]);
+
+		$this->sid_in_url_secret = '&spko=' . sha1(SECRET_KEY);
 	}
 
 	public function isPasswordCompromised($password)
@@ -439,6 +441,11 @@ class Session extends \KD2\UserSession
 		}
 
 		return sprintf('%s=%s', $i->cookie_name, $i->id());
+	}
+
+	static public function getCookieSecret(): string
+	{
+		return self::getInstance()->sid_in_url_secret;
 	}
 
 	public function getUser()
