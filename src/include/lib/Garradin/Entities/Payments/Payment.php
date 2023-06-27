@@ -32,7 +32,7 @@ class Payment extends Entity
 	protected ?string		$reference;
 	protected ?int			$id_transaction;
 	protected ?int			$id_author;
-	protected string		$author_name;
+	protected ?string		$author_name;
 	protected string		$provider;
 	protected string		$type;
 	protected string		$status;

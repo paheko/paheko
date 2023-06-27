@@ -496,7 +496,7 @@ CREATE TABLE IF NOT EXISTS payments
     reference TEXT NULL,
     id_transaction INTEGER NULL REFERENCES acc_transactions (id),
     id_author INTEGER REFERENCES users (id),
-    author_name TEXT NOT NULL,
+    author_name TEXT NULL,
     provider TEXT NOT NULL,
     type TEXT NOT NULL CHECK( type IN ('unique', 'tif', 'monthly', 'other') ),
     status TEXT NOT NULL CHECK( status IN ('planned', 'awaiting', 'validated', 'cancelled') ),
