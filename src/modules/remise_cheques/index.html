@@ -11,7 +11,7 @@
 
 			<h1>Bordereau de remise de chèques</h1>
 
-			<h4>Référence n°{{if $reference}}{{$reference}}{{else}}{{$id}}{{/if}} — {{$date|date_short}}</h4>
+			<h4>Écriture n°{{if $reference}}{{$reference}}{{else}}{{$id}}{{/if}} — {{$date|date_short}}</h4>
 
 			{{#transaction_lines transaction=$id where="debit > 0"}}
 			<h3>Compte de dépôt: {{$account_label}}</h3>
