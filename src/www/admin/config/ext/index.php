@@ -48,6 +48,7 @@ $form->runIf('disable_plugin', function () {
 }, $csrf_key, '!config/ext/');
 
 Modules::refresh();
+Plugins::refresh();
 
 if (qg('install')) {
 	$list = Plugins::listModulesAndPlugins(true);

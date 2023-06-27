@@ -331,6 +331,24 @@ class Plugins
 		return EM::getInstance(Plugin::class)->all('SELECT * FROM @TABLE ORDER BY label COLLATE NOCASE ASC;');
 	}
 
+	static public function refresh(): void
+	{
+		$db = DB::getInstance();
+		$existing = $db->getAssoc(sprintf('SELECT id, name FROM %s;', Plugin::TABLE));
+
+		foreach ($existing as $name) {
+			$f = self::get($name);
+			try {
+				$f->updateFromINI();
+				$f->save();
+			}
+			catch (ValidationException $e) {
+				throw new ValidationException($name . ': ' . $e->getMessage(), 0, $e);
+			}
+		}
+	}
+
+
 	/**
 	 * Liste les plugins téléchargés mais non installés
 	 */
