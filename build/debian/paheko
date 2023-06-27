@@ -45,7 +45,7 @@ Usage : $0 [COMMANDE] [PROJET]
 Où COMMANDE peut être :
 
         server [-p|--port PORT] [-b|--bind IP]
-                Démarre un serveur web Garradin sur le port spécifié
+                Démarre un serveur web Paheko sur le port spécifié
                 (8081 par défaut) et l'IP spécifiée (127.0.0.1 par défaut)
 
         ui [-p|--port PORT] [-b|--bind IP]

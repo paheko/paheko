@@ -75,6 +75,7 @@ if (!empty($_ENV['PAHEKO_STANDALONE']))
 		else if (file_exists($last_file))
 		{
 			$last_sqlite = trim(file_get_contents($last_file));
+			$last_sqlite = str_replace('.local/share/garradin', '.local/share/paheko', $last_sqlite);
 		}
 		else
 		{
