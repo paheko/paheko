@@ -38,7 +38,7 @@ class UserTemplate extends \KD2\Brindille
 	protected $cache_path = USER_TEMPLATES_CACHE_ROOT;
 	protected ?string $path;
 	protected ?UserTemplate $parent = null;
-	public ?Module $module;
+	public ?Module $module = null;
 	protected array $headers = [];
 
 	protected $escape_default = 'html';
