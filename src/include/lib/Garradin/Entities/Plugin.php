@@ -369,9 +369,6 @@ class Plugin extends Entity
 				Utils::redirect('!login.php');
 			}
 		}
-		else {
-			$uri = 'public/' . $uri;
-		}
 
 		if (!$uri || substr($uri, -1) == '/') {
 			$uri .= 'index.php';
