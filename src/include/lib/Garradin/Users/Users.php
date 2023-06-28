@@ -143,19 +143,22 @@ class Users
 
 		$columns = [
 			'_user_id' => [
-				'select' => 'users.id',
+				'select' => 'u.id',
+			],
+			'_user_name_index' => [
+				'select' => $df->getNameFieldsSQL('s'),
 			],
 		];
 
 		$number_column = [
 			'label' => 'Num.',
-			'select' => 'users.' . $number_field,
+			'select' => 'u.' . $number_field,
 		];
 
 		$identity_column = [
 			'label' => $df->getNameLabel(),
-			'select' => $df->getNameFieldsSQL('users'),
-			'order' => 'identity COLLATE U_NOCASE %s',
+			'select' => $df->getNameFieldsSQL('u'),
+			'order' => '_user_name_index %s',
 		];
 
 		$fields = $df->getListedFields();
@@ -182,11 +185,11 @@ class Users
 
 			$columns[$key] = [
 				'label'  => $config->label,
-				'select' => 'users.' . $key,
+				'select' => 'u.' . $key,
 			];
 
-			if ($df->isText($key)) {
-				$columns[$key]['order'] = sprintf('%s COLLATE U_NOCASE %%s', $key);
+			if ($config->hasSearchCache($key)) {
+				$columns[$key]['order'] = sprintf('s.%s %%s', $key);
 			}
 		}
 
@@ -194,34 +197,35 @@ class Users
 			$columns['identity'] = $identity_column;
 		}
 
-		$tables = User::TABLE;
+		$tables = 'users u';
+		$tables .= ' INNER JOIN users_search s ON s.id = u.id';
 		$db = DB::getInstance();
 
 		if ($db->test('users', 'is_parent = 1')) {
-			$tables .= ' LEFT JOIN users b ON b.id = users.id_parent';
+			$tables .= ' LEFT JOIN users b ON b.id = u.id_parent';
 
 			$columns['id_parent'] = [
 				'label'  => 'Rattaché à',
-				'select' => 'users.id_parent',
-				'order'  => 'users.id_parent IS NULL, _parent_name COLLATE U_NOCASE %s, identity COLLATE U_NOCASE %1$s',
+				'select' => 'u.id_parent',
+				'order'  => 'u.id_parent IS NULL, _parent_name COLLATE U_NOCASE %s, _user_name_index %1$s',
 			];
 
 			$columns['_parent_name'] = [
-				'select' => sprintf('CASE WHEN users.id_parent IS NOT NULL THEN %s ELSE NULL END', $df->getNameFieldsSQL('b')),
+				'select' => sprintf('CASE WHEN u.id_parent IS NOT NULL THEN %s ELSE NULL END', $df->getNameFieldsSQL('b')),
 			];
 
 			$columns['is_parent'] = [
 				'label' => 'Responsable',
-				'select' => 'users.is_parent',
-				'order' => 'users.is_parent DESC, identity COLLATE U_NOCASE %1$s',
+				'select' => 'u.is_parent',
+				'order' => 'u.is_parent DESC, _user_name_index %1$s',
 			];
 		}
 
 		if (!$id_category) {
-			$conditions = sprintf('users.id_category IN (SELECT id FROM users_categories WHERE hidden = 0)');
+			$conditions = sprintf('u.id_category IN (SELECT id FROM users_categories WHERE hidden = 0)');
 		}
 		elseif ($id_category > 0) {
-			$conditions = sprintf('users.id_category = %d', $id_category);
+			$conditions = sprintf('u.id_category = %d', $id_category);
 		}
 		else {
 			$conditions = '1';
