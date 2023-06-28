@@ -186,14 +186,14 @@ class Session extends \KD2\UserSession
 		$logged = parent::isLogged();
 
 		// Ajout de la gestion de LOCAL_LOGIN
-		if (!$disable_local_login && LOCAL_LOGIN) {
+		if (!$logged && !$disable_local_login && LOCAL_LOGIN) {
 			$logged = $this->forceLogin(LOCAL_LOGIN);
 		}
 
 		return $logged;
 	}
 
-	public function forceLogin($login)
+	public function forceLogin(bool $logged, $login)
 	{
 		// Force login with a static user, that is not in the local database
 		// this is useful for using a SSO like LDAP for example
