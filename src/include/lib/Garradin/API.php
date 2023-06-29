@@ -11,6 +11,7 @@ use Garradin\Accounting\Reports;
 use Garradin\Accounting\Transactions;
 use Garradin\Accounting\Years;
 use Garradin\Entities\Accounting\Transaction;
+use Garradin\Search;
 
 use KD2\ErrorManager;
 
@@ -65,14 +66,40 @@ class API
 		}
 
 		try {
-			$r = Recherche::rawSQL($body);
+			$s = Search::fromSQL($body);
+			$result = $s->iterateResults();
+			$header = $s->getHeader();
 
 			if (isset($_GET['format']) && in_array($_GET['format'], ['xlsx', 'ods', 'csv'])) {
-				CSV::export($_GET['format'], 'sql', $r);
+				$s->export($_GET['format']);
 				return null;
 			}
 			else {
-				return ['results' => $r];
+				header("Content-Type: application/json; charset=utf-8", true);
+				printf("{\n\"count\": %d,\n\"results\":\n", $s->countResults());
+
+				foreach ($result as $i => $row) {
+					$line = [];
+
+					foreach ($row as $n => $v) {
+						$name = $header[$n];
+
+						// Avoid name collision
+						while (isset($line[$name])) {
+							$name .= '_' . $n;
+						}
+
+						$line[$name] = $v;
+					}
+
+					if ($i > 0) {
+						echo ",\n";
+					}
+
+					echo json_encode($line, JSON_PRETTY_PRINT);
+				}
+
+				return null;
 			}
 		}
 		catch (\Exception $e) {
@@ -432,16 +459,19 @@ class API
 			$return = $api->dispatch($fn, strtok(''));
 
 			if (null !== $return) {
+				header("Content-Type: application/json; charset=utf-8", true);
 				echo json_encode($return, JSON_PRETTY_PRINT);
 			}
 		}
 		catch (\Exception $e) {
 			if ($e instanceof APIException) {
 				http_response_code($e->getCode());
+				header("Content-Type: application/json; charset=utf-8", true);
 				echo json_encode(['error' => $e->getMessage()]);
 			}
 			elseif ($e instanceof UserException || $e instanceof ValidationException) {
 				http_response_code(400);
+				header("Content-Type: application/json; charset=utf-8", true);
 				echo json_encode(['error' => $e->getMessage()]);
 			}
 			else {
