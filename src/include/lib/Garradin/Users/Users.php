@@ -359,8 +359,9 @@ class Users
 		$columns = array_keys($header);
 		$columns = array_map([$db, 'quoteIdentifier'], $columns);
 		$columns = implode(', ', $columns);
+		$header['category'] = 'Catégorie';
 
-		$i = $db->iterate(sprintf('SELECT %s FROM users WHERE %s;', $columns, $where));
+		$i = $db->iterate(sprintf('SELECT %s, (SELECT name FROM users_categories WHERE id = users.id_category) AS category FROM users WHERE %s;', $columns, $where));
 
 		$callback = function (&$row) use ($df) {
 			foreach ($df->fieldsByType('date') as $f) {
