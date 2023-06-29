@@ -193,7 +193,7 @@ class Session extends \KD2\UserSession
 		return $logged;
 	}
 
-	public function forceLogin(bool $logged, $login)
+	public function forceLogin($login)
 	{
 		// Force login with a static user, that is not in the local database
 		// this is useful for using a SSO like LDAP for example
