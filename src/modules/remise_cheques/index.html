@@ -23,7 +23,7 @@
 			{{/accounts}}
 
 			<table>
-				{{:assign i=1}}
+				{{:assign i=0}}
 				{{#transaction_lines transaction=$id where="credit > 0"}}
 				<tr>
 					<th width="5%">{{$i}}.</th>
@@ -31,11 +31,11 @@
 					<td width="40%">{{$reference}}</td>
 					<td width="15%" class="money">{{$credit|raw|money_currency}}</td>
 				</tr>
-				{{:assign i=$i|math:"+":1}}
+				{{:assign i="%d+1"|math:$i}}
 				{{/transaction_lines}}
 			</table>
 
-			<h3>Nombre de chèques : {{$i|math:"-":1}}</h3>
+			<h3>Nombre de chèques : {{$i}}</h3>
 
 			<h3>Total : {{$credit|raw|money_currency}}</h3>
 
