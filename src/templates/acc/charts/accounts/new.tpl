@@ -106,6 +106,8 @@
 	</fieldset>
 
 	<p class="submit">
+		<input type="hidden" name="id" value="{$chart.id}" />
+		<input type="hidden" name="type" value="{$account.type}" />
 		{button type="submit" shape="right" name="from" value="" label="Aucun compte ne correspond" class="main"}
 	</p>
 </form>
