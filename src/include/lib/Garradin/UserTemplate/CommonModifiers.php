@@ -5,6 +5,8 @@ namespace Garradin\UserTemplate;
 use Garradin\Config;
 use Garradin\Utils;
 
+use Garradin\Web\Render\Markdown;
+
 /**
  * Common modifiers used by Template (Smartyer) and UserTemplate
  */
@@ -59,6 +61,7 @@ class CommonModifiers
 	}
 
 	const MODIFIERS_LIST = [
+		'markdown',
 		'money',
 		'money_raw',
 		'money_currency',
@@ -81,6 +84,12 @@ class CommonModifiers
 		'lcfirst',
 		'abs',
 	];
+
+	static public function markdown($str): string
+	{
+		$md = new Markdown;
+		return $md->render($str);
+	}
 
 	static public function money($number, bool $hide_empty = true, bool $force_sign = false, bool $html = false): string
 	{

@@ -18,7 +18,6 @@ use Garradin\Web\Render\Markdown;
 class Modifiers
 {
 	const MODIFIERS_LIST = [
-		'markdown',
 		'replace',
 		'regexp_replace',
 		'regexp_match',
@@ -54,12 +53,6 @@ class Modifiers
 	];
 
 	const LEADING_NUMBER_REGEXP = '/^([\d.]+)\s*[.\)]\s*/';
-
-	static public function markdown($str): string
-	{
-		$md = new Markdown;
-		return $md->render($str);
-	}
 
 	static public function replace($str, $find, $replace = null): string
 	{
