@@ -301,6 +301,13 @@ class Plugin extends Entity
 		$this->save();
 	}
 
+	public function upgradeIfRequired(): void
+	{
+		if ($this->needUpgrade()) {
+			$this->upgrade();
+		}
+	}
+
 	public function oldVersion(): ?string
 	{
 		return $this->getModifiedProperty('version');
