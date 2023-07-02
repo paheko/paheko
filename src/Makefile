@@ -48,6 +48,12 @@ release: test minify doc
 		rm -f font/*.css font/*.json
 	cd /tmp/paheko-build/paheko/src; \
 		rm -f Makefile include/lib/KD2/data/countries.en.json
+	# Download modules and only keep the stable ones
+	cd /tmp/paheko-build/paheko/src && \
+		wget https://fossil.kd2.org/paheko-modules/zip/trunk/modules.zip && \
+		unzip -o modules.zip && \
+		rm -rf `find modules/ -name 'ignore' -type f -execdir pwd \;` && \
+		rm -f modules.zip
 	#cd /tmp/paheko-build/paheko/src/data; mkdir plugins && cd plugins; \
 	#	wget https://fossil.kd2.org/paheko-plugins/uv/welcome.tar.gz \
 	#	&& wget https://fossil.kd2.org/paheko-plugins/uv/caisse.tar.gz \
