@@ -127,6 +127,13 @@ foreach ($list as $file) {
 	}
 }
 
+// Reindex all files, as moving files was broken
+$db->exec('DELETE FROM files_search WHERE path NOT LIKE \'web/%\';');
+
+foreach (Files::listRecursive('', null, false) as $file) {
+	$file->indexForSearch();
+}
+
 $db->commitSchemaUpdate();
 
 Modules::refresh();
