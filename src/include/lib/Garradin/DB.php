@@ -238,6 +238,7 @@ class DB extends SQLite3
 		$db->createFunction('unicode_like', [self::class, 'unicodeLike']);
 		$db->createFunction('transliterate_to_ascii', [Utils::class, 'unicodeTransliterate']);
 		$db->createFunction('email_hash', [Email::class, 'getHash']);
+		$db->createFunction('md5', 'md5');
 		$db->createCollation('U_NOCASE', [Utils::class, 'unicodeCaseComparison']);
 	}
 
