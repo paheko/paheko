@@ -326,7 +326,7 @@ class DynamicFields
 			}
 		});
 
-		usort($list, fn($a, $b) => strnatcasecmp($a->label, $b->label));
+		uasort($list, fn($a, $b) => strnatcasecmp($a->label, $b->label));
 
 		return $list;
 	}
