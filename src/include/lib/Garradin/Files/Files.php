@@ -365,11 +365,11 @@ class Files
 			}
 
 			if ($file->isDir()) {
-				yield from self::listRecursive($file->path, $session, $include_directories);
-
 				if ($include_directories) {
 					yield $file;
 				}
+
+				yield from self::listRecursive($file->path, $session, $include_directories);
 			}
 			else {
 				yield $file;

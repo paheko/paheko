@@ -30,10 +30,11 @@ class Trash
 
 		$tables = Files::getVirtualTableName();
 
-		$conditions = sprintf('type = %d', File::TYPE_FILE);
+		$conditions = sprintf('type = %d AND path LIKE :path', File::TYPE_FILE);
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('modified', true);
+		$list->setParameter('path', File::CONTEXT_TRASH . '/%');
 
 		return $list;
 	}
@@ -48,13 +49,12 @@ class Trash
 					$paths[$file->path] = 0;
 				}
 			}
-			else {
-				if (!isset($paths[$file->parent])) {
-					$paths[$file->parent] = 0;
-				}
 
-				$paths[$file->parent]++;
+			if (!isset($paths[$file->parent])) {
+				$paths[$file->parent] = 0;
 			}
+
+			$paths[$file->parent]++;
 		}
 
 		foreach ($paths as $path => $count) {

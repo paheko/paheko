@@ -313,18 +313,26 @@ class File extends Entity
 			}
 		}
 
+		$db = DB::getInstance();
+		$db->update('files_search', [
+			'path' => $new_path,
+			'title' => Utils::basename($new_path),
+		], 'path = :old_path', ['old_path' => $this->path]);
+
+		if ($this->type == self::TYPE_DIRECTORY) {
+			$escaped = strtr($this->path, ['%' => '!%', '_' => '!_', '!' => '!!']);
+
+			// Rename references in files_search
+			$db->preparedQuery('UPDATE files_search
+				SET path = ? || SUBSTR(path, 1+LENGTH(?))
+				WHERE path LIKE ?;',
+				$new_path . '/', $this->path . '/', $escaped . '/%');
+		}
+
 		Files::ensureDirectoryExists(Utils::dirname($new_path));
 		$return = Files::callStorage('move', $this, $new_path);
 
 		Plugins::fireSignal('files.move', ['file' => $this, 'new_path' => $new_path]);
-
-		$escaped = strtr($this->path, ['%' => '!%', '_' => '!_', '!' => '!!']);
-
-		// Rename references in files_search
-		DB::getInstance()->preparedQuery('UPDATE files_search
-			SET path = ? || SUBSTR(path, 1+LENGTH(?))
-			WHERE path LIKE ?;',
-			$new_path . '/', $this->path . '/', $escaped . '%');
 
 		$this->set('parent', Utils::dirname($new_path));
 		$this->set('path', $new_path);
