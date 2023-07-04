@@ -13,8 +13,6 @@ use KD2\SMTP;
 use KD2\Brindille;
 use KD2\Brindille_Exception;
 
-use Garradin\Web\Render\Markdown;
-
 class Modifiers
 {
 	const MODIFIERS_LIST = [
@@ -33,6 +31,7 @@ class Modifiers
 		'get_leading_number',
 		'spell_out_number',
 		'parse_date',
+		'parse_time',
 		'math',
 		'money_int' => [Utils::class, 'moneyToInteger'],
 		'array_transpose' => [Utils::class, 'array_transpose'],
@@ -50,6 +49,7 @@ class Modifiers
 		'urlencode',
 		'count_words',
 		'or',
+		'uuid',
 	];
 
 	const LEADING_NUMBER_REGEXP = '/^([\d.]+)\s*[.\)]\s*/';
@@ -231,6 +231,37 @@ class Modifiers
 		}
 	}
 
+	static public function parse_time($value)
+	{
+		if ($value instanceof \DateTimeInterface) {
+			return $value->format('H:i');
+		}
+
+		if (empty($value) || !is_string($value)) {
+			return null;
+		}
+
+		if (false === strpos($value, ':')) {
+			$t = explode(':', $value);
+		}
+		elseif (false === strpos($value, 'h')) {
+			$t = explode('h', $value);
+		}
+		else {
+			return null;
+		}
+
+		if (empty($t[0]) || !ctype_digit($t[0]) || $t[0] < 0 || $t[0] > 23) {
+			return false;
+		}
+
+		if (empty($t[1]) || !ctype_digit($t[1]) || $t[1] < 0 || $t[1] > 59) {
+			return false;
+		}
+
+		return sprintf('%02d:%02d', $t[0], $t[1]);
+	}
+
 	static public function math(string $expression, ... $params)
 	{
 		static $tokens_list = [
@@ -403,5 +434,10 @@ class Modifiers
 		}
 
 		return $in;
+	}
+
+	static public function uuid()
+	{
+		return Utils::uuid();
 	}
 }
