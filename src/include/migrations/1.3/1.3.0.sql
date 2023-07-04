@@ -15,7 +15,15 @@ ALTER TABLE emails_queue RENAME TO emails_queue_old;
 
 DROP VIEW acc_accounts_balances;
 
+ALTER TABLE files RENAME TO files_old;
+ALTER TABLE files_contents RENAME TO files_contents_old;
+
 .read schema.sql
+
+INSERT INTO files SELECT id, path, parent, name, type, mime, size, modified, image, '' FROM files_old;
+INSERT INTO files_contents (id, content) SELECT id, content FROM files_contents_old;
+DROP TABLE files_contents_old;
+DROP TABLE files_old;
 
 INSERT INTO acc_charts SELECT * FROM acc_charts_old;
 DROP TABLE acc_charts_old;
@@ -51,6 +59,13 @@ DROP TABLE services_users_old;
 -- Remove old plugin as it cannot be uninstalled as it no longer exists
 DELETE FROM plugins_old WHERE id = 'ouvertures';
 DELETE FROM plugins_signaux_old WHERE plugin = 'ouvertures';
+
+-- Delete old reservations plugin
+DELETE FROM plugins_old WHERE id = 'reservations';
+
+DROP TABLE IF EXISTS plugin_reservations_categories;
+DROP TABLE IF EXISTS plugin_reservations_creneaux;
+DROP TABLE IF EXISTS plugin_reservations_personnes;
 
 -- Rename plugins table columns to English
 INSERT INTO plugins (name, label, description, author, author_url, version, config, enabled, menu, restrict_level, restrict_section)
@@ -94,3 +109,4 @@ DROP TABLE IF EXISTS srs_old;
 
 -- Drop membres
 DROP TABLE IF EXISTS membres;
+

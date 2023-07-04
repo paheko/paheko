@@ -49,7 +49,7 @@ $form->runIf('confirm_delete', function () use ($check, $session) {
 		$file->delete();
 	}
 
-	Trash::pruneEmptyDirectories();
+	Files::pruneEmptyDirectories();
 }, $csrf_key, '!docs/trash.php');
 
 $form->runIf('restore', function() use ($check, $session) {

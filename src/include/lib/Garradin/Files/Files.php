@@ -36,6 +36,13 @@ class Files
 		self::$quota = false;
 	}
 
+	static public function assertStorageIsUnlocked(): void
+	{
+		if (self::callStorage('isLocked')) {
+			throw new \RuntimeException('File storage is locked');
+		}
+	}
+
 	static public function listContextsPermissions(Session $s): array
 	{
 		$perm = self::buildUserPermissions($s);
@@ -67,7 +74,9 @@ class Files
 
 		$p = [];
 
-		if ($s->isLogged() && $id = $s::getUserId()) {
+		if (!$s->canAccess($s::SECTION_USERS, $s::ACCESS_WRITE)
+			&& $s->isLogged()) {
+			$id = $s::getUserId();
 			$list = DynamicFields::getInstance()->fieldsByType('file');
 
 			// Add permissions for each field
@@ -76,7 +85,7 @@ class Files
 					continue;
 				}
 
-				$p[File::CONTEXT_USER . '/' . $s::getUserId() . '/' . $name . '/'] = [
+				$p[File::CONTEXT_USER . '/' . $id . '/' . $name . '/'] = [
 					'mkdir' => false,
 					'move' => false,
 					'create' => true,
@@ -88,7 +97,7 @@ class Files
 			}
 
 			// The user can always access his own profile files
-			$p[File::CONTEXT_USER . '/' . $s::getUserId() . '/'] = [
+			$p[File::CONTEXT_USER . '/' . $id . '/'] = [
 				'mkdir' => false,
 				'move' => false,
 				'create' => false,
@@ -98,6 +107,7 @@ class Files
 				'share' => false,
 			];
 		}
+
 
 		// Subdirectories can be managed by member managemnt
 		$p[File::CONTEXT_USER . '//'] = [
@@ -260,12 +270,6 @@ class Files
 		$db->begin();
 
 		foreach ($db->iterate($query, ...$params) as $row) {
-			// Remove deleted/moved files
-			if (FILE_STORAGE_BACKEND != 'SQLite' && !Files::callStorage('exists', $row->path)) {
-				$db->delete('files_search', 'path = ?', $row->path);
-				continue;
-			}
-
 			$out[] = $row;
 		}
 
@@ -279,20 +283,23 @@ class Files
 	 * This is not recursive and will only return files and directories
 	 * directly in the specified $parent path.
 	 */
-	static public function list(string $parent = ''): array
+	static public function list(?string $parent = null): array
 	{
-		if ($parent !== '') {
+		$params = [];
+		$db = DB::getInstance();
+
+		if ($parent === '') {
+			$where = $db->where('parent', 'IN', array_keys(File::CONTEXTS_NAMES));
+		}
+		else {
 			File::validatePath($parent);
+			$where = 'parent = ?';
+			$params[] = $parent;
 		}
 
-		$dir = self::get($parent);
+		$sql = sprintf('SELECT * FROM @TABLE WHERE %s ORDER BY type DESC, name COLLATE U_NOCASE ASC;', $where);
 
-		if ($dir && $dir->type != File::TYPE_DIRECTORY) {
-			return [$dir];
-		}
-
-		// Update this path
-		return self::callStorage('list', $parent);
+		return EM::getInstance(File::class)->all($sql, ...$params);
 	}
 
 
@@ -306,7 +313,13 @@ class Files
 			return self::listForContext(File::CONTEXT_USER, $path);
 		}
 
-		foreach (self::listForContext(File::CONTEXT_USER, $path) as $dir) {
+		$list = self::listForContext(File::CONTEXT_USER, $path);
+
+		if (!$list) {
+			return [];
+		}
+
+		foreach ($list as $dir) {
 			foreach (Files::list($dir->path) as $file) {
 				$files[] = $file;
 			}
@@ -318,10 +331,15 @@ class Files
 	/**
 	 * Returns a list of files or directories matching a glob pattern
 	 * only * and ? characters are supported in pattern
+	 * Sub-directories are not returned
 	 */
 	static public function glob(string $pattern): array
 	{
-		return self::callStorage('glob', $pattern);
+		return EM::getInstance(File::class)->all(
+			'SELECT * FROM @TABLE WHERE path GLOB ? AND path NOT GLOB ? ORDER BY type DESC, name COLLATE U_NOCASE ASC;',
+			$pattern,
+			$pattern . '/*'
+		);
 	}
 
 	static public function zipAll(?string $target = null): void
@@ -350,7 +368,13 @@ class Files
 
 		foreach ($paths as $path) {
 			foreach (Files::listRecursive($path, $session, false) as $file) {
-				$zip->add($file->path, null, $file->fullpath());
+				$pointer = $file->getReadOnlyPointer();
+				$path = !$pointer ? $file->getLocalFilePath() : null;
+				$zip->add($file->path, null, $path, $pointer);
+
+				if ($pointer) {
+					fclose($pointer);
+				}
 			}
 		}
 
@@ -388,7 +412,7 @@ class Files
 			$path .= '/' . $ref;
 		}
 
-		return self::list($path);
+		return self::list($path) ?? [];
 	}
 
 	/**
@@ -415,99 +439,10 @@ class Files
 	}
 
 	/**
-	 * Copy all files from a storage backend to another one
-	 * This can be used to move from SQLite to FileSystem for example
-	 * Note that this only copies files, and is not removing them from the source storage backend.
+	 * Returns a file, if it doesn't exist, NULL is returned
+	 * If the file exists in DB but not in storage, it is deleted from DB
 	 */
-	static public function migrateStorage(string $from, string $to, $from_config = null, $to_config = null, ?callable $callback = null): void
-	{
-		$from = __NAMESPACE__ . '\\Storage\\' . $from;
-		$to = __NAMESPACE__ . '\\Storage\\' . $to;
-
-		if (!class_exists($from)) {
-			throw new \InvalidArgumentException('Invalid storage: ' . $from);
-		}
-
-		if (!class_exists($to)) {
-			throw new \InvalidArgumentException('Invalid storage: ' . $to);
-		}
-
-		call_user_func([$from, 'configure'], $from_config);
-		call_user_func([$to, 'configure'], $to_config);
-
-		try {
-			call_user_func([$from, 'checkLock']);
-			call_user_func([$to, 'checkLock']);
-
-			call_user_func([$from, 'lock']);
-			call_user_func([$to, 'lock']);
-
-			$db = DB::getInstance();
-			$db->begin();
-			$i = 0;
-
-			self::migrateDirectory($from, $to, '', $i, $callback);
-		}
-		catch (UserException $e) {
-			throw new \RuntimeException('Migration failed', 0, $e);
-		}
-		finally {
-			$db->commit();
-			call_user_func([$from, 'unlock']);
-			call_user_func([$to, 'unlock']);
-		}
-	}
-
-	static protected function migrateDirectory(string $from, string $to, string $path, int &$i, ?callable $callback)
-	{
-		$db = DB::getInstance();
-
-		foreach (call_user_func([$from, 'list'], $path) as $file) {
-			if (!$file->parent && $file->name == '.lock') {
-				// Ignore lock file
-				continue;
-			}
-
-			if (++$i >= 100) {
-				$db->commit();
-				$db->begin();
-				$i = 0;
-			}
-
-			if ($file->type == File::TYPE_DIRECTORY) {
-				call_user_func([$to, 'mkdir'], $file);
-				self::migrateDirectory($from, $to, $file->path, $i, $callback);
-			}
-			else {
-				$from_path = call_user_func([$from, 'getFullPath'], $file);
-				call_user_func([$to, 'storePath'], $file, $from_path);
-			}
-
-			if (null !== $callback) {
-				$callback($file);
-			}
-
-			unset($file);
-		}
-	}
-
-	/**
-	 * Delete all files from a storage backend
-	 */
-	static public function truncateStorage(string $backend, $config = null): void
-	{
-		$backend = __NAMESPACE__ . '\\Storage\\' . $backend;
-
-		call_user_func([$backend, 'configure'], $config);
-
-		if (!class_exists($backend)) {
-			throw new \InvalidArgumentException('Invalid storage: ' . $backend);
-		}
-
-		call_user_func([$backend, 'truncate']);
-	}
-
-	static public function get(string $path, int $type = null): ?File
+	static public function get(string $path): ?File
 	{
 		// Root contexts always exist, same with root itself
 		if ($path == '' || array_key_exists($path, File::CONTEXTS_NAMES)) {
@@ -526,9 +461,14 @@ class Files
 			return null;
 		}
 
-		$file = self::callStorage('get', $path);
+		$file = EM::findOne(File::class, 'SELECT * FROM @TABLE WHERE path = ? LIMIT 1;', $path);
 
-		if (!$file || ($type && $file->type != $type)) {
+		if (!$file) {
+			return null;
+		}
+
+		if (!self::callStorage('exists', $file->path)) {
+			$file->delete();
 			return null;
 		}
 
@@ -541,7 +481,7 @@ class Files
 			return true;
 		}
 
-		return self::callStorage('exists', $path);
+		return DB::getInstance()->test('files', 'path = ?', $path);
 	}
 
 	static public function getFromURI(string $uri): ?File
@@ -614,29 +554,16 @@ class Files
 		return FILE_STORAGE_QUOTA ?? self::callStorage('getQuota');
 	}
 
-	static public function getUsedQuota(bool $force_refresh = false): float
+	static public function getUsedQuota(): float
 	{
-		if ($force_refresh || Static_Cache::expired('used_quota', 3600)) {
-			$quota = self::callStorage('getTotalSize');
-			Static_Cache::store('used_quota', $quota);
-		}
-		else {
-			$quota = (float) Static_Cache::get('used_quota');
-		}
-
-		return $quota;
+		return (float) DB::getInstance()->firstColumn('SELECT SUM(size) FROM files;');
 	}
 
-	static public function getRemainingQuota(bool $force_refresh = false): float
+	static public function getRemainingQuota(): float
 	{
-		if (FILE_STORAGE_QUOTA !== null) {
-			$quota = FILE_STORAGE_QUOTA - self::getUsedQuota($force_refresh);
-		}
-		else {
-			$quota = self::callStorage('getRemainingQuota');
-		}
+		$quota = self::getQuota();
 
-		return max(0, $quota);
+		return max(0, $quota - self::getUsedQuota());
 	}
 
 	static public function checkQuota(int $size = 0): void
@@ -645,48 +572,11 @@ class Files
 			return;
 		}
 
-		$remaining = self::getRemainingQuota(true);
+		$remaining = self::getRemainingQuota();
 
 		if (($remaining - (float) $size) < 0) {
 			throw new ValidationException('L\'espace disque est insuffisant pour réaliser cette opération');
 		}
-	}
-
-	static public function getVirtualTableName(): string
-	{
-		if (FILE_STORAGE_BACKEND == 'SQLite') {
-			return 'files';
-		}
-
-		return 'tmp_files';
-	}
-
-	static public function syncVirtualTable(string $parent = '', bool $recursive = false)
-	{
-		if (FILE_STORAGE_BACKEND == 'SQLite') {
-			// No need to create a virtual table, use the real one
-			return;
-		}
-
-		$db = DB::getInstance();
-		$db->begin();
-
-		$db->exec('CREATE TEMP TABLE IF NOT EXISTS tmp_files AS SELECT * FROM files WHERE 0;');
-
-		foreach (Files::list($parent) as $file) {
-			// Ignore additional directories
-			if ($parent == '' && !array_key_exists($file->name, File::CONTEXTS_NAMES)) {
-				continue;
-			}
-
-			$db->insert('tmp_files', $file->asArray(true));
-
-			if ($recursive && $file->type === $file::TYPE_DIRECTORY) {
-				self::syncVirtualTable($file->path, $recursive);
-			}
-		}
-
-		$db->commit();
 	}
 
 	static protected function create(string $parent, string $name, array $source = []): File
@@ -704,7 +594,7 @@ class Files
 
 		$target = $parent . '/' . $name;
 
-		$file = Files::callStorage('get', $target) ?? new File;
+		$file = new File;
 		$file->path = $target;
 		$file->parent = $parent;
 		$file->name = $name;
@@ -738,6 +628,8 @@ class Files
 		if ($file->mime == 'application/x-empty' && !$file->size) {
 			$file->set('mime', 'text/plain');
 		}
+
+		$file->save();
 
 		return $file;
 	}
@@ -940,6 +832,7 @@ class Files
 		]);
 
 		$file->modified = new \DateTime;
+		$file->save();
 
 		Files::callStorage('mkdir', $file);
 
@@ -998,4 +891,22 @@ class Files
 		return array_intersect_key(File::CONTEXTS_NAMES, array_flip($access));
 	}
 
+	/**
+	 * Remove empty directories, except in documents
+	 */
+	static public function pruneEmptyDirectories(): void
+	{
+		$sql = sprintf('SELECT * FROM @TABLE a
+			WHERE type = %d
+				AND (path NOT LIKE \'%s/\')
+				AND (SELECT COUNT(*) FROM @TABLE b WHERE b.parent = a.path AND type = %d) = 0;',
+			File::TYPE_DIRECTORY,
+			File::CONTEXT_DOCUMENTS,
+			File::TYPE_FILE
+		);
+
+		foreach (EM::getInstance(File::class)->all($sql) as $dir) {
+			$dir->delete();
+		}
+	}
 }

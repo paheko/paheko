@@ -289,21 +289,21 @@ class Config extends Entity
 			// Force favicon format
 			if ($key == 'favicon') {
 				$format = 'png';
-				$i = new Image($f->fullpath());
+				$i = $f->asImageObject();
 				$i->cropResize(32, 32);
 				$f->setContent($i->output($format, true));
 			}
 			// Force icon format
 			else if ($key == 'icon') {
 				$format = 'png';
-				$i = new Image($f->fullpath());
+				$i = $f->asImageObject();
 				$i->cropResize(512, 512);
 				$f->setContent($i->output($format, true));
 			}
 			// Force signature size
 			else if ($key == 'signature') {
 				$format = 'png';
-				$i = new Image($f->fullpath());
+				$i = $f->asImageObject();
 				$i->resize(200, 200);
 				$f->setContent($i->output($format, true));
 			}

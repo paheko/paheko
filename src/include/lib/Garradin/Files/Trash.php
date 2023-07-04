@@ -24,11 +24,9 @@ class Trash
 
 	static public function list(): DynamicList
 	{
-		Files::syncVirtualTable(File::CONTEXT_TRASH, true);
-
 		$columns = self::LIST_COLUMNS;
 
-		$tables = Files::getVirtualTableName();
+		$tables = File::TABLE;
 
 		$conditions = sprintf('type = %d AND path LIKE :path', File::TYPE_FILE);
 
@@ -37,31 +35,6 @@ class Trash
 		$list->setParameter('path', File::CONTEXT_TRASH . '/%');
 
 		return $list;
-	}
-
-	static public function pruneEmptyDirectories(): void
-	{
-		$paths = [];
-
-		foreach (Files::listRecursive(File::CONTEXT_TRASH, null, true) as $file) {
-			if ($file->isDir()) {
-				if (!isset($paths[$file->path])) {
-					$paths[$file->path] = 0;
-				}
-			}
-
-			if (!isset($paths[$file->parent])) {
-				$paths[$file->parent] = 0;
-			}
-
-			$paths[$file->parent]++;
-		}
-
-		foreach ($paths as $path => $count) {
-			if (!$count) {
-				Files::get($path)->delete();
-			}
-		}
 	}
 
 	static public function clean(string $expiry = '-30 days'): void

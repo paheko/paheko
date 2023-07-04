@@ -132,6 +132,10 @@ $db->exec('DELETE FROM files_search WHERE path NOT LIKE \'web/%\';');
 
 foreach (Files::listRecursive('', null, false) as $file) {
 	$file->indexForSearch();
+
+	// Store file hash
+	$file->rehash();
+	$file->save();
 }
 
 $db->commitSchemaUpdate();

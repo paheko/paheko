@@ -22,6 +22,11 @@ interface StorageInterface
 	static public function storeContent(File $file, string $source_content): bool;
 
 	/**
+	 * Stores a file from a file pointer
+	 */
+	static public function storePointer(File $file, $pointer): bool;
+
+	/**
 	 * Create an empty directory
 	 */
 	static public function mkdir(File $file): bool;
@@ -29,24 +34,16 @@ interface StorageInterface
 	/**
 	 * Should return full local file access path.
 	 * If storage backend cannot store the file locally, return NULL.
-	 * In that case a subsequent call to fetch() will be done.
+	 * In that case a subsequent call to getReadOnlyPointer() will be done.
 	 */
-	static public function getFullPath(File $file): ?string;
+	static public function getLocalFilePath(File $file): ?string;
 
 	/**
 	 * Returns a read-only file pointer (resource) to the file contents
+	 * If the storage backedn cannot provide a pointer, return NULL.
+	 * In that case a subsequent call to getLocalFilePath() will be done.
 	 */
 	static public function getReadOnlyPointer(File $file);
-
-	/**
-	 * Returns the binary of a content to php://output
-	 */
-	static public function display(File $file): void;
-
-	/**
-	 * Returns the binary content of a file
-	 */
-	static public function fetch(File $file): string;
 
 	/**
 	 * Delete a file
@@ -56,17 +53,12 @@ interface StorageInterface
 	/**
 	 * Change file mtime
 	 */
-	static public function touch(string $path, $date = null): bool;
+	static public function touch(string $path, \DateTimeInterface $date = null): bool;
 
 	/**
 	 * Return TRUE if file exists
 	 */
 	static public function exists(string $path): bool;
-
-	/**
-	 * Return a File object from a given path or NULL if the file doesn't exist
-	 */
-	static public function get(string $path): ?File;
 
 	/**
 	 * Return an array of File objects for a given path
@@ -80,19 +72,9 @@ interface StorageInterface
 	static public function listDirectoriesRecursively(string $path): array;
 
 	/**
-	 * Return recursive directory size
-	 */
-	static public function getDirectorySize(string $path): int;
-
-	/**
 	 * Moves a file to a new path, when its name or path has changed
 	 */
 	static public function move(File $file, string $new_path): bool;
-
-	/**
-	 * Return total size of used space by files stored in this backed
-	 */
-	static public function getTotalSize(): float;
 
 	/**
 	 * Return total disk space
@@ -123,7 +105,7 @@ interface StorageInterface
 	static public function unlock(): void;
 
 	/**
-	 * Throw a \RuntimeException if the lock is active
+	 * Return TRUE if storage is locked against changes
 	 */
-	static public function checkLock(): void;
+	static public function isLocked(): bool;
 }

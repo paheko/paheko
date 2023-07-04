@@ -10,6 +10,7 @@ use Garradin\Config;
 use Garradin\Entity;
 use Garradin\Form;
 use Garradin\Log;
+use Garradin\Template;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\ValidationException;
@@ -22,11 +23,13 @@ use Garradin\Email\Templates as EmailTemplates;
 use Garradin\Users\DynamicFields;
 use Garradin\Users\Session;
 use Garradin\Users\Users;
+use Garradin\Services\Services_User;
 
 use Garradin\Entities\Files\File;
 
 use KD2\SMTP;
 use KD2\DB\EntityManager as EM;
+use KD2\ZipWriter;
 
 /**
  * WARNING: do not use $user->property = 'value' to set a property value on this class
@@ -592,5 +595,43 @@ class User extends Entity
 		}
 
 		return $out;
+	}
+
+	public function downloadExport(): void
+	{
+		$services_list = Services_User::perUserList($this->id);
+		$services_list->setPageSize(null);
+
+		$export_data = [
+			'user'     => $this,
+			'services' => $services_list->asArray(true),
+		];
+
+		$tpl = Template::getInstance();
+		$tpl->assign('user', $this);
+		$tpl->assign(compact('services_list'));
+		$html = $tpl->fetch('me/export.tpl');
+
+		$name = sprintf('%s - Donnees - %s.zip', Config::getInstance()->get('org_name'), $this->name());
+		header('Content-type: application/zip');
+		header(sprintf('Content-Disposition: attachment; filename="%s"', $name));
+
+		$zip = new ZipWriter('php://output');
+		$zip->setCompression(9);
+
+		$zip->add('info.html', $html);
+		$zip->add('info.json', json_encode($export_data));
+
+		foreach ($this->listFiles() as $file) {
+			$pointer = $file->getReadOnlyPointer();
+			$path = !$pointer ? $file->getLocalFilePath() : null;
+			$zip->add($file->path, null, $path, $pointer);
+
+			if ($pointer) {
+				fclose($pointer);
+			}
+		}
+
+		$zip->close();
 	}
 }

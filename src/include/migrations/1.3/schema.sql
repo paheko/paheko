@@ -507,6 +507,7 @@ CREATE TABLE IF NOT EXISTS files
 	size INT NULL,
 	modified TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(modified) IS NOT NULL AND datetime(modified) = modified),
 	image INT NOT NULL DEFAULT 0,
+	md5 TEXT NULL,
 
 	CHECK (type = 2 OR (mime IS NOT NULL AND size IS NOT NULL))
 );
@@ -521,7 +522,6 @@ CREATE TABLE IF NOT EXISTS files_contents
 -- Files contents (empty if using another storage backend)
 (
 	id INTEGER NOT NULL PRIMARY KEY REFERENCES files(id) ON DELETE CASCADE,
-	compressed INT NOT NULL DEFAULT 0,
 	content BLOB NOT NULL
 );
 

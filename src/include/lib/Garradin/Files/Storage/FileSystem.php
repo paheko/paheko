@@ -54,7 +54,7 @@ class FileSystem implements StorageInterface
 
 	static public function storePath(File $file, string $source_path): bool
 	{
-		$target = self::getFullPath($file);
+		$target = self::getLocalFilePath($file);
 		self::ensureDirectoryExists(dirname($target));
 
 		$return = copy($source_path, $target);
@@ -68,7 +68,7 @@ class FileSystem implements StorageInterface
 
 	static public function storeContent(File $file, string $source_content): bool
 	{
-		$target = self::getFullPath($file);
+		$target = self::getLocalFilePath($file);
 		self::ensureDirectoryExists(dirname($target));
 
 		$return = file_put_contents($target, $source_content) === false ? false : true;
@@ -82,7 +82,7 @@ class FileSystem implements StorageInterface
 
 	static public function storePointer(File $file, $pointer): bool
 	{
-		$target = self::getFullPath($file);
+		$target = self::getLocalFilePath($file);
 		self::ensureDirectoryExists(dirname($target));
 
 		$fp = fopen($target, 'w');
@@ -100,16 +100,13 @@ class FileSystem implements StorageInterface
 
 	static public function mkdir(File $file): bool
 	{
-		return Utils::safe_mkdir(self::getFullPath($file), 0777, true);
+		return Utils::safe_mkdir(self::getLocalFilePath($file), 0777, true);
 	}
 
-	static public function touch(string $path, $date = null): bool
+	static public function touch(string $path, \DateTimeInterface $date = null): bool
 	{
-		if ($date instanceof \DateTimeInterface) {
-			$date = $date->getTimestamp();
-		}
-
-		return touch(self::_getRealPath($path), $date ?? time());
+		$date = $date ? $date->getTimestamp() : time();
+		return touch(self::_getRealPath($path), $date);
 	}
 
 	static protected function _getRealPath(string $path): ?string
@@ -121,29 +118,29 @@ class FileSystem implements StorageInterface
 		return self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
 	}
 
-	static public function getFullPath(File $file): ?string
+	static public function getLocalFilePath(File $file): ?string
 	{
 		return self::_getRealPath($file->path);
 	}
 
 	static public function getReadOnlyPointer(File $file)
 	{
-		return fopen(self::getFullPath($file), 'rb');
+		return fopen(self::getLocalFilePath($file), 'rb');
 	}
 
 	static public function display(File $file): void
 	{
-		readfile(self::getFullPath($file));
+		readfile(self::getLocalFilePath($file));
 	}
 
 	static public function fetch(File $file): string
 	{
-		return file_get_contents(self::getFullPath($file));
+		return file_get_contents(self::getLocalFilePath($file));
 	}
 
 	static public function delete(File $file): bool
 	{
-		$path = self::getFullPath($file);
+		$path = self::getLocalFilePath($file);
 
 		if ($file->type == File::TYPE_DIRECTORY) {
 			return Utils::deleteRecursive($path, true);
@@ -154,7 +151,7 @@ class FileSystem implements StorageInterface
 
 	static public function move(File $file, string $new_path): bool
 	{
-		$source = self::getFullPath($file);
+		$source = self::getLocalFilePath($file);
 		$target = self::_getRealPath($new_path);
 
 		self::ensureDirectoryExists(dirname($target));
@@ -165,17 +162,6 @@ class FileSystem implements StorageInterface
 	static public function exists(string $path): bool
 	{
 		return file_exists(self::_getRealPath($path));
-	}
-
-	static public function get(string $path): ?File
-	{
-		$file = new \SplFileInfo(self::_getRealPath($path));
-
-		if (!$file->getRealPath()) {
-			return null;
-		}
-
-		return self::_SplToFile($file);
 	}
 
 	static protected function _SplToFile(\SplFileInfo $spl): File
@@ -239,25 +225,6 @@ class FileSystem implements StorageInterface
 		return Utils::knatcasesort($files);
 	}
 
-	static public function glob(string $path)
-	{
-		$fullpath = self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
-		$fullpath = rtrim($fullpath, DIRECTORY_SEPARATOR);
-
-		if (!file_exists($fullpath)) {
-			return [];
-		}
-
-		$files = [];
-
-		foreach (glob($fullpath) as $file) {
-			$file = new \SplFileInfo($file);
-			$files[$file->getType() . '_' .$file->getFilename()] = self::_SplToFile($file);
-		}
-
-		return Utils::knatcasesort($files);
-	}
-
 	static public function listDirectoriesRecursively(string $path): array
 	{
 		$fullpath = self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
@@ -268,26 +235,6 @@ class FileSystem implements StorageInterface
 		}
 
 		return self::_recurseGlob($fullpath, '*', \GLOB_ONLYDIR);
-	}
-
-	static public function getDirectorySize(string $path): int
-	{
-		$fullpath = self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
-		$fullpath = rtrim($fullpath, DIRECTORY_SEPARATOR);
-
-		$total = 0;
-
-		foreach (glob($fullpath . '/*', GLOB_NOSORT) as $f) {
-			if (is_dir($f)) {
-				$f = substr($f, strlen($path) + 1);
-				$total += self::getDirectorySize($f);
-			}
-			else {
-				$total += filesize($f);
-			}
-		}
-
-		return $total;
 	}
 
 	static protected function _recurseGlob(string $path, string $pattern = '*', int $flags = 0): array
@@ -314,35 +261,6 @@ class FileSystem implements StorageInterface
 		}
 
 		return $list;
-	}
-
-	static public function getTotalSize(): float
-	{
-		if (null !== self::$_size) {
-			return self::$_size;
-		}
-
-		$total = 0;
-
-		$path = self::_getRoot();
-
-		foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS), \RecursiveIteratorIterator::LEAVES_ONLY, \RecursiveIteratorIterator::CATCH_GET_CHILD) as $p) {
-			if (substr($p->getBaseName(), 0, 1) == '.') {
-				// Ignore dot files
-				continue;
-			}
-
-			try {
-				$total += $p->getSize();
-			}
-			catch (\RuntimeException $e) {
-				// Ignore file that vanished
-			}
-		}
-
-		self::$_size = (float) $total;
-
-		return self::$_size;
 	}
 
 	/**
@@ -376,12 +294,8 @@ class FileSystem implements StorageInterface
 		Utils::safe_unlink(self::_getRoot() . DIRECTORY_SEPARATOR . '.lock');
 	}
 
-	static public function checkLock(): void
+	static public function isLocked(): bool
 	{
-		$lock = file_exists(self::_getRoot() . DIRECTORY_SEPARATOR . '.lock');
-
-		if ($lock) {
-			throw new \RuntimeException('FileSystem storage is locked');
-		}
+		return file_exists(self::_getRoot() . DIRECTORY_SEPARATOR . '.lock');
 	}
 }

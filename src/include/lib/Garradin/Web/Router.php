@@ -188,25 +188,26 @@ class Router
 		$log .= vsprintf($message, $params) . "\n\n";
 	}
 
-	static public function xSendFile(string $path): bool
+	static public function isXSendFileEnabled(): bool
 	{
-		// Utilisation de XSendFile si disponible
-		if (ENABLE_XSENDFILE && isset($_SERVER['SERVER_SOFTWARE']))
-		{
-			if (stristr($_SERVER['SERVER_SOFTWARE'], 'apache')
-				&& function_exists('apache_get_modules')
-				&& in_array('mod_xsendfile', apache_get_modules()))
-			{
-				header('X-Sendfile: ' . $path);
-				return true;
-			}
-			else if (stristr($_SERVER['SERVER_SOFTWARE'], 'lighttpd'))
-			{
-				header('X-Sendfile: ' . $path);
-				return true;
-			}
+		if (!ENABLE_XSENDFILE || !isset($_SERVER['SERVER_SOFTWARE'])) {
+			return false;
+		}
+
+		if (stristr($_SERVER['SERVER_SOFTWARE'], 'apache')
+			&& function_exists('apache_get_modules')
+			&& in_array('mod_xsendfile', apache_get_modules())) {
+			return true;
+		}
+		else if (stristr($_SERVER['SERVER_SOFTWARE'], 'lighttpd')) {
+			return true;
 		}
 
 		return false;
+	}
+
+	static public function xSendFile(string $path): void
+	{
+		header('X-Sendfile: ' . $path);
 	}
 }

@@ -121,7 +121,10 @@ class Storage extends AbstractStorage
 			return null;
 		}
 
-		if (FILE_STORAGE_BACKEND == 'FileSystem' && Router::xSendFile($file->fullpath())) {
+		$path = $file->getLocalFilePath();
+
+		if ($path && Router::isXSendFileEnabled()) {
+			Router::xSendFile($path);
 			return ['stop' => true];
 		}
 
@@ -177,7 +180,7 @@ class Storage extends AbstractStorage
 					return null;
 				}
 
-				return md5_file($file->fullpath());
+				return $file->md5();
 			// NextCloud stuff
 			case NextCloud::PROP_NC_HAS_PREVIEW:
 				return $file->image ? 'true' : 'false';
@@ -375,7 +378,7 @@ class Storage extends AbstractStorage
 		}
 
 		if (!$move) {
-			if ($source->size > Files::getRemainingQuota(true)) {
+			if ($source->size > Files::getRemainingQuota()) {
 				throw new WebDAV_Exception('Your quota is exhausted', 403);
 			}
 		}

@@ -17,6 +17,7 @@ class Users
 			'label' => '',
 		],
 		'path' => [
+			'select' => 'parent',
 		],
 		'id' => [
 			'label' => null,
@@ -26,20 +27,18 @@ class Users
 
 	static public function list(): DynamicList
 	{
-		Files::syncVirtualTable(File::CONTEXT_USER);
+		Files::pruneEmptyDirectories();
 
 		$columns = self::LIST_COLUMNS;
 		$columns['identity']['select'] = DF::getNameFieldsSQL('u');
 		$columns['identity']['label'] = DF::getNameLabel();
 		$columns['number']['select'] = DF::getNumberField();
 
-		$tables = sprintf('%s f INNER JOIN users u ON u.id = f.name', Files::getVirtualTableName());
+		$tables = sprintf('%s f INNER JOIN users u ON f.parent = \'%s/\' || u.id', File::TABLE, File::CONTEXT_USER);
 
-		// Only fetch directories with an ID as the name
-		$conditions = sprintf('f.parent = \'%s\' AND f.type = %d AND printf("%%d", f.name) = name', File::CONTEXT_USER, File::TYPE_DIRECTORY);
-
-		$list = new DynamicList($columns, $tables, $conditions);
+		$list = new DynamicList($columns, $tables);
 		$list->orderBy('number', false);
+		$list->groupBy('u.id');
 		$list->setCount('COUNT(DISTINCT u.id)');
 
 		return $list;
