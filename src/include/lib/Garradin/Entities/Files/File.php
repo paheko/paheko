@@ -374,6 +374,7 @@ class File extends Entity
 
 		$this->set('parent', Utils::dirname($new_path));
 		$this->set('path', $new_path);
+		$this->set('name', $name);
 		$this->save();
 
 		return $return;

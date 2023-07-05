@@ -195,13 +195,25 @@ class Files
 			'share' => false,
 		];
 
-		$p[File::CONTEXT_DOCUMENTS] = [
+		// Documents: you can do everything as long as you have access
+		$p[File::CONTEXT_DOCUMENTS . '/'] = [
 			'mkdir' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
 			'move' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
 			'create' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
 			'read' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_READ),
 			'write' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
 			'delete' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_ADMIN),
+			'share' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
+		];
+
+		// The root directory cannot be deleted or renamed/moved
+		$p[File::CONTEXT_DOCUMENTS] = [
+			'mkdir' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
+			'move' => false,
+			'create' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
+			'read' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_READ),
+			'write' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
+			'delete' => false,
 			'share' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
 		];
 
