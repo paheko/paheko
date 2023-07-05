@@ -500,7 +500,7 @@ CREATE TABLE IF NOT EXISTS files
 (
 	id INTEGER NOT NULL PRIMARY KEY,
 	path TEXT NOT NULL,
-	parent TEXT NOT NULL,
+	parent TEXT NULL REFERENCES files(path) ON DELETE CASCADE ON UPDATE CASCADE,
 	name TEXT NOT NULL, -- File name
 	type INTEGER NOT NULL, -- File type, 1 = file, 2 = directory
 	mime TEXT NULL,
@@ -538,10 +538,10 @@ CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4
 CREATE TABLE IF NOT EXISTS web_pages
 (
 	id INTEGER NOT NULL PRIMARY KEY,
-	parent TEXT NOT NULL, -- Parent path, empty = web root
-	path TEXT NOT NULL, -- Full page directory name
+	parent TEXT NULL REFERENCES web_pages(path) ON DELETE CASCADE ON UPDATE CASCADE, -- Parent path, NULL = root
+	path TEXT NOT NULL, -- Full page path
+	dir_path TEXT NOT NULL REFERENCES files(path) ON DELETE CASCADE ON UPDATE CASCADE, -- Full page directory name
 	uri TEXT NOT NULL, -- Page identifier
-	file_path TEXT NOT NULL, -- Full file path for contents
 	type INTEGER NOT NULL, -- 1 = Category, 2 = Page
 	status TEXT NOT NULL,
 	format TEXT NOT NULL,
@@ -552,8 +552,8 @@ CREATE TABLE IF NOT EXISTS web_pages
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS web_pages_path ON web_pages (path);
+CREATE UNIQUE INDEX IF NOT EXISTS web_pages_dir_path ON web_pages (dir_path);
 CREATE UNIQUE INDEX IF NOT EXISTS web_pages_uri ON web_pages (uri);
-CREATE UNIQUE INDEX IF NOT EXISTS web_pages_file_path ON web_pages (file_path);
 CREATE INDEX IF NOT EXISTS web_pages_parent ON web_pages (parent);
 CREATE INDEX IF NOT EXISTS web_pages_published ON web_pages (published);
 CREATE INDEX IF NOT EXISTS web_pages_title ON web_pages (title);

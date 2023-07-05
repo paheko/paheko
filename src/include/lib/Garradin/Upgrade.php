@@ -151,11 +151,6 @@ class Upgrade
 				require ROOT . '/include/migrations/1.3/1.3.0.php';
 			}
 
-			// This is after 1.3.0 because it requires the files schema to have been updated
-			if (version_compare($v, '1.2.7', '<')) {
-				require ROOT . '/include/migrations/1.2/1.2.7.php';
-			}
-
 			Plugins::upgradeAllIfRequired();
 
 			// Vérification de la cohérence des clés étrangères

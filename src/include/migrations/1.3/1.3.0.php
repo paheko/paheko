@@ -3,9 +3,12 @@
 namespace Garradin;
 
 use Garradin\Files\Files;
+use Garradin\Files\Storage;
+use Garradin\Web\Sync as WebSync;
 use Garradin\Entities\Files\File;
 use Garradin\UserTemplate\Modules;
 use KD2\DB\DB_Exception;
+use KD2\DB\EntityManager;
 
 $db->beginSchemaUpdate();
 
@@ -74,6 +77,76 @@ foreach ($df->all() as $name => $field) {
 // Migrate other stuff
 $db->import(ROOT . '/include/migrations/1.3/1.3.0.sql');
 
+// Reindex all files in search, as moving files was broken
+$db->exec('DELETE FROM files_search WHERE path NOT LIKE \'web/%\';');
+
+Files::ensureContextsExists();
+
+if (FILE_STORAGE_BACKEND == 'FileSystem') {
+	Storage::call(FILE_STORAGE_BACKEND, 'configure', FILE_STORAGE_CONFIG);
+
+	// Move skeletons to new path
+	if (file_exists(FILE_STORAGE_CONFIG . '/skel')) {
+		if (!file_exists(FILE_STORAGE_CONFIG . '/modules')) {
+			@mkdir(FILE_STORAGE_CONFIG . '/modules', 0777, true);
+		}
+
+		rename(FILE_STORAGE_CONFIG . '/skel', FILE_STORAGE_CONFIG . '/modules/web');
+	}
+
+	// now we store file metadata in DB
+	Storage::sync(FILE_STORAGE_BACKEND, FILE_STORAGE_CONFIG);
+
+	WebSync::sync();
+}
+else {
+	// Move skeletons from skel/ to modules/web/
+	Files::mkdir('modules/web');
+	$db->exec('UPDATE files SET path = REPLACE(path, \'skel/\', \'modules/web\'), parent = REPLACE(parent, \'skel/\', \'modules/web\')
+		WHERE parent LIKE \'skel/%\';');
+}
+
+// Prepend "./" to includes functions file parameter in web skeletons
+foreach (Files::list('modules/web') as $file) {
+	if ($file->type == $file::TYPE_DIRECTORY) {
+		continue;
+	}
+
+	foreach (Files::list(File::CONTEXT_MODULES . '/web') as $file) {
+		if ($file->type != File::TYPE_FILE || !preg_match('/\.(?:txt|css|js|html|htm)$/', $file->name)) {
+			continue;
+		}
+
+		$file->setContent(preg_replace('/(\s+file=")(\w+)/', '$1./$2', $file->fetch()));
+	}
+}
+
+foreach (Files::listRecursive(null, null, false) as $file) {
+	if ($file->context() == $file::CONTEXT_WEB && $file->name == 'index.txt') {
+		$file->delete();
+		continue;
+	}
+
+	$file->indexForSearch();
+
+	if (!$file->md5) {
+		// Store file hash
+		$file->rehash();
+	}
+
+	$file->save();
+}
+
+// Migrate web_pages
+$db->exec('
+	INSERT INTO web_pages
+		SELECT id,
+			CASE WHEN parent = \'\' THEN NULL ELSE parent END,
+			path, \'web/\' || path, uri, type, status, format, published, modified, title, content
+		FROM web_pages_old;
+	DROP TABLE web_pages_old;
+');
+
 // Update searches
 foreach ($db->iterate('SELECT * FROM searches;') as $row) {
 	if ($row->type == 'json') {
@@ -101,42 +174,6 @@ $files = $db->firstColumn('SELECT value FROM config WHERE key = \'files\';');
 $files = json_decode($files);
 $files->signature = null;
 $db->exec(sprintf('REPLACE INTO config (key, value) VALUES (\'files\', %s);', $db->quote(json_encode($files))));
-
-// Move skeletons from skel/ to skel/web/
-// Don't use Files::get to get around validatePath security
-$list = Files::list('skel');
-
-foreach ($list as $file) {
-	if ($file->name == 'web') {
-		continue;
-	}
-
-	$file->move(File::CONTEXT_MODULES . '/web', false);
-
-	if ($file->type == $file::TYPE_DIRECTORY) {
-		continue;
-	}
-
-	// Prepend "./" to includes functions file parameter
-	foreach (Files::list(File::CONTEXT_MODULES . '/web') as $file) {
-		if ($file->type != File::TYPE_FILE || !preg_match('/\.(?:txt|css|js|html|htm)$/', $file->name)) {
-			continue;
-		}
-
-		$file->setContent(preg_replace('/(\s+file=")(\w+)/', '$1./$2', $file->fetch()));
-	}
-}
-
-// Reindex all files, as moving files was broken
-$db->exec('DELETE FROM files_search WHERE path NOT LIKE \'web/%\';');
-
-foreach (Files::listRecursive('', null, false) as $file) {
-	$file->indexForSearch();
-
-	// Store file hash
-	$file->rehash();
-	$file->save();
-}
 
 $db->commitSchemaUpdate();
 

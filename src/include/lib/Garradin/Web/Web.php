@@ -8,11 +8,8 @@ use Garradin\Files\Files;
 use Garradin\DB;
 use Garradin\DynamicList;
 use Garradin\Utils;
-use Garradin\ValidationException;
 
 use KD2\DB\EntityManager as EM;
-
-use const Garradin\FILE_STORAGE_BACKEND;
 
 class Web
 {
@@ -34,26 +31,36 @@ class Web
 		return $results;
 	}
 
-	static public function listCategories(string $parent): array
+	static protected function getParentClause(?string $parent): string
 	{
-		$sql = 'SELECT * FROM @TABLE WHERE parent = ? AND type = ? ORDER BY title COLLATE U_NOCASE;';
-		return EM::getInstance(Page::class)->all($sql, $parent, Page::TYPE_CATEGORY);
+		if ($parent) {
+			return 'parent = ' . DB::getInstance()->quote($parent);
+		}
+		else {
+			return 'parent IS NULL';
+		}
 	}
 
-	static public function listPages(string $parent, bool $order_by_date = true): array
+	static public function listCategories(?string $parent): array
+	{
+		$sql = sprintf('SELECT * FROM @TABLE WHERE %s AND type = %d ORDER BY title COLLATE U_NOCASE;', self::getParentClause($parent), Page::TYPE_CATEGORY);
+		return EM::getInstance(Page::class)->all($sql);
+	}
+
+	static public function listPages(?string $parent, bool $order_by_date = true): array
 	{
 		$order = $order_by_date ? 'published DESC' : 'title COLLATE U_NOCASE';
-		$sql = sprintf('SELECT * FROM @TABLE WHERE parent = ? AND type = %d ORDER BY %s;', Page::TYPE_PAGE, $order);
-		return EM::getInstance(Page::class)->all($sql, $parent);
+		$sql = sprintf('SELECT * FROM @TABLE WHERE %s AND type = %d ORDER BY %s;', self::getParentClause($parent), Page::TYPE_PAGE, $order);
+		return EM::getInstance(Page::class)->all($sql);
 	}
 
-	static public function listAll(string $parent): array
+	static public function listAll(?string $parent): array
 	{
-		$sql = 'SELECT * FROM @TABLE WHERE parent = ? ORDER BY title COLLATE U_NOCASE;';
+		$sql = sprintf('SELECT * FROM @TABLE WHERE %s ORDER BY title COLLATE U_NOCASE;', self::getParentClause($parent));
 		return EM::getInstance(Page::class)->all($sql, $parent);
 	}
 
-	static public function getDraftsList(string $parent): DynamicList
+	static public function getDraftsList(?string $parent): DynamicList
 	{
 		$list = self::getPagesList($parent);
 		$list->setParameter('status', Page::STATUS_DRAFT);
@@ -61,7 +68,7 @@ class Web
 		return $list;
 	}
 
-	static public function getPagesList(string $parent): DynamicList
+	static public function getPagesList(?string $parent): DynamicList
 	{
 		$columns = [
 			'path' => [
@@ -79,10 +86,9 @@ class Web
 		];
 
 		$tables = Page::TABLE;
-		$conditions = 'parent = :parent AND type = :type AND status = :status';
+		$conditions = self::getParentClause($parent) . ' AND type = :type AND status = :status';
 
 		$list = new DynamicList($columns, $tables, $conditions);
-		$list->setParameter('parent', $parent);
 		$list->setParameter('type', Page::TYPE_PAGE);
 		$list->setParameter('status', Page::STATUS_ONLINE);
 		$list->orderBy('title', false);
@@ -91,24 +97,12 @@ class Web
 
 	static public function get(string $path): ?Page
 	{
-		$page = EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE path = ?;', $path);
-
-		if ($page && !$page->file()) {
-			return null;
-		}
-
-		return $page;
+		return EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE path = ?;', $path);
 	}
 
 	static public function getByURI(string $uri): ?Page
 	{
-		$page = EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE uri = ?;', $uri);
-
-		if ($page && !$page->file()) {
-			return null;
-		}
-
-		return $page;
+		return EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE uri = ?;', $uri);
 	}
 
 	static public function getAttachmentFromURI(string $uri): ?File
@@ -132,10 +126,6 @@ class Web
 		$list = [];
 
 		foreach (EM::getInstance(Page::class)->iterate($sql) as $page) {
-			if (!$page->file()) {
-				continue;
-			}
-
 			$list[$page->uri] = $page;
 		}
 

@@ -119,18 +119,6 @@ class SQLite implements StorageInterface
 		return self::getPointer($file);
 	}
 
-	static public function listDirectoriesRecursively(string $path): array
-	{
-		$files = [];
-		$it = DB::getInstance()->iterate('SELECT path FROM files WHERE (parent = ? OR parent LIKE ?) AND type = ? ORDER BY path;', $path, $path . '/%', File::TYPE_DIRECTORY);
-
-		foreach ($it as $file) {
-			$files[] = substr($file->path, strlen($path) + 1);
-		}
-
-		return $files;
-	}
-
 	static public function exists(string $path): bool
 	{
 		return (bool) DB::getInstance()->firstColumn('SELECT 1 FROM files_contents c INNER JOIN files f ON f.id = c.id WHERE f.path = ?;', $path);
@@ -144,25 +132,6 @@ class SQLite implements StorageInterface
 
 	static public function move(File $file, string $new_path): bool
 	{
-		return true;
-		$cache_id = 'files.' . $file->pathHash();
-		Static_Cache::remove($cache_id);
-
-		$current_path = $file->path;
-		$file->set('path', $new_path);
-		$file->set('parent', Utils::dirname($new_path));
-		$file->set('name', Utils::basename($new_path));
-		$file->save();
-
-		if ($file->type == File::TYPE_DIRECTORY) {
-			// Move sub-directories and sub-files
-			DB::getInstance()->preparedQuery('UPDATE files SET parent = ?, path = TRIM(? || \'/\' || name, \'/\') WHERE parent = ?;', $new_path, $new_path, $current_path);
-		}
-
-		if ($file->parent) {
-			self::touch($file->parent);
-		}
-
 		return true;
 	}
 

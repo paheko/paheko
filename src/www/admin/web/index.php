@@ -39,9 +39,9 @@ else {
 
 $cat = $page && $page->isCategory() ? $page : null;
 
-$categories = Web::listCategories($cat ? $cat->path : '');
-$pages = Web::getPagesList($cat ? $cat->path : '');
-$drafts = Web::getDraftsList($cat ? $cat->path : '');
+$categories = Web::listCategories($cat ? $cat->path : null);
+$pages = Web::getPagesList($cat ? $cat->path : null);
+$drafts = Web::getDraftsList($cat ? $cat->path : null);
 
 $pages->loadFromQueryString();
 $drafts->loadFromQueryString();

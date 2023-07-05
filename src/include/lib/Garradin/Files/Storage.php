@@ -9,6 +9,73 @@ use const Garradin\{FILE_STORAGE_BACKEND, FILE_STORAGE_QUOTA, FILE_STORAGE_CONFI
 
 class Storage
 {
+	static public function sync(string $backend, $config = null): void
+	{
+		$backend = __NAMESPACE__ . '\\Storage\\' . $backend;
+
+		if (!class_exists($backend)) {
+			throw new \InvalidArgumentException('Invalid storage: ' . $backend);
+		}
+
+		call_user_func([$backend, 'configure'], $config);
+		self::syncDirectory($backend, '');
+	}
+
+	static public function call(string $backend, string $function, ...$params)
+	{
+		$backend = __NAMESPACE__ . '\\Storage\\' . $backend;
+
+		if (!class_exists($backend)) {
+			throw new \InvalidArgumentException('Invalid storage: ' . $backend);
+		}
+
+		return call_user_func([$backend, $function], ...$params);
+	}
+
+	static protected function syncDirectory(string $backend, string $path)
+	{
+		$local_files = Files::list($path);
+
+		foreach (call_user_func([$backend, 'list'], $path) as $file) {
+			if ($file->type == $file::TYPE_DIRECTORY) {
+				self::syncDirectory($backend, $file->path);
+				Files::ensureDirectoryExists($file->path);
+				continue;
+			}
+
+			$local_found = false;
+			$local_differs = false;
+
+			foreach ($local_files as $key => $local) {
+				if ($file->name != $local->name) {
+					continue;
+				}
+
+				$local_found = true;
+				$local_differs = $local->modified !== $file->modified || $local->size !== $file->size;
+				unset($local_found[$key]);
+				break;
+			}
+
+			if ($local_found && !$local_differs) {
+				continue;
+			}
+
+			if ($local_differs) {
+				$file->id($local->id());
+				$file->deleteCache();
+			}
+
+			$file->rehash();
+			$file->save();
+		}
+
+		// Delete local files that are not in backend storage
+		foreach ($local_files as $file) {
+			$file->delete();
+		}
+	}
+
 	/**
 	 * Copy all files from a storage backend to another one
 	 * This can be used to move from SQLite to FileSystem for example

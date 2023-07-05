@@ -300,7 +300,7 @@ class Files
 		$params = [];
 		$db = DB::getInstance();
 
-		if ($parent === '') {
+		if (!$parent) {
 			$where = $db->where('parent', 'IN', array_keys(File::CONTEXTS_NAMES));
 		}
 		else {
@@ -393,7 +393,7 @@ class Files
 		$zip->close();
 	}
 
-	static public function listRecursive(string $path, ?Session $session, bool $include_directories = true): \Generator
+	static public function listRecursive(?string $path = null, ?Session $session = null, bool $include_directories = true): \Generator
 	{
 		foreach (self::list($path) as $file) {
 			if ($session && !$file->canRead($session)) {
@@ -408,7 +408,7 @@ class Files
 				yield from self::listRecursive($file->path, $session, $include_directories);
 			}
 			else {
-				yield $file;
+				yield $file->path => $file;
 			}
 		}
 	}
@@ -450,18 +450,25 @@ class Files
 		return call_user_func_array([$class_name, $function], $args);
 	}
 
+	static public function ensureContextsExists(): void
+	{
+		foreach (File::CONTEXTS_NAMES as $key => $label) {
+			self::ensureDirectoryExists($key);
+		}
+	}
+
 	/**
 	 * Returns a file, if it doesn't exist, NULL is returned
 	 * If the file exists in DB but not in storage, it is deleted from DB
 	 */
-	static public function get(string $path): ?File
+	static public function get(?string $path): ?File
 	{
-		// Root contexts always exist, same with root itself
-		if ($path == '' || array_key_exists($path, File::CONTEXTS_NAMES)) {
+		if (null === $path) {
+			// Root always exists, but is virtual
 			$file = new File;
-			$file->parent = '';
-			$file->name = $path;
-			$file->path = $path;
+			$file->path = '';
+			$file->name = '';
+			$file->parent = null;
 			$file->type = $file::TYPE_DIRECTORY;
 			return $file;
 		}
@@ -474,6 +481,11 @@ class Files
 		}
 
 		$file = EM::findOne(File::class, 'SELECT * FROM @TABLE WHERE path = ? LIMIT 1;', $path);
+
+		if (!$file && array_key_exists($path, File::CONTEXTS_NAMES)) {
+			self::ensureContextsExists();
+			$file = EM::findOne(File::class, 'SELECT * FROM @TABLE WHERE path = ? LIMIT 1;', $path);
+		}
 
 		if (!$file) {
 			return null;
@@ -489,10 +501,6 @@ class Files
 
 	static public function exists(string $path): bool
 	{
-		if (array_key_exists($path, File::CONTEXTS_NAMES)) {
-			return true;
-		}
-
 		return DB::getInstance()->test('files', 'path = ?', $path);
 	}
 
@@ -832,7 +840,7 @@ class Files
 			throw new ValidationException('Le nom de répertoire choisi existe déjà: ' . $path);
 		}
 
-		if ($parent !== '' && $create_parent) {
+		if ($parent !== null && $create_parent) {
 			self::ensureDirectoryExists($parent);
 		}
 
@@ -863,7 +871,7 @@ class Files
 			$tree = trim($tree . '/' . $part, '/');
 
 			if (!self::exists($tree)) {
-				self::mkdir($tree);
+				self::mkdir($tree, false);
 			}
 		}
 	}

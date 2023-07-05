@@ -57,6 +57,8 @@ class Storage extends AbstractStorage
 	{
 		$this->populateRootCache();
 
+		$uri = $uri ?: null;
+
 		if (!isset($this->cache[$uri])) {
 			$this->cache[$uri] = Files::get($uri);
 

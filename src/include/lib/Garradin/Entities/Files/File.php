@@ -42,7 +42,7 @@ class File extends Entity
 	/**
 	 * Parent directory of file
 	 */
-	protected string $parent = '';
+	protected ?string $parent = null;
 
 	/**
 	 * File name
@@ -156,7 +156,7 @@ class File extends Entity
 		$this->assert($this->type === self::TYPE_DIRECTORY || $this->size !== null, 'File size must be set');
 		$this->assert(trim($this->name) !== '', 'Le nom de fichier ne peut rester vide');
 		$this->assert(strlen($this->path), 'Le chemin ne peut rester vide');
-		$this->assert(strlen($this->parent) || '' === $this->parent, 'Le chemin ne peut rester vide');
+		$this->assert(null === $this->parent || strlen($this->parent), 'Le chemin ne peut rester vide');
 	}
 
 	public function context(): string
@@ -267,6 +267,18 @@ class File extends Entity
 		return $parent;
 	}
 
+	public function deleteCache(): void
+	{
+		// This also deletes thumbnails
+		Web_Cache::delete($this->uri());
+
+		// clean up thumbnails
+		foreach (self::ALLOWED_THUMB_SIZES as $key => $operations)
+		{
+			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->pathHash(), $key));
+		}
+	}
+
 	public function delete(): bool
 	{
 		Files::assertStorageIsUnlocked();
@@ -281,19 +293,12 @@ class File extends Entity
 			}
 		}
 
-		// This also deletes thumbnails
-		Web_Cache::delete($this->uri());
-
 		// Delete actual file content
 		Files::callStorage('delete', $this);
 
 		Plugins::fireSignal('files.delete', ['file' => $this]);
 
-		// clean up thumbnails
-		foreach (self::ALLOWED_THUMB_SIZES as $key => $operations)
-		{
-			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->pathHash(), $key));
-		}
+		$this->deleteCache();
 
 		$db->delete('files_search', 'path = ? OR path LIKE ? ESCAPE \'!\'', $this->path, $db->escapeLike($this->path, '!') . '/%');
 
@@ -540,7 +545,7 @@ class File extends Entity
 		return $this;
 	}
 
-	public function indexForSearch(?array $source, ?string $title = null, ?string $forced_mime = null): void
+	public function indexForSearch(?array $source = null, ?string $title = null, ?string $forced_mime = null): void
 	{
 		$mime = $forced_mime ?? $this->mime;
 		$ext = $this->extension();
@@ -556,6 +561,11 @@ class File extends Entity
 		}
 		elseif ($ext == 'pdf' && PDFTOTEXT_COMMAND === 'pdftotext') {
 			$cmd = escapeshellcmd(PDFTOTEXT_COMMAND) . ' -nopgbrk - -';
+
+			if (empty($source)) {
+				$source['pointer'] = $this->getReadOnlyPointer();
+				$source['path'] = $source['pointer'] ? null : $this->getLocalFilePath();
+			}
 
 			if (isset($source['content'])) {
 				Utils::exec($cmd, 2, fn() => $source['content'], fn($out) => $content = $out);
@@ -1044,6 +1054,11 @@ class File extends Entity
 			return false;
 		}
 
+		// Deny delete of directories in web context
+		if ($this->isDir() && $this->context() == self::CONTEXT_WEB) {
+			return false;
+		}
+
 		return $session->checkFilePermission($this->path, 'delete');
 	}
 
@@ -1112,7 +1127,7 @@ class File extends Entity
 
 	public function canRename(Session $session = null): bool
 	{
-		return $this->canCreate($this->parent, $session);
+		return $this->canCreate($this->parent ?? '', $session);
 	}
 
 	static public function canCreate(string $path, Session $session = null): bool

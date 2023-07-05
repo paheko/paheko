@@ -186,6 +186,7 @@ class FileSystem implements StorageInterface
 			'size'     => $spl->getSize(),
 			'type'     => $spl->isDir() ? File::TYPE_DIRECTORY : File::TYPE_FILE,
 			'mime'     => mime_content_type($spl->getRealPath()),
+			'md5'      => null,
 		];
 
 		$data['modified']->setTimeZone(new \DateTimeZone(date_default_timezone_get()));
@@ -223,18 +224,6 @@ class FileSystem implements StorageInterface
 		}
 
 		return Utils::knatcasesort($files);
-	}
-
-	static public function listDirectoriesRecursively(string $path): array
-	{
-		$fullpath = self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
-		$fullpath = rtrim($fullpath, DIRECTORY_SEPARATOR);
-
-		if (!file_exists($fullpath)) {
-			return [];
-		}
-
-		return self::_recurseGlob($fullpath, '*', \GLOB_ONLYDIR);
 	}
 
 	static protected function _recurseGlob(string $path, string $pattern = '*', int $flags = 0): array
