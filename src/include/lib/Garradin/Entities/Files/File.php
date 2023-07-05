@@ -584,7 +584,7 @@ class File extends Entity
 				$content = $content ?: null;
 			}
 		}
-		elseif (in_array($ext, self::EXTENSIONS_TEXT_CONVERT)) {
+		elseif (in_array($ext, self::EXTENSIONS_TEXT_CONVERT) && is_array($source)) {
 			$content = ToText::from($source);
 		}
 		else {
