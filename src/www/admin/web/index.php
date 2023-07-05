@@ -34,10 +34,6 @@ if ($page) {
 	}
 }
 else {
-	foreach (Web::sync() as $error) {
-		$form->addError($error);
-	}
-
 	$links_errors = Web::checkAllInternalLinks();
 }
 
