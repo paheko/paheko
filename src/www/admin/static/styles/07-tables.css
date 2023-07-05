@@ -109,16 +109,25 @@ table.list tr:nth-child(even).disabled {
 
 .userOrder a, .userOrder button {
     text-decoration: none;
-    display: block;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
     box-shadow: none;
     margin: 0;
-    width: 98%;
+    width: calc(100% - .4rem);
+    height: calc(100% - .4rem);
     color: inherit;
-    padding: 1%;
+    padding: .2rem;
     text-align: left;
     border-radius: .5em;
     border: none;
     background: transparent;
+}
+
+.userOrder .icon-header a, .userOrder .icon-header button {
+    width: 1.5rem;
+    flex-direction: column;
 }
 
 .userOrder a:hover, .userOrder button:hover {
@@ -126,7 +135,8 @@ table.list tr:nth-child(even).disabled {
 }
 
 table.list .userOrder td, table.list .userOrder th {
-    padding: .2em;
+    padding: .2rem;
+    height: 2rem;
 }
 
 table.list .userOrder .check {

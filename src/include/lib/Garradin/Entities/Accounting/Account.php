@@ -257,7 +257,12 @@ class Account extends Entity
 		'locked' => [
 			'label' => 'Verrouillée',
 			'header_icon' => 'lock',
-			'select' => 'CASE WHEN t.hash IS NOT NULL THEN \'Oui\' ELSE NULL END',
+			'select' => 'CASE WHEN t.hash IS NOT NULL THEN \'Oui\' ELSE \'\' END',
+		],
+		'files' => [
+			'label' => 'Fichiers joints',
+			'header_icon' => 'attach',
+			'select' => '(SELECT 1 FROM files WHERE path LIKE \'transaction/\' || t.id || \'/%\' LIMIT 1)',
 		],
 		'status' => [
 			'select' => 't.status',
@@ -500,6 +505,11 @@ class Account extends Entity
 	{
 		$db = DB::getInstance();
 		$columns = self::LIST_COLUMNS;
+
+		// Don't show locked column if no transactions are locked
+		if (!$db->test('acc_transactions', 'hash IS NOT NULL')) {
+			unset($columns['locked']);
+		}
 
 		$tables = 'acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction

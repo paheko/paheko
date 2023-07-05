@@ -67,6 +67,7 @@
 			{$transaction->getTypeName()}
 		</dd>
 	{if $transaction.hash}
+		<dt>Verrou</dt>
 		<dd><span class="alert">{icon shape="lock"} Écriture verrouillée</span></dd>
 	{/if}
 

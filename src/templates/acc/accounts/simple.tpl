@@ -46,7 +46,10 @@
 				<th>{$line.label}</th>
 				<td>{$line.line_reference}</td>
 				<td class="num">{foreach from=$line.projects item="code" key="id"}<a href="{$admin_url}acc/reports/statement.php?project={$id}&amp;year={$year.id}">{$code}</a> {/foreach}</td>
+				{if isset($line.locked)}
 				<td>{if $line.locked}{icon title="Écriture verrouillée" shape="lock"}{/if}</td>
+				{/if}
+				<td>{if $line.files}{icon title="Cette écriture a des fichiers joints" shape="attach"}{/if}</td>
 				{if property_exists($line, 'status_label')}
 				<td>
 					{if $line.status & Entities\Accounting\Transaction::STATUS_WAITING}
