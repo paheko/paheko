@@ -18,7 +18,8 @@ $csrf_key = 'web_delete_' . $page->id();
 
 $form->runIf('delete', function () use ($page) {
 	$page->delete();
-}, $csrf_key, ADMIN_URL . 'web/?parent=' . $page->parent);
+	Utils::redirectDialog('!web/?p=' . $page->parent);
+}, $csrf_key);
 
 $tpl->assign(compact('page', 'csrf_key'));
 $tpl->assign('title', $page->type == Page::TYPE_CATEGORY ? 'Supprimer une catégorie' : 'Supprimer une page');
