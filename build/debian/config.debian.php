@@ -2,7 +2,19 @@
 
 namespace Garradin;
 
+const SQLITE_JOURNAL_MODE = 'WAL';
 const ENABLE_UPGRADES = false;
+
+if (shell_exec('which pdftotext')) {
+	define('Garradin\PDFTOTEXT_COMMAND', 'pdftotext');
+}
+
+if (shell_exec('which ssconvert')) {
+	define('Garradin\CALC_CONVERT_COMMAND', 'ssconvert');
+}
+elseif (shell_exec('which unoconv')) {
+	define('Garradin\CALC_CONVERT_COMMAND', 'unoconv');
+}
 
 if (!empty($_ENV['PAHEKO_STANDALONE']))
 {
