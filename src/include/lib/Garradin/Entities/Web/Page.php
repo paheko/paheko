@@ -12,10 +12,11 @@ use Garradin\Files\Files;
 use Garradin\Web\Render\Render;
 use Garradin\Web\Web;
 use Garradin\Web\Cache;
+use Garradin\UserTemplate\Modifiers;
 
 use KD2\DB\EntityManager as EM;
 
-use const Garradin\WWW_URL;
+use const Garradin\{WWW_URL, ADMIN_URL};
 
 class Page extends Entity
 {
@@ -134,7 +135,7 @@ class Page extends Entity
 		return $out;
 	}
 
-	public function render(?string $user_prefix = null): string
+	public function render(bool $admin = false): string
 	{
 		if (!$this->file()) {
 			throw new \LogicException('File does not exist: '  . $this->file_path);
@@ -144,25 +145,28 @@ class Page extends Entity
 			$this->_html_modified = $this->_html = null;
 		}
 
+		$user_prefix = ADMIN_URL . 'web/?uri=';
+
 		$this->_html ??= Render::render($this->format, $this->file(), $this->content, $user_prefix);
 		$this->_html_modified ??= $this->file()->modified;
 
 		return $this->_html;
 	}
 
-	public function excerpt(int $length = 600): string
+	public function excerpt(int $length = 500): string
 	{
-		return $this->preview(mb_substr($this->content, 0, $length) . "\n\n…");
+		return $this->preview(Modifiers::truncate($this->content, $length));
 	}
 
-	public function requiresExcerpt(int $length = 600): bool
+	public function requiresExcerpt(int $length = 500): bool
 	{
 		return mb_strlen($this->content) > $length;
 	}
 
 	public function preview(string $content): string
 	{
-		return Render::render($this->format, $this->file(), $content, '#');
+		$user_prefix = ADMIN_URL . 'web/?uri=';
+		return Render::render($this->format, $this->file(), $content, $user_prefix);
 	}
 
 	public function filepath(bool $stored = true): string
@@ -183,10 +187,10 @@ class Page extends Entity
 
 		$export = $this->export();
 
-		$exists = Files::callStorage('exists', $path);
+		$file = Files::get($path);
 
 		// Create file if required
-		if (!$exists) {
+		if (!$file) {
 			$file = $this->_file = Files::createFromString($path, $export);
 		}
 		else {
@@ -198,8 +202,6 @@ class Page extends Entity
 				$dir->rename(Utils::dirname($target));
 				$this->_file = null;
 			}
-
-			$file = $this->file();
 
 			// Or update file
 			if ($file->fetch() !== $export) {
@@ -440,7 +442,7 @@ class Page extends Entity
 			return [];
 		}
 
-		$html = $this->render();
+		$html = Render::render($this->format, $this->file(), $this->content);
 		preg_match_all('/<a[^>]+href=["\']([^"\']+)["\']/', $html, $match, PREG_PATTERN_ORDER);
 		$errors = [];
 

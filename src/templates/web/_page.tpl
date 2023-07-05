@@ -1,7 +1,7 @@
 {if $excerpt && $page->requiresExcerpt() && !isset($_GET['full'])}
 	<?php $text = $page->excerpt(); $long = true; ?>
 {else}
-	<?php $text = $page->render(ADMIN_URL . 'web/?uri='); $long = false; ?>
+	<?php $text = $page->render(); $long = false; ?>
 {/if}
 
 
@@ -49,7 +49,7 @@
 	<article>
 		{$text|raw}
 		{if $excerpt && $long}
-			<p class="actions">{linkbutton href="?p=%s&full"|args:$page.path label="Lire la suite" shape="image"}</p>
+			<p class="actions">{linkbutton href="?p=%s&full"|args:$page.path label="Lire la suite" shape="right"}</p>
 		{/if}
 	</article>
 	{/if}

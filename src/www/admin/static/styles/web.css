@@ -178,8 +178,7 @@ form#f_upload fieldset {
     display: block;
     font-size: 1.2em;
     min-height: calc(100% - 1.4em);
-    color: rgba(var(--gTextColor), .8);
-    text-decoration-color: rgba(var(--gMainColor), 0.5);
+    text-decoration: none;
 }
 
 .web.category-list li a span {
@@ -191,11 +190,11 @@ form#f_upload fieldset {
 .web.category-list li a:hover, .web.category-list li a:hover span {
     color: rgb(var(--gHoverLinkColor));
     text-decoration-color: rgba(var(--gHoverLinkColor), 0.5);
+    text-decoration: underline;
 }
 
 .web.category-list .draft a {
     background: var(--gLightBackgroundColor);
-    color: var(--gBorderColor);
     text-decoration-color: unset;
 }
 
@@ -242,8 +241,8 @@ form#f_upload fieldset {
 
 .web.preview article .actions {
     float: none;
-    text-align: left;
     margin: 0;
+    text-align: center;
 }
 
 @media screen and (max-width:600px) {

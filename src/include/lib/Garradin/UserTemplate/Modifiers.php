@@ -105,21 +105,14 @@ class Modifiers
 	 */
 	static public function truncate($str, $length = 80, $placeholder = '…', $strict_cut = false): string
 	{
-		// Don't try to use unicode if the string is not valid UTF-8
-		$u = preg_match('//u', $str) ? 'u' : '';
-
-		// Shorter than $length + 1
-		if (!preg_match('/^.{' . ((int)$length + 1) . '}/s' . $u, $str))
-		{
+		if (mb_strlen($str) <= $length) {
 			return $str;
 		}
 
-		// Cut at 80 characters
-		$str = preg_replace('/^(.{0,' . (int)$length . '}).*$/s' . $u, '$1', $str);
+		$str = mb_substr($str, 0, $length);
 
-		if (!$strict_cut)
-		{
-			$cut = preg_replace('/[^\s.,:;!?]*?$/s' . $u, '', $str);
+		if (!$strict_cut) {
+			$cut = preg_replace('/[^\s.,;!?]*$/su', '', $str);
 
 			if (trim($cut) == '') {
 				$cut = $str;
