@@ -966,10 +966,6 @@ class Sections
 				$page->exists(true);
 				$page->load($data);
 
-				if (!$page->file()) {
-					continue;
-				}
-
 				if (isset($row['snippet'])) {
 					$row['snippet'] = preg_replace('!</b>(\s*)<b>!', '$1', $row['snippet']);
 					if (preg_match('!<b>(.*?)</b>!', $row['snippet'], $match)) {
