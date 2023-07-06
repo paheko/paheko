@@ -157,6 +157,10 @@ class File extends Entity
 
 	public function save(bool $selfcheck = true): bool
 	{
+		if ($this->parent) {
+			Files::ensureDirectoryExists($this->parent);
+		}
+
 		$ok = parent::save();
 
 		$context = $this->context();
@@ -283,32 +287,30 @@ class File extends Entity
 		}
 
 		$this->set('trash', new \DateTime);
-		$this->move(self::CONTEXT_TRASH . '/' . $this->parent);
+		$this->save();
 	}
 
-	public function restoreFromTrash(): ?string
+	public function restoreFromTrash(): void
 	{
-		if ($this->context() != self::CONTEXT_TRASH) {
-			return null;
+		if (!$this->trash) {
+			return;
 		}
 
-		$parent = substr($this->parent, strlen(self::CONTEXT_TRASH . '/'));
+		$db = DB::getInstance();
+		$exists = $db->test(File::TABLE, 'path = ? AND trash IS NULL', $this->path);
+		$parent_exists = $db->test(File::TABLE, 'path = ? AND trash IS NULL AND type = ?', $this->parent, self::TYPE_DIRECTORY);
 
 		$this->set('trash', null);
 
-		// Move to original parent path
-		if (Files::exists($parent)) {
-			$this->move($parent);
-		}
-		// Parent directory no longer exists, move file to documents root,
-		// but under a new name to make sure it doesn't overwrite an existing file
-		else {
+		// Parent directory no longer exists, or another file with the same name has been created:
+		// move file to documents root, but under a new name to make sure it doesn't overwrite an existing file
+		if ($exists || !$parent_exists) {
 			$new_name = sprintf('Restauré de la corbeille - %s - %s', date('d-m-Y His'), $this->name);
 			$parent = self::CONTEXT_DOCUMENTS;
 			$this->rename($parent . '/' . $new_name);
 		}
 
-		return $parent;
+		$this->save();
 	}
 
 	public function deleteCache(): void
@@ -343,9 +345,6 @@ class File extends Entity
 		Plugins::fireSignal('files.delete', ['file' => $this]);
 
 		$this->deleteCache();
-
-		$db->delete('files_search', 'path = ? OR path LIKE ? ESCAPE \'!\'', $this->path, $db->escapeLike($this->path, '!') . '/%');
-
 		$r = parent::delete();
 
 		$db->commit();
@@ -381,8 +380,6 @@ class File extends Entity
 	 */
 	public function rename(string $new_path, bool $check_session = true): bool
 	{
-		Files::assertStorageIsUnlocked();
-
 		$name = Utils::basename($new_path);
 
 		self::validatePath($new_path);
@@ -402,31 +399,14 @@ class File extends Entity
 			}
 		}
 
-		$db = DB::getInstance();
-		$db->update('files_search', [
-			'path' => $new_path,
-			'title' => Utils::basename($new_path),
-		], 'path = :old_path', ['old_path' => $this->path]);
-
-		if ($this->type == self::TYPE_DIRECTORY) {
-			// Rename references in files_search
-			$db->preparedQuery('UPDATE files_search
-				SET path = ? || SUBSTR(path, 1+LENGTH(?))
-				WHERE path LIKE ? ESCAPE \'!\';',
-				$new_path . '/', $this->path . '/', $db->escapeLike($this->path, '!') . '/%');
-		}
-
-		Files::ensureDirectoryExists(Utils::dirname($new_path));
-		$return = Files::callStorage('move', $this, $new_path);
+		$parent = Utils::dirname($new_path);
 
 		Plugins::fireSignal('files.move', ['file' => $this, 'new_path' => $new_path]);
 
-		$this->set('parent', Utils::dirname($new_path));
+		$this->set('parent', $parent);
 		$this->set('path', $new_path);
 		$this->set('name', $name);
-		$this->save();
-
-		return $return;
+		return $this->save();
 	}
 
 	/**
@@ -454,7 +434,7 @@ class File extends Entity
 	 * @param  bool   $index_search Set to FALSE if you don't want the document to be indexed in the file search
 	 * @return self
 	 */
-	public function store(array $source, bool $index_search = true): self
+	public function store(array $source): self
 	{
 		if (!$this->path || !$this->name) {
 			throw new \LogicException('Cannot store a file that does not have a target path and name');
@@ -546,6 +526,14 @@ class File extends Entity
 			$this->set('modified', new \DateTime);
 		}
 
+		$new = !$this->exists();
+
+		$db = DB::getInstance();
+		$db->begin();
+
+		// Save metadata now, and rollback if required
+		$this->save();
+
 		try {
 			if (null !== $path) {
 				$return = Files::callStorage('storePath', $this, $path);
@@ -563,13 +551,6 @@ class File extends Entity
 
 			Plugins::fireSignal('files.store', ['file' => $this]);
 
-			if ($index_search) {
-				$this->indexForSearch(compact('content', 'path', 'pointer'));
-			}
-			else {
-				$this->removeFromSearch();
-			}
-
 			// clean up thumbnails
 			foreach (self::ALLOWED_THUMB_SIZES as $key => $operations)
 			{
@@ -577,16 +558,25 @@ class File extends Entity
 			}
 
 			Web_Cache::delete($this->uri());
+
+			// Index regular files, not directories
+			if ($this->type == self::TYPE_FILE) {
+				$this->indexForSearch(compact('content', 'path', 'pointer'));
+			}
+
+			$db->commit();
+
+			return $this;
+		}
+		catch (\Exception $e) {
+			$db->rollback();
+			throw $e;
 		}
 		finally {
 			if (null !== $pointer) {
 				fclose($pointer);
 			}
 		}
-
-		$this->save();
-
-		return $this;
 	}
 
 	public function indexForSearch(?array $source = null, ?string $title = null, ?string $forced_mime = null): void
@@ -644,15 +634,14 @@ class File extends Entity
 			$content = null;
 		}
 
-		$db = DB::getInstance();
-		$db->preparedQuery('DELETE FROM files_search WHERE path = ?;', $this->path);
-		$db->preparedQuery('INSERT INTO files_search (path, title, content) VALUES (?, ?, ?);', $this->path, $title ?? $this->name, $content);
-	}
+		if (null === $content && null === $title) {
+			// This is already the same as what has been inserted by SQLite
+			return;
+		}
 
-	public function removeFromSearch(): void
-	{
 		$db = DB::getInstance();
-		$db->preparedQuery('DELETE FROM files_search WHERE path = ?;', $this->path);
+		$db->preparedQuery('REPLACE INTO files_search (docid, path, title, content) VALUES (?, ?, ?, ?);',
+			$this->id(), $this->path, $title ?? $this->name, $content);
 	}
 
 	/**
@@ -706,12 +695,19 @@ class File extends Entity
 	 */
 	public function uri(): string
 	{
-		$parts = explode('/', $this->path);
-		$parts = array_map('rawurlencode', $parts);
-
 		if ($this->context() == self::CONTEXT_WEB) {
-			$parts = array_slice($parts, -2);
+			if ($this->isDir()) {
+				$parts = [$this->name];
+			}
+			else {
+				$parts = [Utils::basename($this->parent), $this->name];
+			}
 		}
+		else {
+			$parts = explode('/', $this->path);
+		}
+
+		$parts = array_map('rawurlencode', $parts);
 
 		return implode('/', $parts);
 	}

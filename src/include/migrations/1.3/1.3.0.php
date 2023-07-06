@@ -86,22 +86,8 @@ $db->exec('DELETE FROM files_search;');
 Files::ensureContextsExists();
 
 if (FILE_STORAGE_BACKEND == 'FileSystem') {
-	Storage::call(FILE_STORAGE_BACKEND, 'configure', FILE_STORAGE_CONFIG);
-
-	// Move skeletons to new path
-	if (file_exists(FILE_STORAGE_CONFIG . '/skel')) {
-		if (!file_exists(FILE_STORAGE_CONFIG . '/modules')) {
-			@mkdir(FILE_STORAGE_CONFIG . '/modules', 0777, true);
-		}
-
-		if (!file_exists(FILE_STORAGE_CONFIG . '/modules/web')) {
-			rename(FILE_STORAGE_CONFIG . '/skel', FILE_STORAGE_CONFIG . '/modules/web');
-		}
-	}
-
 	// now we store file metadata in DB
-	Storage::sync(FILE_STORAGE_BACKEND, FILE_STORAGE_CONFIG);
-
+	Storage::legacySync(FILE_STORAGE_CONFIG);
 	WebSync::sync();
 }
 else {

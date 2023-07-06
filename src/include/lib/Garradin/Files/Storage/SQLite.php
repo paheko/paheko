@@ -5,7 +5,6 @@ namespace Garradin\Files\Storage;
 use Garradin\Entities\Files\File;
 use Garradin\Files\Files;
 
-use Garradin\Static_Cache;
 use Garradin\DB;
 use Garradin\Utils;
 
@@ -15,16 +14,11 @@ use const Garradin\{DB_FILE, DATA_ROOT};
 
 class SQLite implements StorageInterface
 {
-	static public function list(string $path): array
-	{
-		return Files::list($path);
-	}
-
 	static public function configure(?string $config): void
 	{
 	}
 
-	static protected function getPointer(File $file)
+	static public function getReadOnlyPointer(File $file)
 	{
 		$db = DB::getInstance();
 
@@ -36,7 +30,7 @@ class SQLite implements StorageInterface
 				throw $e;
 			}
 
-			throw new \RuntimeException('File does not exist in DB: ' . $file->path, 0, $e);
+			return null;
 		}
 
 		return $blob;
@@ -99,13 +93,6 @@ class SQLite implements StorageInterface
 
 		fclose($blob);
 
-		if ($file->parent) {
-			self::touch($file->parent);
-		}
-
-		$cache_id = 'files.' . $file->pathHash();
-		Static_Cache::remove($cache_id);
-
 		return true;
 	}
 
@@ -114,34 +101,9 @@ class SQLite implements StorageInterface
 		return null;
 	}
 
-	static public function getReadOnlyPointer(File $file)
-	{
-		return self::getPointer($file);
-	}
-
-	static public function exists(string $path): bool
-	{
-		return (bool) DB::getInstance()->firstColumn('SELECT 1 FROM files_contents c INNER JOIN files f ON f.id = c.id WHERE f.path = ?;', $path);
-	}
-
 	static public function delete(File $file): bool
 	{
 		// Nothing to do, files_contents is deleted when files row is deleted (cascade)
-		return true;
-	}
-
-	static public function move(File $file, string $new_path): bool
-	{
-		return true;
-	}
-
-	static public function touch(string $path, \DateTimeInterface $date = null): bool
-	{
-		return true;
-	}
-
-	static public function mkdir(File $file): bool
-	{
 		return true;
 	}
 
@@ -180,6 +142,5 @@ class SQLite implements StorageInterface
 	static public function isLocked(): bool
 	{
 		return DB::getInstance()->test('sqlite_master', 'name = ? AND type = ?', 'files_lock', 'table');
-
 	}
 }

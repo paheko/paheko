@@ -4,6 +4,8 @@ namespace Garradin\Files\Storage;
 
 use Garradin\Entities\Files\File;
 
+class StorageException extends \RuntimeException {}
+
 interface StorageInterface
 {
 	/**
@@ -27,11 +29,6 @@ interface StorageInterface
 	static public function storePointer(File $file, $pointer): bool;
 
 	/**
-	 * Create an empty directory
-	 */
-	static public function mkdir(File $file): bool;
-
-	/**
 	 * Should return full local file access path.
 	 * If storage backend cannot store the file locally, return NULL.
 	 * In that case a subsequent call to getReadOnlyPointer() will be done.
@@ -42,6 +39,7 @@ interface StorageInterface
 	 * Returns a read-only file pointer (resource) to the file contents
 	 * If the storage backedn cannot provide a pointer, return NULL.
 	 * In that case a subsequent call to getLocalFilePath() will be done.
+	 * @return null|resource
 	 */
 	static public function getReadOnlyPointer(File $file);
 
@@ -49,26 +47,6 @@ interface StorageInterface
 	 * Delete a file
 	 */
 	static public function delete(File $file): bool;
-
-	/**
-	 * Change file mtime
-	 */
-	static public function touch(string $path, \DateTimeInterface $date = null): bool;
-
-	/**
-	 * Return TRUE if file exists
-	 */
-	static public function exists(string $path): bool;
-
-	/**
-	 * Return an array of File objects for a given path
-	 */
-	static public function list(string $path): array;
-
-	/**
-	 * Moves a file to a new path, when its name or path has changed
-	 */
-	static public function move(File $file, string $new_path): bool;
 
 	/**
 	 * Return total disk space

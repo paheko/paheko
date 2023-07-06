@@ -89,10 +89,14 @@ class Page extends Entity
 		return $page;
 	}
 
-	public function dir(bool $force_reload = false)
+	public function dir(bool $force_reload = false): File
 	{
 		if (null === $this->_dir || $force_reload) {
 			$this->_dir = Files::get($this->dir_path);
+
+			if (null === $this->_dir) {
+				$this->_dir = Files::mkdir($this->dir_path);
+			}
 		}
 
 		return $this->_dir;
@@ -149,12 +153,13 @@ class Page extends Entity
 	public function syncSearch(): void
 	{
 		if ($this->format == Render::FORMAT_ENCRYPTED) {
-			$this->dir()->removeFromSearch();
+			$content = null;
 		}
 		else {
 			$content = $this->render();
-			$this->dir()->indexForSearch(compact('content'), $this->title, 'text/html');
 		}
+
+		$this->dir()->indexForSearch(compact('content'), $this->title, 'text/html');
 	}
 
 	public function save(bool $selfcheck = true): bool

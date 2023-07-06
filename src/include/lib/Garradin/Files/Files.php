@@ -309,7 +309,7 @@ class Files
 			$params[] = $parent;
 		}
 
-		$sql = sprintf('SELECT * FROM @TABLE WHERE %s ORDER BY type DESC, name COLLATE U_NOCASE ASC;', $where);
+		$sql = sprintf('SELECT * FROM @TABLE WHERE trash IS NULL AND %s ORDER BY type DESC, name COLLATE U_NOCASE ASC;', $where);
 
 		return EM::getInstance(File::class)->all($sql, ...$params);
 	}
@@ -413,6 +413,17 @@ class Files
 		}
 	}
 
+	static public function all(bool $include_trash = false)
+	{
+		$sql = 'SELECT * FROM @TABLE';
+
+		if (!$include_trash) {
+			$sql .= ' WHERE trash IS NULL';
+		}
+
+		return EM::getInstance(File::class)->all($sql);
+	}
+
 	/**
 	 * List files and directories inside a context (first-level directory)
 	 */
@@ -488,11 +499,6 @@ class Files
 		}
 
 		if (!$file) {
-			return null;
-		}
-
-		if (!self::callStorage('exists', $file->path)) {
-			$file->delete();
 			return null;
 		}
 
@@ -854,8 +860,6 @@ class Files
 		$file->modified = new \DateTime;
 		$file->save();
 
-		Files::callStorage('mkdir', $file);
-
 		Plugins::fireSignal('files.mkdir', compact('file'));
 
 		return $file;
@@ -912,16 +916,17 @@ class Files
 	}
 
 	/**
-	 * Remove empty directories, except in documents
+	 * Remove empty directories in transactions and users
 	 */
 	static public function pruneEmptyDirectories(): void
 	{
 		$sql = sprintf('SELECT * FROM @TABLE a
 			WHERE type = %d
-				AND (path NOT LIKE \'%s/\')
+				AND (path LIKE \'%s/\' OR path LIKE \'%s/\')
 				AND (SELECT COUNT(*) FROM @TABLE b WHERE b.parent = a.path AND type = %d) = 0;',
 			File::TYPE_DIRECTORY,
-			File::CONTEXT_DOCUMENTS,
+			File::CONTEXT_TRANSACTION,
+			File::CONTEXT_USER,
 			File::TYPE_FILE
 		);
 

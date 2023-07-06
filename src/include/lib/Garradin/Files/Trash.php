@@ -15,11 +15,11 @@ class Trash
 		],
 		'parent' => [
 			'label' => 'Chemin d\'origine',
-			'select' => 'SUBSTR(parent, LENGTH(\'trash/\') + 1)',
+			'select' => 'parent',
 		],
 		'path' => [
 		],
-		'modified' => [
+		'trash' => [
 			'label' => 'Supprimé le',
 		],
 	];
@@ -33,7 +33,7 @@ class Trash
 		$conditions = sprintf('type = %d AND trash IS NOT NULL', File::TYPE_FILE);
 
 		$list = new DynamicList($columns, $tables, $conditions);
-		$list->orderBy('modified', true);
+		$list->orderBy('trash', true);
 
 		return $list;
 	}
@@ -41,17 +41,10 @@ class Trash
 	static public function clean(string $expiry = '-30 days'): void
 	{
 		$past = new \DateTime($expiry);
-		$deleted = false;
-
 		$list = EM::getInstance(File::class)->all('SELECT * FROM @TABLE WHERE trash IS NOT NULL AND trash < ?;', $past);
 
 		foreach ($list as $file) {
 			$file->delete();
-			$deleted = true;
-		}
-
-		if ($deleted) {
-			Files::pruneEmptyDirectories();
 		}
 	}
 }

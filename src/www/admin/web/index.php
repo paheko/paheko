@@ -24,6 +24,8 @@ elseif (qg('uri')) {
 	}
 }
 
+$links_errors = null;
+
 if ($page) {
 	$links_errors = $page->checkInternalLinks();
 
@@ -33,7 +35,7 @@ if ($page) {
 		Utils::redirect('!web/?p=' . $page->path);
 	}
 }
-else {
+elseif (isset($_GET['check'])) {
 	$links_errors = Web::checkAllInternalLinks();
 }
 

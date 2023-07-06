@@ -3,24 +3,13 @@
 namespace Garradin\Files;
 
 use Garradin\DB;
+use Garradin\Utils;
 use Garradin\Entities\Files\File;
 
 use const Garradin\{FILE_STORAGE_BACKEND, FILE_STORAGE_QUOTA, FILE_STORAGE_CONFIG};
 
 class Storage
 {
-	static public function sync(string $backend, $config = null): void
-	{
-		$backend = __NAMESPACE__ . '\\Storage\\' . $backend;
-
-		if (!class_exists($backend)) {
-			throw new \InvalidArgumentException('Invalid storage: ' . $backend);
-		}
-
-		call_user_func([$backend, 'configure'], $config);
-		self::syncDirectory($backend, '');
-	}
-
 	static public function call(string $backend, string $function, ...$params)
 	{
 		$backend = __NAMESPACE__ . '\\Storage\\' . $backend;
@@ -32,14 +21,143 @@ class Storage
 		return call_user_func([$backend, $function], ...$params);
 	}
 
-	static protected function syncDirectory(string $backend, string $path)
+	/**
+	 * Only used to migrate from Paheko < 1.3 where storage was on local filesystem
+	 * @deprecated
+	 */
+	static public function legacySync(string $root): void
 	{
-		$local_files = Files::list($path);
+		$root = rtrim(strtok($root, '%'), '/');
 
-		foreach (call_user_func([$backend, 'list'], $path) as $file) {
+		// Move skeletons to new path
+		if (file_exists($root . '/skel')) {
+			if (!file_exists($root . '/modules')) {
+				Utils::safe_mkdir($root . '/modules', 0777, true);
+			}
+
+			if (!file_exists($root . '/modules/web')) {
+				rename($root . '/skel', $root . '/modules/web');
+			}
+		}
+
+		rename($root, $root . '.old');
+		Utils::safe_mkdir($root, 0777, true);
+
+		self::legacySyncDirectory($root . '.old');
+	}
+
+	static protected function legacySyncDirectory(string $root, ?string $path = null)
+	{
+		foreach (self::listLocalFiles($root, $path) as $file) {
+			if ($file->isDir()) {
+				self::legacySyncDirectory($root, $file->path);
+			}
+			else {
+				$file->store(['path' => $root . DIRECTORY_SEPARATOR . $file->path]);
+			}
+		}
+	}
+
+	static protected function _SplToFile(string $root, \SplFileInfo $spl): File
+	{
+		$path = str_replace($root . DIRECTORY_SEPARATOR, '', $spl->getPathname());
+		$path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
+		$parent = Utils::dirname($path);
+
+		if ($parent == '.' || !$parent) {
+			$parent = null;
+		}
+
+		$data = [
+			'id'       => null,
+			// may return slash
+			// see comments https://www.php.net/manual/fr/splfileinfo.getfilename.php
+			// don't use getBasename as it is locale-dependent!
+			'name'     => trim($spl->getFilename(), '/'),
+			'path'     => $path,
+			'parent'   => $parent,
+			'modified' => new \DateTime('@' . $spl->getMTime()),
+			'size'     => $spl->isDir() ? null : $spl->getSize(),
+			'type'     => $spl->isDir() ? File::TYPE_DIRECTORY : File::TYPE_FILE,
+			'mime'     => $spl->isDir() ? null : mime_content_type($spl->getRealPath()),
+			'md5'      => $spl->isDir() ? null : md5_file($spl->getPathname()),
+			'trash'    => 0 === strpos($path, 'trash/') ? new \DateTime : null,
+		];
+
+		$data['modified']->setTimeZone(new \DateTimeZone(date_default_timezone_get()));
+
+		$data['image'] = (int) in_array($data['mime'], File::IMAGE_TYPES);
+
+		$file = new File;
+		$file->load($data);
+
+		return $file;
+	}
+
+	static protected function listLocalFiles(string $root, ?string $path = null): array
+	{
+		$fullpath = $root;
+
+		if ($path) {
+			$fullpath .= DIRECTORY_SEPARATOR . $path;
+		}
+
+		$files = [];
+
+		foreach (new \FilesystemIterator($fullpath, \FilesystemIterator::SKIP_DOTS) as $file) {
+			// Seems that SKIP_DOTS does not work all the time?
+			if ($file->getFilename()[0] == '.') {
+				continue;
+			}
+
+			// Used to make sorting easier
+			// directory_blabla
+			// file_image.jpeg
+			$files[$file->getType() . '_' .$file->getFilename()] = self::_SplToFile($root, $file);
+		}
+
+		return Utils::knatcasesort($files);
+	}
+
+	/**
+	 * Used to sync files between a local directory and Paheko storage
+	 * Plase note that the sync algorithm is currently very limited
+	 * @todo FIXME use csync algo:
+	 * @see https://csync.org/userguide/#_file_synchronization
+	 */
+	static protected function sync(string $root, ?string $path = null, ?SQLite3 $db = null)
+	{
+		$db_files = Files::list($path);
+		$local_files = self::listLocalFiles($root, $path);
+
+		/*
+		if (null === $path) {
+			$db_path = $root . DIRECTORY_SEPARATOR .  '.pahekosync.db';
+			$db_exists = file_exists($db_path);
+			$db = new SQLite3($db_path);
+
+			if (!$db_exists) {
+				$db->exec('CREATE TABLE IF NOT EXISTS metadata (
+						path TEXT NOT NULL PRIMARY KEY,
+						parent TEXT NULL REFERENCES metadata (path) ON DELETE CASCADE,
+						modified INTEGER NOT NULL,
+						size INTEGER NOT NULL,
+						inode INTEGER NOT NULL
+					);
+					CREATE UNIQUE INDEX inode ON metadata (inode);');
+
+				$indexFiles = function (string $path) use ($db) {
+
+				};
+
+				$indexFiles($root);
+			}
+		}
+		*/
+
+		foreach ($local_files as $file) {
 			if ($file->type == $file::TYPE_DIRECTORY) {
-				self::syncDirectory($backend, $file->path);
-				Files::ensureDirectoryExists($file->path);
+				self::sync($root, $file->path);
 				continue;
 			}
 
@@ -66,8 +184,7 @@ class Storage
 				$file->deleteCache();
 			}
 
-			$file->rehash();
-			$file->save();
+			$file->store(['path' => $root . DIRECTORY_SEPARATOR . $file->path]);
 		}
 
 		// Delete local files that are not in backend storage
@@ -83,38 +200,49 @@ class Storage
 	 */
 	static public function migrate(string $from, string $to, $from_config = null, $to_config = null, ?callable $callback = null): void
 	{
-		$from = __NAMESPACE__ . '\\Storage\\' . $from;
-		$to = __NAMESPACE__ . '\\Storage\\' . $to;
-
-		if (!class_exists($from)) {
-			throw new \InvalidArgumentException('Invalid storage: ' . $from);
-		}
-
-		if (!class_exists($to)) {
-			throw new \InvalidArgumentException('Invalid storage: ' . $to);
-		}
-
-		call_user_func([$from, 'configure'], $from_config);
-		call_user_func([$to, 'configure'], $to_config);
+		self::call($from, 'configure', $from_config);
+		self::call($to, 'configure', $to_config);
 
 		$db = DB::getInstance();
 
 		try {
-			if (call_user_func([$from, 'isLocked'])) {
+			if (self::call($from, 'isLocked')) {
 				throw new \RuntimeException('Storage is locked: ' . $from);
 			}
 
-			if (call_user_func([$to, 'isLocked'])) {
+			if (self::call($to, 'isLocked')) {
 				throw new \RuntimeException('Storage is locked: ' . $to);
 			}
 
-			call_user_func([$from, 'lock']);
-			call_user_func([$to, 'lock']);
+			self::call($from, 'lock');
+			self::call($to, 'lock');
 
 			$db->begin();
 			$i = 0;
 
-			self::migrateDirectory($from, $to, '', $i, $callback);
+			foreach (Files::all() as $file) {
+				if ($file->isDir()) {
+					continue;
+				}
+
+				if (++$i >= 100) {
+					$db->commit();
+					$db->begin();
+					$i = 0;
+				}
+
+				if ($pointer = self::call($from, 'getReadOnlyPointer', $file)) {
+					self::call($to, 'storePointer', $file, $pointer);
+					fclose($pointer);
+				}
+				elseif (($path = self::call($from, 'getLocalFilePath', $file)) && file_exists($path)) {
+					self::call($to, 'storePath', $file, $path);
+				}
+				else {
+					$errors[] = sprintf('%s: no pointer or local file path found in "%s"', $file->path, $from);
+				}
+			}
+
 		}
 		catch (RuntimeException $e) {
 			throw new \RuntimeException('Migration failed', 0, $e);
@@ -124,43 +252,8 @@ class Storage
 				$db->rollback();
 			}
 
-			call_user_func([$from, 'unlock']);
-			call_user_func([$to, 'unlock']);
-		}
-	}
-
-	static protected function migrateDirectory(string $from, string $to, string $path, int &$i, ?callable $callback)
-	{
-		$db = DB::getInstance();
-
-		foreach (call_user_func([$from, 'list'], $path) as $file) {
-			if (++$i >= 100) {
-				$db->commit();
-				$db->begin();
-				$i = 0;
-			}
-
-			if ($file->type == File::TYPE_DIRECTORY) {
-				call_user_func([$to, 'mkdir'], $file);
-				self::migrateDirectory($from, $to, $file->path, $i, $callback);
-			}
-			else {
-				$pointer = call_user_func([$from, 'getReadOnlyPointer'], $file);
-
-				if (null !== $pointer) {
-					call_user_func([$to, 'storePointer'], $file, $pointer);
-				}
-				else {
-					$path = call_user_func([$from, 'getLocalFilePath'], $file);
-					call_user_func([$to, 'storePath'], $file, $path);
-				}
-			}
-
-			if (null !== $callback) {
-				$callback($file);
-			}
-
-			unset($file);
+			self::call($from, 'unlock');
+			self::call($to, 'unlock');
 		}
 	}
 
@@ -169,14 +262,7 @@ class Storage
 	 */
 	static public function truncate(string $backend, $config = null): void
 	{
-		$backend = __NAMESPACE__ . '\\Storage\\' . $backend;
-
-		call_user_func([$backend, 'configure'], $config);
-
-		if (!class_exists($backend)) {
-			throw new \InvalidArgumentException('Invalid storage: ' . $backend);
-		}
-
-		call_user_func([$backend, 'truncate']);
+		self::call($backend, 'configure', $config);
+		self::call($backend, 'truncate');
 	}
 }

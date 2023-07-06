@@ -533,12 +533,26 @@ CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4
 (
 	tokenize=unicode61, -- Available from SQLITE 3.7.13 (2012)
 	path TEXT NOT NULL,
-	title TEXT NULL,
-	content TEXT NOT NULL, -- Text content
+	title TEXT NOT NULL,
+	content TEXT NULL, -- Text content
 	notindexed=path
 );
 
+-- Delete/insert search item when item is deleted/inserted from files
+CREATE TRIGGER files_search_bd BEFORE DELETE ON files BEGIN
+	DELETE FROM files_search WHERE docid = OLD.rowid;
+END;
+
+CREATE TRIGGER files_search_ai AFTER INSERT ON files BEGIN
+	INSERT INTO files_search (docid, path, title, content) VALUES (NEW.rowid, NEW.path, NEW.name, NULL);
+END;
+
+CREATE TRIGGER files_search_au AFTER UPDATE OF name, path ON files BEGIN
+	UPDATE files_search SET path = NEW.path, title = NEW.name WHERE docid = NEW.rowid;
+END;
+
 CREATE TABLE IF NOT EXISTS acc_transactions_files
+-- Link between transactions and files
 (
 	id_file INTEGER NOT NULL PRIMARY KEY REFERENCES files(id) ON DELETE CASCADE,
 	id_transaction INTEGER NOT NULL REFERENCES acc_transactions(id) ON DELETE CASCADE
@@ -547,6 +561,7 @@ CREATE TABLE IF NOT EXISTS acc_transactions_files
 CREATE INDEX IF NOT EXISTS acc_transactions_files_transaction ON acc_transactions_files (id_transaction);
 
 CREATE TABLE IF NOT EXISTS users_files
+-- Link between users and files
 (
 	id_file INTEGER NOT NULL PRIMARY KEY REFERENCES files(id) ON DELETE CASCADE,
 	id_user INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -561,7 +576,7 @@ CREATE TABLE IF NOT EXISTS web_pages
 	id INTEGER NOT NULL PRIMARY KEY,
 	parent TEXT NULL REFERENCES web_pages(path) ON DELETE CASCADE ON UPDATE CASCADE, -- Parent path, NULL = root
 	path TEXT NOT NULL, -- Full page path
-	dir_path TEXT NOT NULL REFERENCES files(path) ON DELETE CASCADE ON UPDATE CASCADE, -- Full page directory name
+	dir_path TEXT NOT NULL REFERENCES files(path) ON UPDATE CASCADE, -- Full page directory name
 	uri TEXT NOT NULL, -- Page identifier
 	type INTEGER NOT NULL, -- 1 = Category, 2 = Page
 	status TEXT NOT NULL,

@@ -22,7 +22,7 @@
 			</td>
 			<td>{$item.name}</td>
 			<td>{$item.parent}</td>
-			<td>{$item.modified|date_short:true}</td>
+			<td>{$item.trash|date_short:true}</td>
 			<td class="actions">
 			</td>
 		</tr>
