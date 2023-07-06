@@ -169,7 +169,8 @@ class File extends Entity
 			}
 
 			$db = DB::getInstance();
-			$db->exec(sprintf('INSERT OR IGNORE INTO %s_files (id_file, id_transaction) VALUES (%d, %d);',
+			// Only insert if ID exists in table
+			$db->exec(sprintf('INSERT OR IGNORE INTO %s_files (id_file, id_transaction) SELECT %d, %d FROM %1$s WHERE id = %3$d;',
 				$context == self::CONTEXT_USER ? 'users' : 'acc_transactions',
 				$this->id(),
 				$id
