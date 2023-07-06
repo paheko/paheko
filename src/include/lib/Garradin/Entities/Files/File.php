@@ -145,11 +145,6 @@ class File extends Entity
 	// https://book.hacktricks.xyz/pentesting-web/file-upload
 	const FORBIDDEN_EXTENSIONS = '!^(?:cgi|exe|sh|bash|com|pif|jspx?|jar|js[wxv]|action|do|php(?:s|\d+)?|pht|phtml?|shtml|phar|htaccess|inc|cfml?|cfc|dbm|swf|pl|perl|py|pyc|asp|so)$!i';
 
-	static public function getColumns(): array
-	{
-		return array_keys((new self)->_types);
-	}
-
 	public function selfCheck(): void
 	{
 		$this->assert($this->type === self::TYPE_DIRECTORY || $this->type === self::TYPE_FILE, 'Unknown file type');
@@ -157,6 +152,31 @@ class File extends Entity
 		$this->assert(trim($this->name) !== '', 'Le nom de fichier ne peut rester vide');
 		$this->assert(strlen($this->path), 'Le chemin ne peut rester vide');
 		$this->assert(null === $this->parent || strlen($this->parent), 'Le chemin ne peut rester vide');
+	}
+
+	public function save(bool $selfcheck = true): bool
+	{
+		$ok = parent::save();
+
+		$context = $this->context();
+
+		// Link file to transaction/user
+		if ($ok && $this->type === self::TYPE_FILE && in_array($context, [self::CONTEXT_USER, self::CONTEXT_TRANSACTION])) {
+			$id = (int)Utils::basename($this->parent);
+
+			if (!$id) {
+				return $ok;
+			}
+
+			$db = DB::getInstance();
+			$db->exec(sprintf('INSERT OR IGNORE INTO %s_files (id_file, id_transaction) VALUES (%d, %d);',
+				$context == self::CONTEXT_USER ? 'users' : 'acc_transactions',
+				$this->id(),
+				$id
+			));
+		}
+
+		return $ok;
 	}
 
 	public function context(): string
@@ -556,7 +576,7 @@ class File extends Entity
 			$content = $source['content'] ?? $this->fetch();
 
 			if ($mime === 'text/html' || $mime == 'text/xml') {
-				$content = htmlspecialchars_decode(strip_tags($content));
+				$content = html_entity_decode(strip_tags($content),  ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401);
 			}
 		}
 		elseif ($ext == 'pdf' && PDFTOTEXT_COMMAND === 'pdftotext') {
