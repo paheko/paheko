@@ -929,4 +929,54 @@ class Files
 			$dir->delete();
 		}
 	}
+
+	static public function getIconShape(string $name)
+	{
+		$ext = substr($name, strrpos($name, '.') + 1);
+		$ext = strtolower($ext);
+
+		switch ($ext) {
+			case 'ods':
+			case 'xls':
+			case 'xlsx':
+			case 'csv':
+				return 'table';
+			case 'odt':
+			case 'doc':
+			case 'docx':
+			case 'rtf':
+				return 'document';
+			case 'pdf':
+				return 'pdf';
+			case 'odp':
+			case 'ppt':
+			case 'pptx':
+				return 'gallery';
+			case 'txt':
+			case 'skriv':
+				return 'text';
+			case 'md':
+				return 'markdown';
+			case 'html':
+			case 'css':
+			case 'js':
+			case 'tpl':
+				return 'code';
+			case 'mkv':
+			case 'mp4':
+			case 'avi':
+			case 'ogm':
+			case 'ogv':
+				return 'video';
+			case 'png':
+			case 'jpg':
+			case 'jpeg':
+			case 'webp':
+			case 'gif':
+			case 'svg':
+				return 'image';
+		}
+
+		return 'document';
+	}
 }

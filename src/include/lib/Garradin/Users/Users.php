@@ -137,6 +137,7 @@ class Users
 
 	static public function listByCategory(?int $id_category = null): DynamicList
 	{
+		$db = DB::getInstance();
 		$df = DynamicFields::getInstance();
 		$number_field = $df->getNumberField();
 		$name_fields = $df->getNameFields();
@@ -191,6 +192,15 @@ class Users
 			if ($config->hasSearchCache($key)) {
 				$columns[$key]['order'] = sprintf('s.%s %%s', $key);
 			}
+
+			if ($config->type == 'file') {
+				$columns[$key]['select'] = sprintf('(SELECT GROUP_CONCAT(f.path, \';\')
+					FROM users_files uf
+					INNER JOIN files f ON f.id = uf.id_file AND f.trash IS NULL
+					WHERE uf.id_user = u.id AND uf.field = %s)',
+					$db->quote($key)
+				);
+			}
 		}
 
 		if (null !== $identity_column) {
@@ -199,7 +209,6 @@ class Users
 
 		$tables = 'users u';
 		$tables .= ' INNER JOIN users_search s ON s.id = u.id';
-		$db = DB::getInstance();
 
 		if ($db->test('users', 'is_parent = 1')) {
 			$tables .= ' LEFT JOIN users b ON b.id = u.id_parent';

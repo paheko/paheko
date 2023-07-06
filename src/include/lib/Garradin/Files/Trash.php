@@ -5,6 +5,8 @@ namespace Garradin\Files;
 use Garradin\Entities\Files\File;
 use Garradin\DynamicList;
 
+use KD2\DB\EntityManager as EM;
+
 class Trash
 {
 	const LIST_COLUMNS = [
@@ -28,11 +30,10 @@ class Trash
 
 		$tables = File::TABLE;
 
-		$conditions = sprintf('type = %d AND path LIKE :path', File::TYPE_FILE);
+		$conditions = sprintf('type = %d AND trash IS NOT NULL', File::TYPE_FILE);
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('modified', true);
-		$list->setParameter('path', File::CONTEXT_TRASH . '/%');
 
 		return $list;
 	}
@@ -42,15 +43,15 @@ class Trash
 		$past = new \DateTime($expiry);
 		$deleted = false;
 
-		foreach (Files::listRecursive(File::CONTEXT_TRASH, null, true) as $file) {
-			if ($file->modified < $past) {
-				$file->delete();
-				$deleted = true;
-			}
+		$list = EM::getInstance(File::class)->all('SELECT * FROM @TABLE WHERE trash IS NOT NULL AND trash < ?;', $past);
+
+		foreach ($list as $file) {
+			$file->delete();
+			$deleted = true;
 		}
 
 		if ($deleted) {
-			self::pruneEmptyDirectories();
+			Files::pruneEmptyDirectories();
 		}
 	}
 }

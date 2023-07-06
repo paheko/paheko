@@ -378,16 +378,45 @@ class Template extends Smartyer
 		if ($field->type == 'checkbox') {
 			return $v ? 'Oui' : 'Non';
 		}
-		elseif ($field->type == 'file' && isset($params['thumb_url'])) {
-			$session = Session::getInstance();
+		elseif ($field->type == 'file' && $v) {
+			$files = explode(';', $v);
+			$out = '<aside class="files">';
+			$count = 0;
 
-			foreach (Files::listForUser($params['user_id'], $field->name) as $file) {
-				return '<aside class="file">'
-					. $file->link($session, 'auto', false, $params['thumb_url'])
-					. '</aside>';
+			foreach ($files as $path) {
+				if (preg_match('!\.(?:png|jpe?g|gif|webp)$!i', $path)) {
+					$url = BASE_URL . $path . '?150px';
+					$label = sprintf(
+						'<figure><img src="%s" alt="%s" /></figure>',
+						htmlspecialchars($url),
+						htmlspecialchars($field->label)
+					);
+				}
+				else {
+					$count++;
+					continue;
+				}
+
+				if (isset($params['files_href'])) {
+					$label = sprintf('<a href="%s">%s</a>', $params['files_href'], $label);
+				}
+
+				$out .= sprintf(
+					'<aside class="file">%s</aside>',
+					$label
+				);
 			}
 
-			return '';
+			if ($count) {
+				$out .= sprintf('<aside class="file">%s%s</aside>',
+					($count != count($files)) ? '+' : '',
+					($count == 1 ? '1 fichier' : $count . ' fichiers')
+				);
+			}
+
+			$out .= '</aside>';
+
+			return $out;
 		}
 
 		if (empty($v)) {

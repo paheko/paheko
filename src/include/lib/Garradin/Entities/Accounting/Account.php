@@ -262,7 +262,7 @@ class Account extends Entity
 		'files' => [
 			'label' => 'Fichiers joints',
 			'header_icon' => 'attach',
-			'select' => '(SELECT COUNT(*) FROM acc_transactions_files WHERE id_transaction = t.id)',
+			'select' => '(SELECT COUNT(tf.*) FROM acc_transactions_files tf INNER JOIN files f ON f.id = tf.id_file WHERE tf.id_transaction = t.id AND f.trash IS NULL)',
 		],
 		'status' => [
 			'select' => 't.status',

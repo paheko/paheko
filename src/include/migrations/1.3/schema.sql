@@ -509,6 +509,7 @@ CREATE TABLE IF NOT EXISTS files
 	modified TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(modified) IS NOT NULL AND datetime(modified) = modified),
 	image INT NOT NULL DEFAULT 0,
 	md5 TEXT NULL,
+	trash TEXT NULL CHECK (datetime(trash) IS NULL OR datetime(trash) = trash),
 
 	CHECK (type = 2 OR (mime IS NOT NULL AND size IS NOT NULL))
 );
@@ -518,6 +519,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS files_unique ON files (path);
 CREATE INDEX IF NOT EXISTS files_parent ON files (parent);
 CREATE INDEX IF NOT EXISTS files_name ON files (name);
 CREATE INDEX IF NOT EXISTS files_modified ON files (modified);
+CREATE INDEX IF NOT EXISTS files_trash ON files (trash);
 
 CREATE TABLE IF NOT EXISTS files_contents
 -- Files contents (empty if using another storage backend)
@@ -547,10 +549,12 @@ CREATE INDEX IF NOT EXISTS acc_transactions_files_transaction ON acc_transaction
 CREATE TABLE IF NOT EXISTS users_files
 (
 	id_file INTEGER NOT NULL PRIMARY KEY REFERENCES files(id) ON DELETE CASCADE,
-	id_user INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE
+	id_user INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	field TEXT NOT NULL REFERENCES config_users_fields (name) ON DELETE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS users_files_user ON users_files (id_user);
+CREATE INDEX IF NOT EXISTS users_files_user_field ON users_files (id_user, field);
 
 CREATE TABLE IF NOT EXISTS web_pages
 (

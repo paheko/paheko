@@ -63,6 +63,7 @@ class File extends Entity
 	protected \DateTime $modified;
 	protected bool $image;
 	protected ?string $md5;
+	protected ?\DateTime $trash = null;
 
 	const TYPE_FILE = 1;
 	const TYPE_DIRECTORY = 2;
@@ -162,19 +163,39 @@ class File extends Entity
 
 		// Link file to transaction/user
 		if ($ok && $this->type === self::TYPE_FILE && in_array($context, [self::CONTEXT_USER, self::CONTEXT_TRANSACTION])) {
-			$id = (int)Utils::basename($this->parent);
+			// Only insert if ID exists in table
+			$db = DB::getInstance();
 
-			if (!$id) {
-				return $ok;
+			if ($context == self::CONTEXT_USER) {
+				$id = (int)Utils::basename(Utils::dirname($this->parent));
+				$field = Utils::basename($this->parent);
+
+				if (!$id || !$field) {
+					return $ok;
+				}
+
+				$sql = sprintf('INSERT OR IGNORE INTO %s_files (id_file, id_user, field) SELECT %d, %d, %s FROM %1$s WHERE id = %3$d;',
+					'users',
+					$this->id(),
+					$id,
+					$db->quote($field)
+				);
+			}
+			else {
+				$id = (int)Utils::basename($this->parent);
+
+				if (!$id) {
+					return $ok;
+				}
+
+				$sql = sprintf('INSERT OR IGNORE INTO %s_files (id_file, id_transaction) SELECT %d, %d FROM %1$s WHERE id = %3$d;',
+					'acc_transactions',
+					$this->id(),
+					$id
+				);
 			}
 
-			$db = DB::getInstance();
-			// Only insert if ID exists in table
-			$db->exec(sprintf('INSERT OR IGNORE INTO %s_files (id_file, id_transaction) SELECT %d, %d FROM %1$s WHERE id = %3$d;',
-				$context == self::CONTEXT_USER ? 'users' : 'acc_transactions',
-				$this->id(),
-				$id
-			));
+			$db->exec($sql);
 		}
 
 		return $ok;
@@ -261,7 +282,7 @@ class File extends Entity
 			return;
 		}
 
-		$this->touch();
+		$this->set('trash', new \DateTime);
 		$this->move(self::CONTEXT_TRASH . '/' . $this->parent);
 	}
 
@@ -272,6 +293,8 @@ class File extends Entity
 		}
 
 		$parent = substr($this->parent, strlen(self::CONTEXT_TRASH . '/'));
+
+		$this->set('trash', null);
 
 		// Move to original parent path
 		if (Files::exists($parent)) {
@@ -660,45 +683,7 @@ class File extends Entity
 			return 'directory';
 		}
 
-		$ext = substr($this->name, strrpos($this->name, '.') + 1);
-		$ext = strtolower($ext);
-
-		switch ($ext) {
-			case 'ods':
-			case 'xls':
-			case 'xlsx':
-			case 'csv':
-				return 'table';
-			case 'odt':
-			case 'doc':
-			case 'docx':
-			case 'rtf':
-				return 'document';
-			case 'pdf':
-				return 'pdf';
-			case 'odp':
-			case 'ppt':
-			case 'pptx':
-				return 'gallery';
-			case 'txt':
-			case 'skriv':
-				return 'text';
-			case 'md':
-				return 'markdown';
-			case 'html':
-			case 'css':
-			case 'js':
-			case 'tpl':
-				return 'code';
-			case 'mkv':
-			case 'mp4':
-			case 'avi':
-			case 'ogm':
-			case 'ogv':
-				return 'video';
-		}
-
-		return 'document';
+		return Files::getIconShape($this->name);
 	}
 
 	/**

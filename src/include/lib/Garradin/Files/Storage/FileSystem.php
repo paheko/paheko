@@ -187,6 +187,7 @@ class FileSystem implements StorageInterface
 			'type'     => $spl->isDir() ? File::TYPE_DIRECTORY : File::TYPE_FILE,
 			'mime'     => mime_content_type($spl->getRealPath()),
 			'md5'      => null,
+			'trash'    => 0 === strpos($path, 'trash/') ? new \DateTime : null,
 		];
 
 		$data['modified']->setTimeZone(new \DateTimeZone(date_default_timezone_get()));
