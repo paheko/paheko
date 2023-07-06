@@ -490,7 +490,6 @@
 
 				for (var k = 0; k < inputs.length; k++) {
 					var i2 = inputs[k];
-					i2.type = 'submit'; // Force button to have error message, <button type="button"> cannot show validity message
 
 					// Element is hidden or disabled
 					if (!i2.offsetParent || i2.disabled) {
@@ -501,6 +500,8 @@
 					let v = i2.parentNode.querySelector('input[type="hidden"]:nth-child(1)');
 
 					if (!v || !v.value) {
+						// Force button to have error message, <button type="button"> cannot show validity message
+						i2.type = 'submit';
 						i2.setCustomValidity('Merci de faire une sélection.');
 						i2.reportValidity();
 						e.preventDefault();
