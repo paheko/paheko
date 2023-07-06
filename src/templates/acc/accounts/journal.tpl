@@ -105,7 +105,7 @@
 			{if isset($line.locked)}
 			<td>{if $line.locked}{icon title="Écriture verrouillée" shape="lock"}{/if}</td>
 			{/if}
-			<td>{if $line.files}{icon title="Cette écriture a des fichiers joints" shape="attach"}{/if}</td>
+			<td>{if $line.files}{$line.files}{/if}</td>
 			{* Deposit status, might be consufing
 			<td>
 				{if $account.type == $account::TYPE_OUTSTANDING && $line.debit}
