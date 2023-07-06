@@ -520,7 +520,7 @@ details summary.block::after {
     align-items: center;
 }
 
-aside.file {
+.files-list aside.file, aside.files aside.file {
     max-width: 20em;
     border-radius: .5rem;
     background: rgba(var(--gSecondColor), 0.1);
@@ -529,7 +529,7 @@ aside.file {
     margin: .5rem;
 }
 
-aside.file a span::before {
+.files-list aside.file a span::before, aside.files aside.file a span::before,  {
     color: rgba(var(--gMainColor), 0.7);
     font-size: 3em;
     padding: .2em !important;
@@ -551,7 +551,7 @@ aside.files aside.file {
     margin: .2rem;
 }
 
-aside.file figcaption {
+aside.files aside.file figcaption {
     font-size: .8em;
 }
 
