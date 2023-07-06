@@ -5,6 +5,7 @@ namespace Garradin;
 use Garradin\Files\Files;
 use Garradin\Files\Storage;
 use Garradin\Web\Sync as WebSync;
+use Garradin\Web\Web;
 use Garradin\Entities\Files\File;
 use Garradin\UserTemplate\Modules;
 use KD2\DB\DB_Exception;
@@ -80,7 +81,7 @@ foreach ($df->all() as $name => $field) {
 $db->import(ROOT . '/include/migrations/1.3/1.3.0.sql');
 
 // Reindex all files in search, as moving files was broken
-$db->exec('DELETE FROM files_search WHERE path NOT LIKE \'web/%\';');
+$db->exec('DELETE FROM files_search;');
 
 Files::ensureContextsExists();
 
@@ -131,6 +132,7 @@ foreach (Files::listRecursive(null, null, false) as $file) {
 		continue;
 	}
 
+	// Reindex
 	$file->indexForSearch();
 
 	if (!$file->md5) {
@@ -138,6 +140,7 @@ foreach (Files::listRecursive(null, null, false) as $file) {
 		$file->rehash();
 	}
 
+	// Save files in DB
 	$file->save();
 }
 
@@ -150,6 +153,10 @@ $db->exec('
 		FROM web_pages_old;
 	DROP TABLE web_pages_old;
 ');
+
+foreach (Web::listAll() as $page) {
+	$page->syncSearch();
+}
 
 // Update searches
 foreach ($db->iterate('SELECT * FROM searches;') as $row) {

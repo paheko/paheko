@@ -54,10 +54,10 @@ class Web
 		return EM::getInstance(Page::class)->all($sql);
 	}
 
-	static public function listAll(?string $parent): array
+	static public function listAll(): array
 	{
-		$sql = sprintf('SELECT * FROM @TABLE WHERE %s ORDER BY title COLLATE U_NOCASE;', self::getParentClause($parent));
-		return EM::getInstance(Page::class)->all($sql, $parent);
+		$sql = 'SELECT * FROM @TABLE ORDER BY title COLLATE U_NOCASE;';
+		return EM::getInstance(Page::class)->all($sql);
 	}
 
 	static public function getDraftsList(?string $parent): DynamicList

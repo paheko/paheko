@@ -170,8 +170,14 @@ class Page extends Entity
 			$this->set('modified', new \DateTime);
 		}
 
+		$content_modified = $this->isModified('content') || $this->isModified('format');
+
 		Files::ensureDirectoryExists($this->dir_path);
 		parent::save($selfcheck);
+
+		if ($content_modified) {
+			$this->syncSearch();
+		}
 
 		// Rename/move children
 		if ($change_parent) {
