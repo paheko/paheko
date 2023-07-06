@@ -461,4 +461,15 @@ class DB extends SQLite3
 
 		return (bool) preg_match(self::$unicode_patterns_cache[$id], $value);
 	}
+
+	public function dropIndexes(): void
+	{
+		foreach ($this->getAssoc('SELECT name, name FROM sqlite_master WHERE type = \'index\';') as $index) {
+			if (preg_match('!^(?:sqlite_|plugin_|prv_)!', $index)) {
+				continue;
+			}
+
+			$this->exec(sprintf('DROP INDEX IF EXISTS %s;', $index));
+		}
+	}
 }

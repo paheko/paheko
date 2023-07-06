@@ -262,7 +262,7 @@ class Account extends Entity
 		'files' => [
 			'label' => 'Fichiers joints',
 			'header_icon' => 'attach',
-			'select' => '(SELECT 1 FROM files WHERE path LIKE \'transaction/\' || t.id || \'/%\' LIMIT 1)',
+			'select' => '(SELECT COUNT(*) FROM acc_transactions_files WHERE id_transaction = t.id)',
 		],
 		'status' => [
 			'select' => 't.status',

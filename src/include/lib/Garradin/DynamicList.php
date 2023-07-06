@@ -14,7 +14,8 @@ class DynamicList implements \Countable
 	protected $modifier;
 	protected $export_callback;
 	protected $title = 'Liste';
-	protected $count = 'COUNT(*)';
+	protected string $count = 'COUNT(*)';
+	protected ?string $count_tables = null;
 	protected $desc = true;
 	protected $per_page = 100;
 	protected $page = 1;
@@ -83,7 +84,7 @@ class DynamicList implements \Countable
 	public function count(): int
 	{
 		if (null === $this->count_result) {
-			$sql = sprintf('SELECT %s FROM %s WHERE %s;', $this->count, $this->tables, $this->conditions);
+			$sql = sprintf('SELECT %s FROM %s WHERE %s;', $this->count, $this->count_tables ?? $this->tables, $this->conditions);
 			$this->count_result = DB::getInstance()->firstColumn($sql, $this->parameters);
 		}
 
@@ -128,6 +129,11 @@ class DynamicList implements \Countable
 	public function setCount(string $count)
 	{
 		$this->count = $count;
+	}
+
+	public function setCountTables(string $tables)
+	{
+		$this->count_tables = $tables;
 	}
 
 	public function getHeaderColumns(bool $export = false)

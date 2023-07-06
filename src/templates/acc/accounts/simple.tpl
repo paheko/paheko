@@ -49,7 +49,7 @@
 				{if isset($line.locked)}
 				<td>{if $line.locked}{icon title="Écriture verrouillée" shape="lock"}{/if}</td>
 				{/if}
-				<td>{if $line.files}{icon title="Cette écriture a des fichiers joints" shape="attach"}{/if}</td>
+				<td class="num">{if $line.files}{$line.files}{/if}</td>
 				{if property_exists($line, 'status_label')}
 				<td>
 					{if $line.status & Entities\Accounting\Transaction::STATUS_WAITING}

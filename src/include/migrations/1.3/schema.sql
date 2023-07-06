@@ -175,7 +175,7 @@ CREATE TABLE IF NOT EXISTS mailings (
 	anonymous INTEGER NOT NULL DEFAULT 0
 );
 
-CREATE INDEX mailings_sent ON mailings (sent);
+CREATE INDEX IF NOT EXISTS mailings_sent ON mailings (sent);
 
 CREATE TABLE IF NOT EXISTS mailings_recipients (
 	id INTEGER NOT NULL PRIMARY KEY,
@@ -185,7 +185,7 @@ CREATE TABLE IF NOT EXISTS mailings_recipients (
 	extra_data TEXT NULL
 );
 
-CREATE INDEX mailings_recipients_id ON mailings_recipients (id);
+CREATE INDEX IF NOT EXISTS mailings_recipients_id ON mailings_recipients (id);
 
 ---
 --- Users
@@ -453,6 +453,7 @@ CREATE INDEX IF NOT EXISTS acc_transactions_date ON acc_transactions (date);
 CREATE INDEX IF NOT EXISTS acc_transactions_related ON acc_transactions (id_related);
 CREATE INDEX IF NOT EXISTS acc_transactions_type ON acc_transactions (type, id_year);
 CREATE INDEX IF NOT EXISTS acc_transactions_status ON acc_transactions (status);
+CREATE INDEX IF NOT EXISTS acc_transactions_hash ON acc_transactions (hash);
 
 CREATE TABLE IF NOT EXISTS acc_transactions_lines
 -- Transactions lines (lignes des écritures)
@@ -534,6 +535,22 @@ CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4
 	content TEXT NOT NULL, -- Text content
 	notindexed=path
 );
+
+CREATE TABLE IF NOT EXISTS acc_transactions_files
+(
+	id_file INTEGER NOT NULL PRIMARY KEY REFERENCES files(id) ON DELETE CASCADE,
+	id_transaction INTEGER NOT NULL REFERENCES acc_transactions(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS acc_transactions_files_transaction ON acc_transactions_files (id_transaction);
+
+CREATE TABLE IF NOT EXISTS users_files
+(
+	id_file INTEGER NOT NULL PRIMARY KEY REFERENCES files(id) ON DELETE CASCADE,
+	id_user INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS users_files_user ON users_files (id_user);
 
 CREATE TABLE IF NOT EXISTS web_pages
 (

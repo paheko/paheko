@@ -239,7 +239,8 @@ class Transactions
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('date', true);
-		$list->setCount('COUNT(DISTINCT t.id)');
+		$list->setCount('COUNT(t.id)');
+		$list->setCountTables('acc_transactions t');
 		$list->groupBy('t.id');
 		$list->setModifier(function (&$row) {
 			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);

@@ -18,15 +18,6 @@ DROP VIEW acc_accounts_balances;
 ALTER TABLE files RENAME TO files_old;
 ALTER TABLE files_contents RENAME TO files_contents_old;
 ALTER TABLE web_pages RENAME TO web_pages_old;
-DROP INDEX files_unique;
-DROP INDEX files_parent;
-DROP INDEX files_name;
-DROP INDEX files_modified;
-DROP INDEX web_pages_path;
-DROP INDEX web_pages_uri;
-DROP INDEX web_pages_parent;
-DROP INDEX web_pages_published;
-DROP INDEX web_pages_title;
 
 .read schema.sql
 

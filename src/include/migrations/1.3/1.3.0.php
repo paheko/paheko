@@ -22,6 +22,8 @@ if (!$db->test('plugins', 'id = ?', 'taima')) {
 	');
 }
 
+$db->dropIndexes();
+
 // Get old keys
 $config = (object) $db->getAssoc('SELECT key, value FROM config WHERE key IN (\'champs_membres\', \'champ_identifiant\', \'champ_identite\');');
 
@@ -91,7 +93,9 @@ if (FILE_STORAGE_BACKEND == 'FileSystem') {
 			@mkdir(FILE_STORAGE_CONFIG . '/modules', 0777, true);
 		}
 
-		rename(FILE_STORAGE_CONFIG . '/skel', FILE_STORAGE_CONFIG . '/modules/web');
+		if (!file_exists(FILE_STORAGE_CONFIG . '/modules/web')) {
+			rename(FILE_STORAGE_CONFIG . '/skel', FILE_STORAGE_CONFIG . '/modules/web');
+		}
 	}
 
 	// now we store file metadata in DB
