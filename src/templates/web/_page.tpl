@@ -58,7 +58,7 @@
 		<?php $files = $page->listAttachments(); ?>
 
 		<div class="attachments noprint">
-			<h3 class="ruler">Fichiers joints à cette page</h3>
+			<h3 class="ruler">Fichiers joints</h3>
 
 			{include file="common/files/_context_list.tpl" files=$files edit=$can_edit path=$page.dir_path}
 		</div>
