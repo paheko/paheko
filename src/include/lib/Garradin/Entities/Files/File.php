@@ -756,16 +756,18 @@ class File extends Entity
 			$label = preg_replace('/[_.-]/', '&shy;$0', htmlspecialchars($this->name));
 		}
 
+		$editor = $this->editorType();
+
 		if ($url) {
 			$attrs = sprintf('href="%s"', Utils::getLocalURL($url));
 		}
-		elseif ($allow_edit && $this->canWrite($session) && $this->editorType()) {
+		elseif ($editor && ($allow_edit || $editor == 'wopi') && $this->canWrite($session)) {
 			$attrs = sprintf('href="%s" target="_dialog" data-dialog-class="fullscreen"',
 				Utils::getLocalURL('!common/files/edit.php?p=') . rawurlencode($this->path));
 		}
 		elseif ($this->canPreview($session)) {
 			$attrs = sprintf('href="%s" target="_dialog" data-mime="%s"',
-				Utils::getLocalURL('!common/files/preview.php?p=') . rawurlencode($this->path),
+				$this->isImage() ? $this->url() : Utils::getLocalURL('!common/files/preview.php?p=') . rawurlencode($this->path),
 				$this->mime);
 		}
 		else {
