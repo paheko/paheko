@@ -3,6 +3,7 @@
 namespace Garradin\Files;
 
 use Garradin\Entities\Files\File;
+use Garradin\DB;
 use Garradin\DynamicList;
 
 use KD2\DB\EntityManager as EM;
@@ -47,4 +48,11 @@ class Trash
 			$file->delete();
 		}
 	}
+
+	static public function getSize(): int
+	{
+		$db = DB::getInstance();
+		return $db->firstColumn('SELECT SUM(size) FROM files WHERE trash IS NOT NULL;') ?: 0;
+	}
+
 }

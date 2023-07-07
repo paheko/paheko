@@ -1,12 +1,12 @@
 {include file="_head.tpl" title="Fichiers supprimés" current="docs" hide_title=true}
 
 <nav class="tabs">
-	{include file="./_nav.tpl"}
+	{include file="./_nav.tpl" context="trash"}
 	<h2>Fichiers supprimés</h2>
 </nav>
 
 <p class="help">
-	Les fichiers supprimés occupent actuellement <strong>{$trash_size|size_in_bytes}</strong>.
+	Les fichiers supprimés occupent actuellement <strong>{$size|size_in_bytes}</strong>.
 </p>
 
 {form_errors}

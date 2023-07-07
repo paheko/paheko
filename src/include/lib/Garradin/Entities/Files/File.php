@@ -91,7 +91,6 @@ class File extends Entity
 	const CONTEXT_CONFIG = 'config';
 	const CONTEXT_WEB = 'web';
 	const CONTEXT_MODULES = 'modules';
-	const CONTEXT_TRASH = 'trash';
 	const CONTEXT_ATTACHMENTS = 'attachments';
 
 	/**
@@ -106,7 +105,6 @@ class File extends Entity
 		self::CONTEXT_CONFIG => 'Configuration',
 		self::CONTEXT_WEB => 'Site web',
 		self::CONTEXT_MODULES => 'Modules',
-		self::CONTEXT_TRASH => 'Corbeille',
 		self::CONTEXT_SKELETON => 'Squelettes',
 		self::CONTEXT_ATTACHMENTS => 'Fichiers joints aux messages',
 	];
@@ -228,7 +226,15 @@ class File extends Entity
 
 	public function etag(): string
 	{
-		return $this->md5;
+		if ($this->md5) {
+			return $this->md5;
+		}
+		elseif (!$this->isDir()) {
+			return md5($this->path . $this->size . $this->modified->getTimestamp());
+		}
+		else {
+			return md5($this->path . $this->getRecursiveSize() . $this->getRecursiveLastModified());
+		}
 	}
 
 	public function rehash($pointer = null): void
@@ -282,7 +288,7 @@ class File extends Entity
 
 	public function moveToTrash(): void
 	{
-		if ($this->context() == self::CONTEXT_TRASH) {
+		if ($this->trash) {
 			return;
 		}
 
@@ -1458,6 +1464,20 @@ class File extends Entity
 
 		$db = DB::getInstance();
 		return $db->firstColumn('SELECT SUM(size) FROM files
+			WHERE type = ? AND path LIKE ? ESCAPE \'!\';',
+			File::TYPE_FILE,
+			$db->escapeLike($this->path, '!') . '/%'
+		) ?: 0;
+	}
+
+	public function getRecursiveLastModified(): int
+	{
+		if ($this->type == self::TYPE_FILE) {
+			return $this->modified;
+		}
+
+		$db = DB::getInstance();
+		return $db->firstColumn('SELECT MAX(modified) FROM files
 			WHERE type = ? AND path LIKE ? ESCAPE \'!\';',
 			File::TYPE_FILE,
 			$db->escapeLike($this->path, '!') . '/%'

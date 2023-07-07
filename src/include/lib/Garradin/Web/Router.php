@@ -116,9 +116,14 @@ class Router
 			header('Location: /dav/documents/');
 			return;
 		}
-		elseif ((Files::isContextRoutable($uri) && ($file = Files::getFromURI($uri)))
+		elseif (($file = Files::getFromURI($uri))
 				|| ($file = Web::getAttachmentFromURI($uri))) {
 			$size = null;
+
+			if ($file->trash) {
+				http_response_code(404);
+				throw new UserException('Cette page n\'existe pas.');
+			}
 
 			if ($file->image) {
 				foreach ($_GET as $key => $v) {

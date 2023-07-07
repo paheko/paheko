@@ -164,17 +164,6 @@ class Files
 			'share' => false,
 		];
 
-		// Trash
-		$p[File::CONTEXT_TRASH] = [
-			'mkdir' => false,
-			'move' => $is_admin,
-			'create' => false,
-			'read' => $is_admin,
-			'write' => false,
-			'delete' => $is_admin,
-			'share' => false,
-		];
-
 		$p[File::CONTEXT_WEB . '//'] = [
 			'mkdir' => false,
 			'move' => false,
@@ -337,6 +326,7 @@ class Files
 
 		$tables = File::TABLE;
 		$conditions = self::_getParentClause($parent);
+		$conditions .= ' AND trash IS NULL';
 
 		$list = new DynamicList($columns, $tables, $conditions);
 
@@ -578,22 +568,6 @@ class Files
 		}
 
 		return $context;
-	}
-
-	static public function isContextRoutable(string $path): bool
-	{
-		$context = self::getContext($path);
-
-		if (!$context) {
-			return false;
-		}
-
-		// Trash files can never be served directly
-		if ($context == File::CONTEXT_TRASH) {
-			return false;
-		}
-
-		return true;
 	}
 
 	static public function getContextRef(string $path): ?string

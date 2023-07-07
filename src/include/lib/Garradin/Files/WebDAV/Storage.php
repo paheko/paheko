@@ -172,7 +172,7 @@ class Storage extends AbstractStorage
 			case 'DAV::ishidden':
 				return false;
 			case 'DAV::getetag':
-				return !$is_dir ? $file->etag() : md5($file->getRecursiveSize() . $file->path);
+				return $file->etag();
 			case 'DAV::lastaccessed':
 				return null;
 			case 'DAV::creationdate':
@@ -355,12 +355,7 @@ class Storage extends AbstractStorage
 			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de supprimer ce fichier', 403);
 		}
 
-		if ($target->context() == $target::CONTEXT_TRASH) {
-			$target->delete();
-		}
-		else {
-			$target->moveToTrash();
-		}
+		$target->moveToTrash();
 	}
 
 	protected function copymove(bool $move, string $uri, string $destination): bool
