@@ -562,6 +562,16 @@ class User extends Entity
 		$this->_modified['preferences'] = null;
 	}
 
+	public function deletePreference(string $key): void
+	{
+		if (null === $this->preferences || !isset($this->preferences->{$key})) {
+			return;
+		}
+
+		unset($this->preferences->{$key});
+		$this->_modified['preferences'] = null;
+	}
+
 	/**
 	 * Save preferences if they have been modified
 	 */

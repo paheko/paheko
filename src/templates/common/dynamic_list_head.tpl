@@ -1,4 +1,4 @@
-<table class="list">
+<table class="list{if isset($class)} {$class}{/if}">
 	<thead class="userOrder">
 		<tr>
 			{if !empty($check)}

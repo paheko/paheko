@@ -22,7 +22,7 @@ use Garradin\Entities\Files\File;
 			{input type="text" name="q" size=25 placeholder="Rechercher un document" title="Rechercher dans les documents"}
 			{button shape="search" type="submit" title="Rechercher"}
 		</form>
-	{if !$list || !($list instanceof \Garradin\DynamicList)}
+	{if !$context_specific_root}
 		{if $gallery}
 			{linkbutton shape="menu" label="Afficher en liste" href="?path=%s&gallery=0"|args:$dir_uri}
 		{else}
@@ -60,7 +60,7 @@ use Garradin\Entities\Files\File;
 			{else}
 				Fichiers joints aux fiches des membres
 			{/if}
-		{elseif $context_ref}
+		{elseif $parent_uri}
 			{$dir->name}
 		{else}
 			Documents
@@ -69,201 +69,174 @@ use Garradin\Entities\Files\File;
 </nav>
 
 
-{if $context_ref}
-<nav class="breadcrumbs">
-{if $context == File::CONTEXT_TRANSACTION}
+{if $parent_uri}
+	<nav class="breadcrumbs">
 	{if $context_ref}
-		{linkbutton href="!acc/transactions/details.php?id=%d"|args:$context_ref|local_url label="Détails de l'écriture" shape="menu"}
-	{/if}
-{elseif $context == File::CONTEXT_USER}
-	{if $context_ref}
-		{linkbutton href="!users/details.php?id=%d"|args:$context_ref|local_url label="Fiche du membre" shape="user"}
-	{/if}
-{else}
-	<ul>
-	{foreach from=$breadcrumbs item="name" key="bc_path"}
-		<li><a href="?path={$bc_path}">{$name}</a></li>
-	{/foreach}
-	</ul>
-	{if count($breadcrumbs) > 1}
 		{linkbutton href="?path=%s"|args:$parent_uri label="Retour au répertoire parent" shape="left"}
+		{if $context == File::CONTEXT_TRANSACTION}
+			{linkbutton href="!acc/transactions/details.php?id=%d"|args:$context_ref|local_url label="Détails de l'écriture" shape="menu"}
+		{elseif $context == File::CONTEXT_USER}
+			{linkbutton href="!users/details.php?id=%d"|args:$context_ref|local_url label="Fiche du membre" shape="user"}
+		{/if}
+	{else}
+		<ul>
+		{foreach from=$breadcrumbs item="name" key="bc_path"}
+			<li><a href="?path={$bc_path}">{$name}</a></li>
+		{/foreach}
+		</ul>
+		{if count($breadcrumbs) > 1}
+			{linkbutton href="?path=%s"|args:$parent_uri label="Retour au répertoire parent" shape="left"}
+		{/if}
 	{/if}
-
-{/if}
-</nav>
+	</nav>
 {/if}
 
-{if count($list)}
-	{if is_array($list)}
+{if $list->count()}
 	<form method="post" action="{"!docs/action.php"|local_url}" target="_dialog">
 
-		<table class="list files{if $gallery} gallery{/if}">
-			<thead>
-				<tr>
-					{if $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE)}
-					<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all" /><label title="Tout cocher / décocher" for="f_all"></label></td>
-					{/if}
-					<td></td>
-					<th>Nom</th>
-					<td class="size">Taille</td>
-					<td class="date">Modifié</td>
-					<td></td>
-				</tr>
-			</thead>
+		<?php
+		$class = $gallery && !$context_specific_root ? 'files gallery' : 'files';
 
-			<tbody>
+		if ($context_specific_root) {
+			$can_check = false;
+		}
+		elseif ($context === File::CONTEXT_USER || $context === File::CONTEXT_TRANSACTION) {
+			$can_check = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
+		}
+		else {
+			$can_check = $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE);
+		}
+		?>
 
-			{foreach from=$list item="file"}
-				{if $file->isDir()}
-				<tr class="folder">
-					{if $file->canDelete()}
+		{include file="common/dynamic_list_head.tpl" check=$can_check class=$class}
+
+		{foreach from=$list->iterate() item="item"}
+			{if !$context_ref && $context === File::CONTEXT_TRANSACTION}
+			<tr>
+				{if $can_check}
 					<td class="check">
-						{input type="checkbox" name="check[]" value=$file->path}
-					</td>
-					{/if}
-					<td class="icon"><a href="?path={$file->path_uri()}">{icon shape="folder"}</a></td>
-					<th colspan="3"><a href="?path={$file->path_uri()}">{$file.name}</a></th>
-					<td class="actions">
-					{if $dir->canCreateHere() || $file->canDelete()}
-						{linkmenu label="Modifier…" shape="edit"}
-							{if $file->canRename()}
-								{linkbutton href="!common/files/rename.php?p=%s"|args:$file->path_uri() label="Renommer" shape="minus" target="_dialog"}
-							{/if}
-							{if $file->canDelete()}
-								{linkbutton href="!common/files/delete.php?p=%s"|args:$file->path_uri() label="Supprimer" shape="trash" target="_dialog"}
-							{/if}
-						{/linkmenu}
-					{/if}
-					</td>
-				</tr>
-				{else}
-				<tr{if $highlight == $file->name} class="highlight"{/if}>
-				{if $file->canDelete()}
-					<td class="check">
-						{input type="checkbox" name="check[]" value=$file->path}
+						{input type="checkbox" name="check[]" value=$item.path}
 					</td>
 				{/if}
-				{if $gallery && $file->isImage()}
-					<td class="preview">{$file->link($session, '150px', false)|raw}</td>
-				{else}
-					<td class="icon">
-						{$file->link($session, 'icon', false)|raw}
+				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$item.id}">#{$item.id}</a></td>
+				<th><a href="?path={$item.path}">{$item.label}</a></th>
+				<td>{$item.date|date_short}</td>
+				<td>{$item.reference}</td>
+				<td>{$item.year}</td>
+				<td class="actions">
+					{linkbutton href="!docs/?path=%s"|args:$item.path label="Fichiers" shape="menu"}
+					{linkbutton href="!acc/transactions/details.php?id=%d"|args:$item.id label="Écriture" shape="search"}
+				</td>
+			</tr>
+			{elseif !$context_ref && $context === File::CONTEXT_USER}
+			<tr>
+				{if $can_check}
+					<td class="check">
+						{input type="checkbox" name="check[]" value=$item.path}
 					</td>
 				{/if}
-					<th>
-						{$file->link($session, null, false)|raw}
-					</th>
-					<td class="size">{$file.size|size_in_bytes}</td>
-					<td class="date">{$file.modified|relative_date_short:true}</td>
-					<td class="actions">
-						{linkbutton href=$file->url(true) label="Télécharger" shape="download" title="Télécharger"}
-						{if $file->canShare()}
-							{linkbutton href="!common/files/share.php?p=%s"|args:$file->path_uri() label="Partager" shape="export" target="_dialog" title="Partager"}
+				<td class="num"><a href="{$admin_url}users/details.php?id={$item.id}">{$item.number}</a></td>
+				<th><a href="?path={$item.path}">{$item.identity}</a></th>
+				<td class="actions">
+					{linkbutton href="!docs/?path=%s"|args:$item.path label="Fichiers" shape="menu"}
+					{linkbutton href="!users/details.php?id=%d"|args:$item.id label="Fiche membre" shape="user"}
+				</td>
+			</tr>
+			{else}
+				{if $item->isDir()}
+					<tr class="folder">
+						{if $can_check && $item->canDelete()}
+							<td class="check">
+								{input type="checkbox" name="check[]" value=$item.path}
+							</td>
 						{/if}
-						{if $file->canRename() || $file->canDelete() || ($file->canWrite() && $file->editorType())}
-							{linkmenu label="Modifier…" shape="edit" right=true}
-								{if $file->canWrite() && $file->editorType()}
-									{linkbutton href="!common/files/edit.php?p=%s"|args:$file->path_uri() label="Éditer" shape="edit" target="_dialog" data-dialog-class="fullscreen"}
+						<td class="icon"><a href="?path={$item->path_uri()}">{icon shape="folder"}</a></td>
+						<th colspan="3"><a href="?path={$item->path_uri()}">{$item.name}</a></th>
+						<td class="actions">
+						{if $dir->canCreateHere() || $item->canDelete()}
+							{linkmenu label="Modifier…" shape="edit"}
+								{if $item->canRename()}
+									{linkbutton href="!common/files/rename.php?p=%s"|args:$item->path_uri() label="Renommer" shape="minus" target="_dialog"}
 								{/if}
-								{if $file->canRename()}
-									{linkbutton href="!common/files/rename.php?p=%s"|args:$file->path_uri() label="Renommer" shape="reload" target="_dialog"}
-								{/if}
-								{if $file->canDelete()}
-									{linkbutton href="!common/files/delete.php?p=%s"|args:$file->path_uri() label="Supprimer" shape="trash" target="_dialog"}
+								{if $item->canDelete()}
+									{linkbutton href="!common/files/delete.php?p=%s"|args:$item->path_uri() label="Supprimer" shape="trash" target="_dialog"}
 								{/if}
 							{/linkmenu}
 						{/if}
-					</td>
-				</tr>
-				{/if}
-			{/foreach}
-
-			</tbody>
-
-			{if $file->canDelete()}
-			<tfoot>
-				<tr>
-					<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all2" /><label title="Tout cocher / décocher" for="f_all2"></label></td>
-					<td class="actions" colspan="6">
-						<em>Pour les fichiers sélectionnés&nbsp;:</em>
-							<input type="hidden" name="parent" value="{$dir_uri}" />
-							<select name="action">
-								<option value="">— Choisir une action à effectuer —</option>
-								{if $context == File::CONTEXT_DOCUMENTS}
-								<option value="move">Déplacer</option>
-								{/if}
-								<option value="delete">Supprimer</option>
-								<option value="zip">Télécharger dans un fichier ZIP</option>
-							</select>
-							<noscript>
-								{button type="submit" value="OK" shape="right" label="Valider"}
-							</noscript>
-					</td>
-				</tr>
-			</tfoot>
-			{/if}
-		</table>
-	</form>
-
-	{elseif $list instanceof \Garradin\DynamicList}
-
-		{if $list->count()}
-
-			<?php $is_user_admin = $context === File::CONTEXT_USER && $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN); ?>
-
-			{if $is_user_admin}
-			<form method="post" action="{$admin_url}users/action.php" target="_dialog">
-			{/if}
-
-			{include file="common/dynamic_list_head.tpl" check=$is_user_admin}
-
-			{foreach from=$list->iterate() item="item"}
-				<tr>
-					{if $context == File::CONTEXT_TRANSACTION}
-						<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$item.id}">#{$item.id}</a></td>
-						<th><a href="?path={$item.path}">{$item.label}</a></th>
-						<td>{$item.date|date_short}</td>
-						<td>{$item.reference}</td>
-						<td>{$item.year}</td>
-						<td class="actions">
-							{linkbutton href="!docs/?path=%s"|args:$item.path label="Fichiers" shape="menu"}
-							{linkbutton href="!acc/transactions/details.php?id=%d"|args:$item.id label="Écriture" shape="search"}
 						</td>
-					{else}
-						{if $is_user_admin}
-						<td class="check">{input type="checkbox" name="selected[]" value=$item.id}</td>
-						{/if}
-						<td class="num"><a href="{$admin_url}users/details.php?id={$item.id}">{$item.number}</a></td>
-						<th><a href="?path={$item.path}">{$item.identity}</a></th>
-						<td class="actions">
-							{linkbutton href="!docs/?path=%s"|args:$item.path label="Fichiers" shape="menu"}
-							{linkbutton href="!users/details.php?id=%d"|args:$item.id label="Fiche membre" shape="user"}
+					</tr>
+				{else}
+					<tr{if $highlight == $item.name} class="highlight"{/if}>
+					{if $item->canDelete()}
+						<td class="check">
+							{input type="checkbox" name="check[]" value=$item.path}
 						</td>
 					{/if}
-				</tr>
-			{/foreach}
-			</tbody>
-
-			{if $is_user_admin}
-				{include file="users/_list_actions.tpl" colspan=count($list->getHeaderColumns())+1}
+					{if $gallery && $item->isImage()}
+						<td class="preview">{$item->link($session, '150px', false)|raw}</td>
+					{else}
+						<td class="icon">
+							{$item->link($session, 'icon', false)|raw}
+						</td>
+					{/if}
+						<th>
+							{$item->link($session, null, false)|raw}
+						</th>
+						<td class="size">{$item.size|size_in_bytes}</td>
+						<td class="date">{$item.modified|relative_date_short:true}</td>
+						<td class="actions">
+							{linkbutton href=$item->url(true) label="Télécharger" shape="download" title="Télécharger"}
+							{if $item->canShare()}
+								{linkbutton href="!common/files/share.php?p=%s"|args:$item->path_uri() label="Partager" shape="export" target="_dialog" title="Partager"}
+							{/if}
+							{if $item->canRename() || $item->canDelete() || ($item->canWrite() && $item->editorType())}
+								{linkmenu label="Modifier…" shape="edit" right=true}
+									{if $item->canWrite() && $item->editorType()}
+										{linkbutton href="!common/files/edit.php?p=%s"|args:$item->path_uri() label="Éditer" shape="edit" target="_dialog" data-dialog-class="fullscreen"}
+									{/if}
+									{if $item->canRename()}
+										{linkbutton href="!common/files/rename.php?p=%s"|args:$item->path_uri() label="Renommer" shape="reload" target="_dialog"}
+									{/if}
+									{if $item->canDelete()}
+										{linkbutton href="!common/files/delete.php?p=%s"|args:$item->path_uri() label="Supprimer" shape="trash" target="_dialog"}
+									{/if}
+								{/linkmenu}
+							{/if}
+						</td>
+					</tr>
+				{/if}
 			{/if}
+		{/foreach}
 
-			</table>
+		</tbody>
 
-			{if $is_user_admin}
-			</form>
-			{/if}
-
-			{$list->getHTMLPagination()|raw}
-
-		{else}
-
-			<p class="alert block">Aucun fichier n'existe ici.</p>
-
+		{if $can_check}
+		<tfoot>
+			<tr>
+				<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all2" /><label title="Tout cocher / décocher" for="f_all2"></label></td>
+				<td class="actions" colspan="6">
+					<em>Pour les fichiers sélectionnés&nbsp;:</em>
+					<input type="hidden" name="parent" value="{$dir_uri}" />
+					<select name="action">
+						<option value="">— Choisir une action à effectuer —</option>
+						{if $context == File::CONTEXT_DOCUMENTS}
+						<option value="move">Déplacer</option>
+						{/if}
+						<option value="delete">Supprimer</option>
+						<option value="zip">Télécharger dans un fichier ZIP</option>
+					</select>
+					<noscript>
+						{button type="submit" value="OK" shape="right" label="Valider"}
+					</noscript>
+				</td>
+			</tr>
+		</tfoot>
 		{/if}
+	</table>
 
+	{$list->getHTMLPagination()|raw}
+</form>
 
-	{/if}
 {else}
 	<p class="alert block">Il n'y a aucun fichier dans ce répertoire.</p>
 {/if}

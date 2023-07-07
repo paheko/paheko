@@ -2,26 +2,32 @@
 
 namespace Garradin;
 
+use Garradin\DB;
 use Garradin\Users\Session;
+
+use KD2\DB\EntityManager as EM;
 
 class DynamicList implements \Countable
 {
-	protected $columns;
-	protected $tables;
-	protected $conditions;
-	protected $group;
-	protected $order;
+	protected array $columns;
+	protected string $tables;
+	protected string $conditions;
+	protected ?string $group = null;
+	protected string $order;
 	protected $modifier;
 	protected $export_callback;
-	protected $title = 'Liste';
+	protected string $title = 'Liste';
 	protected string $count = 'COUNT(*)';
 	protected ?string $count_tables = null;
-	protected $desc = true;
-	protected $per_page = 100;
-	protected $page = 1;
+	protected ?string $entity = null;
+	protected ?string $entity_select = null;
+	protected bool $desc = true;
+	protected int $per_page = 100;
+	protected int $page = 1;
 	protected array $parameters = [];
+	protected array $preference_hash_elements = ['tables' => true, 'columns' => true, 'conditions' => true, 'group' => true];
 
-	private $count_result;
+	private ?int $count_result = null;
 
 	public function __construct(array $columns, string $tables, string $conditions = '1')
 	{
@@ -39,6 +45,11 @@ class DynamicList implements \Countable
 	public function __get($key)
 	{
 		return $this->$key;
+	}
+
+	public function togglePreferenceHashElement(string $name, bool $enable): void
+	{
+		$this->preference_hash_elements[$name] = $enable;
 	}
 
 	public function setParameter($key, $value) {
@@ -64,6 +75,17 @@ class DynamicList implements \Countable
 	public function setConditions(string $conditions)
 	{
 		$this->conditions = $conditions;
+	}
+
+	/**
+	 * If an entity is set, then each row will return the specified entity
+	 * (using the SELECT clause passed) instead of the specified columns.
+	 * Columns will only be used for the header and ordering
+	 */
+	public function setEntity(string $entity, string $select = '*')
+	{
+		$this->entity = $entity;
+		$this->entity_select = $select;
 	}
 
 	public function orderBy(string $key, bool $desc)
@@ -176,48 +198,64 @@ class DynamicList implements \Countable
 
 	public function iterate(bool $include_hidden = true)
 	{
-		foreach (DB::getInstance()->iterate($this->SQL(), $this->parameters) as $row) {
+		if ($this->entity) {
+			$list = EM::getInstance($this->entity)->iterate($this->SQL());
+		}
+		else {
+			$list = DB::getInstance()->iterate($this->SQL(), $this->parameters);
+		}
+
+		foreach ($list as $key => $row) {
 			if ($this->modifier) {
 				call_user_func_array($this->modifier, [&$row]);
 			}
 
-			foreach ($this->columns as $key => $config) {
-				if (empty($config['label']) && !$include_hidden) {
-					unset($row->$key);
+			// Hide columns without a label in results
+			if (!$this->entity) {
+				foreach ($this->columns as $key => $config) {
+					if (empty($config['label']) && !$include_hidden) {
+						unset($row->$key);
+					}
 				}
 			}
 
-			yield $row;
+			yield $key => $row;
 		}
 	}
 
 	public function SQL()
 	{
 		$start = ($this->page - 1) * $this->per_page;
-		$columns = [];
 		$db = DB::getInstance();
 
-		foreach ($this->columns as $alias => $properties) {
-			// Skip columns that require a certain order (eg. calculating a running sum)
-			if (isset($properties['only_with_order']) && !($properties['only_with_order'] == $this->order)) {
-				continue;
-			}
-
-			// Skip columns that require a certain order AND paginated result
-			if (isset($properties['only_with_order']) && $this->page > 1) {
-				continue;
-			}
-
-			if (array_key_exists('select', $properties)) {
-				$select = $properties['select'] ?? 'NULL';
-				$columns[] = sprintf('%s AS %s', $select, $db->quoteIdentifier($alias));
-			}
-			else {
-				$columns[] = $db->quoteIdentifier($alias);
-			}
+		if ($this->entity) {
+			$select = $this->entity_select;
 		}
+		else {
+			$columns = [];
 
-		$columns = implode(', ', $columns);
+			foreach ($this->columns as $alias => $properties) {
+				// Skip columns that require a certain order (eg. calculating a running sum)
+				if (isset($properties['only_with_order']) && !($properties['only_with_order'] == $this->order)) {
+					continue;
+				}
+
+				// Skip columns that require a certain order AND paginated result
+				if (isset($properties['only_with_order']) && $this->page > 1) {
+					continue;
+				}
+
+				if (array_key_exists('select', $properties)) {
+					$select = $properties['select'] ?? 'NULL';
+					$columns[] = sprintf('%s AS %s', $select, $db->quoteIdentifier($alias));
+				}
+				else {
+					$columns[] = $db->quoteIdentifier($alias);
+				}
+			}
+
+			$select = implode(', ', $columns);
+		}
 
 		if (isset($this->columns[$this->order]['order'])) {
 			$order = sprintf($this->columns[$this->order]['order'], $this->desc ? 'DESC' : 'ASC');
@@ -233,7 +271,7 @@ class DynamicList implements \Countable
 		$group = $this->group ? 'GROUP BY ' . $this->group : '';
 
 		$sql = sprintf('SELECT %s FROM %s WHERE %s %s ORDER BY %s',
-			$columns, $this->tables, $this->conditions, $group, $order);
+			$select, $this->tables, $this->conditions, $group, $order);
 
 		if (null !== $this->per_page) {
 			$sql .= sprintf(' LIMIT %d,%d', $start, $this->per_page);
@@ -254,7 +292,19 @@ class DynamicList implements \Countable
 		$u = null;
 
 		if ($u = Session::getLoggedUser()) {
-			$hash = md5(json_encode([$this->tables, $this->conditions, $this->columns, $this->group]));
+			$elements = [];
+
+			foreach ($this->preference_hash_elements as $e => $enabled) {
+				if (!$enabled) {
+					continue;
+				}
+
+				$elements[$e] = $this->$e;
+			}
+
+			ksort($elements);
+
+			$hash = md5(json_encode($elements));
 			$preferences = $u->getPreference('list_' . $hash) ?? null;
 
 			$order = $preferences->o ?? null;
@@ -277,9 +327,13 @@ class DynamicList implements \Countable
 
 		// Save current order, if different than default
 		if ($u && $hash
-			&& (($order != ($preferences->o ?? null) && $order != $this->order)
-				|| ($desc != ($preferences->d ?? null) && $desc != $this->desc))) {
-			$u->setPreference('list_' . $hash, ['o' => $order, 'd' => $desc]);
+			&& ($order != ($preferences->o ?? null) || $desc != ($preferences->d ?? null))) {
+			if ($order == $this->order && $desc == $this->desc) {
+				$u->deletePreference('list_' . $hash);
+			}
+			else {
+				$u->setPreference('list_' . $hash, ['o' => $order, 'd' => $desc]);
+			}
 		}
 
 		if ($order) {

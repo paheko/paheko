@@ -5,6 +5,7 @@ namespace Garradin\Files;
 use Garradin\Static_Cache;
 use Garradin\Config;
 use Garradin\DB;
+use Garradin\DynamicList;
 use Garradin\Plugins;
 use Garradin\Utils;
 use Garradin\UserException;
@@ -290,6 +291,19 @@ class Files
 		return $out;
 	}
 
+	static protected function _getParentClause(?string $parent = null): string
+	{
+		$db = DB::getInstance();
+
+		if (!$parent) {
+			return $db->where('parent', 'IN', array_keys(File::CONTEXTS_NAMES));
+		}
+		else {
+			File::validatePath($parent);
+			return 'parent = ' . $db->quote($parent);
+		}
+	}
+
 	/**
 	 * Returns a list of files and directories inside a parent path
 	 * This is not recursive and will only return files and directories
@@ -297,23 +311,43 @@ class Files
 	 */
 	static public function list(?string $parent = null): array
 	{
-		$params = [];
-		$db = DB::getInstance();
-
-		if (!$parent) {
-			$where = $db->where('parent', 'IN', array_keys(File::CONTEXTS_NAMES));
-		}
-		else {
-			File::validatePath($parent);
-			$where = 'parent = ?';
-			$params[] = $parent;
-		}
-
+		$where = self::_getParentClause($parent);
 		$sql = sprintf('SELECT * FROM @TABLE WHERE trash IS NULL AND %s ORDER BY type DESC, name COLLATE U_NOCASE ASC;', $where);
 
-		return EM::getInstance(File::class)->all($sql, ...$params);
+		return EM::getInstance(File::class)->all($sql);
 	}
 
+	static public function getDynamicList(?string $parent = null): DynamicList
+	{
+		$columns = [
+			'icon' => ['label' => '', 'select' => NULL],
+			'name' => [
+				'label' => 'Nom',
+				'order' => 'type DESC, name COLLATE U_NOCASE %s',
+			],
+			'size' => [
+				'label' => 'Taille',
+				'order' => 'type DESC, size %s, name COLLATE U_NOCASE ASC',
+			],
+			'modified' => [
+				'label' => 'Modifié',
+				'order' => 'type DESC, modified %s, name COLLATE U_NOCASE ASC',
+			],
+		];
+
+		$tables = File::TABLE;
+		$conditions = self::_getParentClause($parent);
+
+		$list = new DynamicList($columns, $tables, $conditions);
+
+		$list->orderBy('name', false);
+		$list->setEntity(File::class);
+
+		// Don't take conditions for saving preferences hash
+		$list->togglePreferenceHashElement('conditions', false);
+
+		return $list;
+	}
 
 	static public function listForUser(int $id, string $field_name = null): array
 	{
