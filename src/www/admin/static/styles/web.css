@@ -141,11 +141,6 @@ web-edit dd.help {
     font-size: .9em;
 }
 
-.web-files {
-    text-align: center;
-    clear: both;
-}
-
 form#f_upload fieldset {
     position: relative;
 }

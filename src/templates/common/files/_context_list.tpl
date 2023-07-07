@@ -30,14 +30,16 @@ if ($edit
 	<aside class="file">
 		<figure>
 			<span>{$file->link($session, 'auto')|raw}</span>
-			<figcaption>
-				{$file->link($session)|raw}
-			</figcaption>
 		</figure>
-		{linkbutton shape="download" href=$file->url(true) target="_blank" label="Télécharger"}
-		{if $edit && $file->canDelete()}
-			{linkbutton shape="delete" target="_dialog" href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer"}
-		{/if}
+		<figcaption>
+			{$file->link($session)|raw}
+		</figcaption>
+		<span>
+			{linkbutton shape="download" href=$file->url(true) target="_blank" label="Télécharger"}
+			{if $edit && $file->canDelete()}
+				{linkbutton shape="delete" target="_dialog" href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer"}
+			{/if}
+		</span>
 	</aside>
 {foreachelse}
 	{if !$can_upload}

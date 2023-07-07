@@ -380,7 +380,7 @@ class Template extends Smartyer
 		}
 		elseif ($field->type == 'file' && $v) {
 			$files = explode(';', $v);
-			$out = '<aside class="files">';
+			$out = '<div class="files-list">';
 			$count = 0;
 
 			foreach ($files as $path) {
@@ -414,7 +414,7 @@ class Template extends Smartyer
 				);
 			}
 
-			$out .= '</aside>';
+			$out .= '</div>';
 
 			return $out;
 		}

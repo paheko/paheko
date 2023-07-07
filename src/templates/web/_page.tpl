@@ -8,7 +8,7 @@
 <section class="web preview{if $excerpt} excerpt{/if}">
 	<header>
 		<h1 class="ruler">{$page.title}</h1>
-		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
+		{if $can_edit}
 		<p class="actions">
 			{linkbutton href="edit.php?p=%s"|args:$page.path label="Éditer" shape="edit"}
 			{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)}
@@ -55,37 +55,13 @@
 	{/if}
 
 	{if !($excerpt && $long)}
-		{assign var="images" value=$page->getImageGallery(true)}
-		{assign var="files" value=$page->getAttachmentsGallery(true)}
+		<?php $files = $page->listAttachments(); ?>
 
-		{if count($images) || count($files)}
-		<div class="web-files">
+		<div class="attachments noprint">
 			<h3 class="ruler">Fichiers joints à cette page</h3>
 
-			{if count($images)}
-			<ul class="gallery">
-				{foreach from=$images item="file"}
-					<li>
-						<figure>
-							<a class="internal-image" href="{$file->url()}"><img src="{$file->thumb_url()}" alt="" title="{$file.name}" /></a>
-						</figure>
-					</li>
-				{/foreach}
-			</ul>
-			{/if}
-
-			{if count($files)}
-			<ul class="files">
-				{foreach from=$files item="file"}
-					<li>
-						<aside class="fichier" class="internal-file"><a href="{$file->url()}">{$file.name}</a>
-						<small>({$file.mime}, {$file.size|size_in_bytes})</small></aside>
-				   </li>
-				{/foreach}
-			</ul>
-			{/if}
+			{include file="common/files/_context_list.tpl" files=$files edit=$can_edit path=$page.dir_path}
 		</div>
-		{/if}
 	{/if}
 
 </section>

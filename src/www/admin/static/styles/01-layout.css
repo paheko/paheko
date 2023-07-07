@@ -161,32 +161,6 @@ a:hover {
     color: rgba(var(--gMainColor));
 }
 
-ul.gallery {
-    text-align: center;
-}
-
-ul.gallery li {
-    display: inline-block;
-    margin: .3em;
-    vertical-align: middle;
-    width: 150px;
-}
-
-ul.gallery li img {
-    max-width: 150px;
-    max-height: 150px;
-}
-
-ul.gallery .actions {
-    text-align: center;
-    z-index: 100;
-}
-
-ul.gallery figcaption {
-    font-size: .8em;
-    overflow: hidden;
-    text-align: center;
-}
 body.public, body.raw {
     background: none;
 }

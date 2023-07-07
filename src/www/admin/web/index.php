@@ -53,11 +53,11 @@ $title = $page ? sprintf('%s — Gestion du site web', $page->title) : 'Gestion 
 $type_page = Page::TYPE_PAGE;
 $type_category = Page::TYPE_CATEGORY;
 $breadcrumbs = $page ? $page->getBreadcrumbs() : [];
-
+$can_edit = $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 
 $tpl->assign('custom_js', ['web_gallery.js']);
 $tpl->assign('custom_css', ['web.css', '!web/css.php']);
 
-$tpl->assign(compact('categories', 'pages', 'drafts', 'title', 'type_page', 'type_category', 'breadcrumbs', 'page', 'links_errors'));
+$tpl->assign(compact('categories', 'pages', 'drafts', 'title', 'type_page', 'type_category', 'breadcrumbs', 'page', 'links_errors', 'can_edit'));
 
 $tpl->display('web/index.tpl');
