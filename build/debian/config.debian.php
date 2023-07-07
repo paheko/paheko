@@ -5,11 +5,6 @@ namespace Garradin;
 const SQLITE_JOURNAL_MODE = 'WAL';
 const ENABLE_UPGRADES = false;
 
-// Disable PDF for CLI server
-if (PHP_SAPI == 'cli-server') {
-	define('Garradin\PDF_COMMAND', null);
-}
-
 if (shell_exec('which pdftotext')) {
 	define('Garradin\PDFTOTEXT_COMMAND', 'pdftotext');
 }
@@ -108,7 +103,7 @@ if (!empty($_ENV['PAHEKO_STANDALONE']))
 		define('Garradin\LOCAL_LOGIN', -1);
 	}
 }
-elseif (isset($_SERVER['SERVER_NAME'])) {
+else {
 	if (file_exists('/etc/paheko/config.php')) {
 		require_once '/etc/paheko/config.php';
 	}
@@ -122,6 +117,8 @@ elseif (isset($_SERVER['SERVER_NAME'])) {
 	}
 }
 
+const PLUGINS_ROOT = DATA_ROOT . '/plugins';
+
 if (!defined('Garradin\SECRET_KEY')) {
 	if (file_exists(CACHE_ROOT . '/key')) {
 		define('Garradin\SECRET_KEY', trim(file_get_contents(CACHE_ROOT . '/key')));
@@ -131,3 +128,9 @@ if (!defined('Garradin\SECRET_KEY')) {
 		file_put_contents(CACHE_ROOT . '/key', SECRET_KEY);
 	}
 }
+
+// Disable PDF for CLI server
+if (PHP_SAPI == 'cli-server' && !defined('Garradin\PDF_COMMAND') && !file_exists(PLUGINS_ROOT . '/dompdf')) {
+	define('Garradin\PDF_COMMAND', null);
+}
+
