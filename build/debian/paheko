@@ -97,6 +97,8 @@ export PAHEKO_STANDALONE="$PROJECT"
 
 [ -f $PID_FILE ] && kill `cat $PID_FILE` > /dev/null 2>&1 && rm -f $PID_FILE
 
+PHP_CLI_SERVER_WORKER=2
+
 [ $VERBOSE = 1 ] && {
     php -S ${ADDRESS}:${PORT} -t ${ROOT} -d variables_order=EGPCS ${ROUTER} &
 } || {

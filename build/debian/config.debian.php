@@ -5,6 +5,11 @@ namespace Garradin;
 const SQLITE_JOURNAL_MODE = 'WAL';
 const ENABLE_UPGRADES = false;
 
+// Disable PDF for CLI server
+if (PHP_SAPI == 'cli-server') {
+	define('Garradin\PDF_COMMAND', null);
+}
+
 if (shell_exec('which pdftotext')) {
 	define('Garradin\PDFTOTEXT_COMMAND', 'pdftotext');
 }

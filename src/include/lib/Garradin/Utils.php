@@ -1189,7 +1189,11 @@ class Utils
 	static public function streamPDF(string $str): void
 	{
 		if (!PDF_COMMAND) {
-			return;
+			throw new \LogicException('PDF generation is disabled');
+		}
+
+		if (PHP_SAPI == 'cli-server') {
+			throw new \LogicException('The PHP integrated webserver cannot be used to generate PDF.');
 		}
 
 		if (PDF_COMMAND == 'auto') {
@@ -1234,7 +1238,11 @@ class Utils
 		$cmd = PDF_COMMAND;
 
 		if (!$cmd) {
-			return null;
+			throw new \LogicException('PDF generation is disabled');
+		}
+
+		if (PHP_SAPI == 'cli-server') {
+			throw new \LogicException('The PHP integrated webserver cannot be used to generate PDF.');
 		}
 
 		$source = sprintf('%s/print-%s.html', CACHE_ROOT, md5(random_bytes(16)));

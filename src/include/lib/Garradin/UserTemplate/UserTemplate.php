@@ -24,7 +24,7 @@ use Garradin\UserTemplate\Sections;
 
 use Garradin\Web\Cache as Web_Cache;
 
-use const Garradin\{WWW_URL, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT, ROOT, LEGAL_LINE};
+use const Garradin\{WWW_URL, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT, ROOT, LEGAL_LINE, PDF_COMMAND};
 
 class UserTemplate extends \KD2\Brindille
 {
@@ -97,6 +97,7 @@ class UserTemplate extends \KD2\Brindille
 			'is_logged'    => $is_logged,
 			'logged_user'  => $is_logged ? $session->getUser() : null,
 			'dialog'       => isset($_GET['_dialog']) ? ($_GET['_dialog'] ?: true) : false,
+			'pdf_enabled'  => PDF_COMMAND !== null,
 		];
 
 		return self::$root_variables;
