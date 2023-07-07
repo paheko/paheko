@@ -246,6 +246,11 @@ class File extends Entity
 		}
 		else {
 			$p = $pointer ?? $this->getReadOnlyPointer();
+
+			if (!$p) {
+				return;
+			}
+
 			$hash = hash_init('md5');
 
 			while (!feof($p)) {
