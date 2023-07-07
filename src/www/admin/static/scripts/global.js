@@ -625,6 +625,10 @@
 		for (var i = 0; i < tableActions.length; i++)
 		{
 			tableActions[i].onchange = function () {
+				if (!this.value) {
+					return;
+				}
+
 				if (!this.form.querySelector('table tbody input[type=checkbox]:checked'))
 				{
 					this.selectedIndex = 0;
