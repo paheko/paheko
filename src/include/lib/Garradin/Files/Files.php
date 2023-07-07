@@ -424,16 +424,24 @@ class Files
 
 	static public function listRecursive(?string $path = null, ?Session $session = null, bool $include_directories = true): \Generator
 	{
-		$sql = 'SELECT * FROM @TABLE WHERE path = ? OR (parent = ? OR parent LIKE ? ESCAPE \'!\')';
+		$params = [];
+		$db = DB::getInstance();
 
-		if (!$include_directories) {
-			$sql .= ' AND type != ' . File::TYPE_DIRECTORY;
+		if (!$path) {
+			$sql = 'SELECT * FROM @TABLE WHERE parent IS NULL AND trash IS NULL;';
+		}
+		else {
+			$sql = 'SELECT * FROM @TABLE WHERE path = ? OR (parent = ? OR parent LIKE ? ESCAPE \'!\')';
+
+			if (!$include_directories) {
+				$sql .= ' AND type != ' . File::TYPE_DIRECTORY;
+			}
+
+			$sql .= ';';
+			$params = [$path, $path, $db->escapeLike($path, '!') . '/%'];
 		}
 
-		$sql .= ';';
-
-		$db = DB::getInstance();
-		$list = EM::getInstance(File::class)->iterate($sql, $path, $path, $db->escapeLike($path, '!') . '/%');
+		$list = EM::getInstance(File::class)->iterate($sql, ...$params);
 
 		foreach ($list as $file) {
 			if ($session && !$file->canRead($session)) {
