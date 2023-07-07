@@ -416,6 +416,11 @@ class Files
 			foreach (Files::listRecursive($path, $session, false) as $file) {
 				$pointer = $file->getReadOnlyPointer();
 				$path = !$pointer ? $file->getLocalFilePath() : null;
+
+				if (!$path && !$pointer) {
+					continue;
+				}
+
 				$zip->add($file->path, null, $path, $pointer);
 
 				if ($pointer) {
@@ -429,21 +434,23 @@ class Files
 
 	static public function listRecursive(?string $path = null, ?Session $session = null, bool $include_directories = true): \Generator
 	{
-		foreach (self::list($path) as $file) {
+		$sql = 'SELECT * FROM @TABLE WHERE path = ? OR (parent = ? OR parent LIKE ? ESCAPE \'!\')';
+
+		if (!$include_directories) {
+			$sql .= ' AND type != ' . File::TYPE_DIRECTORY;
+		}
+
+		$sql .= ';';
+
+		$db = DB::getInstance();
+		$list = EM::getInstance(File::class)->iterate($sql, $path, $path, $db->escapeLike($path, '!') . '/%');
+
+		foreach ($list as $file) {
 			if ($session && !$file->canRead($session)) {
 				continue;
 			}
 
-			if ($file->isDir()) {
-				if ($include_directories) {
-					yield $file;
-				}
-
-				yield from self::listRecursive($file->path, $session, $include_directories);
-			}
-			else {
-				yield $file->path => $file;
-			}
+			yield $file->path => $file;
 		}
 	}
 

@@ -219,7 +219,7 @@ class File extends Entity
 	{
 		$path = Files::callStorage('getLocalFilePath', $this);
 
-		if (null === $path) {
+		if (null === $path || !file_exists($path)) {
 			return null;
 		}
 
