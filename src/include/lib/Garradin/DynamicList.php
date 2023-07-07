@@ -22,7 +22,7 @@ class DynamicList implements \Countable
 	protected ?string $entity = null;
 	protected ?string $entity_select = null;
 	protected bool $desc = true;
-	protected int $per_page = 100;
+	protected ?int $per_page = 100;
 	protected int $page = 1;
 	protected array $parameters = [];
 	protected array $preference_hash_elements = ['tables' => true, 'columns' => true, 'conditions' => true, 'group' => true];
