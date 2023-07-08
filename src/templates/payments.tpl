@@ -1,35 +1,52 @@
 {include file="_head.tpl" title="Bonjour %s !"|args:$logged_user->name() current="payments"}
 
-<h2>Providers</h2>
+<h2 class="ruler">Liste des paiements</h2>
 
-<ul>
-{foreach from=$providers item='provider'}
-	<li>{$provider->name}: {$provider->label}</li>
-{/foreach}
-</ul>
+{include file="common/dynamic_list_head.tpl" list=$payments}
 
-<h2>Liste des paiements</h2>
-
-<table class="list">
-	<thead>
-		<tr>
-			<td class="{if $list->order === 'label'}cur{/if}">Libellé</td>
-			<td class="{if $list->order === 'status'}cur{/if}">Statut</td>
-			<td class="{if $list->order === 'amount'}cur{/if}">Montant</td>
-		</tr>
-	</thead>
 	<tbody>
 
-	{foreach from=$payments item='payment'}
-	<tr>
-		<td><a href="{$admin_url}payments.php?id={$payment->id}">{$payment->label}</a></td>
-		<td>{$payment.status}</td>
-		<td>{$payment->amount|escape|money_currency}</td>
-	</tr>
+	{foreach from=$payments->iterate() item="row"}
+		<tr>
+			<td>{$row.reference}</td>
+			<td class="num">{$row.id_transaction}</td>
+			<td>{$row.author_name}</td>
+			{* Fallback to "provider" field when provider has been uninstalled *}
+			<td>{if $row.provider_label}{$row.provider_label}{else}{$row.provider}{/if}</td>
+			<td>{$row.type}</td>
+			<td>{$row.status}</td>
+			<td>{$row.label}</td>
+			<td class="money">{$row.amount|money_currency|raw}</td>
+			<td>{$row.date|date}</td>
+			<td>{$row.method}</td>
+			<td class="actions">{linkbutton href="%spayments.php?id=%s"|args:$admin_url:$row.id shape="help" label="Détails"}</td>
+		</tr>
 	{/foreach}
 
 	</tbody>
 </table>
+
+{$payments->getHTMLPagination()|raw}
+
+<h2 class="ruler">Liste des prestataires de paiement</h2>
+
+{include file="common/dynamic_list_head.tpl" list=$providers}
+
+	<tbody>
+
+	{foreach from=$providers->iterate() item="row"}
+		<tr>
+			<td class="num">{$row.id}</td>
+			<td>{$row.name}</td>
+			<td>{$row.label}</td>
+			<td class="actions"></td>
+		</tr>
+	{/foreach}
+
+	</tbody>
+</table>
+
+{$providers->getHTMLPagination()|raw}
 
 {if $_GET.ok}
 	<p class="confirm block">Paiement enregistré avec succès</p>

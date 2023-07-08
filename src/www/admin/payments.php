@@ -38,16 +38,12 @@ else {
 	foreach ($providers as $provider) {
 		$provider_options[$provider->name] = $provider->label;
 	}
-	$tpl->assign('providers', $providers);
+
+	$tpl->assign('providers', Providers::list());
 	$tpl->assign('provider_options', $provider_options);
-	$tpl->assign('payments', EntityManager::getInstance(Payment::class)->all('SELECT * FROM @TABLE'));
+	$tpl->assign('payments', Payments::list());
 	
 	$tpl->assign('years', Years::listOpen());
-
-	// Not yet implemented
-	$list = new \stdClass();
-	$list->order = null;
-	$tpl->assign('list', $list);
 
 	$payment = new Payment();
 	$form->runIf('save', function () use ($payment) {
@@ -59,4 +55,3 @@ else {
 
 	$tpl->display('payments.tpl');
 }
-flush();

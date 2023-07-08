@@ -3,6 +3,7 @@
 namespace Garradin\Payments;
 
 use Garradin\Entities\Payments\Provider;
+use Garradin\DynamicList;
 use KD2\DB\EntityManager;
 
 class Providers
@@ -40,5 +41,28 @@ class Providers
 			return self::getManualProviderInstance();
 		}
 		return EntityManager::findOne(Provider::class, 'SELECT * FROM @TABLE WHERE name = ?;', $name);
+	}
+
+	static public function list(): DynamicList
+	{
+		$columns = [
+			'id' => [
+				'select' => 'id',
+				'label' => 'ID'
+			],
+			'name' => [
+				'label' => 'Nom',
+				'select' => 'name'
+			],
+			'label' => [
+				'label' => 'Libellé',
+				'select' => 'label'
+			]
+		];
+
+		$list = new DynamicList($columns, Provider::TABLE);
+
+		$list->orderBy('label', true);
+		return $list;
 	}
 }

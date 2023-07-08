@@ -5,6 +5,7 @@ namespace Garradin\Payments;
 use Garradin\Entities\Payments\Payment;
 use Garradin\Entities\Payments\Provider;
 use Garradin\Entities\Users\User;
+use Garradin\DynamicList;
 use Garradin\Payments\Providers;
 use KD2\DB\EntityManager;
 use Garradin\Entities\Accounting\Transaction;
@@ -108,5 +109,81 @@ class Payments
 	static public function getByReference(string $provider_name, string $reference): ?Payment
 	{
 		return EntityManager::findOne(Payment::class, 'SELECT * FROM @TABLE WHERE provider = :provider AND reference = :reference', $provider_name, $reference);
+	}
+
+	static public function list(?string $provider = null): DynamicList
+	{
+		$columns = [
+			'id' => [
+				'select' => 'p.id'
+			],
+			'reference' => [
+				'label' => 'Réf.',
+				'select' => 'p.reference'
+			],
+			'id_transaction' => [
+				'label' => 'Écriture',
+				'select' => 'p.id_transaction'
+			],
+			'id_author' => [
+				'select' => 'p.id_author'
+			],
+			'author_name' => [
+				'label' => 'Auteur/trice',
+				'select' => 'p.author_name'
+			],
+			'provider' => [
+				'label' => 'Prestataire',
+				'select' => 'p.provider'
+			],
+			'provider_label' => [
+				'select' => 'pr.label'
+			],
+			'type' => [
+				'label' => 'Type',
+				'select' => 'p.type'
+			],
+			'status' => [
+				'label' => 'Statut',
+				'select' => 'p.status'
+			],
+			'label' => [
+				'label' => 'Objet',
+				'select' => 'p.label'
+			],
+			'amount' => [
+				'label' => 'Montant',
+				'select' => 'p.amount'
+			],
+			'date' => [
+				'label' => 'Date',
+				'select' => 'p.date'
+			],
+			'method' => [
+				'label' => 'Méthode',
+				'select' => 'p.method'
+			]
+		];
+
+		$tables = Payment::TABLE . ' p
+			LEFT JOIN ' . Provider::TABLE . ' pr ON (pr.name = p.provider)
+		';
+
+		$list = new DynamicList($columns, $tables);
+
+		if ($provider) {
+			$list->setConditions('provider = :provider_name');
+			$list->setParameter('provider_name', $provider);
+			$list->setTitle(sprintf('Prestataire - %s - Paiements', $provider));
+		}
+
+		$list->setModifier(function ($row) {
+			$row->status = Payment::STATUSES[$row->status] ?? 'Inconnu';
+			$row->type = Payment::TYPES[$row->type] ?? 'Inconnu';
+			$row->method = Payment::METHODS[$row->method] ?? 'Inconnu';
+		});
+
+		$list->orderBy('date', true);
+		return $list;
 	}
 }
