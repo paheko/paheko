@@ -31,10 +31,10 @@ class Payment extends Entity
 	const TABLE = 'payments';
 
 	protected int			$id;
-	protected ?string		$reference;
-	protected ?int			$id_transaction;
-	protected ?int			$id_author;
-	protected ?string		$author_name;
+	protected ?string		$reference = null;
+	protected ?int			$id_transaction = null;
+	protected ?int			$id_author = null;
+	protected ?string		$author_name = null;
 	protected string		$provider;
 	protected string		$type;
 	protected string		$status;
@@ -45,7 +45,7 @@ class Payment extends Entity
 	protected string		$history = '';
 	// Warning: do NOT directly set $extra_data properties (e.g., $payment->extra_data->dummy = 17) or the value will not be updated into the database while using $payment->save()
 	// Instead you must use the setExtraData() method (e.g., $payment->setExtraData('dummy', 17) to enable the update trigger
-	protected ?\stdClass	$extra_data;
+	protected ?\stdClass	$extra_data = null;
 	//protected int			$vat;
 
 	public function get(string $key)
