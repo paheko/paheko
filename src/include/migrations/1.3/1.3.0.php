@@ -23,6 +23,8 @@ if (!$db->test('plugins', 'id = ?', 'taima')) {
 	');
 }
 
+// We need to drop indexes, are they will be left, but linked to old tables
+// and new ones won't be re-created
 $db->dropIndexes();
 
 // Get old keys
