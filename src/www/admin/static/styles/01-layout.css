@@ -169,6 +169,11 @@ body.raw main {
     margin: 0;
 }
 
+body.preview {
+    padding: .8rem;
+    background: rgb(var(--gBgColor));
+}
+
 body.public main {
     max-width: 650px;
     margin: 2em auto;
