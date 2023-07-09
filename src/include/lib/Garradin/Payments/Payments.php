@@ -24,41 +24,42 @@ class Payments
 		if (!array_key_exists($type, Payment::TYPES)) {
 			throw new \InvalidArgumentException('Invalid payment type: ' . $type . '. Allowed types are: ' . implode(', ', Payment::TYPES));
 		}
-		$payment->type = $type;
+		$payment->set('type', $type);
 
 		if (!array_key_exists($method, Payment::METHODS)) {
 			throw new \InvalidArgumentException('Invalid payment method: ' . $method . '. Allowed methods are: ' . implode(', ', Payment::METHODS));
 		}
-		$payment->method = $method;
+		$payment->set('method', $method);
 
 		if (!array_key_exists($status, Payment::STATUSES)) {
 			throw new \InvalidArgumentException('Invalid payment status: ' . $status . '. Allowed statuses are: ' . implode(', ', Payment::STATUSES));
 		}
-		$payment->status = $status;
+		$payment->set('status', $status);
 
 		$provider = Providers::getByName($provider_name);
 		if (null === $provider || !($provider instanceof Provider)) {
 			throw new \InvalidArgumentException('Invalid provider: ' . $provider_name);
 		}
-		$payment->provider = $provider->name;
+		$payment->set('provider', $provider->name);
 
 		if ($author_id) {
 			$author = EntityManager::findOneById(User::class, (int)$author_id);
 			if (!$author) {
 				throw new \RuntimeException('User not found. ID: '. $author_id);
 			}
-			$payment->id_author = $author->id;
-			$payment->author_name = $author->nom;
+			$payment->set('id_author', $author->id);
+			$payment->set('author_name', $author->nom);
 		}
 		else {
-			$payment->author_name = $author_name;
+			$payment->set('author_name', $author_name);
 		}
-		$payment->reference = $reference;
-		$payment->label = $label;
-		$payment->amount = $amount;
-		$payment->date = new \DateTime();
+		$payment->set('reference', $reference);
+		$payment->set('label', $label);
+		$payment->set('amount', $amount);
+		$payment->set('date', new \DateTime());
 		$payment->addLog(self::CREATION_LOG_LABEL, $payment->date);
 		$payment->set('extra_data', $extra_data);
+		$payment->selfCheck();
 		
 		if (!$payment->save()) {
 			throw new \RuntimeException(sprintf('Payment recording failed (provider: %s, ID: %s)', $payment->provider, $payment->reference));
@@ -80,7 +81,7 @@ class Payments
 		// ToDo: check accounts validity (right number for the Transaction type)
 
 		$transaction = new Transaction();
-		$transaction->type = Transaction::TYPE_REVENUE;
+		$transaction->set('type', Transaction::TYPE_REVENUE);
 
 		$source = [
 			'status' => Transaction::STATUS_PAID,
@@ -99,6 +100,7 @@ class Payments
 		];
 
 		$transaction->importForm($source);
+		$transaction->selfCheck();
 
 		if (!$transaction->save()) {
 			throw new \RuntimeException(sprintf('Cannot record payment transaction. Payment ID: %d.', $payment->id));
@@ -181,6 +183,9 @@ class Payments
 			$row->status = Payment::STATUSES[$row->status] ?? 'Inconnu';
 			$row->type = Payment::TYPES[$row->type] ?? 'Inconnu';
 			$row->method = Payment::METHODS[$row->method] ?? 'Inconnu';
+			if ($row->provider === Providers::MANUAL_PROVIDER) {
+				$row->provider_label = Providers::MANUAL_PROVIDER_LABEL;
+			}
 		});
 
 		$list->orderBy('date', true);

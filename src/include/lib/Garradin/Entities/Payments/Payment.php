@@ -3,6 +3,8 @@
 namespace Garradin\Entities\Payments;
 
 use Garradin\Entity;
+use Garradin\DB;
+use Garradin\Entities\Users\User;
 
 class Payment extends Entity
 {
@@ -83,6 +85,7 @@ class Payment extends Entity
 		$this->assert(array_key_exists($this->type, self::TYPES), sprintf('Unknown type: %s. Allowed types are: %s.', $this->type, implode(', ', array_keys(self::TYPES))));
 		$this->assert(array_key_exists($this->status, self::STATUSES), sprintf('Unknown status: %s. Allowed statuses are: %s.', $this->status, implode(', ', array_keys(self::STATUSES))));
 		$this->assert(array_key_exists($this->method, self::METHODS), sprintf('Unknown type: %s. Allowed types are: %s.', $this->method, implode(', ', array_keys(self::METHODS))));
+		$this->assert(null === $this->id_author || DB::getInstance()->test(User::TABLE, 'id = ?', $this->id_author), 'L\'autheur/trice sélectionné.e n\'existe pas.');
 	}
 	
 	public function addLog(string $message, ?\Datetime $date = null): void
