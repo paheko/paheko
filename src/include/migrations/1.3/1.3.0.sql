@@ -21,11 +21,6 @@ ALTER TABLE web_pages RENAME TO web_pages_old;
 
 .read schema.sql
 
-INSERT INTO files SELECT id, path, parent, name, type, mime, size, modified, image, '', NULL FROM files_old;
-INSERT INTO files_contents (id, content) SELECT id, content FROM files_contents_old;
-DROP TABLE files_contents_old;
-DROP TABLE files_old;
-
 INSERT INTO acc_charts SELECT * FROM acc_charts_old;
 DROP TABLE acc_charts_old;
 

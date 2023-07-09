@@ -40,7 +40,11 @@ class Storage
 			}
 		}
 
-		rename($root, $root . '.old');
+		if (!is_dir($root . '.old')) {
+			rename($root, $root . '.old');
+		}
+
+		Utils::deleteRecursive($root);
 		Utils::safe_mkdir($root, 0777, true);
 
 		self::legacySyncDirectory($root . '.old');

@@ -91,11 +91,23 @@ if (FILE_STORAGE_BACKEND == 'FileSystem') {
 	WebSync::sync();
 }
 else {
+	// Move files from old table to new
+	$db->exec('
+		REPLACE INTO files
+			SELECT f.id, path, parent, name, type, mime, size, modified, image, md5(fc.content), NULL
+			FROM files_old f INNER JOIN files_contents_old fc ON fc.id = f.id;
+		REPLACE INTO files_contents (id, content) SELECT id, content FROM files_contents_old;');
+
 	// Move skeletons from skel/ to modules/web/
 	Files::mkdir('modules/web');
 	$db->exec('UPDATE files SET path = REPLACE(path, \'skel/\', \'modules/web\'), parent = REPLACE(parent, \'skel/\', \'modules/web\')
 		WHERE parent LIKE \'skel/%\';');
 }
+
+$db->exec('
+	DROP TABLE files_contents_old;
+	DROP TABLE files_old;
+');
 
 // Prepend "./" to includes functions file parameter in web skeletons
 foreach (Files::list('modules/web') as $file) {
@@ -120,11 +132,6 @@ foreach (Files::listRecursive(null, null, false) as $file) {
 
 	// Reindex
 	$file->indexForSearch();
-
-	if (!$file->md5) {
-		// Store file hash
-		$file->rehash();
-	}
 
 	// Save files in DB
 	$file->save();

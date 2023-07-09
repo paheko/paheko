@@ -596,6 +596,10 @@ class File extends Entity
 		$ext = $this->extension();
 		$content = null;
 
+		if ($this->isDir() && !$mime) {
+			return;
+		}
+
 		// Store content in search table
 		if (substr($mime, 0, 5) == 'text/') {
 			$content = $source['content'] ?? $this->fetch();
