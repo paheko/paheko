@@ -13,7 +13,7 @@
 			<td class="num">{$row.id}</td>
 			<td>{$row.name}</td>
 			<td>{$row.label}</td>
-			<td class="actions"></td>
+			<td class="actions">{linkbutton href="payments.php?provider=%s"|args:$row.name label="Voir les paiements"}</td>
 		</tr>
 	{/foreach}
 

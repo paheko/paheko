@@ -1,8 +1,13 @@
-{include file="_head.tpl" title="Paiements" current="payments"}
+{if isset($provider)}
+	{assign var='title' value="Paiements - %s"|args:$provider->label}
+{else}
+	{assign var='title' value="Paiements"}
+{/if}
+{include file="_head.tpl" title=$title current="payments"}
 
 {include file="payments/_menu.tpl"}
 
-<h2 class="ruler">Liste des paiements</h2>
+<h2 class="ruler">Liste des paiements{if isset($provider)} pour {$provider->label}{/if}</h2>
 
 {include file="common/dynamic_list_head.tpl" list=$payments}
 

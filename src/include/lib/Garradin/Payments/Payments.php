@@ -8,6 +8,7 @@ use Garradin\Entities\Users\User;
 use Garradin\DynamicList;
 use Garradin\Payments\Providers;
 use KD2\DB\EntityManager;
+use Garradin\DB;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Accounting\Years;
 
@@ -174,6 +175,9 @@ class Payments
 		$list = new DynamicList($columns, $tables);
 
 		if ($provider) {
+			if ($provider !== Providers::MANUAL_PROVIDER && !DB::getInstance()->test(Provider::TABLE, 'name = ?', $provider)) {
+				throw new \UnexpectedValueException(sprintf('Invalid provider: %s.', $provider));
+			}
 			$list->setConditions('provider = :provider_name');
 			$list->setParameter('provider_name', $provider);
 			$list->setTitle(sprintf('Prestataire - %s - Paiements', $provider));

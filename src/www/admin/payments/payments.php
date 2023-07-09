@@ -18,12 +18,12 @@ $tpl->assign('custom_css', ['!web/css.php']);
 if (array_key_exists('id', $_GET)) {
 	$payment = EntityManager::findOneById(Payment::class, (int)$_GET['id']);
 	if (!$payment) {
-		throw new UserException(sprintf('Paiement introuvable : %d', $_GET['id']));
+		throw new UserException(sprintf('Paiement introuvable : %d.', $_GET['id']));
 	}
 
 	$provider = Providers::getByName($payment->provider);
-	if (!$payment) {
-		throw new UserException(sprintf('Paiement introuvable : %d', $_GET['id']));
+	if (!$provider) {
+		throw new RuntimeException(sprintf('Prestataire introuvable : %s.', $payment->provider));
 	}
 
 	$author = EntityManager::findOneById(User::class, (int)$payment->id_author);
@@ -39,7 +39,15 @@ if (array_key_exists('id', $_GET)) {
 	$tpl->display('payments/payment.tpl');
 }
 else {
-	$tpl->assign('payments', Payments::list());
+	if (array_key_exists('provider', $_GET)) {
+		if (!$provider = Providers::getByName($_GET['provider'])) {
+			throw new UserException(sprintf('Prestataire introuvable : %s.', $_GET['provider']));
+		}
+	}
+	$tpl->assign([
+		'payments' => Payments::list($provider->name ?? null),
+		'provider' => $provider ?? null
+	]);
 
 	$tpl->display('payments/payments.tpl');
 }
