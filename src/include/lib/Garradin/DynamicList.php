@@ -10,12 +10,12 @@ class DynamicList implements \Countable
 	protected $tables;
 	protected $conditions;
 	protected $group;
-	protected $order;
+	protected array $order;
 	protected $modifier;
 	protected $export_callback;
 	protected $title = 'Liste';
 	protected $count = 'COUNT(*)';
-	protected $desc = true;
+	protected array $desc = [ true ];
 	protected $per_page = 100;
 	protected $page = 1;
 	protected array $parameters = [];
@@ -27,7 +27,7 @@ class DynamicList implements \Countable
 		$this->columns = $columns;
 		$this->tables = $tables;
 		$this->conditions = $conditions;
-		$this->order = key($columns);
+		$this->order = [ key($columns) ];
 	}
 
 	public function __isset($key)
@@ -65,13 +65,21 @@ class DynamicList implements \Countable
 		$this->conditions = $conditions;
 	}
 
-	public function orderBy(string $key, bool $desc)
+	public function orderBy($keys, $desc)
 	{
-		if (!array_key_exists($key, $this->columns)) {
-			throw new UserException('Invalid order: ' . $key);
+		if (!is_array($keys)) {
+			$keys = [ $keys ];
+		}
+		if (!is_array($desc)) {
+			$desc = [ $desc ];
+		}
+		foreach ($keys as $key) {
+			if (!array_key_exists($key, $this->columns)) {
+				throw new UserException('Invalid order: ' . $key);
+			}
 		}
 
-		$this->order = $key;
+		$this->order = $keys;
 		$this->desc = $desc;
 	}
 
@@ -118,8 +126,12 @@ class DynamicList implements \Countable
 		return $out;
 	}
 
-	public function orderURL(string $order, bool $desc)
+	public function orderURL($order, $desc)
 	{
+		if (is_array($order)) {
+			$order = implode(', ', $order);
+			$desc = implode(', ', $desc);
+		}
 		$query = array_merge($_GET, ['o' => $order, 'd' => (int) $desc]);
 		$url = Utils::getSelfURI($query);
 		return $url;
@@ -135,7 +147,7 @@ class DynamicList implements \Countable
 		$columns = [];
 
 		foreach ($this->columns as $alias => $properties) {
-			if (isset($properties['only_with_order']) && !($properties['only_with_order'] == $this->order)) {
+			if (isset($properties['only_with_order']) && !($properties['only_with_order'] == current($this->order))) {
 				continue;
 			}
 
@@ -193,7 +205,7 @@ class DynamicList implements \Countable
 
 		foreach ($this->columns as $alias => $properties) {
 			// Skip columns that require a certain order (eg. calculating a running sum)
-			if (isset($properties['only_with_order']) && !($properties['only_with_order'] == $this->order)) {
+			if (isset($properties['only_with_order']) && !($properties['only_with_order'] == current($this->order))) {
 				continue;
 			}
 
@@ -213,16 +225,17 @@ class DynamicList implements \Countable
 
 		$columns = implode(', ', $columns);
 
-		if (isset($this->columns[$this->order]['order'])) {
-			$order = sprintf($this->columns[$this->order]['order'], $this->desc ? 'DESC' : 'ASC');
-		}
-		else {
-			$order = $db->quoteIdentifiers($this->order);
+		$order = [];
+		foreach ($this->order as $i => $column) {
+			if (isset($this->columns[$column]['order'])) {
+				$order[] = sprintf($this->columns[$column]['order'], $this->desc[$i] ? 'DESC' : 'ASC');
+			}
+			else {
 
-			if (true === $this->desc) {
-				$order .= ' DESC';
+				$order[] = $db->quoteIdentifiers($column) . ((true === $this->desc[$i]) ? ' DESC' : '');
 			}
 		}
+		$order = implode(', ', $order);
 
 		$group = $this->group ? 'GROUP BY ' . $this->group : '';
 
@@ -271,8 +284,8 @@ class DynamicList implements \Countable
 
 		// Save current order, if different than default
 		if ($u && $hash
-			&& (($order != ($preferences->o ?? null) && $order != $this->order)
-				|| ($desc != ($preferences->d ?? null) && $desc != $this->desc))) {
+			&& (($order != ($preferences->o ?? null) && $order != current($this->order))
+				|| ($desc != ($preferences->d ?? null) && $desc != current($this->desc)))) {
 			$u->setPreference('list_' . $hash, ['o' => $order, 'd' => $desc]);
 		}
 
