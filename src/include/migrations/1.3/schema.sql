@@ -454,6 +454,7 @@ CREATE INDEX IF NOT EXISTS acc_transactions_date ON acc_transactions (date);
 CREATE INDEX IF NOT EXISTS acc_transactions_related ON acc_transactions (id_related);
 CREATE INDEX IF NOT EXISTS acc_transactions_type ON acc_transactions (type, id_year);
 CREATE INDEX IF NOT EXISTS acc_transactions_status ON acc_transactions (status);
+CREATE INDEX IF NOT EXISTS acc_transactions_reference ON acc_transactions (reference);
 
 CREATE TABLE IF NOT EXISTS acc_transactions_lines
 -- Transactions lines (lignes des écritures)
