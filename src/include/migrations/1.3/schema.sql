@@ -509,7 +509,7 @@ CREATE TABLE IF NOT EXISTS payments
     status TEXT NOT NULL CHECK( status IN ('planned', 'awaiting', 'validated', 'cancelled') ),
     label TEXT NOT NULL,
     amount UNSIGNED INTEGER NOT NULL,
-    `date` TEXT NOT NULL CHECK (datetime(`date`) IS NOT NULL AND datetime(`date`) = `date`),
+    "date" TEXT NOT NULL CHECK (datetime("date") IS NOT NULL AND datetime("date") = "date"),
     method TEXT NOT NULL CHECK (method IN ('cash', 'cheque', 'bank_card', 'bank_wire', 'other') ),
     history TEXT NOT NULL,
     extra_data TEXT
