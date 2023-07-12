@@ -390,7 +390,7 @@ class Users
 
 	static public function importReport(CSV_Custom $csv, bool $ignore_ids, int $logged_user_id): array
 	{
-		$report = ['created' => [], 'modified' => [], 'unchanged' => [], 'has_logged_user' => false];
+		$report = ['created' => [], 'modified' => [], 'unchanged' => [], 'errors' => [], 'has_logged_user' => false];
 
 		foreach (self::iterateImport($csv, $ignore_ids) as $line => $user) {
 			if (!$user) {
@@ -406,7 +406,8 @@ class Users
 				$user->selfCheck();
 			}
 			catch (UserException $e) {
-				throw new UserException(sprintf('Ligne %d (%s) : %s', $line, $user->name(), $e->getMessage()));
+				$report['errors'][] = sprintf('Ligne %d (%s) : %s', $line, $user->name(), $e->getMessage());
+				continue;
 			}
 
 			if (!$user->exists()) {

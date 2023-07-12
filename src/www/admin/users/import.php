@@ -42,12 +42,14 @@ $form->runIf(f('preview') && $csv->loaded(), function () use (&$csv) {
 }, $csrf_key);
 
 if (!f('import') && $csv->ready()) {
-	try {
-		$report = Users::importReport($csv, $ignore_ids, Session::getUserId());
-	}
-	catch (UserException $e) {
+	$report = Users::importReport($csv, $ignore_ids, Session::getUserId());
+
+	if (count($report['errors'])) {
 		$csv->clear();
-		$form->addError($e);
+
+		foreach ($report['errors'] as $msg) {
+			$form->addError($msg);
+		}
 	}
 }
 
