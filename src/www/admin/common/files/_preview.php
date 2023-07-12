@@ -16,6 +16,7 @@ if (null == $content) {
 	throw new UserException('Aucun contenu à prévisualiser');
 }
 
+// Preview single markdown file in documents
 if ($path = qg('f')) {
 	$file = Files::get($path);
 
@@ -23,8 +24,9 @@ if ($path = qg('f')) {
 		throw new UserException('Vous n\'avez pas le droit de lire ce fichier.');
 	}
 
-	$content = Render::render(f('format'), $file, f('content'), ADMIN_URL . $prefix);
+	$content = Render::render(f('format'), $file, f('content'), ADMIN_URL . 'common/files/_preview.php?p=');
 }
+// Preview single web page
 elseif ($web = qg('w')) {
 	$page = Web::get($web);
 
@@ -37,8 +39,6 @@ elseif ($web = qg('w')) {
 else {
 	throw new UserException('Fichier inconnu');
 }
-
-$prefix = $page ? 'web/?uri=' : 'common/files/_preview.php?p=';
 
 $tpl->assign(compact('file', 'content'));
 
