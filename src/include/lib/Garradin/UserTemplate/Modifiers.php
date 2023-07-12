@@ -234,10 +234,10 @@ class Modifiers
 			return null;
 		}
 
-		if (false === strpos($value, ':')) {
+		if (false !== strpos($value, ':')) {
 			$t = explode(':', $value);
 		}
-		elseif (false === strpos($value, 'h')) {
+		elseif (false !== strpos($value, 'h')) {
 			$t = explode('h', $value);
 		}
 		else {
