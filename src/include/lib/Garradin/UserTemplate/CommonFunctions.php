@@ -104,21 +104,21 @@ class CommonFunctions
 			}
 		}
 
-		$attributes['id'] = 'f_' . str_replace(['[', ']'], '', $name);
+		$attributes['id'] = 'f_' . preg_replace('![^a-z0-9_-]!i', '', $name);
 		$attributes['name'] = $name;
 
 		if (!isset($attributes['autocomplete']) && ($type == 'money' || $type == 'password')) {
 			$attributes['autocomplete'] = 'off';
 		}
 
-		if ($type == 'radio' || $type == 'checkbox') {
-			$attributes['id'] .= '_' . (strlen($value) > 30 ? md5($value) : $value);
+		if ($type == 'radio' || $type == 'checkbox' || $type == 'radio-btn') {
+			$attributes['id'] .= '_' . (strlen($value) > 30 ? md5($value) : preg_replace('![^a-z0-9_-]!i', '', $value));
 
 			if ($current_value == $value && $current_value !== null) {
 				$attributes['checked'] = 'checked';
 			}
 
-			$attributes['value'] = htmlspecialchars($value);
+			$attributes['value'] = $value;
 		}
 		elseif ($type == 'date') {
 			$type = 'text';
@@ -173,7 +173,7 @@ class CommonFunctions
 		$attributes_string = $attributes;
 
 		array_walk($attributes_string, function (&$v, $k) {
-			$v = sprintf('%s="%s"', $k, $v);
+			$v = sprintf('%s="%s"', $k, htmlspecialchars($v));
 		});
 
 		$attributes_string = implode(' ', $attributes_string);
@@ -181,8 +181,8 @@ class CommonFunctions
 		if ($type == 'radio-btn') {
 			$radio = self::input(array_merge($params, ['type' => 'radio', 'label' => null, 'help' => null]));
 			$out = sprintf('<dd class="radio-btn">%s
-				<label for="f_%s_%s"><div><h3>%s</h3>%s</div></label>
-			</dd>', $radio, htmlspecialchars((string)$name), htmlspecialchars((string)$value), htmlspecialchars((string)$label), isset($params['help']) ? '<p class="help">' . htmlspecialchars($params['help']) . '</p>' : '');
+				<label for="%s"><div><h3>%s</h3>%s</div></label>
+			</dd>', $radio, $attributes['id'], htmlspecialchars((string)$label), isset($params['help']) ? '<p class="help">' . htmlspecialchars($params['help']) . '</p>' : '');
 			return $out;
 		}
 		if ($type == 'select') {
