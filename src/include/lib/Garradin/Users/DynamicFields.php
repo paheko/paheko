@@ -506,7 +506,7 @@ class DynamicFields
 		return $out;
 	}
 
-	public function listImportRequiredAssocNames()
+	public function listImportRequiredAssocNames(bool $require_number = true)
 	{
 		$out = [];
 
@@ -521,6 +521,10 @@ class DynamicFields
 			}
 
 			if (!$field->required) {
+				continue;
+			}
+
+			if (!$require_number && $field->system & $field::NUMBER) {
 				continue;
 			}
 

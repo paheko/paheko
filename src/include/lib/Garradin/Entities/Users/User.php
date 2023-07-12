@@ -142,7 +142,7 @@ class User extends Entity
 			}
 
 			if ($field->type === 'email') {
-				$this->assert($value === null || SMTP::checkEmailIsValid($value, false), sprintf('"%s" : cette adresse email n\'est pas valide.', $field->label));
+				$this->assert($value === null || SMTP::checkEmailIsValid($value, false), sprintf('"%s" : l\'adresse e-mail "%s" n\'est pas valide.', $field->label, $value));
 			}
 			elseif ($field->type === 'checkbox') {
 				$this->assert($value === false || $value === true, sprintf('"%s" : la valeur de ce champ n\'est pas valide.', $field->label));

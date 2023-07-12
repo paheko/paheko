@@ -17,6 +17,7 @@ use Garradin\DynamicList;
 use Garradin\Search;
 use Garradin\Utils;
 use Garradin\UserException;
+use Garradin\ValidationException;
 
 use KD2\SMTP;
 use KD2\DB\EntityManager as EM;
@@ -392,7 +393,7 @@ class Users
 	{
 		$report = ['created' => [], 'modified' => [], 'unchanged' => [], 'errors' => [], 'has_logged_user' => false];
 
-		foreach (self::iterateImport($csv, $ignore_ids) as $line => $user) {
+		foreach (self::iterateImport($csv, $ignore_ids, $report['errors']) as $line => $user) {
 			if (!$user) {
 				$report['errors'][] = sprintf('Ligne %d : le numéro de membre indiqué n\'existe pas', $line);
 				continue;
@@ -430,7 +431,7 @@ class Users
 		$db = DB::getInstance();
 		$db->begin();
 
-		foreach (self::iterateImport($csv, $ignore_ids) as $user) {
+		foreach (self::iterateImport($csv, $ignore_ids) as $i => $user) {
 			if (!$user) {
 				continue;
 			}
@@ -439,13 +440,18 @@ class Users
 				continue;
 			}
 
-			$user->save();
+			try {
+				$user->save();
+			}
+			catch (UserException $e) {
+				throw new UserException(sprintf('Ligne %d : %s', $i, $e->getMessage()), 0, $e);
+			}
 		}
 
 		$db->commit();
 	}
 
-	static public function iterateImport(CSV_Custom $csv, bool $ignore_ids): \Generator
+	static public function iterateImport(CSV_Custom $csv, bool $ignore_ids, ?array &$errors = null): \Generator
 	{
 		$number_field = DynamicFields::getNumberField();
 
@@ -461,7 +467,17 @@ class Users
 			}
 
 			if ($user) {
-				$user->importForm((array)$row);
+				try {
+					$user->importForm((array)$row);
+				}
+				catch (UserException $e) {
+					if (null !== $errors) {
+						$errors[] = sprintf('Ligne %d : %s', $i, $e->getMessage());
+						continue;
+					}
+
+					throw $e;
+				}
 			}
 
 			yield $i => $user;
