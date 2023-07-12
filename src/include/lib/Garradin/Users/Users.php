@@ -394,7 +394,8 @@ class Users
 
 		foreach (self::iterateImport($csv, $ignore_ids) as $line => $user) {
 			if (!$user) {
-				throw new UserException(sprintf('Ligne %d : le numéro de membre indiqué n\'existe pas', $line));
+				$report['errors'][] = sprintf('Ligne %d : le numéro de membre indiqué n\'existe pas', $line);
+				continue;
 			}
 
 			if ($user->id == $logged_user_id) {
