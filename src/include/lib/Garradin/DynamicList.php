@@ -9,24 +9,105 @@ use KD2\DB\EntityManager as EM;
 
 class DynamicList implements \Countable
 {
+	/**
+	 * List of columns
+	 * - The key is the column alias (AS ...)
+	 * - Each column is an array
+	 * - If the array is empty [] then a SELECT will be done on that table column,
+	 * but it will not be included in HTML table
+	 * - If the key 'select' exists, then it will be used as the SELECT clause
+	 * - If the key 'label' exists, it will be used in the HTML table as its header
+	 * (if not, the result will still be available in the loop, just it will not generate a column in the HTML table)
+	 * - If the key 'export' is TRUE, then the column will ONLY be included in CSV/ODS/XLSX exports
+	 * - If the key 'export' is FALSE, then the column will NOT be included in exports
+	 * (if the key `export` is NULL, or not set, then the column will be included both in HTML and in exports)
+	 */
 	protected array $columns;
+
+	/**
+	 * List of tables (including joins)
+	 */
 	protected string $tables;
+
+	/**
+	 * WHERE clause
+	 */
 	protected string $conditions;
+
+	/**
+	 * GROUP BY clause
+	 */
 	protected ?string $group = null;
+
+	/**
+	 * Default order column (must reference a valid key of $columns)
+	 */
 	protected string $order;
+
+	/**
+	 * Modifier callback function
+	 * This will be called for each row
+	 */
 	protected $modifier;
+
+	/**
+	 * Export modifier callback function
+	 * Called for each row, for export only
+	 */
 	protected $export_callback;
+
+	/**
+	 * Table caption, used for the expor tfilename
+	 */
 	protected string $title = 'Liste';
+
+	/**
+	 * COUNT clause
+	 */
 	protected string $count = 'COUNT(*)';
+
+	/**
+	 * Tables used for the COUNT
+	 * By default, $tables is used, but sometimes you don't need to JOIN
+	 * that many tables just to do a COUNT.
+	 */
 	protected ?string $count_tables = null;
+
+	/**
+	 * @see setEntity
+	 */
 	protected ?string $entity = null;
 	protected ?string $entity_select = null;
+
+	/**
+	 * Default ASC/DESC
+	 */
 	protected bool $desc = true;
+
+	/**
+	 * Number of items per page
+	 * Set to NULL to disable LIMIT clause
+	 */
 	protected ?int $per_page = 100;
+
+	/**
+	 * Current page
+	 */
 	protected int $page = 1;
+
+	/**
+	 * Parameters to be binded to the SQL query
+	 */
 	protected array $parameters = [];
+
+	/**
+	 * Elements that should be used in the preference hash (stored in user preferences)
+	 */
 	protected array $preference_hash_elements = ['tables' => true, 'columns' => true, 'conditions' => true, 'group' => true];
 
+	/**
+	 * COUNT result, cached here to avoid multiple requests
+	 */
 	private ?int $count_result = null;
 
 	public function __construct(array $columns, string $tables, string $conditions = '1')
@@ -176,8 +257,13 @@ class DynamicList implements \Countable
 				continue;
 			}
 
-			if (!$export && !empty($properties['export_only'])) {
-				continue;
+			if (isset($properties['export'])) {
+				if (!$properties['export'] && $export) {
+					continue;
+				}
+				elseif ($properties['export'] && !$export) {
+					continue;
+				}
 			}
 
 			$columns[$alias] = $export ? $properties['label'] : $properties;
