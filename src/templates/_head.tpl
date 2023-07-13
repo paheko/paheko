@@ -2,6 +2,9 @@
 if (!isset($current)) {
 	$current = '';
 }
+if (!isset($title)) {
+	$title = '';
+}
 ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr" class="{if $dialog}dialog{/if}{if $logged_user.preferences.dark_theme} dark{/if}" data-version="{$version_hash}" data-url="{$admin_url}">
