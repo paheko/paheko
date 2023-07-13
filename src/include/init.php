@@ -363,6 +363,9 @@ function user_error(UserException $e)
 	}
 	else
 	{
+		// Flush any previous output, such as module HTML code etc.
+		@ob_end_clean();
+
 		// Don't use Template class as there might be an error there due do the context (eg. install/upgrade)
 		$tpl = new \KD2\Smartyer(ROOT . '/templates/error.tpl');
 		$tpl->setCompiledDir(SMARTYER_CACHE_ROOT);
