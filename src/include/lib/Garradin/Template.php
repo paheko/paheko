@@ -160,8 +160,7 @@ class Template extends Smartyer
 			return Form::tokenHTML($params['key']);
 		});
 
-		$this->register_function('exportmenu', [$this, 'widgetExportMenu']);
-		$this->register_block('linkmenu', [$this, 'widgetLinkMenu']);
+		$this->register_block('linkmenu', [CommonFunctions::class, 'linkmenu']);
 
 		$this->register_modifier('strlen', fn($a) => strlen($a ?? ''));
 		$this->register_modifier('dump', ['KD2\ErrorManager', 'dump']);
@@ -245,73 +244,6 @@ class Template extends Smartyer
 		}
 
 		return '<div class="block error"><ul><li>' . implode('</li><li>', $errors) . '</li></ul></div>';
-	}
-
-	public function widgetExportMenu(array $params): string
-	{
-		$url = $params['href'] ?? Utils::getSelfURL();
-		$suffix = $params['suffix'] ?? 'export=';
-
-		if (false !== strpos($url, '?')) {
-			$url .= '&';
-		}
-		else {
-			$url .= '?';
-		}
-
-		$url .= $suffix;
-
-		$xlsx = $params['xlsx'] ?? null;
-
-		if (null === $xlsx) {
-			$xlsx = !empty(CALC_CONVERT_COMMAND);
-		}
-
-		if (!empty($params['form'])) {
-			$name = $params['name'] ?? 'export';
-			$out = CommonFunctions::button(['value' => 'csv', 'shape' => 'export', 'label' => 'Export CSV', 'name' => $name, 'type' => 'submit']);
-			$out .= CommonFunctions::button(['value' => 'ods', 'shape' => 'export', 'label' => 'Export LibreOffice', 'name' => $name, 'type' => 'submit']);
-
-			if ($xlsx) {
-				$out .= CommonFunctions::button(['value' => 'xlsx', 'shape' => 'export', 'label' => 'Export Excel', 'name' => $name, 'type' => 'submit']);
-			}
-		}
-		else {
-			$out  = CommonFunctions::linkButton(['href' => $url . 'csv', 'label' => 'Export CSV', 'shape' => 'export']);
-			$out .= ' ' . CommonFunctions::linkButton(['href' => $url . 'ods', 'label' => 'Export LibreOffice', 'shape' => 'export']);
-
-			if ($xlsx !== false) {
-				$out .= ' ' . CommonFunctions::linkButton(['href' => $url . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']);
-			}
-		}
-
-		$params = array_merge($params, ['shape' => 'export', 'label' => $params['label'] ?? 'Export…']);
-		return $this->widgetLinkMenu($params, $out);
-	}
-
-	protected function widgetLinkMenu(array $params, ?string $content): string
-	{
-		if (null === $content) {
-			return '';
-		}
-
-		if (!empty($params['right'])) {
-			$params['class'] = 'menu-btn-right';
-		}
-
-		$out = sprintf('
-			<span class="menu-btn %s">
-				<b data-icon="%s" class="btn" ondblclick="this.parentNode.querySelector(\'a, button\').click();" onclick="this.parentNode.classList.toggle(\'active\');">%s</b>
-				<span><span>',
-			htmlspecialchars($params['class'] ?? ''),
-			Utils::iconUnicode($params['shape']),
-			htmlspecialchars($params['label'])
-		);
-
-		$out .= $content . '</span></span>
-			</span>';
-
-		return $out;
 	}
 
 	protected function formatPhoneNumber($n)

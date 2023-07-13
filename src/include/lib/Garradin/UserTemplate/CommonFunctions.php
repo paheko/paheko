@@ -20,6 +20,8 @@ class CommonFunctions
 		'link',
 		'icon',
 		'linkbutton',
+		'linkmenu',
+		'exportmenu',
 	];
 
 	static public function input(array $params)
@@ -173,7 +175,7 @@ class CommonFunctions
 		$attributes_string = $attributes;
 
 		array_walk($attributes_string, function (&$v, $k) {
-			$v = sprintf('%s="%s"', $k, htmlspecialchars($v));
+			$v = sprintf('%s="%s"', $k, htmlspecialchars((string)$v));
 		});
 
 		$attributes_string = implode(' ', $attributes_string);
@@ -373,7 +375,7 @@ class CommonFunctions
 		unset($params['href'], $params['label'], $params['prefix']);
 
 		array_walk($params, function (&$v, $k) {
-			$v = sprintf('%s="%s"', $k, htmlspecialchars($v));
+			$v = sprintf('%s="%s"', $k, htmlspecialchars((string)$v));
 		});
 
 		$params = implode(' ', $params);
@@ -466,4 +468,72 @@ class CommonFunctions
 
 		unset($params['shape']);
 	}
+
+	static public function exportmenu(array $params): string
+	{
+		$url = $params['href'] ?? Utils::getSelfURI();
+		$suffix = $params['suffix'] ?? 'export=';
+
+		if (false !== strpos($url, '?')) {
+			$url .= '&';
+		}
+		else {
+			$url .= '?';
+		}
+
+		$url .= $suffix;
+
+		$xlsx = $params['xlsx'] ?? null;
+
+		if (null === $xlsx) {
+			$xlsx = !empty(CALC_CONVERT_COMMAND);
+		}
+
+		if (!empty($params['form'])) {
+			$name = $params['name'] ?? 'export';
+			$out = self::button(['value' => 'csv', 'shape' => 'export', 'label' => 'Export CSV', 'name' => $name, 'type' => 'submit']);
+			$out .= self::button(['value' => 'ods', 'shape' => 'export', 'label' => 'Export LibreOffice', 'name' => $name, 'type' => 'submit']);
+
+			if ($xlsx) {
+				$out .= self::button(['value' => 'xlsx', 'shape' => 'export', 'label' => 'Export Excel', 'name' => $name, 'type' => 'submit']);
+			}
+		}
+		else {
+			$out  = self::linkButton(['href' => $url . 'csv', 'label' => 'Export CSV', 'shape' => 'export']);
+			$out .= ' ' . self::linkButton(['href' => $url . 'ods', 'label' => 'Export LibreOffice', 'shape' => 'export']);
+
+			if ($xlsx !== false) {
+				$out .= ' ' . self::linkButton(['href' => $url . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']);
+			}
+		}
+
+		$params = array_merge($params, ['shape' => 'export', 'label' => $params['label'] ?? 'Export…']);
+		return self::linkmenu($params, $out);
+	}
+
+	static public function linkmenu(array $params, ?string $content): string
+	{
+		if (null === $content) {
+			return '';
+		}
+
+		if (!empty($params['right'])) {
+			$params['class'] = 'menu-btn-right';
+		}
+
+		$out = sprintf('
+			<span class="menu-btn %s">
+				<b data-icon="%s" class="btn" ondblclick="this.parentNode.querySelector(\'a, button\').click();" onclick="this.parentNode.classList.toggle(\'active\');">%s</b>
+				<span><span>',
+			htmlspecialchars($params['class'] ?? ''),
+			Utils::iconUnicode($params['shape']),
+			htmlspecialchars($params['label'])
+		);
+
+		$out .= $content . '</span></span>
+			</span>';
+
+		return $out;
+	}
+
 }
