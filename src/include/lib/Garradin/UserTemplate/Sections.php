@@ -522,12 +522,14 @@ class Sections
 		}
 
 		$list->setModifier(function(&$row) {
-			//$row->original = clone $row;
+			$row->original = clone $row;
+			unset($row->original->id, $row->original->key, $row->original->document);
+
 			$row = array_merge(json_decode($row->document, true), (array)$row);
 		});
 
 		$list->setExportCallback(function(&$row) {
-			//$row = $row['original'];
+			$row = $row['original'];
 		});
 
 		// Try to create an index if required
@@ -1109,16 +1111,17 @@ class Sections
 			throw new Brindille_Exception('Missing parameter "name"');
 		}
 
-		$module = DB::getInstance()->first('SELECT * FROM modules WHERE name = ?;', $params['name']);
+		$module = Modules::get($params['name']);
 
 		if (!$module || !$module->enabled) {
 			return null;
 		}
 
-		$module->config = $module->config ? @json_decode($module->config) : null;
-		$module->path = 'modules/' . $module->name;
+		$out = $module->asArray();
+		$out['path'] = 'modules/' . $module->name;
+		$out['url'] = $module->url();
 
-		yield (array) $module;
+		yield $out;
 	}
 
 	static public function sql(array $params, UserTemplate $tpl, int $line): \Generator
