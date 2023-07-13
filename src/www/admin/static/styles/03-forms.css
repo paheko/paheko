@@ -297,7 +297,7 @@ input.resetButton {
 }
 
 input[readonly], input.disabled, input[disabled], textarea[disabled], select[disabled], button[disabled],
-fieldset[disabled], fieldset[disabled] input, fieldset[disabled] textarea, fieldset[disabled] select {
+fieldset[disabled], fieldset[disabled] input, fieldset[disabled] textarea, fieldset[disabled] select, .radio-btn.disabled div {
     cursor: not-allowed;
     color: var(--gBorderColor);
     background-color: var(--gLightBackgroundColor);

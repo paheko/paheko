@@ -179,10 +179,14 @@ class CommonFunctions
 		$attributes_string = implode(' ', $attributes_string);
 
 		if ($type == 'radio-btn') {
-			$radio = self::input(array_merge($params, ['type' => 'radio', 'label' => null, 'help' => null]));
-			$out = sprintf('<dd class="radio-btn">%s
+			if (!empty($attributes['disabled'])) {
+				$attributes['class'] = ($attributes['class'] ?? '') . ' disabled';
+			}
+
+			$radio = self::input(array_merge($params, ['type' => 'radio', 'label' => null, 'help' => null, 'disabled' => $attributes['disabled'] ?? null]));
+			$out = sprintf('<dd class="radio-btn %s">%s
 				<label for="%s"><div><h3>%s</h3>%s</div></label>
-			</dd>', $radio, $attributes['id'], htmlspecialchars((string)$label), isset($params['help']) ? '<p class="help">' . htmlspecialchars($params['help']) . '</p>' : '');
+			</dd>', $attributes['class'] ?? '', $radio, $attributes['id'], htmlspecialchars((string)$label), isset($params['help']) ? '<p class="help">' . htmlspecialchars($params['help']) . '</p>' : '');
 			return $out;
 		}
 		if ($type == 'select') {
