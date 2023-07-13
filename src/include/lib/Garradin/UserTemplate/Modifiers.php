@@ -288,10 +288,10 @@ class Modifiers
 			'number'    => '-?\d+(?:[,\.]\d+)?',
 			'sign'      => '[+\-\*\/%]',
 			'separator' => ',',
+			'space'     => '\s+',
 		];
 
 		$expression = vsprintf($expression, $params);
-		$expression = preg_replace('/\s+/', '', $expression);
 
 		try {
 			$tokens = Brindille::tokenize($expression, $tokens_list);
