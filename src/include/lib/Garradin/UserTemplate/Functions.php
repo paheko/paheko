@@ -94,7 +94,11 @@ class Functions
 	{
 		$tpl = Template::getInstance();
 		$tpl->assign($params);
-		$tpl->assign('plugins_menu', Plugins::listModulesAndPluginsMenu(Session::getInstance()));
+
+		if (Session::getInstance()->isLogged()) {
+			$tpl->assign('plugins_menu', Plugins::listModulesAndPluginsMenu(Session::getInstance()));
+		}
+
 		return $tpl->fetch('_head.tpl');
 	}
 
@@ -225,21 +229,37 @@ class Functions
 		}
 
 		$table = 'module_data_' . $tpl->module->name;
+		$where = [];
+		$args = [];
+		$i = 0;
 
-		if (!empty($params['key'])) {
-			$field = 'key';
-			$where_value = $params['key'];
+		foreach ($params as $key => $value) {
+			if ($key[0] == ':') {
+				$args[substr($key, 1)] = $value;
+			}
+			elseif ($key == 'where') {
+				$where[] = self::_moduleReplaceJSONExtract($value);
+			}
+			else {
+				if ($key == 'id') {
+					$value = (int) $value;
+				}
+
+				if ($key !== 'id' && $key !== 'key') {
+					$args['key_' . $i] = '$.' . $key;
+					$key = sprintf('json_extract(document, :key_%d)', $i);
+				}
+
+				$where[] = $key . ' = :value_' . $i;
+				$args['value_' . $i] = $value;
+				$i++;
+			}
 		}
-		elseif (!empty($params['id'])) {
-			$field = 'id';
-			$where_value = (int) $params['id'];
-		}
-		else {
-			throw new Brindille_Exception('No "id" or "key" parameter was passed');
-		}
+
+		$where = implode(' AND ', $where);
 
 		$db = DB::getInstance();
-		$db->delete($table, sprintf('%s = ?', $field), $where_value);
+		$db->delete($table, $where, $args);
 	}
 
 	static public function captcha(array $params, Brindille $tpl, int $line)
@@ -248,7 +268,7 @@ class Functions
 
 		if (isset($params['html'])) {
 			$c = Security::createCaptcha($secret, $params['lang'] ?? 'fr');
-			return sprintf('<label for="f_c_42">Merci d\'écrire <strong><q>%s</q></strong> en chiffres&nbsp;:</label>
+			return sprintf('<label for="f_c_42">Merci d\'écrire <strong><q>&nbsp;%s&nbsp;</q></strong> en chiffres&nbsp;:</label>
 				<input type="text" name="f_c_42" id="f_c_42" placeholder="Exemple : 1234" />
 				<input type="hidden" name="f_c_43" value="%s" />',
 				$c['spellout'], $c['hash']);

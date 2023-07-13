@@ -416,13 +416,13 @@ Note : un appel à cette fonction depuis le code du site web provoquera une erre
 | `key` | optionnel | Clé unique du document |
 | `id` | optionnel | Numéro unique du document |
 
-Si ni `key` ni `id` ne sont indiqués, une erreur sera affichée.
+Il est possible de spécifier d'autres paramètres, ou une clause `where` et des paramètres dont le nom commence par deux points.
 
-Exemple :
-
-```
-{{:delete key="facture_43"}}
-```
+* Supprimer le document avec la clé `facture_43` : `{{:delete key="facture_43"}}`
+* Supprimer le document avec la clé `ABCD` et dont la propriété `type` du document correspond à la valeur `facture` : `{{:delete key="ABCD" type="facture"}}`
+* Supprimer tous les documents : `{{:delete}}`
+* Supprimer tous les documents ayant le type `facture` : `{{:delete type="facture"}}`
+* Supprimer tous les documents de type `devis` ayant une date dans le passé : `{{:delete :type="devis" where="$$.type = :type AND $$.date < datetime()"}}`
 
 ## admin_header
 
