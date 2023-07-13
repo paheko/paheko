@@ -50,6 +50,21 @@ class Sections
 		'else:form'    => [self::class, 'formElse'],
 	];
 
+	const SQL_RESERVED_PARAMS = [
+		'select',
+		'tables',
+		'where',
+		'group',
+		'having',
+		'order',
+		'begin',
+		'limit',
+		'assign',
+		'assign_assoc',
+		'debug',
+		'count',
+	];
+
 	/**
 	 * List of tables and columns that are restricted in SQL queries
 	 *
@@ -155,7 +170,7 @@ class Sections
 	static public function formEnd(string $name, string $params_str, UserTemplate $tpl, int $line): string
 	{
 		if ($tpl->_lastName() !== 'form') {
-			throw new Brindille_Exception(sprintf('"%s": block closing does not match last block "%s" opened', $name . $params, $tpl->_lastName()));
+			throw new Brindille_Exception(sprintf('"%s": block closing does not match last block "%s" opened', $name . $params_str, $tpl->_lastName()));
 		}
 
 		$type = $tpl->_lastType();
@@ -302,12 +317,13 @@ class Sections
 
 		// Replace '$.name = "value"' parameters with json_extract
 		foreach ($params as $key => $value) {
-			if (substr($key, 0, 1) != '$') {
+			$k = substr($key, 0, 1);
+			if ($k == ':' || in_array($key, self::SQL_RESERVED_PARAMS)) {
 				continue;
 			}
 
 			$hash = sha1($key);
-			$params['where'] .= sprintf(' AND json_extract(document, %s) = :quick_%s', $db->quote($key), $hash);
+			$params['where'] .= sprintf(' AND json_extract(document, %s) = :quick_%s', $db->quote('$.' . $key), $hash);
 			$params[':quick_' . $hash] = $value;
 			unset($params[$key]);
 		}
@@ -485,16 +501,15 @@ class Sections
 
 		$list = new DynamicList($columns, $table);
 
-		foreach ($params as $key => $value) {
-			$f = substr($key, 0, 1);
+		static $reserved_keywords = ['max', 'order', 'desc', 'debug', 'explain', 'schema', 'columns', 'select', 'where', 'module'];
 
-			if ($f == ':' && strstr($where, $key)) {
+		foreach ($params as $key => $value) {
+			if ($key[0] == ':' && strstr($where, $key)) {
 				$list->setParameter(substr($key, 1), $value);
 			}
-			elseif ($f == '$') {
-				// Replace '$.name = "value"' parameters with json_extract
+			elseif (!in_array($key, $reserved_keywords)) {
 				$hash = sha1($key);
-				$where .= sprintf(' AND json_extract(document, %s) = :quick_%s', $db->quote($key), $hash);
+				$where .= sprintf(' AND json_extract(document, %s) = :quick_%s', $db->quote('$.' . $key), $hash);
 				$list->setParameter('quick_' . $hash, $value);
 			}
 		}
@@ -1119,7 +1134,7 @@ class Sections
 		if (isset($params['sql'])) {
 			$sql = $params['sql'];
 
-			// Replace raw SQL parameters (undocumented feature, this is for #select section)
+			// Replace raw SQL parameters (this is for #select section)
 			foreach ($params as $k => $v) {
 				if (substr($k, 0, 1) == '!') {
 					$r = '/' . preg_quote($k, '/') . '\b/';
