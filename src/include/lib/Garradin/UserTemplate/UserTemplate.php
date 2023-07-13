@@ -95,7 +95,7 @@ class UserTemplate extends \KD2\Brindille
 			'now'          => new \DateTime,
 			'legal_line'   => LEGAL_LINE,
 			'is_logged'    => $is_logged,
-			'logged_user'  => $is_logged ? $session->getUser() : null,
+			'logged_user'  => $is_logged ? $session->getUser()->asModuleArray() : null,
 			'dialog'       => isset($_GET['_dialog']) ? ($_GET['_dialog'] ?: true) : false,
 			'pdf_enabled'  => PDF_COMMAND !== null,
 		];
