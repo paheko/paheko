@@ -31,6 +31,7 @@ class Modifiers
 		'get_leading_number',
 		'spell_out_number',
 		'parse_date',
+		'parse_datetime',
 		'parse_time',
 		'math',
 		'money_int' => [Utils::class, 'moneyToInteger'],
@@ -43,6 +44,8 @@ class Modifiers
 		'has',
 		'in',
 		'map',
+		'sort',
+		'ksort',
 		'quote_sql_identifier',
 		'quote_sql',
 		'sql_where',
@@ -224,6 +227,27 @@ class Modifiers
 		}
 	}
 
+	static public function parse_datetime($value)
+	{
+		if ($value instanceof \DateTimeInterface) {
+			return $value->format('Y-m-d H:i:s');
+		}
+
+		if (empty($value) || !is_string($value)) {
+			return null;
+		}
+
+		if (preg_match('!^\d{2}/\d{2}/\d{4}$\s+\d{2}:\d{2}!', $value)) {
+			return \DateTime::createFromFormat('!d/m/Y', $value)->format('Y-m-d H:i');
+		}
+		elseif (preg_match('!^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}(:\d{2})?$!', $value, $match)) {
+			return $value . (isset($match[1]) ? '' : ':00');
+		}
+		else {
+			return false;
+		}
+	}
+
 	static public function parse_time($value)
 	{
 		if ($value instanceof \DateTimeInterface) {
@@ -369,6 +393,20 @@ class Modifiers
 	static public function in($value, $array, $strict = false)
 	{
 		return in_array($value, (array)$array, $strict);
+	}
+
+	static public function ksort($value)
+	{
+		$value = (array)$value;
+		uksort($value, 'strnatcasecmp');
+		return $value;
+	}
+
+	static public function sort($value)
+	{
+		$value = (array)$value;
+		natcasesort($value);
+		return $value;
 	}
 
 	static public function quote_sql_identifier($in, string $prefix = '')
