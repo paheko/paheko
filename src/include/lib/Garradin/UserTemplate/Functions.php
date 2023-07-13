@@ -75,19 +75,20 @@ class Functions
 	 */
 	static public function continue(string $name, string $params, Brindille $tpl, int $line)
 	{
-		$in_loop = false;
+		$in_loop = 0;
 		foreach ($tpl->_stack as $element) {
 			if ($element[0] == $tpl::SECTION) {
-				$in_loop = true;
-				break;
+				$in_loop++;
 			}
 		}
 
-		if (!$in_loop) {
+		$i = ctype_digit(trim($params)) ? (int)$params : 1;
+
+		if ($in_loop < $i) {
 			throw new Brindille_Exception(sprintf('Error on line %d: continue can only be used inside a section', $line));
 		}
 
-		return '<?php continue; ?>';
+		return sprintf('<?php continue(%d); ?>', $i);
 	}
 
 	static public function admin_header(array $params): string

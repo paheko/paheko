@@ -103,7 +103,30 @@ Interrompt une section.
 
 ## continue
 
-Passe à l'itération suivante d'une section.
+Passe à l'itération suivante d'une section. Le code situé entre cette instruction et la fin de la section ne sera pas exécuté.
+
+```
+{{#foreach from=$list item="event"}}
+  {{if $event.date == '2023-01-01'}}
+    {{:continue}}
+  {{/if}}
+  {{$event.title}}
+{{/foreach}}
+```
+
+Il est possible de passer à l'itération suivante d'une section parente en utilisant un chiffre en paramètre :
+
+```
+{{#foreach from=$list item="event"}}
+  {{$event.title}}
+  {{#foreach from=$event.people item="person"}}
+    {{if $person.name == 'bohwaz'}}
+      {{:continue 2}}
+    {{/if}}
+    - {{$person.name}}
+  {{/foreach}}
+{{/foreach}}
+```
 
 ## debug
 
