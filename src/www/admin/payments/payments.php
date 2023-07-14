@@ -32,6 +32,7 @@ if (array_key_exists('id', $_GET)) {
 	$tpl->assign([
 		'payment' => $payment,
 		'provider' => $provider,
+		'transactions' => $payment->getTransactions(),
 		'types' => Payment::TYPES,
 		'methods' => Payment::METHODS,
 		'author' => $author,

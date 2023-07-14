@@ -21,17 +21,6 @@
 		<tr>
 			<td class="num">{link href="!payments/payments.php?id=%s"|args:$row.id label=$row.reference}</td>
 			<td class="num">
-				{if $row.id_transaction}
-					{link href="!acc/transactions/details.php?id=%d"|args:$row.id_transaction label="#%d"|args:$row.id_transaction}
-				{else}
-					{if $row.transactions}
-						{foreach from=$row.transactions item="id_transaction"}
-							{link href="!acc/transactions/details.php?id=%d"|args:$id_transaction label="#%d"|args:$id_transaction}
-						{/foreach}
-					{/if}
-				{/if}
-			</td>
-			<td class="num">
 				{if $row.users}
 					{foreach from=$row.users item="id_user"}
 						{link href="!users/details.php?id=%d"|args:$id_user label="#%d"|args:$id_user}
@@ -47,6 +36,13 @@
 			<td class="money">{$row.amount|money_currency|raw}</td>
 			<td>{$row.date|date}</td>
 			<td>{$row.method}</td>
+			<td class="num">
+				{if $row.transactions}
+					{foreach from=$row.transactions item="id_transaction"}
+						{link href="!acc/transactions/details.php?id=%d"|args:$id_transaction label="#%d"|args:$id_transaction}
+					{/foreach}
+				{/if}
+			</td>
 			<td class="actions">{linkbutton href="%spayments/payments.php?id=%s"|args:$admin_url:$row.id shape="help" label="Détails"}</td>
 		</tr>
 	{/foreach}

@@ -15,7 +15,7 @@ use Garradin\Accounting\Years;
 
 class Payments
 {
-	const CREATION_LOG_LABEL = 'Paiement créé';
+	const CREATION_LOG_LABEL = 'Paiement créé.';
 	const TRANSACTION_CREATION_LOG_LABEL = 'Écriture comptable ajoutée';
 	const TRANSACTION_PREFIX = 'Paiement';
 
@@ -82,7 +82,6 @@ class Payments
 		}
 		if ($accounts) {
 			$transaction = self::createTransaction($payment, $accounts, $author_id, $transaction_notes);
-			$payment->set('id_transaction', (int)$transaction->id);
 			$payment->addLog(self::TRANSACTION_CREATION_LOG_LABEL);
 			$payment->save();
 		}
@@ -103,9 +102,10 @@ class Payments
 			'status' => Transaction::STATUS_PAID,
 			'label' => self::TRANSACTION_PREFIX . ' - ' . $payment->label,
 			'notes' => $notes,
-			'payment_reference' => $payment->id,
+			'payment_reference' => $payment->id, // For compatibility
 			'date' => \KD2\DB\Date::createFromInterface($payment->date),
 			'id_year' => (int)$id_year,
+			'id_payment' => (int)$payment->id,
 			'id_creator' => (int)$author_id,
 			'amount' => $payment->amount / 100,
 			'simple' => [
@@ -143,13 +143,6 @@ class Payments
 			'reference' => [
 				'label' => 'Réf.',
 				'select' => 'p.reference'
-			],
-			'transactions' => [
-				'label' => 'Écritures',
-				'select' => sprintf('(SELECT GROUP_CONCAT(t.id, \';\') FROM %s t WHERE t.reference = p.id)', Transaction::TABLE)
-			],
-			'id_transaction' => [
-				'select' => 'p.id_transaction'
 			],
 			'users' => [
 				'label' => 'Membres',
@@ -192,7 +185,11 @@ class Payments
 			'method' => [
 				'label' => 'Méthode',
 				'select' => 'p.method'
-			]
+			],
+			'transactions' => [
+				'label' => 'Écritures',
+				'select' => sprintf('(SELECT GROUP_CONCAT(t.id, \';\') FROM %s t WHERE t.id_payment = p.id)', Transaction::TABLE)
+			],
 		];
 
 		$tables = Payment::TABLE . ' p

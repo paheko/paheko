@@ -430,6 +430,7 @@ CREATE TABLE IF NOT EXISTS acc_transactions
 -- Transactions (écritures comptables)
 (
 	id INTEGER PRIMARY KEY NOT NULL,
+	id_payment INTEGER NULL DEFAULT NULL REFERENCES payments (id) ON DELETE SET NULL,
 
 	type INTEGER NOT NULL DEFAULT 0, -- Transaction type, zero is advanced
 	status INTEGER NOT NULL DEFAULT 0, -- Status (bitmask)

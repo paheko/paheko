@@ -74,6 +74,7 @@ class Transaction extends Entity
 	];
 
 	protected ?int $id;
+	protected ?int $id_payment = null;
 	protected ?int $type = null;
 	protected int $status = 0;
 	protected string $label;

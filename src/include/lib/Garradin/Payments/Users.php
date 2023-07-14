@@ -38,8 +38,8 @@ class Users
 		foreach ($user_ids as $k => $id) {
 			$lines[] = '(' . $db->quote((int)$id_payment) . ', ' . $db->quote((int)$id) . ', ' . (isset($notes[$k]) ? $db->quote($notes[$k]) : 'null') . ')';
 		}
-		// ToDo: link those users to the payment transaction as well
-		return $db->exec(sprintf('INSERT INTO %s (id_payment, id_user, notes) VALUES %s;', self::TABLE, implode(', ', $lines)));
+		// ToDo: log this user association into the payment history
+		return $db->exec(sprintf('REPLACE INTO %s (id_payment, id_user, notes) VALUES %s;', self::TABLE, implode(', ', $lines)));
 	}
 
 	// TODO: implements remove() method as well

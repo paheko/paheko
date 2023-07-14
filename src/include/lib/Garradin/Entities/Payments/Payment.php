@@ -36,7 +36,6 @@ class Payment extends Entity
 
 	protected int			$id;
 	protected ?string		$reference = null;
-	protected ?int			$id_transaction = null;
 	protected ?int			$id_author = null;
 	protected ?int			$id_payer = null;
 	protected ?string		$payer_name = null;

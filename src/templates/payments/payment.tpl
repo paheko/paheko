@@ -34,18 +34,14 @@
 		{/foreach}
 		</ul>
 	</dd>
-
-	{if $payment->id_transaction}
-		<dt>Écriture comptable</dt>
-		<dd><mark>{link href="!acc/transactions/details.php?id=%d"|args:$payment->id_transaction label=$payment->id_transaction}</mark></dd>
-	{else}
-		<dt>Écritures comptables</dt>
-		<dd>
-			{foreach from=$payment->getTransactions() item='transaction'}
+	<dt>Écritures comptables</dt>
+	<dd>
+		{if $transactions}
+			{foreach from=$transactions item='transaction'}
 				<mark>{link href="!acc/transactions/details.php?id=%d"|args:$transaction->id label=$transaction->id}</mark>
 			{/foreach}
-		</dd>
-	{/if}
+		{/if}
+	</dd>
 
 	<dt>Historique</dt>
 	<dd>{$payment->history|escape|nl2br}</dd>
