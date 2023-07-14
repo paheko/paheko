@@ -29,6 +29,10 @@ class Storage
 	{
 		$root = rtrim(strtok($root, '%'), '/');
 
+		if (!is_dir($root)) {
+			return;
+		}
+
 		// Move skeletons to new path
 		if (file_exists($root . '/skel')) {
 			if (!file_exists($root . '/modules')) {
