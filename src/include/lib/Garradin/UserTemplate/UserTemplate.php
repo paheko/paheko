@@ -92,7 +92,7 @@ class UserTemplate extends \KD2\Brindille
 			'_POST'        => &$_POST,
 			'visitor_lang' => Translate::getHttpLang(),
 			'config'       => $config,
-			'now'          => new \DateTime,
+			'now'          => time(),
 			'legal_line'   => LEGAL_LINE,
 			'is_logged'    => $is_logged,
 			'logged_user'  => $is_logged ? $session->getUser()->asModuleArray() : null,

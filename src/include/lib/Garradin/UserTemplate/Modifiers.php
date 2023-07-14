@@ -282,14 +282,21 @@ class Modifiers
 	static public function math(string $expression, ... $params)
 	{
 		static $tokens_list = [
-			'function'  => '(?:round|ceil|floor|cos|sin|tan|asin|acos|atan|sinh|cosh|tanh|abs|max|min|exp|sqrt|log10|log|pi)\(',
+			'function'  => '(?:round|ceil|floor|cos|sin|tan|asin|acos|atan|sinh|cosh|tanh|abs|max|min|exp|sqrt|log10|log|pi|random_int)\(',
 			'open'      => '\(',
 			'close'     => '\)',
-			'number'    => '-?\d+(?:[,\.]\d+)?',
+			'number'    => '-?\d+(?:[\.]\d+)?',
 			'sign'      => '[+\-\*\/%]',
 			'separator' => ',',
 			'space'     => '\s+',
 		];
+
+		// Treat comma as dot in strings
+		foreach ($params as &$param) {
+			$param = str_replace(',', '.', (string)$param);
+		}
+
+		unset($param);
 
 		$expression = vsprintf($expression, $params);
 
@@ -297,7 +304,7 @@ class Modifiers
 			$tokens = Brindille::tokenize($expression, $tokens_list);
 		}
 		catch (\InvalidArgumentException $e) {
-			throw new Brindille_Exception('Invalid value for math modifier: ' . $e->getMessage());
+			throw new Brindille_Exception('Invalid value: ' . $e->getMessage());
 		}
 
 		$stack = [];
@@ -314,21 +321,28 @@ class Modifiers
 				$last = array_pop($stack);
 
 				if (!$last) {
-					throw new Brindille_Exception('Invalid closing parenthesis in math modifier on position ' . $token->offset);
+					throw new Brindille_Exception('Invalid closing parenthesis, on position ' . $token->offset);
 				}
 			}
-			elseif ($token->type == 'number') {
-				$token->value = str_replace(',', '.', $token->value);
+			elseif ($token->type == 'separator') {
+				if (empty(end($stack)['function'])) {
+					throw new Brindille_Exception('Invalid comma outside of a function, on position ' . $token->offset);
+				}
 			}
 
 			$expression .= $token->value;
 		}
 
 		if (count($stack)) {
-			throw new Brindille_Exception('Unmatched open parenthesis in math modifier on position ' . $token->offset);
+			throw new Brindille_Exception('Unmatched open parenthesis, on position ' . $token->offset);
 		}
 
-		return @eval('return ' . $expression . ';') ?: 0;
+		try {
+			return @eval('return ' . $expression . ';') ?: 0;
+		}
+		catch (\Throwable $e) {
+			throw new Brindille_Exception('Syntax error: ' . $e->getMessage(), 0, $e);
+		}
 	}
 
 	static public function map($array, string $modifier, ...$params): array
