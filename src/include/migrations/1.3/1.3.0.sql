@@ -48,6 +48,11 @@ DROP TABLE acc_transactions_users_old;
 DROP TABLE acc_transactions_old;
 DROP TABLE services_users_old;
 
+INSERT INTO users_categories (name, perm_web, perm_documents, perm_users, perm_accounting, perm_subscribe, perm_connect, perm_config, hidden)
+	VALUES ('Prestataires de paiement', 0, 0, 0, 0, 0, 0, 0, 1);
+INSERT INTO config
+	SELECT 'providers_category', id FROM users_categories WHERE name = 'Prestataires de paiement' LIMIT 1;
+
 -- Remove old plugin as it cannot be uninstalled as it no longer exists
 DELETE FROM plugins_old WHERE id = 'ouvertures';
 DELETE FROM plugins_signaux_old WHERE plugin = 'ouvertures';

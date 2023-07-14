@@ -12,7 +12,35 @@
 			{input type="select" name="type" label="Type" options=Entities\Payments\Payment::TYPES default=Entities\Payments\Payment::UNIQUE_TYPE required=true}
 			{input type="select" name="method" label="Méthode" options=Entities\Payments\Payment::METHODS required=true}
 			{input type="select" name="provider" label="Prestataire" options=$provider_options default=Payments\Providers::MANUAL_PROVIDER required=true}
-			{input type="list" name="author" label="Payeur/euse" target="!users/selector.php" can_delete="true" required=true}
+			{input type="list" name="payer" label="Payeur/euse" target="!users/selector.php" can_delete="true" required=true}
+
+			<dt><label for="user_list">Membres concerné·e·s</label> <i>(facultatif)</i></dt>
+			<dd class="help">Ex : bénéficiaires d'une contre-partie</dd>
+			<dd>
+				<table id="user_list" class="list">
+					<thead>
+						<tr>
+							<th>Membre</th>
+							<th>Remarque</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>{input type="list" name="users[0]" label="" target="!users/selector.php" multiple=false can_delete=false required=false help="Ex : bénéficiaires d'une contre-partie"}</td>
+							<td>{input type="text" name="user_notes[0]" label="" required=false placeholder="Ex : adhésion demi-tarif"}</td>
+							<td>{button name="item_0_delete_button" label="Enlever" shape="minus" onclick="remove_item(0)"}</td>
+						</tr>
+					</tbody>
+					<tfoot>
+						<tr>
+							<td colspan="2"></td>
+							<td>{button name="item_add_button" label="Ajouter" shape="plus" onclick="add_item()"}</td>
+						</tr>
+					</tfoot>
+				</table>
+			</dd>
+			
 			{input type="text" name="reference" label="Référence"}
 			{input type="money" name="amount" label="Montant" required=true}
 
@@ -48,29 +76,6 @@
 	{button type="submit" name="save" label="Créer" class="main"}
 </form>
 
-<script type="text/javascript">
-{literal}
-(function () {
-	g.toggle('.accounting', $('#f_accounting_1').checked);
-
-	$('#f_accounting_1').onchange = () => { g.toggle('.accounting', $('#f_accounting_1').checked); };
-
-	function toggleYearForSelector()
-	{
-		var btn = document.querySelector('#f_account_container button');
-		btn.value = btn.value.replace(/year=\d+/, 'year=' + y.value);
-
-		let v = btn.parentNode.querySelector('span');
-		if (v) {
-			v.parentNode.removeChild(v);
-		}
-	}
-
-	var y = $('#f_id_year')
-
-	y.onchange = toggleYearForSelector;
-})();
-{/literal}
-</script>
+<script type="text/javascript" src="{$admin_url}static/scripts/payment.js?{$version_hash}"></script>
 
 {include file="_foot.tpl"}

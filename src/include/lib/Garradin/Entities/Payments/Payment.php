@@ -5,6 +5,10 @@ namespace Garradin\Entities\Payments;
 use Garradin\Entity;
 use Garradin\DB;
 use Garradin\Entities\Users\User;
+use Garradin\Entities\Accounting\Transaction;
+use Garradin\Payments\Users as PaymentsUsers;
+
+use KD2\DB\EntityManager as EM;
 
 class Payment extends Entity
 {
@@ -34,7 +38,8 @@ class Payment extends Entity
 	protected ?string		$reference = null;
 	protected ?int			$id_transaction = null;
 	protected ?int			$id_author = null;
-	protected ?string		$author_name = null;
+	protected ?int			$id_payer = null;
+	protected ?string		$payer_name = null;
 	protected string		$provider;
 	protected string		$type;
 	protected string		$status;
@@ -77,6 +82,16 @@ class Payment extends Entity
 		if ($check_for_changes && $original_value !== $this->extra_data->$key) {
 			$this->_modified['extra_data'] = clone $this->extra_data;
 		}
+	}
+
+	public function bindToUsers(array $user_ids, ?array $notes = null): void
+	{
+		PaymentsUsers::add($this->id, $user_ids, $notes);
+	}
+
+	public function getTransactions(): array
+	{
+		return EM::getInstance(Transaction::class)->all('SELECT * FROM @TABLE WHERE reference = :reference', (int)$this->id);
 	}
 
 	public function selfCheck(): void

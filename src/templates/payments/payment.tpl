@@ -1,4 +1,5 @@
 {include file="_head.tpl" title="Détails du Paiement n°%d"|args:$payment->id current="payments"}
+{include file="payments/_menu.tpl"}
 
 <dl class="describe">
 	<dt>Libellé</dt>
@@ -15,13 +16,41 @@
 	<dd>{$methods[$payment->method]}</dd>
 	<dt>Type</dt>
 	<dd>{$types[$payment->type]}</dd>
-	<dt>Auteur/trice</dt>
-	<dd>{if $author}{link href="!users/details.php?id=%d"|args:$author->id label=$author->nom}{else}{$payment->author_name}{/if}</dd>
-	<dt>Écriture comptable</dt>
-	<dd>{if $payment->id_transaction}<mark>{link href="!acc/transactions/details.php?id=%d"|args:$payment->id_transaction label=$payment->id_transaction}</mark>{else}-{/if}</dd>
+	<dt>Payeur/euse</dt>
+	<dd>{if $payer}{link href="!users/details.php?id=%d"|args:$payer->id label=$payer->nom}{else}{$payment->payer_name}{/if}</dd>
+	<dt>Initiateur/trice</dt>
+	<dd>
+		{if $author}
+			{link href="!users/details.php?id=%d"|args:$author->id label=$author->nom}
+		{else}
+			Prestataire {$provider->label}
+		{/if}
+	</dd>
+	<dt>Membres concerné·e·s</dt>
+	<dd class="num">
+		<ul class="flat">
+		{foreach from=$users item='user'}
+			<li>{$user->nom} {link href="!users/details.php?id=%d"|args:$user->id label=$user->numero}{if isset($users_notes[$user->id])} ({$users_notes[$user->id]}){/if}</li>
+		{/foreach}
+		</ul>
+	</dd>
+
+	{if $payment->id_transaction}
+		<dt>Écriture comptable</dt>
+		<dd><mark>{link href="!acc/transactions/details.php?id=%d"|args:$payment->id_transaction label=$payment->id_transaction}</mark></dd>
+	{else}
+		<dt>Écritures comptables</dt>
+		<dd>
+			{foreach from=$payment->getTransactions() item='transaction'}
+				<mark>{link href="!acc/transactions/details.php?id=%d"|args:$transaction->id label=$transaction->id}</mark>
+			{/foreach}
+		</dd>
+	{/if}
+
 	<dt>Historique</dt>
 	<dd>{$payment->history|escape|nl2br}</dd>
 </dl>
+
 
 {if $TECH_DETAILS}
 	<dl style="background-color: black; color: limegreen; padding-top: 0.8em;" class="describe">

@@ -4,6 +4,7 @@ namespace Garradin;
 
 use Garradin\Payments\Payments;
 use Garradin\Payments\Providers;
+use Garradin\Payments\Users as PaymentsUsers;
 use Garradin\Entities\Payments\Payment;
 use Garradin\Entities\Users\User;
 use Garradin\Accounting\Years;
@@ -27,12 +28,16 @@ if (array_key_exists('id', $_GET)) {
 	}
 
 	$author = EntityManager::findOneById(User::class, (int)$payment->id_author);
+	$payer = EntityManager::findOneById(User::class, (int)$payment->id_payer);
 	$tpl->assign([
 		'payment' => $payment,
 		'provider' => $provider,
 		'types' => Payment::TYPES,
 		'methods' => Payment::METHODS,
 		'author' => $author,
+		'payer' => $payer,
+		'users' => PaymentsUsers::getForPaymentId((int)$payment->id),
+		'users_notes' => PaymentsUsers::getNotesForPaymentId((int)$payment->id),
 		'TECH_DETAILS' => SHOW_ERRORS && ENABLE_TECH_DETAILS
 	]);
 

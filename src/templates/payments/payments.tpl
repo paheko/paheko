@@ -7,6 +7,10 @@
 
 {include file="payments/_menu.tpl"}
 
+{if isset($_GET.ok)}
+	<p class="confirm block">Paiement créé avec succès.</p>
+{/if}
+
 <h2 class="ruler">Liste des paiements{if isset($provider)} pour {$provider->label}{/if}</h2>
 
 {include file="common/dynamic_list_head.tpl" list=$payments}
@@ -16,8 +20,25 @@
 	{foreach from=$payments->iterate() item="row"}
 		<tr>
 			<td class="num">{link href="!payments/payments.php?id=%s"|args:$row.id label=$row.reference}</td>
-			<td class="num">{link href="!acc/transactions/details.php?id=%d"|args:$row.id_transaction label=$row.id_transaction}</td>
-			<td>{if $row.id_author}{link href="!users/details.php?id=%d"|args:$row.id_author label=$row.author_name}{else}{$row.author_name}{/if}</td>
+			<td class="num">
+				{if $row.id_transaction}
+					{link href="!acc/transactions/details.php?id=%d"|args:$row.id_transaction label="#%d"|args:$row.id_transaction}
+				{else}
+					{if $row.transactions}
+						{foreach from=$row.transactions item="id_transaction"}
+							{link href="!acc/transactions/details.php?id=%d"|args:$id_transaction label="#%d"|args:$id_transaction}
+						{/foreach}
+					{/if}
+				{/if}
+			</td>
+			<td class="num">
+				{if $row.users}
+					{foreach from=$row.users item="id_user"}
+						{link href="!users/details.php?id=%d"|args:$id_user label="#%d"|args:$id_user}
+					{/foreach}
+				{/if}
+			</td>
+			<td>{if $row.id_payer}{link href="!users/details.php?id=%d"|args:$row.id_payer label=$row.payer_name}{else}{$row.payer_name}{/if}</td>
 			{* Fallback to "provider" field when provider has been uninstalled *}
 			<td>{if $row.provider_label}{$row.provider_label}{else}{$row.provider}{/if}</td>
 			<td>{$row.type}</td>

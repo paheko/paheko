@@ -502,8 +502,9 @@ CREATE TABLE IF NOT EXISTS payments
     id INTEGER NOT NULL PRIMARY KEY,
     reference TEXT NULL,
     id_transaction INTEGER NULL REFERENCES acc_transactions (id),
-    id_author INTEGER REFERENCES users (id),
-    author_name TEXT NULL,
+    id_author INTEGER NULL REFERENCES users (id),
+    id_payer INTEGER NULL REFERENCES users (id),
+    payer_name TEXT NULL,
     provider TEXT NOT NULL,
     type TEXT NOT NULL CHECK( type IN ('unique', 'tif', 'monthly', 'other') ),
     status TEXT NOT NULL CHECK( status IN ('planned', 'awaiting', 'validated', 'cancelled') ),
@@ -515,14 +516,24 @@ CREATE TABLE IF NOT EXISTS payments
     extra_data TEXT
 );
 CREATE UNIQUE INDEX IF NOT EXISTS payment_reference ON payments (reference, provider);
+CREATE INDEX IF NOT EXISTS payment_provider_status ON payments (provider, status);
 
-CREATE TABLE IF NOT EXISTS payment_provider
+CREATE TABLE IF NOT EXISTS payments_users
+(
+	id_payment INTEGER NOT NULL REFERENCES payments (id) ON DELETE CASCADE,
+	id_user INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+	notes TEXT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS payments_users_key ON payments_users (id_payment, id_user);
+
+CREATE TABLE IF NOT EXISTS payment_providers
 (
     id INTEGER NOT NULL PRIMARY KEY,
+    id_user INTEGER NULL REFERENCES users(id) ON DELETE SET NULL,
     name TEXT NOT NULL,
     label TEXT NOT NULL
 );
-CREATE UNIQUE INDEX IF NOT EXISTS payment_provider_name ON payment_provider (name);
+CREATE UNIQUE INDEX IF NOT EXISTS payment_provider_name ON payment_providers (name);
 
 ---------- FILES ----------------
 

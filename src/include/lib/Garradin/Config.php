@@ -49,6 +49,7 @@ class Config extends Entity
 	protected string $country;
 
 	protected int $default_category;
+	protected int $providers_category;
 
 	protected ?int $backup_frequency;
 	protected ?int $backup_limit;
