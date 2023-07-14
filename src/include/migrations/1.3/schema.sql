@@ -540,15 +540,15 @@ CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4
 );
 
 -- Delete/insert search item when item is deleted/inserted from files
-CREATE TRIGGER files_search_bd BEFORE DELETE ON files BEGIN
+CREATE TRIGGER IF NOT EXISTS files_search_bd BEFORE DELETE ON files BEGIN
 	DELETE FROM files_search WHERE docid = OLD.rowid;
 END;
 
-CREATE TRIGGER files_search_ai AFTER INSERT ON files BEGIN
+CREATE TRIGGER IF NOT EXISTS files_search_ai AFTER INSERT ON files BEGIN
 	INSERT INTO files_search (docid, path, title, content) VALUES (NEW.rowid, NEW.path, NEW.name, NULL);
 END;
 
-CREATE TRIGGER files_search_au AFTER UPDATE OF name, path ON files BEGIN
+CREATE TRIGGER IF NOT EXISTS files_search_au AFTER UPDATE OF name, path ON files BEGIN
 	UPDATE files_search SET path = NEW.path, title = NEW.name WHERE docid = NEW.rowid;
 END;
 
