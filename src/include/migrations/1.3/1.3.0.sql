@@ -59,10 +59,6 @@ DELETE FROM plugins_signaux_old WHERE plugin = 'ouvertures';
 -- Delete old reservations plugin
 DELETE FROM plugins_old WHERE id = 'reservations';
 
-DROP TABLE IF EXISTS plugin_reservations_categories;
-DROP TABLE IF EXISTS plugin_reservations_creneaux;
-DROP TABLE IF EXISTS plugin_reservations_personnes;
-
 -- Rename plugins table columns to English
 INSERT INTO plugins (name, label, description, author, author_url, version, config, enabled, menu, restrict_level, restrict_section)
 	SELECT id, nom, description, auteur, url, version, config, 1, menu,

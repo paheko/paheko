@@ -186,6 +186,17 @@ $files = json_decode($files);
 $files->signature = null;
 $db->exec(sprintf('REPLACE INTO config (key, value) VALUES (\'files\', %s);', $db->quote(json_encode($files))));
 
+Modules::refresh();
+
+if ($db->test('sqlite_master', 'type = \'table\' AND name = ?', 'plugin_reservations_categories')) {
+	$db->import(__DIR__ . '/1.3.0_bookings.sql');
+	$m = Modules::get('bookings');
+
+	if ($m) {
+		$m->enabled = true;
+		$m->save();
+	}
+}
+
 $db->commitSchemaUpdate();
 
-Modules::refresh();
