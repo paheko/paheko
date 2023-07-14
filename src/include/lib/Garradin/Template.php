@@ -210,7 +210,7 @@ class Template extends Smartyer
 	{
 		$form = $this->getTemplateVars('form');
 
-		if (!$form->hasErrors())
+		if (!$form || !$form->hasErrors())
 		{
 			return '';
 		}

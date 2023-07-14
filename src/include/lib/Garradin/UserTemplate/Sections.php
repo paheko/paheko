@@ -146,8 +146,8 @@ class Sections
 
 		return sprintf('<?php if (!empty(%s)): ', $if)
 			. 'try { '
-			. '$hash = md5(\Garradin\Utils::getSelfURI(false)); '
-			. 'if (!\KD2\Form::tokenCheck(\'form_\' . $hash)) { '
+			. '$hash = \Garradin\UserTemplate\Functions::_getFormKey(); '
+			. 'if (!\KD2\Form::tokenCheck($hash)) { '
 			. 'throw new \Garradin\ValidationException(\'Une erreur est survenue, merci de bien vouloir renvoyer le formulaire.\'); '
 			. '} foreach ([null] as $_): ?>';
 		/*

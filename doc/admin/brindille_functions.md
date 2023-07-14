@@ -494,6 +494,46 @@ Affiche le pied de page de l'administration de l'association.
 {{:admin_footer}}
 ```
 
+## delete_form
+
+Affiche un formulaire demandant la confirmation de suppression d'un élément.
+
+| Paramètre | Obligatoire ou optionnel ? | Fonction |
+| :- | :- | :- |
+| `legend` | **obligatoire** | Libellé de l'élément `<legend>` du formulaire |
+| `warning` | **obligatoire** | Libellé de la question de suppression (en gros en rouge) |
+| `alert` | *optionnel* | Message d'alerte supplémentaire (bloc jaune) |
+| `info` | *optionnel* | Informations liées à la suppression (expliquant ce qui va être impacté par la suppression) |
+| `confirm` | *optionnel* | Libellé de la case à cocher pour la suppression, si ce paramètre est absent ou `NULL`, la case à cocher ne sera pas affichée. |
+
+Le formulaire envoie un `POST` avec le bouton ayant le nom `delete`. Si le paramètre `confirm` est renseigné, alors la case à cochée aura le nom `confirm_delete`.
+
+Exemple :
+
+```
+{{#load id=$_GET.id assign="invoice"}}
+{{else}}
+  {{:error message="Facture introuvable"}}
+{{/if}}
+
+{{#form on="delete"}}
+  {{if !$_POST.confirm_delete}}
+    {{:error message="Merci de cocher la case"}}
+  {{/if}}
+  {{:delete id=$invoice.id}}
+{{/form}}
+
+{{:form_errors}}
+
+{{:delete_form
+  legend="Suppression d'une facture"
+  warning="Supprimer la facture n°%d ?"|args:$invoice.id
+  info="Le devis lié sera également supprimé"
+  alert="La facture sera définitivement perdue !"
+  confirm="Cocher cette case pour confirmer la suppression de la facture"
+}}
+```
+
 ## input
 
 Crée un champ de formulaire HTML. Cette fonction est une extension à la balise `<input>` en HTML, mais permet plus de choses.

@@ -3,6 +3,7 @@
 namespace Garradin\UserTemplate;
 
 use Garradin\Config;
+use Garradin\Template;
 use Garradin\Utils;
 
 use KD2\Form;
@@ -22,6 +23,7 @@ class CommonFunctions
 		'linkbutton',
 		'linkmenu',
 		'exportmenu',
+		'delete_form',
 	];
 
 	static public function input(array $params)
@@ -538,6 +540,17 @@ class CommonFunctions
 			</span>';
 
 		return $out;
+	}
+
+	static public function delete_form(array $params): string
+	{
+		if (!isset($params['legend'], $params['warning'], $params['csrf_key'])) {
+			throw new \InvalidArgumentException('Missing parameter: legend, warning and csrf_key are required');
+		}
+
+		$tpl = Template::getInstance();
+		$tpl->assign($params);
+		return $tpl->fetch('common/delete_form.tpl');
 	}
 
 }

@@ -41,6 +41,7 @@ class Functions
 		'captcha',
 		'mail',
 		'button',
+		'delete_form',
 		'form_errors',
 		'redirect',
 	];
@@ -239,7 +240,7 @@ class Functions
 				$args[substr($key, 1)] = $value;
 			}
 			elseif ($key == 'where') {
-				$where[] = self::_moduleReplaceJSONExtract($value);
+				$where[] = Sections::_moduleReplaceJSONExtract($value);
 			}
 			else {
 				if ($key == 'id') {
@@ -572,18 +573,32 @@ class Functions
 		}
 	}
 
+	static public function _getFormKey(): string
+	{
+		return 'form_' . md5(Utils::getSelfURI(false));
+	}
+
+	/**
+	 * @override
+	 */
 	static public function button(array $params): string
 	{
-		static $forms = [];
-
-		$hash = md5(Utils::getSelfURI(false));
-
 		// Always add CSRF protection when a submit button is present in the form
-		if (isset($params['type']) && $params['type'] == 'submit' && !in_array($hash, $forms)) {
-			$params['csrf_key'] = 'form_' . $hash;
+		if (isset($params['type']) && $params['type'] == 'submit') {
+			$key = self::_getFormKey();
+			$params['csrf_key'] = $key;
 		}
 
 		return CommonFunctions::button($params);
+	}
+
+	/**
+	 * @override
+	 */
+	static public function delete_form(array $params, UserTemplate $tpl): string
+	{
+		$params['csrf_key'] = self::_getFormKey();
+		return self::form_errors([], $tpl) . CommonFunctions::delete_form($params);
 	}
 
 	static public function form_errors(array $params, UserTemplate $tpl): string
