@@ -279,7 +279,7 @@ class DynamicField extends Entity
 
 		if ($this->type == 'multiple' || $this->type == 'select') {
 			$this->options = array_filter($this->options);
-			$this->assert(is_array($this->options) && count($this->options) >= 1 && trim(current($this->options)) !== '', 'Ce champ nécessite de comporter au moins une option possible: ' . $this->name);
+			$this->assert(is_array($this->options) && count($this->options) >= 1 && trim(current($this->options) ?? '') !== '', 'Ce champ nécessite de comporter au moins une option possible: ' . $this->name);
 		}
 
 		$db = DB::getInstance();
