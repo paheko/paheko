@@ -611,14 +611,14 @@ class DynamicFields
 		$source = [];
 
 		foreach ($fields as $src_key => $dst_key) {
+			/* Don't cast currently as this can create duplicate records when data was wrong :(
 			$field = $this->get($dst_key);
 
 			if ($field) {
 				$source[] = sprintf('CAST(%s AS %s)', $db->quoteIdentifier($src_key), $field->sql_type());
 			}
-			else {
-				$source[] = $src_key;
-			}
+			*/
+			$source[] = $src_key;
 		}
 
 		if ($function) {

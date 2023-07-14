@@ -176,7 +176,7 @@ class Upgrade
 
 			Static_Cache::remove('upgrade');
 		}
-		catch (\Exception $e)
+		catch (\Throwable $e)
 		{
 			if ($db->inTransaction()) {
 				$db->rollback();
