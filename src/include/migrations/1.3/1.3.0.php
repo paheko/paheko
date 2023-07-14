@@ -126,7 +126,22 @@ foreach (Files::list('modules/web') as $file) {
 	}
 }
 
-foreach (Files::listRecursive(null, null, false) as $file) {
+// Migrate web_pages
+$db->exec('
+	INSERT INTO web_pages
+		SELECT id,
+			CASE WHEN parent = \'\' THEN NULL ELSE parent END,
+			path, \'web/\' || path, uri, type, status, format, published, modified, title, content
+		FROM web_pages_old;
+	DROP TABLE web_pages_old;
+');
+
+
+foreach (Files::all() as $file) {
+	if ($file->isDir()) {
+		continue;
+	}
+
 	if ($file->context() == $file::CONTEXT_WEB && $file->name == 'index.txt') {
 		$file->delete();
 		continue;
@@ -138,16 +153,6 @@ foreach (Files::listRecursive(null, null, false) as $file) {
 	// Save files in DB
 	$file->save();
 }
-
-// Migrate web_pages
-$db->exec('
-	INSERT INTO web_pages
-		SELECT id,
-			CASE WHEN parent = \'\' THEN NULL ELSE parent END,
-			path, \'web/\' || path, uri, type, status, format, published, modified, title, content
-		FROM web_pages_old;
-	DROP TABLE web_pages_old;
-');
 
 foreach (Web::listAll() as $page) {
 	$page->syncSearch();
@@ -175,7 +180,7 @@ foreach ($db->iterate('SELECT * FROM searches;') as $row) {
 	$db->update('searches', ['content' => $content], 'id = ' . (int) $row->id);
 }
 
-// Add signature to files
+// Add signature to config files
 $files = $db->firstColumn('SELECT value FROM config WHERE key = \'files\';');
 $files = json_decode($files);
 $files->signature = null;
