@@ -63,6 +63,28 @@ bleu
 orange
 ```
 
+### Itérer sans tableau
+
+Il est aussi possible de faire `X` itérations, arbitrairement, sans avoir de tableau en entrée, en utilisant le paramètre `count`.
+
+C'est l'équivalent des boucles `for` dans les autres langages de programmation.
+
+Exemple :
+
+```
+{{#foreach count=3 key="i"}}
+- {{$i}}
+{{/foreach}}
+```
+
+Affichera :
+
+```
+- 0
+- 1
+- 2
+```
+
 ## restrict
 
 Permet de limiter (restreindre) une partie de la page aux membres qui sont connectés et/ou qui ont certains droits.

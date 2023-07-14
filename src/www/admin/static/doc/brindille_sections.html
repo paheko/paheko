@@ -137,6 +137,17 @@ b = orange</code></pre>
 <p>Affichera :</p>
 <pre><code>bleu
 orange</code></pre>
+<h3 id="iterer-sans-tableau">Itérer sans tableau</h3>
+<p>Il est aussi possible de faire <code>X</code> itérations, arbitrairement, sans avoir de tableau en entrée, en utilisant le paramètre <code>count</code>.</p>
+<p>C'est l'équivalent des boucles <code>for</code> dans les autres langages de programmation.</p>
+<p>Exemple :</p>
+<pre><code>{{#foreach count=3 key="i"}}
+- {{$i}}
+{{/foreach}}</code></pre>
+<p>Affichera :</p>
+<pre><code>- 0
+- 1
+- 2</code></pre>
 <h2 id="restrict">restrict</h2>
 <p>Permet de limiter (restreindre) une partie de la page aux membres qui sont connectés et/ou qui ont certains droits.</p>
 <p>Deux paramètres optionnels peuvent être utilisés ensemble (il n'est pas possible d'utiliser seulement un des deux) :</p>
