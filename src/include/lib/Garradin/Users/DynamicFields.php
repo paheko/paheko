@@ -296,7 +296,7 @@ class DynamicFields
 	{
 		if (!isset($this->_presets))
 		{
-			$this->_presets = parse_ini_file(self::PRESETS_FILE, true);
+			$this->_presets = Utils::parse_ini_file(self::PRESETS_FILE, true);
 
 			foreach ($this->_presets as &$preset) {
 				$preset = (object) $preset;
@@ -354,9 +354,9 @@ class DynamicFields
 	static public function fromOldINI(string $config, string $login_field, string $name_field, string $number_field)
 	{
 		$db = DB::getInstance();
-		$config = parse_ini_string($config, true);
+		$config = Utils::parse_ini_string($config, true);
 
-		$presets = parse_ini_file(self::PRESETS_FILE, true);
+		$presets = Utils::parse_ini_file(self::PRESETS_FILE, true);
 
 		$i = 0;
 

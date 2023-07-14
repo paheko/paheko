@@ -1442,4 +1442,53 @@ class Utils
 
 		return $out;
 	}
+
+	static public function parse_ini_file(string $path, bool $sections = false)
+	{
+		return self::parse_ini_string(file_get_contents($path), $sections);
+	}
+
+	/**
+	 * Safe alternative to parse_ini_string without constant/variable expansion
+	 * but still type values, like INI_SCANNER_TYPED
+	 */
+	static public function parse_ini_string(string $ini, bool $sections = false)
+	{
+		try {
+			$ini = \parse_ini_string($ini, $sections, \INI_SCANNER_RAW);
+		}
+		catch (\Throwable $e) {
+			throw new \RuntimeException($e->getMessage(), 0, $e);
+		}
+
+		return self::_resolve_ini_types($ini);
+	}
+
+	static protected function _resolve_ini_types(array $ini)
+	{
+		foreach ($ini as $key => &$value) {
+			if (is_array($value)) {
+				$value = self::_resolve_ini_types($value);
+			}
+			elseif ($value === 'FALSE' || $value === 'false' || $value === 'off' || $value === 'no' || $value === 'none') {
+				$value = false;
+			}
+			elseif ($value === 'TRUE' || $value === 'true' || $value === 'on' || $value === 'yes') {
+				$value = true;
+			}
+			elseif ($value === 'NULL' || $value === 'null') {
+				$value = null;
+			}
+			elseif (ctype_digit($value)) {
+				$value = (int)$value;
+			}
+			else {
+				$value = str_replace('\n', "\n", $value);
+			}
+		}
+
+		unset($value);
+
+		return $ini;
+	}
 }
