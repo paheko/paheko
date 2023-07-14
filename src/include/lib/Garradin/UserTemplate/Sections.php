@@ -932,6 +932,8 @@ class Sections
 		$params['where'] .= ' AND status = :status';
 		$params[':status'] = Page::STATUS_ONLINE;
 
+		$allowed_tables = self::SQL_TABLES;
+
 		if (array_key_exists('search', $params)) {
 			if (trim((string) $params['search']) === '') {
 				return;
@@ -940,12 +942,23 @@ class Sections
 			$params[':search'] = substr(trim($params['search']), 0, 100);
 			unset($params['search']);
 
-			$params['tables'] .= ' INNER JOIN files_search ON files_search.path = w.file_path';
+			$params['tables'] .= ' INNER JOIN files_search ON files_search.path = w.dir_path';
 			$params['select'] .= ', rank(matchinfo(files_search), 0, 1.0, 1.0) AS points, snippet(files_search, \'<mark>\', \'</mark>\', \'…\', 2) AS snippet';
 			$params['where'] .= ' AND files_search MATCH :search';
 
 			$params['order'] = 'points DESC';
 			$params['limit'] = '30';
+
+			// There is a bug in SQLite3 < 3.41.0
+			// where virtual tables (eg. FTS4) will trigger UPDATEs in the authorizer,
+			// making the request fail.
+			// So we will disable the authorizer here.
+			// From a security POV, this is a compromise, but in PHP < 8 there was no authorizer
+			// at all.
+			// @see https://sqlite.org/forum/forumpost/e11b51ca555f82147a1cbb58dc640b441e5f126cf6d7400753f62e82ca11ba88
+			if (\SQLite3::version()['versionNumber'] < 3041000) {
+				$allowed_tables = null;
+			}
 		}
 
 		if (isset($params['uri'])) {
@@ -963,8 +976,13 @@ class Sections
 		}
 
 		if (array_key_exists('parent', $params)) {
-			$params['where'] .= ' AND w.parent = :parent';
-			$params[':parent'] = trim((string) $params['parent']);
+			if (null === $params['parent']) {
+				$params['where'] .= ' AND w.parent IS NULL';
+			}
+			else {
+				$params['where'] .= ' AND w.parent = :parent';
+				$params[':parent'] = trim((string) $params['parent']);
+			}
 
 			unset($params['parent']);
 		}
@@ -974,7 +992,7 @@ class Sections
 			unset($params['future']);
 		}
 
-		foreach (self::sql($params, $tpl, $line) as $row) {
+		foreach (self::sql($params, $tpl, $line, $allowed_tables) as $row) {
 			if (empty($params['count'])) {
 				$data = $row;
 				unset($data['points'], $data['snippet']);
@@ -1124,7 +1142,7 @@ class Sections
 		yield $out;
 	}
 
-	static public function sql(array $params, UserTemplate $tpl, int $line): \Generator
+	static public function sql(array $params, UserTemplate $tpl, int $line, ?array $allowed_tables = self::SQL_TABLES): \Generator
 	{
 		static $defaults = [
 			'select' => '*',
@@ -1181,7 +1199,7 @@ class Sections
 		$db = DB::getInstance();
 
 		try {
-			$statement = $db->protectSelect(self::SQL_TABLES, $sql);
+			$statement = $db->protectSelect($allowed_tables, $sql);
 
 			$args = [];
 
