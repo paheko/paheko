@@ -169,7 +169,23 @@
 <h2 id="break">break</h2>
 <p>Interrompt une section.</p>
 <h2 id="continue">continue</h2>
-<p>Passe à l'itération suivante d'une section.</p>
+<p>Passe à l'itération suivante d'une section. Le code situé entre cette instruction et la fin de la section ne sera pas exécuté.</p>
+<pre><code>{{#foreach from=$list item="event"}}
+  {{if $event.date == '2023-01-01'}}
+    {{:continue}}
+  {{/if}}
+  {{$event.title}}
+{{/foreach}}</code></pre>
+<p>Il est possible de passer à l'itération suivante d'une section parente en utilisant un chiffre en paramètre :</p>
+<pre><code>{{#foreach from=$list item="event"}}
+  {{$event.title}}
+  {{#foreach from=$event.people item="person"}}
+    {{if $person.name == 'bohwaz'}}
+      {{:continue 2}}
+    {{/if}}
+    - {{$person.name}}
+  {{/foreach}}
+{{/foreach}}</code></pre>
 <h2 id="debug">debug</h2>
 <p>Cette fonction permet d'afficher le contenu d'une ou plusieurs variables :</p>
 <pre><code>{{:debug test=$title}}</code></pre>
@@ -571,9 +587,14 @@ Le document n°{{$id}} a bien été enregistré.</code></pre>
 </tr>
 </tbody>
 </table>
-<p>Si ni <code>key</code> ni <code>id</code> ne sont indiqués, une erreur sera affichée.</p>
-<p>Exemple :</p>
-<pre><code>{{:delete key="facture_43"}}</code></pre>
+<p>Il est possible de spécifier d'autres paramètres, ou une clause <code>where</code> et des paramètres dont le nom commence par deux points.</p>
+<ul>
+<li>Supprimer le document avec la clé <code>facture_43</code> : <code>{{:delete key="facture_43"}}</code></li>
+<li>Supprimer le document avec la clé <code>ABCD</code> et dont la propriété <code>type</code> du document correspond à la valeur <code>facture</code> : <code>{{:delete key="ABCD" type="facture"}}</code></li>
+<li>Supprimer tous les documents : <code>{{:delete}}</code></li>
+<li>Supprimer tous les documents ayant le type <code>facture</code> : <code>{{:delete type="facture"}}</code></li>
+<li>Supprimer tous les documents de type <code>devis</code> ayant une date dans le passé : <code>{{:delete :type="devis" where="$$.type = :type AND $$.date &lt; datetime()"}}</code></li>
+</ul>
 <h2 id="admin_header">admin_header</h2>
 <p>Affiche l'entête de l'administration de l'association.</p>
 <table>

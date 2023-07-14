@@ -71,7 +71,8 @@
 			<li><a href="#count">count</a></li>
 			<li><a href="#explode">explode</a></li>
 			<li><a href="#implode">implode</a></li>
-			<li><a href="#map">map</a>
+			<li><a href="#map">map</a></li>
+			<li><a href="#ksort-sort">ksort, sort</a>
 		</ol></li>
 		<li><a href="#filtres-de-texte">Filtres de texte</a>
 		<ol>
@@ -117,6 +118,7 @@
 			<li><a href="#date_hour">date_hour</a></li>
 			<li><a href="#atom_date">atom_date</a></li>
 			<li><a href="#parse_date">parse_date</a></li>
+			<li><a href="#parse_datetime">parse_datetime</a></li>
 			<li><a href="#parse_time">parse_time</a>
 		</ol></li>
 		<li><a href="#filtres-de-condition">Filtres de condition</a>
@@ -293,6 +295,14 @@ bleu - orange</code></pre>
 <p>Affichera :</p>
 <pre><code>- 1
 - 2</code></pre>
+<h2 id="ksort-sort">ksort, sort</h2>
+<p>Trie un tableau par ordre alpha-numérique, sans tenir compte des majuscules/minuscules. <code>ksort</code> trie le tableau en utilisant les clés, et <code>sort</code> trie le tableau en utilisant les valeurs.</p>
+<pre><code>{{:assign var="table" b="3" a="2" c="1"}}
+{{$table|sort|implode:","}}
+{{$table|ksort|implode:","}}</code></pre>
+<p>Affichera :</p>
+<pre><code>1,2,3
+2,3,1</code></pre>
 <h1 id="filtres-de-texte">Filtres de texte</h1>
 <h2 id="args">args</h2>
 <p>Remplace des arguments dans le texte selon le schéma utilisé par <a href="https://www.php.net/sprintf" target="_blank" rel="nofollow,noreferrer">sprintf</a>.</p>
@@ -487,6 +497,14 @@ Ceci n'est pas un t</code></pre>
 <li><code>AAAA-MM-JJ</code></li>
 <li><code>JJ/MM/AAAA</code></li>
 <li><code>JJ/MM/AA</code></li>
+</ul>
+<h2 id="parse_datetime">parse_datetime</h2>
+<p>Vérifie le format d'une chaîne de texte représentant la date et l'heure et la transforme en chaîne de date et heure standardisée au format <code>AAAA-MM-JJ HH:mm</code>.</p>
+<p>Les formats acceptés sont :</p>
+<ul>
+<li><code>AAAA-MM-JJ HH:mm:ss</code></li>
+<li><code>AAAA-MM-JJ HH:mm</code></li>
+<li><code>JJ/MM/AAAA HH:mm</code></li>
 </ul>
 <h2 id="parse_time">parse_time</h2>
 <p>Vérifie le format d'une chaîne de texte représentant l'heure et la transforme en chaîne de date standardisée au format <code>HH:MM</code>.</p>

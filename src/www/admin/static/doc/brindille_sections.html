@@ -608,7 +608,7 @@ orange</code></pre>
 </tr>
 </tbody>
 </table>
-<p>Il est possible d'utiliser un paramètre commençant par un dollar : <code>$.cle="valeur"</code>. Cela va comparer <code>"valeur"</code> avec la valeur de la clé <code>cle</code> dans le document JSON. C'est l'équivalent d'écrire <code>where="json_extract(document, '$.cle') = 'valeur'"</code>.</p>
+<p>Il est possible d'utiliser d'autres paramètres : <code>{{#load cle="valeur"}}</code>. Cela va comparer <code>"valeur"</code> avec la valeur de la clé <code>cle</code> dans le document JSON. C'est l'équivalent d'écrire <code>where="json_extract(document, '$.cle') = 'valeur'"</code>.</p>
 <p>Pour des conditions plus complexes qu'une simple égalité, il est possible d'utiliser la syntaxe courte <code>$$…</code> dans le paramètre <code>where</code>. Ainsi <code>where="$$.nom LIKE 'Bourse%'</code> est l'équivalent de <code>where="json_extract(document, '$.nom') LIKE 'Bourse%'"</code>.</p>
 <p>Voir <a href="https://www.sqlite.org/json1.html#jex" target="_blank" rel="nofollow,noreferrer">la documentation de SQLite pour plus de détails sur la syntaxe de json_extract</a>.</p>
 <p>Note : un index SQL dynamique est créé pour chaque requête utilisant une clause <code>json_extract</code>.</p>
@@ -638,7 +638,7 @@ orange</code></pre>
 {{$nom}}
 {{/load}}</code></pre>
 <p>Afficher la liste des devis du module <code>invoice</code> depuis un autre module par exemple :</p>
-<pre><code>{{#load module="invoice" $.type="quote"}}
+<pre><code>{{#load module="invoice" type="quote"}}
 &lt;h1&gt;Titre du devis : {{$subject}}&lt;/h1&gt;
 &lt;h2&gt;Montant : {{$total}}&lt;/h2&gt;
 {{/load}}</code></pre>
@@ -724,7 +724,7 @@ Le document n°{{$id}} est celui qui parle de Greta.
 </tbody>
 </table>
 <p>Pour déterminer quelles colonnes afficher dans le tableau, il faut utiliser soit le paramètre <code>schema</code> pour indiquer un fichier de schéma JSON qui sera utilisé pour donner le libellé des colonnes (via la <code>description</code> indiquée dans le schéma), soit le paramètre <code>select</code>, où il faut alors indiquer le nom et le libellé des colonnes sous la forme <code>$$.colonne1 AS "Libellé"; $$.colonne2 AS "Libellé 2"</code>.</p>
-<p>Comme pour <code>load</code>, il est possible d'utiliser un paramètre commençant par un dollar : <code>$.cle="valeur"</code>. Cela va comparer <code>"valeur"</code> avec la valeur de la clé <code>cle</code> dans le document JSON. C'est l'équivalent d'écrire <code>where="json_extract(document, '$.cle') = 'valeur'"</code>.</p>
+<p>Comme pour <code>load</code>, il est possible d'utiliser des paramètres supplémentaires : <code>cle="valeur"</code>. Cela va comparer <code>"valeur"</code> avec la valeur de la clé <code>cle</code> dans le document JSON. C'est l'équivalent d'écrire <code>where="json_extract(document, '$.cle') = 'valeur'"</code>.</p>
 <p>Pour des conditions plus complexes qu'une simple égalité, il est possible d'utiliser la syntaxe courte <code>$$…</code> dans le paramètre <code>where</code>. Ainsi <code>where="$$.nom LIKE 'Bourse%'</code> est l'équivalent de <code>where="json_extract(document, '$.nom') LIKE 'Bourse%'"</code>.</p>
 <p>Voir <a href="https://www.sqlite.org/json1.html#jex" target="_blank" rel="nofollow,noreferrer">la documentation de SQLite pour plus de détails sur la syntaxe de json_extract</a>.</p>
 <p>Note : un index SQL dynamique est créé pour chaque requête utilisant une clause <code>json_extract</code>.</p>
