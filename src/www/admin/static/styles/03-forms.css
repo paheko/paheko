@@ -323,8 +323,12 @@ input[disabled] + label::before {
     cursor: not-allowed;
 }
 
-select, input[size], input[type=color], button, input[type=button], input[type=submit], input[type=number] {
+select, input[size], input[type=color], button, input[type=button], input[type=submit] {
     min-width: 0;
+}
+
+input[type=number] {
+    min-width: 3em;
 }
 
 select {
