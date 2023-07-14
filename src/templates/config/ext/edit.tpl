@@ -69,7 +69,7 @@
 			</td>
 			<td class="single-action">
 				{if $file.local && $file.dist}
-					{linkbutton label="Supprimer les modifications" href=$file.delete_url shape="trash" target="_dialog"}
+					{linkbutton label="Supprimer les modifications" href="%s&trash=no"|args:$file.delete_url shape="delete" target="_dialog"}
 				{elseif $file.local && $file.dir}
 					{linkbutton label="Supprimer ce répertoire" href=$file.delete_url shape="trash" target="_dialog"}
 				{elseif $file.local}

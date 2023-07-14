@@ -26,7 +26,10 @@
 
 	<p class="submit">
 		{csrf_field key=$csrf_key}
-		{button type="submit" name="delete" label="Supprimer" shape="delete" class="main"}
+		{if !isset($shape)}
+			{assign var="shape" value="delete"}
+		{/if}
+		{button type="submit" name="delete" label="Supprimer" shape=$shape class="main"}
 		{if isset($extra)}
 			{foreach from=$extra key="key" item="value"}
 				{if is_array($value)}
