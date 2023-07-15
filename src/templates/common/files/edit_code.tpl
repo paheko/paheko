@@ -1,5 +1,7 @@
 {include file="_head.tpl" title="Édition de fichier"}
 
+{form_errors}
+
 <form method="post" action="{$self_url}">
 	<p>
 		{input type="textarea" name="content" cols="90" rows="50" default=$content}

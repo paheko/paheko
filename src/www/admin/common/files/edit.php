@@ -27,7 +27,17 @@ $editor = $file->editorType();
 $csrf_key = 'edit_file_' . $file->pathHash();
 
 $form->runIf('content', function () use ($file) {
-	$file->setContent(f('content'));
+	try {
+		$file->setContent(f('content'));
+	}
+	catch (UserException $e) {
+		if (qg('js') !== null) {
+			http_response_code(400);
+			die(json_encode(['error' => $e->getMessage()]));
+		}
+
+		throw $e;
+	}
 
 	if (qg('js') !== null) {
 		die('{"success":true}');

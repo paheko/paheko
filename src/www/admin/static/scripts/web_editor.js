@@ -315,7 +315,7 @@
 				method: 'post',
 				body: data,
 			}).then((response) => {
-				if (!response.ok) {
+				if (response.status != 200 && response.status != 400) {
 					throw Error(response.status);
 				}
 				else {
@@ -323,7 +323,11 @@
 				}
 			})
 			.then((data) => {
-				if (!data.success) {
+				if (data.error) {
+					alert(data.error);
+					return;
+				}
+				else if (!data.success) {
 					throw Error('Invalid response');
 				}
 				callback(data);
