@@ -21,6 +21,7 @@ ALTER TABLE web_pages RENAME TO web_pages_old;
 
 .read schema.sql
 
+UPDATE acc_charts_old SET country = 'FR' WHERE country IS NULL;
 INSERT INTO acc_charts SELECT * FROM acc_charts_old;
 DROP TABLE acc_charts_old;
 
