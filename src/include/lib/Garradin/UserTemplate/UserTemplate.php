@@ -366,7 +366,9 @@ class UserTemplate extends \KD2\Brindille
 
 	public function serve(): void
 	{
-		if (!self::isTemplate($this->path)) {
+		$path = $this->path ?? $this->file->path;
+
+		if (!self::isTemplate($path)) {
 			throw new \InvalidArgumentException('Not a valid template file extension: ' . $this->path);
 		}
 
