@@ -596,7 +596,7 @@ class File extends Entity
 		$ext = $this->extension();
 		$content = null;
 
-		if ($this->isDir() && !$mime) {
+		if ($this->isDir() && (!$mime || !isset($source['content']))) {
 			return;
 		}
 
