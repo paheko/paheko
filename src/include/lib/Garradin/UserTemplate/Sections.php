@@ -322,9 +322,19 @@ class Sections
 				continue;
 			}
 
-			$hash = sha1($key);
-			$params['where'] .= sprintf(' AND json_extract(document, %s) = :quick_%s', $db->quote('$.' . $key), $hash);
-			$params[':quick_' . $hash] = $value;
+			if (is_bool($value)) {
+				$v = '= ' . (int) $value;
+			}
+			elseif (null === $value) {
+				$v = 'IS NULL';
+			}
+			else {
+				$v = sprintf(':quick_%s', sha1($key));
+				$params[$v] = $value;
+				$v = '= ' . $v;
+			}
+
+			$params['where'] .= sprintf(' AND json_extract(document, %s) %s', $db->quote('$.' . $key), $v);
 			unset($params[$key]);
 		}
 
