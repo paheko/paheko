@@ -755,11 +755,6 @@ form.progressing fieldset, form.progressing p {
     margin-bottom: 2em;
 }
 
-.selector header p.edit {
-    float: right;
-    margin: 0;
-}
-
 .selector header h2 input {
     width: calc(100% - 1em);
 }

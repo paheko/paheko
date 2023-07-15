@@ -471,11 +471,14 @@
 			let n = f.match(/^\d+$/) ? (parseInt(f, 10) - 1) : null;
 			let i = form.querySelectorAll(n !== null ? '[name]:not([type="hidden"]):not([readonly]):not([type=button])' : f);
 
-			if(n !== null && i[n]) {
+			if (n !== null && i[n]) {
 				i[n].focus();
 			}
+			else if (n === null && i[0]) {
+				i[0].focus();
+			}
 		}
-	}, 'dom');
+	});
 
 	// Sélecteurs de listes
 	g.onload(() => {

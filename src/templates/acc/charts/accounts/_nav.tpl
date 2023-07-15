@@ -3,7 +3,7 @@
 {if $dialog}
 	{* JS trick to get back to the original iframe URL! *}
 	<aside>
-		{if !$chart.archived && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
+		{if $current != 'new' && !$chart.archived && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 			{linkbutton href="!acc/charts/accounts/new.php?id=%d&%s"|args:$chart.id,$types_arg label="Ajouter un compte" shape="plus"}
 		{/if}
 		{linkbutton shape="left" label="Retour à la sélection de compte" href="#" onclick="g.reloadParentDialog(); return false;"}
