@@ -420,9 +420,9 @@ class DynamicFields
 			}
 
 			$field->set('name', $name);
-			$field->set('label', $data['title']);
-			$field->set('type', $data['type']);
-			$field->set('help', empty($data['help']) ? null : $data['help']);
+			$field->set('label', (string)$data['title']);
+			$field->set('type', (string)$data['type']);
+			$field->set('help', empty($data['help']) ? null : (string)$data['help']);
 			$field->set('read_access', $data['private'] ? $field::ACCESS_ADMIN : $field::ACCESS_USER);
 			$field->set('write_access', $data['editable'] ? $field::ACCESS_ADMIN : $field::ACCESS_USER);
 			$field->set('required', (bool) $data['mandatory']);
