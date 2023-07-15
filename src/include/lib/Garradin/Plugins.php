@@ -236,7 +236,7 @@ class Plugins
 			$item['url'] = null;
 
 			if ($c->hasFile($c::INDEX_FILE)) {
-				$item['url'] = $c->url($c::INDEX_FILE);
+				$item['url'] = $c->url($type == 'plugin' ? 'admin/' : '');
 			}
 		}
 
