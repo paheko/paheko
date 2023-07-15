@@ -754,8 +754,10 @@ class DynamicFields
 
 		$search_table = User::TABLE . '_search';
 		$columns = $this->getSearchColumns();
+		$columns_sql = array_map([$db, 'quoteIdentifier'], $columns);
+		$columns_sql = implode(",\n\t", $columns_sql);
 
-		$sql = sprintf("CREATE TABLE IF NOT EXISTS %s\n(\n\tid INTEGER PRIMARY KEY NOT NULL REFERENCES %s (id) ON DELETE CASCADE,\n\t%s\n);", $search_table . '_tmp', User::TABLE, implode(",\n\t", $columns));
+		$sql = sprintf("CREATE TABLE IF NOT EXISTS %s\n(\n\tid INTEGER PRIMARY KEY NOT NULL REFERENCES %s (id) ON DELETE CASCADE,\n\t%s\n);", $search_table . '_tmp', User::TABLE, $columns_sql);
 
 		$db->exec($sql);
 
