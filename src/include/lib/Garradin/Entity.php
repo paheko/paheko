@@ -6,6 +6,8 @@ use Garradin\Form;
 use KD2\DB\AbstractEntity;
 use KD2\DB\Date;
 
+use DateTime;
+
 class Entity extends AbstractEntity
 {
 	/**
@@ -40,7 +42,19 @@ class Entity extends AbstractEntity
 			return null;
 		}
 
-		if (preg_match('!^\d{2}/\d{2}/\d{2}$!', $value)) {
+		if (ctype_digit($value)) {
+			return new DateTime('@' . $value);
+		}
+		elseif ($v = \DateTime::createFromFormat('!Y-m-d H:i:s', $value)) {
+			return $v;
+		}
+		elseif ($v = \DateTime::createFromFormat('!Y-m-d H:i', $current_value)) {
+			return $v;
+		}
+		elseif ($v = \Date::createFromFormat('!Y-m-d', $value)) {
+			return $v;
+		}
+		elseif (preg_match('!^\d{2}/\d{2}/\d{2}$!', $value)) {
 			$year = substr($value, -2);
 
 			// Make sure recent years are in the 21st century
@@ -62,9 +76,6 @@ class Entity extends AbstractEntity
 		}
 		elseif (preg_match('!^20\d{2}[01]\d[0123]\d$!', $value)) {
 			return Date::createFromFormat('Ymd', $value);
-		}
-		elseif (preg_match('!^\d{4}-\d{2}-\d{2}$!', $value)) {
-			return Date::createFromFormat('Y-m-d', $value);
 		}
 		elseif (null !== $value) {
 			throw new ValidationException('Format de date invalide (merci d\'utiliser le format JJ/MM/AAAA) : ' . $value);
@@ -99,7 +110,7 @@ class Entity extends AbstractEntity
 		}
 		elseif ($type == 'DateTime' && is_string($value)) {
 			if (preg_match('!^\d{2}/\d{2}/\d{4}\s\d{1,2}:\d{2}$!', $value)) {
-				return \DateTime::createFromFormat('d/m/Y H:i', $value);
+				return \DateTime::createFromFormat('!d/m/Y H:i', $value);
 			}
 		}
 

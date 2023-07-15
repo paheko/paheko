@@ -3,6 +3,7 @@
 namespace Garradin\UserTemplate;
 
 use Garradin\Config;
+use Garradin\Entity;
 use Garradin\Template;
 use Garradin\Utils;
 
@@ -78,26 +79,25 @@ class CommonFunctions
 			$current_value = $default;
 		}
 
-		if ($type == 'date' && is_object($current_value) && $current_value instanceof \DateTimeInterface) {
-			$current_value = $current_value->format('d/m/Y');
+		if ($type == 'date' || $type === 'time') {
+			if (is_string($current_value) || is_int($current_value)) {
+				$current_value = Entity::filterUserDateValue((string)$current_value);
+			}
+
+			if (is_object($current_value) && $current_value instanceof \DateTimeInterface) {
+				if ($type == 'date') {
+					$current_value = $current_value->format('d/m/Y');
+				}
+				else {
+					$current_value = $current_value->format('H:i');
+				}
+			}
 		}
 		elseif ($type == 'time' && is_object($current_value) && $current_value instanceof \DateTimeInterface) {
 			$current_value = $current_value->format('H:i');
 		}
 		elseif ($type == 'password') {
 			$current_value = null;
-		}
-		// FIXME: is this still needed?
-		elseif ($type == 'date' && is_string($current_value)) {
-			if ($v = \DateTime::createFromFormat('!Y-m-d', $current_value)) {
-				$current_value = $v->format('d/m/Y');
-			}
-			elseif ($v = \DateTime::createFromFormat('!Y-m-d H:i:s', $current_value)) {
-				$current_value = $v->format('d/m/Y');
-			}
-			elseif ($v = \DateTime::createFromFormat('!Y-m-d H:i', $current_value)) {
-				$current_value = $v->format('d/m/Y');
-			}
 		}
 		elseif ($type == 'time' && is_string($current_value)) {
 			if ($v = \DateTime::createFromFormat('!Y-m-d H:i:s', $current_value)) {
