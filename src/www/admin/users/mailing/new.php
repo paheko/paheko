@@ -34,7 +34,17 @@ elseif ($target == 'service') {
 }
 elseif ($target == 'search') {
 	$search_list = Search::list(SearchEntity::TARGET_USERS, Session::getUserId());
-	$tpl->assign('search_list', array_filter($search_list, fn($s) => $s->hasUserId()));
+	$search_list = array_filter($search_list, function ($s) {
+		try {
+			return $s->hasUserId();
+		}
+		catch (UserException $e) {
+			// Ignore empty or invalid search
+			return false;
+		}
+	});
+
+	$tpl->assign(compact('search_list'));
 }
 
 $tpl->assign(compact('csrf_key', 'target'));
