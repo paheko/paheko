@@ -637,13 +637,17 @@ class Files
 
 		File::validateCanHTML($name, $parent);
 
-		self::ensureDirectoryExists($parent);
-
 		$name = File::filterName($name);
 
-		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
-
 		$target = $parent . '/' . $name;
+
+		if (self::exists($target)) {
+			throw new ValidationException('Un fichier existe déjà avec ce nom');
+		}
+
+		self::ensureDirectoryExists($parent);
+
+		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
 
 		$file = new File;
 		$file->path = $target;
