@@ -618,7 +618,7 @@ class DynamicFields
 				$source[] = sprintf('CAST(%s AS %s)', $db->quoteIdentifier($src_key), $field->sql_type());
 			}
 			*/
-			$source[] = $src_key;
+			$source[] = $db->quoteIdentifier($src_key);
 		}
 
 		if ($function) {
