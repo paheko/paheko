@@ -623,13 +623,15 @@ class Files
 
 		$remaining = self::getRemainingQuota();
 
-		if (($remaining - (float) $size) < 0) {
+		if (($remaining - (float) $size) <= 0) {
 			throw new ValidationException('L\'espace disque est insuffisant pour réaliser cette opération');
 		}
 	}
 
 	static protected function create(string $parent, string $name, array $source = []): File
 	{
+		Files::checkQuota();
+
 		File::validateFileName($name);
 		File::validatePath($parent);
 
@@ -677,8 +679,6 @@ class Files
 		if ($file->mime == 'application/x-empty' && !$file->size) {
 			$file->set('mime', 'text/plain');
 		}
-
-		$file->save();
 
 		return $file;
 	}
