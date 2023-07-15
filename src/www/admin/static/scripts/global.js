@@ -41,7 +41,7 @@
 		document.addEventListener(eventName, callback, false);
 	};
 
-	g.toggle = function(selector, visibility)
+	g.toggle = function(selector, visibility, resize_parent)
 	{
 		if (!('classList' in document.documentElement))
 			return false;
@@ -50,7 +50,11 @@
 		{
 			for (var i = 0; i < selector.length; i++)
 			{
-				g.toggle(selector[i], visibility);
+				g.toggle(selector[i], visibility, false);
+			}
+
+			if (resize_parent !== false) {
+				g.resizeParentDialog();
 			}
 
 			return true;
@@ -70,6 +74,10 @@
 			elements[i].querySelectorAll('input[required], textarea[required], select[required], button[required]').forEach((e) => {
 				e.disabled = !visibility ? true : (e.getAttribute('disabled') ? true : false);
 			});
+		}
+
+		if (resize_parent !== false) {
+			g.resizeParentDialog();
 		}
 
 		return true;
@@ -654,6 +662,10 @@
 				elm.parentNode.parentNode.classList.toggle('checked', elm.checked);
 			});
 		});
+	});
+
+	g.onload(() => {
+		g.resizeParentDialog();
 	});
 
 })();
