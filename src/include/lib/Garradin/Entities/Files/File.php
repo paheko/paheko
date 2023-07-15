@@ -1003,7 +1003,13 @@ class File extends Entity
 		$p = Files::callStorage('getReadOnlyPointer', $this);
 
 		if (null === $p) {
-			return file_get_contents(Files::callStorage('getLocalFilePath', $this));
+			$path = Files::callStorage('getLocalFilePath', $this);
+
+			if (!$path || !file_exists($path)) {
+				return '';
+			}
+
+			return file_get_contents($path);
 		}
 
 		$out = '';
