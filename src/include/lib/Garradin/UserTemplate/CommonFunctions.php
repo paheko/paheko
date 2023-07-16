@@ -140,6 +140,13 @@ class CommonFunctions
 			$attributes['maxlength'] = 5;
 			$attributes['pattern'] = '\d\d?:\d\d?';
 		}
+		elseif ($type == 'year') {
+			$type = 'number';
+			$attributes['size'] = 4;
+			$attributes['maxlength'] = 4;
+			$attributes['pattern'] = '\d';
+
+		}
 		elseif ($type == 'money') {
 			$attributes['class'] = rtrim('money ' . ($attributes['class'] ?? ''));
 		}

@@ -84,7 +84,7 @@ input[type=checkbox] + label:hover {
 /* We can't use :not([type=checkbox]):not([type=radio]) here as it is too specific
 and then it's a mess to override the selector after... */
 input[type=text], input[type=number], input[type=color],
-input[type=date], input[type=datetime-local], input[type=datetime], input[type=time], input[type=week],
+input[type=date], input[type=datetime-local], input[type=datetime], input[type=time], input[type=week], input[type=year],
 input[type=email], input[type=file], input[type=url], input[type=month],
 input[type=password], input[type=range], input[type=search], input[type=tel],
 textarea, select, .input-list, .file-selector {
