@@ -430,7 +430,6 @@ CREATE TABLE IF NOT EXISTS acc_transactions
 -- Transactions (écritures comptables)
 (
 	id INTEGER PRIMARY KEY NOT NULL,
-	id_payment INTEGER NULL DEFAULT NULL REFERENCES payments (id) ON DELETE SET NULL,
 
 	type INTEGER NOT NULL DEFAULT 0, -- Transaction type, zero is advanced
 	status INTEGER NOT NULL DEFAULT 0, -- Status (bitmask)
@@ -447,7 +446,8 @@ CREATE TABLE IF NOT EXISTS acc_transactions
 
 	id_year INTEGER NOT NULL REFERENCES acc_years(id),
 	id_creator INTEGER NULL REFERENCES users(id) ON DELETE SET NULL,
-	id_related INTEGER NULL REFERENCES acc_transactions(id) ON DELETE SET NULL -- linked transaction (eg. payment of a debt)
+	id_related INTEGER NULL REFERENCES acc_transactions(id) ON DELETE SET NULL, -- linked transaction (eg. payment of a debt)
+	id_payment INTEGER NULL DEFAULT NULL REFERENCES payments (id) ON DELETE SET NULL
 );
 
 CREATE INDEX IF NOT EXISTS acc_transactions_year ON acc_transactions (id_year);
@@ -456,6 +456,7 @@ CREATE INDEX IF NOT EXISTS acc_transactions_related ON acc_transactions (id_rela
 CREATE INDEX IF NOT EXISTS acc_transactions_type ON acc_transactions (type, id_year);
 CREATE INDEX IF NOT EXISTS acc_transactions_status ON acc_transactions (status);
 CREATE INDEX IF NOT EXISTS acc_transactions_reference ON acc_transactions (reference);
+CREATE INDEX IF NOT EXISTS acc_transactions_payment ON acc_transactions (id_payment);
 
 CREATE TABLE IF NOT EXISTS acc_transactions_lines
 -- Transactions lines (lignes des écritures)

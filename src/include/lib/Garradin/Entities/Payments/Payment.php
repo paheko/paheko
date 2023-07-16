@@ -90,7 +90,7 @@ class Payment extends Entity
 
 	public function getTransactions(): array
 	{
-		return EM::getInstance(Transaction::class)->all('SELECT * FROM @TABLE WHERE reference = :reference', (int)$this->id);
+		return EM::getInstance(Transaction::class)->all('SELECT * FROM @TABLE WHERE id_payment = :id_payment', (int)$this->id);
 	}
 
 	public function selfCheck(): void

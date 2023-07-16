@@ -28,6 +28,7 @@ $csrf_key = 'payment';
 
 $tpl->assign([
 	'provider_options' => $provider_options,
+	'status_options' => Payment::STATUSES,
 	'years' => Years::listOpen(),
 	'csrf_key' => $csrf_key
 ]);
@@ -40,6 +41,9 @@ $form->runIf('save', function () use ($payment, $session) {
 	}
 	if (!array_key_exists($_POST['method'], Payment::METHODS)) {
 		throw new UserException(sprintf('Méthode invalide : %s.', $_POST['method']));
+	}
+	if (!array_key_exists($_POST['status'], Payment::STATUSES)) {
+		throw new UserException(sprintf('Statut invalide : %s.', $_POST['status']));
 	}
 
 	$provider = Providers::getByName($_POST['provider']);
@@ -55,13 +59,15 @@ $form->runIf('save', function () use ($payment, $session) {
 
 	$user_ids = [];
 	$user_notes = [];
-	foreach ($_POST['users'] as $k => $field) {
-		$id = Form::getSelectorValue($field);
-		if (!DB::getInstance()->test(User::TABLE, 'id = ?', (int)$id)) {
-			throw new UserException('Membres concerné·e introuvable. ID: '. $id);
+	if (array_key_exists('users', $_POST)) {
+		foreach ($_POST['users'] as $k => $field) {
+			$id = Form::getSelectorValue($field);
+			if (!DB::getInstance()->test(User::TABLE, 'id = ?', (int)$id)) {
+				throw new UserException('Membres concerné·e introuvable. ID: '. $id);
+			}
+			$user_ids[] = $id;
+			$user_notes[] = isset($_POST['user_notes'][$k]) ? Form::getSelectorValue($_POST['user_notes'][$k]) : null;
 		}
-		$user_ids[] = $id;
-		$user_notes[] = isset($_POST['user_notes'][$k]) ? Form::getSelectorValue($_POST['user_notes'][$k]) : null;
 	}
 
 	if (array_key_exists('accounting', $_POST)) {
@@ -81,7 +87,7 @@ $form->runIf('save', function () use ($payment, $session) {
 	}
 
 	$accounts = array_key_exists('accounting', $_POST) ? [ $credit_account->id, $debit_account->id ] : null;
-	Payments::createPayment($_POST['type'], $_POST['method'], Payment::AWAITING_STATUS, $_POST['provider'], $accounts, $session->user()->id, $payer->id, $payer->nom, (!empty($_POST['reference']) ? $_POST['reference'] : null), $_POST['label'], $_POST['amount'] * 100, $user_ids, $user_notes, null, $_POST['notes']);
+	Payments::createPayment($_POST['type'], $_POST['method'], $_POST['status'], $_POST['provider'], $accounts, $session->user()->id, $payer->id, $payer->nom, (!empty($_POST['reference']) ? $_POST['reference'] : null), $_POST['label'], $_POST['amount'] * 100, $user_ids ?? null, $user_notes ?? null, null, $_POST['notes']);
 }, $csrf_key, '!payments/payments.php?ok=1');
 
 $tpl->display('payments/new.tpl');

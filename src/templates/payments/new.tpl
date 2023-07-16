@@ -12,6 +12,7 @@
 			{input type="select" name="type" label="Type" options=Entities\Payments\Payment::TYPES default=Entities\Payments\Payment::UNIQUE_TYPE required=true}
 			{input type="select" name="method" label="Méthode" options=Entities\Payments\Payment::METHODS required=true}
 			{input type="select" name="provider" label="Prestataire" options=$provider_options default=Payments\Providers::MANUAL_PROVIDER required=true}
+			{input type="select" name="status" label="Statut" options=$status_options default=Entities\Payments\Payment::VALIDATED_STATUS required=true}
 			{input type="list" name="payer" label="Payeur/euse" target="!users/selector.php" can_delete="true" required=true}
 
 			<dt><label for="user_list">Membres concerné·e·s</label> <i>(facultatif)</i></dt>

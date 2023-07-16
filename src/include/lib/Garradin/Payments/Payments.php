@@ -16,7 +16,7 @@ use Garradin\Accounting\Years;
 class Payments
 {
 	const CREATION_LOG_LABEL = 'Paiement créé.';
-	const TRANSACTION_CREATION_LOG_LABEL = 'Écriture comptable ajoutée';
+	const TRANSACTION_CREATION_LOG_LABEL = 'Écriture comptable n°%d ajoutée.';
 	const TRANSACTION_PREFIX = 'Paiement';
 
 	static public function createPayment(string $type, string $method, string $status, string $provider_name, ?array $accounts, ?int $author_id, ?int $payer_id, ?string $payer_name, ?string $reference, string $label, int $amount, ?array $user_ids = null, ?array $user_notes = null, ?\stdClass $extra_data = null, ?string $transaction_notes = null): ?Payment
@@ -81,8 +81,8 @@ class Payments
 			$payment->bindToUsers($user_ids, $user_notes);
 		}
 		if ($accounts) {
-			$transaction = self::createTransaction($payment, $accounts, $author_id, $transaction_notes);
-			$payment->addLog(self::TRANSACTION_CREATION_LOG_LABEL);
+			$transaction = self::createTransaction($payment, $accounts, $author_id, $user_ids, $transaction_notes);
+			$payment->addLog(sprintf(self::TRANSACTION_CREATION_LOG_LABEL, (int)$transaction->id));
 			$payment->save();
 		}
 		return $payment;
@@ -148,9 +148,9 @@ class Payments
 				'label' => 'Membres',
 				'select' => sprintf('(SELECT GROUP_CONCAT(pu.id_user, \';\') FROM %s pu WHERE pu.id_payment = p.id)', PaymentsUsers::TABLE)
 			],
-			'id_author' => [
-				'select' => 'p.id_author'
-			], // Auteur/trice
+			'id_payer' => [
+				'select' => 'p.id_payer'
+			],
 			'payer_name' => [
 				'label' => 'Payeur',
 				'select' => 'p.payer_name'
