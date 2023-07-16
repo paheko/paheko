@@ -516,8 +516,10 @@ CREATE TABLE IF NOT EXISTS payments
     history TEXT NOT NULL,
     extra_data TEXT
 );
-CREATE UNIQUE INDEX IF NOT EXISTS payment_reference ON payments (reference, provider);
-CREATE INDEX IF NOT EXISTS payment_provider_status ON payments (provider, status);
+CREATE UNIQUE INDEX IF NOT EXISTS payments_reference ON payments (reference, provider);
+CREATE INDEX IF NOT EXISTS payments_provider_status ON payments (provider, status);
+CREATE INDEX IF NOT EXISTS payments_date ON payments (date);
+CREATE INDEX IF NOT EXISTS payments_provider_date ON payments (date, provider);
 
 CREATE TABLE IF NOT EXISTS payments_users
 (
@@ -534,7 +536,7 @@ CREATE TABLE IF NOT EXISTS payment_providers
     name TEXT NOT NULL,
     label TEXT NOT NULL
 );
-CREATE UNIQUE INDEX IF NOT EXISTS payment_provider_name ON payment_providers (name);
+CREATE UNIQUE INDEX IF NOT EXISTS payment_providers_name ON payment_providers (name);
 
 ---------- FILES ----------------
 

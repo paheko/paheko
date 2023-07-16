@@ -192,7 +192,7 @@ class Payments
 			],
 		];
 
-		$tables = Payment::TABLE . ' p
+		$tables = Payment::TABLE . ' p ' . ($provider ? 'INDEXED BY payments_provider_date' : '') . '
 			LEFT JOIN ' . Provider::TABLE . ' pr ON (pr.name = p.provider)
 		';
 
