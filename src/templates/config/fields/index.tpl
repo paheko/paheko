@@ -42,7 +42,7 @@
 				<td>{if $field.list_table}Oui{/if}</td>
 				<td>{if $field.required}Obligatoire{/if}</td>
 				<td>{if $field.read_access == $field::ACCESS_USER}Membre{else}Gestionnaires{/if}</td>
-				<td>{if $field->isGenerated()}-{elseif $field.write_access == $field::ACCESS_USER}Membre{else}Gestionnaires{/if}</td>
+				<td>{if $field->isVirtual()}—{elseif $field.write_access == $field::ACCESS_USER}Membre{else}Gestionnaires{/if}</td>
 				<td class="actions">
 					{if $field->canDelete()}
 						{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$field.id target="_dialog"}

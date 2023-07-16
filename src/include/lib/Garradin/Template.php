@@ -411,8 +411,8 @@ class Template extends Smartyer
 			return '';
 		}
 
-		// GENERATED columns cannot be edited
-		if ($type == 'generated') {
+		// VIRTUAL columns cannot be edited
+		if ($type == 'virtual') {
 			return '';
 		}
 

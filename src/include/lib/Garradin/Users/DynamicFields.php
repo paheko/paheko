@@ -451,7 +451,7 @@ class DynamicFields
 	public function isText(string $field)
 	{
 		$type = $this->_fields[$field]->type;
-		return DynamicField::SQL_TYPES[$type] == 'TEXT';
+		return (DynamicField::SQL_TYPES[$type] ?? null) === 'TEXT';
 	}
 
 	public function getKeys()
@@ -496,7 +496,7 @@ class DynamicFields
 			}
 
 			// Skip fields where the value cannot be imported
-			if ($field->type == 'file' || $field->type == 'generated') {
+			if ($field->type == 'file' || $field->type == 'virtual') {
 				continue;
 			}
 
@@ -516,7 +516,7 @@ class DynamicFields
 			}
 
 			// Skip fields where the value cannot be imported
-			if ($field->type == 'file' || $field->type == 'generated') {
+			if ($field->type == 'file' || $field->type == 'virtual') {
 				continue;
 			}
 
@@ -570,12 +570,13 @@ class DynamicFields
 
 		foreach ($this->_fields as $key => $cfg)
 		{
-			$type = DynamicField::SQL_TYPES[$cfg->type];
-			$line = sprintf('%s %s', $db->quoteIdentifier($key), $type);
+			$type = DynamicField::SQL_TYPES[$cfg->type] ?? null;
 
-			if ($type == 'GENERATED' && $cfg->sql) {
-				$line .= sprintf(' ALWAYS AS (%s) VIRTUAL', $cfg->sql);
+			if (!$type) {
+				continue;
 			}
+
+			$line = sprintf('%s %s', $db->quoteIdentifier($key), $type);
 
 			if ($type == 'TEXT' && $cfg->type != 'password') {
 				$line .= ' COLLATE NOCASE';
@@ -710,9 +711,11 @@ class DynamicFields
 
 		$fields = array_combine($fields, $fields);
 
-		// Generated fields cannot be copied
+		// Virtual fields cannot be copied
 		foreach ($this->_fields as $f) {
-			if (DynamicField::SQL_TYPES[$f->type] == 'GENERATED') {
+			$sql_type = DynamicField::SQL_TYPES[$f->type] ?? null;
+
+			if (!$sql_type) {
 				unset($fields[$f->name]);
 			}
 		}
@@ -811,15 +814,6 @@ class DynamicFields
 
 	public function add(DynamicField $df)
 	{
-		if ($df->isGenerated()) {
-			try {
-				DB::getInstance()->requireFeatures('generated_columns');
-			}
-			catch (\KD2\DB_Exception $e) {
-				throw new UserException("Cette fonctionnalité n'est pas disponible.\nLa version de SQLite installée sur votre serveur est trop ancienne.");
-			}
-		}
-
 		$this->_fields[$df->name] = $df;
 		$this->reloadCache();
 	}

@@ -25,20 +25,20 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 	{/if}
 		{input type="text" name="label" label="Libellé" required=true source=$field}
 	</dl>
-	<dl class="type-not-generated">
+	<dl class="type-not-virtual">
 		{input type="text" name="help" label="Texte d'aide" help="Apparaîtra dans les formulaires de manière identique à ce texte." source=$field}
 
 	</dl>
-	<dl class="type-not-generated">
+	<dl class="type-not-virtual">
 		{input type="checkbox" name="required" value=1 label="Champ obligatoire" help="Si coché, une fiche membre ne pourra pas être enregistrée si ce champ n'est pas renseigné." source=$field}
 	</dl>
-	<dl class="type-not-generated type-not-password">
+	<dl class="type-not-virtual type-not-password">
 		{input type="text" name="default" source=$field label="Valeur par défaut" help="Si renseigné, le champ aura cette valeur par défaut lors de l'ajout d'un nouveau membre"}
 	</dl>
 	<dl class="type-not-password">
 		{input type="checkbox" name="list_table" value=1 label="Afficher dans la liste des membres" source=$field}
 	</dl>
-	<dl class="type-generated">
+	<dl class="type-virtual">
 		{input type="textarea" required=true name="sql" class="full-width" rows=3 source=$field label="Code SQL utilisée pour calculer ce champ" disabled=$field->isPreset()}
 		<dd class="help">
 			Les champs calculés utilisent du code SQL correspondant à une <a href="https://www.sqlite.org/gencol.html" target="_blank">colonne générée dans SQLite</a>.<br />
@@ -75,7 +75,7 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 	{/if}
 	</dl>
 
-	<dl class="type-not-generated">
+	<dl class="type-not-virtual">
 		<dt>Le champ peut être modifié…</dt>
 		{input type="radio" name="write_access" value=$field::ACCESS_ADMIN label="Par les gestionnaires des membres" source=$field}
 		{input type="radio" name="write_access" value=$field::ACCESS_USER label="Par le membre lui-même, et les gestionnaires" source=$field help="Le membre pourra modifier cette information dans sa section 'Mes infos personnelles'" default=$field::ACCESS_USER}

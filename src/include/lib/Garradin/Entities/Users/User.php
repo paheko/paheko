@@ -73,7 +73,8 @@ class User extends Entity
 			$fields = DynamicFields::getInstance()->all();
 
 			foreach ($fields as $key => $config) {
-				$types[$key] = DynamicField::PHP_TYPES[$config->type];
+				// Fallback to dynamic, if a field type has been deleted
+				$types[$key] = DynamicField::PHP_TYPES[$config->type] ?? 'dynamic';
 			}
 
 			self::$_types_cache[static::class] = $types;
@@ -102,7 +103,7 @@ class User extends Entity
 			return;
 		}
 
-		// Don't bother for type with generated columns
+		// Don't bother for type with virtual columns
 		// also don't set it as modified as we don't save the value
 		if ($this->_types[$key] == 'dynamic') {
 			$this->$key = $value;
@@ -205,14 +206,12 @@ class User extends Entity
 	{
 		$out = parent::asArray($for_database);
 
-		// Remove generated columns
+		// Remove virtual columns
 		if ($for_database) {
 			foreach (DynamicFields::getInstance()->all() as $field) {
-				if ($field->type != 'generated') {
-					continue;
+				if ($field->type == 'virtual') {
+					unset($out[$field->name]);
 				}
-
-				unset($out[$field->name]);
 			}
 		}
 
