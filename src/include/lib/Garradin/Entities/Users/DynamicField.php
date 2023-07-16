@@ -101,7 +101,7 @@ class DynamicField extends Entity
 		'country'	=>	'Sélecteur de pays',
 		'text'		=>	'Texte',
 		'textarea'	=>	'Texte multi-lignes',
-		'generated' =>  'Calculé',
+		//'generated' =>  'Calculé',
 	];
 
 	const PHP_TYPES = [
