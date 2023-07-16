@@ -48,10 +48,10 @@ class Entity extends AbstractEntity
 		elseif ($v = \DateTime::createFromFormat('!Y-m-d H:i:s', $value)) {
 			return $v;
 		}
-		elseif ($v = \DateTime::createFromFormat('!Y-m-d H:i', $current_value)) {
+		elseif ($v = \DateTime::createFromFormat('!Y-m-d H:i', $value)) {
 			return $v;
 		}
-		elseif ($v = \Date::createFromFormat('!Y-m-d', $value)) {
+		elseif ($v = Date::createFromFormat('!Y-m-d', $value)) {
 			return $v;
 		}
 		elseif (preg_match('!^\d{2}/\d{2}/\d{2}$!', $value)) {
