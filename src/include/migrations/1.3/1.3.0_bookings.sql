@@ -13,10 +13,12 @@ INSERT INTO module_data_bookings SELECT
 		'description', description,
 		'use_openings', json('false'),
 		'openings_seats', NULL,
-		'openings_seats_split', NULL,
+		'openings_slots', NULL,
+		'openings_delay', NULL,
 		'use_closings', json('false'),
 		'fields', json_array(),
-		'email', NULL
+		'email', NULL,
+		'archived', json('false')
 	)
 	FROM plugin_reservations_categories;
 
