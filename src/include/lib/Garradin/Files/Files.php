@@ -641,18 +641,17 @@ class Files
 
 		$target = $parent . '/' . $name;
 
-		if (self::exists($target)) {
-			throw new ValidationException('Un fichier existe déjà avec ce nom');
-		}
-
 		self::ensureDirectoryExists($parent);
-
 		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
 
-		$file = new File;
-		$file->path = $target;
-		$file->parent = $parent;
-		$file->name = $name;
+		$file = self::get($target);
+
+		if (!$file) {
+			$file = new File;
+			$file->set('path', $target);
+			$file->set('parent', $parent);
+			$file->set('name', $name);
+		}
 
 		if (isset($source['pointer'])) {
 			if (0 !== fseek($source['pointer'], 0, SEEK_END)) {
@@ -702,7 +701,13 @@ class Files
 			$tpl = 'UEsDBBQAAAAAAPMbH0texjIMJwAAACcAAAAIAAAAbWltZXR5cGVhcHBsaWNhdGlvbi92bmQub2FzaXMub3BlbmRvY3VtZW50LnRleHRQSwMEFAAAAAgA3U0SUeqX5meSAAAAMQEAABUAAABNRVRBLUlORi9tYW5pZmVzdC54bWyVUEEOgzAMu+8VqHfa7Rq1/CUqQavUphUNE/wemDTYNO2wW2I7thWbkMNAVeA1NHOKXI/VqWlkyFhDBcZEFcRDLsR99lMiFvjUw01fVXdp7AEMIVK7CcelObEpxrag3J0y6oQT9QFbWQo5haXE4FFCZvPgXj8r6PdkLTSLMv+E+cyyX26df8TunmanN19rvr7TrVBLAwQUAAAACACQThJRWmJBaH8AAADjAAAACwAAAGNvbnRlbnQueG1sXY/RCsMgDEXf+xWj767ba+j8FxcjCGpKE6H9+wlbRfYUbs69uWTlECISeMaaqahBLtrm7cipCHzpa657AXYSBYrLJKAIvFG5UjC64Xl/zHZaf0pwj5vKYq9FaA0mOCTjCdMAXFXOTiMa0TNRI/3Im/3ZfUqHttQysqnL/0/sB1BLAQIUAxQAAAAAAPMbH0texjIMJwAAACcAAAAIAAAAAAAAAAAAAACkgQAAAABtaW1ldHlwZVBLAQIUAxQAAAAIAN1NElHql+ZnkgAAADEBAAAVAAAAAAAAAAAAAACkgU0AAABNRVRBLUlORi9tYW5pZmVzdC54bWxQSwECFAMUAAAACACQThJRWmJBaH8AAADjAAAACwAAAAAAAAAAAAAApIESAQAAY29udGVudC54bWxQSwUGAAAAAAMAAwCyAAAAugEAAAAA';
 		}
 
-		return Files::createFromString($parent . '/' . $name . '.' . $extension, base64_decode($tpl));
+		$target = $parent . '/' . $name . '.' . $extension;
+
+		if (self::exists($target)) {
+			throw new ValidationException('Un document existe déjà avec ce nom : ' . $name . '.' .$extension);
+		}
+
+		return Files::createFromString($target, base64_decode($tpl));
 	}
 
 	static public function createObject(string $target)
