@@ -6,6 +6,7 @@ use Garradin\Config;
 use Garradin\Entity;
 use Garradin\Template;
 use Garradin\Utils;
+use Garradin\ValidationException;
 
 use KD2\Form;
 
@@ -80,8 +81,13 @@ class CommonFunctions
 		}
 
 		if ($type == 'date' || $type === 'time') {
-			if (is_string($current_value) || is_int($current_value)) {
-				$current_value = Entity::filterUserDateValue((string)$current_value);
+			if ((is_string($current_value) && !preg_match('!^\d+:\d+$!', $current_value)) || is_int($current_value)) {
+				try {
+					$current_value = Entity::filterUserDateValue((string)$current_value);
+				}
+				catch (ValidationException $e) {
+					$current_value = null;
+				}
 			}
 
 			if (is_object($current_value) && $current_value instanceof \DateTimeInterface) {

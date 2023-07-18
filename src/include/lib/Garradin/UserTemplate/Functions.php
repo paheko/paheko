@@ -177,7 +177,7 @@ class Functions
 			$params = array_merge($result, $params);
 		}
 
-		if ($validate) {
+		if (!empty($validate)) {
 			$schema = self::read(['file' => $validate], $tpl, $line);
 
 			if ($validate_only && is_string($validate_only)) {
