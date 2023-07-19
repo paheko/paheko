@@ -113,9 +113,8 @@ class Services_User
 		if (null === $id_fee) {
 			unset($params[2]);
 		}
-		return (bool)DB::getInstance()->firstColumn(sprintf('
-				SELECT id FROM %s
-				WHERE id_user = :id_user' . ($id_service ? ' AND id_service = :id_service' : '') . ($id_fee ? ' AND id_fee = :id_fee' : '')
-			, Service_User::TABLE), ...$params);
+		return (bool)DB::getInstance()->test(Service_User::TABLE, sprintf('
+				id_user = :id_user' . ($id_service ? ' AND id_service = :id_service' : '') . ($id_fee ? ' AND id_fee = :id_fee' : '')
+			), ...$params);
 	}
 }
