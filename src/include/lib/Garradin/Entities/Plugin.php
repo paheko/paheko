@@ -8,6 +8,7 @@ use Garradin\Plugins;
 use Garradin\Template;
 use Garradin\UserException;
 use Garradin\Utils;
+use Garradin\ValidationException;
 use Garradin\Files\Files;
 use Garradin\UserTemplate\UserTemplate;
 use Garradin\Users\Session;
@@ -101,7 +102,12 @@ class Plugin extends Entity
 			return false;
 		}
 
-		$ini = parse_ini_file($this->path(self::META_FILE), false, \INI_SCANNER_TYPED);
+		try {
+			$ini = Utils::parse_ini_file($this->path(self::META_FILE), false);
+		}
+		catch (\RuntimeException $e) {
+			throw new ValidationException(sprintf('Le fichier plugin.ini est invalide pour "%s" : %s', $this->name, $e->getMessage(), 0, $e));
+		}
 
 		if (empty($ini)) {
 			return false;
@@ -277,7 +283,7 @@ class Plugin extends Entity
 	 */
 	public function needUpgrade(): bool
 	{
-		$infos = (object) parse_ini_file($this->path(self::META_FILE), false);
+		$infos = (object) Utils::parse_ini_file($this->path(self::META_FILE), false);
 
 		if (version_compare($this->version, $infos->version, '!=')) {
 			return true;
@@ -299,6 +305,13 @@ class Plugin extends Entity
 		}
 
 		$this->save();
+	}
+
+	public function upgradeIfRequired(): void
+	{
+		if ($this->needUpgrade()) {
+			$this->upgrade();
+		}
 	}
 
 	public function oldVersion(): ?string
@@ -368,9 +381,6 @@ class Plugin extends Entity
 			if (!Session::getInstance()->isLogged()) {
 				Utils::redirect('!login.php');
 			}
-		}
-		else {
-			$uri = 'public/' . $uri;
 		}
 
 		if (!$uri || substr($uri, -1) == '/') {

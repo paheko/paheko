@@ -147,12 +147,12 @@ class Upgrade
 				require ROOT . '/include/migrations/1.2/1.2.2.php';
 			}
 
-			if (version_compare($v, '1.2.7', '<')) {
-				require ROOT . '/include/migrations/1.2/1.2.7.php';
+			if (version_compare($v, '1.3.0-rc1', '<')) {
+				require ROOT . '/include/migrations/1.3/1.3.0.php';
 			}
 
-			if (version_compare($v, '1.3.0', '<')) {
-				require ROOT . '/include/migrations/1.3/1.3.0.php';
+			if (version_compare($v, '1.3.0-rc2', '<')) {
+				require ROOT . '/include/migrations/1.3/1.3.0-rc2.php';
 			}
 
 			Plugins::upgradeAllIfRequired();
@@ -180,7 +180,7 @@ class Upgrade
 
 			Static_Cache::remove('upgrade');
 		}
-		catch (\Exception $e)
+		catch (\Throwable $e)
 		{
 			if ($db->inTransaction()) {
 				$db->rollback();

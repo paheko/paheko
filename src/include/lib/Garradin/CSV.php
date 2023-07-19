@@ -201,6 +201,9 @@ class CSV
 
 	static public function export(string $format, string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null): void
 	{
+		// Flush any previous output, such as module HTML code etc.
+		@ob_end_clean();
+
 		if ('csv' == $format) {
 			self::toCSV(... array_slice(func_get_args(), 1));
 		}

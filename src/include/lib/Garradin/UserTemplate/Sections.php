@@ -50,6 +50,21 @@ class Sections
 		'else:form'    => [self::class, 'formElse'],
 	];
 
+	const SQL_RESERVED_PARAMS = [
+		'select',
+		'tables',
+		'where',
+		'group',
+		'having',
+		'order',
+		'begin',
+		'limit',
+		'assign',
+		'assign_assoc',
+		'debug',
+		'count',
+	];
+
 	/**
 	 * List of tables and columns that are restricted in SQL queries
 	 *
@@ -131,8 +146,8 @@ class Sections
 
 		return sprintf('<?php if (!empty(%s)): ', $if)
 			. 'try { '
-			. '$hash = md5(\Garradin\Utils::getSelfURI(false)); '
-			. 'if (!\KD2\Form::tokenCheck(\'form_\' . $hash)) { '
+			. '$hash = \Garradin\UserTemplate\Functions::_getFormKey(); '
+			. 'if (!\KD2\Form::tokenCheck($hash)) { '
 			. 'throw new \Garradin\ValidationException(\'Une erreur est survenue, merci de bien vouloir renvoyer le formulaire.\'); '
 			. '} foreach ([null] as $_): ?>';
 		/*
@@ -155,7 +170,7 @@ class Sections
 	static public function formEnd(string $name, string $params_str, UserTemplate $tpl, int $line): string
 	{
 		if ($tpl->_lastName() !== 'form') {
-			throw new Brindille_Exception(sprintf('"%s": block closing does not match last block "%s" opened', $name . $params, $tpl->_lastName()));
+			throw new Brindille_Exception(sprintf('"%s": block closing does not match last block "%s" opened', $name . $params_str, $tpl->_lastName()));
 		}
 
 		$type = $tpl->_lastType();
@@ -302,13 +317,24 @@ class Sections
 
 		// Replace '$.name = "value"' parameters with json_extract
 		foreach ($params as $key => $value) {
-			if (substr($key, 0, 1) != '$') {
+			$k = substr($key, 0, 1);
+			if ($k == ':' || in_array($key, self::SQL_RESERVED_PARAMS)) {
 				continue;
 			}
 
-			$hash = sha1($key);
-			$params['where'] .= sprintf(' AND json_extract(document, %s) = :quick_%s', $db->quote($key), $hash);
-			$params[':quick_' . $hash] = $value;
+			if (is_bool($value)) {
+				$v = '= ' . (int) $value;
+			}
+			elseif (null === $value) {
+				$v = 'IS NULL';
+			}
+			else {
+				$v = sprintf(':quick_%s', sha1($key));
+				$params[$v] = $value;
+				$v = '= ' . $v;
+			}
+
+			$params['where'] .= sprintf(' AND json_extract(document, %s) %s', $db->quote('$.' . $key), $v);
 			unset($params[$key]);
 		}
 
@@ -485,16 +511,15 @@ class Sections
 
 		$list = new DynamicList($columns, $table);
 
-		foreach ($params as $key => $value) {
-			$f = substr($key, 0, 1);
+		static $reserved_keywords = ['max', 'order', 'desc', 'debug', 'explain', 'schema', 'columns', 'select', 'where', 'module'];
 
-			if ($f == ':' && strstr($where, $key)) {
+		foreach ($params as $key => $value) {
+			if ($key[0] == ':' && strstr($where, $key)) {
 				$list->setParameter(substr($key, 1), $value);
 			}
-			elseif ($f == '$') {
-				// Replace '$.name = "value"' parameters with json_extract
+			elseif (!in_array($key, $reserved_keywords)) {
 				$hash = sha1($key);
-				$where .= sprintf(' AND json_extract(document, %s) = :quick_%s', $db->quote($key), $hash);
+				$where .= sprintf(' AND json_extract(document, %s) = :quick_%s', $db->quote('$.' . $key), $hash);
 				$list->setParameter('quick_' . $hash, $value);
 			}
 		}
@@ -507,12 +532,14 @@ class Sections
 		}
 
 		$list->setModifier(function(&$row) {
-			//$row->original = clone $row;
+			$row->original = clone $row;
+			unset($row->original->id, $row->original->key, $row->original->document);
+
 			$row = array_merge(json_decode($row->document, true), (array)$row);
 		});
 
 		$list->setExportCallback(function(&$row) {
-			//$row = $row['original'];
+			$row = $row['original'];
 		});
 
 		// Try to create an index if required
@@ -915,6 +942,8 @@ class Sections
 		$params['where'] .= ' AND status = :status';
 		$params[':status'] = Page::STATUS_ONLINE;
 
+		$allowed_tables = self::SQL_TABLES;
+
 		if (array_key_exists('search', $params)) {
 			if (trim((string) $params['search']) === '') {
 				return;
@@ -923,12 +952,23 @@ class Sections
 			$params[':search'] = substr(trim($params['search']), 0, 100);
 			unset($params['search']);
 
-			$params['tables'] .= ' INNER JOIN files_search ON files_search.path = w.file_path';
+			$params['tables'] .= ' INNER JOIN files_search ON files_search.path = w.dir_path';
 			$params['select'] .= ', rank(matchinfo(files_search), 0, 1.0, 1.0) AS points, snippet(files_search, \'<mark>\', \'</mark>\', \'…\', 2) AS snippet';
 			$params['where'] .= ' AND files_search MATCH :search';
 
 			$params['order'] = 'points DESC';
 			$params['limit'] = '30';
+
+			// There is a bug in SQLite3 < 3.41.0
+			// where virtual tables (eg. FTS4) will trigger UPDATEs in the authorizer,
+			// making the request fail.
+			// So we will disable the authorizer here.
+			// From a security POV, this is a compromise, but in PHP < 8 there was no authorizer
+			// at all.
+			// @see https://sqlite.org/forum/forumpost/e11b51ca555f82147a1cbb58dc640b441e5f126cf6d7400753f62e82ca11ba88
+			if (\SQLite3::version()['versionNumber'] < 3041000) {
+				$allowed_tables = null;
+			}
 		}
 
 		if (isset($params['uri'])) {
@@ -946,8 +986,13 @@ class Sections
 		}
 
 		if (array_key_exists('parent', $params)) {
-			$params['where'] .= ' AND w.parent = :parent';
-			$params[':parent'] = trim((string) $params['parent']);
+			if (null === $params['parent']) {
+				$params['where'] .= ' AND w.parent IS NULL';
+			}
+			else {
+				$params['where'] .= ' AND w.parent = :parent';
+				$params[':parent'] = trim((string) $params['parent']);
+			}
 
 			unset($params['parent']);
 		}
@@ -957,7 +1002,7 @@ class Sections
 			unset($params['future']);
 		}
 
-		foreach (self::sql($params, $tpl, $line) as $row) {
+		foreach (self::sql($params, $tpl, $line, $allowed_tables) as $row) {
 			if (empty($params['count'])) {
 				$data = $row;
 				unset($data['points'], $data['snippet']);
@@ -965,10 +1010,6 @@ class Sections
 				$page = new Page;
 				$page->exists(true);
 				$page->load($data);
-
-				if (!$page->file()) {
-					continue;
-				}
 
 				if (isset($row['snippet'])) {
 					$row['snippet'] = preg_replace('!</b>(\s*)<b>!', '$1', $row['snippet']);
@@ -1098,19 +1139,20 @@ class Sections
 			throw new Brindille_Exception('Missing parameter "name"');
 		}
 
-		$module = DB::getInstance()->first('SELECT * FROM modules WHERE name = ?;', $params['name']);
+		$module = Modules::get($params['name']);
 
 		if (!$module || !$module->enabled) {
 			return null;
 		}
 
-		$module->config = $module->config ? @json_decode($module->config) : null;
-		$module->path = 'modules/' . $module->name;
+		$out = $module->asArray();
+		$out['path'] = 'modules/' . $module->name;
+		$out['url'] = $module->url();
 
-		yield (array) $module;
+		yield $out;
 	}
 
-	static public function sql(array $params, UserTemplate $tpl, int $line): \Generator
+	static public function sql(array $params, UserTemplate $tpl, int $line, ?array $allowed_tables = self::SQL_TABLES): \Generator
 	{
 		static $defaults = [
 			'select' => '*',
@@ -1123,7 +1165,7 @@ class Sections
 		if (isset($params['sql'])) {
 			$sql = $params['sql'];
 
-			// Replace raw SQL parameters (undocumented feature, this is for #select section)
+			// Replace raw SQL parameters (this is for #select section)
 			foreach ($params as $k => $v) {
 				if (substr($k, 0, 1) == '!') {
 					$r = '/' . preg_quote($k, '/') . '\b/';
@@ -1167,7 +1209,7 @@ class Sections
 		$db = DB::getInstance();
 
 		try {
-			$statement = $db->protectSelect(self::SQL_TABLES, $sql);
+			$statement = $db->protectSelect($allowed_tables, $sql);
 
 			$args = [];
 

@@ -3,13 +3,29 @@
 namespace Garradin;
 
 use Garradin\Files\Files;
+use Garradin\Files\Storage;
+use Garradin\Web\Sync as WebSync;
+use Garradin\Web\Web;
 use Garradin\Entities\Files\File;
 use Garradin\UserTemplate\Modules;
 use KD2\DB\DB_Exception;
+use KD2\DB\EntityManager;
 
 $db->beginSchemaUpdate();
 
 Files::disableQuota();
+
+// There seems to be some plugins table left on some database even when the plugin has been removed
+if (!$db->test('plugins', 'id = ?', 'taima')) {
+	$db->exec('
+		DROP TABLE IF EXISTS plugin_taima_entries;
+		DROP TABLE IF EXISTS plugin_taima_tasks;
+	');
+}
+
+// We need to drop indexes, are they will be left, but linked to old tables
+// and new ones won't be re-created
+$db->dropIndexes();
 
 // Get old keys
 $config = (object) $db->getAssoc('SELECT key, value FROM config WHERE key IN (\'champs_membres\', \'champ_identifiant\', \'champ_identite\');');
@@ -66,6 +82,82 @@ foreach ($df->all() as $name => $field) {
 // Migrate other stuff
 $db->import(ROOT . '/include/migrations/1.3/1.3.0.sql');
 
+// Reindex all files in search, as moving files was broken
+$db->exec('DELETE FROM files_search;');
+
+Files::ensureContextsExists();
+
+if (FILE_STORAGE_BACKEND == 'FileSystem') {
+	// now we store file metadata in DB
+	Storage::legacySync(FILE_STORAGE_CONFIG);
+	WebSync::sync();
+}
+else {
+	// Move files from old table to new
+	$db->exec('
+		REPLACE INTO files
+			SELECT f.id, path, parent, name, type, mime, size, modified, image, md5(fc.content), NULL
+			FROM files_old f INNER JOIN files_contents_old fc ON fc.id = f.id;
+		REPLACE INTO files_contents (id, content) SELECT id, content FROM files_contents_old;');
+
+	// Move skeletons from skel/ to modules/web/
+	Files::mkdir('modules/web');
+	$db->exec('UPDATE files SET path = REPLACE(path, \'skel/\', \'modules/web\'), parent = REPLACE(parent, \'skel/\', \'modules/web\')
+		WHERE parent LIKE \'skel/%\';');
+}
+
+$db->exec('
+	DROP TABLE files_contents_old;
+	DROP TABLE files_old;
+');
+
+// Prepend "./" to includes functions file parameter in web skeletons
+foreach (Files::list('modules/web') as $file) {
+	if ($file->type == $file::TYPE_DIRECTORY) {
+		continue;
+	}
+
+	foreach (Files::list(File::CONTEXT_MODULES . '/web') as $file) {
+		if ($file->type != File::TYPE_FILE || !preg_match('/\.(?:txt|css|js|html|htm)$/', $file->name)) {
+			continue;
+		}
+
+		$file->setContent(preg_replace('/(\s+file=")(\w+)/', '$1./$2', $file->fetch()));
+	}
+}
+
+// Migrate web_pages
+$db->exec('
+	INSERT INTO web_pages
+		SELECT id,
+			CASE WHEN parent = \'\' THEN NULL ELSE parent END,
+			path, \'web/\' || path, uri, type, status, format, published, modified, title, content
+		FROM web_pages_old;
+	DROP TABLE web_pages_old;
+');
+
+
+foreach (Files::all() as $file) {
+	if ($file->isDir()) {
+		continue;
+	}
+
+	if ($file->context() == $file::CONTEXT_WEB && $file->name == 'index.txt') {
+		$file->delete();
+		continue;
+	}
+
+	// Reindex
+	$file->indexForSearch();
+
+	// Save files in DB
+	$file->save();
+}
+
+foreach (Web::listAll() as $page) {
+	$page->syncSearch();
+}
+
 // Update searches
 foreach ($db->iterate('SELECT * FROM searches;') as $row) {
 	if ($row->type == 'json') {
@@ -88,37 +180,23 @@ foreach ($db->iterate('SELECT * FROM searches;') as $row) {
 	$db->update('searches', ['content' => $content], 'id = ' . (int) $row->id);
 }
 
-// Add signature to files
+// Add signature to config files
 $files = $db->firstColumn('SELECT value FROM config WHERE key = \'files\';');
 $files = json_decode($files);
 $files->signature = null;
 $db->exec(sprintf('REPLACE INTO config (key, value) VALUES (\'files\', %s);', $db->quote(json_encode($files))));
 
-// Move skeletons from skel/ to skel/web/
-// Don't use Files::get to get around validatePath security
-$list = Files::list('skel');
+Modules::refresh();
 
-foreach ($list as $file) {
-	if ($file->name == 'web') {
-		continue;
-	}
+if ($db->test('sqlite_master', 'type = \'table\' AND name = ?', 'plugin_reservations_categories')) {
+	$db->import(__DIR__ . '/1.3.0_bookings.sql');
+	$m = Modules::get('bookings');
 
-	$file->move(File::CONTEXT_MODULES . '/web', false);
-
-	if ($file->type == $file::TYPE_DIRECTORY) {
-		continue;
-	}
-
-	// Prepend "./" to includes functions file parameter
-	foreach (Files::list(File::CONTEXT_MODULES . '/web') as $file) {
-		if ($file->type != File::TYPE_FILE || !preg_match('/\.(?:txt|css|js|html|htm)$/', $file->name)) {
-			continue;
-		}
-
-		$file->setContent(preg_replace('/(\s+file=")(\w+)/', '$1./$2', $file->fetch()));
+	if ($m) {
+		$m->enabled = true;
+		$m->save();
 	}
 }
 
 $db->commitSchemaUpdate();
 
-Modules::refresh();

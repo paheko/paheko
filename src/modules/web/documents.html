@@ -1,7 +1,0 @@
-<section class="documents">
-{{#documents order="name" parent=$parent except_in_text=true}}
-	<aside class="file">
-		<a href="{{$url}}"><b>{{$title}}</b> <span class="type">({{$extension}})</span> <span class="size">{{$size|size_in_bytes}}</span></a>
-	</aside>
-{{/documents}}
-</section>

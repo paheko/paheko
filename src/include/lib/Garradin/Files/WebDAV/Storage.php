@@ -57,6 +57,8 @@ class Storage extends AbstractStorage
 	{
 		$this->populateRootCache();
 
+		$uri = $uri ?: null;
+
 		if (!isset($this->cache[$uri])) {
 			$this->cache[$uri] = Files::get($uri);
 
@@ -121,7 +123,10 @@ class Storage extends AbstractStorage
 			return null;
 		}
 
-		if (FILE_STORAGE_BACKEND == 'FileSystem' && Router::xSendFile($file->fullpath())) {
+		$path = $file->getLocalFilePath();
+
+		if ($path && Router::isXSendFileEnabled()) {
+			Router::xSendFile($path);
 			return ['stop' => true];
 		}
 
@@ -167,7 +172,7 @@ class Storage extends AbstractStorage
 			case 'DAV::ishidden':
 				return false;
 			case 'DAV::getetag':
-				return !$is_dir ? $file->etag() : md5($file->getRecursiveSize() . $file->path);
+				return $file->etag();
 			case 'DAV::lastaccessed':
 				return null;
 			case 'DAV::creationdate':
@@ -177,7 +182,7 @@ class Storage extends AbstractStorage
 					return null;
 				}
 
-				return md5_file($file->fullpath());
+				return $file->md5();
 			// NextCloud stuff
 			case NextCloud::PROP_NC_HAS_PREVIEW:
 				return $file->image ? 'true' : 'false';
@@ -197,8 +202,8 @@ class Storage extends AbstractStorage
 					NextCloud::PERM_READ => $file->canRead($this->session),
 					NextCloud::PERM_WRITE => $file->canWrite($this->session),
 					NextCloud::PERM_DELETE => $file->canDelete($this->session),
-					NextCloud::PERM_RENAME => $file->canDelete($this->session),
-					NextCloud::PERM_MOVE => $file->canDelete($this->session),
+					NextCloud::PERM_RENAME => $file->canRename($this->session),
+					NextCloud::PERM_MOVE => $file->canRename($this->session),
 					NextCloud::PERM_CREATE => $file->canCreateHere($this->session),
 					NextCloud::PERM_MKDIR => $file->canCreateDirHere($this->session),
 				];
@@ -350,12 +355,7 @@ class Storage extends AbstractStorage
 			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de supprimer ce fichier', 403);
 		}
 
-		if ($target->context() == $target::CONTEXT_TRASH) {
-			$target->delete();
-		}
-		else {
-			$target->moveToTrash();
-		}
+		$target->moveToTrash();
 	}
 
 	protected function copymove(bool $move, string $uri, string $destination): bool
@@ -375,7 +375,7 @@ class Storage extends AbstractStorage
 		}
 
 		if (!$move) {
-			if ($source->size > Files::getRemainingQuota(true)) {
+			if ($source->size > Files::getRemainingQuota()) {
 				throw new WebDAV_Exception('Your quota is exhausted', 403);
 			}
 		}

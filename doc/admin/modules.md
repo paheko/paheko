@@ -8,7 +8,7 @@ Title: Développer des modules pour Paheko
 * [Filtres](brindille_modifiers.html)
 }}}
 
-<<toc>>
+<<toc aside>>
 
 # Introduction
 

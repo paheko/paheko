@@ -1,7 +1,0 @@
-{{if $module.config.accounts === null}}
-	{{:assign var="module.config.accounts" value='5112'}}
-{{/if}}
-
-{{* FIXME: ne proposer le bordereau que pour les écritures de dépot *}}
-
-{{:include file="/receipt/snippets/transaction_details.html"}}

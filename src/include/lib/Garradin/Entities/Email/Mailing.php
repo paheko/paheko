@@ -300,8 +300,7 @@ class Mailing extends Entity
 			$this->listRecipients(),
 			$sender,
 			$this->subject,
-			$this->getBody(),
-			Render::FORMAT_MARKDOWN
+			$this->getBody()
 		);
 
 		$this->set('sent', new DateTime);

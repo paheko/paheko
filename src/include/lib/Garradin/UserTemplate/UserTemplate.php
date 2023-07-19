@@ -24,7 +24,7 @@ use Garradin\UserTemplate\Sections;
 
 use Garradin\Web\Cache as Web_Cache;
 
-use const Garradin\{WWW_URL, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT, ROOT, LEGAL_LINE};
+use const Garradin\{WWW_URL, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT, ROOT, LEGAL_LINE, PDF_COMMAND};
 
 class UserTemplate extends \KD2\Brindille
 {
@@ -36,9 +36,9 @@ class UserTemplate extends \KD2\Brindille
 	protected ?File $file = null;
 	protected ?string $code = null;
 	protected $cache_path = USER_TEMPLATES_CACHE_ROOT;
-	protected ?string $path;
+	protected ?string $path = null;
 	protected ?UserTemplate $parent = null;
-	public ?Module $module;
+	public ?Module $module = null;
 	protected array $headers = [];
 
 	protected $escape_default = 'html';
@@ -92,11 +92,12 @@ class UserTemplate extends \KD2\Brindille
 			'_POST'        => &$_POST,
 			'visitor_lang' => Translate::getHttpLang(),
 			'config'       => $config,
-			'now'          => new \DateTime,
+			'now'          => time(),
 			'legal_line'   => LEGAL_LINE,
 			'is_logged'    => $is_logged,
-			'logged_user'  => $is_logged ? $session->getUser() : null,
+			'logged_user'  => $is_logged ? $session->getUser()->asModuleArray() : null,
 			'dialog'       => isset($_GET['_dialog']) ? ($_GET['_dialog'] ?: true) : false,
+			'pdf_enabled'  => PDF_COMMAND !== null,
 		];
 
 		return self::$root_variables;
@@ -365,7 +366,9 @@ class UserTemplate extends \KD2\Brindille
 
 	public function serve(): void
 	{
-		if (!self::isTemplate($this->path)) {
+		$path = $this->path ?? $this->file->path;
+
+		if (!self::isTemplate($path)) {
 			throw new \InvalidArgumentException('Not a valid template file extension: ' . $this->path);
 		}
 

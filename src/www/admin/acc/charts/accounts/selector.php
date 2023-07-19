@@ -26,6 +26,16 @@ $filter_options = [
 	'all' => 'Voir tous les comptes',
 ];
 
+$this_url = '?' . http_build_query([
+	'targets' => $targets_str,
+	'chart' => $chart_id,
+	'year' => $year_id,
+]);
+
+if (qg('_dialog') !== null) {
+	$this_url .= '&_dialog';
+}
+
 if (!count($targets)) {
 	$filter_options['all'] = 'Voir tout le plan comptable';
 	$targets = null;
@@ -79,11 +89,12 @@ if (!$chart->country) {
 $accounts = $chart->accounts();
 
 $edit_url = sprintf('!acc/charts/accounts/%s?id=%d&types=%s', isset($grouped_accounts) ? '' : 'all.php', $chart->id(), $targets_str);
+$new_url = sprintf('!acc/charts/accounts/new.php?id=%d&types=%s', $chart->id(), $targets_str);
 
 $targets_names = !empty($targets) ? array_intersect_key(Account::TYPES_NAMES, array_flip($targets)) : [];
 $targets_names = implode(', ', $targets_names);
 
-$tpl->assign(compact('chart', 'targets', 'targets_str', 'filter_options', 'filter', 'edit_url', 'targets_names'));
+$tpl->assign(compact('chart', 'targets', 'targets_str', 'filter_options', 'filter', 'new_url', 'edit_url', 'targets_names', 'this_url'));
 
 if ($filter == 'all') {
 	$tpl->assign('accounts', $accounts->listAll($targets));

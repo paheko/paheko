@@ -2,7 +2,7 @@
 
 {form_errors}
 
-<form method="post" action="">
+<form method="post" action="" data-focus=1>
 {if !$target}
 	<fieldset>
 		<legend>Sujet du message</legend>

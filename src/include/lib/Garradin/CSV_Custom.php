@@ -117,6 +117,17 @@ class CSV_Custom
 		$this->modifier = $callback;
 	}
 
+	public function searchColumn(string $str, array $columns)
+	{
+		foreach ($columns as $key => $value) {
+			$columns[$key] = mb_strtolower(str_replace('’', '\'', $value));
+		}
+
+		$str = mb_strtolower(str_replace('’', '\'', $str));
+
+		return array_search($str, $columns, true);
+	}
+
 	public function getSelectedTable(?array $source = null): array
 	{
 		if (null === $source && isset($_POST['translation_table'])) {
@@ -128,15 +139,18 @@ class CSV_Custom
 
 		$selected = $this->getFirstLine();
 
-		foreach ($selected as $k => &$v) {
-			if (isset($source[$k])) {
-				$v = $source[$k];
+		foreach ($selected as $i => &$v) {
+			if (isset($source[$i])) {
+				$v = $source[$i];
 			}
-			elseif (isset($this->translation[$k])) {
-				$v = $this->translation[$k];
+			elseif (isset($this->translation[$i])) {
+				$v = $this->translation[$i];
 			}
-			elseif (false !== ($pos = array_search($v, $this->columns, true))) {
-				$v = $pos;
+			elseif ($found = $this->searchColumn($v, $this->columns)) {
+				$v = $found;
+			}
+			elseif ($found = $this->searchColumn($v, $this->columns_defaults)) {
+				$v = $found;
 			}
 			else {
 				$v = null;

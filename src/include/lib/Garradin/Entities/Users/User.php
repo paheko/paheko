@@ -10,6 +10,7 @@ use Garradin\Config;
 use Garradin\Entity;
 use Garradin\Form;
 use Garradin\Log;
+use Garradin\Template;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\ValidationException;
@@ -22,11 +23,13 @@ use Garradin\Email\Templates as EmailTemplates;
 use Garradin\Users\DynamicFields;
 use Garradin\Users\Session;
 use Garradin\Users\Users;
+use Garradin\Services\Services_User;
 
 use Garradin\Entities\Files\File;
 
 use KD2\SMTP;
 use KD2\DB\EntityManager as EM;
+use KD2\ZipWriter;
 
 /**
  * WARNING: do not use $user->property = 'value' to set a property value on this class
@@ -70,7 +73,8 @@ class User extends Entity
 			$fields = DynamicFields::getInstance()->all();
 
 			foreach ($fields as $key => $config) {
-				$types[$key] = DynamicField::PHP_TYPES[$config->type];
+				// Fallback to dynamic, if a field type has been deleted
+				$types[$key] = DynamicField::PHP_TYPES[$config->type] ?? 'dynamic';
 			}
 
 			self::$_types_cache[static::class] = $types;
@@ -99,7 +103,7 @@ class User extends Entity
 			return;
 		}
 
-		// Don't bother for type with generated columns
+		// Don't bother for type with virtual columns
 		// also don't set it as modified as we don't save the value
 		if ($this->_types[$key] == 'dynamic') {
 			$this->$key = $value;
@@ -139,7 +143,7 @@ class User extends Entity
 			}
 
 			if ($field->type === 'email') {
-				$this->assert($value === null || SMTP::checkEmailIsValid($value, false), sprintf('"%s" : cette adresse email n\'est pas valide.', $field->label));
+				$this->assert($value === null || SMTP::checkEmailIsValid($value, false), sprintf('"%s" : l\'adresse e-mail "%s" n\'est pas valide.', $field->label, $value));
 			}
 			elseif ($field->type === 'checkbox') {
 				$this->assert($value === false || $value === true, sprintf('"%s" : la valeur de ce champ n\'est pas valide.', $field->label));
@@ -202,14 +206,12 @@ class User extends Entity
 	{
 		$out = parent::asArray($for_database);
 
-		// Remove generated columns
+		// Remove virtual columns
 		if ($for_database) {
 			foreach (DynamicFields::getInstance()->all() as $field) {
-				if ($field->type != 'generated') {
-					continue;
+				if ($field->type == 'virtual') {
+					unset($out[$field->name]);
 				}
-
-				unset($out[$field->name]);
 			}
 		}
 
@@ -559,6 +561,16 @@ class User extends Entity
 		$this->_modified['preferences'] = null;
 	}
 
+	public function deletePreference(string $key): void
+	{
+		if (null === $this->preferences || !isset($this->preferences->{$key})) {
+			return;
+		}
+
+		unset($this->preferences->{$key});
+		$this->_modified['preferences'] = null;
+	}
+
 	/**
 	 * Save preferences if they have been modified
 	 */
@@ -592,5 +604,43 @@ class User extends Entity
 		}
 
 		return $out;
+	}
+
+	public function downloadExport(): void
+	{
+		$services_list = Services_User::perUserList($this->id);
+		$services_list->setPageSize(null);
+
+		$export_data = [
+			'user'     => $this,
+			'services' => $services_list->asArray(true),
+		];
+
+		$tpl = Template::getInstance();
+		$tpl->assign('user', $this);
+		$tpl->assign(compact('services_list'));
+		$html = $tpl->fetch('me/export.tpl');
+
+		$name = sprintf('%s - Donnees - %s.zip', Config::getInstance()->get('org_name'), $this->name());
+		header('Content-type: application/zip');
+		header(sprintf('Content-Disposition: attachment; filename="%s"', $name));
+
+		$zip = new ZipWriter('php://output');
+		$zip->setCompression(9);
+
+		$zip->add('info.html', $html);
+		$zip->add('info.json', json_encode($export_data));
+
+		foreach ($this->listFiles() as $file) {
+			$pointer = $file->getReadOnlyPointer();
+			$path = !$pointer ? $file->getLocalFilePath() : null;
+			$zip->add($file->path, null, $path, $pointer);
+
+			if ($pointer) {
+				fclose($pointer);
+			}
+		}
+
+		$zip->close();
 	}
 }

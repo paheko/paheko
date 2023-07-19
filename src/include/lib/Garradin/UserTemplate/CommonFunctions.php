@@ -3,7 +3,10 @@
 namespace Garradin\UserTemplate;
 
 use Garradin\Config;
+use Garradin\Entity;
+use Garradin\Template;
 use Garradin\Utils;
+use Garradin\ValidationException;
 
 use KD2\Form;
 
@@ -20,6 +23,9 @@ class CommonFunctions
 		'link',
 		'icon',
 		'linkbutton',
+		'linkmenu',
+		'exportmenu',
+		'delete_form',
 	];
 
 	static public function input(array $params)
@@ -74,26 +80,30 @@ class CommonFunctions
 			$current_value = $default;
 		}
 
-		if ($type == 'date' && is_object($current_value) && $current_value instanceof \DateTimeInterface) {
-			$current_value = $current_value->format('d/m/Y');
+		if ($type == 'date' || $type === 'time') {
+			if ((is_string($current_value) && !preg_match('!^\d+:\d+$!', $current_value)) || is_int($current_value)) {
+				try {
+					$current_value = Entity::filterUserDateValue((string)$current_value);
+				}
+				catch (ValidationException $e) {
+					$current_value = null;
+				}
+			}
+
+			if (is_object($current_value) && $current_value instanceof \DateTimeInterface) {
+				if ($type == 'date') {
+					$current_value = $current_value->format('d/m/Y');
+				}
+				else {
+					$current_value = $current_value->format('H:i');
+				}
+			}
 		}
 		elseif ($type == 'time' && is_object($current_value) && $current_value instanceof \DateTimeInterface) {
 			$current_value = $current_value->format('H:i');
 		}
 		elseif ($type == 'password') {
 			$current_value = null;
-		}
-		// FIXME: is this still needed?
-		elseif ($type == 'date' && is_string($current_value)) {
-			if ($v = \DateTime::createFromFormat('!Y-m-d', $current_value)) {
-				$current_value = $v->format('d/m/Y');
-			}
-			elseif ($v = \DateTime::createFromFormat('!Y-m-d H:i:s', $current_value)) {
-				$current_value = $v->format('d/m/Y');
-			}
-			elseif ($v = \DateTime::createFromFormat('!Y-m-d H:i', $current_value)) {
-				$current_value = $v->format('d/m/Y');
-			}
 		}
 		elseif ($type == 'time' && is_string($current_value)) {
 			if ($v = \DateTime::createFromFormat('!Y-m-d H:i:s', $current_value)) {
@@ -104,21 +114,21 @@ class CommonFunctions
 			}
 		}
 
-		$attributes['id'] = 'f_' . str_replace(['[', ']'], '', $name);
+		$attributes['id'] = 'f_' . preg_replace('![^a-z0-9_-]!i', '', $name);
 		$attributes['name'] = $name;
 
 		if (!isset($attributes['autocomplete']) && ($type == 'money' || $type == 'password')) {
 			$attributes['autocomplete'] = 'off';
 		}
 
-		if ($type == 'radio' || $type == 'checkbox') {
-			$attributes['id'] .= '_' . (strlen($value) > 30 ? md5($value) : $value);
+		if ($type == 'radio' || $type == 'checkbox' || $type == 'radio-btn') {
+			$attributes['id'] .= '_' . (strlen($value) > 30 ? md5($value) : preg_replace('![^a-z0-9_-]!i', '', $value));
 
 			if ($current_value == $value && $current_value !== null) {
 				$attributes['checked'] = 'checked';
 			}
 
-			$attributes['value'] = htmlspecialchars($value);
+			$attributes['value'] = $value;
 		}
 		elseif ($type == 'date') {
 			$type = 'text';
@@ -135,6 +145,13 @@ class CommonFunctions
 			$attributes['size'] = 8;
 			$attributes['maxlength'] = 5;
 			$attributes['pattern'] = '\d\d?:\d\d?';
+		}
+		elseif ($type == 'year') {
+			$type = 'number';
+			$attributes['size'] = 4;
+			$attributes['maxlength'] = 4;
+			$attributes['pattern'] = '\d';
+
 		}
 		elseif ($type == 'money') {
 			$attributes['class'] = rtrim('money ' . ($attributes['class'] ?? ''));
@@ -173,16 +190,20 @@ class CommonFunctions
 		$attributes_string = $attributes;
 
 		array_walk($attributes_string, function (&$v, $k) {
-			$v = sprintf('%s="%s"', $k, $v);
+			$v = sprintf('%s="%s"', $k, htmlspecialchars((string)$v));
 		});
 
 		$attributes_string = implode(' ', $attributes_string);
 
 		if ($type == 'radio-btn') {
-			$radio = self::input(array_merge($params, ['type' => 'radio', 'label' => null, 'help' => null]));
-			$out = sprintf('<dd class="radio-btn">%s
-				<label for="f_%s_%s"><div><h3>%s</h3>%s</div></label>
-			</dd>', $radio, htmlspecialchars((string)$name), htmlspecialchars((string)$value), htmlspecialchars((string)$label), isset($params['help']) ? '<p class="help">' . htmlspecialchars($params['help']) . '</p>' : '');
+			if (!empty($attributes['disabled'])) {
+				$attributes['class'] = ($attributes['class'] ?? '') . ' disabled';
+			}
+
+			$radio = self::input(array_merge($params, ['type' => 'radio', 'label' => null, 'help' => null, 'disabled' => $attributes['disabled'] ?? null]));
+			$out = sprintf('<dd class="radio-btn %s">%s
+				<label for="%s"><div><h3>%s</h3>%s</div></label>
+			</dd>', $attributes['class'] ?? '', $radio, $attributes['id'], htmlspecialchars((string)$label), isset($params['help']) ? '<p class="help">' . htmlspecialchars($params['help']) . '</p>' : '');
 			return $out;
 		}
 		if ($type == 'select') {
@@ -190,6 +211,10 @@ class CommonFunctions
 
 			if (empty($attributes['required']) || isset($attributes['default_empty'])) {
 				$input .= sprintf('<option value="">%s</option>', $attributes['default_empty'] ?? '');
+			}
+
+			if (!isset($options)) {
+				throw new \RuntimeException('Missing "options" parameter');
 			}
 
 			foreach ($options as $_key => $_value) {
@@ -369,7 +394,7 @@ class CommonFunctions
 		unset($params['href'], $params['label'], $params['prefix']);
 
 		array_walk($params, function (&$v, $k) {
-			$v = sprintf('%s="%s"', $k, htmlspecialchars($v));
+			$v = sprintf('%s="%s"', $k, htmlspecialchars((string)$v));
 		});
 
 		$params = implode(' ', $params);
@@ -462,4 +487,83 @@ class CommonFunctions
 
 		unset($params['shape']);
 	}
+
+	static public function exportmenu(array $params): string
+	{
+		$url = $params['href'] ?? Utils::getSelfURI();
+		$suffix = $params['suffix'] ?? 'export=';
+
+		if (false !== strpos($url, '?')) {
+			$url .= '&';
+		}
+		else {
+			$url .= '?';
+		}
+
+		$url .= $suffix;
+
+		$xlsx = $params['xlsx'] ?? null;
+
+		if (null === $xlsx) {
+			$xlsx = !empty(CALC_CONVERT_COMMAND);
+		}
+
+		if (!empty($params['form'])) {
+			$name = $params['name'] ?? 'export';
+			$out = self::button(['value' => 'csv', 'shape' => 'export', 'label' => 'Export CSV', 'name' => $name, 'type' => 'submit']);
+			$out .= self::button(['value' => 'ods', 'shape' => 'export', 'label' => 'Export LibreOffice', 'name' => $name, 'type' => 'submit']);
+
+			if ($xlsx) {
+				$out .= self::button(['value' => 'xlsx', 'shape' => 'export', 'label' => 'Export Excel', 'name' => $name, 'type' => 'submit']);
+			}
+		}
+		else {
+			$out  = self::linkButton(['href' => $url . 'csv', 'label' => 'Export CSV', 'shape' => 'export']);
+			$out .= ' ' . self::linkButton(['href' => $url . 'ods', 'label' => 'Export LibreOffice', 'shape' => 'export']);
+
+			if ($xlsx !== false) {
+				$out .= ' ' . self::linkButton(['href' => $url . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']);
+			}
+		}
+
+		$params = array_merge($params, ['shape' => 'export', 'label' => $params['label'] ?? 'Export…']);
+		return self::linkmenu($params, $out);
+	}
+
+	static public function linkmenu(array $params, ?string $content): string
+	{
+		if (null === $content) {
+			return '';
+		}
+
+		if (!empty($params['right'])) {
+			$params['class'] = 'menu-btn-right';
+		}
+
+		$out = sprintf('
+			<span class="menu-btn %s">
+				<b data-icon="%s" class="btn" ondblclick="this.parentNode.querySelector(\'a, button\').click();" onclick="this.parentNode.classList.toggle(\'active\');">%s</b>
+				<span><span>',
+			htmlspecialchars($params['class'] ?? ''),
+			Utils::iconUnicode($params['shape']),
+			htmlspecialchars($params['label'])
+		);
+
+		$out .= $content . '</span></span>
+			</span>';
+
+		return $out;
+	}
+
+	static public function delete_form(array $params): string
+	{
+		if (!isset($params['legend'], $params['warning'], $params['csrf_key'])) {
+			throw new \InvalidArgumentException('Missing parameter: legend, warning and csrf_key are required');
+		}
+
+		$tpl = Template::getInstance();
+		$tpl->assign($params);
+		return $tpl->fetch('common/delete_form.tpl');
+	}
+
 }

@@ -68,7 +68,7 @@
 			<td><a class="num">{$i}</a></td>
 			<th>{$idx.name}</th>
 			<td>{if $idx.unique}Unique{/if}</td>
-			<td>{foreach from=$idx.columns item="c"}{$c.name} {/foreach}</td>
+			<td><ul>{foreach from=$idx.columns item="c"}<li>{$c.name}</li>{/foreach}</ul></td>
 		</tr>
 	{/foreach}
 	</tbody>

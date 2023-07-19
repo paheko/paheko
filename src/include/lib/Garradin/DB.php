@@ -238,6 +238,8 @@ class DB extends SQLite3
 		$db->createFunction('unicode_like', [self::class, 'unicodeLike']);
 		$db->createFunction('transliterate_to_ascii', [Utils::class, 'unicodeTransliterate']);
 		$db->createFunction('email_hash', [Email::class, 'getHash']);
+		$db->createFunction('md5', 'md5');
+		$db->createFunction('uuid', [Utils::class, 'uuid']);
 		$db->createCollation('U_NOCASE', [Utils::class, 'unicodeCaseComparison']);
 	}
 
@@ -459,5 +461,16 @@ class DB extends SQLite3
 		$value = Utils::unicodeCaseFold($value);
 
 		return (bool) preg_match(self::$unicode_patterns_cache[$id], $value);
+	}
+
+	public function dropIndexes(): void
+	{
+		foreach ($this->getAssoc('SELECT name, name FROM sqlite_master WHERE type = \'index\';') as $index) {
+			if (preg_match('!^(?:sqlite_|plugin_|prv_)!', $index)) {
+				continue;
+			}
+
+			$this->exec(sprintf('DROP INDEX IF EXISTS %s;', $index));
+		}
 	}
 }

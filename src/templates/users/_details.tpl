@@ -36,7 +36,7 @@ $fields = DF::getInstance()->all();
 			<?php
 			$edit = ($field->write_access || $mode == 'edit');
 			?>
-			{include file="common/files/_context_list.tpl" path="%s/%s"|args:$user_files_path,$key}
+			{include file="common/files/_context_list.tpl" path="%s/%s"|args:$user_files_path:$key}
 		{elseif empty($value)}
 			<em>(Non renseigné)</em>
 		{elseif in_array($key, $id_fields)}

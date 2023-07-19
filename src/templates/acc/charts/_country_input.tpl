@@ -36,7 +36,6 @@ $name ??= 'country';
 	{literal}
 	var changeCountry = () => {
 		g.toggle('.' + n + '_empty', c.value == '' ? true : false);
-		g.resizeParentDialog();
 	};
 
 	c.onchange = changeCountry;

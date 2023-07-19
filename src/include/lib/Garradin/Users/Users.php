@@ -17,6 +17,7 @@ use Garradin\DynamicList;
 use Garradin\Search;
 use Garradin\Utils;
 use Garradin\UserException;
+use Garradin\ValidationException;
 
 use KD2\SMTP;
 use KD2\DB\EntityManager as EM;
@@ -137,25 +138,29 @@ class Users
 
 	static public function listByCategory(?int $id_category = null): DynamicList
 	{
+		$db = DB::getInstance();
 		$df = DynamicFields::getInstance();
 		$number_field = $df->getNumberField();
 		$name_fields = $df->getNameFields();
 
 		$columns = [
 			'_user_id' => [
-				'select' => 'users.id',
+				'select' => 'u.id',
+			],
+			'_user_name_index' => [
+				'select' => $df->getNameFieldsSQL('s'),
 			],
 		];
 
 		$number_column = [
 			'label' => 'Num.',
-			'select' => 'users.' . $number_field,
+			'select' => 'u.' . $number_field,
 		];
 
 		$identity_column = [
 			'label' => $df->getNameLabel(),
-			'select' => $df->getNameFieldsSQL('users'),
-			'order' => 'identity COLLATE U_NOCASE %s',
+			'select' => $df->getNameFieldsSQL('u'),
+			'order' => '_user_name_index %s',
 		];
 
 		$fields = $df->getListedFields();
@@ -182,11 +187,20 @@ class Users
 
 			$columns[$key] = [
 				'label'  => $config->label,
-				'select' => 'users.' . $key,
+				'select' => 'u.' . $key,
 			];
 
-			if ($df->isText($key)) {
-				$columns[$key]['order'] = sprintf('%s COLLATE U_NOCASE %%s', $key);
+			if ($config->hasSearchCache($key)) {
+				$columns[$key]['order'] = sprintf('s.%s %%s', $key);
+			}
+
+			if ($config->type == 'file') {
+				$columns[$key]['select'] = sprintf('(SELECT GROUP_CONCAT(f.path, \';\')
+					FROM users_files uf
+					INNER JOIN files f ON f.id = uf.id_file AND f.trash IS NULL
+					WHERE uf.id_user = u.id AND uf.field = %s)',
+					$db->quote($key)
+				);
 			}
 		}
 
@@ -194,34 +208,34 @@ class Users
 			$columns['identity'] = $identity_column;
 		}
 
-		$tables = User::TABLE;
-		$db = DB::getInstance();
+		$tables = 'users u';
+		$tables .= ' INNER JOIN users_search s ON s.id = u.id';
 
 		if ($db->test('users', 'is_parent = 1')) {
-			$tables .= ' LEFT JOIN users b ON b.id = users.id_parent';
+			$tables .= ' LEFT JOIN users b ON b.id = u.id_parent';
 
 			$columns['id_parent'] = [
 				'label'  => 'Rattaché à',
-				'select' => 'users.id_parent',
-				'order'  => 'users.id_parent IS NULL, _parent_name COLLATE U_NOCASE %s, identity COLLATE U_NOCASE %1$s',
+				'select' => 'u.id_parent',
+				'order'  => 'u.id_parent IS NULL, _parent_name COLLATE U_NOCASE %s, _user_name_index %1$s',
 			];
 
 			$columns['_parent_name'] = [
-				'select' => sprintf('CASE WHEN users.id_parent IS NOT NULL THEN %s ELSE NULL END', $df->getNameFieldsSQL('b')),
+				'select' => sprintf('CASE WHEN u.id_parent IS NOT NULL THEN %s ELSE NULL END', $df->getNameFieldsSQL('b')),
 			];
 
 			$columns['is_parent'] = [
 				'label' => 'Responsable',
-				'select' => 'users.is_parent',
-				'order' => 'users.is_parent DESC, identity COLLATE U_NOCASE %1$s',
+				'select' => 'u.is_parent',
+				'order' => 'u.is_parent DESC, _user_name_index %1$s',
 			];
 		}
 
 		if (!$id_category) {
-			$conditions = sprintf('users.id_category IN (SELECT id FROM users_categories WHERE hidden = 0)');
+			$conditions = sprintf('u.id_category IN (SELECT id FROM users_categories WHERE hidden = 0)');
 		}
 		elseif ($id_category > 0) {
-			$conditions = sprintf('users.id_category = %d', $id_category);
+			$conditions = sprintf('u.id_category = %d', $id_category);
 		}
 		else {
 			$conditions = '1';
@@ -355,8 +369,9 @@ class Users
 		$columns = array_keys($header);
 		$columns = array_map([$db, 'quoteIdentifier'], $columns);
 		$columns = implode(', ', $columns);
+		$header['category'] = 'Catégorie';
 
-		$i = $db->iterate(sprintf('SELECT %s FROM users WHERE %s;', $columns, $where));
+		$i = $db->iterate(sprintf('SELECT %s, (SELECT name FROM users_categories WHERE id = users.id_category) AS category FROM users WHERE %s;', $columns, $where));
 
 		$callback = function (&$row) use ($df) {
 			foreach ($df->fieldsByType('date') as $f) {
@@ -376,11 +391,12 @@ class Users
 
 	static public function importReport(CSV_Custom $csv, bool $ignore_ids, int $logged_user_id): array
 	{
-		$report = ['created' => [], 'modified' => [], 'unchanged' => [], 'has_logged_user' => false];
+		$report = ['created' => [], 'modified' => [], 'unchanged' => [], 'errors' => [], 'has_logged_user' => false];
 
-		foreach (self::iterateImport($csv, $ignore_ids) as $line => $user) {
+		foreach (self::iterateImport($csv, $ignore_ids, $report['errors']) as $line => $user) {
 			if (!$user) {
-				throw new UserException(sprintf('Ligne %d : le numéro de membre indiqué n\'existe pas', $line));
+				$report['errors'][] = sprintf('Ligne %d : le numéro de membre indiqué n\'existe pas', $line);
+				continue;
 			}
 
 			if ($user->id == $logged_user_id) {
@@ -392,7 +408,8 @@ class Users
 				$user->selfCheck();
 			}
 			catch (UserException $e) {
-				throw new UserException(sprintf('Ligne %d (%s) : %s', $line, $user->name(), $e->getMessage()));
+				$report['errors'][] = sprintf('Ligne %d (%s) : %s', $line, $user->name(), $e->getMessage());
+				continue;
 			}
 
 			if (!$user->exists()) {
@@ -414,7 +431,7 @@ class Users
 		$db = DB::getInstance();
 		$db->begin();
 
-		foreach (self::iterateImport($csv, $ignore_ids) as $user) {
+		foreach (self::iterateImport($csv, $ignore_ids) as $i => $user) {
 			if (!$user) {
 				continue;
 			}
@@ -423,13 +440,18 @@ class Users
 				continue;
 			}
 
-			$user->save();
+			try {
+				$user->save();
+			}
+			catch (UserException $e) {
+				throw new UserException(sprintf('Ligne %d : %s', $i, $e->getMessage()), 0, $e);
+			}
 		}
 
 		$db->commit();
 	}
 
-	static public function iterateImport(CSV_Custom $csv, bool $ignore_ids): \Generator
+	static public function iterateImport(CSV_Custom $csv, bool $ignore_ids, ?array &$errors = null): \Generator
 	{
 		$number_field = DynamicFields::getNumberField();
 
@@ -445,7 +467,17 @@ class Users
 			}
 
 			if ($user) {
-				$user->importForm((array)$row);
+				try {
+					$user->importForm((array)$row);
+				}
+				catch (UserException $e) {
+					if (null !== $errors) {
+						$errors[] = sprintf('Ligne %d : %s', $i, $e->getMessage());
+						continue;
+					}
+
+					throw $e;
+				}
 			}
 
 			yield $i => $user;

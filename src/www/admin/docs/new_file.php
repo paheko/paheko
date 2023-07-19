@@ -22,7 +22,13 @@ $form->runIf('create', function () use ($parent) {
 		$name .= '.md';
 	}
 
-	$file = Files::createFromString($parent . '/' . $name, '');
+	$target = $parent . '/' . $name;
+
+	if (Files::exists($target)) {
+		throw new UserException('Un fichier existe déjà avec ce nom : ' . $name);
+	}
+
+	$file = Files::createFromString($target, '');
 
 	Utils::redirect('!common/files/edit.php?fallback=code&p=' . rawurlencode($file->path));
 }, $csrf_key);

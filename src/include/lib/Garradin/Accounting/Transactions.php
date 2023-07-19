@@ -107,8 +107,17 @@ class Transactions
 	{
 		$columns = Account::LIST_COLUMNS;
 
-		unset($columns['line_label'], $columns['sum'], $columns['debit'], $columns['credit']);
-		unset($columns['project_code'], $columns['id_project'], $columns['line_reference']);
+		unset(
+			$columns['line_label'],
+			$columns['sum'],
+			$columns['debit'],
+			$columns['credit'],
+			$columns['project_code'],
+			$columns['id_project'],
+			$columns['line_reference'],
+			$columns['locked'],
+			$columns['files']
+		);
 
 		$columns['change']['select'] = 'SUM(l.credit)';
 		$columns['change']['label'] = 'Montant';
@@ -176,7 +185,21 @@ class Transactions
 		$reverse = 1;
 
 		$columns = Account::LIST_COLUMNS;
-		unset($columns['line_label'], $columns['sum'], $columns['debit'], $columns['credit']);
+
+		unset(
+			$columns['line_label'],
+			$columns['sum'],
+			$columns['debit'],
+			$columns['credit']
+		);
+
+		$db = DB::getInstance();
+
+		// Don't show locked column if no transactions are locked
+		if (!$db->test('acc_transactions', 'hash IS NOT NULL')) {
+			unset($columns['locked']);
+		}
+
 		$columns['line_reference']['label'] = 'Réf. paiement';
 		$columns['change']['select'] = sprintf('SUM(l.credit) * %d', $reverse);
 		$columns['change']['label'] = 'Montant';
@@ -184,7 +207,6 @@ class Transactions
 		$columns['id_project']['select'] = 'GROUP_CONCAT(l.id_project, \',\')';
 
 		if ($type == Transaction::TYPE_CREDIT || $type == Transaction::TYPE_DEBT) {
-			$db = DB::getInstance();
 
 			$columns['status_label'] = [
 				'label' => 'Statut',
@@ -217,7 +239,8 @@ class Transactions
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('date', true);
-		$list->setCount('COUNT(DISTINCT t.id)');
+		$list->setCount('COUNT(t.id)');
+		$list->setCountTables('acc_transactions t');
 		$list->groupBy('t.id');
 		$list->setModifier(function (&$row) {
 			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);

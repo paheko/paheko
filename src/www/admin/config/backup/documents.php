@@ -41,8 +41,6 @@ if ($ok) {
 	$config->save();
 	$tpl->assign(compact('config'));
 
-	Web::sync(true);
-
 	Static_Cache::clean(0);
 }
 

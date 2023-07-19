@@ -37,35 +37,33 @@ $context = Files::getContext($path);
 $context_ref = Files::getContextRef($path);
 $list = null;
 $user_name = null;
+$context_specific_root = false;
 
 // Specific lists for some contexts
-if (!$context_ref) {
-	if ($context == File::CONTEXT_TRANSACTION) {
-		$list = Transactions::list();
-		$allow_check = false;
+if ($context == File::CONTEXT_TRANSACTION || $context == File::CONTEXT_USER) {
+	if (!$context_ref) {
+		$context_specific_root = true;
+
+		if ($context == File::CONTEXT_TRANSACTION) {
+			$list = Transactions::list();
+		}
+		elseif ($context == File::CONTEXT_USER) {
+			$list = Users_Files::list();
+		}
 	}
-	elseif ($context == File::CONTEXT_USER) {
-		$list = Users_Files::list();
-		$allow_check = false;
-	}
-	elseif ($context == File::CONTEXT_TRASH) {
-		$trash = Files::get(File::CONTEXT_TRASH);
-		$tpl->assign('trash_size', $trash->getRecursiveSize());
-		$list = Trash::list();
-		$allow_check = true;
+	elseif ($context_ref && $context == File::CONTEXT_USER) {
+		$user_name = Users::getName($context_ref);
 	}
 }
-elseif ($context_ref && $context == File::CONTEXT_USER) {
-	$user_name = Users::getName($context_ref);
+else {
+	$context_ref = null;
 }
 
 if (null === $list) {
-	$list = Files::list($path);
-	$allow_check = true;
+	$list = Files::getDynamicList($path);
 }
-elseif ($list instanceof DynamicList) {
-	$list->loadFromQueryString();
-}
+
+$list->loadFromQueryString();
 
 $breadcrumbs = Files::getBreadcrumbs($path);
 
@@ -90,6 +88,6 @@ $parent_uri = $dir->parent_uri();
 
 $tpl->assign(compact('list', 'dir_uri', 'parent_uri', 'dir', 'context', 'context_ref',
 	'breadcrumbs', 'quota_used', 'quota_max', 'quota_percent', 'quota_left',
-	'highlight', 'user_name', 'gallery', 'allow_check'));
+	'highlight', 'user_name', 'gallery', 'context_specific_root'));
 
 $tpl->display('docs/index.tpl');

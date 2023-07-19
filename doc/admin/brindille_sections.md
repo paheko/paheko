@@ -63,6 +63,28 @@ bleu
 orange
 ```
 
+### Itérer sans tableau
+
+Il est aussi possible de faire `X` itérations, arbitrairement, sans avoir de tableau en entrée, en utilisant le paramètre `count`.
+
+C'est l'équivalent des boucles `for` dans les autres langages de programmation.
+
+Exemple :
+
+```
+{{#foreach count=3 key="i"}}
+- {{$i}}
+{{/foreach}}
+```
+
+Affichera :
+
+```
+- 0
+- 1
+- 2
+```
+
 ## restrict
 
 Permet de limiter (restreindre) une partie de la page aux membres qui sont connectés et/ou qui ont certains droits.
@@ -516,7 +538,7 @@ Charge un ou des documents pour le module courant.
 | `id` | optionnel | Numéro unique du document |
 | `each` | optionnel | Traiter une clé du document comme un tableau |
 
-Il est possible d'utiliser un paramètre commençant par un dollar : `$.cle="valeur"`. Cela va comparer `"valeur"` avec la valeur de la clé `cle` dans le document JSON. C'est l'équivalent d'écrire `where="json_extract(document, '$.cle') = 'valeur'"`.
+Il est possible d'utiliser d'autres paramètres : `{{#load cle="valeur"}}`. Cela va comparer `"valeur"` avec la valeur de la clé `cle` dans le document JSON. C'est l'équivalent d'écrire `where="json_extract(document, '$.cle') = 'valeur'"`.
 
 Pour des conditions plus complexes qu'une simple égalité, il est possible d'utiliser la syntaxe courte `$$…` dans le paramètre `where`. Ainsi `where="$$.nom LIKE 'Bourse%'` est l'équivalent de `where="json_extract(document, '$.nom') LIKE 'Bourse%'"`.
 
@@ -546,7 +568,7 @@ Afficher le nom du document dont la clé est `facture_43` :
 Afficher la liste des devis du module `invoice` depuis un autre module par exemple :
 
 ```
-{{#load module="invoice" $.type="quote"}}
+{{#load module="invoice" type="quote"}}
 <h1>Titre du devis : {{$subject}}</h1>
 <h2>Montant : {{$total}}</h2>
 {{/load}}
@@ -607,7 +629,7 @@ Cette section est très puissante et permet de générer des listes simplement, 
 
 Pour déterminer quelles colonnes afficher dans le tableau, il faut utiliser soit le paramètre `schema` pour indiquer un fichier de schéma JSON qui sera utilisé pour donner le libellé des colonnes (via la `description` indiquée dans le schéma), soit le paramètre `select`, où il faut alors indiquer le nom et le libellé des colonnes sous la forme `$$.colonne1 AS "Libellé"; $$.colonne2 AS "Libellé 2"`.
 
-Comme pour `load`, il est possible d'utiliser un paramètre commençant par un dollar : `$.cle="valeur"`. Cela va comparer `"valeur"` avec la valeur de la clé `cle` dans le document JSON. C'est l'équivalent d'écrire `where="json_extract(document, '$.cle') = 'valeur'"`.
+Comme pour `load`, il est possible d'utiliser des paramètres supplémentaires : `cle="valeur"`. Cela va comparer `"valeur"` avec la valeur de la clé `cle` dans le document JSON. C'est l'équivalent d'écrire `where="json_extract(document, '$.cle') = 'valeur'"`.
 
 Pour des conditions plus complexes qu'une simple égalité, il est possible d'utiliser la syntaxe courte `$$…` dans le paramètre `where`. Ainsi `where="$$.nom LIKE 'Bourse%'` est l'équivalent de `where="json_extract(document, '$.nom') LIKE 'Bourse%'"`.
 

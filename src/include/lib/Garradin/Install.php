@@ -289,6 +289,17 @@ class Install
 
 		$user->save();
 
+		// Create category for providers
+		$cat = new Category;
+		$cat->importForm([
+			'name' => 'Prestataires de paiement',
+			'hidden' => 1
+		]);
+		$cat->setAllPermissions(Session::ACCESS_NONE);
+		$cat->save();
+
+		$config->set('providers_category', $cat->id());
+
 		$config->set('files', array_map(fn () => null, $config::FILES));
 
 		$welcome_text = sprintf("Bienvenue dans l'administration de %s !\n\nUtilisez le menu à gauche pour accéder aux différentes sections.\n\nSi vous êtes perdu, n'hésitez pas à consulter l'aide :-)", $name);

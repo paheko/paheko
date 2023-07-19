@@ -49,7 +49,7 @@ $form->runIf('confirm_delete', function () use ($check, $session) {
 		$file->delete();
 	}
 
-	Trash::pruneEmptyDirectories();
+	Files::pruneEmptyDirectories();
 }, $csrf_key, '!docs/trash.php');
 
 $form->runIf('restore', function() use ($check, $session) {
@@ -81,13 +81,10 @@ if (f('delete')) {
 else {
 	Trash::clean();
 
-	$context = File::CONTEXT_TRASH;
-
-	$trash = Files::get($context);
-	$tpl->assign('trash_size', $trash->getRecursiveSize());
+	$size = Trash::getSize();
 	$list = Trash::list();
 
-	$tpl->assign(compact('list', 'context'));
+	$tpl->assign(compact('list', 'size'));
 
 	$tpl->display('docs/trash.tpl');
 }

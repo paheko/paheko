@@ -175,7 +175,7 @@ CREATE TABLE IF NOT EXISTS mailings (
 	anonymous INTEGER NOT NULL DEFAULT 0
 );
 
-CREATE INDEX mailings_sent ON mailings (sent);
+CREATE INDEX IF NOT EXISTS mailings_sent ON mailings (sent);
 
 CREATE TABLE IF NOT EXISTS mailings_recipients (
 	id INTEGER NOT NULL PRIMARY KEY,
@@ -185,7 +185,7 @@ CREATE TABLE IF NOT EXISTS mailings_recipients (
 	extra_data TEXT NULL
 );
 
-CREATE INDEX mailings_recipients_id ON mailings_recipients (id);
+CREATE INDEX IF NOT EXISTS mailings_recipients_id ON mailings_recipients (id);
 
 ---
 --- Users
@@ -455,6 +455,7 @@ CREATE INDEX IF NOT EXISTS acc_transactions_date ON acc_transactions (date);
 CREATE INDEX IF NOT EXISTS acc_transactions_related ON acc_transactions (id_related);
 CREATE INDEX IF NOT EXISTS acc_transactions_type ON acc_transactions (type, id_year);
 CREATE INDEX IF NOT EXISTS acc_transactions_status ON acc_transactions (status);
+CREATE INDEX IF NOT EXISTS acc_transactions_hash ON acc_transactions (hash);
 CREATE INDEX IF NOT EXISTS acc_transactions_reference ON acc_transactions (reference);
 CREATE INDEX IF NOT EXISTS acc_transactions_payment ON acc_transactions (id_payment);
 
@@ -503,7 +504,6 @@ CREATE TABLE IF NOT EXISTS payments
 (
     id INTEGER NOT NULL PRIMARY KEY,
     reference TEXT NULL,
-    id_transaction INTEGER NULL REFERENCES acc_transactions (id),
     id_author INTEGER NULL REFERENCES users (id) ON DELETE SET NULL,
     id_payer INTEGER NULL REFERENCES users (id) ON DELETE SET NULL,
     payer_name TEXT NULL,
@@ -546,13 +546,15 @@ CREATE TABLE IF NOT EXISTS files
 (
 	id INTEGER NOT NULL PRIMARY KEY,
 	path TEXT NOT NULL,
-	parent TEXT NOT NULL,
+	parent TEXT NULL REFERENCES files(path) ON DELETE CASCADE ON UPDATE CASCADE,
 	name TEXT NOT NULL, -- File name
 	type INTEGER NOT NULL, -- File type, 1 = file, 2 = directory
 	mime TEXT NULL,
 	size INT NULL,
 	modified TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(modified) IS NOT NULL AND datetime(modified) = modified),
 	image INT NOT NULL DEFAULT 0,
+	md5 TEXT NULL,
+	trash TEXT NULL CHECK (datetime(trash) IS NULL OR datetime(trash) = trash),
 
 	CHECK (type = 2 OR (mime IS NOT NULL AND size IS NOT NULL))
 );
@@ -562,12 +564,12 @@ CREATE UNIQUE INDEX IF NOT EXISTS files_unique ON files (path);
 CREATE INDEX IF NOT EXISTS files_parent ON files (parent);
 CREATE INDEX IF NOT EXISTS files_name ON files (name);
 CREATE INDEX IF NOT EXISTS files_modified ON files (modified);
+CREATE INDEX IF NOT EXISTS files_trash ON files (trash);
 
 CREATE TABLE IF NOT EXISTS files_contents
 -- Files contents (empty if using another storage backend)
 (
 	id INTEGER NOT NULL PRIMARY KEY REFERENCES files(id) ON DELETE CASCADE,
-	compressed INT NOT NULL DEFAULT 0,
 	content BLOB NOT NULL
 );
 
@@ -576,18 +578,51 @@ CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4
 (
 	tokenize=unicode61, -- Available from SQLITE 3.7.13 (2012)
 	path TEXT NOT NULL,
-	title TEXT NULL,
-	content TEXT NOT NULL, -- Text content
+	title TEXT NOT NULL,
+	content TEXT NULL, -- Text content
 	notindexed=path
 );
+
+-- Delete/insert search item when item is deleted/inserted from files
+CREATE TRIGGER IF NOT EXISTS files_search_bd BEFORE DELETE ON files BEGIN
+	DELETE FROM files_search WHERE docid = OLD.rowid;
+END;
+
+CREATE TRIGGER IF NOT EXISTS files_search_ai AFTER INSERT ON files BEGIN
+	INSERT INTO files_search (docid, path, title, content) VALUES (NEW.rowid, NEW.path, NEW.name, NULL);
+END;
+
+CREATE TRIGGER IF NOT EXISTS files_search_au AFTER UPDATE OF name, path ON files BEGIN
+	UPDATE files_search SET path = NEW.path, title = NEW.name WHERE docid = NEW.rowid;
+END;
+
+CREATE TABLE IF NOT EXISTS acc_transactions_files
+-- Link between transactions and files
+(
+	id_file INTEGER NOT NULL PRIMARY KEY REFERENCES files(id) ON DELETE CASCADE,
+	id_transaction INTEGER NOT NULL REFERENCES acc_transactions(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS acc_transactions_files_transaction ON acc_transactions_files (id_transaction);
+
+CREATE TABLE IF NOT EXISTS users_files
+-- Link between users and files
+(
+	id_file INTEGER NOT NULL PRIMARY KEY REFERENCES files(id) ON DELETE CASCADE,
+	id_user INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	field TEXT NOT NULL REFERENCES config_users_fields (name) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS users_files_user ON users_files (id_user);
+CREATE INDEX IF NOT EXISTS users_files_user_field ON users_files (id_user, field);
 
 CREATE TABLE IF NOT EXISTS web_pages
 (
 	id INTEGER NOT NULL PRIMARY KEY,
-	parent TEXT NOT NULL, -- Parent path, empty = web root
-	path TEXT NOT NULL, -- Full page directory name
+	parent TEXT NULL REFERENCES web_pages(path) ON DELETE CASCADE ON UPDATE CASCADE, -- Parent path, NULL = root
+	path TEXT NOT NULL, -- Full page path
+	dir_path TEXT NOT NULL REFERENCES files(path) ON UPDATE CASCADE, -- Full page directory name
 	uri TEXT NOT NULL, -- Page identifier
-	file_path TEXT NOT NULL, -- Full file path for contents
 	type INTEGER NOT NULL, -- 1 = Category, 2 = Page
 	status TEXT NOT NULL,
 	format TEXT NOT NULL,
@@ -598,8 +633,8 @@ CREATE TABLE IF NOT EXISTS web_pages
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS web_pages_path ON web_pages (path);
+CREATE UNIQUE INDEX IF NOT EXISTS web_pages_dir_path ON web_pages (dir_path);
 CREATE UNIQUE INDEX IF NOT EXISTS web_pages_uri ON web_pages (uri);
-CREATE UNIQUE INDEX IF NOT EXISTS web_pages_file_path ON web_pages (file_path);
 CREATE INDEX IF NOT EXISTS web_pages_parent ON web_pages (parent);
 CREATE INDEX IF NOT EXISTS web_pages_published ON web_pages (published);
 CREATE INDEX IF NOT EXISTS web_pages_title ON web_pages (title);

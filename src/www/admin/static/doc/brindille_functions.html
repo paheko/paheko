@@ -80,6 +80,7 @@
 			<li><a href="#delete">delete</a></li>
 			<li><a href="#admin_header">admin_header</a></li>
 			<li><a href="#admin_footer">admin_footer</a></li>
+			<li><a href="#delete_form">delete_form</a></li>
 			<li><a href="#input">input</a>
 			<ol>
 				<li><a href="#valeur-du-champ">Valeur du champ</a></li>
@@ -169,7 +170,23 @@
 <h2 id="break">break</h2>
 <p>Interrompt une section.</p>
 <h2 id="continue">continue</h2>
-<p>Passe à l'itération suivante d'une section.</p>
+<p>Passe à l'itération suivante d'une section. Le code situé entre cette instruction et la fin de la section ne sera pas exécuté.</p>
+<pre><code>{{#foreach from=$list item="event"}}
+  {{if $event.date == '2023-01-01'}}
+    {{:continue}}
+  {{/if}}
+  {{$event.title}}
+{{/foreach}}</code></pre>
+<p>Il est possible de passer à l'itération suivante d'une section parente en utilisant un chiffre en paramètre :</p>
+<pre><code>{{#foreach from=$list item="event"}}
+  {{$event.title}}
+  {{#foreach from=$event.people item="person"}}
+    {{if $person.name == 'bohwaz'}}
+      {{:continue 2}}
+    {{/if}}
+    - {{$person.name}}
+  {{/foreach}}
+{{/foreach}}</code></pre>
 <h2 id="debug">debug</h2>
 <p>Cette fonction permet d'afficher le contenu d'une ou plusieurs variables :</p>
 <pre><code>{{:debug test=$title}}</code></pre>
@@ -571,9 +588,14 @@ Le document n°{{$id}} a bien été enregistré.</code></pre>
 </tr>
 </tbody>
 </table>
-<p>Si ni <code>key</code> ni <code>id</code> ne sont indiqués, une erreur sera affichée.</p>
-<p>Exemple :</p>
-<pre><code>{{:delete key="facture_43"}}</code></pre>
+<p>Il est possible de spécifier d'autres paramètres, ou une clause <code>where</code> et des paramètres dont le nom commence par deux points.</p>
+<ul>
+<li>Supprimer le document avec la clé <code>facture_43</code> : <code>{{:delete key="facture_43"}}</code></li>
+<li>Supprimer le document avec la clé <code>ABCD</code> et dont la propriété <code>type</code> du document correspond à la valeur <code>facture</code> : <code>{{:delete key="ABCD" type="facture"}}</code></li>
+<li>Supprimer tous les documents : <code>{{:delete}}</code></li>
+<li>Supprimer tous les documents ayant le type <code>facture</code> : <code>{{:delete type="facture"}}</code></li>
+<li>Supprimer tous les documents de type <code>devis</code> ayant une date dans le passé : <code>{{:delete :type="devis" where="$$.type = :type AND $$.date &lt; datetime()"}}</code></li>
+</ul>
 <h2 id="admin_header">admin_header</h2>
 <p>Affiche l'entête de l'administration de l'association.</p>
 <table>
@@ -631,6 +653,67 @@ Le document n°{{$id}} a bien été enregistré.</code></pre>
 <h2 id="admin_footer">admin_footer</h2>
 <p>Affiche le pied de page de l'administration de l'association.</p>
 <pre><code>{{:admin_footer}}</code></pre>
+<h2 id="delete_form">delete_form</h2>
+<p>Affiche un formulaire demandant la confirmation de suppression d'un élément.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Obligatoire ou optionnel ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>legend</code></td>
+<td style="text-align: left;"><strong>obligatoire</strong></td>
+<td style="text-align: left;">Libellé de l'élément <code>&lt;legend&gt;</code> du formulaire</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>warning</code></td>
+<td style="text-align: left;"><strong>obligatoire</strong></td>
+<td style="text-align: left;">Libellé de la question de suppression (en gros en rouge)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>alert</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Message d'alerte supplémentaire (bloc jaune)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>info</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Informations liées à la suppression (expliquant ce qui va être impacté par la suppression)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>confirm</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Libellé de la case à cocher pour la suppression, si ce paramètre est absent ou <code>NULL</code>, la case à cocher ne sera pas affichée.</td>
+</tr>
+</tbody>
+</table>
+<p>Le formulaire envoie un <code>POST</code> avec le bouton ayant le nom <code>delete</code>. Si le paramètre <code>confirm</code> est renseigné, alors la case à cochée aura le nom <code>confirm_delete</code>.</p>
+<p>Exemple :</p>
+<pre><code>{{#load id=$_GET.id assign="invoice"}}
+{{else}}
+  {{:error message="Facture introuvable"}}
+{{/if}}
+
+{{#form on="delete"}}
+  {{if !$_POST.confirm_delete}}
+    {{:error message="Merci de cocher la case"}}
+  {{/if}}
+  {{:delete id=$invoice.id}}
+{{/form}}
+
+{{:form_errors}}
+
+{{:delete_form
+  legend="Suppression d'une facture"
+  warning="Supprimer la facture n°%d ?"|args:$invoice.id
+  info="Le devis lié sera également supprimé"
+  alert="La facture sera définitivement perdue !"
+  confirm="Cocher cette case pour confirmer la suppression de la facture"
+}}</code></pre>
 <h2 id="input">input</h2>
 <p>Crée un champ de formulaire HTML. Cette fonction est une extension à la balise <code>&lt;input&gt;</code> en HTML, mais permet plus de choses.</p>
 <table>

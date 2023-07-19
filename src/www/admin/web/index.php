@@ -24,6 +24,8 @@ elseif (qg('uri')) {
 	}
 }
 
+$links_errors = null;
+
 if ($page) {
 	$links_errors = $page->checkInternalLinks();
 
@@ -33,19 +35,15 @@ if ($page) {
 		Utils::redirect('!web/?p=' . $page->path);
 	}
 }
-else {
-	foreach (Web::sync() as $error) {
-		$form->addError($error);
-	}
-
+elseif (isset($_GET['check'])) {
 	$links_errors = Web::checkAllInternalLinks();
 }
 
 $cat = $page && $page->isCategory() ? $page : null;
 
-$categories = Web::listCategories($cat ? $cat->path : '');
-$pages = Web::getPagesList($cat ? $cat->path : '');
-$drafts = Web::getDraftsList($cat ? $cat->path : '');
+$categories = Web::listCategories($cat ? $cat->path : null);
+$pages = Web::getPagesList($cat ? $cat->path : null);
+$drafts = Web::getDraftsList($cat ? $cat->path : null);
 
 $pages->loadFromQueryString();
 $drafts->loadFromQueryString();
@@ -55,11 +53,11 @@ $title = $page ? sprintf('%s — Gestion du site web', $page->title) : 'Gestion 
 $type_page = Page::TYPE_PAGE;
 $type_category = Page::TYPE_CATEGORY;
 $breadcrumbs = $page ? $page->getBreadcrumbs() : [];
-
+$can_edit = $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 
 $tpl->assign('custom_js', ['web_gallery.js']);
 $tpl->assign('custom_css', ['web.css', '!web/css.php']);
 
-$tpl->assign(compact('categories', 'pages', 'drafts', 'title', 'type_page', 'type_category', 'breadcrumbs', 'page', 'links_errors'));
+$tpl->assign(compact('categories', 'pages', 'drafts', 'title', 'type_page', 'type_category', 'breadcrumbs', 'page', 'links_errors', 'can_edit'));
 
 $tpl->display('web/index.tpl');

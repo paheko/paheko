@@ -2,6 +2,12 @@
 
 <nav class="tabs">
 	<aside>
+		{if !$page && $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
+			{linkbutton shape="check" href="?check=1" label="Vérifier les liens internes"}
+		{/if}
+		{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
+			{linkbutton shape="code" href="!config/ext/edit.php?module=web" label="Code du site"}
+		{/if}
 		<form method="post" action="search.php" target="_dialog" data-disable-progress="1">
 			{input type="text" name="q" size=25 placeholder="Rechercher dans le site" title="Rechercher dans le site"}
 			{button shape="search" type="submit" title="Rechercher"}
@@ -36,16 +42,20 @@
 	</p>
 {/if}
 
-{if count($links_errors) && !$page}
-	<div class="block alert">
-		Des pages contiennent des liens qui mènent à des pages qui n'existent pas&nbsp;:
-		<ul>
-			{foreach from=$links_errors item="p"}
-			<li>{link href="?p=%s"|args:$p.path label=$p.title}</li>
-			{/foreach}
-		</ul>
-	</div>
-{elseif count($links_errors)}
+{if $_GET.check && !$page}
+	{if !empty($links_errors)}
+		<div class="block alert">
+			Des pages contiennent des liens qui mènent à des pages qui n'existent pas&nbsp;:
+			<ul>
+				{foreach from=$links_errors item="p"}
+				<li>{link href="?p=%s"|args:$p.path label=$p.title}</li>
+				{/foreach}
+			</ul>
+		</div>
+	{else}
+		<p class="block confirm">Aucune erreur n'a été détectée.</p>
+	{/if}
+{elseif !empty($links_errors)}
 	<div class="block alert">
 		Cette page contient des liens qui mènent à des pages qui n'existent pas ou ont été renommées&nbsp;:
 		<ul>

@@ -517,22 +517,33 @@ details summary.block::after {
 .files-list {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
+    align-items: stretch;
+    justify-content: stretch;
+    margin: .8rem 0;
 }
 
 .files-list aside.file {
-    max-width: 20em;
+    width: 13rem;
     border-radius: .5rem;
     background: rgba(var(--gSecondColor), 0.1);
     text-align: center;
     padding: .5rem;
     margin: .5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    align-items: stretch;
+}
+
+.files-list aside.file figcaption {
+    font-size: .9em;
+    margin-bottom: .5rem;
 }
 
 .files-list aside.file a span::before {
     color: rgba(var(--gMainColor), 0.7);
-    font-size: 3em;
-    padding: .2em;
+    font-size: 5em;
+    padding: .2em !important;
 }
 
 .files-list aside small {

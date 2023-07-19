@@ -5,6 +5,8 @@ namespace Garradin\UserTemplate;
 use Garradin\Config;
 use Garradin\Utils;
 
+use Garradin\Web\Render\Markdown;
+
 /**
  * Common modifiers used by Template (Smartyer) and UserTemplate
  */
@@ -31,7 +33,6 @@ class CommonModifiers
 		'floatval',
 		'strval',
 		'substr',
-		'abs',
 		'http_build_query',
 	];
 
@@ -60,6 +61,7 @@ class CommonModifiers
 	}
 
 	const MODIFIERS_LIST = [
+		'markdown',
 		'money',
 		'money_raw',
 		'money_currency',
@@ -80,7 +82,14 @@ class CommonModifiers
 		'ucwords',
 		'ucfirst',
 		'lcfirst',
+		'abs',
 	];
+
+	static public function markdown($str): string
+	{
+		$md = new Markdown;
+		return $md->render($str);
+	}
 
 	static public function money($number, bool $hide_empty = true, bool $force_sign = false, bool $html = false): string
 	{
@@ -309,5 +318,17 @@ class CommonModifiers
 	static public function lcfirst($str): string
 	{
 		return function_exists('mb_strtolower') ? mb_strtolower(mb_substr($str, 0, 1)) . mb_substr($str, 1) : ucfirst($str);
+	}
+
+	static public function abs($in)
+	{
+		if (false !== strpos((string)$in, '.')) {
+			$in = (float) $in;
+		}
+		else {
+			$in = (int) $in;
+		}
+
+		return abs($in);
 	}
 }

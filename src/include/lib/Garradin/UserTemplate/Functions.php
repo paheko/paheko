@@ -41,6 +41,7 @@ class Functions
 		'captcha',
 		'mail',
 		'button',
+		'delete_form',
 		'form_errors',
 		'redirect',
 	];
@@ -75,26 +76,31 @@ class Functions
 	 */
 	static public function continue(string $name, string $params, Brindille $tpl, int $line)
 	{
-		$in_loop = false;
+		$in_loop = 0;
 		foreach ($tpl->_stack as $element) {
 			if ($element[0] == $tpl::SECTION) {
-				$in_loop = true;
-				break;
+				$in_loop++;
 			}
 		}
 
-		if (!$in_loop) {
+		$i = ctype_digit(trim($params)) ? (int)$params : 1;
+
+		if ($in_loop < $i) {
 			throw new Brindille_Exception(sprintf('Error on line %d: continue can only be used inside a section', $line));
 		}
 
-		return '<?php continue; ?>';
+		return sprintf('<?php continue(%d); ?>', $i);
 	}
 
 	static public function admin_header(array $params): string
 	{
 		$tpl = Template::getInstance();
 		$tpl->assign($params);
-		$tpl->assign('plugins_menu', Plugins::listModulesAndPluginsMenu(Session::getInstance()));
+
+		if (Session::getInstance()->isLogged()) {
+			$tpl->assign('plugins_menu', Plugins::listModulesAndPluginsMenu(Session::getInstance()));
+		}
+
 		return $tpl->fetch('_head.tpl');
 	}
 
@@ -171,7 +177,7 @@ class Functions
 			$params = array_merge($result, $params);
 		}
 
-		if ($validate) {
+		if (!empty($validate)) {
 			$schema = self::read(['file' => $validate], $tpl, $line);
 
 			if ($validate_only && is_string($validate_only)) {
@@ -225,21 +231,37 @@ class Functions
 		}
 
 		$table = 'module_data_' . $tpl->module->name;
+		$where = [];
+		$args = [];
+		$i = 0;
 
-		if (!empty($params['key'])) {
-			$field = 'key';
-			$where_value = $params['key'];
+		foreach ($params as $key => $value) {
+			if ($key[0] == ':') {
+				$args[substr($key, 1)] = $value;
+			}
+			elseif ($key == 'where') {
+				$where[] = Sections::_moduleReplaceJSONExtract($value);
+			}
+			else {
+				if ($key == 'id') {
+					$value = (int) $value;
+				}
+
+				if ($key !== 'id' && $key !== 'key') {
+					$args['key_' . $i] = '$.' . $key;
+					$key = sprintf('json_extract(document, :key_%d)', $i);
+				}
+
+				$where[] = $key . ' = :value_' . $i;
+				$args['value_' . $i] = $value;
+				$i++;
+			}
 		}
-		elseif (!empty($params['id'])) {
-			$field = 'id';
-			$where_value = (int) $params['id'];
-		}
-		else {
-			throw new Brindille_Exception('No "id" or "key" parameter was passed');
-		}
+
+		$where = implode(' AND ', $where);
 
 		$db = DB::getInstance();
-		$db->delete($table, sprintf('%s = ?', $field), $where_value);
+		$db->delete($table, $where, $args);
 	}
 
 	static public function captcha(array $params, Brindille $tpl, int $line)
@@ -248,7 +270,7 @@ class Functions
 
 		if (isset($params['html'])) {
 			$c = Security::createCaptcha($secret, $params['lang'] ?? 'fr');
-			return sprintf('<label for="f_c_42">Merci d\'écrire <strong><q>%s</q></strong> en chiffres&nbsp;:</label>
+			return sprintf('<label for="f_c_42">Merci d\'écrire <strong><q>&nbsp;%s&nbsp;</q></strong> en chiffres&nbsp;:</label>
 				<input type="text" name="f_c_42" id="f_c_42" placeholder="Exemple : 1234" />
 				<input type="hidden" name="f_c_43" value="%s" />',
 				$c['spellout'], $c['hash']);
@@ -551,18 +573,32 @@ class Functions
 		}
 	}
 
+	static public function _getFormKey(): string
+	{
+		return 'form_' . md5(Utils::getSelfURI(false));
+	}
+
+	/**
+	 * @override
+	 */
 	static public function button(array $params): string
 	{
-		static $forms = [];
-
-		$hash = md5(Utils::getSelfURI(false));
-
 		// Always add CSRF protection when a submit button is present in the form
-		if (isset($params['type']) && $params['type'] == 'submit' && !in_array($hash, $forms)) {
-			$params['csrf_key'] = 'form_' . $hash;
+		if (isset($params['type']) && $params['type'] == 'submit') {
+			$key = self::_getFormKey();
+			$params['csrf_key'] = $key;
 		}
 
 		return CommonFunctions::button($params);
+	}
+
+	/**
+	 * @override
+	 */
+	static public function delete_form(array $params, UserTemplate $tpl): string
+	{
+		$params['csrf_key'] = self::_getFormKey();
+		return self::form_errors([], $tpl) . CommonFunctions::delete_form($params);
 	}
 
 	static public function form_errors(array $params, UserTemplate $tpl): string

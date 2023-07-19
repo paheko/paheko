@@ -8,11 +8,8 @@ use Garradin\Files\Files;
 use Garradin\DB;
 use Garradin\DynamicList;
 use Garradin\Utils;
-use Garradin\ValidationException;
 
 use KD2\DB\EntityManager as EM;
-
-use const Garradin\FILE_STORAGE_BACKEND;
 
 class Web
 {
@@ -34,101 +31,36 @@ class Web
 		return $results;
 	}
 
-	/**
-	 * This syncs the whole website between the actual files and the web_pages table
-	 */
-	static public function sync(bool $force = false): array
+	static protected function getParentClause(?string $parent): string
 	{
-		// This is only useful if web pages are stored outside of the database
-		if (FILE_STORAGE_BACKEND == 'SQLite' && !$force) {
-			return [];
+		if ($parent) {
+			return 'parent = ' . DB::getInstance()->quote($parent);
 		}
-
-		$path = File::CONTEXT_WEB;
-		$errors = [];
-
-		$exists = array_flip(Files::callStorage('listDirectoriesRecursively', $path));
-
-		$db = DB::getInstance();
-
-		$in_db = $db->getGrouped('SELECT path, file_path, modified FROM web_pages;');
-
-		$deleted = array_diff_key($in_db, $exists);
-		$new = array_diff_key($exists, $in_db);
-
-		if ($deleted) {
-			$deleted = array_map(function ($page) {
-				return $page->path;
-			}, $deleted);
-
-			$db->exec(sprintf('DELETE FROM web_pages WHERE %s;', $db->where('path', $deleted)));
+		else {
+			return 'parent IS NULL';
 		}
-
-		$new = array_keys($new);
-		ksort($new);
-
-		foreach ($new as $path) {
-			$f = Files::get(File::CONTEXT_WEB . '/' . $path . '/index.txt');
-
-			if (!$f) {
-				// This is a directory without content, ignore
-				continue;
-			}
-
-			try {
-				Page::fromFile($f)->save();
-			}
-			catch (ValidationException $e) {
-				// Ignore validation errors, just don't add pages to index
-				$errors[] = sprintf('Erreur à l\'import, page "%s": %s', str_replace(File::CONTEXT_WEB . '/', '', $f->parent), $e->getMessage());
-			}
-		}
-
-		if (count($new) || count($deleted)) {
-			Cache::clear();
-		}
-
-		return $errors;
-
-		/*
-		// There's no need for that sync as it is triggered when loading a Page entity!
-		$intersection = array_intersect_key($in_db, $exists);
-		foreach ($intersection as $page) {
-			$file = Files::get($page->file_path);
-
-			$modified = new \DateTime($page->modified);
-
-			if ($modified == $file->modified) {
-				continue;
-			}
-
-			$page = Web::get($page->path);
-			$page->loadFromFile($file);
-			$page->save();
-		}
-		 */
 	}
 
-	static public function listCategories(string $parent): array
+	static public function listCategories(?string $parent): array
 	{
-		$sql = 'SELECT * FROM @TABLE WHERE parent = ? AND type = ? ORDER BY title COLLATE U_NOCASE;';
-		return EM::getInstance(Page::class)->all($sql, $parent, Page::TYPE_CATEGORY);
+		$sql = sprintf('SELECT * FROM @TABLE WHERE %s AND type = %d ORDER BY title COLLATE U_NOCASE;', self::getParentClause($parent), Page::TYPE_CATEGORY);
+		return EM::getInstance(Page::class)->all($sql);
 	}
 
-	static public function listPages(string $parent, bool $order_by_date = true): array
+	static public function listPages(?string $parent, bool $order_by_date = true): array
 	{
 		$order = $order_by_date ? 'published DESC' : 'title COLLATE U_NOCASE';
-		$sql = sprintf('SELECT * FROM @TABLE WHERE parent = ? AND type = %d ORDER BY %s;', Page::TYPE_PAGE, $order);
-		return EM::getInstance(Page::class)->all($sql, $parent);
+		$sql = sprintf('SELECT * FROM @TABLE WHERE %s AND type = %d ORDER BY %s;', self::getParentClause($parent), Page::TYPE_PAGE, $order);
+		return EM::getInstance(Page::class)->all($sql);
 	}
 
-	static public function listAll(string $parent): array
+	static public function listAll(): array
 	{
-		$sql = 'SELECT * FROM @TABLE WHERE parent = ? ORDER BY title COLLATE U_NOCASE;';
-		return EM::getInstance(Page::class)->all($sql, $parent);
+		$sql = 'SELECT * FROM @TABLE ORDER BY title COLLATE U_NOCASE;';
+		return EM::getInstance(Page::class)->all($sql);
 	}
 
-	static public function getDraftsList(string $parent): DynamicList
+	static public function getDraftsList(?string $parent): DynamicList
 	{
 		$list = self::getPagesList($parent);
 		$list->setParameter('status', Page::STATUS_DRAFT);
@@ -136,7 +68,7 @@ class Web
 		return $list;
 	}
 
-	static public function getPagesList(string $parent): DynamicList
+	static public function getPagesList(?string $parent): DynamicList
 	{
 		$columns = [
 			'path' => [
@@ -154,10 +86,9 @@ class Web
 		];
 
 		$tables = Page::TABLE;
-		$conditions = 'parent = :parent AND type = :type AND status = :status';
+		$conditions = self::getParentClause($parent) . ' AND type = :type AND status = :status';
 
 		$list = new DynamicList($columns, $tables, $conditions);
-		$list->setParameter('parent', $parent);
 		$list->setParameter('type', Page::TYPE_PAGE);
 		$list->setParameter('status', Page::STATUS_ONLINE);
 		$list->orderBy('title', false);
@@ -166,24 +97,12 @@ class Web
 
 	static public function get(string $path): ?Page
 	{
-		$page = EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE path = ?;', $path);
-
-		if ($page && !$page->file()) {
-			return null;
-		}
-
-		return $page;
+		return EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE path = ?;', $path);
 	}
 
 	static public function getByURI(string $uri): ?Page
 	{
-		$page = EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE uri = ?;', $uri);
-
-		if ($page && !$page->file()) {
-			return null;
-		}
-
-		return $page;
+		return EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE uri = ?;', $uri);
 	}
 
 	static public function getAttachmentFromURI(string $uri): ?File
@@ -207,10 +126,6 @@ class Web
 		$list = [];
 
 		foreach (EM::getInstance(Page::class)->iterate($sql) as $page) {
-			if (!$page->file()) {
-				continue;
-			}
-
 			$list[$page->uri] = $page;
 		}
 

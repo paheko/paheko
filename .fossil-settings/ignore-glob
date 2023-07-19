@@ -4,3 +4,5 @@ src/*.asc
 src/*.log
 src/include/lib/KD2
 src/debug_sql.sqlite
+src/modules/*
+src/config.local.php

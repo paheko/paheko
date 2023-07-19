@@ -24,12 +24,13 @@ class FileSystem implements StorageInterface
 			throw new \RuntimeException('Le stockage de fichier n\'a pas été configuré (FILE_STORAGE_CONFIG est vide).');
 		}
 
-		if (!is_writable($config) && !Utils::safe_mkdir($config)) {
-			throw new \RuntimeException('Le répertoire de stockage des fichiers est protégé contre l\'écriture.');
+		$target = rtrim($config, DIRECTORY_SEPARATOR);
+
+		if (false === strpos($target, '%')) {
+			$target .= '/%.2s/%1$s';
 		}
 
-		$target = rtrim($config, DIRECTORY_SEPARATOR);
-		self::$_root = realpath($target);
+		self::$_root = $target;
 	}
 
 	static protected function _getRoot()
@@ -38,11 +39,19 @@ class FileSystem implements StorageInterface
 			throw new \RuntimeException('Le stockage de fichier n\'a pas été configuré (FILE_STORAGE_CONFIG est vide ?).');
 		}
 
-		return self::$_root;
+		$root = rtrim(strtok(self::$_root, '%'), DIRECTORY_SEPARATOR);
+
+		if (!file_exists($root)) {
+			Utils::safe_mkdir($root, 0770, true);
+		}
+
+		return $root;
 	}
 
 	static protected function ensureDirectoryExists(string $path): void
 	{
+		$path = Utils::dirname($path);
+
 		if (is_dir($path)) {
 			return;
 		}
@@ -54,8 +63,8 @@ class FileSystem implements StorageInterface
 
 	static public function storePath(File $file, string $source_path): bool
 	{
-		$target = self::getFullPath($file);
-		self::ensureDirectoryExists(dirname($target));
+		$target = self::getLocalFilePath($file);
+		self::ensureDirectoryExists($target);
 
 		$return = copy($source_path, $target);
 
@@ -68,8 +77,8 @@ class FileSystem implements StorageInterface
 
 	static public function storeContent(File $file, string $source_content): bool
 	{
-		$target = self::getFullPath($file);
-		self::ensureDirectoryExists(dirname($target));
+		$target = self::getLocalFilePath($file);
+		self::ensureDirectoryExists($target);
 
 		$return = file_put_contents($target, $source_content) === false ? false : true;
 
@@ -82,8 +91,8 @@ class FileSystem implements StorageInterface
 
 	static public function storePointer(File $file, $pointer): bool
 	{
-		$target = self::getFullPath($file);
-		self::ensureDirectoryExists(dirname($target));
+		$target = self::getLocalFilePath($file);
+		self::ensureDirectoryExists($target);
 
 		$fp = fopen($target, 'w');
 
@@ -98,251 +107,30 @@ class FileSystem implements StorageInterface
 		return true;
 	}
 
-	static public function mkdir(File $file): bool
+	static public function getLocalFilePath(File $file): ?string
 	{
-		return Utils::safe_mkdir(self::getFullPath($file), 0777, true);
-	}
-
-	static public function touch(string $path, $date = null): bool
-	{
-		if ($date instanceof \DateTimeInterface) {
-			$date = $date->getTimestamp();
-		}
-
-		return touch(self::_getRealPath($path), $date ?? time());
-	}
-
-	static protected function _getRealPath(string $path): ?string
-	{
-		if (substr(trim($path, '/'), 0, 1) == '.') {
-			return null;
-		}
-
-		return self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
-	}
-
-	static public function getFullPath(File $file): ?string
-	{
-		return self::_getRealPath($file->path);
+		$path = sprintf(self::$_root, md5($file->id()));
+		return str_replace('/', DIRECTORY_SEPARATOR, $path);
 	}
 
 	static public function getReadOnlyPointer(File $file)
 	{
-		return fopen(self::getFullPath($file), 'rb');
-	}
+		try {
+			return fopen(self::getLocalFilePath($file), 'rb');
+		}
+		catch (\Throwable $e) {
+			if (false !== strpos($e->getMessage(), 'No such file')) {
+				return null;
+			}
 
-	static public function display(File $file): void
-	{
-		readfile(self::getFullPath($file));
-	}
-
-	static public function fetch(File $file): string
-	{
-		return file_get_contents(self::getFullPath($file));
+			throw $e;
+		}
 	}
 
 	static public function delete(File $file): bool
 	{
-		$path = self::getFullPath($file);
-
-		if ($file->type == File::TYPE_DIRECTORY) {
-			return Utils::deleteRecursive($path, true);
-		}
-
+		$path = self::getLocalFilePath($file);
 		return Utils::safe_unlink($path);
-	}
-
-	static public function move(File $file, string $new_path): bool
-	{
-		$source = self::getFullPath($file);
-		$target = self::_getRealPath($new_path);
-
-		self::ensureDirectoryExists(dirname($target));
-
-		return rename($source, $target);
-	}
-
-	static public function exists(string $path): bool
-	{
-		return file_exists(self::_getRealPath($path));
-	}
-
-	static public function get(string $path): ?File
-	{
-		$file = new \SplFileInfo(self::_getRealPath($path));
-
-		if (!$file->getRealPath()) {
-			return null;
-		}
-
-		return self::_SplToFile($file);
-	}
-
-	static protected function _SplToFile(\SplFileInfo $spl): File
-	{
-		$path = str_replace(self::_getRoot() . DIRECTORY_SEPARATOR, '', $spl->getPathname());
-		$path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
-		$parent = Utils::dirname($path);
-
-		if ($parent == '.' || !$parent) {
-			$parent = '';
-		}
-
-		$data = [
-			'id'       => null,
-			// may return slash
-			// see comments https://www.php.net/manual/fr/splfileinfo.getfilename.php
-			// don't use getBasename as it is locale-dependent!
-			'name'     => trim($spl->getFilename(), '/'),
-			'path'     => $path,
-			'parent'   => $parent,
-			'modified' => new \DateTime('@' . $spl->getMTime()),
-			'size'     => $spl->getSize(),
-			'type'     => $spl->isDir() ? File::TYPE_DIRECTORY : File::TYPE_FILE,
-			'mime'     => mime_content_type($spl->getRealPath()),
-		];
-
-		$data['modified']->setTimeZone(new \DateTimeZone(date_default_timezone_get()));
-
-		$data['image'] = (int) in_array($data['mime'], File::IMAGE_TYPES);
-
-		$file = new File;
-		$file->load($data);
-		$file->parent = $parent; // Force empty parent to be empty, not null
-
-		return $file;
-	}
-
-	static public function list(string $path): array
-	{
-		$fullpath = self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
-		$fullpath = rtrim($fullpath, DIRECTORY_SEPARATOR);
-
-		if (!file_exists($fullpath)) {
-			return [];
-		}
-
-		$files = [];
-
-		foreach (new \FilesystemIterator($fullpath, \FilesystemIterator::SKIP_DOTS) as $file) {
-			// Seems that SKIP_DOTS does not work all the time?
-			if ($file->getFilename()[0] == '.') {
-				continue;
-			}
-
-			// Used to make sorting easier
-			// directory_blabla
-			// file_image.jpeg
-			$files[$file->getType() . '_' .$file->getFilename()] = self::_SplToFile($file);
-		}
-
-		return Utils::knatcasesort($files);
-	}
-
-	static public function glob(string $path)
-	{
-		$fullpath = self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
-		$fullpath = rtrim($fullpath, DIRECTORY_SEPARATOR);
-
-		if (!file_exists($fullpath)) {
-			return [];
-		}
-
-		$files = [];
-
-		foreach (glob($fullpath) as $file) {
-			$file = new \SplFileInfo($file);
-			$files[$file->getType() . '_' .$file->getFilename()] = self::_SplToFile($file);
-		}
-
-		return Utils::knatcasesort($files);
-	}
-
-	static public function listDirectoriesRecursively(string $path): array
-	{
-		$fullpath = self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
-		$fullpath = rtrim($fullpath, DIRECTORY_SEPARATOR);
-
-		if (!file_exists($fullpath)) {
-			return [];
-		}
-
-		return self::_recurseGlob($fullpath, '*', \GLOB_ONLYDIR);
-	}
-
-	static public function getDirectorySize(string $path): int
-	{
-		$fullpath = self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
-		$fullpath = rtrim($fullpath, DIRECTORY_SEPARATOR);
-
-		$total = 0;
-
-		foreach (glob($fullpath . '/*', GLOB_NOSORT) as $f) {
-			if (is_dir($f)) {
-				$f = substr($f, strlen($path) + 1);
-				$total += self::getDirectorySize($f);
-			}
-			else {
-				$total += filesize($f);
-			}
-		}
-
-		return $total;
-	}
-
-	static protected function _recurseGlob(string $path, string $pattern = '*', int $flags = 0): array
-	{
-		$target = $path . DIRECTORY_SEPARATOR . $pattern;
-		$list = [];
-
-		// glob is the fastest way to recursely list directories and files apparently
-		// after comparing with opendir(), dir() and filesystem recursive iterators
-		foreach(glob($target, $flags) as $file) {
-			$file = basename($file);
-
-			if ($file[0] == '.') {
-				continue;
-			}
-
-			$list[] = $file;
-
-			if (is_dir($path . DIRECTORY_SEPARATOR . $file)) {
-				foreach (self::_recurseGlob($path . DIRECTORY_SEPARATOR . $file, $pattern, $flags) as $subfile) {
-					$list[] = $file . DIRECTORY_SEPARATOR . $subfile;
-				}
-			}
-		}
-
-		return $list;
-	}
-
-	static public function getTotalSize(): float
-	{
-		if (null !== self::$_size) {
-			return self::$_size;
-		}
-
-		$total = 0;
-
-		$path = self::_getRoot();
-
-		foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS), \RecursiveIteratorIterator::LEAVES_ONLY, \RecursiveIteratorIterator::CATCH_GET_CHILD) as $p) {
-			if (substr($p->getBaseName(), 0, 1) == '.') {
-				// Ignore dot files
-				continue;
-			}
-
-			try {
-				$total += $p->getSize();
-			}
-			catch (\RuntimeException $e) {
-				// Ignore file that vanished
-			}
-		}
-
-		self::$_size = (float) $total;
-
-		return self::$_size;
 	}
 
 	/**
@@ -376,12 +164,8 @@ class FileSystem implements StorageInterface
 		Utils::safe_unlink(self::_getRoot() . DIRECTORY_SEPARATOR . '.lock');
 	}
 
-	static public function checkLock(): void
+	static public function isLocked(): bool
 	{
-		$lock = file_exists(self::_getRoot() . DIRECTORY_SEPARATOR . '.lock');
-
-		if ($lock) {
-			throw new \RuntimeException('FileSystem storage is locked');
-		}
+		return file_exists(self::_getRoot() . DIRECTORY_SEPARATOR . '.lock');
 	}
 }

@@ -71,7 +71,8 @@
 			<li><a href="#count">count</a></li>
 			<li><a href="#explode">explode</a></li>
 			<li><a href="#implode">implode</a></li>
-			<li><a href="#map">map</a>
+			<li><a href="#map">map</a></li>
+			<li><a href="#ksort-sort">ksort, sort</a>
 		</ol></li>
 		<li><a href="#filtres-de-texte">Filtres de texte</a>
 		<ol>
@@ -116,7 +117,9 @@
 			<li><a href="#date_long">date_long</a></li>
 			<li><a href="#date_hour">date_hour</a></li>
 			<li><a href="#atom_date">atom_date</a></li>
-			<li><a href="#parse_date">parse_date</a>
+			<li><a href="#parse_date">parse_date</a></li>
+			<li><a href="#parse_datetime">parse_datetime</a></li>
+			<li><a href="#parse_time">parse_time</a>
 		</ol></li>
 		<li><a href="#filtres-de-condition">Filtres de condition</a>
 		<ol>
@@ -128,7 +131,8 @@
 			<li><a href="#math">math</a></li>
 			<li><a href="#or">or</a></li>
 			<li><a href="#size_in_bytes">size_in_bytes</a></li>
-			<li><a href="#spell_out_number">spell_out_number</a>
+			<li><a href="#spell_out_number">spell_out_number</a></li>
+			<li><a href="#uuid">uuid</a>
 </li></ol></li></ol></aside><h1 id="filtres-php">Filtres PHP</h1>
 <p>Ces filtres viennent directement de PHP et utilisent donc les mêmes paramètres. Voir la <a href="https://www.php.net/manual/fr/function.htmlspecialchars.php" target="_blank" rel="nofollow,noreferrer">documentation PHP</a> pour plus de détails.</p>
 <table>
@@ -291,6 +295,14 @@ bleu - orange</code></pre>
 <p>Affichera :</p>
 <pre><code>- 1
 - 2</code></pre>
+<h2 id="ksort-sort">ksort, sort</h2>
+<p>Trie un tableau par ordre alpha-numérique, sans tenir compte des majuscules/minuscules. <code>ksort</code> trie le tableau en utilisant les clés, et <code>sort</code> trie le tableau en utilisant les valeurs.</p>
+<pre><code>{{:assign var="table" b="3" a="2" c="1"}}
+{{$table|sort|implode:","}}
+{{$table|ksort|implode:","}}</code></pre>
+<p>Affichera :</p>
+<pre><code>1,2,3
+2,3,1</code></pre>
 <h1 id="filtres-de-texte">Filtres de texte</h1>
 <h2 id="args">args</h2>
 <p>Remplace des arguments dans le texte selon le schéma utilisé par <a href="https://www.php.net/sprintf" target="_blank" rel="nofollow,noreferrer">sprintf</a>.</p>
@@ -479,13 +491,31 @@ Ceci n'est pas un t</code></pre>
 <h2 id="atom_date">atom_date</h2>
 <p>Formatte une date au format ATOM : <code>Y-m-d\TH:i:sP</code></p>
 <h2 id="parse_date">parse_date</h2>
-<p>Vérifie le format d'une chaîne de texte et la transforme en chaîne de date standardisée au format <code>AAAA-MM-JJ HH:MM</code> (ou <code>AAAA-MM-JJ</code> si l'heure n'a pas été précisée).</p>
+<p>Vérifie le format d'une chaîne de texte représentant la date et la transforme en chaîne de date standardisée au format <code>AAAA-MM-JJ</code>.</p>
 <p>Les formats acceptés sont :</p>
 <ul>
 <li><code>AAAA-MM-JJ</code></li>
 <li><code>JJ/MM/AAAA</code></li>
 <li><code>JJ/MM/AA</code></li>
 </ul>
+<h2 id="parse_datetime">parse_datetime</h2>
+<p>Vérifie le format d'une chaîne de texte représentant la date et l'heure et la transforme en chaîne de date et heure standardisée au format <code>AAAA-MM-JJ HH:mm</code>.</p>
+<p>Les formats acceptés sont :</p>
+<ul>
+<li><code>AAAA-MM-JJ HH:mm:ss</code></li>
+<li><code>AAAA-MM-JJ HH:mm</code></li>
+<li><code>JJ/MM/AAAA HH:mm</code></li>
+</ul>
+<h2 id="parse_time">parse_time</h2>
+<p>Vérifie le format d'une chaîne de texte représentant l'heure et la transforme en chaîne de date standardisée au format <code>HH:MM</code>.</p>
+<p>Les formats acceptés sont :</p>
+<ul>
+<li><code>HH:MM</code></li>
+<li><code>H:M</code></li>
+<li><code>H:MM</code></li>
+<li><code>HH:M</code></li>
+</ul>
+<p>Le séparateur peut être <code>:</code> ou <code>h</code>.</p>
 <h1 id="filtres-de-condition">Filtres de condition</h1>
 <p>Ces filtres sont à utiliser dans les conditions</p>
 <h2 id="match">match</h2>
@@ -536,4 +566,6 @@ Ceci n'est pas un t</code></pre>
 <p>Le premier paramètre peut être utilisé pour spécifier le code de la langue à utiliser (par défaut c'est le français, donc le code <code>fr</code>).</p>
 <pre><code>{{42|spell_out_number}}</code></pre>
 <p>Donnera :</p>
-<pre><code>quarante deux</code></pre></div></body></html>
+<pre><code>quarante deux</code></pre>
+<h2 id="uuid">uuid</h2>
+<p>Renvoie un identifiant unique au format UUIDv4.</p></div></body></html>

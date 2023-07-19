@@ -16,29 +16,29 @@ if (null == $content) {
 	throw new UserException('Aucun contenu à prévisualiser');
 }
 
+// Preview single markdown file in documents
 if ($path = qg('f')) {
 	$file = Files::get($path);
 
 	if (!$file || !$file->canRead()) {
 		throw new UserException('Vous n\'avez pas le droit de lire ce fichier.');
 	}
+
+	$content = Render::render(f('format'), $file, f('content'), ADMIN_URL . 'common/files/_preview.php?p=');
 }
+// Preview single web page
 elseif ($web = qg('w')) {
 	$page = Web::get($web);
 
-	if (!$page || !$page->file() || !$page->file()->canRead()) {
+	if (!$page || !($file = $page->dir()) || !$file->canRead()) {
 		throw new UserException('Vous n\'avez pas le droit de lire ce fichier.');
 	}
 
-	$file = $page->file();
+	$content = $page->render();
 }
 else {
 	throw new UserException('Fichier inconnu');
 }
-
-$prefix = $page ? 'web/?uri=' : 'common/files/_preview.php?p=';
-
-$content = Render::render(f('format'), $file, f('content'), ADMIN_URL . $prefix);
 
 $tpl->assign(compact('file', 'content'));
 

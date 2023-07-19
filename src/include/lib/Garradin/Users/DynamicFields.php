@@ -296,7 +296,7 @@ class DynamicFields
 	{
 		if (!isset($this->_presets))
 		{
-			$this->_presets = parse_ini_file(self::PRESETS_FILE, true);
+			$this->_presets = Utils::parse_ini_file(self::PRESETS_FILE, true);
 
 			foreach ($this->_presets as &$preset) {
 				$preset = (object) $preset;
@@ -326,7 +326,7 @@ class DynamicFields
 			}
 		});
 
-		usort($list, fn($a, $b) => strnatcasecmp($a->label, $b->label));
+		uasort($list, fn($a, $b) => strnatcasecmp($a->label, $b->label));
 
 		return $list;
 	}
@@ -354,9 +354,9 @@ class DynamicFields
 	static public function fromOldINI(string $config, string $login_field, string $name_field, string $number_field)
 	{
 		$db = DB::getInstance();
-		$config = parse_ini_string($config, true);
+		$config = Utils::parse_ini_string($config, true);
 
-		$presets = parse_ini_file(self::PRESETS_FILE, true);
+		$presets = Utils::parse_ini_file(self::PRESETS_FILE, true);
 
 		$i = 0;
 
@@ -420,9 +420,9 @@ class DynamicFields
 			}
 
 			$field->set('name', $name);
-			$field->set('label', $data['title']);
-			$field->set('type', $data['type']);
-			$field->set('help', empty($data['help']) ? null : $data['help']);
+			$field->set('label', (string)$data['title']);
+			$field->set('type', (string)$data['type']);
+			$field->set('help', empty($data['help']) ? null : (string)$data['help']);
 			$field->set('read_access', $data['private'] ? $field::ACCESS_ADMIN : $field::ACCESS_USER);
 			$field->set('write_access', $data['editable'] ? $field::ACCESS_ADMIN : $field::ACCESS_USER);
 			$field->set('required', (bool) $data['mandatory']);
@@ -451,7 +451,7 @@ class DynamicFields
 	public function isText(string $field)
 	{
 		$type = $this->_fields[$field]->type;
-		return DynamicField::SQL_TYPES[$type] == 'TEXT';
+		return (DynamicField::SQL_TYPES[$type] ?? null) === 'TEXT';
 	}
 
 	public function getKeys()
@@ -496,7 +496,7 @@ class DynamicFields
 			}
 
 			// Skip fields where the value cannot be imported
-			if ($field->type == 'file' || $field->type == 'generated') {
+			if ($field->type == 'file' || $field->type == 'virtual') {
 				continue;
 			}
 
@@ -506,7 +506,7 @@ class DynamicFields
 		return $out;
 	}
 
-	public function listImportRequiredAssocNames()
+	public function listImportRequiredAssocNames(bool $require_number = true)
 	{
 		$out = [];
 
@@ -516,11 +516,15 @@ class DynamicFields
 			}
 
 			// Skip fields where the value cannot be imported
-			if ($field->type == 'file' || $field->type == 'generated') {
+			if ($field->type == 'file' || $field->type == 'virtual') {
 				continue;
 			}
 
 			if (!$field->required) {
+				continue;
+			}
+
+			if (!$require_number && $field->system & $field::NUMBER) {
 				continue;
 			}
 
@@ -566,12 +570,13 @@ class DynamicFields
 
 		foreach ($this->_fields as $key => $cfg)
 		{
-			$type = DynamicField::SQL_TYPES[$cfg->type];
-			$line = sprintf('%s %s', $db->quoteIdentifier($key), $type);
+			$type = DynamicField::SQL_TYPES[$cfg->type] ?? null;
 
-			if ($type == 'GENERATED' && $cfg->sql) {
-				$line .= sprintf(' ALWAYS AS (%s) VIRTUAL', $cfg->sql);
+			if (!$type) {
+				continue;
 			}
+
+			$line = sprintf('%s %s', $db->quoteIdentifier($key), $type);
 
 			if ($type == 'TEXT' && $cfg->type != 'password') {
 				$line .= ' COLLATE NOCASE';
@@ -607,14 +612,14 @@ class DynamicFields
 		$source = [];
 
 		foreach ($fields as $src_key => $dst_key) {
+			/* Don't cast currently as this can create duplicate records when data was wrong :(
 			$field = $this->get($dst_key);
 
 			if ($field) {
 				$source[] = sprintf('CAST(%s AS %s)', $db->quoteIdentifier($src_key), $field->sql_type());
 			}
-			else {
-				$source[] = $src_key;
-			}
+			*/
+			$source[] = $db->quoteIdentifier($src_key);
 		}
 
 		if ($function) {
@@ -706,9 +711,11 @@ class DynamicFields
 
 		$fields = array_combine($fields, $fields);
 
-		// Generated fields cannot be copied
+		// Virtual fields cannot be copied
 		foreach ($this->_fields as $f) {
-			if (DynamicField::SQL_TYPES[$f->type] == 'GENERATED') {
+			$sql_type = DynamicField::SQL_TYPES[$f->type] ?? null;
+
+			if (!$sql_type) {
 				unset($fields[$f->name]);
 			}
 		}
@@ -750,8 +757,10 @@ class DynamicFields
 
 		$search_table = User::TABLE . '_search';
 		$columns = $this->getSearchColumns();
+		$columns_sql = array_map([$db, 'quoteIdentifier'], $columns);
+		$columns_sql = implode(",\n\t", $columns_sql);
 
-		$sql = sprintf("CREATE TABLE IF NOT EXISTS %s\n(\n\tid INTEGER PRIMARY KEY NOT NULL REFERENCES %s (id) ON DELETE CASCADE,\n\t%s\n);", $search_table . '_tmp', User::TABLE, implode(",\n\t", $columns));
+		$sql = sprintf("CREATE TABLE IF NOT EXISTS %s\n(\n\tid INTEGER PRIMARY KEY NOT NULL REFERENCES %s (id) ON DELETE CASCADE,\n\t%s\n);", $search_table . '_tmp', User::TABLE, $columns_sql);
 
 		$db->exec($sql);
 
@@ -805,15 +814,6 @@ class DynamicFields
 
 	public function add(DynamicField $df)
 	{
-		if ($df->isGenerated()) {
-			try {
-				DB::getInstance()->requireFeatures('generated_columns');
-			}
-			catch (\KD2\DB_Exception $e) {
-				throw new UserException("Cette fonctionnalité n'est pas disponible.\nLa version de SQLite installée sur votre serveur est trop ancienne.");
-			}
-		}
-
 		$this->_fields[$df->name] = $df;
 		$this->reloadCache();
 	}

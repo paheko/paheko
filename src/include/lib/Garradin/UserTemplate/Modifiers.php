@@ -13,12 +13,9 @@ use KD2\SMTP;
 use KD2\Brindille;
 use KD2\Brindille_Exception;
 
-use Garradin\Web\Render\Markdown;
-
 class Modifiers
 {
 	const MODIFIERS_LIST = [
-		'markdown',
 		'replace',
 		'regexp_replace',
 		'regexp_match',
@@ -34,6 +31,8 @@ class Modifiers
 		'get_leading_number',
 		'spell_out_number',
 		'parse_date',
+		'parse_datetime',
+		'parse_time',
 		'math',
 		'money_int' => [Utils::class, 'moneyToInteger'],
 		'array_transpose' => [Utils::class, 'array_transpose'],
@@ -45,21 +44,18 @@ class Modifiers
 		'has',
 		'in',
 		'map',
+		'sort',
+		'ksort',
 		'quote_sql_identifier',
 		'quote_sql',
 		'sql_where',
 		'urlencode',
 		'count_words',
 		'or',
+		'uuid',
 	];
 
 	const LEADING_NUMBER_REGEXP = '/^([\d.]+)\s*[.\)]\s*/';
-
-	static public function markdown($str): string
-	{
-		$md = new Markdown;
-		return $md->render($str);
-	}
 
 	static public function replace($str, $find, $replace = null): string
 	{
@@ -112,21 +108,14 @@ class Modifiers
 	 */
 	static public function truncate($str, $length = 80, $placeholder = '…', $strict_cut = false): string
 	{
-		// Don't try to use unicode if the string is not valid UTF-8
-		$u = preg_match('//u', $str) ? 'u' : '';
-
-		// Shorter than $length + 1
-		if (!preg_match('/^.{' . ((int)$length + 1) . '}/s' . $u, $str))
-		{
+		if (mb_strlen($str) <= $length) {
 			return $str;
 		}
 
-		// Cut at 80 characters
-		$str = preg_replace('/^(.{0,' . (int)$length . '}).*$/s' . $u, '$1', $str);
+		$str = mb_substr($str, 0, $length);
 
-		if (!$strict_cut)
-		{
-			$cut = preg_replace('/[^\s.,:;!?]*?$/s' . $u, '', $str);
+		if (!$strict_cut) {
+			$cut = preg_replace('/[^\s.,;!?]*$/su', '', $str);
 
 			if (trim($cut) == '') {
 				$cut = $str;
@@ -238,25 +227,84 @@ class Modifiers
 		}
 	}
 
+	static public function parse_datetime($value)
+	{
+		if ($value instanceof \DateTimeInterface) {
+			return $value->format('Y-m-d H:i:s');
+		}
+
+		if (empty($value) || !is_string($value)) {
+			return null;
+		}
+
+		if (preg_match('!^\d{2}/\d{2}/\d{4}$\s+\d{2}:\d{2}!', $value)) {
+			return \DateTime::createFromFormat('!d/m/Y', $value)->format('Y-m-d H:i');
+		}
+		elseif (preg_match('!^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}(:\d{2})?$!', $value, $match)) {
+			return $value . (isset($match[1]) ? '' : ':00');
+		}
+		else {
+			return false;
+		}
+	}
+
+	static public function parse_time($value)
+	{
+		if ($value instanceof \DateTimeInterface) {
+			return $value->format('H:i');
+		}
+
+		if (empty($value) || !is_string($value)) {
+			return null;
+		}
+
+		if (false !== strpos($value, ':')) {
+			$t = explode(':', $value);
+		}
+		elseif (false !== strpos($value, 'h')) {
+			$t = explode('h', $value);
+		}
+		else {
+			return null;
+		}
+
+		if (empty($t[0]) || !ctype_digit($t[0]) || $t[0] < 0 || $t[0] > 23) {
+			return false;
+		}
+
+		if (empty($t[1]) || !ctype_digit($t[1]) || $t[1] < 0 || $t[1] > 59) {
+			return false;
+		}
+
+		return sprintf('%02d:%02d', $t[0], $t[1]);
+	}
+
 	static public function math(string $expression, ... $params)
 	{
 		static $tokens_list = [
-			'function'  => '(?:round|ceil|floor|cos|sin|tan|asin|acos|atan|sinh|cosh|tanh|abs|max|min|exp|sqrt|log10|log|pi)\(',
+			'function'  => '(?:round|ceil|floor|cos|sin|tan|asin|acos|atan|sinh|cosh|tanh|abs|max|min|exp|sqrt|log10|log|pi|random_int)\(',
 			'open'      => '\(',
 			'close'     => '\)',
-			'number'    => '-?\d+(?:[,\.]\d+)?',
+			'number'    => '-?\d+(?:[\.]\d+)?',
 			'sign'      => '[+\-\*\/%]',
 			'separator' => ',',
+			'space'     => '\s+',
 		];
 
+		// Treat comma as dot in strings
+		foreach ($params as &$param) {
+			$param = str_replace(',', '.', (string)$param);
+		}
+
+		unset($param);
+
 		$expression = vsprintf($expression, $params);
-		$expression = preg_replace('/\s+/', '', $expression);
 
 		try {
 			$tokens = Brindille::tokenize($expression, $tokens_list);
 		}
 		catch (\InvalidArgumentException $e) {
-			throw new Brindille_Exception('Invalid value for math modifier: ' . $e->getMessage());
+			throw new Brindille_Exception('Invalid value: ' . $e->getMessage());
 		}
 
 		$stack = [];
@@ -273,21 +321,28 @@ class Modifiers
 				$last = array_pop($stack);
 
 				if (!$last) {
-					throw new Brindille_Exception('Invalid closing parenthesis in math modifier on position ' . $token->offset);
+					throw new Brindille_Exception('Invalid closing parenthesis, on position ' . $token->offset);
 				}
 			}
-			elseif ($token->type == 'number') {
-				$token->value = str_replace(',', '.', $token->value);
+			elseif ($token->type == 'separator') {
+				if (empty(end($stack)['function'])) {
+					throw new Brindille_Exception('Invalid comma outside of a function, on position ' . $token->offset);
+				}
 			}
 
 			$expression .= $token->value;
 		}
 
 		if (count($stack)) {
-			throw new Brindille_Exception('Unmatched open parenthesis in math modifier on position ' . $token->offset);
+			throw new Brindille_Exception('Unmatched open parenthesis, on position ' . $token->offset);
 		}
 
-		return @eval('return ' . $expression . ';') ?: 0;
+		try {
+			return @eval('return ' . $expression . ';') ?: 0;
+		}
+		catch (\Throwable $e) {
+			throw new Brindille_Exception('Syntax error: ' . $e->getMessage(), 0, $e);
+		}
 	}
 
 	static public function map($array, string $modifier, ...$params): array
@@ -354,6 +409,20 @@ class Modifiers
 		return in_array($value, (array)$array, $strict);
 	}
 
+	static public function ksort($value)
+	{
+		$value = (array)$value;
+		uksort($value, 'strnatcasecmp');
+		return $value;
+	}
+
+	static public function sort($value)
+	{
+		$value = (array)$value;
+		natcasesort($value);
+		return $value;
+	}
+
 	static public function quote_sql_identifier($in, string $prefix = '')
 	{
 		if (null === $in) {
@@ -410,5 +479,10 @@ class Modifiers
 		}
 
 		return $in;
+	}
+
+	static public function uuid()
+	{
+		return Utils::uuid();
 	}
 }

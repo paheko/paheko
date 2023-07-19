@@ -245,13 +245,19 @@
 			var btn = document.createElement('button');
 			btn.type = 'button';
 			btn.title = altTitle ? altTitle : title;
-			if ([...title].length == 1) {
+
+			if (typeof title == 'object') {
+				btn.dataset.icon = title.icon;
+				btn.innerText = title.label;
+			}
+			else if ([...title].length == 1) {
 				btn.dataset.icon = title;
 			}
 			else {
 				btn.innerText = title;
 			}
-			btn.className = 'icn-btn ' +name;
+
+			btn.className = 'icn-btn ' + name;
 			btn.onclick = function () { action.call(); return false; };
 
 			toolbar.appendChild(btn);
@@ -309,7 +315,7 @@
 				method: 'post',
 				body: data,
 			}).then((response) => {
-				if (!response.ok) {
+				if (response.status != 200 && response.status != 400) {
 					throw Error(response.status);
 				}
 				else {
@@ -317,7 +323,11 @@
 				}
 			})
 			.then((data) => {
-				if (!data.success) {
+				if (data.error) {
+					alert(data.error);
+					return;
+				}
+				else if (!data.success) {
 					throw Error('Invalid response');
 				}
 				callback(data);
@@ -370,7 +380,7 @@
 			}
 
 
-			appendButton('ext close', 'Retour à l\'édition', closeIFrame);
+			appendButton('ext close', {icon: '←', label: 'Retour à l\'édition'}, closeIFrame);
 
 			t.parent.insertBefore(toolbar, t.parent.firstChild);
 		}

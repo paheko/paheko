@@ -103,7 +103,30 @@ Interrompt une section.
 
 ## continue
 
-Passe à l'itération suivante d'une section.
+Passe à l'itération suivante d'une section. Le code situé entre cette instruction et la fin de la section ne sera pas exécuté.
+
+```
+{{#foreach from=$list item="event"}}
+  {{if $event.date == '2023-01-01'}}
+    {{:continue}}
+  {{/if}}
+  {{$event.title}}
+{{/foreach}}
+```
+
+Il est possible de passer à l'itération suivante d'une section parente en utilisant un chiffre en paramètre :
+
+```
+{{#foreach from=$list item="event"}}
+  {{$event.title}}
+  {{#foreach from=$event.people item="person"}}
+    {{if $person.name == 'bohwaz'}}
+      {{:continue 2}}
+    {{/if}}
+    - {{$person.name}}
+  {{/foreach}}
+{{/foreach}}
+```
 
 ## debug
 
@@ -416,13 +439,13 @@ Note : un appel à cette fonction depuis le code du site web provoquera une erre
 | `key` | optionnel | Clé unique du document |
 | `id` | optionnel | Numéro unique du document |
 
-Si ni `key` ni `id` ne sont indiqués, une erreur sera affichée.
+Il est possible de spécifier d'autres paramètres, ou une clause `where` et des paramètres dont le nom commence par deux points.
 
-Exemple :
-
-```
-{{:delete key="facture_43"}}
-```
+* Supprimer le document avec la clé `facture_43` : `{{:delete key="facture_43"}}`
+* Supprimer le document avec la clé `ABCD` et dont la propriété `type` du document correspond à la valeur `facture` : `{{:delete key="ABCD" type="facture"}}`
+* Supprimer tous les documents : `{{:delete}}`
+* Supprimer tous les documents ayant le type `facture` : `{{:delete type="facture"}}`
+* Supprimer tous les documents de type `devis` ayant une date dans le passé : `{{:delete :type="devis" where="$$.type = :type AND $$.date < datetime()"}}`
 
 ## admin_header
 
@@ -469,6 +492,46 @@ Affiche le pied de page de l'administration de l'association.
 
 ```
 {{:admin_footer}}
+```
+
+## delete_form
+
+Affiche un formulaire demandant la confirmation de suppression d'un élément.
+
+| Paramètre | Obligatoire ou optionnel ? | Fonction |
+| :- | :- | :- |
+| `legend` | **obligatoire** | Libellé de l'élément `<legend>` du formulaire |
+| `warning` | **obligatoire** | Libellé de la question de suppression (en gros en rouge) |
+| `alert` | *optionnel* | Message d'alerte supplémentaire (bloc jaune) |
+| `info` | *optionnel* | Informations liées à la suppression (expliquant ce qui va être impacté par la suppression) |
+| `confirm` | *optionnel* | Libellé de la case à cocher pour la suppression, si ce paramètre est absent ou `NULL`, la case à cocher ne sera pas affichée. |
+
+Le formulaire envoie un `POST` avec le bouton ayant le nom `delete`. Si le paramètre `confirm` est renseigné, alors la case à cochée aura le nom `confirm_delete`.
+
+Exemple :
+
+```
+{{#load id=$_GET.id assign="invoice"}}
+{{else}}
+  {{:error message="Facture introuvable"}}
+{{/if}}
+
+{{#form on="delete"}}
+  {{if !$_POST.confirm_delete}}
+    {{:error message="Merci de cocher la case"}}
+  {{/if}}
+  {{:delete id=$invoice.id}}
+{{/form}}
+
+{{:form_errors}}
+
+{{:delete_form
+  legend="Suppression d'une facture"
+  warning="Supprimer la facture n°%d ?"|args:$invoice.id
+  info="Le devis lié sera également supprimé"
+  alert="La facture sera définitivement perdue !"
+  confirm="Cocher cette case pour confirmer la suppression de la facture"
+}}
 ```
 
 ## input

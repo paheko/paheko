@@ -3,7 +3,10 @@
 namespace Garradin\Files;
 
 use Garradin\Entities\Files\File;
+use Garradin\DB;
 use Garradin\DynamicList;
+
+use KD2\DB\EntityManager as EM;
 
 class Trash
 {
@@ -13,71 +16,43 @@ class Trash
 		],
 		'parent' => [
 			'label' => 'Chemin d\'origine',
-			'select' => 'SUBSTR(parent, LENGTH(\'trash/\') + 1)',
+			'select' => 'parent',
 		],
 		'path' => [
 		],
-		'modified' => [
+		'trash' => [
 			'label' => 'Supprimé le',
 		],
 	];
 
 	static public function list(): DynamicList
 	{
-		Files::syncVirtualTable(File::CONTEXT_TRASH, true);
-
 		$columns = self::LIST_COLUMNS;
 
-		$tables = Files::getVirtualTableName();
+		$tables = File::TABLE;
 
-		$conditions = sprintf('type = %d', File::TYPE_FILE);
+		$conditions = sprintf('type = %d AND trash IS NOT NULL', File::TYPE_FILE);
 
 		$list = new DynamicList($columns, $tables, $conditions);
-		$list->orderBy('modified', true);
+		$list->orderBy('trash', true);
 
 		return $list;
-	}
-
-	static public function pruneEmptyDirectories(): void
-	{
-		$paths = [];
-
-		foreach (Files::listRecursive(File::CONTEXT_TRASH, null, true) as $file) {
-			if ($file->isDir()) {
-				if (!isset($paths[$file->path])) {
-					$paths[$file->path] = 0;
-				}
-			}
-			else {
-				if (!isset($paths[$file->parent])) {
-					$paths[$file->parent] = 0;
-				}
-
-				$paths[$file->parent]++;
-			}
-		}
-
-		foreach ($paths as $path => $count) {
-			if (!$count) {
-				Files::get($path)->delete();
-			}
-		}
 	}
 
 	static public function clean(string $expiry = '-30 days'): void
 	{
 		$past = new \DateTime($expiry);
-		$deleted = false;
+		$list = EM::getInstance(File::class)->all('SELECT * FROM @TABLE WHERE trash IS NOT NULL AND trash < ?;', $past);
 
-		foreach (Files::listRecursive(File::CONTEXT_TRASH, null, true) as $file) {
-			if ($file->modified < $past) {
-				$file->delete();
-				$deleted = true;
-			}
-		}
-
-		if ($deleted) {
-			self::pruneEmptyDirectories();
+		foreach ($list as $file) {
+			$file->delete();
 		}
 	}
+
+	static public function getSize(): int
+	{
+		$db = DB::getInstance();
+		return $db->firstColumn('SELECT SUM(size) FROM files WHERE trash IS NOT NULL;') ?: 0;
+	}
+
 }

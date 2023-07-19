@@ -5,7 +5,6 @@ namespace Garradin\Files\Storage;
 use Garradin\Entities\Files\File;
 use Garradin\Files\Files;
 
-use Garradin\Static_Cache;
 use Garradin\DB;
 use Garradin\Utils;
 
@@ -19,7 +18,7 @@ class SQLite implements StorageInterface
 	{
 	}
 
-	static protected function getPointer(File $file)
+	static public function getReadOnlyPointer(File $file)
 	{
 		$db = DB::getInstance();
 
@@ -31,7 +30,7 @@ class SQLite implements StorageInterface
 				throw $e;
 			}
 
-			throw new \RuntimeException('File does not exist in DB: ' . $file->path, 0, $e);
+			return null;
 		}
 
 		return $blob;
@@ -94,172 +93,18 @@ class SQLite implements StorageInterface
 
 		fclose($blob);
 
-		if ($file->parent) {
-			self::touch($file->parent);
-		}
-
-		$cache_id = 'files.' . $file->pathHash();
-		Static_Cache::remove($cache_id);
-
 		return true;
 	}
 
-	static public function getFullPath(File $file): ?string
+	static public function getLocalFilePath(File $file): ?string
 	{
-		$cache_id = 'files.' . $file->pathHash();
-
-		if (!Static_Cache::exists($cache_id))
-		{
-			$blob = self::getPointer($file);
-			Static_Cache::storeFromPointer($cache_id, $blob);
-			fclose($blob);
-		}
-
-		return Static_Cache::getPath($cache_id);
-	}
-
-	static public function getReadOnlyPointer(File $file)
-	{
-		return self::getPointer($file);
-	}
-
-	static public function display(File $file): void
-	{
-		$blob = self::getPointer($file);
-
-		while (!feof($blob)) {
-			echo fread($blob, 8192);
-		}
-
-		fclose($blob);
-	}
-
-	static public function fetch(File $file): string
-	{
-		$blob = self::getPointer($file);
-		$out = '';
-
-		while (!feof($blob)) {
-			$out .= fread($blob, 8192);
-		}
-
-		fclose($blob);
-		return $out;
-	}
-
-	static public function get(string $path): ?File
-	{
-		$sql = 'SELECT * FROM @TABLE WHERE path = ? LIMIT 1;';
-		return EM::findOne(File::class, $sql, $path);
-	}
-
-	static public function glob(string $pattern): array
-	{
-		return EM::getInstance(File::class)->all('SELECT * FROM @TABLE WHERE path GLOB ? AND path NOT GLOB ? ORDER BY type DESC, name COLLATE U_NOCASE ASC;', $pattern, $pattern . '/*');
-	}
-
-	static public function list(string $path): array
-	{
-		return EM::getInstance(File::class)->all('SELECT * FROM @TABLE WHERE parent = ? ORDER BY type DESC, name COLLATE U_NOCASE ASC;', $path);
-	}
-
-	static public function listDirectoriesRecursively(string $path): array
-	{
-		$files = [];
-		$it = DB::getInstance()->iterate('SELECT path FROM files WHERE (parent = ? OR parent LIKE ?) AND type = ? ORDER BY path;', $path, $path . '/%', File::TYPE_DIRECTORY);
-
-		foreach ($it as $file) {
-			$files[] = substr($file->path, strlen($path) + 1);
-		}
-
-		return $files;
-	}
-
-	static public function getDirectorySize(string $path): int
-	{
-		return DB::getInstance()->firstColumn('SELECT SUM(size) FROM files WHERE (parent = ? OR parent LIKE ?) AND type = ?;', $path, $path . '/%', File::TYPE_FILE) ?: 0;
-	}
-
-	static public function exists(string $path): bool
-	{
-		return DB::getInstance()->test('files', 'path = ?', $path);
+		return null;
 	}
 
 	static public function delete(File $file): bool
 	{
-		$db = DB::getInstance();
-
-		$cache_id = 'files.' . $file->pathHash();
-		Static_Cache::remove($cache_id);
-
-		$db->delete('files_contents', 'id = ?', $file->id());
-
-		// Delete recursively
-		if ($file->type == File::TYPE_DIRECTORY) {
-			foreach (Files::list($file->path) as $subfile) {
-				$subfile->delete();
-			}
-		}
-
-		if ($file->parent) {
-			self::touch($file->parent);
-		}
-
+		// Nothing to do, files_contents is deleted when files row is deleted (cascade)
 		return true;
-	}
-
-	static public function move(File $file, string $new_path): bool
-	{
-		$cache_id = 'files.' . $file->pathHash();
-		Static_Cache::remove($cache_id);
-
-		$current_path = $file->path;
-		$file->set('path', $new_path);
-		$file->set('parent', Utils::dirname($new_path));
-		$file->set('name', Utils::basename($new_path));
-		$file->save();
-
-		if ($file->type == File::TYPE_DIRECTORY) {
-			// Move sub-directories and sub-files
-			DB::getInstance()->preparedQuery('UPDATE files SET parent = ?, path = TRIM(? || \'/\' || name, \'/\') WHERE parent = ?;', $new_path, $new_path, $current_path);
-		}
-
-		if ($file->parent) {
-			self::touch($file->parent);
-		}
-
-		return true;
-	}
-
-	static public function touch(string $path, $date = null): bool
-	{
-		if (null === $date) {
-			$date = new \DateTime;
-		}
-		elseif (!($date instanceof \DateTimeInterface) && ctype_digit($date)) {
-			$date = new \DateTime('@' . $date);
-		}
-		elseif (!($date instanceof \DateTimeInterface)) {
-			throw new \InvalidArgumentException('Invalid date string: ' . $date);
-		}
-
-		return DB::getInstance()->preparedQuery('UPDATE files SET modified = ? WHERE path = ?;', $date, $path);
-	}
-
-	static public function mkdir(File $file): bool
-	{
-		$file->save();
-
-		if ($file->parent) {
-			self::touch($file->parent);
-		}
-
-		return true;
-	}
-
-	static public function getTotalSize(): float
-	{
-		return (float) DB::getInstance()->firstColumn('SELECT SUM(size) FROM files;');
 	}
 
 	/**
@@ -286,20 +131,16 @@ class SQLite implements StorageInterface
 
 	static public function lock(): void
 	{
-		DB::getInstance()->exec('INSERT INTO files (name, path, parent, type) VALUES (\'.lock\', \'.lock\', \'\', 2);');
+		DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS files_lock (lock);');
 	}
 
 	static public function unlock(): void
 	{
-		DB::getInstance()->exec('DELETE FROM files WHERE path = \'.lock\';');
+		DB::getInstance()->exec('DROP TABLE IF EXISTS files_lock;');
 	}
 
-	static public function checkLock(): void
+	static public function isLocked(): bool
 	{
-		$lock = DB::getInstance()->firstColumn('SELECT 1 FROM files WHERE path = \'.lock\';');
-
-		if ($lock) {
-			throw new \RuntimeException('File storage is locked');
-		}
+		return DB::getInstance()->test('sqlite_master', 'name = ? AND type = ?', 'files_lock', 'table');
 	}
 }

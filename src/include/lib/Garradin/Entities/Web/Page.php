@@ -5,17 +5,17 @@ namespace Garradin\Entities\Web;
 use Garradin\DB;
 use Garradin\Entity;
 use Garradin\Form;
-use Garradin\UserException;
 use Garradin\Utils;
 use Garradin\Entities\Files\File;
 use Garradin\Files\Files;
 use Garradin\Web\Render\Render;
 use Garradin\Web\Web;
 use Garradin\Web\Cache;
+use Garradin\UserTemplate\Modifiers;
 
 use KD2\DB\EntityManager as EM;
 
-use const Garradin\WWW_URL;
+use const Garradin\{WWW_URL, ADMIN_URL};
 
 class Page extends Entity
 {
@@ -24,11 +24,10 @@ class Page extends Entity
 	const TABLE = 'web_pages';
 
 	protected ?int $id;
-	protected string $parent = '';
+	protected ?string $parent = null;
 	protected string $path;
+	protected string $dir_path;
 	protected string $uri;
-	protected string $_name = 'index.txt';
-	protected string $file_path;
 	protected string $title;
 	protected int $type;
 	protected string $status;
@@ -66,11 +65,10 @@ class Page extends Entity
 
 	const DUPLICATE_URI_ERROR = 42;
 
-	protected ?File $_file = null;
+	protected ?File $_dir = null;
 	protected ?array $_attachments = null;
 	protected ?array $_tagged_attachments = null;
 	protected ?string $_html = null;
-	protected ?\DateTime $_html_modified = null;
 
 	static public function create(int $type, ?string $parent, string $title, string $status = self::STATUS_ONLINE): self
 	{
@@ -88,32 +86,20 @@ class Page extends Entity
 			$page->importForm(['uri' => $page->uri . date('-Y-m-d-His')]);
 		}
 
-		$page->file_path = $page->filepath(false);
-
-		Cache::clear();
-
 		return $page;
 	}
 
-	public function file(bool $force_reload = false)
+	public function dir(bool $force_reload = false): File
 	{
-		if (null === $this->_file || $force_reload) {
-			$this->_file = Files::get($this->filepath());
+		if (null === $this->_dir || $force_reload) {
+			$this->_dir = Files::get($this->dir_path);
+
+			if (null === $this->_dir) {
+				$this->_dir = Files::mkdir($this->dir_path);
+			}
 		}
 
-		return $this->_file;
-	}
-
-	public function load(array $data): self
-	{
-		parent::load($data);
-
-		if ($this->file() && $this->file()->modified > $this->modified) {
-			$this->loadFromFile($this->file());
-			$this->save();
-		}
-
-		return $this;
+		return $this->_dir;
 	}
 
 	public function url(): string
@@ -134,40 +120,29 @@ class Page extends Entity
 		return $out;
 	}
 
-	public function render(?string $user_prefix = null): string
+	public function render(bool $admin = false): string
 	{
-		if (!$this->file()) {
-			throw new \LogicException('File does not exist: '  . $this->file_path);
-		}
+		$user_prefix = ADMIN_URL . 'web/?uri=';
 
-		if ($this->_html_modified != $this->file()->modified) {
-			$this->_html_modified = $this->_html = null;
-		}
-
-		$this->_html ??= Render::render($this->format, $this->file(), $this->content, $user_prefix);
-		$this->_html_modified ??= $this->file()->modified;
+		$this->_html ??= Render::render($this->format, $this->dir(), $this->content, $user_prefix);
 
 		return $this->_html;
 	}
 
-	public function excerpt(int $length = 600): string
+	public function excerpt(int $length = 500): string
 	{
-		return $this->preview(mb_substr($this->content, 0, $length) . "\n\n…");
+		return $this->preview(Modifiers::truncate($this->content, $length));
 	}
 
-	public function requiresExcerpt(int $length = 600): bool
+	public function requiresExcerpt(int $length = 500): bool
 	{
 		return mb_strlen($this->content) > $length;
 	}
 
 	public function preview(string $content): string
 	{
-		return Render::render($this->format, $this->file(), $content, '#');
-	}
-
-	public function filepath(bool $stored = true): string
-	{
-		return $stored && isset($this->file_path) ? $this->file_path : File::CONTEXT_WEB . '/' . $this->path . '/' . $this->_name;
+		$user_prefix = ADMIN_URL . 'web/?uri=';
+		return Render::render($this->format, $this->dir(), $content, $user_prefix);
 	}
 
 	public function path(): string
@@ -175,52 +150,16 @@ class Page extends Entity
 		return $this->path;
 	}
 
-	public function syncFile(?string $path = null): void
-	{
-		if (null === $path) {
-			$path = $this->file_path;
-		}
-
-		$export = $this->export();
-
-		$exists = Files::callStorage('exists', $path);
-
-		// Create file if required
-		if (!$exists) {
-			$file = $this->_file = Files::createFromString($path, $export);
-		}
-		else {
-			$target = $this->filepath(false);
-
-			// Move parent directory if needed
-			if ($path !== $target) {
-				$dir = Files::get(Utils::dirname($path));
-				$dir->rename(Utils::dirname($target));
-				$this->_file = null;
-			}
-
-			$file = $this->file();
-
-			// Or update file
-			if ($file->fetch() !== $export) {
-				$file->store(['content' => $export], false);
-			}
-		}
-
-		$file->touch($this->modified);
-
-		$this->syncSearch();
-	}
-
 	public function syncSearch(): void
 	{
 		if ($this->format == Render::FORMAT_ENCRYPTED) {
-			$this->file()->removeFromSearch();
+			$content = null;
 		}
 		else {
 			$content = $this->render();
-			$this->file()->indexForSearch(compact('content'), $this->title, 'text/html');
 		}
+
+		$this->dir()->indexForSearch(compact('content'), $this->title, 'text/html');
 	}
 
 	public function save(bool $selfcheck = true): bool
@@ -228,7 +167,6 @@ class Page extends Entity
 		$change_parent = null;
 
 		if (isset($this->_modified['uri']) || isset($this->_modified['path'])) {
-			$this->set('file_path', $this->filepath(false));
 			$change_parent = $this->_modified['path'];
 		}
 
@@ -237,9 +175,14 @@ class Page extends Entity
 			$this->set('modified', new \DateTime);
 		}
 
-		$current_path = $this->_modified['file_path'] ?? $this->file_path;
+		$content_modified = $this->isModified('content') || $this->isModified('format');
+
+		Files::ensureDirectoryExists($this->dir_path);
 		parent::save($selfcheck);
-		$this->syncFile($current_path);
+
+		if ($content_modified) {
+			$this->syncSearch();
+		}
 
 		// Rename/move children
 		if ($change_parent) {
@@ -248,7 +191,7 @@ class Page extends Entity
 				SET
 					path = %1$s || substr(path, %2$d),
 					parent = %1$s || substr(parent, %2$d),
-					file_path = \'web/\' || %1$s || substr(file_path, %2$d + 4)
+					dir_path = \'web/\' || %1$s || substr(parent, %2$d)
 				WHERE path LIKE %3$s;',
 				$db->quote($this->path), strlen($change_parent) + 1, $db->quote($change_parent . '/%'));
 			$db->exec($sql);
@@ -261,7 +204,12 @@ class Page extends Entity
 
 	public function delete(): bool
 	{
-		Files::get(Utils::dirname($this->file_path))->delete();
+		$dir = $this->dir();
+
+		if ($dir) {
+			$dir->delete();
+		}
+
 		Cache::clear();
 		return parent::delete();
 	}
@@ -274,15 +222,20 @@ class Page extends Entity
 		$this->assert(array_key_exists($this->format, self::FORMATS_LIST), 'Unknown page format');
 		$this->assert(trim($this->title) !== '', 'Le titre ne peut rester vide');
 		$this->assert(mb_strlen($this->title) <= 200, 'Le titre ne peut faire plus de 200 caractères');
-		$this->assert(trim($this->file_path) !== '', 'Le chemin de fichier ne peut rester vide');
 		$this->assert(trim($this->path) !== '', 'Le chemin ne peut rester vide');
 		$this->assert(trim($this->uri) !== '', 'L\'URI ne peut rester vide');
 		$this->assert(strlen($this->uri) <= 150, 'L\'URI ne peut faire plus de 150 caractères');
 		$this->assert($this->path !== $this->parent, 'Invalid parent page');
-		$this->assert($this->parent === '' || $db->test(self::TABLE, 'path = ?', $this->parent), 'Page parent inexistante');
+		$this->assert($this->parent === null || $db->test(self::TABLE, 'path = ?', $this->parent), 'Page parent inexistante');
 
 		$this->assert(!$this->exists() || !$db->test(self::TABLE, 'uri = ? AND id != ?', $this->uri, $this->id()), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre : ' . $this->uri, self::DUPLICATE_URI_ERROR);
 		$this->assert($this->exists() || !$db->test(self::TABLE, 'uri = ?', $this->uri), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre : ' . $this->uri, self::DUPLICATE_URI_ERROR);
+
+		$root = File::CONTEXT_WEB . '/';
+		$this->assert(0 === strpos($this->dir_path, $root), 'Invalid directory context');
+
+		$dir = Files::get($this->dir_path);
+		$this->assert(!$dir || $dir->isDir(), 'Chemin de répertoire invalide');
 	}
 
 	public function importForm(array $source = null)
@@ -314,8 +267,12 @@ class Page extends Entity
 		$uri = $source['uri'] ?? ($this->uri ?? null);
 
 		if (array_key_exists('parent', $source)) {
-			$source['parent'] = Form::getSelectorValue($source['parent']) ?: '';
+			$source['parent'] = Form::getSelectorValue($source['parent']) ?: null;
 			$source['path'] = trim($source['parent'] . '/' . $uri, '/');
+		}
+
+		if (isset($source['path'])) {
+			$source['dir_path'] = File::CONTEXT_WEB . '/' . $source['path'];
 		}
 
 		if (!empty($source['encryption']) ) {
@@ -347,12 +304,10 @@ class Page extends Entity
 	public function listAttachments(): array
 	{
 		if (null === $this->_attachments) {
-			$list = Files::list(Utils::dirname($this->filepath()));
+			$list = Files::list($this->dir_path);
 
-			// Remove the page itself
-			$list = array_filter($list, function ($a) {
-				return $a->name != $this->_name && $a->type != $a::TYPE_DIRECTORY;
-			});
+			// Remove sub-directories
+			$list = array_filter($list, fn ($a) => $a->type != $a::TYPE_DIRECTORY);
 
 			$this->_attachments = $list;
 		}
@@ -367,7 +322,7 @@ class Page extends Entity
 	{
 		if (null === $this->_tagged_attachments) {
 			$this->render();
-			$this->_tagged_attachments = Render::listAttachments($this->file());
+			$this->_tagged_attachments = Render::listAttachments($this->dir());
 		}
 
 		return $this->_tagged_attachments;
@@ -440,7 +395,7 @@ class Page extends Entity
 			return [];
 		}
 
-		$html = $this->render();
+		$html = Render::render($this->format, $this->dir(), $this->content);
 		preg_match_all('/<a[^>]+href=["\']([^"\']+)["\']/', $html, $match, PREG_PATTERN_ORDER);
 		$errors = [];
 
@@ -452,7 +407,7 @@ class Page extends Entity
 			$link = trim($link, '/');
 
 			// Link is not internal
-			if (!trim($link) || preg_match('!https?:|\w+:|/|#!', $link)) {
+			if (!trim($link) || preg_match('!https?:|\w:|/|#|\.!', $link)) {
 				continue;
 			}
 
@@ -467,120 +422,10 @@ class Page extends Entity
 		return array_unique($errors);
 	}
 
-	public function export(): string
-	{
-		$meta = [
-			'Title'     => str_replace("\n", '', trim($this->title)),
-			'Status'    => $this->status,
-			'Published' => $this->published->format('Y-m-d H:i:s'),
-			'Modified'  => $this->modified->format('Y-m-d H:i:s'),
-			'Format'    => $this->format,
-			'Type'      => self::TYPES[$this->type],
-		];
-
-		$out = '';
-
-		foreach ($meta as $key => $value) {
-			$out .= sprintf("%s: %s\n", $key, $value);
-		}
-
-		$content = preg_replace("/\r\n?/", "\n", $this->content);
-		$out .= "\n----\n\n" . $content;
-
-		return $out;
-	}
-
-	public function importFromRaw(string $str): bool
-	{
-		$str = preg_replace("/\r\n?/", "\n", $str);
-		$str = explode("\n\n----\n\n", $str, 2);
-
-		if (count($str) !== 2) {
-			return false;
-		}
-
-		list($meta, $content) = $str;
-
-		$meta = explode("\n", trim($meta));
-
-		foreach ($meta as $line) {
-			$key = strtolower(trim(strtok($line, ':')));
-			$value = trim(strtok(''));
-
-			if ($key == 'title') {
-				$this->set('title', $value);
-			}
-			elseif ($key == 'published') {
-				$this->set('published', new \DateTime($value));
-			}
-			elseif ($key == 'modified') {
-				$this->set('modified', new \DateTime($value));
-			}
-			elseif ($key == 'format') {
-				$value = strtolower($value);
-
-				if (!array_key_exists($value, self::FORMATS_LIST)) {
-					throw new \LogicException('Unknown format: ' . $value);
-				}
-
-				$this->set('format', $value);
-			}
-			elseif ($key == 'type') {
-				$value = strtolower($value);
-
-				if ($value == strtolower(self::TYPES[self::TYPE_CATEGORY])) {
-					$value = self::TYPE_CATEGORY;
-				}
-				elseif ($value == strtolower(self::TYPES[self::TYPE_PAGE])) {
-					$value = self::TYPE_PAGE;
-				}
-				else {
-					throw new \LogicException('Unknown type: ' . $value);
-				}
-
-				$this->set('type', $value);
-			}
-			elseif ($key == 'status') {
-				$value = strtolower($value);
-
-				if (!array_key_exists($value, self::STATUS_LIST)) {
-					throw new \LogicException('Unknown status: ' . $value);
-				}
-
-				$this->set('status', $value);
-			}
-			else {
-				// Ignore other metadata
-			}
-		}
-
-		$this->set('content', trim($content, "\n\r"));
-
-		return true;
-	}
-
-	public function loadFromFile(File $file): void
-	{
-		if (!$this->importFromRaw($file->fetch())) {
-			throw new \LogicException('Invalid page content: ' . $file->parent);
-		}
-
-		if (empty($this->modified)) {
-			$this->set('modified', $file->modified);
-		}
-
-		if (!isset($this->type) || $this->type != self::TYPE_CATEGORY) {
-			$this->set('type', $this->checkRealType());
-		}
-		else {
-			$this->set('type', self::TYPE_CATEGORY);
-		}
-	}
-
 	public function checkRealType(): int
 	{
 		// Make sure this is actually not a category
-		foreach (Files::list(Utils::dirname($this->filepath())) as $subfile) {
+		foreach (Files::list($this->dir_path) as $subfile) {
 			if ($subfile->type == File::TYPE_DIRECTORY) {
 				return self::TYPE_CATEGORY;
 			}
@@ -613,19 +458,5 @@ class Page extends Entity
 	public function isOnline(): bool
 	{
 		return $this->status == self::STATUS_ONLINE;
-	}
-
-	static public function fromFile(File $file): self
-	{
-		$page = new self;
-
-		// Path is relative to web root
-		$page->set('file_path', $file->path);
-		$page->set('path', substr(Utils::dirname($file->path), strlen(File::CONTEXT_WEB . '/')));
-		$page->set('uri', Utils::basename($page->path));
-		$page->set('parent', Utils::dirname($page->path) == '.' ? '' : Utils::dirname($page->path));
-
-		$page->loadFromFile($file);
-		return $page;
 	}
 }

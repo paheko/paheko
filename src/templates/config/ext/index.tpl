@@ -92,7 +92,7 @@
 					</td>
 					<td class="actions">
 						{if $item.config_url && $item.enabled}
-							{linkbutton label="Configurer" href=$item.config_url shape="settings" target="_dialog"}
+							{linkbutton label="Configurer" href=$item.config_url shape="settings"}
 						{/if}
 					</td>
 					<td class="actions">

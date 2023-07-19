@@ -66,7 +66,7 @@ class DynamicField extends Entity
 	protected ?string $default_value;
 
 	/**
-	 * SQL code for generated fields
+	 * SQL code for virtual view
 	 */
 	protected ?string $sql;
 
@@ -101,7 +101,7 @@ class DynamicField extends Entity
 		'country'	=>	'Sélecteur de pays',
 		'text'		=>	'Texte',
 		'textarea'	=>	'Texte multi-lignes',
-		'generated' =>  'Calculé',
+		//'virtual' =>  'Calculé',
 	];
 
 	const PHP_TYPES = [
@@ -121,7 +121,7 @@ class DynamicField extends Entity
 		'country'  => '?string',
 		'text'     => '?string',
 		'textarea' => '?string',
-		'generated'=> 'dynamic',
+		//'virtual'=> 'dynamic',
 	];
 
 	const SQL_TYPES = [
@@ -141,7 +141,7 @@ class DynamicField extends Entity
 		'country'  => 'TEXT',
 		'text'     => 'TEXT',
 		'textarea' => 'TEXT',
-		'generated'=> 'GENERATED',
+		//'virtual'  => null,
 	];
 
 	const SEARCH_TYPES = [
@@ -214,7 +214,10 @@ class DynamicField extends Entity
 		}
 
 		if ($this->type == 'file') {
-			foreach (Files::glob(File::CONTEXT_USER . '/*/' . $this->name) as $file) {
+			// Delete all linked files
+			$glob = sprintf('%s/*/%s/', File::CONTEXT_USER, $this->name);
+
+			foreach (Files::glob($glob) as $file) {
 				$file->delete();
 			}
 		}
@@ -232,9 +235,9 @@ class DynamicField extends Entity
 		return (bool) ($this->system & self::PRESET);
 	}
 
-	public function isGenerated(): bool
+	public function isVirtual(): bool
 	{
-		return isset($this->type) && $this->type == 'generated';
+		return $this->type == 'virtual';
 	}
 
 	public function canDelete(): bool
@@ -276,7 +279,7 @@ class DynamicField extends Entity
 
 		if ($this->type == 'multiple' || $this->type == 'select') {
 			$this->options = array_filter($this->options);
-			$this->assert(is_array($this->options) && count($this->options) >= 1 && trim(current($this->options)) !== '', 'Ce champ nécessite de comporter au moins une option possible: ' . $this->name);
+			$this->assert(is_array($this->options) && count($this->options) >= 1 && trim((string)current($this->options)) !== '', 'Ce champ nécessite de comporter au moins une option possible: ' . $this->name);
 		}
 
 		$db = DB::getInstance();
@@ -292,7 +295,8 @@ class DynamicField extends Entity
 			$this->assert($this->system & self::PRESET || !array_key_exists($this->name, DynamicFields::getInstance()->getPresets()), 'Ce nom de champ est déjà utilisé par un champ pré-défini.');
 		}
 
-		if (self::SQL_TYPES[$this->type] == 'GENERATED') {
+		/* FIXME TODO
+		if (self::SQL_TYPES[$this->type] == 'VIRTUAL') {
 			$this->assert(null !== $this->sql && strlen(trim($this->sql)), 'Le code SQL est manquant');
 
 			try {
@@ -315,6 +319,7 @@ class DynamicField extends Entity
 				throw new ValidationException('Le code SQL du champ calculé est invalide 2: ' . $e->getMessage(), 0, $e);
 			}
 		}
+		*/
 	}
 
 	public function importForm(array $source = null)

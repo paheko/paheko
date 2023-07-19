@@ -102,7 +102,10 @@
 			{if !$simple}<td>{$line.line_label}</td>{/if}
 			<td>{$line.line_reference}</td>
 			<td class="num">{if $line.id_project}<a href="{$admin_url}acc/reports/statement.php?project={$line.id_project}&amp;year={$year.id}">{$line.project_code}</a>{/if}</td>
+			{if isset($line.locked)}
 			<td>{if $line.locked}{icon title="Écriture verrouillée" shape="lock"}{/if}</td>
+			{/if}
+			<td>{if $line.files}{$line.files}{/if}</td>
 			{* Deposit status, might be consufing
 			<td>
 				{if $account.type == $account::TYPE_OUTSTANDING && $line.debit}

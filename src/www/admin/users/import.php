@@ -25,7 +25,10 @@ $df = DynamicFields::getInstance();
 $params = compact('ignore_ids');
 
 $csv->setColumns($df->listImportAssocNames());
-$csv->setMandatoryColumns(array_keys($df->listImportRequiredAssocNames()));
+
+$required_fields = $df->listImportRequiredAssocNames($ignore_ids ? false : true);
+
+$csv->setMandatoryColumns(array_keys($required_fields));
 
 $form->runIf('cancel', function() use ($csv) {
 	$csv->clear();
@@ -42,12 +45,15 @@ $form->runIf(f('preview') && $csv->loaded(), function () use (&$csv) {
 }, $csrf_key);
 
 if (!f('import') && $csv->ready()) {
-	try {
-		$report = Users::importReport($csv, $ignore_ids, Session::getUserId());
-	}
-	catch (UserException $e) {
+	$report = Users::importReport($csv, $ignore_ids, Session::getUserId());
+
+	if (count($report['errors'])) {
 		$csv->clear();
-		$form->addError($e);
+
+		foreach ($report['errors'] as $msg) {
+			$form->addError($msg);
+		}
+
 	}
 }
 

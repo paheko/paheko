@@ -164,6 +164,23 @@ Affichera :
 - 2
 ```
 
+## ksort, sort
+
+Trie un tableau par ordre alpha-numérique, sans tenir compte des majuscules/minuscules. `ksort` trie le tableau en utilisant les clés, et `sort` trie le tableau en utilisant les valeurs.
+
+```
+{{:assign var="table" b="3" a="2" c="1"}}
+{{$table|sort|implode:","}}
+{{$table|ksort|implode:","}}
+```
+
+Affichera :
+
+```
+1,2,3
+2,3,1
+```
+
 # Filtres de texte
 
 ## args
@@ -494,13 +511,36 @@ Formatte une date au format ATOM : `Y-m-d\TH:i:sP`
 
 ## parse_date
 
-Vérifie le format d'une chaîne de texte et la transforme en chaîne de date standardisée au format `AAAA-MM-JJ HH:MM` (ou `AAAA-MM-JJ` si l'heure n'a pas été précisée).
+Vérifie le format d'une chaîne de texte représentant la date et la transforme en chaîne de date standardisée au format `AAAA-MM-JJ`.
 
 Les formats acceptés sont :
 
 * `AAAA-MM-JJ`
 * `JJ/MM/AAAA`
 * `JJ/MM/AA`
+
+## parse_datetime
+
+Vérifie le format d'une chaîne de texte représentant la date et l'heure et la transforme en chaîne de date et heure standardisée au format `AAAA-MM-JJ HH:mm`.
+
+Les formats acceptés sont :
+
+* `AAAA-MM-JJ HH:mm:ss`
+* `AAAA-MM-JJ HH:mm`
+* `JJ/MM/AAAA HH:mm`
+
+## parse_time
+
+Vérifie le format d'une chaîne de texte représentant l'heure et la transforme en chaîne de date standardisée au format `HH:MM`.
+
+Les formats acceptés sont :
+
+* `HH:MM`
+* `H:M`
+* `H:MM`
+* `HH:M`
+
+Le séparateur peut être `:` ou `h`.
 
 # Filtres de condition
 
@@ -600,3 +640,7 @@ Donnera :
 ```
 quarante deux
 ```
+
+## uuid
+
+Renvoie un identifiant unique au format UUIDv4.

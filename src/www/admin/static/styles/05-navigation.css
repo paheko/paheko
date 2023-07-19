@@ -91,6 +91,7 @@ nav.tabs aside {
     max-width: 50%;
     text-align: right;
     clear: right;
+    margin-top: .5em;
 }
 
 nav.tabs aside form {

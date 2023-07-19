@@ -144,7 +144,7 @@ class Fee extends Entity
 			'user_number' => [
 				'label' => 'Numéro de membre',
 				'select' => 'u.' . DynamicFields::getNumberField(),
-				'export_only' => true,
+				'export' => true,
 			],
 			'identity' => [
 				'label' => 'Membre',

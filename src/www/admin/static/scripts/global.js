@@ -41,7 +41,7 @@
 		document.addEventListener(eventName, callback, false);
 	};
 
-	g.toggle = function(selector, visibility)
+	g.toggle = function(selector, visibility, resize_parent)
 	{
 		if (!('classList' in document.documentElement))
 			return false;
@@ -50,7 +50,11 @@
 		{
 			for (var i = 0; i < selector.length; i++)
 			{
-				g.toggle(selector[i], visibility);
+				g.toggle(selector[i], visibility, false);
+			}
+
+			if (resize_parent !== false) {
+				g.resizeParentDialog();
 			}
 
 			return true;
@@ -70,6 +74,10 @@
 			elements[i].querySelectorAll('input[required], textarea[required], select[required], button[required]').forEach((e) => {
 				e.disabled = !visibility ? true : (e.getAttribute('disabled') ? true : false);
 			});
+		}
+
+		if (resize_parent !== false) {
+			g.resizeParentDialog();
 		}
 
 		return true;
@@ -463,11 +471,14 @@
 			let n = f.match(/^\d+$/) ? (parseInt(f, 10) - 1) : null;
 			let i = form.querySelectorAll(n !== null ? '[name]:not([type="hidden"]):not([readonly]):not([type=button])' : f);
 
-			if(n !== null && i[n]) {
+			if (n !== null && i[n]) {
 				i[n].focus();
 			}
+			else if (n === null && i[0]) {
+				i[0].focus();
+			}
 		}
-	}, 'dom');
+	});
 
 	// Sélecteurs de listes
 	g.onload(() => {
@@ -490,7 +501,6 @@
 
 				for (var k = 0; k < inputs.length; k++) {
 					var i2 = inputs[k];
-					i2.type = 'submit'; // Force button to have error message, <button type="button"> cannot show validity message
 
 					// Element is hidden or disabled
 					if (!i2.offsetParent || i2.disabled) {
@@ -501,6 +511,8 @@
 					let v = i2.parentNode.querySelector('input[type="hidden"]:nth-child(1)');
 
 					if (!v || !v.value) {
+						// Force button to have error message, <button type="button"> cannot show validity message
+						i2.type = 'submit';
 						i2.setCustomValidity('Merci de faire une sélection.');
 						i2.reportValidity();
 						e.preventDefault();
@@ -624,6 +636,10 @@
 		for (var i = 0; i < tableActions.length; i++)
 		{
 			tableActions[i].onchange = function () {
+				if (!this.value) {
+					return;
+				}
+
 				if (!this.form.querySelector('table tbody input[type=checkbox]:checked'))
 				{
 					this.selectedIndex = 0;
@@ -649,6 +665,10 @@
 				elm.parentNode.parentNode.classList.toggle('checked', elm.checked);
 			});
 		});
+	});
+
+	g.onload(() => {
+		g.resizeParentDialog();
 	});
 
 })();

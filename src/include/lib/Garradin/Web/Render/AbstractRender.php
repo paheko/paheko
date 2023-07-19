@@ -100,7 +100,7 @@ abstract class AbstractRender
 
 		if ($this->context === File::CONTEXT_WEB) {
 			$this->link_prefix = $this->user_prefix ?? WWW_URL;
-			$this->current_path = Utils::basename(Utils::dirname($file->path));
+			$this->current_path = $file->uri();
 		}
 		else {
 			$this->link_prefix = $this->user_prefix ?? sprintf(ADMIN_URL . 'common/files/preview.php?p=%s/', $this->context);

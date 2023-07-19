@@ -2,25 +2,113 @@
 
 namespace Garradin;
 
+use Garradin\DB;
 use Garradin\Users\Session;
+
+use KD2\DB\EntityManager as EM;
 
 class DynamicList implements \Countable
 {
-	protected $columns;
-	protected $tables;
-	protected $conditions;
-	protected $group;
+	/**
+	 * List of columns
+	 * - The key is the column alias (AS ...)
+	 * - Each column is an array
+	 * - If the array is empty [] then a SELECT will be done on that table column,
+	 * but it will not be included in HTML table
+	 * - If the key 'select' exists, then it will be used as the SELECT clause
+	 * - If the key 'label' exists, it will be used in the HTML table as its header
+	 * (if not, the result will still be available in the loop, just it will not generate a column in the HTML table)
+	 * - If the key 'export' is TRUE, then the column will ONLY be included in CSV/ODS/XLSX exports
+	 * - If the key 'export' is FALSE, then the column will NOT be included in exports
+	 * (if the key `export` is NULL, or not set, then the column will be included both in HTML and in exports)
+	 */
+	protected array $columns;
+
+	/**
+	 * List of tables (including joins)
+	 */
+	protected string $tables;
+
+	/**
+	 * WHERE clause
+	 */
+	protected string $conditions;
+
+	/**
+	 * GROUP BY clause
+	 */
+	protected ?string $group = null;
+
+	/**
+	 * Default order columns (must reference valid keys of $columns)
+	 */
 	protected array $order;
+
+	/**
+	 * Modifier callback function
+	 * This will be called for each row
+	 */
 	protected $modifier;
+
+	/**
+	 * Export modifier callback function
+	 * Called for each row, for export only
+	 */
 	protected $export_callback;
-	protected $title = 'Liste';
-	protected $count = 'COUNT(*)';
+
+	/**
+	 * Table caption, used for the expor tfilename
+	 */
+	protected string $title = 'Liste';
+
+	/**
+	 * COUNT clause
+	 */
+	protected string $count = 'COUNT(*)';
+
+	/**
+	 * Tables used for the COUNT
+	 * By default, $tables is used, but sometimes you don't need to JOIN
+	 * that many tables just to do a COUNT.
+	 */
+	protected ?string $count_tables = null;
+
+	/**
+	 * @see setEntity
+	 */
+	protected ?string $entity = null;
+	protected ?string $entity_select = null;
+
+	/**
+	 * Default ASC/DESC
+	 */
 	protected array $desc = [ true ];
-	protected $per_page = 100;
-	protected $page = 1;
+
+	/**
+	 * Number of items per page
+	 * Set to NULL to disable LIMIT clause
+	 */
+	protected ?int $per_page = 100;
+
+	/**
+	 * Current page
+	 */
+	protected int $page = 1;
+
+	/**
+	 * Parameters to be binded to the SQL query
+	 */
 	protected array $parameters = [];
 
-	private $count_result;
+	/**
+	 * Elements that should be used in the preference hash (stored in user preferences)
+	 */
+	protected array $preference_hash_elements = ['tables' => true, 'columns' => true, 'conditions' => true, 'group' => true];
+
+	/**
+	 * COUNT result, cached here to avoid multiple requests
+	 */
+	private ?int $count_result = null;
 
 	public function __construct(array $columns, string $tables, string $conditions = '1')
 	{
@@ -38,6 +126,11 @@ class DynamicList implements \Countable
 	public function __get($key)
 	{
 		return $this->$key;
+	}
+
+	public function togglePreferenceHashElement(string $name, bool $enable): void
+	{
+		$this->preference_hash_elements[$name] = $enable;
 	}
 
 	public function setParameter($key, $value) {
@@ -63,6 +156,17 @@ class DynamicList implements \Countable
 	public function setConditions(string $conditions)
 	{
 		$this->conditions = $conditions;
+	}
+
+	/**
+	 * If an entity is set, then each row will return the specified entity
+	 * (using the SELECT clause passed) instead of the specified columns.
+	 * Columns will only be used for the header and ordering
+	 */
+	public function setEntity(string $entity, string $select = '*')
+	{
+		$this->entity = $entity;
+		$this->entity_select = $select;
 	}
 
 	public function orderBy($keys, $desc)
@@ -91,7 +195,7 @@ class DynamicList implements \Countable
 	public function count(): int
 	{
 		if (null === $this->count_result) {
-			$sql = sprintf('SELECT %s FROM %s WHERE %s;', $this->count, $this->tables, $this->conditions);
+			$sql = sprintf('SELECT %s FROM %s WHERE %s;', $this->count, $this->count_tables ?? $this->tables, $this->conditions);
 			$this->count_result = DB::getInstance()->firstColumn($sql, $this->parameters);
 		}
 
@@ -142,6 +246,11 @@ class DynamicList implements \Countable
 		$this->count = $count;
 	}
 
+	public function setCountTables(string $tables)
+	{
+		$this->count_tables = $tables;
+	}
+
 	public function getHeaderColumns(bool $export = false)
 	{
 		$columns = [];
@@ -160,8 +269,13 @@ class DynamicList implements \Countable
 				continue;
 			}
 
-			if (!$export && !empty($properties['export_only'])) {
-				continue;
+			if (isset($properties['export'])) {
+				if (!$properties['export'] && $export) {
+					continue;
+				}
+				elseif ($properties['export'] && !$export) {
+					continue;
+				}
 			}
 
 			$columns[$alias] = $export ? $properties['label'] : $properties;
@@ -182,48 +296,64 @@ class DynamicList implements \Countable
 
 	public function iterate(bool $include_hidden = true)
 	{
-		foreach (DB::getInstance()->iterate($this->SQL(), $this->parameters) as $row) {
+		if ($this->entity) {
+			$list = EM::getInstance($this->entity)->iterate($this->SQL());
+		}
+		else {
+			$list = DB::getInstance()->iterate($this->SQL(), $this->parameters);
+		}
+
+		foreach ($list as $key => $row) {
 			if ($this->modifier) {
 				call_user_func_array($this->modifier, [&$row]);
 			}
 
-			foreach ($this->columns as $key => $config) {
-				if (empty($config['label']) && !$include_hidden) {
-					unset($row->$key);
+			// Hide columns without a label in results
+			if (!$this->entity) {
+				foreach ($this->columns as $key => $config) {
+					if (empty($config['label']) && !$include_hidden) {
+						unset($row->$key);
+					}
 				}
 			}
 
-			yield $row;
+			yield $key => $row;
 		}
 	}
 
 	public function SQL()
 	{
 		$start = ($this->page - 1) * $this->per_page;
-		$columns = [];
 		$db = DB::getInstance();
 
-		foreach ($this->columns as $alias => $properties) {
-			// Skip columns that require a certain order (eg. calculating a running sum)
-			if (isset($properties['only_with_order']) && !($properties['only_with_order'] == current($this->order))) {
-				continue;
-			}
-
-			// Skip columns that require a certain order AND paginated result
-			if (isset($properties['only_with_order']) && $this->page > 1) {
-				continue;
-			}
-
-			if (array_key_exists('select', $properties)) {
-				$select = $properties['select'] ?? 'NULL';
-				$columns[] = sprintf('%s AS %s', $select, $db->quoteIdentifier($alias));
-			}
-			else {
-				$columns[] = $db->quoteIdentifier($alias);
-			}
+		if ($this->entity) {
+			$select = $this->entity_select;
 		}
+		else {
+			$columns = [];
 
-		$columns = implode(', ', $columns);
+			foreach ($this->columns as $alias => $properties) {
+				// Skip columns that require a certain order (eg. calculating a running sum)
+				if (isset($properties['only_with_order']) && !($properties['only_with_order'] == current($this->order))) {
+					continue;
+				}
+
+				// Skip columns that require a certain order AND paginated result
+				if (isset($properties['only_with_order']) && $this->page > 1) {
+					continue;
+				}
+
+				if (array_key_exists('select', $properties)) {
+					$select = $properties['select'] ?? 'NULL';
+					$columns[] = sprintf('%s AS %s', $select, $db->quoteIdentifier($alias));
+				}
+				else {
+					$columns[] = $db->quoteIdentifier($alias);
+				}
+			}
+
+			$select = implode(', ', $columns);
+		}
 
 		$order = [];
 		foreach ($this->order as $i => $column) {
@@ -240,7 +370,7 @@ class DynamicList implements \Countable
 		$group = $this->group ? 'GROUP BY ' . $this->group : '';
 
 		$sql = sprintf('SELECT %s FROM %s WHERE %s %s ORDER BY %s',
-			$columns, $this->tables, $this->conditions, $group, $order);
+			$select, $this->tables, $this->conditions, $group, $order);
 
 		if (null !== $this->per_page) {
 			$sql .= sprintf(' LIMIT %d,%d', $start, $this->per_page);
@@ -261,7 +391,19 @@ class DynamicList implements \Countable
 		$u = null;
 
 		if ($u = Session::getLoggedUser()) {
-			$hash = md5(json_encode([$this->tables, $this->conditions, $this->columns, $this->group]));
+			$elements = [];
+
+			foreach ($this->preference_hash_elements as $e => $enabled) {
+				if (!$enabled) {
+					continue;
+				}
+
+				$elements[$e] = $this->$e;
+			}
+
+			ksort($elements);
+
+			$hash = md5(json_encode($elements));
 			$preferences = $u->getPreference('list_' . $hash) ?? null;
 
 			$order = $preferences->o ?? null;
@@ -284,9 +426,13 @@ class DynamicList implements \Countable
 
 		// Save current order, if different than default
 		if ($u && $hash
-			&& (($order != ($preferences->o ?? null) && $order != current($this->order))
-				|| ($desc != ($preferences->d ?? null) && $desc != current($this->desc)))) {
-			$u->setPreference('list_' . $hash, ['o' => $order, 'd' => $desc]);
+			&& ($order != ($preferences->o ?? null) || $desc != ($preferences->d ?? null))) {
+			if ($order == current($this->order) && $desc == current($this->desc)) {
+				$u->deletePreference('list_' . $hash);
+			}
+			else {
+				$u->setPreference('list_' . $hash, ['o' => $order, 'd' => $desc]);
+			}
 		}
 
 		if ($order) {

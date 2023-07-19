@@ -21,7 +21,7 @@ if (!$page) {
 $csrf_key = 'attach_' . $page->id();
 
 $form->runIf('delete', function () use ($page, $session) {
-	$path = Utils::dirname($page->file_path) . '/' . f('delete');
+	$path = $page->dir_path . '/' . f('delete');
 	$file = Files::get($path);
 
 	if (!$file || !$file->canDelete()) {
@@ -33,7 +33,7 @@ $form->runIf('delete', function () use ($page, $session) {
 
 
 $form->runIf('upload', function () use ($page) {
-	$new_file = Files::uploadMultiple(Utils::dirname($page->file_path), 'file');
+	$new_file = Files::uploadMultiple($page->dir_path, 'file');
 }, $csrf_key);
 
 $files = null;

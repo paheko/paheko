@@ -13,7 +13,6 @@ use Garradin\Entities\Users\Category;
 use Garradin\Entities\Users\User;
 use Garradin\UserTemplate\CommonModifiers;
 use Garradin\UserTemplate\CommonFunctions;
-use Garradin\Web\Render\Skriv;
 use Garradin\Files\Files;
 
 class Template extends Smartyer
@@ -161,8 +160,7 @@ class Template extends Smartyer
 			return Form::tokenHTML($params['key']);
 		});
 
-		$this->register_function('exportmenu', [$this, 'widgetExportMenu']);
-		$this->register_block('linkmenu', [$this, 'widgetLinkMenu']);
+		$this->register_block('linkmenu', [CommonFunctions::class, 'linkmenu']);
 
 		$this->register_modifier('strlen', fn($a) => strlen($a ?? ''));
 		$this->register_modifier('dump', ['KD2\ErrorManager', 'dump']);
@@ -184,14 +182,8 @@ class Template extends Smartyer
 			}, $str);
 		});
 
-
 		$this->register_modifier('restore_snippet_markup', function ($str) {
 			return preg_replace('!&lt;(/?mark)&gt;!', '<$1>', $str);
-		});
-
-		$this->register_modifier('format_skriv', function ($str) {
-			$skriv = new Skriv;
-			return $skriv->render((string) $str);
 		});
 
 		foreach (CommonModifiers::PHP_MODIFIERS_LIST as $name) {
@@ -218,7 +210,7 @@ class Template extends Smartyer
 	{
 		$form = $this->getTemplateVars('form');
 
-		if (!$form->hasErrors())
+		if (!$form || !$form->hasErrors())
 		{
 			return '';
 		}
@@ -252,73 +244,6 @@ class Template extends Smartyer
 		}
 
 		return '<div class="block error"><ul><li>' . implode('</li><li>', $errors) . '</li></ul></div>';
-	}
-
-	public function widgetExportMenu(array $params): string
-	{
-		$url = $params['href'] ?? Utils::getSelfURL();
-		$suffix = $params['suffix'] ?? 'export=';
-
-		if (false !== strpos($url, '?')) {
-			$url .= '&';
-		}
-		else {
-			$url .= '?';
-		}
-
-		$url .= $suffix;
-
-		$xlsx = $params['xlsx'] ?? null;
-
-		if (null === $xlsx) {
-			$xlsx = !empty(CALC_CONVERT_COMMAND);
-		}
-
-		if (!empty($params['form'])) {
-			$name = $params['name'] ?? 'export';
-			$out = CommonFunctions::button(['value' => 'csv', 'shape' => 'export', 'label' => 'Export CSV', 'name' => $name, 'type' => 'submit']);
-			$out .= CommonFunctions::button(['value' => 'ods', 'shape' => 'export', 'label' => 'Export LibreOffice', 'name' => $name, 'type' => 'submit']);
-
-			if ($xlsx) {
-				$out .= CommonFunctions::button(['value' => 'xlsx', 'shape' => 'export', 'label' => 'Export Excel', 'name' => $name, 'type' => 'submit']);
-			}
-		}
-		else {
-			$out  = CommonFunctions::linkButton(['href' => $url . 'csv', 'label' => 'Export CSV', 'shape' => 'export']);
-			$out .= ' ' . CommonFunctions::linkButton(['href' => $url . 'ods', 'label' => 'Export LibreOffice', 'shape' => 'export']);
-
-			if ($xlsx !== false) {
-				$out .= ' ' . CommonFunctions::linkButton(['href' => $url . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']);
-			}
-		}
-
-		$params = array_merge($params, ['shape' => 'export', 'label' => $params['label'] ?? 'Export…']);
-		return $this->widgetLinkMenu($params, $out);
-	}
-
-	protected function widgetLinkMenu(array $params, ?string $content): string
-	{
-		if (null === $content) {
-			return '';
-		}
-
-		if (!empty($params['right'])) {
-			$params['class'] = 'menu-btn-right';
-		}
-
-		$out = sprintf('
-			<span class="menu-btn %s">
-				<b data-icon="%s" class="btn" ondblclick="this.parentNode.querySelector(\'a, button\').click();" onclick="this.parentNode.classList.toggle(\'active\');">%s</b>
-				<span><span>',
-			htmlspecialchars($params['class'] ?? ''),
-			Utils::iconUnicode($params['shape']),
-			htmlspecialchars($params['label'])
-		);
-
-		$out .= $content . '</span></span>
-			</span>';
-
-		return $out;
 	}
 
 	protected function formatPhoneNumber($n)
@@ -385,16 +310,45 @@ class Template extends Smartyer
 		if ($field->type == 'checkbox') {
 			return $v ? 'Oui' : 'Non';
 		}
-		elseif ($field->type == 'file' && isset($params['thumb_url'])) {
-			$session = Session::getInstance();
+		elseif ($field->type == 'file' && $v) {
+			$files = explode(';', $v);
+			$out = '<div class="files-list">';
+			$count = 0;
 
-			foreach (Files::listForUser($params['user_id'], $field->name) as $file) {
-				return '<aside class="file">'
-					. $file->link($session, 'auto', false, $params['thumb_url'])
-					. '</aside>';
+			foreach ($files as $path) {
+				if (preg_match('!\.(?:png|jpe?g|gif|webp)$!i', $path)) {
+					$url = BASE_URL . $path . '?150px';
+					$label = sprintf(
+						'<figure><img src="%s" alt="%s" /></figure>',
+						htmlspecialchars($url),
+						htmlspecialchars($field->label)
+					);
+				}
+				else {
+					$count++;
+					continue;
+				}
+
+				if (isset($params['files_href'])) {
+					$label = sprintf('<a href="%s">%s</a>', $params['files_href'], $label);
+				}
+
+				$out .= sprintf(
+					'<aside class="file">%s</aside>',
+					$label
+				);
 			}
 
-			return '';
+			if ($count) {
+				$out .= sprintf('<aside class="file">%s%s</aside>',
+					($count != count($files)) ? '+' : '',
+					($count == 1 ? '1 fichier' : $count . ' fichiers')
+				);
+			}
+
+			$out .= '</div>';
+
+			return $out;
 		}
 
 		if (empty($v)) {
@@ -457,8 +411,8 @@ class Template extends Smartyer
 			return '';
 		}
 
-		// GENERATED columns cannot be edited
-		if ($type == 'generated') {
+		// VIRTUAL columns cannot be edited
+		if ($type == 'virtual') {
 			return '';
 		}
 

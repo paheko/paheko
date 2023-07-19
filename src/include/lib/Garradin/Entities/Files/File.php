@@ -42,7 +42,7 @@ class File extends Entity
 	/**
 	 * Parent directory of file
 	 */
-	protected string $parent = '';
+	protected ?string $parent = null;
 
 	/**
 	 * File name
@@ -62,6 +62,8 @@ class File extends Entity
 	protected ?int $size = null;
 	protected \DateTime $modified;
 	protected bool $image;
+	protected ?string $md5;
+	protected ?\DateTime $trash = null;
 
 	const TYPE_FILE = 1;
 	const TYPE_DIRECTORY = 2;
@@ -89,7 +91,6 @@ class File extends Entity
 	const CONTEXT_CONFIG = 'config';
 	const CONTEXT_WEB = 'web';
 	const CONTEXT_MODULES = 'modules';
-	const CONTEXT_TRASH = 'trash';
 	const CONTEXT_ATTACHMENTS = 'attachments';
 
 	/**
@@ -104,7 +105,6 @@ class File extends Entity
 		self::CONTEXT_CONFIG => 'Configuration',
 		self::CONTEXT_WEB => 'Site web',
 		self::CONTEXT_MODULES => 'Modules',
-		self::CONTEXT_TRASH => 'Corbeille',
 		self::CONTEXT_SKELETON => 'Squelettes',
 		self::CONTEXT_ATTACHMENTS => 'Fichiers joints aux messages',
 	];
@@ -144,18 +144,63 @@ class File extends Entity
 	// https://book.hacktricks.xyz/pentesting-web/file-upload
 	const FORBIDDEN_EXTENSIONS = '!^(?:cgi|exe|sh|bash|com|pif|jspx?|jar|js[wxv]|action|do|php(?:s|\d+)?|pht|phtml?|shtml|phar|htaccess|inc|cfml?|cfc|dbm|swf|pl|perl|py|pyc|asp|so)$!i';
 
-	static public function getColumns(): array
-	{
-		return array_keys((new self)->_types);
-	}
-
 	public function selfCheck(): void
 	{
 		$this->assert($this->type === self::TYPE_DIRECTORY || $this->type === self::TYPE_FILE, 'Unknown file type');
 		$this->assert($this->type === self::TYPE_DIRECTORY || $this->size !== null, 'File size must be set');
 		$this->assert(trim($this->name) !== '', 'Le nom de fichier ne peut rester vide');
 		$this->assert(strlen($this->path), 'Le chemin ne peut rester vide');
-		$this->assert(strlen($this->parent) || '' === $this->parent, 'Le chemin ne peut rester vide');
+		$this->assert(null === $this->parent || strlen($this->parent), 'Le chemin ne peut rester vide');
+	}
+
+	public function save(bool $selfcheck = true): bool
+	{
+		if ($this->parent) {
+			Files::ensureDirectoryExists($this->parent);
+		}
+
+		$ok = parent::save();
+
+		$context = $this->context();
+
+		// Link file to transaction/user
+		if ($ok && $this->type === self::TYPE_FILE && in_array($context, [self::CONTEXT_USER, self::CONTEXT_TRANSACTION])) {
+			// Only insert if ID exists in table
+			$db = DB::getInstance();
+
+			if ($context == self::CONTEXT_USER) {
+				$id = (int)Utils::basename(Utils::dirname($this->parent));
+				$field = Utils::basename($this->parent);
+
+				if (!$id || !$field) {
+					return $ok;
+				}
+
+				$sql = sprintf('INSERT OR IGNORE INTO %s_files (id_file, id_user, field) SELECT %d, %d, %s FROM %1$s WHERE id = %3$d;',
+					'users',
+					$this->id(),
+					$id,
+					$db->quote($field)
+				);
+			}
+			else {
+				$id = (int)Utils::basename($this->parent);
+
+				if (!$id) {
+					return $ok;
+				}
+
+				$sql = sprintf('INSERT OR IGNORE INTO %s_files (id_file, id_transaction) SELECT %d, %d FROM %1$s WHERE id = %3$d;',
+					'acc_transactions',
+					$this->id(),
+					$id
+				);
+			}
+
+			$db->exec($sql);
+		}
+
+		return $ok;
 	}
 
 	public function context(): string
@@ -168,12 +213,12 @@ class File extends Entity
 		return Files::get($this->parent);
 	}
 
-	public function fullpath(): string
+	public function getLocalFilePath(): ?string
 	{
-		$path = Files::callStorage('getFullPath', $this);
+		$path = Files::callStorage('getLocalFilePath', $this);
 
-		if (null === $path) {
-			throw new \RuntimeException('File does not exist: ' . $this->path);
+		if (null === $path || !file_exists($path)) {
+			return null;
 		}
 
 		return $path;
@@ -181,7 +226,48 @@ class File extends Entity
 
 	public function etag(): string
 	{
-		return md5($this->path . $this->size . $this->modified->getTimestamp());
+		if ($this->md5) {
+			return $this->md5;
+		}
+		elseif (!$this->isDir()) {
+			return md5($this->path . $this->size . $this->modified->getTimestamp());
+		}
+		else {
+			return md5($this->path . $this->getRecursiveSize() . $this->getRecursiveLastModified());
+		}
+	}
+
+	public function rehash($pointer = null): void
+	{
+		$path = !$pointer ? $this->getLocalFilePath() : null;
+
+		if ($path) {
+			$hash = md5_file($path);
+		}
+		else {
+			$p = $pointer ?? $this->getReadOnlyPointer();
+
+			if (!$p) {
+				return;
+			}
+
+			$hash = hash_init('md5');
+
+			while (!feof($p)) {
+				hash_update($hash, fread($p, 8192));
+			}
+
+			$hash = hash_final($hash);
+
+			if (null === $pointer) {
+				fclose($p);
+			}
+			else {
+				fseek($pointer, 0, SEEK_SET);
+			}
+		}
+
+		$this->set('md5', $hash);
 	}
 
 	/**
@@ -207,63 +293,74 @@ class File extends Entity
 
 	public function moveToTrash(): void
 	{
-		if ($this->context() == self::CONTEXT_TRASH) {
+		if ($this->trash) {
 			return;
 		}
 
-		$this->touch();
-		$this->move(self::CONTEXT_TRASH . '/' . $this->parent);
+		$this->set('trash', new \DateTime);
+		$this->save();
 	}
 
-	public function restoreFromTrash(): ?string
+	public function restoreFromTrash(): void
 	{
-		if ($this->context() != self::CONTEXT_TRASH) {
-			return null;
+		if (!$this->trash) {
+			return;
 		}
 
-		$parent = substr($this->parent, strlen(self::CONTEXT_TRASH . '/'));
+		$db = DB::getInstance();
+		$exists = $db->test(File::TABLE, 'path = ? AND trash IS NULL', $this->path);
+		$parent_exists = $db->test(File::TABLE, 'path = ? AND trash IS NULL AND type = ?', $this->parent, self::TYPE_DIRECTORY);
 
-		// Move to original parent path
-		if (Files::exists($parent)) {
-			$this->move($parent);
-		}
-		// Parent directory no longer exists, move file to documents root,
-		// but under a new name to make sure it doesn't overwrite an existing file
-		else {
+		$this->set('trash', null);
+
+		// Parent directory no longer exists, or another file with the same name has been created:
+		// move file to documents root, but under a new name to make sure it doesn't overwrite an existing file
+		if ($exists || !$parent_exists) {
 			$new_name = sprintf('Restauré de la corbeille - %s - %s', date('d-m-Y His'), $this->name);
 			$parent = self::CONTEXT_DOCUMENTS;
 			$this->rename($parent . '/' . $new_name);
 		}
 
-		return $parent;
+		$this->save();
 	}
 
-	public function delete(): bool
+	public function deleteCache(): void
 	{
-		Files::callStorage('checkLock');
-
 		// This also deletes thumbnails
 		Web_Cache::delete($this->uri());
-
-		// Delete actual file content
-		Files::callStorage('delete', $this);
-
-		Plugins::fireSignal('files.delete', ['file' => $this]);
 
 		// clean up thumbnails
 		foreach (self::ALLOWED_THUMB_SIZES as $key => $operations)
 		{
 			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->pathHash(), $key));
 		}
+	}
 
-		DB::getInstance()->delete('files_search', 'path = ? OR path LIKE ?', $this->path, $this->path . '/%');
+	public function delete(): bool
+	{
+		Files::assertStorageIsUnlocked();
 
-		// Delete entity if it exists
-		if ($this->exists()) {
-			return parent::delete();
+		$db = DB::getInstance();
+		$db->begin();
+
+		// Also delete sub-directories and files
+		if ($this->type == self::TYPE_DIRECTORY) {
+			foreach (Files::list($this->path) as $file) {
+				$file->delete();
+			}
 		}
 
-		return true;
+		// Delete actual file content
+		Files::callStorage('delete', $this);
+
+		Plugins::fireSignal('files.delete', ['file' => $this]);
+
+		$this->deleteCache();
+		$r = parent::delete();
+
+		$db->commit();
+
+		return $r;
 	}
 
 	/**
@@ -313,23 +410,14 @@ class File extends Entity
 			}
 		}
 
-		Files::ensureDirectoryExists(Utils::dirname($new_path));
-		$return = Files::callStorage('move', $this, $new_path);
+		$parent = Utils::dirname($new_path);
 
 		Plugins::fireSignal('files.move', ['file' => $this, 'new_path' => $new_path]);
 
-		$escaped = strtr($this->path, ['%' => '!%', '_' => '!_', '!' => '!!']);
-
-		// Rename references in files_search
-		DB::getInstance()->preparedQuery('UPDATE files_search
-			SET path = ? || SUBSTR(path, 1+LENGTH(?))
-			WHERE path LIKE ?;',
-			$new_path . '/', $this->path . '/', $escaped . '%');
-
-		$this->set('parent', Utils::dirname($new_path));
+		$this->set('parent', $parent);
 		$this->set('path', $new_path);
-
-		return $return;
+		$this->set('name', $name);
+		return $this->save();
 	}
 
 	/**
@@ -339,7 +427,7 @@ class File extends Entity
 	 */
 	public function copy(string $target): self
 	{
-		return Files::createFromPath($target, Files::callStorage('getFullPath', $this));
+		return Files::createFromPointer($target, Files::callStorage('getReadOnlyPointer', $this));
 	}
 
 	public function setContent(string $content): self
@@ -357,7 +445,7 @@ class File extends Entity
 	 * @param  bool   $index_search Set to FALSE if you don't want the document to be indexed in the file search
 	 * @return self
 	 */
-	public function store(array $source, bool $index_search = true): self
+	public function store(array $source): self
 	{
 		if (!$this->path || !$this->name) {
 			throw new \LogicException('Cannot store a file that does not have a target path and name');
@@ -374,6 +462,8 @@ class File extends Entity
 			throw new \InvalidArgumentException('Invalid source type');
 		}
 
+		Files::assertStorageIsUnlocked();
+
 		$delete_after = false;
 		$path = $content = $pointer = null;
 		extract($source);
@@ -381,10 +471,12 @@ class File extends Entity
 		if ($path) {
 			$this->set('size', filesize($path));
 			Files::checkQuota($this->size);
+			$this->set('md5', md5_file($path));
 		}
 		elseif (null !== $content) {
 			$this->set('size', strlen($content));
 			Files::checkQuota($this->size);
+			$this->set('md5', md5($content));
 		}
 		elseif ($pointer) {
 			// See https://github.com/php/php-src/issues/9441
@@ -400,6 +492,8 @@ class File extends Entity
 			$this->set('size', ftell($pointer));
 			fseek($pointer, 0, SEEK_SET);
 			Files::checkQuota($this->size);
+
+			$this->rehash($pointer);
 		}
 
 		// Check that it's a real image
@@ -439,11 +533,17 @@ class File extends Entity
 			}
 		}
 
-		Files::callStorage('checkLock');
-
 		if (!isset($this->modified)) {
 			$this->set('modified', new \DateTime);
 		}
+
+		$new = !$this->exists();
+
+		$db = DB::getInstance();
+		$db->begin();
+
+		// Save metadata now, and rollback if required
+		$this->save();
 
 		try {
 			if (null !== $path) {
@@ -462,13 +562,6 @@ class File extends Entity
 
 			Plugins::fireSignal('files.store', ['file' => $this]);
 
-			if ($index_search) {
-				$this->indexForSearch(compact('content', 'path', 'pointer'));
-			}
-			else {
-				$this->removeFromSearch();
-			}
-
 			// clean up thumbnails
 			foreach (self::ALLOWED_THUMB_SIZES as $key => $operations)
 			{
@@ -476,32 +569,52 @@ class File extends Entity
 			}
 
 			Web_Cache::delete($this->uri());
+
+			// Index regular files, not directories
+			if ($this->type == self::TYPE_FILE) {
+				$this->indexForSearch(compact('content', 'path', 'pointer'));
+			}
+
+			$db->commit();
+
+			return $this;
+		}
+		catch (\Exception $e) {
+			$db->rollback();
+			throw $e;
 		}
 		finally {
 			if (null !== $pointer) {
 				fclose($pointer);
 			}
 		}
-
-		return $this;
 	}
 
-	public function indexForSearch(?array $source, ?string $title = null, ?string $forced_mime = null): void
+	public function indexForSearch(?array $source = null, ?string $title = null, ?string $forced_mime = null): void
 	{
 		$mime = $forced_mime ?? $this->mime;
 		$ext = $this->extension();
 		$content = null;
 
+		if ($this->isDir() && (!$mime || !isset($source['content']))) {
+			return;
+		}
+
 		// Store content in search table
 		if (substr($mime, 0, 5) == 'text/') {
-			$content = $source['content'] ?? Files::callStorage('fetch', $this);
+			$content = $source['content'] ?? $this->fetch();
 
 			if ($mime === 'text/html' || $mime == 'text/xml') {
-				$content = htmlspecialchars_decode(strip_tags($content));
+				$content = html_entity_decode(strip_tags($content),  ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401);
 			}
 		}
 		elseif ($ext == 'pdf' && PDFTOTEXT_COMMAND === 'pdftotext') {
 			$cmd = escapeshellcmd(PDFTOTEXT_COMMAND) . ' -nopgbrk - -';
+
+			if (empty($source)) {
+				$source['pointer'] = $this->getReadOnlyPointer();
+				$source['path'] = $source['pointer'] ? null : $this->getLocalFilePath();
+			}
 
 			if (isset($source['content'])) {
 				Utils::exec($cmd, 2, fn() => $source['content'], fn($out) => $content = $out);
@@ -520,7 +633,7 @@ class File extends Entity
 				$content = $content ?: null;
 			}
 		}
-		elseif (in_array($ext, self::EXTENSIONS_TEXT_CONVERT)) {
+		elseif (in_array($ext, self::EXTENSIONS_TEXT_CONVERT) && is_array($source)) {
 			$content = ToText::from($source);
 		}
 		else {
@@ -536,15 +649,14 @@ class File extends Entity
 			$content = null;
 		}
 
-		$db = DB::getInstance();
-		$db->preparedQuery('DELETE FROM files_search WHERE path = ?;', $this->path);
-		$db->preparedQuery('INSERT INTO files_search (path, title, content) VALUES (?, ?, ?);', $this->path, $title ?? $this->name, $content);
-	}
+		if (null === $content && null === $title) {
+			// This is already the same as what has been inserted by SQLite
+			return;
+		}
 
-	public function removeFromSearch(): void
-	{
 		$db = DB::getInstance();
-		$db->preparedQuery('DELETE FROM files_search WHERE path = ?;', $this->path);
+		$db->preparedQuery('REPLACE INTO files_search (docid, path, title, content) VALUES (?, ?, ?, ?);',
+			$this->id(), $this->path, $title ?? $this->name, $content);
 	}
 
 	/**
@@ -575,45 +687,7 @@ class File extends Entity
 			return 'directory';
 		}
 
-		$ext = substr($this->name, strrpos($this->name, '.') + 1);
-		$ext = strtolower($ext);
-
-		switch ($ext) {
-			case 'ods':
-			case 'xls':
-			case 'xlsx':
-			case 'csv':
-				return 'table';
-			case 'odt':
-			case 'doc':
-			case 'docx':
-			case 'rtf':
-				return 'document';
-			case 'pdf':
-				return 'pdf';
-			case 'odp':
-			case 'ppt':
-			case 'pptx':
-				return 'gallery';
-			case 'txt':
-			case 'skriv':
-				return 'text';
-			case 'md':
-				return 'markdown';
-			case 'html':
-			case 'css':
-			case 'js':
-			case 'tpl':
-				return 'code';
-			case 'mkv':
-			case 'mp4':
-			case 'avi':
-			case 'ogm':
-			case 'ogv':
-				return 'video';
-		}
-
-		return 'document';
+		return Files::getIconShape($this->name);
 	}
 
 	/**
@@ -636,12 +710,19 @@ class File extends Entity
 	 */
 	public function uri(): string
 	{
-		$parts = explode('/', $this->path);
-		$parts = array_map('rawurlencode', $parts);
-
 		if ($this->context() == self::CONTEXT_WEB) {
-			$parts = array_slice($parts, -2);
+			if ($this->isDir()) {
+				$parts = [$this->name];
+			}
+			else {
+				$parts = [Utils::basename($this->parent), $this->name];
+			}
 		}
+		else {
+			$parts = explode('/', $this->path);
+		}
+
+		$parts = array_map('rawurlencode', $parts);
 
 		return implode('/', $parts);
 	}
@@ -684,16 +765,18 @@ class File extends Entity
 			$label = preg_replace('/[_.-]/', '&shy;$0', htmlspecialchars($this->name));
 		}
 
+		$editor = $this->editorType();
+
 		if ($url) {
 			$attrs = sprintf('href="%s"', Utils::getLocalURL($url));
 		}
-		elseif ($allow_edit && $this->canWrite($session) && $this->editorType()) {
+		elseif ($editor && ($allow_edit || $editor == 'wopi') && $this->canWrite($session)) {
 			$attrs = sprintf('href="%s" target="_dialog" data-dialog-class="fullscreen"',
 				Utils::getLocalURL('!common/files/edit.php?p=') . rawurlencode($this->path));
 		}
 		elseif ($this->canPreview($session)) {
 			$attrs = sprintf('href="%s" target="_dialog" data-mime="%s"',
-				Utils::getLocalURL('!common/files/preview.php?p=') . rawurlencode($this->path),
+				$this->isImage() ? $this->url() : Utils::getLocalURL('!common/files/preview.php?p=') . rawurlencode($this->path),
 				$this->mime);
 		}
 		else {
@@ -735,12 +818,9 @@ class File extends Entity
 			throw new UserException('Page non trouvée', 404);
 		}
 
-		$path = Files::callStorage('getFullPath', $this);
-		$content = null === $path ? Files::callStorage('fetch', $this) : null;
+		$this->_serve(null, $download);
 
-		$this->_serve($path, $content, $download);
-
-		if (in_array($this->context(), [self::CONTEXT_WEB, self::CONTEXT_CONFIG])) {
+		if (($path = $this->getLocalFilePath()) && in_array($this->context(), [self::CONTEXT_WEB, self::CONTEXT_CONFIG])) {
 			Web_Cache::link($this->uri(), $path);
 		}
 	}
@@ -756,6 +836,22 @@ class File extends Entity
 		else {
 			$this->serve($session, isset($params['download']));
 		}
+	}
+
+	public function asImageObject(): Image
+	{
+		$path = $this->getLocalFilePath();
+		$pointer = null;
+
+		if ($path) {
+			$i = new Image($path);
+		}
+		else {
+			$pointer = $this->getReadOnlyPointer();
+			$i = Image::createFromPointer($pointer, null, true);
+		}
+
+		return $i;
 	}
 
 	/**
@@ -782,15 +878,7 @@ class File extends Entity
 
 		if (!Static_Cache::exists($cache_id)) {
 			try {
-				if ($path = Files::callStorage('getFullPath', $this)) {
-					$i = new Image($path);
-				}
-				elseif ($content = Files::callStorage('fetch', $this)) {
-					$i = Image::createFromBlob($content);
-				}
-				else {
-					throw new \RuntimeException('Unable to fetch file');
-				}
+				$i = $this->asImageObject();
 
 				// Always autorotate first
 				$i->autoRotate();
@@ -806,7 +894,7 @@ class File extends Entity
 						throw new \InvalidArgumentException('Opération invalide: ' . $operation);
 					}
 
-					call_user_func_array([$i, $operation], $arguments);
+					$i->$operation(...$arguments);
 				}
 
 				$format = null;
@@ -818,11 +906,12 @@ class File extends Entity
 				$i->save($destination, $format);
 			}
 			catch (\RuntimeException $e) {
+				throw $e;
 				throw new UserException('Impossible de créer la miniature');
 			}
 		}
 
-		$this->_serve($destination, null);
+		$this->_serve($destination, false);
 
 		if (in_array($this->context(), [self::CONTEXT_WEB, self::CONTEXT_CONFIG])) {
 			Web_Cache::link($this->uri(), $destination, $size);
@@ -836,7 +925,7 @@ class File extends Entity
 	 * @param  string $name Nom du fichier avec extension
 	 * @param  integer $size Taille du fichier en octets (facultatif)
 	 */
-	protected function _serve(?string $path, ?string $content, bool $download = false): void
+	protected function _serve(?string $path = null, bool $download = false): void
 	{
 		if ($this->isPublic()) {
 			Utils::HTTPCache($this->etag(), $this->modified->getTimestamp());
@@ -865,21 +954,24 @@ class File extends Entity
 		header(sprintf('Content-Type: %s', $type));
 		header(sprintf('Content-Disposition: %s; filename="%s"', $download ? 'attachment' : 'inline', $this->name));
 
-		// Utilisation de XSendFile si disponible
-		if (null !== $path && Router::xSendFile($path))
-		{
-			return;
+		// Use X-SendFile, if available, and storage has a local copy
+		if (Router::isXSendFileEnabled()) {
+			$local_path = $path ?? Files::callStorage('getLocalFilePath', $this);
+
+			if ($path) {
+				Router::xSendFile($local_path);
+				return;
+			}
 		}
 
-		// Désactiver gzip
-		if (function_exists('apache_setenv'))
-		{
+		// Disable gzip, against buffering issues
+		if (function_exists('apache_setenv')) {
 			@apache_setenv('no-gzip', 1);
 		}
 
 		@ini_set('zlib.output_compression', 'Off');
 
-		header(sprintf('Content-Length: %d', $path ? filesize($path) : strlen($content)));
+		header(sprintf('Content-Length: %d', $path ? filesize($path) : $this->size));
 
 		if (@ob_get_length()) {
 			@ob_clean();
@@ -891,7 +983,14 @@ class File extends Entity
 			readfile($path);
 		}
 		else {
-			echo $content;
+			$p = Files::callStorage('getReadOnlyPointer', $this);
+
+			while (!feof($p)) {
+				echo fread($p, 8192);
+				flush();
+			}
+
+			fclose($p);
 		}
 	}
 
@@ -901,7 +1000,26 @@ class File extends Entity
 			throw new \LogicException('Cannot fetch a directory');
 		}
 
-		return Files::callStorage('fetch', $this);
+		$p = Files::callStorage('getReadOnlyPointer', $this);
+
+		if (null === $p) {
+			$path = Files::callStorage('getLocalFilePath', $this);
+
+			if (!$path || !file_exists($path)) {
+				return '';
+			}
+
+			return file_get_contents($path);
+		}
+
+		$out = '';
+
+		while (!feof($p)) {
+			$out .= fread($p, 8192);
+		}
+
+		fclose($p);
+		return $out;
 	}
 
 	public function render(?string $user_prefix = null)
@@ -958,6 +1076,11 @@ class File extends Entity
 		$session ??= Session::getInstance();
 
 		if (!$session->isLogged()) {
+			return false;
+		}
+
+		// Deny delete of directories in web context
+		if ($this->isDir() && $this->context() == self::CONTEXT_WEB) {
 			return false;
 		}
 
@@ -1029,7 +1152,7 @@ class File extends Entity
 
 	public function canRename(Session $session = null): bool
 	{
-		return $this->canCreate($this->parent, $session);
+		return $this->canCreate($this->parent ?? '', $session);
 	}
 
 	static public function canCreate(string $path, Session $session = null): bool
@@ -1329,7 +1452,20 @@ class File extends Entity
 
 	public function touch($date = null)
 	{
+		if (null === $date) {
+			$date = new \DateTime;
+		}
+		elseif (!($date instanceof \DateTimeInterface) && ctype_digit($date)) {
+			$date = new \DateTime('@' . $date);
+		}
+		elseif (!($date instanceof \DateTimeInterface)) {
+			throw new \InvalidArgumentException('Invalid date string: ' . $date);
+		}
+
+		Files::assertStorageIsUnlocked();
 		Files::callStorage('touch', $this->path, $date);
+		$this->set('modified', $date);
+		$this->save();
 	}
 
 	public function getReadOnlyPointer()
@@ -1343,7 +1479,26 @@ class File extends Entity
 			return $this->size;
 		}
 
-		return Files::callStorage('getDirectorySize', $this->path);
+		$db = DB::getInstance();
+		return $db->firstColumn('SELECT SUM(size) FROM files
+			WHERE type = ? AND path LIKE ? ESCAPE \'!\';',
+			File::TYPE_FILE,
+			$db->escapeLike($this->path, '!') . '/%'
+		) ?: 0;
+	}
+
+	public function getRecursiveLastModified(): int
+	{
+		if ($this->type == self::TYPE_FILE) {
+			return $this->modified;
+		}
+
+		$db = DB::getInstance();
+		return $db->firstColumn('SELECT MAX(modified) FROM files
+			WHERE type = ? AND path LIKE ? ESCAPE \'!\';',
+			File::TYPE_FILE,
+			$db->escapeLike($this->path, '!') . '/%'
+		) ?: 0;
 	}
 
 	public function webdav_root_url(): string

@@ -23,7 +23,7 @@
 							<select name="translation_table[{$index}]">
 								<option value="">-- Ne pas importer cette colonne</option>
 								{foreach from=$csv->getColumnsWithDefaults() item="column"}
-									<option value="{$column.key}" {if $csv_field == $column.match || $csv_field == $column.label}selected="selected"{/if}>{$column.label}</option>
+									<option value="{$column.key}" {if $selected[$index] == $column.key}selected="selected"{/if}>{$column.label}</option>
 								{/foreach}
 							</select>
 						</td>

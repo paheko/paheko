@@ -6,6 +6,7 @@ use Garradin\Entity;
 use Garradin\DB;
 use Garradin\Plugins;
 use Garradin\UserException;
+use Garradin\Utils;
 use Garradin\Files\Files;
 use Garradin\UserTemplate\UserTemplate;
 use Garradin\Users\Session;
@@ -112,7 +113,7 @@ class Module extends Entity
 			return false;
 		}
 
-		$ini = @parse_ini_string($ini, false, \INI_SCANNER_TYPED);
+		$ini = Utils::parse_ini_string($ini, false, \INI_SCANNER_TYPED);
 
 		if (empty($ini)) {
 			return false;
