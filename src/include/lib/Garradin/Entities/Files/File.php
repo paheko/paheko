@@ -1494,7 +1494,7 @@ class File extends Entity
 		}
 
 		$db = DB::getInstance();
-		return $db->firstColumn('SELECT MAX(modified) FROM files
+		return $db->firstColumn('SELECT strftime(\'%s\', MAX(modified)) FROM files
 			WHERE type = ? AND path LIKE ? ESCAPE \'!\';',
 			File::TYPE_FILE,
 			$db->escapeLike($this->path, '!') . '/%'
