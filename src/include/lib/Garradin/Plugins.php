@@ -328,13 +328,25 @@ class Plugins
 
 	static public function listInstalled(): array
 	{
-		return EM::getInstance(Plugin::class)->all('SELECT * FROM @TABLE ORDER BY label COLLATE NOCASE ASC;');
+		$list = EM::getInstance(Plugin::class)->all('SELECT * FROM @TABLE ORDER BY label COLLATE NOCASE ASC;');
+
+		foreach ($list as $p) {
+			try {
+				$p->selfCheck();
+			}
+			catch (ValidationException $e) {
+				$p->setBrokenMessage($e->getMessage());
+			}
+		}
+
+		return $list;
 	}
 
-	static public function refresh(): void
+	static public function refresh(): array
 	{
 		$db = DB::getInstance();
 		$existing = $db->getAssoc(sprintf('SELECT id, name FROM %s;', Plugin::TABLE));
+		$errors = [];
 
 		foreach ($existing as $name) {
 			$f = self::get($name);
@@ -343,9 +355,11 @@ class Plugins
 				$f->save();
 			}
 			catch (ValidationException $e) {
-				throw new ValidationException($name . ': ' . $e->getMessage(), 0, $e);
+				$errors[] = $name . ': ' . $e->getMessage();
 			}
 		}
+
+		return $errors;
 	}
 
 
@@ -373,7 +387,7 @@ class Plugins
 				$file = basename($file);
 				$name = $file;
 			}
-			elseif (substr($file, -7) == '.tar.gz') {
+			elseif (substr($file, -7) == '.tar.gz' && file_exists('phar://' . $file . '/' . Plugin::META_FILE)) {
 				$file = basename($file);
 				$name = substr($file, 0, -7);
 			}
@@ -385,8 +399,6 @@ class Plugins
 			if (in_array($name, $exists)) {
 				continue;
 			}
-
-			$list[$file] = null;
 
 			$p = new Plugin;
 			$p->name = $name;

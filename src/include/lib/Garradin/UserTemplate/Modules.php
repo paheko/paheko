@@ -47,7 +47,7 @@ class Modules
 	/**
 	 * Lists all modules from files and stores a cache
 	 */
-	static public function refresh(): void
+	static public function refresh(): array
 	{
 		$db = DB::getInstance();
 		$existing = $db->getAssoc(sprintf('SELECT id, name FROM %s;', Module::TABLE));
@@ -57,8 +57,15 @@ class Modules
 		$delete = array_diff($existing, $list);
 		$existing = array_diff($list, $create);
 
+		$errors = [];
+
 		foreach ($create as $name) {
-			self::create($name);
+			try {
+				self::create($name);
+			}
+			catch (ValidationException $e) {
+				$errors[] = $name . ': ' . $e->getMessage();
+			}
 		}
 
 		foreach ($delete as $name) {
@@ -66,15 +73,22 @@ class Modules
 		}
 
 		foreach ($existing as $name) {
-			$f = self::get($name);
-			$f->updateFromINI();
-			$f->save();
-			$f->updateTemplates();
+			try {
+				$f = self::get($name);
+				$f->updateFromINI();
+				$f->save();
+				$f->updateTemplates();
+			}
+			catch (ValidationException $e) {
+				$errors[] = $name . ': ' . $e->getMessage();
+			}
 		}
 
 		if (!$db->test(Module::TABLE, 'web = 1 AND enabled = 1')) {
 			$db->exec('UPDATE modules SET enabled = 1 WHERE id = (SELECT id FROM modules WHERE web = 1 ORDER BY system DESC LIMIT 1);');
 		}
+
+		return $errors;
 	}
 
 	/**
