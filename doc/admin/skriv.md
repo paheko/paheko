@@ -4,7 +4,7 @@ Title: Référence rapide SkrivML - Paheko
 
 # Syntaxe SkrivML
 
-Paheko propose la syntaxe [SkrivML](https://fossil.kd2.org/garradin/doc/trunk/doc/skrivml.html) pour le formatage du texte des pages du site web.
+Paheko propose la syntaxe [SkrivML](https://fossil.kd2.org/paheko/doc/trunk/doc/skrivml.html) pour le formatage du texte des pages du site web.
 
 ## Styles de texte
 
