@@ -1,13 +1,13 @@
 @charset "UTF-8";
 
 @font-face {
-    font-family: 'gicon';
-    src: url('../font/garradin.eot');
-    src: url('../font/garradin.eot#iefix') format('embedded-opentype'),
-        url('../font/garradin.woff') format('woff'),
-        url('../font/garradin.woff2') format('woff2'),
-        url('../font/garradin.ttf') format('truetype'),
-        url('../font/garradin.svg#garradin') format('svg');
+    font-family: 'paheko';
+    src: url('../font/paheko.eot');
+    src: url('../font/paheko.eot#iefix') format('embedded-opentype'),
+        url('../font/paheko.woff') format('woff'),
+        url('../font/paheko.woff2') format('woff2'),
+        url('../font/paheko.ttf') format('truetype'),
+        url('../font/paheko.svg#paheko') format('svg');
     font-weight: normal;
     font-style: normal;
 }

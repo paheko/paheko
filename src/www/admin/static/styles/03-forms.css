@@ -128,7 +128,7 @@ input[type=checkbox] + label::before, input[type=radio] + label::before {
     transition: color .2s, box-shadow .2s ease-in-out;
     text-shadow: 1px 1px 3px var(--gLightBorderColor);
     cursor: pointer;
-    font-family: gicon;
+    font-family: "paheko";
     font-size: 1.2rem;
     font-weight: normal;
     color: rgb(var(--gMainColor));
@@ -224,7 +224,7 @@ b.btn {
 
 [data-icon]:before, .main[data-icon]:after {
     display: inline-block;
-    font-family: "gicon", sans-serif;
+    font-family: "paheko", sans-serif;
     text-shadow: 1px 1px 1px var(--gLightBorderColor);
     padding-right: .5em;
     font-size: 1.2em;
@@ -521,7 +521,7 @@ dialog.datepicker {
 
 
 .datepicker nav input[type=button] {
-    font-family: gicon;
+    font-family: "paheko";
     height: 2em;
     width: 2em;
 }
@@ -668,7 +668,7 @@ dialog.datepicker {
     padding: .2rem;
     position: absolute;
     right: 0;
-    font-family: gicon;
+    font-family: "paheko";
 }
 
 .file-selector label .help {
