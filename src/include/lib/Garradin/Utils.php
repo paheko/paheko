@@ -962,7 +962,7 @@ class Utils
 
 			// This is what makes the comparison case insensitive
 			// https://www.php.net/manual/en/collator.setstrength.php
-			self::$collator->setAttribute(\Collator::STRENGTH, \Collator::SECONDARY);
+			self::$collator->setAttribute(\Collator::STRENGTH, \Collator::PRIMARY);
 
 			// Don't use \Collator::NUMERIC_COLLATION here as it goes against what would feel logic
 			// for account ordering

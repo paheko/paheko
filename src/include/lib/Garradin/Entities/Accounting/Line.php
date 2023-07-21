@@ -58,6 +58,7 @@ class Line extends Entity
 		$this->assert($this->id_account !== null, 'Aucun compte n\'a été indiqué.');
 		$this->assert($this->credit || $this->debit, 'Aucun montant au débit ou au crédit');
 		$this->assert($this->credit >= 0 && $this->debit >= 0, 'Le montant ne peut être négatif');
+		$this->assert($this->credit + $this->debit < 100000000000, 'Le montant ne peut être supérieur à un milliard');
 		$this->assert(($this->credit * $this->debit) === 0 && ($this->credit + $this->debit) > 0, 'Ligne non équilibrée : crédit ou débit doit valoir zéro.');
 
 		$this->assert(null === $this->id_project || DB::getInstance()->test(Project::TABLE, 'id = ?', $this->id_project), 'Le projet analytique indiqué n\'existe pas.');
