@@ -1,6 +1,6 @@
 <?php
-namespace Garradin;
-use Garradin\Services\Services;
+namespace Paheko;
+use Paheko\Services\Services;
 
 require_once __DIR__ . '/_inc.php';
 

@@ -1,5 +1,5 @@
 <?php
-use Garradin\Entities\Files\File;
+use Paheko\Entities\Files\File;
 ?>
 <ul>
 	<li{if $context == File::CONTEXT_DOCUMENTS} class="current"{/if}><a href="./"><strong>Documents</strong></a></li>

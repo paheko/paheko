@@ -1,12 +1,12 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\UserException;
-use Garradin\Web\Web;
-use Garradin\Web\Render\Render;
-use Garradin\Entities\Web\Page;
-use Garradin\Entities\Files\File;
+use Paheko\UserException;
+use Paheko\Web\Web;
+use Paheko\Web\Render\Render;
+use Paheko\Entities\Web\Page;
+use Paheko\Entities\Files\File;
 use KD2\SimpleDiff;
 
 require_once __DIR__ . '/_inc.php';

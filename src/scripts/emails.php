@@ -1,8 +1,8 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Email\Emails;
+use Paheko\Email\Emails;
 
 if (PHP_SAPI != 'cli') {
 	die("Wrong call");

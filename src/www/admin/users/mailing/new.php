@@ -1,12 +1,12 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Users\Categories;
-use Garradin\Users\Session;
-use Garradin\Search;
-use Garradin\Services\Services;
-use Garradin\Entities\Search as SearchEntity;
-use Garradin\Email\Mailings;
+use Paheko\Users\Categories;
+use Paheko\Users\Session;
+use Paheko\Search;
+use Paheko\Services\Services;
+use Paheko\Entities\Search as SearchEntity;
+use Paheko\Email\Mailings;
 
 require_once __DIR__ . '/_inc.php';
 

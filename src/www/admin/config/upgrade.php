@@ -1,7 +1,7 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Upgrade;
+use Paheko\Upgrade;
 use KD2\Security;
 
 require_once __DIR__ . '/_inc.php';

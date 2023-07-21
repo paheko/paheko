@@ -1,11 +1,11 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Services\Reminders;
-use Garradin\Files\Trash;
+use Paheko\Services\Reminders;
+use Paheko\Files\Trash;
 
-if (PHP_SAPI != 'cli' && !defined('\Garradin\ROOT')) {
+if (PHP_SAPI != 'cli' && !defined('\Paheko\ROOT')) {
 	die("Wrong call");
 }
 

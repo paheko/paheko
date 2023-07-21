@@ -134,7 +134,7 @@ if (ALERT_MESSAGE && !$dialog) {
 		</li>
 		{/if}
 
-		{if !defined('Garradin\LOCAL_LOGIN') || !LOCAL_LOGIN}
+		{if !defined('Paheko\LOCAL_LOGIN') || !LOCAL_LOGIN}
 			<li><h3><a href="{$admin_url}logout.php">{icon shape="logout"}<b>Déconnexion</b></a></h3></li>
 		{/if}
 
@@ -144,7 +144,7 @@ if (ALERT_MESSAGE && !$dialog) {
 		</li>
 		{/if}
 
-	{elseif !defined('Garradin\INSTALL_PROCESS')}
+	{elseif !defined('Paheko\INSTALL_PROCESS')}
 		{if $config.org_web || !$config.site_disabled}
 		<li><h3><a href="{if $config.site_disabled && $config.org_web}{$config.org_web}{else}{$www_url}{/if}">{icon shape="left"}<b>Retour au site</b></a></h3></li>
 		{/if}

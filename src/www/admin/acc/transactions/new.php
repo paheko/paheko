@@ -1,14 +1,14 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Entity;
-use Garradin\Entities\Accounting\Account;
-use Garradin\Entities\Accounting\Transaction;
-use Garradin\Entities\Files\File;
-use Garradin\Accounting\Accounts;
-use Garradin\Accounting\Projects;
-use Garradin\Accounting\Transactions;
-use Garradin\Accounting\Years;
+use Paheko\Entity;
+use Paheko\Entities\Accounting\Account;
+use Paheko\Entities\Accounting\Transaction;
+use Paheko\Entities\Files\File;
+use Paheko\Accounting\Accounts;
+use Paheko\Accounting\Projects;
+use Paheko\Accounting\Transactions;
+use Paheko\Accounting\Years;
 
 use KD2\DB\Date;
 

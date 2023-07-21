@@ -1,7 +1,7 @@
 <?php
-use Garradin\Users\Session;
-use Garradin\Users\DynamicFields;
-use Garradin\Entities\Users\User;
+use Paheko\Users\Session;
+use Paheko\Users\DynamicFields;
+use Paheko\Entities\Users\User;
 
 $field = $field ?? current(DynamicFields::getInstance()->fieldsBySystemUse('password'));
 $password_length = User::MINIMUM_PASSWORD_LENGTH;

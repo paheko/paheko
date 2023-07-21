@@ -1,13 +1,13 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Entities\Search as SE;
-use Garradin\Search;
-use Garradin\Users\Session;
+use Paheko\Entities\Search as SE;
+use Paheko\Search;
+use Paheko\Users\Session;
 
 require_once __DIR__ . '/../_inc.php';
 
-if (!defined('Garradin\CURRENT_SEARCH_TARGET') || !array_key_exists(CURRENT_SEARCH_TARGET, SE::TARGETS)) {
+if (!defined('Paheko\CURRENT_SEARCH_TARGET') || !array_key_exists(CURRENT_SEARCH_TARGET, SE::TARGETS)) {
 	throw new UserException('Cible inconnue');
 }
 

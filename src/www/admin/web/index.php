@@ -1,9 +1,9 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Web\Web;
-use Garradin\Entities\Web\Page;
+use Paheko\Web\Web;
+use Paheko\Entities\Web\Page;
 
 require_once __DIR__ . '/_inc.php';
 

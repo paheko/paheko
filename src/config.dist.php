@@ -11,7 +11,7 @@
  */
 
 // Nécessaire pour situer les constantes dans le bon namespace
-namespace Garradin;
+namespace Paheko;
 
 /**
  * Clé secrète, doit être unique à chaque instance de Paheko

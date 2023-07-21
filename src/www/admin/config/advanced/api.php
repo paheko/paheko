@@ -1,9 +1,9 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\API_Credentials;
-use Garradin\Entities\API_Credentials AS API_Entity;
+use Paheko\API_Credentials;
+use Paheko\Entities\API_Credentials AS API_Entity;
 
 require_once __DIR__ . '/../_inc.php';
 

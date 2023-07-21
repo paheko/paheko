@@ -1,12 +1,12 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Accounting\Projects;
-use Garradin\Services\Services;
+use Paheko\Accounting\Projects;
+use Paheko\Services\Services;
 
 
-if (!defined('\Garradin\ROOT')) {
+if (!defined('\Paheko\ROOT')) {
 	die();
 }
 

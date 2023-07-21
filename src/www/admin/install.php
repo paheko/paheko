@@ -1,10 +1,10 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Users\Session;
-use Garradin\Entities\Accounting\Chart;
-use Garradin\UserTemplate\Modules;
-use Garradin\Plugins;
+use Paheko\Users\Session;
+use Paheko\Entities\Accounting\Chart;
+use Paheko\UserTemplate\Modules;
+use Paheko\Plugins;
 
 const INSTALL_PROCESS = true;
 

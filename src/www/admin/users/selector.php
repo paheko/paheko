@@ -1,8 +1,8 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Entities\Search as SE;
-use Garradin\Search;
+use Paheko\Entities\Search as SE;
+use Paheko\Search;
 
 require_once __DIR__ . '/_inc.php';
 

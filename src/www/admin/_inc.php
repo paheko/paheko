@@ -1,8 +1,8 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Users\Session;
+use Paheko\Users\Session;
 
 require_once __DIR__ . '/../../include/init.php';
 
@@ -24,7 +24,7 @@ $tpl->assign_by_ref('form', $form);
 $session = Session::getInstance();
 $config = Config::getInstance();
 
-if (!defined('Garradin\LOGIN_PROCESS'))
+if (!defined('Paheko\LOGIN_PROCESS'))
 {
 	if (!$session->isLogged())
 	{

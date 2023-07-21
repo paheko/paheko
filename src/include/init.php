@@ -1,6 +1,6 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
 use KD2\ErrorManager;
 use KD2\Security;
@@ -17,7 +17,7 @@ const CONFIG_FILE = 'config.local.php';
  */
 function paheko_version()
 {
-	if (defined('Garradin\VERSION'))
+	if (defined('Paheko\VERSION'))
 	{
 		return VERSION;
 	}
@@ -33,7 +33,7 @@ function paheko_version()
 		$version = 'unknown';
 	}
 
-	define('Garradin\VERSION', $version);
+	define('Paheko\VERSION', $version);
 	return $version;
 }
 
@@ -98,16 +98,16 @@ if (file_exists(__DIR__ . '/../' . CONFIG_FILE))
 
 // Configuration par défaut, si les constantes ne sont pas définies dans CONFIG_FILE
 // (fallback)
-if (!defined('Garradin\ROOT'))
+if (!defined('Paheko\ROOT'))
 {
-	define('Garradin\ROOT', dirname(__DIR__));
+	define('Paheko\ROOT', dirname(__DIR__));
 }
 
 \spl_autoload_register(function (string $classname): void {
 	$classname = ltrim($classname, '\\');
 
 	// Plugins
-	if (substr($classname, 0, 16) == 'Garradin\\Plugin\\')
+	if (substr($classname, 0, 16) == 'Paheko\\Plugin\\')
 	{
 		$classname = substr($classname, 16);
 		$plugin_name = substr($classname, 0, strpos($classname, '\\'));
@@ -134,11 +134,11 @@ if (!defined('Garradin\ROOT'))
 	}
 }, true);
 
-if (!defined('Garradin\DATA_ROOT')) {
-	define('Garradin\DATA_ROOT', ROOT . '/data');
+if (!defined('Paheko\DATA_ROOT')) {
+	define('Paheko\DATA_ROOT', ROOT . '/data');
 }
 
-if (!defined('Garradin\WWW_URI'))
+if (!defined('Paheko\WWW_URI'))
 {
 	try {
 		$uri = \KD2\HTTP::getRootURI(ROOT);
@@ -155,13 +155,13 @@ if (!defined('Garradin\WWW_URI'))
 		exit;
 	}
 
-	define('Garradin\WWW_URI', $uri);
+	define('Paheko\WWW_URI', $uri);
 	unset($uri);
 }
 
 $host = null;
 
-if (!defined('Garradin\WWW_URL')) {
+if (!defined('Paheko\WWW_URL')) {
 	$host = \KD2\HTTP::getHost();
 }
 
@@ -180,8 +180,8 @@ if (WWW_URI === null || (!empty($host) && $host == 'host.unknown')) {
 	exit(1);
 }
 
-if (!defined('Garradin\WWW_URL') && $host !== null) {
-	define('Garradin\WWW_URL', \KD2\HTTP::getScheme() . '://' . $host . WWW_URI);
+if (!defined('Paheko\WWW_URL') && $host !== null) {
+	define('Paheko\WWW_URL', \KD2\HTTP::getScheme() . '://' . $host . WWW_URI);
 }
 
 static $default_config = [
@@ -238,7 +238,7 @@ static $default_config = [
 
 foreach ($default_config as $const => $value)
 {
-	$const = sprintf('Garradin\\%s', $const);
+	$const = sprintf('Paheko\\%s', $const);
 
 	if (!defined($const))
 	{
@@ -256,7 +256,7 @@ if (SMTP_SECURITY) {
 }
 
 // Used for private files, just in case WWW_URL is not the same domain as ADMIN_URL
-define('Garradin\BASE_URL', str_replace('/admin/', '/', ADMIN_URL));
+define('Paheko\BASE_URL', str_replace('/admin/', '/', ADMIN_URL));
 
 const HELP_URL = 'https://paheko.cloud/aide?from=%s';
 const HELP_PATTERN_URL = 'https://paheko.cloud/%s';
@@ -315,7 +315,7 @@ if (ERRORS_REPORT_URL)
 	ErrorManager::setRemoteReporting(ERRORS_REPORT_URL, true);
 }
 
-ErrorManager::setProductionErrorTemplate(defined('Garradin\ERRORS_TEMPLATE') && ERRORS_TEMPLATE ? ERRORS_TEMPLATE : '<!DOCTYPE html><html><head><title>Erreur interne</title>
+ErrorManager::setProductionErrorTemplate(defined('Paheko\ERRORS_TEMPLATE') && ERRORS_TEMPLATE ? ERRORS_TEMPLATE : '<!DOCTYPE html><html><head><title>Erreur interne</title>
 	<style type="text/css">
 	body {font-family: sans-serif; background: #fff; }
 	code, p, h1 { max-width: 400px; margin: 1em auto; display: block; }
@@ -381,18 +381,18 @@ function user_error(UserException $e)
 
 if (REPORT_USER_EXCEPTIONS < 2) {
 	// Message d'erreur simple pour les erreurs de l'utilisateur
-	ErrorManager::setCustomExceptionHandler('\Garradin\UserException', '\Garradin\user_error');
+	ErrorManager::setCustomExceptionHandler('\Paheko\UserException', '\Paheko\user_error');
 }
 
 // Clé secrète utilisée pour chiffrer les tokens CSRF etc.
-if (!defined('Garradin\SECRET_KEY'))
+if (!defined('Paheko\SECRET_KEY'))
 {
 	if (!is_writable(ROOT)) {
 		throw new \RuntimeException('Impossible de créer le fichier de configuration "'. CONFIG_FILE .'". Le répertoire "'. ROOT . '" n\'est pas accessible en écriture.');
 	}
 	$key = base64_encode(random_bytes(64));
 	Install::setLocalConfig('SECRET_KEY', $key);
-	define('Garradin\SECRET_KEY', $key);
+	define('Paheko\SECRET_KEY', $key);
 }
 
 // Intégration du secret pour les tokens CSRF
@@ -406,7 +406,7 @@ Translate::setLocale('fr_FR');
  * Vérifications pour enclencher le processus d'installation ou de mise à jour
  */
 
-if (!defined('Garradin\INSTALL_PROCESS'))
+if (!defined('Paheko\INSTALL_PROCESS'))
 {
 	$exists = file_exists(DB_FILE);
 

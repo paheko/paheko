@@ -1,8 +1,8 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Users\DynamicFields;
-use Garradin\Users\Categories;
+use Paheko\Users\DynamicFields;
+use Paheko\Users\Categories;
 
 require_once __DIR__ . '/../_inc.php';
 

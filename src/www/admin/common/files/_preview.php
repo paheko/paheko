@@ -1,11 +1,11 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Files\Files;
-use Garradin\Entities\Files\File;
-use Garradin\Web\Render\Render;
-use Garradin\Web\Web;
+use Paheko\Files\Files;
+use Paheko\Entities\Files\File;
+use Paheko\Web\Render\Render;
+use Paheko\Web\Web;
 
 require_once __DIR__ . '/../../_inc.php';
 

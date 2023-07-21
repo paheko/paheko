@@ -1,5 +1,5 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
 use KD2\ErrorManager;
 

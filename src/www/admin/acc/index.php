@@ -1,8 +1,8 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Accounting\Years;
-use Garradin\Accounting\Graph;
+use Paheko\Accounting\Years;
+use Paheko\Accounting\Graph;
 
 require_once __DIR__ . '/../_inc.php';
 

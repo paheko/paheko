@@ -1,8 +1,8 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Accounting\Reports;
-use Garradin\Users\Users;
+use Paheko\Accounting\Reports;
+use Paheko\Users\Users;
 
 require_once __DIR__ . '/../../_inc.php';
 

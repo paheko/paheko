@@ -1,9 +1,9 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Accounting\Transactions;
-use Garradin\UserTemplate\Modules;
-use Garradin\Users\Users;
+use Paheko\Accounting\Transactions;
+use Paheko\UserTemplate\Modules;
+use Paheko\Users\Users;
 
 require_once __DIR__ . '/../_inc.php';
 

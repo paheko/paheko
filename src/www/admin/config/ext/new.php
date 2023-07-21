@@ -1,9 +1,9 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Entities\Module;
-use Garradin\Users\Session;
-use Garradin\Entities\Users\Category;
+use Paheko\Entities\Module;
+use Paheko\Users\Session;
+use Paheko\Entities\Users\Category;
 
 require_once __DIR__ . '/../_inc.php';
 

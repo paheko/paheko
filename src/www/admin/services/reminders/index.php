@@ -1,9 +1,9 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Entities\Services\Reminder;
-use Garradin\Services\Reminders;
-use Garradin\Services\Services;
+use Paheko\Entities\Services\Reminder;
+use Paheko\Services\Reminders;
+use Paheko\Services\Services;
 
 require_once __DIR__ . '/../_inc.php';
 
