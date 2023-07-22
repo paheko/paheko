@@ -136,28 +136,6 @@ $db->exec('
 	DROP TABLE web_pages_old;
 ');
 
-
-foreach (Files::all() as $file) {
-	if ($file->isDir()) {
-		continue;
-	}
-
-	if ($file->context() == $file::CONTEXT_WEB && $file->name == 'index.txt') {
-		$file->delete();
-		continue;
-	}
-
-	// Reindex
-	$file->indexForSearch();
-
-	// Save files in DB
-	$file->save();
-}
-
-foreach (Web::listAll() as $page) {
-	$page->syncSearch();
-}
-
 // Update searches
 foreach ($db->iterate('SELECT * FROM searches;') as $row) {
 	if ($row->type == 'json') {
@@ -200,3 +178,32 @@ if ($db->test('sqlite_master', 'type = \'table\' AND name = ?', 'plugin_reservat
 
 $db->commitSchemaUpdate();
 
+$db->begin();
+
+// Delete index.txt files
+// This needs to be done AFTER commit schema update as it disables foreign key actions
+foreach (Files::all() as $file) {
+	if ($file->isDir()) {
+		continue;
+	}
+
+	if ($file->context() == $file::CONTEXT_WEB && $file->name == 'index.txt') {
+		$file->delete();
+		continue;
+	}
+
+	// Reindex file contents
+	$file->indexForSearch();
+
+	// Save files in DB
+	$file->save();
+
+}
+
+// Reindex web pages
+foreach (Web::listAll() as $page) {
+	$page->syncSearch();
+}
+
+
+$db->commit();
