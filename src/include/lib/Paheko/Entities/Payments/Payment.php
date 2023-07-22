@@ -1,12 +1,12 @@
 <?php
 
-namespace Garradin\Entities\Payments;
+namespace Paheko\Entities\Payments;
 
-use Garradin\Entity;
-use Garradin\DB;
-use Garradin\Entities\Users\User;
-use Garradin\Entities\Accounting\Transaction;
-use Garradin\Payments\Users as PaymentsUsers;
+use Paheko\Entity;
+use Paheko\DB;
+use Paheko\Entities\Users\User;
+use Paheko\Entities\Accounting\Transaction;
+use Paheko\Payments\Users as PaymentsUsers;
 
 use KD2\DB\EntityManager as EM;
 

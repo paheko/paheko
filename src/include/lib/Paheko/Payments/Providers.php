@@ -1,9 +1,9 @@
 <?php
 
-namespace Garradin\Payments;
+namespace Paheko\Payments;
 
-use Garradin\Entities\Payments\Provider;
-use Garradin\DynamicList;
+use Paheko\Entities\Payments\Provider;
+use Paheko\DynamicList;
 use KD2\DB\EntityManager;
 
 class Providers

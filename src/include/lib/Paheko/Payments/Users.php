@@ -1,10 +1,10 @@
 <?php
 
-namespace Garradin\Payments;
+namespace Paheko\Payments;
 
 use KD2\DB\EntityManager as EM;
-use Garradin\DB;
-use Garradin\Entities\Users\User;
+use Paheko\DB;
+use Paheko\Entities\Users\User;
 
 class Users
 {

@@ -1,11 +1,11 @@
 <?php
 
-namespace Garradin\Entities\Payments;
+namespace Paheko\Entities\Payments;
 
-use Garradin\Entity;
-use Garradin\Config;
-use Garradin\Entities\Users\User;
-use Garradin\Users\DynamicFields;
+use Paheko\Entity;
+use Paheko\Config;
+use Paheko\Entities\Users\User;
+use Paheko\Users\DynamicFields;
 
 use KD2\DB\EntityManager as EM;
 

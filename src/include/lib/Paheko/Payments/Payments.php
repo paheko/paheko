@@ -1,17 +1,17 @@
 <?php
 
-namespace Garradin\Payments;
+namespace Paheko\Payments;
 
-use Garradin\Entities\Payments\Payment;
-use Garradin\Entities\Payments\Provider;
-use Garradin\Entities\Users\User;
-use Garradin\DynamicList;
-use Garradin\Payments\Providers;
-use Garradin\Payments\Users as PaymentsUsers;
+use Paheko\Entities\Payments\Payment;
+use Paheko\Entities\Payments\Provider;
+use Paheko\Entities\Users\User;
+use Paheko\DynamicList;
+use Paheko\Payments\Providers;
+use Paheko\Payments\Users as PaymentsUsers;
 use KD2\DB\EntityManager;
-use Garradin\DB;
-use Garradin\Entities\Accounting\Transaction;
-use Garradin\Accounting\Years;
+use Paheko\DB;
+use Paheko\Entities\Accounting\Transaction;
+use Paheko\Accounting\Years;
 
 class Payments
 {
