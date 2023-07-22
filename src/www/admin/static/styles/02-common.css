@@ -67,7 +67,7 @@ span.alert, b.alert {
 }
 
 .confirm.block::before, .alert.block::before, .error.block::before, .help.block::before {
-    font-family: "gicon";
+    font-family: "paheko";
     left: .5em;
     top: .2em;
     position: absolute;
@@ -179,7 +179,7 @@ dd.help li {
     vertical-align: middle;
     position: relative;
     z-index: 10;
-    font-family: "gicon", "Trebuchet MS", Arial, Helvetica, sans-serif;
+    font-family: "paheko", "Trebuchet MS", Arial, Helvetica, sans-serif;
     font-weight: normal;
     overflow: hidden;
 }
@@ -491,7 +491,7 @@ details summary::after {
     height: 1em;
     white-space: pre;
     transition: color .3s, background-color .3s;
-    font-family: "gicon", sans-serif;
+    font-family: "paheko", sans-serif;
     text-shadow: 1px 1px 1px var(--gLightBorderColor);
     font-size: 1.2em;
 }

@@ -1,11 +1,11 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Accounting\Export;
-use Garradin\Accounting\Import;
-use Garradin\Accounting\Transactions;
-use Garradin\Accounting\Years;
-use Garradin\Users\Session;
+use Paheko\Accounting\Export;
+use Paheko\Accounting\Import;
+use Paheko\Accounting\Transactions;
+use Paheko\Accounting\Years;
+use Paheko\Users\Session;
 
 require_once __DIR__ . '/../_inc.php';
 

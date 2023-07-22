@@ -1,11 +1,11 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Entity;
-use Garradin\Accounting\Years;
-use Garradin\Accounting\Projects;
-use Garradin\Accounting\Accounts;
+use Paheko\Entity;
+use Paheko\Accounting\Years;
+use Paheko\Accounting\Projects;
+use Paheko\Accounting\Accounts;
 
 require_once __DIR__ . '/../../_inc.php';
 

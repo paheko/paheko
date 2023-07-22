@@ -1,5 +1,5 @@
 <?php
-use Garradin\Entities\Files\File;
+use Paheko\Entities\Files\File;
 ?>
 {include file="_head.tpl" title="Documents" current="docs" hide_title=true}
 

@@ -26,8 +26,8 @@ assert(!isset($lines_accounts) || is_array($lines_accounts));
 			</td>
 			<td class="money">{input type="money" name="lines[debit][]" default=$line.debit size=5}</td>
 			<td class="money">{input type="money" name="lines[credit][]" default=$line.credit size=5}</td>
-			<td>{input type="text" name="lines[label][]" default=$line.label}</td>
-			<td>{input type="text" name="lines[reference][]" default=$line.reference size=10}</td>
+			<td>{input type="text" name="lines[label][]" default=$line.label class="full-width"}</td>
+			<td>{input type="text" name="lines[reference][]" default=$line.reference size=10 class="full-width"}</td>
 			{if count($projects) > 1}
 				<td>{input default=$line.id_project type="select" name="lines[id_project][]" options=$projects}</td>
 			{/if}

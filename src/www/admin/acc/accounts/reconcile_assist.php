@@ -1,9 +1,9 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Accounting\Accounts;
-use Garradin\Accounting\Transactions;
-use Garradin\Accounting\AssistedReconciliation;
+use Paheko\Accounting\Accounts;
+use Paheko\Accounting\Transactions;
+use Paheko\Accounting\AssistedReconciliation;
 
 require_once __DIR__ . '/../_inc.php';
 

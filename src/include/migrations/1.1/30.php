@@ -1,6 +1,6 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
 /*
 	Dans la version 1.1.29, une mise à jour du plan comptable a écrasé les descriptions et types

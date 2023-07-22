@@ -1,11 +1,11 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Users\Categories;
-use Garradin\Users\DynamicFields;
-use Garradin\Files\Files;
-use Garradin\Backup;
-use Garradin\Entities\Files\File;
+use Paheko\Users\Categories;
+use Paheko\Users\DynamicFields;
+use Paheko\Files\Files;
+use Paheko\Backup;
+use Paheko\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
 
@@ -35,7 +35,7 @@ $tpl->assign([
 	'server_time'      => time(),
 	'sqlite_version'   => \SQLite3::version()['versionString'],
 	'countries'        => Utils::getCountryList(),
-	'garradin_website' => WEBSITE,
+	'paheko_website'   => WEBSITE,
 	'quota_used'       => Files::getUsedQuota(),
 	'quota_max'        => Files::getQuota(),
 	'quota_left'       => Files::getRemainingQuota(),

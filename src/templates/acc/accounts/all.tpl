@@ -1,5 +1,5 @@
 <?php
-use Garradin\Entities\Accounting\Account;
+use Paheko\Entities\Accounting\Account;
 ?>
 {include file="_head.tpl" title="Tous les comptes" current="acc/accounts"}
 

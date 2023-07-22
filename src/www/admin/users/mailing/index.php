@@ -1,7 +1,7 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Email\Mailings;
+use Paheko\Email\Mailings;
 
 require_once __DIR__ . '/_inc.php';
 

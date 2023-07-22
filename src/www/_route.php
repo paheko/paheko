@@ -1,8 +1,8 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Web\Router;
+use Paheko\Web\Router;
 
 if (empty($_SERVER['REQUEST_URI'])) {
 	http_response_code(500);

@@ -1,9 +1,9 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Email\Emails;
-use Garradin\Web\Router;
+use Paheko\Email\Emails;
+use Paheko\Web\Router;
 
 require_once __DIR__ . '/../include/init.php';
 

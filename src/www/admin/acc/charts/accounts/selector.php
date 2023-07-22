@@ -1,10 +1,10 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Entities\Accounting\Account;
-use Garradin\Accounting\Charts;
-use Garradin\Accounting\Years;
+use Paheko\Entities\Accounting\Account;
+use Paheko\Accounting\Charts;
+use Paheko\Accounting\Years;
 
 const ALLOW_ACCOUNTS_ACCESS = true;
 

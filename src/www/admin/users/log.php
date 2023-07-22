@@ -1,8 +1,8 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Log;
-use Garradin\Users\Session;
+use Paheko\Log;
+use Paheko\Users\Session;
 
 require_once __DIR__ . '/../_inc.php';
 

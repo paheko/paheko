@@ -1,5 +1,5 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
 require_once __DIR__ . '/../_inc.php';
 

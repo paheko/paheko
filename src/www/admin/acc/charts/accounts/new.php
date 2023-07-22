@@ -1,12 +1,12 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Entities\Accounting\Account;
-use Garradin\Entities\Accounting\Transaction;
-use Garradin\Entities\Accounting\Line;
-use Garradin\Accounting\Accounts;
-use Garradin\Accounting\Charts;
-use Garradin\Users\Session;
+use Paheko\Entities\Accounting\Account;
+use Paheko\Entities\Accounting\Transaction;
+use Paheko\Entities\Accounting\Line;
+use Paheko\Accounting\Accounts;
+use Paheko\Accounting\Charts;
+use Paheko\Users\Session;
 
 require_once __DIR__ . '/_inc.php';
 
@@ -133,7 +133,10 @@ elseif ($id = (int)qg('ask')) {
 
 if ($account->type && !$from) {
 	$code_base = $account->getNumberBase() ?? '';
-	$code_value = $account->getNewNumberAvailable($code_base);
+
+	if (f('from')) {
+		$code_value = $account->getNewNumberAvailable($code_base);
+	}
 
 	if (null === f('from')) {
 		$missing = $accounts->listMissing($account->type);

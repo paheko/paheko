@@ -1,8 +1,8 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Users\DynamicFields;
+use Paheko\Users\DynamicFields;
 
 $db->beginSchemaUpdate();
 

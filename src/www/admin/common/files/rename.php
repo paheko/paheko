@@ -1,8 +1,8 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Entities\Files\File;
-use Garradin\Files\Files;
+use Paheko\Entities\Files\File;
+use Paheko\Files\Files;
 
 require __DIR__ . '/../../_inc.php';
 

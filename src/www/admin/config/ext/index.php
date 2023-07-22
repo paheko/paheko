@@ -1,9 +1,9 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\UserTemplate\Modules;
-use Garradin\Plugins;
-use Garradin\Users\Session;
+use Paheko\UserTemplate\Modules;
+use Paheko\Plugins;
+use Paheko\Users\Session;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -47,8 +47,15 @@ $form->runIf('disable_plugin', function () {
 	$p->save();
 }, $csrf_key, '!config/ext/');
 
-Modules::refresh();
-Plugins::refresh();
+foreach (Modules::refresh() as $error) {
+	// Errors are not used currently
+	//$form->addError('Module ' . $error);
+}
+
+foreach (Plugins::refresh() as $error) {
+	// Errors are not used currently
+	//$form->addError('Plugin ' . $error);
+}
 
 if (qg('install')) {
 	$list = Plugins::listModulesAndPlugins(true);

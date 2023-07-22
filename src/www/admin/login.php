@@ -1,14 +1,14 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
 use KD2\HTTP;
 use KD2\Security;
 
-use Garradin\Users\DynamicFields;
-use Garradin\Users\Session as UserSession;
-use Garradin\Files\WebDAV\Session as AppSession;
+use Paheko\Users\DynamicFields;
+use Paheko\Users\Session as UserSession;
+use Paheko\Files\WebDAV\Session as AppSession;
 
-use Garradin\UserException;
+use Paheko\UserException;
 
 const LOGIN_PROCESS = true;
 

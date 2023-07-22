@@ -1,8 +1,8 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Email\Emails;
-use Garradin\Entities\Email\Email;
+use Paheko\Email\Emails;
+use Paheko\Entities\Email\Email;
 
 require_once __DIR__ . '/../_inc.php';
 

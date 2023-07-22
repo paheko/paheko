@@ -1,5 +1,5 @@
 <?php
-use Garradin\Accounting\Export;
+use Paheko\Accounting\Export;
 ?>
 {include file="_head.tpl" title="Importer des écritures" current="acc/years"}
 

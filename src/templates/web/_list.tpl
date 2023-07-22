@@ -1,5 +1,5 @@
 <?php
-use Garradin\Entities\Web\Page;
+use Paheko\Entities\Web\Page;
 ?>
 
 {include file="common/dynamic_list_head.tpl"}

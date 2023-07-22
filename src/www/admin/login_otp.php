@@ -1,9 +1,9 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Users\Session as UserSession;
-use Garradin\Files\WebDAV\Session as AppSession;
+use Paheko\Users\Session as UserSession;
+use Paheko\Files\WebDAV\Session as AppSession;
 
 const LOGIN_PROCESS = true;
 

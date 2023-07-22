@@ -1,9 +1,9 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Accounting\Years;
-use Garradin\Files\Files;
-use Garradin\Files\Storage;
+use Paheko\Accounting\Years;
+use Paheko\Files\Files;
+use Paheko\Files\Storage;
 
 require_once __DIR__ . '/../_inc.php';
 

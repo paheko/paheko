@@ -1,5 +1,5 @@
 <?php
-use Garradin\Users\DynamicFields as DF;
+use Paheko\Users\DynamicFields as DF;
 assert(isset($user, $show_message_button));
 
 $user_files_path = $user->attachmentsDirectory();

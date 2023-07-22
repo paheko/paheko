@@ -29,7 +29,7 @@
 				{if ENABLE_UPGRADES}
 					{linkbutton shape="export" href="upgrade.php" label="Mettre à jour"}
 				{else}
-					{linkbutton shape="export" href=$garradin_website label="Télécharger la mise à jour" target="_blank"}
+					{linkbutton shape="export" href=$paheko_website label="Télécharger la mise à jour" target="_blank"}
 				{/if}
 			</p></dd>
 			{/if}

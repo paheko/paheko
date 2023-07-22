@@ -36,8 +36,8 @@
 			{if $item.broken_message}
 				<td></td>
 				<td colspan="6">
-					<strong class="error">Extension cassée : {$item.name}</strong><br />
-					{$item.broken_message}
+					<strong class="error">Extension cassée : plugin "{$item.name}" — Installation impossible</strong><br />
+					Erreur : {$item.broken_message}
 				</td>
 			{else}
 				<td class="icon">
@@ -72,9 +72,9 @@
 				{if $item.broken}
 					<td colspan="5">
 						{if ENABLE_TECH_DETAILS}
-							<strong>Le code source de l'extension est absent du répertoire <tt>…/data/plugins/</tt></strong>
+							<strong class="error">Le code source de l'extension est absent du répertoire des plugins</strong>
 						{else}
-							<strong>Cette extension n'est pas installée sur ce serveur.</strong><br />
+							<strong class="error">Cette extension n'est pas installée sur ce serveur.</strong><br />
 						{/if}
 						<br />
 						<small>Il n'est pas possible de la supprimer non plus, le code source est nécessaire pour pouvoir la supprimer.</small>

@@ -1,13 +1,13 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Files\Files;
-use Garradin\Files\Storage;
-use Garradin\Web\Sync as WebSync;
-use Garradin\Web\Web;
-use Garradin\Entities\Files\File;
-use Garradin\UserTemplate\Modules;
+use Paheko\Files\Files;
+use Paheko\Files\Storage;
+use Paheko\Web\Sync as WebSync;
+use Paheko\Web\Web;
+use Paheko\Entities\Files\File;
+use Paheko\UserTemplate\Modules;
 use KD2\DB\DB_Exception;
 use KD2\DB\EntityManager;
 
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS config_users_fields (
 );');
 
 // Migrate users table
-$df = \Garradin\Users\DynamicFields::fromOldINI($config->champs_membres, $config->champ_identifiant, $config->champ_identite, 'numero');
+$df = \Paheko\Users\DynamicFields::fromOldINI($config->champs_membres, $config->champ_identifiant, $config->champ_identite, 'numero');
 $df->save(false);
 
 $trim_field = function (string $name) use ($db) {
@@ -136,28 +136,6 @@ $db->exec('
 	DROP TABLE web_pages_old;
 ');
 
-
-foreach (Files::all() as $file) {
-	if ($file->isDir()) {
-		continue;
-	}
-
-	if ($file->context() == $file::CONTEXT_WEB && $file->name == 'index.txt') {
-		$file->delete();
-		continue;
-	}
-
-	// Reindex
-	$file->indexForSearch();
-
-	// Save files in DB
-	$file->save();
-}
-
-foreach (Web::listAll() as $page) {
-	$page->syncSearch();
-}
-
 // Update searches
 foreach ($db->iterate('SELECT * FROM searches;') as $row) {
 	if ($row->type == 'json') {
@@ -200,3 +178,32 @@ if ($db->test('sqlite_master', 'type = \'table\' AND name = ?', 'plugin_reservat
 
 $db->commitSchemaUpdate();
 
+$db->begin();
+
+// Delete index.txt files
+// This needs to be done AFTER commit schema update as it disables foreign key actions
+foreach (Files::all() as $file) {
+	if ($file->isDir()) {
+		continue;
+	}
+
+	if ($file->context() == $file::CONTEXT_WEB && $file->name == 'index.txt') {
+		$file->delete();
+		continue;
+	}
+
+	// Reindex file contents
+	$file->indexForSearch();
+
+	// Save files in DB
+	$file->save();
+
+}
+
+// Reindex web pages
+foreach (Web::listAll() as $page) {
+	$page->syncSearch();
+}
+
+
+$db->commit();

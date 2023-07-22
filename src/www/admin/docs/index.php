@@ -1,14 +1,14 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Files\Files;
-use Garradin\Files\Transactions;
-use Garradin\Files\Users as Users_Files;
-use Garradin\Files\Trash;
-use Garradin\Users\Users;
-use Garradin\Users\Session;
-use Garradin\Entities\Files\File;
+use Paheko\Files\Files;
+use Paheko\Files\Transactions;
+use Paheko\Files\Users as Users_Files;
+use Paheko\Files\Trash;
+use Paheko\Users\Users;
+use Paheko\Users\Session;
+use Paheko\Entities\Files\File;
 
 require_once __DIR__ . '/../_inc.php';
 
