@@ -107,9 +107,9 @@ if (!defined('Paheko\ROOT'))
 	$classname = ltrim($classname, '\\');
 
 	// Plugins
-	if (substr($classname, 0, 16) == 'Paheko\\Plugin\\')
+	if (substr($classname, 0, 14) == 'Paheko\\Plugin\\')
 	{
-		$classname = substr($classname, 16);
+		$classname = substr($classname, 14);
 		$plugin_name = substr($classname, 0, strpos($classname, '\\'));
 		$filename = str_replace('\\', '/', substr($classname, strpos($classname, '\\')+1));
 
