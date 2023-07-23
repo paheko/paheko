@@ -9,9 +9,9 @@ DEB_ARCH_NAME=all
 
 PACKAGE_VERSION=`cat ../../src/VERSION`
 
-[ ! -f ../../src/paheko-${PACKAGE_VERSION}.tar.gz ] && (cd ../../src; make release)
+[ ! -f ../paheko-${PACKAGE_VERSION}.tar.gz ] && (cd ../../src; make release)
 
-tar xzvf ../../src/paheko-${PACKAGE_VERSION}.tar.gz -C /tmp
+tar xzvf ../paheko-${PACKAGE_VERSION}.tar.gz -C /tmp
 
 SRCDIR="/tmp/paheko-${PACKAGE_VERSION}"
 

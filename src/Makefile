@@ -80,11 +80,12 @@ windows:
 
 publish: release deb windows
 	$(eval VERSION=$(shell cat VERSION))
-	cd ../build && gpg --armor -r dev@paheko.cloud --detach-sign paheko-${VERSION}.tar.gz
+	cd ../build && gpg --armor -u dev@paheko.cloud --detach-sign paheko-${VERSION}.tar.gz
 	fossil uv sync
 	#fossil uv ls | fgrep -v 'paheko-0.8.5' | grep '^paheko-.*\.(tar\.bz2|deb)' | xargs fossil uv rm
-	fossil uv add ../build/paheko-${VERSION}.tar.gz
-	fossil uv add ../build/paheko-${VERSION}.tar.gz.asc
+	cd ../build && \
+		fossil uv add paheko-${VERSION}.tar.gz && \
+		fossil uv add paheko-${VERSION}.tar.gz.asc
 	cd ../build/debian && fossil uv add paheko-${VERSION}.deb
 	cd ../tools && php make_installer.php > install.php && fossil uv add install.php && rm install.php
 	fossil uv sync
