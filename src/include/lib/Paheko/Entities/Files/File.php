@@ -24,6 +24,7 @@ use Paheko\Web\Render\Render;
 use Paheko\Web\Router;
 use Paheko\Web\Cache as Web_Cache;
 use Paheko\Files\WebDAV\Storage;
+use Paheko\Users\DynamicFields;
 
 use Paheko\Files\Files;
 
@@ -177,7 +178,7 @@ class File extends Entity
 				}
 
 				// The field does not exist anymore, don't link
-				if (!DynamicField::get($field)) {
+				if (!DynamicFields::get($field)) {
 					return $ok;
 				}
 
