@@ -176,6 +176,11 @@ class File extends Entity
 					return $ok;
 				}
 
+				// The field does not exist anymore, don't link
+				if (!DynamicField::get($field)) {
+					return $ok;
+				}
+
 				$sql = sprintf('INSERT OR IGNORE INTO %s_files (id_file, id_user, field) SELECT %d, %d, %s FROM %1$s WHERE id = %3$d;',
 					'users',
 					$this->id(),
@@ -906,8 +911,7 @@ class File extends Entity
 				$i->save($destination, $format);
 			}
 			catch (\RuntimeException $e) {
-				throw $e;
-				throw new UserException('Impossible de créer la miniature');
+				throw new UserException('Impossible de créer la miniature', 0, $e);
 			}
 		}
 
