@@ -160,6 +160,7 @@ class Payment extends Entity
 
 		$transaction = new Transaction();
 		$transaction->set('type', Transaction::TYPE_REVENUE);
+		$transaction->reference = (string)$this->id;
 
 		$source = [
 			'status' => Transaction::STATUS_PAID,
