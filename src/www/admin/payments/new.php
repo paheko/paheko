@@ -1,18 +1,18 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Payments\Payments;
-use Garradin\Payments\Providers;
-use Garradin\Entities\Payments\Payment;
-use Garradin\Entities\Payments\Provider;
-use Garradin\Entities\Accounting\Year;
-use Garradin\Entities\Accounting\Account;
-use Garradin\Entities\Users\User;
-use Garradin\Accounting\Years;
+use Paheko\Payments\Payments;
+use Paheko\Payments\Providers;
+use Paheko\Entities\Payments\Payment;
+use Paheko\Entities\Payments\Provider;
+use Paheko\Entities\Accounting\Year;
+use Paheko\Entities\Accounting\Account;
+use Paheko\Entities\Users\User;
+use Paheko\Accounting\Years;
 
 use KD2\DB\EntityManager;
-use Garradin\UserException;
+use Paheko\UserException;
 
 require_once __DIR__ . '/../_inc.php';
 

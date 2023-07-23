@@ -1,8 +1,8 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Payments\Providers;
+use Paheko\Payments\Providers;
 
 require_once __DIR__ . '/../_inc.php';
 

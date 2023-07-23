@@ -11,13 +11,10 @@ use Paheko\Payments\Users as PaymentsUsers;
 use KD2\DB\EntityManager;
 use Paheko\DB;
 use Paheko\Entities\Accounting\Transaction;
-use Paheko\Accounting\Years;
 
 class Payments
 {
 	const CREATION_LOG_LABEL = 'Paiement créé.';
-	const TRANSACTION_CREATION_LOG_LABEL = 'Écriture comptable n°%d ajoutée.';
-	const TRANSACTION_PREFIX = 'Paiement';
 
 	static public function createPayment(string $type, string $method, string $status, string $provider_name, ?array $accounts, ?int $author_id, ?int $payer_id, ?string $payer_name, ?string $reference, string $label, int $amount, ?array $user_ids = null, ?array $user_notes = null, ?\stdClass $extra_data = null, ?string $transaction_notes = null): ?Payment
 	{
@@ -81,52 +78,9 @@ class Payments
 			$payment->bindToUsers($user_ids, $user_notes);
 		}
 		if ($accounts) {
-			$transaction = self::createTransaction($payment, $accounts, $author_id, $user_ids, $transaction_notes);
-			$payment->addLog(sprintf(self::TRANSACTION_CREATION_LOG_LABEL, (int)$transaction->id));
-			$payment->save();
+			$payment->createTransaction($accounts, $user_ids, $transaction_notes);
 		}
 		return $payment;
-	}
-
-	static public function createTransaction(Payment $payment, array $accounts, ?int $author_id, ?array $user_ids, ?string $notes = null): Transaction
-	{
-		if (!$id_year = Years::getOpenYearIdMatchingDate($payment->date)) {
-			throw new \RuntimeException(sprintf('No opened accounting year matching the payment date "%s"!', $payment->date->format('Y-m-d')));
-		}
-		// ToDo: check accounts validity (right number for the Transaction type)
-
-		$transaction = new Transaction();
-		$transaction->set('type', Transaction::TYPE_REVENUE);
-
-		$source = [
-			'status' => Transaction::STATUS_PAID,
-			'label' => self::TRANSACTION_PREFIX . ' - ' . $payment->label,
-			'notes' => $notes,
-			'payment_reference' => $payment->id, // For compatibility
-			'date' => \KD2\DB\Date::createFromInterface($payment->date),
-			'id_year' => (int)$id_year,
-			'id_payment' => (int)$payment->id,
-			'id_creator' => (int)$author_id,
-			'amount' => $payment->amount / 100,
-			'simple' => [
-				Transaction::TYPE_REVENUE => [
-					'credit' => [ (int)$accounts[0] => null ],
-					'debit' => [ (int)$accounts[1] => null ]
-			]]
-		];
-
-		$transaction->importForm($source);
-		$transaction->selfCheck();
-
-		if (!$transaction->save()) {
-			throw new \RuntimeException(sprintf('Cannot record payment transaction. Payment ID: %d.', $payment->id));
-		}
-		if ($user_ids) {
-			foreach ($user_ids as $id) {
-				$transaction->linkToUser((int)$id);
-			}
-		}
-		return $transaction;
 	}
 
 	static public function getByReference(string $provider_name, string $reference): ?Payment

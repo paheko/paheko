@@ -7,6 +7,7 @@ use Paheko\DB;
 use Paheko\Entities\Users\User;
 use Paheko\Entities\Accounting\Transaction;
 use Paheko\Payments\Users as PaymentsUsers;
+use Paheko\Accounting\Years;
 
 use KD2\DB\EntityManager as EM;
 
@@ -16,22 +17,29 @@ class Payment extends Entity
 	const TIF_TYPE = 'tif'; // three interest-free installments
 	const MONTHLY_TYPE  = 'monthly';
 	const OTHER_TYPE = 'other';
-	
+
 	const PLANNED_STATUS = 'planned';
 	const AWAITING_STATUS = 'awaiting';
 	const VALIDATED_STATUS = 'validated';
+	const REFUSED_STATUS = 'refused';
 	const CANCELLED_STATUS = 'cancelled';
-	
+	const UNKNOWN_STATUS = 'unknown';
+
 	const CASH_METHOD = 'cash';
 	const CHEQUE_METHOD = 'cheque';
 	const BANK_CARD_METHOD = 'bank_card';
 	const BANK_WIRE_METHOD = 'bank_wire';
 	const OTHER_METHOD = 'other';
-	
+
 	const TYPES = [ self::UNIQUE_TYPE => 'unique', self::TIF_TYPE => '3x sans frais', self::MONTHLY_TYPE => 'mensuel', self::OTHER_TYPE => 'autre'];
-	const STATUSES = [ self::PLANNED_STATUS => 'planifié', self::AWAITING_STATUS => 'en attente', self::VALIDATED_STATUS => 'validé', self::CANCELLED_STATUS => 'annulé' ];
+	const STATUSES = [ self::PLANNED_STATUS => 'planifié', self::AWAITING_STATUS => 'en attente', self::VALIDATED_STATUS => 'validé', self::REFUSED_STATUS => 'refusé', self::CANCELLED_STATUS => 'annulé', self::UNKNOWN_STATUS => 'inconnu' ];
 	const METHODS = [ self::CASH_METHOD => 'espèces', self::CHEQUE_METHOD => 'chèque', self::BANK_CARD_METHOD => 'carte bancaire', self::BANK_WIRE_METHOD => 'virement', self::OTHER_METHOD => 'autre'];
-	
+
+	const VALIDATION_LOG_LABEL = 'Paiement validé.';
+	const STATUS_UPDATE_LOG_LABEL = 'Statut mis à jour en %s.';
+	const TRANSACTION_LABEL = 'Paiement - %s';
+	const TRANSACTION_CREATION_LOG_LABEL = 'Écriture comptable n°%d ajoutée.';
+
 	const TABLE = 'payments';
 
 	protected int			$id;
@@ -67,12 +75,17 @@ class Payment extends Entity
 		return null;
 	}
 
+	public function __isset($key)
+	{
+		return (property_exists($this, $key) && isset($this->$key)) || ($this->extra_data && property_exists($this->extra_data, $key) && isset($this->extra_data->$key));
+	}
+
 	public function setExtraData(string $key, $value, bool $loose = false, bool $check_for_changes = true)
 	{
 		// ToDo: implements $loose option
 		// ToDo: implements getAsString() as in AbstractEntity::set()
 		$original_value = isset($this->extra_data->$key) ? $this->extra_data->$key : null;
-		
+
 		if (null === $this->extra_data) {
 			$this->extra_data = new \stdClass();
 		}
@@ -120,7 +133,7 @@ class Payment extends Entity
 			$message = sprintf("Paiement validé (Reçu de paiement : %s).", $receipt_url);
 		}
 		else {
-			$message = 'Paiement validé.';
+			$message = self::VALIDATION_LOG_LABEL;
 		}
 
 		return $this->updateStatus(self::VALIDATED_STATUS, $message);
@@ -136,5 +149,50 @@ class Payment extends Entity
 		$this->set('status', $status);
 
 		return $this->save();
+	}
+
+	public function createTransaction(array $accounts, ?array $user_ids = null, ?string $notes = null): Transaction
+	{
+		if (!$id_year = Years::getOpenYearIdMatchingDate($this->date)) {
+			throw new \RuntimeException(sprintf('No opened accounting year matching the payment date "%s"!', $this->date->format('Y-m-d')));
+		}
+		// ToDo: check accounts validity (right number for the Transaction type)
+
+		$transaction = new Transaction();
+		$transaction->set('type', Transaction::TYPE_REVENUE);
+
+		$source = [
+			'status' => Transaction::STATUS_PAID,
+			'label' => sprintf(self::TRANSACTION_LABEL, $this->label),
+			'notes' => $notes,
+			'payment_reference' => $this->id, // For compatibility
+			'date' => \KD2\DB\Date::createFromInterface($this->date),
+			'id_year' => (int)$id_year,
+			'id_payment' => (int)$this->id,
+			'id_creator' => (int)$this->id_author,
+			'amount' => $this->amount / 100,
+			'simple' => [
+				Transaction::TYPE_REVENUE => [
+					'credit' => [ (int)$accounts[0] => null ],
+					'debit' => [ (int)$accounts[1] => null ]
+			]]
+		];
+
+		$transaction->importForm($source);
+		$transaction->selfCheck();
+
+		if (!$transaction->save()) {
+			throw new \RuntimeException(sprintf('Cannot record payment transaction. Payment ID: %d.', $this->id));
+		}
+		if ($user_ids) {
+			foreach ($user_ids as $id) {
+				$transaction->linkToUser((int)$id);
+			}
+		}
+
+		$this->addLog(sprintf(self::TRANSACTION_CREATION_LOG_LABEL, (int)$transaction->id));
+		$this->save();
+
+		return $transaction;
 	}
 }

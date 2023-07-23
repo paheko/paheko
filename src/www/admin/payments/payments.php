@@ -1,16 +1,16 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Payments\Payments;
-use Garradin\Payments\Providers;
-use Garradin\Payments\Users as PaymentsUsers;
-use Garradin\Entities\Payments\Payment;
-use Garradin\Entities\Users\User;
-use Garradin\Accounting\Years;
+use Paheko\Payments\Payments;
+use Paheko\Payments\Providers;
+use Paheko\Payments\Users as PaymentsUsers;
+use Paheko\Entities\Payments\Payment;
+use Paheko\Entities\Users\User;
+use Paheko\Accounting\Years;
 
 use KD2\DB\EntityManager;
-use Garradin\UserException;
+use Paheko\UserException;
 
 require_once __DIR__ . '/../_inc.php';
 
