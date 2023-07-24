@@ -5,7 +5,7 @@
 	<dt>Libellé</dt>
 	<dd>{$payment->label}</dd>
 	<dt>Statut</dt>
-	<dd>{$payment->status}</dd>
+	<dd>{$statuses[$payment->status]}</dd>
 	<dt>Montant</dt>
 	<dd>{$payment->amount|money_currency|raw}</dd>
 	<dt>Référence</dt>

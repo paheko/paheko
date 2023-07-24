@@ -35,6 +35,7 @@ if (array_key_exists('id', $_GET)) {
 		'transactions' => $payment->getTransactions(),
 		'types' => Payment::TYPES,
 		'methods' => Payment::METHODS,
+		'statuses' => Payment::STATUSES,
 		'author' => $author,
 		'payer' => $payer,
 		'users' => PaymentsUsers::getForPaymentId((int)$payment->id),
