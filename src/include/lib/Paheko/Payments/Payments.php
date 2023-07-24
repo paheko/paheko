@@ -88,7 +88,7 @@ class Payments
 		return EntityManager::findOne(Payment::class, 'SELECT * FROM @TABLE WHERE provider = :provider AND reference = :reference', $provider_name, $reference);
 	}
 
-	static public function list(?string $provider = null): DynamicList
+	static public function list(?string $provider = null, ?User $user = null): DynamicList
 	{
 		$columns = [
 			'id' => [
@@ -147,7 +147,8 @@ class Payments
 		];
 
 		$tables = Payment::TABLE . ' p ' . ($provider ? 'INDEXED BY payments_provider_date' : '') . '
-			LEFT JOIN ' . Provider::TABLE . ' pr ON (pr.name = p.provider)
+			LEFT JOIN ' . Provider::TABLE . ' pr ON (pr.name = p.provider)' . '
+			' . ($user ? 'INNER JOIN ' . PaymentsUsers::TABLE . ' pu ON (pu.id_payment = p.id AND pu.id_user = :id_user)' : '') . '
 		';
 
 		$list = new DynamicList($columns, $tables);
@@ -159,6 +160,12 @@ class Payments
 			$list->setConditions('provider = :provider_name');
 			$list->setParameter('provider_name', $provider);
 			$list->setTitle(sprintf('Prestataire - %s - Paiements', $provider));
+		}
+
+		if ($user) {
+			$list->setConditions('p.id_payer = :id_user OR pu.id_user');
+			$list->setParameter('id_user', (int)$user->id);
+			$list->setTitle(sprintf('Paiements liés à %s', $user->nom));
 		}
 
 		$list->setModifier(function ($row) {
@@ -178,5 +185,10 @@ class Payments
 
 		$list->orderBy('date', true);
 		return $list;
+	}
+
+	static public function countForUser(int $id_user): int
+	{
+		return DB::getInstance()->count(PaymentsUsers::TABLE, 'id_user = ?', $id_user) + DB::getInstance()->count(Payment::TABLE, 'id_payer = ?', $id_user);
 	}
 }

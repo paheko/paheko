@@ -1,7 +1,7 @@
 {if isset($provider)}
 	{assign var='title' value="Paiements - %s"|args:$provider->label}
 {else}
-	{assign var='title' value="Paiements"}
+	{assign var='title' value=$payments->title}
 {/if}
 {include file="_head.tpl" title=$title current="payments"}
 

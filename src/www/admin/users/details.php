@@ -5,6 +5,7 @@ use Paheko\Accounting\Transactions;
 use Paheko\Services\Services_User;
 use Paheko\Users\Categories;
 use Paheko\Users\Users;
+use Paheko\Payments\Payments;
 
 use Paheko\UserTemplate\Modules;
 
@@ -49,6 +50,7 @@ $variables = [];
 if ($session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)) {
 	$variables['transactions_linked'] = Transactions::countForUser($user->id);
 	$variables['transactions_created'] = Transactions::countForCreator($user->id);
+	$variables['payments_linked'] = Payments::countForUser($user->id);
 }
 
 $parent_name = $user->getParentName();

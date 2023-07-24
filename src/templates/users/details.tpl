@@ -34,6 +34,10 @@
 			<dt>Écritures comptables créées</dt>
 			<dd><a href="{$admin_url}acc/transactions/creator.php?id={$user.id}">{$transactions_created} écritures comptables créées par ce membre</a></dd>
 		{/if}
+		{if !empty($payments_linked)}
+			<dt>Paiements liées (payeur ou bénéficiaire)</dt>
+			<dd><a href="{$admin_url}payments/payments.php?id_user={$user.id}">{$payments_linked} paiements liés à ce membre</a></dd>
+		{/if}
 	{/if}
 	{if $user->isChild()}
 		<dt>Membre responsable</dt>

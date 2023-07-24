@@ -50,8 +50,11 @@ else {
 			throw new UserException(sprintf('Prestataire introuvable : %s.', $_GET['provider']));
 		}
 	}
+	if ($id_user = qg('id_user')) {
+		$user = EntityManager::findOneById(User::class, (int)$id_user);
+	}
 	$tpl->assign([
-		'payments' => Payments::list($provider->name ?? null),
+		'payments' => Payments::list($provider->name ?? null, $user ?? null),
 		'provider' => $provider ?? null
 	]);
 
