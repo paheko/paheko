@@ -9,6 +9,7 @@
 		<legend>Paiement</legend>
 		<dl>
 			{input type="text" name="label" label="Libellé" required=true}
+			{input type="date" name="date" label="Date" required=false}
 			{input type="select" name="type" label="Type" options=Entities\Payments\Payment::TYPES default=Entities\Payments\Payment::UNIQUE_TYPE required=true}
 			{input type="select" name="method" label="Méthode" options=Entities\Payments\Payment::METHODS required=true}
 			{input type="select" name="provider" label="Prestataire" options=$provider_options default=Payments\Providers::MANUAL_PROVIDER required=true}

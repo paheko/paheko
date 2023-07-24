@@ -16,7 +16,7 @@ class Payments
 {
 	const CREATION_LOG_LABEL = 'Paiement créé.';
 
-	static public function createPayment(string $type, string $method, string $status, string $provider_name, ?array $accounts, ?int $author_id, ?int $payer_id, ?string $payer_name, ?string $reference, string $label, int $amount, ?array $user_ids = null, ?array $user_notes = null, ?\stdClass $extra_data = null, ?string $transaction_notes = null): ?Payment
+	static public function createPayment(string $type, string $method, string $status, ?\DateTime $date, string $provider_name, ?array $accounts, ?int $author_id, ?int $payer_id, ?string $payer_name, ?string $reference, string $label, int $amount, ?array $user_ids = null, ?array $user_notes = null, ?\stdClass $extra_data = null, ?string $transaction_notes = null): ?Payment
 	{
 		$payment = new Payment();
 
@@ -61,7 +61,7 @@ class Payments
 		$payment->set('reference', $reference);
 		$payment->set('label', $label);
 		$payment->set('amount', $amount);
-		$payment->set('date', new \DateTime());
+		$payment->set('date', $date ?? new \DateTime());
 		$payment->addLog(self::CREATION_LOG_LABEL, $payment->date);
 		$payment->set('extra_data', $extra_data);
 		$payment->selfCheck();

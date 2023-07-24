@@ -87,7 +87,9 @@ $form->runIf('save', function () use ($payment, $session) {
 	}
 
 	$accounts = array_key_exists('accounting', $_POST) ? [ $credit_account->id, $debit_account->id ] : null;
-	Payments::createPayment($_POST['type'], $_POST['method'], $_POST['status'], $_POST['provider'], $accounts, $session->user()->id, $payer->id, $payer->nom, (!empty($_POST['reference']) ? $_POST['reference'] : null), $_POST['label'], $_POST['amount'] * 100, $user_ids ?? null, $user_notes ?? null, null, $_POST['notes']);
+
+	Payments::createPayment($_POST['type'], $_POST['method'], $_POST['status'], Utils::get_datetime($_POST['date']), $_POST['provider'], $accounts, $session->user()->id, $payer->id, $payer->nom, (!empty($_POST['reference']) ? $_POST['reference'] : null), $_POST['label'], $_POST['amount'] * 100, $user_ids ?? null, $user_notes ?? null, null, $_POST['notes']);
+
 }, $csrf_key, '!payments/payments.php?ok=1');
 
 $tpl->display('payments/new.tpl');
