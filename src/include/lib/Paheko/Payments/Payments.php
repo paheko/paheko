@@ -189,6 +189,12 @@ class Payments
 
 	static public function countForUser(int $id_user): int
 	{
-		return DB::getInstance()->count(PaymentsUsers::TABLE, 'id_user = ?', $id_user) + DB::getInstance()->count(Payment::TABLE, 'id_payer = ?', $id_user);
+		return DB::getInstance()->firstColumn(sprintf('
+				SELECT COUNT(*)
+				FROM %s p
+				INNER JOIN %s pu ON (pu.id_payment = p.id AND pu.id_user = :id_user)
+				WHERE p.id_payer = :id_user OR pu.id_user
+			', Payment::TABLE, PaymentsUsers::TABLE), $id_user
+		);
 	}
 }
