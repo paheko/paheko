@@ -214,6 +214,8 @@ CREATE TABLE IF NOT EXISTS users_categories
 );
 
 CREATE INDEX IF NOT EXISTS users_categories_hidden ON users_categories (hidden);
+CREATE INDEX IF NOT EXISTS users_categories_name ON users_categories (name);
+CREATE INDEX IF NOT EXISTS users_categories_hidden_name ON users_categories (hidden, name);
 
 CREATE TABLE IF NOT EXISTS users_sessions
 -- Permanent sessions for logged-in users
