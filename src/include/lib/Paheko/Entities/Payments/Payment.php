@@ -6,6 +6,7 @@ use Paheko\Entity;
 use Paheko\DB;
 use Paheko\Entities\Users\User;
 use Paheko\Entities\Accounting\Transaction;
+use Paheko\Accounting\Transactions;
 use Paheko\Payments\Users as PaymentsUsers;
 use Paheko\Accounting\Years;
 
@@ -158,14 +159,12 @@ class Payment extends Entity
 		}
 		// ToDo: check accounts validity (right number for the Transaction type)
 
-		$transaction = new Transaction();
-		$transaction->set('type', Transaction::TYPE_REVENUE);
-		$transaction->reference = (string)$this->id;
-
 		$source = [
+			'type' => Transaction::TYPE_REVENUE,
 			'status' => Transaction::STATUS_PAID,
 			'label' => sprintf(self::TRANSACTION_LABEL, $this->label),
 			'notes' => $notes,
+			'reference' => (string)$this->id,
 			'payment_reference' => $this->id, // For compatibility
 			'date' => \KD2\DB\Date::createFromInterface($this->date),
 			'id_year' => (int)$id_year,
@@ -178,9 +177,7 @@ class Payment extends Entity
 					'debit' => [ (int)$accounts[1] => null ]
 			]]
 		];
-
-		$transaction->importForm($source);
-		$transaction->selfCheck();
+		$transaction = Transactions::create($source);
 
 		if (!$transaction->save()) {
 			throw new \RuntimeException(sprintf('Cannot record payment transaction. Payment ID: %d.', $this->id));
