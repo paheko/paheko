@@ -311,7 +311,8 @@ class User extends Entity
 			return;
 		}
 
-		$new = DB::getInstance()->firstColumn(sprintf('SELECT MAX(%s) + 1 FROM %s;', $field, User::TABLE));
+		$db = DB::getInstance();
+		$new = $db->firstColumn(sprintf('SELECT MAX(%s) + 1 FROM %s WHERE %1$s IS NOT NULL;', $db->quoteIdentifier($field), User::TABLE));
 		$this->set($field, $new);
 	}
 
