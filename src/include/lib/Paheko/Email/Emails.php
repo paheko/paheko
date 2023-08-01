@@ -17,7 +17,7 @@ use Paheko\Web\Render\Render;
 
 use Paheko\Files\Files;
 
-use const Paheko\{USE_CRON, MAIL_RETURN_PATH, DISABLE_EMAIL};
+use const Paheko\{USE_CRON, MAIL_SENDER, MAIL_RETURN_PATH, DISABLE_EMAIL};
 use const Paheko\{SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURITY};
 
 use KD2\SMTP;
@@ -566,6 +566,11 @@ class Emails
 
 		if (!$message->getFrom()) {
 			$message->setHeader('From', self::getFromHeader());
+		}
+
+		if (MAIL_SENDER) {
+			$message->setHeader('Reply-To', $message->getFromAddress());
+			$message->setHeader('From', self::getFromHeader($message->getFromName(), MAIL_SENDER));
 		}
 
 		$message->setMessageId();
