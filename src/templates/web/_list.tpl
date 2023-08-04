@@ -13,6 +13,9 @@ use Paheko\Entities\Web\Page;
 				{linkbutton shape="image" label="Lire" href="?p=%s"|args:$p.path}
 				{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
 					{linkbutton shape="edit" label="Éditer" href="edit.php?p=%s"|args:$p.path}
+					{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)}
+						{linkbutton shape="delete" label="Supprimer" target="_dialog" href="delete.php?p=%s"|args:$p.path}
+					{/if}
 				{/if}
 			</td>
 		</tr>

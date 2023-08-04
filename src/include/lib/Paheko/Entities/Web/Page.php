@@ -206,12 +206,14 @@ class Page extends Entity
 	{
 		$dir = $this->dir();
 
-		if ($dir) {
+		$r = parent::delete();
+
+		if ($r && $dir) {
 			$dir->delete();
 		}
 
 		Cache::clear();
-		return parent::delete();
+		return $r;
 	}
 
 	public function selfCheck(): void
