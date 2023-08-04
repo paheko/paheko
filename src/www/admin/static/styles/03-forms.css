@@ -699,7 +699,7 @@ form fieldset, form p {
     transition: .5s filter linear;
 }
 
-form.progressing fieldset, form.progressing p {
+form.progressing fieldset, form.progressing p, form.progressing table {
     pointer-events: none;
     opacity: 0.5;
     filter: blur(3px);

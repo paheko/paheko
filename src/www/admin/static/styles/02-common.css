@@ -82,7 +82,7 @@ span.alert, b.alert {
 
 .alert.block::before {
     content: "⚠";
-    color: yellow;
+    color: #990;
 }
 
 .error.block::before {
