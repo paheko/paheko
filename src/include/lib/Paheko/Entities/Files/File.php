@@ -622,21 +622,31 @@ class File extends Entity
 				$source['path'] = $source['pointer'] ? null : $this->getLocalFilePath();
 			}
 
-			if (isset($source['content'])) {
-				Utils::exec($cmd, 2, fn() => $source['content'], fn($out) => $content = $out);
-			}
-			elseif (isset($source['pointer'])) {
-				fseek($source['pointer'], 0, SEEK_END);
-				$size = ftell($source['pointer']);
-				rewind($source['pointer']);
+			try {
+				if (isset($source['content'])) {
+					Utils::exec($cmd, 2, fn() => $source['content'], fn($out) => $content = $out);
+				}
+				elseif (isset($source['pointer'])) {
+					fseek($source['pointer'], 0, SEEK_END);
+					$size = ftell($source['pointer']);
+					rewind($source['pointer']);
 
-				Utils::exec($cmd, 2, fn() => fread($source['pointer'], $size), fn($out) => $content = $out);
+					if ($size >= 8*1024*1024) {
+						throw new \OverflowException('PDF file is too large');
+					}
+
+					Utils::exec($cmd, 2, fn() => fread($source['pointer'], $size), fn($out) => $content = $out);
+				}
+				else {
+					$cmd = sprintf('%s -nopgbrk %s -', escapeshellcmd(PDFTOTEXT_COMMAND), escapeshellarg($source['path']));
+					$content = '';
+					Utils::exec($cmd, 2, null, function($out) use (&$content) { $content .= $out; });
+					$content = $content ?: null;
+				}
 			}
-			else {
-				$cmd = sprintf('%s -nopgbrk %s -', escapeshellcmd(PDFTOTEXT_COMMAND), escapeshellarg($source['path']));
-				$content = '';
-				Utils::exec($cmd, 2, null, function($out) use (&$content) { $content .= $out; });
-				$content = $content ?: null;
+			catch (\OverflowException $e) {
+				// PDF extraction was longer than 2 seconds: PDF file is likely too large
+				$content = null;
 			}
 		}
 		elseif (in_array($ext, self::EXTENSIONS_TEXT_CONVERT) && is_array($source)) {

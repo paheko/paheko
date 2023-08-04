@@ -1172,7 +1172,7 @@ class Utils
 
 		if ($status['running']) {
 			proc_terminate($process, 9);
-			throw new \RuntimeException(sprintf("Command killed after taking more than %d seconds: \n%s", $timeout, $cmd));
+			throw new \OverflowException(sprintf("Command killed after taking more than %d seconds: \n%s", $timeout, $cmd));
 		}
 
 		$status = proc_get_status($process);
