@@ -514,8 +514,10 @@ class Sections
 		static $reserved_keywords = ['max', 'order', 'desc', 'debug', 'explain', 'schema', 'columns', 'select', 'where', 'module'];
 
 		foreach ($params as $key => $value) {
-			if ($key[0] == ':' && strstr($where, $key)) {
-				$list->setParameter(substr($key, 1), $value);
+			if ($key[0] == ':') {
+				if (false !== strpos($where, $key)) {
+					$list->setParameter(substr($key, 1), $value);
+				}
 			}
 			elseif (!in_array($key, $reserved_keywords)) {
 				$hash = sha1($key);
