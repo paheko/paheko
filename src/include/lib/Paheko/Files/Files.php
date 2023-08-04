@@ -861,7 +861,7 @@ class Files
 	 * @param  bool   $create_parent Create parent directories if they don't exist
 	 * @return self
 	 */
-	static public function mkdir(string $path, bool $create_parent = true): File
+	static public function mkdir(string $path, bool $create_parent = true, bool $throw_on_conflict = true): File
 	{
 		$path = trim($path, '/');
 		$parent = Utils::dirname($path);
@@ -875,11 +875,15 @@ class Files
 		Files::checkQuota();
 
 		if (self::exists($path)) {
-			throw new ValidationException('Le nom de répertoire choisi existe déjà: ' . $path);
+			if ($throw_on_conflict) {
+				throw new ValidationException('Le nom de répertoire choisi existe déjà: ' . $path);
+			}
+
+			return self::get($path);
 		}
 
 		if ($parent !== null && $create_parent) {
-			self::ensureDirectoryExists($parent);
+			self::mkdir($parent, true, false);
 		}
 
 		$file = new File;
@@ -907,7 +911,7 @@ class Files
 			$tree = trim($tree . '/' . $part, '/');
 
 			if (!self::exists($tree)) {
-				self::mkdir($tree, false);
+				self::mkdir($tree, false, false);
 			}
 		}
 	}

@@ -1228,7 +1228,18 @@ class File extends Entity
 
 	static public function filterName(string $name): string
 	{
-		return preg_replace('/[^\w\d\p{L}_. -]+/iu', '-', trim($name));
+		return strtr(trim($name), [
+			"\0" => '',
+			'\\' => '',
+			'/' => '',
+			':' => '',
+			'*' => '',
+			'?' => '',
+			'"' => '',
+			'<' => '',
+			'>' => '',
+			'|' => '',
+		]);
 	}
 
 	static public function validateFileName(string $name): void
