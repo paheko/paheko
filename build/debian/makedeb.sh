@@ -127,9 +127,9 @@ Section: web
 Priority: optional
 Maintainer: Paheko <paheko@paheko.eu>
 Architecture: ${DEB_ARCH_NAME}
-Depends: dash | bash, php-cli (>=7.4), php-sqlite3, php-intl, sensible-utils
+Depends: dash | bash, php-cli (>=7.4), php-sqlite3, php-intl, php-mbstring, sensible-utils
 Version: ${PACKAGE_DEB_VERSION}
-Suggests: php-gd, php-imagick
+Suggests: php-imagick
 Replaces: garradin (<< 1.2.3~)
 Breaks: garradin (<< 1.2.3~)
 Homepage: https://fossil.kd2.org/paheko/
