@@ -24,6 +24,9 @@ else {
 		if ($mode == 'data') {
 			$module->deleteData();
 		}
+		elseif ($mode == 'reset') {
+			$module->resetChanges();
+		}
 		else {
 			$module->delete();
 		}

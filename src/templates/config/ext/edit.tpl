@@ -81,4 +81,10 @@
 	</tbody>
 </table>
 
+{if $module->hasDist() && $module->hasLocal()}
+<p class="actions">
+	{linkbutton label="Supprimer toutes les modifications" href="delete.php?module=%s&mode=reset"|args:$module.name shape="delete" target="_dialog"}
+</p>
+{/if}
+
 {include file="_foot.tpl"}
