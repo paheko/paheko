@@ -30,8 +30,11 @@ table.list th {
     font-weight: bold;
 }
 
-table.list thead {
-    background: rgba(var(--gSecondColor), 0.5);
+table.list thead th, table.list thead td {
+    background: rgb(var(--gSecondColor));
+    background-image: linear-gradient(rgba(255, 255, 255, 0.5) 0 0);
+    position: sticky;
+    top: -2px;
 }
 
 table.list tfoot tr {

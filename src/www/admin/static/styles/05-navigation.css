@@ -194,6 +194,7 @@ nav.dropdown {
     height: 2.3rem;
     border: 1px solid rgb(var(--gMainColor));
     border-radius: .25rem;
+    z-index: 100;
 }
 
 nav.dropdown ul {
