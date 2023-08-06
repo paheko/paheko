@@ -489,6 +489,19 @@ namespace Paheko;
 //const SMTP_SECURITY = 'STARTTLS';
 
 /**
+ * Nom du serveur utilisé dans le HELO SMTP
+ *
+ * Si NULL, alors le nom renseigné comme SERVER_NAME (premier nom du virtual host Apache)
+ * sera utilisé.
+ *
+ * Defaut : NULL
+ *
+ * @var null|string
+ */
+
+//const SMTP_HELO_HOSTNAME = 'mail.domain.tld';
+
+/**
  * Adresse e-mail destinée à recevoir les erreurs de mail
  * (adresses invalides etc.) — Return-Path
  *

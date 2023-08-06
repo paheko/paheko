@@ -18,7 +18,7 @@ use Paheko\Web\Render\Render;
 use Paheko\Files\Files;
 
 use const Paheko\{USE_CRON, MAIL_SENDER, MAIL_RETURN_PATH, DISABLE_EMAIL};
-use const Paheko\{SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURITY};
+use const Paheko\{SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURITY, SMTP_HELO_HOSTNAME};
 
 use KD2\SMTP;
 use KD2\Security;
@@ -639,6 +639,11 @@ class Emails
 			$secure = constant($const);
 
 			$smtp = new SMTP(SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, $secure);
+
+			if (SMTP_HELO_HOSTNAME) {
+				$smtp->servername = SMTP_HELO_HOSTNAME;
+			}
+
 			$smtp->send($message);
 		}
 		else {
