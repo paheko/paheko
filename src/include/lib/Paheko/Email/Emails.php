@@ -489,6 +489,7 @@ class Emails
 	static public function listRejectedUsers(): DynamicList
 	{
 		$db = DB::getInstance();
+		$email_field = 'u.' . $db->quoteIdentifier(DynamicFields::getFirstEmailField());
 
 		$columns = [
 			'id' => [
@@ -500,7 +501,7 @@ class Emails
 			],
 			'email' => [
 				'label' => 'Adresse',
-				'select' => 'u.email',
+				'select' => $email_field,
 			],
 			'user_id' => [
 				'select' => 'u.id',
@@ -524,8 +525,7 @@ class Emails
 			'fail_count' => [],
 		];
 
-		$tables = 'emails e
-			INNER JOIN users u ON u.email IS NOT NULL AND u.email != \'\' AND e.hash = email_hash(u.email)';
+		$tables = sprintf('emails e INNER JOIN users u ON %s IS NOT NULL AND %1$s != \'\' AND e.hash = email_hash(%1$s)', $email_field);
 
 		$conditions = sprintf('e.optout = 1 OR e.invalid = 1 OR e.fail_count >= %d', self::FAIL_LIMIT);
 
