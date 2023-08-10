@@ -433,7 +433,7 @@ class File extends Entity
 	 */
 	public function copy(string $target): self
 	{
-		return Files::createFromPointer($target, Files::callStorage('getReadOnlyPointer', $this));
+		return Files::createFromPointer($target, $this->getReadOnlyPointer());
 	}
 
 	public function setContent(string $content): self
@@ -994,18 +994,27 @@ class File extends Entity
 
 		flush();
 
+		if (null === $path) {
+			$pointer = $this->getReadOnlyPointer();
+
+			if (null === $pointer) {
+				$path = $this->getLocalFilePath();
+			}
+		}
+
 		if (null !== $path) {
 			readfile($path);
 		}
-		else {
-			$p = Files::callStorage('getReadOnlyPointer', $this);
-
-			while (!feof($p)) {
-				echo fread($p, 8192);
+		elseif (null !== $pointer) {
+			while (!feof($pointer)) {
+				echo fread($pointer, 8192);
 				flush();
 			}
 
-			fclose($p);
+			fclose($pointer);
+		}
+		else {
+			throw new \RuntimeException(sprintf('Could not serve file #%d (%s): no pointer or file path', $this->id, $this->path));
 		}
 	}
 
@@ -1015,7 +1024,7 @@ class File extends Entity
 			throw new \LogicException('Cannot fetch a directory');
 		}
 
-		$p = Files::callStorage('getReadOnlyPointer', $this);
+		$p = $this->getReadOnlyPointer();
 
 		if (null === $p) {
 			$path = Files::callStorage('getLocalFilePath', $this);
