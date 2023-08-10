@@ -103,7 +103,7 @@ class Transactions
 	/**
 	 * Returns a dynamic list of all waiting credit and debt transactions for closed years
 	 */
-	static public function listPendingCreditAndDebtForClosedYears(): DynamicList
+	static public function listPendingCreditAndDebtForOtherYears(int $current_year_id): DynamicList
 	{
 		$columns = Account::LIST_COLUMNS;
 
@@ -133,8 +133,12 @@ class Transactions
 			]]
 			+ $columns;
 
-		$conditions = sprintf('y.closed = 1 AND t.status & %d AND t.type IN (%d, %d)',
-			Transaction::STATUS_WAITING, Transaction::TYPE_CREDIT, Transaction::TYPE_DEBT);
+		$conditions = sprintf('y.id != %d AND t.status & %d AND t.type IN (%d, %d)',
+			$current_year_id,
+			Transaction::STATUS_WAITING,
+			Transaction::TYPE_CREDIT,
+			Transaction::TYPE_DEBT
+		);
 
 		$tables = 'acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction

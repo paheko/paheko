@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Dettes et créances non réglées sur les exercices clos" current="acc/simple"}
+{include file="_head.tpl" title="Dettes et créances non réglées sur les autres exercices" current="acc/simple"}
 
 <nav class="tabs">
 	<aside>
