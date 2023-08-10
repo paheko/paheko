@@ -533,12 +533,16 @@ class Reports
 		$db = DB::getInstance();
 
 		if (!empty($criterias['projects_only'])) {
-			$join = 'acc_projects a ON a.id = l.id_project';
-			$type = '0 AS account_type';
+			$join = 'acc_projects p ON p.id = l.id_project, acc_accounts a ON a.id = l.id_account';
+			$select = '0 AS account_type, p.label AS project_label, p.code AS project_code, p.id AS id_project';
+			$group_key = 'id_project';
+			$group_type = 'project';
 		}
 		else {
 			$join = 'acc_accounts a ON a.id = l.id_account';
-			$type = 'a.type AS account_type';
+			$select = 'a.type AS account_type';
+			$group_key = 'id_account';
+			$group_type = 'account';
 		}
 
 		$sql = sprintf('SELECT
@@ -549,22 +553,22 @@ class Reports
 			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
 			INNER JOIN %s
 			WHERE %s
-			ORDER BY a.code COLLATE U_NOCASE, t.date, t.id;', $type, $join, $where);
+			ORDER BY a.code COLLATE U_NOCASE, t.date, t.id;', $select, $join, $where);
 
-		$account = null;
+		$group = null;
 		$debit = $credit = 0;
 
 		foreach ($db->iterate($sql) as $row) {
-			if (null !== $account && $account->id != $row->id_account) {
-				yield $account;
-				$account = null;
+			if (null !== $group && $group->id != $row->$group_key) {
+				yield $group;
+				$group = null;
 			}
 
-			if (null === $account) {
-				$account = (object) [
-					'code'  => $row->account_code,
-					'label' => $row->account_label,
-					'id'    => $row->id_account,
+			if (null === $group) {
+				$group = (object) [
+					'code'  => $row->{$group_type . '_code'},
+					'label' => $row->{$group_type . '_label'},
+					'id'    => $row->$group_key,
 					'id_year' => $row->id_year,
 					'sum'   => 0,
 					'debit' => 0,
@@ -581,26 +585,24 @@ class Reports
 				$sum *= -1;
 			}
 
-			$account->sum += $sum;
-			$account->debit += $row->debit;
-			$account->credit += $row->credit;
+			$group->sum += $sum;
+			$group->debit += $row->debit;
+			$group->credit += $row->credit;
 			$debit += $row->debit;
 			$credit += $row->credit;
-			$row->running_sum = $account->sum;
+			$row->running_sum = $group->sum;
 
-			unset($row->account_code, $row->account_label, $row->id_account, $row->id_year);
-
-			$account->lines[] = $row;
+			$group->lines[] = $row;
 		}
 
-		if (null === $account) {
+		if (null === $group) {
 			return;
 		}
 
-		$account->all_debit = $debit;
-		$account->all_credit = $credit;
+		$group->all_debit = $debit;
+		$group->all_credit = $credit;
 
-		yield $account;
+		yield $group;
 	}
 
 	static public function getJournal(array $criterias, bool $reverse_order = false): \Generator

@@ -54,6 +54,9 @@
 				<thead>
 					<tr>
 						<td></td>
+						{if !empty($criterias.projects_only)}
+						<td class="num">Compte</td>
+						{/if}
 						<td>N° pièce</td>
 						<td>Réf. ligne</td>
 						<td>Date</td>
@@ -70,6 +73,9 @@
 		{foreach from=$account.lines item="line"}
 			<tr>
 				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
+				{if !empty($criterias.projects_only)}
+				<td class="num" data-spreadsheet-type="string">{link href="!acc/accounts/journal.php?id=%d&year=%d"|args:$line.id_account,$line.id_year label=$line.account_code}</td>
+				{/if}
 				<td data-spreadsheet-type="string">{$line.reference}</td>
 				<td data-spreadsheet-type="string">{$line.line_reference}</td>
 				<td data-spreadsheet-type="date" data-spreadsheet-value="{$line.date|date:'Y-m-d'}">{$line.date|date_short}</td>
@@ -83,7 +89,7 @@
 		</tbody>
 		<tfoot>
 			<tr>
-				<td colspan="4"></td>
+				<td colspan="{if !empty($criterias.projects_only)}5{else}4{/if}"></td>
 				<th>Solde final</th>
 				<td class="money">{$account.debit|raw|money}</td>
 				<td class="money">{$account.credit|raw|money}</td>
@@ -92,7 +98,7 @@
 
 			{if $table_export && isset($account->all_debit)}
 			<tr>
-				<td colspan="4"></td>
+				<td colspan="{if !empty($criterias.projects_only)}5{else}4{/if}"></td>
 				<th><strong>Totaux</strong></th>
 				<td class="money">{$account.all_debit|raw|money:false}</td>
 				<td class="money">{$account.all_credit|raw|money:false}</td>
