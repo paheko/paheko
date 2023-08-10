@@ -537,7 +537,12 @@ class Sections
 			$row->original = clone $row;
 			unset($row->original->id, $row->original->key, $row->original->document);
 
-			$row = array_merge(json_decode($row->document, true), (array)$row);
+			if (null !== $row->document) {
+				$row = array_merge(json_decode($row->document, true), (array)$row);
+			}
+			else {
+				$row = (array) $row;
+			}
 		});
 
 		$list->setExportCallback(function(&$row) {
