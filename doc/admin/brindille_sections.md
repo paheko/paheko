@@ -240,6 +240,7 @@ Certaines sections (voir plus bas) héritent de `sql` et rajoutent des fonctionn
 | `begin` | Début des résultats, si vide une valeur de `0` sera utilisée. |
 | `limit` | Limitation des résultats. Si vide, une valeur de `1000` sera utilisée. |
 | `group` | Contenu de la clause `GROUP BY` |
+| `having` | Contenu de la clause `HAVING` |
 | `order` | Ordre de tri des résultats. Si vide le tri sera fait par ordre d'ajout dans la base de données. |
 | `assign` | Si renseigné, une variable de ce nom sera créée, et le contenu de la dernière ligne du résultat y sera assigné. | 
 | `debug` | Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle. |
