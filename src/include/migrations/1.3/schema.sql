@@ -579,7 +579,7 @@ CREATE TABLE IF NOT EXISTS web_pages
 	id INTEGER NOT NULL PRIMARY KEY,
 	parent TEXT NULL REFERENCES web_pages(path) ON DELETE CASCADE ON UPDATE CASCADE, -- Parent path, NULL = root
 	path TEXT NOT NULL, -- Full page path
-	dir_path TEXT NOT NULL REFERENCES files(path) ON UPDATE CASCADE, -- Full page directory name
+	dir_path TEXT NOT NULL, -- Full page directory name
 	uri TEXT NOT NULL, -- Page identifier
 	type INTEGER NOT NULL, -- 1 = Category, 2 = Page
 	status TEXT NOT NULL,
