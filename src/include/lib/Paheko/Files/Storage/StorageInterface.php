@@ -44,7 +44,17 @@ interface StorageInterface
 	static public function getReadOnlyPointer(File $file);
 
 	/**
-	 * Delete a file
+	 * Move a file to trash
+	 */
+	static public function trash(File $file): bool;
+
+	/**
+	 * Restore a file from trash
+	 */
+	static public function restore(File $file): bool;
+
+	/**
+	 * Delete a file or directory (whether it was placed in trash before or not)
 	 */
 	static public function delete(File $file): bool;
 

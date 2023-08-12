@@ -142,6 +142,14 @@ class File extends Entity
 		'text/html',
 	];
 
+	const FORBIDDEN_CHARACTERS = [
+		'..', // double dot
+		"\0", // NUL
+		'/', // slash
+		// invalid characters in Windows
+		'\\', ':', '*', '?', '"', '<', '>', '|',
+	];
+
 	// https://book.hacktricks.xyz/pentesting-web/file-upload
 	const FORBIDDEN_EXTENSIONS = '!^(?:cgi|exe|sh|bash|com|pif|jspx?|jar|js[wxv]|action|do|php(?:s|\d+)?|pht|phtml?|shtml|phar|htaccess|inc|cfml?|cfc|dbm|swf|pl|perl|py|pyc|asp|so)$!i';
 
@@ -303,6 +311,8 @@ class File extends Entity
 			return;
 		}
 
+		Files::callStorage('trash', $this);
+
 		$this->set('trash', new \DateTime);
 		$this->save();
 	}
@@ -318,6 +328,8 @@ class File extends Entity
 		$parent_exists = $db->test(File::TABLE, 'path = ? AND trash IS NULL AND type = ?', $this->parent, self::TYPE_DIRECTORY);
 
 		$this->set('trash', null);
+
+		Files::callStorage('restore', $this);
 
 		// Parent directory no longer exists, or another file with the same name has been created:
 		// move file to documents root, but under a new name to make sure it doesn't overwrite an existing file
@@ -376,7 +388,7 @@ class File extends Entity
 	 */
 	public function changeFileName(string $new_name): bool
 	{
-		$new_name = self::filterName($new_name);
+		self::validateFileName($new_name);
 		return $this->rename(ltrim($this->parent . '/' . $new_name, '/'));
 	}
 
@@ -1014,7 +1026,8 @@ class File extends Entity
 			fclose($pointer);
 		}
 		else {
-			throw new \RuntimeException(sprintf('Could not serve file #%d (%s): no pointer or file path', $this->id, $this->path));
+			header('HTTP/1.1 404 Not Found', true, 404);
+			throw new UserException('Le contenu de ce fichier est introuvable', 404);
 		}
 	}
 
@@ -1237,18 +1250,11 @@ class File extends Entity
 
 	static public function filterName(string $name): string
 	{
-		return strtr(trim($name), [
-			"\0" => '',
-			'\\' => '',
-			'/' => '',
-			':' => '',
-			'*' => '',
-			'?' => '',
-			'"' => '',
-			'<' => '',
-			'>' => '',
-			'|' => '',
-		]);
+		foreach (self::FORBIDDEN_CHARACTERS as $char) {
+			$name = str_replace($char, '', $name);
+		}
+
+		return $name;
 	}
 
 	static public function validateFileName(string $name): void
@@ -1257,12 +1263,14 @@ class File extends Entity
 			throw new ValidationException('Nom de fichier interdit');
 		}
 
-		if (strpos($name, "\0") !== false) {
-			throw new ValidationException('Nom de fichier invalide');
-		}
-
 		if (strlen($name) > 250) {
 			throw new ValidationException('Nom de fichier trop long');
+		}
+
+		foreach (self::FORBIDDEN_CHARACTERS as $char) {
+			if (strpos($name, $char) !== false) {
+				throw new ValidationException('Nom de fichier invalide, le caractère suivant est interdit : ' . $char);
+			}
 		}
 
 		$extension = strtolower(substr($name, strrpos($name, '.')+1));
@@ -1287,7 +1295,7 @@ class File extends Entity
 		$context = array_shift($parts);
 
 		if (!array_key_exists($context, self::CONTEXTS_NAMES)) {
-			throw new ValidationException('Chemin invalide: ' . $path);
+			throw new ValidationException('Contexte invalide: ' . $context);
 		}
 
 		$name = array_pop($parts);

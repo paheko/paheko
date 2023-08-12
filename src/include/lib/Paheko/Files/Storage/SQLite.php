@@ -107,6 +107,16 @@ class SQLite implements StorageInterface
 		return true;
 	}
 
+	static public function trash(File $file): bool
+	{
+		return true;
+	}
+
+	static public function restore(File $file): bool
+	{
+		return true;
+	}
+
 	/**
 	 * @see https://www.crazyws.fr/dev/fonctions-php/fonction-disk-free-space-et-disk-total-space-pour-ovh-2JMH9.html
 	 * @see https://github.com/jdel/sspks/commit/a890e347f32e9e3e50a0dd82398947633872bf38

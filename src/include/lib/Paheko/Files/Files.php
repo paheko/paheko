@@ -637,8 +637,6 @@ class Files
 
 		File::validateCanHTML($name, $parent);
 
-		$name = File::filterName($name);
-
 		$target = $parent . '/' . $name;
 
 		self::ensureDirectoryExists($parent);
@@ -870,6 +868,7 @@ class Files
 		$name = File::filterName($name);
 		$path = trim($parent . '/' . $name, '/');
 
+		File::validateFileName($name);
 		File::validatePath($path);
 
 		Files::checkQuota();

@@ -24,13 +24,7 @@ class FileSystem implements StorageInterface
 			throw new \RuntimeException('Le stockage de fichier n\'a pas été configuré (FILE_STORAGE_CONFIG est vide).');
 		}
 
-		$target = rtrim($config, DIRECTORY_SEPARATOR);
-
-		if (false === strpos($target, '%')) {
-			$target .= '/%.2s/%1$s';
-		}
-
-		self::$_root = $target;
+		self::$_root = rtrim($config, DIRECTORY_SEPARATOR);
 	}
 
 	static protected function _getRoot()
@@ -109,7 +103,7 @@ class FileSystem implements StorageInterface
 
 	static public function getLocalFilePath(File $file): ?string
 	{
-		$path = sprintf(self::$_root, md5($file->id()));
+		$path = self::$_root . '/' . $file->path;
 		return str_replace('/', DIRECTORY_SEPARATOR, $path);
 	}
 
@@ -127,10 +121,55 @@ class FileSystem implements StorageInterface
 		}
 	}
 
+	/**
+	 * @see https://specifications.freedesktop.org/trash-spec/trashspec-latest.html
+	 */
+	static public function trash(File $file): bool
+	{
+		$hash = md5($file->path);
+		$src = self::getLocalFilePath($file);
+
+		$target = self::$_root . '/.Trash/files/' . $hash;
+		$info_file = self::$_root . '/.Trash/info/' . $hash;
+
+		self::ensureDirectoryExists($target);
+		self::ensureDirectoryExists($info_file);
+
+		return rename($src, $target) &&
+			// Write info file
+			file_put_contents($info_file, sprintf("[Trash Info]\nPath=%s\nDeletionDate=%s\n", $file->path, date('Ymd\TH:i:s')));
+	}
+
+	static public function restore(File $file): bool
+	{
+		$hash = md5($file->path);
+
+		$src = self::$_root . '/.Trash/files/' . $hash;
+		$info_file = self::$_root . '/.Trash/info/' . $hash;
+
+		$target = self::getLocalFilePath($file);
+
+		if (!file_exists($src)) {
+			return false;
+		}
+
+		return rename($src, $target) && Utils::safe_unlink($info_file);
+	}
+
 	static public function delete(File $file): bool
 	{
-		$path = self::getLocalFilePath($file);
-		return Utils::safe_unlink($path);
+		if ($file->trash) {
+			$hash = md5($file->path);
+			$src = self::$_root . '/.Trash/files/' . $hash;
+			$info_file = self::$_root . '/.Trash/info/' . $hash;
+
+			Utils::safe_unlink($src);
+			Utils::safe_unlink($info_file);
+		}
+		else {
+			$path = self::getLocalFilePath($file);
+			return Utils::safe_unlink($path);
+		}
 	}
 
 	/**

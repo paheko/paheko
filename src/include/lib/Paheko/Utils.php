@@ -493,7 +493,7 @@ class Utils
 		return $str;
 	}
 
-	static public function safe_unlink($path)
+	static public function safe_unlink(string $path): bool
 	{
 		if (!@unlink($path))
 		{
