@@ -1216,6 +1216,9 @@ class Sections
 		$db = DB::getInstance();
 
 		try {
+			// Lock database against changes
+			$db->setReadOnly(true);
+
 			$statement = $db->protectSelect($allowed_tables, $sql);
 
 			$args = [];
@@ -1239,6 +1242,7 @@ class Sections
 			}
 
 			$result = $statement->execute();
+			$db->setReadOnly(false);
 		}
 		catch (\KD2\DB\DB_Exception $e) {
 			throw new Brindille_Exception(sprintf("à la ligne %d erreur SQL :\n%s\n\nRequête exécutée :\n%s", $line, $db->lastErrorMsg(), $sql));
