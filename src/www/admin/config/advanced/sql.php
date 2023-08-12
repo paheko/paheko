@@ -47,7 +47,7 @@ elseif (qg('table_info') && array_key_exists(qg('table_info'), $tables_list)) {
 	$info->sql_indexes = implode(";\n", $sql_indexes);
 	$tpl->assign('table_info', $info);
 }
-elseif ($query || ($pragma = qg('pragma'))) {
+elseif (($pragma = qg('pragma')) || $query) {
 	try {
 		$query_time = microtime(true);
 

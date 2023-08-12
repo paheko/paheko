@@ -243,7 +243,7 @@ class Search extends Entity
 			$db->setReadOnly(true);
 			$st = $db->protectSelect($allowed_tables, $sql);
 			$r = $db->execute($st);
-			$db->setVersion(false);
+			$db->setReadOnly(false);
 
 			$count = (int) $r->fetchArray(\SQLITE3_NUM)[0] ?? 0;
 			$r->finalize();

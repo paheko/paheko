@@ -10,12 +10,12 @@
 
 		<form method="post" action="{$self_url}">
 			<fieldset>
-				<legend>Requête SQL</legend>
+				<legend>Faire une requête SQL en lecture</legend>
 				<dl>
-					{input type="textarea" cols="70" rows="10" name="query" default=$query}
+					{input type="textarea" cols="70" rows="3" name="query" default=$query class="full-width"}
 				</dl>
-				<p class="submit">
-					{button type="submit" name="run" label="Exécuter" shape="search" class="main"}
+				<p>
+					{button type="submit" name="run" label="Exécuter" shape="search"}
 				</p>
 			</fieldset>
 		</form>
@@ -114,11 +114,11 @@
 
 {else}
 
-<div class="center-block">
-	<p class="help block">
-		Cette page vous permet de visualiser les données brutes de la base de données.
-	</p>
+<p class="help">
+	Cette page vous permet de visualiser les données brutes de la base de données.
+</p>
 
+<div class="center-block">
 	<form method="post" action="{$self_url}">
 		<fieldset>
 			<legend>Faire une requête SQL en lecture</legend>
@@ -150,7 +150,7 @@
 					{linkbutton shape="menu" href="?table=%s"|args:$name label="Parcourir"}
 					{linkbutton shape="table" href="?table_info=%s"|args:$name label="Structure"}
 				</td>
-				<td>{$table.count} lignes</td>
+				<td class="num">{$table.count}</td>
 				<td class="size">{if $table.size !== null}{$table.size|size_in_bytes}{else}(inconnue){/if}</td>
 			</tr>
 		{/foreach}
