@@ -4,25 +4,32 @@
 
 {form_errors}
 
-{if $query}
-	<h2 class="ruler">Requête SQL</h2>
+{if $result !== null || $query !== null}
+	{if $query !== null}
+		<h2 class="ruler">Requête SQL</h2>
 
-	<form method="post" action="{$self_url}">
-		<fieldset>
-			<legend>Requête SQL</legend>
-			<dl>
-				{input type="textarea" cols="70" rows="10" name="query" default=$query}
-			</dl>
-			<p class="submit">
-				{button type="submit" name="run" label="Exécuter" shape="search" class="main"}
-			</p>
-		</fieldset>
-	</form>
+		<form method="post" action="{$self_url}">
+			<fieldset>
+				<legend>Requête SQL</legend>
+				<dl>
+					{input type="textarea" cols="70" rows="10" name="query" default=$query}
+				</dl>
+				<p class="submit">
+					{button type="submit" name="run" label="Exécuter" shape="search" class="main"}
+				</p>
+			</fieldset>
+		</form>
+	{else}
+		<p>
+			{linkbutton shape="left" label="Retour" href="?"}
+		</p>
+	{/if}
 
 	{if !empty($result)}
 
 		<p class="help">{$result|count} résultats trouvés pour cette requête.</p>
 		<table class="list search">
+			{if $result_header}
 			<thead>
 				<tr>
 					{foreach from=$result_header item="label"}
@@ -31,6 +38,7 @@
 					<td></td>
 				</tr>
 			</thead>
+			{/if}
 			<tbody>
 				{foreach from=$result item="row"}
 					<tr>

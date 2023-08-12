@@ -33,9 +33,20 @@ if ($table) {
 	$list->orderBy(key($columns), false);
 	$list->loadFromQueryString();
 }
+elseif (qg('pragma') == 'integrity_check') {
+	$result = $db->get('PRAGMA integrity_check;');
+}
+elseif (qg('pragma') == 'foreign_key_check') {
+	$result = $db->get('PRAGMA foreign_key_check;') ?: [['no errors']];
+}
+elseif (ENABLE_TECH_DETAILS && qg('pragma') == 'vacuum') {
+	$result = [['Size before: ' . (new Sauvegarde)->getDBSize()]];
+	$db->exec('VACUUM;');
+	$result[] = ['Size after VACUUM: ' . (new Sauvegarde)->getDBSize()];
+}
 elseif ($query) {
 	try {
-		$result = Recherche::rawSQL($query);
+		$result = Recherche::rawSQL($query, null, true);
 
 		if (count($result)) {
 			$result_header = array_keys((array)reset($result));

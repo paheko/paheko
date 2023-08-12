@@ -10,6 +10,15 @@
 	</ul>
 
 	{if $current == 'advanced'}
+		{if $sub_current == 'sql'}
+		<aside>
+			{linkbutton shape="check" label="Vérifier la BDD" href="?pragma=integrity_check"}
+			{linkbutton shape="check" label="Vérifier les clés étrangères" href="?pragma=foreign_key_check"}
+			{if ENABLE_TECH_DETAILS}
+				{linkbutton shape="reload" label="Reconstruire" href="?pragma=vacuum"}
+			{/if}
+		</aside>
+		{/if}
 	<ul class="sub">
 		<li{if !$sub_current} class="current"{/if}><a href="{$admin_url}config/advanced/">Fonctions avancées</a></li>
 		<li{if $sub_current == 'api'} class="current"{/if}><a href="{$admin_url}config/advanced/api.php">API</a></li>
