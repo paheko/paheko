@@ -504,6 +504,7 @@ class Backup
 	 */
 	static public function getDBSize(bool $signed = false): int
 	{
+		clearstatcache(true, DB_FILE);
 		return filesize(DB_FILE) + ($signed ? 40 : 0);
 	}
 

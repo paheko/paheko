@@ -47,14 +47,36 @@ elseif (qg('table_info') && array_key_exists(qg('table_info'), $tables_list)) {
 	$info->sql_indexes = implode(";\n", $sql_indexes);
 	$tpl->assign('table_info', $info);
 }
-elseif ($query) {
+elseif ($query || ($pragma = qg('pragma'))) {
 	try {
-		$s = Search::fromSQL($query);
 		$query_time = microtime(true);
-		$result = $s->iterateResults();
+
+		if ($pragma) {
+			$result = [];
+			$result_header = null;
+
+			if ($pragma == 'integrity_check') {
+				$result = $db->get('PRAGMA integrity_check;');
+			}
+			elseif ($pragma == 'foreign_key_check') {
+				$result = $db->get('PRAGMA foreign_key_check;') ?: [['no errors']];
+			}
+			elseif (ENABLE_TECH_DETAILS && $pragma == 'vacuum') {
+				$result[] = ['Size before VACUUM: ' . Backup::getDBSize()];
+				$db->exec('VACUUM;');
+				$result[] = ['Size after VACUUM: ' . Backup::getDBSize()];
+			}
+
+			$result_count = count($result);
+		}
+		else {
+			$s = Search::fromSQL($query);
+			$result = $s->iterateResults();
+			$result_header = $s->getHeader();
+			$result_count = $s->countResults();
+		}
+
 		$query_time = round((microtime(true) - $query_time) * 1000, 3);
-		$result_header = $s->getHeader();
-		$result_count = $s->countResults();
 
 		$tpl->assign(compact('result', 'result_header', 'result_count', 'query_time'));
 	}
