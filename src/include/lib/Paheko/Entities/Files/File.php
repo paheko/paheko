@@ -305,15 +305,29 @@ class File extends Entity
 		return false;
 	}
 
-	public function moveToTrash(): void
+	public function moveToTrash(?\DateTime $date = null): void
 	{
 		if ($this->trash) {
 			return;
 		}
 
-		Files::callStorage('trash', $this);
+		$date ??= new \DateTime;
 
-		$this->set('trash', new \DateTime);
+		if ($this->isDir()) {
+			$db = DB::getInstance();
+			$db->begin();
+
+			foreach (Files::list($this->path) as $file) {
+				$file->moveToTrash($date);
+			}
+
+			$db->commit();
+		}
+		else {
+			Files::callStorage('trash', $this, $date);
+		}
+
+		$this->set('trash', $date);
 		$this->save();
 	}
 
@@ -323,22 +337,22 @@ class File extends Entity
 			return;
 		}
 
-		$db = DB::getInstance();
-		$exists = $db->test(File::TABLE, 'path = ? AND trash IS NULL', $this->path);
-		$parent_exists = $db->test(File::TABLE, 'path = ? AND trash IS NULL AND type = ?', $this->parent, self::TYPE_DIRECTORY);
+		if ($this->isDir()) {
+			$db = DB::getInstance();
+			$db->begin();
 
-		$this->set('trash', null);
+			foreach (Files::list($this->path) as $file) {
+				$file->restoreFromTrash();
+			}
 
-		Files::callStorage('restore', $this);
-
-		// Parent directory no longer exists, or another file with the same name has been created:
-		// move file to documents root, but under a new name to make sure it doesn't overwrite an existing file
-		if ($exists || !$parent_exists) {
-			$new_name = sprintf('Restauré de la corbeille - %s - %s', date('d-m-Y His'), $this->name);
-			$parent = self::CONTEXT_DOCUMENTS;
-			$this->rename($parent . '/' . $new_name);
+			$db->commit();
+		}
+		else {
+			Files::ensureDirectoryExists($this->parent);
+			Files::callStorage('restore', $this);
 		}
 
+		$this->set('trash', null);
 		$this->save();
 	}
 
@@ -1276,7 +1290,7 @@ class File extends Entity
 		$extension = strtolower(substr($name, strrpos($name, '.')+1));
 
 		if (preg_match(self::FORBIDDEN_EXTENSIONS, $extension)) {
-			throw new ValidationException('Extension de fichier non autorisée, merci de renommer le fichier avant envoi.');
+			throw new ValidationException(sprintf('Extension de fichier "%s" non autorisée, merci de renommer le fichier avant envoi.', $extension));
 		}
 	}
 
@@ -1506,7 +1520,7 @@ class File extends Entity
 		}
 
 		Files::assertStorageIsUnlocked();
-		Files::callStorage('touch', $this->path, $date);
+		Files::callStorage('touch', $this, $date);
 		$this->set('modified', $date);
 		$this->save();
 	}
