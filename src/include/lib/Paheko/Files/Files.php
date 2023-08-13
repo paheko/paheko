@@ -306,6 +306,13 @@ class Files
 		return EM::getInstance(File::class)->all($sql);
 	}
 
+	static public function listTrash(): array
+	{
+		$sql = sprintf('SELECT * FROM @TABLE WHERE trash IS NOT NULL AND type != %d;', File::TYPE_DIRECTORY);
+
+		return EM::getInstance(File::class)->all($sql);
+	}
+
 	static public function getDynamicList(?string $parent = null): DynamicList
 	{
 		$columns = [
@@ -906,13 +913,20 @@ class Files
 		$parts = array_filter($parts);
 		$tree = '';
 
+		$db = DB::getInstance();
+		$db->begin();
+
 		foreach ($parts as $part) {
+			$parent = $tree ?: null;
 			$tree = trim($tree . '/' . $part, '/');
 
-			if (!self::exists($tree)) {
-				self::mkdir($tree, false, false);
-			}
+			// Make sure directory exists AND is not in trash
+			$db->preparedQuery('INSERT INTO files (path, parent, name, type, trash) VALUES (?, ?, ?, ?, NULL)
+				ON CONFLICT (path) DO UPDATE SET trash = NULL;',
+				$tree, $parent, $part, File::TYPE_DIRECTORY);
 		}
+
+		$db->commit();
 	}
 
 	/**
