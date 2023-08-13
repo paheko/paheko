@@ -83,6 +83,7 @@ else {
 
 	$size = Trash::getSize();
 	$list = Trash::list();
+	$list->loadFromQueryString();
 
 	$tpl->assign(compact('list', 'size'));
 
