@@ -12,6 +12,13 @@ use KD2\DB\EntityManager as EM;
 
 use const Paheko\{DB_FILE, DATA_ROOT};
 
+/**
+ * This class implements the SQLite file storage.
+ *
+ * The content of a file is stored as a BLOB inside the database, in the files_contents table.
+ * In this case, the 'files' table is no longer just a cache of files metadata,
+ * but the only storage of metadata.
+ */
 class SQLite implements StorageInterface
 {
 	static public function configure(?string $config): void
@@ -101,6 +108,10 @@ class SQLite implements StorageInterface
 		return null;
 	}
 
+	static public function touch(File $file, \DateTime $date): void
+	{
+	}
+
 	static public function delete(File $file): bool
 	{
 		// Nothing to do, files_contents is deleted when files row is deleted (cascade)
@@ -152,5 +163,15 @@ class SQLite implements StorageInterface
 	static public function isLocked(): bool
 	{
 		return DB::getInstance()->test('sqlite_master', 'name = ? AND type = ?', 'files_lock', 'table');
+	}
+
+	static public function listFiles(?string $path = null): array
+	{
+		// Doesn't make sense
+		throw new \LogicException('SQLite storage cannot list local files');
+	}
+
+	static public function cleanup(): void
+	{
 	}
 }

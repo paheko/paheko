@@ -921,8 +921,7 @@ class Files
 			$tree = trim($tree . '/' . $part, '/');
 
 			// Make sure directory exists AND is not in trash
-			$db->preparedQuery('INSERT INTO files (path, parent, name, type, trash) VALUES (?, ?, ?, ?, NULL)
-				ON CONFLICT (path) DO UPDATE SET trash = NULL;',
+			$db->preparedQuery('INSERT OR IGNORE INTO files (path, parent, name, type, trash) VALUES (?, ?, ?, ?, NULL);',
 				$tree, $parent, $part, File::TYPE_DIRECTORY);
 		}
 

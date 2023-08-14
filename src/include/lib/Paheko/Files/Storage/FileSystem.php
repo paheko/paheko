@@ -6,17 +6,21 @@ use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
 use Paheko\DB;
 use Paheko\Utils;
+use Paheko\ValidationException;
 
 use const Paheko\DATA_ROOT;
 
 /**
- * This class provides storage in the file system
- * You need to configure FILE_STORAGE_CONFIG to give a file path
+ * This class stores files in the local file system.
+ * You need to configure FILE_STORAGE_CONFIG to give a root path.
+ * Metadata will be stored and cached in the 'files' table.
  */
 class FileSystem implements StorageInterface
 {
 	static protected $_size;
 	static protected $_root;
+
+	const TRASH_INFO_DATE = 'Ymd\TH:i:s';
 
 	static public function configure(?string $config): void
 	{
@@ -33,7 +37,7 @@ class FileSystem implements StorageInterface
 			throw new \RuntimeException('Le stockage de fichier n\'a pas été configuré (FILE_STORAGE_CONFIG est vide ?).');
 		}
 
-		$root = rtrim(strtok(self::$_root, '%'), DIRECTORY_SEPARATOR);
+		$root = rtrim(self::$_root, DIRECTORY_SEPARATOR);
 
 		if (!file_exists($root)) {
 			Utils::safe_mkdir($root, 0770, true);
@@ -103,7 +107,7 @@ class FileSystem implements StorageInterface
 
 	static public function getLocalFilePath(File $file): ?string
 	{
-		$path = self::$_root . '/' . $file->path;
+		$path = self::_getRoot() . '/' . $file->path;
 		return str_replace('/', DIRECTORY_SEPARATOR, $path);
 	}
 
@@ -121,6 +125,12 @@ class FileSystem implements StorageInterface
 		}
 	}
 
+	static public function touch(File $file, \DateTime $date): void
+	{
+		$path = self::getLocalFilePath($file);
+		touch($path, $date->getTimestamp());
+	}
+
 	/**
 	 * @see https://specifications.freedesktop.org/trash-spec/trashspec-latest.html
 	 */
@@ -129,23 +139,25 @@ class FileSystem implements StorageInterface
 		$hash = md5($file->path);
 		$src = self::getLocalFilePath($file);
 
-		$target = self::$_root . '/.Trash/files/' . $hash;
-		$info_file = self::$_root . '/.Trash/info/' . $hash;
+		$root = self::_getRoot();
+		$target = $root . '/.Trash/files/' . $hash;
+		$info_file = $root . '/.Trash/info/' . $hash;
 
 		self::ensureDirectoryExists($target);
 		self::ensureDirectoryExists($info_file);
 
 		return rename($src, $target) &&
 			// Write info file
-			file_put_contents($info_file, sprintf("[Trash Info]\nPath=%s\nDeletionDate=%s\n", $file->path, date('Ymd\TH:i:s')));
+			file_put_contents($info_file, sprintf("[Trash Info]\nPath=%s\nDeletionDate=%s\n", $file->path, date(self::TRASH_INFO_DATE)));
 	}
 
 	static public function restore(File $file): bool
 	{
 		$hash = md5($file->path);
 
-		$src = self::$_root . '/.Trash/files/' . $hash;
-		$info_file = self::$_root . '/.Trash/info/' . $hash;
+		$root = self::_getRoot();
+		$src = $root . '/.Trash/files/' . $hash;
+		$info_file = $root . '/.Trash/info/' . $hash;
 
 		$target = self::getLocalFilePath($file);
 
@@ -160,8 +172,9 @@ class FileSystem implements StorageInterface
 	{
 		if ($file->trash) {
 			$hash = md5($file->path);
-			$src = self::$_root . '/.Trash/files/' . $hash;
-			$info_file = self::$_root . '/.Trash/info/' . $hash;
+			$root = self::_getRoot();
+			$src = $root . '/.Trash/files/' . $hash;
+			$info_file = $root . '/.Trash/info/' . $hash;
 
 			Utils::safe_unlink($src);
 			Utils::safe_unlink($info_file);
@@ -206,5 +219,134 @@ class FileSystem implements StorageInterface
 	static public function isLocked(): bool
 	{
 		return file_exists(self::_getRoot() . DIRECTORY_SEPARATOR . '.lock');
+	}
+
+	static protected function _SplToFile(\SplFileInfo $spl): ?File
+	{
+		// may return slash
+		// see comments https://www.php.net/manual/fr/splfileinfo.getfilename.php
+		// don't use getBasename as it is locale-dependent!
+		$name = trim($spl->getFilename(), '/');
+		$root = self::_getRoot();
+		$trash = 0 === strpos($spl->getPathname(), $root . '/' . self::TRASH_PATH . '/');
+
+		if ($trash) {
+			$info_file = $root . '/.Trash/info/' . $spl->getFilename();
+
+			// Ignore trash files without an info file
+			if (!file_exists($info_file)) {
+				//Utils::safe_unlink($spl->getPathname());
+				return null;
+			}
+
+			$info = parse_ini_file($info_file, false, \INI_SCANNER_RAW);
+
+			// Ignore trash files without valid info
+			if (empty($info['DeletionDate']) || empty($info['Path'])) {
+				//Utils::safe_unlink($spl->getPathname());
+				return null;
+			}
+
+			$path = trim($info['Path']);
+
+			// Invalid hash, ignore this file as it won't be restorable
+			if ($name != md5($path)) {
+				return null;
+			}
+
+			$name = Utils::basename($path);
+			$trash = \DateTime::createFromFormat(self::TRASH_INFO_DATE, $info['DeletionDate']);
+		}
+		else {
+			$path = substr($spl->getPathname(), strlen($root . DIRECTORY_SEPARATOR));
+			$path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
+		}
+
+		try {
+			File::validateFileName($name);
+			File::validatePath($path);
+		}
+		catch (ValidationException $e) {
+			// Invalid files paths or names cannot be added to file cache
+			return null;
+		}
+
+		$parent = Utils::dirname($path);
+
+		if ($parent == '.' || !$parent) {
+			$parent = null;
+		}
+
+		$data = [
+			'id'       => null,
+			'name'     => $name,
+			'path'     => $path,
+			'parent'   => $parent,
+			'modified' => new \DateTime('@' . $spl->getMTime()),
+			'size'     => $spl->isDir() ? null : $spl->getSize(),
+			'type'     => $spl->isDir() ? File::TYPE_DIRECTORY : File::TYPE_FILE,
+			'mime'     => $spl->isDir() ? null : mime_content_type($spl->getRealPath()),
+			'md5'      => null,
+			'trash'    => $trash ?: null,
+		];
+
+		$data['modified']->setTimeZone(new \DateTimeZone(date_default_timezone_get()));
+		$data['image'] = (int) in_array($data['mime'], File::IMAGE_TYPES);
+
+		$file = new File;
+		$file->load($data);
+
+		return $file;
+	}
+
+	static public function listFiles(?string $path = null): array
+	{
+		$root = self::_getRoot();
+		$fullpath = $root . DIRECTORY_SEPARATOR . $path;
+		$trash = 0 === strpos($fullpath, $root . '/' . self::TRASH_PATH);
+		if (!file_exists($fullpath)) {
+			return [];
+		}
+
+		$files = [];
+
+		foreach (new \FilesystemIterator($fullpath, \FilesystemIterator::SKIP_DOTS) as $file) {
+			// Seems that SKIP_DOTS does not work all the time?
+			if ($file->getFilename()[0] == '.') {
+				continue;
+			}
+
+			$obj = self::_SplToFile($file);
+
+			// Skip invalid files
+			if (null === $obj) {
+				continue;
+			}
+
+			// Used to make sorting easier
+			// directory_blabla
+			// file_image.jpeg
+			$files[$file->getType() . '_' .$file->getFilename()] = $obj;
+		}
+
+		return Utils::knatcasesort($files);
+	}
+
+	static public function cleanup(): void
+	{
+		self::_cleanupDirectory(null);
+	}
+
+	/**
+	 * Delete empty directories
+	 */
+	static protected function _cleanupDirectory(?string $path): void
+	{
+		$path ??= self::_getRoot();;
+
+		foreach (glob($path . '/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
+			self::_cleanupDirectory($dir);
+			@rmdir($dir);
+		}
 	}
 }

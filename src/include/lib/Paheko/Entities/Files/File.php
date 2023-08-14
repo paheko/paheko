@@ -321,12 +321,16 @@ class File extends Entity
 				$file->moveToTrash($date);
 			}
 
+			// Delete this directory in files cache, but ONLY this directory
+			// (so don't use $this->delete())
+			// as directories cannot be trashed, only single files
+			parent::delete();
+
 			$db->commit();
-		}
-		else {
-			Files::callStorage('trash', $this, $date);
+			return;
 		}
 
+		Files::callStorage('trash', $this, $date);
 		$this->set('trash', $date);
 		$this->save();
 	}
@@ -338,14 +342,7 @@ class File extends Entity
 		}
 
 		if ($this->isDir()) {
-			$db = DB::getInstance();
-			$db->begin();
-
-			foreach (Files::list($this->path) as $file) {
-				$file->restoreFromTrash();
-			}
-
-			$db->commit();
+			throw new \LogicException('Directories cannot be in trash?!');
 		}
 		else {
 			Files::ensureDirectoryExists($this->parent);
@@ -378,16 +375,21 @@ class File extends Entity
 		// Also delete sub-directories and files
 		if ($this->type == self::TYPE_DIRECTORY) {
 			foreach (Files::list($this->path) as $file) {
-				$file->delete();
+				if (!$file->delete()) {
+					$db->rollback();
+					return false;
+				}
 			}
 		}
+		else {
+			// Delete actual file content
+			Files::callStorage('delete', $this);
 
-		// Delete actual file content
-		Files::callStorage('delete', $this);
+			Plugins::fireSignal('files.delete', ['file' => $this]);
 
-		Plugins::fireSignal('files.delete', ['file' => $this]);
+			$this->deleteCache();
+		}
 
-		$this->deleteCache();
 		$r = parent::delete();
 
 		$db->commit();
@@ -676,6 +678,12 @@ class File extends Entity
 			}
 		}
 		elseif (in_array($ext, self::EXTENSIONS_TEXT_CONVERT) && is_array($source)) {
+
+			if (empty($source)) {
+				$source['pointer'] = $this->getReadOnlyPointer();
+				$source['path'] = $source['pointer'] ? null : $this->getLocalFilePath();
+			}
+
 			$content = ToText::from($source);
 		}
 		else {

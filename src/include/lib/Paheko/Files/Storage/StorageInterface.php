@@ -6,8 +6,37 @@ use Paheko\Entities\Files\File;
 
 class StorageException extends \RuntimeException {}
 
+/**
+ * Storage backends must implement this interface
+ *
+ * In Paheko, storage backends actually store the file contents,
+ * while the file metadata is stored inside the 'files' table of
+ * the database.
+ *
+ * A backend storage MUST be able to store:
+ * - the file contents
+ * - the file modification date
+ * - the file name and path
+ *
+ * This is because the 'files' table is just a cache, it can corrupt
+ * or need to be refreshed after a database update.
+ *
+ * This means that if your storage backend does NOT store files in a file system,
+ * you may have to store these metadata in another place.
+ *
+ * Directories: storage backends should not worry about directories,
+ * directories are automatically created in cache when required.
+ */
 interface StorageInterface
 {
+	/**
+	 * Path to trash files
+	 *
+	 * This is used for listing trashed files *from* storage,
+	 * the storage backend doesn't have to use this path exactly.
+	 */
+	const TRASH_PATH = '.Trash/files';
+
 	/**
 	 * Configures the storage backend for subsequent calls
 	 */
@@ -42,6 +71,11 @@ interface StorageInterface
 	 * @return null|resource
 	 */
 	static public function getReadOnlyPointer(File $file);
+
+	/**
+	 * Change the file modified time to a specific date
+	 */
+	static public function touch(File $file, \DateTime $date): void;
 
 	/**
 	 * Move a file to trash
@@ -90,4 +124,29 @@ interface StorageInterface
 	 * Return TRUE if storage is locked against changes
 	 */
 	static public function isLocked(): bool;
+
+	/**
+	 * List files *from* storage
+	 *
+	 * This is called when the database is restored,
+	 * or if the admin runs the 'scan_files' script.
+	 *
+	 * This method MUST return an array containing unsaved File objects.
+	 * This method MUST NOT rehash every file encountered while listing.
+	 *
+	 * The sync algorithm WILL rehash() and save() if the file has been
+	 * changed or doesn't exist in cache.
+	 *
+	 * Empty directories in storage shouldn't lead to creating an empty
+	 * directory in cache.
+	 *
+	 * @var string|null $path Contains the local path, eg. 'documents/dir'
+	 * or the '.Trash' string to sync trashed files
+	 */
+	static public function listFiles(?string $path = null): array;
+
+	/**
+	 * Perform storage-specific clean-up tasks
+	 */
+	static public function cleanup(): void;
 }
