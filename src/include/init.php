@@ -209,6 +209,7 @@ static $default_config = [
 	'SMTP_SECURITY'         => 'STARTTLS',
 	'MAIL_RETURN_PATH'      => null,
 	'MAIL_BOUNCE_PASSWORD'  => null,
+	'MAIL_SENDER'           => null,
 	'ADMIN_URL'             => WWW_URL . 'admin/',
 	'NTP_SERVER'            => 'fr.pool.ntp.org',
 	'ADMIN_COLOR1'          => '#20787a',
