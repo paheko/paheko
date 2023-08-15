@@ -19,7 +19,10 @@ if (file_exists($config_path) && is_writable($config_path)) {
 
 	$new = strtr($contents, [
 		'namespace Garradin' => 'namespace Paheko',
-		'Garradin\\' => 'Paheko\\',
+		' Garradin\\' => ' Paheko\\',
+		'\'Garradin\\' => '\'Paheko\\',
+		'"Garradin\\' => '"Paheko\\',
+		'\\Garradin\\' => '\\Paheko\\',
 	]);
 
 	if ($new !== $contents) {
