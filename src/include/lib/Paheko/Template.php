@@ -548,6 +548,17 @@ class Template extends Smartyer
 		}
 
 		$out = '<table class="diff">';
+
+		if (isset($params['old_label'], $params['new_label'])) {
+			$out .= sprintf(
+				'<thead><tr><td colspan=2></td><th>%s</th><td></td><th>%s</th></tr></thead>',
+				htmlspecialchars($params['old_label']),
+				htmlspecialchars($params['new_label'])
+			);
+		}
+
+		$out .= '<tbody>';
+
 		$prev = key($diff);
 
 		foreach ($diff as $i=>$line)
@@ -615,7 +626,7 @@ class Template extends Smartyer
 			$prev = $i;
 		}
 
-		$out .= '</table>';
+		$out .= '</tbody></table>';
 		return $out;
 	}
 

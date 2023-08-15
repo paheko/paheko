@@ -48,7 +48,7 @@ class Sync
 			elseif ($key == 'format') {
 				$value = strtolower($value);
 
-				if (!array_key_exists($value, self::FORMATS_LIST)) {
+				if (!array_key_exists($value, Page::FORMATS_LIST)) {
 					throw new \LogicException('Unknown format: ' . $value);
 				}
 
@@ -57,11 +57,11 @@ class Sync
 			elseif ($key == 'type') {
 				$value = strtolower($value);
 
-				if ($value == strtolower(self::TYPES[self::TYPE_CATEGORY])) {
-					$value = self::TYPE_CATEGORY;
+				if ($value == strtolower(Page::TYPES[Page::TYPE_CATEGORY])) {
+					$value = Page::TYPE_CATEGORY;
 				}
-				elseif ($value == strtolower(self::TYPES[self::TYPE_PAGE])) {
-					$value = self::TYPE_PAGE;
+				elseif ($value == strtolower(Page::TYPES[Page::TYPE_PAGE])) {
+					$value = Page::TYPE_PAGE;
 				}
 				else {
 					throw new \LogicException('Unknown type: ' . $value);
@@ -72,7 +72,7 @@ class Sync
 			elseif ($key == 'status') {
 				$value = strtolower($value);
 
-				if (!array_key_exists($value, self::STATUS_LIST)) {
+				if (!array_key_exists($value, Page::STATUS_LIST)) {
 					throw new \LogicException('Unknown status: ' . $value);
 				}
 
@@ -98,15 +98,24 @@ class Sync
 			$page->set('modified', $file->modified);
 		}
 
-		if (!isset($page->type) || $page->type != self::TYPE_CATEGORY) {
-			$page->set('type', $page->checkRealType());
+		if (!isset($page->type) || $page->type != $page::TYPE_CATEGORY) {
+			$type = $page::TYPE_PAGE;
+
+			foreach (Files::list($page->dir_path) as $file) {
+				if ($file->isDir()) {
+					$type = $page::TYPE_CATEGORY;
+					break;
+				}
+			}
+
+			$page->set('type', $type);
 		}
 		else {
-			$page->set('type', self::TYPE_CATEGORY);
+			$page->set('type', $page::TYPE_CATEGORY);
 		}
 	}
 
-	static public function fromFile(File $file): self
+	static public function fromFile(File $file): Page
 	{
 		$page = new Page;
 

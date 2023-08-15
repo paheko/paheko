@@ -3,8 +3,11 @@
 {form_errors}
 
 {if $show_diff}
-	<h3>Modifications entre votre version et la nouvelle version</h3>
-	{diff old=$new_content new=$current_content}
+	{diff old=$my_content new=$page->content old_label="Votre version" new_label="Version enregistrée"}
+{elseif $restored_version}
+	<p class="alert block">
+		Attention, le texte a été restauré depuis une version précédente, vous risquez d'écraser des modifications.
+	</p>
 {/if}
 
 <form method="post" action="{$self_url}" class="web-edit" data-focus="#f_content">
@@ -21,7 +24,7 @@
 
 	<fieldset class="editor">
 		<div class="textEditor">
-			{input type="textarea" name="content" cols="70" rows="20" default=$current_content data-attachments=1 data-savebtn=2 data-preview-url="!common/files/_preview.php?w=%s"|local_url|args:$page.path data-format="#f_format"}
+			{input type="textarea" name="content" cols="70" rows="20" source=$page data-attachments=1 data-savebtn=2 data-preview-url="!common/files/_preview.php?w=%d"|local_url|args:$page.id data-format="#f_format" data-id=$page.id}
 		</div>
 	</fieldset>
 

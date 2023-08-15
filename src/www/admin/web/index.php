@@ -7,22 +7,23 @@ use Paheko\Entities\Web\Page;
 
 require_once __DIR__ . '/_inc.php';
 
-$page = null;
+$page = false;
 
-if (qg('p')) {
+if (qg('id')) {
+	$page = Web::getById((int)qg('id'));
+}
+elseif (qg('p')) {
 	$page = Web::get(qg('p'));
-
-	if (!$page) {
-		throw new UserException('Page inconnue : inexistante ou supprimée');
-	}
 }
 elseif (qg('uri')) {
 	$page = Web::getByURI(qg('uri'));
-
-	if (!$page) {
-		throw new UserException('Page inconnue : inexistante ou supprimée');
-	}
 }
+
+if (null === $page) {
+	throw new UserException('Page inconnue : inexistante ou supprimée');
+}
+
+$page = $page ?: null;
 
 $links_errors = null;
 

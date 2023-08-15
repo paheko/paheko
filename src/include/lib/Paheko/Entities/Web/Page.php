@@ -3,6 +3,7 @@
 namespace Paheko\Entities\Web;
 
 use Paheko\DB;
+use Paheko\DynamicList;
 use Paheko\Entity;
 use Paheko\Form;
 use Paheko\Utils;
@@ -12,6 +13,7 @@ use Paheko\Web\Render\Render;
 use Paheko\Web\Web;
 use Paheko\Web\Cache;
 use Paheko\UserTemplate\Modifiers;
+use Paheko\Users\DynamicFields;
 
 use KD2\DB\EntityManager as EM;
 
@@ -150,6 +152,48 @@ class Page extends Entity
 		return $this->path;
 	}
 
+	public function listVersions(): DynamicList
+	{
+		$name_field = DynamicFields::getNameFieldsSQL('u');
+
+		$columns = [
+			'id' => ['select' => 'v.id'],
+			'id_user' => ['select' => 'v.id_user'],
+			'date' => [
+				'select' => 'v.date',
+				'label' => 'Date',
+			],
+			'author' => [
+				'label' => 'Auteur',
+				'select' => $name_field,
+			],
+			'size' => [
+				'label' => 'Longueur du texte',
+				'select' => 'v.size',
+			],
+			'changes' => [
+				'label' => 'Évolution',
+				'select' => 'v.changes',
+			],
+		];
+
+		$tables = 'web_pages_versions v
+			LEFT JOIN users u ON u.id = v.id_user';
+		$conditions = sprintf('v.id_page = %d', $this->id());
+		$list = new DynamicList($columns, $tables, $conditions);
+		$list->orderBy('id', true);
+
+		return $list;
+	}
+
+	public function getVersion(int $id): ?\stdClass
+	{
+		return DB::getInstance()->first('SELECT a.*,
+			IFNULL((SELECT content FROM web_pages_versions WHERE id_page = a.id_page AND id < a.id ORDER BY id DESC LIMIT 1), \'\') AS previous_content
+			FROM web_pages_versions a
+			WHERE a.id_page = ? AND a.id = ?;', $this->id(), $id) ?: null;
+	}
+
 	public function syncSearch(): void
 	{
 		if ($this->format == Render::FORMAT_ENCRYPTED) {
@@ -160,6 +204,32 @@ class Page extends Entity
 		}
 
 		$this->dir()->indexForSearch(compact('content'), $this->title, 'text/html');
+	}
+
+	public function saveNewVersion(?int $user_id): bool
+	{
+		$content_modified = $this->isModified('content');
+		$prev_content = $this->getModifiedProperty('content');
+
+		$r = $this->save();
+
+		if ($content_modified) {
+			$db = DB::getInstance();
+			$l = mb_strlen($this->content);
+			$version = [
+				'id_user' => $user_id,
+				'id_page' => $this->id(),
+				'date'    => new \DateTime,
+				'content' => $this->content,
+				'size'    => $l,
+				'changes' => $l - mb_strlen($prev_content),
+			];
+			$db->insert('web_pages_versions', $version);
+
+			Plugins::fireSignal('web.page.changed', ['entity' => $this, 'prev_content' => $prev_content, 'version' => $version]);
+		}
+
+		return $r;
 	}
 
 	public function save(bool $selfcheck = true): bool
@@ -175,12 +245,11 @@ class Page extends Entity
 			$this->set('modified', new \DateTime);
 		}
 
-		$content_modified = $this->isModified('content') || $this->isModified('format');
+		$update_search = $this->isModified('content') || $this->isModified('format');
 
-		Files::ensureDirectoryExists($this->dir_path);
 		parent::save($selfcheck);
 
-		if ($content_modified) {
+		if ($update_search) {
 			$this->syncSearch();
 		}
 
@@ -228,7 +297,6 @@ class Page extends Entity
 		$this->assert(trim($this->uri) !== '', 'L\'URI ne peut rester vide');
 		$this->assert(strlen($this->uri) <= 150, 'L\'URI ne peut faire plus de 150 caractères');
 		$this->assert($this->path !== $this->parent, 'Invalid parent page');
-		$this->assert($this->parent === null || $db->test(self::TABLE, 'path = ?', $this->parent), 'Page parent inexistante');
 
 		$this->assert(!$this->exists() || !$db->test(self::TABLE, 'uri = ? AND id != ?', $this->uri, $this->id()), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre : ' . $this->uri, self::DUPLICATE_URI_ERROR);
 		$this->assert($this->exists() || !$db->test(self::TABLE, 'uri = ?', $this->uri), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre : ' . $this->uri, self::DUPLICATE_URI_ERROR);
@@ -292,14 +360,14 @@ class Page extends Entity
 	public function getBreadcrumbs(): array
 	{
 		$sql = '
-			WITH RECURSIVE parents(title, parent, path, level) AS (
-				SELECT title, parent, path, 1 FROM web_pages WHERE id = ?
+			WITH RECURSIVE parents(title, parent, path, id, level) AS (
+				SELECT title, parent, path, id, 1 FROM web_pages WHERE id = ?
 				UNION ALL
-				SELECT p.title, p.parent, p.path, level + 1
+				SELECT p.title, p.parent, p.path, p.id, level + 1
 				FROM web_pages p
 					JOIN parents ON parents.parent = p.path
 			)
-			SELECT path, title FROM parents ORDER BY level DESC;';
+			SELECT id, title FROM parents ORDER BY level DESC;';
 		return DB::getInstance()->getAssoc($sql, $this->id());
 	}
 
@@ -424,25 +492,17 @@ class Page extends Entity
 		return array_unique($errors);
 	}
 
-	public function checkRealType(): int
+	public function hasSubPages(): bool
 	{
-		// Make sure this is actually not a category
-		foreach (Files::list($this->dir_path) as $subfile) {
-			if ($subfile->type == File::TYPE_DIRECTORY) {
-				return self::TYPE_CATEGORY;
-			}
-		}
-
-		// No subdirectory found: this is a single page
-		return self::TYPE_PAGE;
+		return DB::getInstance()->test('web_pages', 'parent = ?', $this->path);
 	}
 
 	public function toggleType(): void
 	{
-		$real_type = $this->checkRealType();
+		$has_sub_pages = $this->hasSubPages();
 
-		if ($real_type == self::TYPE_CATEGORY) {
-			$this->set('type', $real_type);
+		if ($has_sub_pages) {
+			$this->set('type', self::TYPE_CATEGORY);
 		}
 		elseif ($this->type == self::TYPE_CATEGORY) {
 			$this->set('type', self::TYPE_PAGE);

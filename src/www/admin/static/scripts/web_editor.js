@@ -34,7 +34,8 @@
 			attachments: t.textarea.getAttribute('data-attachments') == 1,
 			savebtn: t.textarea.getAttribute('data-savebtn'),
 			preview_url: t.textarea.getAttribute('data-preview-url'),
-			format: t.textarea.getAttribute('data-format')
+			format: t.textarea.getAttribute('data-format'),
+			page_id: t.textarea.getAttribute('data-id')
 		};
 
 		// Use localStorage backup, per path
@@ -145,17 +146,13 @@
 
 		var openFileInsert = function (callback)
 		{
-			let args = new URLSearchParams(window.location.search);
-			var uri = args.get('p');
-			g.openFrameDialog(g.admin_url + 'web/_attach.php?files&_dialog&p=' + uri, {callback});
+			g.openFrameDialog(g.admin_url + 'web/_attach.php?files&_dialog&id=' + config.page_id, {callback});
 			return true;
 		};
 
 		var openImageInsert = function (callback)
 		{
-			let args = new URLSearchParams(window.location.search);
-			var uri = args.get('p');
-			g.openFrameDialog(g.admin_url + 'web/_attach.php?images&_dialog&p=' + uri, {callback});
+			g.openFrameDialog(g.admin_url + 'web/_attach.php?images&_dialog&id=' + config.page_id, {callback});
 			return true;
 		};
 
@@ -325,7 +322,7 @@
 			.then((data) => {
 				if (data.error) {
 					alert(data.error);
-					return;
+					throw Error(data.error);
 				}
 				else if (!data.success) {
 					throw Error('Invalid response');
