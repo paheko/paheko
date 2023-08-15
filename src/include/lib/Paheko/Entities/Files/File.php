@@ -249,6 +249,10 @@ class File extends Entity
 
 	public function rehash($pointer = null): void
 	{
+		if ($this->isDir()) {
+			return;
+		}
+
 		$path = !$pointer ? $this->getLocalFilePath() : null;
 
 		if ($path) {

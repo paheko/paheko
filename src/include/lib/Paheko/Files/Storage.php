@@ -36,42 +36,49 @@ class Storage
 		$cache_files = Files::list($path);
 		$local_files = Files::callStorage('listFiles', $path);
 
+		if ($path === "trash/documents/Prestations/Sources") {
+			var_dump($cache_files);
+			var_dump($local_files);
+			var_dump($db->get('SELECT * FROM files WHERE path LIKE "trash/documents/Prestations/Sources%";'));
+			//exit;
+		}
+
 		foreach ($local_files as $file) {
 			if ($file->type == $file::TYPE_DIRECTORY) {
 				self::sync($file->path);
+				unset($cache_files[$file->path]);
 				continue;
 			}
 
-			$cache_found = false;
 			$cache_differs = false;
+			$cache = $cache_files[$file->path] ?? null;
 
-			foreach ($cache_files as $key => $cache) {
-				if ($file->name !== $cache->name) {
-					continue;
+			if ($cache) {
+				if ($cache->modified->getTimestamp() !== $file->modified->getTimestamp()) {
+					$cache_differs = true;
+				}
+				elseif ($cache->size !== $file->size) {
+					$cache_differs = true;
 				}
 
-				$cache_found = true;
-				$cache_differs = $cache->modified->getTimestamp() !== $file->modified->getTimestamp() || $cache->size !== $file->size;
-				unset($cache_files[$key]);
-				break;
+				unset($cache_files[$file->path]);
 			}
 
-			if ($cache_found && !$cache_differs) {
+			if ($cache && !$cache_differs) {
 				continue;
 			}
 
-			if ($cache_found) {
-				// Replace cache file with local file
-				$cache->import($file->asArray(true));
-				$cache->exists(true);
-				$file = $cache;
+			if ($cache) {
+				$cache->deleteSafe();
+			}
+			else {
+				$file->deleteCache();
 			}
 
 			if ($file->context() === $file::CONTEXT_TRASH) {
 				$file->set('trash', $file->modified);
 			}
 
-			$file->deleteCache();
 
 			// Re-create MD5 hash
 			$file->rehash();
@@ -82,17 +89,13 @@ class Storage
 
 		unset($file, $cache);
 
-		// Remove directories
-		$cache_files = array_filter($cache_files, fn($file) => !$file->isDir());
-
 		// Delete cached files that are not in backend storage from cache
-		if (count($cache_files)) {
-			foreach ($cache_files as $file) {
-				// Don't use ->delete() here as it would trigger delete from storage even if there was a bug
-				// but we don't want to risk losing any data
-				$file->deleteSafe();
-			}
+		foreach ($cache_files as $file) {
+			// Don't use ->delete() here as it would trigger delete from storage even if there was a bug
+			// but we don't want to risk losing any data
+			$file->deleteSafe();
 		}
+
 		$db->commit();
 	}
 

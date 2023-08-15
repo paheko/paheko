@@ -296,7 +296,7 @@ class Files
 		$db = DB::getInstance();
 
 		if (!$parent) {
-			return $db->where('parent', 'IN', array_keys(File::CONTEXTS_NAMES));
+			return $db->where('path', 'IN', array_keys(File::CONTEXTS_NAMES));
 		}
 		else {
 			File::validatePath($parent);
@@ -312,16 +312,9 @@ class Files
 	static public function list(?string $parent = null): array
 	{
 		$where = self::_getParentClause($parent);
-		$sql = sprintf('SELECT * FROM @TABLE WHERE trash IS NULL AND %s ORDER BY type DESC, name COLLATE U_NOCASE ASC;', $where);
+		$sql = sprintf('SELECT * FROM @TABLE WHERE %s ORDER BY type DESC, name COLLATE U_NOCASE ASC;', $where);
 
-		return EM::getInstance(File::class)->all($sql);
-	}
-
-	static public function listTrash(): array
-	{
-		$sql = sprintf('SELECT * FROM @TABLE WHERE trash IS NOT NULL AND type != %d;', File::TYPE_DIRECTORY);
-
-		return EM::getInstance(File::class)->all($sql);
+		return EM::getInstance(File::class)->allAssoc($sql, 'path');
 	}
 
 	static public function getDynamicList(?string $parent = null): DynamicList
@@ -344,7 +337,6 @@ class Files
 
 		$tables = File::TABLE;
 		$conditions = self::_getParentClause($parent);
-		$conditions .= ' AND trash IS NULL';
 
 		$list = new DynamicList($columns, $tables, $conditions);
 
@@ -446,7 +438,7 @@ class Files
 		$db = DB::getInstance();
 
 		if (!$path) {
-			$sql = 'SELECT * FROM @TABLE WHERE parent IS NULL AND trash IS NULL;';
+			$sql = 'SELECT * FROM @TABLE WHERE parent IS NULL;';
 		}
 		else {
 			$sql = 'SELECT * FROM @TABLE WHERE path = ? OR (parent = ? OR parent LIKE ? ESCAPE \'!\')';
@@ -470,14 +462,9 @@ class Files
 		}
 	}
 
-	static public function all(bool $include_trash = false)
+	static public function all()
 	{
-		$sql = 'SELECT * FROM @TABLE';
-
-		if (!$include_trash) {
-			$sql .= ' WHERE trash IS NULL';
-		}
-
+		$sql = 'SELECT * FROM @TABLE;';
 		return EM::getInstance(File::class)->all($sql);
 	}
 
@@ -932,7 +919,7 @@ class Files
 			$tree = trim($tree . '/' . $part, '/');
 
 			// Make sure directory exists AND is not in trash
-			$db->preparedQuery('INSERT OR IGNORE INTO files (path, parent, name, type, trash) VALUES (?, ?, ?, ?, NULL);',
+			$db->preparedQuery('INSERT OR IGNORE INTO files (path, parent, name, type) VALUES (?, ?, ?, ?);',
 				$tree, $parent, $part, File::TYPE_DIRECTORY);
 		}
 

@@ -259,10 +259,10 @@ class FileSystem implements StorageInterface
 			// Used to make sorting easier
 			// directory_blabla
 			// file_image.jpeg
-			$files[$file->getType() . '_' .$file->getFilename()] = $obj;
+			$files[$file->getFilename()] = $obj;
 		}
 
-		return Utils::knatcasesort($files);
+		return $files;
 	}
 
 	static public function cleanup(): void
