@@ -19,7 +19,7 @@ modules:
 	rm -f modules.zip
 
 dev-server:
-	php -S localhost:8082 -t www www/_route.php
+	php -S localhost:8082 -d upload_max_filesize=256M -d post_max_size=256M -t www www/_route.php
 
 test:
 	find . -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
