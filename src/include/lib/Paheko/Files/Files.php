@@ -229,6 +229,17 @@ class Files
 			'share' => false,
 		];
 
+		// But not in root
+		$p[File::CONTEXT_TRASH] = [
+			'mkdir' => false,
+			'move' => false,
+			'write' => false,
+			'create' => false,
+			'delete' => false,
+			'read' => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_READ),
+			'share' => false,
+		];
+
 		$p[''] = [
 			'mkdir' => false,
 			'move' => false,

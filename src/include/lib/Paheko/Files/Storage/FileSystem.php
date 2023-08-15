@@ -20,8 +20,6 @@ class FileSystem implements StorageInterface
 	static protected $_size;
 	static protected $_root;
 
-	const TRASH_INFO_DATE = 'Ymd\TH:i:s';
-
 	static public function configure(?string $config): void
 	{
 		if (!$config) {
@@ -107,7 +105,12 @@ class FileSystem implements StorageInterface
 
 	static public function getLocalFilePath(File $file): ?string
 	{
-		$path = self::_getRoot() . '/' . $file->path;
+		return self::_getStoragePath($file->path);
+	}
+
+	static protected function _getStoragePath(string $path): string
+	{
+		$path = self::_getRoot() . '/' . $path;
 		return str_replace('/', DIRECTORY_SEPARATOR, $path);
 	}
 
@@ -131,58 +134,18 @@ class FileSystem implements StorageInterface
 		touch($path, $date->getTimestamp());
 	}
 
-	/**
-	 * @see https://specifications.freedesktop.org/trash-spec/trashspec-latest.html
-	 */
-	static public function trash(File $file): bool
+	static public function rename(File $file, string $new_path): bool
 	{
-		$hash = md5($file->path);
-		$src = self::getLocalFilePath($file);
-
-		$root = self::_getRoot();
-		$target = $root . '/.Trash/files/' . $hash;
-		$info_file = $root . '/.Trash/info/' . $hash;
-
-		self::ensureDirectoryExists($target);
-		self::ensureDirectoryExists($info_file);
-
-		return rename($src, $target) &&
-			// Write info file
-			file_put_contents($info_file, sprintf("[Trash Info]\nPath=%s\nDeletionDate=%s\n", $file->path, date(self::TRASH_INFO_DATE)));
-	}
-
-	static public function restore(File $file): bool
-	{
-		$hash = md5($file->path);
-
-		$root = self::_getRoot();
-		$src = $root . '/.Trash/files/' . $hash;
-		$info_file = $root . '/.Trash/info/' . $hash;
-
-		$target = self::getLocalFilePath($file);
-
-		if (!file_exists($src)) {
-			return false;
-		}
-
-		return rename($src, $target) && Utils::safe_unlink($info_file);
+		$path = self::getLocalFilePath($file);
+		$new_path = self::_getStoragePath($new_path);
+		self::ensureDirectoryExists($new_path);
+		return rename($path, $new_path);
 	}
 
 	static public function delete(File $file): bool
 	{
-		if ($file->trash) {
-			$hash = md5($file->path);
-			$root = self::_getRoot();
-			$src = $root . '/.Trash/files/' . $hash;
-			$info_file = $root . '/.Trash/info/' . $hash;
-
-			Utils::safe_unlink($src);
-			Utils::safe_unlink($info_file);
-		}
-		else {
-			$path = self::getLocalFilePath($file);
-			return Utils::safe_unlink($path);
-		}
+		$path = self::getLocalFilePath($file);
+		return Utils::safe_unlink($path);
 	}
 
 	/**
@@ -228,39 +191,9 @@ class FileSystem implements StorageInterface
 		// don't use getBasename as it is locale-dependent!
 		$name = trim($spl->getFilename(), '/');
 		$root = self::_getRoot();
-		$trash = 0 === strpos($spl->getPathname(), $root . '/' . self::TRASH_PATH . '/');
 
-		if ($trash) {
-			$info_file = $root . '/.Trash/info/' . $spl->getFilename();
-
-			// Ignore trash files without an info file
-			if (!file_exists($info_file)) {
-				//Utils::safe_unlink($spl->getPathname());
-				return null;
-			}
-
-			$info = parse_ini_file($info_file, false, \INI_SCANNER_RAW);
-
-			// Ignore trash files without valid info
-			if (empty($info['DeletionDate']) || empty($info['Path'])) {
-				//Utils::safe_unlink($spl->getPathname());
-				return null;
-			}
-
-			$path = trim($info['Path']);
-
-			// Invalid hash, ignore this file as it won't be restorable
-			if ($name != md5($path)) {
-				return null;
-			}
-
-			$name = Utils::basename($path);
-			$trash = \DateTime::createFromFormat(self::TRASH_INFO_DATE, $info['DeletionDate']);
-		}
-		else {
-			$path = substr($spl->getPathname(), strlen($root . DIRECTORY_SEPARATOR));
-			$path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
-		}
+		$path = substr($spl->getPathname(), strlen($root . DIRECTORY_SEPARATOR));
+		$path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
 
 		try {
 			File::validateFileName($name);
@@ -287,7 +220,7 @@ class FileSystem implements StorageInterface
 			'type'     => $spl->isDir() ? File::TYPE_DIRECTORY : File::TYPE_FILE,
 			'mime'     => $spl->isDir() ? null : mime_content_type($spl->getRealPath()),
 			'md5'      => null,
-			'trash'    => $trash ?: null,
+			'trash'    => null,
 		];
 
 		$data['modified']->setTimeZone(new \DateTimeZone(date_default_timezone_get()));
@@ -303,7 +236,7 @@ class FileSystem implements StorageInterface
 	{
 		$root = self::_getRoot();
 		$fullpath = $root . DIRECTORY_SEPARATOR . $path;
-		$trash = 0 === strpos($fullpath, $root . '/' . self::TRASH_PATH);
+
 		if (!file_exists($fullpath)) {
 			return [];
 		}

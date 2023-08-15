@@ -16,7 +16,7 @@ class Trash
 		],
 		'parent' => [
 			'label' => 'Chemin d\'origine',
-			'select' => 'parent',
+			'select' => 'SUBSTR(parent, 1 + LENGTH(\'trash/\'))',
 		],
 		'path' => [
 		],
@@ -31,7 +31,7 @@ class Trash
 
 		$tables = File::TABLE;
 
-		$conditions = sprintf('type = %d AND trash IS NOT NULL', File::TYPE_FILE);
+		$conditions = 'trash IS NOT NULL';
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('trash', true);

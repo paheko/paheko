@@ -30,14 +30,6 @@ class StorageException extends \RuntimeException {}
 interface StorageInterface
 {
 	/**
-	 * Path to trash files
-	 *
-	 * This is used for listing trashed files *from* storage,
-	 * the storage backend doesn't have to use this path exactly.
-	 */
-	const TRASH_PATH = '.Trash/files';
-
-	/**
 	 * Configures the storage backend for subsequent calls
 	 */
 	static public function configure(?string $config): void;
@@ -77,15 +69,7 @@ interface StorageInterface
 	 */
 	static public function touch(File $file, \DateTime $date): void;
 
-	/**
-	 * Move a file to trash
-	 */
-	static public function trash(File $file): bool;
-
-	/**
-	 * Restore a file from trash
-	 */
-	static public function restore(File $file): bool;
+	static public function rename(File $file, string $new_path): bool;
 
 	/**
 	 * Delete a file or directory (whether it was placed in trash before or not)

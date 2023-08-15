@@ -30,9 +30,10 @@ class Storage
 			return;
 		}
 
-		$trash_path = constant('\Paheko\Files\Storage\\' . FILE_STORAGE_BACKEND . '::TRASH_PATH');
+		$db = DB::getInstance();
+		$db->begin();
 
-		$cache_files = $path === $trash_path ? Files::listTrash() : Files::list($path);
+		$cache_files = Files::list($path);
 		$local_files = Files::callStorage('listFiles', $path);
 
 		foreach ($local_files as $file) {
@@ -62,7 +63,12 @@ class Storage
 			if ($cache_found) {
 				// Replace cache file with local file
 				$cache->import($file->asArray(true));
+				$cache->exists(true);
 				$file = $cache;
+			}
+
+			if ($file->context() === $file::CONTEXT_TRASH) {
+				$file->set('trash', $file->modified);
 			}
 
 			$file->deleteCache();
@@ -79,25 +85,15 @@ class Storage
 		// Remove directories
 		$cache_files = array_filter($cache_files, fn($file) => !$file->isDir());
 
+		// Delete cached files that are not in backend storage from cache
 		if (count($cache_files)) {
-			$db = DB::getInstance();
-			$db->begin();
-
-			// Delete cached files that are not in backend storage from cache
 			foreach ($cache_files as $file) {
 				// Don't use ->delete() here as it would trigger delete from storage even if there was a bug
 				// but we don't want to risk losing any data
-				$file->deleteCache();
-				$db->delete(File::TABLE, 'id = ?', $file->id);
+				$file->deleteSafe();
 			}
-
-			$db->commit();
 		}
-
-		// Don't forget to also sync trashed files
-		if (null === $path) {
-			self::sync($trash_path);
-		}
+		$db->commit();
 	}
 
 	/**
@@ -171,5 +167,13 @@ class Storage
 	{
 		self::call($backend, 'configure', $config);
 		self::call($backend, 'truncate');
+	}
+
+	/**
+	 * Do cleanup
+	 */
+	static public function cleanup(): void
+	{
+		Files::callStorage('cleanup');
 	}
 }

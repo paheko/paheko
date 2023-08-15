@@ -86,6 +86,7 @@ class File extends Entity
 	const THUMB_SIZE_TINY = '200px';
 	const THUMB_SIZE_SMALL = '500px';
 
+	const CONTEXT_TRASH = 'trash';
 	const CONTEXT_DOCUMENTS = 'documents';
 	const CONTEXT_USER = 'user';
 	const CONTEXT_TRANSACTION = 'transaction';
@@ -94,19 +95,14 @@ class File extends Entity
 	const CONTEXT_MODULES = 'modules';
 	const CONTEXT_ATTACHMENTS = 'attachments';
 
-	/**
-	 * @deprecated
-	 */
-	const CONTEXT_SKELETON = 'skel';
-
 	const CONTEXTS_NAMES = [
+		self::CONTEXT_TRASH => 'Corbeille',
 		self::CONTEXT_DOCUMENTS => 'Documents',
 		self::CONTEXT_USER => 'Membre',
 		self::CONTEXT_TRANSACTION => 'Écriture comptable',
 		self::CONTEXT_CONFIG => 'Configuration',
 		self::CONTEXT_WEB => 'Site web',
 		self::CONTEXT_MODULES => 'Modules',
-		self::CONTEXT_SKELETON => 'Squelettes',
 		self::CONTEXT_ATTACHMENTS => 'Fichiers joints aux messages',
 	];
 
@@ -307,47 +303,25 @@ class File extends Entity
 
 	public function moveToTrash(?\DateTime $date = null): void
 	{
-		if ($this->trash) {
+		if ($this->context() === self::CONTEXT_TRASH) {
 			return;
 		}
+
+		$this->rename(self::CONTEXT_TRASH . '/' . $this->path);
 
 		$date ??= new \DateTime;
-
-		if ($this->isDir()) {
-			$db = DB::getInstance();
-			$db->begin();
-
-			foreach (Files::list($this->path) as $file) {
-				$file->moveToTrash($date);
-			}
-
-			// Delete this directory in files cache, but ONLY this directory
-			// (so don't use $this->delete())
-			// as directories cannot be trashed, only single files
-			parent::delete();
-
-			$db->commit();
-			return;
-		}
-
-		Files::callStorage('trash', $this, $date);
 		$this->set('trash', $date);
 		$this->save();
 	}
 
 	public function restoreFromTrash(): void
 	{
-		if (!$this->trash) {
+		if ($this->context() !== self::CONTEXT_TRASH) {
 			return;
 		}
 
-		if ($this->isDir()) {
-			throw new \LogicException('Directories cannot be in trash?!');
-		}
-		else {
-			Files::ensureDirectoryExists($this->parent);
-			Files::callStorage('restore', $this);
-		}
+		$orig_path = substr($this->path, strlen(self::CONTEXT_TRASH . '/'));
+		$this->rename($orig_path);
 
 		$this->set('trash', null);
 		$this->save();
@@ -363,6 +337,15 @@ class File extends Entity
 		{
 			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->pathHash(), $key));
 		}
+	}
+
+	/**
+	 * Delete file from local database, but not the file from the storage itself
+	 */
+	public function deleteSafe(): bool
+	{
+		$this->deleteCache();
+		return parent::delete();
 	}
 
 	public function delete(): bool
@@ -425,6 +408,7 @@ class File extends Entity
 	 */
 	public function rename(string $new_path, bool $check_session = true): bool
 	{
+		Files::assertStorageIsUnlocked();
 		$name = Utils::basename($new_path);
 
 		self::validatePath($new_path);
@@ -446,7 +430,8 @@ class File extends Entity
 
 		$parent = Utils::dirname($new_path);
 
-		Plugins::fireSignal('files.move', ['file' => $this, 'new_path' => $new_path]);
+		Plugins::fireSignal('files.rename', ['file' => $this, 'new_path' => $new_path]);
+		Files::callStorage('rename', $this, $new_path);
 
 		$this->set('parent', $parent);
 		$this->set('path', $new_path);

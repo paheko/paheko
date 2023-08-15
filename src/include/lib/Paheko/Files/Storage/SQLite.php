@@ -118,12 +118,7 @@ class SQLite implements StorageInterface
 		return true;
 	}
 
-	static public function trash(File $file): bool
-	{
-		return true;
-	}
-
-	static public function restore(File $file): bool
+	static public function rename(File $file, string $new_path): bool
 	{
 		return true;
 	}
