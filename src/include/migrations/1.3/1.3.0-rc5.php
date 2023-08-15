@@ -12,6 +12,9 @@ $db->import(ROOT . '/include/migrations/1.3/1.3.0-rc5.sql');
 $db->commitSchemaUpdate();
 
 if (FILE_STORAGE_BACKEND == 'FileSystem' && file_exists(FILE_STORAGE_CONFIG)) {
+	// Trash works differently now
+	$db->exec('ALTER TABLE files SET trash = NULL WHERE trash IS NOT NULL;');
+
 	rename(FILE_STORAGE_CONFIG, FILE_STORAGE_CONFIG . '.deprecated');
 
 	foreach (Files::all() as $file) {
