@@ -140,22 +140,30 @@ class FileSystem implements StorageInterface
 		$new_path = self::_getStoragePath($new_path);
 
 		if (!file_exists($path)) {
-			return false;
+			return true;
 		}
 
+		// Overwrite
 		if (file_exists($new_path)) {
 			Utils::deleteRecursive($new_path);
 		}
 
 		self::ensureParentDirectoryExists($new_path);
 
-		return rename($path, $new_path);
+		rename($path, $new_path);
+		return true;
 	}
 
 	static public function delete(File $file): bool
 	{
 		$path = self::getLocalFilePath($file);
-		return Utils::safe_unlink($path);
+
+		if (!file_exists($path)) {
+			return true;
+		}
+
+		Utils::deleteRecursive($path);
+		return true;
 	}
 
 	/**

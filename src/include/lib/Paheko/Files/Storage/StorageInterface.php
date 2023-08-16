@@ -69,10 +69,21 @@ interface StorageInterface
 	 */
 	static public function touch(File $file, \DateTime $date): void;
 
+	/**
+	 * Rename/move a file or directory
+	 *
+	 * Note that if the storage backend is not able to rename all files and folders inside
+	 * a folder, it should return false here when trying to rename/move a directory.
+	 *
+	 * If a folder/file of the same name exists, it should be overwritten.
+	 */
 	static public function rename(File $file, string $new_path): bool;
 
 	/**
 	 * Delete a file or directory (whether it was placed in trash before or not)
+     *
+	 * Note that if the storage backend is not able to delete all files and folders inside
+	 * a folder, it should return false here when trying to delete a directory.
 	 */
 	static public function delete(File $file): bool;
 
