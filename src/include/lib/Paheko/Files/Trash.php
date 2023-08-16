@@ -11,12 +11,17 @@ use KD2\DB\EntityManager as EM;
 class Trash
 {
 	const LIST_COLUMNS = [
+		'type' => [
+			'label' => 'Type',
+			'header_icon' => 'folder',
+			'order' => 'type = 2 %s, name COLLATE U_NOCASE %1$s',
+		],
 		'name' => [
-			'label' => 'Fichier',
+			'label' => 'Nom',
 		],
 		'parent' => [
 			'label' => 'Chemin d\'origine',
-			'select' => 'SUBSTR(parent, 1 + LENGTH(\'trash/\'))',
+			'select' => 'SUBSTR(parent, 1 + LENGTH(\'trash/\') + 40 + 1)',
 		],
 		'path' => [
 		],
