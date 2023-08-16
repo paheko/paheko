@@ -44,7 +44,7 @@ class FileSystem implements StorageInterface
 		return $root;
 	}
 
-	static protected function ensureDirectoryExists(string $path): void
+	static protected function ensureParentDirectoryExists(string $path): void
 	{
 		$path = Utils::dirname($path);
 
@@ -60,7 +60,7 @@ class FileSystem implements StorageInterface
 	static public function storePath(File $file, string $source_path): bool
 	{
 		$target = self::getLocalFilePath($file);
-		self::ensureDirectoryExists($target);
+		self::ensureParentDirectoryExists($target);
 
 		$return = copy($source_path, $target);
 
@@ -74,7 +74,7 @@ class FileSystem implements StorageInterface
 	static public function storeContent(File $file, string $source_content): bool
 	{
 		$target = self::getLocalFilePath($file);
-		self::ensureDirectoryExists($target);
+		self::ensureParentDirectoryExists($target);
 
 		$return = file_put_contents($target, $source_content) === false ? false : true;
 
@@ -88,7 +88,7 @@ class FileSystem implements StorageInterface
 	static public function storePointer(File $file, $pointer): bool
 	{
 		$target = self::getLocalFilePath($file);
-		self::ensureDirectoryExists($target);
+		self::ensureParentDirectoryExists($target);
 
 		$fp = fopen($target, 'w');
 
@@ -138,7 +138,17 @@ class FileSystem implements StorageInterface
 	{
 		$path = self::getLocalFilePath($file);
 		$new_path = self::_getStoragePath($new_path);
-		self::ensureDirectoryExists($new_path);
+
+		if (!file_exists($path)) {
+			return false;
+		}
+
+		if (file_exists($new_path)) {
+			Utils::deleteRecursive($new_path);
+		}
+
+		self::ensureParentDirectoryExists($new_path);
+
 		return rename($path, $new_path);
 	}
 
