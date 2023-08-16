@@ -305,17 +305,22 @@ class File extends Entity
 		return false;
 	}
 
-	public function moveToTrash(?\DateTime $date = null): void
+	public function moveToTrash(bool $mark_as_trash = true): void
 	{
 		if ($this->context() === self::CONTEXT_TRASH) {
 			return;
 		}
 
+		$db = DB::getInstance();
+		$db->begin();
+
 		$this->rename(self::CONTEXT_TRASH . '/' . $this->path);
 
-		$date ??= new \DateTime;
-		$this->set('trash', $date);
+		// Only mark the root folder as trashed, but still move everything else
+		$this->set('trash', new \DateTime);
 		$this->save();
+
+		$db->commit();
 	}
 
 	public function restoreFromTrash(): void
@@ -324,11 +329,16 @@ class File extends Entity
 			return;
 		}
 
+		$db = DB::getInstance();
+		$db->begin();
+
 		$orig_path = substr($this->path, strlen(self::CONTEXT_TRASH . '/'));
 		$this->rename($orig_path);
 
 		$this->set('trash', null);
 		$this->save();
+
+		$db->commit();
 	}
 
 	public function deleteCache(): void
@@ -436,6 +446,12 @@ class File extends Entity
 
 		Plugins::fireSignal('files.rename', ['file' => $this, 'new_path' => $new_path]);
 		Files::callStorage('rename', $this, $new_path);
+
+		if ($this->isDir()) {
+			foreach (Files::list($this->path) as $file) {
+				$file->move($new_path . trim(substr($file->parent, strlen($this->path)), '/'));
+			}
+		}
 
 		$this->set('parent', $parent);
 		$this->set('path', $new_path);

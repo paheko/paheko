@@ -312,7 +312,7 @@ class Files
 	static public function list(?string $parent = null): array
 	{
 		$where = self::_getParentClause($parent);
-		$sql = sprintf('SELECT * FROM @TABLE WHERE %s ORDER BY type DESC, name COLLATE U_NOCASE ASC;', $where);
+		$sql = sprintf('SELECT * FROM @TABLE WHERE %s ORDER BY type DESC, name COLLATE NOCASE ASC;', $where);
 
 		return EM::getInstance(File::class)->allAssoc($sql, 'path');
 	}

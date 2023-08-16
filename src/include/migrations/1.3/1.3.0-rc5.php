@@ -4,6 +4,11 @@ namespace Paheko;
 
 use Paheko\Files\Files;
 
+/**
+ * This file *only* applies to setups having updated to 1.3.0 RC1-4
+ * as the filesystem handling was not working correctly
+ */
+
 $db->beginSchemaUpdate();
 $db->dropIndexes();
 
@@ -13,7 +18,7 @@ $db->commitSchemaUpdate();
 
 if (FILE_STORAGE_BACKEND == 'FileSystem' && file_exists(FILE_STORAGE_CONFIG)) {
 	// Trash works differently now
-	$db->exec('ALTER TABLE files SET trash = NULL WHERE trash IS NOT NULL;');
+	$db->exec('UPDATE files SET trash = NULL WHERE trash IS NOT NULL;');
 
 	rename(FILE_STORAGE_CONFIG, FILE_STORAGE_CONFIG . '.deprecated');
 
