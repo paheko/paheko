@@ -23,6 +23,10 @@ class Trash
 		'trash' => [
 			'label' => 'Supprimé le',
 		],
+		'size' => [
+			'label' => 'Taille',
+			'select' => 'CASE WHEN type = 1 THEN size ELSE (SELECT SUM(size) FROM files f2 WHERE f2.path LIKE files.path || \'/%\') END',
+		],
 	];
 
 	static public function list(): DynamicList

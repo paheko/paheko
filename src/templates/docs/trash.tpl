@@ -23,6 +23,7 @@
 			<td>{$item.name}</td>
 			<td>{$item.parent}</td>
 			<td>{$item.trash|date_short:true}</td>
+			<td>{$item.size}</td>
 			<td class="actions">
 			</td>
 		</tr>
