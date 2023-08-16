@@ -36,13 +36,6 @@ class Storage
 		$cache_files = Files::list($path);
 		$local_files = Files::callStorage('listFiles', $path);
 
-		if ($path === "trash/documents/Prestations/Sources") {
-			var_dump($cache_files);
-			var_dump($local_files);
-			var_dump($db->get('SELECT * FROM files WHERE path LIKE "trash/documents/Prestations/Sources%";'));
-			//exit;
-		}
-
 		foreach ($local_files as $file) {
 			if ($file->type == $file::TYPE_DIRECTORY) {
 				self::sync($file->path);
