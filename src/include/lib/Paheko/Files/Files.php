@@ -235,8 +235,8 @@ class Files
 			'move' => false,
 			'write' => false,
 			'create' => false,
-			'delete' => false,
-			'read' => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_READ),
+			'delete' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_ADMIN),
+			'read' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_READ),
 			'share' => false,
 		];
 
@@ -615,9 +615,12 @@ class Files
 
 	static public function getRemainingQuota(): float
 	{
-		$quota = self::getQuota();
-
-		return max(0, $quota - self::getUsedQuota());
+		if (FILE_STORAGE_QUOTA) {
+			return max(0, FILE_STORAGE_QUOTA - self::getUsedQuota());
+		}
+		else {
+			return self::callStorage('getRemainingQuota');
+		}
 	}
 
 	static public function checkQuota(int $size = 0): void
