@@ -969,9 +969,13 @@ class Files
 	 */
 	static public function pruneEmptyDirectories(string $parent): void
 	{
-		$sql = 'SELECT d.* FROM files d LEFT JOIN files f ON f.parent = d.path AND f.type = ?
+		// Select all directories that don't contain any sub-files, even in sub-sub-sub directories
+		$sql = 'SELECT d.* FROM files d
+			LEFT JOIN files f ON (f.parent = d.path OR f.path LIKE escape_like(d.path, \'!\') || \'/%\' ESCAPE \'!\') AND f.type = ?
 			WHERE d.type = ? AND (d.parent = ? OR d.parent LIKE ? ESCAPE \'!\')
-			GROUP BY d.path HAVING COUNT(f.id) = 0 ORDER BY d.path DESC;';
+			GROUP BY d.path
+			HAVING COUNT(f.id) = 0
+			ORDER BY d.path DESC;';
 
 		$like = DB::getInstance()->escapeLike($parent, '!') . '/%';
 
