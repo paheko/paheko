@@ -112,7 +112,7 @@ table.list tr:nth-child(even).disabled {
 
 .userOrder a, .userOrder button {
     text-decoration: none;
-    display: flex;
+    display: inline-flex;
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
@@ -128,9 +128,14 @@ table.list tr:nth-child(even).disabled {
     background: transparent;
 }
 
+.userOrder .icon-header {
+    text-align: center;
+}
+
 .userOrder .icon-header a, .userOrder .icon-header button {
     width: 1.5rem;
     flex-direction: column;
+    justify-content: center;
 }
 
 .userOrder a:hover, .userOrder button:hover {
