@@ -719,8 +719,13 @@ class Utils
 
 	static public function deleteRecursive(string $path, bool $delete_self = false): bool
 	{
-		if (!file_exists($path))
+		if (!file_exists($path)) {
 			return false;
+		}
+
+		if (is_file($path)) {
+			return self::safe_unlink($path);
+		}
 
 		$dir = dir($path);
 		if (!$dir) return false;

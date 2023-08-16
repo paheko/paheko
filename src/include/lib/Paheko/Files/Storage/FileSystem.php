@@ -145,7 +145,7 @@ class FileSystem implements StorageInterface
 
 		// Overwrite
 		if (file_exists($new_path)) {
-			Utils::deleteRecursive($new_path);
+			Utils::deleteRecursive($new_path, true);
 		}
 
 		self::ensureParentDirectoryExists($new_path);
@@ -162,7 +162,7 @@ class FileSystem implements StorageInterface
 			return true;
 		}
 
-		Utils::deleteRecursive($path);
+		Utils::deleteRecursive($path, true);
 		return true;
 	}
 
