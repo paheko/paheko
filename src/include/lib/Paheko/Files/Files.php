@@ -965,21 +965,20 @@ class Files
 	}
 
 	/**
-	 * Remove empty directories in transactions and users
+	 * Remove empty directories
 	 */
-	static public function pruneEmptyDirectories(): void
+	static public function pruneEmptyDirectories(string $parent): void
 	{
-		$sql = sprintf('SELECT * FROM @TABLE a
-			WHERE type = %d
-				AND (path LIKE \'%s/\' OR path LIKE \'%s/\')
-				AND (SELECT COUNT(*) FROM @TABLE b WHERE b.parent = a.path AND type = %d) = 0;',
-			File::TYPE_DIRECTORY,
-			File::CONTEXT_TRANSACTION,
-			File::CONTEXT_USER,
-			File::TYPE_FILE
-		);
+		$sql = 'SELECT d.* FROM files d LEFT JOIN files f ON f.parent = d.path AND f.type = ?
+			WHERE d.type = ? AND (d.parent = ? OR d.parent LIKE ? ESCAPE \'!\')
+			GROUP BY d.path HAVING COUNT(f.id) = 0 ORDER BY d.path DESC;';
 
-		foreach (EM::getInstance(File::class)->all($sql) as $dir) {
+		$like = DB::getInstance()->escapeLike($parent, '!') . '/%';
+
+		// Do not use iterate() here, as the next row might be deleted before we fetch it
+		$i = EM::getInstance(File::class)->all($sql, File::TYPE_FILE, File::TYPE_DIRECTORY, $parent, $like);
+
+		foreach ($i as $dir) {
 			$dir->delete();
 		}
 	}

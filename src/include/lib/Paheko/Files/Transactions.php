@@ -37,7 +37,7 @@ class Transactions
 
 	static public function list()
 	{
-		Files::pruneEmptyDirectories();
+		Files::pruneEmptyDirectories(File::CONTEXT_TRANSACTION);
 
 		$columns = self::LIST_COLUMNS;
 

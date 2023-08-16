@@ -27,7 +27,7 @@ class Users
 
 	static public function list(): DynamicList
 	{
-		Files::pruneEmptyDirectories();
+		Files::pruneEmptyDirectories(File::CONTEXT_USER);
 
 		$columns = self::LIST_COLUMNS;
 		$columns['identity']['select'] = DF::getNameFieldsSQL('u');
