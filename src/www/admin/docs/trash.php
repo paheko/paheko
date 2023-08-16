@@ -62,7 +62,6 @@ $form->runIf('restore', function() use ($check, $session) {
 		throw new UserException('Aucun fichier sélectionné');
 	}
 
-
 	foreach ($check as &$file) {
 		$file = Files::get($file);
 
@@ -70,6 +69,8 @@ $form->runIf('restore', function() use ($check, $session) {
 			throw new UserException('Impossible de restaurer un fichier qui n\'existe plus');
 		}
 	}
+
+	unset($file);
 
 	$db = DB::getInstance();
 	$db->begin();
