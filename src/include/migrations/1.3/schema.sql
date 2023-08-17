@@ -524,6 +524,7 @@ CREATE INDEX IF NOT EXISTS files_type_parent ON files (type, parent, path);
 CREATE INDEX IF NOT EXISTS files_name ON files (name);
 CREATE INDEX IF NOT EXISTS files_modified ON files (modified);
 CREATE INDEX IF NOT EXISTS files_trash ON files (trash);
+CREATE INDEX IF NOT EXISTS files_size ON files (size);
 
 CREATE TABLE IF NOT EXISTS files_contents
 -- Files contents (empty if using another storage backend)
