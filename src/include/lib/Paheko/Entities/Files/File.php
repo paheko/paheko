@@ -322,11 +322,11 @@ class File extends Entity
 		$hash = md5($this->path);
 		$hash = substr(date('Y-m-d.His.') . $hash, 0, 40);
 
-		$this->rename(self::CONTEXT_TRASH . '/' . $hash . '/' . $this->path);
-
 		// Only mark the root folder as trashed, but still move everything else
 		$this->set('trash', new \DateTime);
-		$this->save();
+
+		// ->rename() will ->save()
+		$this->rename(self::CONTEXT_TRASH . '/' . $hash . '/' . $this->path);
 
 		$db->commit();
 	}
@@ -343,10 +343,11 @@ class File extends Entity
 		$root = strtok($this->path, '/') . '/' . strtok('/');
 
 		$orig_path = strtok(false);
-		$this->rename($orig_path);
 
 		$this->set('trash', null);
-		$this->save();
+
+		// rename() will do the save()
+		$this->rename($orig_path);
 
 		$db->commit();
 	}
@@ -454,54 +455,70 @@ class File extends Entity
 			}
 		}
 
-		Files::assertStorageIsUnlocked();
-
 		$parent = Utils::dirname($new_path);
+		$is_dir = $this->isDir();
 
 		$db = DB::getInstance();
 		$db->begin();
 
-		// Overwrite existing path
-		if ($exists = Files::get($new_path)) {
-			$exists->delete();
-			unset($exists);
-		}
+		// Does the target already exist?
+		$exists = Files::get($new_path);
 
+		// List sub-files and sub-directories now, before they are changed
+		$list = $is_dir ? Files::list($this->path) : [];
+
+		// Make sure parent target directory exists
+		Files::ensureDirectoryExists($parent);
+
+		// Save current object for storage use
 		$old = clone $this;
 
+		// Update internal values
 		$this->set('parent', $parent);
 		$this->set('path', $new_path);
 		$this->set('name', $name);
-		$r = $this->save();
 
-		// Update path for sub-files and sub-folders in cache
-		if ($this->isDir()) {
-			$sql = 'SELECT id, path FROM files WHERE path LIKE ? ESCAPE \'!\' ORDER BY path;';
+		// If the target does not exist already, move the current file now
+		// this will avoid ensureDirectoryExists to create a duplicate
+		if (!$exists) {
+			$r = $this->save();
+		}
 
-			foreach ($db->iterate($sql, $db->escapeLike($old->path, '!') . '/%') as $subfile) {
-				$db->preparedQuery('UPDATE files SET path = ? WHERE id = ?;',
-					$new_path . substr($subfile->path, strlen($old->path)),
-					$subfile->id
-				);
+		// Move each file to the new target
+		if ($is_dir) {
+			foreach ($list as $file) {
+				$file->move($new_path . trim(substr($file->parent, strlen($old->path)), '/'));
 			}
 		}
 
-		Files::ensureDirectoryExists($parent);
-		$ok = Files::callStorage('rename', $old, $new_path);
+		if ($exists) {
+			if ($is_dir) {
+				// Make sure trash state is transmitted to target path
+				$exists->set('trash', $this->trash);
+				$r = $exists->save();
 
+				// We assume that at this point, everything inside the source directory
+				// has been moved to the existing target directory
+				// So we can delete the source directory from the database
+				// (both $this and $exists point to the same path, so we can't save $this)
+				parent::delete();
+				$db->commit();
 
-		/*
-		if (!$ok) {
-			// Rename each file in directory one by one
-			if ($this->isDir()) {
-				foreach (Files::list($this->path) as $file) {
-					$file->move($new_path . trim(substr($file->parent, strlen($this->path)), '/'));
-				}
+				return $r;
 			}
 			else {
-				throw new \LogicException('Storage backend could not move file: ' . $this->path);
+				// Overwrite existing file
+				$exists->delete();
 			}
-		}*/
+
+			unset($exists);
+			$r = $this->save();
+		}
+
+		if (!$is_dir) {
+			// Actually move the file
+			Files::callStorage('rename', $old, $new_path);
+		}
 
 		Plugins::fireSignal('files.rename', ['file' => $this, 'new_path' => $new_path]);
 
