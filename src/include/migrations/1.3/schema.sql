@@ -520,6 +520,7 @@ CREATE TABLE IF NOT EXISTS files
 -- Unique index as this is used to make up a file path
 CREATE UNIQUE INDEX IF NOT EXISTS files_unique ON files (path);
 CREATE INDEX IF NOT EXISTS files_parent ON files (parent);
+CREATE INDEX IF NOT EXISTS files_type_parent ON files (type, parent, path);
 CREATE INDEX IF NOT EXISTS files_name ON files (name);
 CREATE INDEX IF NOT EXISTS files_modified ON files (modified);
 CREATE INDEX IF NOT EXISTS files_trash ON files (trash);
