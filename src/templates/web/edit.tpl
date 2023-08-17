@@ -52,7 +52,7 @@
 		*}
 
 		<dl>
-			{input type="text" label="Identifiant unique de la page" name="uri" default=$page.uri required=true help="Utilisé pour désigner l'adresse de la page sur le site. Ne peut comporter que des lettres, chiffres et tirets." pattern="[A-Za-z0-9_-]+" class="full-width" maxlength=150}
+			{input type="text" label="Identifiant unique de la page" name="uri" default=$page.uri required=true help="Utilisé pour désigner l'adresse de la page sur le site. Ne peut comporter que des lettres, chiffres et tirets." pattern="[A-Za-z0-9_\-]+" class="full-width" maxlength=150}
 		</dl>
 	</fieldset>
 
