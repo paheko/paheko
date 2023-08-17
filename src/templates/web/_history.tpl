@@ -9,7 +9,8 @@
 	{/if}
 		<p class="actions">
 			{if isset($version)}
-				{linkbutton shape="left" label="Retour" href="?id=%d&history=list"|args:$page.id}
+				{linkbutton shape="left" label="Retour" href="?id=%d"|args:$page.id}
+				{linkbutton shape="history" label="Historique" href="?id=%d&history=list"|args:$page.id}
 			{else}
 				{linkbutton shape="left" label="Retour" href="?id=%d"|args:$page.id}
 			{/if}
@@ -45,9 +46,25 @@
 			<p class="alert block">Aucun historique n'a été trouvé pour cette page.</p>
 		{/if}
 	{elseif isset($version)}
-		{diff old=$version.previous_content new=$version.content context=true}
-		<article>
-			{$page->preview($version.content)|raw}
-		</article>
+		<?php $view = $_GET['view'] ?? 'diff'; ?>
+		<nav class="tabs">
+			<ul class="small">
+				<li class="{if $view === 'diff'}current{/if}">{link href="?id=%d&history=%d&view=diff"|args:$page.id:$version.id label="Différences"}</li>
+				<li class="{if $view === 'render'}current{/if}">{link href="?id=%d&history=%d&view=render"|args:$page.id:$version.id label="Visualisation"}</li>
+				<li class="{if $view === 'raw'}current{/if}">{link href="?id=%d&history=%d&view=raw"|args:$page.id:$version.id label="Texte brut"}</li>
+			</ul>
+		</nav>
+
+		{if $view === 'render'}
+			<article>
+				{$page->preview($version.content)|raw}
+			</article>
+		{elseif $view === 'raw'}
+			<article>
+				<pre>{$version.content}</pre>
+			</article>
+		{else}
+			{diff old=$version.previous_content new=$version.content context=5 old_label="Ancienne version" new_label="Nouvelle version"}
+		{/if}
 	{/if}
 </section>

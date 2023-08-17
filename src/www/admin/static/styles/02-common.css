@@ -753,7 +753,7 @@ strong.tag {
     border: 1px dashed #ccc;
     border-left: 1px solid #999;
     border-right: 1px solid #999;
-    padding: .5em 1em;
+    padding: .2em .5em;
 }
 
 .diff tbody tr:last-child .leftText, .diff tbody tr:last-child .rightText {

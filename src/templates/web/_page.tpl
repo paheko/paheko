@@ -47,7 +47,7 @@
 						{linkbutton href="?id=%s&toggle_type"|args:$page.id label="Transformer en page simple" shape="reset"}
 					{/if}
 				{/if}
-				{linkbutton shape="menu" label="Historique" href="?id=%d&history=list"|args:$page.id}
+				{linkbutton shape="history" label="Historique" href="?id=%d&history=list"|args:$page.id}
 			</small>
 		</p>
 		{/if}
