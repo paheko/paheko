@@ -145,7 +145,7 @@ class FileSystem implements StorageInterface
 
 		// Overwrite
 		if (file_exists($new_path)) {
-			Utils::deleteRecursive($new_path, true);
+			Utils::safe_unlink($new_path, true);
 		}
 
 		self::ensureParentDirectoryExists($new_path);

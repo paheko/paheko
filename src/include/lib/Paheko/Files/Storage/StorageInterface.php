@@ -26,6 +26,8 @@ class StorageException extends \RuntimeException {}
  *
  * Directories: storage backends should not worry about directories,
  * directories are automatically created in cache when required.
+ * EXCEPT in the case of delete(), a storage backend can speed things up
+ * by deleting a folder directly, if it can.
  */
 interface StorageInterface
 {
@@ -70,12 +72,9 @@ interface StorageInterface
 	static public function touch(File $file, \DateTime $date): void;
 
 	/**
-	 * Rename/move a file or directory
+	 * Rename/move a file
 	 *
-	 * Note that if the storage backend is not able to rename all files and folders inside
-	 * a folder, it should return false here when trying to rename/move a directory.
-	 *
-	 * If a folder/file of the same name exists, it should be overwritten.
+	 * If a file of the same name exists, it should be overwritten.
 	 */
 	static public function rename(File $file, string $new_path): bool;
 
