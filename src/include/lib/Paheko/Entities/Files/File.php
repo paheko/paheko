@@ -314,7 +314,15 @@ class File extends Entity
 		$db = DB::getInstance();
 		$db->begin();
 
-		$this->rename(self::CONTEXT_TRASH . '/' . $this->path);
+		// We need to put files in a specific subdirectory
+		// or we might overwrite files previously put in trash
+		// (for example you move "accounting/report.ods" to "trash/accounting/reports.ods",
+		// then you move "accounting/" to "trash/accounting/", this would delete the previously
+		// trashed "reports.ods" file)
+		$hash = md5($this->path);
+		$hash = substr(date('Y-m-d.His.') . $hash, 0, 40);
+
+		$this->rename(self::CONTEXT_TRASH . '/' . $hash . '/' . $this->path);
 
 		// Only mark the root folder as trashed, but still move everything else
 		$this->set('trash', new \DateTime);
@@ -332,7 +340,9 @@ class File extends Entity
 		$db = DB::getInstance();
 		$db->begin();
 
-		$orig_path = substr($this->path, strlen(self::CONTEXT_TRASH . '/'));
+		$root = strtok($this->path, '/') . '/' . strtok('/');
+
+		$orig_path = strtok(false);
 		$this->rename($orig_path);
 
 		$this->set('trash', null);
@@ -369,8 +379,12 @@ class File extends Entity
 		$db = DB::getInstance();
 		$db->begin();
 
-		// Also delete sub-directories and files
-		if ($this->type == self::TYPE_DIRECTORY) {
+		// Delete actual file content
+		$ok = Files::callStorage('delete', $this);
+
+		// Also delete sub-directories and files, if the storage backend is not able to do it
+		// (eg. object storage)
+		if (!$ok && $this->type == self::TYPE_DIRECTORY) {
 			foreach (Files::list($this->path) as $file) {
 				if (!$file->delete()) {
 					$db->rollback();
@@ -378,14 +392,13 @@ class File extends Entity
 				}
 			}
 		}
-		else {
-			// Delete actual file content
-			Files::callStorage('delete', $this);
-
-			Plugins::fireSignal('files.delete', ['file' => $this]);
-
-			$this->deleteCache();
+		elseif (!$ok) {
+			throw new \LogicException('Storage backend couldn\'t delete a file');
 		}
+
+		Plugins::fireSignal('files.delete', ['file' => $this]);
+
+		$this->deleteCache();
 
 		$r = parent::delete();
 
@@ -422,7 +435,6 @@ class File extends Entity
 	 */
 	public function rename(string $new_path, bool $check_session = true): bool
 	{
-		Files::assertStorageIsUnlocked();
 		$name = Utils::basename($new_path);
 
 		self::validatePath($new_path);
@@ -442,21 +454,60 @@ class File extends Entity
 			}
 		}
 
+		Files::assertStorageIsUnlocked();
+
 		$parent = Utils::dirname($new_path);
 
-		Plugins::fireSignal('files.rename', ['file' => $this, 'new_path' => $new_path]);
-		Files::callStorage('rename', $this, $new_path);
+		$db = DB::getInstance();
+		$db->begin();
 
-		if ($this->isDir()) {
-			foreach (Files::list($this->path) as $file) {
-				$file->move($new_path . trim(substr($file->parent, strlen($this->path)), '/'));
-			}
+		// Overwrite existing path
+		if ($exists = Files::get($new_path)) {
+			$exists->delete();
+			unset($exists);
 		}
+
+		$old = clone $this;
 
 		$this->set('parent', $parent);
 		$this->set('path', $new_path);
 		$this->set('name', $name);
-		return $this->save();
+		$r = $this->save();
+
+		// Update path for sub-files and sub-folders in cache
+		if ($this->isDir()) {
+			$sql = 'SELECT id, path FROM files WHERE path LIKE ? ESCAPE \'!\' ORDER BY path;';
+
+			foreach ($db->iterate($sql, $db->escapeLike($old->path, '!') . '/%') as $subfile) {
+				$db->preparedQuery('UPDATE files SET path = ? WHERE id = ?;',
+					$new_path . substr($subfile->path, strlen($old->path)),
+					$subfile->id
+				);
+			}
+		}
+
+		Files::ensureDirectoryExists($parent);
+		$ok = Files::callStorage('rename', $old, $new_path);
+
+
+		/*
+		if (!$ok) {
+			// Rename each file in directory one by one
+			if ($this->isDir()) {
+				foreach (Files::list($this->path) as $file) {
+					$file->move($new_path . trim(substr($file->parent, strlen($this->path)), '/'));
+				}
+			}
+			else {
+				throw new \LogicException('Storage backend could not move file: ' . $this->path);
+			}
+		}*/
+
+		Plugins::fireSignal('files.rename', ['file' => $this, 'new_path' => $new_path]);
+
+		$db->commit();
+
+		return $r;
 	}
 
 	/**
@@ -1031,8 +1082,6 @@ class File extends Entity
 			@ob_clean();
 		}
 
-		flush();
-
 		if (null === $path) {
 			$pointer = $this->getReadOnlyPointer();
 
@@ -1054,6 +1103,7 @@ class File extends Entity
 		}
 		else {
 			header('HTTP/1.1 404 Not Found', true, 404);
+			header('Content-Type: text/html', true);
 			throw new UserException('Le contenu de ce fichier est introuvable', 404);
 		}
 	}
