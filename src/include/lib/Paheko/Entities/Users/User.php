@@ -271,6 +271,11 @@ class User extends Entity
 
 		if ($password_modified) {
 			Log::add(Log::LOGIN_PASSWORD_CHANGE, null, $this->id());
+			Plugins::fireSignal('user.password.changed', ['user' => $this]);
+		}
+
+		if ($login_modified) {
+			Plugins::fireSignal('user.login.changed', ['user' => $this, 'old_login' => $login_modified]);
 		}
 
 		return true;
