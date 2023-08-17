@@ -358,6 +358,10 @@ ErrorManager::setHtmlHeader('<!DOCTYPE html><html><head><meta charset="utf-8" />
 
 function user_error(UserException $e)
 {
+	if (REPORT_USER_EXCEPTIONS > 0) {
+		\Paheko\Form::reportUserException($e);
+	}
+
 	if (PHP_SAPI == 'cli')
 	{
 		echo $e->getMessage();
