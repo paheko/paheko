@@ -84,7 +84,7 @@
 </p>
 
 <p class="back">
-	<a href="{$admin_url}"><b>«</b><span>Retour</span></a>
+	<a href="{$admin_url}" onclick="if (typeof window.parent.g !== 'undefined') {ldelim} window.parent.g.closeDialog(); return false; {rdelim}"><b>«</b><span>Retour</span></a>
 </p>
 
 </body>
