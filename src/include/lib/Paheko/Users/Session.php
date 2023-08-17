@@ -240,11 +240,14 @@ class Session extends \KD2\UserSession
 			// Mettre à jour la date de connexion
 			$this->db->preparedQuery('UPDATE users SET date_login = datetime() WHERE id = ?;', [$this->getUser()->id]);
 		}
-		elseif ($user = $this->getUserForLogin($login)) {
-			Log::add(Log::LOGIN_FAIL, compact('user_agent'), $user->id);
-		}
-		else {
-			Log::add(Log::LOGIN_FAIL, compact('user_agent'));
+		// $success can be 'OTP' as well
+		elseif (!$success) {
+			if ($user = $this->getUserForLogin($login)) {
+				Log::add(Log::LOGIN_FAIL, compact('user_agent'), $user->id);
+			}
+			else {
+				Log::add(Log::LOGIN_FAIL, compact('user_agent'));
+			}
 		}
 
 		Plugins::fireSignal('user.login', compact('login', 'password', 'remember_me', 'success'));
