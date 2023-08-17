@@ -61,8 +61,8 @@
 					<td>{$row.date|date_format}</td>
 					<td>{$row.script}</td>
 					<td>{$row.user}</td>
-					<td class="num">{if $row.request_time >= 20}<span class="error">{$row.request_time} ms</span>{else}{$row.request_time} ms{/if}</td>
-					<td class="num">{if $row.sql_time >= 10}<span class="error">{$row.sql_time} ms</span>{else}{$row.sql_time} ms{/if}</td>
+					<td class="num">{if $row.request_time >= 80}<span class="error">{$row.request_time} ms</span>{else}{$row.request_time} ms{/if}</td>
+					<td class="num">{if $row.sql_time >= 20}<span class="error">{$row.sql_time} ms</span>{else}{$row.sql_time} ms{/if}</td>
 					<td class="num">{$row.count}</td>
 				</tr>
 				{/foreach}
