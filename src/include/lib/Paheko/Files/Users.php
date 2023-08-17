@@ -34,7 +34,7 @@ class Users
 		$columns['identity']['label'] = DF::getNameLabel();
 		$columns['number']['select'] = DF::getNumberField();
 
-		$tables = 'users_files uf INNER JOIN users u ON uf.id_user = u.id';
+		$tables = 'users_files uf INNER JOIN users u ON uf.id_user = u.id INNER JOIN files f ON uf.id_file = f.id AND f.trash IS NULL';
 
 		$list = new DynamicList($columns, $tables);
 		$list->orderBy('number', false);
