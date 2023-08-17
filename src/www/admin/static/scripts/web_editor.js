@@ -63,7 +63,7 @@
 				// Just in case fetch() fails, then save() will trigger a regular form submit
 				submitted = true;
 
-				save((data) => { localStorage.removeItem(backup_key); location.href = data.redirect; });
+				save((data) => { location.href = data.redirect; });
 				e.preventDefault();
 				return false;
 			}
@@ -316,6 +316,8 @@
 					throw Error(response.status);
 				}
 				else {
+					// Remove backup text
+					localStorage.removeItem(backup_key);
 					return response.json();
 				}
 			})
@@ -337,7 +339,6 @@
 			save((data) => {
 				showSaved();
 				t.textarea.defaultValue = t.textarea.value;
-				localStorage.removeItem(backup_key);
 
 				let e = t.textarea.form.querySelector('input[name=editing_started]');
 
