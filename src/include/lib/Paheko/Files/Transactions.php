@@ -48,7 +48,7 @@ class Transactions
 		$list = new DynamicList($columns, $tables);
 		$list->orderBy('year', true);
 		$list->groupBy('tf.id_transaction');
-		$list->setCount('COUNT(DISTINCT t.id)');
+		$list->setCount('COUNT(DISTINCT tf.id_transaction)');
 		$list->setModifier(function (&$row) {
 			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
 		});

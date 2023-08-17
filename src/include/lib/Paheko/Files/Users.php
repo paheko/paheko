@@ -17,7 +17,7 @@ class Users
 			'label' => '',
 		],
 		'path' => [
-			'select' => 'parent',
+			'select' => '\'user/\' || u.id',
 		],
 		'id' => [
 			'label' => null,
@@ -34,12 +34,12 @@ class Users
 		$columns['identity']['label'] = DF::getNameLabel();
 		$columns['number']['select'] = DF::getNumberField();
 
-		$tables = sprintf('%s f INNER JOIN users u ON f.parent = \'%s/\' || u.id', File::TABLE, File::CONTEXT_USER);
+		$tables = 'users_files uf INNER JOIN users u ON uf.id_user = u.id';
 
 		$list = new DynamicList($columns, $tables);
 		$list->orderBy('number', false);
-		$list->groupBy('u.id');
-		$list->setCount('COUNT(DISTINCT u.id)');
+		$list->groupBy('uf.id_user');
+		$list->setCount('COUNT(DISTINCT uf.id_user)');
 
 		return $list;
 	}
