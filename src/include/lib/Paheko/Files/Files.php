@@ -613,10 +613,10 @@ class Files
 		return (float) DB::getInstance()->firstColumn('SELECT SUM(size) FROM files;');
 	}
 
-	static public function getRemainingQuota(): float
+	static public function getRemainingQuota(float $used_quota = null): float
 	{
 		if (FILE_STORAGE_QUOTA) {
-			return max(0, FILE_STORAGE_QUOTA - self::getUsedQuota());
+			return max(0, FILE_STORAGE_QUOTA - ($used_quota ?? self::getUsedQuota()));
 		}
 		else {
 			return self::callStorage('getRemainingQuota');
@@ -971,8 +971,8 @@ class Files
 	{
 		// Select all directories that don't contain any sub-files, even in sub-sub-sub directories
 		$sql = 'SELECT d.* FROM files d
-			LEFT JOIN files f ON (f.parent = d.path OR f.path LIKE escape_like(d.path, \'!\') || \'/%\' ESCAPE \'!\') AND f.type = ?
-			WHERE d.type = ? AND (d.parent = ? OR d.parent LIKE ? ESCAPE \'!\')
+			LEFT JOIN files f ON f.type = ? AND f.path LIKE d.path || \'/%\'
+			WHERE d.type = ? AND d.parent LIKE ? ESCAPE \'!\'
 			GROUP BY d.path
 			HAVING COUNT(f.id) = 0
 			ORDER BY d.path DESC;';
@@ -980,7 +980,7 @@ class Files
 		$like = DB::getInstance()->escapeLike($parent, '!') . '/%';
 
 		// Do not use iterate() here, as the next row might be deleted before we fetch it
-		$i = EM::getInstance(File::class)->all($sql, File::TYPE_FILE, File::TYPE_DIRECTORY, $parent, $like);
+		$i = EM::getInstance(File::class)->all($sql, File::TYPE_FILE, File::TYPE_DIRECTORY, $like);
 
 		foreach ($i as $dir) {
 			$dir->delete();

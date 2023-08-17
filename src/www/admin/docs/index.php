@@ -69,7 +69,7 @@ $breadcrumbs = Files::getBreadcrumbs($path);
 
 $quota_used = Files::getUsedQuota();
 $quota_max = Files::getQuota();
-$quota_left = Files::getRemainingQuota();
+$quota_left = Files::getRemainingQuota($quota_used);
 $quota_percent = $quota_max ? round(($quota_used / $quota_max) * 100) : 100;
 
 $pref = Session::getPreference('folders_gallery');
