@@ -216,7 +216,7 @@ use Paheko\Entities\Files\File;
 				<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all2" /><label title="Tout cocher / décocher" for="f_all2"></label></td>
 				<td class="actions" colspan="6">
 					<em>Pour les fichiers sélectionnés&nbsp;:</em>
-					<input type="hidden" name="parent" value="{$dir_uri}" />
+					<input type="hidden" name="parent" value="{$dir.path}" />
 					<select name="action">
 						<option value="">— Choisir une action à effectuer —</option>
 						{if $context == File::CONTEXT_DOCUMENTS}
