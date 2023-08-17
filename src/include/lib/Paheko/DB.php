@@ -58,7 +58,7 @@ class DB extends SQLite3
 		// Enable SQL debug log if configured
 		if (SQL_DEBUG) {
 			$this->callback = [$this, 'log'];
-			$this->_log_start = microtime(true);
+			$this->_log_start = $_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true);
 		}
 	}
 
@@ -113,6 +113,11 @@ class DB extends SQLite3
 	 */
 	protected function log(string $method, ?string $timing, $object, ...$params): void
 	{
+		if ($method === '__destruct') {
+			$this->_log_store[] = ['duration' => 0, 'time' => round((microtime(true) - $this->_log_start) * 1000 * 1000), 'sql' => null, 'trace' => null];
+			return;
+		}
+
 		if ($method != 'execute' && $method != 'exec') {
 			return;
 		}
@@ -188,7 +193,7 @@ class DB extends SQLite3
 	static public function getDebugSessionsList(): array
 	{
 		$db = new SQLite3('sqlite', ['file' => SQL_DEBUG]);
-		$s = $db->get('SELECT s.*, SUM(l.duration) AS duration, COUNT(l.rowid) AS count
+		$s = $db->get('SELECT s.*, SUM(l.duration) / 1000 AS sql_time, COUNT(l.rowid) AS count, MAX(l.time) / 1000 AS request_time
 			FROM sessions s
 			INNER JOIN log l ON l.session = s.id
 			GROUP BY s.id
