@@ -76,6 +76,7 @@ class Utils
 		'money'           => '€',
 		'pdf'             => 'P',
 		'trash'           => '🗑',
+		'history'         => '⌚',
 	];
 
 	const FRENCH_DATE_NAMES = [
