@@ -28,12 +28,8 @@ class Markdown extends AbstractRender
 
 	static protected $md = null;
 
-	public function render(?string $content = null): string
+	public function render(string $content = null): string
 	{
-		if (null === $content && $this->file) {
-			$content = $this->file->fetch();
-		}
-
 		if (empty($content)) {
 			return '';
 		}

@@ -17,7 +17,7 @@ if (!$file->canRead()) {
 }
 
 if ($file->renderFormat()) {
-	$tpl->assign('content', $file->render('common/files/_preview.php?p='));
+	$tpl->assign('content', $file->render());
 	$tpl->assign('file', $file);
 	$tpl->display('common/files/_preview.tpl');
 }

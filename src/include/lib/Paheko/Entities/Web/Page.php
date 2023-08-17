@@ -6,6 +6,7 @@ use Paheko\DB;
 use Paheko\DynamicList;
 use Paheko\Entity;
 use Paheko\Form;
+use Paheko\Plugins;
 use Paheko\Utils;
 use Paheko\Entities\Files\File;
 use Paheko\Files\Files;
@@ -126,7 +127,7 @@ class Page extends Entity
 	{
 		$user_prefix = ADMIN_URL . 'web/?uri=';
 
-		$this->_html ??= Render::render($this->format, $this->dir(), $this->content, $user_prefix);
+		$this->_html ??= Render::render($this->format, $this->dir_path, $this->content, $user_prefix);
 
 		return $this->_html;
 	}
@@ -144,7 +145,7 @@ class Page extends Entity
 	public function preview(string $content): string
 	{
 		$user_prefix = ADMIN_URL . 'web/?uri=';
-		return Render::render($this->format, $this->dir(), $content, $user_prefix);
+		return Render::render($this->format, $this->dir_path, $content, $user_prefix);
 	}
 
 	public function path(): string
@@ -465,7 +466,7 @@ class Page extends Entity
 			return [];
 		}
 
-		$html = Render::render($this->format, $this->dir(), $this->content);
+		$html = Render::render($this->format, $this->dir_path, $this->content);
 		preg_match_all('/<a[^>]+href=["\']([^"\']+)["\']/', $html, $match, PREG_PATTERN_ORDER);
 		$errors = [];
 

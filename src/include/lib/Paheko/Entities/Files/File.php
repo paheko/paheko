@@ -1158,7 +1158,7 @@ class File extends Entity
 		$editor_type = $this->renderFormat();
 
 		if ($editor_type == 'skriv' || $editor_type == 'markdown') {
-			return Render::render($editor_type, $this, $this->fetch(), $user_prefix);
+			return Render::render($editor_type, $this->path, $this->fetch(), $user_prefix);
 		}
 		elseif ($editor_type == 'text') {
 			return sprintf('<pre>%s</pre>', htmlspecialchars($this->fetch()));

@@ -17,7 +17,7 @@ Plugins::fireSignal('home.banner', ['user' => $session->getUser(), 'session' => 
 $homepage = Config::getInstance()->file('admin_homepage');
 
 if ($homepage) {
-	$homepage = $homepage->render(ADMIN_URL . 'common/files/preview.php?p=' . File::CONTEXT_DOCUMENTS . '/');
+	$homepage = $homepage->render();
 }
 else {
 	$homepage = null;

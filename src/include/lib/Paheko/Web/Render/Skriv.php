@@ -13,9 +13,9 @@ class Skriv extends AbstractRender
 {
 	static protected $skriv = null;
 
-	public function render(?string $content = null): string
+	public function render(string $content): string
 	{
-		$str = $content ?? $this->file->fetch();
+		$str = $content;
 
 		// Old file URLs, FIXME/TODO remove
 		$str = preg_replace_callback('/#file:\[([^\]\h]+)\]/', function ($match) {
