@@ -6,8 +6,8 @@ use KD2\UserSession;
 
 class CSV_Custom
 {
-	protected UserSession $session;
-	protected string $key;
+	protected ?UserSession $session;
+	protected ?string $key;
 	protected ?array $csv;
 	protected ?array $translation = null;
 	protected array $columns;
@@ -26,7 +26,7 @@ class CSV_Custom
 		$this->skip = $this->session ? $this->session->get($this->key . '_skip') ?? 1 : 1;
 	}
 
-	public function load(array $file): void
+	public function load(?array $file): void
 	{
 		if (empty($file['size']) || empty($file['tmp_name']) || empty($file['name'])) {
 			throw new UserException('Fichier invalide');
@@ -45,14 +45,14 @@ class CSV_Custom
 			$path = CSV::convertUploadIfRequired($path, true);
 		}
 
-		$csv = CSV::readAsArray($path);
+		$this->csv = CSV::readAsArray($path);
 
-		if (!count($csv)) {
+		if (!count($this->csv)) {
 			throw new UserException('Ce fichier est vide (aucune ligne trouvée).');
 		}
 
 		if ($this->session) {
-			$this->session->set($this->key, $csv);
+			$this->session->set($this->key, $this->csv);
 			$this->session->save();
 		}
 	}
@@ -172,6 +172,12 @@ class CSV_Custom
 		return $this->translation;
 	}
 
+	public function setTranslationTableAuto(): void
+	{
+		$sel = $this->getSelectedTable([]);
+		$this->setTranslationTable($sel);
+	}
+
 	public function setTranslationTable(array $table): void
 	{
 		if (!count($table)) {
@@ -192,17 +198,22 @@ class CSV_Custom
 			$translation[(int)$csv] = $target;
 		}
 
+		$this->setIndexedTable($translation);
+	}
+
+	public function setIndexedTable(array $table): void
+	{
+		if (!count($table)) {
+			throw new UserException('Aucune colonne n\'a été sélectionnée');
+		}
+
 		foreach ($this->mandatory_columns as $key) {
-			if (!in_array($key, $translation, true)) {
+			if (!in_array($key, $table, true)) {
 				throw new UserException(sprintf('La colonne "%s" est obligatoire mais n\'a pas été sélectionnée ou n\'existe pas.', $this->columns[$key]));
 			}
 		}
 
-		if (!count($translation)) {
-			throw new UserException('Aucune colonne n\'a été sélectionnée');
-		}
-
-		$this->translation = $translation;
+		$this->translation = $table;
 
 		if ($this->session) {
 			$this->session->set($this->key . '_translation', $this->translation);

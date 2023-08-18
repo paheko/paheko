@@ -29,6 +29,7 @@ use Paheko\Entities\Files\File;
 
 use KD2\SMTP;
 use KD2\DB\EntityManager as EM;
+use KD2\DB\Date;
 use KD2\ZipWriter;
 
 /**
@@ -239,6 +240,13 @@ class User extends Entity
 			}
 			else {
 				$out[$key] = $this->$key;
+			}
+
+			if ($out[$key] instanceof Date) {
+				$out[$key] = $out[$key]->format('d/m/Y');
+			}
+			elseif ($out[$key] instanceof \DateTimeInterface) {
+				$out[$key] = $out[$key]->format('d/m/Y H:i:s');
 			}
 		}
 
