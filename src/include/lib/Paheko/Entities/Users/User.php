@@ -228,12 +228,18 @@ class User extends Entity
 		return $out;
 	}
 
-	public function asDetailsArray(): array
+	public function asDetailsArray(bool $modified_values = false): array
 	{
 		$list = DynamicFields::getInstance()->listAssocNames();
+		$out = [];
 
 		foreach ($list as $key => $label) {
-			$out[$key] = $this->$key;
+			if ($modified_values && $this->isModified($key)) {
+				$out[$key] = $this->getModifiedProperty($key);
+			}
+			else {
+				$out[$key] = $this->$key;
+			}
 		}
 
 		return $out;
