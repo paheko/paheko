@@ -135,7 +135,7 @@ class API
 				throw new APIException('Unknown mode. Only "auto", "create" and "update" are accepted.', 400);
 			}
 
-			$this->requireAccess(Session::ACCESS_WRITE);
+			$this->requireAccess(Session::ACCESS_ADMIN);
 
 			$path = tempnam(CACHE_ROOT, 'tmp-import-api');
 
