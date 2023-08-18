@@ -17,13 +17,13 @@ class CSV_Custom
 	protected $modifier = null;
 	protected array $_default;
 
-	public function __construct(UserSession $session, string $key)
+	public function __construct(?UserSession $session = null, ?string $key = null)
 	{
 		$this->session = $session;
 		$this->key = $key;
-		$this->csv = $this->session->get($this->key);
-		$this->translation = $this->session->get($this->key . '_translation');
-		$this->skip = $this->session->get($this->key . '_skip') ?? 1;
+		$this->csv = $this->session ? $this->session->get($this->key) : null;
+		$this->translation = $this->session ? $this->session->get($this->key . '_translation') : null;
+		$this->skip = $this->session ? $this->session->get($this->key . '_skip') ?? 1 : 1;
 	}
 
 	public function load(array $file): void
@@ -34,7 +34,14 @@ class CSV_Custom
 
 		$path = $file['tmp_name'];
 
-		if (CALC_CONVERT_COMMAND && strtolower(substr($file['name'], -4)) != '.csv') {
+		$this->loadFile($path);
+
+		@unlink($path);
+	}
+
+	public function loadFile(string $path): void
+	{
+		if (CALC_CONVERT_COMMAND && strtolower(substr($path, -4)) != '.csv') {
 			$path = CSV::convertUploadIfRequired($path, true);
 		}
 
@@ -44,10 +51,10 @@ class CSV_Custom
 			throw new UserException('Ce fichier est vide (aucune ligne trouvée).');
 		}
 
-		$this->session->set($this->key, $csv);
-		$this->session->save();
-
-		@unlink($path);
+		if ($this->session) {
+			$this->session->set($this->key, $csv);
+			$this->session->save();
+		}
 	}
 
 	public function iterate(): \Generator
@@ -197,16 +204,21 @@ class CSV_Custom
 
 		$this->translation = $translation;
 
-		$this->session->set($this->key . '_translation', $this->translation);
-		$this->session->save();
+		if ($this->session) {
+			$this->session->set($this->key . '_translation', $this->translation);
+			$this->session->save();
+		}
 	}
 
 	public function clear(): void
 	{
-		$this->session->set($this->key, null);
-		$this->session->set($this->key . '_translation', null);
-		$this->session->set($this->key . '_skip', null);
-		$this->session->save();
+		if ($this->session) {
+			$this->session->set($this->key, null);
+			$this->session->set($this->key . '_translation', null);
+			$this->session->set($this->key . '_skip', null);
+			$this->session->save();
+		}
+
 		$this->csv = null;
 		$this->translation = null;
 		$this->skip = 1;
@@ -230,8 +242,11 @@ class CSV_Custom
 	public function skip(int $count): void
 	{
 		$this->skip = $count;
-		$this->session->set($this->key . '_skip', $count);
-		$this->session->save();
+
+		if ($this->session) {
+			$this->session->set($this->key . '_skip', $count);
+			$this->session->save();
+		}
 	}
 
 	public function setColumns(array $columns, array $defaults = []): void
