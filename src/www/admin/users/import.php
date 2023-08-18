@@ -17,16 +17,16 @@ if ($format = qg('export')) {
 
 $csrf_key = 'user_import';
 $csv = new CSV_Custom($session, 'users_import');
-$ignore_ids = (bool) (f('ignore_ids') ?? qg('ignore_ids'));
+$mode = f('mode') ?? qg('mode');
 $report = [];
 
 $df = DynamicFields::getInstance();
 
-$params = compact('ignore_ids');
+$params = compact('mode');
 
 $csv->setColumns($df->listImportAssocNames());
 
-$required_fields = $df->listImportRequiredAssocNames($ignore_ids ? false : true);
+$required_fields = $df->listImportRequiredAssocNames($mode === 'update' ? true : false);
 
 $csv->setMandatoryColumns(array_keys($required_fields));
 
@@ -45,7 +45,7 @@ $form->runIf(f('preview') && $csv->loaded(), function () use (&$csv) {
 }, $csrf_key);
 
 if (!f('import') && $csv->ready()) {
-	$report = Users::importReport($csv, $ignore_ids, Session::getUserId());
+	$report = Users::importReport($csv, $mode, Session::getUserId());
 
 	if (count($report['errors'])) {
 		$csv->clear();
@@ -57,14 +57,14 @@ if (!f('import') && $csv->ready()) {
 	}
 }
 
-$form->runIf('import', function () use ($csv, $ignore_ids) {
+$form->runIf('import', function () use ($csv, $mode) {
 	try {
 		if (!$csv->ready()) {
 			$csv->clear();
 			throw new UserException('Erreur dans le chargement du CSV');
 		}
 
-		Users::import($csv, $ignore_ids, Session::getUserId());
+		Users::import($csv, $mode, Session::getUserId());
 	}
 	finally {
 		$csv->clear();
