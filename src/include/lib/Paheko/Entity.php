@@ -31,7 +31,12 @@ class Entity extends AbstractEntity
 			$source = $_POST;
 		}
 
-		return $this->import($source);
+		try {
+			return $this->import($source);
+		}
+		catch (\UnexpectedValueException $e) {
+			throw new ValidationException($e->getMessage(), 0, $e);
+		}
 	}
 
 	static public function filterUserDateValue(?string $value): ?\DateTime
