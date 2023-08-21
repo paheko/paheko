@@ -60,7 +60,6 @@ class Sections
 		'begin',
 		'limit',
 		'assign',
-		'assign_assoc',
 		'debug',
 		'count',
 	];
@@ -375,7 +374,7 @@ class Sections
 			}
 
 			if (isset($params['assign'])) {
-				$tpl->assign($params['assign'], $row, 0);
+				$tpl::__assign(['var' => $params['assign'], 'value' => $row], $tpl, $line);
 			}
 
 			yield $row;
@@ -1251,14 +1250,7 @@ class Sections
 		while ($row = $result->fetchArray(\SQLITE3_ASSOC))
 		{
 			if (isset($params['assign'])) {
-				$tpl->assign($params['assign'], $row, 0);
-			}
-			elseif (isset($params['assign_assoc'])) {
-				if (!isset($tpl->_variables[0][$params['assign_assoc']])) {
-					$tpl->assign($params['assign_assoc'], [], 0);
-				}
-
-				$tpl->_variables[0][$params['assign_assoc']][current($row)] = count($row) == 2 ? next($row) : $row;
+				$tpl::__assign(['var' => $params['assign'], 'value' => $row], $tpl, $line);
 			}
 
 			yield $row;
