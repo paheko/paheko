@@ -52,6 +52,7 @@
 	</fieldset>
 {/if}
 {if $target}
+	<p class="help"><small>Note : le nombre de membres affiché ne prend pas en compte les membres qui ne disposent pas d'adresse e-mail, ou qui se sont désinscrits. Le nombre de destinataires réels sera affiché avant envoi.</small></p>
 	<p class="submit">
 		{input type="hidden" name="subject"}
 		{input type="hidden" name="target"}

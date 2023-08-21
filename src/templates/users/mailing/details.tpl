@@ -38,7 +38,7 @@
 		{/if}
 		<dt>Destinataires</dt>
 		<dd>
-			{{%n destinataire}{%n destinataires} n=$mailing->countRecipients()}
+			{{%n destinataire}{%n destinataires} n=$mailing->countRecipients()}<br />
 			{linkbutton shape="users" label="Voir la liste des destinataires" href="recipients.php?id=%d"|args:$mailing.id}
 		</dd>
 		<dt>Sujet</dt>
