@@ -12,12 +12,12 @@ class Render
 
 	static protected $attachments = [];
 
-	static public function render(string $format, string $path, ?string $content = null, ?string $link_prefix = null)
+	static public function render(string $format, ?string $path, ?string $content = null, ?string $link_prefix = null)
 	{
 		return self::getRenderer($format, $path, $link_prefix)->render($content);
 	}
 
-	static public function getRenderer(string $format, string $path, string $link_prefix = null)
+	static public function getRenderer(string $format, ?string $path, string $link_prefix = null)
 	{
 		if ($format == self::FORMAT_SKRIV) {
 			return new Skriv($path, $link_prefix);

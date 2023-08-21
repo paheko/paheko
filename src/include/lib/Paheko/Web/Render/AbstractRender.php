@@ -18,32 +18,35 @@ abstract class AbstractRender
 	protected string $link_prefix = '';
 	protected string $link_suffix = '';
 
-	public function __construct(string $path, ?string $user_prefix)
+	public function __construct(?string $path, ?string $user_prefix)
 	{
-		$this->context = strtok($path, '/');
 		$this->path = $path;
 
-		if ($this->context === File::CONTEXT_WEB) {
-			$this->parent = $path;
-			$this->uri = Utils::basename($path);
-			$this->link_prefix = $user_prefix ?? WWW_URL;
-		}
-		else {
-			$this->parent = Utils::dirname($path);
-			$this->uri = $this->parent;
+		if ($path) {
+			$this->context = strtok($path, '/');
 
-			if ($this->context === File::CONTEXT_DOCUMENTS) {
-				$prefix_path = $this->parent;
+			if ($this->context === File::CONTEXT_WEB) {
+				$this->parent = $path;
+				$this->uri = Utils::basename($path);
+				$this->link_prefix = $user_prefix ?? WWW_URL;
 			}
 			else {
-				$prefix_path = File::CONTEXT_DOCUMENTS;
+				$this->parent = Utils::dirname($path);
+				$this->uri = $this->parent;
+
+				if ($this->context === File::CONTEXT_DOCUMENTS) {
+					$prefix_path = $this->parent;
+				}
+				else {
+					$prefix_path = File::CONTEXT_DOCUMENTS;
+				}
+
+				$this->link_prefix = $user_prefix ?? ADMIN_URL . 'common/files/preview.php?p=' . $prefix_path . '/';
+				$this->link_suffix = '.md';
 			}
 
-			$this->link_prefix = $user_prefix ?? ADMIN_URL . 'common/files/preview.php?p=' . $prefix_path . '/';
-			$this->link_suffix = '.md';
+			$this->uri = str_replace('%2F', '/', rawurlencode($this->uri));
 		}
-
-		$this->uri = str_replace('%2F', '/', rawurlencode($this->uri));
 	}
 
 	abstract public function render(string $content): string;
