@@ -393,7 +393,7 @@ class Page extends Entity
 	{
 		if (null === $this->_tagged_attachments) {
 			$this->render();
-			$this->_tagged_attachments = Render::listAttachments($this->dir());
+			$this->_tagged_attachments = Render::listAttachments($this->dir_path);
 		}
 
 		return $this->_tagged_attachments;

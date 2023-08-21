@@ -20,10 +20,10 @@ $form->runIf('create', function () use ($parent) {
 	$page->save();
 
 	if ($page->type == Page::TYPE_CATEGORY) {
-		$url = '!web/?p=' . $page->path;
+		$url = '!web/?id=' . $page->id();
 	}
 	else {
-		$url = ADMIN_URL . 'web/edit.php?new&p=' . $page->path;
+		$url = ADMIN_URL . 'web/edit.php?new&id=' . $page->id();
 	}
 
 	if (null !== qg('_dialog')) {
