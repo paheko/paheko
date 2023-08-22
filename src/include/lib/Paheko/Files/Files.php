@@ -870,7 +870,7 @@ class Files
 	static public function mkdir(string $path, bool $create_parent = true, bool $throw_on_conflict = true): File
 	{
 		$path = trim($path, '/');
-		$parent = Utils::dirname($path);
+		$parent = Utils::dirname($path) ?: null;
 		$name = Utils::basename($path);
 
 		$name = File::filterName($name);
@@ -889,7 +889,7 @@ class Files
 			return self::get($path);
 		}
 
-		if ($parent !== null && $create_parent) {
+		if ($parent && $create_parent) {
 			self::mkdir($parent, true, false);
 		}
 
