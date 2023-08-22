@@ -619,48 +619,48 @@ dialog.datepicker {
     width: 4em;
 }
 
-.dir-picker nav {
+.dir-picker .breadcrumbs {
     margin-bottom: 1em;
 }
 
-.dir-picker table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.dir-picker .actions {
-    text-align: right;
-}
-
-.dir-picker th button {
-    width: 100%;
-    text-align: left;
-    font-size: 1.4em;
-    border-width: 1px;
-    background: none;
-}
-
-.dir-picker th button::before {
-    color: var(--gLightBorderColor);
-}
-
-.dir-picker nav button {
+.dir-picker .breadcrumbs button {
     border-width: 1px;
     font-size: .9em;
     opacity: 0.7;
 }
 
+.dir-picker .breadcrumbs .current button {
+    font-weight: bold;
+}
+
+.dir-picker .folders {
+    text-align: center;
+}
+
+.dir-picker .folder button {
+    width: calc(100% - 1em);
+    padding: .5em;
+    text-align: left;
+    font-size: 1.2em;
+    border-width: 1px;
+    background: none;
+}
+
+.dir-picker .folder button::before {
+    color: var(--gLightBorderColor);
+}
+
 .dir-picker .parent button {
     margin-bottom: .5em;
     padding: .5em;
-    width: calc(100% - 1em);
+    width: calc(100% - 1.5em);
     border-width: 1px;
     background: none;
     border-color: var(--gLightBorderColor);
     text-align: left;
 }
 
-.dir-picker td.help {
+.dir-picker .help {
     text-align: center;
     padding: 1em;
     font-size: 1.5em;
@@ -671,8 +671,8 @@ dialog.datepicker {
     padding: 1em;
 }
 
-.dir-picker nav .current button {
-    font-weight: bold;
+.dir-picker .select button {
+    font-size: 1.2em;
 }
 
 .file-selector {

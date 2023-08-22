@@ -9,29 +9,36 @@ require_once __DIR__ . '/_inc.php';
 // Force dialog mode
 $_GET['_dialog'] = true;
 
-$current = qg('current') ?? '';
-$parent = qg('parent') ?? '';
+$current = null;
 
-$breadcrumbs = [];
-
-if ($parent) {
-	$page = Web::get($parent);
-
-	if (!$page) {
-		throw new UserException('Page inconnue');
-	}
-
-	$tpl->assign('page', $page);
-	$breadcrumbs = $page->getBreadcrumbs();
+if (f('current')) {
+	$current = Web::getById((int)f('current'));
+}
+elseif (null === f('current') && qg('path')) {
+	$current = Web::get(qg('path'));
 }
 
-$categories = Web::listCategories($parent);
+if ($current) {
+	$parent_id = $current->parent ? Web::get($current->parent)->id() : null;
+	$current_cat_id = $current->id();
+	$current_cat_path = $current->path();
+	$current_cat_title = $current->title;
+	$breadcrumbs = $current->getBreadcrumbs();
+}
+else {
+	$parent_id = null;
+	$current_cat_id = null;
+	$current_cat_path = '';
+	$current_cat_title = 'Racine du site';
+	$breadcrumbs = [];
+}
 
-$categories = array_filter($categories, function ($cat) use ($current) {
-	return ($cat->path == $current) ? false : true;
-});
+$breadcrumbs = [null => 'Racine du site'] + $breadcrumbs;
+$categories = Web::listCategories($current ? $current->path : null);
 
-$tpl->assign('selected', $current);
-$tpl->assign(compact('breadcrumbs', 'parent', 'categories'));
+// used to avoid being able to put a category inside itself
+$id_page = (int) qg('id_page');
+
+$tpl->assign(compact('breadcrumbs', 'parent_id', 'categories', 'current_cat_id', 'current_cat_title', 'current_cat_path', 'id_page'));
 
 $tpl->display('web/_selector.tpl');
