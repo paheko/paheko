@@ -186,6 +186,11 @@ class Modules
 		unset($var);
 
 		foreach (self::listForSnippet($snippet) as $module) {
+			// Maybe the cache was wrong and the template doesn't exist anymore
+			if (!$module->hasFile($snippet)) {
+				continue;
+			}
+
 			$out[$module->name] = $module->fetch($snippet, $variables);
 		}
 
