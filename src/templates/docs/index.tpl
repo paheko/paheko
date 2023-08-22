@@ -34,7 +34,7 @@ use Paheko\Entities\Files\File;
 			{if $dir->canCreateHere()}
 				{linkbutton shape="upload" label="Depuis mon ordinateur" target="_dialog" href="!common/files/upload.php?p=%s"|args:$dir_uri}
 			{if $dir->canCreateDirHere()}
-				{linkbutton shape="folder" label="Répertoire" target="_dialog" href="!docs/new_dir.php?path=%s"|args:$dir_uri}
+				{linkbutton shape="folder" label="Dossier" target="_dialog" href="!docs/new_dir.php?path=%s"|args:$dir_uri}
 			{/if}
 				{linkbutton shape="text" label="Fichier texte" target="_dialog" href="!docs/new_file.php?path=%s"|args:$dir_uri}
 				{if WOPI_DISCOVERY_URL}
@@ -72,7 +72,7 @@ use Paheko\Entities\Files\File;
 {if $parent_uri}
 	<nav class="breadcrumbs">
 	{if $context_ref}
-		{linkbutton href="?path=%s"|args:$parent_uri label="Retour au répertoire parent" shape="left"}
+		{linkbutton href="?path=%s"|args:$parent_uri label="Retour au dossier parent" shape="left"}
 		{if $context == File::CONTEXT_TRANSACTION}
 			{linkbutton href="!acc/transactions/details.php?id=%d"|args:$context_ref|local_url label="Détails de l'écriture" shape="menu"}
 		{elseif $context == File::CONTEXT_USER}
@@ -85,7 +85,7 @@ use Paheko\Entities\Files\File;
 		{/foreach}
 		</ul>
 		{if count($breadcrumbs) > 1}
-			{linkbutton href="?path=%s"|args:$parent_uri label="Retour au répertoire parent" shape="left"}
+			{linkbutton href="?path=%s"|args:$parent_uri label="Retour au dossier parent" shape="left"}
 		{/if}
 	{/if}
 	</nav>
@@ -238,7 +238,7 @@ use Paheko\Entities\Files\File;
 </form>
 
 {else}
-	<p class="alert block">Il n'y a aucun fichier dans ce répertoire.</p>
+	<p class="alert block">Il n'y a aucun fichier dans ce dossier.</p>
 {/if}
 
 {if $dir->path == $dir->context()}
