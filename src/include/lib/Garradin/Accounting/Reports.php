@@ -180,8 +180,6 @@ class Reports
 
 		$balances = DB::getInstance()->getAssoc($sql);
 
-		//var_dump('<pre>', $sql, $balances[Account::REVENUE]); exit;
-
 		return ($balances[Account::REVENUE] ?? 0) - ($balances[Account::EXPENSE] ?? 0);
 	}
 
@@ -223,7 +221,8 @@ class Reports
 			isset($parts['inner_select']) ? $parts['inner_select'] . ',' : '',
 			$parts['inner_join'] ?? '',
 			isset($parts['inner_where']) ? 'WHERE ' . $parts['inner_where'] : '',
-			$parts['inner_group'] ?? 'a.id, t.id_year',
+			// Group by account code when multiple years are concerned
+			$parts['inner_group'] ?? 'a.code, t.id_year',
 			isset($parts['where']) ? 'WHERE ' . $parts['where'] : '',
 			isset($parts['group']) ? 'GROUP BY ' . $parts['group'] : '',
 			$order ?? 'code'
@@ -270,7 +269,7 @@ class Reports
 
 			$inner_where = self::getWhereClause($criterias, 't', 'l', 'a');
 			$remove_zero = $remove_zero ? ', ' . $remove_zero : '';
-			$inner_group = empty($criterias['year']) ? 'a.id' : null;
+			$inner_group = empty($criterias['year']) ? 'a.code' : null;
 
 			$sql = self::getBalancesSQL(['group' => 'code ' . $having] + compact('order', 'inner_where', 'where', 'inner_group'));
 		}
