@@ -136,7 +136,9 @@ class Router
 
 			$session = Session::getInstance();
 
-			if (Plugins::fireSignal('http.request.file.before', compact('file', 'uri', 'session'))) {
+			$signal = Plugins::fire('http.request.file.before', true, compact('file', 'uri', 'session'));
+
+			if ($signal && $signal->isStopped()) {
 				// If a plugin handled the request, let's stop here
 				return;
 			}
@@ -148,7 +150,7 @@ class Router
 				$file->serve($session, isset($_GET['download']), $_GET['s'] ?? null, $_POST['p'] ?? null);
 			}
 
-			Plugins::fireSignal('http.request.file.after', compact('file', 'uri', 'session'));
+			Plugins::fire('http.request.file.after', false, compact('file', 'uri', 'session'));
 
 			return;
 		}

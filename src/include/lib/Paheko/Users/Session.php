@@ -108,11 +108,13 @@ class Session extends \KD2\UserSession
 
 		// Vérifier s'il n'y a pas un plugin qui gère déjà cet aspect
 		// notamment en installation mutualisée c'est plus efficace
-		$return = ['is_compromised' => null];
+		$signal = Plugins::fire('password.check', true, ['password' => $password]);
 
-		if (Plugins::fireSignal('password.check', ['password' => $password], $return) && isset($return['is_compromised'])) {
-			return (bool) $return['is_compromised'];
+		if ($signal && $signal->isStopped()) {
+			return (bool) $signal->getOut('is_compromised');
 		}
+
+		unset($signal);
 
 		return parent::isPasswordCompromised($password);
 	}
@@ -250,7 +252,7 @@ class Session extends \KD2\UserSession
 			}
 		}
 
-		Plugins::fireSignal('user.login', compact('login', 'password', 'remember_me', 'success'));
+		Plugins::fire('user.login.after', false, compact('login', 'password', 'remember_me', 'success'));
 
 		// Clean up logs
 		Log::clean();
@@ -277,7 +279,7 @@ class Session extends \KD2\UserSession
 			Log::add(Log::LOGIN_FAIL, $details, $user_id);
 		}
 
-		Plugins::fireSignal('user.login.otp', compact('success', 'user_id'));
+		Plugins::fire('user.login.otp', false, compact('success', 'user_id'));
 
 		return $success;
 	}

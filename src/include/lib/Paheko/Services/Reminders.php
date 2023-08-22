@@ -127,7 +127,7 @@ class Reminders
 			'due_date'    => $reminder->reminder_date,
 		]);
 
-		Plugins::fireSignal('reminder.send.after', $reminder);
+		Plugins::fire('reminder.send.after', false, $reminder);
 
 		return true;
 	}

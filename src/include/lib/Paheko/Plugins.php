@@ -2,15 +2,17 @@
 
 namespace Paheko;
 
-use Paheko\Entities\Plugin;
 use Paheko\Entities\Module;
+use Paheko\Entities\Plugin;
+use Paheko\Entities\Signal;
 
 use Paheko\Users\Session;
 use Paheko\DB;
 use Paheko\UserTemplate\CommonFunctions;
 use Paheko\UserTemplate\Modules;
 
-use \KD2\DB\EntityManager as EM;
+use KD2\DB\EntityManager as EM;
+use KD2\DB\ErrorManager;
 
 use const Paheko\{SYSTEM_SIGNALS, ADMIN_URL, WWW_URL, PLUGINS_ROOT};
 
@@ -114,70 +116,76 @@ class Plugins
 	}
 
 	/**
-	 * Déclenche le signal donné auprès des plugins enregistrés
-	 * @param  string $signal Nom du signal
-	 * @param  array  $params Paramètres du callback (array ou null)
-	 * @return NULL 		  NULL si aucun plugin n'a été appelé,
-	 * TRUE si un plugin a été appelé et a arrêté l'exécution,
-	 * FALSE si des plugins ont été appelés mais aucun n'a stoppé l'exécution
+	 * Fire a plugin signal
+	 * @param  string $name      Signal name
+	 * @param  bool   $stoppable Set to TRUE if the signal can be stopped
+	 * @param  array  $in        Set to a list of INcoming parameters
+	 * @param  array  $out       Set to a list of possible OUTgoing parameters (callbacks can still set any other keys in this array, just they might not be used then)
+	 * @return Signal|null Signal if a signal was run, null if no signal was registered
 	 */
-	static public function fireSignal($signal, $params = null, &$callback_return = null)
+	static public function fire(string $name, bool $stoppable = false, array $in = [], array $out = []): ?Signal
 	{
 		if (!self::$signals) {
 			return null;
 		}
 
+		$signal = null;
+
 		// Process SYSTEM_SIGNALS first
 		foreach (SYSTEM_SIGNALS as $system_signal) {
-			if (key($system_signal) != $signal) {
+			if (key($system_signal) != $name) {
 				continue;
 			}
 
 			if (!is_callable(current($system_signal))) {
-				throw new \LogicException(sprintf('System signal: cannot call "%s" for signal "%s"', current($system_signal), key($system_signal)));
+				throw new \LogicException(sprintf('System signal: cannot call "%s" for signal "%s"', current($system_signal), $name));
 			}
 
-			if (true === call_user_func_array(current($system_signal), [&$params, &$callback_return])) {
-				return true;
+			$signal ??= new Signal($name, $stoppable, $in, $out);
+
+			call_user_func(current($system_signal), $signal, null);
+
+			if ($signal->isStopped()) {
+				return $signal;
 			}
 		}
 
-		$list = DB::getInstance()->get('SELECT s.* FROM plugins_signals AS s INNER JOIN plugins p ON p.name = s.plugin
-			WHERE s.signal = ? AND p.enabled = 1;', $signal);
+		$list = DB::getInstance()->iterate('SELECT s.* FROM plugins_signals AS s INNER JOIN plugins p ON p.name = s.plugin
+			WHERE s.signal = ? AND p.enabled = 1;', $name);
 
-		if (!count($list)) {
-			return null;
-		}
+		static $plugins = [];
 
-		if (null === $params) {
-			$params = [];
-		}
+		foreach ($list as $row) {
+			$plugins[$row->plugin] ??= Plugins::get($row->plugin);
+			$plugin = $plugins[$row->plugin];
 
-		foreach ($list as $row)
-		{
-			$path = self::getPath($row->plugin);
-
-			// Ne pas appeler les plugins dont le code n'existe pas/plus,
-			if (!$path) {
+			// Don't call plugins when the code has vanished
+			if (!$plugin->hasCode()) {
 				continue;
 			}
 
 			$callback = 'Paheko\\Plugin\\' . $row->callback;
 
+			// Ignore non-callable plugins
 			if (!is_callable($callback)) {
+				ErrorManager::reportExceptionSilent(new \LogicException(sprintf(
+					'Plugin has registered signal "%s" but callback "%s" is not a callable',
+					$name,
+					$callback
+				)));
 				continue;
 			}
 
-			$params['plugin_root'] = $path;
+			$signal ??= new Signal($name, $stoppable, $in, $out);
 
-			$return = call_user_func_array($callback, [&$params, &$callback_return]);
+			call_user_func($callback, $signal, $plugin);
 
-			if (true === $return) {
-				return true;
+			if ($signal->isStopped()) {
+				return $signal;
 			}
 		}
 
-		return false;
+		return $signal;
 	}
 
 	static public function listModulesAndPlugins(bool $installable = false): array
@@ -277,7 +285,7 @@ class Plugins
 		unset($item);
 
 		// Append plugins from signals
-		self::fireSignal('menu.item', compact('session'), $list);
+		self::fire('menu.item', false, compact('session'), $list);
 
 		return $list;
 	}
@@ -316,7 +324,7 @@ class Plugins
 			$list['module_' . $name] = $v;
 		}
 
-		Plugins::fireSignal('home.button', ['user' => $session->getUser(), 'session' => $session], $list);
+		Plugins::fire('home.button', false, ['user' => $session->getUser(), 'session' => $session], $list);
 
 		return $list;
 	}

@@ -154,29 +154,33 @@ class Entity extends AbstractEntity
 
 		$new = $this->exists() ? false : true;
 		$modified = $this->isModified();
+		$entity = $this;
 
 		// Specific entity signal
-		if (Plugins::fireSignal($name . '.before', ['entity' => $this, 'new' => $new])) {
+		$signal = Plugins::fire($name . '.before', true, compact('entity', 'new', 'modified'));
+
+		if ($signal && $signal->isStopped()) {
 			return true;
 		}
 
 		// Generic entity signal
-		if (Plugins::fireSignal('entity.save.before', ['entity' => $this, 'new' => $new])) {
+		$signal = Plugins::fire('entity.save.before', true, compact('entity', 'new', 'modified'));
+
+		if ($signal && $signal->isStopped()) {
 			return true;
 		}
 
-		$return = parent::save(false);
+		$success = parent::save(false);
 
 		// Log creation/edit, but don't record stuff that doesn't change anything
 		if ($this::NAME && ($new || $modified)) {
 			Log::add($new ? Log::CREATE : Log::EDIT, ['entity' => get_class($this), 'id' => $this->id()]);
 		}
 
-		Plugins::fireSignal($name . '.after', ['entity' => $this, 'success' => $return, 'new' => $new]);
+		Plugins::fire($name . '.after', false, compact('entity', 'success', 'new', 'modified'));
+		Plugins::fire('entity.save.after', false, compact('entity', 'success', 'new', 'modified'));
 
-		Plugins::fireSignal('entity.save.after', ['entity' => $this, 'success' => $return, 'new' => $new]);
-
-		return $return;
+		return $success;
 	}
 
 	public function delete(): bool
@@ -187,23 +191,28 @@ class Entity extends AbstractEntity
 
 		$id = $this->id();
 
-		if (Plugins::fireSignal($name . '.before', ['entity' => $this, 'id' => $id])) {
+		// Specific entity signal
+		$signal = Plugins::fire($name . '.before', true, compact('entity', 'id'));
+
+		if ($signal && $signal->isStopped()) {
 			return true;
 		}
 
 		// Generic entity signal
-		if (Plugins::fireSignal('entity.delete.before', ['entity' => $this, 'id' => $id])) {
+		$signal = Plugins::fire('entity.delete.before', true, compact('entity', 'id'));
+
+		if ($signal && $signal->isStopped()) {
 			return true;
 		}
 
-		$return = parent::delete();
+		$success = parent::delete();
 
 		if ($this::NAME) {
 			Log::add(Log::DELETE, ['entity' => get_class($this), 'id' => $id]);
 		}
 
-		Plugins::fireSignal($name . '.after', ['entity' => $this, 'success' => $return, 'id' => $id]);
-		Plugins::fireSignal('entity.delete.after', ['entity' => $this, 'success' => $return, 'id' => $id]);
+		Plugins::fire($name . '.after', false, compact('entity', 'success', 'id'));
+		Plugins::fire('entity.delete.after', false, compact('entity', 'success', 'id'));
 
 		return $return;
 	}

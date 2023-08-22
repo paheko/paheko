@@ -227,7 +227,7 @@ class Page extends Entity
 			];
 			$db->insert('web_pages_versions', $version);
 
-			Plugins::fireSignal('web.page.changed', ['entity' => $this, 'prev_content' => $prev_content, 'version' => $version]);
+			Plugins::fire('web.page.version.new', false, ['entity' => $this, 'content' => $this->content, 'prev_content' => $prev_content, 'version' => $version]);
 		}
 
 		return $r;

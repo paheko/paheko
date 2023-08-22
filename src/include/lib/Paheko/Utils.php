@@ -1202,11 +1202,13 @@ class Utils
 			// Try to see if there's a plugin
 			$in = ['string' => $str];
 
-			if (Plugins::fireSignal('pdf.stream', $in)) {
+			$signal = Plugins::fire('pdf.stream', true, $in);
+
+			if ($signal && $signal->isStopped()) {
 				return;
 			}
 
-			unset($in);
+			unset($signal, $in);
 		}
 
 		// Only Prince handles using STDIN and STDOUT
@@ -1253,12 +1255,14 @@ class Utils
 			// Try to see if there's a plugin
 			$in = ['source' => $source, 'target' => $target];
 
-			if (Plugins::fireSignal('pdf.create', $in)) {
+			$signal = Plugins::fire('pdf.create', true, $in);
+
+			if ($signal && $signal->isStopped()) {
 				Utils::safe_unlink($source);
 				return $target;
 			}
 
-			unset($in);
+			unset($in, $signal);
 
 			// Try to find a local executable
 			$list = ['prince', 'chromium', 'wkhtmltopdf', 'weasyprint'];

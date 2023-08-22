@@ -149,8 +149,11 @@ class Emails
 			$content_html = Render::render(Render::FORMAT_MARKDOWN, null, $content);
 		}
 
-		if (Plugins::fireSignal('email.queue.before', compact('context', 'recipients', 'sender', 'subject', 'content', 'content_html', 'attachments'))) {
-			// queue handling was done by a plugin
+		$signal = Plugins::fire('email.queue.before', true,
+			compact('context', 'recipients', 'sender', 'subject', 'content', 'content_html', 'attachments'));
+
+		// queue handling was done by a plugin, stop here
+		if ($signal && $signal->isStopped()) {
 			return;
 		}
 
@@ -196,10 +199,15 @@ class Emails
 				$content_html = $main_tpl->fetch();
 			}
 
-			if (Plugins::fireSignal('email.queue.insert', compact('context', 'recipient', 'sender', 'subject', 'content', 'recipient_hash', 'recipient_pgp_key', 'content_html', 'attachments'))) {
+			$signal = Plugins::fire('email.queue.insert', true,
+				compact('context', 'recipient', 'sender', 'subject', 'content', 'recipient_hash', 'recipient_pgp_key', 'content_html', 'attachments'));
+
+			if ($signal && $signal->isStopped()) {
 				// queue insert was done by a plugin, stop here
 				continue;
 			}
+
+			unset($signal);
 
 			$db->insert('emails_queue', compact('sender', 'subject', 'context', 'recipient', 'recipient_pgp_key', 'recipient_hash', 'content', 'content_html'));
 
@@ -212,7 +220,10 @@ class Emails
 
 		$db->commit();
 
-		if (Plugins::fireSignal('email.queue.after', compact('context', 'recipients', 'sender', 'subject', 'content', 'content_html', 'attachments'))) {
+		$signal = Plugins::fire('email.queue.after', true,
+			compact('context', 'recipients', 'sender', 'subject', 'content', 'content_html', 'attachments'));
+
+		if ($signal && $signal->isStopped()) {
 			return;
 		}
 
@@ -628,9 +639,9 @@ class Emails
 			return;
 		}
 
-		$email_sent_via_plugin = Plugins::fireSignal('email.send.before', compact('context', 'message'));
+		$signal = Plugins::fire('email.send.before', true, compact('context', 'message'));
 
-		if ($email_sent_via_plugin) {
+		if ($signal && $signal->isStopped()) {
 			return;
 		}
 
@@ -650,7 +661,7 @@ class Emails
 			$message->send();
 		}
 
-		Plugins::fireSignal('email.send.after', compact('context', 'message'));
+		Plugins::fire('email.send.after', false, compact('context', 'message'));
 	}
 
 	/**
@@ -664,7 +675,9 @@ class Emails
 
 		$return = $message->identifyBounce();
 
-		if (Plugins::fireSignal('email.bounce', compact('message', 'return', 'raw_message'))) {
+		$signal = Plugins::fire('email.bounce', false, compact('message', 'return', 'raw_message'));
+
+		if ($signal && $signal->isStopped()) {
 			return null;
 		}
 
@@ -706,7 +719,7 @@ class Emails
 			return null;
 		}
 
-		Plugins::fireSignal('email.bounce', compact('email', 'return'));
+		Plugins::fire('email.bounce', false, compact('email', 'return'));
 		$email->hasFailed($return);
 		$email->save();
 

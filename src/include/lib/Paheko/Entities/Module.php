@@ -516,10 +516,15 @@ class Module extends Entity
 
 		// Fire signal before display of a web page
 		$plugin_params = ['path' => $path, 'uri' => $uri, 'module' => $this];
+		$module = $this;
 
-		if (Plugins::fireSignal('web.request.before', $plugin_params)) {
+		$signal = Plugins::fire('web.request.before', true, compact('path', 'uri', 'module'));
+
+		if ($signal && $signal->isStopped()) {
 			return;
 		}
+
+		unset($signal);
 
 		$type = null;
 
@@ -535,13 +540,25 @@ class Module extends Entity
 			$cache = false;
 		}
 
-		$plugin_params['type'] = $type;
-		$plugin_params['cache'] = $cache;
-
 		// Call plugins, allowing them to modify the content
-		if (Plugins::fireSignal('web.request', $plugin_params, $content)) {
+		$signal = Plugins::fire(
+			'web.request',
+			true,
+			compact('path', 'uri', 'module', 'content', 'type', 'cache'),
+			compact('type', 'cache', 'content')
+		);
+
+		if ($signal && $signal->isStopped()) {
 			return;
 		}
+
+		if ($signal) {
+			$type = $signal->getOut('type');
+			$cache = $signal->getOut('cache');
+			$content = $signal->getOut('content');
+		}
+
+		unset($signal);
 
 		header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
 
@@ -556,7 +573,7 @@ class Module extends Entity
 			Cache::store($uri, $content);
 		}
 
-		Plugins::fireSignal('web.request.after', $plugin_params, $content);
+		Plugins::fire('web.request.after', false, compact('path', 'uri', 'module', 'content', 'type', 'cache'));
 	}
 
 	public function getFileTypeFromExtension(string $path): ?string

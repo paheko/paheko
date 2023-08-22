@@ -10,9 +10,14 @@ use Paheko\Plugins;
 
 require_once __DIR__ . '/_inc.php';
 
-$banner = '';
 $session = Session::getInstance();
-Plugins::fireSignal('home.banner', ['user' => $session->getUser(), 'session' => $session], $banner);
+
+$banner = '';
+$signal = Plugins::fire('home.banner', false, ['user' => $session->getUser(), 'session' => $session]);
+
+if ($signal) {
+	$banner = implode('', $signal->getOut());
+}
 
 $homepage = Config::getInstance()->file('admin_homepage');
 

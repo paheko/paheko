@@ -35,7 +35,11 @@ class Extensions
 			'video'    => [self::class, 'video'],
 		];
 
-		Plugins::fireSignal('render.extensions.init', ['extensions' => &$list]);
+		$signal = Plugins::fire('render.extensions.init', false, $list);
+
+		if ($signal) {
+			$list = array_merge($list, $signal->getOut());
+		}
 
 		return $list;
 	}
