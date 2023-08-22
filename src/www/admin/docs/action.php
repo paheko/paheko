@@ -43,8 +43,8 @@ $form->runIf('delete', function () use ($check, $session) {
 	}
 }, $csrf_key, '!docs/?path=' . $parent);
 
-$form->runIf(f('move') && f('select'), function () use ($check, $session) {
-	$target = f('select');
+$form->runIf('move', function () use ($check, $session) {
+	$target = f('move');
 
 	foreach ($check as &$file) {
 		$file = Files::get($file);
@@ -82,9 +82,9 @@ elseif ($action == 'zip') {
 	$tpl->display('docs/action_zip.tpl');
 }
 else {
-	$parent = f('current') ?? f('parent');
+	$current = f('current') ?? f('parent');
 
-	if (!$parent) {
+	if (!$current) {
 		$first_file = Files::get(current($check));
 
 		if (!$first_file) {
@@ -94,14 +94,17 @@ else {
 		$parent = $first_file->parent;
 	}
 
-	$directories = Files::list($parent);
+	$directories = Files::list($current);
 	$directories = array_filter($directories, function (File $file) {
 		return $file->type == File::TYPE_DIRECTORY;
 	});
 
-	$breadcrumbs = Files::getBreadcrumbs($parent);
+	$breadcrumbs = Files::getBreadcrumbs($current);
+	$parent = Utils::dirname($current);
+	$current_path = $current;
+	$current_path_name = Utils::basename($current);
 
-	$tpl->assign(compact('directories', 'breadcrumbs', 'parent'));
+	$tpl->assign(compact('directories', 'breadcrumbs', 'parent', 'current_path', 'current_path_name'));
 
 	$tpl->display('docs/action_move.tpl');
 }

@@ -2,54 +2,53 @@
 
 {form_errors}
 
-<form method="post" action="{$self_url}">
-	<fieldset>
-		<legend>Déplacer {$count} fichiers vers…</legend>
+<form method="post" action="{$self_url}" class="dir-picker">
+	<nav class="breadcrumbs">
+		<ul>
+		{foreach from=$breadcrumbs item="name" key="path"}
+			<li class="{if $path == $current_path}current{/if}">{button label=$name type="submit" name="current" value=$path}</li>
+		{/foreach}
+		</ul>
+	</nav>
 
-		<table class="tree-selector list">
-			<tbody>
-				<?php $last = 0; ?>
-				{foreach from=$breadcrumbs item="_title" key="_path"}
-				<tr>
-					<td class="check">{input type="radio" name="select" value=$_path}</td>
-					<th><?=str_repeat('<i>&nbsp;</i>', $last)?> {icon shape="right"}
-						<button type="submit" name="current" value="{$_path}">{$_title}</button></th>
-					<?php $last = $iteration; ?>
-				</tr>
-				{/foreach}
-				{foreach from=$directories item="dir"}
-				<tr>
-					<td class="check">{input type="radio" name="select" value=$dir.path}</td>
-					<th><?=str_repeat('<i>&nbsp;</i>', $last)?> {icon shape="right"}
-						<button type="submit" name="current" value="{$dir.path}">{$dir.name}</button></th>
-				</tr>
-				{foreachelse}
-				<tr>
-					<td class="check"></td>
-					<th><?=str_repeat('<i>&nbsp;</i>', $last+1)?> {icon shape="right"} <em>Pas de sous-répertoire</em></th>
-				</tr>
-				{/foreach}
-			</tbody>
-		</table>
-
-	</fieldset>
-
-	<p class="submit">
-		{csrf_field key=$csrf_key}
-		{button type="submit" name="move" label="Déplacer les fichiers" shape="right" class="main"}
-
-		{if isset($extra)}
-			{foreach from=$extra key="key" item="value"}
-				{if is_array($value)}
-					{foreach from=$value key="subkey" item="subvalue"}
-						<input type="hidden" name="{$key}[{$subkey}]" value="{$subvalue}" />
-					{/foreach}
-				{else}
-					<input type="hidden" name="{$key}" value="{$value}" />
-				{/if}
-			{/foreach}
+	<table>
+		{if $parent}
+		<tr class="parent">
+			<td colspan="2">{button shape="left" label="Retour au répertoire parent" type="submit" name="current" value=$parent}</td>
+		</tr>
 		{/if}
-	</p>
+
+		{foreach from=$directories item="dir"}
+		<tr>
+			<th>{button shape="folder" label=$dir.name type="submit" name="current" value=$dir.path}</th>
+			<td class="actions">{button shape="right" label="Déplacer vers ce répertoire" type="submit" name="move" value=$dir.path}</td>
+		</tr>
+		{foreachelse}
+		<tr>
+			<td colspan="2" class="help">Aucun sous-répertoire ici.</td>
+		</tr>
+		{/foreach}
+		<tr>
+			<td colspan="2" class="select">
+				<span class="help">{{%n fichier sélectionné.}{%n fichiers sélectionnés.} n=$count}</span><br />
+				{button shape="right" label="Déplacer vers \"%s\""|args:$current_path_name type="submit" name="move" value=$current_path}
+			</td>
+		</tr>
+	</table>
+
+	{csrf_field key=$csrf_key}
+
+	{if isset($extra)}
+		{foreach from=$extra key="key" item="value"}
+			{if is_array($value)}
+				{foreach from=$value key="subkey" item="subvalue"}
+					<input type="hidden" name="{$key}[{$subkey}]" value="{$subvalue}" />
+				{/foreach}
+			{else}
+				<input type="hidden" name="{$key}" value="{$value}" />
+			{/if}
+		{/foreach}
+	{/if}
 
 </form>
 

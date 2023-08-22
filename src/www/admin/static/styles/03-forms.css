@@ -619,41 +619,60 @@ dialog.datepicker {
     width: 4em;
 }
 
-.tree-selector a {
-    color: #666;
+.dir-picker nav {
+    margin-bottom: 1em;
 }
 
-.tree-selector td {
-    width: 15%;
+.dir-picker table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dir-picker .actions {
     text-align: right;
 }
 
-.tree-selector th {
-    width: 85%;
+.dir-picker th button {
+    width: 100%;
+    text-align: left;
+    font-size: 1.4em;
+    border-width: 1px;
+    background: none;
 }
 
-.tree-selector i {
-    display: inline-block;
-    padding: 0 .5em;
+.dir-picker th button::before {
+    color: var(--gLightBorderColor);
 }
 
-.tree-selector b {
-    display: inline-block;
-    padding: 0 .5em;
-    color: #999;
+.dir-picker nav button {
+    border-width: 1px;
+    font-size: .9em;
+    opacity: 0.7;
 }
 
-.tree-selector em {
-    font-weight: normal;
+.dir-picker .parent button {
+    margin-bottom: .5em;
+    padding: .5em;
+    width: calc(100% - 1em);
+    border-width: 1px;
+    background: none;
+    border-color: var(--gLightBorderColor);
+    text-align: left;
 }
 
-.tree-selector h3 {
-    display: inline-block;
+.dir-picker td.help {
+    text-align: center;
+    padding: 1em;
+    font-size: 1.5em;
 }
 
-.tree-selector .current > a {
+.dir-picker .select {
+    text-align: center;
+    padding: 1em;
+}
+
+.dir-picker nav .current button {
     font-weight: bold;
-    color: #000;
 }
 
 .file-selector {
