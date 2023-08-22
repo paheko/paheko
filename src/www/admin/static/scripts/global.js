@@ -189,7 +189,7 @@
 
 	g.openFrameDialog = function (url, options) {
 		options ??= {};
-		options.height = options.height || '90%';
+		options.height = options.height || 'auto';
 		options.callback = options.callback || null;
 		options.classname = options.classname || null;
 
