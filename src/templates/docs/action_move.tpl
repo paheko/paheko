@@ -11,30 +11,28 @@
 		</ul>
 	</nav>
 
-	<table>
+	<nav class="folders">
+		<ul>
 		{if $parent}
-		<tr class="parent">
-			<td colspan="2">{button shape="left" label="Retour au répertoire parent" type="submit" name="current" value=$parent}</td>
-		</tr>
+			<li class="parent">
+				{button shape="left" label="Retour au dossier parent" type="submit" name="current" value=$parent}
+			</li>
 		{/if}
 
 		{foreach from=$directories item="dir"}
-		<tr>
-			<th>{button shape="folder" label=$dir.name type="submit" name="current" value=$dir.path}</th>
-			<td class="actions">{button shape="right" label="Déplacer vers ce répertoire" type="submit" name="move" value=$dir.path}</td>
-		</tr>
+			<li class="folder">
+				{button shape="folder" label=$dir.name type="submit" name="current" value=$dir.path}
+			</li>
 		{foreachelse}
-		<tr>
-			<td colspan="2" class="help">Aucun sous-répertoire ici.</td>
-		</tr>
+			<li class="help">Aucun sous-dossier ici.</li>
 		{/foreach}
-		<tr>
-			<td colspan="2" class="select">
+
+			<li class="select">
 				<span class="help">{{%n fichier sélectionné.}{%n fichiers sélectionnés.} n=$count}</span><br />
 				{button shape="right" label="Déplacer vers \"%s\""|args:$current_path_name type="submit" name="move" value=$current_path}
-			</td>
-		</tr>
-	</table>
+			</li>
+		</ul>
+	</nav>
 
 	{csrf_field key=$csrf_key}
 
