@@ -38,7 +38,8 @@ CODEDIR=${DEBLOCALPREFIX}/share/${PACKAGE_DEBNAME}
 mkdir -p ${CODEDIR}
 cp -r ${SRCDIR}/* ${CODEDIR}
 cp ${THISDIR}/config.debian.php ${CODEDIR}/config.local.php
-rm -rf ${CODEDIR}/*.sqlite ${CODEDIR}/cache ${CODEDIR}/www/squelettes ${CODEDIR}/www/plugins/*
+mv ${CODEDIR}/data/plugins ${CODEDIR}/plugins
+rm -rf ${CODEDIR}/*.sqlite ${CODEDIR}/data
 cp ${THISDIR}/paheko.png "${CODEDIR}"
 
 mkdir -p "${DEBROOT}/var/lib/${PACKAGE_DEBNAME}"
