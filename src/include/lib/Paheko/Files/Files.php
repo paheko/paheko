@@ -903,7 +903,7 @@ class Files
 		$file->modified = new \DateTime;
 		$file->save();
 
-		Plugins::fire('files.mkdir', false, compact('file'));
+		Plugins::fire('file.mkdir', false, compact('file'));
 
 		return $file;
 	}

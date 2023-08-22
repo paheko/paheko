@@ -328,6 +328,8 @@ class File extends Entity
 		// ->rename() will ->save()
 		$this->rename(self::CONTEXT_TRASH . '/' . $hash . '/' . $this->path);
 
+		Plugins::fire('file.trash', false, ['file' => $this]);
+
 		$db->commit();
 	}
 
@@ -348,6 +350,8 @@ class File extends Entity
 
 		// rename() will do the save()
 		$this->rename($orig_path);
+
+		Plugins::fire('file.restore', false, ['file' => $this]);
 
 		$db->commit();
 	}
@@ -397,7 +401,7 @@ class File extends Entity
 			throw new \LogicException('Storage backend couldn\'t delete a file');
 		}
 
-		Plugins::fire('files.delete', false, ['file' => $this]);
+		Plugins::fire('file.delete', false, ['file' => $this]);
 
 		$this->deleteCache();
 
@@ -520,7 +524,7 @@ class File extends Entity
 			Files::callStorage('rename', $old, $new_path);
 		}
 
-		Plugins::fire('files.rename', false, ['file' => $this, 'new_path' => $new_path]);
+		Plugins::fire('file.rename', false, ['file' => $this, 'new_path' => $new_path]);
 
 		$db->commit();
 
@@ -667,7 +671,14 @@ class File extends Entity
 				throw new UserException('Le fichier n\'a pas pu être enregistré.');
 			}
 
-			Plugins::fire('files.store', false, ['file' => $this]);
+			Plugins::fire('file.store', false, ['file' => $this]);
+
+			if (!$new) {
+				Plugins::fire('file.overwrite', false, ['file' => $this]);
+			}
+			else {
+				Plugins::fire('file.create', false, ['file' => $this]);
+			}
 
 			// clean up thumbnails
 			foreach (self::ALLOWED_THUMB_SIZES as $key => $operations)
