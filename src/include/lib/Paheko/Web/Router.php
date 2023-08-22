@@ -160,7 +160,7 @@ class Router
 
 	static public function markdown(string $text)
 	{
-		$md = new Markdown;
+		$md = new Markdown(null, null);
 		header('Content-Type: text/html');
 
 		$text = $md->text($text);
