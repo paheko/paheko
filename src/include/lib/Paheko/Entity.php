@@ -156,31 +156,45 @@ class Entity extends AbstractEntity
 		$modified = $this->isModified();
 		$entity = $this;
 
-		// Specific entity signal
-		$signal = Plugins::fire($name . '.before', true, compact('entity', 'new', 'modified'));
+		$signals = [
+			// Specific entity signal
+			'entity.' . $name . '.save',
+			// Generic entity signal
+			'entity.save',
+		];
 
-		if ($signal && $signal->isStopped()) {
-			return true;
+		if ($new) {
+			$signals[] = 'entity.' . $name . '.create';
+			$signals[] = 'entity.create';
+		}
+		elseif ($modified) {
+			$signals[] = 'entity.' . $name . '.modify';
+			$signals[] = 'entity.modify';
 		}
 
-		// Generic entity signal
-		$signal = Plugins::fire('entity.save.before', true, compact('entity', 'new', 'modified'));
+		$params = compact('entity', 'new', 'modified');
 
-		if ($signal && $signal->isStopped()) {
-			return true;
+		foreach ($signals as $signal_name) {
+			$signal = Plugins::fire($signal_name . '.before', true, $params);
+
+			if ($signal && $signal->isStopped()) {
+				return true;
+			}
 		}
 
-		$success = parent::save(false);
+		$params['success'] = parent::save(false);
 
 		// Log creation/edit, but don't record stuff that doesn't change anything
 		if ($this::NAME && ($new || $modified)) {
 			Log::add($new ? Log::CREATE : Log::EDIT, ['entity' => get_class($this), 'id' => $this->id()]);
 		}
 
-		Plugins::fire($name . '.after', false, compact('entity', 'success', 'new', 'modified'));
-		Plugins::fire('entity.save.after', false, compact('entity', 'success', 'new', 'modified'));
 
-		return $success;
+		foreach ($signals as $signal_name) {
+			Plugins::fire($signal_name . '.after', false, $params);
+		}
+
+		return $params['success'];
 	}
 
 	public function delete(): bool
