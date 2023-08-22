@@ -190,6 +190,7 @@ class Entity extends AbstractEntity
 		$name = 'entity.' . $type . '.delete';
 
 		$id = $this->id();
+		$entity = $this;
 
 		// Specific entity signal
 		$signal = Plugins::fire($name . '.before', true, compact('entity', 'id'));
@@ -214,6 +215,6 @@ class Entity extends AbstractEntity
 		Plugins::fire($name . '.after', false, compact('entity', 'success', 'id'));
 		Plugins::fire('entity.delete.after', false, compact('entity', 'success', 'id'));
 
-		return $return;
+		return $success;
 	}
 }
