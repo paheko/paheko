@@ -130,13 +130,14 @@ class Config extends Entity
 			$this->selfCheck();
 		}
 
-		$values = $this->modifiedProperties(true);
+		$values = $this->getModifiedProperties(true);
 
 		$db = DB::getInstance();
 		$db->begin();
 
 		foreach ($values as $key => $value)
 		{
+			$value = $this->getAsString($key);
 			$db->preparedQuery('INSERT OR REPLACE INTO config (key, value) VALUES (?, ?);', $key, $value);
 		}
 

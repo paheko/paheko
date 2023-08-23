@@ -194,11 +194,9 @@ class API
 					$report['modified'] = array_map(
 						function ($user) {
 							$out = ['id' => $user->id(), 'name' => $user->name(), 'changed' => []];
-							$old = $user->asDetailsArray(true);
-							$new = $user->asDetailsArray();
 
-							foreach ($user->modifiedProperties() as $key => $value) {
-								$out['changed'][$key] = ['old' => $old[$key], 'new' => $new[$key]];
+							foreach ($user->getModifiedProperties() as $key => $value) {
+								$out['changed'][$key] = ['old' => $value, 'new' => $user->$key];
 							}
 
 							return $out;
