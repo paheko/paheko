@@ -142,7 +142,7 @@ class SQLite implements StorageInterface
 	static public function truncate(): void
 	{
 		$db = DB::getInstance();
-		$db->exec('DELETE FROM files_contents; DELETE FROM files; VACUUM;');
+		$db->exec('DELETE FROM files_contents; VACUUM;');
 	}
 
 	static public function lock(): void

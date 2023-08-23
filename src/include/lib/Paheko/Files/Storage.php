@@ -24,7 +24,7 @@ class Storage
 	/**
 	 * Used to re-sync files between the file storage backend and the files table
 	 */
-	static public function sync(?string $path = null): void
+	static public function sync(?string $path = null, ?callable $callback = null): void
 	{
 		if (FILE_STORAGE_BACKEND == 'SQLite') {
 			return;
@@ -38,7 +38,7 @@ class Storage
 
 		foreach ($local_files as $file) {
 			if ($file->type == $file::TYPE_DIRECTORY) {
-				self::sync($file->path);
+				self::sync($file->path, $callback);
 				unset($cache_files[$file->path]);
 				continue;
 			}
@@ -72,12 +72,15 @@ class Storage
 				$file->set('trash', $file->modified);
 			}
 
-
 			// Re-create MD5 hash
 			$file->rehash();
 
 			// save() will *also* add the file to the users_files or transactions_files table
 			$file->save();
+
+			if ($callback) {
+				$callback($cache ? 'update' : 'create', $file);
+			}
 		}
 
 		unset($file, $cache);
@@ -87,6 +90,10 @@ class Storage
 			// Don't use ->delete() here as it would trigger delete from storage even if there was a bug
 			// but we don't want to risk losing any data
 			$file->deleteSafe();
+
+			if ($callback) {
+				$callback('delete_cache', $file);
+			}
 		}
 
 		$db->commit();
@@ -128,6 +135,10 @@ class Storage
 					$db->commit();
 					$db->begin();
 					$i = 0;
+				}
+
+				if (null !== $callback) {
+					$callback('copy', $file);
 				}
 
 				if ($pointer = self::call($from, 'getReadOnlyPointer', $file)) {
