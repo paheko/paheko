@@ -127,12 +127,12 @@ class Log
 		$columns = [
 			'id_user' => [
 			],
+			'created' => [
+				'label' => 'Date'
+			],
 			'identity' => [
 				'label' => isset($params['id_self']) ? null : (isset($params['history']) ? 'Membre à l\'origine de la modification' : 'Membre'),
 				'select' => $id_field,
-			],
-			'created' => [
-				'label' => 'Date'
 			],
 			'type_icon' => [
 				'select' => null,

@@ -68,7 +68,7 @@
 		<dt>Dernière connexion</dt>
 		<dd>{if empty($user.date_login)}Jamais{else}{$user.date_login|date_short:true}{/if}</dd>
 		<dd>
-			{linkbutton shape="menu" label="Journal d'actions" href="!users/log.php?id=%d"|args:$user.id}
+			{linkbutton shape="menu" label="Journal d'audit" href="!users/log.php?id=%d"|args:$user.id}
 		</dd>
 		<dt>Mot de passe</dt>
 		<dd>

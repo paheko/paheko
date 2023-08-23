@@ -33,6 +33,7 @@
 		{/if}
 	<ul class="sub">
 		<li{if !$sub_current} class="current"{/if}><a href="{$admin_url}config/advanced/">Fonctions avancées</a></li>
+		<li{if $sub_current == 'audit'} class="current"{/if}>{link href="!config/advanced/audit.php" label="Journal d'audit"}</li>
 		<li{if $sub_current == 'api'} class="current"{/if}><a href="{$admin_url}config/advanced/api.php">API</a></li>
 		<li{if $sub_current == 'sql'} class="current"{/if}><a href="{$admin_url}config/advanced/sql.php">SQL</a></li>
 		{if ENABLE_TECH_DETAILS}

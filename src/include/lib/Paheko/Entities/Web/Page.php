@@ -23,6 +23,7 @@ use const Paheko\{WWW_URL, ADMIN_URL};
 class Page extends Entity
 {
 	const NAME = 'Page du site web';
+	const PRIVATE_URL = '!web/?id=%d';
 
 	const TABLE = 'web_pages';
 

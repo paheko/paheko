@@ -808,3 +808,7 @@ pre code {
     padding: .5em;
     border-radius: .3em;
 }
+
+fieldset.message {
+    max-width: 40em;
+}

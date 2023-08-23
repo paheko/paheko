@@ -1,6 +1,7 @@
 /* Forms */
 fieldset {
     border: 1px solid var(--gLightBorderColor);
+    border-radius: .3em;
     padding: 0.8em 1em 0 1em;
     margin-bottom: 1em;
     padding: 0.5em;

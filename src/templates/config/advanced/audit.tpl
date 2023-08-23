@@ -1,32 +1,18 @@
-{if $params.history}
-	{include file="_head.tpl" title="Historique des modifications de la fiche membre"}
-{else}
-	{include file="_head.tpl" title="Journal d'audit du membre"}
-{/if}
+{include file="_head.tpl" title="Journal d'audit — Historique des actions des membres" current="config"}
 
-{if $params.id_user}
-	{include file="users/_nav_user.tpl" id=$params.id_user}
-{elseif $params.history}
-	{include file="users/_nav_user.tpl" id=$params.history}
-{else}
-	{include file="me/_nav.tpl" current="security"}
-{/if}
+{include file="../_menu.tpl" current="advanced" sub_current="audit"}
 
-{if !$params.history}
 <p class="help">
-	Cette page liste les tentatives de connexion, les modifications de mot de passe ou d'identifiant, et toutes les actions de création, suppression ou modification effectuées par ce membre.
+	Cette page liste les tentatives de connexion, les modifications de mot de passe ou d'identifiant, et toutes les actions de création, suppression ou modification effectuées par tous les membre.
 </p>
-{/if}
 
 {if $list->count()}
 	{include file="common/dynamic_list_head.tpl"}
 
 	{foreach from=$list->iterate() item="row"}
 		<tr>
-			<td>{$row.created|date_short:true}</td>
-			{if !$params.id_self}
 			<th>{if !$row.identity}*{else}{$row.identity}{/if}</th>
-			{/if}
+			<td>{$row.created|date_short:true}</td>
 			<td class="help">
 				{if $row.type == Log::LOGIN_FAIL || $row.type == Log::LOGIN_PASSWORD_CHANGE}
 					<span class="alert">{icon shape="alert"}</span>
