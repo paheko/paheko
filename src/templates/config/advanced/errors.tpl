@@ -48,10 +48,6 @@
 		{/foreach}
 	</section>
 {elseif isset($errors)}
-	<p class="help">
-		Liste des erreurs système et de code rencontrées par Paheko.
-	</p>
-
 	{if !count($errors)}
 		<p class="block alert">Aucune erreur n'a été trouvée dans le journal error.log</p>
 	{else}

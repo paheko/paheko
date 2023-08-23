@@ -3,6 +3,13 @@ nav.tabs {
     margin: .7em 0;
 }
 
+/* clearfix */
+nav.tabs::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
 nav.tabs ul {
     margin-bottom: 1em;
     list-style-type: none;

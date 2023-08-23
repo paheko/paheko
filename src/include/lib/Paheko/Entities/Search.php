@@ -259,9 +259,9 @@ class Search extends Entity
 		}
 	}
 
-	public function export(string $format)
+	public function export(string $format, string $title = 'Recherche')
 	{
-		CSV::export($format, 'Recherche', $this->iterateResults(), $this->getHeader());
+		CSV::export($format, $title, $this->iterateResults(), $this->getHeader());
 	}
 
 	public function schema(): array

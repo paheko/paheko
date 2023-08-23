@@ -482,7 +482,7 @@ dd.help.example {
 }
 
 p.actions {
-    float: right;
+    text-align: right;
     margin: .5em;
 }
 

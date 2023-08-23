@@ -2,10 +2,6 @@
 
 {include file="config/_menu.tpl" current="advanced" sub_current=null}
 
-<p class="help block">
-	Attention, les fonctions avancées peuvent permettre de supprimer des données ou rendre votre instance inutilisable&nbsp;!
-</p>
-
 {form_errors}
 
 {if $_GET.msg == 'RESET'}
@@ -16,99 +12,74 @@
 	<p class="block confirm">
 		L'exercice sélectionné a été réouvert.
 	</p>
-{else if $_GET.msg == 'MIGRATION_OK'}
-	<p class="block confirm">
-		La migration est terminée.
-	</p>
 {/if}
 
-<form method="post" action="{$self_url_no_qs}">
+<p class="help">
+	Ces fonctionnalités sont réservées à un public averti.
+</p>
 
-{if count($closed_years)}
-<fieldset>
-	<legend>Réouvrir un exercice clôturé</legend>
-	<p class="help">
+<dl class="large">
+	<dt>Réouvrir un exercice clôturé</dt>
+	<dd class="help">
 		À utiliser si vous avez clôturé un exercice par erreur. Attention, en comptabilité cette action est normalement exceptionnelle.
-	</p>
-	<p class="alert block">
-		L'exercice sera réouvert, mais une écriture sera ajoutée au journal général indiquant que celui-ci a été réouvert après clôture. Cette écriture ne peut pas être supprimée.
-	</p>
-	<dl>
-		{input type="select" options=$closed_years label="Exercicer à réouvrir" name="year"}
-	</dl>
-	<p>
-		{csrf_field key="reopen_year"}
-		{button type="submit" name="reopen_ok" label="Réouvrir l'exercice sélectionné" shape="reset"}
-	</p>
-</fieldset>
-{/if}
+	</dd>
+	<dd>
+		{linkbutton shape="reload" href="reopen.php" label="Réouvrir un exercice clôturé"}
+	</dd>
 
-{if ENABLE_TECH_DETAILS && $storage_backend != 'SQLite'}
-	<h2 class="ruler">Stockage des fichiers</h2>
-	<fieldset>
-		<legend>Migration de stockage de fichiers</legend>
-		<p class="alert block">
-			Les fichiers ne seront pas effacés de la base de données.
-		</p>
-		{*
-		<p class="alert block">
-			Les fichiers seront <strong>supprimés</strong> de la base de données après avoir été recopiés vers '{$storage_backend}'.
-		</p>
-		<p class="error block">
-			Sauvegarde fortement recommandée avant de procéder à cette opération !
-		</p>
-		*}
-		<p class="help">Cette opération peut prendre quelques minutes.</p>
-		<p>
-			{csrf_field key="migrate_backend"}
-			{button type="submit" name="migrate_backend_ok" label="Copier tous les fichiers vers %s"|args:$storage_backend shape="right"}
-		</p>
-	</fieldset>
-	<fieldset>
-		<legend>Recopier les fichiers dans la base de données</legend>
-		<p class="alert block">
-			Les fichiers ne seront pas effacés de {$storage_backend} mais simplement recopiés dans la base de données.
-		</p>
-		<p class="help">Cette opération peut prendre quelques minutes. Elle est utile pour migrer entre deux systèmes de fichiers différents.</p>
-		<p>
-			{csrf_field key="migrate_back"}
-			{button type="submit" name="migrate_back_ok" label="Copier tous les fichiers de %s vers la base de données"|args:$storage_backend shape="right"}
-		</p>
-	</fieldset>
-{/if}
-</form>
+	<dt>Journal d'audit</dt>
+	<dd class="help">
+		Affiche l'historique des actions (connexion, changement de mot de passe, création de membre, modification comptable, etc.) effectuées par tous les membres.
+	</dd>
+	<dd>
+		{linkbutton shape="history" label="Voir le journal d'audit" href="audit.php"}
+	</dd>
 
-<h2 class="ruler">Actions destructrices</h2>
+	<dt>Accès à l'API</dt>
+	<dd class="help">
+		Permet de gérer les identifiants d'accès à l'API. Pour interfacer d'autres programmes et scripts avec les données de votre association.
+	</dd>
+	<dd>
+		{linkbutton shape="settings" label="Gérer les accès à l'API" href="api.php"}
+	</dd>
 
-<form method="post" action="{$self_url_no_qs}">
+	<dt>SQL — Accès à la base de données brute</dt>
+	<dd class="help">
+		Visualiser le schéma des tables et les données brutes de la base de données, ou y effectuer des requêtes SQL.
+	</dd>
+	<dd>
+		{linkbutton shape="code" label="Visualiser la base de données SQL" href="sql.php"}
+	</dd>
 
-<fieldset>
-	<legend>Remise à zéro</legend>
-	<div class="block error">
-		<h3>Attention : toutes les données seront effacées&nbsp;!</h3>
-		<ul>
-			<li>Les membres seront supprimés, ainsi que les activités et l'historique d'inscription</li>
-			<li>Les écritures et exercices comptables seront aussi supprimés, avec toutes les autres données comptables</li>
-			<li>Le contenu du site web</li>
-			<li>Les documents, etc.</li>
-			<li>Bref : tout sera effacé !</li>
-		</ul>
-		<p>Seul votre compte membre sera re-créé avec le même email et mot de passe.</p>
-	</div>
-	<p class="help">
-		Une sauvegarde sera automatiquement créée avant de procéder à la remise à zéro.
-	</p>
-	<dl>
-		<dt><label for="f_passe_verif">Votre mot de passe</label> (pour vérification)</dt>
-		<dd><input type="password" name="passe_verif" id="f_passe_verif" /></dd>
-	</dl>
-	<p>
-		{csrf_field key="reset"}
-		{button type="submit" name="reset_ok" label="Oui, je veux remettre à zéro" shape="delete"}
-	</p>
-</fieldset>
+	{if ENABLE_TECH_DETAILS}
+		<dt>Journal des erreurs système</dt>
+		<dd class="help">
+			Affiche le détail des erreurs système de Paheko et PHP.
+		</dd>
+		<dd>
+			{linkbutton shape="menu" label="Voir le journal des erreurs système" href="errors.php"}
+		</dd>
 
-</form>
+		{if SQL_DEBUG}
+			<dt>Journal des requêtes SQL</dt>
+			<dd class="help">
+				Affiche le détail de toutes les requêtes SQL exécutées et leurs performances.
+			</dd>
+			<dd>
+				{linkbutton shape="menu" label="Voir le journal des requêtes SQL" href="sql_debug.php"}
+			</dd>
+		{/if}
+
+	{/if}
+
+	<dt>Remise à zéro</dt>
+	<dd class="help">
+		Efface toutes les données, sauf votre compte de membre. Utile pour revenir à l'état initial après une période d'essai.
+	</dd>
+	<dd>
+		{linkbutton shape="delete" href="reset.php" label="Remise à zéro"}
+	</dd>
+</dl>
 
 
 {include file="_foot.tpl"}

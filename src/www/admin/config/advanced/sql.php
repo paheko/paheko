@@ -29,6 +29,7 @@ if (qg('table') && array_key_exists(qg('table'), $tables_list)) {
 
 	$list = new DynamicList($columns, $table);
 	$list->orderBy(key($columns), false);
+	$list->setTitle($table);
 	$list->loadFromQueryString();
 	$tpl->assign(compact('table', 'list'));
 }
@@ -47,11 +48,12 @@ elseif (qg('table_info') && array_key_exists(qg('table_info'), $tables_list)) {
 	$info->sql_indexes = implode(";\n", $sql_indexes);
 	$tpl->assign('table_info', $info);
 }
-elseif (($pragma = qg('pragma')) || $query) {
+elseif (($pragma = qg('pragma')) || isset($query)) {
 	try {
 		$query_time = microtime(true);
 
 		if ($pragma) {
+			$query = '';
 			$result = [];
 			$result_header = null;
 
@@ -69,11 +71,20 @@ elseif (($pragma = qg('pragma')) || $query) {
 
 			$result_count = count($result);
 		}
-		else {
+		elseif (!empty($query)) {
 			$s = Search::fromSQL($query);
+
+			if (f('export')) {
+				$s->export(f('export'), 'Requête SQL');
+				return;
+			}
+
 			$result = $s->iterateResults();
 			$result_header = $s->getHeader();
 			$result_count = $s->countResults();
+		}
+		else {
+			$result = $result_count = $result_header = null;
 		}
 
 		$query_time = round((microtime(true) - $query_time) * 1000, 3);

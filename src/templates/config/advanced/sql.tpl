@@ -1,32 +1,45 @@
 {include file="_head.tpl" title="SQL" current="config" custom_css=["config.css"]}
 
-{include file="config/_menu.tpl" current="advanced" sub_current="sql"}
+{include file="config/_menu.tpl" current="advanced"}
+
+<nav class="tabs">
+	{if isset($query) || isset($table) || isset($table_info)}
+		{linkbutton shape="left" label="Retour à la liste des tables SQL" href="sql.php"}
+	{else}
+		{linkbutton shape="search" label="Exécuter une requête SQL" href="?query="}
+	{/if}
+	<aside>
+		{linkbutton shape="check" label="Vérifier la BDD" href="?pragma=integrity_check"}
+		{linkbutton shape="check" label="Vérifier les clés étrangères" href="?pragma=foreign_key_check"}
+		{if ENABLE_TECH_DETAILS}
+			{linkbutton shape="reload" label="Reconstruire" href="?pragma=vacuum"}
+		{/if}
+	</aside>
+</nav>
 
 {form_errors}
 
-{if isset($result)}
+{if isset($query)}
+	<form method="post" action="{$self_url}" data-disable-progress="1">
 	{if $query !== null}
 		<h2 class="ruler">Requête SQL</h2>
 
-		<form method="post" action="{$self_url}">
-			<fieldset>
-				<legend>Faire une requête SQL en lecture</legend>
-				<dl>
-					{input type="textarea" cols="70" rows="3" name="query" default=$query class="full-width"}
-				</dl>
-				<p>
-					{button type="submit" name="run" label="Exécuter" shape="search"}
-				</p>
-			</fieldset>
-		</form>
-	{else}
-		<p>
-			{linkbutton shape="left" label="Retour" href="?"}
-		</p>
+		<fieldset>
+			<legend>Faire une requête SQL en lecture</legend>
+			<dl>
+				{input type="textarea" cols="70" rows="3" name="query" default=$query class="full-width"}
+			</dl>
+			<p>
+				{button type="submit" name="run" label="Exécuter" shape="search"}
+			</p>
+		</fieldset>
 	{/if}
 
 	{if !empty($result_count)}
 
+		<p class="actions">
+			{exportmenu form=true right=true}
+		</p>
 		<p class="alert block">{$result_count} résultats trouvés pour cette requête, en {$query_time} ms.</p>
 		<table class="list search">
 			{if $result_header}
@@ -62,29 +75,32 @@
 		</p>
 
 	{/if}
+	</form>
 
 {elseif !empty($table_info)}
 
 <div class="center-block">
 	<h2 class="ruler">Table : {$table_info.name}</h2>
-	<p class="actions">
+	<p>
 		{linkbutton shape="menu" href="?table=%s"|args:$table_info.name label="Parcourir les données"}
 	</p>
 
 
 	{include file="common/_sql_table.tpl" table=$table_info.schema indexes=$table_info.indexes fk_link=true class="center"}
 
-	<h2 class="ruler">Schéma</h2>
+	<h2 class="ruler">Schéma de la table</h2>
 	<pre>{$table_info.sql}</pre>
-	<pre>{$table_info.sql_indexes}</pre>
+	<h2 class="ruler">Schéma des index</h2>
+	<pre>{if empty($table_info.sql_indexes)}<em>Aucun index</em>{else}{$table_info.sql_indexes}{/if}</pre>
 </div>
 
 {elseif !empty($table)}
 
 	<h2 class="ruler">Table : {$table}</h2>
 	<div class="center-block">
-		<p class="actions">
+		<p>
 			{linkbutton shape="table" href="?table_info=%s"|args:$table label="Voir la structure"}
+			{exportmenu}
 		</p>
 	</div>
 
@@ -114,23 +130,6 @@
 
 {else}
 
-<p class="help">
-	Cette page vous permet de visualiser les données brutes de la base de données.
-</p>
-
-<div class="center-block">
-	<form method="post" action="{$self_url}">
-		<fieldset>
-			<legend>Faire une requête SQL en lecture</legend>
-			<dl>
-				{input type="textarea" cols="70" rows="3" name="query" default=$query class="full-width"}
-			</dl>
-			<p>
-				{button type="submit" name="run" label="Exécuter" shape="search"}
-			</p>
-		</fieldset>
-	</form>
-</div>
 	<h2 class="ruler">Liste des tables</h2>
 
 	<table class="list auto center">
