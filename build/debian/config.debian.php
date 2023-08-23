@@ -121,7 +121,7 @@ if (file_exists(DATA_ROOT . '/plugins')) {
 	define('Paheko\PLUGINS_ROOT', DATA_ROOT  . '/plugins');
 }
 else {
-	define('Paheko\PLUGINS_ROOT', ROOT . '/plugins');
+	define('Paheko\PLUGINS_ROOT', __DIR__ . '/plugins');
 }
 
 if (!defined('Paheko\SECRET_KEY')) {
