@@ -217,6 +217,7 @@ class Page extends Entity
 		if ($content_modified) {
 			$db = DB::getInstance();
 			$l = mb_strlen($this->content);
+
 			$version = [
 				'id_user' => $user_id,
 				'id_page' => $this->id(),
@@ -225,9 +226,16 @@ class Page extends Entity
 				'size'    => $l,
 				'changes' => $l - mb_strlen($prev_content),
 			];
-			$db->insert('web_pages_versions', $version);
 
-			Plugins::fire('web.page.version.new', false, ['entity' => $this, 'content' => $this->content, 'prev_content' => $prev_content, 'version' => $version]);
+			$db->insert('web_pages_versions', $version);
+			$version['id'] = $db->lastInsertId();
+
+			Plugins::fire('web.page.version.new', false, [
+				'entity'      => $this,
+				'content'     => $this->content,
+				'old_content' => $prev_content,
+				'version'     => (object) $version,
+			]);
 		}
 
 		return $r;
