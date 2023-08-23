@@ -22,7 +22,7 @@ dev-server:
 	php -S localhost:8082 -d upload_max_filesize=256M -d post_max_size=256M -t www www/_route.php
 
 test:
-	find . -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
+	find . -name '*.php' -not -path './data/*' -print0 | xargs -0 -n1 php -l > /dev/null
 
 phpstan:
 	phpstan.phar analyze -c ../tests/phpstan.neon include www
