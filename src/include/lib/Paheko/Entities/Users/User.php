@@ -611,6 +611,11 @@ class User extends Entity
 		$this->clearModifiedProperties(['preferences']);
 	}
 
+	public function url(): string
+	{
+		return Utils::getLocalURL(sprintf(self::PRIVATE_URL, $this->id));
+	}
+
 	public function diff(): array
 	{
 		$out = $this->asDetailsArray();
