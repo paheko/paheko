@@ -113,11 +113,11 @@ class Reminders
 			'delai'           => $reminder->delay,
 		];
 
-		$subject = self::replaceTagsInContent($reminder->subject, $replace);
-		$text = self::replaceTagsInContent($reminder->body, $replace);
+		$reminder->subject = self::replaceTagsInContent($reminder->subject, $replace);
+		$reminder->body = self::replaceTagsInContent($reminder->body, $replace);
 
 		// Envoi du mail
-		Emails::queue(Emails::CONTEXT_PRIVATE, [$reminder->email => ['data' => (array) $reminder]], null, $subject, $text);
+		Emails::queue(Emails::CONTEXT_PRIVATE, [$reminder->email => ['data' => (array) $reminder]], null, $reminder->subject, $reminder->body);
 
 		$db = DB::getInstance();
 		$db->insert('services_reminders_sent', [
@@ -127,7 +127,7 @@ class Reminders
 			'due_date'    => $reminder->reminder_date,
 		]);
 
-		Plugins::fire('reminder.send.after', false, $reminder);
+		Plugins::fire('reminder.send.after', false, compact('reminder'));
 
 		return true;
 	}
