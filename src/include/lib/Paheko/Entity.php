@@ -145,7 +145,6 @@ class Entity extends AbstractEntity
 	{
 		$name = get_class($this);
 		$name = str_replace('Paheko\Entities\\', '', $name);
-		$name = 'entity.' . $name . '.save';
 
 		// We are doing selfcheck here before sending the before event
 		if ($selfcheck) {
@@ -155,6 +154,7 @@ class Entity extends AbstractEntity
 		$new = $this->exists() ? false : true;
 		$modified = $this->isModified();
 		$entity = $this;
+		$params = compact('entity', 'new', 'modified');
 
 		$signals = [
 			// Specific entity signal
@@ -170,9 +170,8 @@ class Entity extends AbstractEntity
 		elseif ($modified) {
 			$signals[] = 'entity.' . $name . '.modify';
 			$signals[] = 'entity.modify';
+			$params['modified_properties'] = $this->getModifiedProperties();
 		}
-
-		$params = compact('entity', 'new', 'modified');
 
 		foreach ($signals as $signal_name) {
 			$signal = Plugins::fire($signal_name . '.before', true, $params);
@@ -188,7 +187,6 @@ class Entity extends AbstractEntity
 		if ($this::NAME && ($new || $modified)) {
 			Log::add($new ? Log::CREATE : Log::EDIT, ['entity' => get_class($this), 'id' => $this->id()]);
 		}
-
 
 		foreach ($signals as $signal_name) {
 			Plugins::fire($signal_name . '.after', false, $params);
