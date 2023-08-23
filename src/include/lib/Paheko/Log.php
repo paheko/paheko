@@ -23,6 +23,8 @@ class Log
 
 	const SOFT_LOCKOUT_ATTEMPTS = 3;
 
+	const MESSAGE = 0;
+
 	const LOGIN_FAIL = 1;
 	const LOGIN_SUCCESS = 2;
 	const LOGIN_RECOVER = 3;
@@ -47,6 +49,8 @@ class Log
 		self::DELETE => 'Suppression',
 		self::EDIT => 'Modification',
 		self::SENT => 'Envoi',
+
+		self::MESSAGE => '',
 	];
 
 	static public function add(int $type, ?array $details = null, int $id_user = null): void
@@ -171,7 +175,7 @@ class Log
 		$list->setModifier(function (&$row) {
 			$row->created = \DateTime::createFromFormat('!Y-m-d H:i:s', $row->created);
 			$row->details = $row->details ? json_decode($row->details) : null;
-			$row->type_label = self::ACTIONS[$row->type];
+			$row->type_label = $row->type == self::MESSAGE ? ($row->details->message ?? '') : self::ACTIONS[$row->type];
 
 			if (isset($row->details->entity)) {
 				$const = 'Paheko\Entities\\' . $row->details->entity . '::NAME';

@@ -5,6 +5,7 @@ namespace Paheko\Entities\Accounting;
 use KD2\DB\EntityManager;
 use Paheko\DB;
 use Paheko\Entity;
+use Paheko\Log;
 use Paheko\UserException;
 use Paheko\Utils;
 use Paheko\Accounting\Accounts;
@@ -14,7 +15,7 @@ use Paheko\Entities\Files\File;
 class Year extends Entity
 {
 	const NAME = 'Exercice';
-	const PRIVATE_URL = '!acc/years/reports/graphs.php?year=%d';
+	const PRIVATE_URL = '!acc/reports/graphs.php?year=%d';
 
 	const TABLE = 'acc_years';
 
@@ -86,6 +87,12 @@ class Year extends Entity
 
 		$this->set('closed', 0);
 		$this->save();
+
+		Log::add(Log::MESSAGE, [
+			'message' => sprintf('Réouverture de l\'exercice', $this->label),
+			'entity'  => self::class,
+			'id'      => $this->id(),
+		]);
 
 		// Create validated transaction to show that someone has reopened the year
 		$t = new Transaction;
