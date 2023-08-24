@@ -22,7 +22,7 @@ nav.tabs ul {
 nav.tabs .sub {
     margin: 0;
     margin-bottom: 1em;
-    margin-top: -1em;
+    margin-top: -1.7em;
     margin-left: 2.5em;
     border-left: 3px solid rgba(var(--gSecondColor), .5);
 }
