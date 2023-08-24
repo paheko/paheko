@@ -1091,7 +1091,7 @@ class File extends Entity
 		if (Router::isXSendFileEnabled()) {
 			$local_path = $path ?? Files::callStorage('getLocalFilePath', $this);
 
-			if ($path) {
+			if ($local_path) {
 				Router::xSendFile($local_path);
 				return;
 			}
@@ -1123,8 +1123,7 @@ class File extends Entity
 		}
 		elseif (null !== $pointer) {
 			while (!feof($pointer)) {
-				echo fread($pointer, 8192);
-				flush();
+				echo fread($pointer, 32*1024);
 			}
 
 			fclose($pointer);
