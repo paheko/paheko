@@ -240,6 +240,16 @@ class Files
 			'share' => false,
 		];
 
+		$p[File::CONTEXT_VERSIONS] = [
+			'mkdir' => false,
+			'move' => false,
+			'write' => false,
+			'create' => false,
+			'delete' => false,
+			'read' => false,
+			'share' => false,
+		];
+
 		$p[''] = [
 			'mkdir' => false,
 			'move' => false,
@@ -249,6 +259,7 @@ class Files
 			'read' => true,
 			'share' => false,
 		];
+
 
 		return $p;
 	}
@@ -723,7 +734,7 @@ class Files
 		return self::create($parent, $name);
 	}
 
-	static protected function createFrom(string $target, array $source): File
+	static public function createFrom(string $target, array $source): File
 	{
 		$parent = Utils::dirname($target);
 		$name = Utils::basename($target);

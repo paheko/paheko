@@ -4,7 +4,6 @@ namespace Paheko\Entities\Files;
 
 use KD2\Graphics\Image;
 use KD2\Graphics\Blob;
-use KD2\DB\EntityManager as EM;
 use KD2\Security;
 use KD2\WebDAV\WOPI;
 use KD2\Office\ToText;
@@ -30,11 +29,11 @@ use Paheko\Files\Files;
 
 use const Paheko\{WWW_URL, BASE_URL, ENABLE_XSENDFILE, SECRET_KEY, WOPI_DISCOVERY_URL, SHARED_CACHE_ROOT, PDFTOTEXT_COMMAND};
 
-/**
- * This is a virtual entity, it cannot be saved to a SQL table
- */
 class File extends Entity
 {
+	use FileVersionsTrait;
+	use FilePermissionsTrait;
+
 	const TABLE = 'files';
 	const EXTENSIONS_TEXT_CONVERT = ['ods', 'odt', 'odp', 'pptx', 'xlsx', 'docx', 'pdf'];
 
@@ -94,6 +93,7 @@ class File extends Entity
 	const CONTEXT_WEB = 'web';
 	const CONTEXT_MODULES = 'modules';
 	const CONTEXT_ATTACHMENTS = 'attachments';
+	const CONTEXT_VERSIONS = 'versions';
 
 	const CONTEXTS_NAMES = [
 		self::CONTEXT_TRASH => 'Corbeille',
@@ -104,6 +104,13 @@ class File extends Entity
 		self::CONTEXT_WEB => 'Site web',
 		self::CONTEXT_MODULES => 'Modules',
 		self::CONTEXT_ATTACHMENTS => 'Fichiers joints aux messages',
+		self::CONTEXT_VERSIONS => 'Versions',
+	];
+
+	const VERSIONED_CONTEXTS = [
+		self::CONTEXT_DOCUMENTS,
+		self::CONTEXT_TRANSACTION,
+		self::CONTEXT_USER,
 	];
 
 	const IMAGE_TYPES = [
@@ -325,8 +332,13 @@ class File extends Entity
 		// Only mark the root folder as trashed, but still move everything else
 		$this->set('trash', new \DateTime);
 
+		// Move versions as well
+		if ($v = Files::get(self::CONTEXT_VERSIONS . '/' . $this->path)) {
+			$v->rename(self::CONTEXT_TRASH . '/' . $hash . '/' . $v->path, false);
+		}
+
 		// ->rename() will ->save()
-		$this->rename(self::CONTEXT_TRASH . '/' . $hash . '/' . $this->path);
+		$this->rename(self::CONTEXT_TRASH . '/' . $hash . '/' . $this->path, false);
 
 		Plugins::fire('file.trash', false, ['file' => $this]);
 
@@ -343,13 +355,19 @@ class File extends Entity
 		$db->begin();
 
 		$root = strtok($this->path, '/') . '/' . strtok('/');
-
 		$orig_path = strtok(false);
 
 		$this->set('trash', null);
 
+		$v = Files::get($root . '/' . self::CONTEXT_VERSIONS . '/' . $orig_path);
+
+		// Restore versions
+		if ($v) {
+			$v->rename(self::CONTEXT_VERSIONS . '/' . $orig_path, false);
+		}
+
 		// rename() will do the save()
-		$this->rename($orig_path);
+		$this->rename($orig_path, false);
 
 		Plugins::fire('file.restore', false, ['file' => $this]);
 
@@ -404,12 +422,31 @@ class File extends Entity
 		Plugins::fire('file.delete', false, ['file' => $this]);
 
 		$this->deleteCache();
+		$this->deleteVersions();
 
 		$r = parent::delete();
 
 		$db->commit();
 
 		return $r;
+	}
+
+
+	/**
+	 * Copy the current file to a new location
+	 * @param  string $target Target path
+	 * @return self
+	 */
+	public function copy(string $new_path): self
+	{
+		if ($this->isDir()) {
+			throw new \LogicException('Cannot copy a directory');
+		}
+
+		$path = $this->getLocalFilePath();
+		$pointer = $path ? null : $this->getReadOnlyPointer();
+
+		return Files::createFrom($new_path, compact('path', 'pointer'));
 	}
 
 	/**
@@ -420,7 +457,17 @@ class File extends Entity
 	public function changeFileName(string $new_name): bool
 	{
 		self::validateFileName($new_name);
-		return $this->rename(ltrim($this->parent . '/' . $new_name, '/'));
+
+		$v = $this->getVersionsDirectory();
+
+		$r = $this->rename(ltrim($this->parent . '/' . $new_name, '/'));
+
+		// Rename versions directory as well
+		if ($v && $r) {
+			$v->changeFileName($new_name);
+		}
+
+		return $r;
 	}
 
 	/**
@@ -430,7 +477,15 @@ class File extends Entity
 	 */
 	public function move(string $target, bool $check_session = true): bool
 	{
-		return $this->rename($target . '/' . $this->name, $check_session);
+		$v = $this->getVersionsDirectory();
+
+		$r = $this->rename($target . '/' . $this->name, $check_session);
+
+		if ($r && $v) {
+			$v->rename(self::CONTEXT_VERSIONS . '/' . $this->path);
+		}
+
+		return $r;
 	}
 
 	/**
@@ -512,7 +567,7 @@ class File extends Entity
 			}
 			else {
 				// Overwrite existing file
-				$exists->delete();
+				$exists->deleteSafe();
 			}
 
 			unset($exists);
@@ -529,16 +584,6 @@ class File extends Entity
 		$db->commit();
 
 		return $r;
-	}
-
-	/**
-	 * Copy the current file to a new location
-	 * @param  string $target Target path
-	 * @return self
-	 */
-	public function copy(string $target): self
-	{
-		return Files::createFromPointer($target, $this->getReadOnlyPointer());
 	}
 
 	public function setContent(string $content): self
@@ -569,7 +614,7 @@ class File extends Entity
 		if (!isset($source['path']) && !isset($source['content']) && !isset($source['pointer'])) {
 			throw new \InvalidArgumentException('Unknown source type');
 		}
-		elseif (count($source) != 1) {
+		elseif (count(array_filter($source, fn($a) => !is_null($a))) != 1) {
 			throw new \InvalidArgumentException('Invalid source type');
 		}
 
@@ -593,7 +638,9 @@ class File extends Entity
 		}
 		elseif ($pointer) {
 			// See https://github.com/php/php-src/issues/9441
-			if (stream_get_meta_data($pointer)['uri'] == 'php://input') {
+			$meta = stream_get_meta_data($pointer);
+
+			if (isset($meta['uri']) && $meta['uri'] == 'php://input') {
 				while (!feof($pointer)) {
 					fread($pointer, 8192);
 				}
@@ -610,7 +657,7 @@ class File extends Entity
 		}
 
 		// File hasn't changed
-		if (!$new && !$this->isModified('md5') && !$this->isModified('size')) {
+		if (!$new && !$this->isModified('md5')) {
 			return $this;
 		}
 
@@ -651,12 +698,18 @@ class File extends Entity
 			}
 		}
 
+		$db = DB::getInstance();
+		$db->begin();
+
+		// Only archive previous version if it was more than 0 bytes
+		if (!$new && ($this->getModifiedProperty('size') ?? $this->size) > 0) {
+			$this->pruneVersions();
+			$this->createVersion();
+		}
+
 		if (!isset($this->modified)) {
 			$this->set('modified', new \DateTime);
 		}
-
-		$db = DB::getInstance();
-		$db->begin();
 
 		// Save metadata now, and rollback if required
 		$this->save();
@@ -928,29 +981,8 @@ class File extends Entity
 	/**
 	 * Envoie le fichier au client HTTP
 	 */
-	public function serve(?Session $session = null, bool $download = false, ?string $share_hash = null, ?string $share_password = null): void
+	public function serve($download = null): void
 	{
-		$can_access = $this->canRead();
-
-		if (!$can_access && $share_hash) {
-			$can_access = $this->checkShareLink($share_hash, $share_password);
-
-			if (!$can_access && $this->checkShareLinkRequiresPassword($share_hash)) {
-				$tpl = Template::getInstance();
-				$has_password = (bool) $share_password;
-
-				$tpl->assign(compact('can_access', 'has_password'));
-				$tpl->display('ask_share_password.tpl');
-				return;
-			}
-		}
-
-		if (!$can_access) {
-			header('HTTP/1.1 403 Forbidden', true, 403);
-			throw new UserException('Vous n\'avez pas accès à ce fichier.', 403);
-			return;
-		}
-
 		// Only simple files can be served, not directories
 		if ($this->type != self::TYPE_FILE) {
 			header('HTTP/1.1 404 Not Found', true, 404);
@@ -961,19 +993,6 @@ class File extends Entity
 
 		if (($path = $this->getLocalFilePath()) && in_array($this->context(), [self::CONTEXT_WEB, self::CONTEXT_CONFIG])) {
 			Web_Cache::link($this->uri(), $path);
-		}
-	}
-
-	public function serveAuto(?Session $session = null, array $params = []): void
-	{
-		$found_sizes = array_intersect_key($params, self::ALLOWED_THUMB_SIZES);
-		$size = key($found_sizes);
-
-		if ($size && $this->image) {
-			$this->serveThumbnail($session, $size);
-		}
-		else {
-			$this->serve($session, isset($params['download']));
 		}
 	}
 
@@ -996,14 +1015,8 @@ class File extends Entity
 	/**
 	 * Envoie une miniature à la taille indiquée au client HTTP
 	 */
-	public function serveThumbnail(?Session $session = null, string $size = null): void
+	public function serveThumbnail(string $size = null): void
 	{
-		if (!$this->canRead($session)) {
-			header('HTTP/1.1 403 Forbidden', true, 403);
-			throw new UserException('Accès interdit', 403);
-			return;
-		}
-
 		if (!$this->image) {
 			throw new UserException('Il n\'est pas possible de fournir une miniature pour un fichier qui n\'est pas une image.');
 		}
@@ -1056,14 +1069,7 @@ class File extends Entity
 		}
 	}
 
-	/**
-	 * Servir un fichier local en HTTP
-	 * @param  string $path Chemin vers le fichier local
-	 * @param  string $type Type MIME du fichier
-	 * @param  string $name Nom du fichier avec extension
-	 * @param  integer $size Taille du fichier en octets (facultatif)
-	 */
-	protected function _serve(?string $path = null, bool $download = false): void
+	protected function _serve(?string $path = null, $download = null): void
 	{
 		if ($this->isPublic()) {
 			Utils::HTTPCache($this->etag(), $this->modified->getTimestamp());
@@ -1090,7 +1096,7 @@ class File extends Entity
 		}
 
 		header(sprintf('Content-Type: %s', $type));
-		header(sprintf('Content-Disposition: %s; filename="%s"', $download ? 'attachment' : 'inline', $this->name));
+		header(sprintf('Content-Disposition: %s; filename="%s"', null !== $download ? 'attachment' : 'inline', is_string($download) ? $download : $this->name));
 
 		// Use X-SendFile, if available, and storage has a local copy
 		if (Router::isXSendFileEnabled()) {
@@ -1181,135 +1187,6 @@ class File extends Entity
 		else {
 			throw new \LogicException('Cannot render file of this type');
 		}
-	}
-
-	public function canRead(Session $session = null): bool
-	{
-		// Web pages and config files are always public
-		if ($this->isPublic()) {
-			return true;
-		}
-
-		$session ??= Session::getInstance();
-
-		return $session->checkFilePermission($this->path, 'read');
-	}
-
-	public function canShare(Session $session = null): bool
-	{
-		$session ??= Session::getInstance();
-
-		if (!$session->isLogged()) {
-			return false;
-		}
-
-		return $session->checkFilePermission($this->path, 'share');
-	}
-
-	public function canWrite(Session $session = null): bool
-	{
-		$session ??= Session::getInstance();
-
-		if (!$session->isLogged()) {
-			return false;
-		}
-
-		return $session->checkFilePermission($this->path, 'write');
-	}
-
-	public function canDelete(Session $session = null): bool
-	{
-		$session ??= Session::getInstance();
-
-		if (!$session->isLogged()) {
-			return false;
-		}
-
-		// Deny delete of directories in web context
-		if ($this->isDir() && $this->context() == self::CONTEXT_WEB) {
-			return false;
-		}
-
-		return $session->checkFilePermission($this->path, 'delete');
-	}
-
-	public function canMoveTo(string $destination, Session $session = null): bool
-	{
-		$session ??= Session::getInstance();
-
-		if (!$session->isLogged()) {
-			return false;
-		}
-
-		return $session->checkFilePermission($this->path, 'move') && $this->canDelete() && self::canCreate($destination);
-	}
-
-	public function canCopyTo(string $destination, Session $session = null): bool
-	{
-		$session ??= Session::getInstance();
-
-		if (!$session->isLogged()) {
-			return false;
-		}
-
-		return $this->canRead() && self::canCreate($destination);
-	}
-
-	public function canCreateDirHere(Session $session = null)
-	{
-		if (!$this->isDir()) {
-			return false;
-		}
-
-		$session ??= Session::getInstance();
-
-		if (!$session->isLogged()) {
-			return false;
-		}
-
-		return $session->checkFilePermission($this->path, 'mkdir');
-	}
-
-	static public function canCreateDir(string $path, Session $session = null)
-	{
-		$session ??= Session::getInstance();
-
-		if (!$session->isLogged()) {
-			return false;
-		}
-
-		return $session->checkFilePermission($path, 'mkdir');
-	}
-
-	public function canCreateHere(Session $session = null): bool
-	{
-		if (!$this->isDir()) {
-			return false;
-		}
-
-		$session ??= Session::getInstance();
-
-		if (!$session->isLogged()) {
-			return false;
-		}
-
-		return $session->checkFilePermission($this->path, 'create');
-	}
-
-	public function canRename(Session $session = null): bool
-	{
-		return $this->canCreate($this->parent ?? '', $session);
-	}
-
-	static public function canCreate(string $path, Session $session = null): bool
-	{
-		$session ??= Session::getInstance();
-
-		if (!$session->isLogged()) {
-			return false;
-		}
-
-		return $session->checkFilePermission($path, 'create');
 	}
 
 	public function pathHash(): string

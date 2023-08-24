@@ -191,7 +191,8 @@ use Paheko\Entities\Files\File;
 							{/if}
 							{if $item->canRename() || $item->canDelete() || ($item->canWrite() && $item->editorType())}
 								{linkmenu label="Modifier…" shape="edit" right=true}
-									{if $item->canWrite() && $item->editorType()}
+									{assign var="can_write" value=$item->canWrite()}
+									{if $can_write && $item->editorType()}
 										{linkbutton href="!common/files/edit.php?p=%s"|args:$item->path_uri() label="Éditer" shape="edit" target="_dialog" data-dialog-class="fullscreen"}
 									{/if}
 									{if $item->canRename()}
@@ -199,6 +200,9 @@ use Paheko\Entities\Files\File;
 									{/if}
 									{if $item->canDelete()}
 										{linkbutton href="!common/files/delete.php?p=%s"|args:$item->path_uri() label="Supprimer" shape="trash" target="_dialog"}
+									{/if}
+									{if $can_write}
+										{linkbutton shape="history" href="!common/files/history.php?p=%s"|args:$item->path_uri() label="Historique" target="_dialog"}
 									{/if}
 								{/linkmenu}
 							{/if}
