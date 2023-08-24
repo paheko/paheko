@@ -642,7 +642,7 @@ class Utils
 		}
 	}
 
-	static public function format_bytes($size)
+	static public function format_bytes($size, bool $bytes = false)
 	{
 		if ($size > (1024 * 1024 * 1024 * 1024)) {
 			$size = $size / 1024 / 1024 / 1024 / 1024;
@@ -673,6 +673,9 @@ class Utils
 		}
 		elseif ($size > 1024) {
 			return round($size / 1024) . ' Ko';
+		}
+		elseif ($bytes) {
+			return $size . ' octets';
 		}
 		else {
 			return '< 1 Ko';
