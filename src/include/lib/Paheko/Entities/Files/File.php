@@ -576,8 +576,10 @@ class File extends Entity
 		Files::assertStorageIsUnlocked();
 
 		$delete_after = false;
-		$path = $content = $pointer = null;
-		extract($source);
+		$path = $source['path'] ?? null;
+		$content = $source['content'] ?? null;
+		$pointer = $source['pointer'] ?? null;
+		$new = !$this->exists();
 
 		if ($path) {
 			$this->set('size', filesize($path));
@@ -605,6 +607,11 @@ class File extends Entity
 			Files::checkQuota($this->size);
 
 			$this->rehash($pointer);
+		}
+
+		// File hasn't changed
+		if (!$new && !$this->isModified('md5') && !$this->isModified('size')) {
+			return $this;
 		}
 
 		// Check that it's a real image
@@ -647,8 +654,6 @@ class File extends Entity
 		if (!isset($this->modified)) {
 			$this->set('modified', new \DateTime);
 		}
-
-		$new = !$this->exists();
 
 		$db = DB::getInstance();
 		$db->begin();
