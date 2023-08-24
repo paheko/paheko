@@ -4,7 +4,18 @@
 
 {form_errors}
 
-{if $_GET.msg == ''}
+{if $_GET.msg == 'RENAMED'}
+<p class="confirm block">
+	La version a été nommée.
+</p>
+{elseif $_GET.msg == 'DELETED'}
+<p class="confirm block">
+	La version a été supprimée.
+</p>
+{elseif $_GET.msg == 'RESTORED'}
+<p class="confirm block">
+	La version a été restaurée.
+</p>
 {/if}
 
 <p class="help">

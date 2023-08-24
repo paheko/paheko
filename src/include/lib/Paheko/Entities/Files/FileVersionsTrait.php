@@ -87,13 +87,12 @@ trait FileVersionsTrait
 
 			// Next 2 months, one version per week
 			3600*24*60 => 3600*24*7,
+
 		];
 
-		// Keep one version each month after first 2 months
-		$last_step = 3600*24*30;
-		$last_interval = 3600*24*60;
-		$keep = [];
-		$delete = [];
+		// Keep one version each trimester after first 2 months
+		$max_step = 3600*24*30;
+
 		$last_step = null;
 		$last_timestamp = null;
 
@@ -117,8 +116,7 @@ trait FileVersionsTrait
 				break;
 			}
 
-			$interval ??= $last_interval;
-			$step ??= $last_step;
+			$step ??= $max_step;
 
 			if ($last_step !== $step) {
 				$last_timestamp = null;
