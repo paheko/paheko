@@ -25,5 +25,6 @@ else if ($html = $file->editorHTML(true)) {
 	echo $html;
 }
 else {
+	// We don't need $session here as read access is already checked above
 	$file->serve();
 }

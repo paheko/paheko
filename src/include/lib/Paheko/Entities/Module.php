@@ -491,6 +491,7 @@ class Module extends Entity
 				throw new UserException('Invalid path');
 			}
 
+			$file->validateCanRead();
 			$file->serve();
 		}
 		// Serve a static file from dist path

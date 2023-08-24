@@ -143,11 +143,13 @@ class Router
 				return;
 			}
 
+			$file->validateCanRead($session, $_GET['s'] ?? null, $_POST['p'] ?? null);
+
 			if ($size) {
-				$file->serveThumbnail($session, $size);
+				$file->serveThumbnail($size);
 			}
 			else {
-				$file->serve($session, isset($_GET['download']), $_GET['s'] ?? null, $_POST['p'] ?? null);
+				$file->serve(isset($_GET['download']));
 			}
 
 			Plugins::fire('http.request.file.after', false, compact('file', 'uri', 'session'));
