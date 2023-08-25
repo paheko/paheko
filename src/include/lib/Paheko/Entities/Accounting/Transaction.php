@@ -824,9 +824,9 @@ class Transaction extends Entity
 			unset($line, $accounts, $account, $source['simple']);
 		}
 
-		// Add lines
+		// Add/update lines objects
 		if (isset($source['lines']) && is_array($source['lines'])) {
-			$this->resetLines();
+			$lines = $this->getLines();
 			$db = DB::getInstance();
 
 			foreach ($source['lines'] as $i => $line) {
@@ -851,9 +851,39 @@ class Transaction extends Entity
 				}
 
 
-				$l = new Line;
+				if (array_key_exists($i, $lines)) {
+					$new = false;
+					$l = $lines[$i];
+				}
+				else {
+					$new = true;
+					$l = new Line;
+				}
+
 				$l->importForm($line);
-				$this->addLine($l);
+
+				if ($l->isModified('debit') || $l->isModified('credit') || $l->isModified('id_account')) {
+					$l->set('reconciled', false);
+				}
+
+				if ($new) {
+					$this->addLine($l);
+				}
+			}
+
+			// Remove extra lines
+			if (count($lines) > count($source['lines'])) {
+				$max = count($source['lines']);
+
+				foreach ($lines as $j => $line) {
+					if ($j >= $max) {
+						$this->_old_lines[] = $line;
+						unset($this->_lines[$j]);
+					}
+				}
+
+				// reset array indexes
+				$this->_lines = array_values($this->_lines);
 			}
 		}
 

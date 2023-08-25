@@ -38,6 +38,12 @@ $is_quick = count(array_intersect_key($_GET, array_flip(['a', 'l', 'd', 't', 'ac
 		</dl>
 	</fieldset>
 
+	{if !empty($has_reconciled_lines)}
+	<p class="alert block">
+		Attention, cette écriture contient des lignes qui ont été rapprochées. Modifier son montant ou le compte bancaire entraînera la perte du rapprochement.
+	</p>
+	{/if}
+
 	{foreach from=$types_details item="type"}
 		<fieldset data-types="t{$type.id}"{if $is_new} class="hidden"{/if}>
 			<legend>{$type.label}</legend>
