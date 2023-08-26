@@ -62,9 +62,11 @@ class FileSystem implements StorageInterface
 		$target = self::getLocalFilePath($file);
 		self::ensureParentDirectoryExists($target);
 
-		$return = copy($source_path, $target);
+		$tmpfile = tempnam(CACHE_ROOT, 'file-');
+		$return = copy($source_path, $tmpfile);
 
 		if ($return) {
+			rename($tmpfile, $target);
 			touch($target, $file->modified->getTimestamp());
 		}
 
@@ -76,9 +78,11 @@ class FileSystem implements StorageInterface
 		$target = self::getLocalFilePath($file);
 		self::ensureParentDirectoryExists($target);
 
-		$return = file_put_contents($target, $source_content) === false ? false : true;
+		$tmpfile = tempnam(CACHE_ROOT, 'file-');
+		$return = file_put_contents($tmpfile, $source_content) === false ? false : true;
 
 		if ($return) {
+			rename($tmpfile, $target);
 			touch($target, $file->modified->getTimestamp());
 		}
 
@@ -90,7 +94,8 @@ class FileSystem implements StorageInterface
 		$target = self::getLocalFilePath($file);
 		self::ensureParentDirectoryExists($target);
 
-		$fp = fopen($target, 'w');
+		$tmpfile = tempnam(CACHE_ROOT, 'file-');
+		$fp = fopen($tmpfile, 'w');
 
 		while (!feof($pointer)) {
 			fwrite($fp, fread($pointer, 8192));
@@ -98,6 +103,7 @@ class FileSystem implements StorageInterface
 
 		fclose($fp);
 
+		rename($tmpfile, $target);
 		touch($target, $file->modified->getTimestamp());
 
 		return true;
