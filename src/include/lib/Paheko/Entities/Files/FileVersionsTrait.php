@@ -73,6 +73,7 @@ trait FileVersionsTrait
 	{
 		$now = time();
 
+		// FIXME: get policy from config
 		$max_versions_per_interval = [
 			//ends_after => step (interval size)
 

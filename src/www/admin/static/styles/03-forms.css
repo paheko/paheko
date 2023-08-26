@@ -378,7 +378,7 @@ form .radio-btn input:focus + label::before {
 }
 
 form .radio-btn input:focus + label div {
-    box-shadow: 0 0 5px .2rem rgb(var(--gSecondColor));
+    box-shadow: 0 0 5px 1px rgb(var(--gSecondColor));
 }
 
 form .radio-btn div {
@@ -390,10 +390,6 @@ form .radio-btn div {
     padding: .2em .4em;
     transition: color .3s, background-color .3s;
     color: rgb(var(--gTextColor));
-}
-
-form .radio-btn h3 {
-    text-decoration: underline;
 }
 
 form .radio-btn input {
@@ -408,6 +404,21 @@ form .radio-btn .help {
 form .radio-btn input:checked + label div {
     background-color: rgba(var(--gSecondColor), 0.3);
 }
+
+form .minor .radio-btn h3 {
+    font-size: 1em;
+}
+
+form .minor .radio-btn div {
+    display: table-cell;
+    border: 1px solid rgba(var(--gSecondColor), 0.3);
+    background-color: rgba(var(--gSecondColor), 0.05);
+}
+
+form .minor .radio-btn input:checked + label div {
+    background-color: rgba(var(--gSecondColor), 0.2);
+}
+
 
 /* Custom list input */
 form .input-list {
