@@ -26,28 +26,27 @@ class Markdown extends AbstractRender
 	 */
 	public $toc = [];
 
-	public function render(?string $content = null): string
-	{
-		if (null === $content && $this->file) {
-			$content = $this->file->fetch();
-		}
+	static protected $md = null;
 
+	public function render(string $content = null): string
+	{
 		if (empty($content)) {
 			return '';
 		}
 
-		$md = Markdown_Parser::instance();
-		Markdown_Extensions::register($md);
+		if (!isset(self::$md)) {
+			self::$md = Markdown_Parser::instance();
+			Markdown_Extensions::register(self::$md);
 
-		// Register Paheko extensions
-		$ext = new Extensions($this);
-
-		foreach ($ext->getList() as $name => $callback) {
-			$md->registerExtension($name, $callback);
+			// Register Paheko extensions
+			foreach (Extensions::getList() as $name => $callback) {
+				self::$md->registerExtension($name, $callback);
+			}
 		}
 
-		$content = $md->text($content);
-		unset($md);
+		Extensions::setRenderer($this);
+
+		$content = self::$md->text($content);
 
 		$content = preg_replace_callback(';<a href="([\w_-]+?)">;i', function ($matches) {
 			return sprintf('<a href="%s">', htmlspecialchars($this->resolveLink(htmlspecialchars_decode($matches[1]))));

@@ -136,19 +136,23 @@ class Router
 
 			$session = Session::getInstance();
 
-			if (Plugins::fireSignal('http.request.file.before', compact('file', 'uri', 'session'))) {
+			$signal = Plugins::fire('http.request.file.before', true, compact('file', 'uri', 'session'));
+
+			if ($signal && $signal->isStopped()) {
 				// If a plugin handled the request, let's stop here
 				return;
 			}
 
+			$file->validateCanRead($session, $_GET['s'] ?? null, $_POST['p'] ?? null);
+
 			if ($size) {
-				$file->serveThumbnail($session, $size);
+				$file->serveThumbnail($size);
 			}
 			else {
-				$file->serve($session, isset($_GET['download']), $_GET['s'] ?? null, $_POST['p'] ?? null);
+				$file->serve(isset($_GET['download']));
 			}
 
-			Plugins::fireSignal('http.request.file.after', compact('file', 'uri', 'session'));
+			Plugins::fire('http.request.file.after', false, compact('file', 'uri', 'session'));
 
 			return;
 		}
@@ -158,7 +162,7 @@ class Router
 
 	static public function markdown(string $text)
 	{
-		$md = new Markdown;
+		$md = new Markdown(null, null);
 		header('Content-Type: text/html');
 
 		$text = $md->text($text);

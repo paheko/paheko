@@ -198,9 +198,12 @@ form#f_upload fieldset {
     padding-top: .4em;
 }
 
+.web.preview header {
+    text-align: center;
+}
+
 .web.preview header .actions {
     float: none;
-    text-align: center;
     font-size: 1.2em;
 }
 

@@ -605,6 +605,12 @@
       "css": "trash",
       "code": 128465,
       "src": "fontawesome"
+    },
+    {
+      "uid": "d4816c0845aa43767213d45574b3b145",
+      "css": "history",
+      "code": 8986,
+      "src": "fontawesome"
     }
   ]
 }

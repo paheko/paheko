@@ -65,7 +65,11 @@ foreach (Install::DEFAULT_MODULES as $module) {
 	}
 }
 
-ksort($installable);
+uasort($installable, function ($a, $b) {
+	$name1 = $a['module']->label ?? $a['plugin']->label;
+	$name2 = $b['module']->label ?? $b['plugin']->label;
+	return strcasecmp($name1, $name2);
+});
 
 $tpl->assign(compact('csrf_key', 'installable'));
 

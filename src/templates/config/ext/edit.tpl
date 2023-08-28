@@ -10,7 +10,7 @@
 
 		{linkmenu label="Ajouter…" shape="plus" right=true}
 			{linkbutton shape="upload" label="Depuis mon ordinateur" target="_dialog" href="!common/files/upload.php?p=%s"|args:$parent_path_uri}
-			{linkbutton shape="folder" label="Répertoire" target="_dialog" href="!docs/new_dir.php?path=%s&no_redir"|args:$parent_path_uri}
+			{linkbutton shape="folder" label="Dossier" target="_dialog" href="!docs/new_dir.php?path=%s&no_redir"|args:$parent_path_uri}
 			{linkbutton shape="text" label="Fichier texte" target="_dialog" href="!docs/new_file.php?path=%s"|args:$parent_path_uri}
 		{/linkmenu}
 	</aside>
@@ -71,7 +71,7 @@
 				{if $file.local && $file.dist}
 					{linkbutton label="Supprimer les modifications" href="%s&trash=no"|args:$file.delete_url shape="delete" target="_dialog"}
 				{elseif $file.local && $file.dir}
-					{linkbutton label="Supprimer ce répertoire" href=$file.delete_url shape="trash" target="_dialog"}
+					{linkbutton label="Supprimer ce dossier" href=$file.delete_url shape="trash" target="_dialog"}
 				{elseif $file.local}
 					{linkbutton label="Supprimer ce fichier" href=$file.delete_url shape="trash" target="_dialog"}
 				{/if}
@@ -80,5 +80,11 @@
 		{/foreach}
 	</tbody>
 </table>
+
+{if $module->hasDist() && $module->hasLocal()}
+<p class="actions">
+	{linkbutton label="Supprimer toutes les modifications" href="delete.php?module=%s&mode=reset"|args:$module.name shape="delete" target="_dialog"}
+</p>
+{/if}
 
 {include file="_foot.tpl"}

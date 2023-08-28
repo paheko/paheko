@@ -246,11 +246,7 @@ orange</code></pre>
 </tr>
 <tr>
 <td style="text-align: left;"><code>assign</code></td>
-<td style="text-align: left;">Si renseigné, une variable de ce nom sera créée, et le contenu de la dernière ligne du résultat y sera assigné.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>assign_assoc</code></td>
-<td style="text-align: left;">Si renseigné, le tableau dans la variable de ce nom sera rempli, avec pour chaque ligne une entrée, et comme clé la première colonne, et : s'il y a plus de 2 colonnes sélectionnées, le tableau complet comme valeur, sinon la seconde colonne.</td>
+<td style="text-align: left;">Si renseigné, une variable de ce nom sera créée, et le contenu de la ligne y sera assigné.</td>
 </tr>
 </tbody>
 </table>
@@ -259,10 +255,19 @@ orange</code></pre>
 {{#select * FROM users WHERE prenom = :prenom; :prenom=$prenom debug=true}}
 ...
 {{/select}}</code></pre>
-<p>Affichera : <code>SELECT * FROM users WHERE nom = 'Karim'</code>.</p>
+<p>Affichera juste au dessus du résultat la requête exécutée :</p>
+<pre><code>SELECT * FROM users WHERE nom = 'Karim'</code></pre>
+<h3 id="parametre-assign">Paramètre assign</h3>
 <p>Exemple avec <code>assign</code> :</p>
 <pre><code>{{#select * FROM users WHERE prenom = 'Camille' LIMIT 1; assign="membre"}}{{/select}}
 {{$membre.nom}}</code></pre>
+<p>Il est possible d'utiliser un point final pour que toutes les lignes soient mises dans un tableau :</p>
+<pre><code>{{#select * FROM users WHERE prenom = 'Camille' LIMIT 10; assign="membres."}}{{/select}}
+
+{{#foreach from=$membres}}
+    Nom : {{$nom}}&lt;br /&gt;
+    Adresse : {{$adresse}}
+{{/foreach}}</code></pre>
 <h2 id="sql">sql</h2>
 <p>Effectue une requête SQL de type <code>SELECT</code> dans la base de données, mais de manière simplifiée par rapport à <code>select</code>.</p>
 <pre><code>{{#sql select="*, julianday(date) AS day" tables="membres" where="id_categorie = :id_categorie" :id_categorie=$_GET.id_categorie order="numero DESC" begin=":page*100" limit=100 :page=$_GET.page}}
@@ -316,12 +321,16 @@ orange</code></pre>
 <td style="text-align: left;">Contenu de la clause <code>GROUP BY</code></td>
 </tr>
 <tr>
+<td style="text-align: left;"><code>having</code></td>
+<td style="text-align: left;">Contenu de la clause <code>HAVING</code></td>
+</tr>
+<tr>
 <td style="text-align: left;"><code>order</code></td>
 <td style="text-align: left;">Ordre de tri des résultats. Si vide le tri sera fait par ordre d'ajout dans la base de données.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>assign</code></td>
-<td style="text-align: left;">Si renseigné, une variable de ce nom sera créée, et le contenu de la dernière ligne du résultat y sera assigné.</td>
+<td style="text-align: left;">Si renseigné, une variable de ce nom sera créée, et le contenu de la ligne du résultat y sera assigné.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>debug</code></td>

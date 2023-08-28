@@ -72,7 +72,7 @@
 				{if $item.broken}
 					<td colspan="5">
 						{if ENABLE_TECH_DETAILS}
-							<strong class="error">Le code source de l'extension est absent du répertoire des plugins</strong>
+							<strong class="error">Le code source de l'extension est absent du dossier des plugins</strong>
 						{else}
 							<strong class="error">Cette extension n'est pas installée sur ce serveur.</strong><br />
 						{/if}

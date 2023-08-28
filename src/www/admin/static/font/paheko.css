@@ -1,12 +1,12 @@
 @charset "UTF-8";
 @font-face {
   font-family: 'paheko';
-  src: url('../font/paheko.eot?72026622');
-  src: url('../font/paheko.eot?72026622#iefix') format('embedded-opentype'),
-       url('../font/paheko.woff2?72026622') format('woff2'),
-       url('../font/paheko.woff?72026622') format('woff'),
-       url('../font/paheko.ttf?72026622') format('truetype'),
-       url('../font/paheko.svg?72026622#paheko') format('svg');
+  src: url('../font/paheko.eot?71335949');
+  src: url('../font/paheko.eot?71335949#iefix') format('embedded-opentype'),
+       url('../font/paheko.woff2?71335949') format('woff2'),
+       url('../font/paheko.woff?71335949') format('woff'),
+       url('../font/paheko.ttf?71335949') format('truetype'),
+       url('../font/paheko.svg?71335949#paheko') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -16,7 +16,7 @@
 @media screen and (-webkit-min-device-pixel-ratio:0) {
   @font-face {
     font-family: 'paheko';
-    src: url('../font/paheko.svg?72026622#paheko') format('svg');
+    src: url('../font/paheko.svg?71335949#paheko') format('svg');
   }
 }
 */
@@ -79,6 +79,7 @@
 .icn-download:before { content: '\21d3'; } /* '⇓' */
 .icn-login:before { content: '\21e5'; } /* '⇥' */
 .icn-home:before { content: '\2302'; } /* '⌂' */
+.icn-history:before { content: '\231a'; } /* '⌚' */
 .icn-print:before { content: '\2399'; } /* '⎙' */
 .icn-col:before { content: '\259a'; } /* '▚' */
 .icn-video:before { content: '\25b6'; } /* '▶' */

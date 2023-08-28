@@ -12,6 +12,12 @@
 		confirm="Cocher cette case pour confirmer la suppression de toutes les données liées à cette extension"
 		warning="Êtes-vous sûr de vouloir supprimer les données de l'extension « %s » ?"|args:$module.label
 		alert="Attention, cela supprimera toutes les données liées à l'extension"}
+{elseif $mode == 'reset'}
+	{include file="common/delete_form.tpl"
+		legend="Supprimer les modifications d'un module"
+		confirm="Cocher cette case pour confirmer la suppression des modifications"
+		warning="Êtes-vous sûr de vouloir supprimer les modifications apportées au module « %s » ?"|args:$module.label
+		alert="Le module reviendra à son état initial."}
 {else}
 	{include file="common/delete_form.tpl"
 		legend="Supprimer une extension"

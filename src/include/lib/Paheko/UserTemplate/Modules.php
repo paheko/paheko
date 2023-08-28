@@ -186,6 +186,11 @@ class Modules
 		unset($var);
 
 		foreach (self::listForSnippet($snippet) as $module) {
+			// Maybe the cache was wrong and the template doesn't exist anymore
+			if (!$module->hasFile($snippet)) {
+				continue;
+			}
+
 			$out[$module->name] = $module->fetch($snippet, $variables);
 		}
 
@@ -299,7 +304,7 @@ class Modules
 		$module->serve($path, $has_local_file, compact('uri', 'page'));
 	}
 
-	static public function import(string $path): ?Module
+	static public function import(string $path, bool $overwrite = false): ?Module
 	{
 		$zip = new ZipReader;
 
@@ -345,23 +350,35 @@ class Modules
 
 		$base = File::CONTEXT_MODULES . '/' . $module_name;
 
-		if (Files::exists($base)) {
+		if (Files::exists($base) && !$overwrite) {
 			return null;
 		}
 
 		try {
-			foreach ($files as $local_name => $source) {
-				$f = Files::createObject($base . '/' . $local_name);
-				$fp = fopen('php://temp', 'wb');
-				$zip->extractToPointer($fp, $source);
-				rewind($fp);
-				$f->store(['pointer' => $fp]);
-			}
-
 			$module = self::get($module_name) ?? self::create($module_name);
 
 			if (!$module) {
 				throw new \InvalidArgumentException('Invalid module information');
+			}
+
+			foreach ($files as $local_name => $source) {
+				$content = $zip->fetch($source);
+
+				// Don't store file if it already exists and is the same
+				if ($module->hasLocalFile($local_name) && ($file = Files::get($base . '/' . $local_name))) {
+					if ($file->md5 == md5($content)) {
+						continue;
+					}
+				}
+
+				// Same for dist file
+				if ($dist_file = $module->fetchDistFile($local_name)) {
+					if (md5($dist_file) == md5($content)) {
+						continue;
+					}
+				}
+
+				Files::createFromString($base  . '/' . $local_name, $content);
 			}
 
 			return $module;

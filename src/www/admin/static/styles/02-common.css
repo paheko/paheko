@@ -82,7 +82,7 @@ span.alert, b.alert {
 
 .alert.block::before {
     content: "⚠";
-    color: yellow;
+    color: #990;
 }
 
 .error.block::before {
@@ -665,7 +665,7 @@ dl.large dd {
     padding-left: 2rem;
 }
 
-ins { background: #cfc; color: #000; text-decoration: none; }
+ins { background: #cfc; color: #000; text-decoration: none; font-weight: bold; }
 del { background: #fcc; color: #000; text-decoration-color: rgba(0, 0, 0, .3); }
 
 .center-block {
@@ -727,15 +727,37 @@ strong.tag {
 }
 
 .diff {
-    font-family: monospace;
     border-collapse: collapse;
     width: 100%;
+    margin: 1em 0 2em 0;
+}
+
+.diff thead tr th {
+    font-size: 1.3em;
+    text-align: center;
+    padding: .5em;
+    border: 1px solid #999;
+    border-bottom: none;
+}
+
+.diff tbody {
+    font-family: monospace;
     font-size: 0.9em;
 }
 
-.diff tr {
-    border: 1px solid #ccc;
+.diff tbody tr {
     vertical-align: top;
+}
+
+.diff .leftText, .diff .rightText {
+    border: 1px dashed #ccc;
+    border-left: 1px solid #999;
+    border-right: 1px solid #999;
+    padding: .2em .5em;
+}
+
+.diff tbody tr:last-child .leftText, .diff tbody tr:last-child .rightText {
+    border-bottom: 1px solid #999;
 }
 
 .diff .ins {
@@ -761,7 +783,7 @@ strong.tag {
 .diff .leftChange, .diff .rightChange {
     text-align: center;
     vertical-align: middle;
-    color: #ccc;
+    color: #999;
 }
 
 .diff hr {
@@ -785,4 +807,8 @@ pre code {
     display: block;
     padding: .5em;
     border-radius: .3em;
+}
+
+fieldset.message {
+    max-width: 40em;
 }

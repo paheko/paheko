@@ -17,8 +17,8 @@ use Paheko\Web\Render\Render;
 
 use Paheko\Files\Files;
 
-use const Paheko\{USE_CRON, MAIL_RETURN_PATH, DISABLE_EMAIL};
-use const Paheko\{SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURITY};
+use const Paheko\{USE_CRON, MAIL_SENDER, MAIL_RETURN_PATH, DISABLE_EMAIL};
+use const Paheko\{SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURITY, SMTP_HELO_HOSTNAME};
 
 use KD2\SMTP;
 use KD2\Security;
@@ -149,8 +149,11 @@ class Emails
 			$content_html = Render::render(Render::FORMAT_MARKDOWN, null, $content);
 		}
 
-		if (Plugins::fireSignal('email.queue.before', compact('context', 'recipients', 'sender', 'subject', 'content', 'content_html', 'attachments'))) {
-			// queue handling was done by a plugin
+		$signal = Plugins::fire('email.queue.before', true,
+			compact('context', 'recipients', 'sender', 'subject', 'content', 'content_html', 'attachments'));
+
+		// queue handling was done by a plugin, stop here
+		if ($signal && $signal->isStopped()) {
 			return;
 		}
 
@@ -196,10 +199,15 @@ class Emails
 				$content_html = $main_tpl->fetch();
 			}
 
-			if (Plugins::fireSignal('email.queue.insert', compact('context', 'recipient', 'sender', 'subject', 'content', 'recipient_hash', 'recipient_pgp_key', 'content_html', 'attachments'))) {
+			$signal = Plugins::fire('email.queue.insert', true,
+				compact('context', 'recipient', 'sender', 'subject', 'content', 'recipient_hash', 'recipient_pgp_key', 'content_html', 'attachments'));
+
+			if ($signal && $signal->isStopped()) {
 				// queue insert was done by a plugin, stop here
 				continue;
 			}
+
+			unset($signal);
 
 			$db->insert('emails_queue', compact('sender', 'subject', 'context', 'recipient', 'recipient_pgp_key', 'recipient_hash', 'content', 'content_html'));
 
@@ -212,7 +220,10 @@ class Emails
 
 		$db->commit();
 
-		if (Plugins::fireSignal('email.queue.after', compact('context', 'recipients', 'sender', 'subject', 'content', 'content_html', 'attachments'))) {
+		$signal = Plugins::fire('email.queue.after', true,
+			compact('context', 'recipients', 'sender', 'subject', 'content', 'content_html', 'attachments'));
+
+		if ($signal && $signal->isStopped()) {
 			return;
 		}
 
@@ -489,6 +500,7 @@ class Emails
 	static public function listRejectedUsers(): DynamicList
 	{
 		$db = DB::getInstance();
+		$email_field = 'u.' . $db->quoteIdentifier(DynamicFields::getFirstEmailField());
 
 		$columns = [
 			'id' => [
@@ -500,7 +512,7 @@ class Emails
 			],
 			'email' => [
 				'label' => 'Adresse',
-				'select' => 'u.email',
+				'select' => $email_field,
 			],
 			'user_id' => [
 				'select' => 'u.id',
@@ -524,8 +536,7 @@ class Emails
 			'fail_count' => [],
 		];
 
-		$tables = 'emails e
-			INNER JOIN users u ON u.email IS NOT NULL AND u.email != \'\' AND e.hash = email_hash(u.email)';
+		$tables = sprintf('emails e INNER JOIN users u ON %s IS NOT NULL AND %1$s != \'\' AND e.hash = email_hash(%1$s)', $email_field);
 
 		$conditions = sprintf('e.optout = 1 OR e.invalid = 1 OR e.fail_count >= %d', self::FAIL_LIMIT);
 
@@ -566,6 +577,11 @@ class Emails
 
 		if (!$message->getFrom()) {
 			$message->setHeader('From', self::getFromHeader());
+		}
+
+		if (MAIL_SENDER) {
+			$message->setHeader('Reply-To', $message->getFromAddress());
+			$message->setHeader('From', self::getFromHeader($message->getFromName(), MAIL_SENDER));
 		}
 
 		$message->setMessageId();
@@ -623,9 +639,9 @@ class Emails
 			return;
 		}
 
-		$email_sent_via_plugin = Plugins::fireSignal('email.send.before', compact('context', 'message'));
+		$signal = Plugins::fire('email.send.before', true, compact('context', 'message'));
 
-		if ($email_sent_via_plugin) {
+		if ($signal && $signal->isStopped()) {
 			return;
 		}
 
@@ -634,13 +650,18 @@ class Emails
 			$secure = constant($const);
 
 			$smtp = new SMTP(SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, $secure);
+
+			if (SMTP_HELO_HOSTNAME) {
+				$smtp->servername = SMTP_HELO_HOSTNAME;
+			}
+
 			$smtp->send($message);
 		}
 		else {
 			$message->send();
 		}
 
-		Plugins::fireSignal('email.send.after', compact('context', 'message'));
+		Plugins::fire('email.send.after', false, compact('context', 'message'));
 	}
 
 	/**
@@ -654,7 +675,9 @@ class Emails
 
 		$return = $message->identifyBounce();
 
-		if (Plugins::fireSignal('email.bounce', compact('message', 'return', 'raw_message'))) {
+		$signal = Plugins::fire('email.bounce', false, compact('message', 'return', 'raw_message'));
+
+		if ($signal && $signal->isStopped()) {
 			return null;
 		}
 
@@ -696,7 +719,7 @@ class Emails
 			return null;
 		}
 
-		Plugins::fireSignal('email.bounce', compact('email', 'return'));
+		Plugins::fire('email.bounce', false, compact('email', 'return'));
 		$email->hasFailed($return);
 		$email->save();
 

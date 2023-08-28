@@ -76,6 +76,7 @@ class Utils
 		'money'           => '€',
 		'pdf'             => 'P',
 		'trash'           => '🗑',
+		'history'         => '⌚',
 	];
 
 	const FRENCH_DATE_NAMES = [
@@ -493,7 +494,7 @@ class Utils
 		return $str;
 	}
 
-	static public function safe_unlink($path)
+	static public function safe_unlink(string $path): bool
 	{
 		if (!@unlink($path))
 		{
@@ -641,7 +642,7 @@ class Utils
 		}
 	}
 
-	static public function format_bytes($size)
+	static public function format_bytes($size, bool $bytes = false)
 	{
 		if ($size > (1024 * 1024 * 1024 * 1024)) {
 			$size = $size / 1024 / 1024 / 1024 / 1024;
@@ -672,6 +673,9 @@ class Utils
 		}
 		elseif ($size > 1024) {
 			return round($size / 1024) . ' Ko';
+		}
+		elseif ($bytes) {
+			return $size . ' octets';
 		}
 		else {
 			return '< 1 Ko';
@@ -719,8 +723,13 @@ class Utils
 
 	static public function deleteRecursive(string $path, bool $delete_self = false): bool
 	{
-		if (!file_exists($path))
+		if (!file_exists($path)) {
 			return false;
+		}
+
+		if (is_file($path)) {
+			return self::safe_unlink($path);
+		}
 
 		$dir = dir($path);
 		if (!$dir) return false;
@@ -1172,7 +1181,7 @@ class Utils
 
 		if ($status['running']) {
 			proc_terminate($process, 9);
-			throw new \RuntimeException(sprintf("Command killed after taking more than %d seconds: \n%s", $timeout, $cmd));
+			throw new \OverflowException(sprintf("Command killed after taking more than %d seconds: \n%s", $timeout, $cmd));
 		}
 
 		$status = proc_get_status($process);
@@ -1192,19 +1201,17 @@ class Utils
 			throw new \LogicException('PDF generation is disabled');
 		}
 
-		if (PHP_SAPI == 'cli-server') {
-			throw new \LogicException('The PHP integrated webserver cannot be used to generate PDF.');
-		}
-
 		if (PDF_COMMAND == 'auto') {
 			// Try to see if there's a plugin
 			$in = ['string' => $str];
 
-			if (Plugins::fireSignal('pdf.stream', $in)) {
+			$signal = Plugins::fire('pdf.stream', true, $in);
+
+			if ($signal && $signal->isStopped()) {
 				return;
 			}
 
-			unset($in);
+			unset($signal, $in);
 		}
 
 		// Only Prince handles using STDIN and STDOUT
@@ -1241,10 +1248,6 @@ class Utils
 			throw new \LogicException('PDF generation is disabled');
 		}
 
-		if (PHP_SAPI == 'cli-server') {
-			throw new \LogicException('The PHP integrated webserver cannot be used to generate PDF.');
-		}
-
 		$source = sprintf('%s/print-%s.html', CACHE_ROOT, md5(random_bytes(16)));
 		$target = str_replace('.html', '.pdf', $source);
 
@@ -1255,12 +1258,14 @@ class Utils
 			// Try to see if there's a plugin
 			$in = ['source' => $source, 'target' => $target];
 
-			if (Plugins::fireSignal('pdf.create', $in)) {
+			$signal = Plugins::fire('pdf.create', true, $in);
+
+			if ($signal && $signal->isStopped()) {
 				Utils::safe_unlink($source);
 				return $target;
 			}
 
-			unset($in);
+			unset($in, $signal);
 
 			// Try to find a local executable
 			$list = ['prince', 'chromium', 'wkhtmltopdf', 'weasyprint'];

@@ -91,16 +91,20 @@
 	<fieldset>
 		<legend>Configuration de l'import</legend>
 		<dl>
-			<dt><label for="f_ignore_ids_1">Mode d'import</label> <b>(obligatoire)</b></dt>
+			<dt><label for="f_mode">Mode d'import</label> <b>(obligatoire)</b></dt>
 
-			{input type="radio" name="ignore_ids" value="1" label="Créer tous les membres" required=true}
+			{input type="radio" name="mode" value="create" label="Créer tous les membres" required=true}
 			<dd class="help">Tous les membres trouvés dans le fichier seront créés.<br />Cela peut amener à avoir des membres en doublon si on réalise plusieurs imports du même fichier.</dd>
 
-			{input type="radio" name="ignore_ids" value="0" label="Mettre à jour en utilisant le numéro de membre" required=true}
+			{input type="radio" name="mode" value="update" label="Mettre à jour en utilisant le numéro de membre" required=true}
 			<dd class="help">
 				Les membres présents dans le fichier qui mentionnent un numéro de membre seront mis à jour en utilisant ce numéro.<br/>
-				Si une ligne du fichier mentionne un numéro de membre qui n'existe pas, l'import échouera.<br />
-				Les lignes qui ne mentionnent pas de numéro de membre amèneront à la création d'un nouveau membre.
+				Si une ligne du fichier mentionne un numéro de membre qui n'existe pas ou n'a pas de numéro de membre, l'import échouera.
+			</dd>
+
+			{input type="radio" name="mode" value="auto" label="Automatique : créer ou mettre à jour en utilisant le numéro de membre" required=true}
+			<dd class="help">
+				Met à jour la fiche d'un membre si son numéro existe, sinon crée un membre si le numéro de membre indiqué n'existe pas ou n'est pas renseigné.
 			</dd>
 
 		</dl>

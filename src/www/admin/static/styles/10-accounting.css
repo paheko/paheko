@@ -74,18 +74,18 @@ nav.acc-year h4 {
     max-height: 100px;
 }
 
-.year-infos .graphs {
+.graphs {
     text-align: center;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
 }
 
-.year-infos .graphs figure {
+.graphs figure {
     margin: 1rem;
 }
 
-.year-infos .graphs.small figure img {
+.graphs.small figure img {
     max-width: 500px;
 }
 

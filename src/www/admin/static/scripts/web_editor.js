@@ -34,7 +34,8 @@
 			attachments: t.textarea.getAttribute('data-attachments') == 1,
 			savebtn: t.textarea.getAttribute('data-savebtn'),
 			preview_url: t.textarea.getAttribute('data-preview-url'),
-			format: t.textarea.getAttribute('data-format')
+			format: t.textarea.getAttribute('data-format'),
+			page_id: t.textarea.getAttribute('data-id')
 		};
 
 		// Use localStorage backup, per path
@@ -62,7 +63,7 @@
 				// Just in case fetch() fails, then save() will trigger a regular form submit
 				submitted = true;
 
-				save((data) => { localStorage.removeItem(backup_key); location.href = data.redirect; });
+				save((data) => { location.href = data.redirect; });
 				e.preventDefault();
 				return false;
 			}
@@ -145,17 +146,13 @@
 
 		var openFileInsert = function (callback)
 		{
-			let args = new URLSearchParams(window.location.search);
-			var uri = args.get('p');
-			g.openFrameDialog(g.admin_url + 'web/_attach.php?files&_dialog&p=' + uri, {callback});
+			g.openFrameDialog(g.admin_url + 'web/_attach.php?files&_dialog&id=' + config.page_id, {callback});
 			return true;
 		};
 
 		var openImageInsert = function (callback)
 		{
-			let args = new URLSearchParams(window.location.search);
-			var uri = args.get('p');
-			g.openFrameDialog(g.admin_url + 'web/_attach.php?images&_dialog&p=' + uri, {callback});
+			g.openFrameDialog(g.admin_url + 'web/_attach.php?images&_dialog&id=' + config.page_id, {callback});
 			return true;
 		};
 
@@ -319,13 +316,15 @@
 					throw Error(response.status);
 				}
 				else {
+					// Remove backup text
+					localStorage.removeItem(backup_key);
 					return response.json();
 				}
 			})
 			.then((data) => {
 				if (data.error) {
 					alert(data.error);
-					return;
+					throw Error(data.error);
 				}
 				else if (!data.success) {
 					throw Error('Invalid response');
@@ -340,7 +339,6 @@
 			save((data) => {
 				showSaved();
 				t.textarea.defaultValue = t.textarea.value;
-				localStorage.removeItem(backup_key);
 
 				let e = t.textarea.form.querySelector('input[name=editing_started]');
 

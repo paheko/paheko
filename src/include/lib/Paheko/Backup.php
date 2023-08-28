@@ -4,6 +4,7 @@ namespace Paheko;
 
 use Paheko\Users\Session;
 use Paheko\Files\Files;
+use Paheko\Files\Storage;
 use Paheko\Entities\Files\File;
 
 use KD2\ZipWriter;
@@ -494,6 +495,9 @@ class Backup
 		else {
 			// Check and upgrade plugins, if a software upgrade is necessary, plugins will be upgraded after the upgrade
 			Plugins::upgradeAllIfRequired();
+
+			// Re-sync files cache with storage, if necessary
+			Storage::sync();
 		}
 
 		return $return;
@@ -504,6 +508,7 @@ class Backup
 	 */
 	static public function getDBSize(bool $signed = false): int
 	{
+		clearstatcache(true, DB_FILE);
 		return filesize(DB_FILE) + ($signed ? 40 : 0);
 	}
 

@@ -162,9 +162,14 @@ class Search extends Entity
 
 		try {
 			$db->toggleUnicodeLike(true);
-			$st = $db->protectSelect($allowed_tables, $sql);
 
+			// Lock database against changes
+			$db->setReadOnly(true);
+
+			$st = $db->protectSelect($allowed_tables, $sql);
 			$result = $db->execute($st);
+
+			$db->setReadOnly(false);
 
 			if (empty($options['no_cache'])) {
 				$this->_result = $result;
@@ -233,8 +238,13 @@ class Search extends Entity
 
 		try {
 			$db->toggleUnicodeLike(true);
+
+			// Lock database against changes
+			$db->setReadOnly(true);
 			$st = $db->protectSelect($allowed_tables, $sql);
 			$r = $db->execute($st);
+			$db->setReadOnly(false);
+
 			$count = (int) $r->fetchArray(\SQLITE3_NUM)[0] ?? 0;
 			$r->finalize();
 			$st->close();
@@ -249,9 +259,9 @@ class Search extends Entity
 		}
 	}
 
-	public function export(string $format)
+	public function export(string $format, string $title = 'Recherche')
 	{
-		CSV::export($format, 'Recherche', $this->iterateResults(), $this->getHeader());
+		CSV::export($format, $title, $this->iterateResults(), $this->getHeader());
 	}
 
 	public function schema(): array

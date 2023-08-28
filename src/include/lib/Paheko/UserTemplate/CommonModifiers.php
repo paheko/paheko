@@ -87,7 +87,7 @@ class CommonModifiers
 
 	static public function markdown($str): string
 	{
-		$md = new Markdown;
+		$md = new Markdown(null, null);
 		return $md->render($str);
 	}
 

@@ -67,33 +67,6 @@ class Form
 		return $this->run($fn, $csrf_key, $redirect, $follow_redirect);
 	}
 
-	/**
-	 * @deprecated
-	 */
-	public function check($token_action = '', Array $rules = null)
-	{
-		if (!\KD2\Form::tokenCheck($token_action))
-		{
-			$this->errors[] = 'Une erreur est survenue, merci de bien vouloir renvoyer le formulaire.';
-			return false;
-		}
-
-		if (!is_null($rules) && !$this->validate($rules))
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * @deprecated
-	 */
-	public function validate(Array $rules, array $source = null)
-	{
-		return \KD2\Form::validate($rules, $this->errors, $source);
-	}
-
 	public function hasErrors()
 	{
 		return (count($this->errors) > 0);

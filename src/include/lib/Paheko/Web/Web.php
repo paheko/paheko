@@ -18,7 +18,7 @@ class Web
 		$results = Files::search($search, File::CONTEXT_WEB . '%');
 
 		foreach ($results as &$result) {
-			$result->path = Utils::dirname(substr($result->path, strlen(File::CONTEXT_WEB) + 1));
+			$result->path = substr($result->path, strlen(File::CONTEXT_WEB) + 1);
 			$result->breadcrumbs = [];
 			$path = '';
 
@@ -71,6 +71,7 @@ class Web
 	static public function getPagesList(?string $parent): DynamicList
 	{
 		$columns = [
+			'id' => [],
 			'path' => [
 			],
 			'title' => [
@@ -100,6 +101,11 @@ class Web
 		return EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE path = ?;', $path);
 	}
 
+	static public function getById(int $id): ?Page
+	{
+		return EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE id = ?;', $id);
+	}
+
 	static public function getByURI(string $uri): ?Page
 	{
 		return EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE uri = ?;', $uri);
@@ -126,7 +132,7 @@ class Web
 		$list = [];
 
 		foreach (EM::getInstance(Page::class)->iterate($sql) as $page) {
-			$list[$page->uri] = $page;
+			$list[$page->id] = $page;
 		}
 
 		$errors = [];

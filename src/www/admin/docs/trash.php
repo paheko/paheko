@@ -41,6 +41,9 @@ $form->runIf('confirm_delete', function () use ($check, $session) {
 
 	unset($file);
 
+	$db = DB::getInstance();
+	$db->begin();
+
 	foreach ($check as $file) {
 		if ($file === null) {
 			continue;
@@ -49,14 +52,15 @@ $form->runIf('confirm_delete', function () use ($check, $session) {
 		$file->delete();
 	}
 
-	Files::pruneEmptyDirectories();
+	Files::pruneEmptyDirectories(File::CONTEXT_TRASH);
+
+	$db->commit();
 }, $csrf_key, '!docs/trash.php');
 
 $form->runIf('restore', function() use ($check, $session) {
 	if (empty($check)) {
 		throw new UserException('Aucun fichier sélectionné');
 	}
-
 
 	foreach ($check as &$file) {
 		$file = Files::get($file);
@@ -68,11 +72,17 @@ $form->runIf('restore', function() use ($check, $session) {
 
 	unset($file);
 
+	$db = DB::getInstance();
+	$db->begin();
+
 	foreach ($check as $file) {
 		$file->restoreFromTrash();
 	}
 
-	//Trash::pruneEmptyDirectories();
+	Files::pruneEmptyDirectories(File::CONTEXT_TRASH);
+
+	$db->commit();
+
 }, $csrf_key, '!docs/trash.php');
 
 if (f('delete')) {
@@ -83,6 +93,7 @@ else {
 
 	$size = Trash::getSize();
 	$list = Trash::list();
+	$list->loadFromQueryString();
 
 	$tpl->assign(compact('list', 'size'));
 

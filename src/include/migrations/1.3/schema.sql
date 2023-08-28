@@ -214,6 +214,8 @@ CREATE TABLE IF NOT EXISTS users_categories
 );
 
 CREATE INDEX IF NOT EXISTS users_categories_hidden ON users_categories (hidden);
+CREATE INDEX IF NOT EXISTS users_categories_name ON users_categories (name);
+CREATE INDEX IF NOT EXISTS users_categories_hidden_name ON users_categories (hidden, name);
 
 CREATE TABLE IF NOT EXISTS users_sessions
 -- Permanent sessions for logged-in users
@@ -562,9 +564,11 @@ CREATE TABLE IF NOT EXISTS files
 -- Unique index as this is used to make up a file path
 CREATE UNIQUE INDEX IF NOT EXISTS files_unique ON files (path);
 CREATE INDEX IF NOT EXISTS files_parent ON files (parent);
+CREATE INDEX IF NOT EXISTS files_type_parent ON files (type, parent, path);
 CREATE INDEX IF NOT EXISTS files_name ON files (name);
 CREATE INDEX IF NOT EXISTS files_modified ON files (modified);
 CREATE INDEX IF NOT EXISTS files_trash ON files (trash);
+CREATE INDEX IF NOT EXISTS files_size ON files (size);
 
 CREATE TABLE IF NOT EXISTS files_contents
 -- Files contents (empty if using another storage backend)
@@ -621,7 +625,7 @@ CREATE TABLE IF NOT EXISTS web_pages
 	id INTEGER NOT NULL PRIMARY KEY,
 	parent TEXT NULL REFERENCES web_pages(path) ON DELETE CASCADE ON UPDATE CASCADE, -- Parent path, NULL = root
 	path TEXT NOT NULL, -- Full page path
-	dir_path TEXT NOT NULL REFERENCES files(path) ON UPDATE CASCADE, -- Full page directory name
+	dir_path TEXT NOT NULL, -- Full page directory name
 	uri TEXT NOT NULL, -- Page identifier
 	type INTEGER NOT NULL, -- 1 = Category, 2 = Page
 	status TEXT NOT NULL,
@@ -638,3 +642,14 @@ CREATE UNIQUE INDEX IF NOT EXISTS web_pages_uri ON web_pages (uri);
 CREATE INDEX IF NOT EXISTS web_pages_parent ON web_pages (parent);
 CREATE INDEX IF NOT EXISTS web_pages_published ON web_pages (published);
 CREATE INDEX IF NOT EXISTS web_pages_title ON web_pages (title);
+
+CREATE TABLE IF NOT EXISTS web_pages_versions
+(
+	id INTEGER NOT NULL PRIMARY KEY,
+	id_page INTEGER NOT NULL REFERENCES web_pages ON DELETE CASCADE,
+	id_user INTEGER NULL REFERENCES users (id) ON DELETE SET NULL,
+	date TEXT NOT NULL CHECK (datetime(date) IS NOT NULL AND datetime(date) = date),
+	size INTEGER NOT NULL,
+	changes INTEGER NOT NULL,
+	content TEXT NOT NULL
+);

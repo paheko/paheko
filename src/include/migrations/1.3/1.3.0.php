@@ -11,6 +11,25 @@ use Paheko\UserTemplate\Modules;
 use KD2\DB\DB_Exception;
 use KD2\DB\EntityManager;
 
+$config_path = ROOT . '/' . CONFIG_FILE;
+
+// Rename namespace in config file
+if (file_exists($config_path) && is_writable($config_path)) {
+	$contents = file_get_contents($config_path);
+
+	$new = strtr($contents, [
+		'namespace Garradin' => 'namespace Paheko',
+		' Garradin\\' => ' Paheko\\',
+		'\'Garradin\\' => '\'Paheko\\',
+		'"Garradin\\' => '"Paheko\\',
+		'\\Garradin\\' => '\\Paheko\\',
+	]);
+
+	if ($new !== $contents) {
+		file_put_contents($config_path, $new);
+	}
+}
+
 $db->beginSchemaUpdate();
 
 Files::disableQuota();
@@ -88,8 +107,20 @@ $db->exec('DELETE FROM files_search;');
 Files::ensureContextsExists();
 
 if (FILE_STORAGE_BACKEND == 'FileSystem') {
-	// now we store file metadata in DB
-	Storage::legacySync(FILE_STORAGE_CONFIG);
+	$root = FILE_STORAGE_CONFIG;
+
+	// Move skeletons to new path
+	if (file_exists($root . '/skel')) {
+		if (!file_exists($root . '/modules')) {
+			Utils::safe_mkdir($root . '/modules', 0777, true);
+		}
+
+		if (!file_exists($root . '/modules/web')) {
+			rename($root . '/skel', $root . '/modules/web');
+		}
+	}
+
+	Storage::sync();
 	WebSync::sync();
 }
 else {

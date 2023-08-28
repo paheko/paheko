@@ -17,7 +17,7 @@ if (!$file->canRead()) {
 }
 
 if ($file->renderFormat()) {
-	$tpl->assign('content', $file->render('common/files/_preview.php?p='));
+	$tpl->assign('content', $file->render());
 	$tpl->assign('file', $file);
 	$tpl->display('common/files/_preview.tpl');
 }
@@ -25,5 +25,6 @@ else if ($html = $file->editorHTML(true)) {
 	echo $html;
 }
 else {
+	// We don't need $session here as read access is already checked above
 	$file->serve();
 }

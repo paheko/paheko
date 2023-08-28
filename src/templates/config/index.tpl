@@ -93,6 +93,22 @@
 		</dl>
 	</fieldset>
 
+	<fieldset>
+		<legend>Conservation des anciennes versions des documents</legend>
+		<p class="help">
+			Pour éviter de perdre un travail précieux en cas de maladresse, les anciennes versions des documents peuvent être conservées.<br />
+			Lorsqu'un fichier est modifié, l'ancienne version est archivée.
+		</p>
+		<dl class="minor">
+			{foreach from=$versions_policies key="key" item="policy"}
+				{input type="radio-btn" name="files_version_policy" value=$key default="" source=$config label=$policy.label help=$policy.help}
+			{/foreach}
+		</dl>
+		<dl class="versions">
+			{input type="select" name="files_version_max_size" label="Ne pas conserver de versions si le fichier fait plus de" options=$versions_sizes source=$config required=true}
+		</dl>
+	</fieldset>
+
 	<p class="submit">
 		{csrf_field key="config"}
 		{button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
@@ -105,6 +121,13 @@
 	fetch(g.admin_url + 'config/?check_version');
 {/if}
 {literal}
+function toggleVersions() {
+	g.toggle('.versions', $('#f_files_version_policy_').checked ? false : true);
+	console.log($('#f_files_version_policy_').checked);
+}
+toggleVersions();
+$('input[name=files_version_policy]').forEach((e) => e.onchange = toggleVersions);
+
 function toggleWebInput() {
 	g.toggle('.external-web', $('#f_site_disabled_1').checked);
 }

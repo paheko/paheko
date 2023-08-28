@@ -229,6 +229,27 @@ class Files
 			'share' => false,
 		];
 
+		// But not in root
+		$p[File::CONTEXT_TRASH] = [
+			'mkdir' => false,
+			'move' => false,
+			'write' => false,
+			'create' => false,
+			'delete' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_ADMIN),
+			'read' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_READ),
+			'share' => false,
+		];
+
+		$p[File::CONTEXT_VERSIONS] = [
+			'mkdir' => false,
+			'move' => false,
+			'write' => false,
+			'create' => false,
+			'delete' => false,
+			'read' => false,
+			'share' => false,
+		];
+
 		$p[''] = [
 			'mkdir' => false,
 			'move' => false,
@@ -238,6 +259,7 @@ class Files
 			'read' => true,
 			'share' => false,
 		];
+
 
 		return $p;
 	}
@@ -285,7 +307,7 @@ class Files
 		$db = DB::getInstance();
 
 		if (!$parent) {
-			return $db->where('parent', 'IN', array_keys(File::CONTEXTS_NAMES));
+			return $db->where('path', 'IN', array_keys(File::CONTEXTS_NAMES));
 		}
 		else {
 			File::validatePath($parent);
@@ -301,9 +323,9 @@ class Files
 	static public function list(?string $parent = null): array
 	{
 		$where = self::_getParentClause($parent);
-		$sql = sprintf('SELECT * FROM @TABLE WHERE trash IS NULL AND %s ORDER BY type DESC, name COLLATE U_NOCASE ASC;', $where);
+		$sql = sprintf('SELECT * FROM @TABLE WHERE %s ORDER BY type DESC, name COLLATE NOCASE ASC;', $where);
 
-		return EM::getInstance(File::class)->all($sql);
+		return EM::getInstance(File::class)->allAssoc($sql, 'path');
 	}
 
 	static public function getDynamicList(?string $parent = null): DynamicList
@@ -326,7 +348,6 @@ class Files
 
 		$tables = File::TABLE;
 		$conditions = self::_getParentClause($parent);
-		$conditions .= ' AND trash IS NULL';
 
 		$list = new DynamicList($columns, $tables, $conditions);
 
@@ -428,7 +449,7 @@ class Files
 		$db = DB::getInstance();
 
 		if (!$path) {
-			$sql = 'SELECT * FROM @TABLE WHERE parent IS NULL AND trash IS NULL;';
+			$sql = 'SELECT * FROM @TABLE WHERE parent IS NULL;';
 		}
 		else {
 			$sql = 'SELECT * FROM @TABLE WHERE path = ? OR (parent = ? OR parent LIKE ? ESCAPE \'!\')';
@@ -452,14 +473,9 @@ class Files
 		}
 	}
 
-	static public function all(bool $include_trash = false)
+	static public function all()
 	{
-		$sql = 'SELECT * FROM @TABLE';
-
-		if (!$include_trash) {
-			$sql .= ' WHERE trash IS NULL';
-		}
-
+		$sql = 'SELECT * FROM @TABLE;';
 		return EM::getInstance(File::class)->all($sql);
 	}
 
@@ -608,11 +624,14 @@ class Files
 		return (float) DB::getInstance()->firstColumn('SELECT SUM(size) FROM files;');
 	}
 
-	static public function getRemainingQuota(): float
+	static public function getRemainingQuota(float $used_quota = null): float
 	{
-		$quota = self::getQuota();
-
-		return max(0, $quota - self::getUsedQuota());
+		if (FILE_STORAGE_QUOTA) {
+			return max(0, FILE_STORAGE_QUOTA - ($used_quota ?? self::getUsedQuota()));
+		}
+		else {
+			return self::callStorage('getRemainingQuota');
+		}
 	}
 
 	static public function checkQuota(int $size = 0): void
@@ -636,8 +655,6 @@ class Files
 		File::validatePath($parent);
 
 		File::validateCanHTML($name, $parent);
-
-		$name = File::filterName($name);
 
 		$target = $parent . '/' . $name;
 
@@ -717,7 +734,7 @@ class Files
 		return self::create($parent, $name);
 	}
 
-	static protected function createFrom(string $target, array $source): File
+	static public function createFrom(string $target, array $source): File
 	{
 		$parent = Utils::dirname($target);
 		$name = Utils::basename($target);
@@ -861,25 +878,30 @@ class Files
 	 * @param  bool   $create_parent Create parent directories if they don't exist
 	 * @return self
 	 */
-	static public function mkdir(string $path, bool $create_parent = true): File
+	static public function mkdir(string $path, bool $create_parent = true, bool $throw_on_conflict = true): File
 	{
 		$path = trim($path, '/');
-		$parent = Utils::dirname($path);
+		$parent = Utils::dirname($path) ?: null;
 		$name = Utils::basename($path);
 
 		$name = File::filterName($name);
 		$path = trim($parent . '/' . $name, '/');
 
+		File::validateFileName($name);
 		File::validatePath($path);
 
 		Files::checkQuota();
 
 		if (self::exists($path)) {
-			throw new ValidationException('Le nom de répertoire choisi existe déjà: ' . $path);
+			if ($throw_on_conflict) {
+				throw new ValidationException('Le nom de répertoire choisi existe déjà: ' . $path);
+			}
+
+			return self::get($path);
 		}
 
-		if ($parent !== null && $create_parent) {
-			self::ensureDirectoryExists($parent);
+		if ($parent && $create_parent) {
+			self::mkdir($parent, true, false);
 		}
 
 		$file = new File;
@@ -892,7 +914,7 @@ class Files
 		$file->modified = new \DateTime;
 		$file->save();
 
-		Plugins::fireSignal('files.mkdir', compact('file'));
+		Plugins::fire('file.mkdir', false, compact('file'));
 
 		return $file;
 	}
@@ -903,13 +925,19 @@ class Files
 		$parts = array_filter($parts);
 		$tree = '';
 
+		$db = DB::getInstance();
+		$db->begin();
+
 		foreach ($parts as $part) {
+			$parent = $tree ?: null;
 			$tree = trim($tree . '/' . $part, '/');
 
-			if (!self::exists($tree)) {
-				self::mkdir($tree, false);
-			}
+			// Make sure directory exists AND is not in trash
+			$db->preparedQuery('INSERT OR IGNORE INTO files (path, parent, name, type) VALUES (?, ?, ?, ?);',
+				$tree, $parent, $part, File::TYPE_DIRECTORY);
 		}
+
+		$db->commit();
 	}
 
 	/**
@@ -948,21 +976,24 @@ class Files
 	}
 
 	/**
-	 * Remove empty directories in transactions and users
+	 * Remove empty directories
 	 */
-	static public function pruneEmptyDirectories(): void
+	static public function pruneEmptyDirectories(string $parent): void
 	{
-		$sql = sprintf('SELECT * FROM @TABLE a
-			WHERE type = %d
-				AND (path LIKE \'%s/\' OR path LIKE \'%s/\')
-				AND (SELECT COUNT(*) FROM @TABLE b WHERE b.parent = a.path AND type = %d) = 0;',
-			File::TYPE_DIRECTORY,
-			File::CONTEXT_TRANSACTION,
-			File::CONTEXT_USER,
-			File::TYPE_FILE
-		);
+		// Select all directories that don't contain any sub-files, even in sub-sub-sub directories
+		$sql = 'SELECT d.* FROM files d
+			LEFT JOIN files f ON f.type = ? AND f.path LIKE d.path || \'/%\'
+			WHERE d.type = ? AND d.parent LIKE ? ESCAPE \'!\'
+			GROUP BY d.path
+			HAVING COUNT(f.id) = 0
+			ORDER BY d.path DESC;';
 
-		foreach (EM::getInstance(File::class)->all($sql) as $dir) {
+		$like = DB::getInstance()->escapeLike($parent, '!') . '/%';
+
+		// Do not use iterate() here, as the next row might be deleted before we fetch it
+		$i = EM::getInstance(File::class)->all($sql, File::TYPE_FILE, File::TYPE_DIRECTORY, $like);
+
+		foreach ($i as $dir) {
 			$dir->delete();
 		}
 	}

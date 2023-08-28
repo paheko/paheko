@@ -6,8 +6,8 @@ use KD2\UserSession;
 
 class CSV_Custom
 {
-	protected UserSession $session;
-	protected string $key;
+	protected ?UserSession $session;
+	protected ?string $key;
 	protected ?array $csv;
 	protected ?array $translation = null;
 	protected array $columns;
@@ -17,16 +17,16 @@ class CSV_Custom
 	protected $modifier = null;
 	protected array $_default;
 
-	public function __construct(UserSession $session, string $key)
+	public function __construct(?UserSession $session = null, ?string $key = null)
 	{
 		$this->session = $session;
 		$this->key = $key;
-		$this->csv = $this->session->get($this->key);
-		$this->translation = $this->session->get($this->key . '_translation');
-		$this->skip = $this->session->get($this->key . '_skip') ?? 1;
+		$this->csv = $this->session ? $this->session->get($this->key) : null;
+		$this->translation = $this->session ? $this->session->get($this->key . '_translation') : null;
+		$this->skip = $this->session ? $this->session->get($this->key . '_skip') ?? 1 : 1;
 	}
 
-	public function load(array $file): void
+	public function load(?array $file): void
 	{
 		if (empty($file['size']) || empty($file['tmp_name']) || empty($file['name'])) {
 			throw new UserException('Fichier invalide');
@@ -34,20 +34,27 @@ class CSV_Custom
 
 		$path = $file['tmp_name'];
 
-		if (CALC_CONVERT_COMMAND && strtolower(substr($file['name'], -4)) != '.csv') {
+		$this->loadFile($path);
+
+		@unlink($path);
+	}
+
+	public function loadFile(string $path): void
+	{
+		if (CALC_CONVERT_COMMAND && strtolower(substr($path, -4)) != '.csv') {
 			$path = CSV::convertUploadIfRequired($path, true);
 		}
 
-		$csv = CSV::readAsArray($path);
+		$this->csv = CSV::readAsArray($path);
 
-		if (!count($csv)) {
+		if (!count($this->csv)) {
 			throw new UserException('Ce fichier est vide (aucune ligne trouvée).');
 		}
 
-		$this->session->set($this->key, $csv);
-		$this->session->save();
-
-		@unlink($path);
+		if ($this->session) {
+			$this->session->set($this->key, $this->csv);
+			$this->session->save();
+		}
 	}
 
 	public function iterate(): \Generator
@@ -165,6 +172,12 @@ class CSV_Custom
 		return $this->translation;
 	}
 
+	public function setTranslationTableAuto(): void
+	{
+		$sel = $this->getSelectedTable([]);
+		$this->setTranslationTable($sel);
+	}
+
 	public function setTranslationTable(array $table): void
 	{
 		if (!count($table)) {
@@ -185,28 +198,38 @@ class CSV_Custom
 			$translation[(int)$csv] = $target;
 		}
 
+		$this->setIndexedTable($translation);
+	}
+
+	public function setIndexedTable(array $table): void
+	{
+		if (!count($table)) {
+			throw new UserException('Aucune colonne n\'a été sélectionnée');
+		}
+
 		foreach ($this->mandatory_columns as $key) {
-			if (!in_array($key, $translation, true)) {
+			if (!in_array($key, $table, true)) {
 				throw new UserException(sprintf('La colonne "%s" est obligatoire mais n\'a pas été sélectionnée ou n\'existe pas.', $this->columns[$key]));
 			}
 		}
 
-		if (!count($translation)) {
-			throw new UserException('Aucune colonne n\'a été sélectionnée');
+		$this->translation = $table;
+
+		if ($this->session) {
+			$this->session->set($this->key . '_translation', $this->translation);
+			$this->session->save();
 		}
-
-		$this->translation = $translation;
-
-		$this->session->set($this->key . '_translation', $this->translation);
-		$this->session->save();
 	}
 
 	public function clear(): void
 	{
-		$this->session->set($this->key, null);
-		$this->session->set($this->key . '_translation', null);
-		$this->session->set($this->key . '_skip', null);
-		$this->session->save();
+		if ($this->session) {
+			$this->session->set($this->key, null);
+			$this->session->set($this->key . '_translation', null);
+			$this->session->set($this->key . '_skip', null);
+			$this->session->save();
+		}
+
 		$this->csv = null;
 		$this->translation = null;
 		$this->skip = 1;
@@ -230,8 +253,11 @@ class CSV_Custom
 	public function skip(int $count): void
 	{
 		$this->skip = $count;
-		$this->session->set($this->key . '_skip', $count);
-		$this->session->save();
+
+		if ($this->session) {
+			$this->session->set($this->key . '_skip', $count);
+			$this->session->save();
+		}
 	}
 
 	public function setColumns(array $columns, array $defaults = []): void

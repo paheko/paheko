@@ -11,17 +11,26 @@ use KD2\DB\EntityManager as EM;
 class Trash
 {
 	const LIST_COLUMNS = [
+		'type' => [
+			'label' => 'Type',
+			'header_icon' => 'folder',
+			'order' => 'type = 2 %s, name COLLATE U_NOCASE %1$s',
+		],
 		'name' => [
-			'label' => 'Fichier',
+			'label' => 'Nom',
 		],
 		'parent' => [
 			'label' => 'Chemin d\'origine',
-			'select' => 'parent',
+			'select' => 'SUBSTR(parent, 1 + LENGTH(\'trash/\') + 40 + 1)',
 		],
 		'path' => [
 		],
 		'trash' => [
 			'label' => 'Supprimé le',
+		],
+		'size' => [
+			'label' => 'Taille',
+			'select' => 'CASE WHEN type = 1 THEN size ELSE (SELECT SUM(size) FROM files f2 WHERE f2.path LIKE files.path || \'/%\') END',
 		],
 	];
 
@@ -31,7 +40,7 @@ class Trash
 
 		$tables = File::TABLE;
 
-		$conditions = sprintf('type = %d AND trash IS NOT NULL', File::TYPE_FILE);
+		$conditions = 'trash IS NOT NULL';
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('trash', true);

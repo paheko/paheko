@@ -12,7 +12,7 @@ use KD2\SkrivLite;
  */
 class Extensions
 {
-	public AbstractRender $renderer;
+	static public AbstractRender $renderer;
 
 	static public function error(string $msg, bool $block = false)
 	{
@@ -20,27 +20,31 @@ class Extensions
 		return '<' . $tag . ' style="color: red; background: yellow; padding: 5px">/!\ ' . htmlspecialchars($msg, ENT_QUOTES, 'UTF-8') . '</' . $tag . '>';
 	}
 
-	public function __construct(AbstractRender $renderer)
+	static public function setRenderer(AbstractRender $renderer)
 	{
-		$this->renderer = $renderer;
+		self::$renderer = $renderer;
 	}
 
-	public function getList(): array
+	static public function getList(): array
 	{
 		$list = [
-			'file'     => [$this, 'file'],
-			'fichier'  => [$this, 'file'],
-			'image'    => [$this, 'image'],
-			'gallery'  => [$this, 'gallery'],
-			'video'    => [$this, 'video'],
+			'file'     => [self::class, 'file'],
+			'fichier'  => [self::class, 'file'],
+			'image'    => [self::class, 'image'],
+			'gallery'  => [self::class, 'gallery'],
+			'video'    => [self::class, 'video'],
 		];
 
-		Plugins::fireSignal('render.extensions.init', ['extensions' => &$list]);
+		$signal = Plugins::fire('render.extensions.init', false, $list);
+
+		if ($signal) {
+			$list = array_merge($list, $signal->getOut());
+		}
 
 		return $list;
 	}
 
-	public function gallery(bool $block, array $args, ?string $content): string
+	static public function gallery(bool $block, array $args, ?string $content): string
 	{
 		$type = 'gallery';
 
@@ -59,7 +63,7 @@ class Extensions
 		$index = '';
 
 		if (trim((string)$content) === '') {
-			$images = $this->renderer->listImages();
+			$images = self::$renderer->listImages();
 		}
 		else {
 			$images = explode("\n", $content);
@@ -78,19 +82,19 @@ class Extensions
 			$label = strtok(false);
 			$size = $type == 'slideshow' ? 500 : 200;
 
-			$out .= sprintf('<figure>%s</figure>', $this->img($img, $size, $label ?: null));
+			$out .= sprintf('<figure>%s</figure>', self::img($img, $size, $label ?: null));
 		}
 
 		$out .= '</div></div>';
 		return $out;
 	}
 
-	public function file(bool $block, array $args): string
+	static public function file(bool $block, array $args): string
 	{
 		$name = $args[0] ?? null;
 		$caption = $args[1] ?? null;
 
-		if (!$name || !$this->renderer->hasPath()) {
+		if (!$name || !self::$renderer->hasPath()) {
 			return self::error('Tag file : aucun nom de fichier indiqué.');
 		}
 
@@ -98,7 +102,7 @@ class Extensions
 			$caption = substr($name, 0, strrpos($name, '.'));
 		}
 
-		$url = $this->renderer->resolveAttachment($name);
+		$url = self::$renderer->resolveAttachment($name);
 		$ext = substr($name, strrpos($name, '.')+1);
 
 		return sprintf(
@@ -107,24 +111,24 @@ class Extensions
 		);
 	}
 
-	public function video(bool $block, array $args): string
+	static public function video(bool $block, array $args): string
 	{
 		$name = $args['file'] ?? ($args[0] ?? null);
 
-		if (!$name || !$this->renderer->hasPath()) {
+		if (!$name || !self::$renderer->hasPath()) {
 			return self::error('Tag image : aucun nom de fichier indiqué.');
 		}
 
 		$poster = $args['poster'] ?? ($args[1] ?? null);
 		$subs = $args['subtitles'] ?? ($args[2] ?? null);
-		$url = $this->renderer->resolveAttachment($name);
+		$url = self::$renderer->resolveAttachment($name);
 
 		if ($poster) {
-			$poster = $this->renderer->resolveAttachment($poster);
+			$poster = self::$renderer->resolveAttachment($poster);
 		}
 
 		if ($subs) {
-			$subs = $this->renderer->resolveAttachment($subs);
+			$subs = self::$renderer->resolveAttachment($subs);
 			$subs = sprintf('<track kind="subtitles" default="true" src="%s" />', htmlspecialchars($subs));
 		}
 
@@ -147,7 +151,7 @@ class Extensions
 		);
 	}
 
-	public function image(bool $block, array $args): string
+	static public function image(bool $block, array $args): string
 	{
 		static $align_replace = ['gauche' => 'left', 'droite' => 'right', 'centre' => 'center'];
 
@@ -157,12 +161,12 @@ class Extensions
 
 		$align = strtr((string)$align, $align_replace);
 
-		if (!$name || !$this->renderer->hasPath()) {
+		if (!$name || !self::$renderer->hasPath()) {
 			return self::error('Tag image : aucun nom de fichier indiqué.');
 		}
 
 		$size = $align == 'center' ? 500 : 200;
-		$out = $this->img($name, $size, $caption);
+		$out = self::img($name, $size, $caption);
 
 		if (!empty($align)) {
 			if ($caption) {
@@ -175,9 +179,9 @@ class Extensions
 		return $out;
 	}
 
-	protected function img(string $name, ?int $thumb_size = 200, ?string $caption = null): string
+	static protected function img(string $name, ?int $thumb_size = 200, ?string $caption = null): string
 	{
-		$url = $this->renderer->resolveAttachment($name);
+		$url = self::$renderer->resolveAttachment($name);
 		$svg = substr($name, -4) == '.svg';
 		$thumb_url = null;
 

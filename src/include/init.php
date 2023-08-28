@@ -209,6 +209,7 @@ static $default_config = [
 	'SMTP_SECURITY'         => 'STARTTLS',
 	'MAIL_RETURN_PATH'      => null,
 	'MAIL_BOUNCE_PASSWORD'  => null,
+	'MAIL_SENDER'           => null,
 	'ADMIN_URL'             => WWW_URL . 'admin/',
 	'NTP_SERVER'            => 'fr.pool.ntp.org',
 	'ADMIN_COLOR1'          => '#20787a',
@@ -357,6 +358,10 @@ ErrorManager::setHtmlHeader('<!DOCTYPE html><html><head><meta charset="utf-8" />
 
 function user_error(UserException $e)
 {
+	if (REPORT_USER_EXCEPTIONS > 0) {
+		\Paheko\Form::reportUserException($e);
+	}
+
 	if (PHP_SAPI == 'cli')
 	{
 		echo $e->getMessage();

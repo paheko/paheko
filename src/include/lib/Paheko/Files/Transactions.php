@@ -31,24 +31,25 @@ class Transactions
 			'order' => 'y.end_date %s, t.date %1$s, t.id %1$s',
 		],
 		'path' => [
-			'select' => 'f.parent',
+			'select' => '\'transaction/\' || t.id',
 		],
 	];
 
 	static public function list()
 	{
-		Files::pruneEmptyDirectories();
+		Files::pruneEmptyDirectories(File::CONTEXT_TRANSACTION);
 
 		$columns = self::LIST_COLUMNS;
 
-		$tables = sprintf('%s f
-			INNER JOIN acc_transactions t ON f.parent = \'%s/\' || t.id
-			INNER JOIN acc_years y ON t.id_year = y.id', File::TABLE, File::CONTEXT_TRANSACTION);
+		$tables = 'acc_transactions_files tf
+			INNER JOIN acc_transactions t ON t.id = tf.id_transaction
+			INNER JOIN acc_years y ON t.id_year = y.id
+			INNER JOIN files f ON f.id = tf.id_file AND f.trash IS NULL';
 
 		$list = new DynamicList($columns, $tables);
-		$list->orderBy('year', true);
+		$list->orderBy('id', true);
 		$list->groupBy('t.id');
-		$list->setCount('COUNT(DISTINCT t.id)');
+		$list->setCount('COUNT(DISTINCT tf.id_transaction)');
 		$list->setModifier(function (&$row) {
 			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
 		});

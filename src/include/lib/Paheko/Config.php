@@ -38,12 +38,95 @@ class Config extends Entity
 		'logo', 'icon', 'favicon', 'admin_background', 'admin_css',
 	];
 
+	const VERSIONS_SIZES = [
+		1*1024*1024 => '1 Mo',
+		2*1024*1024 => '2 Mo',
+		3*1024*1024 => '3 Mo',
+		5*1024*1024 => '5 Mo',
+		7*1024*1024 => '7 Mo',
+		10*1024*1024 => '10 Mo',
+		15*1024*1024 => '15 Mo',
+		20*1024*1024 => '20 Mo',
+		25*1024*1024 => '25 Mo',
+		30*1024*1024 => '30 Mo',
+		40*1024*1024 => '40 Mo',
+		50*1024*1024 => '50 Mo',
+	];
+
+	const VERSIONS_POLICIES = [
+		null => [
+			'label' => 'Ne pas conserver les anciennes versions',
+			'help' => 'Permet d\'utiliser moins d\'espace disque',
+		],
+		'min' => [
+			'label' => 'Conservation minimale',
+			'help' => 'Jusqu\'à 5 versions seront conservées pour chaque fichier.',
+			'intervals' => [
+				// Keep one version only after 2 months
+				-1 => 0,
+
+				// First 10 minutes, one version
+				600 => 0,
+
+				// Next hour, one version
+				3600 => 0,
+
+				// Next 24h, one version
+				3600*24 => 0,
+
+				// Next 2 months, one version
+				3600*24*60 => 0,
+			],
+		],
+		'avg' => [
+			'label' => 'Conservation moyenne',
+			'help' => 'Jusqu\'à 20 versions seront conservées pour chaque fichier.',
+			'intervals' => [
+				// Keep one version after first 4 months
+				-1 => 0,
+
+				// First 10 minutes, one version every 5 minutes
+				600 => 300,
+
+				// Next hour, one version every 15 minutes
+				3600 => 90,
+
+				// Next 24h, one version every 3 hours
+				3600*24 => 3*3600,
+
+				// Next 4 months, one version per month
+				3600*24*120 => 3600*24*30,
+			],
+		],
+		'max' => [
+			'label' => 'Conservation maximale',
+			'help' => 'Jusqu\'à 50 versions seront conservées pour chaque fichier.',
+			'intervals' => [
+				//ends_after => step (interval size)
+				// Keep one version each trimester after first 2 months
+				-1 => 3600*24*30,
+
+				// First 10 minutes, one version every 1 minute
+				600 => 60,
+
+				// Next hour, one version every 10 minutes
+				3600 => 600,
+
+				// Next 24h, one version every hour
+				3600*24 => 3600,
+
+				// Next 2 months, one version per week
+				3600*24*60 => 3600*24*7,
+			],
+		],
+	];
+
 	protected string $org_name;
-	protected ?string $org_infos;
+	protected ?string $org_infos = null;
 	protected string $org_email;
-	protected ?string $org_address;
-	protected ?string $org_phone;
-	protected ?string $org_web;
+	protected ?string $org_address = null;
+	protected ?string $org_phone = null;
+	protected ?string $org_web = null;
 
 	protected string $currency;
 	protected string $country;
@@ -51,14 +134,14 @@ class Config extends Entity
 	protected int $default_category;
 	protected int $providers_category;
 
-	protected ?int $backup_frequency;
-	protected ?int $backup_limit;
+	protected ?int $backup_frequency = null;
+	protected ?int $backup_limit = null;
 
-	protected ?int $last_chart_change;
-	protected ?string $last_version_check;
+	protected ?int $last_chart_change = null;
+	protected ?string $last_version_check = null;
 
-	protected ?string $color1;
-	protected ?string $color2;
+	protected ?string $color1 = null;
+	protected ?string $color2 = null;
 
 	protected array $files = [];
 
@@ -66,6 +149,9 @@ class Config extends Entity
 
 	protected int $log_retention;
 	protected bool $analytical_set_all;
+
+	protected ?string $files_version_policy = null;
+	protected int $files_version_max_size = 0;
 
 	protected ?int $auto_logout = 0;
 
@@ -131,13 +217,14 @@ class Config extends Entity
 			$this->selfCheck();
 		}
 
-		$values = $this->modifiedProperties(true);
+		$values = $this->getModifiedProperties(true);
 
 		$db = DB::getInstance();
 		$db->begin();
 
 		foreach ($values as $key => $value)
 		{
+			$value = $this->getAsString($key);
 			$db->preparedQuery('INSERT OR REPLACE INTO config (key, value) VALUES (?, ?);', $key, $value);
 		}
 

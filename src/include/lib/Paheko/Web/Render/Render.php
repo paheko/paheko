@@ -12,34 +12,30 @@ class Render
 
 	static protected $attachments = [];
 
-	static public function render(string $format, ?File $file, string $content = null, string $link_prefix = null)
+	static public function render(string $format, ?string $path, ?string $content = null, ?string $link_prefix = null)
 	{
-		return self::getRenderer($format, $file, $link_prefix)->render($content);
+		return self::getRenderer($format, $path, $link_prefix)->render($content);
 	}
 
-	static public function getRenderer(string $format, ?File $file, string $link_prefix = null)
+	static public function getRenderer(string $format, ?string $path, string $link_prefix = null)
 	{
 		if ($format == self::FORMAT_SKRIV) {
-			return new Skriv($file, $link_prefix);
+			return new Skriv($path, $link_prefix);
 		}
 		else if ($format == self::FORMAT_ENCRYPTED) {
-			return new Encrypted($file, $link_prefix);
+			return new Encrypted($path, $link_prefix);
 		}
 		else if ($format == self::FORMAT_MARKDOWN) {
-			return new Markdown($file, $link_prefix);
+			return new Markdown($path, $link_prefix);
 		}
 		else {
 			throw new \LogicException('Invalid format: ' . $format);
 		}
 	}
 
-	static public function registerAttachment(?File $file, string $uri): void
+	static public function registerAttachment(string $path, string $uri): void
 	{
-		if (null === $file) {
-			return;
-		}
-
-		$hash = $file->pathHash();
+		$hash = md5($path);
 
 		if (!array_key_exists($hash, self::$attachments)) {
 			self::$attachments[$hash] = [];
@@ -48,7 +44,7 @@ class Render
 		self::$attachments[$hash][$uri] = true;
 	}
 
-	static public function listAttachments(File $file) {
-		return array_keys(self::$attachments[$file->pathHash()] ?? []);
+	static public function listAttachments(?string $path) {
+		return array_keys(self::$attachments[md5($path)] ?? []);
 	}
 }

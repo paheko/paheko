@@ -30,8 +30,11 @@ table.list th {
     font-weight: bold;
 }
 
-table.list thead {
-    background: rgba(var(--gSecondColor), 0.5);
+table.list thead th, table.list thead td {
+    background: rgb(var(--gSecondColor));
+    background-image: linear-gradient(rgba(255, 255, 255, 0.5) 0 0);
+    position: sticky;
+    top: -2px;
 }
 
 table.list tfoot tr {
@@ -109,7 +112,7 @@ table.list tr:nth-child(even).disabled {
 
 .userOrder a, .userOrder button {
     text-decoration: none;
-    display: flex;
+    display: inline-flex;
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
@@ -125,9 +128,14 @@ table.list tr:nth-child(even).disabled {
     background: transparent;
 }
 
+.userOrder .icon-header {
+    text-align: center;
+}
+
 .userOrder .icon-header a, .userOrder .icon-header button {
     width: 1.5rem;
     flex-direction: column;
+    justify-content: center;
 }
 
 .userOrder a:hover, .userOrder button:hover {

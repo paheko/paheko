@@ -43,7 +43,4 @@
 	</table>
 {/if}
 
-{include file="services/reminders/_form.tpl" legend="Ajouter un rappel automatique"
-	reminder=null delay_type=0 delay_before=15 delay_after=5}
-
 {include file="_foot.tpl"}

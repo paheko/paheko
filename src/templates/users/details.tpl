@@ -62,7 +62,7 @@
 			<dt>Fiche modifiée le</dt>
 			<dd>{$user.date_updated|date_long:true}</dd>
 			<dd>
-				{linkbutton shape="menu" label="Historique" href="!users/log.php?history=%d"|args:$user.id}
+				{linkbutton shape="history" label="Historique" href="!users/log.php?history=%d"|args:$user.id}
 			</dd>
 		{/if}
 		<dt>Catégorie</dt>
@@ -72,7 +72,7 @@
 		<dt>Dernière connexion</dt>
 		<dd>{if empty($user.date_login)}Jamais{else}{$user.date_login|date_short:true}{/if}</dd>
 		<dd>
-			{linkbutton shape="menu" label="Journal d'actions" href="!users/log.php?id=%d"|args:$user.id}
+			{linkbutton shape="menu" label="Journal d'audit" href="!users/log.php?id=%d"|args:$user.id}
 		</dd>
 		<dt>Mot de passe</dt>
 		<dd>

@@ -33,7 +33,7 @@ use Paheko\Entities\Accounting\Account;
 		{foreach from=$grouped_accounts item="group"}
 		<tbody>
 			<tr>
-				<td colspan="5"><h2 class="ruler">{$group.label}</h2></td>
+				<td colspan="6"><h2 class="ruler">{$group.label}</h2></td>
 			</tr>
 			{foreach from=$group.accounts item="account"}
 				<tr class="account">
@@ -43,7 +43,8 @@ use Paheko\Entities\Accounting\Account;
 					<td class="money">
 						{if $account.balance < 0
 							|| ($account.balance > 0 && $account.position == Account::LIABILITY && ($account.type == Account::TYPE_BANK || $account.type == Account::TYPE_THIRD_PARTY || $account.type == Account::TYPE_CASH))}
-							<strong class="error">-{$account.balance|raw|abs|money_currency:false}</strong>
+							<?php $balance = abs($account->balance)*-1; ?>
+							<strong class="error">{$balance|raw|money_currency:false:true}</strong>
 						{else}
 							{$account.balance|raw|money_currency:false}
 						{/if}

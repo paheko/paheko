@@ -24,9 +24,9 @@
 
 <nav class="web breadcrumbs no-clear">
 	<ul>
-		<li><a href="?p=">Site web</a></li>
+		<li>{link href="!web/" label="Site web"}</li>
 		{foreach from=$breadcrumbs key="id" item="title"}
-			<li><a href="?p={$id}">{$title|truncate:40}</a></li>
+			<li>{link href="!web/?id=%s"|args:$id label=$title|truncate:40}</li>
 		{/foreach}
 	</ul>
 	{if $page}
@@ -48,7 +48,7 @@
 			Des pages contiennent des liens qui mènent à des pages qui n'existent pas&nbsp;:
 			<ul>
 				{foreach from=$links_errors item="p"}
-				<li>{link href="?p=%s"|args:$p.path label=$p.title}</li>
+				<li>{link href="?id=%d"|args:$p.id label=$p.title}</li>
 				{/foreach}
 			</ul>
 		</div>
@@ -69,11 +69,15 @@
 
 {form_errors}
 
-{if $page}
+{if $page && $_GET.history === 'list'}
+	{include file="./_history.tpl" versions=$page->listVersions()}
+{elseif $page && $_GET.history}
+	{include file="./_history.tpl" version=$page->getVersion($_GET.history)}
+{elseif $page}
 	{include file="./_page.tpl" excerpt=$page->isCategory()}
 {/if}
 
-{if !$page || $page->isCategory()}
+{if !$page || (!$_GET.history && $page->isCategory())}
 	<div class="web header">
 		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
 		<p class="actions">
@@ -94,7 +98,7 @@
 		<nav class="web category-list">
 			<ul>
 			{foreach from=$categories item="p"}
-				<li{if !$p->isOnline()} class="draft"{/if}><a href="?p={$p.path}">{icon shape="folder"}{$p.title}</a></li>
+				<li{if !$p->isOnline()} class="draft"{/if}><a href="?id={$p.id}">{icon shape="folder"}{$p.title}</a></li>
 			{/foreach}
 			</ul>
 		</nav>

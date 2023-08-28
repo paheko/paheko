@@ -20,9 +20,15 @@
 			<td class="check">
 				{input type="checkbox" name="check[]" value=$item->path}
 			</td>
+			<td class="icon">
+				{if $item.type == 2}
+					{icon shape="folder"}
+				{/if}
+			</td>
 			<td>{$item.name}</td>
 			<td>{$item.parent}</td>
 			<td>{$item.trash|date_short:true}</td>
+			<td>{$item.size|size_in_bytes}</td>
 			<td class="actions">
 			</td>
 		</tr>

@@ -1,6 +1,7 @@
 /* Forms */
 fieldset {
     border: 1px solid var(--gLightBorderColor);
+    border-radius: .3em;
     padding: 0.8em 1em 0 1em;
     margin-bottom: 1em;
     padding: 0.5em;
@@ -377,7 +378,7 @@ form .radio-btn input:focus + label::before {
 }
 
 form .radio-btn input:focus + label div {
-    box-shadow: 0 0 5px .2rem rgb(var(--gSecondColor));
+    box-shadow: 0 0 5px 1px rgb(var(--gSecondColor));
 }
 
 form .radio-btn div {
@@ -389,10 +390,6 @@ form .radio-btn div {
     padding: .2em .4em;
     transition: color .3s, background-color .3s;
     color: rgb(var(--gTextColor));
-}
-
-form .radio-btn h3 {
-    text-decoration: underline;
 }
 
 form .radio-btn input {
@@ -407,6 +404,21 @@ form .radio-btn .help {
 form .radio-btn input:checked + label div {
     background-color: rgba(var(--gSecondColor), 0.3);
 }
+
+form .minor .radio-btn h3 {
+    font-size: 1em;
+}
+
+form .minor .radio-btn div {
+    display: table-cell;
+    border: 1px solid rgba(var(--gSecondColor), 0.3);
+    background-color: rgba(var(--gSecondColor), 0.05);
+}
+
+form .minor .radio-btn input:checked + label div {
+    background-color: rgba(var(--gSecondColor), 0.2);
+}
+
 
 /* Custom list input */
 form .input-list {
@@ -481,7 +493,7 @@ dd.help.example {
 }
 
 p.actions {
-    float: right;
+    text-align: right;
     margin: .5em;
 }
 
@@ -619,41 +631,60 @@ dialog.datepicker {
     width: 4em;
 }
 
-.tree-selector a {
-    color: #666;
+.dir-picker .breadcrumbs {
+    margin-bottom: 1em;
 }
 
-.tree-selector td {
-    width: 15%;
-    text-align: right;
+.dir-picker .breadcrumbs button {
+    border-width: 1px;
+    font-size: .9em;
+    opacity: 0.7;
 }
 
-.tree-selector th {
-    width: 85%;
-}
-
-.tree-selector i {
-    display: inline-block;
-    padding: 0 .5em;
-}
-
-.tree-selector b {
-    display: inline-block;
-    padding: 0 .5em;
-    color: #999;
-}
-
-.tree-selector em {
-    font-weight: normal;
-}
-
-.tree-selector h3 {
-    display: inline-block;
-}
-
-.tree-selector .current > a {
+.dir-picker .breadcrumbs .current button {
     font-weight: bold;
-    color: #000;
+}
+
+.dir-picker .folders {
+    text-align: center;
+}
+
+.dir-picker .folder button {
+    width: calc(100% - 1em);
+    padding: .5em;
+    text-align: left;
+    font-size: 1.2em;
+    border-width: 1px;
+    background: none;
+}
+
+.dir-picker .folder button::before {
+    color: var(--gLightBorderColor);
+}
+
+.dir-picker .parent button {
+    margin-bottom: .5em;
+    padding: .5em;
+    width: calc(100% - 1.5em);
+    border-width: 1px;
+    background: none;
+    border-color: var(--gLightBorderColor);
+    text-align: left;
+}
+
+.dir-picker .help {
+    text-align: center;
+    padding: 1em;
+    font-size: 1.3em;
+}
+
+.dir-picker .select {
+    text-align: center;
+    padding: 1em;
+}
+
+.dir-picker .select button {
+    font-size: 1.2em;
 }
 
 .file-selector {
@@ -699,7 +730,7 @@ form fieldset, form p {
     transition: .5s filter linear;
 }
 
-form.progressing fieldset, form.progressing p {
+form.progressing fieldset, form.progressing p, form.progressing table {
     pointer-events: none;
     opacity: 0.5;
     filter: blur(3px);

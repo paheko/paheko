@@ -29,6 +29,7 @@ if (qg('table') && array_key_exists(qg('table'), $tables_list)) {
 
 	$list = new DynamicList($columns, $table);
 	$list->orderBy(key($columns), false);
+	$list->setTitle($table);
 	$list->loadFromQueryString();
 	$tpl->assign(compact('table', 'list'));
 }
@@ -47,14 +48,46 @@ elseif (qg('table_info') && array_key_exists(qg('table_info'), $tables_list)) {
 	$info->sql_indexes = implode(";\n", $sql_indexes);
 	$tpl->assign('table_info', $info);
 }
-elseif ($query) {
+elseif (($pragma = qg('pragma')) || isset($query)) {
 	try {
-		$s = Search::fromSQL($query);
 		$query_time = microtime(true);
-		$result = $s->iterateResults();
+
+		if ($pragma) {
+			$query = '';
+			$result = [];
+			$result_header = null;
+
+			if ($pragma == 'integrity_check') {
+				$result = $db->get('PRAGMA integrity_check;');
+			}
+			elseif ($pragma == 'foreign_key_check') {
+				$result = $db->get('PRAGMA foreign_key_check;') ?: [['no errors']];
+			}
+			elseif (ENABLE_TECH_DETAILS && $pragma == 'vacuum') {
+				$result[] = ['Size before VACUUM: ' . Backup::getDBSize()];
+				$db->exec('VACUUM;');
+				$result[] = ['Size after VACUUM: ' . Backup::getDBSize()];
+			}
+
+			$result_count = count($result);
+		}
+		elseif (!empty($query)) {
+			$s = Search::fromSQL($query);
+
+			if (f('export')) {
+				$s->export(f('export'), 'Requête SQL');
+				return;
+			}
+
+			$result = $s->iterateResults();
+			$result_header = $s->getHeader();
+			$result_count = $s->countResults();
+		}
+		else {
+			$result = $result_count = $result_header = null;
+		}
+
 		$query_time = round((microtime(true) - $query_time) * 1000, 3);
-		$result_header = $s->getHeader();
-		$result_count = $s->countResults();
 
 		$tpl->assign(compact('result', 'result_header', 'result_count', 'query_time'));
 	}

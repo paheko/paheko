@@ -6,6 +6,7 @@ if (!isset($files)) {
 }
 
 $can_upload = false;
+$trash = isset($use_trash) && !$use_trash ? '&trash=no' : '';
 
 if ($edit
 	&& Entities\Files\File::canCreate($path . '/')) {
@@ -37,7 +38,7 @@ if ($edit
 		<span>
 			{linkbutton shape="download" href=$file->url(true) target="_blank" label="Télécharger"}
 			{if $edit && $file->canDelete()}
-				{linkbutton shape="delete" target="_dialog" href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer"}
+				{linkbutton shape="delete" target="_dialog" href="!common/files/delete.php?p=%s%s"|args:$file.path:$trash label="Supprimer"}
 			{/if}
 		</span>
 	</aside>

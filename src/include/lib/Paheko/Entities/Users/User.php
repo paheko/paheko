@@ -29,6 +29,7 @@ use Paheko\Entities\Files\File;
 
 use KD2\SMTP;
 use KD2\DB\EntityManager as EM;
+use KD2\DB\Date;
 use KD2\ZipWriter;
 
 /**
@@ -228,12 +229,25 @@ class User extends Entity
 		return $out;
 	}
 
-	public function asDetailsArray(): array
+	public function asDetailsArray(bool $modified_values = false): array
 	{
 		$list = DynamicFields::getInstance()->listAssocNames();
+		$out = [];
 
 		foreach ($list as $key => $label) {
-			$out[$key] = $this->$key;
+			if ($modified_values && $this->isModified($key)) {
+				$out[$key] = $this->getModifiedProperty($key);
+			}
+			else {
+				$out[$key] = $this->$key;
+			}
+
+			if ($out[$key] instanceof Date) {
+				$out[$key] = $out[$key]->format('d/m/Y');
+			}
+			elseif ($out[$key] instanceof \DateTimeInterface) {
+				$out[$key] = $out[$key]->format('d/m/Y H:i:s');
+			}
 		}
 
 		return $out;
@@ -271,6 +285,11 @@ class User extends Entity
 
 		if ($password_modified) {
 			Log::add(Log::LOGIN_PASSWORD_CHANGE, null, $this->id());
+			Plugins::fire('user.change.password.after', false, ['user' => $this]);
+		}
+
+		if ($login_modified) {
+			Plugins::fire('user.change.login.after', false, ['user' => $this, 'old_login' => $login_modified]);
 		}
 
 		return true;
@@ -311,7 +330,8 @@ class User extends Entity
 			return;
 		}
 
-		$new = DB::getInstance()->firstColumn(sprintf('SELECT MAX(%s) + 1 FROM %s;', $field, User::TABLE));
+		$db = DB::getInstance();
+		$new = $db->firstColumn(sprintf('SELECT MAX(%s) + 1 FROM %s WHERE %1$s IS NOT NULL;', $db->quoteIdentifier($field), User::TABLE));
 		$this->set($field, $new);
 	}
 
@@ -589,6 +609,11 @@ class User extends Entity
 
 		DB::getInstance()->update(self::TABLE, ['preferences' => json_encode($this->preferences)], 'id = ' . $this->id());
 		$this->clearModifiedProperties(['preferences']);
+	}
+
+	public function url(): string
+	{
+		return Utils::getLocalURL(sprintf(self::PRIVATE_URL, $this->id));
 	}
 
 	public function diff(): array

@@ -242,11 +242,12 @@ class NextCloud extends WebDAV_NextCloud
 			$size = '150px';
 		}
 
-		$session = Session::getInstance();
+		$file->validateCanRead();
+
 		$this->server->log('Serving thumbnail for: %s - size: %s', $uri, $size);
 
 		try {
-			$file->serveThumbnail($session, $size);
+			$file->serveThumbnail($size);
 		}
 		catch (UserException $e) {
 			throw new WebDAV_Exception($e->getMessage(), $e->getCode(), $e);
@@ -268,7 +269,7 @@ class NextCloud extends WebDAV_NextCloud
 			readfile($path);
 		}
 		else {
-			$file->serveThumbnail(Session::getInstance(), 'crop-256px');
+			$file->serveThumbnail('crop-256px');
 		}
 	}
 }

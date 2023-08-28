@@ -82,7 +82,7 @@ class Reminders
 			'#NOM_ASSO'		=>	$config->get('org_name'),
 			'#ADRESSE_ASSO'	=>	$config->get('org_address'),
 			'#EMAIL_ASSO'	=>	$config->get('org_email'),
-			'#SITE_ASSO'	=>	$config->get('org_web'),
+			'#SITE_ASSO'	=>	$config->site_disabled ? $config->org_web : WWW_URL,
 			'#URL_RACINE'	=>	WWW_URL,
 			'#URL_SITE'		=>	WWW_URL,
 			'#URL_ADMIN'	=>	ADMIN_URL,
@@ -113,11 +113,11 @@ class Reminders
 			'delai'           => $reminder->delay,
 		];
 
-		$subject = self::replaceTagsInContent($reminder->subject, $replace);
-		$text = self::replaceTagsInContent($reminder->body, $replace);
+		$reminder->subject = self::replaceTagsInContent($reminder->subject, $replace);
+		$reminder->body = self::replaceTagsInContent($reminder->body, $replace);
 
 		// Envoi du mail
-		Emails::queue(Emails::CONTEXT_PRIVATE, [$reminder->email => ['data' => (array) $reminder]], null, $subject, $text);
+		Emails::queue(Emails::CONTEXT_PRIVATE, [$reminder->email => ['data' => (array) $reminder]], null, $reminder->subject, $reminder->body);
 
 		$db = DB::getInstance();
 		$db->insert('services_reminders_sent', [
@@ -127,7 +127,7 @@ class Reminders
 			'due_date'    => $reminder->reminder_date,
 		]);
 
-		Plugins::fireSignal('reminder.send.after', $reminder);
+		Plugins::fire('reminder.send.after', false, compact('reminder'));
 
 		return true;
 	}

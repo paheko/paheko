@@ -12,6 +12,8 @@ use Paheko\Accounting\Transactions;
 use Paheko\Accounting\Years;
 use Paheko\Entities\Accounting\Transaction;
 use Paheko\Search;
+use Paheko\Users\DynamicFields;
+use Paheko\Users\Users;
 
 use KD2\ErrorManager;
 
@@ -111,44 +113,108 @@ class API
 	protected function user(string $uri): ?array
 	{
 		$fn = strtok($uri, '/');
+		$fn2 = strtok('/');
 
 		// CSV import
 		if ($fn == 'import') {
-			if ($this->method != 'PUT') {
+			$fp = null;
+
+			if ($this->method === 'PUT') {
+				$params = $_GET;
+			}
+			elseif ($this->method === 'POST') {
+				$params = $_POST;
+			}
+			else {
 				throw new APIException('Wrong request method', 400);
 			}
 
-			$mode = $_GET['mode'] ?? 'auto';
+			$mode = $params['mode'] ?? 'auto';
 
 			if (!in_array($mode, ['auto', 'create', 'update'])) {
-				throw new APIException('Unknown mode. Only "auto", "create" and "update" are accepted.');
+				throw new APIException('Unknown mode. Only "auto", "create" and "update" are accepted.', 400);
 			}
 
 			$this->requireAccess(Session::ACCESS_ADMIN);
 
-			$admin_user_id = 1; // FIXME: should be NULL here
+			$path = tempnam(CACHE_ROOT, 'tmp-import-api');
 
-			$file = tempnam(CACHE_ROOT, 'tmp-import-api');
+			if ($this->method === 'POST') {
+				if (empty($_FILES['file']['tmp_name']) || !empty($_FILES['file']['error'])) {
+					throw new APIException('Empty file or no file was sent.', 400);
+				}
 
-			try {
-				$stdin = fopen('php://input', 'r');
-				$fp = fopen($file, 'w');
+				$path = $_FILES['file']['tmp_name'] ?? null;
+			}
+			else {
+				$stdin = fopen('php://input', 'rb');
+				$fp = fopen($path, 'wb');
 				stream_copy_to_stream($stdin, $fp);
 				fclose($fp);
 				fclose($stdin);
+			}
 
-				if (!filesize($file)) {
+			try {
+				if (!filesize($path)) {
 					throw new APIException('Empty CSV file', 400);
 				}
 
-				$import = new Membres\Import;
-				$import->fromGarradinCSV($file, $admin_user_id, $mode);
+				$csv = new CSV_Custom;
+				$df = DynamicFields::getInstance();
+				$csv->setColumns($df->listImportAssocNames());
+				$required_fields = $df->listImportRequiredAssocNames($mode === 'update' ? true : false);
+				$csv->setMandatoryColumns(array_keys($required_fields));
+				$csv->loadFile($path);
+				$csv->skip((int)($params['skip_lines'] ?? 1));
+
+				if (!empty($params['column']) && is_array($params['column'])) {
+					$csv->setIndexedTable($params['column']);
+				}
+				else {
+					$csv->setTranslationTableAuto();
+				}
+
+				if (!$csv->loaded() || !$csv->ready()) {
+					throw new APIException('Missing columns or error during columns matching of import table', 400);
+				}
+
+				if ($fn2 === 'preview') {
+					$report = Users::importReport($csv, $mode);
+
+					$report['unchanged'] = array_map(
+						fn($user) => ['id' => $user->id(), 'name' => $user->name()],
+						$report['unchanged']
+					);
+
+					$report['created'] = array_map(
+						fn($user) => $user->asDetailsArray(),
+						$report['created']
+					);
+
+					$report['modified'] = array_map(
+						function ($user) {
+							$out = ['id' => $user->id(), 'name' => $user->name(), 'changed' => []];
+
+							foreach ($user->getModifiedProperties() as $key => $value) {
+								$out['changed'][$key] = ['old' => $value, 'new' => $user->$key];
+							}
+
+							return $out;
+						},
+						$report['modified']
+					);
+
+
+					return $report;
+				}
+				else {
+					Users::import($csv, $mode);
+					return null;
+				}
 			}
 			finally {
-				Utils::safe_unlink($file);
+				Utils::safe_unlink($path);
 			}
-
-			return null;
 		}
 		else {
 			throw new APIException('Unknown user action', 404);

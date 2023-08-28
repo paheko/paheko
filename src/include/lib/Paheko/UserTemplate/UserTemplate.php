@@ -127,7 +127,7 @@ class UserTemplate extends \KD2\Brindille
 
 		$this->registerAll();
 
-		Plugins::fireSignal('usertemplate.init', ['template' => $this]);
+		Plugins::fire('usertemplate.init', false, ['template' => $this]);
 	}
 
 	/**

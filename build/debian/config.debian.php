@@ -1,19 +1,19 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
 const SQLITE_JOURNAL_MODE = 'WAL';
 const ENABLE_UPGRADES = false;
 
 if (shell_exec('which pdftotext')) {
-	define('Garradin\PDFTOTEXT_COMMAND', 'pdftotext');
+	define('Paheko\PDFTOTEXT_COMMAND', 'pdftotext');
 }
 
 if (shell_exec('which ssconvert')) {
-	define('Garradin\CALC_CONVERT_COMMAND', 'ssconvert');
+	define('Paheko\CALC_CONVERT_COMMAND', 'ssconvert');
 }
 elseif (shell_exec('which unoconv')) {
-	define('Garradin\CALC_CONVERT_COMMAND', 'unoconv');
+	define('Paheko\CALC_CONVERT_COMMAND', 'unoconv');
 }
 
 if (!empty($_ENV['PAHEKO_STANDALONE']))
@@ -54,8 +54,8 @@ if (!empty($_ENV['PAHEKO_STANDALONE']))
 		mkdir($_ENV['XDG_DATA_HOME'] . '/paheko', 0700, true);
 	}
 
-	if (!defined('Garradin\DATA_ROOT')) {
-		define('Garradin\DATA_ROOT', $_ENV['XDG_DATA_HOME'] . '/paheko');
+	if (!defined('Paheko\DATA_ROOT')) {
+		define('Paheko\DATA_ROOT', $_ENV['XDG_DATA_HOME'] . '/paheko');
 	}
 
 	// Cache directory: temporary stuff
@@ -73,11 +73,11 @@ if (!empty($_ENV['PAHEKO_STANDALONE']))
 		mkdir($_ENV['XDG_CACHE_HOME'] . '/paheko', 0700, true);
 	}
 
-	if (!defined('Garradin\CACHE_ROOT')) {
-		define('Garradin\CACHE_ROOT', $_ENV['XDG_CACHE_HOME'] . '/paheko');
+	if (!defined('Paheko\CACHE_ROOT')) {
+		define('Paheko\CACHE_ROOT', $_ENV['XDG_CACHE_HOME'] . '/paheko');
 	}
 
-	if (!defined('Garradin\DB_FILE')) {
+	if (!defined('Paheko\DB_FILE')) {
 		$last_file = $_ENV['XDG_CONFIG_HOME'] . '/paheko/last';
 
 		if ($_ENV['PAHEKO_STANDALONE'] != 1)
@@ -96,11 +96,11 @@ if (!empty($_ENV['PAHEKO_STANDALONE']))
 
 		file_put_contents($last_file, $last_sqlite);
 
-		define('Garradin\DB_FILE', $last_sqlite);
+		define('Paheko\DB_FILE', $last_sqlite);
 	}
 
-	if (!defined('Garradin\LOCAL_LOGIN')) {
-		define('Garradin\LOCAL_LOGIN', -1);
+	if (!defined('Paheko\LOCAL_LOGIN')) {
+		define('Paheko\LOCAL_LOGIN', -1);
 	}
 }
 else {
@@ -108,29 +108,34 @@ else {
 		require_once '/etc/paheko/config.php';
 	}
 
-	if (!defined('Garradin\DATA_ROOT')) {
-		define('Garradin\DATA_ROOT', '/var/lib/paheko');
+	if (!defined('Paheko\DATA_ROOT')) {
+		define('Paheko\DATA_ROOT', '/var/lib/paheko');
 	}
 
-	if (!defined('Garradin\CACHE_ROOT')) {
-		define('Garradin\CACHE_ROOT', '/var/cache/paheko');
+	if (!defined('Paheko\CACHE_ROOT')) {
+		define('Paheko\CACHE_ROOT', '/var/cache/paheko');
 	}
 }
 
-const PLUGINS_ROOT = DATA_ROOT . '/plugins';
+if (file_exists(DATA_ROOT . '/plugins')) {
+	define('Paheko\PLUGINS_ROOT', DATA_ROOT  . '/plugins');
+}
+else {
+	define('Paheko\PLUGINS_ROOT', __DIR__ . '/plugins');
+}
 
-if (!defined('Garradin\SECRET_KEY')) {
+if (!defined('Paheko\SECRET_KEY')) {
 	if (file_exists(CACHE_ROOT . '/key')) {
-		define('Garradin\SECRET_KEY', trim(file_get_contents(CACHE_ROOT . '/key')));
+		define('Paheko\SECRET_KEY', trim(file_get_contents(CACHE_ROOT . '/key')));
 	}
 	else {
-		define('Garradin\SECRET_KEY', base64_encode(random_bytes(64)));
+		define('Paheko\SECRET_KEY', base64_encode(random_bytes(64)));
 		file_put_contents(CACHE_ROOT . '/key', SECRET_KEY);
 	}
 }
 
 // Disable PDF for CLI server
-if (PHP_SAPI == 'cli-server' && !defined('Garradin\PDF_COMMAND') && !file_exists(PLUGINS_ROOT . '/dompdf')) {
-	define('Garradin\PDF_COMMAND', null);
+if (PHP_SAPI == 'cli-server' && !defined('Paheko\PDF_COMMAND') && !file_exists(PLUGINS_ROOT . '/dompdf')) {
+	define('Paheko\PDF_COMMAND', null);
 }
 

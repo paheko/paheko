@@ -389,17 +389,16 @@ class Users
 		CSV::export($format, $name, $i, $header, $callback);
 	}
 
-	static public function importReport(CSV_Custom $csv, bool $ignore_ids, int $logged_user_id): array
+	static public function importReport(CSV_Custom $csv, string $mode, ?int $logged_user_id = null): array
 	{
-		$report = ['created' => [], 'modified' => [], 'unchanged' => [], 'errors' => [], 'has_logged_user' => false];
+		$report = ['created' => [], 'modified' => [], 'unchanged' => [], 'errors' => []];
 
-		foreach (self::iterateImport($csv, $ignore_ids, $report['errors']) as $line => $user) {
-			if (!$user) {
-				$report['errors'][] = sprintf('Ligne %d : le numéro de membre indiqué n\'existe pas', $line);
-				continue;
-			}
+		if ($logged_user_id) {
+			$report['has_logged_user'] = false;
+		}
 
-			if ($user->id == $logged_user_id) {
+		foreach (self::iterateImport($csv, $mode, $report['errors']) as $line => $user) {
+			if ($logged_user_id && $user->id == $logged_user_id) {
 				$report['has_logged_user'] = true;
 				continue;
 			}
@@ -426,17 +425,14 @@ class Users
 		return $report;
 	}
 
-	static public function import(CSV_Custom $csv, bool $ignore_ids, int $logged_user_id): void
+	static public function import(CSV_Custom $csv, string $mode, ?int $logged_user_id = null): void
 	{
 		$db = DB::getInstance();
 		$db->begin();
 
-		foreach (self::iterateImport($csv, $ignore_ids) as $i => $user) {
-			if (!$user) {
-				continue;
-			}
-
-			if ($user->id == $logged_user_id) {
+		foreach (self::iterateImport($csv, $mode) as $i => $user) {
+			// Skip logged user, to avoid changing own login field
+			if ($logged_user_id && $user->id == $logged_user_id) {
 				continue;
 			}
 
@@ -451,36 +447,51 @@ class Users
 		$db->commit();
 	}
 
-	static public function iterateImport(CSV_Custom $csv, bool $ignore_ids, ?array &$errors = null): \Generator
+	static public function iterateImport(CSV_Custom $csv, string $mode, ?array &$errors = null): \Generator
 	{
 		$number_field = DynamicFields::getNumberField();
 
 		foreach ($csv->iterate() as $i => $row) {
-			if ($ignore_ids || !isset($row->$number_field)) {
-				$user = self::create();
-				$user->$number_field = null;
-				$user->setNumberIfEmpty();
-				unset($row->$number_field);
-			}
-			else {
-				$user = self::getFromNumber($row->$number_field);
-			}
+			$user = null;
 
-			if ($user) {
-				try {
-					$user->importForm((array)$row);
-				}
-				catch (UserException $e) {
-					if (null !== $errors) {
-						$errors[] = sprintf('Ligne %d : %s', $i, $e->getMessage());
-						continue;
+			try {
+				if ($mode === 'update') {
+					if (empty($row->$number_field)) {
+						throw new UserException('Aucun numéro de membre n\'a été indiqué');
 					}
 
-					throw $e;
-				}
-			}
+					$user = self::getFromNumber($row->$number_field);
 
-			yield $i => $user;
+					if (!$user) {
+						$msg = sprintf('Le membre avec le numéro "%s" n\'existe pas.', $row->$number_field);
+						throw new UserException($msg);
+					}
+				}
+				elseif ($mode === 'auto' && !empty($row->$number_field)) {
+					$user = self::getFromNumber($row->$number_field);
+				}
+
+				if (!$user) {
+					$user = self::create();
+
+					if ($mode === 'create' || empty($row->$number_field)) {
+						$user->$number_field = null;
+						$user->setNumberIfEmpty();
+						unset($row->$number_field);
+					}
+				}
+
+				$user->importForm((array)$row);
+				yield $i => $user;
+			}
+			catch (UserException $e) {
+				if (null !== $errors) {
+					$errors[] = sprintf('Ligne %d : %s', $i, $e->getMessage());
+					continue;
+				}
+
+				throw $e;
+			}
 		}
 	}
 

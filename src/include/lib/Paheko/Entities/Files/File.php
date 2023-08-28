@@ -4,7 +4,6 @@ namespace Paheko\Entities\Files;
 
 use KD2\Graphics\Image;
 use KD2\Graphics\Blob;
-use KD2\DB\EntityManager as EM;
 use KD2\Security;
 use KD2\WebDAV\WOPI;
 use KD2\Office\ToText;
@@ -24,16 +23,17 @@ use Paheko\Web\Render\Render;
 use Paheko\Web\Router;
 use Paheko\Web\Cache as Web_Cache;
 use Paheko\Files\WebDAV\Storage;
+use Paheko\Users\DynamicFields;
 
 use Paheko\Files\Files;
 
 use const Paheko\{WWW_URL, BASE_URL, ENABLE_XSENDFILE, SECRET_KEY, WOPI_DISCOVERY_URL, SHARED_CACHE_ROOT, PDFTOTEXT_COMMAND};
 
-/**
- * This is a virtual entity, it cannot be saved to a SQL table
- */
 class File extends Entity
 {
+	use FileVersionsTrait;
+	use FilePermissionsTrait;
+
 	const TABLE = 'files';
 	const EXTENSIONS_TEXT_CONVERT = ['ods', 'odt', 'odp', 'pptx', 'xlsx', 'docx', 'pdf'];
 
@@ -85,6 +85,7 @@ class File extends Entity
 	const THUMB_SIZE_TINY = '200px';
 	const THUMB_SIZE_SMALL = '500px';
 
+	const CONTEXT_TRASH = 'trash';
 	const CONTEXT_DOCUMENTS = 'documents';
 	const CONTEXT_USER = 'user';
 	const CONTEXT_TRANSACTION = 'transaction';
@@ -92,21 +93,24 @@ class File extends Entity
 	const CONTEXT_WEB = 'web';
 	const CONTEXT_MODULES = 'modules';
 	const CONTEXT_ATTACHMENTS = 'attachments';
-
-	/**
-	 * @deprecated
-	 */
-	const CONTEXT_SKELETON = 'skel';
+	const CONTEXT_VERSIONS = 'versions';
 
 	const CONTEXTS_NAMES = [
+		self::CONTEXT_TRASH => 'Corbeille',
 		self::CONTEXT_DOCUMENTS => 'Documents',
 		self::CONTEXT_USER => 'Membre',
 		self::CONTEXT_TRANSACTION => 'Écriture comptable',
 		self::CONTEXT_CONFIG => 'Configuration',
 		self::CONTEXT_WEB => 'Site web',
 		self::CONTEXT_MODULES => 'Modules',
-		self::CONTEXT_SKELETON => 'Squelettes',
 		self::CONTEXT_ATTACHMENTS => 'Fichiers joints aux messages',
+		self::CONTEXT_VERSIONS => 'Versions',
+	];
+
+	const VERSIONED_CONTEXTS = [
+		self::CONTEXT_DOCUMENTS,
+		self::CONTEXT_TRANSACTION,
+		self::CONTEXT_USER,
 	];
 
 	const IMAGE_TYPES = [
@@ -141,6 +145,14 @@ class File extends Entity
 		'text/html',
 	];
 
+	const FORBIDDEN_CHARACTERS = [
+		'..', // double dot
+		"\0", // NUL
+		'/', // slash
+		// invalid characters in Windows
+		'\\', ':', '*', '?', '"', '<', '>', '|',
+	];
+
 	// https://book.hacktricks.xyz/pentesting-web/file-upload
 	const FORBIDDEN_EXTENSIONS = '!^(?:cgi|exe|sh|bash|com|pif|jspx?|jar|js[wxv]|action|do|php(?:s|\d+)?|pht|phtml?|shtml|phar|htaccess|inc|cfml?|cfc|dbm|swf|pl|perl|py|pyc|asp|so)$!i';
 
@@ -173,6 +185,11 @@ class File extends Entity
 				$field = Utils::basename($this->parent);
 
 				if (!$id || !$field) {
+					return $ok;
+				}
+
+				// The field does not exist anymore, don't link
+				if (!DynamicFields::get($field)) {
 					return $ok;
 				}
 
@@ -239,6 +256,10 @@ class File extends Entity
 
 	public function rehash($pointer = null): void
 	{
+		if ($this->isDir()) {
+			return;
+		}
+
 		$path = !$pointer ? $this->getLocalFilePath() : null;
 
 		if ($path) {
@@ -291,37 +312,66 @@ class File extends Entity
 		return false;
 	}
 
-	public function moveToTrash(): void
+	public function moveToTrash(bool $mark_as_trash = true): void
 	{
-		if ($this->trash) {
-			return;
-		}
-
-		$this->set('trash', new \DateTime);
-		$this->save();
-	}
-
-	public function restoreFromTrash(): void
-	{
-		if (!$this->trash) {
+		if ($this->context() === self::CONTEXT_TRASH) {
 			return;
 		}
 
 		$db = DB::getInstance();
-		$exists = $db->test(File::TABLE, 'path = ? AND trash IS NULL', $this->path);
-		$parent_exists = $db->test(File::TABLE, 'path = ? AND trash IS NULL AND type = ?', $this->parent, self::TYPE_DIRECTORY);
+		$db->begin();
+
+		// We need to put files in a specific subdirectory
+		// or we might overwrite files previously put in trash
+		// (for example you move "accounting/report.ods" to "trash/accounting/reports.ods",
+		// then you move "accounting/" to "trash/accounting/", this would delete the previously
+		// trashed "reports.ods" file)
+		$hash = md5($this->path);
+		$hash = substr(date('Y-m-d.His.') . $hash, 0, 40);
+
+		// Only mark the root folder as trashed, but still move everything else
+		$this->set('trash', new \DateTime);
+
+		// Move versions as well
+		if ($v = Files::get(self::CONTEXT_VERSIONS . '/' . $this->path)) {
+			$v->rename(self::CONTEXT_TRASH . '/' . $hash . '/' . $v->path, false);
+		}
+
+		// ->rename() will ->save()
+		$this->rename(self::CONTEXT_TRASH . '/' . $hash . '/' . $this->path, false);
+
+		Plugins::fire('file.trash', false, ['file' => $this]);
+
+		$db->commit();
+	}
+
+	public function restoreFromTrash(): void
+	{
+		if ($this->context() !== self::CONTEXT_TRASH) {
+			return;
+		}
+
+		$db = DB::getInstance();
+		$db->begin();
+
+		$root = strtok($this->path, '/') . '/' . strtok('/');
+		$orig_path = strtok(false);
 
 		$this->set('trash', null);
 
-		// Parent directory no longer exists, or another file with the same name has been created:
-		// move file to documents root, but under a new name to make sure it doesn't overwrite an existing file
-		if ($exists || !$parent_exists) {
-			$new_name = sprintf('Restauré de la corbeille - %s - %s', date('d-m-Y His'), $this->name);
-			$parent = self::CONTEXT_DOCUMENTS;
-			$this->rename($parent . '/' . $new_name);
+		$v = Files::get($root . '/' . self::CONTEXT_VERSIONS . '/' . $orig_path);
+
+		// Restore versions
+		if ($v) {
+			$v->rename(self::CONTEXT_VERSIONS . '/' . $orig_path, false);
 		}
 
-		$this->save();
+		// rename() will do the save()
+		$this->rename($orig_path, false);
+
+		Plugins::fire('file.restore', false, ['file' => $this]);
+
+		$db->commit();
 	}
 
 	public function deleteCache(): void
@@ -336,6 +386,15 @@ class File extends Entity
 		}
 	}
 
+	/**
+	 * Delete file from local database, but not the file from the storage itself
+	 */
+	public function deleteSafe(): bool
+	{
+		$this->deleteCache();
+		return parent::delete();
+	}
+
 	public function delete(): bool
 	{
 		Files::assertStorageIsUnlocked();
@@ -343,24 +402,51 @@ class File extends Entity
 		$db = DB::getInstance();
 		$db->begin();
 
-		// Also delete sub-directories and files
-		if ($this->type == self::TYPE_DIRECTORY) {
+		// Delete actual file content
+		$ok = Files::callStorage('delete', $this);
+
+		// Also delete sub-directories and files, if the storage backend is not able to do it
+		// (eg. object storage)
+		if (!$ok && $this->type == self::TYPE_DIRECTORY) {
 			foreach (Files::list($this->path) as $file) {
-				$file->delete();
+				if (!$file->delete()) {
+					$db->rollback();
+					return false;
+				}
 			}
 		}
+		elseif (!$ok) {
+			throw new \LogicException('Storage backend couldn\'t delete a file');
+		}
 
-		// Delete actual file content
-		Files::callStorage('delete', $this);
-
-		Plugins::fireSignal('files.delete', ['file' => $this]);
+		Plugins::fire('file.delete', false, ['file' => $this]);
 
 		$this->deleteCache();
+		$this->deleteVersions();
+
 		$r = parent::delete();
 
 		$db->commit();
 
 		return $r;
+	}
+
+
+	/**
+	 * Copy the current file to a new location
+	 * @param  string $target Target path
+	 * @return self
+	 */
+	public function copy(string $new_path): self
+	{
+		if ($this->isDir()) {
+			throw new \LogicException('Cannot copy a directory');
+		}
+
+		$path = $this->getLocalFilePath();
+		$pointer = $path ? null : $this->getReadOnlyPointer();
+
+		return Files::createFrom($new_path, compact('path', 'pointer'));
 	}
 
 	/**
@@ -370,8 +456,18 @@ class File extends Entity
 	 */
 	public function changeFileName(string $new_name): bool
 	{
-		$new_name = self::filterName($new_name);
-		return $this->rename(ltrim($this->parent . '/' . $new_name, '/'));
+		self::validateFileName($new_name);
+
+		$v = $this->getVersionsDirectory();
+
+		$r = $this->rename(ltrim($this->parent . '/' . $new_name, '/'));
+
+		// Rename versions directory as well
+		if ($v && $r) {
+			$v->changeFileName($new_name);
+		}
+
+		return $r;
 	}
 
 	/**
@@ -381,7 +477,15 @@ class File extends Entity
 	 */
 	public function move(string $target, bool $check_session = true): bool
 	{
-		return $this->rename($target . '/' . $this->name, $check_session);
+		$v = $this->getVersionsDirectory();
+
+		$r = $this->rename($target . '/' . $this->name, $check_session);
+
+		if ($r && $v) {
+			$v->rename(self::CONTEXT_VERSIONS . '/' . $this->path);
+		}
+
+		return $r;
 	}
 
 	/**
@@ -411,23 +515,75 @@ class File extends Entity
 		}
 
 		$parent = Utils::dirname($new_path);
+		$is_dir = $this->isDir();
 
-		Plugins::fireSignal('files.move', ['file' => $this, 'new_path' => $new_path]);
+		$db = DB::getInstance();
+		$db->begin();
 
+		// Does the target already exist?
+		$exists = Files::get($new_path);
+
+		// List sub-files and sub-directories now, before they are changed
+		$list = $is_dir ? Files::list($this->path) : [];
+
+		// Make sure parent target directory exists
+		Files::ensureDirectoryExists($parent);
+
+		// Save current object for storage use
+		$old = clone $this;
+
+		// Update internal values
 		$this->set('parent', $parent);
 		$this->set('path', $new_path);
 		$this->set('name', $name);
-		return $this->save();
-	}
 
-	/**
-	 * Copy the current file to a new location
-	 * @param  string $target Target path
-	 * @return self
-	 */
-	public function copy(string $target): self
-	{
-		return Files::createFromPointer($target, Files::callStorage('getReadOnlyPointer', $this));
+		// If the target does not exist already, move the current file now
+		// this will avoid ensureDirectoryExists to create a duplicate
+		if (!$exists) {
+			$r = $this->save();
+		}
+
+		// Move each file to the new target
+		if ($is_dir) {
+			foreach ($list as $file) {
+				$file->move($new_path . trim(substr($file->parent, strlen($old->path)), '/'));
+			}
+		}
+
+		if ($exists) {
+			if ($is_dir) {
+				// Make sure trash state is transmitted to target path
+				$exists->set('trash', $this->trash);
+				$r = $exists->save();
+
+				// We assume that at this point, everything inside the source directory
+				// has been moved to the existing target directory
+				// So we can delete the source directory from the database
+				// (both $this and $exists point to the same path, so we can't save $this)
+				parent::delete();
+				$db->commit();
+
+				return $r;
+			}
+			else {
+				// Overwrite existing file
+				$exists->deleteSafe();
+			}
+
+			unset($exists);
+			$r = $this->save();
+		}
+
+		if (!$is_dir) {
+			// Actually move the file
+			Files::callStorage('rename', $old, $new_path);
+		}
+
+		Plugins::fire('file.rename', false, ['file' => $this, 'new_path' => $new_path]);
+
+		$db->commit();
+
+		return $r;
 	}
 
 	public function setContent(string $content): self
@@ -458,15 +614,17 @@ class File extends Entity
 		if (!isset($source['path']) && !isset($source['content']) && !isset($source['pointer'])) {
 			throw new \InvalidArgumentException('Unknown source type');
 		}
-		elseif (count($source) != 1) {
+		elseif (count(array_filter($source, fn($a) => !is_null($a))) != 1) {
 			throw new \InvalidArgumentException('Invalid source type');
 		}
 
 		Files::assertStorageIsUnlocked();
 
 		$delete_after = false;
-		$path = $content = $pointer = null;
-		extract($source);
+		$path = $source['path'] ?? null;
+		$content = $source['content'] ?? null;
+		$pointer = $source['pointer'] ?? null;
+		$new = !$this->exists();
 
 		if ($path) {
 			$this->set('size', filesize($path));
@@ -480,7 +638,9 @@ class File extends Entity
 		}
 		elseif ($pointer) {
 			// See https://github.com/php/php-src/issues/9441
-			if (stream_get_meta_data($pointer)['uri'] == 'php://input') {
+			$meta = stream_get_meta_data($pointer);
+
+			if (isset($meta['uri']) && $meta['uri'] == 'php://input') {
 				while (!feof($pointer)) {
 					fread($pointer, 8192);
 				}
@@ -494,6 +654,11 @@ class File extends Entity
 			Files::checkQuota($this->size);
 
 			$this->rehash($pointer);
+		}
+
+		// File hasn't changed
+		if (!$new && !$this->isModified('md5')) {
+			return $this;
 		}
 
 		// Check that it's a real image
@@ -533,14 +698,18 @@ class File extends Entity
 			}
 		}
 
+		$db = DB::getInstance();
+		$db->begin();
+
+		// Only archive previous version if it was more than 0 bytes
+		if (!$new && ($this->getModifiedProperty('size') ?? $this->size) > 0) {
+			$this->pruneVersions();
+			$this->createVersion();
+		}
+
 		if (!isset($this->modified)) {
 			$this->set('modified', new \DateTime);
 		}
-
-		$new = !$this->exists();
-
-		$db = DB::getInstance();
-		$db->begin();
 
 		// Save metadata now, and rollback if required
 		$this->save();
@@ -560,7 +729,14 @@ class File extends Entity
 				throw new UserException('Le fichier n\'a pas pu être enregistré.');
 			}
 
-			Plugins::fireSignal('files.store', ['file' => $this]);
+			Plugins::fire('file.store', false, ['file' => $this]);
+
+			if (!$new) {
+				Plugins::fire('file.overwrite', false, ['file' => $this]);
+			}
+			else {
+				Plugins::fire('file.create', false, ['file' => $this]);
+			}
 
 			// clean up thumbnails
 			foreach (self::ALLOWED_THUMB_SIZES as $key => $operations)
@@ -616,24 +792,40 @@ class File extends Entity
 				$source['path'] = $source['pointer'] ? null : $this->getLocalFilePath();
 			}
 
-			if (isset($source['content'])) {
-				Utils::exec($cmd, 2, fn() => $source['content'], fn($out) => $content = $out);
-			}
-			elseif (isset($source['pointer'])) {
-				fseek($source['pointer'], 0, SEEK_END);
-				$size = ftell($source['pointer']);
-				rewind($source['pointer']);
+			try {
+				if (isset($source['content'])) {
+					Utils::exec($cmd, 2, fn() => $source['content'], fn($out) => $content = $out);
+				}
+				elseif (isset($source['pointer'])) {
+					fseek($source['pointer'], 0, SEEK_END);
+					$size = ftell($source['pointer']);
+					rewind($source['pointer']);
 
-				Utils::exec($cmd, 2, fn() => fread($source['pointer'], $size), fn($out) => $content = $out);
+					if ($size >= 8*1024*1024) {
+						throw new \OverflowException('PDF file is too large');
+					}
+
+					Utils::exec($cmd, 2, fn() => fread($source['pointer'], $size), fn($out) => $content = $out);
+				}
+				else {
+					$cmd = sprintf('%s -nopgbrk %s -', escapeshellcmd(PDFTOTEXT_COMMAND), escapeshellarg($source['path']));
+					$content = '';
+					Utils::exec($cmd, 2, null, function($out) use (&$content) { $content .= $out; });
+					$content = $content ?: null;
+				}
 			}
-			else {
-				$cmd = sprintf('%s -nopgbrk %s -', escapeshellcmd(PDFTOTEXT_COMMAND), escapeshellarg($source['path']));
-				$content = '';
-				Utils::exec($cmd, 2, null, function($out) use (&$content) { $content .= $out; });
-				$content = $content ?: null;
+			catch (\OverflowException $e) {
+				// PDF extraction was longer than 2 seconds: PDF file is likely too large
+				$content = null;
 			}
 		}
 		elseif (in_array($ext, self::EXTENSIONS_TEXT_CONVERT) && is_array($source)) {
+
+			if (empty($source)) {
+				$source['pointer'] = $this->getReadOnlyPointer();
+				$source['path'] = $source['pointer'] ? null : $this->getLocalFilePath();
+			}
+
 			$content = ToText::from($source);
 		}
 		else {
@@ -789,29 +981,8 @@ class File extends Entity
 	/**
 	 * Envoie le fichier au client HTTP
 	 */
-	public function serve(?Session $session = null, bool $download = false, ?string $share_hash = null, ?string $share_password = null): void
+	public function serve($download = null): void
 	{
-		$can_access = $this->canRead();
-
-		if (!$can_access && $share_hash) {
-			$can_access = $this->checkShareLink($share_hash, $share_password);
-
-			if (!$can_access && $this->checkShareLinkRequiresPassword($share_hash)) {
-				$tpl = Template::getInstance();
-				$has_password = (bool) $share_password;
-
-				$tpl->assign(compact('can_access', 'has_password'));
-				$tpl->display('ask_share_password.tpl');
-				return;
-			}
-		}
-
-		if (!$can_access) {
-			header('HTTP/1.1 403 Forbidden', true, 403);
-			throw new UserException('Vous n\'avez pas accès à ce fichier.', 403);
-			return;
-		}
-
 		// Only simple files can be served, not directories
 		if ($this->type != self::TYPE_FILE) {
 			header('HTTP/1.1 404 Not Found', true, 404);
@@ -822,19 +993,6 @@ class File extends Entity
 
 		if (($path = $this->getLocalFilePath()) && in_array($this->context(), [self::CONTEXT_WEB, self::CONTEXT_CONFIG])) {
 			Web_Cache::link($this->uri(), $path);
-		}
-	}
-
-	public function serveAuto(?Session $session = null, array $params = []): void
-	{
-		$found_sizes = array_intersect_key($params, self::ALLOWED_THUMB_SIZES);
-		$size = key($found_sizes);
-
-		if ($size && $this->image) {
-			$this->serveThumbnail($session, $size);
-		}
-		else {
-			$this->serve($session, isset($params['download']));
 		}
 	}
 
@@ -857,14 +1015,8 @@ class File extends Entity
 	/**
 	 * Envoie une miniature à la taille indiquée au client HTTP
 	 */
-	public function serveThumbnail(?Session $session = null, string $size = null): void
+	public function serveThumbnail(string $size = null): void
 	{
-		if (!$this->canRead($session)) {
-			header('HTTP/1.1 403 Forbidden', true, 403);
-			throw new UserException('Accès interdit', 403);
-			return;
-		}
-
 		if (!$this->image) {
 			throw new UserException('Il n\'est pas possible de fournir une miniature pour un fichier qui n\'est pas une image.');
 		}
@@ -906,8 +1058,7 @@ class File extends Entity
 				$i->save($destination, $format);
 			}
 			catch (\RuntimeException $e) {
-				throw $e;
-				throw new UserException('Impossible de créer la miniature');
+				throw new UserException('Impossible de créer la miniature', 0, $e);
 			}
 		}
 
@@ -918,14 +1069,7 @@ class File extends Entity
 		}
 	}
 
-	/**
-	 * Servir un fichier local en HTTP
-	 * @param  string $path Chemin vers le fichier local
-	 * @param  string $type Type MIME du fichier
-	 * @param  string $name Nom du fichier avec extension
-	 * @param  integer $size Taille du fichier en octets (facultatif)
-	 */
-	protected function _serve(?string $path = null, bool $download = false): void
+	protected function _serve(?string $path = null, $download = null): void
 	{
 		if ($this->isPublic()) {
 			Utils::HTTPCache($this->etag(), $this->modified->getTimestamp());
@@ -952,13 +1096,13 @@ class File extends Entity
 		}
 
 		header(sprintf('Content-Type: %s', $type));
-		header(sprintf('Content-Disposition: %s; filename="%s"', $download ? 'attachment' : 'inline', $this->name));
+		header(sprintf('Content-Disposition: %s; filename="%s"', null !== $download ? 'attachment' : 'inline', is_string($download) ? $download : $this->name));
 
 		// Use X-SendFile, if available, and storage has a local copy
 		if (Router::isXSendFileEnabled()) {
 			$local_path = $path ?? Files::callStorage('getLocalFilePath', $this);
 
-			if ($path) {
+			if ($local_path) {
 				Router::xSendFile($local_path);
 				return;
 			}
@@ -977,20 +1121,28 @@ class File extends Entity
 			@ob_clean();
 		}
 
-		flush();
+		if (null === $path) {
+			$pointer = $this->getReadOnlyPointer();
+
+			if (null === $pointer) {
+				$path = $this->getLocalFilePath();
+			}
+		}
 
 		if (null !== $path) {
 			readfile($path);
 		}
-		else {
-			$p = Files::callStorage('getReadOnlyPointer', $this);
-
-			while (!feof($p)) {
-				echo fread($p, 8192);
-				flush();
+		elseif (null !== $pointer) {
+			while (!feof($pointer)) {
+				echo fread($pointer, 32*1024);
 			}
 
-			fclose($p);
+			fclose($pointer);
+		}
+		else {
+			header('HTTP/1.1 404 Not Found', true, 404);
+			header('Content-Type: text/html', true);
+			throw new UserException('Le contenu de ce fichier est introuvable', 404);
 		}
 	}
 
@@ -1000,7 +1152,7 @@ class File extends Entity
 			throw new \LogicException('Cannot fetch a directory');
 		}
 
-		$p = Files::callStorage('getReadOnlyPointer', $this);
+		$p = $this->getReadOnlyPointer();
 
 		if (null === $p) {
 			$path = Files::callStorage('getLocalFilePath', $this);
@@ -1027,7 +1179,7 @@ class File extends Entity
 		$editor_type = $this->renderFormat();
 
 		if ($editor_type == 'skriv' || $editor_type == 'markdown') {
-			return Render::render($editor_type, $this, $this->fetch(), $user_prefix);
+			return Render::render($editor_type, $this->path, $this->fetch(), $user_prefix);
 		}
 		elseif ($editor_type == 'text') {
 			return sprintf('<pre>%s</pre>', htmlspecialchars($this->fetch()));
@@ -1035,135 +1187,6 @@ class File extends Entity
 		else {
 			throw new \LogicException('Cannot render file of this type');
 		}
-	}
-
-	public function canRead(Session $session = null): bool
-	{
-		// Web pages and config files are always public
-		if ($this->isPublic()) {
-			return true;
-		}
-
-		$session ??= Session::getInstance();
-
-		return $session->checkFilePermission($this->path, 'read');
-	}
-
-	public function canShare(Session $session = null): bool
-	{
-		$session ??= Session::getInstance();
-
-		if (!$session->isLogged()) {
-			return false;
-		}
-
-		return $session->checkFilePermission($this->path, 'share');
-	}
-
-	public function canWrite(Session $session = null): bool
-	{
-		$session ??= Session::getInstance();
-
-		if (!$session->isLogged()) {
-			return false;
-		}
-
-		return $session->checkFilePermission($this->path, 'write');
-	}
-
-	public function canDelete(Session $session = null): bool
-	{
-		$session ??= Session::getInstance();
-
-		if (!$session->isLogged()) {
-			return false;
-		}
-
-		// Deny delete of directories in web context
-		if ($this->isDir() && $this->context() == self::CONTEXT_WEB) {
-			return false;
-		}
-
-		return $session->checkFilePermission($this->path, 'delete');
-	}
-
-	public function canMoveTo(string $destination, Session $session = null): bool
-	{
-		$session ??= Session::getInstance();
-
-		if (!$session->isLogged()) {
-			return false;
-		}
-
-		return $session->checkFilePermission($this->path, 'move') && $this->canDelete() && self::canCreate($destination);
-	}
-
-	public function canCopyTo(string $destination, Session $session = null): bool
-	{
-		$session ??= Session::getInstance();
-
-		if (!$session->isLogged()) {
-			return false;
-		}
-
-		return $this->canRead() && self::canCreate($destination);
-	}
-
-	public function canCreateDirHere(Session $session = null)
-	{
-		if (!$this->isDir()) {
-			return false;
-		}
-
-		$session ??= Session::getInstance();
-
-		if (!$session->isLogged()) {
-			return false;
-		}
-
-		return $session->checkFilePermission($this->path, 'mkdir');
-	}
-
-	static public function canCreateDir(string $path, Session $session = null)
-	{
-		$session ??= Session::getInstance();
-
-		if (!$session->isLogged()) {
-			return false;
-		}
-
-		return $session->checkFilePermission($path, 'mkdir');
-	}
-
-	public function canCreateHere(Session $session = null): bool
-	{
-		if (!$this->isDir()) {
-			return false;
-		}
-
-		$session ??= Session::getInstance();
-
-		if (!$session->isLogged()) {
-			return false;
-		}
-
-		return $session->checkFilePermission($this->path, 'create');
-	}
-
-	public function canRename(Session $session = null): bool
-	{
-		return $this->canCreate($this->parent ?? '', $session);
-	}
-
-	static public function canCreate(string $path, Session $session = null): bool
-	{
-		$session ??= Session::getInstance();
-
-		if (!$session->isLogged()) {
-			return false;
-		}
-
-		return $session->checkFilePermission($path, 'create');
 	}
 
 	public function pathHash(): string
@@ -1213,7 +1236,11 @@ class File extends Entity
 
 	static public function filterName(string $name): string
 	{
-		return preg_replace('/[^\w\d\p{L}_. -]+/iu', '-', trim($name));
+		foreach (self::FORBIDDEN_CHARACTERS as $char) {
+			$name = str_replace($char, '', $name);
+		}
+
+		return $name;
 	}
 
 	static public function validateFileName(string $name): void
@@ -1222,18 +1249,20 @@ class File extends Entity
 			throw new ValidationException('Nom de fichier interdit');
 		}
 
-		if (strpos($name, "\0") !== false) {
-			throw new ValidationException('Nom de fichier invalide');
-		}
-
 		if (strlen($name) > 250) {
 			throw new ValidationException('Nom de fichier trop long');
+		}
+
+		foreach (self::FORBIDDEN_CHARACTERS as $char) {
+			if (strpos($name, $char) !== false) {
+				throw new ValidationException('Nom de fichier invalide, le caractère suivant est interdit : ' . $char);
+			}
 		}
 
 		$extension = strtolower(substr($name, strrpos($name, '.')+1));
 
 		if (preg_match(self::FORBIDDEN_EXTENSIONS, $extension)) {
-			throw new ValidationException('Extension de fichier non autorisée, merci de renommer le fichier avant envoi.');
+			throw new ValidationException(sprintf('Extension de fichier "%s" non autorisée, merci de renommer le fichier avant envoi.', $extension));
 		}
 	}
 
@@ -1252,7 +1281,7 @@ class File extends Entity
 		$context = array_shift($parts);
 
 		if (!array_key_exists($context, self::CONTEXTS_NAMES)) {
-			throw new ValidationException('Chemin invalide: ' . $path);
+			throw new ValidationException('Contexte invalide: ' . $context);
 		}
 
 		$name = array_pop($parts);
@@ -1463,7 +1492,7 @@ class File extends Entity
 		}
 
 		Files::assertStorageIsUnlocked();
-		Files::callStorage('touch', $this->path, $date);
+		Files::callStorage('touch', $this, $date);
 		$this->set('modified', $date);
 		$this->save();
 	}

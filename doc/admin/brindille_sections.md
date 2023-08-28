@@ -193,8 +193,7 @@ Il est aussi possible d'utiliser les paramètres suivants :
 | :- | :- |
 | `debug` | Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle. |
 | `explain` | Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle. | 
-| `assign` | Si renseigné, une variable de ce nom sera créée, et le contenu de la dernière ligne du résultat y sera assigné. | 
-| `assign_assoc` | Si renseigné, le tableau dans la variable de ce nom sera rempli, avec pour chaque ligne une entrée, et comme clé la première colonne, et : s'il y a plus de 2 colonnes sélectionnées, le tableau complet comme valeur, sinon la seconde colonne. | 
+| `assign` | Si renseigné, une variable de ce nom sera créée, et le contenu de la ligne y sera assigné. | 
 
 Exemple avec `debug` :
 
@@ -205,13 +204,30 @@ Exemple avec `debug` :
 {{/select}}
 ```
 
-Affichera : `SELECT * FROM users WHERE nom = 'Karim'`.
+Affichera juste au dessus du résultat la requête exécutée :
+
+```
+SELECT * FROM users WHERE nom = 'Karim'
+```
+
+### Paramètre assign
 
 Exemple avec `assign` :
 
 ```
 {{#select * FROM users WHERE prenom = 'Camille' LIMIT 1; assign="membre"}}{{/select}}
 {{$membre.nom}}
+```
+
+Il est possible d'utiliser un point final pour que toutes les lignes soient mises dans un tableau :
+
+```
+{{#select * FROM users WHERE prenom = 'Camille' LIMIT 10; assign="membres."}}{{/select}}
+
+{{#foreach from=$membres}}
+	Nom : {{$nom}}<br />
+	Adresse : {{$adresse}}
+{{/foreach}}
 ```
 
 ## sql
@@ -240,8 +256,9 @@ Certaines sections (voir plus bas) héritent de `sql` et rajoutent des fonctionn
 | `begin` | Début des résultats, si vide une valeur de `0` sera utilisée. |
 | `limit` | Limitation des résultats. Si vide, une valeur de `1000` sera utilisée. |
 | `group` | Contenu de la clause `GROUP BY` |
+| `having` | Contenu de la clause `HAVING` |
 | `order` | Ordre de tri des résultats. Si vide le tri sera fait par ordre d'ajout dans la base de données. |
-| `assign` | Si renseigné, une variable de ce nom sera créée, et le contenu de la dernière ligne du résultat y sera assigné. | 
+| `assign` | Si renseigné, une variable de ce nom sera créée, et le contenu de la ligne du résultat y sera assigné. | 
 | `debug` | Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle. |
 | `explain` | Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle. | 
 

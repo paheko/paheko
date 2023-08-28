@@ -489,10 +489,23 @@ namespace Paheko;
 //const SMTP_SECURITY = 'STARTTLS';
 
 /**
- * Adresse e-mail destinée à recevoir les erreurs de mail
- * (adresses invalides etc.)
+ * Nom du serveur utilisé dans le HELO SMTP
  *
- * Si laissé NULL, alors l'adresse email de l'association sera utilisée.
+ * Si NULL, alors le nom renseigné comme SERVER_NAME (premier nom du virtual host Apache)
+ * sera utilisé.
+ *
+ * Defaut : NULL
+ *
+ * @var null|string
+ */
+
+//const SMTP_HELO_HOSTNAME = 'mail.domain.tld';
+
+/**
+ * Adresse e-mail destinée à recevoir les erreurs de mail
+ * (adresses invalides etc.) — Return-Path
+ *
+ * Si laissé NULL, alors l'adresse e-mail de l'association sera utilisée.
  * En cas d'hébergement de plusieurs associations, il est conseillé
  * d'utiliser une adresse par association.
  *
@@ -503,6 +516,24 @@ namespace Paheko;
  */
 
 //const MAIL_RETURN_PATH = 'returns@monserveur.com';
+
+
+/**
+ * Adresse e-mail expéditrice des messages (Sender)
+ *
+ * Si vous envoyez des mails pour plusieurs associations, il est souhaitable
+ * de forcer l'adresse d'expéditeur des messages pour passer les règles SPF et DKIM.
+ *
+ * Dans ce cas l'adresse de l'association sera indiquée en "Reply-To", et
+ * l'adresse contenue dans MAIL_SENDER sera dans le From.
+ *
+ * Si laissé NULL, c'est l'adresse de l'association indiquée dans la configuration
+ * qui sera utilisée.
+ *
+ * Défaut : null
+ */
+
+//const MAIL_SENDER = 'associations@monserveur.com';
 
 /**
  * Mot de passe pour l'accès à l'API permettant de gérer les mails d'erreur

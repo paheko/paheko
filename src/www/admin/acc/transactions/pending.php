@@ -6,7 +6,7 @@ use Paheko\Entities\Accounting\Transaction;
 
 require_once __DIR__ . '/../_inc.php';
 
-$list = Transactions::listPendingCreditAndDebtForClosedYears();
+$list = Transactions::listPendingCreditAndDebtForOtherYears(CURRENT_YEAR_ID);
 $list->loadFromQueryString();
 
 $tpl->assign(compact('list'));

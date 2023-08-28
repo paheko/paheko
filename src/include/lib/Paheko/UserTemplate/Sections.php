@@ -60,7 +60,6 @@ class Sections
 		'begin',
 		'limit',
 		'assign',
-		'assign_assoc',
 		'debug',
 		'count',
 	];
@@ -375,7 +374,7 @@ class Sections
 			}
 
 			if (isset($params['assign'])) {
-				$tpl->assign($params['assign'], $row, 0);
+				$tpl::__assign(['var' => $params['assign'], 'value' => $row], $tpl, $line);
 			}
 
 			yield $row;
@@ -514,8 +513,10 @@ class Sections
 		static $reserved_keywords = ['max', 'order', 'desc', 'debug', 'explain', 'schema', 'columns', 'select', 'where', 'module'];
 
 		foreach ($params as $key => $value) {
-			if ($key[0] == ':' && strstr($where, $key)) {
-				$list->setParameter(substr($key, 1), $value);
+			if ($key[0] == ':') {
+				if (false !== strpos($where, $key)) {
+					$list->setParameter(substr($key, 1), $value);
+				}
 			}
 			elseif (!in_array($key, $reserved_keywords)) {
 				$hash = sha1($key);
@@ -535,7 +536,12 @@ class Sections
 			$row->original = clone $row;
 			unset($row->original->id, $row->original->key, $row->original->document);
 
-			$row = array_merge(json_decode($row->document, true), (array)$row);
+			if (null !== $row->document) {
+				$row = array_merge(json_decode($row->document, true), (array)$row);
+			}
+			else {
+				$row = (array) $row;
+			}
 		});
 
 		$list->setExportCallback(function(&$row) {
@@ -1209,6 +1215,9 @@ class Sections
 		$db = DB::getInstance();
 
 		try {
+			// Lock database against changes
+			$db->setReadOnly(true);
+
 			$statement = $db->protectSelect($allowed_tables, $sql);
 
 			$args = [];
@@ -1232,6 +1241,7 @@ class Sections
 			}
 
 			$result = $statement->execute();
+			$db->setReadOnly(false);
 		}
 		catch (\KD2\DB\DB_Exception $e) {
 			throw new Brindille_Exception(sprintf("à la ligne %d erreur SQL :\n%s\n\nRequête exécutée :\n%s", $line, $db->lastErrorMsg(), $sql));
@@ -1240,14 +1250,7 @@ class Sections
 		while ($row = $result->fetchArray(\SQLITE3_ASSOC))
 		{
 			if (isset($params['assign'])) {
-				$tpl->assign($params['assign'], $row, 0);
-			}
-			elseif (isset($params['assign_assoc'])) {
-				if (!isset($tpl->_variables[0][$params['assign_assoc']])) {
-					$tpl->assign($params['assign_assoc'], [], 0);
-				}
-
-				$tpl->_variables[0][$params['assign_assoc']][current($row)] = count($row) == 2 ? next($row) : $row;
+				$tpl::__assign(['var' => $params['assign'], 'value' => $row], $tpl, $line);
 			}
 
 			yield $row;

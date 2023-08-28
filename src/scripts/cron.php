@@ -25,4 +25,4 @@ Reminders::sendPending();
 // Make sure we are cleaning the trash
 Trash::clean();
 
-Plugins::fireSignal('cron');
+Plugins::fire('cron');

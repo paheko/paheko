@@ -13,6 +13,8 @@ use Paheko\Users\Session;
 use Paheko\Web\Cache;
 use Paheko\Web\Router;
 
+use KD2\ZipWriter;
+
 use Paheko\Entities\Files\File;
 
 use const Paheko\{ROOT, WWW_URL};
@@ -304,13 +306,15 @@ class Module extends Entity
 		foreach (Files::listForContext(File::CONTEXT_MODULES, $this->name . $path) as $file) {
 			$_path = substr($file->path, strlen($base . '/'));
 
-			$out[$file->name] = [
+			$out[$file->name] = (object) [
 				'name'      => $file->name,
 				'dir'       => $file->isDir(),
 				'path'      => $_path,
 				'file_path' => $file->path,
 				'type'      => $file->mime,
 				'local'     => true,
+				'dist'      => false,
+				'file'      => $file,
 			];
 		}
 
@@ -323,11 +327,11 @@ class Module extends Entity
 				}
 
 				if (isset($out[$file])) {
-					$out[$file]['dist'] = true;
+					$out[$file]->dist = true;
 					continue;
 				}
 
-				$out[$file] = [
+				$out[$file] = (object) [
 					'name'      => $file,
 					'type'      => mime_content_type($dist_path . '/' . $file),
 					'dir'       => is_dir($dist_path . '/' . $file),
@@ -335,26 +339,28 @@ class Module extends Entity
 					'local'     => false,
 					'dist'      => true,
 					'file_path' => $base . $path . '/' . $file,
+					'file'      => null,
+					'dist_path' => $dist_path . '/' . $file,
 				];
 			}
 		}
 
 		foreach ($out as &$file) {
-			$file['editable'] = !$file['dir'] && (UserTemplate::isTemplate($file['path'])
-				|| substr($file['type'], 0, 5) === 'text/'
-				|| preg_match('/\.(?:json|md|skriv|html|css|js|ini)$/', $file['name']));
-			$file['open_url'] = '!common/files/preview.php?p=' . rawurlencode($file['file_path']);
-			$file['edit_url'] = '!common/files/edit.php?p=' . rawurlencode($file['file_path']);
-			$file['delete_url'] = '!common/files/delete.php?p=' . rawurlencode($file['file_path']);
+			$file->editable = !$file->dir && (UserTemplate::isTemplate($file->path)
+				|| substr($file->type, 0, 5) === 'text/'
+				|| preg_match('/\.(?:json|md|skriv|html|css|js|ini)$/', $file->name));
+			$file->open_url = '!common/files/preview.php?p=' . rawurlencode($file->file_path);
+			$file->edit_url = '!common/files/edit.php?p=' . rawurlencode($file->file_path);
+			$file->delete_url = '!common/files/delete.php?p=' . rawurlencode($file->file_path);
 		}
 
 		unset($file);
 
 		uasort($out, function ($a, $b) {
-			if ($a['dir'] == $b['dir']) {
-				return strnatcasecmp($a['name'], $b['name']);
+			if ($a->dir == $b->dir) {
+				return strnatcasecmp($a->name, $b->name);
 			}
-			elseif ($a['dir'] && !$b['dir']) {
+			elseif ($a->dir && !$b->dir) {
 				return -1;
 			}
 			else {
@@ -368,15 +374,19 @@ class Module extends Entity
 
 	public function delete(): bool
 	{
+		$this->resetChanges();
+		$this->deleteData();
+
+		return parent::delete();
+	}
+
+	public function resetChanges(): void
+	{
 		$dir = $this->dir();
 
 		if ($dir) {
 			$dir->delete();
 		}
-
-		$this->deleteData();
-
-		return parent::delete();
 	}
 
 	public function deleteData(): void
@@ -481,6 +491,7 @@ class Module extends Entity
 				throw new UserException('Invalid path');
 			}
 
+			$file->validateCanRead();
 			$file->serve();
 		}
 		// Serve a static file from dist path
@@ -506,10 +517,15 @@ class Module extends Entity
 
 		// Fire signal before display of a web page
 		$plugin_params = ['path' => $path, 'uri' => $uri, 'module' => $this];
+		$module = $this;
 
-		if (Plugins::fireSignal('web.request.before', $plugin_params)) {
+		$signal = Plugins::fire('web.request.before', true, compact('path', 'uri', 'module'));
+
+		if ($signal && $signal->isStopped()) {
 			return;
 		}
+
+		unset($signal);
 
 		$type = null;
 
@@ -525,13 +541,25 @@ class Module extends Entity
 			$cache = false;
 		}
 
-		$plugin_params['type'] = $type;
-		$plugin_params['cache'] = $cache;
-
 		// Call plugins, allowing them to modify the content
-		if (Plugins::fireSignal('web.request', $plugin_params, $content)) {
+		$signal = Plugins::fire(
+			'web.request',
+			true,
+			compact('path', 'uri', 'module', 'content', 'type', 'cache'),
+			compact('type', 'cache', 'content')
+		);
+
+		if ($signal && $signal->isStopped()) {
 			return;
 		}
+
+		if ($signal) {
+			$type = $signal->getOut('type');
+			$cache = $signal->getOut('cache');
+			$content = $signal->getOut('content');
+		}
+
+		unset($signal);
 
 		header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
 
@@ -546,7 +574,7 @@ class Module extends Entity
 			Cache::store($uri, $content);
 		}
 
-		Plugins::fireSignal('web.request.after', $plugin_params, $content);
+		Plugins::fire('web.request.after', false, compact('path', 'uri', 'module', 'content', 'type', 'cache'));
 	}
 
 	public function getFileTypeFromExtension(string $path): ?string
@@ -599,7 +627,37 @@ class Module extends Entity
 
 	public function export(Session $session): void
 	{
-		Files::zip(null, [$this->path() . '/'], $session, 'module_' . $this->name);
+		$download_name = 'module_' . $this->name;
+
+		header('Content-type: application/zip');
+		header(sprintf('Content-Disposition: attachment; filename="%s"', $download_name. '.zip'));
+
+		$target = 'php://output';
+		$zip = new ZipWriter($target);
+		$zip->setCompression(9);
+
+		$add = function ($path) use ($zip, &$add) {
+			foreach ($this->listFiles($path) as $file) {
+				if ($file->dir) {
+					$add($file->path);
+				}
+				elseif ($file->local) {
+					if ($pointer = $file->file->getReadOnlyPointer()) {
+						$zip->addFromPointer($file->file_path, $pointer);
+					}
+					elseif ($path = $file->file->getLocalFilePath()) {
+						$zip->addFromPath($file->file_path, $path);
+					}
+				}
+				else {
+					$zip->addFromPath($file->file_path, $file->dist_path);
+				}
+			}
+		};
+
+		$add(null);
+
+		$zip->close();
 	}
 
 	public function save(bool $selfcheck = true): bool

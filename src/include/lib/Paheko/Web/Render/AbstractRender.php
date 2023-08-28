@@ -10,45 +10,65 @@ use const Paheko\{WWW_URL, ADMIN_URL};
 
 abstract class AbstractRender
 {
-	protected $current_path;
-	protected $context;
-	protected $link_prefix;
-	protected $link_suffix;
-	protected $user_prefix;
+	protected string $uri;
+	protected string $parent;
+	protected ?string $path = null;
+	protected string $context;
 
-	protected $file;
+	protected string $link_prefix = '';
+	protected string $link_suffix = '';
 
-	public function __construct(?File $file = null, ?string $user_prefix = null)
+	public function __construct(?string $path, ?string $user_prefix)
 	{
-		$this->file = $file;
+		$this->path = $path;
 
-		$this->user_prefix = $user_prefix;
+		if ($path) {
+			$this->context = strtok($path, '/');
 
-		if ($file) {
-			$this->isRelativeTo($file);
+			if ($this->context === File::CONTEXT_WEB) {
+				$this->parent = $path;
+				$this->uri = Utils::basename($path);
+				$this->link_prefix = $user_prefix ?? WWW_URL;
+			}
+			else {
+				$this->parent = Utils::dirname($path);
+				$this->uri = $this->parent;
+
+				if ($this->context === File::CONTEXT_DOCUMENTS) {
+					$prefix_path = $this->parent;
+				}
+				else {
+					$prefix_path = File::CONTEXT_DOCUMENTS;
+				}
+
+				$this->link_prefix = $user_prefix ?? ADMIN_URL . 'common/files/preview.php?p=' . $prefix_path . '/';
+				$this->link_suffix = '.md';
+			}
+
+			$this->uri = str_replace('%2F', '/', rawurlencode($this->uri));
 		}
 	}
 
-	abstract public function render(?string $content = null): string;
+	abstract public function render(string $content): string;
 
 	public function hasPath(): bool
 	{
-		return isset($this->current_path);
+		return isset($this->path);
 	}
 
 	public function registerAttachment(string $uri)
 	{
-		Render::registerAttachment($this->file, $uri);
+		Render::registerAttachment($this->path, $uri);
 	}
 
 	public function listImages(): array
 	{
-		if (!$this->file) {
+		if (!$this->path) {
 			return [];
 		}
 
 		$out = [];
-		$list = Files::list(Utils::dirname($this->file->path));
+		$list = Files::list($this->parent);
 
 		foreach ($list as $file) {
 			if (!$file->image) {
@@ -63,7 +83,7 @@ abstract class AbstractRender
 
 	public function resolveAttachment(string $uri)
 	{
-		$prefix = $this->current_path;
+		$prefix = $this->uri;
 		$pos = strpos($uri, '/');
 
 		if ($pos === 0) {
@@ -91,20 +111,5 @@ abstract class AbstractRender
 		}
 
 		return $this->link_prefix . $uri;
-	}
-
-	public function isRelativeTo(File $file) {
-		$this->current_path = $file->parent;
-		$this->context = $file->context();
-		$this->link_suffix = '';
-
-		if ($this->context === File::CONTEXT_WEB) {
-			$this->link_prefix = $this->user_prefix ?? WWW_URL;
-			$this->current_path = $file->uri();
-		}
-		else {
-			$this->link_prefix = $this->user_prefix ?? sprintf(ADMIN_URL . 'common/files/preview.php?p=%s/', $this->context);
-			$this->link_suffix = '.skriv';
-		}
 	}
 }

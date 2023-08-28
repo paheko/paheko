@@ -31,7 +31,12 @@ class Entity extends AbstractEntity
 			$source = $_POST;
 		}
 
-		return $this->import($source);
+		try {
+			return $this->import($source);
+		}
+		catch (\UnexpectedValueException $e) {
+			throw new ValidationException($e->getMessage(), 0, $e);
+		}
 	}
 
 	static public function filterUserDateValue(?string $value): ?\DateTime
@@ -140,7 +145,6 @@ class Entity extends AbstractEntity
 	{
 		$name = get_class($this);
 		$name = str_replace('Paheko\Entities\\', '', $name);
-		$name = 'entity.' . $name . '.save';
 
 		// We are doing selfcheck here before sending the before event
 		if ($selfcheck) {
@@ -149,29 +153,46 @@ class Entity extends AbstractEntity
 
 		$new = $this->exists() ? false : true;
 		$modified = $this->isModified();
+		$entity = $this;
+		$params = compact('entity', 'new', 'modified');
 
-		// Specific entity signal
-		if (Plugins::fireSignal($name . '.before', ['entity' => $this, 'new' => $new])) {
-			return true;
+		$signals = [
+			// Specific entity signal
+			'entity.' . $name . '.save',
+			// Generic entity signal
+			'entity.save',
+		];
+
+		if ($new) {
+			$signals[] = 'entity.' . $name . '.create';
+			$signals[] = 'entity.create';
+		}
+		elseif ($modified) {
+			$signals[] = 'entity.' . $name . '.modify';
+			$signals[] = 'entity.modify';
+			$params['modified_properties'] = $this->getModifiedProperties();
 		}
 
-		// Generic entity signal
-		if (Plugins::fireSignal('entity.save.before', ['entity' => $this, 'new' => $new])) {
-			return true;
+		foreach ($signals as $signal_name) {
+			$signal = Plugins::fire($signal_name . '.before', true, $params);
+
+			if ($signal && $signal->isStopped()) {
+				return true;
+			}
 		}
 
-		$return = parent::save(false);
+		$params['success'] = parent::save(false);
 
 		// Log creation/edit, but don't record stuff that doesn't change anything
 		if ($this::NAME && ($new || $modified)) {
 			Log::add($new ? Log::CREATE : Log::EDIT, ['entity' => get_class($this), 'id' => $this->id()]);
 		}
 
-		Plugins::fireSignal($name . '.after', ['entity' => $this, 'success' => $return, 'new' => $new]);
+		foreach ($signals as $signal_name) {
+			Plugins::fire($signal_name . '.after', false, $params);
+		}
 
-		Plugins::fireSignal('entity.save.after', ['entity' => $this, 'success' => $return, 'new' => $new]);
-
-		return $return;
+		return $params['success'];
 	}
 
 	public function delete(): bool
@@ -181,25 +202,31 @@ class Entity extends AbstractEntity
 		$name = 'entity.' . $type . '.delete';
 
 		$id = $this->id();
+		$entity = $this;
 
-		if (Plugins::fireSignal($name . '.before', ['entity' => $this, 'id' => $id])) {
+		// Specific entity signal
+		$signal = Plugins::fire($name . '.before', true, compact('entity', 'id'));
+
+		if ($signal && $signal->isStopped()) {
 			return true;
 		}
 
 		// Generic entity signal
-		if (Plugins::fireSignal('entity.delete.before', ['entity' => $this, 'id' => $id])) {
+		$signal = Plugins::fire('entity.delete.before', true, compact('entity', 'id'));
+
+		if ($signal && $signal->isStopped()) {
 			return true;
 		}
 
-		$return = parent::delete();
+		$success = parent::delete();
 
 		if ($this::NAME) {
 			Log::add(Log::DELETE, ['entity' => get_class($this), 'id' => $id]);
 		}
 
-		Plugins::fireSignal($name . '.after', ['entity' => $this, 'success' => $return, 'id' => $id]);
-		Plugins::fireSignal('entity.delete.after', ['entity' => $this, 'success' => $return, 'id' => $id]);
+		Plugins::fire($name . '.after', false, compact('entity', 'success', 'id'));
+		Plugins::fire('entity.delete.after', false, compact('entity', 'success', 'id'));
 
-		return $return;
+		return $success;
 	}
 }

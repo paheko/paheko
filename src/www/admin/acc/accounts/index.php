@@ -10,7 +10,7 @@ if (!CURRENT_YEAR_ID) {
 	Utils::redirect('!acc/years/?msg=OPEN');
 }
 
-$pending_count = Transactions::listPendingCreditAndDebtForClosedYears()->count();
+$pending_count = Transactions::listPendingCreditAndDebtForOtherYears(CURRENT_YEAR_ID)->count();
 
 $tpl->assign(compact('pending_count'));
 

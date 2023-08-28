@@ -34,7 +34,7 @@ use Paheko\Entities\Files\File;
 			{if $dir->canCreateHere()}
 				{linkbutton shape="upload" label="Depuis mon ordinateur" target="_dialog" href="!common/files/upload.php?p=%s"|args:$dir_uri}
 			{if $dir->canCreateDirHere()}
-				{linkbutton shape="folder" label="Répertoire" target="_dialog" href="!docs/new_dir.php?path=%s"|args:$dir_uri}
+				{linkbutton shape="folder" label="Dossier" target="_dialog" href="!docs/new_dir.php?path=%s"|args:$dir_uri}
 			{/if}
 				{linkbutton shape="text" label="Fichier texte" target="_dialog" href="!docs/new_file.php?path=%s"|args:$dir_uri}
 				{if WOPI_DISCOVERY_URL}
@@ -72,7 +72,7 @@ use Paheko\Entities\Files\File;
 {if $parent_uri}
 	<nav class="breadcrumbs">
 	{if $context_ref}
-		{linkbutton href="?path=%s"|args:$parent_uri label="Retour au répertoire parent" shape="left"}
+		{linkbutton href="?path=%s"|args:$parent_uri label="Retour au dossier parent" shape="left"}
 		{if $context == File::CONTEXT_TRANSACTION}
 			{linkbutton href="!acc/transactions/details.php?id=%d"|args:$context_ref|local_url label="Détails de l'écriture" shape="menu"}
 		{elseif $context == File::CONTEXT_USER}
@@ -85,7 +85,7 @@ use Paheko\Entities\Files\File;
 		{/foreach}
 		</ul>
 		{if count($breadcrumbs) > 1}
-			{linkbutton href="?path=%s"|args:$parent_uri label="Retour au répertoire parent" shape="left"}
+			{linkbutton href="?path=%s"|args:$parent_uri label="Retour au dossier parent" shape="left"}
 		{/if}
 	{/if}
 	</nav>
@@ -191,7 +191,8 @@ use Paheko\Entities\Files\File;
 							{/if}
 							{if $item->canRename() || $item->canDelete() || ($item->canWrite() && $item->editorType())}
 								{linkmenu label="Modifier…" shape="edit" right=true}
-									{if $item->canWrite() && $item->editorType()}
+									{assign var="can_write" value=$item->canWrite()}
+									{if $can_write && $item->editorType()}
 										{linkbutton href="!common/files/edit.php?p=%s"|args:$item->path_uri() label="Éditer" shape="edit" target="_dialog" data-dialog-class="fullscreen"}
 									{/if}
 									{if $item->canRename()}
@@ -199,6 +200,9 @@ use Paheko\Entities\Files\File;
 									{/if}
 									{if $item->canDelete()}
 										{linkbutton href="!common/files/delete.php?p=%s"|args:$item->path_uri() label="Supprimer" shape="trash" target="_dialog"}
+									{/if}
+									{if $can_write}
+										{linkbutton shape="history" href="!common/files/history.php?p=%s"|args:$item->path_uri() label="Historique" target="_dialog"}
 									{/if}
 								{/linkmenu}
 							{/if}
@@ -216,7 +220,7 @@ use Paheko\Entities\Files\File;
 				<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all2" /><label title="Tout cocher / décocher" for="f_all2"></label></td>
 				<td class="actions" colspan="6">
 					<em>Pour les fichiers sélectionnés&nbsp;:</em>
-					<input type="hidden" name="parent" value="{$dir_uri}" />
+					<input type="hidden" name="parent" value="{$dir.path}" />
 					<select name="action">
 						<option value="">— Choisir une action à effectuer —</option>
 						{if $context == File::CONTEXT_DOCUMENTS}
@@ -238,7 +242,7 @@ use Paheko\Entities\Files\File;
 </form>
 
 {else}
-	<p class="alert block">Il n'y a aucun fichier dans ce répertoire.</p>
+	<p class="alert block">Il n'y a aucun fichier dans ce dossier.</p>
 {/if}
 
 {if $dir->path == $dir->context()}

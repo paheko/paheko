@@ -49,7 +49,8 @@
 					<td>Date</td>
 					<td>Script</td>
 					<td>Membre connecté</td>
-					<td>Durée totale des requêtes</td>
+					<td>Durée totale</td>
+					<td>Durée SQL</td>
 					<td>Nombre de requêtes</td>
 				</tr>
 			</thead>
@@ -60,7 +61,8 @@
 					<td>{$row.date|date_format}</td>
 					<td>{$row.script}</td>
 					<td>{$row.user}</td>
-					<td class="num"><?=$row->duration/1000?> ms</td>
+					<td class="num">{if $row.request_time >= 80}<span class="error">{$row.request_time} ms</span>{else}{$row.request_time} ms{/if}</td>
+					<td class="num">{if $row.sql_time >= 20}<span class="error">{$row.sql_time} ms</span>{else}{$row.sql_time} ms{/if}</td>
 					<td class="num">{$row.count}</td>
 				</tr>
 				{/foreach}

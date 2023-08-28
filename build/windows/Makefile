@@ -60,9 +60,9 @@ php: php.zip
 installer: clean php
 	$(eval VERSION=$(shell cat ../../src/VERSION))
 	# NSIS only accepts numbers as version
-	$(eval NSIS_VERSION=$(shell sed -E 's/-alpha[0-9]+//' ../../src/VERSION))
+	$(eval NSIS_VERSION=$(shell sed -E 's/-(alpha|beta|rc)[0-9]+//' ../../src/VERSION))
 	mkdir -p install_dir
-	cp ../../src/paheko-${VERSION}.tar.gz install_dir/
+	cp ../paheko-${VERSION}.tar.gz install_dir/
 	cd install_dir && tar xzf paheko-${VERSION}.tar.gz && mv paheko-${VERSION} paheko
 	cp config.local.php install_dir/paheko/
 	cp php.ini install_dir/php

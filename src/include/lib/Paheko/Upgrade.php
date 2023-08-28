@@ -151,8 +151,12 @@ class Upgrade
 				require ROOT . '/include/migrations/1.3/1.3.0.php';
 			}
 
-			if (version_compare($v, '1.3.0-rc2', '<')) {
+			if (version_compare($v, '1.3.0-alpha1', '>=') && version_compare($v, '1.3.0-rc2', '<')) {
 				require ROOT . '/include/migrations/1.3/1.3.0-rc2.php';
+			}
+
+			if (version_compare($v, '1.3.0-alpha1', '>=') && version_compare($v, '1.3.0-rc5', '<')) {
+				require ROOT . '/include/migrations/1.3/1.3.0-rc5.php';
 			}
 
 			Plugins::upgradeAllIfRequired();

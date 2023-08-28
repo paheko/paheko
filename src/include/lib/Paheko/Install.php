@@ -12,6 +12,7 @@ use Paheko\Entities\Search;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
 use Paheko\Files\Files;
+use Paheko\Files\Storage;
 use Paheko\UserTemplate\Modules;
 use Paheko\Plugins;
 
@@ -33,9 +34,8 @@ class Install
 
 	const DEFAULT_MODULES = [
 		'recus_fiscaux',
-		'carte_membre',
-		'recu_don',
-		'recu_paiement',
+		'membership_card',
+		'bookings',
 		//'bilan_pc',
 		//'invoice',
 	];
@@ -385,6 +385,10 @@ class Install
 			$m->save();
 		}
 
+		if (FILE_STORAGE_BACKEND != 'SQLite') {
+			Storage::sync();
+		}
+
 		Files::enableQuota();
 	}
 
@@ -393,7 +397,6 @@ class Install
 		// Vérifier que les répertoires vides existent, sinon les créer
 		$paths = [
 			DATA_ROOT,
-			PLUGINS_ROOT,
 			CACHE_ROOT,
 			SHARED_CACHE_ROOT,
 			USER_TEMPLATES_CACHE_ROOT,
