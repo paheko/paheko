@@ -231,14 +231,16 @@ class Install
 		$config = Config::getInstance();
 		$config->setCreateFlag();
 		$config->import([
-			'org_name'      => $name,
-			'org_email'     => $user_email,
-			'currency'      => $currency,
-			'country'       => $country_code,
-			'site_disabled' => true,
-			'log_retention' => 365,
-			'auto_logout'   => 2*60,
-			'analytical_set_all' => true,
+			'org_name'                 => $name,
+			'org_email'                => $user_email,
+			'currency'                 => $currency,
+			'country'                  => $country_code,
+			'site_disabled'            => true,
+			'log_retention'            => 365,
+			'auto_logout'              => 2*60,
+			'analytical_set_all'       => true,
+			'file_versioning_policy'   => 'none',
+			'file_versioning_max_size' => 5,
 		]);
 
 		$fields = DynamicFields::getInstance();
