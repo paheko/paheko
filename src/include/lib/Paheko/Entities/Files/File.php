@@ -67,7 +67,6 @@ class File extends Entity
 
 	const TYPE_FILE = 1;
 	const TYPE_DIRECTORY = 2;
-	const TYPE_LINK = 3;
 
 	/**
 	 * Tailles de miniatures autorisées, pour ne pas avoir 500 fichiers générés avec 500 tailles différentes
