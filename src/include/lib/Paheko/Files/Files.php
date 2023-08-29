@@ -18,7 +18,7 @@ use Paheko\Entities\Web\Page;
 use KD2\DB\EntityManager as EM;
 use KD2\ZipWriter;
 
-use const Paheko\{FILE_STORAGE_BACKEND, FILE_STORAGE_QUOTA, FILE_STORAGE_CONFIG};
+use const Paheko\{FILE_STORAGE_BACKEND, FILE_STORAGE_QUOTA, FILE_STORAGE_CONFIG, FILE_VERSIONING_POLICY};
 
 class Files
 {
@@ -620,10 +620,10 @@ class Files
 
 	static public function getContextsQuotas(): array
 	{
-		$sql = 'SELECT SUBSTR(parent, 1, INSTR(parent, \'/\') - 1) AS context, SUM(size) AS total
+		$sql = 'SELECT SUBSTR(parent, 1, INSTR(path, \'/\') - 1) AS context, SUM(size) AS total
 			FROM files
 			WHERE type = ?
-			GROUP BY SUBSTR(parent, 1, INSTR(parent, \'/\'));';
+			GROUP BY SUBSTR(parent, 1, INSTR(path, \'/\'));';
 
 		$quotas = DB::getInstance()->getAssoc($sql, File::TYPE_FILE);
 		$list = [];
@@ -631,6 +631,8 @@ class Files
 		foreach (File::CONTEXTS_NAMES as $context => $name) {
 			$list[$context] = ['label' => $name, 'size' => $quotas[$context] ?? null];
 		}
+
+		uasort($list, fn($a, $b) => $a['size'] == $b['size'] ? 0 : ($a['size'] > $b['size'] ? -1 : 1));
 
 		return $list;
 	}
@@ -1017,6 +1019,45 @@ class Files
 		foreach ($i as $dir) {
 			$dir->delete();
 		}
+	}
+
+	/**
+	 * For each versioned file, prune old version
+	 */
+	static public function pruneOldVersions(): void
+	{
+		$sql = 'SELECT a.* FROM files a
+			INNER JOIN files b ON b.path = \'%s/\' || a.path AND b.type = %d
+			WHERE a.type = %d AND a.path NOT LIKE \'%s/%%\';';
+
+		$sql = sprintf($sql, File::CONTEXT_VERSIONS, File::TYPE_DIRECTORY, File::TYPE_FILE, File::CONTEXT_VERSIONS);
+
+		$i = EM::getInstance(File::class)->iterate($sql);
+
+		foreach ($i as $file) {
+			$file->pruneVersions();
+		}
+	}
+
+	/**
+	 * For each versioned file, prune old version
+	 */
+	static public function deleteAllVersions(): void
+	{
+		$sql = 'SELECT * FROM files WHERE type = %d AND path LIKE \'%s/%%\';';
+
+		$sql = sprintf($sql, File::TYPE_DIRECTORY, File::CONTEXT_VERSIONS);
+
+		$i = EM::getInstance(File::class)->iterate($sql);
+
+		foreach ($i as $file) {
+			$file->delete();
+		}
+	}
+
+	static public function getVersioningPolicy(): ?string
+	{
+		return FILE_VERSIONING_POLICY ?? Config::getInstance()->file_versioning_policy;
 	}
 
 	static public function getIconShape(string $name)

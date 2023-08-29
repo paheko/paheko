@@ -97,8 +97,8 @@ class File extends Entity
 	const CONTEXTS_NAMES = [
 		self::CONTEXT_TRASH => 'Corbeille',
 		self::CONTEXT_DOCUMENTS => 'Documents',
-		self::CONTEXT_USER => 'Membre',
-		self::CONTEXT_TRANSACTION => 'Écriture comptable',
+		self::CONTEXT_USER => 'Fiches des membres',
+		self::CONTEXT_TRANSACTION => 'Écritures comptables',
 		self::CONTEXT_CONFIG => 'Configuration',
 		self::CONTEXT_WEB => 'Site web',
 		self::CONTEXT_MODULES => 'Modules',

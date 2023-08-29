@@ -22,6 +22,10 @@ if ($config->backup_frequency && $config->backup_limit) {
 // Send pending reminders
 Reminders::sendPending();
 
+if (Files::getVersioningPolicy() !== 'none') {
+	Files::pruneOldVersions();
+}
+
 // Make sure we are cleaning the trash
 Trash::clean();
 

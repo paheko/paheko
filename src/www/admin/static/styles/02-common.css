@@ -641,6 +641,53 @@ aside.quota {
     display: block;
 }
 
+/**
+ * Advanced meter
+ */
+table.meter-map {
+    min-height: var(--size);
+    margin: 1em auto;
+}
+
+table.meter-map tr {
+    vertical-align: top;
+}
+
+table.meter-map tr:not(:last-child) {
+    border-bottom: none;
+}
+
+table.meter-map tr:not(:first-child) {
+    border-top: none;
+}
+
+table.meter-map tr th {
+    text-align: right;
+    padding: .5rem;
+}
+
+table.meter-map td.actions {
+    text-align: left;
+}
+
+table.meter-map td.size {
+    padding: .5rem;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.meter-map tr:nth-child(1) .size { background: #000; color: #fff; }
+.meter-map tr:nth-child(2) .size { background: MediumAquaMarine; color: #000; }
+.meter-map tr:nth-child(3) .size { background: SkyBlue; color: #000; }
+.meter-map tr:nth-child(4) .size { background: teal; color: #000; }
+.meter-map tr:nth-child(5) .size { background: PaleGreen; color: #000; }
+.meter-map tr:nth-child(6) .size { background: MediumSeaGreen; color: #000; }
+.meter-map tr:nth-child(7) .size { background: steelblue; color: #000; }
+.meter-map tr:nth-child(8) .size { background: LightSeaGreen; color: #000; }
+.meter-map tr:nth-child(9) .size { background: LightGreen; color: #000; }
+.meter-map tr:nth-child(10) .size { background: GreenYellow; color: #000; }
+
 .search-results article {
     margin: 2em 1em;
 }

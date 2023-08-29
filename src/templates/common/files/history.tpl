@@ -26,7 +26,6 @@
 	<table class="list">
 		<thead>
 			<tr>
-				<td class="num">Version</td>
 				<td>Nom</td>
 				<td>Date</td>
 				<td class="num">Taille</td>
@@ -35,7 +34,6 @@
 		</thead>
 		<tbody>
 			<tr>
-				<td class="num"></td>
 				<th>Version actuelle</th>
 				<td>{$file.modified|relative_date:true}</td>
 				<td class="size">{$file.size|size_in_bytes:true}</td>
@@ -44,7 +42,7 @@
 			</tr>
 			{foreach from=$versions item="v"}
 			<tr>
-				<td class="num">{$v.version}</td>
+				{*<td class="num">{$v.version}</td>*}
 				<th>{$v.name}</th>
 				<td>{$v.date|relative_date:true}</td>
 				<td class="size">{$v.size|size_in_bytes:true}</td>
