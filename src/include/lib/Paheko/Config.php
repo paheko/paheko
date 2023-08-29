@@ -107,25 +107,25 @@ class Config extends Entity
 	];
 
 	protected string $org_name;
-	protected ?string $org_infos = null;
+	protected ?string $org_infos;
 	protected string $org_email;
-	protected ?string $org_address = null;
-	protected ?string $org_phone = null;
-	protected ?string $org_web = null;
+	protected ?string $org_address;
+	protected ?string $org_phone;
+	protected ?string $org_web;
 
 	protected string $currency;
 	protected string $country;
 
 	protected int $default_category;
 
-	protected ?int $backup_frequency = null;
-	protected ?int $backup_limit = null;
+	protected ?int $backup_frequency;
+	protected ?int $backup_limit;
 
-	protected ?int $last_chart_change = null;
-	protected ?string $last_version_check = null;
+	protected ?int $last_chart_change;
+	protected ?string $last_version_check;
 
-	protected ?string $color1 = null;
-	protected ?string $color2 = null;
+	protected ?string $color1;
+	protected ?string $color2;
 
 	protected array $files = [];
 
