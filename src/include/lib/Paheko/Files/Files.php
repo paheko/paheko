@@ -425,6 +425,10 @@ class Files
 
 		foreach ($paths as $path) {
 			foreach (Files::listRecursive($path, $session, false) as $file) {
+				if ($file->isDir()) {
+					continue;
+				}
+
 				$pointer = $file->getReadOnlyPointer();
 				$path = !$pointer ? $file->getLocalFilePath() : null;
 
