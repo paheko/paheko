@@ -148,6 +148,7 @@ class Template extends Smartyer
 
 		$this->register_function('form_errors', [$this, 'formErrors']);
 
+		$this->register_function('size_meter', [$this, 'sizeMeter']);
 		$this->register_function('copy_button', [$this, 'copyButton']);
 		$this->register_function('custom_colors', [$this, 'customColors']);
 		$this->register_function('plugin_url', ['Paheko\Utils', 'plugin_url']);
@@ -655,5 +656,44 @@ class Template extends Smartyer
 	protected function copyButton(array $params): string
 	{
 		return sprintf('<samp class="copy" onclick="this.nextSibling.click();" title="Cliquer pour copier dans le presse-papier">%s</samp><input type="button" onclick="var a = this.previousSibling; a.focus(); navigator.clipboard.writeText(a.innerText); this.value = \'Copié !\'; this.focus(); return false;" onblur="this.value = \'Copier\';" value="Copier" title="Copier dans le presse-papier" />', htmlspecialchars($params['label']));
+	}
+
+	// We cannot use <meter> here as Firefox sucks :(
+	protected function sizeMeter(array $params): string
+	{
+		$out = sprintf('<%s class="quota %s">', $params['tag'] ?? 'span', $params['class'] ?? '');
+
+		$attributes = '';
+
+		if (!empty($params['href'])) {
+			$params['meter_tag'] = 'a';
+			$attributes .= sprintf(' href="%s"', htmlspecialchars(Utils::getLocalURL($params['href'])));
+		}
+		else {
+			$params['meter_tag'] = 'span';
+		}
+
+		if (!empty($params['title'])) {
+			$attributes .= sprintf(' title="%s"', htmlspecialchars($params['title']));
+		}
+
+		$more = '';
+
+		if (isset($params['more'])) {
+			$more = '<span class="more">' . $params['more'] . '</span>';
+		}
+
+		$text = sprintf($params['text'] ?? '%s', Utils::format_bytes($params['value']), Utils::format_bytes($params['total']));
+
+		$out .= sprintf('<%s class="meter" style="--quota-percent: %s" %s><span class="text">%s</span>%s</%1$s>',
+			$params['meter_tag'],
+			round($params['value'] / ($params['total'] ?: 1)) * 100,
+			$attributes,
+			$text,
+			$more
+		);
+
+		$out .= sprintf('</%s>', $params['tag'] ?? 'span');
+		return $out;
 	}
 }

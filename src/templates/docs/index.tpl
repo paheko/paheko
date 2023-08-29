@@ -4,15 +4,23 @@ use Paheko\Entities\Files\File;
 {include file="_head.tpl" title="Documents" current="docs" hide_title=true}
 
 <nav class="tabs">
-	<aside class="quota">
-		{* We cannot use <meter> here as Firefox sucks :( *}
-		<span class="meter" style="--quota-percent: {$quota_percent}">
-			<span class="text">{$quota_left|size_in_bytes} libres</span>
-			<span class="more">
-				{$quota_percent}% utilisé ({$quota_used|size_in_bytes}) sur {$quota_max|size_in_bytes}
-			</span>
-		</span>
-	</aside>
+	{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
+		{size_meter
+			tag="aside"
+			total=$quota.max
+			value=$quota.used
+			text="%s libres"|args:$quota.left_bytes
+			more="%s%% utilisé (%s sur %s)"|args:$quota.percent:$quota.used_bytes:$quota.max_bytes
+			href="!config/quotas.php"
+			title="Cliquer pour les détails de l'espace disque"}
+	{else}
+		{size_meter
+			tag="aside"
+			total=$quota.max
+			value=$quota.used
+			text="%s libres"|args:$quota.left_bytes
+			more="%s%% utilisé (%s sur %s)"|args:$quota.percent:$quota.used_bytes:$quota.max_bytes}
+	{/if}
 	{include file="./_nav.tpl"}
 </nav>
 

@@ -677,6 +677,9 @@ class Utils
 		elseif ($bytes) {
 			return $size . ' octets';
 		}
+		elseif (!$size) {
+			return '0 o';
+		}
 		else {
 			return '< 1 Ko';
 		}
