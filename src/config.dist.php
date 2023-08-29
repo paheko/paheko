@@ -668,6 +668,39 @@ namespace Paheko;
 //const FILE_STORAGE_QUOTA = 10*1024*1024; // Forcer le quota alloué à 10 Mo, quel que soit le backend de stockage
 
 /**
+ * FILE_VERSIONING_POLICY
+ * Forcer la politique de versionnement des fichiers.
+ *
+ * null: laisser le choix de la politique (dans la configuration)
+ * 'none': ne rien conserver
+ * 'min': conserver 5 versions (1 minute, 1 heure, 1 jour, 1 semaine, 1 mois)
+ * 'avg': conserver 20 versions
+ * 'max': conserver 50 versions
+ *
+ * Note : indiquer 'none' fait qu'aucune nouvelle version ne sera créée,
+ * mais les versions existantes sont conservées.
+ *
+ * Défaut : null (laisser le choix dans la configuration)
+ *
+ * @var null|string
+ */
+
+//const FILE_VERSIONING_POLICY = 'min';
+
+/**
+ * FILE_VERSIONING_MAX_SIZE
+ * Forcer la taille maximale des fichiers à versionner (en Mio)
+ *
+ * N'a aucun effet si le versionnement de fichiers est désactivé.
+ *
+ * Défaut : null (laisser le choix de la taille dans la configuration)
+ *
+ * @var int|null
+ */
+
+//const FILE_VERSIONING_MAX_SIZE = 10;
+
+/**
  * Adresse de découverte d'un client d'édition de documents (WOPI)
  * (type OnlyOffice, Collabora, MS Office)
  *
