@@ -40,8 +40,7 @@ $tpl->assign([
 	'quota_max'        => Files::getQuota(),
 	'quota_left'       => Files::getRemainingQuota(),
 	'backups_size'     => Backup::getAllBackupsTotalSize(),
-	'versions_policies' => Config::VERSIONS_POLICIES,
-	'versions_sizes'   => Config::VERSIONS_SIZES,
+	'versioning_policies' => Config::VERSIONING_POLICIES,
 ]);
 
 $tpl->display('config/index.tpl');

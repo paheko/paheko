@@ -38,23 +38,8 @@ class Config extends Entity
 		'logo', 'icon', 'favicon', 'admin_background', 'admin_css',
 	];
 
-	const VERSIONS_SIZES = [
-		1*1024*1024 => '1 Mo',
-		2*1024*1024 => '2 Mo',
-		3*1024*1024 => '3 Mo',
-		5*1024*1024 => '5 Mo',
-		7*1024*1024 => '7 Mo',
-		10*1024*1024 => '10 Mo',
-		15*1024*1024 => '15 Mo',
-		20*1024*1024 => '20 Mo',
-		25*1024*1024 => '25 Mo',
-		30*1024*1024 => '30 Mo',
-		40*1024*1024 => '40 Mo',
-		50*1024*1024 => '50 Mo',
-	];
-
-	const VERSIONS_POLICIES = [
-		null => [
+	const VERSIONING_POLICIES = [
+		'none' => [
 			'label' => 'Ne pas conserver les anciennes versions',
 			'help' => 'Permet d\'utiliser moins d\'espace disque',
 		],
@@ -63,19 +48,19 @@ class Config extends Entity
 			'help' => 'Jusqu\'à 5 versions seront conservées pour chaque fichier.',
 			'intervals' => [
 				// Keep one version only after 2 months
-				-1 => 0,
+				-1 => INF,
 
 				// First 10 minutes, one version
-				600 => 0,
+				600 => INF,
 
 				// Next hour, one version
-				3600 => 0,
+				3600 => INF,
 
 				// Next 24h, one version
-				3600*24 => 0,
+				3600*24 => INF,
 
 				// Next 2 months, one version
-				3600*24*60 => 0,
+				3600*24*60 => INF,
 			],
 		],
 		'avg' => [
@@ -83,7 +68,7 @@ class Config extends Entity
 			'help' => 'Jusqu\'à 20 versions seront conservées pour chaque fichier.',
 			'intervals' => [
 				// Keep one version after first 4 months
-				-1 => 0,
+				-1 => INF,
 
 				// First 10 minutes, one version every 5 minutes
 				600 => 300,
@@ -149,8 +134,8 @@ class Config extends Entity
 	protected int $log_retention;
 	protected bool $analytical_set_all;
 
-	protected ?string $files_version_policy = null;
-	protected int $files_version_max_size = 0;
+	protected ?string $file_versioning_policy = null;
+	protected int $file_versioning_max_size = 0;
 
 	protected ?int $auto_logout = 0;
 

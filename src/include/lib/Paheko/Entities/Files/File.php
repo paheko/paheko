@@ -702,9 +702,9 @@ class File extends Entity
 		$db->begin();
 
 		// Only archive previous version if it was more than 0 bytes
-		if (!$new && ($this->getModifiedProperty('size') ?? $this->size) > 0) {
-			$this->pruneVersions();
+		if (!$new && $this->getModifiedProperty('size') !== 0 && $this->size > 0) {
 			$this->createVersion();
+			$this->pruneVersions();
 		}
 
 		if (!isset($this->modified)) {

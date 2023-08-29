@@ -201,7 +201,7 @@ use Paheko\Entities\Files\File;
 									{if $item->canDelete()}
 										{linkbutton href="!common/files/delete.php?p=%s"|args:$item->path_uri() label="Supprimer" shape="trash" target="_dialog"}
 									{/if}
-									{if $can_write}
+									{if !(FILE_VERSIONING_POLICY === 'none' || $config.file_versioning_policy === 'none') && $can_write}
 										{linkbutton shape="history" href="!common/files/history.php?p=%s"|args:$item->path_uri() label="Historique" target="_dialog"}
 									{/if}
 								{/linkmenu}

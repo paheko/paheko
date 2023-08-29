@@ -19,7 +19,7 @@
 {/if}
 
 <p class="help">
-	Cette liste représente les anciennes versions de ce fichier.
+	Voici la liste des anciennes versions de ce fichier.
 </p>
 
 <form method="post" action="">
@@ -69,11 +69,25 @@
 		<div class="help block">
 			<p>Les anciennes versions sont supprimées automatiquement selon ces règles&nbsp;:</p>
 			<ul>
+			{if (FILE_VERSIONING_POLICY ?? $config.file_versioning_policy) === 'min'}
+				<li>Dans les 10 premières minutes, on conserve une version&nbsp;;</li>
+				<li>Dans l'heure suivante, on conserve une version&nbsp;;</li>
+				<li>Dans les 24h suivantes, on conserve une version&nbsp;;</li>
+				<li>Dans les 2 mois suivants, on conserve une version&nbsp;;</li>
+				<li>Ensuite, on conserve une seule version.</li>
+			{elseif (FILE_VERSIONING_POLICY ?? $config.file_versioning_policy) === 'avg'}
+				<li>Dans les 10 premières minutes, on conserve une version toutes les 5 minutes&nbsp;;</li>
+				<li>Dans l'heure suivante, on conserve une version toutes les 15 minutes&nbsp;;</li>
+				<li>Dans les 24h suivantes, on conserve une version toutes les 3 heures&nbsp;;</li>
+				<li>Dans les 4 mois suivants, on conserve une version par mois&nbsp;;</li>
+				<li>Ensuite, on conserve une seule version.</li>
+			{elseif (FILE_VERSIONING_POLICY ?? $config.file_versioning_policy) === 'max'}
 				<li>Dans les 10 premières minutes, on conserve une version par minute&nbsp;;</li>
 				<li>Dans l'heure suivante, on conserve une version toutes les 10 minutes&nbsp;;</li>
 				<li>Dans les 24h suivantes, on conserve une version par heure&nbsp;;</li>
 				<li>Dans les 2 mois suivants, on conserve une version par semaine&nbsp;;</li>
-				<li>Ensuite, on conserve une version par mois.</li>
+				<li>Ensuite, on conserve une version par trimestre.</li>
+			{/if}
 			</ul>
 			<p>Les <strong>versions nommées</strong> ne sont pas concernées par la suppression automatique, elles seront toujours conservées à moins d'être supprimées manuellement.</p>
 		</div>

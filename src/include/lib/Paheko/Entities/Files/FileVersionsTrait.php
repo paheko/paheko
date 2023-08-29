@@ -2,8 +2,11 @@
 
 namespace Paheko\Entities\Files;
 
+use Paheko\Config;
 use Paheko\Files\Files;
 use KD2\DB\EntityManager as EM;
+
+use const Paheko\{FILE_VERSIONING_MAX_SIZE, FILE_VERSIONING_POLICY};
 
 trait FileVersionsTrait
 {
@@ -22,12 +25,27 @@ trait FileVersionsTrait
 
 	protected function createVersion()
 	{
+		// Don't version empty content
+		if (0 === $this->getModifiedProperty('size')) {
+			return;
+		}
+
 		if (!in_array($this->context(), self::VERSIONED_CONTEXTS)) {
 			return;
 		}
 
-		// Don't version large files (> 50MB)
-		if ($this->size > 1024*1024*50) {
+		$config = Config::getInstance();
+		$policy = FILE_VERSIONING_POLICY ?? $config->file_versioning_policy;
+
+		// Versioning is disabled
+		if ('none' === $policy) {
+			return;
+		}
+
+		$max_size = FILE_VERSIONING_MAX_SIZE ?? $config->file_versioning_max_size;
+
+		// Don't version large files
+		if ($this->size > $max_size*1024*1024) {
 			return;
 		}
 
@@ -73,67 +91,74 @@ trait FileVersionsTrait
 	{
 		$now = time();
 
-		// FIXME: get policy from config
-		$max_versions_per_interval = [
-			//ends_after => step (interval size)
+		$config = Config::getInstance();
+		$policy = FILE_VERSIONING_POLICY ?? $config->file_versioning_policy;
 
-			// First 10 minutes, one version every 1 minute
-			600 => 60,
+		// Versioning is disabled, but keep old versions
+		if ('none' === $policy) {
+			return;
+		}
 
-			// Next hour, one version every 10 minutes
-			3600 => 600,
+		$versions_policy = Config::VERSIONING_POLICIES[$policy]['intervals'];
+		ksort($versions_policy);
 
-			// Next 24h, one version every hour
-			3600*24 => 3600,
+		// last step
+		$max_step = $versions_policy[-1] ?? null;
+		unset($versions_policy[-1]);
 
-			// Next 2 months, one version per week
-			3600*24*60 => 3600*24*7,
+		$versions = $this->listVersions();
+		// Sort by timestamp, not by version
+		uasort($versions, fn($a, $b) => $a->timestamp == $b->timestamp ? 0 : ($a->timestamp > $b->timestamp ? -1 : 1));
 
-		];
-
-		// Keep one version each trimester after first 2 months
-		$max_step = 3600*24*30;
-
-		$last_step = null;
+		$delete = [];
+		reset($versions_policy);
+		$step = current($versions_policy);
 		$last_timestamp = null;
 
-		foreach ($this->listVersions() as $v) {
+		foreach ($versions as $v) {
 			if ($v->name) {
 				continue;
 			}
 
 			$version_diff = $now - $v->timestamp;
-			$interval = null;
-			$step = null;
 
-			foreach ($max_versions_per_interval as $_interval => $_step) {
-				// Skip to next interval
-				if ($version_diff > $_interval) {
-					continue;
-				}
-
-				$step = $_step;
-				$interval = $_interval;
-				break;
-			}
-
-			$step ??= $max_step;
-
-			if ($last_step !== $step) {
+			while ($version_diff > key($versions_policy) && $step !== false) {
+				// Skip to next interval by fetching next step
+				$step = next($versions_policy);
 				$last_timestamp = null;
-				$last_step = $step;
 			}
 
-			// This version interval is already filled, delete, unless it has a name
-			if (!$v->name
-				&& $last_timestamp
-				&& ($last_timestamp - $v->timestamp) < $step) {
-				$v->file->delete();
-				continue;
+			// Use max step value if we have reached the max interval
+			if (false === $step) {
+				$step = $max_step;
 			}
 
-			// Keep this version
-			$last_timestamp = $v->timestamp;
+			// Keep named versions, but make them count for next step
+			if ($v->name) {
+				$keep = true;
+			}
+			elseif (!$last_timestamp) {
+				$keep = true;
+			}
+			elseif (($last_timestamp - $v->timestamp) > $step) {
+				$keep = true;
+			}
+			else {
+				// This version interval is already filled, delete
+				$delete[] = $v;
+				$keep = false;
+			}
+
+			if ($keep) {
+				// Keep this version
+				$last_timestamp = $v->timestamp;
+			}
+		}
+
+		unset($v);
+
+		foreach ($delete as $v) {
+			$v->file->delete();
 		}
 	}
 
