@@ -687,7 +687,7 @@ class Template extends Smartyer
 
 		$out .= sprintf('<%s class="meter" style="--quota-percent: %s" %s><span class="text">%s</span>%s</%1$s>',
 			$params['meter_tag'],
-			round($params['value'] / ($params['total'] ?: 1)) * 100,
+			round(100 * $params['value'] / ($params['total'] ?: 1)),
 			$attributes,
 			$text,
 			$more

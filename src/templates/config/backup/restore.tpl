@@ -30,41 +30,47 @@
 	</p>
 {/if}
 
+{if $_GET.from_file}
+	<form method="post" action="{$self_url_no_qs}" enctype="multipart/form-data">
 
-<form method="post" action="{$self_url_no_qs}" enctype="multipart/form-data">
+	<fieldset>
+		<legend><label for="f_file">Restaurer depuis un fichier de sauvegarde</label></legend>
+		<p class="block alert">
+			Attention, l'intégralité des données courantes seront effacées et remplacées par celles
+			contenues dans le fichier fourni.
+		</p>
+		<p class="help">
+			Une sauvegarde des données courantes sera effectuée avant le remplacement,
+			en cas de besoin d'annuler cette restauration.
+		</p>
+		<dl>
+			{input type="file" name="file" label="Fichier de sauvegarde à restaurer" required=true}
+		</dl>
+		<p class="submit">
+			{csrf_field key="backup_restore"}
+			{button type="submit" name="restore_file" label="Restaurer depuis le fichier sélectionné" shape="upload" class="main"}
+		</p>
+		{if $code && ($code == Backup::INTEGRITY_FAIL && ALLOW_MODIFIED_IMPORT)}
+		<p>
+			{input type="checkbox" name="force_import" value="1" label="Ignorer les erreurs, je sais ce que je fait"}
+		</p>
+		{/if}
+	</fieldset>
 
-<fieldset>
-	<legend><label for="f_file">Restaurer depuis un fichier de sauvegarde</label></legend>
-	<p class="block alert">
-		Attention, l'intégralité des données courantes seront effacées et remplacées par celles
-		contenues dans le fichier fourni.
-	</p>
+	</form>
+
+{else}
+
+	{if !$code && !$ok}
 	<p class="help">
-		Une sauvegarde des données courantes sera effectuée avant le remplacement,
-		en cas de besoin d'annuler cette restauration.
-	</p>
-	<dl>
-		{input type="file" name="file" label="Fichier de sauvegarde à restaurer" required=true}
-	</dl>
-	<p class="submit">
-		{csrf_field key="backup_restore"}
-		{button type="submit" name="restore_file" label="Restaurer depuis le fichier sélectionné" shape="upload" class="main"}
-	</p>
-	{if $code && ($code == Backup::INTEGRITY_FAIL && ALLOW_MODIFIED_IMPORT)}
-	<p>
-		{input type="checkbox" name="force_import" value="1" label="Ignorer les erreurs, je sais ce que je fait"}
+		Espace disque occupé par les sauvegardes : <strong>{$size|size_in_bytes}</strong>
 	</p>
 	{/if}
-</fieldset>
 
-</form>
+	<form method="post" action="{$self_url_no_qs}">
 
-<form method="post" action="{$self_url_no_qs}">
-
-<fieldset>
-	<legend>Sauvegardes disponibles</legend>
 	{if empty($list)}
-		<p class="help">Aucune copie de sauvegarde disponible.</p>
+		<p class="alert block">Aucune copie de sauvegarde disponible.</p>
 	{else}
 		<table class="list">
 			<tbody>
@@ -102,12 +108,12 @@
 		</p>
 		<p class="submit">
 			{csrf_field key="backup_manage"}
-			{button type="submit" name="restore" label="Restaurer cette sauvegarde" shape="reset" class="main"}
-			{button type="submit" name="remove" label="Supprimer cette sauvegarde" shape="delete"}
+			{button type="submit" name="restore" label="Restaurer la sauvegarde sélectionnée" shape="reset" class="main"}
+			{button type="submit" name="remove" label="Supprimer la sauvegarde sélectionnée" shape="delete"}
 		</p>
 	{/if}
-</fieldset>
 
-</form>
+	</form>
+{/if}
 
 {include file="_foot.tpl"}

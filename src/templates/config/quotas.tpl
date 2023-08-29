@@ -2,7 +2,7 @@
 
 {include file="config/_menu.tpl"}
 
-<div class="center-block short-block">
+<div class="short-block">
 <h2 class="ruler">Base de données</h2>
 
 <p class="help">
@@ -13,25 +13,51 @@
 	{/if}
 </p>
 
-<dl class="describe">
-	<dt>Base de données</dt>
-	<dd>{size_meter total=$db_total value=$db}</dd>
-	<dt>Sauvegardes</dt>
-	<dd>{size_meter total=$db_total value=$db_backups}</dd>
-	<dt>Total</dt>
-	<dd>{size_meter tag="strong" total=$db_total value=$db_total}</dd>
-</dl>
+<table class="list">
+	<tr>
+		<th>Total</th>
+		<td>{size_meter tag="strong" total=$db_total value=$db_total}</td>
+		<td></td>
+	</tr>
+	<tr>
+		<th>Base de données seule</th>
+		<td>{size_meter total=$db_total value=$db}</td>
+		<td class="actions">{linkbutton shape="download" label="Faire une sauvegarde" href="!config/backup/"}
+	</tr>
+	<tr>
+		<th>Sauvegardes</th>
+		<td>{size_meter total=$db_total value=$db_backups}</td>
+		<td class="actions">{linkbutton shape="menu" label="Liste des sauvegardes" href="!config/backup/restore.php"}
+	</tr>
+</table>
 
 <h2 class="ruler">Documents</h2>
 
-<dl class="describe">
-	<dt>Total</dt>
-	<dd>{size_meter tag="strong" total=$quota_max value=$quota_used text="%s sur %s"} ({$quota_left|size_in_bytes} libres)</dd>
-	{foreach from=$contexts item="context"}
-		<dt>{$context.label}</dt>
-		<dd>{size_meter total=$quota_used value=$context.size text="%s"}</dd>
+<table class="list">
+	<tr>
+		<th>Total</th>
+		<td>{size_meter tag="strong" total=$quota_max value=$quota_used text="%s sur %s"}</td>
+		<td>{$quota_left|size_in_bytes} libres</td>
+		<td class="actions">{linkbutton shape="download" label="Sauvegarder les documents" href="!config/backup/documents.php"}
+		</td>
+	</tr>
+	{foreach from=$contexts item="context" key="ctx"}
+	<tr>
+		<th>{$context.label}</th>
+		<td>
+			{size_meter total=$quota_used value=$context.size text="%s"}
+		</td>
+		<td></td>
+		<td class="actions">
+			{if $ctx == 'trash'}
+				{linkbutton shape="trash" label="Voir les fichiers supprimés" href="!docs/trash.php"}
+			{elseif $ctx == 'versions'}
+				{linkbutton shape="reload" label="Nettoyer les anciennes versions" href="?prune=1"}
+			{/if}
+		</td>
+	</tr>
 	{/foreach}
-</dl>
+</table>
 </div>
 
 {include file="_foot.tpl"}

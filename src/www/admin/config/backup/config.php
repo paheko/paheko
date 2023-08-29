@@ -2,22 +2,10 @@
 namespace Paheko;
 
 use Paheko\Backup;
-use Paheko\Files\Files;
 
 require_once __DIR__ . '/../_inc.php';
 
-$csrf_key = 'backup_save';
-
-// Download database
-$form->runIf('download', function () {
-	Backup::dump();
-	exit;
-}, $csrf_key);
-
-// Create local backup
-$form->runIf('create', function () {
-	Backup::create();
-}, $csrf_key, Utils::getSelfURI(['ok' => 'create']));
+$csrf_key = 'backup_config';
 
 $form->runIf('config', function () {
 	$frequency = (int) f('backup_frequency');
@@ -36,12 +24,7 @@ $form->runIf('config', function () {
 	$config->set('backup_frequency', $frequency);
 	$config->set('backup_limit', $number);
 	$config->save();
-}, $csrf_key, Utils::getSelfURI(['ok' => 'config']));
-
-$db_size = Backup::getDBSize();
-$files_size = (FILE_STORAGE_BACKEND == 'SQLite') ? Files::getUsedQuota() : null;
-
-$ok = qg('ok'); // return message
+}, $csrf_key, '!config/backup/?msg=CONFIG_SAVED');
 
 $frequencies = [
 	0 => 'Aucun — les sauvegardes automatiques sont désactivées',
@@ -53,6 +36,6 @@ $frequencies = [
 	365 => 'Annuelle',
 ];
 
-$tpl->assign(compact('ok', 'db_size', 'files_size', 'frequencies', 'csrf_key'));
+$tpl->assign(compact('frequencies', 'csrf_key'));
 
-$tpl->display('config/backup/save.tpl');
+$tpl->display('config/backup/config.tpl');

@@ -47,6 +47,7 @@
 				Chiffrement GnuPG&nbsp;: {if $has_gpg_support}disponible, module activé{else}non, module PHP gnupg non installé&nbsp;?{/if}<br />
 			</dd>
 			{/if}
+			<dt>Espace disque</dt>
 			<dd>
 				{linkbutton shape="right" label="Voir l'espace disque utilisé" href="quotas.php"}
 			</dd>

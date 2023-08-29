@@ -664,6 +664,17 @@ aside.quota {
     margin-bottom: .8em;
 }
 
+section.large article {
+    margin-top: 1em;
+    border-top: 1px solid var(--gLightBorderColor);
+    padding-top: 1em;
+    padding-left: 2rem;
+}
+
+section.large article h2, section.large article h3, section.large article p {
+    margin-bottom: 1rem;
+}
+
 dl.large dt {
     font-size: 1.5em;
     font-weight: bold;
@@ -683,11 +694,6 @@ del { background: #fcc; color: #000; text-decoration-color: rgba(0, 0, 0, .3); }
 
 .center-block {
     margin: 1em auto;
-}
-
-.short-block {
-    max-width: 40em;
-    margin: 1em 0;
 }
 
 .center-block > p, .center-block > h2, .center-block h3 {

@@ -1,4 +1,5 @@
 {if !$dialog}
+<?php $sub_current ??= null; ?>
 <nav class="tabs">
 	<ul>
 		<li{if $current == 'index'} class="current"{/if}><a href="{$admin_url}config/">Configuration</a></li>
@@ -20,7 +21,6 @@
 			<li{if $sub_current == 'categories'} class="current"{/if}><a href="{$admin_url}config/categories/">Catégories &amp; droits des membres</a></li>
 		</ul>
 	{elseif $current == 'advanced'}
-		<?php $sub_current ??= null; ?>
 		<ul class="sub">
 			<li{if $sub_current == 'audit'} class="current"{/if}><a href="{$admin_url}config/advanced/audit.php">Journal d'audit</a></li>
 			<li{if $sub_current == 'api'} class="current"{/if}><a href="{$admin_url}config/advanced/api.php">Accès à l'API</a></li>
