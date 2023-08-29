@@ -7,7 +7,7 @@ use Paheko\Entities\Files\File;
 class Render
 {
 	const FORMAT_SKRIV = 'skriv';
-	const FORMAT_ENCRYPTED = 'skriv/encrypted';
+	const FORMAT_ENCRYPTED = 'encrypted';
 	const FORMAT_MARKDOWN = 'markdown';
 
 	static protected $attachments = [];
