@@ -614,6 +614,23 @@ class Files
 		return $breadcrumbs;
 	}
 
+	static public function getContextsQuotas(): array
+	{
+		$sql = 'SELECT SUBSTR(parent, 1, INSTR(parent, \'/\') - 1) AS context, SUM(size) AS total
+			FROM files
+			WHERE type = ?
+			GROUP BY SUBSTR(parent, 1, INSTR(parent, \'/\'));';
+
+		$quotas = DB::getInstance()->getAssoc($sql, File::TYPE_FILE);
+		$list = [];
+
+		foreach (File::CONTEXTS_NAMES as $context => $name) {
+			$list[$context] = ['label' => $name, 'size' => $quotas[$context] ?? null];
+		}
+
+		return $list;
+	}
+
 	static public function getQuota(): float
 	{
 		return FILE_STORAGE_QUOTA ?? self::callStorage('getQuota');

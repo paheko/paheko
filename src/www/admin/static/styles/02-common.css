@@ -603,8 +603,17 @@ aside.quota {
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    cursor: help;
     position: relative;
+}
+
+.quota .meter:has(.more) {
+    cursor: help;
+}
+
+.quota a.meter {
+    cursor: pointer !important;
+    color: rgb(var(--gTextColor));
+    text-decoration: none;
 }
 
 .quota .meter span.more {
@@ -624,6 +633,10 @@ aside.quota {
     z-index: 1000;
 }
 
+.quota a.meter span.more {
+    box-shadow: 0 0 5px 2px rgb(var(--gMainColor));
+}
+
 .quota .meter:active span.more, .quota .meter:hover span.more {
     display: block;
 }
@@ -635,7 +648,7 @@ aside.quota {
 .search-results h4 a {
     font-weight: normal !important;
     font-size: .9em;
-    color: #999;
+    color: var(--gBorderColor);
 }
 
 .search-results h3 {
@@ -655,7 +668,7 @@ dl.large dt {
     font-size: 1.5em;
     font-weight: bold;
     margin-top: 1em;
-    border-top: 1px solid #ccc;
+    border-top: 1px solid var(--gLightBorderColor);
     padding-top: 1em;
     padding-left: 2rem;
 }
@@ -672,8 +685,17 @@ del { background: #fcc; color: #000; text-decoration-color: rgba(0, 0, 0, .3); }
     margin: 1em auto;
 }
 
-.center-block > p {
+.short-block {
+    max-width: 40em;
+    margin: 1em 0;
+}
+
+.center-block > p, .center-block > h2, .center-block h3 {
     text-align: center;
+}
+
+.center-block > dl.describe {
+    margin: 1em auto;
 }
 
 .center-block > pre {
