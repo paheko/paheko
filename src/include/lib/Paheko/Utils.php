@@ -663,16 +663,16 @@ class Utils
 				return number_format(round($size, 1), $decimals, ',', '') . ' Go';
 			}
 			else {
-				return round($size) . ' Go';
+				return ceil($size) . ' Go';
 			}
 		}
 		elseif ($size > (1024 * 1024)) {
 			$size = $size / 1024 / 1024;
 			$decimals = $size == (int) $size ? 0 : 2;
-			return round($size) . ' Mo';
+			return ceil($size) . ' Mo';
 		}
 		elseif ($size > 1024) {
-			return round($size / 1024) . ' Ko';
+			return ceil($size / 1024) . ' Ko';
 		}
 		elseif ($bytes) {
 			return $size . ' octets';
