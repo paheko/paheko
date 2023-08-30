@@ -3,6 +3,7 @@
 namespace Paheko;
 
 use Paheko\Services\Reminders;
+use Paheko\Files\Files;
 use Paheko\Files\Trash;
 
 if (PHP_SAPI != 'cli' && !defined('\Paheko\ROOT')) {
