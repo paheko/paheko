@@ -895,3 +895,15 @@ pre code {
 fieldset.message {
     max-width: 40em;
 }
+
+img.broken {
+    font-size: 1.2rem;
+    text-align: center;
+    background: #977;
+    border-radius: .3rem;
+    color: #fff;
+    text-decoration: none;
+    display: inline-block;
+    line-height: 1em;
+    padding: .5rem;
+}

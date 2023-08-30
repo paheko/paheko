@@ -1140,6 +1140,7 @@ class Utils
 		}
 
 		fclose($pipes[0]);
+		$code = null;
 
 		while ($timeout_ms > 0) {
 			$start = microtime(true);
@@ -1159,6 +1160,11 @@ class Utils
 			// Do this before we read from the stream,
 			// this way we can't lose the last bit of output if the process dies between these     functions.
 			$status = proc_get_status($process);
+
+			// We must get the exit code when it is sent, or we won't be able to get it later
+			if ($status['exitcode'] > -1) {
+				$code = $status['exitcode'];
+			}
 
 			// Read the contents from the buffer.
 			// This function will always return immediately as the stream is none-blocking.
@@ -1180,17 +1186,14 @@ class Utils
 		fclose($pipes[1]);
 		fclose($pipes[2]);
 
-		$status = proc_get_status($process);
-
 		if ($status['running']) {
 			proc_terminate($process, 9);
 			throw new \OverflowException(sprintf("Command killed after taking more than %d seconds: \n%s", $timeout, $cmd));
 		}
 
-		$status = proc_get_status($process);
 		proc_close($process);
 
-		return $status['exitcode'];
+		return $code;
 	}
 
 	/**

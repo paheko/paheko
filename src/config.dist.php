@@ -776,7 +776,7 @@ namespace Paheko;
  * Pour cela il procédera simplement à une conversion entre les formats natifs
  * ODS/CSV et XLSX ou XLS.
  *
- * Noter qu'installer ces commandes peut introduire des risques de sécurité sur le serveur.
+ * Note : installer ces commandes peut introduire des risques de sécurité sur le serveur.
  *
  * Les outils supportés sont :
  * - ssconvert (apt install gnumeric) (plus rapide)
@@ -784,10 +784,31 @@ namespace Paheko;
  * - unoconvert (https://github.com/unoconv/unoserver/) en spécifiant l'interface
  *
  * Défault : null (= fonctionnalité désactivée)
+ * @var string|null
  */
 //const CALC_CONVERT_COMMAND = 'unoconv';
 //const CALC_CONVERT_COMMAND = 'ssconvert';
 //const CALC_CONVERT_COMMAND = 'unoconvert --interface localhost --port 2022';
+
+/**
+ * DOCUMENT_THUMBNAILS_COMMANDS
+ * Indique les commandes à utiliser pour générer des miniatures pour les documents
+ * (LibreOffice, OOXML, PDF, SVG, etc.)
+ *
+ * Les options possibles sont (par ordre de rapidité) :
+ * - 'mupdf': les miniatures PDF/SVG/XPS/EPUB sont générées avec mutool (apt install mupdf-tools)
+ * - 'collabora': les miniatures sont générées par le serveur Collabora indiqué dans WOPI_DISCOVERY_URL
+ * - 'unoconvert' : les miniatures des documents Office/LO sont générées avec unoconvert
+ *
+ * Il est conseillé d'utiliser mupdf en priorité pour les PDF, il est plus rapide et léger.
+ *
+ * Note : cette option créera de nombreux fichiers et augmentera la charge serveur !
+ *
+ * Défaut : null (fonctionnalité désactivée)
+ * @var null|array
+ */
+
+//const ENABLE_DOCUMENT_THUMBNAILS = ['mupdf', 'collabora'];
 
 /**
  * PDFTOTEXT_COMMAND

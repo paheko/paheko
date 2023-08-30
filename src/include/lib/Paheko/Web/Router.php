@@ -125,12 +125,10 @@ class Router
 				throw new UserException('Cette page n\'existe pas.');
 			}
 
-			if ($file->image) {
-				foreach ($_GET as $key => $v) {
-					if (array_key_exists($key, File::ALLOWED_THUMB_SIZES)) {
-						$size = $key;
-						break;
-					}
+			foreach ($_GET as $key => $v) {
+				if (array_key_exists($key, File::ALLOWED_THUMB_SIZES)) {
+					$size = $key;
+					break;
 				}
 			}
 

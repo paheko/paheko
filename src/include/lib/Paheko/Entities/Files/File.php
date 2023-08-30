@@ -2,6 +2,7 @@
 
 namespace Paheko\Entities\Files;
 
+use KD2\HTTP;
 use KD2\Graphics\Image;
 use KD2\Graphics\Blob;
 use KD2\Security;
@@ -27,7 +28,7 @@ use Paheko\Users\DynamicFields;
 
 use Paheko\Files\Files;
 
-use const Paheko\{WWW_URL, BASE_URL, ENABLE_XSENDFILE, SECRET_KEY, WOPI_DISCOVERY_URL, SHARED_CACHE_ROOT, PDFTOTEXT_COMMAND};
+use const Paheko\{WWW_URL, BASE_URL, ENABLE_XSENDFILE, SECRET_KEY, WOPI_DISCOVERY_URL, SHARED_CACHE_ROOT, PDFTOTEXT_COMMAND, DOCUMENT_THUMBNAILS, CACHE_ROOT};
 
 class File extends Entity
 {
@@ -73,10 +74,10 @@ class File extends Entity
 	 * @var array
 	 */
 	const ALLOWED_THUMB_SIZES = [
-		'150px' => [['resize', 150]],
-		'200px' => [['resize', 200]],
+		'150px' => [['trim'], ['resize', 150]],
+		'200px' => [['trim'], ['resize', 200]],
 		'500px' => [['resize', 500]],
-		'crop-256px' => [['cropResize', 256, 256]],
+		'crop-256px' => [['trim'], ['cropResize', 256, 256]],
 	];
 
 	const THUMB_CACHE_ID = 'file.thumb.%s.%s';
@@ -382,6 +383,10 @@ class File extends Entity
 		foreach (self::ALLOWED_THUMB_SIZES as $key => $operations)
 		{
 			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->pathHash(), $key));
+		}
+
+		if (!$this->image && $this->hasThumbnail()) {
+			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->pathHash(), 'document'));
 		}
 	}
 
@@ -920,7 +925,7 @@ class File extends Entity
 
 	public function thumb_url($size = null): string
 	{
-		if (!$this->image) {
+		if (!$this->hasThumbnail()) {
 			return $this->url();
 		}
 
@@ -938,7 +943,7 @@ class File extends Entity
 	public function link(Session $session, ?string $thumb = null, bool $allow_edit = false, ?string $url = null)
 	{
 		if ($thumb == 'auto') {
-			if ($this->isImage()) {
+			if ($this->hasThumbnail()) {
 				$thumb = '150px';
 			}
 			else {
@@ -950,7 +955,7 @@ class File extends Entity
 			$label = sprintf('<span data-icon="%s"></span>', Utils::iconUnicode($this->iconShape()));
 		}
 		elseif ($thumb) {
-			$label = sprintf('<img src="%s" alt="%s" />', htmlspecialchars($this->thumb_url($thumb)), htmlspecialchars($this->name));
+			$label = sprintf('<img src="%s" alt="%s" onerror="this.classList.add(\'broken\');" />', htmlspecialchars($this->thumb_url($thumb)), htmlspecialchars($this->name));
 		}
 		else {
 			$label = preg_replace('/[_.-]/', '&shy;$0', htmlspecialchars($this->name));
@@ -997,18 +1002,149 @@ class File extends Entity
 
 	public function asImageObject(): Image
 	{
-		$path = $this->getLocalFilePath();
-		$pointer = null;
+		if (!$this->image) {
+			$path = $this->createDocumentThumbnail();
+
+			if (!$path) {
+				throw new \RuntimeException('Cannot get image object as document thumbnail does not exist');
+			}
+		}
+		else {
+			$path = $this->getLocalFilePath();
+			$pointer = $path === null ? null : $this->getReadOnlyPointer();
+		}
 
 		if ($path) {
 			$i = new Image($path);
 		}
 		else {
-			$pointer = $this->getReadOnlyPointer();
 			$i = Image::createFromPointer($pointer, null, true);
 		}
 
 		return $i;
+	}
+
+	public function hasThumbnail(): bool
+	{
+		if ($this->image) {
+			return true;
+		}
+
+		return $this->getDocumentThumbnailCommand() !== null;
+	}
+
+	protected function getDocumentThumbnailCommand(): ?string
+	{
+		if (!DOCUMENT_THUMBNAILS) {
+			return null;
+		}
+
+		static $libreoffice_extensions = ['doc', 'docx', 'ods', 'xls', 'xlsx', 'odp', 'odt', 'ppt', 'pptx'];
+		static $mupdf_extensions = ['pdf', 'xps', 'cbz', 'epub', 'svg'];
+		static $collabora_extensions = ['doc', 'docx', 'ods', 'xls', 'xlsx', 'odp', 'odt', 'ppt', 'pptx', 'pdf', 'svg'];
+
+		$ext = $this->extension();
+
+		if (in_array('mupdf', DOCUMENT_THUMBNAILS) && in_array($ext, $mupdf_extensions)) {
+			return 'mupdf';
+		}
+		elseif (in_array('unoconvert', DOCUMENT_THUMBNAILS) && in_array($ext, $libreoffice_extensions)) {
+			return 'unoconvert';
+		}
+		elseif (in_array('collabora', DOCUMENT_THUMBNAILS)
+			&& class_exists('CurlFile')
+			&& in_array($ext, $collabora_extensions)
+			&& $this->getWopiURL()) {
+			return 'collabora';
+		}
+
+		return null;
+	}
+
+	protected function createDocumentThumbnail(): ?string
+	{
+		$command = $this->getDocumentThumbnailCommand();
+
+		if (!$command) {
+			return null;
+		}
+
+		$cache_id = sprintf(self::THUMB_CACHE_ID, $this->pathHash(), 'document');
+		$destination = Static_Cache::getPath($cache_id);
+
+		if (Static_Cache::exists($cache_id)) {
+			return $destination;
+		}
+
+		$local_path = $this->getLocalFilePath();
+		$path = $local_path;
+
+		if (!$local_path) {
+			$path = tmpfile(CACHE_ROOT);
+			$p = $this->getReadOnlyPointer();
+			$fp = fopen($path, 'wb');
+
+			while (!feof($p)) {
+				fwrite($fp, fread($p, 8192));
+			}
+
+			fclose($p);
+			fclose($fp);
+			unset($p, $fp);
+		}
+
+		$tmpdir = null;
+
+		try {
+			if ($command === 'collabora') {
+				$url = parse_url(WOPI_DISCOVERY_URL);
+				$url = sprintf('%s://%s:%s/lool/convert-to/png', $url['scheme'], $url['host'], $url['port']);
+
+				$curl = \curl_init($url);
+				curl_setopt($curl, CURLOPT_POST,1);
+				curl_setopt($curl, CURLOPT_POSTFIELDS, ['file' => new \CURLFile($path, $this->mime, $this->name)]);
+
+				$fp = fopen($destination, 'wb');
+				curl_setopt($curl, CURLOPT_FILE, $fp);
+
+				curl_exec($curl);
+				$info = curl_getinfo($curl);
+				curl_close($curl);
+				fclose($fp);
+
+				if (($code = $info['http_code']) != 200) {
+					throw new \RuntimeException('Cannot fetch thumbnail from Collabora: code ' . $code);
+				}
+			}
+			elseif ($command === 'mupdf' || $command === 'unoconvert') {
+				if ($command === 'mupdf') {
+					$cmd = sprintf('mutool draw -F png -o %s -w 500 -h 500 -L -r 72 %s 2>&1', escapeshellarg($destination), escapeshellarg($path));
+				}
+				elseif ($command === 'unoconvert') {
+					$cmd = sprintf('unoconvert --convert-to png %s %s 2>&1', escapeshellarg($path), escapeshellarg($destination));
+				}
+
+				$output = '';
+				$code = Utils::exec($cmd, 5, null, function($data) use (&$output) { $output .= $data; });
+
+				// Don't trust code as it can return != 0 even if generation was OK
+
+				if (!file_exists($destination) || filesize($destination) < 10) {
+					throw new \RuntimeException($command . ' execution failed with code: ' . $code . "\n" . $output);
+				}
+			}
+		}
+		finally {
+			if (!$local_path) {
+				Utils::safe_unlink($path);
+			}
+
+			if ($tmpdir) {
+				Utils::deleteRecursive($tmpdir, true);
+			}
+		}
+
+		return $destination;
 	}
 
 	/**
@@ -1016,8 +1152,8 @@ class File extends Entity
 	 */
 	public function serveThumbnail(string $size = null): void
 	{
-		if (!$this->image) {
-			throw new UserException('Il n\'est pas possible de fournir une miniature pour un fichier qui n\'est pas une image.');
+		if (!$this->hasThumbnail()) {
+			throw new UserException('Il n\'est pas possible de fournir une miniature pour ce fichier.', 404);
 		}
 
 		if (!array_key_exists($size, self::ALLOWED_THUMB_SIZES)) {
@@ -1035,7 +1171,7 @@ class File extends Entity
 				$i->autoRotate();
 
 				$operations = self::ALLOWED_THUMB_SIZES[$size];
-				$allowed_operations = ['resize', 'cropResize', 'flip', 'rotate', 'crop'];
+				$allowed_operations = ['resize', 'cropResize', 'flip', 'rotate', 'crop', 'trim'];
 
 				foreach ($operations as $operation) {
 					$arguments = array_slice($operation, 1);
@@ -1057,10 +1193,12 @@ class File extends Entity
 				$i->save($destination, $format);
 			}
 			catch (\RuntimeException $e) {
-				throw new UserException('Impossible de créer la miniature', 0, $e);
+				throw new UserException('Impossible de créer la miniature', 500, $e);
 			}
 		}
 
+		// We can lie here, it might be something else, it does not matter
+		header('Content-Type: image/png', true);
 		$this->_serve($destination, false);
 
 		if (in_array($this->context(), [self::CONTEXT_WEB, self::CONTEXT_CONFIG])) {
@@ -1080,22 +1218,24 @@ class File extends Entity
 			header('Cache-Control: private, must-revalidate, post-check=0, pre-check=0');
 		}
 
-		$type = $this->mime;
+		if (null === $path) {
+			$type = $this->mime;
 
-		// Force CSS mimetype
-		if (substr($this->name, -4) == '.css') {
-			$type = 'text/css';
-		}
-		elseif (substr($this->name, -3) == '.js') {
-			$type = 'text/javascript';
-		}
+			// Force CSS mimetype
+			if (substr($this->name, -4) == '.css') {
+				$type = 'text/css';
+			}
+			elseif (substr($this->name, -3) == '.js') {
+				$type = 'text/javascript';
+			}
 
-		if (substr($type, 0, 5) == 'text/') {
-			$type .= ';charset=utf-8';
-		}
+			if (substr($type, 0, 5) == 'text/') {
+				$type .= ';charset=utf-8';
+			}
 
-		header(sprintf('Content-Type: %s', $type));
-		header(sprintf('Content-Disposition: %s; filename="%s"', null !== $download ? 'attachment' : 'inline', is_string($download) ? $download : $this->name));
+			header(sprintf('Content-Type: %s', $type));
+			header(sprintf('Content-Disposition: %s; filename="%s"', null !== $download ? 'attachment' : 'inline', is_string($download) ? $download : $this->name));
+		}
 
 		// Use X-SendFile, if available, and storage has a local copy
 		if (Router::isXSendFileEnabled()) {
@@ -1347,14 +1487,14 @@ class File extends Entity
 			return null;
 		}
 
-		if ($this->getWopiURL()) {
+		if ($this->getWopiURL('edit')) {
 			return 'wopi';
 		}
 
 		return null;
 	}
 
-	public function getWopiURL(): ?string
+	public function getWopiURL(?string $action = null): ?string
 	{
 		if (!WOPI_DISCOVERY_URL) {
 			return null;
@@ -1383,11 +1523,15 @@ class File extends Entity
 		$ext = $this->extension();
 		$url = null;
 
-		if (isset($data['extensions'][$ext]['edit'])) {
-			$url = $data['extensions'][$ext]['edit'];
+		if ($action) {
+			$url = $data['extensions'][$ext][$action] ?? null;
+			$url ??= $data['mimetypes'][$this->mime][$action] ?? null;
 		}
-		elseif (isset($data['mimetypes'][$this->mime]['edit'])) {
-			$url = $data['mimetypes'][$this->mime]['edit'];
+		elseif (isset($data['extensions'][$ext])) {
+			$url = current($data['extensions'][$ext]);
+		}
+		elseif (isset($data['mimetypes'][$this->mime])) {
+			$url = current($data['mimetypes'][$this->mime]);
 		}
 
 		return $url;
@@ -1395,7 +1539,7 @@ class File extends Entity
 
 	public function editorHTML(bool $readonly = false): ?string
 	{
-		$url = $this->getWopiURL();
+		$url = $this->getWopiURL('edit');
 
 		if (!$url) {
 			return null;

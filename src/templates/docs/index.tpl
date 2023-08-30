@@ -180,7 +180,7 @@ use Paheko\Entities\Files\File;
 							{input type="checkbox" name="check[]" value=$item.path}
 						</td>
 					{/if}
-					{if $gallery && $item->isImage()}
+					{if $gallery && $item->hasThumbnail()}
 						<td class="preview">{$item->link($session, '150px', false)|raw}</td>
 					{else}
 						<td class="icon">
