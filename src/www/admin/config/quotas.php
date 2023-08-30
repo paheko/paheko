@@ -6,7 +6,7 @@ use Paheko\Backup;
 
 require_once __DIR__ . '/_inc.php';
 
-$csrf_key = 'quotas';
+$csrf_key = 'disk_usage';
 $versioning_policy = Files::getVersioningPolicy();
 
 $form->runIf('prune_versions', function() use ($versioning_policy) {
@@ -31,7 +31,7 @@ $sizes = [
 	'quota_used' => Files::getUsedQuota(),
 	'quota_max'  => Files::getQuota(),
 	'quota_left' => Files::getRemainingQuota(),
-	'contexts'   => Files::getContextsQuotas(),
+	'contexts'   => Files::getContextsDiskUsage(),
 	'db_backups' => Backup::getAllBackupsTotalSize(),
 	'db'         => Backup::getDBSize(),
 ];

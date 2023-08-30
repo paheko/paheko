@@ -6,7 +6,7 @@
 
 {include file="common/delete_form.tpl"
 	legend="Supprimer les anciennes versions ?"
-	warning="Libérer %s d'espace disque en supprimant les anciennes versions ?"|args:$size_bytes
+	warning="Libérer %s d'espace disque en supprimant toutes les anciennes versions ?"|args:$size_bytes
 	alert="Après cette action, seule la dernière version de chaque fichier sera conservée."
 	info="Même les versions nommées seront supprimées."}
 

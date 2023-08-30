@@ -1,10 +1,16 @@
-{include file="_head.tpl" title="Configurer les sauvegardes" current="config"}
+{include file="_head.tpl" title="Sauvegardes automatiques" current="config"}
 
 {include file="config/_menu.tpl" current="backup"}
 
-{include file="config/backup/_menu.tpl" current="config"}
+{include file="config/backup/_menu.tpl" current="auto"}
 
 {form_errors}
+
+{if $_GET.msg === 'CONFIG_SAVED'}
+	<p class="block confirm">
+		La configuration des sauvegardes a bien été enregistrée.
+	</p>
+{/if}
 
 <form method="post" action="{$self_url_no_qs}">
 
@@ -29,7 +35,6 @@
 		{button type="submit" name="config" label="Enregistrer" shape="right" class="main"}
 	</p>
 </fieldset>
-
 
 <div class="help block">
 	<p>

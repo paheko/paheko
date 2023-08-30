@@ -587,7 +587,6 @@ class File extends Entity
 
 	public function setContent(string $content): self
 	{
-		$this->set('modified', new \DateTime);
 		$this->store(['content' => rtrim($content)]);
 		return $this;
 	}
@@ -700,14 +699,15 @@ class File extends Entity
 		$db = DB::getInstance();
 		$db->begin();
 
+		// Set modified time if not already set before
+		if (!$this->isModified('modified')) {
+			$this->set('modified', new \DateTime);
+		}
+
 		// Only archive previous version if it was more than 0 bytes
 		if (!$new && $this->getModifiedProperty('size') !== 0 && $this->size > 0) {
 			$this->createVersion();
 			$this->pruneVersions();
-		}
-
-		if (!isset($this->modified)) {
-			$this->set('modified', new \DateTime);
 		}
 
 		// Save metadata now, and rollback if required

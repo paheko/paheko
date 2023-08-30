@@ -36,7 +36,6 @@ $tpl->assign([
 	'sqlite_version'   => \SQLite3::version()['versionString'],
 	'countries'        => Utils::getCountryList(),
 	'paheko_website'   => WEBSITE,
-	'versioning_policies' => Config::VERSIONING_POLICIES,
 ]);
 
 $tpl->display('config/index.tpl');

@@ -47,7 +47,7 @@
 		<tr>
 			<th>Total</th>
 			<td class="size"><nobr>{$quota_used|size_in_bytes}</nobr></td>
-			<td class="actions">{linkbutton shape="download" label="Sauvegarder les fichiers" href="!config/backup/documents.php"}
+			<td class="actions">{linkbutton shape="download" label="Sauvegarder les fichiers" href="!config/backup/"}
 			</td>
 		</tr>
 		{foreach from=$contexts item="context" key="ctx"}

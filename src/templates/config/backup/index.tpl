@@ -4,13 +4,9 @@
 
 {include file="config/backup/_menu.tpl" current="index"}
 
-{if $_GET.msg}
+{if $_GET.msg == 'BACKUP_CREATED'}
 	<p class="block confirm">
-		{if $_GET.msg === 'CONFIG_SAVED'}
-			La configuration des sauvegardes a bien été enregistrée.
-		{elseif $_GET.msg == 'BACKUP_CREATED'}
-			Une nouvelle sauvegarde a été créée.
-		{/if}
+		Une nouvelle sauvegarde a été créée.
 	</p>
 {/if}
 
@@ -43,7 +39,7 @@
 			<p>Cette sauvegarde sera enregistrée sur le serveur et pourra être restaurée plus tard.</p>
 			<p>Conseillé par exemple avant de réaliser une opération importante, pour pouvoir revenir en arrière.</p>
 			{if FILE_STORAGE_BACKEND !== 'SQLite'}
-				<p><strong>Attention&nbsp;:</strong> seule la base de données est sauvegardées, pas les fichiers et documents.</p>
+				<p><strong>Attention&nbsp;:</strong> seule la base de données est sauvegardées, pas les documents et fichiers joints.</p>
 			{/if}
 			<p class="submit">
 				{csrf_field key=$csrf_key}
@@ -52,9 +48,8 @@
 		</article>
 
 		<article>
-			<h2>Télécharger les documents sur mon ordinateur</h2>
-			<p>
-			<p>Conseillé par exemple avant de réaliser une opération importante, pour pouvoir revenir en arrière.</p>
+			<h2>Télécharger les fichiers sur mon ordinateur</h2>
+			<p>Permet de télécharger un fichier ZIP contenant tous les fichiers (hors base de données et sauvegardes de la base de données)&nbsp;: documents, logo, fichiers joints aux écritures, aux fiches de membres, et aux pages du site web.</p>
 			{if $files_size > 1024*1024*100}
 				<p class="alert block">
 					Ce téléchargement de <strong>{$files_size|size_in_bytes}</strong> peut prendre plusieurs minutes.<br />

@@ -618,12 +618,12 @@ class Files
 		return $breadcrumbs;
 	}
 
-	static public function getContextsQuotas(): array
+	static public function getContextsDiskUsage(): array
 	{
-		$sql = 'SELECT SUBSTR(parent, 1, INSTR(path, \'/\') - 1) AS context, SUM(size) AS total
+		$sql = 'SELECT SUBSTR(path, 1, INSTR(path, \'/\') - 1) AS context, SUM(size) AS total
 			FROM files
 			WHERE type = ?
-			GROUP BY SUBSTR(parent, 1, INSTR(path, \'/\'));';
+			GROUP BY SUBSTR(path, 1, INSTR(path, \'/\'));';
 
 		$quotas = DB::getInstance()->getAssoc($sql, File::TYPE_FILE);
 		$list = [];
@@ -635,6 +635,12 @@ class Files
 		uasort($list, fn($a, $b) => $a['size'] == $b['size'] ? 0 : ($a['size'] > $b['size'] ? -1 : 1));
 
 		return $list;
+	}
+
+	static public function getContextDiskUsage(string $context): int
+	{
+		$sql = 'SELECT SUM(size) FROM files WHERE type = ? AND path LIKE ?;';
+		return (int) DB::getInstance()->firstColumn($sql, File::TYPE_FILE, $context . '/%');
 	}
 
 	static public function getQuota(): float

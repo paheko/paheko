@@ -24,7 +24,7 @@ $form->runIf('config', function () {
 	$config->set('backup_frequency', $frequency);
 	$config->set('backup_limit', $number);
 	$config->save();
-}, $csrf_key, '!config/backup/?msg=CONFIG_SAVED');
+}, $csrf_key, '!config/backup/auto.php?msg=CONFIG_SAVED');
 
 $frequencies = [
 	0 => 'Aucun — les sauvegardes automatiques sont désactivées',
@@ -38,4 +38,4 @@ $frequencies = [
 
 $tpl->assign(compact('frequencies', 'csrf_key'));
 
-$tpl->display('config/backup/config.tpl');
+$tpl->display('config/backup/auto.tpl');
