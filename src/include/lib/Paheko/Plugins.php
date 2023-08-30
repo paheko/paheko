@@ -285,9 +285,9 @@ class Plugins
 		unset($item);
 
 		// Append plugins from signals
-		self::fire('menu.item', false, compact('session'), $list);
+		$signal = self::fire('menu.item', false, compact('session'), $list);
 
-		return $list;
+		return $signal->getOut();
 	}
 
 	static public function listModulesAndPluginsHomeButtons(Session $session): array
@@ -324,9 +324,9 @@ class Plugins
 			$list['module_' . $name] = $v;
 		}
 
-		Plugins::fire('home.button', false, ['user' => $session->getUser(), 'session' => $session], $list);
+		$signal = Plugins::fire('home.button', false, ['user' => $session->getUser(), 'session' => $session], $list);
 
-		return $list;
+		return $signal->getOut();
 	}
 
 	static public function get(string $name): ?Plugin
