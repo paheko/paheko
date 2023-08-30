@@ -72,6 +72,7 @@ class Transactions
 					'reference'  => $row->line_reference,
 					'label'      => $row->line_label ?? $row->label,
 					'id_account' => $row->id_account,
+					'id_project' => $row->id_project,
 				]);
 
 				$line->credit = $row->debit;

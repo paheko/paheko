@@ -681,6 +681,9 @@ class Account extends Entity
 			'id_line' => [
 				'select' => 'l.id',
 			],
+			'id_project' => [
+				'select' => 'l.id_project',
+			],
 		];
 
 		$tables = 'acc_transactions_lines l INNER JOIN acc_transactions t ON t.id = l.id_transaction';

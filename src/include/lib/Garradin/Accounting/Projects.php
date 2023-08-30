@@ -34,7 +34,7 @@ class Projects
 
 		$p = DB::getInstance()->first('SELECT code, label FROM acc_projects WHERE id = ?;', $id);
 
-		$projects[$id] = $p ? sprintf('%s — %s', $p->code, $p->label) : null;
+		$projects[$id] = $p ? ($p->code ? sprintf('%s — %s', $p->code, $p->label) : $p->label) : null;
 		return $projects[$id];
 	}
 
