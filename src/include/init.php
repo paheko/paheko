@@ -228,6 +228,7 @@ static $default_config = [
 	'PDF_USAGE_LOG'         => null,
 	'PDFTOTEXT_COMMAND'     => null,
 	'CALC_CONVERT_COMMAND'  => null,
+	'DOCUMENT_THUMBNAIL_COMMANDS' => null,
 	'CONTRIBUTOR_LICENSE'   => null,
 	'SQL_DEBUG'             => null,
 	'SYSTEM_SIGNALS'        => [],

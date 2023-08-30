@@ -791,24 +791,28 @@ namespace Paheko;
 //const CALC_CONVERT_COMMAND = 'unoconvert --interface localhost --port 2022';
 
 /**
- * DOCUMENT_THUMBNAILS_COMMANDS
+ * DOCUMENT_THUMBNAIL_COMMANDS
  * Indique les commandes à utiliser pour générer des miniatures pour les documents
  * (LibreOffice, OOXML, PDF, SVG, etc.)
  *
  * Les options possibles sont (par ordre de rapidité) :
- * - 'mupdf': les miniatures PDF/SVG/XPS/EPUB sont générées avec mutool (apt install mupdf-tools)
- * - 'collabora': les miniatures sont générées par le serveur Collabora indiqué dans WOPI_DISCOVERY_URL
- * - 'unoconvert' : les miniatures des documents Office/LO sont générées avec unoconvert
+ * - mupdf : les miniatures PDF/SVG/XPS/EPUB sont générées avec mutool
+ *   (apt install mupdf-tools)
+ * - collabora : les miniatures sont générées par le serveur Collabora, via
+ *   l'API dont l'URL est  indiquée dans WOPI_DISCOVERY_URL
+ * - unoconvert : les miniatures des documents Office/LO sont générées
+ *   avec unoconvert <https://github.com/unoconv/unoserver/>
  *
  * Il est conseillé d'utiliser mupdf en priorité pour les PDF, il est plus rapide et léger.
  *
- * Note : cette option créera de nombreux fichiers et augmentera la charge serveur !
+ * Note : cette option créera de nombreux fichiers de cache, et risque d'augmenter
+ * la charge serveur de manière importante.
  *
  * Défaut : null (fonctionnalité désactivée)
  * @var null|array
  */
 
-//const ENABLE_DOCUMENT_THUMBNAILS = ['mupdf', 'collabora'];
+//const DOCUMENT_THUMBNAIL_COMMANDS = ['mupdf', 'collabora'];
 
 /**
  * PDFTOTEXT_COMMAND

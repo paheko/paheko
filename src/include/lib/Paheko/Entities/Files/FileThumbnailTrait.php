@@ -9,7 +9,7 @@ use Paheko\UserException;
 use Paheko\Utils;
 use Paheko\Web\Cache as Web_Cache;
 
-use const Paheko\{DOCUMENT_THUMBNAILS, WOPI_DISCOVERY_URL, CACHE_ROOT};
+use const Paheko\{DOCUMENT_THUMBNAIL_COMMANDS, WOPI_DISCOVERY_URL, CACHE_ROOT};
 
 trait FileThumbnailTrait
 {
@@ -18,11 +18,11 @@ trait FileThumbnailTrait
 		// clean up thumbnails
 		foreach (self::ALLOWED_THUMB_SIZES as $key => $operations)
 		{
-			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->pathHash(), $key));
+			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->md5, $key));
 		}
 
 		if (!$this->image && $this->hasThumbnail()) {
-			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->pathHash(), 'document'));
+			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->md5, 'document'));
 		}
 	}
 
@@ -75,7 +75,7 @@ trait FileThumbnailTrait
 
 	protected function getDocumentThumbnailCommand(): ?string
 	{
-		if (!DOCUMENT_THUMBNAILS) {
+		if (!DOCUMENT_THUMBNAIL_COMMANDS || !is_array(DOCUMENT_THUMBNAIL_COMMANDS)) {
 			return null;
 		}
 
@@ -85,13 +85,13 @@ trait FileThumbnailTrait
 
 		$ext = $this->extension();
 
-		if (in_array('mupdf', DOCUMENT_THUMBNAILS) && in_array($ext, $mupdf_extensions)) {
+		if (in_array('mupdf', DOCUMENT_THUMBNAIL_COMMANDS) && in_array($ext, $mupdf_extensions)) {
 			return 'mupdf';
 		}
-		elseif (in_array('unoconvert', DOCUMENT_THUMBNAILS) && in_array($ext, $libreoffice_extensions)) {
+		elseif (in_array('unoconvert', DOCUMENT_THUMBNAIL_COMMANDS) && in_array($ext, $libreoffice_extensions)) {
 			return 'unoconvert';
 		}
-		elseif (in_array('collabora', DOCUMENT_THUMBNAILS)
+		elseif (in_array('collabora', DOCUMENT_THUMBNAIL_COMMANDS)
 			&& class_exists('CurlFile')
 			&& in_array($ext, $collabora_extensions)
 			&& $this->getWopiURL()) {
@@ -109,7 +109,7 @@ trait FileThumbnailTrait
 			return null;
 		}
 
-		$cache_id = sprintf(self::THUMB_CACHE_ID, $this->pathHash(), 'document');
+		$cache_id = sprintf(self::THUMB_CACHE_ID, $this->md5, 'document');
 		$destination = Static_Cache::getPath($cache_id);
 
 		if (Static_Cache::exists($cache_id)) {
@@ -138,11 +138,25 @@ trait FileThumbnailTrait
 		try {
 			if ($command === 'collabora') {
 				$url = parse_url(WOPI_DISCOVERY_URL);
-				$url = sprintf('%s://%s:%s/lool/convert-to/png', $url['scheme'], $url['host'], $url['port']);
+				$url = sprintf('%s://%s:%s/lool/convert-to', $url['scheme'], $url['host'], $url['port']);
+
+				// see https://vmiklos.hu/blog/pdf-convert-to.html
+				// but does not seem to be working right now (limited to PDF export?)
+				/*
+				$options = [
+					'PageRange' => ['type' => 'string', 'value' => '1'],
+					'PixelWidth' => ['type' => 'int', 'value' => 10],
+					'PixelHeight' => ['type' => 'int', 'value' => 10],
+				];
+				*/
 
 				$curl = \curl_init($url);
-				curl_setopt($curl, CURLOPT_POST,1);
-				curl_setopt($curl, CURLOPT_POSTFIELDS, ['file' => new \CURLFile($path, $this->mime, $this->name)]);
+				curl_setopt($curl, CURLOPT_POST, 1);
+				curl_setopt($curl, CURLOPT_POSTFIELDS, [
+					'format' => 'png',
+					//'options' => json_encode($options),
+					'file' => new \CURLFile($path, $this->mime, $this->name),
+				]);
 
 				$fp = fopen($destination, 'wb');
 				curl_setopt($curl, CURLOPT_FILE, $fp);
@@ -156,11 +170,15 @@ trait FileThumbnailTrait
 					throw new \RuntimeException('Cannot fetch thumbnail from Collabora: code ' . $code);
 				}
 			}
-			elseif ($command === 'mupdf' || $command === 'unoconvert') {
+			else {
 				if ($command === 'mupdf') {
-					$cmd = sprintf('mutool draw -F png -o %s -w 500 -h 500 -L -r 72 %s 2>&1', escapeshellarg($destination), escapeshellarg($path));
+					// The single '1' at the end is to tell only to render the first page
+					$cmd = sprintf('mutool draw -F png -o %s -w 500 -h 500 -r 72 %s 1 2>&1', escapeshellarg($destination), escapeshellarg($path));
 				}
 				elseif ($command === 'unoconvert') {
+					// --filter-options PixelWidth=500 --filter-options PixelHeight=500
+					// see https://github.com/unoconv/unoserver/issues/85
+					// see https://github.com/unoconv/unoserver/issues/86
 					$cmd = sprintf('unoconvert --convert-to png %s %s 2>&1', escapeshellarg($path), escapeshellarg($destination));
 				}
 
@@ -200,7 +218,7 @@ trait FileThumbnailTrait
 			throw new UserException('Cette taille de miniature n\'est pas autorisée.');
 		}
 
-		$cache_id = sprintf(self::THUMB_CACHE_ID, $this->pathHash(), $size);
+		$cache_id = sprintf(self::THUMB_CACHE_ID, $this->md5, $size);
 		$destination = Static_Cache::getPath($cache_id);
 
 		if (!Static_Cache::exists($cache_id)) {
@@ -212,6 +230,10 @@ trait FileThumbnailTrait
 
 				$operations = self::ALLOWED_THUMB_SIZES[$size];
 				$allowed_operations = ['resize', 'cropResize', 'flip', 'rotate', 'crop', 'trim'];
+
+				if (!$this->image) {
+					array_unshift($operations, ['trim']);
+				}
 
 				foreach ($operations as $operation) {
 					$arguments = array_slice($operation, 1);
