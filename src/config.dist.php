@@ -680,6 +680,8 @@ namespace Paheko;
  * Note : indiquer 'none' fait qu'aucune nouvelle version ne sera créée,
  * mais les versions existantes sont conservées.
  *
+ * Si ce paramètre n'est pas NULL, alors il faudra aussi définir FILE_VERSIONING_MAX_SIZE.
+ *
  * Défaut : null (laisser le choix dans la configuration)
  *
  * @var null|string

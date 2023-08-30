@@ -16,8 +16,8 @@ span.alert, b.alert {
     color: #990;
 }
 
-.alert p, .error p, .confirm p, .block p {
-    margin-bottom: .8em;
+.block p, .block h4, .block ul, .block h3 {
+    margin-bottom: .6rem;
 }
 
 .block table {
@@ -30,7 +30,7 @@ span.alert, b.alert {
     border: 1px solid var(--gBorderColor);
 }
 
-.alert.block, .error.block, .confirm.block, .help.block {
+.alert.block, .error.block, .confirm.block, .help.block, .info.block {
     border: 1px solid var(--gLightBorderColor);
     padding: .5em;
     margin: .5em 0;
@@ -60,6 +60,14 @@ span.alert, b.alert {
     color: rgb(var(--gTextColor));
     border-color: var(--gLightBorderColor);
     background-color: var(--gLightBackgroundColor);
+}
+
+.info.block {
+    color: rgb(var(--gTextColor));
+    border-color: var(--gLightBorderColor);
+    background-color: rgb(var(--gBgColor));
+    border-width: 2px;
+    padding: 1rem;
 }
 
 .confirm.block a.icn-btn, .alert.block a.icn-btn, .error.block a.icn-btn {

@@ -2,7 +2,7 @@
 
 {include file="config/_menu.tpl"}
 
-{assign var="size_bytes" value=$contexts.versions.size|size_in_bytes}
+{assign var="size_bytes" value=$disk_use|size_in_bytes}
 
 {include file="common/delete_form.tpl"
 	legend="Supprimer les anciennes versions ?"

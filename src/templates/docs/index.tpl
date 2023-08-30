@@ -11,7 +11,7 @@ use Paheko\Entities\Files\File;
 			value=$quota.used
 			text="%s libres"|args:$quota.left_bytes
 			more="%s%% utilisé (%s sur %s)"|args:$quota.percent:$quota.used_bytes:$quota.max_bytes
-			href="!config/quotas.php"
+			href="!config/disk_usage.php"
 			title="Cliquer pour les détails de l'espace disque"}
 	{else}
 		{size_meter

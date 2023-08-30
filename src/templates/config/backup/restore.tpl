@@ -61,6 +61,13 @@
 
 {else}
 
+
+	<p>
+		{linkbutton shape="reload" label="Restaurer les documents et fichiers joints" href="documents.php"}
+		{linkbutton shape="upload" label="Restaurer la base de données à partir de mon ordinateur" href="restore.php?from_file=1"}
+	</p>
+
+
 	{if !$code && !$ok}
 	<p class="help">
 		Espace disque occupé par les sauvegardes : <strong>{$size|size_in_bytes}</strong>

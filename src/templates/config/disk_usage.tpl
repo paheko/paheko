@@ -2,10 +2,6 @@
 
 {include file="config/_menu.tpl"}
 
-{if $_GET.msg === 'PRUNED'}
-	<p class="confirm block">Les anciennes versions des fichiers qui étaient trop anciennes ont bien été supprimées.</p>
-{/if}
-
 <h2 class="ruler">Base de données</h2>
 
 <div class="center-block">
@@ -42,30 +38,28 @@
 	<p>{$quota_used|size_in_bytes} utilisés sur {$quota_max|size_in_bytes} autorisés <strong>({$quota_left|size_in_bytes} libres)</strong></p>
 </div>
 
-<form method="post" action="">
-	<table class="list meter-map auto" style="--size: 45em">
-		<tr>
-			<th>Total</th>
-			<td class="size"><nobr>{$quota_used|size_in_bytes}</nobr></td>
-			<td class="actions">{linkbutton shape="download" label="Sauvegarder les fichiers" href="!config/backup/"}
-			</td>
-		</tr>
-		{foreach from=$contexts item="context" key="ctx"}
-		<tr height="{$context.size|percent_of:$quota_used}%">
-			<th>{$context.label}</th>
-			<td class="size"><nobr>{$context.size|size_in_bytes}</nobr></td>
-			<td class="actions">
-				{if $ctx == 'trash'}
-					{linkbutton shape="trash" label="Voir les fichiers supprimés" href="!docs/trash.php"}
-				{elseif $ctx == 'versions' && $versioning_policy !== 'none'}
-					{button type="submit" name="prune_versions" value=1 shape="reload" label="Nettoyer les anciennes versions"}
-				{elseif $ctx == 'versions' && $versioning_policy === 'none' && $context.size}
-					{linkbutton href="?prune_versions=1" shape="delete" label="Supprimer les anciennes versions" target="_dialog"}
-				{/if}
-			</td>
-		</tr>
-		{/foreach}
-	</table>
-</form>
+<table class="list meter-map auto" style="--size: 45em">
+	<tr>
+		<th>Total</th>
+		<td class="size"><nobr>{$quota_used|size_in_bytes}</nobr></td>
+		<td class="actions">{linkbutton shape="download" label="Télécharger tous les fichiers" href="!config/backup/"}
+		</td>
+	</tr>
+	{foreach from=$contexts item="context" key="ctx"}
+	<tr height="{$context.size|percent_of:$quota_used}%">
+		<th>{$context.label}</th>
+		<td class="size"><nobr>{$context.size|size_in_bytes}</nobr></td>
+		<td class="actions">
+			{if $ctx == 'trash'}
+				{linkbutton shape="trash" label="Voir les fichiers supprimés" href="!docs/trash.php"}
+			{elseif $ctx == 'versions' && $versioning_policy !== 'none'}
+				{linkbutton href="!config/backup/versions.php" shape="reload" label="Nettoyer les anciennes versions"}
+			{elseif $ctx == 'versions' && $versioning_policy === 'none' && $context.size}
+				{linkbutton href="!config/backup/versions.php?prune_versions=1" shape="delete" label="Supprimer les anciennes versions" target="_dialog"}
+			{/if}
+		</td>
+	</tr>
+	{/foreach}
+</table>
 
 {include file="_foot.tpl"}

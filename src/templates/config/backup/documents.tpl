@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Restaurer les documents" current="config"}
+{include file="_head.tpl" title="Restaurer les documents et fichiers joints" current="config"}
 
 {include file="config/_menu.tpl" current="backup"}
 
@@ -17,7 +17,7 @@
 <form method="post" action="{$self_url_no_qs}" id="restoreDocuments" style="display: none;" enctype="multipart/form-data" data-disable-progress="1">
 
 <fieldset>
-	<legend>Restaurer les documents avec une archive ZIP de sauvegarde</legend>
+	<legend>Restaurer les fichiers avec une archive ZIP de sauvegarde</legend>
 	<p class="help">
 		Sélectionner ici une sauvegarde (archive ZIP) des documents pour les restaurer.
 	</p>

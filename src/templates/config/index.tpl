@@ -49,7 +49,7 @@
 			{/if}
 			<dt>Espace disque</dt>
 			<dd>
-				{linkbutton shape="right" label="Voir l'espace disque utilisé" href="quotas.php"}
+				{linkbutton shape="gallery" label="Voir l'espace disque utilisé" href="disk_usage.php"}
 			</dd>
 		</dl>
 	</fieldset>
