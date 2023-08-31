@@ -239,8 +239,8 @@ class Install
 			'log_retention'            => 365,
 			'auto_logout'              => 2*60,
 			'analytical_set_all'       => true,
-			'file_versioning_policy'   => 'none',
-			'file_versioning_max_size' => 5,
+			'file_versioning_policy'   => 'min',
+			'file_versioning_max_size' => 2,
 		]);
 
 		$fields = DynamicFields::getInstance();
