@@ -7,6 +7,21 @@
 	const supportsFileSystemAccessAPI = 'getAsFileSystemHandle' in DataTransferItem.prototype;
 	const supportsWebkitGetAsEntry = 'webkitGetAsEntry' in DataTransferItem.prototype;
 
+	function isItemFile(item) {
+		if (item.kind !== 'file') {
+			return false;
+		}
+		else if (supportsFileSystemAccessAPI && item.getAsFileSystemHandle().kind == 'directory') {
+			return false;
+		}
+		else if (supportsWebkitGetAsEntry && (entry = item.webkitGetAsEntry()) && entry.isDirectory) {
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
+
 	function enableFileDragDrop(p) {
 		var drag_elements = [];
 		var upload_url = p.dataset.uploadUrl;
@@ -19,7 +34,39 @@
 		msg.className = 'message';
 		bg.appendChild(msg);
 		p.appendChild(bg);
-		console.log(bg);
+
+		if (p === document.body) {
+			window.addEventListener('paste', (e) => {
+				const files = [...e.clipboardData.items]
+					.filter(isItemFile)
+					.map(item => item.getAsFile());
+
+				if (!files.length) {
+					return;
+				}
+
+				e.preventDefault();
+				document.body.appendChild(bg);
+				document.body.classList.add('loading');
+
+				for (var i = 0; i < files.length; i++) {
+					let f = files[i];
+					let name = f.name == 'image.png' ? f.name.replace(/\./, '-' + (+(new Date)) + '.') : f.name;
+
+					msg.innerText = 'Envoi de ' + name + '…';
+
+					var r = upload(upload_url, upload_token_name, upload_token_value, f, name);
+
+					if (!r) {
+						break;
+					}
+				}
+
+				window.setTimeout(() => {
+					location.href = location.href;
+				}, 500);
+			});
+		}
 
 		p.addEventListener('dragover', (e) => {
 			e.preventDefault();
@@ -47,13 +94,10 @@
 
 			drag_elements.splice(idx, 1);
 
-			console.log(idx, drag_elements);
-
 			e.preventDefault();
 			e.stopPropagation();
 
 			if (drag_elements.length === 0) {
-				console.log('deleted');
 				p.classList.remove('dragging');
 			}
 		});
@@ -66,20 +110,7 @@
 			drag_elements = [];
 
 			const files = [...e.dataTransfer.items]
-				// Keep files and directories only
-				.filter(item => item.kind === 'file')
-				// Remove directories
-				.filter(item => {
-					if (supportsWebkitGetAsEntry && item.webkitGetAsEntry().isDirectory) {
-						return false;
-					}
-					else if (supportsFileSystemAccessAPI && item.getAsFileSystemHandle().kind == 'directory') {
-						return false;
-					}
-					else {
-						return true;
-					}
-				})
+				.filter(isItemFile)
 				.map(item => item.getAsFile());
 
 			if (!files.length) return;
@@ -90,7 +121,6 @@
 			(async () => {
 				for (var i = 0; i < files.length; i++) {
 					var f = files[i];
-					console.log(f.name, f.type);
 					msg.innerText = 'Envoi de ' + f.name + '…';
 
 					var r = upload(upload_url, upload_token_name, upload_token_value, f);
@@ -107,9 +137,9 @@
 		});
 	}
 
-	async function upload(url, token_name, token_value, file) {
+	async function upload(url, token_name, token_value, file, file_name) {
 		var data = new FormData();
-		data.append('file', file);
+		data.append('file', file, file_name ? file_name : file.name);
 		data.append(token_name, token_value);
 		data.append('upload', 'yes');
 
