@@ -860,6 +860,10 @@ class Template extends Smartyer
 		$attributes = 'name="' . htmlspecialchars($params['name'], ENT_QUOTES, 'UTF-8') . '" ';
 		$attributes .= 'id="f_' . htmlspecialchars($params['name'], ENT_QUOTES, 'UTF-8') . '" ';
 
+		if ($params['name'] == 'numero') {
+			$config->mandatory = true;
+		}
+
 		if ($params['name'] == 'numero' && $config->type == 'number' && !$value)
 		{
 			$value = DB::getInstance()->firstColumn('SELECT MAX(numero) + 1 FROM membres;');

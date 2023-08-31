@@ -240,6 +240,9 @@ class Membres
                 throw new UserException('Ce numéro est déjà attribué à un autre membre.');
             }
         }
+        else {
+            throw new UserException('Le numéro de membre est manquant.');
+        }
 
         if (isset($data['delete_password'])) {
             $data['passe'] = null;
