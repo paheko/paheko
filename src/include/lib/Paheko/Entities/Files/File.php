@@ -1442,9 +1442,4 @@ class File extends Entity
 	{
 		return BASE_URL . 'dav/' . $this->context() . '/';
 	}
-
-	public function webdav_url(): string
-	{
-		return BASE_URL . 'dav/' . $this->path . '/';
-	}
 }
