@@ -229,7 +229,7 @@ class Files
 			'share' => false,
 		];
 
-		// But not in root
+		// Not in trash
 		$p[File::CONTEXT_TRASH] = [
 			'mkdir' => false,
 			'move' => false,
@@ -240,6 +240,7 @@ class Files
 			'share' => false,
 		];
 
+		// Not in versions
 		$p[File::CONTEXT_VERSIONS] = [
 			'mkdir' => false,
 			'move' => false,
@@ -807,6 +808,11 @@ class Files
 	 */
 	static public function uploadMultiple(string $parent, string $key): array
 	{
+		// Detect if it's actually a single file
+		if (isset($_FILES[$key]['name']) && !is_array($_FILES[$key]['name'])) {
+			return [self::upload($parent, $key)];
+		}
+
 		if (!isset($_FILES[$key]['name'][0])) {
 			throw new UserException('Aucun fichier reçu');
 		}

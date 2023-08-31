@@ -110,7 +110,6 @@ class Template extends Smartyer
 		$this->assign('admin_url', ADMIN_URL);
 		$this->assign('help_pattern_url', HELP_PATTERN_URL);
 		$this->assign('help_url', sprintf(HELP_URL, str_replace('/admin/', '', Utils::getSelfURI(false))));
-		$this->assign('admin_url', ADMIN_URL);
 		$this->assign('self_url', Utils::getSelfURI());
 		$this->assign('self_url_no_qs', Utils::getSelfURI(false));
 
@@ -159,6 +158,16 @@ class Template extends Smartyer
 
 		$this->register_function('csrf_field', function ($params) {
 			return Form::tokenHTML($params['key']);
+		});
+
+		$this->register_function('enable_upload_here', function ($params) {
+			$csrf_key = 'upload_file_' . md5($params['path']);
+			$url = Utils::getLocalURL('!common/files/upload.php?p=' . rawurlencode($params['path']));
+			return sprintf(' data-upload-url="%s" data-upload-token-value="%s" data-upload-token-name="%s" ',
+				htmlspecialchars($url),
+				Form::tokenGenerate($csrf_key),
+				Form::tokenFieldName($csrf_key),
+			);
 		});
 
 		$this->register_block('linkmenu', [CommonFunctions::class, 'linkmenu']);

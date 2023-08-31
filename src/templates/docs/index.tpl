@@ -1,7 +1,7 @@
 <?php
 use Paheko\Entities\Files\File;
 ?>
-{include file="_head.tpl" title="Documents" current="docs" hide_title=true}
+{include file="_head.tpl" title="Documents" current="docs" hide_title=true upload_here=$dir.path}
 
 <nav class="tabs">
 	{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}

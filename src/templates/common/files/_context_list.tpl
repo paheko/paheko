@@ -16,9 +16,10 @@ if ($edit
 ?>
 
 {if $can_upload}
-<p>
-	{linkbutton shape="upload" href="!common/files/upload.php?p=%s"|args:$path target="_dialog" label="Ajouter un fichier"}
-</p>
+<div {enable_upload_here path=$path}>
+	<p>
+		{linkbutton shape="upload" href="!common/files/upload.php?p=%s"|args:$path target="_dialog" label="Ajouter un fichier"}
+	</p>
 {/if}
 
 <div class="files-list">
@@ -48,3 +49,7 @@ if ($edit
 	{/if}
 {/foreach}
 </div>
+
+{if $can_upload}
+</div>
+{/if}
