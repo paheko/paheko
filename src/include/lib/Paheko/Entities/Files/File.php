@@ -243,7 +243,7 @@ class File extends Entity
 
 	public function etag(): string
 	{
-		if ($this->md5) {
+		if (isset($this->md5)) {
 			return $this->md5;
 		}
 		elseif (!$this->isDir()) {
@@ -1441,5 +1441,10 @@ class File extends Entity
 	public function webdav_root_url(): string
 	{
 		return BASE_URL . 'dav/' . $this->context() . '/';
+	}
+
+	public function webdav_url(): string
+	{
+		return BASE_URL . 'dav/' . $this->path . '/';
 	}
 }
