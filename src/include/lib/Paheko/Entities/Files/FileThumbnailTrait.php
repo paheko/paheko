@@ -3,6 +3,7 @@
 namespace Paheko\Entities\Files;
 
 use KD2\Graphics\Image;
+use KD2\ZipReader;
 
 use Paheko\Static_Cache;
 use Paheko\UserException;
@@ -13,6 +14,8 @@ use const Paheko\{DOCUMENT_THUMBNAIL_COMMANDS, WOPI_DISCOVERY_URL, CACHE_ROOT};
 
 trait FileThumbnailTrait
 {
+	static protected array $_opendocument_extensions = ['odt', 'ods', 'odp', 'odg'];
+
 	protected function deleteThumbnails(): void
 	{
 		// clean up thumbnails
@@ -66,7 +69,23 @@ trait FileThumbnailTrait
 
 	public function hasThumbnail(): bool
 	{
+		// Don't try to generate thumbnails for large files (> 25 MB)
+		if ($this->size > 1024*1024*25) {
+			return false;
+		}
+
 		if ($this->image) {
+			return true;
+		}
+
+		$ext = $this->extension();
+
+		if ($ext === 'md' || $ext === 'txt') {
+			return true;
+		}
+
+		// We expect opendocument files to have an embedded thumbnail
+		if (in_array($ext, self::$_opendocument_extensions)) {
 			return true;
 		}
 
@@ -79,9 +98,9 @@ trait FileThumbnailTrait
 			return null;
 		}
 
-		static $libreoffice_extensions = ['doc', 'docx', 'ods', 'xls', 'xlsx', 'odp', 'odt', 'ppt', 'pptx'];
+		static $libreoffice_extensions = ['doc', 'docx', 'ods', 'xls', 'xlsx', 'odp', 'odt', 'ppt', 'pptx', 'odg'];
 		static $mupdf_extensions = ['pdf', 'xps', 'cbz', 'epub', 'svg'];
-		static $collabora_extensions = ['doc', 'docx', 'ods', 'xls', 'xlsx', 'odp', 'odt', 'ppt', 'pptx', 'pdf', 'svg'];
+		static $collabora_extensions = ['doc', 'docx', 'ods', 'xls', 'xlsx', 'odp', 'odt', 'ppt', 'pptx', 'odg', 'pdf', 'svg'];
 
 		$ext = $this->extension();
 
@@ -101,16 +120,82 @@ trait FileThumbnailTrait
 		return null;
 	}
 
+	/**
+	 * Extract PNG thumbnail from odt/ods/odp/odg ZIP archives.
+	 * This is the most efficient way to get a thumbnail.
+	 */
+	protected function extractOpenDocumentThumbnail(string $destination): bool
+	{
+		$zip = new ZipReader;
+
+		// We are not going to extract the archive, so it does not matter
+		$zip->enableSecurityCheck(false);
+
+		$pointer = $this->getReadOnlyPointer();
+
+		try {
+			if ($pointer) {
+				$zip->setPointer($pointer);
+			}
+			else {
+				$zip->open($this->getLocalFilePath());
+			}
+
+			$i = 0;
+			$found = false;
+
+			foreach ($zip->iterate() as $path => $entry) {
+				// There should not be more than 100 files in an opendocument archive, surely?
+				if (++$i > 100) {
+					break;
+				}
+
+				// We only care about the thumbnail
+				if ($path !== 'Thumbnails/thumbnail.png') {
+					continue;
+				}
+
+				// Thumbnail is larger than 500KB, abort, it's probably too weird
+				if ($entry['size'] > 1024*500) {
+					break;
+				}
+
+				$zip->extract($entry, $destination);
+				$found = true;
+				break;
+			}
+		}
+		catch (\RuntimeException $e) {
+			// Invalid archive
+			$found = false;
+		}
+
+		unset($zip);
+
+		if ($pointer) {
+			fclose($pointer);
+		}
+
+		return $found;
+	}
+
+	/**
+	 * Create a document thumbnail using external commands or Collabora Online API
+	 */
 	protected function createDocumentThumbnail(): ?string
 	{
+		$cache_id = sprintf(self::THUMB_CACHE_ID, $this->md5, 'document');
+		$destination = Static_Cache::getPath($cache_id);
+
+		if (in_array($this->extension(), self::$_opendocument_extensions) && $this->extractOpenDocumentThumbnail($destination)) {
+			return $destination;
+		}
+
 		$command = $this->getDocumentThumbnailCommand();
 
 		if (!$command) {
 			return null;
 		}
-
-		$cache_id = sprintf(self::THUMB_CACHE_ID, $this->md5, 'document');
-		$destination = Static_Cache::getPath($cache_id);
 
 		if (Static_Cache::exists($cache_id)) {
 			return $destination;
@@ -206,6 +291,122 @@ trait FileThumbnailTrait
 	}
 
 	/**
+	 * Create a SVG thumbnail of a text/markdown file
+	 */
+	protected function createSVGThumbnail(array $operations, string $destination): void
+	{
+		$width = 150;
+
+		foreach ($operations as $operation) {
+			if ($operation[0] === 'resize') {
+				$width = $operation[1];
+				break;
+			}
+		}
+
+		$text = substr($this->fetch(), 0, 400);
+		$text = wordwrap($text, 50, "\n", true);
+		$text = htmlspecialchars($text, ENT_XML1);
+
+		$text = preg_replace('/\*\*(.+?)\*\*/', '<tspan style="font-weight:bold">$1</tspan>', $text);
+		$text = preg_replace('/\*(.+?)\*/', '<tspan style="font-style:italic">$1</tspan>', $text);
+		$text = preg_replace('/~~(.+?)~~/', '<tspan style="text-decoration:line-through">$1</tspan>', $text);
+		$text = preg_replace('/!?\[([^\]]+?)\]\([^\)]+?\)/', '<tspan style="text-decoration:underline; fill: blue">$1</tspan>', $text);
+		$text = preg_replace('/```+|\|/', '', $text);
+		$text = preg_replace('/`([^`]+?)`/', '<tspan style="font-family:monospace">$1</tspan>', $text);
+
+		$text = explode("\n", $text);
+
+		$out = '<svg version="1.1" viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg" width="' . $width . '">
+			<text x="0" y="0" style="font-size: 7px; font-family: sans-serif">';
+
+		$empty = null;
+
+		foreach ($text as $line) {
+			$line = trim($line);
+
+			if ($line === '') {
+				if ($empty) {
+					continue;
+				}
+
+				$out .= '<tspan x="0" dy="0.7em" xml:space="preserve"> </tspan>' . PHP_EOL;
+				$empty = true;
+				continue;
+			}
+
+			$empty = false;
+
+			$line = preg_replace('/^[\*\+-]\s*/', '• ', $line);
+			$style = '';
+
+			if (preg_match('/^(#{1,6})/', $line, $match)) {
+				$l = strlen($match[1]);
+
+				if ($l == 1) {
+					$style .= 'font-size: 1.7em; font-weight: bold';
+				}
+				elseif ($l == 2) {
+					$style .= 'font-size: 1.5em; font-weight: bold';
+				}
+				elseif ($l == 3) {
+					$style .= 'font-size: 1.25em; font-weight: bold';
+				}
+
+				$line = trim(substr($line, strlen($match[0])));
+			}
+
+			$out .= sprintf('<tspan x="0" dy="1.1em" style="%s">%s</tspan>', $style, $line) . PHP_EOL;
+		}
+
+		$out .= '
+			</text>
+		</svg>';
+
+		file_put_contents($destination, $out);
+	}
+
+	protected function createThumbnail(string $size, string $destination): void
+	{
+		$operations = self::ALLOWED_THUMB_SIZES[$size];
+
+		if ($this->extension() === 'md' || $this->extension() === 'txt') {
+			$this->createSVGThumbnail($operations, $destination);
+			return;
+		}
+
+		$i = $this->asImageObject();
+
+		// Always autorotate first
+		$i->autoRotate();
+
+		$allowed_operations = ['resize', 'cropResize', 'flip', 'rotate', 'crop', 'trim'];
+
+		if (!$this->image) {
+			array_unshift($operations, ['trim']);
+		}
+
+		foreach ($operations as $operation) {
+			$arguments = array_slice($operation, 1);
+			$operation = $operation[0];
+
+			if (!in_array($operation, $allowed_operations)) {
+				throw new \InvalidArgumentException('Opération invalide: ' . $operation);
+			}
+
+			$i->$operation(...$arguments);
+		}
+
+		$format = null;
+
+		if ($i->format() !== 'gif') {
+			$format = ['webp', null];
+		}
+
+		$i->save($destination, $format);
+	}
+
+	/**
 	 * Envoie une miniature à la taille indiquée au client HTTP
 	 */
 	public function serveThumbnail(string $size = null): void
@@ -223,44 +424,22 @@ trait FileThumbnailTrait
 
 		if (!Static_Cache::exists($cache_id)) {
 			try {
-				$i = $this->asImageObject();
-
-				// Always autorotate first
-				$i->autoRotate();
-
-				$operations = self::ALLOWED_THUMB_SIZES[$size];
-				$allowed_operations = ['resize', 'cropResize', 'flip', 'rotate', 'crop', 'trim'];
-
-				if (!$this->image) {
-					array_unshift($operations, ['trim']);
-				}
-
-				foreach ($operations as $operation) {
-					$arguments = array_slice($operation, 1);
-					$operation = $operation[0];
-
-					if (!in_array($operation, $allowed_operations)) {
-						throw new \InvalidArgumentException('Opération invalide: ' . $operation);
-					}
-
-					$i->$operation(...$arguments);
-				}
-
-				$format = null;
-
-				if ($i->format() !== 'gif') {
-					$format = ['webp', null];
-				}
-
-				$i->save($destination, $format);
+				$this->createThumbnail($size, $destination);
 			}
 			catch (\RuntimeException $e) {
 				throw new UserException('Impossible de créer la miniature', 500, $e);
 			}
 		}
 
-		// We can lie here, it might be something else, it does not matter
-		header('Content-Type: image/png', true);
+		if ($this->extension() === 'md') {
+			$type = 'image/svg+xml';
+		}
+		else {
+			// We can lie here, it might be something else, it does not matter
+			$type = 'image/webp';
+		}
+
+		header('Content-Type: ' . $type, true);
 		$this->_serve($destination, false);
 
 		if (in_array($this->context(), [self::CONTEXT_WEB, self::CONTEXT_CONFIG])) {
