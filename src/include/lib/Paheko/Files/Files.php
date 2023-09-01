@@ -27,6 +27,11 @@ class Files
 	 */
 	static protected $quota = true;
 
+	/**
+	 * To enable or disable versions (eg. during upgrades)
+	 */
+	static protected bool $versioning = true;
+
 	static public function enableQuota(): void
 	{
 		self::$quota = true;
@@ -35,6 +40,11 @@ class Files
 	static public function disableQuota(): void
 	{
 		self::$quota = false;
+	}
+
+	static public function disableVersioning(): void
+	{
+		self::$versions = false;
 	}
 
 	static public function assertStorageIsUnlocked(): void
@@ -1067,8 +1077,12 @@ class Files
 		}
 	}
 
-	static public function getVersioningPolicy(): ?string
+	static public function getVersioningPolicy(): string
 	{
+		if (!self::$versioning) {
+			return 'none';
+		}
+
 		return FILE_VERSIONING_POLICY ?? Config::getInstance()->file_versioning_policy;
 	}
 

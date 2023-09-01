@@ -34,14 +34,14 @@ trait FileVersionsTrait
 			return;
 		}
 
-		$config = Config::getInstance();
-		$policy = FILE_VERSIONING_POLICY ?? $config->file_versioning_policy;
+		$policy = Files::getVersioningPolicy();
 
 		// Versioning is disabled
 		if ('none' === $policy) {
 			return;
 		}
 
+		$config = Config::getInstance();
 		$max_size = FILE_VERSIONING_MAX_SIZE ?? $config->file_versioning_max_size;
 
 		// Don't version large files
@@ -91,8 +91,7 @@ trait FileVersionsTrait
 	{
 		$now = time();
 
-		$config = Config::getInstance();
-		$policy = FILE_VERSIONING_POLICY ?? $config->file_versioning_policy;
+		$policy = Files::getVersioningPolicy();
 
 		// Versioning is disabled, but keep old versions
 		if ('none' === $policy) {

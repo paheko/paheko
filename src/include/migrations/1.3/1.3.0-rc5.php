@@ -21,6 +21,7 @@ if (FILE_STORAGE_BACKEND == 'FileSystem' && file_exists(FILE_STORAGE_CONFIG)) {
 	$db->exec('UPDATE files SET trash = NULL WHERE trash IS NOT NULL;');
 
 	rename(FILE_STORAGE_CONFIG, FILE_STORAGE_CONFIG . '.deprecated');
+	Files::disableVersioning();
 
 	foreach (Files::all() as $file) {
 		if ($file->isDir()) {
