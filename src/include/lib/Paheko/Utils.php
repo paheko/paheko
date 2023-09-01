@@ -1117,7 +1117,7 @@ class Utils
 			2 => ['pipe', 'w'], // stderr
 		];
 
-		setlocale('LC_ALL=fr_FR.UTF-8');
+		setlocale(LC_ALL, 'fr_FR.UTF-8');
 		putenv('LANG=fr_FR.UTF-8');
 
 		$process = proc_open($cmd, $descriptorspec, $pipes);
