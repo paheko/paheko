@@ -488,6 +488,13 @@ dd.help.example {
     font-size: .9em;
 }
 
+p.action-upload em {
+    display: block;
+    color: var(--gBorderColor);
+    font-size: .9em;
+    font-style: normal;
+}
+
 .actions-center {
     text-align: center;
 }

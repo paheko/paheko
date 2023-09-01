@@ -17,8 +17,9 @@ if ($edit
 
 {if $can_upload}
 <div {enable_upload_here path=$path}>
-	<p>
+	<p class="action-upload">
 		{linkbutton shape="upload" href="!common/files/upload.php?p=%s"|args:$path target="_dialog" label="Ajouter un fichier"}
+		<em>(ou glisser et déposer un fichier ici)</em>
 	</p>
 {/if}
 
