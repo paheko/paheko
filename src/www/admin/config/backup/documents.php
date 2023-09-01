@@ -34,8 +34,6 @@ if ($ok) {
 	$config->updateFiles();
 	$config->save();
 	$tpl->assign(compact('config'));
-
-	Static_Cache::clean(0);
 }
 
 $tpl->assign(compact('failed', 'ok'));
