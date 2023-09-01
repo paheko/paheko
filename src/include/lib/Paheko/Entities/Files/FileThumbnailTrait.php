@@ -4,6 +4,7 @@ namespace Paheko\Entities\Files;
 
 use KD2\Graphics\Image;
 use KD2\ZipReader;
+use KD2\HTML\Markdown;
 
 use Paheko\Static_Cache;
 use Paheko\UserException;
@@ -292,6 +293,7 @@ trait FileThumbnailTrait
 
 	/**
 	 * Create a SVG thumbnail of a text/markdown file
+	 * It's easy, we just transform it to HTML and embed the HTML in the SVG!
 	 */
 	protected function createSVGThumbnail(array $operations, string $destination): void
 	{
@@ -299,68 +301,24 @@ trait FileThumbnailTrait
 
 		foreach ($operations as $operation) {
 			if ($operation[0] === 'resize') {
-				$width = $operation[1];
+				$width = (int) $operation[1];
 				break;
 			}
 		}
 
-		$text = substr($this->fetch(), 0, 800);
-		$text = wordwrap($text, 50, "\n", true);
-		$text = htmlspecialchars($text, ENT_XML1);
+		$text = substr($this->fetch(), 0, 1200);
+		$text = Markdown::instance()->text($text);
 
-		$text = preg_replace('/\*\*(.+?)\*\*/', '<tspan style="font-weight:bold">$1</tspan>', $text);
-		$text = preg_replace('/\*(.+?)\*/', '<tspan style="font-style:italic">$1</tspan>', $text);
-		$text = preg_replace('/~~(.+?)~~/', '<tspan style="text-decoration:line-through">$1</tspan>', $text);
-		$text = preg_replace('/!?\[([^\]]+?)\]\([^\)]+?\)/', '<tspan style="text-decoration:underline; fill: blue">$1</tspan>', $text);
-		$text = preg_replace('/```+|\|/', '', $text);
-		$text = preg_replace('/`([^`]+?)`/', '<tspan style="font-family:monospace">$1</tspan>', $text);
-
-		$text = explode("\n", $text);
-
-		$out = '<svg version="1.1" viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg" width="' . $width . '">
-			<text x="0" y="0" style="font-size: 7px; font-family: sans-serif">';
-
-		$empty = null;
-
-		foreach ($text as $line) {
-			$line = trim($line);
-
-			if ($line === '') {
-				if ($empty) {
-					continue;
-				}
-
-				$out .= '<tspan x="0" dy="0.7em" xml:space="preserve"> </tspan>' . PHP_EOL;
-				$empty = true;
-				continue;
-			}
-
-			$empty = false;
-
-			$line = preg_replace('/^[\*\+-]\s*/', '• ', $line);
-			$style = '';
-
-			if (preg_match('/^(#{1,6})/', $line, $match)) {
-				$l = strlen($match[1]);
-
-				if ($l == 1) {
-					$style .= 'font-size: 1.7em; font-weight: bold';
-				}
-				elseif ($l == 2) {
-					$style .= 'font-size: 1.5em; font-weight: bold';
-				}
-				elseif ($l == 3) {
-					$style .= 'font-size: 1.25em; font-weight: bold';
-				}
-
-				$line = trim(substr($line, strlen($match[0])));
-			}
-
-			$out .= sprintf('<tspan x="0" dy="1.1em" style="%s">%s</tspan>', $style, $line) . PHP_EOL;
-		}
-
-		$out .= '
-			</text>
+		$out = '<svg version="1.1" viewBox="0 0 240 320" xmlns="http://www.w3.org/2000/svg" width="' . $width . '">
+			<style>
+			body { font-family: sans-serif; font-size: 11px; }
+			table { border-collapse: collapse; width: 100% }
+			table thead { background: #ddd }
+			table td, table th { border: 1px solid #999; padding: .2em }
+			</style>
+			<foreignObject x="0" y="0" width="1200" height="1200">
+				<body xmlns="http://www.w3.org/1999/xhtml">' . $text . '</body>
+			</foreignObject>
 		</svg>';
 
 		file_put_contents($destination, $out);
