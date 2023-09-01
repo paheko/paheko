@@ -304,7 +304,7 @@ trait FileThumbnailTrait
 			}
 		}
 
-		$text = substr($this->fetch(), 0, 400);
+		$text = substr($this->fetch(), 0, 800);
 		$text = wordwrap($text, 50, "\n", true);
 		$text = htmlspecialchars($text, ENT_XML1);
 
