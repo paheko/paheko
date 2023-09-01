@@ -12,7 +12,14 @@ class Static_Cache
 		$parent = Utils::dirname($path);
 
 		if (!file_exists($parent)) {
-			Utils::safe_mkdir($parent, fileperms(STATIC_CACHE_ROOT), true);
+			if (file_exists(STATIC_CACHE_ROOT)) {
+				$perms = fileperms(STATIC_CACHE_ROOT);
+			}
+			else {
+				$perms = 0777;
+			}
+
+			Utils::safe_mkdir($parent, $perms, true);
 		}
 	}
 
