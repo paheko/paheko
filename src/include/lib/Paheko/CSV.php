@@ -75,7 +75,7 @@ class CSV
 			throw new \LogicException(sprintf('Conversion tool "%s" is not supported', $tool));
 		}
 
-		$cmd = sprintf($cmd, escapeshellarg($from), escapeshellarg($to));
+		$cmd = sprintf($cmd, Utils::escapeshellarg($from), Utils::escapeshellarg($to));
 		$cmd .= ' 2>&1';
 		$return = shell_exec($cmd);
 

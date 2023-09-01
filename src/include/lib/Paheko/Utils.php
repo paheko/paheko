@@ -1101,6 +1101,20 @@ class Utils
 	}
 
 	/**
+	 * Escape a command-line argument, because escapeshellarg is stripping UTF-8 characters (d'oh)
+	 * @see https://markushedlund.com/dev/php-escapeshellarg-with-unicodeutf-8-support/
+	 */
+	static public function escapeshellarg(string $arg): string
+	{
+		if (PHP_OS_FAMILY === 'Windows') {
+			return '"' . str_replace(array('"', '%'), array('', ''), $arg) . '"';
+		}
+		else {
+			return "'" . str_replace("'", "'\\''", $arg) . "'";
+		}
+	}
+
+	/**
 	 * Execute a system command with a timeout
 	 * @see https://blog.dubbelboer.com/2012/08/24/execute-with-timeout.html
 	 */
@@ -1116,9 +1130,6 @@ class Utils
 			1 => ["pipe", "w"], // stdout is a pipe that the child will write to
 			2 => ['pipe', 'w'], // stderr
 		];
-
-		setlocale(LC_ALL, 'fr_FR.UTF-8');
-		putenv('LANG=fr_FR.UTF-8');
 
 		$process = proc_open($cmd, $descriptorspec, $pipes);
 
@@ -1315,7 +1326,7 @@ class Utils
 				break;
 		}
 
-		$cmd = sprintf($cmd, escapeshellarg($source), escapeshellarg($target));
+		$cmd = sprintf($cmd, self::escapeshellarg($source), self::escapeshellarg($target));
 		$cmd .= ' 2>&1';
 
 		$output = '';

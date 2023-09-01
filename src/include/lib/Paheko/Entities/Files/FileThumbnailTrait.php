@@ -259,8 +259,8 @@ trait FileThumbnailTrait
 				if ($command === 'mupdf') {
 					// The single '1' at the end is to tell only to render the first page
 					$cmd = sprintf('mutool draw -F png -o %s -w 500 -h 500 -r 72 %s 1 2>&1',
-						escapeshellarg($destination),
-						escapeshellarg($tmpfile ?? $local_path)
+						Utils::escapeshellarg($destination),
+						Utils::escapeshellarg($tmpfile ?? $local_path)
 					);
 				}
 				elseif ($command === 'unoconvert') {
@@ -268,8 +268,8 @@ trait FileThumbnailTrait
 					// see https://github.com/unoconv/unoserver/issues/85
 					// see https://github.com/unoconv/unoserver/issues/86
 					$cmd = sprintf('unoconvert --convert-to png %s %s 2>&1',
-						escapeshellarg($tmpfile ?? $local_path),
-						escapeshellarg($destination)
+						Utils::escapeshellarg($tmpfile ?? $local_path),
+						Utils::escapeshellarg($destination)
 					);
 				}
 

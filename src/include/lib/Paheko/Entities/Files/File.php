@@ -810,8 +810,8 @@ class File extends Entity
 				$tmpdest = tempnam(STATIC_CACHE_ROOT, 'pdftotext-out-');
 
 				$cmd = sprintf('mutool convert -F text -o %s %s',
-					escapeshellarg($tmpdest),
-					escapeshellarg($tmpfile ?? $source['path'])
+					Utils::escapeshellarg($tmpdest),
+					Utils::escapeshellarg($tmpfile ?? $source['path'])
 				);
 
 				Utils::exec($cmd, 2, null, null);
