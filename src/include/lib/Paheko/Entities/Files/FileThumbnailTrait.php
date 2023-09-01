@@ -311,10 +311,12 @@ trait FileThumbnailTrait
 
 		$out = '<svg version="1.1" viewBox="0 0 240 320" xmlns="http://www.w3.org/2000/svg" width="' . $width . '">
 			<style>
-			body { font-family: sans-serif; font-size: 11px; }
+			body { font-family: Arial, Helvetica, sans-serif; font-size: 11px; padding: 1px; }
 			table { border-collapse: collapse; width: 100% }
 			table thead { background: #ddd }
-			table td, table th { border: 1px solid #999; padding: .2em }
+			table td, table th { border: 2px solid #999; padding: .2em }
+			ul, ol { padding-left: 1.5em }
+			h1, h2, h3, h4, h5, h6, ul, ol, table, p { margin: .5em 0 }
 			</style>
 			<foreignObject x="0" y="0" width="1200" height="1200">
 				<body xmlns="http://www.w3.org/1999/xhtml">' . $text . '</body>
