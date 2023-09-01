@@ -44,7 +44,7 @@ class Files
 
 	static public function disableVersioning(): void
 	{
-		self::$versions = false;
+		self::$versioning = false;
 	}
 
 	static public function assertStorageIsUnlocked(): void
