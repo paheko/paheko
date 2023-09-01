@@ -25,9 +25,9 @@ Pour en savoir plus : [voir les principales fonctionnalités](#features).
 </div>
 <nav id="gnav">
 
-* [Guides d'installation](/wiki/?name=Installation)
-* [Documentation](/wiki/?name=Documentation)
-* [Entraide](/wiki/?name=Entraide)
+* [Guides d'installation](wiki:Installation)
+* [Documentation](wiki:Documentation)
+* [Entraide](wiki:Entraide)
 * <a href="https://paheko.cloud/" target="_blank">Essayer gratuitement sur &nbsp; <b><img src="./icon.png" alt="" /> Paheko.cloud</b></a>
 
 <ul id="news">
