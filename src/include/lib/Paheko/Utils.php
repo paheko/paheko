@@ -1117,6 +1117,8 @@ class Utils
 			2 => ['pipe', 'w'], // stderr
 		];
 
+		putenv('LANG=fr_FR.UTF-8');
+
 		$process = proc_open($cmd, $descriptorspec, $pipes);
 
 		if (!is_resource($process)) {

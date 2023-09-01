@@ -198,7 +198,7 @@ trait FileThumbnailTrait
 			return null;
 		}
 
-		if (Static_Cache::exists($cache_id)) {
+		if (file_exists($destination)) {
 			return $destination;
 		}
 
@@ -251,6 +251,7 @@ trait FileThumbnailTrait
 				fclose($fp);
 
 				if (($code = $info['http_code']) != 200) {
+					Utils::safe_unlink($destination);
 					throw new \RuntimeException('Cannot fetch thumbnail from Collabora: code ' . $code);
 				}
 			}
@@ -278,6 +279,7 @@ trait FileThumbnailTrait
 				// Don't trust code as it can return != 0 even if generation was OK
 
 				if (!file_exists($destination) || filesize($destination) < 10) {
+					Utils::safe_unlink($destination);
 					throw new \RuntimeException($command . ' execution failed with code: ' . $code . "\n" . $output);
 				}
 			}
