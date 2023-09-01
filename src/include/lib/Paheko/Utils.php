@@ -1167,8 +1167,10 @@ class Utils
 			}
 
 			// Read the contents from the buffer.
-			// This function will always return immediately as the stream is none-blocking.
-			$stdout(stream_get_contents($pipes[1]));
+			// This function will always return immediately as the stream is non-blocking.
+			if (null !== $stdout) {
+				$stdout(stream_get_contents($pipes[1]));
+			}
 
 			if (null !== $stderr) {
 				$stderr(stream_get_contents($pipes[2]));

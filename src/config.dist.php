@@ -821,11 +821,10 @@ namespace Paheko;
  * Utilisé pour indexer un fichier PDF pour pouvoir rechercher dans son contenu
  * parmi les documents.
  *
- * Il est possible de spécifier ici 'pdftotext' si cet outil est installé
- * (à installer avec : apt install poppler-utils).
+ * Il est possible de spécifier ici la commande suivante :
+ * - mupdf (apt install mupdf-tools)
  *
- * Pour le moment c'est la seule commande supportée, toute autre commande
- * sera ignorée.
+ * Toute autre commande sera ignorée.
  *
  * Défaut : null (= fonctionnalité désactivée)
  */

@@ -27,7 +27,7 @@ use Paheko\Users\DynamicFields;
 
 use Paheko\Files\Files;
 
-use const Paheko\{WWW_URL, BASE_URL, ENABLE_XSENDFILE, SECRET_KEY, WOPI_DISCOVERY_URL, SHARED_CACHE_ROOT, PDFTOTEXT_COMMAND};
+use const Paheko\{WWW_URL, BASE_URL, ENABLE_XSENDFILE, SECRET_KEY, WOPI_DISCOVERY_URL, SHARED_CACHE_ROOT, PDFTOTEXT_COMMAND, STATIC_CACHE_ROOT};
 
 class File extends Entity
 {
@@ -773,40 +773,60 @@ class File extends Entity
 				$content = html_entity_decode(strip_tags($content),  ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401);
 			}
 		}
-		elseif ($ext == 'pdf' && PDFTOTEXT_COMMAND === 'pdftotext') {
-			$cmd = escapeshellcmd(PDFTOTEXT_COMMAND) . ' -nopgbrk - -';
-
+		elseif ($ext == 'pdf' && PDFTOTEXT_COMMAND === 'mupdf') {
 			if (empty($source)) {
-				$source['pointer'] = $this->getReadOnlyPointer();
-				$source['path'] = $source['pointer'] ? null : $this->getLocalFilePath();
+				// Prefer path to pointer
+				$source['path'] = $this->getLocalFilePath();
+				$source['pointer'] = $source['path'] ? null : $this->getReadOnlyPointer();
 			}
 
+			$tmpfile = null;
+
 			try {
-				if (isset($source['content'])) {
-					Utils::exec($cmd, 2, fn() => $source['content'], fn($out) => $content = $out);
-				}
-				elseif (isset($source['pointer'])) {
+				// mutool convert doesn't handle stdin/stdout :(
+				if (isset($source['pointer'])) {
 					fseek($source['pointer'], 0, SEEK_END);
 					$size = ftell($source['pointer']);
 					rewind($source['pointer']);
 
-					if ($size >= 8*1024*1024) {
+					if ($size >= 500*1024*1024) {
 						throw new \OverflowException('PDF file is too large');
 					}
 
-					Utils::exec($cmd, 2, fn() => fread($source['pointer'], $size), fn($out) => $content = $out);
+					$tmpfile = tempnam(STATIC_CACHE_ROOT, 'pdftotext-');
+					$fp = fopen($tmpfile, 'wb');
+
+					while (!feof($source['pointer'])) {
+						fwrite($fp, fread($source['pointer'], 8192));
+					}
+
+					fclose($fp);
 				}
-				else {
-					$cmd = sprintf('%s -nopgbrk %s -', escapeshellcmd(PDFTOTEXT_COMMAND), escapeshellarg($source['path']));
-					$content = '';
-					Utils::exec($cmd, 2, null, function($out) use (&$content) { $content .= $out; });
-					$content = $content ?: null;
+				elseif (isset($source['content'])) {
+					$tmpfile = tempnam(STATIC_CACHE_ROOT, 'pdftotext-');
+					file_put_contents($tmpfile, $source['content']);
 				}
+
+				$tmpdest = tempnam(STATIC_CACHE_ROOT, 'pdftotext-out-');
+
+				$cmd = sprintf('mutool convert -F text -o %s %s',
+					escapeshellarg($tmpdest),
+					escapeshellarg($tmpfile ?? $source['path'])
+				);
+
+				Utils::exec($cmd, 2, null, null);
+				$content = file_get_contents($tmpdest);
 			}
 			catch (\OverflowException $e) {
 				// PDF extraction was longer than 2 seconds: PDF file is likely too large
 				$content = null;
 			}
+
+			if ($tmpfile) {
+				Utils::safe_unlink($tmpfile);
+			}
+
+			Utils::safe_unlink($tmpdest);
 		}
 		elseif (in_array($ext, self::EXTENSIONS_TEXT_CONVERT) && is_array($source)) {
 
