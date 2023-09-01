@@ -203,12 +203,12 @@ trait FileThumbnailTrait
 		}
 
 		$local_path = $this->getLocalFilePath();
-		$path = $local_path;
+		$tmpfile = null;
 
 		if (!$local_path) {
-			$path = tmpfile(CACHE_ROOT);
+			$tmpfile = tmpfile(CACHE_ROOT);
 			$p = $this->getReadOnlyPointer();
-			$fp = fopen($path, 'wb');
+			$fp = fopen($tmpfile, 'wb');
 
 			while (!feof($p)) {
 				fwrite($fp, fread($p, 8192));
@@ -218,8 +218,6 @@ trait FileThumbnailTrait
 			fclose($fp);
 			unset($p, $fp);
 		}
-
-		$tmpdir = null;
 
 		try {
 			if ($command === 'collabora') {
@@ -241,7 +239,7 @@ trait FileThumbnailTrait
 				curl_setopt($curl, CURLOPT_POSTFIELDS, [
 					'format' => 'png',
 					//'options' => json_encode($options),
-					'file' => new \CURLFile($path, $this->mime, $this->name),
+					'file' => new \CURLFile($tmpfile ?? $local_path, $this->mime, $this->name),
 				]);
 
 				$fp = fopen($destination, 'wb');
@@ -259,13 +257,19 @@ trait FileThumbnailTrait
 			else {
 				if ($command === 'mupdf') {
 					// The single '1' at the end is to tell only to render the first page
-					$cmd = sprintf('mutool draw -F png -o %s -w 500 -h 500 -r 72 %s 1 2>&1', escapeshellarg($destination), escapeshellarg($path));
+					$cmd = sprintf('mutool draw -F png -o %s -w 500 -h 500 -r 72 %s 1 2>&1',
+						escapeshellarg($destination),
+						escapeshellarg($tmpfile ?? $local_path)
+					);
 				}
 				elseif ($command === 'unoconvert') {
 					// --filter-options PixelWidth=500 --filter-options PixelHeight=500
 					// see https://github.com/unoconv/unoserver/issues/85
 					// see https://github.com/unoconv/unoserver/issues/86
-					$cmd = sprintf('unoconvert --convert-to png %s %s 2>&1', escapeshellarg($path), escapeshellarg($destination));
+					$cmd = sprintf('unoconvert --convert-to png %s %s 2>&1',
+						escapeshellarg($tmpfile ?? $local_path),
+						escapeshellarg($destination)
+					);
 				}
 
 				$output = '';
@@ -279,12 +283,8 @@ trait FileThumbnailTrait
 			}
 		}
 		finally {
-			if (!$local_path) {
-				Utils::safe_unlink($path);
-			}
-
-			if ($tmpdir) {
-				Utils::deleteRecursive($tmpdir, true);
+			if ($tmpfile) {
+				Utils::safe_unlink($tmpfile);
 			}
 		}
 
