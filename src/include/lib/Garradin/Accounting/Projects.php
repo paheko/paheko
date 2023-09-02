@@ -131,6 +131,7 @@ class Projects
 					'selector' => $id,
 					'id' => $by_year ? $row->id_year : $row->id_project,
 					'label' => $by_year ? $row->year_label : ($row->project_code  ? $row->project_code . ' — ' : '') . $row->project_label,
+					'id_year' => $by_year ? $row->id_year : null,
 					'description' => !$by_year ? $row->project_description : null,
 					'archived' => !$by_year ? $row->archived : 0,
 					'items' => [],

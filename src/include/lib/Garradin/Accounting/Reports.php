@@ -246,8 +246,13 @@ class Reports
 
 		$table = null;
 
-		if (empty($criterias['project']) && empty($criterias['user']) && empty($criterias['creator']) && empty($criterias['subscription'])
-			&& empty($criterias['before']) && empty($criterias['after'])) {
+		if (empty($criterias['project'])
+			&& empty($criterias['projects_only'])
+			&& empty($criterias['user'])
+			&& empty($criterias['creator'])
+			&& empty($criterias['subscription'])
+			&& empty($criterias['before'])
+			&& empty($criterias['after'])) {
 			$table = 'acc_accounts_balances';
 		}
 
