@@ -94,6 +94,7 @@ class File extends Entity
 	const CONTEXT_MODULES = 'modules';
 	const CONTEXT_ATTACHMENTS = 'attachments';
 	const CONTEXT_VERSIONS = 'versions';
+	const CONTEXT_EXTENSIONS = 'ext';
 
 	const CONTEXTS_NAMES = [
 		self::CONTEXT_TRASH => 'Corbeille',
@@ -102,9 +103,10 @@ class File extends Entity
 		self::CONTEXT_TRANSACTION => 'Écritures comptables',
 		self::CONTEXT_CONFIG => 'Configuration',
 		self::CONTEXT_WEB => 'Site web',
-		self::CONTEXT_MODULES => 'Modules',
+		self::CONTEXT_MODULES => 'Code des modules',
 		self::CONTEXT_ATTACHMENTS => 'Fichiers joints aux messages',
 		self::CONTEXT_VERSIONS => 'Versions',
+		self::CONTEXT_EXTENSIONS => 'Extensions',
 	];
 
 	const VERSIONED_CONTEXTS = [
@@ -1019,7 +1021,7 @@ class File extends Entity
 			}
 
 			header(sprintf('Content-Type: %s', $type));
-			header(sprintf('Content-Disposition: %s; filename="%s"', null !== $download ? 'attachment' : 'inline', is_string($download) ? $download : $this->name));
+			header(sprintf('Content-Disposition: %s; filename="%s"', $download ? 'attachment' : 'inline', is_string($download) ? $download : $this->name));
 		}
 
 		// Use X-SendFile, if available, and storage has a local copy
