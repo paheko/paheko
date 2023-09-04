@@ -254,6 +254,12 @@ La syntaxe `$$.type` indique d'aller extraire la clé `type` du document JSON.
 
 C'est un raccourci pour la syntaxe SQLite `json_extract(document, '$.type')`.
 
+# Export et import de modules
+
+Il est possible d'exporter un module modifié. Cela créera un fichier ZIP contenant à la fois le code modifié et le code non modifié.
+
+De la même manière il est possible d'importer un module à partir d'un fichier ZIP d'export. Si vous créez votre fichier ZIP manuellement, attention à respecter le fait que le code du module doit se situer dans le répertoire `modules/nom_du_module` du fichier ZIP. Tout fichier ou répertoire situé en dehors de cette arborescence provoquera une erreur et l'impossibilité d'importer le module.
+
 # Restrictions
 
 * Il n'est pas possible de télécharger ou envoyer des données depuis un autre serveur

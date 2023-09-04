@@ -79,6 +79,7 @@
 				<li><a href="#recuperation-et-liste-de-documents">Récupération et liste de documents</a>
 			</ol></li>
 </ol></li>
+		<li><a href="#export-et-import-de-modules">Export et import de modules</a></li>
 		<li><a href="#restrictions">Restrictions</a>
 		<ol>
 			<li><a href="#envoi-d-e-mail">Envoi d'e-mail</a></li>
@@ -251,6 +252,9 @@ CREATE UNIQUE INDEX module_data_factures_key ON module_data_factures (key);</cod
 &lt;/ul&gt;</code></pre>
 <p>La syntaxe <code>$$.type</code> indique d'aller extraire la clé <code>type</code> du document JSON.</p>
 <p>C'est un raccourci pour la syntaxe SQLite <code>json_extract(document, '$.type')</code>.</p>
+<h1 id="export-et-import-de-modules">Export et import de modules</h1>
+<p>Il est possible d'exporter un module modifié. Cela créera un fichier ZIP contenant à la fois le code modifié et le code non modifié.</p>
+<p>De la même manière il est possible d'importer un module à partir d'un fichier ZIP d'export. Si vous créez votre fichier ZIP manuellement, attention à respecter le fait que le code du module doit se situer dans le répertoire <code>modules/nom_du_module</code> du fichier ZIP. Tout fichier ou répertoire situé en dehors de cette arborescence provoquera une erreur et l'impossibilité d'importer le module.</p>
 <h1 id="restrictions">Restrictions</h1>
 <ul>
 <li>Il n'est pas possible de télécharger ou envoyer des données depuis un autre serveur</li>
