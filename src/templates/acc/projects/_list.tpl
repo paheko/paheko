@@ -26,7 +26,7 @@
 					{/if}
 					{if !$table_export && $by_year}
 					<p class="actions">
-						{linkbutton href="!acc/reports/ledger.php?projects_only=1&year=%d"|args:$parent.id_year label="Grand livre analytique"}
+						{linkbutton href="!acc/reports/ledger.php?project=all&year=%d"|args:$parent.id_year label="Grand livre analytique"}
 					</p>
 					{/if}
 					</th>
@@ -37,13 +37,16 @@
 					<th>{$item.label}{if $item.archived} <em>(archivé)</em>{/if}</th>
 					<td>
 					{if !$table_export}
+					<?php
+					$id_project = $item->id_project ?: 'all';
+					?>
 					<span class="noprint">
-						<a href="{$admin_url}acc/reports/graphs.php?project={$item.id_project}&amp;year={$item.id_year}">Graphiques</a>
-						| <a href="{$admin_url}acc/reports/trial_balance.php?project={$item.id_project}&amp;year={$item.id_year}">Balance générale</a>
-						| <a href="{$admin_url}acc/reports/journal.php?project={$item.id_project}&amp;year={$item.id_year}">Journal général</a>
-						| <a href="{$admin_url}acc/reports/ledger.php?project={$item.id_project}&amp;year={$item.id_year}">Grand livre</a>
-						| <a href="{$admin_url}acc/reports/statement.php?project={$item.id_project}&amp;year={$item.id_year}">Compte de résultat</a>
-						| <a href="{$admin_url}acc/reports/balance_sheet.php?project={$item.id_project}&amp;year={$item.id_year}">Bilan</a>
+						<a href="{$admin_url}acc/reports/graphs.php?project={$id_project}&amp;year={$item.id_year}">Graphiques</a>
+						| <a href="{$admin_url}acc/reports/trial_balance.php?project={$id_project}&amp;year={$item.id_year}">Balance générale</a>
+						| <a href="{$admin_url}acc/reports/journal.php?project={$id_project}&amp;year={$item.id_year}">Journal général</a>
+						| <a href="{$admin_url}acc/reports/ledger.php?project={$id_project}&amp;year={$item.id_year}">Grand livre</a>
+						| <a href="{$admin_url}acc/reports/statement.php?project={$id_project}&amp;year={$item.id_year}">Compte de résultat</a>
+						| <a href="{$admin_url}acc/reports/balance_sheet.php?project={$id_project}&amp;year={$item.id_year}">Bilan</a>
 					</span>
 					{/if}
 					</td>

@@ -15,8 +15,10 @@ $criterias = [];
 
 $tpl->assign('project_title', null);
 
-if (qg('project'))
-{
+if (qg('project') === 'all') {
+	$criterias['projects_only'] = true;
+}
+elseif (qg('project')) {
 	$project = Projects::get((int) qg('project'));
 
 	if (!$project) {
@@ -48,10 +50,6 @@ if (qg('year'))
 	$tpl->assign('year', $year);
 	$tpl->assign('before_default', $criterias['before'] ?? $year->end_date);
 	$tpl->assign('after_default', $criterias['after'] ?? $year->start_date);
-}
-
-if (qg('projects_only')) {
-	$criterias['projects_only'] = true;
 }
 
 if (!count($criterias))

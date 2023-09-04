@@ -42,6 +42,12 @@ class Services_User
 			'id_account' => [
 				'select' => 'sf.id_account',
 			],
+			'id_year' => [
+				'select' => 'sf.id_year',
+			],
+			'account_code' => [
+				'select' => 'a.code',
+			],
 			'has_transactions' => [
 				'select' => 'tu.id_user',
 			],
@@ -76,6 +82,7 @@ class Services_User
 		$tables = 'services_users su
 			INNER JOIN services s ON s.id = su.id_service
 			LEFT JOIN services_fees sf ON sf.id = su.id_fee
+			LEFT JOIN acc_accounts a ON sf.id_account = a.id
 			LEFT JOIN acc_transactions_users tu ON tu.id_service_user = su.id
 			LEFT JOIN acc_transactions_lines tl ON tl.id_transaction = tu.id_transaction';
 		$conditions = sprintf('su.id_user = %d', $user_id);
