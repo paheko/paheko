@@ -23,7 +23,7 @@ class Render
 			return new Skriv($path, $link_prefix);
 		}
 		// Keep legacy format as it is sometimes used in upgrades
-		else if ($format == self::FORMAT_ENCRYPTED || $format === 'skriv/encrypted') {
+		else if ($format == self::FORMAT_ENCRYPTED) {
 			return new Encrypted($path, $link_prefix);
 		}
 		else if ($format == self::FORMAT_MARKDOWN) {
