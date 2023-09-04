@@ -41,7 +41,7 @@ trait FileThumbnailTrait
 		}
 		else {
 			$path = $this->getLocalFilePath();
-			$pointer = $path === null ? null : $this->getReadOnlyPointer();
+			$pointer = $path !== null ? null : $this->getReadOnlyPointer();
 		}
 
 		if ($path) {
