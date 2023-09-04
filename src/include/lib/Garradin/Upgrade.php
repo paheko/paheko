@@ -497,6 +497,11 @@ class Upgrade
 				require ROOT . '/include/migrations/1.2/1.2.7.php';
 			}
 
+			if (version_compare($v, '1.2.11', '<')) {
+				// This will rebuild the index after the collation change in the 1.2.10 release
+				$db->exec('VACUUM;');
+			}
+
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();
 
