@@ -206,7 +206,7 @@ trait FileThumbnailTrait
 		$tmpfile = null;
 
 		if (!$local_path) {
-			$tmpfile = tmpfile(CACHE_ROOT);
+			$tmpfile = tempnam(CACHE_ROOT, 'thumb-');
 			$p = $this->getReadOnlyPointer();
 			$fp = fopen($tmpfile, 'wb');
 
