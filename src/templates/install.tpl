@@ -26,42 +26,6 @@
 	{include file="users/_password_form.tpl" field="password" required=true}
 </fieldset>
 
-{if count($installable)}
-<fieldset>
-	<legend>Activer des extensions</legend>
-	<p class="help">Les extensions apportent des fonctionnalités supplémentaires, et peuvent être activées selon vos besoins.</p>
-	<table class="list">
-		<tr>
-			<td>
-			</td>
-			<th>Nom</th>
-		</tr>
-		{foreach from=$installable key="name" item="data"}
-		<tr>
-			{if $data.plugin}
-				<td class="check">
-					{input type="checkbox" name="plugins[%s]"|args:$name value=1}
-				</td>
-				<td>
-					<label for={"f_plugins%s_1"|args:$name}><strong>{$data.plugin.label}</strong><br />
-					<small>{$data.plugin.description|escape|nl2br}</small></label>
-				</td>
-			{else}
-				<td class="check">
-					{input type="checkbox" name="modules[%s]"|args:$name value=1}
-				</td>
-				<td>
-					<label for={"f_modules%s_1"|args:$name}><strong>{$data.module.label}</strong><br />
-					<small>{$data.module.description|escape|nl2br}</small></label>
-				</td>
-			{/if}
-		</tr>
-		{/foreach}
-	</table>
-	<p class="help">Note : il sera ensuite possible d'activer ou désactiver les extensions dans la <strong>Configuration</strong>.</p>
-</fieldset>
-{/if}
-
 <p class="submit">
 	{csrf_field key=$csrf_key}
 	{button type="submit" name="save" label="Terminer l'installation" shape="right" class="main"}

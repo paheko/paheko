@@ -13,7 +13,6 @@ use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
 use Paheko\Files\Files;
 use Paheko\Files\Storage;
-use Paheko\UserTemplate\Modules;
 use Paheko\Plugins;
 
 use KD2\HTTP;
@@ -24,22 +23,6 @@ use KD2\HTTP;
  */
 class Install
 {
-	/**
-	 * List of plugins that should be displayed during installation (if present)
-	 */
-	const DEFAULT_PLUGINS = [
-		'caisse',
-		'taima',
-	];
-
-	const DEFAULT_MODULES = [
-		'recus_fiscaux',
-		'membership_card',
-		'bookings',
-		//'bilan_pc',
-		//'invoice',
-	];
-
 	/**
 	 * This sends the current installed version, as well as the PHP and SQLite versions
 	 * for statistics purposes.
@@ -191,11 +174,8 @@ class Install
 		self::assert(strlen($source['password']) >= User::MINIMUM_PASSWORD_LENGTH, 'Le mot de passe est trop court');
 		self::assert($source['password'] === $source['password_confirmed'], 'La vérification du mot de passe ne correspond pas');
 
-		$plugins = isset($source['plugins']) ? array_keys($source['plugins']) : [];
-		$modules = isset($source['modules']) ? array_keys($source['modules']) : [];
-
 		try {
-			self::install($source['country'], $source['name'], $source['user_name'], $source['user_email'], $source['password'], $plugins, $modules);
+			self::install($source['country'], $source['name'], $source['user_name'], $source['user_email'], $source['password']);
 			self::ping();
 		}
 		catch (\Exception $e) {
@@ -204,7 +184,7 @@ class Install
 		}
 	}
 
-	static public function install(string $country_code, string $name, string $user_name, string $user_email, string $user_password, array $plugins = [], array $modules = []): void
+	static public function install(string $country_code, string $name, string $user_name, string $user_email, string $user_password): void
 	{
 		if (file_exists(DB_FILE)) {
 			throw new UserException('La base de données existe déjà.');
@@ -362,18 +342,6 @@ class Install
 
 		if ($has_welcome_plugin) {
 			Plugins::install('welcome');
-		}
-
-		foreach ($plugins as $plugin) {
-			Plugins::install($plugin);
-		}
-
-		Modules::refresh();
-
-		foreach ($modules as $module) {
-			$m = Modules::get($module);
-			$m->set('enabled', true);
-			$m->save();
 		}
 
 		if (FILE_STORAGE_BACKEND != 'SQLite') {
