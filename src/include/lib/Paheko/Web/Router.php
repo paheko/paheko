@@ -116,46 +116,67 @@ class Router
 			header('Location: /dav/documents/');
 			return;
 		}
-		elseif (($file = Files::getFromURI($uri))
-				|| ($file = Web::getAttachmentFromURI($uri))) {
-			$size = null;
-
-			if ($file->trash) {
-				http_response_code(404);
-				throw new UserException('Cette page n\'existe pas.');
-			}
-
-			foreach ($_GET as $key => $v) {
-				if (array_key_exists($key, File::ALLOWED_THUMB_SIZES)) {
-					$size = $key;
-					break;
-				}
-			}
-
-			$session = Session::getInstance();
-
-			$signal = Plugins::fire('http.request.file.before', true, compact('file', 'uri', 'session'));
-
-			if ($signal && $signal->isStopped()) {
-				// If a plugin handled the request, let's stop here
-				return;
-			}
-
-			$file->validateCanRead($session, $_GET['s'] ?? null, $_POST['p'] ?? null);
-
-			if ($size) {
-				$file->serveThumbnail($size);
-			}
-			else {
-				$file->serve(isset($_GET['download']));
-			}
-
-			Plugins::fire('http.request.file.after', false, compact('file', 'uri', 'session'));
-
+		elseif (self::routeFile($uri)) {
 			return;
 		}
 
 		Modules::route($uri);
+	}
+
+	static public function routeFile(string $uri): bool
+	{
+		$size = null;
+
+		if (str_contains($uri, 'px.') && preg_match('/\.([\da-z-]+px)\.(?:webp|svg)$/', $uri, $match)) {
+			$uri = substr($uri, 0, -strlen($match[0]));
+			$size = $match[1];
+		}
+
+		$file = Files::getFromURI($uri) ?? Web::getAttachmentFromURI($uri);
+
+		if (!$file) {
+			$context = strtok($uri, '/');
+
+			// URL has a context but is not a file? stop here
+			if (array_key_exists($context, File::CONTEXTS_NAMES)) {
+				throw new UserException('Cette adresse n\'existe pas ou plus.', 404);
+			}
+
+			return false;
+		}
+
+		if ($file->trash) {
+			throw new UserException('Cette page n\'existe pas.', 404);
+		}
+
+		foreach ($_GET as $key => $v) {
+			if (array_key_exists($key, File::ALLOWED_THUMB_SIZES)) {
+				$size = $key;
+				break;
+			}
+		}
+
+		$session = Session::getInstance();
+
+		$signal = Plugins::fire('http.request.file.before', true, compact('file', 'uri', 'session'));
+
+		if ($signal && $signal->isStopped()) {
+			// If a plugin handled the request, let's stop here
+			return true;
+		}
+
+		$file->validateCanRead($session, $_GET['s'] ?? null, $_POST['p'] ?? null);
+
+		if ($size) {
+			$file->serveThumbnail($size);
+		}
+		else {
+			$file->serve(isset($_GET['download']));
+		}
+
+		Plugins::fire('http.request.file.after', false, compact('file', 'uri', 'session'));
+
+		return true;
 	}
 
 	static public function markdown(string $text)

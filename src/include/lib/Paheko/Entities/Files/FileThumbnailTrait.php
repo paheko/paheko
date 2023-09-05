@@ -54,10 +54,30 @@ trait FileThumbnailTrait
 		return $i;
 	}
 
-	public function thumb_url($size = null): string
+	public function thumb_url($size = null): ?string
 	{
-		if (!$this->hasThumbnail()) {
-			return $this->url();
+		// Don't try to generate thumbnails for large files (> 25 MB)
+		if ($this->size > 1024*1024*25) {
+			return null;
+		}
+
+		$ext = $this->extension();
+
+		if ($this->image) {
+			$ext = 'webp';
+		}
+		elseif ($ext === 'md' || $ext === 'txt') {
+			$ext = 'svg';
+		}
+		// We expect opendocument files to have an embedded thumbnail
+		elseif (in_array($ext, self::$_opendocument_extensions)) {
+			$ext = 'webp';
+		}
+		elseif (null !== $this->getDocumentThumbnailCommand()) {
+			$ext = 'webp';
+		}
+		else {
+			return null;
 		}
 
 		if (is_int($size)) {
@@ -65,32 +85,12 @@ trait FileThumbnailTrait
 		}
 
 		$size = isset(self::ALLOWED_THUMB_SIZES[$size]) ? $size : key(self::ALLOWED_THUMB_SIZES);
-		return sprintf('%s?%dpx', $this->url(), $size);
+		return sprintf('%s.%dpx.%s', $this->url(), $size, $ext);
 	}
 
 	public function hasThumbnail(): bool
 	{
-		// Don't try to generate thumbnails for large files (> 25 MB)
-		if ($this->size > 1024*1024*25) {
-			return false;
-		}
-
-		if ($this->image) {
-			return true;
-		}
-
-		$ext = $this->extension();
-
-		if ($ext === 'md' || $ext === 'txt') {
-			return true;
-		}
-
-		// We expect opendocument files to have an embedded thumbnail
-		if (in_array($ext, self::$_opendocument_extensions)) {
-			return true;
-		}
-
-		return $this->getDocumentThumbnailCommand() !== null;
+		return $this->thumb_url() !== null;
 	}
 
 	protected function getDocumentThumbnailCommand(): ?string
@@ -393,19 +393,24 @@ trait FileThumbnailTrait
 			}
 		}
 
-		if ($this->extension() === 'md') {
+		$ext = $this->extension();
+
+		if ($ext === 'md' || $ext === 'txt') {
 			$type = 'image/svg+xml';
+			$ext = 'svg';
 		}
 		else {
 			// We can lie here, it might be something else, it does not matter
 			$type = 'image/webp';
+			$ext = 'webp';
 		}
 
 		header('Content-Type: ' . $type, true);
 		$this->_serve($destination, false);
 
 		if (in_array($this->context(), [self::CONTEXT_WEB, self::CONTEXT_CONFIG])) {
-			Web_Cache::link($this->uri(), $destination, $size);
+			$uri = $this->uri() . '.' . $size . '.' . $ext;
+			Web_Cache::link($uri, $destination);
 		}
 	}
 }
