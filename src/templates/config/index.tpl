@@ -104,12 +104,6 @@
 	fetch(g.admin_url + 'config/?check_version');
 {/if}
 {literal}
-function toggleVersions() {
-	g.toggle('.versions', $('#f_file_versioning_policy_none').checked ? false : true);
-}
-toggleVersions();
-$('input[name=file_versioning_policy]').forEach((e) => e.onchange = toggleVersions);
-
 function toggleWebInput() {
 	g.toggle('.external-web', $('#f_site_disabled_1').checked);
 }
