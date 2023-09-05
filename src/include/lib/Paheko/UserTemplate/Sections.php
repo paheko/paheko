@@ -1080,6 +1080,7 @@ class Sections
 				$row['title'] = str_replace(['_', '-'], ' ', $file->name);
 				$row['title'] = preg_replace('!\.[^\.]{3,5}$!', '', $row['title']);
 				$row['extension'] = strtoupper(preg_replace('!^.*\.([^\.]{3,5})$!', '$1', $file->name));
+				$row['format'] = $file->getFormatDescription();
 				$row['url'] = $file->url();
 				$row['download_url'] = $file->url(true);
 				$row['thumb_url'] = $file->thumb_url();

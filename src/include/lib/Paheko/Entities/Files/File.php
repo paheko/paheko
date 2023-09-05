@@ -1005,6 +1005,8 @@ class File extends Entity
 			header('Cache-Control: private, must-revalidate, post-check=0, pre-check=0');
 		}
 
+		header('X-Powered-By: Paheko/PHP');
+
 		if (null === $path) {
 			$type = $this->mime;
 
@@ -1147,6 +1149,49 @@ class File extends Entity
 	public function parent_uri(): string
 	{
 		return $this->parent ? rawurlencode($this->parent) : '';
+	}
+
+	public function getFormatDescription(): string
+	{
+		switch ($this->extension()) {
+			case 'odt': return 'Document LibreOffice';
+			case 'ods': return 'Tableur LibreOffice';
+			case 'odp': return 'Présentation LibreOffice';
+			case 'odg': return 'Dessin LibreOffice';
+			case 'doc':
+			case 'docx': return 'Document Microsoft Office';
+			case 'xls':
+			case 'xlsx': return 'Tableur Microsoft Office';
+			case 'ppt':
+			case 'pptx': return 'Présentation Microsoft Office';
+			case 'pdf': return 'Document PDF';
+			case 'png':
+			case 'webp':
+			case 'jpeg':
+			case 'jpg':
+			case 'gif':
+				return 'Image';
+			case 'epub':
+			case 'mobi':
+				return 'Livre électronique';
+			case 'md': return 'Texte MarkDown';
+			case 'txt': return 'Texte';
+			case 'mp3':
+			case 'ogg':
+			case 'aac':
+			case 'flac':
+			case 'opus':
+			case 'wav':
+			case 'wma':
+				return 'Fichier audio';
+			case 'mkv':
+			case 'mp4':
+			case 'avi':
+			case 'mov':
+			case 'webm':
+				return 'Fichier vidéo';
+			default: return 'Fichier';
+		}
 	}
 
 	public function extension(): ?string
