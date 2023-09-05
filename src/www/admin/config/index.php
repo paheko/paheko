@@ -36,12 +36,6 @@ $tpl->assign([
 	'sqlite_version'   => \SQLite3::version()['versionString'],
 	'countries'        => Utils::getCountryList(),
 	'paheko_website'   => WEBSITE,
-	'quota_used'       => Files::getUsedQuota(),
-	'quota_max'        => Files::getQuota(),
-	'quota_left'       => Files::getRemainingQuota(),
-	'backups_size'     => Backup::getAllBackupsTotalSize(),
-	'versions_policies' => Config::VERSIONS_POLICIES,
-	'versions_sizes'   => Config::VERSIONS_SIZES,
 ]);
 
 $tpl->display('config/index.tpl');

@@ -616,6 +616,10 @@ Affiche un lien.
 | `target` | *optionnel* | Cible du lien, utiliser `_dialog` pour que le lien s'ouvre dans une fenêtre modale. |
 
 
+Préfixer l'adresse par "!" donnera une URL absolue en préfixant l'adresse par l'URL de l'administration.
+Sans "!", l'adresse générée sera relative au contexte d'appel (module/plugin ou squelette site web).
+
+
 ## linkbutton
 
 Affiche un lien sous forme de faux bouton, avec une icône si le paramètre `shape` est spécifié.

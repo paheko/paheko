@@ -1,6 +1,6 @@
 {include file="_head.tpl" title="SQL" current="config" custom_css=["config.css"]}
 
-{include file="config/_menu.tpl" current="advanced"}
+{include file="config/_menu.tpl" current="advanced" sub_current="sql"}
 
 <nav class="tabs">
 	{if isset($query) || isset($table) || isset($table_info)}

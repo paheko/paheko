@@ -7,12 +7,12 @@
 
 ### Paheko — la gestion d'association simple</h3>
 
-**Paheko** <small>(anciennement appelé *Garradin*)</small> est un logiciel de gestion d'association, libre, simple et efficace. Son but est de&nbsp;:
+**Paheko** <small>(anciennement appelé *Garradin*)</small> signifie *coopérer* en *Māori*. C'est un logiciel de gestion d'association, libre, simple et efficace, développé depuis 2012. Son but est de&nbsp;:
 
 * **réduire le temps** passé sur les tâches administratives&nbsp;;
 * re-**donner de l'autonomie aux adhérent⋅e⋅s** dans la gestion de leurs données&nbsp;;
-* **simplifier la gestion** de l'association, pour inciter à participer à la gestion de l'association&nbsp;;
-* intégrer les outils habituels, afin de réduire le nombre de logiciels à gérer.
+* **simplifier la gestion administrative** de l'association, pour inciter à y participer&nbsp;;
+* **minimiser le nombre de logiciels à installer et maintenir** en intégrant les outils habituels.
 	
 Pour en savoir plus : [voir les principales fonctionnalités](#features).
 </div>
@@ -25,9 +25,9 @@ Pour en savoir plus : [voir les principales fonctionnalités](#features).
 </div>
 <nav id="gnav">
 
-* [Guides d'installation](/wiki/?name=Installation)
-* [Documentation](/wiki/?name=Documentation)
-* [Entraide](/wiki/?name=Entraide)
+* [Guides d'installation](wiki:Installation)
+* [Documentation](wiki:Documentation)
+* [Entraide](wiki:Entraide)
 * <a href="https://paheko.cloud/" target="_blank">Essayer gratuitement sur &nbsp; <b><img src="./icon.png" alt="" /> Paheko.cloud</b></a>
 
 <ul id="news">
@@ -39,7 +39,7 @@ Pour en savoir plus : [voir les principales fonctionnalités](#features).
 
 <p id="give"><a href="https://kd2.org/soutien.html" target="_blank">Soutenir Paheko en effectuant un don :-)</a></p>
 
-<form method="GET" action="$ROOT/wiki" onsubmit="var t = this.querySelector('[type=radio]:checked'); this.querySelector('[name=s]').name=t.dataset.name; this.action=t.dataset.action; this.target=t.dataset.target;">
+<form method="GET" action="$ROOT/wiki" id="search_all" onsubmit="var t = this.querySelector('[type=radio]:checked'); this.querySelector('[name=s]').name=t.dataset.name; this.action=t.dataset.action; this.target=t.dataset.target;">
 <fieldset class="searchForm searchFormWiki">
 	<legend>Rechercher</legend>
 	<input type="search" name="s" size="40" value="" />
@@ -50,182 +50,6 @@ Pour en savoir plus : [voir les principales fonctionnalités](#features).
 </form>
 
 <script type="text/javascript">
-document.head.innerHTML += `<style type="text/css">
-#prez {
-}
-
-#warn {
-	border: 2px solid #990;
-	padding: .5em;
-	border-radius: .5em;
-	background: #ffd;
-	margin: 1em 0;
-	clear: both;
-}
-
-#warn .cloud {
-	font-size: 1.2em;
-}
-
-#prez figure {
-	float: right;
-}
-
-.markdown img {
-	display: inline-block;
-	max-width: unset;
-	vertical-align: middle;
-	box-shadow: none;
-	margin: 0;
-}
-
-/*
-#info {
-	text-align: center;
-	margin: 1em auto;
-	background: #ddd;
-	padding: .5em;
-	border-radius: .5em;
-	max-width: 40em;
-}
-*/
-
-#give {
-	text-align: center;
-	margin: 1em;
-}
-
-#give a {
-	display: inline-block;
-	padding: .5em;
-	padding-left: 70px;
-	border-radius: .5em;
-	font-size: 1.5em;
-	background: #ffc url("https://kd2.org/soutien/coins.png") no-repeat .5em .5em;
-	border: 2px solid #990;
-}
-
-#gnav ul {
-	display: flex;
-	padding: 0;
-	margin: 1em;
-	margin-bottom: 1em;
-	font-size: 1.1em;
-	list-style: none;
-	justify-content: center;
-	align-items: center;
-}
-
-#gnav li {
-	margin: 0;
-	padding: 0;
-	font-size: 1.2em;
-	margin: .5em;
-	text-align: center;
-}
-
-#gnav li a {
-	height: 100%;
-	padding: .5rem;
-	background: #ddf;
-	color: black;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	border-radius: .5em;
-	border: 2px solid #99f;
-	text-decoration: none;
-}
-
-#gnav li.last {
-	height: 100%;
-	padding: .5rem;
-	display: block;
-}
-
-#gnav li a:hover {
-	text-decoration: underline;
-	opacity: 0.7;
-}
-
-#news li {
-	font-size: 1em;
-}
-
-#news li a {
-	border-color: #060;
-	background: #dfd;
-}
-
-#download > h2 {
-	text-align: center;
-}
-
-#download nav {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: center;
-}
-
-#download div, #download div h3 a, #download div h4 a {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-}
-
-#download div {
-	margin: 0 20px;
-}
-
-#download div h3 a, #download div h4 a {
-	background: #eef;
-	border: 2px solid #ccf;
-	padding: 5px;
-	border-radius: 8px;
-}
-
-#download a:hover {
-	background: #fee;
-	border-color: #fcc;
-}
-
-#download img {
-	height: 124px;
-	box-shadow: none;
-	padding: 5px;
-	margin: 0;
-}
-
-#download p, #download h3, #download h4 {
-	margin: 0;
-	margin-bottom: 8px;
-	text-align: center;
-}
-
-#download p em {
-	color: #333;
-	background: #ddd;
-	padding: 2px;
-	border-radius: 4px;
-	display: inline-block;
-}
-
-.searchForm {
-	border: 1px solid #ccc;
-	border-radius: 5px;
-	padding: .5em;
-	margin: 1em auto;
-	max-width: 30em;
-	text-align: center;
-}
-
-.searchForm input[type=search] {
-	border-color: #333;
-}
-`;
-
 function isNewerVersion (oldVer, newVer) {
 	const oldParts = oldVer.split('.')
 	const newParts = newVer.split('.')
@@ -331,20 +155,21 @@ fetch('/paheko/juvlist?'+(+(new Date))).then((r) => {
 
 <a name="features"></a>
 
-<a href="$ROOT/raw/7bb068963b9f6301b27b81fe925caae9e86a229b?m=image/png" target="_blank" style="float: right; margin: 1em;"><img src="/paheko/raw/7bb068963b9f6301b27b81fe925caae9e86a229b?m=image/png" alt="Liste des membres" width="400" /></a>
-
 ## C'est quoi ?
 
 * **100% libre :** placé sous la licence [AGPL v3](https://www.gnu.org/licenses/why-affero-gpl.fr.html).
 * Gestion des **adhérent⋅e⋅s** : fiches de membre personnalisables, recherches personnalisées…
 * Gestion des **cotisations** et **activités** : suivi des adhérent⋅e⋅s à jour, des paiements en attente, **rappels automatiques** de cotisation par e-mail, etc.
 * Envoi de **newsletters** avec suivi des adresses e-mail invalides
-* **Comptabilité** puissante (à double entrée), **simple à utiliser par les débutant⋅e⋅s** : recettes, dépenses, suivi des dettes et créances, bilan et compte de résultat annuel, **comptabilité analytique**, export PDF, etc.
+* **Comptabilité** puissante (à double entrée), **simple à utiliser par les débutant⋅e⋅s** : recettes, dépenses, suivi des dettes et créances, bilan et compte de résultat annuel, **comptabilité analytique**, export PDF, **reçus fiscaux**, etc.
 * Stockage et **partage** de **documents** : édition collaborative, synchronisation des fichiers sur un ordinateur, etc.
 * Gestion du **site web** de l'association
 * Comptabilisation du **temps bénévole** et sa **valorisation**
 * Gestion de la **caisse informatisée** d'un atelier ou d'une boutique
+* Réservation de **créneaux et d'événements**
 * **Conforme au RGPD** : export des données de l'adhérent⋅e, désabonnement des e-mails, chiffrement des mots de passe…
+
+**<a href="http://paheko.cloud/a-propos" target="_blank">Présentation des fonctionnalités sur le site Paheko</a>**
 
 ## Dans quels buts ?
 
@@ -357,28 +182,32 @@ Le but est de permettre :
 *  la __simplification administrative__ : prise de notes en réunion, archivage et partage de fichiers (afin d'éliminer le besoin d'archiver les documents papier), etc.
 *  la publication d'un __site web__ pour l'association, simple mais suffisamment flexible pour pouvoir adapter le fonctionnement à la plupart des besoins
 *  l'__autonomisation des adhérents__ : possibilité de mettre à jour leurs informations par eux-même, ou de s'inscrire seul depuis un ordinateur ou un smartphone
-*  la possibilité d'adapter aux besoins spécifiques de chaque association via des [__extensions__](/wiki/?name=Extensions).
+*  la possibilité d'adapter aux besoins spécifiques de chaque association via des [__extensions__](wiki:Extensions).
 
-Tous ces objectifs ne sont pas encore réalisés, voir :
+* Fonctionnalités qu'il reste à implémenter : voir [la feuille de route (roadmap)](wiki:Roadmap).
+* Paheko ne convient pas ? [Voir la liste des alternatives, libres ou propriétaires](wiki:Alternatives)
 
-* [la liste des fonctionnalités disponibles](/wiki/?name=Fonctionnalités) pour ce qui est actuellement disponible ;
-* [la feuille de route](/wiki/?name=Roadmap) pour la liste des fonctionnalités qu'il reste à implémenter.
+## Un seul logiciel
 
-Paheko est un logiciel libre disponible sous licence [AGPL v3](https://www.gnu.org/licenses/why-affero-gpl.fr.html).
+Paheko réunit en un seul outil les besoins suivants :
 
-Paheko signifie *coopérer* en *Māori*, langue indigène de la Nouvelle-Zélande.
+* gestion des membres : remplace Ciel Associations, EBP, Assoconnect ou Galette ;
+* comptabilité : remplace Assoconnect, Odoo, Dolibarr, Grisbi, GNUcash, Sage, etc. ;
+* gestion et partage de fichiers, remplace NextCloud, Google Drive ou Dropbox ;
+* site web : remplace WordPress, Drupal, etc. ;
+* suivi du bénévolat : remplace Bénévalibre et les tableaux Excel.
 
 ## Documentation et entraide
 
-* D'abord lire la [documentation](/wiki/?name=Documentation) et notamment la [foire aux questions](/wiki/?name=FAQ)
+* D'abord lire la [documentation](/wiki/?name=Documentation) et notamment la [foire aux questions](wiki:FAQ)
 * Voir la page [Entraide](/wiki/?name=Entraide) pour accéder aux listes de discussion et au salon de discussion IRC
 
 ## Participer
 
-Tout coup de main est le bienvenu, pas besoin d'avoir des connaissances techniques ! Nous avons un [guide de contribution](/wiki/?name=Contribuer) pour vous aider à voir comment vous pouvez participer à Paheko :)
+Tout coup de main est le bienvenu, pas besoin d'avoir des connaissances techniques ! Nous avons un [guide de contribution](wiki:Contribuer) pour vous aider à voir comment vous pouvez participer à Paheko :)
 
 ### Développement
 
 Paheko est un logiciel libre, développé en PHP, utilisant la base de données SQLite, et avec une interface utilisant HTML, CSS et un peu de Javascript.
 
-Nous acceptons les contributions (plugins, patch, code, tickets, etc.) avec plaisir, consultez la [documentation développeur⋅euse](/wiki/?name=Documentation développeur) pour découvrir comment vous pouvez contribuer.
+Nous acceptons les contributions (plugins, patch, code, tickets, etc.) avec plaisir, consultez la [documentation développeur⋅euse](wiki:Documentation développeur) pour découvrir comment vous pouvez contribuer.

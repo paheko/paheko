@@ -52,7 +52,8 @@ $ok_code = qg('code'); // return code
 $ok = qg('ok'); // return message
 
 $list = Backup::list();
+$size = Backup::getAllBackupsTotalSize();
 
-$tpl->assign(compact('code', 'list', 'ok', 'ok_code'));
+$tpl->assign(compact('code', 'list', 'ok', 'ok_code', 'size'));
 
 $tpl->display('config/backup/restore.tpl');

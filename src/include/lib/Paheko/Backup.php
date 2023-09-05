@@ -520,6 +520,10 @@ class Backup
 		$size = 0;
 
 		foreach (glob(DATA_ROOT . '/*.sqlite') as $f) {
+			if ($f === DB_FILE) {
+				continue;
+			}
+
 			$size += filesize($f);
 		}
 

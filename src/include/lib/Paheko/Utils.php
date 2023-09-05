@@ -663,19 +663,22 @@ class Utils
 				return number_format(round($size, 1), $decimals, ',', '') . ' Go';
 			}
 			else {
-				return round($size) . ' Go';
+				return ceil($size) . ' Go';
 			}
 		}
 		elseif ($size > (1024 * 1024)) {
 			$size = $size / 1024 / 1024;
 			$decimals = $size == (int) $size ? 0 : 2;
-			return round($size) . ' Mo';
+			return ceil($size) . ' Mo';
 		}
 		elseif ($size > 1024) {
-			return round($size / 1024) . ' Ko';
+			return ceil($size / 1024) . ' Ko';
 		}
 		elseif ($bytes) {
 			return $size . ' octets';
+		}
+		elseif (!$size) {
+			return '0 o';
 		}
 		else {
 			return '< 1 Ko';
@@ -1098,6 +1101,20 @@ class Utils
 	}
 
 	/**
+	 * Escape a command-line argument, because escapeshellarg is stripping UTF-8 characters (d'oh)
+	 * @see https://markushedlund.com/dev/php-escapeshellarg-with-unicodeutf-8-support/
+	 */
+	static public function escapeshellarg(string $arg): string
+	{
+		if (PHP_OS_FAMILY === 'Windows') {
+			return '"' . str_replace(array('"', '%'), array('', ''), $arg) . '"';
+		}
+		else {
+			return "'" . str_replace("'", "'\\''", $arg) . "'";
+		}
+	}
+
+	/**
 	 * Execute a system command with a timeout
 	 * @see https://blog.dubbelboer.com/2012/08/24/execute-with-timeout.html
 	 */
@@ -1137,6 +1154,7 @@ class Utils
 		}
 
 		fclose($pipes[0]);
+		$code = null;
 
 		while ($timeout_ms > 0) {
 			$start = microtime(true);
@@ -1157,9 +1175,16 @@ class Utils
 			// this way we can't lose the last bit of output if the process dies between these     functions.
 			$status = proc_get_status($process);
 
+			// We must get the exit code when it is sent, or we won't be able to get it later
+			if ($status['exitcode'] > -1) {
+				$code = $status['exitcode'];
+			}
+
 			// Read the contents from the buffer.
-			// This function will always return immediately as the stream is none-blocking.
-			$stdout(stream_get_contents($pipes[1]));
+			// This function will always return immediately as the stream is non-blocking.
+			if (null !== $stdout) {
+				$stdout(stream_get_contents($pipes[1]));
+			}
 
 			if (null !== $stderr) {
 				$stderr(stream_get_contents($pipes[2]));
@@ -1177,17 +1202,14 @@ class Utils
 		fclose($pipes[1]);
 		fclose($pipes[2]);
 
-		$status = proc_get_status($process);
-
 		if ($status['running']) {
 			proc_terminate($process, 9);
 			throw new \OverflowException(sprintf("Command killed after taking more than %d seconds: \n%s", $timeout, $cmd));
 		}
 
-		$status = proc_get_status($process);
 		proc_close($process);
 
-		return $status['exitcode'];
+		return $code;
 	}
 
 	/**
@@ -1304,7 +1326,7 @@ class Utils
 				break;
 		}
 
-		$cmd = sprintf($cmd, escapeshellarg($source), escapeshellarg($target));
+		$cmd = sprintf($cmd, self::escapeshellarg($source), self::escapeshellarg($target));
 		$cmd .= ' 2>&1';
 
 		$output = '';

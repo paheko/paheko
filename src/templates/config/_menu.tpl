@@ -1,4 +1,5 @@
 {if !$dialog}
+<?php $sub_current ??= null; ?>
 <nav class="tabs">
 	<ul>
 		<li{if $current == 'index'} class="current"{/if}><a href="{$admin_url}config/">Configuration</a></li>
@@ -18,6 +19,18 @@
 			<li{if !$sub_current} class="current"{/if}><a href="{$admin_url}config/users/">Préférences</a></li>
 			<li{if $sub_current == 'fields'} class="current"{/if}><a href="{$admin_url}config/fields/">Fiche des membres</a></li>
 			<li{if $sub_current == 'categories'} class="current"{/if}><a href="{$admin_url}config/categories/">Catégories &amp; droits des membres</a></li>
+		</ul>
+	{elseif $current == 'advanced'}
+		<ul class="sub">
+			<li{if $sub_current == 'audit'} class="current"{/if}><a href="{$admin_url}config/advanced/audit.php">Journal d'audit</a></li>
+			<li{if $sub_current == 'api'} class="current"{/if}><a href="{$admin_url}config/advanced/api.php">Accès à l'API</a></li>
+			<li{if $sub_current == 'sql'} class="current"{/if}><a href="{$admin_url}config/advanced/sql.php">SQL</a></li>
+			{if ENABLE_TECH_DETAILS}
+				<li{if $sub_current == 'errors'} class="current"{/if}><a href="{$admin_url}config/advanced/errors.php">Erreurs système</a></li>
+				{if SQL_DEBUG}
+					<li{if $sub_current == 'sql_debug'} class="current"{/if}><a href="{$admin_url}config/advanced/sql_debug.php">Journal SQL</a></li>
+				{/if}
+			{/if}
 		</ul>
 	{/if}
 

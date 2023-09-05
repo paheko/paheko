@@ -1,8 +1,8 @@
-{include file="_head.tpl" title="Documents" current="config"}
+{include file="_head.tpl" title="Restaurer les documents et fichiers joints" current="config"}
 
 {include file="config/_menu.tpl" current="backup"}
 
-{include file="config/backup/_menu.tpl" current="documents"}
+{include file="config/backup/_menu.tpl" current="restore"}
 
 {if $ok}
 <p class="confirm block">La restauration a été effectuée.</p>
@@ -14,27 +14,10 @@
 
 {form_errors}
 
-<form method="post" action="{$self_url_no_qs}">
-
-<fieldset>
-	<legend>Téléchargement des documents</legend>
-	<p class="help">
-		Les documents font {$files_size|size_in_bytes}.
-	</p>
-	{if $files_size > 0}
-	<p class="submit">
-		{csrf_field key="files_download"}
-		{button type="submit" name="download_files" label="Télécharger une archive ZIP des documents sur mon ordinateur" shape="download" class="main"}
-	</p>
-	{/if}
-</fieldset>
-
-</form>
-
 <form method="post" action="{$self_url_no_qs}" id="restoreDocuments" style="display: none;" enctype="multipart/form-data" data-disable-progress="1">
 
 <fieldset>
-	<legend>Restaurer les documents</legend>
+	<legend>Restaurer les fichiers avec une archive ZIP de sauvegarde</legend>
 	<p class="help">
 		Sélectionner ici une sauvegarde (archive ZIP) des documents pour les restaurer.
 	</p>

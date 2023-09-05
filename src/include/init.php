@@ -220,12 +220,15 @@ static $default_config = [
 	'FILE_STORAGE_BACKEND'  => 'SQLite',
 	'FILE_STORAGE_CONFIG'   => null,
 	'FILE_STORAGE_QUOTA'    => null,
+	'FILE_VERSIONING_POLICY'   => null,
+	'FILE_VERSIONING_MAX_SIZE' => null,
 	'API_USER'              => null,
 	'API_PASSWORD'          => null,
 	'PDF_COMMAND'           => 'auto',
 	'PDF_USAGE_LOG'         => null,
 	'PDFTOTEXT_COMMAND'     => null,
 	'CALC_CONVERT_COMMAND'  => null,
+	'DOCUMENT_THUMBNAIL_COMMANDS' => null,
 	'CONTRIBUTOR_LICENSE'   => null,
 	'SQL_DEBUG'             => null,
 	'SYSTEM_SIGNALS'        => [],
@@ -370,6 +373,10 @@ function user_error(UserException $e)
 	{
 		// Flush any previous output, such as module HTML code etc.
 		@ob_end_clean();
+
+		if ($e->getCode() >= 400) {
+			http_response_code($e->getCode());
+		}
 
 		// Don't use Template class as there might be an error there due do the context (eg. install/upgrade)
 		$tpl = new \KD2\Smartyer(ROOT . '/templates/error.tpl');

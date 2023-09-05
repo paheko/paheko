@@ -668,6 +668,41 @@ namespace Paheko;
 //const FILE_STORAGE_QUOTA = 10*1024*1024; // Forcer le quota alloué à 10 Mo, quel que soit le backend de stockage
 
 /**
+ * FILE_VERSIONING_POLICY
+ * Forcer la politique de versionnement des fichiers.
+ *
+ * null: laisser le choix de la politique (dans la configuration)
+ * 'none': ne rien conserver
+ * 'min': conserver 5 versions (1 minute, 1 heure, 1 jour, 1 semaine, 1 mois)
+ * 'avg': conserver 20 versions
+ * 'max': conserver 50 versions
+ *
+ * Note : indiquer 'none' fait qu'aucune nouvelle version ne sera créée,
+ * mais les versions existantes sont conservées.
+ *
+ * Si ce paramètre n'est pas NULL, alors il faudra aussi définir FILE_VERSIONING_MAX_SIZE.
+ *
+ * Défaut : null (laisser le choix dans la configuration)
+ *
+ * @var null|string
+ */
+
+//const FILE_VERSIONING_POLICY = 'min';
+
+/**
+ * FILE_VERSIONING_MAX_SIZE
+ * Forcer la taille maximale des fichiers à versionner (en Mio)
+ *
+ * N'a aucun effet si le versionnement de fichiers est désactivé.
+ *
+ * Défaut : null (laisser le choix de la taille dans la configuration)
+ *
+ * @var int|null
+ */
+
+//const FILE_VERSIONING_MAX_SIZE = 10;
+
+/**
  * Adresse de découverte d'un client d'édition de documents (WOPI)
  * (type OnlyOffice, Collabora, MS Office)
  *
@@ -741,7 +776,7 @@ namespace Paheko;
  * Pour cela il procédera simplement à une conversion entre les formats natifs
  * ODS/CSV et XLSX ou XLS.
  *
- * Noter qu'installer ces commandes peut introduire des risques de sécurité sur le serveur.
+ * Note : installer ces commandes peut introduire des risques de sécurité sur le serveur.
  *
  * Les outils supportés sont :
  * - ssconvert (apt install gnumeric) (plus rapide)
@@ -749,10 +784,35 @@ namespace Paheko;
  * - unoconvert (https://github.com/unoconv/unoserver/) en spécifiant l'interface
  *
  * Défault : null (= fonctionnalité désactivée)
+ * @var string|null
  */
 //const CALC_CONVERT_COMMAND = 'unoconv';
 //const CALC_CONVERT_COMMAND = 'ssconvert';
 //const CALC_CONVERT_COMMAND = 'unoconvert --interface localhost --port 2022';
+
+/**
+ * DOCUMENT_THUMBNAIL_COMMANDS
+ * Indique les commandes à utiliser pour générer des miniatures pour les documents
+ * (LibreOffice, OOXML, PDF, SVG, etc.)
+ *
+ * Les options possibles sont (par ordre de rapidité) :
+ * - mupdf : les miniatures PDF/SVG/XPS/EPUB sont générées avec mutool
+ *   (apt install mupdf-tools)
+ * - collabora : les miniatures sont générées par le serveur Collabora, via
+ *   l'API dont l'URL est  indiquée dans WOPI_DISCOVERY_URL
+ * - unoconvert : les miniatures des documents Office/LO sont générées
+ *   avec unoconvert <https://github.com/unoconv/unoserver/>
+ *
+ * Il est conseillé d'utiliser mupdf en priorité pour les PDF, il est plus rapide et léger.
+ *
+ * Note : cette option créera de nombreux fichiers de cache, et risque d'augmenter
+ * la charge serveur de manière importante.
+ *
+ * Défaut : null (fonctionnalité désactivée)
+ * @var null|array
+ */
+
+//const DOCUMENT_THUMBNAIL_COMMANDS = ['mupdf', 'collabora'];
 
 /**
  * PDFTOTEXT_COMMAND
@@ -761,11 +821,10 @@ namespace Paheko;
  * Utilisé pour indexer un fichier PDF pour pouvoir rechercher dans son contenu
  * parmi les documents.
  *
- * Il est possible de spécifier ici 'pdftotext' si cet outil est installé
- * (à installer avec : apt install poppler-utils).
+ * Il est possible de spécifier ici la commande suivante :
+ * - mupdf (apt install mupdf-tools)
  *
- * Pour le moment c'est la seule commande supportée, toute autre commande
- * sera ignorée.
+ * Toute autre commande sera ignorée.
  *
  * Défaut : null (= fonctionnalité désactivée)
  */

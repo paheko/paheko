@@ -159,6 +159,10 @@ class Upgrade
 				require ROOT . '/include/migrations/1.3/1.3.0-rc5.php';
 			}
 
+			if (version_compare($v, '1.3.0-rc7', '<')) {
+				require ROOT . '/include/migrations/1.3/1.3.0-rc7.php';
+			}
+
 			Plugins::upgradeAllIfRequired();
 
 			// Vérification de la cohérence des clés étrangères

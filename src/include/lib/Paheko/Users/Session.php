@@ -14,6 +14,8 @@ use Paheko\Users\Users;
 use Paheko\Email\Templates as EmailsTemplates;
 use Paheko\Files\Files;
 
+use Paheko\Entities\Files\File;
+
 use Paheko\Entities\Users\Category;
 use Paheko\Entities\Users\User;
 
@@ -503,6 +505,58 @@ class Session extends \KD2\UserSession
 		}
 	}
 
+	public function checkExtensionFilePermissions(string $path, string $permission): bool
+	{
+		$context = strtok($path, '/');
+		$type = strtok('/');
+		$name = strtok('/');
+		$file_path = strtok(false);
+
+		if (empty($name) || empty($type) || ($type !== 'm' && $type !== 'p') || empty($file_path)) {
+			return false;
+		}
+
+		$public = substr($file_path, 0, 7) === 'public/';
+
+		$base = $context . '/' . $type . '/' . $name . '/';
+
+		if ($public) {
+			$base .= 'public/';
+		}
+
+		// Build cache
+		if (!isset($this->_files_permissions[$base])) {
+			$read = $write = false;
+			// Public files
+			if (!$this->isLogged() && $public) {
+				$read = true;
+			}
+			// Other files are private
+			elseif ($this->isLogged()) {
+				if ('p' === $type) {
+					$ext = Plugins::get($name);
+				}
+				else {
+					$ext = Modules::get($name);
+				}
+
+				$read = $write = $ext->restrict_section ? $this->canAccess($ext->restrict_section, $ext->restrict_level) : false;
+			}
+
+			$this->_files_permissions[$base] = [
+				'mkdir'  => $write,
+				'move'   => $write,
+				'write'  => $write,
+				'create' => $write,
+				'delete' => $write,
+				'read'   => $write,
+				'share'  => $write,
+			];
+		}
+
+		return $this->_files_permissions[$base][$permission];
+	}
+
 	public function checkFilePermission(string $path, string $permission): bool
 	{
 		$path_level = preg_replace('!/[^/]+!', '/', $path);
@@ -510,6 +564,11 @@ class Session extends \KD2\UserSession
 
 		if (!isset($this->_files_permissions)) {
 			$this->_files_permissions = Files::buildUserPermissions($this);
+		}
+
+		// Check permissions for plugins and modules files
+		if (strpos($path, File::CONTEXT_EXTENSIONS . '/') === 0) {
+			return $this->checkExtensionFilePermissions($path, $permission);
 		}
 
 		foreach ($this->_files_permissions as $context => $permissions) {

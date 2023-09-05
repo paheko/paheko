@@ -110,7 +110,6 @@ class Template extends Smartyer
 		$this->assign('admin_url', ADMIN_URL);
 		$this->assign('help_pattern_url', HELP_PATTERN_URL);
 		$this->assign('help_url', sprintf(HELP_URL, str_replace('/admin/', '', Utils::getSelfURI(false))));
-		$this->assign('admin_url', ADMIN_URL);
 		$this->assign('self_url', Utils::getSelfURI());
 		$this->assign('self_url_no_qs', Utils::getSelfURI(false));
 
@@ -148,6 +147,7 @@ class Template extends Smartyer
 
 		$this->register_function('form_errors', [$this, 'formErrors']);
 
+		$this->register_function('size_meter', [$this, 'sizeMeter']);
 		$this->register_function('copy_button', [$this, 'copyButton']);
 		$this->register_function('custom_colors', [$this, 'customColors']);
 		$this->register_function('plugin_url', ['Paheko\Utils', 'plugin_url']);
@@ -160,6 +160,16 @@ class Template extends Smartyer
 			return Form::tokenHTML($params['key']);
 		});
 
+		$this->register_function('enable_upload_here', function ($params) {
+			$csrf_key = 'upload_file_' . md5($params['path']);
+			$url = Utils::getLocalURL('!common/files/upload.php?p=' . rawurlencode($params['path']));
+			return sprintf(' data-upload-url="%s" data-upload-token-value="%s" data-upload-token-name="%s" ',
+				htmlspecialchars($url),
+				Form::tokenGenerate($csrf_key),
+				Form::tokenFieldName($csrf_key),
+			);
+		});
+
 		$this->register_block('linkmenu', [CommonFunctions::class, 'linkmenu']);
 
 		$this->register_modifier('strlen', fn($a) => strlen($a ?? ''));
@@ -167,7 +177,7 @@ class Template extends Smartyer
 		$this->register_modifier('get_country_name', ['Paheko\Utils', 'getCountryName']);
 		$this->register_modifier('format_tel', [$this, 'formatPhoneNumber']);
 		$this->register_modifier('abs', function($a) { return abs($a ?? 0); });
-
+		$this->register_modifier('percent_of', function($a, $b) { return round($a / $b * 100); });
 
 		$this->register_modifier('linkify_transactions', function ($str) {
 			$str = preg_replace_callback('/(?<=^|\s)(https?:\/\/.*?)(?=\s|$)/', function ($m) {
@@ -655,5 +665,44 @@ class Template extends Smartyer
 	protected function copyButton(array $params): string
 	{
 		return sprintf('<samp class="copy" onclick="this.nextSibling.click();" title="Cliquer pour copier dans le presse-papier">%s</samp><input type="button" onclick="var a = this.previousSibling; a.focus(); navigator.clipboard.writeText(a.innerText); this.value = \'Copié !\'; this.focus(); return false;" onblur="this.value = \'Copier\';" value="Copier" title="Copier dans le presse-papier" />', htmlspecialchars($params['label']));
+	}
+
+	// We cannot use <meter> here as Firefox sucks :(
+	protected function sizeMeter(array $params): string
+	{
+		$out = sprintf('<%s class="quota %s">', $params['tag'] ?? 'span', $params['class'] ?? '');
+
+		$attributes = '';
+
+		if (!empty($params['href'])) {
+			$params['meter_tag'] = 'a';
+			$attributes .= sprintf(' href="%s"', htmlspecialchars(Utils::getLocalURL($params['href'])));
+		}
+		else {
+			$params['meter_tag'] = 'span';
+		}
+
+		if (!empty($params['title'])) {
+			$attributes .= sprintf(' title="%s"', htmlspecialchars($params['title']));
+		}
+
+		$more = '';
+
+		if (isset($params['more'])) {
+			$more = '<span class="more">' . $params['more'] . '</span>';
+		}
+
+		$text = sprintf($params['text'] ?? '%s', Utils::format_bytes($params['value']), Utils::format_bytes($params['total']));
+
+		$out .= sprintf('<%s class="meter" style="--quota-percent: %s" %s><span class="text">%s</span>%s</%1$s>',
+			$params['meter_tag'],
+			round(100 * $params['value'] / ($params['total'] ?: 1)),
+			$attributes,
+			$text,
+			$more
+		);
+
+		$out .= sprintf('</%s>', $params['tag'] ?? 'span');
+		return $out;
 	}
 }

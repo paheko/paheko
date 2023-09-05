@@ -55,26 +55,33 @@
 				{/if}
 			</td>
 			<td class="actions">
+			{if !$row.paid}
 				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE) && $row.id_account}
 					{linkbutton shape="plus" label="Nouveau règlement" href="payment.php?id=%d"|args:$row.id}
 				{/if}
-				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
-					{if $row.has_transactions}
-						{linkbutton shape="menu" label="Liste des écritures" href="!acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user_id}
-					{else}
-						{linkbutton shape="check" label="Lier à une écriture" href="link.php?id=%d"|args:$row.id target="_dialog"}
-					{/if}
+
+				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
+					{linkbutton shape="plus" label="Saisir une écriture liée"
+						href="!acc/transactions/new.php?u[%d]=%d&00=%d&t=1&l=Paiement%%20activité&ar=%s&set_year=%d"|args:$user_id:$row.id:$row.expected_amount:$row.account_code:$row.id_year target="_dialog"}
 				{/if}
-				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-					{if $row.paid}
-						{linkbutton shape="reset" label="Marquer comme non payé" href="?id=%d&su_id=%d&paid=0"|args:$user_id,$row.id}
-					{else}
-						{linkbutton shape="check" label="Marquer comme payé" href="?id=%d&su_id=%d&paid=1"|args:$user_id,$row.id}
-					{/if}
-					<br />
-					{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$row.id target="_dialog"}
-					{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$row.id target="_dialog"}
+				<br />
+			{/if}
+
+			{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
+				{linkbutton shape="menu" label="Liste des écritures" href="!acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user_id}
+			{/if}
+
+			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
+				{if $row.paid}
+					{linkbutton shape="reset" label="Marquer comme non payé" href="?id=%d&su_id=%d&paid=0"|args:$user_id,$row.id}
+				{else}
+					{linkbutton shape="check" label="Marquer comme payé" href="?id=%d&su_id=%d&paid=1"|args:$user_id,$row.id}
 				{/if}
+				<br />
+				{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$row.id}
+				{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$row.id}
+			{/if}
+
 			</td>
 		</tr>
 	{foreachelse}

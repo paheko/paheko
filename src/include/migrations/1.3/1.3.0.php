@@ -33,6 +33,7 @@ if (file_exists($config_path) && is_writable($config_path)) {
 $db->beginSchemaUpdate();
 
 Files::disableQuota();
+Files::disableVersioning();
 
 // There seems to be some plugins table left on some database even when the plugin has been removed
 if (!$db->test('plugins', 'id = ?', 'taima')) {

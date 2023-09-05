@@ -67,11 +67,6 @@ $list->loadFromQueryString();
 
 $breadcrumbs = Files::getBreadcrumbs($path);
 
-$quota_used = Files::getUsedQuota();
-$quota_max = Files::getQuota();
-$quota_left = Files::getRemainingQuota($quota_used);
-$quota_percent = $quota_max ? round(($quota_used / $quota_max) * 100) : 100;
-
 $pref = Session::getPreference('folders_gallery');
 $gallery = $pref ?? true;
 
@@ -87,7 +82,21 @@ $dir_uri = $dir->path_uri();
 $parent_uri = $dir->parent_uri();
 
 $tpl->assign(compact('list', 'dir_uri', 'parent_uri', 'dir', 'context', 'context_ref',
-	'breadcrumbs', 'quota_used', 'quota_max', 'quota_percent', 'quota_left',
-	'highlight', 'user_name', 'gallery', 'context_specific_root'));
+	'breadcrumbs', 'highlight', 'user_name', 'gallery', 'context_specific_root'));
+
+$quota = [
+	'used' => Files::getUsedQuota(),
+	'max' => Files::getQuota(),
+];
+
+$quota['left'] = Files::getRemainingQuota($quota['used']);
+
+foreach ($quota as $key => $value) {
+	$quota[$key . '_bytes'] = Utils::format_bytes($value);
+}
+
+$quota['percent'] = $quota['max'] ? round(($quota['used'] / $quota['max']) * 100) : 100;
+
+$tpl->assign(compact('quota'));
 
 $tpl->display('docs/index.tpl');

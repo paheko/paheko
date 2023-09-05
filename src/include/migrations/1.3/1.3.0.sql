@@ -19,6 +19,8 @@ ALTER TABLE files RENAME TO files_old;
 ALTER TABLE files_contents RENAME TO files_contents_old;
 ALTER TABLE web_pages RENAME TO web_pages_old;
 
+UPDATE web_pages_old SET format = 'encrypted' WHERE format = 'skriv/encrypted';
+
 .read schema.sql
 
 UPDATE acc_charts_old SET country = 'FR' WHERE country IS NULL;

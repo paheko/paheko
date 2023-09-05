@@ -198,6 +198,11 @@ class Plugin extends Entity
 		return sprintf('%sp/%s/%s%s', $url, $this->name, $file, $params);
 	}
 
+	public function storage_root(): string
+	{
+		return File::CONTEXT_EXTENSIONS . '/p/' . $this->name;
+	}
+
 	public function getConfig(string $key = null)
 	{
 		if (is_null($key)) {
@@ -270,6 +275,11 @@ class Plugin extends Entity
 	{
 		if ($this->hasFile(self::UNINSTALL_FILE)) {
 			$this->call(self::UNINSTALL_FILE, true);
+		}
+
+		// Delete all files
+		if ($dir = Files::get($this->storage_root())) {
+			$dir->delete();
 		}
 
 		$db = DB::getInstance();

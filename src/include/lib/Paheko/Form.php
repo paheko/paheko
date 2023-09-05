@@ -19,15 +19,21 @@ class Form
 
 	public function run(callable $fn, ?string $csrf_key = null, ?string $redirect = null, bool $follow_redirect = false): bool
 	{
+		$js = false !== strpos($_SERVER['HTTP_ACCEPT'] ?? '', '/json');
+
 		try {
 			if (null !== $csrf_key && !\KD2\Form::tokenCheck($csrf_key)) {
-				throw new ValidationException('Une erreur est survenue, merci de bien vouloir renvoyer le formulaire.');
+				throw new ValidationException('Une erreur est survenue, merci de bien vouloir renvoyer le formulaire.', 401);
 			}
 
 			call_user_func($fn);
 
 			if (null !== $redirect) {
-				if (array_key_exists('_dialog', $_GET)) {
+				if ($js) {
+					http_response_code(204);
+					exit;
+				}
+				elseif (array_key_exists('_dialog', $_GET)) {
 					Utils::reloadParentFrame($follow_redirect ? $redirect : null);
 				}
 
@@ -37,9 +43,16 @@ class Form
 			return true;
 		}
 		catch (UserException $e) {
-			$this->addError($e);
-
 			Form::reportUserException($e);
+
+			if ($js) {
+				http_response_code($e->getCode() >= 400 ? $e->getCode() : 400);
+				header('Content-Type: application/json; charset="utf-8"', true);
+				echo json_encode(['message' => $e->getMessage()]);
+				exit;
+			}
+
+			$this->addError($e);
 
 			return false;
 		}

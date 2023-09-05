@@ -29,6 +29,7 @@ $transaction = new Transaction;
 $amount = 0;
 $id_project = null;
 $linked_users = null;
+$linked_services = [];
 
 $lines = [[], []];
 
@@ -119,6 +120,28 @@ $form->runIf(f('lines') !== null, function () use (&$lines) {
 	$lines = Transaction::getFormLines();
 });
 
+if (qg('u')) {
+	$linked_users = [];
+	$membres = new Membres;
+	$i = 0;
+
+	foreach ((array) qg('u') as $key => $value) {
+		if ($key != $i++ && $value) {
+			$id = (int) $key;
+			$linked_services[$id] = (int) $value;
+		}
+		else {
+			$id = (int) $value;
+		}
+
+		$name = $membres->getNom($id);
+
+		if ($name) {
+			$linked_users[$id] = $name;
+		}
+	}
+}
+
 $types_details = $transaction->getTypesDetails();
 
 // Duplicate transaction
@@ -179,14 +202,28 @@ if ($id = qg('account')) {
 	}
 }
 
-$form->runIf('save', function () use ($transaction, $session, $current_year) {
+$form->runIf('save', function () use ($transaction, $session, $current_year, $linked_services) {
 	$transaction->importFromNewForm();
 	$transaction->id_creator = $session->getUser()->id;
 	$transaction->save();
 
 	 // Link members
 	if (null !== f('users') && is_array(f('users'))) {
-		$transaction->updateLinkedUsers(array_keys(f('users')));
+		$users = f('users');
+
+		foreach ($linked_services as $user_id => $service_id) {
+			// Maybe the user was deleted from the list manually
+			if (array_key_exists($user_id, $users)) {
+				// Link service_user relationship to transaction
+				$transaction->linkToUser($user_id, $service_id);
+			}
+
+			unset($users[$user_id]);
+		}
+
+		if (count($users)) {
+			$transaction->updateLinkedUsers(array_keys($users));
+		}
 	}
 
 	$session->set('acc_last_date', $transaction->date->format('Y-m-d'));

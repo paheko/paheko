@@ -30,7 +30,7 @@ class CommonFunctions
 
 	static public function input(array $params)
 	{
-		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit', 'copy'];
+		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit', 'copy', 'suffix'];
 
 		// Extract params and keep attributes separated
 		$attributes = array_diff_key($params, array_flip($params_list));
@@ -41,7 +41,7 @@ class CommonFunctions
 			throw new \RuntimeException('Missing name or type');
 		}
 
-		$suffix = null;
+		$suffix = isset($suffix) ? ' ' . $suffix : null;
 
 		if ($type == 'datetime') {
 			$type = 'date';
