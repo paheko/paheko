@@ -38,6 +38,7 @@ class Emails
 	const CONTEXT_BULK = 1;
 	const CONTEXT_PRIVATE = 2;
 	const CONTEXT_SYSTEM = 0;
+	const CONTEXT_NOTIFICATION = 3;
 
 	/**
 	 * When we reach that number of fails, the address is treated as permanently invalid, unless reset by a verification.
