@@ -669,6 +669,11 @@
 
 	g.onload(() => {
 		g.resizeParentDialog();
+
+		// File drag and drop support
+		if ($('[data-upload-url]').length) {
+			g.script('scripts/file_drag.js');
+		}
 	});
 
 })();

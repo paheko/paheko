@@ -25,12 +25,6 @@ $form->runIf('restore', function () {
 }, 'files_restore');
 
 
-// Download all files as ZIP
-$form->runIf('download_files', function () {
-	Files::zipAll();
-	exit;
-}, 'files_download');
-
 $ok = qg('ok') !== null;
 $failed = (int) qg('failed');
 
@@ -40,12 +34,8 @@ if ($ok) {
 	$config->updateFiles();
 	$config->save();
 	$tpl->assign(compact('config'));
-
-	Static_Cache::clean(0);
 }
 
-$files_size = Files::getUsedQuota();
-
-$tpl->assign(compact('files_size', 'failed', 'ok'));
+$tpl->assign(compact('failed', 'ok'));
 
 $tpl->display('config/backup/documents.tpl');

@@ -7,7 +7,7 @@ use Paheko\Entities\Files\File;
 class Render
 {
 	const FORMAT_SKRIV = 'skriv';
-	const FORMAT_ENCRYPTED = 'skriv/encrypted';
+	const FORMAT_ENCRYPTED = 'encrypted';
 	const FORMAT_MARKDOWN = 'markdown';
 
 	static protected $attachments = [];
@@ -22,6 +22,7 @@ class Render
 		if ($format == self::FORMAT_SKRIV) {
 			return new Skriv($path, $link_prefix);
 		}
+		// Keep legacy format as it is sometimes used in upgrades
 		else if ($format == self::FORMAT_ENCRYPTED) {
 			return new Encrypted($path, $link_prefix);
 		}

@@ -9,6 +9,6 @@
 		<input type="button" onclick="return pleaseDecrypt();" value="Entrer le mot de passe" />
 	</p>
 </div>
-<div class="web-content" style="display: none;" id="web_encrypted_content" data-url="{$url}">
+<div class="web-content" style="display: none;" id="web_encrypted_content" data-url="{$www_url}">
 	{$content}
 </div>

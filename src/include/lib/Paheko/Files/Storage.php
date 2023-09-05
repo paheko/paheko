@@ -68,7 +68,8 @@ class Storage
 				$file->deleteCache();
 			}
 
-			if ($file->context() === $file::CONTEXT_TRASH) {
+			// Don't index versioned files as trashed
+			if ($file->context() === $file::CONTEXT_TRASH && strpos($file->path, $file::CONTEXT_TRASH . $file::CONTEXT_VERSIONS) === 0) {
 				$file->set('trash', $file->modified);
 			}
 

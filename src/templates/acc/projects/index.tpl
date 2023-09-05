@@ -21,6 +21,12 @@
 			{linkbutton shape="download" href="%s?by_year=%d&_pdf"|args:$self_url_no_qs,$by_year label="Télécharger en PDF"}
 		{/if}
 	</p>
+
+	{if $by_year}
+	<p class="actions">
+		{linkbutton href="!acc/reports/ledger.php?project=all" label="Grand livre analytique — tous les exercices"}
+	</p>
+	{/if}
 {/if}
 </div>
 

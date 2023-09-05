@@ -253,6 +253,7 @@ table.files.gallery tfoot {
 
 table.files.gallery tbody {
     display: grid;
+    margin: .5em 0;
     grid-template-columns: repeat(auto-fit, 15em);
     grid-gap: .5em;
     justify-content: start;

@@ -137,7 +137,7 @@
 
 		var openSyntaxHelp = function ()
 		{
-			let url = config.format == 'markdown' ? 'markdown.html' : 'skriv.html';
+			let url = config.format != 'skriv' ? 'markdown.html' : 'skriv.html';
 			url = g.admin_url + 'static/doc/' + url;
 
 			g.openFrameDialog(url);
@@ -262,7 +262,7 @@
 		};
 
 		let applyHeader = () => {
-			return wrapTags(config.format == 'markdown' ? '## ' : '== ', '');
+			return wrapTags(config.format != 'skriv' ? '## ' : '== ', '');
 		};
 
 		let applyBold = () => {
@@ -270,7 +270,7 @@
 		};
 
 		let applyItalic = () => {
-			if (config.format == 'markdown') {
+			if (config.format != 'skriv') {
 				return wrapTags("_", "_");
 			}
 			else {
@@ -291,7 +291,7 @@
 				return true;
 			}
 
-			if (config.format == 'markdown') {
+			if (config.format != 'skriv') {
 				return wrapTags("[", "](" + url + ')');
 			}
 			else {
@@ -301,6 +301,11 @@
 
 		let save = function (callback) {
 			const data = new URLSearchParams();
+
+			// For encryption
+			if (typeof t.textarea.form.onbeforesubmit !== 'undefined') {
+				t.textarea.form.onbeforesubmit();
+			}
 
 			for (const pair of new FormData(t.textarea.form)) {
 				data.append(pair[0], pair[1]);

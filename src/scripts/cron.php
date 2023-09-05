@@ -3,6 +3,7 @@
 namespace Paheko;
 
 use Paheko\Services\Reminders;
+use Paheko\Files\Files;
 use Paheko\Files\Trash;
 
 if (PHP_SAPI != 'cli' && !defined('\Paheko\ROOT')) {
@@ -21,6 +22,10 @@ if ($config->backup_frequency && $config->backup_limit) {
 
 // Send pending reminders
 Reminders::sendPending();
+
+if (Files::getVersioningPolicy() !== 'none') {
+	Files::pruneOldVersions();
+}
 
 // Make sure we are cleaning the trash
 Trash::clean();

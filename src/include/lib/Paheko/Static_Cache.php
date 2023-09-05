@@ -7,50 +7,52 @@ class Static_Cache
 	const EXPIRE = 3600; // 1h
 	const CLEAN_EXPIRE = 86400; // 1 day
 
-	protected static function _getCacheDir()
+	static protected function ensureParentDirectoryExists(string $path): void
 	{
-		$dir = STATIC_CACHE_ROOT;
+		$parent = Utils::dirname($path);
 
-		if (!file_exists($dir))
-		{
-			Utils::safe_mkdir($dir, 0777, true);
+		if (!file_exists($parent)) {
+			if (file_exists(STATIC_CACHE_ROOT)) {
+				$perms = fileperms(STATIC_CACHE_ROOT);
+			}
+			else {
+				$perms = 0777;
+			}
+
+			Utils::safe_mkdir($parent, $perms, true);
 		}
-
-		return $dir;
 	}
 
-	protected static function _getCachePath($id)
+	static public function getPath(string $id): string
 	{
-		$id = 'cache_' . sha1(DB_FILE . $id);
-		return self::_getCacheDir() . '/' . $id;
+		$id = sha1(DB_FILE . $id);
+		$path = STATIC_CACHE_ROOT . '/' . substr($id, 0, 2) . '/' . $id;
+
+		self::ensureParentDirectoryExists($path);
+
+		return $path;
 	}
 
-	static public function store($id, $content)
+	static public function store(string $id, string $content): bool
 	{
-		$path = self::_getCachePath($id);
+		$path = self::getPath($id);
 		return (bool) file_put_contents($path, $content);
 	}
 
-	static public function storeFromPointer($id, $pointer)
+	static public function storeFromPointer(string $id, $pointer): bool
 	{
-		$path = self::_getCachePath($id);
+		$path = self::getPath($id);
 
 		$fp = fopen($path, 'wb');
 		$ok = stream_copy_to_stream($pointer, $fp);
 		fclose($fp);
 
-		return $ok;
+		return (bool) $ok;
 	}
 
-	static public function storeFromUpload($id, $uploaded_file)
+	static public function expired(string $id, int $expire = self::EXPIRE): bool
 	{
-		$path = self::_getCachePath($id);
-		return (bool) move_uploaded_file($uploaded_file, $path);
-	}
-
-	static public function expired($id, $expire = self::EXPIRE)
-	{
-		$path = self::_getCachePath($id);
+		$path = self::getPath($id);
 		$time = @filemtime($path);
 
 		if (!$time)
@@ -61,56 +63,26 @@ class Static_Cache
 		return ($time > (time() - (int)$expire)) ? false : true;
 	}
 
-	static public function get($id)
+	static public function get(string $id): string
 	{
-		$path = self::_getCachePath($id);
+		$path = self::getPath($id);
 		return file_get_contents($path);
 	}
 
-	static public function display($id)
+	static public function display(string $id): void
 	{
-		$path = self::_getCachePath($id);
-		return readfile($path);
+		$path = self::getPath($id);
+		readfile($path);
 	}
 
-	static public function getPath($id)
+	static public function exists(string $id): bool
 	{
-		return self::_getCachePath($id);
+		return file_exists(self::getPath($id));
 	}
 
-	static public function exists($id)
+	static public function remove(string $id): bool
 	{
-		return file_exists(self::_getCachePath($id));
-	}
-
-	static public function remove($id)
-	{
-		$path = self::_getCachePath($id);
+		$path = self::getPath($id);
 		return Utils::safe_unlink($path);
-	}
-
-	static public function clean($expire = self::CLEAN_EXPIRE)
-	{
-		$dir = self::_getCacheDir();
-		$d = dir($dir);
-
-		$expire = time() - $expire;
-
-		while ($file = $d->read())
-		{
-			if ($file[0] == '.')
-			{
-				continue;
-			}
-
-			if (filemtime($dir . '/' . $file) < $expire)
-			{
-				Utils::safe_unlink($dir . '/' . $file);
-			}
-		}
-
-		$d->close();
-
-		return true;
 	}
 }

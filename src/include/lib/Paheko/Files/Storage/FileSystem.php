@@ -8,7 +8,7 @@ use Paheko\DB;
 use Paheko\Utils;
 use Paheko\ValidationException;
 
-use const Paheko\DATA_ROOT;
+use const Paheko\CACHE_ROOT;
 
 /**
  * This class stores files in the local file system.

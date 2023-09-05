@@ -216,6 +216,11 @@ class Module extends Entity
 		return $this->url(self::ICON_FILE);
 	}
 
+	public function storage_root(): string
+	{
+		return File::CONTEXT_EXTENSIONS . '/p/' . $this->name;
+	}
+
 	public function path(string $file = null): string
 	{
 		return self::ROOT . '/' . $this->name . ($file ? '/' . $file : '');
@@ -392,6 +397,11 @@ class Module extends Entity
 	public function deleteData(): void
 	{
 		DB::getInstance()->exec(sprintf('DROP TABLE IF EXISTS modules_data_%s; UPDATE modules SET config = NULL WHERE name = \'%1$s\';', $this->name));
+
+		// Delete all files
+		if ($dir = Files::get($this->storage_root())) {
+			$dir->delete();
+		}
 	}
 
 	public function url(string $file = '', array $params = null)
