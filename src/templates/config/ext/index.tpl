@@ -3,17 +3,16 @@
 {include file="config/_menu.tpl" current="ext"}
 
 <nav class="tabs">
+	{if !empty($url_plugins)}
+	<aside>
+		{linkbutton shape="help" href=$url_plugins label="Trouver d'autres extensions à installer" target="_blank"}
+	</aside>
+	{/if}
 	<ul class="sub">
 		<li{if !$installable} class="current"{/if}><a href="./">Activées</a></li>
 		<li{if $installable} class="current"{/if}><a href="./?install=1">Inactives</a></li>
 	</ul>
 </nav>
-
-{if !empty($url_plugins)}
-<p class="actions">
-	{linkbutton shape="help" href=$url_plugins label="Trouver d'autres extensions à installer" target="_blank"}
-</p>
-{/if}
 
 <p class="help">Les extensions apportent des fonctionnalités supplémentaires, et peuvent être activées selon vos besoins.</p>
 
@@ -43,9 +42,6 @@
 				<td class="icon">
 					{if $item.icon_url}
 						<svg><use xlink:href='{$item.icon_url}#img' href="{$item.icon_url}#img"></use></svg>
-						{if $item.url}
-							</a>
-						{/if}
 					{/if}
 				</td>
 				<td>
