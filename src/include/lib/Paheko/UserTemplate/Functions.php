@@ -10,7 +10,7 @@ use KD2\Security;
 
 use Paheko\Config;
 use Paheko\DB;
-use Paheko\Plugins;
+use Paheko\Extensions;
 use Paheko\Template;
 use Paheko\Utils;
 use Paheko\UserException;
@@ -98,7 +98,7 @@ class Functions
 		$tpl->assign($params);
 
 		if (Session::getInstance()->isLogged()) {
-			$tpl->assign('plugins_menu', Plugins::listModulesAndPluginsMenu(Session::getInstance()));
+			$tpl->assign('plugins_menu', Extensions::listMenu(Session::getInstance()));
 		}
 
 		return $tpl->fetch('_head.tpl');

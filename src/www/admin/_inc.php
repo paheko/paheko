@@ -16,22 +16,6 @@ function qg($key)
 	return isset($_GET[$key]) ? $_GET[$key] : null;
 }
 
-// Query-Validate: valider les éléments passés en GET
-function qv(Array $rules)
-{
-    if (\KD2\Form::validate($rules, $errors, $_GET))
-    {
-        return true;
-    }
-
-    foreach ($errors as &$error)
-    {
-        $error = sprintf('%s: %s', $error['name'], $error['rule']);
-    }
-
-    throw new UserException(sprintf('Paramètres invalides (%s).', implode(', ',  $errors)));
-}
-
 $tpl = Template::getInstance();
 
 $form = new Form;
@@ -56,7 +40,7 @@ if (!defined('Paheko\LOGIN_PROCESS'))
 
 	$tpl->assign('current', '');
 
-	$tpl->assign('plugins_menu', Plugins::listModulesAndPluginsMenu($session));
+	$tpl->assign('plugins_menu', Extensions::listMenu($session));
 }
 
 // Make sure we allow frames to work

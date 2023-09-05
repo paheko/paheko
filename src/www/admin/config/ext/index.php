@@ -2,6 +2,7 @@
 namespace Paheko;
 
 use Paheko\UserTemplate\Modules;
+use Paheko\Extensions;
 use Paheko\Plugins;
 use Paheko\Users\Session;
 
@@ -58,12 +59,12 @@ foreach (Plugins::refresh() as $error) {
 }
 
 if (qg('install')) {
-	$list = Plugins::listModulesAndPlugins(true);
+	$list = Extensions::listDisabled();
 	$tpl->assign('url_plugins', ENABLE_TECH_DETAILS ? WEBSITE . 'wiki?name=Extensions' : null);
 	$tpl->assign('installable', true);
 }
 else {
-	$list = Plugins::listModulesAndPlugins(false);
+	$list = Extensions::listEnabled();
 	$tpl->assign('installable', false);
 }
 
