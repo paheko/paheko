@@ -324,7 +324,7 @@ class Modules
 			}
 
 			if (strpos($name, 'modules/') !== 0) {
-				throw new \InvalidArgumentException('Invalid ZIP file: invalid path:' . $name);
+				continue;
 			}
 
 			$_mod = strtok(substr($name, strlen('modules/')), '/');
