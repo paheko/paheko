@@ -32,7 +32,7 @@
 		</thead>
 		<tbody>
 			{foreach from=$list item="item"}
-			<tr {if $_GET.focus == $item.name}class="highlight"{/if}>
+			<tr {if $_GET.focus == $item.name}class="highlight"{/if} id="{$item.name}">
 			{if $item.broken_message}
 				<td></td>
 				<td colspan="6">

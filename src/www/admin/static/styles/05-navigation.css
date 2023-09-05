@@ -166,7 +166,10 @@ nav.home ul li {
 }
 
 nav.home ul li a {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     width: calc(100% - 1em);
     white-space: normal;
     margin: 0;
@@ -191,6 +194,15 @@ nav.home ul li a::before, nav.home ul li a .icon {
     margin-bottom: 5px;
     text-shadow: none;
 }
+
+.expose-extensions nav.home {
+    font-size: .9em;
+}
+
+.expose-extensions nav.home ul li {
+    width: 12em;
+}
+
 
 /**
  * Dropdown, eg. interactive <select>

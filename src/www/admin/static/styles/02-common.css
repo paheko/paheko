@@ -16,7 +16,7 @@ span.alert, b.alert {
     color: #990;
 }
 
-.block p, .block h4, .block ul, .block h3 {
+.block p, .block h4, .block ul, .block h3, .block h2 {
     margin-bottom: .6rem;
 }
 

@@ -6,6 +6,7 @@ use Paheko\Web\Web;
 use Paheko\Files\Files;
 use Paheko\Users\Session;
 use Paheko\Entities\Files\File;
+use Paheko\Extensions;
 use Paheko\Plugins;
 
 require_once __DIR__ . '/_inc.php';
@@ -28,9 +29,14 @@ else {
 	$homepage = null;
 }
 
-$buttons = Plugins::listModulesAndPluginsHomeButtons($session);
+$buttons = Extensions::listHomeButtons($session);
+$has_extensions = empty($buttons) ? Extensions::isAnyExtensionEnabled() : true;
 
-$tpl->assign(compact('homepage', 'banner', 'buttons'));
+if (!$has_extensions && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
+	$buttons = Extensions::listAvailableButtons();
+}
+
+$tpl->assign(compact('homepage', 'banner', 'buttons', 'has_extensions'));
 
 $tpl->assign('custom_css', ['!web/css.php']);
 
