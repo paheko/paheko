@@ -207,6 +207,7 @@ static $default_config = [
 	'SMTP_PASSWORD'         => null,
 	'SMTP_PORT'             => 587,
 	'SMTP_SECURITY'         => 'STARTTLS',
+	'SMTP_HELO_HOSTNAME'    => null,
 	'MAIL_RETURN_PATH'      => null,
 	'MAIL_BOUNCE_PASSWORD'  => null,
 	'MAIL_SENDER'           => null,
