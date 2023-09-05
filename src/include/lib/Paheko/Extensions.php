@@ -19,7 +19,7 @@ class Extensions
 		return (bool) DB::getInstance()->firstColumn('
 			SELECT 1 FROM modules WHERE enabled = 1 AND web = 0
 			UNION ALL
-			SELECT 1 FROM plugins WHERE enabled = 1;');
+			SELECT 1 FROM plugins WHERE enabled = 1 AND name != \'welcome\';');
 	}
 
 	static public function listAvailableButtons(): array
