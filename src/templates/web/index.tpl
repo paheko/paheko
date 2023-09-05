@@ -2,12 +2,6 @@
 
 <nav class="tabs">
 	<aside>
-		{if !$page && $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
-			{linkbutton shape="check" href="?check=1" label="Vérifier les liens internes"}
-		{/if}
-		{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
-			{linkbutton shape="code" href="!config/ext/edit.php?module=web" label="Code du site"}
-		{/if}
 		<form method="post" action="search.php" target="_dialog" data-disable-progress="1">
 			{input type="text" name="q" size=25 placeholder="Rechercher dans le site" title="Rechercher dans le site"}
 			{button shape="search" type="submit" title="Rechercher"}
@@ -22,18 +16,31 @@
 	</aside>
 </nav>
 
-<nav class="web breadcrumbs no-clear">
-	<ul>
-		<li>{link href="!web/" label="Site web"}</li>
-		{foreach from=$breadcrumbs key="id" item="title"}
-			<li>{link href="!web/?id=%s"|args:$id label=$title|truncate:40}</li>
-		{/foreach}
-	</ul>
-	{if $page}
-		<small>{linkbutton href="?p=%s"|args:$page.parent shape="left" label="Retour à la catégorie parent"}</small>
-	{/if}
-</nav>
-
+{if !$page}
+	<nav class="web config">
+		{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
+			{if $url = $module->config_url()}
+				{linkbutton shape="settings" href=$url label="Configuration du site"}
+			{/if}
+			{linkbutton shape="code" href="!config/ext/edit.php?module=%s"|args:$module.name label="Code du site"}
+		{/if}
+		{if !$page && $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
+			{linkbutton shape="check" href="?check=1" label="Vérifier les liens internes"}
+		{/if}
+	</nav>
+{else}
+	<nav class="web breadcrumbs no-clear">
+		<ul>
+			<li>{link href="!web/" label="Site web"}</li>
+			{foreach from=$breadcrumbs key="id" item="title"}
+				<li>{link href="!web/?id=%s"|args:$id label=$title|truncate:40}</li>
+			{/foreach}
+		</ul>
+		{if $page}
+			<small>{linkbutton href="?p=%s"|args:$page.parent shape="left" label="Retour à la catégorie parent"}</small>
+		{/if}
+	</nav>
+{/if}
 
 {if !$page && $config.site_disabled && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
 	<p class="block alert">

@@ -500,7 +500,7 @@ p.action-upload em {
 }
 
 p.actions {
-    text-align: right;
+    float: right;
     margin: .5em;
 }
 

@@ -216,6 +216,15 @@ class Module extends Entity
 		return $this->url(self::ICON_FILE);
 	}
 
+	public function config_url(): ?string
+	{
+		if (!$this->hasFile(self::CONFIG_FILE)) {
+			return null;
+		}
+
+		return $this->url(self::CONFIG_FILE);
+	}
+
 	public function storage_root(): string
 	{
 		return File::CONTEXT_EXTENSIONS . '/p/' . $this->name;

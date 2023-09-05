@@ -244,6 +244,10 @@ form#f_upload fieldset {
     text-align: center;
 }
 
+nav.web.config {
+    padding: .5em 0;
+}
+
 @media screen and (max-width:600px) {
     .web.category-list li {
         width: 95%;

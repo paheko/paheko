@@ -1,11 +1,4 @@
 /** Context-specific tabs */
-/* clearfix */
-nav.tabs::after {
-  content: "";
-  clear: both;
-  display: table;
-}
-
 nav.tabs ul {
     margin-bottom: 1em;
     list-style-type: none;
@@ -23,9 +16,6 @@ nav.tabs .sub {
     border-left: 3px solid rgba(var(--gSecondColor), .5);
 }
 
-nav.tabs:nth-child(2) {
-}
-
 nav.tabs .small {
     display: flex;
     justify-content: center;
@@ -39,7 +29,6 @@ nav.tabs .small .current a {
 nav.tabs .sub:nth-of-type(3), nav.tabs:nth-of-type(3) .sub {
     margin-left: 3em;
 }
-
 
 nav.tabs .title {
     padding: .3em .7em;
