@@ -169,7 +169,7 @@ input:checked + label::before {
 
 /* buttons */
 
-input[type=submit], input[type=button], button, input[type=file] {
+input[type=submit], input[type=button], button, input[type=file], input[type=color] {
     border-radius: 1em;
     border: none;
     box-shadow: 0px 0px 5px 0 var(--gLightBorderColor);
@@ -279,7 +279,7 @@ button.main[data-icon]:after, .icn-btn[data-icon]:after {
 }
 
 input[type=submit]:hover, input[type=button]:hover, button:hover, a.icn-btn:hover, input[type=file]:hover,
-.radio-btn:hover div, a.num:hover, .num a:hover {
+.radio-btn:hover div, a.num:hover, .num a:hover, input[type=color]:hover {
     background-color: rgba(var(--gSecondColor), 0.2);
     color: rgb(var(--gHoverLinkColor)) !important;
     border-color: rgb(var(--gSecondColor));
@@ -290,7 +290,23 @@ input[type=submit]:active, input[type=button]:active, button:active, input[type=
 }
 
 input[type=color] {
+    width: 80px;
+    height: 40px;
     cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+input[type=color]::-webkit-color-swatch {
+    border-radius: .5rem;
+    border: none;
+    box-shadow: 0  0 5px #000;
+}
+input[type=color]::-moz-color-swatch {
+    border-radius: .5rem;
+    border: none;
+    box-shadow: 0  0 5px #000;
 }
 
 input.resetButton {
