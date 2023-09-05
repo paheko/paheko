@@ -77,6 +77,7 @@ class CommonModifiers
 		'size_in_bytes' => [Utils::class, 'format_bytes'],
 		'typo',
 		'css_hex_to_rgb',
+		'css_hex_extract_hsv',
 		'toupper',
 		'tolower',
 		'ucwords',
@@ -293,6 +294,14 @@ class CommonModifiers
 		}
 
 		return implode(', ', $hex);
+	}
+
+	static public function css_hex_extract_hsv($str): array {
+		list($h, $s, $v) = Utils::rgbToHsv($str);
+		$h = (int)$h;
+		$s = floor(100 * $s);
+		$v = floor(100 * $v);
+		return compact('h', 's', 'v');
 	}
 
 	static public function toupper($str): string
