@@ -126,7 +126,7 @@ class Page extends Entity
 
 	public function render(bool $admin = false): string
 	{
-		$user_prefix = ADMIN_URL . 'web/?uri=';
+		$user_prefix = $admin ? ADMIN_URL . 'web/?uri=' : null;
 
 		$this->_html ??= Render::render($this->format, $this->dir_path, $this->content, $user_prefix);
 
