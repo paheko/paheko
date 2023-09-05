@@ -39,7 +39,7 @@ doc:
 htaccess:
 	cat apache-vhost.conf \
 		| sed 's/#RewriteBase/RewriteBase/' \
-		| sed 's/RewriteCond %{DOCUMENT_ROOT}%{REQUEST_/RewriteCond %{REQUEST_}/' \
+		| sed 's/RewriteCond %{DOCUMENT_ROOT}%{REQUEST_/RewriteCond %{REQUEST_/' \
 		> www/.htaccess
 	cat apache-htaccess.conf >> www/.htaccess
 
