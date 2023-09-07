@@ -3,6 +3,7 @@
 namespace Paheko\Entities\Accounting;
 
 use KD2\DB\EntityManager;
+use KD2\DB\Date;
 use Paheko\DB;
 use Paheko\Entity;
 use Paheko\Log;
@@ -19,21 +20,12 @@ class Year extends Entity
 
 	const TABLE = 'acc_years';
 
-	protected $id;
-	protected $label;
-	protected $start_date;
-	protected $end_date;
-	protected $closed = 0;
-	protected $id_chart;
-
-	protected $_types = [
-		'id'         => 'int',
-		'label'      => 'string',
-		'start_date' => 'date',
-		'end_date'   => 'date',
-		'closed'     => 'int',
-		'id_chart'   => 'int',
-	];
+	protected int $id;
+	protected string $label;
+	protected Date $start_date;
+	protected Date $end_date;
+	protected bool $closed = false;
+	protected int $id_chart;
 
 	public function selfCheck(): void
 	{
@@ -43,7 +35,6 @@ class Year extends Entity
 		$this->assert($this->end_date instanceof \DateTime, 'La date de début de l\'exercice n\'est pas définie.');
 
 		$this->assert($this->start_date < $this->end_date, 'La date de fin doit être postérieure à la date de début');
-		$this->assert($this->closed === 0 || $this->closed === 1);
 
 		$db = DB::getInstance();
 
@@ -69,7 +60,7 @@ class Year extends Entity
 			throw new \LogicException('Cet exercice est déjà clôturé');
 		}
 
-		$this->set('closed', 1);
+		$this->set('closed', true);
 		$this->save();
 	}
 
@@ -85,7 +76,7 @@ class Year extends Entity
 			throw new UserException('Aucun compte n\'est indiqué comme compte de clôture dans le plan comptable');
 		}
 
-		$this->set('closed', 0);
+		$this->set('closed', false);
 		$this->save();
 
 		Log::add(Log::MESSAGE, [

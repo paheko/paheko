@@ -2,6 +2,8 @@
 
 namespace Paheko\Entities\Services;
 
+use KD2\DB\Date;
+
 use Paheko\DB;
 use Paheko\DynamicList;
 use Paheko\Entity;
@@ -17,21 +19,12 @@ class Service extends Entity
 
 	const TABLE = 'services';
 
-	protected $id;
-	protected $label;
-	protected $description;
-	protected $duration;
-	protected $start_date;
-	protected $end_date;
-
-	protected $_types = [
-		'id'          => 'int',
-		'label'       => 'string',
-		'description' => '?string',
-		'duration'    => '?int',
-		'start_date'  => '?date',
-		'end_date'    => '?date',
-	];
+	protected int $id;
+	protected string $label;
+	protected ?string $description = null;
+	protected ?int $duration = null;
+	protected ?Date $start_date = null;
+	protected ?Date $end_date = null;
 
 	public function selfCheck(): void
 	{
