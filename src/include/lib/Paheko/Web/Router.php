@@ -90,18 +90,19 @@ class Router
 		}
 		elseif ((($first === 'admin' && 0 === strpos($uri, 'admin/p/')) || $first === 'p')
 			&& preg_match('!^(?:admin/p|p)/(' . Plugins::NAME_REGEXP . ')/(.*)$!', $uri, $match)
-			&& Plugins::exists($match[2])) {
-			$uri = ($first === 'admin' ? 'admin/' : 'public/') . $match[3];
+			&& Plugins::exists($match[1])) {
+			$uri = ($first === 'admin' ? 'admin/' : 'public/') . $match[2];
 
-			if ($match[3] === 'icon.svg' || substr($uri, -3) === '.md') {
-				$r = Plugins::routeStatic($match[2], $uri);
+
+			if ($match[2] === 'icon.svg' || substr($uri, -3) === '.md') {
+				$r = Plugins::routeStatic($match[1], $uri);
 
 				if ($r) {
 					return;
 				}
 			}
 			else {
-				$plugin = Plugins::get($match[2]);
+				$plugin = Plugins::get($match[1]);
 
 				if ($plugin && $plugin->enabled) {
 					$plugin->route($uri);
