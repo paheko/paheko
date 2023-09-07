@@ -127,7 +127,7 @@ class Router
 	{
 		$size = null;
 
-		if (str_contains($uri, 'px.') && preg_match('/\.([\da-z-]+px)\.(?:webp|svg)$/', $uri, $match)) {
+		if (false !== strpos($uri, 'px.') && preg_match('/\.([\da-z-]+px)\.(?:webp|svg)$/', $uri, $match)) {
 			$uri = substr($uri, 0, -strlen($match[0]));
 			$size = $match[1];
 		}
