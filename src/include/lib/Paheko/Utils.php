@@ -1320,6 +1320,7 @@ class Utils
 				$cmd = 'wkhtmltopdf -q --print-media-type --enable-local-file-access --disable-smart-shrinking --encoding "UTF-8" %s %s';
 				break;
 			case 'weasyprint':
+				$timeout = 60;
 				$cmd = 'weasyprint %1$s %2$s';
 				break;
 			default:
