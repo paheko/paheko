@@ -68,19 +68,30 @@ class Router
 		}
 
 		// Redirect old URLs (pre-1.1)
-		if ($uri == 'feed/atom/') {
+		if ($uri === 'feed/atom/') {
 			Utils::redirect('/atom.xml');
 		}
-		elseif ($uri == 'favicon.ico') {
+		elseif ($uri === 'favicon.ico') {
+			http_response_code(301);
 			header('Location: ' . Config::getInstance()->fileURL('favicon'), true);
 			return;
 		}
-		elseif (preg_match('!^(?:admin/p|p|m)/\w+$!', $uri)) {
+		// Default robots.txt if website is disabled
+		elseif ($uri === 'robots.txt' && Config::getInstance()->site_disabled) {
+			http_response_code(200);
+			header('Content-Type: text/plain');
+			echo "User-agent: *\nDisallow: /admin/\n";
+			echo "User-agent: GPTBot\nDisallow: /\n";
+			return;
+		}
+		// Add trailing slash to URLs if required
+		elseif (($first === 'p' || $first === 'm') && preg_match('!^(?:admin/p|p|m)/\w+$!', $uri)) {
 			Utils::redirect('/' . $uri . '/');
 		}
-		elseif (preg_match('!^(admin/p|p)/(' . Plugins::NAME_REGEXP . ')/(.*)$!', $uri, $match)
+		elseif ((($first === 'admin' && 0 === strpos($uri, 'admin/p/')) || $first === 'p')
+			&& preg_match('!^(?:admin/p|p)/(' . Plugins::NAME_REGEXP . ')/(.*)$!', $uri, $match)
 			&& Plugins::exists($match[2])) {
-			$uri = ($match[1] == 'admin/p' ? 'admin/' : 'public/') . $match[3];
+			$uri = ($first === 'admin' ? 'admin/' : 'public/') . $match[3];
 
 			if ($match[3] === 'icon.svg' || substr($uri, -3) === '.md') {
 				$r = Plugins::routeStatic($match[2], $uri);
@@ -104,15 +115,17 @@ class Router
 			http_response_code(404);
 			throw new UserException('Cette page n\'existe pas.');
 		}
-		elseif ('api' === $first) {
+		elseif ($first === 'api') {
 			API::dispatchURI(substr($uri, 4));
 			return;
 		}
+		// Route WebDAV requests to WebDAV server
 		elseif ((in_array($uri, self::DAV_ROUTES) || in_array($first, self::DAV_ROUTES))
 			&& WebDAV_Server::route($uri)) {
 			return;
 		}
-		elseif ($method == 'PROPFIND') {
+		// Redirect PROPFIND requests to WebDAV, required for some WebDAV clients
+		elseif ($method === 'PROPFIND') {
 			header('Location: /dav/documents/');
 			return;
 		}
@@ -120,6 +133,13 @@ class Router
 			return;
 		}
 
+		// Redirect to ADMIN_URL if website is disabled
+		// (but not for content.css)
+		if (Config::getInstance()->site_disabled && $uri !== 'content.css') {
+			Utils::redirect(ADMIN_URL);
+		}
+
+		// Let modules handle the request
 		Modules::route($uri);
 	}
 

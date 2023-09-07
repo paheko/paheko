@@ -248,12 +248,6 @@ class Modules
 		}
 		// Or: we are looking for the "web" module
 		else {
-			// Redirect to ADMIN_URL if website is disabled
-			// (but not for content.css)
-			if (Config::getInstance()->site_disabled && $uri != 'content.css') {
-				Utils::redirect(ADMIN_URL);
-			}
-
 			$module = self::getWeb();
 		}
 
