@@ -69,19 +69,21 @@ class User extends Entity
 	protected function reloadProperties(): void
 	{
 		if (empty(self::$_types_cache[static::class])) {
-			$types = DynamicField::SYSTEM_FIELDS;
+			$this->_types = DynamicField::SYSTEM_FIELDS;
 
 			$fields = DynamicFields::getInstance()->all();
 
 			foreach ($fields as $key => $config) {
 				// Fallback to dynamic, if a field type has been deleted
-				$types[$key] = DynamicField::PHP_TYPES[$config->type] ?? 'dynamic';
+				$this->_types[$key] = DynamicField::PHP_TYPES[$config->type] ?? 'dynamic';
 			}
-
-			self::$_types_cache[static::class] = $types;
+		}
+		elseif (empty($this->_types)) {
+			$this->_types = self::$_types_cache[static::class];
 		}
 
-		$this->_types = self::$_types_cache[static::class];
+		self::_loadEntityTypesCache($this->_types);
+
 		$this->_loading = true;
 
 		foreach ($this->_types as $key => $v) {
@@ -98,7 +100,7 @@ class User extends Entity
 		$this->reloadProperties();
 	}
 
-	public function set(string $key, $value, bool $loose = false, bool $check_for_changes = true) {
+	public function set(string $key, $value) {
 		if ($this->_loading && $value === null) {
 			$this->$key = $value;
 			return;
@@ -106,7 +108,7 @@ class User extends Entity
 
 		// Don't bother for type with virtual columns
 		// also don't set it as modified as we don't save the value
-		if ($this->_types[$key] == 'dynamic') {
+		if ($this->_types[$key] === 'dynamic') {
 			$this->$key = $value;
 			return;
 		}
@@ -118,7 +120,7 @@ class User extends Entity
 			$value = preg_replace('![ ]{2,}!', ' ', $value);
 		}
 
-		return parent::set($key, $value, $loose, $check_for_changes);
+		return parent::set($key, $value);
 	}
 
 	public function selfCheck(): void
