@@ -14,6 +14,7 @@ use Paheko\Users\Session;
 use Paheko\Files\Files;
 use Paheko\Files\Storage;
 use Paheko\Plugins;
+use Paheko\UserTemplate\Modules;
 
 use KD2\HTTP;
 
@@ -336,6 +337,9 @@ class Install
 		$search->save();
 
 		$config->save();
+
+		Plugins::refresh();
+		Modules::refresh();
 
 		// Install welcome plugin if available
 		$has_welcome_plugin = Plugins::exists('welcome');
