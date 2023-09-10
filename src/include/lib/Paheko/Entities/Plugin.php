@@ -335,7 +335,7 @@ class Plugin extends Entity
 		$file = ltrim($file, './');
 
 		if (preg_match('!(?:\.\.|[/\\\\]\.|\.[/\\\\])!', $file)) {
-			throw new \UnexpectedValueException('Chemin de fichier incorrect.');
+			throw new UserException('Chemin de fichier incorrect.');
 		}
 
 		if (!$allow_protected && in_array($file, self::PROTECTED_FILES)) {
@@ -401,7 +401,7 @@ class Plugin extends Entity
 		try {
 			$this->call($uri);
 		}
-		catch (\UnexpectedValueException $e) {
+		catch (UserException $e) {
 			http_response_code(404);
 			throw new UserException($e->getMessage());
 		}
