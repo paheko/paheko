@@ -94,7 +94,6 @@ class Category extends Entity
 		parent::selfCheck();
 
 		$this->assert(trim($this->name) !== '', 'Le nom de catégorie ne peut rester vide.');
-		$this->assert($this->hidden === 0 || $this->hidden === 1, 'Wrong value for hidden');
 
 		foreach (self::PERMISSIONS as $key => $perm) {
 			$this->assert(array_key_exists($this->{'perm_' . $key}, $perm['options']), 'Invalid value for perm_' . $key);
