@@ -136,7 +136,7 @@ class Router
 
 		// Redirect to ADMIN_URL if website is disabled
 		// (but not for content.css)
-		if (Config::getInstance()->site_disabled && $uri !== 'content.css') {
+		if (Config::getInstance()->site_disabled && $uri !== 'content.css' && $first !== 'm') {
 			Utils::redirect(ADMIN_URL);
 		}
 
