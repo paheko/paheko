@@ -342,6 +342,10 @@ class Modules
 			throw new \InvalidArgumentException('No module found in archive');
 		}
 
+		if (!array_key_exists('module.ini', $files)) {
+			throw new \InvalidArgumentException('Missing "module.ini" file in module');
+		}
+
 		$base = File::CONTEXT_MODULES . '/' . $module_name;
 
 		if (Files::exists($base) && !$overwrite) {
@@ -349,10 +353,11 @@ class Modules
 		}
 
 		try {
-			$module = self::get($module_name) ?? self::create($module_name);
+			$module = self::get($module_name);
 
 			if (!$module) {
-				throw new \InvalidArgumentException('Invalid module information');
+				$module = new Module;
+				$module->name = $module_name;
 			}
 
 			foreach ($files as $local_name => $source) {
@@ -374,6 +379,13 @@ class Modules
 
 				Files::createFromString($base  . '/' . $local_name, $content);
 			}
+
+			if (!$module->updateFromINI()) {
+				throw new ValidationException('Le fichier module.ini est invalide.');
+			}
+
+			$module->save();
+			$module->updateTemplates();
 
 			return $module;
 		}
