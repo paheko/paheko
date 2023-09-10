@@ -45,7 +45,7 @@ class Router
 		// This might be changed later
 		http_response_code(200);
 
-		$uri = substr($uri, 1);
+		$uri = ltrim($uri, '/');
 
 		$first = ($pos = strpos($uri, '/')) ? substr($uri, 0, $pos) : null;
 		$method = $_SERVER['REQUEST_METHOD'] ?? $_SERVER['REDIRECT_REQUEST_METHOD'];
@@ -113,8 +113,7 @@ class Router
 
 		// Other admin/plugin routes are not found
 		if ($first === 'admin' || $first === 'p') {
-			http_response_code(404);
-			throw new UserException('Cette page n\'existe pas.');
+			throw new UserException('Cette page ne semble pas exister.', 404);
 		}
 		elseif ($first === 'api') {
 			API::dispatchURI(substr($uri, 4));
@@ -137,7 +136,12 @@ class Router
 		// Redirect to ADMIN_URL if website is disabled
 		// (but not for content.css)
 		if (Config::getInstance()->site_disabled && $uri !== 'content.css' && $first !== 'm') {
-			Utils::redirect(ADMIN_URL);
+			if ($uri === '') {
+				Utils::redirect(ADMIN_URL);
+			}
+			else {
+				throw new UserException('Cette page n\'existe pas.', 404);
+			}
 		}
 
 		// Let modules handle the request
