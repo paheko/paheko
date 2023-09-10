@@ -274,6 +274,14 @@ const STATIC_CACHE_ROOT = CACHE_ROOT . '/static';
 const SHARED_USER_TEMPLATES_CACHE_ROOT = SHARED_CACHE_ROOT . '/utemplates';
 const SMARTYER_CACHE_ROOT = SHARED_CACHE_ROOT . '/compiled';
 
+// Used to get around some providers misconfiguration issues
+if (isset($_SERVER['HTTP_X_OVHREQUEST_ID'])) {
+	define('Paheko\HOSTING_PROVIDER', 'OVH');
+}
+else {
+	define('Paheko\HOSTING_PROVIDER', null);
+}
+
 // PHP devrait être assez intelligent pour chopper la TZ système mais nan
 // il sait pas faire (sauf sur Debian qui a le bon patch pour ça), donc pour
 // éviter le message d'erreur à la con on définit une timezone par défaut
@@ -400,9 +408,6 @@ if (REPORT_USER_EXCEPTIONS < 2) {
 // Clé secrète utilisée pour chiffrer les tokens CSRF etc.
 if (!defined('Paheko\SECRET_KEY'))
 {
-	if (!is_writable(ROOT)) {
-		throw new \RuntimeException('Impossible de créer le fichier de configuration "'. CONFIG_FILE .'". Le répertoire "'. ROOT . '" n\'est pas accessible en écriture.');
-	}
 	$key = base64_encode(random_bytes(64));
 	Install::setLocalConfig('SECRET_KEY', $key);
 	define('Paheko\SECRET_KEY', $key);
@@ -414,6 +419,12 @@ Form::tokenSetSecret(SECRET_KEY);
 EntityManager::setGlobalDB(DB::getInstance());
 
 Translate::setLocale('fr_FR');
+
+// This is specific to OVH and other hosting providers who don't set up their servers properly
+// see https://www.prestashop.com/forums/topic/393496-prestashop-16-webservice-authentification-on-ovh/
+if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) && !empty($_SERVER['HTTP_AUTHORIZATION'])) {
+	@list($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) = explode(':', base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));
+}
 
 /*
  * Vérifications pour enclencher le processus d'installation ou de mise à jour

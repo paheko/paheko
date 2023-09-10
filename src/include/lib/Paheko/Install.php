@@ -397,6 +397,11 @@ class Install
 	static public function setLocalConfig(string $key, $value, bool $overwrite = true): void
 	{
 		$path = ROOT . DIRECTORY_SEPARATOR . CONFIG_FILE;
+
+		if (!is_writable(ROOT)) {
+			throw new \RuntimeException('Impossible de créer le fichier de configuration "'. CONFIG_FILE .'". Le répertoire "'. ROOT . '" n\'est pas accessible en écriture.');
+		}
+
 		$new_line = sprintf('const %s = %s;', $key, var_export($value, true));
 
 		if (@filesize($path)) {
@@ -410,14 +415,12 @@ class Install
 				return;
 			}
 
-			if (!$count)
-			{
+			if (!$count) {
 				$config = preg_replace('/\?>.*/s', '', $config);
 				$config .= PHP_EOL . $new_line . PHP_EOL;
 			}
 		}
-		else
-		{
+		else {
 			$config = '<?php' . PHP_EOL
 				. 'namespace Paheko;' . PHP_EOL . PHP_EOL
 				. $new_line . PHP_EOL;
