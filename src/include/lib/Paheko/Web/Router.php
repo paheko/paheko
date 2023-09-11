@@ -163,7 +163,7 @@ class Router
 			$context = strtok($uri, '/');
 
 			// URL has a context but is not a file? stop here
-			if (!$context || !array_key_exists($context, File::CONTEXTS_NAMES)) {
+			if ($context && array_key_exists($context, File::CONTEXTS_NAMES)) {
 				throw new UserException('Cette adresse n\'existe pas ou plus.', 404);
 			}
 
