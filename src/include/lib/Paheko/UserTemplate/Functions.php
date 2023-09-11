@@ -230,7 +230,14 @@ class Functions
 			throw new Brindille_Exception('Module name could not be found');
 		}
 
+		$db = DB::getInstance();
 		$table = 'module_data_' . $tpl->module->name;
+
+		// No table? No problem!
+		if (!$db->test('sqlite_master', 'name = ? AND type = \'table\'', $table)) {
+			return;
+		}
+
 		$where = [];
 		$args = [];
 		$i = 0;
@@ -259,8 +266,6 @@ class Functions
 		}
 
 		$where = implode(' AND ', $where);
-
-		$db = DB::getInstance();
 		$db->delete($table, $where, $args);
 	}
 
