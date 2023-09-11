@@ -41,6 +41,7 @@ class Modifiers
 		'explode',
 		'implode',
 		'keys',
+		'values',
 		'has',
 		'in',
 		'map',
@@ -397,6 +398,11 @@ class Modifiers
 	static public function keys($array)
 	{
 		return array_keys((array)$array);
+	}
+
+	static public function values($array)
+	{
+		return array_values((array)$array);
 	}
 
 	static public function has($in, $value, $strict = false)
