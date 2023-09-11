@@ -196,7 +196,7 @@ class Storage extends AbstractStorage
 				return '';
 			case NextCloud::PROP_OC_ID:
 				// fileId is required by NextCloud desktop client
-				return $this->nextcloud::getFileId($uri, '');
+				return $file->id();
 			case NextCloud::PROP_OC_PERMISSIONS:
 				$permissions = [
 					NextCloud::PERM_READ => $file->canRead($this->session),
@@ -204,8 +204,7 @@ class Storage extends AbstractStorage
 					NextCloud::PERM_DELETE => $file->canDelete($this->session),
 					NextCloud::PERM_RENAME => $file->canRename($this->session),
 					NextCloud::PERM_MOVE => $file->canRename($this->session),
-					NextCloud::PERM_CREATE => $file->canCreateHere($this->session),
-					NextCloud::PERM_MKDIR => $file->canCreateDirHere($this->session),
+					NextCloud::PERM_CREATE_FILES_DIRS => $file->canCreateHere($this->session),
 				];
 
 				$permissions = array_filter($permissions, fn($a) => $a);
