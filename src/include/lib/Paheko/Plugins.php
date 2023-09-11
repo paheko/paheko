@@ -105,7 +105,7 @@ class Plugins
 
 			// Don't return Content-Length on OVH, as their HTTP 2.0 proxy is buggy
 			// @see https://fossil.kd2.org/paheko/tktview/8b342877cda6ef7023b16277daa0ec8e39d949f8
-			if (HOSTING_PROVIDER === 'OVH') {
+			if (HOSTING_PROVIDER !== 'OVH') {
 				header('Content-Length: ' . filesize($path));
 			}
 
