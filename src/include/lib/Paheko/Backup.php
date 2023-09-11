@@ -484,7 +484,7 @@ class Backup
 		}
 
 		// Force user to be re-logged as the first admin
-		if ($session && version_compare($version, '1.1.0', '>=') && $session->isLogged(true) && !$session->refresh()) {
+		if ($session && version_compare($version, '1.3.0', '>=') && $session->isLogged(true) && !$session->refresh()) {
 			$session->forceLogin(-1);
 			$return |= self::CHANGED_USER;
 		}
