@@ -99,6 +99,34 @@ Donnera :
 a,b
 ```
 
+## values
+
+Renvoie les valeurs du tableau, sous forme de tableau.
+
+Cela revient en fait à supprimer les clés associatives.
+
+```
+{{:assign var="table" a="bleu" b="orange"}}
+{{#foreach from=$table key="cle" item="valeur"}}
+	{{$cle}} = {{$valeur}}
+{{/foreach}}
+--
+{{:assign var="valeurs" value=$table|values}}
+{{#foreach from=$valeurs key="cle" item="valeur"}}
+	{{$cle}} = {{$valeur}}
+{{/foreach}}
+```
+
+Donnera :
+
+```
+a = bleu
+b = orange
+--
+0 = bleu
+1 = orange
+```
+
 ## count
 
 Compte le nombre d'entrées dans un tableau.

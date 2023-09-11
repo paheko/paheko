@@ -68,6 +68,7 @@
 			<li><a href="#has">has</a></li>
 			<li><a href="#in">in</a></li>
 			<li><a href="#keys">keys</a></li>
+			<li><a href="#values">values</a></li>
 			<li><a href="#count">count</a></li>
 			<li><a href="#explode">explode</a></li>
 			<li><a href="#implode">implode</a></li>
@@ -263,6 +264,24 @@
 {{$cles|implode:","}}</code></pre>
 <p>Donnera :</p>
 <pre><code>a,b</code></pre>
+<h2 id="values">values</h2>
+<p>Renvoie les valeurs du tableau, sous forme de tableau.</p>
+<p>Cela revient en fait à supprimer les clés associatives.</p>
+<pre><code>{{:assign var="table" a="bleu" b="orange"}}
+{{#foreach from=$table key="cle" item="valeur"}}
+    {{$cle}} = {{$valeur}}
+{{/foreach}}
+--
+{{:assign var="valeurs" value=$table|values}}
+{{#foreach from=$valeurs key="cle" item="valeur"}}
+    {{$cle}} = {{$valeur}}
+{{/foreach}}</code></pre>
+<p>Donnera :</p>
+<pre><code>a = bleu
+b = orange
+--
+0 = bleu
+1 = orange</code></pre>
 <h2 id="count">count</h2>
 <p>Compte le nombre d'entrées dans un tableau.</p>
 <pre><code>{{$products|count}}
