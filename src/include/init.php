@@ -287,14 +287,11 @@ else {
 // éviter le message d'erreur à la con on définit une timezone par défaut
 // Pour utiliser une autre timezone, il suffit de définir date.timezone dans
 // un .htaccess ou dans CONFIG_FILE
-if (!ini_get('date.timezone'))
-{
-	if (($tz = @date_default_timezone_get()) && $tz != 'UTC')
-	{
+if (!ini_get('date.timezone') || ini_get('date.timezone') === 'UTC') {
+	if (($tz = @date_default_timezone_get()) && $tz !== 'UTC') {
 		ini_set('date.timezone', $tz);
 	}
-	else
-	{
+	else {
 		ini_set('date.timezone', 'Europe/Paris');
 	}
 }
