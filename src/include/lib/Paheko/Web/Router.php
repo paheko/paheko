@@ -129,7 +129,7 @@ class Router
 			header('Location: /dav/documents/');
 			return;
 		}
-		elseif (self::routeFile($uri)) {
+		elseif ($uri && self::routeFile($uri)) {
 			return;
 		}
 
@@ -163,7 +163,7 @@ class Router
 			$context = strtok($uri, '/');
 
 			// URL has a context but is not a file? stop here
-			if (array_key_exists($context, File::CONTEXTS_NAMES)) {
+			if (!$context || !array_key_exists($context, File::CONTEXTS_NAMES)) {
 				throw new UserException('Cette adresse n\'existe pas ou plus.', 404);
 			}
 
