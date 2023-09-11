@@ -138,7 +138,7 @@ class Emails
 		$recipients = $list;
 		unset($list);
 
-		$is_system = $context != self::CONTEXT_SYSTEM;
+		$is_system = $context === self::CONTEXT_SYSTEM;
 		$template = (!$is_system && $content instanceof UserTemplate) ? $content : null;
 		$content_html = null;
 

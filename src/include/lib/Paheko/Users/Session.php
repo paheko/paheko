@@ -297,7 +297,7 @@ class Session extends \KD2\UserSession
 
 	public function recoverPasswordSend(string $id): void
 	{
-		$user = $this->fetchUserForPasswordRecovery($id, true);
+		$user = $this->fetchUserForPasswordRecovery($id);
 
 		if (!$user) {
 			throw new UserException('Aucun membre trouvé avec cette adresse e-mail, ou le membre trouvé n\'a pas le droit de se connecter.');
@@ -323,12 +323,19 @@ class Session extends \KD2\UserSession
 		EmailsTemplates::passwordRecovery($user->$email, $url, $user->pgp_key);
 	}
 
-	protected function fetchUserForPasswordRecovery(string $id, bool $by_login = false): ?\stdClass
+	protected function fetchUserForPasswordRecovery(string $identifier, ?string $identifier_field = null): ?\stdClass
 	{
 		$db = DB::getInstance();
 
-		$id_field = $by_login ? DynamicFields::getLoginField() : 'id';
+		$identifier_field ??= DynamicFields::getLoginField();
 		$email_field = DynamicFields::getFirstEmailField();
+
+		if ($identifier_field === 'id') {
+			$identifier = (int) $identifier;
+		}
+		else {
+			$identifier = trim($identifier);
+		}
 
 		// Fetch user, must have an email
 		$sql = sprintf('SELECT u.id, u.%s AS email, u.password, u.pgp_key, c.perm_connect
@@ -338,9 +345,9 @@ class Session extends \KD2\UserSession
 				AND u.%1$s IS NOT NULL
 			LIMIT 1;',
 			$db->quoteIdentifier($email_field),
-			$db->quoteIdentifier($id_field));
+			$db->quoteIdentifier($identifier_field));
 
-		return $db->first($sql, trim($id)) ?: null;
+		return $db->first($sql, $identifier) ?: null;
 	}
 
 	protected function makePasswordRecoveryHash(\stdClass $user, ?int $expire = null): string
@@ -385,7 +392,7 @@ class Session extends \KD2\UserSession
 		}
 
 		// Fetch user info
-		$user = $this->fetchUserForPasswordRecovery($id);
+		$user = $this->fetchUserForPasswordRecovery($id, 'id');
 
 		if (!$user) {
 			return null;
