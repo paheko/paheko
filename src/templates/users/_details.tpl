@@ -63,7 +63,7 @@ $fields = DF::getInstance()->all();
 		<dd>
 			{if $email.optout}
 				<b class="alert">{icon shape="alert"}</b> Ne souhaite plus recevoir de messages
-				<br/>{linkbutton target="_dialog" label="Rétablir l'envoi à cette adresse" href="!users/mailing/verify.php?address=%s"|args:$value shape="check"}
+				<br/>{linkbutton target="_dialog" label="Rétablir les envois à cette adresse" href="!users/mailing/verify.php?address=%s"|args:$value shape="check"}
 			{elseif $email.invalid}
 				<b class="error">{icon shape="alert"} Adresse invalide</b>
 				{linkbutton href="!users/mailing/rejected.php?hl=%d#e_%1\$d"|args:$email.id label="Détails de l'erreur" shape="help"}
@@ -74,6 +74,7 @@ $fields = DF::getInstance()->all();
 				<b class="confirm">{icon shape="check" class="confirm"}</b> Adresse vérifiée
 			{else}
 				Adresse non vérifiée
+				{linkbutton target="_dialog" label="Désinscrire de tous les envois" href="!users/mailing/block.php?address=%s"|args:$value shape="delete"}
 			{/if}
 		</dd>
 		{/if}
