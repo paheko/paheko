@@ -11,6 +11,7 @@ use Paheko\Entity;
 use Paheko\Form;
 use Paheko\Log;
 use Paheko\Template;
+use Paheko\Plugins;
 use Paheko\Utils;
 use Paheko\UserException;
 use Paheko\ValidationException;

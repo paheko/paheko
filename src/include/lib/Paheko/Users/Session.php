@@ -297,7 +297,7 @@ class Session extends \KD2\UserSession
 
 	public function recoverPasswordSend(string $id): void
 	{
-		$user = $this->fetchUserForPasswordRecovery($id);
+		$user = $this->fetchUserForPasswordRecovery($id, true);
 
 		if (!$user) {
 			throw new UserException('Aucun membre trouvé avec cette adresse e-mail, ou le membre trouvé n\'a pas le droit de se connecter.');
@@ -323,11 +323,11 @@ class Session extends \KD2\UserSession
 		EmailsTemplates::passwordRecovery($user->$email, $url, $user->pgp_key);
 	}
 
-	protected function fetchUserForPasswordRecovery(string $id): ?\stdClass
+	protected function fetchUserForPasswordRecovery(string $id, bool $by_login = false): ?\stdClass
 	{
 		$db = DB::getInstance();
 
-		$id_field = DynamicFields::getLoginField();
+		$id_field = $by_login ? DynamicFields::getLoginField() : 'id';
 		$email_field = DynamicFields::getFirstEmailField();
 
 		// Fetch user, must have an email
