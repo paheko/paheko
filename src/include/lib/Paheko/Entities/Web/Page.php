@@ -120,7 +120,8 @@ class Page extends Entity
 	{
 		$out = $this->asArray();
 		$out['url'] = $this->url();
-		$out['html'] = $this->render();
+		$out['html'] = trim($this->content) !== '' ? $this->render() : '';
+		$row['has_attachments'] = $this->hasAttachments();
 		return $out;
 	}
 
