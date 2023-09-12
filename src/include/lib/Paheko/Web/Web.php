@@ -132,13 +132,13 @@ class Web
 		$list = [];
 
 		foreach (EM::getInstance(Page::class)->iterate($sql) as $page) {
-			$list[$page->id] = $page;
+			$list[$page->uri] = $page;
 		}
 
 		$errors = [];
 
 		foreach ($list as $page) {
-			if (count($page->checkInternalLinks($list))) {
+			if (count($page->checkInternalLinks($list)) > 0) {
 				$errors[] = $page;
 			}
 		}

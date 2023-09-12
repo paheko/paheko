@@ -20,7 +20,7 @@
 	<nav class="web config">
 		{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
 			{if $url = $module->config_url()}
-				{linkbutton shape="settings" href=$url label="Configuration du site" target="_dialog"}
+				{linkbutton shape="settings" href=$url label="Configurer le thème" target="_dialog"}
 			{/if}
 			{linkbutton shape="code" href="!config/ext/edit.php?module=%s"|args:$module.name label="Code du site"}
 		{/if}
