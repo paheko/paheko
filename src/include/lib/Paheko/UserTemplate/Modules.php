@@ -221,7 +221,14 @@ class Modules
 
 		// Just in case
 		if (!$module) {
-			throw new \LogicException('No web module is enabled?!');
+			$module = EM::findOne(Module::class, 'SELECT * FROM @TABLE WHERE web = 1 LIMIT 1;');
+
+			if (!$module) {
+				throw new \LogicException('No web module exists');
+			}
+
+			$module->set('enabled', true);
+			$module->save();
 		}
 
 		return $module;
