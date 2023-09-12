@@ -553,6 +553,11 @@ class Functions
 		}
 
 		if (isset($params['redirect'])) {
+
+			if (isset($params['code'])) {
+				http_response_code((int)$params['code']);
+			}
+
 			Utils::redirectDialog($params['redirect']);
 		}
 
