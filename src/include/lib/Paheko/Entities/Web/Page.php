@@ -425,6 +425,15 @@ class Page extends Entity
 		return $orphans;
 	}
 
+	public function hasAttachments(): bool
+	{
+		foreach ($this->listAttachments() as $attachment) {
+			return true;
+		}
+
+		return false;
+	}
+
 	/**
 	 * Return list of images
 	 * If $all is FALSE then this will only return images that are not present in the content

@@ -1027,6 +1027,8 @@ class Sections
 					}
 				}
 
+				$row['has_attachments'] = $page->hasAttachments();
+
 				$row = array_merge($row, $page->asTemplateArray());
 			}
 
