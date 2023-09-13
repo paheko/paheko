@@ -27,9 +27,7 @@ class Entity extends AbstractEntity
 	 */
 	public function importForm(array $source = null)
 	{
-		if (null === $source) {
-			$source = $_POST;
-		}
+		$source ??= $_POST;
 
 		try {
 			return $this->import($source);

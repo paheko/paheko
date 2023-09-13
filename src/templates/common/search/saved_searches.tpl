@@ -20,10 +20,10 @@
 			<dl>
 				{input type="text" name="label" label="Intitulé" required=1 source=$search}
 				<dt>Statut</dt>
-				<?php $checked = (int)(bool)$search->id_membre; ?>
-				{input type="radio" name="prive" value="1" default=$checked label="Recherche privée" help="Visible seulement par moi-même"}
+				<?php $public = (int) (null === $search->id_user); ?>
+				{input type="radio" name="public" value="0" default=$public label="Recherche privée" help="Visible seulement par moi-même"}
 				{if $session->canAccess($access_section, $session::ACCESS_WRITE)}
-					{input type="radio" name="prive" value="0" default=$checked label="Recherche publique" help="Visible et exécutable par tous les membres ayant accès à la gestion %s"|args:$target}
+					{input type="radio" name="public" value="1" default=$public label="Recherche publique" help="Visible et exécutable par tous les membres ayant accès à la gestion %s"|args:$target}
 				{/if}
 				<dt>Type</dt>
 				<dd>
@@ -71,7 +71,7 @@
 				<td>{if !$search.id_user}Publique{else}Privée{/if}</td>
 				<td class="actions">
 					{linkbutton href="%s?id=%d"|args:$search_url,$search.id shape="search" label="Rechercher"}
-					{if $search.id_membre || $session->canAccess($access_section, $session::ACCESS_ADMIN)}
+					{if $search.id_user || $session->canAccess($access_section, $session::ACCESS_ADMIN)}
 						{linkbutton href="?edit=%d"|args:$search.id shape="edit" label="Modifier"}
 						{linkbutton href="?delete=%d"|args:$search.id shape="delete" label="Supprimer"}
 					{/if}
