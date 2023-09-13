@@ -9,6 +9,7 @@ use Paheko\Entities\Accounting\Year;
 use Paheko\Utils;
 use Paheko\DB;
 use KD2\DB\EntityManager;
+use KD2\DB\Date;
 
 class Years
 {
@@ -121,8 +122,8 @@ class Years
 			$end_date->modify('+1 year');
 		}
 		else {
-			$start_date = new \DateTime('January 1st');
-			$end_date = new \DateTime('December 31');
+			$start_date = new Date('January 1st');
+			$end_date = new Date('December 31');
 		}
 
 		return [$start_date, $end_date];
