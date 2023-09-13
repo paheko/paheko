@@ -17,6 +17,7 @@ use Paheko\UserTemplate\Modifiers;
 use Paheko\Users\DynamicFields;
 
 use KD2\DB\EntityManager as EM;
+use KD2\HTTP;
 
 use const Paheko\{WWW_URL, ADMIN_URL};
 
@@ -479,37 +480,32 @@ class Page extends Entity
 	/**
 	 * Return list of internal links in page that link to non-existing pages
 	 */
-	public function checkInternalLinks(?array &$pages = null): array
+	public function checkInternalPagesLinks(?array &$pages = null): array
 	{
 		if ($this->format == Render::FORMAT_ENCRYPTED) {
 			return [];
 		}
 
-		$html = Render::render($this->format, $this->dir_path, $this->content);
-		preg_match_all('/<a[^>]+href=["\']([^"\']+)["\']/', $html, $match, PREG_PATTERN_ORDER);
+		$renderer = Render::getRenderer($this->format, $this->dir_path);
+		$renderer->render($this->content);
 		$errors = [];
 
-		foreach ($match[1] as $link) {
-			if (strpos($link, WWW_URL) === 0) {
-				$link = substr($link, strlen(WWW_URL));
-			}
-
-			$link = trim($link, '/');
-
-			// Link is not internal
-			if (!trim($link) || preg_match('!https?:|\w:|/|#|\.!', $link)) {
+		foreach ($renderer->listLinks() as $link) {
+			if ($link['type'] !== 'page') {
 				continue;
 			}
 
-			if (null !== $pages && !array_key_exists($link, $pages)) {
-				$errors[] = $link;
+			$uri = $link['uri'];
+
+			if (null !== $pages && !array_key_exists($uri, $pages)) {
+				$errors[$uri] = $link['label'];
 			}
-			elseif (null === $pages && !Web::getByURI($link)) {
-				$errors[] = $link;
+			elseif (null === $pages && !Web::getByURI($uri)) {
+				$errors[$uri] = $link['label'];
 			}
 		}
 
-		return array_unique($errors);
+		return $errors;
 	}
 
 	public function hasSubPages(): bool

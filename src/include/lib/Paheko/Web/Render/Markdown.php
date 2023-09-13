@@ -48,10 +48,6 @@ class Markdown extends AbstractRender
 
 		$content = self::$md->text($content);
 
-		$content = preg_replace_callback(';<a href="([\w_-]+?)">;i', function ($matches) {
-			return sprintf('<a href="%s">', htmlspecialchars($this->resolveLink(htmlspecialchars_decode($matches[1]))));
-		}, $content);
-
-		return sprintf('<div class="web-content">%s</div>', $content);
+		return $this->outputHTML($content);
 	}
 }
