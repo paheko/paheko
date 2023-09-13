@@ -162,6 +162,10 @@ class AdvancedSearch extends A_S
 						'operator' => '= ?',
 						'values'   => [$text],
 					],
+					[
+						'column' => 'label',
+						'operator' => '1',
+					]
 				],
 			];
 		}
