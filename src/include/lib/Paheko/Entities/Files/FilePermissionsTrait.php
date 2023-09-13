@@ -3,6 +3,7 @@
 namespace Paheko\Entities\Files;
 
 use Paheko\Users\Session;
+use Paheko\UserException;
 
 trait FilePermissionsTrait
 {
