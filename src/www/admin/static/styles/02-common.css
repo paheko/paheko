@@ -107,6 +107,11 @@ span.alert, b.alert {
     color: var(--gBorderColor);
 }
 
+.help a {
+    color: var(--gBorderColor);
+}
+
+
 p.help:not(.block) {
     margin: 1em;
 }
