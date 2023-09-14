@@ -53,6 +53,11 @@ elseif (f('category')) {
 
 	$users = iterator_to_array(Users::iterateAssocByCategory($category->id));
 }
+elseif (qg('users')) {
+	$users = explode(',', qg('users'));
+	$users = array_map('intval', $users);
+	$users = Users::getNames($users);
+}
 else {
 	throw new UserException('Aucun membre n\'a été sélectionné');
 }

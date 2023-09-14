@@ -264,6 +264,13 @@ class Users
 		return EM::getInstance(User::class)->col(sprintf('SELECT %s FROM @TABLE WHERE id = ?;', $name), $id);
 	}
 
+	static public function getNames(array $ids): array
+	{
+		$name = DynamicFields::getNameFieldsSQL();
+		$db = EM::getInstance(User::class)->DB();
+		return $db->getAssoc(sprintf('SELECT id, %s FROM users WHERE %s;', $name, $db->where('id', $ids)));
+	}
+
 	static public function getFromNumber(string $number): ?User
 	{
 		$field = DynamicFields::getNumberField();
