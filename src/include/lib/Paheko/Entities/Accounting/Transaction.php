@@ -712,6 +712,21 @@ class Transaction extends Entity
 			$total -= $line->debit;
 		}
 
+		// check that transaction type is respected, or fall back to advanced
+		if ($this->type != self::TYPE_ADVANCED) {
+			$details = $this->getDetails();
+
+			foreach ($details as $detail) {
+				$line = $detail->direction == 'credit' ? $this->getCreditLine() : $this->getDebitLine();
+				$ok = $db->test(Account::TABLE, 'id = ? AND ' . $db->where('type', $detail->targets), $line->id_account);
+
+				if (!$ok) {
+					$this->set('type', self::TYPE_ADVANCED);
+					break;
+				}
+			}
+		}
+
 		$this->assert(0 === $total, sprintf('Écriture non équilibrée : déséquilibre (%s) entre débits et crédits', Utils::money_format($total)));
 
 		// Foreign keys constraints will check for validity of id_creator and id_year
