@@ -247,6 +247,7 @@ class Page extends Entity
 	public function save(bool $selfcheck = true): bool
 	{
 		$change_parent = null;
+		$change_dir_path = $this->_modified['dir_path'] ?? null;
 
 		if (isset($this->_modified['uri']) || isset($this->_modified['path'])) {
 			$change_parent = $this->_modified['path'];
@@ -276,6 +277,11 @@ class Page extends Entity
 				WHERE path LIKE %3$s;',
 				$db->quote($this->path), strlen($change_parent) + 1, $db->quote($change_parent . '/%'));
 			$db->exec($sql);
+		}
+
+		if ($change_dir_path) {
+			$dir = Files::get($change_dir_path);
+			$dir->rename($this->dir_path);
 		}
 
 		Cache::clear();
