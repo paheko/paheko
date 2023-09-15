@@ -44,7 +44,7 @@
 		<dt>Sujet</dt>
 		<dd><strong>{$mailing.subject}</strong></dd>
 		<dt>Message</dt>
-		<dd><pre><code>{$mailing.body}</code></pre></dd>
+		<dd><pre class="preview"><code>{$mailing.body}</code></pre></dd>
 		<dt>Prévisualisation</dt>
 		<dd>{linkbutton shape="eye" label="Prévisualiser le message" href="?id=%d&preview"|args:$mailing.id target="_dialog"}<br />
 		 <small class="help">(Un destinataire sera choisi au hasard.)</small></dd>
