@@ -23,6 +23,13 @@ UPDATE web_pages_old SET format = 'encrypted' WHERE format = 'skriv/encrypted';
 
 .read schema.sql
 
+INSERT INTO web_pages
+	SELECT id,
+		CASE WHEN parent = '' THEN NULL ELSE parent END,
+		path, 'web/' || path, uri, type, status, format, published, modified, title, content
+	FROM web_pages_old;
+DROP TABLE web_pages_old;
+
 UPDATE acc_charts_old SET country = 'FR' WHERE country IS NULL;
 INSERT INTO acc_charts SELECT * FROM acc_charts_old;
 DROP TABLE acc_charts_old;
