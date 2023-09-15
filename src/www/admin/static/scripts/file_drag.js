@@ -80,7 +80,7 @@
 			e.stopPropagation();
 
 			if (drag_elements.length == 1) {
-				p.classList.add('dragging');
+				p.classList.add('dropping');
 				msg.innerText = 'Déposer des fichiers ici';
 			}
 		});
@@ -98,14 +98,14 @@
 			e.stopPropagation();
 
 			if (drag_elements.length === 0) {
-				p.classList.remove('dragging');
+				p.classList.remove('dropping');
 			}
 		});
 
 		p.addEventListener('drop', (e) => {
 			e.preventDefault();
 			e.stopPropagation();
-			p.classList.remove('dragging');
+			p.classList.remove('dropping');
 
 			drag_elements = [];
 

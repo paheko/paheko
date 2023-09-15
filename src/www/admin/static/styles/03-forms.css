@@ -805,7 +805,7 @@ form fieldset, form p {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.dragging * {
+.dropping * {
     pointer-events: none;
 }
 
@@ -873,11 +873,11 @@ body > .overlay {
     font-weight: bold;
 }
 
-.dragging {
+.dropping {
     position: relative;
 }
 
-.dragging .overlay, .loading .overlay {
+.dropping .overlay, .loading .overlay {
     display: flex;
 }
 

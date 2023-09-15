@@ -378,7 +378,7 @@ table.dragging tr td * {
     pointer-events: none;
 }
 
-table.dragging td {
+table.dragging tbody td {
     opacity: 0;
 }
 
