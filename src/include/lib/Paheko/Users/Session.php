@@ -583,7 +583,8 @@ class Session extends \KD2\UserSession
 				throw new \InvalidArgumentException(sprintf('Unknown permission "%s" in context "%s"', $permission, $context));
 			}
 
-			if ($context == $path
+			if ('' === $context
+				|| $context == $path
 				|| 0 === strpos($path, $context)
 				|| 0 === strpos($path_level, $context)) {
 				return $permissions[$permission];
