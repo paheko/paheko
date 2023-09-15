@@ -57,6 +57,9 @@ class Entity extends AbstractEntity
 		elseif ($v = Date::createFromFormat('!Y-m-d', $value)) {
 			return $v;
 		}
+		elseif (preg_match('!^\d{2}/\d{2}/\d{4}\s\d{1,2}:\d{2}$!', $value)) {
+			return \DateTime::createFromFormat('!d/m/Y H:i', $value);
+		}
 		elseif (preg_match('!^\d{2}/\d{2}/\d{2}$!', $value)) {
 			$year = substr($value, -2);
 
@@ -72,13 +75,13 @@ class Entity extends AbstractEntity
 			return Date::createFromFormat('d/m/Y', substr($value, 0, -2) . $year);
 		}
 		elseif (preg_match('!^\d{2}/\d{2}/\d{4}$!', $value)) {
-			return Date::createFromFormat('d/m/Y', $value);
+			return Date::createFromFormat('!d/m/Y', $value);
 		}
 		elseif (preg_match('!^\d{4}/\d{2}/\d{2}$!', $value)) {
-			return Date::createFromFormat('Y/m/d', $value);
+			return Date::createFromFormat('!Y/m/d', $value);
 		}
 		elseif (preg_match('!^20\d{2}[01]\d[0123]\d$!', $value)) {
-			return Date::createFromFormat('Ymd', $value);
+			return Date::createFromFormat('!Ymd', $value);
 		}
 		elseif (null !== $value) {
 			throw new ValidationException('Format de date invalide (merci d\'utiliser le format JJ/MM/AAAA) : ' . $value);
@@ -111,10 +114,9 @@ class Entity extends AbstractEntity
 			return $d;
 
 		}
-		elseif ($type == 'DateTime' && is_string($value)) {
-			if (preg_match('!^\d{2}/\d{2}/\d{4}\s\d{1,2}:\d{2}$!', $value)) {
-				return \DateTime::createFromFormat('!d/m/Y H:i', $value);
-			}
+		elseif (($type == 'DateTime' || $type === 'DateTimeInterface') && is_string($value)) {
+			$d = self::filterUserDateValue($value);
+			return $d;
 		}
 
 		return parent::filterUserValue($type, $value, $key);
