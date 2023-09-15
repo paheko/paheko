@@ -495,7 +495,7 @@ class Page extends Entity
 				continue;
 			}
 
-			$uri = $link['uri'];
+			$uri = strtok($link['uri'], '#');
 
 			if (null !== $pages && !array_key_exists($uri, $pages)) {
 				$errors[$uri] = $link['label'];
