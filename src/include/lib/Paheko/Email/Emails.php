@@ -155,16 +155,22 @@ class Emails
 
 		$db = DB::getInstance();
 		$db->begin();
+		$html = null;
+		$main_tpl = null;
 
 		// Apart from SYSTEM emails, all others should be wrapped in the email.html template
 		if (!$is_system) {
 			$main_tpl = new UserTemplate('web/email.html');
 		}
 
+		if (!$is_system && !$template) {
+			// If E-Mail does not have placeholders, we can render the MarkDown just once for HTML
+			$html = Render::render(Render::FORMAT_MARKDOWN, null, $content);
+		}
+
 		foreach ($recipients as $recipient => $r) {
 			$data = $r['data'];
 			$recipient_pgp_key = $r['pgp_key'];
-			$content_html = null;
 
 			// We won't try to reject invalid/optout recipients here,
 			// it's done in the queue clearing (more efficient)
@@ -180,6 +186,9 @@ class Emails
 
 				// Add Markdown rendering
 				$content_html = Render::render(Render::FORMAT_MARKDOWN, null, $content);
+			}
+			else {
+				$content_html = $html;
 			}
 
 			if (!$is_system) {
