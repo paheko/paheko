@@ -13,7 +13,6 @@ use Paheko\Config;
 use Paheko\DB;
 use Paheko\Entity;
 use Paheko\Plugins;
-use Paheko\Template;
 use Paheko\UserException;
 use Paheko\ValidationException;
 use Paheko\Users\Session;
