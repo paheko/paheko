@@ -137,6 +137,39 @@ class DynamicFields
 		return $fields;
 	}
 
+	static public function getNameFieldsSearchableSQL(?string $prefix = null): string
+	{
+		$fields = [];
+
+		foreach (self::getInstance()->fieldsBySystemUse('name') as $field) {
+			if (!$field->hasSearchCache()) {
+				continue;
+			}
+
+			$fields[] = $field->name;
+		}
+
+		$db = DB::getInstance();
+
+		if ($prefix) {
+			$fields = array_map(fn($v) => $prefix . '.' . $db->quoteIdentifier($v), $fields);
+		}
+
+		if (count($fields) == 1) {
+			return $fields[0];
+		}
+
+		foreach ($fields as &$field) {
+			$field = sprintf('IFNULL(%s, \'\')', $field);
+		}
+
+		unset($field);
+
+		$fields = implode(' || \' \' || ', $fields);
+		$fields = sprintf('TRIM(%s)', $fields);
+		return $fields;
+	}
+
 	static public function getEntityProperties(): array
 	{
 		$fields = self::getEntityTypes();

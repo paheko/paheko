@@ -148,7 +148,7 @@ class Users
 				'select' => 'u.id',
 			],
 			'_user_name_index' => [
-				'select' => $df->getNameFieldsSQL('s'),
+				'select' => $df::getNameFieldsSearchableSQL('s'),
 			],
 		];
 
