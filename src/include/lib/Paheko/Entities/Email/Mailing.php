@@ -270,7 +270,7 @@ class Mailing extends Entity
 	public function getHTMLPreview(string $address = null, bool $append_footer = false): string
 	{
 		$html = $this->getPreview($address);
-		$tpl = new UserTemplate('email.html');
+		$tpl = new UserTemplate('web/email.html');
 		$tpl->assignArray(compact('html'));
 
 		$out = $tpl->fetch();

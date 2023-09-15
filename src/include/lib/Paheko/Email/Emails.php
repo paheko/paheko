@@ -158,7 +158,7 @@ class Emails
 
 		// Apart from SYSTEM emails, all others should be wrapped in the email.html template
 		if (!$is_system) {
-			$main_tpl = new UserTemplate('email.html');
+			$main_tpl = new UserTemplate('web/email.html');
 		}
 
 		foreach ($recipients as $recipient => $r) {
