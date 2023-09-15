@@ -33,6 +33,6 @@ class Skriv extends AbstractRender
 		$str = CommonModifiers::typo($str);
 		$str = self::$skriv->render($str);
 
-		return $this->outputHTML($content);
+		return $this->outputHTML($str);
 	}
 }
