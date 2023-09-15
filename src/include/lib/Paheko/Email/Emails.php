@@ -173,10 +173,10 @@ class Emails
 			// We won't try to reject invalid/optout recipients here,
 			// it's done in the queue clearing (more efficient)
 			$recipient_hash = Email::getHash($recipient);
+			$content_html = null;
 
 			// Replace placeholders: {{$name}}, etc.
 			if ($template) {
-				$content_html = null;
 				$template->assignArray((array) $data, null, false);
 
 				// Disable HTML escaping for plaintext emails
@@ -211,6 +211,9 @@ class Emails
 			unset($signal);
 
 			$db->insert('emails_queue', compact('sender', 'subject', 'context', 'recipient', 'recipient_pgp_key', 'recipient_hash', 'content', 'content_html'));
+
+			// Clean up memory
+			unset($content_html);
 
 			$id = $db->lastInsertId();
 

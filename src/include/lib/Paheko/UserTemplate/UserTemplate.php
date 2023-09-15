@@ -301,7 +301,15 @@ class UserTemplate extends \KD2\Brindille
 	public function fetch(): string
 	{
 		ob_start();
-		$this->display();
+
+		try {
+			$this->display();
+		}
+		catch (\Throwable $e) {
+			ob_end_clean();
+			throw $e;
+		}
+
 		return ob_get_clean();
 	}
 
