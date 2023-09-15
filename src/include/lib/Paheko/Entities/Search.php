@@ -230,7 +230,7 @@ class Search extends Entity
 
 	public function countResults(): int
 	{
-		$sql = $this->SQL();
+		$sql = $this->SQL(['no_limit' => true]);
 		$sql = 'SELECT COUNT(*) FROM (' . $sql . ')';
 
 		$allowed_tables = $this->getProtectedTables();
