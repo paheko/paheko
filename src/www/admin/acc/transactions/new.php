@@ -9,6 +9,7 @@ use Paheko\Accounting\Accounts;
 use Paheko\Accounting\Projects;
 use Paheko\Accounting\Transactions;
 use Paheko\Accounting\Years;
+use Paheko\Users\Users;
 
 use KD2\DB\Date;
 
@@ -122,7 +123,6 @@ $form->runIf(f('lines') !== null, function () use (&$lines) {
 
 if (qg('u')) {
 	$linked_users = [];
-	$membres = new Membres;
 	$i = 0;
 
 	foreach ((array) qg('u') as $key => $value) {
@@ -134,7 +134,7 @@ if (qg('u')) {
 			$id = (int) $value;
 		}
 
-		$name = $membres->getNom($id);
+		$name = Users::getName($id);
 
 		if ($name) {
 			$linked_users[$id] = $name;
