@@ -10,6 +10,10 @@ $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
 $transaction = Transactions::get((int) qg('id'));
 
+if (!$transaction) {
+	throw new UserException('Cette écriture n\'existe pas');
+}
+
 $transaction->assertCanBeModified();
 
 $csrf_key = 'acc_delete_' . $transaction->id;
