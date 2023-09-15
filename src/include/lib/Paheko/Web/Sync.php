@@ -19,7 +19,7 @@ use const Paheko\FILE_STORAGE_BACKEND;
  */
 class Sync
 {
-	static protected function importFromRaw(string $str): bool
+	static protected function importFromRaw(Page $page, string $str): bool
 	{
 		$str = preg_replace("/\r\n?/", "\n", $str);
 		$str = explode("\n\n----\n\n", $str, 2);
