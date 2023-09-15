@@ -140,18 +140,13 @@ class Emails
 
 		$is_system = $context === self::CONTEXT_SYSTEM;
 		$template = (!$is_system && $content instanceof UserTemplate) ? $content : null;
-		$content_html = null;
 
 		if ($template) {
 			$template->toggleSafeMode(true);
 		}
-		elseif (!$is_system) {
-			// Render markdown for HTML email
-			$content_html = Render::render(Render::FORMAT_MARKDOWN, null, $content);
-		}
 
 		$signal = Plugins::fire('email.queue.before', true,
-			compact('context', 'recipients', 'sender', 'subject', 'content', 'content_html', 'attachments'));
+			compact('context', 'recipients', 'sender', 'subject', 'content', 'attachments'));
 
 		// queue handling was done by a plugin, stop here
 		if ($signal && $signal->isStopped()) {
@@ -169,11 +164,11 @@ class Emails
 		foreach ($recipients as $recipient => $r) {
 			$data = $r['data'];
 			$recipient_pgp_key = $r['pgp_key'];
+			$content_html = null;
 
 			// We won't try to reject invalid/optout recipients here,
 			// it's done in the queue clearing (more efficient)
 			$recipient_hash = Email::getHash($recipient);
-			$content_html = null;
 
 			// Replace placeholders: {{$name}}, etc.
 			if ($template) {
@@ -225,7 +220,7 @@ class Emails
 		$db->commit();
 
 		$signal = Plugins::fire('email.queue.after', true,
-			compact('context', 'recipients', 'sender', 'subject', 'content', 'content_html', 'attachments'));
+			compact('context', 'recipients', 'sender', 'subject', 'content', 'attachments'));
 
 		if ($signal && $signal->isStopped()) {
 			return;
