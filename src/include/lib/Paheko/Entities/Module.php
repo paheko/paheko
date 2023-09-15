@@ -267,7 +267,7 @@ class Module extends Entity
 
 	public function hasDistFile(string $path): bool
 	{
-		return file_exists($this->distPath($path));
+		return @file_exists($this->distPath($path));
 	}
 
 	public function fetchLocalFile(string $path): ?string
