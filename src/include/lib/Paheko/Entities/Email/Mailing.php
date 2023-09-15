@@ -141,7 +141,7 @@ class Mailing extends Entity
 	{
 		$db = DB::getInstance();
 
-		foreach ($db->iterate('SELECT email, extra_data AS data FROM mailings_recipients WHERE id_mailing = ? ORDER BY id;', $this->id) as $row) {
+		foreach ($db->iterate('SELECT email, extra_data AS data FROM mailings_recipients WHERE id_mailing = ? ORDER BY id;', $this->id()) as $row) {
 			$data = $row->data ? json_decode($row->data) : null;
 			yield $row->email => ['data' => $data, 'pgp_key' => $data->pgp_key ?? null];
 		}
@@ -178,7 +178,7 @@ class Mailing extends Entity
 		$tables = 'mailings_recipients AS r LEFT JOIN emails e ON e.id = r.id_email';
 		$conditions = 'id_mailing = ' . $this->id;
 
-		$list = new DynamicList($columns, $tables);
+		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('email', false);
 		return $list;
 	}
