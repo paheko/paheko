@@ -713,7 +713,7 @@ class Sections
 
 		if (!empty($params['search_name'])) {
 			$params['tables'] .= sprintf(' INNER JOIN users_search AS us ON us.id = users.id AND %s LIKE :search_name ESCAPE \'\\\' COLLATE NOCASE',
-				DynamicFields::getNameFieldsSQL('us'));
+				DynamicFields::getNameFieldsSearchableSQL('us'));
 			$params[':search_name'] = '%' . Utils::unicodeTransliterate($params['search_name']) . '%';
 			unset($params['search_name']);
 		}

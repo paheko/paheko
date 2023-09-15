@@ -28,8 +28,8 @@ class AdvancedSearch extends A_S
 			'type'     => 'text',
 			'null'     => true,
 			'select'   => $fields::getNameFieldsSQL('u'),
-			'where'    => $fields::getNameFieldsSQL('us') . ' %s',
-			'order'    => sprintf('us.%s %%s', current($fields::getNameFields())),
+			'where'    => $fields::getNameFieldsSearchableSQL('us') . ' %s',
+			'order'    => sprintf('us.%s %%s', $fields::getFirstSearchableNameField()),
 		];
 
 		$columns['is_parent'] = [
