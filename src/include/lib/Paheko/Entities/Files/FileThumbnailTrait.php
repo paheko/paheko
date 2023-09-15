@@ -206,8 +206,13 @@ trait FileThumbnailTrait
 		$tmpfile = null;
 
 		if (!$local_path) {
-			$tmpfile = tempnam(CACHE_ROOT, 'thumb-');
 			$p = $this->getReadOnlyPointer();
+
+			if (!$p) {
+				throw new \LogicException('The file cannot be found in storage, unable to create thumbnail: ' . $this->path);
+			}
+
+			$tmpfile = tempnam(CACHE_ROOT, 'thumb-');
 			$fp = fopen($tmpfile, 'wb');
 
 			while (!feof($p)) {
