@@ -11,7 +11,7 @@ use Paheko\DB;
 use Paheko\UserTemplate\Modules;
 
 use KD2\DB\EntityManager as EM;
-use KD2\DB\ErrorManager;
+use KD2\ErrorManager;
 
 use const Paheko\{SYSTEM_SIGNALS, ADMIN_URL, WWW_URL, PLUGINS_ROOT, HOSTING_PROVIDER};
 
