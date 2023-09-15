@@ -31,7 +31,7 @@
 	{/if}
 	{if !empty($config.org_web) || !$config.site_disabled}
 	<p>
-		Web : <a href="{if $config.site_disabled}{else}{$config.org_web}{/if}" target="_blank">{if $config.site_disabled}{else}{$config.org_web}{/if}</a>
+		Web : <a href="{if $config.site_disabled}{$config.org_web}{else}{$www_url}{/if}" target="_blank">{if $config.site_disabled}{$config.org_web}{else}{$www_url}{/if}</a>
 	</p>
 	{/if}
 </aside>
