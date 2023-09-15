@@ -224,7 +224,13 @@ class Modules
 			$module = EM::findOne(Module::class, 'SELECT * FROM @TABLE WHERE web = 1 LIMIT 1;');
 
 			if (!$module) {
-				throw new \LogicException('No web module exists');
+				// Maybe we need to rescan modules?
+				self::refresh();
+				$module = EM::findOne(Module::class, 'SELECT * FROM @TABLE WHERE web = 1 LIMIT 1;');
+
+				if (!$module) {
+					throw new \LogicException('No web module exists');
+				}
 			}
 
 			$module->set('enabled', true);
