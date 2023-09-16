@@ -21,7 +21,7 @@ if (!$su) {
 
 $fee = $su->fee();
 
-if (!$fee->id_year) {
+if (!$fee || !$fee->id_year) {
 	throw new UserException('Cette inscription n\'est pas liée à un tarif relié à la comptabilité, il n\'est pas possible de saisir un règlement.');
 }
 
