@@ -33,6 +33,7 @@
 			Non renseigné
 		{/if}
 	</p>
+	<p>Toute demande d'accès, modification ou suppression de données personnelles doit être adressée à notre association.</p>
 	<p>
 		Hébergeur&nbsp;:<br />
 		{if LEGAL_HOSTING_DETAILS}
