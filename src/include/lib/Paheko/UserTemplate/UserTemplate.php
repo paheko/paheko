@@ -270,7 +270,7 @@ class UserTemplate extends \KD2\Brindille
 				Utils::safe_mkdir(Utils::dirname($compiled_path), 0777, true);
 			}
 
-			rename($tmp_path, $compiled_path);
+			@rename($tmp_path, $compiled_path);
 		}
 		catch (Brindille_Exception $e) {
 			$path = $this->file ? $this->file->path : ($this->code ? 'code' : str_replace(ROOT, '…', $this->path));
@@ -294,6 +294,9 @@ class UserTemplate extends \KD2\Brindille
 		catch (\Throwable $e) {
 			// Don't delete temporary file as it can be used to debug
 			throw $e;
+		}
+		finally {
+			@unlink($tmp_path);
 		}
 	}
 
