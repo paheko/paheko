@@ -90,6 +90,11 @@ class Sync
 
 	static protected function loadFromFile(Page $page, File $file): void
 	{
+		// Don't update if page was modified in DB since
+		if ($page->modified && $page->modified > $file->modified) {
+			return;
+		}
+
 		if (!self::importFromRaw($page, $file->fetch())) {
 			throw new \LogicException('Invalid page content: ' . $file->parent);
 		}
