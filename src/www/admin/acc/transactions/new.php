@@ -66,7 +66,7 @@ if (null !== qg('t')) {
 }
 
 if (qg('p')) {
-	$id_project = (int) qg('id_project');
+	$id_project = (int) qg('p');
 }
 
 // ab = Bank/cash account
