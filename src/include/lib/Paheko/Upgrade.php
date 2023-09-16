@@ -163,6 +163,10 @@ class Upgrade
 				require ROOT . '/include/migrations/1.3/1.3.0-rc7.php';
 			}
 
+			if (version_compare($v, '1.3.0-rc12', '<')) {
+				$db->import(ROOT . '/include/migrations/1.3/1.3.0-rc12.sql');
+			}
+
 			Plugins::upgradeAllIfRequired();
 
 			// Vérification de la cohérence des clés étrangères
