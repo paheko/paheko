@@ -81,21 +81,24 @@ class Mailing extends Entity
 			throw new \InvalidArgumentException('Invalid target');
 		}
 
-		$list = [];
-
-		foreach ($recipients as $email => $recipient) {
-			$list[$email] = $recipient;
-		}
-
-		if (!count($list)) {
-			throw new UserException('La liste de destinataires sélectionnée ne comporte aucun membre, ou aucun avec une adresse e-mail renseignée.');
-		}
-
 		$db = DB::getInstance();
 		$db->begin();
+		$count = 0;
 
-		foreach ($list as $email => $data) {
+		foreach ($recipients as $email => $data) {
+			// Ignore empty emails, normally NULL emails are already discarded in WHERE clauses
+			// But, just to be sure
+			if (empty($email)) {
+				continue;
+			}
+
 			$this->addRecipient($email, $data);
+			$count++;
+		}
+
+		if (!$count) {
+			$db->rollback();
+			throw new UserException('La liste de destinataires sélectionnée ne comporte aucun membre, ou aucun avec une adresse e-mail renseignée.');
 		}
 
 		$db->commit();

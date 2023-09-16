@@ -140,7 +140,9 @@ class Users
 		$sql = [];
 
 		foreach ($fields as $field) {
-			$sql[] = sprintf('SELECT u.*, u.%s AS _email, NULL AS preferences FROM users u INNER JOIN users_tmp_search AS s ON s.id = u.id', $db->quoteIdentifier($field));
+			$sql[] = sprintf('SELECT u.*, u.%s AS _email, NULL AS preferences
+				FROM users u INNER JOIN users_tmp_search AS s ON s.id = u.id
+				WHERE u.%1$s IS NOT NULL', $db->quoteIdentifier($field));
 		}
 
 		return self::iterateEmails($sql);
