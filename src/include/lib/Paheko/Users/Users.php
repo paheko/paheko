@@ -261,7 +261,9 @@ class Users
 	static public function getName(int $id): ?string
 	{
 		$name = DynamicFields::getNameFieldsSQL();
-		return EM::getInstance(User::class)->col(sprintf('SELECT %s FROM @TABLE WHERE id = ?;', $name), $id) ?: null;
+		$found = EM::getInstance(User::class)->col(sprintf('SELECT %s FROM @TABLE WHERE id = ?;', $name), $id);
+		$found = (string) $found;
+		return $found ?: null;
 	}
 
 	static public function getNames(array $ids): array
@@ -281,7 +283,9 @@ class Users
 	{
 		$name = DynamicFields::getNameFieldsSQL();
 		$field = DynamicFields::getNumberField();
-		return EM::getInstance(User::class)->col(sprintf('SELECT %s FROM @TABLE WHERE %s = ?;', $name, $field), $number) ?: null;
+		$found = EM::getInstance(User::class)->col(sprintf('SELECT %s FROM @TABLE WHERE %s = ?;', $name, $field), $number);
+		$found = (string) $found;
+		return $found ?: null;
 	}
 
 	static public function deleteSelected(array $ids): void
