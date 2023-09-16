@@ -154,7 +154,7 @@ assert(isset($grouped_services) && is_array($grouped_services));
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc."}
 			{input type="textarea" name="notes" label="Remarques"}
 			{if count($projects) > 1}
-			{input type="select" options=$projects name="id_project" label="Projet analytique" required=false}
+			{input type="select" options=$projects name="id_project" label="Projet analytique" required=false default_empty="— Aucun —"}
 			{/if}
 		</dl>
 	</fieldset>

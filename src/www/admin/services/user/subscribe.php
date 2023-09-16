@@ -99,6 +99,6 @@ $account_targets = $types_details[Transaction::TYPE_REVENUE]->accounts[1]->targe
 $service_user = null;
 
 $tpl->assign(compact('csrf_key', 'users', 'account_targets', 'service_user', 'allow_users_edit', 'copy_service', 'copy_fee', 'copy_only_paid'));
-$tpl->assign('projects', Projects::listAssocWithEmpty());
+$tpl->assign('projects', Projects::listAssoc());
 
 $tpl->display('services/user/subscribe.tpl');

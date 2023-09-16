@@ -62,7 +62,7 @@ $has_reconciled_lines = $transaction->hasReconciledLines();
 $tpl->assign(compact('csrf_key', 'transaction', 'lines', 'amount', 'has_reconciled_lines', 'types_details', 'id_project'));
 
 $tpl->assign('chart_id', $chart->id());
-$tpl->assign('projects', Projects::listAssocWithEmpty());
+$tpl->assign('projects', Projects::listAssoc());
 $tpl->assign('linked_users', $transaction->listLinkedUsersAssoc());
 
 $tpl->display('acc/transactions/edit.tpl');

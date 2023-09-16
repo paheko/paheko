@@ -65,6 +65,10 @@ if (null !== qg('t')) {
 	$transaction->type = (int) qg('t');
 }
 
+if (qg('p')) {
+	$id_project = (int) qg('id_project');
+}
+
 // ab = Bank/cash account
 if (qg('ab') && ($a = $accounts->getWithCode(qg('ab')))
 	&& in_array($a->type, [$a::TYPE_BANK, $a::TYPE_CASH, $a::TYPE_OUTSTANDING])) {
@@ -240,6 +244,6 @@ $form->runIf('save', function () use ($transaction, $session, $current_year, $li
 $tpl->assign(compact('csrf_key', 'transaction', 'amount', 'lines', 'id_project', 'types_details', 'linked_users'));
 
 $tpl->assign('chart', $chart);
-$tpl->assign('projects', Projects::listAssocWithEmpty());
+$tpl->assign('projects', Projects::listAssoc());
 
 $tpl->display('acc/transactions/new.tpl');

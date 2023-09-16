@@ -56,7 +56,7 @@ $targets = Entities\Accounting\Account::TYPE_REVENUE;
 			</dd>
 			{input type="list" target="!acc/charts/accounts/selector.php?targets=%s&year=%d"|args:$targets,$fee.id_year name="account" label="Compte de recettes à utiliser" default=$account required=true}
 			{if count($projects) > 1}
-			{input type="select" options=$projects name="id_project" label="Projet analytique" default=$fee.id_project required=false}
+			{input type="select" options=$projects name="id_project" label="Projet analytique" default=$fee.id_project required=false default_empty="— Aucun —"}
 			{/if}
 		</dl>
 		{/if}

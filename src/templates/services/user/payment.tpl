@@ -18,7 +18,7 @@
 			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de reçu, de note de frais, etc."}
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc."}
 			{if count($projects) > 1}
-			{input type="select" options=$projects name="id_project" label="Projet analytique" default=$fee.id_project required=false}
+				{input type="select" options=$projects name="id_project" label="Projet analytique" default=$fee.id_project required=false default_empty="— Aucun —"}
 			{/if}
 		</dl>
 	</fieldset>

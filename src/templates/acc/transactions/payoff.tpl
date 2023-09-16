@@ -38,7 +38,7 @@
 		</dl>
 		<dl data-types="all-but-advanced">
 			{if count($projects) > 1}
-				{input type="select" name="id_project" label="Projet (analytique)" options=$projects default=$id_project}
+				{input type="select" name="id_project" label="Projet (analytique)" options=$projects default=$id_project default_empty="— Aucun —"}
 			{/if}
 		</dl>
 	</fieldset>

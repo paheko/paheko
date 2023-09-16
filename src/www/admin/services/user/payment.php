@@ -44,7 +44,7 @@ $types_details = $t->getTypesDetails();
 
 $account_targets = $types_details[Transaction::TYPE_REVENUE]->accounts[1]->targets_string;
 
-$tpl->assign('projects', Projects::listAssocWithEmpty());
+$tpl->assign('projects', Projects::listAssoc());
 
 $tpl->assign(compact('csrf_key', 'account_targets', 'user_name', 'su', 'fee'));
 

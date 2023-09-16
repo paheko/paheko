@@ -29,7 +29,7 @@ assert(!isset($lines_accounts) || is_array($lines_accounts));
 			<td>{input type="text" name="lines[label][]" default=$line.label class="full-width"}</td>
 			<td>{input type="text" name="lines[reference][]" default=$line.reference size=10 class="full-width"}</td>
 			{if count($projects) > 1}
-				<td>{input default=$line.id_project type="select" name="lines[id_project][]" options=$projects}</td>
+				<td>{input default=$line.id_project type="select" name="lines[id_project][]" options=$projects default_empty="— Aucun —"}</td>
 			{/if}
 			<td>{button label="Enlever" title="Enlever la ligne" shape="minus" min="2" name="remove_line"}</td>
 		</tr>
