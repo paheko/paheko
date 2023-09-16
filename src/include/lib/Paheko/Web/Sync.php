@@ -88,11 +88,15 @@ class Sync
 		return true;
 	}
 
-	static protected function loadFromFile(Page $page, File $file): void
+	static protected function loadFromFile(Page $page, File $file): bool
 	{
 		// Don't update if page was modified in DB since
 		if ($page->modified && $page->modified > $file->modified) {
-			return;
+			return false;
+		}
+
+		if ($page->modified) {
+			$m = clone $page->modified;
 		}
 
 		if (!self::importFromRaw($page, $file->fetch())) {
@@ -101,6 +105,10 @@ class Sync
 
 		if (empty($page->modified)) {
 			$page->set('modified', $file->modified);
+		}
+
+		if ($m && $m > $page->modified) {
+			return false;
 		}
 
 		if (!isset($page->type) || $page->type != $page::TYPE_CATEGORY) {
@@ -118,6 +126,8 @@ class Sync
 		else {
 			$page->set('type', $page::TYPE_CATEGORY);
 		}
+
+		return true;
 	}
 
 	static public function fromFile(File $file): Page
@@ -192,8 +202,10 @@ class Sync
 		foreach ($intersection as $path) {
 			$file = Files::get($path . '/index.txt');
 			$page = Web::get(substr($path, 4));
-			self::loadFromFile($page, $file);
-			$page->save();
+
+			if (self::loadFromFile($page, $file)) {
+				$page->save();
+			}
 		}
 
 		return $errors;
