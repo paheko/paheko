@@ -133,8 +133,8 @@ abstract class AbstractRender
 	{
 		$first = substr($uri, 0, 1);
 
-		if ($first == '/' || $first == '!') {
-			$uri = Utils::getLocalURL($uri);
+		if ($first === '/' || $first === '!') {
+			$uri = $first === '!' ? Utils::getLocalURL($uri) : $uri;
 			$this->links[] = ['type' => 'internal', 'uri' => $uri, 'label' => $label];
 			return $uri;
 		}
