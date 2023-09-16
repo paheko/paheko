@@ -368,7 +368,7 @@ class UserTemplate extends \KD2\Brindille
 
 	public function getStatusCode(): int
 	{
-		return (int) $this->headers['code'] ?: 200;
+		return (int) ($this->headers['code'] ?? 200);
 	}
 
 	public function getContentType(): string
