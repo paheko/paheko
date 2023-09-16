@@ -30,7 +30,7 @@ class Extensions
 		uasort($list, fn ($a, $b) => strnatcasecmp($a->label, $b->label));
 
 		foreach ($list as &$item) {
-			$url = sprintf('%s/%s/', $item->type == 'plugin' ? ADMIN_URL . 'p' : WWW_URL  . 'm', $item->name);
+			$url = sprintf('%s/%s/', $item->type == 'plugin' ? ADMIN_URL . 'p' : BASE_URL  . 'm', $item->name);
 			$item = CommonFunctions::linkButton([
 				'label' => $item->label,
 				'icon' => $url . 'icon.svg',
@@ -141,7 +141,7 @@ class Extensions
 
 		foreach ($list as &$item) {
 			$item = sprintf('<a href="%s/%s/">%s</a>',
-				$item->type == 'plugin' ? ADMIN_URL . 'p' : WWW_URL  . 'm',
+				$item->type == 'plugin' ? ADMIN_URL . 'p' : BASE_URL  . 'm',
 				$item->name,
 				$item->label
 			);
@@ -175,7 +175,7 @@ class Extensions
 		uasort($list, fn ($a, $b) => strnatcasecmp($a->label, $b->label));
 
 		foreach ($list as &$item) {
-			$url = sprintf('%s/%s/', $item->type == 'plugin' ? ADMIN_URL . 'p' : WWW_URL  . 'm', $item->name);
+			$url = sprintf('%s/%s/', $item->type == 'plugin' ? ADMIN_URL . 'p' : BASE_URL  . 'm', $item->name);
 			$item = CommonFunctions::linkButton([
 				'label' => $item->label,
 				'icon' => $url . 'icon.svg',

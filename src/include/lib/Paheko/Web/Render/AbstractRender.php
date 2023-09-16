@@ -6,7 +6,7 @@ use Paheko\Entities\Files\File;
 use Paheko\Files\Files;
 use Paheko\Utils;
 
-use const Paheko\{WWW_URL, ADMIN_URL};
+use const Paheko\{WWW_URI, ADMIN_URL};
 
 abstract class AbstractRender
 {
@@ -30,7 +30,7 @@ abstract class AbstractRender
 			if ($this->context === File::CONTEXT_WEB) {
 				$this->parent = $path;
 				$this->uri = Utils::basename($path);
-				$this->link_prefix = $user_prefix ?? WWW_URL;
+				$this->link_prefix = $user_prefix ?? WWW_URI;
 			}
 			else {
 				$this->parent = Utils::dirname($path);
@@ -108,7 +108,7 @@ abstract class AbstractRender
 		$uri = array_map('rawurlencode', $uri);
 		$uri = implode('/', $uri);
 
-		return WWW_URL . $uri;
+		return WWW_URI . $uri;
 	}
 
 	public function outputHTML(string $content): string

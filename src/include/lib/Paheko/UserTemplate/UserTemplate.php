@@ -24,7 +24,7 @@ use Paheko\UserTemplate\Sections;
 
 use Paheko\Web\Cache as Web_Cache;
 
-use const Paheko\{WWW_URL, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT, ROOT, PDF_COMMAND};
+use const Paheko\{WWW_URL, WWW_URI, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT, ROOT, PDF_COMMAND};
 
 class UserTemplate extends \KD2\Brindille
 {
@@ -85,6 +85,7 @@ class UserTemplate extends \KD2\Brindille
 		self::$root_variables = [
 			'version_hash' => Utils::getVersionHash(),
 			'root_url'     => WWW_URL,
+			'root_uri'     => WWW_URI,
 			'request_url'  => Utils::getRequestURI(),
 			'admin_url'    => ADMIN_URL,
 			'site_url'     => $config['site_disabled'] && $config['org_web'] ? $config['org_web'] : WWW_URL,
@@ -569,6 +570,9 @@ class UserTemplate extends \KD2\Brindille
 		}
 
 		$this->module = $module;
-		$this->assign('module', array_merge($module->asArray(false), ['url' => $module->url()]));
+		$this->assign('module', array_merge($module->asArray(false), [
+			'url' => $module->url(),
+			'public_url' => $module->public_url(),
+		]));
 	}
 }

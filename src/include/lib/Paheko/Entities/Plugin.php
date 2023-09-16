@@ -359,7 +359,7 @@ class Plugin extends Entity
 			if (substr($file, 0, 6) == 'admin/' || substr($file, 0, 7) == 'public/') {
 				define('Paheko\PLUGIN_ROOT', $this->path());
 				define('Paheko\PLUGIN_URL', WWW_URL . 'p/' . $this->name . '/');
-				define('Paheko\PLUGIN_ADMIN_URL', WWW_URL .'admin/p/' . $this->name . '/');
+				define('Paheko\PLUGIN_ADMIN_URL', ADMIN_URL .'p/' . $this->name . '/');
 				define('Paheko\PLUGIN_QSP', '?');
 
 				$tpl = Template::getInstance();

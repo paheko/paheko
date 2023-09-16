@@ -15,8 +15,6 @@ use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
 use Paheko\Users\DynamicFields;
 
-use const Paheko\WWW_URL;
-
 class Sections
 {
 	const SECTIONS_LIST = [
@@ -921,7 +919,7 @@ class Sections
 
 		while ($row = $result->fetchArray(\SQLITE3_ASSOC))
 		{
-			$row['url'] = WWW_URL . Utils::basename($row['path']);
+			$row['url'] = '/' . Utils::basename($row['path']);
 			yield $row;
 		}
 	}
@@ -1155,6 +1153,7 @@ class Sections
 		$out = $module->asArray();
 		$out['path'] = 'modules/' . $module->name;
 		$out['url'] = $module->url();
+		$out['public_url'] = $module->public_url();
 
 		yield $out;
 	}

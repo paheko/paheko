@@ -17,7 +17,7 @@ use KD2\ZipWriter;
 
 use Paheko\Entities\Files\File;
 
-use const Paheko\{ROOT, WWW_URL};
+use const Paheko\{ROOT, WWW_URL, BASE_URL};
 
 class Module extends Entity
 {
@@ -420,10 +420,15 @@ class Module extends Entity
 		}
 
 		if ($this->web && $this->enabled && !$file) {
-			return WWW_URL;
+			return BASE_URL;
 		}
 
-		return sprintf('%sm/%s/%s%s', WWW_URL, $this->name, $file, $params);
+		return sprintf('%sm/%s/%s%s', BASE_URL, $this->name, $file, $params);
+	}
+
+	public function public_url(string $file = '', array $params = null)
+	{
+		return str_replace(BASE_URL, WWW_URL, $this->url($file, $params));
 	}
 
 	public function isValidPath(string $path): bool

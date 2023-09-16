@@ -1414,7 +1414,7 @@ class File extends Entity
 		$expiry -= intval(gmmktime(0, 0, 0, 8, 1, 2022) / 3600);
 		$expiry = base_convert($expiry, 10, 36);
 
-		return sprintf('%s?s=%s%s:%s', $this->url(), $password ? ':' : '', $hash, $expiry);
+		return sprintf('%s%s?s=%s%s:%s', WWW_URL, $this->uri(), $password ? ':' : '', $hash, $expiry);
 	}
 
 	protected function _createShareHash(int $expiry, ?string $password): string

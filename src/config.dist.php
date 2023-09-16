@@ -171,9 +171,10 @@ namespace Paheko;
 //const WWW_URI = '/asso/';
 
 /**
- * Adresse URL HTTP(S) de Paheko
+ * Adresse URL HTTP(S) publique de Paheko
  *
- * Défaut : découverte à partir de HTTP_HOST ou SERVER_NAME + WWW_URI
+ * Défaut : découverte automatique à partir de HTTP_HOST ou SERVER_NAME + WWW_URI
+ * @var null|string
  */
 
 //const WWW_URL = 'http://paheko.chezmoi.tld' . WWW_URI;
@@ -181,7 +182,10 @@ namespace Paheko;
 /**
  * Adresse URL HTTP(S) de l'admin Paheko
  *
+ * Note : il est possible d'avoir un autre domaine que WWW_URL.
+ *
  * Défaut : WWW_URL + 'admin/'
+ * @var null|string
  */
 
 //const ADMIN_URL = 'https://admin.paheko.chezmoi.tld/';
