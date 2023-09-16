@@ -60,13 +60,12 @@ class Install
 	/**
 	 * Reset the database to empty and create a new user with the same password
 	 */
-	static public function reset(Users\Session $session, string $password, array $options = [])
+	static public function reset(Session $session, string $password, array $options = [])
 	{
 		$config = (object) Config::getInstance()->asArray();
 		$user = $session->getUser();
 
-		if (!$session->checkPassword($password, $user->passe))
-		{
+		if (!$session->checkPassword($password, $user->password)) {
 			throw new UserException('Le mot de passe ne correspond pas.');
 		}
 
@@ -74,11 +73,11 @@ class Install
 			throw new UserException('Le nom de l\'association est vide, merci de le renseigner dans la configuration.');
 		}
 
-		if (!trim($user->identite)) {
+		if (!trim($user->name())) {
 			throw new UserException('L\'utilisateur connecté ne dispose pas de nom, merci de le renseigner.');
 		}
 
-		if (!trim($user->email)) {
+		if (!trim($user->email())) {
 			throw new UserException('L\'utilisateur connecté ne dispose pas d\'adresse e-mail, merci de la renseigner.');
 		}
 
@@ -102,7 +101,7 @@ class Install
 		file_put_contents(CACHE_ROOT . '/reset', json_encode([
 			'password'     => $session::hashPassword($password),
 			'name'         => $user->name(),
-			'email'        => $user->email,
+			'email'        => $user->email(),
 			'organization' => $config->org_name,
 			'country'      => $config->country,
 		]));
@@ -133,11 +132,10 @@ class Install
 			$ok = self::install($data->country ?? 'FR', $data->organization ?? 'Association', $data->name, $data->email, md5($data->password));
 
 			// Restore password
-			DB::getInstance()->preparedQuery('UPDATE membres SET passe = ? WHERE id = 1;', [$data->password]);
-
-			if (defined('\Paheko\LOCAL_LOGIN') && \Paheko\LOCAL_LOGIN) {
-				Session::getInstance()->refresh();
-			}
+			DB::getInstance()->preparedQuery('UPDATE users SET password = ? WHERE id = 1;', $data->password);
+			$session = Session::getInstance();
+			$session->logout();
+			$session->forceLogin(1);
 		}
 		catch (\Exception $e) {
 			Config::deleteInstance();

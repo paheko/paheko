@@ -474,6 +474,11 @@ class Session extends \KD2\UserSession
 		}
 
 		$this->_user = Users::get($this->user);
+
+		if (!$this->_user) {
+			throw new \LogicException('User does not exist anymore');
+		}
+
 		$this->_permissions = null;
 		$this->_files_permissions = null;
 		return $this->_user;
