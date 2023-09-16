@@ -2,8 +2,8 @@
 
 {foreach from=$list->iterate() item="row"}
 	<tr>
-		<th>{if !$row.identity}*{else}{$row.identity}{/if}</th>
 		<td>{$row.created|date_short:true}</td>
+		<th>{if !$row.identity}*{else}{$row.identity}{/if}</th>
 		<td class="help">
 			{if $row.type == Log::LOGIN_FAIL || $row.type == Log::LOGIN_PASSWORD_CHANGE}
 				<span class="alert">{icon shape="alert"}</span>
