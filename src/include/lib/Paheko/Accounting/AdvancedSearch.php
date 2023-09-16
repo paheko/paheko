@@ -6,6 +6,7 @@ use Paheko\DynamicList;
 use Paheko\Users\DynamicFields;
 use Paheko\AdvancedSearch as A_S;
 use Paheko\DB;
+use Paheko\Utils;
 use Paheko\Accounting\Years;
 use Paheko\Entities\Accounting\Transaction;
 
