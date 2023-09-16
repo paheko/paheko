@@ -104,6 +104,10 @@ abstract class AbstractRender
 
 		$this->registerAttachment($uri);
 
+		$uri = explode('/', $uri);
+		$uri = array_map('rawurlencode', $uri);
+		$uri = implode('/', $uri);
+
 		return WWW_URL . $uri;
 	}
 
