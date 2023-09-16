@@ -24,6 +24,16 @@ use KD2\DB\EntityManager as EM;
 
 class Users
 {
+	const IMPORT_MODE_AUTO = 'auto';
+	const IMPORT_MODE_CREATE = 'create';
+	const IMPORT_MODE_UPDATE= 'update';
+
+	const IMPORT_MODES = [
+		self::IMPORT_MODE_AUTO,
+		self::IMPORT_MODE_CREATE,
+		self::IMPORT_MODE_UPDATE,
+	];
+
 	static public function create(): User
 	{
 		$default_category = Config::getInstance()->default_category;
@@ -402,6 +412,10 @@ class Users
 
 	static public function importReport(CSV_Custom $csv, string $mode, ?int $logged_user_id = null): array
 	{
+		if (!in_array($mode, self::IMPORT_MODES)) {
+			throw new \InvalidArgumentException('Invalid import mode: ' . $mode);
+		}
+
 		$report = ['created' => [], 'modified' => [], 'unchanged' => [], 'errors' => []];
 
 		if ($logged_user_id) {
@@ -438,6 +452,10 @@ class Users
 
 	static public function import(CSV_Custom $csv, string $mode, ?int $logged_user_id = null): void
 	{
+		if (!in_array($mode, self::IMPORT_MODES)) {
+			throw new \InvalidArgumentException('Invalid import mode: ' . $mode);
+		}
+
 		$db = DB::getInstance();
 		$db->begin();
 
@@ -460,6 +478,10 @@ class Users
 
 	static public function iterateImport(CSV_Custom $csv, string $mode, ?array &$errors = null): \Generator
 	{
+		if (!in_array($mode, self::IMPORT_MODES)) {
+			throw new \InvalidArgumentException('Invalid import mode: ' . $mode);
+		}
+
 		$number_field = DynamicFields::getNumberField();
 
 		foreach ($csv->iterate() as $i => $row) {
