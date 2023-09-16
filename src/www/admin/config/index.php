@@ -27,7 +27,7 @@ if (ENABLE_TECH_DETAILS && qg('dump_config')) {
 			$value = '***HIDDEN***';
 		}
 
-		printf("<tr><th style='text-align: left'>%s</th><td>%s</td></tr>\n", $key, var_export($value, true));
+		printf("<tr><th style='text-align: left'>%s</th><td>%s</td></tr>\n", $key, htmlspecialchars(var_export($value, true)));
 	}
 
 	return;
