@@ -83,12 +83,8 @@ class Mailing extends Entity
 
 		$list = [];
 
-		foreach ($recipients as $recipient) {
-			if (empty($recipient->email)) {
-				continue;
-			}
-
-			$list[$recipient->email] = $recipient;
+		foreach ($recipients as $email => $recipient) {
+			$list[$email] = $recipient;
 		}
 
 		if (!count($list)) {
