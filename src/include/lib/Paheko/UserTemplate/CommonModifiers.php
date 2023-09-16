@@ -61,6 +61,7 @@ class CommonModifiers
 	}
 
 	const MODIFIERS_LIST = [
+		'protect_contact',
 		'markdown',
 		'money',
 		'money_raw',
@@ -85,6 +86,27 @@ class CommonModifiers
 		'lcfirst',
 		'abs',
 	];
+
+	static public function protect_contact(?string $contact, ?string $type = null): string
+	{
+		if (!trim($contact))
+			return '';
+
+		if ($type == 'mail' || strpos($contact, '@')) {
+			$user = strtok($contact, '@');
+			$domain = strtok('.');
+			$ext = strtok(false);
+
+			return sprintf('<a href="#error" class="protected-contact" data-a="%s" data-b="%s" data-c="%s"
+				onclick="if (this.href.match(/#error/)) this.href = [\'mail\', \'to:\', this.dataset.a, \'@\', this.dataset.b, \'.\' + this.dataset.c].join(\'\');"></a>',
+				htmlspecialchars($user), htmlspecialchars($domain), htmlspecialchars($ext));
+		}
+		else {
+			$label = preg_replace_callback('/[a-zA-Z0-9@]/', fn ($match)  => '&#' . ord($match[0]) . ';', htmlspecialchars($contact));
+			$url = htmlspecialchars($type ? $type . ':' : '') . $label;
+			return sprintf('<a href="%s">%s</a>', $url, $label);
+		}
+	}
 
 	static public function markdown($str): string
 	{

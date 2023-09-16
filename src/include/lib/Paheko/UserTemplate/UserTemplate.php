@@ -24,7 +24,7 @@ use Paheko\UserTemplate\Sections;
 
 use Paheko\Web\Cache as Web_Cache;
 
-use const Paheko\{WWW_URL, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT, ROOT, LEGAL_LINE, PDF_COMMAND};
+use const Paheko\{WWW_URL, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT, ROOT, PDF_COMMAND};
 
 class UserTemplate extends \KD2\Brindille
 {
@@ -93,7 +93,6 @@ class UserTemplate extends \KD2\Brindille
 			'visitor_lang' => Translate::getHttpLang(),
 			'config'       => $config,
 			'now'          => time(),
-			'legal_line'   => LEGAL_LINE,
 			'is_logged'    => $is_logged,
 			'logged_user'  => $is_logged ? $session->getUser()->asModuleArray() : null,
 			'dialog'       => isset($_GET['_dialog']) ? ($_GET['_dialog'] ?: true) : false,
@@ -266,6 +265,12 @@ class UserTemplate extends \KD2\Brindille
 			file_put_contents($tmp_path, $code);
 
 			require $tmp_path;
+
+			if (!file_exists(Utils::dirname($compiled_path))) {
+				Utils::safe_mkdir(Utils::dirname($compiled_path), 0777, true);
+			}
+
+			rename($tmp_path, $compiled_path);
 		}
 		catch (Brindille_Exception $e) {
 			$path = $this->file ? $this->file->path : ($this->code ? 'code' : str_replace(ROOT, '…', $this->path));
@@ -290,12 +295,6 @@ class UserTemplate extends \KD2\Brindille
 			// Don't delete temporary file as it can be used to debug
 			throw $e;
 		}
-
-		if (!file_exists(Utils::dirname($compiled_path))) {
-			Utils::safe_mkdir(Utils::dirname($compiled_path), 0777, true);
-		}
-
-		rename($tmp_path, $compiled_path);
 	}
 
 	public function fetch(): string

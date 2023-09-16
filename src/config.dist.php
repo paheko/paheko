@@ -889,15 +889,18 @@ namespace Paheko;
 //const CONTRIBUTOR_LICENSE = 'XXXXX';
 
 /**
- * Ligne légale sur le pied de page du site public
+ * Informations légale sur l'hébergeur
  *
- * Ce texte (HTML) est affiché en bas des pages du site public.
- * Utile pour indiquer les mentions légales obligatoires
- * Le %1$s est remplacé par le nom de l'association, %2$s par son adresse.
+ * Ce texte (HTML) est affiché en bas de la page "mentions légales"
+ * (.../admin/legal.php)
  *
- * Défaut : "Hébergé par nom_association, adresse_association"
+ * S'il est omis, l'association sera indiquée comme étant auto-hébergée.
+ *
+ * Défaut : null
+ *
+ * @var  string|null
  */
-//const LEGAL_LINE = 'Hébergé par <strong>%1$s</strong>, %2$s';
+//const LEGAL_HOSTING_DETAILS = 'OVH<br />5 rue de l'hébergement<br />ROUBAIX';
 
 /**
  * Message d'avertissement
