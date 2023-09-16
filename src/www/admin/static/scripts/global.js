@@ -556,18 +556,21 @@
 				if (type.match(/^image\//)) {
 					var i = document.createElement('img');
 					i.src = e.href;
+					i.draggable = false;
 				}
 				else if (type.match(/^audio\//)) {
 					var i = document.createElement('audio');
 					i.autoplay = true;
 					i.controls = true;
 					i.src = e.href;
+					i.draggable = false;
 				}
 				else if (type.match(/^video\/|^application\/ogg$/)) {
 					var i = document.createElement('video');
 					i.autoplay = true;
 					i.controls = true;
 					i.src = e.href;
+					i.draggable = false;
 				}
 				else {
 					let url = e.href + (e.href.indexOf('?') > 0 ? '&' : '?') + '_dialog';
