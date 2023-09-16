@@ -8,9 +8,12 @@ use KD2\Form;
 use KD2\Translate;
 use KD2\DB\EntityManager;
 
-error_reporting(-1);
-
 const CONFIG_FILE = 'config.local.php';
+
+require __DIR__ . '/lib/KD2/ErrorManager.php';
+
+ErrorManager::enable(ErrorManager::DEVELOPMENT);
+ErrorManager::setLogFile(__DIR__ . '/data/error.log');
 
 /*
  * Version de Paheko
@@ -91,8 +94,7 @@ if (!defined('\SQLITE3_OPEN_READWRITE')) {
  */
 
 // Configuration externalisée
-if (file_exists(__DIR__ . '/../' . CONFIG_FILE))
-{
+if (file_exists(__DIR__ . '/../' . CONFIG_FILE)) {
 	require __DIR__ . '/../' . CONFIG_FILE;
 }
 
