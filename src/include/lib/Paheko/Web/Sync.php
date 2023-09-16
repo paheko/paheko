@@ -119,8 +119,11 @@ class Sync
 	{
 		$page = new Page;
 
+		$path = substr($file->parent, strlen(File::CONTEXT_WEB . '/'));
+
 		$page->importForm([
-			'path' => substr($file->parent, strlen(File::CONTEXT_WEB . '/')),
+			'path' => $path,
+			'parent' => Utils::dirname($path) ?: null,
 			'uri' => Utils::basename($file->parent),
 		]);
 
@@ -152,16 +155,16 @@ class Sync
 
 		$deleted = array_diff($in_db, $exists);
 		$new = array_diff($exists, $in_db);
+		$intersection = array_intersect($in_db, $exists);
 
 		if ($deleted) {
 			$db->exec(sprintf('DELETE FROM web_pages WHERE %s;', $db->where('dir_path', $deleted)));
 		}
 
-		$new = array_keys($new);
-		ksort($new);
+		sort($new);
 
 		foreach ($new as $path) {
-			$f = Files::get(File::CONTEXT_WEB . '/' . $path . '/index.txt');
+			$f = Files::get($path . '/index.txt');
 
 			if (!$f) {
 				// This is a directory without content, ignore
@@ -181,10 +184,9 @@ class Sync
 			Cache::clear();
 		}
 
-		$intersection = array_intersect_key($in_db, $exists);
-		foreach ($intersection as $page) {
-			$file = Files::get($page->dir_path);
-			$page = Web::get($page->path);
+		foreach ($intersection as $path) {
+			$file = Files::get($path . '/index.txt');
+			$page = Web::get(substr($path, 4));
 			self::loadFromFile($page, $file);
 			$page->save();
 		}
