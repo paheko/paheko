@@ -552,8 +552,9 @@ class Module extends Entity
 		$ut->assignArray($params);
 		$content = $ut->fetch();
 		$type = $ut->getContentType();
+		$code = $ut->getStatusCode();
 
-		if ($uri !== null && preg_match('!html|xml|text!', $type) && !$ut->get('nocache')) {
+		if ($uri !== null && preg_match('!html|xml|text!', $type) && !$ut->get('nocache') && $code == 200) {
 			$cache = true;
 		}
 		else {
@@ -564,8 +565,8 @@ class Module extends Entity
 		$signal = Plugins::fire(
 			'web.request',
 			true,
-			compact('path', 'uri', 'module', 'content', 'type', 'cache'),
-			compact('type', 'cache', 'content')
+			compact('path', 'uri', 'module', 'content', 'type', 'cache', 'code'),
+			compact('type', 'cache', 'content', 'code')
 		);
 
 		if ($signal && $signal->isStopped()) {
@@ -573,14 +574,15 @@ class Module extends Entity
 		}
 
 		if ($signal) {
-			$type = $signal->getOut('type');
+			$ut->setHeader('type', $signal->getOut('type'));
+			$ut->setHeader('code', $signal->getOut('code'));
 			$cache = $signal->getOut('cache');
 			$content = $signal->getOut('content');
 		}
 
 		unset($signal);
 
-		header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
+		$ut->dumpHeaders();
 
 		if ($type == 'application/pdf') {
 			Utils::streamPDF($content);
