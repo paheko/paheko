@@ -95,6 +95,8 @@ class Sync
 			return false;
 		}
 
+		$m = null;
+
 		if ($page->modified) {
 			$m = clone $page->modified;
 		}
