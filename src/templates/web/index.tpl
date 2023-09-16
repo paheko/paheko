@@ -2,10 +2,6 @@
 
 <nav class="tabs">
 	<aside>
-		{if $page && $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
-			{linkbutton shape="check" href="?id=%d&check=external"|args:$page.id label="Vérifier les liens externes"}
-		{/if}
-
 		<form method="post" action="search.php" target="_dialog" data-disable-progress="1">
 			{input type="text" name="q" size=25 placeholder="Rechercher dans le site" title="Rechercher dans le site"}
 			{button shape="search" type="submit" title="Rechercher"}
