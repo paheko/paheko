@@ -23,7 +23,7 @@ UPDATE web_pages_old SET format = 'encrypted' WHERE format = 'skriv/encrypted';
 
 .read schema.sql
 
-INSERT INTO web_pages
+INSERT OR IGNORE INTO web_pages
 	SELECT id,
 		CASE WHEN parent = '' THEN NULL ELSE parent END,
 		path, 'web/' || path, uri, type, status, format, published, modified, title, content

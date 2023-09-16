@@ -144,7 +144,7 @@ class Sync
 		$list = iterator_to_array(Files::listRecursive($path, null, false));
 		$list = array_filter($list, fn($a) => !$a->isDir() && $a->name == 'index.txt');
 		$exists = array_keys($list);
-		$exists = array_map([Utils::class, 'basename'], $exists);
+		$exists = array_map([Utils::class, 'dirname'], $exists);
 
 		$db = DB::getInstance();
 
@@ -181,7 +181,6 @@ class Sync
 			Cache::clear();
 		}
 
-		// There's no need for that sync as it is triggered when loading a Page entity!
 		$intersection = array_intersect_key($in_db, $exists);
 		foreach ($intersection as $page) {
 			$file = Files::get($page->dir_path);
