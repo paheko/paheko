@@ -9,7 +9,6 @@ use Paheko\Entities\Signal;
 use Paheko\Users\Session;
 use Paheko\DB;
 use Paheko\UserTemplate\Modules;
-use Paheko\Web\Router;
 
 use KD2\DB\EntityManager as EM;
 use KD2\ErrorManager;
