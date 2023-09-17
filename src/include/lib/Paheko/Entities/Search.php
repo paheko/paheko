@@ -39,6 +39,8 @@ class Search extends Entity
 		self::TARGET_ACCOUNTING => 'Comptabilité',
 	];
 
+	const LIMIT_REGEXP = '/LIMIT\s+\d+(?:\s*,\s*\d+|\s+OFFSET\s+\d+)/is';
+
 	protected ?int $id;
 	protected ?int $id_user = null;
 	protected string $label;
@@ -123,15 +125,16 @@ class Search extends Entity
 			$sql = $this->content;
 		}
 
-		$has_limit = preg_match('/LIMIT\s+\d+/i', $sql);
+		$has_limit = stripos($sql, 'LIMIT') !== false;
 
 		// force LIMIT
 		if (!empty($options['limit'])) {
-			$sql = preg_replace($has_limit ? '/LIMIT\s+.*$/is' : '/;.*$/s', '', trim($sql));
-			$sql .= ' LIMIT ' . (int) $options['limit'];
+			$regexp = $has_limit ? self::LIMIT_REGEXP : '/;.*$|$/s';
+			$limit = ' LIMIT ' . (int) $options['limit'];
+			$sql = preg_replace($regexp, $limit, trim($sql));
 		}
 		elseif (!empty($options['no_limit']) && $has_limit) {
-			$sql = preg_replace('/LIMIT\s+.*;?\s*$/', '', $sql);
+			$sql = preg_replace(self::LIMIT_REGEXP, '', $sql);
 		}
 
 		if (!empty($options['select_also'])) {
