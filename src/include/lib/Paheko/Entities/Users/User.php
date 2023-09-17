@@ -376,6 +376,10 @@ class User extends Entity
 				continue;
 			}
 
+			if (!is_array($source[$f->name])) {
+				continue;
+			}
+
 			$v = 0;
 
 			foreach (array_keys($source[$f->name] ?? []) as $k) {
