@@ -228,7 +228,6 @@ class Search extends Entity
 			$header = $this->getHeader(['limit' => 1, 'no_cache' => true]);
 		}
 		catch (UserException $e) {
-			throw $e;
 			return false;
 		}
 
