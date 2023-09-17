@@ -39,7 +39,14 @@ class Search extends Entity
 		self::TARGET_ACCOUNTING => 'Comptabilité',
 	];
 
-	const LIMIT_REGEXP = '/LIMIT\s+\d+(?:\s*,\s*\d+|\s+OFFSET\s+\d+)/is';
+	/**
+	 * Match the last LIMIT clause from the SQL query
+	 * Will match:
+	 * SELECT * FROM table LIMIT 5 -> LIMIT 5
+	 * SELECT ... (... LIMIT 5) LIMIT 10 -> LIMIT 10
+	 * SELECT * FROM (SELECT * FROM bla LIMIT 10) -> no match (as the limit is in a subquery)
+	 */
+	const LIMIT_REGEXP = '/LIMIT\s+\d+(?:\s*,\s*-?\d+|\s+OFFSET\s+-?\d+)?(?!.*LIMIT\s+-?\d+|.*\))/is';
 
 	protected ?int $id;
 	protected ?int $id_user = null;
