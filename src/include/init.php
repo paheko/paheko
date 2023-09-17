@@ -10,7 +10,7 @@ use KD2\DB\EntityManager;
 
 const CONFIG_FILE = 'config.local.php';
 
-require __DIR__ . '/lib/KD2/ErrorManager.php';
+require_once __DIR__ . '/lib/KD2/ErrorManager.php';
 
 ErrorManager::enable(ErrorManager::DEVELOPMENT);
 ErrorManager::setLogFile(__DIR__ . '/data/error.log');
@@ -307,13 +307,16 @@ class APIException extends \LogicException
 }
 
 // activer le gestionnaire d'erreurs/exceptions
-ErrorManager::enable(SHOW_ERRORS ? ErrorManager::DEVELOPMENT : ErrorManager::PRODUCTION);
+ErrorManager::setEnvironment(SHOW_ERRORS ? ErrorManager::DEVELOPMENT : ErrorManager::PRODUCTION | ErrorManager::CLI_DEVELOPMENT);
 ErrorManager::setLogFile(DATA_ROOT . '/error.log');
 
 // activer l'envoi de mails si besoin est
-if (MAIL_ERRORS)
-{
+if (MAIL_ERRORS) {
 	ErrorManager::setEmail(MAIL_ERRORS);
+}
+
+if (ERRORS_REPORT_URL) {
+	ErrorManager::setRemoteReporting(ERRORS_REPORT_URL, true);
 }
 
 ErrorManager::setContext([
@@ -322,10 +325,6 @@ ErrorManager::setContext([
 	'paheko_version'   => paheko_version(),
 ]);
 
-if (ERRORS_REPORT_URL)
-{
-	ErrorManager::setRemoteReporting(ERRORS_REPORT_URL, true);
-}
 
 ErrorManager::setProductionErrorTemplate(defined('Paheko\ERRORS_TEMPLATE') && ERRORS_TEMPLATE ? ERRORS_TEMPLATE : '<!DOCTYPE html><html><head><title>Erreur interne</title>
 	<style type="text/css">
