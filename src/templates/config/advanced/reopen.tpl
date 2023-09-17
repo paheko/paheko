@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Réouvrir un exercice clôturé" current="config" custom_css=["config.css"]}
+{include file="_head.tpl" title="Réouvrir un exercice clôturé" current="config"}
 
 {include file="config/_menu.tpl" current="advanced"}
 

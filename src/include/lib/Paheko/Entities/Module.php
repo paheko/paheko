@@ -37,11 +37,11 @@ class Module extends Entity
 	const SNIPPET_MY_DETAILS = 'snippets/my_details.html';
 
 	const SNIPPETS = [
-		self::SNIPPET_HOME_BUTTON => 'Icône sur la page d\'accueil',
-		self::SNIPPET_USER => 'En bas de la fiche d\'un membre',
-		self::SNIPPET_TRANSACTION => 'En bas de la fiche d\'une écriture',
-		self::SNIPPET_MY_SERVICES => 'Page "Mes activités"',
-		self::SNIPPET_MY_DETAILS => 'Page "Mes infos personnelles"',
+		self::SNIPPET_HOME_BUTTON => 'icône sur la page d\'accueil',
+		self::SNIPPET_USER => 'en bas de la fiche d\'un membre',
+		self::SNIPPET_TRANSACTION => 'en bas de la fiche d\'une écriture',
+		self::SNIPPET_MY_SERVICES => 'sur la page "Mes activités"',
+		self::SNIPPET_MY_DETAILS => 'sur la page "Mes infos personnelles"',
 	];
 
 	const VALID_NAME_REGEXP = '/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/';
@@ -227,7 +227,7 @@ class Module extends Entity
 
 	public function storage_root(): string
 	{
-		return File::CONTEXT_EXTENSIONS . '/p/' . $this->name;
+		return File::CONTEXT_EXTENSIONS . '/m/' . $this->name;
 	}
 
 	public function path(string $file = null): string
@@ -243,6 +243,11 @@ class Module extends Entity
 	public function dir(): ?File
 	{
 		return Files::get($this->path());
+	}
+
+	public function storage(): ?File
+	{
+		return Files::get($this->storage_root());
 	}
 
 	public function hasFile(string $file): bool
@@ -270,6 +275,15 @@ class Module extends Entity
 		return @file_exists($this->distPath($path));
 	}
 
+	public function fetchFile(string $path): ?string
+	{
+		if ($this->hasLocalFile($path)) {
+			return $this->fetchLocalFile($path);
+		}
+
+		return $this->fetchDistFile($path);
+	}
+
 	public function fetchLocalFile(string $path): ?string
 	{
 		$file = Files::get($this->path($path));
@@ -289,6 +303,33 @@ class Module extends Entity
 	public function hasData(): bool
 	{
 		return DB::getInstance()->test('sqlite_master', 'type = \'table\' AND name = ?', sprintf('modules_data_%s', $this->name));
+	}
+
+	public function getDataSize(): int
+	{
+		return DB::getInstance()->getTableSize(sprintf('modules_data_%s', $this->name));
+	}
+
+	public function getCodeSize(): int
+	{
+		$dir = $this->dir();
+
+		if ($dir) {
+			return $dir->getRecursiveSize();
+		}
+
+		return 0;
+	}
+
+	public function getFilesSize(): int
+	{
+		$dir = $this->storage();
+
+		if ($dir) {
+			return $dir->getRecursiveSize();
+		}
+
+		return 0;
 	}
 
 	public function canDelete(): bool
@@ -679,5 +720,16 @@ class Module extends Entity
 		}
 
 		return $r;
+	}
+
+	public function listSnippets(): array
+	{
+		$out = [];
+
+		foreach (DB::getInstance()->iterate('SELECT name FROM modules_templates WHERE id_module = ? AND name LIKE \'snippets/%\';', $this->id()) as $row) {
+			$out[$row->name] = self::SNIPPETS[$row->name];
+		}
+
+		return $out;
 	}
 }

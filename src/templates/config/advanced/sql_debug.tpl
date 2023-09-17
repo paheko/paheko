@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Journal SQL" current="config" custom_css=["config.css"]}
+{include file="_head.tpl" title="Journal SQL" current="config"}
 
 {include file="config/_menu.tpl" current="advanced" sub_current="sql_debug"}
 

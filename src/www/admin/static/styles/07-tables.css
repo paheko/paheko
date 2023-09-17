@@ -12,6 +12,7 @@ table.list.center {
 }
 
 table.list caption {
+    display: table-caption;
     text-align: center;
     font-size: 1.2em;
 }

@@ -228,6 +228,25 @@ class Plugins
 		return $errors;
 	}
 
+	static public function getInstallable(string $name): ?Plugin
+	{
+		if (!file_exists(PLUGINS_ROOT . '/' . $name) && !file_exists(PLUGINS_ROOT . '/' . $name . '.tar.gz')) {
+			return null;
+		}
+
+		$p = new Plugin;
+		$p->name = $name;
+		$p->updateFromINI();
+
+		try {
+			$p->selfCheck();
+		}
+		catch (ValidationException $e) {
+			$p->setBrokenMessage($e->getMessage());
+		}
+
+		return $p;
+	}
 
 	/**
 	 * Liste les plugins téléchargés mais non installés
@@ -266,17 +285,7 @@ class Plugins
 				continue;
 			}
 
-			$p = new Plugin;
-			$p->name = $name;
-			$p->updateFromINI();
-			$list[$name] = $p;
-
-			try {
-				$p->selfCheck();
-			}
-			catch (ValidationException $e) {
-				$p->setBrokenMessage($e->getMessage());
-			}
+			$list[$name] = self::getInstallable($name);
 		}
 
 		ksort($list);
@@ -284,16 +293,8 @@ class Plugins
 		return $list;
 	}
 
-	static public function install(string $name): void
+	static public function install(string $name): Plugin
 	{
-		$plugin = self::get($name);
-
-		if ($plugin) {
-			$plugin->set('enabled', true);
-			$plugin->save();
-			return;
-		}
-
 		$p = new Plugin;
 		$p->name = $name;
 
@@ -313,6 +314,7 @@ class Plugins
 		}
 
 		$db->commit();
+		return $p;
 	}
 
 	/**

@@ -181,6 +181,15 @@ class Plugin extends Entity
 		return $this->hasFile(self::CONFIG_FILE);
 	}
 
+	public function fetchFile(string $path): ?string
+	{
+		if (!$this->hasFile($path)) {
+			return null;
+		}
+
+		return file_get_contents($this->path($path));
+	}
+
 	public function url(string $file = '', array $params = null)
 	{
 		if (null !== $params) {

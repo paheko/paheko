@@ -1,24 +1,7 @@
-{include file="_head.tpl" title="%s — Modifier"|args:$module.label current="config"}
+{include file="_head.tpl" title="Code source — %s"|args:$module.label current="config"}
 
 {include file="config/_menu.tpl" current="ext"}
-
-<nav class="tabs">
-	<aside>
-		{linkbutton shape="help" label="Comment modifier et développer des modules" href="!static/doc/modules.html" target="_dialog"}
-
-		{linkbutton shape="export" label="Exporter ce module" href="?module=%s&export"|args:$module.name}
-
-		{linkmenu label="Ajouter…" shape="plus" right=true}
-			{linkbutton shape="upload" label="Depuis mon ordinateur" target="_dialog" href="!common/files/upload.php?p=%s"|args:$parent_path_uri}
-			{linkbutton shape="folder" label="Dossier" target="_dialog" href="!docs/new_dir.php?path=%s&no_redir"|args:$parent_path_uri}
-			{linkbutton shape="text" label="Fichier texte" target="_dialog" href="!docs/new_file.php?path=%s"|args:$parent_path_uri}
-		{/linkmenu}
-	</aside>
-
-	<ul class="sub">
-		<li class="title">{$module.label}</li>
-	</ul>
-</nav>
+{include file="./_nav.tpl" current="edit" ext=$module}
 
 {form_errors}
 

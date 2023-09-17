@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Journaux" current="config" custom_css=["config.css"]}
+{include file="_head.tpl" title="Journaux" current="config"}
 
 {include file="config/_menu.tpl" current="advanced" sub_current="errors"}
 

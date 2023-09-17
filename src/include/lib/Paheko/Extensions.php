@@ -41,30 +41,90 @@ class Extensions
 		return $list;
 	}
 
+	static public function get(string $type, string $name)
+	{
+		if ($type === 'module') {
+			return Modules::get($name);
+		}
+		elseif ($type === 'plugin') {
+			$ext = Plugins::get($name);
+			$ext ??= Plugins::getInstallable($name);
+			return $ext;
+		}
+		else {
+			throw new \InvalidArgumentException('Invalid type: ' . $type);
+		}
+	}
+
+	static public function toggle(string $type, string $name, bool $enabled)
+	{
+		if ($type === 'plugin') {
+			$plugin = Plugins::get($name);
+
+			if (!$plugin && $enabled) {
+				$plugin = Plugins::install($name);
+			}
+			elseif ($plugin) {
+				$plugin->set('enabled', $enabled);
+				$plugin->save();
+			}
+			else {
+				return null;
+			}
+
+			return $plugin;
+		}
+		elseif ($type === 'module') {
+			$m = Modules::get($name);
+
+			if (!$m) {
+				return null;
+			}
+
+			$m->set('enabled', $enabled);
+			$m->save();
+
+			return $m;
+		}
+		else {
+			throw new \InvalidArgumentException('Invalid type: ' . $type);
+		}
+	}
+
+	static public function normalize($item): \stdClass
+	{
+		$type = $item instanceof Plugin ? 'plugin' : 'module';
+		$c = $item;
+		$item = (object) $c->asArray();
+		$item->$type = $c;
+		$item->type = $type;
+		$item->label = $c->label ?? $c->name;
+		$item->icon_url = $c->icon_url();
+		$item->details_url = sprintf('details.php?type=%s&name=%s', $type, $c->name);
+		$item->config_url = $c->hasConfig() ? $c->url($c::CONFIG_FILE) : null;
+		$item->installed = $type == 'plugin' ? $c->exists() : true;
+		$item->missing = $type == 'plugin' ? !$c->hasCode() : false;
+		$item->broken_message = $type == 'plugin' ? $c->getBrokenMessage() : false;
+		$item->readme = $c->hasFile($c::README_FILE);
+
+		$item->url = null;
+
+		if ($c->hasFile($c::INDEX_FILE)) {
+			$item->url = $c->url($type == 'plugin' ? 'admin/' : '');
+		}
+
+		return $item;
+	}
+
 	static protected function filterList(array &$list): void
 	{
 		foreach ($list as &$item) {
-			$type = isset($item['plugin']) ? 'plugin' : 'module';
-			$c = $item[$type];
-			$item = $c->asArray();
-			$item[$type] = $c;
-			$item['type'] = $type;
-			$item['icon_url'] = $c->icon_url();
-			$item['config_url'] = $c->hasConfig() ? $c->url($c::CONFIG_FILE) : null;
-			$item['installed'] = $type == 'plugin' ? $c->exists() : true;
-			$item['broken'] = $type == 'plugin' ? !$c->hasCode() : false;
-			$item['broken_message'] = $type == 'plugin' ? $c->getBrokenMessage() : false;
-
-			$item['url'] = null;
-
-			if ($c->hasFile($c::INDEX_FILE)) {
-				$item['url'] = $c->url($type == 'plugin' ? 'admin/' : '');
-			}
+			$item = self::normalize($item);
 		}
 
 		unset($item);
 
-		usort($list, fn ($a, $b) => strnatcasecmp($a['label'] ?? $a['name'], $b['label'] ?? $b['name']));
+		usort($list, fn ($a, $b) => strnatcasecmp($a->label ?? $a->name, $b->label ?? $b->name));
 
 		array_walk($list, fn(&$a) => $a = (object) $a);
 	}
@@ -74,11 +134,11 @@ class Extensions
 		$list = [];
 
 		foreach (EM::getInstance(Module::class)->iterate('SELECT * FROM @TABLE WHERE enabled = 0;') as $m) {
-			$list[$m->name] = ['module' => $m];
+			$list[$m->name] = $m;
 		}
 
 		foreach (Plugins::listInstallable() as $name => $p) {
-			$list[$name] = ['plugin'   => $p];
+			$list[$name] = $p;
 		}
 
 		foreach (Plugins::listInstalled() as $p) {
@@ -86,7 +146,7 @@ class Extensions
 				continue;
 			}
 
-			$list[$p->name] = ['plugin'   => $p];
+			$list[$p->name] = $p;
 		}
 
 		self::filterList($list);
@@ -98,7 +158,7 @@ class Extensions
 		$list = [];
 
 		foreach (EM::getInstance(Module::class)->iterate('SELECT * FROM @TABLE WHERE enabled = 1;') as $m) {
-			$list[$m->name] = ['module' => $m];
+			$list[$m->name] = $m;
 		}
 
 		foreach (Plugins::listInstalled() as $p) {
@@ -112,7 +172,7 @@ class Extensions
 				continue;
 			}
 
-			$list[$p->name] = ['plugin'   => $p];
+			$list[$p->name] = $p;
 		}
 
 		self::filterList($list);

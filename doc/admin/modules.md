@@ -66,8 +66,8 @@ Dans ce répertoire le module peut avoir autant de fichiers qu'il veut, mais cer
 
 * `module.ini` : contient les informations sur le module, voir ci-dessous pour les détails
 * `config.html` : si ce squelette existe, un bouton "Configurer" apparaîtra dans la liste des modules (Configuration -> Modules) et affichera ce squelette dans un dialogue
-* `icon.svg` : icône du module, qui sera utilisée sur la page d'accueil, si le bouton est activé, et dans la liste des modules
-* `README.md` : si ce fichier existe, un lien "Documentation" apparaîtra dans la liste des extensions
+* `icon.svg` : icône du module, qui sera utilisée sur la page d'accueil, si le bouton est activé, et dans la liste des modules. Attention l'élément racine du fichier doit porter l'id `img` pour que l'icône fonctionne (`<svg id="img"...>`), notamment pour que les couleurs du thème s'appliquent à l'icône.
+* `README.md` : si ce fichier existe, son contenu sera affiché dans les détails du module
 
 Les modules peuvent également avoir des `snippets`, ce sont des squelettes qui seront inclus à des endroits précis de l'interface, permettant de rajouter des fonctionnalités, ils sont situés dans le sous-répertoire `snippets` du module :
 
