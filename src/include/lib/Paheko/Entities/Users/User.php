@@ -372,17 +372,16 @@ class User extends Entity
 		}
 
 		foreach (DynamicFields::getInstance()->fieldsByType('multiple') as $f) {
-			if (!isset($source[$f->name . '_present']) && !isset($source[$f->name])) {
+			if (!isset($source[$f->name . '_present'], $source[$f->name])) {
 				continue;
 			}
 
-			if (!is_array($source[$f->name])) {
-				continue;
-			}
+			$options = isset($source[$f->name]) && is_array($source[$f->name]) ? $source[$f->name] : [];
+			$options = array_keys($options);
 
 			$v = 0;
 
-			foreach (array_keys($source[$f->name] ?? []) as $k) {
+			foreach ($options as $k) {
 				$k = 0x01 << $k;
 				$v |= $k;
 			}
