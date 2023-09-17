@@ -490,23 +490,6 @@ class Module extends Entity
 
 			return;
 		}
-		// Render a markdown file
-		elseif (substr($path, -3) === '.md') {
-			if ($has_local_file) {
-				$file = Files::get(File::CONTEXT_MODULES . '/' . $this->name . '/' . $path);
-
-				if (!$file) {
-					throw new UserException('Invalid path');
-				}
-
-				$text = $file->fetch();
-			}
-			else {
-				$text = @file_get_contents($this->distPath($path));
-			}
-
-			Router::markdown($text);
-		}
 		// Serve a static file from a user module
 		elseif ($has_local_file) {
 			$file = Files::get(File::CONTEXT_MODULES . '/' . $this->name . '/' . $path);

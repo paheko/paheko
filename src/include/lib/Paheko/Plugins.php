@@ -9,6 +9,7 @@ use Paheko\Entities\Signal;
 use Paheko\Users\Session;
 use Paheko\DB;
 use Paheko\UserTemplate\Modules;
+use Paheko\Web\Router;
 
 use KD2\DB\EntityManager as EM;
 use KD2\ErrorManager;
@@ -88,30 +89,24 @@ class Plugins
 			return false;
 		}
 
-		if (substr($uri, -3) === '.md') {
-			Router::markdown(file_get_contents($path));
-			return true;
+		// Récupération du type MIME à partir de l'extension
+		$pos = strrpos($path, '.');
+		$ext = substr($path, $pos+1);
+
+		$mime = self::MIME_TYPES[$ext] ?? 'text/plain';
+
+		header('Content-Type: ' .$mime);
+		header('Cache-Control: public, max-age=3600');
+		header('Last-Modified: ' . date(DATE_RFC7231, filemtime($path)));
+
+		// Don't return Content-Length on OVH, as their HTTP 2.0 proxy is buggy
+		// @see https://fossil.kd2.org/paheko/tktview/8b342877cda6ef7023b16277daa0ec8e39d949f8
+		if (HOSTING_PROVIDER !== 'OVH') {
+			header('Content-Length: ' . filesize($path));
 		}
-		else {
-			// Récupération du type MIME à partir de l'extension
-			$pos = strrpos($path, '.');
-			$ext = substr($path, $pos+1);
 
-			$mime = self::MIME_TYPES[$ext] ?? 'text/plain';
-
-			header('Content-Type: ' .$mime);
-			header('Cache-Control: public, max-age=3600');
-			header('Last-Modified: ' . date(DATE_RFC7231, filemtime($path)));
-
-			// Don't return Content-Length on OVH, as their HTTP 2.0 proxy is buggy
-			// @see https://fossil.kd2.org/paheko/tktview/8b342877cda6ef7023b16277daa0ec8e39d949f8
-			if (HOSTING_PROVIDER !== 'OVH') {
-				header('Content-Length: ' . filesize($path));
-			}
-
-			readfile($path);
-			return true;
-		}
+		readfile($path);
+		return true;
 	}
 
 	static public function exists(string $name): bool

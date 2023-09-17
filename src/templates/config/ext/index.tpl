@@ -60,9 +60,6 @@
 							Par <em>{$item.author}</em>
 						{/if}
 						{if $item.plugin && $item.plugin.version}— Version {$item.plugin.version}{/if}
-						{if $item.readme_url}
-							— {link href=$item.readme_url label="Documentation" target="_dialog"}
-						{/if}
 					</small>
 				</td>
 				{if $item.broken}
