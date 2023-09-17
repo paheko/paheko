@@ -136,7 +136,7 @@ class Search extends Entity
 
 		// force LIMIT
 		if (!empty($options['limit'])) {
-			$regexp = $has_limit ? self::LIMIT_REGEXP : '/;.*$|$/s';
+			$regexp = $has_limit ? self::LIMIT_REGEXP : '/;[^;]*$|(<?=;)$/s';
 			$limit = ' LIMIT ' . (int) $options['limit'];
 			$sql = preg_replace($regexp, $limit, trim($sql));
 		}
@@ -228,6 +228,7 @@ class Search extends Entity
 			$header = $this->getHeader(['limit' => 1, 'no_cache' => true]);
 		}
 		catch (UserException $e) {
+			throw $e;
 			return false;
 		}
 
