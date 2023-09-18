@@ -153,6 +153,11 @@ class CSV_Custom
 			elseif (isset($this->translation[$i])) {
 				$v = $this->translation[$i];
 			}
+			// Match by key: code_postal === code_postal
+			elseif (array_key_exists($v, $this->columns)) {
+				// $v is already good, do nothing
+			}
+			// Match by label: Code postal === Code postal
 			elseif ($found = $this->searchColumn($v, $this->columns)) {
 				$v = $found;
 			}
