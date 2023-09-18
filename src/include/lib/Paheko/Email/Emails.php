@@ -398,7 +398,10 @@ class Emails
 
 		foreach ($unused_attachments as $path) {
 			$file = Files::get(Utils::dirname($path));
-			$file->delete();
+
+			if ($file) {
+				$file->delete();
+			}
 		}
 
 		return $count;
