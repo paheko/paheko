@@ -193,4 +193,10 @@ class Payment extends Entity
 
 		return $transaction;
 	}
+
+
+	public function hasAccounted(string $reference): bool
+	{
+		return DB::getInstance()->test(Transaction::TABLE, 'id_payment = ? AND reference = ?', (int)$this->id, $reference);
+	}
 }

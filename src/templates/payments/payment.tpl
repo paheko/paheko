@@ -35,10 +35,10 @@
 		</ul>
 	</dd>
 	<dt>Écritures comptables</dt>
-	<dd>
+	<dd class="num">
 		{if $transactions}
 			{foreach from=$transactions item='transaction'}
-				<mark>{link href="!acc/transactions/details.php?id=%d"|args:$transaction->id label=$transaction->id}</mark>
+				<mark>{link href="!acc/transactions/details.php?id=%d"|args:$transaction->id label='#'|cat:$transaction->id}</mark>
 			{/foreach}
 		{/if}
 	</dd>
