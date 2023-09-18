@@ -80,7 +80,7 @@ class Extensions
 
 			$img = strtok($line, '|');
 			$label = strtok(false);
-			$size = $type == 'slideshow' ? 500 : 200;
+			$size = $type === 'slideshow' ? File::THUMB_SIZE_LARGE : File::THUMB_SIZE_TINY;
 
 			$out .= sprintf('<figure>%s</figure>', self::img($img, $size, $label ?: null));
 		}
@@ -144,7 +144,7 @@ class Extensions
 
 		return sprintf('<video controls="true" preload="%s" poster="%s" src="%s"%s>%s</video>',
 			$poster ? 'metadata' : 'none',
-			htmlspecialchars($poster),
+			htmlspecialchars($posterslideshow),
 			htmlspecialchars($url),
 			$params,
 			$subs
@@ -165,7 +165,7 @@ class Extensions
 			return self::error('Tag image : aucun nom de fichier indiqué.');
 		}
 
-		$size = $align == 'center' ? 500 : 200;
+		$size = $align == 'center' ? File::THUMB_SIZE_LARGE : File::THUMB_SIZE_TINY;
 		$out = self::img($name, $size, $caption);
 
 		if (!empty($align)) {
@@ -179,14 +179,14 @@ class Extensions
 		return $out;
 	}
 
-	static protected function img(string $name, ?int $thumb_size = 200, ?string $caption = null): string
+	static protected function img(string $name, string $thumb_size = File::THUMB_SIZE_TINY, ?string $caption = null): string
 	{
 		$url = self::$renderer->resolveAttachment($name);
 		$svg = substr($name, -4) == '.svg';
 		$thumb_url = null;
 
 		if (!$svg) {
-			$thumb_url = sprintf('%s?%spx', $url, $thumb_size);
+			$thumb_url = sprintf('%s?%s', $url, $thumb_size);
 		}
 
 		return sprintf('<a href="%s" class="internal-image" target="_image"><img src="%s" alt="%s" loading="lazy" /></a>',

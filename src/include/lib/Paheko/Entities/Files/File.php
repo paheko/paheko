@@ -74,15 +74,17 @@ class File extends Entity
 	 */
 	const ALLOWED_THUMB_SIZES = [
 		'150px' => [['trim'], ['resize', 150]],
-		'200px' => [['trim'], ['resize', 200]],
+		'250px' => [['trim'], ['resize', 250]],
 		'500px' => [['resize', 500]],
+		'750px' => [['resize', 750]],
 		'crop-256px' => [['trim'], ['cropResize', 256, 256]],
 	];
 
 	const THUMB_CACHE_ID = 'file.thumb.%s.%s';
 
-	const THUMB_SIZE_TINY = '200px';
+	const THUMB_SIZE_TINY = '250px';
 	const THUMB_SIZE_SMALL = '500px';
+	const THUMB_SIZE_LARGE = '750px';
 
 	const CONTEXT_TRASH = 'trash';
 	const CONTEXT_DOCUMENTS = 'documents';

@@ -1085,6 +1085,7 @@ class Sections
 				$row['download_url'] = $file->url(true);
 				$row['thumb_url'] = $file->thumb_url();
 				$row['small_url'] = $file->thumb_url(File::THUMB_SIZE_SMALL);
+				$row['large_url'] = $file->thumb_url(File::THUMB_SIZE_LARGE);
 
 				$db->preparedQuery('INSERT OR REPLACE INTO web_pages_attachments VALUES (?, ?, ?, ?, ?, ?, ?);',
 					$page->id(), rawurldecode($file->uri()), $file->path, $file->name, $file->modified, $file->isImage(), json_encode($row));

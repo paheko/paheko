@@ -102,7 +102,7 @@
 			btn.onclick = (e) => {
 				var btn = e.target;
 				var i = parseInt(btn.innerText, 10)-1;
-				gallery.firstChild.scrollTop = i*400;
+				gallery.firstChild.scrollTop = i*450;
 				gallery.querySelector('.current').classList.remove('current');
 				btn.classList.add('current');
 			};

@@ -103,7 +103,7 @@
 				var src = params[0];
 				var align = params[1] || 'center';
 				var caption = 2 in params ? '<figcaption>' + params[2] + '</figcaption>' : '';
-				var size = align == 'center' ? '500px' : '200px';
+				var size = align == 'center' ? '750px' : '250px';
 
 				return `<figure class="image img-${align}"><a href="${base_url + src}" class="internal-image" target="_image"><img src="${base_url + src}?${size}" alt="" /></a>${caption}</figure>`;
 			}

@@ -59,6 +59,7 @@
 		{if $excerpt && $long}
 			<p class="actions">{linkbutton href="?id=%d&full"|args:$page.id label="Lire la suite" shape="right"}</p>
 		{/if}
+		<div style="clear:both"></div>
 	</article>
 	{/if}
 
