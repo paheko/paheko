@@ -90,14 +90,13 @@
     background: rgba(var(--gSecondColor), 0.2);
     border-radius: .5em;
     display: grid;
-    flex-direction: row;
     justify-content: flex-start;
     grid-template-columns: 5em 1fr 10em;
 }
 
 .ext-details .icon svg {
-    width: 4em;
-    height: 4em;
+    width: 3em;
+    height: 3em;
 }
 
 .ext-details .toggle {
@@ -158,6 +157,22 @@
     min-width: 22em;
     margin: 2em;
 }
+
+@media screen and (max-width: 980px) {
+    .ext-details header {
+        display: block;
+    }
+
+    .ext-details .icon {
+        float: right;
+        margin-left: .8rem;
+    }
+
+    .ext-details figure.permissions {
+        display: none;
+    }
+}
+
 
 .tag {
     font-size: .8rem;

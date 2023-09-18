@@ -4,6 +4,7 @@ namespace Paheko;
 use Paheko\Users\Categories;
 use Paheko\Users\Session;
 use Paheko\Search;
+use Paheko\UserException;
 use Paheko\Services\Services;
 use Paheko\Entities\Search as SearchEntity;
 use Paheko\Email\Mailings;
@@ -35,7 +36,12 @@ elseif ($target == 'service') {
 elseif ($target == 'search') {
 	$search_list = Search::list(SearchEntity::TARGET_USERS, Session::getUserId());
 	$search_list = array_filter($search_list, function ($s) {
-		return $s->hasUserId();
+		try {
+			return $s->hasUserId();
+		}
+		catch (UserException $e) {
+			return false;
+		}
 	});
 
 	$tpl->assign(compact('search_list'));
