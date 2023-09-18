@@ -397,7 +397,7 @@ class Emails
 		$unused_attachments = array_diff($all_attachments, $db->getAssoc('SELECT id, path FROM emails_queue_attachments;'));
 
 		foreach ($unused_attachments as $path) {
-			$file = Files::get(Utils::dirname($path));
+			$file = Files::get($path);
 
 			if ($file) {
 				$file->delete();
