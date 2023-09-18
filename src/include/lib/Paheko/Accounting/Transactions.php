@@ -250,10 +250,11 @@ class Transactions
 		$list->setModifier(function (&$row) {
 			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
 
-			$row->projects = [];
-
 			if (isset($row->id_project, $row->project_code)) {
-				$row->projects = array_combine(explode(',', $row->id_project), explode(',', $row->project_code));
+				$row->project_code = array_combine(explode(',', $row->id_project), explode(',', $row->project_code));
+			}
+			else {
+				$row->project_code = [];
 			}
 
 			if (isset($row->type_label)) {
@@ -262,8 +263,8 @@ class Transactions
 		});
 		$list->setExportCallback(function (&$row) {
 			$row->change = Utils::money_format($row->change, '.', '', false);
-			$row->projects = implode(', ', $row->projects);
-			unset($row->project_code, $row->id_project);
+			$row->project_code = implode(', ', $row->project_code);
+			unset($row->id_project);
 		});
 
 		return $list;
