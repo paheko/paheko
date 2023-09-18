@@ -128,8 +128,8 @@
 <ul>
 <li><code>module.ini</code> : contient les informations sur le module, voir ci-dessous pour les détails</li>
 <li><code>config.html</code> : si ce squelette existe, un bouton "Configurer" apparaîtra dans la liste des modules (Configuration -&gt; Modules) et affichera ce squelette dans un dialogue</li>
-<li><code>icon.svg</code> : icône du module, qui sera utilisée sur la page d'accueil, si le bouton est activé, et dans la liste des modules</li>
-<li><code>README.md</code> : si ce fichier existe, un lien "Documentation" apparaîtra dans la liste des extensions</li>
+<li><code>icon.svg</code> : icône du module, qui sera utilisée sur la page d'accueil, si le bouton est activé, et dans la liste des modules. Attention l'élément racine du fichier doit porter l'id <code>img</code> pour que l'icône fonctionne (<code>&lt;svg id="img"...&gt;</code>), notamment pour que les couleurs du thème s'appliquent à l'icône.</li>
+<li><code>README.md</code> : si ce fichier existe, son contenu sera affiché dans les détails du module</li>
 </ul>
 <p>Les modules peuvent également avoir des <code>snippets</code>, ce sont des squelettes qui seront inclus à des endroits précis de l'interface, permettant de rajouter des fonctionnalités, ils sont situés dans le sous-répertoire <code>snippets</code> du module :</p>
 <ul>
