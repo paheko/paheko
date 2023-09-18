@@ -1,6 +1,7 @@
 KD2/data/
 KD2/DB/AbstractEntity.php
 KD2/DB/DB.php
+KD2/DB/Date.php
 KD2/DB/EntityManager.php
 KD2/DB/SQLite3.php
 KD2/Brindille.php
