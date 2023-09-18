@@ -131,18 +131,25 @@ class Users
 			throw new UserException('La recherche ne comporte pas de colonne "id" ou "_user_id", et donc ne permet pas l\'envoi d\'email.');
 		}
 
+		$columns = array_map([$db, 'quoteIdentifier'], $header);
+		$columns = implode(', ', $columns);
+
 		// We only need the user id, store it in a temporary table for now
-		$db->exec('DROP TABLE IF EXISTS users_tmp_search; CREATE TEMPORARY TABLE IF NOT EXISTS users_tmp_search (id);');
-		$db->exec(sprintf('INSERT INTO users_tmp_search SELECT %s FROM (%s)', $id_column, $s->SQL(['no_limit' => true])));
+		$db->exec(sprintf('DROP TABLE IF EXISTS users_tmp_search; CREATE TEMPORARY TABLE IF NOT EXISTS users_tmp_search (%s);', $columns));
+		$db->exec(sprintf('INSERT INTO users_tmp_search SELECT * FROM (%s)', $s->SQL(['no_limit' => true])));
 
 		$fields = DynamicFields::getEmailFields();
 
 		$sql = [];
 
 		foreach ($fields as $field) {
-			$sql[] = sprintf('SELECT u.*, u.%s AS _email, NULL AS preferences
-				FROM users u INNER JOIN users_tmp_search AS s ON s.id = u.id
-				WHERE u.%1$s IS NOT NULL', $db->quoteIdentifier($field));
+			$sql[] = sprintf('SELECT s.*, u.*, u.%s AS _email, NULL AS preferences
+				FROM users u
+				INNER JOIN users_tmp_search AS s ON s.%s = u.id
+				WHERE u.%1$s IS NOT NULL',
+				$db->quoteIdentifier($field),
+				$db->quoteIdentifier($id_column)
+			);
 		}
 
 		return self::iterateEmails($sql);
