@@ -844,8 +844,9 @@ class Sections
 		}
 
 		$id_field = DynamicFields::getNameFieldsSQL('u');
+		$email_field = DB::getInstance()->quoteIdentifier(DynamicFields::getFirstEmailField());
 
-		$params['select'] = sprintf('tu.*, %s AS name, u.*', $id_field);
+		$params['select'] = sprintf('tu.*, %s AS name, %1$s AS _name, u.%s AS _email, u.*', $id_field, $email_field);
 		$params['tables'] = 'acc_transactions_users tu
 			INNER JOIN users u ON u.id = tu.id_user';
 
