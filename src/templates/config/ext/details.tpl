@@ -114,7 +114,7 @@
 	{else}
 		<p>Cette extension est un <strong>plugin</strong> installé sur notre serveur.</p>
 		{if !ENABLE_TECH_DETAILS}
-			<p>Son code n'est pas modifiable par votre pour des raisons de sécurité.</p>
+			<p>Son code n'est pas modifiable par votre organisation pour des raisons de sécurité.</p>
 		{else}
 			<p>Son code PHP peut être modifié si vous avez accès au serveur et des connaissances en programmation.</p>
 			<p>{linkbutton shape="help" href=$url_help_plugins label="Documentation des plugins" target="_blank"}
