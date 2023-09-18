@@ -51,6 +51,8 @@ class Modules
 	static public function refresh(): array
 	{
 		$db = DB::getInstance();
+		$db->begin();
+
 		$existing = $db->getAssoc(sprintf('SELECT id, name FROM %s;', Module::TABLE));
 		$list = self::listRaw();
 
@@ -89,7 +91,28 @@ class Modules
 			$db->exec('UPDATE modules SET enabled = 1 WHERE id = (SELECT id FROM modules WHERE web = 1 ORDER BY system DESC LIMIT 1);');
 		}
 
+		$db->commit();
+
 		return $errors;
+	}
+
+	static public function refreshEnabledModules(): void
+	{
+		$db = DB::getInstance();
+		$db->begin();
+
+		foreach (self::list() as $module) {
+			try {
+				$module->updateFromINI();
+				$module->save();
+				$module->updateTemplates();
+			}
+			catch (ValidationException $e) {
+				// Ignore errors here
+			}
+		}
+
+		$db->commit();
 	}
 
 	/**

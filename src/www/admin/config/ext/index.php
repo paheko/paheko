@@ -41,6 +41,7 @@ if (qg('install')) {
 	$tpl->assign('installable', true);
 }
 else {
+	Modules::refreshEnabledModules();
 	$list = Extensions::listEnabled();
 	$tpl->assign('installable', false);
 }
