@@ -30,6 +30,7 @@ class Modules
 	const SNIPPET_HOME_BUTTON = Module::SNIPPET_HOME_BUTTON;
 	const SNIPPET_MY_SERVICES = Module::SNIPPET_MY_SERVICES;
 	const SNIPPET_MY_DETAILS = Module::SNIPPET_MY_DETAILS;
+	const SNIPPET_BEFORE_NEW_TRANSACTION = Module::SNIPPET_BEFORE_NEW_TRANSACTION;
 
 	static public function fetchDistFile(string $path): ?string
 	{

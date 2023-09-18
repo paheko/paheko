@@ -10,6 +10,7 @@ use Paheko\Accounting\Projects;
 use Paheko\Accounting\Transactions;
 use Paheko\Accounting\Years;
 use Paheko\Users\Users;
+use Paheko\UserTemplate\Modules;
 
 use KD2\DB\Date;
 
@@ -241,9 +242,11 @@ $form->runIf('save', function () use ($transaction, $session, $linked_services) 
 	Utils::redirect(sprintf('!acc/transactions/details.php?id=%d&created', $transaction->id()));
 }, $csrf_key);
 
-$tpl->assign(compact('csrf_key', 'transaction', 'amount', 'lines', 'id_project', 'types_details', 'linked_users'));
+$projects = Projects::listAssoc();
+$variables = compact('csrf_key', 'transaction', 'amount', 'lines', 'id_project', 'types_details', 'linked_users', 'chart', 'projects');
 
-$tpl->assign('chart', $chart);
-$tpl->assign('projects', Projects::listAssoc());
+$tpl->assign($variables);
+
+$tpl->assign('snippets', Modules::snippetsAsString(Modules::SNIPPET_BEFORE_NEW_TRANSACTION, $variables));
 
 $tpl->display('acc/transactions/new.tpl');

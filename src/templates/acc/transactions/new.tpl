@@ -8,6 +8,8 @@
 </p>
 {/if}
 
+{$snippets|raw}
+
 {include file="./_form.tpl"}
 
 {include file="_foot.tpl"}
