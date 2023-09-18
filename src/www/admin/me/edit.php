@@ -8,7 +8,7 @@ require_once __DIR__ . '/_inc.php';
 
 $csrf_key = 'edit_my_info';
 
-$form->runIf('save', function () use ($session, $user) {
+$form->runIf('save', function () use ($user) {
 	$user->importForm();
 	$user->checkLoginFieldForUserEdit();
 	$user->save();

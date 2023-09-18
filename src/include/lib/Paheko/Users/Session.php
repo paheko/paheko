@@ -7,6 +7,7 @@ use Paheko\DB;
 use Paheko\Log;
 use Paheko\Utils;
 use Paheko\Plugins;
+use Paheko\UserTemplate\Modules;
 use Paheko\UserException;
 use Paheko\ValidationException;
 

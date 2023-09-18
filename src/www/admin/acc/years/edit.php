@@ -3,6 +3,7 @@ namespace Paheko;
 
 use Paheko\Accounting\Years;
 use Paheko\Entities\Accounting\Year;
+use KD2\DB\Date;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -22,7 +23,7 @@ $csrf_key = 'acc_years_edit_' . $year->id();
 
 $form->runIf('edit', function () use ($year) {
 	if (f('split')) {
-		$date = \DateTime::createFromFormat('!d/m/Y', f('end_date'));
+		$date = Date::createFromFormat('!d/m/Y', f('end_date'));
 
 		if (!$date) {
 			throw new UserException('Date de séparation invalide');

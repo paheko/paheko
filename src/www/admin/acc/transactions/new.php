@@ -206,7 +206,7 @@ if ($id = qg('account')) {
 	}
 }
 
-$form->runIf('save', function () use ($transaction, $session, $current_year, $linked_services) {
+$form->runIf('save', function () use ($transaction, $session, $linked_services) {
 	$transaction->importFromNewForm();
 	$transaction->id_creator = $session->getUser()->id;
 	$transaction->save();

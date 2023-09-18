@@ -27,7 +27,7 @@ $form->runIf('zip', function() use ($check, $session) {
 	exit;
 }, $csrf_key);
 
-$form->runIf('delete', function () use ($check, $session) {
+$form->runIf('delete', function () use ($check) {
 	foreach ($check as &$file) {
 		$file = Files::get($file);
 
@@ -43,7 +43,7 @@ $form->runIf('delete', function () use ($check, $session) {
 	}
 }, $csrf_key, '!docs/?path=' . $parent);
 
-$form->runIf('move', function () use ($check, $session) {
+$form->runIf('move', function () use ($check) {
 	$target = f('move');
 
 	foreach ($check as &$file) {

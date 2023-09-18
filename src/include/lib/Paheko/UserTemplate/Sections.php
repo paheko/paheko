@@ -3,6 +3,7 @@
 namespace Paheko\UserTemplate;
 
 use KD2\Brindille_Exception;
+use KD2\DB\DB_Exception;
 use Paheko\DB;
 use Paheko\DynamicList;
 use Paheko\Template;
@@ -247,7 +248,7 @@ class Sections
 		try {
 			$db->exec(sprintf('CREATE INDEX IF NOT EXISTS %s_auto_%s ON %1$s (%s);', $table, $hash, implode(', ', $search_params)));
 		}
-		catch (\KD2\DB\DB_Exception $e) {
+		catch (DB_Exception $e) {
 			throw new Brindille_Exception(sprintf("à la ligne %d, impossible de créer l'index, erreur SQL :\n%s\n\nRequête exécutée :\n%s", $line, $db->lastErrorMsg(), $sql));
 		}
 	}
@@ -1243,7 +1244,7 @@ class Sections
 			$result = $statement->execute();
 			$db->setReadOnly(false);
 		}
-		catch (\KD2\DB\DB_Exception $e) {
+		catch (DB_Exception $e) {
 			throw new Brindille_Exception(sprintf("à la ligne %d erreur SQL :\n%s\n\nRequête exécutée :\n%s", $line, $db->lastErrorMsg(), $sql));
 		}
 

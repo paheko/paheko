@@ -201,7 +201,7 @@ class Config extends Entity
 			$this->selfCheck();
 		}
 
-		$values = $this->getModifiedProperties(true);
+		$values = $this->getModifiedProperties();
 
 		$db = DB::getInstance();
 		$db->begin();

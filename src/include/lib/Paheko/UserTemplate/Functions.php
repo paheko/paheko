@@ -2,7 +2,6 @@
 
 namespace Paheko\UserTemplate;
 
-use KD2\Brindille;
 use KD2\Brindille_Exception;
 use KD2\ErrorManager;
 use KD2\JSONSchema;
@@ -14,6 +13,7 @@ use Paheko\Extensions;
 use Paheko\Template;
 use Paheko\Utils;
 use Paheko\UserException;
+use Paheko\UserTemplate\UserTemplate;
 use Paheko\Email\Emails;
 use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
@@ -22,7 +22,7 @@ use Paheko\Entities\Email\Email;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
 
-use const Paheko\{ROOT, WWW_URL, SECRET_KEY};
+use const Paheko\{ROOT, WWW_URL, ADMIN_URL, SECRET_KEY};
 
 class Functions
 {
@@ -54,7 +54,7 @@ class Functions
 	/**
 	 * Compile function to break inside a loop
 	 */
-	static public function break(string $name, string $params, Brindille $tpl, int $line)
+	static public function break(string $name, string $params, UserTemplate $tpl, int $line)
 	{
 		$in_loop = false;
 		foreach ($tpl->_stack as $element) {
@@ -74,7 +74,7 @@ class Functions
 	/**
 	 * Compile function to continue inside a loop
 	 */
-	static public function continue(string $name, string $params, Brindille $tpl, int $line)
+	static public function continue(string $name, string $params, UserTemplate $tpl, int $line)
 	{
 		$in_loop = 0;
 		foreach ($tpl->_stack as $element) {
@@ -117,7 +117,7 @@ class Functions
 		return $tpl->fetch('users/_password_form.tpl');
 	}
 
-	static public function save(array $params, Brindille $tpl, int $line): void
+	static public function save(array $params, UserTemplate $tpl, int $line): void
 	{
 		if (!$tpl->module) {
 			throw new Brindille_Exception('Module name could not be found');
@@ -138,6 +138,7 @@ class Functions
 			$where_value = $params['id'];
 		}
 		else {
+			$where_value = null;
 			$field = null;
 		}
 
@@ -224,7 +225,7 @@ class Functions
 		}
 	}
 
-	static public function delete(array $params, Brindille $tpl, int $line): void
+	static public function delete(array $params, UserTemplate $tpl, int $line): void
 	{
 		if (!$tpl->module) {
 			throw new Brindille_Exception('Module name could not be found');
@@ -269,7 +270,7 @@ class Functions
 		$db->delete($table, $where, $args);
 	}
 
-	static public function captcha(array $params, Brindille $tpl, int $line)
+	static public function captcha(array $params, UserTemplate $tpl, int $line)
 	{
 		$secret = md5(SECRET_KEY . Utils::getSelfURL(false));
 
@@ -409,7 +410,7 @@ class Functions
 		$external_count += $external_count;
 	}
 
-	static public function debug(array $params, Brindille $tpl)
+	static public function debug(array $params, UserTemplate $tpl)
 	{
 		if (!count($params)) {
 			$params = $tpl->getAllVariables();
@@ -427,7 +428,7 @@ class Functions
 		return $out;
 	}
 
-	static public function error(array $params, Brindille $tpl)
+	static public function error(array $params, UserTemplate $tpl)
 	{
 		throw new UserException($params['message'] ?? 'Erreur du module');
 	}

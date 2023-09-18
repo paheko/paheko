@@ -35,7 +35,7 @@ $csrf_key = 'user_security_' . $user->id;
 
 $login_field = DF::getLoginField();
 
-$form->runIf('save', function () use ($user, $login_field) {
+$form->runIf('save', function () use ($user) {
 	$user->importSecurityForm(false);
 	$user->save();
 }, $csrf_key, '!users/details.php?id=' . $user->id);

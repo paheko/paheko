@@ -181,12 +181,6 @@ class DynamicFields
 		return $fields;
 	}
 
-	static public function getEntityProperties(): array
-	{
-		$fields = self::getEntityTypes();
-		return DynamicField::SYSTEM_FIELDS + $fields;
-	}
-
 	protected function __construct(bool $load = true)
 	{
 		if ($load) {

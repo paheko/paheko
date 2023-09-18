@@ -213,7 +213,7 @@ class Storage extends AbstractStorage
 				return Files::getRemainingQuota();
 			case 'DAV::quota-used-bytes':
 				return Files::getUsedQuota();
-			case Nextcloud::PROP_OC_SIZE:
+			case NextCloud::PROP_OC_SIZE:
 				return $file->getRecursiveSize();
 			case WOPI::PROP_USER_NAME:
 				return $this->session->getUser()->name();
@@ -245,7 +245,7 @@ class Storage extends AbstractStorage
 		}
 
 		if (null === $properties) {
-			$properties = array_merge(WebDAV::BASIC_PROPERTIES, ['DAV::getetag', Nextcloud::PROP_OC_ID]);
+			$properties = array_merge(WebDAV::BASIC_PROPERTIES, ['DAV::getetag', NextCloud::PROP_OC_ID]);
 		}
 
 		$out = [];

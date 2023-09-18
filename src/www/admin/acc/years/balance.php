@@ -25,7 +25,7 @@ if ($year->closed) {
 $csrf_key = 'acc_years_balance_' . $year->id();
 $accounts = $year->accounts();
 
-$form->runIf('save', function () use ($year, $session) {
+$form->runIf('save', function () use ($year) {
 	$db = DB::getInstance();
 	// Fail everything if appropriation failed
 	$db->begin();
@@ -76,6 +76,8 @@ elseif (null !== f('from_year')) {
 	}
 }
 
+$matching_accounts = null;
+
 if ($previous_year) {
 	$lines = Reports::getAccountsBalances(['year' => $previous_year->id(), 'exclude_position' => [Account::EXPENSE, Account::REVENUE]]);
 
@@ -121,7 +123,7 @@ if ($previous_year) {
 		$line->debit = $line->is_debt ? abs($line->balance) : 0;
 
 		if ($chart_change) {
-			if (array_key_exists($line->code, $matching_accounts)) {
+			if ($matching_accounts && array_key_exists($line->code, $matching_accounts)) {
 				$acc = $matching_accounts[$line->code];
 				$line->account_selector = [$acc->id => sprintf('%s — %s', $acc->code, $acc->label)];
 			}

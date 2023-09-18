@@ -57,7 +57,7 @@ $form->runIf('confirm_delete', function () use ($check, $session) {
 	$db->commit();
 }, $csrf_key, '!docs/trash.php');
 
-$form->runIf('restore', function() use ($check, $session) {
+$form->runIf('restore', function() use ($check) {
 	if (empty($check)) {
 		throw new UserException('Aucun fichier sélectionné');
 	}

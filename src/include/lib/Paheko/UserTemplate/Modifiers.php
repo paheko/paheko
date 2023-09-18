@@ -162,7 +162,7 @@ class Modifiers
 
 	static public function get_leading_number($str): ?string
 	{
-		$match = preg_match(self::LEADING_NUMBER_REGEXP, $str);
+		$match = preg_match(self::LEADING_NUMBER_REGEXP, $str, $match);
 		return $match[1] ?? null;
 	}
 

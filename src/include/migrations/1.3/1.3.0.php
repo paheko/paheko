@@ -11,6 +11,7 @@ use Paheko\UserTemplate\Modules;
 use KD2\DB\DB_Exception;
 use KD2\DB\EntityManager;
 
+$db = DB::getInstance();
 $config_path = ROOT . '/' . CONFIG_FILE;
 
 // Rename namespace in config file

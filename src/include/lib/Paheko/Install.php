@@ -129,7 +129,7 @@ class Install
 
 		try {
 			// We can't use the real password, as it might not be valid (too short or compromised)
-			$ok = self::install($data->country ?? 'FR', $data->organization ?? 'Association', $data->name, $data->email, md5($data->password));
+			self::install($data->country ?? 'FR', $data->organization ?? 'Association', $data->name, $data->email, md5($data->password));
 
 			// Restore password
 			DB::getInstance()->preparedQuery('UPDATE users SET password = ? WHERE id = 1;', $data->password);

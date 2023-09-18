@@ -16,7 +16,7 @@ if (!$email) {
 
 $csrf_key = 'block_email';
 
-$form->runIf('send', function () use ($email, $address) {
+$form->runIf('send', function () use ($email) {
     $email->setOptout('Désinscription manuelle par un administrateur');
     $email->save();
 }, $csrf_key, '!users/');

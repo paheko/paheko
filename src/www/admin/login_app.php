@@ -26,6 +26,8 @@ $form->runIf('cancel', function () use ($app_token, $session) {
 });
 
 $form->runIf('confirm', function () use ($app_token, $session) {
+	$data = null;
+
 	if ($app_token == 'redirect') {
 		$data = $session->createAppCredentials();
 	}

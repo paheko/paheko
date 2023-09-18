@@ -656,11 +656,7 @@ class Emails
 			$const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
 			$secure = constant($const);
 
-			$smtp = new SMTP(SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, $secure);
-
-			if (SMTP_HELO_HOSTNAME) {
-				$smtp->servername = SMTP_HELO_HOSTNAME;
-			}
+			$smtp = new SMTP(SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, $secure, SMTP_HELO_HOSTNAME);
 
 			$smtp->send($message);
 		}

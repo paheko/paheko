@@ -20,7 +20,7 @@ if (!$page) {
 
 $csrf_key = 'attach_' . $page->id();
 
-$form->runIf('delete', function () use ($page, $session) {
+$form->runIf('delete', function () use ($page) {
 	$path = $page->dir_path . '/' . f('delete');
 	$file = Files::get($path);
 

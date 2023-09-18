@@ -585,7 +585,7 @@ class Files
 		$uri = trim($uri, '/');
 		$uri = rawurldecode($uri);
 
-		return self::get($uri, File::TYPE_FILE);
+		return self::get($uri);
 	}
 
 	static public function getContext(string $path): ?string
