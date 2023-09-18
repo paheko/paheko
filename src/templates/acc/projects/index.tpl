@@ -12,6 +12,7 @@
 		{else}
 			{linkbutton href="?by_year=1" label="Grouper par exercice" shape="right"}
 		{/if}
+		{linkbutton href="!acc/reports/ledger.php?project=all" label="Grand livre analytique — tous les exercices"}
 	</p>
 
 
@@ -22,11 +23,6 @@
 		{/if}
 	</p>
 
-	{if $by_year}
-	<p class="actions">
-		{linkbutton href="!acc/reports/ledger.php?project=all" label="Grand livre analytique — tous les exercices"}
-	</p>
-	{/if}
 {/if}
 </div>
 
