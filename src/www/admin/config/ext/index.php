@@ -23,7 +23,8 @@ $form->runIf(f('enable') !== null || f('disable') !== null, function () {
 	$name = current($ext);
 
 	Extensions::toggle($type, $name, $enabled);
-}, $csrf_key, '!config/ext/?focus=' . f('install'));
+	Utils::redirect('!config/ext/?focus=' . $name);
+}, $csrf_key);
 
 if (qg('install')) {
 	foreach (Modules::refresh() as $error) {
