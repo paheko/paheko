@@ -17,7 +17,7 @@ use KD2\ZipWriter;
 
 use Paheko\Entities\Files\File;
 
-use const Paheko\{ROOT, WWW_URL};
+use const Paheko\{ROOT, WWW_URL, BASE_URL};
 
 class Module extends Entity
 {
@@ -37,11 +37,11 @@ class Module extends Entity
 	const SNIPPET_MY_DETAILS = 'snippets/my_details.html';
 
 	const SNIPPETS = [
-		self::SNIPPET_HOME_BUTTON => 'Icône sur la page d\'accueil',
-		self::SNIPPET_USER => 'En bas de la fiche d\'un membre',
-		self::SNIPPET_TRANSACTION => 'En bas de la fiche d\'une écriture',
-		self::SNIPPET_MY_SERVICES => 'Page "Mes activités"',
-		self::SNIPPET_MY_DETAILS => 'Page "Mes infos personnelles"',
+		self::SNIPPET_HOME_BUTTON => 'icône sur la page d\'accueil',
+		self::SNIPPET_USER => 'en bas de la fiche d\'un membre',
+		self::SNIPPET_TRANSACTION => 'en bas de la fiche d\'une écriture',
+		self::SNIPPET_MY_SERVICES => 'sur la page "Mes activités"',
+		self::SNIPPET_MY_DETAILS => 'sur la page "Mes infos personnelles"',
 	];
 
 	const VALID_NAME_REGEXP = '/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/';
@@ -216,9 +216,18 @@ class Module extends Entity
 		return $this->url(self::ICON_FILE);
 	}
 
+	public function config_url(): ?string
+	{
+		if (!$this->hasFile(self::CONFIG_FILE)) {
+			return null;
+		}
+
+		return $this->url(self::CONFIG_FILE);
+	}
+
 	public function storage_root(): string
 	{
-		return File::CONTEXT_EXTENSIONS . '/p/' . $this->name;
+		return File::CONTEXT_EXTENSIONS . '/m/' . $this->name;
 	}
 
 	public function path(string $file = null): string
@@ -234,6 +243,11 @@ class Module extends Entity
 	public function dir(): ?File
 	{
 		return Files::get($this->path());
+	}
+
+	public function storage(): ?File
+	{
+		return Files::get($this->storage_root());
 	}
 
 	public function hasFile(string $file): bool
@@ -258,7 +272,16 @@ class Module extends Entity
 
 	public function hasDistFile(string $path): bool
 	{
-		return file_exists($this->distPath($path));
+		return @file_exists($this->distPath($path));
+	}
+
+	public function fetchFile(string $path): ?string
+	{
+		if ($this->hasLocalFile($path)) {
+			return $this->fetchLocalFile($path);
+		}
+
+		return $this->fetchDistFile($path);
 	}
 
 	public function fetchLocalFile(string $path): ?string
@@ -280,6 +303,33 @@ class Module extends Entity
 	public function hasData(): bool
 	{
 		return DB::getInstance()->test('sqlite_master', 'type = \'table\' AND name = ?', sprintf('modules_data_%s', $this->name));
+	}
+
+	public function getDataSize(): int
+	{
+		return DB::getInstance()->getTableSize(sprintf('modules_data_%s', $this->name));
+	}
+
+	public function getCodeSize(): int
+	{
+		$dir = $this->dir();
+
+		if ($dir) {
+			return $dir->getRecursiveSize();
+		}
+
+		return 0;
+	}
+
+	public function getFilesSize(): int
+	{
+		$dir = $this->storage();
+
+		if ($dir) {
+			return $dir->getRecursiveSize();
+		}
+
+		return 0;
 	}
 
 	public function canDelete(): bool
@@ -411,10 +461,15 @@ class Module extends Entity
 		}
 
 		if ($this->web && $this->enabled && !$file) {
-			return WWW_URL;
+			return BASE_URL;
 		}
 
-		return sprintf('%sm/%s/%s%s', WWW_URL, $this->name, $file, $params);
+		return sprintf('%sm/%s/%s%s', BASE_URL, $this->name, $file, $params);
+	}
+
+	public function public_url(string $file = '', array $params = null)
+	{
+		return str_replace(BASE_URL, WWW_URL, $this->url($file, $params));
 	}
 
 	public function isValidPath(string $path): bool
@@ -476,23 +531,6 @@ class Module extends Entity
 
 			return;
 		}
-		// Render a markdown file
-		elseif (substr($path, -3) === '.md') {
-			if ($has_local_file) {
-				$file = Files::get(File::CONTEXT_MODULES . '/' . $this->name . '/' . $path);
-
-				if (!$file) {
-					throw new UserException('Invalid path');
-				}
-
-				$text = $file->fetch();
-			}
-			else {
-				$text = @file_get_contents($this->distPath($path));
-			}
-
-			Router::markdown($text);
-		}
 		// Serve a static file from a user module
 		elseif ($has_local_file) {
 			$file = Files::get(File::CONTEXT_MODULES . '/' . $this->name . '/' . $path);
@@ -543,8 +581,9 @@ class Module extends Entity
 		$ut->assignArray($params);
 		$content = $ut->fetch();
 		$type = $ut->getContentType();
+		$code = $ut->getStatusCode();
 
-		if ($uri !== null && preg_match('!html|xml|text!', $type) && !$ut->get('nocache')) {
+		if ($uri !== null && preg_match('!html|xml|text!', $type) && !$ut->get('nocache') && $code == 200) {
 			$cache = true;
 		}
 		else {
@@ -555,8 +594,8 @@ class Module extends Entity
 		$signal = Plugins::fire(
 			'web.request',
 			true,
-			compact('path', 'uri', 'module', 'content', 'type', 'cache'),
-			compact('type', 'cache', 'content')
+			compact('path', 'uri', 'module', 'content', 'type', 'cache', 'code'),
+			compact('type', 'cache', 'content', 'code')
 		);
 
 		if ($signal && $signal->isStopped()) {
@@ -564,14 +603,15 @@ class Module extends Entity
 		}
 
 		if ($signal) {
-			$type = $signal->getOut('type');
+			$ut->setHeader('type', $signal->getOut('type'));
+			$ut->setHeader('code', $signal->getOut('code'));
 			$cache = $signal->getOut('cache');
 			$content = $signal->getOut('content');
 		}
 
 		unset($signal);
 
-		header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
+		$ut->dumpHeaders();
 
 		if ($type == 'application/pdf') {
 			Utils::streamPDF($content);
@@ -680,5 +720,16 @@ class Module extends Entity
 		}
 
 		return $r;
+	}
+
+	public function listSnippets(): array
+	{
+		$out = [];
+
+		foreach (DB::getInstance()->iterate('SELECT name FROM modules_templates WHERE id_module = ? AND name LIKE \'snippets/%\';', $this->id()) as $row) {
+			$out[$row->name] = self::SNIPPETS[$row->name];
+		}
+
+		return $out;
 	}
 }

@@ -45,6 +45,7 @@
 				Version SQLite&nbsp;: {$sqlite_version}<br />
 				Heure du serveur&nbsp;: {$server_time|date}<br />
 				Chiffrement GnuPG&nbsp;: {if $has_gpg_support}disponible, module activé{else}non, module PHP gnupg non installé&nbsp;?{/if}<br />
+				{link label="Voir la configuration du serveur" href="?dump_config=1" target="_dialog"}
 			</dd>
 			{/if}
 			<dt>Espace disque</dt>
@@ -104,12 +105,6 @@
 	fetch(g.admin_url + 'config/?check_version');
 {/if}
 {literal}
-function toggleVersions() {
-	g.toggle('.versions', $('#f_file_versioning_policy_none').checked ? false : true);
-}
-toggleVersions();
-$('input[name=file_versioning_policy]').forEach((e) => e.onchange = toggleVersions);
-
 function toggleWebInput() {
 	g.toggle('.external-web', $('#f_site_disabled_1').checked);
 }

@@ -94,9 +94,11 @@
 
 	{$list->getHTMLPagination(true)|raw}
 
-{elseif $results}
+{elseif $count}
 
 	<p class="actions">{exportmenu form=true name="_export" class="menu-btn-right"}</p>
+
+	<p class="help">{$count} résultats trouvés pour cette recherche.</p>
 
 	<table class="list">
 		<thead>
@@ -113,13 +115,13 @@
 				<td>{$column}</td>
 				{/foreach}
 			</tr>
-			{foreachelse}
-			<tr>
-				<td colspan="{$header|count}"><p class="alert block">Aucun résultat</p></td>
-			</tr>
 			{/foreach}
 		</tbody>
 	</table>
+
+{elseif $count === 0}
+
+	<p class="alert block">Aucun résultat trouvé pour cette recherche.</p>
 
 {/if}
 

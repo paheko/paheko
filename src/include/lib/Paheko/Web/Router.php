@@ -45,7 +45,7 @@ class Router
 		// This might be changed later
 		http_response_code(200);
 
-		$uri = substr($uri, 1);
+		$uri = ltrim($uri, '/');
 
 		$first = ($pos = strpos($uri, '/')) ? substr($uri, 0, $pos) : null;
 		$method = $_SERVER['REQUEST_METHOD'] ?? $_SERVER['REDIRECT_REQUEST_METHOD'];
@@ -68,29 +68,41 @@ class Router
 		}
 
 		// Redirect old URLs (pre-1.1)
-		if ($uri == 'feed/atom/') {
+		if ($uri === 'feed/atom/') {
 			Utils::redirect('/atom.xml');
 		}
-		elseif ($uri == 'favicon.ico') {
+		elseif ($uri === 'favicon.ico') {
+			http_response_code(301);
 			header('Location: ' . Config::getInstance()->fileURL('favicon'), true);
 			return;
 		}
-		elseif (preg_match('!^(?:admin/p|p|m)/\w+$!', $uri)) {
+		// Default robots.txt if website is disabled
+		elseif ($uri === 'robots.txt' && Config::getInstance()->site_disabled) {
+			http_response_code(200);
+			header('Content-Type: text/plain');
+			echo "User-agent: *\nDisallow: /admin/\n";
+			echo "User-agent: GPTBot\nDisallow: /\n";
+			return;
+		}
+		// Add trailing slash to URLs if required
+		elseif (($first === 'p' || $first === 'm') && preg_match('!^(?:admin/p|p|m)/\w+$!', $uri)) {
 			Utils::redirect('/' . $uri . '/');
 		}
-		elseif (preg_match('!^(admin/p|p)/(' . Plugins::NAME_REGEXP . ')/(.*)$!', $uri, $match)
-			&& Plugins::exists($match[2])) {
-			$uri = ($match[1] == 'admin/p' ? 'admin/' : 'public/') . $match[3];
+		elseif ((($first === 'admin' && 0 === strpos($uri, 'admin/p/')) || $first === 'p')
+			&& preg_match('!^(?:admin/p|p)/(' . Plugins::NAME_REGEXP . ')/(.*)$!', $uri, $match)
+			&& Plugins::exists($match[1])) {
+			$uri = ($first === 'admin' ? 'admin/' : 'public/') . $match[2];
 
-			if ($match[3] === 'icon.svg' || substr($uri, -3) === '.md') {
-				$r = Plugins::routeStatic($match[2], $uri);
+
+			if ($match[2] === 'icon.svg' || substr($uri, -3) === '.md') {
+				$r = Plugins::routeStatic($match[1], $uri);
 
 				if ($r) {
 					return;
 				}
 			}
 			else {
-				$plugin = Plugins::get($match[2]);
+				$plugin = Plugins::get($match[1]);
 
 				if ($plugin && $plugin->enabled) {
 					$plugin->route($uri);
@@ -101,81 +113,95 @@ class Router
 
 		// Other admin/plugin routes are not found
 		if ($first === 'admin' || $first === 'p') {
-			http_response_code(404);
-			throw new UserException('Cette page n\'existe pas.');
+			throw new UserException('Cette page ne semble pas exister.', 404);
 		}
-		elseif ('api' === $first) {
+		elseif ($first === 'api') {
 			API::dispatchURI(substr($uri, 4));
 			return;
 		}
+		// Route WebDAV requests to WebDAV server
 		elseif ((in_array($uri, self::DAV_ROUTES) || in_array($first, self::DAV_ROUTES))
 			&& WebDAV_Server::route($uri)) {
 			return;
 		}
-		elseif ($method == 'PROPFIND') {
+		// Redirect PROPFIND requests to WebDAV, required for some WebDAV clients
+		elseif ($method === 'PROPFIND') {
 			header('Location: /dav/documents/');
 			return;
 		}
-		elseif (($file = Files::getFromURI($uri))
-				|| ($file = Web::getAttachmentFromURI($uri))) {
-			$size = null;
-
-			if ($file->trash) {
-				http_response_code(404);
-				throw new UserException('Cette page n\'existe pas.');
-			}
-
-			foreach ($_GET as $key => $v) {
-				if (array_key_exists($key, File::ALLOWED_THUMB_SIZES)) {
-					$size = $key;
-					break;
-				}
-			}
-
-			$session = Session::getInstance();
-
-			$signal = Plugins::fire('http.request.file.before', true, compact('file', 'uri', 'session'));
-
-			if ($signal && $signal->isStopped()) {
-				// If a plugin handled the request, let's stop here
-				return;
-			}
-
-			$file->validateCanRead($session, $_GET['s'] ?? null, $_POST['p'] ?? null);
-
-			if ($size) {
-				$file->serveThumbnail($size);
-			}
-			else {
-				$file->serve(isset($_GET['download']));
-			}
-
-			Plugins::fire('http.request.file.after', false, compact('file', 'uri', 'session'));
-
+		elseif ($uri && self::routeFile($uri)) {
 			return;
 		}
 
+		// Redirect to ADMIN_URL if website is disabled
+		// (but not for content.css)
+		if (Config::getInstance()->site_disabled && $uri !== 'content.css' && $first !== 'm') {
+			if ($uri === '') {
+				Utils::redirect(ADMIN_URL);
+			}
+			else {
+				throw new UserException('Cette page n\'existe pas.', 404);
+			}
+		}
+
+		// Let modules handle the request
 		Modules::route($uri);
 	}
 
-	static public function markdown(string $text)
+	static public function routeFile(string $uri): bool
 	{
-		$md = new Markdown(null, null);
-		header('Content-Type: text/html');
+		$size = null;
 
-		$text = $md->text($text);
-		$title = '';
-
-		if (preg_match('!<h1[^>]*>(.*?)</h1>!is', $text, $match)) {
-			$title = strip_tags($match[1]);
+		if (false !== strpos($uri, 'px.') && preg_match('/\.([\da-z-]+px)\.(?:webp|svg)$/', $uri, $match)) {
+			$uri = substr($uri, 0, -strlen($match[0]));
+			$size = $match[1];
 		}
 
-		printf('<!DOCYPE html><head><title>%s</title>
-			<style type="text/css">body { font-family: Verdana, sans-serif; padding: .5em; margin: 0; background: #fff; color: #000; }</style>
-			<link rel="stylesheet" type="text/css" href="%scss.php" /></head><body>', $title, ADMIN_URL);
+		$file = Files::getFromURI($uri) ?? Web::getAttachmentFromURI($uri);
 
-		echo $text;
+		if (!$file) {
+			$context = strtok($uri, '/');
 
+			// URL has a context but is not a file? stop here
+			if ($context && array_key_exists($context, File::CONTEXTS_NAMES)) {
+				throw new UserException('Cette adresse n\'existe pas ou plus.', 404);
+			}
+
+			return false;
+		}
+
+		if ($file->trash) {
+			throw new UserException('Cette page n\'existe pas.', 404);
+		}
+
+		foreach ($_GET as $key => $v) {
+			if (array_key_exists($key, File::ALLOWED_THUMB_SIZES)) {
+				$size = $key;
+				break;
+			}
+		}
+
+		$session = Session::getInstance();
+
+		$signal = Plugins::fire('http.request.file.before', true, compact('file', 'uri', 'session'));
+
+		if ($signal && $signal->isStopped()) {
+			// If a plugin handled the request, let's stop here
+			return true;
+		}
+
+		$file->validateCanRead($session, $_GET['s'] ?? null, $_POST['p'] ?? null);
+
+		if ($size) {
+			$file->serveThumbnail($size);
+		}
+		else {
+			$file->serve(isset($_GET['download']));
+		}
+
+		Plugins::fire('http.request.file.after', false, compact('file', 'uri', 'session'));
+
+		return true;
 	}
 
 	static public function log(string $message, ...$params)

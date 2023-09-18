@@ -29,10 +29,8 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 		{input type="text" name="help" label="Texte d'aide" help="Apparaîtra dans les formulaires de manière identique à ce texte." source=$field}
 
 	</dl>
-	<dl class="type-not-virtual">
-		{input type="checkbox" name="required" value=1 label="Champ obligatoire" help="Si coché, une fiche membre ne pourra pas être enregistrée si ce champ n'est pas renseigné." source=$field}
-	</dl>
 	<dl class="type-not-virtual type-not-password">
+		{input type="checkbox" name="required" value=1 label="Champ obligatoire" help="Si coché, une fiche membre ne pourra pas être enregistrée si ce champ n'est pas renseigné." source=$field}
 		{input type="text" name="default" source=$field label="Valeur par défaut" help="Si renseigné, le champ aura cette valeur par défaut lors de l'ajout d'un nouveau membre"}
 	</dl>
 	<dl class="type-not-password">

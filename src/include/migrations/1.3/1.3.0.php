@@ -158,16 +158,6 @@ foreach (Files::list('modules/web') as $file) {
 	}
 }
 
-// Migrate web_pages
-$db->exec('
-	INSERT INTO web_pages
-		SELECT id,
-			CASE WHEN parent = \'\' THEN NULL ELSE parent END,
-			path, \'web/\' || path, uri, type, status, format, published, modified, title, content
-		FROM web_pages_old;
-	DROP TABLE web_pages_old;
-');
-
 // Update searches
 foreach ($db->iterate('SELECT * FROM searches;') as $row) {
 	if ($row->type == 'json') {

@@ -181,6 +181,15 @@ class Plugin extends Entity
 		return $this->hasFile(self::CONFIG_FILE);
 	}
 
+	public function fetchFile(string $path): ?string
+	{
+		if (!$this->hasFile($path)) {
+			return null;
+		}
+
+		return file_get_contents($this->path($path));
+	}
+
 	public function url(string $file = '', array $params = null)
 	{
 		if (null !== $params) {
@@ -335,7 +344,7 @@ class Plugin extends Entity
 		$file = ltrim($file, './');
 
 		if (preg_match('!(?:\.\.|[/\\\\]\.|\.[/\\\\])!', $file)) {
-			throw new \UnexpectedValueException('Chemin de fichier incorrect.');
+			throw new UserException('Chemin de fichier incorrect.');
 		}
 
 		if (!$allow_protected && in_array($file, self::PROTECTED_FILES)) {
@@ -359,7 +368,7 @@ class Plugin extends Entity
 			if (substr($file, 0, 6) == 'admin/' || substr($file, 0, 7) == 'public/') {
 				define('Paheko\PLUGIN_ROOT', $this->path());
 				define('Paheko\PLUGIN_URL', WWW_URL . 'p/' . $this->name . '/');
-				define('Paheko\PLUGIN_ADMIN_URL', WWW_URL .'admin/p/' . $this->name . '/');
+				define('Paheko\PLUGIN_ADMIN_URL', ADMIN_URL .'p/' . $this->name . '/');
 				define('Paheko\PLUGIN_QSP', '?');
 
 				$tpl = Template::getInstance();
@@ -401,7 +410,7 @@ class Plugin extends Entity
 		try {
 			$this->call($uri);
 		}
-		catch (\UnexpectedValueException $e) {
+		catch (UserException $e) {
 			http_response_code(404);
 			throw new UserException($e->getMessage());
 		}

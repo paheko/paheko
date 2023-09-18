@@ -24,6 +24,16 @@ use KD2\DB\EntityManager as EM;
 
 class Users
 {
+	const IMPORT_MODE_AUTO = 'auto';
+	const IMPORT_MODE_CREATE = 'create';
+	const IMPORT_MODE_UPDATE= 'update';
+
+	const IMPORT_MODES = [
+		self::IMPORT_MODE_AUTO,
+		self::IMPORT_MODE_CREATE,
+		self::IMPORT_MODE_UPDATE,
+	];
+
 	static public function create(): User
 	{
 		$default_category = Config::getInstance()->default_category;
@@ -123,14 +133,16 @@ class Users
 
 		// We only need the user id, store it in a temporary table for now
 		$db->exec('DROP TABLE IF EXISTS users_tmp_search; CREATE TEMPORARY TABLE IF NOT EXISTS users_tmp_search (id);');
-		$db->exec(sprintf('INSERT INTO users_tmp_search SELECT %s FROM (%s)', $id_column, $s->SQL()));
+		$db->exec(sprintf('INSERT INTO users_tmp_search SELECT %s FROM (%s)', $id_column, $s->SQL(['no_limit' => true])));
 
 		$fields = DynamicFields::getEmailFields();
 
 		$sql = [];
 
 		foreach ($fields as $field) {
-			$sql[] = sprintf('SELECT u.*, u.%s AS _email, NULL AS preferences FROM users u INNER JOIN users_tmp_search AS s ON s.id = u.id', $db->quoteIdentifier($field));
+			$sql[] = sprintf('SELECT u.*, u.%s AS _email, NULL AS preferences
+				FROM users u INNER JOIN users_tmp_search AS s ON s.id = u.id
+				WHERE u.%1$s IS NOT NULL', $db->quoteIdentifier($field));
 		}
 
 		return self::iterateEmails($sql);
@@ -148,7 +160,7 @@ class Users
 				'select' => 'u.id',
 			],
 			'_user_name_index' => [
-				'select' => $df->getNameFieldsSQL('s'),
+				'select' => $df::getNameFieldsSearchableSQL('s'),
 			],
 		];
 
@@ -261,7 +273,16 @@ class Users
 	static public function getName(int $id): ?string
 	{
 		$name = DynamicFields::getNameFieldsSQL();
-		return EM::getInstance(User::class)->col(sprintf('SELECT %s FROM @TABLE WHERE id = ?;', $name), $id);
+		$found = EM::getInstance(User::class)->col(sprintf('SELECT %s FROM @TABLE WHERE id = ?;', $name), $id);
+		$found = (string) $found;
+		return $found ?: null;
+	}
+
+	static public function getNames(array $ids): array
+	{
+		$name = DynamicFields::getNameFieldsSQL();
+		$db = EM::getInstance(User::class)->DB();
+		return $db->getAssoc(sprintf('SELECT id, %s FROM users WHERE %s;', $name, $db->where('id', $ids)));
 	}
 
 	static public function getFromNumber(string $number): ?User
@@ -274,7 +295,9 @@ class Users
 	{
 		$name = DynamicFields::getNameFieldsSQL();
 		$field = DynamicFields::getNumberField();
-		return EM::getInstance(User::class)->col(sprintf('SELECT %s FROM @TABLE WHERE %s = ?;', $name, $field), $number);
+		$found = EM::getInstance(User::class)->col(sprintf('SELECT %s FROM @TABLE WHERE %s = ?;', $name, $field), $number);
+		$found = (string) $found;
+		return $found ?: null;
 	}
 
 	static public function deleteSelected(array $ids): void
@@ -391,6 +414,10 @@ class Users
 
 	static public function importReport(CSV_Custom $csv, string $mode, ?int $logged_user_id = null): array
 	{
+		if (!in_array($mode, self::IMPORT_MODES)) {
+			throw new \InvalidArgumentException('Invalid import mode: ' . $mode);
+		}
+
 		$report = ['created' => [], 'modified' => [], 'unchanged' => [], 'errors' => []];
 
 		if ($logged_user_id) {
@@ -427,6 +454,10 @@ class Users
 
 	static public function import(CSV_Custom $csv, string $mode, ?int $logged_user_id = null): void
 	{
+		if (!in_array($mode, self::IMPORT_MODES)) {
+			throw new \InvalidArgumentException('Invalid import mode: ' . $mode);
+		}
+
 		$db = DB::getInstance();
 		$db->begin();
 
@@ -449,6 +480,10 @@ class Users
 
 	static public function iterateImport(CSV_Custom $csv, string $mode, ?array &$errors = null): \Generator
 	{
+		if (!in_array($mode, self::IMPORT_MODES)) {
+			throw new \InvalidArgumentException('Invalid import mode: ' . $mode);
+		}
+
 		$number_field = DynamicFields::getNumberField();
 
 		foreach ($csv->iterate() as $i => $row) {

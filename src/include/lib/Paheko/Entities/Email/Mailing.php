@@ -81,25 +81,24 @@ class Mailing extends Entity
 			throw new \InvalidArgumentException('Invalid target');
 		}
 
-		$list = [];
+		$db = DB::getInstance();
+		$db->begin();
+		$count = 0;
 
-		foreach ($recipients as $recipient) {
-			if (empty($recipient->email)) {
+		foreach ($recipients as $email => $data) {
+			// Ignore empty emails, normally NULL emails are already discarded in WHERE clauses
+			// But, just to be sure
+			if (empty($email)) {
 				continue;
 			}
 
-			$list[$recipient->email] = $recipient;
-		}
-
-		if (!count($list)) {
-			throw new UserException('La liste de destinataires sélectionnée ne comporte aucun membre, ou aucun avec une adresse e-mail renseignée.');
-		}
-
-		$db = DB::getInstance();
-		$db->begin();
-
-		foreach ($list as $email => $data) {
 			$this->addRecipient($email, $data);
+			$count++;
+		}
+
+		if (!$count) {
+			$db->rollback();
+			throw new UserException('La liste de destinataires sélectionnée ne comporte aucun membre, ou aucun avec une adresse e-mail renseignée.');
 		}
 
 		$db->commit();
@@ -140,18 +139,33 @@ class Mailing extends Entity
 	public function listRecipients(): \Generator
 	{
 		$db = DB::getInstance();
+		$sql = sprintf('SELECT email, extra_data AS data, %s AS _name FROM mailings_recipients WHERE id_mailing = %d ORDER BY id;',
+			$this->getNameFieldsSQL(),
+			$this->id()
+		);
 
-		foreach ($db->iterate('SELECT email, extra_data AS data FROM mailings_recipients WHERE id_mailing = ? ORDER BY id;', $this->id) as $row) {
+		foreach ($db->iterate($sql) as $row) {
 			$data = $row->data ? json_decode($row->data) : null;
-			yield $row->email => ['data' => $data, 'pgp_key' => $data->pgp_key ?? null];
+			yield $row->email => [
+				'email' => $row->email,
+				'data' => $data,
+				'_name' => $row->_name ?? null,
+				'pgp_key' => $data->pgp_key ?? null,
+			];
 		}
+	}
+
+	protected function getNameFieldsSQL(string $prefix = ''): string
+	{
+		$prefix = $prefix ? $prefix . '.' : $prefix;
+		$fields = DynamicFields::getNameFields();
+		$fields = array_map(fn($a) => sprintf('json_extract(%sextra_data, \'$.%s\')', $prefix, $a), $fields);
+		$fields = implode(' || \' \' || ', $fields);
+		return $fields;
 	}
 
 	public function getRecipientsList(): DynamicList
 	{
-		$fields = DynamicFields::getNameFields();
-		$fields = array_map(fn($a) => sprintf('json_extract(r.extra_data, \'$.%s\')', $a), $fields);
-		$fields = implode(' || \' \' || ', $fields);
 
 		$columns = [
 			'id' => [
@@ -167,7 +181,7 @@ class Mailing extends Entity
 			],
 			'name' => [
 				'label' => 'Nom',
-				'select' => $fields,
+				'select' => $this->getNameFieldsSQL('r'),
 			],
 			'status' => [
 				'label' => 'Erreur',
@@ -178,7 +192,7 @@ class Mailing extends Entity
 		$tables = 'mailings_recipients AS r LEFT JOIN emails e ON e.id = r.id_email';
 		$conditions = 'id_mailing = ' . $this->id;
 
-		$list = new DynamicList($columns, $tables);
+		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('email', false);
 		return $list;
 	}
@@ -270,7 +284,7 @@ class Mailing extends Entity
 	public function getHTMLPreview(string $address = null, bool $append_footer = false): string
 	{
 		$html = $this->getPreview($address);
-		$tpl = new UserTemplate('email.html');
+		$tpl = new UserTemplate('web/email.html');
 		$tpl->assignArray(compact('html'));
 
 		$out = $tpl->fetch();
@@ -315,7 +329,7 @@ class Mailing extends Entity
 		$rows = [];
 
 		foreach ($this->listRecipients() as $row) {
-			$rows[] = [$row->email ?? '(Anonymisée)', $row->name];
+			$rows[] = [$row['email'] ?? '(Anonymisée)', $row['_name'] ?? ''];
 		}
 
 		CSV::export($format, 'Destinataires message collectif', $rows, ['Adresse e-mail', 'Identité']);

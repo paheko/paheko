@@ -28,6 +28,6 @@ $years = Years::listOpen();
 
 $tpl->assign(compact('service', 'accounting_enabled', 'years'));
 $tpl->assign('list', $fees->listWithStats());
-$tpl->assign('projects', Projects::listAssocWithEmpty());
+$tpl->assign('projects', Projects::listAssoc());
 
 $tpl->display('services/fees/index.tpl');

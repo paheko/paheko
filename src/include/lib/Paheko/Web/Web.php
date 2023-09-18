@@ -126,19 +126,19 @@ class Web
 		return Files::getFromURI(File::CONTEXT_WEB . '/' . $path . '/' . Utils::basename($uri));
 	}
 
-	static public function checkAllInternalLinks(): array
+	static public function checkAllInternalPagesLinks(): array
 	{
 		$sql = 'SELECT * FROM @TABLE ORDER BY title COLLATE U_NOCASE;';
 		$list = [];
 
 		foreach (EM::getInstance(Page::class)->iterate($sql) as $page) {
-			$list[$page->id] = $page;
+			$list[$page->uri] = $page;
 		}
 
 		$errors = [];
 
 		foreach ($list as $page) {
-			if (count($page->checkInternalLinks($list))) {
+			if (count($page->checkInternalPagesLinks($list)) > 0) {
 				$errors[] = $page;
 			}
 		}

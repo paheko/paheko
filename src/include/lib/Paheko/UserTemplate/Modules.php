@@ -221,7 +221,20 @@ class Modules
 
 		// Just in case
 		if (!$module) {
-			throw new \LogicException('No web module is enabled?!');
+			$module = EM::findOne(Module::class, 'SELECT * FROM @TABLE WHERE web = 1 LIMIT 1;');
+
+			if (!$module) {
+				// Maybe we need to rescan modules?
+				self::refresh();
+				$module = EM::findOne(Module::class, 'SELECT * FROM @TABLE WHERE web = 1 LIMIT 1;');
+
+				if (!$module) {
+					throw new \LogicException('No web module exists');
+				}
+			}
+
+			$module->set('enabled', true);
+			$module->save();
 		}
 
 		return $module;
@@ -248,12 +261,6 @@ class Modules
 		}
 		// Or: we are looking for the "web" module
 		else {
-			// Redirect to ADMIN_URL if website is disabled
-			// (but not for content.css)
-			if (Config::getInstance()->site_disabled && $uri != 'content.css') {
-				Utils::redirect(ADMIN_URL);
-			}
-
 			$module = self::getWeb();
 		}
 
@@ -324,7 +331,7 @@ class Modules
 			}
 
 			if (strpos($name, 'modules/') !== 0) {
-				throw new \InvalidArgumentException('Invalid ZIP file: invalid path:' . $name);
+				continue;
 			}
 
 			$_mod = strtok(substr($name, strlen('modules/')), '/');
@@ -348,6 +355,10 @@ class Modules
 			throw new \InvalidArgumentException('No module found in archive');
 		}
 
+		if (!array_key_exists('module.ini', $files)) {
+			throw new \InvalidArgumentException('Missing "module.ini" file in module');
+		}
+
 		$base = File::CONTEXT_MODULES . '/' . $module_name;
 
 		if (Files::exists($base) && !$overwrite) {
@@ -355,10 +366,11 @@ class Modules
 		}
 
 		try {
-			$module = self::get($module_name) ?? self::create($module_name);
+			$module = self::get($module_name);
 
 			if (!$module) {
-				throw new \InvalidArgumentException('Invalid module information');
+				$module = new Module;
+				$module->name = $module_name;
 			}
 
 			foreach ($files as $local_name => $source) {
@@ -380,6 +392,13 @@ class Modules
 
 				Files::createFromString($base  . '/' . $local_name, $content);
 			}
+
+			if (!$module->updateFromINI()) {
+				throw new ValidationException('Le fichier module.ini est invalide.');
+			}
+
+			$module->save();
+			$module->updateTemplates();
 
 			return $module;
 		}

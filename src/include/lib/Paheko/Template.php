@@ -177,7 +177,7 @@ class Template extends Smartyer
 		$this->register_modifier('get_country_name', ['Paheko\Utils', 'getCountryName']);
 		$this->register_modifier('format_tel', [$this, 'formatPhoneNumber']);
 		$this->register_modifier('abs', function($a) { return abs($a ?? 0); });
-		$this->register_modifier('percent_of', function($a, $b) { return round($a / $b * 100); });
+		$this->register_modifier('percent_of', function($a, $b) { return !$b ? $b : round($a / $b * 100); });
 
 		$this->register_modifier('linkify_transactions', function ($str) {
 			$str = preg_replace_callback('/(?<=^|\s)(https?:\/\/.*?)(?=\s|$)/', function ($m) {

@@ -38,6 +38,7 @@ class Emails
 	const CONTEXT_BULK = 1;
 	const CONTEXT_PRIVATE = 2;
 	const CONTEXT_SYSTEM = 0;
+	const CONTEXT_NOTIFICATION = 3;
 
 	/**
 	 * When we reach that number of fails, the address is treated as permanently invalid, unless reset by a verification.
@@ -137,20 +138,15 @@ class Emails
 		$recipients = $list;
 		unset($list);
 
-		$is_system = $context != self::CONTEXT_SYSTEM;
+		$is_system = $context === self::CONTEXT_SYSTEM;
 		$template = (!$is_system && $content instanceof UserTemplate) ? $content : null;
-		$content_html = null;
 
 		if ($template) {
 			$template->toggleSafeMode(true);
 		}
-		elseif (!$is_system) {
-			// Render markdown for HTML email
-			$content_html = Render::render(Render::FORMAT_MARKDOWN, null, $content);
-		}
 
 		$signal = Plugins::fire('email.queue.before', true,
-			compact('context', 'recipients', 'sender', 'subject', 'content', 'content_html', 'attachments'));
+			compact('context', 'recipients', 'sender', 'subject', 'content', 'attachments'));
 
 		// queue handling was done by a plugin, stop here
 		if ($signal && $signal->isStopped()) {
@@ -159,10 +155,17 @@ class Emails
 
 		$db = DB::getInstance();
 		$db->begin();
+		$html = null;
+		$main_tpl = null;
 
 		// Apart from SYSTEM emails, all others should be wrapped in the email.html template
 		if (!$is_system) {
-			$main_tpl = new UserTemplate('email.html');
+			$main_tpl = new UserTemplate('web/email.html');
+		}
+
+		if (!$is_system && !$template) {
+			// If E-Mail does not have placeholders, we can render the MarkDown just once for HTML
+			$html = Render::render(Render::FORMAT_MARKDOWN, null, $content);
 		}
 
 		foreach ($recipients as $recipient => $r) {
@@ -175,7 +178,6 @@ class Emails
 
 			// Replace placeholders: {{$name}}, etc.
 			if ($template) {
-				$content_html = null;
 				$template->assignArray((array) $data, null, false);
 
 				// Disable HTML escaping for plaintext emails
@@ -184,6 +186,9 @@ class Emails
 
 				// Add Markdown rendering
 				$content_html = Render::render(Render::FORMAT_MARKDOWN, null, $content);
+			}
+			else {
+				$content_html = $html;
 			}
 
 			if (!$is_system) {
@@ -211,6 +216,9 @@ class Emails
 
 			$db->insert('emails_queue', compact('sender', 'subject', 'context', 'recipient', 'recipient_pgp_key', 'recipient_hash', 'content', 'content_html'));
 
+			// Clean up memory
+			unset($content_html);
+
 			$id = $db->lastInsertId();
 
 			foreach ($attachments as $file) {
@@ -221,7 +229,7 @@ class Emails
 		$db->commit();
 
 		$signal = Plugins::fire('email.queue.after', true,
-			compact('context', 'recipients', 'sender', 'subject', 'content', 'content_html', 'attachments'));
+			compact('context', 'recipients', 'sender', 'subject', 'content', 'attachments'));
 
 		if ($signal && $signal->isStopped()) {
 			return;
@@ -491,8 +499,7 @@ class Emails
 		return sprintf('CASE
 			WHEN %1$soptout = 1 THEN \'Désinscription\'
 			WHEN %1$sinvalid = 1 THEN \'Invalide\'
-			WHEN %1$sfail_count >= %d THEN \'Trop d\'\'erreurs\'
-			WHEN %1$sverified = 1 THEN \'Vérifiée\'
+			WHEN %1$sfail_count >= %2$d THEN \'Trop d\'\'erreurs\'
 			ELSE \'\'
 		END', $prefix, self::FAIL_LIMIT);
 	}

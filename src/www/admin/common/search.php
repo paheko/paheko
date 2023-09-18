@@ -80,13 +80,14 @@ $form->runIf(f('save') || f('save_new'), function () use ($s) {
 	Utils::redirect(sprintf('!%s/saved_searches.php?edit=%d', $target, $s->id()));
 });
 
-$list = $results = $header = null;
+$list = $results = $header = $count = null;
 
 if (!$default) {
 	try {
 		if ($s->type == $s::TYPE_JSON) {
 			$list = $s->getDynamicList();
 			$list->loadFromQueryString();
+			$count = $list->count();
 		}
 		else {
 			if (!empty($_POST['_export'])) {
@@ -95,6 +96,7 @@ if (!$default) {
 			}
 
 			$header = $s->getHeader();
+			$count = $s->countResults();
 			$results = $s->iterateResults();
 		}
 	}
@@ -108,7 +110,7 @@ $schema = $s->schema();
 $columns = $s->getAdvancedSearch()->columns();
 $columns = array_filter($columns, fn($c) => $c['label'] ?? null && $c['type'] ?? null); // remove columns only for dynamiclist
 
-$tpl->assign(compact('s', 'list', 'header', 'results', 'columns', 'is_admin', 'schema'));
+$tpl->assign(compact('s', 'list', 'header', 'results', 'columns', 'count', 'is_admin', 'schema'));
 
 if ($s->target == $s::TARGET_ACCOUNTING) {
 	$tpl->display('acc/search.tpl');

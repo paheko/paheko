@@ -10,7 +10,7 @@ use KD2\Security;
 
 use Paheko\Config;
 use Paheko\DB;
-use Paheko\Plugins;
+use Paheko\Extensions;
 use Paheko\Template;
 use Paheko\Utils;
 use Paheko\UserException;
@@ -98,7 +98,7 @@ class Functions
 		$tpl->assign($params);
 
 		if (Session::getInstance()->isLogged()) {
-			$tpl->assign('plugins_menu', Plugins::listModulesAndPluginsMenu(Session::getInstance()));
+			$tpl->assign('plugins_menu', Extensions::listMenu(Session::getInstance()));
 		}
 
 		return $tpl->fetch('_head.tpl');
@@ -230,7 +230,14 @@ class Functions
 			throw new Brindille_Exception('Module name could not be found');
 		}
 
+		$db = DB::getInstance();
 		$table = 'module_data_' . $tpl->module->name;
+
+		// No table? No problem!
+		if (!$db->test('sqlite_master', 'name = ? AND type = \'table\'', $table)) {
+			return;
+		}
+
 		$where = [];
 		$args = [];
 		$i = 0;
@@ -259,8 +266,6 @@ class Functions
 		}
 
 		$where = implode(' AND ', $where);
-
-		$db = DB::getInstance();
 		$db->delete($table, $where, $args);
 	}
 
@@ -548,6 +553,11 @@ class Functions
 		}
 
 		if (isset($params['redirect'])) {
+
+			if (isset($params['code'])) {
+				http_response_code((int)$params['code']);
+			}
+
 			Utils::redirectDialog($params['redirect']);
 		}
 

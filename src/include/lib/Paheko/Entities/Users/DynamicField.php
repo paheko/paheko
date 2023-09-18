@@ -114,7 +114,7 @@ class DynamicField extends Entity
 		'year'     => '?int',
 		'file'     => '?string',
 		'password' => '?string',
-		'number'   => '?int|float',
+		'number'   => '?int',
 		'tel'      => '?string',
 		'select'   => '?string',
 		'multiple' => '?int',

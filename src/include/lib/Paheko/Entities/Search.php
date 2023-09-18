@@ -39,6 +39,15 @@ class Search extends Entity
 		self::TARGET_ACCOUNTING => 'Comptabilité',
 	];
 
+	/**
+	 * Match the last LIMIT clause from the SQL query
+	 * Will match:
+	 * SELECT * FROM table LIMIT 5 -> LIMIT 5
+	 * SELECT ... (... LIMIT 5) LIMIT 10 -> LIMIT 10
+	 * SELECT * FROM (SELECT * FROM bla LIMIT 10) -> no match (as the limit is in a subquery)
+	 */
+	const LIMIT_REGEXP = '/LIMIT\s+\d+(?:\s*,\s*-?\d+|\s+OFFSET\s+-?\d+)?(?!.*LIMIT\s+-?\d+|.*\))/is';
+
 	protected ?int $id;
 	protected ?int $id_user = null;
 	protected string $label;
@@ -123,15 +132,16 @@ class Search extends Entity
 			$sql = $this->content;
 		}
 
-		$has_limit = preg_match('/LIMIT\s+\d+/i', $sql);
+		$has_limit = stripos($sql, 'LIMIT') !== false;
 
 		// force LIMIT
 		if (!empty($options['limit'])) {
-			$sql = preg_replace($has_limit ? '/LIMIT\s+.*$/is' : '/;.*$/s', '', trim($sql));
-			$sql .= ' LIMIT ' . (int) $options['limit'];
+			$regexp = $has_limit ? self::LIMIT_REGEXP : '/;[^;]*$|(<?=;)$/s';
+			$limit = ' LIMIT ' . (int) $options['limit'];
+			$sql = preg_replace($regexp, $limit, trim($sql));
 		}
 		elseif (!empty($options['no_limit']) && $has_limit) {
-			$sql = preg_replace('/LIMIT\s+.*;?\s*$/', '', $sql);
+			$sql = preg_replace(self::LIMIT_REGEXP, '', $sql);
 		}
 
 		if (!empty($options['select_also'])) {
@@ -230,7 +240,7 @@ class Search extends Entity
 
 	public function countResults(): int
 	{
-		$sql = $this->SQL();
+		$sql = $this->SQL(['no_limit' => true]);
 		$sql = 'SELECT COUNT(*) FROM (' . $sql . ')';
 
 		$allowed_tables = $this->getProtectedTables();
@@ -251,7 +261,6 @@ class Search extends Entity
 			return $count;
 		}
 		catch (DB_Exception $e) {
-			throw $e;
 			throw new UserException('Erreur dans la requête : ' . $e->getMessage(), 0, $e);
 		}
 		finally {

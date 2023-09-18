@@ -33,11 +33,6 @@ class Skriv extends AbstractRender
 		$str = CommonModifiers::typo($str);
 		$str = self::$skriv->render($str);
 
-		// Resolve internal links
-		$str = preg_replace_callback(';<a href="((?!https?://|\w+:).+?)">;i', function ($matches) {
-			return sprintf('<a href="%s">', htmlspecialchars($this->resolveLink(htmlspecialchars_decode($matches[1]))));
-		}, $str);
-
-		return sprintf('<div class="web-content">%s</div>', $str);
+		return $this->outputHTML($str);
 	}
 }

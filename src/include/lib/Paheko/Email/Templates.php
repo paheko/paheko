@@ -24,7 +24,7 @@ class Templates
 			throw new \LogicException('Template did not define a subject');
 		}
 
-		Emails::queue(Emails::CONTEXT_SYSTEM, [$to], null, $subject, $body);
+		Emails::queue(Emails::CONTEXT_SYSTEM, (array)$to, null, $subject, $body);
 	}
 
 	static public function loginChanged(User $user): void

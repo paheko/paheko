@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Personnalisation" current="config" custom_css=['config.css']}
+{include file="_head.tpl" title="Personnalisation" current="config"}
 
 {include file="config/_menu.tpl" current="custom"}
 

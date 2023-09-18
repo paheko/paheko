@@ -50,11 +50,6 @@ class Projects
 		return $em->DB()->getAssoc($sql);
 	}
 
-	static public function listAssocWithEmpty(): array
-	{
-		return ['' => '-- Aucun'] + self::listAssoc();
-	}
-
 	/**
 	 * Return account balances per year or per project
 	 * @param  bool $by_year If true will return projects grouped by year, if false it will return years grouped by project

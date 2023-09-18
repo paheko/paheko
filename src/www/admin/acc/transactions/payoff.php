@@ -72,5 +72,5 @@ $tpl->assign('payoff_targets', implode(':', [Account::TYPE_BANK, Account::TYPE_C
 
 $tpl->assign('chart_id', $chart->id());
 
-$tpl->assign('projects', Projects::listAssocWithEmpty());
+$tpl->assign('projects', Projects::listAssoc());
 $tpl->display('acc/transactions/payoff.tpl');

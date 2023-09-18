@@ -12,6 +12,7 @@ table.list.center {
 }
 
 table.list caption {
+    display: table-caption;
     text-align: center;
     font-size: 1.2em;
 }
@@ -378,7 +379,7 @@ table.dragging tr td * {
     pointer-events: none;
 }
 
-table.dragging td {
+table.dragging tbody td {
     opacity: 0;
 }
 

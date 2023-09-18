@@ -3,6 +3,8 @@
 namespace Paheko\Entities\Files;
 
 use Paheko\Users\Session;
+use Paheko\Template;
+use Paheko\UserException;
 
 trait FilePermissionsTrait
 {
@@ -17,7 +19,7 @@ trait FilePermissionsTrait
 				$tpl = Template::getInstance();
 				$has_password = (bool) $share_password;
 
-				$tpl->assign(compact('can_access', 'has_password'));
+				$tpl->assign(compact('has_password'));
 				$tpl->display('ask_share_password.tpl');
 				return;
 			}

@@ -35,6 +35,7 @@ if (qg('edit') || qg('delete'))
 
 	$form->runIf('save', function () use ($s) {
 		$s->importForm();
+		$s->set('id_user', f('public') ? null : Session::getUserId());
 		$s->save();
 	}, $csrf_key, Utils::getSelfURI(false));
 

@@ -9,6 +9,7 @@ use Paheko\Accounting\Accounts;
 use Paheko\Accounting\Projects;
 use Paheko\Accounting\Transactions;
 use Paheko\Accounting\Years;
+use Paheko\Users\Users;
 
 use KD2\DB\Date;
 
@@ -62,6 +63,10 @@ if (qg('dt')) {
 // t = type
 if (null !== qg('t')) {
 	$transaction->type = (int) qg('t');
+}
+
+if (qg('p')) {
+	$id_project = (int) qg('p');
 }
 
 // ab = Bank/cash account
@@ -122,7 +127,6 @@ $form->runIf(f('lines') !== null, function () use (&$lines) {
 
 if (qg('u')) {
 	$linked_users = [];
-	$membres = new Membres;
 	$i = 0;
 
 	foreach ((array) qg('u') as $key => $value) {
@@ -134,7 +138,7 @@ if (qg('u')) {
 			$id = (int) $value;
 		}
 
-		$name = $membres->getNom($id);
+		$name = Users::getName($id);
 
 		if ($name) {
 			$linked_users[$id] = $name;
@@ -240,6 +244,6 @@ $form->runIf('save', function () use ($transaction, $session, $current_year, $li
 $tpl->assign(compact('csrf_key', 'transaction', 'amount', 'lines', 'id_project', 'types_details', 'linked_users'));
 
 $tpl->assign('chart', $chart);
-$tpl->assign('projects', Projects::listAssocWithEmpty());
+$tpl->assign('projects', Projects::listAssoc());
 
 $tpl->display('acc/transactions/new.tpl');

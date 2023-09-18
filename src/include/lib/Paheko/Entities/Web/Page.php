@@ -17,6 +17,7 @@ use Paheko\UserTemplate\Modifiers;
 use Paheko\Users\DynamicFields;
 
 use KD2\DB\EntityManager as EM;
+use KD2\HTTP;
 
 use const Paheko\{WWW_URL, ADMIN_URL};
 
@@ -120,13 +121,14 @@ class Page extends Entity
 	{
 		$out = $this->asArray();
 		$out['url'] = $this->url();
-		$out['html'] = $this->render();
+		$out['html'] = trim($this->content) !== '' ? $this->render() : '';
+		$row['has_attachments'] = $this->hasAttachments();
 		return $out;
 	}
 
 	public function render(bool $admin = false): string
 	{
-		$user_prefix = ADMIN_URL . 'web/?uri=';
+		$user_prefix = $admin ? ADMIN_URL . 'web/?uri=' : null;
 
 		$this->_html ??= Render::render($this->format, $this->dir_path, $this->content, $user_prefix);
 
@@ -245,6 +247,7 @@ class Page extends Entity
 	public function save(bool $selfcheck = true): bool
 	{
 		$change_parent = null;
+		$change_dir_path = $this->_modified['dir_path'] ?? null;
 
 		if (isset($this->_modified['uri']) || isset($this->_modified['path'])) {
 			$change_parent = $this->_modified['path'];
@@ -274,6 +277,11 @@ class Page extends Entity
 				WHERE path LIKE %3$s;',
 				$db->quote($this->path), strlen($change_parent) + 1, $db->quote($change_parent . '/%'));
 			$db->exec($sql);
+		}
+
+		if ($change_dir_path) {
+			$dir = Files::get($change_dir_path);
+			$dir->rename($this->dir_path);
 		}
 
 		Cache::clear();
@@ -425,6 +433,15 @@ class Page extends Entity
 		return $orphans;
 	}
 
+	public function hasAttachments(): bool
+	{
+		foreach ($this->listAttachments() as $attachment) {
+			return true;
+		}
+
+		return false;
+	}
+
 	/**
 	 * Return list of images
 	 * If $all is FALSE then this will only return images that are not present in the content
@@ -469,37 +486,32 @@ class Page extends Entity
 	/**
 	 * Return list of internal links in page that link to non-existing pages
 	 */
-	public function checkInternalLinks(?array &$pages = null): array
+	public function checkInternalPagesLinks(?array &$pages = null): array
 	{
 		if ($this->format == Render::FORMAT_ENCRYPTED) {
 			return [];
 		}
 
-		$html = Render::render($this->format, $this->dir_path, $this->content);
-		preg_match_all('/<a[^>]+href=["\']([^"\']+)["\']/', $html, $match, PREG_PATTERN_ORDER);
+		$renderer = Render::getRenderer($this->format, $this->dir_path);
+		$renderer->render($this->content);
 		$errors = [];
 
-		foreach ($match[1] as $link) {
-			if (strpos($link, WWW_URL) === 0) {
-				$link = substr($link, strlen(WWW_URL));
-			}
-
-			$link = trim($link, '/');
-
-			// Link is not internal
-			if (!trim($link) || preg_match('!https?:|\w:|/|#|\.!', $link)) {
+		foreach ($renderer->listLinks() as $link) {
+			if ($link['type'] !== 'page') {
 				continue;
 			}
 
-			if (null !== $pages && !array_key_exists($link, $pages)) {
-				$errors[] = $link;
+			$uri = strtok($link['uri'], '#');
+
+			if (null !== $pages && !array_key_exists($uri, $pages)) {
+				$errors[$uri] = $link['label'];
 			}
-			elseif (null === $pages && !Web::getByURI($link)) {
-				$errors[] = $link;
+			elseif (null === $pages && !Web::getByURI($uri)) {
+				$errors[$uri] = $link['label'];
 			}
 		}
 
-		return array_unique($errors);
+		return $errors;
 	}
 
 	public function hasSubPages(): bool

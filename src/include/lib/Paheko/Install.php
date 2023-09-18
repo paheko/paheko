@@ -13,8 +13,8 @@ use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
 use Paheko\Files\Files;
 use Paheko\Files\Storage;
-use Paheko\UserTemplate\Modules;
 use Paheko\Plugins;
+use Paheko\UserTemplate\Modules;
 
 use KD2\HTTP;
 
@@ -24,22 +24,6 @@ use KD2\HTTP;
  */
 class Install
 {
-	/**
-	 * List of plugins that should be displayed during installation (if present)
-	 */
-	const DEFAULT_PLUGINS = [
-		'caisse',
-		'taima',
-	];
-
-	const DEFAULT_MODULES = [
-		'recus_fiscaux',
-		'membership_card',
-		'bookings',
-		//'bilan_pc',
-		//'invoice',
-	];
-
 	/**
 	 * This sends the current installed version, as well as the PHP and SQLite versions
 	 * for statistics purposes.
@@ -76,13 +60,12 @@ class Install
 	/**
 	 * Reset the database to empty and create a new user with the same password
 	 */
-	static public function reset(Users\Session $session, string $password, array $options = [])
+	static public function reset(Session $session, string $password, array $options = [])
 	{
 		$config = (object) Config::getInstance()->asArray();
 		$user = $session->getUser();
 
-		if (!$session->checkPassword($password, $user->passe))
-		{
+		if (!$session->checkPassword($password, $user->password)) {
 			throw new UserException('Le mot de passe ne correspond pas.');
 		}
 
@@ -90,11 +73,11 @@ class Install
 			throw new UserException('Le nom de l\'association est vide, merci de le renseigner dans la configuration.');
 		}
 
-		if (!trim($user->identite)) {
+		if (!trim($user->name())) {
 			throw new UserException('L\'utilisateur connecté ne dispose pas de nom, merci de le renseigner.');
 		}
 
-		if (!trim($user->email)) {
+		if (!trim($user->email())) {
 			throw new UserException('L\'utilisateur connecté ne dispose pas d\'adresse e-mail, merci de la renseigner.');
 		}
 
@@ -118,7 +101,7 @@ class Install
 		file_put_contents(CACHE_ROOT . '/reset', json_encode([
 			'password'     => $session::hashPassword($password),
 			'name'         => $user->name(),
-			'email'        => $user->email,
+			'email'        => $user->email(),
 			'organization' => $config->org_name,
 			'country'      => $config->country,
 		]));
@@ -149,11 +132,10 @@ class Install
 			$ok = self::install($data->country ?? 'FR', $data->organization ?? 'Association', $data->name, $data->email, md5($data->password));
 
 			// Restore password
-			DB::getInstance()->preparedQuery('UPDATE membres SET passe = ? WHERE id = 1;', [$data->password]);
-
-			if (defined('\Paheko\LOCAL_LOGIN') && \Paheko\LOCAL_LOGIN) {
-				Session::getInstance()->refresh();
-			}
+			DB::getInstance()->preparedQuery('UPDATE users SET password = ? WHERE id = 1;', $data->password);
+			$session = Session::getInstance();
+			$session->logout();
+			$session->forceLogin(1);
 		}
 		catch (\Exception $e) {
 			Config::deleteInstance();
@@ -191,11 +173,8 @@ class Install
 		self::assert(strlen($source['password']) >= User::MINIMUM_PASSWORD_LENGTH, 'Le mot de passe est trop court');
 		self::assert($source['password'] === $source['password_confirmed'], 'La vérification du mot de passe ne correspond pas');
 
-		$plugins = isset($source['plugins']) ? array_keys($source['plugins']) : [];
-		$modules = isset($source['modules']) ? array_keys($source['modules']) : [];
-
 		try {
-			self::install($source['country'], $source['name'], $source['user_name'], $source['user_email'], $source['password'], $plugins, $modules);
+			self::install($source['country'], $source['name'], $source['user_name'], $source['user_email'], $source['password']);
 			self::ping();
 		}
 		catch (\Exception $e) {
@@ -204,7 +183,7 @@ class Install
 		}
 	}
 
-	static public function install(string $country_code, string $name, string $user_name, string $user_email, string $user_password, array $plugins = [], array $modules = []): void
+	static public function install(string $country_code, string $name, string $user_name, string $user_email, string $user_password): void
 	{
 		if (file_exists(DB_FILE)) {
 			throw new UserException('La base de données existe déjà.');
@@ -368,23 +347,14 @@ class Install
 
 		$config->save();
 
+		Plugins::refresh();
+		Modules::refresh();
+
 		// Install welcome plugin if available
 		$has_welcome_plugin = Plugins::exists('welcome');
 
 		if ($has_welcome_plugin) {
 			Plugins::install('welcome');
-		}
-
-		foreach ($plugins as $plugin) {
-			Plugins::install($plugin);
-		}
-
-		Modules::refresh();
-
-		foreach ($modules as $module) {
-			$m = Modules::get($module);
-			$m->set('enabled', true);
-			$m->save();
 		}
 
 		if (FILE_STORAGE_BACKEND != 'SQLite') {
@@ -436,6 +406,11 @@ class Install
 	static public function setLocalConfig(string $key, $value, bool $overwrite = true): void
 	{
 		$path = ROOT . DIRECTORY_SEPARATOR . CONFIG_FILE;
+
+		if (!is_writable(ROOT)) {
+			throw new \RuntimeException('Impossible de créer le fichier de configuration "'. CONFIG_FILE .'". Le répertoire "'. ROOT . '" n\'est pas accessible en écriture.');
+		}
+
 		$new_line = sprintf('const %s = %s;', $key, var_export($value, true));
 
 		if (@filesize($path)) {
@@ -449,14 +424,12 @@ class Install
 				return;
 			}
 
-			if (!$count)
-			{
+			if (!$count) {
 				$config = preg_replace('/\?>.*/s', '', $config);
 				$config .= PHP_EOL . $new_line . PHP_EOL;
 			}
 		}
-		else
-		{
+		else {
 			$config = '<?php' . PHP_EOL
 				. 'namespace Paheko;' . PHP_EOL . PHP_EOL
 				. $new_line . PHP_EOL;

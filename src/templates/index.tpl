@@ -31,18 +31,33 @@
 	{/if}
 	{if !empty($config.org_web) || !$config.site_disabled}
 	<p>
-		Web : <a href="{if $config.site_disabled}{else}{$config.org_web}{/if}" target="_blank">{if $config.site_disabled}{else}{$config.org_web}{/if}</a>
+		Web : <a href="{if $config.site_disabled}{$config.org_web}{else}{$www_url}{/if}" target="_blank">{if $config.site_disabled}{$config.org_web}{else}{$www_url}{/if}</a>
 	</p>
 	{/if}
 </aside>
 
-<nav class="home">
-	<ul>
-	{foreach from=$buttons item="button"}
-		<li>{$button|raw}</li>
-	{/foreach}
-	</ul>
-</nav>
+{if !$has_extensions}
+<div class="expose-extensions block">
+	<h2>Besoin d'autres fonctionnalités&nbsp;?</h2>
+	<p>Découvrez ces extensions dans le menu <strong>Configuration</strong>, onglet <strong>Extensions</strong>&nbsp;:</p>
+
+	<nav class="home">
+		<ul>
+		{foreach from=$buttons item="button"}
+			<li>{$button|raw}</li>
+		{/foreach}
+		</ul>
+	</nav>
+</div>
+{elseif !empty($buttons)}
+	<nav class="home">
+		<ul>
+		{foreach from=$buttons item="button"}
+			<li>{$button|raw}</li>
+		{/foreach}
+		</ul>
+	</nav>
+{/if}
 
 {if $homepage}
 	<article class="web-content">

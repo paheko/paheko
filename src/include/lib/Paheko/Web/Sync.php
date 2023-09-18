@@ -19,7 +19,7 @@ use const Paheko\FILE_STORAGE_BACKEND;
  */
 class Sync
 {
-	static protected function importFromRaw(string $str): bool
+	static protected function importFromRaw(Page $page, string $str): bool
 	{
 		$str = preg_replace("/\r\n?/", "\n", $str);
 		$str = explode("\n\n----\n\n", $str, 2);
@@ -88,14 +88,29 @@ class Sync
 		return true;
 	}
 
-	static protected function loadFromFile(Page $page, File $file): void
+	static protected function loadFromFile(Page $page, File $file): bool
 	{
+		// Don't update if page was modified in DB since
+		if ($page->modified && $page->modified > $file->modified) {
+			return false;
+		}
+
+		$m = null;
+
+		if ($page->modified) {
+			$m = clone $page->modified;
+		}
+
 		if (!self::importFromRaw($page, $file->fetch())) {
 			throw new \LogicException('Invalid page content: ' . $file->parent);
 		}
 
 		if (empty($page->modified)) {
 			$page->set('modified', $file->modified);
+		}
+
+		if ($m && $m > $page->modified) {
+			return false;
 		}
 
 		if (!isset($page->type) || $page->type != $page::TYPE_CATEGORY) {
@@ -113,14 +128,19 @@ class Sync
 		else {
 			$page->set('type', $page::TYPE_CATEGORY);
 		}
+
+		return true;
 	}
 
 	static public function fromFile(File $file): Page
 	{
 		$page = new Page;
 
+		$path = substr($file->parent, strlen(File::CONTEXT_WEB . '/'));
+
 		$page->importForm([
-			'path' => substr($file->parent, strlen(File::CONTEXT_WEB . '/')),
+			'path' => $path,
+			'parent' => Utils::dirname($path) ?: null,
 			'uri' => Utils::basename($file->parent),
 		]);
 
@@ -144,7 +164,7 @@ class Sync
 		$list = iterator_to_array(Files::listRecursive($path, null, false));
 		$list = array_filter($list, fn($a) => !$a->isDir() && $a->name == 'index.txt');
 		$exists = array_keys($list);
-		$exists = array_map([Utils::class, 'basename'], $exists);
+		$exists = array_map([Utils::class, 'dirname'], $exists);
 
 		$db = DB::getInstance();
 
@@ -152,16 +172,16 @@ class Sync
 
 		$deleted = array_diff($in_db, $exists);
 		$new = array_diff($exists, $in_db);
+		$intersection = array_intersect($in_db, $exists);
 
 		if ($deleted) {
 			$db->exec(sprintf('DELETE FROM web_pages WHERE %s;', $db->where('dir_path', $deleted)));
 		}
 
-		$new = array_keys($new);
-		ksort($new);
+		sort($new);
 
 		foreach ($new as $path) {
-			$f = Files::get(File::CONTEXT_WEB . '/' . $path . '/index.txt');
+			$f = Files::get($path . '/index.txt');
 
 			if (!$f) {
 				// This is a directory without content, ignore
@@ -181,13 +201,13 @@ class Sync
 			Cache::clear();
 		}
 
-		// There's no need for that sync as it is triggered when loading a Page entity!
-		$intersection = array_intersect_key($in_db, $exists);
-		foreach ($intersection as $page) {
-			$file = Files::get($page->dir_path);
-			$page = Web::get($page->path);
-			self::loadFromFile($page, $file);
-			$page->save();
+		foreach ($intersection as $path) {
+			$file = Files::get($path . '/index.txt');
+			$page = Web::get(substr($path, 4));
+
+			if (self::loadFromFile($page, $file)) {
+				$page->save();
+			}
 		}
 
 		return $errors;

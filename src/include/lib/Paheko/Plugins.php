@@ -8,13 +8,12 @@ use Paheko\Entities\Signal;
 
 use Paheko\Users\Session;
 use Paheko\DB;
-use Paheko\UserTemplate\CommonFunctions;
 use Paheko\UserTemplate\Modules;
 
 use KD2\DB\EntityManager as EM;
-use KD2\DB\ErrorManager;
+use KD2\ErrorManager;
 
-use const Paheko\{SYSTEM_SIGNALS, ADMIN_URL, WWW_URL, PLUGINS_ROOT};
+use const Paheko\{SYSTEM_SIGNALS, ADMIN_URL, WWW_URL, PLUGINS_ROOT, HOSTING_PROVIDER};
 
 class Plugins
 {
@@ -89,25 +88,24 @@ class Plugins
 			return false;
 		}
 
-		if (substr($uri, -3) === '.md') {
-			Router::markdown(file_get_contents($path));
-			return true;
-		}
-		else {
-			// Récupération du type MIME à partir de l'extension
-			$pos = strrpos($path, '.');
-			$ext = substr($path, $pos+1);
+		// Récupération du type MIME à partir de l'extension
+		$pos = strrpos($path, '.');
+		$ext = substr($path, $pos+1);
 
-			$mime = self::MIME_TYPES[$ext] ?? 'text/plain';
+		$mime = self::MIME_TYPES[$ext] ?? 'text/plain';
 
-			header('Content-Type: ' .$mime);
+		header('Content-Type: ' .$mime);
+		header('Cache-Control: public, max-age=3600');
+		header('Last-Modified: ' . date(DATE_RFC7231, filemtime($path)));
+
+		// Don't return Content-Length on OVH, as their HTTP 2.0 proxy is buggy
+		// @see https://fossil.kd2.org/paheko/tktview/8b342877cda6ef7023b16277daa0ec8e39d949f8
+		if (HOSTING_PROVIDER !== 'OVH') {
 			header('Content-Length: ' . filesize($path));
-			header('Cache-Control: public, max-age=3600');
-			header('Last-Modified: ' . date(DATE_RFC7231, filemtime($path)));
-
-			readfile($path);
-			return true;
 		}
+
+		readfile($path);
+		return true;
 	}
 
 	static public function exists(string $name): bool
@@ -188,147 +186,6 @@ class Plugins
 		return $signal;
 	}
 
-	static public function listModulesAndPlugins(bool $installable = false): array
-	{
-		$list = [];
-
-		if ($installable) {
-			foreach (EM::getInstance(Module::class)->iterate('SELECT * FROM @TABLE WHERE enabled = 0;') as $m) {
-				$list[$m->name] = ['module' => $m];
-			}
-
-			foreach (self::listInstallable() as $name => $p) {
-				$list[$name] = ['plugin'   => $p];
-			}
-
-			foreach (self::listInstalled() as $p) {
-				if ($p->enabled) {
-					continue;
-				}
-
-				$list[$p->name] = ['plugin'   => $p];
-			}
-		}
-		else {
-			foreach (EM::getInstance(Module::class)->iterate('SELECT * FROM @TABLE WHERE enabled = 1;') as $m) {
-				$list[$m->name] = ['module' => $m];
-			}
-
-			foreach (self::listInstalled() as $p) {
-				if (!$p->enabled) {
-					continue;
-				}
-
-				if (!$p->hasCode()) {
-					$p->set('enabled', false);
-					$p->save();
-					continue;
-				}
-
-				$list[$p->name] = ['plugin'   => $p];
-			}
-		}
-
-		foreach ($list as &$item) {
-			$type = isset($item['plugin']) ? 'plugin' : 'module';
-			$c = $item[$type];
-			$item = $c->asArray();
-			$item[$type] = $c;
-			$item['icon_url'] = $c->icon_url();
-			$item['config_url'] = $c->hasConfig() ? $c->url($c::CONFIG_FILE) : null;
-			$item['readme_url'] = $c->enabled && $c->hasFile($c::README_FILE) ? $c->url($c::README_FILE) : null;
-			$item['installed'] = $type == 'plugin' ? $c->exists() : true;
-			$item['broken'] = $type == 'plugin' ? !$c->hasCode() : false;
-			$item['broken_message'] = $type == 'plugin' ? $c->getBrokenMessage() : false;
-
-			$item['url'] = null;
-
-			if ($c->hasFile($c::INDEX_FILE)) {
-				$item['url'] = $c->url($type == 'plugin' ? 'admin/' : '');
-			}
-		}
-
-		unset($item);
-
-		usort($list, fn ($a, $b) => strnatcasecmp($a['label'] ?? $a['name'], $b['label'] ?? $b['name']));
-
-		return $list;
-	}
-
-	static public function listModulesAndPluginsMenu(Session $session): array
-	{
-		$list = [];
-
-		$sql = 'SELECT \'module\' AS type, name, label, restrict_section, restrict_level FROM modules WHERE menu = 1 AND enabled = 1
-			UNION ALL
-			SELECT \'plugin\' AS type, name, label, restrict_section, restrict_level FROM plugins WHERE menu = 1 AND enabled = 1;';
-
-		foreach (DB::getInstance()->get($sql) as $item) {
-			if ($item->restrict_section && !$session->canAccess($item->restrict_section, $item->restrict_level)) {
-				continue;
-			}
-
-			$list[$item->type . '_' . $item->name] = $item;
-		}
-
-		// Sort items by label
-		uasort($list, fn ($a, $b) => strnatcasecmp($a->label, $b->label));
-
-		foreach ($list as &$item) {
-			$item = sprintf('<a href="%s/%s/">%s</a>',
-				$item->type == 'plugin' ? ADMIN_URL . 'p' : WWW_URL  . 'm',
-				$item->name,
-				$item->label
-			);
-		}
-
-		unset($item);
-
-		// Append plugins from signals
-		$signal = self::fire('menu.item', false, compact('session'), $list);
-
-		return $signal ? $signal->getOut() : $list;
-	}
-
-	static public function listModulesAndPluginsHomeButtons(Session $session): array
-	{
-		$list = [];
-
-		$sql = 'SELECT \'module\' AS type, name, label, restrict_section, restrict_level FROM modules WHERE home_button = 1 AND enabled = 1
-			UNION ALL
-			SELECT \'plugin\' AS type, name, label, restrict_section, restrict_level FROM plugins WHERE home_button = 1 AND enabled = 1;';
-
-		foreach (DB::getInstance()->get($sql) as $item) {
-			if ($item->restrict_section && !$session->canAccess($item->restrict_section, $item->restrict_level)) {
-				continue;
-			}
-
-			$list[$item->type . '_' . $item->name] = $item;
-		}
-
-		// Sort items by label
-		uasort($list, fn ($a, $b) => strnatcasecmp($a->label, $b->label));
-
-		foreach ($list as &$item) {
-			$url = sprintf('%s/%s/', $item->type == 'plugin' ? ADMIN_URL . 'p' : WWW_URL  . 'm', $item->name);
-			$item = CommonFunctions::linkButton([
-				'label' => $item->label,
-				'icon' => $url . 'icon.svg',
-				'href' => $url,
-			]);
-		}
-
-		unset($item);
-
-		foreach (Modules::snippets(Modules::SNIPPET_HOME_BUTTON) as $name => $v) {
-			$list['module_' . $name] = $v;
-		}
-
-		$signal = Plugins::fire('home.button', false, ['user' => $session->getUser(), 'session' => $session], $list);
-
-		return $signal ? $signal->getOut() : $list;
-	}
-
 	static public function get(string $name): ?Plugin
 	{
 		return EM::findOne(Plugin::class, 'SELECT * FROM @TABLE WHERE name = ?;', $name);
@@ -370,6 +227,25 @@ class Plugins
 		return $errors;
 	}
 
+	static public function getInstallable(string $name): ?Plugin
+	{
+		if (!file_exists(PLUGINS_ROOT . '/' . $name) && !file_exists(PLUGINS_ROOT . '/' . $name . '.tar.gz')) {
+			return null;
+		}
+
+		$p = new Plugin;
+		$p->name = $name;
+		$p->updateFromINI();
+
+		try {
+			$p->selfCheck();
+		}
+		catch (ValidationException $e) {
+			$p->setBrokenMessage($e->getMessage());
+		}
+
+		return $p;
+	}
 
 	/**
 	 * Liste les plugins téléchargés mais non installés
@@ -408,17 +284,7 @@ class Plugins
 				continue;
 			}
 
-			$p = new Plugin;
-			$p->name = $name;
-			$p->updateFromINI();
-			$list[$name] = $p;
-
-			try {
-				$p->selfCheck();
-			}
-			catch (ValidationException $e) {
-				$p->setBrokenMessage($e->getMessage());
-			}
+			$list[$name] = self::getInstallable($name);
 		}
 
 		ksort($list);
@@ -426,16 +292,8 @@ class Plugins
 		return $list;
 	}
 
-	static public function install(string $name): void
+	static public function install(string $name): Plugin
 	{
-		$plugin = self::get($name);
-
-		if ($plugin) {
-			$plugin->set('enabled', true);
-			$plugin->save();
-			return;
-		}
-
 		$p = new Plugin;
 		$p->name = $name;
 
@@ -455,6 +313,7 @@ class Plugins
 		}
 
 		$db->commit();
+		return $p;
 	}
 
 	/**

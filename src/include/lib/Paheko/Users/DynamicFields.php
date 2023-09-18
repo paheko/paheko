@@ -113,9 +113,53 @@ class DynamicFields
 		return key(self::getInstance()->fieldsBySystemUse('name'));
 	}
 
+	static public function getFirstSearchableNameField(): ?string
+	{
+		foreach (self::getInstance()->fieldsBySystemUse('name') as $field) {
+			if ($field->hasSearchCache()) {
+				return $field->name;
+			}
+		}
+
+		return null;
+	}
+
 	static public function getNameFieldsSQL(?string $prefix = null): string
 	{
 		$fields = self::getNameFields();
+		$db = DB::getInstance();
+
+		if ($prefix) {
+			$fields = array_map(fn($v) => $prefix . '.' . $db->quoteIdentifier($v), $fields);
+		}
+
+		if (count($fields) == 1) {
+			return $fields[0];
+		}
+
+		foreach ($fields as &$field) {
+			$field = sprintf('IFNULL(%s, \'\')', $field);
+		}
+
+		unset($field);
+
+		$fields = implode(' || \' \' || ', $fields);
+		$fields = sprintf('TRIM(%s)', $fields);
+		return $fields;
+	}
+
+	static public function getNameFieldsSearchableSQL(?string $prefix = null): string
+	{
+		$fields = [];
+
+		foreach (self::getInstance()->fieldsBySystemUse('name') as $field) {
+			if (!$field->hasSearchCache()) {
+				continue;
+			}
+
+			$fields[] = $field->name;
+		}
+
 		$db = DB::getInstance();
 
 		if ($prefix) {

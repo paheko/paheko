@@ -6,7 +6,7 @@ use Paheko\Entities\Files\File;
 use Paheko\Files\Files;
 use Paheko\Utils;
 
-use const Paheko\{WWW_URL, ADMIN_URL};
+use const Paheko\{WWW_URI, ADMIN_URL};
 
 abstract class AbstractRender
 {
@@ -18,6 +18,8 @@ abstract class AbstractRender
 	protected string $link_prefix = '';
 	protected string $link_suffix = '';
 
+	protected array $links = [];
+
 	public function __construct(?string $path, ?string $user_prefix)
 	{
 		$this->path = $path;
@@ -28,7 +30,7 @@ abstract class AbstractRender
 			if ($this->context === File::CONTEXT_WEB) {
 				$this->parent = $path;
 				$this->uri = Utils::basename($path);
-				$this->link_prefix = $user_prefix ?? WWW_URL;
+				$this->link_prefix = $user_prefix ?? WWW_URI;
 			}
 			else {
 				$this->parent = Utils::dirname($path);
@@ -59,6 +61,11 @@ abstract class AbstractRender
 	public function registerAttachment(string $uri)
 	{
 		Render::registerAttachment($this->path, $uri);
+	}
+
+	public function listLinks(): array
+	{
+		return $this->links;
 	}
 
 	public function listImages(): array
@@ -97,13 +104,53 @@ abstract class AbstractRender
 
 		$this->registerAttachment($uri);
 
-		return WWW_URL . $uri;
+		$uri = explode('/', $uri);
+		$uri = array_map('rawurlencode', $uri);
+		$uri = implode('/', $uri);
+
+		return WWW_URI . $uri;
 	}
 
-	public function resolveLink(string $uri) {
+	public function outputHTML(string $content): string
+	{
+		$content = trim($content);
+
+		if ($content === '') {
+			return $content;
+		}
+
+		$content = preg_replace_callback(';(<a\s+[^>]*)(href=["\']?((?!#)[^\s\'"]+)[\'"]?)([^>]*>)(.*?)</a>;is', function ($match) {
+			$label = trim(html_entity_decode(strip_tags($match[5]))) ?: null;
+			$href = sprintf(' href="%s"', htmlspecialchars($this->resolveLink(htmlspecialchars_decode($match[3]), $label)));
+			return $match[1] . $href . $match[4] . $match[5] . '</a>';
+		}, $content);
+
+		$content = '<div class="web-content">' . $content . '</div>';
+		return $content;
+	}
+
+	public function resolveLink(string $uri, ?string $label = null): string
+	{
 		$first = substr($uri, 0, 1);
-		if ($first == '/' || $first == '!') {
-			return Utils::getLocalURL($uri);
+
+		if ($first === '/' || $first === '!') {
+			$uri = $first === '!' ? Utils::getLocalURL($uri) : $uri;
+			$this->links[] = ['type' => 'internal', 'uri' => $uri, 'label' => $label];
+			return $uri;
+		}
+
+		$pos = strpos($uri, ':');
+
+		if ($pos !== false && (substr($uri, 0, 7) === 'http://' || substr($uri, 0, 8) === 'https://')) {
+			$this->links[] = ['type' => 'external', 'uri' => $uri, 'label' => $label];
+			return $uri;
+		}
+		elseif ($pos !== false) {
+			$this->links[] = ['type' => 'other', 'uri' => $uri, 'label' => $label];
+			return $uri;
+		}
+		else {
+			$this->links[] = ['type' => 'page', 'uri' => $uri, 'label' => $label];
 		}
 
 		if (strpos(Utils::basename($uri), '.') === false) {

@@ -17,7 +17,7 @@ if ($format = qg('export')) {
 
 $csrf_key = 'user_import';
 $csv = new CSV_Custom($session, 'users_import');
-$mode = f('mode') ?? qg('mode');
+$mode = f('mode') ?? (qg('mode') ?? Users::IMPORT_MODE_AUTO);
 $report = [];
 
 $df = DynamicFields::getInstance();

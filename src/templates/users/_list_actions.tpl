@@ -7,8 +7,9 @@
 					<select name="action">
 						<option value="">— Choisir une action à effectuer —</option>
 						<option value="move">Changer de catégorie</option>
+						<option value="subscribe">Inscrire à une activité</option>
 						{if empty($hide_delete)}
-							<option value="delete">Supprimer le membre</option>
+							<option value="delete">Supprimer les membres</option>
 							<option value="delete_files">Supprimer les fichiers du membre</option>
 						{/if}
 						{if !isset($export) || $export != false}

@@ -171,9 +171,10 @@ namespace Paheko;
 //const WWW_URI = '/asso/';
 
 /**
- * Adresse URL HTTP(S) de Paheko
+ * Adresse URL HTTP(S) publique de Paheko
  *
- * Défaut : découverte à partir de HTTP_HOST ou SERVER_NAME + WWW_URI
+ * Défaut : découverte automatique à partir de HTTP_HOST ou SERVER_NAME + WWW_URI
+ * @var null|string
  */
 
 //const WWW_URL = 'http://paheko.chezmoi.tld' . WWW_URI;
@@ -181,7 +182,10 @@ namespace Paheko;
 /**
  * Adresse URL HTTP(S) de l'admin Paheko
  *
+ * Note : il est possible d'avoir un autre domaine que WWW_URL.
+ *
  * Défaut : WWW_URL + 'admin/'
+ * @var null|string
  */
 
 //const ADMIN_URL = 'https://admin.paheko.chezmoi.tld/';
@@ -889,15 +893,18 @@ namespace Paheko;
 //const CONTRIBUTOR_LICENSE = 'XXXXX';
 
 /**
- * Ligne légale sur le pied de page du site public
+ * Informations légale sur l'hébergeur
  *
- * Ce texte (HTML) est affiché en bas des pages du site public.
- * Utile pour indiquer les mentions légales obligatoires
- * Le %1$s est remplacé par le nom de l'association, %2$s par son adresse.
+ * Ce texte (HTML) est affiché en bas de la page "mentions légales"
+ * (.../admin/legal.php)
  *
- * Défaut : "Hébergé par nom_association, adresse_association"
+ * S'il est omis, l'association sera indiquée comme étant auto-hébergée.
+ *
+ * Défaut : null
+ *
+ * @var  string|null
  */
-//const LEGAL_LINE = 'Hébergé par <strong>%1$s</strong>, %2$s';
+//const LEGAL_HOSTING_DETAILS = 'OVH<br />5 rue de l'hébergement<br />ROUBAIX';
 
 /**
  * Message d'avertissement

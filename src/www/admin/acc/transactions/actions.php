@@ -59,7 +59,7 @@ if (f('action') == 'delete')
 }
 else
 {
-	$tpl->assign('projects', Projects::listAssocWithEmpty());
+	$tpl->assign('projects', Projects::listAssoc());
 
 	$tpl->display('acc/transactions/action_project.tpl');
 }

@@ -16,19 +16,11 @@ class Reminder extends Entity
 
 	const TABLE = 'services_reminders';
 
-	protected $id;
-	protected $id_service;
-	protected $delay;
-	protected $subject;
-	protected $body;
-
-	protected $_types = [
-		'id'         => 'int',
-		'id_service' => 'int',
-		'delay'      => 'int',
-		'subject'    => 'string',
-		'body'       => 'string',
-	];
+	protected int $id;
+	protected int $id_service;
+	protected int $delay;
+	protected string $subject;
+	protected string $body;
 
 	public function selfCheck(): void
 	{

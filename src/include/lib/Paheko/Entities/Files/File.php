@@ -13,7 +13,6 @@ use Paheko\Config;
 use Paheko\DB;
 use Paheko\Entity;
 use Paheko\Plugins;
-use Paheko\Template;
 use Paheko\UserException;
 use Paheko\ValidationException;
 use Paheko\Users\Session;
@@ -27,7 +26,7 @@ use Paheko\Users\DynamicFields;
 
 use Paheko\Files\Files;
 
-use const Paheko\{WWW_URL, BASE_URL, ENABLE_XSENDFILE, SECRET_KEY, WOPI_DISCOVERY_URL, SHARED_CACHE_ROOT, PDFTOTEXT_COMMAND, STATIC_CACHE_ROOT};
+use const Paheko\{WWW_URL, BASE_URL, ENABLE_XSENDFILE, SECRET_KEY, WOPI_DISCOVERY_URL, SHARED_CACHE_ROOT, PDFTOTEXT_COMMAND, STATIC_CACHE_ROOT, HOSTING_PROVIDER};
 
 class File extends Entity
 {
@@ -1005,6 +1004,8 @@ class File extends Entity
 			header('Cache-Control: private, must-revalidate, post-check=0, pre-check=0');
 		}
 
+		header('X-Powered-By: Paheko/PHP');
+
 		if (null === $path) {
 			$type = $this->mime;
 
@@ -1041,7 +1042,11 @@ class File extends Entity
 
 		@ini_set('zlib.output_compression', 'Off');
 
-		header(sprintf('Content-Length: %d', $path ? filesize($path) : $this->size));
+		// Don't return Content-Length on OVH, as their HTTP 2.0 proxy is buggy
+		// @see https://fossil.kd2.org/paheko/tktview/8b342877cda6ef7023b16277daa0ec8e39d949f8
+		if (HOSTING_PROVIDER !== 'OVH') {
+			header(sprintf('Content-Length: %d', $path ? filesize($path) : $this->size));
+		}
 
 		if (@ob_get_length()) {
 			@ob_clean();
@@ -1147,6 +1152,49 @@ class File extends Entity
 	public function parent_uri(): string
 	{
 		return $this->parent ? rawurlencode($this->parent) : '';
+	}
+
+	public function getFormatDescription(): string
+	{
+		switch ($this->extension()) {
+			case 'odt': return 'Document LibreOffice';
+			case 'ods': return 'Tableur LibreOffice';
+			case 'odp': return 'Présentation LibreOffice';
+			case 'odg': return 'Dessin LibreOffice';
+			case 'doc':
+			case 'docx': return 'Document Microsoft Office';
+			case 'xls':
+			case 'xlsx': return 'Tableur Microsoft Office';
+			case 'ppt':
+			case 'pptx': return 'Présentation Microsoft Office';
+			case 'pdf': return 'Document PDF';
+			case 'png':
+			case 'webp':
+			case 'jpeg':
+			case 'jpg':
+			case 'gif':
+				return 'Image';
+			case 'epub':
+			case 'mobi':
+				return 'Livre électronique';
+			case 'md': return 'Texte MarkDown';
+			case 'txt': return 'Texte';
+			case 'mp3':
+			case 'ogg':
+			case 'aac':
+			case 'flac':
+			case 'opus':
+			case 'wav':
+			case 'wma':
+				return 'Fichier audio';
+			case 'mkv':
+			case 'mp4':
+			case 'avi':
+			case 'mov':
+			case 'webm':
+				return 'Fichier vidéo';
+			default: return 'Fichier';
+		}
 	}
 
 	public function extension(): ?string
@@ -1366,7 +1414,7 @@ class File extends Entity
 		$expiry -= intval(gmmktime(0, 0, 0, 8, 1, 2022) / 3600);
 		$expiry = base_convert($expiry, 10, 36);
 
-		return sprintf('%s?s=%s%s:%s', $this->url(), $password ? ':' : '', $hash, $expiry);
+		return sprintf('%s%s?s=%s%s:%s', WWW_URL, $this->uri(), $password ? ':' : '', $hash, $expiry);
 	}
 
 	protected function _createShareHash(int $expiry, ?string $password): string

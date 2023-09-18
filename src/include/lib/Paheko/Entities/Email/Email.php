@@ -219,10 +219,10 @@ class Email extends Entity
 		$this->set('sent_count', $this->sent_count+1);
 	}
 
-	public function setOptout(): void
+	public function setOptout(string $message = null): void
 	{
 		$this->set('optout', true);
-		$this->appendFailLog('Demande de désinscription');
+		$this->appendFailLog($message ?? 'Demande de désinscription');
 	}
 
 	public function appendFailLog(string $message): void

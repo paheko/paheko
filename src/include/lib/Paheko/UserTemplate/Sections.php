@@ -15,8 +15,6 @@ use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
 use Paheko\Users\DynamicFields;
 
-use const Paheko\WWW_URL;
-
 class Sections
 {
 	const SECTIONS_LIST = [
@@ -713,7 +711,7 @@ class Sections
 
 		if (!empty($params['search_name'])) {
 			$params['tables'] .= sprintf(' INNER JOIN users_search AS us ON us.id = users.id AND %s LIKE :search_name ESCAPE \'\\\' COLLATE NOCASE',
-				DynamicFields::getNameFieldsSQL('us'));
+				DynamicFields::getNameFieldsSearchableSQL('us'));
 			$params[':search_name'] = '%' . Utils::unicodeTransliterate($params['search_name']) . '%';
 			unset($params['search_name']);
 		}
@@ -921,7 +919,7 @@ class Sections
 
 		while ($row = $result->fetchArray(\SQLITE3_ASSOC))
 		{
-			$row['url'] = WWW_URL . Utils::basename($row['path']);
+			$row['url'] = '/' . Utils::basename($row['path']);
 			yield $row;
 		}
 	}
@@ -1080,6 +1078,7 @@ class Sections
 				$row['title'] = str_replace(['_', '-'], ' ', $file->name);
 				$row['title'] = preg_replace('!\.[^\.]{3,5}$!', '', $row['title']);
 				$row['extension'] = strtoupper(preg_replace('!^.*\.([^\.]{3,5})$!', '$1', $file->name));
+				$row['format'] = $file->getFormatDescription();
 				$row['url'] = $file->url();
 				$row['download_url'] = $file->url(true);
 				$row['thumb_url'] = $file->thumb_url();
@@ -1154,6 +1153,7 @@ class Sections
 		$out = $module->asArray();
 		$out['path'] = 'modules/' . $module->name;
 		$out['url'] = $module->url();
+		$out['public_url'] = $module->public_url();
 
 		yield $out;
 	}

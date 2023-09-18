@@ -20,11 +20,9 @@
 			{input type="select" name="folders_gallery" label="Affichage des listes de documents" required=true source=$preferences options=$folders_options default=true}
 			{/if}
 			{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
-			<dt><label for="f_accounting_expert_0">Affichage de la comptabilité</label></dt>
-			{input type="radio" name="accounting_expert" value=0 label="Simplifié" source=$preferences}
-			<dd class="help">Conseillé. Pour les novices en comptabilité, affiche notamment les comptes de banque tels qu'ils apparaissent sur les relevés bancaires.</dd>
-			{input type="radio" name="accounting_expert" value=1 label="Expert" source=$preferences}
-			<dd class="help">Si vous avez une bonne expérience de la comptabilité en partie double. Affiche les journaux de compte au sens de la comptabilité en partie double.</dd>
+				<dt><label for="f_accounting_expert_0">Affichage de la comptabilité</label></dt>
+				{input type="radio-btn" name="accounting_expert" value=0 label="Simplifié" default=0 source=$preferences help="Conseillé. Pour les novices en comptabilité, affiche notamment les comptes de banque tels qu'ils apparaissent sur les relevés bancaires."}
+				{input type="radio-btn" name="accounting_expert" value=1 label="Expert" source=$preferences help="Si vous avez une bonne expérience de la comptabilité en partie double. Affiche les journaux de compte au sens de la comptabilité en partie double."}
 			{/if}
 		</dl>
 	</fieldset>

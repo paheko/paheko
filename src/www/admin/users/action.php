@@ -18,11 +18,14 @@ $list = f('selected');
 $list = array_map('intval', $list);
 $csrf_key = 'users_actions';
 
-if ($action == 'ods' || $action == 'csv' || $action == 'xlsx') {
+if ($action === 'ods' || $action === 'csv' || $action === 'xlsx') {
 	Users::exportSelected($action, $list);
 	return;
 }
-elseif ($action == 'move' || $action == 'delete' || $action == 'delete_files') {
+elseif ($action === 'subscribe') {
+	Utils::redirect('!services/user/subscribe.php?users=' . implode(',', $list));
+}
+elseif ($action === 'move' || $action === 'delete' || $action === 'delete_files') {
 	$logged_user_id = Session::getUserId();
 
 	// Don't allow to change or delete the currently logged-in user

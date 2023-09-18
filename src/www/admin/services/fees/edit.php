@@ -39,7 +39,7 @@ $accounting_enabled = (bool) $fee->id_account;
 $years = Years::listOpen();
 
 $account = Accounts::getSelector($fee->id_account);
-$tpl->assign('projects', Projects::listAssocWithEmpty());
+$tpl->assign('projects', Projects::listAssoc());
 
 $tpl->assign(compact('service', 'amount_type', 'fee', 'csrf_key', 'account', 'accounting_enabled', 'years'));
 

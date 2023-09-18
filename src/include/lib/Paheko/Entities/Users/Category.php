@@ -16,32 +16,19 @@ class Category extends Entity
 
 	const TABLE = 'users_categories';
 
-	protected $id;
-	protected $name;
+	protected int $id;
+	protected string $name;
 
-	protected $hidden = 0;
+	protected bool $hidden = false;
 
-	protected $perm_web = 0;
-	protected $perm_documents = 0;
-	protected $perm_users = 0;
-	protected $perm_accounting = 0;
+	protected int $perm_web = 0;
+	protected int $perm_documents = 0;
+	protected int $perm_users = 0;
+	protected int $perm_accounting = 0;
 
-	protected $perm_subscribe = 0;
-	protected $perm_connect = 0;
-	protected $perm_config = 0;
-
-	protected $_types = [
-		'id'              => 'int',
-		'name'            => 'string',
-		'hidden'          => 'int',
-		'perm_web'        => 'int',
-		'perm_documents'  => 'int',
-		'perm_users'      => 'int',
-		'perm_accounting' => 'int',
-		'perm_subscribe'  => 'int',
-		'perm_connect'    => 'int',
-		'perm_config'     => 'int',
-	];
+	protected int $perm_subscribe = 0;
+	protected int $perm_connect = 0;
+	protected int $perm_config = 0;
 
 	const PERMISSIONS = [
 		'connect' => [
@@ -107,7 +94,6 @@ class Category extends Entity
 		parent::selfCheck();
 
 		$this->assert(trim($this->name) !== '', 'Le nom de catégorie ne peut rester vide.');
-		$this->assert($this->hidden === 0 || $this->hidden === 1, 'Wrong value for hidden');
 
 		foreach (self::PERMISSIONS as $key => $perm) {
 			$this->assert(array_key_exists($this->{'perm_' . $key}, $perm['options']), 'Invalid value for perm_' . $key);

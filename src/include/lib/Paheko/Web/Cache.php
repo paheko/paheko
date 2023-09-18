@@ -33,16 +33,12 @@ class Cache
 		return $path;
 	}
 
-	static public function getPath(string $uri, ?string $suffix = null, bool $append_extension = true): string
+	static public function getPath(string $uri, bool $append_extension = true): string
 	{
 		$uri = rawurldecode($uri);
 		$uri = '/' . ltrim($uri, '/');
 
 		$target = self::$root . '/' . md5($uri);
-
-		if ($suffix) {
-			$target .= '_' . $suffix;
-		}
 
 		if ($append_extension) {
 			$ext = self::getFileExtension($uri) ?? '.html';
@@ -79,7 +75,7 @@ class Cache
 		$uri = rawurldecode($uri);
 		$uri = '/' . ltrim($uri, '/');
 
-		$target = self::getPath($uri, null, false);
+		$target = self::getPath($uri, false);
 
 		foreach (glob($target . '*') as $file) {
 			Utils::safe_unlink($file);
@@ -123,13 +119,13 @@ class Cache
 		return true;
 	}
 
-	static public function link(string $uri, string $destination, ?string $suffix = null): void
+	static public function link(string $uri, string $destination): void
 	{
 		if (!self::init()) {
 			return;
 		}
 
-		$target = self::getPath($uri, $suffix);
+		$target = self::getPath($uri);
 
 		@unlink($target);
 		@symlink($destination, $target);

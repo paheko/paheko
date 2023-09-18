@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Remise à zéro" current="config" custom_css=["config.css"]}
+{include file="_head.tpl" title="Remise à zéro" current="config"}
 
 {include file="config/_menu.tpl" current="advanced"}
 
@@ -22,7 +22,7 @@
 		Une sauvegarde sera automatiquement créée avant de procéder à la remise à zéro.
 	</p>
 	<dl>
-		{input type="password" name="checkme" label="Merci d'entrer ici votre mot de passe" help="Pour valider que vous désirez bien tout effacer !" required=true}
+		{input type="password" name="password_check" label="Merci d'entrer ici votre mot de passe" help="Pour valider que vous désirez bien tout effacer !" required=true}
 	</dl>
 	<p class="submit">
 		{csrf_field key="reset"}

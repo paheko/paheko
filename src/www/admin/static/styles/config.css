@@ -80,3 +80,104 @@
     box-shadow: 1px 10px 5px #000;
     display: block;
 }
+
+.ext-list article {
+    margin: .8em 0;
+}
+
+.ext-details header {
+    padding: .8em;
+    background: rgba(var(--gSecondColor), 0.2);
+    border-radius: .5em;
+    display: grid;
+    flex-direction: row;
+    justify-content: flex-start;
+    grid-template-columns: 5em 1fr 10em;
+}
+
+.ext-details .icon svg {
+    width: 4em;
+    height: 4em;
+}
+
+.ext-details .toggle {
+    text-align: center;
+}
+
+.ext-details .toggle button {
+    margin-bottom: .5rem;
+}
+
+.ext-details h2 a {
+    color: unset;
+}
+
+.ext-details figure.permissions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: .5rem 0;
+}
+
+.ext-details figure.permissions figcaption {
+    font-size: .9em;
+}
+
+.ext-details .desc {
+    margin: .5rem 0;
+}
+
+.ext-details .author {
+    color: var(--gBorderColor);
+    margin: .5rem 0;
+    font-size: .9em;
+}
+
+.ext-details .author a {
+    color: unset;
+}
+
+.ext-details .actions {
+    float: none;
+    margin: .5rem 0;
+}
+
+.ext-details.highlight {
+    border-radius: .5rem;
+    box-shadow: 0px 0px 5px 5px rgba(var(--gSecondColor), 1);
+}
+
+.ext-more p.actions {
+    float: none;
+    text-align: center;
+    font-size: 1.1em;
+    margin: 2em 0;
+}
+
+.ext-more .meter-map {
+    min-width: 22em;
+    margin: 2em;
+}
+
+.tag {
+    font-size: .8rem;
+    font-weight: normal;
+    background: rgba(var(--gSecondColor), 0.3);
+    border-radius: .5em;
+    padding: .2em .4em;
+    display: inline-block;
+    margin: 0 .2em;
+}
+
+strong.tag {
+    background: rgba(var(--gMainColor), 0.7);
+    color: rgb(var(--gBgColor));
+}
+
+.tag [data-icon]:before {
+    text-shadow: none;
+}
+
+.ext-tech {
+    margin: 1em;
+}

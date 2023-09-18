@@ -8,9 +8,12 @@ use KD2\Form;
 use KD2\Translate;
 use KD2\DB\EntityManager;
 
-error_reporting(-1);
-
 const CONFIG_FILE = 'config.local.php';
+
+require_once __DIR__ . '/lib/KD2/ErrorManager.php';
+
+ErrorManager::enable(ErrorManager::DEVELOPMENT);
+ErrorManager::setLogFile(__DIR__ . '/data/error.log');
 
 /*
  * Version de Paheko
@@ -91,8 +94,7 @@ if (!defined('\SQLITE3_OPEN_READWRITE')) {
  */
 
 // Configuration externalisée
-if (file_exists(__DIR__ . '/../' . CONFIG_FILE))
-{
+if (file_exists(__DIR__ . '/../' . CONFIG_FILE)) {
 	require __DIR__ . '/../' . CONFIG_FILE;
 }
 
@@ -207,6 +209,7 @@ static $default_config = [
 	'SMTP_PASSWORD'         => null,
 	'SMTP_PORT'             => 587,
 	'SMTP_SECURITY'         => 'STARTTLS',
+	'SMTP_HELO_HOSTNAME'    => null,
 	'MAIL_RETURN_PATH'      => null,
 	'MAIL_BOUNCE_PASSWORD'  => null,
 	'MAIL_SENDER'           => null,
@@ -233,7 +236,7 @@ static $default_config = [
 	'SQL_DEBUG'             => null,
 	'SYSTEM_SIGNALS'        => [],
 	'LOCAL_LOGIN'           => null,
-	'LEGAL_LINE'            => 'Hébergé par <strong>%1$s</strong>, %2$s',
+	'LEGAL_HOSTING_DETAILS' => null,
 	'ALERT_MESSAGE'         => null,
 	'DISABLE_INSTALL_PING'  => false,
 	'WOPI_DISCOVERY_URL'    => null,
@@ -273,19 +276,24 @@ const STATIC_CACHE_ROOT = CACHE_ROOT . '/static';
 const SHARED_USER_TEMPLATES_CACHE_ROOT = SHARED_CACHE_ROOT . '/utemplates';
 const SMARTYER_CACHE_ROOT = SHARED_CACHE_ROOT . '/compiled';
 
+// Used to get around some providers misconfiguration issues
+if (isset($_SERVER['HTTP_X_OVHREQUEST_ID'])) {
+	define('Paheko\HOSTING_PROVIDER', 'OVH');
+}
+else {
+	define('Paheko\HOSTING_PROVIDER', null);
+}
+
 // PHP devrait être assez intelligent pour chopper la TZ système mais nan
 // il sait pas faire (sauf sur Debian qui a le bon patch pour ça), donc pour
 // éviter le message d'erreur à la con on définit une timezone par défaut
 // Pour utiliser une autre timezone, il suffit de définir date.timezone dans
 // un .htaccess ou dans CONFIG_FILE
-if (!ini_get('date.timezone'))
-{
-	if (($tz = @date_default_timezone_get()) && $tz != 'UTC')
-	{
+if (!ini_get('date.timezone') || ini_get('date.timezone') === 'UTC') {
+	if (($tz = @date_default_timezone_get()) && $tz !== 'UTC') {
 		ini_set('date.timezone', $tz);
 	}
-	else
-	{
+	else {
 		ini_set('date.timezone', 'Europe/Paris');
 	}
 }
@@ -299,13 +307,16 @@ class APIException extends \LogicException
 }
 
 // activer le gestionnaire d'erreurs/exceptions
-ErrorManager::enable(SHOW_ERRORS ? ErrorManager::DEVELOPMENT : ErrorManager::PRODUCTION);
+ErrorManager::setEnvironment(SHOW_ERRORS ? ErrorManager::DEVELOPMENT : ErrorManager::PRODUCTION | ErrorManager::CLI_DEVELOPMENT);
 ErrorManager::setLogFile(DATA_ROOT . '/error.log');
 
 // activer l'envoi de mails si besoin est
-if (MAIL_ERRORS)
-{
+if (MAIL_ERRORS) {
 	ErrorManager::setEmail(MAIL_ERRORS);
+}
+
+if (ERRORS_REPORT_URL) {
+	ErrorManager::setRemoteReporting(ERRORS_REPORT_URL, true);
 }
 
 ErrorManager::setContext([
@@ -314,10 +325,6 @@ ErrorManager::setContext([
 	'paheko_version'   => paheko_version(),
 ]);
 
-if (ERRORS_REPORT_URL)
-{
-	ErrorManager::setRemoteReporting(ERRORS_REPORT_URL, true);
-}
 
 ErrorManager::setProductionErrorTemplate(defined('Paheko\ERRORS_TEMPLATE') && ERRORS_TEMPLATE ? ERRORS_TEMPLATE : '<!DOCTYPE html><html><head><title>Erreur interne</title>
 	<style type="text/css">
@@ -399,9 +406,6 @@ if (REPORT_USER_EXCEPTIONS < 2) {
 // Clé secrète utilisée pour chiffrer les tokens CSRF etc.
 if (!defined('Paheko\SECRET_KEY'))
 {
-	if (!is_writable(ROOT)) {
-		throw new \RuntimeException('Impossible de créer le fichier de configuration "'. CONFIG_FILE .'". Le répertoire "'. ROOT . '" n\'est pas accessible en écriture.');
-	}
 	$key = base64_encode(random_bytes(64));
 	Install::setLocalConfig('SECRET_KEY', $key);
 	define('Paheko\SECRET_KEY', $key);
@@ -413,6 +417,12 @@ Form::tokenSetSecret(SECRET_KEY);
 EntityManager::setGlobalDB(DB::getInstance());
 
 Translate::setLocale('fr_FR');
+
+// This is specific to OVH and other hosting providers who don't set up their servers properly
+// see https://www.prestashop.com/forums/topic/393496-prestashop-16-webservice-authentification-on-ovh/
+if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) && !empty($_SERVER['HTTP_AUTHORIZATION'])) {
+	@list($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) = explode(':', base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));
+}
 
 /*
  * Vérifications pour enclencher le processus d'installation ou de mise à jour

@@ -78,7 +78,7 @@ class API
 			}
 			else {
 				header("Content-Type: application/json; charset=utf-8", true);
-				printf("{\n\"count\": %d,\n\"results\":\n", $s->countResults());
+				printf("{\n    \"count\": %d,\n    \"results\":\n    [\n", $s->countResults());
 
 				foreach ($result as $i => $row) {
 					$line = [];
@@ -98,8 +98,12 @@ class API
 						echo ",\n";
 					}
 
-					echo json_encode($line, JSON_PRETTY_PRINT);
+					$json = json_encode($line, JSON_PRETTY_PRINT);
+					$json = "        " . str_replace("\n", "\n        ", $json);
+					echo $json;
 				}
+
+				echo "\n    ]\n}";
 
 				return null;
 			}

@@ -1085,7 +1085,7 @@ class Utils
 
 		// Append session cookie to URLs, so that <img> tags and others work
 		$r = preg_quote(WWW_URL, '!');
-		$r = '!(?<=["\'])(' . $r . '.*?)(?=["\'])!';
+		$r = '!(?<=["\'])((?:/|' . $r . ').*?)(?=["\'])!';
 		$str = preg_replace_callback($r, function ($match) use ($cookie, $secret): string {
 			if (false !== strpos($match[1], '?')) {
 				$separator = '&amp;';
@@ -1094,7 +1094,14 @@ class Utils
 				$separator = '?';
 			}
 
-			return $match[1] . $separator . $cookie . htmlspecialchars($secret);
+			if (substr($match[1], 0, 1) === '/') {
+				$url = BASE_URL . ltrim($match[1], '/');
+			}
+			else {
+				$url = $match[1];
+			}
+
+			return $url . $separator . $cookie . htmlspecialchars($secret);
 		}, $str);
 
 		return $str;
@@ -1320,6 +1327,7 @@ class Utils
 				$cmd = 'wkhtmltopdf -q --print-media-type --enable-local-file-access --disable-smart-shrinking --encoding "UTF-8" %s %s';
 				break;
 			case 'weasyprint':
+				$timeout = 60;
 				$cmd = 'weasyprint %1$s %2$s';
 				break;
 			default:

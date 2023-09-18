@@ -8,7 +8,7 @@ if (!empty(getenv('LOCALAPPDATA'))) {
 }
 
 // Store secret key in user directory
-if (!defined('PahekoPaheko\SECRET_KEY')) {
+if (!defined('Paheko\SECRET_KEY')) {
 	if (file_exists(DATA_ROOT . '/key')) {
 		define('Paheko\SECRET_KEY', trim(file_get_contents(DATA_ROOT . '/key')));
 	}

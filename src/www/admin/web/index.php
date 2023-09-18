@@ -2,6 +2,7 @@
 
 namespace Paheko;
 
+use Paheko\UserTemplate\Modules;
 use Paheko\Web\Web;
 use Paheko\Entities\Web\Page;
 
@@ -28,7 +29,7 @@ $page = $page ?: null;
 $links_errors = null;
 
 if ($page) {
-	$links_errors = $page->checkInternalLinks();
+	$links_errors = $page->checkInternalPagesLinks();
 
 	if (qg('toggle_type') !== null && $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)) {
 		$page->toggleType();
@@ -36,8 +37,8 @@ if ($page) {
 		Utils::redirect('!web/?p=' . $page->path);
 	}
 }
-elseif (isset($_GET['check'])) {
-	$links_errors = Web::checkAllInternalLinks();
+elseif (($_GET['check'] ?? null) === 'internal') {
+	$links_errors = Web::checkAllInternalPagesLinks();
 }
 
 $cat = $page && $page->isCategory() ? $page : null;
@@ -59,6 +60,8 @@ $can_edit = $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 $tpl->assign('custom_js', ['web_gallery.js']);
 $tpl->assign('custom_css', ['web.css', '!web/css.php']);
 
-$tpl->assign(compact('categories', 'pages', 'drafts', 'title', 'type_page', 'type_category', 'breadcrumbs', 'page', 'links_errors', 'can_edit'));
+$module = $page ? null : Modules::getWeb();
+
+$tpl->assign(compact('categories', 'pages', 'drafts', 'title', 'type_page', 'type_category', 'breadcrumbs', 'page', 'links_errors', 'can_edit', 'module'));
 
 $tpl->display('web/index.tpl');

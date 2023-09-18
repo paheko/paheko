@@ -21,7 +21,7 @@ if (!$su) {
 
 $fee = $su->fee();
 
-if (!$fee->id_year) {
+if (!$fee || !$fee->id_year) {
 	throw new UserException('Cette inscription n\'est pas liée à un tarif relié à la comptabilité, il n\'est pas possible de saisir un règlement.');
 }
 
@@ -44,7 +44,7 @@ $types_details = $t->getTypesDetails();
 
 $account_targets = $types_details[Transaction::TYPE_REVENUE]->accounts[1]->targets_string;
 
-$tpl->assign('projects', Projects::listAssocWithEmpty());
+$tpl->assign('projects', Projects::listAssoc());
 
 $tpl->assign(compact('csrf_key', 'account_targets', 'user_name', 'su', 'fee'));
 
