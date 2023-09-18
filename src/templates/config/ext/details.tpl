@@ -79,7 +79,6 @@
 
 		{if $ext.restrict_section}
 			<p>
-				<strong>L'accès à cette extension est limité&nbsp;:</strong>
 				<span class="permissions">{display_permissions section=$ext.restrict_section level=$ext.restrict_level}</span>
 				Seuls les membres ayant accès à la section
 				«&nbsp;<strong><?=Entities\Users\Category::PERMISSIONS[$ext->restrict_section]['label']?></strong>&nbsp;»
