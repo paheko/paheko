@@ -770,9 +770,7 @@ class Transaction extends Entity
 
 	public function importForm(array $source = null)
 	{
-		if (null === $source) {
-			$source = $_POST;
-		}
+		$source ??= $_POST;
 
 		if (isset($source['id_related']) && empty($source['id_related'])) {
 			$source['id_related'] = null;
@@ -835,6 +833,7 @@ class Transaction extends Entity
 			if (Config::getInstance()->analytical_set_all) {
 				$source['lines'][1]['id_project'] = $source['lines'][0]['id_project'];
 			}
+
 
 			unset($line, $accounts, $account, $source['simple']);
 		}
@@ -905,11 +904,20 @@ class Transaction extends Entity
 		return parent::importForm($source);
 	}
 
+	public function importFromEditForm(?array $source = null): void
+	{
+		$source ??= $_POST;
+
+		if (!isset($source['id_related'])) {
+			unset($source['id_related']);
+		}
+
+		$this->importForm($source);
+	}
+
 	public function importFromNewForm(?array $source = null): void
 	{
-		if (null === $source) {
-			$source = $_POST;
-		}
+		$source ??= $_POST;
 
 		if (!isset($source['id_related'])) {
 			unset($source['id_related']);
@@ -917,10 +925,8 @@ class Transaction extends Entity
 
 		$type = $source['type'] ?? ($this->type ?? self::TYPE_ADVANCED);
 
-		if (self::TYPE_ADVANCED != $type) {
-			if (!isset($source['amount'])) {
-				throw new UserException('Montant non précisé');
-			}
+		if (self::TYPE_ADVANCED != $type && !isset($source['amount'])) {
+			throw new UserException('Montant non précisé');
 		}
 
 		$this->importForm($source);
@@ -928,9 +934,7 @@ class Transaction extends Entity
 
 	public function importFromAPI(?array $source = null): void
 	{
-		if (null === $source) {
-			$source = $_POST;
-		}
+		$source ??= $_POST;
 
 		if (isset($source['type']) && ctype_alpha($source['type']) && defined(self::class . '::TYPE_' . strtoupper($source['type']))) {
 			$source['type'] = constant(self::class . '::TYPE_' . strtoupper($source['type']));
@@ -941,9 +945,7 @@ class Transaction extends Entity
 
 	public function importFromPayoffForm(?array $source = null): void
 	{
-		if (null === $source) {
-			$source = $_POST;
-		}
+		$source ??= $_POST;
 
 		if (empty($this->_related)) {
 			throw new \LogicException('Cannot import pay-off if no related transaction is set');
@@ -1002,9 +1004,7 @@ class Transaction extends Entity
 
 	public function importFromBalanceForm(Year $year, ?array $source = null): void
 	{
-		if (null === $source) {
-			$source = $_POST;
-		}
+		$source ??= $_POST;
 
 		$this->label = 'Balance d\'ouverture';
 		$this->date = $year->start_date;
