@@ -27,7 +27,6 @@ $accounts = $chart->accounts();
 
 $csrf_key = 'acc_transaction_new';
 $transaction = new Transaction;
-$transaction->id_year = $current_year->id();
 
 $amount = 0;
 $id_project = null;
@@ -35,16 +34,6 @@ $linked_users = null;
 $linked_services = [];
 
 $lines = [[], []];
-
-$defaults = $transaction->setDefaultsFromQueryString($accounts);
-
-if (null !== $defaults) {
-	extract($defaults);
-}
-
-$form->runIf(f('lines') !== null, function () use (&$lines) {
-	$lines = Transaction::getFormLines();
-});
 
 $types_details = $transaction->getTypesDetails();
 
@@ -69,6 +58,20 @@ if (qg('copy')) {
 
 	$tpl->assign('duplicate_from', $old->id());
 }
+else {
+	$defaults = $transaction->setDefaultsFromQueryString($accounts);
+
+	if (null !== $defaults) {
+		extract($defaults);
+	}
+}
+
+$form->runIf(f('lines') !== null, function () use (&$lines) {
+	$lines = Transaction::getFormLines();
+});
+
+// Keep this line here, as the transaction can be overwritten by copy
+$transaction->id_year = $current_year->id();
 
 // Set last used date
 if (empty($transaction->date) && $session->get('acc_last_date') && $date = Date::createFromFormat('!Y-m-d', $session->get('acc_last_date'))) {
