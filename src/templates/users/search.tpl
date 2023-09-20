@@ -67,12 +67,15 @@
 	<table class="list">
 		<thead>
 			<tr>
-			{if $is_admin && $id_column !== false}
-				<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>
-			{/if}
+				{if $is_admin && $id_column !== false}
+					<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>
+				{/if}
 				{foreach from=$header item="column"}
-				<td>{$column}</td>
+					<td>{$column}</td>
 				{/foreach}
+				{if $id_column !== false}
+					<td class="actions"></td>
+				{/if}
 			</tr>
 		</thead>
 		<tbody>
@@ -82,14 +85,22 @@
 				<td class="check">{input type="checkbox" name="selected[]" value=$row[$id_column]}</td>
 			{/if}
 				{foreach from=$row item="column"}
-				<td>{$column}</td>
+				<td>
+					{$column}
+				</td>
 				{/foreach}
+				{if $id_column !== false}
+					<?php $id = $row[$id_column]; ?>
+					<td class="actions">
+						{linkbutton shape="user" href="!users/details.php?id=%d"|args:$id label="Fiche membre"}
+					</td>
+				{/if}
 			</tr>
 			{/foreach}
 		</tbody>
 
 		{if $is_admin && $id_column !== false}
-			{include file="users/_list_actions.tpl" colspan=$header_count+1}
+			{include file="users/_list_actions.tpl" colspan=$header_count+2}
 		{/if}
 	</table>
 

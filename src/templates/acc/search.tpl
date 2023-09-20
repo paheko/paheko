@@ -100,6 +100,10 @@
 
 	<p class="help">{$count} résultats trouvés pour cette recherche.</p>
 
+	<?php
+	$id_column = array_search('id', $header, true);
+	?>
+
 	<table class="list">
 		<thead>
 			<tr>
@@ -111,8 +115,12 @@
 		<tbody>
 			{foreach from=$results item="row"}
 			<tr>
-				{foreach from=$row item="column"}
-				<td>{$column}</td>
+				{foreach from=$row key="key" item="value"}
+					{if $id_column === $key}
+						<td class="num">{link href="!acc/transactions/details.php?id=%d"|args:$value label="#%d"|args:$value}</td>
+					{else}
+						<td>{$value}</td>
+					{/if}
 				{/foreach}
 			</tr>
 			{/foreach}
