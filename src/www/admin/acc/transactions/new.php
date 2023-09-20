@@ -34,8 +34,6 @@ $linked_services = [];
 
 $lines = [[], []];
 
-$types_details = $transaction->getTypesDetails();
-
 // Duplicate transaction
 if (qg('copy')) {
 	$old = Transactions::get((int)qg('copy'));
@@ -71,6 +69,7 @@ $form->runIf(f('lines') !== null, function () use (&$lines) {
 
 // Keep this line here, as the transaction can be overwritten by copy
 $transaction->id_year = $current_year->id();
+$types_details = $transaction->getTypesDetails();
 
 // Set last used date
 if (empty($transaction->date) && $session->get('acc_last_date') && $date = Date::createFromFormat('!Y-m-d', $session->get('acc_last_date'))) {

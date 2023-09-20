@@ -1552,9 +1552,9 @@ class Transaction extends Entity
 			$amount = Utils::moneyToInteger($_GET['a']);
 		}
 
-		// a0 = Amount, in cents
-		if (isset($_GET['a0'])) {
-			$amount = (int)$_GET['a0'];
+		// a00 = Amount, in cents
+		if (isset($_GET['a00'])) {
+			$amount = (int)$_GET['a00'];
 		}
 
 		// l = label
