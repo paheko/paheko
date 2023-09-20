@@ -1531,4 +1531,133 @@ class Transaction extends Entity
 
 		return null;
 	}
+
+	/**
+	 * Quick-fill transaction from query parameters
+	 */
+	public function setDefaultsFromQueryString(Accounts $accounts): ?array
+	{
+		if (!empty($_POST)) {
+			return null;
+		}
+
+		$amount = null;
+		$id_project = null;
+		$lines = [[], []];
+		$linked_users = null;
+
+		// a = amount, in single currency units
+		if (isset($_GET['a'])) {
+			$amount = Utils::moneyToInteger($_GET['a']);
+		}
+
+		// a0 = Amount, in cents
+		if (isset($_GET['a0'])) {
+			$amount = (int)$_GET['a0'];
+		}
+
+		// l = label
+		if (isset($_GET['l'])) {
+			$this->label = $_GET['l'];
+		}
+
+		// r = reference
+		if (isset($_GET['r'])) {
+			$this->reference = $_GET['r'];
+		}
+
+		// dt = date
+		if (isset($_GET['dt'])) {
+			$this->date = Entity::filterUserDateValue($_GET['dt']);
+		}
+
+		// t = type
+		if (isset($_GET['t'])) {
+			$this->type = (int) $_GET['t'];
+		}
+
+		if (isset($_GET['p'])) {
+			$id_project = (int) $_GET['p'];
+		}
+
+		// ab = Bank/cash account
+		if (isset($_GET['ab'])
+			&& ($a = $accounts->getWithCode($_GET['ab']))
+			&& in_array($a->type, [$a::TYPE_BANK, $a::TYPE_CASH, $a::TYPE_OUTSTANDING])) {
+			$this->setDefaultAccount(self::TYPE_REVENUE, 'debit', $a->id);
+			$this->setDefaultAccount(self::TYPE_EXPENSE, 'credit', $a->id);
+			$this->setDefaultAccount(self::TYPE_TRANSFER, 'debit', $a->id);
+		}
+
+		// ar = Revenue account
+		if (isset($_GET['ar'])
+			&& ($a = $accounts->getWithCode($_GET['ar']))
+			&& $a->type == $a::TYPE_REVENUE) {
+			$this->setDefaultAccount(self::TYPE_REVENUE, 'credit', $a->id);
+			$this->setDefaultAccount(self::TYPE_CREDIT, 'credit', $a->id);
+		}
+
+		// ae = Expense account
+		if (isset($_GET['ae'])
+			&& ($a = $accounts->getWithCode($_GET['ae']))
+			&& $a->type == $a::TYPE_EXPENSE) {
+			$this->setDefaultAccount(self::TYPE_EXPENSE, 'debit', $a->id);
+			$this->setDefaultAccount(self::TYPE_DEBT, 'debit', $a->id);
+		}
+
+		// at = Transfer account
+		if (isset($_GET['at'])
+			&& ($a = $accounts->getWithCode($_GET['at']))
+			&& $a->type == $a::TYPE_BANK) {
+			$this->setDefaultAccount(self::TYPE_TRANSFER, 'credit', $a->id);
+		}
+
+		// a3 = Third-party account
+		if (isset($_GET['a3'])
+			&& ($a = $accounts->getWithCode($_GET['a3']))
+			&& $a->type == $a::TYPE_THIRD_PARTY) {
+			$this->setDefaultAccount(self::TYPE_CREDIT, 'debit', $a->id);
+			$this->setDefaultAccount(self::TYPE_DEBT, 'credit', $a->id);
+		}
+
+		// Pre-fill from lllines
+		if (isset($_GET['ll']) && is_array($_GET['ll'])) {
+			$lines = [];
+			foreach ($_GET['ll'] as $l) {
+				$lines[] = [
+					'debit'            => $l['d0'] ?? Utils::moneyToInteger($l['d'] ?? ''),
+					'credit'           => $l['c0'] ?? Utils::moneyToInteger($l['c'] ?? ''),
+					'account_selector' => $accounts->getSelectorFromCode($l['a'] ?? null),
+					'label'            => $l['l'] ?? null,
+					'reference'        => $l['r'] ?? null,
+				];
+			}
+
+			// Make sure we have at least two lines
+			$lines = array_merge($lines, array_fill(0, max(0, 2 - count($lines)), []));
+		}
+
+		if (isset($_GET['u'])) {
+			$linked_users = [];
+			$i = 0;
+
+			foreach ((array) $_GET['u'] as $key => $value) {
+				if ($key != $i++ && $value) {
+					$id = (int) $key;
+					$linked_services[$id] = (int) $value;
+				}
+				else {
+					$id = (int) $value;
+				}
+
+				$name = Users::getName($id);
+
+				if ($name) {
+					$linked_users[$id] = $name;
+				}
+			}
+		}
+
+		return compact('lines', 'id_project', 'amount', 'linked_users');
+	}
 }

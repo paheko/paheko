@@ -44,21 +44,6 @@ class Accounts
 		return [$id => self::getCodeAndLabel($id)];
 	}
 
-	static public function getSelectorFromCode(?string $code): ?array
-	{
-		if (!$code) {
-			return null;
-		}
-
-		$a = DB::getInstance()->first('SELECT id, code || \' — \' || label AS label FROM acc_accounts WHERE code = ?;', $code);
-
-		if (!$a) {
-			return null;
-		}
-
-		return [$a->id => $a->label];
-	}
-
 	static public function getCodeAndLabel(int $id): string
 	{
 		return EntityManager::getInstance(Account::class)->col('SELECT code || \' — \' || label FROM @TABLE WHERE id = ?;', $id);
@@ -72,6 +57,24 @@ class Accounts
 	static public function getCodeFromId(string $id): string
 	{
 		return EntityManager::getInstance(Account::class)->col('SELECT code FROM @TABLE WHERE id = ?;', $id);
+	}
+
+	public function getSelectorFromCode(?string $code): ?array
+	{
+		if (!$code) {
+			return null;
+		}
+
+		$a = DB::getInstance()->first(
+			'SELECT id, code || \' — \' || label AS label FROM acc_accounts WHERE code = ? AND id_chart = ?;',
+			$code,
+			$this->chart_id);
+
+		if (!$a) {
+			return null;
+		}
+
+		return [$a->id => $a->label];
 	}
 
 	/**

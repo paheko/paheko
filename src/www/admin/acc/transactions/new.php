@@ -27,6 +27,7 @@ $accounts = $chart->accounts();
 
 $csrf_key = 'acc_transaction_new';
 $transaction = new Transaction;
+$transaction->id_year = $current_year->id();
 
 $amount = 0;
 $id_project = null;
@@ -35,117 +36,15 @@ $linked_services = [];
 
 $lines = [[], []];
 
-// Quick-fill transaction from query parameters
-// a = amount, in single currency units
-if (qg('a')) {
-	$amount = Utils::moneyToInteger(qg('a'));
-}
+$defaults = $transaction->setDefaultsFromQueryString($accounts);
 
-// a0 = Amount, in cents
-if (qg('a0')) {
-	$amount = (int)qg('a0');
-}
-
-// l = label
-if (qg('l')) {
-	$transaction->label = qg('l');
-}
-
-// r = reference
-if (qg('r')) {
-	$transaction->reference = qg('r');
-}
-
-// dt = date
-if (qg('dt')) {
-	$transaction->date = Entity::filterUserDateValue(qg('dt'));
-}
-
-// t = type
-if (null !== qg('t')) {
-	$transaction->type = (int) qg('t');
-}
-
-if (qg('p')) {
-	$id_project = (int) qg('p');
-}
-
-// ab = Bank/cash account
-if (qg('ab') && ($a = $accounts->getWithCode(qg('ab')))
-	&& in_array($a->type, [$a::TYPE_BANK, $a::TYPE_CASH, $a::TYPE_OUTSTANDING])) {
-	$transaction->setDefaultAccount($transaction::TYPE_REVENUE, 'debit', $a->id);
-	$transaction->setDefaultAccount($transaction::TYPE_EXPENSE, 'credit', $a->id);
-	$transaction->setDefaultAccount($transaction::TYPE_TRANSFER, 'debit', $a->id);
-}
-
-// ar = Revenue account
-if (qg('ar') && ($a = $accounts->getWithCode(qg('ar')))
-	&& $a->type == $a::TYPE_REVENUE) {
-	$transaction->setDefaultAccount($transaction::TYPE_REVENUE, 'credit', $a->id);
-	$transaction->setDefaultAccount($transaction::TYPE_CREDIT, 'credit', $a->id);
-}
-
-// ae = Expense account
-if (qg('ae') && ($a = $accounts->getWithCode(qg('ae')))
-	&& $a->type == $a::TYPE_EXPENSE) {
-	$transaction->setDefaultAccount($transaction::TYPE_EXPENSE, 'debit', $a->id);
-	$transaction->setDefaultAccount($transaction::TYPE_DEBT, 'debit', $a->id);
-}
-
-// at = Transfer account
-if (qg('at') && ($a = $accounts->getWithCode(qg('at')))
-	&& $a->type == $a::TYPE_BANK) {
-	$transaction->setDefaultAccount($transaction::TYPE_TRANSFER, 'credit', $a->id);
-}
-
-// a3 = Third-party account
-if (qg('a3') && ($a = $accounts->getWithCode(qg('a3')))
-	&& $a->type == $a::TYPE_THIRD_PARTY) {
-	$transaction->setDefaultAccount($transaction::TYPE_CREDIT, 'debit', $a->id);
-	$transaction->setDefaultAccount($transaction::TYPE_DEBT, 'credit', $a->id);
-}
-
-// Pre-fill from lllines
-if (($ll = qg('ll')) && is_array($ll)) {
-	$lines = [];
-	foreach ($ll as $l) {
-		$lines[] = [
-			'debit'            => $l['d0'] ?? Utils::moneyToInteger($l['d'] ?? ''),
-			'credit'           => $l['c0'] ?? Utils::moneyToInteger($l['c'] ?? ''),
-			'account_selector' => Accounts::getSelectorFromCode($l['a'] ?? null),
-			'label'            => $l['l'] ?? null,
-			'reference'        => $l['r'] ?? null,
-		];
-	}
-
-	// Make sure we have at least two lines
-	$lines = array_merge($lines, array_fill(0, max(0, 2 - count($lines)), []));
+if (null !== $defaults) {
+	extract($defaults);
 }
 
 $form->runIf(f('lines') !== null, function () use (&$lines) {
 	$lines = Transaction::getFormLines();
 });
-
-if (qg('u')) {
-	$linked_users = [];
-	$i = 0;
-
-	foreach ((array) qg('u') as $key => $value) {
-		if ($key != $i++ && $value) {
-			$id = (int) $key;
-			$linked_services[$id] = (int) $value;
-		}
-		else {
-			$id = (int) $value;
-		}
-
-		$name = Users::getName($id);
-
-		if ($name) {
-			$linked_users[$id] = $name;
-		}
-	}
-}
 
 $types_details = $transaction->getTypesDetails();
 
@@ -170,8 +69,6 @@ if (qg('copy')) {
 
 	$tpl->assign('duplicate_from', $old->id());
 }
-
-$transaction->id_year = $current_year->id();
 
 // Set last used date
 if (empty($transaction->date) && $session->get('acc_last_date') && $date = Date::createFromFormat('!Y-m-d', $session->get('acc_last_date'))) {
