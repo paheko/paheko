@@ -385,14 +385,16 @@ class Emails
 
 		// Update emails list and send count
 		// then delete messages from queue
+		$db->begin();
 		$db->exec(sprintf('
-		BEGIN;
 			UPDATE emails_queue SET sending = 2 WHERE %s;
 			INSERT OR IGNORE INTO %s (hash) SELECT recipient_hash FROM emails_queue WHERE sending = 2;
 			UPDATE %2$s SET sent_count = sent_count + 1, last_sent = datetime()
 				WHERE hash IN (SELECT recipient_hash FROM emails_queue WHERE sending = 2);
-			DELETE FROM emails_queue WHERE sending = 2;
-		END;', $db->where('id', $ids), Email::TABLE));
+			DELETE FROM emails_queue WHERE sending = 2;',
+			$db->where('id', $ids),
+			Email::TABLE));
+		$db->commit();
 
 		$unused_attachments = array_diff($all_attachments, $db->getAssoc('SELECT id, path FROM emails_queue_attachments;'));
 
