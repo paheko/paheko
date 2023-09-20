@@ -35,14 +35,7 @@ elseif ($target == 'service') {
 }
 elseif ($target == 'search') {
 	$search_list = Search::list(SearchEntity::TARGET_USERS, Session::getUserId());
-	$search_list = array_filter($search_list, function ($s) {
-		try {
-			return $s->hasUserId();
-		}
-		catch (UserException $e) {
-			return false;
-		}
-	});
+	$search_list = array_filter($search_list, fn($s) => $s->hasUserId());
 
 	$tpl->assign(compact('search_list'));
 }

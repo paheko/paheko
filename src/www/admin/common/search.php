@@ -96,7 +96,7 @@ if (!$default) {
 			}
 
 			$header = $s->getHeader();
-			$count = $s->countResults();
+			$count = $s->countResults(false);
 			$results = $s->iterateResults();
 		}
 	}

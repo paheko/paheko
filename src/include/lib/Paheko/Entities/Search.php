@@ -218,13 +218,13 @@ class Search extends Entity
 
 	public function hasUserId(): bool
 	{
-		$sql = $this->SQL();
-
-		if (!preg_match('/(?:FROM|JOIN)\s+users/i', $sql)) {
-			return false;
-		}
-
 		try {
+			$sql = $this->SQL();
+
+			if (!preg_match('/(?:FROM|JOIN)\s+users/i', $sql)) {
+				return false;
+			}
+
 			$header = $this->getHeader(['limit' => 1, 'no_cache' => true]);
 		}
 		catch (UserException $e) {
@@ -238,9 +238,11 @@ class Search extends Entity
 		return true;
 	}
 
-	public function countResults(): int
+	public function countResults(bool $ignore_errors = true): ?int
 	{
-		$sql = $this->SQL(['no_limit' => true]);
+		$sql = $this->SQL(['no_limit' => true, 'no_cache' => true]);
+		$sql = rtrim($sql);
+		$sql = rtrim($sql, ';');
 		$sql = 'SELECT COUNT(*) FROM (' . $sql . ')';
 
 		$allowed_tables = $this->getProtectedTables();
@@ -261,6 +263,10 @@ class Search extends Entity
 			return $count;
 		}
 		catch (DB_Exception $e) {
+			if ($ignore_errors) {
+				return null;
+			}
+
 			throw new UserException('Erreur dans la requête : ' . $e->getMessage(), 0, $e);
 		}
 		finally {
