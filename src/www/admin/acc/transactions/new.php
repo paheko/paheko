@@ -9,7 +9,6 @@ use Paheko\Accounting\Accounts;
 use Paheko\Accounting\Projects;
 use Paheko\Accounting\Transactions;
 use Paheko\Accounting\Years;
-use Paheko\Users\Users;
 use Paheko\UserTemplate\Modules;
 
 use KD2\DB\Date;

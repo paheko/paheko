@@ -12,6 +12,7 @@ use Paheko\Utils;
 use Paheko\UserException;
 
 use Paheko\Users\DynamicFields;
+use Paheko\Users\Users;
 
 use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
