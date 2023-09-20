@@ -378,9 +378,9 @@ class Template extends Smartyer
 			case 'country':
 				return Utils::getCountryName($v);
 			case 'date':
-				return Utils::date_fr($v, 'd/m/Y');
+				return Utils::date_fr($v, 'd/m/Y') ?? '';
 			case 'datetime':
-				return Utils::date_fr($v, 'd/m/Y à H:i');
+				return Utils::date_fr($v, 'd/m/Y à H:i') ?? '';
 			case 'number':
 				return str_replace('.', ',', htmlspecialchars($v));
 			case 'multiple':
