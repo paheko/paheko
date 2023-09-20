@@ -46,7 +46,7 @@
 		<legend>Quelle recherche utiliser&nbsp;?</legend>
 		<dl>
 			{foreach from=$search_list item="search"}
-				{input type="radio" name="target_id" value=$search.id label=$search.label help="%d membres"|args:$search->countResults()}
+				{input type="radio" name="target_id" value=$search.id label=$search.label help="%d membres"|args:$search.count}
 			{/foreach}
 		</dl>
 	</fieldset>
