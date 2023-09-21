@@ -15,7 +15,7 @@ deps:
 
 modules:
 	wget ${MODULES_FILE} -O modules.zip
-	unzip modules.zip
+	unzip -u modules.zip
 	rm -f modules.zip
 
 dev-server:
