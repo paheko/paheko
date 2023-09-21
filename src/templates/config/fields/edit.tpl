@@ -66,17 +66,17 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 	<legend>Accès</legend>
 	<dl>
 	{if !($field->system & $field::PASSWORD)}
-		<dt><label for="f_user_access_level_0">Accès à ce champ par le membre lui-même</label></dt>
+		<dt><label for="f_user_access_level_0">Le membre lui-même peut…</label></dt>
 		<dd class="help">Indiquer ici si le membre pourra voir ou modifier cette information dans sa section <em>"Mes infos personnelles"</em>.</dd>
-		{input type="radio" name="user_access_level" value=$session::ACCESS_NONE label="Cacher ce champ" source=$field}
-		{input type="radio" name="user_access_level" value=$session::ACCESS_READ label="Afficher ce champ, mais ne pas permettre de le modifier" source=$field default=$session::ACCESS_READ}
-		{input type="radio" name="user_access_level" value=$session::ACCESS_WRITE label="Permettre au membre de voir et modifier ce champ" source=$field}
+		{input type="radio" name="user_access_level" value=$session::ACCESS_WRITE label="Voir et modifier ce champ" source=$field}
+		{input type="radio" name="user_access_level" value=$session::ACCESS_READ label="Seulement voir ce champ" source=$field default=$session::ACCESS_READ}
+		{input type="radio" name="user_access_level" value=$session::ACCESS_NONE label="Rien, cette information ne doit pas être visible par le membre" source=$field}
 		<dd class="help">Attention&nbsp;: conformément à la réglementation (RGPD), quel que soit votre choix, le membre pourra voir le contenu de ce champ en effectuant un export de ses données personnelles (s'il a le droit de se connecter).</dd>
 	{/if}
-		<dt><label for="f_management_access_level_1">Accès à ce champ dans la gestion des membres</label></dt>
-		{input type="radio" name="management_access_level" value=$session::ACCESS_READ label="Visible par toute personne ayant accès à la gestion des membres (lecture, écriture, administration)" source=$field default=$session::ACCESS_READ}
-		{input type="radio" name="management_access_level" value=$session::ACCESS_WRITE label="Seulement aux personnes ayant accès en écriture à la gestion des membres" source=$field}
-		{input type="radio" name="management_access_level" value=$session::ACCESS_ADMIN label="Seulement aux personnes ayant accès en administration à la gestion des membres" source=$field}
+		<dt><label for="f_management_access_level_1">Un autre membre peut voir ce champ…</label></dt>
+		{input type="radio" name="management_access_level" value=$session::ACCESS_READ label="S'il a accès à la gestion des membres (en lecture, écriture, ou administration)" source=$field default=$session::ACCESS_READ}
+		{input type="radio" name="management_access_level" value=$session::ACCESS_WRITE label="Seulement s'il a accès en écriture à la gestion des membres" source=$field}
+		{input type="radio" name="management_access_level" value=$session::ACCESS_ADMIN label="Seulement s'il a accès en administration à la gestion des membres" source=$field}
 	</dl>
 </fieldset>
 
