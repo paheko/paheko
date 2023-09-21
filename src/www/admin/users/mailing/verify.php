@@ -15,7 +15,14 @@ if (!$email) {
 }
 
 if (!$email->canSendVerificationAfterFail()) {
-    throw new UserException('Il n\'est pas possible de renvoyer une vérification à cette adresse pour le moment, il faut attendre un mois.');
+	if ($email->optout) {
+		$message = 'Il n\'est pas possible de renvoyer une vérification à cette adresse pour le moment, il faut attendre 3 jours.';
+	}
+	else {
+		$message = 'Il n\'est pas possible de renvoyer une vérification à cette adresse pour le moment, il faut attendre un mois.';
+	}
+
+    throw new UserException($message);
 }
 
 $csrf_key = 'send_verification';

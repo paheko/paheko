@@ -17,6 +17,7 @@ class Email extends Entity
 	const TABLE = 'emails';
 
 	const RESEND_VERIFICATION_DELAY = '1 month ago';
+	const RESEND_VERIFICATION_DELAY_OPTOUT = '3 days ago';
 
 	/**
 	 * Antispam services that require to do a manual action to accept emails
@@ -78,8 +79,8 @@ class Email extends Entity
 
 	public function canSendVerificationAfterFail(): bool
 	{
-		$limit_date = new \DateTime(self::RESEND_VERIFICATION_DELAY);
-		return $this->last_sent > $limit_date && ($this->invalid || $this->hasReachedFailLimit());
+		$limit_date = new \DateTime($this->optout ? self::RESEND_VERIFICATION_DELAY_OPTOUT : self::RESEND_VERIFICATION_DELAY);
+		return $this->last_sent < $limit_date;
 	}
 
 	public function verify(string $code): bool
