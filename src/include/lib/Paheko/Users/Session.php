@@ -190,6 +190,10 @@ class Session extends \KD2\UserSession
 	{
 		$logged = parent::isLogged();
 
+		if ($logged && !$disable_local_login && LOCAL_LOGIN !== -1 && LOCAL_LOGIN !== $this->user) {
+			$logged = false;
+		}
+
 		// Ajout de la gestion de LOCAL_LOGIN
 		if (!$logged && !$disable_local_login && LOCAL_LOGIN) {
 			$logged = $this->forceLogin(LOCAL_LOGIN);
