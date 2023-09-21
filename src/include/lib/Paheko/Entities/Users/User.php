@@ -146,6 +146,11 @@ class User extends Entity
 				continue;
 			}
 
+			if (empty($value) && ($field->system & $field::NUMBER)) {
+				$this->setNumberIfEmpty();
+				continue;
+			}
+
 			$this->assert(null !== $value, sprintf('"%s" : ce champ est requis', $field->label));
 
 			if (is_bool($value) && $field->required) {
@@ -338,6 +343,7 @@ class User extends Entity
 
 		$db = DB::getInstance();
 		$new = $db->firstColumn(sprintf('SELECT MAX(%s) + 1 FROM %s WHERE %1$s IS NOT NULL;', $db->quoteIdentifier($field), User::TABLE));
+		$new = $new ?: $db->count(User::TABLE);
 		$this->set($field, $new);
 	}
 
