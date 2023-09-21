@@ -26,8 +26,8 @@
 				<th>Libellé</th>
 				<td>Liste des membres</td>
 				<td>Obligatoire&nbsp;?</td>
-				<td>Visibilité</td>
-				<td>Modification</td>
+				<td>Accès membre</td>
+				<td>Accès gestion</td>
 				<td></td>
 			</tr>
 		</thead>
@@ -41,8 +41,26 @@
 				<th>{$field.label}</th>
 				<td>{if $field.list_table}Oui{/if}</td>
 				<td>{if $field.required}Obligatoire{/if}</td>
-				<td>{if $field.read_access == $field::ACCESS_USER}Membre{else}Gestionnaires{/if}</td>
-				<td>{if $field->isVirtual()}—{elseif $field.write_access == $field::ACCESS_USER}Membre{else}Gestionnaires{/if}</td>
+				<td>
+					{if $field.user_access_level === $session::ACCESS_NONE}
+						{icon shape="eye-off" title="Caché"}
+					{elseif $field.user_access_level === $session::ACCESS_READ}
+						{icon shape="eye" title="Visible"}
+					{else}
+						{icon shape="eye" title="Visible"}
+						{icon shape="edit" title="Modifiable"}
+					{/if}
+				</td>
+				<td>
+					<span class="permissions">{display_permissions section="users" level=$field.management_access_level}</span>
+					{if $field.management_access_level === $session::ACCESS_READ}
+						Lecture
+					{elseif $field.management_access_level === $session::ACCESS_WRITE}
+						Écriture
+					{elseif $field.management_access_level === $session::ACCESS_ADMIN}
+						Administration
+					{/if}
+				</td>
 				<td class="actions">
 					{if $field->canDelete()}
 						{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$field.id target="_dialog"}

@@ -85,62 +85,7 @@ class Files
 
 		$p = [];
 
-		if (!$s->canAccess($s::SECTION_USERS, $s::ACCESS_WRITE)
-			&& $s->isLogged()) {
-			$id = $s::getUserId();
-			$list = DynamicFields::getInstance()->fieldsByType('file');
-
-			// Add permissions for each field
-			foreach ($list as $name => $field) {
-				if (!$field->write_access) {
-					continue;
-				}
-
-				$p[File::CONTEXT_USER . '/' . $id . '/' . $name . '/'] = [
-					'mkdir' => false,
-					'move' => false,
-					'create' => true,
-					'read' => true,
-					'write' => true,
-					'delete' => false,
-					'share' => false,
-				];
-			}
-
-			// The user can always access his own profile files
-			$p[File::CONTEXT_USER . '/' . $id . '/'] = [
-				'mkdir' => false,
-				'move' => false,
-				'create' => false,
-				'read' => true,
-				'write' => false,
-				'delete' => false,
-				'share' => false,
-			];
-		}
-
-
-		// Subdirectories can be managed by member managemnt
-		$p[File::CONTEXT_USER . '//'] = [
-			'mkdir' => false,
-			'move' => false,
-			'create' => $s->canAccess($s::SECTION_USERS, $s::ACCESS_WRITE),
-			'read' => $s->canAccess($s::SECTION_USERS, $s::ACCESS_READ),
-			'write' => $s->canAccess($s::SECTION_USERS, $s::ACCESS_WRITE),
-			'delete' => $s->canAccess($s::SECTION_USERS, $s::ACCESS_WRITE),
-			'share' => false,
-		];
-
-		// Users can't do anything on the root though
-		$p[File::CONTEXT_USER] = [
-			'mkdir' => false,
-			'move' => false,
-			'create' => false,
-			'write' => false,
-			'delete' => false,
-			'read' => $s->canAccess($s::SECTION_USERS, $s::ACCESS_READ),
-			'share' => false,
-		];
+		// Note USER context files are managed in Session::checkFilePermission
 
 		$p[File::CONTEXT_CONFIG] = [
 			'mkdir' => false,

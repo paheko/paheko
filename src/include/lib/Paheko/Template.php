@@ -426,11 +426,11 @@ class Template extends Smartyer
 			return '';
 		}
 
-		if ($context == 'user_edit' && !$field->read_access) {
+		if ($context === 'user_edit' && $field->user_access_level === Session::ACCESS_NONE) {
 			return '';
 		}
 
-		if ($context == 'user_edit' && !$field->write_access) {
+		if ($context === 'user_edit' && $field->user_access_level === Session::ACCESS_READ) {
 			$v = $this->displayDynamicField(['key' => $key, 'value' => $params['user']->$key]);
 			return sprintf('<dt>%s</dt><dd>%s</dd>', $field->label, $v ?: '<em>Non renseigné</em>');
 		}
@@ -520,7 +520,7 @@ class Template extends Smartyer
 
 			return sprintf('<dt><label for="f_%s_1">%s %s</label><input type="hidden" name="%1$s_present" value="1" /></dt>%s', $field->name, htmlspecialchars($field->label), $required_label, CommonFunctions::input($params));
 		}
-		elseif ($field->system & $field::NUMBER && $context == 'new') {
+		elseif ($field->system & $field::NUMBER && $context === 'new') {
 			$params['default'] = DB::getInstance()->firstColumn(sprintf('SELECT MAX(%s) + 1 FROM %s;', $key, User::TABLE));
 			$params['required'] = false;
 		}
@@ -534,14 +534,14 @@ class Template extends Smartyer
 
 		$out = CommonFunctions::input($params);
 
-		if ($context != 'edit' && $field->system & $field::LOGIN) {
+		if ($context !== 'edit' && $field->system & $field::LOGIN) {
 			$out .= '<dd class="help"><small>(Sera utilisé comme identifiant de connexion si le membre a le droit de se connecter.)</small></dd>';
 		}
 
-		if ($context == 'new' && $field->system & $field::NUMBER) {
+		if ($context === 'new' && $field->system & $field::NUMBER) {
 			$out .= '<dd class="help"><small>Doit être unique, laisser vide pour que le numéro soit attribué automatiquement.</small></dd>';
 		}
-		elseif ($context == 'edit' && $field->system & $field::NUMBER) {
+		elseif ($context === 'edit' && $field->system & $field::NUMBER) {
 			$out .= '<dd class="help"><small>Doit être unique pour chaque membre.</small></dd>';
 		}
 
@@ -645,6 +645,9 @@ class Template extends Smartyer
 		$out = [];
 
 		if (isset($params['section'], $params['level'])) {
+			if (is_string($params['level'])) {
+				$params['level'] = Session::ACCESS_LEVELS[$params['level']];
+			}
 			$list = [$params['section'] => Category::PERMISSIONS[$params['section']]];
 			$perms = (object) ['perm_' . $params['section'] => $params['level']];
 		}

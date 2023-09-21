@@ -1,6 +1,7 @@
 <?php
 use Paheko\Users\DynamicFields as DF;
-assert(isset($user, $show_message_button));
+use Paheko\Users\Session;
+assert(isset($user, $show_message_button, $context));
 
 $user_files_path = $user->attachmentsDirectory();
 
@@ -13,18 +14,25 @@ $fields = DF::getInstance()->all();
 	{foreach from=$fields key="key" item="field"}
 	<?php
 	// Skip private fields from "my info" page
-	if ($mode == 'user' && !$field->read_access) {
+	if ($context === 'user' && Session::ACCESS_NONE === $field->user_access_level) {
 		continue;
 	}
 
 	// Skip files from export
-	if ($mode == 'export' && $field->type == 'file') {
+	if ($context === 'export' && $field->type === 'file') {
 		continue;
 	}
 
 	$value = $user->$key ?? null;
 	?>
 	<dt>{$field.label}</dt>
+
+	{* Skip according to management access rules *}
+	{if $context === 'manage' && !$session->canAccess(Session::SECTION_USERS, $field.management_access_level)}
+		<dd><em>**Caché**</em></dd>
+		<?php continue; ?>
+	{/if}
+
 	<dd>
 		{if $field.type == 'checkbox'}
 			{if $value}
@@ -34,7 +42,7 @@ $fields = DF::getInstance()->all();
 			{/if}
 		{elseif $field.type == 'file'}
 			<?php
-			$edit = ($field->write_access || $mode == 'edit');
+			$edit = ($field->user_access_level === Session::ACCESS_WRITE || $context === 'manage');
 			?>
 			{include file="common/files/_context_list.tpl" path="%s/%s"|args:$user_files_path:$key}
 		{elseif empty($value)}

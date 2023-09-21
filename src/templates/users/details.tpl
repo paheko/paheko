@@ -107,7 +107,7 @@
 	</dl>
 </aside>
 
-{include file="users/_details.tpl" data=$user show_message_button=true mode="edit"}
+{include file="users/_details.tpl" data=$user show_message_button=true context="manage"}
 
 {$snippets|raw}
 

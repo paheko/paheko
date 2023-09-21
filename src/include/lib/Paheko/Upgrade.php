@@ -167,6 +167,12 @@ class Upgrade
 				$db->import(ROOT . '/include/migrations/1.3/1.3.0-rc12.sql');
 			}
 
+			if (version_compare($v, '1.3.0-alpha1', '>=') && version_compare($v, '1.3.0-rc13', '<')) {
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/migrations/1.3/1.3.0-rc13.sql');
+				$db->commitSchemaUpdate();
+			}
+
 			Plugins::upgradeAllIfRequired();
 
 			// Vérification de la cohérence des clés étrangères

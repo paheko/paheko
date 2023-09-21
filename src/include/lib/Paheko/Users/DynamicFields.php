@@ -9,6 +9,7 @@ use Paheko\Utils;
 use Paheko\UserException;
 use Paheko\ValidationException;
 
+use Paheko\Users\Session;
 use Paheko\Entities\Users\DynamicField;
 use Paheko\Entities\Users\User;
 
@@ -238,8 +239,8 @@ class DynamicFields
 			}
 		}
 
-		$data->read_access ??= 1;
-		$data->write_access ??= 0;
+		$data->user_access_level ??= Session::ACCESS_READ;
+		$data->management_access_level ??= Session::ACCESS_READ;
 		$data->required ??= false;
 		$data->list_table ??= false;
 
@@ -461,8 +462,8 @@ class DynamicFields
 			$field->set('label', (string)$data['title']);
 			$field->set('type', (string)$data['type']);
 			$field->set('help', empty($data['help']) ? null : (string)$data['help']);
-			$field->set('read_access', $data['private'] ? $field::ACCESS_ADMIN : $field::ACCESS_USER);
-			$field->set('write_access', $data['editable'] ? $field::ACCESS_ADMIN : $field::ACCESS_USER);
+			$field->set('user_access_level', $data['editable'] ? Session::ACCESS_WRITE : ($data['private'] ? Session::ACCESS_NONE : Session::ACCESS_READ));
+			$field->set('management_access_level', Session::ACCESS_READ);
 			$field->set('required', (bool) $data['mandatory']);
 			$field->set('list_table', (bool) $data['list_row']);
 			$field->set('sort_order', $i++);

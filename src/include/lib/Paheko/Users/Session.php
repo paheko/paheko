@@ -519,6 +519,9 @@ class Session extends \KD2\UserSession
 		}
 	}
 
+	/**
+	 * Check permissions for extensions files (plugins, modules)
+	 */
 	public function checkExtensionFilePermissions(string $path, string $permission): bool
 	{
 		$context = strtok($path, '/');
@@ -573,16 +576,71 @@ class Session extends \KD2\UserSession
 
 	public function checkFilePermission(string $path, string $permission): bool
 	{
-		$path_level = preg_replace('!/[^/]+!', '/', $path);
-		$path = ltrim($path, '/');
+		$path = trim($path, '/');
 
 		if (!isset($this->_files_permissions)) {
 			$this->_files_permissions = Files::buildUserPermissions($this);
 		}
 
+		$context = strtok($path, '/');
+
 		// Check permissions for plugins and modules files
-		if (strpos($path, File::CONTEXT_EXTENSIONS . '/') === 0) {
+		if ($context === File::CONTEXT_EXTENSIONS) {
 			return $this->checkExtensionFilePermissions($path, $permission);
+		}
+
+		$b = strtok('/');
+		$c = strtok('/');
+
+		static $default = [
+			'mkdir'  => false,
+			'move'   => false,
+			'create' => false,
+			'read'   => false,
+			'write'  => false,
+			'delete' => false,
+			'share'  => false,
+		];
+
+		$file_permissions = $default;
+
+		// Access to user files is quite specific as it is defined per field
+		if ($context === File::CONTEXT_USER) {
+			if (!$c) {
+				if ($this->canAccess(self::SECTION_USERS, self::ACCESS_READ)) {
+					$file_permissions['read'] = true;
+				}
+
+				return $file_permissions[$permission];
+			}
+
+			// Always match by field name
+			$path_level = $context . '//' . $c;
+
+			$field = DynamicFields::get($c);
+
+			if (!$field) {
+				return $default[$permission];
+			}
+
+			if ($this->isLogged() && (int)$b === $this::getUserId()) {
+				$read = $field->user_access_level >= self::ACCESS_READ;
+				$write = $field->user_access_level >= self::ACCESS_WRITE;
+			}
+			else {
+				$read = $this->canAccess(self::SECTION_USERS, $field->management_access_level);
+				$write = $this->canAccess(self::SECTION_USERS, self::ACCESS_WRITE) && $this->canAccess(self::SECTION_USERS, $field->management_access_level);
+			}
+
+			$file_permissions['read'] = $read;
+			$file_permissions['write'] =
+				$file_permissions['delete'] =
+				$file_permissions['create'] = $write;
+			return $file_permissions[$permission];
+		}
+		else {
+			// Remove components
+			$path_level = preg_replace('!/[^/]+!', '/', $path);
 		}
 
 		foreach ($this->_files_permissions as $context => $permissions) {

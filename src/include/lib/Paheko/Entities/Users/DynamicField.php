@@ -11,6 +11,7 @@ use Paheko\ValidationException;
 use Paheko\Entities\Files\File;
 use Paheko\Files\Files;
 use Paheko\Users\DynamicFields;
+use Paheko\Users\Session;
 
 use KD2\DB\Date;
 
@@ -39,16 +40,14 @@ class DynamicField extends Entity
 	protected bool $required = false;
 
 	/**
-	 * 0 = only admins can read this field (private)
-	 * 1 = admins + the user themselves can read it
+	 * Maps to Session::ACCESS_LEVEL_*
 	 */
-	protected int $read_access = 0;
+	protected int $user_access_level = 0;
 
 	/**
-	 * 0 = only admins can write this field
-	 * 1 = admins + the user themselves can change it
+	 * Maps to Session::ACCESS_LEVEL_*
 	 */
-	protected int $write_access = 0;
+	protected int $management_access_level = 1;
 
 	/**
 	 * Use in users list table?
@@ -81,8 +80,10 @@ class DynamicField extends Entity
 	const NAMES    = 0x01 << 4;
 	const PRESET   = 0x01 << 5;
 
-	const ACCESS_ADMIN = 0;
-	const ACCESS_USER = 1;
+	const ACCESS_USER = 0x01 << 1;
+	const ACCESS_READ = 0x01 << 2;
+	const ACCESS_WRITE = 0x01 << 3;
+	const ACCESS_ADMIN = 0x01 << 4;
 
 	const TYPES = [
 		'email'		=>	'Adresse E-Mail',
@@ -264,8 +265,8 @@ class DynamicField extends Entity
 
 		$this->name = strtolower($this->name);
 
-		$this->assert($this->read_access == self::ACCESS_ADMIN || $this->read_access == self::ACCESS_USER);
-		$this->assert($this->write_access == self::ACCESS_ADMIN || $this->write_access == self::ACCESS_USER);
+		$this->assert(in_array($this->management_access_level, Session::ACCESS_LEVELS, true));
+		$this->assert(in_array($this->user_access_level, Session::ACCESS_LEVELS, true));
 
 		$this->assert(!array_key_exists($this->name, self::SYSTEM_FIELDS), 'Ce nom de champ est déjà utilisé par un champ système, merci d\'en choisir un autre.');
 		$this->assert(preg_match('!^[a-z][a-z0-9]*(_[a-z0-9]+)*$!', $this->name), 'Le nom du champ est invalide : ne sont acceptés que les lettres minuscules et les chiffres (éventuellement séparés par un underscore).');

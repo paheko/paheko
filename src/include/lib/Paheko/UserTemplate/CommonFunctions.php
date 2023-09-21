@@ -195,6 +195,11 @@ class CommonFunctions
 
 		$attributes_string = implode(' ', $attributes_string);
 
+		if (isset($label)) {
+			$label = htmlspecialchars((string)$label);
+			$label = preg_replace_callback('!\[icon=([\w-]+)\]!', fn ($match) => self::icon(['shape' => $match[1]]), $label);
+		}
+
 		if ($type == 'radio-btn') {
 			if (!empty($attributes['disabled'])) {
 				$attributes['class'] = ($attributes['class'] ?? '') . ' disabled';
@@ -203,7 +208,7 @@ class CommonFunctions
 			$radio = self::input(array_merge($params, ['type' => 'radio', 'label' => null, 'help' => null, 'disabled' => $attributes['disabled'] ?? null]));
 			$out = sprintf('<dd class="radio-btn %s">%s
 				<label for="%s"><div><h3>%s</h3>%s</div></label>
-			</dd>', $attributes['class'] ?? '', $radio, $attributes['id'], htmlspecialchars((string)$label), isset($params['help']) ? '<p class="help">' . nl2br(htmlspecialchars($params['help'])) . '</p>' : '');
+			</dd>', $attributes['class'] ?? '', $radio, $attributes['id'], $label, isset($params['help']) ? '<p class="help">' . nl2br(htmlspecialchars($params['help'])) . '</p>' : '');
 			return $out;
 		}
 		if ($type == 'select') {
@@ -314,7 +319,7 @@ class CommonFunctions
 			return $input;
 		}
 
-		$label = sprintf('<label for="%s">%s</label>', $attributes['id'], htmlspecialchars((string)$label));
+		$label = sprintf('<label for="%s">%s</label>', $attributes['id'], $label);
 
 		if ($type == 'radio' || $type == 'checkbox') {
 			$out = sprintf('<dd>%s %s', $input, $label);

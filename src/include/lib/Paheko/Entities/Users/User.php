@@ -561,7 +561,7 @@ class User extends Entity
 	public function canChangePassword(): bool
 	{
 		$password_field = current(DynamicFields::getInstance()->fieldsBySystemUse('password'));
-		return $password_field->write_access == $password_field::ACCESS_USER;
+		return $password_field->user_access_level === Session::ACCESS_WRITE;
 	}
 
 	public function checkDuplicate(): ?int

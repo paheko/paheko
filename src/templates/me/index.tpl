@@ -29,7 +29,7 @@
 </aside>
 {/if}
 
-{include file="users/_details.tpl" data=$user show_message_button=false mode="user"}
+{include file="users/_details.tpl" data=$user show_message_button=false context="user"}
 
 <dl class="describe">
 	<dd>{linkbutton href="!me/export.php" label="Télécharger toutes les données détenues sur moi" shape="download"}</dd>
