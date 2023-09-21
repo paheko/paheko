@@ -11,7 +11,7 @@ use Paheko\UserException;
 use Paheko\Utils;
 use Paheko\Web\Cache as Web_Cache;
 
-use const Paheko\{DOCUMENT_THUMBNAIL_COMMANDS, WOPI_DISCOVERY_URL, CACHE_ROOT};
+use const Paheko\{DOCUMENT_THUMBNAIL_COMMANDS, WOPI_DISCOVERY_URL, CACHE_ROOT, WWW_URL, BASE_URL};
 
 trait FileThumbnailTrait
 {
@@ -19,10 +19,14 @@ trait FileThumbnailTrait
 
 	protected function deleteThumbnails(): void
 	{
+		if (!$this->image && !$this->hasThumbnail()) {
+			return;
+		}
+
 		// clean up thumbnails
-		foreach (self::ALLOWED_THUMB_SIZES as $key => $operations)
-		{
-			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->md5, $key));
+		foreach (self::ALLOWED_THUMB_SIZES as $size => $operations) {
+			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->md5, $size));
+			Web_Cache::delete($this->thumb_uri($size, false));
 		}
 
 		if (!$this->image && $this->hasThumbnail()) {
@@ -54,7 +58,7 @@ trait FileThumbnailTrait
 		return $i;
 	}
 
-	public function thumb_url($size = null): ?string
+	public function thumb_uri($size = null, bool $with_hash = true): ?string
 	{
 		// Don't try to generate thumbnails for large files (> 25 MB)
 		if ($this->size > 1024*1024*25) {
@@ -85,7 +89,19 @@ trait FileThumbnailTrait
 		}
 
 		$size = isset(self::ALLOWED_THUMB_SIZES[$size]) ? $size : key(self::ALLOWED_THUMB_SIZES);
-		return sprintf('%s.%dpx.%s', $this->url(), $size, $ext);
+		$uri = sprintf('%s.%s.%s', $this->uri(), $size, $ext);
+
+		if ($with_hash) {
+			$uri .= '?h=' . substr($this->etag(), 0, 10);
+		}
+
+		return $uri;
+	}
+
+	public function thumb_url($size = null, bool $with_hash = true): ?string
+	{
+		$base = in_array($this->context(), [self::CONTEXT_WEB, self::CONTEXT_MODULES, self::CONTEXT_CONFIG]) ? WWW_URL : BASE_URL;
+		return $base . $this->thumb_uri($size, $with_hash);
 	}
 
 	public function hasThumbnail(): bool
@@ -402,19 +418,17 @@ trait FileThumbnailTrait
 
 		if ($ext === 'md' || $ext === 'txt') {
 			$type = 'image/svg+xml';
-			$ext = 'svg';
 		}
 		else {
 			// We can lie here, it might be something else, it does not matter
 			$type = 'image/webp';
-			$ext = 'webp';
 		}
 
 		header('Content-Type: ' . $type, true);
 		$this->_serve($destination, false);
 
 		if (in_array($this->context(), [self::CONTEXT_WEB, self::CONTEXT_CONFIG])) {
-			$uri = $this->uri() . '.' . $size . '.' . $ext;
+			$uri = $this->thumb_uri($size, false);
 			Web_Cache::link($uri, $destination);
 		}
 	}
