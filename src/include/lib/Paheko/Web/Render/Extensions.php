@@ -205,6 +205,11 @@ class Extensions
 	static protected function img(string $name, string $thumb_size = File::THUMB_SIZE_TINY, ?string $caption = null): string
 	{
 		$file = self::$renderer->resolveAttachment($name);
+
+		if (!$file) {
+			return self::error('Tag image : nom de fichier inconnu : ' . $name);
+		}
+
 		$svg = substr($name, -4) == '.svg';
 		$thumb_url = null;
 		$url = $file->url();
