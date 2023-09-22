@@ -220,7 +220,7 @@
 	};
 
 	g.reloadParentDialog = () => {
-		if (!window.parent.g.dialog) {
+		if (typeof window.parent.g === 'undefined' || !window.parent.g.dialog) {
 			return;
 		}
 
@@ -228,7 +228,7 @@
 	};
 
 	g.setParentDialogHeight = (height) => {
-		if (!window.parent.g.dialog) {
+		if (typeof window.parent.g === 'undefined' || !window.parent.g.dialog) {
 			return;
 		}
 
@@ -242,7 +242,7 @@
 	};
 
 	g.resizeParentDialog = (forced_height) => {
-		if (!window.parent.g.dialog) {
+		if (typeof window.parent.g === 'undefined' || !window.parent.g.dialog) {
 			return;
 		}
 
