@@ -16,6 +16,8 @@ use Paheko\Files\Storage;
 use Paheko\Plugins;
 use Paheko\UserTemplate\Modules;
 
+use Paheko\{LOCAL_LOGIN, DISABLE_INSTALL_PING, FILE_STORAGE_BACKEND, FILE_STORAGE_CONFIG, CONFIG_FILE, ROOT, WWW_URL, SECRET_KEY, CACHE_ROOT, DATA_ROOT, DB_FILE};
+
 use KD2\HTTP;
 
 /**
@@ -164,14 +166,22 @@ class Install
 		}
 
 		self::assert(isset($source['name']) && trim($source['name']) !== '', 'Le nom de l\'association n\'est pas renseigné');
-		self::assert(isset($source['user_name']) && trim($source['user_name']) !== '', 'Le nom du membre n\'est pas renseigné');
-		self::assert(isset($source['user_email']) && trim($source['user_email']) !== '', 'L\'adresse email du membre n\'est pas renseignée');
-		self::assert(isset($source['password']) && isset($source['password_confirmed']) && trim($source['password']) !== '', 'Le mot de passe n\'est pas renseigné');
 
-		self::assert((bool)filter_var($source['user_email'], FILTER_VALIDATE_EMAIL), 'Adresse email invalide');
+		if (is_array(LOCAL_LOGIN)) {
+			$source['user_name'] = LOCAL_LOGIN['user']['_name'] ?? 'Administrateur';
+			$source['password'] = sha1(random_bytes(10));
+			$source['user_email'] = 'administrateur@association.example';
+		}
+		else {
+			self::assert(isset($source['user_name']) && trim($source['user_name']) !== '', 'Le nom du membre n\'est pas renseigné');
+			self::assert(isset($source['user_email']) && trim($source['user_email']) !== '', 'L\'adresse email du membre n\'est pas renseignée');
+			self::assert(isset($source['password']) && isset($source['password_confirmed']) && trim($source['password']) !== '', 'Le mot de passe n\'est pas renseigné');
 
-		self::assert(strlen($source['password']) >= User::MINIMUM_PASSWORD_LENGTH, 'Le mot de passe est trop court');
-		self::assert($source['password'] === $source['password_confirmed'], 'La vérification du mot de passe ne correspond pas');
+			self::assert((bool)filter_var($source['user_email'], FILTER_VALIDATE_EMAIL), 'Adresse email invalide');
+
+			self::assert(strlen($source['password']) >= User::MINIMUM_PASSWORD_LENGTH, 'Le mot de passe est trop court');
+			self::assert($source['password'] === $source['password_confirmed'], 'La vérification du mot de passe ne correspond pas');
+		}
 
 		try {
 			self::install($source['country'], $source['name'], $source['user_name'], $source['user_email'], $source['password']);

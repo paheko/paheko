@@ -45,6 +45,7 @@ $form->runIf('save', function () {
 }, $csrf_key, ADMIN_URL);
 
 $tpl->assign('countries', Chart::COUNTRY_LIST);
+$tpl->assign('require_admin_account', !is_array(LOCAL_LOGIN));
 
 $tpl->assign(compact('csrf_key'));
 

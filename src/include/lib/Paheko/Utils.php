@@ -273,6 +273,9 @@ class Utils
 		elseif (substr($url, 0, 1) == '/' && ($pos = strpos($url, WWW_URI)) === 0) {
 			return WWW_URL . substr($url, strlen(WWW_URI));
 		}
+		elseif (substr($url, 0, 1) == '/') {
+			return WWW_URL . substr($url, 1);
+		}
 		elseif (substr($url, 0, 5) == 'http:' || substr($url, 0, 6) == 'https:') {
 			return $url;
 		}

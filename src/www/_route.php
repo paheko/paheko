@@ -30,7 +30,7 @@ if (PHP_SAPI === 'cli-server' && file_exists(__DIR__ . $uri)) {
 require __DIR__ . '/../include/init.php';
 
 // Handle __un__subscribe URL: .../?un=XXXX
-if (($uri === '/' || $uri === '') && !empty($_GET['un'])) {
+if ((empty($uri) || $uri === '/') && !empty($_GET['un'])) {
 	$params = array_intersect_key($_GET, ['un' => null, 'v' => null]);
 
 	// RFC 8058

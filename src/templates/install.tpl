@@ -17,18 +17,20 @@
 	</dl>
 </fieldset>
 
-<fieldset>
-	<legend>Création du compte administrateur</legend>
-	<dl>
-		{input type="text" label="Nom et prénom" required=true name="user_name"}
-		{input type="email" label="Adresse E-Mail" required=true name="user_email"}
-	</dl>
-	{include file="users/_password_form.tpl" field="password" required=true}
-</fieldset>
+{if $require_admin_account}
+	<fieldset>
+		<legend>Création du compte administrateur</legend>
+		<dl>
+			{input type="text" label="Nom et prénom" required=true name="user_name"}
+			{input type="email" label="Adresse E-Mail" required=true name="user_email"}
+		</dl>
+		{include file="users/_password_form.tpl" field="password" required=true}
+	</fieldset>
+{/if}
 
 <p class="submit">
 	{csrf_field key=$csrf_key}
-	{button type="submit" name="save" label="Terminer l'installation" shape="right" class="main"}
+	{button type="submit" name="save" label="Commencer à gérer mon association" shape="right" class="main"}
 </p>
 
 </form>
