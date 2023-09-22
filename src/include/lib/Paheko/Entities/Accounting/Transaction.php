@@ -1065,6 +1065,11 @@ class Transaction extends Entity
 			$this->id(), $user_id, $service_id);
 	}
 
+	public function deleteLinkedUsers(): void
+	{
+		DB::getInstance()->delete('acc_transactions_users', 'id_transaction = ? AND id_service_user IS NULL', $this->id());
+	}
+
 	public function updateLinkedUsers(array $users): void
 	{
 		$users = array_values($users);
@@ -1077,33 +1082,14 @@ class Transaction extends Entity
 
 		$db = EntityManager::getInstance(self::class)->DB();
 
-		if (!$this->checkLinkedUsersChange($users)) {
-			return;
-		}
-
 		$db->begin();
-
-		$sql = sprintf('DELETE FROM acc_transactions_users WHERE id_transaction = ? AND %s AND id_service_user IS NULL;', $db->where('id_user', 'NOT IN', $users));
-		$db->preparedQuery($sql, $this->id());
+		$this->deleteLinkedUsers();
 
 		foreach ($users as $id) {
 			$db->preparedQuery('INSERT OR IGNORE INTO acc_transactions_users (id_transaction, id_user, id_service_user) VALUES (?, ?, NULL);', $this->id(), (int)$id);
 		}
 
 		$db->commit();
-	}
-
-	public function checkLinkedUsersChange(array $users): bool
-	{
-		$existing = $this->listLinkedUsersAssoc();
-		ksort($users);
-		ksort($existing);
-
-		if ($users === $existing) {
-			return false;
-		}
-
-		return true;
 	}
 
 	public function listLinkedUsers(): array

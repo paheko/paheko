@@ -38,7 +38,7 @@ $form->runIf('save', function() use ($transaction, $session) {
 	}
 	else {
 		// Remove all
-		$transaction->updateLinkedUsers([]);
+		$transaction->deleteLinkedUsers();
 	}
 }, $csrf_key, '!acc/transactions/details.php?id=' . $transaction->id());
 
