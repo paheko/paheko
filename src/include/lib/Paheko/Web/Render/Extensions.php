@@ -5,6 +5,7 @@ namespace Paheko\Web\Render;
 use Paheko\Entities\Files\File;
 
 use Paheko\Plugins;
+use Paheko\Utils;
 use KD2\SkrivLite;
 
 /**
@@ -102,12 +103,30 @@ class Extensions
 			$caption = substr($name, 0, strrpos($name, '.'));
 		}
 
-		$url = self::$renderer->resolveAttachment($name);
-		$ext = substr($name, strrpos($name, '.')+1);
+		$file = self::$renderer->resolveAttachment($name);
+
+		if (!$file) {
+			return self::error('Tag file : nom de fichier introuvable.');
+		}
+
+		$ext = $file->extension();
+		$thumb = '';
+
+		if ($thumb_url = $file->thumb_url()) {
+			$thumb = sprintf('<img src="%s" alt="%s" loading="lazy" />',
+				htmlspecialchars($thumb_url),
+				htmlspecialchars($file->name)
+			);
+		}
 
 		return sprintf(
-			'<aside class="file" data-type="%s"><a href="%s" class="internal-file"><b>%s</b> <small>(%s)</small></a></aside>',
-			htmlspecialchars($ext), htmlspecialchars($url), htmlspecialchars($caption), htmlspecialchars(strtoupper($ext))
+			'<figure class="file" data-type="%s"><a href="%s" class="internal-file">%s<figcaption><b>%s</b> <small>%s — %s</small></figcaption></a></figure>',
+			htmlspecialchars($ext),
+			htmlspecialchars($file->url()),
+			$thumb,
+			htmlspecialchars($caption),
+			htmlspecialchars($file->getFormatDescription()),
+			htmlspecialchars(Utils::format_bytes($file->size))
 		);
 	}
 
@@ -116,12 +135,16 @@ class Extensions
 		$name = $args['file'] ?? ($args[0] ?? null);
 
 		if (!$name || !self::$renderer->hasPath()) {
-			return self::error('Tag image : aucun nom de fichier indiqué.');
+			return self::error('Tag video : aucun nom de fichier indiqué.');
 		}
 
 		$poster = $args['poster'] ?? ($args[1] ?? null);
 		$subs = $args['subtitles'] ?? ($args[2] ?? null);
-		$url = self::$renderer->resolveAttachment($name);
+		$video = self::$renderer->resolveAttachment($name);
+
+		if (!$video) {
+			return self::error('Tag video : nom de fichier introuvable.');
+		}
 
 		if ($poster) {
 			$poster = self::$renderer->resolveAttachment($poster);
@@ -129,7 +152,7 @@ class Extensions
 
 		if ($subs) {
 			$subs = self::$renderer->resolveAttachment($subs);
-			$subs = sprintf('<track kind="subtitles" default="true" src="%s" />', htmlspecialchars($subs));
+			$subs = sprintf('<track kind="subtitles" default="true" src="%s" />', htmlspecialchars($subs->url()));
 		}
 
 		$params = '';
@@ -144,8 +167,8 @@ class Extensions
 
 		return sprintf('<video controls="true" preload="%s" poster="%s" src="%s"%s>%s</video>',
 			$poster ? 'metadata' : 'none',
-			htmlspecialchars($posterslideshow),
-			htmlspecialchars($url),
+			htmlspecialchars($poster ? $poster->url() : ''),
+			htmlspecialchars($video->url()),
 			$params,
 			$subs
 		);
@@ -181,12 +204,16 @@ class Extensions
 
 	static protected function img(string $name, string $thumb_size = File::THUMB_SIZE_TINY, ?string $caption = null): string
 	{
-		$url = self::$renderer->resolveAttachment($name);
+		$file = self::$renderer->resolveAttachment($name);
 		$svg = substr($name, -4) == '.svg';
 		$thumb_url = null;
+		$url = $file->url();
 
-		if (!$svg) {
-			$thumb_url = sprintf('%s.%s.webp', $url, $thumb_size);
+		if ($svg) {
+			$thumb_url = $url;
+		}
+		else {
+			$thumb_url = $file->thumb_url($thumb_size);
 		}
 
 		return sprintf('<a href="%s" class="internal-image" target="_image"><img src="%s" alt="%s" loading="lazy" /></a>',

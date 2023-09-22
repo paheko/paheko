@@ -14,6 +14,7 @@ abstract class AbstractRender
 	protected string $parent;
 	protected ?string $path = null;
 	protected string $context;
+	protected array $attachments;
 
 	protected string $link_prefix = '';
 	protected string $link_suffix = '';
@@ -68,27 +69,32 @@ abstract class AbstractRender
 		return $this->links;
 	}
 
-	public function listImages(): array
+	public function listAttachments(): array
 	{
-		if (!$this->path) {
+		if (!$this->parent) {
 			return [];
 		}
 
-		$out = [];
-		$list = Files::list($this->parent);
+		$this->loadAttachments();
 
-		foreach ($list as $file) {
-			if (!$file->image) {
-				continue;
-			}
-
-			$out[] = $file->name;
-		}
-
-		return $out;
+		return $this->attachments;
 	}
 
-	public function resolveAttachment(string $uri)
+	protected function loadAttachments(): void
+	{
+		if (isset($this->attachments)) {
+			return;
+		}
+
+		$this->attachments = Files::list($this->parent);
+	}
+
+	public function listImages(): array
+	{
+		return array_filter($this->listAttachments(), fn ($a) => $a->image);
+	}
+
+	public function resolveAttachment(string $uri): ?File
 	{
 		$prefix = $this->uri;
 		$pos = strpos($uri, '/');
@@ -102,13 +108,34 @@ abstract class AbstractRender
 			$uri = $prefix . '/' . $uri;
 		}
 
-		$this->registerAttachment($uri);
+		$this->loadAttachments();
+
+		$uri = ltrim($uri, '/');
+		$path = $uri;
 
 		$uri = explode('/', $uri);
 		$uri = array_map('rawurlencode', $uri);
 		$uri = implode('/', $uri);
 
-		return WWW_URI . $uri;
+		$context = strtok($this->path, '/');
+
+		$attachment = null;
+
+		if ($context === File::CONTEXT_WEB) {
+			foreach ($this->listAttachments() as $file) {
+				if ($file->uri() === $uri) {
+					$attachment = $file;
+					break;
+				}
+			}
+		}
+		else {
+			$attachment = $this->attachments[$path] ?? null;
+		}
+
+		$this->registerAttachment($uri);
+
+		return $attachment;
 	}
 
 	public function outputHTML(string $content): string
