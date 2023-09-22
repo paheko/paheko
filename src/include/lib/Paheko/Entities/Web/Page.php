@@ -275,7 +275,10 @@ class Page extends Entity
 					parent = %1$s || substr(parent, %2$d),
 					dir_path = \'web/\' || %1$s || substr(parent, %2$d)
 				WHERE path LIKE %3$s;',
-				$db->quote($this->path), strlen($change_parent) + 1, $db->quote($change_parent . '/%'));
+				$db->quote($this->path),
+				strlen($change_parent) + 1,
+				$db->quote($change_parent . '/%')
+			);
 			$db->exec($sql);
 		}
 
