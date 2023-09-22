@@ -23,11 +23,16 @@ trait FileThumbnailTrait
 			return;
 		}
 
+		if (!isset($this->md5)) {
+			return;
+		}
+
 		// clean up thumbnails
 		foreach (self::ALLOWED_THUMB_SIZES as $size => $operations) {
 			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->md5, $size));
 
 			$uri = $this->thumb_uri($size, false);
+
 			if ($uri) {
 				Web_Cache::delete($uri);
 			}
