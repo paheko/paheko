@@ -186,7 +186,7 @@ class Extensions
 		$thumb_url = null;
 
 		if (!$svg) {
-			$thumb_url = sprintf('%s?%s', $url, $thumb_size);
+			$thumb_url = sprintf('%s.%s.webp', $url, $thumb_size);
 		}
 
 		return sprintf('<a href="%s" class="internal-image" target="_image"><img src="%s" alt="%s" loading="lazy" /></a>',
