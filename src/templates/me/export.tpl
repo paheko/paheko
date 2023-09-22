@@ -27,7 +27,7 @@
 
 <h2>Profil</h2>
 
-{include file="users/_details.tpl" data=$user show_message_button=false mode="export"}
+{include file="users/_details.tpl" data=$user show_message_button=false context="export"}
 
 <hr />
 
