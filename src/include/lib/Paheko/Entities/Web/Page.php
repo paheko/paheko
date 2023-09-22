@@ -281,7 +281,10 @@ class Page extends Entity
 
 		if ($change_dir_path) {
 			$dir = Files::get($change_dir_path);
-			$dir->rename($this->dir_path);
+
+			if ($dir) {
+				$dir->rename($this->dir_path);
+			}
 		}
 
 		Cache::clear();
