@@ -71,9 +71,11 @@ class Extensions
 				fn($match) => 'href="' . ($args['prefix'] ?? '') . str_replace('_', '-', $match[1]), $body);
 			return $body;
 		}
-		elseif (isset($args['version'])) {
+		elseif (isset($args['version']) || in_array('version', $args)) {
 			return \Paheko\paheko_version();
 		}
+
+		return '';
 	}
 
 	static public function gallery(bool $block, array $args, ?string $content): string
