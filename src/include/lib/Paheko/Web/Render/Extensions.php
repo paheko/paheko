@@ -66,9 +66,30 @@ class Extensions
 			$body = substr($body, strpos($body, '>')+1);
 			$body = substr($body, 0, strrpos($body, '</div'));
 
+			$replace_raw = preg_split('!\s+!', $args['replace'] ?? '');
+			$replace = [];
+
+			foreach ($replace_raw as $r) {
+				$replace[strtok($r, '=')] = strtok('');
+			}
+
 			$body = preg_replace(';<div\s+class="nav">(?:(?!</div>).)*?</div>;s', '', $body);
 			$body = preg_replace_callback('!href="([a-z_-]+)\.html!',
-				fn($match) => 'href="' . ($args['prefix'] ?? '') . str_replace('_', '-', $match[1]), $body);
+				function($match) use ($args, $replace) {
+					$url = $match[1];
+					if (array_key_exists($url, $replace)) {
+						$url = $replace[$url];
+					}
+					else {
+						$url = str_replace('_', '-', $url);
+
+						if (isset($args['prefix'])) {
+							$url = $args['prefix'] . $url;
+						}
+					}
+
+					return 'href="' . $url;
+				}, $body);
 			return $body;
 		}
 		elseif (isset($args['version']) || in_array('version', $args)) {
