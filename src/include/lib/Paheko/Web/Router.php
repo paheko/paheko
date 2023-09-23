@@ -161,7 +161,7 @@ class Router
 		$file = Files::getFromURI($uri) ?? Web::getAttachmentFromURI($uri);
 
 		// We can't serve directories
-		if ($file->isDir()) {
+		if ($file && $file->isDir()) {
 			$file = null;
 		}
 
