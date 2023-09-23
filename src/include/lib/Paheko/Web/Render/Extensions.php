@@ -8,7 +8,7 @@ use Paheko\Plugins;
 use Paheko\Utils;
 use KD2\SkrivLite;
 
-use const Paheko\ROOT;
+use const Paheko\{ADMIN_URL, ROOT};
 
 /**
  * Common extensions between Skriv and Markdown
@@ -74,6 +74,11 @@ class Extensions
 			}
 
 			$body = preg_replace(';<div\s+class="nav">(?:(?!</div>).)*?</div>;s', '', $body);
+
+			// Replace images
+			$body = preg_replace(';src="(?!https?:|/);', 'src="' . ADMIN_URL . 'static/doc/', $body);
+
+			// Replace links
 			$body = preg_replace_callback('!href="([a-z_-]+)\.html!',
 				function($match) use ($args, $replace) {
 					$url = $match[1];
