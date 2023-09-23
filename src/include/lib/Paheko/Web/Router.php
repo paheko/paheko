@@ -129,7 +129,8 @@ class Router
 			header('Location: /dav/documents/');
 			return;
 		}
-		elseif ($uri && self::routeFile($uri)) {
+		// Don't try to route paths with no slash, files are always in a sub-directory
+		elseif ($uri && false !== strpos($uri, '/') && self::routeFile($uri)) {
 			return;
 		}
 
@@ -159,9 +160,12 @@ class Router
 
 		$file = Files::getFromURI($uri) ?? Web::getAttachmentFromURI($uri);
 
-		if (!$file) {
-			$context = strtok($uri, '/');
+		// We can't serve directories
+		if ($file->isDir()) {
+			$file = null;
+		}
 
+		if (!$file) {
 			// URL has a context but is not a file? stop here
 			if ($context && array_key_exists($context, File::CONTEXTS_NAMES)) {
 				throw new UserException('Cette adresse n\'existe pas ou plus.', 404);
