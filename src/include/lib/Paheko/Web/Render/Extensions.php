@@ -8,6 +8,8 @@ use Paheko\Plugins;
 use Paheko\Utils;
 use KD2\SkrivLite;
 
+use const Paheko\ROOT;
+
 /**
  * Common extensions between Skriv and Markdown
  */
@@ -34,6 +36,7 @@ class Extensions
 			'image'    => [self::class, 'image'],
 			'gallery'  => [self::class, 'gallery'],
 			'video'    => [self::class, 'video'],
+			'paheko'   => [self::class, 'paheko'],
 		];
 
 		$signal = Plugins::fire('render.extensions.init', false, $list);
@@ -43,6 +46,34 @@ class Extensions
 		}
 
 		return $list;
+	}
+
+	static public function paheko(bool $block, array $args, ?string $content): string
+	{
+		if (!empty($args['doc'])) {
+			if (!preg_match('/^[\w_-]+$/i', $args['doc'])) {
+				return '[Invalid doc]';
+			}
+
+			$path = ROOT . '/www/admin/static/doc/' . $args['doc'] . '.html';
+
+			if (!file_exists($path)) {
+				return '[Invalid doc]';
+			}
+
+			$body = file_get_contents($path);
+			$body = substr($body, strpos($body, 'class="web-content"'));
+			$body = substr($body, strpos($body, '>')+1);
+			$body = substr($body, 0, strrpos($body, '</div'));
+
+			$body = preg_replace(';<div\s+class="nav">(?:(?!</div>).)*?</div>;s', '', $body);
+			$body = preg_replace_callback('!href="([a-z_-]+)\.html!',
+				fn($match) => 'href="' . ($args['prefix'] ?? '') . str_replace('_', '-', $match[1]), $body);
+			return $body;
+		}
+		elseif (isset($args['version'])) {
+			return \Paheko\paheko_version();
+		}
 	}
 
 	static public function gallery(bool $block, array $args, ?string $content): string
