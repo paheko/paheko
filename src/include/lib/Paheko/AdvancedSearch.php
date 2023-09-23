@@ -172,7 +172,7 @@ abstract class AdvancedSearch
 				}
 
 				// L'opérateur binaire est un peu spécial
-				if ($condition['operator'] == '&')
+				if ($condition['operator'] === '&')
 				{
 					$new_query = [];
 

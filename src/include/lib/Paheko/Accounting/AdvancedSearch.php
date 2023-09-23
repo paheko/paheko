@@ -106,7 +106,7 @@ class AdvancedSearch extends A_S
 				'null'     => false,
 				'values'   => Transaction::TYPES_NAMES,
 				'select'   => $types,
-				'where'    => 't.type',
+				'where'    => 't.type %s',
 			],
 			'id_year' => [
 				'textMatch'=> false,
@@ -115,7 +115,7 @@ class AdvancedSearch extends A_S
 				'null'     => false,
 				'values'   => $db->getAssoc('SELECT id, label FROM acc_years ORDER BY end_date;'),
 				'select'   => 'y.label',
-				'where'    => 't.id_year',
+				'where'    => 't.id_year %s',
 			],
 			'project_code' => [
 				'textMatch'=> true,
