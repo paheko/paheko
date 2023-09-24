@@ -407,7 +407,7 @@ class Module extends Entity
 				|| substr($file->type, 0, 5) === 'text/'
 				|| preg_match('/\.(?:json|md|skriv|html|css|js|ini)$/', $file->name));
 			$file->open_url = '!common/files/preview.php?p=' . rawurlencode($file->file_path);
-			$file->edit_url = '!common/files/edit.php?p=' . rawurlencode($file->file_path);
+			$file->edit_url = '!common/files/edit.php?code&p=' . rawurlencode($file->file_path);
 			$file->delete_url = '!common/files/delete.php?p=' . rawurlencode($file->file_path);
 		}
 

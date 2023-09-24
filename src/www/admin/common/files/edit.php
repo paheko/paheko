@@ -23,7 +23,7 @@ if (!$file->canWrite()) {
 	throw new UserException('Vous n\'avez pas le droit de modifier ce fichier.');
 }
 
-$editor = $file->editorType();
+$editor = isset($_GET['code']) ? 'code' : $file->editorType();
 $csrf_key = 'edit_file_' . $file->pathHash();
 
 $form->runIf('content', function () use ($file) {
