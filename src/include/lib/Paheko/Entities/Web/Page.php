@@ -121,6 +121,7 @@ class Page extends Entity
 	{
 		$out = $this->asArray();
 		$out['path'] = $this->path();
+		$out['parent'] = Utils::dirname($out['path']);
 		$out['url'] = $this->url();
 		$out['html'] = trim($this->content) !== '' ? $this->render() : '';
 		$row['has_attachments'] = $this->hasAttachments();
