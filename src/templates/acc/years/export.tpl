@@ -20,7 +20,7 @@
 
 {form_errors}
 
-<form method="get" action="{$self_url}">
+<form method="get" action="{$self_url}" data-disable-progress="1">
 
 <fieldset>
 	<legend>Export du journal général</legend>
