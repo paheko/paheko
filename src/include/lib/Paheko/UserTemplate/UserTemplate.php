@@ -244,32 +244,28 @@ class UserTemplate extends \KD2\Brindille
 			Utils::safe_mkdir(dirname($compiled_path), 0777, true);
 		}
 
-		if (file_exists($compiled_path) && filemtime($compiled_path) >= $this->modified) {
-			require $compiled_path;
-			return;
-		}
-
-		$tmp_path = $compiled_path . '.tmp';
-
-		if ($this->code) {
-			$source = $this->code;
-		}
-		elseif ($this->file) {
-			$source = $this->file->fetch();
-		}
-		else {
-			$source = file_get_contents($this->path);
-		}
-
 		try {
+			if (file_exists($compiled_path) && filemtime($compiled_path) >= $this->modified) {
+				require $compiled_path;
+				return;
+			}
+
+			$tmp_path = $compiled_path . '.tmp';
+
+			if ($this->code) {
+				$source = $this->code;
+			}
+			elseif ($this->file) {
+				$source = $this->file->fetch();
+			}
+			else {
+				$source = file_get_contents($this->path);
+			}
+
 			$code = $this->compile($source);
 			file_put_contents($tmp_path, $code);
 
 			require $tmp_path;
-
-			if (!file_exists(Utils::dirname($compiled_path))) {
-				Utils::safe_mkdir(Utils::dirname($compiled_path), 0777, true);
-			}
 
 			@rename($tmp_path, $compiled_path);
 		}
@@ -439,7 +435,7 @@ class UserTemplate extends \KD2\Brindille
 				$code = sprintf('<u>%s</u>', $code);
 			}
 
-			echo $code;
+			echo rtrim($code) . "\n";
 		}
 
 		echo '</code></pre>';
