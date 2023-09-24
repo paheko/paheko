@@ -25,9 +25,9 @@ UPDATE web_pages_old SET format = 'encrypted' WHERE format = 'skriv/encrypted';
 
 INSERT OR IGNORE INTO web_pages
 	SELECT id,
-		CASE WHEN parent = '' THEN NULL ELSE parent END,
-		path, 'web/' || path, uri, type, status, format, published, modified, title, content
-	FROM web_pages_old;
+		CASE WHEN parent = '' THEN NULL ELSE (SELECT id FROM web_pages_old WHERE uri = replace(a.parent, rtrim(a.parent, replace(a.parent, '/', '')), '')) END,
+		uri, type, status, format, published, modified, title, content
+	FROM web_pages_old AS a;
 DROP TABLE web_pages_old;
 
 UPDATE acc_charts_old SET country = 'FR' WHERE country IS NULL;

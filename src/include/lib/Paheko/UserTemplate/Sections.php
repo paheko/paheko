@@ -902,27 +902,23 @@ class Sections
 
 	static public function breadcrumbs(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		if (!isset($params['path'])) {
-			throw new Brindille_Exception('"path" parameter is mandatory and is missing');
+		if (isset($params['id_page'])) {
+			$id = (int) $params['id_page'];
+		}
+		elseif (isset($params['path'])) {
+			$id = self::_getPageIdFromPath($params['path']);
+		}
+		else {
+			throw new Brindille_Exception('"id_page" or "path" parameter is mandatory and is missing');
 		}
 
-		$paths = [];
-		$path = '';
-
-		foreach (explode('/', $params['path']) as $part) {
-			$path = trim($path . '/' . $part, '/');
-			$paths[$path] = null;
+		if (!$id) {
+			return;
 		}
 
-		$db = DB::getInstance();
-		$sql = sprintf('SELECT path, title FROM web_pages WHERE %s ORDER BY path ASC;', $db->where('path', array_keys($paths)));
-
-		$result = $db->preparedQuery($sql);
-
-		while ($row = $result->fetchArray(\SQLITE3_ASSOC))
-		{
-			$row['url'] = '/' . Utils::basename($row['path']);
-			yield $row;
+		foreach (Web::getBreadcrumbs($id) as $row) {
+			$row->url = '/' . $row->uri;
+			yield (array) $row;
 		}
 	}
 
@@ -958,7 +954,7 @@ class Sections
 			$params[':search'] = substr(trim($params['search']), 0, 100);
 			unset($params['search']);
 
-			$params['tables'] .= ' INNER JOIN files_search ON files_search.path = w.dir_path';
+			$params['tables'] .= ' INNER JOIN files_search ON files_search.path = \'web/\' || w.uri';
 			$params['select'] .= ', rank(matchinfo(files_search), 0, 1.0, 1.0) AS points, snippet(files_search, \'<mark>\', \'</mark>\', \'…\', 2) AS snippet';
 			$params['where'] .= ' AND files_search MATCH :search';
 
@@ -984,23 +980,28 @@ class Sections
 			unset($params['uri']);
 		}
 
-		if (isset($params['path'])) {
-			$params['where'] .= ' AND w.path = :path';
-			$params['limit'] = 1;
-			$params[':path'] = $params['path'];
-			unset($params['path']);
-		}
-
 		if (array_key_exists('parent', $params)) {
 			if (null === $params['parent']) {
-				$params['where'] .= ' AND w.parent IS NULL';
+				$params['where'] .= ' AND w.id_parent IS NULL';
 			}
 			else {
-				$params['where'] .= ' AND w.parent = :parent';
+				$params['where'] .= ' AND w.id_parent = (SELECT id FROM web_pages WHERE uri = :parent)';
 				$params[':parent'] = trim((string) $params['parent']);
 			}
 
 			unset($params['parent']);
+		}
+
+		if (array_key_exists('id_parent', $params)) {
+			if (null === $params['id_parent']) {
+				$params['where'] .= ' AND w.id_parent IS NULL';
+			}
+			else {
+				$params['where'] .= ' AND w.id_parent = :id_parent';
+				$params[':id_parent'] = (int) $params['id_parent'];
+			}
+
+			unset($params['id_parent']);
 		}
 
 		if (isset($params['future'])) {
@@ -1048,26 +1049,44 @@ class Sections
 		return self::files($params, $tpl, $line);
 	}
 
+	static protected function _getPageIdFromPath(string $path): ?int
+	{
+		return self::cache('page_id_' . md5($path), function () use ($path) {
+			$db = DB::getInstance();
+			return $db->firstColumn('SELECT id FROM web_pages WHERE uri = ?;', Utils::basename($path)) ?: null;
+		});
+	}
+
 	static public function files(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		$params['where'] ??= '';
+		$id = null;
 
-		if (empty($params['parent'])) {
-			throw new Brindille_Exception('La section "files" doit obligatoirement comporter un paramètre "parent"');
+		if (!empty($params['id_page'])) {
+			$id = (int)$params['id_page'];
+		}
+		elseif (!empty($params['parent'])) {
+			$id = self::_getPageIdFromPath($params['parent']);
+		}
+		else {
+			throw new Brindille_Exception('La section "files" doit obligatoirement comporter un paramètre "id_page" ou "parent"');
 		}
 
-		$parent = $params['parent'];
+		if (!$id) {
+			return;
+		}
+
+		$db = DB::getInstance();
+		$params['where'] ??= '';
 
 		// Fetch page
-		$page = self::cache('page_' . md5($parent), function () use ($parent) {
-			$page = Web::get($parent);
+		$page = self::cache('page_' . $id, function () use ($id, $db) {
+			$page = Web::get($id);
 
 			if (!$page) {
 				return null;
 			}
 
 			// Store attachments in temp table
-			$db = DB::getInstance();
 			$db->begin();
 			$db->exec('CREATE TEMP TABLE IF NOT EXISTS web_pages_attachments (page_id, uri, path, name, modified, image, data);');
 
@@ -1088,7 +1107,7 @@ class Sections
 				$row['large_url'] = $file->thumb_url(File::THUMB_SIZE_LARGE);
 
 				$db->preparedQuery('INSERT OR REPLACE INTO web_pages_attachments VALUES (?, ?, ?, ?, ?, ?, ?);',
-					$page->id(), rawurldecode($file->uri()), $file->path, $file->name, $file->modified, $file->isImage(), json_encode($row));
+					$page->id(), $file->uri(), $file->path, $file->name, $file->modified, $file->isImage(), json_encode($row));
 			}
 
 			$db->commit();
@@ -1096,6 +1115,7 @@ class Sections
 			return $page;
 		});
 
+		// Page not found
 		if (!$page) {
 			return;
 		}
@@ -1104,14 +1124,13 @@ class Sections
 		$params['tables'] = 'web_pages_attachments';
 		$params['where'] .= ' AND page_id = :page';
 		$params[':page'] = $page->id();
-		unset($params['parent']);
+		unset($params['page']);
 
 		// Generate a temporary table containing the list of files included in the text
 		if (!empty($params['except_in_text'])) {
 			// Don't regenerate that table for each section called in the page,
 			// we assume the content and list of files will not change between sections
-			self::cache('page_files_text_' . $parent, function () use ($page) {
-				$db = DB::getInstance();
+			self::cache('page_files_text_' . $id, function () use ($page, $db) {
 				$db->begin();
 
 				// Put files mentioned in the text in a temporary table

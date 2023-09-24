@@ -89,9 +89,11 @@ abstract class AbstractRender
 		$this->attachments = Files::list($this->parent);
 	}
 
-	public function listImages(): array
+	public function listImagesFilenames(): array
 	{
-		return array_filter($this->listAttachments(), fn ($a) => $a->image);
+		$out = array_filter($this->listAttachments(), fn ($a) => $a->image);
+		array_walk($out, fn(&$a) => $a = $a->name);
+		return $out;
 	}
 
 	public function resolveAttachment(string $uri): ?File

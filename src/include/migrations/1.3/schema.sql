@@ -579,9 +579,7 @@ CREATE INDEX IF NOT EXISTS users_files_user_field ON users_files (id_user, field
 CREATE TABLE IF NOT EXISTS web_pages
 (
 	id INTEGER NOT NULL PRIMARY KEY,
-	parent TEXT NULL REFERENCES web_pages(path) ON DELETE CASCADE ON UPDATE CASCADE, -- Parent path, NULL = root
-	path TEXT NOT NULL, -- Full page path
-	dir_path TEXT NOT NULL, -- Full page directory name
+	id_parent INTEGER NULL REFERENCES web_pages(id) ON DELETE CASCADE,
 	uri TEXT NOT NULL, -- Page identifier
 	type INTEGER NOT NULL, -- 1 = Category, 2 = Page
 	status TEXT NOT NULL,
@@ -592,10 +590,8 @@ CREATE TABLE IF NOT EXISTS web_pages
 	content TEXT NOT NULL
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS web_pages_path ON web_pages (path);
-CREATE UNIQUE INDEX IF NOT EXISTS web_pages_dir_path ON web_pages (dir_path);
 CREATE UNIQUE INDEX IF NOT EXISTS web_pages_uri ON web_pages (uri);
-CREATE INDEX IF NOT EXISTS web_pages_parent ON web_pages (parent);
+CREATE INDEX IF NOT EXISTS web_pages_id_parent ON web_pages (id_parent);
 CREATE INDEX IF NOT EXISTS web_pages_published ON web_pages (published);
 CREATE INDEX IF NOT EXISTS web_pages_title ON web_pages (title);
 

@@ -8,6 +8,7 @@ use Paheko\ValidationException;
 
 use Paheko\Entities\Web\Page;
 use Paheko\Entities\Files\File;
+use Paheko\Files\Storage;
 use Paheko\Files\Files;
 
 use const Paheko\FILE_STORAGE_BACKEND;
@@ -137,15 +138,35 @@ class Sync
 		$page = new Page;
 
 		$path = substr($file->parent, strlen(File::CONTEXT_WEB . '/'));
+		$parent = Utils::basename($path) ?: null;
+
+		if ($parent) {
+			$parent = Web::getByUri($parent);
+			$parent = $parent ? $parent->id() : null;
+		}
 
 		$page->importForm([
-			'path' => $path,
-			'parent' => Utils::dirname($path) ?: null,
+			'id_parent' => $parent,
 			'uri' => Utils::basename($file->parent),
 		]);
 
 		self::loadFromFile($page, $file);
 		return $page;
+	}
+
+	static public function flatten(?string $path = null)
+	{
+		$path ??= File::CONTEXT_WEB;
+
+		foreach (Files::list($path) as $file) {
+			if ($file->isDir()) {
+				self::flatten($file->path);
+
+				if (substr_count($file->path, '/') >= 2) {
+					$file->rename(File::CONTEXT_WEB . '/' . $file->name);
+				}
+			}
+		}
 	}
 
 	/**
@@ -162,26 +183,32 @@ class Sync
 		$errors = [];
 
 		$list = iterator_to_array(Files::listRecursive($path, null, false));
-		$list = array_filter($list, fn($a) => !$a->isDir() && $a->name == 'index.txt');
-		$exists = array_keys($list);
-		$exists = array_map([Utils::class, 'dirname'], $exists);
+		$exists = [];
+
+		foreach ($list as $path => $file) {
+			if ($file->isDir() || $file->name !== 'index.txt') {
+				continue;
+			}
+
+			$exists[$path] = Utils::basename(Utils::dirname($path));
+		}
 
 		$db = DB::getInstance();
 
-		$in_db = $db->getAssoc('SELECT dir_path, dir_path FROM web_pages;');
+		$in_db = $db->getAssoc('SELECT uri, uri FROM web_pages;');
 
 		$deleted = array_diff($in_db, $exists);
 		$new = array_diff($exists, $in_db);
 		$intersection = array_intersect($in_db, $exists);
 
 		if ($deleted) {
-			$db->exec(sprintf('DELETE FROM web_pages WHERE %s;', $db->where('dir_path', $deleted)));
+			$db->exec(sprintf('DELETE FROM web_pages WHERE %s;', $db->where('uri', $deleted)));
 		}
 
 		sort($new);
 
-		foreach ($new as $path) {
-			$f = Files::get($path . '/index.txt');
+		foreach ($new as $path => $uri) {
+			$f = Files::get($path);
 
 			if (!$f) {
 				// This is a directory without content, ignore
@@ -189,7 +216,8 @@ class Sync
 			}
 
 			try {
-				self::fromFile($f)->save();
+				$page = self::fromFile($f);
+				$page->save();
 			}
 			catch (ValidationException $e) {
 				// Ignore validation errors, just don't add pages to index
@@ -201,14 +229,18 @@ class Sync
 			Cache::clear();
 		}
 
-		foreach ($intersection as $path) {
-			$file = Files::get($path . '/index.txt');
-			$page = Web::get(substr($path, 4));
+		foreach ($intersection as $path => $uri) {
+			$file = Files::get($path);
+			$page = Web::getByUri($uri);
 
-			if (self::loadFromFile($page, $file)) {
+			if ($page && $file && self::loadFromFile($page, $file)) {
 				$page->save();
 			}
 		}
+
+		self::flatten();
+
+		Storage::cleanup();
 
 		return $errors;
 	}

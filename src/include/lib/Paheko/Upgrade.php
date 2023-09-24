@@ -173,6 +173,10 @@ class Upgrade
 				$db->commitSchemaUpdate();
 			}
 
+			if (version_compare($v, '1.3.0-alpha1', '>=') && version_compare($v, '1.3.0-rc14', '<')) {
+				require ROOT . '/include/migrations/1.3/1.3.0-rc14.php';
+			}
+
 			Plugins::upgradeAllIfRequired();
 
 			// Vérification de la cohérence des clés étrangères

@@ -13,44 +13,54 @@ use KD2\DB\EntityManager as EM;
 
 class Web
 {
+	const BREADCRUMBS_SQL = '
+		WITH RECURSIVE parents(title, id_parent, uri, id, level) AS (
+			SELECT title, id_parent, uri, id, 1 FROM web_pages WHERE id = %d
+			UNION ALL
+			SELECT p.title, p.id_parent, p.uri, p.id, level + 1
+			FROM web_pages p
+				JOIN parents ON parents.id_parent = p.id
+		)
+		SELECT id, title, uri FROM parents ORDER BY level DESC;';
+
 	static public function search(string $search): array
 	{
 		$results = Files::search($search, File::CONTEXT_WEB . '%');
 
 		foreach ($results as &$result) {
-			$result->path = substr($result->path, strlen(File::CONTEXT_WEB) + 1);
-			$result->breadcrumbs = [];
-			$path = '';
-
-			foreach (explode('/', $result->path) as $part) {
-				$path = trim($path . '/' . $part, '/');
-				$result->breadcrumbs[$path] = $part;
-			}
+			$result->uri = substr($result->path, strlen(File::CONTEXT_WEB) + 1);
 		}
+
+		unset($result);
 
 		return $results;
 	}
 
-	static protected function getParentClause(?string $parent): string
+	static public function getBreadcrumbs(int $id): array
 	{
-		if ($parent) {
-			return 'parent = ' . DB::getInstance()->quote($parent);
+		return DB::getInstance()->getGrouped(sprintf(self::BREADCRUMBS_SQL, $id));
+	}
+
+	static protected function getParentClause(?int $id_parent): string
+	{
+		if ($id_parent) {
+			return 'id_parent = ' . $id_parent;
 		}
 		else {
-			return 'parent IS NULL';
+			return 'id_parent IS NULL';
 		}
 	}
 
-	static public function listCategories(?string $parent): array
+	static public function listCategories(?int $id_parent): array
 	{
-		$sql = sprintf('SELECT * FROM @TABLE WHERE %s AND type = %d ORDER BY title COLLATE U_NOCASE;', self::getParentClause($parent), Page::TYPE_CATEGORY);
+		$sql = sprintf('SELECT * FROM @TABLE WHERE %s AND type = %d ORDER BY title COLLATE U_NOCASE;', self::getParentClause($id_parent), Page::TYPE_CATEGORY);
 		return EM::getInstance(Page::class)->all($sql);
 	}
 
-	static public function listPages(?string $parent, bool $order_by_date = true): array
+	static public function listPages(?int $id_parent, bool $order_by_date = true): array
 	{
 		$order = $order_by_date ? 'published DESC' : 'title COLLATE U_NOCASE';
-		$sql = sprintf('SELECT * FROM @TABLE WHERE %s AND type = %d ORDER BY %s;', self::getParentClause($parent), Page::TYPE_PAGE, $order);
+		$sql = sprintf('SELECT * FROM @TABLE WHERE %s AND type = %d ORDER BY %s;', self::getParentClause($id_parent), Page::TYPE_PAGE, $order);
 		return EM::getInstance(Page::class)->all($sql);
 	}
 
@@ -60,19 +70,19 @@ class Web
 		return EM::getInstance(Page::class)->all($sql);
 	}
 
-	static public function getDraftsList(?string $parent): DynamicList
+	static public function getDraftsList(?int $id_parent): DynamicList
 	{
-		$list = self::getPagesList($parent);
+		$list = self::getPagesList($id_parent);
 		$list->setParameter('status', Page::STATUS_DRAFT);
 		$list->setPageSize(1000);
 		return $list;
 	}
 
-	static public function getPagesList(?string $parent): DynamicList
+	static public function getPagesList(?int $id_parent): DynamicList
 	{
 		$columns = [
 			'id' => [],
-			'path' => [
+			'uri' => [
 			],
 			'title' => [
 				'label' => 'Titre',
@@ -87,7 +97,7 @@ class Web
 		];
 
 		$tables = Page::TABLE;
-		$conditions = self::getParentClause($parent) . ' AND type = :type AND status = :status';
+		$conditions = self::getParentClause($id_parent) . ' AND type = :type AND status = :status';
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->setParameter('type', Page::TYPE_PAGE);
@@ -96,34 +106,14 @@ class Web
 		return $list;
 	}
 
-	static public function get(string $path): ?Page
-	{
-		return EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE path = ?;', $path);
-	}
-
-	static public function getById(int $id): ?Page
-	{
-		return EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE id = ?;', $id);
-	}
-
 	static public function getByURI(string $uri): ?Page
 	{
 		return EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE uri = ?;', $uri);
 	}
 
-	static public function getAttachmentFromURI(string $uri): ?File
+	static public function get(int $id): ?Page
 	{
-		if (strpos($uri, '/') === false) {
-			return null;
-		}
-
-		$path = DB::getInstance()->firstColumn('SELECT path FROM web_pages WHERE uri = ?;', Utils::dirname($uri));
-
-		if (!$path) {
-			return null;
-		}
-
-		return Files::getFromURI(File::CONTEXT_WEB . '/' . $path . '/' . Utils::basename($uri));
+		return EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE id = ?;', $id);
 	}
 
 	static public function checkAllInternalPagesLinks(): array

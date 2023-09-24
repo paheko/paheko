@@ -19,7 +19,7 @@ class Skriv extends AbstractRender
 
 		// Old file URLs, FIXME/TODO remove
 		$str = preg_replace_callback('/#file:\[([^\]\h]+)\]/', function ($match) {
-			return $this->resolveAttachment($match[1]);
+			return $this->resolveAttachment($match[1])->url();
 		}, $str);
 
 		if (!isset(self::$skriv)) {

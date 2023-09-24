@@ -12,7 +12,7 @@ require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 
-$page = Web::getById((int)qg('id'));
+$page = Web::get((int)qg('id'));
 
 if (!$page) {
 	throw new UserException('Page inconnue');
@@ -21,7 +21,7 @@ if (!$page) {
 $csrf_key = 'attach_' . $page->id();
 
 $form->runIf('delete', function () use ($page) {
-	$path = $page->dir_path . '/' . f('delete');
+	$path = $page->dir_path() . '/' . f('delete');
 	$file = Files::get($path);
 
 	if (!$file || !$file->canDelete()) {
@@ -33,7 +33,7 @@ $form->runIf('delete', function () use ($page) {
 
 
 $form->runIf('upload', function () use ($page) {
-	$new_file = Files::uploadMultiple($page->dir_path, 'file');
+	$new_file = Files::uploadMultiple($page->dir_path(), 'file');
 }, $csrf_key);
 
 $files = null;

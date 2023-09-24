@@ -28,10 +28,8 @@ class Page extends Entity
 
 	const TABLE = 'web_pages';
 
-	protected ?int $id;
-	protected ?string $parent = null;
-	protected string $path;
-	protected string $dir_path;
+	protected int $id;
+	protected ?int $id_parent = null;
 	protected string $uri;
 	protected string $title;
 	protected int $type;
@@ -40,6 +38,8 @@ class Page extends Entity
 	protected \DateTime $published;
 	protected \DateTime $modified;
 	protected string $content;
+
+	protected string $_path;
 
 	const FORMATS_LIST = [
 		Render::FORMAT_MARKDOWN => 'MarkDown',
@@ -75,10 +75,10 @@ class Page extends Entity
 	protected ?array $_tagged_attachments = null;
 	protected ?string $_html = null;
 
-	static public function create(int $type, ?string $parent, string $title, string $status = self::STATUS_ONLINE): self
+	static public function create(int $type, ?int $id_parent, string $title, string $status = self::STATUS_ONLINE): self
 	{
 		$page = new self;
-		$data = compact('type', 'parent', 'title', 'status');
+		$data = compact('type', 'id_parent', 'title', 'status');
 		$data['content'] = '';
 
 		$page->importForm($data);
@@ -97,10 +97,10 @@ class Page extends Entity
 	public function dir(bool $force_reload = false): File
 	{
 		if (null === $this->_dir || $force_reload) {
-			$this->_dir = Files::get($this->dir_path);
+			$this->_dir = Files::get(File::CONTEXT_WEB . '/' . $this->uri);
 
 			if (null === $this->_dir) {
-				$this->_dir = Files::mkdir($this->dir_path);
+				$this->_dir = Files::mkdir(File::CONTEXT_WEB . '/' . $this->uri);
 			}
 		}
 
@@ -120,6 +120,7 @@ class Page extends Entity
 	public function asTemplateArray(): array
 	{
 		$out = $this->asArray();
+		$out['path'] = $this->path();
 		$out['url'] = $this->url();
 		$out['html'] = trim($this->content) !== '' ? $this->render() : '';
 		$row['has_attachments'] = $this->hasAttachments();
@@ -130,7 +131,7 @@ class Page extends Entity
 	{
 		$user_prefix = $admin ? ADMIN_URL . 'web/?uri=' : null;
 
-		$this->_html ??= Render::render($this->format, $this->dir_path, $this->content, $user_prefix);
+		$this->_html ??= Render::render($this->format, $this->dir_path(), $this->content, $user_prefix);
 
 		return $this->_html;
 	}
@@ -148,12 +149,28 @@ class Page extends Entity
 	public function preview(string $content): string
 	{
 		$user_prefix = ADMIN_URL . 'web/?uri=';
-		return Render::render($this->format, $this->dir_path, $content, $user_prefix);
+		return Render::render($this->format, $this->dir_path(), $content, $user_prefix);
 	}
 
+	public function dir_path(): string
+	{
+		return File::CONTEXT_WEB . '/' . $this->uri;
+	}
+
+	/**
+	 * Return page path according to parents, eg. category_uri/sub_category_uri/page_uri
+	 */
 	public function path(): string
 	{
-		return $this->path;
+		if (!isset($this->_path)) {
+			$sql = sprintf('SELECT GROUP_CONCAT(uri, \'/\') FROM (%s);',
+				rtrim(sprintf(Web::BREADCRUMBS_SQL, $this->id()), '; ')
+			);
+
+			$this->_path = DB::getInstance()->firstColumn($sql);
+		}
+
+		return $this->_path;
 	}
 
 	public function listVersions(): DynamicList
@@ -246,11 +263,10 @@ class Page extends Entity
 
 	public function save(bool $selfcheck = true): bool
 	{
-		$change_parent = null;
-		$change_dir_path = $this->_modified['dir_path'] ?? null;
+		$dir = null;
 
-		if (isset($this->_modified['uri']) || isset($this->_modified['path'])) {
-			$change_parent = $this->_modified['path'];
+		if ($this->isModified('uri')) {
+			$dir = Files::get(File::CONTEXT_WEB . '/' . $this->getModifiedProperty('uri'));
 		}
 
 		// Update modified date if required
@@ -262,32 +278,12 @@ class Page extends Entity
 
 		parent::save($selfcheck);
 
+		if ($dir) {
+			$dir->rename($this->dir_path());
+		}
+
 		if ($update_search) {
 			$this->syncSearch();
-		}
-
-		// Rename/move children
-		if ($change_parent) {
-			$db = DB::getInstance();
-			$sql = sprintf('UPDATE web_pages
-				SET
-					path = %1$s || substr(path, %2$d),
-					parent = %1$s || substr(parent, %2$d),
-					dir_path = \'web/\' || %1$s || substr(parent, %2$d)
-				WHERE path LIKE %3$s;',
-				$db->quote($this->path),
-				strlen($change_parent) + 1,
-				$db->quote($change_parent . '/%')
-			);
-			$db->exec($sql);
-		}
-
-		if ($change_dir_path) {
-			$dir = Files::get($change_dir_path);
-
-			if ($dir) {
-				$dir->rename($this->dir_path);
-			}
 		}
 
 		Cache::clear();
@@ -317,19 +313,15 @@ class Page extends Entity
 		$this->assert(array_key_exists($this->format, self::FORMATS_LIST), 'Unknown page format');
 		$this->assert(trim($this->title) !== '', 'Le titre ne peut rester vide');
 		$this->assert(mb_strlen($this->title) <= 200, 'Le titre ne peut faire plus de 200 caractères');
-		$this->assert(trim($this->path) !== '', 'Le chemin ne peut rester vide');
 		$this->assert(trim($this->uri) !== '', 'L\'URI ne peut rester vide');
 		$this->assert(strlen($this->uri) <= 150, 'L\'URI ne peut faire plus de 150 caractères');
-		$this->assert($this->path !== $this->parent, 'Invalid parent page');
+
+		if ($this->exists()) {
+			$this->assert($this->id_parent !== $this->id(), 'Invalid parent page');
+		}
 
 		$this->assert(!$this->exists() || !$db->test(self::TABLE, 'uri = ? AND id != ?', $this->uri, $this->id()), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre : ' . $this->uri, self::DUPLICATE_URI_ERROR);
 		$this->assert($this->exists() || !$db->test(self::TABLE, 'uri = ?', $this->uri), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre : ' . $this->uri, self::DUPLICATE_URI_ERROR);
-
-		$root = File::CONTEXT_WEB . '/';
-		$this->assert(0 === strpos($this->dir_path, $root), 'Invalid directory context');
-
-		$dir = Files::get($this->dir_path);
-		$this->assert(!$dir || $dir->isDir(), 'Chemin de répertoire invalide');
 	}
 
 	public function importForm(array $source = null)
@@ -342,8 +334,6 @@ class Page extends Entity
 			$source['published'] = $source['date'] . ' ' . $source['date_time'];
 		}
 
-		$parent = $this->parent;
-
 		if (isset($source['title']) && !$this->exists()) {
 			$source['uri'] = $source['title'];
 		}
@@ -354,19 +344,12 @@ class Page extends Entity
 			if (!$this->exists()) {
 				$source['uri'] = strtolower($source['uri']);
 			}
-
-			$source['path'] = trim($parent . '/' . $source['uri'], '/');
 		}
 
 		$uri = $source['uri'] ?? ($this->uri ?? null);
 
-		if (array_key_exists('parent', $source)) {
-			$source['parent'] = Form::getSelectorValue($source['parent']) ?: null;
-			$source['path'] = trim($source['parent'] . '/' . $uri, '/');
-		}
-
-		if (isset($source['path'])) {
-			$source['dir_path'] = File::CONTEXT_WEB . '/' . $source['path'];
+		if (array_key_exists('id_parent', $source) && is_array($source['id_parent'])) {
+			$source['id_parent'] = Form::getSelectorValue($source['id_parent']) ?: null;
 		}
 
 		if (!empty($source['encryption']) ) {
@@ -383,22 +366,13 @@ class Page extends Entity
 
 	public function getBreadcrumbs(): array
 	{
-		$sql = '
-			WITH RECURSIVE parents(title, parent, path, id, level) AS (
-				SELECT title, parent, path, id, 1 FROM web_pages WHERE id = ?
-				UNION ALL
-				SELECT p.title, p.parent, p.path, p.id, level + 1
-				FROM web_pages p
-					JOIN parents ON parents.parent = p.path
-			)
-			SELECT id, title FROM parents ORDER BY level DESC;';
-		return DB::getInstance()->getAssoc($sql, $this->id());
+		return Web::getBreadcrumbs($this->id());
 	}
 
 	public function listAttachments(): array
 	{
 		if (null === $this->_attachments) {
-			$list = Files::list($this->dir_path);
+			$list = Files::list($this->dir_path());
 
 			// Remove sub-directories
 			$list = array_filter($list, fn ($a) => $a->type != $a::TYPE_DIRECTORY);
@@ -416,7 +390,7 @@ class Page extends Entity
 	{
 		if (null === $this->_tagged_attachments) {
 			$this->render();
-			$this->_tagged_attachments = Render::listAttachments($this->dir_path);
+			$this->_tagged_attachments = Render::listAttachments($this->dir_path());
 		}
 
 		return $this->_tagged_attachments;
@@ -498,7 +472,7 @@ class Page extends Entity
 			return [];
 		}
 
-		$renderer = Render::getRenderer($this->format, $this->dir_path);
+		$renderer = Render::getRenderer($this->format, $this->dir_path());
 		$renderer->render($this->content);
 		$errors = [];
 
@@ -522,7 +496,7 @@ class Page extends Entity
 
 	public function hasSubPages(): bool
 	{
-		return DB::getInstance()->test('web_pages', 'parent = ?', $this->path);
+		return DB::getInstance()->test('web_pages', 'id_parent = ?', $this->id());
 	}
 
 	public function toggleType(): void
