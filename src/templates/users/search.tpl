@@ -15,9 +15,6 @@
 
 	<p class="help">{$list->count()} membres trouvés pour cette recherche.</p>
 
-	</form>
-	<form method="post" action="action.php" target="_dialog">
-
 	{include file="common/dynamic_list_head.tpl" check=$is_admin use_buttons=true}
 
 	{foreach from=$list->iterate() item="row"}

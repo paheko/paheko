@@ -211,7 +211,7 @@
 
 			// We need to wait a bit for the height to be correct, not sure why
 			window.setTimeout(() => {
-				iframe.style.height = iframe.dataset.height == 'auto' ? iframe.contentWindow.document.body.offsetHeight + 'px' : iframe.dataset.height;
+				iframe.style.height = iframe.dataset.height == 'auto' && iframe.contentWindow.document.body ? iframe.contentWindow.document.body.offsetHeight + 'px' : iframe.dataset.height;
 			}, 200);
 		});
 
@@ -289,6 +289,21 @@
 		if (g.focus_before_dialog) {
 			g.focus_before_dialog.focus();
 		}
+	};
+
+	g.openFormInDialog = (form) => {
+		if (form.target != '_dialog' && form.target != 'dialog') {
+			return;
+		}
+
+		let url = form.getAttribute('action');
+		url = url + (url.indexOf('?') > 0 ? '&' : '?') + '_dialog';
+		form.setAttribute('action', url);
+		form.target = 'dialog';
+
+		g.openFrameDialog('about:blank', {'height': form.getAttribute('data-dialog-height') ? 90 : 'auto'});
+		form.submit();
+		return false;
 	};
 
 	g.checkUncheck = function()
@@ -585,18 +600,7 @@
 		});
 
 		$('form[target="_dialog"]').forEach((e) => {
-			e.addEventListener('submit', () => {
-				if (e.target != '_dialog' && e.target != 'dialog') return;
-
-				let url = e.getAttribute('action');
-				url = url + (url.indexOf('?') > 0 ? '&' : '?') + '_dialog';
-				e.setAttribute('action', url);
-				e.target = 'dialog';
-
-				g.openFrameDialog('about:blank', {height: e.getAttribute('data-dialog-height') ? 90 : 'auto'});
-				e.submit();
-				return false;
-			});
+			e.addEventListener('submit', () => g.openFormInDialog(e));
 		});
 	});
 
@@ -649,12 +653,33 @@
 					return !window.alert("Aucune ligne sélectionnée !");
 				}
 
+				var action = this.form.getAttribute('action');
+				var target = this.form.getAttribute('target');
+
+				if (this.hasAttribute('data-form-action')) {
+					this.form.action = this.dataset.formAction;
+				}
+
+				if (this.getAttribute('data-form-target') === '_dialog') {
+					this.form.target = '_dialog'
+				}
+
 				if (this.options[this.selectedIndex].hasAttribute('data-no-dialog')) {
 					this.form.target = '';
 				}
 
 				this.form.dispatchEvent(new Event('submit'));
-				this.form.submit();
+
+				if (this.form.target === '_dialog') {
+					g.openFormInDialog(this.form);
+				}
+				else {
+					this.form.submit();
+				}
+
+				this.form.action = action;
+				this.form.target = target || '';
+				this.selectedIndex = 0;
 			};
 		}
 

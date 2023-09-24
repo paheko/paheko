@@ -4,7 +4,7 @@
 				<td class="actions" colspan="{$colspan}">
 					<em>Pour les membres cochés :</em>
 					{csrf_field key="membres_action"}
-					<select name="action">
+					<select name="action" data-form-action="action.php" data-form-target="_dialog">
 						<option value="">— Choisir une action à effectuer —</option>
 						<option value="move">Changer de catégorie</option>
 						<option value="subscribe">Inscrire à une activité</option>
