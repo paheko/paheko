@@ -238,6 +238,15 @@ class Search extends Entity
 		return true;
 	}
 
+	public function hasLimit(): bool
+	{
+		if ($this->type === self::TYPE_JSON) {
+			return false;
+		}
+
+		return (bool) preg_match(self::LIMIT_REGEXP, $this->SQL());
+	}
+
 	public function countResults(bool $ignore_errors = true): ?int
 	{
 		$sql = $this->SQL(['no_limit' => true, 'no_cache' => true]);
