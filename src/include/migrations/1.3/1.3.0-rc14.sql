@@ -37,3 +37,5 @@ INSERT INTO web_pages SELECT
 	title,
 	content
 	FROM web_pages_old AS a;
+
+DROP TABLE web_pages_old;
