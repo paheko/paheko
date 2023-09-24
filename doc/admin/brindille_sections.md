@@ -114,7 +114,7 @@ Exemple pour voir si un membre qui peut administrer les membres est connecté :
 	Un membre est connecté, et il a le droit d'administrer les membres.
 {{else}}
 	Aucun membre n'est connecté, ou un membre est connecté mais n'est pas administrateur des membres.
-{{/if}}
+{{/restrict}}
 ```
 
 Pour bloquer l'accès aux membres non connectés, ou qui n'ont pas accès en écriture à la comptabilité.

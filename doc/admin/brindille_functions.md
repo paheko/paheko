@@ -514,7 +514,7 @@ Exemple :
 {{#load id=$_GET.id assign="invoice"}}
 {{else}}
   {{:error message="Facture introuvable"}}
-{{/if}}
+{{/load}}
 
 {{#form on="delete"}}
   {{if !$_POST.confirm_delete}}

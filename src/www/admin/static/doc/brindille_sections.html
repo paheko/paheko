@@ -188,7 +188,7 @@ orange</code></pre>
     Un membre est connecté, et il a le droit d'administrer les membres.
 {{else}}
     Aucun membre n'est connecté, ou un membre est connecté mais n'est pas administrateur des membres.
-{{/if}}</code></pre>
+{{/restrict}}</code></pre>
 <p>Pour bloquer l'accès aux membres non connectés, ou qui n'ont pas accès en écriture à la comptabilité.</p>
 <pre><code>{{#restrict block=true section="accounting" level="write"}}
 {{/restrict}}</code></pre>
@@ -467,7 +467,7 @@ orange</code></pre>
 </table>
 <h1 id="pour-le-site-web">Pour le site web</h1>
 <h2 id="breadcrumbs">breadcrumbs</h2>
-<p>Permet de récupérer la liste des pages parentes d'une page afin de constituer un <a href="https://fr.wikipedia.org/wiki/Fil_d&#039;Ariane_(ergonomie)" target="_blank" rel="nofollow,noreferrer">fil d'ariane</a> permettant de remonter dans l'arborescence du site</p>
+<p>Permet de récupérer la liste des pages parentes d'une page afin de constituer un <a href="https://fr.wikipedia.org/wiki/Fil_d&#039;Ariane_(ergonomie)" target="_blank" rel="noreferrer">fil d'ariane</a> permettant de remonter dans l'arborescence du site</p>
 <p>Un seul paramètre est possible :</p>
 <table>
 <thead>
@@ -577,7 +577,7 @@ orange</code></pre>
 <p>Permet de gérer la soumission d'un formulaire (<code>&lt;form method="post"…&gt;</code> en HTML).</p>
 <p>Si l'élément dont le nom spécifié dans le paramètre <code>on</code> a été envoyé en <code>POST</code>, alors le code à l'intérieur de la section est exécuté.</p>
 <p>Toute erreur à l'intérieur de la section arrêtera son exécution, et le message sera ajouté aux erreurs du formulaire.</p>
-<p>Une vérification de sécurité <a href="https://fr.wikipedia.org/wiki/Cross-site_request_forgery" target="_blank" rel="nofollow,noreferrer">anti-CSRF</a> est également appliquée. Si cette vérification échoue, le message d'erreur "Merci de bien vouloir renvoyer le formulaire." sera renvoyé. Pour que cela marche il faut que le formulaire dispose d'un bouton de type "submit", généré à l'aide de la fonction <code>button</code>. Exemple : <code>{{:button type="submit" name="save" label="Enregistrer"}}</code>.</p>
+<p>Une vérification de sécurité <a href="https://fr.wikipedia.org/wiki/Cross-site_request_forgery" target="_blank" rel="noreferrer">anti-CSRF</a> est également appliquée. Si cette vérification échoue, le message d'erreur "Merci de bien vouloir renvoyer le formulaire." sera renvoyé. Pour que cela marche il faut que le formulaire dispose d'un bouton de type "submit", généré à l'aide de la fonction <code>button</code>. Exemple : <code>{{:button type="submit" name="save" label="Enregistrer"}}</code>.</p>
 <p>En cas d'erreurs, le reste du contenu de la section ne sera pas exécuté. Les messages d'erreurs seront placés dans un tableau dans la variable <code>$form_errors</code>.</p>
 <p>Il est aussi possible de les afficher simplement avec la fonction <code>{{:form_errors}}</code>. Cela revient à faire une boucle sur la variable <code>$form_errors</code>.</p>
 <pre><code>{{#form on="save"}}
@@ -630,7 +630,7 @@ orange</code></pre>
 </table>
 <p>Il est possible d'utiliser d'autres paramètres : <code>{{#load cle="valeur"}}</code>. Cela va comparer <code>"valeur"</code> avec la valeur de la clé <code>cle</code> dans le document JSON. C'est l'équivalent d'écrire <code>where="json_extract(document, '$.cle') = 'valeur'"</code>.</p>
 <p>Pour des conditions plus complexes qu'une simple égalité, il est possible d'utiliser la syntaxe courte <code>$$…</code> dans le paramètre <code>where</code>. Ainsi <code>where="$$.nom LIKE 'Bourse%'</code> est l'équivalent de <code>where="json_extract(document, '$.nom') LIKE 'Bourse%'"</code>.</p>
-<p>Voir <a href="https://www.sqlite.org/json1.html#jex" target="_blank" rel="nofollow,noreferrer">la documentation de SQLite pour plus de détails sur la syntaxe de json_extract</a>.</p>
+<p>Voir <a href="https://www.sqlite.org/json1.html#jex" target="_blank" rel="noreferrer">la documentation de SQLite pour plus de détails sur la syntaxe de json_extract</a>.</p>
 <p>Note : un index SQL dynamique est créé pour chaque requête utilisant une clause <code>json_extract</code>.</p>
 <p>Chaque itération renverra ces deux variables :</p>
 <table>
@@ -663,7 +663,7 @@ orange</code></pre>
 &lt;h2&gt;Montant : {{$total}}&lt;/h2&gt;
 {{/load}}</code></pre>
 <h3 id="utilisation-du-parametre-each">Utilisation du paramètre <code>each</code></h3>
-<p>Le paramètre <code>each</code> est utile pour faire une boucle sur un tableau contenu dans le document. Ce paramètre doit contenir un chemin JSON valide. Par exemple <code>membres[1].noms</code> pour boucler sur le tableau <code>noms</code>, du premier élément du tableau <code>membres</code>. Voir la documentation <a href="https://www.sqlite.org/json1.html#jeach" target="_blank" rel="nofollow,noreferrer">de la fonction json_each de SQLite pour plus de détails</a>.</p>
+<p>Le paramètre <code>each</code> est utile pour faire une boucle sur un tableau contenu dans le document. Ce paramètre doit contenir un chemin JSON valide. Par exemple <code>membres[1].noms</code> pour boucler sur le tableau <code>noms</code>, du premier élément du tableau <code>membres</code>. Voir la documentation <a href="https://www.sqlite.org/json1.html#jeach" target="_blank" rel="noreferrer">de la fonction json_each de SQLite pour plus de détails</a>.</p>
 <p>Pour chaque itération de la section, la variable <code>{{$value}}</code> contiendra l'élément recherché dans le critère <code>each</code>.</p>
 <p>Par exemple nous pouvons avoir un élément <code>membres</code> dans notre document JSON qui contient un tableau de noms de membres :</p>
 <pre><code>{{:assign var="membres." value="Greta Thunberg}}
@@ -746,7 +746,7 @@ Le document n°{{$id}} est celui qui parle de Greta.
 <p>Pour déterminer quelles colonnes afficher dans le tableau, il faut utiliser soit le paramètre <code>schema</code> pour indiquer un fichier de schéma JSON qui sera utilisé pour donner le libellé des colonnes (via la <code>description</code> indiquée dans le schéma), soit le paramètre <code>select</code>, où il faut alors indiquer le nom et le libellé des colonnes sous la forme <code>$$.colonne1 AS "Libellé"; $$.colonne2 AS "Libellé 2"</code>.</p>
 <p>Comme pour <code>load</code>, il est possible d'utiliser des paramètres supplémentaires : <code>cle="valeur"</code>. Cela va comparer <code>"valeur"</code> avec la valeur de la clé <code>cle</code> dans le document JSON. C'est l'équivalent d'écrire <code>where="json_extract(document, '$.cle') = 'valeur'"</code>.</p>
 <p>Pour des conditions plus complexes qu'une simple égalité, il est possible d'utiliser la syntaxe courte <code>$$…</code> dans le paramètre <code>where</code>. Ainsi <code>where="$$.nom LIKE 'Bourse%'</code> est l'équivalent de <code>where="json_extract(document, '$.nom') LIKE 'Bourse%'"</code>.</p>
-<p>Voir <a href="https://www.sqlite.org/json1.html#jex" target="_blank" rel="nofollow,noreferrer">la documentation de SQLite pour plus de détails sur la syntaxe de json_extract</a>.</p>
+<p>Voir <a href="https://www.sqlite.org/json1.html#jex" target="_blank" rel="noreferrer">la documentation de SQLite pour plus de détails sur la syntaxe de json_extract</a>.</p>
 <p>Note : un index SQL dynamique est créé pour chaque requête utilisant une clause <code>json_extract</code>.</p>
 <p>Chaque itération renverra toujours ces deux variables :</p>
 <table>

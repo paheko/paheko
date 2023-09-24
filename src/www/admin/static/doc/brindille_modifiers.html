@@ -135,7 +135,7 @@
 			<li><a href="#spell_out_number">spell_out_number</a></li>
 			<li><a href="#uuid">uuid</a>
 </li></ol></li></ol></aside><h1 id="filtres-php">Filtres PHP</h1>
-<p>Ces filtres viennent directement de PHP et utilisent donc les mêmes paramètres. Voir la <a href="https://www.php.net/manual/fr/function.htmlspecialchars.php" target="_blank" rel="nofollow,noreferrer">documentation PHP</a> pour plus de détails.</p>
+<p>Ces filtres viennent directement de PHP et utilisent donc les mêmes paramètres. Voir la <a href="https://www.php.net/manual/fr/function.htmlspecialchars.php" target="_blank" rel="noreferrer">documentation PHP</a> pour plus de détails.</p>
 <table>
 <thead>
 <tr>
@@ -324,7 +324,7 @@ bleu - orange</code></pre>
 2,3,1</code></pre>
 <h1 id="filtres-de-texte">Filtres de texte</h1>
 <h2 id="args">args</h2>
-<p>Remplace des arguments dans le texte selon le schéma utilisé par <a href="https://www.php.net/sprintf" target="_blank" rel="nofollow,noreferrer">sprintf</a>.</p>
+<p>Remplace des arguments dans le texte selon le schéma utilisé par <a href="https://www.php.net/sprintf" target="_blank" rel="noreferrer">sprintf</a>.</p>
 <pre><code>{{"Il y a %d résultats dans la recherche sur le terme '%s'."|args:$results_count:$query}}
 = Il y a 5 résultat dans la recherche sur le terme 'test'.</code></pre>
 <h2 id="cat">cat</h2>
@@ -360,7 +360,7 @@ bleu - orange</code></pre>
 <pre><code>{{"Tata yoyo"|replace:"yoyo":"yaya"}}
 = Tata yaya</code></pre>
 <h2 id="regexp_replace">regexp_replace</h2>
-<p>Remplace des valeurs en utilisant une expression rationnelles (regexp) (<a href="https://www.php.net/manual/fr/regexp.introduction.php" target="_blank" rel="nofollow,noreferrer">documentation PHP</a>).</p>
+<p>Remplace des valeurs en utilisant une expression rationnelles (regexp) (<a href="https://www.php.net/manual/fr/regexp.introduction.php" target="_blank" rel="noreferrer">documentation PHP</a>).</p>
 <pre><code>{{"Tartagueule"|regexp_replace:"/ta/i":"tou"}}
 = tourtougueule</code></pre>
 <h2 id="remove_leading_number">remove_leading_number</h2>
@@ -410,7 +410,7 @@ Ceci n'est pas un t</code></pre>
 <p>Échappe le contenu pour un usage dans un document XML.</p>
 <h2 id="autres-filtres-de-texte">Autres filtres de texte</h2>
 <p>Les filtres suivants modifient la casse (majuscule/minuscules) d'un texte et ne fonctionneront correctement que si l'extension <code>mbstring</code> est installée sur le serveur. Sinon les lettres accentuées ne seront pas modifiées.</p>
-<p>Note : il est donc préférable d'utiliser la propriété CSS <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/text-transform" target="_blank" rel="nofollow,noreferrer"><code>text-transform</code></a> pour modifier la casse si l'usage n'est que pour l'affichage, et non pas pour enregistrer les données.</p>
+<p>Note : il est donc préférable d'utiliser la propriété CSS <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/text-transform" target="_blank" rel="noreferrer"><code>text-transform</code></a> pour modifier la casse si l'usage n'est que pour l'affichage, et non pas pour enregistrer les données.</p>
 <ul>
 <li><code>tolower</code> : transforme un texte en minuscules</li>
 <li><code>toupper</code> : transforme un texte en majuscules</li>
@@ -488,11 +488,11 @@ Ceci n'est pas un t</code></pre>
 <h1 id="filtres-de-date">Filtres de date</h1>
 <h2 id="date">date</h2>
 <p>Formatte une date selon le format spécifié en premier paramètre.</p>
-<p>Le format est identique au <a href="https://www.php.net/manual/fr/datetime.format.php" target="_blank" rel="nofollow,noreferrer">format utilisé par PHP</a>.</p>
+<p>Le format est identique au <a href="https://www.php.net/manual/fr/datetime.format.php" target="_blank" rel="noreferrer">format utilisé par PHP</a>.</p>
 <p>Si aucun format n'est indiqué, le défaut sera <code>d/m/Y à H:i</code>. (en français)</p>
 <h2 id="strftime">strftime</h2>
 <p>Formatte une date selon un format spécifié en premier paramètre.</p>
-<p>Le format à utiliser est identique <a href="https://www.php.net/strftime" target="_blank" rel="nofollow,noreferrer">au format utilisé par la fonction strftime de PHP</a>.</p>
+<p>Le format à utiliser est identique <a href="https://www.php.net/strftime" target="_blank" rel="noreferrer">au format utilisé par la fonction strftime de PHP</a>.</p>
 <p>Un format doit obligatoirement être spécifié.</p>
 <p>En passant un code de langue en second paramètre, cette langue sera utilisée. Sont supportés le français (<code>fr</code>) et l'anglais (<code>en</code>). Le défaut est le français si aucune valeur n'est passée en second paramètre .</p>
 <h2 id="relative_date">relative_date</h2>
