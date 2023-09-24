@@ -98,6 +98,7 @@ if (!$default) {
 			$header = $s->getHeader();
 			$count = $s->countResults(false);
 			$results = $s->iterateResults();
+			$tpl->assign('has_limit', $s->hasLimit());
 		}
 	}
 	catch (UserException $e) {

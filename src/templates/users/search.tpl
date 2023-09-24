@@ -50,7 +50,12 @@
 
 	<p class="actions">{exportmenu form=true name="_export" class="menu-btn-right"}</p>
 
-	<p class="help">{$count} résultats trouvés pour cette recherche.</p>
+	<p class="help">
+		{$count} résultats trouvés pour cette recherche.
+	</p>
+	{if !empty($has_limit)}
+		<p class="alert block">Le nombre de résultats affichés est limité.</p>
+	{/if}
 
 	<?php
 	$id_column = array_search('_user_id', $header, true);
@@ -84,9 +89,14 @@
 			{if $is_admin && $id_column !== false}
 				<td class="check">{input type="checkbox" name="selected[]" value=$row[$id_column]}</td>
 			{/if}
-				{foreach from=$row item="column"}
+				{foreach from=$header key="i" item="label"}
 				<td>
-					{$column}
+					<?php $value = $row[$i]; $key = $header[$i]; ?>
+					{if $id_column !== false}
+						{display_dynamic_field key=$key value=$value}
+					{else}
+						{$value}
+					{/if}
 				</td>
 				{/foreach}
 				{if $id_column !== false}
