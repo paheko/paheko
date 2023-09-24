@@ -986,7 +986,7 @@ class Sections
 			}
 			else {
 				$params['where'] .= ' AND w.id_parent = (SELECT id FROM web_pages WHERE uri = :parent)';
-				$params[':parent'] = trim((string) $params['parent']);
+				$params[':parent'] = Utils::basename(trim((string) $params['parent']));
 			}
 
 			unset($params['parent']);
