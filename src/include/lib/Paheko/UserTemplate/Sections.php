@@ -973,6 +973,11 @@ class Sections
 			}
 		}
 
+		if (isset($params['path'])) {
+			$params['uri'] = Utils::basename($params['path']);
+			unset($params['path']);
+		}
+
 		if (isset($params['uri'])) {
 			$params['where'] .= ' AND w.uri = :uri';
 			$params['limit'] = 1;
