@@ -442,8 +442,12 @@ if (!defined('Paheko\INSTALL_PROCESS'))
 
 	$v = DB::getInstance()->version();
 
-	if (version_compare($v, paheko_version(), '<'))
-	{
+	if (version_compare($v, paheko_version(), '<')) {
+		if (!empty($_POST)) {
+			readfile(ROOT . '/templates/static/upgrade_post.html');
+			exit;
+		}
+
 		Utils::redirect(ADMIN_URL . 'upgrade.php');
 	}
 }
