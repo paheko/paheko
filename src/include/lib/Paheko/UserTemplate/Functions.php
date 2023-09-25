@@ -395,9 +395,24 @@ class Functions
 			throw new Brindille_Exception(sprintf('Ligne %d: l\'envoi d\'email à une adresse interne est limité à 10 envois par page', $line));
 		}
 
-		if ($external_count && preg_match_all('!(https?://.*?)(?=\s|$)!', $params['subject'] . ' ' . $params['body'], $match, PREG_PATTERN_ORDER)) {
+		if ($external_count
+			&& preg_match_all('!(https?://.*?)(?=\s|$)!', $params['subject'] . ' ' . $params['body'], $match, PREG_PATTERN_ORDER)) {
+			$config = Config::getInstance();
+
 			foreach ($match[1] as $m) {
-				if (0 !== strpos($m, WWW_URL) && 0 !== strpos($m, BASE_URL)) {
+				$allowed = false;
+
+				if (0 === strpos($m, WWW_URL)) {
+					$allowed = true;
+				}
+				elseif (0 === strpos($m, BASE_URL)) {
+					$allowed = true;
+				}
+				elseif ($config->org_web && 0 === strpos($m, $config->org_web)) {
+					$allowed = true;
+				}
+
+				if (!$allowed) {
 					throw new Brindille_Exception(sprintf('Ligne %d: l\'envoi d\'email à une adresse externe interdit l\'utilisation d\'une adresse web autre que le site de l\'association : %s', $line, $m));
 				}
 			}
