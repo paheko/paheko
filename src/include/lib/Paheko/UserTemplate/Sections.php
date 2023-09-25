@@ -990,7 +990,14 @@ class Sections
 				$params['where'] .= ' AND w.id_parent IS NULL';
 			}
 			else {
-				$params['where'] .= ' AND w.id_parent = (SELECT id FROM web_pages WHERE uri = :parent)';
+				if (substr($params['parent'], 0, 1) === '!') {
+					$params['parent'] = substr($params['parent'], 1);
+					$params['where'] .= ' AND w.id_parent != (SELECT id FROM web_pages WHERE uri = :parent)';
+				}
+				else {
+					$params['where'] .= ' AND w.id_parent = (SELECT id FROM web_pages WHERE uri = :parent)';
+				}
+
 				$params[':parent'] = Utils::basename(trim((string) $params['parent']));
 			}
 
