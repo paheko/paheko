@@ -104,6 +104,7 @@ abstract class AdvancedSearch
 		$select_columns = [];
 		$query_columns = [];
 		$query_groups = '';
+		$invalid = 0;
 
 		foreach ($groups as $group)
 		{
@@ -118,8 +119,6 @@ abstract class AdvancedSearch
 			if (isset($group['join_operator']) && $group['join_operator'] != 'AND' && $group['join_operator'] != 'OR') {
 				continue;
 			}
-
-			$invalid = 0;
 
 			$query_group_conditions = [];
 
