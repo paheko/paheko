@@ -77,7 +77,7 @@
 		{if $can_change_password}
 			<dd>{linkbutton href="?edit=password" label="Modifier le mot de passe" shape="edit"}</dd>
 		{else}
-			<dd class="alert">La modification de mot de passe pour votre catégorie est désactivée. Vous devez contacter un administrateur pour qu'il change votre mot de passe.</dd>
+			<dd class="alert">Vous n'avez pas le droit de modifier votre mot de passe. Vous devez contacter un administrateur pour qu'il change votre mot de passe.</dd>
 		{/if}
 		<dt>Authentification à deux facteurs</dt>
 			<dd>
