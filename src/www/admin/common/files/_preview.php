@@ -28,7 +28,7 @@ if ($path = qg('f')) {
 }
 // Preview single web page
 elseif ($web = qg('w')) {
-	$page = Web::getById((int)$web);
+	$page = Web::get((int)$web);
 
 	if (!$page || !($file = $page->dir()) || !$file->canRead()) {
 		throw new UserException('Vous n\'avez pas le droit de lire ce fichier.');

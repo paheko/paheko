@@ -32,12 +32,12 @@
 	<nav class="web breadcrumbs no-clear">
 		<ul>
 			<li>{link href="!web/" label="Site web"}</li>
-			{foreach from=$breadcrumbs key="id" item="title"}
-				<li>{link href="!web/?id=%s"|args:$id label=$title|truncate:40}</li>
+			{foreach from=$breadcrumbs key="id" item="b"}
+				<li>{link href="!web/?id=%s"|args:$id label=$b.title|truncate:40}</li>
 			{/foreach}
 		</ul>
 		{if $page}
-			<small>{linkbutton href="?p=%s"|args:$page.parent shape="left" label="Retour à la catégorie parent"}</small>
+			<small>{linkbutton href="?id=%d"|args:$page.id_parent shape="left" label="Retour à la catégorie parent"}</small>
 		{/if}
 	</nav>
 {/if}
@@ -100,13 +100,11 @@
 		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
 		<p class="actions">
 			{if $page}
-				{assign var="parent" value=$page.path}
 				{assign var="label" value="Nouvelle sous-catégorie"}
 			{else}
-				{assign var="parent" value=""}
 				{assign var="label" value="Nouvelle catégorie"}
 			{/if}
-			{linkbutton shape="plus" label=$label target="_dialog" href="new.php?type=%d&parent=%s"|args:$type_category,$page.path}
+			{linkbutton shape="plus" label=$label target="_dialog" href="new.php?type=%d&parent=%d"|args:$type_category:$page.id}
 		</p>
 		{/if}
 		<h2 class="ruler">{if $page}Sous-catégories{else}Catégories{/if}</h2>
@@ -134,7 +132,7 @@
 	<div class="web header">
 		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
 		<p class="actions">
-			{linkbutton shape="plus" label="Nouvelle page" target="_dialog" href="new.php?type=%d&parent=%s"|args:$type_page,$page.path}
+			{linkbutton shape="plus" label="Nouvelle page" target="_dialog" href="new.php?type=%d&parent=%d"|args:$type_page,$page.id}
 		</p>
 		{/if}
 		<h2 class="ruler">Pages</h2>

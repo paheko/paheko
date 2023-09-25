@@ -159,7 +159,7 @@ class Router
 			$size = $match[1];
 		}
 
-		$file = Files::getFromURI($uri) ?? Web::getAttachmentFromURI($uri);
+		$file = Files::getFromURI($uri);
 
 		// We can't serve directories
 		if ($file && $file->isDir()) {

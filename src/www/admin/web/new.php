@@ -16,14 +16,15 @@ $csrf_key = 'web_page_new';
 $parent = qg('parent') ?: '';
 
 $form->runIf('create', function () use ($parent) {
-	$page = Page::create((int) qg('type'), $parent, f('title'), Page::STATUS_DRAFT);
+	$type = (int) qg('type');
+	$page = Page::create($type, $parent ?: null, f('title'), $type === Page::TYPE_PAGE ? Page::STATUS_DRAFT : Page::STATUS_ONLINE);
 	$page->save();
 
-	if ($page->type == Page::TYPE_CATEGORY) {
+	if ($page->type === Page::TYPE_CATEGORY) {
 		$url = '!web/?id=' . $page->id();
 	}
 	else {
-		$url = ADMIN_URL . 'web/edit.php?new&id=' . $page->id();
+		$url = '!web/edit.php?new&id=' . $page->id();
 	}
 
 	if (null !== qg('_dialog')) {

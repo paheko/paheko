@@ -11,10 +11,7 @@ require_once __DIR__ . '/_inc.php';
 $page = false;
 
 if (qg('id')) {
-	$page = Web::getById((int)qg('id'));
-}
-elseif (qg('p')) {
-	$page = Web::get(qg('p'));
+	$page = Web::get((int)qg('id'));
 }
 elseif (qg('uri')) {
 	$page = Web::getByURI(qg('uri'));
@@ -34,7 +31,7 @@ if ($page) {
 	if (qg('toggle_type') !== null && $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)) {
 		$page->toggleType();
 		$page->save();
-		Utils::redirect('!web/?p=' . $page->path);
+		Utils::redirect('!web/?id=' . $page->id());
 	}
 }
 elseif (($_GET['check'] ?? null) === 'internal') {
@@ -43,9 +40,9 @@ elseif (($_GET['check'] ?? null) === 'internal') {
 
 $cat = $page && $page->isCategory() ? $page : null;
 
-$categories = Web::listCategories($cat ? $cat->path : null);
-$pages = Web::getPagesList($cat ? $cat->path : null);
-$drafts = Web::getDraftsList($cat ? $cat->path : null);
+$categories = Web::listCategories($cat ? $cat->id() : null);
+$pages = Web::getPagesList($cat ? $cat->id() : null);
+$drafts = Web::getDraftsList($cat ? $cat->id() : null);
 
 $pages->loadFromQueryString();
 $drafts->loadFromQueryString();

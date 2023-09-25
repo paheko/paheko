@@ -241,7 +241,7 @@ class API
 					'pages' => array_map(fn($p) => $p->asArray(true), Web::listPages($param)),
 				];
 			case 'attachment':
-				$attachment = Web::getAttachmentFromURI($param);
+				$attachment = Files::getFromURI($param);
 
 				if (!$attachment) {
 					throw new APIException('Page not found', 404);

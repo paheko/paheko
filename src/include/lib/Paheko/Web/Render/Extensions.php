@@ -123,7 +123,7 @@ class Extensions
 		$index = '';
 
 		if (trim((string)$content) === '') {
-			$images = self::$renderer->listImages();
+			$images = self::$renderer->listImagesFilenames();
 		}
 		else {
 			$images = explode("\n", $content);

@@ -945,7 +945,7 @@ class File extends Entity
 			}
 		}
 
-		if ($thumb == 'icon') {
+		if ($thumb === 'icon') {
 			$label = sprintf('<span data-icon="%s"></span>', Utils::iconUnicode($this->iconShape()));
 		}
 		elseif ($thumb) {

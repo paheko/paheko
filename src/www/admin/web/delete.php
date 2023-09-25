@@ -8,7 +8,7 @@ require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess($session::SECTION_WEB, $session::ACCESS_ADMIN);
 
-$page = Web::getById((int)qg('id'));
+$page = Web::get((int)qg('id'));
 
 if (!$page) {
 	throw new UserException('Page inconnue');
@@ -18,7 +18,7 @@ $csrf_key = 'web_delete_' . $page->id();
 
 $form->runIf('delete', function () use ($page) {
 	$page->delete();
-	Utils::redirectDialog('!web/?p=' . $page->parent);
+	Utils::redirectDialog('!web/?id=' . $page->id_parent);
 }, $csrf_key);
 
 $tpl->assign(compact('page', 'csrf_key'));

@@ -527,8 +527,16 @@ class Files
 
 	static public function getFromURI(string $uri): ?File
 	{
-		$uri = trim($uri, '/');
 		$uri = rawurldecode($uri);
+		$uri = trim($uri, '/');
+
+		$context = strtok($uri, '/');
+		$other = strtok('');
+
+		// Not in a context? it's probably a web page attachment
+		if (false === strpos($other, '/') && !array_key_exists($context, File::CONTEXTS_NAMES)) {
+			$uri = File::CONTEXT_WEB . '/' . $uri;
+		}
 
 		return self::get($uri);
 	}
