@@ -381,11 +381,45 @@ Note : ces sections héritent de `sql` (voir plus haut).
 
 | Paramètre | Fonction |
 | :- | :- |
-| `search` | Renseigner ce paramètre avec un terme à rechercher dans le texte ou le titre. Dans ce cas par défaut le tri des résultats se fait sur la pertinence, sauf si le paramètre `order` est spécifié. Dans ce cas une variable `$snippet` sera disponible à l'intérieur de la boucle, contenant les termes trouvés. |
+| `search` | Renseigner ce paramètre avec un terme à rechercher dans le texte ou le titre. Dans ce cas par défaut le tri des résultats se fait sur la pertinence, sauf si le paramètre `order` est spécifié. |
 | `future` | Renseigner ce paramètre à `false` pour que les articles dont la date est dans le futur n'apparaissent pas, `true` pour ne renvoyer QUE les articles dans le futur, et `null` (ou ne pas utiliser ce paramètre) pour que tous les articles, passés et futur, apparaissent. |
 | `uri` | Adresse unique de la page/catégorie à retourner. |
 | `id_parent` | Numéro unique (ID) de la catégorie parente. Utiliser `null` pour n'afficher que les articles ou catégories de la racine du site. |
-| `parent` | Adresse unique (URI) de la catégorie parente. Exemple pour renvoyer la liste des articles de la sous-catégorie "Événements" de la catégorie "Notre atelier" :  `evenements`. Utiliser `null` pour n'afficher que les articles ou catégories de la racine du site. |
+| `parent` | Adresse unique (URI) de la catégorie parente. Exemple pour renvoyer la liste des articles de la sous-catégorie "Événements" de la catégorie "Notre atelier" :  `evenements`. Utiliser `null` pour n'afficher que les articles ou catégories de la racine du site. Ajouter un point d'exclamation au début de la valeur pour inverser la condition. |
+
+Par exemple lister 5 articles de la catégorie "Actualité", qui ne sont pas dans le futur, triés du plus récent au plus ancien :
+
+```
+{{#articles future=false parent="actualite" order="published DESC" limit=5}}
+	<h3>{{$title}}</h3>
+{{/articles}}
+```
+
+Chaque élément de ces boucles contiendra les variables suivantes :
+
+| Nom de la variable | Description | Exemple |
+| :- | :- | :- |
+| `id` | Numéro unique de la page (ID) | `1312` |
+| `id_parent` | Numéro unique de la catégorie parente (ID) | `42` |
+| `type` | Type de page : `1` = catégorie, `2` = article | `2` |
+| `uri` | Adresse unique de la page | `bourse-aux-velos` |
+| `url` | Adresse HTTP de la page | `https://site.association.tld/bourse-aux-velos` |
+| `path` | Chemin complet de la page | `actualite/atelier/bourse-aux-velos` |
+| `parent` | Chemin de la catégorie parente | `actualite/atelier`|
+| `title` | Titre de la page | `Bourse aux vélos` |
+| `content` | Contenu brut de la page | `# Titre …` |
+| `html` | Rendu HTML du contenu de la page | `<div class="web-content"><h1>Titre</h1>…</div>` |
+| `has_attachments` | `true` si la page a des fichiers joints, `false` sinon | `true` |
+| `published` | Date de publication | `2023-01-01 01:01:01` |
+| `modified` | Date de modification | `2023-01-01 01:01:01` |
+
+Si une recherche a été effectuée, deux autres variables sont fournies :
+
+| Nom de la variable | Description | Exemple |
+| :- | :- | :- |
+| `snippet` | Extrait du contenu contenant le texte recherché (entouré de balises `<mark>`) | `L’ONU appelle la France à s’attaquer aux « profonds problèmes » de <mark>racisme</mark> au sein des forces de…` |
+| `url_highlight` | Adresse de la page, où le texte recherché sera mis en évidence | `https://.../onu-racisme#:~:text=racisme%20au%20sein` |
+
 
 ## files, documents, images <sup>(sql)</sup>
 

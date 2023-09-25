@@ -538,7 +538,7 @@ orange</code></pre>
 <tbody>
 <tr>
 <td style="text-align: left;"><code>search</code></td>
-<td style="text-align: left;">Renseigner ce paramètre avec un terme à rechercher dans le texte ou le titre. Dans ce cas par défaut le tri des résultats se fait sur la pertinence, sauf si le paramètre <code>order</code> est spécifié. Dans ce cas une variable <code>$snippet</code> sera disponible à l'intérieur de la boucle, contenant les termes trouvés.</td>
+<td style="text-align: left;">Renseigner ce paramètre avec un terme à rechercher dans le texte ou le titre. Dans ce cas par défaut le tri des résultats se fait sur la pertinence, sauf si le paramètre <code>order</code> est spécifié.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>future</code></td>
@@ -554,7 +554,110 @@ orange</code></pre>
 </tr>
 <tr>
 <td style="text-align: left;"><code>parent</code></td>
-<td style="text-align: left;">Adresse unique (URI) de la catégorie parente. Exemple pour renvoyer la liste des articles de la sous-catégorie "Événements" de la catégorie "Notre atelier" :  <code>evenements</code>. Utiliser <code>null</code> pour n'afficher que les articles ou catégories de la racine du site.</td>
+<td style="text-align: left;">Adresse unique (URI) de la catégorie parente. Exemple pour renvoyer la liste des articles de la sous-catégorie "Événements" de la catégorie "Notre atelier" :  <code>evenements</code>. Utiliser <code>null</code> pour n'afficher que les articles ou catégories de la racine du site. Ajouter un point d'exclamation au début de la valeur pour inverser la condition.</td>
+</tr>
+</tbody>
+</table>
+<p>Par exemple lister 5 articles de la catégorie "Actualité", qui ne sont pas dans le futur, triés du plus récent au plus ancien :</p>
+<pre><code>{{#articles future=false parent="actualite" order="published DESC" limit=5}}
+    &lt;h3&gt;{{$title}}&lt;/h3&gt;
+{{/articles}}</code></pre>
+<p>Chaque élément de ces boucles contiendra les variables suivantes :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Nom de la variable</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Exemple</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>id</code></td>
+<td style="text-align: left;">Numéro unique de la page (ID)</td>
+<td style="text-align: left;"><code>1312</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>id_parent</code></td>
+<td style="text-align: left;">Numéro unique de la catégorie parente (ID)</td>
+<td style="text-align: left;"><code>42</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>type</code></td>
+<td style="text-align: left;">Type de page : <code>1</code> = catégorie, <code>2</code> = article</td>
+<td style="text-align: left;"><code>2</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>uri</code></td>
+<td style="text-align: left;">Adresse unique de la page</td>
+<td style="text-align: left;"><code>bourse-aux-velos</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>url</code></td>
+<td style="text-align: left;">Adresse HTTP de la page</td>
+<td style="text-align: left;"><code>https://site.association.tld/bourse-aux-velos</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>path</code></td>
+<td style="text-align: left;">Chemin complet de la page</td>
+<td style="text-align: left;"><code>actualite/atelier/bourse-aux-velos</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>parent</code></td>
+<td style="text-align: left;">Chemin de la catégorie parente</td>
+<td style="text-align: left;"><code>actualite/atelier</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>title</code></td>
+<td style="text-align: left;">Titre de la page</td>
+<td style="text-align: left;"><code>Bourse aux vélos</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>content</code></td>
+<td style="text-align: left;">Contenu brut de la page</td>
+<td style="text-align: left;"><code># Titre …</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>html</code></td>
+<td style="text-align: left;">Rendu HTML du contenu de la page</td>
+<td style="text-align: left;"><code>&lt;div class="web-content"&gt;&lt;h1&gt;Titre&lt;/h1&gt;…&lt;/div&gt;</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>has_attachments</code></td>
+<td style="text-align: left;"><code>true</code> si la page a des fichiers joints, <code>false</code> sinon</td>
+<td style="text-align: left;"><code>true</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>published</code></td>
+<td style="text-align: left;">Date de publication</td>
+<td style="text-align: left;"><code>2023-01-01 01:01:01</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>modified</code></td>
+<td style="text-align: left;">Date de modification</td>
+<td style="text-align: left;"><code>2023-01-01 01:01:01</code></td>
+</tr>
+</tbody>
+</table>
+<p>Si une recherche a été effectuée, deux autres variables sont fournies :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Nom de la variable</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Exemple</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>snippet</code></td>
+<td style="text-align: left;">Extrait du contenu contenant le texte recherché (entouré de balises <code>&lt;mark&gt;</code>)</td>
+<td style="text-align: left;"><code>L’ONU appelle la France à s’attaquer aux « profonds problèmes » de &lt;mark&gt;racisme&lt;/mark&gt; au sein des forces de…</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>url_highlight</code></td>
+<td style="text-align: left;">Adresse de la page, où le texte recherché sera mis en évidence</td>
+<td style="text-align: left;"><code>https://.../onu-racisme#:~:text=racisme%20au%20sein</code></td>
 </tr>
 </tbody>
 </table>
