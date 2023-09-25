@@ -22,7 +22,7 @@ use Paheko\Entities\Email\Email;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
 
-use const Paheko\{ROOT, WWW_URL, ADMIN_URL, SECRET_KEY};
+use const Paheko\{ROOT, WWW_URL, BASE_URL, SECRET_KEY};
 
 class Functions
 {
@@ -397,7 +397,7 @@ class Functions
 
 		if ($external_count && preg_match_all('!(https?://.*?)(?=\s|$)!', $params['subject'] . ' ' . $params['body'], $match, PREG_PATTERN_ORDER)) {
 			foreach ($match[1] as $m) {
-				if (0 !== strpos($m, WWW_URL) && 0 !== strpos($m, ADMIN_URL)) {
+				if (0 !== strpos($m, WWW_URL) && 0 !== strpos($m, BASE_URL)) {
 					throw new Brindille_Exception(sprintf('Ligne %d: l\'envoi d\'email à une adresse externe interdit l\'utilisation d\'une adresse web autre que le site de l\'association : %s', $line, $m));
 				}
 			}
