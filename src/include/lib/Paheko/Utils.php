@@ -244,7 +244,15 @@ class Utils
 		}
 
 		$sign = $number < 0 ? '-' : '';
-		$number = abs((int) $number);
+
+		// Convert floats to string, and THEN to integer
+		// to avoid truncating numbers
+		// see https://fossil.kd2.org/paheko/tktview/a29df35328fdf783b98edb60f038f248c3af9b38
+		if (!is_int($number)) {
+			$number = (int)(string)$number;
+		}
+
+		$number = abs((int)(string) $number);
 
 		$decimals = substr('0' . $number, -2);
 		$number = (int) substr($number, 0, -2);
