@@ -544,7 +544,7 @@ class File extends Entity
 		// Move each file to the new target
 		if ($is_dir) {
 			foreach ($list as $file) {
-				$file->move($new_path . trim(substr($file->parent, strlen($old->path)), '/'));
+				$file->move($new_path . trim(substr($file->parent, strlen($old->path)), '/'), $check_session);
 			}
 		}
 
