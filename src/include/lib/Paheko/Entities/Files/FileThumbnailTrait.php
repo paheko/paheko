@@ -109,8 +109,14 @@ trait FileThumbnailTrait
 
 	public function thumb_url($size = null, bool $with_hash = true): ?string
 	{
+		$uri = $this->thumb_uri($size, $with_hash);
+
+		if (!$uri) {
+			return $uri;
+		}
+
 		$base = in_array($this->context(), [self::CONTEXT_WEB, self::CONTEXT_MODULES, self::CONTEXT_CONFIG]) ? WWW_URL : BASE_URL;
-		return $base . $this->thumb_uri($size, $with_hash);
+		return $base . $uri;
 	}
 
 	public function hasThumbnail(): bool
