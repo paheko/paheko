@@ -347,21 +347,23 @@ Un seul paramètre est possible :
 
 | Paramètre | Fonction |
 | :- | :- |
-| `path` (obligatoire) | Chemin (adresse unique) de la page parente |
+| `uri` (obligatoire) | Adresse unique de la page parente |
+| ou `id_page` (obligatoire) | Numéro unique (ID) de la page parente |
 
 Chaque itération renverra trois variables :
 
 | Variable | Contenu |
 | :- | :- |
+| `$id` | Numéro unique (ID) de la page ou catégorie |
 | `$title` | Titre de la page ou catégorie |
+| `$uri` | Nom unique de la page ou catégorie |
 | `$url` | Adresse HTTP de la page ou catégorie |
-| `$path` | Chemin (adresse unique) de la page ou catégorie |
 
 ### Exemple
 
 ```
 <ul>
-{{#breadcrumbs path=$page.path}}
+{{#breadcrumbs id_page=$page.id}}
 	<li>{{$title}}</li>
 {{/breadcrumbs}}
 </ul>
@@ -381,7 +383,9 @@ Note : ces sections héritent de `sql` (voir plus haut).
 | :- | :- |
 | `search` | Renseigner ce paramètre avec un terme à rechercher dans le texte ou le titre. Dans ce cas par défaut le tri des résultats se fait sur la pertinence, sauf si le paramètre `order` est spécifié. Dans ce cas une variable `$snippet` sera disponible à l'intérieur de la boucle, contenant les termes trouvés. |
 | `future` | Renseigner ce paramètre à `false` pour que les articles dont la date est dans le futur n'apparaissent pas, `true` pour ne renvoyer QUE les articles dans le futur, et `null` (ou ne pas utiliser ce paramètre) pour que tous les articles, passés et futur, apparaissent. |
-| `parent` | Chemin (path) de la catégorie parente. Exemple pour renvoyer la liste des articles de la sous-catégorie "Événements" de la catégorie "Notre atelier" :  `atelier-velo/evenements`. Utiliser `null` pour n'afficher que les articles ou catégories de la racine du site. |
+| `uri` | Adresse unique de la page/catégorie à retourner. |
+| `id_parent` | Numéro unique (ID) de la catégorie parente. Utiliser `null` pour n'afficher que les articles ou catégories de la racine du site. |
+| `parent` | Adresse unique (URI) de la catégorie parente. Exemple pour renvoyer la liste des articles de la sous-catégorie "Événements" de la catégorie "Notre atelier" :  `evenements`. Utiliser `null` pour n'afficher que les articles ou catégories de la racine du site. |
 
 ## files, documents, images <sup>(sql)</sup>
 
@@ -397,7 +401,8 @@ Note : seul les fichiers de la section site web sont accessibles, les fichiers d
 
 | Paramètre | Optionnel / obligatoire ? | Fonction |
 | :- | :- | :- |
-| `parent` | **obligatoire** | Chemin (adresse unique) de l'article ou catégorie parente dont ont veut lister les fichiers |
+| `parent` | **obligatoire** si `id_parent` n'est pas renseigné | Nom unique (URI) de l'article ou catégorie parente dont ont veut lister les fichiers |
+| `id_parent` | **obligatoire** si `parent` n'est pas renseigné | Numéro unique (ID) de l'article ou catégorie parente dont ont veut lister les fichiers |
 | `except_in_text` | *optionnel* | passer `true` à ce paramètre , et seuls les fichiers qui ne sont pas liés dans le texte de la page seront renvoyés |
 
 # Sections relatives aux modules

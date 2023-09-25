@@ -478,8 +478,12 @@ orange</code></pre>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><code>path</code> (obligatoire)</td>
-<td style="text-align: left;">Chemin (adresse unique) de la page parente</td>
+<td style="text-align: left;"><code>uri</code> (obligatoire)</td>
+<td style="text-align: left;">Adresse unique de la page parente</td>
+</tr>
+<tr>
+<td style="text-align: left;">ou <code>id_page</code> (obligatoire)</td>
+<td style="text-align: left;">Numéro unique (ID) de la page parente</td>
 </tr>
 </tbody>
 </table>
@@ -493,22 +497,26 @@ orange</code></pre>
 </thead>
 <tbody>
 <tr>
+<td style="text-align: left;"><code>$id</code></td>
+<td style="text-align: left;">Numéro unique (ID) de la page ou catégorie</td>
+</tr>
+<tr>
 <td style="text-align: left;"><code>$title</code></td>
 <td style="text-align: left;">Titre de la page ou catégorie</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>$uri</code></td>
+<td style="text-align: left;">Nom unique de la page ou catégorie</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>$url</code></td>
 <td style="text-align: left;">Adresse HTTP de la page ou catégorie</td>
 </tr>
-<tr>
-<td style="text-align: left;"><code>$path</code></td>
-<td style="text-align: left;">Chemin (adresse unique) de la page ou catégorie</td>
-</tr>
 </tbody>
 </table>
 <h3 id="exemple">Exemple</h3>
 <pre><code>&lt;ul&gt;
-{{#breadcrumbs path=$page.path}}
+{{#breadcrumbs id_page=$page.id}}
     &lt;li&gt;{{$title}}&lt;/li&gt;
 {{/breadcrumbs}}
 &lt;/ul&gt;</code></pre>
@@ -537,8 +545,16 @@ orange</code></pre>
 <td style="text-align: left;">Renseigner ce paramètre à <code>false</code> pour que les articles dont la date est dans le futur n'apparaissent pas, <code>true</code> pour ne renvoyer QUE les articles dans le futur, et <code>null</code> (ou ne pas utiliser ce paramètre) pour que tous les articles, passés et futur, apparaissent.</td>
 </tr>
 <tr>
+<td style="text-align: left;"><code>uri</code></td>
+<td style="text-align: left;">Adresse unique de la page/catégorie à retourner.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>id_parent</code></td>
+<td style="text-align: left;">Numéro unique (ID) de la catégorie parente. Utiliser <code>null</code> pour n'afficher que les articles ou catégories de la racine du site.</td>
+</tr>
+<tr>
 <td style="text-align: left;"><code>parent</code></td>
-<td style="text-align: left;">Chemin (path) de la catégorie parente. Exemple pour renvoyer la liste des articles de la sous-catégorie "Événements" de la catégorie "Notre atelier" :  <code>atelier-velo/evenements</code>. Utiliser <code>null</code> pour n'afficher que les articles ou catégories de la racine du site.</td>
+<td style="text-align: left;">Adresse unique (URI) de la catégorie parente. Exemple pour renvoyer la liste des articles de la sous-catégorie "Événements" de la catégorie "Notre atelier" :  <code>evenements</code>. Utiliser <code>null</code> pour n'afficher que les articles ou catégories de la racine du site.</td>
 </tr>
 </tbody>
 </table>
@@ -562,8 +578,13 @@ orange</code></pre>
 <tbody>
 <tr>
 <td style="text-align: left;"><code>parent</code></td>
-<td style="text-align: left;"><strong>obligatoire</strong></td>
-<td style="text-align: left;">Chemin (adresse unique) de l'article ou catégorie parente dont ont veut lister les fichiers</td>
+<td style="text-align: left;"><strong>obligatoire</strong> si <code>id_parent</code> n'est pas renseigné</td>
+<td style="text-align: left;">Nom unique (URI) de l'article ou catégorie parente dont ont veut lister les fichiers</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>id_parent</code></td>
+<td style="text-align: left;"><strong>obligatoire</strong> si <code>parent</code> n'est pas renseigné</td>
+<td style="text-align: left;">Numéro unique (ID) de l'article ou catégorie parente dont ont veut lister les fichiers</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>except_in_text</code></td>

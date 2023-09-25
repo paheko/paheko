@@ -905,11 +905,11 @@ class Sections
 		if (isset($params['id_page'])) {
 			$id = (int) $params['id_page'];
 		}
-		elseif (isset($params['path'])) {
-			$id = self::_getPageIdFromPath($params['path']);
+		elseif (isset($params['path']) || isset($params['uri'])) {
+			$id = self::_getPageIdFromPath($params['path'] ?? $params['uri']);
 		}
 		else {
-			throw new Brindille_Exception('"id_page" or "path" parameter is mandatory and is missing');
+			throw new Brindille_Exception('"id_page", "uri" or "path" parameter is mandatory and is missing');
 		}
 
 		if (!$id) {
