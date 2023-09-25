@@ -274,7 +274,7 @@ class UserTemplate extends \KD2\Brindille
 
 			$message = sprintf("Erreur dans '%s' :\n%s", $path, $e->getMessage());
 
-			if (0 === strpos($this->path ?? '', self::DIST_ROOT)) {
+			if (!$this->file && !$this->code) {
 				// We want errors in shipped code to be reported, it is not normal
 				throw new \RuntimeException($message, 0, $e);
 			}
