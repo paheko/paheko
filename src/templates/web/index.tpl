@@ -37,7 +37,7 @@
 			{/foreach}
 		</ul>
 		{if $page}
-			<small>{linkbutton href="?id=%d"|args:$page.id_parent shape="left" label="Retour à la catégorie parent"}</small>
+			<small>{linkbutton href="?id=%d"|args:$page.id_parent shape="left" label="Retour à la catégorie parente"}</small>
 		{/if}
 	</nav>
 {/if}
