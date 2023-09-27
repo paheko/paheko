@@ -553,6 +553,10 @@ class Module extends Entity
 			$type = $this->getFileTypeFromExtension($path);
 			$real_path = $this->distPath($path);
 
+			if (!is_file($real_path)) {
+				throw new UserException('Invalid path', 404);
+			}
+
 			if ($this->web) {
 				// Create symlink to static file
 				Cache::link($path, $real_path);
