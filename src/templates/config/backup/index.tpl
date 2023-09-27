@@ -14,7 +14,7 @@
 <div class="alert block">
 	<p>Les sauvegardes automatiques sont désactivées. Il est recommandé de les activer pour pouvoir revenir en arrière en cas de problème majeur.</p>
 	<p>Attention&nbsp;: cela ne dispense pas de réaliser des sauvegardes régulières sur votre ordinateur.</p>
-	<p>{linkbutton shape="settings" href="config.php" label="Configurer les sauvegardes automatiques"}</p>
+	<p>{linkbutton shape="settings" href="auto.php" label="Configurer les sauvegardes automatiques"}</p>
 </div>
 {/if}
 
