@@ -23,7 +23,8 @@
 	<fieldset>
 		<legend>Champs spéciaux des fiches de membres</legend>
 		<dl>
-			{input type="select" name="login_field" default=$login_field options=$login_fields_list required=true label="Champ utilisé comme identifiant de connexion" help="Ce champ des fiches membres sera utilisé comme identifiant pour se connecter à l'administration de l'association. Ce champ doit être unique : il ne peut pas y avoir deux membres ayant la même valeur dans ce champ."}
+			{input type="select" name="login_field" default=$login_field options=$login_fields_list required=true label="Champ utilisé comme identifiant de connexion" help="Ce champ des fiches membres sera utilisé comme identifiant pour se connecter à l'administration de l'association."}
+			<dd class="help">Ce champ doit être unique : il ne peut pas y avoir deux membres ayant la même valeur dans ce champ.</dd>
 			{input type="list" name="name_fields" required=true label="Champs utilisés pour définir l'identité des membres" help="Ces champs des fiches membres seront utilisés comme identité (nom) du membre dans les emails, les fiches, les pages, etc." target="!config/users/field_selector.php" multiple=true default=$name_fields}
 			<dd class="help">Il est possible d'utiliser plusieurs champs, par exemple en choisissant les champs <em>Nom</em> et <em>Prénom</em>, l'identité des membres apparaîtra comme <tt>Nom Prénom</tt>.<br />Dans ce cas l'ordre des champs dans l'identité est déterminé selon l'ordre des champs dans la fiche membre.</dd>
 		</dl>
