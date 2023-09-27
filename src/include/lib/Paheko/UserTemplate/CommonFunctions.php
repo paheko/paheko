@@ -411,7 +411,7 @@ class CommonFunctions
 
 	static public function button(array $params): string
 	{
-		$label = isset($params['label']) ? htmlspecialchars($params['label']) : '';
+		$label = isset($params['label']) ? htmlspecialchars((string)$params['label']) : '';
 		unset($params['label']);
 
 		self::setIconAttribute($params);
@@ -447,7 +447,7 @@ class CommonFunctions
 		$params = array_filter($params);
 
 		array_walk($params, function (&$v, $k) {
-			$v = sprintf('%s="%s"', $k, htmlspecialchars($v));
+			$v = sprintf('%s="%s"', $k, htmlspecialchars((string)$v));
 		});
 
 		$params = implode(' ', $params);
