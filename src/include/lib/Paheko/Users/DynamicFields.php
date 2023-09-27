@@ -978,7 +978,7 @@ class DynamicFields
 		return (bool) $db->firstColumn($sql);
 	}
 
-	public function changeLoginField(string $new_field): void
+	public function changeLoginField(string $new_field, ?Session $session = null): void
 	{
 		$old_field = self::getLoginField();
 
@@ -994,6 +994,14 @@ class DynamicFields
 
 		if (!in_array($type, DynamicField::LOGIN_FIELD_TYPES)) {
 			throw new \InvalidArgumentException('This field cannot be used as a login field.');
+		}
+
+		if ($session) {
+			$user = $session->getUser();
+
+			if (empty($user->$new_field)) {
+				throw new UserException(sprintf('Le champ "%s" ne peut être utilisé comme champ de connexion car il est vide dans votre fiche de membre. Sinon vous ne pourriez plus vous connecter.', $this->_fields[$new_field]->label));
+			}
 		}
 
 		$db = DB::getInstance();

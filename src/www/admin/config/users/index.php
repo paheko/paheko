@@ -3,6 +3,7 @@ namespace Paheko;
 
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Categories;
+use Paheko\Users\Session;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -15,7 +16,7 @@ $form->runIf('save', function() use ($df, $config) {
 	$config->save();
 
 	if (!empty($_POST['login_field'])) {
-		$df->changeLoginField($_POST['login_field']);
+		$df->changeLoginField($_POST['login_field'], Session::getInstance());
 	}
 
 	if (!empty($_POST['name_fields'])) {
