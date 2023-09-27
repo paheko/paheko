@@ -62,7 +62,7 @@ trait FileVersionsTrait
 		}
 
 		if ($ts = $this->getModifiedProperty('modified')) {
-			$ts = new \DateTime($ts);
+			$ts = clone $ts;
 		}
 		else {
 			$ts = $this->modified;
