@@ -509,6 +509,10 @@ class Module extends Entity
 
 	public function serve(string $path, bool $has_local_file, array $params = []): void
 	{
+		if (substr(Utils::basename($path), 0, 1) === '.') {
+			throw new UserException('Unknown path', 404);
+		}
+
 		if (UserTemplate::isTemplate($path)) {
 			// Error if path is not valid
 			// we allow any path for static files, but not for skeletons
