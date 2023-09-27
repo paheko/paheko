@@ -4,8 +4,8 @@
 
 	<nav class="breadcrumbs">
 		<ul>
-		{foreach from=$breadcrumbs item="title" key="id"}
-			<li class="{if $id == $current_cat_id}current{/if}">{button label=$title type="submit" name="current" value=$id}</li>
+		{foreach from=$breadcrumbs item="page"}
+			<li class="{if $page.id == $current_cat_id}current{/if}">{button label=$page.title type="submit" name="current" value=$page.id}</li>
 		{/foreach}
 		</ul>
 	</nav>
