@@ -511,6 +511,17 @@
 
 		// Set custom error message if required list is not selected
 		document.querySelectorAll('form').forEach((form) => {
+			let elements = form.elements;
+
+			// Make sure hidden or disabled form elements are not required
+			for (var j = 0; j < elements.length; j++) {
+				var element = elements[j];
+
+				if (element.disabled || !element.offsetParent) {
+					element.required = false;
+				}
+			}
+
 			form.addEventListener('submit', (e) => {
 				let inputs = form.querySelectorAll('.input-list > button[required]');
 
