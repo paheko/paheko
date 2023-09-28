@@ -69,10 +69,18 @@
 		for (var i = 0; i < elements.length; i++) {
 			elements[i].classList.toggle('hidden', visibility ? false : true);
 
+			elements[i].querySelectorAll('[data-required]').forEach(e => {
+				e.required = parseInt(e.dataset.required, 10);
+			});
+
 			// Make sure hidden elements are not really required
 			// Avoid Chrome bug "An invalid form control with name='' is not focusable."
 			elements[i].querySelectorAll('input[required], textarea[required], select[required], button[required]').forEach((e) => {
-				e.disabled = !visibility ? true : (e.getAttribute('disabled') ? true : false);
+				if (typeof e.dataset.disabled === 'undefined') {
+					e.dataset.disabled = e.hasAttribute('disabled') ? 1 : 0;
+				}
+
+				e.disabled = !visibility ? true : parseInt(e.dataset.disabled, 10);
 			});
 		}
 
@@ -518,21 +526,27 @@
 				var element = elements[j];
 
 				if (element.disabled || !element.offsetParent) {
+					element.dataset.required = element.hasAttribute('required') ? 1 : 0;
 					element.required = false;
 				}
 			}
 
 			form.addEventListener('submit', (e) => {
+				let elements = form.elements;
+
+				// Make sure hidden or disabled form elements are not required
+				for (var j = 0; j < elements.length; j++) {
+					var element = elements[j];
+
+					if (element.disabled || !element.offsetParent) {
+						element.required = false;
+					}
+				}
+
 				let inputs = form.querySelectorAll('.input-list > button[required]');
 
 				for (var k = 0; k < inputs.length; k++) {
 					var i2 = inputs[k];
-
-					// Element is hidden or disabled
-					if (!i2.offsetParent || i2.disabled) {
-						i2.required = false;
-						continue;
-					}
 
 					let v = i2.parentNode.querySelector('input[type="hidden"]:nth-child(1)');
 
