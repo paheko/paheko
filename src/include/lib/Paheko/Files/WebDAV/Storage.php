@@ -15,7 +15,7 @@ use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
 use Paheko\Web\Router;
 
-use const Paheko\{FILE_STORAGE_BACKEND, SECRET_KEY, WWW_URL};
+use const Paheko\{FILE_STORAGE_BACKEND, SECRET_KEY, BASE_URL};
 
 class Storage extends AbstractStorage
 {
