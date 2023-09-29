@@ -525,7 +525,7 @@
 			for (var j = 0; j < elements.length; j++) {
 				var element = elements[j];
 
-				if (element.disabled || !element.offsetParent) {
+				if (element.required && (element.disabled || !element.offsetParent)) {
 					element.dataset.required = element.hasAttribute('required') ? 1 : 0;
 					element.required = false;
 				}
@@ -548,6 +548,11 @@
 				for (var k = 0; k < inputs.length; k++) {
 					var i2 = inputs[k];
 
+					// Ignore hidden / disabled form elements
+					if (i2.disabled || !i2.offsetParent) {
+						continue;
+					}
+
 					let v = i2.parentNode.querySelector('input[type="hidden"]:nth-child(1)');
 
 					if (!v || !v.value) {
@@ -559,6 +564,8 @@
 						return false;
 					}
 				}
+
+				return true;
 			});
 		});
 
