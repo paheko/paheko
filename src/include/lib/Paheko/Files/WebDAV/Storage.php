@@ -224,7 +224,7 @@ class Storage extends AbstractStorage
 			case WOPI::PROP_FILE_URL:
 				$id = gzcompress($uri);
 				$id = WOPI::base64_encode_url_safe($id);
-				return WWW_URL . 'wopi/files/' . $id;
+				return BASE_URL . 'wopi/files/' . $id;
 			default:
 				break;
 		}
