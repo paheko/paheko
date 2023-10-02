@@ -348,14 +348,59 @@ orange</code></pre>
 <h2 id="users">users</h2>
 <p>Liste les membres.</p>
 <p>Paramètres possibles :</p>
-<p>| <code>id</code> | optionnel | Identifiant unique du membre, ou tableau contenant une liste d'identifiants. |<br />
-| <code>search_name</code> | optionnel | Ne lister que les membres dont le nom correspond au texte passé en paramètre. |<br />
-| <code>id_parent</code> | optionnel | Ne lister que les membres rattachés à l'identifiant unique du membre responsable indiqué. |</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Optionnel / obligatoire ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>id</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Identifiant unique du membre, ou tableau contenant une liste d'identifiants.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>search_name</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Ne lister que les membres dont le nom correspond au texte passé en paramètre.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>id_parent</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Ne lister que les membres rattachés à l'identifiant unique du membre responsable indiqué.</td>
+</tr>
+</tbody>
+</table>
 <p>Chaque itération renverra la fiche du membre, ainsi que ces variables :</p>
-<p>| <code>$id</code> | Identifiant unique du membre |<br />
-| <code>$_name</code> | Nom du membre, tel que défini dans la configuration |<br />
-| <code>$_login</code> | Identifiant de connexion du membre, tel que défini dans la configuration |<br />
-| <code>$_number</code> | Numéro du membre, tel que défini dans la configuration |</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Variable</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>$id</code></td>
+<td style="text-align: left;">Identifiant unique du membre</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>$_name</code></td>
+<td style="text-align: left;">Nom du membre, tel que défini dans la configuration</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>$_login</code></td>
+<td style="text-align: left;">Identifiant de connexion du membre, tel que défini dans la configuration</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>$_number</code></td>
+<td style="text-align: left;">Numéro du membre, tel que défini dans la configuration</td>
+</tr>
+</tbody>
+</table>
 <h2 id="subscriptions">subscriptions</h2>
 <p>Liste les inscriptions à une ou des activités.</p>
 <p>Paramètres possibles :</p>
