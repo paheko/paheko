@@ -794,11 +794,11 @@ orange</code></pre>
 {{:assign var="membres." value="Valérie Masson-Delmotte"}}
 {{:save membres=$membres}}</code></pre>
 <p>Nous pouvons utiliser <code>each</code> pour faire une liste :</p>
-<pre><code>{{:load each="membres"}}
+<pre><code>{{#load each="membres"}}
 - {{$value}}
 {{/load}}</code></pre>
 <p>Ou pour récupérer les documents qui correspondent à un critère :</p>
-<pre><code>{{:load each="membres" where="value = 'Greta Thunberg'"}}
+<pre><code>{{#load each="membres" where="value = 'Greta Thunberg'"}}
 Le document n°{{$id}} est celui qui parle de Greta.
 {{/load}}</code></pre>
 <h2 id="list">list</h2>

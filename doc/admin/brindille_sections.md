@@ -647,7 +647,7 @@ Par exemple nous pouvons avoir un élément `membres` dans notre document JSON q
 Nous pouvons utiliser `each` pour faire une liste :
 
 ```
-{{:load each="membres"}}
+{{#load each="membres"}}
 - {{$value}}
 {{/load}}
 ```
@@ -655,7 +655,7 @@ Nous pouvons utiliser `each` pour faire une liste :
 Ou pour récupérer les documents qui correspondent à un critère :
 
 ```
-{{:load each="membres" where="value = 'Greta Thunberg'"}}
+{{#load each="membres" where="value = 'Greta Thunberg'"}}
 Le document n°{{$id}} est celui qui parle de Greta.
 {{/load}}
 ```
