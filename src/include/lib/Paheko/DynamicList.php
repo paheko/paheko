@@ -430,7 +430,7 @@ class DynamicList implements \Countable
 			$this->page = (int) $page;
 		}
 
-		if ($nb = Session::getPreference('page_size')) {
+		if ($this->per_page !== null && ($nb = Session::getPreference('page_size'))) {
 			$this->setPageSize((int) $nb);
 		}
 	}
