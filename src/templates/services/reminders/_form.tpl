@@ -23,40 +23,63 @@
 			{input type="textarea" name="body" required=1 source=$reminder label="Texte du message envoyé" cols="90" rows="15"}
 			<dd class="help">
 				Il est possible d'utiliser les mots-clés suivant dans le corps du mail, ils seront remplacés lors de l'envoi&nbsp;:
+				{literal}
 				<table class="list auto">
 					<tr>
-						<th>#IDENTITE</th>
+						<th>{{$label}}</th>
+						<td>Nom de l'activité concernée par le rappel</td>
+					</tr>
+					<tr>
+						<th>{{$fee_label}}</th>
+						<td>Nom du tarif utilisé lors de la dernière inscription du membre à cette activité</td>
+					</tr>
+					<tr>
+						<th>{{$id_user}}</th>
+						<td>ID du membre concerné par le rappel</td>
+					</tr>
+					<tr>
+						<th>{{$identity}}</th>
 						<td>Nom du membre</td>
 					</tr>
 					<tr>
-						<th>#NB_JOURS</th>
+						<th>{{$email}}</th>
+						<td>Adresse e-mail utilisée pour l'envoi du rappel au membre</td>
+					</tr>
+					<tr>
+						<th>{{$nb_days}}</th>
 						<td>Nombre de jours restants avant (ou après) expiration de l'inscription</td>
 					</tr>
 					<tr>
-						<th>#DATE_RAPPEL</th>
+						<th>{{$reminder_date}}</th>
 						<td>Date d'envoi du rappel</td>
 					</tr>
 					<tr>
-						<th>#DATE_EXPIRATION</th>
+						<th>{{$expiry_date}}</th>
 						<td>Date d'expiration de l'inscription</td>
 					</tr>
 					<tr>
-						<th>#DELAI</th>
+						<th>{{$user_amount}}</th>
+						<td>Montant dû par le membre pour se réinscrire à cette activité</td>
+					</tr>
+					<tr>
+						<th>{{$delay}}</th>
 						<td>Nombre de jours défini dans le rappel</td>
 					</tr>
 					<tr>
-						<th>#NOM_ASSO</th>
+						<th>{{$org_name}}</th>
 						<td>Nom de l'association</td>
 					</tr>
 					<tr>
-						<th>#ADRESSE_ASSO</th>
+						<th>{{$org_address}}</th>
 						<td>Adresse de l'association</td>
 					</tr>
 					<tr>
-						<th>#SITE_ASSO</th>
+						<th>{{$org_web}}</th>
 						<td>Adresse du site web de l'association</td>
 					</tr>
 				</table>
+				<p class="help">Note : il est aussi possible d'utiliser les champs de la fiche membre, par exemple <tt>{{$nom}}</tt> pour le nom du membre.</p>
+				{/literal}
 			</dd>
 		</dl>
 	</fieldset>

@@ -17,9 +17,8 @@ $form->runIf('save', function () use ($reminder) {
 	$reminder->save();
 }, $csrf_key, '!services/reminders/');
 
-$reminder->subject = 'Échéance de cotisation';
-$reminder->body = "Bonjour #IDENTITE,\n\nVotre cotisation arrive à échéance dans #NB_JOURS jours.\n\n"
-	.   "Merci de nous contacter pour renouveler votre cotisation.\n\nCordialement.";
+$reminder->subject = $reminder::DEFAULT_SUBJECT;
+$reminder->body = $reminder::DEFAULT_BODY;
 
 $tpl->assign(compact('csrf_key', 'reminder', 'services_list'));
 

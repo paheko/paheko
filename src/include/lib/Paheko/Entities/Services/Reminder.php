@@ -22,6 +22,11 @@ class Reminder extends Entity
 	protected string $subject;
 	protected string $body;
 
+	const DEFAULT_SUBJECT = 'Votre inscription arrive à expiration';
+	const DEFAULT_BODY = 'Bonjour {{$identity}},' . "\n\n" .
+		'Votre inscription pour « {{$label}} » arrive à échéance dans {{$nb_days}} jours.' . "\n\n" .
+		'Merci de nous contacter pour renouveler votre inscription.' . "\n\nCordialement.";
+
 	public function selfCheck(): void
 	{
 		parent::selfCheck();

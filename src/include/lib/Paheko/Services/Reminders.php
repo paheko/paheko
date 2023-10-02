@@ -10,6 +10,8 @@ use Paheko\Utils;
 use Paheko\Users\DynamicFields;
 use Paheko\Email\Emails;
 use Paheko\Entities\Services\Reminder;
+use Paheko\UserTemplate\CommonModifiers;
+use Paheko\UserTemplate\UserTemplate;
 use KD2\DB\EntityManager;
 
 use const Paheko\WWW_URL;
@@ -105,19 +107,40 @@ class Reminders
 	 */
 	static public function sendAuto(\stdClass $reminder)
 	{
-		$replace = [
-			'identite'        => $reminder->identity,
-			'date_rappel'     => Utils::date_fr($reminder->reminder_date, 'd/m/Y'),
-			'date_expiration' => Utils::date_fr($reminder->expiry_date, 'd/m/Y'),
-			'nb_jours'        => $reminder->nb_days,
-			'delai'           => $reminder->delay,
-		];
+		$body = UserTemplate::createFromUserString($reminder->body);
+		$body ??= $reminder->body;
 
-		$reminder->subject = self::replaceTagsInContent($reminder->subject, $replace);
-		$reminder->body = self::replaceTagsInContent($reminder->body, $replace);
+		if (is_string($body)) {
+			$replace = [
+				'identite'        => $reminder->identity,
+				'date_rappel'     => Utils::date_fr($reminder->reminder_date, 'd/m/Y'),
+				'date_expiration' => Utils::date_fr($reminder->expiry_date, 'd/m/Y'),
+				'nb_jours'        => $reminder->nb_days,
+				'delai'           => $reminder->delay,
+			];
 
-		// Envoi du mail
-		Emails::queue(Emails::CONTEXT_PRIVATE, [$reminder->email => ['data' => (array) $reminder]], null, $reminder->subject, $reminder->body);
+			$reminder->subject = self::replaceTagsInContent($reminder->subject, $replace);
+			$reminder->body = self::replaceTagsInContent($reminder->body, $replace);
+		}
+
+		$data = (array) $reminder;
+		$data['user_amount'] = CommonModifiers::money_currency($data['user_amount'] ?? 0, true, false, false);
+		$data['reminder_date'] = CommonModifiers::date_short($data['reminder_date']);
+		$data['expiry_date'] = CommonModifiers::date_short($data['expiry_date']);
+		$data = ['data' => $data];
+
+		foreach (DynamicFields::getEmailFields() as $email_field) {
+			$email = $reminder->$email_field ?? null;
+
+			if (empty($email)) {
+				continue;
+			}
+
+			$data['data']['email'] = $email;
+
+			// Envoi du mail
+			Emails::queue(Emails::CONTEXT_PRIVATE, [$email => $data], null, $reminder->subject, $body);
+		}
 
 		$db = DB::getInstance();
 		$db->insert('services_reminders_sent', [
@@ -136,23 +159,26 @@ class Reminders
 	 * Envoi des rappels automatiques par e-mail
 	 * @return boolean TRUE en cas de succès
 	 */
-	static public function sendPending()
+	static public function sendPending(): void
 	{
 		$db = DB::getInstance();
 
 		$sql = 'SELECT
+			u.*, %s AS identity,
 			date(su.expiry_date, sr.delay || \' days\') AS reminder_date,
 			ABS(julianday(date()) - julianday(expiry_date)) AS nb_days,
 			MAX(sr.delay) AS delay, sr.subject, sr.body, s.label, s.description,
 			su.expiry_date, sr.id AS id_reminder, su.id_service, su.id_user,
-			u.%s AS email, %s AS identity
+			sf.label AS fee_label, sf.amount, sf.formula
 			FROM services_reminders sr
 			INNER JOIN services s ON s.id = sr.id_service
 			-- Select latest subscription to a service (MAX) only
-			INNER JOIN (SELECT MAX(expiry_date) AS expiry_date, id_user, id_service FROM services_users GROUP BY id_user, id_service) AS su ON s.id = su.id_service
+			INNER JOIN (SELECT MAX(expiry_date) AS expiry_date, id_user, id_service, id_fee FROM services_users GROUP BY id_user, id_service) AS su ON s.id = su.id_service
+			-- Select fee
+			LEFT JOIN services_fees sf ON sf.id = su.id_fee
 			-- Join with users, but not ones part of a hidden category
 			INNER JOIN users u ON su.id_user = u.id
-				AND u.%1$s IS NOT NULL
+				AND (%s)
 				AND (u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1))
 			-- Join with sent reminders to exclude users that already have received this reminder
 			LEFT JOIN (SELECT id, MAX(due_date) AS due_date, id_user, id_reminder FROM services_reminders_sent GROUP BY id_user, id_reminder) AS srs ON su.id_user = srs.id_user AND srs.id_reminder = sr.id
@@ -162,13 +188,19 @@ class Reminders
 			GROUP BY su.id_user, sr.id_service
 			ORDER BY su.id_user;';
 
-		$sql = sprintf($sql, DynamicFields::getFirstEmailField(), DynamicFields::getNameFieldsSQL('u'));
+		$emails = DynamicFields::getEmailFields();
+		$emails = array_map(fn($e) => sprintf('u.%s IS NOT NULL', $db->quoteIdentifier($e)), $emails);
+		$emails = implode(' OR ', $emails);
 
-		foreach ($db->iterate($sql) as $row)
-		{
+		$sql = sprintf($sql, DynamicFields::getNameFieldsSQL('u'), $emails);
+
+		$db->begin();
+
+		foreach ($db->iterate($sql) as $row) {
+			$row = Fees::addUserAmountToObject($row, $row->id_user);
 			self::sendAuto($row);
 		}
 
-		return true;
+		$db->commit();
 	}
 }

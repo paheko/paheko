@@ -45,6 +45,30 @@ class UserTemplate extends \KD2\Brindille
 
 	static protected $root_variables;
 
+	static public function createFromUserString(string $content): ?self
+	{
+		static $templates = [];
+
+		// Create UserTemplate
+		if (false === strpos($content, '{{')) {
+			return null;
+		}
+
+		$hash = md5($content);
+
+		if (isset($templates[$hash])) {
+			return $templates[$hash];
+		}
+
+		$tpl = new UserTemplate(null);
+		$tpl->setCode($content);
+		$tpl->toggleSafeMode(true);
+		$tpl->setEscapeDefault(null);
+		$templates[$hash] = $tpl;
+
+		return $tpl;
+	}
+
 	static public function getRootVariables()
 	{
 		if (null !== self::$root_variables) {

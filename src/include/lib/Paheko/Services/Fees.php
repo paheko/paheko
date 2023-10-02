@@ -58,18 +58,37 @@ class Fees
 				continue;
 			}
 
-			try {
-				$sql = sprintf('SELECT (%s) FROM users WHERE id = %d;', $row->formula, $user_id);
-				$row->user_amount = $db->firstColumn($sql);
-			}
-			catch (DB_Exception $e) {
-				$row->label .= sprintf(' (**FORMULE DE CALCUL INVALIDE: %s**)', $e->getMessage());
-				$row->description .= "\n\n**MERCI DE CORRIGER LA FORMULE**";
+			$row = self::addUserAmountToObject($row, $user_id);
+
+			if (!empty($row->user_amount_error)) {
 				$row->user_amount = -1;
+				$row->label .= sprintf(' (**FORMULE DE CALCUL INVALIDE: %s**)', $row->user_amount_error);
+				$row->description .= "\n\n**MERCI DE CORRIGER LA FORMULE**";
 			}
 		}
 
 		return $result;
+	}
+
+	static public function addUserAmountToObject(\stdClass $object, int $user_id): \stdClass
+	{
+		if (!empty($object->amount)) {
+			$object->user_amount = $object->amount;
+		}
+
+		if (empty($object->formula)) {
+			return $object;
+		}
+
+		try {
+			$sql = sprintf('SELECT (%s) FROM users WHERE id = %d;', $object->formula, $user_id);
+			$object->user_amount = DB::getInstance()->firstColumn($sql);
+		}
+		catch (DB_Exception $e) {
+			$object->user_amount_error = $e->getMessage();
+		}
+
+		return $object;
 	}
 
 	public function listWithStats()

@@ -237,15 +237,7 @@ class Mailing extends Entity
 	 */
 	public function getBody()
 	{
-		if (false !== strpos($this->body, '{{')) {
-			$tpl = new UserTemplate(null);
-			$tpl->setCode($this->body);
-			$tpl->toggleSafeMode(true);
-			$tpl->setEscapeDefault(null);
-			return $tpl;
-		}
-
-		return $this->body;
+		return UserTemplate::createFromUserString($this->body) ?? $this->body;
 	}
 
 	public function getPreview(string $address = null): string
