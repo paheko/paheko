@@ -216,11 +216,13 @@ class DynamicField extends Entity
 
 		if ($this->type == 'file') {
 			// Delete all linked files
-			$glob = sprintf('%s/*/%s/', File::CONTEXT_USER, $this->name);
+			$glob = sprintf('%s/*/%s', File::CONTEXT_USER, $this->name);
 
 			foreach (Files::glob($glob) as $file) {
 				$file->delete();
 			}
+
+			DB::getInstance()->preparedQuery('DELETE FROM users_files WHERE field = ?;', $this->name);
 		}
 
 		return parent::delete();
