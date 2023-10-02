@@ -65,7 +65,7 @@
 		</p>
 		{/if}
 	{else}
-		{if !$plugin.enabled && $plugin.installed}
+		{if !$plugin.enabled && $plugin->exists()}
 		<p class="actions">
 			{linkbutton label="Supprimer les données" href="delete.php?plugin=%s"|args:$plugin.name shape="delete" target="_dialog"}
 		</p>
