@@ -16,6 +16,7 @@ use Paheko\Entities\Files\File;
 use Paheko\Entities\Web\Page;
 
 use KD2\DB\EntityManager as EM;
+use KD2\DB\DB_Exception;
 use KD2\ZipWriter;
 
 use const Paheko\{FILE_STORAGE_BACKEND, FILE_STORAGE_QUOTA, FILE_STORAGE_CONFIG, FILE_VERSIONING_POLICY};
@@ -246,14 +247,23 @@ class Files
 
 		$out = [];
 
-		$db = DB::getInstance();
-		$db->begin();
+		try {
+			$db = DB::getInstance();
+			$db->begin();
 
-		foreach ($db->iterate($query, ...$params) as $row) {
-			$out[] = $row;
+			foreach ($db->iterate($query, ...$params) as $row) {
+				$out[] = $row;
+			}
+
+			$db->commit();
 		}
+		catch (DB_Exception $e) {
+			if (strpos($e->getMessage(), 'malformed MATCH') !== false) {
+				throw new UserException('Motif de recherche invalide', 0, $e);
+			}
 
-		$db->commit();
+			throw $e;
+		}
 
 		return $out;
 	}
