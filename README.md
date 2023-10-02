@@ -10,7 +10,7 @@ Il est possible d'essayer et utiliser gratuitement Garradin sur la plateforme [P
 
 Le code sur Github n'est qu'un miroir, le développement principal se passe sur Fossil, mais les PR sont quand même possibles.
 
-Pour les PR, sauf si c'est une correction de bug, le mieux est de discuter de la modification sur dev(arobase)paheko.cloud avant de proposer la PR, pour qu'elle ait plus de chances d'êter acceptée.
+Pour les PR, sauf si c'est une correction de bug, le mieux est de discuter de la modification sur dev(arobase)paheko.cloud avant de proposer la PR, pour qu'elle ait plus de chances d'être acceptée.
 
 ## Licence
 
