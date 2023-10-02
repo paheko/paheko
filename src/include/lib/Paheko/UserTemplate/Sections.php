@@ -1258,16 +1258,12 @@ class Sections
 
 			foreach ($params as $key => $value) {
 				if (substr($key, 0, 1) == ':') {
+					if (is_object($value) || is_array($value)) {
+						throw new Brindille_Exception(sprintf("à la ligne %d : Section 'sql': le paramètre '%s' est un tableau.", $line, $key));
+					}
+
 					$args[$key] = $value;
 				}
-			}
-
-			foreach ($args as $key => $value) {
-				if (is_object($value) || is_array($value)) {
-					throw new Brindille_Exception(sprintf("à la ligne %d : Section 'sql': le paramètre '%s' est un tableau.", $line, $key));
-				}
-
-				$statement->bindValue($key, $value, $db->getArgType($value));
 			}
 
 			if (!empty($params['debug'])) {
@@ -1278,7 +1274,7 @@ class Sections
 				self::_debugExplain($statement->getSQL(true));
 			}
 
-			$result = $statement->execute();
+			$result = $db->execute($statement, $args);
 			$db->setReadOnly(false);
 		}
 		catch (DB_Exception $e) {
