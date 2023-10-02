@@ -486,6 +486,10 @@ class Sections
 					$label = null;
 				}
 
+				if ($select === '*') {
+					throw new Brindille_Exception(sprintf('Line %d: "*" cannot be used in "select" parameter', $line));
+				}
+
 				$select = self::_moduleReplaceJSONExtract($select);
 
 				$columns['col' . ($i + 1)] = compact('label', 'select');
