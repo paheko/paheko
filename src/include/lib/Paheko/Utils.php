@@ -457,13 +457,8 @@ class Utils
 	static public function getCountryName($code)
 	{
 		$code = strtoupper($code);
-
 		$list = self::getCountryList();
-
-		if (!isset($list[$code]))
-			return false;
-
-		return $list[$code];
+		return $list[$code] ?? null;
 	}
 
 	static public function transliterateToAscii($str, $charset='UTF-8')
