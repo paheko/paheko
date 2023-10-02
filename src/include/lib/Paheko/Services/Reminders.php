@@ -72,56 +72,12 @@ class Reminders
 	}
 
 	/**
-	 * Remplacer les tags dans le contenu/sujet du mail
-	 * @param  string $content Chaîne à traiter
-	 * @param  array  $data    Données supplémentaires à utiliser comme tags (tableau associatif)
-	 * @return string          $content dont les tags ont été remplacés par le contenu correct
-	 */
-	static public function replaceTagsInContent(string $content, ?array $data = null)
-	{
-		$config = Config::getInstance();
-		$tags = [
-			'#NOM_ASSO'		=>	$config->get('org_name'),
-			'#ADRESSE_ASSO'	=>	$config->get('org_address'),
-			'#EMAIL_ASSO'	=>	$config->get('org_email'),
-			'#SITE_ASSO'	=>	$config->site_disabled ? $config->org_web : WWW_URL,
-			'#URL_RACINE'	=>	WWW_URL,
-			'#URL_SITE'		=>	WWW_URL,
-			'#URL_ADMIN'	=>	ADMIN_URL,
-		];
-
-		if (!empty($data) && is_array($data))
-		{
-			foreach ($data as $key=>$value)
-			{
-				$key = '#' . strtoupper($key);
-				$tags[$key] = $value;
-			}
-		}
-
-		return strtr($content, $tags);
-	}
-
-	/**
 	 * Envoi de mail pour rappel automatisé
 	 */
 	static public function sendAuto(\stdClass $reminder)
 	{
 		$body = UserTemplate::createFromUserString($reminder->body);
 		$body ??= $reminder->body;
-
-		if (is_string($body)) {
-			$replace = [
-				'identite'        => $reminder->identity,
-				'date_rappel'     => Utils::date_fr($reminder->reminder_date, 'd/m/Y'),
-				'date_expiration' => Utils::date_fr($reminder->expiry_date, 'd/m/Y'),
-				'nb_jours'        => $reminder->nb_days,
-				'delai'           => $reminder->delay,
-			];
-
-			$reminder->subject = self::replaceTagsInContent($reminder->subject, $replace);
-			$reminder->body = self::replaceTagsInContent($reminder->body, $replace);
-		}
 
 		$data = (array) $reminder;
 		$data['user_amount'] = CommonModifiers::money_currency($data['user_amount'] ?? 0, true, false, false);
