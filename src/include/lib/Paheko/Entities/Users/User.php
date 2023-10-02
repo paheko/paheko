@@ -242,7 +242,7 @@ class User extends Entity
 
 	public function asDetailsArray(bool $modified_values = false): array
 	{
-		$list = DynamicFields::getInstance()->list();
+		$list = DynamicFields::getInstance()->all();
 		$out = [];
 
 		foreach ($list as $field) {
