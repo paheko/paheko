@@ -66,15 +66,15 @@
 						<td>Nombre de jours défini dans le rappel</td>
 					</tr>
 					<tr>
-						<th>{{$org_name}}</th>
+						<th>{{$config.org_name}}</th>
 						<td>Nom de l'association</td>
 					</tr>
 					<tr>
-						<th>{{$org_address}}</th>
-						<td>Adresse de l'association</td>
+						<th>{{$config.org_address}}</th>
+						<td>Adresse postale de l'association</td>
 					</tr>
 					<tr>
-						<th>{{$org_web}}</th>
+						<th>{{$site_url}}</th>
 						<td>Adresse du site web de l'association</td>
 					</tr>
 				</table>
