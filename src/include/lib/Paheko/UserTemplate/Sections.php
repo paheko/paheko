@@ -1278,7 +1278,7 @@ class Sections
 				self::_debugExplain($statement->getSQL(true));
 			}
 
-			$result = $db->execute($statement, ...$args);
+			$result = $db->execute($statement, $args);
 			$db->setReadOnly(false);
 		}
 		catch (DB_Exception $e) {
