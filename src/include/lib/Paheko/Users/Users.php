@@ -403,20 +403,31 @@ class Users
 
 		$i = $db->iterate(sprintf('SELECT %s, (SELECT name FROM users_categories WHERE id = users.id_category) AS category FROM users WHERE %s;', $columns, $where));
 
-		$callback = function (&$row) use ($df) {
-			foreach ($df->fieldsByType('date') as $f) {
-				if (isset($row->{$f->name})) {
-					$row->{$f->name} = \DateTime::createFromFormat('!Y-m-d', $row->{$f->name});
-				}
-			}
-			foreach ($df->fieldsByType('datetime') as $f) {
-				if (isset($row->{$f->name})) {
-					$row->{$f->name} = \DateTime::createFromFormat('!Y-m-d H:i:s', $row->{$f->name});
-				}
-			}
-		};
+		CSV::export($format, $name, $i, $header, [self::class, 'exportRowCallback']);
+	}
 
-		CSV::export($format, $name, $i, $header, $callback);
+	static public function exportRowCallback(&$row) {
+		$df = DynamicFields::getInstance();
+
+		foreach ($row as $key => &$value) {
+			$field = $df->get($key);
+
+			if (!$field || null === $value) {
+				continue;
+			}
+
+			if ($field->type === 'date' && is_string($value)) {
+				$value = \DateTime::createFromFormat('!Y-m-d', $value);
+			}
+			elseif ($field->type === 'datetime' && is_string($value)) {
+				$value = \DateTime::createFromFormat('!Y-m-d', $value);
+			}
+			else {
+				$value = $field->getStringValue($value);
+			}
+		}
+
+		unset($value);
 	}
 
 	static public function importReport(CSV_Custom $csv, string $mode, ?int $logged_user_id = null): array

@@ -369,31 +369,11 @@ class Template extends Smartyer
 				return '<a href="tel:' . rawurlencode($v) . '">' . htmlspecialchars($this->formatPhoneNumber($v)) . '</a>';
 			case 'url':
 				return '<a href="' . htmlspecialchars($v) . '" target="_blank">' . htmlspecialchars($v) . '</a>';
-			case 'country':
-				return Utils::getCountryName($v);
-			case 'date':
-				return Utils::date_fr($v, 'd/m/Y') ?? '';
-			case 'datetime':
-				return Utils::date_fr($v, 'd/m/Y à H:i') ?? '';
 			case 'number':
 				return str_replace('.', ',', htmlspecialchars($v));
-			case 'multiple':
-				// Useful for search results, if a value is not a number
-				if (!is_numeric($v)) {
-					return htmlspecialchars($v);
-				}
-
-				$out = [];
-
-				foreach ($field->options as $b => $name)
-				{
-					if ($v & (0x01 << $b))
-						$out[] = $name;
-				}
-
-				return htmlspecialchars(implode(', ', $out));
 			default:
-				return nl2br(htmlspecialchars(rtrim((string) $v)));
+				$v = $field->getStringValue($v);
+				return nl2br(htmlspecialchars((string) $v));
 		}
 	}
 

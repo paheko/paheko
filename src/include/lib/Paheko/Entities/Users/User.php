@@ -242,10 +242,12 @@ class User extends Entity
 
 	public function asDetailsArray(bool $modified_values = false): array
 	{
-		$list = DynamicFields::getInstance()->listAssocNames();
+		$list = DynamicFields::getInstance()->list();
 		$out = [];
 
-		foreach ($list as $key => $label) {
+		foreach ($list as $field) {
+			$key = $field->name;
+
 			if ($modified_values && $this->isModified($key)) {
 				$out[$key] = $this->getModifiedProperty($key);
 			}
@@ -253,12 +255,7 @@ class User extends Entity
 				$out[$key] = $this->$key;
 			}
 
-			if ($out[$key] instanceof Date) {
-				$out[$key] = $out[$key]->format('d/m/Y');
-			}
-			elseif ($out[$key] instanceof \DateTimeInterface) {
-				$out[$key] = $out[$key]->format('d/m/Y H:i:s');
-			}
+			$out[$key] = $field->getStringValue($out[$key]);
 		}
 
 		return $out;

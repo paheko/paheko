@@ -334,4 +334,43 @@ class DynamicField extends Entity
 
 		return parent::importForm($source);
 	}
+
+	public function getStringValue($value): ?string
+	{
+		switch ($this->type) {
+			case 'multiple':
+				// Useful for search results, if a value is not a number
+				if (!is_numeric($value)) {
+					return '';
+				}
+
+				$out = [];
+
+				foreach ($this->options as $b => $name)
+				{
+					if ($value & (0x01 << $b))
+						$out[] = $name;
+				}
+
+				return implode(', ', $out);
+			case 'checkbox':
+				return $value ? 'Oui' : '';
+			case 'date':
+				if (is_object($value) && $value instanceof \DateTimeInterface) {
+					return $value->format('d/m/Y');
+				}
+
+				return (string) $value;
+			case 'datetime':
+				if (is_object($value) && $value instanceof \DateTimeInterface) {
+					return $value->format('d/m/Y à H:i');
+				}
+
+				return (string) $value;
+			case 'country':
+				return Utils::getCountryName($value);
+			default:
+				return $value === null ? null : (string) $value;
+		}
+	}
 }

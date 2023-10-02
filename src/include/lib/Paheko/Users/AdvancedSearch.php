@@ -229,7 +229,10 @@ class AdvancedSearch extends A_S
 	public function make(string $query): DynamicList
 	{
 		$tables = 'users AS u INNER JOIN users_search AS us USING (id)';
-		return $this->makeList($query, $tables, 'identity', false, ['id', 'identity']);
+		$list = $this->makeList($query, $tables, 'identity', false, ['id', 'identity']);
+
+		$list->setExportCallback([Users::class, 'exportRowCallback']);
+		return $list;
 	}
 
 	public function defaults(): \stdClass

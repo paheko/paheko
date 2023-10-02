@@ -573,13 +573,6 @@ class DynamicFields
 		return $out;
 	}
 
-	public function getMultiples()
-	{
-		return array_filter($this->_fields, function ($a) {
-			return $a->type == 'multiple';
-		});
-	}
-
 	public function getListedFields(): array
 	{
 		$fields = array_filter(
