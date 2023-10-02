@@ -1266,7 +1266,7 @@ class Sections
 						throw new Brindille_Exception(sprintf("à la ligne %d : Section 'sql': le paramètre '%s' est un tableau.", $line, $key));
 					}
 
-					$args[$key] = $value;
+					$args[substr($key, 1)] = $value;
 				}
 			}
 
@@ -1278,7 +1278,7 @@ class Sections
 				self::_debugExplain($statement->getSQL(true));
 			}
 
-			$result = $db->execute($statement, $args);
+			$result = $db->execute($statement, ...$args);
 			$db->setReadOnly(false);
 		}
 		catch (DB_Exception $e) {
