@@ -338,7 +338,7 @@ class Utils
 
 	static public function getModifiedURL(string $new)
 	{
-		return HTTP::mergeURLs(self::getSelfURL(), $new);
+		return HTTP::mergeURLs(self::getSelfURI(), $new);
 	}
 
 	static public function redirectDialog(?string $destination = null, bool $exit = true): void
