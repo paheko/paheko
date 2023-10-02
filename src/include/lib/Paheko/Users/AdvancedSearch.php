@@ -57,6 +57,10 @@ class AdvancedSearch extends A_S
 			}
 			*/
 
+			if ($field->type === 'file') {
+				continue;
+			}
+
 			// nope
 			if ($field->system & $field::PASSWORD) {
 				continue;
