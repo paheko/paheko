@@ -299,7 +299,7 @@
 			}
 		};
 
-		let save = function (callback) {
+		let save = async function (callback) {
 			const data = new URLSearchParams();
 
 			// For encryption
@@ -313,30 +313,44 @@
 
 			data.append('save', 1);
 
-			fetch(t.textarea.form.action + '&js', {
-				method: 'post',
-				body: data,
-			}).then((response) => {
-				if (response.status != 200 && response.status != 400) {
-					throw Error(response.status);
+			var r = await fetch(t.textarea.form.action, {
+				'method': 'post',
+				'body': data,
+				'headers': {
+					'Accept': 'application/json'
+				}
+			});
+
+			if (r.ok) {
+				// Remove backup text
+				localStorage.removeItem(backup_key);
+			}
+
+			if (r.status === 204) {
+				callback(null);
+				return true;
+			}
+
+			try {
+				const received = await r.json();
+
+				if (!r.ok && !received) {
+					throw Error(r.status);
+				}
+
+				if (received.error) {
+					alert(received.error);
+					throw Error(received.error);
 				}
 				else {
-					// Remove backup text
-					localStorage.removeItem(backup_key);
-					return response.json();
+					callback(received);
 				}
-			})
-			.then((data) => {
-				if (data.error) {
-					alert(data.error);
-					throw Error(data.error);
-				}
-				else if (!data.success) {
-					throw Error('Invalid response');
-				}
-				callback(data);
-			})
-			.catch(e => { console.log(e); t.textarea.form.querySelector('[type=submit]').click(); });
+			}
+			catch (e) {
+				console.error(e);
+				t.textarea.form.querySelector('[type=submit]').click();
+			}
+
 			return true;
 		};
 
@@ -344,6 +358,10 @@
 			save((data) => {
 				showSaved();
 				t.textarea.defaultValue = t.textarea.value;
+
+				if (!data) {
+					return;
+				}
 
 				let e = t.textarea.form.querySelector('input[name=editing_started]');
 

@@ -34,6 +34,6 @@ $form->runIf('create', function () use ($parent, $default_ext) {
 	Utils::redirect('!common/files/edit.php?fallback=code&p=' . rawurlencode($file->path));
 }, $csrf_key);
 
-$tpl->assign(compact('csrf_key'));
+$tpl->assign(compact('csrf_key', 'parent'));
 
 $tpl->display('docs/new_file.tpl');
