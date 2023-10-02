@@ -322,43 +322,37 @@ class Template extends Smartyer
 		}
 		elseif ($field->type == 'file' && $v) {
 			$files = explode(';', $v);
-			$out = '<div class="files-list">';
 			$count = 0;
+			$label = '';
 
 			foreach ($files as $path) {
-				if (preg_match('!\.(?:png|jpe?g|gif|webp)$!i', $path)) {
-					$url = BASE_URL . $path . '?150px';
-					$label = sprintf(
-						'<figure><img src="%s" alt="%s" /></figure>',
-						htmlspecialchars($url),
-						htmlspecialchars($field->label)
-					);
-				}
-				else {
+				if (!preg_match('!\.(?:png|jpe?g|gif|webp)$!i', $path)) {
 					$count++;
 					continue;
 				}
 
-				if (isset($params['files_href'])) {
-					$label = sprintf('<a href="%s">%s</a>', $params['files_href'], $label);
-				}
-
-				$out .= sprintf(
-					'<aside class="file">%s</aside>',
-					$label
+				$url = BASE_URL . $path . '?150px';
+				$label = sprintf(
+					'<img src="%s" alt="%s" />',
+					htmlspecialchars($url),
+					htmlspecialchars($field->label)
 				);
 			}
 
 			if ($count) {
-				$out .= sprintf('<aside class="file">%s%s</aside>',
-					($count != count($files)) ? '+' : '',
-					($count == 1 ? '1 fichier' : $count . ' fichiers')
-				);
+				$label = ($count != count($files) ? '+' : '')
+					. ($count == 1 ? '1 fichier' : $count . ' fichiers');
 			}
 
-			$out .= '</div>';
+			if ($label === '') {
+				return '';
+			}
 
-			return $out;
+			if (isset($params['files_href'])) {
+				$label = sprintf('<a href="%s">%s</a>', $params['files_href'], $label);
+			}
+
+			return '<div class="files-list"><figure>' . $label . '</label></div>';
 		}
 
 		if (empty($v)) {

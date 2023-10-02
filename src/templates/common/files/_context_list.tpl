@@ -32,20 +32,18 @@ $button_label ??= "Ajouter un fichier"
 		break;
 	}
 	?>
-	<aside class="file">
-		<figure>
-			<span>{$file->link($session, 'auto')|raw}</span>
-		</figure>
+	<figure class="file">
+		<span>{$file->link($session, 'auto')|raw}</span>
 		<figcaption>
 			{$file->link($session)|raw}
 		</figcaption>
-		<span>
+		<span class="actions">
 			{linkbutton shape="download" href=$file->url(true) target="_blank" label="Télécharger"}
 			{if $edit && $file->canDelete()}
 				{linkbutton shape="delete" target="_dialog" href="!common/files/delete.php?p=%s%s"|args:$file.path:$trash label="Supprimer"}
 			{/if}
 		</span>
-	</aside>
+	</figure>
 {foreachelse}
 	{if !$can_upload}
 		<em>—</em>

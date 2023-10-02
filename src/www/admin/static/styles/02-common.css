@@ -295,8 +295,8 @@ dd.help li {
     clear: both;
 }
 
-.users-list td .file img {
-    max-height: 80px;
+.users-list td .files-list img {
+    max-height: 100px;
 }
 
 .pagination {
@@ -532,10 +532,10 @@ details summary.block::after {
     flex-wrap: wrap;
     align-items: stretch;
     justify-content: stretch;
-    margin: .8rem 0;
+    margin: .8rem 0
 }
 
-.files-list aside.file {
+.files-list figure {
     width: 13rem;
     border-radius: .5rem;
     background: rgba(var(--gSecondColor), 0.1);
@@ -548,12 +548,16 @@ details summary.block::after {
     align-items: stretch;
 }
 
-.files-list aside.file figcaption {
+table .files-list, table .files-list figure {
+    margin: 0;
+}
+
+.files-list figure figcaption {
     font-size: .9em;
     margin-bottom: .5rem;
 }
 
-.files-list aside.file a span::before {
+.files-list figure a span::before {
     color: rgba(var(--gMainColor), 0.7);
     font-size: 5em;
     padding: .2em !important;
