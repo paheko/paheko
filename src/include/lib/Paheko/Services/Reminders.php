@@ -145,7 +145,7 @@ class Reminders
 			ABS(julianday(date()) - julianday(expiry_date)) AS nb_days,
 			MAX(sr.delay) AS delay, sr.subject, sr.body, s.label, s.description,
 			su.expiry_date, sr.id AS id_reminder, su.id_service, su.id_user,
-			u.%s, %s AS identity
+			u.%s AS email, %s AS identity
 			FROM services_reminders sr
 			INNER JOIN services s ON s.id = sr.id_service
 			-- Select latest subscription to a service (MAX) only
