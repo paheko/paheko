@@ -237,7 +237,7 @@ class Mailing extends Entity
 	 */
 	public function getBody()
 	{
-		return UserTemplate::createFromUserString($this->body) ?? $this->body;
+		return UserTemplate::createFromUserString($this->body ?? '') ?? $this->body;
 	}
 
 	public function getPreview(string $address = null): string
