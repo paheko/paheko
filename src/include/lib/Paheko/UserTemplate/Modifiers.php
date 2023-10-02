@@ -364,7 +364,7 @@ class Modifiers
 		return explode($separator, (string)$string);
 	}
 
-	static public function implode($array, string $separator): string
+	static public function implode($array, string $separator): ?string
 	{
 		if (!is_array($array) && !is_object($array)) {
 			return $array;
