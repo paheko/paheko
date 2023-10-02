@@ -23,25 +23,11 @@ if (!$file->canWrite()) {
 	throw new UserException('Vous n\'avez pas le droit de modifier ce fichier.');
 }
 
-$editor = isset($_GET['code']) ? 'code' : $file->editorType();
+$editor = $file->editorType();
 $csrf_key = 'edit_file_' . $file->pathHash();
 
 $form->runIf('content', function () use ($file) {
-	try {
-		$file->setContent(f('content'));
-	}
-	catch (UserException $e) {
-		if (qg('js') !== null) {
-			http_response_code(400);
-			die(json_encode(['error' => $e->getMessage()]));
-		}
-
-		throw $e;
-	}
-
-	if (qg('js') !== null) {
-		die('{"success":true}');
-	}
+	$file->setContent(f('content'));
 }, $csrf_key, Utils::getSelfURI());
 
 $tpl->assign(compact('csrf_key', 'file'));

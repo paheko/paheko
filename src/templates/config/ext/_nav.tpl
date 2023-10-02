@@ -15,7 +15,7 @@
 				{linkmenu label="Ajouter…" shape="plus" right=true}
 					{linkbutton shape="upload" label="Depuis mon ordinateur" target="_dialog" href="!common/files/upload.php?p=%s"|args:$parent_path_uri}
 					{linkbutton shape="folder" label="Dossier" target="_dialog" href="!docs/new_dir.php?path=%s&no_redir"|args:$parent_path_uri}
-					{linkbutton shape="text" label="Fichier texte" target="_dialog" href="!docs/new_file.php?path=%s"|args:$parent_path_uri}
+					{linkbutton shape="text" label="Fichier texte" target="_dialog" href="!docs/new_file.php?path=%s&ext="|args:$parent_path_uri}
 				{/linkmenu}
 			</aside>
 		{elseif $current === 'details' && $module}

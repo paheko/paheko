@@ -65,7 +65,7 @@
 
 		};
 
-		code.saveFile = function ()
+		code.saveFile = async function ()
 		{
 			const data = new URLSearchParams();
 
@@ -76,37 +76,56 @@
 			data.append('save', 1);
 			this.textarea.form.classList.add('progressing');
 
-			fetch(this.textarea.form.action + '&js', {
-				method: 'post',
-				body: data,
-			}).then((response) => response.json())
-			.then(data => {
-				this.textarea.defaultValue = this.textarea.value;
+			var r = await fetch(this.textarea.form.action, {
+				'method': 'post',
+				'body': data,
+				'headers': {
+					'Accept': 'application/json'
+				}
+			});
 
-				// Show saved
-				let c = document.createElement('p');
-				c.className = 'block confirm';
-				c.id = 'confirm_saved';
-				c.innerText = 'Enregistré';
-				c.style.left = '-100%';
-				c.style.opacity = '1';
-				c.onclick = () => c.remove();
+			if (!r.ok) {
+				console.log(r);
+				const data = await r.json();
+				console.error(data);
 
-				document.querySelector('.codeEditor').appendChild(c);
+				if (data.error) {
+					alert(data.error);
+				}
+				else if (!data.success) {
+					throw Error('Invalid response');
+				}
 
-				window.setTimeout(() => {
-					c.style.left = '';
-					this.textarea.form.classList.remove('progressing');
-				}, 200);
+				this.textarea.form.querySelector('[type=submit]').click();
+				return false;
+			}
 
-				window.setTimeout(() => {
-					c.style.opacity = 0;
-				}, 3000);
+			this.textarea.defaultValue = this.textarea.value;
 
-				window.setTimeout(() => {
-					c.remove();
-				}, 5000);
-			}).catch(e => { console.log(e); this.textarea.form.querySelector('[type=submit]').click(); } );
+			// Show saved
+			let c = document.createElement('p');
+			c.className = 'block confirm';
+			c.id = 'confirm_saved';
+			c.innerText = 'Enregistré';
+			c.style.left = '-100%';
+			c.style.opacity = '1';
+			c.onclick = () => c.remove();
+
+			document.querySelector('.codeEditor').appendChild(c);
+
+			window.setTimeout(() => {
+				c.style.left = '';
+				this.textarea.form.classList.remove('progressing');
+			}, 200);
+
+			window.setTimeout(() => {
+				c.style.opacity = 0;
+			}, 3000);
+
+			window.setTimeout(() => {
+				c.remove();
+			}, 5000);
+
 			return true;
 		};
 

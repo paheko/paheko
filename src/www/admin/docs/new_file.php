@@ -8,6 +8,7 @@ use Paheko\Entities\Files\File;
 require_once __DIR__ . '/_inc.php';
 
 $parent = qg('path');
+$default_ext = qg('ext') ?? 'md';
 
 if (!File::canCreate($parent)) {
 	throw new UserException('Vous n\'avez pas le droit de créer de fichier ici.');
@@ -15,11 +16,11 @@ if (!File::canCreate($parent)) {
 
 $csrf_key = 'create_file';
 
-$form->runIf('create', function () use ($parent) {
+$form->runIf('create', function () use ($parent, $default_ext) {
 	$name = trim((string) f('name'));
 
-	if (!strpos($name, '.')) {
-		$name .= '.md';
+	if ($default_ext && !strpos($name, '.')) {
+		$name .= '.' . $default_ext;
 	}
 
 	$target = $parent . '/' . $name;
