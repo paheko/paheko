@@ -1263,6 +1263,10 @@ class Sections
 			}
 
 			foreach ($args as $key => $value) {
+				if (is_object($value) || is_array($value)) {
+					throw new Brindille_Exception(sprintf("à la ligne %d : Section 'sql': le paramètre '%s' est un tableau.", $line, $key));
+				}
+
 				$statement->bindValue($key, $value, $db->getArgType($value));
 			}
 
