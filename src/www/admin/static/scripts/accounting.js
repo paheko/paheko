@@ -14,6 +14,7 @@ function initTransactionForm(is_new) {
 
 			if (accounts.includes(a.value)) {
 				if (!window.confirm(`Attention, cette écriture affecte deux fois le même compte (${a.value}). Confirmer ?`)) {
+					form.classList.remove('progressing');
 					e.preventDefault();
 					return false;
 				}
