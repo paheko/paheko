@@ -108,6 +108,7 @@ class Template extends Smartyer
 
 		$this->assign('www_url', WWW_URL);
 		$this->assign('admin_url', ADMIN_URL);
+		$this->assign('base_url', BASE_URL);
 		$this->assign('help_pattern_url', HELP_PATTERN_URL);
 		$this->assign('help_url', sprintf(HELP_URL, str_replace('/admin/', '', Utils::getSelfURI(false))));
 		$this->assign('self_url', Utils::getSelfURI());
