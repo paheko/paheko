@@ -365,7 +365,6 @@ Ces variables sont définies tout le temps :
 | `$logged_user` | Informations sur le membre actuellement connecté dans l'administration (vide si non connecté). |
 | `$dialog` | Vaut `TRUE` si la page est dans un dialogue (iframe sous forme de pop-in dans l'administration). |
 | `$now` | Contient la date et heure courante. |
-| `$legal_line` | Contient la ligne de bas de page des mentions légales (sous forme de code HTML) qui doit être présente en bas des pages publiques. |
 | `$config.org_name` | Nom de l'association |
 | `$config.org_email` | Adresse e-mail de l'association |
 | `$config.org_phone` | Numéro de téléphone de l'association |
