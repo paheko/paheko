@@ -291,7 +291,7 @@ class DynamicList implements \Countable
 			$list = DB::getInstance()->iterate($this->SQL(), $this->parameters);
 		}
 
-		foreach ($list as $key => $row) {
+		foreach ($list as $row_key => $row) {
 			if ($this->modifier) {
 				call_user_func_array($this->modifier, [&$row]);
 			}
@@ -305,7 +305,7 @@ class DynamicList implements \Countable
 				}
 			}
 
-			yield $key => $row;
+			yield $row_key => $row;
 		}
 	}
 
