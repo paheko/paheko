@@ -30,12 +30,6 @@
 		{/if}
 		</ul>
 
-		{if $current == 'trial_balance'}
-		<ul class="sub">
-			<li{if $sub_current == 'simple'} class="current"{/if}>{link href="?%s"|args:$criterias_query_no_compare label="Vue simplifiée"}</li>
-			<li{if $sub_current != 'simple'} class="current"{/if}>{link href="?%s&simple=0"|args:$criterias_query_no_compare label="Vue comptable"}</li>
-		</ul>
-		{/if}
 	</nav>
 
 	{if !empty($year)}
@@ -78,7 +72,11 @@
 	</div>
 	{/if}
 
-	<h2>{$config.nom_asso} — {$title}</h2>
+	{if $config.files.logo}
+	<figure class="logo print-only"><img src="{$config->fileURL('logo', '150px')}" alt="" /></figure>
+	{/if}
+
+	<h2>{$config.org_name} — {$title}</h2>
 	{if isset($project)}
 		<h3>Projet&nbsp;: {if $project.code}{$project.code} — {/if}{$project.label}{if $project.archived} <em>(archivé)</em>{/if}</h3>
 	{/if}
@@ -86,7 +84,7 @@
 		<p>Exercice&nbsp;: {$year.label} ({if $year.closed}clôturé{else}<strong>en cours</strong>{/if})
 			— du {$year.start_date|date_short}
 			— au {$year.end_date|date_short}<br />
-			<em>Document généré le {$now|date_short}</em>
+			<small><em>Document généré le {$now|date_short}</em></small>
 		</p>
 	{/if}
 

@@ -1,6 +1,6 @@
 /*
-    marron : #9c4f15 rgb(156, 79, 21)
-    orange : #d98628 rgb(217, 134, 40)
+    color1 : #20787a rgb(32, 120, 122)
+    colro2 : #85b9ba rgb(133, 185, 186)
 */
 
 /* Light colors */
@@ -13,8 +13,8 @@
     --gLinkColor: blue;
     --gHoverLinkColor: 127, 0, 0;
 
-    --gMainColor: 156, 79, 21;
-    --gSecondColor: 217, 134, 40;
+    --gMainColor: 32, 120, 122;
+    --gSecondColor: 133, 185, 186;
     --gBgImage: url("../bg.png");
 }
 
@@ -27,6 +27,11 @@ html.dark {
     --gLightBackgroundColor: #222;
     --gLinkColor: #99f;
     --gHoverLinkColor: 250, 127, 127;
+}
+
+html.dark .header .menu, html.dark .header .menu a, html.dark .header .menu li.current h3 span[data-icon]::before, html.dark nav.tabs .current a {
+    color: rgb(var(--gTextColor)) !important;
+    text-shadow: 0px 0px 5px rgb(var(--gBgColor)) !important;
 }
 
 html {
@@ -139,51 +144,53 @@ a:hover {
     position: relative;
 }
 
-.header .menu h3 b[data-icn]::before {
+.header .menu h3 span[data-icon]::before {
     position: absolute;
     right: .4rem;
-    content: attr(data-icn);
     display: block;
-    font-family: "gicon";
-    float: right;
     text-decoration: none;
-    margin-top: -.2em;
+    text-shadow: none;
+    margin: 0;
+    top: .4rem;
     font-size: 20pt;
     color: rgba(var(--gBgColor), .5);
     font-weight: normal;
 }
 
-.header .menu li.current h3 b[data-icn]::before {
+.header .menu li.current h3 span[data-icon]::before {
     color: rgba(var(--gMainColor));
 }
 
-ul.gallery {
-    text-align: center;
+body.public, body.raw {
+    background: none;
 }
 
-ul.gallery li {
-    display: inline-block;
-    margin: .3em;
-    vertical-align: middle;
-    width: 150px;
+body.raw main {
+    margin: 0;
 }
 
-ul.gallery li img {
-    max-width: 150px;
-    max-height: 150px;
+body.preview {
+    padding: .8rem;
+    background: rgb(var(--gBgColor));
 }
 
-ul.gallery .actions {
-    text-align: center;
-    z-index: 100;
+body.public main {
+    max-width: 650px;
+    margin: 2em auto;
 }
 
-ul.gallery figcaption {
-    font-size: .8em;
-    overflow: hidden;
-    text-align: center;
+body.public main legend {
+    font-size: 1.3em;
 }
 
+body.public main dl {
+    padding: 1em 0;
+}
+
+body.public main p.block.error, body.public main p.block.alert {
+    margin: 2em 0;
+    font-size: 1.2em;
+}
 body.public, body.raw {
     background: none;
 }
@@ -229,4 +236,20 @@ header.summary {
     margin-bottom: 1em;
     border-bottom: 2px solid #999;
     text-align: center;
+}
+
+#sticky-alert {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #ffd;
+    border-bottom: 2px solid #990;
+    padding: 5px;
+    z-index: 10000;
+    text-align: center;
+}
+
+body.sticky, body.sticky .header .menu {
+    padding-top: 2em;
 }

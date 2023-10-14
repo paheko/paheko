@@ -1,61 +1,45 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
+
+use Paheko\Users\DynamicFields;
+use Paheko\Users\Session;
 
 const LOGIN_PROCESS = true;
 
 require_once __DIR__ . '/_inc.php';
 
-if (qg('c'))
-{
-    if (!$session->recoverPasswordCheck(qg('c')))
-    {
-        $form->addError('Le lien que vous avez suivi est invalide ou a expiré.');
-    }
-    else
-    {
-        if (f('change') && $form->check('changePassword'))
-        {
-            try {
-                $session->recoverPasswordChange(qg('c'), f('passe'), f('passe_confirmed'));
-                Utils::redirect('!login.php?changed');
-            }
-            catch (UserException $e) {
-                $form->addError($e->getMessage());
-            }
-        }
+$session = Session::getInstance();
 
-        $tpl->assign('passphrase', Utils::suggestPassword());
-        $tpl->display('admin/password_change.tpl');
-        exit;
-    }
-}
-elseif (f('recover'))
-{
-    $form->check('recoverPassword', [
-        'id' => 'required'
-    ]);
+$form->runIf(qg('c') !== null, function () use ($session, $form, $tpl) {
+	if (!$session->checkRecoveryPasswordQuery(qg('c'))) {
+		throw new UserException('Le lien que vous avez suivi est invalide ou a expiré.');
+	}
 
-    if (!$form->hasErrors())
-    {
-        if (f('id') && $session->recoverPasswordSend(f('id')))
-        {
-            Utils::redirect(ADMIN_URL . 'password.php?sent');
-        }
 
-        $form->addError('Ce membre n\'a pas d\'adresse email enregistrée ou n\'a pas le droit de se connecter.');
-    }
-}
+	$csrf_key = 'password_change_' . md5(qg('c'));
 
-if (!$form->hasErrors() && null !== qg('sent'))
-{
-    $tpl->assign('sent', true);
-}
+	$form->runIf('change', function () use ($session) {
+		$session->recoverPasswordChange(qg('c'), f('password'), f('password_confirmed'));
+	}, $csrf_key, '!login.php?changed');
 
-$champs = $config->get('champs_membres');
+	$tpl->assign(compact('csrf_key'));
+	$tpl->display('password_change.tpl');
+	exit;
+});
 
-$champ = $champs->get($config->get('champ_identifiant'));
+$csrf_key = 'recover_password';
+$new = qg('new') !== null;
 
-$tpl->assign('champ', $champ);
+$form->runIf('recover', function () use ($session) {
+	$session->recoverPasswordSend(f('id'));
+}, $csrf_key, '!password.php?sent' . ($new ? '&new' : ''));
 
-$tpl->display('admin/password.tpl');
+$sent = !$form->hasErrors() && null !== qg('sent');
+
+$id_field = DynamicFields::get(DynamicFields::getLoginField());
+$title = $new ? 'Première connexion ?' : 'Mot de passe perdu ?';
+
+$tpl->assign(compact('id_field', 'sent', 'csrf_key', 'title', 'new'));
+
+$tpl->display('password.tpl');

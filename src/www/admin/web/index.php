@@ -1,41 +1,64 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Web\Web;
-use Garradin\Entities\Web\Page;
+use Paheko\UserTemplate\Modules;
+use Paheko\Web\Web;
+use Paheko\Entities\Web\Page;
 
 require_once __DIR__ . '/_inc.php';
 
-$current_path = qg('p') ?: '';
-$cat = null;
+$page = false;
 
-if ($current_path) {
-	$cat = Web::get($current_path);
-
-	if (!$cat) {
-		throw new UserException('Catégorie inconnue');
-	}
+if (qg('id')) {
+	$page = Web::get((int)qg('id'));
 }
-else {
-	foreach (Web::sync() as $error) {
-		$form->addError($error);
-	}
+elseif (qg('uri')) {
+	$page = Web::getByURI(qg('uri'));
 }
 
-$order_date = qg('order_date') !== null;
+if (null === $page) {
+	throw new UserException('Page inconnue : inexistante ou supprimée');
+}
 
-$categories = Web::listCategories($cat ? $cat->path : '');
-$pages = Web::listPages($cat ? $cat->path : '', $order_date);
-$title = $cat ? sprintf('Gestion du site web : %s', $cat->title) : 'Gestion du site web';
+$page = $page ?: null;
+
+$links_errors = null;
+
+if ($page) {
+	$links_errors = $page->checkInternalPagesLinks();
+
+	if (qg('toggle_type') !== null && $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)) {
+		$page->toggleType();
+		$page->save();
+		Utils::redirect('!web/?id=' . $page->id());
+	}
+}
+elseif (($_GET['check'] ?? null) === 'internal') {
+	$links_errors = Web::checkAllInternalPagesLinks();
+}
+
+$cat = $page && $page->isCategory() ? $page : null;
+
+$categories = Web::listCategories($cat ? $cat->id() : null);
+$pages = Web::getPagesList($cat ? $cat->id() : null);
+$drafts = Web::getDraftsList($cat ? $cat->id() : null);
+
+$pages->loadFromQueryString();
+$drafts->loadFromQueryString();
+
+$title = $page ? sprintf('%s — Gestion du site web', $page->title) : 'Gestion du site web';
+
 $type_page = Page::TYPE_PAGE;
 $type_category = Page::TYPE_CATEGORY;
-$breadcrumbs = $cat ? $cat->getBreadcrumbs() : [];
+$breadcrumbs = $page ? $page->getBreadcrumbs() : [];
+$can_edit = $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 
-$parent = $cat ? $cat->parent : null;
+$tpl->assign('custom_js', ['web_gallery.js']);
+$tpl->assign('custom_css', ['web.css', '!web/css.php']);
 
-$links_errors = $cat !== null ? [] : Web::checkAllInternalLinks();
+$module = $page ? null : Modules::getWeb();
 
-$tpl->assign(compact('categories', 'pages', 'title', 'current_path', 'parent', 'type_page', 'type_category', 'order_date', 'breadcrumbs', 'cat', 'links_errors'));
+$tpl->assign(compact('categories', 'pages', 'drafts', 'title', 'type_page', 'type_category', 'breadcrumbs', 'page', 'links_errors', 'can_edit', 'module'));
 
 $tpl->display('web/index.tpl');

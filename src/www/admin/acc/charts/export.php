@@ -1,7 +1,7 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Accounting\Charts;
+use Paheko\Accounting\Charts;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -13,7 +13,7 @@ if (!$chart) {
 
 CSV::export(
 	qg('format'),
-	sprintf('Plan comptable - %s - %s', Config::getInstance()->get('nom_asso'), $chart->label),
+	sprintf('Plan comptable - %s - %s', Config::getInstance()->get('org_name'), $chart->label),
 	$chart->export(),
 	$chart::COLUMNS
 );

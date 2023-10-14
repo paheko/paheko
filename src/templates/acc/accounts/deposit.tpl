@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Dépôt en banque : %s — %s"|args:$account.code,$account.label current="acc/accounts"}
+{include file="_head.tpl" title="Dépôt en banque : %s — %s"|args:$account.code,$account.label current="acc/accounts"}
 
 {form_errors}
 
@@ -80,4 +80,4 @@
 	{/literal}
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

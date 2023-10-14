@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+	<html>
+	<head>
+		<title>Développer des modules pour Paheko</title>
+		<meta charset="utf-8" />
+		<style type="text/css">
+		body, form, p, div, hr, fieldset, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6 {
+			margin: 0;
+			padding: 0;
+		}
+		body {
+			font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
+			padding: .8em;
+			background: #eee;
+		}
+		.web-content .nav ul {
+			list-style-type: none;
+			margin: -.8em;
+			margin-bottom: 1em;
+			padding: 1em;
+			background: #ddd;
+			border-bottom: 1px solid #999;
+			text-align: center;
+		}
+		.web-content .boutons ul {
+			list-style-type: none;
+			background: #ccc;
+			padding: .5em;
+			margin: 0;
+		}
+		.web-content .nav li, .web-content .boutons li {
+			display: inline-block;
+			margin: 0 1em;
+		}
+		.web-content .nav a, .web-content .boutons a {
+			display: inline-block;
+			background: #fff;
+			color: darkblue;
+			border-radius: .2em;
+			padding: .3em .5em;
+			font-size: 1.2em;
+		}
+		.web-content .nav strong a {
+			color: darkred;
+			box-shadow: 0px 0px 5px orange;
+		}
+		</style>
+		<link rel="stylesheet" type="text/css" href="../../../content.css" />
+	</head>
+	<body><div class="web-content"><div class="nav">
+<ul>
+<li><strong><a href="modules.html">Modules</a></strong></li>
+<li><a href="brindille.html">Documentation Brindille</a></li>
+<li><a href="brindille_functions.html">Fonctions</a></li>
+<li><a href="brindille_sections.html">Sections</a></li>
+<li><a href="brindille_modifiers.html">Filtres</a></li>
+</ul>
+</div><aside class="toc">
+	<ol>
+		<li><a href="#introduction">Introduction</a></li>
+		<li><a href="#exemples">Exemples</a></li>
+		<li><a href="#pre-requis">Pré-requis</a></li>
+		<li><a href="#resume-technique">Résumé technique</a></li>
+		<li><a href="#structure-des-repertoires">Structure des répertoires</a>
+		<ol>
+			<li><a href="#fichier-module-ini">Fichier module.ini</a>
+		</ol></li>
+		<li><a href="#variables-speciales">Variables spéciales</a></li>
+		<li><a href="#stockage-de-donnees">Stockage de données</a>
+		<ol>
+			<li><a href="#configuration">Configuration</a></li>
+			<li><a href="#stockage-de-documents-json">Stockage de documents JSON</a>
+			<ol>
+				<li><a href="#validation">Validation</a>
+				<ol>
+					<li><a href="#propriete-non-requise">Propriété non requise</a>
+				</ol></li>
+				<li><a href="#stockage-json-dans-sqlite-pour-information">Stockage JSON dans SQLite (pour information)</a></li>
+				<li><a href="#recuperation-et-liste-de-documents">Récupération et liste de documents</a>
+			</ol></li>
+</ol></li>
+		<li><a href="#export-et-import-de-modules">Export et import de modules</a></li>
+		<li><a href="#restrictions">Restrictions</a>
+		<ol>
+			<li><a href="#envoi-d-e-mail">Envoi d'e-mail</a></li>
+			<li><a href="#tables-et-colonnes-de-la-base-de-donnees">Tables et colonnes de la base de données</a>
+</li></ol></li></ol></aside><h1 id="introduction">Introduction</h1>
+<p>Depuis la version 1.3, Paheko dispose d'extensions modifiables, nommées <strong>Modules</strong>.</p>
+<p>Les modules permettent de créer et modifier des formulaires, des modèles de documents simples, à imprimer, mais aussi de créer des "mini-applications" directement dans l'administration de l'association, avec le minimum de code, sans avoir à apprendre à programmer PHP.</p>
+<p>Les modules utilisent le langage <a href="brindille.html">Brindille</a>, aussi utilisé pour le site web (qui est lui-même un module). Avec Brindille on parle d'un <strong>squelette</strong> pour un fichier texte contenant du code Brindille.</p>
+<p>Les modules ne permettent pas d'exécuter du code PHP, ni de modifier la base de données en dehors des données du module, contrairement aux <a href="https://fossil.kd2.org/paheko/wiki?name=Documentation/Plugin&amp;p" target="_blank" rel="noreferrer">plugins</a>. Grâce à Brindille, les administrateurs de l'association peuvent modifier ou créer de nouveaux modules sans risques pour le serveur, car le code Brindille ne permet pas d'exécuter de fonctions dangereuses. Les <strong>plugins</strong> eux sont écrits en PHP et ne peuvent pas être modifiés par une association. Du fait des risques de sécurité, seuls les plugins officiels sont proposés sur Paheko.cloud.</p>
+<h1 id="exemples">Exemples</h1>
+<p>Paheko fournit quelques modules par défaut, qui peuvent être modifiés ou servir d'inspiration pour de nouveaux modules :</p>
+<ul>
+<li>Reçu de don simple</li>
+<li>Reçu de paiement simple</li>
+<li>Reçu fiscal</li>
+<li>Cartes de membres</li>
+<li>Heures d'ouverture</li>
+<li>Modèles d'écritures comptables</li>
+</ul>
+<p>Ces exemples sont développés directement avec Brindille et peuvent être modifiés ou lus depuis le menu <strong>Configuration</strong>, onglet <strong>Extensions</strong>.</p>
+<p>Un module fourni dans Paheko peut être modifié, et en cas de problème il peut être remis à son état d'origine.</p>
+<p>D'autres exemples d'utilisation sont imaginables :</p>
+<ul>
+<li>Auto-remplissage de la déclaration de la liste des dirigeants à la préfecture</li>
+<li>Compte de résultat et bilan conforme au modèle du plan comptable</li>
+<li>Formulaires partagés entre la partie privée, et le site web (voir par exemple le module "heures d'ouverture")</li>
+<li>Gestion de matériel prêté par l'association</li>
+</ul>
+<h1 id="pre-requis">Pré-requis</h1>
+<p>Une connaissance de la programmation informatique est souhaitable pour commencer à modifier ou créer des modules, mais cela n'est pas requis, il est possible d'apprendre progressivement.</p>
+<h1 id="resume-technique">Résumé technique</h1>
+<ul>
+<li>Utilisation de la syntaxe Brindille</li>
+<li>Les modules peuvent utiliser toutes les fonctions et boucles de Brindille</li>
+<li>Les modules peuvent stocker et récupérer des données dans la base SQLite dans une table clé-valeur spécifique à chaque module</li>
+<li>Les données du module sont stockées en JSON, on peut faire des requêtes complètes avec l'extension <a href="https://www.sqlite.org/json1.html" target="_blank" rel="noreferrer">JSON de SQLite</a></li>
+<li>Les données peuvent être validées avant enregistrement en utilisant <a href="https://json-schema.org/understanding-json-schema/" target="_blank" rel="noreferrer">JSON Schema</a></li>
+<li>Un module peut également accéder aux données des autres modules</li>
+<li>Un module peut aussi accéder à toutes les données de la base de données, sauf certaines données à risque (voir plus bas)</li>
+<li>Un module ne peut pas modifier les données de la base de données</li>
+<li>Paheko crée automatiquement des index sur les requêtes SQL des modules, permettant de rendre les requêtes rapides</li>
+</ul>
+<h1 id="structure-des-repertoires">Structure des répertoires</h1>
+<p>Chaque module a un nom unique (composé uniquement de lettres minuscules, de tirets bas et de chiffres) et dispose d'un sous-répertoire dans le dossier <code>modules</code>. Ainsi le module <code>recu_don</code> serait dans le répertoire <code>modules/recu_don</code>.</p>
+<p>Dans ce répertoire le module peut avoir autant de fichiers qu'il veut, mais certains fichiers ont une fonction spéciale :</p>
+<ul>
+<li><code>module.ini</code> : contient les informations sur le module, voir ci-dessous pour les détails</li>
+<li><code>config.html</code> : si ce squelette existe, un bouton "Configurer" apparaîtra dans la liste des modules (Configuration -&gt; Modules) et affichera ce squelette dans un dialogue</li>
+<li><code>icon.svg</code> : icône du module, qui sera utilisée sur la page d'accueil, si le bouton est activé, et dans la liste des modules. Attention l'élément racine du fichier doit porter l'id <code>img</code> pour que l'icône fonctionne (<code>&lt;svg id="img"...&gt;</code>), notamment pour que les couleurs du thème s'appliquent à l'icône.</li>
+<li><code>README.md</code> : si ce fichier existe, son contenu sera affiché dans les détails du module</li>
+</ul>
+<p>Les modules peuvent également avoir des <code>snippets</code>, ce sont des squelettes qui seront inclus à des endroits précis de l'interface, permettant de rajouter des fonctionnalités, ils sont situés dans le sous-répertoire <code>snippets</code> du module :</p>
+<ul>
+<li><code>snippets/transaction_details.html</code> : sera inclus en dessous de la fiche d'une écriture comptable</li>
+<li><code>snippets/user_details.html</code> : sera inclus en dessous de la fiche d'un membre</li>
+<li><code>snippets/home_button.html</code> : sera inclus dans la liste des boutons de la page d'accueil (ce fichier ne sera pas appelé si <code>home_button</code> est à <code>true</code> dans <code>module.ini</code>, il le remplace)</li>
+</ul>
+<h2 id="fichier-module-ini">Fichier module.ini</h2>
+<p>Ce fichier décrit le module, au format INI (<code>clé=valeur</code>), en utilisant les clés suivantes :</p>
+<ul>
+<li><code>name</code> (obligatoire) : nom du module</li>
+<li><code>description</code> : courte description de la fonctionnalité apportée par le module</li>
+<li><code>author</code> : nom de l'auteur</li>
+<li><code>author_url</code> : adresse web HTTP menant au site de l'auteur</li>
+<li><code>home_button</code> : indique si un bouton pour ce module doit être affiché sur la page d'accueil (<code>true</code> ou <code>false</code>)</li>
+<li><code>menu</code> : indique si ce module doit être listé dans le menu de gauche (<code>true</code> ou <code>false</code>)</li>
+<li><code>restrict_section</code> : indique la section auquel le membre doit avoir accès pour pouvoir voir le menu de ce module, parmi <code>web, documents, users, accounting, connect, config</code></li>
+<li><code>restrict_level</code> : indique le niveau d'accès que le membre doit avoir dans la section indiquée pour pouvoir voir le menu de ce module, parmi <code>read, write, admin</code>.</li>
+</ul>
+<p>Attention : les directives <code>restrict_section</code> et <code>restrict_level</code> ne contrôlent <em>que</em> l'affichage du lien vers le module dans le menu et dans les boutons de la page d'accueil, mais pas l'accès aux pages du module.</p>
+<h1 id="variables-speciales">Variables spéciales</h1>
+<p>Toutes les pages d'un module disposent de la variable <code>$module</code> qui contient l'entité du module en cours :</p>
+<ul>
+<li><code>$module.name</code> contient le nom unique (<code>recu_don</code> par exemple)</li>
+<li><code>$module.label</code> le libellé du module</li>
+<li><code>$module.description</code> la description</li>
+<li><code>$module.config</code> la configuration du module</li>
+<li><code>$module.url</code> l'adresse URL du module (<code>https://site-association.tld/m/recu_don/</code> par exemple)</li>
+</ul>
+<h1 id="stockage-de-donnees">Stockage de données</h1>
+<p>Un module peut stocker des données de deux manières : dans sa configuration, ou dans son stockage de documents JSON.</p>
+<h2 id="configuration">Configuration</h2>
+<p>La première manière est de stocker des informations dans la configuration du module. Pour cela on utilise la fonction <code>save</code> et la clé <code>config</code> :</p>
+<pre><code>{{:save key="config" accounts_list="512A,512B" check_boxes=true}}</code></pre>
+<p>On pourra retrouver ces valeurs dans la variable <code>$module.config</code> :</p>
+<pre><code>{{if $module.config.check_boxes}}
+  {{$module.config.accounts_list}}
+{{/if}}</code></pre>
+<h2 id="stockage-de-documents-json">Stockage de documents JSON</h2>
+<p>Chaque module peut stocker ses données dans une base de données clé-document qui stockera les données dans des documents au format JSON dans une table SQLite.</p>
+<p>Grâce aux <a href="https://www.sqlite.org/json1.html" target="_blank" rel="noreferrer">fonctions JSON de SQLite</a> on pourra ensuite effectuer des recherches sur ces documents.</p>
+<p>Pour enregistrer il suffit d'utiliser la fonction <code>save</code> :</p>
+<pre><code>{{:save key="facture001" type="facture" date="2022-01-01" label="Vente de petits pains au chocolat" total="42"}}</code></pre>
+<p>Si la clé indiquée (dans le paramètre <code>key</code>) n'existe pas, l'enregistrement sera créé, sinon il sera mis à jour avec les valeurs données.</p>
+<h3 id="validation">Validation</h3>
+<p>On peut utiliser un <a href="https://json-schema.org/understanding-json-schema/" target="_blank" rel="noreferrer">schéma JSON</a> pour valider que le document qu'on enregistre est valide :</p>
+<pre><code>{{:save validate_schema="./document.schema.json" type="facture" date="2022-01-01" label="Vente de petits pains au chocolat" total="42"}}</code></pre>
+<p>Le fichier <code>document.schema.json</code> devra être dans le même répertoire que le squelette et devra contenir un schéma valide. Voici un exemple :</p>
+<pre><code>{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+        "date": {
+            "description": "Date d'émission",
+            "type": "string",
+            "format": "date"
+        },
+        "type": {
+            "description": "Type de document",
+            "type": "string",
+            "enum": ["devis", "facture"]
+        },
+        "total": {
+            "description": "Montant total",
+            "type": "integer",
+            "minimum": 0
+        },
+        "label": {
+            "description": "Libellé",
+            "type": "string"
+        },
+        "description": {
+            "description": "Description",
+            "type": ["string", "null"]
+        }
+    },
+    "required": [ "type", "date", "total", "label"]
+}</code></pre>
+<p>Si le document fourni n'est pas conforme au schéma, il ne sera pas enregistré et une erreur sera affichée.</p>
+<h4 id="propriete-non-requise">Propriété non requise</h4>
+<p>Si vous souhaitez utiliser dans votre document une propriété non requise, il ne faut pas la fournir en paramètre de la fonction <code>save</code>.</p>
+<p>Si elle est fournie mais vide, il faut aussi autoriser le type <code>null</code> (en minuscules) au type de votre propriété.</p>
+<p>Exemple :  </p>
+<pre><code>[...]
+    "description": {
+        "description": "Description",
+        "type": ["string", "null"]
+    }
+[...]</code></pre>
+<h3 id="stockage-json-dans-sqlite-pour-information">Stockage JSON dans SQLite (pour information)</h3>
+<p>Explication du fonctionnement technique derrière la fonction <code>save</code>.</p>
+<p>En pratique chaque enregistrement sera placé dans une table SQL dont le nom commence par <code>module_data_</code>. Ici la table sera donc nommée <code>module_data_factures</code> si le nom unique du module est <code>factures</code>.</p>
+<p>Le schéma de cette table est le suivant :</p>
+<pre><code>CREATE TABLE module_data_factures (
+  id INTEGER PRIMARY KEY NOT NULL,
+  key TEXT NULL,
+  document TEXT NOT NULL
+);
+
+CREATE UNIQUE INDEX module_data_factures_key ON module_data_factures (key);</code></pre>
+<p>Comme on peut le voir, chaque ligne dans la table peut avoir une clé unique (<code>key</code>), et un ID ou juste un ID auto-incrémenté. La clé unique n'est pas obligatoire, mais peut être utile pour différencier certains documents.</p>
+<p>Par exemple le code suivant :</p>
+<pre><code>{{:save key="facture_43" nom="Facture de courses"}}</code></pre>
+<p>Est l'équivalent de la requête SQL suivante :</p>
+<pre><code>INSERT OR REPLACE INTO module_data_factures (key, document) VALUES ('facture_43', '{"nom": "Facture de courses"}');</code></pre>
+<h3 id="recuperation-et-liste-de-documents">Récupération et liste de documents</h3>
+<p>Il sera ensuite possible d'utiliser la boucle <code>load</code> pour récupérer les données :</p>
+<pre><code>{{#load id=42}}
+    Ce document est de type {{$type}} créé le {{$date}}.
+    &lt;h2&gt;{{$label}}&lt;/h2&gt;
+    À payer : {{$total}} €
+    {{else}}
+    Le document numéro 42 n'a pas été trouvé.
+{{/load}}</code></pre>
+<p>Cette boucle <code>load</code> permet aussi de faire des recherches sur les valeurs du document :</p>
+<pre><code>&lt;ul&gt;
+{{#load where="$$.type = 'facture'" order="date DESC"}}
+    &lt;li&gt;{{$label}} ({{$total}} €)&lt;/li&gt;
+{{/load}}
+&lt;/ul&gt;</code></pre>
+<p>La syntaxe <code>$$.type</code> indique d'aller extraire la clé <code>type</code> du document JSON.</p>
+<p>C'est un raccourci pour la syntaxe SQLite <code>json_extract(document, '$.type')</code>.</p>
+<h1 id="export-et-import-de-modules">Export et import de modules</h1>
+<p>Il est possible d'exporter un module modifié. Cela créera un fichier ZIP contenant à la fois le code modifié et le code non modifié.</p>
+<p>De la même manière il est possible d'importer un module à partir d'un fichier ZIP d'export. Si vous créez votre fichier ZIP manuellement, attention à respecter le fait que le code du module doit se situer dans le répertoire <code>modules/nom_du_module</code> du fichier ZIP. Tout fichier ou répertoire situé en dehors de cette arborescence provoquera une erreur et l'impossibilité d'importer le module.</p>
+<h1 id="restrictions">Restrictions</h1>
+<ul>
+<li>Il n'est pas possible de télécharger ou envoyer des données depuis un autre serveur</li>
+<li>Il n'est pas possible d'écrire un fichier local</li>
+</ul>
+<h2 id="envoi-d-e-mail">Envoi d'e-mail</h2>
+<p>Voir <a href="brindille_functions.html#mail">la documentation de la fonction <code>{{:mail}}</code></a></p>
+<h2 id="tables-et-colonnes-de-la-base-de-donnees">Tables et colonnes de la base de données</h2>
+<p>Pour des raisons de sécurité, les modules ne peuvent pas accéder à toutes les données de la base de données.</p>
+<p>Les colonnes suivantes de la table <code>users</code> (liste des membres) renverront toujours <code>NULL</code> :</p>
+<ul>
+<li><code>password</code></li>
+<li><code>pgp_key</code></li>
+<li><code>otp_secret</code></li>
+</ul>
+<p>Tenter de lire les données des tables suivantes résultera également en une erreur :</p>
+<ul>
+<li>emails</li>
+<li>emails_queue</li>
+<li>compromised_passwords_cache</li>
+<li>compromised_passwords_cache_ranges</li>
+<li>api_credentials</li>
+<li>plugins_signals</li>
+<li>config</li>
+<li>users_sessions</li>
+<li>logs</li>
+</ul></div></body></html>

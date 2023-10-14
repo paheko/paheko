@@ -1,8 +1,8 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Accounting\Reports;
-use Garradin\Accounting\Transactions;
+use Paheko\Accounting\Reports;
+use Paheko\Accounting\Transactions;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -10,7 +10,7 @@ if (!CURRENT_YEAR_ID) {
 	Utils::redirect('!acc/years/?msg=OPEN');
 }
 
-$pending_count = Transactions::listPendingCreditAndDebtForClosedYears()->count();
+$pending_count = Transactions::listPendingCreditAndDebtForOtherYears(CURRENT_YEAR_ID)->count();
 
 $tpl->assign(compact('pending_count'));
 

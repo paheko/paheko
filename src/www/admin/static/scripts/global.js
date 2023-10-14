@@ -1,9 +1,9 @@
 (function () {
+	let d = document.documentElement.dataset;
 	window.g = window.garradin = {
-		url: window.location.href.replace(/\/admin\/.*?$/, ''),
-		admin_url: window.location.href.replace(/\/admin\/.*?$/, '/admin/'),
-		static_url: window.location.href.replace(/\/admin\/.*?$/, '/admin/static/'),
-		version: document.documentElement.getAttribute('data-version'),
+		admin_url: d.url,
+		static_url: d.url + 'static/',
+		version: d.version,
 		loaded: {}
 	};
 
@@ -41,7 +41,7 @@
 		document.addEventListener(eventName, callback, false);
 	};
 
-	g.toggle = function(selector, visibility)
+	g.toggle = function(selector, visibility, resize_parent)
 	{
 		if (!('classList' in document.documentElement))
 			return false;
@@ -50,7 +50,11 @@
 		{
 			for (var i = 0; i < selector.length; i++)
 			{
-				g.toggle(selector[i], visibility);
+				g.toggle(selector[i], visibility, false);
+			}
+
+			if (resize_parent !== false) {
+				g.resizeParentDialog();
 			}
 
 			return true;
@@ -65,11 +69,23 @@
 		for (var i = 0; i < elements.length; i++) {
 			elements[i].classList.toggle('hidden', visibility ? false : true);
 
+			elements[i].querySelectorAll('[data-required]').forEach(e => {
+				e.required = parseInt(e.dataset.required, 10);
+			});
+
 			// Make sure hidden elements are not really required
 			// Avoid Chrome bug "An invalid form control with name='' is not focusable."
 			elements[i].querySelectorAll('input[required], textarea[required], select[required], button[required]').forEach((e) => {
-				e.disabled = !visibility ? true : (e.getAttribute('disabled') ? true : false);
+				if (typeof e.dataset.disabled === 'undefined') {
+					e.dataset.disabled = e.hasAttribute('disabled') ? 1 : 0;
+				}
+
+				e.disabled = !visibility ? true : parseInt(e.dataset.disabled, 10);
 			});
+		}
+
+		if (resize_parent !== false) {
+			g.resizeParentDialog();
 		}
 
 		return true;
@@ -98,8 +114,20 @@
 
 	g.dialog = null;
 	g.focus_before_dialog = null;
+	g.dialog_on_close = false;
 
-	g.openDialog = function (content, callback) {
+	g.openDialog = function (content, options) {
+		var close = true,
+			callback = null,
+			classname = null;
+
+		if (typeof options === "object" && options !== null) {
+			callback = options.callback ?? null;
+			classname = options.classname ?? null;
+			close = options.close ?? true;
+			g.dialog_on_close = options.on_close || false;
+		}
+
 		if (null !== g.dialog) {
 			g.closeDialog();
 		}
@@ -109,14 +137,20 @@
 		g.dialog = document.createElement('dialog');
 		g.dialog.id = 'dialog';
 		g.dialog.open = true;
+		g.dialog.className = classname || '';
 
-		var btn = document.createElement('button');
-		btn.className = 'icn-btn closeBtn';
-		btn.setAttribute('data-icon', '✘');
-		btn.type = 'button';
-		btn.innerHTML = 'Fermer';
-		btn.onclick = g.closeDialog;
-		g.dialog.appendChild(btn);
+		if (close) {
+			var btn = document.createElement('button');
+			btn.className = 'icn-btn closeBtn';
+			btn.setAttribute('data-icon', '✘');
+			btn.type = 'button';
+			btn.innerHTML = 'Fermer';
+			btn.onclick = g.closeDialog;
+			g.dialog.appendChild(btn);
+
+			g.dialog.onclick = (e) => { if (e.target == g.dialog) g.closeDialog(); };
+			window.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
+		}
 
 		if (typeof content == 'string') {
 			var container = document.createElement('div');
@@ -132,8 +166,6 @@
 		g.dialog.appendChild(content);
 
 		g.dialog.style.opacity = 0;
-		g.dialog.onclick = (e) => { if (e.target == g.dialog) g.closeDialog(); };
-		window.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
 
 		let tag = content.tagName.toLowerCase();
 
@@ -163,7 +195,12 @@
 		return content;
 	}
 
-	g.openFrameDialog = function (url, height = 'auto', callback) {
+	g.openFrameDialog = function (url, options) {
+		options = options ?? {};
+		options.height = options.height || 'auto';
+		options.callback = options.callback || null;
+		options.classname = options.classname || null;
+
 		var iframe = document.createElement('iframe');
 		iframe.src = url;
 		iframe.name = 'dialog';
@@ -171,21 +208,27 @@
 		iframe.frameborder = '0';
 		iframe.scrolling = 'yes';
 		iframe.width = iframe.height = 0;
-		iframe.setAttribute('data-height', height);
+		iframe.setAttribute('data-height', options.height);
+
 		iframe.addEventListener('load', () => {
 			iframe.contentWindow.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
+
+			if (iframe.parentNode.className) {
+				return;
+			}
+
 			// We need to wait a bit for the height to be correct, not sure why
 			window.setTimeout(() => {
-				iframe.style.height = iframe.dataset.height == 'auto' ? iframe.contentWindow.document.body.offsetHeight + 'px' : iframe.dataset.height;
-			}, 100);
+				iframe.style.height = iframe.dataset.height == 'auto' && iframe.contentWindow.document.body ? iframe.contentWindow.document.body.offsetHeight + 'px' : iframe.dataset.height;
+			}, 200);
 		});
 
-		g.openDialog(iframe, callback);
+		g.openDialog(iframe, options);
 		return iframe;
 	};
 
 	g.reloadParentDialog = () => {
-		if (!window.parent.g.dialog) {
+		if (typeof window.parent.g === 'undefined' || !window.parent.g.dialog) {
 			return;
 		}
 
@@ -193,7 +236,7 @@
 	};
 
 	g.setParentDialogHeight = (height) => {
-		if (!window.parent.g.dialog) {
+		if (typeof window.parent.g === 'undefined' || !window.parent.g.dialog) {
 			return;
 		}
 
@@ -201,8 +244,13 @@
 		g.resizeParentDialog(height);
 	};
 
+	g.toggleDialogFullscreen = () => {
+		g.dialog.classList.add('fullscreen')
+		g.dialog.childNodes[1].style.height = null;
+	};
+
 	g.resizeParentDialog = (forced_height) => {
-		if (!window.parent.g.dialog) {
+		if (typeof window.parent.g === 'undefined' || !window.parent.g.dialog) {
 			return;
 		}
 
@@ -235,6 +283,11 @@
 			return false;
 		}
 
+		if (g.dialog_on_close) {
+			location.href = g.dialog_on_close == true ? location.href : g.dialog_on_close.replace(/!/, g.admin_url);
+			return;
+		}
+
 		var d = g.dialog;
 		d.style.opacity = 0;
 		window.onkeyup = g.dialog = null;
@@ -244,6 +297,21 @@
 		if (g.focus_before_dialog) {
 			g.focus_before_dialog.focus();
 		}
+	};
+
+	g.openFormInDialog = (form) => {
+		if (form.target != '_dialog' && form.target != 'dialog') {
+			return;
+		}
+
+		let url = form.getAttribute('action');
+		url = url + (url.indexOf('?') > 0 ? '&' : '?') + '_dialog';
+		form.setAttribute('action', url);
+		form.target = 'dialog';
+
+		g.openFrameDialog('about:blank', {'height': form.getAttribute('data-dialog-height') ? 90 : 'auto'});
+		form.submit();
+		return false;
 	};
 
 	g.checkUncheck = function()
@@ -283,13 +351,22 @@
 		}
 	};
 
-	g.enhancePasswordField = function (field, repeat_field)
+	/**
+	 * Adds a "show password" button next to password inputs
+	 */
+	g.enhancePasswordField = function (field)
 	{
+		if (field.id.indexOf('_confirmed') != -1) {
+			return;
+		}
+
 		var show_password = document.createElement('button');
 		show_password.type = 'button';
 		show_password.className = 'icn-btn';
 
 		field.parentNode.insertBefore(show_password, field.nextSibling);
+
+		let repeat_field = document.getElementById(field.id + '_confirmed');
 
 		g.togglePasswordVisibility(field, repeat_field, false);
 
@@ -356,6 +433,7 @@
 			throw Error('Parent input list not found');
 		}
 
+		var can_delete = i.firstChild.getAttribute('data-can-delete');
 		var multiple = i.firstChild.getAttribute('data-multiple');
 		var name = i.firstChild.getAttribute('data-name');
 
@@ -364,7 +442,7 @@
 		span.innerHTML = '<input type="hidden" name="' + name + '[' + value + ']" value="' + label + '" />' + label;
 
 		// Add delete button
-		if (parseInt(multiple, 10) == 1) {
+		if (can_delete == 1) {
 			var btn = document.createElement('button');
 			btn.className = 'icn-btn';
 			btn.type = 'button';
@@ -372,7 +450,8 @@
 			btn.onclick = () => span.parentNode.removeChild(span);
 			span.appendChild(btn);
 		}
-		else if (old = i.querySelector('span')) {
+
+		if (!multiple && (old = i.querySelector('span'))) {
 			i.removeChild(old);
 		}
 
@@ -411,10 +490,18 @@
 				return;
 			}
 
-			var i = form.querySelector(form.dataset.focus == 1 ? '[name]:not([type="hidden"])' : form.dataset.focus);
-			i.focus();
+			let f = form.dataset.focus;
+			let n = f.match(/^\d+$/) ? (parseInt(f, 10) - 1) : null;
+			let i = form.querySelectorAll(n !== null ? '[name]:not([type="hidden"]):not([readonly]):not([type=button])' : f);
+
+			if (n !== null && i[n]) {
+				i[n].focus();
+			}
+			else if (n === null && i[0]) {
+				i[0].focus();
+			}
 		}
-	}, 'dom');
+	});
 
 	// Sélecteurs de listes
 	g.onload(() => {
@@ -432,28 +519,53 @@
 
 		// Set custom error message if required list is not selected
 		document.querySelectorAll('form').forEach((form) => {
+			let elements = form.elements;
+
+			// Make sure hidden or disabled form elements are not required
+			for (var j = 0; j < elements.length; j++) {
+				var element = elements[j];
+
+				if (element.required && (element.disabled || !element.offsetParent)) {
+					element.dataset.required = element.hasAttribute('required') ? 1 : 0;
+					element.required = false;
+				}
+			}
+
 			form.addEventListener('submit', (e) => {
+				let elements = form.elements;
+
+				// Make sure hidden or disabled form elements are not required
+				for (var j = 0; j < elements.length; j++) {
+					var element = elements[j];
+
+					if (element.disabled || !element.offsetParent) {
+						element.required = false;
+					}
+				}
+
 				let inputs = form.querySelectorAll('.input-list > button[required]');
 
 				for (var k = 0; k < inputs.length; k++) {
 					var i2 = inputs[k];
-					i2.type = 'submit'; // Force button to have error message, <button type="button"> cannot show validity message
 
-					// Element is hidden or disabled
-					if (!i2.offsetParent || i2.disabled) {
-						i2.required = false;
+					// Ignore hidden / disabled form elements
+					if (i2.disabled || !i2.offsetParent) {
 						continue;
 					}
 
-					let v = i2.parentNode.querySelector('input[type="hidden"]');
+					let v = i2.parentNode.querySelector('input[type="hidden"]:nth-child(1)');
 
 					if (!v || !v.value) {
+						// Force button to have error message, <button type="button"> cannot show validity message
+						i2.type = 'submit';
 						i2.setCustomValidity('Merci de faire une sélection.');
 						i2.reportValidity();
 						e.preventDefault();
 						return false;
 					}
 				}
+
+				return true;
 			});
 		});
 
@@ -480,29 +592,36 @@
 						return false;
 					}
 
-					g.openFrameDialog(url, e.getAttribute('data-dialog-height') ? '90%' : 'auto');
+					g.openFrameDialog(url, {
+						'height': e.getAttribute('data-dialog-height') || 'auto',
+						'classname': e.getAttribute('data-dialog-class'),
+						'on_close': e.getAttribute('data-dialog-on-close') == 1
+					});
 					return false;
 				}
 
 				if (type.match(/^image\//)) {
 					var i = document.createElement('img');
 					i.src = e.href;
+					i.draggable = false;
 				}
 				else if (type.match(/^audio\//)) {
 					var i = document.createElement('audio');
 					i.autoplay = true;
 					i.controls = true;
 					i.src = e.href;
+					i.draggable = false;
 				}
 				else if (type.match(/^video\/|^application\/ogg$/)) {
 					var i = document.createElement('video');
 					i.autoplay = true;
 					i.controls = true;
 					i.src = e.href;
+					i.draggable = false;
 				}
 				else {
 					let url = e.href + (e.href.indexOf('?') > 0 ? '&' : '?') + '_dialog';
-					g.openFrameDialog(url, '90%');
+					g.openFrameDialog(url, {height: '90%'});
 					return false;
 				}
 
@@ -513,16 +632,7 @@
 		});
 
 		$('form[target="_dialog"]').forEach((e) => {
-			e.addEventListener('submit', () => {
-				let url = e.getAttribute('action');
-				url = url + (url.indexOf('?') > 0 ? '&' : '?') + '_dialog';
-				e.setAttribute('action', url);
-				e.target = 'dialog';
-
-				g.openFrameDialog('about:blank', e.getAttribute('data-dialog-height') ? '90%' : 'auto');
-				e.submit();
-				return false;
-			});
+			e.addEventListener('submit', () => g.openFormInDialog(e));
 		});
 	});
 
@@ -533,9 +643,29 @@
 	});
 
 	g.onload(() => {
+		document.querySelectorAll('input[type="password"]:not([readonly]):not([disabled]):not(.hidden)').forEach((e) => {
+			g.enhancePasswordField(e);
+		});
+	});
+
+	g.onload(() => {
 		if (document.querySelector('input[type="file"][data-enhanced]')) {
 			g.script('scripts/file_input.js');
 		}
+	});
+
+	g.onload(() => {
+		let forms = document.forms;
+
+		if (forms.length != 1) return;
+
+		// Disable progress on search or the form will stay blurred when clicking export buttons
+		if (forms[0].hasAttribute('data-disable-progress')) return;
+
+		forms[0].addEventListener('submit', (e) => {
+			if (e.defaultPrevented) return;
+			forms[0].classList.add('progressing');
+		});
 	});
 
 	// To be able to select a whole table line just by clicking the row
@@ -545,14 +675,43 @@
 		for (var i = 0; i < tableActions.length; i++)
 		{
 			tableActions[i].onchange = function () {
+				if (!this.value) {
+					return;
+				}
+
 				if (!this.form.querySelector('table tbody input[type=checkbox]:checked'))
 				{
 					this.selectedIndex = 0;
 					return !window.alert("Aucune ligne sélectionnée !");
 				}
 
+				var action = this.form.getAttribute('action');
+				var target = this.form.getAttribute('target');
+
+				if (this.hasAttribute('data-form-action')) {
+					this.form.action = this.dataset.formAction;
+				}
+
+				if (this.getAttribute('data-form-target') === '_dialog') {
+					this.form.target = '_dialog'
+				}
+
+				if (this.options[this.selectedIndex].hasAttribute('data-no-dialog')) {
+					this.form.target = '';
+				}
+
 				this.form.dispatchEvent(new Event('submit'));
-				this.form.submit();
+
+				if (this.form.target === '_dialog') {
+					g.openFormInDialog(this.form);
+				}
+				else {
+					this.form.submit();
+				}
+
+				this.form.action = action;
+				this.form.target = target || '';
+				this.selectedIndex = 0;
 			};
 		}
 
@@ -566,6 +725,15 @@
 				elm.parentNode.parentNode.classList.toggle('checked', elm.checked);
 			});
 		});
+	});
+
+	g.onload(() => {
+		g.resizeParentDialog();
+
+		// File drag and drop support
+		if ($('[data-upload-url]').length) {
+			g.script('scripts/file_drag.js');
+		}
 	});
 
 })();

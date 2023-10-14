@@ -1,9 +1,8 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Entities\Services\Reminder;
-use Garradin\Services\Reminders;
-use Garradin\Services\Services;
+use Paheko\Services\Reminders;
+use Paheko\Services\Services;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -15,22 +14,8 @@ if (!count($services_list)) {
 	Utils::redirect(ADMIN_URL . 'services/?CREATE');
 }
 
-$csrf_key = 'reminder_add';
-
-$form->runIf('save', function () {
-	$reminder = new Reminder;
-	$reminder->importForm();
-	$reminder->save();
-}, $csrf_key, Utils::getSelfURI());
-
 $list = Reminders::list();
-$services_list = Services::listAssoc();
 
-$default_subject = 'Échéance de cotisation';
-$default_body = "Bonjour #IDENTITE,\n\nVotre cotisation arrive à échéance dans #NB_JOURS jours.\n\n"
-	.   "Merci de nous contacter pour renouveler votre cotisation.\n\nCordialement.\n\n"
-	.   "--\n#NOM_ASSO\n#ADRESSE_ASSO\nE-Mail : #EMAIL_ASSO\nSite web : #SITE_ASSO";
-
-$tpl->assign(compact('csrf_key', 'list', 'services_list', 'default_subject', 'default_body'));
+$tpl->assign(compact('list'));
 
 $tpl->display('services/reminders/index.tpl');

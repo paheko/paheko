@@ -1,10 +1,10 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Accounting\Projects;
-use Garradin\Accounting\Transactions;
-use Garradin\Accounting\Years;
+use Paheko\Accounting\Projects;
+use Paheko\Accounting\Transactions;
+use Paheko\Accounting\Years;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -59,7 +59,7 @@ if (f('action') == 'delete')
 }
 else
 {
-	$tpl->assign('projects', Projects::listAssocWithEmpty());
+	$tpl->assign('projects', Projects::listAssoc());
 
 	$tpl->display('acc/transactions/action_project.tpl');
 }

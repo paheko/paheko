@@ -419,6 +419,36 @@ Il est aussi possible d'utiliser la syntaxe avec des paramètres nommés :
 
 Les images qui ne sont pas mentionnées dans le texte seront affichées après le texte sous forme de galerie.
 
+## Galerie d'images
+
+Il est possible d'afficher une galerie d'images (sous forme d'images miniatures) avec la balise `<<gallery` qui contient la liste des images à mettre dans la galerie :
+
+```
+<<gallery
+Nom_fichier.jpg
+Nom_fichier_2.jpg
+>>
+```
+
+Si aucun nom de fichier n'est indiqué, alors toutes les images jointes à la page seront affichées :
+
+```
+<<gallery>>
+```
+
+### Diaporama d'images
+
+On peut également afficher cette galerie sous forme de diaporama. Dans ce cas une seule image est affichée, et on peut passer de l'une à l'autre.
+
+La syntaxe est la même, mais on ajoute le mot `slideshow` après le mot `gallery` :
+
+```
+<<gallery slideshow
+Nom_fichier.jpg
+Nom_fichier_2.jpg
+>>
+```
+
 ## Fichiers joints
 
 Pour créer un bouton permettant de voir ou télécharger un fichier joint à la page web, il suffit d'utiliser la syntaxe suivante :
@@ -429,6 +459,28 @@ Pour créer un bouton permettant de voir ou télécharger un fichier joint à la
 
 * `Nom_fichier.ext` : remplacer par le nom du fichier  (parmi les fichiers joints à la page)
 * `Libellé` : indique le libellé du qui sera affiché sur le bouton, si aucun libellé n'est indiqué alors c'est le nom du fichier qui sera affiché
+
+## Vidéos
+
+Pour inclure un lecteur vidéo dans la page web à partir d'un fichier vidéo joint à la page, il faut utiliser le code suivant :
+
+```
+<<video|Nom_du_fichier.ext>>
+```
+
+On peut aussi spécifier d'autres paramètres :
+
+* `file` : nom du fichier vidéo
+* `poster` : nom de fichier d'une image utilisée pour remplacer la vidéo avant qu'elle ne soit lue
+* `subtitles` : nom d'un fichier de sous-titres au format VTT (le format SRT n'est pas géré par les navigateurs)
+* `width` : largeur de la vidéo (en pixels)
+* `height` : hauteur de la vidéo (en pixels)
+
+Exemple :
+
+```
+<<video file="Ma_video.webm" poster="Ma_video_poster.jpg" width="640" height="360" subtitles="Ma_video_sous_titres.vtt">>
+```
 
 ## Sommaire / table des matières automatique
 

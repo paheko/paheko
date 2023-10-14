@@ -279,25 +279,6 @@ CREATE INDEX IF NOT EXISTS acc_transactions_lines_account ON acc_transactions_li
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_project ON acc_transactions_lines (id_project);
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_reconciled ON acc_transactions_lines (reconciled);
 
--- Make sure we cannot mix charts inside a transaction
-CREATE TRIGGER IF NOT EXISTS acc_transactions_chart_insert BEFORE INSERT ON acc_transactions_lines
-BEGIN
-    SELECT RAISE(FAIL, 'Specified account is from a different chart')
-    FROM acc_transactions t
-    INNER JOIN acc_accounts a ON a.id = NEW.id_account
-    INNER JOIN acc_years y ON y.id = t.id_year
-    WHERE t.id = NEW.id_transaction AND y.id_chart != a.id_chart;
-END;
-
-CREATE TRIGGER IF NOT EXISTS acc_transactions_chart_update BEFORE UPDATE ON acc_transactions_lines
-BEGIN
-    SELECT RAISE(FAIL, 'Specified account is from a different chart')
-    FROM acc_transactions t
-    INNER JOIN acc_accounts a ON a.id = NEW.id_account
-    INNER JOIN acc_years y ON y.id = t.id_year
-    WHERE t.id = NEW.id_transaction AND y.id_chart != a.id_chart;
-END;
-
 CREATE TABLE IF NOT EXISTS acc_transactions_users
 -- Liaison des écritures et des membres
 (

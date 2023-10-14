@@ -34,7 +34,8 @@
 			attachments: t.textarea.getAttribute('data-attachments') == 1,
 			savebtn: t.textarea.getAttribute('data-savebtn'),
 			preview_url: t.textarea.getAttribute('data-preview-url'),
-			format: t.textarea.getAttribute('data-format')
+			format: t.textarea.getAttribute('data-format'),
+			page_id: t.textarea.getAttribute('data-id')
 		};
 
 		// Use localStorage backup, per path
@@ -53,10 +54,20 @@
 		// Warn before closing window if content was changed
 		window.addEventListener('beforeunload', preventClose, { capture: true });
 
-		t.textarea.form.addEventListener('submit', () => {
+		var submitted = false;
+
+		t.textarea.form.addEventListener('submit', (e) => {
 			window.removeEventListener('beforeunload', preventClose, {capture: true});
-			save((data) => { location.href = data.redirect; });
-			return false;
+
+			if (!submitted) {
+				// Just in case fetch() fails, then save() will trigger a regular form submit
+				submitted = true;
+
+				save((data) => { location.href = data.redirect; });
+				e.preventDefault();
+				return false;
+			}
+
 		});
 
 		// Cancel Escape to close.value
@@ -126,7 +137,7 @@
 
 		var openSyntaxHelp = function ()
 		{
-			let url = config.format == 'markdown' ? 'markdown.html' : 'skriv.html';
+			let url = config.format != 'skriv' ? 'markdown.html' : 'skriv.html';
 			url = g.admin_url + 'static/doc/' + url;
 
 			g.openFrameDialog(url);
@@ -135,17 +146,13 @@
 
 		var openFileInsert = function (callback)
 		{
-			let args = new URLSearchParams(window.location.search);
-			var uri = args.get('p');
-			g.openFrameDialog(g.admin_url + 'web/_attach.php?files&_dialog&p=' + uri, null, callback);
+			g.openFrameDialog(g.admin_url + 'web/_attach.php?files&_dialog&id=' + config.page_id, {callback});
 			return true;
 		};
 
 		var openImageInsert = function (callback)
 		{
-			let args = new URLSearchParams(window.location.search);
-			var uri = args.get('p');
-			g.openFrameDialog(g.admin_url + 'web/_attach.php?images&_dialog&p=' + uri, null, callback);
+			g.openFrameDialog(g.admin_url + 'web/_attach.php?images&_dialog&id=' + config.page_id, {callback});
 			return true;
 		};
 
@@ -235,13 +242,19 @@
 			var btn = document.createElement('button');
 			btn.type = 'button';
 			btn.title = altTitle ? altTitle : title;
-			if ([...title].length == 1) {
+
+			if (typeof title == 'object') {
+				btn.dataset.icon = title.icon;
+				btn.innerText = title.label;
+			}
+			else if ([...title].length == 1) {
 				btn.dataset.icon = title;
 			}
 			else {
 				btn.innerText = title;
 			}
-			btn.className = 'icn-btn ' +name;
+
+			btn.className = 'icn-btn ' + name;
 			btn.onclick = function () { action.call(); return false; };
 
 			toolbar.appendChild(btn);
@@ -249,7 +262,7 @@
 		};
 
 		let applyHeader = () => {
-			return wrapTags(config.format == 'markdown' ? '## ' : '== ', '');
+			return wrapTags(config.format != 'skriv' ? '## ' : '== ', '');
 		};
 
 		let applyBold = () => {
@@ -257,7 +270,7 @@
 		};
 
 		let applyItalic = () => {
-			if (config.format == 'markdown') {
+			if (config.format != 'skriv') {
 				return wrapTags("_", "_");
 			}
 			else {
@@ -278,7 +291,7 @@
 				return true;
 			}
 
-			if (config.format == 'markdown') {
+			if (config.format != 'skriv') {
 				return wrapTags("[", "](" + url + ')');
 			}
 			else {
@@ -286,8 +299,13 @@
 			}
 		};
 
-		let save = function (callback) {
+		let save = async function (callback) {
 			const data = new URLSearchParams();
+
+			// For encryption
+			if (typeof t.textarea.form.onbeforesubmit !== 'undefined') {
+				t.textarea.form.onbeforesubmit();
+			}
 
 			for (const pair of new FormData(t.textarea.form)) {
 				data.append(pair[0], pair[1]);
@@ -295,19 +313,44 @@
 
 			data.append('save', 1);
 
-			fetch(t.textarea.form.action + '&js', {
-				method: 'post',
-				body: data,
-			}).then((response) => {
-				if (!response.ok) {
-					throw Error(response.status);
+			var r = await fetch(t.textarea.form.action, {
+				'method': 'post',
+				'body': data,
+				'headers': {
+					'Accept': 'application/json'
+				}
+			});
+
+			if (r.ok) {
+				// Remove backup text
+				localStorage.removeItem(backup_key);
+			}
+
+			if (r.status === 204) {
+				callback(null);
+				return true;
+			}
+
+			try {
+				const received = await r.json();
+
+				if (!r.ok && !received) {
+					throw Error(r.status);
+				}
+
+				if (received.error) {
+					alert(received.error);
+					throw Error(received.error);
 				}
 				else {
-					return response.json();
+					callback(received);
 				}
-			})
-			.then(data => callback(data))
-			.catch(e => { console.log(e); t.textarea.form.querySelector('[type=submit]').click(); });
+			}
+			catch (e) {
+				console.error(e);
+				t.textarea.form.querySelector('[type=submit]').click();
+			}
+
 			return true;
 		};
 
@@ -315,7 +358,10 @@
 			save((data) => {
 				showSaved();
 				t.textarea.defaultValue = t.textarea.value;
-				localStorage.removeItem(backup_key);
+
+				if (!data) {
+					return;
+				}
 
 				let e = t.textarea.form.querySelector('input[name=editing_started]');
 
@@ -355,7 +401,7 @@
 			}
 
 
-			appendButton('ext close', 'Retour à l\'édition', closeIFrame);
+			appendButton('ext close', {icon: '←', label: 'Retour à l\'édition'}, closeIFrame);
 
 			t.parent.insertBefore(toolbar, t.parent.firstChild);
 		}
@@ -489,6 +535,9 @@
 			if ((v = localStorage.getItem(backup_key)) && v.trim() !== t.textarea.value.trim() && window.confirm(msg_restore)) {
 				t.textarea.value = v;
 			}
+			else {
+				localStorage.removeItem(backup_key);
+			}
 		}, 50);
 
 		window.setInterval(() => {
@@ -496,7 +545,14 @@
 				return;
 			}
 
+			var v = localStorage.getItem(backup_key);
+
+			if (v && v.trim() === t.textarea.value.trim()) {
+				return;
+			}
+
 			localStorage.setItem(backup_key, t.textarea.value);
+			console.log('Saved');
 		}, 10000);
 
 	}

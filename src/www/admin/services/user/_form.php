@@ -1,12 +1,12 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Accounting\Projects;
-use Garradin\Services\Services;
+use Paheko\Accounting\Projects;
+use Paheko\Services\Services;
 
 
-if (!defined('\Garradin\ROOT')) {
+if (!defined('\Paheko\ROOT')) {
 	die();
 }
 
@@ -42,4 +42,4 @@ $tpl->assign([
 $tpl->assign(compact('form_url', 'today', 'grouped_services', 'current_only', 'has_past_services',
 	'create', 'copy_service', 'copy_service_only_paid', 'users'));
 
-$tpl->assign('projects', Projects::listAssocWithEmpty());
+$tpl->assign('projects', Projects::listAssoc());

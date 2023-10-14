@@ -9,9 +9,9 @@ DEB_ARCH_NAME=all
 
 PACKAGE_VERSION=`cat ../../src/VERSION`
 
-[ ! -f ../../src/paheko-${PACKAGE_VERSION}.tar.gz ] && (cd ../../src; make release)
+[ ! -f ../paheko-${PACKAGE_VERSION}.tar.gz ] && (cd ../../src; make release)
 
-tar xzvf ../../src/paheko-${PACKAGE_VERSION}.tar.gz -C /tmp
+tar xzvf ../paheko-${PACKAGE_VERSION}.tar.gz -C /tmp
 
 SRCDIR="/tmp/paheko-${PACKAGE_VERSION}"
 
@@ -38,7 +38,8 @@ CODEDIR=${DEBLOCALPREFIX}/share/${PACKAGE_DEBNAME}
 mkdir -p ${CODEDIR}
 cp -r ${SRCDIR}/* ${CODEDIR}
 cp ${THISDIR}/config.debian.php ${CODEDIR}/config.local.php
-rm -rf ${CODEDIR}/*.sqlite ${CODEDIR}/cache ${CODEDIR}/www/squelettes ${CODEDIR}/www/plugins/*
+mv ${CODEDIR}/data/plugins ${CODEDIR}/plugins
+rm -rf ${CODEDIR}/*.sqlite ${CODEDIR}/data
 cp ${THISDIR}/paheko.png "${CODEDIR}"
 
 mkdir -p "${DEBROOT}/var/lib/${PACKAGE_DEBNAME}"
@@ -127,9 +128,9 @@ Section: web
 Priority: optional
 Maintainer: Paheko <paheko@paheko.eu>
 Architecture: ${DEB_ARCH_NAME}
-Depends: dash | bash, php-cli (>=7.4), php-sqlite3, php-intl, sensible-utils
+Depends: dash | bash, php-cli (>=7.4), php-sqlite3, php-intl, php-mbstring, sensible-utils
 Version: ${PACKAGE_DEB_VERSION}
-Suggests: php-gd, php-imagick
+Suggests: php-imagick
 Replaces: garradin (<< 1.2.3~)
 Breaks: garradin (<< 1.2.3~)
 Homepage: https://fossil.kd2.org/paheko/

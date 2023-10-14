@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Saisie d'une écriture" current="acc/new"}
+{include file="_head.tpl" title="Saisie d'une écriture" current="acc/new"}
 
 {include file="acc/_year_select.tpl"}
 
@@ -33,12 +33,12 @@
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc." source=$transaction}
 		</dl>
 		<dl>
-			{input type="list" multiple=true name="users" label="Membres associés" target="!membres/selector.php"}
+			{input type="list" multiple=true name="users" label="Membres associés" target="!users/selector.php"}
 			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30}
 		</dl>
 		<dl data-types="all-but-advanced">
-			{if count($projects) > 1}
-				{input type="select" name="id_project" label="Projet (analytique)" options=$projects default=$id_project}
+			{if count($projects) > 0}
+				{input type="select" name="id_project" label="Projet (analytique)" options=$projects default=$id_project default_empty="— Aucun —"}
 			{/if}
 		</dl>
 	</fieldset>
@@ -56,4 +56,4 @@ g.script('scripts/accounting.js', () => { initTransactionForm(false); });
 </script>
 {/literal}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

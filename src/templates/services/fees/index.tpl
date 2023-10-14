@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="%s — Tarifs"|args:$service.label current="membres/services"}
+{include file="_head.tpl" title="%s — Tarifs"|args:$service.label current="users/services"}
 
 {include file="services/_nav.tpl" current="index" current_service=$service service_page="index"}
 
@@ -49,4 +49,4 @@
 	{include file="services/fees/_fee_form.tpl" legend="Ajouter un tarif" submit_label="Ajouter" csrf_key="fee_add" fee=null amount_type=0 account=null}
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

@@ -1,7 +1,7 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Upgrade;
+use Paheko\Upgrade;
 use KD2\Security;
 
 require_once __DIR__ . '/_inc.php';
@@ -15,7 +15,7 @@ $i = Upgrade::getInstaller();
 
 $csrf_key = 'upgrade_' . sha1(SECRET_KEY);
 $releases = $i->listReleases();
-$v = garradin_version();
+$v = paheko_version();
 
 // Remove releases that are in the past
 foreach ($releases as $rv => $release) {
@@ -46,4 +46,4 @@ $form->runIf('upgrade', function () use ($i) {
 
 $tpl->assign('website', WEBSITE);
 $tpl->assign(compact('releases', 'latest', 'csrf_key'));
-$tpl->display('admin/config/upgrade.tpl');
+$tpl->display('config/upgrade.tpl');

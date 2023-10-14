@@ -1,6 +1,6 @@
 <?php
-use Garradin\Entities\Accounting\Chart;
-use Garradin\Config;
+use Paheko\Entities\Accounting\Chart;
+use Paheko\Config;
 
 $country_list = Chart::COUNTRY_LIST + ['' => '— Autre'];
 
@@ -36,7 +36,6 @@ $name ??= 'country';
 	{literal}
 	var changeCountry = () => {
 		g.toggle('.' + n + '_empty', c.value == '' ? true : false);
-		g.resizeParentDialog();
 	};
 
 	c.onchange = changeCountry;

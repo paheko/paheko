@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="%sGraphiques"|args:$project_title current="acc/years"}
+{include file="_head.tpl" title="%sGraphiques"|args:$project_title current="acc/years"}
 
 {include file="acc/reports/_header.tpl" current="graphs" title="Graphiques" allow_filter=false}
 
@@ -21,4 +21,4 @@
 	</p>
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

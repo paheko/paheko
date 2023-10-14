@@ -12,14 +12,15 @@ parameters:
       - ../src/include/lib/Parsedown.php
     reportUnmatchedIgnoredErrors: false
     ignoreErrors:
-        - '#Access to protected property Garradin\\Entities#'
+        - '#Access to protected property Paheko\\Entities#'
+        - '#Access to an undefined property Paheko\\Entities\\Users\\User#'
         - '#Access to an undefined property KD2\\DB\\AbstractEntity#'
         - '#but returns KD2\\DB\\AbstractEntity#'
         - '#Call to an undefined method KD2\\DB\\AbstractEntity#'
         - '#Property .* does not accept KD2\\DB\\AbstractEntity#'
         - '#PHPDoc#'
         -
-          message: '#Variable \$(tpl|form|session|user|session|wiki|config|membres|current_year) might not be defined#'
+          message: '#Variable \$(tpl|form|session|user|session|wiki|config|user|current_year) might not be defined#'
           path: ../src/www/*
         -
           message: '#Constant CURRENT_YEAR_ID not found#'

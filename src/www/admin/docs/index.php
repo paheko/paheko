@@ -1,78 +1,102 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Files\Files;
-use Garradin\Files\Transactions;
-use Garradin\Files\Users;
-use Garradin\Entities\Files\File;
+use Paheko\Files\Files;
+use Paheko\Files\Transactions;
+use Paheko\Files\Users as Users_Files;
+use Paheko\Files\Trash;
+use Paheko\Users\Users;
+use Paheko\Users\Session;
+use Paheko\Entities\Files\File;
 
-require_once __DIR__ . '/_inc.php';
+require_once __DIR__ . '/../_inc.php';
 
-$path = qg('path') ?: File::CONTEXT_DOCUMENTS;
+$highlight = null;
+
+if (qg('f')) {
+	$pos = strrpos(qg('f'), '/');
+	$path = substr(qg('f'), 0, $pos);
+	$highlight = substr(qg('f'), $pos + 1);
+}
+else {
+	$path = qg('path') ?: File::CONTEXT_DOCUMENTS;
+}
+
+$dir = Files::get($path);
+
+if (!$dir || !$dir->isDir()) {
+	throw new UserException('Ce répertoire n\'existe pas.');
+}
+
+if (!$dir->canRead()) {
+	throw new UserException('Vous n\'avez pas accès à ce répertoire');
+}
 
 $context = Files::getContext($path);
 $context_ref = Files::getContextRef($path);
 $list = null;
+$user_name = null;
+$context_specific_root = false;
 
 // Specific lists for some contexts
-if ($context == File::CONTEXT_TRANSACTION) {
-	if (!$session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)) {
-		throw new UserException('Vous n\'avez pas accès à ce répertoire');
-	}
-
+if ($context == File::CONTEXT_TRANSACTION || $context == File::CONTEXT_USER) {
 	if (!$context_ref) {
-		$list = Transactions::list();
-		$can_delete = $can_write = false;
-	}
-}
-elseif ($context == File::CONTEXT_USER) {
-	if (!$session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)) {
-		throw new UserException('Vous n\'avez pas accès à ce répertoire');
-	}
+		$context_specific_root = true;
 
-	if (!$context_ref) {
-		$list = Users::list();
-		$can_delete = $can_write = false;
-	}
-}
-
-if (null == $list) {
-	$list = Files::list($path);
-
-	// We consider that the first file has the same rights as the others
-	if (count($list)) {
-		$first = current($list);
-
-		if (!$first->checkReadAccess($session)) {
-			throw new UserException('Vous n\'avez pas accès à ce répertoire');
+		if ($context == File::CONTEXT_TRANSACTION) {
+			$list = Transactions::list();
 		}
-
-		$can_delete = $first->checkDeleteAccess($session);
-		$can_write = $first->checkWriteAccess($session);
+		elseif ($context == File::CONTEXT_USER) {
+			$list = Users_Files::list();
+		}
 	}
-	else {
-		$can_delete = $can_write = false;
+	elseif ($context_ref && $context == File::CONTEXT_USER) {
+		$user_name = Users::getName($context_ref);
 	}
 }
-elseif ($list instanceof DynamicList) {
-	$list->loadFromQueryString();
+else {
+	$context_ref = null;
 }
 
-$can_create = File::checkCreateAccess($path, $session);
-$can_upload = $can_create && (($context == File::CONTEXT_DOCUMENTS || $context == File::CONTEXT_SKELETON)
-	|| (($context == File::CONTEXT_USER || $context == File::CONTEXT_TRANSACTION) && $context_ref));
-$can_mkdir = $can_create && ($context == File::CONTEXT_DOCUMENTS || $context == File::CONTEXT_SKELETON);
+if (null === $list) {
+	$list = Files::getDynamicList($path);
+}
+
+$list->loadFromQueryString();
 
 $breadcrumbs = Files::getBreadcrumbs($path);
 
-$parent_path = Utils::dirname($path);
+$pref = Session::getPreference('folders_gallery');
+$gallery = $pref ?? true;
 
-$quota_used = Files::getUsedQuota();
-$quota_max = Files::getQuota();
-$quota_left = Files::getRemainingQuota();
-$quota_percent = $quota_max ? round(($quota_used / $quota_max) * 100) : 100;
+if (null !== qg('gallery')) {
+	$gallery = (bool) qg('gallery');
+}
 
-$tpl->assign(compact('path', 'list', 'can_write', 'can_delete', 'can_mkdir', 'can_upload', 'context', 'context_ref', 'breadcrumbs', 'parent_path', 'quota_used', 'quota_max', 'quota_percent', 'quota_left'));
+if ($gallery !== $pref) {
+	Session::getLoggedUser()->setPreference('folders_gallery', $gallery);
+}
+
+$dir_uri = $dir->path_uri();
+$parent_uri = $dir->parent_uri();
+
+$tpl->assign(compact('list', 'dir_uri', 'parent_uri', 'dir', 'context', 'context_ref',
+	'breadcrumbs', 'highlight', 'user_name', 'gallery', 'context_specific_root'));
+
+$quota = [
+	'used' => Files::getUsedQuota(),
+	'max' => Files::getQuota(),
+];
+
+$quota['left'] = Files::getRemainingQuota($quota['used']);
+
+foreach ($quota as $key => $value) {
+	$quota[$key . '_bytes'] = Utils::format_bytes($value);
+}
+
+$quota['percent'] = $quota['max'] ? round(($quota['used'] / $quota['max']) * 100) : 100;
+
+$tpl->assign(compact('quota'));
 
 $tpl->display('docs/index.tpl');

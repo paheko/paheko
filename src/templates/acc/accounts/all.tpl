@@ -1,13 +1,11 @@
 <?php
-use Garradin\Entities\Accounting\Account;
+use Paheko\Entities\Accounting\Account;
 ?>
-{include file="admin/_head.tpl" title="Tous les comptes" current="acc/accounts"}
+{include file="_head.tpl" title="Tous les comptes" current="acc/accounts"}
 
 {include file="acc/_year_select.tpl"}
 
 {include file="acc/accounts/_nav.tpl" current="all"}
-
-{include file="acc/_simple_help.tpl" link="../reports/trial_balance.php?year=%d"|args:$current_year.id type=null}
 
 {if !empty($balance)}
 <table class="list">
@@ -49,4 +47,4 @@ use Garradin\Entities\Accounting\Account;
 	Pour voir la liste complète des comptes, même ceux qui n'ont pas été utilisés, se référer au <a href="{$admin_url}acc/charts/accounts/?id={$current_year.id_chart}">plan comptable</a>.
 </p>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

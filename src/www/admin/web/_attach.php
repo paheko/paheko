@@ -1,18 +1,18 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
 require_once __DIR__ . '/_inc.php';
 
-use Garradin\Web\Web;
-use Garradin\Entities\Web\Page;
-use Garradin\Entities\Files\File;
-use Garradin\Files\Files;
+use Paheko\Web\Web;
+use Paheko\Entities\Web\Page;
+use Paheko\Entities\Files\File;
+use Paheko\Files\Files;
 
 require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 
-$page = Web::get(qg('p') ?: '');
+$page = Web::get((int)qg('id'));
 
 if (!$page) {
 	throw new UserException('Page inconnue');
@@ -20,11 +20,11 @@ if (!$page) {
 
 $csrf_key = 'attach_' . $page->id();
 
-$form->runIf('delete', function () use ($page, $session) {
-	$path = Utils::dirname($page->file_path) . '/' . f('delete');
+$form->runIf('delete', function () use ($page) {
+	$path = $page->dir_path() . '/' . f('delete');
 	$file = Files::get($path);
 
-	if (!$file || !$file->checkDeleteAccess($session)) {
+	if (!$file || !$file->canDelete()) {
 		throw new UserException('Vous ne pouvez pas supprimer ce fichier');
 	}
 
@@ -33,7 +33,7 @@ $form->runIf('delete', function () use ($page, $session) {
 
 
 $form->runIf('upload', function () use ($page) {
-	$new_file = File::uploadMultiple(Utils::dirname($page->file_path), 'file');
+	$new_file = Files::uploadMultiple($page->dir_path(), 'file');
 }, $csrf_key);
 
 $files = null;

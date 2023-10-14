@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Rapprochement : %s — %s"|args:$account.code,$account.label current="acc/accounts"}
+{include file="_head.tpl" title="Rapprochement : %s — %s"|args:$account.code,$account.label current="acc/accounts"}
 
 {include file="acc/_year_select.tpl"}
 
@@ -128,7 +128,7 @@
 						{if $line->journal && $line->csv}
 							==
 						{else}
-							<b class="icn">⚠</b>
+							{icon shape="alert"}
 						{/if}
 						</td>
 					{if isset($line->csv)}
@@ -153,4 +153,4 @@
 	</form>
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

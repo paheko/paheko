@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Balance d'ouverture" current="acc/years"}
+{include file="_head.tpl" title="Balance d'ouverture" current="acc/years"}
 
 {form_errors}
 
@@ -150,4 +150,4 @@
 </form>
 
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

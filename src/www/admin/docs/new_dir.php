@@ -1,15 +1,15 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Files\Files;
-use Garradin\Entities\Files\File;
+use Paheko\Files\Files;
+use Paheko\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
 
 $parent = qg('path');
 
-if (!File::checkCreateAccess($parent, $session)) {
+if (!File::canCreate($parent)) {
 	throw new UserException('Vous n\'avez pas le droit de créer de répertoire ici.');
 }
 
@@ -17,13 +17,12 @@ $csrf_key = 'create_dir';
 
 $form->runIf('create', function () use ($parent) {
 	$name = trim((string) f('name'));
-	File::validatePath($parent . '/' . $name);
-	$f = File::createDirectory($parent, $name);
+	$f = Files::mkdir($parent . '/' . $name);
 
 	$url = '!docs/?path=' . $f->path;
 
 	if (null !== qg('_dialog')) {
-		Utils::reloadParentFrame($url);
+		Utils::reloadParentFrame(null === qg('no_redir') ? $url : null);
 	}
 
 	Utils::redirect($url);

@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Supprimer un plan comptable" current="acc/years"}
+{include file="_head.tpl" title="Supprimer un plan comptable" current="acc/years"}
 
 {include file="common/delete_form.tpl"
 	legend="Supprimer ce plan comptable ?"
@@ -6,4 +6,4 @@
 	csrf_key="acc_charts_delete_%s"|args:$chart.id
 }
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

@@ -45,7 +45,7 @@ Usage : $0 [COMMANDE] [PROJET]
 Où COMMANDE peut être :
 
         server [-p|--port PORT] [-b|--bind IP]
-                Démarre un serveur web Garradin sur le port spécifié
+                Démarre un serveur web Paheko sur le port spécifié
                 (8081 par défaut) et l'IP spécifiée (127.0.0.1 par défaut)
 
         ui [-p|--port PORT] [-b|--bind IP]
@@ -96,6 +96,8 @@ PROJECT="$2"
 export PAHEKO_STANDALONE="$PROJECT"
 
 [ -f $PID_FILE ] && kill `cat $PID_FILE` > /dev/null 2>&1 && rm -f $PID_FILE
+
+PHP_CLI_SERVER_WORKER=2
 
 [ $VERBOSE = 1 ] && {
     php -S ${ADDRESS}:${PORT} -t ${ROOT} -d variables_order=EGPCS ${ROUTER} &

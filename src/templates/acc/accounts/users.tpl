@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Comptes de membres" current="acc/accounts"}
+{include file="_head.tpl" title="Comptes de membres" current="acc/accounts"}
 
 {include file="acc/_year_select.tpl"}
 
@@ -48,4 +48,4 @@
 </p>
 
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

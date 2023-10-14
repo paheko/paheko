@@ -4,3 +4,11 @@ src/*.asc
 src/*.log
 src/include/lib/KD2
 src/debug_sql.sqlite
+src/modules/*
+src/config.local.php
+build/windows/*.exe
+build/windows/php.zip
+build/windows/install_dir
+build/*.tar.gz*
+build/debian/*.deb
+src/psalm.phar

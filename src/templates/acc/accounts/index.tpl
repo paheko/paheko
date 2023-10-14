@@ -1,7 +1,7 @@
 <?php
-use Garradin\Entities\Accounting\Account;
+use Paheko\Entities\Accounting\Account;
 ?>
-{include file="admin/_head.tpl" title="Comptes favoris" current="acc/accounts"}
+{include file="_head.tpl" title="Comptes favoris" current="acc/accounts"}
 
 {include file="acc/_year_select.tpl"}
 
@@ -18,8 +18,6 @@ use Garradin\Entities\Accounting\Account;
 	{include file="acc/transactions/_pending_message.tpl"}
 {/if}
 
-{include file="acc/_simple_help.tpl" link="../reports/trial_balance.php?year=%d"|args:$current_year.id type=null}
-
 {if !empty($grouped_accounts)}
 	<table class="list">
 		<thead>
@@ -35,7 +33,7 @@ use Garradin\Entities\Accounting\Account;
 		{foreach from=$grouped_accounts item="group"}
 		<tbody>
 			<tr>
-				<td colspan="5"><h2 class="ruler">{$group.label}</h2></td>
+				<td colspan="6"><h2 class="ruler">{$group.label}</h2></td>
 			</tr>
 			{foreach from=$group.accounts item="account"}
 				<tr class="account">
@@ -45,7 +43,8 @@ use Garradin\Entities\Accounting\Account;
 					<td class="money">
 						{if $account.balance < 0
 							|| ($account.balance > 0 && $account.position == Account::LIABILITY && ($account.type == Account::TYPE_BANK || $account.type == Account::TYPE_THIRD_PARTY || $account.type == Account::TYPE_CASH))}
-							<strong class="error">-{$account.balance|raw|abs|money_currency:false}</strong>
+							<?php $balance = abs($account->balance)*-1; ?>
+							<strong class="error">{$balance|raw|money_currency:false:true}</strong>
 						{else}
 							{$account.balance|raw|money_currency:false}
 						{/if}
@@ -91,4 +90,4 @@ use Garradin\Entities\Accounting\Account;
 	Pour voir la liste complète des comptes, même ceux qui n'ont pas été utilisés, se référer au <a href="{$admin_url}acc/charts/accounts/?id={$current_year.id_chart}">plan comptable</a>.
 </p>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

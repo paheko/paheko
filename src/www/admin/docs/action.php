@@ -1,9 +1,12 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Files\Files;
-use Garradin\Entities\Files\File;
+use Paheko\Users\Session;
+
+use Paheko\Files\Files;
+use Paheko\Files\Trash;
+use Paheko\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
 
@@ -11,19 +14,24 @@ $check = f('check');
 $action = f('action');
 $parent = f('parent');
 
-$actions = ['move', 'delete'];
+$actions = ['move', 'delete', 'zip'];
 
 if (!is_array($check) || !count($check) || !in_array($action, $actions)) {
-	throw new UserException('Action invalide');
+	throw new UserException('Action invalide: ' . $action);
 }
 
-$csrf_key = 'action_' . $action;
+$csrf_key = 'docs_action_' . $action;
 
-$form->runIf('confirm_delete', function () use ($check, $session) {
+$form->runIf('zip', function() use ($check, $session) {
+	Files::zip(null, $check, $session);
+	exit;
+}, $csrf_key);
+
+$form->runIf('delete', function () use ($check) {
 	foreach ($check as &$file) {
 		$file = Files::get($file);
 
-		if (!$file || !$file->checkDeleteAccess($session)) {
+		if (!$file || !$file->canDelete()) {
 			throw new UserException('Impossible de supprimer un fichier car vous n\'avez pas le droit de le supprimer');
 		}
 	}
@@ -31,20 +39,21 @@ $form->runIf('confirm_delete', function () use ($check, $session) {
 	unset($file);
 
 	foreach ($check as $file) {
-		$file->delete();
+		$file->moveToTrash();
 	}
 }, $csrf_key, '!docs/?path=' . $parent);
 
-$form->runIf(f('move') && f('select'), function () use ($check, $session) {
+$form->runIf('move', function () use ($check) {
+	$target = f('move');
+
 	foreach ($check as &$file) {
 		$file = Files::get($file);
 
-		if (!$file || !$file->checkWriteAccess($session) || $file->context() != File::CONTEXT_DOCUMENTS) {
-			throw new UserException('Impossible de déplacer un fichier car vous n\'avez pas le droit de le modifier');
+		if (!$file || !$file->canMoveTo($target)) {
+			throw new UserException('Impossible de déplacer un fichier car vous n\'avez pas le droit de le déplacer à cet endroit');
 		}
 	}
 
-	$target = f('select');
 	unset($file);
 
 	foreach ($check as $file) {
@@ -60,10 +69,22 @@ $tpl->assign(compact('csrf_key', 'extra', 'action', 'count'));
 if ($action == 'delete') {
 	$tpl->display('docs/action_delete.tpl');
 }
-else {
-	$parent = f('current') ?? f('parent');
+elseif ($action == 'zip') {
+	$size = 0;
 
-	if (!$parent) {
+	foreach ($check as $selected) {
+		foreach (Files::listRecursive($selected, Session::getInstance(), false) as $file) {
+			$size += $file->size;
+		}
+	}
+
+	$tpl->assign(compact('extra', 'count', 'size'));
+	$tpl->display('docs/action_zip.tpl');
+}
+else {
+	$current = f('current') ?? f('parent');
+
+	if (!$current) {
 		$first_file = Files::get(current($check));
 
 		if (!$first_file) {
@@ -73,14 +94,17 @@ else {
 		$parent = $first_file->parent;
 	}
 
-	$directories = Files::list($parent);
+	$directories = Files::list($current);
 	$directories = array_filter($directories, function (File $file) {
 		return $file->type == File::TYPE_DIRECTORY;
 	});
 
-	$breadcrumbs = Files::getBreadcrumbs($parent);
+	$breadcrumbs = Files::getBreadcrumbs($current);
+	$parent = Utils::dirname($current);
+	$current_path = $current;
+	$current_path_name = Utils::basename($current);
 
-	$tpl->assign(compact('directories', 'breadcrumbs', 'parent'));
+	$tpl->assign(compact('directories', 'breadcrumbs', 'parent', 'current_path', 'current_path_name'));
 
 	$tpl->display('docs/action_move.tpl');
 }

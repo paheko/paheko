@@ -1,6 +1,7 @@
 /* Forms */
 fieldset {
     border: 1px solid var(--gLightBorderColor);
+    border-radius: .3em;
     padding: 0.8em 1em 0 1em;
     margin-bottom: 1em;
     padding: 0.5em;
@@ -10,6 +11,20 @@ fieldset legend {
     padding: 0 0.5em;
     font-weight: bold;
     color: rgb(var(--gTextColor));
+}
+
+fieldset.header {
+    grid-column: span 2;
+    margin-top: 1em;
+}
+
+fieldset.header legend {
+    font-size: 1.5em;
+    text-align: center;
+}
+
+fieldset.header p input {
+    font-size: 1.5em;
 }
 
 /* Override selector in 06-tables.css */
@@ -70,7 +85,7 @@ input[type=checkbox] + label:hover {
 /* We can't use :not([type=checkbox]):not([type=radio]) here as it is too specific
 and then it's a mess to override the selector after... */
 input[type=text], input[type=number], input[type=color],
-input[type=date], input[type=datetime-local], input[type=datetime], input[type=time], input[type=week],
+input[type=date], input[type=datetime-local], input[type=datetime], input[type=time], input[type=week], input[type=year],
 input[type=email], input[type=file], input[type=url], input[type=month],
 input[type=password], input[type=range], input[type=search], input[type=tel],
 textarea, select, .input-list, .file-selector {
@@ -79,10 +94,10 @@ textarea, select, .input-list, .file-selector {
     min-width: 20em;
     max-width: 100%;
     border: 1px solid rgb(var(--gMainColor));
+    border-radius: .25rem;
     font-size: inherit;
     background: rgb(var(--gBgColor));
     color: rgb(var(--gTextColor));
-    border-radius: .25rem;
     transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
 
@@ -114,7 +129,7 @@ input[type=checkbox] + label::before, input[type=radio] + label::before {
     transition: color .2s, box-shadow .2s ease-in-out;
     text-shadow: 1px 1px 3px var(--gLightBorderColor);
     cursor: pointer;
-    font-family: gicon;
+    font-family: "paheko";
     font-size: 1.2rem;
     font-weight: normal;
     color: rgb(var(--gMainColor));
@@ -154,7 +169,7 @@ input:checked + label::before {
 
 /* buttons */
 
-input[type=submit], input[type=button], button, input[type=file] {
+input[type=submit], input[type=button], button, input[type=file], input[type=color] {
     border-radius: 1em;
     border: none;
     box-shadow: 0px 0px 5px 0 var(--gLightBorderColor);
@@ -193,6 +208,15 @@ a.icn-btn, b.btn {
     font-weight: normal;
 }
 
+a.icn-btn > span {
+    text-decoration: underline;
+    text-decoration-color: rgba(var(--gTextColor), 0.25);
+}
+
+a.icn-btn:hover span {
+    text-decoration-color: rgba(var(--gHoverLinkColor), 1) !important;
+}
+
 b.btn {
     cursor: unset;
     text-decoration: none;
@@ -201,47 +225,34 @@ b.btn {
 
 [data-icon]:before, .main[data-icon]:after {
     display: inline-block;
-    font-family: "gicon", sans-serif;
+    font-family: "paheko", sans-serif;
     text-shadow: 1px 1px 1px var(--gLightBorderColor);
     padding-right: .5em;
     font-size: 1.2em;
     line-height: .8em;
     vertical-align: middle;
     content: attr(data-icon);
+    font-weight: normal;
 }
 
 [data-icon]:empty:before {
     padding: 0;
 }
 
-.icn, .icnl {
-    font-family: "gicon", sans-serif;
-    font-style: normal;
-    font-weight: normal;
-    speak: none;
-    font-variant: normal;
-    text-transform: none;
-    position: relative;
-}
-
-.actions .icn, .icn.action {
-    text-decoration: none;
-    border-radius: 1em;
+/* Custom SVG icon */
+.icn-btn > .icon {
     display: inline-block;
-    text-align: center;
-    font-size: 1.2em;
-    line-height: .8em;
+    padding-right: .3em;
+    height: 1em;
+    width: 1em;
     vertical-align: middle;
-    padding: .2em;
-    font-family: "gicon", sans-serif;
-    color: rgb(var(--gMainColor));
-    text-shadow: 1px 1px 1px var(--gBorderColor);
-    border: none;
-    cursor: pointer;
-    position: relative;
-    z-index: 200;
+    transition: fill .3s, stroke .3s;
 }
 
+.icn-btn:hover > .icon {
+    fill: rgb(var(--gHoverLinkColor)) !important;
+    stroke: rgb(var(--gHoverLinkColor)) !important;
+}
 
 button.main, .icn-btn.main {
     color: rgb(var(--gTextColor));
@@ -268,7 +279,7 @@ button.main[data-icon]:after, .icn-btn[data-icon]:after {
 }
 
 input[type=submit]:hover, input[type=button]:hover, button:hover, a.icn-btn:hover, input[type=file]:hover,
-.radio-btn:hover div, a.num:hover, .num a:hover {
+.radio-btn:hover div, a.num:hover, .num a:hover, input[type=color]:hover {
     background-color: rgba(var(--gSecondColor), 0.2);
     color: rgb(var(--gHoverLinkColor)) !important;
     border-color: rgb(var(--gSecondColor));
@@ -279,15 +290,31 @@ input[type=submit]:active, input[type=button]:active, button:active, input[type=
 }
 
 input[type=color] {
+    width: 80px;
+    height: 40px;
     cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+input[type=color]::-webkit-color-swatch {
+    border-radius: .5rem;
+    border: none;
+    box-shadow: 0  0 5px #000;
+}
+input[type=color]::-moz-color-swatch {
+    border-radius: .5rem;
+    border: none;
+    box-shadow: 0  0 5px #000;
 }
 
 input.resetButton {
     margin-left: 1em;
 }
 
-input[readonly], input.disabled, input[disabled], textarea[disabled], select[disabled],
-fieldset[disabled], fieldset[disabled] input, fieldset[disabled] textarea, fieldset[disabled] select {
+input[readonly], input.disabled, input[disabled], textarea[disabled], select[disabled], button[disabled],
+fieldset[disabled], fieldset[disabled] input, fieldset[disabled] textarea, fieldset[disabled] select, .radio-btn.disabled div {
     cursor: not-allowed;
     color: var(--gBorderColor);
     background-color: var(--gLightBackgroundColor);
@@ -313,8 +340,37 @@ input[disabled] + label::before {
     cursor: not-allowed;
 }
 
-select, input[size], input[type=color], button, input[type=button], input[type=submit], input[type=number] {
+select, input[size], input[type=color], button, input[type=button], input[type=submit] {
     min-width: 0;
+}
+
+input[type=number] {
+    min-width: 3em;
+}
+
+select {
+    max-width: calc(100% - 1.5em);
+}
+
+select option[value=""] {
+    color: var(--gBorderColor);
+    background-color: var(--gLightBackgroundColor);
+}
+
+input.otp {
+    font-family: monospace;
+    font-size: 30px;
+    width: 240px;
+    letter-spacing: 22px;
+    min-width: 0;
+    padding-left: 10px;
+    background: linear-gradient(rgb(var(--gMainColor)) 0 0) 40px,
+        linear-gradient(rgb(var(--gMainColor)) 0 0) 80px,
+        linear-gradient(rgb(var(--gMainColor)) 0 0) 120px,
+        linear-gradient(rgb(var(--gMainColor)) 0 0) 160px,
+        linear-gradient(rgb(var(--gMainColor)) 0 0) 200px;
+    background-size:1px 100%;
+    background-repeat:no-repeat;
 }
 
 /* Radio button lists (eg. new transaction) */
@@ -338,7 +394,7 @@ form .radio-btn input:focus + label::before {
 }
 
 form .radio-btn input:focus + label div {
-    box-shadow: 0 0 5px .2rem rgb(var(--gSecondColor));
+    box-shadow: 0 0 5px 1px rgb(var(--gSecondColor));
 }
 
 form .radio-btn div {
@@ -350,10 +406,6 @@ form .radio-btn div {
     padding: .2em .4em;
     transition: color .3s, background-color .3s;
     color: rgb(var(--gTextColor));
-}
-
-form .radio-btn h3 {
-    text-decoration: underline;
 }
 
 form .radio-btn input {
@@ -368,6 +420,21 @@ form .radio-btn .help {
 form .radio-btn input:checked + label div {
     background-color: rgba(var(--gSecondColor), 0.3);
 }
+
+form .minor .radio-btn h3 {
+    font-size: 1em;
+}
+
+form .minor .radio-btn div {
+    display: table-cell;
+    border: 1px solid rgba(var(--gSecondColor), 0.3);
+    background-color: rgba(var(--gSecondColor), 0.05);
+}
+
+form .minor .radio-btn input:checked + label div {
+    background-color: rgba(var(--gSecondColor), 0.2);
+}
+
 
 /* Custom list input */
 form .input-list {
@@ -411,7 +478,6 @@ p.submit {
     margin: 1em;
 }
 
-
 form .checkUncheck {
     float: left;
 }
@@ -438,7 +504,18 @@ dd.help.example {
     font-size: .9em;
 }
 
-form p.actions {
+p.action-upload em {
+    display: block;
+    color: var(--gBorderColor);
+    font-size: .9em;
+    font-style: normal;
+}
+
+.actions-center {
+    text-align: center;
+}
+
+p.actions {
     float: right;
     margin: .5em;
 }
@@ -479,7 +556,7 @@ dialog.datepicker {
 
 
 .datepicker nav input[type=button] {
-    font-family: gicon;
+    font-family: "paheko";
     height: 2em;
     width: 2em;
 }
@@ -544,20 +621,9 @@ dialog.datepicker {
     color: darkred;
 }
 
-fieldset.mailing {
-    max-width: 40em;
-}
-
-fieldset.mailing dd.preview > * {
-    border-radius: .5em;
-    background: var(--gLightBackgroundColor);
-    padding: 1em;
-}
-
-#queryBuilderForm textarea, fieldset.mailing textarea, fieldset.mailing #f_subject, fieldset.mailing #f_target {
+#queryBuilderForm textarea {
     width: calc(100% - 2em);
 }
-
 
 #queryBuilder .column select, #queryBuilderForm .actions select {
     max-width: 15em;
@@ -588,41 +654,60 @@ fieldset.mailing dd.preview > * {
     width: 4em;
 }
 
-.tree-selector a {
-    color: #666;
+.dir-picker .breadcrumbs {
+    margin-bottom: 1em;
 }
 
-.tree-selector td {
-    width: 15%;
-    text-align: right;
+.dir-picker .breadcrumbs button {
+    border-width: 1px;
+    font-size: .9em;
+    opacity: 0.7;
 }
 
-.tree-selector th {
-    width: 85%;
-}
-
-.tree-selector i {
-    display: inline-block;
-    padding: 0 .5em;
-}
-
-.tree-selector b {
-    display: inline-block;
-    padding: 0 .5em;
-    color: #999;
-}
-
-.tree-selector em {
-    font-weight: normal;
-}
-
-.tree-selector h3 {
-    display: inline-block;
-}
-
-.tree-selector .current > a {
+.dir-picker .breadcrumbs .current button {
     font-weight: bold;
-    color: #000;
+}
+
+.dir-picker .folders {
+    text-align: center;
+}
+
+.dir-picker .folder button {
+    width: calc(100% - 1em);
+    padding: .5em;
+    text-align: left;
+    font-size: 1.2em;
+    border-width: 1px;
+    background: none;
+}
+
+.dir-picker .folder button::before {
+    color: var(--gLightBorderColor);
+}
+
+.dir-picker .parent button {
+    margin-bottom: .5em;
+    padding: .5em;
+    width: calc(100% - 1.5em);
+    border-width: 1px;
+    background: none;
+    border-color: var(--gLightBorderColor);
+    text-align: left;
+}
+
+.dir-picker .help {
+    text-align: center;
+    padding: 1em;
+    font-size: 1.3em;
+}
+
+.dir-picker .select {
+    text-align: center;
+    padding: 1em;
+}
+
+.dir-picker .select button {
+    font-size: 1.2em;
 }
 
 .file-selector {
@@ -637,7 +722,7 @@ fieldset.mailing dd.preview > * {
     padding: .2rem;
     position: absolute;
     right: 0;
-    font-family: gicon;
+    font-family: "paheko";
 }
 
 .file-selector label .help {
@@ -660,13 +745,24 @@ fieldset.mailing dd.preview > * {
 /**
  * Progress spinner
  */
-.progressing {
+form.progressing {
     position: relative;
 }
 
-fieldset.progressing > dl, fieldset.progressing > p {
+form fieldset, form p {
+    transition: .5s filter linear;
+}
+
+.progressing > * {
+    pointer-events: none;
     opacity: 0.5;
     filter: blur(3px);
+    filter: grayscale(100%) blur(3px);
+}
+
+.progressing.block {
+    height: 100px;
+    position: relative;
 }
 
 .progressing::after {
@@ -680,9 +776,9 @@ fieldset.progressing > dl, fieldset.progressing > p {
     margin: auto;
     width: 50px;
     height: 50px;
-    border: 5px solid #666;
+    border: 5px solid var(--gBorderColor);
     border-radius: 50%;
-    border-top-color: #ccc;
+    border-top-color: var(--gLightBackgroundColor);
     animation: spin 1s ease-in-out infinite;
     filter: none;
 }
@@ -709,13 +805,84 @@ fieldset.progressing > dl, fieldset.progressing > p {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.selector header {
-    margin-bottom: 2em;
+.dropping * {
+    pointer-events: none;
 }
 
-.selector header p.edit {
-    float: right;
+.overlay {
+    display: none;
+    backdrop-filter: blur(5px);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: absolute;
+    border-radius: .5em;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: -.5em;
+    padding: 0;
+    border: none;
+    z-index: 10000;
+    /*
+    opacity: 0;
+    display: flex;
+    */
+}
+
+.loading .overlay::after {
+    display: block;
+    content: " ";
+    width: 70px;
+    height: 70px;
+    border: 10px solid #fff;
+    border-radius: 50%;
+    border-top-color: #000;
+    animation: spin 1s ease-in-out infinite;
+    filter: none;
+    position: absolute;
+}
+
+.loading .overlay::before {
+    display: block;
+    content: " ";
+    width: 70px;
+    height: 70px;
+    border: 8px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    position: absolute;
+}
+
+.loading .overlay .message {
+    margin-top: 190px;
+}
+
+body > .overlay {
     margin: 0;
+    border-radius: 0;
+    position: fixed;
+}
+
+.overlay .message {
+    padding: 1rem;
+    font-size: 150%;
+    font-weight: bold;
+}
+
+.dropping {
+    position: relative;
+}
+
+.dropping .overlay, .loading .overlay {
+    display: flex;
+}
+
+.selector header {
+    margin-bottom: 2em;
 }
 
 .selector header h2 input {
@@ -740,6 +907,20 @@ h2.quick-search button[type=reset] {
     border-color: var(--gLightBorderColor);
     cursor: pointer;
     width: auto;
+}
+
+samp.copy {
+    font-family: monospace;
+    background: var(--gLightBorderColor);
+    color: var(--gBorderColor);
+    cursor: pointer;
+    padding: .5em;
+    border-radius: .5em;
+}
+
+samp.copy:hover {
+    color: rgb(var(--gTextColor));
+    box-shadow: 0px 0px 5px var(--gBorderColor);
 }
 
 @media screen and (max-width: 1279px) {

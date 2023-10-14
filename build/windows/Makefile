@@ -1,5 +1,7 @@
 .PHONY := php installer clean publish
-PHP_ARCHIVE := https://windows.php.net/downloads/releases/php-8.0.27-nts-Win32-vs16-x64.zip
+PHP_ARCHIVE := https://windows.php.net/downloads/releases/php-8.2.10-nts-Win32-vs16-x64.zip
+
+all: installer
 
 php.zip:
 	wget ${PHP_ARCHIVE} -O php.zip
@@ -57,15 +59,17 @@ php: php.zip
 
 installer: clean php
 	$(eval VERSION=$(shell cat ../../src/VERSION))
+	# NSIS only accepts numbers as version
+	$(eval NSIS_VERSION=$(shell sed -E 's/-(alpha|beta|rc)[0-9]+//' ../../src/VERSION))
 	mkdir -p install_dir
-	cp ../../src/paheko-${VERSION}.tar.gz install_dir/
+	cp ../paheko-${VERSION}.tar.gz install_dir/
 	cd install_dir && tar xzf paheko-${VERSION}.tar.gz && mv paheko-${VERSION} paheko
 	cp config.local.php install_dir/paheko/
 	cp php.ini install_dir/php
 	cp launch.bat install_dir
 	cp paheko.ico install_dir
 	rm -f install_dir/paheko-${VERSION}.tar.gz
-	makensis -V3 -DVERSION=${VERSION} paheko.nsis
+	makensis -V3 -DNVERSION=${NSIS_VERSION} -DVERSION=${VERSION} paheko.nsis
 
 clean:
 	rm -rf install_dir

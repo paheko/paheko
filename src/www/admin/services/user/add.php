@@ -1,7 +1,9 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Services\Services;
+use Paheko\Services\Services;
+use Paheko\Users\Categories;
+use Paheko\Users\Session;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -18,7 +20,8 @@ if (!$count_all) {
 }
 
 $services = Services::listAssocWithFees();
+$categories = Categories::listAssoc();
 
-$tpl->assign(compact('services'));
+$tpl->assign(compact('services', 'categories'));
 
 $tpl->display('services/user/add.tpl');

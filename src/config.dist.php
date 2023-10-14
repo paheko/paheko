@@ -2,19 +2,19 @@
 
 /**
  * Ce fichier représente un exemple des constantes de configuration
- * disponibles pour Garradin.
+ * disponibles pour Paheko.
  *
  * NE PAS MODIFIER CE FICHIER!
  *
- * Pour configurer Garradin, copiez ce fichier en 'config.local.php'
+ * Pour configurer Paheko, copiez ce fichier en 'config.local.php'
  * puis décommentez et modifiez ce dont vous avez besoin.
  */
 
 // Nécessaire pour situer les constantes dans le bon namespace
-namespace Garradin;
+namespace Paheko;
 
 /**
- * Clé secrète, doit être unique à chaque instance de Garradin
+ * Clé secrète, doit être unique à chaque instance de Paheko
  *
  * Ceci est utilisé afin de sécuriser l'envoi de formulaires
  * (protection anti-CSRF).
@@ -22,25 +22,41 @@ namespace Garradin;
  * Cette valeur peut être modifiée sans autre impact que la déconnexion des utilisateurs
  * actuellement connectés.
  *
- * Si cette constante n'est définie, Garradin ajoutera automatiquement
+ * Si cette constante n'est définie, Paheko ajoutera automatiquement
  * une valeur aléatoire dans le fichier config.local.php.
  */
 
 //const SECRET_KEY = '3xUhIgGwuovRKOjVsVPQ5yUMfXUSIOX2GKzcebsz5OINrYC50r';
 
 /**
- * Se connecter automatiquement avec l'ID de membre indiqué
- * Exemple: LOCAL_LOGIN = 42 connectera automatiquement le membre n°42
+ * @var null|int|array
+ *
+ * Forcer la connexion locale
+ *
+ * Si un numéro est spécifié, alors le membre avec l'ID correspondant à ce
+ * numéro sera connecté (sans besoin de mot de passe).
+ *
+ * Exemple: LOCAL_LOGIN = 42 connectera automatiquement le membre avec id = 42
  * Attention à ne pas utiliser en production !
  *
- * Il est aussi possible de mettre "LOCAL_LOGIN = -1" pour se connecter
- * avec le premier membre trouvé qui peut gérer la configuration (et donc
- * modifier les droits des membres).
+ * Si le nombre spécifié est -1, alors c'est le premier membre trouvé qui
+ * peut gérer la configuration (et donc modifier les droits des membres)
+ * qui sera connecté.
  *
- * Défault : false (connexion automatique désactivée)
+ * Si un tableau est spécifié, alors Paheko considérera que l'utilisateur
+ * connecté fourni dans le tableau n'est pas un membre.
+ * Voir la documentation sur l'utilisation avec SSO et LDAP pour plus de détails.
+ *
+ * Exemple :
+ * const LOCAL_LOGIN = [
+ * 	'user' => ['_name' => 'bohwaz'],
+ * 	'permissions' => ['users' => 9, 'config' => 9]
+ * ];
+ *
+ * Défault : null (connexion automatique désactivée)
  */
 
-//const LOCAL_LOGIN = false;
+//const LOCAL_LOGIN = null;
 
 /**
  * Autoriser (ou non) l'import de sauvegarde qui a été modifiée ?
@@ -59,29 +75,15 @@ namespace Garradin;
 //const ALLOW_MODIFIED_IMPORT = true;
 
 /**
- * Doit-on suggérer à l'utilisateur d'utiliser la version chiffrée du site ?
+ * Répertoire où se situe le code source de Paheko
  *
- * 1 ou true = affiche un message de suggestion sur l'écran de connexion invitant à utiliser le site chiffré
- * (conseillé si vous avez un certificat auto-signé ou peu connu type CACert)
- * 2 = rediriger automatiquement sur la version chiffrée pour l'administration (mais pas le site public)
- * 3 = rediriger automatiquement sur la version chiffrée pour administration et site public
- * false ou 0 = aucune version chiffrée disponible, donc ne rien proposer ni rediriger
- *
- * Défaut : false
- */
-
-//const PREFER_HTTPS = false;
-
-/**
- * Répertoire où se situe le code source de Garradin
- *
- * Défaut : répertoire racine de Garradin (__DIR__)
+ * Défaut : répertoire racine de Paheko (__DIR__)
  */
 
 //const ROOT = __DIR__;
 
 /**
- * Répertoire où sont situées les données de Garradin
+ * Répertoire où sont situées les données de Paheko
  * (incluant la base de données SQLite, les sauvegardes, le cache, les fichiers locaux et les plugins)
  *
  * Défaut : sous-répertoire "data" de la racine
@@ -100,7 +102,7 @@ namespace Garradin;
 
 /**
  * Répertoire où est situé le cache partagé entre instances
- * Garradin utilisera ce répertoire pour stocker le cache susceptible d'être partagé entre instances, comme
+ * Paheko utilisera ce répertoire pour stocker le cache susceptible d'être partagé entre instances, comme
  * le code PHP généré à partir des templates Smartyer.
  *
  * Défaut : sous-répertoire 'shared' de CACHE_ROOT
@@ -109,7 +111,28 @@ namespace Garradin;
 //const SHARED_CACHE_ROOT = CACHE_ROOT . '/shared';
 
 /**
- * Emplacement du fichier de base de données de Garradin
+ * Motif qui détermine l'emplacement des fichiers de cache du site web.
+ *
+ * Le site web peut créer des fichiers de cache pour les pages et catégories.
+ * Ensuite le serveur web (Apache) servira ces fichiers directement, sans faire
+ * appel au PHP, permettant de supporter beaucoup de trafic si le site web
+ * a une vague de popularité.
+ *
+ * Certaines valeurs sont remplacées :
+ * %host% = hash MD5 du hostname (utile en cas d'hébergement de plusieurs instances)
+ * %host.2% = 2 premiers caractères du hash MD5 du hostname
+ *
+ * Utiliser NULL pour désactiver le cache.
+ *
+ * Défault : CACHE_ROOT . '/web/%host%'
+ *
+ * @var null|string
+ */
+
+//const WEB_CACHE_ROOT = CACHE_ROOT . '/web/%host%';
+
+/**
+ * Emplacement du fichier de base de données de Paheko
  *
  * Défaut : DATA_ROOT . '/association.sqlite'
  */
@@ -139,7 +162,7 @@ namespace Garradin;
 //const SYSTEM_SIGNALS = [['files.delete' => 'MyNamespace\Signals::deleteFile'], ['entity.Accounting\Transaction.save.before' => 'MyNamespace\Signals::saveTransaction']];
 
 /**
- * Adresse URI de la racine du site Garradin
+ * Adresse URI de la racine du site Paheko
  * (doit se terminer par un slash)
  *
  * Défaut : découverte automatique à partir de SCRIPT_NAME
@@ -148,29 +171,33 @@ namespace Garradin;
 //const WWW_URI = '/asso/';
 
 /**
- * Adresse URL HTTP(S) de Garradin
+ * Adresse URL HTTP(S) publique de Paheko
  *
- * Défaut : découverte à partir de HTTP_HOST ou SERVER_NAME + WWW_URI
+ * Défaut : découverte automatique à partir de HTTP_HOST ou SERVER_NAME + WWW_URI
+ * @var null|string
  */
 
-//const WWW_URL = 'http://garradin.chezmoi.tld' . WWW_URI;
+//const WWW_URL = 'http://paheko.chezmoi.tld' . WWW_URI;
 
 /**
- * Adresse URL HTTP(S) de l'admin Garradin
+ * Adresse URL HTTP(S) de l'admin Paheko
+ *
+ * Note : il est possible d'avoir un autre domaine que WWW_URL.
  *
  * Défaut : WWW_URL + 'admin/'
+ * @var null|string
  */
 
-//const ADMIN_URL = 'https://admin.garradin.chezmoi.tld/';
+//const ADMIN_URL = 'https://admin.paheko.chezmoi.tld/';
 
 /**
  * Affichage des erreurs
  * Si "true" alors un message expliquant l'erreur et comment rapporter le bug s'affiche
  * en cas d'erreur. Sinon rien ne sera affiché.
  *
- * Défaut : false
+ * Défaut : TRUE (pour aider le debug de l'auto-hébergement)
  *
- * Il est fortement conseillé de mettre cette valeur à false en production !
+ * Il est fortement conseillé de mettre cette valeur à FALSE en production !
  */
 
 //const SHOW_ERRORS = false;
@@ -189,16 +216,16 @@ namespace Garradin;
 //const MAIL_ERRORS = false;
 
 /**
- * Envoi des erreurs à une API compatible AirBrake/Errbit/Garradin
+ * Envoi des erreurs à une API compatible AirBrake/Errbit/Paheko
  *
  * Si renseigné avec une URL HTTP(S) valide, chaque erreur système sera envoyée
  * automatiquement à cette URL.
  *
  * Si laissé à null, aucun rapport ne sera envoyé.
  *
- * Garradin accepte aussi les rapports d'erreur venant d'autres instances.
+ * Paheko accepte aussi les rapports d'erreur venant d'autres instances.
  *
- * Pour cela utiliser l'URL https://login:password@garradin.site.tld/api/errors/report
+ * Pour cela utiliser l'URL https://login:password@paheko.site.tld/api/errors/report
  * (voir aussi API_USER et API_PASSWORD)
  *
  * Les erreurs seront ensuite visibles dans
@@ -274,6 +301,7 @@ namespace Garradin;
 // const SQL_DEBUG = __DIR__ . '/debug_sql.sqlite';
 
 /**
+/**
  * Mode de journalisation de SQLite
  *
  * Paheko recommande le mode 'WAL' de SQLite, qui permet à SQLite
@@ -301,6 +329,22 @@ namespace Garradin;
 //const SQLITE_JOURNAL_MODE = 'TRUNCATE';
 
 /**
+ * Activation du log HTTP (option de développement)
+ *
+ * Si cette constante est renseignée par un fichier texte, *TOUTES* les requêtes HTTP
+ * ainsi que leur contenu y sera enregistré.
+ *
+ * C'est surtout utile pour débuguer les problèmes de WebDAV par exemple.
+ *
+ * ATTENTION : cela signifie que des informations personnelles (mot de passe etc.)
+ * peuvent se retrouver dans le log. Ne pas utiliser à moins de tester en développement.
+ *
+ * Default : null (= désactivé)
+ * @var string|null
+ */
+// const HTTP_LOG_FILE = __DIR__ . '/http.log';
+
+/**
  * Activer la possibilité de faire une mise à jour semi-automatisée
  * depuis fossil.kd2.org.
  *
@@ -312,7 +356,7 @@ namespace Garradin;
  *
  * Si cette constante est désactivée, mais que ENABLE_TECH_DETAILS est activé,
  * la vérification de nouvelle version se fera quand même, mais plutôt que de proposer
- * la mise à jour, Garradin proposera de se rendre sur le site officiel pour
+ * la mise à jour, Paheko proposera de se rendre sur le site officiel pour
  * télécharger la mise à jour.
  *
  * Défaut : true
@@ -354,11 +398,11 @@ namespace Garradin;
  * Nginx n'est PAS supporté, car X-Accel-Redirect ne peut gérer que des fichiers
  * qui sont *dans* le document root du vhost, ce qui n'est pas le cas ici.
  *
- * Pour activer X-SendFile mettre dans la config du virtualhost de Garradin:
+ * Pour activer X-SendFile mettre dans la config du virtualhost de Paheko:
  * XSendFile On
- * XSendFilePath /var/www/garradin
+ * XSendFilePath /var/www/paheko
  *
- * (remplacer le chemin par le répertoire racine de Garradin)
+ * (remplacer le chemin par le répertoire racine de Paheko)
  *
  * Détails : https://tn123.org/mod_xsendfile/
  *
@@ -377,6 +421,23 @@ namespace Garradin;
  */
 
 //const NTP_SERVER = 'fr.pool.ntp.org';
+
+/**
+ * Désactiver l'envoi d'e-mails
+ *
+ * Si positionné à TRUE, l'envoi d'e-mail ne sera pas proposé, et il ne sera
+ * pas non plus possible de récupérer un mot de passe perdu.
+ * Les parties de l'interface relatives à l'envoi d'e-mail seront cachées.
+ *
+ * Ce réglage est utilisé pour la version autonome sous Windows, car Windows
+ * ne permet pas l'envoi d'e-mails.
+ *
+ * Défaut : false
+ * @var bool
+ */
+
+//const DISABLE_EMAIL = false;
+
 
 /**
  * Hôte du serveur SMTP, mettre à false (défaut) pour utiliser la fonction
@@ -406,7 +467,7 @@ namespace Garradin;
  * Défaut : null
  */
 
-//const SMTP_USER = 'garradin@monserveur.com';
+//const SMTP_USER = 'paheko@monserveur.com';
 
 /**
  * Mot de passe pour le serveur SMTP
@@ -432,10 +493,23 @@ namespace Garradin;
 //const SMTP_SECURITY = 'STARTTLS';
 
 /**
- * Adresse e-mail destinée à recevoir les erreurs de mail
- * (adresses invalides etc.)
+ * Nom du serveur utilisé dans le HELO SMTP
  *
- * Si laissé NULL, alors l'adresse email de l'association sera utilisée.
+ * Si NULL, alors le nom renseigné comme SERVER_NAME (premier nom du virtual host Apache)
+ * sera utilisé.
+ *
+ * Defaut : NULL
+ *
+ * @var null|string
+ */
+
+//const SMTP_HELO_HOSTNAME = 'mail.domain.tld';
+
+/**
+ * Adresse e-mail destinée à recevoir les erreurs de mail
+ * (adresses invalides etc.) — Return-Path
+ *
+ * Si laissé NULL, alors l'adresse e-mail de l'association sera utilisée.
  * En cas d'hébergement de plusieurs associations, il est conseillé
  * d'utiliser une adresse par association.
  *
@@ -446,6 +520,24 @@ namespace Garradin;
  */
 
 //const MAIL_RETURN_PATH = 'returns@monserveur.com';
+
+
+/**
+ * Adresse e-mail expéditrice des messages (Sender)
+ *
+ * Si vous envoyez des mails pour plusieurs associations, il est souhaitable
+ * de forcer l'adresse d'expéditeur des messages pour passer les règles SPF et DKIM.
+ *
+ * Dans ce cas l'adresse de l'association sera indiquée en "Reply-To", et
+ * l'adresse contenue dans MAIL_SENDER sera dans le From.
+ *
+ * Si laissé NULL, c'est l'adresse de l'association indiquée dans la configuration
+ * qui sera utilisée.
+ *
+ * Défaut : null
+ */
+
+//const MAIL_SENDER = 'associations@monserveur.com';
 
 /**
  * Mot de passe pour l'accès à l'API permettant de gérer les mails d'erreur
@@ -531,7 +623,7 @@ namespace Garradin;
  * Stockage des fichiers
  *
  * Indiquer ici le nom d'une classe de stockage de fichiers
- * (parmis celles disponibles dans lib/Garradin/Files/Backend)
+ * (parmis celles disponibles dans lib/Paheko/Files/Backend)
  *
  * Indiquer NULL si vous souhaitez stocker les fichier dans la base
  * de données SQLite (valeur par défaut).
@@ -580,12 +672,59 @@ namespace Garradin;
 //const FILE_STORAGE_QUOTA = 10*1024*1024; // Forcer le quota alloué à 10 Mo, quel que soit le backend de stockage
 
 /**
- * PDF_COMMAND
- * Commande de création de PDF
+ * FILE_VERSIONING_POLICY
+ * Forcer la politique de versionnement des fichiers.
  *
+ * null: laisser le choix de la politique (dans la configuration)
+ * 'none': ne rien conserver
+ * 'min': conserver 5 versions (1 minute, 1 heure, 1 jour, 1 semaine, 1 mois)
+ * 'avg': conserver 20 versions
+ * 'max': conserver 50 versions
+ *
+ * Note : indiquer 'none' fait qu'aucune nouvelle version ne sera créée,
+ * mais les versions existantes sont conservées.
+ *
+ * Si ce paramètre n'est pas NULL, alors il faudra aussi définir FILE_VERSIONING_MAX_SIZE.
+ *
+ * Défaut : null (laisser le choix dans la configuration)
+ *
+ * @var null|string
+ */
+
+//const FILE_VERSIONING_POLICY = 'min';
+
+/**
+ * FILE_VERSIONING_MAX_SIZE
+ * Forcer la taille maximale des fichiers à versionner (en Mio)
+ *
+ * N'a aucun effet si le versionnement de fichiers est désactivé.
+ *
+ * Défaut : null (laisser le choix de la taille dans la configuration)
+ *
+ * @var int|null
+ */
+
+//const FILE_VERSIONING_MAX_SIZE = 10;
+
+/**
+ * Adresse de découverte d'un client d'édition de documents (WOPI)
+ * (type OnlyOffice, Collabora, MS Office)
+ *
+ * Cela permet de savoir quels types de fichiers sont éditables
+ * avec l'éditeur web.
+ *
+ * Si NULL, alors l'édition de documents est désactivée.
+ *
+ * Défaut : null
+ */
+
+//const WOPI_DISCOVERY_URL = 'http://localhost:9980/hosting/discovery';
+
+/**
+ * PDF_COMMAND
  * Commande qui sera exécutée pour créer un fichier PDF à partir d'un HTML.
  *
- * Si laissé sur 'auto', Garradin essaiera de détecter une solution entre
+ * Si laissé sur 'auto', Paheko essaiera de détecter une solution entre
  * PrinceXML, Chromium, wkhtmltopdf ou weasyprint (dans cet ordre).
  * Si aucune solution n'est disponible, une erreur sera affichée.
  *
@@ -608,6 +747,10 @@ namespace Garradin;
  * 'weasyprint'
  * 'wkhtmltopdf -q --print-media-type --enable-local-file-access %s %s'
  *
+ * Si vous utilisez Prince, un message mentionnant l'utilisation de Prince
+ * sera joint aux e-mails utilisant des fichiers PDF, conformément à la licence :
+ * https://www.princexml.com/purchase/license_faq/#non-commercial
+ *
  * Défaut : 'auto'
  * @var null|string
  */
@@ -628,16 +771,16 @@ namespace Garradin;
  * CALC_CONVERT_COMMAND
  * Outil de conversion de formats de tableur vers un format propriétaire
  *
- * Garradin gère nativement les exports en ODS (OpenDocument : LibreOffice)
+ * Paheko gère nativement les exports en ODS (OpenDocument : LibreOffice)
  * et CSV, et imports en CSV.
  *
- * En indiquant ici le nom d'un outil, Garradin autorisera aussi
+ * En indiquant ici le nom d'un outil, Paheko autorisera aussi
  * l'import en XLSX, XLS et ODS, et l'export en XLSX.
  *
  * Pour cela il procédera simplement à une conversion entre les formats natifs
  * ODS/CSV et XLSX ou XLS.
  *
- * Noter qu'installer ces commandes peut introduire des risques de sécurité sur le serveur.
+ * Note : installer ces commandes peut introduire des risques de sécurité sur le serveur.
  *
  * Les outils supportés sont :
  * - ssconvert (apt install gnumeric) (plus rapide)
@@ -645,17 +788,58 @@ namespace Garradin;
  * - unoconvert (https://github.com/unoconv/unoserver/) en spécifiant l'interface
  *
  * Défault : null (= fonctionnalité désactivée)
+ * @var string|null
  */
 //const CALC_CONVERT_COMMAND = 'unoconv';
 //const CALC_CONVERT_COMMAND = 'ssconvert';
 //const CALC_CONVERT_COMMAND = 'unoconvert --interface localhost --port 2022';
 
 /**
+ * DOCUMENT_THUMBNAIL_COMMANDS
+ * Indique les commandes à utiliser pour générer des miniatures pour les documents
+ * (LibreOffice, OOXML, PDF, SVG, etc.)
+ *
+ * Les options possibles sont (par ordre de rapidité) :
+ * - mupdf : les miniatures PDF/SVG/XPS/EPUB sont générées avec mutool
+ *   (apt install mupdf-tools)
+ * - collabora : les miniatures sont générées par le serveur Collabora, via
+ *   l'API dont l'URL est  indiquée dans WOPI_DISCOVERY_URL
+ * - unoconvert : les miniatures des documents Office/LO sont générées
+ *   avec unoconvert <https://github.com/unoconv/unoserver/>
+ *
+ * Il est conseillé d'utiliser mupdf en priorité pour les PDF, il est plus rapide et léger.
+ *
+ * Note : cette option créera de nombreux fichiers de cache, et risque d'augmenter
+ * la charge serveur de manière importante.
+ *
+ * Défaut : null (fonctionnalité désactivée)
+ * @var null|array
+ */
+
+//const DOCUMENT_THUMBNAIL_COMMANDS = ['mupdf', 'collabora'];
+
+/**
+ * PDFTOTEXT_COMMAND
+ * Outil de conversion de PDF au format texte.
+ *
+ * Utilisé pour indexer un fichier PDF pour pouvoir rechercher dans son contenu
+ * parmi les documents.
+ *
+ * Il est possible de spécifier ici la commande suivante :
+ * - mupdf (apt install mupdf-tools)
+ *
+ * Toute autre commande sera ignorée.
+ *
+ * Défaut : null (= fonctionnalité désactivée)
+ */
+//const PDFTOTEXT_COMMAND = 'pdftotext';
+
+/**
  * API_USER et API_PASSWORD
  * Login et mot de passe système de l'API
  *
- * Une API est disponible via l'URL https://login:password@garradin.association.tld/api/...
- * Voir https://fossil.kd2.org/garradin/wiki?name=API pour la documentation
+ * Une API est disponible via l'URL https://login:password@paheko.association.tld/api/...
+ * Voir https://fossil.kd2.org/paheko/wiki?name=API pour la documentation
  *
  * Ces deux constantes permettent d'indiquer un nom d'utilisateur
  * et un mot de passe pour accès à l'API.
@@ -671,7 +855,7 @@ namespace Garradin;
 /**
  * DISABLE_INSTALL_PING
  *
- * Lors de l'installation, ou d'une mise à jour, la version installée de Garradin,
+ * Lors de l'installation, ou d'une mise à jour, la version installée de Paheko,
  * ainsi que celle de PHP et de SQLite, sont envoyées à Paheko.cloud.
  *
  * Cela permet de savoir quelles sont les versions utilisées, et également de compter
@@ -707,3 +891,31 @@ namespace Garradin;
  * financement de notre travail :-)
  */
 //const CONTRIBUTOR_LICENSE = 'XXXXX';
+
+/**
+ * Informations légale sur l'hébergeur
+ *
+ * Ce texte (HTML) est affiché en bas de la page "mentions légales"
+ * (.../admin/legal.php)
+ *
+ * S'il est omis, l'association sera indiquée comme étant auto-hébergée.
+ *
+ * Défaut : null
+ *
+ * @var  string|null
+ */
+//const LEGAL_HOSTING_DETAILS = 'OVH<br />5 rue de l'hébergement<br />ROUBAIX';
+
+/**
+ * Message d'avertissement
+ *
+ * Sera affiché en haut de toutes les pages de l'administration.
+ *
+ * Code HTML autorisé.
+ * Utiliser NULL pour désactiver le message.
+ *
+ * Défaut : null
+ *
+ * @var null|string
+ */
+//const ALERT_MESSAGE = 'Ceci est un compte de test.';

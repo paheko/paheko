@@ -1,8 +1,8 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Accounting\Transactions;
+use Paheko\Accounting\Transactions;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -14,23 +14,14 @@ if (!$transaction) {
 	throw new UserException('Cette écriture n\'existe pas');
 }
 
-if ($transaction->validated) {
-	throw new UserException('Cette écriture est validée et ne peut être modifiée');
-}
+$transaction->assertCanBeModified();
 
-if (f('delete') && $form->check('acc_delete_' . $transaction->id))
-{
-	try
-	{
-		$transaction->delete();
-		Utils::redirect(ADMIN_URL . 'acc/');
-	}
-	catch (UserException $e)
-	{
-		$form->addError($e->getMessage());
-	}
-}
+$csrf_key = 'acc_delete_' . $transaction->id;
 
-$tpl->assign('transaction', $transaction);
+$form->runIf('delete', function () use ($transaction) {
+	$transaction->delete();
+}, $csrf_key, '!acc/');
+
+$tpl->assign(compact('transaction', 'csrf_key'));
 
 $tpl->display('acc/transactions/delete.tpl');

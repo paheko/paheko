@@ -1,35 +1,51 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Web\Web;
-use Garradin\Files\Files;
-use Garradin\Entities\Files\File;
+use Paheko\Web\Web;
+use Paheko\Files\Files;
+use Paheko\Users\Session;
+use Paheko\Entities\Files\File;
+use Paheko\Extensions;
+use Paheko\Plugins;
 
 require_once __DIR__ . '/_inc.php';
 
-$banner = null;
-Plugin::fireSignal('home.banner', ['user' => $user, 'session' => $session], $banner);
+$session = Session::getInstance();
+
+$banner = '';
+$signal = Plugins::fire('home.banner', false, ['user' => $session->getUser(), 'session' => $session]);
+
+if ($signal) {
+	$banner = implode('', $signal->getOut());
+}
 
 $homepage = Config::getInstance()->file('admin_homepage');
 
 if ($homepage) {
-	$homepage = $homepage->render(ADMIN_URL . 'common/files/preview.php?p=' . File::CONTEXT_DOCUMENTS . '/');
+	$homepage = $homepage->render();
 }
 else {
 	$homepage = null;
 }
 
-$tpl->assign(compact('homepage', 'banner'));
+$buttons = Extensions::listHomeButtons($session);
+$has_extensions = empty($buttons) ? Extensions::isAnyExtensionEnabled() : true;
+
+if (!$has_extensions && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
+	$buttons = Extensions::listAvailableButtons();
+}
+
+$tpl->assign(compact('homepage', 'banner', 'buttons', 'has_extensions'));
 
 $tpl->assign('custom_css', ['!web/css.php']);
 
-$tpl->display('admin/index.tpl');
+$tpl->display('index.tpl');
 flush();
 
-// Si pas de cron on réalise les tâches automatisées à ce moment-là
-// c'est pas idéal mais mieux que rien
-if (!USE_CRON)
-{
+// If no cron task is used, then the cron is run when visiting the homepage
+// this is not the best, but better than nothing
+if (!USE_CRON && @filemtime(CACHE_ROOT . '/last_cron_run') < (time() - 24*3600*3600)) {
+	touch(CACHE_ROOT . '/last_cron_run');
 	require_once ROOT . '/scripts/cron.php';
 }

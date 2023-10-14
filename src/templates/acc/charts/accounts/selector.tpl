@@ -1,19 +1,27 @@
-{include file="admin/_head.tpl" title="Sélectionner un compte"}
+{include file="_head.tpl" title="Sélectionner un compte"}
 
 <div class="selector">
 
-<header>
-	<h2 class="quick-search">
-		<input type="text" placeholder="Recherche rapide…" title="Filtrer la liste" />{button shape="delete" type="reset" title="Effacer la recherche"}
-		{* We can't use input type="search" because Firefox sucks *}
-	</h2>
-
-	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-		<p class="edit">{linkbutton label="Modifier les comptes" href=$edit_url shape="edit"}</p>
+	<nav class="tabs">
+	{if !$chart.archived && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
+		<aside>
+			{linkbutton href=$new_url label="Ajouter un compte" shape="plus"}
+			{linkbutton label="Modifier les comptes" href=$edit_url shape="edit"}
+		</aside>
 	{/if}
 
-	<p>{input type="select" name="filter" options=$filter_options default=$filter}</p>
-</header>
+		<ul>
+			<li{if $filter == 'usual'} class="current"{/if}><a href="{$this_url}&filter=usual">Comptes favoris et usuels</a></li>
+			<li{if $filter == 'all'} class="current"{/if}><a href="{$this_url}&filter=all">Tous les comptes</a></li>
+		</ul>
+	</nav>
+
+	<header>
+		<h2 class="quick-search">
+			<input type="text" placeholder="Recherche rapide…" title="Filtrer la liste" />{button shape="delete" type="reset" title="Effacer la recherche"}
+			{* We can't use input type="search" because Firefox sucks *}
+		</h2>
+	</header>
 
 {if empty($grouped_accounts) && empty($accounts)}
 	<p class="block alert">
@@ -41,7 +49,8 @@
 					<th>{$account.label}</th>
 					<td class="desc">{$account.description}</td>
 					<td class="actions">
-						{button shape="right" value=$account.id data-label="%s — %s"|args:$account.code,$account.label label="Sélectionner"}
+						<?php $v = ($_GET['key'] ?? null) == 'code' ? $account->code : $account->id; ?>
+						{button shape="right" value=$v data-label="%s — %s"|args:$account.code,$account.label label="Sélectionner"}
 					</td>
 				</tr>
 				<?php $index++; ?>
@@ -69,7 +78,8 @@
 				<td class="num">{$account.code}</td>
 				<th>{$account.label}</th>
 				<td class="actions">
-					{button shape="right" value=$account.id data-label="%s — %s"|args:$account.code,$account.label label="Sélectionner"}
+					<?php $v = ($_GET['key'] ?? null) == 'code' ? $account->code : $account->id; ?>
+					{button shape="right" value=$v data-label="%s — %s"|args:$account.code,$account.label label="Sélectionner"}
 				</td>
 			</tr>
 		{/foreach}
@@ -82,4 +92,4 @@
 
 <script type="text/javascript" src="{$admin_url}static/scripts/selector.js?{$version_hash}"></script>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

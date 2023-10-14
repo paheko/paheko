@@ -49,6 +49,7 @@
 	</head>
 	<body><div class="web-content"><div class="nav">
 <ul>
+<li><a href="modules.html">Modules</a></li>
 <li><strong><a href="brindille.html">Documentation Brindille</a></strong></li>
 <li><a href="brindille_functions.html">Fonctions</a></li>
 <li><a href="brindille_sections.html">Sections</a></li>
@@ -56,37 +57,71 @@
 </ul>
 </div><aside class="toc">
 	<ol>
+		<li><a href="#introduction">Introduction</a>
+		<ol>
+			<li><a href="#fichiers">Fichiers</a>
+		</ol></li>
 		<li><a href="#syntaxe-de-base">Syntaxe de base</a>
 		<ol>
 			<li><a href="#affichage-de-variable">Affichage de variable</a>
 			<ol>
-				<li><a href="#ordre-de-recherche-des-variables">Ordre de recherche des variables</a></li>
-				<li><a href="#conflit-de-noms-de-variables">Conflit de noms de variables</a>
+				<li><a href="#echappement-des-caracteres-speciaux-dans-les-chaines-de-caractere">Échappement des caractères spéciaux dans les chaînes de caractère</a>
 			</ol></li>
-			<li><a href="#conditions">Conditions</a></li>
-			<li><a href="#fonctions">Fonctions</a></li>
-			<li><a href="#sections">Sections</a></li>
-			<li><a href="#sections-literales">Sections litérales</a>
+			<li><a href="#ordre-de-recherche-des-variables">Ordre de recherche des variables</a></li>
+			<li><a href="#conflit-de-noms-de-variables">Conflit de noms de variables</a></li>
+			<li><a href="#creation-manuelle-de-variable">Création manuelle de variable</a>
 			<ol>
-				<li><a href="#commentaires">Commentaires</a>
+				<li><a href="#variable-simple">Variable simple</a></li>
+				<li><a href="#nom-de-variable-dynamique">Nom de variable dynamique</a></li>
+				<li><a href="#tableaux-array">Tableaux *(array)*</a>
+				<ol>
+					<li><a href="#clef-dynamique-de-tableau">Clef dynamique de tableau</a>
+				</ol></li>
+</ol></li>
+			<li><a href="#conditions">Conditions</a>
+			<ol>
+				<li><a href="#tester-si-une-variable-existe">Tester si une variable existe</a>
 			</ol></li>
-			<li><a href="#reference-des-variables-definies-par-defaut">Référence des variables définies par défaut</a>
-</li></ol></li></ol></aside><p>La syntaxe utilisée dans Paheko pour les squelettes du site web s'appelle <strong>Brindille</strong>. Si vous avez déjà fait de la programmation, elle ressemble à un mélange de Mustache, Smarty, Twig et PHP.</p>
+			<li><a href="#fonctions">Fonctions</a>
+			<ol>
+				<li><a href="#fonctions-natives">Fonctions natives</a>
+			</ol></li>
+			<li><a href="#sections">Sections</a></li>
+			<li><a href="#bloc-literal">Bloc litéral</a></li>
+			<li><a href="#commentaires">Commentaires</a>
+		</ol></li>
+		<li><a href="#liste-des-variables-definies-par-defaut">Liste des variables définies par défaut</a></li>
+		<li><a href="#erreurs">Erreurs</a></li>
+		<li><a href="#avertissement-sur-la-securite-des-requetes-sql">Avertissement sur la sécurité des requêtes SQL</a>
+		<ol>
+			<li><a href="#mesures-prises-pour-la-securite-des-donnees">Mesures prises pour la sécurité des données</a>
+</li></ol></li></ol></aside><h1 id="introduction">Introduction</h1>
+<p>La syntaxe utilisée dans les squelettes du site web et des modules s'appelle <strong>Brindille</strong>.</p>
+<p>Si vous avez déjà fait de la programmation, elle ressemble à un mélange de Mustache, Smarty, Twig et PHP.</p>
 <p>Son but est de permettre une grande flexibilité, sans avoir à utiliser un "vrai" langage de programmation, mais en s'en rapprochant suffisamment quand même.</p>
+<h2 id="fichiers">Fichiers</h2>
+<p>Un fichier texte contenant du code Brindille est appelé un <strong>squelette</strong>.</p>
+<p>Seuls les fichiers ayant une des extensions <code>.tpl</code>, <code>.html</code>, <code>.htm</code>, <code>.skel</code> ou <code>.xml</code> seront traités par Brindille.<br />
+De même, les fichiers qui n'ont pas d'extension seront également traités par Brindille.</p>
+<p>Les autres types de fichiers seront renvoyés sans traitement, comme des fichiers "bruts". En d'autres termes, il n'est pas possible de mettre du code <em>Brindille</em> dans des fichiers qui ne sont pas des fichiers textes.</p>
 <h1 id="syntaxe-de-base">Syntaxe de base</h1>
 <h2 id="affichage-de-variable">Affichage de variable</h2>
 <p>Une variable est affichée à l'aide de la syntaxe : <code>{{$date}}</code> affichera la valeur brute de la date par exemple : <code>2020-01-31 16:32:00</code>.</p>
 <p>La variable peut être modifiée à l'aide de filtres de modification, qui sont ajoutés avec le symbole de la barre verticale (pipe <code>|</code>) : <code>{{$date|date_long}}</code> affichera une date au format long : <code>jeudi 7 mars 2021</code>.</p>
 <p>Ces filtres peuvent accepter des paramètres, séparés par deux points <code>:</code>. Exemple : <code>{{$date|date:"%d/%m/%Y"}}</code> affichera <code>31/01/2020</code>.</p>
 <p>Par défaut la variable sera recherchée dans le contexte actuel de la section, si elle n'est pas trouvée elle sera recherchée dans le contexte parent (section parente), etc. jusqu'à trouver la variable.</p>
-<p>Il est possible de faire référence à une variable d'un contexte particulier avec la notation à points : <code>{{$article.date}}</code>.</p>
+<p>Il est possible de faire référence à une variable d'un contexte particulier avec la notation à points : <code>{{$article.date}}</code>.<br />
+La même syntaxe est utilisée pour accéder aux membres d'un tableau : <code>{{$labels.new_page}}</code>.</p>
 <p>Il existe deux variables de contexte spécifiques : <code>$_POST</code> et <code>$_GET</code> qui permettent d'accéder aux données envoyées dans un formulaire et dans les paramètres de la page.</p>
-<p>Par défaut le filtre <code>escape</code> est appliqué à toutes les variables pour protéger les variables contre les injections de code HTML. Ce filtre est appliqué en dernier, après les autres filtres. Il est possible de contourner cet automatisme en rajoutant le filtre <code>escape</code> ou <code>raw</code> explicitement. <code>raw</code> désactive tout échappement, mais <code>escape</code> est utilisé pour changer l'ordre d'échappement. Exemple :</p>
-<pre><code>{{:assign text = "Coucou
-ça va ?" }}
+<p>Par défaut le filtre <code>escape</code> est appliqué à toutes les variables pour protéger les variables contre les injections de code HTML. Ce filtre est appliqué en dernier, après les autres filtres. Il est possible de contourner cet automatisme en rajoutant le filtre <code>escape</code> ou <code>raw</code> explicitement. <code>raw</code> désactive tout échappement, alors que <code>escape</code> est utilisé pour changer l'ordre d'échappement. Exemple :</p>
+<pre><code>{{:assign text = "Coucou\nça va ?" }}
 {{$text|escape|nl2br}}</code></pre>
-<p>Donnera bien <code>Coucou&lt;br /&gt;ça va ?</code>. Sans indiquer le filtre <code>escape</code> le résultat serait <code>Coucou&amp;lt;br /&amp;gt;ça va ?</code>.</p>
-<h3 id="ordre-de-recherche-des-variables">Ordre de recherche des variables</h3>
+<p>Donnera bien <code>Coucou&lt;br /&gt;ça va ?</code>. Si on n'avait pas indiqué le filtre <code>escape</code> le résultat serait <code>Coucou&amp;lt;br /&amp;gt;ça va ?</code>.</p>
+<h3 id="echappement-des-caracteres-speciaux-dans-les-chaines-de-caractere">Échappement des caractères spéciaux dans les chaînes de caractère</h3>
+<p>Pour inclure un caractère spécial (retour de ligne, guillemets ou apostrophe) dans une chaîne de caractère il suffit d'utiliser un antislash :</p>
+<pre><code>{{:assign text="Retour \n à la ligne"}}
+{{:assign text="Utiliser des \"apostrophes\"}}</code></pre>
+<h2 id="ordre-de-recherche-des-variables">Ordre de recherche des variables</h2>
 <p>Par défaut les variables sont recherchées dans l'ordre inverse, c'est à dire que sont d'abord recherchées les variables avec le nom demandé dans la section courante. Si la variable n'existe pas dans la section courante, alors elle est recherchée dans la section parente, et ainsi de suite jusqu'à ce que la variable soit trouvée, où qu'il n'y ait plus de section parente.</p>
 <p>Prenons cet exemple :</p>
 <pre><code>{{#articles uri="Actualite"}}
@@ -97,19 +132,76 @@
 {{/articles}}</code></pre>
 <p>Dans la section <code>articles</code>, <code>$title</code> est une variable de l'article, donc la variable est celle de l'article.</p>
 <p>Dans la section <code>images</code>, les images n'ayant pas de titre, la variable sera celle de l'article de la section parente, alors que <code>$thumb_url</code> sera lié à l'image.</p>
-<h3 id="conflit-de-noms-de-variables">Conflit de noms de variables</h3>
+<h2 id="conflit-de-noms-de-variables">Conflit de noms de variables</h2>
 <p>Imaginons que nous voulions mettre un lien vers l'article sur l'image de l'exemple précédent :</p>
 <pre><code>{{#articles uri="Actualite"}}
   &lt;h1&gt;{{$title}}&lt;/h1&gt;
     {{#images parent=$path limit=1}}
-      &lt;a href="{{$url}}"&gt;&lt;img src="{{$thumb_url}}" alt="{{$title}}" /&gt;&lt;/a&gt;
+
     {{/images}}
 {{/articles}}</code></pre>
 <p>Problème, ici <code>$url</code> fera référence à l'URL de l'image elle-même, et non pas l'URL de l'article.</p>
 <p>La solution est d'ajouter un point au début du nom de variable : <code>{{$.url}}</code>.</p>
 <p>Un point au début d'un nom de variable signifie que la variable est recherchée à partir de la section précédente. Il est possible d'utiliser plusieurs points, chaque point correspond à un niveau à remonter. Ainsi <code>$.url</code> cherchera la variable dans la section parente (et ses sections parentes si elle n'existe pas, etc.). De même, <code>$..url</code> cherchera dans la section parente de la section parente.</p>
+<h2 id="creation-manuelle-de-variable">Création manuelle de variable</h2>
+<h3 id="variable-simple">Variable simple</h3>
+<p>La création d'une variable se fait via l'appel de la fonction <code>{{:assign}}</code>.</p>
+<p>Exemple :</p>
+<pre><code>{{:assign source='wiki'}}
+{{* est identique à : *}}
+{{:assign var='source' value='wiki'}}</code></pre>
+<p>Un deuxième appel à <code>{{:assign}}</code> avec le même nom de variable écrase la valeur précédente</p>
+<pre><code>{{:assign var='source' value='wiki'}}
+{{:assign var='source' value='documentation'}}
+
+{{$source}}
+{{* =&gt; Affiche documentation *}}</code></pre>
+<h3 id="nom-de-variable-dynamique">Nom de variable dynamique</h3>
+<p>Il est possible de créer une variable dont une partie du nom est dynamique.</p>
+<pre><code>{{:assign type='user'}}
+{{:assign var='allowed_%s'|args:$type value='jeanne'}}
+{{:assign type='side'}}
+{{:assign var='allowed_%s'|args:$type value='admin'}}
+
+{{$allowed_user}} =&gt; jeanne
+{{$allowed_side}} =&gt; admin</code></pre>
+<p><a href="brindille_functions.html#assign">Documentation complète de la fonction {{:assign}}</a>.</p>
+<h3 id="tableaux-array">Tableaux <em>(array)</em></h3>
+<p>Pour créer des tableaux, il suffit d'utiliser des points <code>.</code> dans le nom de la variable (ex : <code>colors.yellow</code>). Il n'y a pas besoin d'initialiser le tableau avant de le remplir.</p>
+<pre><code>{{:assign var='colors.admin' value='blue'}}
+{{:assign var='colors.website' value='grey'}}
+{{:assign var='colors.debug' value='yellow'}}</code></pre>
+<p>On accède ensuite à la valeur d'un élément du tableau avec la même syntaxe : <code>{{$colors.website}}</code></p>
+<p>Méthode rapide de création du même tableau :</p>
+<pre><code>{{:assign var='colors' admin='blue' website='grey' debug='yellow'}}</code></pre>
+<p>Pour ajouter un élément à la suite du tableau sans spécifier de clef <em>(push)</em>, il suffit de terminer le nom de la variable par un point <code>.</code> sans suffixe.</p>
+<p>Exemple :</p>
+<pre><code>{{* Ajouter les valeurs 17, 43 et 214 dans $processed_ids *}}
+
+{{:assign var='processed_ids.' value=17}}
+{{:assign var='processed_ids.' value=43}}
+{{:assign var='processed_ids.' value=214}}</code></pre>
+<h4 id="clef-dynamique-de-tableau">Clef dynamique de tableau</h4>
+<p>Il est possible d'accéder dynamiquement à un des éléments d'un tableau de la manière suivante :</p>
+<pre><code>{{:assign location='admin'}}
+{{:assign var='location_color' from='colors.%s'|args:$location}}
+
+{{$location_color}} =&gt; blue</code></pre>
+<p>Exemple plus complexe :</p>
+<pre><code>{{:assign var='type_whitelist.text' value=1}}
+{{:assign var='type_whitelist.html' value=1}}
+
+{{#foreach from=$documents item='document'}}
+  {{:assign var='allowed' value='type_whitelist.%s'|args:$document-&gt;type}}
+  {{if $allowed !== null}}
+    {{:include file='document/'|cat:$type:'.tpl' keep='document'}}
+  {{/if}}
+{{/foreach}}</code></pre>
+<p>Il est également possible de créer un membre dynamique d'un tableau en conjuguant les syntaxes précédentes.</p>
+<p>Exemple :</p>
+<pre><code>{{:assign var='type_whitelist.%s'|args:$type value=1}}</code></pre>
 <h2 id="conditions">Conditions</h2>
-<p>Il est possible d'utiliser des conditions de type "si" (<code>if</code>), "sinon si" (<code>elseif</code>) et "sinon" (<code>else</code>). Celles-ci sont terminées par un block "fin si" (<code>/if</code>).</p>
+<p>Il est possible d'utiliser des conditions de type <strong>"si"</strong> (<code>if</code>), <strong>"sinon si"</strong> (<code>elseif</code>) et <strong>"sinon"</strong> (<code>else</code>). Celles-ci sont terminées par un block <strong>"fin si"</strong> (<code>/if</code>).</p>
 <pre><code>{{if $date|date:"%Y" &gt; 2020}}
     La date est en 2020
 {{elseif $article.status == 'draft'}}
@@ -172,7 +264,7 @@
 </tbody>
 </table>
 <p>Il est aussi possible de précéder une variable de l'opérateur <code>!</code>, c'est un raccourci pour <code>$variable == false</code>.</p>
-<p>Voir <a href="https://www.php.net/manual/fr/language.operators.comparison.php" target="_blank" rel="nofollow,noreferrer">les opérateurs de comparaison PHP pour plus de détails</a>.</p>
+<p>Voir <a href="https://www.php.net/manual/fr/language.operators.comparison.php" target="_blank" rel="noreferrer">les opérateurs de comparaison PHP pour plus de détails</a>.</p>
 <p>Les opérateurs logiques supportés sont :</p>
 <table>
 <thead>
@@ -197,8 +289,18 @@
 <li><code>false &amp;&amp; true</code> : sera évalué comme faux</li>
 <li><code>false || true</code> : sera évalué comme vrai</li>
 </ul>
+<h3 id="tester-si-une-variable-existe">Tester si une variable existe</h3>
+<p>Brindille ne fait pas de différences entre une variable qui n'existe pas, et une variable définie à <code>null</code>.<br />
+On peut donc tester l'existence d'une variable en la comparant à <code>null</code> comme ceci :</p>
+<pre><code>{{if $session !== null}}
+  Session en cours pour l'utilisateur/trice {{$session.user.name}}.
+{{else}}
+  Session inexistante.
+{{/if}}</code></pre>
 <h2 id="fonctions">Fonctions</h2>
-<p>Une fonction va répondre à certains paramètres et renvoyer un résultat ou réaliser une action. Un bloc de fonction commence par le signe deux points <code>:</code> :</p>
+<h3 id="fonctions-natives">Fonctions natives</h3>
+<p>Une fonction va répondre à certains paramètres et renvoyer un résultat ou réaliser une action.</p>
+<p><strong>Un bloc de fonction commence par le signe deux points <code>:</code>.</strong></p>
 <pre><code>{{:http code=404}}</code></pre>
 <p>Contrairement aux autres types de blocs, et comme pour les variables, il n'y a pas de bloc fermant (avec un slash <code>/</code>).</p>
 <h2 id="sections">Sections</h2>
@@ -213,7 +315,7 @@
     &lt;h1&gt;{{$title}}&lt;/h1&gt;
 
     {{#articles parent=$path order="published DESC" limit="10"}}
-        &lt;h2&gt;&lt;a href="{{$url}}"&gt;{{$title}}&lt;/a&gt;&lt;/h2&gt;
+        &lt;h2&gt;&lt;/h2&gt;
         &lt;p&gt;{{$content|truncate:600:"..."}}&lt;/p&gt;
     {{else}}
         &lt;p&gt;Aucun article trouvé.&lt;/p&gt;
@@ -221,7 +323,7 @@
 
 {{/categories}}</code></pre>
 <p>Voir la référence des sections pour voir quelles sont les sections possibles et quel est leur comportement.</p>
-<h2 id="sections-literales">Sections litérales</h2>
+<h2 id="bloc-literal">Bloc litéral</h2>
 <p>Pour qu'une partie du code ne soit pas interprété, pour éviter les conflits avec certaines syntaxes, il est possible d'utiliser un bloc <code>literal</code> :</p>
 <pre><code>{{literal}}
 &lt;script&gt;
@@ -230,7 +332,7 @@ function test (a) {{
 }}
 &lt;/script&gt;
 {{/literal}}</code></pre>
-<h3 id="commentaires">Commentaires</h3>
+<h2 id="commentaires">Commentaires</h2>
 <p>Les commentaires sont figurés dans des blocs qui commencent et se terminent par une étoile (<code>*</code>) :</p>
 <pre><code>{{* Ceci est un commentaire
 Il sera supprimé du résultat final
@@ -239,71 +341,116 @@ Il peut contenir du code qui ne sera pas interprété :
 OK
 {{/if}}
 *}}</code></pre>
-<h2 id="reference-des-variables-definies-par-defaut">Référence des variables définies par défaut</h2>
+<h1 id="liste-des-variables-definies-par-defaut">Liste des variables définies par défaut</h1>
 <p>Ces variables sont définies tout le temps :</p>
 <table>
 <thead>
 <tr>
-<th>Nom</th>
-<th>Contenu</th>
+<th style="text-align: left;">Nom de la variable</th>
+<th style="text-align: left;">Valeur</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>$_GET</code></td>
-<td>Alias de la super-globale _GET de PHP.</td>
+<td style="text-align: left;"><code>$_GET</code></td>
+<td style="text-align: left;">Alias de la super-globale _GET de PHP.</td>
 </tr>
 <tr>
-<td><code>$_POST</code></td>
-<td>Alias de la super-globale _POST de PHP.</td>
+<td style="text-align: left;"><code>$_POST</code></td>
+<td style="text-align: left;">Alias de la super-globale _POST de PHP.</td>
 </tr>
 <tr>
-<td><code>$root_url</code></td>
-<td>Adresse racine du site web Paheko.</td>
+<td style="text-align: left;"><code>$root_url</code></td>
+<td style="text-align: left;">Adresse racine du site web Paheko.</td>
 </tr>
 <tr>
-<td><code>$request_url</code></td>
-<td>Adresse de la page courante.</td>
+<td style="text-align: left;"><code>$request_url</code></td>
+<td style="text-align: left;">Adresse de la page courante.</td>
 </tr>
 <tr>
-<td><code>$admin_url</code></td>
-<td>Adresse de la racine de l'administration Paheko.</td>
+<td style="text-align: left;"><code>$admin_url</code></td>
+<td style="text-align: left;">Adresse de la racine de l'administration Paheko.</td>
 </tr>
 <tr>
-<td><code>$visitor_lang</code></td>
-<td>Langue préférée du visiteur, sur 2 lettres (exemple : <code>fr</code>, <code>en</code>, etc.).</td>
+<td style="text-align: left;"><code>$visitor_lang</code></td>
+<td style="text-align: left;">Langue préférée du visiteur, sur 2 lettres (exemple : <code>fr</code>, <code>en</code>, etc.).</td>
 </tr>
 <tr>
-<td><code>$logged_user</code></td>
-<td>Informations sur le membre actuellement connecté dans l'administration (vide si non connecté).</td>
+<td style="text-align: left;"><code>$logged_user</code></td>
+<td style="text-align: left;">Informations sur le membre actuellement connecté dans l'administration (vide si non connecté).</td>
 </tr>
 <tr>
-<td><code>$config.org_name</code></td>
-<td>Nom de l'association</td>
+<td style="text-align: left;"><code>$dialog</code></td>
+<td style="text-align: left;">Vaut <code>TRUE</code> si la page est dans un dialogue (iframe sous forme de pop-in dans l'administration).</td>
 </tr>
 <tr>
-<td><code>$config.org_email</code></td>
-<td>Adresse e-mail de l'association</td>
+<td style="text-align: left;"><code>$now</code></td>
+<td style="text-align: left;">Contient la date et heure courante.</td>
 </tr>
 <tr>
-<td><code>$config.org_phone</code></td>
-<td>Numéro de téléphone de l'association</td>
+<td style="text-align: left;"><code>$legal_line</code></td>
+<td style="text-align: left;">Contient la ligne de bas de page des mentions légales (sous forme de code HTML) qui doit être présente en bas des pages publiques.</td>
 </tr>
 <tr>
-<td><code>$config.org_address</code></td>
-<td>Adresse postale de l'association</td>
+<td style="text-align: left;"><code>$config.org_name</code></td>
+<td style="text-align: left;">Nom de l'association</td>
 </tr>
 <tr>
-<td><code>$config.org_web</code></td>
-<td>Adresse du site web de l'association</td>
+<td style="text-align: left;"><code>$config.org_email</code></td>
+<td style="text-align: left;">Adresse e-mail de l'association</td>
 </tr>
 <tr>
-<td><code>$config.files.logo</code></td>
-<td>Adresse du logo de l'association, si définit dans la personnalisation</td>
+<td style="text-align: left;"><code>$config.org_phone</code></td>
+<td style="text-align: left;">Numéro de téléphone de l'association</td>
 </tr>
 <tr>
-<td><code>$config.files.favicon</code></td>
-<td>Adresse de l'icône de favoris de l'association, si définit dans la personnalisation</td>
+<td style="text-align: left;"><code>$config.org_address</code></td>
+<td style="text-align: left;">Adresse postale de l'association</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>$config.org_web</code></td>
+<td style="text-align: left;">Adresse du site web de l'association</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>$config.files.logo</code></td>
+<td style="text-align: left;">Adresse du logo de l'association, si définit dans la personnalisation</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>$config.files.favicon</code></td>
+<td style="text-align: left;">Adresse de l'icône de favoris de l'association, si défini dans la personnalisation</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>$config.files.signature</code></td>
+<td style="text-align: left;">Adresse de l'image de signature, si défini dans la personnalisation</td>
 </tr>
 </tbody>
-</table></div></body></html>
+</table>
+<p>À celles-ci s'ajoutent <a href="modules.html#variables_speciales">les variables spéciales des modules</a> lorsque le script est chargé dans un module.</p>
+<h1 id="erreurs">Erreurs</h1>
+<p>Si une erreur survient dans un squelette, que ça soit au niveau d'une erreur de syntaxe, ou une erreur dans une fonction, filtre ou section, alors elle sera affichée selon les règles suivantes :</p>
+<ul>
+<li>si le membre connecté est administrateur, une erreur est affichée avec le code du squelette ;</li>
+<li>sinon l'erreur est affichée sans le code.</li>
+</ul>
+<h1 id="avertissement-sur-la-securite-des-requetes-sql">Avertissement sur la sécurité des requêtes SQL</h1>
+<p>Attention, en utilisant la section <code>{{#select ...}}</code>, ou une des sections SQL (voir plus bas), avec des paramètres qui ne seraient pas protégés, il est possible qu'une personne mal intentionnée ait accès à des parties de la base de données à laquelle vous ne désirez pas donner accès.</p>
+<p>Pour protéger contre cela il est essentiel d'utiliser les paramètres nommés.</p>
+<p>Exemple de requête dangereuse :</p>
+<pre><code>{{#sql select="*" tables="users" where="id = %s"|args:$_GET.id}}
+...
+{{/sql}}</code></pre>
+<p>On se dit que la requête finale sera donc : <code>SELECT * FROM users WHERE id = 42;</code> si le numéro 42 est passé dans le paramètre <code>id</code> de la page.</p>
+<p>Imaginons qu'une personne mal-intentionnée indique dans le paramètre <code>id</code> de la page la chaîne de caractère suivante : <code>0 OR 1</code>. Dans ce cas la requête exécutée sera  <code>SELECT * FROM users WHERE id = 0 OR 1;</code>. Cela aura pour effet de lister tous les membres, au lieu d'un seul.</p>
+<p>Pour protéger contre cela il convient d'utiliser un paramètre nommé :</p>
+<pre><code>{{#sql select="*" tables="users" where="id = :id" :id=$_GET.id}}</code></pre>
+<p>Dans ce cas la requête malveillante générée sera <code>SELECT * FROM users WHERE id = '0 OR 1';</code>. Ce qui aura pour effet de ne lister aucun membre.</p>
+<h2 id="mesures-prises-pour-la-securite-des-donnees">Mesures prises pour la sécurité des données</h2>
+<p>Dans Brindille, il n'est pas possible de modifier ou supprimer des éléments dans la base de données avec les requêtes SQL directement. Seules les requêtes SQL en lecture (<code>SELECT</code>) sont permises.</p>
+<p>Cependant certaines fonctions permettent de modifier ou créer des éléments précis (écritures par exemple), ce qui peut avoir un effet de remplir ou modifier des données par une personne mal-intentionnée, donc attention à leur utilisation.</p>
+<p>Les autres mesures prises sont :</p>
+<ul>
+<li>impossibilité d'accéder à certaines données sensibles (mot de passe, logs de connexion, etc.)</li>
+<li>incitation forte à utiliser les paramètres nommés dans la documentation</li>
+<li>protection automatique des variables dans la section <code>{{#select}}</code></li>
+<li>fourniture de fonctions pour protéger les chaînes de caractères contre l'injection SQL</li>
+</ul></div></body></html>

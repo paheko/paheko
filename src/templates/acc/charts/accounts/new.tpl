@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Nouveau compte" current="acc/years"}
+{include file="_head.tpl" title="Nouveau compte" current="acc/years"}
 
 {include file="acc/charts/accounts/_nav.tpl" current="new"}
 
@@ -80,6 +80,8 @@
 	<fieldset>
 		<legend>Comptes disponibles</legend>
 
+		<p class="submit actions right">{button type="submit" shape="right" name="from" value="" label="Aucun compte ne correspond" class="main"}</p>
+
 		<h2>Est-ce que le compte dont vous avez besoin est dans cette liste&nbsp;?</h2>
 
 		<p class="help">
@@ -94,8 +96,9 @@
 				<tr class="account account-level-{$item.level}">
 					<td>{if $item.already_listed}{icon shape="star" title="Ce compte est déjà favori"}{/if}</td>
 					<td class="num">{$item.code}</td>
-					<th>{linkbutton href="?id=%d&type=%d&ask=%d&%s"|args:$account.id_chart,$account.type,$item.id,$types_arg label=$item.label}</th>
-					<td>{if $item.description}<span class="help">{$item.description|escape|nl2br}</span>{/if}</td>
+					<th>{linkbutton href="?id=%d&type=%d&ask=%d&%s"|args:$account.id_chart,$account.type,$item.id,$types_arg label=$item.label}
+						{if $item.description}<span class="help">{$item.description|escape|nl2br}</span>{/if}
+					</th>
 					<td class="actions">
 						{linkbutton href="?id=%d&type=%d&ask=%d&%s"|args:$account.id_chart,$account.type,$item.id,$types_arg label="Sélectionner" shape="right"}
 					</td>
@@ -115,7 +118,7 @@
 
 {else}
 
-<form method="post" action="{$self_url}" data-focus="[name='code']">
+<form method="post" action="{$self_url}" data-focus="[name='code'],[name=code_value]">
 
 	<fieldset>
 		<legend>Créer un nouveau compte</legend>
@@ -134,4 +137,4 @@
 
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

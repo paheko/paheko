@@ -1,7 +1,8 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Services\Services_User;
+use Paheko\Services\Services_User;
+use Paheko\Users\Users;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -20,7 +21,7 @@ $form->runIf('delete', function () use ($su) {
 	$su->delete();
 }, $csrf_key, ADMIN_URL . 'services/user/?id=' . $user_id);
 
-$user_name = (new Membres)->getNom($user_id);
+$user_name = Users::getName($su->id_user);
 
 $service_name = $su->service()->label;
 $fee_name = $su->id_fee ? $su->fee()->label : null;

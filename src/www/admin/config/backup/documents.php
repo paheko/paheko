@@ -1,9 +1,9 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Web\Web;
-use Garradin\Files\Files;
-use Garradin\Entities\Files\File;
+use Paheko\Web\Web;
+use Paheko\Files\Files;
+use Paheko\Entities\Files\File;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -15,7 +15,7 @@ $form->runIf('restore', function () {
 			file_put_contents($f, gzinflate(file_get_contents($f), 1024*1024*1024));
 		}
 
-		File::upload(Utils::dirname(f('target')), 'file1');
+		Files::upload(Utils::dirname(f('target')), 'file1');
 	}
 	catch (UserException $e) {
 		die(json_encode(['success' => false, 'error' => f('target') . ': '. $e->getMessage()]));
@@ -24,12 +24,6 @@ $form->runIf('restore', function () {
 	die(json_encode(['success' => true, 'error' => null]));
 }, 'files_restore');
 
-
-// Download all files as ZIP
-$form->runIf('download_files', function () {
-	(new Sauvegarde)->dumpFilesZip();
-	exit;
-}, 'files_download');
 
 $ok = qg('ok') !== null;
 $failed = (int) qg('failed');
@@ -40,14 +34,8 @@ if ($ok) {
 	$config->updateFiles();
 	$config->save();
 	$tpl->assign(compact('config'));
-
-	Web::sync(true);
-
-	Static_Cache::clean(0);
 }
 
-$files_size = Files::getUsedQuota();
+$tpl->assign(compact('failed', 'ok'));
 
-$tpl->assign(compact('files_size', 'failed', 'ok'));
-
-$tpl->display('admin/config/backup/documents.tpl');
+$tpl->display('config/backup/documents.tpl');

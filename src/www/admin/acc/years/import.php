@@ -1,14 +1,17 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Accounting\Export;
-use Garradin\Accounting\Import;
-use Garradin\Accounting\Transactions;
-use Garradin\Accounting\Years;
+use Paheko\Accounting\Export;
+use Paheko\Accounting\Import;
+use Paheko\Accounting\Transactions;
+use Paheko\Accounting\Years;
+use Paheko\Users\Session;
 
 require_once __DIR__ . '/../_inc.php';
 
+$session = Session::getInstance();
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
+$user = $session->getUser();
 
 $year_id = (int) qg('year') ?: CURRENT_YEAR_ID;
 
@@ -58,7 +61,7 @@ if ($type && $type_name) {
 	$csv->setColumns($columns_table, $columns);
 	$csv->setMandatoryColumns(Export::MANDATORY_COLUMNS[$type]);
 
-	$form->runIf(f('load') && isset($_FILES['file']['tmp_name']), function () use ($type, $csv, $year, $params) {
+	$form->runIf(f('load') && isset($_FILES['file']['tmp_name']), function () use ($csv, $params) {
 		$csv->load($_FILES['file']);
 		Utils::redirect(Utils::getSelfURI($params));
 	}, $csrf_key);
@@ -96,6 +99,10 @@ $types = [
 	Export::SIMPLE => [
 		'label' => 'Simplifié (comptabilité de trésorerie)',
 		'help' => 'Chaque ligne représente une écriture, comme dans un cahier. Les écritures avancées ne peuvent pas être importées dans ce format.',
+	],
+	Export::FULL => [
+		'label' => 'Complet (comptabilité d\'engagement)',
+		'help' => 'Permet d\'avoir des écritures avancées. Les écritures sont groupées en utilisant leur numéro.',
 	],
 	Export::GROUPED => [
 		'label' => 'Complet groupé (comptabilité d\'engagement)',

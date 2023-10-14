@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Démarrer la comptabilité" current="acc"}
+{include file="_head.tpl" title="Démarrer la comptabilité" current="acc"}
 
 {form_errors}
 
@@ -18,7 +18,7 @@
 		</p>
 		<dl>
 			<dt>Pays</dt>
-			<dd>{$config.pays|get_country_name} {linkbutton href="!config/" shape="settings" label="Modifier le pays dans la configuration"}</dd>
+			<dd>{$config.country|get_country_name} {linkbutton href="!config/" shape="settings" label="Modifier le pays dans la configuration"}</dd>
 		</dl>
 		{if $default_chart && $year.id_chart == $default_chart.id}
 		<dl class="chart-default">
@@ -112,4 +112,4 @@
 
 <script type="text/javascript" src="{$admin_url}static/scripts/accounting_setup.js"></script>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

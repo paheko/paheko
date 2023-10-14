@@ -1,65 +1,59 @@
 <?php
-namespace Garradin;
+namespace Paheko;
+
+use Paheko\Entities\Search as SE;
+use Paheko\Search;
+use Paheko\Users\Session;
 
 require_once __DIR__ . '/../_inc.php';
 
-if (empty($target) || !in_array($target, Recherche::TARGETS)) {
-    throw new UserException('Cible inconnue');
+if (!defined('Paheko\CURRENT_SEARCH_TARGET') || !array_key_exists(CURRENT_SEARCH_TARGET, SE::TARGETS)) {
+	throw new UserException('Cible inconnue');
 }
 
 if (empty($search_url)) {
 	throw new \LogicException('Missing $search_url');
 }
 
-$access_section = $target == 'compta' ? $session::SECTION_ACCOUNTING : $session::SECTION_USERS;
+$access_section = CURRENT_SEARCH_TARGET == 'accounting' ? $session::SECTION_ACCOUNTING : $session::SECTION_USERS;
 
-$recherche = new Recherche;
 $mode = null;
 
 if (qg('edit') || qg('delete'))
 {
-	$r = $recherche->get(qg('edit') ?: qg('delete'));
+	$s = Search::get(qg('edit') ?: qg('delete'));
 
-	if (!$r)
-	{
+	if (!$s) {
 		throw new UserException('Recherche non trouvée');
 	}
 
-	if ($r->id_membre !== null && $r->id_membre != $user->id)
-	{
+	if ($s->id_user !== null && $s->id_user != Session::getInstance()->getUser()->id) {
 		throw new UserException('Recherche privée appartenant à un autre membre.');
 	}
 
-	$tpl->assign('recherche', $r);
+	$csrf_key = 'search_' . $s->id;
+
+	$form->runIf('save', function () use ($s) {
+		$s->importForm();
+		$s->set('id_user', f('public') ? null : Session::getUserId());
+		$s->save();
+	}, $csrf_key, Utils::getSelfURI(false));
+
+	$form->runIf('delete', function () use ($s) {
+		$s->delete();
+	}, $csrf_key, Utils::getSelfURI(false));
+
+	$tpl->assign('search', $s);
+	$tpl->assign('csrf_key', $csrf_key);
 
 	$mode = qg('edit') ? 'edit' : 'delete';
 }
-
-if ($mode == 'edit' && f('save') && $form->check('edit_recherche_' . $r->id))
-{
-	try {
-		$recherche->edit($r->id, [
-			'intitule'  => f('intitule'),
-			'id_membre' => f('prive') ? $user->id : null,
-		]);
-
-		Utils::redirect(Utils::getSelfURI(false));
-	}
-	catch (UserException $e) {
-		$form->addError($e->getMessage());
-	}
-}
-elseif ($mode == 'delete' && f('delete') && $form->check('del_recherche_' . $r->id))
-{
-	$recherche->remove($r->id);
-	Utils::redirect(Utils::getSelfURI(false));
+else {
+	$tpl->assign('list', Search::list(CURRENT_SEARCH_TARGET, Session::getUserId()));
+	$mode = 'list';
 }
 
-if (!$mode)
-{
-	$tpl->assign('liste', $recherche->getList($user->id, $target));
-}
-
+$target = CURRENT_SEARCH_TARGET;
 $tpl->assign(compact('mode', 'target', 'search_url', 'access_section'));
 
 $tpl->display('common/search/saved_searches.tpl');

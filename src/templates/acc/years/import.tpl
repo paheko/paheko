@@ -1,7 +1,7 @@
 <?php
-use Garradin\Accounting\Export;
+use Paheko\Accounting\Export;
 ?>
-{include file="admin/_head.tpl" title="Importer des écritures" current="acc/years"}
+{include file="_head.tpl" title="Importer des écritures" current="acc/years"}
 
 <nav class="acc-year">
 	<h4>Exercice sélectionné&nbsp;:</h4>
@@ -47,7 +47,7 @@ use Garradin\Accounting\Export;
 	{if $report.unchanged_count}
 	<details>
 		<summary>
-			<h3>{{%n écriture ne sera pas affectée.}{%n écritures ne seront pas affectées.} n=$report.unchanged_count}</h3>
+			<h3>{{%n écriture ne sera pas affectée}{%n écritures ne seront pas affectées} n=$report.unchanged_count}</h3>
 		</summary>
 		<p class="help">Les écritures suivantes mentionnées dans le fichier <strong>ne seront pas modifiées</strong>.</p>
 		{include file="acc/reports/_journal.tpl" journal=$report.unchanged with_linked_users=true}
@@ -137,9 +137,9 @@ use Garradin\Accounting\Export;
 	<fieldset>
 		<legend>Import d'écritures</legend>
 		<dl>
-			<dt><label for="f_type_garradin">Type de fichier à importer</label></dt>
+			<dt><label for="f_type_grouped">Type de fichier à importer</label></dt>
 			{foreach from=$types key="type" item="info"}
-			{input type="radio-btn" name="type" value=$type label=$info.label help=$info.help default="full"}
+			{input type="radio-btn" name="type" value=$type label=$info.label help=$info.help default="simple"}
 			<dd class="help example">
 				Exemple :
 				<table class="list auto">
@@ -170,4 +170,4 @@ use Garradin\Accounting\Export;
 {/if}
 
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

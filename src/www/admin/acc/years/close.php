@@ -1,7 +1,8 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Accounting\Years;
+use Paheko\Users\Session;
+use Paheko\Accounting\Years;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -22,7 +23,13 @@ $csrf_key = 'acc_years_close_' . $year->id();
 $form->runIf('close', function () use ($year, $user, $session) {
 	$year->close($user->id);
 	$year->save();
-	$session->set('acc_year', null);
+
+	$user = Session::getLoggedUser();
+
+	// Year is closed, remove it from preferences
+	if ($user->getPreference('accounting_year') == $year->id()) {
+		$user->setPreference('accounting_year', null);
+	}
 	$session->save();
 }, $csrf_key, ADMIN_URL . 'acc/years/new.php?from=' . $year->id());
 

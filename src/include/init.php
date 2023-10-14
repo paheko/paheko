@@ -1,6 +1,6 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
 use KD2\ErrorManager;
 use KD2\Security;
@@ -8,15 +8,19 @@ use KD2\Form;
 use KD2\Translate;
 use KD2\DB\EntityManager;
 
-error_reporting(-1);
+const CONFIG_FILE = 'config.local.php';
+
+require_once __DIR__ . '/lib/KD2/ErrorManager.php';
+
+ErrorManager::enable(ErrorManager::DEVELOPMENT);
+ErrorManager::setLogFile(__DIR__ . '/data/error.log');
 
 /*
- * Version de Garradin
+ * Version de Paheko
  */
-
-function garradin_version()
+function paheko_version()
 {
-	if (defined('Garradin\VERSION'))
+	if (defined('Paheko\VERSION'))
 	{
 		return VERSION;
 	}
@@ -32,11 +36,11 @@ function garradin_version()
 		$version = 'unknown';
 	}
 
-	define('Garradin\VERSION', $version);
+	define('Paheko\VERSION', $version);
 	return $version;
 }
 
-function garradin_manifest()
+function paheko_manifest()
 {
 	$file = __DIR__ . '/../../manifest.uuid';
 
@@ -49,10 +53,10 @@ function garradin_manifest()
 }
 
 /**
- * Le code de Garradin ne s'écrit pas tout seul comme par magie,
+ * Le code de Paheko ne s'écrit pas tout seul comme par magie,
  * merci de soutenir notre travail en faisant une contribution :)
  */
-function garradin_contributor_license(): ?int
+function paheko_contributor_license(): ?int
 {
 	static $level = null;
 
@@ -90,29 +94,35 @@ if (!defined('\SQLITE3_OPEN_READWRITE')) {
  */
 
 // Configuration externalisée
-if (file_exists(__DIR__ . '/../config.local.php'))
-{
-	require __DIR__ . '/../config.local.php';
+if (file_exists(__DIR__ . '/../' . CONFIG_FILE)) {
+	require __DIR__ . '/../' . CONFIG_FILE;
 }
 
-// Configuration par défaut, si les constantes ne sont pas définies dans config.local.php
+// Configuration par défaut, si les constantes ne sont pas définies dans CONFIG_FILE
 // (fallback)
-if (!defined('Garradin\ROOT'))
+if (!defined('Paheko\ROOT'))
 {
-	define('Garradin\ROOT', dirname(__DIR__));
+	define('Paheko\ROOT', dirname(__DIR__));
 }
 
-\spl_autoload_register(function (string $classname) {
+\spl_autoload_register(function (string $classname): void {
 	$classname = ltrim($classname, '\\');
 
 	// Plugins
-	if (substr($classname, 0, 16) == 'Garradin\\Plugin\\')
+	if (substr($classname, 0, 14) == 'Paheko\\Plugin\\')
 	{
-		$classname = substr($classname, 16);
+		$classname = substr($classname, 14);
 		$plugin_name = substr($classname, 0, strpos($classname, '\\'));
 		$filename = str_replace('\\', '/', substr($classname, strpos($classname, '\\')+1));
 
-		$path = Plugin::getPath(strtolower($plugin_name)) . '/lib/' . $filename . '.php';
+		$path = Plugins::getPath(strtolower($plugin_name));
+
+		// Plugin does not exist, just abort
+		if (!$path) {
+			return;
+		}
+
+		$path = $path . '/lib/' . $filename . '.php';
 	}
 	else
 	{
@@ -126,16 +136,11 @@ if (!defined('Garradin\ROOT'))
 	}
 }, true);
 
-if (!defined('Garradin\DATA_ROOT')) {
-	// Migrate plugins, cache and SQLite to data/ subdirectory (version 1.1)
-	if (!file_exists(ROOT . '/data/association.sqlite') && file_exists(ROOT . '/association.sqlite')) {
-		Upgrade::moveDataRoot();
-	}
-
-	define('Garradin\DATA_ROOT', ROOT . '/data');
+if (!defined('Paheko\DATA_ROOT')) {
+	define('Paheko\DATA_ROOT', ROOT . '/data');
 }
 
-if (!defined('Garradin\WWW_URI'))
+if (!defined('Paheko\WWW_URI'))
 {
 	try {
 		$uri = \KD2\HTTP::getRootURI(ROOT);
@@ -152,13 +157,13 @@ if (!defined('Garradin\WWW_URI'))
 		exit;
 	}
 
-	define('Garradin\WWW_URI', $uri);
+	define('Paheko\WWW_URI', $uri);
 	unset($uri);
 }
 
 $host = null;
 
-if (!defined('Garradin\WWW_URL')) {
+if (!defined('Paheko\WWW_URL')) {
 	$host = \KD2\HTTP::getHost();
 }
 
@@ -177,33 +182,37 @@ if (WWW_URI === null || (!empty($host) && $host == 'host.unknown')) {
 	exit(1);
 }
 
-if (!defined('Garradin\WWW_URL') && $host !== null) {
-	define('Garradin\WWW_URL', \KD2\HTTP::getScheme() . '://' . $host . WWW_URI);
+if (!defined('Paheko\WWW_URL') && $host !== null) {
+	define('Paheko\WWW_URL', \KD2\HTTP::getScheme() . '://' . $host . WWW_URI);
 }
 
 static $default_config = [
 	'CACHE_ROOT'            => DATA_ROOT . '/cache',
 	'SHARED_CACHE_ROOT'     => DATA_ROOT . '/cache/shared',
+	'WEB_CACHE_ROOT'        => DATA_ROOT . '/cache/web/%host%',
 	'DB_FILE'               => DATA_ROOT . '/association.sqlite',
 	'DB_SCHEMA'             => ROOT . '/include/data/schema.sql',
 	'PLUGINS_ROOT'          => DATA_ROOT . '/plugins',
-	'PREFER_HTTPS'          => false,
 	'ALLOW_MODIFIED_IMPORT' => true,
 	'SHOW_ERRORS'           => true,
 	'MAIL_ERRORS'           => false,
 	'ERRORS_REPORT_URL'     => null,
 	'REPORT_USER_EXCEPTIONS' => 0,
 	'ENABLE_TECH_DETAILS'   => true,
+	'HTTP_LOG_FILE'         => null,
 	'ENABLE_UPGRADES'       => true,
 	'USE_CRON'              => false,
 	'ENABLE_XSENDFILE'      => false,
+	'DISABLE_EMAIL'         => false,
 	'SMTP_HOST'             => false,
 	'SMTP_USER'             => null,
 	'SMTP_PASSWORD'         => null,
 	'SMTP_PORT'             => 587,
 	'SMTP_SECURITY'         => 'STARTTLS',
+	'SMTP_HELO_HOSTNAME'    => null,
 	'MAIL_RETURN_PATH'      => null,
 	'MAIL_BOUNCE_PASSWORD'  => null,
+	'MAIL_SENDER'           => null,
 	'ADMIN_URL'             => WWW_URL . 'admin/',
 	'NTP_SERVER'            => 'fr.pool.ntp.org',
 	'ADMIN_COLOR1'          => '#20787a',
@@ -214,21 +223,29 @@ static $default_config = [
 	'FILE_STORAGE_BACKEND'  => 'SQLite',
 	'FILE_STORAGE_CONFIG'   => null,
 	'FILE_STORAGE_QUOTA'    => null,
+	'FILE_VERSIONING_POLICY'   => null,
+	'FILE_VERSIONING_MAX_SIZE' => null,
 	'API_USER'              => null,
 	'API_PASSWORD'          => null,
 	'PDF_COMMAND'           => 'auto',
 	'PDF_USAGE_LOG'         => null,
+	'PDFTOTEXT_COMMAND'     => null,
 	'CALC_CONVERT_COMMAND'  => null,
+	'DOCUMENT_THUMBNAIL_COMMANDS' => null,
 	'CONTRIBUTOR_LICENSE'   => null,
 	'SQL_DEBUG'             => null,
 	'SYSTEM_SIGNALS'        => [],
+	'LOCAL_LOGIN'           => null,
+	'LEGAL_HOSTING_DETAILS' => null,
+	'ALERT_MESSAGE'         => null,
 	'DISABLE_INSTALL_PING'  => false,
+	'WOPI_DISCOVERY_URL'    => null,
 	'SQLITE_JOURNAL_MODE'   => 'TRUNCATE',
 ];
 
 foreach ($default_config as $const => $value)
 {
-	$const = sprintf('Garradin\\%s', $const);
+	$const = sprintf('Paheko\\%s', $const);
 
 	if (!defined($const))
 	{
@@ -246,7 +263,7 @@ if (SMTP_SECURITY) {
 }
 
 // Used for private files, just in case WWW_URL is not the same domain as ADMIN_URL
-define('Garradin\BASE_URL', str_replace('/admin/', '/', ADMIN_URL));
+define('Paheko\BASE_URL', str_replace('/admin/', '/', ADMIN_URL));
 
 const HELP_URL = 'https://paheko.cloud/aide?from=%s';
 const HELP_PATTERN_URL = 'https://paheko.cloud/%s';
@@ -259,19 +276,24 @@ const STATIC_CACHE_ROOT = CACHE_ROOT . '/static';
 const SHARED_USER_TEMPLATES_CACHE_ROOT = SHARED_CACHE_ROOT . '/utemplates';
 const SMARTYER_CACHE_ROOT = SHARED_CACHE_ROOT . '/compiled';
 
+// Used to get around some providers misconfiguration issues
+if (isset($_SERVER['HTTP_X_OVHREQUEST_ID'])) {
+	define('Paheko\HOSTING_PROVIDER', 'OVH');
+}
+else {
+	define('Paheko\HOSTING_PROVIDER', null);
+}
+
 // PHP devrait être assez intelligent pour chopper la TZ système mais nan
 // il sait pas faire (sauf sur Debian qui a le bon patch pour ça), donc pour
 // éviter le message d'erreur à la con on définit une timezone par défaut
 // Pour utiliser une autre timezone, il suffit de définir date.timezone dans
-// un .htaccess ou dans config.local.php
-if (!ini_get('date.timezone'))
-{
-	if (($tz = @date_default_timezone_get()) && $tz != 'UTC')
-	{
+// un .htaccess ou dans CONFIG_FILE
+if (!ini_get('date.timezone') || ini_get('date.timezone') === 'UTC') {
+	if (($tz = @date_default_timezone_get()) && $tz !== 'UTC') {
 		ini_set('date.timezone', $tz);
 	}
-	else
-	{
+	else {
 		ini_set('date.timezone', 'Europe/Paris');
 	}
 }
@@ -285,29 +307,28 @@ class APIException extends \LogicException
 }
 
 // activer le gestionnaire d'erreurs/exceptions
-ErrorManager::enable(SHOW_ERRORS ? ErrorManager::DEVELOPMENT : ErrorManager::PRODUCTION);
+ErrorManager::setEnvironment(SHOW_ERRORS ? ErrorManager::DEVELOPMENT : ErrorManager::PRODUCTION | ErrorManager::CLI_DEVELOPMENT);
 ErrorManager::setLogFile(DATA_ROOT . '/error.log');
 
 // activer l'envoi de mails si besoin est
-if (MAIL_ERRORS)
-{
+if (MAIL_ERRORS) {
 	ErrorManager::setEmail(MAIL_ERRORS);
 }
 
-ErrorManager::setContext([
-	'root_directory'      => ROOT,
-	'garradin_data_root' => DATA_ROOT,
-	'garradin_version'   => garradin_version(),
-]);
-
-if (ERRORS_REPORT_URL)
-{
+if (ERRORS_REPORT_URL) {
 	ErrorManager::setRemoteReporting(ERRORS_REPORT_URL, true);
 }
 
-ErrorManager::setProductionErrorTemplate(defined('Garradin\ERRORS_TEMPLATE') && ERRORS_TEMPLATE ? ERRORS_TEMPLATE : '<!DOCTYPE html><html><head><title>Erreur interne</title>
+ErrorManager::setContext([
+	'root_directory'   => ROOT,
+	'paheko_data_root' => DATA_ROOT,
+	'paheko_version'   => paheko_version(),
+]);
+
+
+ErrorManager::setProductionErrorTemplate(defined('Paheko\ERRORS_TEMPLATE') && ERRORS_TEMPLATE ? ERRORS_TEMPLATE : '<!DOCTYPE html><html><head><title>Erreur interne</title>
 	<style type="text/css">
-	body {font-family: sans-serif; }
+	body {font-family: sans-serif; background: #fff; }
 	code, p, h1 { max-width: 400px; margin: 1em auto; display: block; }
 	code { text-align: right; color: #666; }
 	a { color: blue; }
@@ -322,8 +343,8 @@ ErrorManager::setProductionErrorTemplate(defined('Garradin\ERRORS_TEMPLATE') && 
 	<p><a href="' . WWW_URL . '">&larr; Retour à la page d\'accueil</a></p>
 	</body></html>');
 
-ErrorManager::setHtmlHeader('<!DOCTYPE html><meta charset="utf-8" /><style type="text/css">
-	body { font-family: sans-serif; } * { margin: 0; padding: 0; }
+ErrorManager::setHtmlHeader('<!DOCTYPE html><html><head><meta charset="utf-8" /><style type="text/css">
+	body { font-family: sans-serif; background: #fff; } * { margin: 0; padding: 0; }
 	u, code b, i, h3 { font-style: normal; font-weight: normal; text-decoration: none; }
 	#icn { color: #fff; font-size: 2em; float: right; margin: 1em; padding: 1em; background: #900; border-radius: 50%; }
 	section header { background: #fdd; padding: 1em; }
@@ -335,7 +356,7 @@ ErrorManager::setHtmlHeader('<!DOCTYPE html><meta charset="utf-8" /><style type=
 	table { border-collapse: collapse; margin: 1em; } td, th { border: 1px solid #ccc; padding: .2em .5em; text-align: left; 
 	vertical-align: top; }
 	input { padding: .3em; margin: .5em; font-size: 1.2em; cursor: pointer; }
-</style>
+</style></head><body>
 <pre id="icn"> \__/<br /> (xx)<br />//||\\\\</pre>
 <section>
 	<article>
@@ -347,18 +368,31 @@ ErrorManager::setHtmlHeader('<!DOCTYPE html><meta charset="utf-8" /><style type=
 
 function user_error(UserException $e)
 {
+	if (REPORT_USER_EXCEPTIONS > 0) {
+		\Paheko\Form::reportUserException($e);
+	}
+
 	if (PHP_SAPI == 'cli')
 	{
 		echo $e->getMessage();
 	}
 	else
 	{
-		$tpl = Template::getInstance();
+		// Flush any previous output, such as module HTML code etc.
+		@ob_end_clean();
+
+		if ($e->getCode() >= 400) {
+			http_response_code($e->getCode());
+		}
+
+		// Don't use Template class as there might be an error there due do the context (eg. install/upgrade)
+		$tpl = new \KD2\Smartyer(ROOT . '/templates/error.tpl');
+		$tpl->setCompiledDir(SMARTYER_CACHE_ROOT);
 
 		$tpl->assign('error', $e->getMessage());
 		$tpl->assign('html_error', $e->getHTMLMessage());
 		$tpl->assign('admin_url', ADMIN_URL);
-		$tpl->display('error.tpl');
+		$tpl->display();
 	}
 
 	exit;
@@ -366,15 +400,15 @@ function user_error(UserException $e)
 
 if (REPORT_USER_EXCEPTIONS < 2) {
 	// Message d'erreur simple pour les erreurs de l'utilisateur
-	ErrorManager::setCustomExceptionHandler('\Garradin\UserException', '\Garradin\user_error');
+	ErrorManager::setCustomExceptionHandler('\Paheko\UserException', '\Paheko\user_error');
 }
 
 // Clé secrète utilisée pour chiffrer les tokens CSRF etc.
-if (!defined('Garradin\SECRET_KEY'))
+if (!defined('Paheko\SECRET_KEY'))
 {
 	$key = base64_encode(random_bytes(64));
 	Install::setLocalConfig('SECRET_KEY', $key);
-	define('Garradin\SECRET_KEY', $key);
+	define('Paheko\SECRET_KEY', $key);
 }
 
 // Intégration du secret pour les tokens CSRF
@@ -384,13 +418,21 @@ EntityManager::setGlobalDB(DB::getInstance());
 
 Translate::setLocale('fr_FR');
 
+// This is specific to OVH and other hosting providers who don't set up their servers properly
+// see https://www.prestashop.com/forums/topic/393496-prestashop-16-webservice-authentification-on-ovh/
+if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) && !empty($_SERVER['HTTP_AUTHORIZATION'])) {
+	@list($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) = explode(':', base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));
+}
+
 /*
  * Vérifications pour enclencher le processus d'installation ou de mise à jour
  */
 
-if (!defined('Garradin\INSTALL_PROCESS') && !defined('Garradin\UPGRADE_PROCESS'))
+if (!defined('Paheko\INSTALL_PROCESS'))
 {
-	if (!file_exists(DB_FILE)) {
+	$exists = file_exists(DB_FILE);
+
+	if (!$exists) {
 		if (in_array('install.php', get_included_files())) {
 			die('Erreur de redirection en boucle : problème de configuration ?');
 		}
@@ -400,8 +442,12 @@ if (!defined('Garradin\INSTALL_PROCESS') && !defined('Garradin\UPGRADE_PROCESS')
 
 	$v = DB::getInstance()->version();
 
-	if (version_compare($v, garradin_version(), '<'))
-	{
+	if (version_compare($v, paheko_version(), '<')) {
+		if (!empty($_POST)) {
+			readfile(ROOT . '/templates/static/upgrade_post.html');
+			exit;
+		}
+
 		Utils::redirect(ADMIN_URL . 'upgrade.php');
 	}
 }

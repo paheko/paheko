@@ -1,8 +1,8 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Users\Emails;
+use Paheko\Email\Emails;
 
 require_once __DIR__ . '/../include/init.php';
 

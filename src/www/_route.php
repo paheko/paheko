@@ -1,6 +1,9 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
+
+use Paheko\Web\Router;
+use Paheko\Email\Emails;
 
 if (empty($_SERVER['REQUEST_URI'])) {
 	http_response_code(500);
@@ -16,33 +19,41 @@ if ('_route.php' === basename($uri)) {
 
 http_response_code(200);
 
-if (($pos = strpos($uri, '?')) !== false)
-{
+if (($pos = strpos($uri, '?')) !== false) {
 	$uri = substr($uri, 0, $pos);
 }
 
-if (file_exists(__DIR__ . $uri))
-{
-	if (PHP_SAPI != 'cli-server') {
-		http_response_code(500);
-		die('Erreur de configuration du serveur web: cette URL ne devrait pas être traitée par Garradin');
-	}
-
+if (PHP_SAPI === 'cli-server' && file_exists(__DIR__ . $uri)) {
 	return false;
 }
-elseif (preg_match('!/p/(.+?)/(.*)!', $uri, $match))
-{
-	$_GET['_p'] = $match[1];
-	$_GET['_u'] = $match[2];
-	require __DIR__ . '/plugin.php';
+
+
+// Include init.php in a function namespace so that its variables definitions don't affect us
+// (eg. $uri)
+(function () { require(__DIR__ . '/../include/init.php'); })();
+
+// Handle __un__subscribe URL: .../?un=XXXX
+if ((empty($uri) || $uri === '/') && !empty($_GET['un'])) {
+	$params = array_intersect_key($_GET, ['un' => null, 'v' => null]);
+
+	// RFC 8058
+	if (!empty($_POST['Unsubscribe']) && $_POST['Unsubscribe'] == 'Yes') {
+		$email = Emails::getEmailFromOptout($params['un']);
+
+		if (!$email) {
+			throw new UserException('Adresse email introuvable.');
+		}
+
+		$email->setOptout();
+		$email->save();
+		http_response_code(200);
+		echo 'Unsubscribe successful';
+		return;
+	}
+
+	Utils::redirect('!optout.php?' . http_build_query($params));
+	return;
 }
-elseif (preg_match('!/admin/plugin/(.+?)/(.*)!', $uri, $match))
-{
-	$_GET['_p'] = $match[1];
-	$_GET['_u'] = $match[2];
-	require __DIR__ . '/admin/plugin.php';
-}
-else
-{
-	require __DIR__ . '/index.php';
-}
+
+// Call router
+Router::route();

@@ -1,9 +1,9 @@
-{include file="admin/_head.tpl" title="Projets" current="acc/years"}
+{include file="_head.tpl" title="Projets" current="acc/years"}
 
 {include file="./_nav.tpl" current='index'}
 
 <div class="year-header">
-	<h2>{$config.nom_asso} — Projets</h2>
+	<h2>{$config.org_name} — Projets</h2>
 
 {if $projects_count}
 	<p class="noprint">
@@ -12,6 +12,7 @@
 		{else}
 			{linkbutton href="?by_year=1" label="Grouper par exercice" shape="right"}
 		{/if}
+		{linkbutton href="!acc/reports/ledger.php?project=all" label="Grand livre analytique — tous les exercices"}
 	</p>
 
 
@@ -22,11 +23,6 @@
 		{/if}
 	</p>
 
-	{if $by_year}
-	<p class="actions">
-		{linkbutton href="!acc/reports/ledger.php?project=all" label="Grand livre analytique — tous les exercices"}
-	</p>
-	{/if}
 {/if}
 </div>
 
@@ -39,4 +35,4 @@
 	<p class="help">Les projets (aussi appelés comptabilité analytique) permettent de suivre le budget d'une activité ou d'un projet. {linkbutton shape="help" label="Aide sur les projets" target="_dialog" href=$help_pattern_url|args:"comptabilite-analytique"}</p>
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

@@ -1,8 +1,8 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Entities\Files\File;
-use Garradin\Files\Files;
+use Paheko\Entities\Files\File;
+use Paheko\Files\Files;
 
 require __DIR__ . '/../../_inc.php';
 
@@ -12,15 +12,19 @@ if (!$file) {
 	throw new UserException('Ce fichier est introuvable.');
 }
 
-if (!$file->checkReadAccess($session)) {
+if (!$file->canRead()) {
 	throw new UserException('Vous n\'avez pas le droit de lire ce fichier.');
 }
 
-try {
-	$tpl->assign('content', $file->render('common/files/_preview.php?p='));
+if ($file->renderFormat()) {
+	$tpl->assign('content', $file->render());
 	$tpl->assign('file', $file);
 	$tpl->display('common/files/_preview.tpl');
 }
-catch (\LogicException $e) {
-	$file->serve($session);
+else if ($html = $file->editorHTML(true)) {
+	echo $html;
+}
+else {
+	// We don't need $session here as read access is already checked above
+	$file->serve();
 }

@@ -49,6 +49,7 @@
 	</head>
 	<body><div class="web-content"><div class="nav">
 <ul>
+<li><a href="modules.html">Modules</a></li>
 <li><a href="brindille.html">Documentation Brindille</a></li>
 <li><a href="brindille_functions.html">Fonctions</a></li>
 <li><a href="brindille_sections.html">Sections</a></li>
@@ -57,90 +58,498 @@
 </div><aside class="toc">
 	<ol>
 		<li><a href="#filtres-php">Filtres PHP</a></li>
+		<li><a href="#filtres-utiles-pour-les-e-mails">Filtres utiles pour les e-mails</a>
+		<ol>
+			<li><a href="#check_email">check_email</a></li>
+			<li><a href="#protect_contact">protect_contact</a>
+		</ol></li>
+		<li><a href="#filtres-de-tableaux">Filtres de tableaux</a>
+		<ol>
+			<li><a href="#has">has</a></li>
+			<li><a href="#in">in</a></li>
+			<li><a href="#keys">keys</a></li>
+			<li><a href="#values">values</a></li>
+			<li><a href="#count">count</a></li>
+			<li><a href="#explode">explode</a></li>
+			<li><a href="#implode">implode</a></li>
+			<li><a href="#map">map</a></li>
+			<li><a href="#ksort-sort">ksort, sort</a>
+		</ol></li>
 		<li><a href="#filtres-de-texte">Filtres de texte</a>
 		<ol>
-			<li><a href="#truncate">truncate</a></li>
-			<li><a href="#excerpt">excerpt</a></li>
-			<li><a href="#protect_contact">protect_contact</a></li>
-			<li><a href="#escape">escape</a></li>
-			<li><a href="#xml_escape">xml_escape</a></li>
-			<li><a href="#raw">raw</a></li>
 			<li><a href="#args">args</a></li>
-			<li><a href="#count">count</a></li>
 			<li><a href="#cat">cat</a></li>
-			<li><a href="#math">math</a></li>
+			<li><a href="#count_words">count_words</a></li>
+			<li><a href="#escape">escape</a></li>
+			<li><a href="#excerpt">excerpt</a></li>
+			<li><a href="#extract_leading_number">extract_leading_number</a></li>
+			<li><a href="#markdown">markdown</a></li>
+			<li><a href="#raw">raw</a></li>
 			<li><a href="#replace">replace</a></li>
 			<li><a href="#regexp_replace">regexp_replace</a></li>
-			<li><a href="#size_in_bytes">size_in_bytes</a></li>
+			<li><a href="#remove_leading_number">remove_leading_number</a></li>
+			<li><a href="#truncate">truncate</a></li>
 			<li><a href="#typo">typo</a></li>
+			<li><a href="#urlencode">urlencode</a></li>
+			<li><a href="#xml_escape">xml_escape</a></li>
+			<li><a href="#autres-filtres-de-texte">Autres filtres de texte</a>
+		</ol></li>
+		<li><a href="#filtres-sur-les-sommes-en-devises">Filtres sur les sommes en devises</a>
+		<ol>
 			<li><a href="#money">money</a></li>
 			<li><a href="#money_currency">money_currency</a></li>
-			<li><a href="#remove_leading_number">remove_leading_number</a></li>
-			<li><a href="#extract_leading_number">extract_leading_number</a></li>
-			<li><a href="#check_email">check_email</a></li>
-			<li><a href="#filtres-de-date">Filtres de date</a></li>
-			<li><a href="#filtres-de-condition">Filtres de condition</a>
+			<li><a href="#money_html">money_html</a></li>
+			<li><a href="#money_currency_html">money_currency_html</a></li>
+			<li><a href="#money_raw">money_raw</a></li>
+			<li><a href="#money_int">money_int</a>
+		</ol></li>
+		<li><a href="#filtres-sql">Filtres SQL</a>
+		<ol>
+			<li><a href="#quote_sql">quote_sql</a></li>
+			<li><a href="#quote_sql_identifier">quote_sql_identifier</a></li>
+			<li><a href="#sql_where">sql_where</a>
+		</ol></li>
+		<li><a href="#filtres-de-date">Filtres de date</a>
+		<ol>
+			<li><a href="#date">date</a></li>
+			<li><a href="#strftime">strftime</a></li>
+			<li><a href="#relative_date">relative_date</a></li>
+			<li><a href="#date_short">date_short</a></li>
+			<li><a href="#date_long">date_long</a></li>
+			<li><a href="#date_hour">date_hour</a></li>
+			<li><a href="#atom_date">atom_date</a></li>
+			<li><a href="#parse_date">parse_date</a></li>
+			<li><a href="#parse_datetime">parse_datetime</a></li>
+			<li><a href="#parse_time">parse_time</a>
+		</ol></li>
+		<li><a href="#filtres-de-condition">Filtres de condition</a>
+		<ol>
+			<li><a href="#match">match</a></li>
+			<li><a href="#regexp_match">regexp_match</a>
+		</ol></li>
+		<li><a href="#autres-filtres">Autres filtres</a>
+		<ol>
+			<li><a href="#math">math</a></li>
+			<li><a href="#or">or</a></li>
+			<li><a href="#size_in_bytes">size_in_bytes</a></li>
+			<li><a href="#spell_out_number">spell_out_number</a></li>
+			<li><a href="#uuid">uuid</a>
 </li></ol></li></ol></aside><h1 id="filtres-php">Filtres PHP</h1>
-<p>Ces filtres viennent directement de PHP et utilisent donc les mêmes paramètres :</p>
-<ul>
-<li>strtolower</li>
-<li>strtoupper</li>
-<li>ucfirst</li>
-<li>ucwords</li>
-<li>htmlentities</li>
-<li>htmlspecialchars</li>
-<li>trim, ltrim, rtrim</li>
-<li>lcfirst</li>
-<li>md5</li>
-<li>sha1</li>
-<li>metaphone</li>
-<li>soundex</li>
-<li>str_split</li>
-<li>str_word_count</li>
-<li>strrev</li>
-<li>strlen</li>
-<li>strip_tags</li>
-<li>nl2br</li>
-<li>wordwrap</li>
-<li>strlen</li>
-<li>abs</li>
-</ul>
+<p>Ces filtres viennent directement de PHP et utilisent donc les mêmes paramètres. Voir la <a href="https://www.php.net/manual/fr/function.htmlspecialchars.php" target="_blank" rel="noreferrer">documentation PHP</a> pour plus de détails.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Nom</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>htmlentities</code></td>
+<td style="text-align: left;">Convertit tous les caractères éligibles en entités HTML</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>htmlspecialchars</code></td>
+<td style="text-align: left;">Convertit les caractères spéciaux en entités HTML</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>trim</code></td>
+<td style="text-align: left;">Supprime les espaces et lignes vides au début et à la fin d'un texte</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>ltrim</code></td>
+<td style="text-align: left;">Supprime les espaces et lignes vides au début d'un texte</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>rtrim</code></td>
+<td style="text-align: left;">Supprime les espaces et lignes vides à la fin d'un texte</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>md5</code></td>
+<td style="text-align: left;">Génère un hash MD5 d'un texte</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>sha1</code></td>
+<td style="text-align: left;">Génère un hash SHA1 d'un texte</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>strlen</code></td>
+<td style="text-align: left;">Nombre de caractères dans une chaîne de texte</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>strpos</code></td>
+<td style="text-align: left;">Position d'un élément dans une chaîne de texte</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>strrpos</code></td>
+<td style="text-align: left;">Position d'un dernier élément dans une chaîne de texte</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>strip_tags</code></td>
+<td style="text-align: left;">Supprime les tags HTML</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>nl2br</code></td>
+<td style="text-align: left;">Remplace les retours à la ligne par des tags HTML <code>&lt;br/&gt;</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>wordwrap</code></td>
+<td style="text-align: left;">Ajoute des retours à la ligne tous les 75 caractères</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>substr</code></td>
+<td style="text-align: left;">Découpe une chaîne de caractère</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>abs</code></td>
+<td style="text-align: left;">Renvoie la valeur absolue d'un nombre (exemple : -42 sera transformé en 42)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>intval</code></td>
+<td style="text-align: left;">Transforme une valeur en entier (integer)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>boolval</code></td>
+<td style="text-align: left;">Transforme une valeur en booléen (true ou false)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>floatval</code></td>
+<td style="text-align: left;">Transforme une valeur en nombre flottant (à virgule)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>strval</code></td>
+<td style="text-align: left;">Transforme une valeur en chaîne de texte</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>arrayval</code></td>
+<td style="text-align: left;">Transforme une valeur en tableau</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>json_decode</code></td>
+<td style="text-align: left;">Transforme une chaîne JSON en tableau</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>json_encode</code></td>
+<td style="text-align: left;">Transforme une valeur en chaîne JSON</td>
+</tr>
+</tbody>
+</table>
+<h1 id="filtres-utiles-pour-les-e-mails">Filtres utiles pour les e-mails</h1>
+<h2 id="check_email">check_email</h2>
+<p>Permet de vérifier la validité d'une adresse email. Cette fonction vérifie la syntaxe de l'adresse mais aussi que le nom de domaine indiqué possède bien un enregistrement de type MX.</p>
+<p>Renvoie <code>true</code> si l'adresse est valide.</p>
+<pre><code>{{if !$_POST.email|check_email}}
+&lt;p class="alert"&gt;L'adresse e-mail indiquée est invalide.&lt;/p&gt;
+{{/if}}</code></pre>
+<h2 id="protect_contact">protect_contact</h2>
+<p>Crée un lien protégé pour une adresse email, pour éviter que l'adresse ne soit recueillie par les robots spammeurs (empêche également le copier-coller et le lien ne fonctionnera pas avec javascript désactivé).</p>
+<h1 id="filtres-de-tableaux">Filtres de tableaux</h1>
+<h2 id="has">has</h2>
+<p>Renvoie vrai si le tableau contient l'élément passé en paramètre.</p>
+<pre><code>{{:assign var="table" a="bleu" b="orange"}}
+{{if $table|has:"bleu"}}
+    Oui, il y a du bleu
+{{/if}}</code></pre>
+<h2 id="in">in</h2>
+<p>Renvoie vrai si l'élément fait partie du tableau passé en paramètre.</p>
+<p>C'est exactement la même chose que <code>has</code>, mais exprimé à l'envers.</p>
+<pre><code>{{:assign var="table" a="bleu" b="orange"}}
+{{if "bleu"|in:$table}}
+    Oui, il y a du bleu
+{{/if}}</code></pre>
+<h2 id="keys">keys</h2>
+<p>Renvoie les clés du tableau, sous forme de tableau.</p>
+<pre><code>{{:assign var="table" a="bleu" b="orange"}}
+{{:assign var="cles" value=$table|keys}}
+{{$cles|implode:","}}</code></pre>
+<p>Donnera :</p>
+<pre><code>a,b</code></pre>
+<h2 id="values">values</h2>
+<p>Renvoie les valeurs du tableau, sous forme de tableau.</p>
+<p>Cela revient en fait à supprimer les clés associatives.</p>
+<pre><code>{{:assign var="table" a="bleu" b="orange"}}
+{{#foreach from=$table key="cle" item="valeur"}}
+    {{$cle}} = {{$valeur}}
+{{/foreach}}
+--
+{{:assign var="valeurs" value=$table|values}}
+{{#foreach from=$valeurs key="cle" item="valeur"}}
+    {{$cle}} = {{$valeur}}
+{{/foreach}}</code></pre>
+<p>Donnera :</p>
+<pre><code>a = bleu
+b = orange
+--
+0 = bleu
+1 = orange</code></pre>
+<h2 id="count">count</h2>
+<p>Compte le nombre d'entrées dans un tableau.</p>
+<pre><code>{{$products|count}}
+= 5</code></pre>
+<h2 id="explode">explode</h2>
+<p>Sépare une chaîne de texte en tableau à partir d'une chaîne de séparation.</p>
+<pre><code>{{:assign var="table" value="a,b,c"|explode:","}}
+- {{$table.0}}
+- {{$table.1}}
+- {{$table.2}}</code></pre>
+<p>Affichera :</p>
+<pre><code>- a
+- b
+- c</code></pre>
+<h2 id="implode">implode</h2>
+<p>Réunit un tableau sous forme de chaîne de texte en utilisant éventuellement une chaîne de liaison entre chaque élément du tableau.</p>
+<pre><code>{{:assign var="table" a="bleu" b="orange"}}
+{{$table|implode}}
+{{$table|implode:" - "}}</code></pre>
+<p>Affichera :</p>
+<pre><code>bleuorange
+bleu - orange</code></pre>
+<h2 id="map">map</h2>
+<p>Applique un filtre sur chaque élément du tableau.</p>
+<p>Le premier paramètre doit être le nom du filtre. Les autres paramètres seront passés au filtre.</p>
+<pre><code>{{:assign var="table" a="01" b="02"}}
+{{:assign var="table" value=$table|map:intval}}
+- {{$table.a}}
+- {{$table.b}}</code></pre>
+<p>Affichera :</p>
+<pre><code>- 1
+- 2</code></pre>
+<h2 id="ksort-sort">ksort, sort</h2>
+<p>Trie un tableau par ordre alpha-numérique, sans tenir compte des majuscules/minuscules. <code>ksort</code> trie le tableau en utilisant les clés, et <code>sort</code> trie le tableau en utilisant les valeurs.</p>
+<pre><code>{{:assign var="table" b="3" a="2" c="1"}}
+{{$table|sort|implode:","}}
+{{$table|ksort|implode:","}}</code></pre>
+<p>Affichera :</p>
+<pre><code>1,2,3
+2,3,1</code></pre>
 <h1 id="filtres-de-texte">Filtres de texte</h1>
-<h2 id="truncate">truncate</h2>
-<p>Arguments :</p>
-<ul>
-<li>nombre : longueur en nombre de caractères (défaut = 80)</li>
-<li>texte : texte à placer à la fin (si tronqué) (défaut = …)</li>
-<li>booléen : coupure stricte, si <code>true</code> alors un mot pourra être coupé en deux, sinon le texte sera coupé au dernier mot complet</li>
-</ul>
-<p>Tronque un texte à une longueur définie.</p>
+<h2 id="args">args</h2>
+<p>Remplace des arguments dans le texte selon le schéma utilisé par <a href="https://www.php.net/sprintf" target="_blank" rel="noreferrer">sprintf</a>.</p>
+<pre><code>{{"Il y a %d résultats dans la recherche sur le terme '%s'."|args:$results_count:$query}}
+= Il y a 5 résultat dans la recherche sur le terme 'test'.</code></pre>
+<h2 id="cat">cat</h2>
+<p>Concaténer un texte avec un autre.</p>
+<pre><code>{{"Tangerine"|cat:" Dream"}}
+= Tangerine Dream</code></pre>
+<h2 id="count_words">count_words</h2>
+<p>Compte le nombre de mots dans un texte.</p>
+<h2 id="escape">escape</h2>
+<p>Échappe le contenu pour un usage dans un document HTML. Ce filtre est appliqué par défaut à tout ce qui est affiché (variables, etc.) sauf à utiliser le filtre <code>raw</code> (voir plus bas).</p>
 <h2 id="excerpt">excerpt</h2>
 <p>Produit un extrait d'un texte.</p>
 <p>Supprime les tags HTML, tronque au nombre de caractères indiqué en second argument (si rien n'est indiqué, alors 600 est utilisé), et englobe dans un paragraphe <code>&lt;p&gt;...&lt;/p&gt;</code>.</p>
 <p>Équivalent de :</p>
 <pre><code>&lt;p&gt;{{$html|strip_tags|truncate:600|nl2br}}&lt;/p&gt;</code></pre>
-<h2 id="protect_contact">protect_contact</h2>
-<p>Crée un lien protégé pour une adresse email, pour éviter que l'adresse ne soit recueillie par les robots spammeurs (empêche également le copier-coller et le lien ne fonctionnera pas avec javascript désactivé).</p>
-<h2 id="escape">escape</h2>
-<p>Échappe le contenu pour un usage dans un document HTML. Ce filtre est appliqué par défaut à tout ce qui est affiché (variables, etc.) sauf à utiliser le filtre <code>raw</code> (voir plus bas).</p>
-<h2 id="xml_escape">xml_escape</h2>
-<p>Échappe le contenu pour un usage dans un document XML.</p>
+<h2 id="extract_leading_number">extract_leading_number</h2>
+<p>Extrait le numéro au début d'une chaîne de texte.</p>
+<p>Exemple :</p>
+<pre><code>{{:assign title="02. Cours sur la physique nucléaire"}}
+{{$title|extract_leading_number}}</code></pre>
+<p>Affichera :</p>
+<pre><code>02</code></pre>
+<h2 id="markdown">markdown</h2>
+<p>Transforme un texte en HTML en utilisant la syntaxe Markdown.</p>
+<p>Il est conseillé de rajouter le filtre <code>|raw</code> pour ne pas échapper le HTML produit, si on veut afficher le texte formatté dans une page HTML.</p>
+<pre><code>{{$texte|markdown|raw}}</code></pre>
 <h2 id="raw">raw</h2>
 <p>Passer ce filtre désactive la protection automatique contre le HTML (échappement) dans le texte. À utiliser en connaissance de cause avec les contenus qui contiennent du HTML et sont déjà filtrés !</p>
 <pre><code>{{"&lt;b&gt;Test"}} = &amp;lt;b&amp;gt;Test
 {{"&lt;b&gt;Test"|raw}} = &lt;b&gt;Test</code></pre>
-<h2 id="args">args</h2>
-<p>Remplace des arguments dans le texte selon le schéma utilisé par <a href="https://www.php.net/sprintf" target="_blank" rel="nofollow,noreferrer">sprintf</a>.</p>
-<pre><code>{{"Il y a %d résultats dans la recherche sur le terme '%s'."|args:$results_count:$query}}
-= Il y a 5 résultat dans la recherche sur le terme 'test'.</code></pre>
-<h2 id="count">count</h2>
-<p>Compte le nombre d'entrées dans un tableau.</p>
-<pre><code>{{$products|count}}
-= 5</code></pre>
-<h2 id="cat">cat</h2>
-<p>Concaténer un texte avec un autre.</p>
-<pre><code>{{"Tangerine"|cat:" Dream"}}
-= Tangerine Dream</code></pre>
+<h2 id="replace">replace</h2>
+<p>Remplace des parties du texte par une autre partie.</p>
+<pre><code>{{"Tata yoyo"|replace:"yoyo":"yaya"}}
+= Tata yaya</code></pre>
+<h2 id="regexp_replace">regexp_replace</h2>
+<p>Remplace des valeurs en utilisant une expression rationnelles (regexp) (<a href="https://www.php.net/manual/fr/regexp.introduction.php" target="_blank" rel="noreferrer">documentation PHP</a>).</p>
+<pre><code>{{"Tartagueule"|regexp_replace:"/ta/i":"tou"}}
+= tourtougueule</code></pre>
+<h2 id="remove_leading_number">remove_leading_number</h2>
+<p>Supprime le numéro au début d'un titre.</p>
+<p>Cela permet de définir un ordre spécifique aux pages et catégories dans les listes.</p>
+<pre><code>{{"03. Beau titre"|remove_leading_number}}
+Beau titre</code></pre>
+<h2 id="truncate">truncate</h2>
+<p>Tronque un texte à une longueur définie.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Argument</th>
+<th style="text-align: left;">Fonction</th>
+<th style="text-align: left;">Valeur par défaut (si omis)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">longueur en nombre de caractères</td>
+<td style="text-align: left;">80</td>
+</tr>
+<tr>
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">texte à placer à la fin (si tronqué)</td>
+<td style="text-align: left;">…</td>
+</tr>
+<tr>
+<td style="text-align: left;">3</td>
+<td style="text-align: left;">coupure stricte, si <code>true</code> alors un mot pourra être coupé en deux, si <code>false</code> le texte sera coupé au dernier mot complet</td>
+<td style="text-align: left;"><code>false</code></td>
+</tr>
+</tbody>
+</table>
+<pre><code>{{:assign texte="Ceci n'est pas un texte."}}
+{{$texte|truncate:19:"(...)":true}}
+{{$texte|truncate:19:"":false}}</code></pre>
+<p>Affichera :</p>
+<pre><code>Ceci n'est pas un (...)
+Ceci n'est pas un t</code></pre>
+<h2 id="typo">typo</h2>
+<p>Formatte un texte selon les règles typographiques françaises : ajoute des espaces insécables devant ou derrière les ponctuations françaises (<code>« » ? ! :</code>).</p>
+<h2 id="urlencode">urlencode</h2>
+<p>Encode une chaîne de texte pour utilisation dans une adresse URL (alias de <code>rawurlencode</code> en PHP).</p>
+<h2 id="xml_escape">xml_escape</h2>
+<p>Échappe le contenu pour un usage dans un document XML.</p>
+<h2 id="autres-filtres-de-texte">Autres filtres de texte</h2>
+<p>Les filtres suivants modifient la casse (majuscule/minuscules) d'un texte et ne fonctionneront correctement que si l'extension <code>mbstring</code> est installée sur le serveur. Sinon les lettres accentuées ne seront pas modifiées.</p>
+<p>Note : il est donc préférable d'utiliser la propriété CSS <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/text-transform" target="_blank" rel="noreferrer"><code>text-transform</code></a> pour modifier la casse si l'usage n'est que pour l'affichage, et non pas pour enregistrer les données.</p>
+<ul>
+<li><code>tolower</code> : transforme un texte en minuscules</li>
+<li><code>toupper</code> : transforme un texte en majuscules</li>
+<li><code>ucfirst</code> : met la première lettre du texte en majuscule</li>
+<li><code>ucwords</code> : met la première lettre de chaque mot en majuscule</li>
+<li><code>lcfirst</code> : met la première lettre du texte en minuscule</li>
+</ul>
+<h1 id="filtres-sur-les-sommes-en-devises">Filtres sur les sommes en devises</h1>
+<h2 id="money">money</h2>
+<p>Formatte une valeur de monnaie pour l'affichage.</p>
+<p>Une valeur de monnaie doit <strong>toujours</strong> inclure les cents (exprimée sous forme d'entier). Ainsi <code>15,02</code> doit être exprimée sous la forme <code>1502</code>.</p>
+<p>Paramètres optionnels :</p>
+<ol>
+<li><code>true</code> (défaut) pour ne rien afficher si la valeur est zéro, ou <code>false</code> pour afficher <code>0,00</code></li>
+<li><code>true</code> pour afficher le signe <code>+</code> si le nombre est positif (<code>-</code> est toujours affiché si le nombre est négatif)</li>
+</ol>
+<pre><code>{{* 12 345,67 = 1234567 *}}
+{{:assign amount=1234567}}
+{{$amount|money}}
+12 345,67</code></pre>
+<h2 id="money_currency">money_currency</h2>
+<p>Comme <code>money</code> (même paramètres), formatte une valeur de monnaie (entier) pour affichage, mais en ajoutant la devise.</p>
+<pre><code>{{:assign amount=1502}}
+{{$amount|money_currency}}
+15,02 €</code></pre>
+<h2 id="money_html">money_html</h2>
+<p>Idem que <code>money</code>, mais pour l'affichage en HTML :</p>
+<pre><code>{{* 12 345,67 = 1234567 *}}
+{{:assign amount=1234567}}
+{{$amount|money_html}}
+&lt;span class="money"&gt;12&amp;nbsp;345,67&lt;/span&gt;</code></pre>
+<h2 id="money_currency_html">money_currency_html</h2>
+<p>Idem que <code>money_currency</code>, mais pour l'affichage en HTML :</p>
+<pre><code>{{:assign amount=1502}}
+{{$amount|money_currency_html}}
+&lt;span class="money"&gt;15,02&amp;nbsp;€&lt;/span&gt;</code></pre>
+<h2 id="money_raw">money_raw</h2>
+<p>Formatte une valeur de monnaie (entier) de manière brute : les milliers n'auront pas de séparateur.</p>
+<pre><code>{{:assign amount=1234567}}
+{{$amount|money_raw}}
+12345,67</code></pre>
+<h2 id="money_int">money_int</h2>
+<p>Transforme un nombre à partir d'une chaîne de caractère (par exemple <code>12345,67</code>) en entier (<code>1234567</code>) pour stocker une valeur de monnaie.</p>
+<pre><code>{{:assign montant=$_POST.montant|trim|money_int}}</code></pre>
+<h1 id="filtres-sql">Filtres SQL</h1>
+<h2 id="quote_sql">quote_sql</h2>
+<p>Protège une chaîne contre les attaques SQL, pour l'utilisation dans une condition.</p>
+<p><strong>Note : il est FORTEMENT déconseillé d'intégrer directement des sources extérieures dans les requêtes SQL, il est préférable d'utiliser les paramètres dans la boucle <code>sql</code> et ses dérivées, comme ceci : <code>{{#sql select="id, nom" tables="users" where="lettre_infos = :lettre" :lettre=$_GET.lettre}}</code>.</strong></p>
+<p>Exemple :</p>
+<pre><code>{{:assign nom=$_GET.nom|quote_sql}}
+{{#sql select="id, nom" tables="users" where="nom = %s"|args:$nom}}</code></pre>
+<h2 id="quote_sql_identifier">quote_sql_identifier</h2>
+<p>La même chose que <code>quote_sql</code>, mais pour les identifiants (par exemple nom de table ou de colonne).</p>
+<p>Exemple :</p>
+<pre><code>{{:assign colonne=$_GET.colonne|quote_sql_identifier}}
+{{#sql select="id, %s"|args:$colonne tables="users"}}</code></pre>
+<p>Il est possible d'utiliser un préfixe en argument, utile par exemple quand on a plusieurs tables avec le même nom de colonne :</p>
+<pre><code>{{:assign colonne=$_GET.colonne|quote_sql_identifier:"u1"}}
+{{#sql select="u1.id, %s"|args:$colonne tables="users AS u1 INNER JOIN users AS u2 ON u2.id_parent = u1.id"}}</code></pre>
+<h2 id="sql_where">sql_where</h2>
+<p>Permet de créer une partie d'une clause SQL <code>WHERE</code> complexe.</p>
+<p>Le premier paramètre est le nom de la colonne (sans préfixe).</p>
+<p>Paramètres :</p>
+<ol>
+<li>Comparateur : <code>=, !=, IN, NOT IN, &gt;, &gt;=, &lt;, &lt;=</code></li>
+<li>Valeur à comparer (peut être un tableau)</li>
+</ol>
+<p>Exemple pour afficher la liste des membres des catégories n°1 et n°2:</p>
+<pre><code>{{:assign var="list." value=1}}
+{{:assign var="list." value=2}}
+{{#sql select="nom" tables="users" where="id_category"|sql_where:'IN':$id_list}}
+    {{$nom}}
+{{/sql}}</code></pre>
+<p>Le requête SQL générée sera alors <code>SELECT nom FROM users WHERE id_category IN (1, 2)</code>.</p>
+<h1 id="filtres-de-date">Filtres de date</h1>
+<h2 id="date">date</h2>
+<p>Formatte une date selon le format spécifié en premier paramètre.</p>
+<p>Le format est identique au <a href="https://www.php.net/manual/fr/datetime.format.php" target="_blank" rel="noreferrer">format utilisé par PHP</a>.</p>
+<p>Si aucun format n'est indiqué, le défaut sera <code>d/m/Y à H:i</code>. (en français)</p>
+<h2 id="strftime">strftime</h2>
+<p>Formatte une date selon un format spécifié en premier paramètre.</p>
+<p>Le format à utiliser est identique <a href="https://www.php.net/strftime" target="_blank" rel="noreferrer">au format utilisé par la fonction strftime de PHP</a>.</p>
+<p>Un format doit obligatoirement être spécifié.</p>
+<p>En passant un code de langue en second paramètre, cette langue sera utilisée. Sont supportés le français (<code>fr</code>) et l'anglais (<code>en</code>). Le défaut est le français si aucune valeur n'est passée en second paramètre .</p>
+<h2 id="relative_date">relative_date</h2>
+<p>Renvoie une date relative à la date du jour : <code>aujourd'hui</code>, <code>hier</code>, <code>demain</code>, ou sinon <code>mardi 2 janvier</code> (si la date est de l'année en cours) ou <code>2 janvier 2021</code> (si la date est d'une autre année).</p>
+<p>En spécifiant <code>true</code> en premier paramètre, l'heure sera ajoutée au format <code>14h34</code>.</p>
+<h2 id="date_short">date_short</h2>
+<p>Formatte une date au format court : <code>d/m/Y</code>.</p>
+<p>En spécifiant <code>true</code> en premier paramètre l'heure sera ajoutée : <code>à H\hi</code>.</p>
+<h2 id="date_long">date_long</h2>
+<p>Formatte une date au format long : <code>lundi 2 janvier 2021</code>.</p>
+<p>En spécifiant <code>true</code> en premier paramètre l'heure sera ajoutée : <code>à 20h42</code>.</p>
+<h2 id="date_hour">date_hour</h2>
+<p>Formatte une date en renvoyant l'heure uniquement : <code>20h00</code>.</p>
+<p>En passant <code>true</code> en premier paramètre, les minutes seront omises si elles sont égales à zéro : <code>20h</code>.</p>
+<h2 id="atom_date">atom_date</h2>
+<p>Formatte une date au format ATOM : <code>Y-m-d\TH:i:sP</code></p>
+<h2 id="parse_date">parse_date</h2>
+<p>Vérifie le format d'une chaîne de texte représentant la date et la transforme en chaîne de date standardisée au format <code>AAAA-MM-JJ</code>.</p>
+<p>Les formats acceptés sont :</p>
+<ul>
+<li><code>AAAA-MM-JJ</code></li>
+<li><code>JJ/MM/AAAA</code></li>
+<li><code>JJ/MM/AA</code></li>
+</ul>
+<h2 id="parse_datetime">parse_datetime</h2>
+<p>Vérifie le format d'une chaîne de texte représentant la date et l'heure et la transforme en chaîne de date et heure standardisée au format <code>AAAA-MM-JJ HH:mm</code>.</p>
+<p>Les formats acceptés sont :</p>
+<ul>
+<li><code>AAAA-MM-JJ HH:mm:ss</code></li>
+<li><code>AAAA-MM-JJ HH:mm</code></li>
+<li><code>JJ/MM/AAAA HH:mm</code></li>
+</ul>
+<h2 id="parse_time">parse_time</h2>
+<p>Vérifie le format d'une chaîne de texte représentant l'heure et la transforme en chaîne de date standardisée au format <code>HH:MM</code>.</p>
+<p>Les formats acceptés sont :</p>
+<ul>
+<li><code>HH:MM</code></li>
+<li><code>H:M</code></li>
+<li><code>H:MM</code></li>
+<li><code>HH:M</code></li>
+</ul>
+<p>Le séparateur peut être <code>:</code> ou <code>h</code>.</p>
+<h1 id="filtres-de-condition">Filtres de condition</h1>
+<p>Ces filtres sont à utiliser dans les conditions</p>
+<h2 id="match">match</h2>
+<p>Renvoie <code>true</code> si le texte indiqué en premier paramètre est trouvé dans la variable.</p>
+<p>Ce filtre est insensible à la casse.</p>
+<pre><code>{{if $page.path|match:"/aide"}}Bienvenue dans l'aide !{{/if}}</code></pre>
+<h2 id="regexp_match">regexp_match</h2>
+<p>Renvoie <code>true</code> si l'expression régulière indiquée en premier paramètre est trouvée dans la variable.</p>
+<p>Exemple pour voir si le texte contient les mots "Bonjour" ou "Au revoir" (insensible à la casse) :</p>
+<pre><code>{{if $texte|regexp_match:"/Bonjour|Au revoir/i"}}
+    Trouvé !
+{{else}}
+    Rien trouvé :-(
+{{/if}}</code></pre>
+<h1 id="autres-filtres">Autres filtres</h1>
 <h2 id="math">math</h2>
 <p>Réalise un calcul mathématique. Cette fonction accepte :</p>
 <ul>
@@ -159,58 +568,23 @@
 {{:assign prix=39.99 tva=19.1}}
 {{"round(%f*%f, 2)"|math:$prix:$tva}}
 = 47.63</code></pre>
-<p>Il est aussi possible d'utiliser </p>
-<h2 id="replace">replace</h2>
-<p>Remplace des parties du texte par une autre partie.</p>
-<pre><code>{{"Tata yoyo"|replace:"yoyo":"yaya"}}
-= Tata yaya</code></pre>
-<h2 id="regexp_replace">regexp_replace</h2>
-<p>Remplace des valeurs en utilisant une expression rationnelles (regexp) (<a href="https://www.php.net/manual/fr/regexp.introduction.php" target="_blank" rel="nofollow,noreferrer">documentation PHP</a>).</p>
-<pre><code>{{"Tartagueule"|regexp_replace:"/ta/i":"tou"}}
-= tourtougueule</code></pre>
+<h2 id="or">or</h2>
+<p>Si la variable passée est évalue comme <code>false</code> (c'est à dire que sa valeur est un texte vide, ou un nombre qui vaut zéro, ou la valeur <code>false</code>), alors le premier paramètre sera utilisé.</p>
+<pre><code>{{:assign texte=""}}
+{{$texte|or:"Le texte est vide"}}</code></pre>
+<p>Il est possible de chaîner les appels à <code>or</code> :</p>
+<pre><code>{{:assign texte1="" texte2="0"}}
+{{$texte1|or:$texte2|or:"Aucun texte"}}</code></pre>
 <h2 id="size_in_bytes">size_in_bytes</h2>
 <p>Renvoie une taille en octets, Ko, Mo, ou Go à partir d'une taille en octets.</p>
 <pre><code>{{100|size_in_bytes}} = 100 o
 {{1500|size_in_bytes}} = 1,50 Ko
 {{1048576|size_in_bytes}} = 1 Mo</code></pre>
-<h2 id="typo">typo</h2>
-<p>Pour le français.</p>
-<p>Ajoute des espaces insécables (<code>&amp;nbsp;</code>) devant ou derrière les ponctuations françaises (<code>« » ? ! :</code>).</p>
-<h2 id="money">money</h2>
-<p>Formatte une valeur de monnaie (exprimée avec les cents inclus : <code>1502</code> = 15,02) pour l'affichage :</p>
-<pre><code>{{$amount|money}}
-15,02</code></pre>
-<h2 id="money_currency">money_currency</h2>
-<p>Formatte une valeur de monnaie en ajoutant la devise :</p>
-<pre><code>{{$amount|money_currency}}
-15,02 €</code></pre>
-<h2 id="remove_leading_number">remove_leading_number</h2>
-<p>Supprime le numéro au début d'un titre.</p>
-<p>Cela permet de définir un ordre spécifique aux pages et catégories dans les listes.</p>
-<pre><code>{{"03. Beau titre"|remove_leading_number}}
-Beau titre</code></pre>
-<h2 id="extract_leading_number">extract_leading_number</h2>
-<p>Extrait le numéro du titre.</p>
-<h2 id="check_email">check_email</h2>
-<p>Permet de vérifier la validité d'une adresse email. Cette fonction vérifie la syntaxe de l'adresse mais aussi que le nom de domaine indiqué possède bien un enregistrement de type MX.</p>
-<p>Renvoie <code>true</code> si l'adresse est valide.</p>
-<pre><code>{{if !$_POST.email|check_email}}
-&lt;p class="alert"&gt;L'adresse e-mail indiquée est invalide.&lt;/p&gt;
-{{/if}}</code></pre>
-<h2 id="filtres-de-date">Filtres de date</h2>
-<ul>
-<li><code>date</code> : formatte une date selon un format spécifié (identique au <a href="https://www.php.net/manual/fr/datetime.format.php" target="_blank" rel="nofollow,noreferrer">format utilisé par PHP</a>). Si aucun format n'est utilisé, le défaut sera <code>d/m/Y à H:i</code>. (en français)</li>
-<li><code>strftime</code> : formatte une date selon un format spécifié, identique <a href="https://www.php.net/strftime" target="_blank" rel="nofollow,noreferrer">au format utilisé par la fonction strftime de PHP</a>. Un format doit obligatoirement être spécifié. En passant un code de langue en second paramètre, cette langue sera utilisée. Sont supportés le français (<code>fr</code>) et l'anglais (<code>en</code>). Le défaut est le français si aucune valeur n'est passée en second paramètre .</li>
-<li><code>relative_date</code> : renvoie une date relative à la date du jour : <code>aujourd'hui</code>, <code>hier</code>, <code>demain</code>, ou sinon <code>mardi 2 janvier</code> (si la date est de l'année en cours) ou <code>2 janvier 2021</code> (si la date est d'une autre année). En spécifiant <code>true</code> en second paramètre, l'heure sera ajoutée au format <code>14h34</code>.</li>
-<li><code>date_short</code> : date au format court : <code>d/m/Y</code>, en spécifiant <code>true</code> en second paramètre l'heure sera ajoutée : <code>à H\hi</code>.</li>
-<li><code>date_long</code> : date au format long : <code>lundi 2 janvier 2021</code>. En spécifiant <code>true</code> en second paramètre l'heure sera ajoutée : <code>à 20h42</code>.</li>
-<li><code>date_hour</code> : renvoie l'heure uniquement à partir d'une date : <code>20h00</code>. En passant <code>true</code> en second paramètre, les minutes seront omises si elles sont égales à zéro : <code>20h</code>.</li>
-<li><code>atom_date</code> : formatte une date au format ATOM : <code>Y-m-d\TH:i:sP</code></li>
-</ul>
-<h2 id="filtres-de-condition">Filtres de condition</h2>
-<p>Ces filtres renvoient <code>1</code> si la condition est remplie, ou <code>0</code> sinon. Ils peuvent être utilisés dans les conditions :</p>
-<pre><code>{{if $page.path|match:"/aide"}}Bienvenue dans l'aide !{{/if}}</code></pre>
-<ul>
-<li><code>match</code> renvoie <code>1</code> si le texte indiqué est trouvé (insensible à la casse)</li>
-<li><code>regexp_match</code>, idem mais avec une expression régulière (de type <code>/Bonjour|revoir/i</code>)</li>
-</ul></div></body></html>
+<h2 id="spell_out_number">spell_out_number</h2>
+<p>Épelle un nombre en toutes lettres.</p>
+<p>Le premier paramètre peut être utilisé pour spécifier le code de la langue à utiliser (par défaut c'est le français, donc le code <code>fr</code>).</p>
+<pre><code>{{42|spell_out_number}}</code></pre>
+<p>Donnera :</p>
+<pre><code>quarante deux</code></pre>
+<h2 id="uuid">uuid</h2>
+<p>Renvoie un identifiant unique au format UUIDv4.</p></div></body></html>

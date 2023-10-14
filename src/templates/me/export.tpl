@@ -2,17 +2,32 @@
 <html>
 <head>
 	<title>Données utilisateur</title>
+	<style type="text/css">
+	{literal}
+		table {
+			border-collapse: collapse;
+		}
+		table td, table th {
+			border: 1px solid #000;
+			text-align: left;
+			padding: .5em;
+		}
+		table thead {
+			background: #eee;
+		}
+	{/literal}
+	</style>
 </head>
 
 <body>
 <h1>Données utilisateur</h1>
-<p>Ce document contient une copie de toutes les données détenues sur vous par {$config.nom_asso}, conformément à la réglementation.</p>
+<p>Ce document contient une copie de toutes les données détenues sur vous par {$config.org_name}, conformément à la réglementation.</p>
 
 <hr />
 
 <h2>Profil</h2>
 
-{include file="admin/membres/_details.tpl" champs=$champs_list data=$data show_message_button=false mode="export"}
+{include file="users/_details.tpl" data=$user show_message_button=false context="export"}
 
 <hr />
 
@@ -37,8 +52,6 @@
 			<td>{$row.fee}</td>
 			<td>{if $row.paid}<b class="confirm">Oui</b>{else}<b class="error">Non</b>{/if}</td>
 			<td>{$row.amount|raw|money_currency}</td>
-			<td class="actions">
-			</td>
 		</tr>
 	{/foreach}
 

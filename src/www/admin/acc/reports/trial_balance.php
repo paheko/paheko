@@ -1,12 +1,12 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Accounting\Reports;
+use Paheko\Accounting\Reports;
 
 require_once __DIR__ . '/_inc.php';
 
-$simple = qg('simple') === null || qg('simple') ? 'simple' : null;
+$simple = !empty($session->user()->preferences->accounting_expert) ? false : true;
 $balance = Reports::getTrialBalance($criterias, (bool) $simple);
 
 $tpl->assign(compact('simple', 'balance'));

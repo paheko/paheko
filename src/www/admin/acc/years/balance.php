@@ -1,14 +1,15 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Entities\Accounting\Account;
-use Garradin\Entities\Accounting\Transaction;
-use Garradin\Accounting\Reports;
-use Garradin\Accounting\Years;
-use Garradin\Membres\Session;
+use Paheko\Entities\Accounting\Account;
+use Paheko\Entities\Accounting\Transaction;
+use Paheko\Accounting\Reports;
+use Paheko\Accounting\Years;
+use Paheko\Users\Session;
 
 require_once __DIR__ . '/../_inc.php';
 
+$session = Session::getInstance();
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
 $year = Years::get((int)qg('id'));
@@ -32,7 +33,7 @@ $form->runIf('save', function () use ($year) {
 	$year->deleteOpeningBalance();
 
 	$transaction = new Transaction;
-	$transaction->id_creator = Session::getInstance()->getUser()->id;
+	$transaction->id_creator = Session::getUserId();
 	$transaction->importFromBalanceForm($year);
 	$transaction->save();
 
@@ -74,6 +75,8 @@ elseif (null !== f('from_year')) {
 		throw new UserException('Année précédente invalide');
 	}
 }
+
+$matching_accounts = null;
 
 if ($previous_year) {
 	$lines = Reports::getAccountsBalances(['year' => $previous_year->id(), 'exclude_position' => [Account::EXPENSE, Account::REVENUE]]);
@@ -120,7 +123,7 @@ if ($previous_year) {
 		$line->debit = $line->is_debt ? abs($line->balance) : 0;
 
 		if ($chart_change) {
-			if (array_key_exists($line->code, $matching_accounts)) {
+			if ($matching_accounts && array_key_exists($line->code, $matching_accounts)) {
 				$acc = $matching_accounts[$line->code];
 				$line->account_selector = [$acc->id => sprintf('%s — %s', $acc->code, $acc->label)];
 			}

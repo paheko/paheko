@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Journal : %s - %s"|args:$account.code:$account.label current="acc/accounts" body_id="rapport"}
+{include file="_head.tpl" title="Journal : %s - %s"|args:$account.code:$account.label current="acc/accounts" body_id="rapport"}
 
 {if empty($year)}
 	{include file="acc/_year_select.tpl"}
@@ -10,10 +10,6 @@
 {/if}
 
 {if $account.type}
-
-	{if $simple && !$account->isReversed($simple, $year.id)}
-		{include file="acc/_simple_help.tpl" link="?id=%d&simple=0&year=%d"|args:$account.id,$year.id type=$account.type}
-	{/if}
 
 	{if $simple}
 		{if $account.type == $account::TYPE_THIRD_PARTY}
@@ -50,6 +46,9 @@
 
 	<nav class="tabs">
 		<aside>
+		{if !$filter.start && !$filter.end}
+			{linkbutton shape="search" href="?start=1" label="Filtrer" onclick="g.toggle('#filterForm', true); this.remove(); return false;"}
+		{/if}
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 			{exportmenu}
 		{/if}
@@ -58,17 +57,6 @@
 			{linkbutton href="!acc/transactions/new.php?account=%d"|args:$account.id label="Saisir une écriture dans ce compte" shape="plus"}
 		{/if}
 		</aside>
-		<ul>
-			<li{if $simple} class="current"{/if}><a href="?id={$account.id}&amp;simple=1&amp;year={$year.id}">Vue simplifiée</a></li>
-			<li{if !$simple} class="current"{/if}><a href="?id={$account.id}&amp;simple=0&amp;year={$year.id}">Vue comptable</a></li>
-		</ul>
-
-	{if !$filter.start && !$filter.end}
-	<aside>
-		{linkbutton shape="search" href="?start=1" label="Filtrer" onclick="g.toggle('#filterForm', true); this.remove(); return false;"}
-	</aside>
-	{/if}
-
 	</nav>
 {/if}
 
@@ -82,7 +70,6 @@
 			{input type="date" name="end" source=$filter default=$year.end_date}
 			<input type="hidden" name="id" value="{$account.id}" />
 			<input type="hidden" name="year" value="{$year.id}" />
-			<input type="hidden" name="simple" value="{$simple}" />
 			<input type="submit" value="Filtrer" />
 		</p>
 	</fieldset>
@@ -102,7 +89,7 @@
 			<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
 			<td>{$line.date|date_short}</td>
 			{if $simple}
-			<td class="money">{if $line.change > 0}+{else}-{/if}{$line.change|abs|raw|money}</td>
+			<td class="money"><nobr>{if $line.change > 0}+{else}-{/if}{$line.change|abs|raw|money}</nobr></td>
 			{else}
 			<td class="money">{$line.debit|raw|money}</td>
 			<td class="money">{$line.credit|raw|money}</td>
@@ -115,6 +102,10 @@
 			{if !$simple}<td>{$line.line_label}</td>{/if}
 			<td>{$line.line_reference}</td>
 			<td class="num">{if $line.id_project}<a href="{$admin_url}acc/reports/statement.php?project={$line.id_project}&amp;year={$year.id}">{$line.project_code}</a>{/if}</td>
+			{if isset($line.locked)}
+			<td>{if $line.locked}{icon title="Écriture verrouillée" shape="lock"}{/if}</td>
+			{/if}
+			<td>{if $line.files}{$line.files}{/if}</td>
 			{* Deposit status, might be consufing
 			<td>
 				{if $account.type == $account::TYPE_OUTSTANDING && $line.debit}
@@ -159,7 +150,7 @@
 				<td colspan="4"></td>
 			{/if}
 			{if !$simple}<td></td>{/if}
-			<td class="actions" colspan="5">
+			<td class="actions" colspan="6">
 				{if $can_edit}
 					<em>Pour les écritures cochées :</em>
 					<input type="hidden" name="from" value="{$self_url}" />
@@ -181,4 +172,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

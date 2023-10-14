@@ -5,11 +5,10 @@
  * but it is required for when WWW_URL is on a different domain than ADMIN_URL
  */
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Web\Skeleton;
+use Paheko\Web\Router;
 
 require_once __DIR__ . '/../_inc.php';
 
-$s = new Skeleton('content.css');
-$s->serve();
+Router::route('/content.css');

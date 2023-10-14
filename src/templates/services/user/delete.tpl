@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="%s : Supprimer une inscription"|args:$user_name current="membres/services"}
+{include file="_head.tpl" title="%s : Supprimer une inscription"|args:$user_name current="users/services"}
 
 {include file="common/delete_form.tpl"
 	legend="Supprimer l'inscription ?"
@@ -6,4 +6,4 @@
 	alert="Les écritures comptables liées à cette inscription ne seront pas supprimées, la comptabilité demeurera inchangée."
 	info="%s – à « %s — %s »"|args:$user_name,$service_name,$fee_name}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

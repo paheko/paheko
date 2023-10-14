@@ -1,11 +1,11 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Files\Files;
-use Garradin\Entities\Files\File;
-use Garradin\Web\Render\Render;
-use Garradin\Web\Web;
+use Paheko\Files\Files;
+use Paheko\Entities\Files\File;
+use Paheko\Web\Render\Render;
+use Paheko\Web\Web;
 
 require_once __DIR__ . '/../../_inc.php';
 
@@ -16,29 +16,29 @@ if (null == $content) {
 	throw new UserException('Aucun contenu à prévisualiser');
 }
 
+// Preview single markdown file in documents
 if ($path = qg('f')) {
 	$file = Files::get($path);
 
-	if ($file && !$file->checkReadAccess($session)) {
+	if (!$file || !$file->canRead()) {
 		throw new UserException('Vous n\'avez pas le droit de lire ce fichier.');
 	}
+
+	$content = Render::render(f('format'), $file->path, f('content'), ADMIN_URL . 'common/files/_preview.php?p=');
 }
+// Preview single web page
 elseif ($web = qg('w')) {
-	$page = Web::get($web);
+	$page = Web::get((int)$web);
 
-	if (!$page || !$page->file() || !$page->file()->checkReadAccess($session)) {
+	if (!$page || !($file = $page->dir()) || !$file->canRead()) {
 		throw new UserException('Vous n\'avez pas le droit de lire ce fichier.');
 	}
 
-	$file = $page->file();
+	$content = $page->render();
 }
 else {
 	throw new UserException('Fichier inconnu');
 }
-
-$prefix = $page ? 'web/page.php?uri=' : 'common/files/_preview.php?p=';
-
-$content = Render::render(f('format'), $file, f('content'), ADMIN_URL . $prefix);
 
 $tpl->assign(compact('file', 'content'));
 

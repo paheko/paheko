@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Commencer un exercice" current="acc/years"}
+{include file="_head.tpl" title="Commencer un exercice" current="acc/years"}
 
 {if isset($_GET.from)}
 	<p class="confirm block"><strong>L'exercice a bien été clôturé.</strong><br />Vous pouvez commencer un nouvel exercice ci-dessous.</p>
@@ -36,4 +36,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

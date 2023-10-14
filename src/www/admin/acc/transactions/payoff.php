@@ -1,12 +1,12 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Entities\Accounting\Account;
-use Garradin\Entities\Accounting\Transaction;
-use Garradin\Entities\Files\File;
-use Garradin\Accounting\Projects;
-use Garradin\Accounting\Transactions;
-use Garradin\Accounting\Years;
+use Paheko\Entities\Accounting\Account;
+use Paheko\Entities\Accounting\Transaction;
+use Paheko\Entities\Files\File;
+use Paheko\Accounting\Projects;
+use Paheko\Accounting\Transactions;
+use Paheko\Accounting\Years;
 
 use KD2\DB\Date;
 
@@ -72,5 +72,5 @@ $tpl->assign('payoff_targets', implode(':', [Account::TYPE_BANK, Account::TYPE_C
 
 $tpl->assign('chart_id', $chart->id());
 
-$tpl->assign('projects', Projects::listAssocWithEmpty());
+$tpl->assign('projects', Projects::listAssoc());
 $tpl->display('acc/transactions/payoff.tpl');

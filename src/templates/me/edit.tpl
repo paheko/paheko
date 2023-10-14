@@ -1,30 +1,23 @@
-{include file="admin/_head.tpl" title="Mes informations personnelles" current="me"}
+{include file="_head.tpl" title="Mes informations personnelles" current="me"}
 
-<nav class="tabs">
-	<ul>
-		<li class="current"><a href="{$admin_url}me/">Mes informations personnelles</a></li>
-		<li><a href="{$admin_url}me/security.php">Mot de passe et options de sécurité</a></li>
-	</ul>
-</nav>
+{include file="./_nav.tpl" current="me"}
 
-{form_errors membre=1}
+{form_errors}
 
 <form method="post" action="{$self_url}">
 
 	<fieldset>
 		<legend>Informations personnelles</legend>
 		<dl>
-			{foreach from=$champs item="champ" key="nom"}
-			{if empty($champ.private) && $nom != 'passe'}
-				{html_champ_membre config=$champ name=$nom data=$data user_mode=true}
-			{/if}
+			{foreach from=$fields item="field"}
+				{edit_dynamic_field field=$field user=$user context="user_edit"}
 			{/foreach}
 		</dl>
 	</fieldset>
 
 	<fieldset>
 		<legend>Changer mon mot de passe</legend>
-		<p><a href="{$admin_url}me/security.php">Modifier mon mot de passe ou autres informations de sécurité.</a></p>
+		<p>{link href="!me/security.php" label="Modifier mon mot de passe ou autres informations de sécurité"}</p>
 	</fieldset>
 
 	<p class="submit">
@@ -34,4 +27,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

@@ -65,7 +65,7 @@ table.statement tr td.colspan, table.statement tr td.spacer {
 
 td.money, th.money {
 	text-align: right;
-	width: 2em;
+	min-width: 2em;
 }
 
 table.statement tfoot td, table.statement tfoot th {

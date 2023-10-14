@@ -1,95 +1,104 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Accounting\Years;
+use Paheko\Entities\Search as SE;
+use Paheko\Search;
+use Paheko\Users\Session;
 
 require_once __DIR__ . '/../_inc.php';
 
-if (empty($target) || !in_array($target, Recherche::TARGETS)) {
+if (!defined('Paheko\CURRENT_SEARCH_TARGET') || !array_key_exists(CURRENT_SEARCH_TARGET, SE::TARGETS)) {
 	throw new UserException('Cible inconnue');
 }
 
-$access_section = $target == 'compta' ? $session::SECTION_ACCOUNTING : $session::SECTION_USERS;
+$access_section = CURRENT_SEARCH_TARGET == SE::TARGET_ACCOUNTING ? $session::SECTION_ACCOUNTING : $session::SECTION_USERS;
 
-$recherche = new Recherche;
+Session::getInstance()->requireAccess($access_section, Session::ACCESS_READ);
 
-$query = (object) [
-	'query' => f('q') ? json_decode(f('q'), true) : null,
-	'order' => f('order') ?: $recherche->getDefaultOrder($target),
-	'limit' => f('limit') ?: 100,
-	'desc'  => $recherche->getDefaultDesc($target),
-];
-
-$query->desc = (bool) f('desc');
-
-$text_query = trim((string) qg('qt'));
-$result = null;
-$sql_query = null;
-$search = null;
 $id = f('id') ?: qg('id');
 
-$is_unprotected = false;
+if ($id) {
+	$s = Search::get($id);
 
-// Recherche simple
-if ($text_query !== '' && $target === 'membres' && empty($query->query))
-{
-	$query = $recherche->buildSimpleMemberQuery($text_query);
-}
-elseif ($text_query !== '' && $target == 'compta' && empty($query->query)) {
-	$query = $recherche->buildSimpleAccountingQuery($text_query, (int) qg('year'));
-
-	if (is_string($query)) {
-		Utils::redirect($query);
-	}
-}
-// Recherche existante
-elseif ($id && empty($query->query))
-{
-	$search = $recherche->get($id);
-
-	if (!$search) {
+	if (!$s) {
 		throw new UserException('Recherche inconnue ou invalide');
 	}
-
-	if ($search->type != Recherche::TYPE_JSON) {
-		if ($search->type == Recherche::TYPE_SQL_UNPROTECTED) {
-			$is_unprotected = true;
-		}
-
-		$sql_query = $search->contenu;
-	}
-	else {
-		$query = $search->query;
-		$query->limit = (int) f('limit') ?: $query->limit;
-	}
+}
+else {
+	$s = new SE;
+	$s->target = CURRENT_SEARCH_TARGET;
+	$s->created = new \DateTime();
 }
 
-// Recherche SQL
-if (f('sql_query')) {
-	$sql_query = f('sql_query');
+$text_query = trim((string) qg('qt'));
+$sql_query = trim((string) f('sql'));
+$json_query = f('q') ? json_decode(f('q'), true) : null;
+$default = false;
 
-	if ($session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
-		$is_unprotected = (bool) f('unprotected');
+if ($text_query !== '') {
+	$s->content = json_encode($s->getAdvancedSearch()->simple($text_query, true));
+	$s->type = SE::TYPE_JSON;
+}
+elseif ($sql_query !== '') {
+	// Only admins can run custom queries, others can only run saved queries
+	$session->requireAccess($access_section, $session::ACCESS_ADMIN);
+
+	if (Session::getInstance()->canAccess($access_section, Session::ACCESS_ADMIN) && f('unprotected')) {
+		$s->type = SE::TYPE_SQL_UNPROTECTED;
 	}
 	else {
-		$is_unprotected = false;
+		$s->type = SE::TYPE_SQL;
 	}
+
+	$s->content = $sql_query;
+}
+elseif ($json_query !== null) {
+	$s->content = json_encode(['groups' => $json_query]);
+	$s->type = SE::TYPE_JSON;
+}
+elseif (!$s->content) {
+	$s->content = json_encode($s->getAdvancedSearch()->defaults());
+	$s->type = SE::TYPE_JSON;
+	$default = true;
 }
 
-// Execute search
-if ($query->query || $sql_query) {
+if (f('to_sql')) {
+	$s->transformToSQL();
+}
+
+$form->runIf(f('save') || f('save_new'), function () use ($s) {
+	if (f('save_new') || !$s->exists()) {
+		$s = clone $s;
+		$label = $s->type != $s::TYPE_JSON ? 'Recherche SQL du ' : 'Recherche avancée du ';
+		$label .= date('d/m/Y à H:i');
+		$s->label = $label;
+	}
+
+	$s->save();
+
+	$target = $s->target == $s::TARGET_ACCOUNTING ? 'acc' : 'users';
+	Utils::redirect(sprintf('!%s/saved_searches.php?edit=%d', $target, $s->id()));
+});
+
+$list = $results = $header = $count = null;
+
+if (!$default) {
 	try {
-		if ($sql_query) {
-			$sql = $sql_query;
+		if ($s->type == $s::TYPE_JSON) {
+			$list = $s->getDynamicList();
+			$list->loadFromQueryString();
+			$count = $list->count();
 		}
 		else {
-			$sql = $recherche->buildQuery($target, $query->query, $query->order, $query->desc, $query->limit);
-		}
+			if (!empty($_POST['_export'])) {
+				$s->export($_POST['_export']);
+				exit;
+			}
 
-	   $result = $recherche->searchSQL($target, $sql, null, false, $is_unprotected);
-
-		if (f('to_sql')) {
-			$sql_query = $sql;
+			$header = $s->getHeader();
+			$count = $s->countResults(false);
+			$results = $s->iterateResults();
+			$tpl->assign('has_limit', $s->hasLimit());
 		}
 	}
 	catch (UserException $e) {
@@ -97,110 +106,16 @@ if ($query->query || $sql_query) {
 	}
 }
 
-if (null !== $result)
-{
-	if (count($result) == 1 && $text_query !== '' && $target === 'membres') {
-		Utils::redirect(ADMIN_URL . 'membres/fiche.php?id=' . (int)$result[0]->_user_id);
-	}
-
-	if ((f('save_new') || f('save')) && !$form->hasErrors())
-	{
-		if (!$sql_query) {
-			$type = Recherche::TYPE_JSON;
-		}
-		elseif ($is_unprotected) {
-			$type = Recherche::TYPE_SQL_UNPROTECTED;
-		}
-		else {
-			$type = Recherche::TYPE_SQL;
-		}
-
-		if ($id && !f('save_new')) {
-			$recherche->edit($id, [
-				'type'    => $type,
-				'contenu' => $sql_query ?: $query,
-			]);
-		}
-		else
-		{
-			$label = $sql_query ? 'Recherche SQL du ' : 'Recherche avancée du ';
-			$label .= date('d/m/Y à H:i:s');
-			$id = $recherche->add($label, $user->id, $type, $target, $sql_query ?: $query);
-		}
-
-		$url = $target == 'compta' ? '!acc/saved_searches.php?edit=' : '!membres/recherches.php?edit=';
-		Utils::redirect($url . $id);
-	}
-
-	$tpl->assign('result_header', $recherche->getResultHeader($target, $result));
-}
-elseif ($target === 'membres')
-{
-	$query->query = [[
-		'operator' => 'AND',
-		'conditions' => [
-			[
-				'column'   => $config->get('champ_identite'),
-				'operator' => '= ?',
-				'values'   => [''],
-			],
-		],
-	]];
-	$result = null;
-}
-elseif ($target === 'compta')
-{
-	// Default
-	$query->query = [[
-		'operator' => 'AND',
-		'conditions' => [
-			[
-				'column'   => 't.id_year',
-				'operator' => '= ?',
-				'values'   => [(int)qg('year') ?: Years::getCurrentOpenYearId()],
-			],
-			[
-				'column'   => 't.label',
-				'operator' => 'LIKE %?%',
-				'values'   => '',
-			],
-			[
-				'column'   => 't.reference',
-				'operator' => 'LIKE %?%',
-				'values'   => '',
-			],
-		],
-	]];
-
-	if (null !== qg('type')) {
-		$query->query[0]['conditions'][] = [
-			'column' => 't.type',
-			'operator' => '= ?',
-			'values' => [(int)qg('type')],
-		];
-	}
-
-	if (null !== qg('account')) {
-		$query->query[0]['conditions'][] = [
-			'column' => 'a.code',
-			'operator' => '= ?',
-			'values' => [qg('account')],
-		];
-	}
-
-	$query->desc = true;
-	$result = null;
-}
-
-$columns = $recherche->getColumns($target);
 $is_admin = $session->canAccess($access_section, $session::ACCESS_ADMIN);
-$schema = $recherche->schema($target);
+$schema = $s->schema();
+$columns = $s->getAdvancedSearch()->columns();
+$columns = array_filter($columns, fn($c) => $c['label'] ?? null && $c['type'] ?? null); // remove columns only for dynamiclist
 
-$tpl->assign(compact('query', 'sql_query', 'result', 'columns', 'is_admin', 'schema', 'search', 'target', 'is_unprotected'));
+$tpl->assign(compact('s', 'list', 'header', 'results', 'columns', 'count', 'is_admin', 'schema'));
 
-if ($target == 'compta') {
+if ($s->target == $s::TARGET_ACCOUNTING) {
 	$tpl->display('acc/search.tpl');
 }
 else {
-	$tpl->display('admin/membres/recherche.tpl');
+	$tpl->display('users/search.tpl');
 }

@@ -1,13 +1,16 @@
+{if !$dialog}
 <nav class="tabs">
 	<aside>
-		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-		{linkbutton href="!services/user/add.php" label="Inscrire à une activité" shape="plus"}
+		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE) && $current != 'reminders'}
+			{linkbutton href="!services/user/add.php" label="Inscrire à une activité" shape="plus"}
+		{elseif $current == 'reminders'}
+			{linkbutton href="!services/reminders/new.php" label="Nouveau rappel automatique" shape="plus" target="_dialog"}
 		{/if}
 	</aside>
 
 	<ul>
 		<li{if $current == 'index'} class="current"{/if}><a href="{$admin_url}services/">Activités et cotisations</a></li>
-		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
+		{if !DISABLE_EMAIL && $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
 			<li{if $current == 'reminders'} class="current"{/if}><a href="{$admin_url}services/reminders/">Gestion des rappels automatiques</a></li>
 		{/if}
 	</ul>
@@ -46,3 +49,4 @@
 	{/if}
 
 </nav>
+{/if}

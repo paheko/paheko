@@ -1,9 +1,9 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\API_Credentials;
-use Garradin\Entities\API_Credentials AS API_Entity;
+use Paheko\API_Credentials;
+use Paheko\Entities\API_Credentials AS API_Entity;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -26,4 +26,4 @@ $access_levels = API_Entity::ACCESS_LEVELS;
 $tpl->assign('website', WEBSITE);
 $tpl->assign(compact('list', 'csrf_key', 'default_key', 'secret', 'access_levels'));
 
-$tpl->display('admin/config/advanced/api.tpl');
+$tpl->display('config/advanced/api.tpl');

@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Activités et cotisations" current="membres/services"}
+{include file="_head.tpl" title="Activités et cotisations" current="users/services"}
 
 {include file="services/_nav.tpl" current="index" service=null fee=null}
 
@@ -43,4 +43,4 @@
 	{include file="services/_service_form.tpl" legend="Ajouter une activité" service=null period=0}
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

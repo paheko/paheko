@@ -1,8 +1,8 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Entities\Files\File;
-use Garradin\Files\Files;
+use Paheko\Entities\Files\File;
+use Paheko\Files\Files;
 
 require __DIR__ . '/../../_inc.php';
 
@@ -12,8 +12,8 @@ if (!$file) {
 	throw new UserException('Fichier inconnu');
 }
 
-if (!$file->checkWriteAccess($session)) {
-    throw new UserException('Vous n\'avez pas le droit de modifier ce fichier.');
+if (!$file->canWrite()) {
+	throw new UserException('Vous n\'avez pas le droit de partager ce fichier.');
 }
 
 $context = $file->context();

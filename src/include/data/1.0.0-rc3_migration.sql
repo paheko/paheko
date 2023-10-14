@@ -1,1 +1,0 @@
-UPDATE acc_transactions SET type = 0 WHERE type = 6;

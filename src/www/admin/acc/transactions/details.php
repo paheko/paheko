@@ -1,7 +1,9 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Accounting\Transactions;
+use Paheko\Accounting\Transactions;
+use Paheko\UserTemplate\Modules;
+use Paheko\Users\Users;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -18,17 +20,22 @@ $form->runIf('mark_paid', function () use ($transaction) {
 	$transaction->save();
 }, $csrf_key, Utils::getSelfURI());
 
-$tpl->assign(compact('transaction', 'csrf_key'));
+$expert = !empty($session->user()->preferences->accounting_expert);
 
-$tpl->assign('simple', !isset($_GET['advanced']));
-$tpl->assign('details', $transaction->getDetails());
-$tpl->assign('files', $transaction->listFiles());
-$tpl->assign('tr_year', $transaction->year());
-$tpl->assign('creator_name', $transaction->id_creator ? (new Membres)->getNom($transaction->id_creator) : null);
+$variables = compact('csrf_key', 'transaction') + [
+	'transaction_lines'    => $transaction->getLinesWithAccounts(),
+	'transaction_year'     => $transaction->year(),
+	'simple'               => isset($_GET['advanced']) ? !$_GET['advanced'] : !$expert,
+	'details'              => $transaction->getDetails(),
+	'files'                => $transaction->listFiles(),
+	'creator_name'         => $transaction->id_creator ? Users::getName($transaction->id_creator) : null,
+	'files_edit'           => $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE),
+	'file_parent'          => $transaction->getAttachementsDirectory(),
+	'related_users'        => $transaction->listLinkedUsers(),
+	'related_transactions' => $transaction->listRelatedTransactions()
+];
 
-$tpl->assign('files_edit', $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE));
-$tpl->assign('file_parent', $transaction->getAttachementsDirectory());
-$tpl->assign('related_users', $transaction->listLinkedUsers());
-$tpl->assign('related_transactions', $transaction->listRelatedTransactions());
+$tpl->assign($variables);
+$tpl->assign('snippets', Modules::snippetsAsString(Modules::SNIPPET_TRANSACTION, $variables));
 
 $tpl->display('acc/transactions/details.tpl');

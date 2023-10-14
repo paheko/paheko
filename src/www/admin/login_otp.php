@@ -1,32 +1,43 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
+
+use Paheko\Users\Session as UserSession;
+use Paheko\Files\WebDAV\Session as AppSession;
 
 const LOGIN_PROCESS = true;
 
 require_once __DIR__ . '/_inc.php';
 
-if (!$session->isOTPRequired())
-{
-    Utils::redirect(ADMIN_URL . '');
+$app_token = $_GET['app'] ?? null;
+
+if ($app_token) {
+	$session = AppSession::getInstance();
+}
+else {
+	$session = UserSession::getInstance();
+}
+
+if (!$session->isOTPRequired()) {
+	Utils::redirect(ADMIN_URL);
 }
 
 $login = null;
+$csrf_key = 'login_otp';
 
-if (f('login'))
-{
-    $form->check('otp', [
-        'code' => 'numeric|required',
-    ]);
+$args = $app_token ? '?app=' . rawurlencode($app_token) : '';
+$layout = $app_token ? 'public' : null;
 
-    if (!$form->hasErrors() && ($login = $session->loginOTP(f('code'))))
-    {
-        Utils::redirect(ADMIN_URL);
-    }
-}
+$form->runIf('login', function () use ($session, $args) {
+	if (!$session->loginOTP(f('code'))) {
+		throw new UserException(sprintf('Code incorrect. Vérifiez que votre téléphone est à l\'heure (heure du serveur : %s).', date('d/m/Y H:i:s')));
+	}
 
-$tpl->assign('fail', $login === false);
+	if ($args) {
+		Utils::redirect('!login_app.php' . $args);
+	}
+}, $csrf_key, '!');
 
-$tpl->assign('time', time());
+$tpl->assign(compact('csrf_key', 'layout'));
 
-$tpl->display('admin/login_otp.tpl');
+$tpl->display('login_otp.tpl');

@@ -1,9 +1,9 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Entities\Users\Category;
-use Garradin\Users\Categories;
-use Garradin\Membres\Session;
+use Paheko\Entities\Users\Category;
+use Paheko\Users\Categories;
+use Paheko\Users\Session;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -25,4 +25,4 @@ $list =  Categories::listWithStats();
 
 $tpl->assign(compact('list', 'csrf_key'));
 
-$tpl->display('admin/config/categories/index.tpl');
+$tpl->display('config/categories/index.tpl');

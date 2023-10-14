@@ -38,6 +38,12 @@ $is_quick = count(array_intersect_key($_GET, array_flip(['a', 'l', 'd', 't', 'ac
 		</dl>
 	</fieldset>
 
+	{if !empty($has_reconciled_lines)}
+	<p class="alert block">
+		Attention, cette écriture contient des lignes qui ont été rapprochées. Modifier son montant ou le compte bancaire entraînera la perte du rapprochement.
+	</p>
+	{/if}
+
 	{foreach from=$types_details item="type"}
 		<fieldset data-types="t{$type.id}"{if $is_new} class="hidden"{/if}>
 			<legend>{$type.label}</legend>
@@ -60,15 +66,15 @@ $is_quick = count(array_intersect_key($_GET, array_flip(['a', 'l', 'd', 't', 'ac
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc." default=$transaction->payment_reference()}
 		</dl>
 		<dl>
-			{input type="list" multiple=true name="users" label="Membres associés" target="!membres/selector.php" default=$linked_users}
+			{input type="list" multiple=true name="users" label="Membres associés" target="!users/selector.php" default=$linked_users}
 			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30 source=$transaction}
 		</dl>
 		<dl data-types="t{$transaction::TYPE_ADVANCED} t{$transaction::TYPE_DEBT} t{$transaction::TYPE_CREDIT}">
 			{input type="number" name="id_related" label="Lier à l'écriture numéro" source=$transaction help="Indiquer ici un numéro d'écriture pour faire le lien par exemple avec une dette"}
 		</dl>
 		<dl data-types="all-but-advanced">
-			{if count($projects) > 1}
-				{input type="select" name="id_project" label="Projet (analytique)" options=$projects default=$id_project}
+			{if !empty($projects)}
+				{input type="select" name="id_project" label="Projet (analytique)" options=$projects default=$id_project default_empty="— Aucun —"}
 			{/if}
 		</dl>
 	</fieldset>

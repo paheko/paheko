@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Modifier un exercice" current="acc/years"}
+{include file="_head.tpl" title="Modifier un exercice" current="acc/years"}
 
 {form_errors}
 
@@ -36,4 +36,4 @@ split.onchange = () => {
 </script>
 {/literal}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

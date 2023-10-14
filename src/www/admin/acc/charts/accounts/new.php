@@ -1,15 +1,16 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Entities\Accounting\Account;
-use Garradin\Entities\Accounting\Transaction;
-use Garradin\Entities\Accounting\Line;
-use Garradin\Accounting\Accounts;
-use Garradin\Accounting\Charts;
-use Garradin\Membres\Session;
+use Paheko\Entities\Accounting\Account;
+use Paheko\Entities\Accounting\Transaction;
+use Paheko\Entities\Accounting\Line;
+use Paheko\Accounting\Accounts;
+use Paheko\Accounting\Charts;
+use Paheko\Users\Session;
 
 require_once __DIR__ . '/_inc.php';
 
+$session = Session::getInstance();
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
 $chart = Charts::get((int)qg('id'));

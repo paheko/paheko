@@ -1,11 +1,6 @@
-{include file="admin/_head.tpl" title="Mes informations personnelles" current="me"}
+{include file="_head.tpl" title="Mes informations personnelles" current="me"}
 
-<nav class="tabs">
-	<ul>
-		<li class="current"><a href="{$admin_url}me/">Mes informations personnelles</a></li>
-		<li><a href="{$admin_url}me/security.php">Mot de passe et options de sécurité</a></li>
-	</ul>
-</nav>
+{include file="./_nav.tpl" current="me"}
 
 {if $ok !== null}
 <p class="confirm block">
@@ -14,15 +9,32 @@
 {/if}
 
 <dl class="describe">
-	<dd>
-		{linkbutton href="!me/edit.php" label="Modifier mes informations" shape="edit"}
-	</dd>
+	<dd>{linkbutton href="!me/edit.php" label="Modifier mes informations" shape="edit"}</dd>
 </dl>
 
-{include file="admin/membres/_details.tpl" champs=$champs data=$data show_message_button=false mode="user"}
 
-<p>
-	{linkbutton href="!me/export.php" label="Télécharger toutes les données détenues sur moi" shape="download"}
-</p>
+{if $user->isChild() || count($children)}
+<aside class="describe">
+	<dl class="describe">
+		{if $user->isChild()}
+			<dt>Membre responsable</dt>
+			<dd>{$parent_name}</dd>
+		{elseif count($children)}
+			<dt>Membres rattachés</dt>
+			{foreach from=$children item="child"}
+				<dd>{$child.name}</dd>
+			{/foreach}
+		{/if}
+	</dl>
+</aside>
+{/if}
 
-{include file="admin/_foot.tpl"}
+{include file="users/_details.tpl" data=$user show_message_button=false context="user"}
+
+<dl class="describe">
+	<dd>{linkbutton href="!me/export.php" label="Télécharger toutes les données détenues sur moi" shape="download"}</dd>
+</dl>
+
+{$snippets|raw}
+
+{include file="_foot.tpl"}

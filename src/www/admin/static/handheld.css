@@ -11,10 +11,10 @@ body main {
 input[type=number], input[type=color],
 input[type=email], input[type=file], input[type=url], input[type=month],
 input[type=password], input[type=range], input[type=search], input[type=tel],
-textarea, select, .input-list, .file-selector, input[type=text]:not([data-input]) {
-    min-width: 0;
-    max-width: calc(100% - 2em);
-    width: calc(95% - 2em);
+textarea, select, .input-list, .file-selector, input[type=text]:not([data-input]):not([size]) {
+	min-width: 0;
+	max-width: calc(100% - 2em);
+	width: calc(95% - 2em);
 }
 
 input[size] {
@@ -25,8 +25,13 @@ img {
 	max-width: 100% !important;
 }
 
-a.icn-btn, input[type=submit], input[type=button], button, input[type=file] {
+a.icn-btn, input[type=submit], input[type=button], button, input[type=file], .menu-btn > b {
 	padding: .4em .6em;
+}
+
+.menu-btn > span {
+	top: 2.2em;
+	left: -.2em;
 }
 
 a.icn-btn {
@@ -76,8 +81,8 @@ nav.breadcrumbs ul {
 .header .menu > ul {
 	background: rgb(var(--gMainColor));
 	flex-wrap: nowrap;
-    grid-template: none / repeat(auto-fit, minmax(20px, 1fr));
-    display: grid;
+	grid-template: none / repeat(auto-fit, minmax(20px, 1fr));
+	display: grid;
 	align-items: center;
 }
 
@@ -85,7 +90,7 @@ nav.breadcrumbs ul {
 	display: inline;
 }
 
-.header .menu > ul > li > h3 a span {
+.header .menu > ul > li > h3 a b {
 	display: none;
 }
 
@@ -96,9 +101,10 @@ nav.breadcrumbs ul {
 .header .menu h3 a {
 	text-align: center;
 	text-decoration: none !important;
+	font-weight: normal;
 }
 
-.header .menu h3 b[data-icn]::before {
+.header .menu h3 span[data-icon]::before {
 	float: none;
 	display: block;
 	position: relative;
@@ -108,15 +114,16 @@ nav.breadcrumbs ul {
 	line-height: 10pt;
 	color: rgb(var(--gBgColor));
 	font-size: 20pt;
+	top: 0;
+	text-shadow: none;
 }
 
-.header .menu li.current_parent h3 a {
-	background: rgb(var(--gBgColor));
-}
-
-.header .menu li.current h3 b[data-icn]::before,
-.header .menu > ul > li.current_parent h3 b[data-icn]::before {
+.header .menu li.current_parent h3 a, .header .menu li.current h3 a {
 	background: rgb(var(--gSecondColor));
+}
+
+.header .menu li.current h3 span[data-icon]::before,
+.header .menu > ul > li.current_parent h3 span[data-icon]::before {
 	color: rgb(var(--gBgColor));
 	text-shadow: 0px 0px 5px rgb(var(--gTextColor)), 0px 0px 5px rgb(var(--gTextColor));
 }
@@ -164,19 +171,26 @@ nav.tabs ul {
 	justify-content: center;
 }
 
-nav.tabs ul li a, nav.tabs ul li label {
-	margin: .2em;
-	border-radius: .5em;
-}
-
 nav.tabs ul li a {
 	padding: .4rem .6rem;
+}
+
+nav.tabs ul li.current a {
+	font-size: 1em;
+}
+
+nav.tabs li:first-child::before, nav.tabs li:last-child::after {
+	display: none;
 }
 
 nav.tabs .sub {
 	margin: 1em 0;
 	border: none;
-	border-top: .2rem dashed rgb(var(--gSecondColor));
+	border-top: .2rem dashed rgba(var(--gMainColor), .5);
+}
+
+nav.tabs h2 {
+	text-align: center;
 }
 
 .filterCategory, .searchMember {
@@ -211,7 +225,7 @@ table.list tfoot .actions[colspan] {
 }
 
 table.list tbody .actions {
-	text-align: left;
+	text-align: center;
 	display: flex;
 	flex-wrap: wrap;
 	flex-direction: row;
@@ -219,8 +233,8 @@ table.list tbody .actions {
 	border: none;
 }
 
-table.list tbody .actions a {
-	align-self: flex-end;
+table.list tbody td.actions > a {
+	align-self: center;
 }
 
 table.list th {
@@ -231,16 +245,67 @@ table.list th {
 	font-size: 1.2em;
 }
 
+table.files.gallery tbody {
+	justify-content: center;
+}
+
 /* Petits écrans (smartphones) */
 @media screen and (max-width:600px) {
+	.transaction-details {
+		flex-direction: column;
+	}
+
+	div.help.flex {
+		flex-direction: column;
+	}
+
+	samp.copy {
+		display: inline-block;
+		text-overflow: ellipsis;
+		max-width: 95%;
+		overflow: hidden;
+	}
+
 	table.list tr {
 		display: block;
 	}
 
-	table.list td, table.list th {
+	table.list tbody td.check {
+		float: left;
+	}
+
+	table.list tbody td.icon, table.list tbody td.bookmark {
+		float: right;
+	}
+
+	table.list thead td.check label, table.list tfoot td.check label {
+		background: rgba(255, 255, 255, 0.5);
+		padding: .3em .5em;
+		border-radius: .5em;
 		display: inline-block;
-		border-left: 2px dashed #999;
+	}
+
+	table.list thead td.check label::after, table.list tfoot td.check label::after {
+		content: attr(title);
+	}
+
+	table.list td, table.list th {
+		display: block;
+		text-align: center !important;
 		width: auto !important;
+		height: auto !important;
+	}
+
+	table.list tbody .actions {
+		justify-content: center;
+	}
+
+	table.list.gallery td, table.list.gallery th {
+		border-left: none;
+	}
+
+	table.files.gallery tbody {
+		    grid-template-columns: repeat(auto-fit, 95%);
 	}
 
 	colgroup {
@@ -275,7 +340,7 @@ table.list th {
 	}
 
 	#dialog {
-		background: black;
+		background: #333;
 	}
 
 	#dialog > iframe {
@@ -283,8 +348,13 @@ table.list th {
 		height: 100%;
 		margin: 0;
 		max-width: 100%;
-    	border-radius: 0;
-    	box-shadow: none;
+		border-radius: 0;
+		box-shadow: 0px 0px 5px 10px #fff;
+	}
+
+	#dialog > button.closeBtn {
+		color: var(--gLightBackgroundColor);
+		margin-bottom: .5em;
 	}
 
 	#dialog.loaded > iframe {

@@ -103,7 +103,7 @@
 				var src = params[0];
 				var align = params[1] || 'center';
 				var caption = 2 in params ? '<figcaption>' + params[2] + '</figcaption>' : '';
-				var size = align == 'center' ? '500px' : '200px';
+				var size = align == 'center' ? '750px' : '250px';
 
 				return `<figure class="image img-${align}"><a href="${base_url + src}" class="internal-image" target="_image"><img src="${base_url + src}?${size}" alt="" /></a>${caption}</figure>`;
 			}
@@ -125,14 +125,24 @@
 	}
 
 	let edit = document.getElementById('f_content') ? true : false;
+	var new_content;
 
 	let disableEncryption = (reset) => {
+		var c = document.getElementById('f_content');
+
 		if (reset) {
-			document.getElementById('f_content').value = '';
-			document.getElementById('f_format').selectedIndex = 0;
+			c.value = '';
+			document.getElementById('f_format').value = 'markdown';
 		}
 
-		document.getElementById('f_content').disabled = false;
+		delete c.form.onbeforesubmit;
+		c.disabled = false;
+
+		if (new_content) {
+			c.name = new_content.name;
+			new_content.remove();
+		}
+
 		encryptPassword = null;
 	};
 
@@ -147,8 +157,15 @@
 				decrypt();
 			}
 
-			form.onsubmit = function ()
-			{
+			var content = document.getElementById('f_content');
+
+			new_content = document.createElement('input');
+			new_content.type = 'hidden';
+			new_content.name = content.name;
+			content.name = null;
+			content.parentNode.appendChild(new_content);
+
+			form.onbeforesubmit = function () {
 				if (typeof GibberishAES == 'undefined')
 				{
 					alert("Le chargement de la bibliothèque AES n'est pas terminé.\nLe chiffrement est impossible pour le moment, recommencez dans quelques instants ou désactivez le chiffrement.");
@@ -159,10 +176,9 @@
 					return;
 				}
 
-				var content = document.getElementById('f_content');
-				content.value = GibberishAES.enc(content.value, encryptPassword);
-				content.readOnly = true;
-				return true;
+				new_content.value = GibberishAES.enc(content.value, encryptPassword);
+				content.disabled = true;
+				console.log('encrypted');
 			};
 		});
 	};
@@ -181,7 +197,10 @@
 				if (window.confirm("Aucun mot de passe entré.\nDésactiver le chiffrement et effacer le contenu ?"))
 				{
 					disableEncryption(true);
+					return;
 				}
+
+				askPassword(first);
 			}
 
 			return;
@@ -272,7 +291,7 @@
 			edit = true;
 
 			e.addEventListener('change', () => {
-				if (e.value == 'skriv/encrypted') {
+				if (e.value == 'encrypted') {
 					enableEncryption(e.form);
 				}
 				else if (encryptPassword) {
@@ -280,7 +299,7 @@
 				}
 			});
 
-			if (e.value == "skriv/encrypted") {
+			if (e.value == "encrypted") {
 				enableEncryption(e.form, true);
 			}
 		}

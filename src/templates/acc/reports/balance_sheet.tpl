@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="%sBilan"|args:$project_title current="acc/years"}
+{include file="_head.tpl" title="%sBilan"|args:$project_title current="acc/years"}
 
 {include file="acc/reports/_header.tpl" current="balance_sheet" title="Bilan" allow_compare=true allow_filter=true}
 
@@ -13,6 +13,6 @@
 
 {include file="acc/reports/_statement.tpl" statement=$balance}
 
-<p class="help">Toutes les écritures sont libellées en {$config.monnaie}.</p>
+<p class="help">Toutes les écritures sont libellées en {$config.currency}.</p>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

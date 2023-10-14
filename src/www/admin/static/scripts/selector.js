@@ -146,13 +146,3 @@ function filterTableList(e) {
 
 	return false;
 }
-
-var o = document.getElementById('f_filter');
-
-if (o) {
-	o.onchange = () => {
-		let s = new URLSearchParams(window.location.search);
-		s.set("filter", o.value);
-		window.location.search = s.toString();
-	};
-}

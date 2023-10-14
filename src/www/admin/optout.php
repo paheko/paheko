@@ -1,7 +1,7 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Users\Emails;
+use Paheko\Email\Emails;
 
 const LOGIN_PROCESS = true;
 
@@ -47,4 +47,4 @@ $resub_ok = isset($_GET['resub_ok']);
 
 $tpl->assign(compact('email', 'ok', 'resub_ok', 'code', 'verify'));
 
-$tpl->display('admin/optout.tpl');
+$tpl->display('optout.tpl');

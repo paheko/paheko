@@ -28,6 +28,7 @@ $targets = Entities\Accounting\Account::TYPE_REVENUE;
 				<dl>
 					{input name="formula" type="textarea" label="Formule de calcul" source=$fee required=true}
 					<dd class="help">
+						Le résultat doit être un nombre entier incluant les centimes. Exemple&nbsp;: <tt>950</tt> pour représenter <strong>9,50</strong>.<br />
 						{linkbutton shape="help" href=$help_pattern_url|args:"formule-calcul-activite" target="_dialog" label="Aide sur les formules de calcul"}
 					</dd>
 				</dl>
@@ -55,8 +56,8 @@ $targets = Entities\Accounting\Account::TYPE_REVENUE;
 				</select>
 			</dd>
 			{input type="list" target="!acc/charts/accounts/selector.php?targets=%s&year=%d"|args:$targets,$fee.id_year name="account" label="Compte de recettes à utiliser" default=$account required=true}
-			{if count($projects) > 1}
-			{input type="select" options=$projects name="id_project" label="Projet analytique" default=$fee.id_project required=false}
+			{if count($projects) > 0}
+				{input type="select" options=$projects name="id_project" label="Projet analytique" default=$fee.id_project required=false default_empty="— Aucun —"}
 			{/if}
 		</dl>
 		{/if}

@@ -44,20 +44,6 @@
     text-align: right;
 }
 
-fieldset.header {
-    grid-column: span 2;
-    margin-top: 1em;
-}
-
-.web-edit fieldset.header legend {
-    font-size: 1.5em;
-    text-align: center;
-}
-
-fieldset.header p input {
-    font-size: 1.5em;
-}
-
 fieldset.header div {
     display: flex;
     flex-direction: row;
@@ -85,7 +71,6 @@ fieldset.header div select {
 }
 
 fieldset.header div dt {
-    margin-right: 1em;
     display: none;
 }
 
@@ -156,75 +141,116 @@ web-edit dd.help {
     font-size: .9em;
 }
 
-.web-files {
-    text-align: center;
-}
-
-.web-footer, .web-files {
-    font-size: 0.8em;
-    color: var(--gBorderColor);
-    border-top: 0.1em solid var(--gLightBorderColor);
-    clear: both;
-}
-
 form#f_upload fieldset {
     position: relative;
 }
 
-
-.diff {
-    margin: 1em;
+.web.header {
+    clear: both;
 }
 
-.diff .ins {
-    background: #cfc;
-    width: 45%;
+.web.header .actions {
+    margin: 0;
 }
 
-.diff .del {
-    background: #fcc;
-    width: 45%;
+.web.category-list ul {
+    display: flex;
+    flex-direction: row;
+    clear: both;
+    flex-wrap: wrap;
 }
 
-.diff .line {
-    width: 2%;
-    padding: 0.2em;
-    text-align: right;
-    font-family: Mono;
-    font-size: 90%;
-    color: #666;
+.web.category-list li {
+    display: block;
+    width: 32%;
+    margin: 0.5%;
 }
 
-.diff .leftChange, .diff .rightChange {
+.web.category-list li a {
+    background: rgba(var(--gSecondColor), 0.2);
+    padding: .7em;
+    border-radius: .5em;
+    display: block;
+    font-size: 1.2em;
+    min-height: calc(100% - 1.4em);
+    text-decoration: none;
+}
+
+.web.category-list li a span {
+    float: right;
+    color: rgba(var(--gMainColor), 0.5);
+    transition: color .2s;
+}
+
+.web.category-list li a:hover, .web.category-list li a:hover span {
+    color: rgb(var(--gHoverLinkColor));
+    text-decoration-color: rgba(var(--gHoverLinkColor), 0.5);
+    text-decoration: underline;
+}
+
+.web.category-list .draft a {
+    background: var(--gLightBackgroundColor);
+    text-decoration-color: unset;
+}
+
+.web.breadcrumbs {
+    font-size: 1.1em;
+    padding-top: .4em;
+}
+
+.web.preview header {
     text-align: center;
-    vertical-align: middle;
 }
 
-
-.diff hr {
-    background: none;
-    border: none;
-    border-top: 5px dotted #fff;
-    color: #fff;
-    margin: .2em .4em;
+.web.preview header .actions {
+    float: none;
+    font-size: 1.2em;
+    text-align: center;
 }
 
-.diff .separator {
-    background: #ccc;
+.web.preview .describe {
+    margin: 1em 0;
+    text-align: center;
 }
 
-.diff {
-    border-collapse: collapse;
-    width: 100%;
-    font-size: 0.9em;
+.web.preview .describe > * {
+    padding: .2em .4em;
+    display: inline-block;
+    background: var(--gLightBackgroundColor);
+    border-radius: .3em;
+    margin: .2em .5em;
 }
 
-.diff tr {
-    border: 1px solid #ccc;
-    vertical-align: top;
+.web.preview .describe > * > span {
+    color: rgba(var(--gMainColor), 0.9);
+    margin-right: .3em;
 }
 
-.diff .leftChange b, .diff .rightChange b {
-    text-shadow: 1px 1px 1px #ccc;
-    color: #666;
+.web.preview .describe > tt a span {
+    font-size: .9em;
+}
+
+.web.preview article {
+    margin: 1em auto;
+    background: var(--gLightBackgroundColor);
+    padding: 1em;
+    max-width: 50em;
+    border-radius: .5em;
+}
+
+.web.preview article .actions {
+    float: none;
+    margin: 0;
+    text-align: center;
+}
+
+nav.web.config {
+    padding: .5em 0;
+}
+
+@media screen and (max-width:600px) {
+    .web.category-list li {
+        width: 95%;
+        margin: .2em auto;
+    }
 }

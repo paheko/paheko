@@ -1,9 +1,9 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Entities\Accounting\Chart;
-use Garradin\Accounting\Accounts;
-use Garradin\Accounting\Charts;
+use Paheko\Entities\Accounting\Chart;
+use Paheko\Accounting\Accounts;
+use Paheko\Accounting\Charts;
 
 require_once __DIR__ . '/../_inc.php';
 

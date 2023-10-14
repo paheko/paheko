@@ -1,5 +1,5 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
 use KD2\ErrorManager;
 
@@ -20,4 +20,4 @@ else
 	$tpl->assign('list', DB::getDebugSessionsList());
 }
 
-$tpl->display('admin/config/advanced/sql_debug.tpl');
+$tpl->display('config/advanced/sql_debug.tpl');

@@ -1,17 +1,23 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Entities\Accounting\Chart;
-use Garradin\Membres\Session;
+use Paheko\Users\Session;
+use Paheko\Entities\Accounting\Chart;
 
 const INSTALL_PROCESS = true;
 
 require_once __DIR__ . '/../../include/test_required.php';
 require_once __DIR__ . '/../../include/init.php';
 
-if (file_exists(DB_FILE))
-{
-    throw new UserException('Garradin est déjà installé');
+$exists = file_exists(DB_FILE);
+
+if ($exists && !filesize(DB_FILE)) {
+	@unlink(DB_FILE);
+	$exists = false;
+}
+
+if ($exists) {
+	throw new UserException('Paheko est déjà installé');
 }
 
 Install::checkAndCreateDirectories();
@@ -23,7 +29,7 @@ if (DISABLE_INSTALL_FORM) {
 
 function f($key)
 {
-    return \KD2\Form::get($key);
+	return \KD2\Form::get($key);
 }
 
 $tpl = Template::getInstance();
@@ -31,12 +37,16 @@ $tpl->assign('admin_url', ADMIN_URL);
 
 $form = new Form;
 $tpl->assign_by_ref('form', $form);
+$csrf_key = 'install';
 
 $form->runIf('save', function () {
-    Install::installFromForm();
-    Session::getInstance()->forceLogin(1);
-}, 'install', ADMIN_URL);
+	Install::installFromForm();
+	Session::getInstance()->forceLogin(1);
+}, $csrf_key, ADMIN_URL);
 
 $tpl->assign('countries', Chart::COUNTRY_LIST);
+$tpl->assign('require_admin_account', !is_array(LOCAL_LOGIN));
 
-$tpl->display('admin/install.tpl');
+$tpl->assign(compact('csrf_key'));
+
+$tpl->display('install.tpl');

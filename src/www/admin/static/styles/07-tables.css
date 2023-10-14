@@ -7,7 +7,12 @@ table.list.auto {
     width: auto;
 }
 
+table.list.center {
+    margin: 1em auto;
+}
+
 table.list caption {
+    display: table-caption;
     text-align: center;
     font-size: 1.2em;
 }
@@ -15,10 +20,6 @@ table.list caption {
 table.list tbody td.desc {
     font-size: .9em;
     color: var(--gBorderColor);
-}
-
-table.list.auto {
-    width: auto;
 }
 
 table.list table {
@@ -30,8 +31,11 @@ table.list th {
     font-weight: bold;
 }
 
-table.list thead {
-    background: rgba(var(--gSecondColor), 0.5);
+table.list thead th, table.list thead td {
+    background: rgb(var(--gSecondColor));
+    background-image: linear-gradient(rgba(255, 255, 255, 0.5) 0 0);
+    position: sticky;
+    top: -2px;
 }
 
 table.list tfoot tr {
@@ -55,9 +59,13 @@ table.multi tr {
     background: inherit !important;
 }
 
-table.list tr.checked {
-    color: #633;
-    background: #ffc;
+table.list tbody tr.checked {
+    color: #633 !important;
+    background: #ffc !important;
+}
+
+table.list tbody tr.highlight {
+    box-shadow: 0px 0px 5px 5px rgba(var(--gSecondColor), 1);
 }
 
 table.list .error {
@@ -74,7 +82,7 @@ table.list .confirm {
     color: darkgreen;
 }
 
-table.list .num {
+table.list .num, table.list .check {
     text-align: center;
 }
 
@@ -90,6 +98,10 @@ table.list tr.disabled, table.list td.disabled, table.list th.disabled {
     color: var(--gBorderColor);
 }
 
+table.list tr.crossed th, table.list tr.crossed td, table.list .crossed a {
+    text-decoration: line-through;
+}
+
 table.list tr:nth-child(even).disabled {
     background: var(--gLightBackgroundColor);
 }
@@ -99,30 +111,52 @@ table.list tr:nth-child(even).disabled {
     color: rgb(var(--gBgColor));
 }
 
-.userOrder a {
+.userOrder a, .userOrder button {
     text-decoration: none;
-    display: block;
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    box-shadow: none;
+    margin: 0;
+    width: calc(100% - .4rem);
+    height: calc(100% - .4rem);
     color: inherit;
-    padding: .2em;
+    padding: .2rem;
+    text-align: left;
     border-radius: .5em;
+    border: none;
+    background: transparent;
 }
 
-.userOrder a:hover {
+.userOrder .icon-header {
+    text-align: center;
+}
+
+.userOrder .icon-header a, .userOrder .icon-header button {
+    width: 1.5rem;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.userOrder a:hover, .userOrder button:hover {
     background: rgba(var(--gBgColor), 0.5);
 }
 
 table.list .userOrder td, table.list .userOrder th {
-    padding: .2em;
+    padding: .2rem;
+    height: 2rem;
 }
 
 table.list .userOrder .check {
     padding-left: .5em;
 }
 
-.userOrder .icn {
+.userOrder [data-icon]::before {
     display: inline-block;
     color: rgb(var(--gMainColor));
     font-size: 1.5em;
+    text-shadow: none !important;
     line-height: .2em;
     width: 1em;
     text-align: center;
@@ -130,7 +164,7 @@ table.list .userOrder .check {
     font-weight: normal;
 }
 
-thead .cur .icn {
+thead .cur [data-icon]::before {
     color: rgb(var(--gBgColor));
 }
 
@@ -138,15 +172,222 @@ table.list .actions {
     text-align: right;
 }
 
+table.list .single-action {
+    text-align: center;
+}
+
 table.list .separator {
     border-left: 2px dashed #999;
 }
 
-table.list .icon {
-    width: 1.5em;
-    color: rgba(var(--gTextColor), 0.3);
+/* Files list */
+table.list.files tbody tr td {
+    height: 2em;
 }
 
-table.list .folder .icon {
-    color: rgba(var(--gTextColor), 0.5);
+table.list.files .date {
+    text-align: left;
+    color: var(--gBorderColor);
+    font-size: .9em;
+}
+
+table.list .size {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+}
+
+table.list.files .size {
+    font-size: .9em;
+    color: var(--gBorderColor);
+}
+
+table.list.files th {
+    font-weight: normal;
+}
+
+table.list.files th a {
+    display: block;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 40em;
+}
+
+table.list.files .folder th {
+    font-weight: bold;
+}
+
+table.list .icon {
+    width: 4em;
+    text-align: center;
+}
+
+table.list .icon span::before {
+    width: 1.5em;
+    color: rgba(var(--gMainColor), 0.5);
+    text-shadow: none;
+    transition: color .2s;
+}
+
+table.list td.icon svg {
+    max-width: 48px;
+    max-height: 48px;
+}
+
+table.list .folder .icon span::before {
+    color: rgba(var(--gMainColor), 0.9);
+}
+
+table.files.gallery {
+    display: block;
+    clear: both;
+}
+
+table.files.gallery thead {
+    display: none;
+}
+
+table.files.gallery tfoot {
+    display: block;
+    margin: 1em 0;
+}
+
+table.files.gallery tbody {
+    display: grid;
+    margin: .5em 0;
+    grid-template-columns: repeat(auto-fit, 15em);
+    grid-gap: .5em;
+    justify-content: start;
+}
+
+table.files.gallery tbody tr {
+    display: grid;
+    grid-gap: .2em;
+    grid-template-columns: .3fr .7fr;
+    text-align: center;
+    padding: .3em 0;
+    min-width: 15em;
+}
+
+table.files.gallery tbody tr td {
+    padding: 0 .3em;
+    height: auto;
+}
+
+table.files.gallery tbody tr:nth-child(even) {
+    background: unset;
+}
+
+table.files.gallery .preview {
+    height: 150px;
+}
+
+table.files.gallery .preview img {
+    max-height: 150px;
+    max-width: 150px;
+}
+
+table.files.gallery .icon a:hover span::before {
+    color: rgba(var(--gMainColor), 1);
+}
+
+table.files.gallery tbody .check {
+    position: absolute;
+}
+
+table.files.gallery .icon, table.files.gallery .preview {
+    width: auto;
+    grid-column: span 2;
+    font-size: 4em;
+    line-height: .6em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 150px;
+}
+
+table.files.gallery th {
+    grid-column: span 2;
+    text-align: center;
+    font-size: .9em;
+    text-overflow: ellipsis;
+}
+
+table.files.gallery .size, table.files.gallery .date {
+    display: none;
+}
+
+table.files.gallery tbody .actions {
+    font-size: .9em;
+    grid-column: span 2;
+    text-align: center;
+}
+
+table.files.gallery tbody .actions a {
+    margin: .1em;
+}
+
+table.files.gallery tbody .actions > a::before {
+    padding: 0;
+}
+
+table.files.gallery tbody .actions > a span {
+    text-indent: -70em;
+    overflow: hidden;
+    display: none;
+}
+
+table.drag tbody tr:nth-child(1) .up,
+table.drag tbody tr:last-child .down {
+    visibility: hidden;
+}
+
+/* We need a container here or the cursor won't change because of pointer-events: none */
+table .draggable {
+    cursor: move;
+}
+
+/** Draggable table rows */
+table .draggable button {
+    user-select: none;
+    position: relative;
+    pointer-events: none;
+}
+
+/* Get around Firefox bug https://bugzilla.mozilla.org/show_bug.cgi?id=568313
+   Because Mozilla prefers to pay their CEO millions of dollars instead of fixing Firefox bugs. */
+table .draggable button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    cursor: move;
+}
+
+table.dragging tr.placeholder {
+    box-shadow: 0 10px 0 rgba(var(--gHoverLinkColor), 0.5);
+}
+
+table tr.dragging {
+    background: rgba(var(--gHoverLinkColor), 0.1);
+    box-shadow: 0 0 5px 5px rgba(var(--gHoverLinkColor), 0.3) !important;
+}
+
+table.dragging tr td * {
+    pointer-events: none;
+}
+
+table.dragging tbody td {
+    opacity: 0;
+}
+
+table.schema caption {
+    background: rgba(var(--gSecondColor), 0.2);
+
+}
+
+table.list th a {
+    text-decoration: none;
 }

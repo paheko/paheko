@@ -1,10 +1,12 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Services\Reminders;
+use Paheko\Services\Reminders;
+use Paheko\Files\Files;
+use Paheko\Files\Trash;
 
-if (PHP_SAPI != 'cli' && !defined('\Garradin\ROOT')) {
+if (PHP_SAPI != 'cli' && !defined('\Paheko\ROOT')) {
 	die("Wrong call");
 }
 
@@ -14,13 +16,18 @@ require_once __DIR__ . '/../include/init.php';
 
 $config = Config::getInstance();
 
-if ($config->get('frequence_sauvegardes') && $config->get('nombre_sauvegardes'))
-{
-	$s = new Sauvegarde;
-	$s->auto();
+if ($config->backup_frequency && $config->backup_limit) {
+	Backup::auto();
 }
 
-// Exécution des rappels automatiques
+// Send pending reminders
 Reminders::sendPending();
 
-Plugin::fireSignal('cron');
+if (Files::getVersioningPolicy() !== 'none') {
+	Files::pruneOldVersions();
+}
+
+// Make sure we are cleaning the trash
+Trash::clean();
+
+Plugins::fire('cron');

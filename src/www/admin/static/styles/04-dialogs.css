@@ -1,16 +1,3 @@
-body.transparent {
-    background: none;
-    padding: .5em;
-}
-
-body.transparent .header .menu {
-    display: none;
-}
-
-body.transparent main {
-    margin: 0;
-}
-
 html.dialog body {
     background: transparent;
     overflow: auto;
@@ -69,9 +56,14 @@ html.dialog main {
     height: initial;
 }
 
-#dialog > iframe {
+#dialog > iframe, #dialog > div {
     border-radius: .5em;
     box-shadow: 0px 0px 5px #000;
+    background: #fff;
+}
+
+#dialog > div {
+    padding: 1em;
 }
 
 #dialog.loaded > iframe {
@@ -79,18 +71,26 @@ html.dialog main {
     opacity: 1;
 }
 
+#dialog.fullscreen iframe {
+    width: 100%;
+    max-width: unset;
+    max-height: unset;
+    height: calc(100% - 2em);
+    border-radius: 0;
+}
+
 #dialog > button.closeBtn {
     background: unset;
     border: unset;
     box-shadow: unset;
-    color: #999;
+    color: var(--gLightBorderColor);
     font-size: 1.3em;
     display: block;
-    width: 90%;
+    width: 100%;
 }
 
 #dialog > button.closeBtn:hover {
-    color: #fff !important;
+    color: var(--gLightBackgroundColor) !important;
 }
 
 .loader {

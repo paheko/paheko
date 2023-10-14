@@ -49,6 +49,7 @@
 	</head>
 	<body><div class="web-content"><div class="nav">
 <ul>
+<li><a href="modules.html">Modules</a></li>
 <li><a href="brindille.html">Documentation Brindille</a></li>
 <li><a href="brindille_functions.html">Fonctions</a></li>
 <li><strong><a href="brindille_sections.html">Sections</a></strong></li>
@@ -61,184 +62,473 @@
 			<li><a href="#foreach">foreach</a></li>
 			<li><a href="#restrict">restrict</a>
 		</ol></li>
-		<li><a href="#sections-sql">Sections SQL</a>
+		<li><a href="#requetes-sql">Requêtes SQL</a>
 		<ol>
-			<li><a href="#sql">sql</a></li>
-			<li><a href="#pages-articles-categories-heritent-de-sql">pages, articles, categories (héritent de sql)</a></li>
-			<li><a href="#files-documents-images-heritent-de-sql">files, documents, images (héritent de sql)</a></li>
-			<li><a href="#breadcrumbs">breadcrumbs</a>
+			<li><a href="#select">select</a></li>
+			<li><a href="#sql">sql</a>
+		</ol></li>
+		<li><a href="#membres">Membres</a>
+		<ol>
+			<li><a href="#users">users</a></li>
+			<li><a href="#subscriptions">subscriptions</a>
+		</ol></li>
+		<li><a href="#comptabilite">Comptabilité</a>
+		<ol>
+			<li><a href="#accounts">accounts</a></li>
+			<li><a href="#balances">balances</a></li>
+			<li><a href="#transactions">transactions</a></li>
+			<li><a href="#years">years</a>
+		</ol></li>
+		<li><a href="#pour-le-site-web">Pour le site web</a>
+		<ol>
+			<li><a href="#breadcrumbs">breadcrumbs</a></li>
+			<li><a href="#pages-articles-categories-sup-sql-sup">pages, articles, categories <sup>(sql)</sup></a></li>
+			<li><a href="#files-documents-images-sup-sql-sup">files, documents, images <sup>(sql)</sup></a>
+		</ol></li>
+		<li><a href="#sections-relatives-aux-modules">Sections relatives aux modules</a>
+		<ol>
+			<li><a href="#form">form</a></li>
+			<li><a href="#load-sup-sql-sup">load <sup>(sql)</sup></a></li>
+			<li><a href="#list">list</a>
 </li></ol></li></ol></aside><h1 id="sections-generalistes">Sections généralistes</h1>
 <h2 id="foreach">foreach</h2>
-<p>Permet d'itérer sur un tableau par exemple :</p>
-<pre><code>{{#foreach from=$variable key="key" item="value"}}
+<p>Permet d'itérer sur un tableau par exemple. Ainsi chaque élément du tableau exécutera une fois le contenu de la section.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Optionnel / obligatoire ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>from</code></td>
+<td style="text-align: left;"><strong>obligatoire</strong></td>
+<td style="text-align: left;">Variable sur laquelle effectuer l'itération</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>key</code></td>
+<td style="text-align: left;"><strong>optionnel</strong></td>
+<td style="text-align: left;">Nom de la variable à utiliser pour la clé de l'élément</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>value</code></td>
+<td style="text-align: left;"><strong>optionnel</strong></td>
+<td style="text-align: left;">Nom de la variable à utiliser pour la valeur de l'élément</td>
+</tr>
+</tbody>
+</table>
+<p>Considérons ce tableau :</p>
+<pre><code>{{:assign var="tableau" a="bleu" b="orange"}}</code></pre>
+<p>On peut alors itérer pour récupérer les clés (<code>a</code> et <code>b</code> ainsi que les valeurs <code>bleu</code> et <code>orange</code>) :</p>
+<pre><code>{{#foreach from=$tableau key="key" item="value"}}
 {{$key}} = {{$value}}
 {{/foreach}}</code></pre>
+<p>Cela affichera :</p>
+<pre><code>a = bleu
+b = orange</code></pre>
+<p>Si on a un tableau à plusieurs niveaux, les éléments du tableau sont automatiquement transformés en variable :</p>
+<pre><code>{{:assign var="tableau.a" couleur="bleu"}}
+{{:assign var="tableau.b" couleur="orange"}}</code></pre>
+<pre><code>{{#foreach from=$variable}}
+{{$couleur}}
+{{/foreach}}</code></pre>
+<p>Affichera :</p>
+<pre><code>bleu
+orange</code></pre>
+<h3 id="iterer-sans-tableau">Itérer sans tableau</h3>
+<p>Il est aussi possible de faire <code>X</code> itérations, arbitrairement, sans avoir de tableau en entrée, en utilisant le paramètre <code>count</code>.</p>
+<p>C'est l'équivalent des boucles <code>for</code> dans les autres langages de programmation.</p>
+<p>Exemple :</p>
+<pre><code>{{#foreach count=3 key="i"}}
+- {{$i}}
+{{/foreach}}</code></pre>
+<p>Affichera :</p>
+<pre><code>- 0
+- 1
+- 2</code></pre>
 <h2 id="restrict">restrict</h2>
 <p>Permet de limiter (restreindre) une partie de la page aux membres qui sont connectés et/ou qui ont certains droits.</p>
 <p>Deux paramètres optionnels peuvent être utilisés ensemble (il n'est pas possible d'utiliser seulement un des deux) :</p>
 <table>
 <thead>
 <tr>
-<th>Paramètre</th>
-<th>Fonction</th>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Optionnel / obligatoire ?</th>
+<th style="text-align: left;">Fonction</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>level</code></td>
-<td>Niveau d'accès : read, write, admin</td>
+<td style="text-align: left;"><code>level</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Niveau d'accès : <code>read</code>, <code>write</code>, <code>admin</code></td>
 </tr>
 <tr>
-<td><code>section</code></td>
-<td>Section où le niveau d'accès doit s'appliquer : users, accounting, web, documents, config</td>
+<td style="text-align: left;"><code>section</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Section où le niveau d'accès doit s'appliquer : <code>users</code>, <code>accounting</code>, <code>web</code>, <code>documents</code>, <code>config</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>block</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Si ce paramètre est présent et vaut <code>true</code>, alors l'accès sera interdit si les conditions d'accès demandées ne sont pas remplies : une page d'erreur sera renvoyée.</td>
 </tr>
 </tbody>
 </table>
+<p>Exemple pour voir si un membre est connecté :</p>
 <pre><code>{{#restrict}}
     Un membre est connecté, mais on ne sait pas avec quels droits.
 {{else}}
     Aucun membre n'est connecté.
 {{/restrict}}</code></pre>
+<p>Exemple pour voir si un membre qui peut administrer les membres est connecté :</p>
 <pre><code>{{#restrict section="users" level="admin"}}
     Un membre est connecté, et il a le droit d'administrer les membres.
 {{else}}
     Aucun membre n'est connecté, ou un membre est connecté mais n'est pas administrateur des membres.
-{{/if}}</code></pre>
+{{/restrict}}</code></pre>
+<p>Pour bloquer l'accès aux membres non connectés, ou qui n'ont pas accès en écriture à la comptabilité.</p>
 <pre><code>{{#restrict block=true section="accounting" level="write"}}
-{{/restrict}}
-Si le membre n'est pas connecté ou n'a pas le droit de modifier la compta, il aura une page d'erreur.</code></pre>
-<h1 id="sections-sql">Sections SQL</h1>
-<p>Dans toutes les sections héritées de <code>sql</code> suivantes il est possible d'utiliser les paramètres suivants :</p>
+{{/restrict}}</code></pre>
+<p>Le mieux est de mettre ce code au début d'un squelette.</p>
+<h1 id="requetes-sql">Requêtes SQL</h1>
+<h2 id="select">select</h2>
+<p>Exécute une requête SQL <code>SELECT</code> et effectue une itération pour chaque résultat de la requête.</p>
+<p>Pour une utilisation plus simplifiée des requêtes, voir aussi la section <a href="#sql">sql</a>.</p>
+<p>Attention : la syntaxe de cette section est différente des autres sections Brindille. En effet après le début (<code>{{#select</code>) doit suivre la suite de la requête, et non pas les paramètres :</p>
+<pre><code>Liste des membres inscrits à la lettre d'informations :
+{{#select nom, prenom FROM users WHERE lettre_infos = 1;}}
+    - {{prenom}} {{$nom}}&lt;br /&gt;
+{{else}}
+    Aucun membre n'est inscrit à la lettre d'information.
+{{/select}}</code></pre>
+<p>Des paramètres nommés de SQL peuvent être présentés après le point-virgule marquant la fin de la requête SQL :</p>
+<pre><code>{{:assign prenom="Karim"}}
+{{#select * FROM users WHERE prenom = :prenom;
+    :prenom=$prenom}}
+...
+{{/select}}</code></pre>
+<p>Notez les deux points avant le nom du paramètre. Ces paramètres sont protégés contre les injections SQL (généralement appelés paramètres nommés).</p>
+<p>Pour intégrer des paramètres qui ne sont pas protégés (<strong>attention !</strong>), il faut utiliser le point d'exclamation :</p>
+<pre><code>{{:assign var="categories." value=1}}
+{{:assign var="categories." value=2}}
+{{#select * FROM users WHERE !categories;
+    !categories='id_category'|sql_where:'IN':$categories}}</code></pre>
+<p>Cela créera la requête suivante : <code>SELECT * FROM users WHERE id_category IN (1, 2);</code></p>
+<p>Il est aussi possible d'intégrer directement des variables dans la requête, en utilisant la syntaxe <code>{$variable|filtre:argument1:argument2}</code>, comme une variable classique donc, mais au lieu d'utiliser des doubles accolades, on utilise ici des accolades simples. Ces variables seront automatiquement protégées contre les injections SQL.</p>
+<pre><code>{{:assign prenom="Camille"}}
+{{#select * FROM users WHERE initiale_prenom = {$prenom|substr:0:1};}}</code></pre>
+<p>Cependant, pour plus de lisibilité il est conseillé d'utiliser la syntaxe des paramètres nommés SQL (voir ci-dessus).</p>
+<p>Il est aussi possible d'insérer directement du code SQL (attention aux problèmes de sécurité dans ce cas !), pour cela il faut rajouter un point d'exclamation après l'accolade ouvrante :</p>
+<pre><code>{{:assign var="prenoms." value="Karim"}}
+{{:assign var="prenoms." value="Camille"}}
+{{#select * FROM users WHERE {!"prenom"|sql_where:"IN":$prenoms};}}
+...
+{{/select}}</code></pre>
+<p>Il est aussi possible d'utiliser les paramètres suivants :</p>
 <table>
 <thead>
 <tr>
-<th>Paramètre</th>
-<th>Fonction</th>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Fonction</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>where</code></td>
-<td>Condition de sélection des résultats</td>
+<td style="text-align: left;"><code>debug</code></td>
+<td style="text-align: left;">Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle.</td>
 </tr>
 <tr>
-<td><code>begin</code></td>
-<td>Début des résultats, si vide une valeur de <code>0</code> sera utilisée.</td>
+<td style="text-align: left;"><code>explain</code></td>
+<td style="text-align: left;">Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle.</td>
 </tr>
 <tr>
-<td><code>limit</code></td>
-<td>Limitation des résultats. Si vide, une valeur de <code>1000</code> sera utilisée.</td>
-</tr>
-<tr>
-<td><code>order</code></td>
-<td>Ordre de tri des résultats. Si vide le tri sera fait par ordre d'ajout dans la base de données.</td>
-</tr>
-<tr>
-<td><code>debug</code></td>
-<td>Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle.</td>
+<td style="text-align: left;"><code>assign</code></td>
+<td style="text-align: left;">Si renseigné, une variable de ce nom sera créée, et le contenu de la ligne y sera assigné.</td>
 </tr>
 </tbody>
 </table>
-<p>Il est également possible de passer des arguments dans les paramètres à l'aides des arguments nommés qui commencent par deux points <code>:</code> : <code>{{#articles where="title = :montitre" :montitre="Actualité"}}</code></p>
+<p>Exemple avec <code>debug</code> :</p>
+<pre><code>{{:assign prenom="Karim"}}
+{{#select * FROM users WHERE prenom = :prenom; :prenom=$prenom debug=true}}
+...
+{{/select}}</code></pre>
+<p>Affichera juste au dessus du résultat la requête exécutée :</p>
+<pre><code>SELECT * FROM users WHERE nom = 'Karim'</code></pre>
+<h3 id="parametre-assign">Paramètre assign</h3>
+<p>Exemple avec <code>assign</code> :</p>
+<pre><code>{{#select * FROM users WHERE prenom = 'Camille' LIMIT 1; assign="membre"}}{{/select}}
+{{$membre.nom}}</code></pre>
+<p>Il est possible d'utiliser un point final pour que toutes les lignes soient mises dans un tableau :</p>
+<pre><code>{{#select * FROM users WHERE prenom = 'Camille' LIMIT 10; assign="membres."}}{{/select}}
+
+{{#foreach from=$membres}}
+    Nom : {{$nom}}&lt;br /&gt;
+    Adresse : {{$adresse}}
+{{/foreach}}</code></pre>
 <h2 id="sql">sql</h2>
-<p>Effectue une requête SQL de type <code>SELECT</code> dans la base de données.</p>
+<p>Effectue une requête SQL de type <code>SELECT</code> dans la base de données, mais de manière simplifiée par rapport à <code>select</code>.</p>
 <pre><code>{{#sql select="*, julianday(date) AS day" tables="membres" where="id_categorie = :id_categorie" :id_categorie=$_GET.id_categorie order="numero DESC" begin=":page*100" limit=100 :page=$_GET.page}}
 …
 {{/sql}}</code></pre>
-<h3 id="parametres-possibles">Paramètres possibles</h3>
 <table>
 <thead>
 <tr>
-<th>Paramètre</th>
-<th>Fonction</th>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Optionnel / obligatoire ?</th>
+<th style="text-align: left;">Fonction</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>tables</code></td>
-<td>Liste des tables à utiliser dans la requête. Ce paramètre est obligatoire.</td>
+<td style="text-align: left;"><code>tables</code></td>
+<td style="text-align: left;"><strong>obligatoire</strong></td>
+<td style="text-align: left;">Liste des tables à utiliser dans la requête (séparées par des virgules).</td>
 </tr>
 <tr>
-<td><code>select</code></td>
-<td>Liste des colonnes à sélectionner, si non spécifié, toutes les colonnes (<code>*</code>) seront sélectionnées</td>
-</tr>
-<tr>
-<td><code>group</code></td>
-<td>Contenu de la clause <code>GROUP BY</code></td>
+<td style="text-align: left;"><code>select</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Liste des colonnes à sélectionner, si non spécifié, toutes les colonnes (<code>*</code>) seront sélectionnées</td>
 </tr>
 </tbody>
 </table>
-<h2 id="pages-articles-categories-heritent-de-sql">pages, articles, categories (héritent de sql)</h2>
-<ul>
-<li><code>pages</code> renvoie une liste de pages, qu'elles soient des articles ou des catégories</li>
-<li><code>categories</code> ne renvoie que des catégories</li>
-<li><code>articles</code> ne renvoie que des articles</li>
-</ul>
-<p>À part cela les trois types de section se comportent de manière identique</p>
-<h3 id="parametres-possibles">Paramètres possibles</h3>
+<h3 id="sections-qui-heritent-de-sql">Sections qui héritent de <code>sql</code></h3>
+<p>Certaines sections (voir plus bas) héritent de <code>sql</code> et rajoutent des fonctionnalités. Dans toutes ces sections, il est possible d'utiliser les paramètres suivants :</p>
 <table>
 <thead>
 <tr>
-<th>Paramètre</th>
-<th>Fonction</th>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Fonction</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>search</code></td>
-<td>Renseigner ce paramètre avec un terme à rechercher dans le texte ou le titre. Dans ce cas par défaut le tri des résultats se fait sur la pertinence, sauf si le paramètre <code>order</code> est spécifié. Dans ce cas une variable <code>$snippet</code> sera disponible à l'intérieur de la boucle, contenant les termes trouvés.</td>
+<td style="text-align: left;"><code>where</code></td>
+<td style="text-align: left;">Condition de sélection des résultats</td>
 </tr>
 <tr>
-<td><code>future</code></td>
-<td>Renseigner ce paramètre à <code>false</code> pour que les articles dont la date est dans le futur n'apparaissent pas, <code>true</code> pour ne renvoyer QUE les articles dans le futur, et <code>null</code> (ou ne pas utiliser ce paramètre) pour que tous les articles, passés et futur, apparaissent.</td>
+<td style="text-align: left;"><code>begin</code></td>
+<td style="text-align: left;">Début des résultats, si vide une valeur de <code>0</code> sera utilisée.</td>
 </tr>
 <tr>
-<td><code>parent</code></td>
-<td>Indiquer ici le chemin d'article ou de catégorie parente. Utile pour renvoyer par exemple la liste des articles d'une catégorie.</td>
+<td style="text-align: left;"><code>limit</code></td>
+<td style="text-align: left;">Limitation des résultats. Si vide, une valeur de <code>1000</code> sera utilisée.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>group</code></td>
+<td style="text-align: left;">Contenu de la clause <code>GROUP BY</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>having</code></td>
+<td style="text-align: left;">Contenu de la clause <code>HAVING</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>order</code></td>
+<td style="text-align: left;">Ordre de tri des résultats. Si vide le tri sera fait par ordre d'ajout dans la base de données.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>assign</code></td>
+<td style="text-align: left;">Si renseigné, une variable de ce nom sera créée, et le contenu de la ligne du résultat y sera assigné.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>debug</code></td>
+<td style="text-align: left;">Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>explain</code></td>
+<td style="text-align: left;">Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle.</td>
 </tr>
 </tbody>
 </table>
-<h2 id="files-documents-images-heritent-de-sql">files, documents, images (héritent de sql)</h2>
-<ul>
-<li><code>files</code> renvoie une liste de fichiers</li>
-<li><code>documents</code> renvoie une liste de fichiers qui ne sont pas des images</li>
-<li><code>images</code> renvoie une liste de fichiers qui sont des images</li>
-</ul>
-<p>À part cela les trois types de section se comportent de manière identique</p>
-<p>Note : seul les fichiers de la section site web sont accessibles, les fichiers de membres, de comptabilité, etc. ne sont pas disponibles.</p>
-<h3 id="parametres-possibles">Paramètres possibles</h3>
+<p>Il est également possible de passer des arguments dans les paramètres à l'aides des arguments nommés qui commencent par deux points <code>:</code> :</p>
+<pre><code>{{#articles where="title = :montitre" :montitre="Actualité"}}</code></pre>
+<h1 id="membres">Membres</h1>
+<h2 id="users">users</h2>
+<p>Liste les membres.</p>
+<p>Paramètres possibles :</p>
 <table>
 <thead>
 <tr>
-<th>Paramètre</th>
-<th>Fonction</th>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Optionnel / obligatoire ?</th>
+<th style="text-align: left;">Fonction</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>parent</code> (obligatoire)</td>
-<td>Chemin (adresse unique) de l'article ou catégorie parente dont ont veut lister les fichiers</td>
+<td style="text-align: left;"><code>id</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Identifiant unique du membre, ou tableau contenant une liste d'identifiants.</td>
 </tr>
 <tr>
-<td><code>except_in_text</code></td>
-<td>passer <code>true</code> à ce paramètre , et seuls les fichiers qui ne sont pas liés dans le texte de la page seront renvoyés</td>
+<td style="text-align: left;"><code>search_name</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Ne lister que les membres dont le nom correspond au texte passé en paramètre.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>id_parent</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Ne lister que les membres rattachés à l'identifiant unique du membre responsable indiqué.</td>
 </tr>
 </tbody>
 </table>
+<p>Chaque itération renverra la fiche du membre, ainsi que ces variables :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Variable</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>$id</code></td>
+<td style="text-align: left;">Identifiant unique du membre</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>$_name</code></td>
+<td style="text-align: left;">Nom du membre, tel que défini dans la configuration</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>$_login</code></td>
+<td style="text-align: left;">Identifiant de connexion du membre, tel que défini dans la configuration</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>$_number</code></td>
+<td style="text-align: left;">Numéro du membre, tel que défini dans la configuration</td>
+</tr>
+</tbody>
+</table>
+<h2 id="subscriptions">subscriptions</h2>
+<p>Liste les inscriptions à une ou des activités.</p>
+<p>Paramètres possibles :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;"></th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>user</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Identifiant unique du membre</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>active</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Si <code>TRUE</code>, seules les inscriptions à jour sont listées</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>id_service</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Ne renvoie que les inscriptions à l'activité correspondant à cet ID.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="comptabilite">Comptabilité</h1>
+<h2 id="accounts">accounts</h2>
+<p>Liste les comptes d'un plan comptable.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>codes</code> (optionel)</td>
+<td style="text-align: left;">Ne renvoyer que les comptes ayant ces codes (séparer par des virgules).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>id</code> (optionel)</td>
+<td style="text-align: left;">Ne renvoyer que le compte ayant cet ID.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="balances">balances</h2>
+<p>Renvoie la balance des comptes.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>codes</code> (optionel)</td>
+<td style="text-align: left;">Ne renvoyer que les balances des comptes ayant ces codes (séparer par des virgules).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>year</code> (optionel)</td>
+<td style="text-align: left;">Ne renvoyer que les balances des comptes utilisés sur l'année (indiquer ici un ID de year).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="transactions">transactions</h2>
+<p>Renvoie des écritures.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;"></th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>id</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Indiquer un ID d'écriture pour récupérer ses informations.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>user</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Indiquer ici un ID utilisateur pour lister les écritures liées à un membre.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="years">years</h2>
+<p>Liste les exercices comptables</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>closed</code> (optionel)</td>
+<td style="text-align: left;">Mettre <code>closed=true</code> pour ne lister que les exercices clôturés, ou <code>closed=false</code> pour ne lister que les exercices ouverts.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="pour-le-site-web">Pour le site web</h1>
 <h2 id="breadcrumbs">breadcrumbs</h2>
-<p>Permet de récupérer la liste des pages parentes d'une page afin de constituer un <a href="https://fr.wikipedia.org/wiki/Fil_d&#039;Ariane_(ergonomie)" target="_blank" rel="nofollow,noreferrer">fil d'ariane</a> permettant de remonter dans l'arborescence du site</p>
+<p>Permet de récupérer la liste des pages parentes d'une page afin de constituer un <a href="https://fr.wikipedia.org/wiki/Fil_d&#039;Ariane_(ergonomie)" target="_blank" rel="noreferrer">fil d'ariane</a> permettant de remonter dans l'arborescence du site</p>
 <p>Un seul paramètre est possible :</p>
 <table>
 <thead>
 <tr>
-<th>Paramètre</th>
-<th>Fonction</th>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Fonction</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>path</code> (obligatoire)</td>
-<td>Chemin (adresse unique) de la page parente</td>
+<td style="text-align: left;"><code>uri</code> (obligatoire)</td>
+<td style="text-align: left;">Adresse unique de la page parente</td>
+</tr>
+<tr>
+<td style="text-align: left;">ou <code>id_page</code> (obligatoire)</td>
+<td style="text-align: left;">Numéro unique (ID) de la page parente</td>
 </tr>
 </tbody>
 </table>
@@ -246,26 +536,460 @@ Si le membre n'est pas connecté ou n'a pas le droit de modifier la compta, il a
 <table>
 <thead>
 <tr>
-<th>Variable</th>
-<th>Contenu</th>
+<th style="text-align: left;">Variable</th>
+<th style="text-align: left;">Contenu</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>$title</code></td>
-<td>Titre de la page ou catégorie</td>
+<td style="text-align: left;"><code>$id</code></td>
+<td style="text-align: left;">Numéro unique (ID) de la page ou catégorie</td>
 </tr>
 <tr>
-<td><code>$url</code></td>
-<td>Adresse HTTP de la page ou catégorie</td>
+<td style="text-align: left;"><code>$title</code></td>
+<td style="text-align: left;">Titre de la page ou catégorie</td>
 </tr>
 <tr>
-<td><code>$path</code></td>
-<td>Chemin (adresse unique) de la page ou catégorie</td>
+<td style="text-align: left;"><code>$uri</code></td>
+<td style="text-align: left;">Nom unique de la page ou catégorie</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>$url</code></td>
+<td style="text-align: left;">Adresse HTTP de la page ou catégorie</td>
 </tr>
 </tbody>
 </table>
 <h3 id="exemple">Exemple</h3>
-<pre><code>{{#breadcrumbs path=$page.path}}
-&amp;rarr; &lt;a href="{{ $url }}"&gt;{{ $title }}&lt;/a&gt;&lt;br /&gt;
-{{/breadcrumbs}}</code></pre></div></body></html>
+<pre><code>&lt;ul&gt;
+{{#breadcrumbs id_page=$page.id}}
+    &lt;li&gt;{{$title}}&lt;/li&gt;
+{{/breadcrumbs}}
+&lt;/ul&gt;</code></pre>
+<h2 id="pages-articles-categories-sup-sql-sup">pages, articles, categories <sup>(sql)</sup></h2>
+<p>Note : ces sections héritent de <code>sql</code> (voir plus haut).</p>
+<ul>
+<li><code>pages</code> renvoie une liste de pages, qu'elles soient des articles ou des catégories</li>
+<li><code>categories</code> ne renvoie que des catégories</li>
+<li><code>articles</code> ne renvoie que des articles</li>
+</ul>
+<p>À part cela ces trois types de section se comportent de manière identique.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>search</code></td>
+<td style="text-align: left;">Renseigner ce paramètre avec un terme à rechercher dans le texte ou le titre. Dans ce cas par défaut le tri des résultats se fait sur la pertinence, sauf si le paramètre <code>order</code> est spécifié.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>future</code></td>
+<td style="text-align: left;">Renseigner ce paramètre à <code>false</code> pour que les articles dont la date est dans le futur n'apparaissent pas, <code>true</code> pour ne renvoyer QUE les articles dans le futur, et <code>null</code> (ou ne pas utiliser ce paramètre) pour que tous les articles, passés et futur, apparaissent.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>uri</code></td>
+<td style="text-align: left;">Adresse unique de la page/catégorie à retourner.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>id_parent</code></td>
+<td style="text-align: left;">Numéro unique (ID) de la catégorie parente. Utiliser <code>null</code> pour n'afficher que les articles ou catégories de la racine du site.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>parent</code></td>
+<td style="text-align: left;">Adresse unique (URI) de la catégorie parente. Exemple pour renvoyer la liste des articles de la sous-catégorie "Événements" de la catégorie "Notre atelier" :  <code>evenements</code>. Utiliser <code>null</code> pour n'afficher que les articles ou catégories de la racine du site. Ajouter un point d'exclamation au début de la valeur pour inverser la condition.</td>
+</tr>
+</tbody>
+</table>
+<p>Par exemple lister 5 articles de la catégorie "Actualité", qui ne sont pas dans le futur, triés du plus récent au plus ancien :</p>
+<pre><code>{{#articles future=false parent="actualite" order="published DESC" limit=5}}
+    &lt;h3&gt;{{$title}}&lt;/h3&gt;
+{{/articles}}</code></pre>
+<p>Chaque élément de ces boucles contiendra les variables suivantes :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Nom de la variable</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Exemple</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>id</code></td>
+<td style="text-align: left;">Numéro unique de la page (ID)</td>
+<td style="text-align: left;"><code>1312</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>id_parent</code></td>
+<td style="text-align: left;">Numéro unique de la catégorie parente (ID)</td>
+<td style="text-align: left;"><code>42</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>type</code></td>
+<td style="text-align: left;">Type de page : <code>1</code> = catégorie, <code>2</code> = article</td>
+<td style="text-align: left;"><code>2</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>uri</code></td>
+<td style="text-align: left;">Adresse unique de la page</td>
+<td style="text-align: left;"><code>bourse-aux-velos</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>url</code></td>
+<td style="text-align: left;">Adresse HTTP de la page</td>
+<td style="text-align: left;"><code>https://site.association.tld/bourse-aux-velos</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>path</code></td>
+<td style="text-align: left;">Chemin complet de la page</td>
+<td style="text-align: left;"><code>actualite/atelier/bourse-aux-velos</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>parent</code></td>
+<td style="text-align: left;">Chemin de la catégorie parente</td>
+<td style="text-align: left;"><code>actualite/atelier</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>title</code></td>
+<td style="text-align: left;">Titre de la page</td>
+<td style="text-align: left;"><code>Bourse aux vélos</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>content</code></td>
+<td style="text-align: left;">Contenu brut de la page</td>
+<td style="text-align: left;"><code># Titre …</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>html</code></td>
+<td style="text-align: left;">Rendu HTML du contenu de la page</td>
+<td style="text-align: left;"><code>&lt;div class="web-content"&gt;&lt;h1&gt;Titre&lt;/h1&gt;…&lt;/div&gt;</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>has_attachments</code></td>
+<td style="text-align: left;"><code>true</code> si la page a des fichiers joints, <code>false</code> sinon</td>
+<td style="text-align: left;"><code>true</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>published</code></td>
+<td style="text-align: left;">Date de publication</td>
+<td style="text-align: left;"><code>2023-01-01 01:01:01</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>modified</code></td>
+<td style="text-align: left;">Date de modification</td>
+<td style="text-align: left;"><code>2023-01-01 01:01:01</code></td>
+</tr>
+</tbody>
+</table>
+<p>Si une recherche a été effectuée, deux autres variables sont fournies :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Nom de la variable</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Exemple</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>snippet</code></td>
+<td style="text-align: left;">Extrait du contenu contenant le texte recherché (entouré de balises <code>&lt;mark&gt;</code>)</td>
+<td style="text-align: left;"><code>L’ONU appelle la France à s’attaquer aux « profonds problèmes » de &lt;mark&gt;racisme&lt;/mark&gt; au sein des forces de…</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>url_highlight</code></td>
+<td style="text-align: left;">Adresse de la page, où le texte recherché sera mis en évidence</td>
+<td style="text-align: left;"><code>https://.../onu-racisme#:~:text=racisme%20au%20sein</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="files-documents-images-sup-sql-sup">files, documents, images <sup>(sql)</sup></h2>
+<p>Note : ces sections héritent de <code>sql</code> (voir plus haut).</p>
+<ul>
+<li><code>files</code> renvoie une liste de fichiers</li>
+<li><code>documents</code> renvoie une liste de fichiers qui ne sont pas des images</li>
+<li><code>images</code> renvoie une liste de fichiers qui sont des images</li>
+</ul>
+<p>À part cela ces trois types de section se comportent de manière identique.</p>
+<p>Note : seul les fichiers de la section site web sont accessibles, les fichiers de membres, de comptabilité, etc. ne sont pas disponibles.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Optionnel / obligatoire ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>parent</code></td>
+<td style="text-align: left;"><strong>obligatoire</strong> si <code>id_parent</code> n'est pas renseigné</td>
+<td style="text-align: left;">Nom unique (URI) de l'article ou catégorie parente dont ont veut lister les fichiers</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>id_parent</code></td>
+<td style="text-align: left;"><strong>obligatoire</strong> si <code>parent</code> n'est pas renseigné</td>
+<td style="text-align: left;">Numéro unique (ID) de l'article ou catégorie parente dont ont veut lister les fichiers</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>except_in_text</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">passer <code>true</code> à ce paramètre , et seuls les fichiers qui ne sont pas liés dans le texte de la page seront renvoyés</td>
+</tr>
+</tbody>
+</table>
+<h1 id="sections-relatives-aux-modules">Sections relatives aux modules</h1>
+<h2 id="form">form</h2>
+<p>Permet de gérer la soumission d'un formulaire (<code>&lt;form method="post"…&gt;</code> en HTML).</p>
+<p>Si l'élément dont le nom spécifié dans le paramètre <code>on</code> a été envoyé en <code>POST</code>, alors le code à l'intérieur de la section est exécuté.</p>
+<p>Toute erreur à l'intérieur de la section arrêtera son exécution, et le message sera ajouté aux erreurs du formulaire.</p>
+<p>Une vérification de sécurité <a href="https://fr.wikipedia.org/wiki/Cross-site_request_forgery" target="_blank" rel="noreferrer">anti-CSRF</a> est également appliquée. Si cette vérification échoue, le message d'erreur "Merci de bien vouloir renvoyer le formulaire." sera renvoyé. Pour que cela marche il faut que le formulaire dispose d'un bouton de type "submit", généré à l'aide de la fonction <code>button</code>. Exemple : <code>{{:button type="submit" name="save" label="Enregistrer"}}</code>.</p>
+<p>En cas d'erreurs, le reste du contenu de la section ne sera pas exécuté. Les messages d'erreurs seront placés dans un tableau dans la variable <code>$form_errors</code>.</p>
+<p>Il est aussi possible de les afficher simplement avec la fonction <code>{{:form_errors}}</code>. Cela revient à faire une boucle sur la variable <code>$form_errors</code>.</p>
+<pre><code>{{#form on="save"}}
+    {{if $_POST.titre|trim === ''}}
+        {{:error message="Le titre est vide."}}
+    {{/if}}
+    {{* La ligne suivante ne sera pas exécutée si le titre est vide. *}}
+    {{:save title=$_POST.titre|trim}}
+{{else}}
+    {{:form_errors}}
+{{/form}}</code></pre>
+<p>Il est possible d'utiliser <code>{{:form_errors}}</code> en dehors du bloc <code>{{else}}</code> :</p>
+<pre><code>{{#form on="save"}}
+    …
+{{/form}}
+…
+{{:form_errors}}</code></pre><h2 id="load-sup-sql-sup">load <sup>(sql)</sup></h2>
+<p>Note : cette section hérite de <code>sql</code> (voir plus haut).</p>
+<p>Charge un ou des documents pour le module courant.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Optionnel / obligatoire ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>module</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Nom unique du module lié (par exemple : <code>recu_don</code>). Si non spécifié, alors le nom du module courant sera utilisé.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>key</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Clé unique du document</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>id</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Numéro unique du document</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>each</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Traiter une clé du document comme un tableau</td>
+</tr>
+</tbody>
+</table>
+<p>Il est possible d'utiliser d'autres paramètres : <code>{{#load cle="valeur"}}</code>. Cela va comparer <code>"valeur"</code> avec la valeur de la clé <code>cle</code> dans le document JSON. C'est l'équivalent d'écrire <code>where="json_extract(document, '$.cle') = 'valeur'"</code>.</p>
+<p>Pour des conditions plus complexes qu'une simple égalité, il est possible d'utiliser la syntaxe courte <code>$$…</code> dans le paramètre <code>where</code>. Ainsi <code>where="$$.nom LIKE 'Bourse%'</code> est l'équivalent de <code>where="json_extract(document, '$.nom') LIKE 'Bourse%'"</code>.</p>
+<p>Voir <a href="https://www.sqlite.org/json1.html#jex" target="_blank" rel="noreferrer">la documentation de SQLite pour plus de détails sur la syntaxe de json_extract</a>.</p>
+<p>Note : un index SQL dynamique est créé pour chaque requête utilisant une clause <code>json_extract</code>.</p>
+<p>Chaque itération renverra ces deux variables :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Variable</th>
+<th style="text-align: left;">Valeur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>$key</code></td>
+<td style="text-align: left;">Clé unique du document</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>$id</code></td>
+<td style="text-align: left;">Numéro unique du document</td>
+</tr>
+</tbody>
+</table>
+<p>Ainsi que chaque élément du document JSON lui-même.</p>
+<h3 id="exemples">Exemples</h3>
+<p>Afficher le nom du document dont la clé est <code>facture_43</code> :</p>
+<pre><code>{{#load key="facture_43"}}
+{{$nom}}
+{{/load}}</code></pre>
+<p>Afficher la liste des devis du module <code>invoice</code> depuis un autre module par exemple :</p>
+<pre><code>{{#load module="invoice" type="quote"}}
+&lt;h1&gt;Titre du devis : {{$subject}}&lt;/h1&gt;
+&lt;h2&gt;Montant : {{$total}}&lt;/h2&gt;
+{{/load}}</code></pre>
+<h3 id="utilisation-du-parametre-each">Utilisation du paramètre <code>each</code></h3>
+<p>Le paramètre <code>each</code> est utile pour faire une boucle sur un tableau contenu dans le document. Ce paramètre doit contenir un chemin JSON valide. Par exemple <code>membres[1].noms</code> pour boucler sur le tableau <code>noms</code>, du premier élément du tableau <code>membres</code>. Voir la documentation <a href="https://www.sqlite.org/json1.html#jeach" target="_blank" rel="noreferrer">de la fonction json_each de SQLite pour plus de détails</a>.</p>
+<p>Pour chaque itération de la section, la variable <code>{{$value}}</code> contiendra l'élément recherché dans le critère <code>each</code>.</p>
+<p>Par exemple nous pouvons avoir un élément <code>membres</code> dans notre document JSON qui contient un tableau de noms de membres :</p>
+<pre><code>{{:assign var="membres." value="Greta Thunberg}}
+{{:assign var="membres." value="Valérie Masson-Delmotte"}}
+{{:save membres=$membres}}</code></pre>
+<p>Nous pouvons utiliser <code>each</code> pour faire une liste :</p>
+<pre><code>{{#load each="membres"}}
+- {{$value}}
+{{/load}}</code></pre>
+<p>Ou pour récupérer les documents qui correspondent à un critère :</p>
+<pre><code>{{#load each="membres" where="value = 'Greta Thunberg'"}}
+Le document n°{{$id}} est celui qui parle de Greta.
+{{/load}}</code></pre>
+<h2 id="list">list</h2>
+<p>Attention : cette section n'hérite <strong>PAS de <code>sql</code></strong>.</p>
+<p>Un peu comme <code>{{#load}}</code> cette section charge les documents d'un module, mais au sein d'une liste (tableau HTML).</p>
+<p>Cette liste gère automatiquement l'ordre selon les préférences des utilisateurs, ainsi que la pagination.</p>
+<p>Cette section est très puissante et permet de générer des listes simplement, une fois qu'on a saisi la logique de son fonctionnement.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Optionnel / obligatoire ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>schema</code></td>
+<td style="text-align: left;"><strong>requis</strong> si <code>select</code> n'est pas fourni</td>
+<td style="text-align: left;">Chemin vers un fichier de schéma JSON qui représenterait le document</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>select</code></td>
+<td style="text-align: left;"><strong>requis</strong> si <code>schema</code> n'est pas fourni</td>
+<td style="text-align: left;">Liste des colonnes à sélectionner, sous la forme <code>$$.colonne AS "Colonne"</code>, chaque colonne étant séparée par un point-virgule.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>module</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Nom unique du module lié (par exemple : <code>recu_don</code>). Si non spécifié, alors le nom du module courant sera utilisé.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>columns</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Permet de n'afficher que certaines colonnes du schéma. Indiquer ici le nom des colonnes, séparées par des virgules.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>order</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Colonne utilisée par défaut pour le tri (si l'utilisateur n'a pas choisi le tri sur une autre colonne). Si <code>select</code> est utilisé, il faut alors indiquer ici le numéro de la colonne, et non pas son nom.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>desc</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Si ce paramètre est à <code>true</code>, l'ordre de tri sera inversé.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>max</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Nombre d'éléments à afficher dans la liste, sur chaque page.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>where</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Condition <code>WHERE</code> de la requête SQL.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>debug</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>explain</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle.</td>
+</tr>
+</tbody>
+</table>
+<p>Pour déterminer quelles colonnes afficher dans le tableau, il faut utiliser soit le paramètre <code>schema</code> pour indiquer un fichier de schéma JSON qui sera utilisé pour donner le libellé des colonnes (via la <code>description</code> indiquée dans le schéma), soit le paramètre <code>select</code>, où il faut alors indiquer le nom et le libellé des colonnes sous la forme <code>$$.colonne1 AS "Libellé"; $$.colonne2 AS "Libellé 2"</code>.</p>
+<p>Comme pour <code>load</code>, il est possible d'utiliser des paramètres supplémentaires : <code>cle="valeur"</code>. Cela va comparer <code>"valeur"</code> avec la valeur de la clé <code>cle</code> dans le document JSON. C'est l'équivalent d'écrire <code>where="json_extract(document, '$.cle') = 'valeur'"</code>.</p>
+<p>Pour des conditions plus complexes qu'une simple égalité, il est possible d'utiliser la syntaxe courte <code>$$…</code> dans le paramètre <code>where</code>. Ainsi <code>where="$$.nom LIKE 'Bourse%'</code> est l'équivalent de <code>where="json_extract(document, '$.nom') LIKE 'Bourse%'"</code>.</p>
+<p>Voir <a href="https://www.sqlite.org/json1.html#jex" target="_blank" rel="noreferrer">la documentation de SQLite pour plus de détails sur la syntaxe de json_extract</a>.</p>
+<p>Note : un index SQL dynamique est créé pour chaque requête utilisant une clause <code>json_extract</code>.</p>
+<p>Chaque itération renverra toujours ces deux variables :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Variable</th>
+<th style="text-align: left;">Valeur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>$key</code></td>
+<td style="text-align: left;">Clé unique du document</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>$id</code></td>
+<td style="text-align: left;">Numéro unique du document</td>
+</tr>
+</tbody>
+</table>
+<p>Ainsi que chaque élément du document JSON lui-même.</p>
+<p>La section ouvre un tableau HTML et le ferme automatiquement, donc le contenu de la section <strong>doit</strong> être une ligne de tableau HTML (<code>&lt;tr&gt;</code>).</p>
+<p>Dans chaque ligne du tableau il faut respecter l'ordre des colonnes indiqué dans <code>columns</code> ou <code>select</code>. Une dernière colonne est réservée aux boutons d'action : <code>&lt;td class="actions"&gt;...&lt;/td&gt;</code>.</p>
+<h3 id="exemples">Exemples</h3>
+<p>Lister le nom, la date et le montant des reçus fiscaux, à partir du schéma JSON suivant :</p>
+<pre><code>{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+        "date": {
+            "description": "Date d'émission",
+            "type": "string",
+            "format": "date"
+        },
+        "adresse": {
+            "description": "Adresse du bénéficiaire",
+            "type": "string"
+        },
+        "nom": {
+            "description": "Nom du bénéficiaire",
+            "type": "string"
+        },
+        "montant": {
+            "description": "Montant",
+            "type": "integer",
+            "minimum": 0
+        }
+    }
+}</code></pre>
+<p>Le code de la section sera alors comme suivant :</p>
+<pre><code>{{#list schema="./recu.schema.json" columns="nom, date, montant"}}
+    &lt;tr&gt;
+        &lt;th&gt;{{$nom}}&lt;/th&gt;
+        &lt;td&gt;{{$date|date_short}}&lt;/td&gt;
+        &lt;td&gt;{{$montant|raw|money_currency}}&lt;/td&gt;
+        &lt;td class="actions"&gt;
+            {{:linkbutton shape="eye" label="Ouvrir" href="./voir.html?id=%d"|args:$id target="_dialog"}}
+        &lt;/td&gt;
+    &lt;/tr&gt;
+{{else}}
+    &lt;p class="alert block"&gt;Aucun reçu n'a été trouvé.&lt;/p&gt;
+{{/list}}</code></pre>
+<p>Si le paramètre <code>columns</code> avait été omis, la colonne <code>adresse</code> aurait également été incluse.</p>
+<p>Il est à noter que si l'utilisation directe du schéma est bien pratique, cela ne permet pas de récupérer des informations plus complexes dans la structure JSON, par exemple une sous-clé ou l'application d'une fonction SQL. Dans ce cas il faut obligatoirement utiliser <code>select</code>. Par exemple ici on veut pouvoir afficher l'année, et trier sur l'année par défaut :</p>
+<pre><code>{{#list select="$$.nom AS 'Nom du donateur' ; strftime('%Y', $$.date) AS 'Année'" order=2}}
+    &lt;tr&gt;
+        &lt;th&gt;{{$nom}}&lt;/th&gt;
+        &lt;td&gt;{{$col2}}&lt;/td&gt;
+        &lt;td class="actions"&gt;
+            {{:linkbutton shape="eye" label="Ouvrir" href="./voir.html?id=%d"|args:$id target="_dialog"}}
+        &lt;/td&gt;
+    &lt;/tr&gt;
+{{else}}
+    &lt;p class="alert block"&gt;Aucun reçu n'a été trouvé.&lt;/p&gt;
+{{/list}}</code></pre>
+<p>On peut utiliser le nom des clés du document JSON, mais sinon pour faire référence à la valeur d'une colonne spécifique dans la boucle, il faut utiliser son numéro d'ordre (qui commence à <code>1</code>, pas zéro). Ici on veut afficher l'année, donc la seconde colonne, donc <code>$col1</code>.</p>
+<p>Noter aussi l'utilisation du numéro de la colonne de l'année (<code>2</code>) pour le paramètre <code>order</code>, qui avec <code>select</code> doit indiquer le numéro de la colonne à utiliser pour l'ordre.</p></div></body></html>

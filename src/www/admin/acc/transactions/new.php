@@ -1,12 +1,15 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Entities\Accounting\Account;
-use Garradin\Entities\Accounting\Transaction;
-use Garradin\Entities\Files\File;
-use Garradin\Accounting\Projects;
-use Garradin\Accounting\Transactions;
-use Garradin\Accounting\Years;
+use Paheko\Entity;
+use Paheko\Entities\Accounting\Account;
+use Paheko\Entities\Accounting\Transaction;
+use Paheko\Entities\Files\File;
+use Paheko\Accounting\Accounts;
+use Paheko\Accounting\Projects;
+use Paheko\Accounting\Transactions;
+use Paheko\Accounting\Years;
+use Paheko\UserTemplate\Modules;
 
 use KD2\DB\Date;
 
@@ -30,94 +33,6 @@ $linked_users = null;
 $linked_services = [];
 
 $lines = [[], []];
-$form->runIf(f('lines') !== null, function () use (&$lines) {
-	$lines = Transaction::getFormLines();
-});
-
-// Quick-fill transaction from query parameters
-// 0 = amount, in single currency units
-if (qg('0')) {
-	$amount = Utils::moneyToInteger(qg('0'));
-}
-
-// 00 = Amount, in cents
-if (qg('00')) {
-	$amount = (int)qg('00');
-}
-
-// l = label
-if (qg('l')) {
-	$transaction->label = qg('l');
-}
-
-// dt = date
-if (qg('dt')) {
-	$transaction->date = new Date(qg('dt'));
-}
-
-// t = type
-if (qg('t')) {
-	$transaction->type = (int) qg('t');
-}
-
-// ab = Bank/cash account
-if (qg('ab') && ($a = $accounts->getWithCode(qg('ab')))
-	&& in_array($a->type, [$a::TYPE_BANK, $a::TYPE_CASH, $a::TYPE_OUTSTANDING])) {
-	$transaction->setDefaultAccount($transaction::TYPE_REVENUE, 'debit', $a->id);
-	$transaction->setDefaultAccount($transaction::TYPE_EXPENSE, 'credit', $a->id);
-	$transaction->setDefaultAccount($transaction::TYPE_TRANSFER, 'debit', $a->id);
-}
-
-// ar = Revenue account
-if (qg('ar') && ($a = $accounts->getWithCode(qg('ar')))
-	&& $a->type == $a::TYPE_REVENUE) {
-	$transaction->setDefaultAccount($transaction::TYPE_REVENUE, 'credit', $a->id);
-	$transaction->setDefaultAccount($transaction::TYPE_CREDIT, 'credit', $a->id);
-}
-
-// ae = Expense account
-if (qg('ae') && ($a = $accounts->getWithCode(qg('ae')))
-	&& $a->type == $a::TYPE_REVENUE) {
-	$transaction->setDefaultAccount($transaction::TYPE_EXPENSE, 'debit', $a->id);
-	$transaction->setDefaultAccount($transaction::TYPE_DEBT, 'debit', $a->id);
-}
-
-// at = Transfer account
-if (qg('at') && ($a = $accounts->getWithCode(qg('at')))
-	&& $a->type == $a::TYPE_BANK) {
-	$transaction->setDefaultAccount($transaction::TYPE_TRANSFER, 'credit', $a->id);
-}
-
-// a3 = Third-party account
-if (qg('a3') && ($a = $accounts->getWithCode(qg('a3')))
-	&& $a->type == $a::TYPE_BANK) {
-	$transaction->setDefaultAccount($transaction::TYPE_CREDIT, 'debit', $a->id);
-	$transaction->setDefaultAccount($transaction::TYPE_DEBT, 'credit', $a->id);
-}
-
-if (qg('u')) {
-	$linked_users = [];
-	$membres = new Membres;
-	$i = 0;
-
-	foreach ((array) qg('u') as $key => $value) {
-		if ($key != $i++ && $value) {
-			$id = (int) $key;
-			$linked_services[$id] = (int) $value;
-		}
-		else {
-			$id = (int) $value;
-		}
-
-		$name = $membres->getNom($id);
-
-		if ($name) {
-			$linked_users[$id] = $name;
-		}
-	}
-}
-
-$types_details = $transaction->getTypesDetails();
 
 // Duplicate transaction
 if (qg('copy')) {
@@ -140,8 +55,21 @@ if (qg('copy')) {
 
 	$tpl->assign('duplicate_from', $old->id());
 }
+else {
+	$defaults = $transaction->setDefaultsFromQueryString($accounts);
 
+	if (null !== $defaults) {
+		extract($defaults);
+	}
+}
+
+$form->runIf(f('lines') !== null, function () use (&$lines) {
+	$lines = Transaction::getFormLines();
+});
+
+// Keep this line here, as the transaction can be overwritten by copy
 $transaction->id_year = $current_year->id();
+$types_details = $transaction->getTypesDetails();
 
 // Set last used date
 if (empty($transaction->date) && $session->get('acc_last_date') && $date = Date::createFromFormat('!Y-m-d', $session->get('acc_last_date'))) {
@@ -177,7 +105,7 @@ if ($id = qg('account')) {
 	}
 }
 
-$form->runIf('save', function () use ($transaction, $session, $current_year, $linked_services) {
+$form->runIf('save', function () use ($transaction, $session, $linked_services) {
 	$transaction->importFromNewForm();
 	$transaction->id_creator = $session->getUser()->id;
 	$transaction->save();
@@ -212,9 +140,11 @@ $form->runIf('save', function () use ($transaction, $session, $current_year, $li
 	Utils::redirect(sprintf('!acc/transactions/details.php?id=%d&created', $transaction->id()));
 }, $csrf_key);
 
-$tpl->assign(compact('csrf_key', 'transaction', 'amount', 'lines', 'id_project', 'types_details', 'linked_users'));
+$projects = Projects::listAssoc();
+$variables = compact('csrf_key', 'transaction', 'amount', 'lines', 'id_project', 'types_details', 'linked_users', 'chart', 'projects');
 
-$tpl->assign('chart', $chart);
-$tpl->assign('projects', Projects::listAssocWithEmpty());
+$tpl->assign($variables);
+
+$tpl->assign('snippets', Modules::snippetsAsString(Modules::SNIPPET_BEFORE_NEW_TRANSACTION, $variables));
 
 $tpl->display('acc/transactions/new.tpl');

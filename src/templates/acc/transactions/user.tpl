@@ -1,7 +1,13 @@
-{include file="admin/_head.tpl" title="Écritures liées à %s"|args:$transaction_user.identite current="acc/accounts"}
+{include file="_head.tpl" title="Écritures liées à %s"|args:$transaction_user->name() current="acc/accounts"}
 
+{if !$dialog}
 <p>
-	{linkbutton href="!membres/fiche.php?id=%d"|args:$transaction_user.id label="Retour à la fiche membre" shape="user"}
+	{linkbutton href="!users/details.php?id=%d"|args:$transaction_user.id label="Retour à la fiche membre" shape="user"}
+</p>
+{/if}
+
+<p class="help">
+	De la plus récente à la plus ancienne.
 </p>
 
 {include file="acc/reports/_journal.tpl"}
@@ -42,4 +48,4 @@
 	</tbody>
 </table>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

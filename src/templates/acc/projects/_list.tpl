@@ -15,7 +15,7 @@
 		{foreach from=$list item="parent"}
 			<tbody{if $parent.archived} class="archived"{/if}>
 				<tr class="title">
-					<th colspan="7">
+					<th colspan="8">
 						<h2 class="ruler">{$parent.label}{if $parent.archived} <em>(archivé)</em>{/if}</h2>
 						{if $parent.description}<p class="help">{$parent.description|escape|nl2br}</p>{/if}
 					{if !$table_export && !$by_year && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}

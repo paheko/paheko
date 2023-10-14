@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Suivi : %s"|args:$types[$type] current="acc/simple"}
+{include file="_head.tpl" title="Suivi : %s"|args:$types[$type] current="acc/simple"}
 
 {include file="acc/_year_select.tpl"}
 
@@ -45,7 +45,11 @@
 				<td>{$line.reference}</td>
 				<th>{$line.label}</th>
 				<td>{$line.line_reference}</td>
-				<td class="num">{foreach from=$line.projects item="code" key="id"}<a href="{$admin_url}acc/reports/statement.php?project={$id}&amp;year={$year.id}">{$code}</a> {/foreach}</td>
+				<td class="num">{foreach from=$line.project_code item="code" key="id"}<a href="{$admin_url}acc/reports/statement.php?project={$id}&amp;year={$year.id}">{$code}</a> {/foreach}</td>
+				{if isset($line.locked)}
+				<td>{if $line.locked}{icon title="Écriture verrouillée" shape="lock"}{/if}</td>
+				{/if}
+				<td class="num">{if $line.files}{$line.files}{/if}</td>
 				{if property_exists($line, 'status_label')}
 				<td>
 					{if $line.status & Entities\Accounting\Transaction::STATUS_WAITING}
@@ -92,7 +96,7 @@
 
 	</form>
 
-	{pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count()}
+	{$list->getHTMLPagination()|raw}
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

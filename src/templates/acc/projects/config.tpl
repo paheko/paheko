@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Projets - configuration" current="acc/years"}
+{include file="_head.tpl" title="Projets - configuration" current="acc/years"}
 
 {include file="./_nav.tpl" current="config" order_code=null}
 
@@ -25,4 +25,4 @@
 </p>
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

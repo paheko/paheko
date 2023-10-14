@@ -1,12 +1,13 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Services\Services_User;
-use Garradin\Accounting\Accounts;
-use Garradin\Accounting\Projects;
-use Garradin\Accounting\Years;
-use Garradin\Entities\Accounting\Account;
-use Garradin\Entities\Accounting\Transaction;
+use Paheko\Services\Services_User;
+use Paheko\Accounting\Accounts;
+use Paheko\Accounting\Projects;
+use Paheko\Accounting\Years;
+use Paheko\Entities\Accounting\Account;
+use Paheko\Entities\Accounting\Transaction;
+use Paheko\Users\Users;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -20,11 +21,11 @@ if (!$su) {
 
 $fee = $su->fee();
 
-if (!$fee->id_year) {
+if (!$fee || !$fee->id_year) {
 	throw new UserException('Cette inscription n\'est pas liée à un tarif relié à la comptabilité, il n\'est pas possible de saisir un règlement.');
 }
 
-$user_name = (new Membres)->getNom($su->id_user);
+$user_name = Users::getName($su->id_user);
 
 $csrf_key = 'service_pay';
 
@@ -43,7 +44,7 @@ $types_details = $t->getTypesDetails();
 
 $account_targets = $types_details[Transaction::TYPE_REVENUE]->accounts[1]->targets_string;
 
-$tpl->assign('projects', Projects::listAssocWithEmpty());
+$tpl->assign('projects', Projects::listAssoc());
 
 $tpl->assign(compact('csrf_key', 'account_targets', 'user_name', 'su', 'fee'));
 

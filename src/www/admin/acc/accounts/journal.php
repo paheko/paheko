@@ -1,8 +1,8 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Accounting\Accounts;
-use Garradin\Accounting\Years;
+use Paheko\Accounting\Accounts;
+use Paheko\Accounting\Years;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -44,7 +44,7 @@ if ($account->id_chart != $year->id_chart) {
 }
 
 $can_edit = $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$year->closed;
-$simple = qg('simple');
+$simple = !empty($session->user()->preferences->accounting_expert) ? false : true;
 
 // Use simplified view for favourite accounts
 if (null === $simple) {

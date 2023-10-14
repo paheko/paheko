@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Modifier un plan comptable" current="acc/years"}
+{include file="_head.tpl" title="Modifier un plan comptable" current="acc/years"}
 
 {form_errors}
 
@@ -20,4 +20,4 @@
 	</fieldset>
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

@@ -4,7 +4,11 @@
     font-feature-settings: "tnum";
 }
 
-b.money {
+.crossed .money {
+    text-decoration: line-through;
+}
+
+span.money {
     font-weight: inherit;
     white-space: pre;
 }
@@ -65,18 +69,23 @@ nav.acc-year h4 {
     margin: 1em;
 }
 
-.year-infos .graphs {
+.year-header figure.logo img {
+    float: left;
+    max-height: 100px;
+}
+
+.graphs {
     text-align: center;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
 }
 
-.year-infos .graphs figure {
+.graphs figure {
     margin: 1rem;
 }
 
-.year-infos .graphs.small figure img {
+.graphs.small figure img {
     max-width: 500px;
 }
 
@@ -92,7 +101,7 @@ tr.account-level-6 th { padding-left: 5em; }
 tr.account button[name*="bookmark"] { opacity: 0.6; transition: opacity .3s; width: 8em;}
 tr.account button[value="1"] { opacity: 1; }
 tr.account td.bookmark { width: 2%; }
-tr.account td.bookmark b { color: var(--gBorderColor); }
+tr.account td.bookmark span[data-icon] { color: var(--gBorderColor); font-size: .9em; }
 
 table.projects tr.title p.help { font-weight: normal; text-align: center; }
 table.projects tr.title p.actions {
@@ -122,7 +131,6 @@ input[name=code_base] {
     text-align: right;
     color: rgb(var(--gTextColor));
 }
-
 .transaction-details {
     display: flex;
     flex-direction: row;
@@ -135,7 +143,7 @@ input[name=code_base] {
     justify-content: center;
     display: flex;
     flex-direction: column;
-    margin: 0 .5rem;
+    margin: .5rem;
 }
 
 .transaction-details .account {

@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Lier une inscription à une écriture" current="acc/accounts"}
+{include file="_head.tpl" title="Lier une inscription à une écriture" current="acc/accounts"}
 
 {form_errors}
 
@@ -19,4 +19,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

@@ -1,8 +1,8 @@
 {if !empty($criterias.projects_only)}
-	{include file="admin/_head.tpl" title="Grand livre analytique" current="acc/years"}
+	{include file="_head.tpl" title="Grand livre analytique" current="acc/years"}
 	{include file="acc/reports/_header.tpl" current="analytical_ledger" title="Grand livre analytique" allow_filter=true}
 {else}
-	{include file="admin/_head.tpl" title="%sGrand livre"|args:$project_title current="acc/years"}
+	{include file="_head.tpl" title="%sGrand livre"|args:$project_title current="acc/years"}
 	{include file="acc/reports/_header.tpl" current="ledger" title="Grand livre" allow_filter=true}
 {/if}
 
@@ -54,6 +54,9 @@
 				<thead>
 					<tr>
 						<td></td>
+						{if !empty($criterias.projects_only)}
+						<td class="num">Compte</td>
+						{/if}
 						<td>N° pièce</td>
 						<td>Réf. ligne</td>
 						<td>Date</td>
@@ -70,6 +73,9 @@
 		{foreach from=$account.lines item="line"}
 			<tr>
 				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
+				{if !empty($criterias.projects_only)}
+				<td class="num" data-spreadsheet-type="string">{link href="!acc/accounts/journal.php?id=%d&year=%d"|args:$line.id_account,$line.id_year label=$line.account_code}</td>
+				{/if}
 				<td data-spreadsheet-type="string">{$line.reference}</td>
 				<td data-spreadsheet-type="string">{$line.line_reference}</td>
 				<td data-spreadsheet-type="date" data-spreadsheet-value="{$line.date|date:'Y-m-d'}">{$line.date|date_short}</td>
@@ -83,15 +89,16 @@
 		</tbody>
 		<tfoot>
 			<tr>
-				<td colspan="4"></td>
+				<td colspan="{if !empty($criterias.projects_only)}5{else}4{/if}"></td>
 				<th>Solde final</th>
 				<td class="money">{$account.debit|raw|money}</td>
 				<td class="money">{$account.credit|raw|money}</td>
 				<td class="money">{$account.sum|raw|money:false}</td>
 			</tr>
+
 			{if $table_export && isset($account->all_debit)}
 			<tr>
-				<td colspan="4"></td>
+				<td colspan="{if !empty($criterias.projects_only)}5{else}4{/if}"></td>
 				<th><strong>Totaux</strong></th>
 				<td class="money">{$account.all_debit|raw|money:false}</td>
 				<td class="money">{$account.all_credit|raw|money:false}</td>
@@ -147,6 +154,6 @@ document.querySelector('#close_details').onclick = () => {
 </script>
 {/literal}
 
-<p class="help">Toutes les écritures sont libellées en {$config.monnaie}.</p>
+<p class="help">Toutes les écritures sont libellées en {$config.currency}.</p>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

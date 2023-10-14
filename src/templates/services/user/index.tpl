@@ -1,9 +1,6 @@
-{include file="admin/_head.tpl" title="%s — Inscriptions aux activités et cotisations"|args:$user.identite current="membres/services"}
+{include file="_head.tpl" title="%s — Inscriptions aux activités et cotisations"|args:$user_name current="users/services"}
 
-<p>
-	{linkbutton href="!membres/fiche.php?id=%d"|args:$user.id label="Retour à la fiche membre" shape="user"}
-	{linkbutton href="!services/user/subscribe.php?user=%d"|args:$user.id label="Inscrire à une activité" shape="plus"}
-</p>
+{include file="users/_nav_user.tpl" id=$user_id current="services"}
 
 {form_errors}
 
@@ -31,7 +28,7 @@
 	<dd>
 		{$list->count()}
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
-			{exportmenu href="?id=%d"|args:$user.id}
+			{exportmenu href="?id=%d"|args:$user_id}
 		{/if}
 	</dd>
 	{/if}
@@ -40,10 +37,7 @@
 
 {if $only}
 	<p class="alert block">Cette liste ne montre qu'une seule inscription, liée à l'activité <strong>{$only_service.label}</strong><br />
-	{linkbutton shape="right" href="?id=%d"|args:$user.id label="Voir toutes les inscriptions"}</p>
-{elseif $after}
-	<p class="alert block">Cette liste ne montre que les inscriptions réalisées après le {$after|date_long}.<br />
-		{linkbutton shape="right" href="?id=%d"|args:$user.id label="Voir toutes les inscriptions"}
+		{linkbutton shape="right" href="?id=%d"|args:$user_id label="Voir toutes les inscriptions"}
 	</p>
 {/if}
 
@@ -65,27 +59,29 @@
 				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE) && $row.id_account}
 					{linkbutton shape="plus" label="Nouveau règlement" href="payment.php?id=%d"|args:$row.id}
 				{/if}
+
 				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
 					{linkbutton shape="plus" label="Saisir une écriture liée"
-						href="!acc/transactions/new.php?u[%d]=%d&00=%d&t=1&l=Paiement%%20activité&ar=%s&set_year=%d"|args:$user.id:$row.id:$row.expected_amount:$row.account_code:$row.id_year target="_dialog"}
+						href="!acc/transactions/new.php?u[%d]=%d&00=%d&t=1&l=Paiement%%20activité&ar=%s&set_year=%d"|args:$user_id:$row.id:$row.expected_amount:$row.account_code:$row.id_year target="_dialog"}
 				{/if}
 				<br />
 			{/if}
 
 			{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
-				{linkbutton shape="menu" label="Liste des écritures" href="!acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user.id}
+				{linkbutton shape="menu" label="Liste des écritures" href="!acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user_id}
 			{/if}
 
 			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
 				{if $row.paid}
-					{linkbutton shape="reset" label="Marquer comme non payé" href="?id=%d&su_id=%d&paid=0"|args:$user.id,$row.id}
+					{linkbutton shape="reset" label="Marquer comme non payé" href="?id=%d&su_id=%d&paid=0"|args:$user_id,$row.id}
 				{else}
-					{linkbutton shape="check" label="Marquer comme payé" href="?id=%d&su_id=%d&paid=1"|args:$user.id,$row.id}
+					{linkbutton shape="check" label="Marquer comme payé" href="?id=%d&su_id=%d&paid=1"|args:$user_id,$row.id}
 				{/if}
 				<br />
 				{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$row.id}
 				{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$row.id}
 			{/if}
+
 			</td>
 		</tr>
 	{foreachelse}
@@ -97,7 +93,7 @@
 	</tbody>
 </table>
 
-{pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count()}
+{$list->getHTMLPagination()|raw}
 
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Export d'exercice" current="acc/years"}
+{include file="_head.tpl" title="Export d'exercice" current="acc/years"}
 
 <nav class="acc-year">
 	<h4>Exercice sélectionné&nbsp;:</h4>
@@ -20,7 +20,7 @@
 
 {form_errors}
 
-<form method="get" action="{$self_url}">
+<form method="get" action="{$self_url}" data-disable-progress="1">
 
 <fieldset>
 	<legend>Export du journal général</legend>
@@ -59,4 +59,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

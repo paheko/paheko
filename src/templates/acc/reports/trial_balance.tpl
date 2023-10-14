@@ -1,6 +1,6 @@
-{include file="admin/_head.tpl" title="%sBalance générale"|args:$project_title current="acc/years"}
+{include file="_head.tpl" title="%sBalance générale"|args:$project_title current="acc/years"}
 
-{include file="acc/reports/_header.tpl" current="trial_balance" title="Balance générale" sub_current=$simple allow_filter=true}
+{include file="acc/reports/_header.tpl" current="trial_balance" title="Balance générale" allow_filter=true}
 
 <table class="list statement">
 	<thead>
@@ -39,6 +39,6 @@
 	</tbody>
 </table>
 
-<p class="help">Toutes les écritures sont libellées en {$config.monnaie}. Les lignes grisées correspondent aux comptes soldés.</p>
+<p class="help">Toutes les écritures sont libellées en {$config.currency}. Les lignes grisées correspondent aux comptes soldés.</p>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

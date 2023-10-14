@@ -1,45 +1,47 @@
-{include file="admin/_head.tpl" title="Choisir la page parent" current="web"}
+{include file="_head.tpl" title="Sélectionner la catégorie" current="web"}
 
-<h2 class="ruler">Sélectionner la catégorie</h2>
+<form method="post" action="{$self_url}" class="dir-picker">
 
-<table class="tree-selector list">
-	<tbody>
-		<tr{if !$parent} class="focused"{/if}>
-			<td><input type="button" value="Choisir" data-path="" data-label="Racine du site" /></td>
-			<th><h3><a href="?current={$selected}&amp;_dialog">Racine du site</a></h3></th>
-		</tr>
-		<?php $last = 1; ?>
-		{foreach from=$breadcrumbs item="_title" key="_path"}
-		<tr{if $_path == $parent} class="focused"{/if}>
-			<td><input type="button" value="Choisir" data-path="{$_path}" data-label="{$_title}" /></td>
-			<th><?=str_repeat('<i>&nbsp;</i>', $iteration)?> <b class="icn">&rarr;</b> <a href="?parent={$_path}&amp;current={$selected}&amp;_dialog">{$_title}</a></th>
-			<?php $last = $iteration; ?>
-		</tr>
+	<nav class="breadcrumbs">
+		<ul>
+		{foreach from=$breadcrumbs item="page"}
+			<li class="{if $page.id == $current_cat_id}current{/if}">{button label=$page.title type="submit" name="current" value=$page.id}</li>
 		{/foreach}
-		{foreach from=$categories item="cat"}
-		<tr{if $cat.path == $parent} class="focused"{/if}>
-			<td><input type="button" value="Choisir" data-path="{$cat.path}" data-label="{$cat.title}" /></td>
-			<th><?=str_repeat('<i>&nbsp;</i>', $last+1)?> <b class="icn">&rarr;</b> <a href="?parent={$cat.path}&amp;current={$selected}&amp;_dialog">{$cat.title}</a></th>
-		</tr>
+		</ul>
+	</nav>
+
+	<nav class="folders">
+		<ul>
+		{if $current_cat_id}
+			<li class="parent">
+				{button shape="left" label="Retour à la catégorie parente" type="submit" name="current" value=$parent_id}
+			</li>
+		{/if}
+
+		{foreach from=$categories item="c"}
+			<li class="folder">{button shape="folder" label=$c.title type="submit" name="current" value=$c.id}</li>
 		{foreachelse}
-		<tr>
-			<td></td>
-			<th><?=str_repeat('<i>&nbsp;</i>', $last+1)?> <b class="icn">&rarr;</b> <em>Pas de sous-catégorie…</em></th>
-		</tr>
+			<li class="help">Aucune sous-catégorie ici.</li>
 		{/foreach}
-	</tbody>
-</table>
+
+		{if $id_page !== $current_cat_id}
+			<li class="select">
+				{button shape="right" label="Choisir la catégorie \"%s\""|args:$current_cat_title type="button" name="move" value=$current_cat_id data-label=$current_cat_title}
+			</li>
+		{/if}
+		</ul>
+	</nav>
 
 {literal}
 <script type="text/javascript">
-var buttons = document.querySelectorAll('input');
+var buttons = document.querySelectorAll('button[name=move]');
 
 buttons.forEach((e) => {
 	e.onclick = () => {
-		window.parent.g.inputListSelected(e.dataset.path, e.dataset.label);
+		window.parent.g.inputListSelected(e.value, e.dataset.label);
 	};
 });
 </script>
 {/literal}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

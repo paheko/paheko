@@ -1,7 +1,8 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Accounting\Years;
+use Paheko\Users\Session;
+use Paheko\Accounting\Years;
 
 require_once __DIR__ . '/../../_inc.php';
 
@@ -14,7 +15,9 @@ if (f('change')) {
 		throw new UserException('Exercice inconnu');
 	}
 
-	$session->set('acc_year', $year->id());
+	$user = Session::getLoggedUser();
+	$user->setPreference('accounting_year', $year->id());
+
 	$session->save();
 	Utils::redirect(f('from') ?: ADMIN_URL . 'acc/years/');
 }

@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title=$chart.label current="acc/years"}
+{include file="_head.tpl" title=$chart.label current="acc/years"}
 
 {include file="acc/charts/accounts/_nav.tpl" current="favorites"}
 
@@ -56,4 +56,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

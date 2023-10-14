@@ -1,6 +1,6 @@
-{include file="admin/_head.tpl" title="Rechercher dans le site web" current="web"}
+{include file="_head.tpl" title="Rechercher dans le site web" current="web"}
 
-<form method="post" action="{$self_url}" data-focus="1">
+<form method="post" action="{$self_url}">
 	<fieldset>
 		<legend>Rechercher une page ou catégorie</legend>
 		<p class="submit">
@@ -11,27 +11,29 @@
 </form>
 
 {if $query}
-	<p class="block alert">
-		<strong>{$results_count}</strong> pages trouvées pour «&nbsp;{$query}&nbsp;»
+	<p class="help">
+		{{%n résultat trouvé.}{%n résultats trouvés.} n=$results_count}
 	</p>
 
 	<section class="search-results">
 	{foreach from=$results item="result"}
 		<article>
-			<h3><a href="{"!web/page.php?p=%s"|local_url|args:$result.path}" target="_parent">{$result.title}</a></h3>
+			<h3><a href="{"!web/?uri=%s"|local_url|args:$result.uri}" target="_parent">{$result.title}</a></h3>
+			{*
 			<h4>
 				<nav class="breadcrumbs">
 					<ul>
 						{foreach from=$result.breadcrumbs key="id" item="title"}
-							<li><a href="{"!web/page.php?p=%s"|local_url|args:$id}" target="_parent">{$title}</a></li>
+							<li><a href="{"!web/?p=%s"|local_url|args:$id}" target="_parent">{$title}</a></li>
 						{/foreach}
 					</ul>
 				</nav>
 			</h4>
-			<p>{$result.snippet|escape|clean_snippet}</p>
+			*}
+			<p>{$result.snippet|escape|restore_snippet_markup}</p>
 		</article>
 	{/foreach}
 	</section>
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

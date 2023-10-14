@@ -1,21 +1,21 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Entities\Files\File;
-use Garradin\Files\Files;
+use Paheko\Entities\Files\File;
+use Paheko\Files\Files;
 
 require __DIR__ . '/../../_inc.php';
 
 $parent = qg('p');
 
-if (!File::checkCreateAccess($parent, $session)) {
-	throw new UserException('Vous n\'avez pas le droit d\'ajouter de fichier.');
+if (!File::canCreate($parent . '/')) {
+	throw new UserException('Vous n\'avez pas le droit d\'ajouter de fichier ici.', 403);
 }
 
 $csrf_key = 'upload_file_' . md5($parent);
 
 $form->runIf('upload', function () use ($parent) {
-	File::uploadMultiple($parent, 'file');
+	Files::uploadMultiple($parent, 'file');
 }, $csrf_key, '!docs/?path=' . $parent);
 
 $tpl->assign(compact('parent', 'csrf_key'));

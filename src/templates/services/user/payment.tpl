@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Enregistrer un règlement" current="membres/services"}
+{include file="_head.tpl" title="Enregistrer un règlement" current="users/services"}
 
 {form_errors}
 
@@ -17,8 +17,8 @@
 			{input type="list" target="!acc/charts/accounts/selector.php?targets=%s&year=%d"|args:$account_targets,$fee.id_year name="account_selector" label="Compte de règlement" required=1}
 			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de reçu, de note de frais, etc."}
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc."}
-			{if count($projects) > 1}
-			{input type="select" options=$projects name="id_project" label="Projet analytique" default=$fee.id_project required=false}
+			{if count($projects) > 0}
+				{input type="select" options=$projects name="id_project" label="Projet analytique" default=$fee.id_project required=false default_empty="— Aucun —"}
 			{/if}
 		</dl>
 	</fieldset>
@@ -30,4 +30,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

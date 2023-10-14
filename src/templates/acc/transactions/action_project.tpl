@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Ajouter/supprimer des écritures à un projet" current="acc/accounts"}
+{include file="_head.tpl" title="Ajouter/supprimer des écritures à un projet" current="acc/accounts"}
 
 {form_errors}
 
@@ -7,7 +7,7 @@
 	<fieldset>
 		<legend>Affecter {$count} écritures sélectionnées à un projet</legend>
 		<dl>
-			{input type="select" name="id_project" options=$projects label="Projet à utiliser" help="Pour retirer les écritures de leur projet actuellement affecté, sélectionner « Aucun projet »."}
+			{input type="select" name="id_project" options=$projects label="Projet à utiliser" help="Pour retirer les écritures de leur projet actuellement affecté, sélectionner « Aucun projet »." default_empty="— Aucun projet —"}
 			{input type="checkbox" name="apply_lines" value="1" default="1" checked=1 label="Appliquer à toutes les lignes des écritures"}
 			<dd class="help">Si décoché, alors seules les lignes sélectionnées seront modifiées. Si coché, toutes les lignes des écritures sélectionnées seront modifiées. Laisser coché en cas de doute.</dd>
 		</dl>
@@ -33,4 +33,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

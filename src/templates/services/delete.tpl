@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Supprimer une activité" current="membres/services"}
+{include file="_head.tpl" title="Supprimer une activité" current="users/services"}
 
 {include file="services/_nav.tpl" current="index"}
 
@@ -9,4 +9,4 @@
 	alert="Attention, cela supprimera également tous les tarifs, mais aussi l'historique des membres inscrits à cette activité, ainsi que les rappels associés."
 	info="Les écritures comptables liées à l'historique des membres inscrits à cette activité ne seront pas supprimées, et la comptabilité demeurera inchangée."}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

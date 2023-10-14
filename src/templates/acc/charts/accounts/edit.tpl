@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Modifier un compte" current="acc/years"}
+{include file="_head.tpl" title="Modifier un compte" current="acc/years"}
 
 {include file="acc/charts/accounts/_nav.tpl" current="new"}
 
@@ -25,4 +25,4 @@
 
 </form>
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

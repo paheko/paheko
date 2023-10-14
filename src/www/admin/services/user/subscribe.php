@@ -1,12 +1,14 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Services\Services;
-use Garradin\Services\Fees;
-use Garradin\Accounting\Projects;
-use Garradin\Entities\Services\Service_User;
-use Garradin\Entities\Accounting\Account;
-use Garradin\Entities\Accounting\Transaction;
+use Paheko\Services\Fees;
+use Paheko\Services\Services;
+use Paheko\Users\Categories;
+use Paheko\Users\Users;
+use Paheko\Accounting\Projects;
+use Paheko\Entities\Services\Service_User;
+use Paheko\Entities\Accounting\Account;
+use Paheko\Entities\Accounting\Transaction;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -30,7 +32,7 @@ $allow_users_edit = true;
 $copy = substr((string) f('copy'), 0, 1);
 $copy_id = (int) substr((string) f('copy'), 1);
 
-if (qg('user') && ($name = (new Membres)->getNom((int)qg('user')))) {
+if (qg('user') && ($name = Users::getName((int)qg('user')))) {
 	$users = [(int)qg('user') => $name];
 	$allow_users_edit = false;
 }
@@ -41,6 +43,20 @@ elseif (f('users') && is_array(f('users')) && count(f('users'))) {
 elseif (($copy == 's' && ($copy_service = Services::get($copy_id)))
 	|| ($copy == 'f' && ($copy_fee = Fees::get($copy_id)))) {
 	$copy_only_paid = (bool) f('copy_only_paid');
+}
+elseif (f('category')) {
+	$category = Categories::get((int)f('category'));
+
+	if (!$category) {
+		throw new UserException('Catégorie inconnue.');
+	}
+
+	$users = iterator_to_array(Users::iterateAssocByCategory($category->id));
+}
+elseif (qg('users')) {
+	$users = explode(',', qg('users'));
+	$users = array_map('intval', $users);
+	$users = Users::getNames($users);
 }
 else {
 	throw new UserException('Aucun membre n\'a été sélectionné');
@@ -63,6 +79,8 @@ $form->runIf('save', function () use ($session, $users, $copy_service, $copy_fee
 
 	$su = Service_User::createFromForm($users, $session->getUser()->id, $copy_service ? true : false);
 
+	Utils::reloadParentFrameIfDialog();
+
 	if (count($users) > 1) {
 		$url = ADMIN_URL . 'services/details.php?id=' . $su->id_service;
 	}
@@ -81,6 +99,6 @@ $account_targets = $types_details[Transaction::TYPE_REVENUE]->accounts[1]->targe
 $service_user = null;
 
 $tpl->assign(compact('csrf_key', 'users', 'account_targets', 'service_user', 'allow_users_edit', 'copy_service', 'copy_fee', 'copy_only_paid'));
-$tpl->assign('projects', Projects::listAssocWithEmpty());
+$tpl->assign('projects', Projects::listAssoc());
 
 $tpl->display('services/user/subscribe.tpl');

@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Exercices" current="acc/years"}
+{include file="_head.tpl" title="Exercices" current="acc/years"}
 
 <nav class="tabs">
 	<aside>
@@ -81,7 +81,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td><em>{if $year.closed}Clôturé{else}En cours{/if}</em></td>
+				<td>{if $year.closed}<em>Clôturé</em>{else}<strong class="confirm">En cours</strong>{/if}</td>
 				<td>
 				{linkbutton label="Export" shape="export" href="export.php?year=%d"|args:$year.id}
 				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$year.closed}
@@ -102,4 +102,4 @@
 	</p>
 {/if}
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

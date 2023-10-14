@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title=$title current="web"}
+{include file="_head.tpl" title=$title current="web"}
 
 {include file="common/delete_form.tpl"
 	legend=$title
@@ -6,4 +6,4 @@
 	alert=$alert
 }
 
-{include file="admin/_foot.tpl"}
+{include file="_foot.tpl"}

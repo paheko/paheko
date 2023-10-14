@@ -1,8 +1,8 @@
 <?php
-namespace Garradin;
+namespace Paheko;
 
-use Garradin\Files\Files;
-use Garradin\Entities\Files\File;
+use Paheko\Files\Files;
+use Paheko\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
 
@@ -15,11 +15,5 @@ if ($q) {
 	$tpl->assign('results', $r);
 	$tpl->assign('results_count', count($r));
 }
-
-function tpl_clean_snippet($str) {
-	return preg_replace('!&lt;(/?b)&gt;!', '<$1>', $str);
-}
-
-$tpl->register_modifier('clean_snippet', 'Garradin\tpl_clean_snippet');
 
 $tpl->display('docs/search.tpl');
