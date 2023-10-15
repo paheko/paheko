@@ -1236,6 +1236,8 @@ class Utils
 			throw new \LogicException('PDF generation is disabled');
 		}
 
+		$str = self::appendCookieToURLs($str);
+
 		if (PDF_COMMAND == 'auto') {
 			// Try to see if there's a plugin
 			$in = ['string' => $str];
@@ -1256,8 +1258,6 @@ class Utils
 			unlink($file);
 			return;
 		}
-
-		$str = self::appendCookieToURLs($str);
 
 		// 3 seconds is plenty enough to fetch resources, right?
 		$cmd = 'prince --http-timeout=3 --pdf-profile="PDF/A-3b" -o - -';
