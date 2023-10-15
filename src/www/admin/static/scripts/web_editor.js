@@ -135,10 +135,15 @@
 			return true;
 		};
 
-		var openSyntaxHelp = function ()
+		var openSyntaxHelp = function (new_window)
 		{
 			let url = config.format != 'skriv' ? 'markdown.html' : 'skriv.html';
 			url = g.admin_url + 'static/doc/' + url;
+
+			if (new_window) {
+				window.open(url);
+				return true;
+			}
 
 			g.openFrameDialog(url);
 			return true;
@@ -256,6 +261,7 @@
 
 			btn.className = 'icn-btn ' + name;
 			btn.onclick = function () { action.call(); return false; };
+			btn.onauxclick = function () { action(true); return false; };
 
 			toolbar.appendChild(btn);
 			return btn;
