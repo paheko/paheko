@@ -18,7 +18,18 @@ $form->runIf('save', function () use ($mailing) {
 	$mailing->importForm();
 	$mailing->set('body', trim(f('content') ?? ''));
 	$mailing->save();
-}, $csrf_key, '!users/mailing/details.php?id=' . $mailing->id);
+
+	$js = false !== strpos($_SERVER['HTTP_ACCEPT'] ?? '', '/json');
+
+	$url = '!users/mailing/details.php?id=' . $mailing->id;
+	$url = Utils::getLocalURL($url);
+
+	if ($js) {
+		die(json_encode(['success' => true, 'modified' => time(), 'redirect' => $url]));
+	}
+
+	Utils::redirect($url);
+}, $csrf_key);
 
 if (!$form->hasErrors()) {
 	$form->runIf('content', function() use ($mailing) {
