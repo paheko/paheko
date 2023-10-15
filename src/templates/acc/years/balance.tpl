@@ -124,7 +124,7 @@
 			{button type="submit" name="next" label="Continuer" shape="right" class="main"}
 			{if $_GET.from}
 				— ou —
-				{linkbutton shape="reset" href="!acc/years/appropriation.php?id=%d&from=%d"|args:$year.id,$_GET.from label="Passer cet étape"}
+				{linkbutton shape="reset" href="!acc/years/" label="Passer cet étape"}
 				<i class="help">(Il sera toujours possible de reprendre la balance d'ouverture plus tard.)</i>
 			{/if}
 		{else}
