@@ -530,7 +530,7 @@ class Account extends Entity
 		$columns['change']['select'] = sprintf($columns['change']['select'], $reverse);
 
 		if ($simple) {
-			unset($columns['debit']['label'], $columns['credit']['label'], $columns['line_label']);
+			unset($columns['debit']['label'], $columns['credit']['label'], $columns['line_label']['label']);
 			$columns['line_reference']['label'] = 'Réf. paiement';
 		}
 		else {
