@@ -444,6 +444,7 @@ if (!defined('Paheko\INSTALL_PROCESS'))
 
 	if (version_compare($v, paheko_version(), '<')) {
 		if (!empty($_POST)) {
+			http_response_code(500);
 			readfile(ROOT . '/templates/static/upgrade_post.html');
 			exit;
 		}

@@ -12,24 +12,6 @@ use KD2\DB\DB_Exception;
 use KD2\DB\EntityManager;
 
 $db = DB::getInstance();
-$config_path = ROOT . '/' . CONFIG_FILE;
-
-// Rename namespace in config file
-if (file_exists($config_path) && is_writable($config_path)) {
-	$contents = file_get_contents($config_path);
-
-	$new = strtr($contents, [
-		'namespace Garradin' => 'namespace Paheko',
-		' Garradin\\' => ' Paheko\\',
-		'\'Garradin\\' => '\'Paheko\\',
-		'"Garradin\\' => '"Paheko\\',
-		'\\Garradin\\' => '\\Paheko\\',
-	]);
-
-	if ($new !== $contents) {
-		file_put_contents($config_path, $new);
-	}
-}
 
 $db->beginSchemaUpdate();
 
