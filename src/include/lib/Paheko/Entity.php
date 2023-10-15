@@ -57,8 +57,8 @@ class Entity extends AbstractEntity
 		elseif ($v = Date::createFromFormat('!Y-m-d', $value)) {
 			return $v;
 		}
-		elseif (preg_match('!^\d{2}/\d{2}/\d{4}\s\d{1,2}:\d{2}$!', $value)) {
-			return \DateTime::createFromFormat('!d/m/Y H:i', $value);
+		elseif (preg_match('!^\d{2}/\d{2}/\d{4}\s\d{1,2}:\d{2}(?::\d{2})?$!', $value)) {
+			return \DateTime::createFromFormat('!d/m/Y H:i:s', $value);
 		}
 		elseif (preg_match('!^\d{2}/\d{2}/\d{2}$!', $value)) {
 			$year = substr($value, -2);
@@ -84,6 +84,7 @@ class Entity extends AbstractEntity
 			return Date::createFromFormat('!Ymd', $value);
 		}
 		elseif (null !== $value) {
+			die($value);
 			throw new ValidationException('Format de date invalide (merci d\'utiliser le format JJ/MM/AAAA) : ' . $value);
 		}
 
