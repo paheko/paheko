@@ -375,9 +375,10 @@ class User extends Entity
 		}
 
 		foreach (DynamicFields::getInstance()->fieldsByType('multiple') as $f) {
-			if (!isset($source[$f->name . '_present'], $source[$f->name])) {
+			if (!isset($source[$f->name . '_present'])) {
 				continue;
 			}
+
 
 			$options = isset($source[$f->name]) && is_array($source[$f->name]) ? $source[$f->name] : [];
 			$options = array_keys($options);
@@ -394,7 +395,7 @@ class User extends Entity
 
 		// Handle unchecked checkbox in HTML form: no value returned
 		foreach (DynamicFields::getInstance()->fieldsByType('checkbox') as $f) {
-			if (!isset($source[$f->name . '_present']) && !isset($source[$f->name])) {
+			if (!isset($source[$f->name . '_present'])) {
 				continue;
 			}
 
