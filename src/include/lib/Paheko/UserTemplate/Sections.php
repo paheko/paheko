@@ -39,7 +39,6 @@ class Sections
 		'sql',
 		'restrict',
 		'module',
-		'create_function',
 	];
 
 	const COMPILE_SECTIONS_LIST = [
