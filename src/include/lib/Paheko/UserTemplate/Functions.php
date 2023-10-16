@@ -179,7 +179,7 @@ class Functions
 		}
 
 		if (!empty($validate)) {
-			$schema = self::read(['file' => $validate], $tpl, $line);
+			$schema = self::_readFile($validate, 'validate_schema', $tpl, $line);
 
 			if ($validate_only && is_string($validate_only)) {
 				$validate_only = explode(',', $validate_only);
@@ -454,10 +454,6 @@ class Functions
 			throw new Brindille_Exception(sprintf('Ligne %d: argument "%s" manquant', $arg_name, $line));
 		}
 
-		if (strpos($path, '..') !== false) {
-			throw new Brindille_Exception(sprintf('Ligne %d: argument "%s" invalide', $line, $arg_name));
-		}
-
 		if (substr($path, 0, 2) == './') {
 			$path = Utils::dirname($ut->_tpl_path) . substr($path, 1);
 		}
@@ -479,21 +475,35 @@ class Functions
 
 		$out = implode('/', $out);
 
+		if (preg_match('!\.\.|://|/\.|^\.!', $out)) {
+			throw new Brindille_Exception(sprintf('Ligne %d: argument "%s" invalide', $line, $arg_name));
+		}
+
 		return $out;
 	}
 
-	static public function read(array $params, UserTemplate $ut, int $line): string
+	static public function _readFile(string $file, string $arg_name, UserTemplate $ut, int $line): string
 	{
-		$path = self::getFilePath($params['file'] ?? null, 'file', $ut, $line);
+		$path = self::getFilePath($file ?? null, $arg_name, $ut, $line);
 
 		$file = Files::get(File::CONTEXT_MODULES . '/' . $path);
 
 		if ($file) {
 			$content = $file->fetch();
 		}
-		else {
+		elseif (file_exists(ROOT . '/modules/' . $path)) {
 			$content = file_get_contents(ROOT . '/modules/' . $path);
 		}
+		else {
+			throw new Brindille_Exception(sprintf('Ligne %d : le fichier appelé "%s" n\'existe pas', $line, $path));
+		}
+
+		return $content;
+	}
+
+	static public function read(array $params, UserTemplate $ut, int $line): string
+	{
+		$content = self::_readFile($params['file'] ?? '', 'file', $ut, $line);
 
 		if (!empty($params['base64'])) {
 			return base64_encode($content);

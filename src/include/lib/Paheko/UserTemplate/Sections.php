@@ -382,7 +382,7 @@ class Sections
 
 	static protected function _getModuleColumnsFromSchema(string $schema, ?string $columns, UserTemplate $tpl, int $line): array
 	{
-		$schema = Functions::read(['file' => $schema], $tpl, $line);
+		$schema = Functions::_readFile($schema, 'schema', $tpl, $line);
 		$schema = json_decode($schema, true);
 
 		if (!$schema) {
