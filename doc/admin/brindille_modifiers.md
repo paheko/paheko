@@ -12,32 +12,35 @@ Title: Référence des filtres Brindille
 
 # Filtres PHP
 
-Ces filtres viennent directement de PHP et utilisent donc les mêmes paramètres. Voir la [documentation PHP](https://www.php.net/manual/fr/function.htmlspecialchars.php) pour plus de détails.
+Ces filtres viennent directement de PHP et utilisent donc les mêmes paramètres. Voir la documentation PHP pour plus de détails.
 
-| Nom | Description |
-| :- | :- |
-| `htmlentities` | Convertit tous les caractères éligibles en entités HTML |
-| `htmlspecialchars` | Convertit les caractères spéciaux en entités HTML |
-| `trim` | Supprime les espaces et lignes vides au début et à la fin d'un texte |
-| `ltrim` | Supprime les espaces et lignes vides au début d'un texte | [Documentation](https://www.php.net/ltrim) |
-| `rtrim` | Supprime les espaces et lignes vides à la fin d'un texte | [Documentation](https://www.php.net/rtrim) |
-| `md5` | Génère un hash MD5 d'un texte |
-| `sha1` | Génère un hash SHA1 d'un texte |
-| `strlen` | Nombre de caractères dans une chaîne de texte |
-| `strpos` | Position d'un élément dans une chaîne de texte |
-| `strrpos` | Position d'un dernier élément dans une chaîne de texte |
-| `strip_tags` | Supprime les tags HTML |
-| `nl2br` | Remplace les retours à la ligne par des tags HTML `<br/>` |
-| `wordwrap` | Ajoute des retours à la ligne tous les 75 caractères |
-| `substr` | Découpe une chaîne de caractère |
-| `abs` | Renvoie la valeur absolue d'un nombre (exemple : -42 sera transformé en 42) |
-| `intval` | Transforme une valeur en entier (integer) |
-| `boolval` | Transforme une valeur en booléen (true ou false) |
-| `floatval` | Transforme une valeur en nombre flottant (à virgule) |
-| `strval` | Transforme une valeur en chaîne de texte |
-| `arrayval` | Transforme une valeur en tableau |
-| `json_decode` | Transforme une chaîne JSON en tableau |
-| `json_encode` | Transforme une valeur en chaîne JSON |
+| Nom | Description | Documentation PHP |
+| :- | :- | :- |
+| `htmlentities` | Convertit tous les caractères éligibles en entités HTML | [Documentation PHP](https://www.php.net/htmlentities) |
+| `htmlspecialchars` | Convertit les caractères spéciaux en entités HTML | [Documentation PHP](https://www.php.net/htmlspecialchars) |
+| `trim` | Supprime les espaces et lignes vides au début et à la fin d'un texte | [Documentation PHP](https://www.php.net/trim) |
+| `ltrim` | Supprime les espaces et lignes vides au début d'un texte | [Documentation PHP](https://www.php.net/ltrim) |
+| `rtrim` | Supprime les espaces et lignes vides à la fin d'un texte | [Documentation PHP](https://www.php.net/rtrim) |
+| `md5` | Génère un hash MD5 d'un texte | [Documentation PHP](https://www.php.net/md5) |
+| `sha1` | Génère un hash SHA1 d'un texte | [Documentation PHP](https://www.php.net/sha1) |
+| `strlen` | Nombre de caractères dans une chaîne de texte | [Documentation PHP](https://www.php.net/strlen) |
+| `strpos` | Position d'un élément dans une chaîne de texte | [Documentation PHP](https://www.php.net/strpos) |
+| `strrpos` | Position d'un dernier élément dans une chaîne de texte | [Documentation PHP](https://www.php.net/strrpos) |
+| `substr` | Découpe une chaîne de caractère | [Documentation PHP](https://www.php.net/substr) |
+| `strtotime` | Transforme une date en timestamp UNIX | [Documentation PHP](https://www.php.net/strtotime) |
+| `strip_tags` | Supprime les tags HTML | [Documentation PHP](https://www.php.net/strip_tags) |
+| `nl2br` | Remplace les retours à la ligne par des tags HTML `<br/>` | [Documentation PHP](https://www.php.net/nl2br) |
+| `wordwrap` | Ajoute des retours à la ligne tous les 75 caractères | [Documentation PHP](https://www.php.net/wordwrap) |
+| `abs` | Renvoie la valeur absolue d'un nombre (exemple : -42 sera transformé en 42) | [Documentation PHP](https://www.php.net/abs) |
+| `intval` | Transforme une valeur en entier (integer) | [Documentation PHP](https://www.php.net/intval) |
+| `boolval` | Transforme une valeur en booléen (true ou false) | [Documentation PHP](https://www.php.net/boolval) |
+| `floatval` | Transforme une valeur en nombre flottant (à virgule) | [Documentation PHP](https://www.php.net/floatval) |
+| `strval` | Transforme une valeur en chaîne de texte | [Documentation PHP](https://www.php.net/strval) |
+| `arrayval` | Transforme une valeur en tableau | [Documentation PHP](https://www.php.net/manual/fr/language.types.type-juggling.php) |
+| `json_decode` | Transforme une chaîne JSON en valeur | [Documentation PHP](https://www.php.net/json_decode) |
+| `json_encode` | Transforme une valeur en chaîne JSON | [Documentation PHP](https://www.php.net/json_encode) |
+| `http_build_query` | Transformer un tableau en chaîne *query string* pour URL | [Documentation PHP](https://www.php.net/http_build_query) |
+| `str_getcsv` | Transformer une chaîne de texte de format CSV en tableau | [Documentation PHP](https://www.php.net/str_getcsv) |
 
 # Filtres utiles pour les e-mails
 
