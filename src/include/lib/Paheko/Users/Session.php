@@ -570,7 +570,7 @@ class Session extends \KD2\UserSession
 				'write'  => $write,
 				'create' => $write,
 				'delete' => $write,
-				'read'   => $write,
+				'read'   => $read,
 				'share'  => $write,
 			];
 		}
