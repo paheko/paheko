@@ -564,7 +564,12 @@ class Sections
 			self::_debugExplain($list->SQL());
 		}
 
-		$i = $list->iterate();
+		try {
+			$i = $list->iterate();
+		}
+		catch (DB_Exception $e) {
+			throw new Brindille_Exception(sprintf("Line %d: invalid SQL query: %s\nQuery: %s", $line, $e->getMessage(), $list->SQL()));
+		}
 
 		// If there is nothing to iterate, just stop
 		if (!$i->valid()) {
@@ -588,7 +593,6 @@ class Sections
 
 		echo '</tbody>';
 		echo '</table>';
-
 
 		echo $list->getHTMLPagination();
 	}
