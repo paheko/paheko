@@ -6,14 +6,16 @@ if (!isset($files)) {
 }
 
 $can_upload = false;
+$upload ??= $edit;
 $trash = isset($use_trash) && !$use_trash ? '&trash=no' : '';
 
 if ($edit
+	&& $upload
 	&& Entities\Files\File::canCreate($path . '/')) {
 	$can_upload = true;
 }
 
-$button_label ??= "Ajouter un fichier"
+$button_label ??= "Ajouter un fichier";
 
 ?>
 
