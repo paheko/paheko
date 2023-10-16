@@ -24,10 +24,10 @@ class Sections
 		'categories',
 		'articles',
 		'pages',
-		'images',
 		'breadcrumbs',
+		'images',
 		'documents',
-		'files',
+		'attachments',
 		'users',
 		'subscriptions',
 		'transactions',
@@ -39,6 +39,7 @@ class Sections
 		'sql',
 		'restrict',
 		'module',
+		'create_function',
 	];
 
 	const COMPILE_SECTIONS_LIST = [
@@ -1059,14 +1060,14 @@ class Sections
 	{
 		$params['where'] ??= '';
 		$params['where'] .= ' AND image = 1';
-		return self::files($params, $tpl, $line);
+		return self::attachments($params, $tpl, $line);
 	}
 
 	static public function documents(array $params, UserTemplate $tpl, int $line): \Generator
 	{
 		$params['where'] ??= '';
 		$params['where'] .= ' AND image = 0';
-		return self::files($params, $tpl, $line);
+		return self::attachments($params, $tpl, $line);
 	}
 
 	static protected function _getPageIdFromPath(string $path): ?int
@@ -1077,7 +1078,7 @@ class Sections
 		});
 	}
 
-	static public function files(array $params, UserTemplate $tpl, int $line): \Generator
+	static public function attachments(array $params, UserTemplate $tpl, int $line): \Generator
 	{
 		$id = null;
 
@@ -1088,7 +1089,7 @@ class Sections
 			$id = self::_getPageIdFromPath($params['parent']);
 		}
 		else {
-			throw new Brindille_Exception('La section "files" doit obligatoirement comporter un paramètre "id_page" ou "parent"');
+			throw new Brindille_Exception('La section "attachments" doit obligatoirement comporter un paramètre "id_page" ou "parent"');
 		}
 
 		if (!$id) {
