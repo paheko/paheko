@@ -44,6 +44,7 @@ class Functions
 		'delete_form',
 		'form_errors',
 		'redirect',
+		'admin_files',
 	];
 
 	const COMPILE_FUNCTIONS_LIST = [
@@ -505,8 +506,9 @@ class Functions
 	{
 		$content = self::_readFile($params['file'] ?? '', 'file', $ut, $line);
 
-		if (!empty($params['base64'])) {
-			return base64_encode($content);
+		if (!empty($params['assign'])) {
+			$ut::__assign(['var' => $params['assign'], 'value' => $content], $ut, $line);
+			return '';
 		}
 
 		return $content;
@@ -657,5 +659,49 @@ class Functions
 		else {
 			Utils::redirectDialog($params['to'] ?? null);
 		}
+	}
+
+	static public function admin_files(array $params, UserTemplate $ut): string
+	{
+		if (empty($ut->module)) {
+			throw new Brindille_Exception('Module could not be found');
+		}
+
+		$tpl = Template::getInstance();
+
+		if (!isset($params['edit'])) {
+			$params['edit'] = false;
+		}
+
+		if (!isset($params['upload'])) {
+			$params['upload'] = $params['edit'];
+		}
+
+		if (isset($params['path']) && preg_match('!/\.|\.\.!', $params['path'])) {
+			throw new Brindille_Exception(sprintf('Line %d: "path" parameter is invalid: "%s"', $line, $params['path']));
+		}
+
+		$path = isset($params['path']) && preg_match('/^[a-z0-9_-]+$/i', $params['path']) ? '/' . $params['path'] : '';
+
+		$tpl->assign($params);
+		$tpl->assign('path', $ut->module->storage_root() . $path);
+		return '<div class="attachments noprint"><h3 class="ruler">Fichiers joints</h3>' . $tpl->fetch('common/files/_context_list.tpl') . '</div>';
+	}
+
+	static public function delete_file(array $params, UserTemplate $ut, int $line): void
+	{
+		if (empty($ut->module)) {
+			throw new Brindille_Exception('Module could not be found');
+		}
+
+		if (empty($params['path'])) {
+			throw new Brindille_Exception(sprintf('Line %d: "path" parameter is missing or empty', $line));
+		}
+
+		if (preg_match('!/\.|\.\.!', $params['path'])) {
+			throw new Brindille_Exception(sprintf('Line %d: "path" parameter is invalid: "%s"', $line, $params['path']));
+		}
+
+		Files::delete($ut->module->storage_root() . '/' . $params['path']);
 	}
 }
