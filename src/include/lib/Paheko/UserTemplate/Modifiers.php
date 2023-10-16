@@ -320,7 +320,7 @@ class Modifiers
 			return @eval('return ' . $expression . ';') ?: 0;
 		}
 		catch (\Throwable $e) {
-			throw new Brindille_Exception('Syntax error: ' . $e->getMessage(), 0, $e);
+			throw new Brindille_Exception(sprintf('Syntax error: "%s" (in "%s")', $e->getMessage(), $expression), 0, $e);
 		}
 	}
 
