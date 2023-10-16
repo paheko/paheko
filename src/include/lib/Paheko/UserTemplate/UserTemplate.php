@@ -97,10 +97,11 @@ class UserTemplate extends \KD2\Brindille
 		$config['telephone_asso'] = $config['org_phone'];
 		$config['site_asso'] = $config['org_web'];
 		$config['user_fields'] = [
-			'number' => DynamicFields::getNumberField(),
-			'login'  => DynamicFields::getLoginField(),
-			'email'  => DynamicFields::getEmailFields(),
-			'name'   => DynamicFields::getNameFields(),
+			'number'   => DynamicFields::getNumberField(),
+			'login'    => DynamicFields::getLoginField(),
+			'email'    => DynamicFields::getEmailFields(),
+			'name'     => DynamicFields::getNameFields(),
+			'name_sql' => DynamicFields::getNameFieldsSQL(),
 		];
 
 		$session = Session::getInstance();
