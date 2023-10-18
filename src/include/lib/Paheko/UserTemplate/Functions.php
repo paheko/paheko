@@ -249,7 +249,7 @@ class Functions
 				$args[substr($key, 1)] = $value;
 			}
 			elseif ($key == 'where') {
-				$where[] = Sections::_moduleReplaceJSONExtract($value);
+				$where[] = Sections::_moduleReplaceJSONExtract($value, $table);
 			}
 			else {
 				if ($key == 'id') {

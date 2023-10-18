@@ -297,7 +297,7 @@ class Sections
 			$params['where'] = '1';
 		}
 		else {
-			$params['where'] = self::_moduleReplaceJSONExtract($params['where']);
+			$params['where'] = self::_moduleReplaceJSONExtract($params['where'], $table);
 		}
 
 		if (isset($params['key'])) {
@@ -339,22 +339,22 @@ class Sections
 		$s = 'id, key, document AS json';
 
 		if (isset($params['select'])) {
-			$params['select'] = $s . ', ' . self::_moduleReplaceJSONExtract($params['select']);
+			$params['select'] = $s . ', ' . self::_moduleReplaceJSONExtract($params['select'], $table);
 		}
 		else {
 			$params['select'] = $s;
 		}
 
 		if (isset($params['group'])) {
-			$params['group'] = self::_moduleReplaceJSONExtract($params['group']);
+			$params['group'] = self::_moduleReplaceJSONExtract($params['group'], $table);
 		}
 
 		if (isset($params['having'])) {
-			$params['having'] = self::_moduleReplaceJSONExtract($params['having']);
+			$params['having'] = self::_moduleReplaceJSONExtract($params['having'], $table);
 		}
 
 		if (isset($params['order'])) {
-			$params['order'] = self::_moduleReplaceJSONExtract($params['order']);
+			$params['order'] = self::_moduleReplaceJSONExtract($params['order'], $table);
 		}
 
 		// Try to create an index if required
@@ -428,15 +428,20 @@ class Sections
 		return $out;
 	}
 
-	static public function _moduleReplaceJSONExtract(string $str): string
+	static public function _moduleReplaceJSONExtract(string $str, string $table): string
 	{
+		$str = str_replace('@TABLE', $table, $str);
+
 		if (!strstr($str, '$')) {
 			return $str;
 		}
 
 		return preg_replace_callback(
-			'/\$(\$[\[\.][\w\d\.\[\]#]+)/',
-			fn ($m) => sprintf('json_extract(document, %s)', DB::getInstance()->quote($m[1])),
+			'/(?:([\w\d]+)\.)?\$(\$[\[\.][\w\d\.\[\]#]+)/',
+			fn ($m) => sprintf('json_extract(%sdocument, %s)',
+				!empty($m[1]) ? $db->quote($m[1]) . '.' : '',
+				$db->quote($m[2])
+			),
 			$str
 		);
 	}
@@ -466,7 +471,7 @@ class Sections
 			$where = '1';
 		}
 		else {
-			$where = self::_moduleReplaceJSONExtract($params['where']);
+			$where = self::_moduleReplaceJSONExtract($params['where'], $table);
 		}
 
 		$columns = [];
@@ -490,7 +495,7 @@ class Sections
 					throw new Brindille_Exception(sprintf('Line %d: "*" cannot be used in "select" parameter', $line));
 				}
 
-				$select = self::_moduleReplaceJSONExtract($select);
+				$select = self::_moduleReplaceJSONExtract($select, $table);
 
 				$columns['col' . ($i + 1)] = compact('label', 'select');
 			}
