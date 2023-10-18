@@ -160,6 +160,13 @@ class User extends Entity
 				$this->assert('' !== trim((string)$value), sprintf('"%s" : ce champ ne peut être vide', $field->label));
 			}
 
+			if ($field->type === 'select') {
+				$this->assert(in_array($value, $field->options), sprintf('"%s" : la valeur "%s" ne fait pas partie des options possibles', $field->label, $value));
+			}
+			elseif ($field->type === 'country') {
+				$this->assert(strlen($value) === 2, sprintf('"%s" : un champ pays ne peut contenir que deux lettres', $field->label));
+				$this->assert(Utils::getCountryName($value) !== null, sprintf('"%s" : pays inconnu : "%s"', $field->label, $value));
+			}
 		}
 
 		// check user number

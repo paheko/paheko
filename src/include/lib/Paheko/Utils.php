@@ -454,7 +454,7 @@ class Utils
 		return Translate::getCountriesList('fr');
 	}
 
-	static public function getCountryName($code)
+	static public function getCountryName(string $code): ?string
 	{
 		$code = strtoupper($code);
 		$list = self::getCountryList();
