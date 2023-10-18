@@ -436,6 +436,8 @@ class Sections
 			return $str;
 		}
 
+		$db = DB::getInstance();
+
 		return preg_replace_callback(
 			'/(?:([\w\d]+)\.)?\$(\$[\[\.][\w\d\.\[\]#]+)/',
 			fn ($m) => sprintf('json_extract(%sdocument, %s)',
