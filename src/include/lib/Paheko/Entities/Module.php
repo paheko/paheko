@@ -6,6 +6,7 @@ use Paheko\Entity;
 use Paheko\DB;
 use Paheko\Plugins;
 use Paheko\UserException;
+use Paheko\ValidationException;
 use Paheko\Utils;
 use Paheko\Files\Files;
 use Paheko\UserTemplate\UserTemplate;
