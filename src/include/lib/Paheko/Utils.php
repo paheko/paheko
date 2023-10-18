@@ -1496,7 +1496,7 @@ class Utils
 	static public function parse_ini_string(string $ini, bool $sections = false)
 	{
 		try {
-			$ini = \parse_ini_string($ini, $sections, \INI_SCANNER_RAW);
+			$ini = parse_ini_string($ini, $sections, \INI_SCANNER_RAW);
 		}
 		catch (\Throwable $e) {
 			throw new \RuntimeException($e->getMessage(), 0, $e);
