@@ -46,13 +46,13 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 	</dl>
 </fieldset>
 
-<fieldset class="type-select type-multiple">
+<fieldset class="type-select type-multiple type-datalist">
 	<legend>Options possibles</legend>
 
-	<p class="alert block type-select">Attention renommer ou supprimer une option n'affecte pas ce qui a déjà été enregistré dans les fiches des membres.</p>
+	<p class="alert block type-select type-datalist">Attention renommer ou supprimer une option n'affecte pas ce qui a déjà été enregistré dans les fiches des membres.</p>
 	<p class="alert block type-multiple">Attention changer l'ordre des options peut avoir des effets indésirables.</p>
 
-	<dl class="type-multiple type-select options">
+	<dl class="type-multiple type-select type-datalist options">
 		{if $field.options}
 			{foreach from=$field.options item="option"}
 			<dd>{input type="text" name="options[]" default=$option}</dd>

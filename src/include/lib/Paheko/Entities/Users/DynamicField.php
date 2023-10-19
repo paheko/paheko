@@ -100,8 +100,9 @@ class DynamicField extends Entity
 		'select'	=>	'Sélecteur à choix unique',
 		'multiple'  =>  'Sélecteur à choix multiple',
 		'country'	=>	'Sélecteur de pays',
-		'text'		=>	'Texte',
-		'textarea'	=>	'Texte multi-lignes',
+		'text'		=>	'Texte libre, une ligne',
+		'datalist'  =>  'Texte libre, une ligne, à choix multiple',
+		'textarea'	=>	'Texte libre, plusieurs lignes',
 		//'virtual' =>  'Calculé',
 	];
 
@@ -122,6 +123,7 @@ class DynamicField extends Entity
 		'country'  => '?string',
 		'text'     => '?string',
 		'textarea' => '?string',
+		'datalist' => '?string',
 		//'virtual'=> 'dynamic',
 	];
 
@@ -142,6 +144,7 @@ class DynamicField extends Entity
 		'country'  => 'TEXT',
 		'text'     => 'TEXT',
 		'textarea' => 'TEXT',
+		'datalist' => 'TEXT',
 		//'virtual'  => null,
 	];
 
