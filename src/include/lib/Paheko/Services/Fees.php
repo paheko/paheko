@@ -91,6 +91,11 @@ class Fees
 		return $object;
 	}
 
+	static public function listGroupedById(): array
+	{
+		return EntityManager::getInstance(Fee::class)->allAssoc('SELECT * FROM services_fees ORDER BY label COLLATE U_NOCASE;', 'id');
+	}
+
 	public function listWithStats()
 	{
 		$db = DB::getInstance();

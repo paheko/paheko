@@ -294,14 +294,21 @@ class Users
 
 	static public function getFromNumber(string $number): ?User
 	{
-		$field = DynamicFields::getNumberField();
+		$field = DynamicFields::getNumberFieldSQL();
 		return EM::findOne(User::class, 'SELECT * FROM @TABLE WHERE ' . $field . ' = ?', $number);
+	}
+
+	static public function getIdFromNumber(string $number): ?int
+	{
+		$field = DynamicFields::getNumberFieldSQL();
+		return EM::getInstance(User::class)->col('SELECT id FROM @TABLE WHERE ' . $field . ' = ?', $number);
 	}
 
 	static public function getNameFromNumber(string $number): ?string
 	{
 		$name = DynamicFields::getNameFieldsSQL();
-		$field = DynamicFields::getNumberField();
+		$field = DynamicFields::getNumberFieldSQL();
+		$field = DB::getInstance()->quote($field);
 		$found = EM::getInstance(User::class)->col(sprintf('SELECT %s FROM @TABLE WHERE %s = ?;', $name, $field), $number);
 		$found = (string) $found;
 		return $found ?: null;
