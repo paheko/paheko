@@ -689,7 +689,7 @@
 				var target = this.form.getAttribute('target');
 
 				if (this.hasAttribute('data-form-action')) {
-					action = this.dataset.formAction;
+					this.form.action = this.dataset.formAction;
 				}
 
 				if (this.getAttribute('data-form-target') === '_dialog') {
