@@ -6,6 +6,7 @@ use Paheko\CSV_Custom;
 use Paheko\DB;
 use Paheko\DynamicList;
 use Paheko\Utils;
+use Paheko\UserException;
 use Paheko\Entities\Services\Service_User;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Users;
