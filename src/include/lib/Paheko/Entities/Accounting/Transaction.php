@@ -839,8 +839,9 @@ class Transaction extends Entity
 
 			unset($line, $accounts, $account, $source['simple']);
 		}
+
 		// Add/update lines objects
-		elseif (isset($source['lines']) && is_array($source['lines'])) {
+		if (isset($source['lines']) && is_array($source['lines'])) {
 			$lines = $this->getLines();
 			$db = DB::getInstance();
 
