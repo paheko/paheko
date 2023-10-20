@@ -818,11 +818,13 @@ class Transaction extends Entity
 			$source['lines'] = [
 				$line + [
 					$accounts[0]->direction => $source['amount'],
+					$accounts[1]->direction => 0,
 					'account_selector' => $accounts[0]->selector_value,
 					'account' => $source[$accounts[0]->direction] ?? null,
 				],
 				$line + [
 					$accounts[1]->direction => $source['amount'],
+					$accounts[0]->direction => 0,
 					'account_selector' => $accounts[1]->selector_value,
 					'account' => $source[$accounts[1]->direction] ?? null,
 				],
@@ -835,7 +837,6 @@ class Transaction extends Entity
 			if (Config::getInstance()->analytical_set_all) {
 				$source['lines'][1]['id_project'] = $source['lines'][0]['id_project'];
 			}
-
 
 			unset($line, $accounts, $account, $source['simple']);
 		}
