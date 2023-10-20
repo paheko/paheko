@@ -839,9 +839,8 @@ class Transaction extends Entity
 
 			unset($line, $accounts, $account, $source['simple']);
 		}
-
 		// Add/update lines objects
-		if (isset($source['lines']) && is_array($source['lines'])) {
+		elseif (isset($source['lines']) && is_array($source['lines'])) {
 			$lines = $this->getLines();
 			$db = DB::getInstance();
 
@@ -904,17 +903,6 @@ class Transaction extends Entity
 		}
 
 		return parent::importForm($source);
-	}
-
-	public function importFromEditForm(?array $source = null): void
-	{
-		$source ??= $_POST;
-
-		if (!isset($source['id_related'])) {
-			unset($source['id_related']);
-		}
-
-		$this->importForm($source);
 	}
 
 	public function importFromNewForm(?array $source = null): void

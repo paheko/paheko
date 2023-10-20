@@ -330,7 +330,7 @@ class API
 				}
 				elseif ($this->method == 'POST') {
 					$this->requireAccess(Session::ACCESS_WRITE);
-					$transaction->importFromEditForm();
+					$transaction->importFromNewForm();
 					$transaction->save();
 					return $transaction->asJournalArray();
 				}
