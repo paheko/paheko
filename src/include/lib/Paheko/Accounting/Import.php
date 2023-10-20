@@ -252,7 +252,7 @@ class Import
 							}
 						}
 
-						$transaction->status = $status;
+						$transaction->set('status', $status);
 					}
 
 					if (isset($row->linked_users) && trim($row->linked_users) !== '') {
