@@ -38,12 +38,22 @@ $form->runIf('assign', function () use ($ar) {
 
 $start = $end = null;
 
-try {
-	extract($ar->getStartAndEndDates());
+if (null !== qg('start') && null !== qg('end')) {
+	$start = \DateTime::createFromFormat('!d/m/Y', qg('start'));
+	$end = \DateTime::createFromFormat('!d/m/Y', qg('end'));
+
+	if (!$start || !$end) {
+		$form->addError('La date donnée est invalide.');
+	}
 }
-catch (UserException $e) {
-	$form->addError($e->getMessage());
-	$csv->clear();
+else {
+	try {
+		extract($ar->getStartAndEndDates());
+	}
+	catch (UserException $e) {
+		$form->addError($e->getMessage());
+		$csv->clear();
+	}
 }
 
 $journal = null;
@@ -70,7 +80,7 @@ $lines = null;
 
 if ($journal && $csv->ready()) {
 	try {
-		$lines = $ar->mergeJournal($journal);
+		$lines = $ar->mergeJournal($journal, $start, $end);
 	}
 	catch (UserException $e) {
 		$form->addError($e->getMessage());
