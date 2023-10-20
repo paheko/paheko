@@ -34,7 +34,7 @@ elseif ($web = qg('w')) {
 		throw new UserException('Vous n\'avez pas le droit de lire ce fichier.');
 	}
 
-	$content = $page->render();
+	$content = $page->preview($content);
 }
 else {
 	throw new UserException('Fichier inconnu');

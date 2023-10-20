@@ -113,7 +113,7 @@ class AdvancedSearch extends A_S
 				'label'    => 'Exercice',
 				'type'     => 'enum',
 				'null'     => false,
-				'values'   => $db->getAssoc('SELECT id, label FROM acc_years ORDER BY end_date;'),
+				'values'   => $db->getAssoc('SELECT id, label FROM acc_years ORDER BY end_date DESC;'),
 				'select'   => 'y.label',
 				'where'    => 't.id_year %s',
 			],
@@ -123,6 +123,13 @@ class AdvancedSearch extends A_S
 				'type'     => 'text',
 				'null'     => true,
 				'select'   => 'p.code',
+			],
+			'project_label' => [
+				'textMatch'=> true,
+				'label'    => 'Libellé projet',
+				'type'     => 'text',
+				'null'     => true,
+				'select'   => 'p.label',
 			],
 		];
 	}

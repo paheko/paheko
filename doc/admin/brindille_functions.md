@@ -378,8 +378,6 @@ Si `to=null` est utilisé, alors la fenêtre modale sera fermée. Ou, si la page
 
 Enregistre des données, sous la forme d'un document, dans la base de données, pour le module courant.
 
-Note : un appel à cette fonction depuis le code du site web provoquera une erreur, elle ne peut être appelée que depuis un module.
-
 | Paramètre | Obligatoire ou optionnel ? | Fonction |
 | :- | :- | :- |
 | `key` | optionnel | Clé unique du document |
@@ -432,8 +430,6 @@ Pour ne valider qu'une partie du schéma, par exemple si on veut faire une mise 
 
 Supprime un document lié au module courant.
 
-Note : un appel à cette fonction depuis le code du site web provoquera une erreur, elle ne peut être appelée que depuis un module.
-
 | Paramètre | Obligatoire ou optionnel ? | Fonction |
 | :- | :- | :- |
 | `key` | optionnel | Clé unique du document |
@@ -446,6 +442,38 @@ Il est possible de spécifier d'autres paramètres, ou une clause `where` et des
 * Supprimer tous les documents : `{{:delete}}`
 * Supprimer tous les documents ayant le type `facture` : `{{:delete type="facture"}}`
 * Supprimer tous les documents de type `devis` ayant une date dans le passé : `{{:delete :type="devis" where="$$.type = :type AND $$.date < datetime()"}}`
+
+## read
+
+Lire un fichier stocké dans les fichiers du code du module.
+
+| Paramètre | Obligatoire ou optionnel ? | Fonction |
+| :- | :- | :- |
+| `file` | obligatoire | Chemin du fichier à lire |
+| `assign` | optionnel | Variable dans laquelle placer le contenu du fichier. |
+
+Si le paramètre `assign` n'est pas utilisé, le contenu du fichier sera affiché directement.
+
+Exemple pour lire un fichier JSON :
+
+```
+{{#read file="baremes.json" assign="baremes"}}
+{{:assign baremes=$baremes|json_decode}}
+Barème kilométrique pour une voiture de 3 CV : {{$baremes.voiture.3cv}}
+```
+
+Exemple pour lire un fichier CSV :
+
+```
+{{#read file="baremes.csv" assign="baremes"}}
+{{:assign baremes=$baremes|trim|explode:"\n"}}
+
+{{#foreach from=$baremes item="line"}}
+  {{:assign bareme=$line|str_getcsv}}
+  Nom du barème : {{$bareme.0}}
+  Calcul : {{$bareme.1}}
+{{/foreach}}
+```
 
 ## admin_header
 
@@ -652,6 +680,58 @@ Affiche une icône.
 | `shape` | **obligatoire** | Forme de l'icône. |
 
 
-# Formes d'icônes disponibles
+### Formes d'icônes disponibles
 
 ![](shapes.png)
+
+# Gestion de fichiers dans les modules
+
+Les modules peuvent stocker des fichiers, mais seulement dans leur propre contexte. Un module ne peut pas gérer les fichiers du site web, des écritures comptables, des membres, ou des autres modules, il ne peut gérer que ses propres fichiers.
+
+Quand les données d'un module sont supprimé, les fichiers du module sont aussi supprimés.
+
+Mais si le module stocke des fichiers liés à un document JSON (par exemple dans un sous-répertoire pour chaque module), c'est au code du module de s'assurer que les fichiers seront supprimés lors de la suppression du document.
+
+Par défaut, tous les fichiers des modules sont en accès restreint : ils ne peuvent être vus et modifiés que par les membres connectés qui sont au niveau d'accès indiqué dans les paramètres `restrict_section` et `restrict_level` du fichier `module.ini`.
+
+Pour qu'un fichier soit visible publiquement aux personnes non connectées, il faut le placer dans le sous-répertoire `public` du module.
+
+Attention : de par ce fonctionnement, **tous les fichiers** d'un module sont potentiellement accessibles par **tous les membres ayant accès au module** et connaissant le nom du fichier.
+
+Il est donc recommandé de ne pas utiliser ce mécanisme pour stocker des données personnelles ou des données sensibles.
+
+## admin_files
+
+Affiche (dans le contexte de l'administration) la liste des fichiers dans un sous-répertoire, et éventuellement la possibilité d'en ajouter ou de les supprimer.
+
+| Paramètre | Obligatoire ou optionnel ? | Fonction |
+| :- | :- | :- |
+| `path` | optionnel | Chemin du sous-répertoire où sont stockés les fichiers |
+| `upload` | optionnel | Booléen. Si `true`, l'utilisateur pourra ajouter des fichiers. (Défaut : `false`) |
+| `edit` | optionnel | Booléen. Si `true`, l'utilisateur pourra modifier ou supprimer les fichiers existants. (Défaut : `false`) |
+
+Exemple pour afficher la liste des fichiers du sous-répertoire `facture43` et permettre de rajouter de nouveaux fichiers :
+
+```
+{{:admin_files path="facture43" upload=true edit=false}}
+```
+
+## delete_file
+
+Supprimer un fichier ou un répertoire lié au module courant.
+
+| Paramètre | Obligatoire ou optionnel ? | Fonction |
+| :- | :- | :- |
+| `path` | obligatoire | Chemin du fichier ou répertoire |
+
+Exemple pour supprimer un fichier seul :
+
+```
+{{:delete_file path="facture43/justificatif.pdf"}}
+```
+
+Pour supprimer un répertoire et tous les fichiers dedans :
+
+```
+{{:delete_file path="facture43"}}
+```

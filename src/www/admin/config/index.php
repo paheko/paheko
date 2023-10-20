@@ -14,25 +14,6 @@ if (qg('check_version') !== null) {
 	exit;
 }
 
-if (ENABLE_TECH_DETAILS && qg('dump_config')) {
-	echo "<table>";
-	foreach (get_defined_constants(false) as $key => $value) {
-		if (strpos($key, 'Paheko\\') !== 0) {
-			continue;
-		}
-
-		$key = str_replace('Paheko\\', '', $key);
-
-		if ($key === 'SECRET_KEY') {
-			$value = '***HIDDEN***';
-		}
-
-		printf("<tr><th style='text-align: left'>%s</th><td>%s</td></tr>\n", $key, htmlspecialchars(var_export($value, true)));
-	}
-
-	return;
-}
-
 $config = Config::getInstance();
 
 $form->runIf('save', function () use ($config) {

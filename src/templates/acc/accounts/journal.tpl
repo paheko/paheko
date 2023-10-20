@@ -98,7 +98,7 @@
 				<td class="money">{$line.sum|raw|money:false}</td>
 			{/if}
 			<td>{$line.reference}</td>
-			<th>{$line.label}</th>
+			<th>{$line.label}{if $simple && $line.line_label} — <em>{$line.line_label}</em>{/if}</th>
 			{if !$simple}<td>{$line.line_label}</td>{/if}
 			<td>{$line.line_reference}</td>
 			<td class="num">{if $line.id_project}<a href="{$admin_url}acc/reports/statement.php?project={$line.id_project}&amp;year={$year.id}">{$line.project_code}</a>{/if}</td>

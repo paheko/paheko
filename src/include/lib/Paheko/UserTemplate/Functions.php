@@ -44,6 +44,7 @@ class Functions
 		'delete_form',
 		'form_errors',
 		'redirect',
+		'admin_files',
 	];
 
 	const COMPILE_FUNCTIONS_LIST = [
@@ -179,7 +180,7 @@ class Functions
 		}
 
 		if (!empty($validate)) {
-			$schema = self::read(['file' => $validate], $tpl, $line);
+			$schema = self::_readFile($validate, 'validate_schema', $tpl, $line);
 
 			if ($validate_only && is_string($validate_only)) {
 				$validate_only = explode(',', $validate_only);
@@ -248,7 +249,7 @@ class Functions
 				$args[substr($key, 1)] = $value;
 			}
 			elseif ($key == 'where') {
-				$where[] = Sections::_moduleReplaceJSONExtract($value);
+				$where[] = Sections::_moduleReplaceJSONExtract($value, $table);
 			}
 			else {
 				if ($key == 'id') {
@@ -454,10 +455,6 @@ class Functions
 			throw new Brindille_Exception(sprintf('Ligne %d: argument "%s" manquant', $arg_name, $line));
 		}
 
-		if (strpos($path, '..') !== false) {
-			throw new Brindille_Exception(sprintf('Ligne %d: argument "%s" invalide', $line, $arg_name));
-		}
-
 		if (substr($path, 0, 2) == './') {
 			$path = Utils::dirname($ut->_tpl_path) . substr($path, 1);
 		}
@@ -479,24 +476,39 @@ class Functions
 
 		$out = implode('/', $out);
 
+		if (preg_match('!\.\.|://|/\.|^\.!', $out)) {
+			throw new Brindille_Exception(sprintf('Ligne %d: argument "%s" invalide', $line, $arg_name));
+		}
+
 		return $out;
 	}
 
-	static public function read(array $params, UserTemplate $ut, int $line): string
+	static public function _readFile(string $file, string $arg_name, UserTemplate $ut, int $line): string
 	{
-		$path = self::getFilePath($params['file'] ?? null, 'file', $ut, $line);
+		$path = self::getFilePath($file ?? null, $arg_name, $ut, $line);
 
 		$file = Files::get(File::CONTEXT_MODULES . '/' . $path);
 
 		if ($file) {
 			$content = $file->fetch();
 		}
-		else {
+		elseif (file_exists(ROOT . '/modules/' . $path)) {
 			$content = file_get_contents(ROOT . '/modules/' . $path);
 		}
+		else {
+			throw new Brindille_Exception(sprintf('Ligne %d : le fichier appelé "%s" n\'existe pas', $line, $path));
+		}
 
-		if (!empty($params['base64'])) {
-			return base64_encode($content);
+		return $content;
+	}
+
+	static public function read(array $params, UserTemplate $ut, int $line): string
+	{
+		$content = self::_readFile($params['file'] ?? '', 'file', $ut, $line);
+
+		if (!empty($params['assign'])) {
+			$ut::__assign(['var' => $params['assign'], 'value' => $content], $ut, $line);
+			return '';
 		}
 
 		return $content;
@@ -647,5 +659,49 @@ class Functions
 		else {
 			Utils::redirectDialog($params['to'] ?? null);
 		}
+	}
+
+	static public function admin_files(array $params, UserTemplate $ut): string
+	{
+		if (empty($ut->module)) {
+			throw new Brindille_Exception('Module could not be found');
+		}
+
+		$tpl = Template::getInstance();
+
+		if (!isset($params['edit'])) {
+			$params['edit'] = false;
+		}
+
+		if (!isset($params['upload'])) {
+			$params['upload'] = $params['edit'];
+		}
+
+		if (isset($params['path']) && preg_match('!/\.|\.\.!', $params['path'])) {
+			throw new Brindille_Exception(sprintf('Line %d: "path" parameter is invalid: "%s"', $line, $params['path']));
+		}
+
+		$path = isset($params['path']) && preg_match('/^[a-z0-9_-]+$/i', $params['path']) ? '/' . $params['path'] : '';
+
+		$tpl->assign($params);
+		$tpl->assign('path', $ut->module->storage_root() . $path);
+		return '<div class="attachments noprint"><h3 class="ruler">Fichiers joints</h3>' . $tpl->fetch('common/files/_context_list.tpl') . '</div>';
+	}
+
+	static public function delete_file(array $params, UserTemplate $ut, int $line): void
+	{
+		if (empty($ut->module)) {
+			throw new Brindille_Exception('Module could not be found');
+		}
+
+		if (empty($params['path'])) {
+			throw new Brindille_Exception(sprintf('Line %d: "path" parameter is missing or empty', $line));
+		}
+
+		if (preg_match('!/\.|\.\.!', $params['path'])) {
+			throw new Brindille_Exception(sprintf('Line %d: "path" parameter is invalid: "%s"', $line, $params['path']));
+		}
+
+		Files::delete($ut->module->storage_root() . '/' . $params['path']);
 	}
 }

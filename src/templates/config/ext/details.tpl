@@ -44,7 +44,7 @@
 				<td class="size"><nobr>{$files_size|size_in_bytes}</nobr></td>
 				<td class="actions"></td>
 			</tr>
-			<caption>Utilisation de l'escape disque</caption>
+			<caption>Utilisation de l'espace disque</caption>
 		</table>
 	</article>
 {else}

@@ -45,7 +45,7 @@
 				Version SQLite&nbsp;: {$sqlite_version}<br />
 				Heure du serveur&nbsp;: {$server_time|date}<br />
 				Chiffrement GnuPG&nbsp;: {if $has_gpg_support}disponible, module activé{else}non, module PHP gnupg non installé&nbsp;?{/if}<br />
-				{link label="Voir la configuration du serveur" href="?dump_config=1" target="_dialog"}
+				{linkbutton shape="settings" label="Configuration du serveur" href="server/"}
 			</dd>
 			{/if}
 			<dt>Espace disque</dt>

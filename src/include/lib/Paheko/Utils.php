@@ -229,7 +229,7 @@ class Utils
 			return 0;
 		}
 
-		if (!preg_match('/^(-?)(\d+)(?:[,.](\d{1,2}))?$/', $value, $match)) {
+		if (!preg_match('/^(-?)(\d+)(?:[,.](\d{1,2}))?/', $value, $match)) {
 			throw new UserException(sprintf('Le montant est invalide : %s. Exemple de format accepté : 142,02', $value));
 		}
 
@@ -454,7 +454,7 @@ class Utils
 		return Translate::getCountriesList('fr');
 	}
 
-	static public function getCountryName($code)
+	static public function getCountryName(string $code): ?string
 	{
 		$code = strtoupper($code);
 		$list = self::getCountryList();
@@ -1236,6 +1236,8 @@ class Utils
 			throw new \LogicException('PDF generation is disabled');
 		}
 
+		$str = self::appendCookieToURLs($str);
+
 		if (PDF_COMMAND == 'auto') {
 			// Try to see if there's a plugin
 			$in = ['string' => $str];
@@ -1256,8 +1258,6 @@ class Utils
 			unlink($file);
 			return;
 		}
-
-		$str = self::appendCookieToURLs($str);
 
 		// 3 seconds is plenty enough to fetch resources, right?
 		$cmd = 'prince --http-timeout=3 --pdf-profile="PDF/A-3b" -o - -';
@@ -1496,7 +1496,7 @@ class Utils
 	static public function parse_ini_string(string $ini, bool $sections = false)
 	{
 		try {
-			$ini = \parse_ini_string($ini, $sections, \INI_SCANNER_RAW);
+			$ini = parse_ini_string($ini, $sections, \INI_SCANNER_RAW);
 		}
 		catch (\Throwable $e) {
 			throw new \RuntimeException($e->getMessage(), 0, $e);

@@ -34,6 +34,7 @@ class CommonModifiers
 		'strval',
 		'substr',
 		'http_build_query',
+		'str_getcsv',
 	];
 
 	/**

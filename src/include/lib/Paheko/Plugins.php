@@ -195,16 +195,37 @@ class Plugins
 	{
 		$list = EM::getInstance(Plugin::class)->all('SELECT * FROM @TABLE ORDER BY label COLLATE NOCASE ASC;');
 
-		foreach ($list as $p) {
+		foreach ($list as $key => $p) {
 			try {
 				$p->selfCheck();
 			}
 			catch (ValidationException $e) {
-				$p->setBrokenMessage($e->getMessage());
+				if (self::removeBroken($p->name)) {
+					unset($list[$key]);
+				}
+				else {
+					$p->setBrokenMessage($e->getMessage());
+				}
 			}
 		}
 
 		return $list;
+	}
+
+	/**
+	 * Remove old/broken extensions if they are still installed somehow
+	 */
+	static public function removeBroken(string $name): bool
+	{
+		if ($name === 'garradin_eu') {
+			DB::getInstance()->exec('
+				DELETE FROM plugins_signals WHERE plugin = \'garradin_eu\';
+				DELETE FROM plugins WHERE name = \'garradin_eu\';
+			');
+			return true;
+		}
+
+		return false;
 	}
 
 	static public function refresh(): array

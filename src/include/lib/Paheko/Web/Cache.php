@@ -113,7 +113,8 @@ class Cache
 			if (!is_writable(ROOT . '/www')) {
 				throw new UserException('Le répertoire "'. ROOT . '/www" n\'est pas accessible en écriture.');
 			}
-			symlink(DATA_ROOT . '/cache/web', ROOT . '/www/.cache');
+
+			@symlink(DATA_ROOT . '/cache/web', ROOT . '/www/.cache');
 		}
 
 		return true;

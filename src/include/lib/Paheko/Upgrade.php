@@ -52,6 +52,29 @@ class Upgrade
 		$db = DB::getInstance();
 		$v = $db->version();
 
+		// Rename namespace in config file, before starting any upgrade
+		if (version_compare($v, '1.3.0', '<')) {
+			$config_path = ROOT . '/' . CONFIG_FILE;
+
+			if (file_exists($config_path) && is_writable($config_path)) {
+				$contents = file_get_contents($config_path);
+
+				$new = strtr($contents, [
+					'namespace Garradin' => 'namespace Paheko',
+					' Garradin\\' => ' Paheko\\',
+					'\'Garradin\\' => '\'Paheko\\',
+					'"Garradin\\' => '"Paheko\\',
+					'\\Garradin\\' => '\\Paheko\\',
+				]);
+
+				if ($new !== $contents) {
+					file_put_contents($config_path, $new);
+					Install::showProgressSpinner('!upgrade.php?a=' . time(), 'Suite de la mise à jour…');
+					exit;
+				}
+			}
+		}
+
 		Plugins::toggleSignals(false);
 
 		Static_Cache::store('upgrade', 'Updating');

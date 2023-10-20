@@ -47,6 +47,7 @@
 					{$transaction.label}
 				{/if}
 			</th>
+			{if !empty($with_linked_users)}
 			<td rowspan="{$lines_count}">
 				{if $diff.linked_users}
 					<del>{$diff.linked_users[0]}</del><br />
@@ -55,6 +56,7 @@
 					{$t.linked_users}
 				{/if}
 			</td>
+			{/if}
 	{if $diff.lines_removed || $diff.lines_new || $diff.lines}
 		{foreach from=$diff.lines_removed item="line"}
 			<td><del>{$line.account}</del></td>

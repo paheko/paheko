@@ -499,8 +499,19 @@ class Template extends Smartyer
 			$params['default'] = DB::getInstance()->firstColumn(sprintf('SELECT MAX(%s) + 1 FROM %s;', $key, User::TABLE));
 			$params['required'] = false;
 		}
-		elseif ($type == 'number') {
+		elseif ($type === 'number') {
 			$params['step'] = 'any';
+		}
+		elseif ($type === 'datalist') {
+			$options = '';
+
+			foreach ($field->options as $value) {
+				$options .= sprintf('<option>%s</option>', htmlspecialchars($value));
+			}
+
+			$params['type'] = 'text';
+			$params['list'] = 'list-' . $params['name'];
+			$params['suffix'] = sprintf('<datalist id="%s">%s</datalist>', $params['list'], $options);
 		}
 
 		if ($field->default_value == '=NOW') {

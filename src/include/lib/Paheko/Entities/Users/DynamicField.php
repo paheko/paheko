@@ -100,8 +100,9 @@ class DynamicField extends Entity
 		'select'	=>	'Sélecteur à choix unique',
 		'multiple'  =>  'Sélecteur à choix multiple',
 		'country'	=>	'Sélecteur de pays',
-		'text'		=>	'Texte',
-		'textarea'	=>	'Texte multi-lignes',
+		'text'		=>	'Texte libre, une ligne',
+		'datalist'  =>  'Texte libre, une ligne, à choix multiple',
+		'textarea'	=>	'Texte libre, plusieurs lignes',
 		//'virtual' =>  'Calculé',
 	];
 
@@ -115,13 +116,14 @@ class DynamicField extends Entity
 		'year'     => '?int',
 		'file'     => '?string',
 		'password' => '?string',
-		'number'   => '?int',
+		'number'   => '?float',
 		'tel'      => '?string',
 		'select'   => '?string',
 		'multiple' => '?int',
 		'country'  => '?string',
 		'text'     => '?string',
 		'textarea' => '?string',
+		'datalist' => '?string',
 		//'virtual'=> 'dynamic',
 	];
 
@@ -135,13 +137,14 @@ class DynamicField extends Entity
 		'year'     => 'INTEGER',
 		'file'     => 'TEXT',
 		'password' => 'TEXT',
-		'number'   => 'INTEGER',
+		'number'   => 'FLOAT',
 		'tel'      => 'TEXT',
 		'select'   => 'TEXT',
 		'multiple' => 'INTEGER',
 		'country'  => 'TEXT',
 		'text'     => 'TEXT',
 		'textarea' => 'TEXT',
+		'datalist' => 'TEXT',
 		//'virtual'  => null,
 	];
 
@@ -339,6 +342,10 @@ class DynamicField extends Entity
 
 	public function getStringValue($value): ?string
 	{
+		if (null === $value) {
+			return null;
+		}
+
 		switch ($this->type) {
 			case 'multiple':
 				// Useful for search results, if a value is not a number
@@ -372,7 +379,7 @@ class DynamicField extends Entity
 			case 'country':
 				return Utils::getCountryName($value);
 			default:
-				return $value === null ? null : (string) $value;
+				return (string) $value;
 		}
 	}
 }

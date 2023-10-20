@@ -24,10 +24,10 @@ class Sections
 		'categories',
 		'articles',
 		'pages',
-		'images',
 		'breadcrumbs',
+		'images',
 		'documents',
-		'files',
+		'attachments',
 		'users',
 		'subscriptions',
 		'transactions',
@@ -297,7 +297,7 @@ class Sections
 			$params['where'] = '1';
 		}
 		else {
-			$params['where'] = self::_moduleReplaceJSONExtract($params['where']);
+			$params['where'] = self::_moduleReplaceJSONExtract($params['where'], $table);
 		}
 
 		if (isset($params['key'])) {
@@ -339,22 +339,22 @@ class Sections
 		$s = 'id, key, document AS json';
 
 		if (isset($params['select'])) {
-			$params['select'] = $s . ', ' . self::_moduleReplaceJSONExtract($params['select']);
+			$params['select'] = $s . ', ' . self::_moduleReplaceJSONExtract($params['select'], $table);
 		}
 		else {
 			$params['select'] = $s;
 		}
 
 		if (isset($params['group'])) {
-			$params['group'] = self::_moduleReplaceJSONExtract($params['group']);
+			$params['group'] = self::_moduleReplaceJSONExtract($params['group'], $table);
 		}
 
 		if (isset($params['having'])) {
-			$params['having'] = self::_moduleReplaceJSONExtract($params['having']);
+			$params['having'] = self::_moduleReplaceJSONExtract($params['having'], $table);
 		}
 
 		if (isset($params['order'])) {
-			$params['order'] = self::_moduleReplaceJSONExtract($params['order']);
+			$params['order'] = self::_moduleReplaceJSONExtract($params['order'], $table);
 		}
 
 		// Try to create an index if required
@@ -382,7 +382,7 @@ class Sections
 
 	static protected function _getModuleColumnsFromSchema(string $schema, ?string $columns, UserTemplate $tpl, int $line): array
 	{
-		$schema = Functions::read(['file' => $schema], $tpl, $line);
+		$schema = Functions::_readFile($schema, 'schema', $tpl, $line);
 		$schema = json_decode($schema, true);
 
 		if (!$schema) {
@@ -428,15 +428,22 @@ class Sections
 		return $out;
 	}
 
-	static public function _moduleReplaceJSONExtract(string $str): string
+	static public function _moduleReplaceJSONExtract(string $str, string $table): string
 	{
+		$str = str_replace('@TABLE', $table, $str);
+
 		if (!strstr($str, '$')) {
 			return $str;
 		}
 
+		$db = DB::getInstance();
+
 		return preg_replace_callback(
-			'/\$(\$[\[\.][\w\d\.\[\]#]+)/',
-			fn ($m) => sprintf('json_extract(document, %s)', DB::getInstance()->quote($m[1])),
+			'/(?:([\w\d]+)\.)?\$(\$[\[\.][\w\d\.\[\]#]+)/',
+			fn ($m) => sprintf('json_extract(%sdocument, %s)',
+				!empty($m[1]) ? $db->quote($m[1]) . '.' : '',
+				$db->quote($m[2])
+			),
 			$str
 		);
 	}
@@ -466,7 +473,7 @@ class Sections
 			$where = '1';
 		}
 		else {
-			$where = self::_moduleReplaceJSONExtract($params['where']);
+			$where = self::_moduleReplaceJSONExtract($params['where'], $table);
 		}
 
 		$columns = [];
@@ -490,7 +497,7 @@ class Sections
 					throw new Brindille_Exception(sprintf('Line %d: "*" cannot be used in "select" parameter', $line));
 				}
 
-				$select = self::_moduleReplaceJSONExtract($select);
+				$select = self::_moduleReplaceJSONExtract($select, $table);
 
 				$columns['col' . ($i + 1)] = compact('label', 'select');
 			}
@@ -564,7 +571,12 @@ class Sections
 			self::_debugExplain($list->SQL());
 		}
 
-		$i = $list->iterate();
+		try {
+			$i = $list->iterate();
+		}
+		catch (DB_Exception $e) {
+			throw new Brindille_Exception(sprintf("Line %d: invalid SQL query: %s\nQuery: %s", $line, $e->getMessage(), $list->SQL()));
+		}
 
 		// If there is nothing to iterate, just stop
 		if (!$i->valid()) {
@@ -588,7 +600,6 @@ class Sections
 
 		echo '</tbody>';
 		echo '</table>';
-
 
 		echo $list->getHTMLPagination();
 	}
@@ -1055,14 +1066,14 @@ class Sections
 	{
 		$params['where'] ??= '';
 		$params['where'] .= ' AND image = 1';
-		return self::files($params, $tpl, $line);
+		return self::attachments($params, $tpl, $line);
 	}
 
 	static public function documents(array $params, UserTemplate $tpl, int $line): \Generator
 	{
 		$params['where'] ??= '';
 		$params['where'] .= ' AND image = 0';
-		return self::files($params, $tpl, $line);
+		return self::attachments($params, $tpl, $line);
 	}
 
 	static protected function _getPageIdFromPath(string $path): ?int
@@ -1073,7 +1084,7 @@ class Sections
 		});
 	}
 
-	static public function files(array $params, UserTemplate $tpl, int $line): \Generator
+	static public function attachments(array $params, UserTemplate $tpl, int $line): \Generator
 	{
 		$id = null;
 
@@ -1084,7 +1095,7 @@ class Sections
 			$id = self::_getPageIdFromPath($params['parent']);
 		}
 		else {
-			throw new Brindille_Exception('La section "files" doit obligatoirement comporter un paramètre "id_page" ou "parent"');
+			throw new Brindille_Exception('La section "attachments" doit obligatoirement comporter un paramètre "id_page" ou "parent"');
 		}
 
 		if (!$id) {

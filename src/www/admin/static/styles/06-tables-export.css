@@ -81,3 +81,7 @@ table.statement tr.spacer td {
 table caption {
 	display: none;
 }
+
+table th em {
+	font-weight: normal;
+}

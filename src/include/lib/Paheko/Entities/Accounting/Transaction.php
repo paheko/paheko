@@ -3,6 +3,7 @@
 namespace Paheko\Entities\Accounting;
 
 use KD2\DB\EntityManager;
+use KD2\DB\Date;
 
 use Paheko\Config;
 use Paheko\DB;
@@ -81,7 +82,7 @@ class Transaction extends Entity
 	protected ?string $notes = null;
 	protected ?string $reference = null;
 
-	protected \KD2\DB\Date $date;
+	protected Date $date;
 
 	protected ?string $hash = null;
 	protected ?int $prev_id = null;
@@ -817,11 +818,13 @@ class Transaction extends Entity
 			$source['lines'] = [
 				$line + [
 					$accounts[0]->direction => $source['amount'],
+					$accounts[1]->direction => 0,
 					'account_selector' => $accounts[0]->selector_value,
 					'account' => $source[$accounts[0]->direction] ?? null,
 				],
 				$line + [
 					$accounts[1]->direction => $source['amount'],
+					$accounts[0]->direction => 0,
 					'account_selector' => $accounts[1]->selector_value,
 					'account' => $source[$accounts[1]->direction] ?? null,
 				],
@@ -834,7 +837,6 @@ class Transaction extends Entity
 			if (Config::getInstance()->analytical_set_all) {
 				$source['lines'][1]['id_project'] = $source['lines'][0]['id_project'];
 			}
-
 
 			unset($line, $accounts, $account, $source['simple']);
 		}
@@ -903,17 +905,6 @@ class Transaction extends Entity
 		}
 
 		return parent::importForm($source);
-	}
-
-	public function importFromEditForm(?array $source = null): void
-	{
-		$source ??= $_POST;
-
-		if (!isset($source['id_related'])) {
-			unset($source['id_related']);
-		}
-
-		$this->importForm($source);
 	}
 
 	public function importFromNewForm(?array $source = null): void
@@ -1545,22 +1536,26 @@ class Transaction extends Entity
 
 		// l = label
 		if (isset($_GET['l'])) {
-			$this->label = $_GET['l'];
+			$this->set('label', $_GET['l']);
 		}
 
 		// r = reference
 		if (isset($_GET['r'])) {
-			$this->reference = $_GET['r'];
+			$this->set('reference', $_GET['r']);
 		}
 
 		// dt = date
 		if (isset($_GET['dt'])) {
-			$this->date = Entity::filterUserDateValue($_GET['dt']);
+			$date = Entity::filterUserDateValue($_GET['dt']);
+
+			if (null !== $date && $date instanceof Date) {
+				$this->set('date', $date);
+			}
 		}
 
 		// t = type
 		if (isset($_GET['t'])) {
-			$this->type = (int) $_GET['t'];
+			$this->set('type', (int) $_GET['t']);
 		}
 
 		if (isset($_GET['p'])) {

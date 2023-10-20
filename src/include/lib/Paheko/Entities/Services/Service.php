@@ -120,6 +120,12 @@ class Service extends Entity
 		$list->groupBy('su.id_user');
 		$list->orderBy('paid', true);
 		$list->setCount('COUNT(DISTINCT su.id_user)');
+
+		$list->setExportCallback(function (&$row) {
+			$row->status = $row->status ? 'En cours' : 'Expiré';
+			$row->paid = $row->paid ? 'Oui' : 'Non';
+		});
+
 		return $list;
 	}
 

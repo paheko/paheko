@@ -11,6 +11,7 @@
 	<ul>
 		<li{if $current == 'index'} class="current"{/if}><a href="{$admin_url}services/">Activités et cotisations</a></li>
 		{if !DISABLE_EMAIL && $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
+			<li{if $current == 'import'} class="current"{/if}><a href="{$admin_url}services/import.php">Import</a></li>
 			<li{if $current == 'reminders'} class="current"{/if}><a href="{$admin_url}services/reminders/">Gestion des rappels automatiques</a></li>
 		{/if}
 	</ul>

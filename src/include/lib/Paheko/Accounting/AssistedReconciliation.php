@@ -108,7 +108,7 @@ class AssistedReconciliation
 		return compact('start', 'end');
 	}
 
-	public function mergeJournal(\Generator $journal)
+	public function mergeJournal(\Generator $journal, \DateTimeInterface $start, \DateTimeInterface $end)
 	{
 		$lines = [];
 
@@ -157,6 +157,10 @@ class AssistedReconciliation
 					 continue;
 				}
 
+				if ($line->date < $start || $line->date > $end) {
+					continue;
+				}
+
 				if ($j->date->format('Ymd') == $line->date->format('Ymd')
 					&& ($j->credit * -1 == $line->amount || $j->debit == $line->amount)) {
 					$row->csv = $line;
@@ -171,6 +175,10 @@ class AssistedReconciliation
 		// Then add CSV lines on the right
 		foreach ($csv as $line) {
 			if (null == $line || !isset($line->date)) {
+				continue;
+			}
+
+			if ($line->date < $start || $line->date > $end) {
 				continue;
 			}
 

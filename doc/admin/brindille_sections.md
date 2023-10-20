@@ -425,13 +425,13 @@ Si une recherche a été effectuée, deux autres variables sont fournies :
 | `url_highlight` | Adresse de la page, où le texte recherché sera mis en évidence | `https://.../onu-racisme#:~:text=racisme%20au%20sein` |
 
 
-## files, documents, images <sup>(sql)</sup>
+## attachments, documents, images <sup>(sql)</sup>
 
 Note : ces sections héritent de `sql` (voir plus haut).
 
-* `files` renvoie une liste de fichiers
-* `documents` renvoie une liste de fichiers qui ne sont pas des images
-* `images` renvoie une liste de fichiers qui sont des images
+* `attachments` renvoie une liste de fichiers joints à une page du site web
+* `documents` renvoie une liste de fichiers joints qui ne sont pas des images
+* `images` renvoie une liste de fichiers joints qui sont des images
 
 À part cela ces trois types de section se comportent de manière identique.
 
@@ -780,3 +780,28 @@ On peut utiliser le nom des clés du document JSON, mais sinon pour faire réfé
 
 Noter aussi l'utilisation du numéro de la colonne de l'année (`2`) pour le paramètre `order`, qui avec `select` doit indiquer le numéro de la colonne à utiliser pour l'ordre.
 
+<!--
+TODO:
+## files
+
+Liste les fichiers du module courant, éventuellement limité à un sous-répertoire designé.
+
+| Paramètre | Optionnel / obligatoire ? | Fonction |
+| :- | :- | :- |
+| `path` | optionnel | Désigne le sous-répertoire éventuel pour limiter la liste. |
+| `recursive` | optionnel | Booléen. Indique si on veut aussi lister les fichiers dans les sous-répertoires. Défaut : `false`. |
+
+Exemple :
+
+```
+<table>
+{{#files path="facture43" recursive=false}}
+	<tr>
+		<td>{{if $is_dir}}Répertoire{{else}}{{$mime}}{{/if}}</td>
+		<td>{{$name}}</td>
+		<td>{{$size|size_in_bytes}}</td>
+	</tr>
+{{/files}}
+</table>
+```
+-->

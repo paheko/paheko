@@ -2,10 +2,15 @@
 
 namespace Paheko\Services;
 
+use Paheko\CSV_Custom;
 use Paheko\DB;
 use Paheko\DynamicList;
 use Paheko\Utils;
+use Paheko\UserException;
 use Paheko\Entities\Services\Service_User;
+use Paheko\Users\DynamicFields;
+use Paheko\Users\Users;
+
 use KD2\DB\EntityManager;
 
 class Services_User
@@ -105,5 +110,121 @@ class Services_User
 		$list->groupBy('su.id');
 		$list->setCount('COUNT(DISTINCT su.id)');
 		return $list;
+	}
+
+	static protected function iterateImport(CSV_Custom $csv, array &$errors = null): \Generator
+	{
+		$number_field = DynamicFields::getNumberField();
+		$services = Services::listAssoc();
+		$fees = Fees::listGroupedById();
+
+		foreach ($csv->iterate() as $i => $row) {
+			try {
+				if (empty($row->$number_field)) {
+					throw new UserException('Aucun numéro de membre n\'a été indiqué');
+				}
+
+				$id_user = Users::getIdFromNumber($row->$number_field);
+
+				if (!$id_user) {
+					throw new UserException(sprintf('Le numéro de membre "%s" n\'existe pas', $row->$number_field));
+				}
+
+				$id_service = array_search($row->service, $services);
+
+				if (!$id_service) {
+					throw new UserException(sprintf('L\'activité "%s" n\'existe pas', $row->service));
+				}
+
+				$id_fee = null;
+
+				if (!empty($row->fee)) {
+					foreach ($fees as $fee) {
+						if (strcasecmp($fee->label, $row->fee) === 0) {
+							$id_fee = $fee->id;
+							break;
+						}
+					}
+
+					if (!$id_fee) {
+						throw new UserException(sprintf('Le tarif d\'activité "%s" n\'existe pas', $row->fee));
+					}
+
+					if ($fee->id_service !== $id_service) {
+						throw new UserException(sprintf('Le tarif d\'activité "%s" ne correspond pas à l\'activité "%s"', $fee->label, $row->service));
+					}
+
+					$id_fee = $fee->id;
+				}
+
+				$su = new Service_User;
+				$su->set('id_user', $id_user);
+				$su->set('id_service', $id_service);
+				$su->set('id_fee', $id_fee);
+				unset($row->fee, $row->service, $row->$number_field);
+
+				if (empty($row->paid) || strtolower(trim($row->paid)) === 'non') {
+					$row->paid = false;
+				}
+				else {
+					$row->paid = true;
+				}
+
+				$su->import((array)$row);
+
+				yield $i => $su;
+			}
+			catch (UserException $e) {
+				if (null !== $errors) {
+					$errors[] = sprintf('Ligne %d : %s', $i, $e->getMessage());
+					continue;
+				}
+
+				throw $e;
+			}
+		}
+	}
+
+	static public function import(CSV_Custom $csv): void
+	{
+		$db = DB::getInstance();
+		$db->begin();
+
+		foreach (self::iterateImport($csv) as $i => $su) {
+			try {
+				$su->save();
+			}
+			catch (UserException $e) {
+				throw new UserException(sprintf('Ligne %d : %s', $i, $e->getMessage()), 0, $e);
+			}
+		}
+
+		$db->commit();
+	}
+
+	static public function listImportColumns(): array
+	{
+		$number_field = DynamicFields::getNumberField();
+
+		return [
+			$number_field     => 'Numéro de membre',
+			'service'         => 'Activité',
+			'fee'             => 'Tarif',
+			'paid'            => 'Payé ?',
+			'expected_amount' => 'Montant à régler',
+			'date'            => 'Date d\'inscription',
+			'expiry_date'     => 'Date d\'expiration',
+		];
+	}
+
+	static public function listMandatoryImportColumns(): array
+	{
+		$number_field = DynamicFields::getNumberField();
+
+		return [
+			$number_field,
+			'service',
+			'date',
+		];
 	}
 }

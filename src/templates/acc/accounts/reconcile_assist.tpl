@@ -45,16 +45,28 @@
 				<dd>
 					{$csv->count()}
 				</dd>
-				<dt>
-					Période couverte
-				</dt>
-				<dd>
-					Du {$start|date_short} au {$end|date_short}
-				</dd>
 			</dl>
 			<p class="submit">
 				{csrf_field key=$csrf_key}
-				{button type="submit" name="cancel" value="1" label="Annuler" shape="left"}
+				{button type="submit" name="cancel" value="1" label="Annuler le rapprochement" shape="left"}
+			</p>
+		</fieldset>
+	</form>
+
+	<form method="get" action="">
+		<fieldset>
+			<legend>Période de rapprochement</legend>
+			<dl>
+				<dd>
+					Du
+					{input type="date" name="start" default=$start}
+					au
+					{input type="date" name="end" default=$end}
+				</dd>
+			</dl>
+			<p class="submit">
+				<input type="hidden" name="id" value="{$account.id}" />
+				{button type="submit" label="Modifier" shape="right"}
 			</p>
 		</fieldset>
 	{/if}

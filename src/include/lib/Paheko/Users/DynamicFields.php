@@ -71,6 +71,11 @@ class DynamicFields
 		return key(self::getInstance()->fieldsBySystemUse('number'));
 	}
 
+	static public function getNumberFieldSQL(): string
+	{
+		return DB::getInstance()->quoteIdentifier(self::getNumberField());
+	}
+
 	static public function getLoginField(): string
 	{
 		return key(self::getInstance()->fieldsBySystemUse('login'));
@@ -161,14 +166,15 @@ class DynamicFields
 			$fields[] = $field->name;
 		}
 
+		// There are no indexed fields in the name, eg. only the user number, then discard the index
+		if (!count($fields)) {
+			return '1';
+		}
+
 		$db = DB::getInstance();
 
 		if ($prefix) {
 			$fields = array_map(fn($v) => $prefix . '.' . $db->quoteIdentifier($v), $fields);
-		}
-
-		if (count($fields) == 1) {
-			return $fields[0];
 		}
 
 		foreach ($fields as &$field) {

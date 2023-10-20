@@ -303,7 +303,12 @@ class Plugin extends Entity
 	 */
 	public function needUpgrade(): bool
 	{
-		$infos = (object) Utils::parse_ini_file($this->path(self::META_FILE), false);
+		try {
+			$infos = (object) Utils::parse_ini_file($this->path(self::META_FILE), false);
+		}
+		catch (\RuntimeException $e) {
+			return false;
+		}
 
 		if (version_compare($this->version, $infos->version, '!=')) {
 			return true;
