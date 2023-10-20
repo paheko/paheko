@@ -342,6 +342,10 @@ class DynamicField extends Entity
 
 	public function getStringValue($value): ?string
 	{
+		if (null === $value) {
+			return null;
+		}
+
 		switch ($this->type) {
 			case 'multiple':
 				// Useful for search results, if a value is not a number
@@ -375,7 +379,7 @@ class DynamicField extends Entity
 			case 'country':
 				return Utils::getCountryName($value);
 			default:
-				return $value === null ? null : (string) $value;
+				return (string) $value;
 		}
 	}
 }
