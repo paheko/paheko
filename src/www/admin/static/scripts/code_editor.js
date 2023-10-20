@@ -89,15 +89,15 @@
 				const data = await r.json();
 				console.error(data);
 
-				if (data.error) {
-					alert(data.error);
+				if (data.message) {
+					alert(data.message);
 				}
 				else if (!data.success) {
 					throw Error('Invalid response');
 				}
 
 				this.textarea.form.querySelector('[type=submit]').click();
-				return false;
+				return;
 			}
 
 			this.textarea.defaultValue = this.textarea.value;

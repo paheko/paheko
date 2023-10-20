@@ -344,9 +344,9 @@
 					throw Error(r.status);
 				}
 
-				if (received.error) {
-					alert(received.error);
-					throw Error(received.error);
+				if (received.message) {
+					alert(received.message);
+					throw Error(received.message);
 				}
 				else {
 					callback(received);
