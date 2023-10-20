@@ -229,7 +229,7 @@ class Utils
 			return 0;
 		}
 
-		if (!preg_match('/^(-?)(\d+)(?:[,.](\d{1,2}))?$/', $value, $match)) {
+		if (!preg_match('/^(-?)(\d+)(?:[,.](\d{1,2}))?/', $value, $match)) {
 			throw new UserException(sprintf('Le montant est invalide : %s. Exemple de format accepté : 142,02', $value));
 		}
 
