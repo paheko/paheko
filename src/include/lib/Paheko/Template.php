@@ -371,6 +371,7 @@ class Template extends Smartyer
 			case 'url':
 				return '<a href="' . htmlspecialchars($v) . '" target="_blank">' . htmlspecialchars($v) . '</a>';
 			case 'number':
+			case 'decimal':
 				return str_replace('.', ',', htmlspecialchars($v));
 			default:
 				$v = $field->getStringValue($v);
@@ -390,22 +391,18 @@ class Template extends Smartyer
 		if ($field->system & $field::PASSWORD) {
 			return '';
 		}
-
 		// Files are managed out of the form
-		if ($type == 'file') {
+		elseif ($type == 'file') {
 			return '';
 		}
-
 		// VIRTUAL columns cannot be edited
-		if ($type == 'virtual') {
+		elseif ($type == 'virtual') {
 			return '';
 		}
-
-		if ($context === 'user_edit' && $field->user_access_level === Session::ACCESS_NONE) {
+		elseif ($context === 'user_edit' && $field->user_access_level === Session::ACCESS_NONE) {
 			return '';
 		}
-
-		if ($context === 'user_edit' && $field->user_access_level === Session::ACCESS_READ) {
+		elseif ($context === 'user_edit' && $field->user_access_level === Session::ACCESS_READ) {
 			$v = $this->displayDynamicField(['key' => $key, 'value' => $params['user']->$key]);
 			return sprintf('<dt>%s</dt><dd>%s</dd>', $field->label, $v ?: '<em>Non renseigné</em>');
 		}
@@ -500,6 +497,11 @@ class Template extends Smartyer
 			$params['required'] = false;
 		}
 		elseif ($type === 'number') {
+			$params['step'] = '1';
+			$params['pattern'] = '\\d+';
+		}
+		elseif ($type === 'decimal') {
+			$params['type'] = 'number';
 			$params['step'] = 'any';
 		}
 		elseif ($type === 'datalist') {
