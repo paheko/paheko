@@ -13,6 +13,9 @@
 	<fieldset>
 		<legend>Qui doit recevoir ce message&nbsp;?</legend>
 		<dl>
+		{foreach from=$mailing_fields item=$field}
+			{input type="radio-btn" name="target" value="field_%s"|args:$field.name label="%s (%s membres)"|args:$field.label:$field.count required=true help="Les membres appartenant à une catégorie cachée ne sont pas inclus."}
+		{/foreach}
 			{input type="radio-btn" name="target" value="all" label="Tous les membres (sauf ceux appartenant à une catégorie cachée)" required=true}
 			{input type="radio-btn" name="target" value="category" label="Les membres d'une seule catégorie" required=true}
 			{input type="radio-btn" name="target" value="service" label="Les membres inscrits à une activité, et à jour" required=true help="Les membres dont l'inscription a expiré ne recevront pas de message."}

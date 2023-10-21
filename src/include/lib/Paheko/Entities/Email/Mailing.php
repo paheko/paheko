@@ -59,23 +59,26 @@ class Mailing extends Entity
 		}
 	}
 
-	public function populate(string $target, ?int $target_id = null): void
+	public function populate(string $target, $target_id = null): void
 	{
 		if ($target !== 'all' && empty($target_id)) {
 			throw new \InvalidArgumentException('Missing target ID');
 		}
 
-		if ($target == 'all') {
+		if ($target === 'field') {
+			$recipients = Users::iterateEmailsByField($target_id, true);
+		}
+		elseif ($target === 'all') {
 			$recipients = Users::iterateEmailsByCategory(null);
 		}
-		elseif ($target == 'category') {
-			$recipients = Users::iterateEmailsByCategory($target_id);
+		elseif ($target === 'category') {
+			$recipients = Users::iterateEmailsByCategory((int) $target_id);
 		}
-		elseif ($target == 'search') {
-			$recipients = Users::iterateEmailsBySearch($target_id);
+		elseif ($target === 'search') {
+			$recipients = Users::iterateEmailsBySearch((int) $target_id);
 		}
-		elseif ($target == 'service') {
-			$recipients = Users::iterateEmailsByActiveService($target_id);
+		elseif ($target === 'service') {
+			$recipients = Users::iterateEmailsByActiveService((int) $target_id);
 		}
 		else {
 			throw new \InvalidArgumentException('Invalid target');

@@ -63,6 +63,38 @@ class Users
 	}
 
 	/**
+	 * Return a list for all emails for a specific mailing checkbox
+	 */
+	static public function iterateEmailsByField(string $field_name, $field_value): iterable
+	{
+		$db = DB::getInstance();
+		$field = DynamicFields::get($field_name);
+
+		if (!$field) {
+			throw new \InvalidArgumentException('Unknown field: ' . $field_name);
+		}
+
+		if (is_bool($field_value)) {
+			$field_value = (int)$field_value;
+		}
+		else {
+			$field_value = $db->quote($field_value);
+		}
+
+		$sql = [];
+		$where = sprintf('%s = %d', $db->quoteIdentifier($field->name), $field_value);
+		$where .= ' AND id_category IN (SELECT id FROM users_categories WHERE hidden = 0)';
+
+		$fields = DynamicFields::getEmailFields();
+
+		foreach ($fields as $field) {
+			$sql[] = sprintf('SELECT *, %s AS _email, NULL AS preferences FROM users WHERE %s AND %1$s IS NOT NULL', $db->quoteIdentifier($field), $where);
+		}
+
+		return self::iterateEmails($sql);
+	}
+
+	/**
 	 * Return a list for all emails by category
 	 * @param  int|null $id_category If NULL, then all categories except hidden ones will be returned
 	 */

@@ -27,7 +27,10 @@ $form->runIf($target == 'all' || f('step3'), function () {
 	Utils::redirectDialog('!users/mailing/write.php?id=' . $m->id());
 }, $csrf_key);
 
-if ($target == 'category') {
+if ($target == 'field') {
+	$tpl->assign('fields', Users::listCheckboxFieldsTargets());
+}
+elseif ($target == 'category') {
 	$tpl->assign('categories', Categories::listWithStats(Categories::WITHOUT_HIDDEN));
 }
 elseif ($target == 'service') {
