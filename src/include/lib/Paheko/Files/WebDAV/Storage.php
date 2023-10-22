@@ -196,6 +196,11 @@ class Storage extends AbstractStorage
 				return '';
 			case NextCloud::PROP_OC_ID:
 				// fileId is required by NextCloud desktop client
+				if (!isset($file->id)) {
+					// Root directory doesn't have a ID, give something random instead
+					return 10000000;
+				}
+
 				return $file->id();
 			case NextCloud::PROP_OC_PERMISSIONS:
 				$permissions = [
