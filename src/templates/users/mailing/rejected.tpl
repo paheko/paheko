@@ -1,14 +1,6 @@
 {include file="_head.tpl" title="Adresses rejetées" current="users/mailing"}
 
-<nav class="tabs">
-	<aside>
-		{exportmenu}
-	</aside>
-	<ul>
-		<li><a href="./">Messages collectifs</a></li>
-		<li class="current"><a href="rejected.php">Adresses rejetées</a></li>
-	</ul>
-</nav>
+{include file="./_nav.tpl" current="rejected"}
 
 {if isset($_GET['sent'])}
 <p class="confirm block">
@@ -42,12 +34,12 @@
 		<tr{if $_GET.hl == $row.id} class="highlight"{/if} id="e_{$row.id}">
 			<th>{link href="!users/details.php?id=%d"|args:$row.user_id label=$row.identity}</th>
 			<td>{$row.email}</td>
-			<td>{$row.status}</td>
+			<td><b class="error">{$row.status}</b></td>
 			<td class="num">{$row.sent_count}</td>
 			<td>{$row.fail_log|escape|nl2br}</td>
 			<td>{$row.last_sent|date}</td>
 			<td>
-				{if $row.email && ($row.optout || $row.last_sent < $limit_date)}
+				{if $row.email && $row.last_sent < $limit_date}
 					{linkbutton target="_dialog" label="Rétablir" href="!users/mailing/verify.php?address=%s"|args:$row.email shape="check"}
 				{/if}
 			</td>
@@ -66,8 +58,6 @@
 			<dt>Vérifiée</dt>
 			<dd>L'adresse a déjà reçu un message et a été vérifiée manuellement par le destinataire.</dd>
 			*}
-			<dt>Désinscription</dt>
-			<dd>Le destinataire a demandé à être désinscrit et ne recevra plus de messages.</dd>
 			<dt>Invalide</dt>
 			<dd>L'adresse n'existe pas ou plus. Il n'est pas possible de lui envoyer des messages.</dd>
 			<dt>Trop d'erreurs</dt>

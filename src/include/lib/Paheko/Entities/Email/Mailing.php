@@ -218,7 +218,7 @@ class Mailing extends Entity
 			],
 			'status' => [
 				'label' => 'Erreur',
-				'select' => sprintf('CASE WHEN o.email_hash IS NOT NULL THEN \'Désinscription de cet envoi\' ELSE (%s)', Emails::getRejectionStatusClause('e')),
+				'select' => sprintf('CASE WHEN o.email_hash IS NOT NULL THEN \'Désinscription de cet envoi\' ELSE (%s) END', Emails::getRejectionStatusClause('e')),
 			],
 		];
 

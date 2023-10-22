@@ -1,14 +1,6 @@
 {include file="_head.tpl" title="Destinataires du message collectif : %s"|args:$mailing.subject current="users/mailing"}
 
-<nav class="tabs">
-	<aside>
-		{linkbutton shape="plus" label="Nouveau message" href="new.php" target="_dialog"}
-	</aside>
-	<ul>
-		<li><a href="./">Messages collectifs</a></li>
-		<li><a href="rejected.php">Adresses rejetées</a></li>
-	</ul>
-</nav>
+{include file="./_nav.tpl" current="details"}
 
 <p>
 	{linkbutton shape="left" label="Retour au message" href="details.php?id=%d"|args:$mailing.id}

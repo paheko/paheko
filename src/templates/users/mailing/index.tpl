@@ -6,6 +6,7 @@
 	</aside>
 	<ul>
 		<li class="current"><a href="{$self_url}">Messages collectifs</a></li>
+		<li><a href="optout.php">Désinscriptions</a></li>
 		<li><a href="rejected.php">Adresses rejetées</a></li>
 	</ul>
 </nav>

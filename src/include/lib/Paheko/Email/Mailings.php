@@ -129,4 +129,55 @@ class Mailings
 		 return $db->get($sql);
 	}
 
+	static public function getOptoutUsersList(): DynamicList
+	{
+		$db = DB::getInstance();
+		$email_field = 'u.' . $db->quoteIdentifier(DynamicFields::getFirstEmailField());
+
+		$columns = [
+			'id' => [
+				'select' => 'e.id',
+			],
+			'identity' => [
+				'label' => 'Membre',
+				'select' => DynamicFields::getNameFieldsSQL('u'),
+			],
+			'email' => [
+				'label' => 'Adresse',
+				'select' => $email_field,
+			],
+			'user_id' => [
+				'select' => 'u.id',
+			],
+			'hash' => [
+			],
+			'status' => [
+				'label' => 'Désinscription',
+				'select' => 'CASE WHEN e.optout = 1 THEN \'Désinscription globale\' ELSE o.target_label END',
+			],
+			'sent_count' => [
+				'label' => 'Messages envoyés',
+			],
+			'last_sent' => [
+				'label' => 'Dernière tentative d\'envoi',
+			],
+			'optout' => [],
+			'target_type' => [],
+			'target_label' => [],
+		];
+
+		$tables = sprintf('users u
+			INNER JOIN emails e ON e.hash = email_hash(%1$s)
+			LEFT JOIN mailings_optouts o ON o.email_hash = e.hash', $email_field);
+
+		$conditions = sprintf('%s IS NOT NULL AND %1$s != \'\' AND (e.optout = 1 OR o.email_hash IS NOT NULL)', $email_field);
+
+		$list = new DynamicList($columns, $tables, $conditions);
+		$list->orderBy('last_sent', true);
+		$list->setModifier(function (&$row) {
+			$row->last_sent = $row->last_sent ? new \DateTime($row->last_sent) : null;
+		});
+		return $list;
+	}
+
 }

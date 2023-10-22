@@ -259,4 +259,22 @@ class Email extends Entity
 			$this->appendFailLog($return['message']);
 		}
 	}
+
+	public function save(bool $selfcheck = true): bool
+	{
+		$optout = false;
+
+		if ($this->isModified('optout')) {
+			$optout = true;
+		}
+
+		$return = parent::save($selfcheck);
+
+		if ($return && $optout) {
+			// Delete all specific optouts when opting out of everything
+			DB::getInstance()->preparedQuery('DELETE FROM mailings_optouts WHERE email_hash = ?;', $this->hash);
+		}
+
+		return $return;
+	}
 }

@@ -26,7 +26,8 @@ DROP TABLE mailings_old;
 CREATE TABLE IF NOT EXISTS mailings_optouts (
 	email_hash TEXT NOT NULL,
 	target_type TEXT NOT NULL,
-	target_value TEXT NOT NULL
+	target_value TEXT NOT NULL,
+	target_label TEXT NOT NULL
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS mailings_optouts_unique ON mailings_optouts (email_hash, target_type, target_value);

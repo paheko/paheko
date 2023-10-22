@@ -550,7 +550,7 @@ class Emails
 
 		$tables = sprintf('emails e INNER JOIN users u ON %s IS NOT NULL AND %1$s != \'\' AND e.hash = email_hash(%1$s)', $email_field);
 
-		$conditions = sprintf('e.optout = 1 OR e.invalid = 1 OR e.fail_count >= %d', self::FAIL_LIMIT);
+		$conditions = sprintf('e.invalid = 1 OR e.fail_count >= %d', self::FAIL_LIMIT);
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('last_sent', true);
