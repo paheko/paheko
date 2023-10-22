@@ -45,6 +45,8 @@ class Emails
 	 */
 	const FAIL_LIMIT = 5;
 
+	static public function appendToQueue(int $context, string $email, array $data = [], ?string)
+
 	/**
 	 * Add a message to the sending queue using templates
 	 * @param  int          $context
@@ -558,91 +560,6 @@ class Emails
 			$row->last_sent = $row->last_sent ? new \DateTime($row->last_sent) : null;
 		});
 		return $list;
-	}
-
-	static public function getOptoutText(): string
-	{
-		return "Vous recevez ce message car vous êtes dans nos contacts.\n"
-			. "Pour ne plus jamais recevoir de message de notre part cliquez ici :\n";
-	}
-
-	static public function appendHTMLOptoutFooter(string $html, string $url): string
-	{
-		$footer = '<hr style="border-top: 2px solid #999; background: none;" /><p style="color: #666; background: #fff; padding: 10px; text-align: center; font-size: 9pt">' . nl2br(htmlspecialchars(self::getOptoutText()));
-		$footer .= sprintf('<br /><a href="%s" style="color: #009; text-decoration: underline; padding: 5px 10px; border-radius: 5px; background: #ddd; border: 1px outset #999;">Me désinscrire</a></p>', $url);
-
-		if (stripos($html, '</body>') !== false) {
-			$html = str_ireplace('</body>', $footer . '</body>', $html);
-		}
-		else {
-			$html .= $footer;
-		}
-
-		return $html;
-	}
-
-	static protected function send(int $context, string $recipient_hash, array $headers, string $content, ?string $content_html, ?string $pgp_key = null, array $attachments = []): void
-	{
-		$config = Config::getInstance();
-		$message = new Mail_Message;
-		$message->setHeaders($headers);
-
-		if (!$message->getFrom()) {
-			$message->setHeader('From', self::getFromHeader());
-		}
-
-		if (MAIL_SENDER) {
-			$message->setHeader('Reply-To', $message->getFromAddress());
-			$message->setHeader('From', self::getFromHeader($message->getFromName(), MAIL_SENDER));
-		}
-
-		$message->setMessageId();
-
-		// Append unsubscribe, except for password reminders
-		if ($context != self::CONTEXT_SYSTEM) {
-			$url = Email::getOptoutURL($recipient_hash);
-
-			// RFC 8058
-			$message->setHeader('List-Unsubscribe', sprintf('<%s>', $url));
-			$message->setHeader('List-Unsubscribe-Post', 'Unsubscribe=Yes');
-
-			$content .= sprintf("\n\n-- \n%s\n\n%s\n%s", $config->org_name, self::getOptoutText(), $url);
-
-			if (null !== $content_html) {
-				$content_html = self::appendHTMLOptoutFooter($content_html, $url);
-			}
-		}
-
-		$message->setBody($content);
-
-		if (null !== $content_html) {
-			$message->addPart('text/html', $content_html);
-		}
-
-		$message->setHeader('Return-Path', MAIL_RETURN_PATH ?? $config->org_email);
-		$message->setHeader('X-Auto-Response-Suppress', 'All'); // This is to avoid getting auto-replies from Exchange servers
-
-		foreach ($attachments as $path) {
-			$file = Files::get($path);
-
-			if (!$file) {
-				continue;
-			}
-
-			$message->addPart($file->mime, $file->fetch(), $file->name);
-		}
-
-		static $can_use_encryption = null;
-
-		if (null === $can_use_encryption) {
-			$can_use_encryption = Security::canUseEncryption();
-		}
-
-		if ($pgp_key && $can_use_encryption) {
-			$message->encrypt($pgp_key);
-		}
-
-		self::sendMessage($context, $message);
 	}
 
 	static public function sendMessage(int $context, Mail_Message $message): void
