@@ -24,9 +24,24 @@ class Mailing extends Entity
 	const NAME = 'Message collectif';
 	const PRIVATE_URL = '!users/mailing/details.php?id=%d';
 
+	const TARGETS_TYPES = [
+		'all'      => 'Tous les membres (sauf catégories cachées)',
+		'field'    => 'Champ de la fiche membre',
+		'category' => 'Catégorie',
+		'service'  => 'Inscrits à jour d\'une activité',
+		'search'   => 'Recherche enregistrée',
+	];
+
 	protected ?int $id = null;
 	protected string $subject;
 	protected ?string $body;
+
+	/**
+	 * We need to store these in order to have opt-out per-target
+	 */
+	protected ?string $target_type;
+	protected ?string $target_value;
+	protected ?string $target_label;
 
 	/**
 	 * Leave sender name and email NULL to use org name + email
@@ -59,26 +74,31 @@ class Mailing extends Entity
 		}
 	}
 
-	public function populate(string $target, $target_id = null): void
+	public function getTargetTypeLabel(): string
 	{
-		if ($target !== 'all' && empty($target_id)) {
+		return self::TARGETS_TYPES[$this->target_type] ?? '';
+	}
+
+	public function populate(): void
+	{
+		if ($this->target_type !== 'all' && empty($this->target_value)) {
 			throw new \InvalidArgumentException('Missing target ID');
 		}
 
-		if ($target === 'field') {
-			$recipients = Users::iterateEmailsByField($target_id, true);
+		if ($this->target_type === 'field') {
+			$recipients = Users::iterateEmailsByField($this->target_value, true);
 		}
-		elseif ($target === 'all') {
+		elseif ($this->target_type === 'all') {
 			$recipients = Users::iterateEmailsByCategory(null);
 		}
-		elseif ($target === 'category') {
-			$recipients = Users::iterateEmailsByCategory((int) $target_id);
+		elseif ($this->target_type === 'category') {
+			$recipients = Users::iterateEmailsByCategory((int) $this->target_value);
 		}
-		elseif ($target === 'search') {
-			$recipients = Users::iterateEmailsBySearch((int) $target_id);
+		elseif ($this->target_type === 'search') {
+			$recipients = Users::iterateEmailsBySearch((int) $this->target_value);
 		}
-		elseif ($target === 'service') {
-			$recipients = Users::iterateEmailsByActiveService((int) $target_id);
+		elseif ($this->target_type === 'service') {
+			$recipients = Users::iterateEmailsByActiveService((int) $this->target_value);
 		}
 		else {
 			throw new \InvalidArgumentException('Invalid target');
@@ -104,7 +124,17 @@ class Mailing extends Entity
 			throw new UserException('La liste de destinataires sélectionnée ne comporte aucun membre, ou aucun avec une adresse e-mail renseignée.');
 		}
 
+		$this->cleanupRecipients();
+
 		$db->commit();
+	}
+
+	/**
+	 * Remove opt-out recipients from list
+	 */
+	public function cleanupRecipients(): void
+	{
+
 	}
 
 	public function addRecipient(string $email, $data = null): void
@@ -188,14 +218,18 @@ class Mailing extends Entity
 			],
 			'status' => [
 				'label' => 'Erreur',
-				'select' => Emails::getRejectionStatusClause('e'),
+				'select' => sprintf('CASE WHEN o.email_hash IS NOT NULL THEN \'Désinscription de cet envoi\' ELSE (%s)', Emails::getRejectionStatusClause('e')),
 			],
 		];
 
-		$tables = 'mailings_recipients AS r LEFT JOIN emails e ON e.id = r.id_email';
+		$tables = 'mailings_recipients AS r
+			LEFT JOIN emails e ON e.id = r.id_email
+			LEFT JOIN mailings_optouts o ON e.hash = o.email_hash AND o.target_type = :target_type AND o.target_value = :target_value';
 		$conditions = 'id_mailing = ' . $this->id;
 
 		$list = new DynamicList($columns, $tables, $conditions);
+		$list->setParameter(':target_type', $this->target_type);
+		$list->setParameter(':target_value', $this->target_value);
 		$list->orderBy('email', false);
 		return $list;
 	}

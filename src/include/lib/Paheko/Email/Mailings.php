@@ -5,6 +5,12 @@ namespace Paheko\Email;
 use Paheko\Entities\Email\Mailing;
 use Paheko\DB;
 use Paheko\DynamicList;
+use Paheko\Users\DynamicFields;
+use Paheko\Search;
+use Paheko\Entities\Search as SearchEntity;
+use Paheko\Users\Categories;
+use Paheko\UserException;
+use Paheko\Services\Services;
 
 use KD2\DB\EntityManager;
 
@@ -40,15 +46,16 @@ class Mailings
 		return EntityManager::findOneById(Mailing::class, $id);
 	}
 
-	static public function create(string $subject, string $target, ?string $target_id): Mailing
+	static public function create(string $subject, string $target_type, ?string $target_value, ?string $target_label): Mailing
 	{
 		$db = DB::getInstance();
 		$db->begin();
 
 		$m = new Mailing;
 		$m->set('subject', $subject);
+		$m->importForm(compact('subject', 'target_type', 'target_value', 'target_label'));
 		$m->save();
-		$m->populate($target, $target_id);
+		$m->populate();
 
 		$db->commit();
 		return $m;
@@ -68,4 +75,58 @@ class Mailings
 
 		$db->commit();
 	}
+
+	static public function listTargets(string $type): array
+	{
+		if ($type === 'field') {
+			$list = self::listCheckboxFieldsTargets();
+		}
+		elseif ($type === 'category') {
+			$list = Categories::listWithStats(Categories::WITHOUT_HIDDEN);
+		}
+		elseif ($type === 'service') {
+			$list = iterator_to_array(Services::listWithStats(true)->iterate());
+		}
+		elseif ($type === 'search') {
+			$list = Search::list(SearchEntity::TARGET_USERS, Session::getUserId());
+			$list = array_filter($list, fn($s) => $s->hasUserId());
+			array_walk($search_list, function (&$s) {
+				$s = (object) ['label' => $s->label, 'id' => $s->id, 'count' => $s->countResults()];
+			});
+
+		}
+		else {
+			throw new \InvalidArgumentException('Unknown target type: ' . $type);
+		}
+
+		if (!count($list)) {
+			throw new UserException('Il n\'y aucun résultat correspondant à cette cible d\'envoi.');
+		}
+
+		return $list;
+	}
+
+	static public function listCheckboxFieldsTargets(): array
+	{
+		 $fields = DynamicFields::getInstance()->fieldsByType('checkbox');
+
+		 if (!count($fields)) {
+		 	return [];
+		 }
+
+		 $db = DB::getInstance();
+		 $sql = [];
+
+		 foreach ($fields as $field) {
+		 	$sql[] = sprintf('SELECT %s AS name, %s AS label, COUNT(*) AS count FROM users WHERE %s = 1 AND id_category IN (SELECT id FROM users_categories WHERE hidden = 0)',
+		 		$db->quote($field->name),
+		 		$db->quote($field->label),
+		 		$db->quoteIdentifier($field->name)
+		 	);
+		 }
+
+		 $sql = implode(' UNION ALL ', $sql);
+		 return $db->get($sql);
+	}
+
 }

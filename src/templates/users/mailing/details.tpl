@@ -36,6 +36,12 @@
 				{$mailing->getFrom()}<br/>
 			</dd>
 		{/if}
+		{if $mailing.target_type}
+		<dt>Cible</dt>
+		<dd>
+			{$mailing->getTargetTypeLabel()} — {$mailing.target_label}
+		</dd>
+		{/if}
 		<dt>Destinataires</dt>
 		<dd>
 			{{%n destinataire}{%n destinataires} n=$mailing->countRecipients()}<br />

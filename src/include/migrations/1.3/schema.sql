@@ -169,6 +169,9 @@ CREATE TABLE IF NOT EXISTS mailings (
 	id INTEGER NOT NULL PRIMARY KEY,
 	subject TEXT NOT NULL,
 	body TEXT NULL,
+	target_type TEXT NULL,
+	target_value TEXT NULL,
+	target_label TEXT NULL,
 	sender_name TEXT NULL,
 	sender_email TEXT NULL,
 	sent TEXT NULL CHECK (datetime(sent) IS NULL OR datetime(sent) = sent),
@@ -186,6 +189,14 @@ CREATE TABLE IF NOT EXISTS mailings_recipients (
 );
 
 CREATE INDEX IF NOT EXISTS mailings_recipients_id ON mailings_recipients (id);
+
+CREATE TABLE IF NOT EXISTS mailings_optouts (
+	email_hash TEXT NOT NULL,
+	target_type TEXT NOT NULL,
+	target_value TEXT NOT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS mailings_optouts_unique ON mailings_optouts (email_hash, target_type, target_value);
 
 ---
 --- Users

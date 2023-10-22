@@ -502,7 +502,7 @@ class Emails
 		$prefix .= '.';
 
 		return sprintf('CASE
-			WHEN %1$soptout = 1 THEN \'Désinscription\'
+			WHEN %1$soptout = 1 THEN \'Désinscription globale\'
 			WHEN %1$sinvalid = 1 THEN \'Invalide\'
 			WHEN %1$sfail_count >= %2$d THEN \'Trop d\'\'erreurs\'
 			ELSE \'\'
