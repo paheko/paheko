@@ -53,6 +53,7 @@ class Modifiers
 		'count_words',
 		'or',
 		'uuid',
+		'key',
 	];
 
 	const LEADING_NUMBER_REGEXP = '/^([\d.]+)\s*[.\)]\s*/';
@@ -376,6 +377,11 @@ class Modifiers
 	static public function keys($array)
 	{
 		return array_keys((array)$array);
+	}
+
+	static public function key($array, $key)
+	{
+		return $array[$key] ?? null;
 	}
 
 	static public function values($array)

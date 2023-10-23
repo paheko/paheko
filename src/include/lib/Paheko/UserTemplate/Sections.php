@@ -788,6 +788,7 @@ class Sections
 
 	static public function transactions(array $params, UserTemplate $tpl, int $line): \Generator
 	{
+		$db = DB::getInstance();
 		$params['where'] ??= '';
 
 		$id_field = DynamicFields::getNameFieldsSQL();
