@@ -1662,6 +1662,10 @@ class Transaction extends Entity
 			}
 		}
 
+		if (isset($_GET['pr'])) {
+			$_POST['payment_reference'] = trim($_GET['pr']);
+		}
+
 		return compact('lines', 'id_project', 'amount', 'linked_users');
 	}
 }
