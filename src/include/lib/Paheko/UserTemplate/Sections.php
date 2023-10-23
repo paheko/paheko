@@ -800,7 +800,11 @@ class Sections
 			INNER JOIN acc_accounts AS a ON l.id_account = a.id';
 		$params['group'] = 't.id';
 
-		if (isset($params['id'])) {
+		if (isset($params['id']) && is_array($params['id'])) {
+			$params['where'] .= ' AND t.' . $db->where('id', array_map('intval', $params['id']));
+			unset($params['id']);
+		}
+		elseif (isset($params['id'])) {
 			$params['where'] .= ' AND t.id = :id';
 			$params[':id'] = (int) $params['id'];
 			unset($params['id']);

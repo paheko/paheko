@@ -22,6 +22,8 @@ use Paheko\Entities\Email\Email;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
 
+use Paheko\Entities\Accounting\Transaction;
+
 use const Paheko\{ROOT, WWW_URL, BASE_URL, SECRET_KEY};
 
 class Functions
@@ -45,6 +47,7 @@ class Functions
 		'form_errors',
 		'redirect',
 		'admin_files',
+		'create',
 	];
 
 	const COMPILE_FUNCTIONS_LIST = [
@@ -703,5 +706,47 @@ class Functions
 		}
 
 		Files::delete($ut->module->storage_root() . '/' . $params['path']);
+	}
+
+	static public function create(array $params, UserTemplate $ut, int $line): void
+	{
+		if (empty($params['entity'])) {
+			throw new Brindille_Exception('"entity" parameter is missing');
+		}
+
+		$entity = $params['entity'];
+		$assign_new_id = $params['assign_new_id'] ?? null;
+		unset($params['entity'], $params['assign_new_id']);
+
+		if ($entity === 'transaction') {
+			try {
+				$transaction = new Transaction;
+				$transaction->importFromAPI($params);
+				$transaction->save();
+
+				foreach ((array)($params['linked_users'] ?? []) as $user) {
+					$transaction->linkToUser((int)$user);
+				}
+
+				if (isset($params['move_attachments_from'])) {
+					$path = $ut->module->storage_root() . '/' . $params['move_attachments_from'];
+					$file = Files::get($path);
+
+					if ($file && $file->isDir()) {
+						$file->rename($transaction->getAttachementsDirectory());
+					}
+				}
+			}
+			catch (UserException $e) {
+				throw new Brindille_Exception($e->getMessage(), 0, $e);
+			}
+
+			if ($assign_new_id) {
+				$ut->assign($assign_new_id, $transaction->id());
+			}
+		}
+		else {
+			throw new Brindille_Exception('"entity" parameter value is invalid: ' . $params['entity']);
+		}
 	}
 }

@@ -932,6 +932,28 @@ class Transaction extends Entity
 			$source['type'] = constant(self::class . '::TYPE_' . strtoupper($source['type']));
 		}
 
+		if (isset($source['id_year'])) {
+			$y = $source['id_year'];
+
+			if ($source['id_year'] === 'current') {
+				$source['id_year'] = Years::getCurrentOpenYearId();
+			}
+			elseif ($source['id_year'] === 'match') {
+				if (isset($source['date'])) {
+					$date = self::filterUserDateValue($source['date']);
+				}
+				else {
+					$date = null;
+				}
+
+				$source['id_year'] = Years::getMatchingOpenYearId($date);
+			}
+
+			if (!$source['id_year']) {
+				throw new UserException(sprintf('Cannot find a valid open year matching "%s"', $y));
+			}
+		}
+
 		$this->importFromNewForm($source);
 	}
 
