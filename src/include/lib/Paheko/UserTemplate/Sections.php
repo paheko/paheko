@@ -892,6 +892,7 @@ class Sections
 		}
 
 		$convert = [
+			'none' => $session::ACCESS_NONE,
 			'read' => $session::ACCESS_READ,
 			'write' => $session::ACCESS_WRITE,
 			'admin' => $session::ACCESS_ADMIN,
