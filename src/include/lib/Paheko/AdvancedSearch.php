@@ -171,9 +171,15 @@ abstract class AdvancedSearch
 				}
 
 				// L'opérateur binaire est un peu spécial
-				if ($condition['operator'] === '&')
+				if ($condition['operator'] === '&' || $condition['operator'] === 'NOT &')
 				{
+					if (empty($values)) {
+						throw new UserException('Aucun choix n\'a été sélectionné');
+					}
+
 					$new_query = [];
+
+					$query = str_replace('NOT ', '', $query);
 
 					foreach ($values as $value)
 					{
@@ -181,6 +187,10 @@ abstract class AdvancedSearch
 					}
 
 					$query = '(' . implode(' AND ', $new_query) . ')';
+
+					if ($condition['operator'] === 'NOT &') {
+						$query = 'NOT ' . $query;
+					}
 				}
 				// Remplacement de liste
 				elseif (strpos($query, '??') !== false)
