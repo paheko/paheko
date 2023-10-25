@@ -7,6 +7,7 @@ use Paheko\Users\DynamicFields;
 use Paheko\AdvancedSearch as A_S;
 use Paheko\DB;
 use Paheko\Utils;
+use Paheko\UserException;
 
 class AdvancedSearch extends A_S
 {
@@ -190,6 +191,11 @@ class AdvancedSearch extends A_S
 
 			if ($column == 'identity') {
 				$c = DynamicFields::getNameFieldsSearchableSQL();
+
+				if (!$c) {
+					throw new UserException('Aucun champ texte n\'est indiqué comme identité des membres, il n\'est pas possible de faire une recherche.');
+				}
+
 				$table = 'users_search';
 			}
 
