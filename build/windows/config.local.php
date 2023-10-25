@@ -7,6 +7,8 @@ if (!empty(getenv('LOCALAPPDATA'))) {
 	define('Paheko\DATA_ROOT', trim(getenv('LOCALAPPDATA'), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'Paheko');
 }
 
+define('Paheko\PLUGINS_ROOT', __DIR__ . '/data/plugins');
+
 // Store secret key in user directory
 if (!defined('Paheko\SECRET_KEY')) {
 	if (file_exists(DATA_ROOT . '/key')) {

@@ -23,7 +23,7 @@ if (($pos = strpos($uri, '?')) !== false) {
 	$uri = substr($uri, 0, $pos);
 }
 
-if (PHP_SAPI === 'cli-server' && file_exists(__DIR__ . $uri)) {
+if (PHP_SAPI === 'cli-server' && $uri !== '/' && file_exists(__DIR__ . $uri)) {
 	return false;
 }
 
