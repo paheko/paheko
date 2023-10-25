@@ -565,7 +565,7 @@ class Transaction extends Entity
 	{
 		if ($this->type == self::TYPE_DEBT || $this->type == self::TYPE_CREDIT) {
 			// Debts and credits add a waiting status
-			if (!$this->exists()) {
+			if (!$this->exists() && !$this->hasStatus(self::STATUS_PAID)) {
 				$this->addStatus(self::STATUS_WAITING);
 			}
 		}
@@ -636,6 +636,11 @@ class Transaction extends Entity
 
 	public function addStatus(int $property) {
 		$this->set('status', $this->status | $property);
+	}
+
+	public function hasStatus(int $property): bool
+	{
+		return $this->status & $property;
 	}
 
 	public function markPaid() {
