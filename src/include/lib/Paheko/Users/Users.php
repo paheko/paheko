@@ -301,7 +301,7 @@ class Users
 	static public function getIdFromNumber(string $number): ?int
 	{
 		$field = DynamicFields::getNumberFieldSQL();
-		return EM::getInstance(User::class)->col('SELECT id FROM @TABLE WHERE ' . $field . ' = ?', $number);
+		return EM::getInstance(User::class)->col('SELECT id FROM @TABLE WHERE ' . $field . ' = ?', $number) ?: null;
 	}
 
 	static public function getNameFromNumber(string $number): ?string
