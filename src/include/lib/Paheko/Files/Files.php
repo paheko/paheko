@@ -739,6 +739,7 @@ class Files
 
 	static public function createFrom(string $target, array $source): File
 	{
+		$target = preg_replace('!\.\.|//!', '', $target);
 		$parent = Utils::dirname($target);
 		$name = Utils::basename($target);
 		$file = self::create($parent, $name, $source);

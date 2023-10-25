@@ -351,6 +351,13 @@ class UserTemplate extends \KD2\Brindille
 		$content = $ut->fetch();
 		$type = $ut->getContentType();
 		$name = $ut->getHeader('filename') ?? 'document';
+
+		// Sanitize file name
+		$name = preg_replace('/[^\w\d\.]+/U', ' ', $name);
+		$name = substr($name, -128);
+
+		File::validateFileName($name);
+
 		$target = File::CONTEXT_ATTACHMENTS . '/' . md5($content) . '/' . $name;
 
 		if ($type == 'application/pdf') {
