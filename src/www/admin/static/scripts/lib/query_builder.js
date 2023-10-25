@@ -203,7 +203,7 @@
 
 	qb.prototype.switchColumn = function (columnSelect) {
 		var row = columnSelect.parentNode.parentNode;
-		var current_operator = row.cells[2].firstChild.value;
+		var current_operator = row.cells[2].firstChild ? row.cells[2].firstChild.value : null;
 		var current_values = this.getValues(row);
 		row.childNodes[2].innerHTML = '';
 
