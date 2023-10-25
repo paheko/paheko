@@ -126,7 +126,7 @@ if (ALERT_MESSAGE && !$dialog) {
 			<li class="{if $current == 'config'} current{elseif $current_parent == 'config'} current_parent{/if}"><h3><a href="{$admin_url}config/">{icon shape="settings"}<b>Configuration</b></a></h3>
 		{/if}
 
-		{if $logged_user->exists()}
+		{if $logged_user && $logged_user->exists()}
 		<li class="{if $current == 'me'} current{elseif $current_parent == 'me'} current_parent{/if}"><h3><a href="{$admin_url}me/">{icon shape="user"}<b>Mes infos personnelles</b></a></h3>
 			<ul>
 				<li{if $current == 'me/services'}  class="current"{/if}><a href="{$admin_url}me/services.php">Mes activités &amp; cotisations</a></li>

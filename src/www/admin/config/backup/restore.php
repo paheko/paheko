@@ -8,6 +8,15 @@ require_once __DIR__ . '/../_inc.php';
 
 $code = null; // error code
 $session = Session::getInstance();
+$ok_code = qg('code'); // return code
+$ok = qg('ok'); // return message
+
+if ($ok === 'restore') {
+	if (!$session->refresh()) {
+		$session->forceLogin(-1);
+		$ok_code |= Backup::CHANGED_USER;
+	}
+}
 
 if (qg('download')) {
 	Backup::dump(qg('download'));
@@ -41,15 +50,12 @@ $form->runIf('restore_file', function () use (&$code, $session, $form) {
 		Utils::redirect(Utils::getSelfURI(['ok' => 'restore', 'code' => (int)$r]));
 	} catch (UserException $e) {
 		$code = $e->getCode();
-		if ($code == 0) {
+		if ($code === 0) {
 			throw $e;
 		}
 		$form->addError($e->getMessage());
 	}
 }, 'backup_restore');
-
-$ok_code = qg('code'); // return code
-$ok = qg('ok'); // return message
 
 $list = Backup::list();
 $size = Backup::getAllBackupsTotalSize();
