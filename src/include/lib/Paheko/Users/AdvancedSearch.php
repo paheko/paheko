@@ -239,9 +239,10 @@ class AdvancedSearch extends A_S
 	{
 		return (object) ['groups' => [[
 			'operator' => 'AND',
+			'join_operator' => null,
 			'conditions' => [
 				[
-					'column'   => current(DynamicFields::getNameFields()),
+					'column'   => 'identity',
 					'operator' => 'LIKE %?%',
 					'values'   => [''],
 				],
