@@ -719,26 +719,21 @@ class Functions
 		unset($params['entity'], $params['assign_new_id']);
 
 		if ($entity === 'transaction') {
-			try {
-				$transaction = new Transaction;
-				$transaction->importFromAPI($params);
-				$transaction->save();
+			$transaction = new Transaction;
+			$transaction->importFromAPI($params);
+			$transaction->save();
 
-				foreach ((array)($params['linked_users'] ?? []) as $user) {
-					$transaction->linkToUser((int)$user);
-				}
-
-				if (isset($params['move_attachments_from'])) {
-					$path = $ut->module->storage_root() . '/' . $params['move_attachments_from'];
-					$file = Files::get($path);
-
-					if ($file && $file->isDir()) {
-						$file->rename($transaction->getAttachementsDirectory());
-					}
-				}
+			foreach ((array)($params['linked_users'] ?? []) as $user) {
+				$transaction->linkToUser((int)$user);
 			}
-			catch (UserException $e) {
-				throw new Brindille_Exception($e->getMessage(), 0, $e);
+
+			if (isset($params['move_attachments_from'])) {
+				$path = $ut->module->storage_root() . '/' . $params['move_attachments_from'];
+				$file = Files::get($path);
+
+				if ($file && $file->isDir()) {
+					$file->rename($transaction->getAttachementsDirectory());
+				}
 			}
 
 			if ($assign_new_id) {
