@@ -108,15 +108,16 @@ abstract class AdvancedSearch
 
 		foreach ($groups as $group)
 		{
-			if (!isset($group['conditions'], $group['operator'])
+			if (empty($group['conditions'])
+				|| empty($group['operator'])
 				|| !is_array($group['conditions'])
-				|| ($group['operator'] != 'AND' && $group['operator'] != 'OR'))
+				|| !($group['operator'] === 'AND' || $group['operator'] === 'OR'))
 			{
 				// Ignorer les groupes de conditions invalides
 				continue;
 			}
 
-			if (isset($group['join_operator']) && $group['join_operator'] != 'AND' && $group['join_operator'] != 'OR') {
+			if (isset($group['join_operator']) && $group['join_operator'] !== 'AND' && $group['join_operator'] !== 'OR') {
 				continue;
 			}
 
