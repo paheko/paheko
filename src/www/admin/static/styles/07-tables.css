@@ -181,10 +181,6 @@ table.list .separator {
 }
 
 /* Files list */
-table.list.files tbody tr td {
-    height: 2em;
-}
-
 table.list.files .date {
     text-align: left;
     color: var(--gBorderColor);
