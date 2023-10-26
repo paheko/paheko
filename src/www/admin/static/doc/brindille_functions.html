@@ -78,6 +78,7 @@
 				<li><a href="#validation-avec-un-schema-json">Validation avec un schéma JSON</a>
 			</ol></li>
 			<li><a href="#delete">delete</a></li>
+			<li><a href="#read">read</a></li>
 			<li><a href="#admin_header">admin_header</a></li>
 			<li><a href="#admin_footer">admin_footer</a></li>
 			<li><a href="#delete_form">delete_form</a></li>
@@ -90,9 +91,15 @@
 			<li><a href="#link">link</a></li>
 			<li><a href="#linkbutton">linkbutton</a></li>
 			<li><a href="#icon">icon</a>
-		</ol></li>
-		<li><a href="#formes-d-icones-disponibles">Formes d'icônes disponibles</a>
-</li></ol></aside><h1 id="fonctions-generalistes">Fonctions généralistes</h1>
+			<ol>
+				<li><a href="#formes-d-icones-disponibles">Formes d'icônes disponibles</a>
+			</ol></li>
+</ol></li>
+		<li><a href="#gestion-de-fichiers-dans-les-modules">Gestion de fichiers dans les modules</a>
+		<ol>
+			<li><a href="#admin_files">admin_files</a></li>
+			<li><a href="#delete_file">delete_file</a>
+</li></ol></li></ol></aside><h1 id="fonctions-generalistes">Fonctions généralistes</h1>
 <h2 id="assign">assign</h2>
 <p>Permet d'assigner une valeur dans une variable.</p>
 <table>
@@ -508,7 +515,6 @@
 <h1 id="fonctions-relatives-aux-modules">Fonctions relatives aux Modules</h1>
 <h2 id="save">save</h2>
 <p>Enregistre des données, sous la forme d'un document, dans la base de données, pour le module courant.</p>
-<p>Note : un appel à cette fonction depuis le code du site web provoquera une erreur, elle ne peut être appelée que depuis un module.</p>
 <table>
 <thead>
 <tr>
@@ -566,7 +572,6 @@ Le document n°{{$id}} a bien été enregistré.</code></pre>
 <pre><code>{{:save key="test" titre="Coucou" validate_schema="./document.schema.json" validate_only="titre"}}</code></pre>
 <h2 id="delete">delete</h2>
 <p>Supprime un document lié au module courant.</p>
-<p>Note : un appel à cette fonction depuis le code du site web provoquera une erreur, elle ne peut être appelée que depuis un module.</p>
 <table>
 <thead>
 <tr>
@@ -596,6 +601,43 @@ Le document n°{{$id}} a bien été enregistré.</code></pre>
 <li>Supprimer tous les documents ayant le type <code>facture</code> : <code>{{:delete type="facture"}}</code></li>
 <li>Supprimer tous les documents de type <code>devis</code> ayant une date dans le passé : <code>{{:delete :type="devis" where="$$.type = :type AND $$.date &lt; datetime()"}}</code></li>
 </ul>
+<h2 id="read">read</h2>
+<p>Lire un fichier stocké dans les fichiers du code du module.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Obligatoire ou optionnel ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>file</code></td>
+<td style="text-align: left;">obligatoire</td>
+<td style="text-align: left;">Chemin du fichier à lire</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>assign</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Variable dans laquelle placer le contenu du fichier.</td>
+</tr>
+</tbody>
+</table>
+<p>Si le paramètre <code>assign</code> n'est pas utilisé, le contenu du fichier sera affiché directement.</p>
+<p>Exemple pour lire un fichier JSON :</p>
+<pre><code>{{#read file="baremes.json" assign="baremes"}}
+{{:assign baremes=$baremes|json_decode}}
+Barème kilométrique pour une voiture de 3 CV : {{$baremes.voiture.3cv}}</code></pre>
+<p>Exemple pour lire un fichier CSV :</p>
+<pre><code>{{#read file="baremes.csv" assign="baremes"}}
+{{:assign baremes=$baremes|trim|explode:"\n"}}
+
+{{#foreach from=$baremes item="line"}}
+  {{:assign bareme=$line|str_getcsv}}
+  Nom du barème : {{$bareme.0}}
+  Calcul : {{$bareme.1}}
+{{/foreach}}</code></pre>
 <h2 id="admin_header">admin_header</h2>
 <p>Affiche l'entête de l'administration de l'association.</p>
 <table>
@@ -928,5 +970,65 @@ Sans "!", l'adresse générée sera relative au contexte d'appel (module/plugin 
 </tr>
 </tbody>
 </table>
-<h1 id="formes-d-icones-disponibles">Formes d'icônes disponibles</h1>
-<p><img src="shapes.png" alt="" /></p></div></body></html>
+<h3 id="formes-d-icones-disponibles">Formes d'icônes disponibles</h3>
+<p><img src="shapes.png" alt="" /></p>
+<h1 id="gestion-de-fichiers-dans-les-modules">Gestion de fichiers dans les modules</h1>
+<p>Les modules peuvent stocker des fichiers, mais seulement dans leur propre contexte. Un module ne peut pas gérer les fichiers du site web, des écritures comptables, des membres, ou des autres modules, il ne peut gérer que ses propres fichiers.</p>
+<p>Quand les données d'un module sont supprimé, les fichiers du module sont aussi supprimés.</p>
+<p>Mais si le module stocke des fichiers liés à un document JSON (par exemple dans un sous-répertoire pour chaque module), c'est au code du module de s'assurer que les fichiers seront supprimés lors de la suppression du document.</p>
+<p>Par défaut, tous les fichiers des modules sont en accès restreint : ils ne peuvent être vus et modifiés que par les membres connectés qui sont au niveau d'accès indiqué dans les paramètres <code>restrict_section</code> et <code>restrict_level</code> du fichier <code>module.ini</code>.</p>
+<p>Pour qu'un fichier soit visible publiquement aux personnes non connectées, il faut le placer dans le sous-répertoire <code>public</code> du module.</p>
+<p>Attention : de par ce fonctionnement, <strong>tous les fichiers</strong> d'un module sont potentiellement accessibles par <strong>tous les membres ayant accès au module</strong> et connaissant le nom du fichier.</p>
+<p>Il est donc recommandé de ne pas utiliser ce mécanisme pour stocker des données personnelles ou des données sensibles.</p>
+<h2 id="admin_files">admin_files</h2>
+<p>Affiche (dans le contexte de l'administration) la liste des fichiers dans un sous-répertoire, et éventuellement la possibilité d'en ajouter ou de les supprimer.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Obligatoire ou optionnel ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>path</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Chemin du sous-répertoire où sont stockés les fichiers</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>upload</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Booléen. Si <code>true</code>, l'utilisateur pourra ajouter des fichiers. (Défaut : <code>false</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>edit</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Booléen. Si <code>true</code>, l'utilisateur pourra modifier ou supprimer les fichiers existants. (Défaut : <code>false</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>Exemple pour afficher la liste des fichiers du sous-répertoire <code>facture43</code> et permettre de rajouter de nouveaux fichiers :</p>
+<pre><code>{{:admin_files path="facture43" upload=true edit=false}}</code></pre>
+<h2 id="delete_file">delete_file</h2>
+<p>Supprimer un fichier ou un répertoire lié au module courant.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Obligatoire ou optionnel ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>path</code></td>
+<td style="text-align: left;">obligatoire</td>
+<td style="text-align: left;">Chemin du fichier ou répertoire</td>
+</tr>
+</tbody>
+</table>
+<p>Exemple pour supprimer un fichier seul :</p>
+<pre><code>{{:delete_file path="facture43/justificatif.pdf"}}</code></pre>
+<p>Pour supprimer un répertoire et tous les fichiers dedans :</p>
+<pre><code>{{:delete_file path="facture43"}}</code></pre></div></body></html>
