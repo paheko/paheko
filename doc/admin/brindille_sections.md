@@ -254,7 +254,7 @@ Certaines sections (voir plus bas) héritent de `sql` et rajoutent des fonctionn
 | :- | :- |
 | `where` | Condition de sélection des résultats |
 | `begin` | Début des résultats, si vide une valeur de `0` sera utilisée. |
-| `limit` | Limitation des résultats. Si vide, une valeur de `1000` sera utilisée. |
+| `limit` | Limitation des résultats. Si vide, une valeur de `100` sera utilisée. |
 | `group` | Contenu de la clause `GROUP BY` |
 | `having` | Contenu de la clause `HAVING` |
 | `order` | Ordre de tri des résultats. Si vide le tri sera fait par ordre d'ajout dans la base de données. |
