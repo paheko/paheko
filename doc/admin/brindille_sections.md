@@ -587,7 +587,7 @@ La section `{{#form …}}` permet de simplifier ces tests, et s'assurer qu'aucun
 
 ## load <sup>(sql)</sup>
 
-Note : cette section hérite de `sql` (voir plus haut).
+Note : cette section hérite de `sql` (voir plus haut). De ce fait, le nombre de résultats est limité à 100 par défaut, si le paramètre `limit` n'est pas renseigné.
 
 Charge un ou des documents pour le module courant.
 
