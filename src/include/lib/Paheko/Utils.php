@@ -69,7 +69,6 @@ class Utils
 		'gallery'         => '🖼',
 		'code'            => '<',
 		'markdown'        => 'M',
-		'skriv'           => 'S',
 		'globe'           => '🌍',
 		'video'           => '▶',
 		'quote'           => '«',
