@@ -37,15 +37,15 @@
 					<span class="error">{$r.status}</span>
 				{/if}
 			</td>
-			<td>
+			<td class="actions">
+				{if $r.id_user}
+					{linkbutton shape="user" label="Fiche membre" href="!users/details.php?id=%d"|args:$r.id_user}
+				{/if}
 				{if !$mailing.sent}
 					{button shape="delete" label="Supprimer" name="delete" value=$r.id type="submit"}
 				{/if}
 				{if !$mailing.anonymous && $r.email}
 					{linkbutton href="details.php?id=%d&preview=%s"|args:$mailing.id:$r.email label="Prévisualiser" shape="eye" target="_dialog"}
-				{/if}
-				{if $r.status}
-					{linkbutton href="rejected.php?hl=%d#e_%1\$d"|args:$r.id_email label="Détails de l'erreur" shape="help"}
 				{/if}
 			</td>
 		</tr>

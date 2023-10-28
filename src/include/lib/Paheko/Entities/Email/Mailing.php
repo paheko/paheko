@@ -159,20 +159,35 @@ class Mailing extends Entity
 	{
 		$prefix = $prefix ? $prefix . '.' : $prefix;
 		$fields = DynamicFields::getNameFields();
-		$fields = array_map(fn($a) => sprintf('json_extract(%sextra_data, \'$.%s\')', $prefix, $a), $fields);
-		$fields = implode(' || \' \' || ', $fields);
-		return $fields;
+		$db = DB::getInstance();
+		$out = [];
+
+		foreach ($fields as $field) {
+			$field = $db->quote('$.' . $field);
+			$out[] = sprintf('json_extract(%sextra_data, %s)', $prefix, $field);
+		}
+
+		$out = implode(' || \' \' || ', $out);
+		return $out;
 	}
 
 	public function getRecipientsList(): DynamicList
 	{
-
+		$db = DB::getInstance();
 		$columns = [
 			'id' => [
 				'select' => 'r.id',
 			],
+			'id_user' => [
+				'select' => sprintf('json_extract(r.extra_data, %s)', $db->quote('$.id')),
+			],
 			'id_email' => [
 				'select' => 'r.id_email',
+			],
+			'user_number' => [
+				'label' => 'Numéro de membre',
+				'select' => sprintf('json_extract(r.extra_data, %s)', $db->quote('$.' . DynamicFields::getNumberField())),
+				'export' => true,
 			],
 			'email' => [
 				'label' => 'Adresse',
@@ -194,6 +209,7 @@ class Mailing extends Entity
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('email', false);
+		$list->setTitle('Liste des destinataires');
 		return $list;
 	}
 
@@ -314,16 +330,5 @@ class Mailing extends Entity
 		$this->save();
 
 		Log::add(Log::SENT, ['entity' => get_class($this), 'id' => $this->id()]);
-	}
-
-	public function export(string $format): void
-	{
-		$rows = [];
-
-		foreach ($this->listRecipients() as $row) {
-			$rows[] = [$row['email'] ?? '(Anonymisée)', $row['_name'] ?? ''];
-		}
-
-		CSV::export($format, 'Destinataires message collectif', $rows, ['Adresse e-mail', 'Identité']);
 	}
 }
