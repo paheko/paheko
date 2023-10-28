@@ -573,14 +573,14 @@ class Sections
 
 		try {
 			$i = $list->iterate();
+
+			// If there is nothing to iterate, just stop
+			if (!$i->valid()) {
+				return;
+			}
 		}
 		catch (DB_Exception $e) {
 			throw new Brindille_Exception(sprintf("Line %d: invalid SQL query: %s\nQuery: %s", $line, $e->getMessage(), $list->SQL()));
-		}
-
-		// If there is nothing to iterate, just stop
-		if (!$i->valid()) {
-			return;
 		}
 
 		$tpl = Template::getInstance();
