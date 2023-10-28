@@ -296,10 +296,11 @@ class UserTemplate extends \KD2\Brindille
 		}
 		catch (Brindille_Exception $e) {
 			$path = $this->file ? $this->file->path : ($this->code ? 'code' : str_replace(ROOT, '…', $this->path));
+			$is_user_code = $this->file || $this->code || ($this->module && $this->module->hasLocal());
 
 			$message = sprintf("Erreur dans '%s' :\n%s", $path, $e->getMessage());
 
-			if (!$this->file && !$this->code) {
+			if (!$is_user_code) {
 				// We want errors in shipped code to be reported, it is not normal
 				throw new \RuntimeException($message, 0, $e);
 			}
