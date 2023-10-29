@@ -43,7 +43,7 @@ trait FileThumbnailTrait
 		}
 	}
 
-	public function asImageObject(): Image
+	public function asImageObject(): ?Image
 	{
 		if (!$this->image) {
 			$path = $this->createDocumentThumbnail();
@@ -60,8 +60,11 @@ trait FileThumbnailTrait
 		if ($path) {
 			$i = new Image($path);
 		}
-		else {
+		elseif ($pointer) {
 			$i = Image::createFromPointer($pointer, null, true);
+		}
+		else {
+			return null;
 		}
 
 		return $i;
@@ -374,6 +377,10 @@ trait FileThumbnailTrait
 		}
 
 		$i = $this->asImageObject();
+
+		if (!$i) {
+			return;
+		}
 
 		// Always autorotate first
 		$i->autoRotate();
