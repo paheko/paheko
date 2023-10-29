@@ -15,6 +15,8 @@ use Paheko\Users\Users;
 use Paheko\UserTemplate\UserTemplate;
 use Paheko\Web\Render\Render;
 
+use Paheko\Entities\Users\DynamicField;
+
 use DateTime;
 use stdClass;
 
@@ -104,7 +106,7 @@ class Mailing extends Entity
 		$db->commit();
 	}
 
-	public function addRecipient(string $email, $data = null): void
+	public function addRecipient(string $email, ?stdClass $data = null): void
 	{
 		if (!$this->exists()) {
 			throw new \LogicException('Mailing does not exist');
@@ -128,12 +130,33 @@ class Mailing extends Entity
 			}
 		}
 
+		$this->cleanExtraData($data);
+
 		DB::getInstance()->insert('mailings_recipients', [
 			'id_mailing' => $this->id,
 			'id_email'   => $e ? $e->id : null,
 			'email'      => $email,
 			'extra_data' => $data ? json_encode($data) : null,
 		]);
+	}
+
+	protected function cleanExtraData(?stdClass &$data): void
+	{
+		if (null === $data) {
+			return;
+		}
+
+		// Clean up users, just in case password/PGP key/etc. are included
+		foreach (DynamicField::SYSTEM_FIELDS as $key => $type) {
+			unset($data->$key);
+		}
+
+		// Just in case the password has another column name
+		foreach ($data as $key => $value) {
+			if (is_string($value) && substr($value, 0, 2) === '$2') {
+				unset($data->$key);
+			}
+		}
 	}
 
 	public function listRecipients(): \Generator
@@ -202,6 +225,9 @@ class Mailing extends Entity
 				'label' => 'Erreur',
 				'select' => Emails::getRejectionStatusClause('e'),
 			],
+			'has_extra_data' => [
+				'select' => 'r.extra_data IS NOT NULL',
+			],
 		];
 
 		$tables = 'mailings_recipients AS r LEFT JOIN emails e ON e.id = r.id_email';
@@ -226,6 +252,15 @@ class Mailing extends Entity
 	public function deleteRecipient(int $id): void
 	{
 		DB::getInstance()->delete('mailings_recipients', 'id = ? AND id_mailing = ?', $id, $this->id);
+	}
+
+	public function getRecipientExtraData(int $id): ?stdClass
+	{
+		$value = DB::getInstance()->firstColumn('SELECT extra_data FROM mailings_recipients WHERE id = ?;', $id);
+		$value = !$value ? null : json_decode($value, false);
+
+		$this->cleanExtraData($value);
+		return $value;
 	}
 
 /*

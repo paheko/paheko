@@ -38,6 +38,9 @@
 				{/if}
 			</td>
 			<td class="actions">
+				{if $r.has_extra_data}
+					{linkbutton shape="menu" label="Données" href="recipient_data.php?id=%d&r=%d"|args:$mailing.id:$r.id target="_dialog"}
+				{/if}
 				{if $r.id_user}
 					{linkbutton shape="user" label="Fiche membre" href="!users/details.php?id=%d"|args:$r.id_user}
 				{/if}
