@@ -264,7 +264,7 @@ class CommonFunctions
 
 			if (null !== $current_value && (is_array($current_value) || is_object($current_value))) {
 				foreach ($current_value as $v => $l) {
-					if (trim($l) === '') {
+					if (empty($l) || trim($l) === '') {
 						continue;
 					}
 
