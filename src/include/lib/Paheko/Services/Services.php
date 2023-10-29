@@ -87,8 +87,8 @@ class Services
 			CREATE TEMP TABLE IF NOT EXISTS services_list_stats (id_service, id_user, ok, expired, paid);
 			INSERT INTO services_list_stats SELECT
 				id_service, id_user,
-				CASE WHEN (expiry_date IS NULL OR expiry_date >= date()) AND paid = 1 THEN 1 ELSE 0 END,
-				CASE WHEN expiry_date < date() THEN 1 ELSE 0 END,
+				CASE WHEN (su.expiry_date IS NULL OR su.expiry_date >= date()) AND su.paid = 1 THEN 1 ELSE 0 END,
+				CASE WHEN su.expiry_date < date() THEN 1 ELSE 0 END,
 				paid
 			FROM services_users su
 			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_service) su2 ON su2.id = su.id
