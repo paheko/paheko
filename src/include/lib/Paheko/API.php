@@ -517,7 +517,7 @@ class API
 
 		$api->method = $_SERVER['REQUEST_METHOD'] ?? null;
 		$type = $_SERVER['CONTENT_TYPE'] ?? null;
-		$type ??= $_SERVER['HTTP_CONTENT_TYPE'] ?? null;
+		$type ??= $_SERVER['HTTP_CONTENT_TYPE'] ?? '';
 
 		if ($api->method === 'POST' && false !== strpos($type, '/json')) {
 			$_POST = (array) json_decode($api->body(), true);
