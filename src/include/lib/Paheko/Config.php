@@ -353,31 +353,36 @@ class Config extends Entity
 		elseif ($upload) {
 			$f = Files::upload(Utils::dirname($path), $value, Utils::basename($path));
 
-			if ($type == 'image' && !$f->image) {
+			if ($type === 'image' && !$f->image) {
 				$this->setFile($key, null);
 				throw new UserException('Le fichier n\'est pas une image.');
 			}
 
-			// Force favicon format
-			if ($key == 'favicon') {
-				$format = 'png';
-				$i = $f->asImageObject();
-				$i->cropResize(32, 32);
-				$f->setContent($i->output($format, true));
+			try {
+				// Force favicon format
+				if ($key === 'favicon') {
+					$format = 'png';
+					$i = $f->asImageObject();
+					$i->cropResize(32, 32);
+					$f->setContent($i->output($format, true));
+				}
+				// Force icon format
+				else if ($key === 'icon') {
+					$format = 'png';
+					$i = $f->asImageObject();
+					$i->cropResize(512, 512);
+					$f->setContent($i->output($format, true));
+				}
+				// Force signature size
+				else if ($key === 'signature') {
+					$format = 'png';
+					$i = $f->asImageObject();
+					$i->resize(200, 200);
+					$f->setContent($i->output($format, true));
+				}
 			}
-			// Force icon format
-			else if ($key == 'icon') {
-				$format = 'png';
-				$i = $f->asImageObject();
-				$i->cropResize(512, 512);
-				$f->setContent($i->output($format, true));
-			}
-			// Force signature size
-			else if ($key == 'signature') {
-				$format = 'png';
-				$i = $f->asImageObject();
-				$i->resize(200, 200);
-				$f->setContent($i->output($format, true));
+			catch (\Exception $e) {
+				throw new UserException('Cet format d\'image n\'est pas supporté.', 0, $e);
 			}
 		}
 		elseif ($f) {
