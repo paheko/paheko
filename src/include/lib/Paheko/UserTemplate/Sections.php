@@ -482,7 +482,7 @@ class Sections
 			foreach (explode(';', $params['select']) as $i => $c) {
 				$c = trim($c);
 
-				$pos = strrpos($c, ' AS ');
+				$pos = strripos($c, ' AS ');
 
 				if ($pos) {
 					$select = trim(substr($c, 0, $pos));
