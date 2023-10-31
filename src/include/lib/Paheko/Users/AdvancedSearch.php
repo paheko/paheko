@@ -142,7 +142,16 @@ class AdvancedSearch extends A_S
 			'null'   => false,
 			'values' => $db->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE U_NOCASE;'),
 			'select' => '\'À jour\'',
-			'where'  => 'id IN (SELECT id_user FROM services_users WHERE id_service %s AND (expiry_date IS NULL OR expiry_date > date()))',
+			'where'  => 'id IN (SELECT id_user FROM (SELECT id_user, MAX(expiry_date) AS edate FROM services_users WHERE id_service %s GROUP BY id_user) WHERE edate >= date())',
+		];
+
+		$columns['service_expired'] = [
+			'label'  => 'Activité expirée',
+			'type'   => 'enum',
+			'null'   => false,
+			'values' => $db->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE U_NOCASE;'),
+			'select' => '\'Expiré\'',
+			'where'  => 'id IN (SELECT id_user FROM (SELECT id_user, MAX(expiry_date) AS edate FROM services_users WHERE id_service %s GROUP BY id_user) WHERE edate < date())',
 		];
 
 		return $columns;
