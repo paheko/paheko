@@ -24,7 +24,7 @@
 			{/if}
 			{foreach from=$list->getHeaderColumns() key="key" item="label"}
 				<td>
-					{display_dynamic_field key=$key value=$row->$key}
+					{display_dynamic_field key=$key value=$row->$key link_name_id=$row.id}
 				</td>
 			{/foreach}
 			<td class="actions">

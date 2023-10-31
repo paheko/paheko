@@ -244,6 +244,11 @@ class DynamicField extends Entity
 		return (bool) ($this->system & self::PRESET);
 	}
 
+	public function isName(): bool
+	{
+		return (bool) ($this->system & self::NAMES);
+	}
+
 	public function isVirtual(): bool
 	{
 		return $this->type == 'virtual';

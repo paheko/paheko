@@ -311,15 +311,17 @@ class Template extends Smartyer
 
 	protected function displayDynamicField(array $params): string
 	{
-		$field = $params['field'] ?? DynamicFields::get($params['key']);
+		$key = $params['key'] ?? null;
+		$field = $params['field'] ?? DynamicFields::get($key);
 		$v = $params['value'];
 
-		if (!$field) {
-			return htmlspecialchars((string)$v);
-		}
+		$out = '';
 
-		if ($field->type == 'checkbox') {
-			return $v ? 'Oui' : 'Non';
+		if (!$field) {
+			$out = htmlspecialchars((string)$v);
+		}
+		elseif ($field->type == 'checkbox') {
+			$out = $v ? 'Oui' : 'Non';
 		}
 		elseif ($field->type == 'file' && $v) {
 			$files = explode(';', $v);
@@ -345,38 +347,39 @@ class Template extends Smartyer
 					. ($count == 1 ? '1 fichier' : $count . ' fichiers');
 			}
 
-			if ($label === '') {
-				return '';
+			if ($label !== '') {
+				if (isset($params['files_href'])) {
+					$label = sprintf('<a href="%s">%s</a>', $params['files_href'], $label);
+				}
+
+				$out = '<div class="files-list"><figure>' . $label . '</label></div>';
 			}
-
-			if (isset($params['files_href'])) {
-				$label = sprintf('<a href="%s">%s</a>', $params['files_href'], $label);
-			}
-
-			return '<div class="files-list"><figure>' . $label . '</label></div>';
+		}
+		elseif ($field->type === 'password') {
+			$out = '*****';
+		}
+		elseif ($field->type === 'email') {
+			$out = '<a href="mailto:' . rawurlencode($v) . '">' . htmlspecialchars($v) . '</a>';
+		}
+		elseif ($field->type === 'tel') {
+			$out = '<a href="tel:' . rawurlencode($v) . '">' . htmlspecialchars($this->formatPhoneNumber($v)) . '</a>';
+		}
+		elseif ($field->type === 'url') {
+			$out ='<a href="' . htmlspecialchars($v) . '" target="_blank">' . htmlspecialchars($v) . '</a>';
+		}
+		elseif ($field->type === 'number' || $field->type === 'decimal') {
+			$out = str_replace('.', ',', htmlspecialchars($v));
+		}
+		else {
+			$v = $field->getStringValue($v);
+			$out = nl2br(htmlspecialchars((string) $v));
 		}
 
-		if (empty($v)) {
-			return '';
+		if (!empty($params['link_name_id']) && ($key === 'identity' || ($field && $field->isName()))) {
+			$out = sprintf('<a href="%s">%s</a>', Utils::getLocalURL('!users/details.php?id=' . (int)$params['link_name_id']), $out);
 		}
 
-		switch ($field->type)
-		{
-			case 'password':
-				return '*****';
-			case 'email':
-				return '<a href="mailto:' . rawurlencode($v) . '">' . htmlspecialchars($v) . '</a>';
-			case 'tel':
-				return '<a href="tel:' . rawurlencode($v) . '">' . htmlspecialchars($this->formatPhoneNumber($v)) . '</a>';
-			case 'url':
-				return '<a href="' . htmlspecialchars($v) . '" target="_blank">' . htmlspecialchars($v) . '</a>';
-			case 'number':
-			case 'decimal':
-				return str_replace('.', ',', htmlspecialchars($v));
-			default:
-				$v = $field->getStringValue($v);
-				return nl2br(htmlspecialchars((string) $v));
-		}
+		return $out;
 	}
 
 	protected function editDynamicField(array $params): string
