@@ -20,7 +20,7 @@ Permet d'itérer sur un tableau par exemple. Ainsi chaque élément du tableau e
 | :- | :- | :- |
 | `from` | **obligatoire** | Variable sur laquelle effectuer l'itération |
 | `key` | **optionnel** | Nom de la variable à utiliser pour la clé de l'élément |
-| `value` | **optionnel** | Nom de la variable à utiliser pour la valeur de l'élément |
+| `item` | **optionnel** | Nom de la variable à utiliser pour la valeur de l'élément |
 
 Considérons ce tableau :
 
