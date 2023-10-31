@@ -218,7 +218,7 @@ class Functions
 
 		$document = $value;
 		if (!$result) {
-			$db->insert($table, compact('document', 'key'));
+			$db->insert($table, compact('id', 'document', 'key'));
 
 			if ($assign_new_id) {
 				$tpl->assign($assign_new_id, $db->lastInsertId());
