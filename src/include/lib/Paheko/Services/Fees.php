@@ -107,9 +107,9 @@ class Fees
 			implode(',', $hidden_cats));
 
 		$sql = sprintf('SELECT f.*,
-			(%s AND (expiry_date IS NULL OR expiry_date >= date()) AND paid = 1) AS nb_users_ok,
-			(%1$s AND expiry_date < date()) AS nb_users_expired,
-			(%1$s AND paid = 0) AS nb_users_unpaid
+			(%s AND (su.expiry_date IS NULL OR su.expiry_date >= date()) AND su.paid = 1) AS nb_users_ok,
+			(%1$s AND su.expiry_date < date()) AS nb_users_expired,
+			(%1$s AND su.paid = 0) AS nb_users_unpaid
 			FROM services_fees f
 			WHERE id_service = ?
 			ORDER BY amount, label COLLATE U_NOCASE;', $condition);
