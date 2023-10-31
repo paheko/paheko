@@ -48,7 +48,7 @@
 					{button shape="delete" label="Supprimer" name="delete" value=$r.id type="submit"}
 				{/if}
 				{if !$mailing.anonymous && $r.email}
-					{linkbutton href="details.php?id=%d&preview=%s"|args:$mailing.id:$r.email label="Prévisualiser" shape="eye" target="_dialog"}
+					{linkbutton href="details.php?id=%d&preview=%d"|args:$mailing.id:$r.id label="Prévisualiser" shape="eye" target="_dialog"}
 				{/if}
 			</td>
 		</tr>

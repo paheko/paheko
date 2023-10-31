@@ -13,7 +13,7 @@ if (!$mailing) {
 }
 
 if (qg('preview') !== null) {
-	echo $mailing->getHTMLPreview(qg('preview') ?: null, true);
+	echo $mailing->getHTMLPreview((int)qg('preview') ?: null, true);
 	return;
 }
 

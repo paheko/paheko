@@ -288,21 +288,30 @@ class Mailing extends Entity
 	 */
 	public function getBody()
 	{
-		return UserTemplate::createFromUserString($this->body ?? '') ?? $this->body;
+		if (!isset($this->body)) {
+			return '';
+		}
+
+		if (false !== strpos($this->body, '{{')) {
+			return UserTemplate::createFromUserString($this->body);
+		}
+		else {
+			return $this->body;
+		}
 	}
 
-	public function getPreview(string $address = null): string
+	public function getPreview(int $id = null): string
 	{
 		$db = DB::getInstance();
 
-		$where = $address ? 'email = ?' : '1 ORDER BY RANDOM()';
+		$where = $id ? 'id = ?' : '1 ORDER BY RANDOM()';
 		$sql = sprintf('SELECT extra_data FROM mailings_recipients WHERE %s LIMIT 1;', $where);
-		$args = $address ? (array)$address : [];
+		$args = $id ? (array)$id : [];
 
 		$r = $db->firstColumn($sql, ...$args);
 
 		if (!$r) {
-			throw new UserException('Cette adresse ne fait pas partie des destinataires: ' . $address);
+			throw new UserException('Cette adresse ne fait pas partie des destinataires');
 		}
 
 		$r = json_decode($r, true);
