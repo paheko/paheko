@@ -122,7 +122,7 @@ class Reminders
 		$sql = 'SELECT
 			u.*, %s AS identity,
 			date(su.expiry_date, sr.delay || \' days\') AS reminder_date,
-			ABS(julianday(date()) - julianday(expiry_date)) AS nb_days,
+			ABS(julianday(date()) - julianday(su.expiry_date)) AS nb_days,
 			MAX(sr.delay) AS delay, sr.subject, sr.body, s.label, s.description,
 			su.expiry_date, sr.id AS id_reminder, su.id_service, su.id_user,
 			sf.label AS fee_label, sf.amount, sf.formula
