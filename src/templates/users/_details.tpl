@@ -38,7 +38,7 @@ $fields = DF::getInstance()->all();
 			{if $value}
 				{icon shape="check"} Oui
 			{else}
-				Non
+				{icon shape="uncheck"} Non
 			{/if}
 		{elseif $field.type == 'file'}
 			<?php
@@ -47,8 +47,6 @@ $fields = DF::getInstance()->all();
 			{include file="common/files/_context_list.tpl" path="%s/%s"|args:$user_files_path:$key}
 		{elseif empty($value)}
 			<em>(Non renseigné)</em>
-		{elseif in_array($key, $id_fields)}
-			<strong>{$value}</strong>
 		{elseif $field.type == 'email'}
 			<a href="mailto:{$value|escape:'url'}">{$value}</a>
 			{if !DISABLE_EMAIL && $show_message_button && !$email_button++}
@@ -63,7 +61,9 @@ $fields = DF::getInstance()->all();
 			{/foreach}
 			</ul>
 		{else}
+			{if in_array($key, $id_fields)}<strong>{/if}
 			{display_dynamic_field field=$field value=$value user_id=$user.id}
+			{if in_array($key, $id_fields)}</strong>{/if}
 		{/if}
 	</dd>
 		{if $field.type == 'email' && $value && ($email = Email\Emails::getEmail($value))}

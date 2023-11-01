@@ -358,13 +358,13 @@ class Template extends Smartyer
 		elseif ($field->type === 'password') {
 			$out = '*****';
 		}
-		elseif ($field->type === 'email') {
+		elseif ($field->type === 'email' && empty($params['link_name_id'])) {
 			$out = '<a href="mailto:' . rawurlencode($v) . '">' . htmlspecialchars($v) . '</a>';
 		}
-		elseif ($field->type === 'tel') {
+		elseif ($field->type === 'tel' && empty($params['link_name_id'])) {
 			$out = '<a href="tel:' . rawurlencode($v) . '">' . htmlspecialchars($this->formatPhoneNumber($v)) . '</a>';
 		}
-		elseif ($field->type === 'url') {
+		elseif ($field->type === 'url' && empty($params['link_name_id'])) {
 			$out ='<a href="' . htmlspecialchars($v) . '" target="_blank">' . htmlspecialchars($v) . '</a>';
 		}
 		elseif ($field->type === 'number' || $field->type === 'decimal') {
