@@ -62,6 +62,7 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 	</dl>
 </fieldset>
 
+{if !$field->isNumber()}
 <fieldset>
 	<legend>Accès</legend>
 	<dl>
@@ -77,6 +78,7 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 		{input type="radio" name="management_access_level" value=$session::ACCESS_ADMIN label="Seulement s'il a accès en administration à la gestion des membres" source=$field}
 	</dl>
 </fieldset>
+{/if}
 
 <p class="submit">
 	{csrf_field key=$csrf_key}

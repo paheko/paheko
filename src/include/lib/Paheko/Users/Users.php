@@ -155,7 +155,7 @@ class Users
 		return self::iterateEmails($sql);
 	}
 
-	static public function listByCategory(?int $id_category = null): DynamicList
+	static public function listByCategory(?int $id_category = null, ?Session $session = null): DynamicList
 	{
 		$db = DB::getInstance();
 		$df = DynamicFields::getInstance();
@@ -201,6 +201,10 @@ class Users
 					$identity_column = null;
 				}
 
+				continue;
+			}
+
+			if ($session && !$session->canAccess(Session::SECTION_USERS, $config->management_access_level)) {
 				continue;
 			}
 
