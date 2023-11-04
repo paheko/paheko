@@ -37,6 +37,7 @@ class Module extends Entity
 	const SNIPPET_MY_SERVICES = 'snippets/my_services.html';
 	const SNIPPET_MY_DETAILS = 'snippets/my_details.html';
 	const SNIPPET_BEFORE_NEW_TRANSACTION = 'snippets/transaction_new.html';
+	const SNIPPET_MARKDOWN_EXTENSION = 'snippets/markdown/%s.html';
 
 	const SNIPPETS = [
 		self::SNIPPET_HOME_BUTTON => 'icône sur la page d\'accueil',
@@ -210,6 +211,10 @@ class Module extends Entity
 				$templates[] = $file;
 				$db->insert('modules_templates', ['id_module' => $this->id(), 'name' => $file]);
 			}
+		}
+
+		foreach ($this->listFiles('snippets/markdown') as $file) {
+			$db->insert('modules_templates', ['id_module' => $this->id(), 'name' => $file->path]);
 		}
 
 		$db->commit();
@@ -398,7 +403,7 @@ class Module extends Entity
 					'name'      => $file,
 					'type'      => mime_content_type($dist_path . '/' . $file),
 					'dir'       => is_dir($dist_path . '/' . $file),
-					'path'      => $path . $file,
+					'path'      => ltrim($path, '/') . '/' . $file,
 					'local'     => false,
 					'dist'      => true,
 					'file_path' => $base . $path . '/' . $file,
