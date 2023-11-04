@@ -63,6 +63,10 @@
 		<li><a href="#resume-technique">Résumé technique</a></li>
 		<li><a href="#structure-des-repertoires">Structure des répertoires</a>
 		<ol>
+			<li><a href="#snippets">Snippets</a>
+			<ol>
+				<li><a href="#snippets-markdown">Snippets MarkDown</a>
+			</ol></li>
 			<li><a href="#fichier-module-ini">Fichier module.ini</a>
 		</ol></li>
 		<li><a href="#variables-speciales">Variables spéciales</a></li>
@@ -131,12 +135,40 @@
 <li><code>icon.svg</code> : icône du module, qui sera utilisée sur la page d'accueil, si le bouton est activé, et dans la liste des modules. Attention l'élément racine du fichier doit porter l'id <code>img</code> pour que l'icône fonctionne (<code>&lt;svg id="img"...&gt;</code>), notamment pour que les couleurs du thème s'appliquent à l'icône.</li>
 <li><code>README.md</code> : si ce fichier existe, son contenu sera affiché dans les détails du module</li>
 </ul>
+<h2 id="snippets">Snippets</h2>
 <p>Les modules peuvent également avoir des <code>snippets</code>, ce sont des squelettes qui seront inclus à des endroits précis de l'interface, permettant de rajouter des fonctionnalités, ils sont situés dans le sous-répertoire <code>snippets</code> du module :</p>
 <ul>
 <li><code>snippets/transaction_details.html</code> : sera inclus en dessous de la fiche d'une écriture comptable</li>
+<li><code>snippets/transaction_new.html</code> : sera inclus au début du formulaire de saisie d'écriture</li>
 <li><code>snippets/user_details.html</code> : sera inclus en dessous de la fiche d'un membre</li>
+<li><code>snippets/my_details.html</code> : sera inclus en dessous de la page "Mes informations personnelles"</li>
+<li><code>snippets/my_services.html</code> : sera inclus en dessous de la page "Mes inscriptions et cotisations"</li>
 <li><code>snippets/home_button.html</code> : sera inclus dans la liste des boutons de la page d'accueil (ce fichier ne sera pas appelé si <code>home_button</code> est à <code>true</code> dans <code>module.ini</code>, il le remplace)</li>
 </ul>
+<h3 id="snippets-markdown">Snippets MarkDown</h3>
+<p>Il est également possible, depuis Paheko 1.3.2, d'étendre les fonctionnalités Markdown du site web en créant un snippet dans le répertoire <code>snippets/markdown/</code>, par exemple <code>snippets/markdown/map.html</code>.</p>
+<p>Le snippet sera appelé quand on utilise le tag du même nom dans le contenu du site web. Ici par exemple ça serait <code>&lt;&lt;map&gt;&gt;</code>.</p>
+<p>Le snippet reçoit ces variables :</p>
+<ul>
+<li><code>$params</code> : les paramètres du tag</li>
+<li><code>$block</code> : booléen, <code>TRUE</code> si le tag est seul sur une ligne, ou <code>FALSE</code> s'il se situe à l'intérieur d'un texte</li>
+<li><code>$content</code> : le contenu du bloc, si celui-ci est sur plusieurs lignes</li>
+</ul>
+<p>Exemple :</p>
+<pre><code>&lt;&lt;map center="Auckland, New Zealand"
+
+Ceci est la capitale de Nouvelle-Zélande !
+&gt;&gt;
+
+Voici un marqueur : &lt;&lt;map marker&gt;&gt;</code></pre>
+<p>Dans le premier appel, <code>map.html</code> recevra ces variables :</p>
+<pre><code>$params = ['center' =&gt; 'Auckland, New Zealand']
+$content = "Ceci est la capitale de Nouvelle-Zélande !"
+$block = TRUE</code></pre>
+<p>Dans le second appel, le snippet recevra celles-ci :</p>
+<pre><code>$params = [0 =&gt; 'marker']
+$content = NULL
+$block = FALSE</code></pre>
 <h2 id="fichier-module-ini">Fichier module.ini</h2>
 <p>Ce fichier décrit le module, au format INI (<code>clé=valeur</code>), en utilisant les clés suivantes :</p>
 <ul>
