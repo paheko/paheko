@@ -430,7 +430,7 @@ class API
 		$fn2 = strtok('/');
 
 		// CSV import
-		if ($fn == 'import') {
+		if ($fn === 'subscriptions' && $fn2 === 'import') {
 			$fp = null;
 
 			if ($this->method === 'PUT') {
