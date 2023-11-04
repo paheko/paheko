@@ -323,6 +323,9 @@ class Template extends Smartyer
 		elseif ($field->type == 'checkbox') {
 			$out = $v ? 'Oui' : 'Non';
 		}
+		elseif (null === $v) {
+			return '';
+		}
 		elseif ($field->type == 'file' && $v) {
 			$files = explode(';', $v);
 			$count = 0;
