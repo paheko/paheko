@@ -12,6 +12,7 @@ use Paheko\Accounting\Transactions;
 use Paheko\Accounting\Years;
 use Paheko\Entities\Accounting\Transaction;
 use Paheko\Search;
+use Paheko\Services\Services_User;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Users;
 
@@ -423,6 +424,76 @@ class API
 		}
 	}
 
+	protected function services(string $uri): ?array
+	{
+		$fn = strtok($uri, '/');
+		$fn2 = strtok('/');
+
+		// CSV import
+		if ($fn == 'import') {
+			$fp = null;
+
+			if ($this->method === 'PUT') {
+				$params = $_GET;
+			}
+			elseif ($this->method === 'POST') {
+				$params = $_POST;
+			}
+			else {
+				throw new APIException('Wrong request method', 400);
+			}
+
+			$this->requireAccess(Session::ACCESS_ADMIN);
+
+			$path = tempnam(CACHE_ROOT, 'tmp-import-api');
+
+			if ($this->method === 'POST') {
+				if (empty($_FILES['file']['tmp_name']) || !empty($_FILES['file']['error'])) {
+					throw new APIException('Empty file or no file was sent.', 400);
+				}
+
+				$path = $_FILES['file']['tmp_name'] ?? null;
+			}
+			else {
+				$stdin = fopen('php://input', 'rb');
+				$fp = fopen($path, 'wb');
+				stream_copy_to_stream($stdin, $fp);
+				fclose($fp);
+				fclose($stdin);
+			}
+
+			if (!$path) {
+				throw new APIException('Empty CSV file', 400);
+			}
+
+			try {
+				if (!filesize($path)) {
+					throw new APIException('Invalid upload', 400);
+				}
+
+				$csv = new CSV_Custom;
+				$csv->setColumns(Services_User::listImportColumns());
+				$csv->setMandatoryColumns(Services_User::listMandatoryImportColumns());
+
+				$csv->loadFile($path);
+				$csv->setTranslationTableAuto();
+
+				if (!$csv->loaded() || !$csv->ready()) {
+					throw new APIException('Missing columns or error during columns matching of import table: ' . json_encode(Services_User::listMandatoryImportColumns()), 400);
+				}
+
+				Services_User::import($csv);
+				return null;
+			}
+			finally {
+				Utils::safe_unlink($path);
+			}
+		}
+		else {
+			throw new APIException('Unknown user action', 404);
+		}
+	}
+
 	public function errors(string $uri)
 	{
 		$fn = strtok($uri, '/');
@@ -504,6 +575,8 @@ class API
 				return $this->errors($uri);
 			case 'accounting':
 				return $this->accounting($uri);
+			case 'services':
+				return $this->services($uri);
 			default:
 				throw new APIException('Unknown path', 404);
 		}
