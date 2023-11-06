@@ -522,7 +522,7 @@ class Template extends Smartyer
 			$params['suffix'] = sprintf('<datalist id="%s">%s</datalist>', $params['list'], $options);
 		}
 
-		if ($field->default_value == '=NOW') {
+		if ($field->default_value === 'NOW()') {
 			$params['default'] = new \DateTime;
 		}
 
