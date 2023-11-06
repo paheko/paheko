@@ -525,6 +525,9 @@ class Template extends Smartyer
 		if ($field->default_value === 'NOW()') {
 			$params['default'] = new \DateTime;
 		}
+		elseif (!empty($field->default_value)) {
+			$params['default'] = $field->default_value;
+		}
 
 		$out = CommonFunctions::input($params);
 
