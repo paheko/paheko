@@ -107,7 +107,8 @@
 		<ol>
 			<li><a href="#quote_sql">quote_sql</a></li>
 			<li><a href="#quote_sql_identifier">quote_sql_identifier</a></li>
-			<li><a href="#sql_where">sql_where</a>
+			<li><a href="#sql_where">sql_where</a></li>
+			<li><a href="#sql_user_fields">sql_user_fields</a>
 		</ol></li>
 		<li><a href="#filtres-de-date">Filtres de date</a>
 		<ol>
@@ -523,6 +524,26 @@ Ceci n'est pas un t</code></pre>
     {{$nom}}
 {{/sql}}</code></pre>
 <p>Le requête SQL générée sera alors <code>SELECT nom FROM users WHERE id_category IN (1, 2)</code>.</p>
+<h2 id="sql_user_fields">sql_user_fields</h2>
+<p>Permet de récupérer le contenu de champs de la fiche utilisateur pour une requête SQL.</p>
+<p>C'est particulièrement utile si le module permet de sélectionner dans sa configuration une liste de champs de membre (par exemple pour la carte de membre, ou les reçus fiscaux).</p>
+<p>Si un champ mentionné n'existe plus dans les fiches de membres, il sera ignoré.</p>
+<ul>
+<li>Le premier paramètre est la liste des champs (tableau ou chaîne de texte)</li>
+<li>Le second est le préfixe à utiliser (alias de la table membres), optionnel</li>
+<li>Le troisième est la chaîne de texte à utiliser pour coller les champs entre eux</li>
+</ul>
+<p>Exemple :</p>
+<pre><code>{{:assign var="champs_adresse." value="rue"}}
+{{:assign var="champs_adresse." value="ville"}}
+{{:assign var="champs_adresse_sql" value=$champs_adresse|sql_user_fields:"u":" - "}}
+{{#select !champs_adresse_sql AS adresse FROM users AS u; !champs_adresse_sql=$champs_adresse_sql}}
+    {{$adresse}}
+{{/select}}</code></pre>
+<p>Affichera :</p>
+<pre><code>30 rue de Machin Chose — Dijon</code></pre>
+<p>Et la clause SQL générée sera :</p>
+<pre><code>RTRIM(COALESCE(' - ' || u.rue, '') || COALESCE(' - ' || u.ville), ' - ')</code></pre>
 <h1 id="filtres-de-date">Filtres de date</h1>
 <h2 id="date">date</h2>
 <p>Formatte une date selon le format spécifié en premier paramètre.</p>

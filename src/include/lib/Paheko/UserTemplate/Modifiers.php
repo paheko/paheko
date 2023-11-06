@@ -6,6 +6,7 @@ use Paheko\DB;
 use Paheko\Utils;
 use Paheko\UserException;
 
+use Paheko\Users\DynamicFields;
 use Paheko\Entities\Email\Email;
 
 use KD2\SMTP;
@@ -49,6 +50,7 @@ class Modifiers
 		'quote_sql_identifier',
 		'quote_sql',
 		'sql_where',
+		'sql_user_fields',
 		'urlencode',
 		'count_words',
 		'or',
@@ -450,6 +452,24 @@ class Modifiers
 	static public function sql_where(...$args)
 	{
 		return DB::getInstance()->where(...$args);
+	}
+
+	static public function sql_user_fields($list, string $prefix = '', string $glue = ' '): string
+	{
+		$db = DB::getInstance();
+		$prefix = $prefix ? $db->quoteIdentifier($prefix) . '.' : '';
+		$out = [];
+		$glue = $db->quote($glue);
+
+		foreach ((array) $list as $field) {
+			if (!DynamicFields::get($field)) {
+				continue;
+			}
+
+			$out[] = sprintf('COALESCE(%s || %s%s, \'\')', $glue, $prefix, $db->quoteIdentifier($field));
+		}
+
+		return sprintf('RTRIM(%s, %s)', implode(' || ', $out), $glue);
 	}
 
 	static public function urlencode($str): string

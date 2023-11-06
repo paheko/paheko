@@ -492,6 +492,41 @@ Exemple pour afficher la liste des membres des catégories n°1 et n°2:
 
 Le requête SQL générée sera alors `SELECT nom FROM users WHERE id_category IN (1, 2)`.
 
+## sql_user_fields
+
+Permet de récupérer le contenu de champs de la fiche utilisateur pour une requête SQL.
+
+C'est particulièrement utile si le module permet de sélectionner dans sa configuration une liste de champs de membre (par exemple pour la carte de membre, ou les reçus fiscaux).
+
+Si un champ mentionné n'existe plus dans les fiches de membres, il sera ignoré.
+
+* Le premier paramètre est la liste des champs (tableau ou chaîne de texte)
+* Le second est le préfixe à utiliser (alias de la table membres), optionnel
+* Le troisième est la chaîne de texte à utiliser pour coller les champs entre eux
+
+Exemple :
+
+```
+{{:assign var="champs_adresse." value="rue"}}
+{{:assign var="champs_adresse." value="ville"}}
+{{:assign var="champs_adresse_sql" value=$champs_adresse|sql_user_fields:"u":" - "}}
+{{#select !champs_adresse_sql AS adresse FROM users AS u; !champs_adresse_sql=$champs_adresse_sql}}
+	{{$adresse}}
+{{/select}}
+```
+
+Affichera :
+
+```
+30 rue de Machin Chose — Dijon
+```
+
+Et la clause SQL générée sera :
+
+```
+RTRIM(COALESCE(' - ' || u.rue, '') || COALESCE(' - ' || u.ville), ' - ')
+```
+
 # Filtres de date
 
 ## date
