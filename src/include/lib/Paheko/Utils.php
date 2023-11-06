@@ -1166,7 +1166,7 @@ class Utils
 		}
 
 		fclose($pipes[0]);
-		$code = null;
+		$code = 0;
 
 		while ($timeout_ms > 0) {
 			$start = microtime(true);
