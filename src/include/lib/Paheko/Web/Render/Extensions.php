@@ -247,7 +247,16 @@ class Extensions
 			return self::error('Tag image : aucun nom de fichier indiqué.');
 		}
 
-		$size = $align === 'center' ? File::THUMB_SIZE_LARGE : File::THUMB_SIZE_TINY;
+		if ($align === 'center') {
+			$size = File::THUMB_SIZE_LARGE;
+		}
+		elseif ($align === 'left' || $align === 'right') {
+			$size = File::THUMB_SIZE_TINY;
+		}
+		else {
+			$size = null;
+		}
+
 		$out = self::img($name, $align ? $size : null, $caption);
 
 		if (!empty($align)) {
