@@ -288,9 +288,14 @@ class Emails
 	/**
 	 * Return or create a new email entity
 	 */
-	static public function getOrCreateEmail(string $address): Email
+	static public function getOrCreateEmail(string $address): ?Email
 	{
 		$address = strtolower($address);
+
+		if (!Email::isAddressValid($address, false)) {
+			return null;
+		}
+
 		$e = self::getEmail($address);
 
 		if (!$e) {

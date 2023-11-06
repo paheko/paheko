@@ -48,7 +48,8 @@
 			<td>{$row.last_sent|date}</td>
 			<td>
 				{if $row.email && ($row.optout || $row.last_sent < $limit_date)}
-					{linkbutton target="_dialog" label="Rétablir" href="!users/mailing/verify.php?address=%s"|args:$row.email shape="check"}
+					<?php $email = rawurlencode($row->email); ?>
+					{linkbutton target="_dialog" label="Rétablir" href="!users/mailing/verify.php?address=%s"|args:$email shape="check"}
 				{/if}
 			</td>
 		</tr>

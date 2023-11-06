@@ -72,6 +72,7 @@ $fields = DF::getInstance()->all();
 			{if $email.optout}
 				<b class="alert">{icon shape="alert"}</b> Ne souhaite plus recevoir de messages
 				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
+					<?php $value = rawurlencode($value); ?>
 					<br/>{linkbutton target="_dialog" label="Rétablir les envois à cette adresse" href="!users/mailing/verify.php?address=%s"|args:$value shape="check"}
 				{/if}
 			{elseif $email.invalid}
