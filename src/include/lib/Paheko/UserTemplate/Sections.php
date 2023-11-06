@@ -1219,7 +1219,7 @@ class Sections
 			'select' => '*',
 			'order' => '1',
 			'begin' => 0,
-			'limit' => 100,
+			'limit' => 10000,
 			'where' => '',
 		];
 

@@ -254,7 +254,7 @@ Certaines sections (voir plus bas) héritent de `sql` et rajoutent des fonctionn
 | :- | :- |
 | `where` | Condition de sélection des résultats |
 | `begin` | Début des résultats, si vide une valeur de `0` sera utilisée. |
-| `limit` | Limitation des résultats. Si vide, une valeur de `100` sera utilisée. |
+| `limit` | Limitation des résultats. Si vide, une valeur de `10000` sera utilisée. |
 | `group` | Contenu de la clause `GROUP BY` |
 | `having` | Contenu de la clause `HAVING` |
 | `order` | Ordre de tri des résultats. Si vide le tri sera fait par ordre d'ajout dans la base de données. |
@@ -587,7 +587,7 @@ La section `{{#form …}}` permet de simplifier ces tests, et s'assurer qu'aucun
 
 ## load <sup>(sql)</sup>
 
-Note : cette section hérite de `sql` (voir plus haut). De ce fait, le nombre de résultats est limité à 100 par défaut, si le paramètre `limit` n'est pas renseigné.
+Note : cette section hérite de `sql` (voir plus haut). De ce fait, le nombre de résultats est limité à 10000 par défaut, si le paramètre `limit` n'est pas renseigné.
 
 Charge un ou des documents pour le module courant.
 
