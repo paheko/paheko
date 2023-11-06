@@ -93,7 +93,7 @@ class Transactions
 
 	static public function countForUser(int $user_id): int
 	{
-		return DB::getInstance()->count('acc_transactions_users', 'id_user = ?', $user_id);
+		return (int) DB::getInstance()->firstColumn('SELECT COUNT(*) FROM acc_transactions_users WHERE id_user = ? GROUP BY id_transaction;', $user_id);
 	}
 
 	static public function countForCreator(int $user_id): int
