@@ -26,7 +26,7 @@
 
 		{if $id_page !== $current_cat_id}
 			<li class="select">
-				{button shape="right" label="Choisir la catégorie \"%s\""|args:$current_cat_title type="button" name="move" value=$current_cat_id data-label=$current_cat_title}
+				{button shape="right" label="Choisir la catégorie \"%s\""|args:$current_cat_title type="button" name="move" value=$current_cat_id|intval data-label=$current_cat_title}
 			</li>
 		{/if}
 		</ul>
