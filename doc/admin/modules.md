@@ -86,6 +86,8 @@ Il est également possible, depuis Paheko 1.3.2, d'étendre les fonctionnalités
 
 Le snippet sera appelé quand on utilise le tag du même nom dans le contenu du site web. Ici par exemple ça serait `<<map>>`.
 
+Le nom du snippet doit commencer par une lettre minuscule et peut être suivi de lettres minuscules, de chiffres, ou de tirets bas. Exemples : `map2024` `map_openstreetmap`, etc.
+
 Le snippet reçoit ces variables :
 
 * `$params` : les paramètres du tag
