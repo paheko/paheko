@@ -383,7 +383,7 @@ class Transaction extends Entity
 	{
 		$new = new Transaction;
 
-		$copy = ['type', 'status', 'label', 'notes', 'reference'];
+		$copy = ['type', 'label', 'notes', 'reference'];
 
 		foreach ($copy as $field) {
 			$new->$field = $this->$field;
