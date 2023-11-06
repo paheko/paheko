@@ -939,6 +939,7 @@ Le document n°{{$id}} est celui qui parle de Greta.
 <p>Ainsi que chaque élément du document JSON lui-même.</p>
 <p>La section ouvre un tableau HTML et le ferme automatiquement, donc le contenu de la section <strong>doit</strong> être une ligne de tableau HTML (<code>&lt;tr&gt;</code>).</p>
 <p>Dans chaque ligne du tableau il faut respecter l'ordre des colonnes indiqué dans <code>columns</code> ou <code>select</code>. Une dernière colonne est réservée aux boutons d'action : <code>&lt;td class="actions"&gt;...&lt;/td&gt;</code>.</p>
+<p><strong>Attention :</strong> une seule liste peut être utilisée dans une même page. Avoir plusieurs listes provoquera des problèmes au niveau du tri des colonnes.</p>
 <h3 id="exemples">Exemples</h3>
 <p>Lister le nom, la date et le montant des reçus fiscaux, à partir du schéma JSON suivant :</p>
 <pre><code>{

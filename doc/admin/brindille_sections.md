@@ -710,6 +710,8 @@ La section ouvre un tableau HTML et le ferme automatiquement, donc le contenu de
 
 Dans chaque ligne du tableau il faut respecter l'ordre des colonnes indiqué dans `columns` ou `select`. Une dernière colonne est réservée aux boutons d'action : `<td class="actions">...</td>`.
 
+**Attention :** une seule liste peut être utilisée dans une même page. Avoir plusieurs listes provoquera des problèmes au niveau du tri des colonnes.
+
 ### Exemples
 
 Lister le nom, la date et le montant des reçus fiscaux, à partir du schéma JSON suivant :
