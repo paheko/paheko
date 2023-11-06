@@ -565,7 +565,8 @@ class Transaction extends Entity
 	{
 		if ($this->type == self::TYPE_DEBT || $this->type == self::TYPE_CREDIT) {
 			// Debts and credits add a waiting status
-			if (!$this->exists() && !$this->hasStatus(self::STATUS_PAID)) {
+			// Don't use if ($this->exists()) here as the type can be changed on an existing transaction
+			if (!$this->hasStatus(self::STATUS_PAID)) {
 				$this->addStatus(self::STATUS_WAITING);
 			}
 		}
