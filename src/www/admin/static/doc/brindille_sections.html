@@ -910,6 +910,11 @@ Le document n°{{$id}} est celui qui parle de Greta.
 <td style="text-align: left;"><em>optionnel</em></td>
 <td style="text-align: left;">Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle.</td>
 </tr>
+<tr>
+<td style="text-align: left;"><code>disable_user_ordering</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Booléen. Si ce paramètre est <code>true</code>, il ne sera pas possible à l'utilisateur d'ordonner les colonnes.</td>
+</tr>
 </tbody>
 </table>
 <p>Pour déterminer quelles colonnes afficher dans le tableau, il faut utiliser soit le paramètre <code>schema</code> pour indiquer un fichier de schéma JSON qui sera utilisé pour donner le libellé des colonnes (via la <code>description</code> indiquée dans le schéma), soit le paramètre <code>select</code>, où il faut alors indiquer le nom et le libellé des colonnes sous la forme <code>$$.colonne1 AS "Libellé"; $$.colonne2 AS "Libellé 2"</code>.</p>

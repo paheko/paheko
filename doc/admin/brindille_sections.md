@@ -686,6 +686,7 @@ Cette section est très puissante et permet de générer des listes simplement, 
 | `where` | *optionnel* | Condition `WHERE` de la requête SQL. |
 | `debug` | *optionnel* | Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle. |
 | `explain` | *optionnel* | Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle. | 
+| `disable_user_ordering` | *optionnel* | Booléen. Si ce paramètre est `true`, il ne sera pas possible à l'utilisateur d'ordonner les colonnes. |
 
 Pour déterminer quelles colonnes afficher dans le tableau, il faut utiliser soit le paramètre `schema` pour indiquer un fichier de schéma JSON qui sera utilisé pour donner le libellé des colonnes (via la `description` indiquée dans le schéma), soit le paramètre `select`, où il faut alors indiquer le nom et le libellé des colonnes sous la forme `$$.colonne1 AS "Libellé"; $$.colonne2 AS "Libellé 2"`.
 
