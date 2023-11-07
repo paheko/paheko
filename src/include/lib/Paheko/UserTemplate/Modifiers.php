@@ -469,6 +469,10 @@ class Modifiers
 			$out[] = sprintf('COALESCE(%s || %s%s, \'\')', $glue, $prefix, $db->quoteIdentifier($field));
 		}
 
+		if (!count($out)) {
+			return '\'\'';
+		}
+
 		return sprintf('LTRIM(%s, %s)', implode(' || ', $out), $glue);
 	}
 
