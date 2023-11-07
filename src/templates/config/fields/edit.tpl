@@ -14,11 +14,7 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 	{if !$field->isPreset() && !$field->exists()}
 		{input type="select" name="type" options=$field::TYPES source=$field label="Type" default="text" help="Il ne sera plus possible de modifier le type une fois le champ créé." required=true}
 	{else}
-		{if $field->isPreset()}
-			<dd class="help">Le type, identifiant et libellé ne sont pas modifiables pour ce champ.</dd>
-		{else}
-			<dd class="help">Le type et l'identifiant ne sont pas modifiables.</dd>
-		{/if}
+		<dd class="help">Le type et l'identifiant ne sont pas modifiables.</dd>
 		{input type="select" name="type" options=$field::TYPES source=$field label="Type" disabled=true}
 	{/if}
 		{input type="text" name="label" label="Libellé" required=true source=$field}
