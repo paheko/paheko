@@ -469,7 +469,7 @@ class Modifiers
 			$out[] = sprintf('COALESCE(%s || %s%s, \'\')', $glue, $prefix, $db->quoteIdentifier($field));
 		}
 
-		return sprintf('RTRIM(%s, %s)', implode(' || ', $out), $glue);
+		return sprintf('LTRIM(%s, %s)', implode(' || ', $out), $glue);
 	}
 
 	static public function urlencode($str): string

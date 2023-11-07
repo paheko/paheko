@@ -543,7 +543,7 @@ Ceci n'est pas un t</code></pre>
 <p>Affichera :</p>
 <pre><code>30 rue de Machin Chose — Dijon</code></pre>
 <p>Et la clause SQL générée sera :</p>
-<pre><code>RTRIM(COALESCE(' - ' || u.rue, '') || COALESCE(' - ' || u.ville), ' - ')</code></pre>
+<pre><code>LTRIM(COALESCE(' - ' || u.rue, '') || COALESCE(' - ' || u.ville), ' - ')</code></pre>
 <h1 id="filtres-de-date">Filtres de date</h1>
 <h2 id="date">date</h2>
 <p>Formatte une date selon le format spécifié en premier paramètre.</p>

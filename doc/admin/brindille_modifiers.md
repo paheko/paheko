@@ -524,7 +524,7 @@ Affichera :
 Et la clause SQL générée sera :
 
 ```
-RTRIM(COALESCE(' - ' || u.rue, '') || COALESCE(' - ' || u.ville), ' - ')
+LTRIM(COALESCE(' - ' || u.rue, '') || COALESCE(' - ' || u.ville), ' - ')
 ```
 
 # Filtres de date
