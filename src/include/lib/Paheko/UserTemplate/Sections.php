@@ -780,6 +780,11 @@ class Sections
 			unset($params['active']);
 		}
 
+		if (isset($params['active']) && empty($params['active'])) {
+			$params['having'] = 'MAX(su.expiry_date) < date()';
+			unset($params['active']);
+		}
+
 		if (empty($params['order'])) {
 			$params['order'] = 'su.id';
 		}
