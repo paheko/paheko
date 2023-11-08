@@ -537,6 +537,13 @@ Le format est identique au [format utilisé par PHP](https://www.php.net/manual/
 
 Si aucun format n'est indiqué, le défaut sera `d/m/Y à H:i`. (en français)
 
+Exemples :
+
+```
+{{:assign this_year=$now|date:'Y'}}
+{{$date|date:'d/m/Y'}}
+```
+
 ## strftime
 
 Formatte une date selon un format spécifié en premier paramètre.
@@ -546,6 +553,11 @@ Le format à utiliser est identique [au format utilisé par la fonction strftime
 Un format doit obligatoirement être spécifié.
 
 En passant un code de langue en second paramètre, cette langue sera utilisée. Sont supportés le français (`fr`) et l'anglais (`en`). Le défaut est le français si aucune valeur n'est passée en second paramètre .
+
+```
+{{:assign this_year=$now|date:'%Y'}}
+{{$date|date:'%d/%m/%Y'}}
+```
 
 ## relative_date 
 

@@ -549,11 +549,16 @@ Ceci n'est pas un t</code></pre>
 <p>Formatte une date selon le format spécifié en premier paramètre.</p>
 <p>Le format est identique au <a href="https://www.php.net/manual/fr/datetime.format.php" target="_blank" rel="noreferrer">format utilisé par PHP</a>.</p>
 <p>Si aucun format n'est indiqué, le défaut sera <code>d/m/Y à H:i</code>. (en français)</p>
+<p>Exemples :</p>
+<pre><code>{{:assign this_year=$now|date:'Y'}}
+{{$date|date:'d/m/Y'}}</code></pre>
 <h2 id="strftime">strftime</h2>
 <p>Formatte une date selon un format spécifié en premier paramètre.</p>
 <p>Le format à utiliser est identique <a href="https://www.php.net/strftime" target="_blank" rel="noreferrer">au format utilisé par la fonction strftime de PHP</a>.</p>
 <p>Un format doit obligatoirement être spécifié.</p>
 <p>En passant un code de langue en second paramètre, cette langue sera utilisée. Sont supportés le français (<code>fr</code>) et l'anglais (<code>en</code>). Le défaut est le français si aucune valeur n'est passée en second paramètre .</p>
+<pre><code>{{:assign this_year=$now|date:'%Y'}}
+{{$date|date:'%d/%m/%Y'}}</code></pre>
 <h2 id="relative_date">relative_date</h2>
 <p>Renvoie une date relative à la date du jour : <code>aujourd'hui</code>, <code>hier</code>, <code>demain</code>, ou sinon <code>mardi 2 janvier</code> (si la date est de l'année en cours) ou <code>2 janvier 2021</code> (si la date est d'une autre année).</p>
 <p>En spécifiant <code>true</code> en premier paramètre, l'heure sera ajoutée au format <code>14h34</code>.</p>

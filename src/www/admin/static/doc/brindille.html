@@ -108,7 +108,7 @@ De même, les fichiers qui n'ont pas d'extension seront également traités par 
 <h2 id="affichage-de-variable">Affichage de variable</h2>
 <p>Une variable est affichée à l'aide de la syntaxe : <code>{{$date}}</code> affichera la valeur brute de la date par exemple : <code>2020-01-31 16:32:00</code>.</p>
 <p>La variable peut être modifiée à l'aide de filtres de modification, qui sont ajoutés avec le symbole de la barre verticale (pipe <code>|</code>) : <code>{{$date|date_long}}</code> affichera une date au format long : <code>jeudi 7 mars 2021</code>.</p>
-<p>Ces filtres peuvent accepter des paramètres, séparés par deux points <code>:</code>. Exemple : <code>{{$date|date:"%d/%m/%Y"}}</code> affichera <code>31/01/2020</code>.</p>
+<p>Ces filtres peuvent accepter des paramètres, séparés par deux points <code>:</code>. Exemple : <code>{{$date|date:"d/m/Y"}}</code> affichera <code>31/01/2020</code>.</p>
 <p>Par défaut la variable sera recherchée dans le contexte actuel de la section, si elle n'est pas trouvée elle sera recherchée dans le contexte parent (section parente), etc. jusqu'à trouver la variable.</p>
 <p>Il est possible de faire référence à une variable d'un contexte particulier avec la notation à points : <code>{{$article.date}}</code>.<br />
 La même syntaxe est utilisée pour accéder aux membres d'un tableau : <code>{{$labels.new_page}}</code>.</p>

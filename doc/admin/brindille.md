@@ -35,7 +35,7 @@ Une variable est affichée à l'aide de la syntaxe : `{{$date}}` affichera la va
 
 La variable peut être modifiée à l'aide de filtres de modification, qui sont ajoutés avec le symbole de la barre verticale (pipe `|`) : `{{$date|date_long}}` affichera une date au format long : `jeudi 7 mars 2021`.
 
-Ces filtres peuvent accepter des paramètres, séparés par deux points `:`. Exemple : `{{$date|date:"%d/%m/%Y"}}` affichera `31/01/2020`.
+Ces filtres peuvent accepter des paramètres, séparés par deux points `:`. Exemple : `{{$date|date:"d/m/Y"}}` affichera `31/01/2020`.
 
 Par défaut la variable sera recherchée dans le contexte actuel de la section, si elle n'est pas trouvée elle sera recherchée dans le contexte parent (section parente), etc. jusqu'à trouver la variable.
 
