@@ -300,13 +300,13 @@ class Sections
 			$params['where'] = self::_moduleReplaceJSONExtract($params['where'], $table);
 		}
 
-		if (isset($params['key'])) {
+		if (array_key_exists('key', $params)) {
 			$params['where'] .= ' AND key = :key';
 			$params['limit'] = 1;
 			$params[':key'] = $params['key'];
 			unset($params['key']);
 		}
-		elseif (isset($params['id'])) {
+		elseif (array_key_exists('id', $params)) {
 			$params['where'] .= ' AND id = :id';
 			$params['limit'] = 1;
 			$params[':id'] = $params['id'];
