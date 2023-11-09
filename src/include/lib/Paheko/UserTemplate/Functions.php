@@ -47,6 +47,7 @@ class Functions
 		'form_errors',
 		'redirect',
 		'admin_files',
+		'delete_file',
 		'create',
 	];
 
