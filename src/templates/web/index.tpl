@@ -142,6 +142,12 @@
 	{else}
 		<p class="help">Il n'y a aucune page dans cette catégorie.</p>
 	{/if}
+
+	{if !$page}
+	<p class="actions-left">
+		{linkbutton shape="menu" label="Liste de toutes les pages du site" href="all.php"}
+	</p>
+	{/if}
 {/if}
 
 
