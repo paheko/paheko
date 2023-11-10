@@ -414,14 +414,10 @@ class Sections
 
 			$types = is_array($rule['type']) ? $rule['type'] : [$rule['type']];
 
-			// Only "simple" types are supported
-			if (in_array('array', $types) || in_array('object', $types)) {
-				continue;
-			}
-
 			$out[$key] = [
 				'label' => $rule['description'] ?? null,
 				'select' => sprintf('json_extract(document, \'$.%s\')', $key),
+				'_json_decode' => in_array('array', $types) || in_array('object', $types),
 			];
 		}
 
@@ -599,7 +595,16 @@ class Sections
 		$tpl->assign('disable_user_ordering', $params['disable_user_ordering'] ?? false);
 		$tpl->display('common/dynamic_list_head.tpl');
 
-		yield from $i;
+		foreach ($i as $row) {
+			// Decode arrays/objects
+			foreach ($columns as $name => $column) {
+				if (!empty($column['_json_decode']) && isset($row[$name]) && is_string($row[$name])) {
+					$row[$name] = json_decode($row[$name], true);
+				}
+			}
+
+			yield $row;
+		}
 
 		echo '</tbody>';
 		echo '</table>';
