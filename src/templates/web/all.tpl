@@ -6,6 +6,8 @@
 
 {if $list->count()}
 
+	<p class="actions">{exportmenu name="_dl_export" class="menu-btn-right"}</p>
+
 	{include file="common/dynamic_list_head.tpl"}
 
 		{foreach from=$list->iterate() item="p"}
