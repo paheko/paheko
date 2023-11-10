@@ -305,7 +305,7 @@ class Mailing extends Entity
 		$db = DB::getInstance();
 
 		$where = $id ? 'id = ?' : '1 ORDER BY RANDOM()';
-		$sql = sprintf('SELECT extra_data FROM mailings_recipients WHERE %s LIMIT 1;', $where);
+		$sql = sprintf('SELECT extra_data FROM mailings_recipients WHERE id_mailing = %d AND %s LIMIT 1;', $this->id(), $where);
 		$args = $id ? (array)$id : [];
 
 		$r = $db->firstColumn($sql, ...$args);
@@ -319,7 +319,7 @@ class Mailing extends Entity
 		$body = $this->getBody();
 
 		if ($body instanceof UserTemplate) {
-			$body->assignArray($r);
+			$body->assignArray($r, null, false);
 
 			try {
 				$body = $body->fetch();
@@ -337,7 +337,7 @@ class Mailing extends Entity
 	{
 		$html = $this->getPreview($address);
 		$tpl = new UserTemplate('web/email.html');
-		$tpl->assignArray(compact('html'));
+		$tpl->assignArray(compact('html'), null, false);
 
 		$out = $tpl->fetch();
 
