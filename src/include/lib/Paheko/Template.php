@@ -326,7 +326,11 @@ class Template extends Smartyer
 		elseif (null === $v) {
 			return '';
 		}
-		elseif ($field->type == 'file' && $v) {
+		elseif ($field->type == 'file') {
+			if (!$v) {
+				return '';
+			}
+
 			$files = explode(';', $v);
 			$count = 0;
 			$label = '';
@@ -336,9 +340,13 @@ class Template extends Smartyer
 					$count++;
 					continue;
 				}
+				elseif ($label !== '') {
+					$count++;
+					continue;
+				}
 
 				$url = BASE_URL . $path . '?150px';
-				$label = sprintf(
+				$label .= sprintf(
 					'<img src="%s" alt="%s" />',
 					htmlspecialchars($url),
 					htmlspecialchars($field->label)
@@ -346,13 +354,13 @@ class Template extends Smartyer
 			}
 
 			if ($count) {
-				$label = ($count != count($files) ? '+' : '')
+				$label .= ($count != count($files) ? '+' : '')
 					. ($count == 1 ? '1 fichier' : $count . ' fichiers');
 			}
 
 			if ($label !== '') {
 				if (isset($params['files_href'])) {
-					$label = sprintf('<a href="%s">%s</a>', $params['files_href'], $label);
+					$label = sprintf('<a href="%s">%s</a>', Utils::getLocalURL($params['files_href']), $label);
 				}
 
 				$out = '<div class="files-list"><figure>' . $label . '</label></div>';

@@ -170,6 +170,9 @@ abstract class AdvancedSearch
 						$values = array_map(['Paheko\Utils', 'moneyToInteger'], $values);
 					}
 				}
+				elseif ($column['type'] === 'integer') {
+					$values = array_map('intval', $values);
+				}
 
 				// L'opérateur binaire est un peu spécial
 				if ($condition['operator'] === '&' || $condition['operator'] === 'NOT &')
@@ -217,8 +220,7 @@ abstract class AdvancedSearch
 						throw new \RuntimeException(sprintf('Operator %s expects at least %d parameters, only %d supplied', $condition['operator'], $expected, $found));
 					}
 
-					for ($i = 0; $i < $expected; $i++)
-					{
+					for ($i = 0; $i < $expected; $i++) {
 						$pos = strpos($query, '?');
 						$query = substr_replace($query, $db->quote(array_shift($values)), $pos, 1);
 					}

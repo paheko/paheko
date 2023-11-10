@@ -58,10 +58,6 @@ class AdvancedSearch extends A_S
 			}
 			*/
 
-			if ($field->type === 'file') {
-				continue;
-			}
-
 			// nope
 			if ($field->system & $field::PASSWORD) {
 				continue;
@@ -103,6 +99,13 @@ class AdvancedSearch extends A_S
 			elseif ($field->type == 'number')
 			{
 				$column['type'] = 'integer';
+			}
+			elseif ($field->type === 'file') {
+				$column['type'] = 'integer';
+				$column['null'] = false;
+				$column['label'] .= ' (nombres de fichiers)';
+				$column['select'] = sprintf('(SELECT GROUP_CONCAT(f.path, \';\') FROM users_files AS uf INNER JOIN files AS f ON f.id = uf.id_file WHERE uf.id_user = u.id AND uf.field = %s)', $db->quote($field->name));
+				$column['where'] = sprintf('(SELECT COUNT(*) FROM users_files AS uf WHERE uf.id_user = u.id AND uf.field = %s) %%s', $db->quote($field->name));
 			}
 
 			if ($field->type == 'tel') {
@@ -172,6 +175,7 @@ class AdvancedSearch extends A_S
 	{
 		return array_merge(array_keys($this->schemaTables()), [
 			'users_search',
+			'user_files',
 		]);
 	}
 
