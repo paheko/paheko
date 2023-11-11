@@ -33,7 +33,7 @@ class Services_User
 			CASE WHEN s.end_date < date() THEN 1 ELSE 0 END AS archived
 			FROM services_users su
 			INNER JOIN services s ON s.id = su.id_service
-			INNER JOIN services_fees sf ON sf.id = su.id_fee
+			LEFT JOIN services_fees sf ON sf.id = su.id_fee
 			WHERE su.id_user = ?
 			GROUP BY su.id_service ORDER BY expiry_date DESC;', $user_id);
 	}
