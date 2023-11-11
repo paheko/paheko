@@ -832,7 +832,7 @@ namespace Paheko;
  *
  * Défaut : null (= fonctionnalité désactivée)
  */
-//const PDFTOTEXT_COMMAND = 'pdftotext';
+//const PDFTOTEXT_COMMAND = 'mupdf';
 
 /**
  * API_USER et API_PASSWORD
