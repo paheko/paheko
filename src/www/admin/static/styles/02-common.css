@@ -530,12 +530,13 @@ details summary.block::after {
 .files-list {
     display: flex;
     flex-wrap: wrap;
-    align-items: stretch;
+    align-items: end;
     justify-content: stretch;
-    margin: .8rem 0
+    margin: .8rem 0;
+    gap: .5rem;
 }
 
-.files-list figure a {
+.files-list figure .thumb a {
     border-radius: .5rem;
     background: rgba(var(--gSecondColor), 0.1);
     padding: .5rem;
@@ -547,6 +548,14 @@ details summary.block::after {
 
 table .files-list, table .files-list figure {
     margin: 0;
+}
+
+.files-list figure .actions {
+    display: flex;
+    flex-direction: column;
+    font-size: .9em;
+    justify-content: center;
+    align-items: center;
 }
 
 .files-list figure figcaption {
