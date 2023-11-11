@@ -538,9 +538,16 @@ class Sections
 			$list->orderBy($params['order'], $params['desc'] ?? false);
 		}
 
-		$list->setModifier(function(&$row) {
+		$list->setModifier(function(&$row) use ($columns) {
 			$row->original = clone $row;
 			unset($row->original->id, $row->original->key, $row->original->document);
+
+			// Decode arrays/objects
+			foreach ($columns as $name => $column) {
+				if (!empty($column['_json_decode']) && isset($row->$name) && is_string($row->$name)) {
+					$row->$name = json_decode($row->$name, true);
+				}
+			}
 
 			if (null !== $row->document) {
 				$row = array_merge(json_decode($row->document, true), (array)$row);
@@ -595,16 +602,7 @@ class Sections
 		$tpl->assign('disable_user_ordering', $params['disable_user_ordering'] ?? false);
 		$tpl->display('common/dynamic_list_head.tpl');
 
-		foreach ($i as $row) {
-			// Decode arrays/objects
-			foreach ($columns as $name => $column) {
-				if (!empty($column['_json_decode']) && isset($row[$name]) && is_string($row[$name])) {
-					$row[$name] = json_decode($row[$name], true);
-				}
-			}
-
-			yield $row;
-		}
+		yield from $i;
 
 		echo '</tbody>';
 		echo '</table>';
