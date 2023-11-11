@@ -204,6 +204,10 @@ class Upgrade
 				$db->import(ROOT . '/include/migrations/1.3/1.3.0-rc15.sql');
 			}
 
+			if (version_compare($v, '1.3.2', '<')) {
+				$db->import(ROOT . '/include/migrations/1.3/1.3.2.sql');
+			}
+
 			Plugins::upgradeAllIfRequired();
 
 			// Vérification de la cohérence des clés étrangères
