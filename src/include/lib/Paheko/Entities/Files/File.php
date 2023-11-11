@@ -166,6 +166,8 @@ class File extends Entity
 		$this->assert(trim($this->name) !== '', 'Le nom de fichier ne peut rester vide');
 		$this->assert(strlen($this->path), 'Le chemin ne peut rester vide');
 		$this->assert(null === $this->parent || strlen($this->parent), 'Le chemin ne peut rester vide');
+		$this->assert(false === strpos($this->path, '//'));
+		$this->assert(null === $this->parent || false === strpos($this->parent, '//'));
 	}
 
 	public function save(bool $selfcheck = true): bool

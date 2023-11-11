@@ -369,7 +369,7 @@ class Module extends Entity
 			return [];
 		}
 
-		$path = $path ? '/' . $path : '';
+		$path = $path ? '/' . ltrim($path, '/') : '';
 
 		foreach (Files::listForContext(File::CONTEXT_MODULES, $this->name . $path) as $file) {
 			$_path = substr($file->path, strlen($base . '/'));
@@ -403,10 +403,10 @@ class Module extends Entity
 					'name'      => $file,
 					'type'      => mime_content_type($dist_path . '/' . $file),
 					'dir'       => is_dir($dist_path . '/' . $file),
-					'path'      => ltrim($path, '/') . '/' . $file,
+					'path'      => trim($path, '/') . '/' . $file,
 					'local'     => false,
 					'dist'      => true,
-					'file_path' => $base . $path . '/' . $file,
+					'file_path' => $base . rtrim($path, '/') . '/' . $file,
 					'file'      => null,
 					'dist_path' => $dist_path . '/' . $file,
 				];
