@@ -369,9 +369,10 @@ class Module extends Entity
 			return [];
 		}
 
-		$path = $path ? '/' . ltrim($path, '/') : '';
+		$path ??= '';
+		$local_path = trim($base . '/' . $path, '/');
 
-		foreach (Files::listForContext(File::CONTEXT_MODULES, $this->name . $path) as $file) {
+		foreach (Files::list($local_path) as $file) {
 			$_path = substr($file->path, strlen($base . '/'));
 
 			$out[$file->name] = (object) [
@@ -386,7 +387,7 @@ class Module extends Entity
 			];
 		}
 
-		$dist_path = $this->distPath(trim($path, '/'));
+		$dist_path = $this->distPath($path);
 
 		if (is_dir($dist_path)) {
 			foreach (scandir($dist_path) as $file) {
@@ -403,10 +404,10 @@ class Module extends Entity
 					'name'      => $file,
 					'type'      => mime_content_type($dist_path . '/' . $file),
 					'dir'       => is_dir($dist_path . '/' . $file),
-					'path'      => trim($path, '/') . '/' . $file,
+					'path'      => trim($path . '/' . $file, '/'),
 					'local'     => false,
 					'dist'      => true,
-					'file_path' => $base . rtrim($path, '/') . '/' . $file,
+					'file_path' => $base . '/' . trim($path . '/' . $file, '/'),
 					'file'      => null,
 					'dist_path' => $dist_path . '/' . $file,
 				];
