@@ -136,6 +136,10 @@ class Services_User
 					throw new UserException(sprintf('L\'activité "%s" n\'existe pas', $row->service));
 				}
 
+				if (empty($row->date)) {
+					throw new UserException('La date est vide');
+				}
+
 				$id_fee = null;
 
 				if (!empty($row->fee)) {
