@@ -352,7 +352,7 @@ class Emails
 			if (!$row->email_hash) {
 				$email = self::getOrCreateEmail($row->recipient);
 
-				if (!$email->canSend()) {
+				if (!$email || !$email->canSend()) {
 					// Email address is invalid, skip
 					self::deleteFromQueue($row->id);
 					continue;
