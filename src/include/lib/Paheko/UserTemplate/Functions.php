@@ -448,15 +448,19 @@ class Functions
 		return $out;
 	}
 
-	static public function error(array $params, UserTemplate $tpl)
+	static public function error(array $params, UserTemplate $tpl, int $line)
 	{
+		if (isset($params['admin'])) {
+			throw new Brindille_Exception($params['admin']);
+		}
+
 		throw new UserException($params['message'] ?? 'Erreur du module');
 	}
 
 	static protected function getFilePath(?string $path, string $arg_name, UserTemplate $ut, int $line)
 	{
 		if (empty($path)) {
-			throw new Brindille_Exception(sprintf('Ligne %d: argument "%s" manquant', $arg_name, $line));
+			throw new Brindille_Exception(sprintf('Ligne %d: argument "%s" manquant', $line, $arg_name));
 		}
 
 		if (substr($path, 0, 2) == './') {
