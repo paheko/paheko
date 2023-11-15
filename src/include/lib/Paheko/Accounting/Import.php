@@ -194,7 +194,7 @@ class Import
 							$linked_users = null;
 						}
 
-						$current_id = (int) $row->id;
+						$current_id = $row->id;
 					}
 				}
 
@@ -327,17 +327,32 @@ class Import
 						throw new UserException(sprintf('le compte "%s" n\'existe pas dans le plan comptable', $row->account));
 					}
 
+					$line_label = $row->line_label ?? null;
+					$line_reference = $row->line_reference ?? null;
+
+					// Try to use label/reference if it changes from line to line
+					if (null === $line_label && $row->label != $transaction->label) {
+						$line_label = $row->label;
+					}
+
+					if (null === $line_reference && $row->reference != $transaction->reference) {
+						$line_reference = $row->reference;
+					}
+
 					$data = $data + [
 						'credit'     => $row->credit ?: 0,
 						'debit'      => $row->debit ?: 0,
 						'id_account' => $id_account,
-						'reference'  => $row->line_reference ?? null,
-						'label'      => $row->line_label ?? null,
+						'reference'  => $line_reference,
+						'label'      => $line_label,
 						'reconciled' => $row->reconciled ?? false,
 					];
 
 					$line = new Line;
 					$line->importForm($data);
+					if (!$line->credit && !$line->debit) {
+						var_dump($row); exit;
+					}
 					$transaction->addLine($line);
 				}
 			}
