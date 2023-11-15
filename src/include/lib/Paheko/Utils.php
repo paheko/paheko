@@ -228,11 +228,24 @@ class Utils
 			return 0;
 		}
 
-		if (!preg_match('/^(-?)(\d+)(?:[,.](\d{1,2}))?/', $value, $match)) {
+		if (!preg_match('/^(-?)(\d+)(?:[,.](\d{1,3}))?/', $value, $match)) {
 			throw new UserException(sprintf('Le montant est invalide : %s. Exemple de format accepté : 142,02', $value));
 		}
 
-		$value = $match[1] . $match[2] . str_pad($match[3] ?? '', 2, '0', STR_PAD_RIGHT);
+		$cents = $match[3] ?? '0';
+
+		if (strlen($cents) === 1) {
+			$cents .= '0';
+		}
+
+		$more = (int) substr($cents, 2, 1);
+		$cents = (int) substr($cents, 0, 2);
+
+		if ($more >= 5) {
+			$cents++;
+		}
+
+		$value = $match[1] . $match[2] . str_pad((string)$cents, 2, '0', STR_PAD_LEFT);
 		$value = (int) $value;
 		return $value;
 	}
