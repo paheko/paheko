@@ -331,11 +331,11 @@ class Import
 					$line_reference = $row->line_reference ?? null;
 
 					// Try to use label/reference if it changes from line to line
-					if (null === $line_label && $row->label != $transaction->label) {
+					if (null === $line_label && isset($row->label) && $row->label != $transaction->label) {
 						$line_label = $row->label;
 					}
 
-					if (null === $line_reference && $row->reference != $transaction->reference) {
+					if (null === $line_reference && isset($row->reference) && $row->reference != $transaction->reference) {
 						$line_reference = $row->reference;
 					}
 
