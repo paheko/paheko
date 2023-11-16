@@ -2,18 +2,10 @@
 
 {include file="services/_nav.tpl" current="index" current_service=$service service_page="index"}
 
-{if count($list)}
-	<table class="list">
-		<thead>
-			<th>Tarif</th>
-			<td>Montant</td>
-			<td>Membres à jour</td>
-			<td>Membres expirés</td>
-			<td>Membres en attente de règlement</td>
-			<td></td>
-		</thead>
-		<tbody>
-			{foreach from=$list item="row"}
+
+{if $list->count()}
+	{include file="common/dynamic_list_head.tpl"}
+			{foreach from=$list->iterate() item="row"}
 				<tr>
 					<th><a href="details.php?id={$row.id}">{$row.label}</a></th>
 					<td>

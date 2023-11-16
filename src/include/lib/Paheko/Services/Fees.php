@@ -3,6 +3,7 @@
 namespace Paheko\Services;
 
 use Paheko\DB;
+use Paheko\DynamicList;
 use Paheko\UserException;
 use Paheko\Users\Categories;
 use Paheko\Entities\Services\Fee;
@@ -12,7 +13,7 @@ use KD2\DB\DB_Exception;
 
 class Fees
 {
-	protected $service_id;
+	protected int $service_id;
 
 	public function __construct(int $id)
 	{
@@ -96,24 +97,55 @@ class Fees
 		return EntityManager::getInstance(Fee::class)->allAssoc('SELECT * FROM services_fees ORDER BY label COLLATE U_NOCASE;', 'id');
 	}
 
-	public function listWithStats()
+	public function listWithStats(): DynamicList
 	{
 		$db = DB::getInstance();
 		$hidden_cats = array_keys(Categories::listAssoc(Categories::HIDDEN_ONLY));
 
-		$condition = sprintf('SELECT COUNT(DISTINCT su.id_user) FROM services_users su
+		$sql = sprintf('DROP TABLE IF EXISTS fees_list_stats;
+			CREATE TEMP TABLE IF NOT EXISTS fees_list_stats (id_fee, id_user, ok, expired, paid);
+			INSERT INTO fees_list_stats SELECT
+				id_fee, id_user,
+				CASE WHEN (su.expiry_date IS NULL OR su.expiry_date >= date()) AND su.paid = 1 THEN 1 ELSE 0 END,
+				CASE WHEN su.expiry_date < date() THEN 1 ELSE 0 END,
+				paid
+			FROM services_users su
 			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_fee) su2 ON su2.id = su.id
-			INNER JOIN users u ON u.id = su.id_user WHERE su.id_fee = f.id AND u.id_category NOT IN (%s)',
-			implode(',', $hidden_cats));
+			INNER JOIN users u ON u.id = su.id_user WHERE u.%s',
+			$db->where('id_category', 'NOT IN', $hidden_cats));
 
-		$sql = sprintf('SELECT f.*,
-			(%s AND (su.expiry_date IS NULL OR su.expiry_date >= date()) AND su.paid = 1) AS nb_users_ok,
-			(%1$s AND su.expiry_date < date()) AS nb_users_expired,
-			(%1$s AND su.paid = 0) AS nb_users_unpaid
-			FROM services_fees f
-			WHERE id_service = ?
-			ORDER BY amount, label COLLATE U_NOCASE;', $condition);
+		$db->exec($sql);
 
-		return $db->get($sql, $this->service_id);
+		$columns = [
+			'id' => [],
+			'formula' => [],
+			'label' => [
+				'label' => 'Tarif',
+			],
+			'amount' => [
+				'label' => 'Montant',
+				'select' => 'CASE WHEN formula IS NOT NULL THEN -1 WHEN amount IS NOT NULL THEN amount ELSE 0 END',
+			],
+			'nb_users_ok' => [
+				'label' => 'Membres à jour',
+				'order' => null,
+				'select' => '(SELECT COUNT(DISTINCT id_user) FROM fees_list_stats WHERE id_fee = fees.id AND ok = 1)',
+			],
+			'nb_users_expired' => [
+				'label' => 'Membres expirés',
+				'order' => null,
+				'select' => '(SELECT COUNT(DISTINCT id_user) FROM fees_list_stats WHERE id_fee = fees.id AND expired = 1)',
+			],
+			'nb_users_unpaid' => [
+				'label' => 'Membres en attente de règlement',
+				'order' => null,
+				'select' => '(SELECT COUNT(DISTINCT id_user) FROM fees_list_stats WHERE id_fee = fees.id AND paid = 0)',
+			],
+		];
+
+		$list = new DynamicList($columns, 'services_fees AS fees', 'id_service = ' . $this->service_id);
+		$list->setPageSize(null);
+		$list->orderBy('label', false);
+		return $list;
 	}
 }
