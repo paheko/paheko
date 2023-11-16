@@ -31,6 +31,8 @@
 			{/foreach}
 		</tbody>
 	</table>
+
+	{$list->getHTMLPagination()|raw}
 {else}
 	<p class="block alert">
 		Il n'y a aucun tarif enregistré. Créez un premier tarif pour l'activité «&nbsp;{$service.label}&nbsp;» pour pouvoir y inscrire des membres.
