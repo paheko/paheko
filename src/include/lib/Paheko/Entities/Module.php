@@ -749,7 +749,13 @@ class Module extends Entity
 		$out = [];
 
 		foreach (DB::getInstance()->iterate('SELECT name FROM modules_templates WHERE id_module = ? AND name LIKE \'snippets/%\';', $this->id()) as $row) {
-			$out[$row->name] = self::SNIPPETS[$row->name] ?? 'Extension MarkDown';
+			$label = self::SNIPPETS[$row->name] ?? null;
+
+			if (!$label && ($match = sscanf($row->name, 'snippets/markdown/%[^.].html'))) {
+				$label = sprintf('extension MarkDown <<%s>>, utilisable dans les pages du site web', current($match));
+			}
+
+			$out[$row->name] = $label;
 		}
 
 		return $out;
