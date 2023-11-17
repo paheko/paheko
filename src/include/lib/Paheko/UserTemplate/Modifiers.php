@@ -37,6 +37,7 @@ class Modifiers
 		'money_int' => [Utils::class, 'moneyToInteger'],
 		'array_transpose' => [Utils::class, 'array_transpose'],
 		'check_email',
+		'gettype',
 		'arrayval',
 		'explode',
 		'implode',
@@ -355,6 +356,26 @@ class Modifiers
 		}
 
 		return $out;
+	}
+
+	static public function gettype($v): string
+	{
+		$type = gettype($v);
+
+		switch($type) {
+			case 'object':
+				return 'array';
+			case 'double':
+				return 'float';
+			case 'NULL':
+				return 'null';
+			case 'resource':
+			case 'resource (closed)':
+			case 'unknown type':
+				throw new \LogicException('Unexpected type: ' . $type);
+			default:
+				return $type;
+		}
 	}
 
 	static public function arrayval($v): array

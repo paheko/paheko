@@ -32,6 +32,7 @@ Ces filtres viennent directement de PHP et utilisent donc les mêmes paramètres
 | `nl2br` | Remplace les retours à la ligne par des tags HTML `<br/>` | [Documentation PHP](https://www.php.net/nl2br) |
 | `wordwrap` | Ajoute des retours à la ligne tous les 75 caractères | [Documentation PHP](https://www.php.net/wordwrap) |
 | `abs` | Renvoie la valeur absolue d'un nombre (exemple : -42 sera transformé en 42) | [Documentation PHP](https://www.php.net/abs) |
+| `gettype` | Renvoie le type d'une variable | |
 | `intval` | Transforme une valeur en entier (integer) | [Documentation PHP](https://www.php.net/intval) |
 | `boolval` | Transforme une valeur en booléen (true ou false) | [Documentation PHP](https://www.php.net/boolval) |
 | `floatval` | Transforme une valeur en nombre flottant (à virgule) | [Documentation PHP](https://www.php.net/floatval) |
