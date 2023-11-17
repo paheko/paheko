@@ -92,7 +92,7 @@
 <p>Depuis la version 1.3, Paheko dispose d'extensions modifiables, nommées <strong>Modules</strong>.</p>
 <p>Les modules permettent de créer et modifier des formulaires, des modèles de documents simples, à imprimer, mais aussi de créer des "mini-applications" directement dans l'administration de l'association, avec le minimum de code, sans avoir à apprendre à programmer PHP.</p>
 <p>Les modules utilisent le langage <a href="brindille.html">Brindille</a>, aussi utilisé pour le site web (qui est lui-même un module). Avec Brindille on parle d'un <strong>squelette</strong> pour un fichier texte contenant du code Brindille.</p>
-<p>Les modules ne permettent pas d'exécuter du code PHP, ni de modifier la base de données en dehors des données du module, contrairement aux <a href="https://fossil.kd2.org/paheko/wiki?name=Documentation/Plugin&amp;p" target="_blank" rel="noreferrer">plugins</a>. Grâce à Brindille, les administrateurs de l'association peuvent modifier ou créer de nouveaux modules sans risques pour le serveur, car le code Brindille ne permet pas d'exécuter de fonctions dangereuses. Les <strong>plugins</strong> eux sont écrits en PHP et ne peuvent pas être modifiés par une association. Du fait des risques de sécurité, seuls les plugins officiels sont proposés sur Paheko.cloud.</p>
+<p>Les modules ne permettent pas d'exécuter du code PHP, ni de modifier la base de données en dehors des données du module, contrairement aux <a href="https://fossil.kd2.org/paheko/wiki?name=Documentation/Plugin&amp;p" rel="noreferrer noopener external" target="_blank">plugins</a>. Grâce à Brindille, les administrateurs de l'association peuvent modifier ou créer de nouveaux modules sans risques pour le serveur, car le code Brindille ne permet pas d'exécuter de fonctions dangereuses. Les <strong>plugins</strong> eux sont écrits en PHP et ne peuvent pas être modifiés par une association. Du fait des risques de sécurité, seuls les plugins officiels sont proposés sur Paheko.cloud.</p>
 <h1 id="exemples">Exemples</h1>
 <p>Paheko fournit quelques modules par défaut, qui peuvent être modifiés ou servir d'inspiration pour de nouveaux modules :</p>
 <ul>
@@ -119,8 +119,8 @@
 <li>Utilisation de la syntaxe Brindille</li>
 <li>Les modules peuvent utiliser toutes les fonctions et boucles de Brindille</li>
 <li>Les modules peuvent stocker et récupérer des données dans la base SQLite dans une table clé-valeur spécifique à chaque module</li>
-<li>Les données du module sont stockées en JSON, on peut faire des requêtes complètes avec l'extension <a href="https://www.sqlite.org/json1.html" target="_blank" rel="noreferrer">JSON de SQLite</a></li>
-<li>Les données peuvent être validées avant enregistrement en utilisant <a href="https://json-schema.org/understanding-json-schema/" target="_blank" rel="noreferrer">JSON Schema</a></li>
+<li>Les données du module sont stockées en JSON, on peut faire des requêtes complètes avec l'extension <a href="https://www.sqlite.org/json1.html" rel="noreferrer noopener external" target="_blank">JSON de SQLite</a></li>
+<li>Les données peuvent être validées avant enregistrement en utilisant <a href="https://json-schema.org/understanding-json-schema/" rel="noreferrer noopener external" target="_blank">JSON Schema</a></li>
 <li>Un module peut également accéder aux données des autres modules</li>
 <li>Un module peut aussi accéder à toutes les données de la base de données, sauf certaines données à risque (voir plus bas)</li>
 <li>Un module ne peut pas modifier les données de la base de données</li>
@@ -203,12 +203,12 @@ $block = FALSE</code></pre>
 {{/if}}</code></pre>
 <h2 id="stockage-de-documents-json">Stockage de documents JSON</h2>
 <p>Chaque module peut stocker ses données dans une base de données clé-document qui stockera les données dans des documents au format JSON dans une table SQLite.</p>
-<p>Grâce aux <a href="https://www.sqlite.org/json1.html" target="_blank" rel="noreferrer">fonctions JSON de SQLite</a> on pourra ensuite effectuer des recherches sur ces documents.</p>
+<p>Grâce aux <a href="https://www.sqlite.org/json1.html" rel="noreferrer noopener external" target="_blank">fonctions JSON de SQLite</a> on pourra ensuite effectuer des recherches sur ces documents.</p>
 <p>Pour enregistrer il suffit d'utiliser la fonction <code>save</code> :</p>
 <pre><code>{{:save key="facture001" type="facture" date="2022-01-01" label="Vente de petits pains au chocolat" total="42"}}</code></pre>
 <p>Si la clé indiquée (dans le paramètre <code>key</code>) n'existe pas, l'enregistrement sera créé, sinon il sera mis à jour avec les valeurs données.</p>
 <h3 id="validation">Validation</h3>
-<p>On peut utiliser un <a href="https://json-schema.org/understanding-json-schema/" target="_blank" rel="noreferrer">schéma JSON</a> pour valider que le document qu'on enregistre est valide :</p>
+<p>On peut utiliser un <a href="https://json-schema.org/understanding-json-schema/" rel="noreferrer noopener external" target="_blank">schéma JSON</a> pour valider que le document qu'on enregistre est valide :</p>
 <pre><code>{{:save validate_schema="./document.schema.json" type="facture" date="2022-01-01" label="Vente de petits pains au chocolat" total="42"}}</code></pre>
 <p>Le fichier <code>document.schema.json</code> devra être dans le même répertoire que le squelette et devra contenir un schéma valide. Voici un exemple :</p>
 <pre><code>{

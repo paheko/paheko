@@ -63,8 +63,15 @@
 		</ol></li>
 		<li><a href="#syntaxe-de-base">Syntaxe de base</a>
 		<ol>
+			<li><a href="#variables">Variables</a>
+			<ol>
+				<li><a href="#types-de-variables">Types de variables</a></li>
+				<li><a href="#tableaux">Tableaux</a>
+			</ol></li>
 			<li><a href="#affichage-de-variable">Affichage de variable</a>
 			<ol>
+				<li><a href="#protection-contre-le-html-echappement">Protection contre le HTML (échappement)</a></li>
+				<li><a href="#variables-de-tableaux">Variables de tableaux</a></li>
 				<li><a href="#echappement-des-caracteres-speciaux-dans-les-chaines-de-caractere">Échappement des caractères spéciaux dans les chaînes de caractère</a>
 			</ol></li>
 			<li><a href="#ordre-de-recherche-des-variables">Ordre de recherche des variables</a></li>
@@ -105,18 +112,55 @@
 De même, les fichiers qui n'ont pas d'extension seront également traités par Brindille.</p>
 <p>Les autres types de fichiers seront renvoyés sans traitement, comme des fichiers "bruts". En d'autres termes, il n'est pas possible de mettre du code <em>Brindille</em> dans des fichiers qui ne sont pas des fichiers textes.</p>
 <h1 id="syntaxe-de-base">Syntaxe de base</h1>
+<h2 id="variables">Variables</h2>
+<p>En programmation, une variable est une référence vers une donnée stockée en mémoire.</p>
+<p>Dans Brindille, une variable commence par le symbole dollar <code>$</code> et suivi d'un nom.</p>
+<p>Le nom est composé de lettres minuscules (sans accents), de chiffres et de tirets bas (<code>[a-z0-9_]</code>).</p>
+<p>Exemples de variables :</p>
+<pre><code>$config
+$compte_32
+$nom_de_variable_long</code></pre>
+<h3 id="types-de-variables">Types de variables</h3>
+<p>Dans Brindille, une variable peut avoir un des types suivants :</p>
+<ul>
+<li><code>null</code> : utilisé pour une variable qui n'est pas définie, ou une variable définie qui n'a pas de valeur</li>
+<li><code>boolean</code> : valeur booléenne, peut seulement avoir <code>true</code> ou <code>false</code> comme valeur</li>
+<li><code>integer</code> : nombre entier (sans virgule). Exemple : <code>4200</code>.</li>
+<li><code>float</code> : nombre à virgule flottante, exemple <code>3.14</code>. Leur usage est déconseillé, car les erreurs de calcul sont possibles, les ordinateurs ne sachant pas compter de manière précise avec les nombres à virgule flottante. Exemple : <code>0.2+0.3</code> est différent de <code>0.5</code>.</li>
+<li><code>string</code> : chaîne de texte (aussi appelé chaîne de caractères, car c'est une suite de caractères). Exemple : <code>coucou</code>.</li>
+<li><code>array</code> : tableau.</li>
+</ul>
+<h3 id="tableaux">Tableaux</h3>
+<p>Les tableaux sont une sorte de dictionnaire, ou pour chaque entrée (appelée "clé") on peut associer une valeur. qui peut être de n'importe lequel des types listés ci-dessus, y compris un autre tableau.</p>
+<p>Les tableaux peuvent être de deux types :</p>
+<ol>
+<li>tableau indexé (liste) : dans ce cas les clés ne sont pas choisies, on ajoute simplement des valeurs, et l'ordinateur incrémente le numéro de la clé à chaque nouvelle entrée dans le tableau. La numérotation commence au chiffre zéro.</li>
+<li>tableau associatif (dictionnaire) : les clés sont des nombres ou des chaînes de texte, et permettent, comme dans un dictionnaire, de choisir la clé.</li>
+</ol>
+<p>Exemple de tableau indexé :</p>
+<pre><code>[
+  0 =&gt; 'Texte 1',
+  1 =&gt; 'Texte 2'
+]</code></pre>
+<p>Exemple de tableau associatif :</p>
+<pre><code>[
+  'un' =&gt; 'Texte 1',
+  'deux' =&gt; 'Texte 2'
+]</code></pre>
 <h2 id="affichage-de-variable">Affichage de variable</h2>
 <p>Une variable est affichée à l'aide de la syntaxe : <code>{{$date}}</code> affichera la valeur brute de la date par exemple : <code>2020-01-31 16:32:00</code>.</p>
 <p>La variable peut être modifiée à l'aide de filtres de modification, qui sont ajoutés avec le symbole de la barre verticale (pipe <code>|</code>) : <code>{{$date|date_long}}</code> affichera une date au format long : <code>jeudi 7 mars 2021</code>.</p>
 <p>Ces filtres peuvent accepter des paramètres, séparés par deux points <code>:</code>. Exemple : <code>{{$date|date:"d/m/Y"}}</code> affichera <code>31/01/2020</code>.</p>
 <p>Par défaut la variable sera recherchée dans le contexte actuel de la section, si elle n'est pas trouvée elle sera recherchée dans le contexte parent (section parente), etc. jusqu'à trouver la variable.</p>
-<p>Il est possible de faire référence à une variable d'un contexte particulier avec la notation à points : <code>{{$article.date}}</code>.<br />
-La même syntaxe est utilisée pour accéder aux membres d'un tableau : <code>{{$labels.new_page}}</code>.</p>
-<p>Il existe deux variables de contexte spécifiques : <code>$_POST</code> et <code>$_GET</code> qui permettent d'accéder aux données envoyées dans un formulaire et dans les paramètres de la page.</p>
-<p>Par défaut le filtre <code>escape</code> est appliqué à toutes les variables pour protéger les variables contre les injections de code HTML. Ce filtre est appliqué en dernier, après les autres filtres. Il est possible de contourner cet automatisme en rajoutant le filtre <code>escape</code> ou <code>raw</code> explicitement. <code>raw</code> désactive tout échappement, alors que <code>escape</code> est utilisé pour changer l'ordre d'échappement. Exemple :</p>
+<h3 id="protection-contre-le-html-echappement">Protection contre le HTML (échappement)</h3>
+<p>Par défaut le filtre <code>escape</code> est appliqué à toutes les variables affichées, pour protéger les variables contre les injections de code HTML.</p>
+<p>Ce filtre modifie (on dit qu'il "échappe") les caractères HTML <code>&lt;&gt;&amp;"'</code> présents dans une chaîne de texte en entités HTML, évitant que le HTML éventuellement présent dans la chaîne de texte soit interprété par le navigateur.</p>
+<p>Ce filtre est appliqué en dernier, après les autres filtres. Il est possible de contourner cet automatisme en rajoutant le filtre <code>escape</code> ou <code>raw</code> explicitement. <code>raw</code> désactive tout échappement, alors que <code>escape</code> est utilisé pour changer l'ordre d'échappement. Exemple :</p>
 <pre><code>{{:assign text = "Coucou\nça va ?" }}
 {{$text|escape|nl2br}}</code></pre>
 <p>Donnera bien <code>Coucou&lt;br /&gt;ça va ?</code>. Si on n'avait pas indiqué le filtre <code>escape</code> le résultat serait <code>Coucou&amp;lt;br /&amp;gt;ça va ?</code>.</p>
+<h3 id="variables-de-tableaux">Variables de tableaux</h3>
+<p>Il est possible de faire référence à une clé d'un tableau avec la notation à points : <code>{{$article.date}}</code> renverra la clé <code>date</code> du tableau stocké dans la variable <code>$article</code>.</p>
 <h3 id="echappement-des-caracteres-speciaux-dans-les-chaines-de-caractere">Échappement des caractères spéciaux dans les chaînes de caractère</h3>
 <p>Pour inclure un caractère spécial (retour de ligne, guillemets ou apostrophe) dans une chaîne de caractère il suffit d'utiliser un antislash :</p>
 <pre><code>{{:assign text="Retour \n à la ligne"}}
@@ -181,6 +225,12 @@ La même syntaxe est utilisée pour accéder aux membres d'un tableau : <code>{{
 {{:assign var='processed_ids.' value=17}}
 {{:assign var='processed_ids.' value=43}}
 {{:assign var='processed_ids.' value=214}}</code></pre>
+<p>Donnera le tableau suivant :</p>
+<pre><code>[
+  0 =&gt; 17,
+  1 =&gt; 43,
+  2 =&gt; 214
+]</code></pre>
 <h4 id="clef-dynamique-de-tableau">Clef dynamique de tableau</h4>
 <p>Il est possible d'accéder dynamiquement à un des éléments d'un tableau de la manière suivante :</p>
 <pre><code>{{:assign location='admin'}}
@@ -264,7 +314,7 @@ La même syntaxe est utilisée pour accéder aux membres d'un tableau : <code>{{
 </tbody>
 </table>
 <p>Il est aussi possible de précéder une variable de l'opérateur <code>!</code>, c'est un raccourci pour <code>$variable == false</code>.</p>
-<p>Voir <a href="https://www.php.net/manual/fr/language.operators.comparison.php" target="_blank" rel="noreferrer">les opérateurs de comparaison PHP pour plus de détails</a>.</p>
+<p>Voir <a href="https://www.php.net/manual/fr/language.operators.comparison.php" rel="noreferrer noopener external" target="_blank">les opérateurs de comparaison PHP pour plus de détails</a>.</p>
 <p>Les opérateurs logiques supportés sont :</p>
 <table>
 <thead>
@@ -353,11 +403,11 @@ OK
 <tbody>
 <tr>
 <td style="text-align: left;"><code>$_GET</code></td>
-<td style="text-align: left;">Alias de la super-globale _GET de PHP.</td>
+<td style="text-align: left;">Tableau contenant tous les paramètres passés dans la chaîne de requêtre de l'URL.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>$_POST</code></td>
-<td style="text-align: left;">Alias de la super-globale _POST de PHP.</td>
+<td style="text-align: left;">Tableau de tous les éléments de formulaire envoyés lors d'une requête POST.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>$root_url</code></td>

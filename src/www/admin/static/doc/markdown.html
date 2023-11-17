@@ -102,7 +102,7 @@
 			<li><a href="#alignement-du-texte">Alignement du texte</a></li>
 			<li><a href="#couleurs">Couleurs</a>
 </li></ol></li></ol></aside><h1 id="syntaxe-markdown">Syntaxe MarkDown</h1>
-<p>Paheko permet d'utiliser la syntaxe <a href="https://fr.wikipedia.org/wiki/Markdown" target="_blank" rel="noreferrer">MarkDown</a> dans les pages du site web.</p>
+<p>Paheko permet d'utiliser la syntaxe <a href="https://fr.wikipedia.org/wiki/Markdown" rel="noreferrer noopener external" target="_blank">MarkDown</a> dans les pages du site web.</p>
 <p>Cette syntaxe est la plus répandue dans les outils d'édition de texte, si vous ne la connaissez pas encore, voici les règles qu'on peut utiliser pour formatter du texte avec MarkDown dans la plupart des outils (dont Paheko), ainsi que <a href="#extensions">les règles spécifiques supportées par Paheko</a>.</p>
 <h2 id="styles-de-texte">Styles de texte</h2>
 <h3 id="italique">Italique</h3>
@@ -137,7 +137,7 @@
 <p>Ce texte est <mark>surligné</mark>.</p>
 </blockquote>
 <h3 id="code">Code</h3>
-<p>Il est possible d'indiquer du code dans une ligne de texte avec un caractère <em>backtick</em> (accent grave en français, obtenu avec les touches <a href="https://superuser.com/questions/254076/how-do-i-type-the-tick-and-backtick-characters-on-windows" target="_blank" rel="noreferrer">Alt Gr + 7</a>) :</p>
+<p>Il est possible d'indiquer du code dans une ligne de texte avec un caractère <em>backtick</em> (accent grave en français, obtenu avec les touches <a href="https://superuser.com/questions/254076/how-do-i-type-the-tick-and-backtick-characters-on-windows" rel="noreferrer noopener external" target="_blank">Alt Gr + 7</a>) :</p>
 <pre><code>Le code `&lt;html&gt;` c'est rigolo !</code></pre>
 <blockquote>
 <p>Le code <code>&lt;html&gt;</code> c'est rigolo !</p>
@@ -157,7 +157,7 @@ Et celui-ci encore moins**.</code></pre>
 <pre><code>Je connais un super gestionnaire [d'association](https://paheko.cloud/) !</code></pre>
 <p>Donne :</p>
 <blockquote>
-<p>Je connais un super gestionnaire <a href="https://paheko.cloud/" target="_blank" rel="noreferrer">d'association</a> !</p>
+<p>Je connais un super gestionnaire <a href="https://paheko.cloud/" rel="noreferrer noopener external" target="_blank">d'association</a> !</p>
 </blockquote>
 <p>Il est possible de faire un lien vers une autre page du site web en utilisant son adresse unique : </p>
 <pre><code>N'oubliez pas de [vous inscrire à notre atelier](atelier-soudure).</code></pre>
@@ -249,14 +249,14 @@ paragraphe.</p>
 <p>Programming is not a science. Programming is a craft.</p>
 </blockquote>
 <h3 id="code">Code</h3>
-<p>Créez un bloc de code en indentant chaque ligne avec quatre espaces, ou en mettant trois accents graves <code>`</code> (<em>backtick</em>, obtenu avec <a href="https://superuser.com/questions/254076/how-do-i-type-the-tick-and-backtick-characters-on-windows" target="_blank" rel="noreferrer">Alt Gr + 7</a>) sur la ligne au dessus et en dessous de votre code:</p>
+<p>Créez un bloc de code en indentant chaque ligne avec quatre espaces, ou en mettant trois accents graves <code>`</code> (<em>backtick</em>, obtenu avec <a href="https://superuser.com/questions/254076/how-do-i-type-the-tick-and-backtick-characters-on-windows" rel="noreferrer noopener external" target="_blank">Alt Gr + 7</a>) sur la ligne au dessus et en dessous de votre code:</p>
 <pre><code>```
 &lt;html&gt;...&lt;/html&gt;
 ```</code></pre>
 <p>Résultat :</p>
 <pre><code>&lt;html&gt;...&lt;/html&gt;</code></pre>
 <h3 id="tableaux">Tableaux</h3>
-<p>Pour créer un tableau vous devez séparer les colonnes avec des barres verticales (<code>|</code>, obtenu avec les touches <a href="https://fr.wikipedia.org/wiki/Barre_verticale#Saisie" target="_blank" rel="noreferrer">AltGr + 6</a>).</p>
+<p>Pour créer un tableau vous devez séparer les colonnes avec des barres verticales (<code>|</code>, obtenu avec les touches <a href="https://fr.wikipedia.org/wiki/Barre_verticale#Saisie" rel="noreferrer noopener external" target="_blank">AltGr + 6</a>).</p>
 <p>La première ligne contient les noms des colonnes, la seconde ligne contient la ligne de séparation (chaque cellule doit contenir un ou plusieurs tirets), et les lignes suivantes représentent le contenu du tableau.</p>
 <pre><code>| Colonne 1 | Colonne 2 |
 | - | - | - |
@@ -531,12 +531,12 @@ Nom_fichier_2.jpg
 		<li><a href="#extensions">Extensions</a>
 </li></ol></div><p>Enfin il est possible de placer la table des matières sur le côté du texte, en utilisant le paramètre <code>aside</code> :</p>
 <pre><code>&lt;&lt;toc level=1 aside&gt;&gt;</code></pre>
-<p>Note : en plus de la syntaxe <code>&lt;&lt;toc&gt;&gt;</code>, Paheko supporte aussi les syntaxes suivantes par compatibilité avec <a href="https://alexharv074.github.io/2018/08/28/auto-generating-markdown-tables-of-contents.html" target="_blank" rel="noreferrer">les autres moteurs de rendu MarkDown</a> : <code>{:toc}</code> <code>[[_TOC_]]</code> <code>[toc]</code>.</p>
+<p>Note : en plus de la syntaxe <code>&lt;&lt;toc&gt;&gt;</code>, Paheko supporte aussi les syntaxes suivantes par compatibilité avec <a href="https://alexharv074.github.io/2018/08/28/auto-generating-markdown-tables-of-contents.html" rel="noreferrer noopener external" target="_blank">les autres moteurs de rendu MarkDown</a> : <code>{:toc}</code> <code>[[_TOC_]]</code> <code>[toc]</code>.</p>
 <h3 id="exclure-un-sous-titre-du-sommaire">Exclure un sous-titre du sommaire</h3>
 <p>Il est aussi possible d'indiquer qu'un titre ne doit pas être inclus dans le sommaire en utilisant la classe <code>no_toc</code> comme ceci :</p>
 <pre><code>## Sous-titre non-inclus {.no_toc}</code></pre>
 <h2 id="grilles-et-colonnes">Grilles et colonnes</h2>
-<p>Pour une mise en page plus avancée, il est possible d'utiliser les <em>grilles</em>, adaptation des <a href="https://developer.mozilla.org/fr/docs/Web/CSS/CSS_Grid_Layout" target="_blank" rel="noreferrer">grids en CSS</a>. Il faut utiliser la syntaxe <code>&lt;&lt;grid&gt;&gt;...Contenu...&lt;&lt;/grid&gt;&gt;</code>.</p>
+<p>Pour une mise en page plus avancée, il est possible d'utiliser les <em>grilles</em>, adaptation des <a href="https://developer.mozilla.org/fr/docs/Web/CSS/CSS_Grid_Layout" rel="noreferrer noopener external" target="_blank">grids en CSS</a>. Il faut utiliser la syntaxe <code>&lt;&lt;grid&gt;&gt;...Contenu...&lt;&lt;/grid&gt;&gt;</code>.</p>
 <p>Attention, les blocs <code>&lt;&lt;grid&gt;&gt;</code> et <code>&lt;&lt;/grid&gt;&gt;</code> doivent obligatoirement être placés sur des lignes qui ne contiennent rien d'autre.</p>
 <p><strong>Note :</strong> sur petit écran (mobile ou tablette) les grilles et colonnes sont désactivées, tout sera affiché dans une seule colonne, comme si les grilles n'étaient pas utilisées.</p>
 <p>Pour spécifier le nombre de colonnes on peut utiliser un raccourci qui <em>mime</em> les colonnes, comme ceci :</p>
@@ -554,7 +554,7 @@ Nom_fichier_2.jpg
 <ul>
 <li><code>short</code> : notation courte décrite ci-dessus</li>
 <li><code>gap</code> : espacement entre les blocs de la grille</li>
-<li><code>template</code> : description CSS complète de la grille (propriété <a href="https://developer.mozilla.org/fr/docs/Web/CSS/grid-template" target="_blank" rel="noreferrer"><code>grid-template</code></a>)</li>
+<li><code>template</code> : description CSS complète de la grille (propriété <a href="https://developer.mozilla.org/fr/docs/Web/CSS/grid-template" rel="noreferrer noopener external" target="_blank"><code>grid-template</code></a>)</li>
 </ul>
 <p>Après ce premier bloc <code>&lt;&lt;grid&gt;&gt;</code> qui définit la forme de la grille, on peut entrer le contenu de la première colonne.</p>
 <p>Pour créer la seconde colonne il faut simplement placer un nouveau bloc <code>&lt;&lt;grid&gt;&gt;</code> vide (aucun paramètre) sur une ligne.</p>
@@ -581,7 +581,7 @@ L1 C2
 L2 C1
 &lt;&lt;grid&gt;&gt;
 L2 C2
-&lt;&lt;/grid&gt;&gt;</code></pre><section class="web-grid web-grid-debug" style="--grid-template: none / minmax(0, 0.5fr) minmax(0, 0.5fr)"><article class="web-block" style=""><p>L1 C1</p></article><article class="web-block" style=""><p>L1 C2</p></article><article class="web-block" style=""><p>L2 C1</p></article><article class="web-block" style=""><p>L2 C2</p></article></section><p>Enfin, il est possible d'utiliser la notation CSS <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/grid-row" target="_blank" rel="noreferrer"><code>grid-row</code></a> et <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/grid-column" target="_blank" rel="noreferrer"><code>grid-column</code></a> pour chaque bloc, permettant de déplacer les blocs, ou de faire en sorte qu'un bloc s'étende sur plusieurs colonnes ou plusieurs lignes. Pour cela il faut utiliser le paramètre <code>row</code> ou <code>column</code> qui précède le bloc :</p>
+&lt;&lt;/grid&gt;&gt;</code></pre><section class="web-grid web-grid-debug" style="--grid-template: none / minmax(0, 0.5fr) minmax(0, 0.5fr)"><article class="web-block" style=""><p>L1 C1</p></article><article class="web-block" style=""><p>L1 C2</p></article><article class="web-block" style=""><p>L2 C1</p></article><article class="web-block" style=""><p>L2 C2</p></article></section><p>Enfin, il est possible d'utiliser la notation CSS <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/grid-row" rel="noreferrer noopener external" target="_blank"><code>grid-row</code></a> et <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/grid-column" rel="noreferrer noopener external" target="_blank"><code>grid-column</code></a> pour chaque bloc, permettant de déplacer les blocs, ou de faire en sorte qu'un bloc s'étende sur plusieurs colonnes ou plusieurs lignes. Pour cela il faut utiliser le paramètre <code>row</code> ou <code>column</code> qui précède le bloc :</p>
 <pre><code>&lt;&lt;grid short="#!!" column="span 2"&gt;&gt;
 A
 &lt;&lt;grid row="span 2"&gt;&gt;
@@ -591,7 +591,7 @@ C
 &lt;&lt;grid&gt;&gt;
 D
 &lt;&lt;/grid&gt;&gt;</code></pre><section class="web-grid web-grid-debug" style="--grid-template: none / minmax(0, 0.34fr) minmax(0, 0.34fr) minmax(0, 0.34fr)"><article class="web-block" style="grid-column: span 2"><p>A</p></article><article class="web-block" style="grid-row: span 2"><p>B</p></article><article class="web-block" style=""><p>C</p></article><article class="web-block" style=""><p>D</p></article></section><p>Noter que dans ce cas on doit utiliser la notation <code>short="…"</code> pour pouvoir utiliser les autres paramètres.</p>
-<p>Enfin, il est possible d'aligner un bloc verticalement par rapport aux autres en utilisant le paramètre <code>align</code> (équivalent de la propriété CSS <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/align-self" target="_blank" rel="noreferrer"><code>align-self</code></a>).</p>
+<p>Enfin, il est possible d'aligner un bloc verticalement par rapport aux autres en utilisant le paramètre <code>align</code> (équivalent de la propriété CSS <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/align-self" rel="noreferrer noopener external" target="_blank"><code>align-self</code></a>).</p>
 <h2 id="alignement-du-texte">Alignement du texte</h2>
 <p>Il suffit de placer sur une ligne seule le code <code>&lt;&lt;center&gt;&gt;</code> pour centrer du texte :</p>
 <pre><code>&lt;&lt;center&gt;&gt;
@@ -599,7 +599,7 @@ Texte centré
 &lt;&lt;/center&gt;&gt;</code></pre>
 <p>On peut procéder de même avec <code>&lt;&lt;left&gt;&gt;</code> et <code>&lt;&lt;right&gt;&gt;</code> pour aligner à gauche ou à droite.</p>
 <h2 id="couleurs">Couleurs</h2>
-<p>Comme sur les <a href="https://decoblog.skyrock.com/" target="_blank" rel="noreferrer">Skyblogs</a>, il est possible de mettre en couleur le texte et le fond, et même de créer des dégradés !</p>
+<p>Comme sur les <a href="https://decoblog.skyrock.com/" rel="noreferrer noopener external" target="_blank">Skyblogs</a>, il est possible de mettre en couleur le texte et le fond, et même de créer des dégradés !</p>
 <p>Utiliser la syntaxe <code>&lt;&lt;color COULEUR&gt;&gt;...texte...&lt;&lt;/color&gt;&gt;</code> pour changer la couleur du texte, ou <code>&lt;&lt;bgcolor COULEUR&gt;&gt;...texte...&lt;&lt;/bgcolor&gt;&gt;</code> pour la couleur du fond.</p>
 <p>Il est possible d'indiquer plusieurs couleurs, séparées par des espaces, pour créer des dégradés.</p>
 <pre><code>&lt;&lt;color red&gt;&gt;Rouge !&lt;&lt;/color&gt;&gt;
@@ -627,5 +627,5 @@ Avec des paragraphes
 <blockquote>
 <p>Et citations</p>
 </blockquote></div></div></blockquote>
-<p>Il est possible d'utiliser les couleurs avec <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/named-color" target="_blank" rel="noreferrer">leur nom</a> ou leur code hexadécimal (exemple : <code>#ff0000</code> pour rouge).</p>
+<p>Il est possible d'utiliser les couleurs avec <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/named-color" rel="noreferrer noopener external" target="_blank">leur nom</a> ou leur code hexadécimal (exemple : <code>#ff0000</code> pour rouge).</p>
 <p><strong>Attention : cette fonctionnalité est rigolote mais doit être utilisé avec parcimonie, en effet cela risque de rendre le texte illisible, notamment pour les personnes daltoniennes.</strong></p></div></body></html>
