@@ -1298,6 +1298,8 @@ class Sections
 				}
 			}
 
+			$result = $db->execute($statement, $args);
+
 			if (!empty($params['debug'])) {
 				self::_debug($statement->getSQL(true));
 			}
@@ -1306,7 +1308,6 @@ class Sections
 				self::_debugExplain($statement->getSQL(true));
 			}
 
-			$result = $db->execute($statement, $args);
 			$db->setReadOnly(false);
 		}
 		catch (DB_Exception $e) {
