@@ -7,6 +7,7 @@ use Paheko\DB;
 use Paheko\Entity;
 use Paheko\ValidationException;
 use Paheko\Users\DynamicFields;
+use Paheko\Services\Reminders;
 
 use KD2\DB\EntityManager;
 
@@ -68,7 +69,6 @@ class Reminder extends Entity
 	public function sentList(): DynamicList
 	{
 		$id_field = DynamicFields::getNameFieldsSQL('u');
-		$email_field = DynamicFields::getFirstEmailField();
 		$db = DB::getInstance();
 
 		$columns = [
@@ -78,10 +78,6 @@ class Reminder extends Entity
 			'identity' => [
 				'label' => 'Membre',
 				'select' => $id_field,
-			],
-			'email' => [
-				'label' => 'Adresse e-mail',
-				'select' => 'u.' . $db->quoteIdentifier($email_field),
 			],
 			'date' => [
 				'label' => 'Date d\'envoi',
@@ -99,4 +95,41 @@ class Reminder extends Entity
 		return $list;
 	}
 
+	public function pendingList(): DynamicList
+	{
+		$db = DB::getInstance();
+
+		$columns = [
+			'id_user' => [
+				'select' => 'id',
+			],
+			'identity' => [
+				'label' => 'Membre',
+			],
+			'expiry_date' => [
+				'label' => 'Date d\'expiration',
+			],
+		];
+
+		$conditions = sprintf('su.id_service = %d AND sr.id = %d', $this->id_service, $this->id);
+		$tables = '(' . Reminders::getPendingSQL($conditions) . ') AS pending';
+
+		$list = new DynamicList($columns, $tables);
+		$list->orderBy('expiry_date', false);
+		return $list;
+	}
+
+	public function getPreview(int $id_user): ?string
+	{
+		$conditions = sprintf('su.id_service = %d AND su.id_user = %d AND sr.id = %d', $this->id_service, $id_user, $this->id);
+		$sql = Reminders::getPendingSQL($conditions);
+		$db = DB::getInstance();
+
+		foreach ($db->iterate($sql) as $reminder) {
+			$m = Reminders::createMessage($reminder);
+			return $m->getMessage($reminder);
+		}
+
+		return null;
+	}
 }
