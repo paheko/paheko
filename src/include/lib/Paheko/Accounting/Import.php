@@ -350,9 +350,11 @@ class Import
 
 					$line = new Line;
 					$line->importForm($data);
+
 					if (!$line->credit && !$line->debit) {
-						var_dump($row); exit;
+						continue;
 					}
+
 					$transaction->addLine($line);
 				}
 			}
