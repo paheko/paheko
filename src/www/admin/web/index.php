@@ -8,6 +8,16 @@ use Paheko\Entities\Web\Page;
 
 require_once __DIR__ . '/_inc.php';
 
+if ($session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
+	$csrf_key = 'config_web';
+	$tpl->assign(compact('csrf_key'));
+	$form->runIf('enable', function() {
+		$config = Config::getInstance();
+		$config->set('site_disabled', false);
+		$config->save();
+	}, $csrf_key, Utils::getSelfURI());
+}
+
 $page = false;
 
 if (qg('id')) {

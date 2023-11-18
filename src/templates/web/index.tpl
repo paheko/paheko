@@ -43,10 +43,13 @@
 {/if}
 
 {if !$page && $config.site_disabled && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
+<form method="post" action="">
 	<p class="block alert">
 		Le site public est désactivé.
-		{linkbutton shape="settings" href="!config/" label="Activer le site dans la configuration"}
+		{button shape="right" name="enable" value=1 type="submit" class="main" label="Activer le site"}
+		{csrf_field key=$csrf_key}
 	</p>
+</form>
 {/if}
 
 {if $_GET.check && !$page}
