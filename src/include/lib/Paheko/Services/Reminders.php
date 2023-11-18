@@ -2,11 +2,8 @@
 
 namespace Paheko\Services;
 
-use Paheko\Config;
 use Paheko\DB;
 use Paheko\DynamicList;
-use Paheko\Plugins;
-use Paheko\Utils;
 use Paheko\Users\DynamicFields;
 use Paheko\Entities\Services\Reminder;
 use Paheko\Entities\Services\ReminderMessage;
