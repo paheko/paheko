@@ -188,6 +188,7 @@ class Log
 				$const = 'Paheko\Entities\\' . $row->details->entity . '::PRIVATE_URL';
 
 				if (isset($row->details->id, $row->details->entity)
+					&& $row->type !== self::DELETE
 					&& defined($const)
 					&& ($value = constant($const))) {
 					$row->entity_url = sprintf($value, $row->details->id);
