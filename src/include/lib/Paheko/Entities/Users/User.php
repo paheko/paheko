@@ -412,11 +412,9 @@ class User extends Entity
 		return parent::importForm($source);
 	}
 
-	public function importSecurityForm(bool $user_mode = true, array $source = null)
+	public function importSecurityForm(bool $user_mode = true, array $source = null, Session $session = null)
 	{
-		if (null === $source) {
-			$source = $_POST;
-		}
+		$source ??= $_POST;
 
 		$allowed = ['password', 'password_check', 'password_confirmed', 'password_delete', 'otp_secret', 'otp_disable', 'pgp_key', 'otp_code'];
 		$source = array_intersect_key($source, array_flip($allowed));
@@ -458,11 +456,13 @@ class User extends Entity
 		}
 
 		// Don't allow user to change password if the password field cannot be changed by user
-		if ($user_mode && !$this->canChangePassword()) {
-			unset($source['password'], $source['password_check']);
+		if ($user_mode && !$this->canChangePassword($session)) {
+			unset($source['password']);
 		}
 
-		return parent::importForm($source);
+		unset($source['password_confirmed'], $source['password_check']);
+
+		parent::importForm($source);
 	}
 
 	public function getEmails(): array
@@ -569,8 +569,12 @@ class User extends Entity
 		throw new UserException("Le champ identifiant ne peut être laissé vide pour un administrateur, sinon vous ne pourriez plus vous connecter.");
 	}
 
-	public function canChangePassword(): bool
+	public function canChangePassword(Session $session): bool
 	{
+		if ($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)) {
+			return true;
+		}
+
 		$password_field = current(DynamicFields::getInstance()->fieldsBySystemUse('password'));
 		return $password_field->user_access_level === Session::ACCESS_WRITE;
 	}
