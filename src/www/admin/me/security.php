@@ -14,7 +14,7 @@ $edit = qg('edit');
 
 $form->runIf('confirm', function () use ($user, $session) {
 	$user->importSecurityForm(true, null, $session);
-	$user->save();
+	$user->save(false);
 }, $csrf_key, '!me/security.php?ok');
 
 $otp = null;

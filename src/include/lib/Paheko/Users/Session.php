@@ -423,7 +423,7 @@ class Session extends \KD2\UserSession
 
 		$ue = Users::get($user->id);
 		$ue->importSecurityForm(false, compact('password', 'password_confirmed'));
-		$ue->save();
+		$ue->save(false);
 		EmailsTemplates::passwordChanged($ue);
 	}
 
