@@ -66,7 +66,8 @@ $fields = DF::getInstance()->all();
 			{if in_array($key, $id_fields)}</strong>{/if}
 		{/if}
 	</dd>
-		{if $field.type == 'email' && $value && ($email = Email\Emails::getEmail($value))}
+		{if $field.type == 'email' && $value}
+		<?php $email = Email\Emails::getEmail($value); ?>
 		<dt>Statut e-mail</dt>
 		<dd>
 			{if $email.optout}
@@ -78,7 +79,7 @@ $fields = DF::getInstance()->all();
 			{elseif $email.invalid}
 				<b class="error">{icon shape="alert"} Adresse invalide</b>
 				{linkbutton href="!users/mailing/rejected.php?hl=%d#e_%1\$d"|args:$email.id label="Détails de l'erreur" shape="help"}
-			{elseif $email->hasReachedFailLimit()}
+			{elseif $email && $email->hasReachedFailLimit()}
 				<b class="error">{icon shape="alert"} Trop d'erreurs</b>
 				{linkbutton href="!users/mailing/rejected.php?hl=%d#e_%1\$d"|args:$email.id label="Détails de l'erreur" shape="help"}
 			{elseif $email.verified}
