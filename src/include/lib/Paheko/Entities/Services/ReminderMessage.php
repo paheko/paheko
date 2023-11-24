@@ -82,10 +82,10 @@ class ReminderMessage extends Entity
 		return $this->_reminder;
 	}
 
-	public function send(stdClass $reminder)
+	public function send(stdClass $reminder, $body = null)
 	{
-		$body = $this->getBody($reminder);
-		$data = ['data' => (array)$reminder];
+		$body ??= $this->getBody($reminder);
+		$data = ['data' => (array)self::getMessageVariables($reminder)];
 
 		foreach (DynamicFields::getEmailFields() as $email_field) {
 			$email = $reminder->$email_field ?? null;
