@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+	<html>
+	<head>
+		<title>/home/bohwaz/fossil/paheko/tools/../doc/admin/api.md</title>
+		<meta charset="utf-8" />
+		<style type="text/css">
+		body, form, p, div, hr, fieldset, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6 {
+			margin: 0;
+			padding: 0;
+		}
+		body {
+			font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
+			padding: .8em;
+			background: #eee;
+		}
+		.web-content .nav ul {
+			list-style-type: none;
+			margin: -.8em;
+			margin-bottom: 1em;
+			padding: 1em;
+			background: #ddd;
+			border-bottom: 1px solid #999;
+			text-align: center;
+		}
+		.web-content .boutons ul {
+			list-style-type: none;
+			background: #ccc;
+			padding: .5em;
+			margin: 0;
+		}
+		.web-content .nav li, .web-content .boutons li {
+			display: inline-block;
+			margin: 0 1em;
+		}
+		.web-content .nav a, .web-content .boutons a {
+			display: inline-block;
+			background: #fff;
+			color: darkblue;
+			border-radius: .2em;
+			padding: .3em .5em;
+			font-size: 1.2em;
+		}
+		.web-content .nav strong a {
+			color: darkred;
+			box-shadow: 0px 0px 5px orange;
+		}
+		</style>
+		<link rel="stylesheet" type="text/css" href="../../../content.css" />
+	</head>
+	<body><div class="web-content"><p>Une API de type REST est disponible dans Paheko.</p>
+<p>Pour accéder à l'API il faut un identifiant et un mot de passe, à créer dans le menu <mark>Configuration</mark>, onglet <mark>Fonctions avancées</mark>, puis <mark>API</mark>.</p>
+<p>L'API peut ensuite recevoir des requêtes REST sur l'URL <code>https://adresse_association/api/{chemin}/</code>.</p>
+<p>Remplacer <mark>{chemin}</mark> par un des chemins de l'API (voir ci-dessous). La méthode HTTP à utiliser est spécifiée pour chaque chemin.</p>
+<p>Pour les requêtes de type <code>POST</code>, les paramètres peuvent être envoyés par le client sous forme de formulaire HTTP classique (<code>application/x-www-form-urlencoded</code>) ou sous forme d'objet JSON. Dans ce cas le <code>Content-Type</code> doit être positionné sur <code>application/json</code>.</p>
+<p>Les réponses sont faites en JSON par défaut.</p><div class="toc">
+	<ol>
+		<li><a href="#utiliser-l-api">Utiliser l'API</a></li>
+		<li><a href="#authentification">Authentification</a></li>
+		<li><a href="#erreurs">Erreurs</a></li>
+		<li><a href="#chemins">Chemins</a>
+		<ol>
+			<li><a href="#sql-post">sql (POST)</a></li>
+			<li><a href="#download-get">download (GET)</a></li>
+			<li><a href="#site-web">Site web</a>
+			<ol>
+				<li><a href="#web-list-get">web/list (GET)</a></li>
+				<li><a href="#web-attachment-page_uri-filename-get">web/attachment/{PAGE_URI}/{FILENAME} (GET)</a></li>
+				<li><a href="#web-page-page_uri-get">web/page/{PAGE_URI} (GET)</a></li>
+				<li><a href="#web-html-page_uri-get">web/html/{PAGE_URI} (GET)</a>
+			</ol></li>
+			<li><a href="#membres">Membres</a>
+			<ol>
+				<li><a href="#user-import-put">user/import (PUT)</a></li>
+				<li><a href="#user-import-post">user/import (POST)</a></li>
+				<li><a href="#user-import-preview-put">user/import/preview (PUT)</a></li>
+				<li><a href="#user-import-preview-post">user/import/preview (POST)</a>
+			</ol></li>
+			<li><a href="#activites">Activités</a>
+			<ol>
+				<li><a href="#services-subscriptions-import-put">services/subscriptions/import (PUT)</a>
+			</ol></li>
+			<li><a href="#erreurs">Erreurs</a>
+			<ol>
+				<li><a href="#errors-report-post">errors/report (POST)</a></li>
+				<li><a href="#errors-log-get">errors/log (GET)</a>
+			</ol></li>
+			<li><a href="#comptabilite">Comptabilité</a>
+			<ol>
+				<li><a href="#accounting-years-get">accounting/years (GET)</a></li>
+				<li><a href="#accounting-charts-get">accounting/charts (GET)</a></li>
+				<li><a href="#accounting-charts-id_chart-accounts-get">accounting/charts/{ID_CHART}/accounts (GET)</a></li>
+				<li><a href="#accounting-years-id_year-journal-get">accounting/years/{ID_YEAR}/journal (GET)</a></li>
+				<li><a href="#accounting-years-id_year-account-journal-get">accounting/years/{ID_YEAR}/account/journal (GET)</a></li>
+				<li><a href="#accounting-transaction-id_transaction-get">accounting/transaction/{ID_TRANSACTION} (GET)</a></li>
+				<li><a href="#accounting-transaction-id_transaction-post">accounting/transaction/{ID_TRANSACTION} (POST)</a></li>
+				<li><a href="#accounting-transaction-id_transaction-users-get">accounting/transaction/{ID_TRANSACTION}/users (GET)</a></li>
+				<li><a href="#accounting-transaction-id_transaction-users-post">accounting/transaction/{ID_TRANSACTION}/users (POST)</a></li>
+				<li><a href="#accounting-transaction-id_transaction-users-delete">accounting/transaction/{ID_TRANSACTION}/users (DELETE)</a></li>
+				<li><a href="#accounting-transaction-post">accounting/transaction (POST)</a>
+</li></ol></li></ol></li></ol></div><h1 id="utiliser-l-api">Utiliser l'API</h1>
+<p>N'importe quel client HTTP capable de gérer TLS (HTTPS) et l'authentification basique fonctionnera.</p>
+<p>En ligne de commande il est possible d'utiliser <code>curl</code>. Exemple pour télécharger la base de données :</p>
+<pre><code>curl https://test:coucou@[identifiant_association].paheko.cloud/api/download -o association.sqlite</code></pre>
+<p>On peut aussi utiliser <code>wget</code> en n'oubliant pas l'option <code>--auth-no-challenge</code> sinon l'authentification ne fonctionnera pas :</p>
+<pre><code>wget https://test:coucou@[identifiant_association].paheko.cloud/api/download  --auth-no-challenge -O association.sqlite</code></pre>
+<p>Exemple pour créer une écriture sous forme de formulaire :</p>
+<pre><code>curl -v "http://test:test@[identifiant_association].paheko.cloud/api/accounting/transaction" -F id_year=1 -F label=Test -F "date=01/02/2023" …</code></pre>
+<p>Ou sous forme d'objet JSON :</p>
+<pre><code>curl -v "http://test:test@[identifiant_association].paheko.cloud/api/accounting/transaction" -H 'Content-Type: application/json' -d '{"id_year":1, "label": "Test écriture", "date": "01/02/2023"}'</code></pre>
+<h1 id="authentification">Authentification</h1>
+<p>Il ne faut pas oublier de fournir le nom d'utilisateur et mot de passe en HTTP :</p>
+<pre><code>curl http://test:abcd@paheko.monasso.tld/api/download/</code></pre>
+<h1 id="erreurs">Erreurs</h1>
+<p>En cas d'erreur un code HTTP 4XX sera fourni, et le contenu sera un objet JSON avec une clé <code>error</code> contenant le message d'erreur.</p>
+<h1 id="chemins">Chemins</h1>
+<h2 id="sql-post">sql (POST)</h2>
+<p>Permet d'exécuter une requête SQL <code>SELECT</code> (uniquement, pas de requête UPDATE, DELETE, INSERT, etc.) sur la base de données. La requête SQL doit être passée dans le corps de la requête HTTP, ou dans le paramètre <code>sql</code>. Le résultat est retourné dans la clé <code>results</code> de l'objet JSON.</p>
+<p>S'il n'y a pas de limite à la requête, une limite à 1000 résultats sera ajoutée obligatoirement.</p>
+<pre><code>curl https://test:abcd@paheko.monasso.tld/api/sql/ -d 'SELECT * FROM membres LIMIT 5;'</code></pre>
+<p><strong>ATTENTION :</strong> Les requêtes en écriture (<code>INSERT, DELETE, UPDATE, CREATE TABLE</code>, etc.) ne sont pas acceptées, il n'est pas possible de modifier la base de données directement via Paheko, afin d'éviter les soucis de données corrompues.</p>
+<p>Depuis la version 1.2.8, il est possible d'utiliser le paramètre <code>format</code> pour choisir le format renvoyé :</p>
+<ul>
+<li><code>json</code> (défaut) : renvoie un objet JSON, dont la clé est <code>"results"</code> et contient un tableau de la liste des membres trouvés</li>
+<li><code>csv</code> : renvoie un fichier CSV</li>
+<li><code>ods</code> : renvoie un tableau LibreOffice Calc (ODS)</li>
+<li><code>xlsx</code> : renvoie un tableau Excel (XLSX)</li>
+</ul>
+<p>Exemple :</p>
+<pre><code>curl https://test:abcd@paheko.monasso.tld/api/sql/ -F sql='SELECT * FROM membres LIMIT 5;' -F format=csv</code></pre>
+<h2 id="download-get">download (GET)</h2>
+<p>Télécharge la base de données complète. Renvoie directement le fichier SQLite de la base de données.</p>
+<h2 id="site-web">Site web</h2>
+<h3 id="web-list-get">web/list (GET)</h3>
+<p>Renvoie la liste des pages du site web.</p>
+<h3 id="web-attachment-page_uri-filename-get">web/attachment/{PAGE_URI}/{FILENAME} (GET)</h3>
+<p>Renvoie le fichier joint correspondant à la page et nom de fichier indiqués.</p>
+<h3 id="web-page-page_uri-get">web/page/{PAGE_URI} (GET)</h3>
+<p>Renvoie un objet JSON avec toutes les infos de la page donnée.</p>
+<p>Rajouter le paramètre <code>?html</code> à l'URL pour obtenir en plus une clé <code>html</code> dans l'objet JSON qui contiendra la page au format HTML.</p>
+<h3 id="web-html-page_uri-get">web/html/{PAGE_URI} (GET)</h3>
+<p>Renvoie uniquement le contenu de la page au format HTML.</p>
+<h2 id="membres">Membres</h2>
+<h3 id="user-import-put">user/import (PUT)</h3>
+<p>Permet d'importer un fichier de tableur (CSV/XLSX/ODS) de la liste des membres, comme si c'était fait depuis l'interface de Paheko.</p>
+<p>Cette route nécessite une clé d'API ayant les droits d'administration, car importer un fichier peut permettre de modifier l'identifiant de connexion d'un administrateur et donc potentiellement d'obtenir l'accès à l'interface d'administration.</p>
+<p>Paheko s'attend à ce que la première est ligne du tableau contienne le nom des colonnes, et que le nom des colonnes correspond au nom des champs de la fiche membre (ou à leur nom unique). Par exemple si votre fiche membre contient les champs <em>Nom et prénom</em> et <em>Adresse postale</em>, alors le fichier fourni devra ressembler à ceci :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Nom et prénom</th>
+<th style="text-align: left;">Adresse postale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Ada Lovelace</td>
+<td style="text-align: left;">42 rue du binaire, 21000 DIJON</td>
+</tr>
+</tbody>
+</table>
+<p>Ou à ceci :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">nom_prenom</th>
+<th style="text-align: left;">adresse_postale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Ada Lovelace</td>
+<td style="text-align: left;">42 rue du binaire, 21000 DIJON</td>
+</tr>
+</tbody>
+</table>
+<p>La méthode renvoie un code HTTP <code>200 OK</code> si l'import s'est bien passé, sinon un code 400 et un message d'erreur JSON dans le corps de la réponse.</p>
+<p>Utilisez la route <code>user/import/preview</code> avant pour vérifier que l'import correspond à ce que vous attendez.</p>
+<p>Exemple pour modifier le nom du membre n°42 :</p>
+<pre><code>echo 'numero,nom' &gt; membres.csv
+echo '42,"Nouveau nom"' &gt;&gt; membres.csv
+curl https://test:abcd@monpaheko.tld/api/user/import -T membres.csv</code></pre>
+<h4 id="parametres">Paramètres</h4>
+<p>Les paramètres sont à spécifier dans l'URL, dans la query string.</p>
+<p>Depuis la version 1.2.8 il est possible d'utiliser un paramètre supplémentaire <code>mode</code> contenant une de ces options pour spécifier le mode d'import :</p>
+<ul>
+<li><code>auto</code> (défaut si le mode n'est pas spécifié) : met à jour la fiche d'un membre si son numéro existe, sinon crée un membre si le numéro de membre indiqué n'existe pas ou n'est pas renseigné</li>
+<li><code>create</code> : ne fait que créer de nouvelles fiches de membre, si le numéro de membre existe déjà une erreur sera produite</li>
+<li><code>update</code> : ne fait que mettre à jour les fiches de membre en utilisant le numéro de membre comme référence, si le numéro de membre n'existe pas une erreur sera produite</li>
+</ul>
+<p>Depuis la version 1.3.0 il est possible de spécifier :</p>
+<ul>
+<li>le nombre de lignes à ignorer avec le paramètre <code>skip_lines=X</code> : elles ne seront pas importées. Par défaut la première ligne est ignorée.</li>
+<li>la correspondance des colonnes avec des paramètres <code>column[x]</code> ou <code>x</code> est le numéro de la colonne (la numérotation commence à zéro), et la valeur contient le nom unique du champ de la fiche membre.</li>
+</ul>
+<p>Exemple :</p>
+<pre><code>curl https://test:abcd@monpaheko.tld/api/user/import?mode=create&amp;column[0]=nom_prenom&amp;column[1]=code_postal&amp;skip_lines=0 -T membres.csv</code></pre>
+<h3 id="user-import-post">user/import (POST)</h3>
+<p>Identique à la même méthode en <code>PUT</code>, mais les paramètres sont passés dans le corps de la requête, avec le fichier, dont le nom sera alors <code>file</code>.</p>
+<pre><code>curl https://test:abcd@monpaheko.tld/api/user/import \
+  -F mode=create \
+  -F 'column[0]=nom_prenom' \
+  -F 'column[1]=code_postal' \
+  -F skip_lines=0 \
+  -F file=@membres.csv</code></pre>
+<h3 id="user-import-preview-put">user/import/preview (PUT)</h3>
+<p>Identique à <code>user/import</code>, mais l'import n'est pas enregistré, et la route renvoie les modifications qui seraient effectuées en important le fichier :</p>
+<ul>
+<li><code>errors</code> : liste des erreurs d'import</li>
+<li><code>created</code> : liste des membres ajoutés, chaque objet contenant tous les champs de la fiche membre qui serait créée</li>
+<li><code>modified</code> : liste des membres modifiés, chaque membre aura une clé <code>id</code> et une clé <code>name</code>, ainsi qu'un objet <code>changed</code> contenant la liste des champs modifiés. Chaque champ modifié aura 2 propriétés <code>old</code> et <code>new</code>, contenant respectivement l'ancienne valeur du champ et la nouvelle.</li>
+<li><code>unchanged</code> : liste des membres mentionnés dans l'import, mais qui ne seront pas affectés. Pour chaque membre une clé <code>name</code> et une clé <code>id</code> indiquant le nom et l'identifiant unique numérique du membre</li>
+</ul>
+<p>Note : si <code>errors</code> n'est pas vide, alors il sera impossible d'importer le fichier avec <code>user/import</code>.</p>
+<p>Exemple de retour :</p>
+<pre><code>{
+    "created": [
+        {
+            "numero": 3434351,
+            "nom": "Bla Bli Blu"
+        }
+    ],
+    "modified": [
+        {
+            "id": 1,
+            "name": "Ada Lovelace",
+            "changed": {
+                "nom": {
+                    "old": "Ada Lvelavce",
+                    "new": "Ada Lovelace"
+                }
+            }
+        }
+    ],
+    "unchanged": [
+        {
+            "id": 2,
+            "name": "Paul Muad'Dib"
+        }
+    ]
+}</code></pre>
+<h3 id="user-import-preview-post">user/import/preview (POST)</h3>
+<p>Idem quel la méthode en <code>PUT</code> mais accepte les paramètres dans le corps de la requête (voir ci-dessus).</p>
+<h2 id="activites">Activités</h2>
+<h3 id="services-subscriptions-import-put">services/subscriptions/import (PUT)</h3>
+<p><em>(Depuis Paheko 1.3.2)</em></p>
+<p>Permet d'importer les inscriptions des membres aux activités à partir d'un fichier CSV. Les activités et tarifs doivent déjà exister avant l'import.</p>
+<p>Les colonnes suivantes peuvent être utilisées :</p>
+<ul>
+<li>Numéro de membre<code>**</code></li>
+<li>Activité<code>**</code></li>
+<li>Tarif</li>
+<li>Date d'inscription<code>**</code></li>
+<li>Date d'expiration</li>
+<li>Montant à régler</li>
+<li>Payé ?</li>
+</ul>
+<p>Les colonnes suivies de deux astérisques (<code>**</code>) sont obligatoires.</p>
+<p>Exemple :</p>
+<pre><code>echo '"Numéro de membre","Activité","Tarif","Date d'inscription","Date d'expiration","Montant à régler","Payé ?"' &gt; /tmp/inscriptions.csv
+echo '42,"Cours de théâtre","Tarif adulte","01/09/2023","01/07/2023","123,50","Non"' &gt;&gt; /tmp/inscriptions.csv
+curl https://test:abcd@monpaheko.tld/api/services/subscriptions/import -T /tmp/inscriptions.csv</code></pre>
+<h2 id="erreurs">Erreurs</h2>
+<p>Paheko dispose d'un système dédié à la gestion des erreurs internes, compatible avec les formats des logiciels AirBrake et errbit.</p>
+<h3 id="errors-report-post">errors/report (POST)</h3>
+<p>Permet d'envoyer un rapport d'erreur (au format airbrake/errbit/Paheko), comme si c'était une erreur locale.</p>
+<h3 id="errors-log-get">errors/log (GET)</h3>
+<p>Renvoie le log d'erreurs système, au format airbrake/errbit (<a href="https://airbrake.io/docs/api/#create-notice-v3" rel="noreferrer noopener external" target="_blank">voir la doc AirBrake pour un exemple du format</a>)</p>
+<h2 id="comptabilite">Comptabilité</h2>
+<h3 id="accounting-years-get">accounting/years (GET)</h3>
+<p>Renvoie la liste des exercices.</p>
+<h3 id="accounting-charts-get">accounting/charts (GET)</h3>
+<p>Renvoie la liste des plans comptables.</p>
+<h3 id="accounting-charts-id_chart-accounts-get">accounting/charts/{ID_CHART}/accounts (GET)</h3>
+<p>Renvoie la liste des comptes pour le plan comptable indiqué (voir <code>id_chart</code> dans la liste des exercices).</p>
+<h3 id="accounting-years-id_year-journal-get">accounting/years/{ID_YEAR}/journal (GET)</h3>
+<p>Renvoie le journal général des écritures de l'exercice indiqué. </p>
+<p>Note : il est possible d'utiliser <code>current</code> comme paramètre pour <code>{ID_YEAR}</code> pour désigner l'exercice ouvert en cours. S'il y a plusieurs exercices ouverts, alors le plus ancien sera choisi.</p>
+<h3 id="accounting-years-id_year-account-journal-get">accounting/years/{ID_YEAR}/account/journal (GET)</h3>
+<p>Renvoie le journal des écritures d'un compte pour l'exercice indiqué.</p>
+<p>Le compte est spécifié soit via le paramètre <code>code</code>, soit via le paramètre <code>id</code>. Exemple :  <code>/accounting/years/4/account/journal?code=512A</code></p>
+<p>Note : il est possible d'utiliser <code>current</code> comme paramètre pour <code>{ID_YEAR}</code> pour désigner l'exercice ouvert en cours. S'il y a plusieurs exercices ouverts, alors le plus ancien sera choisi.</p>
+<h3 id="accounting-transaction-id_transaction-get">accounting/transaction/{ID_TRANSACTION} (GET)</h3>
+<p>Renvoie les détails de l'écriture indiquée.</p>
+<h3 id="accounting-transaction-id_transaction-post">accounting/transaction/{ID_TRANSACTION} (POST)</h3>
+<p>Modifie l'écriture indiquée. Voir plus bas le format attendu.</p>
+<h3 id="accounting-transaction-id_transaction-users-get">accounting/transaction/{ID_TRANSACTION}/users (GET)</h3>
+<p>Renvoie la liste des membres liés à une écriture.</p>
+<h3 id="accounting-transaction-id_transaction-users-post">accounting/transaction/{ID_TRANSACTION}/users (POST)</h3>
+<p>Met à jour la liste des membres liés à une écriture, en utilisant les ID de membres passés dans un tableau nommé <code>users</code>.</p>
+<pre><code> curl -v "http://…/api/accounting/transaction/9337/users"  -F 'users[]=2'</code></pre>
+<h3 id="accounting-transaction-id_transaction-users-delete">accounting/transaction/{ID_TRANSACTION}/users (DELETE)</h3>
+<p>Efface la liste des membres liés à une écriture.</p>
+<h3 id="accounting-transaction-post">accounting/transaction (POST)</h3>
+<p>Crée une nouvelle écriture, renvoie les détails si l'écriture a été créée. Voir plus bas le format attendu.</p>
+<h4 id="structure-pour-creer-modifier-une-ecriture">Structure pour créer / modifier une écriture</h4>
+<p>Les champs à spécifier pour créer ou modifier une écriture sont les suivants :</p>
+<ul>
+<li><code>id_year</code></li>
+<li><code>date</code> (format YYYY-MM-DD)</li>
+<li><code>type</code> peut être un type d'écriture simplifié (2 lignes) : <code>EXPENSE</code> (dépense), <code>REVENUE</code> (recette), <code>TRANSFER</code> (virement), <code>DEBT</code> (dette), <code>CREDIT</code> (créance), ou <code>ADVANCED</code> pour une écriture multi-ligne</li>
+<li><code>amount</code> (uniquement pour les écritures simplifiées) : contient le montant de l'écriture</li>
+<li><code>credit</code> (uniquement pour les écritures simplifiées) : contient le numéro du compte porté au crédit</li>
+<li><code>debit</code> (uniquement pour les écritures simplifiées) : contient le numéro du compte porté au débit</li>
+<li><code>lines</code> (pour les écritures multi-lignes) : un tableau dont chaque ligne doit contenir :<ul>
+<li><code>account</code> (numéro du compte) ou <code>id_account</code> (ID unique du compte)</li>
+<li><code>credit</code> : montant à inscrire au crédit (doit être zéro ou non renseigné si <code>debit</code> est renseigné, et vice-versa)</li>
+<li><code>debit</code> : montant à inscrire au débit</li>
+<li><code>label</code> (facultatif) : libellé de la ligne</li>
+<li><code>reference</code> (facultatif) : référence de la ligne (aussi appelé référence du paiement pour les écritures simplifiées)</li>
+<li><code>id_project</code> : ID unique du projet à affecter</li>
+</ul>
+</li>
+</ul>
+<p>Champs optionnels :</p>
+<ul>
+<li><code>reference</code> : numéro de pièce comptable</li>
+<li><code>notes</code> : remarques (texte multi ligne)</li>
+<li><code>id_project</code> : ID unique du projet à affecter (pour les écritures simplifiées uniquement)</li>
+<li><code>payment_reference</code> (uniquement pour les écritures simplifiées) : référence de paiement</li>
+<li><code>linked_users</code> : ID des membres à lier à l'écriture <em>(depuis 1.3.3)</em></li>
+</ul>
+<p>Exemple :</p>
+<pre><code>curl -F 'id_year=12' -F 'label=Test' -F 'date=01/02/2022' -F 'type=EXPENSE' -F 'amount=42' -F 'debit=512A' -F 'credit=601' …</code></pre></div></body></html>
