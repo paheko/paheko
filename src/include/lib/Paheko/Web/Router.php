@@ -116,7 +116,7 @@ class Router
 			throw new UserException('Cette page ne semble pas exister.', 404);
 		}
 		elseif ($first === 'api') {
-			API::dispatchURI(substr($uri, 4));
+			API::routeHttpRequest(substr($uri, 4));
 			return;
 		}
 		// Route WebDAV requests to WebDAV server
