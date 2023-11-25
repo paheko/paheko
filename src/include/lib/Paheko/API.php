@@ -689,7 +689,6 @@ class API
 
 		$api = new self($method, $uri, $params);
 		$api->is_http_client = true;
-		$api->checkAuth();
 
 		if ($method === 'PUT') {
 			$api->setFilePointer(fopen('php://input', 'rb'));
@@ -698,6 +697,8 @@ class API
 		http_response_code(200);
 
 		try {
+			$api->checkAuth();
+
 			try {
 				$return = $api->route();
 			}
