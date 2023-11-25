@@ -42,7 +42,7 @@ class ReminderMessage extends Entity
 			return UserTemplate::createFromUserString($body);
 		}
 		else {
-			return $this->body;
+			return $body;
 		}
 	}
 
