@@ -57,7 +57,7 @@ En cas d'erreur un code HTTP 4XX sera fourni, et le contenu sera un objet JSON a
 
 ## sql (POST)
 
-Permet d'exécuter une requête SQL `SELECT` (uniquement, pas de requête UPDATE, DELETE, INSERT, etc.) sur la base de données. La requête SQL doit être passée dans le corps de la requête HTTP. Le résultat est retourné dans la clé `results` de l'objet JSON.
+Permet d'exécuter une requête SQL `SELECT` (uniquement, pas de requête UPDATE, DELETE, INSERT, etc.) sur la base de données. La requête SQL doit être passée dans le corps de la requête HTTP, ou dans le paramètre `sql`. Le résultat est retourné dans la clé `results` de l'objet JSON.
 
 S'il n'y a pas de limite à la requête, une limite à 1000 résultats sera ajoutée obligatoirement.
 
@@ -77,7 +77,7 @@ Depuis la version 1.2.8, il est possible d'utiliser le paramètre `format` pour 
 Exemple :
 
 ```
-curl 'https://test:abcd@paheko.monasso.tld/api/sql/?format=csv' -d 'SELECT * FROM membres LIMIT 5;'
+curl https://test:abcd@paheko.monasso.tld/api/sql/ -F sql='SELECT * FROM membres LIMIT 5;' -F format=csv
 ```
 
 ## download (GET)
@@ -336,6 +336,7 @@ Champs optionnels :
 * `reference` : numéro de pièce comptable
 * `notes` : remarques (texte multi ligne)
 * `id_project` : ID unique du projet à affecter (pour les écritures simplifiées uniquement)
+* `linked_users` : ID des membres à lier à l'écriture *(depuis 1.3.3)*
 
 Exemple :
 
