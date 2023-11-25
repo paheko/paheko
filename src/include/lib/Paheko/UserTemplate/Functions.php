@@ -7,6 +7,8 @@ use KD2\ErrorManager;
 use KD2\JSONSchema;
 use KD2\Security;
 
+use Paheko\API;
+use Paheko\APIException;
 use Paheko\Config;
 use Paheko\DB;
 use Paheko\Extensions;
@@ -48,7 +50,7 @@ class Functions
 		'redirect',
 		'admin_files',
 		'delete_file',
-		'create',
+		'api',
 	];
 
 	const COMPILE_FUNCTIONS_LIST = [
@@ -713,40 +715,103 @@ class Functions
 		Files::delete($ut->module->storage_root() . '/' . $params['path']);
 	}
 
-	static public function create(array $params, UserTemplate $ut, int $line): void
+	static public function api(array $params, UserTemplate $ut, int $line): void
 	{
-		if (empty($params['entity'])) {
-			throw new Brindille_Exception('"entity" parameter is missing');
+		if (empty($params['path'])) {
+			throw new Brindille_Exception('"path" parameter is missing');
 		}
 
-		$entity = $params['entity'];
-		$assign_new_id = $params['assign_new_id'] ?? null;
-		unset($params['entity'], $params['assign_new_id']);
+		if (empty($params['method'])) {
+			throw new Brindille_Exception('"method" parameter is missing');
+		}
 
-		if ($entity === 'transaction') {
-			$transaction = new Transaction;
-			$transaction->importFromAPI($params);
-			$transaction->save();
+		$path = trim($params['path'], '/');
+		$method = strtoupper($params['method']);
+		$assign = $params['assign'] ?? null;
+		$assign_code = $params['assign_code'] ?? null;
+		$fail = $params['fail'] ?? true;
+		$access_level = null;
+		$url = null;
 
-			foreach ((array)($params['linked_users'] ?? []) as $user) {
-				$transaction->linkToUser((int)$user);
+		unset($params['method'], $params['path'], $params['assign'], $params['assign_code'], $params['fail']);
+
+		if (isset($params['url'])) {
+			if (empty($params['user'])) {
+				throw new Brindille_Exception('"user" parameter is missing');
 			}
 
-			if (isset($params['move_attachments_from'])) {
-				$path = $ut->module->storage_root() . '/' . $params['move_attachments_from'];
-				$file = Files::get($path);
-
-				if ($file && $file->isDir()) {
-					$file->rename($transaction->getAttachementsDirectory());
-				}
+			if (empty($params['password'])) {
+				throw new Brindille_Exception('"password" parameter is missing');
 			}
 
-			if ($assign_new_id) {
-				$ut->assign($assign_new_id, $transaction->id());
-			}
+			$url = str_replace('://', '://' . $params['user'] . '@' . $params['password'], $params['url']);
+			unset($params['user'], $params['password'], $params['url']);
 		}
 		else {
-			throw new Brindille_Exception('"entity" parameter value is invalid: ' . $params['entity']);
+			$access_level = $params['access'] ?? 'admin';
+			unset($params['access_level']);
+		}
+
+		$body = null;
+
+		if ($method !== 'GET' && array_key_exists('body', $params)) {
+			$body = $params['body'];
+			unset($params['body']);
+		}
+
+		$code = null;
+
+		// External HTTP request
+		if ($url) {
+			$http = new HTTP;
+			$url = rtrim($url, '/') . '/' . $path;
+			$body ??= json_encode($params);
+
+			if ($method === 'POST') {
+				$r = $http->POST($url, $body, $http::JSON);
+			}
+			else {
+				$r = $http->GET($url);
+			}
+
+			if ($fail && $r->fail) {
+				$body = json_decode($r->body);
+				throw new Brindille_Exception(sprintf('External API request failed: %d - %s', $r->status, $body->error ?? $r->error));
+			}
+
+			$code = $r->status;
+			$return = $r->body;
+
+			if ($assign && isset($r->headers['Content-Type']) && false !== strpos($r->headers['Content-Type'], '/json')) {
+				$return = @json_decode($return);
+			}
+		}
+		// Internal request
+		else {
+			$api = new API($method, $path, $params);
+
+			if ($access_level) {
+				$api->setAccessLevelByName($access_level);
+			}
+
+			$api->setAllowedFilesRoot($ut->module->storage_root());
+
+			try {
+				$return = $api->route();
+			}
+			catch (APIException $e) {
+				if ($fail) {
+					throw new Brindille_Exception(sprintf('Internal API request failed: %d - %s', $e->getCode(), $e->getMessage()));
+				}
+			}
+		}
+
+		if ($assign_code) {
+			$ut->assign($assign_code, $code);
+		}
+
+		if ($assign) {
+			$ut->assign($assign, $return);
 		}
 	}
 }
