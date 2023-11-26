@@ -593,7 +593,7 @@ class API
 
 			$this->requireAccess(Session::ACCESS_ADMIN);
 
-			$body = $this->body();
+			$body = self::getRequestInput();
 			$report = json_decode($body);
 
 			if (!isset($report->context->id)) {
@@ -666,7 +666,9 @@ class API
 
 	static public function getRequestInput(): string
 	{
-		return trim(file_get_contents('php://input'));
+		static $input = null;
+		$input ??= trim(file_get_contents('php://input'));
+		return $input;
 	}
 
 	static public function routeHttpRequest(string $uri)
