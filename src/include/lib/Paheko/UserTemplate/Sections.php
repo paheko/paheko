@@ -94,7 +94,7 @@ class Sections
 	static public function selectStart(string $name, string $sql, UserTemplate $tpl, int $line): string
 	{
 		$sql = strtok($sql, ';');
-		$extra_params = strtok(false);
+		$extra_params = strtok('');
 
 		$i = 0;
 		$params = '';

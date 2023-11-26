@@ -126,7 +126,7 @@ class CommonModifiers
 		if ($type == 'mail' || strpos($contact, '@')) {
 			$user = strtok($contact, '@');
 			$domain = strtok('.');
-			$ext = strtok(false);
+			$ext = strtok('');
 
 			return sprintf('<a href="#error" class="protected-contact" data-a="%s" data-b="%s" data-c="%s"
 				onclick="if (this.href.match(/#error/)) this.href = [\'mail\', \'to:\', this.dataset.a, \'@\', this.dataset.b, \'.\' + this.dataset.c].join(\'\');"></a>',

@@ -174,7 +174,7 @@ class Modifiers
 	{
 		$number = str_replace(',', '.', $number);
 		$number = strtok($number, '.');
-		$decimals = strtok(false);
+		$decimals = strtok('');
 
 		$out = numfmt_create($locale, \NumberFormatter::SPELLOUT)->format((float) $number);
 		$out .= ' ' . $currency;

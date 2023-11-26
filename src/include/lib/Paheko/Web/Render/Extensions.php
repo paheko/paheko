@@ -139,7 +139,7 @@ class Extensions
 			}
 
 			$img = strtok($line, '|');
-			$label = strtok(false);
+			$label = strtok('');
 			$size = $type === 'slideshow' ? File::THUMB_SIZE_LARGE : File::THUMB_SIZE_TINY;
 
 			$out .= sprintf('<figure>%s</figure>', self::img($img, $size, $label ?: null));

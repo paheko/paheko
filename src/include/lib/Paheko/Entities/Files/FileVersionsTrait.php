@@ -54,7 +54,7 @@ trait FileVersionsTrait
 
 		if ($last) {
 			$v = (int) strtok($last, '.');
-			strtok(false);
+			strtok('');
 			$v++;
 		}
 		else {
@@ -181,7 +181,7 @@ trait FileVersionsTrait
 		$out = (object) [
 			'version'   => (int) strtok($v->name, '.'),
 			'timestamp' => (int) strtok('.'),
-			'name'      => strtok(false),
+			'name'      => strtok(''),
 			'size'      => $v->size,
 			'file'      => $v,
 		];

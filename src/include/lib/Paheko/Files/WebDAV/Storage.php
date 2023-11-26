@@ -457,7 +457,7 @@ class Storage extends AbstractStorage
 		$token_decode = WOPI::base64_decode_url_safe($token);
 		$hash = strtok($token_decode, '_');
 		$session_id = strtok('_');
-		$ttl = (int) strtok(false);
+		$ttl = (int) strtok('');
 		$check = WebDAV::hmac(compact('uri', 'ttl', 'session_id'), SECRET_KEY);
 
 		if (!hash_equals($hash, $check)) {
