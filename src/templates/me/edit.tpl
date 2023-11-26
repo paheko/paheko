@@ -10,7 +10,7 @@
 		<legend>Informations personnelles</legend>
 		<dl>
 			{foreach from=$fields item="field"}
-				{edit_dynamic_field field=$field user=$user context="user_edit"}
+				{edit_user_field field=$field user=$user context="user_edit"}
 			{/foreach}
 		</dl>
 	</fieldset>

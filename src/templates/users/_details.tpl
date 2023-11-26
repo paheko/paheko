@@ -62,7 +62,7 @@ $fields = DF::getInstance()->all();
 			</ul>
 		{else}
 			{if in_array($key, $id_fields)}<strong>{/if}
-			{display_dynamic_field field=$field value=$value user_id=$user.id}
+			{user_field field=$field value=$value user_id=$user.id}
 			{if in_array($key, $id_fields)}</strong>{/if}
 		{/if}
 	</dd>

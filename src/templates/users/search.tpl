@@ -22,9 +22,9 @@
 			{if $is_admin}
 			<td class="check">{input type="checkbox" name="selected[]" value=$row.id}</td>
 			{/if}
-			{foreach from=$list->getHeaderColumns() key="key" item="label"}
+			{foreach from=$list->getHeaderColumns() key="name" item="label"}
 				<td>
-					{display_dynamic_field key=$key value=$row->$key link_name_id=$row.id files_href="!users/details.php?id=%d"|args:$row.id}
+					{user_field name=$name value=$row->$name link_name_id=$row.id files_href="!users/details.php?id=%d"|args:$row.id}
 				</td>
 			{/foreach}
 			<td class="actions">
@@ -88,9 +88,9 @@
 			{/if}
 				{foreach from=$header key="i" item="label"}
 				<td>
-					<?php $value = $row[$i]; $key = $header[$i]; ?>
+					<?php $value = $row[$i]; $name = $header[$i]; ?>
 					{if $id_column !== false}
-						{display_dynamic_field key=$key value=$value}
+						{user_field name=$name value=$value}
 					{else}
 						{$value}
 					{/if}

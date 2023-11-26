@@ -758,6 +758,24 @@ Affiche une icône.
 
 ![](shapes.png)
 
+## user_field
+
+Affiche un champ de la fiche membre.
+
+| Paramètre | Obligatoire ou optionnel ? | Fonction |
+| :- | :- | :- |
+| `name` | **obligatoire** | Nom du champ. |
+| `value` | **obligatoire** | Valeur du champ. |
+
+## edit_user_field
+
+Afficher un champ de formulaire pour modifier un champ de la fiche membre.
+
+| Paramètre | Obligatoire ou optionnel ? | Fonction |
+| :- | :- | :- |
+| `name` | **obligatoire** | Nom du champ. |
+| `source` | *optionnel* | Source de pré-remplissage du champ. Si le nom du champ est `montant`, alors la valeur de `[source].montant` sera utilisée comme valeur du champ. |
+
 # Gestion de fichiers dans les modules
 
 Les modules peuvent stocker des fichiers, mais seulement dans leur propre contexte. Un module ne peut pas gérer les fichiers du site web, des écritures comptables, des membres, ou des autres modules, il ne peut gérer que ses propres fichiers.

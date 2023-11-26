@@ -94,7 +94,9 @@
 			<ol>
 				<li><a href="#formes-d-icones-disponibles">Formes d'icônes disponibles</a>
 			</ol></li>
-</ol></li>
+			<li><a href="#user_field">user_field</a></li>
+			<li><a href="#edit_user_field">edit_user_field</a>
+		</ol></li>
 		<li><a href="#gestion-de-fichiers-dans-les-modules">Gestion de fichiers dans les modules</a>
 		<ol>
 			<li><a href="#admin_files">admin_files</a></li>
@@ -971,6 +973,52 @@ Sans "!", l'adresse générée sera relative au contexte d'appel (module/plugin 
 </table>
 <h3 id="formes-d-icones-disponibles">Formes d'icônes disponibles</h3>
 <p><img src="shapes.png" alt="" /></p>
+<h2 id="user_field">user_field</h2>
+<p>Affiche un champ de la fiche membre.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Obligatoire ou optionnel ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>name</code></td>
+<td style="text-align: left;"><strong>obligatoire</strong></td>
+<td style="text-align: left;">Nom du champ.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>value</code></td>
+<td style="text-align: left;"><strong>obligatoire</strong></td>
+<td style="text-align: left;">Valeur du champ.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="edit_user_field">edit_user_field</h2>
+<p>Afficher un champ de formulaire pour modifier un champ de la fiche membre.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Obligatoire ou optionnel ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>name</code></td>
+<td style="text-align: left;"><strong>obligatoire</strong></td>
+<td style="text-align: left;">Nom du champ.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>source</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Source de pré-remplissage du champ. Si le nom du champ est <code>montant</code>, alors la valeur de <code>[source].montant</code> sera utilisée comme valeur du champ.</td>
+</tr>
+</tbody>
+</table>
 <h1 id="gestion-de-fichiers-dans-les-modules">Gestion de fichiers dans les modules</h1>
 <p>Les modules peuvent stocker des fichiers, mais seulement dans leur propre contexte. Un module ne peut pas gérer les fichiers du site web, des écritures comptables, des membres, ou des autres modules, il ne peut gérer que ses propres fichiers.</p>
 <p>Quand les données d'un module sont supprimé, les fichiers du module sont aussi supprimés.</p>

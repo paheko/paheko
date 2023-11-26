@@ -83,6 +83,7 @@
 			<li><a href="#escape">escape</a></li>
 			<li><a href="#excerpt">excerpt</a></li>
 			<li><a href="#extract_leading_number">extract_leading_number</a></li>
+			<li><a href="#format_phone_number">format_phone_number</a></li>
 			<li><a href="#markdown">markdown</a></li>
 			<li><a href="#raw">raw</a></li>
 			<li><a href="#replace">replace</a></li>
@@ -391,6 +392,14 @@ bleu - orange</code></pre>
 {{$title|extract_leading_number}}</code></pre>
 <p>Affichera :</p>
 <pre><code>02</code></pre>
+<h2 id="format_phone_number">format_phone_number</h2>
+<p>Formatte un numéro de téléphone selon le format du pays de l'association.</p>
+<p>Seule la France est supportée pour le moment.</p>
+<p>Exemple :</p>
+<pre><code>{{:assign number="0102030405"}}
+{{$number|format_phone_number}}</code></pre>
+<p>Affichera :</p>
+<pre><code>01 02 03 04 05</code></pre>
 <h2 id="markdown">markdown</h2>
 <p>Transforme un texte en HTML en utilisant la syntaxe Markdown.</p>
 <p>Il est conseillé de rajouter le filtre <code>|raw</code> pour ne pas échapper le HTML produit, si on veut afficher le texte formatté dans une page HTML.</p>

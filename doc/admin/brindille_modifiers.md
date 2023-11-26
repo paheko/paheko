@@ -270,6 +270,25 @@ Affichera :
 02
 ```
 
+## format_phone_number
+
+Formatte un numéro de téléphone selon le format du pays de l'association.
+
+Seule la France est supportée pour le moment.
+
+Exemple :
+
+```
+{{:assign number="0102030405"}}
+{{$number|format_phone_number}}
+```
+
+Affichera :
+
+```
+01 02 03 04 05
+```
+
 ## markdown
 
 Transforme un texte en HTML en utilisant la syntaxe Markdown.

@@ -3,10 +3,14 @@
 namespace Paheko\UserTemplate;
 
 use Paheko\Config;
+use Paheko\DB;
 use Paheko\Entity;
 use Paheko\Template;
 use Paheko\Utils;
 use Paheko\ValidationException;
+use Paheko\Users\DynamicFields;
+use Paheko\Entities\Users\DynamicField;
+use Paheko\Entities\Users\User;
 
 use KD2\Form;
 
@@ -26,6 +30,8 @@ class CommonFunctions
 		'linkmenu',
 		'exportmenu',
 		'delete_form',
+		'edit_user_field',
+		'user_field',
 	];
 
 	static public function input(array $params)
@@ -571,4 +577,284 @@ class CommonFunctions
 		return $tpl->fetch('common/delete_form.tpl');
 	}
 
+	static public function edit_user_field(array $params): string
+	{
+		if (isset($params['field'])) {
+			$field = $params['field'];
+		}
+		else {
+			$name = $params['name'] ?? $params['key'] ?? null;
+
+			if (null === $name) {
+				throw new \RuntimeException('Missing "name" parameter');
+			}
+
+			$field = DynamicFields::get($name);
+		}
+
+		if (!($field instanceof DynamicField)) {
+			throw new \LogicException('This field does not exist.');
+		}
+
+		$context = $params['context'] ?? 'module';
+
+		if (!in_array($context, ['user_edit', 'admin_new', 'admin_edit', 'module'])) {
+			throw new \InvalidArgumentException('Invalid "context" parameter value: ' . $context);
+		}
+
+		$source = $params['user'] ?? $params['source'] ?? null;
+
+		$name = $field->name;
+		$type = $field->type;
+
+		// The password must be changed using a specific field
+		if ($field->system & $field::PASSWORD) {
+			return '';
+		}
+		// Files are managed out of the form
+		elseif ($type == 'file') {
+			return '';
+		}
+		// VIRTUAL columns cannot be edited
+		elseif ($type == 'virtual') {
+			return '';
+		}
+		elseif ($context === 'user_edit' && $field->user_access_level === Session::ACCESS_NONE) {
+			return '';
+		}
+		elseif ($context === 'user_edit' && $field->user_access_level === Session::ACCESS_READ) {
+			$v = self::user_field(['name' => $name, 'value' => $params['user']->$name]);
+			return sprintf('<dt>%s</dt><dd>%s</dd>', $field->label, $v ?: '<em>Non renseigné</em>');
+		}
+
+		$params = [
+			'type'     => $type,
+			'name'     => $name,
+			'label'    => $field->label,
+			'required' => $field->required,
+			'source'   => $source,
+			'disabled' => !empty($disabled),
+			'required' => $field->required && $type != 'checkbox',
+			'help'     => $field->help,
+			// Fix for autocomplete, lpignore is for Lastpass
+			'autocomplete' => 'off',
+			'data-lpignore' => 'true',
+		];
+
+		// Multiple choice checkboxes is a specific thingy
+		if ($type == 'multiple') {
+			$options = $field->options;
+
+			if (isset($_POST[$name]) && is_array($_POST[$name])) {
+				$value = 0;
+
+				foreach ($_POST[$name] as $k => $v) {
+					if (array_key_exists($k, $options) && !empty($v)) {
+						$value |= 0x01 << $k;
+					}
+				}
+			}
+			else {
+				$value = $params['source']->$name ?? null;
+			}
+
+			// Forcer la valeur à être un entier (depuis PHP 7.1)
+			$value = (int)$value;
+
+			if ($field->required) {
+				$required_label =  ' <b title="Champ obligatoire">(obligatoire)</b>';
+			}
+			else {
+				$required_label =  ' <i>(facultatif)</i>';
+			}
+
+			$out  = sprintf('<dt><label for="f_%s_0">%s</label>%s<input type="hidden" name="%s_present" value="1" /></dt>', $name, htmlspecialchars($field->label), $required_label, $name);
+
+			if ($field->help ?? null) {
+				$out .= sprintf('<dd class="help">%s</dd>', htmlspecialchars($field->help));
+			}
+
+			foreach ($options as $k => $v)
+			{
+				$b = 0x01 << (int)$k;
+
+				$p = [
+					'type'    => 'checkbox',
+					'label'   => $v,
+					'value'   => 1,
+					'default' => ($value & $b) ? 1 : 0,
+					'name'    => sprintf('%s[%d]', $name, $k),
+				];
+
+				$out .= CommonFunctions::input($p);
+			}
+
+			return $out;
+		}
+		elseif ($type == 'select') {
+			$params['options'] = array_combine($field->options, $field->options);
+		}
+		elseif ($type == 'country') {
+			$params['type'] = 'select';
+			$params['options'] = Utils::getCountryList();
+			$params['default'] = Config::getInstance()->get('country');
+		}
+		elseif ($type == 'checkbox') {
+			$params['value'] = 1;
+			$params['label'] = 'Oui';
+
+			if ($field->required) {
+				$required_label =  ' <b title="Champ obligatoire">(obligatoire)</b>';
+			}
+			else {
+				$required_label =  ' <i>(facultatif)</i>';
+			}
+
+			return sprintf('<dt><label for="f_%s_1">%s %s</label><input type="hidden" name="%1$s_present" value="1" /></dt>%s', $field->name, htmlspecialchars($field->label), $required_label, CommonFunctions::input($params));
+		}
+		elseif ($field->system & $field::NUMBER && $context === 'admin_new') {
+			$params['default'] = DB::getInstance()->firstColumn(sprintf('SELECT MAX(%s) + 1 FROM %s;', $name, User::TABLE));
+			$params['required'] = false;
+		}
+		elseif ($type === 'number') {
+			$params['step'] = '1';
+			$params['pattern'] = '\\d+';
+		}
+		elseif ($type === 'decimal') {
+			$params['type'] = 'number';
+			$params['step'] = 'any';
+		}
+		elseif ($type === 'datalist') {
+			$options = '';
+
+			foreach ($field->options as $value) {
+				$options .= sprintf('<option>%s</option>', htmlspecialchars($value));
+			}
+
+			$params['type'] = 'text';
+			$params['list'] = 'list-' . $params['name'];
+			$params['suffix'] = sprintf('<datalist id="%s">%s</datalist>', $params['list'], $options);
+		}
+
+		if ($field->default_value === 'NOW()') {
+			$params['default'] = new \DateTime;
+		}
+		elseif (!empty($field->default_value)) {
+			$params['default'] = $field->default_value;
+		}
+
+		$out = CommonFunctions::input($params);
+
+		if (($context === 'admin_new' || $context === 'admin_edit') && $field->system & $field::LOGIN) {
+			$out .= '<dd class="help"><small>(Sera utilisé comme identifiant de connexion si le membre a le droit de se connecter.)</small></dd>';
+		}
+
+		if ($context === 'admin_new' && $field->system & $field::NUMBER) {
+			$out .= '<dd class="help"><small>Doit être unique, laisser vide pour que le numéro soit attribué automatiquement.</small></dd>';
+		}
+		elseif ($context === 'admin_edit' && $field->system & $field::NUMBER) {
+			$out .= '<dd class="help"><small>Doit être unique pour chaque membre.</small></dd>';
+		}
+
+		return $out;
+	}
+
+	static public function user_field(array $params): string
+	{
+		if (isset($params['field'])) {
+			$field = $params['field'];
+		}
+		else {
+			$name = $params['name'] ?? $params['key'] ?? null;
+
+			if (null === $name) {
+				throw new \RuntimeException('Missing "name" parameter');
+			}
+
+			$field = DynamicFields::get($name);
+		}
+
+		if (!($field instanceof DynamicField)) {
+			throw new \LogicException('This field does not exist.');
+		}
+
+		$v = $params['value'] ?? null;
+
+		$out = '';
+
+		if (!$field) {
+			$out = htmlspecialchars((string)$v);
+		}
+		elseif ($field->type == 'checkbox') {
+			$out = $v ? 'Oui' : 'Non';
+		}
+		elseif (null === $v) {
+			return '';
+		}
+		elseif ($field->type == 'file') {
+			if (!$v) {
+				return '';
+			}
+
+			$files = explode(';', $v);
+			$count = 0;
+			$label = '';
+
+			foreach ($files as $path) {
+				if (!preg_match('!\.(?:png|jpe?g|gif|webp)$!i', $path)) {
+					$count++;
+					continue;
+				}
+				elseif ($label !== '') {
+					$count++;
+					continue;
+				}
+
+				$url = BASE_URL . $path . '?150px';
+				$label .= sprintf(
+					'<img src="%s" alt="%s" />',
+					htmlspecialchars($url),
+					htmlspecialchars($field->label)
+				);
+			}
+
+			if ($count) {
+				$label .= ($count != count($files) ? '+' : '')
+					. ($count == 1 ? '1 fichier' : $count . ' fichiers');
+			}
+
+			if ($label !== '') {
+				if (isset($params['files_href'])) {
+					$label = sprintf('<a href="%s">%s</a>', Utils::getLocalURL($params['files_href']), $label);
+				}
+
+				$out = '<div class="files-list"><figure>' . $label . '</label></div>';
+			}
+		}
+		elseif ($field->type === 'password') {
+			$out = '*****';
+		}
+		elseif ($field->type === 'email' && empty($params['link_name_id'])) {
+			$out = '<a href="mailto:' . rawurlencode($v) . '">' . htmlspecialchars($v) . '</a>';
+		}
+		elseif ($field->type === 'tel' && empty($params['link_name_id'])) {
+			$out = '<a href="tel:' . rawurlencode($v) . '">' . htmlspecialchars(CommonModifiers::format_phone_number($v)) . '</a>';
+		}
+		elseif ($field->type === 'url' && empty($params['link_name_id'])) {
+			$out ='<a href="' . htmlspecialchars($v) . '" target="_blank">' . htmlspecialchars($v) . '</a>';
+		}
+		elseif ($field->type === 'number' || $field->type === 'decimal') {
+			$out = str_replace('.', ',', htmlspecialchars($v));
+		}
+		else {
+			$v = $field->getStringValue($v);
+			$out = nl2br(htmlspecialchars((string) $v));
+		}
+
+		if (!empty($params['link_name_id']) && ($name === 'identity' || ($field && $field->isName() && substr($out, 0, 2) !== '<a'))) {
+			$out = sprintf('<a href="%s">%s</a>', Utils::getLocalURL('!users/details.php?id=' . (int)$params['link_name_id']), $out);
+		}
+
+		return $out;
+	}
 }

@@ -116,6 +116,7 @@ class CommonModifiers
 		'ucfirst',
 		'lcfirst',
 		'abs',
+		'format_phone_number',
 	];
 
 	static public function protect_contact(?string $contact, ?string $type = null): string
@@ -392,5 +393,24 @@ class CommonModifiers
 		}
 
 		return abs($in);
+	}
+
+	protected function format_phone_number($n)
+	{
+		if (empty($n)) {
+			return '';
+		}
+
+		$country = Config::getInstance()->get('country');
+
+		if ($country !== 'FR') {
+			return $n;
+		}
+
+		if ($n[0] === '0' && strlen($n) === 10) {
+			$n = preg_replace('!(\d{2})!', '\\1 ', $n);
+		}
+
+		return $n;
 	}
 }
