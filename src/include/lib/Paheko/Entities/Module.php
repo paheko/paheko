@@ -97,7 +97,7 @@ class Module extends Entity
 
 		if (isset($source['restrict'])) {
 			$this->set('restrict_section', strtok($source['restrict'], '_') ?: null);
-			$this->set('restrict_level', (int)strtok(false) ?: null);
+			$this->set('restrict_level', (int)strtok('') ?: null);
 		}
 
 		parent::importForm($source);
