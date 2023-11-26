@@ -187,6 +187,7 @@ class API
 	{
 		$fn = strtok($uri, '/');
 		$fn2 = strtok('/');
+		strtok('');
 
 		// CSV import
 		if ($fn == 'import') {
@@ -347,7 +348,7 @@ class API
 	{
 		$fn = strtok($uri, '/');
 		$p1 = strtok('/');
-		$p2 = strtok(false);
+		$p2 = strtok('');
 
 		if ($fn == 'transaction') {
 			if (!$p1) {
@@ -509,6 +510,7 @@ class API
 	{
 		$fn = strtok($uri, '/');
 		$fn2 = strtok('/');
+		strtok('');
 
 		// CSV import
 		if ($fn === 'subscriptions' && $fn2 === 'import') {
@@ -577,6 +579,7 @@ class API
 	public function errors(string $uri)
 	{
 		$fn = strtok($uri, '/');
+		strtok('');
 
 		if (!ini_get('error_log')) {
 			throw new APIException('The error log is disabled', 404);

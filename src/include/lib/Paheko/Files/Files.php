@@ -575,7 +575,9 @@ class Files
 	static public function getContextRef(string $path): ?string
 	{
 		$context = strtok($path, '/');
-		return strtok('/') ?: null;
+		$ref = strtok('/');
+		strtok('');
+		return $ref ?: null;
 	}
 
 	static public function getBreadcrumbs(string $path): array

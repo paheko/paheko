@@ -227,7 +227,9 @@ class File extends Entity
 
 	public function context(): string
 	{
-		return strtok($this->path, '/');
+		$value = strtok($this->path, '/');
+		strtok('');
+		return $value;
 	}
 
 	public function parent(): File
@@ -360,7 +362,7 @@ class File extends Entity
 		$db->begin();
 
 		$root = strtok($this->path, '/') . '/' . strtok('/');
-		$orig_path = strtok(false);
+		$orig_path = strtok('');
 
 		$this->set('trash', null);
 
@@ -1443,7 +1445,7 @@ class File extends Entity
 		$str = ltrim($str, ':');
 
 		$hash = strtok($str, ':');
-		$expiry = strtok(false);
+		$expiry = strtok('');
 
 		if (!ctype_alnum($expiry)) {
 			return false;
