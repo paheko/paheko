@@ -81,7 +81,7 @@ class CommonModifiers
 			if ($nullable && (null === $value || '' === $value)) {
 				$value = null;
 			}
-			else {
+			elseif ($param !== 'mixed') {
 				settype($value, $param);
 			}
 		}
