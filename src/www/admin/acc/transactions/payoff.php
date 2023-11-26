@@ -18,13 +18,15 @@ if (!CURRENT_YEAR_ID) {
 	Utils::redirect(ADMIN_URL . 'acc/years/?msg=OPEN');
 }
 
-$transaction = new Transaction;
-// Quick pay-off for debts and credits, directly from a debt/credit details page
-$payoff_for = $transaction->payOffFrom((int) qg('for'));
+$original = Transactions::get((int) qg('for'));
 
-if (!$payoff_for) {
+if (!$original) {
 	throw new UserException('Écriture inconnue');
 }
+
+$transaction = new Transaction;
+// Quick pay-off for debts and credits, directly from a debt/credit details page
+$payoff_for = $transaction->payOffFrom($original);
 
 $amount = $payoff_for->amount;
 
@@ -71,6 +73,7 @@ $tpl->assign(compact('transaction', 'payoff_for', 'amount', 'id_project'));
 $tpl->assign('payoff_targets', implode(':', [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]));
 
 $tpl->assign('chart_id', $chart->id());
+$tpl->assign('linked_users', $original->listLinkedUsersAssoc());
 
 $tpl->assign('projects', Projects::listAssoc());
 $tpl->display('acc/transactions/payoff.tpl');

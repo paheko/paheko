@@ -1338,14 +1338,9 @@ class Transaction extends Entity
 		];
 	}
 
-	public function payOffFrom(int $id): ?\stdClass
+	public function payOffFrom(Transaction $transaction): ?\stdClass
 	{
-		$this->_related = EntityManager::findOneById(self::class, $id);
-
-		if (!$this->_related) {
-			return null;
-		}
-
+		$this->_related = $transaction;
 		$this->id_related = $this->_related->id();
 		$this->label = ($this->_related->type == Transaction::TYPE_DEBT ? 'Règlement de dette : ' : 'Règlement de créance : ') . $this->_related->label;
 		$this->type = self::TYPE_ADVANCED;
