@@ -336,8 +336,8 @@ class Modifiers
 
 		$callback = null;
 
-		if (in_array($modifier, CommonModifiers::PHP_MODIFIERS_LIST)) {
-			$callback = $modifier;
+		if (array_key_exists($modifier, CommonModifiers::PHP_MODIFIERS_LIST)) {
+			$callback = [CommonModifiers::class, $modifier];
 		}
 		elseif (in_array($modifier, CommonModifiers::MODIFIERS_LIST)) {
 			$callback = [CommonModifiers::class, $modifier];
