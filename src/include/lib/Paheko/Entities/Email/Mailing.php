@@ -263,20 +263,6 @@ class Mailing extends Entity
 		return $value;
 	}
 
-/*
-	public function populateFromCSV(string $list): void
-	{
-		$list = explode("\n", $list);
-		$emails = [];
-
-		foreach ($list as $line) {
-			$line = trim($line);
-
-			$address = strtok(';')
-		}
-	}
-*/
-
 	public function getFrom(): string
 	{
 		$config = Config::getInstance();

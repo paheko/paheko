@@ -588,15 +588,14 @@ class Session extends \KD2\UserSession
 		}
 
 		$context = strtok($path, '/');
+		$b = strtok('/');
+		$c = strtok('/');
+		strtok('');
 
 		// Check permissions for plugins and modules files
 		if ($context === File::CONTEXT_EXTENSIONS) {
 			return $this->checkExtensionFilePermissions($path, $permission);
 		}
-
-		$b = strtok('/');
-		$c = strtok('/');
-		strtok('');
 
 		static $default = [
 			'mkdir'  => false,

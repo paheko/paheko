@@ -436,6 +436,7 @@ class UserTemplate extends \KD2\Brindille
 		echo $header;
 
 		$name = strtok($this->_tpl_path, '/');
+		strtok('');
 
 		$path = $this->file->name ?? $this->path;
 		$location = sprintf('Dans le code du module "%s"', $name);
