@@ -395,7 +395,7 @@ class CommonModifiers
 		return abs($in);
 	}
 
-	protected function format_phone_number($n)
+	static public function format_phone_number($n)
 	{
 		if (empty($n)) {
 			return '';
