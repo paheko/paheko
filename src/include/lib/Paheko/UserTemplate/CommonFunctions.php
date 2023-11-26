@@ -9,6 +9,7 @@ use Paheko\Template;
 use Paheko\Utils;
 use Paheko\ValidationException;
 use Paheko\Users\DynamicFields;
+use Paheko\Users\Session;
 use Paheko\Entities\Users\DynamicField;
 use Paheko\Entities\Users\User;
 
