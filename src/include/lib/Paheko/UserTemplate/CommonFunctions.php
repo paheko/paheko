@@ -338,7 +338,7 @@ class CommonFunctions
 			}
 
 			if (isset($help)) {
-				$out .= sprintf('<dd class="help">%s</dd>', htmlspecialchars($help));
+				$out .= sprintf('<dd class="help">%s</dd>', nl2br(htmlspecialchars($help)));
 			}
 		}
 
