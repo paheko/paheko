@@ -207,7 +207,7 @@ class UserTemplate extends \KD2\Brindille
 		}
 
 		// PHP modifiers
-		foreach (CommonModifiers::PHP_MODIFIERS_LIST as $name) {
+		foreach (CommonModifiers::PHP_MODIFIERS_LIST as $name => $params) {
 			$this->registerModifier($name, [CommonModifiers::class, $name]);
 		}
 

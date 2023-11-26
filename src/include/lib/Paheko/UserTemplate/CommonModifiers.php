@@ -12,29 +12,35 @@ use Paheko\Web\Render\Markdown;
  */
 class CommonModifiers
 {
+	/**
+	 * List of accepted PHP functions as modifiers
+	 *
+	 * Key is name of function, value is list of accepted parameters
+	 * Each parameter is a PHP type, eventually prefixed with '?' if nullable,
+	 * eventually suffixed with '=' if parameter is optional.
+	 */
 	const PHP_MODIFIERS_LIST = [
-		'strtotime',
-		'htmlentities',
-		'htmlspecialchars',
-		'trim',
-		'ltrim',
-		'rtrim',
-		'md5',
-		'sha1',
-		'nl2br',
-		'strlen',
-		'strpos',
-		'strrpos',
-		'wordwrap',
-		'strip_tags',
-		'strlen',
-		'boolval',
-		'intval',
-		'floatval',
-		'strval',
-		'substr',
-		'http_build_query',
-		'str_getcsv',
+		'strtotime' => ['string', '?int='],
+		'htmlentities' => ['string', 'int=', '?string=', 'bool='],
+		'htmlspecialchars' => ['string', 'int=', '?string=', 'bool='],
+		'trim' => ['string', 'string='],
+		'ltrim' => ['string', 'string='],
+		'rtrim' => ['string', 'string='],
+		'md5' => ['string', 'bool='],
+		'sha1' => ['string', 'bool='],
+		'nl2br' => ['string', 'bool='],
+		'strlen' => ['string'],
+		'strpos' => ['string', 'string', 'int='],
+		'strrpos' => ['string', 'string', 'int='],
+		'wordwrap' => ['string', 'int=', 'string=', 'bool='],
+		'strip_tags' => ['string', '?array='],
+		'boolval' => ['mixed'],
+		'intval' => ['mixed'],
+		'floatval' => ['mixed'],
+		'strval' => ['mixed'],
+		'substr' => ['string', 'int', '?int='],
+		'http_build_query' => ['array', 'string=', '?string=', 'int='],
+		'str_getcsv' => ['string', 'string=', 'string=', 'string='],
 	];
 
 	/**
@@ -42,21 +48,45 @@ class CommonModifiers
 	 */
 	static public function __callStatic(string $name, array $arguments)
 	{
-		if (!in_array($name, self::PHP_MODIFIERS_LIST)) {
-			throw new \Exception('Invalid method: ' . $name);
+		if (!array_key_exists($name, self::PHP_MODIFIERS_LIST)) {
+			throw new \LogicException('Invalid method: ' . $name);
 		}
 
-		// That change sucks PHP :(
-		// https://php.watch/versions/8.1/internal-func-non-nullable-null-deprecation
-		if (PHP_VERSION_ID >= 80100) {
-			foreach ($arguments as &$arg) {
-				if (null === $arg) {
-					$arg = '';
-				}
+		// Verify arguments
+		foreach (self::PHP_MODIFIERS_LIST[$name] as $i => $param) {
+			$nullable = false;
+			$optional = false;
+
+			if (substr($param, -1) === '=') {
+				$optional = true;
+				$param = substr($param, 0, -1);
 			}
 
-			unset($arg);
+			if (substr($param, 0, 1) === '?') {
+				$nullable = true;
+				$param = substr($param, 1);
+			}
+
+			if (!array_key_exists($i, $arguments)) {
+				// Stop at first optional and not provided argument
+				if ($optional) {
+					break;
+				}
+
+				throw new \BadMethodCallException(sprintf('Missing parameter %d of type %s', $i+1, $param));
+			}
+
+			$value =& $arguments[$i];
+
+			if ($nullable && (null === $value || '' === $value)) {
+				$value = null;
+			}
+			else {
+				settype($value, $param);
+			}
 		}
+
+		unset($value, $i, $param);
 
 		return call_user_func_array($name, $arguments);
 	}

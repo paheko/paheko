@@ -197,7 +197,7 @@ class Template extends Smartyer
 			return preg_replace('!&lt;(/?mark)&gt;!', '<$1>', $str);
 		});
 
-		foreach (CommonModifiers::PHP_MODIFIERS_LIST as $name) {
+		foreach (CommonModifiers::PHP_MODIFIERS_LIST as $name => $params) {
 			$this->register_modifier($name, [CommonModifiers::class, $name]);
 		}
 
