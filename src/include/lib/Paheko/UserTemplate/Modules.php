@@ -276,7 +276,7 @@ class Modules
 		if (substr($uri, 0, 2) == 'm/') {
 			$path = substr($uri, 2);
 			$name = strtok($path, '/');
-			$path = strtok(false);
+			$path = strtok('');
 			$module = self::get($name);
 
 			if (!$module) {
@@ -360,6 +360,7 @@ class Modules
 			}
 
 			$_mod = strtok(substr($name, strlen('modules/')), '/');
+			$_name = strtok('');
 
 			if (!$module_name) {
 				if (!$_mod || !preg_match(Module::VALID_NAME_REGEXP, $_mod)) {
@@ -372,7 +373,6 @@ class Modules
 				throw new \InvalidArgumentException('Two different modules names found.');
 			}
 
-			$_name = strtok(false);
 			$files[$_name] = $name;
 		}
 
