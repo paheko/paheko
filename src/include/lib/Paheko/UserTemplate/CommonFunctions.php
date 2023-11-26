@@ -775,7 +775,7 @@ class CommonFunctions
 			$field = DynamicFields::get($name);
 		}
 
-		if (!($field instanceof DynamicField)) {
+		if ($field && !($field instanceof DynamicField)) {
 			throw new \LogicException('This field does not exist.');
 		}
 
