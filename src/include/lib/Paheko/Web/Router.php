@@ -152,6 +152,8 @@ class Router
 	static public function routeFile(string $uri): bool
 	{
 		$context = strtok($uri, '/');
+		strtok('');
+
 		$size = null;
 
 		if (false !== strpos($uri, 'px.') && preg_match('/\.([\da-z-]+px)\.(?:webp|svg)$/', $uri, $match)) {

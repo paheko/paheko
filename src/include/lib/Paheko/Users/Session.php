@@ -532,7 +532,7 @@ class Session extends \KD2\UserSession
 		$context = strtok($path, '/');
 		$type = strtok('/');
 		$name = strtok('/');
-		$file_path = strtok(false);
+		$file_path = strtok('');
 
 		if (empty($name) || empty($type) || ($type !== 'm' && $type !== 'p') || empty($file_path)) {
 			return false;
@@ -596,6 +596,7 @@ class Session extends \KD2\UserSession
 
 		$b = strtok('/');
 		$c = strtok('/');
+		strtok('');
 
 		static $default = [
 			'mkdir'  => false,
