@@ -8,10 +8,10 @@
 			<dt>{$csv->getColumnLabel($key)}</dt>
 			<dd>
 				{if $user->exists() && $user->isModified() && ($old_value = $user->getModifiedProperty($key))}
-					<del>{user_field name=$name value=$old_value}</del><br />
-					<ins>{user_field name=$name value=$value}</ins>
+					<del>{user_field name=$key value=$old_value}</del><br />
+					<ins>{user_field name=$key value=$value}</ins>
 				{else}
-					{user_field key=$key value=$value}
+					{user_field name=$key value=$value}
 				{/if}
 			</dd>
 		{/foreach}
