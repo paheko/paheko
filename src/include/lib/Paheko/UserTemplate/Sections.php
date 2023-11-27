@@ -360,6 +360,9 @@ class Sections
 		// Try to create an index if required
 		self::_createModuleIndexes($table, $params['where']);
 
+		$assign = $params['assign'] ?? null;
+		unset($params['assign']);
+
 		$query = self::sql($params, $tpl, $line);
 
 		foreach ($query as $row) {
@@ -372,8 +375,8 @@ class Sections
 				}
 			}
 
-			if (isset($params['assign'])) {
-				$tpl::__assign(['var' => $params['assign'], 'value' => $row], $tpl, $line);
+			if (isset($assign)) {
+				$tpl::__assign(['var' => $assign, 'value' => $row], $tpl, $line);
 			}
 
 			yield $row;
