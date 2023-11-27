@@ -15,7 +15,7 @@ use Paheko\Entities\Users\User;
 
 use KD2\Form;
 
-use const Paheko\{ADMIN_URL, CALC_CONVERT_COMMAND};
+use const Paheko\{ADMIN_URL, BASE_URL, CALC_CONVERT_COMMAND};
 
 /**
  * Common functions used by Template (Smartyer) and UserTemplate
