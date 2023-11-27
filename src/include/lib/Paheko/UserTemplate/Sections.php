@@ -904,7 +904,6 @@ class Sections
 			return null;
 		}
 
-
 		if (empty($params['level']) && empty($params['section'])) {
 			yield [];
 			return null;
@@ -917,11 +916,15 @@ class Sections
 			'admin' => $session::ACCESS_ADMIN,
 		];
 
-		if (empty($params['level']) || !isset($convert[$params['level']])) {
+		if (empty($params['level']) || !array_key_exists($params['level'], $convert)) {
 			throw new Brindille_Exception(sprintf("Ligne %d: 'restrict' niveau d'accès inconnu : %s", $line, $params['level'] ?? ''));
 		}
 
-		$ok = $session->canAccess($params['section'] ?? '', $convert[$params['level']]);
+		if (empty($params['section']) || !in_array($params['section'], $session::SECTIONS)) {
+			throw new Brindille_Exception(sprintf("Ligne %d: 'restrict' section d'accès inconnu : %s", $line, $params['section'] ?? ''));
+		}
+
+		$ok = $session->canAccess($params['section'], $convert[$params['level']]);
 
 		if ($ok) {
 			yield [];

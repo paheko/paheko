@@ -512,7 +512,11 @@ class Session extends \KD2\UserSession
 			$this->_permissions = $this->user()->category()->getPermissions();
 		}
 
-		$perm = $this->_permissions[$section];
+		$perm = $this->_permissions[$section] ?? null;
+
+		if (null === $perm) {
+			throw new \InvalidArgumentException('Unknown section: ' . $section);
+		}
 
 		return ($perm >= $permission);
 	}
