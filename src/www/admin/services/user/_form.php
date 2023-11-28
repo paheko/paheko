@@ -40,6 +40,8 @@ $tpl->assign([
 ]);
 
 $tpl->assign(compact('form_url', 'today', 'grouped_services', 'current_only', 'has_past_services',
-	'create', 'copy_service', 'copy_service_only_paid', 'users'));
+	'create', 'copy_service', 'copy_service_only_paid'));
+
+$tpl->assign_by_ref('users', $users);
 
 $tpl->assign('projects', Projects::listAssoc());

@@ -202,7 +202,7 @@ class Service_User extends Entity
 		}
 	}
 
-	static public function createFromForm(array $users, int $creator_id, bool $from_copy = false, ?array $source = null): self
+	static public function createFromForm(array &$users, int $creator_id, bool $from_copy = false, ?array $source = null): self
 	{
 		if (null === $source) {
 			$source = $_POST;
@@ -214,6 +214,9 @@ class Service_User extends Entity
 		if (!count($users)) {
 			throw new ValidationException('Aucun membre n\'a été sélectionné.');
 		}
+
+		$multiple_users = count($users) > 1;
+		$errors = [];
 
 		foreach ($users as $id => $name) {
 			$su = new self;
@@ -232,7 +235,14 @@ class Service_User extends Entity
 					continue;
 				}
 				else {
-					throw new ValidationException(sprintf('%s : Cette activité a déjà été enregistrée pour ce membre et cette date', $name));
+					$errors[] = $name;
+
+					if (!$multiple_users) {
+						throw new ValidationException(sprintf('%s : Cette activité a déjà été enregistrée pour ce membre et cette date', $name));
+					}
+
+					unset($users[$id]);
+					continue;
 				}
 			}
 
@@ -253,6 +263,12 @@ class Service_User extends Entity
 					}
 				}
 			}
+		}
+
+		if (count($errors)) {
+			$db->rollback();
+
+			throw new ValidationException(sprintf("Les membres suivants ne pourront pas être inscrits car ils sont déjà inscrits à cette activité et à la date indiquée :\n%s\n\nValidez à nouveau le formulaire pour confirmer les inscriptions des autres membres.", implode(', ', $errors)));
 		}
 
 		$db->commit();
