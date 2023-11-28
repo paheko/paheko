@@ -700,12 +700,12 @@
 					this.form.target = '';
 				}
 
-				this.form.dispatchEvent(new Event('submit'));
-
 				if (this.form.target === '_dialog') {
 					g.openFormInDialog(this.form);
 				}
 				else {
+					// Not sure if this is required?
+					this.form.dispatchEvent(new Event('submit'));
 					this.form.submit();
 				}
 
