@@ -62,6 +62,10 @@ else {
 	throw new UserException('Aucun membre n\'a été sélectionné');
 }
 
+if (null !== $users) {
+	natcasesort($users);
+}
+
 $form_url = '?';
 $csrf_key = 'service_save';
 $create = true;
