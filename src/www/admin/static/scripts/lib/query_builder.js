@@ -83,7 +83,7 @@
 
 	qb.prototype.init = function (targetElement) {
 		this.parent = targetElement;
-		var options = {'': '---'};
+		var options = {};
 		for (column in this.columns)
 		{
 			options[column] = this.columns[column].label;
@@ -235,7 +235,7 @@
 
 	qb.prototype.addOperator = function (targetRow, column) {
 		var operators = this.types_operators[column.type];
-		var options = {'': '---'};
+		var options = {};
 
 		if (column.null)
 		{
