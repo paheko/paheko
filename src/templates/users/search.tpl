@@ -7,13 +7,13 @@
 {include file="common/search/advanced.tpl"}
 
 {if $list !== null}
-	{$list->getHTMLPagination(true)|raw}
-
 	{if $list->count() > 0}
 	<p class="actions">{exportmenu form=true name="_dl_export" class="menu-btn-right"}</p>
 	{/if}
 
 	<p class="help">{$list->count()} membres trouvés pour cette recherche.</p>
+
+	{$list->getHTMLPagination(true)|raw}
 
 	{include file="common/dynamic_list_head.tpl" check=$is_admin use_buttons=true}
 
@@ -40,6 +40,8 @@
 		{include file="users/_list_actions.tpl" colspan=$list->countHeaderColumns()+1}
 	{/if}
 	</table>
+
+	{$list->getHTMLPagination(true)|raw}
 
 	</form>
 
