@@ -511,6 +511,13 @@
 			i.onclick = () => {
 				i.setCustomValidity('');
 				g.current_list_input = i.parentNode;
+				var max = i.getAttribute('data-max');
+
+				if (max && max <= i.parentNode.querySelectorAll('span').length) {
+					alert('Il n\'est pas possible de faire plus de ' + max + ' choix.');
+					return false;
+				}
+
 				let url = i.value + (i.value.indexOf('?') > 0 ? '&' : '?') + '_dialog';
 				g.openFrameDialog(url);
 				return false;

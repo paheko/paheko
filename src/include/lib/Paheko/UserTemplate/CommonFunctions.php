@@ -280,13 +280,14 @@ class CommonFunctions
 			}
 
 			$button = self::button([
-				'shape' => $multiple ? 'plus' : 'menu',
-				'label' => $multiple ? 'Ajouter' : 'Sélectionner',
-				'required' => $attributes['required'] ?? null,
-				'value' => Utils::getLocalURL($attributes['target']),
-				'data-multiple' => $multiple ? '1' : '0',
+				'shape'           => $multiple ? 'plus' : 'menu',
+				'label'           => $multiple ? 'Ajouter' : 'Sélectionner',
+				'required'        => $attributes['required'] ?? null,
+				'value'           => Utils::getLocalURL($attributes['target']),
+				'data-multiple'   => $multiple ? '1' : '0',
 				'data-can-delete' => (int) $can_delete,
-				'data-name' => $name,
+				'data-name'       => $name,
+				'data-max'        => $attributes['max'] ?? 0,
 			]);
 
 			$input = sprintf('<span id="%s_container" class="input-list">%s%s</span>', htmlspecialchars($attributes['id']), $button, $values);
