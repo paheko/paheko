@@ -32,7 +32,13 @@
 					{/if}
 			{else}
 				<td class="{if $column.header_icon} icon-header{/if}">
-					<span>{$column.label}</span>
+					<span>
+					{if $column.header_icon}
+						{icon shape=$column.header_icon title=$column.label}
+					{else}
+						{$column.label}
+					{/if}
+					</span>
 				</td>
 			{/if}
 			</td>
