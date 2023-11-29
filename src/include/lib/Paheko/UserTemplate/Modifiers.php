@@ -312,6 +312,15 @@ class Modifiers
 					throw new Brindille_Exception('Invalid comma outside of a function, on position ' . $token->offset);
 				}
 			}
+			elseif ($token->type === 'number') {
+				// Add spaces around numbers, so that 0--1 is treated as 0 - -1 = 0 + 1
+				$token->value = ' ' . $token->value . ' ';
+			}
+			elseif ($token->type === 'sign') {
+				if ($tokens[$i-1]->type === 'sign') {
+					throw new Brindille_Exception('Invalid sign following a sign, on position ' . $token->offset);
+				}
+			}
 
 			$expression .= $token->value;
 		}
