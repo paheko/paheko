@@ -22,6 +22,8 @@ use Paheko\Accounting\Projects;
 use Paheko\Accounting\Years;
 use Paheko\ValidationException;
 
+use Paheko\UserTemplate\CommonModifiers;
+
 class Transaction extends Entity
 {
 	use TransactionUsersTrait;
@@ -143,7 +145,7 @@ class Transaction extends Entity
 		return current($types);
 	}
 
-	public function getLinesWithAccounts(bool $as_array = false): array
+	public function getLinesWithAccounts(bool $as_array = false, bool $amount_as_int = true): array
 	{
 		$db = EntityManager::getInstance(Line::class)->DB();
 
@@ -186,6 +188,11 @@ class Transaction extends Entity
 
 			if (!$as_array) {
 				$l = (object) $l;
+			}
+
+			if (!$amount_as_int) {
+				$l['debit'] = CommonModifiers::money_raw($l['debit']);
+				$l['credit'] = CommonModifiers::money_raw($l['credit']);
 			}
 
 			$lines_with_accounts[] = $l;
@@ -972,10 +979,10 @@ class Transaction extends Entity
 
 				foreach ($this->getLines() as $line) {
 					if ($line->debit != 0) {
-						$line->debit = $amount;
+						$line->set('debit', $amount);
 					}
 					else {
-						$line->credit = $amount;
+						$line->set('credit', $amount);
 					}
 				}
 			}
@@ -994,7 +1001,7 @@ class Transaction extends Entity
 				}
 			}
 
-			$source['lines'] = $this->getLinesWithAccounts(true);
+			$source['lines'] = $this->getLinesWithAccounts(true, false);
 		}
 
 		$this->importFromNewForm($source);

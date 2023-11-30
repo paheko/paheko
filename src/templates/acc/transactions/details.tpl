@@ -124,12 +124,36 @@
 
 		<dt>Écritures liées</dt>
 		{if count($linked_transactions)}
+			<?php $amount = 0; ?>
 			<dd>
-				<ul class="flat">
-				{foreach from=$linked_transactions item="linked"}
-					<li><a href="?id={$linked.id}" class="num">#{$linked.id}</a> — {$linked.label} — {$linked.date|date_short}</li>
-				{/foreach}
-				</ul>
+				<table class="list auto">
+					<tbody>
+					{foreach from=$linked_transactions item="linked"}
+						<?php $amount += $linked->sum(); ?>
+						<tr>
+							<td class="num"><a href="?id={$linked.id}" class="num">#{$linked.id}</a></td>
+							<td>{$linked.label}</td>
+							<td>{$linked.date|date_short}</td>
+							<td class="money">{$linked->sum()|money_currency|raw}</td>
+						</tr>
+					{/foreach}
+					</tbody>
+					{if ($transaction.status & $transaction::STATUS_WAITING || $transaction.status & $transaction::STATUS_PAID) || count($linked_transactions) > 1}
+					<tfoot>
+						<tr>
+							<td colspan="3">Total</td>
+							<td class="money">{$amount|money_currency|raw}</td>
+						</tr>
+						{if $transaction.status & $transaction::STATUS_WAITING || $transaction.status & $transaction::STATUS_PAID}
+							<?php $left = max(0, $transaction->sum() - $amount); ?>
+							<tr>
+								<td colspan="3"><em>Reste à régler</em></td>
+								<td class="money">{$left|money_currency:false|raw}</td>
+							</tr>
+						{/if}
+					</tfoot>
+					{/if}
+				</table>
 			</dd>
 		{else}
 			<dd>—</dd>
