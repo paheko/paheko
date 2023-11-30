@@ -57,26 +57,10 @@ if (qg('copy')) {
 	$tpl->assign('duplicate_from', $old->id());
 }
 elseif (qg('payoff')) {
-	$sources = [];
 	$list = explode(',', qg('payoff'));
 
-	foreach ($list as $id) {
-		$id = (int) $id;
-		$t = Transactions::get($id);
-
-		if (!$t) {
-			throw new UserException('Écriture inconnue : ' . $id);
-		}
-
-		if ($t->isPaid()) {
-			continue;
-		}
-
-		$sources[] = $t;
-	}
-
 	// Quick pay-off for debts and credits, directly from a debt/credit details page
-	$payoff = Transactions::createPayoffFrom($sources);
+	$payoff = Transactions::createPayoffFrom($list);
 	$transaction = $payoff->transaction;
 	$linked_users = $payoff->linked_users;
 	$linked_transactions = $payoff->linked_transactions;

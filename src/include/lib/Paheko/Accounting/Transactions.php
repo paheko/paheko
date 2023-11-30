@@ -314,7 +314,18 @@ class Transactions
 
 		$labels = [];
 
-		foreach ($transactions as $t) {
+		foreach ($transactions as $id) {
+			$id = (int) $id;
+			$t = Transactions::get($id);
+
+			if (!$t) {
+				throw new UserException('Écriture inconnue : ' . $id);
+			}
+
+			if (!$t->hasStatus(Transaction::STATUS_WAITING)) {
+				continue;
+			}
+
 			$out->transactions[$t->id()] = $t;
 
 			if ($out->multiple === null) {
@@ -359,6 +370,10 @@ class Transactions
 			}
 
 			$new->addLine($line);
+		}
+
+		if (!count($out->transactions)) {
+			throw new UserException('Aucune des écritures sélectionnées n\'est en attente de paiement.');
 		}
 
 		$line = new Line;
