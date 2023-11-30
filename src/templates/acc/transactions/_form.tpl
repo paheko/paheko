@@ -70,7 +70,7 @@ $is_quick = count(array_intersect_key($_GET, array_flip(['a', 'l', 'd', 't', 'ac
 			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30 source=$transaction}
 		</dl>
 		<dl data-types="t{$transaction::TYPE_ADVANCED} t{$transaction::TYPE_DEBT} t{$transaction::TYPE_CREDIT}">
-			{input type="number" name="id_related" label="Lier à l'écriture numéro" source=$transaction help="Indiquer ici un numéro d'écriture pour faire le lien par exemple avec une dette"}
+			{input type="list" name="linked" label="Écritures liées" default=$linked_transactions target="!acc/transactions/selector.php" multiple=true}
 		</dl>
 		<dl data-types="all-but-advanced">
 			{if !empty($projects)}

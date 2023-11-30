@@ -31,15 +31,7 @@ $tpl->assign('chart', $chart);
 $form->runIf('save', function() use ($transaction, $session) {
 	$transaction->importFromNewForm();
 	$transaction->save();
-
-	// Link members
-	if (null !== f('users') && is_array(f('users'))) {
-		$transaction->updateLinkedUsers(array_keys(f('users')));
-	}
-	else {
-		// Remove all
-		$transaction->deleteLinkedUsers();
-	}
+	$transaction->saveLinks();
 }, $csrf_key, '!acc/transactions/details.php?id=' . $transaction->id());
 
 $types_accounts = [];
@@ -64,5 +56,6 @@ $tpl->assign(compact('csrf_key', 'transaction', 'lines', 'amount', 'has_reconcil
 $tpl->assign('chart_id', $chart->id());
 $tpl->assign('projects', Projects::listAssoc());
 $tpl->assign('linked_users', $transaction->listLinkedUsersAssoc());
+$tpl->assign('linked_transactions', $transaction->listLinkedTransactionsAssoc());
 
 $tpl->display('acc/transactions/edit.tpl');

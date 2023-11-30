@@ -12,7 +12,6 @@ use Paheko\Form;
 use Paheko\Utils;
 use Paheko\UserException;
 
-use Paheko\Users\DynamicFields;
 use Paheko\Users\Users;
 
 use Paheko\Files\Files;
@@ -25,6 +24,9 @@ use Paheko\ValidationException;
 
 class Transaction extends Entity
 {
+	use TransactionUsersTrait;
+	use TransactionLinksTrait;
+
 	const NAME = 'Écriture';
 	const PRIVATE_URL = '!acc/transactions/details.php?id=%d';
 
@@ -90,18 +92,12 @@ class Transaction extends Entity
 
 	protected int $id_year;
 	protected ?int $id_creator = null;
-	protected ?int $id_related = null;
 
 	protected $_lines;
 	protected $_old_lines = [];
 
 	protected $_accounts = [];
 	protected $_default_selector = [];
-
-	/**
-	 * @var Transaction
-	 */
-	protected $_related;
 
 	static public function getTypeFromAccountType(int $account_type)
 	{
@@ -365,11 +361,6 @@ class Transaction extends Entity
 		}
 
 		return $id_project;
-	}
-
-	public function related(): ?Transaction
-	{
-		return $this->_related;
 	}
 
 	/**
@@ -739,9 +730,6 @@ class Transaction extends Entity
 
 		// Foreign keys constraints will check for validity of id_creator and id_year
 
-		$this->assert(!$this->id_related || $db->test('acc_transactions', 'id = ?', $this->id_related), 'L\'écriture liée indiquée n\'existe pas');
-		$this->assert(!$this->id_related || !$this->exists() || $this->id_related != $this->id, 'Il n\'est pas possible de lier une écriture à elle-même');
-
 		parent::selfCheck();
 	}
 
@@ -779,10 +767,6 @@ class Transaction extends Entity
 	public function importForm(array $source = null)
 	{
 		$source ??= $_POST;
-
-		if (isset($source['id_related']) && empty($source['id_related'])) {
-			$source['id_related'] = null;
-		}
 
 		// Transpose lines (HTML transaction forms)
 		if (!empty($source['lines']) && is_array($source['lines']) && is_string(key($source['lines']))) {
@@ -916,10 +900,6 @@ class Transaction extends Entity
 	public function importFromNewForm(?array $source = null): void
 	{
 		$source ??= $_POST;
-
-		if (!isset($source['id_related'])) {
-			unset($source['id_related']);
-		}
 
 		$type = $source['type'] ?? ($this->type ?? self::TYPE_ADVANCED);
 
@@ -1074,71 +1054,6 @@ class Transaction extends Entity
 	public function getAttachementsDirectory(): string
 	{
 		return File::CONTEXT_TRANSACTION . '/' . $this->id();
-	}
-
-	public function linkToUser(int $user_id, ?int $service_id = null)
-	{
-		$db = EntityManager::getInstance(self::class)->DB();
-
-		return $db->preparedQuery('REPLACE INTO acc_transactions_users (id_transaction, id_user, id_service_user) VALUES (?, ?, ?);',
-			$this->id(), $user_id, $service_id);
-	}
-
-	public function deleteLinkedUsers(): void
-	{
-		DB::getInstance()->delete('acc_transactions_users', 'id_transaction = ? AND id_service_user IS NULL', $this->id());
-	}
-
-	public function updateLinkedUsers(array $users): void
-	{
-		$users = array_values($users);
-
-		foreach ($users as $i => $user) {
-			if (!(is_int($user) || (is_string($user) && ctype_digit($user)))) {
-				throw new ValidationException(sprintf('Array item #%d: "%s" is not a valid user ID', $i, $user));
-			}
-		}
-
-		$db = EntityManager::getInstance(self::class)->DB();
-
-		$db->begin();
-		$this->deleteLinkedUsers();
-
-		foreach ($users as $id) {
-			$db->preparedQuery('INSERT OR IGNORE INTO acc_transactions_users (id_transaction, id_user, id_service_user) VALUES (?, ?, NULL);', $this->id(), (int)$id);
-		}
-
-		$db->commit();
-	}
-
-	public function listLinkedUsers(): array
-	{
-		$db = EntityManager::getInstance(self::class)->DB();
-		$identity_column = DynamicFields::getNameFieldsSQL('u');
-		$sql = sprintf('SELECT u.id, %s AS identity, l.id_service_user FROM users u INNER JOIN acc_transactions_users l ON l.id_user = u.id WHERE l.id_transaction = ? ORDER BY id;', $identity_column);
-		return $db->get($sql, $this->id());
-	}
-
-	public function listLinkedUsersAssoc(): array
-	{
-		$db = EntityManager::getInstance(self::class)->DB();
-		$identity_column = DynamicFields::getNameFieldsSQL('u');
-		$sql = sprintf('SELECT u.id, %s AS identity, l.id_service_user
-			FROM users u
-			INNER JOIN acc_transactions_users l ON l.id_user = u.id
-			WHERE l.id_transaction = ? AND l.id_service_user IS NULL;', $identity_column);
-		return $db->getAssoc($sql, $this->id());
-	}
-
-	public function unlinkServiceUser(int $id): void
-	{
-		$db = EntityManager::getInstance(self::class)->DB();
-		$db->delete('acc_transactions_users', 'id_transaction = ? AND id_service_user = ?', $this->id(), $id);
-	}
-
-	public function listRelatedTransactions()
-	{
-		return EntityManager::getInstance(self::class)->all('SELECT * FROM @TABLE WHERE id_related = ?;', $this->id);
 	}
 
 	public function setDefaultAccount(int $type, string $direction, int $id): void
@@ -1668,5 +1583,24 @@ class Transaction extends Entity
 		}
 
 		return compact('lines', 'id_project', 'amount', 'linked_users');
+	}
+
+	public function saveLinks(?array $source = null): void
+	{
+		$source ??= $_POST;
+
+		if (empty($source['users'])) {
+			$this->deleteLinkedUsers();
+		}
+		elseif (is_array($source['users']) && count($source['users'])) {
+			$this->updateLinkedUsers(array_keys($source['users']));
+		}
+
+		if (empty($source['linked'])) {
+			$this->deleteLinkedTransactions();
+		}
+		elseif (is_array($source['linked']) && count($source['linked'])) {
+			$this->updateLinkedTransactions(array_keys($source['linked']));
+		}
 	}
 }

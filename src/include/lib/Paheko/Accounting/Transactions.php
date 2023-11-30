@@ -269,4 +269,28 @@ class Transactions
 
 		return $list;
 	}
+
+	static public function quickSearch(string $query, ?int $id_year = null)
+	{
+		$params = [];
+		$db = DB::getInstance();
+
+		if (ctype_digit($query)) {
+			$conditions = 'id = ?';
+			$params[] = (int) $query;
+		}
+		else {
+			$query = '%' . $db->escapeLike($query, '!') . '%';
+			$conditions = 'label LIKE ? ESCAPE \'!\' COLLATE U_NOCASE OR reference LIKE ? ESCAPE \'!\' COLLATE U_NOCASE';
+			$params = [$query, $query];
+		}
+
+		if ($id_year) {
+			$conditions .= ' AND id_year = ?';
+			$params[] = $id_year;
+		}
+
+		$sql = sprintf('SELECT id, label, reference, id_year FROM acc_transactions WHERE %s ORDER BY id DESC;', $conditions);
+		return DB::getInstance()->iterate($sql, ...$params);
+	}
 }

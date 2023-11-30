@@ -30,7 +30,6 @@ $transaction = new Transaction;
 $amount = 0;
 $id_project = null;
 $linked_users = null;
-$linked_services = [];
 
 $lines = [[], []];
 
@@ -105,29 +104,11 @@ if ($id = qg('account')) {
 	}
 }
 
-$form->runIf('save', function () use ($transaction, $session, $linked_services) {
+$form->runIf('save', function () use ($transaction, $session) {
 	$transaction->importFromNewForm();
 	$transaction->id_creator = $session->getUser()->id;
 	$transaction->save();
-
-	 // Link members
-	if (null !== f('users') && is_array(f('users'))) {
-		$users = f('users');
-
-		foreach ($linked_services as $user_id => $service_id) {
-			// Maybe the user was deleted from the list manually
-			if (array_key_exists($user_id, $users)) {
-				// Link service_user relationship to transaction
-				$transaction->linkToUser($user_id, $service_id);
-			}
-
-			unset($users[$user_id]);
-		}
-
-		if (count($users)) {
-			$transaction->updateLinkedUsers(array_keys($users));
-		}
-	}
+	$transaction->saveLinks();
 
 	$session->set('acc_last_date', $transaction->date->format('Y-m-d'));
 	$session->save();

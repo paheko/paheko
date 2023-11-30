@@ -82,24 +82,6 @@
 			</dd>
 		{/if}
 
-		{if $transaction.id_related}
-			<dt>Écriture liée à</dt>
-			<dd><a class="num" href="?id={$transaction.id_related}">#{$transaction.id_related}</a>
-				{if $transaction.type == $transaction::TYPE_DEBT || $transaction.type == $transaction::TYPE_CREDIT}(en règlement de){/if}
-			</dd>
-		{/if}
-
-		{if count($related_transactions)}
-			<dt>Écritures liées</dt>
-			<dd>
-				<ul class="flat">
-				{foreach from=$related_transactions item="related"}
-					<li><a href="?id={$related.id}" class="num">#{$related.id}</a> — {$related.label} — {$related.date|date_short}</li>
-				{/foreach}
-				</ul>
-			</dd>
-		{/if}
-
 		<dt>Date</dt>
 		<dd>{$transaction.date|date:'l j F Y (d/m/Y)'}</dd>
 		<dt>Numéro pièce comptable</dt>
@@ -136,13 +118,30 @@
 			</dd>
 		{/if}
 
-		<dt>Écriture liée à</dt>
-		{if empty($related_users)}
-			<dd><em>Aucun membre n'est lié à cette écriture.</em></dd>
+		<dt>Remarques</dt>
+		<dd>{if $transaction.notes}{$transaction.notes|escape|nl2br|linkify_transactions}{else}—{/if}</dd>
+
+
+		<dt>Écritures liées</dt>
+		{if count($linked_transactions)}
+			<dd>
+				<ul class="flat">
+				{foreach from=$linked_transactions item="linked"}
+					<li><a href="?id={$linked.id}" class="num">#{$linked.id}</a> — {$linked.label} — {$linked.date|date_short}</li>
+				{/foreach}
+				</ul>
+			</dd>
+		{else}
+			<dd>—</dd>
+		{/if}
+
+		<dt>Membres liés</dt>
+		{if empty($linked_users)}
+			<dd>—</dd>
 		{else}
 		<dd>
 			<ul class="flat">
-			{foreach from=$related_users item="u"}
+			{foreach from=$linked_users item="u"}
 				<li>
 					<a href="{$admin_url}users/details.php?id={$u.id}">{$u.identity}</a>
 					{if $u.id_service_user}— en règlement d'une <a href="{$admin_url}services/user/?id={$u.id}&amp;only={$u.id_service_user}">activité</a>{/if}
@@ -152,8 +151,6 @@
 		</dd>
 		{/if}
 
-		<dt>Remarques</dt>
-		<dd>{if $transaction.notes}{$transaction.notes|escape|nl2br|linkify_transactions}{else}—{/if}</dd>
 	</dl>
 
 	<nav class="tabs">
