@@ -24,10 +24,6 @@ if (qg('plugin')) {
 else {
 	$module = Modules::get(qg('module'));
 
-	if ($module->enabled) {
-		throw new UserException('Impossible de supprimer un module activé');
-	}
-
 	if ($mode === 'data' && !$module->canDeleteData()) {
 		throw new UserException('Impossible de supprimer les données de ce module.');
 	}

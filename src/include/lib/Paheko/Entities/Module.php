@@ -347,7 +347,7 @@ class Module extends Entity
 
 	public function canDelete(): bool
 	{
-		return $this->hasLocal() && !$this->hasDist();
+		return !$this->enabled && $this->hasLocal() && !$this->hasDist();
 	}
 
 	public function canReset(): bool
