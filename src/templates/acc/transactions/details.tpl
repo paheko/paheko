@@ -28,10 +28,10 @@
 	<form method="post" action="{$self_url}">
 	{if $transaction.type == $transaction::TYPE_DEBT}
 		<h3>Dette en attente</h3>
-		{linkbutton shape="check" label="Enregistrer le règlement de cette dette" href="!acc/transactions/payoff.php?for=%d"|args:$transaction.id}
+		{linkbutton shape="check" label="Régler cette dette" href="!acc/transactions/new.php?payoff=%d"|args:$transaction.id}
 	{else}
 		<h3>Créance en attente</h3>
-		{linkbutton shape="export" label="Enregistrer le règlement de cette créance" href="!acc/transactions/payoff.php?for=%d"|args:$transaction.id}
+		{linkbutton shape="export" label="Régler cette créance" href="!acc/transactions/new.php?payoff=%d"|args:$transaction.id}
 	{/if}
 		{button type="submit" shape="check" label="Marquer manuellement comme réglée" name="mark_paid" value="1"}
 		{csrf_field key=$csrf_key}

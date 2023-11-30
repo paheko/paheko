@@ -1,3 +1,4 @@
+<?php use Paheko\Entities\Accounting\Transaction; ?>
 {include file="_head.tpl" title="Suivi : %s"|args:$types[$type] current="acc/simple"}
 
 {include file="acc/_year_select.tpl"}
@@ -60,10 +61,10 @@
 				</td>
 				{/if}
 				<td class="actions">
-					{if $line.type == Entities\Accounting\Transaction::TYPE_DEBT && ($line.status & Entities\Accounting\Transaction::STATUS_WAITING)}
-						{linkbutton shape="check" label="Régler cette dette" href="!acc/transactions/payoff.php?for=%d"|args:$line.id}
-					{elseif $line.type == Entities\Accounting\Transaction::TYPE_CREDIT && ($line.status & Entities\Accounting\Transaction::STATUS_WAITING)}
-						{linkbutton shape="export" label="Régler cette créance" href="!acc/transactions/payoff.php?for=%d"|args:$line.id}
+					{if $line.type == Transaction::TYPE_DEBT && ($line.status & Transaction::STATUS_WAITING)}
+						{linkbutton shape="check" label="Régler cette dette" href="!acc/transactions/new.php?payoff=%d"|args:$line.id}
+					{elseif $line.type == Transaction::TYPE_CREDIT && ($line.status & Transaction::STATUS_WAITING)}
+						{linkbutton shape="export" label="Régler cette créance" href="!acc/transactions/new.php?payoff=%d"|args:$line.id}
 					{/if}
 
 					{linkbutton href="!acc/transactions/details.php?id=%d"|args:$line.id label="Détails" shape="search"}
@@ -82,6 +83,11 @@
 					{csrf_field key="projects_action"}
 					<select name="action">
 						<option value="">— Choisir une action à effectuer —</option>
+						{if $type == Transaction::TYPE_DEBT}
+							<option value="payoff">Régler ces dettes</option>
+						{elseif $type == Transaction::TYPE_CREDIT}
+							<option value="payoff">Régler ces créances</option>
+						{/if}
 						<option value="change_project">Ajouter/enlever d'un projet</option>
 						<option value="delete">Supprimer les écritures</option>
 					</select>

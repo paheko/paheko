@@ -143,7 +143,7 @@ class Transaction extends Entity
 		return current($types);
 	}
 
-	public function getLinesWithAccounts(): array
+	public function getLinesWithAccounts(bool $as_array = false): array
 	{
 		$db = EntityManager::getInstance(Line::class)->DB();
 
@@ -176,13 +176,17 @@ class Transaction extends Entity
 		}
 
 		foreach ($this->getLines() as &$line) {
-			$l = (object) $line->asArray();
-			$l->account_code = $this->_accounts[$line->id_account]->code ?? null;
-			$l->account_label = $this->_accounts[$line->id_account]->label ?? null;
-			$l->account_position = $this->_accounts[$line->id_account]->position ?? null;
-			$l->project_name = $projects[$line->id_project] ?? null;
-			$l->account_selector = [$line->id_account => sprintf('%s — %s', $l->account_code, $l->account_label)];
-			$l->line =& $line;
+			$l = $line->asArray();
+			$l['account_code'] = $this->_accounts[$line->id_account]->code ?? null;
+			$l['account_label'] = $this->_accounts[$line->id_account]->label ?? null;
+			$l['account_position'] = $this->_accounts[$line->id_account]->position ?? null;
+			$l['project_name'] = $projects[$line->id_project] ?? null;
+			$l['account_selector'] = [$line->id_account => sprintf('%s — %s', $l['account_code'], $l['account_label'])];
+			$l['line'] =& $line;
+
+			if (!$as_array) {
+				$l = (object) $l;
+			}
 
 			$lines_with_accounts[] = $l;
 		}
@@ -635,6 +639,11 @@ class Transaction extends Entity
 		return $this->status & $property;
 	}
 
+	public function isPaid(): bool
+	{
+		return $this->hasStatus(self::STATUS_PAID);
+	}
+
 	public function markPaid() {
 		$this->removeStatus(self::STATUS_WAITING);
 		$this->addStatus(self::STATUS_PAID);
@@ -943,60 +952,49 @@ class Transaction extends Entity
 		$this->importFromNewForm($source);
 	}
 
-	public function importFromPayoffForm(?array $source = null): void
+	public function importFromPayoffForm(\stdClass $payoff, ?array $source = null): void
 	{
 		$source ??= $_POST;
 
-		if (empty($this->_related)) {
-			throw new \LogicException('Cannot import pay-off if no related transaction is set');
-		}
+		if ($source['type'] == 99) {
+			// Just make sure we can't trigger importFromNewForm
+			unset($source['lines']);
 
-		// Just make sure we can't trigger importFromNewForm
-		unset($source['type'], $source['lines']);
+			$id_project = isset($source['id_project']) ? intval($source['id_project']) : null;
+			$source['type'] = self::TYPE_ADVANCED;
 
-		if (empty($source['amount'])) {
-			throw new ValidationException('Montant non précisé');
-		}
+			if (!$payoff->multiple) {
+				if (empty($source['amount'])) {
+					throw new ValidationException('Montant non précisé');
+				}
 
-		if (empty($source['account']) || !is_array($source['account'])) {
-			throw new ValidationException('Aucun compte de règlement sélectionné.');
-		}
+				$amount = Utils::moneyToInteger($source['amount']);
 
-		$id_account = null;
-		// Reverse direction (compared with debt/credit transaction)
-		$d1 = ($this->_related->type == self::TYPE_CREDIT) ? 'credit' : 'debit';
-		$d2 = ($d1 == 'credit') ? 'debit' : 'credit';
-
-		foreach ($this->_related->getLines() as $line) {
-			if (($this->_related->type == self::TYPE_DEBT && $line->debit)
-				|| ($this->_related->type == self::TYPE_CREDIT && $line->credit)) {
-				// Skip the type of debt/credit, just keep the thirdparty account
-				continue;
+				foreach ($this->getLines() as $line) {
+					if ($line->debit != 0) {
+						$line->debit = $amount;
+					}
+					else {
+						$line->credit = $amount;
+					}
+				}
 			}
 
-			$id_account = $line->id_account;
-			break;
-		}
+			if (empty($source['payoff_account']) || !is_array($source['payoff_account'])) {
+				throw new ValidationException('Aucun compte de règlement sélectionné.');
+			}
 
-		if (!$id_account) {
-			throw new \LogicException('Cannot find account ID of related transaction');
-		}
+			$payoff->payment_line->set('id_account', (int)key($source['payoff_account']));
+			$payoff->payment_line->set('reference', $source['payment_reference'] ?? null);
+			$payoff->payment_line->set('id_project', $id_project);
 
-		$line = [
-			'reference' => $source['payment_reference'] ?? null,
-		];
+			if (Config::getInstance()->analytical_set_all) {
+				foreach ($this->getLines() as $line) {
+					$line->set('id_project', $id_project);
+				}
+			}
 
-		$source['lines'] = [
-			// First line is third-party account
-			$line + compact('id_account') + [$d1 => $source['amount']],
-			// Second line is payment account
-			$line + ['account_selector' => $source['account'], $d2 => $source['amount']],
-		];
-
-		$source['lines'][0]['id_project'] = $source['id_project'] ?? null;
-
-		if (Config::getInstance()->analytical_set_all) {
-			$source['lines'][1]['id_project'] = $source['lines'][0]['id_project'];
+			$source['lines'] = $this->getLinesWithAccounts(true);
 		}
 
 		$this->importFromNewForm($source);

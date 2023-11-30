@@ -18,17 +18,22 @@ if (!CURRENT_YEAR_ID) {
 	Utils::redirect(ADMIN_URL . 'acc/years/?msg=OPEN');
 }
 
-$original = Transactions::get((int) qg('for'));
+$sources = [];
 
-if (!$original) {
-	throw new UserException('Écriture inconnue');
+foreach ((array)qg('for') as $id) {
+	$id = (int) $id;
+	$t = Transactions::get($id);
+
+	if (!$t) {
+		throw new UserException('Écriture inconnue : ' . $id);
+	}
 }
 
-$transaction = new Transaction;
 // Quick pay-off for debts and credits, directly from a debt/credit details page
-$payoff_for = $transaction->payOffFrom($original);
+$payoff = Transactions::createPayoffFrom($sources);
+$transaction = $payoff->transaction;
 
-$amount = $payoff_for->amount;
+$amount = $payoff->amount;
 
 $chart = $current_year->chart();
 $accounts = $chart->accounts();
