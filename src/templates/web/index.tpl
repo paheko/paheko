@@ -16,19 +16,20 @@
 	</aside>
 </nav>
 
-{if !$page}
+{if !$page && $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
 	<nav class="web config">
-		{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
-			{if $url = $module->config_url()}
-				{linkbutton shape="settings" href=$url label="Configurer le thème" target="_dialog"}
-			{/if}
-			{linkbutton shape="code" href="!config/ext/edit.php?module=%s"|args:$module.name label="Code du site"}
-		{/if}
-		{if !$page && $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
+		{linkmenu shape="menu" label="Administration"}
+			{linkbutton shape="menu" label="Liste de toutes les pages du site" href="all.php"}
 			{linkbutton shape="check" href="?check=internal" label="Vérifier les liens internes"}
-		{/if}
+			{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
+				{if $url = $module->config_url()}
+					{linkbutton shape="settings" href=$url label="Configurer le thème" target="_dialog"}
+				{/if}
+				{linkbutton shape="code" href="!config/ext/edit.php?module=%s"|args:$module.name label="Code du site"}
+			{/if}
+		{/linkmenu}
 	</nav>
-{else}
+{elseif $page}
 	<nav class="web breadcrumbs no-clear">
 		<ul>
 			<li>{link href="!web/" label="Site web"}</li>
@@ -144,12 +145,6 @@
 		{include file="./_list.tpl" list=$pages}
 	{else}
 		<p class="help">Il n'y a aucune page dans cette catégorie.</p>
-	{/if}
-
-	{if !$page}
-	<p class="actions-left">
-		{linkbutton shape="menu" label="Liste de toutes les pages du site" href="all.php"}
-	</p>
 	{/if}
 {/if}
 
