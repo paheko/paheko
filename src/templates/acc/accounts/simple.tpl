@@ -27,6 +27,7 @@
 	</p>
 {else}
 	<form method="post" action="{$admin_url}acc/transactions/actions.php">
+	{assign var="has_debt_or_credit" value=false}
 
 	{include file="common/dynamic_list_head.tpl" check=$can_edit}
 
@@ -62,8 +63,10 @@
 				{/if}
 				<td class="actions">
 					{if $line.type == Transaction::TYPE_DEBT && ($line.status & Transaction::STATUS_WAITING)}
+						{assign var="has_debt_or_credit" value=true}
 						{linkbutton shape="check" label="Régler cette dette" href="!acc/transactions/new.php?payoff=%d"|args:$line.id}
 					{elseif $line.type == Transaction::TYPE_CREDIT && ($line.status & Transaction::STATUS_WAITING)}
+						{assign var="has_debt_or_credit" value=true}
 						{linkbutton shape="export" label="Régler cette créance" href="!acc/transactions/new.php?payoff=%d"|args:$line.id}
 					{/if}
 
@@ -83,10 +86,12 @@
 					{csrf_field key="projects_action"}
 					<select name="action">
 						<option value="">— Choisir une action à effectuer —</option>
-						{if $type == Transaction::TYPE_DEBT}
+						{if $has_debt_or_credit}
 							<option value="payoff">Régler ces dettes</option>
 						{elseif $type == Transaction::TYPE_CREDIT}
 							<option value="payoff">Régler ces créances</option>
+						{elseif $has_debt_or_credit}
+							<option value="payoff">Régler ces dettes ou créances</option>
 						{/if}
 						<option value="change_project">Ajouter/enlever d'un projet</option>
 						<option value="delete">Supprimer les écritures</option>

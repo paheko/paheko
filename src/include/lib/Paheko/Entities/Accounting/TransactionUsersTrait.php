@@ -47,7 +47,11 @@ trait TransactionUsersTrait
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
 		$identity_column = DynamicFields::getNameFieldsSQL('u');
-		$sql = sprintf('SELECT u.id, %s AS identity, l.id_service_user FROM users u INNER JOIN acc_transactions_users l ON l.id_user = u.id WHERE l.id_transaction = ? ORDER BY id;', $identity_column);
+		$number_column = DynamicFields::getNumberFieldSQL('u');
+		$sql = sprintf('SELECT u.id, %s AS identity, %s AS number, l.id_service_user
+			FROM users u
+			INNER JOIN acc_transactions_users l ON l.id_user = u.id
+			WHERE l.id_transaction = ? ORDER BY id;', $identity_column, $number_column);
 		return $db->get($sql, $this->id());
 	}
 

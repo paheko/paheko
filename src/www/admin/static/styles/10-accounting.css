@@ -186,11 +186,14 @@ input[name=code_base] {
 }
 
 .transaction-details-container {
-    max-width: 60rem;
+    display: grid;
+    grid-template-columns: 1fr .5fr;
+    grid-gap: 1em;
+    clear: both;
 }
 
-.transaction-details-container nav {
-    text-align: center;
+.transaction-details-container aside {
+    margin-top: 2em;
 }
 
 table.statement td, table.statement th {
