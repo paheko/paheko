@@ -47,7 +47,7 @@ $sql_disabled = (!$session->canAccess($session::SECTION_CONFIG, $session::ACCESS
 		</p>
 	{/if}
 {else}
-	<legend>Rechercher</legend>
+	<legend>{if isset($legend)}{$legend}{else}Rechercher{/if}</legend>
 
 	<div class="queryBuilder" id="queryBuilder" data-groups="{$s->getGroups()|escape:'json'|escape}" data-columns="{$columns|escape:'json'|escape}"></div>
 	<p class="submit">

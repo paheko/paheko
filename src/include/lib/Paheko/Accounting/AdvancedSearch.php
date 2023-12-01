@@ -131,6 +131,20 @@ class AdvancedSearch extends A_S
 				'null'     => true,
 				'select'   => 'p.label',
 			],
+			'has_linked_transactions' => [
+				'type'   => 'boolean',
+				'label'  => 'Est liée à des écritures',
+				'null'   => false,
+				'select' => '(SELECT 1 FROM acc_transactions_links tl WHERE tl.id_transaction = t.id OR tl.id_related = t.id) IS NOT NULL',
+				'where'  => '(SELECT 1 FROM acc_transactions_links tl WHERE tl.id_transaction = t.id OR tl.id_related = t.id) IS NOT NULL %s',
+			],
+			'has_linked_users' => [
+				'type'   => 'boolean',
+				'label'  => 'Est liée à des membres',
+				'null'   => false,
+				'select' => '(SELECT 1 FROM acc_transactions_users tu WHERE tu.id_transaction = t.id) IS NOT NULL',
+				'where'  => '(SELECT 1 FROM acc_transactions_users tu WHERE tu.id_transaction = t.id) IS NOT NULL %s',
+			],
 		];
 	}
 
@@ -250,6 +264,7 @@ class AdvancedSearch extends A_S
 		return array_merge(array_keys($this->schemaTables()), [
 			'acc_charts',
 			'acc_transactions_users',
+			'acc_transactions_links',
 		]);
 	}
 

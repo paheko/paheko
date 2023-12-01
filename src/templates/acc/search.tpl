@@ -9,7 +9,7 @@
 
 <form method="post" action="{$self_url_no_qs}" id="queryBuilderForm" data-disable-progress="1">
 
-{include file="common/search/advanced.tpl"}
+{include file="common/search/advanced.tpl" legend="Rechercher des écritures…"}
 
 {if $list !== null}
 	<p class="help">{$list->count()} écritures trouvées pour cette recherche.</p>
@@ -31,6 +31,9 @@
 		<tr>
 			{if $is_admin}<td class="check">{input type="checkbox" name="selected[]" value=$row.id}</td>{/if}
 			{foreach from=$row key="key" item="value"}
+				<?php
+				$column = $columns[$key] ?? null;
+				?>
 				{if $prev_id == $row.id && !in_array($key, ['debit', 'credit', 'account_code', 'line_label', 'line_reference', 'project_code'])}
 					<td></td>
 				{elseif $key == 'id'}
@@ -46,8 +49,16 @@
 					</td>
 				{else}
 				<td>
-					{if $key == 'date'}
+					{if $key === 'date'}
 						{$value|date_short}
+					{elseif $column.type === 'boolean'}
+						{if $value === null}
+							—
+						{elseif $value}
+							Oui
+						{else}
+							Non
+						{/if}
 					{else}
 						{$value}
 					{/if}
