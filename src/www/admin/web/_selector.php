@@ -32,7 +32,7 @@ else {
 }
 
 $breadcrumbs = [null => 'Racine du site'] + $breadcrumbs;
-$categories = Web::listCategories($parent_id);
+$categories = Web::listCategories($current_cat_id);
 
 // used to avoid being able to put a category inside itself
 $id_page = (int) qg('id_page');
