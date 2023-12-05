@@ -315,12 +315,12 @@ class Module extends Entity
 
 	public function hasData(): bool
 	{
-		return DB::getInstance()->test('sqlite_master', 'type = \'table\' AND name = ?', sprintf('modules_data_%s', $this->name));
+		return DB::getInstance()->test('sqlite_master', 'type = \'table\' AND name = ?', sprintf('module_data_%s', $this->name));
 	}
 
 	public function getDataSize(): int
 	{
-		return DB::getInstance()->getTableSize(sprintf('modules_data_%s', $this->name));
+		return DB::getInstance()->getTableSize(sprintf('module_data_%s', $this->name));
 	}
 
 	public function getCodeSize(): int
@@ -460,7 +460,7 @@ class Module extends Entity
 
 	public function deleteData(): void
 	{
-		DB::getInstance()->exec(sprintf('DROP TABLE IF EXISTS modules_data_%s; UPDATE modules SET config = NULL WHERE name = \'%1$s\';', $this->name));
+		DB::getInstance()->exec(sprintf('DROP TABLE IF EXISTS module_data_%s; UPDATE modules SET config = NULL WHERE name = \'%1$s\';', $this->name));
 
 		// Delete all files
 		if ($dir = Files::get($this->storage_root())) {
