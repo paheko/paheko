@@ -110,10 +110,12 @@
 
 		{foreach from=$list->iterate() item="row"}
 			<tr>
-				{foreach from=$row item="value"}
+				{foreach from=$row key="key" item="value"}
 				<td>
 					{if null == $value}
 						<em>NULL</em>
+					{elseif $is_module && $key === 'document'}
+						<pre>{$value|format_json}</pre>
 					{else}
 						{$value}
 					{/if}

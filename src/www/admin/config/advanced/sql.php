@@ -21,6 +21,8 @@ if (qg('table') && array_key_exists(qg('table'), $tables_list)) {
 		throw new UserException('This table does not exist');
 	}
 
+	$is_module = 0 === strpos($table, 'module_data_');
+
 	$columns = [];
 
 	foreach ($all_columns as $c) {
@@ -31,7 +33,12 @@ if (qg('table') && array_key_exists(qg('table'), $tables_list)) {
 	$list->orderBy(key($columns), false);
 	$list->setTitle($table);
 	$list->loadFromQueryString();
-	$tpl->assign(compact('table', 'list'));
+
+	$tpl->register_modifier('format_json', function (string $str) {
+		return json_encode(json_decode($str, true), JSON_PRETTY_PRINT);
+	});
+
+	$tpl->assign(compact('table', 'list', 'is_module'));
 }
 elseif (qg('table_info') && array_key_exists(qg('table_info'), $tables_list)) {
 	$name = qg('table_info');
