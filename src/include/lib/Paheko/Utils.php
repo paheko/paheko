@@ -473,6 +473,23 @@ class Utils
 		return $list[$code] ?? null;
 	}
 
+	static public function getCountryCode(string $find): ?string
+	{
+		if (!strlen($find)) {
+			return null;
+		}
+
+		$list = self::getCountryList();
+
+		foreach ($list as $code => $name) {
+			if (strnatcasecmp($find, $name) === 0) {
+				return $code;
+			}
+		}
+
+		return null;
+	}
+
 	static public function transliterateToAscii($str, $charset='UTF-8')
 	{
 		// Don't process empty strings

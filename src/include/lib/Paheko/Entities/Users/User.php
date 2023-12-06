@@ -382,19 +382,23 @@ class User extends Entity
 		}
 
 		foreach (DynamicFields::getInstance()->fieldsByType('multiple') as $f) {
-			if (!isset($source[$f->name . '_present'])) {
+			if (!(isset($source[$f->name . '_present']) || isset($source[$f->name]))) {
 				continue;
 			}
 
+			if (isset($source[$f->name]) && is_string($source[$f->name])) {
+				$source[$f->name] = array_map('trim', explode(',', $source[$f->name]));
+			}
 
 			$options = isset($source[$f->name]) && is_array($source[$f->name]) ? $source[$f->name] : [];
-			$options = array_keys($options);
 
 			$v = 0;
 
-			foreach ($options as $k) {
-				$k = 0x01 << $k;
-				$v |= $k;
+			foreach ($f->options as $k => $label) {
+				if (in_array($label, $options, true)) {
+					$k = 0x01 << $k;
+					$v |= $k;
+				}
 			}
 
 			$source[$f->name] = $v ?: null;
@@ -402,11 +406,23 @@ class User extends Entity
 
 		// Handle unchecked checkbox in HTML form: no value returned
 		foreach (DynamicFields::getInstance()->fieldsByType('checkbox') as $f) {
-			if (!isset($source[$f->name . '_present'])) {
+			if (!(isset($source[$f->name . '_present']) || isset($source[$f->name]))) {
 				continue;
 			}
 
 			$source[$f->name] = !empty($source[$f->name]);
+		}
+
+		foreach (DynamicFields::getInstance()->fieldsByType('country') as $f) {
+			if (!isset($source[$f->name])) {
+				continue;
+			}
+
+			if (strlen($source[$f->name]) !== 2) {
+				$source[$f->name] = Utils::getCountryCode($source[$f->name]);
+			}
+
+			$source[$f->name] = $source[$f->name] ?: null;
 		}
 
 		return parent::importForm($source);
@@ -642,13 +658,9 @@ class User extends Entity
 
 	public function diff(): array
 	{
-		$out = $this->asDetailsArray();
+		$out = [];
 
 		foreach ($this->_modified as $key => $old) {
-			if (!array_key_exists($key, $out)) {
-				continue;
-			}
-
 			$out[$key] = [$old, $this->$key];
 		}
 
