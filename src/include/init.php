@@ -232,6 +232,7 @@ if (SMTP_SECURITY) {
 
 // Used for private files, just in case WWW_URL is not the same domain as ADMIN_URL
 define('Paheko\BASE_URL', str_replace('/admin/', '/', ADMIN_URL));
+define('Paheko\ADMIN_URI', preg_replace('!(^https?://[^/]+)!', '', ADMIN_URL));
 
 const HELP_URL = 'https://paheko.cloud/aide?from=%s';
 const HELP_PATTERN_URL = 'https://paheko.cloud/%s';
