@@ -34,10 +34,6 @@ if (qg('table') && array_key_exists(qg('table'), $tables_list)) {
 	$list->setTitle($table);
 	$list->loadFromQueryString();
 
-	$tpl->register_modifier('format_json', function (string $str) {
-		return json_encode(json_decode($str, true), JSON_PRETTY_PRINT);
-	});
-
 	$tpl->assign(compact('table', 'list', 'is_module'));
 }
 elseif (qg('table_info') && array_key_exists(qg('table_info'), $tables_list)) {
@@ -115,5 +111,9 @@ else {
 }
 
 $tpl->assign(compact('tables_list', 'query', 'list'));
+
+$tpl->register_modifier('format_json', function (string $str) {
+	return json_encode(json_decode($str, true), JSON_PRETTY_PRINT);
+});
 
 $tpl->display('config/advanced/sql.tpl');
