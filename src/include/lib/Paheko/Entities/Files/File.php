@@ -456,13 +456,13 @@ class File extends Entity
 	 * @param  string $new_name New file name
 	 * @return bool
 	 */
-	public function changeFileName(string $new_name): bool
+	public function changeFileName(string $new_name, bool $check_session = true, bool $check_exists = false): bool
 	{
 		self::validateFileName($new_name);
 
 		$v = $this->getVersionsDirectory();
 
-		$r = $this->rename(ltrim($this->parent . '/' . $new_name, '/'));
+		$r = $this->rename(ltrim($this->parent . '/' . $new_name, '/'), $check_session, $check_exists);
 
 		// Rename versions directory as well
 		if ($v && $r) {
@@ -477,7 +477,7 @@ class File extends Entity
 	 * @param  string $target New directory path
 	 * @return bool
 	 */
-	public function move(string $target, bool $check_session = true): bool
+	public function move(string $target, bool $check_session = true, bool $check_exists = false): bool
 	{
 		$v = $this->getVersionsDirectory();
 
@@ -495,7 +495,7 @@ class File extends Entity
 	 * @param  string $new_path Target path
 	 * @return bool
 	 */
-	public function rename(string $new_path, bool $check_session = true): bool
+	public function rename(string $new_path, bool $check_session = true, bool $check_exists = false): bool
 	{
 		$name = Utils::basename($new_path);
 
@@ -524,6 +524,10 @@ class File extends Entity
 
 		// Does the target already exist?
 		$exists = Files::get($new_path);
+
+		if ($exists && $check_exists) {
+			throw new UserException('Un fichier de ce nom existe déjà.');
+		}
 
 		// List sub-files and sub-directories now, before they are changed
 		$list = $is_dir ? Files::list($this->path) : [];
