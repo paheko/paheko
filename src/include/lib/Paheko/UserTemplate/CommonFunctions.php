@@ -717,6 +717,7 @@ class CommonFunctions
 		}
 		elseif ($type == 'select') {
 			$params['options'] = array_combine($field->options, $field->options);
+			$params['default_empty'] = '—';
 		}
 		elseif ($type == 'country') {
 			$params['type'] = 'select';
