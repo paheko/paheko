@@ -37,7 +37,7 @@ class CommonFunctions
 
 	static public function input(array $params)
 	{
-		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit', 'copy', 'suffix'];
+		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit', 'copy', 'suffix', 'prefix_title', 'prefix_help'];
 
 		// Extract params and keep attributes separated
 		$attributes = array_diff_key($params, array_flip($params_list));
@@ -207,18 +207,26 @@ class CommonFunctions
 			$label = preg_replace_callback('!\[icon=([\w-]+)\]!', fn ($match) => self::icon(['shape' => $match[1]]), $label);
 		}
 
-		if ($type == 'radio-btn') {
+		if ($type === 'radio-btn') {
 			if (!empty($attributes['disabled'])) {
 				$attributes['class'] = ($attributes['class'] ?? '') . ' disabled';
 			}
 
 			$radio = self::input(array_merge($params, ['type' => 'radio', 'label' => null, 'help' => null, 'disabled' => $attributes['disabled'] ?? null]));
-			$out = sprintf('<dd class="radio-btn %s">%s
+
+			$input = sprintf('<dd class="radio-btn %s">%s
 				<label for="%s"><div><h3>%s</h3>%s</div></label>
-			</dd>', $attributes['class'] ?? '', $radio, $attributes['id'], $label, isset($params['help']) ? '<p class="help">' . nl2br(htmlspecialchars($params['help'])) . '</p>' : '');
-			return $out;
+			</dd>',
+				$attributes['class'] ?? '',
+				$radio,
+				$attributes['id'],
+				$label,
+				isset($params['help']) ? '<p class="help">' . nl2br(htmlspecialchars($params['help'])) . '</p>' : ''
+			);
+
+			unset($help, $label);
 		}
-		if ($type == 'select') {
+		elseif ($type === 'select') {
 			$input = sprintf('<select %s>', $attributes_string);
 
 			if (empty($attributes['required']) || isset($attributes['default_empty'])) {
@@ -236,7 +244,7 @@ class CommonFunctions
 
 			$input .= '</select>';
 		}
-		elseif ($type == 'select_groups') {
+		elseif ($type === 'select_groups') {
 			$input = sprintf('<select %s>', $attributes_string);
 
 			if (empty($attributes['required'])) {
@@ -260,10 +268,10 @@ class CommonFunctions
 
 			$input .= '</select>';
 		}
-		elseif ($type == 'textarea') {
+		elseif ($type === 'textarea') {
 			$input = sprintf('<textarea %s>%s</textarea>', $attributes_string, htmlspecialchars((string)$current_value));
 		}
-		elseif ($type == 'list') {
+		elseif ($type === 'list') {
 			$multiple = !empty($attributes['multiple']);
 			$can_delete = $multiple || !empty($attributes['can_delete']);
 			$values = '';
@@ -292,7 +300,7 @@ class CommonFunctions
 
 			$input = sprintf('<span id="%s_container" class="input-list">%s%s</span>', htmlspecialchars($attributes['id']), $button, $values);
 		}
-		elseif ($type == 'money') {
+		elseif ($type === 'money') {
 			if (null !== $current_value && !$current_value_from_user) {
 				$current_value = Utils::money_format($current_value, ',', '');
 			}
@@ -309,8 +317,11 @@ class CommonFunctions
 			$input = sprintf('<input type="%s" %s %s />', $type, $attributes_string, $value);
 		}
 
-		if ($type == 'file') {
+		if ($type === 'file') {
 			$input .= sprintf('<input type="hidden" name="MAX_FILE_SIZE" value="%d" id="f_maxsize" />', Utils::return_bytes(Utils::getMaxUploadSize()));
+		}
+		elseif ($type === 'checkbox') {
+			$input = sprintf('<input type="hidden" name="%s" value="1" />', preg_replace('/(?=\[|$)/', '_present', $name, 1)) . $input;
 		}
 		elseif (!empty($copy)) {
 			$input .= sprintf('<input type="button" onclick="var a = $(\'#f_%s\'); a.focus(); a.select(); document.execCommand(\'copy\'); this.value = \'Copié !\'; this.focus(); return false;" onblur="this.value = \'Copier\';" value="Copier" title="Copier dans le presse-papier" />', $params['name']);
@@ -327,10 +338,26 @@ class CommonFunctions
 			return $input;
 		}
 
+		$out = '';
+
+		if (!empty($params['prefix_title'])) {
+			$out .= sprintf('<dt><label for="%s">%s</label>%s</dt>',
+				$attributes['id'],
+				htmlspecialchars($params['prefix_title']),
+				$required_label
+			);
+		}
+
+		if (!empty($params['prefix_help'])) {
+			$out .= sprintf('<dd class="help">%s</dd>',
+				htmlspecialchars($params['prefix_help'])
+			);
+		}
+
 		$label = sprintf('<label for="%s">%s</label>', $attributes['id'], $label);
 
 		if ($type == 'radio' || $type == 'checkbox') {
-			$out = sprintf('<dd>%s %s', $input, $label);
+			$out .= sprintf('<dd>%s %s', $input, $label);
 
 			if (isset($help)) {
 				$out .= sprintf(' <em class="help">(%s)</em>', htmlspecialchars($help));
@@ -339,7 +366,7 @@ class CommonFunctions
 			$out .= '</dd>';
 		}
 		else {
-			$out = sprintf('<dt>%s%s</dt><dd>%s</dd>', $label, $required_label, $input);
+			$out .= sprintf('<dt>%s%s</dt><dd>%s</dd>', $label, $required_label, $input);
 
 			if ($type == 'file' && empty($params['no_size_limit'])) {
 				$out .= sprintf('<dd class="help"><small>Taille maximale : %s</small></dd>', Utils::format_bytes(Utils::getMaxUploadSize()));
@@ -662,19 +689,8 @@ class CommonFunctions
 
 			// Forcer la valeur à être un entier (depuis PHP 7.1)
 			$value = (int)$value;
-
-			if ($field->required) {
-				$required_label =  ' <b title="Champ obligatoire">(obligatoire)</b>';
-			}
-			else {
-				$required_label =  ' <i>(facultatif)</i>';
-			}
-
-			$out  = sprintf('<dt><label for="f_%s_0">%s</label>%s<input type="hidden" name="%s_present" value="1" /></dt>', $name, htmlspecialchars($field->label), $required_label, $name);
-
-			if ($field->help ?? null) {
-				$out .= sprintf('<dd class="help">%s</dd>', htmlspecialchars($field->help));
-			}
+			$has_title = false;
+			$out = '';
 
 			foreach ($options as $k => $v)
 			{
@@ -683,10 +699,16 @@ class CommonFunctions
 				$p = [
 					'type'    => 'checkbox',
 					'label'   => $v,
-					'value'   => 1,
-					'default' => ($value & $b) ? 1 : 0,
+					'value'   => $v,
+					'default' => ($value & $b) ? $v : 0,
 					'name'    => sprintf('%s[%d]', $name, $k),
 				];
+
+				if (!$has_title) {
+					$has_title = true;
+					$p['prefix_title'] = $field->label;
+					$p['prefix_help'] = $field->help;
+				}
 
 				$out .= CommonFunctions::input($p);
 			}
@@ -704,15 +726,7 @@ class CommonFunctions
 		elseif ($type == 'checkbox') {
 			$params['value'] = 1;
 			$params['label'] = 'Oui';
-
-			if ($field->required) {
-				$required_label =  ' <b title="Champ obligatoire">(obligatoire)</b>';
-			}
-			else {
-				$required_label =  ' <i>(facultatif)</i>';
-			}
-
-			return sprintf('<dt><label for="f_%s_1">%s %s</label><input type="hidden" name="%1$s_present" value="1" /></dt>%s', $field->name, htmlspecialchars($field->label), $required_label, CommonFunctions::input($params));
+			$params['prefix_title'] = $field->label;
 		}
 		elseif ($field->system & $field::NUMBER && $context === 'admin_new') {
 			$params['default'] = DB::getInstance()->firstColumn(sprintf('SELECT MAX(%s) + 1 FROM %s;', $name, User::TABLE));
