@@ -19,7 +19,7 @@ use Paheko\Users\Session;
 
 use \KD2\HTML\Markdown;
 
-use const Paheko\{WWW_URI, ADMIN_URL, ROOT, HTTP_LOG_FILE, ENABLE_XSENDFILE};
+use const Paheko\{WWW_URI, ADMIN_URL, BASE_URL, WWW_URL, ROOT, HTTP_LOG_FILE, ENABLE_XSENDFILE};
 
 class Router
 {
@@ -66,6 +66,9 @@ class Router
 				self::log("ROUTER: <= Request body:\n%s", file_get_contents('php://input'));
 			}
 		}
+
+		$csp = sprintf('base-uri \'self\'; default-src \'self\' \'unsafe-inline\' %s %s; frame-ancestors \'self\' %1$s;', BASE_URL, WWW_URL);
+		header('Content-Security-Policy: ' . $csp, true);
 
 		// Redirect old URLs (pre-1.1)
 		if ($uri === 'feed/atom/') {

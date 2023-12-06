@@ -24,7 +24,7 @@ use Paheko\UserTemplate\Sections;
 
 use Paheko\Web\Cache as Web_Cache;
 
-use const Paheko\{WWW_URL, WWW_URI, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT, ROOT, PDF_COMMAND};
+use const Paheko\{WWW_URL, WWW_URI, ADMIN_URL, BASE_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT, ROOT, PDF_COMMAND};
 
 class UserTemplate extends \KD2\Brindille
 {
@@ -113,6 +113,7 @@ class UserTemplate extends \KD2\Brindille
 			'root_uri'     => WWW_URI,
 			'request_url'  => Utils::getRequestURI(),
 			'admin_url'    => ADMIN_URL,
+			'base_url'     => BASE_URL,
 			'site_url'     => $config['site_disabled'] && $config['org_web'] ? $config['org_web'] : WWW_URL,
 			'_GET'         => &$_GET,
 			'_POST'        => &$_POST,
