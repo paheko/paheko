@@ -37,7 +37,7 @@ class CommonFunctions
 
 	static public function input(array $params)
 	{
-		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit', 'copy', 'suffix', 'prefix_title', 'prefix_help'];
+		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit', 'copy', 'suffix', 'prefix_title', 'prefix_help', 'prefix_required'];
 
 		// Extract params and keep attributes separated
 		$attributes = array_diff_key($params, array_flip($params_list));
@@ -187,7 +187,7 @@ class CommonFunctions
 			unset($attributes['readonly']);
 		}
 
-		if (array_key_exists('required', $attributes)) {
+		if (!empty($attributes['required']) || !empty($params['prefix_required'])) {
 			$required_label =  ' <b title="Champ obligatoire">(obligatoire)</b>';
 		}
 		else {
@@ -660,10 +660,9 @@ class CommonFunctions
 			'type'     => $type,
 			'name'     => $name,
 			'label'    => $field->label,
-			'required' => $field->required,
 			'source'   => $source,
 			'disabled' => !empty($disabled),
-			'required' => $field->required && $type != 'checkbox',
+			'required' => $field->required,
 			'help'     => $field->help,
 			// Fix for autocomplete, lpignore is for Lastpass
 			'autocomplete' => 'off',
@@ -708,6 +707,7 @@ class CommonFunctions
 					$has_title = true;
 					$p['prefix_title'] = $field->label;
 					$p['prefix_help'] = $field->help;
+					$p['prefix_required'] = $field->required;
 				}
 
 				$out .= CommonFunctions::input($p);
