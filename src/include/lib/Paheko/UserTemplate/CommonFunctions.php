@@ -699,7 +699,7 @@ class CommonFunctions
 					'type'    => 'checkbox',
 					'label'   => $v,
 					'value'   => $v,
-					'default' => ($value & $b) ? $v : 0,
+					'default' => ($value & $b) ? $v : null,
 					'name'    => sprintf('%s[%d]', $name, $k),
 				];
 
