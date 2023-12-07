@@ -118,9 +118,9 @@
 			<td class="actions">
 			{if ($line.status & Entities\Accounting\Transaction::STATUS_WAITING)}
 				{if $line.type == Entities\Accounting\Transaction::TYPE_DEBT}
-					{linkbutton shape="check" label="Régler cette dette" href="!acc/transactions/payoff.php?for=%d"|args:$line.id}
+					{linkbutton shape="check" label="Régler cette dette" href="!acc/transactions/new.php?payoff=%d"|args:$line.id}
 				{elseif $line.type == Entities\Accounting\Transaction::TYPE_CREDIT}
-					{linkbutton shape="export" label="Régler cette créance" href="!acc/transactions/payoff.php?for=%d"|args:$line.id}
+					{linkbutton shape="export" label="Régler cette créance" href="!acc/transactions/new.php?payoff=%d"|args:$line.id}
 				{/if}
 			{/if}
 

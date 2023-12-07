@@ -25,9 +25,9 @@
 				<th>{$line.label}</th>
 				<td class="actions">
 					{if $line.type == Entities\Accounting\Transaction::TYPE_DEBT && ($line.status & Entities\Accounting\Transaction::STATUS_WAITING)}
-						{linkbutton shape="check" label="Régler cette dette" href="!acc/transactions/payoff.php?for=%d"|args:$line.id}
+						{linkbutton shape="check" label="Régler cette dette" href="!acc/transactions/new.php?payoff=%d"|args:$line.id}
 					{elseif $line.type == Entities\Accounting\Transaction::TYPE_CREDIT && ($line.status & Entities\Accounting\Transaction::STATUS_WAITING)}
-						{linkbutton shape="export" label="Régler cette créance" href="!acc/transactions/payoff.php?for=%d"|args:$line.id}
+						{linkbutton shape="export" label="Régler cette créance" href="!acc/transactions/new.php?payoff=%d"|args:$line.id}
 					{/if}
 
 					{linkbutton href="!acc/transactions/details.php?id=%d"|args:$line.id label="Détails" shape="search"}

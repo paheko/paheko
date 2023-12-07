@@ -8,9 +8,17 @@ CREATE TABLE IF NOT EXISTS acc_transactions_links
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_id_transaction ON acc_transactions_links (id_transaction);
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_id_related ON acc_transactions_links (id_related);
 
+-- Move id_related to separate many-to-many table
 INSERT INTO acc_transactions_links SELECT id, id_related FROM acc_transactions WHERE id_related IS NOT NULL;
 
 DROP INDEX acc_transactions_related;
+DROP INDEX acc_transactions_year;
+DROP INDEX acc_transactions_date;
+DROP INDEX acc_transactions_type;
+DROP INDEX acc_transactions_status;
+DROP INDEX acc_transactions_hash;
+DROP INDEX acc_transactions_reference;
+
 ALTER TABLE acc_transactions RENAME TO acc_transactions_old;
 
 CREATE TABLE IF NOT EXISTS acc_transactions
@@ -42,4 +50,8 @@ CREATE INDEX IF NOT EXISTS acc_transactions_status ON acc_transactions (status);
 CREATE INDEX IF NOT EXISTS acc_transactions_hash ON acc_transactions (hash);
 CREATE INDEX IF NOT EXISTS acc_transactions_reference ON acc_transactions (reference);
 
-INSERT INTO acc_transactions 
+INSERT INTO acc_transactions
+	SELECT id, type, status, label, notes, reference, date, hash, prev_id, prev_hash, id_year, id_creator
+	FROM acc_transactions_old;
+
+DROP TABLE acc_transactions_old;

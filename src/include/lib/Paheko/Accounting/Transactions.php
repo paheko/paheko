@@ -269,4 +269,136 @@ class Transactions
 
 		return $list;
 	}
+
+	static public function quickSearch(string $query, ?int $id_year = null)
+	{
+		$params = [];
+		$db = DB::getInstance();
+
+		if (ctype_digit($query)) {
+			$conditions = 'id = ?';
+			$params[] = (int) $query;
+		}
+		else {
+			$query = '%' . $db->escapeLike($query, '!') . '%';
+			$conditions = 'label LIKE ? ESCAPE \'!\' COLLATE U_NOCASE OR reference LIKE ? ESCAPE \'!\' COLLATE U_NOCASE';
+			$params = [$query, $query];
+		}
+
+		if ($id_year) {
+			$conditions .= ' AND id_year = ?';
+			$params[] = $id_year;
+		}
+
+		$sql = sprintf('SELECT id, label, reference, id_year FROM acc_transactions WHERE %s ORDER BY id DESC;', $conditions);
+		return DB::getInstance()->iterate($sql, ...$params);
+	}
+
+	static public function createPayoffFrom(array $transactions): ?\stdClass
+	{
+		$new = new Transaction;
+
+		$out = (object) [
+			'type'                => null,
+			'amount'              => 0,
+			'multiple'            => null,
+			'transactions'        => [],
+			'transaction'         => $new,
+			'linked_users'        => [],
+			'linked_transactions' => [],
+			'type_label'          => null,
+			'targets'             => implode(':', [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]),
+			'id_project'          => null,
+			'payment_line'        => null,
+		];
+
+		$labels = [];
+
+		foreach ($transactions as $id) {
+			$id = (int) $id;
+			$t = Transactions::get($id);
+
+			if (!$t) {
+				throw new UserException('Écriture inconnue : ' . $id);
+			}
+
+			if (!$t->hasStatus(Transaction::STATUS_WAITING)) {
+				continue;
+			}
+
+			$out->transactions[$t->id()] = $t;
+
+			if ($out->multiple === null) {
+				$out->multiple = false;
+			}
+			elseif ($out->multiple === false) {
+				$out->multiple = true;
+			}
+
+			if ($out->type === null) {
+				$out->type = $t->type;
+			}
+			elseif ($out->type !== $t->type) {
+				throw new UserException('Il n\'est pas possible de régler à la fois des créances et des dettes');
+			}
+
+			$id_project = $t->getProjectId();
+			$out->id_project = $id_project;
+
+			$sum = $t->sum();
+			$out->amount += $sum;
+			$out->linked_transactions[] = $t->id;
+
+			foreach ($t->listLinkedUsersAssoc() as $id => $name) {
+				$out->linked_users[$id] = $name;
+			}
+
+			$labels[] = $t->label;
+
+			$line = new Line;
+			$line->label = $t->label;
+			$line->reference = $t->getPaymentReference();
+			$line->id_project = $id_project;
+
+			if ($out->type === Transaction::TYPE_CREDIT) {
+				$line->credit = $sum;
+				$line->id_account = $t->getDebitLine()->id_account;
+			}
+			else {
+				$line->debit = $sum;
+				$line->id_account = $t->getCreditLine()->id_account;
+			}
+
+			$new->addLine($line);
+		}
+
+		if (!count($out->transactions)) {
+			throw new UserException('Aucune des écritures sélectionnées n\'est en attente de paiement.');
+		}
+
+		$line = new Line;
+		$line->label = 'Règlement';
+
+		if ($out->type === Transaction::TYPE_CREDIT) {
+			$line->debit = $out->amount;
+		}
+		else {
+			$line->credit = $out->amount;
+		}
+
+		$new->addLine($line);
+		$out->payment_line = $line;
+
+		if ($out->type === Transaction::TYPE_DEBT) {
+			$out->type_label = 'Règlement de dette';
+		}
+		else {
+			$out->type_label = 'Règlement de créance';
+		}
+
+		$new->label = $out->type_label . ' — ' . implode(', ', $labels);
+		$new->type = 99;
+
+		return $out;
+	}
 }

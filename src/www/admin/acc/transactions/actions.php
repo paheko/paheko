@@ -19,6 +19,10 @@ if (!$check || !is_array($check)) {
 $transactions = array_unique(array_values($check));
 $lines = array_keys($check);
 
+if (f('action') === 'payoff') {
+	Utils::redirect('!acc/transactions/new.php?payoff=' . implode(',', $transactions));
+}
+
 $csrf_key = 'acc_actions';
 
 // Delete transactions
