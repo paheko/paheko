@@ -546,8 +546,15 @@ class Utils
 		return true;
 	}
 
-	static public function safe_mkdir($path, $mode = 0777, $recursive = false)
+	static public function safe_mkdir($path, $mode = null, $recursive = false)
 	{
+		if (null === $mode && file_exists(DATA_ROOT)) {
+			$mode = fileperms(DATA_ROOT);
+		}
+		elseif (null === $mode && file_exists(ROOT)) {
+			$mode = fileperms(ROOT);
+		}
+
 		return @mkdir($path, $mode, $recursive) || is_dir($path);
 	}
 
@@ -1316,6 +1323,8 @@ class Utils
 		$target = str_replace('.html', '.pdf', $source);
 
 		$str = self::appendCookieToURLs($str);
+
+		Utils::safe_mkdir(CACHE_ROOT, null, true);
 		file_put_contents($source, $str);
 
 		if ($cmd == 'auto') {
