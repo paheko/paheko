@@ -626,19 +626,20 @@ class API
 
 	public function checkAuth(): void
 	{
-		if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
+		$login = $_SERVER['PHP_AUTH_USER'] ?? null;
+		$password = $_SERVER['PHP_AUTH_PW'] ?? null;
+
+		if (!isset($login, $password)) {
 			throw new APIException('No username or password supplied', 401);
 		}
 
-		if (API_USER && API_PASSWORD && $_SERVER['PHP_AUTH_USER'] === API_USER && $_SERVER['PHP_AUTH_PW'] === API_PASSWORD) {
-			$this->access = Session::ACCESS_ADMIN;
-		}
-		elseif ($c = API_Credentials::login($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
-			$this->access = $c->access_level;
-		}
-		else {
+		$access = API_Credentials::auth($login, $password);
+
+		if (null === $access) {
 			throw new APIException('Invalid username or password', 403);
 		}
+
+		$this->access = $access;
 	}
 
 	public function route()

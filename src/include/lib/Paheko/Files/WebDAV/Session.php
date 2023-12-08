@@ -2,8 +2,11 @@
 
 namespace Paheko\Files\WebDAV;
 
+use Paheko\API_Credentials;
 use Paheko\DB;
+use Paheko\Users\DynamicFields;
 use Paheko\Users\Users;
+use Paheko\Entities\Users\Category;
 use Paheko\Entities\Users\User;
 
 use Paheko\Users\Session as UserSession;
@@ -17,6 +20,27 @@ class Session extends UserSession
 	// Use a different session name so that someone cannot access the admin
 	// with a cookie from WebDAV/app
 	protected $cookie_name = 'pkow';
+
+	public function loginAPI(string $login, string $password): bool
+	{
+		$access = API_Credentials::auth($login, $password);
+
+		if (null === $access) {
+			return false;
+		}
+
+		$name = DynamicFields::getFirstNameField();
+		$this->_user = (new User)->import([$name => $login . ' (API)']);
+
+		$this->user = -1;
+		$this->_permissions = [];
+
+		foreach (Category::PERMISSIONS as $perm => $data) {
+			$this->_permissions[$perm] = $access;
+		}
+
+		return true;
+	}
 
 	/**
 	 * Create a temporary app token for an external service session (eg. NextCloud)
