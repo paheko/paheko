@@ -217,6 +217,10 @@ class UserTemplate extends \KD2\Brindille
 			$this->registerModifier(is_int($key) ? $name : $key, is_int($key) ? [Modifiers::class, $name] : $name);
 		}
 
+		foreach (Modifiers::MODIFIERS_WITH_INSTANCE_LIST as $key => $name) {
+			$this->registerModifier(is_int($key) ? $name : $key, is_int($key) ? [Modifiers::class, $name] : $name, true);
+		}
+
 		// Local functions
 		foreach (Functions::FUNCTIONS_LIST as $name) {
 			$this->registerFunction($name, [Functions::class, $name]);

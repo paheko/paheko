@@ -825,18 +825,16 @@ class Sections
 			unset($params['id']);
 		}
 		elseif (isset($params['user'])) {
-			$params['where'] .= ' AND tu.id_user = :id_user';
+			$params['where'] .= ' AND t.id IN (SELECT id_transaction FROM acc_transactions_users WHERE id_user = :id_user)';
 			$params[':id_user'] = (int) $params['user'];
 			unset($params['user']);
-
-			$params['tables'] .= ' INNER JOIN acc_transactions_users AS tu ON tu.id_transaction = t.id';
 		}
 
 		if (isset($params['debit_codes'])) {
-			$params['where'] .= sprintf(' AND l.debit > 0 AND (%s)', self::getAccountCodeCondition($params['debit_codes'], 'a.code'));
+			$params['where'] .= sprintf(' AND l.credit = 0 AND (%s)', self::getAccountCodeCondition($params['debit_codes'], 'a.code'));
 		}
 		elseif (isset($params['credit_codes'])) {
-			$params['where'] .= sprintf(' AND l.debit > 0 AND (%s)', self::getAccountCodeCondition($params['credit_codes'], 'a.code'));
+			$params['where'] .= sprintf(' AND l.debit = 0 AND (%s)', self::getAccountCodeCondition($params['credit_codes'], 'a.code'));
 		}
 
 		unset($params['debit_codes'], $params['credit_codes']);

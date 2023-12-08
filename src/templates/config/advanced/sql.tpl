@@ -27,7 +27,7 @@
 		<fieldset>
 			<legend>Faire une requête SQL en lecture</legend>
 			<dl>
-				{input type="textarea" cols="70" rows="3" name="query" default=$query class="full-width"}
+				{input type="textarea" cols="70" rows="10" name="query" default=$query class="full-width"}
 			</dl>
 			<p>
 				{button type="submit" name="run" label="Exécuter" shape="search"}

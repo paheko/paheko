@@ -45,7 +45,6 @@ class Modifiers
 		'values',
 		'has',
 		'in',
-		'map',
 		'sort',
 		'ksort',
 		'quote_sql_identifier',
@@ -57,6 +56,10 @@ class Modifiers
 		'or',
 		'uuid',
 		'key',
+	];
+
+	const MODIFIERS_WITH_INSTANCE_LIST = [
+		'map',
 	];
 
 	const LEADING_NUMBER_REGEXP = '/^([\d.]+)\s*[.\)]\s*/';
@@ -337,7 +340,7 @@ class Modifiers
 		}
 	}
 
-	static public function map($array, string $modifier, ...$params): array
+	static public function map(UserTemplate $tpl, int $line, $array, string $modifier, ...$params): array
 	{
 		if (!is_array($array)) {
 			throw new Brindille_Exception('Supplied argument is not an array');
@@ -345,23 +348,14 @@ class Modifiers
 
 		$callback = null;
 
-		if (array_key_exists($modifier, CommonModifiers::PHP_MODIFIERS_LIST)) {
-			$callback = [CommonModifiers::class, $modifier];
-		}
-		elseif (in_array($modifier, CommonModifiers::MODIFIERS_LIST)) {
-			$callback = [CommonModifiers::class, $modifier];
-		}
-		elseif (in_array($modifier, self::MODIFIERS_LIST)) {
-			$callback = [self::class, $modifier];
-		}
-		else {
+		if (!$tpl->checkModifierExists($modifier)) {
 			throw new Brindille_Exception('Unknown modifier: ' . $modifier);
 		}
 
 		$out = [];
 
 		foreach ($array as $key => $value) {
-			$out[$key] = call_user_func($callback, $value, ...$params);
+			$out[$key] = $tpl->callModifier($modifier, $line, $value, ...$params);
 		}
 
 		return $out;
