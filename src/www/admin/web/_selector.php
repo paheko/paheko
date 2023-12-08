@@ -14,8 +14,8 @@ $current = null;
 if (f('current')) {
 	$current = Web::get((int) f('current'));
 }
-elseif (null === f('current') && qg('id_page')) {
-	$current = Web::get((int) qg('id_page'));
+elseif (null === f('current') && qg('id_parent')) {
+	$current = Web::get((int) qg('id_parent'));
 }
 
 if ($current) {

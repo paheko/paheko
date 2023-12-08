@@ -14,7 +14,7 @@
 		<ul>
 		{if $current_cat_id}
 			<li class="parent">
-				{button shape="left" label="Retour à la catégorie parente" type="submit" name="current" value=$parent_id}
+				{button shape="left" label="Catégorie parente" type="submit" name="current" value=$parent_id|intval}
 			</li>
 		{/if}
 
