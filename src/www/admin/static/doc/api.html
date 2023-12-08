@@ -60,7 +60,11 @@
 		<li><a href="#chemins">Chemins</a>
 		<ol>
 			<li><a href="#sql-post">sql (POST)</a></li>
-			<li><a href="#download-get">download (GET)</a></li>
+			<li><a href="#telechargements">Téléchargements</a>
+			<ol>
+				<li><a href="#download-get">download (GET)</a></li>
+				<li><a href="#download-files-get">download/files (GET)</a>
+			</ol></li>
 			<li><a href="#site-web">Site web</a>
 			<ol>
 				<li><a href="#web-list-get">web/list (GET)</a></li>
@@ -127,8 +131,16 @@
 </ul>
 <p>Exemple :</p>
 <pre><code>curl https://test:abcd@paheko.monasso.tld/api/sql/ -F sql='SELECT * FROM membres LIMIT 5;' -F format=csv</code></pre>
-<h2 id="download-get">download (GET)</h2>
-<p>Télécharge la base de données complète. Renvoie directement le fichier SQLite de la base de données.</p>
+<h2 id="telechargements">Téléchargements</h2>
+<h3 id="download-get">download (GET)</h3>
+<p>Télécharger la base de données complète. Renvoie directement le fichier SQLite de la base de données.</p>
+<p>Exemple :</p>
+<pre><code>curl https://test:abcd@paheko.monasso.tld/api/download -o db.sqlite</code></pre>
+<h3 id="download-files-get">download/files (GET)</h3>
+<p><em>(Depuis la version 1.3.4)</em></p>
+<p>Télécharger un fichier ZIP contenant tous les fichiers (documents, fichiers des écritures, des membres, modules modifiés, etc.).</p>
+<p>Exemple :</p>
+<pre><code>curl https://test:abcd@paheko.monasso.tld/api/download/files -o backup_files.zip</code></pre>
 <h2 id="site-web">Site web</h2>
 <h3 id="web-list-get">web/list (GET)</h3>
 <p>Renvoie la liste des pages du site web.</p>

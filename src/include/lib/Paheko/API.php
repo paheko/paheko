@@ -111,13 +111,22 @@ class API
 		return array_key_exists($param, $this->params);
 	}
 
-	protected function download()
+	protected function download(string $uri)
 	{
 		if ($this->method != 'GET') {
 			throw new APIException('Wrong request method', 400);
 		}
 
-		Backup::dump();
+		if ($uri === 'files') {
+			Files::zipAll();
+		}
+		elseif ($uri === '') {
+			Backup::dump();
+		}
+		else {
+			throw new APIException('Unknown path: ' . $uri, 404);
+		}
+
 		return null;
 	}
 
@@ -652,7 +661,7 @@ class API
 			case 'sql':
 				return $this->sql();
 			case 'download':
-				return $this->download();
+				return $this->download($uri);
 			case 'web':
 				return $this->web($uri);
 			case 'user':

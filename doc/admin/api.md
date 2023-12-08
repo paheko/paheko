@@ -80,9 +80,29 @@ Exemple :
 curl https://test:abcd@paheko.monasso.tld/api/sql/ -F sql='SELECT * FROM membres LIMIT 5;' -F format=csv
 ```
 
-## download (GET)
+## Téléchargements
 
-Télécharge la base de données complète. Renvoie directement le fichier SQLite de la base de données.
+### download (GET)
+
+Télécharger la base de données complète. Renvoie directement le fichier SQLite de la base de données.
+
+Exemple :
+
+```
+curl https://test:abcd@paheko.monasso.tld/api/download -o db.sqlite
+```
+
+### download/files (GET)
+
+*(Depuis la version 1.3.4)*
+
+Télécharger un fichier ZIP contenant tous les fichiers (documents, fichiers des écritures, des membres, modules modifiés, etc.).
+
+Exemple :
+
+```
+curl https://test:abcd@paheko.monasso.tld/api/download/files -o backup_files.zip
+```
 
 ## Site web
 
