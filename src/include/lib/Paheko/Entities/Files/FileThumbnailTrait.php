@@ -432,7 +432,9 @@ trait FileThumbnailTrait
 				$this->createThumbnail($size, $destination);
 			}
 			catch (\RuntimeException $e) {
-				throw new UserException('Impossible de créer la miniature', 500, $e);
+				header('Content-Type: image/svg+xml', true);
+				echo $this->getMissingThumbnail($size);
+				return;
 			}
 		}
 
@@ -453,5 +455,27 @@ trait FileThumbnailTrait
 			$uri = $this->thumb_uri($size, false);
 			Web_Cache::link($uri, $destination);
 		}
+	}
+
+	protected function getMissingThumbnail(string $size): string
+	{
+		$w = preg_replace('/[^\d]+/', '', $size) ?: 150;
+		$h = intval($w / (2/3));
+		return sprintf('<svg width="%d" height="%d" version="1.1" viewBox="0 0 210 297" xmlns="http://www.w3.org/2000/svg">
+			<g stroke="#808080">
+				<g fill="none" stroke-width="8">
+					<path d="m27.44 40.23 155.1 0.1495"/>
+					<path d="m27.44 76.33 155.1 0.1495"/>
+					<path d="m27.44 110.2 155.1 0.1495"/>
+					<path d="m27.44 148.2 155.1 0.1495"/>
+					<path d="m27.44 182.2 155.1 0.1495"/>
+					<path d="m87.08 268.9 94.9 0.1505"/>
+					<path d="m87.35 225 94.9 0.1505"/>
+				</g>
+				<g fill="#808080" stop-color="#000000" stroke-width="71.02" style="text-orientation:upright" aria-label="?">
+					<path d="m49.23 255.1q-0.04893-1.762-0.04893-2.642 0-5.187 1.468-8.954 1.076-2.838 3.474-5.725 1.762-2.104 6.312-6.116 4.599-4.061 5.97-6.459 1.37-2.398 1.37-5.236 0-5.138-4.012-9.003-4.012-3.914-9.835-3.914-5.627 0-9.395 3.523t-4.942 11.01l-9.052-1.076q1.223-10.03 7.242-15.36 6.067-5.333 16-5.333 10.52 0 16.78 5.725t6.263 13.85q0 4.697-2.202 8.661-2.202 3.963-8.612 9.639-4.306 3.817-5.627 5.627-1.321 1.81-1.957 4.159-0.6361 2.349-0.734 7.633zm-0.5382 17.66v-10.03h10.03v10.03z" stroke="none"/>
+				</g>
+			</g>
+		</svg>', $w, $h);
 	}
 }
