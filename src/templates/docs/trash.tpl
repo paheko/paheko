@@ -6,7 +6,8 @@
 </nav>
 
 <p class="help">
-	Les fichiers supprimés occupent actuellement <strong>{$size|size_in_bytes}</strong>.
+	Les fichiers supprimés occupent actuellement <strong>{$size|size_in_bytes}</strong>.<br />
+	Les fichiers sont supprimés automatiquement après 30 jours.
 </p>
 
 {form_errors}
