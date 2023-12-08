@@ -328,6 +328,7 @@ class CSV
 			throw new \LogicException('CALC_CONVERT_COMMAND is not set');
 		}
 
+		Utils::safe_mkdir(STATIC_CACHE_ROOT, null, true);
 		$tmpfile1 = sprintf('%s/export_%s.ods', STATIC_CACHE_ROOT, md5(random_bytes(10)));
 		$tmpfile2 = substr($tmpfile1, 0, -3) . 'xlsx';
 
