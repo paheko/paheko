@@ -35,7 +35,7 @@ class UserTemplate extends \KD2\Brindille
 	protected $modified;
 	protected ?File $file = null;
 	protected ?string $code = null;
-	protected $cache_path = USER_TEMPLATES_CACHE_ROOT;
+	protected string $cache_path;
 	protected ?string $path = null;
 	protected ?UserTemplate $parent = null;
 	public ?Module $module = null;
@@ -134,19 +134,10 @@ class UserTemplate extends \KD2\Brindille
 		$this->_tpl_path = $path;
 
 		if ($path && $file = Files::get(File::CONTEXT_MODULES . '/' . $path)) {
-			if ($file->type != $file::TYPE_FILE) {
-				throw new \LogicException('Cannot construct a UserTemplate with a directory');
-			}
-
-			$this->file = $file;
-			$this->modified = $file->modified->getTimestamp();
+			$this->setLocalSource($file);
 		}
 		elseif ($path) {
-			$this->path = self::DIST_ROOT . $path;
-
-			if (!($this->modified = @filemtime($this->path))) {
-				throw new \InvalidArgumentException('File not found: ' . $this->path);
-			}
+			$this->setSource(self::DIST_ROOT . $path);
 		}
 
 		$this->assignArray(self::getRootVariables());
@@ -240,11 +231,27 @@ class UserTemplate extends \KD2\Brindille
 		}
 	}
 
+	public function setLocalSource(File $file)
+	{
+		if ($file->type != $file::TYPE_FILE) {
+			throw new \LogicException('Cannot construct a UserTemplate with a directory');
+		}
+
+		$this->file = $file;
+		$this->modified = $file->modified->getTimestamp();
+
+		$this->cache_path = USER_TEMPLATES_CACHE_ROOT;
+	}
+
 	public function setSource(string $path)
 	{
+		if (!($this->modified = @filemtime($path))) {
+			throw new \InvalidArgumentException('File not found: ' . $path);
+		}
+
 		$this->file = null;
 		$this->path = $path;
-		$this->modified = filemtime($path);
+
 		// Use shared cache for default templates
 		$this->cache_path = SHARED_USER_TEMPLATES_CACHE_ROOT;
 	}
