@@ -8,7 +8,7 @@
 </p>
 {/if}
 
-{if !isset($snippets)}
+{if isset($snippets)}
 	{$snippets|raw}
 {/if}
 
