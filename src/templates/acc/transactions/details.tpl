@@ -158,7 +158,7 @@
 			</div>
 		{/if}
 
-		<div class="transaction-details-advanced{if $simple} hidden{/if}">
+		<div class="transaction-details-advanced{if $simple && $transaction.type !== $transaction::TYPE_ADVANCED} hidden{/if}">
 			<table class="list">
 				<thead>
 					<tr>
