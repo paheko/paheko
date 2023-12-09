@@ -18,11 +18,11 @@
 	</aside>
 	<nav>
 	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$transaction->validated && !$transaction_year->closed}
-		{linkbutton href="edit.php?id=%d"|args:$transaction.id shape="edit" label="Modifier cette écriture"}
-		{linkbutton href="delete.php?id=%d"|args:$transaction.id shape="delete" label="Supprimer cette écriture"}
+		{linkbutton href="edit.php?id=%d"|args:$transaction.id shape="edit" label="Modifier cette écriture" accesskey="M"}
+		{linkbutton href="delete.php?id=%d"|args:$transaction.id shape="delete" label="Supprimer cette écriture" accesskey="S"}
 	{/if}
 	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
-		{linkbutton href="new.php?copy=%d"|args:$transaction.id shape="plus" label="Dupliquer cette écriture"}
+		{linkbutton href="new.php?copy=%d"|args:$transaction.id shape="plus" label="Dupliquer cette écriture" accesskey="D"}
 	{/if}
 	</nav>
 </nav>

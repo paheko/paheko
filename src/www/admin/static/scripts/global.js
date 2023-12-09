@@ -743,11 +743,18 @@
 		}
 	});
 
+	// Add support for accesskeys, even if web browser doesn't support it, or has a weird keys combination
 	window.addEventListener('keydown', (e) => {
 		if (!e.altKey || !e.shiftKey) {
 			return true;
 		}
 
+		if (e.key.length === 1 && (el = document.querySelector('[accesskey="' + e.key + '"]'))) {
+			el.click();
+			return true;
+		}
+
+		// Highlight accesskeys
 		document.body.classList.add('accesskeys');
 	});
 	window.addEventListener('keyup', () => { document.body.classList.remove('accesskeys'); });
