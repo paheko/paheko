@@ -77,7 +77,7 @@ if (ALERT_MESSAGE && !$dialog) {
 	<?php
 	$current_parent = substr($current, 0, strpos($current, '/'));
 	?>
-		<li class="home{if $current == 'home'} current{elseif $current_parent == 'home'} current_parent{/if}"><h3><a href="{$admin_uri}">{icon shape="home"}<b>Accueil</b></a></h3>
+		<li class="home{if $current == 'home'} current{elseif $current_parent == 'home'} current_parent{/if}"><h3><a href="{$admin_uri}" accesskey="H">{icon shape="home"}<b>Accueil</b></a></h3>
 			{if !empty($plugins_menu)}
 				<ul>
 				{foreach from=$plugins_menu key="key" item="html"}
@@ -87,10 +87,10 @@ if (ALERT_MESSAGE && !$dialog) {
 			{/if}
 		</li>
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)}
-			<li class="{if $current == 'users'} current{elseif $current_parent == 'users'} current_parent{/if}"><h3><a href="{$admin_uri}users/">{icon shape="users"}<b>Membres</b></a></h3>
+			<li class="{if $current == 'users'} current{elseif $current_parent == 'users'} current_parent{/if}"><h3><a href="{$admin_uri}users/" accesskey="U">{icon shape="users"}<b>Membres</b></a></h3>
 			<ul>
 			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-				<li{if $current == 'users/new'} class="current"{/if}><a href="{$admin_uri}users/new.php">Ajouter</a></li>
+				<li{if $current == 'users/new'} class="current"{/if}><a href="{$admin_uri}users/new.php" accesskey="A">Ajouter</a></li>
 			{/if}
 				<li{if $current == 'users/services'} class="current"{/if}><a href="{$admin_uri}services/">Activités &amp; cotisations</a></li>
 			{if !DISABLE_EMAIL && $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
@@ -103,7 +103,7 @@ if (ALERT_MESSAGE && !$dialog) {
 			<li class="{if $current == 'acc'} current{elseif $current_parent == 'acc'} current_parent{/if}"><h3><a href="{$admin_uri}acc/">{icon shape="money"}<b>Comptabilité</b></a></h3>
 			<ul>
 			{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
-				<li class="{if $current == 'acc/new'} current{/if}"><a href="{$admin_uri}acc/transactions/new.php">Saisie</a></li>
+				<li class="{if $current == 'acc/new'} current{/if}"><a href="{$admin_uri}acc/transactions/new.php" accesskey="N">Saisie</a></li>
 			{/if}
 				<li class="{if $current == 'acc/accounts'} current{/if}"><a href="{$admin_uri}acc/accounts/">Comptes</a></li>
 				<li class="{if $current == 'acc/simple'} current{/if}"><a href="{$admin_uri}acc/accounts/simple.php">Suivi des écritures</a></li>
@@ -113,12 +113,12 @@ if (ALERT_MESSAGE && !$dialog) {
 		{/if}
 
 		{if $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_READ)}
-			<li class="{if $current == 'docs'} current{elseif $current_parent == 'docs'} current_parent{/if}"><h3><a href="{$admin_uri}docs/">{icon shape="folder"}<b>Documents</b></a></h3>
+			<li class="{if $current == 'docs'} current{elseif $current_parent == 'docs'} current_parent{/if}"><h3><a href="{$admin_uri}docs/" accesskey="D">{icon shape="folder"}<b>Documents</b></a></h3>
 			</li>
 		{/if}
 
 		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_READ)}
-			<li class="{if $current == 'web'} current{elseif $current_parent == 'web'} current_parent{/if}"><h3><a href="{$admin_uri}web/">{icon shape="globe"}<b>Site web</b></a></h3>
+			<li class="{if $current == 'web'} current{elseif $current_parent == 'web'} current_parent{/if}"><h3><a href="{$admin_uri}web/" accesskey="W">{icon shape="globe"}<b>Site web</b></a></h3>
 			</li>
 		{/if}
 
@@ -140,7 +140,7 @@ if (ALERT_MESSAGE && !$dialog) {
 
 		{if $help_url}
 		<li>
-			<h3><a href="{$help_url}" target="_dialog">{icon shape="help"}<b>Aide</b></a></h3>
+			<h3><a href="{$help_url}" target="_dialog" accesskey="?">{icon shape="help"}<b>Aide</b></a></h3>
 		</li>
 		{/if}
 

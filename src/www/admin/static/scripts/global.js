@@ -743,4 +743,12 @@
 		}
 	});
 
+	window.addEventListener('keydown', (e) => {
+		if (!e.altKey || !e.shiftKey) {
+			return true;
+		}
+
+		document.body.classList.add('accesskeys');
+	});
+	window.addEventListener('keyup', () => { document.body.classList.remove('accesskeys'); });
 })();
