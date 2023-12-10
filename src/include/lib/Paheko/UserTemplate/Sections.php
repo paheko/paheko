@@ -42,11 +42,13 @@ class Sections
 	];
 
 	const COMPILE_SECTIONS_LIST = [
-		'#select' => [self::class, 'selectStart'],
-		'/select' => [self::class, 'selectEnd'],
-		'#form'    => [self::class, 'formStart'],
-		'/form'    => [self::class, 'formEnd'],
-		'else:form'    => [self::class, 'formElse'],
+		'#select'  => [self::class, 'selectStart'],
+		'/select'   => [self::class, 'selectEnd'],
+		'#form'     => [self::class, 'formStart'],
+		'/form'     => [self::class, 'formEnd'],
+		'else:form' => [self::class, 'formElse'],
+		'#capture'  => [self::class, 'captureStart'],
+		'/capture'  => [self::class, 'captureEnd'],
 	];
 
 	const SQL_RESERVED_PARAMS = [
@@ -185,6 +187,35 @@ class Sections
 		$out = str_replace(' ?><?php ', ' ', $out);
 
 		return $out;
+	}
+
+	static public function captureStart(string $name, string $params_str, UserTemplate $tpl, int $line): string
+	{
+		$params = $tpl->_parseArguments($params_str, $line);
+
+		if (!isset($params['assign']) || !is_string($params['assign'])) {
+			throw new Brindille_Exception(sprintf('"%s": missing "assign" parameter', $name));
+		}
+
+		$assign = $tpl->getValueFromArgument($params['assign']);
+
+		$tpl->_push($tpl::SECTION, 'capture');
+
+		return sprintf('<?php $capture_assign ??= []; $capture_assign[] = %s; @ob_start(); ?>',
+			var_export($assign, true));
+	}
+
+	static public function captureEnd(string $name, string $params_str, UserTemplate $tpl, int $line): string
+	{
+		$last = $tpl->_lastName();
+
+		if ($last !== 'capture') {
+			throw new Brindille_Exception(sprintf('"%s": block closing does not match last block "%s" opened', $name . $params_str, $last));
+		}
+
+		$tpl->_pop();
+
+		return sprintf('<?php $this->assign(array_pop($capture_assign), ob_get_clean()); ?>');
 	}
 
 	static protected function _debug(string $str): void

@@ -573,8 +573,8 @@ class Emails
 
 	static public function appendHTMLOptoutFooter(string $html, string $url): string
 	{
-		$footer = '<hr style="border-top: 2px solid #999; background: none;" /><p style="color: #666; background: #fff; padding: 10px; text-align: center; font-size: 9pt">' . nl2br(htmlspecialchars(self::getOptoutText()));
-		$footer .= sprintf('<br /><a href="%s" style="color: #009; text-decoration: underline; padding: 5px 10px; border-radius: 5px; background: #ddd; border: 1px outset #999;">Me désinscrire</a></p>', $url);
+		$footer = '<p style="color: #666; background: #fff; padding: 10px; text-align: center; font-size: 9pt">' . nl2br(htmlspecialchars(self::getOptoutText()));
+		$footer .= sprintf('<br /><a href="%s" style="color: #009; text-decoration: underline; padding: 5px 10px; border-radius: 5px; background: #eee; border: 1px outset #ccc;">Me désinscrire</a></p>', $url);
 
 		if (stripos($html, '</body>') !== false) {
 			$html = str_ireplace('</body>', $footer . '</body>', $html);

@@ -27,6 +27,7 @@ class Modifiers
 		'xml_escape',
 		'json_decode',
 		'json_encode',
+		'minify',
 		'remove_leading_number',
 		'get_leading_number',
 		'spell_out_number',
@@ -160,6 +161,62 @@ class Modifiers
 	static public function json_encode($obj)
 	{
 		return json_encode($obj, JSON_PRETTY_PRINT);
+	}
+
+	static public function minify(string $str, string $language = 'js'): string
+	{
+		// Remove comments
+		$str = preg_replace('!/\*.*?\*/!s', '', $str);
+
+		if ($language === 'css') {
+			static $regexp = <<<'EOS'
+				(?six)
+				  # quotes
+				  (
+				    "(?:[^"\\]++|\\.)*+"
+				  | '(?:[^'\\]++|\\.)*+'
+				  )
+				|
+				  # ; before } (and the spaces after it while we're here)
+				  \s*+ ; \s*+ ( } ) \s*+
+				|
+				  # all spaces around meta chars/operators
+				  \s*+ ( [*$~^|]?+= | [{};,>~+-] | !important\b ) \s*+
+				|
+				  # spaces right of ( [ :
+				  ( [[(:] ) \s++
+				|
+				  # spaces left of ) ]
+				  \s++ ( [])] )
+				|
+				  # spaces left (and right) of :
+				  \s++ ( : ) \s*+
+				  # but not in selectors: not followed by a {
+				  (?!
+				    (?>
+				      [^{}"']++
+				    | "(?:[^"\\]++|\\.)*+"
+				    | '(?:[^'\\]++|\\.)*+'
+				    )*+
+				    {
+				  )
+				|
+				  # spaces at beginning/end of string
+				  ^ \s++ | \s++ \z
+				|
+				  # double spaces to single
+				  (\s)\s+
+EOS;
+
+			$str = preg_replace('%' . $regexp . '%', '$1$2$3$4$5$6$7$8', $str);
+		}
+		else {
+			$str = preg_replace('!\s{2,}!', ' ', $str);
+			$str = preg_replace('!(\{|\(|\[)\s+!', '$1', $str);
+			$str = preg_replace('!\s+(\}|\)|\])!', '$1', $str);
+		}
+
+		return $str;
 	}
 
 	static public function remove_leading_number($str): string
