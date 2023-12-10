@@ -48,6 +48,8 @@
 		<dt>Prévisualisation</dt>
 		<dd>{linkbutton shape="eye" label="Prévisualiser le message" href="?id=%d&preview"|args:$mailing.id target="_dialog"}<br />
 		 <small class="help">(Un destinataire sera choisi au hasard.)</small></dd>
+		 <dt></dt>
+		 <dd class="help">Note : la prévisualisation peut différer du rendu final, selon le logiciel utilisé par vos destinataires pour lire leurs messages.</dd>
 	</dl>
 	{csrf_field key=$csrf_key}
 </form>
