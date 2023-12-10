@@ -25,7 +25,7 @@ if (!array_key_exists($current_cat, $categories)) {
 
 $can_edit = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
 
-$list = Users::listByCategory($current_cat);
+$list = Users::listByCategory($current_cat, $session);
 $list->loadFromQueryString();
 
 if (!$current_cat) {

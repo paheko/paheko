@@ -290,9 +290,14 @@ class Emails
 	/**
 	 * Return or create a new email entity
 	 */
-	static public function getOrCreateEmail(string $address): Email
+	static public function getOrCreateEmail(string $address): ?Email
 	{
 		$address = strtolower($address);
+
+		if (!Email::isAddressValid($address, false)) {
+			return null;
+		}
+
 		$e = self::getEmail($address);
 
 		if (!$e) {
@@ -349,7 +354,7 @@ class Emails
 			if (!$row->email_hash) {
 				$email = self::getOrCreateEmail($row->recipient);
 
-				if (!$email->canSend()) {
+				if (!$email || !$email->canSend()) {
 					// Email address is invalid, skip
 					self::deleteFromQueue($row->id);
 					continue;
@@ -635,17 +640,17 @@ class Emails
 		return self::handleManualBounce($return['recipient'], $return['type'], $return['message']);
 	}
 
-	static public function handleManualBounce(string $recipient, string $type, ?string $message): ?array
+	static public function handleManualBounce(string $address, string $type, ?string $message): ?array
 	{
-		$return = compact('recipient', 'type', 'message');
-		$email = self::getOrCreateEmail($return['recipient']);
+		$return = compact('address', 'type', 'message');
+		$email = self::getOrCreateEmail($address);
 
 		if (!$email) {
 			return null;
 		}
 
-		Plugins::fire('email.bounce', false, compact('email', 'return'));
 		$email->hasFailed($return);
+		Plugins::fire('email.bounce.save.before', false, compact('email', 'return', 'type', 'message'));
 		$email->save();
 
 		return $return;

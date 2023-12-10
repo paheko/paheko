@@ -49,6 +49,7 @@ foreach (glob(__DIR__ . '/../doc/admin/*.md') as $file) {
 	}
 
 	$t = $md->text($t);
+	$t = preg_replace('!(<a\s+[^>]+external[^>]+)>!', '$1 target="_blank">', $t);
 
 	$title = $match[1] ?? $file;
 

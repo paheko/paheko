@@ -33,7 +33,7 @@ class Services_User
 			CASE WHEN s.end_date < date() THEN 1 ELSE 0 END AS archived
 			FROM services_users su
 			INNER JOIN services s ON s.id = su.id_service
-			INNER JOIN services_fees sf ON sf.id = su.id_fee
+			LEFT JOIN services_fees sf ON sf.id = su.id_fee
 			WHERE su.id_user = ?
 			GROUP BY su.id_service ORDER BY expiry_date DESC;', $user_id);
 	}
@@ -134,6 +134,10 @@ class Services_User
 
 				if (!$id_service) {
 					throw new UserException(sprintf('L\'activité "%s" n\'existe pas', $row->service));
+				}
+
+				if (empty($row->date)) {
+					throw new UserException('La date est vide');
 				}
 
 				$id_fee = null;

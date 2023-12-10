@@ -77,7 +77,7 @@
 					</td>
 				{else}
 					<td>
-						{display_dynamic_field key=$key value=$value user_id=$row._user_id files_href="details.php?id=%d"|args:$row._user_id}
+						{user_field name=$key value=$value user_id=$row._user_id files_href="details.php?id=%d"|args:$row._user_id}
 					</td>
 				{/if}
 			{/foreach}

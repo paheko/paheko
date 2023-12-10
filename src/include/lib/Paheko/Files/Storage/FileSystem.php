@@ -62,6 +62,7 @@ class FileSystem implements StorageInterface
 		$target = self::getLocalFilePath($file);
 		self::ensureParentDirectoryExists($target);
 
+		Utils::safe_mkdir(CACHE_ROOT, null, true);
 		$tmpfile = tempnam(CACHE_ROOT, 'file-');
 		$return = copy($source_path, $tmpfile);
 
@@ -78,6 +79,7 @@ class FileSystem implements StorageInterface
 		$target = self::getLocalFilePath($file);
 		self::ensureParentDirectoryExists($target);
 
+		Utils::safe_mkdir(CACHE_ROOT, null, true);
 		$tmpfile = tempnam(CACHE_ROOT, 'file-');
 		$return = file_put_contents($tmpfile, $source_content) === false ? false : true;
 
@@ -94,6 +96,7 @@ class FileSystem implements StorageInterface
 		$target = self::getLocalFilePath($file);
 		self::ensureParentDirectoryExists($target);
 
+		Utils::safe_mkdir(CACHE_ROOT, null, true);
 		$tmpfile = tempnam(CACHE_ROOT, 'file-');
 		$fp = fopen($tmpfile, 'w');
 
@@ -151,7 +154,7 @@ class FileSystem implements StorageInterface
 
 		// Overwrite
 		if (file_exists($new_path)) {
-			Utils::safe_unlink($new_path, true);
+			Utils::deleteRecursive($new_path, true);
 		}
 
 		self::ensureParentDirectoryExists($new_path);

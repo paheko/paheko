@@ -575,7 +575,9 @@ class Files
 	static public function getContextRef(string $path): ?string
 	{
 		$context = strtok($path, '/');
-		return strtok('/') ?: null;
+		$ref = strtok('/');
+		strtok('');
+		return $ref ?: null;
 	}
 
 	static public function getBreadcrumbs(string $path): array
@@ -739,6 +741,7 @@ class Files
 
 	static public function createFrom(string $target, array $source): File
 	{
+		$target = preg_replace('!\.\.|//!', '', $target);
 		$parent = Utils::dirname($target);
 		$name = Utils::basename($target);
 		$file = self::create($parent, $name, $source);

@@ -32,6 +32,7 @@ Ces filtres viennent directement de PHP et utilisent donc les mêmes paramètres
 | `nl2br` | Remplace les retours à la ligne par des tags HTML `<br/>` | [Documentation PHP](https://www.php.net/nl2br) |
 | `wordwrap` | Ajoute des retours à la ligne tous les 75 caractères | [Documentation PHP](https://www.php.net/wordwrap) |
 | `abs` | Renvoie la valeur absolue d'un nombre (exemple : -42 sera transformé en 42) | [Documentation PHP](https://www.php.net/abs) |
+| `gettype` | Renvoie le type d'une variable | |
 | `intval` | Transforme une valeur en entier (integer) | [Documentation PHP](https://www.php.net/intval) |
 | `boolval` | Transforme une valeur en booléen (true ou false) | [Documentation PHP](https://www.php.net/boolval) |
 | `floatval` | Transforme une valeur en nombre flottant (à virgule) | [Documentation PHP](https://www.php.net/floatval) |
@@ -269,6 +270,25 @@ Affichera :
 02
 ```
 
+## format_phone_number
+
+Formatte un numéro de téléphone selon le format du pays de l'association.
+
+Seule la France est supportée pour le moment.
+
+Exemple :
+
+```
+{{:assign number="0102030405"}}
+{{$number|format_phone_number}}
+```
+
+Affichera :
+
+```
+01 02 03 04 05
+```
+
 ## markdown
 
 Transforme un texte en HTML en utilisant la syntaxe Markdown.
@@ -492,6 +512,41 @@ Exemple pour afficher la liste des membres des catégories n°1 et n°2:
 
 Le requête SQL générée sera alors `SELECT nom FROM users WHERE id_category IN (1, 2)`.
 
+## sql_user_fields
+
+Permet de récupérer le contenu de champs de la fiche utilisateur pour une requête SQL.
+
+C'est particulièrement utile si le module permet de sélectionner dans sa configuration une liste de champs de membre (par exemple pour la carte de membre, ou les reçus fiscaux).
+
+Si un champ mentionné n'existe plus dans les fiches de membres, il sera ignoré.
+
+* Le premier paramètre est la liste des champs (tableau ou chaîne de texte)
+* Le second est le préfixe à utiliser (alias de la table membres), optionnel
+* Le troisième est la chaîne de texte à utiliser pour coller les champs entre eux
+
+Exemple :
+
+```
+{{:assign var="champs_adresse." value="rue"}}
+{{:assign var="champs_adresse." value="ville"}}
+{{:assign var="champs_adresse_sql" value=$champs_adresse|sql_user_fields:"u":" - "}}
+{{#select !champs_adresse_sql AS adresse FROM users AS u; !champs_adresse_sql=$champs_adresse_sql}}
+	{{$adresse}}
+{{/select}}
+```
+
+Affichera :
+
+```
+30 rue de Machin Chose — Dijon
+```
+
+Et la clause SQL générée sera :
+
+```
+LTRIM(COALESCE(' - ' || u.rue, '') || COALESCE(' - ' || u.ville), ' - ')
+```
+
 # Filtres de date
 
 ## date
@@ -502,6 +557,13 @@ Le format est identique au [format utilisé par PHP](https://www.php.net/manual/
 
 Si aucun format n'est indiqué, le défaut sera `d/m/Y à H:i`. (en français)
 
+Exemples :
+
+```
+{{:assign this_year=$now|date:'Y'}}
+{{$date|date:'d/m/Y'}}
+```
+
 ## strftime
 
 Formatte une date selon un format spécifié en premier paramètre.
@@ -511,6 +573,11 @@ Le format à utiliser est identique [au format utilisé par la fonction strftime
 Un format doit obligatoirement être spécifié.
 
 En passant un code de langue en second paramètre, cette langue sera utilisée. Sont supportés le français (`fr`) et l'anglais (`en`). Le défaut est le français si aucune valeur n'est passée en second paramètre .
+
+```
+{{:assign this_year=$now|date:'%Y'}}
+{{$date|date:'%d/%m/%Y'}}
+```
 
 ## relative_date 
 

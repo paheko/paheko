@@ -20,7 +20,7 @@ Permet d'itérer sur un tableau par exemple. Ainsi chaque élément du tableau e
 | :- | :- | :- |
 | `from` | **obligatoire** | Variable sur laquelle effectuer l'itération |
 | `key` | **optionnel** | Nom de la variable à utiliser pour la clé de l'élément |
-| `value` | **optionnel** | Nom de la variable à utiliser pour la valeur de l'élément |
+| `item` | **optionnel** | Nom de la variable à utiliser pour la valeur de l'élément |
 
 Considérons ce tableau :
 
@@ -248,24 +248,41 @@ Effectue une requête SQL de type `SELECT` dans la base de données, mais de man
 
 ### Sections qui héritent de `sql`
 
-Certaines sections (voir plus bas) héritent de `sql` et rajoutent des fonctionnalités. Dans toutes ces sections, il est possible d'utiliser les paramètres suivants :
+Certaines sections (voir plus bas) héritent de `sql` et rajoutent des fonctionnalités. Dans toutes ces sections, il est possible d'utiliser les paramètres facultatifs suivants :
 
 | Paramètre | Fonction |
 | :- | :- |
 | `where` | Condition de sélection des résultats |
 | `begin` | Début des résultats, si vide une valeur de `0` sera utilisée. |
-| `limit` | Limitation des résultats. Si vide, une valeur de `1000` sera utilisée. |
+| `limit` | Limitation des résultats. Si vide, une valeur de `10000` sera utilisée. |
 | `group` | Contenu de la clause `GROUP BY` |
 | `having` | Contenu de la clause `HAVING` |
 | `order` | Ordre de tri des résultats. Si vide le tri sera fait par ordre d'ajout dans la base de données. |
 | `assign` | Si renseigné, une variable de ce nom sera créée, et le contenu de la ligne du résultat y sera assigné. | 
 | `debug` | Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle. |
 | `explain` | Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle. | 
+| `count` | Booléen ou texte. Si ce paramètre est `TRUE`, le nombre de résultats sera retourné. Si une chaîne de texte est indiquée, elle sera utilisée dans la clause `COUNT(<texte>)`. |
 
 Il est également possible de passer des arguments dans les paramètres à l'aides des arguments nommés qui commencent par deux points `:` :
 
 ```
 {{#articles where="title = :montitre" :montitre="Actualité"}}
+```
+
+Exemples d'utilisation du paramètre `count` :
+
+```
+{{#articles count=true}}
+	Il y a {{$count}} articles.
+{{/articles}}
+
+{{#articles count=true assign="result"}}
+{{/articles}}
+Il y a {{$result.count}} articles.
+
+{{#articles count="DISTINCT title"}}
+	Il y a {{$count}} articles avec un titre différent.
+{{/articles}}
 ```
 
 # Membres
@@ -587,7 +604,7 @@ La section `{{#form …}}` permet de simplifier ces tests, et s'assurer qu'aucun
 
 ## load <sup>(sql)</sup>
 
-Note : cette section hérite de `sql` (voir plus haut).
+Note : cette section hérite de `sql` (voir plus haut). De ce fait, le nombre de résultats est limité à 10000 par défaut, si le paramètre `limit` n'est pas renseigné.
 
 Charge un ou des documents pour le module courant.
 
@@ -686,6 +703,7 @@ Cette section est très puissante et permet de générer des listes simplement, 
 | `where` | *optionnel* | Condition `WHERE` de la requête SQL. |
 | `debug` | *optionnel* | Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle. |
 | `explain` | *optionnel* | Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle. | 
+| `disable_user_ordering` | *optionnel* | Booléen. Si ce paramètre est `true`, il ne sera pas possible à l'utilisateur d'ordonner les colonnes. |
 
 Pour déterminer quelles colonnes afficher dans le tableau, il faut utiliser soit le paramètre `schema` pour indiquer un fichier de schéma JSON qui sera utilisé pour donner le libellé des colonnes (via la `description` indiquée dans le schéma), soit le paramètre `select`, où il faut alors indiquer le nom et le libellé des colonnes sous la forme `$$.colonne1 AS "Libellé"; $$.colonne2 AS "Libellé 2"`.
 
@@ -709,6 +727,8 @@ Ainsi que chaque élément du document JSON lui-même.
 La section ouvre un tableau HTML et le ferme automatiquement, donc le contenu de la section **doit** être une ligne de tableau HTML (`<tr>`).
 
 Dans chaque ligne du tableau il faut respecter l'ordre des colonnes indiqué dans `columns` ou `select`. Une dernière colonne est réservée aux boutons d'action : `<td class="actions">...</td>`.
+
+**Attention :** une seule liste peut être utilisée dans une même page. Avoir plusieurs listes provoquera des problèmes au niveau du tri des colonnes.
 
 ### Exemples
 

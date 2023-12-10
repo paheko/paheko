@@ -85,15 +85,23 @@ class Server
 	static public function auth(): bool
 	{
 		$session = Session::getInstance();
+
 		if ($session->isLogged()) {
 			return true;
 		}
 
-		if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
+		$login = $_SERVER['PHP_AUTH_USER'] ?? null;
+		$password = $_SERVER['PHP_AUTH_PW'] ?? null;
+
+		if (!isset($login, $password)) {
 			return false;
 		}
 
-		if ($session->login($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
+		if ($session->loginAPI($login, $password)) {
+			return true;
+		}
+
+		if ($session->login($login, $password)) {
 			return true;
 		}
 

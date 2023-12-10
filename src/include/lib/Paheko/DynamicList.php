@@ -467,8 +467,8 @@ class DynamicList implements \Countable
 				$out .= sprintf('<button type="submit" name="_dl_page" value="%d">%s</button>', $page['id'], htmlspecialchars($page['label']));
 			}
 			else {
-				$out .= sprintf('<a accesskey="%s" href="%s">%s</a>',
-					$page['accesskey'] ?? '',
+				$out .= sprintf('<a %s href="%s">%s</a>',
+					isset($page['accesskey']) ? 'accesskey="' . strtoupper($page['accesskey']) . '"' : '',
 					str_replace('DDD', $page['id'], $url),
 					htmlspecialchars($page['label'])
 				);

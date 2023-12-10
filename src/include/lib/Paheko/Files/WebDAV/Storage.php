@@ -196,6 +196,11 @@ class Storage extends AbstractStorage
 				return '';
 			case NextCloud::PROP_OC_ID:
 				// fileId is required by NextCloud desktop client
+				if (!isset($file->id)) {
+					// Root directory doesn't have a ID, give something random instead
+					return 10000000;
+				}
+
 				return $file->id();
 			case NextCloud::PROP_OC_PERMISSIONS:
 				$permissions = [
@@ -452,7 +457,7 @@ class Storage extends AbstractStorage
 		$token_decode = WOPI::base64_decode_url_safe($token);
 		$hash = strtok($token_decode, '_');
 		$session_id = strtok('_');
-		$ttl = (int) strtok(false);
+		$ttl = (int) strtok('');
 		$check = WebDAV::hmac(compact('uri', 'ttl', 'session_id'), SECRET_KEY);
 
 		if (!hash_equals($hash, $check)) {

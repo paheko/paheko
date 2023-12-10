@@ -1,6 +1,7 @@
-.PHONY: dev-server release deps publish check-dependencies test minify phpstan www htaccess modules
+.PHONY: dev-server release deps publish check-dependencies test minify phpstan www htaccess modules installer plugins
 KD2_FILE := https://fossil.kd2.org/kd2fw/uv/KD2-7.4.zip
 MODULES_FILE := https://fossil.kd2.org/paheko-modules/zip/trunk/modules.zip
+PLUGINS_FILE := https://fossil.kd2.org/paheko-plugins/zip/trunk/plugins.zip
 
 deps:
 	$(eval TMP_KD2=$(shell mktemp -d))
@@ -17,6 +18,11 @@ modules:
 	wget ${MODULES_FILE} -O modules.zip
 	unzip -u modules.zip
 	rm -f modules.zip
+
+plugins:
+	wget ${PLUGINS_FILE} -O plugins.zip
+	unzip -u plugins.zip -d data
+	rm -f plugins.zip
 
 dev-server:
 	php -S localhost:8082 -d upload_max_filesize=256M -d post_max_size=256M -t www www/_route.php
@@ -83,7 +89,7 @@ deb:
 windows:
 	cd ../build/windows; make installer
 
-publish: release deb windows
+publish: installer release deb windows
 	$(eval VERSION=$(shell cat VERSION))
 	cd ../build && gpg --armor -u dev@paheko.cloud --detach-sign paheko-${VERSION}.tar.gz
 	fossil uv sync
@@ -92,12 +98,15 @@ publish: release deb windows
 		fossil uv add paheko-${VERSION}.tar.gz && \
 		fossil uv add paheko-${VERSION}.tar.gz.asc
 	cd ../build/debian && fossil uv add paheko-${VERSION}.deb
-	cd ../tools && php make_installer.php > install.php && fossil uv add install.php && rm install.php
+	cd ../tools && fossil uv add install.php && rm install.php
 	fossil uv sync
 	cd ../build/windows && make publish
 
 check-dependencies:
 	grep -hEo '^use \\?KD2\\[^; ]+|\\KD2\\[^\(:; ]+' -R include/lib/Garradin www | sed -r 's/^use \\?KD2\\|^\\KD2\\//' | sort | uniq
+
+installer:
+	cd ../tools && php make_installer.php > install.php
 
 minify:
 	cat `ls www/admin/static/styles/[0-9]*.css` | sed 's/\.\.\///' > www/admin/static/mini.css

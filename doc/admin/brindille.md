@@ -29,22 +29,77 @@ Les autres types de fichiers seront renvoyés sans traitement, comme des fichier
 
 # Syntaxe de base
 
+## Variables
+
+En programmation, une variable est une référence vers une donnée stockée en mémoire.
+
+Dans Brindille, une variable commence par le symbole dollar `$` et suivi d'un nom.
+
+Le nom est composé de lettres minuscules (sans accents), de chiffres et de tirets bas (`[a-z0-9_]`).
+
+Exemples de variables :
+
+```
+$config
+$compte_32
+$nom_de_variable_long
+```
+
+### Types de variables
+
+Dans Brindille, une variable peut avoir un des types suivants :
+
+* `null` : utilisé pour une variable qui n'est pas définie, ou une variable définie qui n'a pas de valeur
+* `boolean` : valeur booléenne, peut seulement avoir `true` ou `false` comme valeur
+* `integer` : nombre entier (sans virgule). Exemple : `4200`.
+* `float` : nombre à virgule flottante, exemple `3.14`. Leur usage est déconseillé, car les erreurs de calcul sont possibles, les ordinateurs ne sachant pas compter de manière précise avec les nombres à virgule flottante. Exemple : `0.2+0.3` est différent de `0.5`.
+* `string` : chaîne de texte (aussi appelé chaîne de caractères, car c'est une suite de caractères). Exemple : `coucou`.
+* `array` : tableau.
+
+### Tableaux
+
+Les tableaux sont une sorte de dictionnaire, ou pour chaque entrée (appelée "clé") on peut associer une valeur. qui peut être de n'importe lequel des types listés ci-dessus, y compris un autre tableau.
+
+Les tableaux peuvent être de deux types :
+
+1. tableau indexé (liste) : dans ce cas les clés ne sont pas choisies, on ajoute simplement des valeurs, et l'ordinateur incrémente le numéro de la clé à chaque nouvelle entrée dans le tableau. La numérotation commence au chiffre zéro.
+2. tableau associatif (dictionnaire) : les clés sont des nombres ou des chaînes de texte, et permettent, comme dans un dictionnaire, de choisir la clé.
+
+Exemple de tableau indexé :
+
+```
+[
+  0 => 'Texte 1',
+  1 => 'Texte 2'
+]
+```
+
+Exemple de tableau associatif :
+
+```
+[
+  'un' => 'Texte 1',
+  'deux' => 'Texte 2'
+]
+```
+
 ## Affichage de variable
 
 Une variable est affichée à l'aide de la syntaxe : `{{$date}}` affichera la valeur brute de la date par exemple : `2020-01-31 16:32:00`.
 
 La variable peut être modifiée à l'aide de filtres de modification, qui sont ajoutés avec le symbole de la barre verticale (pipe `|`) : `{{$date|date_long}}` affichera une date au format long : `jeudi 7 mars 2021`.
 
-Ces filtres peuvent accepter des paramètres, séparés par deux points `:`. Exemple : `{{$date|date:"%d/%m/%Y"}}` affichera `31/01/2020`.
+Ces filtres peuvent accepter des paramètres, séparés par deux points `:`. Exemple : `{{$date|date:"d/m/Y"}}` affichera `31/01/2020`.
 
 Par défaut la variable sera recherchée dans le contexte actuel de la section, si elle n'est pas trouvée elle sera recherchée dans le contexte parent (section parente), etc. jusqu'à trouver la variable.
 
-Il est possible de faire référence à une variable d'un contexte particulier avec la notation à points : `{{$article.date}}`.  
-La même syntaxe est utilisée pour accéder aux membres d'un tableau : `{{$labels.new_page}}`.
+### Protection contre le HTML (échappement)
 
-Il existe deux variables de contexte spécifiques : `$_POST` et `$_GET` qui permettent d'accéder aux données envoyées dans un formulaire et dans les paramètres de la page.
+Par défaut le filtre `escape` est appliqué à toutes les variables affichées, pour protéger les variables contre les injections de code HTML.
 
-Par défaut le filtre `escape` est appliqué à toutes les variables pour protéger les variables contre les injections de code HTML. Ce filtre est appliqué en dernier, après les autres filtres. Il est possible de contourner cet automatisme en rajoutant le filtre `escape` ou `raw` explicitement. `raw` désactive tout échappement, alors que `escape` est utilisé pour changer l'ordre d'échappement. Exemple :
+Ce filtre modifie (on dit qu'il "échappe") les caractères HTML `<>&"'` présents dans une chaîne de texte en entités HTML, évitant que le HTML éventuellement présent dans la chaîne de texte soit interprété par le navigateur.
+
+Ce filtre est appliqué en dernier, après les autres filtres. Il est possible de contourner cet automatisme en rajoutant le filtre `escape` ou `raw` explicitement. `raw` désactive tout échappement, alors que `escape` est utilisé pour changer l'ordre d'échappement. Exemple :
 
 ```
 {{:assign text = "Coucou\nça va ?" }}
@@ -52,6 +107,10 @@ Par défaut le filtre `escape` est appliqué à toutes les variables pour proté
 ```
 
 Donnera bien `Coucou<br />ça va ?`. Si on n'avait pas indiqué le filtre `escape` le résultat serait `Coucou&lt;br /&gt;ça va ?`.
+
+### Variables de tableaux
+
+Il est possible de faire référence à une clé d'un tableau avec la notation à points : `{{$article.date}}` renverra la clé `date` du tableau stocké dans la variable `$article`.
 
 ### Échappement des caractères spéciaux dans les chaînes de caractère
 
@@ -168,6 +227,16 @@ Exemple :
 {{:assign var='processed_ids.' value=17}}
 {{:assign var='processed_ids.' value=43}}
 {{:assign var='processed_ids.' value=214}}
+```
+
+Donnera le tableau suivant :
+
+```
+[
+  0 => 17,
+  1 => 43,
+  2 => 214
+]
 ```
 
 #### Clef dynamique de tableau
@@ -356,8 +425,8 @@ Ces variables sont définies tout le temps :
 
 | Nom de la variable | Valeur |
 | :- | :- |
-| `$_GET` | Alias de la super-globale _GET de PHP. |
-| `$_POST` | Alias de la super-globale _POST de PHP. |
+| `$_GET` | Tableau contenant tous les paramètres passés dans la chaîne de requêtre de l'URL. |
+| `$_POST` | Tableau de tous les éléments de formulaire envoyés lors d'une requête POST. |
 | `$root_url` | Adresse racine du site web Paheko. |
 | `$request_url` | Adresse de la page courante. |
 | `$admin_url` | Adresse de la racine de l'administration Paheko. |

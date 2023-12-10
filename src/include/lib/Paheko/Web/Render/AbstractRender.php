@@ -27,6 +27,7 @@ abstract class AbstractRender
 
 		if ($path) {
 			$this->context = strtok($path, '/');
+			strtok('');
 
 			if ($this->context === File::CONTEXT_WEB) {
 				$this->parent = $path;
@@ -120,6 +121,7 @@ abstract class AbstractRender
 		$uri = implode('/', $uri);
 
 		$context = strtok($this->path, '/');
+		strtok('');
 
 		$attachment = null;
 

@@ -29,15 +29,18 @@
 					<span class="error">{$r.status}</span>
 				{/if}
 			</td>
-			<td>
+			<td class="actions">
+				{if $r.has_extra_data}
+					{linkbutton shape="menu" label="Données" href="recipient_data.php?id=%d&r=%d"|args:$mailing.id:$r.id target="_dialog"}
+				{/if}
+				{if $r.id_user}
+					{linkbutton shape="user" label="Fiche membre" href="!users/details.php?id=%d"|args:$r.id_user}
+				{/if}
 				{if !$mailing.sent}
 					{button shape="delete" label="Supprimer" name="delete" value=$r.id type="submit"}
 				{/if}
 				{if !$mailing.anonymous && $r.email}
-					{linkbutton href="details.php?id=%d&preview=%s"|args:$mailing.id:$r.email label="Prévisualiser" shape="eye" target="_dialog"}
-				{/if}
-				{if $r.status}
-					{linkbutton href="rejected.php?hl=%d#e_%1\$d"|args:$r.id_email label="Détails de l'erreur" shape="help"}
+					{linkbutton href="details.php?id=%d&preview=%d"|args:$mailing.id:$r.id label="Prévisualiser" shape="eye" target="_dialog"}
 				{/if}
 			</td>
 		</tr>

@@ -3,7 +3,11 @@
 {include file="services/_nav.tpl" current="reminders"}
 
 <p class="help">
-	Les rappels automatiques sont envoyés aux membres disposant d'une adresse e-mail selon le délai défini. Il est possible de définir plusieurs rappels pour une même activité.
+	Les rappels automatiques sont envoyés aux membres disposant d'une adresse e-mail selon le délai défini.<br />
+	Il est possible de définir plusieurs rappels pour une même activité.<br />
+	{if USE_CRON}
+		Les rappels sont envoyés automatiquement chaque jour.
+	{/if}
 </p>
 
 {if empty($list)}
@@ -33,7 +37,8 @@
 					</td>
 					<th><a href="details.php?id={$reminder.id}">{$reminder.subject}</a></th>
 					<td class="actions">
-						{linkbutton shape="mail" label="Liste des rappels envoyés" href="!services/reminders/details.php?id=%d"|args:$reminder.id}
+						{linkbutton shape="history" label="Liste des rappels envoyés" href="!services/reminders/details.php?id=%d&list=sent"|args:$reminder.id}
+						{linkbutton shape="mail" label="Liste des rappels à envoyer" href="!services/reminders/details.php?id=%d&list=pending"|args:$reminder.id}<br />
 						{linkbutton shape="edit" label="Modifier" href="!services/reminders/edit.php?id=%d"|args:$reminder.id}
 						{linkbutton shape="delete" label="Supprimer" href="!services/reminders/delete.php?id=%d"|args:$reminder.id}
 					</td>

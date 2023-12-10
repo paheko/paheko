@@ -63,6 +63,10 @@
 		<li><a href="#resume-technique">Résumé technique</a></li>
 		<li><a href="#structure-des-repertoires">Structure des répertoires</a>
 		<ol>
+			<li><a href="#snippets">Snippets</a>
+			<ol>
+				<li><a href="#snippets-markdown">Snippets MarkDown</a>
+			</ol></li>
 			<li><a href="#fichier-module-ini">Fichier module.ini</a>
 		</ol></li>
 		<li><a href="#variables-speciales">Variables spéciales</a></li>
@@ -88,7 +92,7 @@
 <p>Depuis la version 1.3, Paheko dispose d'extensions modifiables, nommées <strong>Modules</strong>.</p>
 <p>Les modules permettent de créer et modifier des formulaires, des modèles de documents simples, à imprimer, mais aussi de créer des "mini-applications" directement dans l'administration de l'association, avec le minimum de code, sans avoir à apprendre à programmer PHP.</p>
 <p>Les modules utilisent le langage <a href="brindille.html">Brindille</a>, aussi utilisé pour le site web (qui est lui-même un module). Avec Brindille on parle d'un <strong>squelette</strong> pour un fichier texte contenant du code Brindille.</p>
-<p>Les modules ne permettent pas d'exécuter du code PHP, ni de modifier la base de données en dehors des données du module, contrairement aux <a href="https://fossil.kd2.org/paheko/wiki?name=Documentation/Plugin&amp;p" target="_blank" rel="noreferrer">plugins</a>. Grâce à Brindille, les administrateurs de l'association peuvent modifier ou créer de nouveaux modules sans risques pour le serveur, car le code Brindille ne permet pas d'exécuter de fonctions dangereuses. Les <strong>plugins</strong> eux sont écrits en PHP et ne peuvent pas être modifiés par une association. Du fait des risques de sécurité, seuls les plugins officiels sont proposés sur Paheko.cloud.</p>
+<p>Les modules ne permettent pas d'exécuter du code PHP, ni de modifier la base de données en dehors des données du module, contrairement aux <a href="https://fossil.kd2.org/paheko/wiki?name=Documentation/Plugin&amp;p" rel="noreferrer noopener external" target="_blank">plugins</a>. Grâce à Brindille, les administrateurs de l'association peuvent modifier ou créer de nouveaux modules sans risques pour le serveur, car le code Brindille ne permet pas d'exécuter de fonctions dangereuses. Les <strong>plugins</strong> eux sont écrits en PHP et ne peuvent pas être modifiés par une association. Du fait des risques de sécurité, seuls les plugins officiels sont proposés sur Paheko.cloud.</p>
 <h1 id="exemples">Exemples</h1>
 <p>Paheko fournit quelques modules par défaut, qui peuvent être modifiés ou servir d'inspiration pour de nouveaux modules :</p>
 <ul>
@@ -115,8 +119,8 @@
 <li>Utilisation de la syntaxe Brindille</li>
 <li>Les modules peuvent utiliser toutes les fonctions et boucles de Brindille</li>
 <li>Les modules peuvent stocker et récupérer des données dans la base SQLite dans une table clé-valeur spécifique à chaque module</li>
-<li>Les données du module sont stockées en JSON, on peut faire des requêtes complètes avec l'extension <a href="https://www.sqlite.org/json1.html" target="_blank" rel="noreferrer">JSON de SQLite</a></li>
-<li>Les données peuvent être validées avant enregistrement en utilisant <a href="https://json-schema.org/understanding-json-schema/" target="_blank" rel="noreferrer">JSON Schema</a></li>
+<li>Les données du module sont stockées en JSON, on peut faire des requêtes complètes avec l'extension <a href="https://www.sqlite.org/json1.html" rel="noreferrer noopener external" target="_blank">JSON de SQLite</a></li>
+<li>Les données peuvent être validées avant enregistrement en utilisant <a href="https://json-schema.org/understanding-json-schema/" rel="noreferrer noopener external" target="_blank">JSON Schema</a></li>
 <li>Un module peut également accéder aux données des autres modules</li>
 <li>Un module peut aussi accéder à toutes les données de la base de données, sauf certaines données à risque (voir plus bas)</li>
 <li>Un module ne peut pas modifier les données de la base de données</li>
@@ -131,12 +135,41 @@
 <li><code>icon.svg</code> : icône du module, qui sera utilisée sur la page d'accueil, si le bouton est activé, et dans la liste des modules. Attention l'élément racine du fichier doit porter l'id <code>img</code> pour que l'icône fonctionne (<code>&lt;svg id="img"...&gt;</code>), notamment pour que les couleurs du thème s'appliquent à l'icône.</li>
 <li><code>README.md</code> : si ce fichier existe, son contenu sera affiché dans les détails du module</li>
 </ul>
+<h2 id="snippets">Snippets</h2>
 <p>Les modules peuvent également avoir des <code>snippets</code>, ce sont des squelettes qui seront inclus à des endroits précis de l'interface, permettant de rajouter des fonctionnalités, ils sont situés dans le sous-répertoire <code>snippets</code> du module :</p>
 <ul>
 <li><code>snippets/transaction_details.html</code> : sera inclus en dessous de la fiche d'une écriture comptable</li>
+<li><code>snippets/transaction_new.html</code> : sera inclus au début du formulaire de saisie d'écriture</li>
 <li><code>snippets/user_details.html</code> : sera inclus en dessous de la fiche d'un membre</li>
+<li><code>snippets/my_details.html</code> : sera inclus en dessous de la page "Mes informations personnelles"</li>
+<li><code>snippets/my_services.html</code> : sera inclus en dessous de la page "Mes inscriptions et cotisations"</li>
 <li><code>snippets/home_button.html</code> : sera inclus dans la liste des boutons de la page d'accueil (ce fichier ne sera pas appelé si <code>home_button</code> est à <code>true</code> dans <code>module.ini</code>, il le remplace)</li>
 </ul>
+<h3 id="snippets-markdown">Snippets MarkDown</h3>
+<p>Il est également possible, depuis Paheko 1.3.2, d'étendre les fonctionnalités Markdown du site web en créant un snippet dans le répertoire <code>snippets/markdown/</code>, par exemple <code>snippets/markdown/map.html</code>.</p>
+<p>Le snippet sera appelé quand on utilise le tag du même nom dans le contenu du site web. Ici par exemple ça serait <code>&lt;&lt;map&gt;&gt;</code>.</p>
+<p>Le nom du snippet doit commencer par une lettre minuscule et peut être suivi de lettres minuscules, de chiffres, ou de tirets bas. Exemples : <code>map2024</code> <code>map_openstreetmap</code>, etc.</p>
+<p>Le snippet reçoit ces variables :</p>
+<ul>
+<li><code>$params</code> : les paramètres du tag</li>
+<li><code>$block</code> : booléen, <code>TRUE</code> si le tag est seul sur une ligne, ou <code>FALSE</code> s'il se situe à l'intérieur d'un texte</li>
+<li><code>$content</code> : le contenu du bloc, si celui-ci est sur plusieurs lignes</li>
+</ul>
+<p>Exemple :</p>
+<pre><code>&lt;&lt;map center="Auckland, New Zealand"
+
+Ceci est la capitale de Nouvelle-Zélande !
+&gt;&gt;
+
+Voici un marqueur : &lt;&lt;map marker&gt;&gt;</code></pre>
+<p>Dans le premier appel, <code>map.html</code> recevra ces variables :</p>
+<pre><code>$params = ['center' =&gt; 'Auckland, New Zealand']
+$content = "Ceci est la capitale de Nouvelle-Zélande !"
+$block = TRUE</code></pre>
+<p>Dans le second appel, le snippet recevra celles-ci :</p>
+<pre><code>$params = [0 =&gt; 'marker']
+$content = NULL
+$block = FALSE</code></pre>
 <h2 id="fichier-module-ini">Fichier module.ini</h2>
 <p>Ce fichier décrit le module, au format INI (<code>clé=valeur</code>), en utilisant les clés suivantes :</p>
 <ul>
@@ -170,12 +203,12 @@
 {{/if}}</code></pre>
 <h2 id="stockage-de-documents-json">Stockage de documents JSON</h2>
 <p>Chaque module peut stocker ses données dans une base de données clé-document qui stockera les données dans des documents au format JSON dans une table SQLite.</p>
-<p>Grâce aux <a href="https://www.sqlite.org/json1.html" target="_blank" rel="noreferrer">fonctions JSON de SQLite</a> on pourra ensuite effectuer des recherches sur ces documents.</p>
+<p>Grâce aux <a href="https://www.sqlite.org/json1.html" rel="noreferrer noopener external" target="_blank">fonctions JSON de SQLite</a> on pourra ensuite effectuer des recherches sur ces documents.</p>
 <p>Pour enregistrer il suffit d'utiliser la fonction <code>save</code> :</p>
 <pre><code>{{:save key="facture001" type="facture" date="2022-01-01" label="Vente de petits pains au chocolat" total="42"}}</code></pre>
 <p>Si la clé indiquée (dans le paramètre <code>key</code>) n'existe pas, l'enregistrement sera créé, sinon il sera mis à jour avec les valeurs données.</p>
 <h3 id="validation">Validation</h3>
-<p>On peut utiliser un <a href="https://json-schema.org/understanding-json-schema/" target="_blank" rel="noreferrer">schéma JSON</a> pour valider que le document qu'on enregistre est valide :</p>
+<p>On peut utiliser un <a href="https://json-schema.org/understanding-json-schema/" rel="noreferrer noopener external" target="_blank">schéma JSON</a> pour valider que le document qu'on enregistre est valide :</p>
 <pre><code>{{:save validate_schema="./document.schema.json" type="facture" date="2022-01-01" label="Vente de petits pains au chocolat" total="42"}}</code></pre>
 <p>Le fichier <code>document.schema.json</code> devra être dans le même répertoire que le squelette et devra contenir un schéma valide. Voici un exemple :</p>
 <pre><code>{

@@ -15,7 +15,7 @@ class Web
 {
 	const BREADCRUMBS_SQL = '
 		WITH RECURSIVE parents(title, id_parent, uri, id, level) AS (
-			SELECT title, id_parent, uri, id, 1 FROM web_pages WHERE id = %d
+			SELECT title, id_parent, uri, id, 1 FROM web_pages WHERE id = %s
 			UNION ALL
 			SELECT p.title, p.id_parent, p.uri, p.id, level + 1
 			FROM web_pages p
@@ -103,6 +103,46 @@ class Web
 		$list->setParameter('type', Page::TYPE_PAGE);
 		$list->setParameter('status', Page::STATUS_ONLINE);
 		$list->orderBy('title', false);
+		return $list;
+	}
+
+	static public function getAllList(): DynamicList
+	{
+		$db = DB::getInstance();
+
+		$columns = [
+			'id' => [],
+			'uri' => [
+			],
+			'title' => [
+				'label' => 'Titre',
+				'order' => 'title COLLATE U_NOCASE %s',
+			],
+			'path' => [
+				'label' => 'Catégorie',
+				'select' => sprintf('(SELECT GROUP_CONCAT(title, \' > \') FROM (%s))',
+					rtrim(sprintf(Web::BREADCRUMBS_SQL, 'p.id_parent'), '; ')),
+			],
+			'draft' => [
+				'label' => 'Brouillon',
+				'select' => sprintf('CASE WHEN p.status = %s THEN 1 ELSE 0 END',
+					$db->quote(Page::STATUS_DRAFT),
+				),
+				'order' => 'status %s, title COLLATE U_NOCASE %1$s',
+			],
+			'published' => [
+				'label' => 'Publication',
+			],
+			'modified' => [
+				'label' => 'Modification',
+			],
+		];
+
+		$tables = Page::TABLE . ' AS p';
+
+		$list = new DynamicList($columns, $tables);
+		$list->orderBy('title', false);
+		$list->setPageSize(null);
 		return $list;
 	}
 

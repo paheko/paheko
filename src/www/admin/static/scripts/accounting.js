@@ -2,6 +2,12 @@ function initTransactionForm(is_new) {
 	var form = $('form')[0];
 	// Check if an account is listed twice and ask for confirmation
 	form.addEventListener('submit', (e) => {
+		var type = document.querySelector('input[name=type]:checked');
+
+		if (type.value) {
+			return true;
+		}
+
 		var accounts = [];
 		var lines = $('.transaction-lines tbody tr');
 

@@ -5,7 +5,13 @@ namespace Paheko;
 if (!empty(getenv('LOCALAPPDATA'))) {
 	// Store data in user AppData directory
 	define('Paheko\DATA_ROOT', trim(getenv('LOCALAPPDATA'), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'Paheko');
+
+	if (!file_exists(DATA_ROOT)) {
+		@mkdir(DATA_ROOT, 0700, true);
+	}
 }
+
+define('Paheko\PLUGINS_ROOT', __DIR__ . '/data/plugins');
 
 // Store secret key in user directory
 if (!defined('Paheko\SECRET_KEY')) {

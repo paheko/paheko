@@ -69,11 +69,57 @@ Dans ce répertoire le module peut avoir autant de fichiers qu'il veut, mais cer
 * `icon.svg` : icône du module, qui sera utilisée sur la page d'accueil, si le bouton est activé, et dans la liste des modules. Attention l'élément racine du fichier doit porter l'id `img` pour que l'icône fonctionne (`<svg id="img"...>`), notamment pour que les couleurs du thème s'appliquent à l'icône.
 * `README.md` : si ce fichier existe, son contenu sera affiché dans les détails du module
 
+## Snippets
+
 Les modules peuvent également avoir des `snippets`, ce sont des squelettes qui seront inclus à des endroits précis de l'interface, permettant de rajouter des fonctionnalités, ils sont situés dans le sous-répertoire `snippets` du module :
 
 * `snippets/transaction_details.html` : sera inclus en dessous de la fiche d'une écriture comptable
+* `snippets/transaction_new.html` : sera inclus au début du formulaire de saisie d'écriture
 * `snippets/user_details.html` : sera inclus en dessous de la fiche d'un membre
+* `snippets/my_details.html` : sera inclus en dessous de la page "Mes informations personnelles"
+* `snippets/my_services.html` : sera inclus en dessous de la page "Mes inscriptions et cotisations"
 * `snippets/home_button.html` : sera inclus dans la liste des boutons de la page d'accueil (ce fichier ne sera pas appelé si `home_button` est à `true` dans `module.ini`, il le remplace)
+
+### Snippets MarkDown
+
+Il est également possible, depuis Paheko 1.3.2, d'étendre les fonctionnalités Markdown du site web en créant un snippet dans le répertoire `snippets/markdown/`, par exemple `snippets/markdown/map.html`.
+
+Le snippet sera appelé quand on utilise le tag du même nom dans le contenu du site web. Ici par exemple ça serait `<<map>>`.
+
+Le nom du snippet doit commencer par une lettre minuscule et peut être suivi de lettres minuscules, de chiffres, ou de tirets bas. Exemples : `map2024` `map_openstreetmap`, etc.
+
+Le snippet reçoit ces variables :
+
+* `$params` : les paramètres du tag
+* `$block` : booléen, `TRUE` si le tag est seul sur une ligne, ou `FALSE` s'il se situe à l'intérieur d'un texte
+* `$content` : le contenu du bloc, si celui-ci est sur plusieurs lignes
+
+Exemple :
+
+```
+<<map center="Auckland, New Zealand"
+
+Ceci est la capitale de Nouvelle-Zélande !
+>>
+
+Voici un marqueur : <<map marker>>
+```
+
+Dans le premier appel, `map.html` recevra ces variables :
+
+```
+$params = ['center' => 'Auckland, New Zealand']
+$content = "Ceci est la capitale de Nouvelle-Zélande !"
+$block = TRUE
+```
+
+Dans le second appel, le snippet recevra celles-ci :
+
+```
+$params = [0 => 'marker']
+$content = NULL
+$block = FALSE
+```
 
 ## Fichier module.ini
 

@@ -30,7 +30,8 @@ $transaction = new Transaction;
 $amount = 0;
 $id_project = null;
 $linked_users = null;
-$linked_services = [];
+$linked_transactions = null;
+$payoff = null;
 
 $lines = [[], []];
 
@@ -54,6 +55,19 @@ if (qg('copy')) {
 	$linked_users = $old->listLinkedUsersAssoc();
 
 	$tpl->assign('duplicate_from', $old->id());
+}
+elseif (qg('payoff')) {
+	$list = explode(',', qg('payoff'));
+
+	// Quick pay-off for debts and credits, directly from a debt/credit details page
+	$payoff = Transactions::createPayoffFrom($list);
+	$transaction = $payoff->transaction;
+	$linked_users = $payoff->linked_users;
+	$linked_transactions = $payoff->linked_transactions;
+	$id_project = $payoff->id_project;
+
+	$lines = $transaction->getLinesWithAccounts();
+	$amount = $payoff->amount;
 }
 else {
 	$defaults = $transaction->setDefaultsFromQueryString($accounts);
@@ -105,32 +119,31 @@ if ($id = qg('account')) {
 	}
 }
 
-$form->runIf('save', function () use ($transaction, $session, $linked_services) {
-	$transaction->importFromNewForm();
+$form->runIf('save', function () use ($transaction, $session, $payoff) {
+	if ($payoff) {
+		$transaction->importFromPayoffForm($payoff);
+	}
+	else {
+		$transaction->importFromNewForm();
+	}
+
 	$transaction->id_creator = $session->getUser()->id;
 	$transaction->save();
-
-	 // Link members
-	if (null !== f('users') && is_array(f('users'))) {
-		$users = f('users');
-
-		foreach ($linked_services as $user_id => $service_id) {
-			// Maybe the user was deleted from the list manually
-			if (array_key_exists($user_id, $users)) {
-				// Link service_user relationship to transaction
-				$transaction->linkToUser($user_id, $service_id);
-			}
-
-			unset($users[$user_id]);
-		}
-
-		if (count($users)) {
-			$transaction->updateLinkedUsers(array_keys($users));
-		}
-	}
+	$transaction->saveLinks();
 
 	$session->set('acc_last_date', $transaction->date->format('Y-m-d'));
 	$session->save();
+
+	if ($payoff) {
+		$transaction->updateLinkedTransactions(array_keys($payoff->transactions));
+
+		if (f('mark_paid')) {
+			foreach ($payoff->transactions as $t) {
+				$t->markPaid();
+				$t->save();
+			}
+		}
+	}
 
 	if (array_key_exists('_dialog', $_GET)) {
 		Utils::reloadParentFrame();
@@ -141,7 +154,7 @@ $form->runIf('save', function () use ($transaction, $session, $linked_services) 
 }, $csrf_key);
 
 $projects = Projects::listAssoc();
-$variables = compact('csrf_key', 'transaction', 'amount', 'lines', 'id_project', 'types_details', 'linked_users', 'chart', 'projects');
+$variables = compact('csrf_key', 'transaction', 'amount', 'lines', 'id_project', 'types_details', 'linked_users', 'linked_transactions', 'chart', 'projects', 'payoff');
 
 $tpl->assign($variables);
 

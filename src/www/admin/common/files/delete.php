@@ -16,7 +16,7 @@ if (!$file->canDelete()) {
 	throw new UserException('Vous n\'avez pas le droit de supprimer ce fichier.');
 }
 
-$trash = !(qg('trash') === 'no' && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN));
+$trash = qg('trash') !== 'no';
 
 $csrf_key = 'file_delete_' . $file->pathHash();
 $parent = $file->parent;

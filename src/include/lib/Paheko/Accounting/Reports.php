@@ -543,12 +543,14 @@ class Reports
 			$select = '0 AS account_type, p.label AS project_label, p.code AS project_code, p.id AS id_project';
 			$group_key = 'id_project';
 			$group_type = 'project';
+			$order = 'l.id_project, t.date, t.id';
 		}
 		else {
 			$join = 'acc_accounts a ON a.id = l.id_account';
 			$select = 'a.type AS account_type';
 			$group_key = 'id_account';
 			$group_type = 'account';
+			$order = 'a.code COLLATE NOCASE, t.date, t.id';
 		}
 
 		$sql = sprintf('SELECT
@@ -559,7 +561,7 @@ class Reports
 			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
 			INNER JOIN %s
 			WHERE %s
-			ORDER BY a.code COLLATE U_NOCASE, t.date, t.id;', $select, $join, $where);
+			ORDER BY %s;', $select, $join, $where, $order);
 
 		$group = null;
 		$debit = $credit = 0;

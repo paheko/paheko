@@ -423,7 +423,7 @@ class Session extends \KD2\UserSession
 
 		$ue = Users::get($user->id);
 		$ue->importSecurityForm(false, compact('password', 'password_confirmed'));
-		$ue->save();
+		$ue->save(false);
 		EmailsTemplates::passwordChanged($ue);
 	}
 
@@ -434,7 +434,8 @@ class Session extends \KD2\UserSession
 
 	static public function getPreference(string $key)
 	{
-		return self::getLoggedUser()->getPreference($key);
+		$user = self::getLoggedUser();
+		return $user ? $user->getPreference($key) : null;
 	}
 
 	static public function getLoggedUser(): ?User
@@ -498,7 +499,7 @@ class Session extends \KD2\UserSession
 			return null;
 		}
 
-		return $i->user;
+		return $i->getUser()->id;
 	}
 
 	public function canAccess(string $section, int $permission): bool
@@ -511,7 +512,11 @@ class Session extends \KD2\UserSession
 			$this->_permissions = $this->user()->category()->getPermissions();
 		}
 
-		$perm = $this->_permissions[$section];
+		$perm = $this->_permissions[$section] ?? null;
+
+		if (null === $perm) {
+			throw new \InvalidArgumentException('Unknown section: ' . $section);
+		}
 
 		return ($perm >= $permission);
 	}
@@ -531,7 +536,7 @@ class Session extends \KD2\UserSession
 		$context = strtok($path, '/');
 		$type = strtok('/');
 		$name = strtok('/');
-		$file_path = strtok(false);
+		$file_path = strtok('');
 
 		if (empty($name) || empty($type) || ($type !== 'm' && $type !== 'p') || empty($file_path)) {
 			return false;
@@ -587,14 +592,14 @@ class Session extends \KD2\UserSession
 		}
 
 		$context = strtok($path, '/');
+		$b = strtok('/');
+		$c = strtok('/');
+		strtok('');
 
 		// Check permissions for plugins and modules files
 		if ($context === File::CONTEXT_EXTENSIONS) {
 			return $this->checkExtensionFilePermissions($path, $permission);
 		}
-
-		$b = strtok('/');
-		$c = strtok('/');
 
 		static $default = [
 			'mkdir'  => false,

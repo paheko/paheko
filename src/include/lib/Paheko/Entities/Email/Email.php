@@ -80,7 +80,7 @@ class Email extends Entity
 	public function canSendVerificationAfterFail(): bool
 	{
 		$limit_date = new \DateTime($this->optout ? self::RESEND_VERIFICATION_DELAY_OPTOUT : self::RESEND_VERIFICATION_DELAY);
-		return $this->last_sent < $limit_date;
+		return isset($this->last_sent) ? $this->last_sent < $limit_date : false;
 	}
 
 	public function verify(string $code): bool

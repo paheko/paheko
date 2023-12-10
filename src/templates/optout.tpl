@@ -20,7 +20,8 @@
 	</p>
 {elseif $ok}
 	<p class="block confirm">
-		Vous avez été bien désinscrit, vous ne recevrez plus aucun message de notre part.
+		Vous avez été bien désinscrit.<br />
+		Vous ne recevrez plus de messages de notre part.
 	</p>
 
 	<p class="help">
@@ -59,8 +60,8 @@
 
 	<form method="post" action="{$self_url}">
 
-		<p class="help">
-			En cliquant sur ce bouton vous confirmez ne plus vouloir recevoir de messages de notre part.
+		<p class="alert block">
+			En cliquant sur ce bouton vous confirmez ne plus vouloir recevoir <strong>aucun</strong> message de notre part.
 		</p>
 
 		<p class="submit">

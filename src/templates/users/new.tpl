@@ -27,7 +27,7 @@
 		<legend>Fiche du membre</legend>
 		<dl>
 			{foreach from=$fields item="field"}
-				{edit_dynamic_field context="new" field=$field user=$user}
+				{edit_user_field context="admin_new" field=$field user=$user}
 			{/foreach}
 		</dl>
 	</fieldset>

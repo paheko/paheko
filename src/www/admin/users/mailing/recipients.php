@@ -12,11 +12,6 @@ if (!$mailing) {
 	throw new UserException('Invalid mailing ID');
 }
 
-if (isset($_GET['export'])) {
-	$mailing->export($_GET['export']);
-	return;
-}
-
 $csrf_key = 'mailing';
 
 if (!$mailing->sent) {

@@ -1,13 +1,13 @@
 <?php
 
-namespace Garradin;
+namespace Paheko;
 
 /**
  * Ce fichier permet de configurer Paheko pour une utilisation
  * avec plusieurs associations, mais une seule copie du code source.
  * (aussi appelé installation multi-sites, ferme ou usine)
  *
- * Voir la doc : https://fossil.kd2.org/garradin/wiki?name=Multi-sites
+ * Voir la doc : https://fossil.kd2.org/paheko/wiki?name=Multi-sites
  *
  * N'oubliez pas d'installer également le script cron.sh fournit
  * pour lancer les rappels automatiques et sauvegardes.
@@ -25,13 +25,13 @@ namespace Garradin;
 #const SQLITE_JOURNAL_MODE = 'WAL';
 
 // Nom de domaine parent des associations hébergées
-// Exemple : si vos associations sont hébergées en clubdetennis.garradin.eu,
-// indiquer ici 'garradin.eu'
+// Exemple : si vos associations sont hébergées en clubdetennis.paheko.cloud,
+// indiquer ici 'paheko.cloud'
 const FACTORY_DOMAIN = 'monsite.tld';
 
 // Répertoire où seront stockées les données des utilisateurs
 // Dans ce répertoire, un sous-répertoire sera créé pour chaque compte
-// Ainsi 'clubdetennis.garradin.eu' sera dans le répertoire courant (__DIR__),
+// Ainsi 'clubdetennis.paheko.cloud' sera dans le répertoire courant (__DIR__),
 // sous-répertoire 'users' et dans celui-ci, sous-répertoire 'clubdetennis'
 //
 // Pour chaque utilisateur il faudra créer le sous-répertoire en premier lieu
@@ -70,7 +70,7 @@ const ENABLE_UPGRADES = false;
 const SHOW_ERRORS = false;
 
 ////////////////////////////////////////////////////////////////
-// Code 'magique' qui va configurer Garradin selon les réglages
+// Code 'magique' qui va configurer Paheko selon les réglages
 
 $login = null;
 
@@ -81,8 +81,8 @@ $domain_regexp = sprintf('/^%s\.%s$/', $login_regexp, preg_quote(FACTORY_DOMAIN,
 if (isset($_SERVER['SERVER_NAME']) && preg_match($domain_regexp, $_SERVER['SERVER_NAME'], $match)) {
 	$login = $match[1];
 }
-elseif (PHP_SAPI == 'cli' && !empty($_SERVER['GARRADIN_FACTORY_USER']) && preg_match('/^' . $login_regexp . '$/', $_SERVER['GARRADIN_FACTORY_USER'])) {
-	$login = $_SERVER['GARRADIN_FACTORY_USER'];
+elseif (PHP_SAPI == 'cli' && !empty($_SERVER['PAHEKO_FACTORY_USER']) && preg_match('/^' . $login_regexp . '$/', $_SERVER['PAHEKO_FACTORY_USER'])) {
+	$login = $_SERVER['PAHEKO_FACTORY_USER'];
 }
 else {
 	// Login invalide ou non fourni
@@ -98,8 +98,8 @@ if (!is_dir($user_data_dir)) {
 }
 
 // Définir le dossier où sont stockés les données
-define('Garradin\DATA_ROOT', $user_data_dir);
+define('Paheko\DATA_ROOT', $user_data_dir);
 
 // Définir l'URL
-define('Garradin\WWW_URL', 'https://' . $login . '.' . FACTORY_DOMAIN . '/');
-define('Garradin\WWW_URI', '/');
+define('Paheko\WWW_URL', 'https://' . $login . '.' . FACTORY_DOMAIN . '/');
+define('Paheko\WWW_URI', '/');

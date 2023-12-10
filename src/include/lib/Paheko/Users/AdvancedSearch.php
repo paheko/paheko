@@ -7,6 +7,7 @@ use Paheko\Users\DynamicFields;
 use Paheko\AdvancedSearch as A_S;
 use Paheko\DB;
 use Paheko\Utils;
+use Paheko\UserException;
 
 class AdvancedSearch extends A_S
 {
@@ -57,10 +58,6 @@ class AdvancedSearch extends A_S
 			}
 			*/
 
-			if ($field->type === 'file') {
-				continue;
-			}
-
 			// nope
 			if ($field->system & $field::PASSWORD) {
 				continue;
@@ -103,6 +100,13 @@ class AdvancedSearch extends A_S
 			{
 				$column['type'] = 'integer';
 			}
+			elseif ($field->type === 'file') {
+				$column['type'] = 'integer';
+				$column['null'] = false;
+				$column['label'] .= ' (nombres de fichiers)';
+				$column['select'] = sprintf('(SELECT GROUP_CONCAT(f.path, \';\') FROM users_files AS uf INNER JOIN files AS f ON f.id = uf.id_file WHERE uf.id_user = u.id AND uf.field = %s)', $db->quote($field->name));
+				$column['where'] = sprintf('(SELECT COUNT(*) FROM users_files AS uf WHERE uf.id_user = u.id AND uf.field = %s) %%s', $db->quote($field->name));
+			}
 
 			if ($field->type == 'tel') {
 				$column['normalize'] = 'tel';
@@ -135,13 +139,31 @@ class AdvancedSearch extends A_S
 			'where'  => 'id IN (SELECT id_user FROM services_users WHERE id_service %s)',
 		];
 
+		$columns['service_not'] = [
+			'label'  => 'N\'est pas inscrit à l\'activité',
+			'type'   => 'enum',
+			'null'   => false,
+			'values' => $db->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE U_NOCASE;'),
+			'select' => '\'Inscrit\'',
+			'where'  => 'id NOT IN (SELECT id_user FROM services_users WHERE id_service %s)',
+		];
+
 		$columns['service_active'] = [
 			'label'  => 'À jour de l\'activité',
 			'type'   => 'enum',
 			'null'   => false,
 			'values' => $db->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE U_NOCASE;'),
 			'select' => '\'À jour\'',
-			'where'  => 'id IN (SELECT id_user FROM services_users WHERE id_service %s AND (expiry_date IS NULL OR expiry_date > date()))',
+			'where'  => 'id IN (SELECT id_user FROM (SELECT id_user, MAX(expiry_date) AS edate FROM services_users WHERE id_service %s GROUP BY id_user) WHERE edate >= date())',
+		];
+
+		$columns['service_expired'] = [
+			'label'  => 'Activité expirée',
+			'type'   => 'enum',
+			'null'   => false,
+			'values' => $db->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE U_NOCASE;'),
+			'select' => '\'Expiré\'',
+			'where'  => 'id IN (SELECT id_user FROM (SELECT id_user, MAX(expiry_date) AS edate FROM services_users WHERE id_service %s GROUP BY id_user) WHERE edate < date())',
 		];
 
 		return $columns;
@@ -162,6 +184,7 @@ class AdvancedSearch extends A_S
 	{
 		return array_merge(array_keys($this->schemaTables()), [
 			'users_search',
+			'user_files',
 		]);
 	}
 
@@ -190,6 +213,11 @@ class AdvancedSearch extends A_S
 
 			if ($column == 'identity') {
 				$c = DynamicFields::getNameFieldsSearchableSQL();
+
+				if (!$c) {
+					throw new UserException('Aucun champ texte n\'est indiqué comme identité des membres, il n\'est pas possible de faire une recherche.');
+				}
+
 				$table = 'users_search';
 			}
 
@@ -239,9 +267,10 @@ class AdvancedSearch extends A_S
 	{
 		return (object) ['groups' => [[
 			'operator' => 'AND',
+			'join_operator' => null,
 			'conditions' => [
 				[
-					'column'   => current(DynamicFields::getNameFields()),
+					'column'   => 'identity',
 					'operator' => 'LIKE %?%',
 					'values'   => [''],
 				],

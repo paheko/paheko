@@ -56,4 +56,18 @@ class API_Credentials
 
 		return $e;
 	}
+
+	static public function auth(string $login, string $password): ?int
+	{
+		if (API_USER && API_PASSWORD && $login === API_USER && $password === API_PASSWORD) {
+			return Session::ACCESS_ADMIN;
+		}
+		elseif ($c = API_Credentials::login($login, $password)) {
+			return $c->access_level;
+		}
+		else {
+			return null;
+		}
+	}
+
 }

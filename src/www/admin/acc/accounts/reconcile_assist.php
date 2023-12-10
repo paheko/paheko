@@ -74,7 +74,7 @@ if ($start && $end) {
 $form->runIf('save', function () use ($journal, $csv) {
 	Transactions::saveReconciled($journal, f('reconcile'));
 	$csv->clear();
-}, $csrf_key, Utils::getSelfURI());
+}, $csrf_key, '!acc/accounts/reconcile_assist.php?msg=OK');
 
 $lines = null;
 

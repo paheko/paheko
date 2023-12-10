@@ -94,7 +94,7 @@ class Sections
 	static public function selectStart(string $name, string $sql, UserTemplate $tpl, int $line): string
 	{
 		$sql = strtok($sql, ';');
-		$extra_params = strtok(false);
+		$extra_params = strtok('');
 
 		$i = 0;
 		$params = '';
@@ -300,13 +300,13 @@ class Sections
 			$params['where'] = self::_moduleReplaceJSONExtract($params['where'], $table);
 		}
 
-		if (isset($params['key'])) {
+		if (array_key_exists('key', $params)) {
 			$params['where'] .= ' AND key = :key';
 			$params['limit'] = 1;
 			$params[':key'] = $params['key'];
 			unset($params['key']);
 		}
-		elseif (isset($params['id'])) {
+		elseif (array_key_exists('id', $params)) {
 			$params['where'] .= ' AND id = :id';
 			$params['limit'] = 1;
 			$params[':id'] = $params['id'];
@@ -360,6 +360,9 @@ class Sections
 		// Try to create an index if required
 		self::_createModuleIndexes($table, $params['where']);
 
+		$assign = $params['assign'] ?? null;
+		unset($params['assign']);
+
 		$query = self::sql($params, $tpl, $line);
 
 		foreach ($query as $row) {
@@ -372,8 +375,8 @@ class Sections
 				}
 			}
 
-			if (isset($params['assign'])) {
-				$tpl::__assign(['var' => $params['assign'], 'value' => $row], $tpl, $line);
+			if (isset($assign)) {
+				$tpl::__assign(['var' => $assign, 'value' => $row], $tpl, $line);
 			}
 
 			yield $row;
@@ -414,14 +417,10 @@ class Sections
 
 			$types = is_array($rule['type']) ? $rule['type'] : [$rule['type']];
 
-			// Only "simple" types are supported
-			if (in_array('array', $types) || in_array('object', $types)) {
-				continue;
-			}
-
 			$out[$key] = [
 				'label' => $rule['description'] ?? null,
 				'select' => sprintf('json_extract(document, \'$.%s\')', $key),
+				'_json_decode' => in_array('array', $types) || in_array('object', $types),
 			];
 		}
 
@@ -482,7 +481,7 @@ class Sections
 			foreach (explode(';', $params['select']) as $i => $c) {
 				$c = trim($c);
 
-				$pos = strpos($c, ' AS ');
+				$pos = strripos($c, ' AS ');
 
 				if ($pos) {
 					$select = trim(substr($c, 0, $pos));
@@ -520,7 +519,7 @@ class Sections
 
 		$list = new DynamicList($columns, $table);
 
-		static $reserved_keywords = ['max', 'order', 'desc', 'debug', 'explain', 'schema', 'columns', 'select', 'where', 'module'];
+		static $reserved_keywords = ['max', 'order', 'desc', 'debug', 'explain', 'schema', 'columns', 'select', 'where', 'module', 'disable_user_ordering'];
 
 		foreach ($params as $key => $value) {
 			if ($key[0] == ':') {
@@ -542,9 +541,16 @@ class Sections
 			$list->orderBy($params['order'], $params['desc'] ?? false);
 		}
 
-		$list->setModifier(function(&$row) {
+		$list->setModifier(function(&$row) use ($columns) {
 			$row->original = clone $row;
 			unset($row->original->id, $row->original->key, $row->original->document);
+
+			// Decode arrays/objects
+			foreach ($columns as $name => $column) {
+				if (!empty($column['_json_decode']) && isset($row->$name) && is_string($row->$name)) {
+					$row->$name = json_decode($row->$name, true);
+				}
+			}
 
 			if (null !== $row->document) {
 				$row = array_merge(json_decode($row->document, true), (array)$row);
@@ -561,7 +567,9 @@ class Sections
 		// Try to create an index if required
 		self::_createModuleIndexes($table, $where);
 
-		$list->loadFromQueryString();
+		if (empty($params['disable_user_ordering'])) {
+			$list->loadFromQueryString();
+		}
 
 		if (!empty($params['debug'])) {
 			self::_debug($list->SQL());
@@ -573,14 +581,14 @@ class Sections
 
 		try {
 			$i = $list->iterate();
+
+			// If there is nothing to iterate, just stop
+			if (!$i->valid()) {
+				return;
+			}
 		}
 		catch (DB_Exception $e) {
 			throw new Brindille_Exception(sprintf("Line %d: invalid SQL query: %s\nQuery: %s", $line, $e->getMessage(), $list->SQL()));
-		}
-
-		// If there is nothing to iterate, just stop
-		if (!$i->valid()) {
-			return;
 		}
 
 		$tpl = Template::getInstance();
@@ -594,6 +602,7 @@ class Sections
 
 		$tpl->assign(compact('list'));
 		$tpl->assign('check', $params['check'] ?? false);
+		$tpl->assign('disable_user_ordering', $params['disable_user_ordering'] ?? false);
 		$tpl->display('common/dynamic_list_head.tpl');
 
 		yield from $i;
@@ -777,6 +786,11 @@ class Sections
 			unset($params['active']);
 		}
 
+		if (isset($params['active']) && empty($params['active'])) {
+			$params['having'] = 'MAX(su.expiry_date) < date()';
+			unset($params['active']);
+		}
+
 		if (empty($params['order'])) {
 			$params['order'] = 'su.id';
 		}
@@ -788,6 +802,7 @@ class Sections
 
 	static public function transactions(array $params, UserTemplate $tpl, int $line): \Generator
 	{
+		$db = DB::getInstance();
 		$params['where'] ??= '';
 
 		$id_field = DynamicFields::getNameFieldsSQL();
@@ -800,24 +815,26 @@ class Sections
 			INNER JOIN acc_accounts AS a ON l.id_account = a.id';
 		$params['group'] = 't.id';
 
-		if (isset($params['id'])) {
+		if (isset($params['id']) && is_array($params['id'])) {
+			$params['where'] .= ' AND t.' . $db->where('id', array_map('intval', $params['id']));
+			unset($params['id']);
+		}
+		elseif (isset($params['id'])) {
 			$params['where'] .= ' AND t.id = :id';
 			$params[':id'] = (int) $params['id'];
 			unset($params['id']);
 		}
 		elseif (isset($params['user'])) {
-			$params['where'] .= ' AND tu.id_user = :id_user';
+			$params['where'] .= ' AND t.id IN (SELECT id_transaction FROM acc_transactions_users WHERE id_user = :id_user)';
 			$params[':id_user'] = (int) $params['user'];
 			unset($params['user']);
-
-			$params['tables'] .= ' INNER JOIN acc_transactions_users AS tu ON tu.id_transaction = t.id';
 		}
 
 		if (isset($params['debit_codes'])) {
-			$params['where'] .= sprintf(' AND l.debit > 0 AND (%s)', self::getAccountCodeCondition($params['debit_codes'], 'a.code'));
+			$params['where'] .= sprintf(' AND l.credit = 0 AND (%s)', self::getAccountCodeCondition($params['debit_codes'], 'a.code'));
 		}
 		elseif (isset($params['credit_codes'])) {
-			$params['where'] .= sprintf(' AND l.debit > 0 AND (%s)', self::getAccountCodeCondition($params['credit_codes'], 'a.code'));
+			$params['where'] .= sprintf(' AND l.debit = 0 AND (%s)', self::getAccountCodeCondition($params['credit_codes'], 'a.code'));
 		}
 
 		unset($params['debit_codes'], $params['credit_codes']);
@@ -885,23 +902,27 @@ class Sections
 			return null;
 		}
 
-
 		if (empty($params['level']) && empty($params['section'])) {
 			yield [];
 			return null;
 		}
 
 		$convert = [
+			'none' => $session::ACCESS_NONE,
 			'read' => $session::ACCESS_READ,
 			'write' => $session::ACCESS_WRITE,
 			'admin' => $session::ACCESS_ADMIN,
 		];
 
-		if (empty($params['level']) || !isset($convert[$params['level']])) {
+		if (empty($params['level']) || !array_key_exists($params['level'], $convert)) {
 			throw new Brindille_Exception(sprintf("Ligne %d: 'restrict' niveau d'accès inconnu : %s", $line, $params['level'] ?? ''));
 		}
 
-		$ok = $session->canAccess($params['section'] ?? '', $convert[$params['level']]);
+		if (empty($params['section']) || !in_array($params['section'], $session::SECTIONS)) {
+			throw new Brindille_Exception(sprintf("Ligne %d: 'restrict' section d'accès inconnu : %s", $line, $params['section'] ?? ''));
+		}
+
+		$ok = $session->canAccess($params['section'], $convert[$params['level']]);
 
 		if ($ok) {
 			yield [];
@@ -1213,7 +1234,7 @@ class Sections
 			'select' => '*',
 			'order' => '1',
 			'begin' => 0,
-			'limit' => 100,
+			'limit' => 10000,
 			'where' => '',
 		];
 
@@ -1281,6 +1302,8 @@ class Sections
 				}
 			}
 
+			$result = $db->execute($statement, $args);
+
 			if (!empty($params['debug'])) {
 				self::_debug($statement->getSQL(true));
 			}
@@ -1289,7 +1312,6 @@ class Sections
 				self::_debugExplain($statement->getSQL(true));
 			}
 
-			$result = $db->execute($statement, $args);
 			$db->setReadOnly(false);
 		}
 		catch (DB_Exception $e) {

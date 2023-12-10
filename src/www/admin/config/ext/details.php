@@ -52,7 +52,7 @@ else {
 	}
 
 	foreach ($snippets as $label) {
-		$access_details[] = sprintf('Cette extension insère un élément&nbsp;: <strong>%s</strong>', $label);
+		$access_details[] = sprintf('Cette extension insère un élément&nbsp;: <strong>%s</strong>', htmlspecialchars($label));
 	}
 
 	$tpl->assign(compact('access_details'));

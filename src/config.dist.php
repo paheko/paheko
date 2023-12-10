@@ -832,7 +832,7 @@ namespace Paheko;
  *
  * Défaut : null (= fonctionnalité désactivée)
  */
-//const PDFTOTEXT_COMMAND = 'pdftotext';
+//const PDFTOTEXT_COMMAND = 'mupdf';
 
 /**
  * API_USER et API_PASSWORD
@@ -873,24 +873,6 @@ namespace Paheko;
  * Défaut : false
  */
 //const DISABLE_INSTALL_PING = false;
-
-/**
- * Clé de licence
- *
- * Cette clé permet de débloquer certaines fonctionnalités dans des extensions officielles.
- *
- * Pour l'obtenir il faut se créer un compte sur Paheko.cloud
- * et faire une contribution financière.
- * La clé apparaîtra ensuite en dessous des informations
- * de l'association dans la page "Mon abonnement Paheko.cloud".
- *
- * Il faut recopier cette clé dans le fichier config.local.php
- * dans la constante CONTRIBUTOR_LICENSE.
- *
- * Merci de ne pas essayer de contourner cette licence et de contribuer au
- * financement de notre travail :-)
- */
-//const CONTRIBUTOR_LICENSE = 'XXXXX';
 
 /**
  * Informations légale sur l'hébergeur

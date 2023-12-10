@@ -26,7 +26,7 @@
 			</td>
 			<th>
 				{if $file.dir}
-					{link href="?module=%s&p=%s"|args:$module.name,$file.path label=$file.name}
+					{link href="?module=%s&p=%s"|args:$module.name:$file.path label=$file.name}
 				{elseif $file.editable}
 					{link href=$file.edit_url label=$file.name target="_dialog"}
 				{else}

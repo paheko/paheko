@@ -62,6 +62,10 @@ else {
 	throw new UserException('Aucun membre n\'a été sélectionné');
 }
 
+if (null !== $users) {
+	natcasesort($users);
+}
+
 $form_url = '?';
 $csrf_key = 'service_save';
 $create = true;
@@ -69,7 +73,7 @@ $create = true;
 // Only load the form if a user has been selected
 require __DIR__ . '/_form.php';
 
-$form->runIf('save', function () use ($session, $users, $copy_service, $copy_fee, $copy_only_paid) {
+$form->runIf('save', function () use ($session, &$users, $copy_service, $copy_fee, $copy_only_paid) {
 	if ($copy_service) {
 		$users = $copy_service->getUsers($copy_only_paid);
 	}
@@ -90,6 +94,10 @@ $form->runIf('save', function () use ($session, $users, $copy_service, $copy_fee
 
 	Utils::redirect($url);
 }, $csrf_key);
+
+if (null !== $users && !count($users)) {
+	throw new ValidationException('Aucun membre sélectionné ne peut être inscrit, car ils sont tous déjà inscrits à cette activité et à la date indiquée.');
+}
 
 $t = new Transaction;
 $t->type = $t::TYPE_REVENUE;

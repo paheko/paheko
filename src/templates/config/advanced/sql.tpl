@@ -27,7 +27,7 @@
 		<fieldset>
 			<legend>Faire une requête SQL en lecture</legend>
 			<dl>
-				{input type="textarea" cols="70" rows="3" name="query" default=$query class="full-width"}
+				{input type="textarea" cols="70" rows="10" name="query" default=$query class="full-width"}
 			</dl>
 			<p>
 				{button type="submit" name="run" label="Exécuter" shape="search"}
@@ -110,10 +110,12 @@
 
 		{foreach from=$list->iterate() item="row"}
 			<tr>
-				{foreach from=$row item="value"}
+				{foreach from=$row key="key" item="value"}
 				<td>
 					{if null == $value}
 						<em>NULL</em>
+					{elseif $is_module && $key === 'document'}
+						<pre>{$value|format_json}</pre>
 					{else}
 						{$value}
 					{/if}

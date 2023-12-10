@@ -45,7 +45,7 @@ flush();
 
 // If no cron task is used, then the cron is run when visiting the homepage
 // this is not the best, but better than nothing
-if (!USE_CRON && @filemtime(CACHE_ROOT . '/last_cron_run') < (time() - 24*3600*3600)) {
+if (!USE_CRON && @filemtime(CACHE_ROOT . '/last_cron_run') < (time() - 24*3600)) {
 	touch(CACHE_ROOT . '/last_cron_run');
 	require_once ROOT . '/scripts/cron.php';
 }

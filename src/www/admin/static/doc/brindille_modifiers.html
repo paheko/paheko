@@ -83,6 +83,7 @@
 			<li><a href="#escape">escape</a></li>
 			<li><a href="#excerpt">excerpt</a></li>
 			<li><a href="#extract_leading_number">extract_leading_number</a></li>
+			<li><a href="#format_phone_number">format_phone_number</a></li>
 			<li><a href="#markdown">markdown</a></li>
 			<li><a href="#raw">raw</a></li>
 			<li><a href="#replace">replace</a></li>
@@ -107,7 +108,8 @@
 		<ol>
 			<li><a href="#quote_sql">quote_sql</a></li>
 			<li><a href="#quote_sql_identifier">quote_sql_identifier</a></li>
-			<li><a href="#sql_where">sql_where</a>
+			<li><a href="#sql_where">sql_where</a></li>
+			<li><a href="#sql_user_fields">sql_user_fields</a>
 		</ol></li>
 		<li><a href="#filtres-de-date">Filtres de date</a>
 		<ol>
@@ -148,127 +150,132 @@
 <tr>
 <td style="text-align: left;"><code>htmlentities</code></td>
 <td style="text-align: left;">Convertit tous les caractères éligibles en entités HTML</td>
-<td style="text-align: left;"><a href="https://www.php.net/htmlentities" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/htmlentities" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>htmlspecialchars</code></td>
 <td style="text-align: left;">Convertit les caractères spéciaux en entités HTML</td>
-<td style="text-align: left;"><a href="https://www.php.net/htmlspecialchars" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/htmlspecialchars" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>trim</code></td>
 <td style="text-align: left;">Supprime les espaces et lignes vides au début et à la fin d'un texte</td>
-<td style="text-align: left;"><a href="https://www.php.net/trim" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/trim" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>ltrim</code></td>
 <td style="text-align: left;">Supprime les espaces et lignes vides au début d'un texte</td>
-<td style="text-align: left;"><a href="https://www.php.net/ltrim" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/ltrim" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>rtrim</code></td>
 <td style="text-align: left;">Supprime les espaces et lignes vides à la fin d'un texte</td>
-<td style="text-align: left;"><a href="https://www.php.net/rtrim" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/rtrim" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>md5</code></td>
 <td style="text-align: left;">Génère un hash MD5 d'un texte</td>
-<td style="text-align: left;"><a href="https://www.php.net/md5" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/md5" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>sha1</code></td>
 <td style="text-align: left;">Génère un hash SHA1 d'un texte</td>
-<td style="text-align: left;"><a href="https://www.php.net/sha1" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/sha1" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>strlen</code></td>
 <td style="text-align: left;">Nombre de caractères dans une chaîne de texte</td>
-<td style="text-align: left;"><a href="https://www.php.net/strlen" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/strlen" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>strpos</code></td>
 <td style="text-align: left;">Position d'un élément dans une chaîne de texte</td>
-<td style="text-align: left;"><a href="https://www.php.net/strpos" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/strpos" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>strrpos</code></td>
 <td style="text-align: left;">Position d'un dernier élément dans une chaîne de texte</td>
-<td style="text-align: left;"><a href="https://www.php.net/strrpos" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/strrpos" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>substr</code></td>
 <td style="text-align: left;">Découpe une chaîne de caractère</td>
-<td style="text-align: left;"><a href="https://www.php.net/substr" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/substr" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>strtotime</code></td>
 <td style="text-align: left;">Transforme une date en timestamp UNIX</td>
-<td style="text-align: left;"><a href="https://www.php.net/strtotime" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/strtotime" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>strip_tags</code></td>
 <td style="text-align: left;">Supprime les tags HTML</td>
-<td style="text-align: left;"><a href="https://www.php.net/strip_tags" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/strip_tags" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>nl2br</code></td>
 <td style="text-align: left;">Remplace les retours à la ligne par des tags HTML <code>&lt;br/&gt;</code></td>
-<td style="text-align: left;"><a href="https://www.php.net/nl2br" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/nl2br" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>wordwrap</code></td>
 <td style="text-align: left;">Ajoute des retours à la ligne tous les 75 caractères</td>
-<td style="text-align: left;"><a href="https://www.php.net/wordwrap" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/wordwrap" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>abs</code></td>
 <td style="text-align: left;">Renvoie la valeur absolue d'un nombre (exemple : -42 sera transformé en 42)</td>
-<td style="text-align: left;"><a href="https://www.php.net/abs" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/abs" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>gettype</code></td>
+<td style="text-align: left;">Renvoie le type d'une variable</td>
+<td style="text-align: left;"></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>intval</code></td>
 <td style="text-align: left;">Transforme une valeur en entier (integer)</td>
-<td style="text-align: left;"><a href="https://www.php.net/intval" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/intval" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>boolval</code></td>
 <td style="text-align: left;">Transforme une valeur en booléen (true ou false)</td>
-<td style="text-align: left;"><a href="https://www.php.net/boolval" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/boolval" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>floatval</code></td>
 <td style="text-align: left;">Transforme une valeur en nombre flottant (à virgule)</td>
-<td style="text-align: left;"><a href="https://www.php.net/floatval" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/floatval" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>strval</code></td>
 <td style="text-align: left;">Transforme une valeur en chaîne de texte</td>
-<td style="text-align: left;"><a href="https://www.php.net/strval" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/strval" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>arrayval</code></td>
 <td style="text-align: left;">Transforme une valeur en tableau</td>
-<td style="text-align: left;"><a href="https://www.php.net/manual/fr/language.types.type-juggling.php" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/manual/fr/language.types.type-juggling.php" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>json_decode</code></td>
 <td style="text-align: left;">Transforme une chaîne JSON en valeur</td>
-<td style="text-align: left;"><a href="https://www.php.net/json_decode" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/json_decode" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>json_encode</code></td>
 <td style="text-align: left;">Transforme une valeur en chaîne JSON</td>
-<td style="text-align: left;"><a href="https://www.php.net/json_encode" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/json_encode" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>http_build_query</code></td>
 <td style="text-align: left;">Transformer un tableau en chaîne <em>query string</em> pour URL</td>
-<td style="text-align: left;"><a href="https://www.php.net/http_build_query" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/http_build_query" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>str_getcsv</code></td>
 <td style="text-align: left;">Transformer une chaîne de texte de format CSV en tableau</td>
-<td style="text-align: left;"><a href="https://www.php.net/str_getcsv" target="_blank" rel="noreferrer">Documentation PHP</a></td>
+<td style="text-align: left;"><a href="https://www.php.net/str_getcsv" rel="noreferrer noopener external" target="_blank">Documentation PHP</a></td>
 </tr>
 </tbody>
 </table>
@@ -362,7 +369,7 @@ bleu - orange</code></pre>
 2,3,1</code></pre>
 <h1 id="filtres-de-texte">Filtres de texte</h1>
 <h2 id="args">args</h2>
-<p>Remplace des arguments dans le texte selon le schéma utilisé par <a href="https://www.php.net/sprintf" target="_blank" rel="noreferrer">sprintf</a>.</p>
+<p>Remplace des arguments dans le texte selon le schéma utilisé par <a href="https://www.php.net/sprintf" rel="noreferrer noopener external" target="_blank">sprintf</a>.</p>
 <pre><code>{{"Il y a %d résultats dans la recherche sur le terme '%s'."|args:$results_count:$query}}
 = Il y a 5 résultat dans la recherche sur le terme 'test'.</code></pre>
 <h2 id="cat">cat</h2>
@@ -385,6 +392,14 @@ bleu - orange</code></pre>
 {{$title|extract_leading_number}}</code></pre>
 <p>Affichera :</p>
 <pre><code>02</code></pre>
+<h2 id="format_phone_number">format_phone_number</h2>
+<p>Formatte un numéro de téléphone selon le format du pays de l'association.</p>
+<p>Seule la France est supportée pour le moment.</p>
+<p>Exemple :</p>
+<pre><code>{{:assign number="0102030405"}}
+{{$number|format_phone_number}}</code></pre>
+<p>Affichera :</p>
+<pre><code>01 02 03 04 05</code></pre>
 <h2 id="markdown">markdown</h2>
 <p>Transforme un texte en HTML en utilisant la syntaxe Markdown.</p>
 <p>Il est conseillé de rajouter le filtre <code>|raw</code> pour ne pas échapper le HTML produit, si on veut afficher le texte formatté dans une page HTML.</p>
@@ -398,7 +413,7 @@ bleu - orange</code></pre>
 <pre><code>{{"Tata yoyo"|replace:"yoyo":"yaya"}}
 = Tata yaya</code></pre>
 <h2 id="regexp_replace">regexp_replace</h2>
-<p>Remplace des valeurs en utilisant une expression rationnelles (regexp) (<a href="https://www.php.net/manual/fr/regexp.introduction.php" target="_blank" rel="noreferrer">documentation PHP</a>).</p>
+<p>Remplace des valeurs en utilisant une expression rationnelles (regexp) (<a href="https://www.php.net/manual/fr/regexp.introduction.php" rel="noreferrer noopener external" target="_blank">documentation PHP</a>).</p>
 <pre><code>{{"Tartagueule"|regexp_replace:"/ta/i":"tou"}}
 = tourtougueule</code></pre>
 <h2 id="remove_leading_number">remove_leading_number</h2>
@@ -448,7 +463,7 @@ Ceci n'est pas un t</code></pre>
 <p>Échappe le contenu pour un usage dans un document XML.</p>
 <h2 id="autres-filtres-de-texte">Autres filtres de texte</h2>
 <p>Les filtres suivants modifient la casse (majuscule/minuscules) d'un texte et ne fonctionneront correctement que si l'extension <code>mbstring</code> est installée sur le serveur. Sinon les lettres accentuées ne seront pas modifiées.</p>
-<p>Note : il est donc préférable d'utiliser la propriété CSS <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/text-transform" target="_blank" rel="noreferrer"><code>text-transform</code></a> pour modifier la casse si l'usage n'est que pour l'affichage, et non pas pour enregistrer les données.</p>
+<p>Note : il est donc préférable d'utiliser la propriété CSS <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/text-transform" rel="noreferrer noopener external" target="_blank"><code>text-transform</code></a> pour modifier la casse si l'usage n'est que pour l'affichage, et non pas pour enregistrer les données.</p>
 <ul>
 <li><code>tolower</code> : transforme un texte en minuscules</li>
 <li><code>toupper</code> : transforme un texte en majuscules</li>
@@ -523,16 +538,41 @@ Ceci n'est pas un t</code></pre>
     {{$nom}}
 {{/sql}}</code></pre>
 <p>Le requête SQL générée sera alors <code>SELECT nom FROM users WHERE id_category IN (1, 2)</code>.</p>
+<h2 id="sql_user_fields">sql_user_fields</h2>
+<p>Permet de récupérer le contenu de champs de la fiche utilisateur pour une requête SQL.</p>
+<p>C'est particulièrement utile si le module permet de sélectionner dans sa configuration une liste de champs de membre (par exemple pour la carte de membre, ou les reçus fiscaux).</p>
+<p>Si un champ mentionné n'existe plus dans les fiches de membres, il sera ignoré.</p>
+<ul>
+<li>Le premier paramètre est la liste des champs (tableau ou chaîne de texte)</li>
+<li>Le second est le préfixe à utiliser (alias de la table membres), optionnel</li>
+<li>Le troisième est la chaîne de texte à utiliser pour coller les champs entre eux</li>
+</ul>
+<p>Exemple :</p>
+<pre><code>{{:assign var="champs_adresse." value="rue"}}
+{{:assign var="champs_adresse." value="ville"}}
+{{:assign var="champs_adresse_sql" value=$champs_adresse|sql_user_fields:"u":" - "}}
+{{#select !champs_adresse_sql AS adresse FROM users AS u; !champs_adresse_sql=$champs_adresse_sql}}
+    {{$adresse}}
+{{/select}}</code></pre>
+<p>Affichera :</p>
+<pre><code>30 rue de Machin Chose — Dijon</code></pre>
+<p>Et la clause SQL générée sera :</p>
+<pre><code>LTRIM(COALESCE(' - ' || u.rue, '') || COALESCE(' - ' || u.ville), ' - ')</code></pre>
 <h1 id="filtres-de-date">Filtres de date</h1>
 <h2 id="date">date</h2>
 <p>Formatte une date selon le format spécifié en premier paramètre.</p>
-<p>Le format est identique au <a href="https://www.php.net/manual/fr/datetime.format.php" target="_blank" rel="noreferrer">format utilisé par PHP</a>.</p>
+<p>Le format est identique au <a href="https://www.php.net/manual/fr/datetime.format.php" rel="noreferrer noopener external" target="_blank">format utilisé par PHP</a>.</p>
 <p>Si aucun format n'est indiqué, le défaut sera <code>d/m/Y à H:i</code>. (en français)</p>
+<p>Exemples :</p>
+<pre><code>{{:assign this_year=$now|date:'Y'}}
+{{$date|date:'d/m/Y'}}</code></pre>
 <h2 id="strftime">strftime</h2>
 <p>Formatte une date selon un format spécifié en premier paramètre.</p>
-<p>Le format à utiliser est identique <a href="https://www.php.net/strftime" target="_blank" rel="noreferrer">au format utilisé par la fonction strftime de PHP</a>.</p>
+<p>Le format à utiliser est identique <a href="https://www.php.net/strftime" rel="noreferrer noopener external" target="_blank">au format utilisé par la fonction strftime de PHP</a>.</p>
 <p>Un format doit obligatoirement être spécifié.</p>
 <p>En passant un code de langue en second paramètre, cette langue sera utilisée. Sont supportés le français (<code>fr</code>) et l'anglais (<code>en</code>). Le défaut est le français si aucune valeur n'est passée en second paramètre .</p>
+<pre><code>{{:assign this_year=$now|date:'%Y'}}
+{{$date|date:'%d/%m/%Y'}}</code></pre>
 <h2 id="relative_date">relative_date</h2>
 <p>Renvoie une date relative à la date du jour : <code>aujourd'hui</code>, <code>hier</code>, <code>demain</code>, ou sinon <code>mardi 2 janvier</code> (si la date est de l'année en cours) ou <code>2 janvier 2021</code> (si la date est d'une autre année).</p>
 <p>En spécifiant <code>true</code> en premier paramètre, l'heure sera ajoutée au format <code>14h34</code>.</p>

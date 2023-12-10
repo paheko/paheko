@@ -37,7 +37,7 @@ $login_field = DF::getLoginField();
 
 $form->runIf('save', function () use ($user) {
 	$user->importSecurityForm(false);
-	$user->save();
+	$user->save(false);
 }, $csrf_key, '!users/details.php?id=' . $user->id);
 
 $tpl->assign(compact('user', 'csrf_key', 'login_field'));

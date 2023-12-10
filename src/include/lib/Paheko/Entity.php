@@ -45,7 +45,10 @@ class Entity extends AbstractEntity
 			return null;
 		}
 
-		if (ctype_digit($value)) {
+		if (preg_match('!^20\d{2}[01]\d[0123]\d$!', $value)) {
+			return Date::createFromFormat('!Ymd', $value);
+		}
+		elseif (ctype_digit($value)) {
 			return new DateTime('@' . $value);
 		}
 		elseif ($v = \DateTime::createFromFormat('!Y-m-d H:i:s', $value)) {
@@ -79,9 +82,6 @@ class Entity extends AbstractEntity
 		}
 		elseif (preg_match('!^\d{4}/\d{2}/\d{2}$!', $value)) {
 			return Date::createFromFormat('!Y/m/d', $value);
-		}
-		elseif (preg_match('!^20\d{2}[01]\d[0123]\d$!', $value)) {
-			return Date::createFromFormat('!Ymd', $value);
 		}
 		elseif (null !== $value) {
 			throw new ValidationException('Format de date invalide (merci d\'utiliser le format JJ/MM/AAAA) : ' . $value);

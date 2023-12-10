@@ -27,6 +27,9 @@
 			{elseif $row.entity_name}
 				{$row.entity_name}
 			{/if}
+			{if isset($row.details.id) && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
+				<small class="help">(ID = {$row.details.id})</small>
+			{/if}
 		</td>
 		<td>{$row.ip_address}</td>
 		<td class="actions">

@@ -24,7 +24,7 @@ use Paheko\UserTemplate\Sections;
 
 use Paheko\Web\Cache as Web_Cache;
 
-use const Paheko\{WWW_URL, WWW_URI, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT, ROOT, PDF_COMMAND};
+use const Paheko\{WWW_URL, WWW_URI, ADMIN_URL, BASE_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT, ROOT, PDF_COMMAND};
 
 class UserTemplate extends \KD2\Brindille
 {
@@ -35,7 +35,7 @@ class UserTemplate extends \KD2\Brindille
 	protected $modified;
 	protected ?File $file = null;
 	protected ?string $code = null;
-	protected $cache_path = USER_TEMPLATES_CACHE_ROOT;
+	protected string $cache_path;
 	protected ?string $path = null;
 	protected ?UserTemplate $parent = null;
 	public ?Module $module = null;
@@ -113,6 +113,7 @@ class UserTemplate extends \KD2\Brindille
 			'root_uri'     => WWW_URI,
 			'request_url'  => Utils::getRequestURI(),
 			'admin_url'    => ADMIN_URL,
+			'base_url'     => BASE_URL,
 			'site_url'     => $config['site_disabled'] && $config['org_web'] ? $config['org_web'] : WWW_URL,
 			'_GET'         => &$_GET,
 			'_POST'        => &$_POST,
@@ -133,19 +134,10 @@ class UserTemplate extends \KD2\Brindille
 		$this->_tpl_path = $path;
 
 		if ($path && $file = Files::get(File::CONTEXT_MODULES . '/' . $path)) {
-			if ($file->type != $file::TYPE_FILE) {
-				throw new \LogicException('Cannot construct a UserTemplate with a directory');
-			}
-
-			$this->file = $file;
-			$this->modified = $file->modified->getTimestamp();
+			$this->setLocalSource($file);
 		}
 		elseif ($path) {
-			$this->path = self::DIST_ROOT . $path;
-
-			if (!($this->modified = @filemtime($this->path))) {
-				throw new \InvalidArgumentException('File not found: ' . $this->path);
-			}
+			$this->setSource(self::DIST_ROOT . $path);
 		}
 
 		$this->assignArray(self::getRootVariables());
@@ -207,13 +199,17 @@ class UserTemplate extends \KD2\Brindille
 		}
 
 		// PHP modifiers
-		foreach (CommonModifiers::PHP_MODIFIERS_LIST as $name) {
+		foreach (CommonModifiers::PHP_MODIFIERS_LIST as $name => $params) {
 			$this->registerModifier($name, [CommonModifiers::class, $name]);
 		}
 
 		// Local modifiers
 		foreach (Modifiers::MODIFIERS_LIST as $key => $name) {
 			$this->registerModifier(is_int($key) ? $name : $key, is_int($key) ? [Modifiers::class, $name] : $name);
+		}
+
+		foreach (Modifiers::MODIFIERS_WITH_INSTANCE_LIST as $key => $name) {
+			$this->registerModifier(is_int($key) ? $name : $key, is_int($key) ? [Modifiers::class, $name] : $name, true);
 		}
 
 		// Local functions
@@ -235,11 +231,27 @@ class UserTemplate extends \KD2\Brindille
 		}
 	}
 
+	public function setLocalSource(File $file)
+	{
+		if ($file->type != $file::TYPE_FILE) {
+			throw new \LogicException('Cannot construct a UserTemplate with a directory');
+		}
+
+		$this->file = $file;
+		$this->modified = $file->modified->getTimestamp();
+
+		$this->cache_path = USER_TEMPLATES_CACHE_ROOT;
+	}
+
 	public function setSource(string $path)
 	{
+		if (!($this->modified = @filemtime($path))) {
+			throw new \InvalidArgumentException('File not found: ' . $path);
+		}
+
 		$this->file = null;
 		$this->path = $path;
-		$this->modified = filemtime($path);
+
 		// Use shared cache for default templates
 		$this->cache_path = SHARED_USER_TEMPLATES_CACHE_ROOT;
 	}
@@ -296,10 +308,11 @@ class UserTemplate extends \KD2\Brindille
 		}
 		catch (Brindille_Exception $e) {
 			$path = $this->file ? $this->file->path : ($this->code ? 'code' : str_replace(ROOT, '…', $this->path));
+			$is_user_code = $this->file || $this->code || ($this->module && $this->module->hasLocal());
 
 			$message = sprintf("Erreur dans '%s' :\n%s", $path, $e->getMessage());
 
-			if (!$this->file && !$this->code) {
+			if (!$is_user_code) {
 				// We want errors in shipped code to be reported, it is not normal
 				throw new \RuntimeException($message, 0, $e);
 			}
@@ -351,6 +364,13 @@ class UserTemplate extends \KD2\Brindille
 		$content = $ut->fetch();
 		$type = $ut->getContentType();
 		$name = $ut->getHeader('filename') ?? 'document';
+
+		// Sanitize file name
+		$name = preg_replace('/[^\w\d\.]+/U', ' ', $name);
+		$name = substr($name, -128);
+
+		File::validateFileName($name);
+
 		$target = File::CONTEXT_ATTACHMENTS . '/' . md5($content) . '/' . $name;
 
 		if ($type == 'application/pdf') {
@@ -428,6 +448,7 @@ class UserTemplate extends \KD2\Brindille
 		echo $header;
 
 		$name = strtok($this->_tpl_path, '/');
+		strtok('');
 
 		$path = $this->file->name ?? $this->path;
 		$location = sprintf('Dans le code du module "%s"', $name);
@@ -592,8 +613,10 @@ class UserTemplate extends \KD2\Brindille
 
 		$this->module = $module;
 		$this->assign('module', array_merge($module->asArray(false), [
-			'url' => $module->url(),
-			'public_url' => $module->public_url(),
+			'config'       => json_decode(json_encode($module->config), true),
+			'url'          => $module->url(),
+			'public_url'   => $module->public_url(),
+			'storage_root' => $module->storage_root(),
 		]));
 	}
 }

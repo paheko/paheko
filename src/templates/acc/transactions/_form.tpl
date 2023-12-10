@@ -10,21 +10,39 @@ $is_quick = count(array_intersect_key($_GET, array_flip(['a', 'l', 'd', 't', 'ac
 	<fieldset>
 		<legend>Type d'écriture</legend>
 		<dl>
-		{foreach from=$types_details item="type"}
-			<dd class="radio-btn">
-				{input type="radio" name="type" value=$type.id source=$transaction label=null}
-				<label for="f_type_{$type.id}">
-					<div>
-						<h3>{$type.label}</h3>
-						{if !empty($type.help)}
-							<p class="help">{$type.help}</p>
-						{/if}
-					</div>
-				</label>
-			</dd>
-		{/foreach}
+		{if isset($payoff)}
+			{input type="radio-btn" name="type" value=99 source=$transaction label=$payoff.type_label}
+			{input type="radio-btn" name="type" value=0 source=$transaction label="Avancé"}
+		{else}
+			{foreach from=$types_details item="type"}
+				<dd class="radio-btn">
+					{input type="radio" name="type" value=$type.id source=$transaction label=null}
+					<label for="f_type_{$type.id}">
+						<div>
+							<h3>{$type.label}</h3>
+							{if !empty($type.help)}
+								<p class="help">{$type.help}</p>
+							{/if}
+						</div>
+					</label>
+				</dd>
+			{/foreach}
+		{/if}
 		</dl>
 	</fieldset>
+
+	{if isset($payoff)}
+		<fieldset>
+			<legend>{if $payoff.type == $transaction::TYPE_DEBT}Règlement de dette{else}Règlement de créance{/if}</legend>
+			<dl>
+				<dt>Écritures d'origine</dt>
+				{foreach from=$payoff.transactions item="t"}
+					<dd>{link class="num" href="!acc/transactions/details.php?id=%d"|args:$t.id label="#%d"|args:$t.id} — {$t.label} — {$t->sum()|money_currency|raw}</dd>
+				{/foreach}
+				{input type="checkbox" name="mark_paid" value="1" default="1" label="Marquer ces écritures comme réglées"}
+			</dl>
+		</fieldset>
+	{/if}
 
 	<fieldset{if $is_new} class="hidden"{/if}>
 		<legend>Informations</legend>
@@ -34,7 +52,11 @@ $is_quick = count(array_intersect_key($_GET, array_flip(['a', 'l', 'd', 't', 'ac
 			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de reçu, de note de frais, etc." source=$transaction}
 		</dl>
 		<dl data-types="all-but-advanced">
-			{input type="money" name="amount" label="Montant" required=1 default=$amount}
+			{if !isset($payoff) || !$payoff.multiple}
+				{input type="money" name="amount" label="Montant" required=1 default=$amount}
+			{else}
+				{input type="money" name="amount" label="Montant" required=1 default=$amount disabled=true help="Le montant ne peut être modifié pour le règlement de plusieurs écritures."}
+			{/if}
 		</dl>
 	</fieldset>
 
@@ -42,6 +64,15 @@ $is_quick = count(array_intersect_key($_GET, array_flip(['a', 'l', 'd', 't', 'ac
 	<p class="alert block">
 		Attention, cette écriture contient des lignes qui ont été rapprochées. Modifier son montant ou le compte bancaire entraînera la perte du rapprochement.
 	</p>
+	{/if}
+
+	{if isset($payoff)}
+		<fieldset data-types="t99"{if $is_new} class="hidden"{/if}>
+			<legend>{$payoff.type_label}</legend>
+			<dl>
+				{input type="list" target="!acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$payoff.targets,$chart.id name="payoff_account" label="Compte de règlement" required=1}
+			</dl>
+		</fieldset>
 	{/if}
 
 	{foreach from=$types_details item="type"}
@@ -69,9 +100,11 @@ $is_quick = count(array_intersect_key($_GET, array_flip(['a', 'l', 'd', 't', 'ac
 			{input type="list" multiple=true name="users" label="Membres associés" target="!users/selector.php" default=$linked_users}
 			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30 source=$transaction}
 		</dl>
-		<dl data-types="t{$transaction::TYPE_ADVANCED} t{$transaction::TYPE_DEBT} t{$transaction::TYPE_CREDIT}">
-			{input type="number" name="id_related" label="Lier à l'écriture numéro" source=$transaction help="Indiquer ici un numéro d'écriture pour faire le lien par exemple avec une dette"}
-		</dl>
+		{if !isset($payoff)}
+			<dl data-types="t{$transaction::TYPE_ADVANCED} t{$transaction::TYPE_DEBT} t{$transaction::TYPE_CREDIT}">
+				{input type="list" name="linked" label="Écritures liées" default=$linked_transactions target="!acc/transactions/selector.php" multiple=true}
+			</dl>
+		{/if}
 		<dl data-types="all-but-advanced">
 			{if !empty($projects)}
 				{input type="select" name="id_project" label="Projet (analytique)" options=$projects default=$id_project default_empty="— Aucun —"}

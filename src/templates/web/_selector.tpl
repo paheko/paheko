@@ -14,7 +14,7 @@
 		<ul>
 		{if $current_cat_id}
 			<li class="parent">
-				{button shape="left" label="Retour à la catégorie parente" type="submit" name="current" value=$parent_id}
+				{button shape="left" label="Catégorie parente" type="submit" name="current" value=$parent_id|intval}
 			</li>
 		{/if}
 
@@ -26,7 +26,7 @@
 
 		{if $id_page !== $current_cat_id}
 			<li class="select">
-				{button shape="right" label="Choisir la catégorie \"%s\""|args:$current_cat_title type="button" name="move" value=$current_cat_id data-label=$current_cat_title}
+				{button shape="right" label="Choisir la catégorie \"%s\""|args:$current_cat_title type="button" name="move" value=$current_cat_id|intval data-label=$current_cat_title}
 			</li>
 		{/if}
 		</ul>

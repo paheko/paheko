@@ -83,7 +83,7 @@
 		<ol>
 			<li><a href="#breadcrumbs">breadcrumbs</a></li>
 			<li><a href="#pages-articles-categories-sup-sql-sup">pages, articles, categories <sup>(sql)</sup></a></li>
-			<li><a href="#files-documents-images-sup-sql-sup">files, documents, images <sup>(sql)</sup></a>
+			<li><a href="#attachments-documents-images-sup-sql-sup">attachments, documents, images <sup>(sql)</sup></a>
 		</ol></li>
 		<li><a href="#sections-relatives-aux-modules">Sections relatives aux modules</a>
 		<ol>
@@ -113,7 +113,7 @@
 <td style="text-align: left;">Nom de la variable à utiliser pour la clé de l'élément</td>
 </tr>
 <tr>
-<td style="text-align: left;"><code>value</code></td>
+<td style="text-align: left;"><code>item</code></td>
 <td style="text-align: left;"><strong>optionnel</strong></td>
 <td style="text-align: left;">Nom de la variable à utiliser pour la valeur de l'élément</td>
 </tr>
@@ -295,7 +295,7 @@ orange</code></pre>
 </tbody>
 </table>
 <h3 id="sections-qui-heritent-de-sql">Sections qui héritent de <code>sql</code></h3>
-<p>Certaines sections (voir plus bas) héritent de <code>sql</code> et rajoutent des fonctionnalités. Dans toutes ces sections, il est possible d'utiliser les paramètres suivants :</p>
+<p>Certaines sections (voir plus bas) héritent de <code>sql</code> et rajoutent des fonctionnalités. Dans toutes ces sections, il est possible d'utiliser les paramètres facultatifs suivants :</p>
 <table>
 <thead>
 <tr>
@@ -314,7 +314,7 @@ orange</code></pre>
 </tr>
 <tr>
 <td style="text-align: left;"><code>limit</code></td>
-<td style="text-align: left;">Limitation des résultats. Si vide, une valeur de <code>1000</code> sera utilisée.</td>
+<td style="text-align: left;">Limitation des résultats. Si vide, une valeur de <code>10000</code> sera utilisée.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>group</code></td>
@@ -340,10 +340,26 @@ orange</code></pre>
 <td style="text-align: left;"><code>explain</code></td>
 <td style="text-align: left;">Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle.</td>
 </tr>
+<tr>
+<td style="text-align: left;"><code>count</code></td>
+<td style="text-align: left;">Booléen ou texte. Si ce paramètre est <code>TRUE</code>, le nombre de résultats sera retourné. Si une chaîne de texte est indiquée, elle sera utilisée dans la clause <code>COUNT(&lt;texte&gt;)</code>.</td>
+</tr>
 </tbody>
 </table>
 <p>Il est également possible de passer des arguments dans les paramètres à l'aides des arguments nommés qui commencent par deux points <code>:</code> :</p>
 <pre><code>{{#articles where="title = :montitre" :montitre="Actualité"}}</code></pre>
+<p>Exemples d'utilisation du paramètre <code>count</code> :</p>
+<pre><code>{{#articles count=true}}
+    Il y a {{$count}} articles.
+{{/articles}}
+
+{{#articles count=true assign="result"}}
+{{/articles}}
+Il y a {{$result.count}} articles.
+
+{{#articles count="DISTINCT title"}}
+    Il y a {{$count}} articles avec un titre différent.
+{{/articles}}</code></pre>
 <h1 id="membres">Membres</h1>
 <h2 id="users">users</h2>
 <p>Liste les membres.</p>
@@ -512,7 +528,7 @@ orange</code></pre>
 </table>
 <h1 id="pour-le-site-web">Pour le site web</h1>
 <h2 id="breadcrumbs">breadcrumbs</h2>
-<p>Permet de récupérer la liste des pages parentes d'une page afin de constituer un <a href="https://fr.wikipedia.org/wiki/Fil_d&#039;Ariane_(ergonomie)" target="_blank" rel="noreferrer">fil d'ariane</a> permettant de remonter dans l'arborescence du site</p>
+<p>Permet de récupérer la liste des pages parentes d'une page afin de constituer un <a href="https://fr.wikipedia.org/wiki/Fil_d&#039;Ariane_(ergonomie)" rel="noreferrer noopener external" target="_blank">fil d'ariane</a> permettant de remonter dans l'arborescence du site</p>
 <p>Un seul paramètre est possible :</p>
 <table>
 <thead>
@@ -706,12 +722,12 @@ orange</code></pre>
 </tr>
 </tbody>
 </table>
-<h2 id="files-documents-images-sup-sql-sup">files, documents, images <sup>(sql)</sup></h2>
+<h2 id="attachments-documents-images-sup-sql-sup">attachments, documents, images <sup>(sql)</sup></h2>
 <p>Note : ces sections héritent de <code>sql</code> (voir plus haut).</p>
 <ul>
-<li><code>files</code> renvoie une liste de fichiers</li>
-<li><code>documents</code> renvoie une liste de fichiers qui ne sont pas des images</li>
-<li><code>images</code> renvoie une liste de fichiers qui sont des images</li>
+<li><code>attachments</code> renvoie une liste de fichiers joints à une page du site web</li>
+<li><code>documents</code> renvoie une liste de fichiers joints qui ne sont pas des images</li>
+<li><code>images</code> renvoie une liste de fichiers joints qui sont des images</li>
 </ul>
 <p>À part cela ces trois types de section se comportent de manière identique.</p>
 <p>Note : seul les fichiers de la section site web sont accessibles, les fichiers de membres, de comptabilité, etc. ne sont pas disponibles.</p>
@@ -746,7 +762,7 @@ orange</code></pre>
 <p>Permet de gérer la soumission d'un formulaire (<code>&lt;form method="post"…&gt;</code> en HTML).</p>
 <p>Si l'élément dont le nom spécifié dans le paramètre <code>on</code> a été envoyé en <code>POST</code>, alors le code à l'intérieur de la section est exécuté.</p>
 <p>Toute erreur à l'intérieur de la section arrêtera son exécution, et le message sera ajouté aux erreurs du formulaire.</p>
-<p>Une vérification de sécurité <a href="https://fr.wikipedia.org/wiki/Cross-site_request_forgery" target="_blank" rel="noreferrer">anti-CSRF</a> est également appliquée. Si cette vérification échoue, le message d'erreur "Merci de bien vouloir renvoyer le formulaire." sera renvoyé. Pour que cela marche il faut que le formulaire dispose d'un bouton de type "submit", généré à l'aide de la fonction <code>button</code>. Exemple : <code>{{:button type="submit" name="save" label="Enregistrer"}}</code>.</p>
+<p>Une vérification de sécurité <a href="https://fr.wikipedia.org/wiki/Cross-site_request_forgery" rel="noreferrer noopener external" target="_blank">anti-CSRF</a> est également appliquée. Si cette vérification échoue, le message d'erreur "Merci de bien vouloir renvoyer le formulaire." sera renvoyé. Pour que cela marche il faut que le formulaire dispose d'un bouton de type "submit", généré à l'aide de la fonction <code>button</code>. Exemple : <code>{{:button type="submit" name="save" label="Enregistrer"}}</code>.</p>
 <p>En cas d'erreurs, le reste du contenu de la section ne sera pas exécuté. Les messages d'erreurs seront placés dans un tableau dans la variable <code>$form_errors</code>.</p>
 <p>Il est aussi possible de les afficher simplement avec la fonction <code>{{:form_errors}}</code>. Cela revient à faire une boucle sur la variable <code>$form_errors</code>.</p>
 <pre><code>{{#form on="save"}}
@@ -764,7 +780,7 @@ orange</code></pre>
 {{/form}}
 …
 {{:form_errors}}</code></pre><h2 id="load-sup-sql-sup">load <sup>(sql)</sup></h2>
-<p>Note : cette section hérite de <code>sql</code> (voir plus haut).</p>
+<p>Note : cette section hérite de <code>sql</code> (voir plus haut). De ce fait, le nombre de résultats est limité à 10000 par défaut, si le paramètre <code>limit</code> n'est pas renseigné.</p>
 <p>Charge un ou des documents pour le module courant.</p>
 <table>
 <thead>
@@ -799,7 +815,7 @@ orange</code></pre>
 </table>
 <p>Il est possible d'utiliser d'autres paramètres : <code>{{#load cle="valeur"}}</code>. Cela va comparer <code>"valeur"</code> avec la valeur de la clé <code>cle</code> dans le document JSON. C'est l'équivalent d'écrire <code>where="json_extract(document, '$.cle') = 'valeur'"</code>.</p>
 <p>Pour des conditions plus complexes qu'une simple égalité, il est possible d'utiliser la syntaxe courte <code>$$…</code> dans le paramètre <code>where</code>. Ainsi <code>where="$$.nom LIKE 'Bourse%'</code> est l'équivalent de <code>where="json_extract(document, '$.nom') LIKE 'Bourse%'"</code>.</p>
-<p>Voir <a href="https://www.sqlite.org/json1.html#jex" target="_blank" rel="noreferrer">la documentation de SQLite pour plus de détails sur la syntaxe de json_extract</a>.</p>
+<p>Voir <a href="https://www.sqlite.org/json1.html#jex" rel="noreferrer noopener external" target="_blank">la documentation de SQLite pour plus de détails sur la syntaxe de json_extract</a>.</p>
 <p>Note : un index SQL dynamique est créé pour chaque requête utilisant une clause <code>json_extract</code>.</p>
 <p>Chaque itération renverra ces deux variables :</p>
 <table>
@@ -832,7 +848,7 @@ orange</code></pre>
 &lt;h2&gt;Montant : {{$total}}&lt;/h2&gt;
 {{/load}}</code></pre>
 <h3 id="utilisation-du-parametre-each">Utilisation du paramètre <code>each</code></h3>
-<p>Le paramètre <code>each</code> est utile pour faire une boucle sur un tableau contenu dans le document. Ce paramètre doit contenir un chemin JSON valide. Par exemple <code>membres[1].noms</code> pour boucler sur le tableau <code>noms</code>, du premier élément du tableau <code>membres</code>. Voir la documentation <a href="https://www.sqlite.org/json1.html#jeach" target="_blank" rel="noreferrer">de la fonction json_each de SQLite pour plus de détails</a>.</p>
+<p>Le paramètre <code>each</code> est utile pour faire une boucle sur un tableau contenu dans le document. Ce paramètre doit contenir un chemin JSON valide. Par exemple <code>membres[1].noms</code> pour boucler sur le tableau <code>noms</code>, du premier élément du tableau <code>membres</code>. Voir la documentation <a href="https://www.sqlite.org/json1.html#jeach" rel="noreferrer noopener external" target="_blank">de la fonction json_each de SQLite pour plus de détails</a>.</p>
 <p>Pour chaque itération de la section, la variable <code>{{$value}}</code> contiendra l'élément recherché dans le critère <code>each</code>.</p>
 <p>Par exemple nous pouvons avoir un élément <code>membres</code> dans notre document JSON qui contient un tableau de noms de membres :</p>
 <pre><code>{{:assign var="membres." value="Greta Thunberg}}
@@ -910,12 +926,17 @@ Le document n°{{$id}} est celui qui parle de Greta.
 <td style="text-align: left;"><em>optionnel</em></td>
 <td style="text-align: left;">Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle.</td>
 </tr>
+<tr>
+<td style="text-align: left;"><code>disable_user_ordering</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Booléen. Si ce paramètre est <code>true</code>, il ne sera pas possible à l'utilisateur d'ordonner les colonnes.</td>
+</tr>
 </tbody>
 </table>
 <p>Pour déterminer quelles colonnes afficher dans le tableau, il faut utiliser soit le paramètre <code>schema</code> pour indiquer un fichier de schéma JSON qui sera utilisé pour donner le libellé des colonnes (via la <code>description</code> indiquée dans le schéma), soit le paramètre <code>select</code>, où il faut alors indiquer le nom et le libellé des colonnes sous la forme <code>$$.colonne1 AS "Libellé"; $$.colonne2 AS "Libellé 2"</code>.</p>
 <p>Comme pour <code>load</code>, il est possible d'utiliser des paramètres supplémentaires : <code>cle="valeur"</code>. Cela va comparer <code>"valeur"</code> avec la valeur de la clé <code>cle</code> dans le document JSON. C'est l'équivalent d'écrire <code>where="json_extract(document, '$.cle') = 'valeur'"</code>.</p>
 <p>Pour des conditions plus complexes qu'une simple égalité, il est possible d'utiliser la syntaxe courte <code>$$…</code> dans le paramètre <code>where</code>. Ainsi <code>where="$$.nom LIKE 'Bourse%'</code> est l'équivalent de <code>where="json_extract(document, '$.nom') LIKE 'Bourse%'"</code>.</p>
-<p>Voir <a href="https://www.sqlite.org/json1.html#jex" target="_blank" rel="noreferrer">la documentation de SQLite pour plus de détails sur la syntaxe de json_extract</a>.</p>
+<p>Voir <a href="https://www.sqlite.org/json1.html#jex" rel="noreferrer noopener external" target="_blank">la documentation de SQLite pour plus de détails sur la syntaxe de json_extract</a>.</p>
 <p>Note : un index SQL dynamique est créé pour chaque requête utilisant une clause <code>json_extract</code>.</p>
 <p>Chaque itération renverra toujours ces deux variables :</p>
 <table>
@@ -939,6 +960,7 @@ Le document n°{{$id}} est celui qui parle de Greta.
 <p>Ainsi que chaque élément du document JSON lui-même.</p>
 <p>La section ouvre un tableau HTML et le ferme automatiquement, donc le contenu de la section <strong>doit</strong> être une ligne de tableau HTML (<code>&lt;tr&gt;</code>).</p>
 <p>Dans chaque ligne du tableau il faut respecter l'ordre des colonnes indiqué dans <code>columns</code> ou <code>select</code>. Une dernière colonne est réservée aux boutons d'action : <code>&lt;td class="actions"&gt;...&lt;/td&gt;</code>.</p>
+<p><strong>Attention :</strong> une seule liste peut être utilisée dans une même page. Avoir plusieurs listes provoquera des problèmes au niveau du tri des colonnes.</p>
 <h3 id="exemples">Exemples</h3>
 <p>Lister le nom, la date et le montant des reçus fiscaux, à partir du schéma JSON suivant :</p>
 <pre><code>{

@@ -3,7 +3,7 @@
 {include file="../_menu.tpl" current="advanced" sub_current="audit"}
 
 <p class="help">
-	Cette page liste les tentatives de connexion, les modifications de mot de passe ou d'identifiant, et toutes les actions de création, suppression ou modification effectuées par tous les membre.
+	Cette page liste les tentatives de connexion, les modifications de mot de passe ou d'identifiant, et toutes les actions de création, suppression ou modification effectuées par tous les membres.
 </p>
 
 {if $list->count()}

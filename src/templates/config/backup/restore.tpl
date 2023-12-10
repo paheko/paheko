@@ -31,7 +31,7 @@
 {/if}
 
 {if $_GET.from_file}
-	<form method="post" action="{$self_url_no_qs}" enctype="multipart/form-data">
+	<form method="post" action="{$self_url}" enctype="multipart/form-data">
 
 	<fieldset>
 		<legend><label for="f_file">Restaurer depuis un fichier de sauvegarde</label></legend>

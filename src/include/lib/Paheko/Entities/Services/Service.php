@@ -122,7 +122,7 @@ class Service extends Entity
 		$list->setCount('COUNT(DISTINCT su.id_user)');
 
 		$list->setExportCallback(function (&$row) {
-			$row->status = $row->status ? 'En cours' : 'Expiré';
+			$row->status = $row->status == -1 ? 'En retard' : ($row->status == 1 ? 'En cours' : '');
 			$row->paid = $row->paid ? 'Oui' : 'Non';
 		});
 

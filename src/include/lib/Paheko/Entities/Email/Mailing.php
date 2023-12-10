@@ -15,6 +15,8 @@ use Paheko\Users\Users;
 use Paheko\UserTemplate\UserTemplate;
 use Paheko\Web\Render\Render;
 
+use Paheko\Entities\Users\DynamicField;
+
 use DateTime;
 use stdClass;
 
@@ -137,7 +139,7 @@ class Mailing extends Entity
 
 	}
 
-	public function addRecipient(string $email, $data = null): void
+	public function addRecipient(string $email, ?stdClass $data = null): void
 	{
 		if (!$this->exists()) {
 			throw new \LogicException('Mailing does not exist');
@@ -161,12 +163,33 @@ class Mailing extends Entity
 			}
 		}
 
+		$this->cleanExtraData($data);
+
 		DB::getInstance()->insert('mailings_recipients', [
 			'id_mailing' => $this->id,
 			'id_email'   => $e ? $e->id : null,
 			'email'      => $email,
 			'extra_data' => $data ? json_encode($data) : null,
 		]);
+	}
+
+	protected function cleanExtraData(?stdClass &$data): void
+	{
+		if (null === $data) {
+			return;
+		}
+
+		// Clean up users, just in case password/PGP key/etc. are included
+		foreach (DynamicField::SYSTEM_FIELDS as $key => $type) {
+			unset($data->$key);
+		}
+
+		// Just in case the password has another column name
+		foreach ($data as $key => $value) {
+			if (is_string($value) && substr($value, 0, 2) === '$2') {
+				unset($data->$key);
+			}
+		}
 	}
 
 	public function listRecipients(): \Generator
@@ -192,20 +215,35 @@ class Mailing extends Entity
 	{
 		$prefix = $prefix ? $prefix . '.' : $prefix;
 		$fields = DynamicFields::getNameFields();
-		$fields = array_map(fn($a) => sprintf('json_extract(%sextra_data, \'$.%s\')', $prefix, $a), $fields);
-		$fields = implode(' || \' \' || ', $fields);
-		return $fields;
+		$db = DB::getInstance();
+		$out = [];
+
+		foreach ($fields as $field) {
+			$field = $db->quote('$.' . $field);
+			$out[] = sprintf('json_extract(%sextra_data, %s)', $prefix, $field);
+		}
+
+		$out = implode(' || \' \' || ', $out);
+		return $out;
 	}
 
 	public function getRecipientsList(): DynamicList
 	{
-
+		$db = DB::getInstance();
 		$columns = [
 			'id' => [
 				'select' => 'r.id',
 			],
+			'id_user' => [
+				'select' => sprintf('json_extract(r.extra_data, %s)', $db->quote('$.id')),
+			],
 			'id_email' => [
 				'select' => 'r.id_email',
+			],
+			'user_number' => [
+				'label' => 'Numéro de membre',
+				'select' => sprintf('json_extract(r.extra_data, %s)', $db->quote('$.' . DynamicFields::getNumberField())),
+				'export' => true,
 			],
 			'email' => [
 				'label' => 'Adresse',
@@ -220,6 +258,9 @@ class Mailing extends Entity
 				'label' => 'Erreur',
 				'select' => sprintf('CASE WHEN o.email_hash IS NOT NULL THEN \'Désinscription de cet envoi\' ELSE (%s) END', Emails::getRejectionStatusClause('e')),
 			],
+			'has_extra_data' => [
+				'select' => 'r.extra_data IS NOT NULL',
+			],
 		];
 
 		$tables = 'mailings_recipients AS r
@@ -231,6 +272,7 @@ class Mailing extends Entity
 		$list->setParameter(':target_type', $this->target_type);
 		$list->setParameter(':target_value', $this->target_value);
 		$list->orderBy('email', false);
+		$list->setTitle('Liste des destinataires');
 		return $list;
 	}
 
@@ -249,19 +291,14 @@ class Mailing extends Entity
 		DB::getInstance()->delete('mailings_recipients', 'id = ? AND id_mailing = ?', $id, $this->id);
 	}
 
-/*
-	public function populateFromCSV(string $list): void
+	public function getRecipientExtraData(int $id): ?stdClass
 	{
-		$list = explode("\n", $list);
-		$emails = [];
+		$value = DB::getInstance()->firstColumn('SELECT extra_data FROM mailings_recipients WHERE id = ?;', $id);
+		$value = !$value ? null : json_decode($value, false);
 
-		foreach ($list as $line) {
-			$line = trim($line);
-
-			$address = strtok(';')
-		}
+		$this->cleanExtraData($value);
+		return $value;
 	}
-*/
 
 	public function getFrom(): string
 	{
@@ -274,21 +311,30 @@ class Mailing extends Entity
 	 */
 	public function getBody()
 	{
-		return UserTemplate::createFromUserString($this->body ?? '') ?? $this->body;
+		if (!isset($this->body)) {
+			return '';
+		}
+
+		if (false !== strpos($this->body, '{{')) {
+			return UserTemplate::createFromUserString($this->body);
+		}
+		else {
+			return $this->body;
+		}
 	}
 
-	public function getPreview(string $address = null): string
+	public function getPreview(int $id = null): string
 	{
 		$db = DB::getInstance();
 
-		$where = $address ? 'email = ?' : '1 ORDER BY RANDOM()';
-		$sql = sprintf('SELECT extra_data FROM mailings_recipients WHERE %s LIMIT 1;', $where);
-		$args = $address ? (array)$address : [];
+		$where = $id ? 'id = ?' : '1 ORDER BY RANDOM()';
+		$sql = sprintf('SELECT extra_data FROM mailings_recipients WHERE id_mailing = %d AND %s LIMIT 1;', $this->id(), $where);
+		$args = $id ? (array)$id : [];
 
 		$r = $db->firstColumn($sql, ...$args);
 
 		if (!$r) {
-			throw new UserException('Cette adresse ne fait pas partie des destinataires: ' . $address);
+			throw new UserException('Cette adresse ne fait pas partie des destinataires');
 		}
 
 		$r = json_decode($r, true);
@@ -296,7 +342,7 @@ class Mailing extends Entity
 		$body = $this->getBody();
 
 		if ($body instanceof UserTemplate) {
-			$body->assignArray($r);
+			$body->assignArray($r, null, false);
 
 			try {
 				$body = $body->fetch();
@@ -314,7 +360,7 @@ class Mailing extends Entity
 	{
 		$html = $this->getPreview($address);
 		$tpl = new UserTemplate('web/email.html');
-		$tpl->assignArray(compact('html'));
+		$tpl->assignArray(compact('html'), null, false);
 
 		$out = $tpl->fetch();
 
@@ -351,16 +397,5 @@ class Mailing extends Entity
 		$this->save();
 
 		Log::add(Log::SENT, ['entity' => get_class($this), 'id' => $this->id()]);
-	}
-
-	public function export(string $format): void
-	{
-		$rows = [];
-
-		foreach ($this->listRecipients() as $row) {
-			$rows[] = [$row['email'] ?? '(Anonymisée)', $row['_name'] ?? ''];
-		}
-
-		CSV::export($format, 'Destinataires message collectif', $rows, ['Adresse e-mail', 'Identité']);
 	}
 }

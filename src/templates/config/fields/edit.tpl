@@ -13,28 +13,38 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 	<dl>
 	{if !$field->isPreset() && !$field->exists()}
 		{input type="select" name="type" options=$field::TYPES source=$field label="Type" default="text" help="Il ne sera plus possible de modifier le type une fois le champ créé." required=true}
-		{input type="text" name="name" pattern="[a-z](_?[a-z0-9]+)*" label="Nom unique" required=true source=$field help="Ne peut comporter que des lettres minuscules et des tirets bas. Par exemple pour un champ demandant l'adresse, on peut utiliser 'adresse_postale'. Ce nom ne peut plus être modifié ensuite."}
 	{else}
-		{if $field->isPreset()}
-			<dd class="help">Le type, nom unique et libellé ne sont pas modifiables pour ce champ.</dd>
-		{else}
-			<dd class="help">Le type et le nom unique ne sont pas modifiables.</dd>
-		{/if}
+		<dd class="help">Le type et l'identifiant ne sont pas modifiables.</dd>
 		{input type="select" name="type" options=$field::TYPES source=$field label="Type" disabled=true}
-		{input type="text" name="name" disabled=true label="Nom unique" source=$field}
 	{/if}
 		{input type="text" name="label" label="Libellé" required=true source=$field}
 	</dl>
-	<dl class="type-not-virtual">
-		{input type="text" name="help" label="Texte d'aide" help="Apparaîtra dans les formulaires de manière identique à ce texte." source=$field}
+</fieldset>
 
+<fieldset>
+	<legend>Identifiant unique</legend>
+	<p class="help">
+		Cet identifiant est utilisé dans la base de données de Paheko pour identifier ce champ.
+	</p>
+	<dl>
+	{if !$field->isPreset() && !$field->exists()}
+		{input type="text" name="name" pattern="[a-z](_?[a-z0-9]+)*" label="Identifiant" required=true source=$field help="Ne peut comporter que des lettres minuscules et des tirets bas. Par exemple pour un champ demandant l'adresse, on peut utiliser 'adresse_postale'. Ce nom ne peut plus être modifié ensuite."}
+	{else}
+		{input type="text" name="name" disabled=true label="Identifiant" source=$field}
+	{/if}
+</fieldset>
+
+<fieldset>
+	<legend>Préférences</legend>
+	<dl class="type-not-password">
+		{input type="checkbox" name="list_table" value=1 label="Afficher dans la liste des membres" source=$field}
 	</dl>
 	<dl class="type-not-virtual type-not-password">
 		{input type="checkbox" name="required" value=1 label="Champ obligatoire" help="Si coché, une fiche membre ne pourra pas être enregistrée si ce champ n'est pas renseigné." source=$field}
-		{input type="text" name="default" source=$field label="Valeur par défaut" help="Si renseigné, le champ aura cette valeur par défaut lors de l'ajout d'un nouveau membre"}
+		{input type="text" name="default_value" source=$field label="Valeur par défaut" help="Si renseigné, le champ aura cette valeur par défaut lors de l'ajout d'un nouveau membre"}
 	</dl>
-	<dl class="type-not-password">
-		{input type="checkbox" name="list_table" value=1 label="Afficher dans la liste des membres" source=$field}
+	<dl class="type-not-virtual">
+		{input type="text" name="help" label="Texte d'aide" help="Apparaîtra dans les formulaires de manière identique à ce texte." source=$field}
 	</dl>
 	<dl class="type-virtual">
 		{input type="textarea" required=true name="sql" class="full-width" rows=3 source=$field label="Code SQL utilisée pour calculer ce champ" disabled=$field->isPreset()}
@@ -45,6 +55,7 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 		</dd>
 	</dl>
 </fieldset>
+
 
 <fieldset class="type-select type-multiple type-datalist">
 	<legend>Options possibles</legend>
@@ -62,6 +73,7 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 	</dl>
 </fieldset>
 
+{if !$field->isNumber()}
 <fieldset>
 	<legend>Accès</legend>
 	<dl>
@@ -77,6 +89,7 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 		{input type="radio" name="management_access_level" value=$session::ACCESS_ADMIN label="Seulement s'il a accès en administration à la gestion des membres" source=$field}
 	</dl>
 </fieldset>
+{/if}
 
 <p class="submit">
 	{csrf_field key=$csrf_key}

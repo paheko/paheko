@@ -7,6 +7,8 @@ use KD2\ErrorManager;
 use KD2\JSONSchema;
 use KD2\Security;
 
+use Paheko\API;
+use Paheko\APIException;
 use Paheko\Config;
 use Paheko\DB;
 use Paheko\Extensions;
@@ -21,6 +23,8 @@ use Paheko\Entities\Module;
 use Paheko\Entities\Email\Email;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
+
+use Paheko\Entities\Accounting\Transaction;
 
 use const Paheko\{ROOT, WWW_URL, BASE_URL, SECRET_KEY};
 
@@ -45,6 +49,8 @@ class Functions
 		'form_errors',
 		'redirect',
 		'admin_files',
+		'delete_file',
+		'api',
 	];
 
 	const COMPILE_FUNCTIONS_LIST = [
@@ -215,7 +221,7 @@ class Functions
 
 		$document = $value;
 		if (!$result) {
-			$db->insert($table, compact('document', 'key'));
+			$db->insert($table, compact('id', 'document', 'key'));
 
 			if ($assign_new_id) {
 				$tpl->assign($assign_new_id, $db->lastInsertId());
@@ -444,15 +450,19 @@ class Functions
 		return $out;
 	}
 
-	static public function error(array $params, UserTemplate $tpl)
+	static public function error(array $params, UserTemplate $tpl, int $line)
 	{
+		if (isset($params['admin'])) {
+			throw new Brindille_Exception($params['admin']);
+		}
+
 		throw new UserException($params['message'] ?? 'Erreur du module');
 	}
 
 	static protected function getFilePath(?string $path, string $arg_name, UserTemplate $ut, int $line)
 	{
 		if (empty($path)) {
-			throw new Brindille_Exception(sprintf('Ligne %d: argument "%s" manquant', $arg_name, $line));
+			throw new Brindille_Exception(sprintf('Ligne %d: argument "%s" manquant', $line, $arg_name));
 		}
 
 		if (substr($path, 0, 2) == './') {
@@ -703,5 +713,105 @@ class Functions
 		}
 
 		Files::delete($ut->module->storage_root() . '/' . $params['path']);
+	}
+
+	static public function api(array $params, UserTemplate $ut, int $line): void
+	{
+		if (empty($params['path'])) {
+			throw new Brindille_Exception('"path" parameter is missing');
+		}
+
+		if (empty($params['method'])) {
+			throw new Brindille_Exception('"method" parameter is missing');
+		}
+
+		$path = trim($params['path'], '/');
+		$method = strtoupper($params['method']);
+		$assign = $params['assign'] ?? null;
+		$assign_code = $params['assign_code'] ?? null;
+		$fail = $params['fail'] ?? true;
+		$access_level = null;
+		$url = null;
+
+		unset($params['method'], $params['path'], $params['assign'], $params['assign_code'], $params['fail']);
+
+		if (isset($params['url'])) {
+			if (empty($params['user'])) {
+				throw new Brindille_Exception('"user" parameter is missing');
+			}
+
+			if (empty($params['password'])) {
+				throw new Brindille_Exception('"password" parameter is missing');
+			}
+
+			$url = str_replace('://', '://' . $params['user'] . '@' . $params['password'], $params['url']);
+			unset($params['user'], $params['password'], $params['url']);
+		}
+		else {
+			$access_level = $params['access'] ?? 'admin';
+			unset($params['access_level']);
+		}
+
+		$body = null;
+
+		if ($method !== 'GET' && array_key_exists('body', $params)) {
+			$body = $params['body'];
+			unset($params['body']);
+		}
+
+		$code = null;
+
+		// External HTTP request
+		if ($url) {
+			$http = new HTTP;
+			$url = rtrim($url, '/') . '/' . $path;
+			$body ??= json_encode($params);
+
+			if ($method === 'POST') {
+				$r = $http->POST($url, $body, $http::JSON);
+			}
+			else {
+				$r = $http->GET($url);
+			}
+
+			if ($fail && $r->fail) {
+				$body = json_decode($r->body);
+				throw new Brindille_Exception(sprintf('External API request failed: %d - %s', $r->status, $body->error ?? $r->error));
+			}
+
+			$code = $r->status;
+			$return = $r->body;
+
+			if ($assign && isset($r->headers['Content-Type']) && false !== strpos($r->headers['Content-Type'], '/json')) {
+				$return = @json_decode($return);
+			}
+		}
+		// Internal request
+		else {
+			$api = new API($method, $path, $params);
+
+			if ($access_level) {
+				$api->setAccessLevelByName($access_level);
+			}
+
+			$api->setAllowedFilesRoot($ut->module->storage_root());
+
+			try {
+				$return = $api->route();
+			}
+			catch (APIException $e) {
+				if ($fail) {
+					throw new Brindille_Exception(sprintf('Internal API request failed: %d - %s', $e->getCode(), $e->getMessage()));
+				}
+			}
+		}
+
+		if ($assign_code) {
+			$ut->assign($assign_code, $code);
+		}
+
+		if ($assign) {
+			$ut->assign($assign, $return);
+		}
 	}
 }

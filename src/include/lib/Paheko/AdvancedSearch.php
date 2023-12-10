@@ -108,15 +108,16 @@ abstract class AdvancedSearch
 
 		foreach ($groups as $group)
 		{
-			if (!isset($group['conditions'], $group['operator'])
+			if (empty($group['conditions'])
+				|| empty($group['operator'])
 				|| !is_array($group['conditions'])
-				|| ($group['operator'] != 'AND' && $group['operator'] != 'OR'))
+				|| !($group['operator'] === 'AND' || $group['operator'] === 'OR'))
 			{
 				// Ignorer les groupes de conditions invalides
 				continue;
 			}
 
-			if (isset($group['join_operator']) && $group['join_operator'] != 'AND' && $group['join_operator'] != 'OR') {
+			if (isset($group['join_operator']) && $group['join_operator'] !== 'AND' && $group['join_operator'] !== 'OR') {
 				continue;
 			}
 
@@ -169,11 +170,20 @@ abstract class AdvancedSearch
 						$values = array_map(['Paheko\Utils', 'moneyToInteger'], $values);
 					}
 				}
+				elseif ($column['type'] === 'integer') {
+					$values = array_map('intval', $values);
+				}
 
 				// L'opérateur binaire est un peu spécial
-				if ($condition['operator'] === '&')
+				if ($condition['operator'] === '&' || $condition['operator'] === 'NOT &')
 				{
+					if (empty($values)) {
+						throw new UserException('Aucun choix n\'a été sélectionné');
+					}
+
 					$new_query = [];
+
+					$query = str_replace('NOT ', '', $query);
 
 					foreach ($values as $value)
 					{
@@ -181,6 +191,10 @@ abstract class AdvancedSearch
 					}
 
 					$query = '(' . implode(' AND ', $new_query) . ')';
+
+					if ($condition['operator'] === 'NOT &') {
+						$query = 'NOT ' . $query;
+					}
 				}
 				// Remplacement de liste
 				elseif (strpos($query, '??') !== false)
@@ -206,8 +220,7 @@ abstract class AdvancedSearch
 						throw new \RuntimeException(sprintf('Operator %s expects at least %d parameters, only %d supplied', $condition['operator'], $expected, $found));
 					}
 
-					for ($i = 0; $i < $expected; $i++)
-					{
+					for ($i = 0; $i < $expected; $i++) {
 						$pos = strpos($query, '?');
 						$query = substr_replace($query, $db->quote(array_shift($values)), $pos, 1);
 					}

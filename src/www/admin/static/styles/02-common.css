@@ -530,26 +530,32 @@ details summary.block::after {
 .files-list {
     display: flex;
     flex-wrap: wrap;
-    align-items: stretch;
+    align-items: end;
     justify-content: stretch;
-    margin: .8rem 0
+    margin: .8rem 0;
+    gap: .5rem;
 }
 
-.files-list figure {
-    width: 13rem;
+.files-list figure .thumb a {
     border-radius: .5rem;
     background: rgba(var(--gSecondColor), 0.1);
-    text-align: center;
     padding: .5rem;
-    margin: .5rem;
     display: flex;
     flex-direction: column;
-    justify-content: end;
-    align-items: stretch;
+    justify-content: center;
+    align-items: center;
 }
 
 table .files-list, table .files-list figure {
     margin: 0;
+}
+
+.files-list figure .actions {
+    display: flex;
+    flex-direction: column;
+    font-size: .9em;
+    justify-content: center;
+    align-items: center;
 }
 
 .files-list figure figcaption {

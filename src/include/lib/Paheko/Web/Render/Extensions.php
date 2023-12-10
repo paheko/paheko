@@ -139,7 +139,7 @@ class Extensions
 			}
 
 			$img = strtok($line, '|');
-			$label = strtok(false);
+			$label = strtok('');
 			$size = $type === 'slideshow' ? File::THUMB_SIZE_LARGE : File::THUMB_SIZE_TINY;
 
 			$out .= sprintf('<figure>%s</figure>', self::img($img, $size, $label ?: null));
@@ -247,8 +247,17 @@ class Extensions
 			return self::error('Tag image : aucun nom de fichier indiqué.');
 		}
 
-		$size = $align == 'center' ? File::THUMB_SIZE_LARGE : File::THUMB_SIZE_TINY;
-		$out = self::img($name, $size, $caption);
+		if ($align === 'center') {
+			$size = File::THUMB_SIZE_LARGE;
+		}
+		elseif ($align === 'left' || $align === 'right') {
+			$size = File::THUMB_SIZE_TINY;
+		}
+		else {
+			$size = null;
+		}
+
+		$out = self::img($name, $align ? $size : null, $caption);
 
 		if (!empty($align)) {
 			if ($caption) {
@@ -261,7 +270,7 @@ class Extensions
 		return $out;
 	}
 
-	static protected function img(string $name, string $thumb_size = File::THUMB_SIZE_TINY, ?string $caption = null): string
+	static protected function img(string $name, ?string $thumb_size = File::THUMB_SIZE_TINY, ?string $caption = null): string
 	{
 		$file = self::$renderer->resolveAttachment($name);
 
@@ -273,7 +282,7 @@ class Extensions
 		$thumb_url = null;
 		$url = $file->url();
 
-		if ($svg) {
+		if ($svg || !$thumb_size) {
 			$thumb_url = $url;
 		}
 		else {

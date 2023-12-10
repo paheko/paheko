@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Recherche de membre" current="users" custom_js=['lib/query_builder.min.js']}
+{include file="_head.tpl" title="Recherche de membre" current="users"}
 
 {include file="users/_nav.tpl" current="search"}
 
@@ -7,13 +7,13 @@
 {include file="common/search/advanced.tpl"}
 
 {if $list !== null}
-	{$list->getHTMLPagination(true)|raw}
-
 	{if $list->count() > 0}
 	<p class="actions">{exportmenu form=true name="_dl_export" class="menu-btn-right"}</p>
 	{/if}
 
 	<p class="help">{$list->count()} membres trouvés pour cette recherche.</p>
+
+	{$list->getHTMLPagination(true)|raw}
 
 	{include file="common/dynamic_list_head.tpl" check=$is_admin use_buttons=true}
 
@@ -22,9 +22,9 @@
 			{if $is_admin}
 			<td class="check">{input type="checkbox" name="selected[]" value=$row.id}</td>
 			{/if}
-			{foreach from=$list->getHeaderColumns() key="key" item="label"}
+			{foreach from=$list->getHeaderColumns() key="name" item="label"}
 				<td>
-					{display_dynamic_field key=$key value=$row->$key}
+					{user_field name=$name value=$row->$name link_name_id=$row.id files_href="!users/details.php?id=%d"|args:$row.id}
 				</td>
 			{/foreach}
 			<td class="actions">
@@ -40,6 +40,8 @@
 		{include file="users/_list_actions.tpl" colspan=$list->countHeaderColumns()+1}
 	{/if}
 	</table>
+
+	{$list->getHTMLPagination(true)|raw}
 
 	</form>
 
@@ -88,9 +90,9 @@
 			{/if}
 				{foreach from=$header key="i" item="label"}
 				<td>
-					<?php $value = $row[$i]; $key = $header[$i]; ?>
+					<?php $value = $row[$i]; $name = $header[$i]; ?>
 					{if $id_column !== false}
-						{display_dynamic_field key=$key value=$value}
+						{user_field name=$name value=$value}
 					{else}
 						{$value}
 					{/if}

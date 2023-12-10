@@ -9,6 +9,12 @@
 	</ul>
 </nav>
 
+{if $_GET.msg === 'OK'}
+<p class="confirm block">
+	Le rapprochement a bien été enregistré.
+</p>
+{/if}
+
 {form_errors}
 
 <p class="help">

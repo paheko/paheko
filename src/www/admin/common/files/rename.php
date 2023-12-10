@@ -21,7 +21,7 @@ if (!$parent->canCreateHere()) {
 $csrf_key = 'file_rename_' . $file->pathHash();
 
 $form->runIf('rename', function () use ($file) {
-	$file->changeFileName(f('new_name'));
+	$file->changeFileName(f('new_name'), true, true);
 }, $csrf_key, '!docs/?path=' . $file->parent);
 
 $tpl->assign(compact('file', 'csrf_key'));

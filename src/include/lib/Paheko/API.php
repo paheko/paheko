@@ -12,17 +12,92 @@ use Paheko\Accounting\Transactions;
 use Paheko\Accounting\Years;
 use Paheko\Entities\Accounting\Transaction;
 use Paheko\Search;
+use Paheko\Services\Services_User;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Users;
+use Paheko\Files\Files;
 
 use KD2\ErrorManager;
 
 class API
 {
-	protected $body;
-	protected $params;
-	protected $method;
+	protected string $path;
+	protected array $params;
+	protected bool $is_http_client = false;
+	protected string $method;
 	protected int $access;
+	protected $file_pointer = null;
+	protected ?string $allowed_files_root = null;
+
+	protected array $allowed_methods = ['GET', 'POST', 'PUT'];
+
+	public function __construct(string $method, string $path, array $params)
+	{
+		if (!in_array($method, $this->allowed_methods)) {
+			throw new APIException('Invalid request method: ' . $method, 405);
+		}
+
+		$this->path = trim($path, '/');
+		$this->method = $method;
+		$this->params = $params;
+	}
+
+	public function __destruct()
+	{
+		if (null !== $this->file_pointer) {
+			$this->closeFilePointer();
+		}
+	}
+
+	public function setAllowedFilesRoot(?string $root): void
+	{
+		$this->allowed_files_root = rtrim($root, '/') . '/';
+	}
+
+	public function isPathAllowed(string $path): bool
+	{
+		if (!$this->allowed_files_root) {
+			return false;
+		}
+
+		return 0 === strpos($path, $this->allowed_files_root);
+	}
+
+	public function setAccessLevelByName(string $level): void
+	{
+		if ($level === 'read') {
+			$this->access = Session::ACCESS_READ;
+		}
+		elseif ($level === 'write') {
+			$this->access = Session::ACCESS_WRITE;
+		}
+		elseif ($level === 'admin') {
+			$this->access = Session::ACCESS_ADMIN;
+		}
+		else {
+			throw new \InvalidArgumentException('Invalid access level: ' . $level);
+		}
+	}
+
+	public function setAccessLevel(int $level): void
+	{
+		$this->access = $level;
+	}
+
+	public function setFilePointer($pointer): void
+	{
+		if (!is_resource($pointer)) {
+			throw new InvalidArgumentException('Invalid argument: not a file resource');
+		}
+
+		$this->file_pointer = $pointer;
+	}
+
+	public function closeFilePointer(): void
+	{
+		@fclose($this->file_pointer);
+		$this->file_pointer = null;
+	}
 
 	protected function requireAccess(int $level)
 	{
@@ -31,27 +106,27 @@ class API
 		}
 	}
 
-	protected function body(): string
-	{
-		if (null == $this->body) {
-			$this->body = trim(file_get_contents('php://input'));
-		}
-
-		return $this->body;
-	}
-
 	protected function hasParam(string $param): bool
 	{
-		return array_key_exists($param, $_GET);
+		return array_key_exists($param, $this->params);
 	}
 
-	protected function download()
+	protected function download(string $uri)
 	{
 		if ($this->method != 'GET') {
 			throw new APIException('Wrong request method', 400);
 		}
 
-		Backup::dump();
+		if ($uri === 'files') {
+			Files::zipAll();
+		}
+		elseif ($uri === '') {
+			Backup::dump();
+		}
+		else {
+			throw new APIException('Unknown path: ' . $uri, 404);
+		}
+
 		return null;
 	}
 
@@ -61,7 +136,7 @@ class API
 			throw new APIException('Wrong request method', 400);
 		}
 
-		$body = $this->body();
+		$body = $this->params['sql'] ?? self::getRequestInput();
 
 		if ($body === '') {
 			throw new APIException('Missing SQL statement', 400);
@@ -72,11 +147,15 @@ class API
 			$result = $s->iterateResults();
 			$header = $s->getHeader();
 
-			if (isset($_GET['format']) && in_array($_GET['format'], ['xlsx', 'ods', 'csv'])) {
-				$s->export($_GET['format']);
+			if (isset($this->params['format']) && in_array($this->params['format'], ['xlsx', 'ods', 'csv'])) {
+				$s->export($this->params['format']);
 				return null;
 			}
+			elseif (!$this->is_http_client) {
+				return ['count' => $s->countResults, 'results' => iterator_to_array($result)];
+			}
 			else {
+				// Stream results to client, in case request is slow
 				header("Content-Type: application/json; charset=utf-8", true);
 				printf("{\n    \"count\": %d,\n    \"results\":\n    [\n", $s->countResults());
 
@@ -108,9 +187,8 @@ class API
 				return null;
 			}
 		}
-		catch (\Exception $e) {
-			http_response_code(400);
-			return ['error' => 'Error in SQL statement', 'sql_error' => $e->getMessage()];
+		catch (DB_Exception $e) {
+			throw new APIException('Error in SQL statement: ' . $e->getMessage(), 400);
 		}
 	}
 
@@ -118,13 +196,14 @@ class API
 	{
 		$fn = strtok($uri, '/');
 		$fn2 = strtok('/');
+		strtok('');
 
 		// CSV import
 		if ($fn == 'import') {
 			$fp = null;
 
 			if ($this->method === 'PUT') {
-				$params = $_GET;
+				$params = $this->params;
 			}
 			elseif ($this->method === 'POST') {
 				$params = $_POST;
@@ -151,11 +230,10 @@ class API
 				$path = $_FILES['file']['tmp_name'] ?? null;
 			}
 			else {
-				$stdin = fopen('php://input', 'rb');
 				$fp = fopen($path, 'wb');
-				stream_copy_to_stream($stdin, $fp);
+				stream_copy_to_stream($this->file_pointer, $fp);
 				fclose($fp);
-				fclose($stdin);
+				$this->closeFilePointer();
 			}
 
 			try {
@@ -279,7 +357,7 @@ class API
 	{
 		$fn = strtok($uri, '/');
 		$p1 = strtok('/');
-		$p2 = strtok(false);
+		$p2 = strtok('');
 
 		if ($fn == 'transaction') {
 			if (!$p1) {
@@ -289,8 +367,22 @@ class API
 
 				$this->requireAccess(Session::ACCESS_WRITE);
 				$transaction = new Transaction;
-				$transaction->importFromAPI();
+				$transaction->importFromAPI($this->params);
 				$transaction->save();
+
+				foreach ((array)($this->params['linked_users'] ?? []) as $user) {
+					$transaction->linkToUser((int)$user);
+				}
+
+				if ($this->hasParam('move_attachments_from')
+					&& $this->isPathAllowed($this->params['move_attachments_from'])) {
+					$file = Files::get($this->params['move_attachments_from']);
+
+					if ($file && $file->isDir()) {
+						$file->rename($transaction->getAttachementsDirectory());
+					}
+				}
+
 				return $transaction->asJournalArray();
 			}
 			// Return or edit linked users
@@ -330,7 +422,7 @@ class API
 				}
 				elseif ($this->method == 'POST') {
 					$this->requireAccess(Session::ACCESS_WRITE);
-					$transaction->importFromNewForm();
+					$transaction->importFromNewForm($this->params);
 					$transaction->save();
 					return $transaction->asJournalArray();
 				}
@@ -376,11 +468,11 @@ class API
 
 					$a = $year->chart()->accounts();
 
-					if (!empty($_GET['code'])) {
-						$account = $a->getWithCode($_GET['code']);
+					if (!empty($this->params['code'])) {
+						$account = $a->getWithCode($this->params['code']);
 					}
 					else {
-						$account = $a->get((int)$_GET['code'] ?? null);
+						$account = $a->get((int)$this->params['code'] ?? null);
 					}
 
 					if (!$account) {
@@ -423,9 +515,80 @@ class API
 		}
 	}
 
+	protected function services(string $uri): ?array
+	{
+		$fn = strtok($uri, '/');
+		$fn2 = strtok('/');
+		strtok('');
+
+		// CSV import
+		if ($fn === 'subscriptions' && $fn2 === 'import') {
+			$fp = null;
+
+			if ($this->method === 'PUT') {
+				$params = $this->params;
+			}
+			elseif ($this->method === 'POST') {
+				$params = $_POST;
+			}
+			else {
+				throw new APIException('Wrong request method', 400);
+			}
+
+			$this->requireAccess(Session::ACCESS_ADMIN);
+
+			$path = tempnam(CACHE_ROOT, 'tmp-import-api');
+
+			if ($this->method === 'POST') {
+				if (empty($_FILES['file']['tmp_name']) || !empty($_FILES['file']['error'])) {
+					throw new APIException('Empty file or no file was sent.', 400);
+				}
+
+				$path = $_FILES['file']['tmp_name'] ?? null;
+			}
+			else {
+				$fp = fopen($path, 'wb');
+				stream_copy_to_stream($this->file_pointer, $fp);
+				fclose($fp);
+				$this->closeFilePointer();
+			}
+
+			if (!$path) {
+				throw new APIException('Empty CSV file', 400);
+			}
+
+			try {
+				if (!filesize($path)) {
+					throw new APIException('Invalid upload', 400);
+				}
+
+				$csv = new CSV_Custom;
+				$csv->setColumns(Services_User::listImportColumns());
+				$csv->setMandatoryColumns(Services_User::listMandatoryImportColumns());
+
+				$csv->loadFile($path);
+				$csv->setTranslationTableAuto();
+
+				if (!$csv->loaded() || !$csv->ready()) {
+					throw new APIException('Missing columns or error during columns matching of import table: ' . json_encode(Services_User::listMandatoryImportColumns()), 400);
+				}
+
+				Services_User::import($csv);
+				return null;
+			}
+			finally {
+				Utils::safe_unlink($path);
+			}
+		}
+		else {
+			throw new APIException('Unknown user action', 404);
+		}
+	}
+
 	public function errors(string $uri)
 	{
 		$fn = strtok($uri, '/');
+		strtok('');
 
 		if (!ini_get('error_log')) {
 			throw new APIException('The error log is disabled', 404);
@@ -442,7 +605,7 @@ class API
 
 			$this->requireAccess(Session::ACCESS_ADMIN);
 
-			$body = $this->body();
+			$body = self::getRequestInput();
 			$report = json_decode($body);
 
 			if (!isset($report->context->id)) {
@@ -472,30 +635,33 @@ class API
 
 	public function checkAuth(): void
 	{
-		if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
+		$login = $_SERVER['PHP_AUTH_USER'] ?? null;
+		$password = $_SERVER['PHP_AUTH_PW'] ?? null;
+
+		if (!isset($login, $password)) {
 			throw new APIException('No username or password supplied', 401);
 		}
 
-		if (API_USER && API_PASSWORD && $_SERVER['PHP_AUTH_USER'] === API_USER && $_SERVER['PHP_AUTH_PW'] === API_PASSWORD) {
-			$this->access = Session::ACCESS_ADMIN;
-		}
-		elseif ($c = API_Credentials::login($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
-			$this->access = $c->access_level;
-		}
-		else {
+		$access = API_Credentials::auth($login, $password);
+
+		if (null === $access) {
 			throw new APIException('Invalid username or password', 403);
 		}
+
+		$this->access = $access;
 	}
 
-	public function dispatch(string $fn, string $uri)
+	public function route()
 	{
-		$this->checkAuth();
+		$uri = $this->path;
+		$fn = strtok($uri, '/');
+		$uri = strtok('');
 
 		switch ($fn) {
 			case 'sql':
 				return $this->sql();
 			case 'download':
-				return $this->download();
+				return $this->download($uri);
 			case 'web':
 				return $this->web($uri);
 			case 'user':
@@ -504,49 +670,66 @@ class API
 				return $this->errors($uri);
 			case 'accounting':
 				return $this->accounting($uri);
+			case 'services':
+				return $this->services($uri);
 			default:
 				throw new APIException('Unknown path', 404);
 		}
 	}
 
-	static public function dispatchURI(string $uri)
+	static public function getRequestInput(): string
 	{
-		$fn = strtok($uri, '/');
+		static $input = null;
+		$input ??= trim(file_get_contents('php://input'));
+		return $input;
+	}
 
-		$api = new self;
-
-		$api->method = $_SERVER['REQUEST_METHOD'] ?? null;
+	static public function routeHttpRequest(string $uri)
+	{
 		$type = $_SERVER['CONTENT_TYPE'] ?? null;
-		$type ??= $_SERVER['HTTP_CONTENT_TYPE'] ?? null;
+		$type ??= $_SERVER['HTTP_CONTENT_TYPE'] ?? '';
+		$method = $_SERVER['REQUEST_METHOD'] ?? null;
 
-		if ($api->method === 'POST' && false !== strpos($type, '/json')) {
-			$_POST = (array) json_decode($api->body(), true);
+		if ($method === 'POST') {
+			if (false !== strpos($type, '/json')) {
+				$params = (array) json_decode(self::getRequestInput(), true);
+			}
+			else {
+				$params = array_merge($_GET, $_POST);
+			}
+		}
+		else {
+			$params = $_GET;
+		}
+
+		$api = new self($method, $uri, $params);
+		$api->is_http_client = true;
+
+		if ($method === 'PUT') {
+			$api->setFilePointer(fopen('php://input', 'rb'));
 		}
 
 		http_response_code(200);
 
 		try {
-			$return = $api->dispatch($fn, strtok(''));
+			$api->checkAuth();
+
+			try {
+				$return = $api->route();
+			}
+			catch (UserException|ValidationException $e) {
+				throw new APIException($e->getMessage(), 400, $e);
+			}
 
 			if (null !== $return) {
 				header("Content-Type: application/json; charset=utf-8", true);
 				echo json_encode($return, JSON_PRETTY_PRINT);
 			}
 		}
-		catch (\Exception $e) {
-			if ($e instanceof APIException) {
-				http_response_code($e->getCode());
-				header("Content-Type: application/json; charset=utf-8", true);
-				echo json_encode(['error' => $e->getMessage()]);
-			}
-			elseif ($e instanceof UserException || $e instanceof ValidationException) {
-				http_response_code(400);
-				header("Content-Type: application/json; charset=utf-8", true);
-				echo json_encode(['error' => $e->getMessage()]);
-			}
-			else {
-				throw $e;
-			}
+		catch (APIException $e) {
+			http_response_code($e->getCode());
+			header("Content-Type: application/json; charset=utf-8", true);
+			echo json_encode(['error' => $e->getMessage()]);
 		}
 	}
 }

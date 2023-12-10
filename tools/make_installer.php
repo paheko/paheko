@@ -119,7 +119,13 @@ namespace {
 
 		$i->install($latest);
 		$i->clean($latest);
-		$next = null;
+
+		if (class_exists('\OCP\AppFramework\Controller')) {
+			$next = 'nc' . time();
+		}
+		else {
+			$next = null;
+		}
 	}
 	else {
 		$next = 'download';

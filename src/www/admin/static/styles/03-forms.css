@@ -309,6 +309,23 @@ input[type=color]::-moz-color-swatch {
     box-shadow: 0  0 5px #000;
 }
 
+.accesskeys a[accesskey]::after, .accesskeys input[accesskey]::after, .accesskeys button[accesskey]::after {
+    content: attr(accesskey);
+    display: absolute;
+    position: absolute;
+    background: darkorange;
+    color: #fff;
+    box-shadow: 0px 0px 5px orange;
+    padding: 2px 5px;
+    border-radius: .5em;
+    font-size: 12px;
+    font-weight: bold;
+    font-family: Arial !important;
+    height: unset;
+    line-height: unset;
+    margin-left: 5px;
+}
+
 input.resetButton {
     margin-left: 1em;
 }

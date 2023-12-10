@@ -52,37 +52,6 @@ function paheko_manifest()
 	return false;
 }
 
-/**
- * Le code de Paheko ne s'écrit pas tout seul comme par magie,
- * merci de soutenir notre travail en faisant une contribution :)
- */
-function paheko_contributor_license(): ?int
-{
-	static $level = null;
-
-	if (null !== $level) {
-		return $level;
-	}
-
-	if (!CONTRIBUTOR_LICENSE) {
-		return null;
-	}
-
-	if (is_int(CONTRIBUTOR_LICENSE)) {
-		return CONTRIBUTOR_LICENSE;
-	}
-
-	$key = CONTRIBUTOR_LICENSE;
-	$key = gzinflate(base64_decode($key));
-	list($email, $level, $hash) = explode('==', $key);
-	$level = (int)hexdec($level);
-
-	if (substr(sha1($email . $level), 0, 10) != $hash) {
-		return null;
-	}
-
-	return $level;
-}
 
 if (!defined('\SQLITE3_OPEN_READWRITE')) {
 	echo 'Le module de base de données SQLite3 n\'est pas disponible.' . PHP_EOL;
@@ -232,7 +201,6 @@ static $default_config = [
 	'PDFTOTEXT_COMMAND'     => null,
 	'CALC_CONVERT_COMMAND'  => null,
 	'DOCUMENT_THUMBNAIL_COMMANDS' => null,
-	'CONTRIBUTOR_LICENSE'   => null,
 	'SQL_DEBUG'             => null,
 	'SYSTEM_SIGNALS'        => [],
 	'LOCAL_LOGIN'           => null,
@@ -264,6 +232,7 @@ if (SMTP_SECURITY) {
 
 // Used for private files, just in case WWW_URL is not the same domain as ADMIN_URL
 define('Paheko\BASE_URL', str_replace('/admin/', '/', ADMIN_URL));
+define('Paheko\ADMIN_URI', preg_replace('!(^https?://[^/]+)!', '', ADMIN_URL));
 
 const HELP_URL = 'https://paheko.cloud/aide?from=%s';
 const HELP_PATTERN_URL = 'https://paheko.cloud/%s';

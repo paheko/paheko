@@ -37,6 +37,7 @@ class Module extends Entity
 	const SNIPPET_MY_SERVICES = 'snippets/my_services.html';
 	const SNIPPET_MY_DETAILS = 'snippets/my_details.html';
 	const SNIPPET_BEFORE_NEW_TRANSACTION = 'snippets/transaction_new.html';
+	const SNIPPET_MARKDOWN_EXTENSION = 'snippets/markdown/%s.html';
 
 	const SNIPPETS = [
 		self::SNIPPET_HOME_BUTTON => 'icône sur la page d\'accueil',
@@ -96,7 +97,7 @@ class Module extends Entity
 
 		if (isset($source['restrict'])) {
 			$this->set('restrict_section', strtok($source['restrict'], '_') ?: null);
-			$this->set('restrict_level', (int)strtok(false) ?: null);
+			$this->set('restrict_level', (int)strtok('') ?: null);
 		}
 
 		parent::importForm($source);
@@ -212,6 +213,10 @@ class Module extends Entity
 			}
 		}
 
+		foreach ($this->listFiles('snippets/markdown') as $file) {
+			$db->insert('modules_templates', ['id_module' => $this->id(), 'name' => $file->path]);
+		}
+
 		$db->commit();
 	}
 
@@ -310,12 +315,12 @@ class Module extends Entity
 
 	public function hasData(): bool
 	{
-		return DB::getInstance()->test('sqlite_master', 'type = \'table\' AND name = ?', sprintf('modules_data_%s', $this->name));
+		return DB::getInstance()->test('sqlite_master', 'type = \'table\' AND name = ?', sprintf('module_data_%s', $this->name));
 	}
 
 	public function getDataSize(): int
 	{
-		return DB::getInstance()->getTableSize(sprintf('modules_data_%s', $this->name));
+		return DB::getInstance()->getTableSize(sprintf('module_data_%s', $this->name));
 	}
 
 	public function getCodeSize(): int
@@ -342,7 +347,7 @@ class Module extends Entity
 
 	public function canDelete(): bool
 	{
-		return $this->hasLocal() && !$this->hasDist();
+		return !$this->enabled && $this->hasLocal() && !$this->hasDist();
 	}
 
 	public function canReset(): bool
@@ -364,9 +369,10 @@ class Module extends Entity
 			return [];
 		}
 
-		$path = $path ? '/' . $path : '';
+		$path ??= '';
+		$local_path = trim($base . '/' . $path, '/');
 
-		foreach (Files::listForContext(File::CONTEXT_MODULES, $this->name . $path) as $file) {
+		foreach (Files::list($local_path) as $file) {
 			$_path = substr($file->path, strlen($base . '/'));
 
 			$out[$file->name] = (object) [
@@ -381,7 +387,7 @@ class Module extends Entity
 			];
 		}
 
-		$dist_path = $this->distPath(trim($path, '/'));
+		$dist_path = $this->distPath($path);
 
 		if (is_dir($dist_path)) {
 			foreach (scandir($dist_path) as $file) {
@@ -398,10 +404,10 @@ class Module extends Entity
 					'name'      => $file,
 					'type'      => mime_content_type($dist_path . '/' . $file),
 					'dir'       => is_dir($dist_path . '/' . $file),
-					'path'      => $path . $file,
+					'path'      => trim($path . '/' . $file, '/'),
 					'local'     => false,
 					'dist'      => true,
-					'file_path' => $base . $path . '/' . $file,
+					'file_path' => $base . '/' . trim($path . '/' . $file, '/'),
 					'file'      => null,
 					'dist_path' => $dist_path . '/' . $file,
 				];
@@ -454,7 +460,7 @@ class Module extends Entity
 
 	public function deleteData(): void
 	{
-		DB::getInstance()->exec(sprintf('DROP TABLE IF EXISTS modules_data_%s; UPDATE modules SET config = NULL WHERE name = \'%1$s\';', $this->name));
+		DB::getInstance()->exec(sprintf('DROP TABLE IF EXISTS module_data_%s; UPDATE modules SET config = NULL WHERE name = \'%1$s\';', $this->name));
 
 		// Delete all files
 		if ($dir = Files::get($this->storage_root())) {
@@ -743,7 +749,13 @@ class Module extends Entity
 		$out = [];
 
 		foreach (DB::getInstance()->iterate('SELECT name FROM modules_templates WHERE id_module = ? AND name LIKE \'snippets/%\';', $this->id()) as $row) {
-			$out[$row->name] = self::SNIPPETS[$row->name];
+			$label = self::SNIPPETS[$row->name] ?? null;
+
+			if (!$label && ($match = sscanf($row->name, 'snippets/markdown/%[^.].html'))) {
+				$label = sprintf('extension MarkDown <<%s>>, utilisable dans les pages du site web', current($match));
+			}
+
+			$out[$row->name] = $label;
 		}
 
 		return $out;

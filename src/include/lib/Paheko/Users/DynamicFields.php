@@ -154,7 +154,7 @@ class DynamicFields
 		return $fields;
 	}
 
-	static public function getNameFieldsSearchableSQL(?string $prefix = null): string
+	static public function getNameFieldsSearchableSQL(?string $prefix = null): ?string
 	{
 		$fields = [];
 
@@ -168,7 +168,7 @@ class DynamicFields
 
 		// There are no indexed fields in the name, eg. only the user number, then discard the index
 		if (!count($fields)) {
-			return '1';
+			return null;
 		}
 
 		$db = DB::getInstance();
@@ -1055,6 +1055,8 @@ class DynamicFields
 			throw new UserException('Aucun champ n\'a été sélectionné pour l\'identité des membres.');
 		}
 
+		$has_text = false;
+
 		foreach ($fields as $field) {
 			if (empty($this->_fields[$field])) {
 				throw new \InvalidArgumentException('This field does not exist: ' . $field);
@@ -1065,6 +1067,14 @@ class DynamicFields
 			if (!in_array($type, DynamicField::NAME_FIELD_TYPES)) {
 				throw new \InvalidArgumentException('This field cannot be used as a name field: ' . $field);
 			}
+
+			if ($type !== 'number') {
+				$has_text = true;
+			}
+		}
+
+		if (!$has_text) {
+			throw new UserException('Aucun champ texte n\'a été sélectionné pour l\'identité des membres. Au moins un champ texte doit être sélectionné.');
 		}
 
 		$db = DB::getInstance();

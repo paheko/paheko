@@ -382,19 +382,23 @@ class User extends Entity
 		}
 
 		foreach (DynamicFields::getInstance()->fieldsByType('multiple') as $f) {
-			if (!isset($source[$f->name . '_present'])) {
+			if (!(isset($source[$f->name . '_present']) || isset($source[$f->name]))) {
 				continue;
 			}
 
+			if (isset($source[$f->name]) && is_string($source[$f->name])) {
+				$source[$f->name] = array_map('trim', explode(',', $source[$f->name]));
+			}
 
 			$options = isset($source[$f->name]) && is_array($source[$f->name]) ? $source[$f->name] : [];
-			$options = array_keys($options);
 
 			$v = 0;
 
-			foreach ($options as $k) {
-				$k = 0x01 << $k;
-				$v |= $k;
+			foreach ($f->options as $k => $label) {
+				if (in_array($label, $options, true)) {
+					$k = 0x01 << $k;
+					$v |= $k;
+				}
 			}
 
 			$source[$f->name] = $v ?: null;
@@ -402,21 +406,31 @@ class User extends Entity
 
 		// Handle unchecked checkbox in HTML form: no value returned
 		foreach (DynamicFields::getInstance()->fieldsByType('checkbox') as $f) {
-			if (!isset($source[$f->name . '_present'])) {
+			if (!(isset($source[$f->name . '_present']) || isset($source[$f->name]))) {
 				continue;
 			}
 
 			$source[$f->name] = !empty($source[$f->name]);
 		}
 
+		foreach (DynamicFields::getInstance()->fieldsByType('country') as $f) {
+			if (!isset($source[$f->name])) {
+				continue;
+			}
+
+			if (strlen($source[$f->name]) !== 2) {
+				$source[$f->name] = Utils::getCountryCode($source[$f->name]);
+			}
+
+			$source[$f->name] = $source[$f->name] ?: null;
+		}
+
 		return parent::importForm($source);
 	}
 
-	public function importSecurityForm(bool $user_mode = true, array $source = null)
+	public function importSecurityForm(bool $user_mode = true, array $source = null, Session $session = null)
 	{
-		if (null === $source) {
-			$source = $_POST;
-		}
+		$source ??= $_POST;
 
 		$allowed = ['password', 'password_check', 'password_confirmed', 'password_delete', 'otp_secret', 'otp_disable', 'pgp_key', 'otp_code'];
 		$source = array_intersect_key($source, array_flip($allowed));
@@ -458,11 +472,13 @@ class User extends Entity
 		}
 
 		// Don't allow user to change password if the password field cannot be changed by user
-		if ($user_mode && !$this->canChangePassword()) {
-			unset($source['password'], $source['password_check']);
+		if ($user_mode && !$this->canChangePassword($session)) {
+			unset($source['password']);
 		}
 
-		return parent::importForm($source);
+		unset($source['password_confirmed'], $source['password_check']);
+
+		parent::importForm($source);
 	}
 
 	public function getEmails(): array
@@ -569,8 +585,12 @@ class User extends Entity
 		throw new UserException("Le champ identifiant ne peut être laissé vide pour un administrateur, sinon vous ne pourriez plus vous connecter.");
 	}
 
-	public function canChangePassword(): bool
+	public function canChangePassword(Session $session): bool
 	{
+		if ($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)) {
+			return true;
+		}
+
 		$password_field = current(DynamicFields::getInstance()->fieldsBySystemUse('password'));
 		return $password_field->user_access_level === Session::ACCESS_WRITE;
 	}
@@ -638,13 +658,9 @@ class User extends Entity
 
 	public function diff(): array
 	{
-		$out = $this->asDetailsArray();
+		$out = [];
 
 		foreach ($this->_modified as $key => $old) {
-			if (!array_key_exists($key, $out)) {
-				continue;
-			}
-
 			$out[$key] = [$old, $this->$key];
 		}
 

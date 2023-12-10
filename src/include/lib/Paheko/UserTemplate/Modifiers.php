@@ -6,6 +6,7 @@ use Paheko\DB;
 use Paheko\Utils;
 use Paheko\UserException;
 
+use Paheko\Users\DynamicFields;
 use Paheko\Entities\Email\Email;
 
 use KD2\SMTP;
@@ -36,6 +37,7 @@ class Modifiers
 		'money_int' => [Utils::class, 'moneyToInteger'],
 		'array_transpose' => [Utils::class, 'array_transpose'],
 		'check_email',
+		'gettype',
 		'arrayval',
 		'explode',
 		'implode',
@@ -43,16 +45,21 @@ class Modifiers
 		'values',
 		'has',
 		'in',
-		'map',
 		'sort',
 		'ksort',
 		'quote_sql_identifier',
 		'quote_sql',
 		'sql_where',
+		'sql_user_fields',
 		'urlencode',
 		'count_words',
 		'or',
 		'uuid',
+		'key',
+	];
+
+	const MODIFIERS_WITH_INSTANCE_LIST = [
+		'map',
 	];
 
 	const LEADING_NUMBER_REGEXP = '/^([\d.]+)\s*[.\)]\s*/';
@@ -170,7 +177,7 @@ class Modifiers
 	{
 		$number = str_replace(',', '.', $number);
 		$number = strtok($number, '.');
-		$decimals = strtok(false);
+		$decimals = strtok('');
 
 		$out = numfmt_create($locale, \NumberFormatter::SPELLOUT)->format((float) $number);
 		$out .= ' ' . $currency;
@@ -308,6 +315,15 @@ class Modifiers
 					throw new Brindille_Exception('Invalid comma outside of a function, on position ' . $token->offset);
 				}
 			}
+			elseif ($token->type === 'number') {
+				// Add spaces around numbers, so that 0--1 is treated as 0 - -1 = 0 + 1
+				$token->value = ' ' . $token->value . ' ';
+			}
+			elseif ($token->type === 'sign') {
+				if ($tokens[$i-1]->type === 'sign') {
+					throw new Brindille_Exception('Invalid sign following a sign, on position ' . $token->offset);
+				}
+			}
 
 			$expression .= $token->value;
 		}
@@ -324,7 +340,7 @@ class Modifiers
 		}
 	}
 
-	static public function map($array, string $modifier, ...$params): array
+	static public function map(UserTemplate $tpl, int $line, $array, string $modifier, ...$params): array
 	{
 		if (!is_array($array)) {
 			throw new Brindille_Exception('Supplied argument is not an array');
@@ -332,26 +348,37 @@ class Modifiers
 
 		$callback = null;
 
-		if (in_array($modifier, CommonModifiers::PHP_MODIFIERS_LIST)) {
-			$callback = $modifier;
-		}
-		elseif (in_array($modifier, CommonModifiers::MODIFIERS_LIST)) {
-			$callback = [CommonModifiers::class, $modifier];
-		}
-		elseif (in_array($modifier, self::MODIFIERS_LIST)) {
-			$callback = [self::class, $modifier];
-		}
-		else {
+		if (!$tpl->checkModifierExists($modifier)) {
 			throw new Brindille_Exception('Unknown modifier: ' . $modifier);
 		}
 
 		$out = [];
 
 		foreach ($array as $key => $value) {
-			$out[$key] = call_user_func($callback, $value, ...$params);
+			$out[$key] = $tpl->callModifier($modifier, $line, $value, ...$params);
 		}
 
 		return $out;
+	}
+
+	static public function gettype($v): string
+	{
+		$type = gettype($v);
+
+		switch($type) {
+			case 'object':
+				return 'array';
+			case 'double':
+				return 'float';
+			case 'NULL':
+				return 'null';
+			case 'resource':
+			case 'resource (closed)':
+			case 'unknown type':
+				throw new \LogicException('Unexpected type: ' . $type);
+			default:
+				return $type;
+		}
 	}
 
 	static public function arrayval($v): array
@@ -376,6 +403,11 @@ class Modifiers
 	static public function keys($array)
 	{
 		return array_keys((array)$array);
+	}
+
+	static public function key($array, $key)
+	{
+		return $array[$key] ?? null;
 	}
 
 	static public function values($array)
@@ -444,6 +476,28 @@ class Modifiers
 	static public function sql_where(...$args)
 	{
 		return DB::getInstance()->where(...$args);
+	}
+
+	static public function sql_user_fields($list, string $prefix = '', string $glue = ' '): string
+	{
+		$db = DB::getInstance();
+		$prefix = $prefix ? $db->quoteIdentifier($prefix) . '.' : '';
+		$out = [];
+		$glue = $db->quote($glue);
+
+		foreach ((array) $list as $field) {
+			if (!DynamicFields::get($field)) {
+				continue;
+			}
+
+			$out[] = sprintf('COALESCE(%s || %s%s, \'\')', $glue, $prefix, $db->quoteIdentifier($field));
+		}
+
+		if (!count($out)) {
+			return '\'\'';
+		}
+
+		return sprintf('LTRIM(%s, %s)', implode(' || ', $out), $glue);
 	}
 
 	static public function urlencode($str): string

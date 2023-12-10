@@ -930,6 +930,13 @@ class Account extends Entity
 
 	public function createOpeningBalance(Year $year, int $amount, ?string $label = null): Transaction
 	{
+		$accounts = $year->accounts();
+		$opening_account = $accounts->getOpeningAccountId();
+
+		if (!$opening_account) {
+			throw new UserException('Impossible de créer la balance d\'ouverture : le plan comptable sélectionné n\'a pas de compte 890 — Balance d\'ouverture.');
+		}
+
 		$t = new Transaction;
 		$t->label = $label ?? 'Solde d\'ouverture du compte';
 		$t->date = clone $year->start_date;
@@ -937,9 +944,7 @@ class Account extends Entity
 		$t->notes = 'Créé automatiquement à l\'ajout du compte';
 		$t->id_year = $year->id;
 
-		$accounts = $year->accounts();
 
-		$opening_account = $accounts->getOpeningAccountId();
 		$credit = $amount > 0 ? 0 : abs($amount);
 		$debit = $amount < 0 ? 0 : abs($amount);
 		$t->addLine(Line::create($this->id(), $credit, $debit));

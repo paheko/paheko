@@ -12,9 +12,9 @@ $user = Session::getLoggedUser();
 $csrf_key = 'edit_security_' . md5($user->password);
 $edit = qg('edit');
 
-$form->runIf('confirm', function () use ($user) {
-	$user->importSecurityForm(true);
-	$user->save();
+$form->runIf('confirm', function () use ($user, $session) {
+	$user->importSecurityForm(true, null, $session);
+	$user->save(false);
 }, $csrf_key, '!me/security.php?ok');
 
 $otp = null;
@@ -31,7 +31,7 @@ $sessions_count = $session->countActiveSessions();
 
 $id_field = current(DynamicFields::getInstance()->fieldsBySystemUse('login'));
 $id = $user->{$id_field->name};
-$can_change_password = $user->canChangePassword();
+$can_change_password = $user->canChangePassword($session);
 
 $tpl->assign(compact('id', 'edit', 'id_field', 'user', 'csrf_key', 'sessions_count', 'can_change_password', 'otp'));
 

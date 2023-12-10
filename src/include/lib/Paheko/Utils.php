@@ -69,7 +69,6 @@ class Utils
 		'gallery'         => '🖼',
 		'code'            => '<',
 		'markdown'        => 'M',
-		'skriv'           => 'S',
 		'globe'           => '🌍',
 		'video'           => '▶',
 		'quote'           => '«',
@@ -229,11 +228,24 @@ class Utils
 			return 0;
 		}
 
-		if (!preg_match('/^(-?)(\d+)(?:[,.](\d{1,2}))?/', $value, $match)) {
+		if (!preg_match('/^(-?)(\d+)(?:[,.](\d{1,3}))?/', $value, $match)) {
 			throw new UserException(sprintf('Le montant est invalide : %s. Exemple de format accepté : 142,02', $value));
 		}
 
-		$value = $match[1] . $match[2] . str_pad($match[3] ?? '', 2, '0', STR_PAD_RIGHT);
+		$cents = $match[3] ?? '0';
+
+		if (strlen($cents) === 1) {
+			$cents .= '0';
+		}
+
+		$more = (int) substr($cents, 2, 1);
+		$cents = (int) substr($cents, 0, 2);
+
+		if ($more >= 5) {
+			$cents++;
+		}
+
+		$value = $match[1] . $match[2] . str_pad((string)$cents, 2, '0', STR_PAD_LEFT);
 		$value = (int) $value;
 		return $value;
 	}
@@ -461,6 +473,23 @@ class Utils
 		return $list[$code] ?? null;
 	}
 
+	static public function getCountryCode(string $find): ?string
+	{
+		if (!strlen($find)) {
+			return null;
+		}
+
+		$list = self::getCountryList();
+
+		foreach ($list as $code => $name) {
+			if (strnatcasecmp($find, $name) === 0) {
+				return $code;
+			}
+		}
+
+		return null;
+	}
+
 	static public function transliterateToAscii($str, $charset='UTF-8')
 	{
 		// Don't process empty strings
@@ -517,8 +546,15 @@ class Utils
 		return true;
 	}
 
-	static public function safe_mkdir($path, $mode = 0777, $recursive = false)
+	static public function safe_mkdir($path, $mode = null, $recursive = false)
 	{
+		if (null === $mode && file_exists(DATA_ROOT)) {
+			$mode = fileperms(DATA_ROOT);
+		}
+		elseif (null === $mode && file_exists(ROOT)) {
+			$mode = fileperms(ROOT);
+		}
+
 		return @mkdir($path, $mode, $recursive) || is_dir($path);
 	}
 
@@ -1167,7 +1203,7 @@ class Utils
 		}
 
 		fclose($pipes[0]);
-		$code = null;
+		$code = 0;
 
 		while ($timeout_ms > 0) {
 			$start = microtime(true);
@@ -1287,6 +1323,8 @@ class Utils
 		$target = str_replace('.html', '.pdf', $source);
 
 		$str = self::appendCookieToURLs($str);
+
+		Utils::safe_mkdir(CACHE_ROOT, null, true);
 		file_put_contents($source, $str);
 
 		if ($cmd == 'auto') {

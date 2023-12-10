@@ -19,7 +19,7 @@ use Paheko\Users\Session;
 
 use \KD2\HTML\Markdown;
 
-use const Paheko\{WWW_URI, ADMIN_URL, ROOT, HTTP_LOG_FILE, ENABLE_XSENDFILE};
+use const Paheko\{WWW_URI, ADMIN_URL, BASE_URL, WWW_URL, HELP_URL, ROOT, HTTP_LOG_FILE, ENABLE_XSENDFILE};
 
 class Router
 {
@@ -116,7 +116,7 @@ class Router
 			throw new UserException('Cette page ne semble pas exister.', 404);
 		}
 		elseif ($first === 'api') {
-			API::dispatchURI(substr($uri, 4));
+			API::routeHttpRequest(substr($uri, 4));
 			return;
 		}
 		// Route WebDAV requests to WebDAV server
@@ -152,6 +152,8 @@ class Router
 	static public function routeFile(string $uri): bool
 	{
 		$context = strtok($uri, '/');
+		strtok('');
+
 		$size = null;
 
 		if (false !== strpos($uri, 'px.') && preg_match('/\.([\da-z-]+px)\.(?:webp|svg)$/', $uri, $match)) {

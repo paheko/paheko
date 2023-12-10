@@ -26,7 +26,7 @@ if (!$user->canEmail()) {
 $csrf_key = 'send_message_' . $user->id;
 
 $form->runIf('send', function () use ($user, $self) {
-	$user->sendMessage(f('subject'), f('message'), (bool) f('send_copy'), $self);
+	$user->sendMessage(f('subject'), f('message'), (bool) f('send_copy'), f('sender') === 'self' ? $self : null);
 }, $csrf_key, '!users/?sent');
 
 $tpl->assign('category', Categories::get($user->id_category));

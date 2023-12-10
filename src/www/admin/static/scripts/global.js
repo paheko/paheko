@@ -511,6 +511,13 @@
 			i.onclick = () => {
 				i.setCustomValidity('');
 				g.current_list_input = i.parentNode;
+				var max = i.getAttribute('data-max');
+
+				if (max && max <= i.parentNode.querySelectorAll('span').length) {
+					alert('Il n\'est pas possible de faire plus de ' + max + ' choix.');
+					return false;
+				}
+
 				let url = i.value + (i.value.indexOf('?') > 0 ? '&' : '?') + '_dialog';
 				g.openFrameDialog(url);
 				return false;
@@ -700,12 +707,12 @@
 					this.form.target = '';
 				}
 
-				this.form.dispatchEvent(new Event('submit'));
-
 				if (this.form.target === '_dialog') {
 					g.openFormInDialog(this.form);
 				}
 				else {
+					// Not sure if this is required?
+					this.form.dispatchEvent(new Event('submit'));
 					this.form.submit();
 				}
 
@@ -736,4 +743,19 @@
 		}
 	});
 
+	// Add support for accesskeys, even if web browser doesn't support it, or has a weird keys combination
+	window.addEventListener('keydown', (e) => {
+		if (!e.altKey || !e.shiftKey) {
+			return true;
+		}
+
+		if (e.key.length === 1 && (el = document.querySelector('[accesskey="' + e.key + '"]'))) {
+			el.click();
+			return true;
+		}
+
+		// Highlight accesskeys
+		document.body.classList.add('accesskeys');
+	});
+	window.addEventListener('keyup', () => { document.body.classList.remove('accesskeys'); });
 })();

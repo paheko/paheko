@@ -7,6 +7,8 @@ use Paheko\UserTemplate\CommonModifiers;
 use KD2\HTML\Markdown as KD2_Markdown;
 use KD2\HTML\Markdown_Extensions;
 
+use Paheko\UserTemplate\Modules;
+
 class Markdown_Parser extends KD2_Markdown
 {
 	/**
@@ -42,6 +44,8 @@ class Markdown extends AbstractRender
 			foreach (Extensions::getList() as $name => $callback) {
 				self::$md->registerExtension($name, $callback);
 			}
+
+			self::$md->registerDefaultExtensionCallback([self::class, 'defaultExtensionCallback']);
 		}
 
 		Extensions::setRenderer($this);
@@ -49,5 +53,18 @@ class Markdown extends AbstractRender
 		$content = self::$md->text($content);
 
 		return $this->outputHTML($content);
+	}
+
+	static public function defaultExtensionCallback(bool $block, array $params, ?string $content, string $name, KD2_Markdown $md): string
+	{
+		$args = array_merge($params, compact('block', 'params', 'content'));
+
+		$out = Modules::snippetsAsString(sprintf(Modules::SNIPPET_MARKDOWN_EXTENSION, $name), $args);
+
+		if (!$out) {
+			return $md::error(sprintf("L'extension <<%s>> n'existe pas.", $name), $block);
+		}
+
+		return $out;
 	}
 }

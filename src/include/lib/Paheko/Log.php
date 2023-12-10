@@ -81,6 +81,7 @@ class Log
 			'type'       => $type,
 			'details'    => $details ? json_encode($details) : null,
 			'ip_address' => $ip,
+			'created'    => new \DateTime,
 		]);
 	}
 
@@ -173,7 +174,7 @@ class Log
 		$list->orderBy('created', true);
 		$list->setCount('COUNT(logs.id)');
 		$list->setModifier(function (&$row) {
-			$row->created = \DateTime::createFromFormat('!Y-m-d H:i:s', $row->created);
+			//$row->created = \DateTime::createFromFormat('!Y-m-d H:i:s', $row->created);
 			$row->details = $row->details ? json_decode($row->details) : null;
 			$row->type_label = $row->type == self::MESSAGE ? ($row->details->message ?? '') : self::ACTIONS[$row->type];
 
@@ -188,6 +189,7 @@ class Log
 				$const = 'Paheko\Entities\\' . $row->details->entity . '::PRIVATE_URL';
 
 				if (isset($row->details->id, $row->details->entity)
+					&& $row->type !== self::DELETE
 					&& defined($const)
 					&& ($value = constant($const))) {
 					$row->entity_url = sprintf($value, $row->details->id);

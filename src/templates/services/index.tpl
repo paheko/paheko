@@ -35,6 +35,8 @@
 			{/foreach}
 		</tbody>
 	</table>
+
+	{$list->getHTMLPagination()|raw}
 {else}
 	<p class="block alert">Il n'y a aucune activité enregistrée.</p>
 {/if}

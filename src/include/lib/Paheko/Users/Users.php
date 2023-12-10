@@ -187,7 +187,7 @@ class Users
 		return self::iterateEmails($sql);
 	}
 
-	static public function listByCategory(?int $id_category = null): DynamicList
+	static public function listByCategory(?int $id_category = null, ?Session $session = null): DynamicList
 	{
 		$db = DB::getInstance();
 		$df = DynamicFields::getInstance();
@@ -233,6 +233,10 @@ class Users
 					$identity_column = null;
 				}
 
+				continue;
+			}
+
+			if ($session && !$session->canAccess(Session::SECTION_USERS, $config->management_access_level)) {
 				continue;
 			}
 
@@ -333,7 +337,7 @@ class Users
 	static public function getIdFromNumber(string $number): ?int
 	{
 		$field = DynamicFields::getNumberFieldSQL();
-		return EM::getInstance(User::class)->col('SELECT id FROM @TABLE WHERE ' . $field . ' = ?', $number);
+		return EM::getInstance(User::class)->col('SELECT id FROM @TABLE WHERE ' . $field . ' = ?', $number) ?: null;
 	}
 
 	static public function getNameFromNumber(string $number): ?string

@@ -38,7 +38,7 @@ $fields = DF::getInstance()->all();
 			{if $value}
 				{icon shape="check"} Oui
 			{else}
-				Non
+				{icon shape="uncheck"} Non
 			{/if}
 		{elseif $field.type == 'file'}
 			<?php
@@ -47,8 +47,6 @@ $fields = DF::getInstance()->all();
 			{include file="common/files/_context_list.tpl" path="%s/%s"|args:$user_files_path:$key}
 		{elseif empty($value)}
 			<em>(Non renseigné)</em>
-		{elseif in_array($key, $id_fields)}
-			<strong>{$value}</strong>
 		{elseif $field.type == 'email'}
 			<a href="mailto:{$value|escape:'url'}">{$value}</a>
 			{if !DISABLE_EMAIL && $show_message_button && !$email_button++}
@@ -63,27 +61,31 @@ $fields = DF::getInstance()->all();
 			{/foreach}
 			</ul>
 		{else}
-			{display_dynamic_field field=$field value=$value user_id=$user.id}
+			{if in_array($key, $id_fields)}<strong>{/if}
+			{user_field field=$field value=$value user_id=$user.id}
+			{if in_array($key, $id_fields)}</strong>{/if}
 		{/if}
 	</dd>
-		{if $field.type == 'email' && $value && ($email = Email\Emails::getEmail($value))}
+		{if $field.type == 'email' && $value}
+		<?php $email = Email\Emails::getEmail($value); ?>
 		<dt>Statut e-mail</dt>
 		<dd>
 			{if $email.optout}
 				<b class="alert">{icon shape="alert"}</b> Ne souhaite plus recevoir de messages
 				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
+					<?php $value = rawurlencode($value); ?>
 					<br/>{linkbutton target="_dialog" label="Rétablir les envois à cette adresse" href="!users/mailing/verify.php?address=%s"|args:$value shape="check"}
 				{/if}
 			{elseif $email.invalid}
 				<b class="error">{icon shape="alert"} Adresse invalide</b>
 				{linkbutton href="!users/mailing/rejected.php?hl=%d#e_%1\$d"|args:$email.id label="Détails de l'erreur" shape="help"}
-			{elseif $email->hasReachedFailLimit()}
+			{elseif $email && $email->hasReachedFailLimit()}
 				<b class="error">{icon shape="alert"} Trop d'erreurs</b>
 				{linkbutton href="!users/mailing/rejected.php?hl=%d#e_%1\$d"|args:$email.id label="Détails de l'erreur" shape="help"}
 			{elseif $email.verified}
 				<b class="confirm">{icon shape="check" class="confirm"}</b> Adresse vérifiée
 			{else}
-				Adresse non vérifiée
+				{* Adresse non vérifiée *}
 				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
 					{linkbutton target="_dialog" label="Désinscrire de tous les envois" href="!users/mailing/block.php?address=%s"|args:$value shape="delete"}
 				{/if}

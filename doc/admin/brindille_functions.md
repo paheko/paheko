@@ -372,6 +372,80 @@ Seules les adresses internes sont acceptées, il n'est pas possible de rediriger
 
 Si `to=null` est utilisé, alors la fenêtre modale sera fermée. Ou, si la page n'est pas dans une fenêtre modale, la page courante sera rechargée.
 
+<!--
+## api
+
+Permet d'appeler l'API de Paheko, que ça soit sur l'instance locale, en cours, ou une autre instance externe.
+
+Voir la [documentation de l'API](https://paheko.cloud/api) pour la liste des fonctions disponibles.
+
+| Paramètre | Obligatoire ou optionnel ? | Fonction |
+| :- | :- | :- |
+| `method` | obligatoire | Méthode de requête : `GET`, `POST`, etc. |
+| `path` | obligatoire | Chemin de la méthode de l'API à appeler. |
+| `fail` | optionnel | Booléen. Si `true`, alors une erreur sera affichée si la requête échoue. Si `false`, aucune erreur ne sera affichée. Défaut : `true`. |
+| `assign` | optionnel | Capturer le résultat dans cette variable. |
+| `assign_code` | optionnel | Capturer le code de retour dans cette variable. |
+
+Par défaut, les requêtes sont réalisées sur la base de données locale, dans ce cas les paramètres suivants sont également disponibles :
+
+| Paramètre | Obligatoire ou optionnel ? | Fonction |
+| :- | :- | :- |
+| `access` | optionnel | Niveau d'autorisation de l'API (défaut : `admin`). |
+
+
+```
+{{:assign var="users." value=42}}
+{{:api
+  method="POST"
+  path="accounting/transaction"
+  assign="result"
+
+  id_year=1
+  type="revenue"
+  date="01/01/2023"
+  label="Don de Ada Lovelace"
+  reference="DON-0001"
+  payment_reference="Credit Mutuel 00042"
+  amount="51,49"
+  debit="756"
+  credit="512A"
+  linked_users=$users
+}}
+
+L'écriture n°{{$result.id}} a été créée.
+```
+
+Mais cette fonction permet également d'appeler une API Paheko distante, dans ce cas les paramètres suivants sont nécessaires :
+
+| Paramètre | Obligatoire ou optionnel ? | Fonction |
+| :- | :- | :- |
+| `url` | obligatoire | Adresse HTTP de l'instance Paheko distante. |
+| `user` | obligatoire | Identifiant d'accès à l'API distante. |
+| `password` | obligatoire | Mot de passe d'accès à l'API distante. |
+
+```
+{{:api
+  method="POST"
+  path="sql"
+  sql="SELECT * FROM users;"
+  url="https://mon-asso.paheko.cloud/"
+  user="zmgyfr1qnm"
+  password="OAqFTLFzujJWr6lLn1Mu7w"
+  assign="result"
+  assign_code="code"
+  fail=false
+}}
+
+{{if $code == 200}}
+  Il y a {{$result.count}} résultats.
+{{else}}
+  La requête a échoué : code {{$code}} — {{$result.error}}
+{{/if}}
+
+```
+-->
+
 # Fonctions relatives aux Modules
 
 ## save
@@ -684,6 +758,24 @@ Affiche une icône.
 
 ![](shapes.png)
 
+## user_field
+
+Affiche un champ de la fiche membre.
+
+| Paramètre | Obligatoire ou optionnel ? | Fonction |
+| :- | :- | :- |
+| `name` | **obligatoire** | Nom du champ. |
+| `value` | **obligatoire** | Valeur du champ. |
+
+## edit_user_field
+
+Afficher un champ de formulaire pour modifier un champ de la fiche membre.
+
+| Paramètre | Obligatoire ou optionnel ? | Fonction |
+| :- | :- | :- |
+| `name` | **obligatoire** | Nom du champ. |
+| `source` | *optionnel* | Source de pré-remplissage du champ. Si le nom du champ est `montant`, alors la valeur de `[source].montant` sera utilisée comme valeur du champ. |
+
 # Gestion de fichiers dans les modules
 
 Les modules peuvent stocker des fichiers, mais seulement dans leur propre contexte. Un module ne peut pas gérer les fichiers du site web, des écritures comptables, des membres, ou des autres modules, il ne peut gérer que ses propres fichiers.
@@ -709,6 +801,7 @@ Affiche (dans le contexte de l'administration) la liste des fichiers dans un sou
 | `path` | optionnel | Chemin du sous-répertoire où sont stockés les fichiers |
 | `upload` | optionnel | Booléen. Si `true`, l'utilisateur pourra ajouter des fichiers. (Défaut : `false`) |
 | `edit` | optionnel | Booléen. Si `true`, l'utilisateur pourra modifier ou supprimer les fichiers existants. (Défaut : `false`) |
+| `use_trash` | optionnel | Booléen. Si `false`, le fichier sera supprimé, sans passer par la corbeille. Défaut : `true` |
 
 Exemple pour afficher la liste des fichiers du sous-répertoire `facture43` et permettre de rajouter de nouveaux fichiers :
 

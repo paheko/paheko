@@ -8,7 +8,9 @@
 </p>
 {/if}
 
-{$snippets|raw}
+{if isset($snippets)}
+	{$snippets|raw}
+{/if}
 
 {include file="./_form.tpl"}
 

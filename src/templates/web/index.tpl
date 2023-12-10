@@ -16,19 +16,20 @@
 	</aside>
 </nav>
 
-{if !$page}
+{if !$page && $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
 	<nav class="web config">
-		{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
-			{if $url = $module->config_url()}
-				{linkbutton shape="settings" href=$url label="Configurer le thème" target="_dialog"}
-			{/if}
-			{linkbutton shape="code" href="!config/ext/edit.php?module=%s"|args:$module.name label="Code du site"}
-		{/if}
-		{if !$page && $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
+		{linkmenu shape="menu" label="Administration"}
+			{linkbutton shape="menu" label="Liste de toutes les pages du site" href="all.php"}
 			{linkbutton shape="check" href="?check=internal" label="Vérifier les liens internes"}
-		{/if}
+			{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
+				{if $url = $module->config_url()}
+					{linkbutton shape="settings" href=$url label="Configurer le thème" target="_dialog"}
+				{/if}
+				{linkbutton shape="code" href="!config/ext/edit.php?module=%s"|args:$module.name label="Code du site"}
+			{/if}
+		{/linkmenu}
 	</nav>
-{else}
+{elseif $page}
 	<nav class="web breadcrumbs no-clear">
 		<ul>
 			<li>{link href="!web/" label="Site web"}</li>
@@ -43,10 +44,13 @@
 {/if}
 
 {if !$page && $config.site_disabled && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
+<form method="post" action="">
 	<p class="block alert">
 		Le site public est désactivé.
-		{linkbutton shape="settings" href="!config/" label="Activer le site dans la configuration"}
+		{button shape="right" name="enable" value=1 type="submit" class="main" label="Activer le site"}
+		{csrf_field key=$csrf_key}
 	</p>
+</form>
 {/if}
 
 {if $_GET.check && !$page}

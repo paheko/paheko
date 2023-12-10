@@ -22,7 +22,7 @@
 	{/foreach}
 	<dd>
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-			{linkbutton href="!services/user/subscribe.php?user=%d"|args:$user.id label="Inscrire à une activité" shape="plus" target="_dialog"}
+			{linkbutton href="!services/user/subscribe.php?user=%d"|args:$user.id label="Inscrire à une activité" shape="plus" target="_dialog" accesskey="V"}
 		{/if}
 	</dd>
 	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)}

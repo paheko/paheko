@@ -96,6 +96,7 @@ class DynamicField extends Entity
 		'file'      =>  'Fichier',
 		'password'  =>  'Mot de passe',
 		'number'	=>	'Nombre',
+		'decimal'	=>	'Nombre à virgule',
 		'tel'		=>	'Numéro de téléphone',
 		'select'	=>	'Sélecteur à choix unique',
 		'multiple'  =>  'Sélecteur à choix multiple',
@@ -116,7 +117,8 @@ class DynamicField extends Entity
 		'year'     => '?int',
 		'file'     => '?string',
 		'password' => '?string',
-		'number'   => '?float',
+		'number'   => '?integer',
+		'decimal'  => '?float',
 		'tel'      => '?string',
 		'select'   => '?string',
 		'multiple' => '?int',
@@ -137,7 +139,8 @@ class DynamicField extends Entity
 		'year'     => 'INTEGER',
 		'file'     => 'TEXT',
 		'password' => 'TEXT',
-		'number'   => 'FLOAT',
+		'number'   => 'INTEGER',
+		'decimal'  => 'FLOAT',
 		'tel'      => 'TEXT',
 		'select'   => 'TEXT',
 		'multiple' => 'INTEGER',
@@ -239,6 +242,16 @@ class DynamicField extends Entity
 	public function isPreset(): bool
 	{
 		return (bool) ($this->system & self::PRESET);
+	}
+
+	public function isName(): bool
+	{
+		return (bool) ($this->system & self::NAMES);
+	}
+
+	public function isNumber(): bool
+	{
+		return (bool) ($this->system & self::NUMBER);
 	}
 
 	public function isVirtual(): bool
