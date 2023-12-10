@@ -32,8 +32,9 @@ table.list th {
 }
 
 table.list thead th, table.list thead td {
-    background: rgb(var(--gSecondColor));
-    background-image: linear-gradient(rgba(255, 255, 255, 0.5) 0 0);
+    background-color: rgb(var(--gBgColor));
+    background-image: linear-gradient(rgba(var(--gSecondColor), 0.5), rgba(var(--gSecondColor), 0.5));
+    color: rgb(var(--gTextColor));
     position: sticky;
     top: -2px;
 }
@@ -107,8 +108,7 @@ table.list tr:nth-child(even).disabled {
 }
 
 .userOrder .cur {
-    background: rgba(var(--gSecondColor), 1.0);
-    color: rgb(var(--gBgColor));
+    background-image: linear-gradient(rgba(var(--gMainColor), .5), rgba(var(--gMainColor), .5));
 }
 
 .userOrder a, .userOrder button {
