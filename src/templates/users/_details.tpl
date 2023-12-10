@@ -85,7 +85,7 @@ $fields = DF::getInstance()->all();
 			{elseif $email.verified}
 				<b class="confirm">{icon shape="check" class="confirm"}</b> Adresse vérifiée
 			{else}
-				Adresse non vérifiée
+				{* Adresse non vérifiée *}
 				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
 					{linkbutton target="_dialog" label="Désinscrire de tous les envois" href="!users/mailing/block.php?address=%s"|args:$value shape="delete"}
 				{/if}
