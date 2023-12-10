@@ -723,17 +723,17 @@ class Emails
 		return self::handleManualBounce($return['recipient'], $return['type'], $return['message']);
 	}
 
-	static public function handleManualBounce(string $recipient, string $type, ?string $message): ?array
+	static public function handleManualBounce(string $address, string $type, ?string $message): ?array
 	{
-		$return = compact('recipient', 'type', 'message');
-		$email = self::getOrCreateEmail($return['recipient']);
+		$return = compact('address', 'type', 'message');
+		$email = self::getOrCreateEmail($address);
 
 		if (!$email) {
 			return null;
 		}
 
-		Plugins::fire('email.bounce', false, compact('email', 'return'));
 		$email->hasFailed($return);
+		Plugins::fire('email.bounce.save.before', false, compact('email', 'return', 'type', 'message'));
 		$email->save();
 
 		return $return;
