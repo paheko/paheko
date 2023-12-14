@@ -426,8 +426,17 @@ class API
 				}
 				elseif ($this->method == 'POST') {
 					$this->requireAccess(Session::ACCESS_WRITE);
-					$transaction->importFromNewForm($this->params);
+					$transaction->importFromAPI($this->params);
 					$transaction->save();
+
+					if (!empty($this->params['linked_users'])) {
+						$transaction->updateLinkedUsers((array)$this->params['linked_users']);
+					}
+
+					if (!empty($this->params['linked_transactions'])) {
+						$transaction->updateLinkedTransactions((array)$this->params['linked_transactions']);
+					}
+
 					return $transaction->asJournalArray();
 				}
 				else {
