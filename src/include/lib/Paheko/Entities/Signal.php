@@ -64,6 +64,11 @@ class Signal
 		return $this->in[$name];
 	}
 
+	public function setOutArray(array $out): void
+	{
+		$this->out = $out;
+	}
+
 	public function setOut(string $name, $value): void
 	{
 		$this->out[$name] = $value;
