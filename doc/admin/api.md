@@ -357,7 +357,8 @@ Champs optionnels :
 * `notes` : remarques (texte multi ligne)
 * `id_project` : ID unique du projet à affecter (pour les écritures simplifiées uniquement)
 * `payment_reference` (uniquement pour les écritures simplifiées) : référence de paiement
-* `linked_users` : ID des membres à lier à l'écriture *(depuis 1.3.3)*
+* `linked_users` : Tableau des IDs des membres à lier à l'écriture *(depuis 1.3.3)*
+* `linked_transactions` : Tableau des IDs des écritures à lier à l'écriture *(depuis 1.3.5)*
 
 Exemple :
 
