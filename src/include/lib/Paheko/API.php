@@ -370,8 +370,12 @@ class API
 				$transaction->importFromAPI($this->params);
 				$transaction->save();
 
-				foreach ((array)($this->params['linked_users'] ?? []) as $user) {
-					$transaction->linkToUser((int)$user);
+				if (!empty($this->params['linked_users'])) {
+					$transaction->updateLinkedUsers((array)$this->params['linked_users']);
+				}
+
+				if (!empty($this->params['linked_transactions'])) {
+					$transaction->updateLinkedTransactions((array)$this->params['linked_transactions']);
 				}
 
 				if ($this->hasParam('move_attachments_from')
