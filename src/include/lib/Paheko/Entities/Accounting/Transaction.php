@@ -1511,7 +1511,7 @@ class Transaction extends Entity
 			&& in_array($a->type, [$a::TYPE_BANK, $a::TYPE_CASH, $a::TYPE_OUTSTANDING])) {
 			$this->setDefaultAccount(self::TYPE_REVENUE, 'debit', $a->id);
 			$this->setDefaultAccount(self::TYPE_EXPENSE, 'credit', $a->id);
-			$this->setDefaultAccount(self::TYPE_TRANSFER, 'debit', $a->id);
+			$this->setDefaultAccount(self::TYPE_TRANSFER, 'credit', $a->id);
 		}
 
 		// ar = Revenue account
@@ -1533,8 +1533,8 @@ class Transaction extends Entity
 		// at = Transfer account
 		if (isset($_GET['at'])
 			&& ($a = $accounts->getWithCode($_GET['at']))
-			&& $a->type == $a::TYPE_BANK) {
-			$this->setDefaultAccount(self::TYPE_TRANSFER, 'credit', $a->id);
+			&& ($a->type === $a::TYPE_BANK || $a->type === $a::TYPE_CASH || $a->type === $a::TYPE_OUTSTANDING)) {
+			$this->setDefaultAccount(self::TYPE_TRANSFER, 'debit', $a->id);
 		}
 
 		// a3 = Third-party account
