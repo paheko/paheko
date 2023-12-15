@@ -578,7 +578,7 @@ class User extends Entity
 			return;
 		}
 
-		if (trim($this->$field) !== '') {
+		if (!isset($this->$field) || trim($this->$field) !== '') {
 			return;
 		}
 
