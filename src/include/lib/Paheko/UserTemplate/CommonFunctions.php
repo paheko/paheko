@@ -172,6 +172,13 @@ class CommonFunctions
 			unset($attributes['required']);
 		}
 
+		if (!empty($attributes['autofocus'])) {
+			$attributes['autofocus'] = 'autofocus';
+		}
+		else {
+			unset($attributes['autofocus']);
+		}
+
 		if (!empty($attributes['disabled'])) {
 			$attributes['disabled'] = 'disabled';
 			unset($attributes['required']);
