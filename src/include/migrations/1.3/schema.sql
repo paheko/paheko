@@ -389,6 +389,7 @@ AS
 		INNER JOIN acc_transactions t ON t.id = l.id_transaction
 		GROUP BY t.id_year, a.id
 	);
+
 CREATE TABLE IF NOT EXISTS acc_projects
 -- Analytical projects
 (
