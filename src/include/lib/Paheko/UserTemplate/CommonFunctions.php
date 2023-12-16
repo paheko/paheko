@@ -167,7 +167,7 @@ class CommonFunctions
 			$suffix = ' kg';
 
 			if (null !== $current_value && !$current_value_from_user) {
-				$current_value = Utils::format_weight($current_value);
+				$current_value = str_replace(',', '.', Utils::format_weight($current_value));
 			}
 		}
 		elseif ($type == 'money') {

@@ -275,7 +275,7 @@ class Utils
 		$decimals = substr($number, -3);
 
 		if ((int)$decimals > 0) {
-			$decimals = '.' . substr('000' . $decimals, -3);
+			$decimals = ',' . substr('000' . $decimals, -3);
 		}
 		else {
 			$decimals = '';
