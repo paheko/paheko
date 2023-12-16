@@ -256,20 +256,26 @@ class Utils
 			return null;
 		}
 
+		if (-1 == $number) {
+			return -1;
+		}
+
 		$w = explode('.', str_replace(',', '.', $number));
-		return strval($w[0] ?: 0) . substr(strval($w[1] ?? '0') . '000', 0, 3);
+		$a = $w[0] ?: '0';
+		$b = substr(($w[1] ?? '0') . '000', 0, 3);
+		return intval($a . $b);
 	}
 
-	static public function format_weight($number, bool $append_unit = false): string
+	static public function format_weight($number, bool $empty_is_zero = false, bool $append_unit = false): string
 	{
-		if (empty($number)) {
-			return (string)$number;
+		if (empty($number) || $number < 0) {
+			return $empty_is_zero ? '0' : '';
 		}
 
 		$decimals = substr($number, -3);
 
 		if ((int)$decimals > 0) {
-			$decimals = '.' . $decimals;
+			$decimals = '.' . substr('000' . $decimals, -3);
 		}
 		else {
 			$decimals = '';
