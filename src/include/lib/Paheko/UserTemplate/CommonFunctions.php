@@ -50,7 +50,7 @@ class CommonFunctions
 
 		$suffix = isset($suffix) ? ' ' . $suffix : null;
 
-		if ($type == 'datetime') {
+		if ($type === 'datetime') {
 			$type = 'date';
 			$tparams = func_get_arg(0);
 			$tparams['type'] = 'time';
@@ -158,7 +158,17 @@ class CommonFunctions
 			$attributes['size'] = 4;
 			$attributes['maxlength'] = 4;
 			$attributes['pattern'] = '\d';
+		}
+		elseif ($type == 'weight') {
+			$type = 'number';
+			$attributes['placeholder'] = '1,312';
+			$attributes['size'] = 10;
+			$attributes['step'] = '0.001';
+			$suffix = ' kg';
 
+			if (null !== $current_value && !$current_value_from_user) {
+				$current_value = Utils::format_weight($current_value);
+			}
 		}
 		elseif ($type == 'money') {
 			$attributes['class'] = rtrim('money ' . ($attributes['class'] ?? ''));

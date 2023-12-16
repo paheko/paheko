@@ -172,6 +172,7 @@ class Template extends Smartyer
 		$this->register_block('linkmenu', [CommonFunctions::class, 'linkmenu']);
 
 		$this->register_modifier('strlen', fn($a) => strlen($a ?? ''));
+		$this->register_modifier('format_weight', [Utils::class, 'format_weight']);
 		$this->register_modifier('dump', ['KD2\ErrorManager', 'dump']);
 		$this->register_modifier('get_country_name', ['Paheko\Utils', 'getCountryName']);
 		$this->register_modifier('abs', function($a) { return abs($a ?? 0); });
