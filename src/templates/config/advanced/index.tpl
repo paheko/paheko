@@ -72,6 +72,7 @@
 
 	{/if}
 
+	{if $logged_user.password}
 	<dt>Remise à zéro</dt>
 	<dd class="help">
 		Efface toutes les données, sauf votre compte de membre. Utile pour revenir à l'état initial après une période d'essai.
@@ -79,6 +80,7 @@
 	<dd>
 		{linkbutton shape="delete" href="reset.php" label="Remise à zéro"}
 	</dd>
+	{/if}
 </dl>
 
 
