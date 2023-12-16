@@ -250,6 +250,16 @@ class Utils
 		return $value;
 	}
 
+	static public function weightToInteger($number): ?int
+	{
+		if (null === $number || '' === $number) {
+			return null;
+		}
+
+		$w = explode('.', str_replace(',', '.', $number));
+		return strval($w[0] ?: 0) . substr(strval($w[1] ?? '0') . '000', 0, 3);
+	}
+
 	static public function format_weight($number, bool $append_unit = false): string
 	{
 		if (empty($number)) {
