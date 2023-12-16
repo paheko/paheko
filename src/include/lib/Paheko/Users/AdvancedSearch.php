@@ -107,6 +107,19 @@ class AdvancedSearch extends A_S
 				$column['select'] = sprintf('(SELECT GROUP_CONCAT(f.path, \';\') FROM users_files AS uf INNER JOIN files AS f ON f.id = uf.id_file WHERE uf.id_user = u.id AND uf.field = %s)', $db->quote($field->name));
 				$column['where'] = sprintf('(SELECT COUNT(*) FROM users_files AS uf WHERE uf.id_user = u.id AND uf.field = %s) %%s', $db->quote($field->name));
 			}
+			elseif ($field->type === 'virtual') {
+				$type = $field->getRealType();
+
+				if ($type === 'integer' || $type === 'real') {
+					$type = 'integer';
+				}
+				else {
+					$type = 'text';
+				}
+
+				$column['type'] = $type;
+				$column['null'] = $field->hasNullValues();
+			}
 
 			if ($field->type == 'tel') {
 				$column['normalize'] = 'tel';
@@ -185,6 +198,7 @@ class AdvancedSearch extends A_S
 		return array_merge(array_keys($this->schemaTables()), [
 			'users_search',
 			'user_files',
+			'user_view',
 		]);
 	}
 
@@ -256,7 +270,7 @@ class AdvancedSearch extends A_S
 
 	public function make(string $query): DynamicList
 	{
-		$tables = 'users AS u INNER JOIN users_search AS us USING (id)';
+		$tables = 'users_view AS u INNER JOIN users_search AS us USING (id)';
 		$list = $this->makeList($query, $tables, 'identity', false, ['id', 'identity']);
 
 		$list->setExportCallback([Users::class, 'exportRowCallback']);

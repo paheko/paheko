@@ -604,12 +604,21 @@ class DynamicFields
 		$create = DynamicField::SYSTEM_FIELDS_SQL;
 
 		end($this->_fields);
-		$last_one = key($this->_fields);
+
+		// Find out which field is the last one to be a real column
+		do {
+			$field = !isset($field) ? current($this->_fields) : prev($this->_fields);
+			$type = DynamicField::SQL_TYPES[$field->type] ?? null;
+		}
+		while ($type === null);
+
+		$last_one = $field->name;
 
 		foreach ($this->_fields as $key => $cfg)
 		{
 			$type = DynamicField::SQL_TYPES[$cfg->type] ?? null;
 
+			// Skip fields that don't have a type (= virtual fields)
 			if (!$type) {
 				continue;
 			}
@@ -716,28 +725,53 @@ class DynamicFields
 		// These triggers are to set id_parent to the ID of the user on parent user, when the user has children
 		$db = DB::getInstance();
 		$db->exec(sprintf('
-			CREATE TRIGGER %1$s_parent_trigger_update_new AFTER UPDATE OF id_parent ON %1$s BEGIN
+			CREATE TRIGGER %1$s_parent_trigger_update_new AFTER UPDATE OF id_parent ON %2$s BEGIN
 				UPDATE users SET is_parent = 1 WHERE id = NEW.id_parent;
 			END;
-			CREATE TRIGGER %1$s_parent_trigger_update_old AFTER UPDATE OF id_parent ON %1$s BEGIN
+			CREATE TRIGGER %1$s_parent_trigger_update_old AFTER UPDATE OF id_parent ON %2$s BEGIN
 				-- Set is_parent to 0 if user has no longer any children
 				UPDATE %1$s SET is_parent = 0 WHERE id = OLD.id_parent
-					AND 0 = (SELECT COUNT(*) FROM %1$s WHERE id_parent = OLD.id_parent);
+					AND 0 = (SELECT COUNT(*) FROM %2$s WHERE id_parent = OLD.id_parent);
 			END;
-			CREATE TRIGGER %1$s_parent_trigger_insert AFTER INSERT ON %1$s BEGIN
+			CREATE TRIGGER %1$s_parent_trigger_insert AFTER INSERT ON %2$s BEGIN
 				SELECT CASE WHEN NEW.id_parent IS NULL THEN RAISE(IGNORE) ELSE 0 END;
 				UPDATE users SET is_parent = 1 WHERE id = NEW.id_parent;
 			END;
-			CREATE TRIGGER %1$s_parent_trigger_delete AFTER DELETE ON %1$s BEGIN
+			CREATE TRIGGER %1$s_parent_trigger_delete AFTER DELETE ON %2$s BEGIN
 				SELECT CASE WHEN OLD.id_parent IS NULL THEN RAISE(IGNORE) ELSE 0 END;
 				-- Set is_parent to 0 if user has no longer any children
-				UPDATE %1$s SET is_parent = 0 WHERE id = OLD.id_parent
-					AND 0 = (SELECT COUNT(*) FROM users WHERE id_parent = OLD.id_parent);
+				UPDATE %2$s SET is_parent = 0 WHERE id = OLD.id_parent
+					AND 0 = (SELECT COUNT(*) FROM %2$s WHERE id_parent = OLD.id_parent);
 			END;
 			-- Keep logs for create/delete/edit actions, just make them anonymous
-			CREATE TRIGGER %1$s_delete_logs BEFORE DELETE ON users BEGIN
+			CREATE TRIGGER %1$s_delete_logs BEFORE DELETE ON %2$s BEGIN
 			    UPDATE logs SET id_user = NULL WHERE id_user = OLD.id AND type >= 10;
-			END;', $table_name));
+			END;', $table_name, $table_name));
+	}
+
+	public function createView(string $table_name = User::TABLE): void
+	{
+		$db = DB::getInstance();
+		$virtual_fields = [];
+
+		foreach ($this->fieldsByType('virtual') as $field) {
+			$virtual_fields[] = sprintf('(%s) AS %s', $field->sql, $field->name);
+		}
+
+		$virtual_fields = implode(', ', $virtual_fields);
+
+		if (strlen($virtual_fields)) {
+			$virtual_fields = ', ' . $virtual_fields;
+		}
+
+		$sql = sprintf('
+			DROP VIEW IF EXISTS %s_view;
+			CREATE VIEW IF NOT EXISTS %1$s_view
+			AS
+				SELECT * %s
+				FROM %1$s;
+			', $table_name, $virtual_fields);
+		$db->exec($sql);
 	}
 
 	/**
@@ -780,6 +814,7 @@ class DynamicFields
 
 		$this->createIndexes(User::TABLE);
 		$this->createTriggers(User::TABLE);
+		$this->createView(User::TABLE);
 
 		$this->rebuildSearchTable(false);
 

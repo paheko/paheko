@@ -231,7 +231,7 @@ class Users
 			$columns['identity'] = $identity_column;
 		}
 
-		$tables = 'users u';
+		$tables = 'users_view u';
 		$tables .= ' INNER JOIN users_search s ON s.id = u.id';
 
 		if ($db->test('users', 'is_parent = 1')) {
@@ -278,7 +278,7 @@ class Users
 
 	static public function get(int $id): ?User
 	{
-		return EM::findOneById(User::class, $id);
+		return EM::findOneById(User::class, $id, 'users_view');
 	}
 
 	static public function getName(int $id): ?string
@@ -299,7 +299,7 @@ class Users
 	static public function getFromNumber(string $number): ?User
 	{
 		$field = DynamicFields::getNumberFieldSQL();
-		return EM::findOne(User::class, 'SELECT * FROM @TABLE WHERE ' . $field . ' = ?', $number);
+		return EM::findOne(User::class, 'SELECT * FROM @TABLE_view WHERE ' . $field . ' = ?', $number);
 	}
 
 	static public function getIdFromNumber(string $number): ?int
@@ -412,7 +412,7 @@ class Users
 		$columns = implode(', ', $columns);
 		$header['category'] = 'Catégorie';
 
-		$i = $db->iterate(sprintf('SELECT %s, (SELECT name FROM users_categories WHERE id = users.id_category) AS category FROM users WHERE %s;', $columns, $where));
+		$i = $db->iterate(sprintf('SELECT %s, (SELECT name FROM users_categories WHERE id = u.id_category) AS category FROM users_view u WHERE %s;', $columns, $where));
 
 		CSV::export($format, $name, $i, $header, [self::class, 'exportRowCallback']);
 	}

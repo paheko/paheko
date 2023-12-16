@@ -49,9 +49,7 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 	<dl class="type-virtual">
 		{input type="textarea" required=true name="sql" class="full-width" rows=3 source=$field label="Code SQL utilisée pour calculer ce champ" disabled=$field->isPreset()}
 		<dd class="help">
-			Les champs calculés utilisent du code SQL correspondant à une <a href="https://www.sqlite.org/gencol.html" target="_blank">colonne générée dans SQLite</a>.<br />
-			Le code ne peut faire référence qu'à des colonnes de la même ligne et n'utiliser que des <a href="https://www.sqlite.org/deterministic.html" target="_blank">fonctions déterministes</a>. Il n'est pas possible d'utiliser des sous-requêtes, des fonctions d'aggrégation, etc.<br />
-			Exemple : il est possible de mettre <code>SUBSTR(nom, 1, 1) || SUBSTR(prenom, 1, 1)</code> pour que le champ renvoie les initiales du nom et du prénom. Mais il n'est pas possible de mettre <code>SELECT nom FROM users WHERE …</code> pour utiliser le nom d'un autre membre.
+			Les champs calculés utilisent du code SQL. Ils sont des colonnes virtuelles de la vue (<code>VIEW</code>) des membres.
 		</dd>
 	</dl>
 </fieldset>
@@ -74,7 +72,7 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 </fieldset>
 
 {if !$field->isNumber()}
-<fieldset>
+<fieldset class="type-not-virtual">
 	<legend>Accès</legend>
 	<dl>
 		<dt><label for="f_user_access_level_0">Le membre lui-même peut…</label></dt>
