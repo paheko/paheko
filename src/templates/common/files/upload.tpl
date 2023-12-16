@@ -6,7 +6,7 @@
 	<fieldset>
 		<legend>Téléverser des fichiers</legend>
 		<dl>
-			{input type="file" name="file[]" multiple=true label="Fichiers à envoyer" data-enhanced=1}
+			{input type="file" name="file[]" multiple=$multiple label="Fichiers à envoyer" data-enhanced=1}
 		</dl>
 		<p class="submit">
 			{csrf_field key=$csrf_key}

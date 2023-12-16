@@ -18,6 +18,9 @@ $form->runIf('upload', function () use ($parent) {
 	Files::uploadMultiple($parent, 'file');
 }, $csrf_key, '!docs/?path=' . $parent);
 
-$tpl->assign(compact('parent', 'csrf_key'));
+$max = (int) qg('max');
+$multiple = $max > 1;
+
+$tpl->assign(compact('parent', 'csrf_key', 'multiple'));
 
 $tpl->display('common/files/upload.tpl');
