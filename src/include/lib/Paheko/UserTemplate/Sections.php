@@ -731,49 +731,49 @@ class Sections
 
 		$db = DB::getInstance();
 
-		$id_field = DynamicFields::getNameFieldsSQL('users');
+		$id_field = DynamicFields::getNameFieldsSQL('u');
 		$login_field = DynamicFields::getLoginField();
 		$number_field = DynamicFields::getNumberField();
 		$email_field = DynamicFields::getFirstEmailField();
 
 		if (empty($params['select'])) {
-			$params['select'] = 'users.*';
+			$params['select'] = 'u.*';
 		}
 
-		$params['select'] .= sprintf(', users.id AS id, %s AS _name, users.%s AS _login, users.%s AS _number, users.%s AS _email',
+		$params['select'] .= sprintf(', u.id AS id, %s AS _name, u.%s AS _login, u.%s AS _number, u.%s AS _email',
 			$id_field,
 			$db->quoteIdentifier($login_field),
 			$db->quoteIdentifier($number_field),
 			$db->quoteIdentifier($email_field)
 		);
 
-		$params['tables'] = 'users';
+		$params['tables'] = 'users_view AS u';
 
 		if (isset($params['id']) && is_array($params['id'])) {
 			$params['id'] = array_map('intval', $params['id']);
-			$params['where'] .= ' AND users.' . $db->where('id', $params['id']);
+			$params['where'] .= ' AND u.' . $db->where('id', $params['id']);
 			unset($params['id']);
 		}
 		elseif (isset($params['id'])) {
-			$params['where'] .= ' AND users.id = :id';
+			$params['where'] .= ' AND u.id = :id';
 			$params[':id'] = (int) $params['id'];
 			unset($params['id']);
 		}
 		elseif (isset($params['id_parent'])) {
-			$params['where'] .= ' AND users.id_parent = :id_parent';
+			$params['where'] .= ' AND u.id_parent = :id_parent';
 			$params[':id_parent'] = (int) $params['id_parent'];
 			unset($params['id_parent']);
 		}
 
 		if (!empty($params['search_name'])) {
-			$params['tables'] .= sprintf(' INNER JOIN users_search AS us ON us.id = users.id AND %s LIKE :search_name ESCAPE \'\\\' COLLATE NOCASE',
+			$params['tables'] .= sprintf(' INNER JOIN users_search AS us ON us.id = u.id AND %s LIKE :search_name ESCAPE \'\\\' COLLATE NOCASE',
 				DynamicFields::getNameFieldsSearchableSQL('us'));
 			$params[':search_name'] = '%' . Utils::unicodeTransliterate($params['search_name']) . '%';
 			unset($params['search_name']);
 		}
 
 		if (empty($params['order'])) {
-			$params['order'] = 'users.id';
+			$params['order'] = 'u.id';
 		}
 
 		$files_fields = array_keys(DynamicFields::getInstance()->fieldsByType('file'));

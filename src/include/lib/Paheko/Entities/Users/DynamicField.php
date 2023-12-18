@@ -12,6 +12,7 @@ use Paheko\Entities\Files\File;
 use Paheko\Files\Files;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
+use Paheko\UserTemplate\CommonModifiers;
 
 use KD2\DB\Date;
 
@@ -376,17 +377,9 @@ class DynamicField extends Entity
 			case 'checkbox':
 				return $value ? 'Oui' : '';
 			case 'date':
-				if (is_object($value) && $value instanceof \DateTimeInterface) {
-					return $value->format('d/m/Y');
-				}
-
-				return (string) $value;
+			return CommonModifiers::date_short($value, false);
 			case 'datetime':
-				if (is_object($value) && $value instanceof \DateTimeInterface) {
-					return $value->format('d/m/Y à H:i');
-				}
-
-				return (string) $value;
+				return CommonModifiers::date_short($value, true);
 			case 'country':
 				return Utils::getCountryName($value);
 			default:
