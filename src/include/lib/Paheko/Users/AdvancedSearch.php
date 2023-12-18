@@ -24,13 +24,24 @@ class AdvancedSearch extends A_S
 
 		$columns['id'] = [];
 
+		$order = $fields::getFirstSearchableNameField();
+
+		if ($order === null) {
+			$order = 'u.' . $fields::getFirstNameField();
+		}
+		else {
+			$order = 'us.' . $order;
+		}
+
+		$order .= ' %s';
+
 		$columns['identity'] = [
 			'label'    => $fields::getNameLabel(),
 			'type'     => 'text',
 			'null'     => true,
 			'select'   => $fields::getNameFieldsSQL('u'),
 			'where'    => $fields::getNameFieldsSearchableSQL('us') . ' %s',
-			'order'    => sprintf('us.%s %%s', $fields::getFirstSearchableNameField()),
+			'order'    => $order,
 		];
 
 		$columns['is_parent'] = [
