@@ -72,7 +72,7 @@ abstract class AbstractRender
 
 	public function listAttachments(): array
 	{
-		if (!$this->parent) {
+		if (!isset($this->parent)) {
 			return [];
 		}
 
