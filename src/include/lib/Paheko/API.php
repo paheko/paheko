@@ -461,7 +461,7 @@ class API
 					}
 				}
 				else {
-					$id_year = (int)$match[1];
+					$id_year = (int)$p1;
 				}
 
 				if ($p2 == 'journal') {
