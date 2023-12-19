@@ -215,7 +215,13 @@ class Upgrade
 			}
 
 			if (version_compare($v, '1.3.5', '<')) {
-				require ROOT . '/include/migrations/1.3/1.3.5.php';
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/migrations/1.3/1.3.5.sql');
+				$db->commitSchemaUpdate();
+			}
+
+			if (version_compare($v, '1.3.6', '<')) {
+				require ROOT . '/include/migrations/1.3/1.3.6.php';
 			}
 
 			Plugins::upgradeAllIfRequired();

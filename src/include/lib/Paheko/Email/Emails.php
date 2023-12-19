@@ -370,7 +370,12 @@ class Emails
 			try {
 				$attachments = $db->getAssoc('SELECT id, path FROM emails_queue_attachments WHERE id_queue = ?;', $row->id);
 				$all_attachments = array_merge($all_attachments, $attachments);
-				self::send($row->context, $row->recipient_hash, $headers, $row->content, $row->content_html, $row->recipient_pgp_key, $attachments);
+				$sent = self::send($row->context, $row->recipient_hash, $headers, $row->content, $row->content_html, $row->recipient_pgp_key, $attachments);
+
+				// Keep waiting until email is sent
+				if (!$sent) {
+					continue;
+				}
 			}
 			catch (\Exception $e) {
 				// If sending fails, at least save what has been sent so far
@@ -567,16 +572,16 @@ class Emails
 		return $list;
 	}
 
-	static public function sendMessage(int $context, Mail_Message $message): void
+	static public function sendMessage(int $context, Mail_Message $message): bool
 	{
 		if (DISABLE_EMAIL) {
-			return;
+			return false;
 		}
 
-		$signal = Plugins::fire('email.send.before', true, compact('context', 'message'));
+		$signal = Plugins::fire('email.send.before', true, compact('context', 'message'), ['sent' => null]);
 
 		if ($signal && $signal->isStopped()) {
-			return;
+			return $signal->getOut('sent') ?? true;
 		}
 
 		if (SMTP_HOST) {
@@ -592,6 +597,7 @@ class Emails
 		}
 
 		Plugins::fire('email.send.after', false, compact('context', 'message'));
+		return true;
 	}
 
 	/**

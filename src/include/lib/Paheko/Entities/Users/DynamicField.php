@@ -12,6 +12,7 @@ use Paheko\Entities\Files\File;
 use Paheko\Files\Files;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
+use Paheko\UserTemplate\CommonModifiers;
 
 use KD2\DB\Date;
 
@@ -104,7 +105,7 @@ class DynamicField extends Entity
 		'text'		=>	'Texte libre, une ligne',
 		'datalist'  =>  'Texte libre, une ligne, à choix multiple',
 		'textarea'	=>	'Texte libre, plusieurs lignes',
-		//'virtual' =>  'Calculé',
+		'virtual' =>  'Calculé',
 	];
 
 	const PHP_TYPES = [
@@ -126,7 +127,7 @@ class DynamicField extends Entity
 		'text'     => '?string',
 		'textarea' => '?string',
 		'datalist' => '?string',
-		//'virtual'=> 'dynamic',
+		'virtual'  => 'dynamic',
 	];
 
 	const SQL_TYPES = [
@@ -148,7 +149,7 @@ class DynamicField extends Entity
 		'text'     => 'TEXT',
 		'textarea' => 'TEXT',
 		'datalist' => 'TEXT',
-		//'virtual'  => null,
+		'virtual'  => null,
 	];
 
 	const SEARCH_TYPES = [
@@ -314,7 +315,6 @@ class DynamicField extends Entity
 			$this->assert($this->system & self::PRESET || !array_key_exists($this->name, DynamicFields::getInstance()->getPresets()), 'Ce nom de champ est déjà utilisé par un champ pré-défini.');
 		}
 
-		/* FIXME TODO
 		if (self::SQL_TYPES[$this->type] == 'VIRTUAL') {
 			$this->assert(null !== $this->sql && strlen(trim($this->sql)), 'Le code SQL est manquant');
 
@@ -324,21 +324,7 @@ class DynamicField extends Entity
 			catch (\KD2\DB\DB_Exception $e) {
 				throw new ValidationException('Le code SQL du champ calculé est invalide: ' . $e->getMessage(), 0, $e);
 			}
-
-			try {
-				$fields = DynamicFields::getInstance()->getKeys();
-				$fields = array_map([DB::getInstance(), 'quoteIdentifier'], $fields);
-				$fields = implode(', ', $fields);
-				$db->exec(sprintf('DROP TABLE IF EXISTS test_generated_column;
-					CREATE TEMP TABLE test_generated_column (%s, a GENERATED ALWAYS AS (%s) VIRTUAL);
-					SELECT 1 FROM test_generated_column;
-					DROP TABLE IF EXISTS test_generated_column;', $fields, $this->sql));
-			}
-			catch (\KD2\DB\DB_Exception $e) {
-				throw new ValidationException('Le code SQL du champ calculé est invalide 2: ' . $e->getMessage(), 0, $e);
-			}
 		}
-		*/
 	}
 
 	public function importForm(array $source = null)
@@ -351,6 +337,19 @@ class DynamicField extends Entity
 		$source['list_table'] = !empty($source['list_table']) ? true : false;
 
 		return parent::importForm($source);
+	}
+
+	public function getRealType(): ?string
+	{
+		$db = DB::getInstance();
+		$type = $db->firstColumn(sprintf('SELECT TYPEOF(%s) FROM users_view WHERE %1$s IS NOT NULL LIMIT 1;', $db->quoteIdentifier($this->name)));
+		return strtolower($type) ?: null;
+	}
+
+	public function hasNullValues(): bool
+	{
+		$db = DB::getInstance();
+		return (bool) $db->firstColumn(sprintf('SELECT 1 FROM users_view WHERE %1$s IS NULL LIMIT 1;', $db->quoteIdentifier($this->name)));
 	}
 
 	public function getStringValue($value): ?string
@@ -378,17 +377,9 @@ class DynamicField extends Entity
 			case 'checkbox':
 				return $value ? 'Oui' : '';
 			case 'date':
-				if (is_object($value) && $value instanceof \DateTimeInterface) {
-					return $value->format('d/m/Y');
-				}
-
-				return (string) $value;
+			return CommonModifiers::date_short($value, false);
 			case 'datetime':
-				if (is_object($value) && $value instanceof \DateTimeInterface) {
-					return $value->format('d/m/Y à H:i');
-				}
-
-				return (string) $value;
+				return CommonModifiers::date_short($value, true);
 			case 'country':
 				return Utils::getCountryName($value);
 			default:

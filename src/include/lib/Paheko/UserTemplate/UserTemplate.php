@@ -129,9 +129,13 @@ class UserTemplate extends \KD2\Brindille
 		return self::$root_variables;
 	}
 
-	public function __construct(?string $path)
+	public function __construct(?string $path = null)
 	{
-		$this->_tpl_path = $path;
+		if ($path) {
+			$path = trim($path, '/');
+		}
+
+		$this->_tpl_path = $path ?? '';
 
 		if ($path && $file = Files::get(File::CONTEXT_MODULES . '/' . $path)) {
 			$this->setLocalSource($file);
@@ -231,6 +235,9 @@ class UserTemplate extends \KD2\Brindille
 		}
 	}
 
+	/**
+	 * Load template code from a user-stored file
+	 */
 	public function setLocalSource(File $file)
 	{
 		if ($file->type != $file::TYPE_FILE) {
@@ -243,6 +250,9 @@ class UserTemplate extends \KD2\Brindille
 		$this->cache_path = USER_TEMPLATES_CACHE_ROOT;
 	}
 
+	/**
+	 * Load template code from a filesystem file
+	 */
 	public function setSource(string $path)
 	{
 		if (!($this->modified = @filemtime($path))) {
@@ -256,6 +266,9 @@ class UserTemplate extends \KD2\Brindille
 		$this->cache_path = SHARED_USER_TEMPLATES_CACHE_ROOT;
 	}
 
+	/**
+	 * Load template code from a string
+	 */
 	public function setCode(string $code)
 	{
 		$this->code = $code;
@@ -350,24 +363,20 @@ class UserTemplate extends \KD2\Brindille
 		return ob_get_clean();
 	}
 
-	public function fetchToAttachment(string $uri): File
+	public function fetchAsAttachment(?string $type = null): File
 	{
-		$parts = explode('?', $uri, 2);
-		$path = $parts[0] ?? '';
-		$query = $parts[1] ?? '';
-		parse_str($query, $qs);
-
-		$ut = new UserTemplate($path);
-		$ut->setModule($this->module);
-		$ut->assignArray(['_POST' => [], '_GET' => $qs]);
-
-		$content = $ut->fetch();
-		$type = $ut->getContentType();
-		$name = $ut->getHeader('filename') ?? 'document';
+		$content = $this->fetch();
+		$type ??= $this->getContentType();
+		$name = $this->getHeader('filename') ?? 'document';
 
 		// Sanitize file name
+		$name = Utils::transliterateToAscii($name);
 		$name = preg_replace('/[^\w\d\.]+/U', ' ', $name);
 		$name = substr($name, -128);
+
+		if ($type == 'application/pdf' && substr($name, -4) !== '.pdf') {
+			$name .= '.pdf';
+		}
 
 		File::validateFileName($name);
 
@@ -383,6 +392,19 @@ class UserTemplate extends \KD2\Brindille
 		}
 
 		return $file;
+	}
+
+	public function fetchToAttachment(string $uri): File
+	{
+		$parts = explode('?', $uri, 2);
+		$path = $parts[0] ?? '';
+		$query = $parts[1] ?? '';
+		parse_str($query, $qs);
+
+		$ut = new UserTemplate($path);
+		$ut->setModule($this->module);
+		$ut->assignArray(['_POST' => [], '_GET' => $qs]);
+		return $ut->fetchAsAttachment();
 	}
 
 	static public function isTemplate(string $filename): bool

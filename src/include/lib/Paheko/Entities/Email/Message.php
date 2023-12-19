@@ -92,14 +92,14 @@ class Message
 		$text = nl2br(htmlspecialchars($this->getOptoutText()));
 
 		if (isset($this->context_optout)) {
-			$button = sprintf('<a href="%s" style="color: #009; text-decoration: underline; padding: 3px 6px; border-radius: 3px; background: #ddd; border: 1px outset #999;">Me désinscrire de ces envois uniquement</a></p>', $this->getContextSpecificOptoutURL());
+			$button = sprintf('<a href="%s" style="color: #009; text-decoration: underline; padding: 5px 10px; border-radius: 5px; background: #eee; border: 1px outset #ccc;">Me désinscrire de ces envois uniquement</a></p>', $this->getContextSpecificOptoutURL());
 			$text = str_replace('[context_optout_url]', $button, $text);
 		}
 
-		$button = sprintf('<a href="%s" style="color: #009; text-decoration: underline; padding: 3px 6px; border-radius: 3px; background: #ddd; border: 1px outset #999;">Me désinscrire de <b>tous les envois</b></a></p>', $this->getOptoutURL());
+		$button = sprintf('<a href="%s" style="color: #009; text-decoration: underline; padding: 5px 10px; border-radius: 3px; background: #eee; border: 1px outset #ccc;">Me désinscrire de <b>tous les envois</b></a></p>', $this->getOptoutURL());
 		$text = str_replace('[optout_url]', $button, $text);
 
-		$footer = '<hr style="border-top: 2px solid #999; background: none;" /><p style="color: #666; background: #fff; padding: 10px; text-align: center; font-size: 9pt">';
+		$footer = '<p style="color: #666; background: #fff; padding: 10px; text-align: center; font-size: 9pt">';
 		$footer .= $text;
 
 		$html = $this->body_html;
@@ -134,7 +134,7 @@ class Message
 
 	}
 
-	public function send()
+	public function send(): bool
 	{
 		$config = Config::getInstance();
 		$message = new Mail_Message;
@@ -201,6 +201,6 @@ class Message
 			$message->encrypt($this->recipient_pgp_key);
 		}
 
-		Emails::sendMessage($context, $message);
+		return Emails::sendMessage($context, $message);
 	}
 }

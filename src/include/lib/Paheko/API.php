@@ -370,8 +370,12 @@ class API
 				$transaction->importFromAPI($this->params);
 				$transaction->save();
 
-				foreach ((array)($this->params['linked_users'] ?? []) as $user) {
-					$transaction->linkToUser((int)$user);
+				if (!empty($this->params['linked_users'])) {
+					$transaction->updateLinkedUsers((array)$this->params['linked_users']);
+				}
+
+				if (!empty($this->params['linked_transactions'])) {
+					$transaction->updateLinkedTransactions((array)$this->params['linked_transactions']);
 				}
 
 				if ($this->hasParam('move_attachments_from')
@@ -422,8 +426,17 @@ class API
 				}
 				elseif ($this->method == 'POST') {
 					$this->requireAccess(Session::ACCESS_WRITE);
-					$transaction->importFromNewForm($this->params);
+					$transaction->importFromAPI($this->params);
 					$transaction->save();
+
+					if (!empty($this->params['linked_users'])) {
+						$transaction->updateLinkedUsers((array)$this->params['linked_users']);
+					}
+
+					if (!empty($this->params['linked_transactions'])) {
+						$transaction->updateLinkedTransactions((array)$this->params['linked_transactions']);
+					}
+
 					return $transaction->asJournalArray();
 				}
 				else {
@@ -448,7 +461,7 @@ class API
 					}
 				}
 				else {
-					$id_year = (int)$match[1];
+					$id_year = (int)$p1;
 				}
 
 				if ($p2 == 'journal') {

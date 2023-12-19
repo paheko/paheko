@@ -27,6 +27,7 @@ class Trash
 		],
 		'trash' => [
 			'label' => 'Supprimé le',
+			'order' => 'path %s',
 		],
 		'size' => [
 			'label' => 'Taille',
@@ -40,7 +41,7 @@ class Trash
 
 		$tables = File::TABLE;
 
-		$conditions = 'trash IS NOT NULL';
+		$conditions = 'trash IS NOT NULL OR (path LIKE \'trash/%\' AND type = 1)';
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('trash', true);
@@ -61,7 +62,7 @@ class Trash
 	static public function getSize(): int
 	{
 		$db = DB::getInstance();
-		return $db->firstColumn('SELECT SUM(size) FROM files WHERE trash IS NOT NULL;') ?: 0;
+		return $db->firstColumn('SELECT SUM(size) FROM files WHERE trash IS NOT NULL OR path LIKE \'trash/%\';') ?: 0;
 	}
 
 }

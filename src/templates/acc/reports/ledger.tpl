@@ -16,6 +16,9 @@
 		<thead>
 			<tr>
 				<td></td>
+						{if !empty($criterias.projects_only)}
+						<td class="num">Compte</td>
+						{/if}
 				<td>N° pièce</td>
 				<td>Réf. ligne</td>
 				<td>Date</td>
@@ -32,7 +35,7 @@
 	{if $table_export}
 		<thead>
 			<tr>
-				<th colspan="8"><h2 class="ruler">{if $account.code}{$account.code} — {/if}{$account.label}</h2></th>
+				<th colspan="{if !empty($criterias.projects_only)}9{else}8{/if}"><h2 class="ruler">{if $account.code}{$account.code} — {/if}{$account.label}</h2></th>
 			</tr>
 		</thead>
 	{else}

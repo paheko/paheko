@@ -123,7 +123,9 @@ if (ALERT_MESSAGE && !$dialog) {
 		{/if}
 
 		{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
-			<li class="{if $current == 'config'} current{elseif $current_parent == 'config'} current_parent{/if}"><h3><a href="{$admin_uri}config/">{icon shape="settings"}<b>Configuration</b></a></h3>
+			<li class="{if $current == 'config'} current{elseif $current_parent == 'config'} current_parent{/if}">
+				<h3><a href="{$admin_uri}config/">{icon shape="settings"}<b>Configuration</b></a></h3>
+			</li>
 		{/if}
 
 		{if $logged_user && $logged_user->exists()}

@@ -21,7 +21,7 @@ ALTER TABLE web_pages RENAME TO web_pages_old;
 
 UPDATE web_pages_old SET format = 'encrypted' WHERE format = 'skriv/encrypted';
 
-.read schema.sql
+.read 1.3.0_schema.sql
 
 INSERT OR IGNORE INTO web_pages
 	SELECT id,

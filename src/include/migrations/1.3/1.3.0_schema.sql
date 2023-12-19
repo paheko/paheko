@@ -169,9 +169,6 @@ CREATE TABLE IF NOT EXISTS mailings (
 	id INTEGER NOT NULL PRIMARY KEY,
 	subject TEXT NOT NULL,
 	body TEXT NULL,
-	target_type TEXT NULL,
-	target_value TEXT NULL,
-	target_label TEXT NULL,
 	sender_name TEXT NULL,
 	sender_email TEXT NULL,
 	sent TEXT NULL CHECK (datetime(sent) IS NULL OR datetime(sent) = sent),
@@ -189,15 +186,6 @@ CREATE TABLE IF NOT EXISTS mailings_recipients (
 );
 
 CREATE INDEX IF NOT EXISTS mailings_recipients_id ON mailings_recipients (id);
-
-CREATE TABLE IF NOT EXISTS mailings_optouts (
-	email_hash TEXT NOT NULL,
-	target_type TEXT NOT NULL,
-	target_value TEXT NOT NULL,
-	target_label TEXT NOT NULL
-);
-
-CREATE UNIQUE INDEX IF NOT EXISTS mailings_optouts_unique ON mailings_optouts (email_hash, target_type, target_value);
 
 ---
 --- Users
@@ -401,7 +389,6 @@ AS
 		INNER JOIN acc_transactions t ON t.id = l.id_transaction
 		GROUP BY t.id_year, a.id
 	);
-
 CREATE TABLE IF NOT EXISTS acc_projects
 -- Analytical projects
 (
@@ -459,11 +446,13 @@ CREATE TABLE IF NOT EXISTS acc_transactions
 	prev_hash TEXT NULL,
 
 	id_year INTEGER NOT NULL REFERENCES acc_years(id),
-	id_creator INTEGER NULL REFERENCES users(id) ON DELETE SET NULL
+	id_creator INTEGER NULL REFERENCES users(id) ON DELETE SET NULL,
+	id_related INTEGER NULL REFERENCES acc_transactions(id) ON DELETE SET NULL -- linked transaction (eg. payment of a debt)
 );
 
 CREATE INDEX IF NOT EXISTS acc_transactions_year ON acc_transactions (id_year);
 CREATE INDEX IF NOT EXISTS acc_transactions_date ON acc_transactions (date);
+CREATE INDEX IF NOT EXISTS acc_transactions_related ON acc_transactions (id_related);
 CREATE INDEX IF NOT EXISTS acc_transactions_type ON acc_transactions (type, id_year);
 CREATE INDEX IF NOT EXISTS acc_transactions_status ON acc_transactions (status);
 CREATE INDEX IF NOT EXISTS acc_transactions_hash ON acc_transactions (hash);
@@ -495,16 +484,6 @@ CREATE INDEX IF NOT EXISTS acc_transactions_lines_transaction ON acc_transaction
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_account ON acc_transactions_lines (id_account);
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_project ON acc_transactions_lines (id_project);
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_reconciled ON acc_transactions_lines (reconciled);
-
-CREATE TABLE IF NOT EXISTS acc_transactions_links
-(
-	id_transaction INTEGER NOT NULL REFERENCES acc_transactions(id) ON DELETE CASCADE,
-	id_related INTEGER NOT NULL REFERENCES acc_transactions(id) ON DELETE CASCADE CHECK (id_transaction != id_related),
-	PRIMARY KEY (id_transaction, id_related)
-);
-
-CREATE INDEX IF NOT EXISTS acc_transactions_lines_id_transaction ON acc_transactions_links (id_transaction);
-CREATE INDEX IF NOT EXISTS acc_transactions_lines_id_related ON acc_transactions_links (id_related);
 
 CREATE TABLE IF NOT EXISTS acc_transactions_users
 -- Linking transactions and users

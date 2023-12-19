@@ -309,9 +309,11 @@ input[type=color]::-moz-color-swatch {
     box-shadow: 0  0 5px #000;
 }
 
-.accesskeys a[accesskey]::after, .accesskeys input[accesskey]::after, .accesskeys button[accesskey]::after {
+.accesskeys a[accesskey]::after,
+.accesskeys button[accesskey]:not(.main)::after,
+.accesskeys button.main[data-icon]::before {
     content: attr(accesskey);
-    display: absolute;
+    display: inline-block;
     position: absolute;
     background: darkorange;
     color: #fff;
@@ -324,6 +326,10 @@ input[type=color]::-moz-color-swatch {
     height: unset;
     line-height: unset;
     margin-left: 5px;
+}
+
+.accesskeys button.main[data-icon]::before {
+    margin-left: -25px;
 }
 
 input.resetButton {

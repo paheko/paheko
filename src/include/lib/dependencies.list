@@ -10,6 +10,7 @@ KD2/Form.php
 KD2/FossilInstaller.php
 KD2/Graphics/Blob.php
 KD2/Graphics/Image.php
+KD2/Graphics/BarCode.php
 KD2/Graphics/QRCode.php
 KD2/Graphics/SVG/Pie.php
 KD2/Graphics/SVG/Plot.php

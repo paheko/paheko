@@ -42,11 +42,13 @@ class Sections
 	];
 
 	const COMPILE_SECTIONS_LIST = [
-		'#select' => [self::class, 'selectStart'],
-		'/select' => [self::class, 'selectEnd'],
-		'#form'    => [self::class, 'formStart'],
-		'/form'    => [self::class, 'formEnd'],
-		'else:form'    => [self::class, 'formElse'],
+		'#select'  => [self::class, 'selectStart'],
+		'/select'   => [self::class, 'selectEnd'],
+		'#form'     => [self::class, 'formStart'],
+		'/form'     => [self::class, 'formEnd'],
+		'else:form' => [self::class, 'formElse'],
+		'#capture'  => [self::class, 'captureStart'],
+		'/capture'  => [self::class, 'captureEnd'],
 	];
 
 	const SQL_RESERVED_PARAMS = [
@@ -185,6 +187,35 @@ class Sections
 		$out = str_replace(' ?><?php ', ' ', $out);
 
 		return $out;
+	}
+
+	static public function captureStart(string $name, string $params_str, UserTemplate $tpl, int $line): string
+	{
+		$params = $tpl->_parseArguments($params_str, $line);
+
+		if (!isset($params['assign']) || !is_string($params['assign'])) {
+			throw new Brindille_Exception(sprintf('"%s": missing "assign" parameter', $name));
+		}
+
+		$assign = $tpl->getValueFromArgument($params['assign']);
+
+		$tpl->_push($tpl::SECTION, 'capture');
+
+		return sprintf('<?php $capture_assign ??= []; $capture_assign[] = %s; @ob_start(); ?>',
+			var_export($assign, true));
+	}
+
+	static public function captureEnd(string $name, string $params_str, UserTemplate $tpl, int $line): string
+	{
+		$last = $tpl->_lastName();
+
+		if ($last !== 'capture') {
+			throw new Brindille_Exception(sprintf('"%s": block closing does not match last block "%s" opened', $name . $params_str, $last));
+		}
+
+		$tpl->_pop();
+
+		return sprintf('<?php $this->assign(array_pop($capture_assign), ob_get_clean()); ?>');
 	}
 
 	static protected function _debug(string $str): void
@@ -700,49 +731,49 @@ class Sections
 
 		$db = DB::getInstance();
 
-		$id_field = DynamicFields::getNameFieldsSQL('users');
+		$id_field = DynamicFields::getNameFieldsSQL('u');
 		$login_field = DynamicFields::getLoginField();
 		$number_field = DynamicFields::getNumberField();
 		$email_field = DynamicFields::getFirstEmailField();
 
 		if (empty($params['select'])) {
-			$params['select'] = 'users.*';
+			$params['select'] = 'u.*';
 		}
 
-		$params['select'] .= sprintf(', users.id AS id, %s AS _name, users.%s AS _login, users.%s AS _number, users.%s AS _email',
+		$params['select'] .= sprintf(', u.id AS id, %s AS _name, u.%s AS _login, u.%s AS _number, u.%s AS _email',
 			$id_field,
 			$db->quoteIdentifier($login_field),
 			$db->quoteIdentifier($number_field),
 			$db->quoteIdentifier($email_field)
 		);
 
-		$params['tables'] = 'users';
+		$params['tables'] = 'users_view AS u';
 
 		if (isset($params['id']) && is_array($params['id'])) {
 			$params['id'] = array_map('intval', $params['id']);
-			$params['where'] .= ' AND users.' . $db->where('id', $params['id']);
+			$params['where'] .= ' AND u.' . $db->where('id', $params['id']);
 			unset($params['id']);
 		}
 		elseif (isset($params['id'])) {
-			$params['where'] .= ' AND users.id = :id';
+			$params['where'] .= ' AND u.id = :id';
 			$params[':id'] = (int) $params['id'];
 			unset($params['id']);
 		}
 		elseif (isset($params['id_parent'])) {
-			$params['where'] .= ' AND users.id_parent = :id_parent';
+			$params['where'] .= ' AND u.id_parent = :id_parent';
 			$params[':id_parent'] = (int) $params['id_parent'];
 			unset($params['id_parent']);
 		}
 
 		if (!empty($params['search_name'])) {
-			$params['tables'] .= sprintf(' INNER JOIN users_search AS us ON us.id = users.id AND %s LIKE :search_name ESCAPE \'\\\' COLLATE NOCASE',
+			$params['tables'] .= sprintf(' INNER JOIN users_search AS us ON us.id = u.id AND %s LIKE :search_name ESCAPE \'\\\' COLLATE NOCASE',
 				DynamicFields::getNameFieldsSearchableSQL('us'));
 			$params[':search_name'] = '%' . Utils::unicodeTransliterate($params['search_name']) . '%';
 			unset($params['search_name']);
 		}
 
 		if (empty($params['order'])) {
-			$params['order'] = 'users.id';
+			$params['order'] = 'u.id';
 		}
 
 		$files_fields = array_keys(DynamicFields::getInstance()->fieldsByType('file'));

@@ -31,6 +31,10 @@
 </dl>
 
 {if $list->count()}
+	{if $current_list === 'pending'}
+		<p class="help">Note : cette liste ne prend pas en compte les membres qui ont une adresse e-mail invalide, ou qui se sont désinscrit des envois de messages.</p>
+	{/if}
+
 	{include file="common/dynamic_list_head.tpl"}
 
 		{foreach from=$list->iterate() item="row"}

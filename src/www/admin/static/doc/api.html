@@ -329,7 +329,8 @@ curl https://test:abcd@monpaheko.tld/api/services/subscriptions/import -T /tmp/i
 <li><code>notes</code> : remarques (texte multi ligne)</li>
 <li><code>id_project</code> : ID unique du projet à affecter (pour les écritures simplifiées uniquement)</li>
 <li><code>payment_reference</code> (uniquement pour les écritures simplifiées) : référence de paiement</li>
-<li><code>linked_users</code> : ID des membres à lier à l'écriture <em>(depuis 1.3.3)</em></li>
+<li><code>linked_users</code> : Tableau des IDs des membres à lier à l'écriture <em>(depuis 1.3.3)</em></li>
+<li><code>linked_transactions</code> : Tableau des IDs des écritures à lier à l'écriture <em>(depuis 1.3.5)</em></li>
 </ul>
 <p>Exemple :</p>
 <pre><code>curl -F 'id_year=12' -F 'label=Test' -F 'date=01/02/2022' -F 'type=EXPENSE' -F 'amount=42' -F 'debit=512A' -F 'credit=601' …</code></pre></div></body></html>

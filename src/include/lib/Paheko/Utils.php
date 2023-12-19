@@ -250,6 +250,46 @@ class Utils
 		return $value;
 	}
 
+	static public function weightToInteger($number): ?int
+	{
+		if (null === $number || '' === $number) {
+			return null;
+		}
+
+		if (-1 == $number) {
+			return -1;
+		}
+
+		$w = explode('.', str_replace(',', '.', $number));
+		$a = $w[0] ?: '0';
+		$b = substr(($w[1] ?? '0') . '000', 0, 3);
+		return intval($a . $b);
+	}
+
+	static public function format_weight($number, bool $empty_is_zero = false, bool $append_unit = false): string
+	{
+		if (empty($number) || $number < 0) {
+			return $empty_is_zero ? '0' : '';
+		}
+
+		$decimals = substr($number, -3);
+
+		if ((int)$decimals > 0) {
+			$decimals = ',' . substr('000' . $decimals, -3);
+		}
+		else {
+			$decimals = '';
+		}
+
+		$out = (int)substr($number, 0, -3) . $decimals;
+
+		if ($append_unit) {
+			$out .= ' kg';
+		}
+
+		return $out;
+	}
+
 	static public function money_format($number, ?string $dec_point = ',', string $thousands_sep = ' ', $zero_if_empty = true): string {
 		if ($number == 0) {
 			return $zero_if_empty ? '0' : '0,00';
