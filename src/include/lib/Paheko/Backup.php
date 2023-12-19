@@ -3,12 +3,7 @@
 namespace Paheko;
 
 use Paheko\Users\Session;
-use Paheko\Files\Files;
 use Paheko\Files\Storage;
-use Paheko\Entities\Files\File;
-
-use KD2\ZipWriter;
-use KD2\ErrorManager;
 
 class Backup
 {

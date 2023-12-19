@@ -83,6 +83,13 @@ class Upgrade
 		$backup_file = sprintf(DATA_ROOT . '/association.pre_upgrade-%s.sqlite', paheko_version());
 		Backup::make($backup_file);
 
+		// Extend execution time, just in case
+		if (false === strpos(@ini_get('disable_functions'), 'set_time_limit')) {
+			@set_time_limit(600);
+		}
+
+		@ini_set('max_execution_time', 600);
+
 		try {
 			if (version_compare($v, '1.1.21', '<')) {
 				$db->beginSchemaUpdate();
