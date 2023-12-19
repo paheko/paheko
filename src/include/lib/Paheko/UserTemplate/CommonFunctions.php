@@ -550,6 +550,9 @@ class CommonFunctions
 		$url = $params['href'] ?? Utils::getSelfURI();
 		$suffix = $params['suffix'] ?? 'export=';
 
+		$url = str_replace([$suffix . 'csv', $suffix . 'ods', $suffix . 'xlsx'], '', $url);
+		$url = rtrim($url, '?&');
+
 		if (false !== strpos($url, '?')) {
 			$url .= '&';
 		}
