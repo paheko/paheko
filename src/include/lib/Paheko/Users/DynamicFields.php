@@ -86,6 +86,11 @@ class DynamicFields
 		return array_keys(self::getInstance()->fieldsBySystemUse('name'));
 	}
 
+	static public function getVirtualFields(): array
+	{
+		return self::getInstance()->fieldsByType('virtual');
+	}
+
 	static public function getNameFromArray($in): ?string
 	{
 		$out = [];

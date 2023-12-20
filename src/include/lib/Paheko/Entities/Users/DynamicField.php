@@ -216,6 +216,12 @@ class DynamicField extends Entity
 			throw new ValidationException('Ce champ est utilisé en interne, il n\'est pas possible de le supprimer');
 		}
 
+		foreach (DynamicFields::getVirtualFields() as $field) {
+			if ($field->isReferencing($this->name)) {
+				throw new ValidationException(sprintf('Ce champ ne peut être supprimé, car le champ calculé "%s" en a besoin pour fonctionner.', $field->label));
+			}
+		}
+
 		if ($this->type == 'file') {
 			// Delete all linked files
 			$glob = sprintf('%s/*/%s', File::CONTEXT_USER, $this->name);
@@ -253,6 +259,11 @@ class DynamicField extends Entity
 	public function isVirtual(): bool
 	{
 		return $this->type == 'virtual';
+	}
+
+	public function isReferencing(string $name): bool
+	{
+		return $this->isVirtual() && preg_match('/\b' . $name . '\b/', $this->sql);
 	}
 
 	public function canDelete(): bool
