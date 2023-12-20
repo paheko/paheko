@@ -18,6 +18,10 @@ if (!$reminder) {
 $csrf_key = 'reminder_delete_' . $reminder->id();
 
 $form->runIf('delete', function () use ($reminder) {
+	if (f('confirm_delete')) {
+		$reminder->deleteHistory();
+	}
+
 	$reminder->delete();
 }, $csrf_key, ADMIN_URL . 'services/reminders/');
 

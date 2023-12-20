@@ -24,7 +24,7 @@ class ReminderMessage extends Entity
 	protected ?int $id;
 	protected int $id_service;
 	protected int $id_user;
-	protected int $id_reminder;
+	protected ?int $id_reminder = null;
 	protected Date $sent_date;
 	protected Date $due_date;
 
@@ -76,8 +76,12 @@ class ReminderMessage extends Entity
 		return (array) $reminder;
 	}
 
-	public function reminder(): Reminder
+	public function reminder(): ?Reminder
 	{
+		if (!$this->id_reminder) {
+			return null;
+		}
+
 		$this->_reminder ??= Reminders::get($this->id_reminder);
 		return $this->_reminder;
 	}

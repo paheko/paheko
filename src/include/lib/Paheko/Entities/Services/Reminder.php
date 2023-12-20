@@ -132,4 +132,10 @@ class Reminder extends Entity
 
 		return null;
 	}
+
+	public function deleteHistory(): void
+	{
+		$db = DB::getInstance();
+		$db->exec(sprintf('DELETE FROM services_reminders_sent WHERE id_reminder = %s;', $this->id));
+	}
 }

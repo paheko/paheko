@@ -327,7 +327,7 @@ CREATE TABLE IF NOT EXISTS services_reminders_sent
 
 	id_user INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
 	id_service INTEGER NOT NULL REFERENCES services (id) ON DELETE CASCADE,
-	id_reminder INTEGER NOT NULL REFERENCES services_reminders (id) ON DELETE CASCADE,
+	id_reminder INTEGER NULL REFERENCES services_reminders (id) ON DELETE SET NULL,
 
 	sent_date TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(sent_date) IS NOT NULL AND date(sent_date) = sent_date),
 	due_date TEXT NOT NULL CHECK (date(due_date) IS NOT NULL AND date(due_date) = due_date)

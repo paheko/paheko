@@ -44,7 +44,7 @@ class Reminders
 		];
 
 		$tables = 'services_reminders_sent srs
-			INNER JOIN services_reminders r ON r.id = srs.id_reminder
+			LEFT JOIN services_reminders r ON r.id = srs.id_reminder
 			INNER JOIN services s ON s.id = srs.id_service';
 		$conditions = sprintf('srs.id_user = %d', $user_id);
 
