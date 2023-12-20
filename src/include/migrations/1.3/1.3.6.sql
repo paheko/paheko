@@ -1,3 +1,6 @@
+-- Fix access level of number field
+UPDATE config_users_fields SET user_access_level = 1 WHERE user_access_level = 2 AND name = 'numero';
+
 ALTER TABLE mailings RENAME TO mailings_old;
 
 DROP INDEX IF EXISTS mailings_sent;
