@@ -144,18 +144,14 @@ class Services_User
 
 				if (!empty($row->fee)) {
 					foreach ($fees as $fee) {
-						if (strcasecmp($fee->label, $row->fee) === 0) {
+						if (strcasecmp($fee->label, $row->fee) === 0 && $fee->id === $id_service) {
 							$id_fee = $fee->id;
 							break;
 						}
 					}
 
 					if (!$id_fee) {
-						throw new UserException(sprintf('Le tarif d\'activité "%s" n\'existe pas', $row->fee));
-					}
-
-					if ($fee->id_service !== $id_service) {
-						throw new UserException(sprintf('Le tarif d\'activité "%s" ne correspond pas à l\'activité "%s"', $fee->label, $row->service));
+						throw new UserException(sprintf('Le tarif "%s" n\'existe pas pour cette activité', $row->fee));
 					}
 
 					$id_fee = $fee->id;
