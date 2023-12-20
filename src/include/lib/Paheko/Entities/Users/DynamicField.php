@@ -81,11 +81,6 @@ class DynamicField extends Entity
 	const NAMES    = 0x01 << 4;
 	const PRESET   = 0x01 << 5;
 
-	const ACCESS_USER = 0x01 << 1;
-	const ACCESS_READ = 0x01 << 2;
-	const ACCESS_WRITE = 0x01 << 3;
-	const ACCESS_ADMIN = 0x01 << 4;
-
 	const TYPES = [
 		'email'		=>	'Adresse E-Mail',
 		'url'		=>	'Adresse URL',
