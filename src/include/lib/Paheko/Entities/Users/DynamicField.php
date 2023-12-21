@@ -321,7 +321,7 @@ class DynamicField extends Entity
 			$this->assert($this->system & self::PRESET || !array_key_exists($this->name, DynamicFields::getInstance()->getPresets()), 'Ce nom de champ est déjà utilisé par un champ pré-défini.');
 		}
 
-		if (self::SQL_TYPES[$this->type] == 'VIRTUAL') {
+		if ($this->type === 'virtual') {
 			$this->assert(null !== $this->sql && strlen(trim($this->sql)), 'Le code SQL est manquant');
 
 			try {
