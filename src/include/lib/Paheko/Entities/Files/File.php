@@ -1034,6 +1034,9 @@ class File extends Entity
 			header(sprintf('Content-Type: %s', $type));
 			header(sprintf('Content-Disposition: %s; filename="%s"', $download ? 'attachment' : 'inline', is_string($download) ? $download : $this->name));
 		}
+		elseif (!file_exists($path)) {
+			throw new UserException('Le contenu du fichier est introuvable.');
+		}
 
 		// Use X-SendFile, if available, and storage has a local copy
 		if (Router::isXSendFileEnabled()) {
