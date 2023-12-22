@@ -72,8 +72,8 @@ trait FileThumbnailTrait
 
 	public function thumb_uri($size = null, bool $with_hash = true): ?string
 	{
-		// Don't try to generate thumbnails for large files (> 25 MB)
-		if ($this->size > 1024*1024*25) {
+		// Don't try to generate thumbnails for large files (> 25 MB), except if it's a video
+		if ($this->size > 1024*1024*25 && substr($this->mime, 0, 6) !== 'video/') {
 			return null;
 		}
 
@@ -150,6 +150,10 @@ trait FileThumbnailTrait
 			&& in_array($ext, $collabora_extensions)
 			&& $this->getWopiURL()) {
 			return 'collabora';
+		}
+		// Generate video thumbnails, for up to 1GB in size
+		elseif (in_array('ffmpeg', DOCUMENT_THUMBNAIL_COMMANDS) && substr($this->mime, 0, 6) === 'video/' && $this->size < 1024*1024*1024) {
+			return 'ffmpeg';
 		}
 
 		return null;
@@ -311,6 +315,12 @@ trait FileThumbnailTrait
 						Utils::escapeshellarg($destination)
 					);
 				}
+				elseif ($command === 'ffmpeg') {
+					$cmd = sprintf('ffmpeg -ss 00:00:02 -i %s -frames:v 1 -f image2 -c png -vf scale="min(900\, iw)":-1 %s 2>&1',
+						Utils::escapeshellarg($tmpfile ?? $local_path),
+						Utils::escapeshellarg($destination)
+					);
+				}
 
 				$output = '';
 				$code = Utils::exec($cmd, 5, null, function($data) use (&$output) { $output .= $data; });
@@ -432,6 +442,7 @@ trait FileThumbnailTrait
 				$this->createThumbnail($size, $destination);
 			}
 			catch (\RuntimeException $e) {
+				throw $e;
 				header('Content-Type: image/svg+xml', true);
 				echo $this->getMissingThumbnail($size);
 				return;

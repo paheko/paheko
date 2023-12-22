@@ -207,14 +207,25 @@ class Extensions
 
 		if ($poster) {
 			$poster = self::$renderer->resolveAttachment($poster);
+			$poster = $poster ? $poster->url() : null;
 		}
-
-		if ($subs) {
-			$subs = self::$renderer->resolveAttachment($subs);
-			$subs = sprintf('<track kind="subtitles" default="true" src="%s" />', htmlspecialchars($subs->url()));
+		else {
+			$poster = $video->thumb_url('750px');
 		}
 
 		$params = '';
+
+		if ($subs) {
+			$subs = self::$renderer->resolveAttachment($subs);
+
+			// Automagically manage .srt files
+			// Inspired by https://github.com/codeit-ninja/SRT-Support-for-HTML5-videos
+			if (substr($subs->name, -4) === '.srt') {
+				$params .= ' onplay="var k = this.querySelector(\'track\'); fetch(k.src).then((r) => r.text()).then((t) => { t = \'WEBVTT\n\n\' + t.split(/\n/g).map(line => line.replace(/((\d+:){0,2}\d+),(\d+)/g, \'$1.$3\')).join(\'\n\'); k.src = window.URL.createObjectURL(new Blob([t])); } ); return true;"';
+			}
+
+			$subs = sprintf('<track kind="subtitles" default="true" src="%s" />', htmlspecialchars($subs->url()));
+		}
 
 		if (isset($args['width'])) {
 			$params .= sprintf(' width="%d"', $args['width']);
@@ -224,9 +235,9 @@ class Extensions
 			$params .= sprintf(' height="%d"', $args['height']);
 		}
 
-		return sprintf('<video controls="true" preload="%s" poster="%s" src="%s"%s>%s</video>',
+		return sprintf('<figure class="video"><video controls="true" preload="%s" poster="%s" src="%s"%s>%s</video><button onclick="this.parentNode.firstChild.play(); this.remove();">Play</button></figure>',
 			$poster ? 'metadata' : 'none',
-			htmlspecialchars($poster ? $poster->url() : ''),
+			htmlspecialchars($poster),
 			htmlspecialchars($video->url()),
 			$params,
 			$subs
