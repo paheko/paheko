@@ -572,6 +572,9 @@ class Transaction extends Entity
 				$this->addStatus(self::STATUS_WAITING);
 			}
 		}
+		else {
+			$this->removeStatus(self::STATUS_WAITING);
+		}
 
 		$this->assertCanBeModified();
 		$this->selfCheck();
@@ -654,6 +657,15 @@ class Transaction extends Entity
 	public function markPaid() {
 		$this->removeStatus(self::STATUS_WAITING);
 		$this->addStatus(self::STATUS_PAID);
+	}
+
+	public function isWaiting(): bool
+	{
+		if ($this->type !== self::TYPE_DEBT && $this->type !== self::TYPE_CREDIT) {
+			return false;
+		}
+
+		return $this->hasStatus(self::STATUS_WAITING);
 	}
 
 	public function delete(): bool

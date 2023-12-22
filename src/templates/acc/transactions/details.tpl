@@ -32,7 +32,7 @@
 	<h3>{"Écriture n°%d"|args:$transaction.id}</h3>
 </header>
 
-{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE) && $transaction.status & $transaction::STATUS_WAITING}
+{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE) && $transaction->isWaiting()}
 <div class="block alert">
 	<form method="post" action="{$self_url}">
 	{if $transaction.type == $transaction::TYPE_DEBT}
