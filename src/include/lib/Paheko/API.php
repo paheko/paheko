@@ -390,7 +390,7 @@ class API
 				return $transaction->asJournalArray();
 			}
 			// Return or edit linked users
-			elseif (ctype_digit($p1) && $p2 == 'users') {
+			elseif ($p1 && ctype_digit($p1) && $p2 == 'users') {
 				$transaction = Transactions::get((int)$p1);
 
 				if (!$transaction) {
@@ -414,7 +414,7 @@ class API
 					throw new APIException('Wrong request method', 400);
 				}
 			}
-			elseif (ctype_digit($p1) && !$p2) {
+			elseif ($p1 && ctype_digit($p1) && !$p2) {
 				$transaction = Transactions::get((int)$p1);
 
 				if (!$transaction) {
@@ -452,7 +452,7 @@ class API
 				throw new APIException('Wrong request method', 400);
 			}
 
-			if (($p1 === 'current' || ctype_digit($p1)) && ($p2 === 'journal' || $p2 === 'account/journal')) {
+			if (($p1 === 'current' || ($p1 && ctype_digit($p1))) && ($p2 === 'journal' || $p2 === 'account/journal')) {
 				if ($p1 === 'current') {
 					$id_year = Years::getCurrentOpenYearId();
 
@@ -512,7 +512,7 @@ class API
 				throw new APIException('Wrong request method', 400);
 			}
 
-			if (ctype_digit($p1) && $p2 === 'accounts') {
+			if ($p1 && ctype_digit($p1) && $p2 === 'accounts') {
 				$a = new Accounts((int)$p1);
 				return array_map(fn($c) => $c->asArray(), $a->listAll());
 			}
