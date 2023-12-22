@@ -65,7 +65,7 @@ $breadcrumbs = $page ? $page->getBreadcrumbs() : [];
 $can_edit = $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 
 $tpl->assign('custom_js', ['web_gallery.js']);
-$tpl->assign('custom_css', ['web.css', '!web/css.php']);
+$tpl->assign('custom_css', ['web.css', BASE_URL . 'content.css']);
 
 $module = $page ? null : Modules::getWeb();
 
