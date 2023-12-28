@@ -294,6 +294,11 @@ trait FileThumbnailTrait
 
 				curl_exec($curl);
 				$info = curl_getinfo($curl);
+
+				if ($error = curl_error($curl)) {
+					throw new \RuntimeException('cURL error: ' . $error);
+				}
+
 				curl_close($curl);
 				fclose($fp);
 
