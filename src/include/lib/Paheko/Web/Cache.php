@@ -108,13 +108,11 @@ class Cache
 			Utils::safe_mkdir(self::$root, 0777, true);
 		}
 
-		// Create symlink for self-hosting with .htaccess
-		if (!file_exists(ROOT . '/www/.cache') && file_exists(DATA_ROOT . '/cache/web')) {
-			if (!is_writable(ROOT . '/www')) {
-				throw new UserException('Le répertoire "'. ROOT . '/www" n\'est pas accessible en écriture.');
-			}
+		$cache_root = Utils::dirname(WEB_CACHE_ROOT);
 
-			@symlink(DATA_ROOT . '/cache/web', ROOT . '/www/.cache');
+		// Create symlink for self-hosting with .htaccess
+		if (!file_exists(ROOT . '/www/.cache') && file_exists($cache_root) && is_writable(ROOT . '/www')) {
+			@symlink($cache_root, ROOT . '/www/.cache');
 		}
 
 		return true;

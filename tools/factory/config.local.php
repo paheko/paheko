@@ -107,6 +107,7 @@ define('Paheko\DATA_ROOT', $user_data_dir);
 define('Paheko\WWW_URL', 'https://' . $login . '.' . FACTORY_DOMAIN . '/');
 define('Paheko\WWW_URI', '/');
 
+// Créer le lien symbolique vers le cache partagé des pages du site web
 $web_cache_public = __DIR__ . '/www/.cache';
 
 if (!file_exists($web_cache_public)) {
