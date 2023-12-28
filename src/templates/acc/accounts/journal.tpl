@@ -83,7 +83,7 @@
 		<tr>
 			{if $can_edit}
 			<td class="check">
-				{input type="checkbox" name="check[%s]"|args:$line.id_line value=$line.id default=0}
+				{input type="checkbox" name="check[%s]"|args:$line.id_line value=$line.id}
 			</td>
 			{/if}
 			<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>

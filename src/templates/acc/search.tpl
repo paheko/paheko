@@ -15,9 +15,8 @@
 	<p class="help">{$list->count()} écritures trouvées pour cette recherche.</p>
 
 	{if $list->count() > 0}
-	<p class="actions">{exportmenu form=true name="_dl_export" class="menu-btn-right"}</p>
+		<p class="actions">{exportmenu form=true name="_dl_export" class="menu-btn-right"}</p>
 	{/if}
-
 
 	{include file="common/dynamic_list_head.tpl" check=$is_admin use_buttons=true}
 
@@ -29,10 +28,16 @@
 
 	{foreach from=$list->iterate() item="row"}
 		<tr>
-			{if $is_admin}<td class="check">{input type="checkbox" name="selected[]" value=$row.id}</td>{/if}
+			{if $is_admin}
+				<td class="check">{input type="checkbox" name="check[%s]"|args:$row.id_line value=$row.id}</td>
+			{/if}
 			{foreach from=$row key="key" item="value"}
 				<?php
 				$column = $columns[$key] ?? null;
+
+				if (!isset($column['label'])) {
+					continue;
+				}
 				?>
 				{if $prev_id == $row.id && !in_array($key, ['debit', 'credit', 'account_code', 'line_label', 'line_reference', 'project_code'])}
 					<td></td>
@@ -66,7 +71,9 @@
 				{/if}
 			{/foreach}
 			<td class="actions">
-				{linkbutton shape="search" label="Détails" href="!acc/transactions/details.php?id=%d"|args:$row.id}
+				{if $prev_id != $row.id}
+					{linkbutton shape="search" label="Détails" href="!acc/transactions/details.php?id=%d"|args:$row.id}
+				{/if}
 			</td>
 		</tr>
 		<?php $prev_id = $row->id; ?>
@@ -82,6 +89,9 @@
 		}
 		$span1++;
 	}
+	if ($is_admin) {
+		$span1--;
+	}
 	$span2 = count((array)$row) - $span1;
 	?>
 	<tfoot>
@@ -96,7 +106,21 @@
 				</td>
 				{/if}
 			{/foreach}
-			<td colspan="{$span2}"></td>
+			<td colspan="{$span2}" class="actions">
+				{if $is_admin}
+					<em>Pour les écritures cochées :</em>
+					<input type="hidden" name="from" value="{$self_url}" />
+					{csrf_field key="projects_action"}
+					<select name="action" data-form-action="{"!acc/transactions/actions.php"|local_url}">
+						<option value="">— Choisir une action à effectuer —</option>
+						<option value="change_project">Ajouter/enlever d'un projet</option>
+						<option value="delete">Supprimer les écritures</option>
+					</select>
+					<noscript>
+						{button type="submit" value="OK" shape="right" label="Valider"}
+					</noscript>
+				{/if}
+			</td>
 		</tr>
 	</tfoot>
 	{/if}
