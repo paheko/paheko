@@ -144,7 +144,7 @@ class Services_User
 
 				if (!empty($row->fee)) {
 					foreach ($fees as $fee) {
-						if (strcasecmp($fee->label, $row->fee) === 0 && $fee->id === $id_service) {
+						if (strcasecmp($fee->label, $row->fee) === 0 && $fee->id_service === $id_service) {
 							$id_fee = $fee->id;
 							break;
 						}
@@ -153,8 +153,6 @@ class Services_User
 					if (!$id_fee) {
 						throw new UserException(sprintf('Le tarif "%s" n\'existe pas pour cette activité', $row->fee));
 					}
-
-					$id_fee = $fee->id;
 				}
 
 				$su = new Service_User;
