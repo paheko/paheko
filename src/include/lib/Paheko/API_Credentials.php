@@ -3,6 +3,7 @@
 namespace Paheko;
 
 use Paheko\Entities\API_Credentials as Entity;
+use Paheko\Users\Session;
 
 use KD2\DB\EntityManager as EM;
 

@@ -29,7 +29,7 @@ class API
 	protected $file_pointer = null;
 	protected ?string $allowed_files_root = null;
 
-	protected array $allowed_methods = ['GET', 'POST', 'PUT'];
+	protected array $allowed_methods = ['GET', 'POST', 'PUT', 'DELETE'];
 
 	public function __construct(string $method, string $path, array $params)
 	{
@@ -409,6 +409,31 @@ class API
 				}
 				elseif ($this->method === 'GET') {
 					return $transaction->listLinkedUsers();
+				}
+				else {
+					throw new APIException('Wrong request method', 400);
+				}
+			}
+			// Return or edit linked subscriptions
+			elseif ($p1 && ctype_digit($p1) && $p2 == 'subscriptions') {
+				$transaction = Transactions::get((int)$p1);
+
+				if (!$transaction) {
+					throw new APIException(sprintf('Transaction #%d not found', $p1), 404);
+				}
+
+				if ($this->method === 'POST') {
+					$this->requireAccess(Session::ACCESS_WRITE);
+					$transaction->updateLinkedSubscriptions((array)($_POST['subscriptions'] ?? null));
+					return ['success' => true];
+				}
+				elseif ($this->method === 'DELETE') {
+					$this->requireAccess(Session::ACCESS_WRITE);
+					$transaction->updateLinkedSubscriptions([]);
+					return ['success' => true];
+				}
+				elseif ($this->method === 'GET') {
+					return $transaction->listLinkedSubscriptions();
 				}
 				else {
 					throw new APIException('Wrong request method', 400);

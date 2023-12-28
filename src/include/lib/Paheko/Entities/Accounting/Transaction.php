@@ -26,8 +26,9 @@ use Paheko\UserTemplate\CommonModifiers;
 
 class Transaction extends Entity
 {
-	use TransactionUsersTrait;
 	use TransactionLinksTrait;
+	use TransactionSubscriptionsTrait;
+	use TransactionUsersTrait;
 
 	const NAME = 'Écriture';
 	const PRIVATE_URL = '!acc/transactions/details.php?id=%d';
