@@ -74,7 +74,7 @@ trait FileThumbnailTrait
 	public function thumb_uri($size = null, bool $with_hash = true): ?string
 	{
 		// Don't try to generate thumbnails for large files (> 25 MB), except if it's a video
-		if ($this->size > 1024*1024*25 && substr($this->mime, 0, 6) !== 'video/') {
+		if ($this->size > 1024*1024*25 && substr($this->mime ?? '', 0, 6) !== 'video/') {
 			return null;
 		}
 
@@ -153,7 +153,10 @@ trait FileThumbnailTrait
 			return 'collabora';
 		}
 		// Generate video thumbnails, for up to 1GB in size
-		elseif (in_array('ffmpeg', DOCUMENT_THUMBNAIL_COMMANDS) && substr($this->mime, 0, 6) === 'video/' && $this->size < 1024*1024*1024) {
+		elseif (in_array('ffmpeg', DOCUMENT_THUMBNAIL_COMMANDS)
+			&& $this->mime
+			&& substr($this->mime, 0, 6) === 'video/'
+			&& $this->size < 1024*1024*1024) {
 			return 'ffmpeg';
 		}
 
