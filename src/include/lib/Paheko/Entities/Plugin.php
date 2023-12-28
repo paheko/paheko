@@ -401,10 +401,16 @@ class Plugin extends Entity
 	public function route(string $uri): void
 	{
 		$uri = ltrim($uri, '/');
+		$session = Session::getInstance();
 
 		if (0 === strpos($uri, 'admin/')) {
-			if (!Session::getInstance()->isLogged()) {
+			if (!$session->isLogged()) {
 				Utils::redirect('!login.php');
+			}
+
+			// Restrict access
+			if (isset($this->restrict_section, $this->restrict_level)) {
+				$session->requireAccess($this->restrict_section, $this->restrict_level);
 			}
 		}
 

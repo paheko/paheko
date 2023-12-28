@@ -323,6 +323,17 @@ class Modules
 			throw new UserException('This page is currently disabled.');
 		}
 
+		// Restrict access
+		if (isset($module->restrict_section, $module->restrict_level)) {
+			$session = Session::getInstance();
+
+			if (!$session->isLogged()) {
+				Utils::redirect('!login.php');
+			}
+
+			$session->requireAccess($module->restrict_section, $module->restrict_level);
+		}
+
 		$has_local_file ??= $module->hasLocalFile($path);
 		$has_dist_file ??= !$has_local_file && $module->hasDistFile($path);
 
