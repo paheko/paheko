@@ -381,6 +381,7 @@ Champs optionnels :
 * `payment_reference` (uniquement pour les écritures simplifiées) : référence de paiement
 * `linked_users` : Tableau des IDs des membres à lier à l'écriture *(depuis 1.3.3)*
 * `linked_transactions` : Tableau des IDs des écritures à lier à l'écriture *(depuis 1.3.5)*
+* `linked_subscriptions` : Tableau des IDs des inscriptions à lier à l'écriture *(depuis 1.3.6)*
 
 Exemple :
 

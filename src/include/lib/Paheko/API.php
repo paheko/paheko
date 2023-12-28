@@ -378,6 +378,10 @@ class API
 					$transaction->updateLinkedTransactions((array)$this->params['linked_transactions']);
 				}
 
+				if (!empty($this->params['linked_subscriptions'])) {
+					$transaction->updateSubscriptionLinks((array)$this->params['linked_subscriptions']);
+				}
+
 				if ($this->hasParam('move_attachments_from')
 					&& $this->isPathAllowed($this->params['move_attachments_from'])) {
 					$file = Files::get($this->params['move_attachments_from']);
@@ -460,6 +464,10 @@ class API
 
 					if (!empty($this->params['linked_transactions'])) {
 						$transaction->updateLinkedTransactions((array)$this->params['linked_transactions']);
+					}
+
+					if (!empty($this->params['linked_subscriptions'])) {
+						$transaction->updateSubscriptionLinks((array)$this->params['linked_subscriptions']);
 					}
 
 					return $transaction->asJournalArray();
