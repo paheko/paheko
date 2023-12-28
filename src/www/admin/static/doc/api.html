@@ -306,11 +306,14 @@ curl https://test:abcd@monpaheko.tld/api/services/subscriptions/import -T /tmp/i
 <h3 id="accounting-transaction-id_transaction-users-delete">accounting/transaction/{ID_TRANSACTION}/users (DELETE)</h3>
 <p>Efface la liste des membres liés à une écriture.</p>
 <h3 id="accounting-transaction-id_transaction-subscriptions-get">accounting/transaction/{ID_TRANSACTION}/subscriptions (GET)</h3>
-<p>Renvoie la liste des inscriptions liés à une écriture.</p>
+<p>(Depuis la version 1.3.6)</p>
+<p>Renvoie la liste des inscriptions (aux activités) liées à une écriture.</p>
 <h3 id="accounting-transaction-id_transaction-subscriptions-post">accounting/transaction/{ID_TRANSACTION}/subscriptions (POST)</h3>
-<p>Met à jour la liste des inscriptions liés à une écriture, en utilisant les ID d'inscriptions passés dans un tableau nommé <code>subscriptions</code>.</p>
+<p>(Depuis la version 1.3.6)</p>
+<p>Met à jour la liste des inscriptions liées à une écriture, en utilisant les ID d'inscriptions passés dans un tableau nommé <code>subscriptions</code>.</p>
 <pre><code> curl -v "http://…/api/accounting/transaction/9337/subscriptions"  -F 'subscriptions[]=2'</code></pre>
 <h3 id="accounting-transaction-id_transaction-subscriptions-delete">accounting/transaction/{ID_TRANSACTION}/subscriptions (DELETE)</h3>
+<p>(Depuis la version 1.3.6)</p>
 <p>Efface la liste des inscriptions liées à une écriture.</p>
 <h3 id="accounting-transaction-post">accounting/transaction (POST)</h3>
 <p>Crée une nouvelle écriture, renvoie les détails si l'écriture a été créée. Voir plus bas le format attendu.</p>

@@ -331,17 +331,23 @@ Efface la liste des membres liés à une écriture.
 
 ### accounting/transaction/{ID_TRANSACTION}/subscriptions (GET)
 
-Renvoie la liste des inscriptions liés à une écriture.
+(Depuis la version 1.3.6)
+
+Renvoie la liste des inscriptions (aux activités) liées à une écriture.
 
 ### accounting/transaction/{ID_TRANSACTION}/subscriptions (POST)
 
-Met à jour la liste des inscriptions liés à une écriture, en utilisant les ID d'inscriptions passés dans un tableau nommé `subscriptions`.
+(Depuis la version 1.3.6)
+
+Met à jour la liste des inscriptions liées à une écriture, en utilisant les ID d'inscriptions passés dans un tableau nommé `subscriptions`.
 
 ```
  curl -v "http://…/api/accounting/transaction/9337/subscriptions"  -F 'subscriptions[]=2'
 ```
 
 ### accounting/transaction/{ID_TRANSACTION}/subscriptions (DELETE)
+
+(Depuis la version 1.3.6)
 
 Efface la liste des inscriptions liées à une écriture.
 
