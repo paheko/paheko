@@ -424,16 +424,16 @@ class API
 
 				if ($this->method === 'POST') {
 					$this->requireAccess(Session::ACCESS_WRITE);
-					$transaction->updateLinkedSubscriptions((array)($_POST['subscriptions'] ?? null));
+					$transaction->updateSubscriptionLinks((array)($_POST['subscriptions'] ?? null));
 					return ['success' => true];
 				}
 				elseif ($this->method === 'DELETE') {
 					$this->requireAccess(Session::ACCESS_WRITE);
-					$transaction->updateLinkedSubscriptions([]);
+					$transaction->deleteAllSubscriptionLinks([]);
 					return ['success' => true];
 				}
 				elseif ($this->method === 'GET') {
-					return $transaction->listLinkedSubscriptions();
+					return $transaction->listSubscriptionLinks();
 				}
 				else {
 					throw new APIException('Wrong request method', 400);

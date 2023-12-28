@@ -209,7 +209,22 @@
 				<tr>
 					<td class="num"><a href="{$admin_url}users/details.php?id={$u.id}">{$u.number}</a></td>
 					<td>{$u.identity}</td>
-					<td>{if $u.id_service_user}— en règlement d'une <a href="{$admin_url}services/user/?id={$u.id}&amp;only={$u.id_service_user}">activité</a>{/if}</td>
+					<td class="actions">{linkbutton href="!users/details.php?id=%d"|args:$u.id label="Fiche membre" shape="user"}</td>
+				</tr>
+			{/foreach}
+			</tbody>
+		</table>
+	{/if}
+
+	{if count($linked_subscriptions)}
+		<table class="list">
+			<caption>Inscriptions liées</caption>
+			<tbody>
+			{foreach from=$linked_subscriptions item="s"}
+				<tr>
+					<td class="num">{link href="!users/details.php?id=%d"|args:$s.id_user label=$s.user_number}</td>
+					<td>{$s.user_identity}</td>
+					<td class="actions">{linkbutton href="!services/user/?id=%d&only=%s"|args:$s.id_user:$s.id_subscription label="Inscription" shape="right"}</td>
 				</tr>
 			{/foreach}
 			</tbody>

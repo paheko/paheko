@@ -15,7 +15,7 @@ $self_url = sprintf('!acc/transactions/service_user.php?id=%d&user=%d', $id, $us
 
 $form->runIf(qg('unlink') !== null, function () use ($id) {
 	$t = Transactions::get((int)qg('unlink'));
-	$t->unlinkServiceUser($id);
+	$t->deleteSubscriptionLink($id);
 }, null, $self_url);
 
 $criterias = ['subscription' => $id];
