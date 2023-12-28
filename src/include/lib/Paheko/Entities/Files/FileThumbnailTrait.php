@@ -5,6 +5,7 @@ namespace Paheko\Entities\Files;
 use KD2\Graphics\Image;
 use KD2\ZipReader;
 use KD2\HTML\Markdown;
+use KD2\ErrorManager;
 
 use Paheko\Static_Cache;
 use Paheko\UserException;
@@ -293,10 +294,9 @@ trait FileThumbnailTrait
 				curl_close($curl);
 				fclose($fp);
 
-				if (($code = $info['status']) != 200) {
+				if (($code = $info['http_code']) != 200) {
 					Utils::safe_unlink($destination);
-					ErrorManager::reportExceptionSilent('Cannot fetch thumbnail from Collabora: code ' . $code);
-					return null;
+					throw new \RuntimeException('Cannot fetch thumbnail from Collabora: code ' . $code . "\n" . json_encode($info));
 				}
 			}
 			else {
@@ -443,7 +443,7 @@ trait FileThumbnailTrait
 				$this->createThumbnail($size, $destination);
 			}
 			catch (\RuntimeException $e) {
-				throw $e;
+				ErrorManager::reportExceptionSilent($e);
 				header('Content-Type: image/svg+xml', true);
 				echo $this->getMissingThumbnail($size);
 				return;
