@@ -293,9 +293,10 @@ trait FileThumbnailTrait
 				curl_close($curl);
 				fclose($fp);
 
-				if (($code = $info['http_code']) != 200) {
+				if (($code = $info['status']) != 200) {
 					Utils::safe_unlink($destination);
-					throw new \RuntimeException('Cannot fetch thumbnail from Collabora: code ' . $code);
+					ErrorManager::reportExceptionSilent('Cannot fetch thumbnail from Collabora: code ' . $code);
+					return null;
 				}
 			}
 			else {
