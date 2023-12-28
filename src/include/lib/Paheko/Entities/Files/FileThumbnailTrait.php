@@ -269,7 +269,7 @@ trait FileThumbnailTrait
 		try {
 			if ($command === 'collabora') {
 				$url = parse_url(WOPI_DISCOVERY_URL);
-				$url = sprintf('%s://%s:%s/lool/convert-to', $url['scheme'], $url['host'], $url['port'] ?? 80);
+				$url = sprintf('%s://%s:%s/lool/convert-to', $url['scheme'], $url['host'], $url['port'] ?? ($url['scheme'] === 'https' ? 443 : 80));
 
 				// see https://vmiklos.hu/blog/pdf-convert-to.html
 				// but does not seem to be working right now (limited to PDF export?)
