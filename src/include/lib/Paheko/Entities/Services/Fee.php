@@ -141,6 +141,16 @@ class Fee extends Entity
 			'id_user' => [
 				'select' => 'su.id_user',
 			],
+			'service_label' => [
+				'select' => 's.label',
+				'label' => 'Activité',
+				'export' => true,
+			],
+			'fee_label' => [
+				'select' => 'sf.label',
+				'label' => 'Tarif',
+				'export' => true,
+			],
 			'user_number' => [
 				'label' => 'Numéro de membre',
 				'select' => 'u.' . DynamicFields::getNumberField(),
@@ -168,6 +178,7 @@ class Fee extends Entity
 		$tables = 'services_users su
 			INNER JOIN users u ON u.id = su.id_user
 			INNER JOIN services_fees sf ON sf.id = su.id_fee
+			INNER JOIN services s ON s.id = sf.id_service
 			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_fee) AS su2 ON su2.id = su.id
 			LEFT JOIN acc_transactions_users tu ON tu.id_service_user = su.id
 			LEFT JOIN acc_transactions_lines l ON l.id_transaction = tu.id_transaction';
