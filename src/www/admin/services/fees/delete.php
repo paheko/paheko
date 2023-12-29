@@ -14,15 +14,25 @@ if (!$fee) {
 }
 
 $csrf_key = 'fee_delete_' . $fee->id();
+$has_subscriptions = $fee->hasSubscriptions();
 
-$form->runIf('delete', function () use ($fee) {
-	if (!f('confirm_delete')) {
-		throw new UserException('Merci de cocher la case pour confirmer la suppression.');
+$form->runIf('delete', function () use ($has_subscriptions, $fee) {
+	if ($has_subscriptions && 0 !== strnatcasecmp($fee->label, trim((string) f('confirm_delete')))) {
+		throw new UserException('Merci de recopier le nom du tarif correctement pour confirmer la suppression.');
 	}
 
 	$fee->delete();
 }, $csrf_key, ADMIN_URL . 'services/fees/?id=' . $fee->id_service);
 
-$tpl->assign(compact('fee', 'csrf_key'));
+
+$confirm_label = null;
+$confirm_text = null;
+
+if ($has_subscriptions) {
+	$confirm_label = "Entrer ici le nom du tarif pour confirmer que vous souhaitez désinscrire tous les membres de ce tarif";
+	$confirm_text = $fee->label;
+}
+
+$tpl->assign(compact('fee', 'csrf_key', 'confirm_label', 'confirm_text'));
 
 $tpl->display('services/fees/delete.tpl');

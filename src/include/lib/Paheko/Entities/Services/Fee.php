@@ -248,4 +248,9 @@ class Fee extends Entity
 		$sql = sprintf('SELECT su.id_user, %s FROM services_users su INNER JOIN users u ON u.id = su.id_user WHERE su.id_fee = ? %s;', $id_field, $where);
 		return DB::getInstance()->getAssoc($sql, $this->id());
 	}
+
+	public function hasSubscriptions(): bool
+	{
+		return DB::getInstance()->test('services_users', 'id_fee = ?', $this->id());
+	}
 }
