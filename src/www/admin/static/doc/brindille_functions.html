@@ -69,7 +69,8 @@
 			<li><a href="#include">include</a></li>
 			<li><a href="#captcha">captcha</a></li>
 			<li><a href="#mail">mail</a></li>
-			<li><a href="#redirect">redirect</a>
+			<li><a href="#redirect">redirect</a></li>
+			<li><a href="#api">api</a>
 		</ol></li>
 		<li><a href="#fonctions-relatives-aux-modules">Fonctions relatives aux Modules</a>
 		<ol>
@@ -513,7 +514,128 @@
 </tr>
 </tbody>
 </table>
-<p>Si <code>to=null</code> est utilisé, alors la fenêtre modale sera fermée. Ou, si la page n'est pas dans une fenêtre modale, la page courante sera rechargée.</p><h1 id="fonctions-relatives-aux-modules">Fonctions relatives aux Modules</h1>
+<p>Si <code>to=null</code> est utilisé, alors la fenêtre modale sera fermée. Ou, si la page n'est pas dans une fenêtre modale, la page courante sera rechargée.</p>
+<h2 id="api">api</h2>
+<p>Permet d'appeler l'API de Paheko, que ça soit sur l'instance locale, en cours, ou une autre instance externe.</p>
+<p>Voir la <a href="https://paheko.cloud/api" rel="noreferrer noopener external" target="_blank">documentation de l'API</a> pour la liste des fonctions disponibles.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Obligatoire ou optionnel ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>method</code></td>
+<td style="text-align: left;">obligatoire</td>
+<td style="text-align: left;">Méthode de requête : <code>GET</code>, <code>POST</code>, etc.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>path</code></td>
+<td style="text-align: left;">obligatoire</td>
+<td style="text-align: left;">Chemin de la méthode de l'API à appeler.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>fail</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Booléen. Si <code>true</code>, alors une erreur sera affichée si la requête échoue. Si <code>false</code>, aucune erreur ne sera affichée. Défaut : <code>true</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>assign</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Capturer le résultat dans cette variable.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>assign_code</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Capturer le code de retour dans cette variable.</td>
+</tr>
+</tbody>
+</table>
+<p>Par défaut, les requêtes sont réalisées sur la base de données locale, dans ce cas les paramètres suivants sont également disponibles :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Obligatoire ou optionnel ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>access</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Niveau d'autorisation de l'API (défaut : <code>admin</code>).</td>
+</tr>
+</tbody>
+</table>
+<pre><code>{{:assign var="users." value=42}}
+{{:api
+  method="POST"
+  path="accounting/transaction"
+  assign="result"
+
+  id_year=1
+  type="revenue"
+  date="01/01/2023"
+  label="Don de Ada Lovelace"
+  reference="DON-0001"
+  payment_reference="Credit Mutuel 00042"
+  amount="51,49"
+  debit="756"
+  credit="512A"
+  linked_users=$users
+}}
+
+L'écriture n°{{$result.id}} a été créée.</code></pre>
+<p>Mais cette fonction permet également d'appeler une API Paheko distante, dans ce cas les paramètres suivants sont nécessaires :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Obligatoire ou optionnel ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>url</code></td>
+<td style="text-align: left;">obligatoire</td>
+<td style="text-align: left;">Adresse HTTP de l'instance Paheko distante.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>user</code></td>
+<td style="text-align: left;">obligatoire</td>
+<td style="text-align: left;">Identifiant d'accès à l'API distante.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>password</code></td>
+<td style="text-align: left;">obligatoire</td>
+<td style="text-align: left;">Mot de passe d'accès à l'API distante.</td>
+</tr>
+</tbody>
+</table>
+<pre><code>{{:api
+  method="POST"
+  path="sql"
+  sql="SELECT * FROM users;"
+  url="https://mon-asso.paheko.cloud/"
+  user="zmgyfr1qnm"
+  password="OAqFTLFzujJWr6lLn1Mu7w"
+  assign="result"
+  assign_code="code"
+  fail=false
+}}
+
+{{if $code == 200}}
+  Il y a {{$result.count}} résultats.
+{{else}}
+  La requête a échoué : code {{$code}} — {{$result.error}}
+{{/if}}
+</code></pre>
+<h1 id="fonctions-relatives-aux-modules">Fonctions relatives aux Modules</h1>
 <h2 id="save">save</h2>
 <p>Enregistre des données, sous la forme d'un document, dans la base de données, pour le module courant.</p>
 <table>

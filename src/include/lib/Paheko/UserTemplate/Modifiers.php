@@ -45,9 +45,13 @@ class Modifiers
 		'keys',
 		'values',
 		'has',
+		'has_key',
 		'in',
+		'key_in',
 		'sort',
 		'ksort',
+		'max',
+		'min',
 		'quote_sql_identifier',
 		'quote_sql',
 		'sql_where',
@@ -482,6 +486,16 @@ EOS;
 		return in_array($value, (array)$array, $strict);
 	}
 
+	static public function has_key($in, $key)
+	{
+		return array_key_exists($key, (array)$in);
+	}
+
+	static public function key_in($key, $array)
+	{
+		return array_key_exists($key, (array)$array);
+	}
+
 	static public function ksort($value)
 	{
 		$value = (array)$value;
@@ -494,6 +508,16 @@ EOS;
 		$value = (array)$value;
 		natcasesort($value);
 		return $value;
+	}
+
+	static public function max($value)
+	{
+		return max((array)$value);
+	}
+
+	static public function min($value)
+	{
+		return min((array)$value);
 	}
 
 	static public function quote_sql_identifier($in, string $prefix = '')

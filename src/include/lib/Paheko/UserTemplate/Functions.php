@@ -54,14 +54,15 @@ class Functions
 	];
 
 	const COMPILE_FUNCTIONS_LIST = [
-		':break' => [self::class, 'break'],
-		':continue' => [self::class, 'continue'],
+		':break' => [self::class, 'compile_break'],
+		':continue' => [self::class, 'compile_continue'],
+		':return' => [self::class, 'compile_return'],
 	];
 
 	/**
 	 * Compile function to break inside a loop
 	 */
-	static public function break(string $name, string $params, UserTemplate $tpl, int $line)
+	static public function compile_break(string $name, string $params, UserTemplate $tpl, int $line)
 	{
 		$in_loop = false;
 		foreach ($tpl->_stack as $element) {
@@ -81,7 +82,7 @@ class Functions
 	/**
 	 * Compile function to continue inside a loop
 	 */
-	static public function continue(string $name, string $params, UserTemplate $tpl, int $line)
+	static public function compile_continue(string $name, string $params, UserTemplate $tpl, int $line)
 	{
 		$in_loop = 0;
 		foreach ($tpl->_stack as $element) {
@@ -97,6 +98,11 @@ class Functions
 		}
 
 		return sprintf('<?php continue(%d); ?>', $i);
+	}
+
+	static public function compile_return(string $name, string $params, UserTemplate $tpl, int $line)
+	{
+		return '<?php return; ?>';
 	}
 
 	static public function admin_header(array $params): string

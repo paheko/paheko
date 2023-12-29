@@ -67,13 +67,16 @@
 		<ol>
 			<li><a href="#has">has</a></li>
 			<li><a href="#in">in</a></li>
+			<li><a href="#has_key">has_key</a></li>
+			<li><a href="#key_in">key_in</a></li>
 			<li><a href="#keys">keys</a></li>
 			<li><a href="#values">values</a></li>
 			<li><a href="#count">count</a></li>
 			<li><a href="#explode">explode</a></li>
 			<li><a href="#implode">implode</a></li>
 			<li><a href="#map">map</a></li>
-			<li><a href="#ksort-sort">ksort, sort</a>
+			<li><a href="#ksort-sort">ksort, sort</a></li>
+			<li><a href="#max-min">max, min</a>
 		</ol></li>
 		<li><a href="#filtres-de-texte">Filtres de texte</a>
 		<ol>
@@ -302,6 +305,19 @@
 {{if "bleu"|in:$table}}
     Oui, il y a du bleu
 {{/if}}</code></pre>
+<h2 id="has_key">has_key</h2>
+<p>Renvoie vrai si le tableau contient la clé passée en paramètre.</p>
+<pre><code>{{:assign var="table" a="bleu" b="orange"}}
+{{if $table|has_key:"b"}}
+    Oui, il y a la clé "b"
+{{/if}}</code></pre>
+<h2 id="key_in">key_in</h2>
+<p>Renvoie vrai si la clé fait partie du tableau passé en paramètre.</p>
+<p>C'est exactement la même chose que <code>has_key</code>, mais exprimé à l'envers.</p>
+<pre><code>{{:assign var="table" a="bleu" b="orange"}}
+{{if "b"|key_in:$table}}
+    Oui, il y a la clé "b"
+{{/if}}</code></pre>
 <h2 id="keys">keys</h2>
 <p>Renvoie les clés du tableau, sous forme de tableau.</p>
 <pre><code>{{:assign var="table" a="bleu" b="orange"}}
@@ -367,6 +383,14 @@ bleu - orange</code></pre>
 <p>Affichera :</p>
 <pre><code>1,2,3
 2,3,1</code></pre>
+<h2 id="max-min">max, min</h2>
+<p>Renvoie respectivement la valeur la plus haute ou la plus basse d'un tableau de valeurs numériques.</p>
+<pre><code>{{:assign var="table" b="3" a="2" c="1"}}
+{{$table|max}}
+{{$table|min}}</code></pre>
+<p>Affichera :</p>
+<pre><code>3
+1</code></pre>
 <h1 id="filtres-de-texte">Filtres de texte</h1>
 <h2 id="args">args</h2>
 <p>Remplace des arguments dans le texte selon le schéma utilisé par <a href="https://www.php.net/sprintf" rel="noreferrer noopener external" target="_blank">sprintf</a>.</p>
