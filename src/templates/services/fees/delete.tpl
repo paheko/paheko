@@ -7,7 +7,7 @@
 	confirm_label=$confirm_label
 	confirm_text=$confirm_text
 	warning="Êtes-vous sûr de vouloir supprimer le tarif « %s » ?"|args:$fee.label
-	alert="Attention, cela supprimera également les inscriptions des membres à ce tarif."
+	error="Attention, cela supprimera également les inscriptions des membres à ce tarif !"
 	info="Les écritures comptables liées à l'historique des membres ayant réglé ce tarif ne seront pas supprimées, et la comptabilité demeurera inchangée."}
 
 {include file="_foot.tpl"}

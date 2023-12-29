@@ -12,6 +12,11 @@
 			{$alert}
 		</p>
 		{/if}
+		{if isset($error)}
+		<p class="block error">
+			{$error}
+		</p>
+		{/if}
 		{if isset($confirm_text, $confirm_label)}
 		<dl>
 			{input type="text" required=true label=$confirm_label name="confirm_delete"}
