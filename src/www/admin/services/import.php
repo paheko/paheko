@@ -41,7 +41,7 @@ $form->runIf(f('import') && $csv->loaded(), function () use (&$csv) {
 	finally {
 		$csv->clear();
 	}
-}, $csrf_key, '!users/import.php?msg=OK');
+}, $csrf_key, '!services/import.php?msg=OK');
 
 $tpl->assign(compact('csv', 'csrf_key'));
 
