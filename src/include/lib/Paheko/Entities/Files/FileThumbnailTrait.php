@@ -240,7 +240,7 @@ trait FileThumbnailTrait
 			return null;
 		}
 
-		if (file_exists($destination)) {
+		if (file_exists($destination) && filesize($destination)) {
 			return $destination;
 		}
 
@@ -296,11 +296,13 @@ trait FileThumbnailTrait
 				$info = curl_getinfo($curl);
 
 				if ($error = curl_error($curl)) {
+					Utils::safe_unlink($destination);
 					throw new \RuntimeException(sprintf('cURL error on "%s": %s', $url, $error));
 				}
 
 				curl_close($curl);
 				fclose($fp);
+				unset($curl);
 
 				if (($code = $info['http_code']) != 200) {
 					Utils::safe_unlink($destination);
