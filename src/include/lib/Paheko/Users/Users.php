@@ -312,7 +312,6 @@ class Users
 	{
 		$name = DynamicFields::getNameFieldsSQL();
 		$field = DynamicFields::getNumberFieldSQL();
-		$field = DB::getInstance()->quote($field);
 		$found = EM::getInstance(User::class)->col(sprintf('SELECT %s FROM @TABLE WHERE %s = ?;', $name, $field), $number);
 		$found = (string) $found;
 		return $found ?: null;
