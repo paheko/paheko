@@ -169,6 +169,11 @@ class Service extends Entity
 		return $list;
 	}
 
+	public function hasSubscriptions(): bool
+	{
+		return DB::getInstance()->test('services_users', 'id_service = ?', $this->id());
+	}
+
 	public function getUsers(bool $paid_only = false) {
 		$where = $paid_only ? 'AND paid = 1' : '';
 		$id_field = DynamicFields::getNameFieldsSQL('u');

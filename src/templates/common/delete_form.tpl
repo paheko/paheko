@@ -12,15 +12,20 @@
 			{$alert}
 		</p>
 		{/if}
+		{if isset($confirm_text, $confirm_label)}
+		<dl>
+			{input type="text" required=true label=$confirm_label name="confirm_delete"}
+		</dl>
+		{/if}
 		{if isset($info)}
 		<p class="help">
 			{$info}
 		</p>
 		{/if}
 		{if isset($confirm)}
-		<p>
+		<dl>
 			{input type="checkbox" name="confirm_delete" value=1 label=$confirm}
-		</p>
+		</dl>
 		{/if}
 	</fieldset>
 
