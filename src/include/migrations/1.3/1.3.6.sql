@@ -1,3 +1,6 @@
+-- Delete old unmaintained plugin
+DELETE FROM plugins WHERE name = 'git_documents';
+
 -- Fix access level of number field
 UPDATE config_users_fields SET user_access_level = 1 WHERE user_access_level = 2 AND name = 'numero';
 
