@@ -28,7 +28,7 @@
 
 	{foreach from=$list->iterate() item="row"}
 		<tr>
-			{if $is_admin}
+			{if $is_admin && $row.id_line && $row.id}
 				<td class="check">{input type="checkbox" name="check[%s]"|args:$row.id_line value=$row.id}</td>
 			{/if}
 			{foreach from=$row key="key" item="value"}
@@ -108,17 +108,7 @@
 			{/foreach}
 			<td colspan="{$span2}" class="actions">
 				{if $is_admin}
-					<em>Pour les écritures cochées :</em>
-					<input type="hidden" name="from" value="{$self_url}" />
-					{csrf_field key="projects_action"}
-					<select name="action" data-form-action="{"!acc/transactions/actions.php"|local_url}">
-						<option value="">— Choisir une action à effectuer —</option>
-						<option value="change_project">Ajouter/enlever d'un projet</option>
-						<option value="delete">Supprimer les écritures</option>
-					</select>
-					<noscript>
-						{button type="submit" value="OK" shape="right" label="Valider"}
-					</noscript>
+					{include file="acc/_table_actions.tpl"}
 				{/if}
 			</td>
 		</tr>
@@ -137,29 +127,54 @@
 
 	<?php
 	$id_column = array_search('id', $header, true);
+	$id_line_column = array_search('id_line', $header, true);
+	$colspan = count($header) + 1;
+	$prev_id = null;
 	?>
 
 	<table class="list">
 		<thead>
 			<tr>
+				{if $is_admin}
+					<td class="check"></td>
+				{/if}
 				{foreach from=$header item="column"}
-				<td>{$column}</td>
+				<td{if $column === 'id'} class="num"{/if}>{$column}</td>
 				{/foreach}
 			</tr>
 		</thead>
 		<tbody>
 			{foreach from=$results item="row"}
 			<tr>
+				<?php $id = $row[$id_column] ?? null; ?>
+				<?php $id_line = $row[$id_line_column] ?? null; ?>
+				{if $is_admin && $id_column !== false && $id_line_column !== false}
+					<td class="check">{input type="checkbox" name="check[%s]"|args:$id_line value=$id}</td>
+				{elseif $is_admin}
+					<td class="check"></td>
+				{/if}
 				{foreach from=$row key="key" item="value"}
-					{if $id_column === $key}
+					{if $prev_id == $id && $key === $id_column}
+						<td></td>
+					{elseif $id_column === $key}
 						<td class="num">{link href="!acc/transactions/details.php?id=%d"|args:$value label="#%d"|args:$value}</td>
 					{else}
 						<td>{$value}</td>
 					{/if}
 				{/foreach}
 			</tr>
+			<?php $prev_id = $id; ?>
 			{/foreach}
 		</tbody>
+		{if $is_admin && $id_column !== false && $id_line_column !== false}
+			<tfoot>
+				<tr>
+					<td colspan="{$colspan}" class="actions">
+						{include file="acc/_table_actions.tpl"}
+					</td>
+				</tr>
+			</tfoot>
+		{/if}
 	</table>
 
 {elseif $count === 0}

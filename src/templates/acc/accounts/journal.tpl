@@ -152,18 +152,7 @@
 			{if !$simple}<td></td>{/if}
 			<td class="actions" colspan="6">
 				{if $can_edit}
-					<em>Pour les écritures cochées :</em>
-					<input type="hidden" name="from" value="{$self_url}" />
-					<input type="hidden" name="year" value="{$year.id}" />
-					{csrf_field key="projects_action"}
-					<select name="action">
-						<option value="">— Choisir une action à effectuer —</option>
-						<option value="change_project">Ajouter/enlever d'un projet</option>
-						<option value="delete">Supprimer les écritures</option>
-					</select>
-					<noscript>
-						{button type="submit" value="OK" shape="right" label="Valider"}
-					</noscript>
+					{include file="acc/_table_actions.tpl"}
 				{/if}
 			</td>
 		</tr>
