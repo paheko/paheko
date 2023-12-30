@@ -973,9 +973,11 @@ class File extends Entity
 				Utils::getLocalURL('!common/files/edit.php?p=') . rawurlencode($this->path));
 		}
 		elseif ($this->canPreview($session)) {
-			$attrs = sprintf('href="%s" target="_dialog" data-mime="%s"',
+			$attrs = sprintf('href="%s" target="_dialog" data-mime="%s" data-caption="%s"',
 				$this->isImage() ? $this->url() : Utils::getLocalURL('!common/files/preview.php?p=') . rawurlencode($this->path),
-				$this->mime);
+				$this->mime,
+				$this->name
+			);
 		}
 		else {
 			$attrs = sprintf('href="%s" target="_blank"', $this->url(true));

@@ -176,11 +176,22 @@
 			event = 'canplaythrough';
 		}
 
+		if (tag === 'img') {
+			content.onclick = g.closeDialog;
+		}
+
 		if (event) {
 			content.addEventListener(event, () => { if (g.dialog) g.dialog.classList.add('loaded'); });
 
 			if (event && callback) {
 				content.addEventListener(event, callback);
+			}
+
+			if (options.caption ?? null) {
+				var caption = document.createElement('h4');
+				caption.className = 'title';
+				caption.innerText = options.caption;
+				g.dialog.appendChild(caption);
 			}
 		}
 		else {
@@ -586,6 +597,7 @@
 		$('a[target*="_dialog"]').forEach((e) => {
 			e.onclick = () => {
 				let type = e.getAttribute('data-mime');
+				let caption = e.getAttribute('data-caption');
 
 				if (!type) {
 					let url = e.href + (e.href.indexOf('?') > 0 ? '&' : '?') + '_dialog';
@@ -602,7 +614,8 @@
 					g.openFrameDialog(url, {
 						'height': e.getAttribute('data-dialog-height') || 'auto',
 						'classname': e.getAttribute('data-dialog-class'),
-						'on_close': e.getAttribute('data-dialog-on-close') == 1
+						'on_close': e.getAttribute('data-dialog-on-close') == 1,
+						caption
 					});
 					return false;
 				}
@@ -628,11 +641,11 @@
 				}
 				else {
 					let url = e.href + (e.href.indexOf('?') > 0 ? '&' : '?') + '_dialog';
-					g.openFrameDialog(url, {height: '90%'});
+					g.openFrameDialog(url, {height: '90%', caption});
 					return false;
 				}
 
-				g.openDialog(i);
+				g.openDialog(i, {caption});
 
 				return false;
 			};
