@@ -1472,7 +1472,7 @@ class File extends Entity
 		return hash_equals($hash, $hash_check);
 	}
 
-	public function touch($date = null)
+	public function touch($date = null): void
 	{
 		if (null === $date) {
 			$date = new \DateTime;
