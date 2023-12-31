@@ -1,4 +1,5 @@
 -- Delete old unmaintained plugin
+DELETE FROM plugins_signals WHERE plugin = 'git_documents';
 DELETE FROM plugins WHERE name = 'git_documents';
 
 -- Fix access level of number field
