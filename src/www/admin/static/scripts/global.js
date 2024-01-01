@@ -127,6 +127,9 @@
 			close = options.close ?? true;
 			g.dialog_on_close = options.on_close || false;
 		}
+		else {
+			var options = {};
+		}
 
 		if (null !== g.dialog) {
 			g.closeDialog();
