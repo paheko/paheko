@@ -9,6 +9,7 @@ use Paheko\ValidationException;
 use Paheko\Users\DynamicFields;
 use Paheko\Services\Reminders;
 
+use KD2\DB\Date;
 use KD2\DB\EntityManager;
 
 class Reminder extends Entity
@@ -22,6 +23,7 @@ class Reminder extends Entity
 	protected int $delay;
 	protected string $subject;
 	protected string $body;
+	protected ?Date $only_after_date = null;
 
 	const DEFAULT_SUBJECT = 'Votre inscription arrive à expiration';
 	const DEFAULT_BODY = 'Bonjour {{$identity}},' . "\n\n" .
@@ -50,7 +52,6 @@ class Reminder extends Entity
 			$source = $_POST;
 		}
 
-
 		if (isset($source['delay_type'])) {
 			if (1 == $source['delay_type'] && !empty($source['delay_before'])) {
 				$source['delay'] = (int)$source['delay_before'] * -1;
@@ -61,6 +62,14 @@ class Reminder extends Entity
 			else {
 				$source['delay'] = 0;
 			}
+		}
+
+		// Warning: inverse logic here
+		if (isset($source['yes_before'])) {
+			$source['only_after_date'] = null;
+		}
+		elseif (isset($source['yes_before_present']) && !isset($this->only_after_date)) {
+			$source['only_after_date'] = (new \DateTime('yesterday'))->format('Y-m-d');
 		}
 
 		parent::importForm($source);

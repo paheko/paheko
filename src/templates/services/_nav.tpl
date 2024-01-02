@@ -4,7 +4,7 @@
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE) && $current != 'reminders'}
 			{linkbutton href="!services/user/add.php" label="Inscrire à une activité" shape="plus"}
 		{elseif $current == 'reminders'}
-			{linkbutton href="!services/reminders/new.php" label="Nouveau rappel automatique" shape="plus" target="_dialog"}
+			{linkbutton href="!services/reminders/new.php" label="Nouveau rappel automatique" shape="plus"}
 		{/if}
 	</aside>
 
@@ -12,7 +12,7 @@
 		<li{if $current == 'index'} class="current"{/if}><a href="{$admin_url}services/">Activités et cotisations</a></li>
 		{if !DISABLE_EMAIL && $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
 			<li{if $current == 'import'} class="current"{/if}><a href="{$admin_url}services/import.php">Import</a></li>
-			<li{if $current == 'reminders'} class="current"{/if}><a href="{$admin_url}services/reminders/">Gestion des rappels automatiques</a></li>
+			<li{if $current == 'reminders'} class="current"{/if}><a href="{$admin_url}services/reminders/">Rappels automatiques</a></li>
 		{/if}
 	</ul>
 

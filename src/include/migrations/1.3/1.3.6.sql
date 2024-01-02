@@ -5,6 +5,25 @@ DELETE FROM plugins WHERE name = 'git_documents';
 -- Fix access level of number field
 UPDATE config_users_fields SET user_access_level = 1 WHERE user_access_level = 2 AND name = 'numero';
 
+ALTER TABLE services_reminders RENAME TO services_reminders_old;
+
+CREATE TABLE IF NOT EXISTS services_reminders
+-- Reminders for service expiry
+(
+	id INTEGER NOT NULL PRIMARY KEY,
+	id_service INTEGER NOT NULL REFERENCES services (id) ON DELETE CASCADE,
+
+	delay INTEGER NOT NULL, -- Delay in days before or after expiry date
+
+	subject TEXT NOT NULL,
+	body TEXT NOT NULL,
+
+	only_after_date TEXT NULL CHECK (date(only_after_date) IS NULL OR date(only_after_date) = only_after_date) -- Don't send reminder to users unless they expire after this date
+);
+
+INSERT INTO services_reminders SELECT *, NULL FROM services_reminders_old;
+DROP TABLE services_reminders_old;
+
 ALTER TABLE services_reminders_sent RENAME TO services_reminders_sent_old;
 DROP INDEX IF EXISTS srs_index;
 DROP INDEX IF EXISTS srs_reminder;

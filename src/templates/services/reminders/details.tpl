@@ -24,9 +24,6 @@
 		<dd>
 			{$list->count()}
 		</dd>
-		{if USE_CRON && $list->count()}
-			<dd class="help">Ces rappels seront envoyés dans les prochaines 24 heures.</dd>
-		{/if}
 	{/if}
 </dl>
 

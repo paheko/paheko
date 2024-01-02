@@ -93,6 +93,7 @@ class Reminders
 			LEFT JOIN (SELECT id, MAX(due_date) AS due_date, id_user, id_reminder FROM services_reminders_sent GROUP BY id_user, id_reminder) AS srs ON su.id_user = srs.id_user AND srs.id_reminder = sr.id
 			WHERE
 				date() > date(su.expiry_date, sr.delay || \' days\')
+				AND (sr.only_after_date IS NULL OR sr.only_after_date <= date(su.expiry_date, sr.delay || \' days\'))
 				AND (srs.id IS NULL OR srs.due_date < date(su.expiry_date, (sr.delay - 1) || \' days\'))
 				AND %s
 			GROUP BY su.id_user, sr.id_service
