@@ -319,7 +319,7 @@ CREATE TABLE IF NOT EXISTS services_reminders
 	subject TEXT NOT NULL,
 	body TEXT NOT NULL,
 
-	only_after_date TEXT NULL CHECK (date(only_after_date) IS NULL OR date(only_after_date) = only_after_date) -- Don't send reminder to users unless they expire after this date
+	not_before_date TEXT NULL CHECK (date(not_before_date) IS NULL OR date(not_before_date) = not_before_date) -- Don't send reminder to users if they expire before this date
 );
 
 CREATE TABLE IF NOT EXISTS services_reminders_sent

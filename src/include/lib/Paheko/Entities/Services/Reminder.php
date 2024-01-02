@@ -23,7 +23,7 @@ class Reminder extends Entity
 	protected int $delay;
 	protected string $subject;
 	protected string $body;
-	protected ?Date $only_after_date = null;
+	protected ?Date $not_before_date = null;
 
 	const DEFAULT_SUBJECT = 'Votre inscription arrive à expiration';
 	const DEFAULT_BODY = 'Bonjour {{$identity}},' . "\n\n" .
@@ -65,11 +65,11 @@ class Reminder extends Entity
 		}
 
 		// Warning: inverse logic here
-		if (isset($source['yes_before'])) {
-			$source['only_after_date'] = null;
+		if (!empty($source['yes_before'])) {
+			$source['not_before_date'] = null;
 		}
-		elseif (isset($source['yes_before_present']) && !isset($this->only_after_date)) {
-			$source['only_after_date'] = (new \DateTime('yesterday'))->format('Y-m-d');
+		elseif (isset($source['yes_before']) && empty($source['yes_before'])) {
+			$source['not_before_date'] = date('Y-m-d');
 		}
 
 		parent::importForm($source);

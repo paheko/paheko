@@ -6,7 +6,6 @@
 		<legend>{$legend}</legend>
 		<dl>
 			{input type="select" name="id_service" options=$services_list label="Activité associée au rappel" required=1 source=$reminder}
-			{input type="text" name="subject" required=1 source=$reminder label="Sujet du message envoyé"}
 
 			<dt><label for="f_delay_type_0">Délai d'envoi</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
 			{input type="radio" name="delay_type" value=0 default=$delay_type label="Le jour de l'expiration de l'activité"}
@@ -20,11 +19,22 @@
 				{input type="number" name="delay_after" min=1 max=999 size=4 default=$delay_after}
 				<label for="f_delay_type_2">jours <strong>après</strong> expiration</label>
 			</dd>
-			<?php $yes_before = ($reminder->only_after_date ?? null) === null; ?>
-			{input type="checkbox" name="yes_before" value=1 default=$yes_before label="Envoyer ce rappel aussi aux membres dont l'activité a déjà expiré"}
-			<dd class="help">
-				Si cette case est cochée, les membres dont l'activité a expiré dans le passé (avant aujourd'hui) recevront aussi ce rappel, sauf s'ils ont déjà reçu un autre rappel pour cette activité.
-			</dd>			{input type="textarea" name="body" required=1 source=$reminder label="Texte du message envoyé" cols="90" rows="15"}
+
+			{if !$reminder->exists()}
+				<?php $yes_before = ($reminder->not_before_date ?? null) === null; ?>
+				{input type="radio" name="yes_before" value=1 default=$yes_before prefix_title="Envoyer ce rappel…" prefix_required=true label="À tous les membres" help="Même si leur inscription a expiré il y a longtemps, sauf s'ils ont déjà reçu un rappel pour cette activité"}
+				{input type="radio" name="yes_before" value=0 default=$yes_before label="Seulement aux membres dont l'inscription n'a pas encore expiré" help="Seuls les inscriptions expirant dans le futur seront concernées"}
+			{else}
+				<dt><strong>Restriction d'envoi</strong></dt>
+				{if $reminder.not_before_date}
+					<dd>Aucun rappel ne sera envoyé aux inscriptions expirant avant le {$reminder.not_before_date|date_short}
+				{else}
+					<dd>Aucune restriction. Tous les membres recevront ce rappel, selon le délai choisi.</dd>
+				{/if}
+			{/if}
+
+			{input type="text" name="subject" required=1 source=$reminder label="Sujet du message envoyé"}
+			{input type="textarea" name="body" required=1 source=$reminder label="Texte du message envoyé" cols="90" rows="15"}
 			<dd class="help">
 				Il est possible d'utiliser les mots-clés suivant dans le corps du mail, ils seront remplacés lors de l'envoi&nbsp;:
 				{literal}
