@@ -575,7 +575,7 @@ EOS;
 		}
 
 		if (!count($out)) {
-			return '\'\'';
+			return 'NULL';
 		}
 
 		return sprintf('LTRIM(%s, %s)', implode(' || ', $out), $glue);
