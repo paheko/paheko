@@ -5,6 +5,7 @@ namespace Paheko\Entities\Files;
 use KD2\Graphics\Image;
 use KD2\ZipReader;
 use KD2\HTML\Markdown;
+use KD2\ErrorManager;
 
 use Paheko\Static_Cache;
 use Paheko\UserException;
@@ -72,8 +73,8 @@ trait FileThumbnailTrait
 
 	public function thumb_uri($size = null, bool $with_hash = true): ?string
 	{
-		// Don't try to generate thumbnails for large files (> 25 MB)
-		if ($this->size > 1024*1024*25) {
+		// Don't try to generate thumbnails for large files (> 25 MB), except if it's a video
+		if ($this->size > 1024*1024*25 && substr($this->mime ?? '', 0, 6) !== 'video/') {
 			return null;
 		}
 
@@ -150,6 +151,13 @@ trait FileThumbnailTrait
 			&& in_array($ext, $collabora_extensions)
 			&& $this->getWopiURL()) {
 			return 'collabora';
+		}
+		// Generate video thumbnails, for up to 1GB in size
+		elseif (in_array('ffmpeg', DOCUMENT_THUMBNAIL_COMMANDS)
+			&& $this->mime
+			&& substr($this->mime, 0, 6) === 'video/'
+			&& $this->size < 1024*1024*1024) {
+			return 'ffmpeg';
 		}
 
 		return null;
@@ -232,7 +240,7 @@ trait FileThumbnailTrait
 			return null;
 		}
 
-		if (file_exists($destination)) {
+		if (file_exists($destination) && filesize($destination)) {
 			return $destination;
 		}
 
@@ -261,7 +269,7 @@ trait FileThumbnailTrait
 		try {
 			if ($command === 'collabora') {
 				$url = parse_url(WOPI_DISCOVERY_URL);
-				$url = sprintf('%s://%s:%s/lool/convert-to', $url['scheme'], $url['host'], $url['port'] ?? 80);
+				$url = sprintf('%s://%s:%s/lool/convert-to', $url['scheme'], $url['host'], $url['port'] ?? ($url['scheme'] === 'https' ? 443 : 80));
 
 				// see https://vmiklos.hu/blog/pdf-convert-to.html
 				// but does not seem to be working right now (limited to PDF export?)
@@ -286,12 +294,19 @@ trait FileThumbnailTrait
 
 				curl_exec($curl);
 				$info = curl_getinfo($curl);
+
+				if ($error = curl_error($curl)) {
+					Utils::safe_unlink($destination);
+					throw new \RuntimeException(sprintf('cURL error on "%s": %s', $url, $error));
+				}
+
 				curl_close($curl);
 				fclose($fp);
+				unset($curl);
 
 				if (($code = $info['http_code']) != 200) {
 					Utils::safe_unlink($destination);
-					throw new \RuntimeException('Cannot fetch thumbnail from Collabora: code ' . $code);
+					throw new \RuntimeException('Cannot fetch thumbnail from Collabora: code ' . $code . "\n" . json_encode($info));
 				}
 			}
 			else {
@@ -307,6 +322,12 @@ trait FileThumbnailTrait
 					// see https://github.com/unoconv/unoserver/issues/85
 					// see https://github.com/unoconv/unoserver/issues/86
 					$cmd = sprintf('unoconvert --convert-to png %s %s 2>&1',
+						Utils::escapeshellarg($tmpfile ?? $local_path),
+						Utils::escapeshellarg($destination)
+					);
+				}
+				elseif ($command === 'ffmpeg') {
+					$cmd = sprintf('ffmpeg -ss 00:00:02 -i %s -frames:v 1 -f image2 -c png -vf scale="min(900\, iw)":-1 %s 2>&1',
 						Utils::escapeshellarg($tmpfile ?? $local_path),
 						Utils::escapeshellarg($destination)
 					);
@@ -432,6 +453,7 @@ trait FileThumbnailTrait
 				$this->createThumbnail($size, $destination);
 			}
 			catch (\RuntimeException $e) {
+				ErrorManager::reportExceptionSilent($e);
 				header('Content-Type: image/svg+xml', true);
 				echo $this->getMissingThumbnail($size);
 				return;

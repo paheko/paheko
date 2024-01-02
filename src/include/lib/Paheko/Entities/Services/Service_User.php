@@ -185,7 +185,7 @@ class Service_User extends Entity
 		$transaction->type = Transaction::TYPE_REVENUE;
 
 		$transaction->save();
-		$transaction->linkToUser($this->id_user, $this->id());
+		$transaction->linkToSubscription($this->id());
 
 		return $transaction;
 	}

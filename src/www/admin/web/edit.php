@@ -97,6 +97,7 @@ $tpl->assign('custom_js', [
 	'web_encryption.js',
 	//'block_editor.js',
 ]);
-$tpl->assign('custom_css', ['web.css', '!web/css.php']);
+
+$tpl->assign('custom_css', ['web.css', BASE_URL . 'content.css']);
 
 $tpl->display('web/edit.tpl');

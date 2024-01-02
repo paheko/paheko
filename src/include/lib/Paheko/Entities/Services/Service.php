@@ -73,6 +73,16 @@ class Service extends Entity
 			],
 			'end_date' => [
 			],
+			'service_label' => [
+				'select' => 's.label',
+				'label' => 'Activité',
+				'export' => true,
+			],
+			'fee_label' => [
+				'select' => 'sf.label',
+				'label' => 'Tarif',
+				'export' => true,
+			],
 			'user_number' => [
 				'label' => 'Numéro de membre',
 				'select' => 'u.' . DynamicFields::getNumberField(),
@@ -167,6 +177,11 @@ class Service extends Entity
 
 		$list->setConditions($conditions);
 		return $list;
+	}
+
+	public function hasSubscriptions(): bool
+	{
+		return DB::getInstance()->test('services_users', 'id_service = ?', $this->id());
 	}
 
 	public function getUsers(bool $paid_only = false) {

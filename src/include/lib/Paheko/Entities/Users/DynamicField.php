@@ -81,11 +81,6 @@ class DynamicField extends Entity
 	const NAMES    = 0x01 << 4;
 	const PRESET   = 0x01 << 5;
 
-	const ACCESS_USER = 0x01 << 1;
-	const ACCESS_READ = 0x01 << 2;
-	const ACCESS_WRITE = 0x01 << 3;
-	const ACCESS_ADMIN = 0x01 << 4;
-
 	const TYPES = [
 		'email'		=>	'Adresse E-Mail',
 		'url'		=>	'Adresse URL',
@@ -221,6 +216,12 @@ class DynamicField extends Entity
 			throw new ValidationException('Ce champ est utilisé en interne, il n\'est pas possible de le supprimer');
 		}
 
+		foreach (DynamicFields::getVirtualFields() as $field) {
+			if ($field->isReferencing($this->name)) {
+				throw new ValidationException(sprintf('Ce champ ne peut être supprimé, car le champ calculé "%s" en a besoin pour fonctionner.', $field->label));
+			}
+		}
+
 		if ($this->type == 'file') {
 			// Delete all linked files
 			$glob = sprintf('%s/*/%s', File::CONTEXT_USER, $this->name);
@@ -258,6 +259,11 @@ class DynamicField extends Entity
 	public function isVirtual(): bool
 	{
 		return $this->type == 'virtual';
+	}
+
+	public function isReferencing(string $name): bool
+	{
+		return $this->isVirtual() && preg_match('/\b' . $name . '\b/', $this->sql);
 	}
 
 	public function canDelete(): bool
@@ -315,7 +321,7 @@ class DynamicField extends Entity
 			$this->assert($this->system & self::PRESET || !array_key_exists($this->name, DynamicFields::getInstance()->getPresets()), 'Ce nom de champ est déjà utilisé par un champ pré-défini.');
 		}
 
-		if (self::SQL_TYPES[$this->type] == 'VIRTUAL') {
+		if ($this->type === 'virtual') {
 			$this->assert(null !== $this->sql && strlen(trim($this->sql)), 'Le code SQL est manquant');
 
 			try {

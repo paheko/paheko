@@ -25,6 +25,7 @@ $form->runIf('send', function() use ($mailing) {
 
 $tpl->assign(compact('mailing', 'csrf_key'));
 
+$tpl->assign('custom_css', [BASE_URL . 'content.css']);
 $tpl->assign('sent', null !== qg('sent'));
 
 $tpl->display('users/mailing/details.tpl');

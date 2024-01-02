@@ -25,7 +25,7 @@ $form->runIf('save', function () use ($su) {
 		throw new UserException('Impossible de trouver l\'écriture #' . $id);
 	}
 
-	$transaction->linkToUser($su->id_user, $su->id);
+	$transaction->linkToSubscription($su->id);
 }, $csrf_key, '!acc/transactions/service_user.php?id=' . $su->id . '&user=' . $su->id_user);
 
 $tpl->assign(compact('csrf_key'));

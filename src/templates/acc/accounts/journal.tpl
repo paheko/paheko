@@ -83,7 +83,7 @@
 		<tr>
 			{if $can_edit}
 			<td class="check">
-				{input type="checkbox" name="check[%s]"|args:$line.id_line value=$line.id default=0}
+				{input type="checkbox" name="check[%s]"|args:$line.id_line value=$line.id}
 			</td>
 			{/if}
 			<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
@@ -152,18 +152,7 @@
 			{if !$simple}<td></td>{/if}
 			<td class="actions" colspan="6">
 				{if $can_edit}
-					<em>Pour les écritures cochées :</em>
-					<input type="hidden" name="from" value="{$self_url}" />
-					<input type="hidden" name="year" value="{$year.id}" />
-					{csrf_field key="projects_action"}
-					<select name="action">
-						<option value="">— Choisir une action à effectuer —</option>
-						<option value="change_project">Ajouter/enlever d'un projet</option>
-						<option value="delete">Supprimer les écritures</option>
-					</select>
-					<noscript>
-						{button type="submit" value="OK" shape="right" label="Valider"}
-					</noscript>
+					{include file="acc/_table_actions.tpl"}
 				{/if}
 			</td>
 		</tr>

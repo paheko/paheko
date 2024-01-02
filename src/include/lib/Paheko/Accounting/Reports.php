@@ -543,7 +543,7 @@ class Reports
 			$select = '0 AS account_type, p.label AS project_label, p.code AS project_code, p.id AS id_project';
 			$group_key = 'id_project';
 			$group_type = 'project';
-			$order = 'l.id_project, t.date, t.id';
+			$order = 'p.code, p.label COLLATE NOCASE, t.date, t.id';
 		}
 		else {
 			$join = 'acc_accounts a ON a.id = l.id_account';

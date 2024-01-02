@@ -42,6 +42,6 @@ if (!$form->hasErrors()) {
 $tpl->assign(compact('mailing', 'csrf_key'));
 
 $tpl->assign('custom_js', ['web_editor.js']);
-$tpl->assign('custom_css', ['web.css', '!web/css.php']);
+$tpl->assign('custom_css', ['web.css', BASE_URL . 'content.css']);
 
 $tpl->display('users/mailing/write.tpl');

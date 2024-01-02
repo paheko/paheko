@@ -4,7 +4,6 @@ namespace Paheko;
 
 use Paheko\Accounting\Projects;
 use Paheko\Accounting\Transactions;
-use Paheko\Accounting\Years;
 
 require_once __DIR__ . '/../_inc.php';
 

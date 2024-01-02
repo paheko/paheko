@@ -87,6 +87,30 @@ C'est exactement la même chose que `has`, mais exprimé à l'envers.
 {{/if}}
 ```
 
+## has_key
+
+Renvoie vrai si le tableau contient la clé passée en paramètre.
+
+```
+{{:assign var="table" a="bleu" b="orange"}}
+{{if $table|has_key:"b"}}
+	Oui, il y a la clé "b"
+{{/if}}
+```
+
+## key_in
+
+Renvoie vrai si la clé fait partie du tableau passé en paramètre.
+
+C'est exactement la même chose que `has_key`, mais exprimé à l'envers.
+
+```
+{{:assign var="table" a="bleu" b="orange"}}
+{{if "b"|key_in:$table}}
+	Oui, il y a la clé "b"
+{{/if}}
+```
+
 ## keys
 
 Renvoie les clés du tableau, sous forme de tableau.
@@ -211,6 +235,23 @@ Affichera :
 ```
 1,2,3
 2,3,1
+```
+
+## max, min
+
+Renvoie respectivement la valeur la plus haute ou la plus basse d'un tableau de valeurs numériques.
+
+```
+{{:assign var="table" b="3" a="2" c="1"}}
+{{$table|max}}
+{{$table|min}}
+```
+
+Affichera :
+
+```
+3
+1
 ```
 
 # Filtres de texte

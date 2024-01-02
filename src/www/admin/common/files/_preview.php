@@ -42,6 +42,6 @@ else {
 
 $tpl->assign(compact('file', 'content'));
 
-$tpl->assign('custom_css', ['!web/css.php']);
+$tpl->assign('custom_css', [BASE_URL . 'content.css']);
 
 $tpl->display('common/files/_preview.tpl');

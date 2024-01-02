@@ -37,6 +37,9 @@ class AdvancedSearch extends A_S
 				'null'     => false,
 				'select'   => 't.id',
 			],
+			'id_line' => [
+				'select'   => 'l.id',
+			],
 			'date' => [
 				'label'    => 'Date',
 				'type'     => 'date',
@@ -275,7 +278,7 @@ class AdvancedSearch extends A_S
 			INNER JOIN acc_accounts AS a ON l.id_account = a.id
 			INNER JOIN acc_years AS y ON t.id_year = y.id
 			LEFT JOIN acc_projects AS p ON l.id_project = p.id';
-		return $this->makeList($query, $tables, 'id', true, ['id', 'account_code', 'debit', 'credit']);
+		return $this->makeList($query, $tables, 'id', true, ['id', 'id_line', 'account_code', 'debit', 'credit']);
 	}
 
 	public function defaults(): \stdClass

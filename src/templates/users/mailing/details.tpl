@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Message collectif : %s"|args:$mailing.subject current="users/mailing" custom_css=["!web/css.php"]}
+{include file="_head.tpl" title="Message collectif : %s"|args:$mailing.subject current="users/mailing"}
 
 {include file="./_nav.tpl" current="details"}
 

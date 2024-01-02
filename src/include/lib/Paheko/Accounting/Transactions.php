@@ -326,6 +326,10 @@ class Transactions
 				continue;
 			}
 
+			if ($t->type !== Transaction::TYPE_CREDIT && $t->type !== Transaction::TYPE_DEBT) {
+				continue;
+			}
+
 			$out->transactions[$t->id()] = $t;
 
 			if ($out->multiple === null) {

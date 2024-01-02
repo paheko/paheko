@@ -29,7 +29,7 @@ class API
 	protected $file_pointer = null;
 	protected ?string $allowed_files_root = null;
 
-	protected array $allowed_methods = ['GET', 'POST', 'PUT'];
+	protected array $allowed_methods = ['GET', 'POST', 'PUT', 'DELETE'];
 
 	public function __construct(string $method, string $path, array $params)
 	{
@@ -378,6 +378,10 @@ class API
 					$transaction->updateLinkedTransactions((array)$this->params['linked_transactions']);
 				}
 
+				if (!empty($this->params['linked_subscriptions'])) {
+					$transaction->updateSubscriptionLinks((array)$this->params['linked_subscriptions']);
+				}
+
 				if ($this->hasParam('move_attachments_from')
 					&& $this->isPathAllowed($this->params['move_attachments_from'])) {
 					$file = Files::get($this->params['move_attachments_from']);
@@ -390,7 +394,7 @@ class API
 				return $transaction->asJournalArray();
 			}
 			// Return or edit linked users
-			elseif (ctype_digit($p1) && $p2 == 'users') {
+			elseif ($p1 && ctype_digit($p1) && $p2 == 'users') {
 				$transaction = Transactions::get((int)$p1);
 
 				if (!$transaction) {
@@ -414,7 +418,32 @@ class API
 					throw new APIException('Wrong request method', 400);
 				}
 			}
-			elseif (ctype_digit($p1) && !$p2) {
+			// Return or edit linked subscriptions
+			elseif ($p1 && ctype_digit($p1) && $p2 == 'subscriptions') {
+				$transaction = Transactions::get((int)$p1);
+
+				if (!$transaction) {
+					throw new APIException(sprintf('Transaction #%d not found', $p1), 404);
+				}
+
+				if ($this->method === 'POST') {
+					$this->requireAccess(Session::ACCESS_WRITE);
+					$transaction->updateSubscriptionLinks((array)($_POST['subscriptions'] ?? null));
+					return ['success' => true];
+				}
+				elseif ($this->method === 'DELETE') {
+					$this->requireAccess(Session::ACCESS_WRITE);
+					$transaction->deleteAllSubscriptionLinks([]);
+					return ['success' => true];
+				}
+				elseif ($this->method === 'GET') {
+					return $transaction->listSubscriptionLinks();
+				}
+				else {
+					throw new APIException('Wrong request method', 400);
+				}
+			}
+			elseif ($p1 && ctype_digit($p1) && !$p2) {
 				$transaction = Transactions::get((int)$p1);
 
 				if (!$transaction) {
@@ -437,6 +466,10 @@ class API
 						$transaction->updateLinkedTransactions((array)$this->params['linked_transactions']);
 					}
 
+					if (!empty($this->params['linked_subscriptions'])) {
+						$transaction->updateSubscriptionLinks((array)$this->params['linked_subscriptions']);
+					}
+
 					return $transaction->asJournalArray();
 				}
 				else {
@@ -452,7 +485,7 @@ class API
 				throw new APIException('Wrong request method', 400);
 			}
 
-			if (($p1 === 'current' || ctype_digit($p1)) && ($p2 === 'journal' || $p2 === 'account/journal')) {
+			if (($p1 === 'current' || ($p1 && ctype_digit($p1))) && ($p2 === 'journal' || $p2 === 'account/journal')) {
 				if ($p1 === 'current') {
 					$id_year = Years::getCurrentOpenYearId();
 
@@ -512,7 +545,7 @@ class API
 				throw new APIException('Wrong request method', 400);
 			}
 
-			if (ctype_digit($p1) && $p2 === 'accounts') {
+			if ($p1 && ctype_digit($p1) && $p2 === 'accounts') {
 				$a = new Accounts((int)$p1);
 				return array_map(fn($c) => $c->asArray(), $a->listAll());
 			}

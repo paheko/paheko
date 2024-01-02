@@ -329,6 +329,28 @@ Met à jour la liste des membres liés à une écriture, en utilisant les ID de 
 
 Efface la liste des membres liés à une écriture.
 
+### accounting/transaction/{ID_TRANSACTION}/subscriptions (GET)
+
+(Depuis la version 1.3.6)
+
+Renvoie la liste des inscriptions (aux activités) liées à une écriture.
+
+### accounting/transaction/{ID_TRANSACTION}/subscriptions (POST)
+
+(Depuis la version 1.3.6)
+
+Met à jour la liste des inscriptions liées à une écriture, en utilisant les ID d'inscriptions passés dans un tableau nommé `subscriptions`.
+
+```
+ curl -v "http://…/api/accounting/transaction/9337/subscriptions"  -F 'subscriptions[]=2'
+```
+
+### accounting/transaction/{ID_TRANSACTION}/subscriptions (DELETE)
+
+(Depuis la version 1.3.6)
+
+Efface la liste des inscriptions liées à une écriture.
+
 ### accounting/transaction (POST)
 
 Crée une nouvelle écriture, renvoie les détails si l'écriture a été créée. Voir plus bas le format attendu.
@@ -359,6 +381,7 @@ Champs optionnels :
 * `payment_reference` (uniquement pour les écritures simplifiées) : référence de paiement
 * `linked_users` : Tableau des IDs des membres à lier à l'écriture *(depuis 1.3.3)*
 * `linked_transactions` : Tableau des IDs des écritures à lier à l'écriture *(depuis 1.3.5)*
+* `linked_subscriptions` : Tableau des IDs des inscriptions à lier à l'écriture *(depuis 1.3.6)*
 
 Exemple :
 

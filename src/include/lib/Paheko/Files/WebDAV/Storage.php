@@ -130,9 +130,18 @@ class Storage extends AbstractStorage
 			return ['stop' => true];
 		}
 
+		$pointer = $file->getReadOnlyPointer();
+
 		// We trust the WebDAV server to be more efficient that File::serve
 		// with serving a file for WebDAV clients
-		return ['resource' => $file->getReadOnlyPointer()];
+		if (!$pointer && $path) {
+			return ['path' => $path];
+		}
+		elseif (!$pointer) {
+			throw new WebDAV_Exception('File Content not found', 404);
+		}
+
+		return ['resource' => $pointer];
 	}
 
 	/**
@@ -240,7 +249,7 @@ class Storage extends AbstractStorage
 	/**
 	 * @extends
 	 */
-	public function properties(string $uri, ?array $properties, int $depth): ?array
+	public function propfind(string $uri, ?array $properties, int $depth): ?array
 	{
 		$this->populateRootCache();
 		$file = $this->load($uri);
@@ -272,7 +281,7 @@ class Storage extends AbstractStorage
 		return $out;
 	}
 
-	public function put(string $uri, $pointer, ?string $hash_algo, ?string $hash, ?int $mtime): bool
+	public function put(string $uri, $pointer, ?string $hash_algo, ?string $hash): bool
 	{
 		if (!strpos($uri, '/')) {
 			throw new WebDAV_Exception('Impossible de créer un fichier ici', 403);
@@ -331,10 +340,6 @@ class Storage extends AbstractStorage
 		}
 		else {
 			$target->store(compact('pointer'));
-		}
-
-		if ($mtime) {
-			$target->touch(new \DateTime('@' . $mtime));
 		}
 
 		return $new;
@@ -435,6 +440,21 @@ class Storage extends AbstractStorage
 		}
 
 		Files::mkdir($uri);
+	}
+
+	/**
+	 * @extends
+	 */
+	public function touch(string $uri, \DateTimeInterface $datetime): bool
+	{
+		$file = Files::get($uri);
+
+		if (!$file) {
+			return false;
+		}
+
+		$file->touch($datetime);
+		return true;
 	}
 
 	protected function createWopiToken(string $uri)

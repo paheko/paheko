@@ -367,6 +367,13 @@ class Files
 
 	static public function zipAll(?string $target = null): void
 	{
+		// Extend execution time, up to one hour, just in case
+		if (false === strpos(@ini_get('disable_functions'), 'set_time_limit')) {
+			@set_time_limit(3600);
+		}
+
+		@ini_set('max_execution_time', 3600);
+
 		Files::zip($target, array_keys(File::CONTEXTS_NAMES), null);
 	}
 

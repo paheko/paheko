@@ -973,9 +973,11 @@ class File extends Entity
 				Utils::getLocalURL('!common/files/edit.php?p=') . rawurlencode($this->path));
 		}
 		elseif ($this->canPreview($session)) {
-			$attrs = sprintf('href="%s" target="_dialog" data-mime="%s"',
+			$attrs = sprintf('href="%s" target="_dialog" data-mime="%s" data-caption="%s"',
 				$this->isImage() ? $this->url() : Utils::getLocalURL('!common/files/preview.php?p=') . rawurlencode($this->path),
-				$this->mime);
+				$this->mime,
+				$this->name
+			);
 		}
 		else {
 			$attrs = sprintf('href="%s" target="_blank"', $this->url(true));
@@ -1033,6 +1035,9 @@ class File extends Entity
 
 			header(sprintf('Content-Type: %s', $type));
 			header(sprintf('Content-Disposition: %s; filename="%s"', $download ? 'attachment' : 'inline', is_string($download) ? $download : $this->name));
+		}
+		elseif (!file_exists($path)) {
+			throw new UserException('Le contenu du fichier est introuvable.');
 		}
 
 		// Use X-SendFile, if available, and storage has a local copy
@@ -1467,7 +1472,7 @@ class File extends Entity
 		return hash_equals($hash, $hash_check);
 	}
 
-	public function touch($date = null)
+	public function touch($date = null): void
 	{
 		if (null === $date) {
 			$date = new \DateTime;

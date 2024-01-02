@@ -266,6 +266,11 @@ class UserTemplate extends \KD2\Brindille
 		$this->cache_path = SHARED_USER_TEMPLATES_CACHE_ROOT;
 	}
 
+	public function isTrusted(): bool
+	{
+		return isset($this->path) && !isset($this->code) && !isset($this->file);
+	}
+
 	/**
 	 * Load template code from a string
 	 */

@@ -57,7 +57,10 @@ const FILE_STORAGE_QUOTA = 1 * 1024 * 1024 * 1024; // 1 Go
 const USE_CRON = true;
 
 // Cache partagé
-const SHARED_CACHE_ROOT = __DIR__ . '/cache';
+const SHARED_CACHE_ROOT = __DIR__ . '/cache/shared';
+
+// Cache web partagé
+const WEB_CACHE_ROOT = __DIR__ . '/cache/web/%host%';
 
 // Désactiver le log des erreurs PHP visible dans l'interface (sécurité)
 const ENABLE_TECH_DETAILS = false;
@@ -103,3 +106,17 @@ define('Paheko\DATA_ROOT', $user_data_dir);
 // Définir l'URL
 define('Paheko\WWW_URL', 'https://' . $login . '.' . FACTORY_DOMAIN . '/');
 define('Paheko\WWW_URI', '/');
+
+// Créer le lien symbolique vers le cache partagé des pages du site web
+$web_cache_public = __DIR__ . '/www/.cache';
+
+if (!file_exists($web_cache_public)) {
+	$web_cache_root = dirname(WEB_CACHE_ROOT);
+
+	if (!@symlink($web_cache_root, $web_cache_public)) {
+		echo "<h2>Impossible de créer le lien symbolique pour le cache web partagé</h2>";
+		echo "<p>Vous pouvez exécuter la commande suivante :</p>";
+		printf("<pre>ln -s %s %s</pre>", $web_cache_root, $web_cache_public);
+		exit;
+	}
+}

@@ -610,8 +610,9 @@ class Emails
 		$message->parse($raw_message);
 
 		$return = $message->identifyBounce();
+		$address = $return['recipient'] ?? null;
 
-		$signal = Plugins::fire('email.bounce', false, compact('message', 'return', 'raw_message'));
+		$signal = Plugins::fire('email.bounce', false, compact('address', 'message', 'return', 'raw_message'));
 
 		if ($signal && $signal->isStopped()) {
 			return null;

@@ -14,15 +14,24 @@ if (!$service) {
 }
 
 $csrf_key = 'service_delete_' . $service->id();
+$has_subscriptions = $service->hasSubscriptions();
 
-$form->runIf('delete', function () use ($service) {
-	if (!f('confirm_delete')) {
-		throw new UserException('Merci de cocher la case pour confirmer la suppression.');
+$form->runIf('delete', function () use ($service, $has_subscriptions) {
+	if ($has_subscriptions && 0 !== strnatcasecmp($service->label, trim((string) f('confirm_delete')))) {
+		throw new UserException('Merci de recopier le nom de l\'activité correctement pour confirmer la suppression.');
 	}
 
 	$service->delete();
 }, $csrf_key, ADMIN_URL . 'services/');
 
-$tpl->assign(compact('service', 'csrf_key'));
+$confirm_label = null;
+$confirm_text = null;
+
+if ($has_subscriptions) {
+	$confirm_label = "Entrer ici le nom de l'activité pour confirmer que vous souhaitez désinscrire tous les membres de cette activité";
+	$confirm_text = $service->label;
+}
+
+$tpl->assign(compact('service', 'csrf_key', 'confirm_label', 'confirm_text'));
 
 $tpl->display('services/delete.tpl');

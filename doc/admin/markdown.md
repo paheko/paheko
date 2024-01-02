@@ -472,7 +472,7 @@ On peut aussi spécifier d'autres paramètres :
 
 * `file` : nom du fichier vidéo
 * `poster` : nom de fichier d'une image utilisée pour remplacer la vidéo avant qu'elle ne soit lue
-* `subtitles` : nom d'un fichier de sous-titres au format VTT (le format SRT n'est pas géré par les navigateurs)
+* `subtitles` : nom d'un fichier de sous-titres au format VTT ou SRT
 * `width` : largeur de la vidéo (en pixels)
 * `height` : hauteur de la vidéo (en pixels)
 

@@ -38,7 +38,7 @@ if (!$has_extensions && $session->canAccess($session::SECTION_CONFIG, $session::
 
 $tpl->assign(compact('homepage', 'banner', 'buttons', 'has_extensions'));
 
-$tpl->assign('custom_css', ['!web/css.php']);
+$tpl->assign('custom_css', [BASE_URL . 'content.css']);
 
 $tpl->display('index.tpl');
 flush();

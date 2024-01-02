@@ -54,14 +54,15 @@ class Functions
 	];
 
 	const COMPILE_FUNCTIONS_LIST = [
-		':break' => [self::class, 'break'],
-		':continue' => [self::class, 'continue'],
+		':break' => [self::class, 'compile_break'],
+		':continue' => [self::class, 'compile_continue'],
+		':return' => [self::class, 'compile_return'],
 	];
 
 	/**
 	 * Compile function to break inside a loop
 	 */
-	static public function break(string $name, string $params, UserTemplate $tpl, int $line)
+	static public function compile_break(string $name, string $params, UserTemplate $tpl, int $line)
 	{
 		$in_loop = false;
 		foreach ($tpl->_stack as $element) {
@@ -81,7 +82,7 @@ class Functions
 	/**
 	 * Compile function to continue inside a loop
 	 */
-	static public function continue(string $name, string $params, UserTemplate $tpl, int $line)
+	static public function compile_continue(string $name, string $params, UserTemplate $tpl, int $line)
 	{
 		$in_loop = 0;
 		foreach ($tpl->_stack as $element) {
@@ -97,6 +98,11 @@ class Functions
 		}
 
 		return sprintf('<?php continue(%d); ?>', $i);
+	}
+
+	static public function compile_return(string $name, string $params, UserTemplate $tpl, int $line)
+	{
+		return '<?php return; ?>';
 	}
 
 	static public function admin_header(array $params): string
@@ -389,38 +395,41 @@ class Functions
 
 		unset($to);
 
-		$db = DB::getInstance();
-		$email_field = DynamicFields::getFirstEmailField();
-		$internal_count = $db->count('users', $db->where($email_field, 'IN', $params['to']));
-		$external_count = count($params['to']) - $internal_count;
+		// Restrict sending recipients
+		if (!$ut->isTrusted()) {
+			$db = DB::getInstance();
+			$email_field = DynamicFields::getFirstEmailField();
+			$internal_count = $db->count('users', $db->where($email_field, 'IN', $params['to']));
+			$external_count = count($params['to']) - $internal_count;
 
-		if (($external_count + $external) > 1) {
-			throw new Brindille_Exception(sprintf('Ligne %d: l\'envoi d\'email à une adresse externe est limité à un envoi par page', $line));
-		}
+			if (($external_count + $external) > 1) {
+				throw new Brindille_Exception(sprintf('Ligne %d: l\'envoi d\'email à une adresse externe est limité à un envoi par page', $line));
+			}
 
-		if (($internal_count + $internal) > 10) {
-			throw new Brindille_Exception(sprintf('Ligne %d: l\'envoi d\'email à une adresse interne est limité à 10 envois par page', $line));
-		}
+			if (($internal_count + $internal) > 10) {
+				throw new Brindille_Exception(sprintf('Ligne %d: l\'envoi d\'email à une adresse interne est limité à 10 envois par page', $line));
+			}
 
-		if ($external_count
-			&& preg_match_all('!(https?://.*?)(?=\s|$)!', $params['subject'] . ' ' . $params['body'], $match, PREG_PATTERN_ORDER)) {
-			$config = Config::getInstance();
+			if ($external_count
+				&& preg_match_all('!(https?://.*?)(?=\s|$)!', $params['subject'] . ' ' . $params['body'], $match, PREG_PATTERN_ORDER)) {
+				$config = Config::getInstance();
 
-			foreach ($match[1] as $m) {
-				$allowed = false;
+				foreach ($match[1] as $m) {
+					$allowed = false;
 
-				if (0 === strpos($m, WWW_URL)) {
-					$allowed = true;
-				}
-				elseif (0 === strpos($m, BASE_URL)) {
-					$allowed = true;
-				}
-				elseif ($config->org_web && 0 === strpos($m, $config->org_web)) {
-					$allowed = true;
-				}
+					if (0 === strpos($m, WWW_URL)) {
+						$allowed = true;
+					}
+					elseif (0 === strpos($m, BASE_URL)) {
+						$allowed = true;
+					}
+					elseif ($config->org_web && 0 === strpos($m, $config->org_web)) {
+						$allowed = true;
+					}
 
-				if (!$allowed) {
-					throw new Brindille_Exception(sprintf('Ligne %d: l\'envoi d\'email à une adresse externe interdit l\'utilisation d\'une adresse web autre que le site de l\'association : %s', $line, $m));
+					if (!$allowed) {
+						throw new Brindille_Exception(sprintf('Ligne %d: l\'envoi d\'email à une adresse externe interdit l\'utilisation d\'une adresse web autre que le site de l\'association : %s', $line, $m));
+					}
 				}
 			}
 		}
@@ -428,8 +437,10 @@ class Functions
 		$context = count($params['to']) == 1 ? Emails::CONTEXT_PRIVATE : Emails::CONTEXT_BULK;
 		Emails::queue($context, $params['to'], null, $params['subject'], $params['body'], $attachments);
 
-		$internal += $internal_count;
-		$external_count += $external_count;
+		if (!$ut->isTrusted()) {
+			$internal += $internal_count;
+			$external_count += $external_count;
+		}
 	}
 
 	static public function debug(array $params, UserTemplate $tpl)

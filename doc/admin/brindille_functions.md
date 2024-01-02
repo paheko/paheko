@@ -372,7 +372,6 @@ Seules les adresses internes sont acceptées, il n'est pas possible de rediriger
 
 Si `to=null` est utilisé, alors la fenêtre modale sera fermée. Ou, si la page n'est pas dans une fenêtre modale, la page courante sera rechargée.
 
-<!--
 ## api
 
 Permet d'appeler l'API de Paheko, que ça soit sur l'instance locale, en cours, ou une autre instance externe.
@@ -444,7 +443,6 @@ Mais cette fonction permet également d'appeler une API Paheko distante, dans ce
 {{/if}}
 
 ```
--->
 
 # Fonctions relatives aux Modules
 

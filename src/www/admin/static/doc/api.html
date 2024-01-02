@@ -100,6 +100,9 @@
 				<li><a href="#accounting-transaction-id_transaction-users-get">accounting/transaction/{ID_TRANSACTION}/users (GET)</a></li>
 				<li><a href="#accounting-transaction-id_transaction-users-post">accounting/transaction/{ID_TRANSACTION}/users (POST)</a></li>
 				<li><a href="#accounting-transaction-id_transaction-users-delete">accounting/transaction/{ID_TRANSACTION}/users (DELETE)</a></li>
+				<li><a href="#accounting-transaction-id_transaction-subscriptions-get">accounting/transaction/{ID_TRANSACTION}/subscriptions (GET)</a></li>
+				<li><a href="#accounting-transaction-id_transaction-subscriptions-post">accounting/transaction/{ID_TRANSACTION}/subscriptions (POST)</a></li>
+				<li><a href="#accounting-transaction-id_transaction-subscriptions-delete">accounting/transaction/{ID_TRANSACTION}/subscriptions (DELETE)</a></li>
 				<li><a href="#accounting-transaction-post">accounting/transaction (POST)</a>
 </li></ol></li></ol></li></ol></div><h1 id="utiliser-l-api">Utiliser l'API</h1>
 <p>N'importe quel client HTTP capable de gérer TLS (HTTPS) et l'authentification basique fonctionnera.</p>
@@ -302,6 +305,16 @@ curl https://test:abcd@monpaheko.tld/api/services/subscriptions/import -T /tmp/i
 <pre><code> curl -v "http://…/api/accounting/transaction/9337/users"  -F 'users[]=2'</code></pre>
 <h3 id="accounting-transaction-id_transaction-users-delete">accounting/transaction/{ID_TRANSACTION}/users (DELETE)</h3>
 <p>Efface la liste des membres liés à une écriture.</p>
+<h3 id="accounting-transaction-id_transaction-subscriptions-get">accounting/transaction/{ID_TRANSACTION}/subscriptions (GET)</h3>
+<p>(Depuis la version 1.3.6)</p>
+<p>Renvoie la liste des inscriptions (aux activités) liées à une écriture.</p>
+<h3 id="accounting-transaction-id_transaction-subscriptions-post">accounting/transaction/{ID_TRANSACTION}/subscriptions (POST)</h3>
+<p>(Depuis la version 1.3.6)</p>
+<p>Met à jour la liste des inscriptions liées à une écriture, en utilisant les ID d'inscriptions passés dans un tableau nommé <code>subscriptions</code>.</p>
+<pre><code> curl -v "http://…/api/accounting/transaction/9337/subscriptions"  -F 'subscriptions[]=2'</code></pre>
+<h3 id="accounting-transaction-id_transaction-subscriptions-delete">accounting/transaction/{ID_TRANSACTION}/subscriptions (DELETE)</h3>
+<p>(Depuis la version 1.3.6)</p>
+<p>Efface la liste des inscriptions liées à une écriture.</p>
 <h3 id="accounting-transaction-post">accounting/transaction (POST)</h3>
 <p>Crée une nouvelle écriture, renvoie les détails si l'écriture a été créée. Voir plus bas le format attendu.</p>
 <h4 id="structure-pour-creer-modifier-une-ecriture">Structure pour créer / modifier une écriture</h4>
@@ -331,6 +344,7 @@ curl https://test:abcd@monpaheko.tld/api/services/subscriptions/import -T /tmp/i
 <li><code>payment_reference</code> (uniquement pour les écritures simplifiées) : référence de paiement</li>
 <li><code>linked_users</code> : Tableau des IDs des membres à lier à l'écriture <em>(depuis 1.3.3)</em></li>
 <li><code>linked_transactions</code> : Tableau des IDs des écritures à lier à l'écriture <em>(depuis 1.3.5)</em></li>
+<li><code>linked_subscriptions</code> : Tableau des IDs des inscriptions à lier à l'écriture <em>(depuis 1.3.6)</em></li>
 </ul>
 <p>Exemple :</p>
 <pre><code>curl -F 'id_year=12' -F 'label=Test' -F 'date=01/02/2022' -F 'type=EXPENSE' -F 'amount=42' -F 'debit=512A' -F 'credit=601' …</code></pre></div></body></html>

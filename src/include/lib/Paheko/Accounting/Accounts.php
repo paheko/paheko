@@ -158,7 +158,9 @@ class Accounts
 
 	public function listForCodes(array $codes): array
 	{
-		return DB::getInstance()->getGrouped('SELECT code, id, label FROM acc_accounts WHERE id_chart = ?;', $this->chart_id);
+		$db = DB::getInstance();
+		$sql = sprintf('SELECT code, id, label FROM acc_accounts WHERE id_chart = %d AND %s;', $this->chart_id, $db->where('code', $codes));
+		return $db->getGrouped($sql);
 	}
 
 	/**

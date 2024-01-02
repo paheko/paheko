@@ -155,7 +155,7 @@ class AdvancedSearch extends A_S
 		];
 
 		$columns['service'] = [
-			'label'  => 'Inscrit à l\'activité',
+			'label'  => 'Est inscrit à l\'activité',
 			'type'   => 'enum',
 			'null'   => false,
 			'values' => $db->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE U_NOCASE;'),
@@ -173,7 +173,7 @@ class AdvancedSearch extends A_S
 		];
 
 		$columns['service_active'] = [
-			'label'  => 'À jour de l\'activité',
+			'label'  => 'Est à jour de l\'activité',
 			'type'   => 'enum',
 			'null'   => false,
 			'values' => $db->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE U_NOCASE;'),
@@ -182,7 +182,7 @@ class AdvancedSearch extends A_S
 		];
 
 		$columns['service_expired'] = [
-			'label'  => 'Activité expirée',
+			'label'  => 'N\'est pas à jour de l\'activité',
 			'type'   => 'enum',
 			'null'   => false,
 			'values' => $db->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE U_NOCASE;'),

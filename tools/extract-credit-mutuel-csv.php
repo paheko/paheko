@@ -17,7 +17,7 @@
 
 // Ajuster cette constante en fonction du chemin où vous avez placé
 // le JAR de Tabula
-const TABULA_PATH = '/home/bohwaz/bin/tabula.jar';
+const TABULA_PATH = 'tabula.jar';
 
 if (empty($argv[1]) || empty($argv[2])) {
 	printf("Usage: %s REPERTOIRE_OU_FICHIER FICHIER_SORTIE_CSV\n", $argv[0]);
