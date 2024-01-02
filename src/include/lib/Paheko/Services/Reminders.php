@@ -67,7 +67,7 @@ class Reminders
 		return DB::getInstance()->get('SELECT * FROM services_reminders WHERE id_service = ? ORDER BY delay, subject;', $service_id);
 	}
 
-	static public function getPendingSQL(string $conditions = '1')
+	static public function getPendingSQL(bool $due_only = true, string $conditions = '1')
 	{
 		$db = DB::getInstance();
 
@@ -92,9 +92,9 @@ class Reminders
 			-- Join with sent reminders to exclude users that already have received this reminder
 			LEFT JOIN (SELECT id, MAX(due_date) AS due_date, id_user, id_reminder FROM services_reminders_sent GROUP BY id_user, id_reminder) AS srs ON su.id_user = srs.id_user AND srs.id_reminder = sr.id
 			WHERE
-				date() > date(su.expiry_date, sr.delay || \' days\')
-				AND (sr.not_before_date IS NULL OR sr.not_before_date <= date(su.expiry_date, sr.delay || \' days\'))
+				(sr.not_before_date IS NULL OR sr.not_before_date <= date(su.expiry_date, sr.delay || \' days\'))
 				AND (srs.id IS NULL OR srs.due_date < date(su.expiry_date, (sr.delay - 1) || \' days\'))
+				AND %s
 				AND %s
 			GROUP BY su.id_user, sr.id_service
 			ORDER BY su.id_user';
@@ -103,7 +103,12 @@ class Reminders
 		$emails = array_map(fn($e) => sprintf('u.%s IS NOT NULL', $db->quoteIdentifier($e)), $emails);
 		$emails = implode(' OR ', $emails);
 
-		$sql = sprintf($sql, DynamicFields::getNameFieldsSQL('u'), $emails, $conditions);
+		$sql = sprintf($sql,
+			DynamicFields::getNameFieldsSQL('u'),
+			$emails,
+			$due_only ? 'date() > date(su.expiry_date, sr.delay || \' days\')' : '1',
+			$conditions
+		);
 
 		return $sql;
 	}
@@ -128,7 +133,7 @@ class Reminders
 	static public function sendPending(): void
 	{
 		$db = DB::getInstance();
-		$sql = self::getPendingSQL();
+		$sql = self::getPendingSQL(true);
 
 		$date = new \DateTime;
 

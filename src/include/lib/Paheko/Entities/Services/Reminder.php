@@ -88,7 +88,7 @@ class Reminder extends Entity
 				'label' => 'Membre',
 				'select' => $id_field,
 			],
-			'date' => [
+			'reminder_date' => [
 				'label' => 'Date d\'envoi',
 				'select' => 'srs.sent_date',
 				'order' => 'srs.sent_date %s, srs.id %1$s',
@@ -100,7 +100,7 @@ class Reminder extends Entity
 		$conditions = sprintf('srs.id_reminder = %d', $this->id());
 
 		$list = new DynamicList($columns, $tables, $conditions);
-		$list->orderBy('date', true);
+		$list->orderBy('reminder_date', true);
 		return $list;
 	}
 
@@ -118,10 +118,13 @@ class Reminder extends Entity
 			'expiry_date' => [
 				'label' => 'Date d\'expiration',
 			],
+			'reminder_date' => [
+				'label' => 'Date d\'envoi',
+			],
 		];
 
 		$conditions = sprintf('su.id_service = %d AND sr.id = %d', $this->id_service, $this->id);
-		$tables = '(' . Reminders::getPendingSQL($conditions) . ') AS pending';
+		$tables = '(' . Reminders::getPendingSQL(false, $conditions) . ') AS pending';
 
 		$list = new DynamicList($columns, $tables);
 		$list->orderBy('expiry_date', false);
@@ -131,7 +134,7 @@ class Reminder extends Entity
 	public function getPreview(int $id_user): ?string
 	{
 		$conditions = sprintf('su.id_service = %d AND su.id_user = %d AND sr.id = %d', $this->id_service, $id_user, $this->id);
-		$sql = Reminders::getPendingSQL($conditions);
+		$sql = Reminders::getPendingSQL(false, $conditions);
 		$db = DB::getInstance();
 
 		foreach ($db->iterate($sql) as $reminder) {
