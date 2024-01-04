@@ -45,7 +45,10 @@ class Emails
 	 */
 	const FAIL_LIMIT = 5;
 
-	static public function appendToQueue(int $context, string $email, array $data = [], ?string)
+	static public function appendToQueue(int $context, string $email, array $data = [])
+	{
+
+	}
 
 	/**
 	 * Add a message to the sending queue using templates

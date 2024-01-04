@@ -5,6 +5,30 @@ DELETE FROM plugins WHERE name = 'git_documents';
 -- Fix access level of number field
 UPDATE config_users_fields SET user_access_level = 1 WHERE user_access_level = 2 AND name = 'numero';
 
+-- Update services to add archived column
+ALTER TABLE services RENAME TO services_old;
+
+CREATE TABLE IF NOT EXISTS services
+-- Services types (French: cotisations)
+(
+	id INTEGER PRIMARY KEY NOT NULL,
+
+	label TEXT NOT NULL,
+	description TEXT NULL,
+
+	duration INTEGER NULL CHECK (duration IS NULL OR duration > 0), -- En jours
+	start_date TEXT NULL CHECK (start_date IS NULL OR date(start_date) = start_date),
+	end_date TEXT NULL CHECK (end_date IS NULL OR (date(end_date) = end_date AND date(end_date) >= date(start_date))),
+
+	archived INTEGER NOT NULL DEFAULT 0
+);
+
+INSERT INTO services
+	SELECT *, CASE WHEN end_date IS NOT NULL AND end_date < datetime() THEN 1 ELSE 0 END FROM services_old;
+
+DROP TABLE services_old;
+
+-- Update services_reminders to add not_before_date
 ALTER TABLE services_reminders RENAME TO services_reminders_old;
 
 CREATE TABLE IF NOT EXISTS services_reminders

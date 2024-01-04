@@ -1,7 +1,5 @@
 <?php
 assert(isset($create) && is_bool($create));
-assert(isset($has_past_services) && is_bool($has_past_services));
-assert(isset($current_only) && is_bool($current_only));
 assert(isset($form_url) && is_string($form_url));
 assert(isset($today) && $today instanceof \DateTimeInterface);
 assert($create === false || isset($account_targets));
@@ -49,21 +47,6 @@ assert(isset($grouped_services) && is_array($grouped_services));
 		{/if}
 
 			<dt><label for="f_service_ID">Activité</label> <b>(obligatoire)</b></dt>
-
-			{if $has_past_services}
-			<dd>
-				{* We can't use a button type="submit" here because it would trigger when user presses Enter, instead of the true submit button *}
-				<input type="hidden" name="past_services" value="{$current_only}" />
-				{if $current_only}
-					Seules les activités courantes sont affichées.
-					{button value="1" shape="reset" type="button" onclick="this.form.past_services=this.value; this.form.submit();" label="Inscrire à une activité passée"}
-				{else}
-					Seules les activités passées sont affichées.
-					{button value="0" shape="left" type="button"  onclick="this.form.past_services=this.value; this.form.submit();" label="Inscrire à une activité courante"}
-				{/if}
-			</dd>
-			{/if}
-
 
 			{foreach from=$grouped_services item="service"}
 				<dd class="radio-btn">

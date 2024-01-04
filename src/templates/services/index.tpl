@@ -41,7 +41,7 @@
 	<p class="block alert">Il n'y a aucune activité enregistrée.</p>
 {/if}
 
-{if empty($show_old_services) && $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
+{if empty($show_archived_services) && $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
 	{include file="services/_service_form.tpl" legend="Ajouter une activité" service=null period=0}
 {/if}
 

@@ -43,22 +43,13 @@ class Services
 		return DB::getInstance()->count(Service::TABLE, 1);
 	}
 
-	static public function listGroupedWithFees(?int $user_id = null, int $current = 1)
+	static public function listGroupedWithFees(?int $user_id = null)
 	{
-		if ($current === 1) {
-			$where = 'WHERE end_date IS NULL OR end_date >= date()';
-		}
-		elseif ($current === 2) {
-			$where = '';
-		}
-		else {
-			$where = 'WHERE end_date IS NOT NULL AND end_date < date()';
-		}
-
-		$sql = sprintf('SELECT
+		$sql = 'SELECT
 			id, label, duration, start_date, end_date, description,
 			CASE WHEN end_date IS NOT NULL THEN end_date WHEN duration IS NOT NULL THEN date(\'now\', \'+\'||duration||\' days\') ELSE NULL END AS expiry_date
-			FROM services %s ORDER BY label COLLATE U_NOCASE;', $where);
+			FROM services
+			WHERE archived = 0 ORDER BY label COLLATE U_NOCASE;';
 
 		$services = DB::getInstance()->getGrouped($sql);
 		$fees = Fees::listAllByService($user_id);
@@ -78,7 +69,14 @@ class Services
 		return $out;
 	}
 
-	static public function listWithStats(bool $current_only = true): DynamicList
+	static public function listArchivedWithStats(): DynamicList
+	{
+		$list = self::listWithStats();
+		$list->setConditions('archived = 1');
+		return $list;
+	}
+
+	static public function listWithStats(): DynamicList
 	{
 		$db = DB::getInstance();
 		$hidden_cats = array_keys(Categories::listAssoc(Categories::HIDDEN_ONLY));
@@ -128,16 +126,14 @@ class Services
 			],
 		];
 
-		$current_condition = $current_only ? '(end_date IS NULL OR end_date >= datetime())' : '(end_date IS NOT NULL AND end_date < datetime())';
-
-		$list = new DynamicList($columns, 'services', $current_condition);
+		$list = new DynamicList($columns, 'services', 'archived = 0');
 		$list->setPageSize(null);
 		$list->orderBy('label', false);
 		return $list;
 	}
 
-	static public function countOldServices(): int
+	static public function hasArchivedServices(): bool
 	{
-		return DB::getInstance()->count(Service::TABLE, 'end_date IS NOT NULL AND end_date < datetime()');
+		return DB::getInstance()->test(Service::TABLE, 'archived = 1');
 	}
 }

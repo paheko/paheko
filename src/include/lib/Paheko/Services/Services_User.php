@@ -35,12 +35,16 @@ class Services_User
 			INNER JOIN services s ON s.id = su.id_service
 			LEFT JOIN services_fees sf ON sf.id = su.id_fee
 			WHERE su.id_user = ?
+			AND s.archived = 0
 			GROUP BY su.id_service ORDER BY expiry_date DESC;', $user_id);
 	}
 
 	static public function perUserList(int $user_id, ?int $only_id = null, ?\DateTime $after = null): DynamicList
 	{
 		$columns = [
+			'archived' => [
+				'select' => 's.archived',
+			],
 			'id' => [
 				'select' => 'su.id',
 			],

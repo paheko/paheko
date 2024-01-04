@@ -80,7 +80,7 @@ class Reminders
 			su.expiry_date, sr.id AS id_reminder, su.id_service, su.id_user,
 			sf.label AS fee_label, sf.amount, sf.formula
 			FROM services_reminders sr
-			INNER JOIN services s ON s.id = sr.id_service
+			INNER JOIN services s ON s.id = sr.id_service AND s.archived = 0
 			-- Select latest subscription to a service (MAX) only
 			INNER JOIN (SELECT MAX(su2.expiry_date) AS expiry_date, su2.id_user, su2.id_service, su2.id_fee FROM services_users AS su2 GROUP BY id_user, id_service) AS su ON s.id = su.id_service
 			-- Select fee
