@@ -1610,4 +1610,23 @@ class Utils
 
 		return $ini;
 	}
+
+	static public function export_value($value, int $level = 0): string
+	{
+		$out = '';
+
+		if (is_object($value) || is_array($value)) {
+			foreach ($value as $key => $subvalue) {
+				if (empty($subvalue)) {
+					continue;
+				}
+				$out .= str_repeat(' ', $level) . $key . ': ' . self::export_value($subvalue, $level+1) . "\n";
+			}
+		}
+		else {
+			$out .= (string)$value;
+		}
+
+		return rtrim($out);
+	}
 }

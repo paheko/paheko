@@ -550,7 +550,7 @@ class Sections
 
 		$list = new DynamicList($columns, $table);
 
-		static $reserved_keywords = ['max', 'order', 'desc', 'debug', 'explain', 'schema', 'columns', 'select', 'where', 'module', 'disable_user_ordering', 'check'];
+		static $reserved_keywords = ['max', 'order', 'desc', 'debug', 'explain', 'schema', 'columns', 'select', 'where', 'module', 'disable_user_ordering', 'check', 'export'];
 
 		foreach ($params as $key => $value) {
 			if ($key[0] == ':') {
@@ -591,8 +591,16 @@ class Sections
 			}
 		});
 
+
 		$list->setExportCallback(function(&$row) {
 			$row = $row['original'];
+			foreach ($row as $key => $value) {
+				if (!is_string($value) || substr($value, 0, 1) !== '{' || substr($value, -1) !== '}') {
+					continue;
+				}
+
+				$row->$key = Utils::export_value(json_decode($value));
+			}
 		});
 
 		// Try to create an index if required
@@ -624,12 +632,11 @@ class Sections
 
 		$tpl = Template::getInstance();
 
-		/*
-		FIXME: Export is broken currently
-		$export_url = Utils::getSelfURI();
-		$export_url .= strstr($export_url, '?') ? '&export=' : '?export=';
-		printf('<p class="actions">%s</p>', $tpl->widgetExportMenu(['href' => $export_url, 'class' => 'menu-btn-right']));
-		*/
+		if (!empty($params['export'])) {
+			$export_url = Utils::getSelfURI();
+			$export_url .= strstr($export_url, '?') ? '&export=' : '?export=';
+			printf('<p class="actions">%s</p>', CommonFunctions::exportmenu(['href' => $export_url, 'class' => 'menu-btn-right']));
+		}
 
 		$tpl->assign(compact('list'));
 		$tpl->assign('check', $params['check'] ?? false);
