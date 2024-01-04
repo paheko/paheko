@@ -10,7 +10,7 @@
 
 			{if $service && $service->exists()}
 				{input type="checkbox" name="archived" value=1 label="Archiver cette activité" source=$service}
-				<dd class="help">Si coché, les inscrits ne recevront plus de rappels, l'activité ne sera plus visible sur leur fiche, il ne sera plus possible d'y inscrire des membres.</dd>
+				<dd class="help">Si coché, les inscrits ne recevront plus de rappels, l'activité ne sera plus visible sur la fiche des membres, il ne sera plus possible d'y inscrire des membres.</dd>
 			{/if}
 
 			<dt><label for="f_periodicite_jours">Durée de validité</label> <b title="Champ obligatoire">(obligatoire)</b></dt>
