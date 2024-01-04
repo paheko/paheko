@@ -77,6 +77,8 @@ class Account extends Entity
 	const TYPE_CREDIT_REPORT = 14;
 	const TYPE_DEBIT_REPORT = 15;
 
+	const TYPE_TEMPORARY_TRANSFER = 16;
+
 	const TYPES_NAMES = [
 		'',
 		'Banque',
@@ -94,6 +96,7 @@ class Account extends Entity
 		'Affectation du résultat',
 		'Report à nouveau créditeur',
 		'Report à nouveau débiteur',
+		'Virements internes',
 	];
 
 	/**
@@ -151,6 +154,7 @@ class Account extends Entity
 	const LOCAL_TYPES = [
 		'FR' => [
 			self::TYPE_BANK => '512',
+			self::TYPE_TEMPORARY_TRANSFER => '580',
 			self::TYPE_CASH => '53',
 			self::TYPE_OUTSTANDING => '511',
 			self::TYPE_THIRD_PARTY => '4',

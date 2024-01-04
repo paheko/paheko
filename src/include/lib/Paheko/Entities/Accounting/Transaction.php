@@ -1138,7 +1138,7 @@ class Transaction extends Entity
 				'accounts' => [
 					[
 						'label' => 'De',
-						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
+						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING, Account::TYPE_TEMPORARY_TRANSFER],
 						'direction' => 'credit',
 						'defaults' => [
 							self::TYPE_EXPENSE => 'credit',
@@ -1147,7 +1147,7 @@ class Transaction extends Entity
 					],
 					[
 						'label' => 'Vers',
-						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
+						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING, Account::TYPE_TEMPORARY_TRANSFER],
 						'direction' => 'debit',
 					],
 				],
