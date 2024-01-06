@@ -213,6 +213,9 @@ class CSV
 		elseif ('ods' == $format) {
 			self::toODS(... array_slice(func_get_args(), 1));
 		}
+		elseif ('json' == $format) {
+			self::toJSON(... array_slice(func_get_args(), 1));
+		}
 		else {
 			throw new \InvalidArgumentException('Unknown export format');
 		}
@@ -320,6 +323,38 @@ class CSV
 		}
 
 		$ods->output($output);
+	}
+
+	static public function toJSON(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, string $output = null): void
+	{
+		if (null === $output) {
+			header('Content-type: application/json');
+			header(sprintf('Content-Disposition: attachment; filename="%s.json"', $name));
+
+			$fp = fopen('php://output', 'w');
+		}
+		else {
+			$fp = fopen($output, 'w');
+		}
+
+		$i = 0;
+
+		fputs($fp, '[');
+
+		if (!($iterator instanceof \Iterator) || $iterator->valid()) {
+			foreach ($iterator as $row) {
+				if ($i++ > 0) {
+					fputs($fp, ",\n");
+				}
+
+				$row = self::rowToArray($row, $row_map_callback);
+
+				fputs($fp, json_encode($row));
+			}
+		}
+
+		fputs($fp, ']');
+		fclose($fp);
 	}
 
 	static public function toXLSX(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null): void

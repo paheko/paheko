@@ -295,7 +295,27 @@ Renvoie la liste des comptes pour le plan comptable indiqué (voir `id_chart` da
 
 Renvoie le journal général des écritures de l'exercice indiqué. 
 
-Note : il est possible d'utiliser `current` comme paramètre pour `{ID_YEAR}` pour désigner l'exercice ouvert en cours. S'il y a plusieurs exercices ouverts, alors le plus ancien sera choisi.
+Note : il est possible d'utiliser `current` comme paramètre pour `{ID_YEAR}` pour désigner l'exercice ouvert en cours. S'il y a plusieurs exercices ouverts, alors celui qui est le plus proche de la date actuelle sera utilisé.
+
+### accounting/years/{ID_YEAR}/export/{FORMAT}.{EXTENSION} (GET)
+
+*(Depuis la version 1.3.6)*
+
+Exporte l'exercice indiqué au format indiqué. Les formats suivants sont disponibles :
+
+* `full` : complet
+* `grouped` : complet groupé
+* `simple` : simple (ne comporte pas les saisies avancées)
+* `fec` : format FEC (Fichier des Écritures Comptables)
+
+L'extension indique le type de fichier :
+
+* `csv` : Tableur CSV
+* `ods` : LibreOffice Calc
+* `xlsx` : Microsoft OOXML (Excel) - seulement disponible si l'instance le permet
+* `json` : Texte JSON
+
+Note : il est possible d'utiliser `current` comme paramètre pour `{ID_YEAR}` pour désigner l'exercice ouvert en cours. S'il y a plusieurs exercices ouverts, alors celui qui est le plus proche de la date actuelle sera utilisé.
 
 ### accounting/years/{ID_YEAR}/account/journal (GET)
 
@@ -303,7 +323,7 @@ Renvoie le journal des écritures d'un compte pour l'exercice indiqué.
 
 Le compte est spécifié soit via le paramètre `code`, soit via le paramètre `id`. Exemple :  `/accounting/years/4/account/journal?code=512A`
 
-Note : il est possible d'utiliser `current` comme paramètre pour `{ID_YEAR}` pour désigner l'exercice ouvert en cours. S'il y a plusieurs exercices ouverts, alors le plus ancien sera choisi.
+Note : il est possible d'utiliser `current` comme paramètre pour `{ID_YEAR}` pour désigner l'exercice ouvert en cours. S'il y a plusieurs exercices ouverts, alors celui qui est le plus proche de la date actuelle sera utilisé.
 
 ### accounting/transaction/{ID_TRANSACTION} (GET)
 
