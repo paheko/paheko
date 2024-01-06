@@ -286,7 +286,7 @@ trait FileThumbnailTrait
 				curl_setopt($curl, CURLOPT_POSTFIELDS, [
 					'format' => 'png',
 					//'options' => json_encode($options),
-					'file' => new \CURLFile($tmpfile ?? $local_path, $this->mime, $this->name),
+					'file' => new \CURLFile($tmpfile ?? $local_path, $this->mime, md5($this->name) . '.' . $this->extension()),
 				]);
 
 				$fp = fopen($destination, 'wb');
@@ -446,7 +446,7 @@ trait FileThumbnailTrait
 		}
 
 		$cache_id = sprintf(self::THUMB_CACHE_ID, $this->md5, $size);
-		$destination = Static_Cache::getPath($cache_id);
+		$destination = Static_Cache::create($cache_id);
 
 		if (!Static_Cache::exists($cache_id)) {
 			try {
