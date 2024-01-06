@@ -446,7 +446,7 @@ trait FileThumbnailTrait
 		}
 
 		$cache_id = sprintf(self::THUMB_CACHE_ID, $this->md5, $size);
-		$destination = Static_Cache::create($cache_id);
+		$destination = Static_Cache::getPath($cache_id);
 
 		if (!Static_Cache::exists($cache_id)) {
 			try {
