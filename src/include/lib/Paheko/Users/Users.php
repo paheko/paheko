@@ -205,7 +205,7 @@ class Users
 
 		$number_column = [
 			'label' => 'Num.',
-			'select' => 'u.' . $number_field,
+			'select' => 'u.' . $db->quoteIdentifier($number_field),
 		];
 
 		$identity_column = [
@@ -242,11 +242,11 @@ class Users
 
 			$columns[$key] = [
 				'label'  => $config->label,
-				'select' => 'u.' . $key,
+				'select' => 'u.' . $db->quoteIdentifier($key),
 			];
 
 			if ($config->hasSearchCache($key)) {
-				$columns[$key]['order'] = sprintf('s.%s %%s', $key);
+				$columns[$key]['order'] = sprintf('s.%s %%s', $db->quoteIdentifier($key));
 			}
 
 			if ($config->type == 'file') {
@@ -254,7 +254,7 @@ class Users
 					FROM users_files uf
 					INNER JOIN files f ON f.id = uf.id_file AND f.trash IS NULL
 					WHERE uf.id_user = u.id AND uf.field = %s)',
-					$db->quote($key)
+					$db->quoteIdentifier($key)
 				);
 			}
 		}
