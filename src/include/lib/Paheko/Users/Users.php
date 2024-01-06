@@ -173,7 +173,7 @@ class Users
 
 		$number_column = [
 			'label' => 'Num.',
-			'select' => 'u.' . $number_field,
+			'select' => 'u.' . $db->quoteIdentifier($number_field),
 		];
 
 		$identity_column = [
@@ -210,11 +210,11 @@ class Users
 
 			$columns[$key] = [
 				'label'  => $config->label,
-				'select' => 'u.' . $key,
+				'select' => 'u.' . $db->quoteIdentifier($key),
 			];
 
 			if ($config->hasSearchCache($key)) {
-				$columns[$key]['order'] = sprintf('s.%s %%s', $key);
+				$columns[$key]['order'] = sprintf('s.%s %%s', $db->quoteIdentifier($key));
 			}
 
 			if ($config->type == 'file') {
