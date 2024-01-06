@@ -312,7 +312,7 @@ trait FileThumbnailTrait
 			else {
 				if ($command === 'mupdf') {
 					// The single '1' at the end is to tell only to render the first page
-					$cmd = sprintf('mutool draw -F png -o %s -w 500 -h 500 -r 72 %s 1 2>&1',
+					$cmd = sprintf('mutool draw -i -N -q -F png -o %s -w 500 -h 500 -r 72 %s 1 2>&1',
 						Utils::escapeshellarg($destination),
 						Utils::escapeshellarg($tmpfile ?? $local_path)
 					);
