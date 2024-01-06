@@ -136,6 +136,10 @@ class CSV
 			$row = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $row);
 
 			$out[$line] = $row;
+
+			if ($line > 499999) {
+				throw new UserException('Dépassement de la taille maximale : le fichier fait plus de 500.000 lignes.');
+			}
 		}
 
 		fclose($fp);

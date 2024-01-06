@@ -8,7 +8,7 @@ class CSV_Custom
 {
 	protected ?UserSession $session;
 	protected ?string $key;
-	protected ?array $csv;
+	protected ?array $csv = null;
 	protected ?array $translation = null;
 	protected array $columns;
 	protected array $columns_defaults;
@@ -16,14 +16,33 @@ class CSV_Custom
 	protected int $skip = 1;
 	protected $modifier = null;
 	protected array $_default;
+	protected ?string $cache_key = null;
 
 	public function __construct(?UserSession $session = null, ?string $key = null)
 	{
 		$this->session = $session;
 		$this->key = $key;
-		$this->csv = $this->session ? $this->session->get($this->key) : null;
-		$this->translation = $this->session ? $this->session->get($this->key . '_translation') : null;
-		$this->skip = $this->session ? $this->session->get($this->key . '_skip') ?? 1 : 1;
+		$this->cache_key = $session ? $session::getUserId() . '_' . $key : null;
+
+		if ($this->cache_key && !Static_Cache::hasExpired($this->cache_key)) {
+			$data = Static_Cache::import($this->cache_key);
+
+			$this->csv = $data['csv'];
+			$this->translation = $data['translation'];
+			$this->skip = $data['skip'];
+		}
+	}
+
+	public function __destruct()
+	{
+		if ($this->session && $this->cache_key && ($this->csv || $this->translation || $this->skip !== 1)) {
+			Static_Cache::export($this->cache_key,
+				['csv' => $this->csv, 'translation' => $this->translation, 'skip' => $this->skip],
+				new \DateTime('+3 hours')
+			);
+
+			Static_Cache::prune();
+		}
 	}
 
 	public function load(?array $file): void
@@ -49,11 +68,6 @@ class CSV_Custom
 
 		if (!count($this->csv)) {
 			throw new UserException('Ce fichier est vide (aucune ligne trouvée).');
-		}
-
-		if ($this->session) {
-			$this->session->set($this->key, $this->csv);
-			$this->session->save();
 		}
 	}
 
@@ -219,25 +233,17 @@ class CSV_Custom
 		}
 
 		$this->translation = $table;
-
-		if ($this->session) {
-			$this->session->set($this->key . '_translation', $this->translation);
-			$this->session->save();
-		}
 	}
 
 	public function clear(): void
 	{
-		if ($this->session) {
-			$this->session->set($this->key, null);
-			$this->session->set($this->key . '_translation', null);
-			$this->session->set($this->key . '_skip', null);
-			$this->session->save();
-		}
-
 		$this->csv = null;
 		$this->translation = null;
 		$this->skip = 1;
+
+		if ($this->cache_key) {
+			Static_Cache::remove($this->cache_key);
+		}
 	}
 
 	public function loaded(): bool
@@ -258,11 +264,6 @@ class CSV_Custom
 	public function skip(int $count): void
 	{
 		$this->skip = $count;
-
-		if ($this->session) {
-			$this->session->set($this->key . '_skip', $count);
-			$this->session->save();
-		}
 	}
 
 	public function setColumns(array $columns, array $defaults = []): void
