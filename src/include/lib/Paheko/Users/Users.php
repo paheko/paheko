@@ -254,7 +254,7 @@ class Users
 					FROM users_files uf
 					INNER JOIN files f ON f.id = uf.id_file AND f.trash IS NULL
 					WHERE uf.id_user = u.id AND uf.field = %s)',
-					$db->quoteIdentifier($key)
+					$db->quote($key)
 				);
 			}
 		}
