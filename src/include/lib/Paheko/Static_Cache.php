@@ -114,6 +114,10 @@ class Static_Cache
 		$now = time();
 
 		foreach (glob(STATIC_CACHE_ROOT . '/*') as $path) {
+			if (!is_dir($path)) {
+				continue;
+			}
+
 			$dir = dir($path);
 
 			while($file = $dir->read()) {
