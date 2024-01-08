@@ -611,6 +611,12 @@ class UserTemplate extends \KD2\Brindille
 				$this->headers['disposition'],
 				Utils::safeFileName($this->headers['filename'])
 			), true);
+
+			if ($this->headers['disposition'] === 'inline') {
+				// Seems that this is required for Chrome
+				// @see https://stackoverflow.com/questions/71679544/content-disposition-inline-filename-not-working
+				header('Cache-Control: no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0', true);
+			}
 		}
 	}
 
