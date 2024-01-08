@@ -94,7 +94,7 @@ curl https://test:abcd@paheko.monasso.tld/api/download -o db.sqlite
 
 ### download/files (GET)
 
-*(Depuis la version 1.3.4)*
+_(Depuis la version 1.3.4)_
 
 Télécharger un fichier ZIP contenant tous les fichiers (documents, fichiers des écritures, des membres, modules modifiés, etc.).
 
@@ -125,6 +125,83 @@ Rajouter le paramètre `?html` à l'URL pour obtenir en plus une clé `html` dan
 Renvoie uniquement le contenu de la page au format HTML.
 
 ## Membres
+
+### user/categories (GET)
+
+_(Depuis la version 1.3.6)_
+
+Renvoie la liste des catégories de membres, triée par nom, et incluant le nombre de membres de la catégorie (dans la clé `count`).
+
+### user/category/{ID}.{FORMAT} (GET)
+
+_(Depuis la version 1.3.6)_
+
+Exporte la liste des membres d'une catégorie correspondant à l'ID demandé, au format indiqué :
+
+* `json`
+* `csv`
+* `ods`
+* `xlsx`
+
+### user/new (POST)
+
+_(Depuis la version 1.3.6)_
+
+Permet de créer un nouveau membre.
+
+Attention, cette méthode comporte des restrictions :
+
+* il n'est pas possible de créer un membre dans une catégorie ayant accès à la configuration
+* il n'est pas possible de définir l'OTP ou la clé PGP du membre créé
+* seul un identifiant API ayant le droit "Administration" pourra créer des membres administrateurs
+
+Il est possible d'utiliser tous les champs de la fiche membre en utilisant leur clé unique, ainsi que les clés suivantes :
+
+* `id_category` : indique l'ID d'une catégorie, si absent la catégorie par défaut sera utilisée
+* `password` : mot de passe du membre
+* `force_duplicate=1` : ne pas renvoyer une erreur si le nom du membre à ajouter est identique au nom d'un membre existant.
+
+Sera renvoyée la liste des infos de la fiche membre.
+
+Si un membre avec le même nom existe déjà (et que `force_duplicate` n'est pas utilisé), une erreur `409` sera renvoyée.
+
+```
+curl -F nom="Bla bla" -F id_category=3 -F password=abcdef123456 https://test:abcd@monpaheko.tld/api/user/new
+```
+
+### user/{ID} (GET)
+
+_(Depuis la version 1.3.6)_
+
+Renvoie les infos de la fiche d'un membre à partir de son ID, ainsi que 3 autres clés :
+
+* `has_password`
+* `has_pgp_key`
+* `has_otp`
+
+### user/{ID} (DELETE)
+
+_(Depuis la version 1.3.6)_
+
+Supprime un membre à partir de son ID.
+
+Seuls les identifiants d'API ayant le droit "Administration" pourront supprimer des membres.
+
+Note : il n'est pas possible de supprimer un membre appartenant à une catégorie ayant accès à la configuration.
+
+### user/{ID} (POST)
+
+_(Depuis la version 1.3.6)_
+
+Modifie les infos de la fiche d'un membre à partir de son ID.
+
+Notes :
+
+* il n'est pas possible de modifier la catégorie d'un membre
+* il n'est pas possible de modifier un membre appartenant à une catégorie ayant accès à la configuration.
+* il n'est pas possible de modifier le mot de passe, l'OTP ou la clé PGP du membre créé
+* il n'est pas possible de modifier des membres ayant accès à la configuration
+* seul un identifiant d'API ayant l'accès en "Administartion" pourra modifier un membre administrateur
 
 ### user/import (PUT)
 
@@ -166,7 +243,7 @@ Depuis la version 1.2.8 il est possible d'utiliser un paramètre supplémentaire
 * `create` : ne fait que créer de nouvelles fiches de membre, si le numéro de membre existe déjà une erreur sera produite
 * `update` : ne fait que mettre à jour les fiches de membre en utilisant le numéro de membre comme référence, si le numéro de membre n'existe pas une erreur sera produite
 
-Depuis la version 1.3.0 il est possible de spécifier :
+_Depuis la version 1.3.0 il est possible de spécifier :_
 
 * le nombre de lignes à ignorer avec le paramètre `skip_lines=X` : elles ne seront pas importées. Par défaut la première ligne est ignorée.
 * la correspondance des colonnes avec des paramètres `column[x]` ou `x` est le numéro de la colonne (la numérotation commence à zéro), et la valeur contient le nom unique du champ de la fiche membre.
@@ -299,7 +376,7 @@ Note : il est possible d'utiliser `current` comme paramètre pour `{ID_YEAR}` po
 
 ### accounting/years/{ID_YEAR}/export/{FORMAT}.{EXTENSION} (GET)
 
-*(Depuis la version 1.3.6)*
+_(Depuis la version 1.3.6)_
 
 Exporte l'exercice indiqué au format indiqué. Les formats suivants sont disponibles :
 
@@ -351,13 +428,13 @@ Efface la liste des membres liés à une écriture.
 
 ### accounting/transaction/{ID_TRANSACTION}/subscriptions (GET)
 
-(Depuis la version 1.3.6)
+_(Depuis la version 1.3.6)_
 
 Renvoie la liste des inscriptions (aux activités) liées à une écriture.
 
 ### accounting/transaction/{ID_TRANSACTION}/subscriptions (POST)
 
-(Depuis la version 1.3.6)
+_(Depuis la version 1.3.6)_
 
 Met à jour la liste des inscriptions liées à une écriture, en utilisant les ID d'inscriptions passés dans un tableau nommé `subscriptions`.
 
@@ -367,7 +444,7 @@ Met à jour la liste des inscriptions liées à une écriture, en utilisant les 
 
 ### accounting/transaction/{ID_TRANSACTION}/subscriptions (DELETE)
 
-(Depuis la version 1.3.6)
+_(Depuis la version 1.3.6)_
 
 Efface la liste des inscriptions liées à une écriture.
 

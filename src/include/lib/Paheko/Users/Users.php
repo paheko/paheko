@@ -388,6 +388,11 @@ class Users
 		}
 		else {
 			$cat = Categories::get($id_category);
+
+			if (!$cat) {
+				throw new \InvalidArgumentException('This category does not exist');
+			}
+
 			$name = sprintf('Membres - %s', $cat->name);
 			$where = sprintf('id_category = %d', $id_category);
 		}

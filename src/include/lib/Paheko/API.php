@@ -14,6 +14,7 @@ use Paheko\Accounting\Years;
 use Paheko\Entities\Accounting\Transaction;
 use Paheko\Search;
 use Paheko\Services\Services_User;
+use Paheko\Users\Categories;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Users;
 use Paheko\Files\Files;
@@ -199,8 +200,82 @@ class API
 		$fn2 = strtok('/');
 		strtok('');
 
-		// CSV import
-		if ($fn == 'import') {
+		if ($fn === 'categories') {
+			return Categories::listWithStats();
+		}
+		elseif ($fn === 'category') {
+			$id = (int) strtok($fn2, '.');
+			$format = strtok('');
+
+			try {
+				Users::exportCategory($format ?: 'json', $id);
+			}
+			catch (\InvalidArgumentException $e) {
+				throw new APIException($e->getMessage(), 400, $e);
+			}
+
+			return null;
+		}
+		elseif ($fn === 'new') {
+			$this->requireAccess(Session::ACCESS_WRITE);
+
+			$user = Users::create();
+			$user->importForm($this->params);
+			$user->setNumberIfEmpty();
+
+			if (empty($this->params['force_duplicate']) && $user->checkDuplicate()) {
+				throw new APIException('This user seems to be a duplicate of an existing one', 409);
+			}
+
+			if (!empty($this->params['id_category']) && !$user->setCategorySafeNoConfig($this->params['id_category'])) {
+				throw new APIException('You are not allowed to create a user in this category', 403);
+			}
+
+			if (isset($this->params['password'])) {
+				$user->importSecurityForm(false, ['password' => $this->params['password'], 'password_confirmed' => $this->params['password']]);
+			}
+
+			$user->save();
+
+			return $user->exportAPI();
+		}
+		elseif (ctype_digit($fn)) {
+			$user = Users::get((int)$fn);
+
+			if (!$user) {
+				throw new APIException('The requested user ID does not exist', 404);
+			}
+
+			if ($this->method === 'POST') {
+				$this->requireAccess(Session::ACCESS_WRITE);
+
+				try {
+					$user->validateCanChange();
+				}
+				catch (UserException $e) {
+					throw new APIException($e->getMessage(), 403, $e);
+				}
+
+				$user->importForm($this->params);
+				$user->save();
+			}
+			elseif ($this->method === 'DELETE') {
+				$this->requireAccess(Session::ACCESS_ADMIN);
+
+				try {
+					$user->validateCanChange();
+				}
+				catch (UserException $e) {
+					throw new APIException($e->getMessage(), 403, $e);
+				}
+
+				$user->delete();
+				return ['success' => true];
+			}
+
+			return $user->exportAPI();
+		}
+		elseif ($fn === 'import') {
 			$fp = null;
 
 			if ($this->method === 'PUT') {

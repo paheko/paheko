@@ -704,4 +704,65 @@ class User extends Entity
 
 		$zip->close();
 	}
+
+	public function validateCanChange(?Session $session = null): void
+	{
+		$category = $this->category();
+
+		if (($category->perm_config == Session::ACCESS_ADMIN)
+			&& (!$session || !$session->canAccess(Session::SECTION_CONFIG, Session::ACCESS_ADMIN))) {
+			throw new UserException("Seul un membre administrateur peut modifier un autre membre administrateur.");
+		}
+	}
+
+	/**
+	 * Set category if it has same or lower rights than current user
+	 * If category has higher rights, an exception is raised.
+	 * @throws UserException
+	 */
+	public function setCategorySafe(int $id_category, Session $session): void
+	{
+		$safe_categories = Categories::listAssocSafe($session);
+
+		if (!array_key_exists($id_category, $safe_categories)) {
+			throw new UserException('Vous n\'avez pas le droit de placer ce membre dans cette catégorie');
+		}
+
+		$this->set('id_category', $id_category);
+	}
+
+	/**
+	 * Set category if it doesn't have access to config
+	 * @throws UserException
+	 */
+	public function setCategorySafeNoConfig(int $id_category): bool
+	{
+		$is_safe = DB::getInstance()->test(Category::TABLE, 'id = ? AND perm_config = 0', $id_category);
+
+		if ($is_safe) {
+			$this->set('id_category', $id_category);
+		}
+
+		return $is_safe;
+	}
+
+	public function exportAPI(): array
+	{
+		$out = $this->asArray();
+
+		$prefix['has_password'] = !empty($out['password']);
+		$prefix['has_otp'] = !empty($out['otp_secret']);
+		$prefix['has_pgp_key'] = !empty($out['pgp_key']);
+		unset($out['password'], $out['otp_secret'], $out['pgp_key']);
+
+		foreach ($out as $key => &$value) {
+			if ($value instanceof Date || $value instanceof \DateTimeInterface) {
+				$value = $this->getAsString($key);
+			}
+		}
+
+		unset($value);
+
+		return array_merge($prefix, $out);
+	}
 }

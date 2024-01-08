@@ -186,6 +186,17 @@ class Session extends \KD2\UserSession
 		return $this->db->delete('users_sessions', $this->db->where('id_user', $user_id));
 	}
 
+	public function refresh(): bool
+	{
+		$v = parent::refresh();
+
+		$this->_user = null;
+		$this->_permissions = null;
+		$this->_files_permissions = null;
+
+		return $v;
+	}
+
 	public function isLogged(bool $disable_local_login = false)
 	{
 		$logged = parent::isLogged();
@@ -468,7 +479,7 @@ class Session extends \KD2\UserSession
 		return self::getInstance()->sid_in_url_secret;
 	}
 
-	public function getUser()
+	public function getUser(): ?User
 	{
 		if (isset($this->_user)) {
 			return $this->_user;
@@ -481,13 +492,11 @@ class Session extends \KD2\UserSession
 
 		$this->_user = Users::get($this->user);
 
+		// If user does not exist anymore
 		if (!$this->_user) {
 			$this->logout();
-			// User does not exist anymore
 		}
 
-		$this->_permissions = null;
-		$this->_files_permissions = null;
 		return $this->_user;
 	}
 
@@ -502,14 +511,23 @@ class Session extends \KD2\UserSession
 		return $i->getUser()->id;
 	}
 
-	public function canAccess(string $section, int $permission): bool
+	public function getPermissions(): array
+	{
+		if (!isset($this->_permissions)) {
+			$this->_permissions = $this->user()->category()->getPermissions();
+		}
+
+		return $this->_permissions;
+	}
+
+	public function canAccess(string $section, int $required): bool
 	{
 		if (!$this->isLogged()) {
 			return false;
 		}
 
 		if (!isset($this->_permissions)) {
-			$this->_permissions = $this->user()->category()->getPermissions();
+			$this->getPermissions();
 		}
 
 		$perm = $this->_permissions[$section] ?? null;
@@ -518,7 +536,7 @@ class Session extends \KD2\UserSession
 			throw new \InvalidArgumentException('Unknown section: ' . $section);
 		}
 
-		return ($perm >= $permission);
+		return ($perm >= $required);
 	}
 
 	public function requireAccess(string $section, int $permission): void

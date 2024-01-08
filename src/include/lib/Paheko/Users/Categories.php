@@ -36,6 +36,26 @@ class Categories
 		));
 	}
 
+	/**
+	 * Return a list of categories that have less or same permissions as the logged user
+	 */
+	static public function listAssocSafe(Session $session, ?int $hidden = null): array
+	{
+		$perms = $session->getPermissions();
+		$conditions = self::getHiddenClause($hidden);
+
+		foreach ($perms as $section => $level) {
+			$conditions .= sprintf(' AND perm_%s <= %d', $section, $level);
+		}
+
+		$sql = sprintf('SELECT id, name FROM %s WHERE 1 %s ORDER BY name COLLATE U_NOCASE;',
+			Category::TABLE,
+			$conditions
+		);
+
+		return DB::getInstance()->getAssoc($sql);
+	}
+
 	static public function listAssocWithStats(?int $hidden = null): array
 	{
 		$db = DB::getInstance();

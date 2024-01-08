@@ -10,12 +10,12 @@
 	<aside class="secondary">
 		<fieldset>
 			<dl>
-			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
-				{if $user.id != $logged_user.id}
-					{input type="select" name="id_category" label="Catégorie du membre" required=true source=$user options=$categories}
-				{else}
-					<p class="alert block">Vous ne pouvez pas modifier votre catégorie de membre, il faut qu'un autre administrateur le fasse pour vous.</p>
-				{/if}
+			{if $user.id == $logged_user.id && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
+				<p class="alert block">Pour éviter que votre association ne se retrouve sans administrateur, vous ne pouvez pas modifier votre catégorie de membre. Il faut qu'un autre administrateur le fasse pour vous.</p>
+			{elseif !$can_change_category}
+				<p class="alert block">Vous ne pouvez pas modifier la catégorie de ce membre, demandez à un administrateur.</p>
+			{else}
+				{input type="select" name="id_category" label="Catégorie du membre" required=true source=$user options=$categories}
 			{/if}
 
 			{if !$user->is_parent}

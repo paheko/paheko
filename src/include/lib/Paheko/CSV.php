@@ -353,6 +353,15 @@ class CSV
 
 				$row = self::rowToArray($row, $row_map_callback);
 
+				foreach ($row as $key => $value) {
+					if ($value instanceof \KD2\DB\Date) {
+						$row[$key] = $value->format('Y-m-d');
+					}
+					elseif ($value instanceof \DateTimeInterface) {
+						$row[$key] = $value->format('Y-m-d H:i:s');
+					}
+				}
+
 				fputs($fp, json_encode($row));
 			}
 		}
