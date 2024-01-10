@@ -129,6 +129,7 @@ class User extends Entity
 		$this->assert(!empty($this->id_category), 'Aucune catégorie n\'a été sélectionnée.');
 
 		$df = DynamicFields::getInstance();
+		$is_admin = DB::getInstance()->test('users_categories', 'id = ? AND perm_config = 9', $this->id_category);
 
 		foreach ($df->all() as $field) {
 			$value = $this->{$field->name};
@@ -140,6 +141,10 @@ class User extends Entity
 				elseif ($field->type === 'checkbox') {
 					$this->assert($value === false || $value === true, sprintf('"%s" : la valeur de ce champ n\'est pas valide.', $field->label));
 				}
+			}
+
+			if ($is_admin && empty($value) && $field->isLogin() && !empty($this->getModifiedProperty($field->name))) {
+				throw new ValidationException(sprintf('Le champ "%s" est vide. Cette action aurait pour effet d\'empêcher cet administrateur de se connecter. Si vous souhaitez empêcher ce membre de se connecter, modifiez sa catégorie.', $field->label));
 			}
 
 			if (!$field->required || $field->system & $field::PASSWORD) {

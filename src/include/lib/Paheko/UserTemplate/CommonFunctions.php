@@ -681,7 +681,7 @@ class CommonFunctions
 			'name'     => $name,
 			'label'    => $field->label,
 			'source'   => $source,
-			'disabled' => !empty($disabled),
+			'disabled' => !empty($params['disabled']),
 			'required' => $field->required,
 			'help'     => $field->help,
 			// Fix for autocomplete, lpignore is for Lastpass

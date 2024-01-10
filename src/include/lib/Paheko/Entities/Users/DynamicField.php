@@ -251,6 +251,11 @@ class DynamicField extends Entity
 		return (bool) ($this->system & self::NAMES);
 	}
 
+	public function isLogin(): bool
+	{
+		return (bool) ($this->system & self::LOGIN);
+	}
+
 	public function isNumber(): bool
 	{
 		return (bool) ($this->system & self::NUMBER);
