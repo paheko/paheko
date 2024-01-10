@@ -13,7 +13,21 @@ if (!defined('Paheko\CURRENT_SEARCH_TARGET') || !array_key_exists(CURRENT_SEARCH
 
 $access_section = CURRENT_SEARCH_TARGET == SE::TARGET_ACCOUNTING ? $session::SECTION_ACCOUNTING : $session::SECTION_USERS;
 
-Session::getInstance()->requireAccess($access_section, Session::ACCESS_READ);
+$session = Session::getInstance();
+$session->requireAccess($access_section, Session::ACCESS_READ);
+
+$is_admin = $session->canAccess($access_section, Session::ACCESS_ADMIN);
+$can_sql_unprotected = $session->canAccess(Session::SECTION_CONFIG, Session::ACCESS_ADMIN);
+
+if ($access_section === $session::SECTION_USERS) {
+	// Only admins of user section can do custom SQL queries
+	// to protect access-restricted user fields from being read
+	$can_sql = $is_admin;
+}
+else {
+	// anyone can do custom SQL queries in accounting
+	$can_sql = true;
+}
 
 $id = f('id') ?: qg('id');
 
@@ -106,12 +120,11 @@ if (!$default) {
 	}
 }
 
-$is_admin = $session->canAccess($access_section, $session::ACCESS_ADMIN);
 $schema = $s->schema();
 $columns = $s->getAdvancedSearch()->columns();
 $columns = array_filter($columns, fn($c) => $c['label'] ?? null && $c['type'] ?? null); // remove columns only for dynamiclist
 
-$tpl->assign(compact('s', 'list', 'header', 'results', 'columns', 'count', 'is_admin', 'schema'));
+$tpl->assign(compact('s', 'list', 'header', 'results', 'columns', 'count', 'is_admin', 'schema', 'can_sql', 'can_sql_unprotected'));
 
 if ($s->target == $s::TARGET_ACCOUNTING) {
 	$tpl->display('acc/search.tpl');
