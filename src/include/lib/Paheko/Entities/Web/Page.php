@@ -336,7 +336,7 @@ class Page extends Entity
 		}
 
 		if (isset($source['title']) && !$this->exists()) {
-			$source['uri'] = $source['title'];
+			$source['uri'] = Modifiers::remove_leading_number($source['title']);
 		}
 
 		if (isset($source['uri'])) {
