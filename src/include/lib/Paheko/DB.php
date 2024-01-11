@@ -6,6 +6,7 @@ use KD2\DB\SQLite3;
 use KD2\DB\DB_Exception;
 use KD2\ErrorManager;
 
+use Paheko\Users\DynamicFields;
 use Paheko\Entities\Email\Email;
 
 class DB extends SQLite3
@@ -245,6 +246,50 @@ class DB extends SQLite3
 		$db->createFunction('email_hash', [Email::class, 'getHash']);
 		$db->createFunction('md5', 'md5');
 		$db->createFunction('uuid', [Utils::class, 'uuid']);
+		$db->createFunction('print_binary', fn($value) => sprintf('%032d', decbin($value)));
+
+		$db->createFunction('print_dynamic_field', function($name, $value) {
+			$field = DynamicFields::get($name);
+
+			if (!$field) {
+				throw new DB_Exception(sprintf('There is no dynamic field with name "%s"', $name));
+			}
+
+			return $field->getStringValue($value);
+		});
+
+		$db->createFunction('match_dynamic_field', function($name, $value, ...$match) {
+			$field = DynamicFields::get($name);
+
+			if (!$field) {
+				throw new DB_Exception(sprintf('There is no dynamic field with name "%s"', $name));
+			}
+
+			if ($field->type === 'multiple') {
+				if (!is_int($value)) {
+					throw new DB_Exception(sprintf('The value "%s" is not an integer', $value));
+				}
+
+				foreach ($match as $search) {
+					$bit = array_search($search, $field->options, true);
+
+					if ($bit === false) {
+						throw new DB_Exception(sprintf('The option "%s" does not exist in field options', $search));
+					}
+
+					$found = $value & (1 << $bit);
+
+					if (!$found) {
+						return null;
+					}
+				}
+
+				return 1;
+			}
+
+			return $match === $value;
+		});
+
 		$db->createCollation('U_NOCASE', [Utils::class, 'unicodeCaseComparison']);
 	}
 
