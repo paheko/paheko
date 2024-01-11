@@ -209,7 +209,7 @@ class AdvancedSearch extends A_S
 		return array_merge(array_keys($this->schemaTables()), [
 			'users_search',
 			'user_files',
-			'user_view',
+			'users_view',
 		]);
 	}
 
