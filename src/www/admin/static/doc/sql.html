@@ -48,15 +48,20 @@
 		<link rel="stylesheet" type="text/css" href="../../../content.css" />
 	</head>
 	<body><div class="web-content"><div class="toc">
+	<ol>
+		<li><a href="#collations">Collations</a>
 		<ol>
-<ol>
-			<li><a href="#collation-u_nocase">Collation U_NOCASE</a></li>
+			<li><a href="#collation-u_nocase">Collation U_NOCASE</a>
+		</ol></li>
+		<li><a href="#fonctions">Fonctions</a>
+		<ol>
 			<li><a href="#fonction-transliterate_to_ascii">Fonction transliterate_to_ascii</a></li>
 			<li><a href="#fonction-email_hash">Fonction email_hash</a></li>
 			<li><a href="#fonction-print_dynamic_field">Fonction print_dynamic_field</a></li>
 			<li><a href="#fonction-match_dynamic_field">Fonction match_dynamic_field</a>
 </li></ol></li></ol></div><p>Paheko permet d'effectuer des requêtes SQL en lecture dans la base de données, que ça soit via son API, ou via les recherches avancées.</p>
 <p>Dans ce cas, certaines fonctionnalités additionnelles sont offertes par Paheko. Ces fonctionnalités ne sont bien sûr pas disponibles si la requête est effectuée avec un autre logiciel directement sur la base de données.</p>
+<h1 id="collations">Collations</h1>
 <h2 id="collation-u_nocase">Collation U_NOCASE</h2>
 <p>Cet algorithme de classement (<em>collation</em> en anglais), permet de trier des chaînes de texte UTF-8 sans prendre en compte les accents ni les différences de majuscules et minuscules.</p>
 <p>Il peut être utilisé dans les clauses <code>ORDER BY</code> ou de comparaison.</p>
@@ -71,6 +76,7 @@ Emilie
 Émilien
 Emma</code></pre>
 <p>Note : pour des raisons de performances, cette comparaison n'est effectuée que sur les 100 premiers caractères de la chaîne de texte.</p>
+<h1 id="fonctions">Fonctions</h1>
 <h2 id="fonction-transliterate_to_ascii">Fonction transliterate_to_ascii</h2>
 <p>Syntaxe : <code>transliterate_to_ascii(string value)</code></p>
 <p>Cette fonction permet de transformer une chaîne de texte UTF-8 en ASCII, sans accents, et en minuscules.</p>

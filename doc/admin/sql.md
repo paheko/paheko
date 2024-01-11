@@ -4,6 +4,8 @@ Paheko permet d'effectuer des requêtes SQL en lecture dans la base de données,
 
 Dans ce cas, certaines fonctionnalités additionnelles sont offertes par Paheko. Ces fonctionnalités ne sont bien sûr pas disponibles si la requête est effectuée avec un autre logiciel directement sur la base de données.
 
+# Collations
+
 ## Collation U_NOCASE
 
 Cet algorithme de classement (*collation* en anglais), permet de trier des chaînes de texte UTF-8 sans prendre en compte les accents ni les différences de majuscules et minuscules.
@@ -29,6 +31,8 @@ Emma
 ```
 
 Note : pour des raisons de performances, cette comparaison n'est effectuée que sur les 100 premiers caractères de la chaîne de texte.
+
+# Fonctions
 
 ## Fonction transliterate_to_ascii
 
