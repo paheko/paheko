@@ -109,8 +109,11 @@ $upload_here = $context_specific_root ? null : $dir->path;
 		if ($context_specific_root) {
 			$can_check = false;
 		}
-		elseif ($context === File::CONTEXT_USER || $context === File::CONTEXT_TRANSACTION) {
+		elseif ($context === File::CONTEXT_USER) {
 			$can_check = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
+		}
+		elseif ($context === File::CONTEXT_TRANSACTION) {
+			$can_check = $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 		}
 		else {
 			$can_check = $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE);
@@ -154,7 +157,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 			{else}
 				{if $item->isDir()}
 					<tr class="folder">
-						{if $can_check && $item->canDelete()}
+						{if $can_check}
 							<td class="check">
 								{input type="checkbox" name="check[]" value=$item.path}
 							</td>
@@ -176,7 +179,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 					</tr>
 				{else}
 					<tr{if $highlight == $item.name} class="highlight"{/if}>
-					{if $item->canDelete()}
+					{if $can_check}
 						<td class="check">
 							{input type="checkbox" name="check[]" value=$item.path}
 						</td>

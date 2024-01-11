@@ -12,11 +12,14 @@ if (!$file) {
 	throw new UserException('Fichier inconnu');
 }
 
-if (!$file->canDelete()) {
+$trash = qg('trash') !== 'no';
+
+if ($trash && !$file->canMoveToTrash()) {
+	throw new UserException('Vous n\'avez pas le droit de mettre ce fichier à la corbeille.');
+}
+elseif (!$trash && !$file->canDelete()) {
 	throw new UserException('Vous n\'avez pas le droit de supprimer ce fichier.');
 }
-
-$trash = qg('trash') !== 'no';
 
 $csrf_key = 'file_delete_' . $file->pathHash();
 $parent = $file->parent;
