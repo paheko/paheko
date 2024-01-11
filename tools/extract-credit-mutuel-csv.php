@@ -24,6 +24,11 @@ if (empty($argv[1]) || empty($argv[2])) {
 	exit(1);
 }
 
+if (!file_exists(TABULA_PATH)) {
+	printf("Tabula introuvable: %s\n", TABULA_PATH);
+	exit(1);
+}
+
 $path = $argv[1];
 $dest = $argv[2];
 
