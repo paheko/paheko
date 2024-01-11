@@ -1070,6 +1070,9 @@ class Utils
 		$a = self::utf8_encode($a);
 		$b = self::utf8_encode($b);
 
+		$a = mb_substr($a, 0, 100);
+		$b = mb_substr($b, 0, 100);
+
 		if (isset(self::$collator)) {
 			return (int) self::$collator->compare($a, $b);
 		}
