@@ -1,3 +1,5 @@
+[toc]
+
 Paheko permet d'effectuer des requêtes SQL en lecture dans la base de données, que ça soit via son API, ou via les recherches avancées.
 
 Dans ce cas, certaines fonctionnalités additionnelles sont offertes par Paheko. Ces fonctionnalités ne sont bien sûr pas disponibles si la requête est effectuée avec un autre logiciel directement sur la base de données.

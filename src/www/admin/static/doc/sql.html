@@ -47,7 +47,15 @@
 		</style>
 		<link rel="stylesheet" type="text/css" href="../../../content.css" />
 	</head>
-	<body><div class="web-content"><p>Paheko permet d'effectuer des requêtes SQL en lecture dans la base de données, que ça soit via son API, ou via les recherches avancées.</p>
+	<body><div class="web-content"><div class="toc">
+		<ol>
+<ol>
+			<li><a href="#collation-u_nocase">Collation U_NOCASE</a></li>
+			<li><a href="#fonction-transliterate_to_ascii">Fonction transliterate_to_ascii</a></li>
+			<li><a href="#fonction-email_hash">Fonction email_hash</a></li>
+			<li><a href="#fonction-print_dynamic_field">Fonction print_dynamic_field</a></li>
+			<li><a href="#fonction-match_dynamic_field">Fonction match_dynamic_field</a>
+</li></ol></li></ol></div><p>Paheko permet d'effectuer des requêtes SQL en lecture dans la base de données, que ça soit via son API, ou via les recherches avancées.</p>
 <p>Dans ce cas, certaines fonctionnalités additionnelles sont offertes par Paheko. Ces fonctionnalités ne sont bien sûr pas disponibles si la requête est effectuée avec un autre logiciel directement sur la base de données.</p>
 <h2 id="collation-u_nocase">Collation U_NOCASE</h2>
 <p>Cet algorithme de classement (<em>collation</em> en anglais), permet de trier des chaînes de texte UTF-8 sans prendre en compte les accents ni les différences de majuscules et minuscules.</p>
@@ -77,7 +85,8 @@ INNER JOIN emails e ON
   AND e.hash = email_hash(u.email)</code></pre>
 <h2 id="fonction-print_dynamic_field">Fonction print_dynamic_field</h2>
 <p>Syntaxe : <code>print_dynamic_field(string field_name, mixed value)</code></p>
-<p>Affiche la valeur du champ de la fiche membre. Utile pour afficher les champs de fiche membre de type "choix multiple".</p>
+<p>Affiche la valeur du champ de la fiche membre.</p>
+<p>Surtout utile pour afficher les champs de fiche membre de type "choix multiple".</p>
 <ul>
 <li>Le premier paramètre doit être le nom du champ entre guillemets,</li>
 <li>le second paramètre étant la valeur du champ (donc le nom de la colonne généralement)</li>
@@ -88,7 +97,7 @@ INNER JOIN emails e ON
 <h2 id="fonction-match_dynamic_field">Fonction match_dynamic_field</h2>
 <p>Syntaxe : <code>match_dynamic_field(string field_name, mixed value, mixed search[, mixed search...])</code></p>
 <p>Renvoie <code>1</code> si la condition de recherche passée en 3ème paramètre et suivants correspond à la valeur passée en second paramètre.</p>
-<p>Utile pour savoir si un champ de fiche membre à choix multiple correspond à une recherche.</p>
+<p>Surtout utile pour savoir si un champ de fiche membre à choix multiple correspond à une recherche.</p>
 <p>Il est possible de passer la chaîne <code>AND</code> ou <code>OR</code> en 3ème paramètre pour spécifier si la recherche doit vérifier la présence de tous les éléments ou seulement un des éléments. Si aucune chaîne n'est passée, c'est la condition <code>OR</code> qui sera utilisée.</p>
 <p>Exemple si on veut lister les membres inscrits au groupe de travail "Communication" :</p>
 <pre><code>SELECT nom
