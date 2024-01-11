@@ -26,6 +26,13 @@ if (empty($argv[1]) || empty($argv[2])) {
 
 if (!file_exists(TABULA_PATH)) {
 	printf("Tabula introuvable: %s\n", TABULA_PATH);
+	print("Téléchargez-le ici : https://github.com/tabulapdf/tabula/releases/download/v1.2.1/tabula-jar-1.2.1.zip\n");
+	print("Puis extraire le fichier tabula.jar dans ce répertoire.\n");
+	exit(1);
+}
+
+if (!exec('which java')) {
+	print("Java n\'est pas installé ?!\n");
 	exit(1);
 }
 
