@@ -270,6 +270,15 @@ class DB extends SQLite3
 					throw new DB_Exception(sprintf('The value "%s" is not an integer', $value));
 				}
 
+				$first = reset($match);
+
+				if ($first === 'AND' || $first === 'OR') {
+					array_shift($match);
+				}
+				else {
+					$first = 'OR';
+				}
+
 				foreach ($match as $search) {
 					$bit = array_search($search, $field->options, true);
 
@@ -279,12 +288,15 @@ class DB extends SQLite3
 
 					$found = $value & (1 << $bit);
 
-					if (!$found) {
+					if ($first === 'OR' && $found) {
+						return 1;
+					}
+					elseif ($first === 'AND' && !$found) {
 						return null;
 					}
 				}
 
-				return 1;
+				return $first === 'AND' ? 1 : null;
 			}
 
 			return $match === $value;
