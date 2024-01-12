@@ -141,6 +141,10 @@ class DynamicList implements \Countable
 		$this->title = $title;
 	}
 
+	public function getTitle(): string {
+		return $this->title;
+	}
+
 	public function setModifier(callable $fn) {
 		$this->modifier = $fn;
 	}
