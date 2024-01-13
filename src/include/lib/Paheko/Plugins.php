@@ -13,7 +13,7 @@ use Paheko\UserTemplate\Modules;
 use KD2\DB\EntityManager as EM;
 use KD2\ErrorManager;
 
-use const Paheko\{SYSTEM_SIGNALS, ADMIN_URL, WWW_URL, PLUGINS_ROOT, HOSTING_PROVIDER};
+use const Paheko\{SYSTEM_SIGNALS, ADMIN_URL, WWW_URL, PLUGINS_ROOT, HOSTING_PROVIDER, PLUGINS_ALLOWLIST, PLUGINS_BLACKLIST};
 
 class Plugins
 {
@@ -300,6 +300,16 @@ class Plugins
 				continue;
 			}
 
+			// Ignore plugin is not allowed
+			if (is_array(PLUGINS_ALLOWLIST) && !in_array($name, PLUGINS_ALLOWLIST, true)) {
+				continue;
+			}
+
+			// Ignore plugin if blocked
+			if (is_array(PLUGINS_BLOCKLIST) && in_array($name, PLUGINS_BLOCKLIST, true)) {
+				continue;
+			}
+
 			// Ignore existing plugins
 			if (in_array($name, $exists)) {
 				continue;
@@ -315,6 +325,16 @@ class Plugins
 
 	static public function install(string $name): Plugin
 	{
+		// Ignore plugin if not in whitelist
+		if (is_array(PLUGINS_ALLOWLIST) && !in_array($name, PLUGINS_ALLOWLIST, true)) {
+			throw new UserException('This plugin is not whitelisted: ' . $name);
+		}
+
+		// Ignore plugin if in blacklist
+		if (is_array(PLUGINS_BLACKLIST) && in_array($name, PLUGINS_BLACKLIST, true)) {
+			throw new UserException('This plugin is blacklisted: ' . $name);
+		}
+
 		$p = new Plugin;
 		$p->name = $name;
 
