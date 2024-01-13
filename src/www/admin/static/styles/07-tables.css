@@ -104,7 +104,7 @@ table.list tr.crossed th, table.list tr.crossed td, table.list .crossed a {
 }
 
 table.list tr:nth-child(even).disabled {
-    background: var(--gLightBackgroundColor);
+    background: rgba(var(--gSecondColor), 0.1);
 }
 
 .userOrder .cur {
