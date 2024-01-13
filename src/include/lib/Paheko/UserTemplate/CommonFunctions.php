@@ -60,13 +60,14 @@ class CommonFunctions
 		}
 
 		if ($type == 'file' && isset($attributes['accept']) && $attributes['accept'] == 'csv') {
+			$attributes['accept'] = '.csv,text/csv,application/csv,.CSV';
+			$help = ($help ?? '') . PHP_EOL . 'Format accepté : CSV';
+
 			if (CALC_CONVERT_COMMAND) {
-				$help = ($help ?? '') . PHP_EOL . 'Formats acceptés : CSV, LibreOffice Calc (ODS), ou Excel (XLSX)';
-				$attributes['accept'] = '.ods,application/vnd.oasis.opendocument.spreadsheet,.xls,application/vnd.ms-excel,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.csv,text/csv,application/csv';
-			}
-			else {
-				$help = ($help ?? '') . PHP_EOL . 'Format accepté : CSV';
-				$attributes['accept'] = '.csv,text/csv,application/csv';
+				$help .= ', LibreOffice Calc (ODS), ou Excel (XLSX)';
+				$attributes['accept'] .= ',.ods,.ODS,application/vnd.oasis.opendocument.spreadsheet'
+					. ',.xls,.XLS,application/vnd.ms-excel'
+					. ',.xlsx,.XLSX,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 			}
 		}
 
