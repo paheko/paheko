@@ -627,6 +627,7 @@ class Session extends \KD2\UserSession
 			'write'  => false,
 			'delete' => false,
 			'share'  => false,
+			'trash'  => false,
 		];
 
 		$file_permissions = $default;
@@ -661,7 +662,7 @@ class Session extends \KD2\UserSession
 
 			$file_permissions['read'] = $read;
 			$file_permissions['write'] =
-				$file_permissions['delete'] =
+				$file_permissions['trash'] =
 				$file_permissions['create'] = $write;
 			return $file_permissions[$permission];
 		}

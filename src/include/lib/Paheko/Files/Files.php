@@ -89,132 +89,144 @@ class Files
 		// Note USER context files are managed in Session::checkFilePermission
 
 		$p[File::CONTEXT_CONFIG] = [
-			'mkdir' => false,
-			'move' => false,
+			'mkdir'  => false,
+			'move'   => false,
 			'create' => false,
-			'read' => $s->isLogged(), // All config files can be accessed by all logged-in users
-			'write' => $is_admin,
+			'read'   => $s->isLogged(), // All config files can be accessed by all logged-in users
+			'write'  => $is_admin,
 			'delete' => false,
-			'share' => false,
+			'share'  => false,
+			'trash'  => false,
 		];
 
 		// Modules source code
 		$p[File::CONTEXT_MODULES . '/'] = [
-			'mkdir' => $is_admin,
-			'move' => $is_admin,
+			'mkdir'  => $is_admin,
+			'move'   => $is_admin,
 			'create' => $is_admin,
-			'read' => $s->isLogged(),
-			'write' => $is_admin,
+			'read'   => $s->isLogged(),
+			'write'  => $is_admin,
 			'delete' => $is_admin,
-			'share' => false,
+			'share'  => false,
+			'trash'  => $is_admin,
 		];
 
-		// Modules source code
+		// Modules root
 		$p[File::CONTEXT_MODULES] = [
-			'mkdir' => false,
-			'move' => false,
+			'mkdir'  => false,
+			'move'   => false,
 			'create' => false,
-			'read' => $s->isLogged(),
-			'write' => false,
+			'read'   => $s->isLogged(),
+			'write'  => false,
 			'delete' => false,
-			'share' => false,
+			'share'  => false,
+			'trash'  => false,
 		];
 
 		$p[File::CONTEXT_WEB . '//'] = [
-			'mkdir' => false,
-			'move' => false,
+			'mkdir'  => false,
+			'move'   => false,
 			'create' => $s->canAccess($s::SECTION_WEB, $s::ACCESS_WRITE),
-			'read' => $s->canAccess($s::SECTION_WEB, $s::ACCESS_READ),
-			'write' => $s->canAccess($s::SECTION_WEB, $s::ACCESS_WRITE),
+			'read'   => $s->canAccess($s::SECTION_WEB, $s::ACCESS_READ),
+			'write'  => $s->canAccess($s::SECTION_WEB, $s::ACCESS_WRITE),
 			'delete' => $s->canAccess($s::SECTION_WEB, $s::ACCESS_WRITE),
-			'share' => false,
+			'share'  => false,
+			'trash'  => $s->canAccess($s::SECTION_WEB, $s::ACCESS_WRITE),
 		];
 
 		// At root level of web you can only create new articles
 		$p[File::CONTEXT_WEB] = [
-			'mkdir' => $s->canAccess($s::SECTION_WEB, $s::ACCESS_WRITE),
-			'move' => false,
+			'mkdir'  => $s->canAccess($s::SECTION_WEB, $s::ACCESS_WRITE),
+			'move'   => false,
 			'create' => false,
-			'read' => $s->canAccess($s::SECTION_WEB, $s::ACCESS_READ),
-			'write' => false,
+			'read'   => $s->canAccess($s::SECTION_WEB, $s::ACCESS_READ),
+			'write'  => false,
 			'delete' => false,
-			'share' => false,
+			'share'  => false,
+			'trash'  => false,
 		];
 
 		// Documents: you can do everything as long as you have access
 		$p[File::CONTEXT_DOCUMENTS . '/'] = [
-			'mkdir' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
-			'move' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
+			'mkdir'  => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
+			'move'   => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
 			'create' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
-			'read' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_READ),
-			'write' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
+			'read'   => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_READ),
+			'write'  => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
 			'delete' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_ADMIN),
-			'share' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
+			'share'  => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
+			'trash'  => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
 		];
 
 		// The root directory cannot be deleted or renamed/moved
 		$p[File::CONTEXT_DOCUMENTS] = [
-			'mkdir' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
-			'move' => false,
+			'mkdir'  => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
+			'move'   => false,
 			'create' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
-			'read' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_READ),
-			'write' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
+			'read'   => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_READ),
+			'write'  => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
 			'delete' => false,
-			'share' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
+			'share'  => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_WRITE),
+			'trash'  => false,
 		];
 
 		// You can write in transaction subdirectories
 		$p[File::CONTEXT_TRANSACTION . '//'] = [
-			'mkdir' => false,
-			'move' => false,
+			'mkdir'  => false,
+			'move'   => false,
 			'create' => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_WRITE),
-			'read' => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_READ),
-			'write' => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_WRITE),
+			'read'   => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_READ),
+			'write'  => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_WRITE),
 			'delete' => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_ADMIN),
-			'share' => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_WRITE),
+			'share'  => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_WRITE),
+			'trash'  => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_WRITE),
 		];
 
 		// But not in root
 		$p[File::CONTEXT_TRANSACTION] = [
-			'mkdir' => false,
-			'move' => false,
-			'write' => false,
+			'mkdir'  => false,
+			'move'   => false,
+			'write'  => false,
 			'create' => false,
 			'delete' => false,
-			'read' => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_READ),
-			'share' => false,
+			'read'   => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_READ),
+			'share'  => false,
+			'trash'  => false,
 		];
 
 		// Not in trash
 		$p[File::CONTEXT_TRASH] = [
-			'mkdir' => false,
-			'move' => false,
-			'write' => false,
+			'mkdir'  => false,
+			'move'   => false,
+			'write'  => false,
 			'create' => false,
 			'delete' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_ADMIN),
-			'read' => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_READ),
-			'share' => false,
+			'read'   => $s->canAccess($s::SECTION_DOCUMENTS, $s::ACCESS_READ),
+			'share'  => false,
+			'trash'  => false,
 		];
 
 		// Not in versions
 		$p[File::CONTEXT_VERSIONS] = [
-			'mkdir' => false,
-			'move' => false,
-			'write' => false,
+			'mkdir'  => false,
+			'move'   => false,
+			'write'  => false,
 			'create' => false,
 			'delete' => false,
-			'read' => false,
-			'share' => false,
+			'read'   => false,
+			'share'  => false,
+			'trash'  => false,
 		];
 
 		$p[''] = [
-			'mkdir' => false,
-			'move' => false,
-			'write' => false,
+			'mkdir'  => false,
+			'move'   => false,
+			'write'  => false,
 			'create' => false,
 			'delete' => false,
-			'read' => true,
-			'share' => false,
+			'read'   => true,
+			'share'  => false,
+			'trash'  => false,
 		];
 
 

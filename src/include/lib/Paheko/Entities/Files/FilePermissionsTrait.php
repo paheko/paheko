@@ -90,7 +90,7 @@ trait FilePermissionsTrait
 			return false;
 		}
 
-		return $session->checkFilePermission($this->path, 'move');
+		return $session->checkFilePermission($this->path, 'trash');
 	}
 
 	public function canMoveTo(string $destination, Session $session = null): bool
