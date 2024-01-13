@@ -259,6 +259,10 @@ class DB extends SQLite3
 		});
 
 		$db->createFunction('match_dynamic_field', function($name, $value, ...$match) {
+			if (empty($value)) {
+				return null;
+			}
+
 			$field = DynamicFields::get($name);
 
 			if (!$field) {
