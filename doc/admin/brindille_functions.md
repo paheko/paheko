@@ -444,6 +444,112 @@ Mais cette fonction permet également d'appeler une API Paheko distante, dans ce
 
 ```
 
+## csv
+
+Permet de demander à l'utilisateur de charger un fichier CSV (ou XLSX/ODS, selon la configuration de Paheko), et ensuite d'associer les colonnes pour permettre d'utiliser ces données dans une boucle.
+
+| Paramètre | Obligatoire ou optionnel ? | Fonction |
+| :- | :- | :- |
+| action | obligatoire | Action à réaliser : `initialize`, `form`, `cancel_button`, `clear` |
+| name | optionnel | Définit le nom du fichier, utile s'il y a plusieurs fichiers CSV dans le même module. |
+| assign | optionnel | Assigner le tableau indiquant les informations du fichier CSV à la variable donnée en valeur. |
+
+Paramètres pour l'action `initialize` :
+
+| Paramètre | Obligatoire ou optionnel ? | Fonction |
+| :- | :- | :- |
+| columns | obligatoire | Tableau des colonnes qui pourront être utilisées, sous la forme clé => valeur. |
+| mandatory_columns | optionnel | Liste des clés de colonnes qui sont obligatoires. |
+
+Cette fonction est très puissante mais un peu complexe.
+
+Il faut commencer par définir les colonnes que nous voudrons pouvoir utiliser, dans un tableau :
+
+```
+{{:assign var="columns"
+  date="Date"
+  name="Nom"
+  address="Adresse"
+}}
+```
+
+La valeur représente le libellé par défaut de la colonne dans le tableau. La clé représente elle la clé unique qu'on pourra ensuite utiliser dans les données (voir plus bas).
+
+On peut ensuite définir les colonnes que nous souhaitons rendre obligatoire (en utilisant la clé unique) :
+
+```
+{{:assign var="mandatory_columns." value="name"}}
+{{:assign var="mandatory_columns." value="date"}}
+```
+
+Si ces colonnes ne sont pas fournies dans le fichier importé, l'import ne pourra pas continuer.
+
+On commence ensuite la procédure de chargement du CSV :
+
+```
+{{:csv action="initialize" name="import_noms" columns=$columns mandatory_columns=$mandatory_columns assign="csv"}}
+```
+
+La variable `$csv` contiendra ensuite les informations sur le fichier CSV actuellement chargé. Le tableau de cette variable contiendra les clés suivantes :
+
+* `ready` (booléen) : vaut `true` quand le fichier est chargé et que l'utilisateur a fait correspondre les colonnes
+* `loaded` (booléen) : vaut `true` quand le fichier est chargé
+* `columns` (tableau) : les colonnes, définies dans l'appel avec l'action `initialize`
+* `mandatory_columns` (tableau) : les colonnes requises, définies dans l'appel avec l'action `initialize`
+
+Les clés suivantes ne sont renseignées que quand `ready` vaut `true` :
+
+* `translation_table` (tableau) : le tableau associatif entre le numéro de colonne du fichier CSV (clé) et le nom des colonnes définies (valeur)
+* `header` (tableau) : la première ligne du fichier CSV chargé
+* `rows` (tableau) : les lignes du fichier CSV
+* `count` (entier) : le nombre de lignes du fichier CSV chargé
+* `skip` (entier) : le nombre de lignes à ignorer (généralement `1`, car la première ligne contient les entêtes des colonnes)
+
+À ce stade, rien n'est affiché. Il faut commencer par afficher le formulaire de chargement et de choix des colonnes si le fichier n'est pas encore chargé :
+
+```
+{{if !$csv.ready}}
+
+  {{:csv action="form"}}
+
+{{/if}}
+```
+
+Cet appel génère le formulaire complet HTML (`<form>…</form>`), il n'y a rien besoin d'ajouter. Il gère à la fois le formulaire de sélection du fichier CSV, et le formulaire permettant d'associer les colonnes du CSV aux colonnes demandées.
+
+Pour exploiter ensuite les données du CSV il faut d'abord vérifier qu'il est prêt à être utilisé, avec la variable `$csv.ready` :
+
+```
+{{if $csv.ready}}
+
+  {{#foreach from=$csv.rows item="row"}}
+    Nom : {{$row.name}}<br />
+    Adresse : {{$row.address}}<br />
+  {{/foreach}}
+
+{{/if}}
+```
+
+Il est conseillé d'ajouter dans la page du résultat un bouton pour annuler la procédure. Dans ce cas le CSV chargé sur le serveur sera supprimé :
+
+```
+<form method="post" action="">
+  <p>{{:csv action="cancel_button"}}</p>
+</form>
+```
+
+Quand on a terminé avec le CSV, de la même manière il faut faire appel à l'action `clear`.
+
+Note : il est possible de combiner l'usage de la fonction `csv` avec le paramètre `from` de `save` pour enregistrer en une fois toutes les lignes :
+
+```
+{{if $csv.ready}}
+  {{:save type="entry" from=$csv.rows validate_schema="./entry.schema.json"}}
+  {{:csv action="clear"}}
+  {{:redirect to="./"}}
+{{/if}}
+```
+
 # Fonctions relatives aux Modules
 
 ## save
@@ -457,6 +563,7 @@ Enregistre des données, sous la forme d'un document, dans la base de données, 
 | `validate_schema` | optionnel | Fichier de schéma JSON à utiliser pour valider les données avant enregistrement |
 | `validate_only` | optionnel | Liste des paramètres à valider (par exemple pour ne faire qu'une mise à jour partielle), séparés par des virgules. |
 | `assign_new_id` | optionnel | Si renseigné, le nouveau numéro unique du document sera indiqué dans cette variable. |
+| `from` | optionnel | Si renseigné avec un tableau, chaque entrée du tableau sera traitée comme un élément à enregistrer. |
 | … | optionnel | Autres paramètres : traités comme des valeurs à enregistrer dans le document |
 
 Si ni `key` ni `id` ne sont indiqués, un nouveau document sera créé avec un nouveau numéro (ID) unique.
@@ -484,6 +591,24 @@ Exemple de récupération du nouvel ID :
 ```
 {{:save titre="Coucou !" assign_new_id="id"}}
 Le document n°{{$id}} a bien été enregistré.
+```
+
+Le paramètre `from` est équivalent à appeler la fonction `save` dans une boucle. Ainsi au lieu de :
+
+```
+{{:assign var="documents." title="Titre 1"}}
+{{:assign var="documents." title="Titre 2"}}
+{{#foreach from=$documents item="doc"}}
+  {{:save title=$doc.title validate_schema="./document.schema.json"}}
+{{/foreach}}
+```
+
+On peut simplement utiliser :
+
+```
+{{:assign var="documents." title="Titre 1"}}
+{{:assign var="documents." title="Titre 2"}}
+{{:save from=$documents validate_schema="./document.schema.json"}}
 ```
 
 ### Validation avec un schéma JSON
