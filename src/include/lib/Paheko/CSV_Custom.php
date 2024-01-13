@@ -22,7 +22,8 @@ class CSV_Custom
 	{
 		$this->session = $session;
 		$this->key = $key;
-		$this->cache_key = $session ? $session::getUserId() . '_' . $key : null;
+		$id = $session::getUserId() ?: 'anon';
+		$this->cache_key = $id . '_' . $key;
 
 		if ($this->cache_key && !Static_Cache::hasExpired($this->cache_key)) {
 			$data = Static_Cache::import($this->cache_key);
@@ -48,7 +49,7 @@ class CSV_Custom
 	public function load(?array $file): void
 	{
 		if (empty($file['size']) || empty($file['tmp_name']) || empty($file['name'])) {
-			throw new UserException('Fichier invalide');
+			throw new UserException('Fichier invalide, ou aucun fichier fourni');
 		}
 
 		$path = $file['tmp_name'];
@@ -325,5 +326,35 @@ class CSV_Custom
 	public function getMandatoryColumns(): array
 	{
 		return $this->mandatory_columns;
+	}
+
+	public function export(): array
+	{
+		return [
+			'loaded'            => $this->loaded(),
+			'ready'             => $this->ready(),
+			'count'             => $this->count(),
+			'skip'              => $this->skip,
+			'columns'           => $this->columns,
+			'mandatory_columns' => $this->mandatory_columns,
+			'translation_table' => $this->translation,
+			'rows'              => $this->ready() ? $this->iterate() : null,
+			'header'            => $this->getHeader(),
+		];
+	}
+
+	public function getHeader(): ?array
+	{
+		if (!$this->ready()) {
+			return null;
+		}
+
+		$out = [];
+
+		foreach ($this->translation as $i => $name) {
+			$out[$name] = $this->columns[$name];
+		}
+
+		return $out;
 	}
 }
