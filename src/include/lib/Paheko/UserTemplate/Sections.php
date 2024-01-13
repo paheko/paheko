@@ -566,7 +566,8 @@ class Sections
 		}
 
 		$list->setConditions($where);
-		$list->setPageSize((int) ($params['max'] ?? 50));
+		$size = (int) ($params['max'] ?? 50);
+		$list->setPageSize($size === 0 ? null : $size);
 
 		if (isset($params['order'])) {
 			$list->orderBy($params['order'], $params['desc'] ?? false);
@@ -635,7 +636,7 @@ class Sections
 		if (!empty($params['export'])) {
 			$export_url = Utils::getSelfURI();
 			$export_url .= strstr($export_url, '?') ? '&export=' : '?export=';
-			printf('<p class="actions">%s</p>', CommonFunctions::exportmenu(['href' => $export_url, 'class' => 'menu-btn-right']));
+			printf('<p class="actions">%s</p>', CommonFunctions::exportmenu(['href' => $export_url, 'right' => true]));
 		}
 
 		$tpl->assign(compact('list'));
