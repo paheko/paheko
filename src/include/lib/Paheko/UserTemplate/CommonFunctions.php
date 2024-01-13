@@ -548,7 +548,7 @@ class CommonFunctions
 	static public function exportmenu(array $params): string
 	{
 		$url = $params['href'] ?? Utils::getSelfURI();
-		$suffix = $params['suffix'] ?? 'export=';
+		$suffix = $params['suffix'] ?? (!empty($params['table']) ? '_export=' : 'export=');
 
 		$url = str_replace([$suffix . 'csv', $suffix . 'ods', $suffix . 'xlsx'], '', $url);
 		$url = rtrim($url, '?&');
@@ -586,6 +586,7 @@ class CommonFunctions
 			}
 		}
 
+		unset($params['table'], $params['suffix']);
 		$params = array_merge($params, ['shape' => 'export', 'label' => $params['label'] ?? 'Export…']);
 		return self::linkmenu($params, $out);
 	}
