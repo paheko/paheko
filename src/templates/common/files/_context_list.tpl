@@ -7,8 +7,20 @@ if (!isset($files)) {
 
 $can_upload = false;
 $upload ??= $edit;
-$trash = isset($use_trash) && !$use_trash ? '&trash=no' : '';
-$delete_shape = !$trash ? 'trash' : 'delete';
+$delete_shape = null;
+
+if ($edit) {
+	$use_trash ??= true;
+
+	if ($use_trash && $file->canMoveToTrash()) {
+		$trash = '&trash=no';
+		$delete_shape = 'trash'
+	}
+	elseif (!$use_trash && $file->canDelete()) {
+		$trash = '';
+		$delete_shape = 'delete';
+	}
+}
 
 if ($edit
 	&& $upload
@@ -42,7 +54,7 @@ $button_label ??= "Ajouter un fichier";
 		</figcaption>
 		<span class="actions">
 			{linkbutton shape="download" href=$file->url(true) target="_blank" label="Télécharger"}
-			{if $edit && $file->canDelete()}
+			{if $delete_shape}
 				{linkbutton shape=$delete_shape target="_dialog" href="!common/files/delete.php?p=%s%s"|args:$file.path:$trash label="Supprimer"}
 			{/if}
 		</span>
