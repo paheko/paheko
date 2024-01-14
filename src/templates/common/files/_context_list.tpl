@@ -7,20 +7,7 @@ if (!isset($files)) {
 
 $can_upload = false;
 $upload ??= $edit;
-$delete_shape = null;
-
-if ($edit) {
-	$use_trash ??= true;
-
-	if ($use_trash && $file->canMoveToTrash()) {
-		$trash = '&trash=no';
-		$delete_shape = 'trash'
-	}
-	elseif (!$use_trash && $file->canDelete()) {
-		$trash = '';
-		$delete_shape = 'delete';
-	}
-}
+$use_trash ??= true;
 
 if ($edit
 	&& $upload
@@ -45,6 +32,20 @@ $button_label ??= "Ajouter un fichier";
 	<?php
 	if (!$file->canRead()) {
 		break;
+	}
+
+	$delete_shape = null;
+
+	if ($edit) {
+
+		if ($use_trash && $file->canMoveToTrash()) {
+			$trash = '&trash=no';
+			$delete_shape = 'trash';
+		}
+		elseif (!$use_trash && $file->canDelete()) {
+			$trash = '';
+			$delete_shape = 'delete';
+		}
 	}
 	?>
 	<figure class="file">
