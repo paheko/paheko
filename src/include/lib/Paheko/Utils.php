@@ -135,6 +135,9 @@ class Utils
 		elseif (preg_match('!^\d{2}/\d{2}/\d{4}$!', $ts)) {
 			return \DateTime::createFromFormat('!d/m/Y', $ts);
 		}
+		elseif (preg_match('!^\d{2}/\d{2}/\d{2}$!', $ts)) {
+			return \DateTime::createFromFormat('!d/m/y', $ts);
+		}
 		elseif (strlen($ts) == 10) {
 			return \DateTime::createFromFormat('!Y-m-d', $ts);
 		}
