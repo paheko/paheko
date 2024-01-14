@@ -37,13 +37,12 @@ $button_label ??= "Ajouter un fichier";
 	$delete_shape = null;
 
 	if ($edit) {
-
 		if ($use_trash && $file->canMoveToTrash()) {
-			$trash = '&trash=no';
+			$trash = '';
 			$delete_shape = 'trash';
 		}
 		elseif (!$use_trash && $file->canDelete()) {
-			$trash = '';
+			$trash = '&trash=no';
 			$delete_shape = 'delete';
 		}
 	}
