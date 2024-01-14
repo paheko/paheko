@@ -425,6 +425,10 @@ class CSV
 
 			$header = fgetcsv($fp, 4096, $delim);
 
+			if ($header === false) {
+				throw new UserException('Impossible de trouver l\'entête du tableau');
+			}
+
 			// Make sure the data is UTF-8 encoded
 			$header = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $header);
 
