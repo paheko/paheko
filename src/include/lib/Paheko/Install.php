@@ -350,7 +350,7 @@ class Install
 		Modules::refresh();
 
 		// Install welcome plugin if available
-		$has_welcome_plugin = Plugins::exists('welcome');
+		$has_welcome_plugin = Plugins::exists('welcome') && Plugins::isAllowed('welcome');
 
 		if ($has_welcome_plugin) {
 			Plugins::install('welcome');

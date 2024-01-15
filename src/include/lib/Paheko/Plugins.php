@@ -300,13 +300,7 @@ class Plugins
 				continue;
 			}
 
-			// Ignore plugin is not allowed
-			if (is_array(PLUGINS_ALLOWLIST) && !in_array($name, PLUGINS_ALLOWLIST, true)) {
-				continue;
-			}
-
-			// Ignore plugin if blocked
-			if (is_array(PLUGINS_BLOCKLIST) && in_array($name, PLUGINS_BLOCKLIST, true)) {
+			if (!self::isAllowed($name)) {
 				continue;
 			}
 
@@ -323,16 +317,25 @@ class Plugins
 		return $list;
 	}
 
-	static public function install(string $name): Plugin
+	static public function isAllowed(string $name): bool
 	{
 		// Ignore plugin if not in whitelist
 		if (is_array(PLUGINS_ALLOWLIST) && !in_array($name, PLUGINS_ALLOWLIST, true)) {
-			throw new UserException('This plugin is not allowed: ' . $name);
+			return false;
 		}
 
 		// Ignore plugin if in blacklist
 		if (is_array(PLUGINS_BLOCKLIST) && in_array($name, PLUGINS_BLOCKLIST, true)) {
-			throw new UserException('This plugin is blocked: ' . $name);
+			return false;
+		}
+
+		return true;
+	}
+
+	static public function install(string $name): Plugin
+	{
+		if (!self::isAllowed($name)) {
+			throw new \RuntimeException('This plugin is not allowed: ' . $name);
 		}
 
 		$p = new Plugin;
