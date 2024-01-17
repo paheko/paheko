@@ -91,6 +91,7 @@ footer.public {
     max-width: 650px;
     margin: 3rem auto 0 auto;
     padding-top: .5rem;
+    color: #999;
 }
 
 footer.public a {

@@ -36,7 +36,7 @@
 	{/if}
 </aside>
 
-{if !$has_extensions}
+{if !$has_extensions && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
 <div class="expose-extensions block">
 	<h2>Besoin d'autres fonctionnalités&nbsp;?</h2>
 	<p>Découvrez ces extensions dans le menu <strong>Configuration</strong>, onglet <strong>Extensions</strong>&nbsp;:</p>
