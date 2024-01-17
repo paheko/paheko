@@ -75,7 +75,7 @@ release: test minify doc
 
 	# Download plugins and only keep the stable ones
 	cd /tmp/paheko-build/paheko/src/data && \
-		wget https://fossil.kd2.org/paheko-plugins/zip/dev/plugins.zip && \
+		wget https://fossil.kd2.org/paheko-plugins/zip/trunk/plugins.zip && \
 		unzip -o plugins.zip && \
 		rm -rf `find plugins/ -name 'ignore' -type f -execdir pwd \;` && \
 		rm -f plugins.zip
