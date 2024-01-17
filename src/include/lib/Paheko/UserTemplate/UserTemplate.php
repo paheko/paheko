@@ -86,17 +86,17 @@ class UserTemplate extends \KD2\Brindille
 			$v = $config->fileURL($k);
 		});
 
-		$config = array_intersect_key($config->asArray(), array_flip($keys));
-		$config['files'] = $files;
+		$cfg = array_intersect_key($config->asArray(), array_flip($keys));
+		$cfg['files'] = $files;
 
 		// @deprecated
 		// FIXME: remove in a future version
-		$config['nom_asso'] = $config['org_name'];
-		$config['adresse_asso'] = $config['org_address'];
-		$config['email_asso'] = $config['org_email'];
-		$config['telephone_asso'] = $config['org_phone'];
-		$config['site_asso'] = $config['org_web'];
-		$config['user_fields'] = [
+		$cfg['nom_asso'] = $cfg['org_name'];
+		$cfg['adresse_asso'] = $cfg['org_address'];
+		$cfg['email_asso'] = $cfg['org_email'];
+		$cfg['telephone_asso'] = $cfg['org_phone'];
+		$cfg['site_asso'] = $cfg['org_web'];
+		$cfg['user_fields'] = [
 			'number'   => DynamicFields::getNumberField(),
 			'login'    => DynamicFields::getLoginField(),
 			'email'    => DynamicFields::getEmailFields(),
@@ -114,11 +114,11 @@ class UserTemplate extends \KD2\Brindille
 			'request_url'  => Utils::getRequestURI(),
 			'admin_url'    => ADMIN_URL,
 			'base_url'     => BASE_URL,
-			'site_url'     => $config['site_disabled'] && $config['org_web'] ? $config['org_web'] : WWW_URL,
+			'site_url'     => $config->getSiteURL(),
 			'_GET'         => &$_GET,
 			'_POST'        => &$_POST,
 			'visitor_lang' => Translate::getHttpLang(),
-			'config'       => $config,
+			'config'       => $cfg,
 			'now'          => time(),
 			'is_logged'    => $is_logged,
 			'logged_user'  => $is_logged ? $session->getUser()->asModuleArray() : null,
@@ -611,6 +611,12 @@ class UserTemplate extends \KD2\Brindille
 				$this->headers['disposition'],
 				Utils::safeFileName($this->headers['filename'])
 			), true);
+
+			if ($this->headers['disposition'] === 'inline') {
+				// Seems that this is required for Chrome
+				// @see https://stackoverflow.com/questions/71679544/content-disposition-inline-filename-not-working
+				header('Cache-Control: no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0', true);
+			}
 		}
 	}
 

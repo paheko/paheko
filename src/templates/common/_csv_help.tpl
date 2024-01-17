@@ -2,7 +2,7 @@
 	Merci de respecter les règles suivantes&nbsp;:
 	<ul>
 	{if !CALC_CONVERT_COMMAND}
-		<li>Il est recommandé d'utiliser LibreOffice pour créer le fichier CSV</li>
+		<li>Il est recommandé d'utiliser LibreOffice pour créer le fichier CSV, Excel est très mauvais pour ça.</li>
 		<li>Le fichier doit être en UTF-8</li>
 		<li>Le séparateur doit être le point-virgule ou la virgule</li>
 		<li>Cocher l'option <em>"Mettre en guillemets toutes les cellules du texte"</em></li>

@@ -16,35 +16,39 @@ if (!$user) {
 	throw new UserException("Ce membre n'existe pas.");
 }
 
-// Protection contre la modification des admins par des membres moins puissants
-$category = $user->category();
+// Protect against admin users being deleted/modified by less powerful users
+$user->validateCanChange($session);
 
-if (($category->perm_users == $session::ACCESS_ADMIN)
-	&& !$session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)) {
-	throw new UserException("Seul un membre administrateur peut modifier un autre membre administrateur.");
-}
-
+$categories = Categories::listAssocSafe($session);
 $csrf_key = 'user_edit_' . $user->id;
+$can_change_category = array_key_exists($user->id_category, $categories);
 
-$form->runIf('save', function () use ($user, $session) {
+$form->runIf('save', function () use ($user, $session, $can_change_category) {
 	$user->importForm();
+	$myself = $user->id == $session::getUserId();
 
 	if (empty($_POST['id_parent'])) {
 		$user->set('id_parent', null);
 	}
 
-	// Only admins can set a category
-	if (f('id_category') && $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)) {
-		$user->set('id_category', (int) f('id_category'));
+	if ($can_change_category && !($session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN) && $myself)) {
+		$user->setCategorySafe((int) f('id_category'), $session);
 	}
 
 	$user->save();
-}, $csrf_key, '!users/details.php?id=' . $user->id);
 
-$categories = Categories::listAssoc();
+	if ($myself) {
+		$session->refresh();
+
+		// If user has removed their own rights to access users, redirect to admin homepage
+		if (!$session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)) {
+			Utils::redirect('!');
+		}
+	}
+}, $csrf_key, '!users/details.php?id=' . $user->id);
 
 $fields = DF::getInstance()->all();
 
-$tpl->assign(compact('user', 'categories', 'fields', 'csrf_key'));
+$tpl->assign(compact('user', 'categories', 'fields', 'csrf_key', 'can_change_category'));
 
 $tpl->display('users/edit.tpl');

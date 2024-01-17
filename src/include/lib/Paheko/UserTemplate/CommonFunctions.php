@@ -60,13 +60,14 @@ class CommonFunctions
 		}
 
 		if ($type == 'file' && isset($attributes['accept']) && $attributes['accept'] == 'csv') {
+			$attributes['accept'] = '.csv,text/csv,application/csv,.CSV';
+			$help = ($help ?? '') . PHP_EOL . 'Format accepté : CSV';
+
 			if (CALC_CONVERT_COMMAND) {
-				$help = ($help ?? '') . PHP_EOL . 'Formats acceptés : CSV, LibreOffice Calc (ODS), ou Excel (XLSX)';
-				$attributes['accept'] = '.ods,application/vnd.oasis.opendocument.spreadsheet,.xls,application/vnd.ms-excel,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.csv,text/csv,application/csv';
-			}
-			else {
-				$help = ($help ?? '') . PHP_EOL . 'Format accepté : CSV';
-				$attributes['accept'] = '.csv,text/csv,application/csv';
+				$help .= ', LibreOffice Calc (ODS), ou Excel (XLSX)';
+				$attributes['accept'] .= ',.ods,.ODS,application/vnd.oasis.opendocument.spreadsheet'
+					. ',.xls,.XLS,application/vnd.ms-excel'
+					. ',.xlsx,.XLSX,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 			}
 		}
 
@@ -548,7 +549,7 @@ class CommonFunctions
 	static public function exportmenu(array $params): string
 	{
 		$url = $params['href'] ?? Utils::getSelfURI();
-		$suffix = $params['suffix'] ?? 'export=';
+		$suffix = $params['suffix'] ?? (!empty($params['table']) ? '_export=' : 'export=');
 
 		$url = str_replace([$suffix . 'csv', $suffix . 'ods', $suffix . 'xlsx'], '', $url);
 		$url = rtrim($url, '?&');
@@ -586,6 +587,7 @@ class CommonFunctions
 			}
 		}
 
+		unset($params['table'], $params['suffix']);
 		$params = array_merge($params, ['shape' => 'export', 'label' => $params['label'] ?? 'Export…']);
 		return self::linkmenu($params, $out);
 	}
@@ -673,7 +675,11 @@ class CommonFunctions
 		}
 		elseif ($context === 'user_edit' && $field->user_access_level === Session::ACCESS_READ) {
 			$v = self::user_field(['name' => $name, 'value' => $params['user']->$name]);
-			return sprintf('<dt>%s</dt><dd>%s</dd>', $field->label, $v ?: '<em>Non renseigné</em>');
+			return sprintf('<dt>%s</dt><dd>%s</dd>', htmlspecialchars($field->label), $v ?: '<em>Non renseigné</em>');
+		}
+
+		if (isset($params['session']) && !$params['session']->canAccess(Session::SECTION_USERS, $field->management_access_level)) {
+			return '';
 		}
 
 		$params = [
@@ -681,7 +687,7 @@ class CommonFunctions
 			'name'     => $name,
 			'label'    => $field->label,
 			'source'   => $source,
-			'disabled' => !empty($disabled),
+			'disabled' => !empty($params['disabled']),
 			'required' => $field->required,
 			'help'     => $field->help,
 			// Fix for autocomplete, lpignore is for Lastpass

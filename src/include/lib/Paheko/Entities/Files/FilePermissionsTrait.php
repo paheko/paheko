@@ -82,6 +82,17 @@ trait FilePermissionsTrait
 		return $session->checkFilePermission($this->path, 'delete');
 	}
 
+	public function canMoveToTrash(Session $session = null): bool
+	{
+		$session ??= Session::getInstance();
+
+		if (!$session->isLogged()) {
+			return false;
+		}
+
+		return $session->checkFilePermission($this->path, 'trash');
+	}
+
 	public function canMoveTo(string $destination, Session $session = null): bool
 	{
 		$session ??= Session::getInstance();

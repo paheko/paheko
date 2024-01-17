@@ -7,12 +7,14 @@ use Paheko\Users\Session;
 use Paheko\Web\Web;
 use Paheko\Accounting\Accounts;
 use Paheko\Accounting\Charts;
+use Paheko\Accounting\Export;
 use Paheko\Accounting\Reports;
 use Paheko\Accounting\Transactions;
 use Paheko\Accounting\Years;
 use Paheko\Entities\Accounting\Transaction;
 use Paheko\Search;
 use Paheko\Services\Services_User;
+use Paheko\Users\Categories;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Users;
 use Paheko\Files\Files;
@@ -198,8 +200,82 @@ class API
 		$fn2 = strtok('/');
 		strtok('');
 
-		// CSV import
-		if ($fn == 'import') {
+		if ($fn === 'categories') {
+			return Categories::listWithStats();
+		}
+		elseif ($fn === 'category') {
+			$id = (int) strtok($fn2, '.');
+			$format = strtok('');
+
+			try {
+				Users::exportCategory($format ?: 'json', $id);
+			}
+			catch (\InvalidArgumentException $e) {
+				throw new APIException($e->getMessage(), 400, $e);
+			}
+
+			return null;
+		}
+		elseif ($fn === 'new') {
+			$this->requireAccess(Session::ACCESS_WRITE);
+
+			$user = Users::create();
+			$user->importForm($this->params);
+			$user->setNumberIfEmpty();
+
+			if (empty($this->params['force_duplicate']) && $user->checkDuplicate()) {
+				throw new APIException('This user seems to be a duplicate of an existing one', 409);
+			}
+
+			if (!empty($this->params['id_category']) && !$user->setCategorySafeNoConfig($this->params['id_category'])) {
+				throw new APIException('You are not allowed to create a user in this category', 403);
+			}
+
+			if (isset($this->params['password'])) {
+				$user->importSecurityForm(false, ['password' => $this->params['password'], 'password_confirmed' => $this->params['password']]);
+			}
+
+			$user->save();
+
+			return $user->exportAPI();
+		}
+		elseif (ctype_digit($fn)) {
+			$user = Users::get((int)$fn);
+
+			if (!$user) {
+				throw new APIException('The requested user ID does not exist', 404);
+			}
+
+			if ($this->method === 'POST') {
+				$this->requireAccess(Session::ACCESS_WRITE);
+
+				try {
+					$user->validateCanChange();
+				}
+				catch (UserException $e) {
+					throw new APIException($e->getMessage(), 403, $e);
+				}
+
+				$user->importForm($this->params);
+				$user->save();
+			}
+			elseif ($this->method === 'DELETE') {
+				$this->requireAccess(Session::ACCESS_ADMIN);
+
+				try {
+					$user->validateCanChange();
+				}
+				catch (UserException $e) {
+					throw new APIException($e->getMessage(), 403, $e);
+				}
+
+				$user->delete();
+				return ['success' => true];
+			}
+
+			return $user->exportAPI();
+		}
+		elseif ($fn === 'import') {
 			$fp = null;
 
 			if ($this->method === 'PUT') {
@@ -480,66 +556,6 @@ class API
 				throw new APIException('Unknown transactions route', 404);
 			}
 		}
-		elseif ($fn == 'years') {
-			if ($this->method != 'GET') {
-				throw new APIException('Wrong request method', 400);
-			}
-
-			if (($p1 === 'current' || ($p1 && ctype_digit($p1))) && ($p2 === 'journal' || $p2 === 'account/journal')) {
-				if ($p1 === 'current') {
-					$id_year = Years::getCurrentOpenYearId();
-
-					if (!$id_year) {
-						throw new APIException('There are no currently open years', 404);
-					}
-				}
-				else {
-					$id_year = (int)$p1;
-				}
-
-				if ($p2 == 'journal') {
-					try {
-						return iterator_to_array(Reports::getJournal(['year' => $id_year]));
-					}
-					catch (\LogicException $e) {
-						throw new APIException('Missing parameter for journal: ' . $e->getMessage(), 400, $e);
-					}
-				}
-				else {
-					$year = Years::get($id_year);
-
-					if (!$year) {
-						throw new APIException('Invalid year.', 400, $e);
-					}
-
-					$a = $year->chart()->accounts();
-
-					if (!empty($this->params['code'])) {
-						$account = $a->getWithCode($this->params['code']);
-					}
-					else {
-						$account = $a->get((int)$this->params['code'] ?? null);
-					}
-
-					if (!$account) {
-						throw new APIException('Unknown account id or code.', 400, $e);
-					}
-
-					$list = $account->listJournal($year->id, false);
-					$list->setTitle(sprintf('Journal - %s - %s', $account->code, $account->label));
-					$list->loadFromQueryString();
-					$list->setPageSize(null);
-					$list->orderBy('date', false);
-					return iterator_to_array($list->iterate());
-				}
-			}
-			elseif (!$p1 && !$p2) {
-				return Years::list();
-			}
-			else {
-				throw new APIException('Unknown years action', 404);
-			}
-		}
 		elseif ($fn == 'charts') {
 			if ($this->method != 'GET') {
 				throw new APIException('Wrong request method', 400);
@@ -554,6 +570,74 @@ class API
 			}
 			else {
 				throw new APIException('Unknown charts action', 404);
+			}
+		}
+		elseif ($fn == 'years') {
+			if ($this->method != 'GET') {
+				throw new APIException('Wrong request method', 400);
+			}
+
+			if (!$p1 && !$p2) {
+				return Years::list();
+			}
+
+			$id_year = null;
+
+			if ($p1 === 'current') {
+				$id_year = Years::getCurrentOpenYearId();
+			}
+			elseif ($p1 && ctype_digit($p1)) {
+				$id_year = (int)$p1;
+			}
+
+			if (!$id_year) {
+				throw new APIException('Missing year in request, or no open years exist', 400);
+			}
+
+			$year = Years::get($id_year);
+
+			if (!$year) {
+				throw new APIException('Invalid year.', 400, $e);
+			}
+
+			if ($p2 === 'journal') {
+				try {
+					return iterator_to_array(Reports::getJournal(['year' => $id_year]));
+				}
+				catch (\LogicException $e) {
+					throw new APIException('Missing parameter for journal: ' . $e->getMessage(), 400, $e);
+				}
+			}
+			elseif (0 === strpos($p2, 'export/')) {
+				strtok($p2, '/');
+				$type = strtok('.');
+				$format = strtok('');
+				Export::export($year, $format, $type);
+				return null;
+			}
+			elseif ($p2 === 'account/journal') {
+				$a = $year->chart()->accounts();
+
+				if (!empty($this->params['code'])) {
+					$account = $a->getWithCode($this->params['code']);
+				}
+				else {
+					$account = $a->get((int)$this->params['code'] ?? null);
+				}
+
+				if (!$account) {
+					throw new APIException('Unknown account id or code.', 400, $e);
+				}
+
+				$list = $account->listJournal($year->id, false);
+				$list->setTitle(sprintf('Journal - %s - %s', $account->code, $account->label));
+				$list->loadFromQueryString();
+				$list->setPageSize(null);
+				$list->orderBy('date', false);
+				return iterator_to_array($list->iterate());
+			}
+			else {
+				throw new APIException('Unknown years action', 404);
 			}
 		}
 		else {

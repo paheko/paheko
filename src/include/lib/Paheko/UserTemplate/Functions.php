@@ -10,7 +10,9 @@ use KD2\Security;
 use Paheko\API;
 use Paheko\APIException;
 use Paheko\Config;
+use Paheko\CSV_Custom;
 use Paheko\DB;
+use Paheko\DynamicList;
 use Paheko\Extensions;
 use Paheko\Template;
 use Paheko\Utils;
@@ -51,6 +53,7 @@ class Functions
 		'admin_files',
 		'delete_file',
 		'api',
+		'csv',
 	];
 
 	const COMPILE_FUNCTIONS_LIST = [
@@ -136,6 +139,35 @@ class Functions
 			throw new Brindille_Exception('Module name could not be found');
 		}
 
+		$db = DB::getInstance();
+
+		if (isset($params['from'])) {
+			if (!is_array($params['from'])) {
+				throw new Brindille_Exception('"from" parameter is not an array');
+			}
+
+			$from = $params['from'];
+			unset($params['from']);
+			$db->begin();
+
+			try {
+				foreach ($from as $key => $row) {
+					if (!is_array($row) && !is_object($row)) {
+						throw new Brindille_Exception('"from" parameter item is not an array on index: ' . $key);
+					}
+
+					self::save(array_merge($params, (array)$row), $tpl, $line);
+				}
+			}
+			catch (Brindille_Exception|DB_Exception $e) {
+				$db->rollback();
+				throw $e;
+			}
+
+			$db->commit();
+			return;
+		}
+
 		$table = 'module_data_' . $tpl->module->name;
 
 		if (!empty($params['key'])) {
@@ -162,8 +194,6 @@ class Functions
 		$validate_only = $params['validate_only'] ?? null;
 
 		unset($params['key'], $params['id'], $params['assign_new_id'], $params['validate_schema'], $params['validate_only']);
-
-		$db = DB::getInstance();
 
 		if ($key == 'config') {
 			$result = $db->firstColumn(sprintf('SELECT config FROM %s WHERE name = ?;', Module::TABLE), $tpl->module->name);
@@ -634,7 +664,8 @@ class Functions
 
 	static public function _getFormKey(): string
 	{
-		return 'form_' . md5(Utils::getSelfURI(false));
+		$uri = preg_replace('![^/]*$!', '', Utils::getSelfURI(false));
+		return 'form_' . md5($uri);
 	}
 
 	/**
@@ -824,5 +855,148 @@ class Functions
 		if ($assign) {
 			$ut->assign($assign, $return);
 		}
+	}
+
+	static public function csv(array $params, UserTemplate $ut, int $line): string
+	{
+		if (!$ut->module) {
+			throw new Brindille_Exception('Module name could not be found');
+		}
+
+		static $sheets = [];
+
+		$action = $params['action'] ?? null;
+
+		if (empty($sheets) && $action !== 'initialize') {
+			throw new Brindille_Exception('"action" parameter is missing or is not "initialize"');
+		}
+
+		if (empty($params['name'])) {
+			if (count($sheets)) {
+				$name = key($sheets);
+			}
+			else {
+				$name = 'default';
+				$name = $ut->module->name . '_' . $name;
+			}
+		}
+		else {
+			$name = $params['name'];
+			$name = $ut->module->name . '_' . $name;
+		}
+
+		if ($action === 'initialize') {
+			$session = Session::getInstance();
+
+			if (!$session->isLogged()) {
+				throw new Brindille_Exception('This function may only be called by a logged-in user');
+			}
+
+			if (empty($params['columns']) || !is_array($params['columns'])) {
+				throw new Brindille_Exception('"columns" parameter is missing or is empty');
+			}
+
+			$sheets[$name] = new CSV_Custom($session, $name);
+
+			$csv->setColumns($params['columns']);
+
+			if (!empty($params['mandatory_columns']) && is_array($params['mandatory_columns'])) {
+				$csv->setMandatoryColumns($params['mandatory_columns']);
+			}
+
+			if (!empty($_POST['csv_cancel'])) {
+				$csv->clear();
+				Utils::redirect(Utils::getSelfURI());
+			}
+			elseif (($key = self::_getFormKey()) && \KD2\Form::tokenCheck($key)) {
+				if (!empty($_POST['csv_upload'])) {
+					$csv->load($_FILES['csv'] ?? []);
+					Utils::redirect(Utils::getSelfURI());
+				}
+				elseif (!empty($_POST['translation_table'])) {
+					$csv->setTranslationTable($_POST['translation_table']);
+					Utils::redirect(Utils::getSelfURI());
+				}
+			}
+		}
+
+		if (empty($sheets[$name])) {
+			throw new Brindille_Exception(sprintf('"name" parameter is referencing an unknown instance: "%s"', $name));
+		}
+
+		$csv =& $sheets[$name];
+
+		if ($action === 'clear') {
+			$csv->clear();
+		}
+		elseif ($action === 'form') {
+			if ($csv->ready()) {
+				return '';
+			}
+
+			if (!$csv->loaded()) {
+				$tpl = Template::getInstance();
+				$tpl->assign('csv', $csv);
+				$help = $tpl->fetch('common/_csv_help.tpl');
+				$input = CommonFunctions::input([
+					'required' => true,
+					'label'    => $params['label'] ?? 'Fichier',
+					'name'     => 'csv',
+					'type'     => 'file',
+				]);
+				$button = self::button([
+					'type'  => 'submit',
+					'name'  => 'csv_upload',
+					'label' => 'Configurer',
+					'shape' => 'right',
+					'class' => 'main',
+				]);
+
+				return sprintf('<form method="post" action="" enctype="multipart/form-data"><fieldset><legend>%s</legend><dl>%s%s</dl></fieldset><p class="submit">%s</p></form>',
+					htmlspecialchars($params['legend'] ?? 'Charger un fichier'),
+					$input,
+					$help,
+					$button
+				);
+			}
+			else {
+				$tpl = Template::getInstance();
+				$tpl->assign('csv', $csv);
+				$form = $tpl->fetch('common/_csv_match_columns.tpl');
+
+				$button = self::button([
+					'type'  => 'submit',
+					'name'  => 'csv_set_translation_table',
+					'label' => 'Continuer',
+					'shape' => 'right',
+					'class' => 'main',
+				]);
+
+				return sprintf('<form method="post" action="">%s<p class="submit">%s%s</p></form>',
+					$form,
+					self::csv(['action' => 'cancel_button'], $ut, $line),
+					$button
+				);
+			}
+		}
+		elseif ($action === 'cancel_button') {
+			return self::button([
+				'type'  => 'submit',
+				'name'  => 'csv_cancel',
+				'label' => 'Annuler',
+				'shape' => 'left',
+			]);
+		}
+		elseif ($action && $action !== 'initialize') {
+			throw new Brindille_Exception('Unknown action: ' . $action);
+		}
+
+		$assign = $params['assign'] ?? null;
+
+		if ($assign) {
+			$ut->assign($assign, $csv->export());
+		}
+
+		return '';
 	}
 }

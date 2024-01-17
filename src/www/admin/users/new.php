@@ -14,8 +14,13 @@ $user = Users::create();
 $is_duplicate = null;
 
 $form->runIf('save', function () use ($user, $session, &$is_duplicate) {
-	if ($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && !empty($_POST['id_category'])) {
-		$user->set('id_category', (int) $_POST['id_category']);
+	$id_category = (int)f('id_category');
+
+	if ($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)) {
+		$user->set('id_category', $id_category);
+	}
+	else {
+		$user->setCategorySafe($id_category, $session);
 	}
 
 	$user->importForm();
@@ -36,7 +41,7 @@ $tpl->assign('id_field_name', DynamicFields::getLoginField());
 $tpl->assign('passphrase', Utils::suggestPassword());
 $tpl->assign('fields', DynamicFields::getInstance()->all());
 
-$tpl->assign('categories', Categories::listAssoc());
+$tpl->assign('categories', Categories::listAssocSafe($session));
 $default_category = Config::getInstance()->default_category;
 $tpl->assign('current_cat', f('id_category') ?: $default_category);
 

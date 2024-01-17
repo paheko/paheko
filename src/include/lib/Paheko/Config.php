@@ -281,6 +281,18 @@ class Config extends Entity
 		$this->assert($db->test('users_categories', 'id = ?', $this->default_category), 'Catégorie de membres inconnue');
 	}
 
+	public function getSiteURL(): ?string
+	{
+		if ($this->site_disabled && $this->org_web) {
+			return $this->org_web;
+		}
+		elseif ($this->site_disabled) {
+			return null;
+		}
+
+		return WWW_URL;
+	}
+
 	public function file(string $key): ?File
 	{
 		if (!isset(self::FILES[$key])) {
@@ -294,10 +306,9 @@ class Config extends Entity
 		return Files::get(self::FILES[$key]);
 	}
 
-	public function fileURL(string $key, string $params = ''): ?string
+	public function fileURL(string $key, ?string $thumb_size = null): ?string
 	{
 		if (empty($this->files[$key])) {
-
 			if ($key == 'favicon') {
 				return ADMIN_URL . 'static/favicon.png';
 			}
@@ -308,9 +319,14 @@ class Config extends Entity
 			return null;
 		}
 
-		$params = $params ? $params . '&' : '';
+		$url = WWW_URI . self::FILES[$key];
 
-		return WWW_URI . self::FILES[$key] . '?' . $params . 'h=' . substr(md5($this->files[$key]), 0, 10);
+		if ($thumb_size) {
+			$url .= '.' . $thumb_size . '.webp';
+		}
+
+		$url .= '?h=' . substr(md5($this->files[$key]), 0, 10);
+		return $url;
 	}
 
 

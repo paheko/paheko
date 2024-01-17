@@ -280,6 +280,14 @@ class Import
 
 				// Add two transaction lines for each CSV line
 				if ($type == Export::SIMPLE) {
+					if (empty($row->credit_account)) {
+						throw new UserException('Compte de crédit non renseigné');
+					}
+
+					if (empty($row->debit_account)) {
+						throw new UserException('Compte de crédit non renseigné');
+					}
+
 					$credit_account = $accounts->getIdFromCode($row->credit_account);
 					$debit_account = $accounts->getIdFromCode($row->debit_account);
 

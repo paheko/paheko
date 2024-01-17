@@ -540,7 +540,14 @@ p.action-upload em {
 
 p.actions {
     float: right;
-    margin: .5em;
+    clear: right;
+    margin: .5em 0;
+}
+
+p.actions-spaced {
+    display: flex;
+    justify-content: space-between;
+    margin: .5em 0;
 }
 
 /** Datepicker widget */

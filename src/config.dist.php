@@ -148,6 +148,32 @@ namespace Paheko;
 //const PLUGINS_ROOT = DATA_ROOT . '/plugins';
 
 /**
+ * Liste des plugins autorisés.
+ *
+ * Permet de restreindre la liste des plugins autorisés. Les autres seront cachés.
+ *
+ * Si non défini, ou NULL, alors tous les plugins seront autorisés.
+ *
+ * Cette configuration n'affecte pas les plugins qui sont *déjà* installés.
+ *
+ * @var array|null
+ */
+//const PLUGINS_ALLOWLIST = ['caisse', 'webstats'];
+
+/**
+ * Liste des plugins interdits
+ *
+ * Permet d'empêcher l'installation de certains plugins.
+ *
+ * Si non défini, ou NULL, alors tous les plugins seront autorisés.
+ *
+ * Cette configuration n'affecte pas les plugins qui sont *déjà* installés.
+ *
+ * @var array|null
+ */
+//const PLUGINS_BLOCKLIST = ['dompdf'];
+
+/**
  * Signaux système
  *
  * Permet de déclencher des signaux sans passer par un plugin.

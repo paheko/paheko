@@ -105,7 +105,7 @@ class AdvancedSearch extends A_S
 			}
 			elseif ($field->type == 'date' || $field->type == 'datetime')
 			{
-				$column['type'] = $field->type;
+				$column['type'] = 'date';
 			}
 			elseif ($field->type == 'number')
 			{
@@ -190,6 +190,12 @@ class AdvancedSearch extends A_S
 			'where'  => 'id IN (SELECT id_user FROM (SELECT id_user, MAX(expiry_date) AS edate FROM services_users WHERE id_service %s GROUP BY id_user) WHERE edate < date())',
 		];
 
+		$columns['date_login'] = [
+			'label' => 'Date de dernière connexion',
+			'type'  => 'date',
+			'null'  => true,
+		];
+
 		return $columns;
 	}
 
@@ -209,7 +215,7 @@ class AdvancedSearch extends A_S
 		return array_merge(array_keys($this->schemaTables()), [
 			'users_search',
 			'user_files',
-			'user_view',
+			'users_view',
 		]);
 	}
 

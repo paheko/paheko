@@ -420,6 +420,11 @@ class Users
 		}
 		else {
 			$cat = Categories::get($id_category);
+
+			if (!$cat) {
+				throw new \InvalidArgumentException('This category does not exist');
+			}
+
 			$name = sprintf('Membres - %s', $cat->name);
 			$where = sprintf('id_category = %d', $id_category);
 		}
@@ -518,6 +523,7 @@ class Users
 			throw new \InvalidArgumentException('Invalid import mode: ' . $mode);
 		}
 
+		$number_field = DynamicFields::getNumberField();
 		$db = DB::getInstance();
 		$db->begin();
 
@@ -528,6 +534,12 @@ class Users
 			}
 
 			try {
+				if ($mode === 'create' || empty($user->$number_field)) {
+					$user->$number_field = null;
+					$user->setNumberIfEmpty();
+					unset($row->$number_field);
+				}
+
 				$user->save();
 			}
 			catch (UserException $e) {
@@ -568,12 +580,6 @@ class Users
 
 				if (!$user) {
 					$user = self::create();
-
-					if ($mode === 'create' || empty($row->$number_field)) {
-						$user->$number_field = null;
-						$user->setNumberIfEmpty();
-						unset($row->$number_field);
-					}
 				}
 
 				$user->importForm((array)$row);

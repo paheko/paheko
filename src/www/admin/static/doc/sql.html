@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+	<html>
+	<head>
+		<title>/home/bohwaz/fossil/paheko/tools/../doc/admin/sql.md</title>
+		<meta charset="utf-8" />
+		<style type="text/css">
+		body, form, p, div, hr, fieldset, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6 {
+			margin: 0;
+			padding: 0;
+		}
+		body {
+			font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
+			padding: .8em;
+			background: #eee;
+		}
+		.web-content .nav ul {
+			list-style-type: none;
+			margin: -.8em;
+			margin-bottom: 1em;
+			padding: 1em;
+			background: #ddd;
+			border-bottom: 1px solid #999;
+			text-align: center;
+		}
+		.web-content .boutons ul {
+			list-style-type: none;
+			background: #ccc;
+			padding: .5em;
+			margin: 0;
+		}
+		.web-content .nav li, .web-content .boutons li {
+			display: inline-block;
+			margin: 0 1em;
+		}
+		.web-content .nav a, .web-content .boutons a {
+			display: inline-block;
+			background: #fff;
+			color: darkblue;
+			border-radius: .2em;
+			padding: .3em .5em;
+			font-size: 1.2em;
+		}
+		.web-content .nav strong a {
+			color: darkred;
+			box-shadow: 0px 0px 5px orange;
+		}
+		</style>
+		<link rel="stylesheet" type="text/css" href="../../../content.css" />
+	</head>
+	<body><div class="web-content"><div class="toc">
+	<ol>
+		<li><a href="#collations">Collations</a>
+		<ol>
+			<li><a href="#collation-u_nocase">Collation U_NOCASE</a>
+		</ol></li>
+		<li><a href="#fonctions">Fonctions</a>
+		<ol>
+			<li><a href="#fonction-transliterate_to_ascii">Fonction transliterate_to_ascii</a></li>
+			<li><a href="#fonction-email_hash">Fonction email_hash</a></li>
+			<li><a href="#fonction-print_dynamic_field">Fonction print_dynamic_field</a></li>
+			<li><a href="#fonction-match_dynamic_field">Fonction match_dynamic_field</a>
+</li></ol></li></ol></div><p>Paheko permet d'effectuer des requêtes SQL en lecture dans la base de données, que ça soit via son API, ou via les recherches avancées.</p>
+<p>Dans ce cas, certaines fonctionnalités additionnelles sont offertes par Paheko. Ces fonctionnalités ne sont bien sûr pas disponibles si la requête est effectuée avec un autre logiciel directement sur la base de données.</p>
+<h1 id="collations">Collations</h1>
+<h2 id="collation-u_nocase">Collation U_NOCASE</h2>
+<p>Cet algorithme de classement (<em>collation</em> en anglais), permet de trier des chaînes de texte UTF-8 sans prendre en compte les accents ni les différences de majuscules et minuscules.</p>
+<p>Il peut être utilisé dans les clauses <code>ORDER BY</code> ou de comparaison.</p>
+<p>Par exemple si on a une table <code>users</code> qui contient une colonne <code>nom</code> et les enregistrements suivants en faisant un <code>SELECT nom FROM users</code> :</p>
+<pre><code>Émilien
+Emilie
+Émilia
+Emma</code></pre>
+<p>Alors la requête <code>SELECT nom FROM users ORDER BY nom COLLATE U_NOCASE</code> donnera l'ordre suivant :</p>
+<pre><code>Émilia
+Emilie
+Émilien
+Emma</code></pre>
+<p>Note : pour des raisons de performances, cette comparaison n'est effectuée que sur les 100 premiers caractères de la chaîne de texte.</p>
+<h1 id="fonctions">Fonctions</h1>
+<h2 id="fonction-transliterate_to_ascii">Fonction transliterate_to_ascii</h2>
+<p>Syntaxe : <code>transliterate_to_ascii(string value)</code></p>
+<p>Cette fonction permet de transformer une chaîne de texte UTF-8 en ASCII, sans accents, et en minuscules.</p>
+<pre><code>SELECT transliterate_to_ascii('Ça boume les jeunôts ?');
+-&gt; ca boume les jeunots ?</code></pre>
+<h2 id="fonction-email_hash">Fonction email_hash</h2>
+<p>Syntaxe : <code>email_hash(string email)</code></p>
+<p>Renvoie le hash d'une adresse e-mail normalisée, utile pour faire des jointures avec la table emails qui stocke le statut anonyme d'une adresse e-mail, conformément au RGPD.</p>
+<pre><code>SELECT * FROM users u
+INNER JOIN emails e ON 
+  u.email IS NOT NULL
+  AND e.hash = email_hash(u.email)</code></pre>
+<h2 id="fonction-print_dynamic_field">Fonction print_dynamic_field</h2>
+<p>Syntaxe : <code>print_dynamic_field(string field_name, mixed value)</code></p>
+<p>Affiche la valeur du champ de la fiche membre.</p>
+<p>Surtout utile pour afficher les champs de fiche membre de type "choix multiple".</p>
+<ul>
+<li>Le premier paramètre doit être le nom du champ entre guillemets,</li>
+<li>le second paramètre étant la valeur du champ (donc le nom de la colonne généralement)</li>
+</ul>
+<pre><code>SELECT print_dynamic_field('moyen_paiement', u.moyen_paiement)
+  FROM users AS u
+  WHERE u.moyen_paiement IS NOT NULL;</code></pre>
+<h2 id="fonction-match_dynamic_field">Fonction match_dynamic_field</h2>
+<p>Syntaxe : <code>match_dynamic_field(string field_name, mixed value, mixed search[, mixed search...])</code></p>
+<p>Renvoie <code>1</code> si la condition de recherche passée en 3ème paramètre et suivants correspond à la valeur passée en second paramètre.</p>
+<p>Surtout utile pour savoir si un champ de fiche membre à choix multiple correspond à une recherche.</p>
+<p>Il est possible de passer la chaîne <code>AND</code> ou <code>OR</code> en 3ème paramètre pour spécifier si la recherche doit vérifier la présence de tous les éléments ou seulement un des éléments. Si aucune chaîne n'est passée, c'est la condition <code>OR</code> qui sera utilisée.</p>
+<p>Exemple si on veut lister les membres inscrits au groupe de travail "Communication" :</p>
+<pre><code>SELECT nom
+  FROM users AS u
+  WHERE match_dynamic_field('groupe_travail', u.groupe_travail, 'Communication');</code></pre>
+<p>Exemple si on veut lister les membres inscrits soit au groupe de travail "Communication", soit au groupe de travail "Accueil" :</p>
+<pre><code>SELECT nom
+  FROM users AS u
+  WHERE match_dynamic_field('groupe_travail', u.groupe_travail, 'Communication', 'Accueil');</code></pre>
+<p>Exemple si on veut lister les membres inscrits dans les deux groupes de travail "Communication" et "Accueil" :</p>
+<pre><code>SELECT nom
+  FROM users AS u
+  WHERE match_dynamic_field('groupe_travail', u.groupe_travail, 'AND', Communication', 'Accueil');</code></pre></div></body></html>

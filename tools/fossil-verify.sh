@@ -1,16 +1,19 @@
 #!/bin/bash
 
-REPO="$1"
+TAG="${1-current}"
 
-if [ ! -f "$1/manifest" ]
+if [ "$2" != "" ]
 then
-	echo "Missing manifest, maybe you didn't specify a repository path,"
-	echo "or you didn't enable the manifest? (fossil settings manifest on)"
-	echo "Usage: $0 FOSSIL_REPOSITORY_PATH"
-	exit 1
+	REPO="-R '${2}'"
+else
+	REPO=""
 fi
 
-gpg --verify "$1/manifest" 2> /dev/null
+TMPMANIFEST=$(mktemp)
+
+fossil artifact ${REPO} "${TAG}" > ${TMPMANIFEST}
+
+gpg --verify ${TMPMANIFEST} 2> /dev/null
 
 if [ $? != 0 ]
 then
@@ -35,20 +38,26 @@ do
 	FILE="${PARTS[1]//\\s/ }"
 	HASH="${PARTS[2]}"
 
+	if [ -L "$FILE" ]
+	then
+		echo " . Skipping symlink $FILE"
+		echo "$LINE" >> $TMPFILE
+		continue
+	fi
+
 	if [ "${#HASH}" = 40 ]
 	then
-		NEW_HASH=$(sha1sum "$1/$FILE" | awk '{print $1}')
+		NEW_HASH=$(sha1sum "$FILE" | awk '{print $1}')
 	else
-		NEW_HASH=$(openssl dgst -sha3-256 -binary "$1/$FILE" | xxd -p -c 100)
+		NEW_HASH=$(openssl dgst -sha3-256 -binary "$FILE" | xxd -p -c 100)
 	fi
 
 	if [ "$HASH" != "$NEW_HASH" ]
 	then
-		echo "Local file has changed"
-		echo "$FILE"
-		echo "Manifest hash:   $HASH"
-		echo "Local file hash: $NEW_HASH"
-		exit 2
+		echo " ! Local file has changed: $FILE"
+		echo "   Manifest hash:   $HASH"
+		echo "   Local file hash: $NEW_HASH"
+		continue
 	fi
 
 	PARTS[2]="$HASH"
@@ -58,14 +67,14 @@ do
 	NEW_LINE="${NEW_LINE:1}"
 
 	echo "$NEW_LINE" >> $TMPFILE
-done < "$1/manifest"
+done < ${TMPMANIFEST}
 
 gpg --verify $TMPFILE 2>/dev/null
 
 if [ $? != 0 ]
 then
 	echo "Something has changed between manifest and check?!"
-	diff "$1/manifest" $TMPFILE
+	diff ${TMPMANIFEST} ${TMPFILE}
 	rm -f $TMPFILE
 	exit 2
 fi

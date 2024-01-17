@@ -135,6 +135,9 @@ class Utils
 		elseif (preg_match('!^\d{2}/\d{2}/\d{4}$!', $ts)) {
 			return \DateTime::createFromFormat('!d/m/Y', $ts);
 		}
+		elseif (preg_match('!^\d{2}/\d{2}/\d{2}$!', $ts)) {
+			return \DateTime::createFromFormat('!d/m/y', $ts);
+		}
 		elseif (strlen($ts) == 10) {
 			return \DateTime::createFromFormat('!Y-m-d', $ts);
 		}
@@ -1070,6 +1073,9 @@ class Utils
 		$a = self::utf8_encode($a);
 		$b = self::utf8_encode($b);
 
+		$a = mb_substr($a, 0, 100);
+		$b = mb_substr($b, 0, 100);
+
 		if (isset(self::$collator)) {
 			return (int) self::$collator->compare($a, $b);
 		}
@@ -1609,5 +1615,24 @@ class Utils
 		unset($value);
 
 		return $ini;
+	}
+
+	static public function export_value($value, int $level = 0): string
+	{
+		$out = '';
+
+		if (is_object($value) || is_array($value)) {
+			foreach ($value as $key => $subvalue) {
+				if (empty($subvalue)) {
+					continue;
+				}
+				$out .= str_repeat(' ', $level) . $key . ': ' . self::export_value($subvalue, $level+1) . "\n";
+			}
+		}
+		else {
+			$out .= (string)$value;
+		}
+
+		return rtrim($out);
 	}
 }

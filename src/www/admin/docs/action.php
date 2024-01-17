@@ -31,8 +31,8 @@ $form->runIf('delete', function () use ($check) {
 	foreach ($check as &$file) {
 		$file = Files::get($file);
 
-		if (!$file || !$file->canDelete()) {
-			throw new UserException('Impossible de supprimer un fichier car vous n\'avez pas le droit de le supprimer');
+		if (!$file || !$file->canMoveToTrash()) {
+			throw new UserException('Vous n\'avez pas le droit de mettre ce fichier à la corbeille : ' . $file->path);
 		}
 	}
 

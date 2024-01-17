@@ -157,14 +157,6 @@ input[name=code_base] {
     font-weight: normal;
 }
 
-/*
-.transaction-details .account h5 {
-    font-weight: normal;
-    font-style: italic;
-    color: var(--gBorderColor);
-}
-*/
-
 .transaction-details .amount h3 {
     font-weight: normal;
 }
@@ -206,4 +198,10 @@ table.statement tbody tr.even td, table.statement tbody tr.even th {
 
 table.statement tfoot td, table.statement tfoot th {
     background: rgba(var(--gSecondColor), 0.2);
+}
+
+@media handheld, screen and (max-width: 980px) {
+    .transaction-details-container {
+        grid-template-columns: 1fr;
+    }
 }

@@ -699,7 +699,7 @@ Cette section est très puissante et permet de générer des listes simplement, 
 | `columns` | *optionnel* | Permet de n'afficher que certaines colonnes du schéma. Indiquer ici le nom des colonnes, séparées par des virgules. |
 | `order` | *optionnel* | Colonne utilisée par défaut pour le tri (si l'utilisateur n'a pas choisi le tri sur une autre colonne). Si `select` est utilisé, il faut alors indiquer ici le numéro de la colonne, et non pas son nom. |
 | `desc` | *optionnel* | Si ce paramètre est à `true`, l'ordre de tri sera inversé. |
-| `max` | *optionnel* | Nombre d'éléments à afficher dans la liste, sur chaque page. |
+| `max` | *optionnel* | Nombre d'éléments à afficher sur chaque page. Mettre à `null` pour ne pas paginer la liste. |
 | `where` | *optionnel* | Condition `WHERE` de la requête SQL. |
 | `debug` | *optionnel* | Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle. |
 | `explain` | *optionnel* | Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle. | 

@@ -74,6 +74,12 @@
 			</ol></li>
 			<li><a href="#membres">Membres</a>
 			<ol>
+				<li><a href="#user-categories-get">user/categories (GET)</a></li>
+				<li><a href="#user-category-id-format-get">user/category/{ID}.{FORMAT} (GET)</a></li>
+				<li><a href="#user-new-post">user/new (POST)</a></li>
+				<li><a href="#user-id-get">user/{ID} (GET)</a></li>
+				<li><a href="#user-id-delete">user/{ID} (DELETE)</a></li>
+				<li><a href="#user-id-post">user/{ID} (POST)</a></li>
 				<li><a href="#user-import-put">user/import (PUT)</a></li>
 				<li><a href="#user-import-post">user/import (POST)</a></li>
 				<li><a href="#user-import-preview-put">user/import/preview (PUT)</a></li>
@@ -94,6 +100,7 @@
 				<li><a href="#accounting-charts-get">accounting/charts (GET)</a></li>
 				<li><a href="#accounting-charts-id_chart-accounts-get">accounting/charts/{ID_CHART}/accounts (GET)</a></li>
 				<li><a href="#accounting-years-id_year-journal-get">accounting/years/{ID_YEAR}/journal (GET)</a></li>
+				<li><a href="#accounting-years-id_year-export-format-extension-get">accounting/years/{ID_YEAR}/export/{FORMAT}.{EXTENSION} (GET)</a></li>
 				<li><a href="#accounting-years-id_year-account-journal-get">accounting/years/{ID_YEAR}/account/journal (GET)</a></li>
 				<li><a href="#accounting-transaction-id_transaction-get">accounting/transaction/{ID_TRANSACTION} (GET)</a></li>
 				<li><a href="#accounting-transaction-id_transaction-post">accounting/transaction/{ID_TRANSACTION} (POST)</a></li>
@@ -155,6 +162,60 @@
 <h3 id="web-html-page_uri-get">web/html/{PAGE_URI} (GET)</h3>
 <p>Renvoie uniquement le contenu de la page au format HTML.</p>
 <h2 id="membres">Membres</h2>
+<h3 id="user-categories-get">user/categories (GET)</h3>
+<p><em>(Depuis la version 1.3.6)</em></p>
+<p>Renvoie la liste des catégories de membres, triée par nom, et incluant le nombre de membres de la catégorie (dans la clé <code>count</code>).</p>
+<h3 id="user-category-id-format-get">user/category/{ID}.{FORMAT} (GET)</h3>
+<p><em>(Depuis la version 1.3.6)</em></p>
+<p>Exporte la liste des membres d'une catégorie correspondant à l'ID demandé, au format indiqué :</p>
+<ul>
+<li><code>json</code></li>
+<li><code>csv</code></li>
+<li><code>ods</code></li>
+<li><code>xlsx</code></li>
+</ul>
+<h3 id="user-new-post">user/new (POST)</h3>
+<p><em>(Depuis la version 1.3.6)</em></p>
+<p>Permet de créer un nouveau membre.</p>
+<p>Attention, cette méthode comporte des restrictions :</p>
+<ul>
+<li>il n'est pas possible de créer un membre dans une catégorie ayant accès à la configuration</li>
+<li>il n'est pas possible de définir l'OTP ou la clé PGP du membre créé</li>
+<li>seul un identifiant API ayant le droit "Administration" pourra créer des membres administrateurs</li>
+</ul>
+<p>Il est possible d'utiliser tous les champs de la fiche membre en utilisant leur clé unique, ainsi que les clés suivantes :</p>
+<ul>
+<li><code>id_category</code> : indique l'ID d'une catégorie, si absent la catégorie par défaut sera utilisée</li>
+<li><code>password</code> : mot de passe du membre</li>
+<li><code>force_duplicate=1</code> : ne pas renvoyer une erreur si le nom du membre à ajouter est identique au nom d'un membre existant.</li>
+</ul>
+<p>Sera renvoyée la liste des infos de la fiche membre.</p>
+<p>Si un membre avec le même nom existe déjà (et que <code>force_duplicate</code> n'est pas utilisé), une erreur <code>409</code> sera renvoyée.</p>
+<pre><code>curl -F nom="Bla bla" -F id_category=3 -F password=abcdef123456 https://test:abcd@monpaheko.tld/api/user/new</code></pre>
+<h3 id="user-id-get">user/{ID} (GET)</h3>
+<p><em>(Depuis la version 1.3.6)</em></p>
+<p>Renvoie les infos de la fiche d'un membre à partir de son ID, ainsi que 3 autres clés :</p>
+<ul>
+<li><code>has_password</code></li>
+<li><code>has_pgp_key</code></li>
+<li><code>has_otp</code></li>
+</ul>
+<h3 id="user-id-delete">user/{ID} (DELETE)</h3>
+<p><em>(Depuis la version 1.3.6)</em></p>
+<p>Supprime un membre à partir de son ID.</p>
+<p>Seuls les identifiants d'API ayant le droit "Administration" pourront supprimer des membres.</p>
+<p>Note : il n'est pas possible de supprimer un membre appartenant à une catégorie ayant accès à la configuration.</p>
+<h3 id="user-id-post">user/{ID} (POST)</h3>
+<p><em>(Depuis la version 1.3.6)</em></p>
+<p>Modifie les infos de la fiche d'un membre à partir de son ID.</p>
+<p>Notes :</p>
+<ul>
+<li>il n'est pas possible de modifier la catégorie d'un membre</li>
+<li>il n'est pas possible de modifier un membre appartenant à une catégorie ayant accès à la configuration.</li>
+<li>il n'est pas possible de modifier le mot de passe, l'OTP ou la clé PGP du membre créé</li>
+<li>il n'est pas possible de modifier des membres ayant accès à la configuration</li>
+<li>seul un identifiant d'API ayant l'accès en "Administartion" pourra modifier un membre administrateur</li>
+</ul>
 <h3 id="user-import-put">user/import (PUT)</h3>
 <p>Permet d'importer un fichier de tableur (CSV/XLSX/ODS) de la liste des membres, comme si c'était fait depuis l'interface de Paheko.</p>
 <p>Cette route nécessite une clé d'API ayant les droits d'administration, car importer un fichier peut permettre de modifier l'identifiant de connexion d'un administrateur et donc potentiellement d'obtenir l'accès à l'interface d'administration.</p>
@@ -202,7 +263,7 @@ curl https://test:abcd@monpaheko.tld/api/user/import -T membres.csv</code></pre>
 <li><code>create</code> : ne fait que créer de nouvelles fiches de membre, si le numéro de membre existe déjà une erreur sera produite</li>
 <li><code>update</code> : ne fait que mettre à jour les fiches de membre en utilisant le numéro de membre comme référence, si le numéro de membre n'existe pas une erreur sera produite</li>
 </ul>
-<p>Depuis la version 1.3.0 il est possible de spécifier :</p>
+<p><em>Depuis la version 1.3.0 il est possible de spécifier :</em></p>
 <ul>
 <li>le nombre de lignes à ignorer avec le paramètre <code>skip_lines=X</code> : elles ne seront pas importées. Par défaut la première ligne est ignorée.</li>
 <li>la correspondance des colonnes avec des paramètres <code>column[x]</code> ou <code>x</code> est le numéro de la colonne (la numérotation commence à zéro), et la valeur contient le nom unique du champ de la fiche membre.</li>
@@ -289,11 +350,28 @@ curl https://test:abcd@monpaheko.tld/api/services/subscriptions/import -T /tmp/i
 <p>Renvoie la liste des comptes pour le plan comptable indiqué (voir <code>id_chart</code> dans la liste des exercices).</p>
 <h3 id="accounting-years-id_year-journal-get">accounting/years/{ID_YEAR}/journal (GET)</h3>
 <p>Renvoie le journal général des écritures de l'exercice indiqué. </p>
-<p>Note : il est possible d'utiliser <code>current</code> comme paramètre pour <code>{ID_YEAR}</code> pour désigner l'exercice ouvert en cours. S'il y a plusieurs exercices ouverts, alors le plus ancien sera choisi.</p>
+<p>Note : il est possible d'utiliser <code>current</code> comme paramètre pour <code>{ID_YEAR}</code> pour désigner l'exercice ouvert en cours. S'il y a plusieurs exercices ouverts, alors celui qui est le plus proche de la date actuelle sera utilisé.</p>
+<h3 id="accounting-years-id_year-export-format-extension-get">accounting/years/{ID_YEAR}/export/{FORMAT}.{EXTENSION} (GET)</h3>
+<p><em>(Depuis la version 1.3.6)</em></p>
+<p>Exporte l'exercice indiqué au format indiqué. Les formats suivants sont disponibles :</p>
+<ul>
+<li><code>full</code> : complet</li>
+<li><code>grouped</code> : complet groupé</li>
+<li><code>simple</code> : simple (ne comporte pas les saisies avancées)</li>
+<li><code>fec</code> : format FEC (Fichier des Écritures Comptables)</li>
+</ul>
+<p>L'extension indique le type de fichier :</p>
+<ul>
+<li><code>csv</code> : Tableur CSV</li>
+<li><code>ods</code> : LibreOffice Calc</li>
+<li><code>xlsx</code> : Microsoft OOXML (Excel) - seulement disponible si l'instance le permet</li>
+<li><code>json</code> : Texte JSON</li>
+</ul>
+<p>Note : il est possible d'utiliser <code>current</code> comme paramètre pour <code>{ID_YEAR}</code> pour désigner l'exercice ouvert en cours. S'il y a plusieurs exercices ouverts, alors celui qui est le plus proche de la date actuelle sera utilisé.</p>
 <h3 id="accounting-years-id_year-account-journal-get">accounting/years/{ID_YEAR}/account/journal (GET)</h3>
 <p>Renvoie le journal des écritures d'un compte pour l'exercice indiqué.</p>
 <p>Le compte est spécifié soit via le paramètre <code>code</code>, soit via le paramètre <code>id</code>. Exemple :  <code>/accounting/years/4/account/journal?code=512A</code></p>
-<p>Note : il est possible d'utiliser <code>current</code> comme paramètre pour <code>{ID_YEAR}</code> pour désigner l'exercice ouvert en cours. S'il y a plusieurs exercices ouverts, alors le plus ancien sera choisi.</p>
+<p>Note : il est possible d'utiliser <code>current</code> comme paramètre pour <code>{ID_YEAR}</code> pour désigner l'exercice ouvert en cours. S'il y a plusieurs exercices ouverts, alors celui qui est le plus proche de la date actuelle sera utilisé.</p>
 <h3 id="accounting-transaction-id_transaction-get">accounting/transaction/{ID_TRANSACTION} (GET)</h3>
 <p>Renvoie les détails de l'écriture indiquée.</p>
 <h3 id="accounting-transaction-id_transaction-post">accounting/transaction/{ID_TRANSACTION} (POST)</h3>
@@ -306,14 +384,14 @@ curl https://test:abcd@monpaheko.tld/api/services/subscriptions/import -T /tmp/i
 <h3 id="accounting-transaction-id_transaction-users-delete">accounting/transaction/{ID_TRANSACTION}/users (DELETE)</h3>
 <p>Efface la liste des membres liés à une écriture.</p>
 <h3 id="accounting-transaction-id_transaction-subscriptions-get">accounting/transaction/{ID_TRANSACTION}/subscriptions (GET)</h3>
-<p>(Depuis la version 1.3.6)</p>
+<p><em>(Depuis la version 1.3.6)</em></p>
 <p>Renvoie la liste des inscriptions (aux activités) liées à une écriture.</p>
 <h3 id="accounting-transaction-id_transaction-subscriptions-post">accounting/transaction/{ID_TRANSACTION}/subscriptions (POST)</h3>
-<p>(Depuis la version 1.3.6)</p>
+<p><em>(Depuis la version 1.3.6)</em></p>
 <p>Met à jour la liste des inscriptions liées à une écriture, en utilisant les ID d'inscriptions passés dans un tableau nommé <code>subscriptions</code>.</p>
 <pre><code> curl -v "http://…/api/accounting/transaction/9337/subscriptions"  -F 'subscriptions[]=2'</code></pre>
 <h3 id="accounting-transaction-id_transaction-subscriptions-delete">accounting/transaction/{ID_TRANSACTION}/subscriptions (DELETE)</h3>
-<p>(Depuis la version 1.3.6)</p>
+<p><em>(Depuis la version 1.3.6)</em></p>
 <p>Efface la liste des inscriptions liées à une écriture.</p>
 <h3 id="accounting-transaction-post">accounting/transaction (POST)</h3>
 <p>Crée une nouvelle écriture, renvoie les détails si l'écriture a été créée. Voir plus bas le format attendu.</p>

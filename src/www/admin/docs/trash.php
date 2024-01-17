@@ -12,7 +12,6 @@ require_once __DIR__ . '/../_inc.php';
 $session = Session::getInstance();
 $session->requireAccess($session::SECTION_DOCUMENTS, $session::ACCESS_ADMIN);
 
-
 $csrf_key = 'trash_action';
 $check = f('check');
 $extra = compact('check');
@@ -21,8 +20,6 @@ $count = $check ? count($check) : null;
 $tpl->assign(compact('csrf_key', 'extra', 'count'));
 
 $form->runIf('confirm_delete', function () use ($check, $session) {
-	$session->requireAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
-
 	if (empty($check)) {
 		throw new UserException('Aucun fichier sélectionné');
 	}

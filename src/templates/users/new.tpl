@@ -15,9 +15,7 @@
 	<aside class="secondary">
 		<fieldset>
 			<dl>
-			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
-				{input type="select" name="id_category" label="Catégorie du membre" required=true options=$categories default=$default_category}
-			{/if}
+			{input type="select" name="id_category" label="Catégorie du membre" required=true options=$categories default=$default_category}
 			{input type="list" name="id_parent" label="Rattacher à un membre" target="!users/selector.php?no_children=1" help="Permet de regrouper les personnes d'un même foyer par exemple. Sélectionner ici le membre responsable." can_delete=true}
 		</dl>
 		</fieldset>

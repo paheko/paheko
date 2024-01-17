@@ -34,15 +34,29 @@
 		<tr>
 			<td class="num">Numéro</td>
 			<th>Compte</th>
-			<td class="money">Solde</td>
+			{if $simple}
+				<td class="money">Solde</td>
+			{else}
+				<td class="money">Débits</td>
+				<td class="money">Crédits</td>
+				<td class="money">Solde débiteur</td>
+				<td class="money">Solde créditeur</td>
+			{/if}
 		</tr>
 	</thead>
 	<tbody>
 	{foreach from=$balance item="account"}
-		<tr>
+		<tr class="{if $account.balance === 0}disabled{/if}">
 			<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}">{$account.code}</a></td>
 			<th>{$account.label}</th>
-			<td class="money">{$account.balance|raw|money}</td>
+			{if $simple}
+				<td class="money">{show_balance account=$account}</td>
+			{else}
+				<td class="money{if !$account.debit} disabled{/if}">{$account.debit|raw|money:false}</td>
+				<td class="money{if !$account.credit} disabled{/if}">{$account.credit|raw|money:false}</td>
+				<td class="money">{if $account.balance > 0}{$account.balance|abs|escape|money:false}{/if}</td>
+				<td class="money">{if $account.balance < 0}{$account.balance|abs|escape|money:false}{/if}</td>
+			{/if}
 		</tr>
 	{/foreach}
 	</tbody>

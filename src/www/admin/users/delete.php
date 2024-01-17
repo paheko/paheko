@@ -17,6 +17,9 @@ if ($user->id == $session->getUser()->id) {
 	throw new UserException("Il n'est pas possible de supprimer votre propre compte, merci de demander à un administrateur de le faire.");
 }
 
+// Protect against admin users being deleted/modified by less powerful users
+$user->validateCanChange($session);
+
 $csrf_key = 'delete_user_' . $user->id;
 
 $form->runIf('delete', function () use ($user) {

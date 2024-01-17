@@ -712,8 +712,12 @@ class Account extends Entity
 		];
 
 		$tables = 'acc_transactions_lines l INNER JOIN acc_transactions t ON t.id = l.id_transaction';
-		$conditions = sprintf('t.id_year = %d AND l.id_account = %d AND l.credit = 0 AND NOT (t.status & %d)',
-			$year_id, $this->id(), Transaction::STATUS_DEPOSIT);
+		$conditions = sprintf('t.id_year = %d AND l.id_account = %d AND l.credit = 0 AND NOT (t.status & %d) AND NOT (t.status & %d)',
+			$year_id,
+			$this->id(),
+			Transaction::STATUS_DEPOSIT,
+			Transaction::STATUS_OPENING_BALANCE
+		);
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->setPageSize(null);
@@ -732,9 +736,16 @@ class Account extends Entity
 		$deposit_balance = DB::getInstance()->firstColumn('SELECT SUM(l.debit)
 			FROM acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
-			WHERE t.id_year = ? AND l.id_account = ? AND l.credit = 0 AND NOT (t.status & ?)
+			WHERE t.id_year = ? AND l.id_account = ? AND l.credit = 0
+				AND NOT (t.status & ?)
+				AND NOT (t.status & ?)
 			ORDER BY t.date, t.id;',
-			$year_id, $this->id(), Transaction::STATUS_DEPOSIT);
+			$year_id,
+			$this->id(),
+			Transaction::STATUS_DEPOSIT,
+			Transaction::STATUS_OPENING_BALANCE
+		);
+
 		$account_balance = $this->getSum($year_id)->balance;
 
 		return $account_balance - $deposit_balance;

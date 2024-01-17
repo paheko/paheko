@@ -286,7 +286,7 @@ trait FileThumbnailTrait
 				curl_setopt($curl, CURLOPT_POSTFIELDS, [
 					'format' => 'png',
 					//'options' => json_encode($options),
-					'file' => new \CURLFile($tmpfile ?? $local_path, $this->mime, $this->name),
+					'file' => new \CURLFile($tmpfile ?? $local_path, $this->mime, md5($this->name) . '.' . $this->extension()),
 				]);
 
 				$fp = fopen($destination, 'wb');
@@ -304,7 +304,7 @@ trait FileThumbnailTrait
 				fclose($fp);
 				unset($curl);
 
-				if (($code = $info['http_code']) != 200) {
+				if (($code = $info['http_code']) != 200 || @filesize($destination) < 10) {
 					Utils::safe_unlink($destination);
 					throw new \RuntimeException('Cannot fetch thumbnail from Collabora: code ' . $code . "\n" . json_encode($info));
 				}
@@ -312,7 +312,7 @@ trait FileThumbnailTrait
 			else {
 				if ($command === 'mupdf') {
 					// The single '1' at the end is to tell only to render the first page
-					$cmd = sprintf('mutool draw -F png -o %s -w 500 -h 500 -r 72 %s 1 2>&1',
+					$cmd = sprintf('mutool draw -i -N -q -F png -o %s -w 500 -h 500 -r 72 %s 1 2>&1',
 						Utils::escapeshellarg($destination),
 						Utils::escapeshellarg($tmpfile ?? $local_path)
 					);
@@ -337,7 +337,6 @@ trait FileThumbnailTrait
 				$code = Utils::exec($cmd, 5, null, function($data) use (&$output) { $output .= $data; });
 
 				// Don't trust code as it can return != 0 even if generation was OK
-
 				if (!file_exists($destination) || filesize($destination) < 10) {
 					Utils::safe_unlink($destination);
 					throw new \RuntimeException($command . ' execution failed with code: ' . $code . "\n" . $output);

@@ -20,5 +20,17 @@
 </script>
 {/if}
 
+<?php
+$layout ??= '';
+?>
+
+{if $layout === 'public'}
+	<footer class="public">
+		<p><a href="{$site_url}"><b>{$config.org_name}</b></a>
+			| <a href="{$admin_url}legal.php">Mentions légales</a>
+		</p>
+	</footer>
+{/if}
+
 </body>
 </html>

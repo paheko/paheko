@@ -136,6 +136,10 @@ class CSV
 			$row = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $row);
 
 			$out[$line] = $row;
+
+			if ($line > 499999) {
+				throw new UserException('Dépassement de la taille maximale : le fichier fait plus de 500.000 lignes.');
+			}
 		}
 
 		fclose($fp);
@@ -212,6 +216,9 @@ class CSV
 		}
 		elseif ('ods' == $format) {
 			self::toODS(... array_slice(func_get_args(), 1));
+		}
+		elseif ('json' == $format) {
+			self::toJSON(... array_slice(func_get_args(), 1));
 		}
 		else {
 			throw new \InvalidArgumentException('Unknown export format');
@@ -322,6 +329,47 @@ class CSV
 		$ods->output($output);
 	}
 
+	static public function toJSON(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, string $output = null): void
+	{
+		if (null === $output) {
+			header('Content-type: application/json');
+			header(sprintf('Content-Disposition: attachment; filename="%s.json"', $name));
+
+			$fp = fopen('php://output', 'w');
+		}
+		else {
+			$fp = fopen($output, 'w');
+		}
+
+		$i = 0;
+
+		fputs($fp, '[');
+
+		if (!($iterator instanceof \Iterator) || $iterator->valid()) {
+			foreach ($iterator as $row) {
+				if ($i++ > 0) {
+					fputs($fp, ",\n");
+				}
+
+				$row = self::rowToArray($row, $row_map_callback);
+
+				foreach ($row as $key => $value) {
+					if ($value instanceof \KD2\DB\Date) {
+						$row[$key] = $value->format('Y-m-d');
+					}
+					elseif ($value instanceof \DateTimeInterface) {
+						$row[$key] = $value->format('Y-m-d H:i:s');
+					}
+				}
+
+				fputs($fp, json_encode($row));
+			}
+		}
+
+		fputs($fp, ']');
+		fclose($fp);
+	}
+
 	static public function toXLSX(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null): void
 	{
 		if (!CALC_CONVERT_COMMAND) {
@@ -376,6 +424,10 @@ class CSV
 			$line = 0;
 
 			$header = fgetcsv($fp, 4096, $delim);
+
+			if ($header === false) {
+				throw new UserException('Impossible de trouver l\'entête du tableau');
+			}
 
 			// Make sure the data is UTF-8 encoded
 			$header = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $header);

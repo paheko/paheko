@@ -70,7 +70,8 @@
 			<li><a href="#captcha">captcha</a></li>
 			<li><a href="#mail">mail</a></li>
 			<li><a href="#redirect">redirect</a></li>
-			<li><a href="#api">api</a>
+			<li><a href="#api">api</a></li>
+			<li><a href="#csv">csv</a>
 		</ol></li>
 		<li><a href="#fonctions-relatives-aux-modules">Fonctions relatives aux Modules</a>
 		<ol>
@@ -635,6 +636,112 @@ L'écriture n°{{$result.id}} a été créée.</code></pre>
   La requête a échoué : code {{$code}} — {{$result.error}}
 {{/if}}
 </code></pre>
+<h2 id="csv">csv</h2>
+<p>Permet de demander à l'utilisateur de charger un fichier CSV (ou XLSX/ODS, selon la configuration de Paheko), et ensuite d'associer les colonnes pour permettre d'utiliser ces données dans une boucle.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Obligatoire ou optionnel ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">action</td>
+<td style="text-align: left;">obligatoire</td>
+<td style="text-align: left;">Action à réaliser : <code>initialize</code>, <code>form</code>, <code>cancel_button</code>, <code>clear</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">name</td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Définit le nom du fichier, utile s'il y a plusieurs fichiers CSV dans le même module.</td>
+</tr>
+<tr>
+<td style="text-align: left;">assign</td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Assigner le tableau indiquant les informations du fichier CSV à la variable donnée en valeur.</td>
+</tr>
+</tbody>
+</table>
+<p>Paramètres pour l'action <code>initialize</code> :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Obligatoire ou optionnel ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">columns</td>
+<td style="text-align: left;">obligatoire</td>
+<td style="text-align: left;">Tableau des colonnes qui pourront être utilisées, sous la forme clé =&gt; valeur.</td>
+</tr>
+<tr>
+<td style="text-align: left;">mandatory_columns</td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Liste des clés de colonnes qui sont obligatoires.</td>
+</tr>
+</tbody>
+</table>
+<p>Cette fonction est très puissante mais un peu complexe.</p>
+<p>Il faut commencer par définir les colonnes que nous voudrons pouvoir utiliser, dans un tableau :</p>
+<pre><code>{{:assign var="columns"
+  date="Date"
+  name="Nom"
+  address="Adresse"
+}}</code></pre>
+<p>La valeur représente le libellé par défaut de la colonne dans le tableau. La clé représente elle la clé unique qu'on pourra ensuite utiliser dans les données (voir plus bas).</p>
+<p>On peut ensuite définir les colonnes que nous souhaitons rendre obligatoire (en utilisant la clé unique) :</p>
+<pre><code>{{:assign var="mandatory_columns." value="name"}}
+{{:assign var="mandatory_columns." value="date"}}</code></pre>
+<p>Si ces colonnes ne sont pas fournies dans le fichier importé, l'import ne pourra pas continuer.</p>
+<p>On commence ensuite la procédure de chargement du CSV :</p>
+<pre><code>{{:csv action="initialize" name="import_noms" columns=$columns mandatory_columns=$mandatory_columns assign="csv"}}</code></pre>
+<p>La variable <code>$csv</code> contiendra ensuite les informations sur le fichier CSV actuellement chargé. Le tableau de cette variable contiendra les clés suivantes :</p>
+<ul>
+<li><code>ready</code> (booléen) : vaut <code>true</code> quand le fichier est chargé et que l'utilisateur a fait correspondre les colonnes</li>
+<li><code>loaded</code> (booléen) : vaut <code>true</code> quand le fichier est chargé</li>
+<li><code>columns</code> (tableau) : les colonnes, définies dans l'appel avec l'action <code>initialize</code></li>
+<li><code>mandatory_columns</code> (tableau) : les colonnes requises, définies dans l'appel avec l'action <code>initialize</code></li>
+</ul>
+<p>Les clés suivantes ne sont renseignées que quand <code>ready</code> vaut <code>true</code> :</p>
+<ul>
+<li><code>translation_table</code> (tableau) : le tableau associatif entre le numéro de colonne du fichier CSV (clé) et le nom des colonnes définies (valeur)</li>
+<li><code>header</code> (tableau) : la première ligne du fichier CSV chargé</li>
+<li><code>rows</code> (tableau) : les lignes du fichier CSV</li>
+<li><code>count</code> (entier) : le nombre de lignes du fichier CSV chargé</li>
+<li><code>skip</code> (entier) : le nombre de lignes à ignorer (généralement <code>1</code>, car la première ligne contient les entêtes des colonnes)</li>
+</ul>
+<p>À ce stade, rien n'est affiché. Il faut commencer par afficher le formulaire de chargement et de choix des colonnes si le fichier n'est pas encore chargé :</p>
+<pre><code>{{if !$csv.ready}}
+
+  {{:csv action="form"}}
+
+{{/if}}</code></pre>
+<p>Cet appel génère le formulaire complet HTML (<code>&lt;form&gt;…&lt;/form&gt;</code>), il n'y a rien besoin d'ajouter. Il gère à la fois le formulaire de sélection du fichier CSV, et le formulaire permettant d'associer les colonnes du CSV aux colonnes demandées.</p>
+<p>Pour exploiter ensuite les données du CSV il faut d'abord vérifier qu'il est prêt à être utilisé, avec la variable <code>$csv.ready</code> :</p>
+<pre><code>{{if $csv.ready}}
+
+  {{#foreach from=$csv.rows item="row"}}
+    Nom : {{$row.name}}&lt;br /&gt;
+    Adresse : {{$row.address}}&lt;br /&gt;
+  {{/foreach}}
+
+{{/if}}</code></pre>
+<p>Il est conseillé d'ajouter dans la page du résultat un bouton pour annuler la procédure. Dans ce cas le CSV chargé sur le serveur sera supprimé :</p>
+<pre><code>&lt;form method="post" action=""&gt;
+  &lt;p&gt;{{:csv action="cancel_button"}}&lt;/p&gt;
+&lt;/form&gt;</code></pre>
+<p>Quand on a terminé avec le CSV, de la même manière il faut faire appel à l'action <code>clear</code>.</p>
+<p>Note : il est possible de combiner l'usage de la fonction <code>csv</code> avec le paramètre <code>from</code> de <code>save</code> pour enregistrer en une fois toutes les lignes :</p>
+<pre><code>{{if $csv.ready}}
+  {{:save type="entry" from=$csv.rows validate_schema="./entry.schema.json"}}
+  {{:csv action="clear"}}
+  {{:redirect to="./"}}
+{{/if}}</code></pre>
 <h1 id="fonctions-relatives-aux-modules">Fonctions relatives aux Modules</h1>
 <h2 id="save">save</h2>
 <p>Enregistre des données, sous la forme d'un document, dans la base de données, pour le module courant.</p>
@@ -673,6 +780,11 @@ L'écriture n°{{$result.id}} a été créée.</code></pre>
 <td style="text-align: left;">Si renseigné, le nouveau numéro unique du document sera indiqué dans cette variable.</td>
 </tr>
 <tr>
+<td style="text-align: left;"><code>from</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Si renseigné avec un tableau, chaque entrée du tableau sera traitée comme un élément à enregistrer.</td>
+</tr>
+<tr>
 <td style="text-align: left;">…</td>
 <td style="text-align: left;">optionnel</td>
 <td style="text-align: left;">Autres paramètres : traités comme des valeurs à enregistrer dans le document</td>
@@ -689,6 +801,16 @@ L'écriture n°{{$result.id}} a été créée.</code></pre>
 <p>Exemple de récupération du nouvel ID :</p>
 <pre><code>{{:save titre="Coucou !" assign_new_id="id"}}
 Le document n°{{$id}} a bien été enregistré.</code></pre>
+<p>Le paramètre <code>from</code> est équivalent à appeler la fonction <code>save</code> dans une boucle. Ainsi au lieu de :</p>
+<pre><code>{{:assign var="documents." title="Titre 1"}}
+{{:assign var="documents." title="Titre 2"}}
+{{#foreach from=$documents item="doc"}}
+  {{:save title=$doc.title validate_schema="./document.schema.json"}}
+{{/foreach}}</code></pre>
+<p>On peut simplement utiliser :</p>
+<pre><code>{{:assign var="documents." title="Titre 1"}}
+{{:assign var="documents." title="Titre 2"}}
+{{:save from=$documents validate_schema="./document.schema.json"}}</code></pre>
 <h3 id="validation-avec-un-schema-json">Validation avec un schéma JSON</h3>
 <pre><code>{{:save titre="Coucou" texte="Très long" validate_schema="./document.schema.json"}}</code></pre>
 <p>Pour ne valider qu'une partie du schéma, par exemple si on veut faire une mise à jour du document :</p>

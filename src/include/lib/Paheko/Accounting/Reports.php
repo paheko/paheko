@@ -346,7 +346,7 @@ class Reports
 		return $out;
 	}
 
-	static public function getTrialBalance(array $criterias, bool $simple = false): \Iterator
+	static public function getTrialBalance(array $criterias, bool $simple = false, bool $sum = true): \Iterator
 	{
 		unset($criterias['compare_year']);
 		$out = self::getAccountsBalances($criterias, null, false);
@@ -368,7 +368,9 @@ class Reports
 			yield $row;
 		}
 
-		yield (object) $sums;
+		if ($sum) {
+			yield (object) $sums;
+		}
 	}
 
 	/**

@@ -118,10 +118,13 @@ class Template extends Smartyer
 
 		if (!defined('Paheko\INSTALL_PROCESS')) {
 			$session = Session::getInstance();
-			$this->assign('config', Config::getInstance());
+			$config = Config::getInstance();
+			$this->assign('config', $config);
+			$this->assign('site_url', $config->getSiteURL());
 		}
 		else {
 			$this->assign('config', null);
+			$this->assign('site_url', null);
 		}
 
 		$is_logged = $session ? $session->isLogged() : null;
@@ -157,6 +160,21 @@ class Template extends Smartyer
 
 		$this->register_function('csrf_field', function ($params) {
 			return Form::tokenHTML($params['key']);
+		});
+
+		$this->register_function('show_balance', function ($params) {
+			$account = (object) $params['account'];
+
+			if ($account->balance < 0
+				|| ($account->balance > 0 && $account->position == Account::LIABILITY
+					&& ($account->type == Account::TYPE_BANK || $account->type == Account::TYPE_THIRD_PARTY || $account->type == Account::TYPE_CASH)))
+			{
+				$balance = abs($account->balance) * -1;
+				return sprintf('<strong class="error">%s</strong>', CommonModifiers::money_currency_html($balance, false, true));
+			}
+			else {
+				return CommonModifiers::money_currency_html($account->balance, false);
+			}
 		});
 
 		$this->register_function('enable_upload_here', function ($params) {

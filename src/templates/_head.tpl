@@ -1,10 +1,7 @@
 <?php
-if (!isset($current)) {
-	$current = '';
-}
-if (!isset($title)) {
-	$title = '';
-}
+$layout ??= '';
+$title ??= '';
+$current ??= '';
 ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr" class="{if $dialog}dialog{/if}{if $logged_user.preferences.dark_theme} dark{/if}" data-version="{$version_hash}" data-url="{$admin_url}">
@@ -51,7 +48,7 @@ if (!isset($title)) {
 </head>
 
 <?php
-$class = $layout ?? '';
+$class = $layout;
 
 if (ALERT_MESSAGE && !$dialog) {
 	$class .= ' sticky';
@@ -148,7 +145,7 @@ if (ALERT_MESSAGE && !$dialog) {
 
 	{elseif !defined('Paheko\INSTALL_PROCESS')}
 		{if $config.org_web || !$config.site_disabled}
-		<li><h3><a href="{if $config.site_disabled && $config.org_web}{$config.org_web}{else}{$www_url}{/if}">{icon shape="left"}<b>Retour au site</b></a></h3></li>
+		<li><h3><a href="{$site_url}">{icon shape="left"}<b>Retour au site</b></a></h3></li>
 		{/if}
 		<li{if $current == 'login'} class="current"{/if}><h3><a href="{$admin_url}">{icon shape="login"}<b>Connexion</b></a></h3></li>
 	{/if}
@@ -158,6 +155,10 @@ if (ALERT_MESSAGE && !$dialog) {
 	{if empty($hide_title)}
 	<h1>{$title}</h1>
 	{/if}
+</header>
+{elseif $layout === 'public'}
+<header class="public">
+	<h1><a href="{$site_url}">{if $config.files.logo}<img src="{$config->fileURL('logo', '150px')}" alt="" />{else}{$config.org_name}{/if}</a></h1>
 </header>
 {/if}
 

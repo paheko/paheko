@@ -64,6 +64,40 @@ a:hover {
     color: rgb(var(--gHoverLinkColor));
 }
 
+header.public {
+    background: rgba(var(--gSecondColor), 0.2);
+    margin-bottom: 1rem;
+}
+
+header.public h1 a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    font-size: 1.3rem;
+    padding: .4rem;
+    text-decoration: none;
+    color: darkblue;
+}
+
+header.public h1 a img {
+    max-height: 64px;
+}
+
+footer.public {
+    text-align: center;
+    font-size: .9rem;
+    border-top: 1px solid #ccc;
+    max-width: 650px;
+    margin: 3rem auto 0 auto;
+    padding-top: .5rem;
+    color: #999;
+}
+
+footer.public a {
+    color: darkblue;
+}
+
 .header h1 {
     color: rgb(var(--gMainColor));
     margin-left: 180px;

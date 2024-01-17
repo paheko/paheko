@@ -12,7 +12,14 @@
 				</dd>
 			{/foreach}
 		{else}
+			<?php
+			$number_field = \Paheko\Users\DynamicFields::getNumberField();
+			?>
 			{foreach from=$user->asDetailsArray() key="key" item="value"}
+				{if $key === $number_field}
+					{* Don't show number field when creating user*}
+					{continue}
+				{/if}
 				<dt>{$csv->getColumnLabel($key)}</dt>
 				<dd>
 					{user_field name=$key value=$value}

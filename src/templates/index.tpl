@@ -29,14 +29,14 @@
 		E-Mail : <a href="mailto:{$config.org_email}">{$config.org_email}</a>
 	</p>
 	{/if}
-	{if !empty($config.org_web) || !$config.site_disabled}
+	{if $site_url}
 	<p>
-		Web : <a href="{if $config.site_disabled}{$config.org_web}{else}{$www_url}{/if}" target="_blank">{if $config.site_disabled}{$config.org_web}{else}{$www_url}{/if}</a>
+		Web : <a href="{$site_url}" target="_blank">{$site_url}</a>
 	</p>
 	{/if}
 </aside>
 
-{if !$has_extensions}
+{if !$has_extensions && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
 <div class="expose-extensions block">
 	<h2>Besoin d'autres fonctionnalités&nbsp;?</h2>
 	<p>Découvrez ces extensions dans le menu <strong>Configuration</strong>, onglet <strong>Extensions</strong>&nbsp;:</p>
