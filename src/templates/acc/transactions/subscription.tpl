@@ -2,9 +2,9 @@
 
 <nav class="tabs">
 	{linkbutton href="!users/details.php?id=%d"|args:$user_id label="Retour à la fiche membre" shape="user"}
-	{linkbutton href="!services/user/payment.php?id=%d"|args:$service_user_id label="Nouveau règlement" shape="plus" target="_dialog"}
+	{linkbutton href="!services/user/payment.php?id=%d"|args:$subscription_id label="Nouveau règlement" shape="plus" target="_dialog"}
 	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-	{linkbutton href="!services/user/link.php?id=%d"|args:$service_user_id label="Lier à une écriture" shape="check" target="_dialog"}
+	{linkbutton href="!services/user/link.php?id=%d"|args:$subscription_id label="Lier à une écriture" shape="check" target="_dialog"}
 	{/if}
 </nav>
 

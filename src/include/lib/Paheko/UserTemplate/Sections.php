@@ -805,36 +805,36 @@ class Sections
 
 		$number_field = DynamicFields::getNumberField();
 
-		$params['select'] = sprintf('su.expiry_date, su.date, s.label, su.paid, su.expected_amount');
-		$params['tables'] = 'services_users su INNER JOIN services s ON s.id = su.id_service';
+		$params['select'] = sprintf('sub.expiry_date, sub.date, s.label, sub.paid, sub.expected_amount');
+		$params['tables'] = 'services_subscriptions sub INNER JOIN services s ON s.id = sub.id_service';
 
 		if (isset($params['user'])) {
-			$params['where'] .= ' AND su.id_user = :id_user';
+			$params['where'] .= ' AND sub.id_user = :id_user';
 			$params[':id_user'] = (int) $params['user'];
 			unset($params['user']);
 		}
 
 		if (isset($params['id_service'])) {
-			$params['where'] .= ' AND su.id_service = :id_service';
+			$params['where'] .= ' AND sub.id_service = :id_service';
 			$params[':id_service'] = (int) $params['id_service'];
 			unset($params['id_service']);
 		}
 
 		if (!empty($params['active'])) {
-			$params['having'] = 'MAX(su.expiry_date) >= date()';
+			$params['having'] = 'MAX(sub.expiry_date) >= date()';
 			unset($params['active']);
 		}
 
 		if (isset($params['active']) && empty($params['active'])) {
-			$params['having'] = 'MAX(su.expiry_date) < date()';
+			$params['having'] = 'MAX(sub.expiry_date) < date()';
 			unset($params['active']);
 		}
 
 		if (empty($params['order'])) {
-			$params['order'] = 'su.id';
+			$params['order'] = 'sub.id';
 		}
 
-		$params['group'] = 'su.id_user, su.id_service';
+		$params['group'] = 'sub.id_user, sub.id_service';
 
 		return self::sql($params, $tpl, $line);
 	}

@@ -286,7 +286,7 @@ CREATE TABLE IF NOT EXISTS services_fees
 	id_project INTEGER NULL REFERENCES acc_projects (id) ON DELETE SET NULL
 );
 
-CREATE TABLE IF NOT EXISTS services_users
+CREATE TABLE IF NOT EXISTS services_subscriptions
 -- Records of services and fees linked to users
 (
 	id INTEGER NOT NULL PRIMARY KEY,
@@ -301,12 +301,12 @@ CREATE TABLE IF NOT EXISTS services_users
 	expiry_date TEXT NULL CHECK (date(expiry_date) IS NULL OR date(expiry_date) = expiry_date)
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS su_unique ON services_users (id_user, id_service, id_fee, date);
+CREATE UNIQUE INDEX IF NOT EXISTS services_subscriptions_unique ON services_subscriptions (id_user, id_service, id_fee, date);
 
-CREATE INDEX IF NOT EXISTS su_service ON services_users (id_service);
-CREATE INDEX IF NOT EXISTS su_fee ON services_users (id_fee);
-CREATE INDEX IF NOT EXISTS su_paid ON services_users (paid);
-CREATE INDEX IF NOT EXISTS su_expiry ON services_users (expiry_date);
+CREATE INDEX IF NOT EXISTS su_service ON services_subscriptions (id_service);
+CREATE INDEX IF NOT EXISTS su_fee ON services_subscriptions (id_fee);
+CREATE INDEX IF NOT EXISTS su_paid ON services_subscriptions (paid);
+CREATE INDEX IF NOT EXISTS su_expiry ON services_subscriptions (expiry_date);
 
 CREATE TABLE IF NOT EXISTS services_reminders
 -- Reminders for service expiry
@@ -511,14 +511,26 @@ CREATE INDEX IF NOT EXISTS acc_transactions_lines_id_related ON acc_transactions
 CREATE TABLE IF NOT EXISTS acc_transactions_users
 -- Linking transactions and users
 (
-	id_user INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
 	id_transaction INTEGER NOT NULL REFERENCES acc_transactions (id) ON DELETE CASCADE,
-	id_service_user INTEGER NULL REFERENCES services_users (id) ON DELETE SET NULL,
+	id_user INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
 
-	PRIMARY KEY (id_user, id_transaction, id_service_user)
+	PRIMARY KEY (id_user, id_transaction)
 );
 
-CREATE INDEX IF NOT EXISTS acc_transactions_users_service ON acc_transactions_users (id_service_user);
+CREATE INDEX IF NOT EXISTS acc_transactions_users_transaction ON acc_transactions_users (id_transaction);
+CREATE INDEX IF NOT EXISTS acc_transactions_user ON acc_transactions_users (id_user);
+
+CREATE TABLE IF NOT EXISTS acc_transactions_subscriptions
+-- Linking transactions and subscriptions
+(
+	id_transaction INTEGER NOT NULL REFERENCES acc_transactions (id) ON DELETE CASCADE,
+	id_subscription INTEGER NOT NULL REFERENCES services_subscriptions (id) ON DELETE CASCADE,
+
+	PRIMARY KEY (id_user, id_subscription)
+);
+
+CREATE INDEX IF NOT EXISTS acc_transactions_subscriptions_transaction ON acc_transactions_users (id_transaction);
+CREATE INDEX IF NOT EXISTS acc_transactions_subscription ON acc_transactions_subscriptions (id_subscription);
 
 ---------- FILES ----------------
 

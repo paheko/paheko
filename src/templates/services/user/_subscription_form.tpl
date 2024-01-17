@@ -50,7 +50,7 @@ assert(isset($grouped_services) && is_array($grouped_services));
 
 			{foreach from=$grouped_services item="service"}
 				<dd class="radio-btn">
-					{input type="radio" name="id_service" value=$service.id data-duration=$service.duration data-expiry=$service.expiry_date|date_short label=null source=$service_user}
+					{input type="radio" name="id_service" value=$service.id data-duration=$service.duration data-expiry=$service.expiry_date|date_short label=null source=$subscription}
 					<label for="f_id_service_{$service.id}">
 						<div>
 							<h3>{$service.label}</h3>
@@ -83,7 +83,7 @@ assert(isset($grouped_services) && is_array($grouped_services));
 			<dt><label for="f_fee">Tarif</label> <b>(obligatoire)</b></dt>
 			{foreach from=$service.fees key="service_id" item="fee"}
 			<dd class="radio-btn">
-				{input type="radio" name="id_fee" value=$fee.id data-user-amount=$fee.user_amount data-account=$fee.id_account data-year=$fee.id_year label=null data-project=$fee.id_project source=$service_user }
+				{input type="radio" name="id_fee" value=$fee.id data-user-amount=$fee.user_amount data-account=$fee.id_account data-year=$fee.id_year label=null data-project=$fee.id_project source=$subscription}
 				<label for="f_id_fee_{$fee.id}">
 					<div>
 						<h3>{$fee.label}</h3>
@@ -118,9 +118,9 @@ assert(isset($grouped_services) && is_array($grouped_services));
 	<fieldset>
 		<legend>Détails</legend>
 		<dl>
-			{input type="date" name="date" required=1 default=$today source=$service_user label="Date d'inscription"}
-			{input type="date" name="expiry_date" source=$service_user label="Date d'expiration de l'inscription"}
-			{input type="checkbox" name="paid" value="1" source=$service_user default="1" label="Marquer cette inscription comme payée"}
+			{input type="date" name="date" required=1 default=$today source=$subscription label="Date d'inscription"}
+			{input type="date" name="expiry_date" source=$subscription label="Date d'expiration de l'inscription"}
+			{input type="checkbox" name="paid" value="1" source=$subscription default="1" label="Marquer cette inscription comme payée"}
 			<dd class="help">Décocher cette case pour pouvoir suivre les règlements de personnes qui payent en plusieurs fois. Il sera possible de cocher cette case lorsque le solde aura été réglé.</dd>
 		</dl>
 	</fieldset>

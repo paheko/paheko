@@ -124,7 +124,7 @@ class Users
 			$db->exec('DROP TABLE IF EXISTS users_active_services;
 				CREATE TEMPORARY TABLE IF NOT EXISTS users_active_services (id, service);
 				INSERT INTO users_active_services SELECT id_user, id_service FROM (
-					SELECT id_user, id_service, MAX(expiry_date) FROM services_users
+					SELECT id_user, id_service, MAX(expiry_date) FROM services_subscriptions
 					WHERE expiry_date IS NULL OR expiry_date >= date()
 					GROUP BY id_user, id_service
 				);

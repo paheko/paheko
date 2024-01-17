@@ -15,9 +15,9 @@ use Paheko\Entities\Accounting\Line;
 
 use KD2\DB\Date;
 
-class Service_User extends Entity
+class Subscription extends Entity
 {
-	const TABLE = 'services_users';
+	const TABLE = 'services_subscriptions';
 
 	protected ?int $id;
 	protected int $id_user;

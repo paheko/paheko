@@ -14,8 +14,8 @@ trait TransactionSubscriptionsTrait
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
 
-		return $db->preparedQuery('REPLACE INTO acc_transactions_users (id_transaction, id_user, id_service_user)
-			SELECT ?, id_user, id FROM services_users WHERE id = ?;',
+		return $db->preparedQuery('REPLACE INTO acc_transactions_subscriptions (id_transaction, id_subscription)
+			SELECT ?, id FROM services_subscriptions WHERE id = ?;',
 			$this->id(),
 			$id_subscription
 		);
@@ -24,13 +24,13 @@ trait TransactionSubscriptionsTrait
 	public function deleteAllSubscriptionLinks(): void
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
-		$db->delete('acc_transactions_users', 'id_transaction = ? AND id_service_user IS NOT NULL', $this->id());
+		$db->delete('acc_transactions_subscriptions', 'id_transaction = ?', $this->id());
 	}
 
 	public function deleteSubscriptionLink(int $id): void
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
-		$db->delete('acc_transactions_users', 'id_transaction = ? AND id_service_user = ?', $this->id(), $id);
+		$db->delete('acc_transactions_subscriptions', 'id_transaction = ? AND id_subscription = ?', $this->id(), $id);
 	}
 
 	public function listSubscriptionLinks(): array
@@ -38,11 +38,11 @@ trait TransactionSubscriptionsTrait
 		$db = EntityManager::getInstance(self::class)->DB();
 		$identity_column = DynamicFields::getNameFieldsSQL('u');
 		$number_column = DynamicFields::getNumberFieldSQL('u');
-		$sql = sprintf('SELECT s.*, %s AS user_identity, %s AS user_number, l.id_service_user AS id_subscription
+		$sql = sprintf('SELECT s.*, %s AS user_identity, %s AS user_number, sub.id_subscription
 			FROM users u
-			INNER JOIN acc_transactions_users l ON l.id_user = u.id
-			INNER JOIN services_users s ON s.id = l.id_service_user
-			WHERE l.id_transaction = ? AND l.id_service_user IS NOT NULL;', $identity_column, $number_column);
+			INNER JOIN services_subscriptions sub ON sub.id_user = u.id
+			INNER JOIN acc_transactions_subscriptions l ON l.id_subscription = sub.id
+			WHERE l.id_transaction = ?;', $identity_column, $number_column);
 		return $db->get($sql, $this->id());
 	}
 
@@ -62,8 +62,8 @@ trait TransactionSubscriptionsTrait
 		$this->deleteAllSubscriptionLinks();
 
 		foreach ($subscriptions as $id) {
-			$db->preparedQuery('INSERT OR IGNORE INTO acc_transactions_users (id_transaction, id_user, id_service_user)
-				SELECT ?, id_user, id FROM services_users WHERE id = ?;',
+			$db->preparedQuery('INSERT OR IGNORE INTO acc_transactions_subscriptions (id_transaction, id_subscription)
+				SELECT ?, id FROM services_subscriptions WHERE id = ?;',
 				$this->id(),
 				(int)$id
 			);

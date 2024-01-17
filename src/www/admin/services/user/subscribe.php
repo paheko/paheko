@@ -6,7 +6,7 @@ use Paheko\Services\Services;
 use Paheko\Users\Categories;
 use Paheko\Users\Users;
 use Paheko\Accounting\Projects;
-use Paheko\Entities\Services\Service_User;
+use Paheko\Entities\Services\Subscription;
 use Paheko\Entities\Accounting\Account;
 use Paheko\Entities\Accounting\Transaction;
 
@@ -15,7 +15,7 @@ require_once __DIR__ . '/../_inc.php';
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 
 // This controller allows to either select a user if none has been provided in the query string
-// or subscribe a user to an activity (create a new Service_User entity)
+// or subscribe a user to an activity (create a new Subscription entity)
 // If $user_id is null then the form is just a select to choose a user
 
 $count_all = Services::count();
@@ -81,7 +81,7 @@ $form->runIf('save', function () use ($session, &$users, $copy_service, $copy_fe
 		$users = $copy_fee->getUsers($copy_only_paid);
 	}
 
-	$su = Service_User::createFromForm($users, $session->getUser()->id, $copy_service ? true : false);
+	$su = Subscription::createFromForm($users, $session->getUser()->id, $copy_service ? true : false);
 
 	Utils::reloadParentFrameIfDialog();
 
@@ -104,9 +104,9 @@ $t->type = $t::TYPE_REVENUE;
 $types_details = $t->getTypesDetails();
 $account_targets = $types_details[Transaction::TYPE_REVENUE]->accounts[1]->targets_string;
 
-$service_user = null;
+$subscription = null;
 
-$tpl->assign(compact('csrf_key', 'users', 'account_targets', 'service_user', 'allow_users_edit', 'copy_service', 'copy_fee', 'copy_only_paid'));
+$tpl->assign(compact('csrf_key', 'users', 'account_targets', 'subscription', 'allow_users_edit', 'copy_service', 'copy_fee', 'copy_only_paid'));
 $tpl->assign('projects', Projects::listAssoc());
 
 $tpl->display('services/user/subscribe.tpl');

@@ -6,6 +6,6 @@
 
 {form_errors}
 
-{include file="services/user/_service_user_form.tpl" create=true}
+{include file="services/user/_subscription_form.tpl" create=true}
 
 {include file="_foot.tpl"}

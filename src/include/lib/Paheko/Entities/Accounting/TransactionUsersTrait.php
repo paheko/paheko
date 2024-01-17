@@ -10,7 +10,7 @@ trait TransactionUsersTrait
 	public function deleteLinkedUsers(): void
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
-		$db->delete('acc_transactions_users', 'id_transaction = ? AND id_service_user IS NULL', $this->id());
+		$db->delete('acc_transactions_users', 'id_transaction = ?', $this->id());
 	}
 
 	public function updateLinkedUsers(array $users): void
@@ -29,7 +29,7 @@ trait TransactionUsersTrait
 		$this->deleteLinkedUsers();
 
 		foreach ($users as $id) {
-			$db->preparedQuery('INSERT OR IGNORE INTO acc_transactions_users (id_transaction, id_user, id_service_user) VALUES (?, ?, NULL);', $this->id(), (int)$id);
+			$db->preparedQuery('INSERT OR IGNORE INTO acc_transactions_users (id_transaction, id_user) VALUES (?, ?);', $this->id(), (int)$id);
 		}
 
 		$db->commit();
@@ -43,7 +43,7 @@ trait TransactionUsersTrait
 		$sql = sprintf('SELECT u.id, %s AS identity, %s AS number
 			FROM users u
 			INNER JOIN acc_transactions_users l ON l.id_user = u.id
-			WHERE l.id_transaction = ? AND l.id_service_user IS NULL
+			WHERE l.id_transaction = ?
 			ORDER BY id;', $identity_column, $number_column);
 		return $db->get($sql, $this->id());
 	}
@@ -55,7 +55,7 @@ trait TransactionUsersTrait
 		$sql = sprintf('SELECT u.id, %s AS identity
 			FROM users u
 			INNER JOIN acc_transactions_users l ON l.id_user = u.id
-			WHERE l.id_transaction = ? AND l.id_service_user IS NULL;', $identity_column);
+			WHERE l.id_transaction = ?;', $identity_column);
 		return $db->getAssoc($sql, $this->id());
 	}
 }

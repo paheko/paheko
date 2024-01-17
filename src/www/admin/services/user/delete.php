@@ -1,14 +1,14 @@
 <?php
 namespace Paheko;
 
-use Paheko\Services\Services_User;
+use Paheko\Services\Subscriptions;
 use Paheko\Users\Users;
 
 require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 
-$su = Services_User::get((int) qg('id'));
+$su = Subscriptions::get((int) qg('id'));
 
 if (!$su) {
 	throw new UserException("Cette inscription n'existe pas");

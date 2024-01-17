@@ -106,12 +106,12 @@ class Fees
 			CREATE TEMP TABLE IF NOT EXISTS fees_list_stats (id_fee, id_user, ok, expired, paid);
 			INSERT INTO fees_list_stats SELECT
 				id_fee, id_user,
-				CASE WHEN (su.expiry_date IS NULL OR su.expiry_date >= date()) AND su.paid = 1 THEN 1 ELSE 0 END,
-				CASE WHEN su.expiry_date < date() THEN 1 ELSE 0 END,
+				CASE WHEN (sub.expiry_date IS NULL OR sub.expiry_date >= date()) AND sub.paid = 1 THEN 1 ELSE 0 END,
+				CASE WHEN sub.expiry_date < date() THEN 1 ELSE 0 END,
 				paid
-			FROM services_users su
-			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_fee) su2 ON su2.id = su.id
-			INNER JOIN users u ON u.id = su.id_user WHERE u.%s',
+			FROM services_subscriptions sub
+			INNER JOIN (SELECT id, MAX(date) FROM services_subscriptions GROUP BY id_user, id_fee) sub2 ON sub2.id = sub.id
+			INNER JOIN users u ON u.id = sub.id_user WHERE u.%s',
 			$db->where('id_category', 'NOT IN', $hidden_cats));
 
 		$db->exec($sql);

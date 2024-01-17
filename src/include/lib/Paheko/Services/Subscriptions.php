@@ -7,36 +7,36 @@ use Paheko\DB;
 use Paheko\DynamicList;
 use Paheko\Utils;
 use Paheko\UserException;
-use Paheko\Entities\Services\Service_User;
+use Paheko\Entities\Services\Subscription;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Users;
 
 use KD2\DB\EntityManager;
 
-class Services_User
+class Subscriptions
 {
 	static public function get(int $id)
 	{
-		return EntityManager::findOneById(Service_User::class, $id);
+		return EntityManager::findOneById(Subscription::class, $id);
 	}
 
 	static public function countForUser(int $user_id)
 	{
-		return DB::getInstance()->count(Service_User::TABLE, 'id_user = ?', $user_id);
+		return DB::getInstance()->count(Subscription::TABLE, 'id_user = ?', $user_id);
 	}
 
 	static public function listDistinctForUser(int $user_id)
 	{
 		return DB::getInstance()->get('SELECT
-			s.label, MAX(su.date) AS last_date, su.expiry_date AS expiry_date, sf.label AS fee_label, su.paid, s.end_date,
-			CASE WHEN su.expiry_date < date() THEN -1 WHEN su.expiry_date >= date() THEN 1 ELSE 0 END AS status,
+			s.label, MAX(sub.date) AS last_date, sub.expiry_date AS expiry_date, sf.label AS fee_label, sub.paid, s.end_date,
+			CASE WHEN sub.expiry_date < date() THEN -1 WHEN sub.expiry_date >= date() THEN 1 ELSE 0 END AS status,
 			CASE WHEN s.end_date < date() THEN 1 ELSE 0 END AS archived
-			FROM services_users su
-			INNER JOIN services s ON s.id = su.id_service
-			LEFT JOIN services_fees sf ON sf.id = su.id_fee
-			WHERE su.id_user = ?
+			FROM services_subscriptions sub
+			INNER JOIN services s ON s.id = sub.id_service
+			LEFT JOIN services_fees sf ON sf.id = sub.id_fee
+			WHERE sub.id_user = ?
 			AND s.archived = 0
-			GROUP BY su.id_service ORDER BY expiry_date DESC;', $user_id);
+			GROUP BY sub.id_service ORDER BY expiry_date DESC;', $user_id);
 	}
 
 	static public function perUserList(int $user_id, ?int $only_id = null, ?\DateTime $after = null): DynamicList
@@ -46,7 +46,7 @@ class Services_User
 				'select' => 's.archived',
 			],
 			'id' => [
-				'select' => 'su.id',
+				'select' => 'sub.id',
 			],
 			'id_account' => [
 				'select' => 'sf.id_account',
@@ -58,7 +58,7 @@ class Services_User
 				'select' => 'a.code',
 			],
 			'has_transactions' => [
-				'select' => 'tu.id_user',
+				'select' => 'ts.id_transaction',
 			],
 			'label' => [
 				'select' => 's.label',
@@ -70,38 +70,38 @@ class Services_User
 			],
 			'date' => [
 				'label' => 'Date d\'inscription',
-				'select' => 'su.date',
+				'select' => 'sub.date',
 			],
 			'expiry' => [
 				'label' => 'Date d\'expiration',
-				'select' => 'MAX(su.expiry_date)',
+				'select' => 'MAX(sub.expiry_date)',
 			],
 			'paid' => [
 				'label' => 'Payé',
-				'select' => 'su.paid',
+				'select' => 'sub.paid',
 			],
 			'amount' => [
 				'label' => 'Reste à régler',
-				'select' => 'CASE WHEN su.paid = 1 AND COUNT(tl.debit) = 0 THEN NULL
+				'select' => 'CASE WHEN sub.paid = 1 AND COUNT(tl.debit) = 0 THEN NULL
 					ELSE MAX(0, expected_amount - IFNULL(SUM(tl.debit), 0)) END',
 			],
 			'expected_amount' => [],
 		];
 
-		$tables = 'services_users su
-			INNER JOIN services s ON s.id = su.id_service
-			LEFT JOIN services_fees sf ON sf.id = su.id_fee
+		$tables = 'services_subscriptions sub
+			INNER JOIN services s ON s.id = sub.id_service
+			LEFT JOIN services_fees sf ON sf.id = sub.id_fee
 			LEFT JOIN acc_accounts a ON sf.id_account = a.id
-			LEFT JOIN acc_transactions_users tu ON tu.id_service_user = su.id
-			LEFT JOIN acc_transactions_lines tl ON tl.id_transaction = tu.id_transaction';
-		$conditions = sprintf('su.id_user = %d', $user_id);
+			LEFT JOIN acc_transactions_subscriptions ts ON ts.id_subscription = sub.id
+			LEFT JOIN acc_transactions_lines tl ON tl.id_transaction = ts.id_transaction';
+		$conditions = sprintf('sub.id_user = %d', $user_id);
 
 		if ($only_id) {
-			$conditions .= sprintf(' AND su.id = %d', $only_id);
+			$conditions .= sprintf(' AND sub.id = %d', $only_id);
 		}
 
 		if ($after) {
-			$conditions .= sprintf(' AND su.date >= %s', DB::getInstance()->quote($after->format('Y-m-d')));
+			$conditions .= sprintf(' AND sub.date >= %s', DB::getInstance()->quote($after->format('Y-m-d')));
 		}
 
 		$list = new DynamicList($columns, $tables, $conditions);
@@ -111,8 +111,8 @@ class Services_User
 		});
 
 		$list->orderBy('date', true);
-		$list->groupBy('su.id');
-		$list->setCount('COUNT(DISTINCT su.id)');
+		$list->groupBy('sub.id');
+		$list->setCount('COUNT(DISTINCT sub.id)');
 		return $list;
 	}
 
@@ -159,7 +159,7 @@ class Services_User
 					}
 				}
 
-				$su = new Service_User;
+				$su = new Subscription;
 				$su->set('id_user', $id_user);
 				$su->set('id_service', $id_service);
 				$su->set('id_fee', $id_fee);

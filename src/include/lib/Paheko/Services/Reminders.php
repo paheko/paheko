@@ -74,30 +74,30 @@ class Reminders
 		$sql = 'SELECT
 			u.*, %s AS identity,
 			u.id AS id_user,
-			date(su.expiry_date, sr.delay || \' days\') AS reminder_date,
-			ABS(julianday(date()) - julianday(su.expiry_date)) AS nb_days,
+			date(sub.expiry_date, sr.delay || \' days\') AS reminder_date,
+			ABS(julianday(date()) - julianday(sub.expiry_date)) AS nb_days,
 			MAX(sr.delay) AS delay, sr.subject, sr.body, s.label, s.description,
-			su.expiry_date, sr.id AS id_reminder, su.id_service, su.id_user,
+			sub.expiry_date, sr.id AS id_reminder, sub.id_service, sub.id_user,
 			sf.label AS fee_label, sf.amount, sf.formula
 			FROM services_reminders sr
 			INNER JOIN services s ON s.id = sr.id_service AND s.archived = 0
 			-- Select latest subscription to a service (MAX) only
-			INNER JOIN (SELECT MAX(su2.expiry_date) AS expiry_date, su2.id_user, su2.id_service, su2.id_fee FROM services_users AS su2 GROUP BY id_user, id_service) AS su ON s.id = su.id_service
+			INNER JOIN (SELECT MAX(sub2.expiry_date) AS expiry_date, sub2.id_user, sub2.id_service, sub2.id_fee FROM services_subscriptions AS sub2 GROUP BY id_user, id_service) AS sub ON s.id = sub.id_service
 			-- Select fee
-			LEFT JOIN services_fees sf ON sf.id = su.id_fee
+			LEFT JOIN services_fees sf ON sf.id = sub.id_fee
 			-- Join with users, but not ones part of a hidden category
-			INNER JOIN users u ON su.id_user = u.id
+			INNER JOIN users u ON sub.id_user = u.id
 				AND (%s)
 				AND (u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1))
 			-- Join with sent reminders to exclude users that already have received this reminder
-			LEFT JOIN (SELECT id, MAX(due_date) AS due_date, id_user, id_reminder FROM services_reminders_sent GROUP BY id_user, id_reminder) AS srs ON su.id_user = srs.id_user AND srs.id_reminder = sr.id
+			LEFT JOIN (SELECT id, MAX(due_date) AS due_date, id_user, id_reminder FROM services_reminders_sent GROUP BY id_user, id_reminder) AS srs ON sub.id_user = srs.id_user AND srs.id_reminder = sr.id
 			WHERE
-				(sr.not_before_date IS NULL OR sr.not_before_date <= date(su.expiry_date, sr.delay || \' days\'))
-				AND (srs.id IS NULL OR srs.due_date < date(su.expiry_date, (sr.delay - 1) || \' days\'))
+				(sr.not_before_date IS NULL OR sr.not_before_date <= date(sub.expiry_date, sr.delay || \' days\'))
+				AND (srs.id IS NULL OR srs.due_date < date(sub.expiry_date, (sr.delay - 1) || \' days\'))
 				AND %s
 				AND %s
-			GROUP BY su.id_user, sr.id_service
-			ORDER BY su.id_user';
+			GROUP BY sub.id_user, sr.id_service
+			ORDER BY sub.id_user';
 
 		$emails = DynamicFields::getEmailFields();
 		$emails = array_map(fn($e) => sprintf('u.%s IS NOT NULL', $db->quoteIdentifier($e)), $emails);

@@ -1,7 +1,7 @@
 <?php
 namespace Paheko;
 
-use Paheko\Services\Services_User;
+use Paheko\Services\Subscriptions;
 use Paheko\Accounting\Transactions;
 
 require_once __DIR__ . '/../_inc.php';
@@ -9,15 +9,15 @@ require_once __DIR__ . '/../_inc.php';
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ);
 
-$su = Services_User::get((int)qg('id'));
+$subscription = Subscriptions::get((int)qg('id'));
 
-if (!$su) {
+if (!$subscription) {
 	throw new UserException("Cette inscription n'existe pas");
 }
 
 $csrf_key = 'service_link';
 
-$form->runIf('save', function () use ($su) {
+$form->runIf('save', function () use ($subscription) {
 	$id = (int)f('id_transaction');
 	$transaction = Transactions::get($id);
 
@@ -25,8 +25,8 @@ $form->runIf('save', function () use ($su) {
 		throw new UserException('Impossible de trouver l\'écriture #' . $id);
 	}
 
-	$transaction->linkToSubscription($su->id);
-}, $csrf_key, '!acc/transactions/service_user.php?id=' . $su->id . '&user=' . $su->id_user);
+	$transaction->linkToSubscription($subscription->id);
+}, $csrf_key, '!acc/transactions/subscription.php?id=' . $subscription->id . '&user=' . $subscription->id_user);
 
 $tpl->assign(compact('csrf_key'));
 

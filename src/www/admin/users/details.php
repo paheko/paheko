@@ -2,7 +2,7 @@
 namespace Paheko;
 
 use Paheko\Accounting\Transactions;
-use Paheko\Services\Services_User;
+use Paheko\Services\Subscriptions;
 use Paheko\Users\Categories;
 use Paheko\Users\Users;
 
@@ -42,7 +42,7 @@ $form->runIf('login_as', function () use ($user, $category, $session) {
 
 }, $csrf_key, '!?login_as=1');
 
-$services = Services_User::listDistinctForUser($user->id);
+$services = Subscriptions::listDistinctForUser($user->id);
 
 $variables = [];
 

@@ -3,7 +3,7 @@
 namespace Paheko;
 
 use Paheko\Services\Services;
-use Paheko\Services\Services_User;
+use Paheko\Services\Subscriptions;
 use Paheko\Users\Users;
 
 require_once __DIR__ . '/../_inc.php';
@@ -18,7 +18,7 @@ if (!$user_name) {
 }
 
 $form->runIf($session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE) && null !== qg('paid') && qg('su_id'), function () {
-	$su = Services_User::get((int) qg('su_id'));
+	$su = Subscriptions::get((int) qg('su_id'));
 
 	if (!$su) {
 		throw new UserException("Cette inscription est introuvable");
@@ -36,11 +36,11 @@ if ($after = qg('after')) {
 
 $only_service = !$only ? null : Services::get($only);
 
-$list = Services_User::perUserList($user_id, $only, $after);
+$list = Subscriptions::perUserList($user_id, $only, $after);
 $list->setTitle(sprintf('Inscriptions — %s', $user_name));
 $list->loadFromQueryString();
 
-$tpl->assign('services', Services_User::listDistinctForUser($user_id));
+$tpl->assign('services', Subscriptions::listDistinctForUser($user_id));
 $tpl->assign(compact('list', 'user_id', 'user_name', 'only', 'only_service', 'after'));
 
 $tpl->display('services/user/index.tpl');

@@ -13,7 +13,7 @@ use Paheko\Accounting\Transactions;
 use Paheko\Accounting\Years;
 use Paheko\Entities\Accounting\Transaction;
 use Paheko\Search;
-use Paheko\Services\Services_User;
+use Paheko\Services\Subscriptions;
 use Paheko\Users\Categories;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Users;
@@ -693,17 +693,17 @@ class API
 				}
 
 				$csv = new CSV_Custom;
-				$csv->setColumns(Services_User::listImportColumns());
-				$csv->setMandatoryColumns(Services_User::listMandatoryImportColumns());
+				$csv->setColumns(Subscriptions::listImportColumns());
+				$csv->setMandatoryColumns(Subscriptions::listMandatoryImportColumns());
 
 				$csv->loadFile($path);
 				$csv->setTranslationTableAuto();
 
 				if (!$csv->loaded() || !$csv->ready()) {
-					throw new APIException('Missing columns or error during columns matching of import table: ' . json_encode(Services_User::listMandatoryImportColumns()), 400);
+					throw new APIException('Missing columns or error during columns matching of import table: ' . json_encode(Subscriptions::listMandatoryImportColumns()), 400);
 				}
 
-				Services_User::import($csv);
+				Subscriptions::import($csv);
 				return null;
 			}
 			finally {

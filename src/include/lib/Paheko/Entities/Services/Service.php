@@ -99,16 +99,16 @@ class Service extends Entity
 			],
 			'status' => [
 				'label' => 'Statut',
-				'select' => 'CASE WHEN su.expiry_date < date() THEN -1 WHEN su.expiry_date >= date() THEN 1 ELSE 0 END',
+				'select' => 'CASE WHEN sub.expiry_date < date() THEN -1 WHEN sub.expiry_date >= date() THEN 1 ELSE 0 END',
 			],
 			'paid' => [
 				'label' => 'Payé ?',
-				'select' => 'su.paid',
-				'order' => 'su.paid %s, su.date %1$s',
+				'select' => 'sub.paid',
+				'order' => 'sub.paid %s, sub.date %1$s',
 			],
 			'expiry' => [
 				'label' => 'Date d\'expiration',
-				'select' => 'MAX(su.expiry_date)',
+				'select' => 'MAX(sub.expiry_date)',
 			],
 			'fee' => [
 				'label' => 'Tarif',
@@ -116,25 +116,25 @@ class Service extends Entity
 			],
 			'date' => [
 				'label' => 'Date d\'inscription',
-				'select' => 'su.date',
+				'select' => 'sub.date',
 			],
 		];
 
-		$tables = 'services_users su
-			INNER JOIN users u ON u.id = su.id_user
-			INNER JOIN services s ON s.id = su.id_service
-			LEFT JOIN services_fees sf ON sf.id = su.id_fee
-			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_service) AS su2 ON su2.id = su.id';
-		$conditions = sprintf('su.id_service = %d', $this->id());
+		$tables = 'services_subscriptions AS sub
+			INNER JOIN users u ON u.id = sub.id_user
+			INNER JOIN services s ON s.id = sub.id_service
+			LEFT JOIN services_fees sf ON sf.id = sub.id_fee
+			INNER JOIN (SELECT id, MAX(date) FROM services_subscriptions GROUP BY id_user, id_service) AS su2 ON su2.id = sub.id';
+		$conditions = sprintf('sub.id_service = %d', $this->id());
 
 		if (!$include_hidden_categories) {
 			$conditions .= ' AND u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)';
 		}
 
 		$list = new DynamicList($columns, $tables, $conditions);
-		$list->groupBy('su.id_user');
+		$list->groupBy('sub.id_user');
 		$list->orderBy('paid', true);
-		$list->setCount('COUNT(DISTINCT su.id_user)');
+		$list->setCount('COUNT(DISTINCT sub.id_user)');
 
 		$list->setExportCallback(function (&$row) {
 			$row->status = $row->status == -1 ? 'En retard' : ($row->status == 1 ? 'En cours' : '');
@@ -147,8 +147,8 @@ class Service extends Entity
 	public function activeUsersList(bool $include_hidden_categories = false): DynamicList
 	{
 		$list = $this->allUsersList();
-		$conditions = sprintf('su.id_service = %d AND (su.expiry_date >= date() OR su.expiry_date IS NULL)
-			AND su.paid = 1', $this->id());
+		$conditions = sprintf('sub.id_service = %d AND (sub.expiry_date >= date() OR sub.expiry_date IS NULL)
+			AND sub.paid = 1', $this->id());
 
 		if (!$include_hidden_categories) {
 			$conditions .= ' AND u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)';
@@ -161,7 +161,7 @@ class Service extends Entity
 	public function unpaidUsersList(bool $include_hidden_categories = false): DynamicList
 	{
 		$list = $this->allUsersList();
-		$conditions = sprintf('su.id_service = %d AND su.paid = 0', $this->id());
+		$conditions = sprintf('sub.id_service = %d AND sub.paid = 0', $this->id());
 
 		if (!$include_hidden_categories) {
 			$conditions .= ' AND u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)';
@@ -174,7 +174,7 @@ class Service extends Entity
 	public function expiredUsersList(bool $include_hidden_categories = false): DynamicList
 	{
 		$list = $this->allUsersList();
-		$conditions = sprintf('su.id_service = %d AND su.expiry_date < date()', $this->id());
+		$conditions = sprintf('sub.id_service = %d AND sub.expiry_date < date()', $this->id());
 
 		if (!$include_hidden_categories) {
 			$conditions .= ' AND u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)';
@@ -186,13 +186,18 @@ class Service extends Entity
 
 	public function hasSubscriptions(): bool
 	{
-		return DB::getInstance()->test('services_users', 'id_service = ?', $this->id());
+		return DB::getInstance()->test('services_subscriptions', 'id_service = ?', $this->id());
 	}
 
 	public function getUsers(bool $paid_only = false) {
 		$where = $paid_only ? 'AND paid = 1' : '';
 		$id_field = DynamicFields::getNameFieldsSQL('u');
-		$sql = sprintf('SELECT su.id_user, %s FROM services_users su INNER JOIN users u ON u.id = su.id_user WHERE su.id_service = ? %s;', $id_field, $where);
+		$sql = sprintf('SELECT sub.id_user, %s FROM services_subscriptions sub
+			INNER JOIN users u ON u.id = sub.id_user
+			WHERE subn.id_service = ? %s;',
+			$id_field,
+			$where
+		);
 		return DB::getInstance()->getAssoc($sql, $this->id());
 	}
 

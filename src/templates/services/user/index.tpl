@@ -68,7 +68,7 @@
 			{/if}
 
 			{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
-				{linkbutton shape="menu" label="Liste des écritures" href="!acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user_id}
+				{linkbutton shape="menu" label="Liste des écritures" href="!acc/transactions/subscription.php?id=%d&user=%d"|args:$row.id,$user_id}
 			{/if}
 
 			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
