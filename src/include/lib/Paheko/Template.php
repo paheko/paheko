@@ -118,10 +118,13 @@ class Template extends Smartyer
 
 		if (!defined('Paheko\INSTALL_PROCESS')) {
 			$session = Session::getInstance();
-			$this->assign('config', Config::getInstance());
+			$config = Config::getInstance();
+			$this->assign('config', $config);
+			$this->assign('site_url', $config->getSiteURL());
 		}
 		else {
 			$this->assign('config', null);
+			$this->assign('site_url', null);
 		}
 
 		$is_logged = $session ? $session->isLogged() : null;
