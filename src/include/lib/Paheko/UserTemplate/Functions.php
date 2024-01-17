@@ -151,8 +151,12 @@ class Functions
 			$db->begin();
 
 			try {
-				foreach ($from as $row) {
-					self::save(array_merge($params, $row), $tpl, $line);
+				foreach ($from as $key => $row) {
+					if (!is_array($row) && !is_object($row)) {
+						throw new Brindille_Exception('"from" parameter item is not an array on index: ' . $key);
+					}
+
+					self::save(array_merge($params, (array)$row), $tpl, $line);
 				}
 			}
 			catch (Brindille_Exception|DB_Exception $e) {
@@ -660,7 +664,8 @@ class Functions
 
 	static public function _getFormKey(): string
 	{
-		return 'form_' . md5(Utils::getSelfURI(false));
+		$uri = preg_replace('![^/]*$!', '', Utils::getSelfURI(false));
+		return 'form_' . md5($uri);
 	}
 
 	/**

@@ -159,6 +159,21 @@ class Template extends Smartyer
 			return Form::tokenHTML($params['key']);
 		});
 
+		$this->register_function('show_balance', function ($params) {
+			$account = (object) $params['account'];
+
+			if ($account->balance < 0
+				|| ($account->balance > 0 && $account->position == Account::LIABILITY
+					&& ($account->type == Account::TYPE_BANK || $account->type == Account::TYPE_THIRD_PARTY || $account->type == Account::TYPE_CASH)))
+			{
+				$balance = abs($account->balance) * -1;
+				return sprintf('<strong class="error">%s</strong>', CommonModifiers::money_currency_html($balance, false, true));
+			}
+			else {
+				return CommonModifiers::money_currency_html($account->balance, false);
+			}
+		});
+
 		$this->register_function('enable_upload_here', function ($params) {
 			$csrf_key = 'upload_file_' . md5($params['path']);
 			$url = Utils::getLocalURL('!common/files/upload.php?p=' . rawurlencode($params['path']));

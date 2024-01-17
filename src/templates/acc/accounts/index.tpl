@@ -41,13 +41,7 @@ use Paheko\Entities\Accounting\Account;
 					<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$current_year.id}">{$account.code}</a></td>
 					<th><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$current_year.id}">{$account.label}</a></th>
 					<td class="money">
-						{if $account.balance < 0
-							|| ($account.balance > 0 && $account.position == Account::LIABILITY && ($account.type == Account::TYPE_BANK || $account.type == Account::TYPE_THIRD_PARTY || $account.type == Account::TYPE_CASH))}
-							<?php $balance = abs($account->balance)*-1; ?>
-							<strong class="error">{$balance|raw|money_currency:false:true}</strong>
-						{else}
-							{$account.balance|raw|money_currency:false}
-						{/if}
+						{show_balance account=$account}
 					</td>
 					<td>
 						{if $account.type == Account::TYPE_THIRD_PARTY && $account.balance > 0}
