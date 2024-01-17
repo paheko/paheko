@@ -675,7 +675,11 @@ class CommonFunctions
 		}
 		elseif ($context === 'user_edit' && $field->user_access_level === Session::ACCESS_READ) {
 			$v = self::user_field(['name' => $name, 'value' => $params['user']->$name]);
-			return sprintf('<dt>%s</dt><dd>%s</dd>', $field->label, $v ?: '<em>Non renseigné</em>');
+			return sprintf('<dt>%s</dt><dd>%s</dd>', htmlspecialchars($field->label), $v ?: '<em>Non renseigné</em>');
+		}
+
+		if (isset($params['session']) && !$params['session']->canAccess(Session::SECTION_USERS, $field->management_access_level)) {
+			return '';
 		}
 
 		$params = [
