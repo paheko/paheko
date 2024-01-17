@@ -38,7 +38,7 @@ trait TransactionSubscriptionsTrait
 		$db = EntityManager::getInstance(self::class)->DB();
 		$identity_column = DynamicFields::getNameFieldsSQL('u');
 		$number_column = DynamicFields::getNumberFieldSQL('u');
-		$sql = sprintf('SELECT s.*, %s AS user_identity, %s AS user_number, sub.id_subscription
+		$sql = sprintf('SELECT sub.*, %s AS user_identity, %s AS user_number, l.id_subscription
 			FROM users u
 			INNER JOIN services_subscriptions sub ON sub.id_user = u.id
 			INNER JOIN acc_transactions_subscriptions l ON l.id_subscription = sub.id
