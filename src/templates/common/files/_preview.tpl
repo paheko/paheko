@@ -1,4 +1,4 @@
-{include file="_head.tpl" title=$file.name layout="raw preview"}
+{include file="_head.tpl" title=$file.name layout="raw preview" custom_css=["/content.css"]}
 
 {$content|raw}
 
