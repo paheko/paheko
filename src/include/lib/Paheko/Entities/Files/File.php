@@ -1018,6 +1018,14 @@ class File extends Entity
 
 		header('X-Powered-By: Paheko/PHP');
 
+		// Security: disable running scripts from SVG images and HTML documents
+		if (strpos($this->mime, 'svg') !== false
+			|| stripos($this->name, '.svg') !== false
+			|| strpos($this->mime, 'html') !== false
+			|| stripos($this->name, '.htm') !== false) {
+			header('Content-Security-Policy: script-src ;');
+		}
+
 		if (null === $path) {
 			$type = $this->mime;
 
