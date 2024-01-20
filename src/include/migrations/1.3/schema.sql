@@ -513,24 +513,14 @@ CREATE TABLE IF NOT EXISTS acc_transactions_users
 (
 	id_transaction INTEGER NOT NULL REFERENCES acc_transactions (id) ON DELETE CASCADE,
 	id_user INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+	id_subscription INTEGER NULL REFERENCES services_subscriptions (id) ON DELETE CASCADE,
 
-	PRIMARY KEY (id_user, id_transaction)
+	PRIMARY KEY (id_transaction, id_user, id_subscription)
 );
 
 CREATE INDEX IF NOT EXISTS acc_transactions_users_transaction ON acc_transactions_users (id_transaction);
 CREATE INDEX IF NOT EXISTS acc_transactions_user ON acc_transactions_users (id_user);
-
-CREATE TABLE IF NOT EXISTS acc_transactions_subscriptions
--- Linking transactions and subscriptions
-(
-	id_transaction INTEGER NOT NULL REFERENCES acc_transactions (id) ON DELETE CASCADE,
-	id_subscription INTEGER NOT NULL REFERENCES services_subscriptions (id) ON DELETE CASCADE,
-
-	PRIMARY KEY (id_user, id_subscription)
-);
-
-CREATE INDEX IF NOT EXISTS acc_transactions_subscriptions_transaction ON acc_transactions_users (id_transaction);
-CREATE INDEX IF NOT EXISTS acc_transactions_subscription ON acc_transactions_subscriptions (id_subscription);
+CREATE INDEX IF NOT EXISTS acc_transactions_subscription ON acc_transactions_users (id_subscription);
 
 ---------- FILES ----------------
 

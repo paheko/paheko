@@ -58,7 +58,7 @@ class Subscriptions
 				'select' => 'a.code',
 			],
 			'has_transactions' => [
-				'select' => 'ts.id_transaction',
+				'select' => 'tu.id_transaction',
 			],
 			'label' => [
 				'select' => 's.label',
@@ -92,8 +92,8 @@ class Subscriptions
 			INNER JOIN services s ON s.id = sub.id_service
 			LEFT JOIN services_fees sf ON sf.id = sub.id_fee
 			LEFT JOIN acc_accounts a ON sf.id_account = a.id
-			LEFT JOIN acc_transactions_subscriptions ts ON ts.id_subscription = sub.id
-			LEFT JOIN acc_transactions_lines tl ON tl.id_transaction = ts.id_transaction';
+			LEFT JOIN acc_transactions_users tu ON tu.id_subscription = sub.id
+			LEFT JOIN acc_transactions_lines tl ON tl.id_transaction = tu.id_transaction';
 		$conditions = sprintf('sub.id_user = %d', $user_id);
 
 		if ($only_id) {

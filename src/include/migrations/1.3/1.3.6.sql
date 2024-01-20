@@ -78,34 +78,23 @@ ALTER TABLE services_users RENAME TO services_subscriptions;
 
 ALTER TABLE acc_transactions_users RENAME TO acc_transactions_users_old;
 
+
 CREATE TABLE IF NOT EXISTS acc_transactions_users
 -- Linking transactions and users
 (
 	id_transaction INTEGER NOT NULL REFERENCES acc_transactions (id) ON DELETE CASCADE,
 	id_user INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+	id_subscription INTEGER NULL REFERENCES services_subscriptions (id) ON DELETE CASCADE,
 
-	PRIMARY KEY (id_transaction, id_user)
+	PRIMARY KEY (id_transaction, id_user, id_subscription)
 );
 
-CREATE TABLE IF NOT EXISTS acc_transactions_subscriptions
--- Linking transactions and subscriptions
-(
-	id_transaction INTEGER NOT NULL REFERENCES acc_transactions (id) ON DELETE CASCADE,
-	id_subscription INTEGER NULL REFERENCES services_subscriptions (id) ON DELETE SET NULL,
-
-	PRIMARY KEY (id_transaction, id_subscription)
-);
-
-
-INSERT INTO acc_transactions_users SELECT id_transaction, id_user FROM acc_transactions_users_old WHERE id_service_user IS NULL;
-INSERT INTO acc_transactions_subscriptions SELECT id_transaction, id_service_user FROM acc_transactions_users_old WHERE id_service_user IS NOT NULL;
+INSERT INTO acc_transactions_users SELECT id_transaction, id_user, id_service_user FROM acc_transactions_users_old;
 DROP TABLE acc_transactions_users_old;
 
 CREATE INDEX IF NOT EXISTS acc_transactions_users_transaction ON acc_transactions_users (id_transaction);
 CREATE INDEX IF NOT EXISTS acc_transactions_user ON acc_transactions_users (id_user);
-
-CREATE INDEX IF NOT EXISTS acc_transactions_subscriptions_transaction ON acc_transactions_users (id_transaction);
-CREATE INDEX IF NOT EXISTS acc_transactions_subscription ON acc_transactions_subscriptions (id_subscription);
+CREATE INDEX IF NOT EXISTS acc_transactions_subscription ON acc_transactions_users (id_subscription);
 
 -- Update mailings
 ALTER TABLE mailings RENAME TO mailings_old;

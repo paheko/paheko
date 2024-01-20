@@ -180,7 +180,7 @@ class Fee extends Entity
 			INNER JOIN services_fees sf ON sf.id = sub.id_fee
 			INNER JOIN services s ON s.id = sf.id_service
 			INNER JOIN (SELECT id, MAX(date) FROM services_subscriptions GROUP BY id_user, id_fee) AS su2 ON su2.id = sub.id
-			LEFT JOIN acc_transactions_subscriptions link ON link.id_subscription = sub.id
+			LEFT JOIN acc_transactions_users link ON link.id_subscription = sub.id
 			LEFT JOIN acc_transactions_lines l ON l.id_transaction = link.id_transaction';
 		$conditions = sprintf('sub.id_fee = %d', $this->id());
 

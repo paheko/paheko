@@ -14,8 +14,8 @@ trait TransactionSubscriptionsTrait
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
 
-		return $db->preparedQuery('REPLACE INTO acc_transactions_subscriptions (id_transaction, id_subscription)
-			SELECT ?, id FROM services_subscriptions WHERE id = ?;',
+		return $db->preparedQuery('REPLACE INTO acc_transactions_users (id_transaction, id_subscription, id_user)
+			SELECT ?, id, id_user FROM services_subscriptions WHERE id = ?;',
 			$this->id(),
 			$id_subscription
 		);
@@ -24,13 +24,13 @@ trait TransactionSubscriptionsTrait
 	public function deleteAllSubscriptionLinks(): void
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
-		$db->delete('acc_transactions_subscriptions', 'id_transaction = ?', $this->id());
+		$db->delete('acc_transactions_users', 'id_transaction = ? AND id_subscription IS NOT NULL', $this->id());
 	}
 
 	public function deleteSubscriptionLink(int $id): void
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
-		$db->delete('acc_transactions_subscriptions', 'id_transaction = ? AND id_subscription = ?', $this->id(), $id);
+		$db->delete('acc_transactions_users', 'id_transaction = ? AND id_subscription = ?', $this->id(), $id);
 	}
 
 	public function listSubscriptionLinks(): array
@@ -41,7 +41,7 @@ trait TransactionSubscriptionsTrait
 		$sql = sprintf('SELECT sub.*, %s AS user_identity, %s AS user_number, l.id_subscription
 			FROM users u
 			INNER JOIN services_subscriptions sub ON sub.id_user = u.id
-			INNER JOIN acc_transactions_subscriptions l ON l.id_subscription = sub.id
+			INNER JOIN acc_transactions_users l ON l.id_subscription = sub.id
 			WHERE l.id_transaction = ?;', $identity_column, $number_column);
 		return $db->get($sql, $this->id());
 	}
@@ -62,8 +62,8 @@ trait TransactionSubscriptionsTrait
 		$this->deleteAllSubscriptionLinks();
 
 		foreach ($subscriptions as $id) {
-			$db->preparedQuery('INSERT OR IGNORE INTO acc_transactions_subscriptions (id_transaction, id_subscription)
-				SELECT ?, id FROM services_subscriptions WHERE id = ?;',
+			$db->preparedQuery('INSERT OR IGNORE INTO acc_transactions_users (id_transaction, id_subscription, id_user)
+				SELECT ?, id, id_user FROM services_subscriptions WHERE id = ?;',
 				$this->id(),
 				(int)$id
 			);
