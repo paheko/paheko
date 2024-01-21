@@ -55,44 +55,57 @@ En cas d'erreur un code HTTP 4XX sera fourni, et le contenu sera un objet JSON a
 
 # Chemins
 
-## sql (POST)
+## Requêtes SQL
 
-Permet d'exécuter une requête SQL `SELECT` (uniquement, pas de requête UPDATE, DELETE, INSERT, etc.) sur la base de données. La requête SQL doit être passée dans le corps de la requête HTTP, ou dans le paramètre `sql`. Le résultat est retourné dans la clé `results` de l'objet JSON.
+### POST sql.{FORMAT}
+
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `FORMAT` | `string:enum(json, csv, ods, xlsx)` | Format de retour. |
+| `sql` | `string` | Requête SQL à exécuter. |
+
+Si aucun format n'est passé (exemple : `…/api/sql`, sans point ni extension), `json` sera utilisé.
+
+Permet d'exécuter une requête SQL `SELECT` (uniquement, pas de requête `UPDATE`, `DELETE`, `INSERT`, etc.) sur la base de données. La requête SQL doit être passée dans le corps de la requête HTTP, ou dans le paramètre `sql`.
 
 S'il n'y a pas de limite à la requête, une limite à 1000 résultats sera ajoutée obligatoirement.
 
+```request
+curl https://test:abcd@paheko.monasso.tld/api/sql -d 'SELECT nom, code_postal FROM users LIMIT 2;'
 ```
-curl https://test:abcd@paheko.monasso.tld/api/sql/ -d 'SELECT * FROM membres LIMIT 5;'
+
+```response
+{
+    "count": 65,
+    "results":
+    [
+        {
+            "nom": "Ada Lovelace",
+            "code_postal": null
+        },
+        {
+            "nom": "James Coincoin",
+            "code_postal": "78990"
+        }
+    ]
+}
 ```
 
-**ATTENTION :** Les requêtes en écriture (`INSERT, DELETE, UPDATE, CREATE TABLE`, etc.) ne sont pas acceptées, il n'est pas possible de modifier la base de données directement via Paheko, afin d'éviter les soucis de données corrompues.
-
-Depuis la version 1.2.8, il est possible d'utiliser le paramètre `format` pour choisir le format renvoyé :
-
-* `json` (défaut) : renvoie un objet JSON, dont la clé est `"results"` et contient un tableau de la liste des membres trouvés
-* `csv` : renvoie un fichier CSV
-* `ods` : renvoie un tableau LibreOffice Calc (ODS)
-* `xlsx` : renvoie un tableau Excel (XLSX)
-
-Exemple :
-
-```
-curl https://test:abcd@paheko.monasso.tld/api/sql/ -F sql='SELECT * FROM membres LIMIT 5;' -F format=csv
-```
+**Attention :** Les requêtes en écriture (`INSERT, DELETE, UPDATE, CREATE TABLE`, etc.) ne sont pas acceptées, il n'est pas possible de modifier la base de données directement via Paheko, afin d'éviter les soucis de données corrompues.
 
 ## Téléchargements
 
-### download (GET)
+### GET download
 
 Télécharger la base de données complète. Renvoie directement le fichier SQLite de la base de données.
 
 Exemple :
 
-```
+```request
 curl https://test:abcd@paheko.monasso.tld/api/download -o db.sqlite
 ```
 
-### download/files (GET)
+### GET download/files
 
 _(Depuis la version 1.3.4)_
 
@@ -100,29 +113,63 @@ Télécharger un fichier ZIP contenant tous les fichiers (documents, fichiers de
 
 Exemple :
 
-```
+```request
 curl https://test:abcd@paheko.monasso.tld/api/download/files -o backup_files.zip
 ```
 
 ## Site web
 
-### web/list (GET)
+### GET web
 
-Renvoie la liste des pages du site web.
+Renvoie la liste de toutes les pages du site web.
 
-### web/attachment/{PAGE_URI}/{FILENAME} (GET)
+### GET web/{PAGE_URI}
 
-Renvoie le fichier joint correspondant à la page et nom de fichier indiqués.
-
-### web/page/{PAGE_URI} (GET)
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `html` | `bool` | Si `true` ou `1`, une clé `html` sera ajoutée à la réponse avec le contenu de la page au format HTML. |
 
 Renvoie un objet JSON avec toutes les infos de la page donnée.
 
-Rajouter le paramètre `?html` à l'URL pour obtenir en plus une clé `html` dans l'objet JSON qui contiendra la page au format HTML.
+### PUT web/{PAGE_URI}
 
-### web/html/{PAGE_URI} (GET)
+Modifie le contenu de la page.
+
+### POST web/{PAGE_URI}
+
+Modifie les métadonnées de la page.
+
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `id_parent` | `int|null` | Numéro de la catégorie parente de cette page. |
+| `uri` | `string` | Adresse unique de la page. |
+| `title` | `string` | Titre de la page. |
+| `type` | `int:enum(1, 2)` | Type de page. `1` pour les catégories, `2` pour les pages simples. |
+| `status` | `string:enum(online, draft)` | Statut de la page. `online` si la page est en ligne, `draft` si la page est en brouillon. |
+| `format` | `string:enum(markdown, encrypted, skriv)` | Format de la page. |
+| `published` | `string:datetime` | Date et heure de publication. |
+| `modified` | `string:datetime` | Date et heure de modification. |
+| `content` | `string` | Contenu. |
+
+### DELETE web/{PAGE_URI}
+
+Supprime la page et ses fichiers joints.
+
+### GET web/{PAGE_URI}.html
 
 Renvoie uniquement le contenu de la page au format HTML.
+
+### GET web/{PAGE_URI}/children
+
+Renvoie la liste des pages et sous-catégories dans cette catégorie.
+
+### GET web/{PAGE_URI}/attachments
+
+Renvoie la liste des fichiers joints à la page.
+
+### GET web/{PAGE_URI}/{FILE_NAME}
+
+Renvoie le fichier joint à la page.
 
 ## Membres
 
@@ -280,7 +327,7 @@ Note : si `errors` n'est pas vide, alors il sera impossible d'importer le fichie
 
 Exemple de retour :
 
-```
+```return
 {
     "created": [
         {
