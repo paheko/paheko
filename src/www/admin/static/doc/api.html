@@ -69,6 +69,7 @@
 			position: relative;
 			padding: .5rem;
 			padding-right: 2em;
+			flex-wrap: wrap;
 		}
 
 		details.api summary::after {
@@ -120,6 +121,7 @@
 		details.api summary code {
 			background: none;
 			font-weight: bold;
+			word-break: keep-all;
 		}
 
 		details.api summary code u {
@@ -226,7 +228,7 @@
             "code_postal": "78990"
         }
     ]
-}</code></pre><p><strong>Attention :</strong> Les requ&ecirc;tes en &eacute;criture (<code>INSERT, DELETE, UPDATE, CREATE TABLE</code>, etc.) ne sont pas accept&eacute;es, il n'est pas possible de modifier la base de donn&eacute;es directement via Paheko, afin d'&eacute;viter les soucis de donn&eacute;es corrompues.</p></details><h2 id="telechargements">T&eacute;l&eacute;chargements</h2><details class="api"><summary id="get-download" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/download</code> <span>T&eacute;l&eacute;charger la base de donn&eacute;es compl&egrave;te. Renvoie directement le fichier SQLite de la base de donn&eacute;es.</span></summary><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/download -o db.sqlite</code></pre></details><details class="api"><summary id="get-download-files" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/download/files</code> <span>T&eacute;l&eacute;charger un fichier ZIP contenant tous les fichiers</span></summary><p><em>(Depuis la version 1.3.4)</em></p><p>Les fichiers inclus sont :</p><ul>
+}</code></pre><p><strong>Attention :</strong> Les requ&ecirc;tes en &eacute;criture (<code>INSERT, DELETE, UPDATE, CREATE TABLE</code>, etc.) ne sont pas accept&eacute;es, il n'est pas possible de modifier la base de donn&eacute;es directement via Paheko, afin d'&eacute;viter les soucis de donn&eacute;es corrompues.</p></details><h2 id="telechargements">T&eacute;l&eacute;chargements</h2><details class="api"><summary id="get-download" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/download</code> <span>T&eacute;l&eacute;charger la base de donn&eacute;es</span></summary><p>Renvoie directement le fichier SQLite de la base de donn&eacute;es.</p><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/download -o db.sqlite</code></pre></details><details class="api"><summary id="get-download-files" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/download/files</code> <span>T&eacute;l&eacute;charger un fichier ZIP contenant tous les fichiers</span></summary><p><em>(Depuis la version 1.3.4)</em></p><p>Les fichiers inclus sont :</p><ul>
 <li>documents</li>
 <li>fichiers li&eacute;s aux &eacute;critures,</li>
 <li>fichiers li&eacute;s des membres,</li>

@@ -141,6 +141,7 @@ foreach (glob(__DIR__ . '/../doc/admin/*.md') as $file) {
 			position: relative;
 			padding: .5rem;
 			padding-right: 2em;
+			flex-wrap: wrap;
 		}
 
 		details.api summary::after {
@@ -192,6 +193,7 @@ foreach (glob(__DIR__ . '/../doc/admin/*.md') as $file) {
 		details.api summary code {
 			background: none;
 			font-weight: bold;
+			word-break: keep-all;
 		}
 
 		details.api summary code u {

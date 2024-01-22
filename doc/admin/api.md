@@ -128,7 +128,9 @@ Exemple de réponse :
 
 ### GET download
 
-Télécharger la base de données complète. Renvoie directement le fichier SQLite de la base de données.
+Télécharger la base de données
+
+Renvoie directement le fichier SQLite de la base de données.
 
 Exemple de requête :
 
