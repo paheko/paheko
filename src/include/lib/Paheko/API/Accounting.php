@@ -9,6 +9,8 @@ use Paheko\Accounting\Reports;
 use Paheko\Accounting\Transactions;
 use Paheko\Accounting\Years;
 use Paheko\Entities\Accounting\Transaction;
+use Paheko\APIException;
+use Paheko\Utils;
 
 trait Accounting
 {
@@ -20,11 +22,9 @@ trait Accounting
 
 		if ($fn == 'transaction') {
 			if (!$p1) {
-				if ($this->method != 'POST') {
-					throw new APIException('Wrong request method', 400);
-				}
-
+				$this->requireMethod('POST');
 				$this->requireAccess(Session::ACCESS_WRITE);
+
 				$transaction = new Transaction;
 				$transaction->importFromAPI($this->params);
 				$transaction->save();
@@ -74,7 +74,7 @@ trait Accounting
 					return $transaction->listLinkedUsers();
 				}
 				else {
-					throw new APIException('Wrong request method', 400);
+					throw new APIException('Wrong request method', 405);
 				}
 			}
 			// Return or edit linked subscriptions
@@ -99,7 +99,7 @@ trait Accounting
 					return $transaction->listSubscriptionLinks();
 				}
 				else {
-					throw new APIException('Wrong request method', 400);
+					throw new APIException('Wrong request method', 405);
 				}
 			}
 			elseif ($p1 && ctype_digit($p1) && !$p2) {
@@ -109,10 +109,10 @@ trait Accounting
 					throw new APIException(sprintf('Transaction #%d not found', $p1), 404);
 				}
 
-				if ($this->method == 'GET') {
+				if ($this->method === 'GET') {
 					return $transaction->asJournalArray();
 				}
-				elseif ($this->method == 'POST') {
+				elseif ($this->method === 'POST') {
 					$this->requireAccess(Session::ACCESS_WRITE);
 					$transaction->importFromAPI($this->params);
 					$transaction->save();
@@ -140,9 +140,7 @@ trait Accounting
 			}
 		}
 		elseif ($fn == 'charts') {
-			if ($this->method != 'GET') {
-				throw new APIException('Wrong request method', 400);
-			}
+			$this->requireMethod('GET');
 
 			if ($p1 && ctype_digit($p1) && $p2 === 'accounts') {
 				$a = new Accounts((int)$p1);
@@ -156,9 +154,7 @@ trait Accounting
 			}
 		}
 		elseif ($fn == 'years') {
-			if ($this->method != 'GET') {
-				throw new APIException('Wrong request method', 400);
-			}
+			$this->requireMethod('GET');
 
 			if (!$p1 && !$p2) {
 				return Years::list();
@@ -185,27 +181,21 @@ trait Accounting
 
 			if ($p2 === 'journal') {
 				try {
-					return iterator_to_array(Reports::getJournal(['year' => $id_year]));
+					return $this->export(Reports::getJournal(['year' => $id_year]));
 				}
 				catch (\LogicException $e) {
 					throw new APIException('Missing parameter for journal: ' . $e->getMessage(), 400, $e);
 				}
 			}
-			elseif (0 === strpos($p2, 'export/')) {
-				strtok($p2, '/');
-				$type = strtok('.');
-				$format = strtok('');
-				Export::export($year, $format, $type);
-				return null;
-			}
-			elseif ($p2 === 'account/journal') {
+			elseif (0 === strpos($p2, 'journal/')) {
+				$account = substr($p2, strlen('journal/'));
 				$a = $year->chart()->accounts();
 
-				if (!empty($this->params['code'])) {
-					$account = $a->getWithCode($this->params['code']);
+				if (substr($account, 0, 1) === '=') {
+					$account = $a->get(intval(substr($account, 1)));
 				}
 				else {
-					$account = $a->get((int)$this->params['code'] ?? null);
+					$account = $a->getWithCode($account);
 				}
 
 				if (!$account) {
@@ -217,7 +207,21 @@ trait Accounting
 				$list->loadFromQueryString();
 				$list->setPageSize(null);
 				$list->orderBy('date', false);
-				return iterator_to_array($list->iterate());
+				return $this->export($list->iterate());
+			}
+			elseif (0 === strpos($p2, 'export/')) {
+				strtok($p2, '/');
+				$type = strtok('.');
+				$format = strtok('') ?: 'json';
+
+				try {
+					Export::export($year, $format, $type);
+				}
+				catch (\InvalidArgumentException $e) {
+					throw new APIException($e->getMessage(), 400, $e);
+				}
+
+				return null;
 			}
 			else {
 				throw new APIException('Unknown years action', 404);

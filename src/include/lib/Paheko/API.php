@@ -117,6 +117,84 @@ class API
 		return array_key_exists($param, $this->params);
 	}
 
+	protected function toArray($in, bool $recursive = true): array
+	{
+		if (!is_array($in) && is_iterable($in)) {
+			$in = iterator_to_array($in);
+		}
+
+		$in = (array)$in;
+
+		foreach ($in as $key => &$value) {
+			if ($recursive && (is_array($value) || is_iterable($value))) {
+				$value = $this->toArray($value);
+			}
+			elseif ($value instanceof \DateTime) {
+				if ((int)$value->format('His')) {
+					$value = $value->format('Y-m-d H:i:s');
+				}
+				else {
+					$value = $value->format('Y-m-d');
+				}
+			}
+		}
+
+		unset($value);
+		return $in;
+	}
+
+	public function exportJSON($in, $level = 0): void
+	{
+		$is_list = null;
+
+		foreach ($in as $key => $value) {
+			if (null === $is_list) {
+				if (is_int($key)) {
+					echo "[\n";
+					$is_list = true;
+				}
+				else {
+					echo "{\n";
+					$is_list = false;
+				}
+			}
+			else {
+				echo ",\n";
+			}
+
+			if (!$is_list) {
+				echo str_repeat("\t", $level) . json_encode((string)$key) . ': ';
+			}
+
+			if (is_object($value) || is_array($value)) {
+				$value = $this->toArray($value, false);
+				$this->exportJSON($value, $level+1);
+			}
+			else {
+				echo json_encode($value);
+			}
+		}
+
+		if ($is_list) {
+			echo "\n]";
+		}
+		else {
+			echo "\n}";
+		}
+	}
+
+	public function export($in): ?array
+	{
+		if (!$this->is_http_client) {
+			$in = $this->toArray($in);
+			return json_encode($in);
+		}
+
+		header("Content-Type: application/json; charset=utf-8", true);
+		echo $this->exportJSON($in);
+		return null;
+	}
+
 	protected function download(string $uri)
 	{
 		if ($this->method != 'GET') {
@@ -161,7 +239,7 @@ class API
 				return null;
 			}
 			elseif (!$this->is_http_client) {
-				return ['count' => $s->countResults, 'results' => iterator_to_array($result)];
+				return $this->export(['count' => $s->countResults(), 'results' => $result]);
 			}
 			else {
 				// Stream results to client, in case request is slow

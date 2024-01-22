@@ -5,6 +5,7 @@ namespace Paheko\API;
 use Paheko\Users\Categories;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Users;
+use Paheko\APIException;
 
 trait User
 {

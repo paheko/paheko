@@ -3,6 +3,7 @@
 namespace Paheko\API;
 
 use Paheko\Web\Web as PWeb;
+use Paheko\APIException;
 
 trait Web
 {
@@ -19,11 +20,7 @@ trait Web
 			$this->requireMethod('GET');
 			$list = PWeb::getAllList();
 			$list->setPageSize(null);
-			return iterator_to_array($list->iterate());
-			return [
-				'categories' => array_map(fn($p) => $p->asArray(true), PWeb::listCategories($param)),
-				'pages' => array_map(fn($p) => $p->asArray(true), PWeb::listPages($param)),
-			];
+			return $this->export($list->iterate());
 		}
 
 		if (substr($fn, 0, -5) === '.html') {
@@ -78,8 +75,8 @@ trait Web
 		elseif ($param === 'children') {
 			$this->requireMethod('GET');
 			return [
-				'categories' => array_map(fn($p) => $p->asArray(true), PWeb::listCategories($page->uri)),
-				'pages' => array_map(fn($p) => $p->asArray(true), PWeb::listPages($page->uri)),
+				'categories' => array_map(fn($p) => $p->asArray(true), PWeb::listCategories($page->id())),
+				'pages' => array_map(fn($p) => $p->asArray(true), PWeb::listPages($page->id())),
 			];
 		}
 		elseif ($param === 'attachments') {
@@ -94,8 +91,18 @@ trait Web
 				throw new APIException('Attachment not found', 404);
 			}
 
-			$attachment->serve();
-			return null;
+			if ($this->method === 'GET') {
+				$attachment->serve();
+				return null;
+			}
+			elseif ($this->method === 'DELETE') {
+				$this->requireAccess(Session::ACCESS_WRITE);
+				$attachment->delete();
+				return self::SUCCESS;
+			}
+			else {
+				throw new APIException('Invalid method', 405);
+			}
 		}
 	}
 }
