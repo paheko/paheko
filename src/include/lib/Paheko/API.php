@@ -117,6 +117,11 @@ class API
 		return array_key_exists($param, $this->params);
 	}
 
+	protected function hasParamTrue(string $param): bool
+	{
+		return array_key_exists($param, $this->params) && in_array($this->params[$param], [1, true, 'true', 'TRUE', '1'], true);
+	}
+
 	protected function toArray($in, bool $recursive = true): array
 	{
 		if (!is_array($in) && is_iterable($in)) {
@@ -143,13 +148,14 @@ class API
 		return $in;
 	}
 
-	public function exportJSON($in, $level = 0): void
+	public function exportJSON($in, $level = 2): void
 	{
 		$is_list = null;
+		$in = $this->toArray($in, false);
 
 		foreach ($in as $key => $value) {
 			if (null === $is_list) {
-				if (is_int($key)) {
+				if ($key === 0) {
 					echo "[\n";
 					$is_list = true;
 				}
@@ -162,24 +168,26 @@ class API
 				echo ",\n";
 			}
 
+			echo str_repeat(" ", $level);
+
 			if (!$is_list) {
-				echo str_repeat("\t", $level) . json_encode((string)$key) . ': ';
+				echo json_encode((string)$key) . ': ';
 			}
 
-			if (is_object($value) || is_array($value)) {
-				$value = $this->toArray($value, false);
-				$this->exportJSON($value, $level+1);
+			if (is_array($value) || is_object($value)) {
+				$this->exportJSON($value, $level+2);
 			}
 			else {
 				echo json_encode($value);
 			}
 		}
 
+		$space = str_repeat(' ', max($level-2, 0));
 		if ($is_list === true) {
-			echo "\n]";
+			echo "\n$space]";
 		}
 		elseif ($is_list === false) {
-			echo "\n}";
+			echo "\n$space}";
 		}
 		else {
 			echo "[]\n";
@@ -492,6 +500,8 @@ class API
 			catch (UserException|ValidationException $e) {
 				throw new APIException($e->getMessage(), 400, $e);
 			}
+
+			$return = $api->export($return);
 
 			if (null !== $return) {
 				header("Content-Type: application/json; charset=utf-8", true);

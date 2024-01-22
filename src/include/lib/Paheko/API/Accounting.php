@@ -181,7 +181,7 @@ trait Accounting
 
 			if ($p2 === 'journal') {
 				try {
-					return $this->export(Reports::getJournal(['year' => $id_year]));
+					return Reports::getJournal(['year' => $id_year]);
 				}
 				catch (\LogicException $e) {
 					throw new APIException('Missing parameter for journal: ' . $e->getMessage(), 400, $e);
@@ -207,7 +207,7 @@ trait Accounting
 				$list->loadFromQueryString();
 				$list->setPageSize(null);
 				$list->orderBy('date', false);
-				return $this->export($list->iterate());
+				return $list->iterate();
 			}
 			elseif (0 === strpos($p2, 'export/')) {
 				strtok($p2, '/');
