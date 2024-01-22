@@ -208,8 +208,8 @@ class Transactions
 		$columns['line_reference']['label'] = 'Réf. paiement';
 		$columns['change']['select'] = sprintf('SUM(l.credit) * %d', $reverse);
 		$columns['change']['label'] = 'Montant';
-		$columns['project_code']['select'] = 'GROUP_CONCAT(IFNULL(b.code, SUBSTR(b.label, 1, 10) || \'…\'), \',\')';
-		$columns['id_project']['select'] = 'GROUP_CONCAT(l.id_project, \',\')';
+		$columns['project_code']['select'] = 'json_group_array(IFNULL(b.code, SUBSTR(b.label, 1, 10) || \'…\'))';
+		$columns['id_project']['select'] = 'json_group_array(l.id_project)';
 
 		if ($type == Transaction::TYPE_CREDIT || $type == Transaction::TYPE_DEBT) {
 
@@ -251,7 +251,7 @@ class Transactions
 			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
 
 			if (isset($row->id_project, $row->project_code)) {
-				$row->project_code = array_combine(explode(',', $row->id_project), explode(',', $row->project_code));
+				$row->project_code = array_combine(json_decode($row->id_project, true), json_decode($row->project_code, true));
 			}
 			else {
 				$row->project_code = [];
