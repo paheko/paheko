@@ -115,7 +115,7 @@ class AdvancedSearch extends A_S
 				$column['type'] = 'integer';
 				$column['null'] = false;
 				$column['label'] .= ' (nombres de fichiers)';
-				$column['select'] = sprintf('(SELECT GROUP_CONCAT(f.path, \';\') FROM users_files AS uf INNER JOIN files AS f ON f.id = uf.id_file WHERE uf.id_user = u.id AND uf.field = %s)', $db->quote($field->name));
+				$column['select'] = sprintf('(SELECT json_group_array(f.path) FROM users_files AS uf INNER JOIN files AS f ON f.id = uf.id_file WHERE uf.id_user = u.id AND uf.field = %s)', $db->quote($field->name));
 				$column['where'] = sprintf('(SELECT COUNT(*) FROM users_files AS uf WHERE uf.id_user = u.id AND uf.field = %s) %%s', $db->quote($field->name));
 			}
 			elseif ($field->type === 'virtual') {

@@ -295,8 +295,20 @@ dd.help li {
     clear: both;
 }
 
-.users-list td .files-list img {
+table .files-list img {
     max-height: 100px;
+    border-radius: .3rem;
+}
+
+table .files-list figure figcaption {
+    margin: 0;
+}
+
+table .files-list figcaption a {
+    display: block;
+    background-color: rgba(var(--gSecondColor), 0.3);
+    padding: .2rem;
+    border-radius: .2rem;
 }
 
 .pagination {
