@@ -175,12 +175,17 @@ class API
 			}
 		}
 
-		if ($is_list) {
+		if ($is_list === true) {
 			echo "\n]";
 		}
-		else {
+		elseif ($is_list === false) {
 			echo "\n}";
 		}
+		else {
+			echo "[]\n";
+		}
+
+		flush();
 	}
 
 	public function export($in): ?array
