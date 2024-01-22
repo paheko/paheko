@@ -122,6 +122,7 @@ foreach (glob(__DIR__ . '/../doc/admin/*.md') as $file) {
 
 		$t = '<style type="text/css">
 		details.api {
+			clear: both;
 			list-style: none;
 			padding: 0.2em 0.5em;
 			transition: background-color .2s;
