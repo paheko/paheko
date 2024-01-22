@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 	<html>
 	<head>
-		<title>/home/bohwaz/fossil/paheko/tools/../doc/admin/api.md</title>
 		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>/home/bohwaz/fossil/paheko/tools/../doc/admin/api.md</title>
 		<style type="text/css">
 		body, form, p, div, hr, fieldset, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6 {
 			margin: 0;
@@ -47,183 +48,604 @@
 		</style>
 		<link rel="stylesheet" type="text/css" href="../../../content.css" />
 	</head>
-	<body><div class="web-content"><p>Une API de type REST est disponible dans Paheko.</p>
-<p>Pour accéder à l'API il faut un identifiant et un mot de passe, à créer dans le menu <mark>Configuration</mark>, onglet <mark>Fonctions avancées</mark>, puis <mark>API</mark>.</p>
-<p>L'API peut ensuite recevoir des requêtes REST sur l'URL <code>https://adresse_association/api/{chemin}/</code>.</p>
-<p>Remplacer <mark>{chemin}</mark> par un des chemins de l'API (voir ci-dessous). La méthode HTTP à utiliser est spécifiée pour chaque chemin.</p>
-<p>Pour les requêtes de type <code>POST</code>, les paramètres peuvent être envoyés par le client sous forme de formulaire HTTP classique (<code>application/x-www-form-urlencoded</code>) ou sous forme d'objet JSON. Dans ce cas le <code>Content-Type</code> doit être positionné sur <code>application/json</code>.</p>
-<p>Les réponses sont faites en JSON par défaut.</p><div class="toc">
-	<ol>
-		<li><a href="#utiliser-l-api">Utiliser l'API</a></li>
-		<li><a href="#authentification">Authentification</a></li>
-		<li><a href="#erreurs">Erreurs</a></li>
-		<li><a href="#chemins">Chemins</a>
-		<ol>
-			<li><a href="#sql-post">sql (POST)</a></li>
-			<li><a href="#telechargements">Téléchargements</a>
-			<ol>
-				<li><a href="#download-get">download (GET)</a></li>
-				<li><a href="#download-files-get">download/files (GET)</a>
-			</ol></li>
-			<li><a href="#site-web">Site web</a>
-			<ol>
-				<li><a href="#web-list-get">web/list (GET)</a></li>
-				<li><a href="#web-attachment-page_uri-filename-get">web/attachment/{PAGE_URI}/{FILENAME} (GET)</a></li>
-				<li><a href="#web-page-page_uri-get">web/page/{PAGE_URI} (GET)</a></li>
-				<li><a href="#web-html-page_uri-get">web/html/{PAGE_URI} (GET)</a>
-			</ol></li>
-			<li><a href="#membres">Membres</a>
-			<ol>
-				<li><a href="#user-categories-get">user/categories (GET)</a></li>
-				<li><a href="#user-category-id-format-get">user/category/{ID}.{FORMAT} (GET)</a></li>
-				<li><a href="#user-new-post">user/new (POST)</a></li>
-				<li><a href="#user-id-get">user/{ID} (GET)</a></li>
-				<li><a href="#user-id-delete">user/{ID} (DELETE)</a></li>
-				<li><a href="#user-id-post">user/{ID} (POST)</a></li>
-				<li><a href="#user-import-put">user/import (PUT)</a></li>
-				<li><a href="#user-import-post">user/import (POST)</a></li>
-				<li><a href="#user-import-preview-put">user/import/preview (PUT)</a></li>
-				<li><a href="#user-import-preview-post">user/import/preview (POST)</a>
-			</ol></li>
-			<li><a href="#activites">Activités</a>
-			<ol>
-				<li><a href="#services-subscriptions-import-put">services/subscriptions/import (PUT)</a>
-			</ol></li>
-			<li><a href="#erreurs">Erreurs</a>
-			<ol>
-				<li><a href="#errors-report-post">errors/report (POST)</a></li>
-				<li><a href="#errors-log-get">errors/log (GET)</a>
-			</ol></li>
-			<li><a href="#comptabilite">Comptabilité</a>
-			<ol>
-				<li><a href="#accounting-years-get">accounting/years (GET)</a></li>
-				<li><a href="#accounting-charts-get">accounting/charts (GET)</a></li>
-				<li><a href="#accounting-charts-id_chart-accounts-get">accounting/charts/{ID_CHART}/accounts (GET)</a></li>
-				<li><a href="#accounting-years-id_year-journal-get">accounting/years/{ID_YEAR}/journal (GET)</a></li>
-				<li><a href="#accounting-years-id_year-export-format-extension-get">accounting/years/{ID_YEAR}/export/{FORMAT}.{EXTENSION} (GET)</a></li>
-				<li><a href="#accounting-years-id_year-account-journal-get">accounting/years/{ID_YEAR}/account/journal (GET)</a></li>
-				<li><a href="#accounting-transaction-id_transaction-get">accounting/transaction/{ID_TRANSACTION} (GET)</a></li>
-				<li><a href="#accounting-transaction-id_transaction-post">accounting/transaction/{ID_TRANSACTION} (POST)</a></li>
-				<li><a href="#accounting-transaction-id_transaction-users-get">accounting/transaction/{ID_TRANSACTION}/users (GET)</a></li>
-				<li><a href="#accounting-transaction-id_transaction-users-post">accounting/transaction/{ID_TRANSACTION}/users (POST)</a></li>
-				<li><a href="#accounting-transaction-id_transaction-users-delete">accounting/transaction/{ID_TRANSACTION}/users (DELETE)</a></li>
-				<li><a href="#accounting-transaction-id_transaction-subscriptions-get">accounting/transaction/{ID_TRANSACTION}/subscriptions (GET)</a></li>
-				<li><a href="#accounting-transaction-id_transaction-subscriptions-post">accounting/transaction/{ID_TRANSACTION}/subscriptions (POST)</a></li>
-				<li><a href="#accounting-transaction-id_transaction-subscriptions-delete">accounting/transaction/{ID_TRANSACTION}/subscriptions (DELETE)</a></li>
-				<li><a href="#accounting-transaction-post">accounting/transaction (POST)</a>
-</li></ol></li></ol></li></ol></div><h1 id="utiliser-l-api">Utiliser l'API</h1>
-<p>N'importe quel client HTTP capable de gérer TLS (HTTPS) et l'authentification basique fonctionnera.</p>
-<p>En ligne de commande il est possible d'utiliser <code>curl</code>. Exemple pour télécharger la base de données :</p>
-<pre><code>curl https://test:coucou@[identifiant_association].paheko.cloud/api/download -o association.sqlite</code></pre>
-<p>On peut aussi utiliser <code>wget</code> en n'oubliant pas l'option <code>--auth-no-challenge</code> sinon l'authentification ne fonctionnera pas :</p>
-<pre><code>wget https://test:coucou@[identifiant_association].paheko.cloud/api/download  --auth-no-challenge -O association.sqlite</code></pre>
-<p>Exemple pour créer une écriture sous forme de formulaire :</p>
-<pre><code>curl -v "http://test:test@[identifiant_association].paheko.cloud/api/accounting/transaction" -F id_year=1 -F label=Test -F "date=01/02/2023" …</code></pre>
-<p>Ou sous forme d'objet JSON :</p>
-<pre><code>curl -v "http://test:test@[identifiant_association].paheko.cloud/api/accounting/transaction" -H 'Content-Type: application/json' -d '{"id_year":1, "label": "Test écriture", "date": "01/02/2023"}'</code></pre>
-<h1 id="authentification">Authentification</h1>
-<p>Il ne faut pas oublier de fournir le nom d'utilisateur et mot de passe en HTTP :</p>
-<pre><code>curl http://test:abcd@paheko.monasso.tld/api/download/</code></pre>
-<h1 id="erreurs">Erreurs</h1>
-<p>En cas d'erreur un code HTTP 4XX sera fourni, et le contenu sera un objet JSON avec une clé <code>error</code> contenant le message d'erreur.</p>
-<h1 id="chemins">Chemins</h1>
-<h2 id="sql-post">sql (POST)</h2>
-<p>Permet d'exécuter une requête SQL <code>SELECT</code> (uniquement, pas de requête UPDATE, DELETE, INSERT, etc.) sur la base de données. La requête SQL doit être passée dans le corps de la requête HTTP, ou dans le paramètre <code>sql</code>. Le résultat est retourné dans la clé <code>results</code> de l'objet JSON.</p>
-<p>S'il n'y a pas de limite à la requête, une limite à 1000 résultats sera ajoutée obligatoirement.</p>
-<pre><code>curl https://test:abcd@paheko.monasso.tld/api/sql/ -d 'SELECT * FROM membres LIMIT 5;'</code></pre>
-<p><strong>ATTENTION :</strong> Les requêtes en écriture (<code>INSERT, DELETE, UPDATE, CREATE TABLE</code>, etc.) ne sont pas acceptées, il n'est pas possible de modifier la base de données directement via Paheko, afin d'éviter les soucis de données corrompues.</p>
-<p>Depuis la version 1.2.8, il est possible d'utiliser le paramètre <code>format</code> pour choisir le format renvoyé :</p>
-<ul>
-<li><code>json</code> (défaut) : renvoie un objet JSON, dont la clé est <code>"results"</code> et contient un tableau de la liste des membres trouvés</li>
-<li><code>csv</code> : renvoie un fichier CSV</li>
-<li><code>ods</code> : renvoie un tableau LibreOffice Calc (ODS)</li>
-<li><code>xlsx</code> : renvoie un tableau Excel (XLSX)</li>
+	<body><div class="web-content"><style type="text/css">
+		details.api {
+			list-style: none;
+			padding: 0.2em 0.5em;
+			transition: background-color .2s;
+			background: #fff;
+			padding: 0;
+			border: 1px solid #ccc;
+			margin-bottom: .7em;
+			border-radius: .5rem;
+		}
+
+		details.api summary {
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			gap: .8rem;
+			font-size: 1.2em;
+			position: relative;
+			padding: .5rem;
+			padding-right: 2em;
+		}
+
+		details.api summary::after {
+			content: "⌄";
+			position: absolute;
+			right: .5rem;
+			bottom: .5em;
+			font-size: 2em;
+			line-height: .5em;
+			transition: top .2s, transform .4s, color .2s;
+		}
+
+		details.api summary:hover::after {
+			color: darkred;
+			text-shadow: 0px 0px 5px orange;
+		}
+
+		details.api:not([open]):hover {
+			background: #eee;
+			box-shadow: 0px 0px 5px orange;
+		}
+
+		details.api[open] summary::after {
+			transform: rotate(180deg);
+			top: .75em;
+			right: 0;
+		}
+
+		details.api[open] {
+			padding: .5rem;
+		}
+
+		details.api[open] summary {
+			margin-bottom: 1em;
+			padding: 0;
+			padding-right: 2em;
+		}
+
+		details.api summary b {
+			display: block;
+			border-radius: .3em;
+			background: #333;
+			padding: .1rem .4rem;
+			color: #fff;
+			width: 8ch;
+			text-align: center;
+		}
+
+		details.api summary code {
+			background: none;
+			font-weight: bold;
+		}
+
+		details.api summary code u {
+			text-decoration: none;
+			border: 1px dashed #999;
+			color: darkblue;
+			border-radius: .5rem;
+			padding: .2rem;
+		}
+
+		details.api summary span {
+			font-size: 1rem;
+		}
+
+		details.api summary b.method-GET {
+			background: #8fbc8f;
+		}
+		details.api summary b.method-POST {
+			background: #4682b4;
+		}
+		details.api summary b.method-PUT {
+			background: #9370db;
+		}
+		details.api summary b.method-DELETE {
+			background: #cd5c5c;
+		}
+
+		details.api summary h3 {
+			margin: 0;
+		}
+
+		details.api.all {
+			float: right;
+		}
+
+		details.api.all summary {
+			margin: 0;
+			font-size: .9rem;
+		}
+
+		@media screen and (max-width: 800px) {
+			details.api summary {
+				flex-direction: column;
+				align-items: start;
+			}
+
+			details.api.all {
+				float: none;
+			}
+		}
+		</style>
+		<details class="api all"><summary onclick="var open = !this.parentNode.hasAttribute('open'); document.querySelectorAll('details').forEach(elm => elm.open = open); return false;">Tout déplier / replier</summary></details><?xml encoding="utf-8" ?><h1 id="introduction">Introduction</h1><details class="api"><summary id="debuter" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><h3>D&eacute;buter</h3></summary><p>Une API de type REST est disponible dans Paheko.</p><p>Pour acc&eacute;der &agrave; l'API il faut un identifiant et un mot de passe, &agrave; cr&eacute;er dans le menu <mark>Configuration</mark>, onglet <mark>Fonctions avanc&eacute;es</mark>, puis <mark>API</mark>.</p><p>L'API peut ensuite recevoir des requ&ecirc;tes REST sur l'URL <code>https://adresse_association/api{route}</code>.</p><p>Remplacer <mark>{route}</mark> par une des routes de l'API (voir ci-dessous).</p><p>La m&eacute;thode HTTP (<code>GET</code>, <code>POST</code>, etc.) &agrave; utiliser est sp&eacute;cifi&eacute;e pour chaque route.</p><p>Des exemples sont donn&eacute;s pour l'utilisation de l'outil <code>curl</code> en ligne de commande, si vous souhaitez utiliser un autre langage de programmation il faudra adapter votre code.</p></details><details class="api"><summary id="formats-des-requetes-et-reponses" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><h3>Formats des requ&ecirc;tes et r&eacute;ponses</h3></summary><p>Les param&egrave;tres peuvent &ecirc;tre fournis sous les formes suivantes :</p><ul>
+<li>dans les param&egrave;tres de l'URL (query string) : pour toutes les m&eacute;thodes</li>
+<li>formulaire HTTP classique pour les requ&ecirc;tes <code>POST</code> :<ul>
+<li><code>Content-Type: application/x-www-form-urlencoded</code></li>
+<li>ou <code>Content-Type: multipart/form-data</code></li>
 </ul>
-<p>Exemple :</p>
-<pre><code>curl https://test:abcd@paheko.monasso.tld/api/sql/ -F sql='SELECT * FROM membres LIMIT 5;' -F format=csv</code></pre>
-<h2 id="telechargements">Téléchargements</h2>
-<h3 id="download-get">download (GET)</h3>
-<p>Télécharger la base de données complète. Renvoie directement le fichier SQLite de la base de données.</p>
-<p>Exemple :</p>
-<pre><code>curl https://test:abcd@paheko.monasso.tld/api/download -o db.sqlite</code></pre>
-<h3 id="download-files-get">download/files (GET)</h3>
-<p><em>(Depuis la version 1.3.4)</em></p>
-<p>Télécharger un fichier ZIP contenant tous les fichiers (documents, fichiers des écritures, des membres, modules modifiés, etc.).</p>
-<p>Exemple :</p>
-<pre><code>curl https://test:abcd@paheko.monasso.tld/api/download/files -o backup_files.zip</code></pre>
-<h2 id="site-web">Site web</h2>
-<h3 id="web-list-get">web/list (GET)</h3>
-<p>Renvoie la liste des pages du site web.</p>
-<h3 id="web-attachment-page_uri-filename-get">web/attachment/{PAGE_URI}/{FILENAME} (GET)</h3>
-<p>Renvoie le fichier joint correspondant à la page et nom de fichier indiqués.</p>
-<h3 id="web-page-page_uri-get">web/page/{PAGE_URI} (GET)</h3>
-<p>Renvoie un objet JSON avec toutes les infos de la page donnée.</p>
-<p>Rajouter le paramètre <code>?html</code> à l'URL pour obtenir en plus une clé <code>html</code> dans l'objet JSON qui contiendra la page au format HTML.</p>
-<h3 id="web-html-page_uri-get">web/html/{PAGE_URI} (GET)</h3>
-<p>Renvoie uniquement le contenu de la page au format HTML.</p>
-<h2 id="membres">Membres</h2>
-<h3 id="user-categories-get">user/categories (GET)</h3>
-<p><em>(Depuis la version 1.3.6)</em></p>
-<p>Renvoie la liste des catégories de membres, triée par nom, et incluant le nombre de membres de la catégorie (dans la clé <code>count</code>).</p>
-<h3 id="user-category-id-format-get">user/category/{ID}.{FORMAT} (GET)</h3>
-<p><em>(Depuis la version 1.3.6)</em></p>
-<p>Exporte la liste des membres d'une catégorie correspondant à l'ID demandé, au format indiqué :</p>
-<ul>
-<li><code>json</code></li>
-<li><code>csv</code></li>
-<li><code>ods</code></li>
-<li><code>xlsx</code></li>
+</li>
+<li>objet JSON pour les requ&ecirc;tes POST :<ul>
+<li><code>Content-Type: application/json</code></li>
 </ul>
-<h3 id="user-new-post">user/new (POST)</h3>
-<p><em>(Depuis la version 1.3.6)</em></p>
-<p>Permet de créer un nouveau membre.</p>
-<p>Attention, cette méthode comporte des restrictions :</p>
-<ul>
-<li>il n'est pas possible de créer un membre dans une catégorie ayant accès à la configuration</li>
-<li>il n'est pas possible de définir l'OTP ou la clé PGP du membre créé</li>
-<li>seul un identifiant API ayant le droit "Administration" pourra créer des membres administrateurs</li>
-</ul>
-<p>Il est possible d'utiliser tous les champs de la fiche membre en utilisant leur clé unique, ainsi que les clés suivantes :</p>
-<ul>
-<li><code>id_category</code> : indique l'ID d'une catégorie, si absent la catégorie par défaut sera utilisée</li>
-<li><code>password</code> : mot de passe du membre</li>
-<li><code>force_duplicate=1</code> : ne pas renvoyer une erreur si le nom du membre à ajouter est identique au nom d'un membre existant.</li>
-</ul>
-<p>Sera renvoyée la liste des infos de la fiche membre.</p>
-<p>Si un membre avec le même nom existe déjà (et que <code>force_duplicate</code> n'est pas utilisé), une erreur <code>409</code> sera renvoyée.</p>
-<pre><code>curl -F nom="Bla bla" -F id_category=3 -F password=abcdef123456 https://test:abcd@monpaheko.tld/api/user/new</code></pre>
-<h3 id="user-id-get">user/{ID} (GET)</h3>
-<p><em>(Depuis la version 1.3.6)</em></p>
-<p>Renvoie les infos de la fiche d'un membre à partir de son ID, ainsi que 3 autres clés :</p>
-<ul>
+</li>
+</ul><p>Les r&eacute;ponses sont renvoy&eacute;es en JSON par d&eacute;faut, sauf quand la route permet de choisir un autre format.</p><p>Les formats ODS et XLSX ne sont disponibles &agrave; l'import que si le serveur est configur&eacute; pour convertir ces formats.</p><p>De la m&ecirc;me mani&egrave;re, le format XLSX n'est disponible que si le serveur est configur&eacute; pour g&eacute;n&eacute;rer ce format.</p></details><details class="api"><summary id="utiliser-l-api" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><h3>Utiliser l'API</h3></summary><p>N'importe quel client HTTP capable de g&eacute;rer TLS (HTTPS) et l'authentification basique fonctionnera.</p><p>En ligne de commande il est possible d'utiliser <code>curl</code>. Exemple pour t&eacute;l&eacute;charger la base de donn&eacute;es :</p><pre><code>curl -u test:secret https://[identifiant_association].paheko.cloud/api/download -o association.sqlite</code></pre><p>On peut aussi utiliser <code>wget</code> en n'oubliant pas l'option <code>--auth-no-challenge</code> sinon l'authentification ne fonctionnera pas :</p><pre><code>wget https://test:secret@[identifiant_association].paheko.cloud/api/download \
+  --auth-no-challenge \
+  -O association.sqlite</code></pre><p>Exemple pour cr&eacute;er une &eacute;criture sous forme de formulaire :</p><pre><code>curl -v -u test:secret \
+  https://[identifiant_association].paheko.cloud/api/accounting/transaction \
+  -F id_year=1 \
+  -F label=Test \
+  -F "date=01/02/2023"
+  &hellip;</code></pre><p>Ou sous forme d'objet JSON :</p><pre><code>curl -v -u test:secret \
+  https://[identifiant_association].paheko.cloud/api/accounting/transaction \
+  -H 'Content-Type: application/json' \
+  -d '{"id_year":1, "label": "Test &eacute;criture", "date": "01/02/2023", &hellip;}'</code></pre></details><details class="api"><summary id="authentification" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><h3>Authentification</h3></summary><p>L'API utilise l'authentification <a href="https://fr.wikipedia.org/wiki/Authentification_HTTP#M%C3%A9thode_%C2%AB_Basic_%C2%BB" rel="noreferrer noopener external" target="_blank"><code>Basic</code> de HTTP</a>.</p></details><details class="api"><summary id="erreurs" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><h3>Erreurs</h3></summary><p>En cas d'erreur un code HTTP 4XX sera fourni, et le contenu sera un objet JSON avec une cl&eacute; <code>error</code> contenant le message d'erreur.</p></details><h1 id="routes">Routes</h1><h2 id="requetes-sql">Requ&ecirc;tes SQL</h2><details class="api"><summary id="post-sql-format" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/sql.<u>{FORMAT}</u></code> <span>Ex&eacute;cute une requ&ecirc;te SQL en lecture</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>FORMAT</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Format de retour : <code>json</code>, <code>csv</code>, <code>ods</code> ou <code>xlsx</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>sql</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Requ&ecirc;te SQL &agrave; ex&eacute;cuter.</td>
+</tr>
+</tbody>
+</table><p>Si aucun format n'est pass&eacute; (exemple : <code>&hellip;/api/sql</code>, sans point ni extension), <code>json</code> sera utilis&eacute;.</p><p>Permet d'ex&eacute;cuter une requ&ecirc;te SQL <code>SELECT</code> (uniquement, pas de requ&ecirc;te <code>UPDATE</code>, <code>DELETE</code>, <code>INSERT</code>, etc.) sur la base de donn&eacute;es. La requ&ecirc;te SQL doit &ecirc;tre pass&eacute;e dans le corps de la requ&ecirc;te HTTP, ou dans le param&egrave;tre <code>sql</code>.</p><p>S'il n'y a pas de limite &agrave; la requ&ecirc;te, une limite &agrave; 1000 r&eacute;sultats sera ajout&eacute;e obligatoirement.</p><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/sql \
+  -d 'SELECT nom, code_postal FROM users LIMIT 2;'</code></pre><p>Exemple de r&eacute;ponse :</p><pre><code class="language-response">{
+    "count": 65,
+    "results":
+    [
+        {
+            "nom": "Ada Lovelace",
+            "code_postal": null
+        },
+        {
+            "nom": "James Coincoin",
+            "code_postal": "78990"
+        }
+    ]
+}</code></pre><p><strong>Attention :</strong> Les requ&ecirc;tes en &eacute;criture (<code>INSERT, DELETE, UPDATE, CREATE TABLE</code>, etc.) ne sont pas accept&eacute;es, il n'est pas possible de modifier la base de donn&eacute;es directement via Paheko, afin d'&eacute;viter les soucis de donn&eacute;es corrompues.</p></details><h2 id="telechargements">T&eacute;l&eacute;chargements</h2><details class="api"><summary id="get-download" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/download</code> <span>T&eacute;l&eacute;charger la base de donn&eacute;es compl&egrave;te. Renvoie directement le fichier SQLite de la base de donn&eacute;es.</span></summary><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/download -o db.sqlite</code></pre></details><details class="api"><summary id="get-download-files" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/download/files</code> <span>T&eacute;l&eacute;charger un fichier ZIP contenant tous les fichiers</span></summary><p><em>(Depuis la version 1.3.4)</em></p><p>Les fichiers inclus sont :</p><ul>
+<li>documents</li>
+<li>fichiers li&eacute;s aux &eacute;critures,</li>
+<li>fichiers li&eacute;s des membres,</li>
+<li>fichiers joints aux pages du site web</li>
+<li>code des modules modifi&eacute;s</li>
+<li>corbeille</li>
+<li>configuration : logo, ic&ocirc;nes, etc.</li>
+<li>anciennes versions des fichiers</li>
+</ul><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/download/files -o backup_files.zip</code></pre></details><h2 id="site-web">Site web</h2><p><em>(Depuis la version 1.4.0)</em></p><details class="api"><summary id="get-web" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/web</code> <span>Liste de toutes les pages du site web</span></summary></details><details class="api"><summary id="get-web-page_uri" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/web/<u>{PAGE_URI}</u></code> <span>M&eacute;tadonn&eacute;es de la page du site web</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>PAGE_URI</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Adresse unique de la page.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>html</code></td>
+<td style="text-align: left;"><code>bool</code></td>
+<td style="text-align: left;">Si <code>true</code> ou <code>1</code>, une cl&eacute; <code>html</code> sera ajout&eacute;e &agrave; la r&eacute;ponse avec le contenu de la page au format HTML.</td>
+</tr>
+</tbody>
+</table><p>Exemple de r&eacute;ponse :</p><pre><code class="language-response">[
+    {
+        "id": 13,
+        "uri": "actualite",
+        "title": "Actualit\u00e9",
+        "path": null,
+        "draft": 0,
+        "published": "2019-04-22 18:00:00",
+        "modified": "2023-09-12 15:44:55"
+    },
+    {
+        "id": 66,
+        "uri": "Affiches-des-bourses-aux-velos",
+        "title": "Affiches des bourses aux v\u00e9los",
+        "path": "Nos activit\u00e9s",
+        "draft": 0,
+        "published": "2019-07-18 19:05:00",
+        "modified": "2023-04-04 14:44:04"
+    },
+    &hellip;
+]</code></pre></details><details class="api"><summary id="put-web-page_uri" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-PUT">PUT</b> <code>/web/<u>{PAGE_URI}</u></code> <span>Modifie le contenu de la page</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>PAGE_URI</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Adresse unique de la page.</td>
+</tr>
+</tbody>
+</table><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/web/bourse-28-septembre -X PUT -d 'La bourse aura lieu le 28 septembre'</code></pre></details><details class="api"><summary id="post-web-page_uri" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/web/<u>{PAGE_URI}</u></code> <span>Modifie les m&eacute;tadonn&eacute;es de la page</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>PAGE_URI</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Adresse unique de la page.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>id_parent</code></td>
+<td style="text-align: left;"><code>int|null</code></td>
+<td style="text-align: left;">Num&eacute;ro de la cat&eacute;gorie parente de cette page.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>uri</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Nouvelle adresse unique de la page.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>title</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Titre de la page.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>type</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">Type de page. <code>1</code> pour les cat&eacute;gories, <code>2</code> pour les pages simples.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>status</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Statut de la page. <code>online</code> si la page est en ligne, <code>draft</code> si la page est en brouillon.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>format</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Format de la page : <code>markdown</code>, <code>encrypted</code> ou <code>skriv</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>published</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Date et heure de publication au format <code>YYYY-MM-DD HH:mm:ss</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>modified</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Date et heure de modification au format <code>YYYY-MM-DD HH:mm:ss</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>content</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Contenu.</td>
+</tr>
+</tbody>
+</table><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/web/bourse-28-septembre -F title="Bourse aux v&eacute;los du 28 septembre"</code></pre></details><details class="api"><summary id="delete-web-page_uri" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-DELETE">DELETE</b> <code>/web/<u>{PAGE_URI}</u></code> <span>Supprime la page et ses fichiers joints</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>PAGE_URI</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Adresse unique de la page.</td>
+</tr>
+</tbody>
+</table><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/web/bourse-28-septembre -X DELETE</code></pre></details><details class="api"><summary id="get-web-page_uri-html" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/web/<u>{PAGE_URI}</u>.html</code> <span>Contenu de la page web au format HTML</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>PAGE_URI</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Adresse unique de la page.</td>
+</tr>
+</tbody>
+</table><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/web/bourse-28-septembre.html</code></pre></details><details class="api"><summary id="get-web-page_uri-children" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/web/<u>{PAGE_URI}</u>/children</code> <span>Liste des pages et sous-cat&eacute;gories dans cette cat&eacute;gorie</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>PAGE_URI</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Adresse unique de la page.</td>
+</tr>
+</tbody>
+</table><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/web/actualite/children</code></pre><p>Exemple de r&eacute;ponse :</p><pre><code class="language-response">{
+    "categories": [],
+    "pages": [
+        {
+            "id": 86,
+            "id_parent": 13,
+            "uri": "bourse-aux-velos-le-30-septembre-et-1er-octobre",
+            "title": "Bourse aux v\u00e9los 30 septembre et 1er octobre",
+            "type": 2,
+            "status": "online",
+            "format": "skriv",
+            "published": "2023-10-01 18:00:00",
+            "modified": "2023-09-11 23:41:41",
+            "content": "&hellip;"
+        },
+        &hellip;
+    ]
+}</code></pre></details><details class="api"><summary id="get-web-page_uri-attachments" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/web/<u>{PAGE_URI}</u>/attachments</code> <span>Liste des fichiers joints &agrave; la page</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>PAGE_URI</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Adresse unique de la page.</td>
+</tr>
+</tbody>
+</table></details><details class="api"><summary id="get-web-page_uri-file_name" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/web/<u>{PAGE_URI}</u>/<u>{FILE_NAME}</u></code> <span>R&eacute;cup&eacute;rer le fichier joint &agrave; la page</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>PAGE_URI</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Adresse unique de la page.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>FILENAME</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Nom du fichier.</td>
+</tr>
+</tbody>
+</table></details><details class="api"><summary id="delete-web-page_uri-file_name" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-DELETE">DELETE</b> <code>/web/<u>{PAGE_URI}</u>/<u>{FILE_NAME}</u></code> <span>Supprime le fichier joint &agrave; la page</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>PAGE_URI</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Adresse unique de la page.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>FILENAME</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Nom du fichier.</td>
+</tr>
+</tbody>
+</table></details><h2 id="membres">Membres</h2><details class="api"><summary id="get-user-categories" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/user/categories</code> <span>Liste des cat&eacute;gories de membres</span></summary><p><em>(Depuis la version 1.4.0)</em></p><p>La liste est tri&eacute;e par nom, et inclue le nombre de membres de la cat&eacute;gorie dans la cl&eacute; <code>count</code>.</p><p>Exemple de r&eacute;ponse :</p><pre><code class="language-response">{
+    "12": {
+        "id": 12,
+        "name": "Administration technique",
+        "perm_web": 9,
+        "perm_documents": 9,
+        "perm_users": 9,
+        "perm_accounting": 9,
+        "perm_subscribe": 0,
+        "perm_connect": 1,
+        "perm_config": 9,
+        "hidden": 0,
+        "count": 1
+    }
+}</code></pre></details><details class="api"><summary id="get-user-category-id-format" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/user/category/<u>{ID}</u>.<u>{FORMAT}</u></code> <span>Exporte la liste des membres d'une cat&eacute;gorie</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>ID</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">Identifiant unique de la cat&eacute;gorie.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>FORMAT</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Format de sortie : <code>json</code>, <code>csv</code>, <code>ods</code> ou <code>xlsx</code></td>
+</tr>
+</tbody>
+</table><p><em>(Depuis la version 1.4.0)</em></p></details><details class="api"><summary id="post-user-new" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/user/new</code> <span>Cr&eacute;er un nouveau membre</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>id_category</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">Identifiant de la cat&eacute;gorie. Si absent, la cat&eacute;gorie par d&eacute;faut sera utilis&eacute;e.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>password</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Mot de passe du membre.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>force_duplicate</code></td>
+<td style="text-align: left;"><code>bool</code></td>
+<td style="text-align: left;">Si <code>true</code> ou <code>1</code>, alors aucune erreur ne sera renvoy&eacute;e si le nom du membre correspond &agrave; un membre d&eacute;j&agrave; existant.</td>
+</tr>
+</tbody>
+</table><p><em>(Depuis la version 1.4.0)</em></p><p>Attention, cette m&eacute;thode comporte des restrictions :</p><ul>
+<li>il n'est pas possible de cr&eacute;er un membre dans une cat&eacute;gorie ayant acc&egrave;s &agrave; la configuration</li>
+<li>il n'est pas possible de d&eacute;finir l'OTP ou la cl&eacute; PGP du membre cr&eacute;&eacute;</li>
+<li>seul un identifiant API ayant le droit "Administration" pourra cr&eacute;er des membres administrateurs</li>
+</ul><p>Il est possible d'utiliser tous les champs de la fiche membre en utilisant la cl&eacute; unique du champ.</p><p>Sera renvoy&eacute;e la liste des infos de la fiche membre.</p><p>Si un membre avec le m&ecirc;me nom existe d&eacute;j&agrave; (et que <code>force_duplicate</code> n'est pas utilis&eacute;), une erreur <code>409</code> sera renvoy&eacute;e.</p><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -F nom="Bla bla" -F id_category=3 -F password=abcdef123456 https://test:abcd@monpaheko.tld/api/user/new</code></pre></details><details class="api"><summary id="get-user-id" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/user/<u>{ID}</u></code> <span>Informations de la fiche d'un membre</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>ID</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">Identifiant unique du membre (diff&eacute;rent du num&eacute;ro).</td>
+</tr>
+</tbody>
+</table><p><em>(Depuis la version 1.4.0)</em></p><p>Plusieurs cl&eacute;s suppl&eacute;mentaires sont retourn&eacute;es, en plus des champs de la fiche membre :</p><ul>
 <li><code>has_password</code></li>
 <li><code>has_pgp_key</code></li>
 <li><code>has_otp</code></li>
-</ul>
-<h3 id="user-id-delete">user/{ID} (DELETE)</h3>
-<p><em>(Depuis la version 1.3.6)</em></p>
-<p>Supprime un membre à partir de son ID.</p>
-<p>Seuls les identifiants d'API ayant le droit "Administration" pourront supprimer des membres.</p>
-<p>Note : il n'est pas possible de supprimer un membre appartenant à une catégorie ayant accès à la configuration.</p>
-<h3 id="user-id-post">user/{ID} (POST)</h3>
-<p><em>(Depuis la version 1.3.6)</em></p>
-<p>Modifie les infos de la fiche d'un membre à partir de son ID.</p>
-<p>Notes :</p>
-<ul>
-<li>il n'est pas possible de modifier la catégorie d'un membre</li>
-<li>il n'est pas possible de modifier un membre appartenant à une catégorie ayant accès à la configuration.</li>
-<li>il n'est pas possible de modifier le mot de passe, l'OTP ou la clé PGP du membre créé</li>
-<li>il n'est pas possible de modifier des membres ayant accès à la configuration</li>
-<li>seul un identifiant d'API ayant l'accès en "Administartion" pourra modifier un membre administrateur</li>
-</ul>
-<h3 id="user-import-put">user/import (PUT)</h3>
-<p>Permet d'importer un fichier de tableur (CSV/XLSX/ODS) de la liste des membres, comme si c'était fait depuis l'interface de Paheko.</p>
-<p>Cette route nécessite une clé d'API ayant les droits d'administration, car importer un fichier peut permettre de modifier l'identifiant de connexion d'un administrateur et donc potentiellement d'obtenir l'accès à l'interface d'administration.</p>
-<p>Paheko s'attend à ce que la première est ligne du tableau contienne le nom des colonnes, et que le nom des colonnes correspond au nom des champs de la fiche membre (ou à leur nom unique). Par exemple si votre fiche membre contient les champs <em>Nom et prénom</em> et <em>Adresse postale</em>, alors le fichier fourni devra ressembler à ceci :</p>
-<table>
+</ul><p>Exemple de r&eacute;ponse :</p><pre><code class="language-response">{
+    "has_password": true,
+    "has_otp": false,
+    "has_pgp_key": false,
+    "id": 1,
+    "id_category": 8,
+    "date_login": "2021-06-06 09:17:39",
+    "date_updated": null,
+    "id_parent": null,
+    "is_parent": false,
+    "preferences": null,
+    "numero": 1,
+    "nom": "Ada Lovelace",
+    "notes": null,
+    "groupe_information": true,
+    "groupe_benevoles": false,
+    "email": "ada@lovelace.org",
+    "telephone": "010101010101",
+    "adresse": null,
+    "code_postal": "21000",
+    "ville": "DIJON",
+    "pays": "FR",
+    "date_inscription": "2012-02-25"
+}</code></pre></details><details class="api"><summary id="delete-user-id" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-DELETE">DELETE</b> <code>/user/<u>{ID}</u></code> <span>Supprime un membre</span></summary><table>
 <thead>
 <tr>
-<th style="text-align: left;">Nom et prénom</th>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>ID</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">Identifiant unique du membre (diff&eacute;rent du num&eacute;ro).</td>
+</tr>
+</tbody>
+</table><p><em>(Depuis la version 1.4.0)</em></p><p>Seuls les identifiants d'API ayant le droit "Administration" pourront supprimer des membres.</p><p>Note : il n'est pas possible de supprimer via l'API un membre appartenant &agrave; une cat&eacute;gorie ayant acc&egrave;s &agrave; la configuration.</p></details><details class="api"><summary id="post-user-id" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/user/<u>{ID}</u></code> <span>Modifie les infos de la fiche d'un membre</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>ID</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">Identifiant unique du membre (diff&eacute;rent du num&eacute;ro).</td>
+</tr>
+</tbody>
+</table><p><em>(Depuis la version 1.4.0)</em></p><p>Notes :</p><ul>
+<li>il n'est pas possible de modifier la cat&eacute;gorie d'un membre</li>
+<li>il n'est pas possible de modifier un membre appartenant &agrave; une cat&eacute;gorie ayant acc&egrave;s &agrave; la configuration.</li>
+<li>il n'est pas possible de modifier le mot de passe, l'OTP ou la cl&eacute; PGP du membre cr&eacute;&eacute;</li>
+<li>il n'est pas possible de modifier des membres ayant acc&egrave;s &agrave; la configuration</li>
+<li>seul un identifiant d'API ayant l'acc&egrave;s en "Administration" pourra modifier un membre administrateur</li>
+</ul></details><details class="api"><summary id="post-user-import" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/user/import</code> <span>Importer un fichier de tableur de la liste des membres</span></summary><p>Formats de fichiers accept&eacute;s : CSV, ODS, XLSX.</p><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>mode</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Mode d'import du fichier. Voir ci-dessous pour les d&eacute;tails. <em>(Depuis la version 1.2.8)</em></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>skip_lines</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">Nombre de lignes &agrave; ignorer. D&eacute;faut : <code>1</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>column</code></td>
+<td style="text-align: left;"><code>array</code></td>
+<td style="text-align: left;">Correspondance entre la colonne (cl&eacute;, commence &agrave; z&eacute;ro) et le champ de la fiche membre (valeur).</td>
+</tr>
+</tbody>
+</table><p>Cette route n&eacute;cessite une cl&eacute; d'API ayant les droits d'administration, car importer un fichier peut permettre de modifier l'identifiant de connexion d'un administrateur et donc potentiellement d'obtenir l'acc&egrave;s &agrave; l'interface d'administration.</p><p>Le param&egrave;tre <code>mode</code> permet d'utiliser une de ces options pour sp&eacute;cifier le mode d'import :</p><ul>
+<li><code>auto</code> (d&eacute;faut si le mode n'est pas sp&eacute;cifi&eacute;) : met &agrave; jour la fiche d'un membre si son num&eacute;ro existe, sinon cr&eacute;e un membre si le num&eacute;ro de membre indiqu&eacute; n'existe pas ou n'est pas renseign&eacute;</li>
+<li><code>create</code> : ne fait que cr&eacute;er de nouvelles fiches de membre, si le num&eacute;ro de membre existe d&eacute;j&agrave; une erreur sera produite</li>
+<li><code>update</code> : ne fait que mettre &agrave; jour les fiches de membre en utilisant le num&eacute;ro de membre comme r&eacute;f&eacute;rence, si le num&eacute;ro de membre n'existe pas une erreur sera produite</li>
+</ul><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://monpaheko.tld/api/user/import \
+  -F mode=create \
+  -F 'column[0]=nom_prenom' \
+  -F 'column[1]=code_postal' \
+  -F skip_lines=0 \
+  -F file=@membres.csv</code></pre><p>Si aucun param&egrave;tre <code>column</code> n'est fourni, Paheko s'attend alors &agrave; ce que la premi&egrave;re est ligne du tableau contienne le nom des colonnes, et que le nom des colonnes correspond au nom des champs de la fiche membre (ou &agrave; leur nom unique). Par exemple si votre fiche membre contient les champs <em>Nom et pr&eacute;nom</em> et <em>Adresse postale</em>, alors le fichier fourni devra ressembler &agrave; ceci :</p><table>
+<thead>
+<tr>
+<th style="text-align: left;">Nom et pr&eacute;nom</th>
 <th style="text-align: left;">Adresse postale</th>
 </tr>
 </thead>
@@ -233,9 +655,7 @@
 <td style="text-align: left;">42 rue du binaire, 21000 DIJON</td>
 </tr>
 </tbody>
-</table>
-<p>Ou à ceci :</p>
-<table>
+</table><p>Ou &agrave; ceci :</p><table>
 <thead>
 <tr>
 <th style="text-align: left;">nom_prenom</th>
@@ -248,47 +668,15 @@
 <td style="text-align: left;">42 rue du binaire, 21000 DIJON</td>
 </tr>
 </tbody>
-</table>
-<p>La méthode renvoie un code HTTP <code>200 OK</code> si l'import s'est bien passé, sinon un code 400 et un message d'erreur JSON dans le corps de la réponse.</p>
-<p>Utilisez la route <code>user/import/preview</code> avant pour vérifier que l'import correspond à ce que vous attendez.</p>
-<p>Exemple pour modifier le nom du membre n°42 :</p>
-<pre><code>echo 'numero,nom' &gt; membres.csv
+</table><p>La m&eacute;thode renvoie un code HTTP <code>200 OK</code> si l'import s'est bien pass&eacute;, sinon un code 400 et un message d'erreur JSON dans le corps de la r&eacute;ponse.</p><p>Utilisez la route <code>user/import/preview</code> avant pour v&eacute;rifier que l'import correspond &agrave; ce que vous attendez.</p><p>Exemple pour modifier le nom du membre n&deg;42 :</p><pre><code>echo 'numero,nom' &gt; membres.csv
 echo '42,"Nouveau nom"' &gt;&gt; membres.csv
-curl https://test:abcd@monpaheko.tld/api/user/import -T membres.csv</code></pre>
-<h4 id="parametres">Paramètres</h4>
-<p>Les paramètres sont à spécifier dans l'URL, dans la query string.</p>
-<p>Depuis la version 1.2.8 il est possible d'utiliser un paramètre supplémentaire <code>mode</code> contenant une de ces options pour spécifier le mode d'import :</p>
-<ul>
-<li><code>auto</code> (défaut si le mode n'est pas spécifié) : met à jour la fiche d'un membre si son numéro existe, sinon crée un membre si le numéro de membre indiqué n'existe pas ou n'est pas renseigné</li>
-<li><code>create</code> : ne fait que créer de nouvelles fiches de membre, si le numéro de membre existe déjà une erreur sera produite</li>
-<li><code>update</code> : ne fait que mettre à jour les fiches de membre en utilisant le numéro de membre comme référence, si le numéro de membre n'existe pas une erreur sera produite</li>
-</ul>
-<p><em>Depuis la version 1.3.0 il est possible de spécifier :</em></p>
-<ul>
-<li>le nombre de lignes à ignorer avec le paramètre <code>skip_lines=X</code> : elles ne seront pas importées. Par défaut la première ligne est ignorée.</li>
-<li>la correspondance des colonnes avec des paramètres <code>column[x]</code> ou <code>x</code> est le numéro de la colonne (la numérotation commence à zéro), et la valeur contient le nom unique du champ de la fiche membre.</li>
-</ul>
-<p>Exemple :</p>
-<pre><code>curl https://test:abcd@monpaheko.tld/api/user/import?mode=create&amp;column[0]=nom_prenom&amp;column[1]=code_postal&amp;skip_lines=0 -T membres.csv</code></pre>
-<h3 id="user-import-post">user/import (POST)</h3>
-<p>Identique à la même méthode en <code>PUT</code>, mais les paramètres sont passés dans le corps de la requête, avec le fichier, dont le nom sera alors <code>file</code>.</p>
-<pre><code>curl https://test:abcd@monpaheko.tld/api/user/import \
-  -F mode=create \
-  -F 'column[0]=nom_prenom' \
-  -F 'column[1]=code_postal' \
-  -F skip_lines=0 \
-  -F file=@membres.csv</code></pre>
-<h3 id="user-import-preview-put">user/import/preview (PUT)</h3>
-<p>Identique à <code>user/import</code>, mais l'import n'est pas enregistré, et la route renvoie les modifications qui seraient effectuées en important le fichier :</p>
-<ul>
+curl -u test:abcd https://monpaheko.tld/api/user/import -F file=@membres.csv</code></pre></details><details class="api"><summary id="put-user-import" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-PUT">PUT</b> <code>/user/import</code> <span>Importer un fichier de tableur de la liste des membres</span></summary><p>Formats de fichiers accept&eacute;s : CSV, ODS, XLSX.</p><p>Identique &agrave; la m&ecirc;me m&eacute;thode en <code>POST</code>, mais les param&egrave;tres sont pass&eacute;s dans l'URL, et le fichier en contenu de la requ&ecirc;te.</p><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://monpaheko.tld/api/user/import?mode=create&amp;column[0]=nom_prenom&amp;skip_lines=0 \
+  -T membres.csv</code></pre></details><details class="api"><summary id="post-user-import-preview" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/user/import/preview</code> <span>Pr&eacute;visualise un import de membres, sans modifier les membres</span></summary><p>Identique &agrave; <code>user/import</code>, mais l'import n'est pas enregistr&eacute;. &Agrave; la place l'API indique les modifications qui seraient apport&eacute;es.</p><p>Renvoie un objet JSON comme ceci :</p><ul>
 <li><code>errors</code> : liste des erreurs d'import</li>
-<li><code>created</code> : liste des membres ajoutés, chaque objet contenant tous les champs de la fiche membre qui serait créée</li>
-<li><code>modified</code> : liste des membres modifiés, chaque membre aura une clé <code>id</code> et une clé <code>name</code>, ainsi qu'un objet <code>changed</code> contenant la liste des champs modifiés. Chaque champ modifié aura 2 propriétés <code>old</code> et <code>new</code>, contenant respectivement l'ancienne valeur du champ et la nouvelle.</li>
-<li><code>unchanged</code> : liste des membres mentionnés dans l'import, mais qui ne seront pas affectés. Pour chaque membre une clé <code>name</code> et une clé <code>id</code> indiquant le nom et l'identifiant unique numérique du membre</li>
-</ul>
-<p>Note : si <code>errors</code> n'est pas vide, alors il sera impossible d'importer le fichier avec <code>user/import</code>.</p>
-<p>Exemple de retour :</p>
-<pre><code>{
+<li><code>created</code> : liste des membres ajout&eacute;s, chaque objet contenant tous les champs de la fiche membre qui serait cr&eacute;&eacute;e</li>
+<li><code>modified</code> : liste des membres modifi&eacute;s, chaque membre aura une cl&eacute; <code>id</code> et une cl&eacute; <code>name</code>, ainsi qu'un objet <code>changed</code> contenant la liste des champs modifi&eacute;s. Chaque champ modifi&eacute; aura 2 propri&eacute;t&eacute;s <code>old</code> et <code>new</code>, contenant respectivement l'ancienne valeur du champ et la nouvelle.</li>
+<li><code>unchanged</code> : liste des membres mentionn&eacute;s dans l'import, mais qui ne seront pas affect&eacute;s. Pour chaque membre une cl&eacute; <code>name</code> et une cl&eacute; <code>id</code> indiquant le nom et l'identifiant unique num&eacute;rique du membre</li>
+</ul><p>Note : si <code>errors</code> n'est pas vide, alors il sera impossible d'importer le fichier avec <code>user/import</code>.</p><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://monpaheko.tld/api/user/import/preview -F mode=update -F file=@/tmp/membres.csv</code></pre><p>Exemple de r&eacute;ponse :</p><pre><code class="language-response">{
     "created": [
         {
             "numero": 3434351,
@@ -313,116 +701,512 @@ curl https://test:abcd@monpaheko.tld/api/user/import -T membres.csv</code></pre>
             "name": "Paul Muad'Dib"
         }
     ]
-}</code></pre>
-<h3 id="user-import-preview-post">user/import/preview (POST)</h3>
-<p>Idem quel la méthode en <code>PUT</code> mais accepte les paramètres dans le corps de la requête (voir ci-dessus).</p>
-<h2 id="activites">Activités</h2>
-<h3 id="services-subscriptions-import-put">services/subscriptions/import (PUT)</h3>
-<p><em>(Depuis Paheko 1.3.2)</em></p>
-<p>Permet d'importer les inscriptions des membres aux activités à partir d'un fichier CSV. Les activités et tarifs doivent déjà exister avant l'import.</p>
-<p>Les colonnes suivantes peuvent être utilisées :</p>
-<ul>
-<li>Numéro de membre<code>**</code></li>
-<li>Activité<code>**</code></li>
+}</code></pre></details><details class="api"><summary id="put-user-import-preview" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-PUT">PUT</b> <code>/user/import/preview</code> <span>Pr&eacute;visualise un import de membres, sans modifier les membres</span></summary><p>Idem quel la m&eacute;thode en <code>POST</code> mais les param&egrave;tres doivent &ecirc;tre pass&eacute;s dans l'URL, et le fichier dans le corps de la requ&ecirc;te.</p></details><h2 id="activites">Activit&eacute;s</h2><details class="api"><summary id="put-services-subscriptions-import" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-PUT">PUT</b> <code>/services/subscriptions/import</code> <span>Importer les inscriptions des membres aux activit&eacute;s</span></summary><p>Fichiers accept&eacute;s : CSV, XLSX, ODS.</p><p><em>(Depuis Paheko 1.3.2)</em></p><p>Les activit&eacute;s et tarifs doivent d&eacute;j&agrave; exister avant l'import.</p><p>Les colonnes suivantes peuvent &ecirc;tre utilis&eacute;es :</p><ul>
+<li>Num&eacute;ro de membre<code>**</code></li>
+<li>Activit&eacute;<code>**</code></li>
 <li>Tarif</li>
 <li>Date d'inscription<code>**</code></li>
 <li>Date d'expiration</li>
-<li>Montant à régler</li>
-<li>Payé ?</li>
-</ul>
-<p>Les colonnes suivies de deux astérisques (<code>**</code>) sont obligatoires.</p>
-<p>Exemple :</p>
-<pre><code>echo '"Numéro de membre","Activité","Tarif","Date d'inscription","Date d'expiration","Montant à régler","Payé ?"' &gt; /tmp/inscriptions.csv
-echo '42,"Cours de théâtre","Tarif adulte","01/09/2023","01/07/2023","123,50","Non"' &gt;&gt; /tmp/inscriptions.csv
-curl https://test:abcd@monpaheko.tld/api/services/subscriptions/import -T /tmp/inscriptions.csv</code></pre>
-<h2 id="erreurs">Erreurs</h2>
-<p>Paheko dispose d'un système dédié à la gestion des erreurs internes, compatible avec les formats des logiciels AirBrake et errbit.</p>
-<h3 id="errors-report-post">errors/report (POST)</h3>
-<p>Permet d'envoyer un rapport d'erreur (au format airbrake/errbit/Paheko), comme si c'était une erreur locale.</p>
-<h3 id="errors-log-get">errors/log (GET)</h3>
-<p>Renvoie le log d'erreurs système, au format airbrake/errbit (<a href="https://airbrake.io/docs/api/#create-notice-v3" rel="noreferrer noopener external" target="_blank">voir la doc AirBrake pour un exemple du format</a>)</p>
-<h2 id="comptabilite">Comptabilité</h2>
-<h3 id="accounting-years-get">accounting/years (GET)</h3>
-<p>Renvoie la liste des exercices.</p>
-<h3 id="accounting-charts-get">accounting/charts (GET)</h3>
-<p>Renvoie la liste des plans comptables.</p>
-<h3 id="accounting-charts-id_chart-accounts-get">accounting/charts/{ID_CHART}/accounts (GET)</h3>
-<p>Renvoie la liste des comptes pour le plan comptable indiqué (voir <code>id_chart</code> dans la liste des exercices).</p>
-<h3 id="accounting-years-id_year-journal-get">accounting/years/{ID_YEAR}/journal (GET)</h3>
-<p>Renvoie le journal général des écritures de l'exercice indiqué. </p>
-<p>Note : il est possible d'utiliser <code>current</code> comme paramètre pour <code>{ID_YEAR}</code> pour désigner l'exercice ouvert en cours. S'il y a plusieurs exercices ouverts, alors celui qui est le plus proche de la date actuelle sera utilisé.</p>
-<h3 id="accounting-years-id_year-export-format-extension-get">accounting/years/{ID_YEAR}/export/{FORMAT}.{EXTENSION} (GET)</h3>
-<p><em>(Depuis la version 1.3.6)</em></p>
-<p>Exporte l'exercice indiqué au format indiqué. Les formats suivants sont disponibles :</p>
-<ul>
-<li><code>full</code> : complet</li>
-<li><code>grouped</code> : complet groupé</li>
-<li><code>simple</code> : simple (ne comporte pas les saisies avancées)</li>
-<li><code>fec</code> : format FEC (Fichier des Écritures Comptables)</li>
-</ul>
-<p>L'extension indique le type de fichier :</p>
-<ul>
-<li><code>csv</code> : Tableur CSV</li>
-<li><code>ods</code> : LibreOffice Calc</li>
-<li><code>xlsx</code> : Microsoft OOXML (Excel) - seulement disponible si l'instance le permet</li>
-<li><code>json</code> : Texte JSON</li>
-</ul>
-<p>Note : il est possible d'utiliser <code>current</code> comme paramètre pour <code>{ID_YEAR}</code> pour désigner l'exercice ouvert en cours. S'il y a plusieurs exercices ouverts, alors celui qui est le plus proche de la date actuelle sera utilisé.</p>
-<h3 id="accounting-years-id_year-account-journal-get">accounting/years/{ID_YEAR}/account/journal (GET)</h3>
-<p>Renvoie le journal des écritures d'un compte pour l'exercice indiqué.</p>
-<p>Le compte est spécifié soit via le paramètre <code>code</code>, soit via le paramètre <code>id</code>. Exemple :  <code>/accounting/years/4/account/journal?code=512A</code></p>
-<p>Note : il est possible d'utiliser <code>current</code> comme paramètre pour <code>{ID_YEAR}</code> pour désigner l'exercice ouvert en cours. S'il y a plusieurs exercices ouverts, alors celui qui est le plus proche de la date actuelle sera utilisé.</p>
-<h3 id="accounting-transaction-id_transaction-get">accounting/transaction/{ID_TRANSACTION} (GET)</h3>
-<p>Renvoie les détails de l'écriture indiquée.</p>
-<h3 id="accounting-transaction-id_transaction-post">accounting/transaction/{ID_TRANSACTION} (POST)</h3>
-<p>Modifie l'écriture indiquée. Voir plus bas le format attendu.</p>
-<h3 id="accounting-transaction-id_transaction-users-get">accounting/transaction/{ID_TRANSACTION}/users (GET)</h3>
-<p>Renvoie la liste des membres liés à une écriture.</p>
-<h3 id="accounting-transaction-id_transaction-users-post">accounting/transaction/{ID_TRANSACTION}/users (POST)</h3>
-<p>Met à jour la liste des membres liés à une écriture, en utilisant les ID de membres passés dans un tableau nommé <code>users</code>.</p>
-<pre><code> curl -v "http://…/api/accounting/transaction/9337/users"  -F 'users[]=2'</code></pre>
-<h3 id="accounting-transaction-id_transaction-users-delete">accounting/transaction/{ID_TRANSACTION}/users (DELETE)</h3>
-<p>Efface la liste des membres liés à une écriture.</p>
-<h3 id="accounting-transaction-id_transaction-subscriptions-get">accounting/transaction/{ID_TRANSACTION}/subscriptions (GET)</h3>
-<p><em>(Depuis la version 1.3.6)</em></p>
-<p>Renvoie la liste des inscriptions (aux activités) liées à une écriture.</p>
-<h3 id="accounting-transaction-id_transaction-subscriptions-post">accounting/transaction/{ID_TRANSACTION}/subscriptions (POST)</h3>
-<p><em>(Depuis la version 1.3.6)</em></p>
-<p>Met à jour la liste des inscriptions liées à une écriture, en utilisant les ID d'inscriptions passés dans un tableau nommé <code>subscriptions</code>.</p>
-<pre><code> curl -v "http://…/api/accounting/transaction/9337/subscriptions"  -F 'subscriptions[]=2'</code></pre>
-<h3 id="accounting-transaction-id_transaction-subscriptions-delete">accounting/transaction/{ID_TRANSACTION}/subscriptions (DELETE)</h3>
-<p><em>(Depuis la version 1.3.6)</em></p>
-<p>Efface la liste des inscriptions liées à une écriture.</p>
-<h3 id="accounting-transaction-post">accounting/transaction (POST)</h3>
-<p>Crée une nouvelle écriture, renvoie les détails si l'écriture a été créée. Voir plus bas le format attendu.</p>
-<h4 id="structure-pour-creer-modifier-une-ecriture">Structure pour créer / modifier une écriture</h4>
-<p>Les champs à spécifier pour créer ou modifier une écriture sont les suivants :</p>
-<ul>
-<li><code>id_year</code></li>
-<li><code>date</code> (format YYYY-MM-DD)</li>
-<li><code>type</code> peut être un type d'écriture simplifié (2 lignes) : <code>EXPENSE</code> (dépense), <code>REVENUE</code> (recette), <code>TRANSFER</code> (virement), <code>DEBT</code> (dette), <code>CREDIT</code> (créance), ou <code>ADVANCED</code> pour une écriture multi-ligne</li>
-<li><code>amount</code> (uniquement pour les écritures simplifiées) : contient le montant de l'écriture</li>
-<li><code>credit</code> (uniquement pour les écritures simplifiées) : contient le numéro du compte porté au crédit</li>
-<li><code>debit</code> (uniquement pour les écritures simplifiées) : contient le numéro du compte porté au débit</li>
-<li><code>lines</code> (pour les écritures multi-lignes) : un tableau dont chaque ligne doit contenir :<ul>
-<li><code>account</code> (numéro du compte) ou <code>id_account</code> (ID unique du compte)</li>
-<li><code>credit</code> : montant à inscrire au crédit (doit être zéro ou non renseigné si <code>debit</code> est renseigné, et vice-versa)</li>
-<li><code>debit</code> : montant à inscrire au débit</li>
-<li><code>label</code> (facultatif) : libellé de la ligne</li>
-<li><code>reference</code> (facultatif) : référence de la ligne (aussi appelé référence du paiement pour les écritures simplifiées)</li>
-<li><code>id_project</code> : ID unique du projet à affecter</li>
-</ul>
-</li>
-</ul>
-<p>Champs optionnels :</p>
-<ul>
-<li><code>reference</code> : numéro de pièce comptable</li>
-<li><code>notes</code> : remarques (texte multi ligne)</li>
-<li><code>id_project</code> : ID unique du projet à affecter (pour les écritures simplifiées uniquement)</li>
-<li><code>payment_reference</code> (uniquement pour les écritures simplifiées) : référence de paiement</li>
-<li><code>linked_users</code> : Tableau des IDs des membres à lier à l'écriture <em>(depuis 1.3.3)</em></li>
-<li><code>linked_transactions</code> : Tableau des IDs des écritures à lier à l'écriture <em>(depuis 1.3.5)</em></li>
-<li><code>linked_subscriptions</code> : Tableau des IDs des inscriptions à lier à l'écriture <em>(depuis 1.3.6)</em></li>
-</ul>
-<p>Exemple :</p>
-<pre><code>curl -F 'id_year=12' -F 'label=Test' -F 'date=01/02/2022' -F 'type=EXPENSE' -F 'amount=42' -F 'debit=512A' -F 'credit=601' …</code></pre></div></body></html>
+<li>Montant &agrave; r&eacute;gler</li>
+<li>Pay&eacute; ?</li>
+</ul><p>Les colonnes suivies de deux ast&eacute;risques (<code>**</code>) sont obligatoires.</p><p>Exemple :</p><pre><code>echo '"Num&eacute;ro de membre","Activit&eacute;","Tarif","Date d'inscription","Date d'expiration","Montant &agrave; r&eacute;gler","Pay&eacute; ?"' &gt; /tmp/inscriptions.csv
+echo '42,"Cours de th&eacute;&acirc;tre","Tarif adulte","01/09/2023","01/07/2023","123,50","Non"' &gt;&gt; /tmp/inscriptions.csv
+curl -u test:abcd https://monpaheko.tld/api/services/subscriptions/import -T /tmp/inscriptions.csv</code></pre></details><h2 id="erreurs">Erreurs</h2><p>Paheko dispose d'un syst&egrave;me d&eacute;di&eacute; &agrave; la gestion des erreurs internes, compatible avec les formats des logiciels AirBrake et errbit.</p><details class="api"><summary id="post-errors-report" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/errors/report</code> <span>Ajouter un rapport d'erreur au log</span></summary><p>Cette route permet d'ajouter une erreur au log de l'instance. Utile pour centraliser les erreurs de plusieurs instances.</p><p>Paheko utilise le format d'erreurs de <a href="https://docs.airbrake.io/docs/devops-tools/api/#post-data-schema-v3" rel="noreferrer noopener external" target="_blank">AirBrake</a> et errbit.</p></details><details class="api"><summary id="get-errors-log" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/errors/log</code> <span>Log d'erreurs de l'instance</span></summary></details><h2 id="comptabilite">Comptabilit&eacute;</h2><details class="api"><summary id="get-accounting-years" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/accounting/years</code> <span>Liste des exercices</span></summary><p>Exemple de r&eacute;ponse :</p><pre><code class="language-response">[
+    {
+        "id": 1,
+        "label": "Premier exercice",
+        "start_date": "2011-11-01",
+        "end_date": "2013-01-31",
+        "closed": 1,
+        "id_chart": 1,
+        "nb_transactions": 1194,
+        "chart_name": "Plan comptable associatif 1999"
+    },
+    &hellip;
+]</code></pre></details><details class="api"><summary id="get-accounting-charts" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/accounting/charts</code> <span>Liste des plans comptables</span></summary><p>Exemple de r&eacute;ponse :</p><pre><code class="language-response">[
+    {
+        "id": 2,
+        "label": "Plan comptable associatif 2018",
+        "country": "FR",
+        "code": "PCA_2018",
+        "archived": false
+    }
+]</code></pre></details><details class="api"><summary id="get-accounting-charts-id_chart-accounts" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/accounting/charts/<u>{ID_CHART}</u>/accounts</code> <span>Liste des comptes pour le plan comptable indiqu&eacute;</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>ID_CHART</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">ID du plan comptable.</td>
+</tr>
+</tbody>
+</table><p>Exemple de r&eacute;ponse :</p><pre><code class="language-response">[
+    {
+        "id": 312,
+        "id_chart": 2,
+        "code": "1",
+        "label": "Classe 1 \u2014 Comptes de capitaux (Fonds propres, emprunts et dettes assimil\u00e9s)",
+        "description": null,
+        "position": 2,
+        "type": 0,
+        "user": false,
+        "bookmark": false
+    },
+    &hellip;
+]</code></pre></details><details class="api"><summary id="get-accounting-years-id_year-journal" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/accounting/years/<u>{ID_YEAR}</u>/journal</code> <span>Journal g&eacute;n&eacute;ral des &eacute;critures de l'exercice indiqu&eacute;</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>ID_YEAR</code></td>
+<td style="text-align: left;"><code>int|string</code></td>
+<td style="text-align: left;">ID de l'exercice, ou <code>current</code>.</td>
+</tr>
+</tbody>
+</table><p>Note : il est possible d'utiliser <code>current</code> comme param&egrave;tre pour <code>{ID_YEAR}</code> pour d&eacute;signer l'exercice ouvert en cours. S'il y a plusieurs exercices ouverts, alors celui qui est le plus proche de la date actuelle sera utilis&eacute;.</p></details><details class="api"><summary id="get-accounting-years-id_year-export-type-format" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/accounting/years/<u>{ID_YEAR}</u>/export/<u>{TYPE}</u>.<u>{FORMAT}</u></code> <span>Export d'un exercice</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>ID_YEAR</code></td>
+<td style="text-align: left;"><code>int|string</code></td>
+<td style="text-align: left;">ID de l'exercice, ou <code>current</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>TYPE</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Type d'export : <code>full</code>, <code>grouped</code>, <code>simple</code> ou <code>fec</code>. <code>simple</code> ne contient pas les &eacute;critures avanc&eacute;es.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>FORMAT</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Format d'export : <code>json</code>, <code>csv</code>, <code>ods</code> ou <code>xlsx</code></td>
+</tr>
+</tbody>
+</table><p><em>(Depuis la version 1.4.0)</em></p></details><details class="api"><summary id="get-accounting-years-id_year-journal-code" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/accounting/years/<u>{ID_YEAR}</u>/journal/<u>{CODE}</u></code> <span>Journal des &eacute;critures d'un compte</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>ID_YEAR</code></td>
+<td style="text-align: left;"><code>int|string</code></td>
+<td style="text-align: left;">ID de l'exercice, ou <code>current</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>CODE</code></td>
+<td style="text-align: left;"><code>int|string</code></td>
+<td style="text-align: left;">Code du compte.</td>
+</tr>
+</tbody>
+</table><p>Exemple de r&eacute;ponse :</p><pre><code class="language-response">[
+    {
+        "id": 9297,
+        "id_line": 22401,
+        "date": "2022-02-08",
+        "debit": 0,
+        "credit": 850,
+        "change": 850,
+        "sum": 850,
+        "reference": "POS-SESSION-434",
+        "type": 0,
+        "label": "Session de caisse n\u00b0434",
+        "line_label": null,
+        "line_reference": null,
+        "id_project": null,
+        "project_code": null,
+        "files": 1,
+        "status": 0
+    },
+    &hellip;
+]</code></pre></details><details class="api"><summary id="get-accounting-years-id_year-journal-id" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/accounting/years/<u>{ID_YEAR}</u>/journal/=<u>{ID}</u></code> <span>Journal des &eacute;critures d'un compte</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>ID_YEAR</code></td>
+<td style="text-align: left;"><code>int|string</code></td>
+<td style="text-align: left;">ID de l'exercice, ou <code>current</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>ID</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">ID du compte.</td>
+</tr>
+</tbody>
+</table></details><details class="api"><summary id="post-accounting-transaction" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/accounting/transaction</code> <span>Cr&eacute;er une nouvelle &eacute;criture</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>id_year</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">Identifiant de l'exercice.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>date</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Date au format <code>YYYY-MM-DD</code> ou <code>DD/MM/YYYY</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>type</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Type d'&eacute;criture.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>reference</code></td>
+<td style="text-align: left;"><code>string|null</code></td>
+<td style="text-align: left;">Num&eacute;ro de pi&egrave;ce comptable</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>notes</code></td>
+<td style="text-align: left;"><code>string|null</code></td>
+<td style="text-align: left;">Remarques (texte multi ligne)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>linked_transactions</code></td>
+<td style="text-align: left;"><code>array(int, &hellip;)|null</code></td>
+<td style="text-align: left;">Tableau des IDs des &eacute;critures &agrave; lier &agrave; l'&eacute;criture <em>(depuis 1.3.5)</em></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>linked_users</code></td>
+<td style="text-align: left;"><code>array(int, &hellip;)|null</code></td>
+<td style="text-align: left;">Tableau des IDs des membres &agrave; lier &agrave; l'&eacute;criture <em>(depuis 1.3.3)</em></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>linked_subscriptions</code></td>
+<td style="text-align: left;"><code>array(int, &hellip;)|null</code></td>
+<td style="text-align: left;">Tableau des IDs des inscriptions &agrave; lier &agrave; l'&eacute;criture <em>(depuis 1.4.0)</em></td>
+</tr>
+</tbody>
+</table><h4 id="types-d-ecriture">Types d'&eacute;criture</h4><table>
+<thead>
+<tr>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>expense</code></td>
+<td style="text-align: left;">D&eacute;pense</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>revenue</code></td>
+<td style="text-align: left;">Recette</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>transfer</code></td>
+<td style="text-align: left;">Virement</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>debt</code></td>
+<td style="text-align: left;">Dette</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>credit</code></td>
+<td style="text-align: left;">Cr&eacute;ance</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>advanced</code></td>
+<td style="text-align: left;">Saisie avanc&eacute;e</td>
+</tr>
+</tbody>
+</table><p>Les &eacute;critures avanc&eacute;es (multi-lignes) ont obligatoirement le type <code>advanced</code>. Les autres &eacute;critures sont appel&eacute;es <em>"&eacute;critures simplifi&eacute;es"</em> et ne peuvent comporter que deux lignes.</p><h4 id="parametres-des-ecritures-simplifiees">Param&egrave;tres des &eacute;critures simplifi&eacute;es</h4><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>amount</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Montant de l'&eacute;criture, au format flottant (<code>53,34</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>credit</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Code du compte port&eacute; au cr&eacute;dit</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>debit</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Code du compte port&eacute; au d&eacute;bit</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>id_project</code></td>
+<td style="text-align: left;"><code>int|null</code></td>
+<td style="text-align: left;">ID du projet &agrave; affecter</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>payment_reference</code></td>
+<td style="text-align: left;"><code>int|null</code></td>
+<td style="text-align: left;">r&eacute;f&eacute;rence de paiement</td>
+</tr>
+</tbody>
+</table><h4 id="parametres-des-ecritures-avancees">Param&egrave;tres des &eacute;critures avanc&eacute;es</h4><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>lines</code></td>
+<td style="text-align: left;"><code>array(object, &hellip;)</code></td>
+<td style="text-align: left;">un tableau dont chaque &eacute;l&eacute;ment est un objet correspondant &agrave; une ligne de l'&eacute;criture.</td>
+</tr>
+</tbody>
+</table><p>Structure de l'objet repr&eacute;sentant une ligne de l'&eacute;criture :</p><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>account</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Code du compte</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>id_account</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">Identifiant du compte (ID). Peut &ecirc;tre utilis&eacute; en alternative au code du compte.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>credit</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Montant &agrave; inscrire au cr&eacute;dit (doit &ecirc;tre z&eacute;ro ou non renseign&eacute; si <code>debit</code> est renseign&eacute;, et vice-versa)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>debit</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">montant &agrave; inscrire au d&eacute;bit</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>label</code></td>
+<td style="text-align: left;"><code>string|null</code></td>
+<td style="text-align: left;">libell&eacute; de la ligne</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>reference</code></td>
+<td style="text-align: left;"><code>string|null</code></td>
+<td style="text-align: left;">r&eacute;f&eacute;rence de la ligne (aussi appel&eacute; r&eacute;f&eacute;rence du paiement pour les &eacute;critures simplifi&eacute;es)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>id_project</code></td>
+<td style="text-align: left;"><code>int|null</code></td>
+<td style="text-align: left;">ID du projet &agrave; affecter &agrave; cette ligne</td>
+</tr>
+</tbody>
+</table><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -F 'id_year=12' \
+  -F 'label=Test' \
+  -F 'date=01/02/2022' \
+  -F 'type=expense' \
+  -F 'amount=42,45' \
+  -F 'debit=512A' \
+  -F 'credit=601'</code></pre></details><details class="api"><summary id="get-accounting-transaction-id_transaction" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/accounting/transaction/<u>{ID_TRANSACTION}</u></code> <span>D&eacute;tails de l'&eacute;criture</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>ID_TRANSACTION</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">ID de l'&eacute;criture.</td>
+</tr>
+</tbody>
+</table><p>Exemple de r&eacute;ponse :</p><pre><code class="language-response">{
+  "id": 9302,
+  "type": 0,
+  "status": 0,
+  "label": "Session de caisse n\u00b0439",
+  "notes": null,
+  "reference": "POS-SESSION-439",
+  "date": "2022-02-12",
+  "hash": null,
+  "prev_id": null,
+  "prev_hash": null,
+  "id_year": 12,
+  "id_creator": 5883,
+  "url": "http:\/\/dev.paheko.localhost\/admin\/acc\/transactions\/details.php?id=9302",
+  "lines": [
+    {
+      "id": 22421,
+      "id_transaction": 9302,
+      "id_account": 542,
+      "credit": 0,
+      "debit": 3000,
+      "reference": "CE342",
+      "label": null,
+      "reconciled": false,
+      "id_project": null,
+      "account_code": "5112",
+      "account_label": "Ch\u00e8ques \u00e0 encaisser",
+      "account_position": 3,
+      "project_name": null,
+      "account_selector": {
+        "542": "5112 \u2014 Ch\u00e8ques \u00e0 encaisser"
+      }
+    },
+    &hellip;
+  ]
+}</code></pre></details><details class="api"><summary id="post-accounting-transaction-id_transaction" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/accounting/transaction/<u>{ID_TRANSACTION}</u></code> <span>Modifier l'&eacute;criture</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>ID_TRANSACTION</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">ID de l'&eacute;criture.</td>
+</tr>
+</tbody>
+</table><p>Si l'&eacute;criture est verrouill&eacute;e, ou dans un exercice cl&ocirc;tur&eacute;, la modification sera impossible.</p><p>Voir la route <code>POST accounting/transaction</code> (cr&eacute;ation d'une &eacute;criture) pour la liste des param&egrave;tres.</p></details><details class="api"><summary id="get-accounting-transaction-id_transaction-users" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/accounting/transaction/<u>{ID_TRANSACTION}</u>/users</code> <span>Liste des membres li&eacute;s &agrave; une &eacute;criture</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>ID_TRANSACTION</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">ID de l'&eacute;criture.</td>
+</tr>
+</tbody>
+</table></details><details class="api"><summary id="post-accounting-transaction-id_transaction-users" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/accounting/transaction/<u>{ID_TRANSACTION}</u>/users</code> <span>Met &agrave; jour la liste des membres li&eacute;s &agrave; une &eacute;criture</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>ID_TRANSACTION</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">ID de l'&eacute;criture.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>users</code></td>
+<td style="text-align: left;"><code>array(int, &hellip;)</code></td>
+<td style="text-align: left;">ID des membres.</td>
+</tr>
+</tbody>
+</table><p>Exemple de requ&ecirc;te :</p><pre><code> curl -v "https://&hellip;/api/accounting/transaction/9337/users"  -F 'users[]=2'</code></pre></details><details class="api"><summary id="delete-accounting-transaction-id_transaction-users" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-DELETE">DELETE</b> <code>/accounting/transaction/<u>{ID_TRANSACTION}</u>/users</code> <span>Efface la liste des membres li&eacute;s &agrave; une &eacute;criture</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>ID_TRANSACTION</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">ID de l'&eacute;criture.</td>
+</tr>
+</tbody>
+</table></details><details class="api"><summary id="get-accounting-transaction-id_transaction-subscriptions" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/accounting/transaction/<u>{ID_TRANSACTION}</u>/subscriptions</code> <span>Liste des inscriptions (aux activit&eacute;s) li&eacute;es &agrave; une &eacute;criture</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>ID_TRANSACTION</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">ID de l'&eacute;criture.</td>
+</tr>
+</tbody>
+</table><p><em>(Depuis la version 1.4.0)</em></p></details><details class="api"><summary id="post-accounting-transaction-id_transaction-subscriptions" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/accounting/transaction/<u>{ID_TRANSACTION}</u>/subscriptions</code> <span>Met &agrave; jour la liste des inscriptions li&eacute;es &agrave; une &eacute;criture</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>ID_TRANSACTION</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">ID de l'&eacute;criture.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>subscriptions</code></td>
+<td style="text-align: left;"><code>array(int, &hellip;)</code></td>
+<td style="text-align: left;">ID des inscriptions.</td>
+</tr>
+</tbody>
+</table><p><em>(Depuis la version 1.4.0)</em></p><p>Exemple de requ&ecirc;te :</p><pre><code> curl -v "https://&hellip;/api/accounting/transaction/9337/subscriptions"  -F 'subscriptions[]=2'</code></pre></details><details class="api"><summary id="delete-accounting-transaction-id_transaction-subscriptions" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-DELETE">DELETE</b> <code>/accounting/transaction/<u>{ID_TRANSACTION}</u>/subscriptions</code> <span>Efface la liste des inscriptions li&eacute;es &agrave; une &eacute;criture</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>ID_TRANSACTION</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">ID de l'&eacute;criture.</td>
+</tr>
+</tbody>
+</table><p><em>(Depuis la version 1.4.0)</em></p></details>
+</div></body></html>

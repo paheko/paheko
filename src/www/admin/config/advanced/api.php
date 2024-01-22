@@ -23,7 +23,7 @@ $default_key = API_Credentials::generateKey();
 $secret = API_Credentials::generateSecret();
 $access_levels = API_Entity::ACCESS_LEVELS;
 
-$tpl->assign('website', WEBSITE);
+$tpl->assign('api_doc_url', Utils::getLocalURL('!static/doc/api.html'));
 $tpl->assign(compact('list', 'csrf_key', 'default_key', 'secret', 'access_levels'));
 
 $tpl->display('config/advanced/api.tpl');

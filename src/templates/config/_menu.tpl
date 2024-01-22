@@ -10,8 +10,8 @@
 		<li{if $current == 'advanced'} class="current"{/if}><a href="{$admin_url}config/advanced/">Fonctions avancées</a></li>
 	</ul>
 
-	{if $current == 'users'}
-		{if $sub_current == 'fields'}
+	{if $current === 'users'}
+		{if $sub_current === 'fields'}
 			<aside>{linkbutton shape="plus" label="Ajouter un champ" href="new.php"}</aside>
 		{/if}
 
@@ -21,6 +21,10 @@
 			<li{if $sub_current == 'categories'} class="current"{/if}><a href="{$admin_url}config/categories/">Catégories &amp; droits des membres</a></li>
 		</ul>
 	{elseif $current == 'advanced'}
+		{if $sub_current === 'api'}
+			<aside>{linkbutton shape="help" label="Documentation de l'API" href=$api_doc_url target="_dialog"}</aside>
+		{/if}
+
 		<ul class="sub">
 			<li{if $sub_current == 'audit'} class="current"{/if}><a href="{$admin_url}config/advanced/audit.php">Journal d'audit</a></li>
 			<li{if $sub_current == 'api'} class="current"{/if}><a href="{$admin_url}config/advanced/api.php">Accès à l'API</a></li>

@@ -1,67 +1,93 @@
+# Introduction
+
+### Débuter
+
 Une API de type REST est disponible dans Paheko.
 
 Pour accéder à l'API il faut un identifiant et un mot de passe, à créer dans le menu ==Configuration==, onglet ==Fonctions avancées==, puis ==API==.
 
-L'API peut ensuite recevoir des requêtes REST sur l'URL `https://adresse_association/api/{chemin}/`.
+L'API peut ensuite recevoir des requêtes REST sur l'URL `https://adresse_association/api{route}`.
 
-Remplacer =={chemin}== par un des chemins de l'API (voir ci-dessous). La méthode HTTP à utiliser est spécifiée pour chaque chemin.
+Remplacer =={route}== par une des routes de l'API (voir ci-dessous).
 
-Pour les requêtes de type `POST`, les paramètres peuvent être envoyés par le client sous forme de formulaire HTTP classique (`application/x-www-form-urlencoded`) ou sous forme d'objet JSON. Dans ce cas le `Content-Type` doit être positionné sur `application/json`.
+La méthode HTTP (`GET`, `POST`, etc.) à utiliser est spécifiée pour chaque route.
 
-Les réponses sont faites en JSON par défaut.
+Des exemples sont donnés pour l'utilisation de l'outil `curl` en ligne de commande, si vous souhaitez utiliser un autre langage de programmation il faudra adapter votre code.
 
-<<toc level=3>>
+### Formats des requêtes et réponses
 
-# Utiliser l'API
+Les paramètres peuvent être fournis sous les formes suivantes :
+
+* dans les paramètres de l'URL (query string) : pour toutes les méthodes
+* formulaire HTTP classique pour les requêtes `POST` :
+  * `Content-Type: application/x-www-form-urlencoded`
+  * ou `Content-Type: multipart/form-data`
+* objet JSON pour les requêtes POST :
+  * `Content-Type: application/json`
+
+Les réponses sont renvoyées en JSON par défaut, sauf quand la route permet de choisir un autre format.
+
+Les formats ODS et XLSX ne sont disponibles à l'import que si le serveur est configuré pour convertir ces formats.
+
+De la même manière, le format XLSX n'est disponible que si le serveur est configuré pour générer ce format.
+
+### Utiliser l'API
 
 N'importe quel client HTTP capable de gérer TLS (HTTPS) et l'authentification basique fonctionnera.
 
 En ligne de commande il est possible d'utiliser `curl`. Exemple pour télécharger la base de données :
 
 ```
-curl https://test:coucou@[identifiant_association].paheko.cloud/api/download -o association.sqlite
+curl -u test:secret https://[identifiant_association].paheko.cloud/api/download -o association.sqlite
 ```
 
 On peut aussi utiliser `wget` en n'oubliant pas l'option `--auth-no-challenge` sinon l'authentification ne fonctionnera pas :
 
 ```
-wget https://test:coucou@[identifiant_association].paheko.cloud/api/download  --auth-no-challenge -O association.sqlite
+wget https://test:secret@[identifiant_association].paheko.cloud/api/download \
+  --auth-no-challenge \
+  -O association.sqlite
 ```
 
 Exemple pour créer une écriture sous forme de formulaire :
 
 ```
-curl -v "http://test:test@[identifiant_association].paheko.cloud/api/accounting/transaction" -F id_year=1 -F label=Test -F "date=01/02/2023" …
+curl -v -u test:secret \
+  https://[identifiant_association].paheko.cloud/api/accounting/transaction \
+  -F id_year=1 \
+  -F label=Test \
+  -F "date=01/02/2023"
+  …
 ```
 
 Ou sous forme d'objet JSON :
 
 ```
-curl -v "http://test:test@[identifiant_association].paheko.cloud/api/accounting/transaction" -H 'Content-Type: application/json' -d '{"id_year":1, "label": "Test écriture", "date": "01/02/2023"}'
+curl -v -u test:secret \
+  https://[identifiant_association].paheko.cloud/api/accounting/transaction \
+  -H 'Content-Type: application/json' \
+  -d '{"id_year":1, "label": "Test écriture", "date": "01/02/2023", …}'
 ```
 
+### Authentification
 
-# Authentification
+L'API utilise l'authentification [`Basic` de HTTP](https://fr.wikipedia.org/wiki/Authentification_HTTP#M%C3%A9thode_%C2%AB_Basic_%C2%BB).
 
-Il ne faut pas oublier de fournir le nom d'utilisateur et mot de passe en HTTP :
-
-```
-curl http://test:abcd@paheko.monasso.tld/api/download/
-```
-
-# Erreurs
+### Erreurs
 
 En cas d'erreur un code HTTP 4XX sera fourni, et le contenu sera un objet JSON avec une clé `error` contenant le message d'erreur.
 
-# Chemins
+# Routes
 
 ## Requêtes SQL
 
 ### POST sql.{FORMAT}
 
+Exécute une requête SQL en lecture
+
 | Paramètre | Type | Description |
 | :- | :- | :- |
-| `FORMAT` | `string:enum(json, csv, ods, xlsx)` | Format de retour. |
+| `FORMAT` | `string` | Format de retour : `json`, `csv`, `ods` ou `xlsx` |
 | `sql` | `string` | Requête SQL à exécuter. |
 
 Si aucun format n'est passé (exemple : `…/api/sql`, sans point ni extension), `json` sera utilisé.
@@ -70,9 +96,14 @@ Permet d'exécuter une requête SQL `SELECT` (uniquement, pas de requête `UPDAT
 
 S'il n'y a pas de limite à la requête, une limite à 1000 résultats sera ajoutée obligatoirement.
 
+Exemple de requête :
+
 ```request
-curl https://test:abcd@paheko.monasso.tld/api/sql -d 'SELECT nom, code_postal FROM users LIMIT 2;'
+curl -u test:abcd https://paheko.monasso.tld/api/sql \
+  -d 'SELECT nom, code_postal FROM users LIMIT 2;'
 ```
+
+Exemple de réponse :
 
 ```response
 {
@@ -99,22 +130,33 @@ curl https://test:abcd@paheko.monasso.tld/api/sql -d 'SELECT nom, code_postal FR
 
 Télécharger la base de données complète. Renvoie directement le fichier SQLite de la base de données.
 
-Exemple :
+Exemple de requête :
 
 ```request
-curl https://test:abcd@paheko.monasso.tld/api/download -o db.sqlite
+curl -u test:abcd https://paheko.monasso.tld/api/download -o db.sqlite
 ```
 
 ### GET download/files
 
+Télécharger un fichier ZIP contenant tous les fichiers
+
 _(Depuis la version 1.3.4)_
 
-Télécharger un fichier ZIP contenant tous les fichiers (documents, fichiers des écritures, des membres, modules modifiés, etc.).
+Les fichiers inclus sont :
 
-Exemple :
+* documents
+* fichiers liés aux écritures,
+* fichiers liés des membres,
+* fichiers joints aux pages du site web
+* code des modules modifiés
+* corbeille
+* configuration : logo, icônes, etc.
+* anciennes versions des fichiers
+
+Exemple de requête :
 
 ```request
-curl https://test:abcd@paheko.monasso.tld/api/download/files -o backup_files.zip
+curl -u test:abcd https://paheko.monasso.tld/api/download/files -o backup_files.zip
 ```
 
 ## Site web
@@ -123,16 +165,18 @@ _(Depuis la version 1.4.0)_
 
 ### GET web
 
-Renvoie la liste de toutes les pages du site web.
+Liste de toutes les pages du site web
 
 ### GET web/{PAGE_URI}
 
-Renvoie un objet JSON avec toutes les infos de la page donnée.
+Métadonnées de la page du site web
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
 | `PAGE_URI` | `string` | Adresse unique de la page. |
 | `html` | `bool` | Si `true` ou `1`, une clé `html` sera ajoutée à la réponse avec le contenu de la page au format HTML. |
+
+Exemple de réponse :
 
 ```response
 [
@@ -160,19 +204,21 @@ Renvoie un objet JSON avec toutes les infos de la page donnée.
 
 ### PUT web/{PAGE_URI}
 
-Modifie le contenu de la page.
+Modifie le contenu de la page
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
 | `PAGE_URI` | `string` | Adresse unique de la page. |
 
+Exemple de requête :
+
 ```request
-curl https://test:abcd@paheko.monasso.tld/api/web/bourse-28-septembre -X PUT -d 'La bourse aura lieu le 28 septembre'
+curl -u test:abcd https://paheko.monasso.tld/api/web/bourse-28-septembre -X PUT -d 'La bourse aura lieu le 28 septembre'
 ```
 
 ### POST web/{PAGE_URI}
 
-Modifie les métadonnées de la page.
+Modifie les métadonnées de la page
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
@@ -180,52 +226,62 @@ Modifie les métadonnées de la page.
 | `id_parent` | `int|null` | Numéro de la catégorie parente de cette page. |
 | `uri` | `string` | Nouvelle adresse unique de la page. |
 | `title` | `string` | Titre de la page. |
-| `type` | `int:enum(1, 2)` | Type de page. `1` pour les catégories, `2` pour les pages simples. |
-| `status` | `string:enum(online, draft)` | Statut de la page. `online` si la page est en ligne, `draft` si la page est en brouillon. |
-| `format` | `string:enum(markdown, encrypted, skriv)` | Format de la page. |
-| `published` | `string:datetime` | Date et heure de publication. |
-| `modified` | `string:datetime` | Date et heure de modification. |
+| `type` | `int` | Type de page. `1` pour les catégories, `2` pour les pages simples. |
+| `status` | `string` | Statut de la page. `online` si la page est en ligne, `draft` si la page est en brouillon. |
+| `format` | `string` | Format de la page : `markdown`, `encrypted` ou `skriv` |
+| `published` | `string` | Date et heure de publication au format `YYYY-MM-DD HH:mm:ss`. |
+| `modified` | `string` | Date et heure de modification au format `YYYY-MM-DD HH:mm:ss`. |
 | `content` | `string` | Contenu. |
 
+Exemple de requête :
+
 ```request
-curl https://test:abcd@paheko.monasso.tld/api/web/bourse-28-septembre -F title="Bourse aux vélos du 28 septembre"
+curl -u test:abcd https://paheko.monasso.tld/api/web/bourse-28-septembre -F title="Bourse aux vélos du 28 septembre"
 ```
 
 ### DELETE web/{PAGE_URI}
 
-Supprime la page et ses fichiers joints.
+Supprime la page et ses fichiers joints
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
 | `PAGE_URI` | `string` | Adresse unique de la page. |
 
+Exemple de requête :
+
 ```request
-curl https://test:abcd@paheko.monasso.tld/api/web/bourse-28-septembre -X DELETE
+curl -u test:abcd https://paheko.monasso.tld/api/web/bourse-28-septembre -X DELETE
 ```
 
 ### GET web/{PAGE_URI}.html
 
-Renvoie uniquement le contenu de la page au format HTML.
+Contenu de la page web au format HTML
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
 | `PAGE_URI` | `string` | Adresse unique de la page. |
 
+Exemple de requête :
+
 ```request
-curl https://test:abcd@paheko.monasso.tld/api/web/bourse-28-septembre.html
+curl -u test:abcd https://paheko.monasso.tld/api/web/bourse-28-septembre.html
 ```
 
 ### GET web/{PAGE_URI}/children
 
-Renvoie la liste des pages et sous-catégories dans cette catégorie.
+Liste des pages et sous-catégories dans cette catégorie
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
 | `PAGE_URI` | `string` | Adresse unique de la page. |
 
+Exemple de requête :
+
 ```request
-curl https://test:abcd@paheko.monasso.tld/api/web/actualite/children
+curl -u test:abcd https://paheko.monasso.tld/api/web/actualite/children
 ```
+
+Exemple de réponse :
 
 ```response
 {
@@ -250,7 +306,7 @@ curl https://test:abcd@paheko.monasso.tld/api/web/actualite/children
 
 ### GET web/{PAGE_URI}/attachments
 
-Renvoie la liste des fichiers joints à la page.
+Liste des fichiers joints à la page
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
@@ -258,7 +314,7 @@ Renvoie la liste des fichiers joints à la page.
 
 ### GET web/{PAGE_URI}/{FILE_NAME}
 
-Renvoie le fichier joint à la page.
+Récupérer le fichier joint à la page
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
@@ -267,7 +323,7 @@ Renvoie le fichier joint à la page.
 
 ### DELETE web/{PAGE_URI}/{FILE_NAME}
 
-Supprime le fichier joint à la page.
+Supprime le fichier joint à la page
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
@@ -278,9 +334,13 @@ Supprime le fichier joint à la page.
 
 ### GET user/categories
 
+Liste des catégories de membres
+
 _(Depuis la version 1.4.0)_
 
-Renvoie la liste des catégories de membres, triée par nom, et incluant le nombre de membres de la catégorie (dans la clé `count`).
+La liste est triée par nom, et inclue le nombre de membres de la catégorie dans la clé `count`.
+
+Exemple de réponse :
 
 ```response
 {
@@ -302,26 +362,26 @@ Renvoie la liste des catégories de membres, triée par nom, et incluant le nomb
 
 ### GET user/category/{ID}.{FORMAT}
 
-_(Depuis la version 1.4.0)_
-
-Exporte la liste des membres d'une catégorie.
+Exporte la liste des membres d'une catégorie
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
 | `ID` | `int` | Identifiant unique de la catégorie. |
-| `FORMAT` | `string:enum(json, csv, ods, xlsx)` | Format de sortie. |
-
-### user/new (POST)
+| `FORMAT` | `string` | Format de sortie : `json`, `csv`, `ods` ou `xlsx` |
 
 _(Depuis la version 1.4.0)_
 
-Permet de créer un nouveau membre.
+### POST user/new
+
+Créer un nouveau membre
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
 | `id_category` | `int` | Identifiant de la catégorie. Si absent, la catégorie par défaut sera utilisée. |
 | `password` | `string` | Mot de passe du membre. |
 | `force_duplicate` | `bool` | Si `true` ou `1`, alors aucune erreur ne sera renvoyée si le nom du membre correspond à un membre déjà existant. |
+
+_(Depuis la version 1.4.0)_
 
 Attention, cette méthode comporte des restrictions :
 
@@ -335,13 +395,15 @@ Sera renvoyée la liste des infos de la fiche membre.
 
 Si un membre avec le même nom existe déjà (et que `force_duplicate` n'est pas utilisé), une erreur `409` sera renvoyée.
 
+Exemple de requête :
+
 ```request
 curl -F nom="Bla bla" -F id_category=3 -F password=abcdef123456 https://test:abcd@monpaheko.tld/api/user/new
 ```
 
-### user/{ID} (GET)
+### GET user/{ID}
 
-Renvoie les infos de la fiche d'un membre à partir de son ID.
+Informations de la fiche d'un membre
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
@@ -354,6 +416,8 @@ Plusieurs clés supplémentaires sont retournées, en plus des champs de la fich
 * `has_password`
 * `has_pgp_key`
 * `has_otp`
+
+Exemple de réponse :
 
 ```response
 {
@@ -384,7 +448,7 @@ Plusieurs clés supplémentaires sont retournées, en plus des champs de la fich
 
 ### DELETE user/{ID}
 
-Supprime un membre à partir de son ID.
+Supprime un membre
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
@@ -398,7 +462,7 @@ Note : il n'est pas possible de supprimer via l'API un membre appartenant à une
 
 ### POST user/{ID}
 
-Modifie les infos de la fiche d'un membre à partir de son ID.
+Modifie les infos de la fiche d'un membre
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
@@ -416,13 +480,15 @@ Notes :
 
 ### POST user/import
 
-Permet d'importer un fichier de tableur (CSV/XLSX/ODS) de la liste des membres.
+Importer un fichier de tableur de la liste des membres
+
+Formats de fichiers acceptés : CSV, ODS, XLSX.
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
-| `mode` | `string:enum(create, update, auto)` | Mode d'import du fichier. Voir ci-dessous pour les détails. _(Depuis la version 1.2.8)_ |
+| `mode` | `string` | Mode d'import du fichier. Voir ci-dessous pour les détails. _(Depuis la version 1.2.8)_ |
 | `skip_lines` | `int` | Nombre de lignes à ignorer. Défaut : `1`. |
-| `column[x]` | `string` | Correspondance entre la colonne numéro `x` (commence à zéro) et le champ de la fiche membre. |
+| `column` | `array` | Correspondance entre la colonne (clé, commence à zéro) et le champ de la fiche membre (valeur). |
 
 
 Cette route nécessite une clé d'API ayant les droits d'administration, car importer un fichier peut permettre de modifier l'identifiant de connexion d'un administrateur et donc potentiellement d'obtenir l'accès à l'interface d'administration.
@@ -433,8 +499,10 @@ Le paramètre `mode` permet d'utiliser une de ces options pour spécifier le mod
 * `create` : ne fait que créer de nouvelles fiches de membre, si le numéro de membre existe déjà une erreur sera produite
 * `update` : ne fait que mettre à jour les fiches de membre en utilisant le numéro de membre comme référence, si le numéro de membre n'existe pas une erreur sera produite
 
+Exemple de requête :
+
 ```request
-curl https://test:abcd@monpaheko.tld/api/user/import \
+curl -u test:abcd https://monpaheko.tld/api/user/import \
   -F mode=create \
   -F 'column[0]=nom_prenom' \
   -F 'column[1]=code_postal' \
@@ -463,21 +531,27 @@ Exemple pour modifier le nom du membre n°42 :
 ```
 echo 'numero,nom' > membres.csv
 echo '42,"Nouveau nom"' >> membres.csv
-curl https://test:abcd@monpaheko.tld/api/user/import -F file=@membres.csv
+curl -u test:abcd https://monpaheko.tld/api/user/import -F file=@membres.csv
 ```
 
 ### PUT user/import
 
-Permet d'importer un fichier de tableur (CSV/XLSX/ODS) de la liste des membres.
+Importer un fichier de tableur de la liste des membres
+
+Formats de fichiers acceptés : CSV, ODS, XLSX.
 
 Identique à la même méthode en `POST`, mais les paramètres sont passés dans l'URL, et le fichier en contenu de la requête.
 
+Exemple de requête :
+
 ```request
-curl https://test:abcd@monpaheko.tld/api/user/import?mode=create&column[0]=nom_prenom&skip_lines=0 \
+curl -u test:abcd https://monpaheko.tld/api/user/import?mode=create&column[0]=nom_prenom&skip_lines=0 \
   -T membres.csv
 ```
 
 ### POST user/import/preview
+
+Prévisualise un import de membres, sans modifier les membres
 
 Identique à `user/import`, mais l'import n'est pas enregistré. À la place l'API indique les modifications qui seraient apportées.
 
@@ -490,9 +564,13 @@ Renvoie un objet JSON comme ceci :
 
 Note : si `errors` n'est pas vide, alors il sera impossible d'importer le fichier avec `user/import`.
 
+Exemple de requête :
+
 ```request
-curl https://test:abcd@monpaheko.tld/api/user/import/preview -F mode=update -F file=@/tmp/membres.csv
+curl -u test:abcd https://monpaheko.tld/api/user/import/preview -F mode=update -F file=@/tmp/membres.csv
 ```
+
+Exemple de réponse :
 
 ```response
 {
@@ -525,13 +603,17 @@ curl https://test:abcd@monpaheko.tld/api/user/import/preview -F mode=update -F f
 
 ### PUT user/import/preview
 
-Idem quel la méthode en `POST` mais les paramètres sont passés dans l'URL et le fichier dans le corps de la requête.
+Prévisualise un import de membres, sans modifier les membres
+
+Idem quel la méthode en `POST` mais les paramètres doivent être passés dans l'URL, et le fichier dans le corps de la requête.
 
 ## Activités
 
 ### PUT services/subscriptions/import
 
-Permet d'importer les inscriptions des membres aux activités à partir d'un fichier CSV.
+Importer les inscriptions des membres aux activités
+
+Fichiers acceptés : CSV, XLSX, ODS.
 
 _(Depuis Paheko 1.3.2)_
 
@@ -554,7 +636,7 @@ Exemple :
 ```
 echo '"Numéro de membre","Activité","Tarif","Date d'inscription","Date d'expiration","Montant à régler","Payé ?"' > /tmp/inscriptions.csv
 echo '42,"Cours de théâtre","Tarif adulte","01/09/2023","01/07/2023","123,50","Non"' >> /tmp/inscriptions.csv
-curl https://test:abcd@monpaheko.tld/api/services/subscriptions/import -T /tmp/inscriptions.csv
+curl -u test:abcd https://monpaheko.tld/api/services/subscriptions/import -T /tmp/inscriptions.csv
 ```
 
 ## Erreurs
@@ -563,19 +645,23 @@ Paheko dispose d'un système dédié à la gestion des erreurs internes, compati
 
 ### POST errors/report
 
-Permet d'envoyer un rapport d'erreur (au format airbrake/errbit/Paheko), comme si c'était une erreur locale.
+Ajouter un rapport d'erreur au log
 
-Utile pour centraliser les erreurs de plusieurs instances.
+Cette route permet d'ajouter une erreur au log de l'instance. Utile pour centraliser les erreurs de plusieurs instances.
+
+Paheko utilise le format d'erreurs de [AirBrake](https://docs.airbrake.io/docs/devops-tools/api/#post-data-schema-v3) et errbit.
 
 ### GET errors/log
 
-Renvoie le log d'erreurs système, au format airbrake/errbit ([voir la doc AirBrake pour un exemple du format](https://airbrake.io/docs/api/#create-notice-v3))
+Log d'erreurs de l'instance
 
 ## Comptabilité
 
 ### GET accounting/years
 
-Renvoie la liste des exercices.
+Liste des exercices
+
+Exemple de réponse :
 
 ```response
 [
@@ -595,7 +681,9 @@ Renvoie la liste des exercices.
 
 ### GET accounting/charts
 
-Renvoie la liste des plans comptables.
+Liste des plans comptables
+
+Exemple de réponse :
 
 ```response
 [
@@ -611,11 +699,13 @@ Renvoie la liste des plans comptables.
 
 ### GET accounting/charts/{ID_CHART}/accounts
 
-Renvoie la liste des comptes pour le plan comptable indiqué.
+Liste des comptes pour le plan comptable indiqué
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
 | `ID_CHART` | `int` | ID du plan comptable. |
+
+Exemple de réponse :
 
 ```response
 [
@@ -636,7 +726,7 @@ Renvoie la liste des comptes pour le plan comptable indiqué.
 
 ### GET accounting/years/{ID_YEAR}/journal
 
-Renvoie le journal général des écritures de l'exercice indiqué. 
+Journal général des écritures de l'exercice indiqué
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
@@ -644,116 +734,255 @@ Renvoie le journal général des écritures de l'exercice indiqué.
 
 Note : il est possible d'utiliser `current` comme paramètre pour `{ID_YEAR}` pour désigner l'exercice ouvert en cours. S'il y a plusieurs exercices ouverts, alors celui qui est le plus proche de la date actuelle sera utilisé.
 
-### GET accounting/years/{ID_YEAR}/export/{TYPE}.{FORMAT} (GET)
+### GET accounting/years/{ID_YEAR}/export/{TYPE}.{FORMAT}
 
-Exporte l'exercice indiqué au format indiqué.
+Export d'un exercice
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
 | `ID_YEAR` | `int|string` | ID de l'exercice, ou `current`. |
-| `TYPE` | `string:enum(full, grouped, simple, fec)` | Type d'export. `simple` ne contient pas les écritures avancées. |
-| `FORMAT` | `string:enum(csv, ods, xlsx, json)` | Format d'export. |
+| `TYPE` | `string` | Type d'export : `full`, `grouped`, `simple` ou `fec`. `simple` ne contient pas les écritures avancées. |
+| `FORMAT` | `string` | Format d'export : `json`, `csv`, `ods` ou `xlsx` |
 
 _(Depuis la version 1.4.0)_
 
 ### GET accounting/years/{ID_YEAR}/journal/{CODE}
 
-Renvoie le journal des écritures d'un compte pour l'exercice indiqué.
+Journal des écritures d'un compte
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
 | `ID_YEAR` | `int|string` | ID de l'exercice, ou `current`. |
 | `CODE` | `int|string` | Code du compte. |
 
+Exemple de réponse :
+
+```response
+[
+    {
+        "id": 9297,
+        "id_line": 22401,
+        "date": "2022-02-08",
+        "debit": 0,
+        "credit": 850,
+        "change": 850,
+        "sum": 850,
+        "reference": "POS-SESSION-434",
+        "type": 0,
+        "label": "Session de caisse n\u00b0434",
+        "line_label": null,
+        "line_reference": null,
+        "id_project": null,
+        "project_code": null,
+        "files": 1,
+        "status": 0
+    },
+    …
+]
+```
+
 ### GET accounting/years/{ID_YEAR}/journal/={ID}
 
-Renvoie le journal des écritures d'un compte pour l'exercice indiqué.
+Journal des écritures d'un compte
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
 | `ID_YEAR` | `int|string` | ID de l'exercice, ou `current`. |
 | `ID` | `int` | ID du compte. |
 
-### accounting/transaction/{ID_TRANSACTION} (GET)
+### POST accounting/transaction
 
-Renvoie les détails de l'écriture indiquée.
+Créer une nouvelle écriture
 
-### accounting/transaction/{ID_TRANSACTION} (POST)
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `id_year` | `int` | Identifiant de l'exercice. |
+| `date` | `string` | Date au format `YYYY-MM-DD` ou `DD/MM/YYYY` |
+| `type` | `string` | Type d'écriture. |
+| `reference` | `string|null` | Numéro de pièce comptable |
+| `notes` | `string|null` | Remarques (texte multi ligne) |
+| `linked_transactions` | `array(int, …)|null` | Tableau des IDs des écritures à lier à l'écriture *(depuis 1.3.5)*
+| `linked_users` | `array(int, …)|null` | Tableau des IDs des membres à lier à l'écriture *(depuis 1.3.3)* |
+| `linked_subscriptions` | `array(int, …)|null` | Tableau des IDs des inscriptions à lier à l'écriture *(depuis 1.4.0)* |
 
-Modifie l'écriture indiquée. Voir plus bas le format attendu.
+#### Types d'écriture
 
-### accounting/transaction/{ID_TRANSACTION}/users (GET)
+| Type | Description |
+| :- | :- |
+| `expense` | Dépense |
+| `revenue` | Recette |
+| `transfer` | Virement |
+| `debt` | Dette |
+| `credit` | Créance |
+| `advanced` | Saisie avancée |
 
-Renvoie la liste des membres liés à une écriture.
+Les écritures avancées (multi-lignes) ont obligatoirement le type `advanced`. Les autres écritures sont appelées *"écritures simplifiées"* et ne peuvent comporter que deux lignes.
 
-### accounting/transaction/{ID_TRANSACTION}/users (POST)
+#### Paramètres des écritures simplifiées
 
-Met à jour la liste des membres liés à une écriture, en utilisant les ID de membres passés dans un tableau nommé `users`.
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `amount` | `string` | Montant de l'écriture, au format flottant (`53,34`) |
+| `credit` | `string` | Code du compte porté au crédit |
+| `debit` | `string` | Code du compte porté au débit |
+| `id_project` | `int|null` | ID du projet à affecter |
+| `payment_reference` | `int|null` | référence de paiement |
+
+#### Paramètres des écritures avancées
+
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `lines` | `array(object, …)` | un tableau dont chaque élément est un objet correspondant à une ligne de l'écriture. |
+
+Structure de l'objet représentant une ligne de l'écriture :
+
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `account` | `string` | Code du compte |
+| `id_account` | `int` | Identifiant du compte (ID). Peut être utilisé en alternative au code du compte. |
+| `credit` | `string` | Montant à inscrire au crédit (doit être zéro ou non renseigné si `debit` est renseigné, et vice-versa) |
+| `debit` | `string` | montant à inscrire au débit |
+| `label` | `string|null` | libellé de la ligne |
+| `reference` | `string|null` | référence de la ligne (aussi appelé référence du paiement pour les écritures simplifiées) |
+| `id_project` | `int|null` | ID du projet à affecter à cette ligne |
+
+Exemple de requête :
+
+```request
+curl -F 'id_year=12' \
+  -F 'label=Test' \
+  -F 'date=01/02/2022' \
+  -F 'type=expense' \
+  -F 'amount=42,45' \
+  -F 'debit=512A' \
+  -F 'credit=601'
+```
+
+### GET accounting/transaction/{ID_TRANSACTION}
+
+Détails de l'écriture
+
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `ID_TRANSACTION` | `int` | ID de l'écriture. |
+
+Exemple de réponse :
+
+```response
+{
+  "id": 9302,
+  "type": 0,
+  "status": 0,
+  "label": "Session de caisse n\u00b0439",
+  "notes": null,
+  "reference": "POS-SESSION-439",
+  "date": "2022-02-12",
+  "hash": null,
+  "prev_id": null,
+  "prev_hash": null,
+  "id_year": 12,
+  "id_creator": 5883,
+  "url": "http:\/\/dev.paheko.localhost\/admin\/acc\/transactions\/details.php?id=9302",
+  "lines": [
+    {
+      "id": 22421,
+      "id_transaction": 9302,
+      "id_account": 542,
+      "credit": 0,
+      "debit": 3000,
+      "reference": "CE342",
+      "label": null,
+      "reconciled": false,
+      "id_project": null,
+      "account_code": "5112",
+      "account_label": "Ch\u00e8ques \u00e0 encaisser",
+      "account_position": 3,
+      "project_name": null,
+      "account_selector": {
+        "542": "5112 \u2014 Ch\u00e8ques \u00e0 encaisser"
+      }
+    },
+    …
+  ]
+}
+```
+
+### POST accounting/transaction/{ID_TRANSACTION}
+
+Modifier l'écriture
+
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `ID_TRANSACTION` | `int` | ID de l'écriture. |
+
+Si l'écriture est verrouillée, ou dans un exercice clôturé, la modification sera impossible.
+
+Voir la route `POST accounting/transaction` (création d'une écriture) pour la liste des paramètres.
+
+### GET accounting/transaction/{ID_TRANSACTION}/users
+
+Liste des membres liés à une écriture
+
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `ID_TRANSACTION` | `int` | ID de l'écriture. |
+
+### POST accounting/transaction/{ID_TRANSACTION}/users
+
+Met à jour la liste des membres liés à une écriture
+
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `ID_TRANSACTION` | `int` | ID de l'écriture. |
+| `users` | `array(int, …)` | ID des membres. |
+
+Exemple de requête :
 
 ```
- curl -v "http://…/api/accounting/transaction/9337/users"  -F 'users[]=2'
+ curl -v "https://…/api/accounting/transaction/9337/users"  -F 'users[]=2'
 ```
 
-### accounting/transaction/{ID_TRANSACTION}/users (DELETE)
+### DELETE accounting/transaction/{ID_TRANSACTION}/users
 
-Efface la liste des membres liés à une écriture.
+Efface la liste des membres liés à une écriture
 
-### accounting/transaction/{ID_TRANSACTION}/subscriptions (GET)
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `ID_TRANSACTION` | `int` | ID de l'écriture. |
+
+### GET accounting/transaction/{ID_TRANSACTION}/subscriptions
+
+Liste des inscriptions (aux activités) liées à une écriture
+
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `ID_TRANSACTION` | `int` | ID de l'écriture. |
 
 _(Depuis la version 1.4.0)_
 
-Renvoie la liste des inscriptions (aux activités) liées à une écriture.
+### POST accounting/transaction/{ID_TRANSACTION}/subscriptions
 
-### accounting/transaction/{ID_TRANSACTION}/subscriptions (POST)
+Met à jour la liste des inscriptions liées à une écriture
 
-_(Depuis la version 1.4.0)_
-
-Met à jour la liste des inscriptions liées à une écriture, en utilisant les ID d'inscriptions passés dans un tableau nommé `subscriptions`.
-
-```
- curl -v "http://…/api/accounting/transaction/9337/subscriptions"  -F 'subscriptions[]=2'
-```
-
-### accounting/transaction/{ID_TRANSACTION}/subscriptions (DELETE)
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `ID_TRANSACTION` | `int` | ID de l'écriture. |
+| `subscriptions` | `array(int, …)` | ID des inscriptions. |
 
 _(Depuis la version 1.4.0)_
 
-Efface la liste des inscriptions liées à une écriture.
-
-### accounting/transaction (POST)
-
-Crée une nouvelle écriture, renvoie les détails si l'écriture a été créée. Voir plus bas le format attendu.
-
-#### Structure pour créer / modifier une écriture
-
-Les champs à spécifier pour créer ou modifier une écriture sont les suivants :
-
-* `id_year`
-* `date` (format YYYY-MM-DD)
-* `type` peut être un type d'écriture simplifié (2 lignes) : `EXPENSE` (dépense), `REVENUE` (recette), `TRANSFER` (virement), `DEBT` (dette), `CREDIT` (créance), ou `ADVANCED` pour une écriture multi-ligne
-* `amount` (uniquement pour les écritures simplifiées) : contient le montant de l'écriture
-* `credit` (uniquement pour les écritures simplifiées) : contient le numéro du compte porté au crédit
-* `debit` (uniquement pour les écritures simplifiées) : contient le numéro du compte porté au débit
-* `lines` (pour les écritures multi-lignes) : un tableau dont chaque ligne doit contenir :
-  * `account` (numéro du compte) ou `id_account` (ID unique du compte)
-  * `credit` : montant à inscrire au crédit (doit être zéro ou non renseigné si `debit` est renseigné, et vice-versa)
-  * `debit` : montant à inscrire au débit
-  * `label` (facultatif) : libellé de la ligne
-  * `reference` (facultatif) : référence de la ligne (aussi appelé référence du paiement pour les écritures simplifiées)
-  * `id_project` : ID unique du projet à affecter
-
-Champs optionnels :
-
-* `reference` : numéro de pièce comptable
-* `notes` : remarques (texte multi ligne)
-* `id_project` : ID unique du projet à affecter (pour les écritures simplifiées uniquement)
-* `payment_reference` (uniquement pour les écritures simplifiées) : référence de paiement
-* `linked_users` : Tableau des IDs des membres à lier à l'écriture *(depuis 1.3.3)*
-* `linked_transactions` : Tableau des IDs des écritures à lier à l'écriture *(depuis 1.3.5)*
-* `linked_subscriptions` : Tableau des IDs des inscriptions à lier à l'écriture *(depuis 1.4.0)*
-
-Exemple :
+Exemple de requête :
 
 ```
-curl -F 'id_year=12' -F 'label=Test' -F 'date=01/02/2022' -F 'type=EXPENSE' -F 'amount=42' -F 'debit=512A' -F 'credit=601' …
+ curl -v "https://…/api/accounting/transaction/9337/subscriptions"  -F 'subscriptions[]=2'
 ```
+
+### DELETE accounting/transaction/{ID_TRANSACTION}/subscriptions
+
+Efface la liste des inscriptions liées à une écriture
+
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `ID_TRANSACTION` | `int` | ID de l'écriture. |
+
+_(Depuis la version 1.4.0)_
