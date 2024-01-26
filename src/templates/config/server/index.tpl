@@ -68,7 +68,7 @@
 		<th>{$key}</th>
 		<td>
 			{if $value === true}<samp>TRUE</samp>
-			{elseif $value === false}<samp>TRUE</samp>
+			{elseif $value === false}<samp>FALSE</samp>
 			{elseif $value === null}<em><samp>NULL</samp></em>
 			{elseif is_array($value)}
 				<code><?=var_export($value)?></code>
