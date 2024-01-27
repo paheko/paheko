@@ -186,7 +186,7 @@ class Upgrade
 			}
 
 			if (version_compare($v, '1.3.0-alpha1', '>=') && version_compare($v, '1.3.0-rc5', '<')) {
-				require ROOT . '/include/migrations/1.3/1.3.0-rc5.php';
+				throw new UserException('Merci de faire la mise à jour vers la dernière version de la 1.3.0');
 			}
 
 			if (version_compare($v, '1.3.0-rc7', '<')) {
@@ -228,7 +228,7 @@ class Upgrade
 			}
 
 			if (version_compare($v, '1.4.0', '<')) {
-				require ROOT . '/include/migrations/1.3/1.4.0.php';
+				require ROOT . '/include/migrations/1.4/1.4.0.php';
 			}
 
 			Plugins::upgradeAllIfRequired();
