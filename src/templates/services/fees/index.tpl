@@ -5,7 +5,13 @@
 
 {if $list->count()}
 	{include file="common/dynamic_list_head.tpl"}
+			<?php $total = ['nb_users_ok' => 0, 'nb_users_expired' => 0, 'nb_users_unpaid' => 0]; ?>
 			{foreach from=$list->iterate() item="row"}
+				<?php
+				foreach ($total as $key => $v) {
+					$total[$key] += $row->$key;
+				}
+				?>
 				<tr>
 					<th><a href="details.php?id={$row.id}">{$row.label}</a></th>
 					<td>
@@ -30,6 +36,15 @@
 				</tr>
 			{/foreach}
 		</tbody>
+		<tfoot>
+			<tr>
+				<td colspan="2">Total</td>
+				<td class="num">{$total.nb_users_ok}</td>
+				<td class="num">{$total.nb_users_expired}</td>
+				<td class="num">{$total.nb_users_unpaid}</td>
+				<td></td>
+			</tr>
+		</tfoot>
 	</table>
 
 	{$list->getHTMLPagination()|raw}
