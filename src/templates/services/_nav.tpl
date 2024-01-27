@@ -2,7 +2,7 @@
 <nav class="tabs">
 	<aside>
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE) && $current != 'reminders'}
-			{linkbutton href="!services/user/add.php" label="Inscrire à une activité" shape="plus"}
+			{linkbutton href="!services/subscription/select.php" label="Inscrire à une activité" shape="plus"}
 		{elseif $current == 'reminders'}
 			{linkbutton href="!services/reminders/new.php" label="Nouveau rappel automatique" shape="plus"}
 		{/if}

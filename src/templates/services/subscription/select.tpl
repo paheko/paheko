@@ -4,7 +4,7 @@
 
 {form_errors}
 
-<form method="post" action="subscribe.php" data-focus="button">
+<form method="post" action="new.php" data-focus="button">
 
 	<fieldset>
 		<legend>Inscrire à une activité</legend>

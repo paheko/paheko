@@ -30,4 +30,4 @@ $form->runIf('save', function () use ($subscription) {
 
 $tpl->assign(compact('csrf_key'));
 
-$tpl->display('services/user/link.tpl');
+$tpl->display('services/subscription/link.tpl');

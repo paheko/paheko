@@ -6,7 +6,7 @@ use Paheko\Services\Services;
 use Paheko\Services\Subscriptions;
 use Paheko\Users\Users;
 
-require_once __DIR__ . '/../_inc.php';
+require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_READ);
 
@@ -26,7 +26,7 @@ $form->runIf($session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE
 
 	$su->paid = (bool)qg('paid');
 	$su->save();
-}, null, ADMIN_URL . 'services/user/?id=' . $user_id);
+}, null, '!users/subscriptions.php?id=' . $user_id);
 
 $only = (int)qg('only') ?: null;
 
@@ -43,4 +43,4 @@ $list->loadFromQueryString();
 $tpl->assign('services', Subscriptions::listDistinctForUser($user_id));
 $tpl->assign(compact('list', 'user_id', 'user_name', 'only', 'only_service', 'after'));
 
-$tpl->display('services/user/index.tpl');
+$tpl->display('users/subscriptions.tpl');

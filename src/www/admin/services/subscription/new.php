@@ -89,7 +89,7 @@ $form->runIf('save', function () use ($session, &$users, $copy_service, $copy_fe
 		$url = ADMIN_URL . 'services/details.php?id=' . $su->id_service;
 	}
 	else {
-		$url = ADMIN_URL . 'services/user/?id=' . $su->id_user;
+		$url = ADMIN_URL . 'users/subscriptions.php?id=' . $su->id_user;
 	}
 
 	Utils::redirect($url);
@@ -109,4 +109,4 @@ $subscription = null;
 $tpl->assign(compact('csrf_key', 'users', 'account_targets', 'subscription', 'allow_users_edit', 'copy_service', 'copy_fee', 'copy_only_paid'));
 $tpl->assign('projects', Projects::listAssoc());
 
-$tpl->display('services/user/subscribe.tpl');
+$tpl->display('services/subscription/new.tpl');

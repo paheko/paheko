@@ -24,4 +24,4 @@ $categories = Categories::listAssoc();
 
 $tpl->assign(compact('services', 'categories'));
 
-$tpl->display('services/user/add.tpl');
+$tpl->display('services/subscription/select.tpl');

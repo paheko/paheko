@@ -43,7 +43,7 @@ $can_action = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMI
 			<td class="money">{if null === $row.paid_amount}<em title="Aucune écriture n'est liée à cette inscription">—</em>{else}{$row.paid_amount|raw|money_currency}{/if}</td>
 			<td>{$row.date|date_short}</td>
 			<td class="actions">
-				{linkbutton shape="user" label="Toutes les activités de ce membre" href="!services/user/?id=%d"|args:$row.id_user}
+				{linkbutton shape="user" label="Toutes les activités de ce membre" href="!users/subscriptions.php?id=%d"|args:$row.id_user}
 				{linkbutton shape="alert" label="Rappels envoyés" href="!services/reminders/user.php?id=%d"|args:$row.id_user}
 			</td>
 		</tr>

@@ -36,7 +36,7 @@ $form->runIf(f('save') || f('save_and_add_payment'), function () use ($su, $sess
 		$su->paid = (bool) f('paid');
 		$su->save();
 	}
-}, $csrf_key, '!services/user/?id=' . $su->id_user);
+}, $csrf_key, '!users/subscriptions.php?id=' . $su->id_user);
 
 $t = new Transaction;
 $t->type = $t::TYPE_REVENUE;
@@ -48,4 +48,4 @@ $tpl->assign('projects', Projects::listAssoc());
 
 $tpl->assign(compact('csrf_key', 'account_targets', 'user_name', 'su', 'fee'));
 
-$tpl->display('services/user/payment.tpl');
+$tpl->display('services/subscription/payment.tpl');

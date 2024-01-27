@@ -26,8 +26,8 @@ $form->runIf('save', function () use ($subscription) {
 	$subscription->importForm(['paid' => (bool)f('paid')]);
 	$subscription->updateExpectedAmount();
 	$subscription->save();
-}, $csrf_key, ADMIN_URL . 'services/user/?id=' . $subscription->id_user);
+}, $csrf_key, ADMIN_URL . 'users/subscriptions.php?id=' . $subscription->id_user);
 
 $tpl->assign(compact('csrf_key', 'subscription'));
 
-$tpl->display('services/user/edit.tpl');
+$tpl->display('services/subscription/edit.tpl');
