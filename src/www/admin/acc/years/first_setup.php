@@ -34,7 +34,6 @@ elseif ($default_chart) {
 $new_dates = Years::getNewYearDates();
 $year->start_date = $new_dates[0];
 $year->end_date = $new_dates[1];
-$year->label = sprintf('Exercice %s', $year->label_years());
 
 $new_accounts = f('accounts');
 
@@ -60,6 +59,7 @@ $form->runIf('save', function () use ($year, $new_accounts, $appropriation_accou
 
 	$db->begin();
 	$year->importForm();
+	$year->label = sprintf('Exercice %s', $year->label_years());
 	$year->save();
 
 	foreach ($new_accounts as $row) {

@@ -250,7 +250,7 @@ class Users
 			}
 
 			if ($config->type == 'file') {
-				$columns[$key]['select'] = sprintf('(SELECT GROUP_CONCAT(f.path, \';\')
+				$columns[$key]['select'] = sprintf('(SELECT json_group_array(f.path)
 					FROM users_files uf
 					INNER JOIN files f ON f.id = uf.id_file AND f.trash IS NULL
 					WHERE uf.id_user = u.id AND uf.field = %s)',

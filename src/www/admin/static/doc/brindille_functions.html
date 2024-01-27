@@ -248,11 +248,6 @@
 <td style="text-align: left;">Modifie le code HTTP renvoyé. <a href="https://fr.wikipedia.org/wiki/Liste_des_codes_HTTP" rel="noreferrer noopener external" target="_blank">Liste des codes HTTP</a></td>
 </tr>
 <tr>
-<td style="text-align: left;"><code>redirect</code></td>
-<td style="text-align: left;"><em>optionnel</em></td>
-<td style="text-align: left;">Rediriger vers l'adresse URL indiquée en valeur.</td>
-</tr>
-<tr>
 <td style="text-align: left;"><code>type</code></td>
 <td style="text-align: left;"><em>optionnel</em></td>
 <td style="text-align: left;">Modifie le type MIME renvoyé</td>
@@ -265,7 +260,7 @@
 <tr>
 <td style="text-align: left;"><code>inline</code></td>
 <td style="text-align: left;"><em>optionnel</em></td>
-<td style="text-align: left;">Force la page à être affichée, et peut ensuite être téléchargée sous le nom indiqué (utile pour la généraion de PDF : permet d'afficher le PDF dans le navigateur avant de le télécharger).</td>
+<td style="text-align: left;">Force la page à être affichée, et peut ensuite être téléchargée sous le nom indiqué (utile pour la génération de PDF : permet d'afficher le PDF dans le navigateur avant de le télécharger).</td>
 </tr>
 </tbody>
 </table>
@@ -491,9 +486,9 @@
 &lt;p&gt;&lt;input type="submit" name="send" value="Envoyer !" /&gt;&lt;/p&gt;
 &lt;/form&gt;</code></pre>
 <h2 id="redirect">redirect</h2>
-<p>Redirige vers une nouvelle page.</p>
+<p>Redirige vers une nouvelle page immédiatement. Le code situé après cette fonction ne sera pas exécuté. </p>
 <p>Avec le paramètre <code>force</code>, si la page actuelle est ouverte dans une fenêtre modale (grâce à la cible <code>_dialog</code>), alors la fenêtre modale est fermée, et la redirection se passe dans la page parente.</p>
-<p>Avec le paramètre <code>to</code>, si la page actuelle est ouverte dans une fenêtre modal (grâce à la cible <code>_dialog</code>), alors la fenêtre modale est fermée, et  la page parente est rechargée. Si la page n'est pas ouvertre dans dans une fenêtre modale, la redirection est effectuée.</p>
+<p>Avec le paramètre <code>to</code>, si la page actuelle est ouverte dans une fenêtre modal (grâce à la cible <code>_dialog</code>), alors la fenêtre modale est fermée, et  la page parente est rechargée. Si la page n'est pas ouverte dans dans une fenêtre modale, la redirection est effectuée.</p>
 <p>Seules les adresses internes sont acceptées, il n'est pas possible de rediriger vers une adresse extérieure.</p>
 <table>
 <thead>
@@ -514,9 +509,14 @@
 <td style="text-align: left;">optionnel</td>
 <td style="text-align: left;">Adresse de redirection si pas dans une fenêtre modale</td>
 </tr>
+<tr>
+<td style="text-align: left;"><code>permanent</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">(booléen) Indiquer <code>TRUE</code> à ce paramètre pour indiquer une redirection permanente (code HTTP 301).</td>
+</tr>
 </tbody>
 </table>
-<p>Si <code>to=null</code> est utilisé, alors la fenêtre modale sera fermée. Ou, si la page n'est pas dans une fenêtre modale, la page courante sera rechargée.</p>
+<p>Si <code>to=null</code> est utilisé (ou aucun paramètre n'est passé), alors la fenêtre modale sera fermée. Ou, si la page n'est pas dans une fenêtre modale, la page courante sera simplement rechargée.</p>
 <h2 id="api">api</h2>
 <p>Permet d'appeler l'API de Paheko, que ça soit sur l'instance locale, en cours, ou une autre instance externe.</p>
 <p>Voir la <a href="https://paheko.cloud/api" rel="noreferrer noopener external" target="_blank">documentation de l'API</a> pour la liste des fonctions disponibles.</p>

@@ -12,6 +12,7 @@ use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
 use Paheko\Entities\Users\DynamicField;
 use Paheko\Entities\Users\User;
+use Paheko\Files\Files;
 
 use KD2\Form;
 
@@ -839,39 +840,44 @@ class CommonFunctions
 				return '';
 			}
 
-			$files = explode(';', $v);
+			$files = json_decode($v, true);
+
+			if (empty($files)) {
+				return '';
+			}
+
 			$count = 0;
 			$label = '';
+			$thumb = '';
 
 			foreach ($files as $path) {
-				if (!preg_match('!\.(?:png|jpe?g|gif|webp)$!i', $path)) {
+				$file = Files::get($path);
+
+				if (!$file->hasThumbnail()) {
 					$count++;
 					continue;
 				}
-				elseif ($label !== '') {
+				elseif ($thumb !== '') {
 					$count++;
 					continue;
 				}
 
-				$url = BASE_URL . $path . '?150px';
-				$label .= sprintf(
-					'<img src="%s" alt="%s" />',
-					htmlspecialchars($url),
+				$thumb = sprintf(
+					'<a href="%s"><img src="%s" alt="%s" /></a>',
+					Utils::getLocalURL($params['files_href']),
+					htmlspecialchars($file->thumb_url()),
 					htmlspecialchars($field->label)
 				);
 			}
 
 			if ($count) {
-				$label .= ($count != count($files) ? '+' : '')
+				$label = ($count != count($files) ? '+' : '')
 					. ($count == 1 ? '1 fichier' : $count . ' fichiers');
+				$label = '<figcaption><a href="' . Utils::getLocalURL($params['files_href']) . '">' . $label . '</a></figcaption>';
 			}
 
-			if ($label !== '') {
-				if (isset($params['files_href'])) {
-					$label = sprintf('<a href="%s">%s</a>', Utils::getLocalURL($params['files_href']), $label);
-				}
-
-				$out = '<div class="files-list"><figure>' . $label . '</label></div>';
+			if ($thumb !== '') {
+				$out = '<div class="files-list"><figure>' . $thumb . $label . '</figure></div>';
 			}
 		}
 		elseif ($field->type === 'password') {

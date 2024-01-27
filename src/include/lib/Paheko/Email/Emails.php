@@ -660,7 +660,7 @@ class Emails
 		}
 
 		$email->hasFailed($return);
-		Plugins::fire('email.bounce.save.before', false, compact('email', 'return', 'type', 'message'));
+		Plugins::fire('email.bounce.save.before', false, compact('email', 'address', 'return', 'type', 'message'));
 		$email->save();
 
 		return $return;
