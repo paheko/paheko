@@ -1,5 +1,6 @@
 ---
---- Main stuff
+--- This file contains the schema used when doing a fresh install
+--- Any schema change must be done in this file and the migration as well!
 ---
 
 CREATE TABLE IF NOT EXISTS config (
