@@ -128,6 +128,13 @@ class Sections
 
 	static public function formStart(string $name, string $params_str, UserTemplate $tpl, int $line): string
 	{
+		// Nested #form sections are not allowed
+		foreach ($tpl->_stack as $section) {
+			if ($section[0] === $tpl::SECTION && $section[1] === 'form') {
+				throw new Brindille_Exception('Cannot use a #form section inside a #form section');
+			}
+		}
+
 		$tpl->_push($tpl::SECTION, 'form');
 
 		$params = $tpl->_parseArguments($params_str, $line);
@@ -146,6 +153,8 @@ class Sections
 
 		return sprintf('<?php if (!empty(%s)): ', $if)
 			. 'try { '
+			. '$fail = false; ' // We define this for committing changes later if everything is fine
+			. '\Paheko\DB::getInstance()->begin(); '
 			. '$hash = \Paheko\UserTemplate\Functions::_getFormKey(); '
 			. 'if (!\KD2\Form::tokenCheck($hash)) { '
 			. 'throw new \Paheko\ValidationException(\'Une erreur est survenue, merci de bien vouloir renvoyer le formulaire.\'); '
@@ -162,8 +171,10 @@ class Sections
 	static public function formElse(string $name, string $params_str, UserTemplate $tpl, int $line): string
 	{
 		return '<?php '
-			. 'endforeach; } catch (\Paheko\UserException $e) { '
+			. 'endforeach; '
+			. '} catch (\Paheko\UserException $e) { '
 			. '$this->assign(\'form_errors\', [$e->getMessage()]); '
+			. '$fail = true; '
 			. '?>';
 	}
 
@@ -182,7 +193,16 @@ class Sections
 			$out .= self::formElse($name, $params_str, $tpl, $line);
 		}
 
-		$out .= '<?php } endif; ?>';
+		$out .= '<?php '
+			. '} catch (\Throwable $e) { '
+			. '$fail = true; '
+			. 'throw $e; '
+			. '} finally { '
+			. '$db = \Paheko\DB::getInstance(); '
+			. 'if ($fail) { $db->rollback(); } ' // Rollback DB if something failed
+			. 'else { $db->commit(); } ' // Commit changes if no exception was raised
+			. '} unset($db, $fail); ' // Close finally block
+			. 'endif; ?>';
 
 		$out = str_replace(' ?><?php ', ' ', $out);
 

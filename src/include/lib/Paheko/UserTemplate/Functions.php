@@ -49,7 +49,6 @@ class Functions
 		'button',
 		'delete_form',
 		'form_errors',
-		'redirect',
 		'admin_files',
 		'delete_file',
 		'api',
@@ -60,6 +59,7 @@ class Functions
 		':break' => [self::class, 'compile_break'],
 		':continue' => [self::class, 'compile_continue'],
 		':return' => [self::class, 'compile_return'],
+		':redirect' => [self::class, 'compile_redirect'],
 	];
 
 	/**
@@ -85,7 +85,7 @@ class Functions
 	/**
 	 * Compile function to continue inside a loop
 	 */
-	static public function compile_continue(string $name, string $params, UserTemplate $tpl, int $line)
+	static public function compile_continue(string $name, string $params, UserTemplate $tpl, int $line): string
 	{
 		$in_loop = 0;
 		foreach ($tpl->_stack as $element) {
@@ -103,9 +103,34 @@ class Functions
 		return sprintf('<?php continue(%d); ?>', $i);
 	}
 
-	static public function compile_return(string $name, string $params, UserTemplate $tpl, int $line)
+	static public function compile_return(string $name, string $params, UserTemplate $tpl, int $line): string
 	{
 		return '<?php return; ?>';
+	}
+
+	static public function compile_redirect(string $name, string $params, UserTemplate $tpl, int $line): string
+	{
+		$params = $tpl->_parseArguments($params, $line);
+		$params = $tpl->_exportArguments($params, true);
+
+		return sprintf('<?php return %s::redirect(%s); ?>', self::class, $params);
+	}
+
+	static public function redirect(array $params): void
+	{
+		if (!empty($params['permanent']) && !isset($_GET['_dialog'])) {
+			http_response_code(301);
+		}
+
+		if (isset($params['force'])) {
+			Utils::redirectDialog($params['force'], false);
+		}
+		elseif (isset($_GET['_dialog'])) {
+			Utils::reloadParentFrame(null, false);
+		}
+		else {
+			Utils::redirectDialog($params['to'] ?? null, false);
+		}
 	}
 
 	static public function admin_header(array $params): string
@@ -632,12 +657,7 @@ class Functions
 		}
 
 		if (isset($params['redirect'])) {
-
-			if (isset($params['code'])) {
-				http_response_code((int)$params['code']);
-			}
-
-			Utils::redirectDialog($params['redirect']);
+			throw new Brindille_Exception('Le paramètre "redirect" a été supprimé');
 		}
 
 		if (isset($params['code'])) {
@@ -698,19 +718,6 @@ class Functions
 		}
 
 		return '';
-	}
-
-	static public function redirect(array $params): void
-	{
-		if (isset($params['force'])) {
-			Utils::redirectDialog($params['force']);
-		}
-		elseif (isset($_GET['_dialog'])) {
-			Utils::reloadParentFrame();
-		}
-		else {
-			Utils::redirectDialog($params['to'] ?? null);
-		}
 	}
 
 	static public function admin_files(array $params, UserTemplate $ut): string
