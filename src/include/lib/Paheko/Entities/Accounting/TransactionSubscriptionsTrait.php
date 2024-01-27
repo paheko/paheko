@@ -33,14 +33,15 @@ trait TransactionSubscriptionsTrait
 		$db->delete('acc_transactions_users', 'id_transaction = ? AND id_subscription = ?', $this->id(), $id);
 	}
 
-	public function listSubscriptionLinks(): array
+	public function listLinkedSubscriptions(): array
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
 		$identity_column = DynamicFields::getNameFieldsSQL('u');
 		$number_column = DynamicFields::getNumberFieldSQL('u');
-		$sql = sprintf('SELECT sub.*, %s AS user_identity, %s AS user_number, l.id_subscription
+		$sql = sprintf('SELECT sub.*, s.label, %s AS user_identity, %s AS user_number, l.id_subscription
 			FROM users u
 			INNER JOIN services_subscriptions sub ON sub.id_user = u.id
+			INNER JOIN services s ON s.id = sub.id_service
 			INNER JOIN acc_transactions_users l ON l.id_subscription = sub.id
 			WHERE l.id_transaction = ?;', $identity_column, $number_column);
 		return $db->get($sql, $this->id());

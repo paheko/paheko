@@ -96,7 +96,7 @@ trait Accounting
 					return self::SUCCESS;
 				}
 				elseif ($this->method === 'GET') {
-					return $transaction->listSubscriptionLinks();
+					return $transaction->listLinkedSubscriptions();
 				}
 				else {
 					throw new APIException('Wrong request method', 405);

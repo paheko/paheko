@@ -33,7 +33,7 @@ $variables = compact('csrf_key', 'transaction') + [
 	'file_parent'          => $transaction->getAttachementsDirectory(),
 	'linked_users'         => $transaction->listLinkedUsers(),
 	'linked_transactions'  => $transaction->listLinkedTransactions(),
-	'linked_subscriptions' => $transaction->listSubscriptionLinks(),
+	'linked_subscriptions' => $transaction->listLinkedSubscriptions(),
 ];
 
 $tpl->assign($variables);
