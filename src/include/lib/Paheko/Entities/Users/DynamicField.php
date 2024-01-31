@@ -354,6 +354,11 @@ class DynamicField extends Entity
 	{
 		$db = DB::getInstance();
 		$type = $db->firstColumn(sprintf('SELECT TYPEOF(%s) FROM users_view WHERE %1$s IS NOT NULL LIMIT 1;', $db->quoteIdentifier($this->name)));
+
+		if (!$type) {
+			return null;
+		}
+
 		return strtolower($type) ?: null;
 	}
 
