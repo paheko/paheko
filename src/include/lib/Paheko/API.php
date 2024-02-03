@@ -832,16 +832,16 @@ class API
 			$params = $_GET;
 		}
 
-		$api = new self($method, $uri, $params);
-		$api->is_http_client = true;
-
-		if ($method === 'PUT') {
-			$api->setFilePointer(fopen('php://input', 'rb'));
-		}
-
 		http_response_code(200);
 
 		try {
+			$api = new self($method, $uri, $params);
+			$api->is_http_client = true;
+
+			if ($method === 'PUT') {
+				$api->setFilePointer(fopen('php://input', 'rb'));
+			}
+
 			$api->checkAuth();
 
 			try {
