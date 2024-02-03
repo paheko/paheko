@@ -99,6 +99,10 @@ abstract class AbstractRender
 
 	public function resolveAttachment(string $uri): ?File
 	{
+		if (!isset($this->uri)) {
+			return null;
+		}
+
 		$prefix = $this->uri;
 		$pos = strpos($uri, '/');
 
