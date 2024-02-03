@@ -627,7 +627,11 @@ class Functions
 
 		$include->assignArray(array_merge($ut->getAllVariables(), $params));
 
-		if (!empty($params['capture']) && preg_match('/^[a-z0-9_]+$/', $params['capture'])) {
+		if (!empty($params['capture'])) {
+			if (!preg_match($ut::RE_VALID_VARIABLE_NAME, $params['capture'])) {
+				throw new Brindille_Exception('Nom de variable invalide : ' . $params['capture']);
+			}
+
 			$ut::__assign([$params['capture'] => $include->fetch()], $ut, $line);
 		}
 		else {
