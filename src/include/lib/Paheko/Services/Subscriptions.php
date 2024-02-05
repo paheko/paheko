@@ -159,11 +159,21 @@ class Subscriptions
 					}
 				}
 
-				$su = new Subscription;
-				$su->set('id_user', $id_user);
-				$su->set('id_service', $id_service);
-				$su->set('id_fee', $id_fee);
-				unset($row->fee, $row->service, $row->$number_field);
+				if (!empty($row->id)) {
+					$su = self::get((int)$row->id);
+
+					if (!$su) {
+						throw new UserException(sprintf('L\'inscription numéro %d n\'existe pas', $row->id));
+					}
+				}
+				else {
+					$su = new Subscription;
+					$su->set('id_user', $id_user);
+					$su->set('id_service', $id_service);
+					$su->set('id_fee', $id_fee);
+				}
+
+				unset($row->fee, $row->service, $row->$number_field, $row->id_service, $row->id_fee, $row->id);
 
 				if (empty($row->paid) || strtolower(trim($row->paid)) === 'non') {
 					$row->paid = false;
@@ -172,7 +182,7 @@ class Subscriptions
 					$row->paid = true;
 				}
 
-				$su->import((array)$row);
+				$su->importForm((array)$row);
 
 				yield $i => $su;
 			}
@@ -204,11 +214,94 @@ class Subscriptions
 		$db->commit();
 	}
 
+	static public function getList(): DynamicList
+	{
+		$number_field = DynamicFields::getNumberFieldSQL('u');
+		$name_field = DynamicFields::getNameFieldsSQL('u');
+
+		$columns = [
+			'number' => [
+				'label' => 'Numéro de membre',
+				'select' => $number_field,
+				'export' => true,
+			],
+			'name' => [
+				'label' => 'Nom du membre',
+				'select' => $name_field,
+			],
+			'id' => [
+				'label' => 'Numéro d\'inscription',
+				'select' => 'sub.id',
+				'export' => true,
+			],
+			'service' => [
+				'label' => 'Activité',
+				'select' => 's.label',
+			],
+			'fee' => [
+				'label' => 'Tarif',
+				'select' => 'sf.label',
+			],
+			'paid' => [
+				'label' => 'Payé',
+				'select' => 'sub.paid',
+			],
+			'expected_amount' => [
+				'label' => 'Montant de l\'inscription',
+				'select' => 'sub.expected_amount',
+				'export' => true,
+			],
+			'paid_amount' => [
+				'label' => 'Montant réglé',
+				'select' => 'SUM(tl.credit)',
+				'export' => true,
+			],
+			'left_amount' => [
+				'label' => 'Reste à régler',
+				'select' => 'CASE WHEN sub.paid = 1 AND COUNT(tl.debit) = 0 THEN NULL
+					ELSE MAX(0, expected_amount - IFNULL(SUM(tl.debit), 0)) END',
+			],
+			'date' => [
+				'label' => 'Date d\'inscription',
+				'select' => 'sub.date',
+			],
+			'expiry_date' => [
+				'label' => 'Date d\'expiration',
+				'select' => 'sub.expiry_date',
+			],
+			'id_user' => ['select' => 'sub.id_user'],
+			'id_fee' => ['select' => 'sub.id_fee'],
+			'id_service' => ['select' => 'sub.id_service'],
+		];
+
+		$tables = 'services_subscriptions sub
+			INNER JOIN services s ON s.id = sub.id_service
+			INNER JOIN users u ON u.id = sub.id_user
+			LEFT JOIN services_fees sf ON sf.id = sub.id_fee
+			LEFT JOIN acc_transactions_users tu ON tu.id_subscription = sub.id
+			LEFT JOIN acc_transactions_lines tl ON tl.id_transaction = tu.id_transaction';
+
+		$list = new DynamicList($columns, $tables);
+		$list->orderBy('id', true);
+		$list->groupBy('sub.id');
+		$list->setTitle('Historique des inscriptions');
+		$list->setModifier(function (&$row) {
+			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
+			$row->expiry_date = \DateTime::createFromFormat('!Y-m-d', $row->expiry_date);
+		});
+		$list->setExportCallback(function (&$row) {
+			$row->paid = $row->paid ? 'Oui' : '';
+		});
+
+		return $list;
+	}
+
 	static public function listImportColumns(): array
 	{
 		$number_field = DynamicFields::getNumberField();
 
 		return [
+			'id'              => 'Numéro d\'inscription',
 			$number_field     => 'Numéro de membre',
 			'service'         => 'Activité',
 			'fee'             => 'Tarif',

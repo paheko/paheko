@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Importer des inscriptions" current="users"}
+{include file="_head.tpl" title="Importer des inscriptions" current="users/services"}
 
 {include file="services/_nav.tpl" current="import" service=null fee=null}
 
@@ -32,7 +32,7 @@
 		<legend>Importer depuis un fichier</legend>
 		<dl>
 			{input type="file" name="file" label="Fichier à importer" required=true accept="csv"}
-			{include file="common/_csv_help.tpl" csv=$csv}
+			{include file="common/_csv_help.tpl" csv=$csv more_text="Si le numéro d'inscription est fourni, l'inscription correspondante sera mise à jour."}
 		</dl>
 	</fieldset>
 

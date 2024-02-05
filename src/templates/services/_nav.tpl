@@ -1,17 +1,22 @@
 {if !$dialog}
 <nav class="tabs">
 	<aside>
-		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE) && $current != 'reminders'}
-			{linkbutton href="!services/subscription/select.php" label="Inscrire à une activité" shape="plus"}
-		{elseif $current == 'reminders'}
+		{if $current === 'history' || $current === 'import'}
+			{linkbutton href="!services/import.php" label="Import" shape="import"}
+			{if $current === 'history'}
+				{exportmenu right=true}
+			{/if}
+		{elseif $current === 'reminders'}
 			{linkbutton href="!services/reminders/new.php" label="Nouveau rappel automatique" shape="plus"}
+		{elseif $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
+			{linkbutton href="!services/subscription/select.php" label="Inscrire à une activité" shape="plus"}
 		{/if}
 	</aside>
 
 	<ul>
 		<li{if $current == 'index'} class="current"{/if}><a href="{$admin_url}services/">Activités et cotisations</a></li>
+		<li{if $current == 'history'} class="current"{/if}><a href="{$admin_url}services/history.php">Inscriptions</a></li>
 		{if !DISABLE_EMAIL && $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
-			<li{if $current == 'import'} class="current"{/if}><a href="{$admin_url}services/import.php">Import</a></li>
 			<li{if $current == 'reminders'} class="current"{/if}><a href="{$admin_url}services/reminders/">Rappels automatiques</a></li>
 		{/if}
 	</ul>
