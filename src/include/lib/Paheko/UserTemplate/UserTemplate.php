@@ -302,7 +302,12 @@ class UserTemplate extends \KD2\Brindille
 
 		try {
 			if (file_exists($compiled_path) && filemtime($compiled_path) >= $this->modified) {
-				require $compiled_path;
+				$return = include($compiled_path);
+
+				if ($return === 'STOP') {
+					exit;
+				}
+
 				return;
 			}
 
@@ -321,7 +326,7 @@ class UserTemplate extends \KD2\Brindille
 			$code = $this->compile($source);
 			file_put_contents($tmp_path, $code);
 
-			require $tmp_path;
+			$return = include($tmp_path);
 
 			@rename($tmp_path, $compiled_path);
 		}
@@ -351,6 +356,10 @@ class UserTemplate extends \KD2\Brindille
 		}
 		finally {
 			@unlink($tmp_path);
+		}
+
+		if ($return === 'STOP') {
+			exit;
 		}
 	}
 

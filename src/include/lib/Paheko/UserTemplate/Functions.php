@@ -116,7 +116,7 @@ class Functions
 		return sprintf('<?php return %s::redirect(%s); ?>', self::class, $params);
 	}
 
-	static public function redirect(array $params): void
+	static public function redirect(array $params): string
 	{
 		if (!empty($params['permanent']) && !isset($_GET['_dialog'])) {
 			http_response_code(301);
@@ -131,6 +131,8 @@ class Functions
 		else {
 			Utils::redirectDialog($params['to'] ?? null, false);
 		}
+
+		return 'STOP';
 	}
 
 	static public function admin_header(array $params): string
