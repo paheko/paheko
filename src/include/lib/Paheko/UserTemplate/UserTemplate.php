@@ -7,6 +7,7 @@ use KD2\Brindille_Exception;
 use KD2\Translate;
 
 use Paheko\Config;
+use Paheko\DB;
 use Paheko\Plugins;
 use Paheko\Utils;
 use Paheko\UserException;
@@ -644,12 +645,19 @@ class UserTemplate extends \KD2\Brindille
 			return;
 		}
 
+		$table_name = 'module_data_' . $module->name;
+
+		if (!DB::getInstance()->test('sqlite_master', 'type = \'table\' AND name = ?', $table_name)) {
+			$table_name = null;
+		}
+
 		$this->module = $module;
 		$this->assign('module', array_merge($module->asArray(false), [
 			'config'       => json_decode(json_encode($module->config), true),
 			'url'          => $module->url(),
 			'public_url'   => $module->public_url(),
 			'storage_root' => $module->storage_root(),
+			'table'        => $table_name,
 		]));
 	}
 }
