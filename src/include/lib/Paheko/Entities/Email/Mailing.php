@@ -319,9 +319,9 @@ class Mailing extends Entity
 		return Render::render($render, null, $body);
 	}
 
-	public function getHTMLPreview(string $address = null, bool $append_footer = false): string
+	public function getHTMLPreview(int $recipient = null, bool $append_footer = false): string
 	{
-		$html = $this->getPreview($address);
+		$html = $this->getPreview($recipient);
 		$tpl = new UserTemplate('web/email.html');
 		$tpl->assignArray(compact('html'), null, false);
 
