@@ -25,9 +25,11 @@ $form->runIf($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN
 
 $accounting_enabled = false;
 $years = Years::listOpen();
+$list = $fees->listWithStats();
+$list->loadFromQueryString();
 
 $tpl->assign(compact('service', 'accounting_enabled', 'years'));
-$tpl->assign('list', $fees->listWithStats());
+$tpl->assign('list', $list);
 $tpl->assign('projects', Projects::listAssoc());
 
 $tpl->display('services/fees/index.tpl');
