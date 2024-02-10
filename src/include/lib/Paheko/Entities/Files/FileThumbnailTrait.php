@@ -244,6 +244,14 @@ trait FileThumbnailTrait
 			return $destination;
 		}
 
+		// Don't overload servers with large documents, this is useless
+		if (($command === 'collabora' || $command === 'unoconvert') && $this->size >= 15*1024*1024) {
+			return null;
+		}
+		elseif ($command === 'mupdf' && $this->size >= 50*1024*1024) {
+			return null;
+		}
+
 		$local_path = $this->getLocalFilePath();
 		$tmpfile = null;
 
