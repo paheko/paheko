@@ -346,8 +346,8 @@ class Functions
 
 		if (isset($params['html'])) {
 			$c = Security::createCaptcha($secret, $params['lang'] ?? 'fr');
-			return sprintf('<label for="f_c_42">Merci d\'écrire <strong><q>&nbsp;%s&nbsp;</q></strong> en chiffres&nbsp;:</label>
-				<input type="text" name="f_c_42" id="f_c_42" placeholder="Exemple : 1234" />
+			return sprintf('<label for="f_c_42">Merci d\'écrire <strong><q>&nbsp;%s&nbsp;</q></strong> en chiffres pour montrer que vous êtes humain&nbsp;:</label>
+				<input name="f_c_42" id="f_c_42" placeholder="Ex : 1234" size="8" />
 				<input type="hidden" name="f_c_43" value="%s" />',
 				$c['spellout'], $c['hash']);
 		}
