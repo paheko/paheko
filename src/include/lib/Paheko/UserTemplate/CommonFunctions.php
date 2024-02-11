@@ -34,11 +34,12 @@ class CommonFunctions
 		'delete_form',
 		'edit_user_field',
 		'user_field',
+		'tag',
 	];
 
 	static public function input(array $params)
 	{
-		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit', 'copy', 'suffix', 'prefix_title', 'prefix_help', 'prefix_required'];
+		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit', 'copy', 'suffix', 'prefix_label', 'prefix_help', 'prefix_required'];
 
 		// Extract params and keep attributes separated
 		$attributes = array_diff_key($params, array_flip($params_list));
@@ -226,6 +227,22 @@ class CommonFunctions
 			$label = preg_replace_callback('!\[icon=([\w-]+)\]!', fn ($match) => self::icon(['shape' => $match[1]]), $label);
 		}
 
+		$prefix = '';
+
+		if (!empty($params['prefix_label'])) {
+			$prefix .= sprintf('<dt><label for="%s">%s</label>%s</dt>',
+				$attributes['id'],
+				htmlspecialchars($params['prefix_label']),
+				$required_label
+			);
+		}
+
+		if (!empty($params['prefix_help'])) {
+			$prefix .= sprintf('<dd class="help">%s</dd>',
+				htmlspecialchars($params['prefix_help'])
+			);
+		}
+
 		if ($type === 'radio-btn') {
 			if (!empty($attributes['disabled'])) {
 				$attributes['class'] = ($attributes['class'] ?? '') . ' disabled';
@@ -243,7 +260,7 @@ class CommonFunctions
 				isset($params['help']) ? '<p class="help">' . nl2br(htmlspecialchars($params['help'])) . '</p>' : ''
 			);
 
-			unset($help, $label);
+			return $prefix . $input;
 		}
 		elseif ($type === 'select') {
 			$input = sprintf('<select %s>', $attributes_string);
@@ -357,21 +374,7 @@ class CommonFunctions
 			return $input;
 		}
 
-		$out = '';
-
-		if (!empty($params['prefix_title'])) {
-			$out .= sprintf('<dt><label for="%s">%s</label>%s</dt>',
-				$attributes['id'],
-				htmlspecialchars($params['prefix_title']),
-				$required_label
-			);
-		}
-
-		if (!empty($params['prefix_help'])) {
-			$out .= sprintf('<dd class="help">%s</dd>',
-				htmlspecialchars($params['prefix_help'])
-			);
-		}
+		$out = $prefix;
 
 		$label = sprintf('<label for="%s">%s</label>', $attributes['id'], $label);
 
@@ -905,5 +908,10 @@ class CommonFunctions
 		}
 
 		return $out;
+	}
+
+	static public function tag(array $params): string
+	{
+		return sprintf('<span class="tag" style="--tag-color: %s;">%s</span>', htmlspecialchars($params['color'] ?? '#999'), htmlspecialchars($params['label'] ?? ''));
 	}
 }

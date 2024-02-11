@@ -22,7 +22,7 @@
 
 			{if !$reminder->exists()}
 				<?php $yes_before = ($reminder->not_before_date ?? null) === null; ?>
-				{input type="radio" name="yes_before" value=1 default=$yes_before prefix_title="Envoyer ce rappel…" prefix_required=true label="À tous les membres" help="Même si leur inscription a expiré il y a longtemps, sauf s'ils ont déjà reçu un rappel pour cette activité"}
+				{input type="radio" name="yes_before" value=1 default=$yes_before prefix_label="Envoyer ce rappel…" prefix_required=true label="À tous les membres" help="Même si leur inscription a expiré il y a longtemps, sauf s'ils ont déjà reçu un rappel pour cette activité"}
 				{input type="radio" name="yes_before" value=0 default=$yes_before label="Seulement aux membres dont l'inscription n'a pas encore expiré" help="Seuls les inscriptions expirant dans le futur seront concernées"}
 			{else}
 				<dt><strong>Restriction d'envoi</strong></dt>
