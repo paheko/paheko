@@ -140,8 +140,12 @@ class Sections
 		$params = $tpl->_parseArguments($params_str, $line);
 
 		if (isset($params['on'])
-			&& ($on = $tpl->getValueFromArgument($params['on']))
-			&& preg_match('/^[a-z0-9-]+$/i', $on)) {
+			&& ($on = $tpl->getValueFromArgument($params['on']))) {
+
+			if (!preg_match($tpl::RE_VALID_VARIABLE_NAME, $on)) {
+				throw new Brindille_Exception('Nom de variable invalide : ' . $on);
+			}
+
 			$if = sprintf('$_POST[%s]', var_export($on, true));
 		}
 		else {

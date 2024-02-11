@@ -116,7 +116,7 @@ class Functions
 		return sprintf('<?php return %s::redirect(%s); ?>', self::class, $params);
 	}
 
-	static public function redirect(array $params): void
+	static public function redirect(array $params): string
 	{
 		if (!empty($params['permanent']) && !isset($_GET['_dialog'])) {
 			http_response_code(301);
@@ -131,6 +131,8 @@ class Functions
 		else {
 			Utils::redirectDialog($params['to'] ?? null, false);
 		}
+
+		return 'STOP';
 	}
 
 	static public function admin_header(array $params): string
@@ -344,8 +346,8 @@ class Functions
 
 		if (isset($params['html'])) {
 			$c = Security::createCaptcha($secret, $params['lang'] ?? 'fr');
-			return sprintf('<label for="f_c_42">Merci d\'écrire <strong><q>&nbsp;%s&nbsp;</q></strong> en chiffres&nbsp;:</label>
-				<input type="text" name="f_c_42" id="f_c_42" placeholder="Exemple : 1234" />
+			return sprintf('<label for="f_c_42">Merci d\'écrire <strong><q>&nbsp;%s&nbsp;</q></strong> en chiffres pour montrer que vous êtes humain&nbsp;:</label>
+				<input name="f_c_42" id="f_c_42" placeholder="Ex : 1234" size="8" />
 				<input type="hidden" name="f_c_43" value="%s" />',
 				$c['spellout'], $c['hash']);
 		}
@@ -627,7 +629,11 @@ class Functions
 
 		$include->assignArray(array_merge($ut->getAllVariables(), $params));
 
-		if (!empty($params['capture']) && preg_match('/^[a-z0-9_]+$/', $params['capture'])) {
+		if (!empty($params['capture'])) {
+			if (!preg_match($ut::RE_VALID_VARIABLE_NAME, $params['capture'])) {
+				throw new Brindille_Exception('Nom de variable invalide : ' . $params['capture']);
+			}
+
 			$ut::__assign([$params['capture'] => $include->fetch()], $ut, $line);
 		}
 		else {

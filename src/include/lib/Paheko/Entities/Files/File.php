@@ -1358,7 +1358,7 @@ class File extends Entity
 			return null;
 		}
 
-		$cache_file = SHARED_CACHE_ROOT . '/wopi.json';
+		$cache_file = sprintf('%s/wopi_%s.json', SHARED_CACHE_ROOT, md5(WOPI_DISCOVERY_URL));
 		static $data = null;
 
 		if (null === $data) {
