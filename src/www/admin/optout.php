@@ -1,7 +1,7 @@
 <?php
 namespace Paheko;
 
-use Paheko\Email\Emails;
+use Paheko\Email\Addresses;
 
 const LOGIN_PROCESS = true;
 
@@ -12,7 +12,7 @@ if (empty($_GET['un'])) {
 }
 
 $code = $_GET['un'];
-$email = Emails::getEmailFromOptout($code);
+$email = Addresses::getFromOptout($code);
 $verify = null;
 
 if (!$email) {

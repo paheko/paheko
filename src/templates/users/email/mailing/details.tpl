@@ -1,6 +1,6 @@
 {include file="_head.tpl" title="Message collectif : %s"|args:$mailing.subject current="users/mailing" hide_title=true}
 
-{include file="./_nav.tpl" current="mailing"}
+{include file="../_nav.tpl" current="mailing"}
 
 {if $sent}
 	<p class="confirm block">L'envoi du message a bien commencé. Il peut prendre quelques minutes avant d'avoir été expédié à tous les destinataires.</p>

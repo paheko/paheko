@@ -18,6 +18,7 @@ use Paheko\Web\Render\Render;
 use Paheko\Files\Files;
 
 use KD2\Mail_Message;
+use KD2\SMTP;
 use KD2\DB\EntityManager as EM;
 
 class Addresses
@@ -42,7 +43,7 @@ class Addresses
 		$host = null;
 		$email = self::normalize($email, $local_part, $host);
 
-		if (!$email || !$local_part || !$host) {
+		if (!$email) {
 			return 'Adresse e-mail invalide : vérifiez que vous n\'avez pas fait une faute de frappe.';
 		}
 
@@ -115,8 +116,8 @@ class Addresses
 			return null;
 		}
 
-		$local_part = substr($address, $pos);
-		$address = substr($address, $pos + 1);
+		$local_part = substr($address, 0, $pos);
+		$host = substr($address, $pos + 1);
 		$host = idn_to_ascii($host);
 
 		$address = $local_part . '@' . $host;
@@ -135,7 +136,7 @@ class Addresses
 	/**
 	 * Return an Email entity from the optout code
 	 */
-	static public function getEmailFromOptout(string $code): ?Email
+	static public function getFromOptout(string $code): ?Address
 	{
 		$hash = base64_decode(str_pad(strtr($code, '-_', '+/'), strlen($code) % 4, '=', STR_PAD_RIGHT));
 
@@ -152,7 +153,7 @@ class Addresses
 	 */
 	static public function markAddressAsInvalid(string $address): void
 	{
-		$e = self::getEmail($address);
+		$e = self::get($address);
 
 		if (!$e) {
 			return;
@@ -167,39 +168,35 @@ class Addresses
 	/**
 	 * Return an Email entity from an email address
 	 */
-	static public function get(string $address): ?Email
+	static public function get(string $address): ?Address
 	{
-		return EM::findOne(Address::class, 'SELECT * FROM @TABLE WHERE hash = ?;', Address::hash($address));
+		return EM::findOne(Address::class, 'SELECT * FROM @TABLE WHERE hash = ?;', self::hash($address));
+	}
+
+	/**
+	 * Return an Email entity from an ID
+	 */
+	static public function getByID(int $id): ?Address
+	{
+		return EM::findOne(Address::class, 'SELECT * FROM @TABLE WHERE id = ?;', $id);
 	}
 
 	/**
 	 * Return or create a new email entity
 	 */
-	static public function getOrCreate(string $address): ?Email
+	static public function getOrCreate(string $address): Address
 	{
 		$e = self::get($address);
 		$e ??= self::create($address);
 		return $e;
 	}
 
-	static public function create(string $address): Email
+	static public function create(string $address): Address
 	{
 		$e = new Address;
 		$e->setAddress($address);
 		$e->save();
 		return $e;
-	}
-
-	static public function getRejectionStatusClause(string $prefix): string
-	{
-		$prefix .= '.';
-
-		return sprintf('CASE
-			WHEN %1$soptout = 1 THEN \'Désinscription globale\'
-			WHEN %1$sinvalid = 1 THEN \'Invalide\'
-			WHEN %1$sfail_count >= %2$d THEN \'Trop d\'\'erreurs\'
-			ELSE \'\'
-		END', $prefix, self::FAIL_LIMIT);
 	}
 
 	static public function listRejectedUsers(): DynamicList
@@ -209,7 +206,7 @@ class Addresses
 
 		$columns = [
 			'id' => [
-				'select' => 'e.id',
+				'select' => 'a.id',
 			],
 			'identity' => [
 				'label' => 'Membre',
@@ -226,13 +223,9 @@ class Addresses
 			],
 			'status' => [
 				'label' => 'Statut',
-				'select' => self::getRejectionStatusClause('e'),
 			],
 			'sent_count' => [
 				'label' => 'Messages envoyés',
-			],
-			'fail_log' => [
-				'label' => 'Journal d\'erreurs',
 			],
 			'last_sent' => [
 				'label' => 'Dernière tentative d\'envoi',
@@ -241,9 +234,9 @@ class Addresses
 			'fail_count' => [],
 		];
 
-		$tables = sprintf('emails e INNER JOIN users u ON %s IS NOT NULL AND %1$s != \'\' AND e.hash = email_hash(%1$s)', $email_field);
+		$tables = sprintf('emails_addresses a INNER JOIN users u ON %s IS NOT NULL AND %1$s != \'\' AND a.hash = email_hash(%1$s)', $email_field);
 
-		$conditions = sprintf('e.invalid = 1 OR e.fail_count >= %d', self::FAIL_LIMIT);
+		$conditions = 'a.status < 0';
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('last_sent', true);
@@ -334,4 +327,9 @@ class Addresses
 		return sprintf('"%s" <%s>', $name, $email);
 	}
 
+	static public function getVerificationLimitDate(): \DateTime
+	{
+		$delay = Address::RESEND_VERIFICATION_DELAY . ' hours ago';
+		return new \DateTime($delay);
+	}
 }

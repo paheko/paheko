@@ -24,7 +24,7 @@ class Mailing extends Entity
 {
 	const TABLE = 'mailings';
 	const NAME = 'Message collectif';
-	const PRIVATE_URL = '!users/mailing/details.php?id=%d';
+	const PRIVATE_URL = '!users/email/mailing/details.php?id=%d';
 
 	const TARGETS_TYPES = [
 		'all'      => 'Tous les membres (sauf catégories cachées)',
@@ -256,8 +256,8 @@ class Mailing extends Entity
 		];
 
 		$tables = 'mailings_recipients AS r
-			LEFT JOIN emails e ON e.id = r.id_email
-			LEFT JOIN mailings_optouts o ON e.hash = o.email_hash AND o.target_type = :target_type AND o.target_value = :target_value';
+			LEFT JOIN emails_addresses a ON a.id = r.id_email
+			LEFT JOIN mailings_optouts o ON a.hash = o.email_hash AND o.target_type = :target_type AND o.target_value = :target_value';
 		$conditions = 'id_mailing = ' . $this->id;
 
 		$list = new DynamicList($columns, $tables, $conditions);

@@ -22,9 +22,9 @@
 			<td>{$row.last_sent|date}</td>
 			<td>
 				{if $row.email && $row.optout}
-					{linkbutton target="_dialog" label="Rétablir" href="!users/mailing/verify.php?address=%s"|args:$row.email shape="check"}
+					{linkbutton target="_dialog" label="Rétablir" href="!users/email/verify.php?address=%s"|args:$row.email shape="check"}
 				{elseif $row.email && $row.target_type}
-					{linkbutton target="_dialog" label="Supprimer" href="!users/mailing/optout_delete.php?address=%s"|args:$row.email shape="delete"}
+					{linkbutton target="_dialog" label="Supprimer" href="!users/email/optout_delete.php?address=%s"|args:$row.email shape="delete"}
 				{/if}
 			</td>
 		</tr>

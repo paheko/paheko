@@ -13,4 +13,4 @@ $list->loadFromQueryString();
 
 $tpl->assign(compact('list'));
 
-$tpl->display('users/mailing/index.tpl');
+$tpl->display('users/email/mailing/index.tpl');

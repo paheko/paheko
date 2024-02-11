@@ -2,29 +2,13 @@
 
 namespace Paheko\Email;
 
+use Paheko\Entities\Email\Message;
+
 use Paheko\DB;
 use Paheko\DynamicList;
 
 class Queue
 {
-	static public function getStatusList()
-	{
-		return [
-			self::WAITING => 'En attente',
-			self::SENDING => 'Envoi en cours',
-			self::SENT    => 'Envoyé',
-		];
-	}
-
-	static public function getStatusColors()
-	{
-		return [
-			self::WAITING => 'cadetblue',
-			self::SENDING => 'chocolate',
-			self::SENT    => 'darkgreen',
-		];
-	}
-
 	static public function append(int $context, string $email, array $data = [])
 	{
 
@@ -123,7 +107,7 @@ class Queue
 		$recipients = $list;
 		unset($list);
 
-		$is_system = $context === self::CONTEXT_SYSTEM;
+		$is_system = $context === Message::CONTEXT_SYSTEM;
 		$template = (!$is_system && $content instanceof UserTemplate) ? $content : null;
 
 		if ($template) {
@@ -222,11 +206,11 @@ class Queue
 
 		// If no crontab is used, then the queue should be run now
 		if (!USE_CRON) {
-			self::runQueue();
+			self::run();
 		}
 		// Always send system emails right away
 		elseif ($is_system) {
-			self::runQueue(self::CONTEXT_SYSTEM);
+			self::run(Message::CONTEXT_SYSTEM);
 		}
 	}
 
@@ -245,7 +229,7 @@ class Queue
 				return null;
 			}
 
-			$db->exec(sprintf('UPDATE emails_queue SET status = %d WHERE %s;', self::SENT, $db->where('id', $ids)));
+			$db->exec(sprintf('UPDATE emails_queue SET status = %d WHERE %s;', Message::STATUS_SENT, $db->where('id', $ids)));
 			$ids = [];
 		};
 
@@ -256,20 +240,20 @@ class Queue
 		// listQueue nettoie déjà la queue
 		foreach ($queue as $row) {
 			// We allow system emails to be sent to invalid addresses after a while, and to optout addresses all the time
-			if ($row->optout || $row->invalid || $row->fail_count >= self::FAIL_LIMIT) {
-				if ($row->context != self::CONTEXT_SYSTEM || (!$row->optout && $row->last_sent > $limit_time)) {
-					self::deleteFromQueue($row->id);
+			if ($row->optout || $row->invalid || $row->fail_count >= Message::FAIL_LIMIT) {
+				if ($row->context != Message::CONTEXT_SYSTEM || (!$row->optout && $row->last_sent > $limit_time)) {
+					self::delete($row->id);
 					continue;
 				}
 			}
 
 			// Create email address in database
 			if (!$row->email_hash) {
-				$email = self::getOrCreate($row->recipient);
+				$email = Addresses::getOrCreate($row->recipient);
 
-				if (!$email || !$email->canSend()) {
+				if (!$email->canSend()) {
 					// Email address is invalid, skip
-					self::deleteFromQueue($row->id);
+					self::delete($row->id);
 					continue;
 				}
 			}
@@ -317,7 +301,7 @@ class Queue
 			UPDATE %3$s SET sent_count = sent_count + 1, last_sent = datetime()
 				WHERE hash IN (SELECT recipient_hash FROM emails_queue WHERE status = %1$d);
 			DELETE FROM emails_queue WHERE status = %1$d;',
-			self::SENT,
+			Message::STATUS_SENT,
 			$db->where('id', $ids),
 			Email::TABLE));
 		$db->commit();
@@ -341,7 +325,7 @@ class Queue
 	 */
 	static protected function listQueueAndMarkAsSending(?int $context = null): array
 	{
-		$queue = self::listQueue($context);
+		$queue = self::list($context);
 
 		if (!count($queue)) {
 			return $queue;
@@ -354,7 +338,7 @@ class Queue
 		}
 
 		$db = DB::getInstance();
-		$db->update('emails_queue', ['status' => self::SENDING, 'sending_started' => new \DateTime], $db->where('id', $ids));
+		$db->update('emails_queue', ['status' => Message::STATUS_SENDING, 'sending_started' => new \DateTime], $db->where('id', $ids));
 
 		return $queue;
 	}
@@ -368,21 +352,21 @@ class Queue
 	 * @param int|null $context Context to list, leave NULL to have all contexts
 	 * @return array
 	 */
-	static protected function listQueue(?int $context = null): array
+	static protected function list(?int $context = null): array
 	{
 		// Clean-up the queue from reject emails
-		self::purgeQueueFromRejected();
+		self::removeRejectedRecipients();
 
 		// Reset messages that failed during the queue run
 		self::resetFailed();
 
 		$condition = null === $context ? '' : sprintf(' AND context = %d', $context);
 
-		return DB::getInstance()->get(sprintf('SELECT q.*, e.optout, e.verified, e.hash AS email_hash,
-				e.invalid, e.fail_count, strftime(\'%%s\', e.last_sent) AS last_sent
+		return DB::getInstance()->get(sprintf('SELECT q.*, a.optout, a.verified, a.hash AS email_hash,
+				a.invalid, a.fail_count, strftime(\'%%s\', a.last_sent) AS last_sent
 			FROM emails_queue q
-			LEFT JOIN emails e ON e.hash = q.recipient_hash
-			WHERE q.status = %d %s;', self::WAITING, $condition));
+			LEFT JOIN emails_addresses a ON a.hash = q.recipient_hash
+			WHERE q.status = %d %s;', Message::STATUS_WAITING, $condition));
 	}
 
 	/**
@@ -393,7 +377,7 @@ class Queue
 	static protected function removeRejectedRecipients(): void
 	{
 		DB::getInstance()->delete('emails_queue',
-			'recipient_hash IN (SELECT hash FROM emails WHERE (invalid = 1 OR fail_count >= ?)
+			'recipient_hash IN (SELECT hash FROM emails_addresses WHERE (invalid = 1 OR fail_count >= ?)
 			AND last_sent >= datetime(\'now\', \'-1 month\'));',
 			self::FAIL_LIMIT);
 	}
@@ -405,7 +389,7 @@ class Queue
 	{
 		$sql = 'UPDATE emails_queue SET status = %d, sending_started = NULL
 			WHERE status = %d AND sending_started < datetime(\'now\', \'-3 hours\');';
-		$sql = sprintf($sql, self::WAITING, self::SENDING);
+		$sql = sprintf($sql, Message::STATUS_WAITING, Message::STATUS_SENDING);
 		DB::getInstance()->exec($sql);
 	}
 
@@ -419,7 +403,7 @@ class Queue
 
 	static public function count(): int
 	{
-		return DB::getInstance()->count('emails_queue', 'status = ' . self::WAITING);
+		return DB::getInstance()->count('emails_queue', 'status = ' . Message::STATUS_WAITING);
 	}
 
 	static public function getList(): DynamicList

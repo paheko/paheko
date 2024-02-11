@@ -3,6 +3,7 @@ namespace Paheko;
 
 use Paheko\Email\Queue;
 use Paheko\Email\Emails;
+use Paheko\Entities\Email\Message;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -17,16 +18,16 @@ $form->runIf(qg('run') && !USE_CRON, function () use ($session) {
 
 	// Continue sending by batch as long as there is something in the queue
 	if ($i < 20 && Queue::count()) {
-		Utils::redirect('!users/mailing/queue.php?run=' . $i);
+		Utils::redirect('!users/email/queue.php?run=' . $i);
 	}
-}, null, '!users/mailing/queue.php?msg=EMPTY');
+}, null, '!users/email/queue.php?msg=EMPTY');
 
 $count = Queue::count();
 $list = Queue::getList();
-$statuses = Queue::getStatusList();
-$statuses_colors = Queue::getStatusColors();
-$contexts = Emails::getContextsList();
+$statuses = Message::STATUS_LIST;
+$statuses_colors = Message::STATUS_COLORS;
+$contexts = Message::CONTEXT_LIST;
 
 $tpl->assign(compact('list', 'count', 'statuses', 'statuses_colors', 'contexts'));
 
-$tpl->display('users/mailing/queue.tpl');
+$tpl->display('users/email/queue.tpl');

@@ -136,7 +136,7 @@ class Mailings
 
 		$columns = [
 			'id' => [
-				'select' => 'e.id',
+				'select' => 'a.id',
 			],
 			'identity' => [
 				'label' => 'Membre',
@@ -153,7 +153,7 @@ class Mailings
 			],
 			'status' => [
 				'label' => 'Désinscription',
-				'select' => 'CASE WHEN e.optout = 1 THEN \'Désinscription globale\' ELSE o.target_label END',
+				'select' => 'CASE WHEN a.optout = 1 THEN \'Désinscription globale\' ELSE o.target_label END',
 			],
 			'sent_count' => [
 				'label' => 'Messages envoyés',
@@ -167,10 +167,10 @@ class Mailings
 		];
 
 		$tables = sprintf('users u
-			INNER JOIN emails e ON e.hash = email_hash(%1$s)
-			LEFT JOIN mailings_optouts o ON o.email_hash = e.hash', $email_field);
+			INNER JOIN emails_addresses a ON a.hash = email_hash(%1$s)
+			LEFT JOIN mailings_optouts o ON o.email_hash = a.hash', $email_field);
 
-		$conditions = sprintf('%s IS NOT NULL AND %1$s != \'\' AND (e.optout = 1 OR o.email_hash IS NOT NULL)', $email_field);
+		$conditions = sprintf('%s IS NOT NULL AND %1$s != \'\' AND (a.optout = 1 OR o.email_hash IS NOT NULL)', $email_field);
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('last_sent', true);

@@ -17,11 +17,11 @@
 	{/if}
 
 	<ul>
-		<li{if $current === 'index' || $current === 'mailing'} class="current"{/if}><a href="./">Messages collectifs</a></li>
-		<li{if $current === 'optout'} class="current"{/if}><a href="optout.php">Désinscriptions</a></li>
-		<li{if $current === 'rejected'} class="current"{/if}><a href="rejected.php">Adresses rejetées</a></li>
+		<li{if $current === 'index' || $current === 'mailing'} class="current"{/if}>{link href="!users/email/mailing/" label="Messages collectifs"}</li>
+		<li{if $current === 'optout'} class="current"{/if}>{link href="!users/email/optout.php" label="Désinscriptions"}</li>
+		<li{if $current === 'rejected'} class="current"{/if}>{link href="!users/email/rejected.php" label="Adresses rejetées"}</li>
 		{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
-			<li {if $current === 'queue'}class="current"{/if}>{link href="queue.php" label="File d'envoi"}</li>
+			<li {if $current === 'queue'}class="current"{/if}>{link href="!users/email/queue.php" label="File d'envoi"}</li>
 		{/if}
 	</ul>
 

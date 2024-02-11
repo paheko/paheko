@@ -17,7 +17,7 @@ $csrf_key = 'mailing';
 if (!$mailing->sent) {
 	$form->runIf('delete', function () use ($mailing) {
 		$mailing->deleteRecipient((int)f('delete'));
-	}, $csrf_key, '!users/mailing/recipients.php?id=' . $mailing->id);
+	}, $csrf_key, '!users/email/mailing/recipients.php?id=' . $mailing->id);
 }
 
 $list = $mailing->getRecipientsList();
@@ -25,4 +25,4 @@ $list->loadFromQueryString();
 
 $tpl->assign(compact('mailing', 'list', 'csrf_key'));
 
-$tpl->display('users/mailing/recipients.tpl');
+$tpl->display('users/email/mailing/recipients.tpl');

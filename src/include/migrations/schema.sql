@@ -133,12 +133,10 @@ CREATE TABLE IF NOT EXISTS emails_addresses (
 -- email address has been removed from the users table
 	id INTEGER NOT NULL PRIMARY KEY,
 	hash TEXT NOT NULL,
-	verified INTEGER NOT NULL DEFAULT 0,
-	optout INTEGER NOT NULL DEFAULT 0,
-	invalid INTEGER NOT NULL DEFAULT 0,
-	fail_count INTEGER NOT NULL DEFAULT 0,
+	status INTEGER NOT NULL,
+	bounce_count INTEGER NOT NULL DEFAULT 0,
 	sent_count INTEGER NOT NULL DEFAULT 0,
-	fail_log TEXT NULL,
+	log TEXT NULL,
 	last_sent TEXT NULL,
 	added TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -188,7 +186,7 @@ CREATE TABLE IF NOT EXISTS mailings_recipients (
 	id INTEGER NOT NULL PRIMARY KEY,
 	id_mailing INTEGER NOT NULL REFERENCES mailings (id) ON DELETE CASCADE,
 	email TEXT NULL,
-	id_email TEXT NULL REFERENCES emails (id) ON DELETE CASCADE,
+	id_email TEXT NULL REFERENCES emails_addresses (id) ON DELETE CASCADE,
 	extra_data TEXT NULL
 );
 

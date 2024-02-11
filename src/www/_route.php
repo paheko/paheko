@@ -3,7 +3,7 @@
 namespace Paheko;
 
 use Paheko\Web\Router;
-use Paheko\Email\Emails;
+use Paheko\Email\Addresses;
 
 if (empty($_SERVER['REQUEST_URI'])) {
 	http_response_code(500);
@@ -38,7 +38,7 @@ if ((empty($uri) || $uri === '/') && !empty($_GET['un'])) {
 
 	// RFC 8058
 	if (!empty($_POST['Unsubscribe']) && $_POST['Unsubscribe'] == 'Yes') {
-		$email = Emails::getEmailFromOptout($params['un']);
+		$email = Addresses::getFromOptout($params['un']);
 
 		if (!$email) {
 			throw new UserException('Adresse email introuvable.');

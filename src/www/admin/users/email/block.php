@@ -22,4 +22,4 @@ $form->runIf('send', function () use ($email) {
 }, $csrf_key, '!users/');
 
 $tpl->assign(compact('csrf_key', 'email', 'address'));
-$tpl->display('users/mailing/block.tpl');
+$tpl->display('users/email/block.tpl');

@@ -20,4 +20,4 @@ if (!$data) {
 
 $tpl->assign(compact('mailing', 'data'));
 
-$tpl->display('users/mailing/recipient_data.tpl');
+$tpl->display('users/email/mailing/recipient_data.tpl');

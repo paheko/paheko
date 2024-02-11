@@ -1,6 +1,6 @@
 {include file="_head.tpl" title="Messages collectifs" current="users/mailing"}
 
-{include file="./_nav.tpl" current="index"}
+{include file="../_nav.tpl" current="index"}
 
 {if $_GET.msg === 'DELETE'}
 	<p class="confirm block">Le message a bien été supprimé.</p>

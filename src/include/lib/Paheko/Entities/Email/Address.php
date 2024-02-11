@@ -16,23 +16,47 @@ class Address extends Entity
 {
 	const TABLE = 'emails_addresses';
 
-	const RESEND_VERIFICATION_DELAY_INVALID = 7;
-	const RESEND_VERIFICATION_DELAY_OPTOUT = 2;
+	const RESEND_VERIFICATION_DELAY = 24;
 
 	/**
 	 * When we reach that number of fails, the address is treated as permanently invalid, unless reset by a verification.
 	 */
-	const FAIL_LIMIT = 5;
+	const SOFT_BOUNCE_LIMIT = 5;
 
+	const STATUS_UNKNOWN = 0;
+	const STATUS_VERIFIED = 1;
+	const STATUS_INVALID = -1;
+	const STATUS_SOFT_BOUNCE_LIMIT_REACHED = -2;
+	const STATUS_HARD_BOUNCE = -3;
+	const STATUS_OPTOUT = -4;
+	const STATUS_SPAM = -5;
+
+	const STATUS_LIST = [
+		self::STATUS_UNKNOWN => 'OK',
+		self::STATUS_VERIFIED => 'Vérifiée',
+		self::STATUS_INVALID => 'Invalide',
+		self::STATUS_SOFT_BOUNCE_LIMIT_REACHED => 'Trop d\'erreurs',
+		self::STATUS_HARD_BOUNCE => 'Échec',
+		self::STATUS_OPTOUT => 'Refus',
+		self::STATUS_SPAM => 'Spam',
+	];
+
+	const STATUS_COLORS = [
+		self::STATUS_UNKNOWN => 'steelblue',
+		self::STATUS_VERIFIED => 'darkgreen',
+		self::STATUS_INVALID => 'crimson',
+		self::STATUS_SOFT_BOUNCE_LIMIT_REACHED => 'darkorange',
+		self::STATUS_HARD_BOUNCE => 'darkred',
+		self::STATUS_OPTOUT => 'palevioletred',
+		self::STATUS_SPAM => 'darkmagenta',
+	];
 
 	protected int $id;
 	protected string $hash;
-	protected bool $verified = false;
-	protected bool $optout = false;
-	protected bool $invalid = false;
+	protected int $status = self::STATUS_UNKNOWN;
 	protected int $sent_count = 0;
-	protected int $fail_count = 0;
-	protected ?string $fail_log;
+	protected int $bounce_count = 0;
+	protected ?string $log;
 	protected \DateTime $added;
 	protected ?\DateTime $last_sent;
 
@@ -61,15 +85,9 @@ class Address extends Entity
 		EmailsTemplates::verifyAddress($email, $verify_url);
 	}
 
-	public function getVerificationDelay(): int
-	{
-		return $this->optout ? self::RESEND_VERIFICATION_DELAY_OPTOUT : self::RESEND_VERIFICATION_DELAY_INVALID;
-	}
-
 	public function canSendVerificationAfterFail(): bool
 	{
-		$delay = $this->getVerificationDelay() . ' days ago';
-		$limit_date = new \DateTime($delay);
+		$limit_date = Addresses::getVerificationLimitDate();
 		return isset($this->last_sent) ? $this->last_sent < $limit_date : false;
 	}
 
@@ -79,11 +97,9 @@ class Address extends Entity
 			return false;
 		}
 
-		$this->set('verified', true);
-		$this->set('optout', false);
-		$this->set('invalid', false);
-		$this->set('fail_count', 0);
-		$this->set('fail_log', null);
+		$this->set('status', self::STATUS_VERIFIED);
+		$this->set('bounce_count', 0);
+		$this->log('Adresse vérifiée par le destinataire');
 		return true;
 	}
 
@@ -95,37 +111,20 @@ class Address extends Entity
 		$error = Addresses::checkForErrors($address);
 
 		if (null !== $error) {
-			$this->setFailedValidation($error);
+			$this->set('status', self::STATUS_INVALID);
+			$this->log($error);
 		}
 
 		return $error === null;
 	}
 
-	public function setFailedValidation(string $message): void
-	{
-		$this->hasFailed(['type' => 'permanent', 'message' => $message]);
-	}
-
 	public function canSend(): bool
 	{
-		if (!empty($this->optout)) {
-			return false;
-		}
-
-		if (!empty($this->invalid)) {
-			return false;
-		}
-
-		if ($this->hasReachedFailLimit()) {
+		if ($this->status < self::STATUS_UNKNOWN) {
 			return false;
 		}
 
 		return true;
-	}
-
-	public function hasReachedFailLimit(): bool
-	{
-		return !empty($this->fail_count) && ($this->fail_count >= self::FAIL_LIMIT);
 	}
 
 	public function incrementSentCount(): void
@@ -135,20 +134,20 @@ class Address extends Entity
 
 	public function setOptout(string $message = null): void
 	{
-		$this->set('optout', true);
-		$this->appendFailLog($message ?? 'Demande de désinscription');
+		$this->set('status', self::STATUS_OPTOUT);
+		$this->log($message ?? 'Demande de désinscription');
 	}
 
-	public function appendFailLog(string $message): void
+	public function log(string $message): void
 	{
-		$log = $this->fail_log ?? '';
+		$log = $this->log ?? '';
 
 		if ($log) {
 			$log .= "\n";
 		}
 
 		$log .= date('d/m/Y H:i:s - ') . trim($message);
-		$this->set('fail_log', $log);
+		$this->set('log', $log);
 	}
 
 	public function hasFailed(array $return): void
@@ -159,17 +158,21 @@ class Address extends Entity
 
 		// Treat complaints as opt-out
 		if ($return['type'] == 'complaint') {
-			$this->set('optout', true);
-			$this->appendFailLog("Un signalement de spam a été envoyé par le destinataire.\n: " . $return['message']);
+			$this->set('status', self::STATUS_SPAM);
+			$this->log("Un signalement de spam a été envoyé par le destinataire.\n: " . $return['message']);
 		}
 		elseif ($return['type'] == 'permanent') {
-			$this->set('invalid', true);
-			$this->set('fail_count', $this->fail_count+1);
-			$this->appendFailLog($return['message']);
+			$this->set('status', self::STATUS_HARD_BOUNCE);
+			$this->set('bounce_count', $this->bounce_count+1);
+			$this->log($return['message']);
 		}
 		elseif ($return['type'] == 'temporary') {
-			$this->set('fail_count', $this->fail_count+1);
-			$this->appendFailLog($return['message']);
+			$this->set('bounce_count', $this->bounce_count+1);
+			$this->log($return['message']);
+
+			if ($this->bounce_count > self::SOFT_BOUNCE_LIMIT) {
+				$this->set('status', self::STATUS_SOFT_BOUNCE_LIMIT_REACHED);
+			}
 		}
 	}
 
@@ -189,5 +192,15 @@ class Address extends Entity
 		}
 
 		return $return;
+	}
+
+	public function getStatusColor(): string
+	{
+		return self::STATUS_COLORS[$this->status];
+	}
+
+	public function getStatusLabel(): string
+	{
+		return self::STATUS_LIST[$this->status];
 	}
 }

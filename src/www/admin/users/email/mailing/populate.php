@@ -20,7 +20,7 @@ $form->runIf($target_type == 'all' || f('step3'), function () {
 	}
 
 	$m = Mailings::create(f('subject'), $target_type, $target_value, $target_label);
-	Utils::redirectDialog('!users/mailing/write.php?id=' . $m->id());
+	Utils::redirectDialog('!users/email/mailing/write.php?id=' . $m->id());
 }, $csrf_key);
 
 $list = null;
@@ -31,4 +31,4 @@ if ($target_type) {
 
 $tpl->assign(compact('csrf_key', 'target_type', 'list'));
 
-$tpl->display('users/mailing/new.tpl');
+$tpl->display('users/email/mailing/new.tpl');

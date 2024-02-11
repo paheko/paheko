@@ -21,7 +21,7 @@ $csrf_key = 'mailing_details';
 
 $form->runIf('send', function() use ($mailing) {
 	$mailing->send();
-}, $csrf_key, '!users/mailing/details.php?sent&id=' . $mailing->id);
+}, $csrf_key, '!users/email/mailing/details.php?sent&id=' . $mailing->id);
 
 $count = $mailing->countRecipients();
 
@@ -30,4 +30,4 @@ $tpl->assign(compact('mailing', 'csrf_key', 'count'));
 $tpl->assign('custom_css', [BASE_URL . 'content.css']);
 $tpl->assign('sent', null !== qg('sent'));
 
-$tpl->display('users/mailing/details.tpl');
+$tpl->display('users/email/mailing/details.tpl');

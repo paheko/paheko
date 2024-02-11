@@ -3,6 +3,7 @@
 namespace Paheko\Entities\Email;
 
 use Paheko\Config;
+use Paheko\Entity;
 
 use const Paheko\{DISABLE_EMAIL, MAIL_RETURN_PATH, MAIL_SENDER};
 use const Paheko\{SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURITY, SMTP_HELO_HOSTNAME};
@@ -11,7 +12,7 @@ use KD2\SMTP;
 use KD2\Security;
 use KD2\Mail_Message;
 
-class Message extends AbstractEntity
+class Message extends Entity
 {
 	const TABLE = 'emails_queue';
 
@@ -35,15 +36,15 @@ class Message extends AbstractEntity
 	const STATUS_SENT = 2;
 
 	const STATUS_LIST = [
-		self::WAITING => 'En attente',
-		self::SENDING => 'Envoi en cours',
-		self::SENT    => 'Envoyé',
+		self::STATUS_WAITING => 'En attente',
+		self::STATUS_SENDING => 'Envoi en cours',
+		self::STATUS_SENT    => 'Envoyé',
 	];
 
 	const STATUS_COLORS = [
-		self::WAITING => 'cadetblue',
-		self::SENDING => 'chocolate',
-		self::SENT    => 'darkgreen',
+		self::STATUS_WAITING => 'cadetblue',
+		self::STATUS_SENDING => 'chocolate',
+		self::STATUS_SENT    => 'darkgreen',
 	];
 
 	const CONTEXT_SYSTEM = 0;

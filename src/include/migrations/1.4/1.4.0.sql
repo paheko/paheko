@@ -157,4 +157,49 @@ CREATE INDEX IF NOT EXISTS emails_queue_status ON emails_queue (status);
 
 DROP TABLE emails_queue_old;
 
-ALTER TABLE emails RENAME TO emails_addresses;
+CREATE TABLE IF NOT EXISTS emails_addresses (
+-- List of emails addresses
+-- We are not storing actual email addresses here for privacy reasons
+-- So that we can keep the record (for opt-out reasons) even when the
+-- email address has been removed from the users table
+	id INTEGER NOT NULL PRIMARY KEY,
+	hash TEXT NOT NULL,
+	status INTEGER NOT NULL,
+	bounce_count INTEGER NOT NULL DEFAULT 0,
+	sent_count INTEGER NOT NULL DEFAULT 0,
+	log TEXT NULL,
+	last_sent TEXT NULL,
+	added TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO emails_addresses SELECT id, hash,
+	CASE
+		WHEN invalid = 1 THEN -3
+		WHEN optout = 1 THEN -4
+		WHEN verified = 1 THEN 1
+		WHEN fail_count > 5 THEN -2
+		ELSE 0
+	END,
+	fail_count, sent_count, fail_log, last_sent, added
+	FROM emails;
+
+DROP TABLE emails;
+
+CREATE UNIQUE INDEX IF NOT EXISTS emails_hash ON emails_addresses (hash);
+
+ALTER TABLE mailings_recipients RENAME TO mailings_recipients_old;
+
+CREATE TABLE IF NOT EXISTS mailings_recipients (
+	id INTEGER NOT NULL PRIMARY KEY,
+	id_mailing INTEGER NOT NULL REFERENCES mailings (id) ON DELETE CASCADE,
+	email TEXT NULL,
+	id_email TEXT NULL REFERENCES emails_addresses (id) ON DELETE CASCADE,
+	extra_data TEXT NULL
+);
+
+INSERT INTO mailings_recipients SELECT * FROM mailings_recipients_old;
+
+DROP INDEX mailings_recipients_id;
+CREATE INDEX IF NOT EXISTS mailings_recipients_id ON mailings_recipients (id);
+
+DROP TABLE mailings_recipients_old;

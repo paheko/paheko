@@ -1,6 +1,6 @@
 {include file="_head.tpl" title="Destinataires du message collectif : %s"|args:$mailing.subject current="users/mailing"}
 
-{include file="./_nav.tpl" current="details"}
+{include file="../_nav.tpl" current="mailing"}
 
 <p>
 	{linkbutton shape="left" label="Retour au message" href="details.php?id=%d"|args:$mailing.id}
