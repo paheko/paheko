@@ -50,7 +50,7 @@ $fields = DF::getInstance()->all();
 		{elseif $field.type == 'email'}
 			<a href="mailto:{$value|escape:'url'}">{$value}</a>
 			{if !DISABLE_EMAIL && $show_message_button && !$email_button++}
-				{linkbutton href="!users/message.php?id=%d"|args:$data.id label="Envoyer un message" shape="mail"}
+				{linkbutton href="!users/message.php?id=%d"|args:$data.id label="Envoyer un message" shape="mail" target="_dialog"}
 			{/if}
 		{elseif $field.type == 'multiple'}
 			<ul>
