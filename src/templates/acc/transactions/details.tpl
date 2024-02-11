@@ -224,7 +224,7 @@
 				<tr>
 					<td class="num">{link href="!users/details.php?id=%d"|args:$s.id_user label=$s.user_number}</td>
 					<td>{$s.user_identity}</td>
-					<td class="actions">{linkbutton href="!services/user/?id=%d&only=%s"|args:$s.id_user:$s.id_subscription label="Inscription" shape="right"}</td>
+					<td class="actions">{linkbutton href="!services/user/?id=%d&only=%s"|args:$s.id_user:$s.id_subscription label="Inscription" shape="eye"}</td>
 				</tr>
 			{/foreach}
 			</tbody>
