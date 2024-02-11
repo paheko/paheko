@@ -126,7 +126,7 @@ CREATE TABLE IF NOT EXISTS compromised_passwords_cache_ranges
 	date INTEGER NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS emails (
+CREATE TABLE IF NOT EXISTS emails_addresses (
 -- List of emails addresses
 -- We are not storing actual email addresses here for privacy reasons
 -- So that we can keep the record (for opt-out reasons) even when the
@@ -143,7 +143,7 @@ CREATE TABLE IF NOT EXISTS emails (
 	added TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS emails_hash ON emails (hash);
+CREATE UNIQUE INDEX IF NOT EXISTS emails_hash ON emails_addresses (hash);
 
 CREATE TABLE IF NOT EXISTS emails_queue (
 -- List of emails waiting to be sent
@@ -153,12 +153,15 @@ CREATE TABLE IF NOT EXISTS emails_queue (
 	recipient_hash TEXT NOT NULL,
 	recipient_pgp_key TEXT NULL,
 	subject TEXT NOT NULL,
-	content TEXT NOT NULL,
-	content_html TEXT NULL,
-	sending INTEGER NOT NULL DEFAULT 0, -- Will be changed to 1 when the queue run will start
-	sending_started TEXT NULL, -- Will be filled with the datetime when the email sending was started
+	body TEXT NOT NULL,
+	html_body TEXT NULL,
+	added TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(added) = added),
+	status INTEGER NOT NULL DEFAULT 0, -- Will be changed to 1 when the queue run will start
+	sending_started TEXT NULL CHECK (datetime(sending_started) IS NULL OR datetime(sending_started) = sending_started), -- Will be filled with the datetime when the email queue sending has started
 	context INTEGER NOT NULL
 );
+
+CREATE INDEX IF NOT EXISTS emails_queue_status ON emails_queue (status);
 
 CREATE TABLE IF NOT EXISTS emails_queue_attachments (
 	id INTEGER NOT NULL PRIMARY KEY,

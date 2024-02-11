@@ -9,7 +9,7 @@ use Paheko\DynamicList;
 use Paheko\Entity;
 use Paheko\Log;
 use Paheko\UserException;
-use Paheko\Email\Emails;
+use Paheko\Email\Addresses;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Users;
 use Paheko\UserTemplate\UserTemplate;
@@ -72,7 +72,9 @@ class Mailing extends Entity
 		if (isset($this->sender_name) || isset($this->sender_email)) {
 			$this->assert(trim($this->sender_name) !== '', 'Le nom d\'expéditeur est vide.');
 			$this->assert(trim($this->sender_email) !== '', 'L\'adresse e-mail de l\'expéditeur est manquante.');
-			$this->assert(Email::isAddressValid($this->sender_email), 'L\'adresse e-mail de l\'expéditeur est invalide.');
+
+			$error = Addresses::checkForErrors($this->sender_email);
+			$this->assert($error === null, 'L\'adresse e-mail de l\'expéditeur est invalide : ' . $error);
 		}
 	}
 
@@ -146,24 +148,14 @@ class Mailing extends Entity
 		}
 
 		$email = strtolower(trim($email));
-		$e = Emails::getEmail($email);
+		$e = Addresses::getOrCreate($email);
 
-		if ($e && !$e->canSend()) {
+		if (!$e->canSend()) {
 			$data = null;
 		}
 		else {
-			try {
-				// Validate e-mail address, but not MX (quick check)
-				Email::validateAddress($email, false);
-			}
-			catch (UserException $ex) {
-				$e = Emails::createEmail($email);
-				$e->setFailedValidation($ex->getMessage());
-				$data = null;
-			}
+			$this->cleanExtraData($data);
 		}
-
-		$this->cleanExtraData($data);
 
 		DB::getInstance()->insert('mailings_recipients', [
 			'id_mailing' => $this->id,

@@ -130,3 +130,31 @@ CREATE TABLE IF NOT EXISTS mailings_optouts (
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS mailings_optouts_unique ON mailings_optouts (email_hash, target_type, target_value);
+
+ALTER TABLE emails_queue RENAME TO emails_queue_old;
+
+CREATE TABLE IF NOT EXISTS emails_queue (
+-- List of emails waiting to be sent
+	id INTEGER NOT NULL PRIMARY KEY,
+	sender TEXT NULL,
+	recipient TEXT NOT NULL,
+	recipient_hash TEXT NOT NULL,
+	recipient_pgp_key TEXT NULL,
+	subject TEXT NOT NULL,
+	body TEXT NOT NULL,
+	html_body TEXT NULL,
+	added TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(added) = added),
+	status INTEGER NOT NULL DEFAULT 0, -- Will be changed to 1 when the queue run will start
+	sending_started TEXT NULL CHECK (datetime(sending_started) IS NULL OR datetime(sending_started) = sending_started), -- Will be filled with the datetime when the email queue sending has started
+	context INTEGER NOT NULL
+);
+
+INSERT INTO emails_queue SELECT id, sender, recipient, recipient_hash,
+	recipient_pgp_key, subject, content, content_html, datetime(), sending,
+	sending_started, context FROM emails_queue_old;
+
+CREATE INDEX IF NOT EXISTS emails_queue_status ON emails_queue (status);
+
+DROP TABLE emails_queue_old;
+
+ALTER TABLE emails RENAME TO emails_addresses;

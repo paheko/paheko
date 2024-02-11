@@ -18,11 +18,12 @@ use Paheko\Template;
 use Paheko\Utils;
 use Paheko\UserException;
 use Paheko\UserTemplate\UserTemplate;
-use Paheko\Email\Emails;
+use Paheko\Email\Addresses;
+use Paheko\Email\Queue;
 use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
 use Paheko\Entities\Module;
-use Paheko\Entities\Email\Email;
+use Paheko\Entities\Email\Message;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
 
@@ -447,7 +448,7 @@ class Functions
 
 		foreach ($params['to'] as &$to) {
 			$to = trim($to);
-			Email::validateAddress($to);
+			Addresses::validate($to);
 		}
 
 		unset($to);
@@ -491,8 +492,10 @@ class Functions
 			}
 		}
 
-		$context = count($params['to']) == 1 ? Emails::CONTEXT_PRIVATE : Emails::CONTEXT_BULK;
-		Emails::queue($context, $params['to'], null, $params['subject'], $params['body'], $attachments);
+		$context = count($params['to']) === 1 ? Message::CONTEXT_PRIVATE : Message::CONTEXT_BULK;
+		$message = Queue::createMessage($context, $params['subject'], $params['body'], $attachments);
+		$message->setAttachments($attachments);
+		$message->queueToArray($params['to']);
 
 		if (!$ut->isTrusted()) {
 			$internal += $internal_count;

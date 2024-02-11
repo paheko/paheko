@@ -19,7 +19,7 @@ use Paheko\ValidationException;
 use Paheko\Files\Files;
 
 use Paheko\Users\Categories;
-use Paheko\Email\Emails;
+use Paheko\Email\Queue;
 use Paheko\Email\Templates as EmailTemplates;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
@@ -557,15 +557,22 @@ class User extends Entity
 
 	public function sendMessage(string $subject, string $message, bool $send_copy, ?User $from = null)
 	{
-		$config = Config::getInstance();
-		$email_field = DynamicFields::getFirstEmailField();
+		if (!$this->email()) {
+			throw new UserException('Ce membre n\'a pas d\'adresse e-mail');
+		}
 
-		$from = $from ? $from->getNameAndEmail() : null;
+		$sender = $from ? $from->getNameAndEmail() : null;
 
-		Emails::queue(Emails::CONTEXT_PRIVATE, [$this->{$email_field} => ['pgp_key' => $this->pgp_key]], $from, $subject, $message);
+		$message = Queue::createMessage(Message::CONTEXT_PRIVATE, $subject, $message);
+		$message->setSender($sender);
+		$message->setRecipient($this->email(), $this->pgp_key);
+		$message->queue();
 
-		if ($send_copy) {
-			Emails::queue(Emails::CONTEXT_PRIVATE, [$config->org_email], null, $subject, $message);
+		if ($send_copy && $from->email()) {
+			$message = clone $message;
+			$message->set('subject', 'Message envoyé : ' . $message->subject);
+			$message->setRecipient($from->email());
+			$message->queue();
 		}
 	}
 

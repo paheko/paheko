@@ -7,7 +7,7 @@ use KD2\DB\DB_Exception;
 use KD2\ErrorManager;
 
 use Paheko\Users\DynamicFields;
-use Paheko\Entities\Email\Email;
+use Paheko\Email\Addresses;
 
 class DB extends SQLite3
 {
@@ -243,7 +243,7 @@ class DB extends SQLite3
 		$db->createFunction('basename', [Utils::class, 'basename']);
 		$db->createFunction('unicode_like', [self::class, 'unicodeLike']);
 		$db->createFunction('transliterate_to_ascii', [Utils::class, 'unicodeTransliterate']);
-		$db->createFunction('email_hash', [Email::class, 'getHash']);
+		$db->createFunction('email_hash', [Addresses::class, 'hash']);
 		$db->createFunction('md5', 'md5');
 		$db->createFunction('uuid', [Utils::class, 'uuid']);
 		$db->createFunction('print_binary', fn($value) => sprintf('%032d', decbin($value)));

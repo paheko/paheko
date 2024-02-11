@@ -3,14 +3,14 @@
 <form method="post" action="{$self_url}">
 	<fieldset>
 		<legend>Demander la vérification de l'adresse</legend>
-		{if $email.optout}
+		{if $address.optout}
 		<p class="help">
 			Si le membre a cliqué par erreur sur le lien de désinscription, il est possible de rétablir l'envoi des messages.<br />
 			Le membre recevra alors un message contenant un lien pour se réinscrire.
 		</p>
-		{elseif $email->hasReachedFailLimit()}
+		{else}
 		<p class="help">
-			Si l'adresse du membre a rencontré trop d'erreurs (boîte mail pleine par exemple), il est possible de rétablir l'envoi des messages.<br />
+			Si l'adresse du membre a rencontré une erreur fatale, ou trop d'erreurs temporaires, il est possible de rétablir l'envoi des messages.<br />
 			Le membre recevra alors un message contenant un lien pour valider son adresse.
 		</p>
 		{/if}

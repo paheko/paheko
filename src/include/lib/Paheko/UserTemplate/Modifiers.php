@@ -7,7 +7,7 @@ use Paheko\Utils;
 use Paheko\UserException;
 
 use Paheko\Users\DynamicFields;
-use Paheko\Entities\Email\Email;
+use Paheko\Email\Addresses;
 
 use KD2\SMTP;
 
@@ -95,18 +95,7 @@ class Modifiers
 
 	static public function check_email($str)
 	{
-		if (!trim((string)$str)) {
-			return false;
-		}
-
-		try {
-			Email::validateAddress((string)$str);
-		}
-		catch (UserException $e) {
-			return false;
-		}
-
-		return true;
+		return Addresses::check((string)$str);
 	}
 
 	/**

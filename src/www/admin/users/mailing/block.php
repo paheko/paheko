@@ -1,17 +1,17 @@
 <?php
 namespace Paheko;
 
-use Paheko\Email\Emails;
+use Paheko\Email\Addresses;
 
 require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 
 $address = qg('address');
-$email = Emails::getOrCreateEmail($address);
+$email = Addresses::get($address);
 
 if (!$email) {
-    throw new UserException('Adresse invalide');
+    throw new UserException('Adresse invalide ou inconnue');
 }
 
 $csrf_key = 'block_email';

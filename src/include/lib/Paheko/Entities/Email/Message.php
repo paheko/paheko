@@ -1,24 +1,74 @@
 <?php
 
-class Message
+namespace Paheko\Entities\Email;
+
+use Paheko\Config;
+
+use const Paheko\{DISABLE_EMAIL, MAIL_RETURN_PATH, MAIL_SENDER};
+use const Paheko\{SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURITY, SMTP_HELO_HOSTNAME};
+
+use KD2\SMTP;
+use KD2\Security;
+use KD2\Mail_Message;
+
+class Message extends AbstractEntity
 {
 	const TABLE = 'emails_queue';
 
 	protected int $context;
+	protected int $status = self::WAITING;
 
 	protected ?string $sender;
 	protected string $recipient;
 	protected string $recipient_hash;
-	protected string $recipient_pgp_key;
+	protected ?string $recipient_pgp_key;
 
 	protected string $subject;
 	protected string $body;
-	protected string $body_html;
+	protected string $html_body;
 	protected array $attachments;
 
 	protected ?string $context_optout;
 
-	public function setBodyFromUserTemplate(UserTemplate $template, array $data = []): void
+	const STATUS_WAITING = 0;
+	const STATUS_SENDING = 1;
+	const STATUS_SENT = 2;
+
+	const STATUS_LIST = [
+		self::WAITING => 'En attente',
+		self::SENDING => 'Envoi en cours',
+		self::SENT    => 'Envoyé',
+	];
+
+	const STATUS_COLORS = [
+		self::WAITING => 'cadetblue',
+		self::SENDING => 'chocolate',
+		self::SENT    => 'darkgreen',
+	];
+
+	const CONTEXT_SYSTEM = 0;
+	const CONTEXT_BULK = 1;
+	const CONTEXT_PRIVATE = 2;
+	const CONTEXT_NOTIFICATION = 3;
+
+	const CONTEXT_LIST = [
+		self::CONTEXT_SYSTEM => 'Système',
+		self::CONTEXT_BULK => 'Collectif',
+		self::CONTEXT_PRIVATE => 'Privé',
+		self::CONTEXT_NOTIFICATION => 'Notification',
+	];
+
+	public function selfCheck(): void
+	{
+		$this->assert(in_array($this->context, self::CONTEXT_LIST), 'Contexte inconnu');
+		$this->assert(in_array($this->status, self::STATUS_LIST), 'Statut inconnu');
+		$this->assert(strlen($this->subject), 'Sujet vide');
+		$this->assert(strlen($this->body), 'Corps vide');
+		$this->assert(strlen($this->recipient), 'Destinataire absent');
+		$this->assert(strlen($this->recipient_hash) === 40, 'Hash invalide');
+	}
+
+	public function setBodyFromUserTemplate(UserTemplate $template, array $data = [], bool $markdown = false): void
 	{
 		// Replace placeholders: {{$name}}, etc.
 		$template->assignArray((array) $data, null, false);
@@ -28,17 +78,12 @@ class Message
 		$this->body = $template->fetch();
 
 		if ($markdown) {
-			// Use Markdown rendering for HTML emails
-			$this->body_html = Render::render(Render::FORMAT_MARKDOWN, null, $this->body);
+			$this->markdownToHTML();
 		}
 	}
 
-	public function createHTMLFromMarkdownBody(?string $body = null): void
+	public function markdownToHTML(): void
 	{
-		if (null !== $body) {
-			$this->body = $body;
-		}
-
 		$this->body_html = Render::render(Render::FORMAT_MARKDOWN, null, $this->body);
 	}
 
@@ -128,14 +173,20 @@ class Message
 		return Email::getOptoutURL() . '&c=' . $this->context_optout;
 	}
 
-
-	public function save(bool $selfcheck = true): bool
+	public function setRecipient(string $email, ?string $pgp_key = null)
 	{
-
+		$this->set('recipient', $email);
+		$this->set('recipient_pgp_key', $pgp_key);
 	}
 
-	public function send(): bool
+	public function queue(): bool
 	{
+		return $this->save();
+	}
+
+	public function createSMTPMessage(): Mail_Message
+	{
+
 		$config = Config::getInstance();
 		$message = new Mail_Message;
 
@@ -201,6 +252,50 @@ class Message
 			$message->encrypt($this->recipient_pgp_key);
 		}
 
-		return Emails::sendMessage($context, $message);
+		return $message;
+	}
+
+	public function send(): bool
+	{
+		if (DISABLE_EMAIL) {
+			return false;
+		}
+
+		$message = $this->createSMTPMessage();
+		$entity = $this;
+		$context = $this->context;
+		$fail = false;
+
+		try {
+			$signal = Plugins::fire('email.send.before', true, compact('message', 'context', 'entity'), ['sent' => null]);
+
+			if ($signal && $signal->isStopped()) {
+				return $signal->getOut('sent') ?? true;
+			}
+
+			if (SMTP_HOST) {
+				$const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
+				$secure = constant($const);
+
+				$smtp = new SMTP(SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, $secure, SMTP_HELO_HOSTNAME);
+
+				$smtp->send($message);
+			}
+			else {
+				// Send using PHP mail() function
+				$message->send();
+			}
+
+			Plugins::fire('email.send.after', false, compact('context', 'message', 'entity'));
+			return true;
+		}
+		catch (\Throwable $e) {
+			$fail = true;
+		}
+		finally {
+			if (!$fail) {
+				$this->set('status', self::STATUS_SENT);
+			}
+		}
 	}
 }

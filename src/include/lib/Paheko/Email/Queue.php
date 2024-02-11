@@ -159,7 +159,7 @@ class Queue
 
 			// We won't try to reject invalid/optout recipients here,
 			// it's done in the queue clearing (more efficient)
-			$recipient_hash = Email::getHash($recipient);
+			$recipient_hash = Addresses::hash($recipient);
 
 			// Replace placeholders: {{$name}}, etc.
 			if ($template) {
@@ -265,7 +265,7 @@ class Queue
 
 			// Create email address in database
 			if (!$row->email_hash) {
-				$email = self::getOrCreateEmail($row->recipient);
+				$email = self::getOrCreate($row->recipient);
 
 				if (!$email || !$email->canSend()) {
 					// Email address is invalid, skip
