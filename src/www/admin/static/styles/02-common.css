@@ -905,10 +905,6 @@ pre code {
     border-radius: .3em;
 }
 
-fieldset.message {
-    max-width: 40em;
-}
-
 img.broken {
     font-size: 1.2rem;
     text-align: center;

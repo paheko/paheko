@@ -2,10 +2,10 @@
 
 {form_errors}
 
-<form method="post" action="{$self_url}">
+<form method="post" action="{$self_url}" data-focus="{if $mailing->exists()}textarea{else}1{/if}">
 
 	<fieldset class="header">
-		<legend>Modifier le message collectif</legend>
+		<legend>{if $mailing->exists()}Modifier le message collectif{else}Nouveau message collectif{/if}</legend>
 		<p>
 			{input type="text" name="subject" required=true class="full-width" placeholder="Sujet du message…" source=$mailing}
 		</p>
@@ -23,8 +23,12 @@
 
 	<fieldset class="textEditor">
 		{input type="textarea" name="content" cols=35 rows=25 required=true class="full-width"
-				data-attachments=0 data-savebtn=0 data-preview-url="!users/mailing/write.php?id=%s&preview"|local_url|args:$mailing.id data-format="markdown" placeholder="Contenu du message…" default=$mailing.body}
+				data-attachments=0 data-savebtn=0 data-preview-url="!users/mailing/edit.php?id=%s&preview"|local_url|args:$mailing.id data-format="markdown" placeholder="Contenu du message…" default=$mailing.body}
 	</fieldset>
+
+	{if !$mailing->exists()}
+		<p class="help">Vous pourrez sélectionner les destinataires à l'étape suivante.</p>
+	{/if}
 
 	<p class="submit">
 		{csrf_field key=$csrf_key}

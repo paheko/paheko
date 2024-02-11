@@ -1,18 +1,11 @@
 {include file="_head.tpl" title="Messages collectifs" current="users/mailing"}
 
-<nav class="tabs">
-	<aside>
-		{linkbutton shape="plus" label="Nouveau message" href="new.php" target="_dialog"}
-	</aside>
-	<ul>
-		<li class="current"><a href="{$self_url}">Messages collectifs</a></li>
-		<li><a href="optout.php">Désinscriptions</a></li>
-		<li><a href="rejected.php">Adresses rejetées</a></li>
-	</ul>
-</nav>
+{include file="./_nav.tpl" current="index"}
 
-{if $_GET.msg == 'DELETE'}
+{if $_GET.msg === 'DELETE'}
 	<p class="confirm block">Le message a bien été supprimé.</p>
+{elseif $_GET.msg === 'FORCED'}
+	<p class="confirm block">La file d'attente a été envoyée.</p>
 {/if}
 
 {if !$list->count()}
@@ -29,9 +22,6 @@
 			<td>{if $row.sent}{$row.sent|relative_date:true}{else}Brouillon{/if}</td>
 			<td class="actions">
 				{linkbutton shape="eye" label="Ouvrir" href="details.php?id=%d"|args:$row.id}
-				{if !$row.sent}
-					{linkbutton shape="edit" label="Modifier" href="write.php?id=%d"|args:$row.id}
-				{/if}
 				{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$row.id target="_dialog"}
 			</td>
 		</tr>

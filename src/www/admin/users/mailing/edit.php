@@ -3,16 +3,24 @@ namespace Paheko;
 
 use Paheko\Users\Session;
 use Paheko\Email\Mailings;
+use Paheko\Entities\Email\Mailing;
 
 require_once __DIR__ . '/_inc.php';
 
-$mailing = Mailings::get((int)qg('id'));
+$id = intval($_GET['id'] ?? 0);
 
-if (!$mailing) {
-	throw new UserException('Invalid mailing ID');
+if ($id !== 0) {
+	$mailing = Mailings::get($id);
+
+	if (!$mailing) {
+		throw new UserException('Invalid mailing ID');
+	}
+}
+else {
+	$mailing = new Mailing;
 }
 
-$csrf_key = 'mailing_write';
+$csrf_key = 'mailing_edit';
 
 $form->runIf('save', function () use ($mailing) {
 	$mailing->importForm();
@@ -44,4 +52,4 @@ $tpl->assign(compact('mailing', 'csrf_key'));
 $tpl->assign('custom_js', ['web_editor.js']);
 $tpl->assign('custom_css', ['web.css', BASE_URL . 'content.css']);
 
-$tpl->display('users/mailing/write.tpl');
+$tpl->display('users/mailing/edit.tpl');
