@@ -50,7 +50,7 @@ trait FileThumbnailTrait
 			$path = $this->createDocumentThumbnail();
 
 			if (!$path) {
-				throw new \RuntimeException('Cannot get image object as document thumbnail does not exist');
+				return null;
 			}
 		}
 		else {
