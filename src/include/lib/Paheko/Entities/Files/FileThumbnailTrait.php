@@ -259,7 +259,8 @@ trait FileThumbnailTrait
 			$p = $this->getReadOnlyPointer();
 
 			if (!$p) {
-				throw new \LogicException('The file cannot be found in storage, unable to create thumbnail: ' . $this->path);
+				// File does not exist in storage backend, we can't generate a thumbnail
+				return null;
 			}
 
 			$tmpfile = tempnam(CACHE_ROOT, 'thumb-');
