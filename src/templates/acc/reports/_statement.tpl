@@ -14,14 +14,14 @@ $max = max(count($statement->body_left), count($statement->body_right));
 		<tr>
 			<td></td>
 			<td></td>
-			<td class="money" width="10%">{$year->label_years()}</td>
 			<td class="money" width="10%">{$year2->label_years()}</td>
+			<td class="money" width="10%">{$year->label_years()}</td>
 			<td class="money" width="10%">Écart</td>
 			<td class="spacer"></td>
 			<td></td>
 			<td></td>
-			<td class="money" width="10%">{$year->label_years()}</td>
 			<td class="money" width="10%">{$year2->label_years()}</td>
+			<td class="money" width="10%">{$year->label_years()}</td>
 			<td class="money" width="10%">Écart</td>
 		</tr>
 	{/if}
@@ -41,9 +41,11 @@ $max = max(count($statement->body_left), count($statement->body_right));
 					{/if}
 				</td>
 				<th>{$row.label}</th>
-				<td class="money">{$row.balance|raw|money:false}</td>
 				{if isset($year2)}
 					<td class="money">{$row.balance2|raw|money:false}</td>
+				{/if}
+				<td class="money">{$row.balance|raw|money:false}</td>
+				{if isset($year2)}
 					<td class="money">{$row.change|raw|money:false:true}</td>
 				{/if}
 			{else}
@@ -60,9 +62,11 @@ $max = max(count($statement->body_left), count($statement->body_right));
 					{/if}
 				</td>
 				<th>{$row.label}</th>
-				<td class="money">{$row.balance|raw|money:false}</td>
 				{if isset($year2)}
 					<td class="money">{$row.balance2|raw|money:false}</td>
+				{/if}
+				<td class="money">{$row.balance|raw|money:false}</td>
+				{if isset($year2)}
 					<td class="money">{$row.change|raw|money:false:true}</td>
 				{/if}
 			{else}
@@ -82,9 +86,11 @@ $max = max(count($statement->body_left), count($statement->body_right));
 		<tr class="{$class}">
 		{if $row}
 			<th colspan="2">{$row.label}</th>
-			<td class="money" width="10%">{$row.balance|raw|money:false}</td>
 			{if $row.balance2 || $row.change}
 			<td class="money" width="10%">{$row.balance2|raw|money:false}</td>
+			{/if}
+			<td class="money" width="10%">{$row.balance|raw|money:false}</td>
+			{if $row.balance2 || $row.change}
 			<td class="money" width="10%">{$row.change|raw|money:false:true}</td>
 			{/if}
 		{else}
@@ -94,9 +100,11 @@ $max = max(count($statement->body_left), count($statement->body_right));
 		<?php $row = $statement->foot_right[$i] ?? null; ?>
 		{if $row}
 			<th colspan="2">{$row.label}</th>
-			<td class="money" width="10%">{$row.balance|raw|money:false}</td>
 			{if $row.balance2 || $row.change}
 			<td class="money" width="10%">{$row.balance2|raw|money:false}</td>
+			{/if}
+			<td class="money" width="10%">{$row.balance|raw|money:false}</td>
+			{if $row.balance2 || $row.change}
 			<td class="money" width="10%">{$row.change|raw|money:false:true}</td>
 			{/if}
 		{else}

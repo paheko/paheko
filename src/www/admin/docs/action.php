@@ -28,17 +28,19 @@ $form->runIf('zip', function() use ($check, $session) {
 }, $csrf_key);
 
 $form->runIf('delete', function () use ($check) {
-	foreach ($check as &$file) {
-		$file = Files::get($file);
+	$files = [];
+
+	foreach ($check as $path) {
+		$file = Files::get($path);
 
 		if (!$file || !$file->canMoveToTrash()) {
-			throw new UserException('Vous n\'avez pas le droit de mettre ce fichier à la corbeille : ' . $file->path);
+			throw new UserException('Vous n\'avez pas le droit de mettre ce fichier à la corbeille : ' . $path);
 		}
+
+		$files[] = $file;
 	}
 
-	unset($file);
-
-	foreach ($check as $file) {
+	foreach ($files as $file) {
 		$file->moveToTrash();
 	}
 }, $csrf_key, '!docs/?path=' . $parent);

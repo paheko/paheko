@@ -8,9 +8,9 @@
 		</form>
 		{if !$config.site_disabled}
 			{if $page && $page->isOnline()}
-				{linkbutton shape="eye" label="Voir sur le site" target="_blank" href=$page->url()}
+				{linkbutton shape="eye" label="Voir sur le site" href=$page->url()}
 			{elseif !$page}
-				{linkbutton shape="eye" label="Voir sur le site" target="_blank" href=$www_url}
+				{linkbutton shape="eye" label="Voir sur le site" href=$www_url}
 			{/if}
 		{/if}
 	</aside>

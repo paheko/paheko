@@ -152,28 +152,27 @@ class Utils
 		}
 	}
 
-	static public function strftime_fr($ts, $format)
+	static public function strftime_fr($ts, $format): string
 	{
 		$ts = self::get_datetime($ts);
 
 		if (null === $ts) {
-			return $ts;
+			return '';
 		}
 
 		$date = Translate::strftime($format, $ts, 'fr_FR');
 		return $date;
 	}
 
-	static public function date_fr($ts, $format = null)
+	static public function date_fr($ts, $format = null): string
 	{
 		$ts = self::get_datetime($ts);
 
-		if (null === $ts) {
-			return $ts;
+		if (!$ts) {
+			return '';
 		}
 
-		if (is_null($format))
-		{
+		if (empty($format)) {
 			$format = 'd/m/Y à H:i';
 		}
 
