@@ -31,7 +31,7 @@ $form->runIf('delete', function () use ($check) {
 	$files = [];
 
 	foreach ($check as $path) {
-		$file = Files::get($file);
+		$file = Files::get($path);
 
 		if (!$file || !$file->canMoveToTrash()) {
 			throw new UserException('Vous n\'avez pas le droit de mettre ce fichier à la corbeille : ' . $path);
