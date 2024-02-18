@@ -109,6 +109,11 @@ class Service extends Entity
 				'label' => 'Tarif',
 				'select' => 'sf.label',
 			],
+			'amount' => [
+				'label' => 'Montant de l\'inscription',
+				'select' => 'sub.expected_amount',
+				'export' => true,
+			],
 			'date' => [
 				'label' => 'Date d\'inscription',
 				'select' => 'sub.date',
@@ -134,6 +139,7 @@ class Service extends Entity
 		$list->setExportCallback(function (&$row) {
 			$row->status = $row->status == -1 ? 'En retard' : ($row->status == 1 ? 'En cours' : '');
 			$row->paid = $row->paid ? 'Oui' : 'Non';
+			$row->amount = $row->amount ? Utils::money_format($row->amount, '.', '', false) : null;
 		});
 
 		return $list;
