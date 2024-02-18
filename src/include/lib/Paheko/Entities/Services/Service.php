@@ -78,11 +78,6 @@ class Service extends Entity
 				'label' => 'Activité',
 				'export' => true,
 			],
-			'fee_label' => [
-				'select' => 'sf.label',
-				'label' => 'Tarif',
-				'export' => true,
-			],
 			'user_number' => [
 				'label' => 'Numéro de membre',
 				'select' => 'u.' . DynamicFields::getNumberField(),
