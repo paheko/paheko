@@ -636,7 +636,7 @@ class Utils
 
 	static public function suggestPassword()
 	{
-		return Security::getRandomPassphrase(ROOT . '/include/data/dictionary.fr');
+		return Security::getRandomPassphrase(ROOT . '/include/data/locales/fr/dictionary.txt');
 	}
 
 	static public function normalizePhoneNumber($n)
