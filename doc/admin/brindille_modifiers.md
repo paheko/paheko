@@ -63,6 +63,24 @@ Crée un lien protégé pour une adresse email, pour éviter que l'adresse ne so
 
 # Filtres de tableaux
 
+## array_to_list
+
+Transforme un tableau en liste textuelle, par exemple pour envoyer dans un e-mail.
+
+```
+{{:assign var="table" a="blue" b="cyan"}}
+{{:assign var="table.c" color1="darkred" color2="darkgreen"}}
+{{$table|array}}
+```
+
+```
+a = blue
+b = cyan
+c =
+ color1 = darkred
+ color2 = darkgreen
+```
+
 ## has
 
 Renvoie vrai si le tableau contient l'élément passé en paramètre.

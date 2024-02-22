@@ -52,6 +52,7 @@ class Modifiers
 		'ksort',
 		'max',
 		'min',
+		'array_to_list',
 		'quote_sql_identifier',
 		'quote_sql',
 		'sql_where',
@@ -518,6 +519,34 @@ EOS;
 	static public function min($value)
 	{
 		return min((array)$value);
+	}
+
+	static public function array_to_list($value, int $i = 0): string
+	{
+		$out = '';
+
+		foreach ((array)$value as $k => $v) {
+			$out .= str_repeat(' ', $i);
+
+			if (!is_int($k)) {
+				$out .= $k . ' = ';
+			}
+			else {
+				$out .= ($k + 1) . ' = ';
+			}
+
+			if (is_array($v) || is_object($v)) {
+				$out .= "\n";
+				$out .= self::array_to_list($v, $i + 1);
+			}
+			else {
+				$out .= $v;
+			}
+
+			$out .= "\n";
+		}
+
+		return rtrim($out);
 	}
 
 	static public function quote_sql_identifier($in, string $prefix = '')
