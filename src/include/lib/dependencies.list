@@ -24,6 +24,7 @@ KD2/HTML/TableToXLSX.php
 KD2/HTML/Markdown.php
 KD2/HTML/Markdown_Extensions.php
 KD2/HTTP.php
+KD2/I18N/TimeZones.php
 KD2/Mail_Message.php
 KD2/Office/Calc/Writer.php
 KD2/Office/ToText.php
