@@ -258,8 +258,6 @@ else {
 // PHP devrait être assez intelligent pour chopper la TZ système mais nan
 // il sait pas faire (sauf sur Debian qui a le bon patch pour ça), donc pour
 // éviter le message d'erreur à la con on définit une timezone par défaut
-// Pour utiliser une autre timezone, il suffit de définir date.timezone dans
-// un .htaccess ou dans CONFIG_FILE
 if (!ini_get('date.timezone') || ini_get('date.timezone') === 'UTC') {
 	if (($tz = @date_default_timezone_get()) && $tz !== 'UTC') {
 		ini_set('date.timezone', $tz);
@@ -399,8 +397,7 @@ if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) && !empty($_SERVE
  * Vérifications pour enclencher le processus d'installation ou de mise à jour
  */
 
-if (!defined('Paheko\INSTALL_PROCESS'))
-{
+if (!defined('Paheko\INSTALL_PROCESS')) {
 	$exists = file_exists(DB_FILE);
 
 	if (!$exists) {
@@ -421,5 +418,9 @@ if (!defined('Paheko\INSTALL_PROCESS'))
 		}
 
 		Utils::redirect(ADMIN_URL . 'upgrade.php');
+	}
+
+	if (Config::getInstance()->timezone) {
+		@date_default_timezone_set(Config::getInstance()->timezone);
 	}
 }

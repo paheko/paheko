@@ -8,6 +8,7 @@ use Paheko\Entities\Files\File;
 
 use KD2\SMTP;
 use KD2\Graphics\Image;
+use KD2\I18N\TimeZones;
 
 class Config extends Entity
 {
@@ -115,6 +116,7 @@ class Config extends Entity
 
 	protected string $currency;
 	protected string $country;
+	protected ?string $timezone;
 
 	protected int $default_category;
 
@@ -279,6 +281,13 @@ class Config extends Entity
 
 		$db = DB::getInstance();
 		$this->assert($db->test('users_categories', 'id = ?', $this->default_category), 'Catégorie de membres inconnue');
+
+		$tzlist = TimeZones::listForCountry($this->country);
+
+		// Make sure we set a valid timezone
+		if (!array_key_exists($this->timezone, $tzlist)) {
+			$this->set('timezone', key($tzlist));
+		}
 	}
 
 	public function getSiteURL(): ?string
