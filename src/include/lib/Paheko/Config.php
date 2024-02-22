@@ -116,7 +116,7 @@ class Config extends Entity
 
 	protected string $currency;
 	protected string $country;
-	protected ?string $timezone;
+	protected ?string $timezone = null;
 
 	protected int $default_category;
 
