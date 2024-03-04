@@ -22,7 +22,8 @@ class CSV_Custom
 	{
 		$this->session = $session;
 		$this->key = $key;
-		$id = $session::getUserId() ?: 'anon';
+		$id = $session ? $session::getUserId() : null;
+		$id ??= 'anon';
 		$this->cache_key = $id . '_' . $key;
 
 		if ($this->cache_key && !Static_Cache::hasExpired($this->cache_key)) {
