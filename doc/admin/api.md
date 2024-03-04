@@ -426,6 +426,22 @@ Met à jour la liste des membres liés à une écriture, en utilisant les ID de 
 
 Efface la liste des membres liés à une écriture.
 
+### accounting/transaction/{ID_TRANSACTION}/transactions (GET)
+
+Renvoie la liste des écritures liées à une écriture.
+
+### accounting/transaction/{ID_TRANSACTION}/transactions (POST)
+
+Met à jour la liste des écritures liées à une écriture, en utilisant les ID des écritures, passées dans un tableau nommé `transactions`.
+
+```
+ curl -v "http://…/api/accounting/transaction/9337/transactions"  -F 'transactions[]=2'
+```
+
+### accounting/transaction/{ID_TRANSACTION}/transactions (DELETE)
+
+Efface la liste des écritures liées à une écriture.
+
 ### accounting/transaction/{ID_TRANSACTION}/subscriptions (GET)
 
 _(Depuis la version 1.3.6)_

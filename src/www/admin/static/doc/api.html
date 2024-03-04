@@ -107,6 +107,9 @@
 				<li><a href="#accounting-transaction-id_transaction-users-get">accounting/transaction/{ID_TRANSACTION}/users (GET)</a></li>
 				<li><a href="#accounting-transaction-id_transaction-users-post">accounting/transaction/{ID_TRANSACTION}/users (POST)</a></li>
 				<li><a href="#accounting-transaction-id_transaction-users-delete">accounting/transaction/{ID_TRANSACTION}/users (DELETE)</a></li>
+				<li><a href="#accounting-transaction-id_transaction-transactions-get">accounting/transaction/{ID_TRANSACTION}/transactions (GET)</a></li>
+				<li><a href="#accounting-transaction-id_transaction-transactions-post">accounting/transaction/{ID_TRANSACTION}/transactions (POST)</a></li>
+				<li><a href="#accounting-transaction-id_transaction-transactions-delete">accounting/transaction/{ID_TRANSACTION}/transactions (DELETE)</a></li>
 				<li><a href="#accounting-transaction-id_transaction-subscriptions-get">accounting/transaction/{ID_TRANSACTION}/subscriptions (GET)</a></li>
 				<li><a href="#accounting-transaction-id_transaction-subscriptions-post">accounting/transaction/{ID_TRANSACTION}/subscriptions (POST)</a></li>
 				<li><a href="#accounting-transaction-id_transaction-subscriptions-delete">accounting/transaction/{ID_TRANSACTION}/subscriptions (DELETE)</a></li>
@@ -383,6 +386,13 @@ curl https://test:abcd@monpaheko.tld/api/services/subscriptions/import -T /tmp/i
 <pre><code> curl -v "http://…/api/accounting/transaction/9337/users"  -F 'users[]=2'</code></pre>
 <h3 id="accounting-transaction-id_transaction-users-delete">accounting/transaction/{ID_TRANSACTION}/users (DELETE)</h3>
 <p>Efface la liste des membres liés à une écriture.</p>
+<h3 id="accounting-transaction-id_transaction-transactions-get">accounting/transaction/{ID_TRANSACTION}/transactions (GET)</h3>
+<p>Renvoie la liste des écritures liées à une écriture.</p>
+<h3 id="accounting-transaction-id_transaction-transactions-post">accounting/transaction/{ID_TRANSACTION}/transactions (POST)</h3>
+<p>Met à jour la liste des écritures liées à une écriture, en utilisant les ID des écritures, passées dans un tableau nommé <code>transactions</code>.</p>
+<pre><code> curl -v "http://…/api/accounting/transaction/9337/transactions"  -F 'transactions[]=2'</code></pre>
+<h3 id="accounting-transaction-id_transaction-transactions-delete">accounting/transaction/{ID_TRANSACTION}/transactions (DELETE)</h3>
+<p>Efface la liste des écritures liées à une écriture.</p>
 <h3 id="accounting-transaction-id_transaction-subscriptions-get">accounting/transaction/{ID_TRANSACTION}/subscriptions (GET)</h3>
 <p><em>(Depuis la version 1.3.6)</em></p>
 <p>Renvoie la liste des inscriptions (aux activités) liées à une écriture.</p>
