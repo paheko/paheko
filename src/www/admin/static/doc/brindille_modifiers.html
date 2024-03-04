@@ -77,6 +77,7 @@
 			<li><a href="#implode">implode</a></li>
 			<li><a href="#map">map</a></li>
 			<li><a href="#ksort-sort">ksort, sort</a></li>
+			<li><a href="#reverse">reverse</a></li>
 			<li><a href="#max-min">max, min</a>
 		</ol></li>
 		<li><a href="#filtres-de-texte">Filtres de texte</a>
@@ -394,6 +395,12 @@ bleu - orange</code></pre>
 <p>Affichera :</p>
 <pre><code>1,2,3
 2,3,1</code></pre>
+<h2 id="reverse">reverse</h2>
+<p>Inverse l'ordre des éléments d'un tableau.</p>
+<pre><code>{{:assign var="table" b="B" a="A" c="AC"}}
+{{$table|reverse|implode:","}}</code></pre>
+<p>Affichera :</p>
+<pre><code>AC,A,B</code></pre>
 <h2 id="max-min">max, min</h2>
 <p>Renvoie respectivement la valeur la plus haute ou la plus basse d'un tableau de valeurs numériques.</p>
 <pre><code>{{:assign var="table" b="3" a="2" c="1"}}

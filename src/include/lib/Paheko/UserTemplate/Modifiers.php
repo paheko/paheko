@@ -50,6 +50,7 @@ class Modifiers
 		'key_in',
 		'sort',
 		'ksort',
+		'reverse',
 		'max',
 		'min',
 		'array_to_list',
@@ -509,6 +510,11 @@ EOS;
 		$value = (array)$value;
 		natcasesort($value);
 		return $value;
+	}
+
+	static public function reverse($value)
+	{
+		return array_reverse((array)$value, true);
 	}
 
 	static public function max($value)

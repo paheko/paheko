@@ -255,6 +255,21 @@ Affichera :
 2,3,1
 ```
 
+## reverse
+
+Inverse l'ordre des éléments d'un tableau.
+
+```
+{{:assign var="table" b="B" a="A" c="AC"}}
+{{$table|reverse|implode:","}}
+```
+
+Affichera :
+
+```
+AC,A,B
+```
+
 ## max, min
 
 Renvoie respectivement la valeur la plus haute ou la plus basse d'un tableau de valeurs numériques.
