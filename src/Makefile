@@ -1,13 +1,16 @@
 .PHONY: dev-server release deps publish check-dependencies test minify phpstan www htaccess modules installer plugins
-KD2_FILE := https://fossil.kd2.org/kd2fw/uv/KD2-7.4.zip
-MODULES_FILE := https://fossil.kd2.org/paheko-modules/zip/trunk/modules.zip
-PLUGINS_FILE := https://fossil.kd2.org/paheko-plugins/zip/trunk/plugins.zip
+KD2FW_BRANCH := trunk
+MODULES_BRANCH := trunk
+PLUGINS_BRANCH := trunk
+KD2FW_URL := https://fossil.kd2.org/kd2fw/
+MODULES_URL := https://fossil.kd2.org/paheko-modules/
+PLUGINS_URL := https://fossil.kd2.org/paheko-plugins/
 
 deps:
 	$(eval TMP_KD2=$(shell mktemp -d))
 	#cd ${TMP_KD2}
 
-	wget ${KD2_FILE} -O ${TMP_KD2}/kd2.zip
+	wget ${KD2FW_URL}zip/${KD2FW_BRANCH}/kd2.zip -O ${TMP_KD2}/kd2.zip
 
 	rm -rf "include/lib/KD2"
 	unzip "${TMP_KD2}/kd2.zip" -d include/lib
@@ -15,12 +18,12 @@ deps:
 	rm -rf ${TMP_KD2}
 
 modules:
-	wget ${MODULES_FILE} -O modules.zip
+	wget ${MODULES_URL}zip/${MODULES_BRANCH}/modules.zip -O modules.zip
 	unzip -u modules.zip
 	rm -f modules.zip
 
 plugins:
-	wget ${PLUGINS_FILE} -O plugins.zip
+	wget ${PLUGINS_URL}zip/${PLUGINS_BRANCH}/plugins.zip -O plugins.zip
 	unzip -u plugins.zip -d data
 	rm -f plugins.zip
 
@@ -50,17 +53,40 @@ htaccess:
 		> www/.htaccess
 	cat apache-htaccess.conf >> www/.htaccess
 
+# Freeze versions before release
+freeze:
+	$(eval VERSION=$(shell cat VERSION))
+	php ../tools/fossil_get_branch_hash.php ${KD2FW_URL} ${KD2FW_BRANCH} > ../build/kd2fw.version
+	php ../tools/fossil_get_branch_hash.php ${MODULES_URL} ${MODULES_BRANCH} > ../build/modules.version
+	php ../tools/fossil_get_branch_hash.php ${PLUGINS_URL} ${PLUGINS_BRANCH} > ../build/plugins.version
+	fossil commit ../build/*.version --tag ${VERSION}
+
 release: test minify doc
 	$(eval VERSION=$(shell cat VERSION))
+	$(eval KD2FW_VERSION=$(shell cat ../build/kd2fw.version))
+	$(eval MODULES_VERSION=$(shell cat ../build/modules.version))
+	$(eval PLUGINS_VERSION=$(shell cat ../build/plugins.version))
+
 	rm -rf /tmp/paheko-build
 	mkdir -p /tmp/paheko-build
 	fossil zip ${VERSION} /tmp/paheko-build/src.zip --name paheko
 	unzip -d /tmp/paheko-build /tmp/paheko-build/src.zip
-	cd include/lib; \
-		rsync --files-from=dependencies.list -r ./ /tmp/paheko-build/paheko/src/include/lib/
+
+	# Download and package required KD2fw libraries
+	cd /tmp/paheko-build && \
+		mkdir -p kd2fw && cd kd2fw && \
+		wget ${KD2FW_URL}zip/${KD2FW_VERSION}/kd2.zip && \
+		unzip kd2.zip && \
+		cd ../paheko/src/include/lib && \
+		rsync --files-from=dependencies.list -r /tmp/paheko-build/kd2/src/lib/ /tmp/paheko-build/paheko/src/include/lib/
+
+	# Overwrite admin.css with united file
 	mv www/admin/static/mini.css /tmp/paheko-build/paheko/src/www/admin/static/admin.css
+
 	# Generate .htaccess file
 	cd /tmp/paheko-build/paheko/src && make htaccess
+
+	# Remove useless files
 	cd /tmp/paheko-build/paheko/src/www/admin/static; \
 		rm -f font/*.css font/*.json
 	cd /tmp/paheko-build/paheko/src; \
@@ -68,14 +94,14 @@ release: test minify doc
 
 	# Download modules and only keep the stable ones
 	cd /tmp/paheko-build/paheko/src && \
-		wget https://fossil.kd2.org/paheko-modules/zip/trunk/modules.zip && \
+		wget ${MODULES_URL}zip/${MODULES_VERSION}/modules.zip && \
 		unzip -o modules.zip && \
 		rm -rf `find modules/ -name 'ignore' -type f -execdir pwd \;` && \
 		rm -f modules.zip
 
 	# Download plugins and only keep the stable ones
 	cd /tmp/paheko-build/paheko/src/data && \
-		wget https://fossil.kd2.org/paheko-plugins/zip/trunk/plugins.zip && \
+		wget ${PLUGINS_URL}zip/${PLUGINS_VERSION}/plugins.zip && \
 		unzip -o plugins.zip && \
 		rm -rf `find plugins/ -name 'ignore' -type f -execdir pwd \;` && \
 		rm -f plugins.zip
