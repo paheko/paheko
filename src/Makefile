@@ -74,10 +74,9 @@ release: test minify doc
 
 	# Download and package required KD2fw libraries
 	cd /tmp/paheko-build && \
-		mkdir -p kd2fw && cd kd2fw && \
 		wget ${KD2FW_URL}zip/${KD2FW_VERSION}/kd2.zip && \
 		unzip kd2.zip && \
-		cd ../paheko/src/include/lib && \
+		cd paheko/src/include/lib && \
 		rsync --files-from=dependencies.list -r /tmp/paheko-build/kd2/src/lib/ /tmp/paheko-build/paheko/src/include/lib/
 
 	# Overwrite admin.css with united file
