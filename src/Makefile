@@ -61,6 +61,16 @@ freeze:
 	php ../tools/fossil_get_branch_hash.php ${PLUGINS_URL} ${PLUGINS_BRANCH} > ../build/plugins.version
 	fossil commit ../build/*.version --tag ${VERSION}
 
+verify:
+	echo "Verifying Paheko..."
+	cd .. && bash tools/fossil_verify.sh
+	echo "Verifying Plugins..."
+	cd data/plugins && bash ../../../tools/fossil_verify.sh ${PLUGINS_BRANCH} ${PLUGINS_URL}
+	echo "Verifying Modules..."
+	cd modules && bash ../../../tools/fossil_verify.sh ${MODULES_BRANCH} ${MODULES_URL}
+	echo "Verifying KD2fw..."
+	cd lib/KD2 && bash ../../../tools/fossil_verify.sh ${KD2FW_BRANCH} ${KD2FW_URL}
+
 release: test minify doc
 	$(eval VERSION=$(shell cat VERSION))
 	$(eval KD2FW_VERSION=$(shell cat ../build/kd2fw.version))

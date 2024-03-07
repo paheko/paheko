@@ -11,7 +11,16 @@ fi
 
 TMPMANIFEST=$(mktemp)
 
-fossil artifact ${REPO} "${TAG}" > ${TMPMANIFEST}
+if [[ "$2" =~ ^https?\:\/\/ ]]
+then
+	if [[ $(curl -L $2/raw/${TAG} -o ${TMPMANIFEST} -w '%{http_code}\n' -s) != "200" ]]
+	then
+		echo "Cannot download from $2"
+		exit 1
+	fi
+else
+	fossil artifact ${REPO} "${TAG}" > ${TMPMANIFEST}
+fi
 
 gpg --verify ${TMPMANIFEST} 2> /dev/null
 
@@ -37,6 +46,12 @@ do
 	FILE_ENCODED="${PARTS[1]}"
 	FILE="${PARTS[1]//\\s/ }"
 	HASH="${PARTS[2]}"
+
+	if [ ! -f "$FILE" ]
+	then
+		echo "! File is missing: $FILE"
+		continue
+	fi
 
 	if [ -L "$FILE" ]
 	then
