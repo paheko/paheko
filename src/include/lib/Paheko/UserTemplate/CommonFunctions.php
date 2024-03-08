@@ -34,6 +34,7 @@ class CommonFunctions
 		'delete_form',
 		'edit_user_field',
 		'user_field',
+		'tag',
 	];
 
 	static public function input(array $params)
@@ -905,5 +906,14 @@ class CommonFunctions
 		}
 
 		return $out;
+	}
+
+	static public function tag(array $params): string
+	{
+		return sprintf('<span class="tag%s" style="--tag-color: %s;">%s</span>',
+			!empty($params['small']) ? ' small' : '',
+			htmlspecialchars($params['color'] ?? '#999'),
+			htmlspecialchars($params['label'] ?? '')
+		);
 	}
 }

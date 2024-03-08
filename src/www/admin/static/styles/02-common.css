@@ -937,3 +937,17 @@ pre.preview {
 
     white-space: pre-wrap;
 }
+
+span.tag {
+    display: inline-block;
+    color: #fff;
+    text-shadow: 0px 0px 5px #000;
+    padding: .2rem .4rem;
+    background: #666;
+    background: var(--tag-color);
+    border-radius: .3rem;
+}
+
+span.tag.small {
+    font-size: .85em;
+}
