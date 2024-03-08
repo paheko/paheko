@@ -327,6 +327,14 @@ class Accounts
 		return true;
 	}
 
+	static public function getReconciledBalance(int $account_id, int $year_id): int
+	{
+		return (int) DB::getInstance()->firstColumn('SELECT SUM(l.credit) - SUM(l.debit)
+			FROM acc_transactions_lines l
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			WHERE t.id_year = ? AND l.id_account = ? AND l.reconciled = 1;', $year_id, $account_id);
+	}
+
 /* FIXME: implement closing of accounts
 
 	public function closeRevenueExpenseAccounts(Year $year, int $user_id)
