@@ -1,6 +1,8 @@
 #!/bin/bash
 
 TAG="${1-current}"
+ROOT="$3"
+ROOT_LENGTH="${#ROOT}"
 
 if [ "$2" != "" ]
 then
@@ -46,6 +48,18 @@ do
 	FILE_ENCODED="${PARTS[1]}"
 	FILE="${PARTS[1]//\\s/ }"
 	HASH="${PARTS[2]}"
+
+	if [ ${ROOT_LENGTH} -gt 0 ]
+	then
+		if [[ ${FILE:0:$ROOT_LENGTH} != ${ROOT} ]]
+		then
+			# Ignoring files out of the path
+			echo "$LINE" >> $TMPFILE
+			continue
+		else
+			FILE=${FILE:$ROOT_LENGTH+1}
+		fi
+	fi
 
 	if [ ! -f "$FILE" ]
 	then
