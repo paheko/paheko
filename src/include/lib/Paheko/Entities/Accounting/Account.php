@@ -511,6 +511,14 @@ class Account extends Entity
 			unset($columns['locked']);
 		}
 
+		if ($this->type === self::TYPE_BANK) {
+			$columns['reconciled'] = [
+				'label' => 'Rapprochée',
+				'header_icon' => 'check',
+				'select' => 'l.reconciled',
+			];
+		}
+
 		$tables = 'acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
 			LEFT JOIN acc_projects p ON p.id = l.id_project';
