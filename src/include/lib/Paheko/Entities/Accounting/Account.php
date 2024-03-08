@@ -3,6 +3,7 @@
 namespace Paheko\Entities\Accounting;
 
 use DateTimeInterface;
+use KD2\DB\Date;
 use Paheko\Config;
 use Paheko\CSV_Custom;
 use Paheko\DB;
@@ -268,6 +269,10 @@ class Account extends Entity
 			'select' => 't.status',
 		],
 	];
+
+	const RECONCILE_ALL = 0;
+	const RECONCILE_ONLY = 1;
+	const RECONCILE_MISSING = 2;
 
 	protected ?int $id;
 	protected int $id_chart;
@@ -620,21 +625,38 @@ class Account extends Entity
 		return $position;
 	}
 
-	public function getReconcileJournal(int $year_id, DateTimeInterface $start_date, DateTimeInterface $end_date, bool $only_non_reconciled = false)
+	public function hasUnreconciledLinesBefore(int $year_id, DateTimeInterface $start_date): bool
+	{
+		return (bool) DB::getInstance()->firstColumn('SELECT 1 FROM acc_transactions_lines l
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			WHERE l.id_account = ? AND t.id_year = ? AND l.reconciled = 0 AND t.date < ?
+			LIMIT 1;',
+			$this->id(), $year_id, Date::createFromInterface($start_date));
+	}
+
+	public function getReconcileJournal(int $year_id, DateTimeInterface $start_date, DateTimeInterface $end_date, int $filter = self::RECONCILE_ALL, bool $desc = false)
 	{
 		if ($end_date < $start_date) {
 			throw new ValidationException('La date de début ne peut être avant la date de fin.');
 		}
 
-		$condition = $only_non_reconciled ? ' AND l.reconciled = 0' : '';
+		$condition = '';
+
+		if ($filter === self::RECONCILE_ONLY) {
+			$condition = ' AND l.reconciled = 1';
+		}
+		elseif ($filter === self::RECONCILE_MISSING) {
+			$condition = ' AND l.reconciled = 0';
+		}
 
 		$db = DB::getInstance();
 		$sql = 'SELECT l.debit, l.credit, t.id, t.date, t.reference, l.reference AS line_reference, t.label, l.label AS line_label, l.reconciled, l.id AS id_line
 			FROM acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
 			WHERE l.id_account = ? AND t.id_year = ? AND t.date >= ? AND t.date <= ? %s
-			ORDER BY t.date, t.id;';
-		$rows = $db->iterate(sprintf($sql, $condition), $this->id(), $year_id, $start_date->format('Y-m-d'), $end_date->format('Y-m-d'));
+			ORDER BY t.date %s, t.id %1$s;';
+		$sql = sprintf($sql, $condition, $desc ? 'DESC' : 'ASC');
+		$rows = $db->iterate($sql, $this->id(), $year_id, $start_date->format('Y-m-d'), $end_date->format('Y-m-d'));
 
 		$sum = $this->getSumAtDate($year_id, $start_date);
 		$reconciled_sum = $this->getSumAtDate($year_id, $start_date, true);
@@ -660,7 +682,7 @@ class Account extends Entity
 			yield $row;
 		}
 
-		if (!$only_non_reconciled) {
+		if (!$filter) {
 			yield (object) ['sum' => $sum, 'reconciled_sum' => $reconciled_sum, 'date' => $end_date];
 		}
 	}

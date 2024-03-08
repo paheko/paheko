@@ -474,14 +474,24 @@
 		i.firstChild.focus();
 	};
 
-	g.formatMoney = (v) => {
+	g.formatMoney = (v, html) => {
 		if (!v) {
 			return '0,00';
 		}
 
 		var s = v < 0 ? '-' : '';
 		v = '' + Math.abs(v);
-		return s + (v.substr(0, v.length-2) || '0') + ',' + ('00' + v).substr(-2);
+
+		var units = v.substr(0, v.length-2) || '0';
+
+		if (html) {
+			// Add spacer
+			units = units.split("").reverse().join("");
+			units = units.replace(/(\d{3})/g, "$1\xa0");
+			units = units.split("").reverse().join("").trim("\xa0");
+		}
+
+		return s + units + ',' + ('00' + v).substr(-2);
 	};
 
 	g.getMoneyAsInt = (v) => {

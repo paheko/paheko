@@ -26,7 +26,25 @@ if ($account->id_chart != $current_year->id_chart) {
 
 $start = new \DateTime('first day of this month');
 $end = new \DateTime('last day of this month');
-$only = (bool) qg('only');
+$filter = (int)qg('filter') ?: $account::RECONCILE_ALL;
+$desc = (bool) qg('desc');
+$sum_start = Utils::moneyToInteger(qg('sum_start'));
+$sum_end = Utils::moneyToInteger(qg('sum_end'));
+$has_advanced_options = $filter || $sum_start || $sum_end || $desc;
+
+$sum_start_diff = null;
+$sum_end_diff = null;
+
+$desc_options = [
+	0 => 'Chronologique',
+	1 => 'Du plus récent au plus ancien',
+];
+
+$filter_options = [
+	$account::RECONCILE_ALL => 'Toutes les écritures',
+	$account::RECONCILE_ONLY => 'Seulement les écritures rapprochées',
+	$account::RECONCILE_MISSING => 'Seulement les écritures non rapprochées',
+];
 
 if (null !== qg('start') && null !== qg('end'))
 {
@@ -50,10 +68,18 @@ if ($start > $end) {
 	$end = clone $start;
 }
 
-$journal = $account->getReconcileJournal($current_year->id(), $start, $end, $only);
+$journal = $account->getReconcileJournal($current_year->id(), $start, $end, $filter, $desc);
+
+$has_unreconciled = $account->hasUnreconciledLinesBefore($current_year->id(), $start);
+
+if ($sum_end) {
+	$sum_after = $account->getSumAtDate($current_year->id(), (clone $end)->modify('+1 day'), true);
+	$sum_after *= -1;
+	$sum_end_diff = $sum_after - $sum_end;
+}
 
 // Enregistrement des cases cochées
-$form->runIf(f('save') || f('save_next'), function () use ($journal, $start, $account, $only) {
+$form->runIf(f('save') || f('save_next'), function () use ($journal, $start, $account, $filter, $desc) {
 	Transactions::saveReconciled($journal, f('reconcile'));
 
 	if (f('save')) {
@@ -61,8 +87,8 @@ $form->runIf(f('save') || f('save_next'), function () use ($journal, $start, $ac
 	}
 	else {
 		$start->modify('+1 month');
-		$url = sprintf('%sacc/accounts/reconcile.php?id=%s&start=%s&end=%s&only=%d',
-			ADMIN_URL, $account->id(), $start->format('01/m/Y'), $start->format('t/m/Y'), $only);
+		$url = sprintf('%sacc/accounts/reconcile.php?id=%s&start=%s&end=%s&filter=%d&desc=%d',
+			ADMIN_URL, $account->id(), $start->format('01/m/Y'), $start->format('t/m/Y'), $filter, $desc);
 		Utils::redirect($url);
 	}
 }, 'acc_reconcile_' . $account->id());
@@ -85,18 +111,16 @@ $self_uri = Utils::getSelfURI(false);
 if (null !== $prev) {
 	$prev = [
 		'date' => $prev,
-		'url' => sprintf($self_uri . '?id=%d&start=%s&end=%s&only=%d', $account->id, $prev->format('01/m/Y'), $prev->format('t/m/Y'), $only),
+		'url' => sprintf($self_uri . '?id=%d&start=%s&end=%s&filter=%d&desc=%d', $account->id, $prev->format('01/m/Y'), $prev->format('t/m/Y'), $filter, $desc),
 	];
 }
 
 if (null !== $next) {
 	$next = [
 		'date' => $next,
-		'url' => sprintf($self_uri . '?id=%d&start=%s&end=%s&only=%d', $account->id, $next->format('01/m/Y'), $next->format('t/m/Y'), $only),
+		'url' => sprintf($self_uri . '?id=%d&start=%s&end=%s&filter=%d&desc=%d', $account->id, $next->format('01/m/Y'), $next->format('t/m/Y'), $filter, $desc),
 	];
 }
-
-$final_sum = qg('final_sum');
 
 $tpl->assign(compact(
 	'account',
@@ -105,8 +129,16 @@ $tpl->assign(compact(
 	'prev',
 	'next',
 	'journal',
-	'only',
-	'final_sum'
+	'filter',
+	'filter_options',
+	'sum_start',
+	'sum_start_diff',
+	'sum_end',
+	'sum_end_diff',
+	'has_unreconciled',
+	'has_advanced_options',
+	'desc',
+	'desc_options'
 ));
 
 $tpl->display('acc/accounts/reconcile.tpl');
