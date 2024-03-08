@@ -54,7 +54,10 @@
 		{/if}
 			{linkbutton shape="search" href="!acc/search.php?year=%d&account=%s"|args:$year.id,$account.code label="Recherche"}
 		{if $year.id == CURRENT_YEAR_ID}
-			{linkbutton href="!acc/transactions/new.php?account=%d"|args:$account.id label="Saisir une écriture dans ce compte" shape="plus"}
+			{if $account.type == $account::TYPE_BANK}
+				{linkbutton label="Rapprochement" shape="check" href="reconcile.php?id=%d"|args:$account.id}
+			{/if}
+			{linkbutton href="!acc/transactions/new.php?account=%d"|args:$account.id label="Saisie" shape="plus"}
 		{/if}
 		</aside>
 	</nav>
