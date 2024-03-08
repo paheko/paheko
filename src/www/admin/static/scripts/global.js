@@ -485,13 +485,19 @@
 	};
 
 	g.getMoneyAsInt = (v) => {
-		v = v.replace(/[^0-9.,]/, '');
+		v = v.replace(/[^0-9.,-]/, '');
 		if (v.length == 0) return;
+		var m = 1;
+
+		if (v.match(/^-/)) {
+			m = -1;
+			v = v.substr(1);
+		}
 
 		v = v.split(/[,.]/);
 		var d = v.length == 2 ? v[1] : '0';
 		v = v[0] + (d + '00').substr(0, 2);
-		v = parseInt(v, 10);
+		v = parseInt(v, 10) * m;
 		return v;
 	};
 

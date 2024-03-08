@@ -96,6 +96,8 @@ if (null !== $next) {
 	];
 }
 
+$final_sum = qg('final_sum');
+
 $tpl->assign(compact(
 	'account',
 	'start',
@@ -103,7 +105,8 @@ $tpl->assign(compact(
 	'prev',
 	'next',
 	'journal',
-	'only'
+	'only',
+	'final_sum'
 ));
 
 $tpl->display('acc/accounts/reconcile.tpl');
