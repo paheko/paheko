@@ -19,7 +19,7 @@
 			<dd>Paheko {$paheko_version}</dd>
 			<dd class="help">
 				Le développement et le support de Paheko ne sont possibles que grâce à votre soutien&nbsp;!<br />
-				{linkbutton href="https://kd2.org/soutien.html" label="Faire un don pour soutenir le développement" target="_blank" shape="export"} :-)
+				{linkbutton href="https://paheko.cloud/don/" label="Faire un don pour soutenir le développement" target="_blank" shape="export"} :-)
 			</dd>
 			{if $new_version}
 			<dd><p class="block alert">
