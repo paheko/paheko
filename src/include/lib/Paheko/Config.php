@@ -119,6 +119,8 @@ class Config extends Entity
 	protected ?string $timezone = null;
 
 	protected int $default_category;
+	protected ?bool $show_parent_column = true;
+	protected ?bool $show_has_children_column = true;
 
 	protected ?int $backup_frequency;
 	protected ?int $backup_limit;
@@ -232,8 +234,14 @@ class Config extends Entity
 
 	public function importForm($source = null): void
 	{
-		if (null === $source) {
-			$source = $_POST;
+		$source ??= $_POST;
+
+		if (!empty($source['show_parent_column_present']) && empty($source['show_parent_column'])) {
+			$source['show_parent_column'] = false;
+		}
+
+		if (!empty($source['show_has_children_column_present']) && empty($source['show_has_children_column'])) {
+			$source['show_has_children_column'] = false;
 		}
 
 		// N'enregistrer les couleurs que si ce ne sont pas les couleurs par défaut

@@ -4,6 +4,7 @@ namespace Paheko;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Categories;
 use Paheko\Users\Session;
+use Paheko\Users\Users;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -28,6 +29,7 @@ $names = $df->listAssocNames();
 $name_fields = array_intersect_key($names, array_flip(DynamicFields::getNameFields()));
 
 $tpl->assign([
+	'has_parents'      => Users::hasParents(),
 	'users_categories' => Categories::listAssoc(),
 	'fields_list'      => $names,
 	'login_field'      => DynamicFields::getLoginField(),

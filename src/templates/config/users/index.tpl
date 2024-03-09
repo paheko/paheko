@@ -30,6 +30,16 @@
 		</dl>
 	</fieldset>
 
+	{if $has_parents}
+	<fieldset>
+		<legend>Rattachement de membres</legend>
+		<dl>
+			{input prefix_label="Dans la liste des membres…" type="checkbox" name="show_parent_column" value=1 source=$config label="Indiquer le nom du membre responsable" default=1}
+			{input type="checkbox" name="show_has_children_column" value=1 source=$config label="Indiquer si des membres sont rattachés à ce membre" default=1}
+		</dl>
+	</fieldset>
+	{/if}
+
 	<fieldset>
 		<legend>Journaux d'activité</legend>
 		<p class="help">
