@@ -70,7 +70,7 @@
 		<p class="help">
 			Cette option permet d'activer ou désactiver la visibilité publique du site web intégré à Paheko.<br/>
 			En désactivant le site public, les visiteurs seront automatiquement redirigés vers la page de connexion.<br />
-			Vous pourrez toujours y publier des informations, mais celles-ci ne seront visibles que pour les membres connectés.
+			Vous pourrez toujours y publier des informations, mais celles-ci ne seront visibles que pour les membres connectés, dans le menu <strong>Site web</strong> de l'administration.
 		</p>
 		<dl>
 			{input type="radio" name="site_disabled" value=0 source=$config label="Activer le site web public"}
