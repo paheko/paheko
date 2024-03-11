@@ -698,6 +698,7 @@ Cette section est très puissante et permet de générer des listes simplement, 
 | `module` | *optionnel* | Nom unique du module lié (par exemple : `recu_don`). Si non spécifié, alors le nom du module courant sera utilisé. |
 | `columns` | *optionnel* | Permet de n'afficher que certaines colonnes du schéma. Indiquer ici le nom des colonnes, séparées par des virgules. |
 | `order` | *optionnel* | Colonne utilisée par défaut pour le tri (si l'utilisateur n'a pas choisi le tri sur une autre colonne). Si `select` est utilisé, il faut alors indiquer ici le numéro de la colonne, et non pas son nom. |
+| `group` | *optionnel* | Expression SQL utilisée par défaut pour le groupement des résultats (`GROUP BY`). |
 | `desc` | *optionnel* | Si ce paramètre est à `true`, l'ordre de tri sera inversé. |
 | `max` | *optionnel* | Nombre d'éléments à afficher sur chaque page. Mettre à `null` pour ne pas paginer la liste. |
 | `where` | *optionnel* | Condition `WHERE` de la requête SQL. |
