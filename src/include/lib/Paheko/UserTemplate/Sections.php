@@ -574,7 +574,7 @@ class Sections
 
 		$list = new DynamicList($columns, $table);
 
-		static $reserved_keywords = ['max', 'order', 'desc', 'debug', 'explain', 'schema', 'columns', 'select', 'where', 'module', 'disable_user_ordering', 'check', 'export'];
+		static $reserved_keywords = ['max', 'order', 'desc', 'debug', 'explain', 'schema', 'columns', 'select', 'where', 'module', 'disable_user_ordering', 'check', 'export', 'group'];
 
 		foreach ($params as $key => $value) {
 			if ($key[0] == ':') {
@@ -595,6 +595,10 @@ class Sections
 
 		if (isset($params['order'])) {
 			$list->orderBy($params['order'], $params['desc'] ?? false);
+		}
+
+		if (isset($params['group'])) {
+			$list->groupBy(self::_moduleReplaceJSONExtract($params['group'], $table));
 		}
 
 		$list->setModifier(function(&$row) use ($columns) {
