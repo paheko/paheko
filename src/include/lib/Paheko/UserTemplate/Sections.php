@@ -1125,6 +1125,9 @@ class Sections
 			unset($params['future']);
 		}
 
+		$assign = $params['assign'] ?? null;
+		unset($params['assign']);
+
 		foreach (self::sql($params, $tpl, $line, $allowed_tables) as $row) {
 			if (empty($params['count'])) {
 				$data = $row;
@@ -1145,6 +1148,10 @@ class Sections
 				}
 
 				$row = array_merge($row, $page->asTemplateArray());
+			}
+
+			if ($assign) {
+				$tpl::__assign(['var' => $assign, 'value' => $row], $tpl, $line);
 			}
 
 			yield $row;
