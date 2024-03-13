@@ -155,7 +155,7 @@
 		toolbar.appendChild(t);
 
 		if (caption) {
-			g.title = document.title;
+			g.dialog_title = document.title;
 			document.title = caption + ' — ' + document.title;
 		}
 
@@ -279,14 +279,18 @@
 			return;
 		}
 
-		var dialog = window.parent.g.dialog;
+		var p = window.parent;
+		var dialog = p.g.dialog;
 
 		if (dialog.classList.contains('fullscreen')) {
 			return;
 		}
 
 		if (!dialog.dataset.caption) {
-			dialog.querySelector('.title').innerText = document.title.replace(/^([^—-]+).*$/, "$1");
+			var title = document.title.replace(/^([^—-]+).*$/, "$1");
+			dialog.querySelector('.title').innerText = title;
+			p.g.dialog_title = p.document.title;
+			p.document.title = document.title + ' — ' + p.document.title;
 		}
 
 		let height;
@@ -296,7 +300,7 @@
 		}
 		else {
 			let body_height = document.body.offsetHeight;
-			let parent_height = window.parent.innerHeight;
+			let parent_height = p.innerHeight;
 
 			if (body_height > parent_height * 0.9) {
 				height = '90%';
@@ -333,9 +337,9 @@
 			g.focus_before_dialog.focus();
 		}
 
-		if (g.title !== null) {
-			document.title = g.title;
-			g.title = null;
+		if (g.dialog_title !== null) {
+			document.title = g.dialog_title;
+			g.dialog_title = null;
 		}
 	};
 
