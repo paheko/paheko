@@ -312,6 +312,7 @@ class CommonFunctions
 				'label'           => $multiple ? 'Ajouter' : 'Sélectionner',
 				'required'        => $attributes['required'] ?? null,
 				'value'           => Utils::getLocalURL($attributes['target']),
+				'data-caption'    => $params['label'] ?? '',
 				'data-multiple'   => $multiple ? '1' : '0',
 				'data-can-delete' => (int) $can_delete,
 				'data-name'       => $name,

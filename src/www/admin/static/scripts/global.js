@@ -113,19 +113,21 @@
 	};
 
 	g.dialog = null;
-	g.title = null;
+	g.dialog_title = null;
 	g.focus_before_dialog = null;
 	g.dialog_on_close = false;
 
 	g.openDialog = function (content, options) {
 		var close = true,
 			callback = null,
+			caption = null,
 			classname = null;
 
 		if (typeof options === "object" && options !== null) {
 			callback = options.callback ?? null;
 			classname = options.classname ?? null;
 			close = options.close ?? true;
+			caption = options.caption ?? null;
 			g.dialog_on_close = options.on_close || false;
 		}
 		else {
@@ -142,19 +144,34 @@
 		g.dialog.id = 'dialog';
 		g.dialog.open = true;
 		g.dialog.className = classname || '';
+		g.dialog.dataset.caption = caption || '';
+
+		var toolbar = document.createElement('header');
+		toolbar.className = 'toolbar';
+
+		var t = document.createElement('h4');
+		t.className = 'title';
+		t.innerText = caption || '';
+		toolbar.appendChild(t);
+
+		if (caption) {
+			g.title = document.title;
+			document.title = caption + ' — ' + document.title;
+		}
 
 		if (close) {
 			var btn = document.createElement('button');
-			btn.className = 'icn-btn closeBtn';
+			btn.className = 'icn-btn closeBtn main';
 			btn.setAttribute('data-icon', '✘');
 			btn.type = 'button';
 			btn.innerHTML = 'Fermer';
 			btn.onclick = g.closeDialog;
-			g.dialog.appendChild(btn);
+			toolbar.appendChild(btn);
 
-			g.dialog.onclick = (e) => { if (e.target == g.dialog) g.closeDialog(); };
 			window.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
 		}
+
+		g.dialog.appendChild(toolbar);
 
 		if (typeof content == 'string') {
 			var container = document.createElement('div');
@@ -189,15 +206,6 @@
 
 			if (event && callback) {
 				content.addEventListener(event, callback);
-			}
-
-			if (options.caption ?? null) {
-				var caption = document.createElement('h4');
-				caption.className = 'title';
-				caption.innerText = options.caption;
-				g.dialog.appendChild(caption);
-				g.title = document.title;
-				document.title = options.caption + ' — ' + document.title;
 			}
 		}
 		else {
@@ -271,6 +279,16 @@
 			return;
 		}
 
+		var dialog = window.parent.g.dialog;
+
+		if (dialog.classList.contains('fullscreen')) {
+			return;
+		}
+
+		if (!dialog.dataset.caption) {
+			dialog.querySelector('.title').innerText = document.title.replace(/^([^—-]+).*$/, "$1");
+		}
+
 		let height;
 
 		if (forced_height) {
@@ -288,7 +306,7 @@
 			}
 		}
 
-		window.parent.g.dialog.childNodes[1].style.height = height;
+		dialog.childNodes[1].style.height = height;
 	};
 
 	g.closeDialog = function () {
@@ -557,7 +575,8 @@
 				}
 
 				let url = i.value + (i.value.indexOf('?') > 0 ? '&' : '?') + '_dialog';
-				g.openFrameDialog(url);
+				var caption = i.dataset.caption || null;
+				g.openFrameDialog(url, {caption});
 				return false;
 			};
 		});

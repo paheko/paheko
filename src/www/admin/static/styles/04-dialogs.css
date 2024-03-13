@@ -41,11 +41,45 @@ html.dialog main {
     background-image: none;
 }
 
-#dialog > h4.title {
-    margin-top: 1rem;
+#dialog > header.toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 90%;
+    margin: 0 auto;
+}
+
+#dialog.fullscreen > header.toolbar {
+    width: 100%;
+    font-size: .9em;
+}
+
+#dialog h4.title {
     color: #fff;
     text-shadow: 0px 0px 5px #000, 0px 0px 10px #000;
-    font-size: 1.5rem;
+    font-size: 1.5em;
+    width: 80%;
+    padding: .5em;
+}
+
+#dialog > header.toolbar button.closeBtn {
+    background: unset;
+    border: unset;
+    box-shadow: unset;
+    font-size: 1.3rem;
+    display: block;
+    padding: .5em 1em;
+    margin-left: auto;
+}
+
+#dialog > header.toolbar button.closeBtn, #dialog > header.toolbar button.closeBtn::after {
+    color: #ccc;
+    text-shadow: 0px 0px 5px #000;
+    transition: color .2s;
+}
+
+#dialog > header.toolbar button.closeBtn:hover, #dialog > header.toolbar button.closeBtn:hover::after {
+    color: #fff !important;
 }
 
 #dialog > iframe, #dialog > img, #dialog > audio, #dialog > video {
@@ -56,7 +90,6 @@ html.dialog main {
     transition: opacity .2s, height .2s;
     border: none;
     opacity: 0;
-    margin-top: 1rem;
 }
 
 #dialog.loaded > img, #dialog.loaded > audio, #dialog.loaded > video {
@@ -85,20 +118,6 @@ html.dialog main {
     max-height: unset;
     height: calc(100% - 2em);
     border-radius: 0;
-}
-
-#dialog > button.closeBtn {
-    background: unset;
-    border: unset;
-    box-shadow: unset;
-    color: var(--gLightBorderColor);
-    font-size: 1.3em;
-    display: block;
-    width: 100%;
-}
-
-#dialog > button.closeBtn:hover {
-    color: var(--gLightBackgroundColor) !important;
 }
 
 .loader {
