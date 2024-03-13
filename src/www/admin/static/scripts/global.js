@@ -113,6 +113,7 @@
 	};
 
 	g.dialog = null;
+	g.title = null;
 	g.focus_before_dialog = null;
 	g.dialog_on_close = false;
 
@@ -195,6 +196,8 @@
 				caption.className = 'title';
 				caption.innerText = options.caption;
 				g.dialog.appendChild(caption);
+				g.title = document.title;
+				document.title = options.caption + ' — ' + document.title;
 			}
 		}
 		else {
@@ -310,6 +313,11 @@
 
 		if (g.focus_before_dialog) {
 			g.focus_before_dialog.focus();
+		}
+
+		if (g.title !== null) {
+			document.title = g.title;
+			g.title = null;
 		}
 	};
 

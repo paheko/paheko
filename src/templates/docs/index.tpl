@@ -2,7 +2,7 @@
 use Paheko\Entities\Files\File;
 $upload_here = $context_specific_root ? null : $dir->path;
 ?>
-{include file="_head.tpl" title="Documents" current="docs" hide_title=true upload_here=$upload_here}
+{include file="_head.tpl" title=$title current="docs" hide_title=true upload_here=$upload_here}
 
 <nav class="tabs">
 	{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
