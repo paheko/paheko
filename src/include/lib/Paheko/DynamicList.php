@@ -162,6 +162,11 @@ class DynamicList implements \Countable
 		$this->conditions = $conditions;
 	}
 
+	public function setColumns(array $columns)
+	{
+		$this->columns = $columns;
+	}
+
 	/**
 	 * If an entity is set, then each row will return the specified entity
 	 * (using the SELECT clause passed) instead of the specified columns.
