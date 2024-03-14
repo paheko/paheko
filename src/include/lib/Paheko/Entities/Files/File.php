@@ -5,14 +5,14 @@ namespace Paheko\Entities\Files;
 use KD2\HTTP;
 use KD2\Graphics\Image;
 use KD2\Graphics\Blob;
-use KD2\Security;
-use KD2\WebDAV\WOPI;
 use KD2\Office\ToText;
 
 use Paheko\Config;
 use Paheko\DB;
 use Paheko\Entity;
+use Paheko\Form;
 use Paheko\Plugins;
+use Paheko\Template;
 use Paheko\UserException;
 use Paheko\ValidationException;
 use Paheko\Users\Session;
@@ -21,23 +21,29 @@ use Paheko\Entities\Web\Page;
 use Paheko\Web\Render\Render;
 use Paheko\Web\Router;
 use Paheko\Web\Cache as Web_Cache;
-use Paheko\Files\WebDAV\Storage;
 use Paheko\Users\DynamicFields;
 
 use Paheko\Files\Files;
 
-use const Paheko\{WWW_URL, BASE_URL, ENABLE_XSENDFILE, SECRET_KEY, WOPI_DISCOVERY_URL, SHARED_CACHE_ROOT, PDFTOTEXT_COMMAND, STATIC_CACHE_ROOT, HOSTING_PROVIDER};
+use const Paheko\{WWW_URL, BASE_URL, ENABLE_XSENDFILE, WOPI_DISCOVERY_URL, PDFTOTEXT_COMMAND, STATIC_CACHE_ROOT, HOSTING_PROVIDER};
 
 class File extends Entity
 {
 	use FilePermissionsTrait;
 	use FileThumbnailTrait;
 	use FileVersionsTrait;
+	use FileSharingTrait;
+	use FileWOPITrait;
 
 	const TABLE = 'files';
 	const EXTENSIONS_TEXT_CONVERT = ['ods', 'odt', 'odp', 'pptx', 'xlsx', 'docx', 'pdf'];
 
 	protected ?int $id;
+
+	/**
+	 * Unique file identifier as a random string
+	 */
+	protected string $hash_id;
 
 	/**
 	 * Parent directory of file
@@ -974,9 +980,9 @@ class File extends Entity
 				htmlspecialchars($this->name)
 			);
 		}
-		elseif ($this->canPreview($session)) {
+		elseif ($this->canPreview()) {
 			$attrs = sprintf('href="%s" target="_dialog" data-mime="%s" data-caption="%s"',
-				$this->isImage() ? $this->url() : Utils::getLocalURL('!common/files/preview.php?p=') . rawurlencode($this->path),
+				$this->getPreviewURL(),
 				$this->mime,
 				htmlspecialchars($this->name)
 			);
@@ -986,6 +992,70 @@ class File extends Entity
 		}
 
 		return sprintf('<a %s>%s</a>', $attrs, $label);
+	}
+
+	public function canEdit(): bool
+	{
+		return $this->editorType() !== null;
+	}
+
+	public function getPreviewURL(): string
+	{
+		return $this->isImage() ? $this->url() : Utils::getLocalURL('!common/files/preview.php?p=') . rawurlencode($this->path);
+	}
+
+	public function preview(): void
+	{
+		if (!$this->canPreview()) {
+			throw new \LogicException('This file cannot be previewed');
+		}
+
+		if ($this->renderFormat()) {
+			$tpl = Template::getInstance();
+			$tpl->assign('content', $this->render());
+			$tpl->assign('file', $this);
+			$tpl->display('common/files/_preview.tpl');
+		}
+		else if ($html = $this->getWOPIEditorHTML(true)) {
+			echo $html;
+		}
+		else {
+			// We don't need $session here as read access is already checked above
+			$this->serve();
+		}
+	}
+
+	public function editor(): bool
+	{
+		$editor = $this->editorType() ?? 'code';
+		$csrf_key = 'edit_file_' . $this->pathHash();
+		$form = new Form;
+		$done = false;
+		$file = $this;
+
+		$form->runIf('content', function () use ($file, $done) {
+			$file->setContent(f('content'));
+			$done = true;
+		}, $csrf_key);
+
+		if ($done) {
+			return true;
+		}
+
+		$tpl = Template::getInstance();
+		$tpl->assign(compact('csrf_key', 'file'));
+
+		if ($editor == 'wopi') {
+			echo $this->getWOPIEditorHTML();
+			return false;
+		}
+
+		$content ??= $this->fetch();
+		$path = $this->path;
+		$format = $this->renderFormat();
+		$tpl->assign(compact('csrf_key', 'content', 'path', 'format'));
+		$tpl->display(sprintf('common/files/edit_%s.tpl', $editor));
+		return false;
 	}
 
 	/**
@@ -1354,132 +1424,9 @@ class File extends Entity
 		return null;
 	}
 
-	public function getWopiURL(?string $action = null): ?string
-	{
-		if (!WOPI_DISCOVERY_URL) {
-			return null;
-		}
-
-		$cache_file = sprintf('%s/wopi_%s.json', SHARED_CACHE_ROOT, md5(WOPI_DISCOVERY_URL));
-		static $data = null;
-
-		if (null === $data) {
-			// We are caching discovery for 15 days, there is no need to request the server all the time
-			if (file_exists($cache_file) && filemtime($cache_file) >= 3600*24*15) {
-				$data = json_decode(file_get_contents($cache_file), true);
-			}
-
-			if (!$data) {
-				try {
-					$data = WOPI::discover(WOPI_DISCOVERY_URL);
-					file_put_contents($cache_file, json_encode($data));
-				}
-				catch (\RuntimeException $e) {
-					return null;
-				}
-			}
-		}
-
-		$ext = $this->extension();
-		$url = null;
-
-		if ($action) {
-			$url = $data['extensions'][$ext][$action] ?? null;
-			$url ??= $data['mimetypes'][$this->mime][$action] ?? null;
-		}
-		elseif (isset($data['extensions'][$ext])) {
-			$url = current($data['extensions'][$ext]);
-		}
-		elseif (isset($data['mimetypes'][$this->mime])) {
-			$url = current($data['mimetypes'][$this->mime]);
-		}
-
-		return $url;
-	}
-
-	public function editorHTML(bool $readonly = false): ?string
-	{
-		$url = $this->getWopiURL('edit');
-
-		if (!$url) {
-			return null;
-		}
-
-		$wopi = new WOPI;
-		$url = $wopi->setEditorOptions($url, [
-			// Undocumented editor parameters
-			// see https://github.com/nextcloud/richdocuments/blob/2338e2ff7078040d54fc0c70a96c8a1b860f43a0/src/helpers/url.js#L49
-			'lang' => 'fr',
-			//'closebutton' => 1,
-			//'revisionhistory' => 1,
-			//'title' => 'Test',
-			'permission' => $readonly || !$this->canWrite() ? 'readonly' : '',
-		]);
-		$wopi->setStorage(new Storage(Session::getInstance()));
-		return $wopi->getEditorHTML($url, $this->path, $this->name);
-	}
-
 	public function export(): array
 	{
 		return $this->asArray(true) + ['url' => $this->url()];
-	}
-
-	/**
-	 * Returns a sharing link for a file, valid
-	 * @param  int $expiry Expiry, in hours
-	 * @param  string|null $password
-	 * @return string
-	 */
-	public function createShareLink(int $expiry = 24, ?string $password = null): string
-	{
-		$expiry = intval(time() / 3600) + $expiry;
-
-		$hash = $this->_createShareHash($expiry, $password);
-
-		$expiry -= intval(gmmktime(0, 0, 0, 8, 1, 2022) / 3600);
-		$expiry = base_convert($expiry, 10, 36);
-
-		return sprintf('%s%s?s=%s%s:%s', WWW_URL, $this->uri(), $password ? ':' : '', $hash, $expiry);
-	}
-
-	protected function _createShareHash(int $expiry, ?string $password): string
-	{
-		$password = trim((string)$password) ?: null;
-
-		$str = sprintf('%s:%s:%s:%s', SECRET_KEY, $this->path, $expiry, $password);
-
-		$hash = hash('sha256', $str, true);
-		$hash = substr($hash, 0, 10);
-		$hash = Security::base64_encode_url_safe($hash);
-		return $hash;
-	}
-
-	public function checkShareLinkRequiresPassword(string $str): bool
-	{
-		return substr($str, 0, 1) == ':';
-	}
-
-	public function checkShareLink(string $str, ?string $password): bool
-	{
-		$str = ltrim($str, ':');
-
-		$hash = strtok($str, ':');
-		$expiry = strtok('');
-
-		if (!ctype_alnum($expiry)) {
-			return false;
-		}
-
-		$expiry = (int)base_convert($expiry, 36, 10);
-		$expiry += intval(gmmktime(0, 0, 0, 8, 1, 2022) / 3600);
-
-		if ($expiry < time()/3600) {
-			return false;
-		}
-
-		$hash_check = $this->_createShareHash($expiry, $password);
-
-		return hash_equals($hash, $hash_check);
 	}
 
 	public function touch($date = null): void

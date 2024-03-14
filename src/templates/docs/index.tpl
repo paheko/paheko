@@ -199,7 +199,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 						<td class="actions">
 							{linkbutton href=$item->url(true) label="Télécharger" shape="download" title="Télécharger"}
 							{if $item->canShare()}
-								{linkbutton href="!common/files/share.php?p=%s"|args:$item->path_uri() label="Partager" shape="export" target="_dialog" title="Partager"}
+								{linkbutton href="!common/files/share.php?h=%s"|args:$item->hash_id label="Partager" shape="export" target="_dialog" title="Partager"}
 							{/if}
 							{if $item->canRename() || $item->canDelete() || ($item->canWrite() && $item->editorType())}
 								{linkmenu label="Modifier…" shape="edit" right=true}

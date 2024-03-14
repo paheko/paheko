@@ -26,7 +26,7 @@ class Server
 
 		$wopi = new WOPI;
 		$dav = new WebDAV;
-		$storage = new Storage(UserSession::getInstance());
+		$storage = new Storage(null);
 		$dav->setStorage($storage);
 		$wopi->setServer($dav);
 

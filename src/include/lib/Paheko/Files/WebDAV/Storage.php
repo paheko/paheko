@@ -29,9 +29,9 @@ class Storage extends AbstractStorage
 	protected array $root = [];
 
 	protected ?NextCloud $nextcloud;
-	protected UserSession $session;
+	protected ?UserSession $session;
 
-	public function __construct(UserSession $session, ?NextCloud $nextcloud = null)
+	public function __construct(?UserSession $session, ?NextCloud $nextcloud = null)
 	{
 		$this->session = $session;
 		$this->nextcloud = $nextcloud;
@@ -39,7 +39,7 @@ class Storage extends AbstractStorage
 
 	protected function populateRootCache(): void
 	{
-		if (isset($this->cache)) {
+		if (isset($this->cache) || null === $this->session) {
 			return;
 		}
 
@@ -112,7 +112,7 @@ class Storage extends AbstractStorage
 			throw new WebDAV_Exception('File Not Found', 404);
 		}
 
-		if (!$file->canRead($this->session)) {
+		if (null !== $this->session && !$file->canRead($this->session)) {
 			throw new WebDAV_Exception('Vous n\'avez pas accès à ce chemin', 403);
 		}
 
@@ -229,16 +229,6 @@ class Storage extends AbstractStorage
 				return Files::getUsedQuota();
 			case NextCloud::PROP_OC_SIZE:
 				return $file->getRecursiveSize();
-			case WOPI::PROP_USER_NAME:
-				return $this->session->getUser()->name();
-			case WOPI::PROP_USER_ID:
-				return $this->session->getUser()->id;
-			case WOPI::PROP_READ_ONLY:
-				return $file->canWrite($this->session) ? false : true;
-			case WOPI::PROP_FILE_URL:
-				$id = gzcompress($uri);
-				$id = WOPI::base64_encode_url_safe($id);
-				return BASE_URL . 'wopi/files/' . $id;
 			default:
 				break;
 		}
@@ -263,12 +253,6 @@ class Storage extends AbstractStorage
 		}
 
 		$out = [];
-
-		// Generate a new token for WOPI, and provide also TTL
-		if (in_array(WOPI::PROP_TOKEN, $properties)) {
-			$out = $this->createWopiToken($uri);
-			unset($properties[WOPI::PROP_TOKEN], $properties[WOPI::PROP_TOKEN_TTL]);
-		}
 
 		foreach ($properties as $name) {
 			$v = $this->get_file_property($uri, $name, $depth);
@@ -302,7 +286,7 @@ class Storage extends AbstractStorage
 		if ($new && !File::canCreate($uri, $this->session)) {
 			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de créer ce fichier', 403);
 		}
-		elseif (!$new && !$target->canWrite($this->session)) {
+		elseif (!$new && null !== $this->session && !$target->canWrite($this->session)) {
 			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de modifier ce fichier', 403);
 		}
 
@@ -457,28 +441,19 @@ class Storage extends AbstractStorage
 		return true;
 	}
 
-	protected function createWopiToken(string $uri)
+	public function verifyWopiToken(string $id, string $token): ?array
 	{
-		$ttl = time()+(3600*10);
-		$session_id = $this->session->id();
-		$hash = WebDAV::hmac(compact('uri', 'ttl', 'session_id'), SECRET_KEY);
-		$data = sprintf('%s_%s_%s', $hash, $session_id, $ttl);
+		$token = WOPI::base64_decode_url_safe($token);
 
-		return [
-			WOPI::PROP_TOKEN => WOPI::base64_encode_url_safe($data),
-			WOPI::PROP_TOKEN_TTL => $ttl * 1000,
-		];
-	}
+		// FIXME: don't use ID here, but random hash, to avoid enumeration of files
+		$id = (int) $id;
+		$hash = strtok($token, '_');
+		$ttl = (int) strtok('_');
+		$random = strtok('_');
+		$readonly = (bool) strtok('');
 
-	public function getWopiURI(string $id, string $token): ?string
-	{
-		$id = WOPI::base64_decode_url_safe($id);
-		$uri = gzuncompress($id);
-		$token_decode = WOPI::base64_decode_url_safe($token);
-		$hash = strtok($token_decode, '_');
-		$session_id = strtok('_');
-		$ttl = (int) strtok('');
-		$check = WebDAV::hmac(compact('uri', 'ttl', 'session_id'), SECRET_KEY);
+		$hash_data = compact('id', 'ttl', 'random', 'readonly');
+		$check = WebDAV::hmac($hash_data, SECRET_KEY);
 
 		if (!hash_equals($hash, $check)) {
 			return null;
@@ -488,13 +463,17 @@ class Storage extends AbstractStorage
 			return null;
 		}
 
-		$this->session->setId($session_id);
-		$this->session->start(true);
+		$file = Files::getById($id);
 
-		if (!$this->session->isLogged()) {
+		if (!$file) {
 			return null;
 		}
 
-		return $uri;
+		return [
+			WOPI::PROP_FILE_URI => $file->uri(),
+			WOPI::PROP_READ_ONLY => $this->session && !$readonly ? !$this->canWrite($this->session) : (bool) $readonly,
+			WOPI::PROP_USER_NAME => $this->session ? $this->session->getUser()->name() : 'Anonyme',
+			WOPI::PROP_USER_ID => $this->session ? $this->session->getUser()->id : null,
+		];
 	}
 }

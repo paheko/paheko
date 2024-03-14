@@ -23,31 +23,9 @@ if (!$file->canWrite()) {
 	throw new UserException('Vous n\'avez pas le droit de modifier ce fichier.');
 }
 
-$editor = $file->editorType();
-$csrf_key = 'edit_file_' . $file->pathHash();
+// Handle all the file editor
+$saved = $file->editor();
 
-$form->runIf('content', function () use ($file) {
-	$file->setContent(f('content'));
-}, $csrf_key, Utils::getSelfURI());
-
-$tpl->assign(compact('csrf_key', 'file'));
-
-$fallback = qg('fallback');
-
-if (!$editor && $fallback) {
-	$editor = $fallback;
-}
-
-if (!$editor) {
-	$tpl->display('common/files/upload.tpl');
-}
-elseif ($editor == 'wopi') {
-	echo $file->editorHTML();
-}
-else {
-	$content ??= $file->fetch();
-	$path = $file->path;
-	$format = $file->renderFormat();
-	$tpl->assign(compact('csrf_key', 'content', 'path', 'format'));
-	$tpl->display(sprintf('common/files/edit_%s.tpl', $editor));
+if ($saved) {
+	Utils::redirect(Utils::getSelfURI());
 }

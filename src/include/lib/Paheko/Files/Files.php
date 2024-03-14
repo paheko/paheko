@@ -512,6 +512,16 @@ class Files
 		}
 	}
 
+	static public function getByID(int $id): ?File
+	{
+		return EM::findOneById(File::class, $id);
+	}
+
+	static public function getByHashID(string $id): ?File
+	{
+		return EM::findOne(File::class, 'SELECT * FROM @TABLE WHERE hash_id = ? LIMIT 1;', $id);
+	}
+
 	/**
 	 * Returns a file, if it doesn't exist, NULL is returned
 	 * If the file exists in DB but not in storage, it is deleted from DB
@@ -689,6 +699,7 @@ class Files
 
 		if (!$file) {
 			$file = new File;
+			$file->set('hash_id', Utils::random_string(12));
 			$file->set('path', $target);
 			$file->set('parent', $parent);
 			$file->set('name', $name);
@@ -935,6 +946,7 @@ class Files
 		}
 
 		$file = new File;
+		$file->set('hash_id', Utils::random_string(12));
 		$type = $file::TYPE_DIRECTORY;
 		$file->import(compact('path', 'name', 'parent') + [
 			'type'     => file::TYPE_DIRECTORY,

@@ -8,27 +8,11 @@ use Paheko\UserException;
 
 trait FilePermissionsTrait
 {
-	public function validateCanRead(?Session $session = null, ?string $share_hash = null, ?string $share_password = null): void
+	public function validateCanRead(?Session $session = null): void
 	{
-		if ($share_hash) {
-			if ($this->checkShareLink($share_hash, $share_password)) {
-				return;
-			}
-
-			if ($this->checkShareLinkRequiresPassword($share_hash)) {
-				$tpl = Template::getInstance();
-				$has_password = (bool) $share_password;
-
-				$tpl->assign(compact('has_password'));
-				$tpl->display('ask_share_password.tpl');
-				return;
-			}
-		}
-
 		if (!$this->canRead($session)) {
 			header('HTTP/1.1 403 Forbidden', true, 403);
 			throw new UserException('Vous n\'avez pas accès à ce fichier.', 403);
-			return;
 		}
 	}
 
