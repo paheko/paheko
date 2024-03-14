@@ -290,7 +290,12 @@
 			var title = document.title.replace(/^([^—-]+).*$/, "$1");
 			dialog.querySelector('.title').innerText = title;
 			p.g.dialog_title = p.document.title;
-			p.document.title = document.title + ' — ' + p.document.title;
+			p.document.title = document.title + ' — ' + p.g.dialog_title;
+
+			window.addEventListener('beforeunload', () => {
+				p.document.title = p.g.dialog_title;
+				p.g.dialog_title = null;
+			});
 		}
 
 		let height;
