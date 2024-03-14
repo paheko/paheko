@@ -227,6 +227,12 @@ class Upgrade
 				$db->commitSchemaUpdate();
 			}
 
+			if (version_compare($v, '1.3.7', '<')) {
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/migrations/1.3/1.3.7.sql');
+				$db->commitSchemaUpdate();
+			}
+
 			Plugins::upgradeAllIfRequired();
 
 			// Vérification de la cohérence des clés étrangères

@@ -1,39 +1,41 @@
 <?php
 namespace Paheko;
 
-use Paheko\Entities\Files\File;
+use Paheko\Entities\Files\Share;
 use Paheko\Files\Files;
+use Paheko\Files\Shares;
+use Paheko\Users\Session;
 
 require __DIR__ . '/../../_inc.php';
 
-$file = Files::get(qg('p'));
+$file = Files::getByHashID(qg('h'));
 
 if (!$file) {
-	throw new UserException('Fichier inconnu');
+	throw new UserException('Fichier inconnu', 404);
 }
 
-if (!$file->canWrite()) {
+if (!$file->canShare()) {
 	throw new UserException('Vous n\'avez pas le droit de partager ce fichier.');
 }
 
-$context = $file->context();
+$csrf_key = 'file_share_' . $file->hash_id;
+$share = null;
 
-$csrf_key = 'file_share_' . $file->pathHash();
-$share_url = null;
-
-$form->runIf('share', function () use ($file, &$share_url) {
-	$share_url = $file->createShareLink(f('expiry'), f('password'));
+$form->runIf('share', function () use ($file) {
+	$share = Shares::create($file, Session::getInstance(), (int)f('option'), (int)f('ttl'), f('password'));
+	$share->save();
+	Utils::redirect(sprintf('!common/files/share.php?h=%s&s=%s', $file->hash_id, $share->hash_id));
 }, $csrf_key);
 
-$expiry_options = [
-	1         => 'Une heure',
-	24        => 'Un jour',
-	24*31     => 'Un mois',
-	24*365    => 'Un an',
-	24*365*10 => 'Dix ans',
-	24*365*30 => 'Infinie',
-];
 
-$tpl->assign(compact('file', 'csrf_key', 'share_url', 'expiry_options'));
+if (!empty($_GET['s'])) {
+	$share = Shares::getByHashID($_GET['s']);
+}
+
+$ttl_options = Share::TTL_OPTIONS;
+$default_ttl = Share::DEFAULT_TTL;
+$sharing_options = Share::OPTIONS;
+
+$tpl->assign(compact('file', 'csrf_key', 'share', 'sharing_options', 'ttl_options', 'default_ttl'));
 
 $tpl->display('common/files/share.tpl');

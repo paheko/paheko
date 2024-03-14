@@ -76,6 +76,7 @@ class Utils
 		'pdf'             => 'P',
 		'trash'           => '🗑',
 		'history'         => '⌚',
+		'link'            => '🔗',
 	];
 
 	const FRENCH_DATE_NAMES = [
@@ -1458,6 +1459,13 @@ class Utils
 			$n -= pow(26, $i);
 		}
 		return $r;
+	}
+
+	static public function random_string(int $length): string
+	{
+		$bytes = ceil($length * 0.7);
+		$str = base_convert(bin2hex(random_bytes($bytes)), 16, 36);
+		return substr($str, 0, $length);
 	}
 
 	static public function uuid(): string

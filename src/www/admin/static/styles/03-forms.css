@@ -953,6 +953,14 @@ samp.copy:hover {
     box-shadow: 0px 0px 5px var(--gBorderColor);
 }
 
+dl.share {
+    font-size: 1.3em;
+}
+
+dl.share dt, dl.share dd {
+    margin: 1rem;
+}
+
 @media screen and (max-width: 1279px) {
     #queryBuilder table tr {
         display: flex;
