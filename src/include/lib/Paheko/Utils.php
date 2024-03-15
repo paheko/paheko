@@ -926,6 +926,22 @@ class Utils
 		return sscanf($hex, '#%02x%02x%02x');
 	}
 
+	static public function rgbDecToHex(array $rgb)
+	{
+		foreach ($rgb as &$v) {
+			if ($v > 255) {
+				$v = 255;
+			}
+			elseif ($v < 0) {
+				$v = 0;
+			}
+		}
+
+		unset($v);
+
+		return vsprintf('#%02x%02x%02x', $rgb);
+	}
+
 	/**
 	 * Converts an RGB color value to HSV. Conversion formula
 	 * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
