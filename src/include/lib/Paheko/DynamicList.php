@@ -137,6 +137,12 @@ class DynamicList implements \Countable
 		$this->parameters[$key] = $value;
 	}
 
+	public function setParameters(array $parameters) {
+		foreach ($parameters as $key => $value) {
+			$this->parameters[$key] = $value;
+		}
+	}
+
 	public function setTitle(string $title) {
 		$this->title = $title;
 	}
