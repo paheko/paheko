@@ -3,11 +3,12 @@ declare(strict_types=1);
 
 namespace Paheko\Entities\Files;
 
+use Paheko\Files\Files;
 use Paheko\Entity;
 
 use DateTime;
 
-use const Paheko\{WWW_URL};
+use const Paheko\{WWW_URL, SECRET_KEY};
 
 class Share extends Entity
 {
@@ -64,9 +65,29 @@ class Share extends Entity
 		return WWW_URL . 's/' . $this->hash_id;
 	}
 
-	public function verify(string $password): bool
+	public function download_url(?File $file = null): string
+	{
+		$file ??= $this->file();
+		return WWW_URL . 's/' . $this->hash_id . '/' . rawurlencode($file->name);
+	}
+
+	public function verifyPassword(string $password): bool
 	{
 		return $this->password && password_verify(trim($password), $this->password);
+	}
+
+	public function verifyToken(string $token): bool
+	{
+		$random_hash = strtok($token, ':') ?: '';
+		$hmac = strtok('') ?: '';
+
+		return hash_equals($token, $this->generateToken($random_hash));
+	}
+
+	public function generateToken(?string $hash = null): string
+	{
+		$hash ??= sha1(random_bytes(16));
+		return $hash . ':' . hash_hmac('sha256', $hash, SECRET_KEY . $this->password . $this->id());
 	}
 
 	public function importForm(?array $source = null)
@@ -79,6 +100,7 @@ class Share extends Entity
 
 	 	if (array_key_exists('password', $source)) {
 	 		$this->set('password', $source['password'] ? password_hash(trim($source['password']), \PASSWORD_DEFAULT) : null);
+	 		unset($source['password']);
 	 	}
 
 	 	parent::import($source);

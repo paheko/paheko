@@ -8,7 +8,7 @@
 	<p class="block alert">Un mot de passe est nécessaire pour accéder à ce document.</p>
 {/if}
 
-<form method="post" action="">
+<form method="post" action="" data-focus="1">
 	<fieldset>
 		<legend>Accès au document</legend>
 		<dl>

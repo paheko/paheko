@@ -4,6 +4,7 @@ namespace Paheko;
 use Paheko\Entities\Files\File;
 use Paheko\Files\Files;
 use Paheko\UserTemplate\Modules;
+use Paheko\Users\Session;
 
 require __DIR__ . '/../../_inc.php';
 
@@ -24,7 +25,7 @@ if (!$file->canWrite()) {
 }
 
 // Handle all the file editor
-$saved = $file->editor();
+$saved = $file->editor(Session::getInstance());
 
 if ($saved) {
 	Utils::redirect(Utils::getSelfURI());

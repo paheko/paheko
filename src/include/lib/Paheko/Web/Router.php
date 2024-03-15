@@ -13,6 +13,7 @@ use Paheko\Config;
 use Paheko\Plugins;
 use Paheko\UserException;
 use Paheko\Utils;
+use Paheko\Users\Users;
 use Paheko\UserTemplate\Modules;
 
 use Paheko\Users\Session;
@@ -88,6 +89,11 @@ class Router
 		elseif ($first === 's') {
 			$_GET['uri'] = substr($uri, 2);
 			require ROOT . '/www/admin/share.php';
+			return;
+		}
+		// Users avatars
+		elseif ($first === 'user' && strpos($uri, 'user/avatar/') !== false) {
+			Users::serveAvatar((int)substr($uri, strlen('user/avatar/')));
 			return;
 		}
 		// Add trailing slash to URLs if required

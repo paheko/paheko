@@ -699,7 +699,6 @@ class Files
 
 		if (!$file) {
 			$file = new File;
-			$file->set('hash_id', Utils::random_string(12));
 			$file->set('path', $target);
 			$file->set('parent', $parent);
 			$file->set('name', $name);
@@ -946,7 +945,6 @@ class Files
 		}
 
 		$file = new File;
-		$file->set('hash_id', Utils::random_string(12));
 		$type = $file::TYPE_DIRECTORY;
 		$file->import(compact('path', 'name', 'parent') + [
 			'type'     => file::TYPE_DIRECTORY,
@@ -975,7 +973,7 @@ class Files
 			$tree = trim($tree . '/' . $part, '/');
 
 			// Make sure directory exists AND is not in trash
-			$db->preparedQuery('INSERT OR IGNORE INTO files (path, parent, name, type) VALUES (?, ?, ?, ?);',
+			$db->preparedQuery('INSERT OR IGNORE INTO files (hash_id, path, parent, name, type) VALUES (random_string(12), ?, ?, ?, ?);',
 				$tree, $parent, $part, File::TYPE_DIRECTORY);
 		}
 

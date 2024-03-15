@@ -36,6 +36,10 @@ $ttl_options = Share::TTL_OPTIONS;
 $default_ttl = Share::DEFAULT_TTL;
 $sharing_options = Share::OPTIONS;
 
+if (!$file->canEditInShare()) {
+	unset($sharing_options[Share::EDIT]);
+}
+
 $tpl->assign(compact('file', 'csrf_key', 'share', 'sharing_options', 'ttl_options', 'default_ttl'));
 
 $tpl->display('common/files/share.tpl');

@@ -3,6 +3,7 @@ namespace Paheko;
 
 use Paheko\Entities\Files\File;
 use Paheko\Files\Files;
+use Paheko\Users\Session;
 
 require __DIR__ . '/../../_inc.php';
 
@@ -16,4 +17,4 @@ if (!$file->canRead()) {
 	throw new UserException('Vous n\'avez pas le droit de lire ce fichier.');
 }
 
-$file->preview();
+$file->preview(Session::getInstance());

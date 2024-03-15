@@ -27,7 +27,7 @@
 			Un lien de partage sera créé, permettant de partager ce fichier publiquement, sans avoir à se connecter à l'administration.
 		</p>
 		<dl>
-			{input type="select" required=true name="option" options=$sharing_options label="Que pourront faire les personnes qui auront ce lien de partage ?"}
+			{input type="select" required=true name="option" options=$sharing_options label="Que pourront faire les personnes qui auront ce lien de partage ?" default=1}
 			{input type="select" name="ttl" required=true label="Durée de validité du lien" options=$ttl_options default=$default_ttl help="Après ce délai, le lien cessera de fonctionner."}
 			{input type="password" name="password" label="Demander un mot de passe" help="Si renseigné, alors les personnes devront entrer ce mot de passe pour accéder au fichier partagé."}
 		</dl>

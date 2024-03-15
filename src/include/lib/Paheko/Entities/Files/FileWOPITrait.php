@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
 
 namespace Paheko\Entities\Files;
 
 use Paheko\Files\WebDAV\WebDAV;
+use Paheko\Users\Session;
 
 use KD2\WebDAV\WOPI;
 
@@ -53,7 +55,7 @@ trait FileWOPITrait
 		return $url;
 	}
 
-	public function getWOPIEditorHTML(bool $readonly = false): ?string
+	public function getWOPIEditorHTML(Session $session = null, bool $readonly = false, bool $frame_only = false): ?string
 	{
 		$url = $this->getWopiURL('edit');
 
@@ -69,23 +71,29 @@ trait FileWOPITrait
 			//'closebutton' => 1,
 			//'revisionhistory' => 1,
 			//'title' => 'Test',
-			'permission' => $readonly,
+			'permission' => $readonly ? 'readonly' : '',
 		]);
 
-		$src = BASE_URL . 'wopi/files/' . $this->id(); // Fix: use random hash instead of file ID
+		$src = BASE_URL . 'wopi/files/' . $this->hash_id;
 		$ttl = time()+(3600*10);
-		$token = $this->createWopiToken($ttl, $readonly);
+		$token = $this->createWopiToken($ttl, $readonly, $session ? $session::getUserId() : null);
 
-		return $wopi->rawEditorHTML($url, $src, $token, $ttl);
+		if ($frame_only) {
+			return $wopi->getEditorFrameHTML($url, $src, $token, $ttl);
+		}
+		else {
+			return $wopi->rawEditorHTML($url, $src, $token, $ttl);
+		}
 	}
 
-	protected function createWopiToken(int $ttl, bool $readonly): string
+	protected function createWopiToken(int $ttl, bool $readonly, ?int $user_id): string
 	{
 		$random = substr(sha1(random_bytes(10)), 0, 10);
-		$id = $this->id();
-		$hash_data = compact('id', 'ttl', 'random', 'readonly');
+		$hash_id = $this->hash_id;
+		$user_id = (int) $user_id;
+		$hash_data = compact('hash_id', 'ttl', 'random', 'readonly', 'user_id');
 		$hash = WebDAV::hmac($hash_data, SECRET_KEY);
-		$data = sprintf('%s_%s_%s_%d', $hash, $ttl, $random, $readonly);
+		$data = sprintf('%s_%s_%s_%d_%d', $hash, $ttl, $random, $readonly, $user_id);
 
 		return WOPI::base64_encode_url_safe($data);
 	}

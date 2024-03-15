@@ -10,12 +10,13 @@ use Paheko\DB;
 use Paheko\Utils;
 use Paheko\ValidationException;
 use Paheko\Users\Session as UserSession;
+use Paheko\Users\Users;
 
 use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
 use Paheko\Web\Router;
 
-use const Paheko\{FILE_STORAGE_BACKEND, SECRET_KEY, BASE_URL};
+use const Paheko\{SECRET_KEY};
 
 class Storage extends AbstractStorage
 {
@@ -445,14 +446,14 @@ class Storage extends AbstractStorage
 	{
 		$token = WOPI::base64_decode_url_safe($token);
 
-		// FIXME: don't use ID here, but random hash, to avoid enumeration of files
-		$id = (int) $id;
+		$hash_id = $id;
 		$hash = strtok($token, '_');
 		$ttl = (int) strtok('_');
 		$random = strtok('_');
-		$readonly = (bool) strtok('');
+		$readonly = (bool) strtok('_');
+		$user_id = (int) strtok('');
 
-		$hash_data = compact('id', 'ttl', 'random', 'readonly');
+		$hash_data = compact('hash_id', 'ttl', 'random', 'readonly', 'user_id');
 		$check = WebDAV::hmac($hash_data, SECRET_KEY);
 
 		if (!hash_equals($hash, $check)) {
@@ -463,17 +464,24 @@ class Storage extends AbstractStorage
 			return null;
 		}
 
-		$file = Files::getById($id);
+		$file = Files::getByHashId($hash_id);
 
 		if (!$file) {
 			return null;
 		}
 
+		$user = null;
+
+		if ($user_id) {
+			$user = Users::get($user_id);
+		}
+
 		return [
-			WOPI::PROP_FILE_URI => $file->uri(),
-			WOPI::PROP_READ_ONLY => $this->session && !$readonly ? !$this->canWrite($this->session) : (bool) $readonly,
-			WOPI::PROP_USER_NAME => $this->session ? $this->session->getUser()->name() : 'Anonyme',
-			WOPI::PROP_USER_ID => $this->session ? $this->session->getUser()->id : null,
+			WOPI::PROP_FILE_URI    => $file->uri(),
+			WOPI::PROP_READ_ONLY   => (bool) $readonly,
+			WOPI::PROP_USER_NAME   => $user ? $user->name() : 'Anonyme',
+			WOPI::PROP_USER_ID     => $user ? $user->id() : null,
+			WOPI::PROP_USER_AVATAR => $user ? $user->avatar_url() : null,
 		];
 	}
 }

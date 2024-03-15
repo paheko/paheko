@@ -24,7 +24,8 @@ if ($path = qg('f')) {
 		throw new UserException('Vous n\'avez pas le droit de lire ce fichier.');
 	}
 
-	$content = Render::render(f('format'), $file->path, f('content'), ADMIN_URL . 'common/files/_preview.php?p=');
+	$file->preview();
+	return;
 }
 // Preview single web page
 elseif ($web = qg('w')) {

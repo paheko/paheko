@@ -143,8 +143,8 @@ class File extends Entity
 		'audio/webm',
 		'video/webm',
 		'video/ogg',
-		'application/ogg',
 		'video/mp4',
+		'application/ogg',
 		'image/png',
 		'image/gif',
 		'image/jpeg',
@@ -180,6 +180,10 @@ class File extends Entity
 	{
 		if ($this->parent) {
 			Files::ensureDirectoryExists($this->parent);
+		}
+
+		if (!isset($this->hash_id)) {
+			$this->set('hash_id', Utils::random_string(12));
 		}
 
 		$ok = parent::save();
@@ -999,12 +1003,50 @@ class File extends Entity
 		return $this->editorType() !== null;
 	}
 
+	public function canEditInShare(): bool
+	{
+		return $this->editorType() === 'wopi';
+	}
+
 	public function getPreviewURL(): string
 	{
 		return $this->isImage() ? $this->url() : Utils::getLocalURL('!common/files/preview.php?p=') . rawurlencode($this->path);
 	}
 
-	public function preview(): void
+	public function previewHTML(?string $url, ?Session $session = null): ?string
+	{
+		$url ??= $this->url();
+
+		if ($this->image) {
+			return sprintf('<img src="%s" alt="%s" />', $url, htmlspecialchars($this->name));
+		}
+		elseif ($this->mime && ($this->mime === 'application/ogg' || strpos($this->mime, 'video/') === 0)) {
+			return sprintf('<video draggable="false" autoplay="false" controls="true" src="%s" />', $url);
+		}
+		elseif ($this->mime && strpos($this->mine, 'audio/') === 0) {
+			return sprintf('<audio draggable="false" autoplay="false" controls="true" src="%s" />', $url);
+		}
+		elseif ($this->renderFormat()) {
+			return $this->render();
+		}
+		else if ($html = $this->getWOPIEditorHTML($session, true, true)) {
+			return $html;
+		}
+		else {
+			return sprintf('<iframe src="%s"></iframe>', $url);
+		}
+	}
+
+	public function editorHTML(?Session $session = null): ?string
+	{
+		if ($html = $this->getWOPIEditorHTML($session, false, true)) {
+			return $html;
+		}
+
+		return null;
+	}
+
+	public function preview(?Session $session = null): void
 	{
 		if (!$this->canPreview()) {
 			throw new \LogicException('This file cannot be previewed');
@@ -1016,16 +1058,16 @@ class File extends Entity
 			$tpl->assign('file', $this);
 			$tpl->display('common/files/_preview.tpl');
 		}
-		else if ($html = $this->getWOPIEditorHTML(true)) {
+		else if ($html = $this->getWOPIEditorHTML($session, true)) {
 			echo $html;
 		}
 		else {
-			// We don't need $session here as read access is already checked above
+			// We don't need $session here as read access is already checked before
 			$this->serve();
 		}
 	}
 
-	public function editor(): bool
+	public function editor(?Session $session = null): bool
 	{
 		$editor = $this->editorType() ?? 'code';
 		$csrf_key = 'edit_file_' . $this->pathHash();
@@ -1046,7 +1088,7 @@ class File extends Entity
 		$tpl->assign(compact('csrf_key', 'file'));
 
 		if ($editor == 'wopi') {
-			echo $this->getWOPIEditorHTML();
+			echo $this->getWOPIEditorHTML($session, false);
 			return false;
 		}
 

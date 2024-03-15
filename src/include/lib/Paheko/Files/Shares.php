@@ -40,11 +40,7 @@ class Shares
 		$share->set('id_file', $file->id());
 		$share->set('created', new DateTime);
 
-		$share->importForm([
-			'option'   => $option,
-			'ttl'      => $ttl,
-			'password' => $password,
-		]);
+		$share->importForm(compact('option', 'ttl', 'password'));
 
 		return $share;
 	}

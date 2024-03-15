@@ -225,9 +225,6 @@ body.public main p.block.error, body.public main p.block.alert {
     margin: 2em 0;
     font-size: 1.2em;
 }
-body.public, body.raw {
-    background: none;
-}
 
 body.public .header .menu, body.raw .header .menu {
     display: none;

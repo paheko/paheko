@@ -2,8 +2,6 @@
 
 namespace Paheko\Files\WebDAV;
 
-use Paheko\Users\Session as UserSession;
-
 use KD2\WebDAV\WOPI;
 
 use const Paheko\WOPI_DISCOVERY_URL;
@@ -11,8 +9,8 @@ use const Paheko\WOPI_DISCOVERY_URL;
 class Server
 {
 	/**
-	 * WOPI routes are only available to users logged-in in /admin/
-	 * Not people logged-in using webdav
+	 * WOPI routes are only available to users logged-in in /admin, or using sharing links
+	 * People logged-in with a webdav cookie won't be able to use WOPI
 	 */
 	static public function wopiRoute(?string $uri = null): bool
 	{

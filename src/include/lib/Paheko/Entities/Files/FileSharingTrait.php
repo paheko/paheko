@@ -8,7 +8,8 @@ use const Paheko\{SECRET_KEY};
 
 /**
  * @deprecated FIXME: delete for 1.5.0
- * This is for handling older file sharing links
+ * This is for handling older file sharing links.
+ * New shares are handled using the files_shares table.
  */
 trait FileSharingTrait
 {
