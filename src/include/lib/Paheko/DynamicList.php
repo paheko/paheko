@@ -46,9 +46,19 @@ class DynamicList implements \Countable
 
 	/**
 	 * Modifier callback function
-	 * This will be called for each row
+	 * This will be called for each row.
+	 * This can also insert new rows after current one by using "yield"
+	 * (useful for eg. stepped totals)
 	 */
 	protected $modifier;
+
+	/**
+	 * Final callback function
+	 * This will be called after the last row.
+	 * This can insert new rows after current one by using "yield"
+	 * (useful for eg. last total number)
+	 */
+	protected $final_generator;
 
 	/**
 	 * Export modifier callback function
@@ -153,6 +163,10 @@ class DynamicList implements \Countable
 
 	public function setModifier(callable $fn) {
 		$this->modifier = $fn;
+	}
+
+	public function setFinalGenerator(callable $fn) {
+		$this->final_generator = $fn;
 	}
 
 	public function setExportCallback(callable $fn) {
@@ -301,9 +315,11 @@ class DynamicList implements \Countable
 			$list = DB::getInstance()->iterate($this->SQL(), $this->parameters);
 		}
 
+		$row = null;
+
 		foreach ($list as $row_key => $row) {
 			if ($this->modifier) {
-				call_user_func_array($this->modifier, [&$row]);
+				yield from call_user_func_array($this->modifier, [&$row]);
 			}
 
 			// Hide columns without a label in results
@@ -316,6 +332,10 @@ class DynamicList implements \Countable
 			}
 
 			yield $row_key => $row;
+		}
+
+		if ($this->final_generator) {
+			yield from call_user_func($this->final_generator, $row);
 		}
 	}
 
