@@ -319,7 +319,10 @@ class DynamicList implements \Countable
 
 		foreach ($list as $row_key => $row) {
 			if ($this->modifier) {
-				yield from call_user_func_array($this->modifier, [&$row]);
+				$r = call_user_func_array($this->modifier, [&$row]);
+				if (is_array($r) || $r instanceof \Generator) {
+					yield from $r;
+				}
 			}
 
 			// Hide columns without a label in results
@@ -335,7 +338,11 @@ class DynamicList implements \Countable
 		}
 
 		if ($this->final_generator) {
-			yield from call_user_func($this->final_generator, $row);
+			$r = call_user_func($this->final_generator, $row);
+
+			if (is_array($r) || $r instanceof \Generator) {
+				yield from $r;
+			}
 		}
 	}
 
