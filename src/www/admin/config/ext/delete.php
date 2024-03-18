@@ -43,6 +43,7 @@ else {
 		}
 		else {
 			$module->delete();
+			Utils::redirectDialog('!config/ext/');
 		}
 	}, $csrf_key, '!config/ext/');
 }

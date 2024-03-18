@@ -13,7 +13,8 @@ deps:
 	wget ${KD2FW_URL}zip/${KD2FW_BRANCH}/kd2.zip -O ${TMP_KD2}/kd2.zip
 
 	rm -rf "include/lib/KD2"
-	unzip "${TMP_KD2}/kd2.zip" -d include/lib
+	unzip "${TMP_KD2}/kd2.zip" -d ${TMP_KD2}
+	mv ${TMP_KD2}/kd2/src/lib/KD2 include/lib
 
 	rm -rf ${TMP_KD2}
 

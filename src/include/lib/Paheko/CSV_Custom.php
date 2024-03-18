@@ -99,7 +99,7 @@ class CSV_Custom
 		}
 
 		if (!isset($this->_default)) {
-			$this->_default = array_map(function ($a) { return null; }, array_flip($this->translation));
+			$this->_default = array_fill_keys(array_flip($this->translation), null);
 		}
 
 		$row = $this->_default;
@@ -357,5 +357,19 @@ class CSV_Custom
 		}
 
 		return $out;
+	}
+
+	public function getRawHeader(): ?array
+	{
+		if (!$this->loaded()) {
+			return null;
+		}
+
+		return reset($this->csv) ?: null;
+	}
+
+	public function hasRawHeaderColumn(string $label)
+	{
+		return in_array($label, $this->getRawHeader(), true);
 	}
 }
