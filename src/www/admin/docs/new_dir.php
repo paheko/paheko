@@ -7,9 +7,9 @@ use Paheko\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
 
-$parent = qg('path');
+$parent = Files::getByHashID(qg('id'));
 
-if (!File::canCreate($parent)) {
+if (!$parent->canCreateHere(Session::getInstance())) {
 	throw new UserException('Vous n\'avez pas le droit de créer de répertoire ici.');
 }
 

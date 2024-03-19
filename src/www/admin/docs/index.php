@@ -14,16 +14,21 @@ require_once __DIR__ . '/../_inc.php';
 
 $highlight = null;
 
-if (qg('f')) {
-	$pos = strrpos(qg('f'), '/');
-	$path = substr(qg('f'), 0, $pos);
-	$highlight = substr(qg('f'), $pos + 1);
+if ($id = qg('id')) {
+	$dir = Files::getByHashID($id);
 }
 else {
-	$path = qg('path') ?: File::CONTEXT_DOCUMENTS;
-}
+	if (qg('f')) {
+		$pos = strrpos(qg('f'), '/');
+		$path = substr(qg('f'), 0, $pos);
+		$highlight = substr(qg('f'), $pos + 1);
+	}
+	else {
+		$path = qg('path') ?: File::CONTEXT_DOCUMENTS;
+	}
 
-$dir = Files::get($path);
+	$dir = Files::get($path);
+}
 
 if (!$dir || !$dir->isDir()) {
 	throw new UserException('Ce répertoire n\'existe pas.');
@@ -78,7 +83,6 @@ if ($gallery !== $pref) {
 	Session::getLoggedUser()->setPreference('folders_gallery', $gallery);
 }
 
-$dir_uri = $dir->path_uri();
 $parent_uri = $dir->parent_uri();
 
 $quota = [
@@ -117,7 +121,7 @@ else {
 	$title = 'Documents';
 }
 
-$tpl->assign(compact('list', 'dir_uri', 'parent_uri', 'dir', 'context', 'context_ref',
+$tpl->assign(compact('list', 'parent_uri', 'dir', 'context', 'context_ref',
 	'breadcrumbs', 'highlight', 'user_name', 'gallery', 'context_specific_root',
 	'quota', 'title'));
 
