@@ -479,7 +479,7 @@ class API
 
 				if ($this->method === 'POST') {
 					$this->requireAccess(Session::ACCESS_WRITE);
-					$transaction->updateLinkedTransactions((array)($_POST['transactions'] ?? null));
+					$transaction->updateLinkedTransactions((array)($this->params['transactions'] ?? null));
 					return ['success' => true];
 				}
 				elseif ($this->method === 'DELETE') {
@@ -504,7 +504,7 @@ class API
 
 				if ($this->method === 'POST') {
 					$this->requireAccess(Session::ACCESS_WRITE);
-					$transaction->updateLinkedUsers((array)($_POST['users'] ?? null));
+					$transaction->updateLinkedUsers((array)($this->params['users'] ?? null));
 					return ['success' => true];
 				}
 				elseif ($this->method === 'DELETE') {
@@ -529,7 +529,7 @@ class API
 
 				if ($this->method === 'POST') {
 					$this->requireAccess(Session::ACCESS_WRITE);
-					$transaction->updateSubscriptionLinks((array)($_POST['subscriptions'] ?? null));
+					$transaction->updateSubscriptionLinks((array)($this->params['subscriptions'] ?? null));
 					return ['success' => true];
 				}
 				elseif ($this->method === 'DELETE') {
