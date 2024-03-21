@@ -94,6 +94,9 @@ class Email extends Entity
 		$this->set('invalid', false);
 		$this->set('fail_count', 0);
 		$this->set('fail_log', null);
+
+		Plugins::fire('email.address.verified', false, ['address' => $this]);
+
 		return true;
 	}
 

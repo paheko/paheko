@@ -349,14 +349,17 @@ class Emails
 			}
 
 			// Create email address in database
-			if (!$row->email_hash) {
-				$email = self::getOrCreateEmail($row->recipient);
+			$email = self::getOrCreateEmail($row->recipient);
 
-				if (!$email || !$email->canSend()) {
-					// Email address is invalid, skip
-					self::deleteFromQueue($row->id);
-					continue;
-				}
+			if ($row->context !== self::CONTEXT_SYSTEM && $email && $email->canSend()) {
+				// Allow a signal to validate the email address (eg. global list validation)
+				Plugins::fire('email.address.check', false, ['address' => $email, 'raw_address' => $row->recipient]);
+			}
+
+			if (!$email || !$email->canSend()) {
+				// Email address is invalid, skip
+				self::deleteFromQueue($row->id);
+				continue;
 			}
 
 			$headers = [
@@ -730,18 +733,18 @@ class Emails
 		return self::handleManualBounce($return['recipient'], $return['type'], $return['message']);
 	}
 
-	static public function handleManualBounce(string $address, string $type, ?string $message): ?array
+	static public function handleManualBounce(string $raw_address, string $type, ?string $message): ?array
 	{
 		$return = compact('address', 'type', 'message');
-		$email = self::getOrCreateEmail($address);
+		$address = self::getOrCreateEmail($raw_address);
 
-		if (!$email) {
+		if (!$address) {
 			return null;
 		}
 
-		$email->hasFailed($return);
-		Plugins::fire('email.bounce.save.before', false, compact('email', 'address', 'return', 'type', 'message'));
-		$email->save();
+		$address->hasFailed($return);
+		Plugins::fire('email.bounce.save.before', false, compact('address', 'raw_address', 'return', 'type', 'message'));
+		$address->save();
 
 		return $return;
 	}
