@@ -1582,14 +1582,7 @@ class Transaction extends Entity
 			$i = 0;
 
 			foreach ((array) $_GET['u'] as $key => $value) {
-				if ($key != $i++ && $value) {
-					$id = (int) $key;
-					$linked_services[$id] = (int) $value;
-				}
-				else {
-					$id = (int) $value;
-				}
-
+				$id = (int) $value;
 				$name = Users::getName($id);
 
 				if ($name) {
