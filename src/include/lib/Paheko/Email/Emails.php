@@ -735,7 +735,7 @@ class Emails
 
 	static public function handleManualBounce(string $raw_address, string $type, ?string $message): ?array
 	{
-		$return = compact('address', 'type', 'message');
+		$return = compact('raw_address', 'type', 'message');
 		$address = self::getOrCreateEmail($raw_address);
 
 		if (!$address) {
