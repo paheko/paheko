@@ -600,10 +600,15 @@ EOS;
 		$prefix = $prefix ? $db->quoteIdentifier($prefix) . '.' : '';
 		$out = [];
 		$glue = $db->quote($glue);
+		$list = (array) $list;
 
-		foreach ((array) $list as $field) {
+		foreach ($list as $field) {
 			if (!DynamicFields::get($field)) {
 				continue;
+			}
+
+			if (count($list) === 1) {
+				return $prefix . $db->quoteIdentifier($field);
 			}
 
 			$out[] = sprintf('COALESCE(%s || %s%s, \'\')', $glue, $prefix, $db->quoteIdentifier($field));
