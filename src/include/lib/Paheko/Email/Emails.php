@@ -751,7 +751,7 @@ class Emails
 		Plugins::fire('email.bounce.save.before', false, compact('address', 'raw_address', 'type', 'message'));
 		$address->save();
 
-		return $return;
+		return compact('type', 'message', 'raw_address');
 	}
 
 
