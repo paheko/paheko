@@ -113,21 +113,10 @@ class Mailing extends Entity
 		}
 
 		$email = strtolower(trim($email));
-		$e = Emails::getEmail($email);
+		$e = Emails::getOrCreateEmail($email);
 
-		if ($e && !$e->canSend()) {
+		if (!$e->canSend()) {
 			$data = null;
-		}
-		else {
-			try {
-				// Validate e-mail address, but not MX (quick check)
-				Email::validateAddress($email, false);
-			}
-			catch (UserException $ex) {
-				$e = Emails::createEmail($email);
-				$e->setFailedValidation($ex->getMessage());
-				$data = null;
-			}
 		}
 
 		$this->cleanExtraData($data);

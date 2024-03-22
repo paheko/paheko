@@ -288,28 +288,21 @@ class Emails
 	/**
 	 * Return or create a new email entity
 	 */
-	static public function getOrCreateEmail(string $address): ?Email
+	static public function getOrCreateEmail(string $address): Email
 	{
-		$address = strtolower($address);
+		$hash = Email::getHash($address);
 
-		if (!Email::isAddressValid($address, false)) {
-			return null;
-		}
-
-		$e = self::getEmail($address);
-
-		if (!$e) {
-			$e = self::createEmail($address);
-		}
+		$e = EM::findOne(Email::class, 'SELECT * FROM @TABLE WHERE hash = ?;', $hash);
+		$e ??= self::createEmail($address, $hash);
 
 		return $e;
 	}
 
-	static public function createEmail(string $address): Email
+	static public function createEmail(string $address, string $hash): Email
 	{
 		$e = new Email;
-		$e->added = new \DateTime;
-		$e->hash = $e::getHash($address);
+		$e->set('added', new \DateTime);
+		$e->set('hash', $hash);
 		$e->validate($address);
 		$e->save();
 		return $e;
@@ -348,16 +341,33 @@ class Emails
 				}
 			}
 
-			// Create email address in database
-			$email = self::getOrCreateEmail($row->recipient);
+			$fail = null;
+			$fail_message = null;
 
-			if ($row->context !== self::CONTEXT_SYSTEM && $email && $email->canSend()) {
-				// Allow a signal to validate the email address (eg. global list validation)
-				Plugins::fire('email.address.check', false, ['address' => $email, 'raw_address' => $row->recipient]);
+			try {
+				Email::validateAddress($row->recipient, true);
+			}
+			catch (UserException $e) {
+				$fail = 'hard';
+				$fail_message = $e->getMessage();
 			}
 
-			if (!$email || !$email->canSend()) {
-				// Email address is invalid, skip
+			if (!$fail && $row->context !== self::CONTEXT_SYSTEM) {
+				// Allow a signal to validate the email address (eg. global list validation)
+				$signal = Plugins::fire('email.address.check', true, ['hash' => $row->email_hash, 'address' => $row->recipient]);
+
+				if ($signal->isStopped()) {
+					$fail = $signal->getOut('fail');
+					$fail_message = $signal->getOut('message');
+				}
+			}
+
+			if ($fail) {
+				$address = self::getOrCreateEmail($row->recipient);
+				$address->hasBounced($fail, $fail_message);
+				$address->save();
+
+				// Skip, email address cannot receive emails
 				self::deleteFromQueue($row->id);
 				continue;
 			}
@@ -735,15 +745,10 @@ class Emails
 
 	static public function handleManualBounce(string $raw_address, string $type, ?string $message): ?array
 	{
-		$return = compact('raw_address', 'type', 'message');
 		$address = self::getOrCreateEmail($raw_address);
 
-		if (!$address) {
-			return null;
-		}
-
-		$address->hasFailed($return);
-		Plugins::fire('email.bounce.save.before', false, compact('address', 'raw_address', 'return', 'type', 'message'));
+		$address->hasBounced($type, $message);
+		Plugins::fire('email.bounce.save.before', false, compact('address', 'raw_address', 'type', 'message'));
 		$address->save();
 
 		return $return;

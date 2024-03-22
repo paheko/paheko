@@ -10,10 +10,6 @@ $session->requireAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 $address = qg('address');
 $email = Emails::getOrCreateEmail($address);
 
-if (!$email) {
-    throw new UserException('Adresse invalide');
-}
-
 $csrf_key = 'block_email';
 
 $form->runIf('send', function () use ($email) {
