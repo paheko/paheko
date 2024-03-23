@@ -7,6 +7,7 @@ require_once __DIR__ . '/../_inc.php';
 
 $list = null;
 $query = f('query') ?? qg('query');
+$diagram = false;
 
 $db = DB::getInstance();
 $tables_list = $db->getGrouped('SELECT name, sql, NULL AS count, NULL AS schema FROM sqlite_master
@@ -98,6 +99,16 @@ elseif (($pragma = qg('pragma')) || isset($query)) {
 		$form->addError($e->getMessage());
 	}
 }
+elseif (qg('diagram') !== null) {
+	$tables = [];
+
+	foreach ($tables_list as $name => $data) {
+		$tables[$name] = $db->getTableSchema($name);
+	}
+
+	$diagram = true;
+	$tpl->assign(compact('tables'));
+}
 else {
 	foreach ($tables_list as $name => &$data) {
 		$data->count = $db->count($name);
@@ -110,7 +121,7 @@ else {
 	$tpl->assign('triggers_list', $db->getAssoc('SELECT name, sql FROM sqlite_master WHERE type = \'trigger\' ORDER BY name;'));
 }
 
-$tpl->assign(compact('tables_list', 'query', 'list'));
+$tpl->assign(compact('tables_list', 'query', 'list', 'diagram'));
 
 $tpl->register_modifier('format_json', function (string $str) {
 	return json_encode(json_decode($str, true), JSON_PRETTY_PRINT);
