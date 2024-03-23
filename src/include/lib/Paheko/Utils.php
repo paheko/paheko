@@ -1401,7 +1401,7 @@ class Utils
 			$cmd = null;
 
 			foreach ($list as $program) {
-				if (shell_exec('which ' . $program)) {
+				if (self::quick_exec('which ' . $program, 1)) {
 					$cmd = $program;
 					break;
 				}
