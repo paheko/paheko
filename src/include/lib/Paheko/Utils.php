@@ -1210,7 +1210,17 @@ class Utils
 	}
 
 	/**
-	 * Execute a system command with a timeout
+	 * Execute a system command with a timeout, just returning a string from stdout
+	 */
+	static public function quick_exec(string $cmd, int $timeout, ?int &$code = null): string
+	{
+		$output = '';
+		$code = self::exec($cmd, $timeout, null, function($data) use (&$output) { $output .= $data; });
+		return $output;
+	}
+
+	/**
+	 * Execute a system command with a timeout, handling STDIN, STDOUT and STDERR with callbacks
 	 * @see https://blog.dubbelboer.com/2012/08/24/execute-with-timeout.html
 	 */
 	static public function exec(string $cmd, int $timeout, ?callable $stdin, ?callable $stdout, ?callable $stderr = null): int
@@ -1430,7 +1440,7 @@ class Utils
 		$output = '';
 
 		try {
-			self::exec($cmd, $timeout, null, function($data) use (&$output) { $output .= $data; });
+			$output = self::quick_exec($cmd, $timeout);
 		}
 		finally {
 			Utils::safe_unlink($source);

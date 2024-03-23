@@ -825,7 +825,7 @@ class File extends Entity
 					Utils::escapeshellarg($tmpfile ?? $source['path'])
 				);
 
-				Utils::exec($cmd, 2, null, null);
+				Utils::quick_exec($cmd, 2);
 				$content = file_get_contents($tmpdest);
 			}
 			catch (\OverflowException $e) {
