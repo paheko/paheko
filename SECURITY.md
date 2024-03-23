@@ -37,6 +37,8 @@ Example of security issues that will be inside our scope:
 * Remote code execution
 * Directory traversal
 * Ability for a user to get access to stuff only users with more permissions should have access to (eg. deleting an accounting transaction if you only have the "read" permission for accounting)
+* Official plugins ([repo](https://fossil.kd2.org/paheko-plugins/)) and modules ([repo](https://fossil.kd2.org/paheko-modules/))
+* KD2 libraries used by the project ([repo](https://fossil.kd2.org/kd2fw/)), but not the ones not used by Paheko (obviously)
 * etc.
 
 We also welcome security findings on Paheko.cloud as well as other hosted Paheko services.
@@ -65,3 +67,4 @@ Note: users inside Paheko have different permissions, according to the category 
 * Proof of concepts that require physical access to the device
 * Flaws impacting out-of-date browsers
 * Self-injection of code when having root access
+* Unofficial (community) plugins and modules (but please report issues to their authors)
