@@ -356,7 +356,7 @@ class Emails
 				// Allow a signal to validate the email address (eg. global list validation)
 				$signal = Plugins::fire('email.address.check', true, ['hash' => $row->email_hash, 'address' => $row->recipient]);
 
-				if ($signal->isStopped()) {
+				if ($signal && $signal->isStopped()) {
 					$fail = $signal->getOut('fail');
 					$fail_message = $signal->getOut('message');
 				}
