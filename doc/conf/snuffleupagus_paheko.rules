@@ -93,7 +93,6 @@ sp.disable_function.function("ini_set").param("option").value("include_path").dr
 sp.disable_function.function("ini_set").param("option").value("open_basedir").drop();
 
 # Detect some backdoors via environment recon
-sp.disable_function.function("ini_get").param("option").value("allow_url_fopen").drop();
 sp.disable_function.function("ini_get").param("option").value("open_basedir").drop();
 sp.disable_function.function("ini_get").param("option").value_r("suhosin").drop();
 sp.disable_function.function("function_exists").param("function").value("eval").drop();
@@ -111,11 +110,3 @@ sp.disable_function.function("is_callable").param("value").value("passthru").dro
 
 # File upload
 sp.disable_function.function("move_uploaded_file").param("to").value_r("\.php").drop();
-
-## prevent remote access via fopen/include
-sp.ini.key("allow_url_fopen").ro();
-sp.ini.key("allow_url_include").set("0").ro();
-
-## prevent code execution from auto-included files
-sp.ini.key("auto_append_file").ro();
-sp.ini.key("auto_prepend_file").ro();
