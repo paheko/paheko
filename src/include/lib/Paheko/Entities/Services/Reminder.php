@@ -123,7 +123,7 @@ class Reminder extends Entity
 			],
 		];
 
-		$conditions = sprintf('su.id_service = %d AND sr.id = %d', $this->id_service, $this->id);
+		$conditions = sprintf('sub.id_service = %d AND sr.id = %d', $this->id_service, $this->id);
 		$tables = '(' . Reminders::getPendingSQL(false, $conditions) . ') AS pending';
 
 		$list = new DynamicList($columns, $tables);
@@ -133,7 +133,7 @@ class Reminder extends Entity
 
 	public function getPreview(int $id_user): ?string
 	{
-		$conditions = sprintf('su.id_service = %d AND su.id_user = %d AND sr.id = %d', $this->id_service, $id_user, $this->id);
+		$conditions = sprintf('sub.id_service = %d AND sub.id_user = %d AND sr.id = %d', $this->id_service, $id_user, $this->id);
 		$sql = Reminders::getPendingSQL(false, $conditions);
 		$db = DB::getInstance();
 

@@ -106,7 +106,7 @@ class Reminders
 		$sql = sprintf($sql,
 			DynamicFields::getNameFieldsSQL('u'),
 			$emails,
-			$due_only ? 'date() > date(su.expiry_date, sr.delay || \' days\')' : '1',
+			$due_only ? 'date() > date(sub.expiry_date, sr.delay || \' days\')' : '1',
 			$conditions
 		);
 
