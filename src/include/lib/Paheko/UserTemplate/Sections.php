@@ -1390,7 +1390,7 @@ class Sections
 			$db->setReadOnly(false);
 		}
 		catch (DB_Exception $e) {
-			throw new Brindille_Exception(sprintf("à la ligne %d erreur SQL :\n%s\n\nRequête exécutée :\n%s", $line, $db->lastErrorMsg(), $sql));
+			throw new Brindille_Exception(sprintf("à la ligne %d erreur SQL :\n%s\n\nRequête exécutée :\n%s", $line, $e->getMessage(), $sql));
 		}
 
 		while ($row = $result->fetchArray(\SQLITE3_ASSOC))
