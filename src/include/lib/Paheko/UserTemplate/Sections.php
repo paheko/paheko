@@ -304,7 +304,7 @@ class Sections
 			$db->exec(sprintf('CREATE INDEX IF NOT EXISTS %s_auto_%s ON %1$s (%s);', $table, $hash, implode(', ', $search_params)));
 		}
 		catch (DB_Exception $e) {
-			throw new Brindille_Exception(sprintf("à la ligne %d, impossible de créer l'index, erreur SQL :\n%s\n\nRequête exécutée :\n%s", $line, $db->lastErrorMsg(), $sql));
+			throw new Brindille_Exception(sprintf("Impossible de créer l'index, erreur SQL :\n%s\n\nRequête exécutée :\n%s", $db->lastErrorMsg(), $sql));
 		}
 	}
 
@@ -495,7 +495,7 @@ class Sections
 		return preg_replace_callback(
 			'/(?:([\w\d]+)\.)?\$(\$[\[\.][\w\d\.\[\]#]+)/',
 			fn ($m) => sprintf('json_extract(%sdocument, %s)',
-				!empty($m[1]) ? $db->quote($m[1]) . '.' : '',
+				!empty($m[1]) ? $db->quoteIdentifier($m[1]) . '.' : '',
 				$db->quote($m[2])
 			),
 			$str
