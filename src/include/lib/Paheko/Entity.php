@@ -37,7 +37,7 @@ class Entity extends AbstractEntity
 		}
 	}
 
-	static public function filterUserDateValue(?string $value, string $class = \DateTime::class): ?\DateTime
+	static public function filterUserDateValue($value, string $class = \DateTime::class): ?\DateTime
 	{
 		if (null === $value) {
 			return null;
