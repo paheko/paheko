@@ -1564,11 +1564,12 @@ class Transaction extends Entity
 		if (isset($_GET['ll']) && is_array($_GET['ll'])) {
 			$lines = [];
 			foreach ($_GET['ll'] as $l) {
+				$lock = $l['k'] ?? null;
 				$lines[] = [
 					'debit'            => $l['d0'] ?? Utils::moneyToInteger($l['d'] ?? ''),
 					'credit'           => $l['c0'] ?? Utils::moneyToInteger($l['c'] ?? ''),
-					'debit_locked'     => ($l['o'] ?? null) === 'c',
-					'credit_locked'    => ($l['o'] ?? null) === 'd',
+					'debit_locked'     => $lock === 'd' || $lock === 'a',
+					'credit_locked'    => $lock === 'c' || $lock === 'a',
 					'account_selector' => $accounts->getSelectorFromCode($l['a'] ?? null),
 					'label'            => $l['l'] ?? null,
 					'reference'        => $l['r'] ?? null,
