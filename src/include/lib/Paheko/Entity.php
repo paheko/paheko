@@ -5,6 +5,7 @@ namespace Paheko;
 use Paheko\Form;
 use KD2\DB\AbstractEntity;
 use KD2\DB\Date;
+use KD2\ErrorManager;
 
 use DateTime;
 
