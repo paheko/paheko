@@ -30,12 +30,19 @@ if (qg('table') && array_key_exists(qg('table'), $tables_list)) {
 		$columns[$c->name] = ['label' => $c->name];
 	}
 
+	$foreign_keys = $db->getTableForeignKeys($table);
+
 	$list = new DynamicList($columns, $table);
 	$list->orderBy(key($columns), false);
 	$list->setTitle($table);
 	$list->loadFromQueryString();
 
-	$tpl->assign(compact('table', 'list', 'is_module'));
+	if (!empty($_GET['only']) && is_array($_GET['only'])) {
+		$list->setConditions(sprintf('%s = ?', $db->quoteIdentifier(key($_GET['only']))));
+		$list->setParameter(0, current($_GET['only']));
+	}
+
+	$tpl->assign(compact('table', 'list', 'is_module', 'foreign_keys'));
 }
 elseif (qg('table_info') && array_key_exists(qg('table_info'), $tables_list)) {
 	$name = qg('table_info');

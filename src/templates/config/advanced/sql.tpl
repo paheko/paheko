@@ -117,7 +117,9 @@
 				<td>
 					{if null == $value}
 						<em>NULL</em>
-					{elseif $is_module && $key === 'document'}
+					{elseif ($fk = $foreign_keys[$key] ?? null) && $fk.to}
+						{link href="?table=%s&only[%s]=%s"|args:$fk.table:$fk.to:$value label=$value class="num"}
+					{elseif Utils::is_json($value) || ($is_module && $key === 'document')}
 						<pre>{$value|format_json}</pre>
 					{else}
 						{$value}

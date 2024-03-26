@@ -1645,4 +1645,13 @@ class Utils
 
 		return rtrim($out);
 	}
+
+	static public function is_json($value): bool
+	{
+		if (is_string($value) && substr($value, 0, 1) === '{' && substr($value, -1) === '}') {
+			return true;
+		}
+
+		return false;
+	}
 }
