@@ -1567,6 +1567,8 @@ class Transaction extends Entity
 				$lines[] = [
 					'debit'            => $l['d0'] ?? Utils::moneyToInteger($l['d'] ?? ''),
 					'credit'           => $l['c0'] ?? Utils::moneyToInteger($l['c'] ?? ''),
+					'debit_locked'     => ($l['o'] ?? null) === 'c',
+					'credit_locked'    => ($l['o'] ?? null) === 'd',
 					'account_selector' => $accounts->getSelectorFromCode($l['a'] ?? null),
 					'label'            => $l['l'] ?? null,
 					'reference'        => $l['r'] ?? null,
