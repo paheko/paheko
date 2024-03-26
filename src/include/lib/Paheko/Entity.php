@@ -158,7 +158,7 @@ class Entity extends AbstractEntity
 
 		$y = $date->format('Y');
 		if ($y < 1900 || $y > 2100) {
-			throw new ValidationException(sprintf('Date invalide (%s) : doit être entre 1900 et 2100', $key));
+			throw new ValidationException(sprintf('Date invalide (%s) : doit être entre 1900 et 2100', $value));
 		}
 
 		return $date;
