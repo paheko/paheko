@@ -44,7 +44,7 @@ class Transaction extends Entity
 
 	const STATUS_WAITING = 1;
 	const STATUS_PAID = 2;
-	const STATUS_DEPOSIT = 4;
+	const STATUS_DEPOSITED = 4;
 	const STATUS_ERROR = 8;
 	const STATUS_OPENING_BALANCE = 16;
 

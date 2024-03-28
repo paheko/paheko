@@ -114,8 +114,8 @@
 			{/if}
 			{* Deposit status, might be consufing
 			<td>
-				{if $account.type == $account::TYPE_OUTSTANDING && $line.debit}
-					{if !($line.status & Entities\Accounting\Transaction::STATUS_DEPOSIT)}
+				{if $account.type === $account::TYPE_OUTSTANDING && $line.debit}
+					{if !($line.status & Entities\Accounting\Transaction::STATUS_DEPOSITED)}
 						{icon shape="alert" title="Cette opération n'a pas été déposée"}
 					{/if}
 				{/if}
