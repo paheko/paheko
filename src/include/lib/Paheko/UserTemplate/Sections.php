@@ -663,8 +663,12 @@ class Sections
 
 		if (!empty($params['export'])) {
 			$export_url = Utils::getSelfURI();
-			$export_url .= strstr($export_url, '?') ? '&export=' : '?export=';
-			printf('<p class="actions">%s</p>', CommonFunctions::exportmenu(['href' => $export_url, 'right' => true]));
+			$export_url .= strstr($export_url, '?') ? '&' : '?';
+
+			$export_params = ['right' => true];
+			//$export_params['table'] = $params['export'] === 'table'; // Table export is currently not working in modules FIXME
+
+			printf('<p class="actions">%s</p>', CommonFunctions::exportmenu($export_params));
 		}
 
 		$tpl->assign(compact('list'));
@@ -808,6 +812,39 @@ class Sections
 			unset($params['search_name']);
 		}
 
+		if (!empty($params['search'])) {
+			if (!is_array($params['search'])) {
+				throw new Brindille_Exception('Le paramètre "search" n\'est pas un tableau');
+			}
+
+			$params['tables'] .= sprintf(' INNER JOIN users_search AS us ON us.id = u.id');
+			$i = 0;
+
+			foreach ($params['search'] as $field => $value) {
+				if ($field === '_email') {
+					$params[':search_email'] = $value;
+					$email_fields = DynamicFields::getEmailFields();
+					$email_fields = array_map([$db, 'quoteIdentifier'], $email_fields);
+					$email_fields = array_map(fn($a) => 'u.' . $a, $email_fields);
+					$search[] = sprintf(':search_email IN (%s)', implode(', ', $email_fields));
+				}
+				elseif ($field === '_name' || $field === '_reversed_name') {
+					$params[':search_name'] = Utils::unicodeTransliterate($value);
+					$search[] = sprintf('%s = :search_name', DynamicFields::getNameFieldsSearchableSQL('us', $field === '_reversed_name'));
+				}
+				else {
+					$params[':search_' . $i] = Utils::unicodeTransliterate($value);
+					$search[] = sprintf('%s = :search_name', 'us.' . $db->quoteIdentifier($field));
+				}
+
+				$i++;
+			}
+
+			$params['where'] .= sprintf('(%s)', implode(' OR ', $search));
+
+			unset($params['search']);
+		}
+
 		if (empty($params['order'])) {
 			$params['order'] = 'u.id';
 		}
@@ -832,8 +869,10 @@ class Sections
 		$params['where'] ??= '';
 
 		$number_field = DynamicFields::getNumberField();
+		$db = DB::getInstance();
 
-		$params['select'] = sprintf('su.expiry_date, su.date, s.label, su.paid, su.expected_amount');
+		$params['select'] = 'su.expiry_date, su.date, s.label, su.paid, su.expected_amount,
+			CASE WHEN su.expiry_date >= date() THEN 1 WHEN su.expiry_date IS NOT NULL THEN -1 ELSE NULL END AS status';
 		$params['tables'] = 'services_users su INNER JOIN services s ON s.id = su.id_service';
 
 		if (isset($params['user'])) {
@@ -848,14 +887,24 @@ class Sections
 			unset($params['id_service']);
 		}
 
-		if (!empty($params['active'])) {
-			$params['having'] = 'MAX(su.expiry_date) >= date()';
+		if (isset($params['active'])) {
+			if (!$params['active']) {
+				$params['having'] = 'MAX(su.expiry_date) < date()';
+			}
+			else {
+				$params['having'] = 'MAX(su.expiry_date) >= date()';
+			}
+
 			unset($params['active']);
 		}
+		elseif (!empty($params['by_service'])) {
+			$params['select'] .= ', MAX(su.expiry_date) AS expiry_date';
+			$params['group'] = 's.id';
+		}
 
-		if (isset($params['active']) && empty($params['active'])) {
-			$params['having'] = 'MAX(su.expiry_date) < date()';
-			unset($params['active']);
+		// Hide archived subscriptions (FIXME Paheko 1.4!)
+		if (($params['archived'] ?? null) === false) {
+			$params['where'] .= ' AND (s.end_date IS NULL OR s.end_date >= date())';
 		}
 
 		if (empty($params['order'])) {
