@@ -397,13 +397,13 @@ dl.describe ul.flat li {
     margin-bottom: .2em;
 }
 
-dl.describe mark {
+mark {
     background-color: rgba(var(--gSecondColor), 0.3);
     border-radius: .5em;
     padding: .1rem .4rem;
 }
 
-dl.describe mark.variant-a {
+mark.variant-a {
     background-color: rgba(var(--gMainColor), 0.2);
 }
 

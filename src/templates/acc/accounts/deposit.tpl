@@ -42,8 +42,8 @@
 		<fieldset>
 			<legend>Détails de l'écriture de dépôt</legend>
 			<dl>
-				<dt>Nombre de chèques</dt>
-				<dd><span id="cheques_count">0</span></dd>
+				<dt><strong>Nombre de chèques</strong></dt>
+				<dd><mark id="cheques_count">0</mark></dd>
 				{input type="text" name="label" label="Libellé" required=1 default="Dépôt en banque"}
 				{input type="date" name="date" default=$date label="Date" required=1}
 				{input type="money" name="amount" label="Montant" required=1}
