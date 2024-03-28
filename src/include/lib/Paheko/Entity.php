@@ -72,9 +72,14 @@ class Entity extends AbstractEntity
 
 		$a = substr($value, 2, 1);
 		$b = substr($value, 4, 1);
+		$c = substr($value, 1, 1);
 		$l = strlen($value);
 
-		if ($a === '/') {
+		if ($c === '/' && ($l === 8 || $l === 9)) {
+			// D/MM/YYY, D/M/YYYY
+			$format = '!d/m/Y';
+		}
+		elseif ($a === '/') {
 			// DD/MM/YY
 			if ($l === 8) {
 				$year = substr($value, -2);
@@ -140,10 +145,6 @@ class Entity extends AbstractEntity
 			else {
 				$format = 'U';
 			}
-		}
-		elseif (substr($value, 1, 1) === '/' && ($l === 8 || $l === 9)) {
-			// D/MM/YYY, D/M/YYYY
-			$format = '!d/m/Y';
 		}
 
 		if (null !== $format) {
