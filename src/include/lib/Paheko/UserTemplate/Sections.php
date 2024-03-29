@@ -177,7 +177,7 @@ class Sections
 		return '<?php '
 			. 'endforeach; '
 			. '} catch (\Paheko\UserException $e) { '
-			. '$this->assign(\'form_errors\', [$e->getMessage()]); '
+			. '$this->assign(\'form_errors\', [$e]); '
 			. '$fail = true; '
 			. '?>';
 	}

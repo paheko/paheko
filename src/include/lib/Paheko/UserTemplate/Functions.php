@@ -493,7 +493,16 @@ class Functions
 			}
 		}
 
-		$context = count($params['to']) == 1 ? Emails::CONTEXT_PRIVATE : Emails::CONTEXT_BULK;
+		if (!empty($params['notification'])) {
+			$context = Emails::CONTEXT_NOTIFICATION;
+		}
+		elseif (count($params['to']) == 1) {
+			$context = Emails::CONTEXT_PRIVATE;
+		}
+		else {
+			$context = Emails::CONTEXT_BULK;
+		}
+
 		Emails::queue($context, $params['to'], null, $params['subject'], $params['body'], $attachments);
 
 		if (!$ut->isTrusted()) {
@@ -721,11 +730,33 @@ class Functions
 
 	static public function form_errors(array $params, UserTemplate $tpl): string
 	{
-		if (($e = $tpl->get('form_errors')) && is_array($e)) {
-			return sprintf('<p class="error block">%s</p>', nl2br(htmlspecialchars(implode("\n", $e))));
+		$errors = $tpl->get('form_errors');
+
+		if (empty($errors)) {
+			return '';
 		}
 
-		return '';
+		foreach ($errors as &$error) {
+			if ($error instanceof UserException) {
+				if ($html = $error->getHTMLMessage()) {
+					$message = $html;
+				}
+				else {
+					$message = nl2br($this->escape($error->getMessage()));
+				}
+
+				if ($error->hasDetails()) {
+					$message = '<h3>' . $message . '</h3>' . $error->getDetailsHTML();
+				}
+
+				$error = $message;
+			}
+			else {
+				$error = nl2br(htmlspecialchars($error->getMessage()));
+			}
+		}
+
+		return '<div class="block error"><ul><li>' . implode('</li><li>', $errors) . '</li></ul></div>';
 	}
 
 	static public function admin_files(array $params, UserTemplate $ut): string
