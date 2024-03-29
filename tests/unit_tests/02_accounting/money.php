@@ -3,7 +3,7 @@
 namespace Paheko;
 use KD2\Test;
 
-require_once INIT;
+paheko_init(null);
 
 Test::strictlyEquals(500, Utils::moneyToInteger('5'));
 Test::strictlyEquals(442, Utils::moneyToInteger('4,42'));

@@ -4,10 +4,7 @@ namespace Paheko;
 
 use KD2\Test;
 
-const DB_FILE = ':memory:';
-const INSTALL_PROCESS = true;
-
-require_once INIT;
+paheko_init(null);
 
 $db = DB::getInstance();
 

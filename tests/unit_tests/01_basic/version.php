@@ -3,7 +3,7 @@
 namespace Paheko;
 use KD2\Test;
 
-require_once INIT;
+paheko_init(null);
 
 Test::assert(function_exists('Paheko\paheko_version'));
 Test::assert(paheko_version());

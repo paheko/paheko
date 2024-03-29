@@ -3,7 +3,7 @@
 namespace Paheko;
 use KD2\Test;
 
-require_once INIT;
+paheko_init(null);
 
 Test::assert(defined('Paheko\ROOT'));
 Test::assert(is_readable(ROOT));
