@@ -7,6 +7,7 @@ require_once __DIR__ . '/../_inc.php';
 
 $list = null;
 $query = f('query') ?? qg('query');
+$diagram = false;
 
 $db = DB::getInstance();
 $tables_list = $db->getGrouped('SELECT name, sql, NULL AS count, NULL AS schema FROM sqlite_master
@@ -29,12 +30,19 @@ if (qg('table') && array_key_exists(qg('table'), $tables_list)) {
 		$columns[$c->name] = ['label' => $c->name];
 	}
 
+	$foreign_keys = $db->getTableForeignKeys($table);
+
 	$list = new DynamicList($columns, $table);
 	$list->orderBy(key($columns), false);
 	$list->setTitle($table);
 	$list->loadFromQueryString();
 
-	$tpl->assign(compact('table', 'list', 'is_module'));
+	if (!empty($_GET['only']) && is_array($_GET['only'])) {
+		$list->setConditions(sprintf('%s = ?', $db->quoteIdentifier(key($_GET['only']))));
+		$list->setParameter(0, current($_GET['only']));
+	}
+
+	$tpl->assign(compact('table', 'list', 'is_module', 'foreign_keys'));
 }
 elseif (qg('table_info') && array_key_exists(qg('table_info'), $tables_list)) {
 	$name = qg('table_info');
@@ -98,6 +106,16 @@ elseif (($pragma = qg('pragma')) || isset($query)) {
 		$form->addError($e->getMessage());
 	}
 }
+elseif (qg('diagram') !== null) {
+	$tables = [];
+
+	foreach ($tables_list as $name => $data) {
+		$tables[$name] = $db->getTableSchema($name);
+	}
+
+	$diagram = true;
+	$tpl->assign(compact('tables'));
+}
 else {
 	foreach ($tables_list as $name => &$data) {
 		$data->count = $db->count($name);
@@ -110,7 +128,7 @@ else {
 	$tpl->assign('triggers_list', $db->getAssoc('SELECT name, sql FROM sqlite_master WHERE type = \'trigger\' ORDER BY name;'));
 }
 
-$tpl->assign(compact('tables_list', 'query', 'list'));
+$tpl->assign(compact('tables_list', 'query', 'list', 'diagram'));
 
 $tpl->register_modifier('format_json', function (string $str) {
 	return json_encode(json_decode($str, true), JSON_PRETTY_PRINT);

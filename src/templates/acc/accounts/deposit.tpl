@@ -42,6 +42,8 @@
 		<fieldset>
 			<legend>Détails de l'écriture de dépôt</legend>
 			<dl>
+				<dt><strong>Nombre de chèques</strong></dt>
+				<dd><mark id="cheques_count">0</mark></dd>
 				{input type="text" name="label" label="Libellé" required=1 default="Dépôt en banque"}
 				{input type="date" name="date" default=$date label="Date" required=1}
 				{input type="money" name="amount" label="Montant" required=1}
@@ -60,15 +62,18 @@
 	{literal}
 	<script type="text/javascript">
 	var total = 0;
+	var count = 0;
 	$('tbody input[type=checkbox]').forEach((e) => {
 		e.addEventListener('change', () => {
 			var v = e.getAttribute('data-debit') || e.getAttribute('data-credit');
 			v = parseInt(v, 10);
 			total += e.checked ? v : -v;
+			count += e.checked ? 1 : -1;
 			if (total < 0) {
 				total = 0;
 			}
 			$('#f_amount').value = g.formatMoney(total);
+			$('#cheques_count').innerText = count;
 		});
 	});
 

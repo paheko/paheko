@@ -63,19 +63,24 @@ html.dialog main {
 }
 
 #dialog > header.toolbar button.closeBtn {
-    background: unset;
-    border: unset;
-    box-shadow: unset;
+    background: rgba(0, 0, 0, 0.3);
+    border: none;
+    box-shadow: 0px 0px 5px #000;
     font-size: 1.3rem;
-    display: block;
-    padding: .5em 1em;
+    padding: .3em 1em;
     margin-left: auto;
+    border-radius: .5em;
+}
+
+#dialog > header.toolbar button.closeBtn:hover {
+    box-shadow: 0px 0px 5px 2px orange;
+    background: #000;
 }
 
 #dialog > header.toolbar button.closeBtn, #dialog > header.toolbar button.closeBtn::after {
     color: #ccc;
     text-shadow: 0px 0px 5px #000;
-    transition: color .2s;
+    transition: color .2s, box-shadow .2s;
 }
 
 #dialog > header.toolbar button.closeBtn:hover, #dialog > header.toolbar button.closeBtn:hover::after {

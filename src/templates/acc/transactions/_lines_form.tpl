@@ -24,8 +24,8 @@ assert(!isset($lines_accounts) || is_array($lines_accounts));
 			<td class="account">
 				{input type="list" target="!acc/charts/accounts/selector.php?year=%d"|args:$transaction.id_year name="lines[account_selector][]" default=$line.account_selector}
 			</td>
-			<td class="money">{input type="money" name="lines[debit][]" default=$line.debit size=5}</td>
-			<td class="money">{input type="money" name="lines[credit][]" default=$line.credit size=5}</td>
+			<td class="money">{input type="money" name="lines[debit][]" default=$line.debit size=5 readonly=$line.debit_locked}</td>
+			<td class="money">{input type="money" name="lines[credit][]" default=$line.credit size=5 readonly=$line.credit_locked}</td>
 			<td>{input type="text" name="lines[label][]" default=$line.label class="full-width"}</td>
 			<td>{input type="text" name="lines[reference][]" default=$line.reference size=10 class="full-width"}</td>
 			{if count($projects) > 0}

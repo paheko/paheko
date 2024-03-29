@@ -22,6 +22,7 @@ use Paheko\Web\Render\Render;
 use Paheko\Web\Router;
 use Paheko\Web\Cache as Web_Cache;
 use Paheko\Users\DynamicFields;
+use Paheko\UserTemplate\CommonFunctions;
 
 use Paheko\Files\Files;
 
@@ -835,7 +836,7 @@ class File extends Entity
 					Utils::escapeshellarg($tmpfile ?? $source['path'])
 				);
 
-				Utils::exec($cmd, 2, null, null);
+				Utils::quick_exec($cmd, 2);
 				$content = file_get_contents($tmpdest);
 			}
 			catch (\OverflowException $e) {
@@ -964,7 +965,7 @@ class File extends Entity
 		}
 
 		if ($thumb === 'icon') {
-			$label = sprintf('<span data-icon="%s"></span>', Utils::iconUnicode($this->iconShape()));
+			$label = CommonFunctions::icon(['shape' => $this->iconShape()]);
 		}
 		elseif ($thumb) {
 			$label = sprintf('<img src="%s" alt="%s" onerror="this.classList.add(\'broken\');" />', htmlspecialchars($this->thumb_url($thumb)), htmlspecialchars($this->name));

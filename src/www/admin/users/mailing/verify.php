@@ -10,10 +10,6 @@ $session->requireAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 $address = qg('address');
 $email = Emails::getOrCreateEmail($address);
 
-if (!$email) {
-    throw new UserException('Adresse invalide');
-}
-
 if (!$email->canSendVerificationAfterFail()) {
 	if ($email->optout) {
 		$message = 'Il n\'est pas possible de renvoyer une vérification à cette adresse pour le moment, il faut attendre 3 jours.';

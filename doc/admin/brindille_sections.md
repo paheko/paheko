@@ -297,6 +297,7 @@ Paramètres possibles :
 | :- | :- | :- |
 | `id` | optionnel | Identifiant unique du membre, ou tableau contenant une liste d'identifiants. |
 | `search_name` | optionnel | Ne lister que les membres dont le nom correspond au texte passé en paramètre. |
+| `search` | optionnel | (Tableau) Ne lister que les membres dont les champs passés en clés dans le tableau correspondent aux valeurs. Les clés spéciales `_name` et `_email` peuvent être utilisées pour rechercher dans les champs du nom, ou d'email (si la fiche membre a plusieurs champs de type email). |
 | `id_parent` | optionnel | Ne lister que les membres rattachés à l'identifiant unique du membre responsable indiqué. |
 
 Chaque itération renverra la fiche du membre, ainsi que ces variables :
@@ -308,6 +309,14 @@ Chaque itération renverra la fiche du membre, ainsi que ces variables :
 | `$_login` | Identifiant de connexion du membre, tel que défini dans la configuration |
 | `$_number` | Numéro du membre, tel que défini dans la configuration |
 
+Rechercher un membre par adresse e-mail ou nom :
+
+```
+{{:assign var="fields" _name="Ada Lovelace" _email="ada@example.org"}}
+{{#users search=$fields}}
+	{{$_number}} - {{$_name}}
+{{/users}}
+```
 
 ## subscriptions
 
@@ -317,8 +326,10 @@ Paramètres possibles :
 
 | Paramètre | | Fonction |
 | :- | :- | :- |
-| `user` | optionnel | Identifiant unique du membre |
-| `active` | optionnel | Si `TRUE`, seules les inscriptions à jour sont listées |
+| `user` | optionnel | Identifiant unique du membre (ID) |
+| `active` | optionnel | Si `TRUE`, seules les inscriptions à jour sont listées, si `FALSE`, seules les inscriptions expirées seront listées. |
+| `archived` | optionnel | Si `FALSE`, les inscriptions à des activités archivées ne seront pas listées |
+| `by_service` | optionnel | Si `TRUE`, seule la dernière inscription (la plus récente) de chaque activité sera listée. |
 | `id_service` | optionnel | Ne renvoie que les inscriptions à l'activité correspondant à cet ID. |
 
 # Comptabilité

@@ -44,7 +44,7 @@ class Transaction extends Entity
 
 	const STATUS_WAITING = 1;
 	const STATUS_PAID = 2;
-	const STATUS_DEPOSIT = 4;
+	const STATUS_DEPOSITED = 4;
 	const STATUS_ERROR = 8;
 	const STATUS_OPENING_BALANCE = 16;
 
@@ -1564,9 +1564,12 @@ class Transaction extends Entity
 		if (isset($_GET['ll']) && is_array($_GET['ll'])) {
 			$lines = [];
 			foreach ($_GET['ll'] as $l) {
+				$lock = $l['k'] ?? null;
 				$lines[] = [
 					'debit'            => $l['d0'] ?? Utils::moneyToInteger($l['d'] ?? ''),
 					'credit'           => $l['c0'] ?? Utils::moneyToInteger($l['c'] ?? ''),
+					'debit_locked'     => $lock === 'd' || $lock === 'a',
+					'credit_locked'    => $lock === 'c' || $lock === 'a',
 					'account_selector' => $accounts->getSelectorFromCode($l['a'] ?? null),
 					'label'            => $l['l'] ?? null,
 					'reference'        => $l['r'] ?? null,
@@ -1582,14 +1585,7 @@ class Transaction extends Entity
 			$i = 0;
 
 			foreach ((array) $_GET['u'] as $key => $value) {
-				if ($key != $i++ && $value) {
-					$id = (int) $key;
-					$linked_services[$id] = (int) $value;
-				}
-				else {
-					$id = (int) $value;
-				}
-
+				$id = (int) $value;
 				$name = Users::getName($id);
 
 				if ($name) {

@@ -741,7 +741,7 @@ class Account extends Entity
 		$conditions = sprintf('t.id_year = %d AND l.id_account = %d AND l.credit = 0 AND NOT (t.status & %d) AND NOT (t.status & %d)',
 			$year_id,
 			$this->id(),
-			Transaction::STATUS_DEPOSIT,
+			Transaction::STATUS_DEPOSITED,
 			Transaction::STATUS_OPENING_BALANCE
 		);
 
@@ -768,7 +768,7 @@ class Account extends Entity
 			ORDER BY t.date, t.id;',
 			$year_id,
 			$this->id(),
-			Transaction::STATUS_DEPOSIT,
+			Transaction::STATUS_DEPOSITED,
 			Transaction::STATUS_OPENING_BALANCE
 		);
 

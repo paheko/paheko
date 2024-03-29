@@ -159,7 +159,7 @@ class DynamicFields
 		return $fields;
 	}
 
-	static public function getNameFieldsSearchableSQL(?string $prefix = null): ?string
+	static public function getNameFieldsSearchableSQL(?string $prefix = null, bool $reverse = false): ?string
 	{
 		$fields = [];
 
@@ -187,6 +187,10 @@ class DynamicFields
 		}
 
 		unset($field);
+
+		if ($reverse) {
+			$fields = array_reverse($fields);
+		}
 
 		$fields = implode(' || \' \' || ', $fields);
 		$fields = sprintf('TRIM(%s)', $fields);

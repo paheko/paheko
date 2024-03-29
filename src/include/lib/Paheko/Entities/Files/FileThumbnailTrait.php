@@ -343,7 +343,8 @@ trait FileThumbnailTrait
 				}
 
 				$output = '';
-				$code = Utils::exec($cmd, 5, null, function($data) use (&$output) { $output .= $data; });
+				$code = null;
+				$output = Utils::quick_exec($cmd, 5, $code);
 
 				// Don't trust code as it can return != 0 even if generation was OK
 				if (!file_exists($destination) || filesize($destination) < 10) {

@@ -5,6 +5,7 @@ namespace Paheko;
 use Paheko\Form;
 use KD2\DB\AbstractEntity;
 use KD2\DB\Date;
+use KD2\ErrorManager;
 
 use DateTime;
 
@@ -37,86 +38,146 @@ class Entity extends AbstractEntity
 		}
 	}
 
-	static public function filterUserDateValue(?string $value): ?\DateTime
+	static public function filterUserDateValue($value, string $class = \DateTime::class): ?\DateTime
 	{
+		if (null === $value) {
+			return null;
+		}
+		elseif ('' === $value) {
+			return null;
+		}
+		elseif (is_object($value)) {
+			if ($value instanceof $class) {
+				return $value;
+			}
+			elseif ($class === Date::class && $value instanceof \DateTimeInterface) {
+				return Date::createFromInterface($value);
+			}
+			elseif ($class === \DateTime::class && $value instanceof \DateTimeInterface) {
+				return $value;
+			}
+			else {
+				throw new \InvalidArgumentException('Invalid argument, not a valid date object: ' . get_class($value));
+			}
+		}
+
 		$value = trim((string) $value);
 
 		if (!$value) {
 			return null;
 		}
 
-		if (preg_match('!^20\d{2}[01]\d[0123]\d$!', $value)) {
-			return Date::createFromFormat('!Ymd', $value);
+		$format = null;
+		$date = null;
+
+		$a = substr($value, 2, 1);
+		$b = substr($value, 4, 1);
+		$c = substr($value, 1, 1);
+		$l = strlen($value);
+
+		if ($c === '/' && ($l === 8 || $l === 9)) {
+			// D/MM/YYY, D/M/YYYY
+			$format = '!d/m/Y';
+		}
+		elseif ($a === '/') {
+			// DD/MM/YY
+			if ($l === 8) {
+				$year = substr($value, -2);
+
+				// Make sure recent years are in the 21st century
+				if ($year < date('y') + 10) {
+					$year = sprintf('20%02d', $year);
+				}
+				// while old dates remain in the old one
+				else {
+					$year = sprintf('19%02d', $year);
+				}
+
+				$format = '!d/m/Y';
+				$value = substr($value, 0, -2) . $year;
+			}
+			// DD/MM/YYYY, DD/M/YYYY
+			elseif ($l === 10 || $l === 9) {
+				$format = '!d/m/Y';
+			}
+			// DD/MM/YYYY HH:MM
+			elseif ($l === 16) {
+				$format = '!d/m/Y H:i';
+			}
+			// DD/MM/YYYY HH:MM:SS
+			elseif ($l === 19) {
+				$format = '!d/m/Y H:i:s';
+			}
+		}
+		elseif ($b === '/') {
+			// YYYY/MM/DD
+			if ($l === 10) {
+				$format = '!Y/m/d';
+			}
+			// YYYY/MM/DD HH:MM
+			elseif ($l === 16) {
+				$format = '!Y/m/d H:i';
+			}
+			// YYYY/MM/DD HH:MM:SS
+			elseif ($l === 19) {
+				$format = '!Y/m/d H:i:s';
+			}
+		}
+		elseif ($b === '-') {
+			// YYYY-MM-DD HH:MM:SS
+			if ($l === 19) {
+				$format = '!Y-m-d H:i:s';
+			}
+			// YYYY-MM-DD HH:MM
+			elseif ($l === 16) {
+				$format = '!Y-m-d H:i';
+			}
+			// YYYY-MM-DD
+			elseif ($l === 10) {
+				$format = '!Y-m-d';
+			}
 		}
 		elseif (ctype_digit($value)) {
-			return new DateTime('@' . $value);
-		}
-		elseif ($v = \DateTime::createFromFormat('!Y-m-d H:i:s', $value)) {
-			return $v;
-		}
-		elseif ($v = \DateTime::createFromFormat('!Y-m-d H:i', $value)) {
-			return $v;
-		}
-		elseif ($v = Date::createFromFormat('!Y-m-d', $value)) {
-			return $v;
-		}
-		elseif (preg_match('!^\d{2}/\d{2}/\d{4}\s\d{2}:\d{2}!', $value)) {
-			return \DateTime::createFromFormat('!d/m/Y H:i', substr($value, 0, 16));
-		}
-		elseif (preg_match('!^\d{2}/\d{2}/\d{2}$!', $value)) {
-			$year = substr($value, -2);
-
-			// Make sure recent years are in the 21st century
-			if ($year < date('y') + 10) {
-				$year = sprintf('20%02d', $year);
+			// YYYYMMDD
+			if ($l === 8 && preg_match('!^20\d{2}[01]\d[0123]\d$!', $value)) {
+				$format = '!Ymd';
 			}
-			// while old dates remain in the old one
 			else {
-				$year = sprintf('19%02d', $year);
+				$format = 'U';
 			}
-
-			return Date::createFromFormat('d/m/Y', substr($value, 0, -2) . $year);
-		}
-		elseif (preg_match('!^\d{2}/\d{2}/\d{4}$!', $value)) {
-			return Date::createFromFormat('!d/m/Y', $value);
-		}
-		elseif (preg_match('!^\d{4}/\d{2}/\d{2}$!', $value)) {
-			return Date::createFromFormat('!Y/m/d', $value);
-		}
-		elseif (null !== $value) {
-			throw new ValidationException('Format de date invalide (merci d\'utiliser le format JJ/MM/AAAA) : ' . $value);
 		}
 
-		return null;
+		if (null !== $format) {
+			if ($class === Date::class) {
+				$date = Date::createFromFormat($format, $value);
+			}
+			else {
+				$date = \DateTime::createFromFormat($format, $value);
+			}
+		}
+
+		if (!$date) {
+			$e = new ValidationException('Format de date invalide (merci d\'utiliser le format JJ/MM/AAAA) : ' . $value);
+			ErrorManager::reportExceptionSilent($e); // FIXME: don't report invalid dates
+			throw $e;
+		}
+
+		$y = $date->format('Y');
+		if ($y < 1900 || $y > 2100) {
+			throw new ValidationException(sprintf('Date invalide (%s) : doit être entre 1900 et 2100', $value));
+		}
+
+		return $date;
 	}
 
 	protected function filterUserValue(string $type, $value, string $key)
 	{
-		if ($type == 'date' || $type == Date::class) {
-			if ($value instanceof Date) {
-				return $value;
-			}
-			elseif ($value instanceof \DateTimeInterface) {
-				return Date::createFromInterface($value);
-			}
-
-			$d = self::filterUserDateValue($value);
-
-			if (!$d) {
-				return $d;
-			}
-
-			$y = $d->format('Y');
-			if ($y < 1900 || $y > 2100) {
-				throw new ValidationException(sprintf('Date invalide (%s) : doit être entre 1900 et 2100', $key));
-			}
-
-			return $d;
-
-		}
-		elseif (($type == 'DateTime' || $type === 'DateTimeInterface') && is_string($value)) {
-			$d = self::filterUserDateValue($value);
-			return $d;
+		if ($type === 'date'
+			|| $type === Date::class
+			|| $type === \DateTimeInterface::class
+			|| $type === \DateTime::class)
+		{
+			return self::filterUserDateValue($value, $type);
 		}
 
 		return parent::filterUserValue($type, $value, $key);

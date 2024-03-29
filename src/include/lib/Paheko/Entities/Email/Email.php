@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Paheko\Entities\Email;
 
 use Paheko\Entity;
+use Paheko\Plugins;
 use Paheko\UserException;
 use Paheko\Email\Emails;
 use Paheko\Email\Templates as EmailsTemplates;
@@ -94,6 +95,9 @@ class Email extends Entity
 		$this->set('invalid', false);
 		$this->set('fail_count', 0);
 		$this->set('fail_log', null);
+
+		Plugins::fire('email.address.verified', false, ['address' => $this]);
+
 		return true;
 	}
 
@@ -107,16 +111,11 @@ class Email extends Entity
 			self::validateAddress($email);
 		}
 		catch (UserException $e) {
-			$this->setFailedValidation($e->getMessage());
+			$this->hasBounced('hard', $e->getMessage());
 			return false;
 		}
 
 		return true;
-	}
-
-	public function setFailedValidation(string $message): void
-	{
-		$this->hasFailed(['type' => 'permanent', 'message' => $message]);
 	}
 
 	static public function isAddressValid(string $email, bool $mx_check = true): bool
@@ -180,16 +179,35 @@ class Email extends Entity
 			return;
 		}
 
-		getmxrr($host, $mx_list);
+		static $results = [];
 
-		if (empty($mx_list)) {
-			throw new UserException('Adresse e-mail invalide (le domaine indiqué n\'a pas de service e-mail) : vérifiez que vous n\'avez pas fait une faute de frappe.');
+		if (array_key_exists($host, $results)) {
+			$r = $results[$host];
+		}
+		else {
+			getmxrr($host, $mx_list);
+			$r = null;
+
+			if (empty($mx_list)) {
+				$r = 'empty';
+			}
+			else {
+				foreach ($mx_list as $mx) {
+					if (preg_match(self::BLACKLIST_MANUAL_VALIDATION_MX, $mx)) {
+						$r = 'blocked';
+						break;
+					}
+				}
+			}
+
+			$results[$host] = $r;
 		}
 
-		foreach ($mx_list as $mx) {
-  			if (preg_match(self::BLACKLIST_MANUAL_VALIDATION_MX, $mx)) {
-				throw new UserException('Adresse e-mail invalide : impossible d\'envoyer des mails à un service (de type mailinblack ou spamenmoins) qui demande une validation manuelle de l\'expéditeur. Merci de choisir une autre adresse e-mail.');
-			}
+		if ($r === 'empty') {
+			throw new UserException('Adresse e-mail invalide (le domaine indiqué n\'a pas de service e-mail) : vérifiez que vous n\'avez pas fait une faute de frappe.');
+		}
+		elseif ($r === 'blocked') {
+			throw new UserException('Adresse e-mail invalide : impossible d\'envoyer des mails à un service (de type mailinblack ou spamenmoins) qui demande une validation manuelle de l\'expéditeur. Merci de choisir une autre adresse e-mail.');
 		}
 	}
 
@@ -238,25 +256,21 @@ class Email extends Entity
 		$this->set('fail_log', $log);
 	}
 
-	public function hasFailed(array $return): void
+	public function hasBounced(string $type, string $message = null): void
 	{
-		if (!isset($return['type'])) {
-			throw new \InvalidArgumentException('Bounce email type not supplied in argument.');
-		}
-
 		// Treat complaints as opt-out
-		if ($return['type'] == 'complaint') {
+		if ($type == 'complaint') {
 			$this->set('optout', true);
-			$this->appendFailLog("Un signalement de spam a été envoyé par le destinataire.\n: " . $return['message']);
+			$this->appendFailLog($message ?? "Un signalement de spam a été envoyé par le destinataire.");
 		}
-		elseif ($return['type'] == 'permanent') {
+		elseif ($type == 'hard') {
 			$this->set('invalid', true);
 			$this->set('fail_count', $this->fail_count+1);
-			$this->appendFailLog($return['message']);
+			$this->appendFailLog($message);
 		}
-		elseif ($return['type'] == 'temporary') {
+		elseif ($type == 'soft') {
 			$this->set('fail_count', $this->fail_count+1);
-			$this->appendFailLog($return['message']);
+			$this->appendFailLog($message);
 		}
 	}
 }
