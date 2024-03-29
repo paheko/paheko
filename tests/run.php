@@ -40,6 +40,10 @@ else
 	natcasesort($list);
 
 	foreach ($list as $file) {
+		if (str_starts_with(basename($file), '_')) {
+			continue;
+		}
+
 		$cmd = sprintf('php %s %s', escapeshellarg(__FILE__), escapeshellarg($file));
 		echo substr($file, strlen(__DIR__) + 1) . "\n";
 		passthru($cmd);

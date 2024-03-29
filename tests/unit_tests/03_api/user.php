@@ -2,17 +2,9 @@
 
 namespace Paheko;
 
-use Paheko\API;
 use KD2\Test;
 
-paheko_init();
-
-function api(string $method, string $path, array $params = [])
-{
-	$api = new API($method, $path, $params);
-	Test::isInstanceOf(API::class, $api);
-	return $api->route();
-}
+require __DIR__ . '/_inc.php';
 
 $c = api('GET', 'user/categories');
 Test::isArray($c);
