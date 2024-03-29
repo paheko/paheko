@@ -23,6 +23,7 @@ use Paheko\Web\Router;
 use Paheko\Web\Cache as Web_Cache;
 use Paheko\Files\WebDAV\Storage;
 use Paheko\Users\DynamicFields;
+use Paheko\UserTemplate\CommonFunctions;
 
 use Paheko\Files\Files;
 
@@ -954,7 +955,7 @@ class File extends Entity
 		}
 
 		if ($thumb === 'icon') {
-			$label = sprintf('<span data-icon="%s"></span>', Utils::iconUnicode($this->iconShape()));
+			$label = CommonFunctions::icon(['shape' => $this->iconShape()]);
 		}
 		elseif ($thumb) {
 			$label = sprintf('<img src="%s" alt="%s" onerror="this.classList.add(\'broken\');" />', htmlspecialchars($this->thumb_url($thumb)), htmlspecialchars($this->name));

@@ -8,11 +8,11 @@ body main {
 	padding-bottom: 7em;
 }
 
-input[type=number], input[type=color],
-input[type=email], input[type=file], input[type=url], input[type=month],
+input[type=number],
+input[type=email], input[type=url], input[type=month],
 input[type=password], input[type=range], input[type=search], input[type=tel],
 textarea, select, .input-list, .file-selector, input[type=text]:not([data-input]):not([size]) {
-	min-width: 0;
+	min-width: 5em;
 	max-width: calc(100% - 2em);
 	width: calc(95% - 2em);
 }
