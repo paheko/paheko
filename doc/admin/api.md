@@ -960,7 +960,7 @@ Liste des inscriptions (aux activités) liées à une écriture
 | :- | :- | :- |
 | `ID_TRANSACTION` | `int` | ID de l'écriture. |
 
-_(Depuis la version 1.4.0)_
+_(Depuis la version 1.3.6)_
 
 ### POST accounting/transaction/{ID_TRANSACTION}/subscriptions
 
@@ -971,7 +971,7 @@ Met à jour la liste des inscriptions liées à une écriture
 | `ID_TRANSACTION` | `int` | ID de l'écriture. |
 | `subscriptions` | `array(int, …)` | ID des inscriptions. |
 
-_(Depuis la version 1.4.0)_
+_(Depuis la version 1.3.6)_
 
 Exemple de requête :
 
@@ -987,4 +987,41 @@ Efface la liste des inscriptions liées à une écriture
 | :- | :- | :- |
 | `ID_TRANSACTION` | `int` | ID de l'écriture. |
 
-_(Depuis la version 1.4.0)_
+_(Depuis la version 1.3.6)_
+
+### GET accounting/transaction/{ID_TRANSACTION}/transactions
+
+Liste les écritures liées à une écriture.
+
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `ID_TRANSACTION` | `int` | ID de l'écriture. |
+
+_(Depuis la version 1.3.7)_
+
+### accounting/transaction/{ID_TRANSACTION}/transactions (POST)
+
+Met à jour la liste des écritures liées à une écriture, en utilisant les ID des écritures, passées dans un tableau nommé `transactions`.
+
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `ID_TRANSACTION` | `int` | ID de l'écriture. |
+| `transactions` | `array(int, …)` | ID des inscriptions. |
+
+_(Depuis la version 1.3.7)_
+
+Exemple de requête :
+
+```
+ curl -v "http://…/api/accounting/transaction/9337/transactions"  -F 'transactions[]=2'
+```
+
+### accounting/transaction/{ID_TRANSACTION}/transactions (DELETE)
+
+Efface la liste des écritures liées à une écriture.
+
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `ID_TRANSACTION` | `int` | ID de l'écriture. |
+
+_(Depuis la version 1.3.7)_

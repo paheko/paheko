@@ -11,15 +11,25 @@
 	<article class="ext-more">
 		<?php
 		$data_size = $module->getDataSize();
+		$config_size = $module->getConfigSize();
 		$code_size = $module->getCodeSize();
 		$files_size = $module->getFilesSize();
-		$total = $data_size + $code_size + $files_size;
+		$total = $data_size + $code_size + $files_size + $config_size;
 		?>
 		<table class="list meter-map auto">
 			<tr>
 				<th>Total</th>
 				<td class="size"><nobr>{$total|size_in_bytes}</nobr></td>
 				<td></td>
+			</tr>
+			<tr height="{$config_size|percent_of:$total}%">
+				<th>Configuration</th>
+				<td class="size"><nobr>{$config_size|size_in_bytes}</nobr></td>
+				<td class="actions">
+					{if !$data_size && $config_size && $module->canDeleteData()}
+						{linkbutton shape="delete" label="Supprimer les données" href="delete.php?module=%s&mode=data"|args:$ext.name target="_dialog"}
+					{/if}
+				</td>
 			</tr>
 			<tr height="{$data_size|percent_of:$total}%">
 				<th>Données seules</th>

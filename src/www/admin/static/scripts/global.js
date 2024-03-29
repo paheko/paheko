@@ -113,18 +113,21 @@
 	};
 
 	g.dialog = null;
+	g.dialog_title = null;
 	g.focus_before_dialog = null;
 	g.dialog_on_close = false;
 
 	g.openDialog = function (content, options) {
 		var close = true,
 			callback = null,
+			caption = null,
 			classname = null;
 
 		if (typeof options === "object" && options !== null) {
 			callback = options.callback ?? null;
 			classname = options.classname ?? null;
 			close = options.close ?? true;
+			caption = options.caption ?? null;
 			g.dialog_on_close = options.on_close || false;
 		}
 		else {
@@ -141,19 +144,34 @@
 		g.dialog.id = 'dialog';
 		g.dialog.open = true;
 		g.dialog.className = classname || '';
+		g.dialog.dataset.caption = caption || '';
+
+		var toolbar = document.createElement('header');
+		toolbar.className = 'toolbar';
+
+		var t = document.createElement('h4');
+		t.className = 'title';
+		t.innerText = caption || '';
+		toolbar.appendChild(t);
+
+		if (caption) {
+			g.dialog_title = document.title;
+			document.title = caption + ' — ' + document.title;
+		}
 
 		if (close) {
 			var btn = document.createElement('button');
-			btn.className = 'icn-btn closeBtn';
+			btn.className = 'icn-btn closeBtn main';
 			btn.setAttribute('data-icon', '✘');
 			btn.type = 'button';
 			btn.innerHTML = 'Fermer';
 			btn.onclick = g.closeDialog;
-			g.dialog.appendChild(btn);
+			toolbar.appendChild(btn);
 
-			g.dialog.onclick = (e) => { if (e.target == g.dialog) g.closeDialog(); };
 			window.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
 		}
+
+		g.dialog.appendChild(toolbar);
 
 		if (typeof content == 'string') {
 			var container = document.createElement('div');
@@ -188,13 +206,6 @@
 
 			if (event && callback) {
 				content.addEventListener(event, callback);
-			}
-
-			if (options.caption ?? null) {
-				var caption = document.createElement('h4');
-				caption.className = 'title';
-				caption.innerText = options.caption;
-				g.dialog.appendChild(caption);
 			}
 		}
 		else {
@@ -268,6 +279,25 @@
 			return;
 		}
 
+		var p = window.parent;
+		var dialog = p.g.dialog;
+
+		if (dialog.classList.contains('fullscreen')) {
+			return;
+		}
+
+		if (!dialog.dataset.caption) {
+			var title = document.title.replace(/^([^—-]+).*$/, "$1");
+			dialog.querySelector('.title').innerText = title;
+			p.g.dialog_title = p.document.title;
+			p.document.title = document.title + ' — ' + p.g.dialog_title;
+
+			window.addEventListener('beforeunload', () => {
+				p.document.title = p.g.dialog_title;
+				p.g.dialog_title = null;
+			});
+		}
+
 		let height;
 
 		if (forced_height) {
@@ -275,7 +305,7 @@
 		}
 		else {
 			let body_height = document.body.offsetHeight;
-			let parent_height = window.parent.innerHeight;
+			let parent_height = p.innerHeight;
 
 			if (body_height > parent_height * 0.9) {
 				height = '90%';
@@ -285,7 +315,7 @@
 			}
 		}
 
-		window.parent.g.dialog.childNodes[1].style.height = height;
+		dialog.childNodes[1].style.height = height;
 	};
 
 	g.closeDialog = function () {
@@ -310,6 +340,11 @@
 
 		if (g.focus_before_dialog) {
 			g.focus_before_dialog.focus();
+		}
+
+		if (g.dialog_title !== null) {
+			document.title = g.dialog_title;
+			g.dialog_title = null;
 		}
 	};
 
@@ -474,24 +509,40 @@
 		i.firstChild.focus();
 	};
 
-	g.formatMoney = (v) => {
+	g.formatMoney = (v, html) => {
 		if (!v) {
 			return '0,00';
 		}
 
 		var s = v < 0 ? '-' : '';
 		v = '' + Math.abs(v);
-		return s + (v.substr(0, v.length-2) || '0') + ',' + ('00' + v).substr(-2);
+
+		var units = v.substr(0, v.length-2) || '0';
+
+		if (html) {
+			// Add spacer
+			units = units.split("").reverse().join("");
+			units = units.replace(/(\d{3})/g, "$1\xa0");
+			units = units.split("").reverse().join("").trim("\xa0");
+		}
+
+		return s + units + ',' + ('00' + v).substr(-2);
 	};
 
 	g.getMoneyAsInt = (v) => {
-		v = v.replace(/[^0-9.,]/, '');
+		v = v.replace(/[^0-9.,-]/, '');
 		if (v.length == 0) return;
+		var m = 1;
+
+		if (v.match(/^-/)) {
+			m = -1;
+			v = v.substr(1);
+		}
 
 		v = v.split(/[,.]/);
 		var d = v.length == 2 ? v[1] : '0';
 		v = v[0] + (d + '00').substr(0, 2);
-		v = parseInt(v, 10);
+		v = parseInt(v, 10) * m;
 		return v;
 	};
 
@@ -533,7 +584,8 @@
 				}
 
 				let url = i.value + (i.value.indexOf('?') > 0 ? '&' : '?') + '_dialog';
-				g.openFrameDialog(url);
+				var caption = i.dataset.caption || null;
+				g.openFrameDialog(url, {caption});
 				return false;
 			};
 		});

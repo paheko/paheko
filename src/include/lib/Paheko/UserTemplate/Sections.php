@@ -304,7 +304,7 @@ class Sections
 			$db->exec(sprintf('CREATE INDEX IF NOT EXISTS %s_auto_%s ON %1$s (%s);', $table, $hash, implode(', ', $search_params)));
 		}
 		catch (DB_Exception $e) {
-			throw new Brindille_Exception(sprintf("à la ligne %d, impossible de créer l'index, erreur SQL :\n%s\n\nRequête exécutée :\n%s", $line, $db->lastErrorMsg(), $sql));
+			throw new Brindille_Exception(sprintf("Impossible de créer l'index, erreur SQL :\n%s\n\nRequête exécutée :\n%s", $db->lastErrorMsg(), $sql));
 		}
 	}
 
@@ -495,7 +495,7 @@ class Sections
 		return preg_replace_callback(
 			'/(?:([\w\d]+)\.)?\$(\$[\[\.][\w\d\.\[\]#]+)/',
 			fn ($m) => sprintf('json_extract(%sdocument, %s)',
-				!empty($m[1]) ? $db->quote($m[1]) . '.' : '',
+				!empty($m[1]) ? $db->quoteIdentifier($m[1]) . '.' : '',
 				$db->quote($m[2])
 			),
 			$str
@@ -574,7 +574,7 @@ class Sections
 
 		$list = new DynamicList($columns, $table);
 
-		static $reserved_keywords = ['max', 'order', 'desc', 'debug', 'explain', 'schema', 'columns', 'select', 'where', 'module', 'disable_user_ordering', 'check', 'export'];
+		static $reserved_keywords = ['max', 'order', 'desc', 'debug', 'explain', 'schema', 'columns', 'select', 'where', 'module', 'disable_user_ordering', 'check', 'export', 'group'];
 
 		foreach ($params as $key => $value) {
 			if ($key[0] == ':') {
@@ -595,6 +595,10 @@ class Sections
 
 		if (isset($params['order'])) {
 			$list->orderBy($params['order'], $params['desc'] ?? false);
+		}
+
+		if (isset($params['group'])) {
+			$list->groupBy(self::_moduleReplaceJSONExtract($params['group'], $table));
 		}
 
 		$list->setModifier(function(&$row) use ($columns) {
@@ -659,8 +663,12 @@ class Sections
 
 		if (!empty($params['export'])) {
 			$export_url = Utils::getSelfURI();
-			$export_url .= strstr($export_url, '?') ? '&export=' : '?export=';
-			printf('<p class="actions">%s</p>', CommonFunctions::exportmenu(['href' => $export_url, 'right' => true]));
+			$export_url .= strstr($export_url, '?') ? '&' : '?';
+
+			$export_params = ['right' => true];
+			//$export_params['table'] = $params['export'] === 'table'; // Table export is currently not working in modules FIXME
+
+			printf('<p class="actions">%s</p>', CommonFunctions::exportmenu($export_params));
 		}
 
 		$tpl->assign(compact('list'));
@@ -804,6 +812,39 @@ class Sections
 			unset($params['search_name']);
 		}
 
+		if (!empty($params['search'])) {
+			if (!is_array($params['search'])) {
+				throw new Brindille_Exception('Le paramètre "search" n\'est pas un tableau');
+			}
+
+			$params['tables'] .= sprintf(' INNER JOIN users_search AS us ON us.id = u.id');
+			$i = 0;
+
+			foreach ($params['search'] as $field => $value) {
+				if ($field === '_email') {
+					$params[':search_email'] = $value;
+					$email_fields = DynamicFields::getEmailFields();
+					$email_fields = array_map([$db, 'quoteIdentifier'], $email_fields);
+					$email_fields = array_map(fn($a) => 'u.' . $a, $email_fields);
+					$search[] = sprintf(':search_email IN (%s)', implode(', ', $email_fields));
+				}
+				elseif ($field === '_name' || $field === '_reversed_name') {
+					$params[':search_name'] = Utils::unicodeTransliterate($value);
+					$search[] = sprintf('%s = :search_name', DynamicFields::getNameFieldsSearchableSQL('us', $field === '_reversed_name'));
+				}
+				else {
+					$params[':search_' . $i] = Utils::unicodeTransliterate($value);
+					$search[] = sprintf('%s = :search_name', 'us.' . $db->quoteIdentifier($field));
+				}
+
+				$i++;
+			}
+
+			$params['where'] .= sprintf('(%s)', implode(' OR ', $search));
+
+			unset($params['search']);
+		}
+
 		if (empty($params['order'])) {
 			$params['order'] = 'u.id';
 		}
@@ -828,8 +869,10 @@ class Sections
 		$params['where'] ??= '';
 
 		$number_field = DynamicFields::getNumberField();
+		$db = DB::getInstance();
 
-		$params['select'] = sprintf('sub.expiry_date, sub.date, s.label, sub.paid, sub.expected_amount');
+		$params['select'] = 'sub.expiry_date, sub.date, s.label, sub.paid, sub.expected_amount,
+			CASE WHEN sub.expiry_date >= date() THEN 1 WHEN sub.expiry_date IS NOT NULL THEN -1 ELSE NULL END AS status';
 		$params['tables'] = 'services_subscriptions sub INNER JOIN services s ON s.id = sub.id_service';
 
 		if (isset($params['user'])) {
@@ -844,14 +887,24 @@ class Sections
 			unset($params['id_service']);
 		}
 
-		if (!empty($params['active'])) {
-			$params['having'] = 'MAX(sub.expiry_date) >= date()';
+		if (isset($params['active'])) {
+			if (!$params['active']) {
+				$params['having'] = 'MAX(sub.expiry_date) < date()';
+			}
+			else {
+				$params['having'] = 'MAX(sub.expiry_date) >= date()';
+			}
+
 			unset($params['active']);
 		}
+		elseif (!empty($params['by_service'])) {
+			$params['select'] .= ', MAX(su.expiry_date) AS expiry_date';
+			$params['group'] = 's.id';
+		}
 
-		if (isset($params['active']) && empty($params['active'])) {
-			$params['having'] = 'MAX(sub.expiry_date) < date()';
-			unset($params['active']);
+		// Hide archived subscriptions
+		if (($params['archived'] ?? null) === false) {
+			$params['where'] .= ' AND s.archived = 0';
 		}
 
 		if (empty($params['order'])) {
@@ -1121,6 +1174,9 @@ class Sections
 			unset($params['future']);
 		}
 
+		$assign = $params['assign'] ?? null;
+		unset($params['assign']);
+
 		foreach (self::sql($params, $tpl, $line, $allowed_tables) as $row) {
 			if (empty($params['count'])) {
 				$data = $row;
@@ -1141,6 +1197,10 @@ class Sections
 				}
 
 				$row = array_merge($row, $page->asTemplateArray());
+			}
+
+			if ($assign) {
+				$tpl::__assign(['var' => $assign, 'value' => $row], $tpl, $line);
 			}
 
 			yield $row;
@@ -1379,7 +1439,7 @@ class Sections
 			$db->setReadOnly(false);
 		}
 		catch (DB_Exception $e) {
-			throw new Brindille_Exception(sprintf("à la ligne %d erreur SQL :\n%s\n\nRequête exécutée :\n%s", $line, $db->lastErrorMsg(), $sql));
+			throw new Brindille_Exception(sprintf("à la ligne %d erreur SQL :\n%s\n\nRequête exécutée :\n%s", $line, $e->getMessage(), $sql));
 		}
 
 		while ($row = $result->fetchArray(\SQLITE3_ASSOC))

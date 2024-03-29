@@ -11,6 +11,10 @@ require_once __DIR__ . '/_inc.php';
 
 $session = Session::getInstance();
 
+if ($session->isLogged(true)) {
+	Utils::redirect('!');
+}
+
 $form->runIf(qg('c') !== null, function () use ($session, $form, $tpl) {
 	if (!$session->checkRecoveryPasswordQuery(qg('c'))) {
 		throw new UserException('Le lien que vous avez suivi est invalide ou a expiré.');

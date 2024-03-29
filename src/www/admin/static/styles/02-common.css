@@ -397,13 +397,13 @@ dl.describe ul.flat li {
     margin-bottom: .2em;
 }
 
-dl.describe mark {
+mark {
     background-color: rgba(var(--gSecondColor), 0.3);
     border-radius: .5em;
     padding: .1rem .4rem;
 }
 
-dl.describe mark.variant-a {
+mark.variant-a {
     background-color: rgba(var(--gMainColor), 0.2);
 }
 
@@ -557,6 +557,7 @@ details summary.block::after {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    text-decoration: none;
 }
 
 table .files-list, table .files-list figure {
@@ -939,6 +940,11 @@ span.tag {
     color: #fff;
     text-shadow: 0px 0px 5px #000;
     padding: .2rem .4rem;
+    background: #666;
     background: var(--tag-color);
     border-radius: .3rem;
+}
+
+span.tag.small {
+    font-size: .85em;
 }

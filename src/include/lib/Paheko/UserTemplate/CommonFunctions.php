@@ -328,6 +328,7 @@ class CommonFunctions
 				'label'           => $multiple ? 'Ajouter' : 'Sélectionner',
 				'required'        => $attributes['required'] ?? null,
 				'value'           => Utils::getLocalURL($attributes['target']),
+				'data-caption'    => $params['label'] ?? '',
 				'data-multiple'   => $multiple ? '1' : '0',
 				'data-can-delete' => (int) $can_delete,
 				'data-name'       => $name,
@@ -912,6 +913,10 @@ class CommonFunctions
 
 	static public function tag(array $params): string
 	{
-		return sprintf('<span class="tag" style="--tag-color: %s;">%s</span>', htmlspecialchars($params['color'] ?? '#999'), htmlspecialchars($params['label'] ?? ''));
+		return sprintf('<span class="tag%s" style="--tag-color: %s;">%s</span>',
+			!empty($params['small']) ? ' small' : '',
+			htmlspecialchars($params['color'] ?? '#999'),
+			htmlspecialchars($params['label'] ?? '')
+		);
 	}
 }

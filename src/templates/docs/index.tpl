@@ -2,7 +2,7 @@
 use Paheko\Entities\Files\File;
 $upload_here = $context_specific_root ? null : $dir->path;
 ?>
-{include file="_head.tpl" title="Documents" current="docs" hide_title=true upload_here=$upload_here}
+{include file="_head.tpl" title=$title current="docs" hide_title=true upload_here=$upload_here}
 
 <nav class="tabs">
 	{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
@@ -205,7 +205,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 								{linkmenu label="Modifier…" shape="edit" right=true}
 									{assign var="can_write" value=$item->canWrite()}
 									{if $can_write && $item->editorType()}
-										{linkbutton href="!common/files/edit.php?p=%s"|args:$item->path_uri() label="Éditer" shape="edit" target="_dialog" data-dialog-class="fullscreen"}
+										{linkbutton href="!common/files/edit.php?p=%s"|args:$item->path_uri() label="Éditer" shape="edit" target="_dialog" data-dialog-class="fullscreen" data-caption=$item->name}
 									{/if}
 									{if $item->canRename()}
 										{linkbutton href="!common/files/rename.php?p=%s"|args:$item->path_uri() label="Renommer" shape="reload" target="_dialog"}

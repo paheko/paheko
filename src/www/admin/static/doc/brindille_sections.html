@@ -385,6 +385,11 @@ Il y a {{$result.count}} articles.
 <td style="text-align: left;">Ne lister que les membres dont le nom correspond au texte passé en paramètre.</td>
 </tr>
 <tr>
+<td style="text-align: left;"><code>search</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">(Tableau) Ne lister que les membres dont les champs passés en clés dans le tableau correspondent aux valeurs. Les clés spéciales <code>_name</code> et <code>_email</code> peuvent être utilisées pour rechercher dans les champs du nom, ou d'email (si la fiche membre a plusieurs champs de type email).</td>
+</tr>
+<tr>
 <td style="text-align: left;"><code>id_parent</code></td>
 <td style="text-align: left;">optionnel</td>
 <td style="text-align: left;">Ne lister que les membres rattachés à l'identifiant unique du membre responsable indiqué.</td>
@@ -418,6 +423,11 @@ Il y a {{$result.count}} articles.
 </tr>
 </tbody>
 </table>
+<p>Rechercher un membre par adresse e-mail ou nom :</p>
+<pre><code>{{:assign var="fields" _name="Ada Lovelace" _email="ada@example.org"}}
+{{#users search=$fields}}
+    {{$_number}} - {{$_name}}
+{{/users}}</code></pre>
 <h2 id="subscriptions">subscriptions</h2>
 <p>Liste les inscriptions à une ou des activités.</p>
 <p>Paramètres possibles :</p>
@@ -433,12 +443,22 @@ Il y a {{$result.count}} articles.
 <tr>
 <td style="text-align: left;"><code>user</code></td>
 <td style="text-align: left;">optionnel</td>
-<td style="text-align: left;">Identifiant unique du membre</td>
+<td style="text-align: left;">Identifiant unique du membre (ID)</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>active</code></td>
 <td style="text-align: left;">optionnel</td>
-<td style="text-align: left;">Si <code>TRUE</code>, seules les inscriptions à jour sont listées</td>
+<td style="text-align: left;">Si <code>TRUE</code>, seules les inscriptions à jour sont listées, si <code>FALSE</code>, seules les inscriptions expirées seront listées.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>archived</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Si <code>FALSE</code>, les inscriptions à des activités archivées ne seront pas listées</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>by_service</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Si <code>TRUE</code>, seule la dernière inscription (la plus récente) de chaque activité sera listée.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>id_service</code></td>
@@ -901,6 +921,11 @@ Le document n°{{$id}} est celui qui parle de Greta.
 <td style="text-align: left;"><code>order</code></td>
 <td style="text-align: left;"><em>optionnel</em></td>
 <td style="text-align: left;">Colonne utilisée par défaut pour le tri (si l'utilisateur n'a pas choisi le tri sur une autre colonne). Si <code>select</code> est utilisé, il faut alors indiquer ici le numéro de la colonne, et non pas son nom.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>group</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Expression SQL utilisée par défaut pour le groupement des résultats (<code>GROUP BY</code>).</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>desc</code></td>

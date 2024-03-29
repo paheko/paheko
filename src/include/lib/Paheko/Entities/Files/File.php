@@ -23,6 +23,7 @@ use Paheko\Web\Router;
 use Paheko\Web\Cache as Web_Cache;
 use Paheko\Files\WebDAV\Storage;
 use Paheko\Users\DynamicFields;
+use Paheko\UserTemplate\CommonFunctions;
 
 use Paheko\Files\Files;
 
@@ -825,7 +826,7 @@ class File extends Entity
 					Utils::escapeshellarg($tmpfile ?? $source['path'])
 				);
 
-				Utils::exec($cmd, 2, null, null);
+				Utils::quick_exec($cmd, 2);
 				$content = file_get_contents($tmpdest);
 			}
 			catch (\OverflowException $e) {
@@ -942,7 +943,7 @@ class File extends Entity
 	/**
 	 * Return a HTML link to the file
 	 */
-	public function link(Session $session, ?string $thumb = null, bool $allow_edit = false, ?string $url = null)
+	public function link(Session $session, ?string $thumb = null, bool $allow_edit = false, ?string $url = null): string
 	{
 		if ($thumb == 'auto') {
 			if ($this->hasThumbnail()) {
@@ -954,7 +955,7 @@ class File extends Entity
 		}
 
 		if ($thumb === 'icon') {
-			$label = sprintf('<span data-icon="%s"></span>', Utils::iconUnicode($this->iconShape()));
+			$label = CommonFunctions::icon(['shape' => $this->iconShape()]);
 		}
 		elseif ($thumb) {
 			$label = sprintf('<img src="%s" alt="%s" onerror="this.classList.add(\'broken\');" />', htmlspecialchars($this->thumb_url($thumb)), htmlspecialchars($this->name));
@@ -969,14 +970,16 @@ class File extends Entity
 			$attrs = sprintf('href="%s"', Utils::getLocalURL($url));
 		}
 		elseif ($editor && ($allow_edit || $editor == 'wopi') && $this->canWrite($session)) {
-			$attrs = sprintf('href="%s" target="_dialog" data-dialog-class="fullscreen"',
-				Utils::getLocalURL('!common/files/edit.php?p=') . rawurlencode($this->path));
+			$attrs = sprintf('href="%s" target="_dialog" data-dialog-class="fullscreen" data-caption="%s"',
+				Utils::getLocalURL('!common/files/edit.php?p=') . rawurlencode($this->path),
+				htmlspecialchars($this->name)
+			);
 		}
 		elseif ($this->canPreview($session)) {
 			$attrs = sprintf('href="%s" target="_dialog" data-mime="%s" data-caption="%s"',
 				$this->isImage() ? $this->url() : Utils::getLocalURL('!common/files/preview.php?p=') . rawurlencode($this->path),
 				$this->mime,
-				$this->name
+				htmlspecialchars($this->name)
 			);
 		}
 		else {

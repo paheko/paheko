@@ -59,11 +59,6 @@
 				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE) && $row.id_account}
 					{linkbutton shape="plus" label="Nouveau règlement" href="!services/subscription/payment.php?id=%d"|args:$row.id}
 				{/if}
-
-				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
-					{linkbutton shape="plus" label="Saisir une écriture liée"
-						href="!acc/transactions/new.php?u[%d]=%d&00=%d&t=1&l=Paiement%%20activité&ar=%s&set_year=%d"|args:$user_id:$row.id:$row.expected_amount:$row.account_code:$row.id_year target="_dialog"}
-				{/if}
 				<br />
 			{/if}
 

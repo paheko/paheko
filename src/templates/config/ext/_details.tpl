@@ -33,10 +33,10 @@
 				<h2><a href="{$item.details_url}">{$item.label}</a></h2>
 			{if $item.module && $item.module->canDelete()}
 				<h4>
-					<strong class="tag">{icon shape="edit"} Modifiée</strong>
+					<strong class="ext-tag">{icon shape="edit"} Modifiée</strong>
 				</h4>
 			{elseif $item.module}
-				<h4><span class="tag">Modifiable</span></h4>
+				<h4><span class="ext-tag">Modifiable</span></h4>
 			{/if}
 			</div>
 			<p class="desc">

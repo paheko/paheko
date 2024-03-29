@@ -54,7 +54,10 @@
 		{/if}
 			{linkbutton shape="search" href="!acc/search.php?year=%d&account=%s"|args:$year.id,$account.code label="Recherche"}
 		{if $year.id == CURRENT_YEAR_ID}
-			{linkbutton href="!acc/transactions/new.php?account=%d"|args:$account.id label="Saisir une écriture dans ce compte" shape="plus"}
+			{if $account.type == $account::TYPE_BANK}
+				{linkbutton label="Rapprochement" shape="check" href="reconcile.php?id=%d"|args:$account.id}
+			{/if}
+			{linkbutton href="!acc/transactions/new.php?account=%d"|args:$account.id label="Saisie" shape="plus"}
 		{/if}
 		</aside>
 	</nav>
@@ -106,10 +109,13 @@
 			<td>{if $line.locked}{icon title="Écriture verrouillée" shape="lock"}{/if}</td>
 			{/if}
 			<td>{if $line.files}{$line.files}{/if}</td>
+			{if isset($line.reconciled)}
+				<td>{if $line.reconciled}{icon title="Rapprochée" shape="check"}{/if}</td>
+			{/if}
 			{* Deposit status, might be consufing
 			<td>
-				{if $account.type == $account::TYPE_OUTSTANDING && $line.debit}
-					{if !($line.status & Entities\Accounting\Transaction::STATUS_DEPOSIT)}
+				{if $account.type === $account::TYPE_OUTSTANDING && $line.debit}
+					{if !($line.status & Entities\Accounting\Transaction::STATUS_DEPOSITED)}
 						{icon shape="alert" title="Cette opération n'a pas été déposée"}
 					{/if}
 				{/if}

@@ -19,7 +19,7 @@
 			<dd>Paheko {$paheko_version}</dd>
 			<dd class="help">
 				Le développement et le support de Paheko ne sont possibles que grâce à votre soutien&nbsp;!<br />
-				{linkbutton href="https://kd2.org/soutien.html" label="Faire un don pour soutenir le développement" target="_blank" shape="export"} :-)
+				{linkbutton href="https://paheko.cloud/don/" label="Faire un don pour soutenir le développement" target="_blank" shape="export"} :-)
 			</dd>
 			{if $new_version}
 			<dd><p class="block alert">
@@ -36,16 +36,17 @@
 				Les PDF sont générés à l'aide du génial logiciel <a href="https://www.princexml.com/" target="_blank">Prince</a>. Merci à eux.
 			</dd>
 			{/if}
-			{if ENABLE_TECH_DETAILS}
 			<dt>Informations système</dt>
-			<dd class="help">
-				Version PHP&nbsp;: {$php_version}<br />
+			<dd>
+				Heure du serveur&nbsp;: {$server_time|date}
+				<small class="help">(Fuseau horaire : {$server_tz})</small>
+			{if ENABLE_TECH_DETAILS}
+				<br />Version PHP&nbsp;: {$php_version}<br />
 				Version SQLite&nbsp;: {$sqlite_version}<br />
-				Heure du serveur&nbsp;: {$server_time|date}<br />
 				Chiffrement GnuPG&nbsp;: {if $has_gpg_support}disponible, module activé{else}non, module PHP gnupg non installé&nbsp;?{/if}<br />
 				{linkbutton shape="settings" label="Configuration du serveur" href="server/"}
-			</dd>
 			{/if}
+			</dd>
 			<dt>Espace disque</dt>
 			<dd>
 				{linkbutton shape="gallery" label="Voir l'espace disque utilisé" href="disk_usage.php"}
@@ -69,7 +70,7 @@
 		<p class="help">
 			Cette option permet d'activer ou désactiver la visibilité publique du site web intégré à Paheko.<br/>
 			En désactivant le site public, les visiteurs seront automatiquement redirigés vers la page de connexion.<br />
-			Vous pourrez toujours y publier des informations, mais celles-ci ne seront visibles que pour les membres connectés.
+			Vous pourrez toujours y publier des informations, mais celles-ci ne seront visibles que pour les membres connectés, dans le menu <strong>Site web</strong> de l'administration.
 		</p>
 		<dl>
 			{input type="radio" name="site_disabled" value=0 source=$config label="Activer le site web public"}
@@ -88,6 +89,7 @@
 		<dl>
 			{input type="text" name="currency" required=true source=$config label="Monnaie" help="Inscrire ici la devise utilisée : €, CHF, XPF, etc." size="3"}
 			{input type="select" name="country" required=true source=$config label="Pays" options=$countries}
+			{input type="select" name="timezone" required=true source=$config label="Fuseau horaire" options=$timezones default="Europe/Paris"}
 		</dl>
 	</fieldset>
 
@@ -102,7 +104,26 @@
 {if ENABLE_TECH_DETAILS}
 	fetch(g.admin_url + 'config/?check_version');
 {/if}
+
+
 {literal}
+var c = $('#f_country');
+c.onchange = () => {
+	var s = $('#f_timezone');
+	fetch(g.admin_url + 'config/?tzlist=' + c.value).then(r => r.json()).then(j => {
+		s.innerHTML = '';
+		for (const [key, value] of Object.entries(j.list)) {
+			s.appendChild(new Option(value, key));
+		}
+
+		if (j.default) {
+			s.value = j.default;
+		}
+		else {
+			s.selectedIndex = 0;
+		}
+	});
+};
 function toggleWebInput() {
 	g.toggle('.external-web', $('#f_site_disabled_1').checked);
 }

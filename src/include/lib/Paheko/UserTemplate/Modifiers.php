@@ -50,8 +50,10 @@ class Modifiers
 		'key_in',
 		'sort',
 		'ksort',
+		'reverse',
 		'max',
 		'min',
+		'array_to_list',
 		'quote_sql_identifier',
 		'quote_sql',
 		'sql_where',
@@ -499,6 +501,11 @@ EOS;
 		return $value;
 	}
 
+	static public function reverse($value)
+	{
+		return array_reverse((array)$value, true);
+	}
+
 	static public function max($value)
 	{
 		return max((array)$value);
@@ -507,6 +514,34 @@ EOS;
 	static public function min($value)
 	{
 		return min((array)$value);
+	}
+
+	static public function array_to_list($value, int $i = 0): string
+	{
+		$out = '';
+
+		foreach ((array)$value as $k => $v) {
+			$out .= str_repeat(' ', $i);
+
+			if (!is_int($k)) {
+				$out .= $k . ' = ';
+			}
+			else {
+				$out .= ($k + 1) . ' = ';
+			}
+
+			if (is_array($v) || is_object($v)) {
+				$out .= "\n";
+				$out .= self::array_to_list($v, $i + 1);
+			}
+			else {
+				$out .= $v;
+			}
+
+			$out .= "\n";
+		}
+
+		return rtrim($out);
 	}
 
 	static public function quote_sql_identifier($in, string $prefix = '')
@@ -554,10 +589,15 @@ EOS;
 		$prefix = $prefix ? $db->quoteIdentifier($prefix) . '.' : '';
 		$out = [];
 		$glue = $db->quote($glue);
+		$list = (array) $list;
 
-		foreach ((array) $list as $field) {
+		foreach ($list as $field) {
 			if (!DynamicFields::get($field)) {
 				continue;
+			}
+
+			if (count($list) === 1) {
+				return $prefix . $db->quoteIdentifier($field);
 			}
 
 			$out[] = sprintf('COALESCE(%s || %s%s, \'\')', $glue, $prefix, $db->quoteIdentifier($field));

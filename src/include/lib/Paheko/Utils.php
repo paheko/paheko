@@ -636,7 +636,7 @@ class Utils
 
 	static public function suggestPassword()
 	{
-		return Security::getRandomPassphrase(ROOT . '/include/data/dictionary.fr');
+		return Security::getRandomPassphrase(ROOT . '/include/data/locales/fr/dictionary.txt');
 	}
 
 	static public function normalizePhoneNumber($n)
@@ -1210,7 +1210,17 @@ class Utils
 	}
 
 	/**
-	 * Execute a system command with a timeout
+	 * Execute a system command with a timeout, just returning a string from stdout
+	 */
+	static public function quick_exec(string $cmd, int $timeout, ?int &$code = null): string
+	{
+		$output = '';
+		$code = self::exec($cmd, $timeout, null, function($data) use (&$output) { $output .= $data; });
+		return $output;
+	}
+
+	/**
+	 * Execute a system command with a timeout, handling STDIN, STDOUT and STDERR with callbacks
 	 * @see https://blog.dubbelboer.com/2012/08/24/execute-with-timeout.html
 	 */
 	static public function exec(string $cmd, int $timeout, ?callable $stdin, ?callable $stdout, ?callable $stderr = null): int
@@ -1391,7 +1401,7 @@ class Utils
 			$cmd = null;
 
 			foreach ($list as $program) {
-				if (shell_exec('which ' . $program)) {
+				if (self::quick_exec('which ' . $program, 1)) {
 					$cmd = $program;
 					break;
 				}
@@ -1430,7 +1440,7 @@ class Utils
 		$output = '';
 
 		try {
-			self::exec($cmd, $timeout, null, function($data) use (&$output) { $output .= $data; });
+			$output = self::quick_exec($cmd, $timeout);
 		}
 		finally {
 			Utils::safe_unlink($source);
@@ -1634,5 +1644,14 @@ class Utils
 		}
 
 		return rtrim($out);
+	}
+
+	static public function is_json($value): bool
+	{
+		if (is_string($value) && substr($value, 0, 1) === '{' && substr($value, -1) === '}') {
+			return true;
+		}
+
+		return false;
 	}
 }

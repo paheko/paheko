@@ -2,6 +2,7 @@
 
 {include file="config/_menu.tpl" current="advanced" sub_current="sql"}
 
+{if !$diagram}
 <nav class="tabs">
 	{if isset($query) || isset($table) || isset($table_info)}
 		{linkbutton shape="left" label="Retour à la liste des tables SQL" href="sql.php"}
@@ -9,6 +10,7 @@
 		{linkbutton shape="search" label="Exécuter une requête SQL" href="?query="}
 	{/if}
 	<aside>
+		{linkbutton shape="table" label="Diagramme" href="?diagram"}
 		{linkbutton shape="check" label="Vérifier la BDD" href="?pragma=integrity_check"}
 		{linkbutton shape="check" label="Vérifier les clés étrangères" href="?pragma=foreign_key_check"}
 		{if ENABLE_TECH_DETAILS}
@@ -16,6 +18,7 @@
 		{/if}
 	</aside>
 </nav>
+{/if}
 
 {form_errors}
 
@@ -79,20 +82,20 @@
 
 {elseif !empty($table_info)}
 
-<div class="center-block">
-	<h2 class="ruler">Table : {$table_info.name}</h2>
-	<p>
-		{linkbutton shape="menu" href="?table=%s"|args:$table_info.name label="Parcourir les données"}
-	</p>
+	<div class="center-block">
+		<h2 class="ruler">Table : {$table_info.name}</h2>
+		<p>
+			{linkbutton shape="menu" href="?table=%s"|args:$table_info.name label="Parcourir les données"}
+		</p>
 
 
-	{include file="common/_sql_table.tpl" table=$table_info.schema indexes=$table_info.indexes fk_link=true class="center"}
+		{include file="common/_sql_table.tpl" table=$table_info.schema indexes=$table_info.indexes fk_link=true class="center"}
 
-	<h2 class="ruler">Schéma de la table</h2>
-	<pre>{$table_info.sql}</pre>
-	<h2 class="ruler">Schéma des index</h2>
-	<pre>{if empty($table_info.sql_indexes)}<em>Aucun index</em>{else}{$table_info.sql_indexes}{/if}</pre>
-</div>
+		<h2 class="ruler">Schéma de la table</h2>
+		<pre>{$table_info.sql}</pre>
+		<h2 class="ruler">Schéma des index</h2>
+		<pre>{if empty($table_info.sql_indexes)}<em>Aucun index</em>{else}{$table_info.sql_indexes}{/if}</pre>
+	</div>
 
 {elseif !empty($table)}
 
@@ -114,7 +117,9 @@
 				<td>
 					{if null == $value}
 						<em>NULL</em>
-					{elseif $is_module && $key === 'document'}
+					{elseif ($fk = $foreign_keys[$key] ?? null) && $fk.to}
+						{link href="?table=%s&only[%s]=%s"|args:$fk.table:$fk.to:$value label=$value class="num"}
+					{elseif Utils::is_json($value) || ($is_module && $key === 'document')}
 						<pre>{$value|format_json}</pre>
 					{else}
 						{$value}
@@ -130,6 +135,30 @@
 
 	{$list->getHTMLPagination()|raw}
 
+{elseif $diagram}
+
+	<h2 class="ruler">Schéma de la base de données</h2>
+
+	<div class="er-diagram">
+	{foreach from=$tables item="table"}
+		<table id="t_{$table.name}">
+			<caption>{link href="?table_info=%s"|args:$table.name label=$table.name}</caption>
+			<tbody>
+			{foreach from=$table.columns item="column"}
+				<tr id="t_{$table.name}_{$column.name}"
+					{if $column.fk.table && $column.fk.to}
+					data-fk-table="{$column.fk.table}"
+					data-fk-column="{$column.fk.to}"
+					{/if}>
+					<td>{$column.name}</td>
+				</tr>
+			{/foreach}
+			</tbody>
+		</table>
+	{/foreach}
+	</div>
+
+	<script type="text/javascript" src="{$admin_url}static/scripts/erdiagram.js"></script>
 {else}
 
 	<h2 class="ruler">Liste des tables</h2>

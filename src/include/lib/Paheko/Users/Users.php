@@ -42,6 +42,11 @@ class Users
 		return $user;
 	}
 
+	static public function hasParents(): bool
+	{
+		return DB::getInstance()->test('users', 'is_parent = 1');
+	}
+
 	static public function iterateAssocByCategory(?int $id_category = null): iterable
 	{
 		$where = $id_category ? sprintf('id_category = %d', $id_category) : 'id_category IN (SELECT id FROM users_categories WHERE hidden = 0)';
@@ -266,24 +271,29 @@ class Users
 		$tables = 'users_view u';
 		$tables .= ' INNER JOIN users_search s ON s.id = u.id';
 
-		if ($db->test('users', 'is_parent = 1')) {
+		if (self::hasParents()) {
 			$tables .= ' LEFT JOIN users b ON b.id = u.id_parent';
+			$config = Config::getInstance();
 
-			$columns['id_parent'] = [
-				'label'  => 'Rattaché à',
-				'select' => 'u.id_parent',
-				'order'  => 'u.id_parent IS NULL, _parent_name COLLATE U_NOCASE %s, _user_name_index %1$s',
-			];
+			if ($config->show_parent_column !== false) {
+				$columns['id_parent'] = [
+					'label'  => 'Rattaché à',
+					'select' => 'u.id_parent',
+					'order'  => 'u.id_parent IS NULL, _parent_name COLLATE U_NOCASE %s, _user_name_index %1$s',
+				];
 
-			$columns['_parent_name'] = [
-				'select' => sprintf('CASE WHEN u.id_parent IS NOT NULL THEN %s ELSE NULL END', $df->getNameFieldsSQL('b')),
-			];
+				$columns['_parent_name'] = [
+					'select' => sprintf('CASE WHEN u.id_parent IS NOT NULL THEN %s ELSE NULL END', $df->getNameFieldsSQL('b')),
+				];
+			}
 
-			$columns['is_parent'] = [
-				'label' => 'Responsable',
-				'select' => 'u.is_parent',
-				'order' => 'u.is_parent DESC, _user_name_index %1$s',
-			];
+			if ($config->show_has_children_column !== false) {
+				$columns['is_parent'] = [
+					'label' => 'Responsable',
+					'select' => 'u.is_parent',
+					'order' => 'u.is_parent DESC, _user_name_index %1$s',
+				];
+			}
 		}
 
 		if (!$id_category) {

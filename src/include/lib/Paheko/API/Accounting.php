@@ -102,6 +102,31 @@ trait Accounting
 					throw new APIException('Wrong request method', 405);
 				}
 			}
+			// Return or edit linked transactions
+			elseif ($p1 && ctype_digit($p1) && $p2 == 'transactions') {
+				$transaction = Transactions::get((int)$p1);
+
+				if (!$transaction) {
+					throw new APIException(sprintf('Transaction #%d not found', $p1), 404);
+				}
+
+				if ($this->method === 'POST') {
+					$this->requireAccess(Session::ACCESS_WRITE);
+					$transaction->updateLinkedTransactions((array)($this->params['transactions'] ?? null));
+					return ['success' => true];
+				}
+				elseif ($this->method === 'DELETE') {
+					$this->requireAccess(Session::ACCESS_WRITE);
+					$transaction->deleteLinkedTransactions();
+					return ['success' => true];
+				}
+				elseif ($this->method === 'GET') {
+					return array_values($transaction->listLinkedTransactionsAssoc());
+				}
+				else {
+					throw new APIException('Wrong request method', 400);
+				}
+			}
 			elseif ($p1 && ctype_digit($p1) && !$p2) {
 				$transaction = Transactions::get((int)$p1);
 

@@ -142,9 +142,7 @@ class Reminders
 
 		foreach ($db->iterate($sql) as $row) {
 			$m = self::createMessage($row);
-
-			// Create body user template only once
-			$body ??= $m->getBody($row);
+			$body = $m->getBody($row);
 
 			$m->set('sent_date', $date);
 			$m->send($row, $body);

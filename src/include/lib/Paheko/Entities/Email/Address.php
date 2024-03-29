@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Paheko\Entities\Email;
 
 use Paheko\Entity;
+use Paheko\Plugins;
 use Paheko\UserException;
 use Paheko\Email\Addresses;
 use Paheko\Email\Templates as EmailsTemplates;
@@ -150,23 +151,19 @@ class Address extends Entity
 		$this->set('log', $log);
 	}
 
-	public function hasFailed(array $return): void
+	public function hasBounced(string $type, string $message = null): void
 	{
-		if (!isset($return['type'])) {
-			throw new \InvalidArgumentException('Bounce email type not supplied in argument.');
-		}
-
 		// Treat complaints as opt-out
-		if ($return['type'] == 'complaint') {
-			$this->set('status', self::STATUS_SPAM);
-			$this->log("Un signalement de spam a été envoyé par le destinataire.\n: " . $return['message']);
+		if ($type == 'complaint') {
+			$this->set('optout', true);
+			$this->appendFailLog($message ?? "Un signalement de spam a été envoyé par le destinataire.");
 		}
-		elseif ($return['type'] == 'permanent') {
+		elseif ($type == 'hard') {
 			$this->set('status', self::STATUS_HARD_BOUNCE);
 			$this->set('bounce_count', $this->bounce_count+1);
 			$this->log($return['message']);
 		}
-		elseif ($return['type'] == 'temporary') {
+		elseif ($type == 'soft') {
 			$this->set('bounce_count', $this->bounce_count+1);
 			$this->log($return['message']);
 

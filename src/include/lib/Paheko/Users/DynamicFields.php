@@ -159,7 +159,7 @@ class DynamicFields
 		return $fields;
 	}
 
-	static public function getNameFieldsSearchableSQL(?string $prefix = null): ?string
+	static public function getNameFieldsSearchableSQL(?string $prefix = null, bool $reverse = false): ?string
 	{
 		$fields = [];
 
@@ -187,6 +187,10 @@ class DynamicFields
 		}
 
 		unset($field);
+
+		if ($reverse) {
+			$fields = array_reverse($fields);
+		}
 
 		$fields = implode(' || \' \' || ', $fields);
 		$fields = sprintf('TRIM(%s)', $fields);
@@ -754,7 +758,7 @@ class DynamicFields
 			END;', $table_name, $table_name));
 	}
 
-	public function createView(string $table_name = User::TABLE): void
+	public function rebuildView(string $table_name = User::TABLE): void
 	{
 		$db = DB::getInstance();
 		$virtual_fields = [];
@@ -819,7 +823,7 @@ class DynamicFields
 
 		$this->createIndexes(User::TABLE);
 		$this->createTriggers(User::TABLE);
-		$this->createView(User::TABLE);
+		$this->rebuildView(User::TABLE);
 
 		$this->rebuildSearchTable(false);
 
@@ -935,6 +939,7 @@ class DynamicFields
 		}
 
 		$rebuild = false;
+		$rebuild_view = false;
 
 		$db = DB::getInstance();
 
@@ -953,6 +958,10 @@ class DynamicFields
 			}
 
 			if ($field->isModified()) {
+				if ($field->isVirtual() && $field->isModified('sql')) {
+					$rebuild_view = true;
+				}
+
 				$field->save();
 			}
 		}
@@ -969,6 +978,9 @@ class DynamicFields
 			// some conditions apply
 			// https://www.sqlite.org/lang_altertable.html#altertabdropcol
 			$this->rebuildUsersTable($copy);
+		}
+		elseif ($rebuild_view && $allow_rebuild) {
+			$this->rebuildView();
 		}
 
 		$db->commitSchemaUpdate();

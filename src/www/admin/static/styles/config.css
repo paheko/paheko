@@ -178,7 +178,7 @@
 }
 
 
-.tag {
+.ext-tag {
     font-size: .8rem;
     font-weight: normal;
     background: rgba(var(--gSecondColor), 0.3);
@@ -188,15 +188,94 @@
     margin: 0 .2em;
 }
 
-strong.tag {
+strong.ext-tag {
     background: rgba(var(--gMainColor), 0.7);
     color: rgb(var(--gBgColor));
 }
 
-.tag [data-icon]:before {
+.ext-tag [data-icon]:before {
     text-shadow: none;
 }
 
 .ext-tech {
     margin: 1em;
+}
+
+.er-diagram {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    flex-wrap: wrap;
+    padding: 1em 6em;
+}
+
+.er-diagram table {
+    z-index: 1000;
+    background: #fff;
+    border-collapse: collapse;
+    box-shadow: 0px 0px 10px #666;
+    order: 100;
+    margin: 1rem;
+}
+
+.er-diagram table:hover {
+    cursor: pointer;
+    box-shadow: 0px 0px 10px orange;
+    opacity: 1 !important;
+}
+
+.er-diagram table tr:nth-child(even) {
+    background: #eee;
+}
+
+.er-diagram table td {
+    font-size: .8em;
+    border: 1px solid #ccc;
+    padding: .2em .4em;
+    color: #000;
+}
+
+.er-diagram table caption {
+    background: #ccc;
+    border-bottom: none;
+    padding: .2em .4em;
+    font-weight: bold;
+    display: table-caption;
+    font-size: .9em;
+}
+
+.er-diagram table caption a {
+    color: darkblue;
+}
+
+.er-diagram:has(.focused) table, .er-diagram:has(.focused) svg g {
+    opacity: 0.3;
+    z-index: 0;
+}
+
+svg path {
+    stroke-width: 3px;
+}
+
+.er-diagram table.focused, .er-diagram svg g.focused {
+    opacity: 1;
+    box-shadow: 0px 0px 10px orange;
+    z-index: 2000;
+}
+
+.er-diagram table.focused {
+    order: 1;
+    margin-right: 5em;
+}
+
+.er-diagram table.clicked {
+    order: 0;
+}
+
+.er-diagram svg g.linked {
+    opacity: 1;
+}
+
+.er-diagram svg polygon {
+    z-index: 3000 !important;
 }

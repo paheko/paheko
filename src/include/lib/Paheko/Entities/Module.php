@@ -323,6 +323,11 @@ class Module extends Entity
 		return DB::getInstance()->getTableSize(sprintf('module_data_%s', $this->name));
 	}
 
+	public function getConfigSize(): int
+	{
+		return DB::getInstance()->firstColumn('SELECT LENGTH(config) FROM modules WHERE id = ?;', $this->id()) ?: 0;
+	}
+
 	public function getCodeSize(): int
 	{
 		$dir = $this->dir();

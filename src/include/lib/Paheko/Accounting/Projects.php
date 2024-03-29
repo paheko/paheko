@@ -80,11 +80,11 @@ class Projects
 
 		if ($by_year) {
 			$group = 'y.id, p.id';
-			$order = 'y.start_date DESC, ' . $order;
+			$order = 'y.end_date DESC, ' . $order;
 		}
 		else {
 			$group = 'p.id, y.id';
-			$order = $order . ', y.id';
+			$order = $order . ', y.end_date DESC';
 		}
 
 		$sql = sprintf($sql, Account::EXPENSE, Account::REVENUE, $join, $group, $order);

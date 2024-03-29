@@ -82,7 +82,7 @@ class Transactions
 
 			$transaction->save();
 			$ids = implode(',', $ids);
-			$db->exec(sprintf('UPDATE acc_transactions SET status = (status | %d) WHERE id IN (%s);', Transaction::STATUS_DEPOSIT, $ids));
+			$db->exec(sprintf('UPDATE acc_transactions SET status = (status | %d) WHERE id IN (%s);', Transaction::STATUS_DEPOSITED, $ids));
 			$db->commit();
 		}
 		catch (\Exception $e) {

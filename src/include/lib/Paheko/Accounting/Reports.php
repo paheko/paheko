@@ -519,6 +519,11 @@ class Reports
 
 		foreach ($accounts as $row) {
 			$t = in_array($row->type, $types, true) ? $row->type : 0;
+
+			if ($row->type === Account::TYPE_BANK && isset($criterias['year'])) {
+				$row->reconciled_balance = Accounts::getReconciledBalance($row->id, (int) $criterias['year']) * -1;
+			}
+
 			$out[$t]->accounts[] = $row;
 		}
 

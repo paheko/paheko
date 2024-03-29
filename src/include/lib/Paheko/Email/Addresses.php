@@ -28,7 +28,7 @@ class Addresses
 	 */
 	const BLACKLIST_MANUAL_VALIDATION_MX = '/mailinblack\.com|spamenmoins\.com/';
 
-	const COMMON_DOMAINS = ['laposte.net', 'gmail.com', 'hotmail.fr', 'hotmail.com', 'wanadoo.fr', 'free.fr', 'sfr.fr', 'yahoo.fr', 'orange.fr', 'live.fr', 'outlook.fr', 'yahoo.com', 'neuf.fr', 'outlook.com', 'icloud.com', 'riseup.net', 'vivaldi.net', 'aol.com', 'gmx.de', 'lilo.org', 'mailo.com', 'protonmail.com', 'proton.me'];
+	const COMMON_DOMAINS = ['laposte.net', 'gmail.com', 'hotmail.fr', 'hotmail.com', 'wanadoo.fr', 'free.fr', 'sfr.fr', 'yahoo.fr', 'orange.fr', 'live.fr', 'outlook.fr', 'yahoo.com', 'neuf.fr', 'outlook.com', 'icloud.com', 'riseup.net', 'vivaldi.net', 'aol.com', 'gmx.de', 'lilo.org', 'mailo.com', 'protonmail.com', 'proton.me', 'zaclys.net', 'pm.me'];
 
 	/**
 	 * Return NULL if address is valid, or a string for an error message if invalid
@@ -72,24 +72,51 @@ class Addresses
 			return 'Adresse e-mail invalide : vérifiez que vous n\'avez pas fait une faute de frappe.';
 		}
 
-		// Windows does not support MX lookups
-		if (PHP_OS_FAMILY == 'Windows' || !$mx_check) {
+		if (!$mx_check) {
 			return null;
 		}
 
-		getmxrr($host, $mx_list);
+		return self::checkMX($host);
+	}
 
-		if (empty($mx_list)) {
+
+	static public function checkMX(string $host): ?string
+	{
+		if (PHP_OS_FAMILY == 'Windows') {
+			return null;
+		}
+
+		// Use cache for domains, to avoid requesting MX details multiple times
+		static $results = [];
+
+		if (array_key_exists($host, $results)) {
+			$r = $results[$host];
+		}
+		else {
+			getmxrr($host, $mx_list);
+			$r = null;
+
+			if (empty($mx_list)) {
+				$r = 'empty';
+			}
+			else {
+				foreach ($mx_list as $mx) {
+					if (preg_match(self::BLACKLIST_MANUAL_VALIDATION_MX, $mx)) {
+						$r = 'blocked';
+						break;
+					}
+				}
+			}
+
+			$results[$host] = $r;
+		}
+
+		if ($r === 'empty') {
 			return 'Adresse e-mail invalide (le domaine indiqué n\'a pas de service e-mail) : vérifiez que vous n\'avez pas fait une faute de frappe.';
 		}
-
-		foreach ($mx_list as $mx) {
-  			if (preg_match(self::BLACKLIST_MANUAL_VALIDATION_MX, $mx)) {
-				return 'Adresse e-mail invalide : impossible d\'envoyer des mails à un service (de type mailinblack ou spamenmoins) qui demande une validation manuelle de l\'expéditeur. Merci de choisir une autre adresse e-mail.';
-			}
+		elseif ($r === 'blocked') {
+			return 'Adresse e-mail invalide : impossible d\'envoyer des mails à un service (de type mailinblack ou spamenmoins) qui demande une validation manuelle de l\'expéditeur. Merci de choisir une autre adresse e-mail.';
 		}
-
-		return null;
 	}
 
 	static public function isValid(string $address, bool $check_mx = true): bool
@@ -293,22 +320,16 @@ class Addresses
 		return self::handleManualBounce($return['recipient'], $return['type'], $return['message']);
 	}
 
-	static public function handleManualBounce(string $address, string $type, ?string $message): ?array
+	static public function handleManualBounce(string $raw_address, string $type, ?string $message): ?array
 	{
-		$return = compact('address', 'type', 'message');
-		$email = self::getOrCreate($address);
+		$address = self::getOrCreate($raw_address);
 
-		if (!$email) {
-			return null;
-		}
+		$address->hasBounced($type, $message);
+		Plugins::fire('email.bounce.save.before', false, compact('address', 'raw_address', 'type', 'message'));
+		$address->save();
 
-		$email->hasFailed($return);
-		Plugins::fire('email.bounce.save.before', false, compact('email', 'address', 'return', 'type', 'message'));
-		$email->save();
-
-		return $return;
+		return compact('type', 'message', 'raw_address');
 	}
-
 
 	static public function getFromHeader(string $name = null, string $email = null): string
 	{

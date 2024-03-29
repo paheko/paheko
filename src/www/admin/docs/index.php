@@ -81,9 +81,6 @@ if ($gallery !== $pref) {
 $dir_uri = $dir->path_uri();
 $parent_uri = $dir->parent_uri();
 
-$tpl->assign(compact('list', 'dir_uri', 'parent_uri', 'dir', 'context', 'context_ref',
-	'breadcrumbs', 'highlight', 'user_name', 'gallery', 'context_specific_root'));
-
 $quota = [
 	'used' => Files::getUsedQuota(),
 	'max' => Files::getQuota(),
@@ -97,6 +94,31 @@ foreach ($quota as $key => $value) {
 
 $quota['percent'] = $quota['max'] ? round(($quota['used'] / $quota['max']) * 100) : 100;
 
-$tpl->assign(compact('quota'));
+if ($context === File::CONTEXT_TRANSACTION) {
+	if ($context_ref) {
+		$title = sprintf('Écriture #%s', $context_ref);
+	}
+	else {
+		$title = 'Fichiers joints aux écritures comptables';
+	}
+}
+elseif ($context == File::CONTEXT_USER) {
+	if ($context_ref) {
+		$title = sprintf('Fichiers joints à la fiche du membre : %s', $user_name);
+	}
+	else {
+		$title = 'Fichiers joints aux fiches des membres';
+	}
+}
+elseif ($parent_uri) {
+	$title = sprintf('%s — Documents', $dir->name);
+}
+else {
+	$title = 'Documents';
+}
+
+$tpl->assign(compact('list', 'dir_uri', 'parent_uri', 'dir', 'context', 'context_ref',
+	'breadcrumbs', 'highlight', 'user_name', 'gallery', 'context_specific_root',
+	'quota', 'title'));
 
 $tpl->display('docs/index.tpl');

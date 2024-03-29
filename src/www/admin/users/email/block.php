@@ -11,14 +11,14 @@ $address = qg('address');
 $email = Addresses::get($address);
 
 if (!$email) {
-    throw new UserException('Adresse invalide ou inconnue');
+	throw new UserException('Adresse invalide ou inconnue');
 }
 
 $csrf_key = 'block_email';
 
 $form->runIf('send', function () use ($email) {
-    $email->setOptout('Désinscription manuelle par un administrateur');
-    $email->save();
+	$email->setOptout('Désinscription manuelle par un administrateur');
+	$email->save();
 }, $csrf_key, '!users/');
 
 $tpl->assign(compact('csrf_key', 'email', 'address'));
