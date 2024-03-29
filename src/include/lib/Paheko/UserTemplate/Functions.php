@@ -438,8 +438,10 @@ class Functions
 		static $internal = 0;
 
 		if (is_string($params['to'])) {
-			$params['to'] = [$params['to']];
+			$params['to'] = (array) $params['to'];
 		}
+
+		$params['to'] = array_filter($params['to']);
 
 		if (!count($params['to'])) {
 			throw new Brindille_Exception(sprintf('Ligne %d: aucune adresse destinataire n\'a été précisée pour la fonction "mail"', $line));
