@@ -742,7 +742,7 @@ class Functions
 					$message = $html;
 				}
 				else {
-					$message = nl2br($this->escape($error->getMessage()));
+					$message = nl2br(htmlspecialchars($error->getMessage()));
 				}
 
 				if ($error->hasDetails()) {
