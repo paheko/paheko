@@ -752,7 +752,7 @@ class Functions
 				$error = $message;
 			}
 			else {
-				$error = nl2br(htmlspecialchars($error->getMessage()));
+				$error = nl2br(htmlspecialchars($error));
 			}
 		}
 
