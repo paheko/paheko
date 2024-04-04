@@ -6,6 +6,7 @@ use KD2\HTTP;
 use KD2\Graphics\Image;
 use KD2\Graphics\Blob;
 use KD2\Office\ToText;
+use KD2\DB\EntityManager;
 
 use Paheko\Config;
 use Paheko\DB;
@@ -1077,7 +1078,7 @@ class File extends Entity
 		$file = $this;
 
 		$form->runIf('content', function () use ($file, $done) {
-			$file->setContent(f('content'));
+			$file->setContent($_POST['content'] ?? null);
 			$done = true;
 		}, $csrf_key);
 
@@ -1495,6 +1496,18 @@ class File extends Entity
 		return Files::callStorage('getReadOnlyPointer', $this);
 	}
 
+	public function iterateRecursive(): \Generator
+	{
+		yield $this;
+
+		if (!$this->isDir()) {
+			return;
+		}
+
+		$db = DB::getInstance();
+		yield from EntityManager::getInstance(self::class)->iterate('SELECT * FROM files WHERE parent = ? OR parent LIKE ? ESCAPE \'!\' ORDER BY type DESC, name COLLATE NOCASE ASC;', $this->path, $db->escapeLike($this->path, '!') . '/%');
+	}
+
 	public function getRecursiveSize(): int
 	{
 		if ($this->type == self::TYPE_FILE) {
@@ -1521,6 +1534,11 @@ class File extends Entity
 			File::TYPE_FILE,
 			$db->escapeLike($this->path, '!') . '/%'
 		) ?: 0;
+	}
+
+	public function getParentHashID(): string
+	{
+		return $this->parent()->hash_id;
 	}
 
 	public function webdav_root_url(): string

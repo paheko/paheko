@@ -16,7 +16,7 @@
 </form>
 
 <script type="text/javascript">
-var parent_path = {$parent|escape:'json'};
+var parent_path = {$parent.path|escape:'json'};
 {literal}
 var f = document.forms[0];
 f.addEventListener('submit', () => {

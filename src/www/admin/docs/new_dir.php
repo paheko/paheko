@@ -3,6 +3,7 @@
 namespace Paheko;
 
 use Paheko\Files\Files;
+use Paheko\Users\Session;
 use Paheko\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
@@ -17,9 +18,9 @@ $csrf_key = 'create_dir';
 
 $form->runIf('create', function () use ($parent) {
 	$name = trim((string) f('name'));
-	$f = Files::mkdir($parent . '/' . $name);
+	$f = Files::mkdir($parent->path . '/' . $name);
 
-	$url = '!docs/?path=' . $f->path;
+	$url = '!docs/?id=' . $f->hash_id;
 
 	if (null !== qg('_dialog')) {
 		Utils::reloadParentFrame(null === qg('no_redir') ? $url : null);

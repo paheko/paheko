@@ -23,7 +23,7 @@ if (!is_array($check) || !count($check) || !in_array($action, $actions)) {
 $csrf_key = 'docs_action_' . $action;
 
 $form->runIf('zip', function() use ($check, $session) {
-	Files::zip(null, $check, $session);
+	Files::zipFromHashIDList($check, null, $session);
 	exit;
 }, $csrf_key);
 
@@ -31,10 +31,14 @@ $form->runIf('delete', function () use ($check) {
 	$files = [];
 
 	foreach ($check as $path) {
-		$file = Files::get($path);
+		$file = Files::getByHashID($path);
 
-		if (!$file || !$file->canMoveToTrash()) {
-			throw new UserException('Vous n\'avez pas le droit de mettre ce fichier à la corbeille : ' . $path);
+		if (!$file) {
+			continue;
+		}
+
+		if (!$file->canMoveToTrash()) {
+			throw new UserException(sprintf('Vous n\'avez pas le droit de mettre ce fichier à la corbeille : %s', $file->path));
 		}
 
 		$files[] = $file;
@@ -47,13 +51,20 @@ $form->runIf('delete', function () use ($check) {
 
 $form->runIf('move', function () use ($check) {
 	$target = f('move');
+	$files = [];
 
-	foreach ($check as &$file) {
-		$file = Files::get($file);
+	foreach ($check as $file) {
+		$file = Files::getByHashID($file);
 
-		if (!$file || !$file->canMoveTo($target)) {
-			throw new UserException('Impossible de déplacer un fichier car vous n\'avez pas le droit de le déplacer à cet endroit');
+		if (!$file) {
+			continue;
 		}
+
+		if (!$file->canMoveTo($target)) {
+			throw new UserException(sprintf('Vous n\'avez pas le droit de déplacer le fichier "%s" dans "%s"', $file->path, $target));
+		}
+
+		$files[] = $file;
 	}
 
 	unset($file);
@@ -75,9 +86,13 @@ elseif ($action == 'zip') {
 	$size = 0;
 
 	foreach ($check as $selected) {
-		foreach (Files::listRecursive($selected, Session::getInstance(), false) as $file) {
-			$size += $file->size;
+		$file = Files::getByHashID($selected);
+
+		if (!$file) {
+			continue;
 		}
+
+		$size += $file->getRecursiveSize();
 	}
 
 	$tpl->assign(compact('extra', 'count', 'size'));

@@ -19,7 +19,7 @@
 	{foreach from=$list->iterate() item="item"}
 		<tr>
 			<td class="check">
-				{input type="checkbox" name="check[]" value=$item->path}
+				{input type="checkbox" name="check[]" value=$item.hash_id}
 			</td>
 			<td class="icon">
 				{if $item.type == 2}

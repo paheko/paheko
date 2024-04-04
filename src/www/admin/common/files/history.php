@@ -6,7 +6,7 @@ use Paheko\Files\Files;
 
 require __DIR__ . '/../../_inc.php';
 
-$file = Files::get(qg('p'));
+$file = Files::getByHashID(qg('id'));
 
 if (!$file) {
 	throw new UserException('Fichier inconnu');

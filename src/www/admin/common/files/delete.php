@@ -6,7 +6,7 @@ use Paheko\Files\Files;
 
 require __DIR__ . '/../../_inc.php';
 
-$file = Files::get(qg('p'));
+$file = Files::getByHashID(qg('id'));
 
 if (!$file) {
 	throw new UserException('Fichier inconnu');
@@ -21,7 +21,7 @@ elseif (!$trash && !$file->canDelete()) {
 	throw new UserException('Vous n\'avez pas le droit de supprimer ce fichier.');
 }
 
-$csrf_key = 'file_delete_' . $file->pathHash();
+$csrf_key = 'file_delete_' . $file->hash_id;
 $parent = $file->parent;
 
 $form->runIf('delete', function () use ($file, $trash) {

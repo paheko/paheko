@@ -38,6 +38,8 @@ if (!$dir->canRead()) {
 	throw new UserException('Vous n\'avez pas accès à ce répertoire');
 }
 
+$path = $dir->path;
+
 $context = Files::getContext($path);
 $context_ref = Files::getContextRef($path);
 $list = null;
