@@ -386,32 +386,13 @@ class Files
 
 		@ini_set('max_execution_time', 3600);
 
-		$files = [];
-
-		foreach (File::CONTEXTS_NAMES as $ctx => $name) {
-			$files[] = Files::get($ctx);
-		}
-
-		Files::zip($files, $target, null);
-	}
-
-	static public function zipFromHashIDList(array $sources, ?string $target, ?Session $session, ?string $download_name = null): void
-	{
-		$files = [];
-
-		foreach ($sources as $id) {
-			$files[] = Files::getByHashID($id);
-		}
-
-		$files = array_filter($files);
-
-		self::zip($files, $target, $session, $download_name);
+		Files::zip(array_keys(File::CONTEXTS_NAMES), $target, null);
 	}
 
 	/**
 	 * Creates a ZIP file archive from multiple paths
 	 * @param null|string $target Target file name, if left NULL, then will be sent to browser
-	 * @param  array $files List of File objects to append to ZIP file
+	 * @param  array $files List of file paths to append to ZIP file
 	 * @param  Session $session Logged-in user session, if set access rights to the path will be checked,
 	 * if left NULL, then no check will be made (!).
 	 */
@@ -430,6 +411,12 @@ class Files
 		$i = 0;
 
 		foreach ($files as $file) {
+			$file = Files::get($file);
+
+			if (!$file) {
+				continue;
+			}
+
 			foreach ($file->iterateRecursive() as $f) {
 				if ($f->isDir()) {
 					// Don't add directories to zip file
@@ -632,8 +619,12 @@ class Files
 		return $ref ?: null;
 	}
 
-	static public function getBreadcrumbs(string $path): array
+	static public function getBreadcrumbs(?string $path): array
 	{
+		if (empty($path)) {
+			return [];
+		}
+
 		$parts = explode('/', $path);
 		$breadcrumbs = [];
 		$path = '';

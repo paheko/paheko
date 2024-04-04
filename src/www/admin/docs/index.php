@@ -86,6 +86,7 @@ if ($gallery !== $pref) {
 }
 
 $parent_uri = $dir->parent_uri();
+$dir_uri = $dir->uri();
 
 $quota = [
 	'used' => Files::getUsedQuota(),
@@ -123,7 +124,7 @@ else {
 	$title = 'Documents';
 }
 
-$tpl->assign(compact('list', 'parent_uri', 'dir', 'context', 'context_ref',
+$tpl->assign(compact('list', 'parent_uri', 'dir_uri', 'dir', 'context', 'context_ref',
 	'breadcrumbs', 'highlight', 'user_name', 'gallery', 'context_specific_root',
 	'quota', 'title'));
 

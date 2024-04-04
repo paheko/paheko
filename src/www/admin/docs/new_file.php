@@ -5,15 +5,13 @@ namespace Paheko;
 use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
 
-use Paheko\Users\Session;
-
 require_once __DIR__ . '/_inc.php';
 
-$parent = Files::getByHashID(qg('id'));
 $default_ext = qg('ext') ?? 'md';
+$parent = qg('p');
 
-if (!$parent->canCreateHere(Session::getInstance())) {
-	throw new UserException('Vous n\'avez pas le droit de créer de fichier ici.');
+if (!File::canCreate($parent)) {
+	throw new UserException('Vous n\'avez pas le droit de créer de fichier ici.', 403);
 }
 
 $csrf_key = 'create_file';
@@ -25,7 +23,7 @@ $form->runIf('create', function () use ($parent, $default_ext) {
 		$name .= '.' . $default_ext;
 	}
 
-	$target = $parent->path . '/' . $name;
+	$target = $parent . '/' . $name;
 
 	if (Files::exists($target)) {
 		throw new UserException('Un fichier existe déjà avec ce nom : ' . $name);

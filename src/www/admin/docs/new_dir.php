@@ -3,24 +3,23 @@
 namespace Paheko;
 
 use Paheko\Files\Files;
-use Paheko\Users\Session;
 use Paheko\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
 
-$parent = Files::getByHashID(qg('id'));
+$parent = qg('p');
 
-if (!$parent->canCreateHere(Session::getInstance())) {
-	throw new UserException('Vous n\'avez pas le droit de créer de répertoire ici.');
+if (!File::canCreate($parent)) {
+	throw new UserException('Vous n\'avez pas le droit de créer de répertoire ici.', 403);
 }
 
 $csrf_key = 'create_dir';
 
 $form->runIf('create', function () use ($parent) {
 	$name = trim((string) f('name'));
-	$f = Files::mkdir($parent->path . '/' . $name);
+	$f = Files::mkdir($parent . '/' . $name);
 
-	$url = '!docs/?id=' . $f->hash_id;
+	$url = '!docs/?path=' . $f->path;
 
 	if (null !== qg('_dialog')) {
 		Utils::reloadParentFrame(null === qg('no_redir') ? $url : null);
