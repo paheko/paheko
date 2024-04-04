@@ -51,6 +51,7 @@
 	{include file="common/dynamic_list_head.tpl" check=$can_edit}
 
 	{foreach from=$list->iterate() item="row"}
+		<?php $url = sprintf('details.php?id=%d&list_category=%d', $row->_user_id, $current_cat); ?>
 		<tr>
 			{if $can_edit}
 				<td class="check">{input type="checkbox" name="selected[]" value=$row._user_id}</td>
@@ -59,14 +60,14 @@
 				<?php $value = $row->$key; ?>
 				{if $key == 'number'}
 					<td class="num">
-						{link href="details.php?id=%d"|args:$row._user_id label=$value}
+						{link href=$url label=$value}
 					</td>
 				{elseif $key == 'identity'}
-					<th>{link href="details.php?id=%d"|args:$row._user_id label=$value}</th>
+					<th>{link href=$url label=$value}</th>
 				{elseif $key == 'id_parent'}
 					<td>
 						{if $value}
-							{link href="details.php?id=%d"|args:$value label=$row._parent_name}
+							{link href=$url label=$row._parent_name}
 						{/if}
 					</td>
 				{elseif $key == 'is_parent'}
@@ -77,15 +78,15 @@
 					</td>
 				{else}
 					<td>
-						{user_field name=$key value=$value user_id=$row._user_id files_href="details.php?id=%d"|args:$row._user_id}
+						{user_field name=$key value=$value user_id=$row._user_id files_href=$url}
 					</td>
 				{/if}
 			{/foreach}
 
 			<td class="actions">
-				{linkbutton label="Fiche membre" shape="user" href="details.php?id=%d"|args:$row._user_id}
+				{linkbutton label="Fiche membre" shape="user" href=$url}
 				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-					{linkbutton label="Modifier" shape="edit" href="edit.php?id=%d"|args:$row._user_id}
+					{linkbutton label="Modifier" shape="edit" href="edit.php?id=%d&list_category=%d"|args:$row._user_id:$current_cat}
 				{/if}
 			</td>
 		</tr>

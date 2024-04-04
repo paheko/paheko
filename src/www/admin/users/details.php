@@ -21,6 +21,26 @@ if (!$user) {
 	throw new UserException("Ce membre n'existe pas.");
 }
 
+$list_category = isset($_GET['list_category']) && strlen($_GET['list_category']) ? intval($_GET['list_category']) : null;
+
+if ($list_category !== null) {
+	$form->runIf('goto', function () use ($user, $list_category, $session) {
+		$list = Users::listByCategory((int) $list_category, $session);
+		$list->toggleNavigation(true);
+		$list->iterateUntilCondition('_user_id', $user->id);
+
+		if (f('goto') === 'next') {
+			$row = $list->next() ?? $list->first();
+		}
+		else {
+			$row = $list->prev() ?? $list->last();
+		}
+
+		$url = sprintf('?id=%d&list_category=%d', $row->_user_id, $list_category);
+		Utils::redirect($url);
+	});
+}
+
 $category = $user->category();
 $csrf_key = 'user_' . $user->id();
 
@@ -55,7 +75,7 @@ $parent_name = $user->getParentName();
 $children = $user->listChildren();
 $siblings = $user->listSiblings();
 
-$variables += compact('services', 'user', 'category', 'children', 'siblings', 'parent_name', 'csrf_key');
+$variables += compact('list_category', 'services', 'user', 'category', 'children', 'siblings', 'parent_name', 'csrf_key');
 
 $tpl->assign($variables);
 $tpl->assign('snippets', Modules::snippetsAsString(Modules::SNIPPET_USER, $variables));
