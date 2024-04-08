@@ -538,18 +538,22 @@ class Module extends Entity
 					$path = '404.html';
 				}
 				else {
-					http_response_code(404);
-					throw new UserException('This address is invalid.');
+					throw new UserException('This address is invalid.', 404);
 				}
 			}
 
-			if ($this->web) {
-				$this->serveWeb($path, $params);
-				return;
+			try {
+				if ($this->web) {
+					$this->serveWeb($path, $params);
+					return;
+				}
+				else {
+					$ut = $this->template($path);
+					$ut->serve($params);
+				}
 			}
-			else {
-				$ut = $this->template($path);
-				$ut->serve($params);
+			catch (\LogicException $e) {
+				throw new UserException('This address is invalid.', 404);
 			}
 
 			return;
