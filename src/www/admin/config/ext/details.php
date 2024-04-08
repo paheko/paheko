@@ -7,9 +7,8 @@ use Paheko\Users\Session;
 require_once __DIR__ . '/../_inc.php';
 
 $type = qg('type');
-$ext = Extensions::get($type, qg('name'));
 
-if (!$ext) {
+if (!$type || !($ext = Extensions::get($type, qg('name')))) {
 	throw new UserException('Extension inconnue');
 }
 

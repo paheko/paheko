@@ -168,6 +168,7 @@ class DynamicList implements \Countable
 	public function toggleNavigation(bool $enable): void
 	{
 		$this->allow_navigation = $enable;
+		$this->setPageSize(null);
 	}
 
 	public function togglePreferenceHashElement(string $name, bool $enable): void

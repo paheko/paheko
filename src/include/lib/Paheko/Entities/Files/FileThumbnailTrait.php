@@ -58,17 +58,26 @@ trait FileThumbnailTrait
 			$pointer = $path !== null ? null : $this->getReadOnlyPointer();
 		}
 
-		if ($path) {
-			$i = new Image($path);
-		}
-		elseif ($pointer) {
-			$i = Image::createFromPointer($pointer, null, true);
-		}
-		else {
-			return null;
-		}
+		try {
+			if ($path) {
+				$i = new Image($path);
+			}
+			elseif ($pointer) {
+				$i = Image::createFromPointer($pointer, null, true);
+			}
+			else {
+				return null;
+			}
 
-		return $i;
+			return $i;
+		}
+		catch (\Exception $e) {
+			if (strstr($e->getMessage(), 'Invalid image format')) {
+				return null;
+			}
+
+			throw $e;
+		}
 	}
 
 	public function thumb_uri($size = null, bool $with_hash = true): ?string
