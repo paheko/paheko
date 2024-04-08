@@ -118,48 +118,35 @@
 	g.dialog_on_close = false;
 
 	g.openDialog = function (content, options) {
-		var close = true,
-			callback = null,
-			caption = null,
-			classname = null;
-
-		if (typeof options === "object" && options !== null) {
-			callback = options.callback ?? null;
-			classname = options.classname ?? null;
-			close = options.close ?? true;
-			caption = options.caption ?? null;
-			g.dialog_on_close = options.on_close || false;
-		}
-		else {
-			var options = {};
-		}
-
 		if (null !== g.dialog) {
 			g.closeDialog();
 		}
+		return g.replaceDialog(content, options);
+	};
+
+	g.createDialog = function (content, options) {
+		options = g.getDialogOptions(options);
 
 		g.focus_before_dialog = document.activeElement;
 
 		g.dialog = document.createElement('dialog');
 		g.dialog.id = 'dialog';
 		g.dialog.open = true;
-		g.dialog.className = classname || '';
-		g.dialog.dataset.caption = caption || '';
+		g.dialog.className = options.classname || '';
+		g.dialog.dataset.caption = options.caption || '';
 
 		var toolbar = document.createElement('header');
 		toolbar.className = 'toolbar';
 
 		var t = document.createElement('h4');
 		t.className = 'title';
-		t.innerText = caption || '';
 		toolbar.appendChild(t);
 
-		if (caption) {
+		if (options.caption) {
 			g.dialog_title = document.title;
-			document.title = caption + ' — ' + document.title;
 		}
 
-		if (close) {
+		if (options.close) {
 			var btn = document.createElement('button');
 			btn.className = 'icn-btn closeBtn main';
 			btn.setAttribute('data-icon', '✘');
@@ -167,28 +154,80 @@
 			btn.innerHTML = 'Fermer';
 			btn.onclick = g.closeDialog;
 			toolbar.appendChild(btn);
-
-			window.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
 		}
 
-		g.dialog.appendChild(toolbar);
+		g.dialog.style.opacity = 0;
+		console.log(g.dialog.appendChild(toolbar));
+		console.log(t, toolbar, g.dialog);
+		document.body.appendChild(g.dialog);
+	};
+
+	g.getDialogOptions = function (options) {
+		if (typeof options !== 'object' || options === null) {
+			options = {};
+		}
+
+		options.callback = options.callback ?? null;
+		options.classname = options.classname ?? null;
+		options.close = options.close ?? true;
+		options.caption = options.caption ?? null;
+		options.click_to_close = options.click_to_close ?? false;
+		g.dialog_on_close = options.on_close || false;
+		return options;
+	};
+
+	g.replaceDialog = function (content, options) {
+		if (!g.dialog) {
+			g.createDialog(content, options);
+		}
+		else {
+			g.dialog.style.opacity = 0;
+			g.dialog.classList.remove('loaded');
+			g.dialog.lastElementChild.remove();
+			g.resetDialogKeys();
+		}
+
+		options = g.getDialogOptions(options);
+
+		var t = g.dialog.querySelector('h4.title');
+
+		if (!t) {
+			console.log(g.dialog, t);
+			return;
+		}
+
+		t.innerText = options.caption || '';
+
+		if (options.caption) {
+			document.title = options.caption + ' — ' + document.title;
+		}
+
+		g.setDialogKey('Escape', g.closeDialog);
 
 		if (typeof content == 'string') {
 			var container = document.createElement('div');
+			container.className = 'content';
 			container.innerHTML = content;
 			content = container;
 		}
 		else if (content instanceof DocumentFragment) {
 			var container = document.createElement('div');
+			container.className = 'content';
 			container.appendChild(content.cloneNode(true));
 			content = container;
 		}
 
-		g.dialog.appendChild(content);
-
-		g.dialog.style.opacity = 0;
-
 		let tag = content.tagName.toLowerCase();
+
+		if (tag !== 'iframe' && tag !== 'div') {
+			var container = document.createElement('div');
+			container.className = 'preview';
+			container.appendChild(content);
+			g.dialog.appendChild(container);
+		}
+		else {
+			g.dialog.appendChild(content);
+		}
 
 		if (tag == 'img' || tag == 'iframe') {
 			event = 'load';
@@ -197,28 +236,30 @@
 			event = 'canplaythrough';
 		}
 
-		if (tag === 'img') {
-			content.onclick = g.closeDialog;
-		}
-
 		if (event) {
 			content.addEventListener(event, () => { if (g.dialog) g.dialog.classList.add('loaded'); });
 
-			if (event && callback) {
-				content.addEventListener(event, callback);
+			if (event && options.callback) {
+				content.addEventListener(event, options.callback);
 			}
 		}
 		else {
 			g.dialog.classList.add('loaded');
 		}
 
-		document.body.appendChild(g.dialog);
-
 		// Restore CSS defaults
 		window.setTimeout(() => { g.dialog.style.opacity = ''; }, 50);
 
+		if (options.click_to_close) {
+			g.dialog.onclick = (e) => {
+				if (e.target === g.dialog) {
+					g.closeDialog();
+				}
+			};
+		}
+
 		return content;
-	}
+	};
 
 	g.openFrameDialog = function (url, options) {
 		options = options ?? {};
@@ -323,6 +364,8 @@
 	};
 
 	g.closeDialog = function () {
+		g.resetDialogKeys();
+
 		if (null === g.dialog) {
 			return;
 		}
@@ -338,7 +381,7 @@
 
 		var d = g.dialog;
 		d.style.opacity = 0;
-		window.onkeyup = g.dialog = null;
+		g.dialog = null;
 
 		window.setTimeout(() => { d.parentNode.removeChild(d); }, 500);
 
@@ -654,66 +697,133 @@
 
 		// Open links in dialog
 		$('a[target*="_dialog"]').forEach((e) => {
-			e.onclick = () => {
-				let type = e.getAttribute('data-mime');
-				let caption = e.getAttribute('data-caption');
-
-				if (!type) {
-					let url = e.href + (e.href.indexOf('?') > 0 ? '&' : '?') + '_dialog';
-
-					if (m = e.getAttribute('target').match(/_dialog=(.*)/)) {
-						url += '=' + m[1];
-					}
-
-					if (location.href.match(/_dialog/)) {
-						location.href = url;
-						return false;
-					}
-
-					g.openFrameDialog(url, {
-						'height': e.getAttribute('data-dialog-height') || 'auto',
-						'classname': e.getAttribute('data-dialog-class'),
-						'on_close': e.getAttribute('data-dialog-on-close') == 1,
-						caption
-					});
-					return false;
-				}
-
-				if (type.match(/^image\//)) {
-					var i = document.createElement('img');
-					i.src = e.href;
-					i.draggable = false;
-				}
-				else if (type.match(/^audio\//)) {
-					var i = document.createElement('audio');
-					i.autoplay = true;
-					i.controls = true;
-					i.src = e.href;
-					i.draggable = false;
-				}
-				else if (type.match(/^video\/|^application\/ogg$/)) {
-					var i = document.createElement('video');
-					i.autoplay = true;
-					i.controls = true;
-					i.src = e.href;
-					i.draggable = false;
-				}
-				else {
-					let url = e.href + (e.href.indexOf('?') > 0 ? '&' : '?') + '_dialog';
-					g.openFrameDialog(url, {height: '90%', caption});
-					return false;
-				}
-
-				g.openDialog(i, {caption});
-
-				return false;
-			};
+			e.onclick = () => g.openPreview(e);
 		});
 
 		$('form[target="_dialog"]').forEach((e) => {
 			e.addEventListener('submit', () => g.openFormInDialog(e));
 		});
 	});
+
+	g.dialog_events = [];
+	g.setDialogKey = function (key, callback) {
+		var a = (e) => {
+			if (e.key !== key) {
+				return;
+			}
+
+			e.preventDefault();
+			callback();
+			return false;
+		}
+		window.addEventListener('keyup', a, true);
+		g.dialog_events.push(['keyup', a]);
+	};
+
+	g.resetDialogKeys = function () {
+		var e;
+
+		while (e = g.dialog_events.pop()) {
+			window.removeEventListener(e[0], e[1], true);
+		}
+	};
+
+	g.openPreview = function (e) {
+		let type = e.getAttribute('data-mime');
+		let caption = e.getAttribute('data-caption');
+
+		if (!type) {
+			let url = e.href + (e.href.indexOf('?') > 0 ? '&' : '?') + '_dialog';
+
+			if (m = e.getAttribute('target').match(/_dialog=(.*)/)) {
+				url += '=' + m[1];
+			}
+
+			if (location.href.match(/_dialog/)) {
+				location.href = url;
+				return false;
+			}
+
+			g.openFrameDialog(url, {
+				'height': e.getAttribute('data-dialog-height') || 'auto',
+				'classname': e.getAttribute('data-dialog-class'),
+				'on_close': e.getAttribute('data-dialog-on-close') == 1,
+				caption
+			});
+			return false;
+		}
+
+		if (type.match(/^image\//)) {
+			var i = document.createElement('img');
+			i.src = e.href;
+			i.draggable = false;
+			i.onclick = () => g.navigateToPreview(e);
+		}
+		else if (type.match(/^audio\//)) {
+			var i = document.createElement('audio');
+			i.autoplay = true;
+			i.controls = true;
+			i.src = e.href;
+			i.draggable = false;
+		}
+		else if (type.match(/^video\/|^application\/ogg$/)) {
+			var i = document.createElement('video');
+			i.autoplay = true;
+			i.controls = true;
+			i.src = e.href;
+			i.draggable = false;
+		}
+		else {
+			let url = e.href + (e.href.indexOf('?') > 0 ? '&' : '?') + '_dialog';
+			g.openFrameDialog(url, {height: '90%', caption});
+			return false;
+		}
+
+		g.replaceDialog(i, {caption, 'click_to_close': true});
+
+		g.setDialogKey('ArrowLeft', () => g.navigateToPreview(e, true));
+		g.setDialogKey('ArrowRight', () => g.navigateToPreview(e));
+
+		return false;
+	};
+
+	g.navigateToPreview = function (element, to_prev) {
+		console.log(element);
+		var preview_items = document.querySelectorAll('a[target="_dialog"][data-mime]');
+		preview_items = Array.from(preview_items).filter((e) => e.dataset.mime.match(/^(audio|video|image)\//));
+		var next = null;
+		var prev = null;
+
+		for (var i = 0; i < preview_items.length; i++) {
+			var item = preview_items[i];
+
+			if (item.href === element.href) {
+				if (to_prev) {
+					next = prev;
+					break;
+				}
+
+				next = false;
+				continue;
+			}
+
+			if (next === false) {
+				next = item;
+				break;
+			}
+
+			prev = item;
+		}
+
+		if (to_prev && !next) {
+			next = preview_items[preview_items.length-1];
+		}
+		else if (!next) {
+			next = preview_items[0];
+		}
+
+		g.openPreview(next);
+	};
 
 	g.onload(() => {
 		document.querySelectorAll('input[data-input="date"]').forEach((e) => {
