@@ -37,16 +37,8 @@ header.public {
 	display: flex;
 	width: 100%;
 	align-items: center;
+	justify-content: space-between;
 	margin: 0;
-}
-header.public div {
-	display: flex;
-	flex-direction: column;
-	margin: .5rem 1rem;
-}
-header.public p {
-	margin-left: auto;
-	margin-right: 1rem;
 }
 header.public div h1 a {
 	font-size: .9rem;
@@ -55,6 +47,11 @@ header.public div h1 a {
 	padding: 0;
 	color: var(--gBorderColor);
 }
+
+header.public h1 a img {
+    max-height: 32px;
+}
+
 header.public div h3 {
 	font-size: 1rem;
 }
@@ -81,10 +78,8 @@ body.public main {
 </style>
 
 <header class="public">
-	<div>
-		<h1 class="org"><a href="{$site_url}" target="_blank">{if $config.files.logo}<img src="{$config->fileURL('logo', '150px')}" alt="" />{else}{$config.org_name}{/if}</a></h1>
-		<h3 class="title">{$file.name}</h3>
-	</div>
+	<h1 class="org"><a href="{$site_url}" target="_blank">{if $config.files.logo}<img src="{$config->fileURL('logo', '150px')}" alt="" />{else}{$config.org_name}{/if}</a></h1>
+	<h3 class="title">{$file.name}</h3>
 	<p>
 		{linkbutton shape="download" label="Télécharger" href=$download_url}
 	</p>
