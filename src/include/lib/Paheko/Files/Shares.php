@@ -6,6 +6,7 @@ namespace Paheko\Files;
 use Paheko\Entities\Files\File;
 use Paheko\Entities\Files\Share;
 
+use Paheko\DB;
 use Paheko\DynamicList;
 use Paheko\Utils;
 use Paheko\Users\Session;
