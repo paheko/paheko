@@ -6,7 +6,7 @@ use Paheko\Files\Files;
 
 require __DIR__ . '/../../_inc.php';
 
-$file = Files::get(qg('p'));
+$file = Files::getByHashID(qg('id'));
 
 if (!$file) {
 	throw new UserException('Fichier inconnu');
@@ -22,7 +22,7 @@ $csrf_key = 'file_rename_' . $file->pathHash();
 
 $form->runIf('rename', function () use ($file) {
 	$file->changeFileName(f('new_name'), true, true);
-}, $csrf_key, '!docs/?path=' . $file->parent);
+}, $csrf_key, '!docs/?id=' . $file->getParentHashID());
 
 $tpl->assign(compact('file', 'csrf_key'));
 

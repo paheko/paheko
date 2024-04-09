@@ -512,6 +512,7 @@ CREATE TABLE IF NOT EXISTS files
 -- Files metadata
 (
 	id INTEGER NOT NULL PRIMARY KEY,
+	hash_id TEXT NOT NULL,
 	path TEXT NOT NULL,
 	parent TEXT NULL REFERENCES files(path) ON DELETE CASCADE ON UPDATE CASCADE,
 	name TEXT NOT NULL, -- File name
@@ -528,6 +529,7 @@ CREATE TABLE IF NOT EXISTS files
 
 -- Unique index as this is used to make up a file path
 CREATE UNIQUE INDEX IF NOT EXISTS files_unique ON files (path);
+CREATE UNIQUE INDEX IF NOT EXISTS files_unique_hash ON files (hash_id);
 CREATE INDEX IF NOT EXISTS files_parent ON files (parent);
 CREATE INDEX IF NOT EXISTS files_type_parent ON files (type, parent, path);
 CREATE INDEX IF NOT EXISTS files_name ON files (name);
@@ -564,6 +566,23 @@ END;
 CREATE TRIGGER IF NOT EXISTS files_search_au AFTER UPDATE OF name, path ON files BEGIN
 	UPDATE files_search SET path = NEW.path, title = NEW.name WHERE docid = NEW.rowid;
 END;
+
+CREATE TABLE IF NOT EXISTS files_shares
+-- Sharing links for files
+(
+	id INTEGER NOT NULL PRIMARY KEY,
+	id_file INTEGER NOT NULL REFERENCES files(id) ON DELETE CASCADE,
+	id_user INTEGER NULL REFERENCES users(id) ON DELETE CASCADE,
+	created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(created) IS NOT NULL AND datetime(created) = created),
+	hash_id TEXT NOT NULL,
+	option INTEGER NOT NULL,
+	expiry TEXT NULL CHECK (datetime(expiry) IS NULL OR datetime(expiry) = expiry),
+	password TEXT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS files_shares_hash ON files_shares (hash_id);
+CREATE INDEX IF NOT EXISTS files_shares_file ON files_shares (id_file);
+CREATE INDEX IF NOT EXISTS files_shares_expiry ON files_shares (expiry);
 
 CREATE TABLE IF NOT EXISTS acc_transactions_files
 -- Link between transactions and files

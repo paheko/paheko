@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Ajouter/supprimer des écritures à un projet" current="acc/accounts"}
+{include file="_head.tpl" title="Déplacer des fichiers" current="docs"}
 
 {form_errors}
 
@@ -36,17 +36,11 @@
 
 	{csrf_field key=$csrf_key}
 
-	{if isset($extra)}
-		{foreach from=$extra key="key" item="value"}
-			{if is_array($value)}
-				{foreach from=$value key="subkey" item="subvalue"}
-					<input type="hidden" name="{$key}[{$subkey}]" value="{$subvalue}" />
-				{/foreach}
-			{else}
-				<input type="hidden" name="{$key}" value="{$value}" />
-			{/if}
-		{/foreach}
-	{/if}
+	{foreach from=$check key="key" item="value"}
+		<input type="hidden" name="check[]" value="{$value}" />
+	{/foreach}
+
+	<input type="hidden" name="action" value="{$_POST.action}" />
 
 </form>
 

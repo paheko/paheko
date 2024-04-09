@@ -70,6 +70,7 @@ html.dialog main {
     padding: .3em 1em;
     margin-left: auto;
     border-radius: .5em;
+    flex-wrap: unset;
 }
 
 #dialog > header.toolbar button.closeBtn:hover {
@@ -87,29 +88,60 @@ html.dialog main {
     color: #fff !important;
 }
 
-#dialog > iframe, #dialog > img, #dialog > audio, #dialog > video {
-    max-width: 90%;
-    max-height: 85%;
+
+@media screen and (max-width: 800px) {
+    #dialog > header.toolbar {
+        flex-direction: column-reverse;
+        text-align: center;
+        width: 100%;
+        margin: .5rem 0;
+    }
+
+    #dialog h4.title {
+        font-size: 1.2em;
+    }
+
+    #dialog > header.toolbar button.closeBtn {
+        margin: 0;
+    }
+}
+
+#dialog > iframe, #dialog > .preview {
     min-height: 3em;
-    height: 90%;
+    height: calc(100% - 5em);
+    max-width: 90%;
     transition: opacity .2s, height .2s;
     border: none;
     opacity: 0;
 }
 
-#dialog.loaded > img, #dialog.loaded > audio, #dialog.loaded > video {
+#dialog.loaded > .preview {
     opacity: 1;
-    height: initial;
 }
 
-#dialog > iframe, #dialog > div {
+#dialog > iframe, #dialog > .content {
     border-radius: .5em;
     box-shadow: 0px 0px 5px #000;
     background: #fff;
 }
 
-#dialog > div {
+#dialog > .content {
     padding: 1em;
+}
+
+#dialog > .preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#dialog > .preview * {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+#dialog > .preview img {
+    cursor: pointer;
 }
 
 #dialog.loaded > iframe {

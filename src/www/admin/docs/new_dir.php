@@ -7,10 +7,10 @@ use Paheko\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
 
-$parent = qg('path');
+$parent = qg('p');
 
 if (!File::canCreate($parent)) {
-	throw new UserException('Vous n\'avez pas le droit de créer de répertoire ici.');
+	throw new UserException('Vous n\'avez pas le droit de créer de répertoire ici.', 403);
 }
 
 $csrf_key = 'create_dir';

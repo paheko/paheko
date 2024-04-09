@@ -215,6 +215,11 @@ class DynamicList implements \Countable
 		$this->conditions = $conditions;
 	}
 
+	public function setColumns(array $columns)
+	{
+		$this->columns = $columns;
+	}
+
 	/**
 	 * Enable or disable prev() next() navigation when using iterate()
 	 */

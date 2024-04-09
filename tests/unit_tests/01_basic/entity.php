@@ -4,7 +4,7 @@ namespace Paheko;
 use KD2\Test;
 use DateTime;
 
-require_once INIT;
+paheko_init(null);
 
 $ts = strtotime('2024-03-01 00:00:00 UTC');
 

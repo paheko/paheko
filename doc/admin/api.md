@@ -428,9 +428,13 @@ Efface la liste des membres liés à une écriture.
 
 ### accounting/transaction/{ID_TRANSACTION}/transactions (GET)
 
+_(Depuis la version 1.3.7)_
+
 Renvoie la liste des écritures liées à une écriture.
 
 ### accounting/transaction/{ID_TRANSACTION}/transactions (POST)
+
+_(Depuis la version 1.3.7)_
 
 Met à jour la liste des écritures liées à une écriture, en utilisant les ID des écritures, passées dans un tableau nommé `transactions`.
 
@@ -439,6 +443,8 @@ Met à jour la liste des écritures liées à une écriture, en utilisant les ID
 ```
 
 ### accounting/transaction/{ID_TRANSACTION}/transactions (DELETE)
+
+_(Depuis la version 1.3.7)_
 
 Efface la liste des écritures liées à une écriture.
 

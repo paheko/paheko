@@ -1,12 +1,12 @@
 @charset "UTF-8";
 @font-face {
   font-family: 'paheko';
-  src: url('../font/paheko.eot?71335949');
-  src: url('../font/paheko.eot?71335949#iefix') format('embedded-opentype'),
-       url('../font/paheko.woff2?71335949') format('woff2'),
-       url('../font/paheko.woff?71335949') format('woff'),
-       url('../font/paheko.ttf?71335949') format('truetype'),
-       url('../font/paheko.svg?71335949#paheko') format('svg');
+  src: url('../font/paheko.eot?20248705');
+  src: url('../font/paheko.eot?20248705#iefix') format('embedded-opentype'),
+       url('../font/paheko.woff2?20248705') format('woff2'),
+       url('../font/paheko.woff?20248705') format('woff'),
+       url('../font/paheko.ttf?20248705') format('truetype'),
+       url('../font/paheko.svg?20248705#paheko') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -16,7 +16,7 @@
 @media screen and (-webkit-min-device-pixel-ratio:0) {
   @font-face {
     font-family: 'paheko';
-    src: url('../font/paheko.svg?71335949#paheko') format('svg');
+    src: url('../font/paheko.svg?20248705#paheko') format('svg');
   }
 }
 */
@@ -62,12 +62,11 @@
 .icn-italic:before { content: '\49'; } /* 'I' */
 .icn-markdown:before { content: '\4d'; } /* 'M' */
 .icn-pdf:before { content: '\50'; } /* 'P' */
-.icn-skriv:before { content: '\53'; } /* 'S' */
 .icn-text:before { content: '\54'; } /* 'T' */
 .icn-paragraph:before { content: '\a7'; } /* '§' */
 .icn-quote:before { content: '\ab'; } /* '«' */
 .icn-list-ul:before { content: '\2022'; } /* '•' */
-.icn-euro:before { content: '\20ac'; } /* '€' */
+.icn-money:before { content: '\20ac'; } /* '€' */
 .icn-left:before { content: '\2190'; } /* '←' */
 .icn-up:before { content: '\2191'; } /* '↑' */
 .icn-right:before { content: '\2192'; } /* '→' */
@@ -109,6 +108,7 @@
 .icn-search:before { content: '🔍'; } /* '\1f50d' */
 .icn-lock:before { content: '🔒'; } /* '\1f512' */
 .icn-unlock:before { content: '🔓'; } /* '\1f513' */
+.icn-link:before { content: '🔗'; } /* '\1f517' */
 .icn-image:before { content: '🖻'; } /* '\1f5bb' */
 .icn-gallery:before { content: '🖼'; } /* '\1f5bc' */
 .icn-folder:before { content: '🗀'; } /* '\1f5c0' */

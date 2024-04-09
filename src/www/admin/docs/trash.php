@@ -25,7 +25,7 @@ $form->runIf('confirm_delete', function () use ($check, $session) {
 	}
 
 	foreach ($check as &$file) {
-		$file = Files::get($file);
+		$file = Files::getByHashID($file);
 
 		if (!$file) {
 			continue;
@@ -60,7 +60,7 @@ $form->runIf('restore', function() use ($check) {
 	}
 
 	foreach ($check as &$file) {
-		$file = Files::get($file);
+		$file = Files::getByHashID($file);
 
 		if (!$file) {
 			throw new UserException('Impossible de restaurer un fichier qui n\'existe plus');

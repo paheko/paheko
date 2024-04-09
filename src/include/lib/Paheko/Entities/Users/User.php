@@ -33,6 +33,8 @@ use KD2\DB\EntityManager as EM;
 use KD2\DB\Date;
 use KD2\ZipWriter;
 
+use const Paheko\{WWW_URL};
+
 /**
  * WARNING: do not use $user->property = 'value' to set a property value on this class
  * as they will not be saved using save(). Please use $user->set('property', 'value').
@@ -659,6 +661,11 @@ class User extends Entity
 	public function url(): string
 	{
 		return Utils::getLocalURL(sprintf(self::PRIVATE_URL, $this->id));
+	}
+
+	public function avatar_url(): string
+	{
+		return WWW_URL . 'user/avatar/' . $this->id();
 	}
 
 	public function diff(): array

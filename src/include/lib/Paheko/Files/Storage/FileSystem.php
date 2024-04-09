@@ -254,7 +254,7 @@ class FileSystem implements StorageInterface
 		$data['image'] = (int) in_array($data['mime'], File::IMAGE_TYPES);
 
 		$file = new File;
-		$file->load($data);
+		$file->import($data);
 
 		return $file;
 	}

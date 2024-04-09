@@ -11,11 +11,11 @@ if (!WOPI_DISCOVERY_URL) {
 	throw new UserException('Le support des documents Office est désactivé.');
 }
 
-$parent = qg('path');
 $ext = qg('ext');
+$parent = qg('p');
 
 if (!File::canCreate($parent)) {
-	throw new UserException('Vous n\'avez pas le droit de créer de document ici.');
+	throw new UserException('Vous n\'avez pas le droit de créer de document ici.', 403);
 }
 
 $csrf_key = 'create_doc';
@@ -37,6 +37,6 @@ else {
 	$submit_name = 'Créer le document';
 }
 
-$tpl->assign(compact('csrf_key', 'submit_name', 'ext'));
+$tpl->assign(compact('csrf_key', 'submit_name', 'ext', 'parent'));
 
 $tpl->display('docs/new_doc.tpl');
