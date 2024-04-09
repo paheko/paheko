@@ -142,9 +142,7 @@
 		t.className = 'title';
 		toolbar.appendChild(t);
 
-		if (options.caption) {
-			g.dialog_title = document.title;
-		}
+		g.dialog_title = document.title;
 
 		if (options.close) {
 			var btn = document.createElement('button');
@@ -157,9 +155,13 @@
 		}
 
 		g.dialog.style.opacity = 0;
-		console.log(g.dialog.appendChild(toolbar));
-		console.log(t, toolbar, g.dialog);
+		g.dialog.appendChild(toolbar);
 		document.body.appendChild(g.dialog);
+
+		// Remove ability to scoll background when dialog is open
+		// Avoid having the page "jumping" because the scrollbar has been removed
+		document.body.style.width = document.body.clientWidth + 'px';
+		document.body.style.overflow = 'hidden';
 	};
 
 	g.getDialogOptions = function (options) {
@@ -184,7 +186,7 @@
 			g.dialog.style.opacity = 0;
 			g.dialog.classList.remove('loaded');
 			g.dialog.lastElementChild.remove();
-			g.resetDialogKeys();
+			g.resetDialogEvents();
 		}
 
 		options = g.getDialogOptions(options);
@@ -192,14 +194,13 @@
 		var t = g.dialog.querySelector('h4.title');
 
 		if (!t) {
-			console.log(g.dialog, t);
 			return;
 		}
 
 		t.innerText = options.caption || '';
 
 		if (options.caption) {
-			document.title = options.caption + ' — ' + document.title;
+			document.title = options.caption + ' — ' + g.dialog_title;
 		}
 
 		g.setDialogKey('Escape', g.closeDialog);
@@ -364,7 +365,7 @@
 	};
 
 	g.closeDialog = function () {
-		g.resetDialogKeys();
+		g.resetDialogEvents();
 
 		if (null === g.dialog) {
 			return;
@@ -393,6 +394,9 @@
 			document.title = g.dialog_title;
 			g.dialog_title = null;
 		}
+
+		document.body.style.overflow = null;
+		document.body.style.width = null;
 	};
 
 	g.openFormInDialog = (form) => {
@@ -707,7 +711,7 @@
 
 	g.dialog_events = [];
 	g.setDialogKey = function (key, callback) {
-		var a = (e) => {
+		g.addDialogEvent('keyup', (e) => {
 			if (e.key !== key) {
 				return;
 			}
@@ -715,12 +719,22 @@
 			e.preventDefault();
 			callback();
 			return false;
+		});
+
+		if (key === 'ArrowLeft') {
+			g.addDialogEvent('swipeleft', callback);
 		}
-		window.addEventListener('keyup', a, true);
-		g.dialog_events.push(['keyup', a]);
+		else if (key === 'ArrowRight') {
+			g.addDialogEvent('swiperight', callback);
+		}
 	};
 
-	g.resetDialogKeys = function () {
+	g.addDialogEvent = function (event, callback) {
+		window.addEventListener(event, callback, true);
+		g.dialog_events.push([event, callback]);
+	};
+
+	g.resetDialogEvents = function () {
 		var e;
 
 		while (e = g.dialog_events.pop()) {
@@ -784,11 +798,14 @@
 		g.setDialogKey('ArrowLeft', () => g.navigateToPreview(e, true));
 		g.setDialogKey('ArrowRight', () => g.navigateToPreview(e));
 
+		var evt = e => { e.stopPropagation(); e.preventDefault(); g.closeDialog(); };
+		g.addDialogEvent('swipeup', evt);
+		i.addEventListener('swipeup', evt);
+
 		return false;
 	};
 
 	g.navigateToPreview = function (element, to_prev) {
-		console.log(element);
 		var preview_items = document.querySelectorAll('a[target="_dialog"][data-mime]');
 		preview_items = Array.from(preview_items).filter((e) => e.dataset.mime.match(/^(audio|video|image)\//));
 		var next = null;
@@ -815,14 +832,13 @@
 			prev = item;
 		}
 
-		if (to_prev && !next) {
-			next = preview_items[preview_items.length-1];
-		}
-		else if (!next) {
-			next = preview_items[0];
+		if (!next) {
+			g.closeDialog();
+			return;
 		}
 
 		g.openPreview(next);
+		return false;
 	};
 
 	g.onload(() => {
@@ -940,4 +956,54 @@
 		document.body.classList.add('accesskeys');
 	});
 	window.addEventListener('keyup', () => { document.body.classList.remove('accesskeys'); });
+
+	// Implement swipeleft/swiperight events
+	let touch_start_x = 0;
+	let touch_start_y = 0;
+	let touch_start_el = null;
+
+	window.addEventListener('touchstart', e => {
+		touch_start_el = e.target;
+		touch_start_x = e.changedTouches[0].screenX;
+		touch_start_y = e.changedTouches[0].screenY;
+	});
+
+	window.addEventListener('touchend', e => {
+		if (touch_start_el !== e.target) {
+			return;
+		}
+
+		var touch_end_x = e.changedTouches[0].screenX;
+		var touch_end_y = e.changedTouches[0].screenY;
+		var distance_x = touch_end_x - touch_start_x;
+		var distance_y = touch_end_y - touch_start_y;
+		var direction = null;
+
+		if (Math.abs(distance_x) > Math.abs(distance_y)) {
+			if (distance_x < -20) {
+				direction = 'left';
+			}
+			else if (distance_x > 20) {
+				direction = 'right';
+			}
+		}
+		else {
+			if (distance_y < -20) {
+				direction = 'up';
+			}
+			else if (distance_y > 20) {
+				direction = 'down';
+			}
+		}
+
+		if (!direction) {
+			return;
+		}
+
+		touch_start_el.dispatchEvent(new CustomEvent('swipe' + direction, {
+			bubbles: true,
+			cancelable: true,
+			detail: {direction, distance_x, distance_y}
+		}));
+	})
 })();

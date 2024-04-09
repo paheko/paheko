@@ -70,6 +70,7 @@ html.dialog main {
     padding: .3em 1em;
     margin-left: auto;
     border-radius: .5em;
+    flex-wrap: unset;
 }
 
 #dialog > header.toolbar button.closeBtn:hover {
@@ -85,6 +86,24 @@ html.dialog main {
 
 #dialog > header.toolbar button.closeBtn:hover, #dialog > header.toolbar button.closeBtn:hover::after {
     color: #fff !important;
+}
+
+
+@media screen and (max-width: 800px) {
+    #dialog > header.toolbar {
+        flex-direction: column-reverse;
+        text-align: center;
+        width: 100%;
+        margin: .5rem 0;
+    }
+
+    #dialog h4.title {
+        font-size: 1.2em;
+    }
+
+    #dialog > header.toolbar button.closeBtn {
+        margin: 0;
+    }
 }
 
 #dialog > iframe, #dialog > .preview {
@@ -119,6 +138,10 @@ html.dialog main {
 #dialog > .preview * {
     max-width: 100%;
     max-height: 100%;
+}
+
+#dialog > .preview img {
+    cursor: pointer;
 }
 
 #dialog.loaded > iframe {
