@@ -176,6 +176,17 @@ class CommonFunctions
 		elseif ($type == 'money') {
 			$attributes['class'] = rtrim('money ' . ($attributes['class'] ?? ''));
 		}
+		elseif ($type === 'datalist') {
+			$list = '';
+
+			foreach ($options as $value) {
+				$list .= sprintf('<option>%s</option>', htmlspecialchars($value));
+			}
+
+			$type = 'text';
+			$attributes['list'] = 'list-' . $attributes['id'];
+			$suffix = sprintf('<datalist id="%s">%s</datalist>', $attributes['list'], $list);
+		}
 
 		// Create attributes string
 		if (!empty($attributes['required'])) {
@@ -771,15 +782,7 @@ class CommonFunctions
 			$params['step'] = 'any';
 		}
 		elseif ($type === 'datalist') {
-			$options = '';
-
-			foreach ($field->options as $value) {
-				$options .= sprintf('<option>%s</option>', htmlspecialchars($value));
-			}
-
-			$params['type'] = 'text';
-			$params['list'] = 'list-' . $params['name'];
-			$params['suffix'] = sprintf('<datalist id="%s">%s</datalist>', $params['list'], $options);
+			$params['options'] = $field->options;
 		}
 
 		if ($field->default_value === 'NOW()') {
