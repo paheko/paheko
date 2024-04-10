@@ -619,7 +619,7 @@
 		}
 	});
 
-	// Sélecteurs de listes
+	// List selectors, using an iframe for list
 	g.onload(() => {
 		var inputs = $('form .input-list > button');
 
@@ -742,6 +742,9 @@
 		}
 	};
 
+	/**
+	 * Open file preview
+	 */
 	g.openPreview = function (e) {
 		let type = e.getAttribute('data-mime');
 		let caption = e.getAttribute('data-caption');
@@ -805,6 +808,9 @@
 		return false;
 	};
 
+	/**
+	 * Navigate between elements to preview (eg. images)
+	 */
 	g.navigateToPreview = function (element, to_prev) {
 		var preview_items = document.querySelectorAll('a[target="_dialog"][data-mime]');
 		preview_items = Array.from(preview_items).filter((e) => e.dataset.mime.match(/^(audio|video|image)\//));
@@ -845,17 +851,18 @@
 		document.querySelectorAll('input[data-input="date"]').forEach((e) => {
 			g.enhanceDateField(e);
 		});
-	});
 
-	g.onload(() => {
 		document.querySelectorAll('input[type="password"]:not([readonly]):not([disabled]):not(.hidden)').forEach((e) => {
 			g.enhancePasswordField(e);
 		});
-	});
 
-	g.onload(() => {
+		// Enhance file inputs to add image preview, paste support, etc.
 		if (document.querySelector('input[type="file"][data-enhanced]')) {
-			g.script('scripts/file_input.js');
+			g.script('scripts/inputs/file.js');
+		}
+
+		if (document.querySelector('input[list], textarea[list]')) {
+			g.script('scripts/inputs/datalist.js');
 		}
 	});
 
