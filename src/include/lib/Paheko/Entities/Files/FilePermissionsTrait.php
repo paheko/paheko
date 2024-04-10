@@ -158,6 +158,8 @@ trait FilePermissionsTrait
 			return false;
 		}
 
+		$path = rtrim($path, '/') . '/';
+
 		return $session->checkFilePermission($path, 'create');
 	}
 }
