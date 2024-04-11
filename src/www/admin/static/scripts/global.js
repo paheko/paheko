@@ -112,6 +112,10 @@
 		return document.head.appendChild(link);
 	};
 
+	g.normalizeString = function (str) {
+		return str.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
+	};
+
 	g.dialog = null;
 	g.dialog_title = null;
 	g.focus_before_dialog = null;

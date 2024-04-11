@@ -1,11 +1,3 @@
-RegExp.escape = function(string) {
-  return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
-};
-
-function normalizeString(str) {
-	return str.normalize('NFD').replace(/[\u0300-\u036f]/g, "")
-}
-
 var buttons = document.querySelectorAll('button[type=button]');
 
 buttons.forEach((e) => {
@@ -19,7 +11,7 @@ var rows = document.querySelectorAll('table tr');
 rows.forEach((e, k) => {
 	e.classList.add('clickable');
 	var l = e.querySelector('td.num').innerText + ' ' + e.querySelector('th').innerText;
-	e.setAttribute('data-search-label', normalizeString(l));
+	e.setAttribute('data-search-label', g.normalizeString(l));
 
 	e.querySelector('button').onfocus = () => {
 		if (f = document.querySelector('tr.focused')) {
@@ -120,7 +112,7 @@ if (q && qr) {
 }
 
 function filterTableList(e) {
-	var query = new RegExp(RegExp.escape(normalizeString(q.value)), 'i');
+	var query = g.normalizeString(q.value);
 
 	rows.forEach((elm) => {
 		if (elm.getAttribute('data-search-label').match(query)) {

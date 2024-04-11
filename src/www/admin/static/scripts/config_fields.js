@@ -11,10 +11,6 @@ function changeType() {
 
 $('#f_type').onchange = changeType;
 
-function normalizeString(str) {
-	return str.normalize('NFD').replace(/[\u0300-\u036f]/g, "")
-}
-
 var label = $('#f_label');
 label.onkeyup = () => {
 	var n = $('#f_name');
@@ -22,7 +18,7 @@ label.onkeyup = () => {
 		return;
 	}
 
-	n.value = normalizeString(label.value).toLowerCase().replace(/[^a-z_]+/g, '_');
+	n.value = g.normalizeString(label.value).replace(/[^a-z_]+/g, '_');
 };
 
 changeType();
