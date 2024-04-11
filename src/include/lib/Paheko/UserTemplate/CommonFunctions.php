@@ -39,7 +39,7 @@ class CommonFunctions
 
 	static public function input(array $params)
 	{
-		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit', 'copy', 'suffix', 'prefix_title', 'prefix_help', 'prefix_required'];
+		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit', 'copy', 'suffix', 'prefix_title', 'prefix_help', 'prefix_required', 'datalist'];
 
 		// Extract params and keep attributes separated
 		$attributes = array_diff_key($params, array_flip($params_list));
@@ -180,16 +180,22 @@ class CommonFunctions
 		elseif ($type == 'money') {
 			$attributes['class'] = rtrim('money ' . ($attributes['class'] ?? ''));
 		}
-		elseif ($type === 'datalist') {
-			$list = '';
 
-			foreach ($options as $value) {
-				$list .= sprintf('<option>%s</option>', htmlspecialchars($value));
+		if (!empty($params['datalist'])) {
+			$list = '';
+			$list_attributes = '';
+
+			if (is_array($params['datalist'])) {
+				foreach ($params['datalist'] as $value) {
+					$list .= sprintf('<option>%s</option>', htmlspecialchars($value));
+				}
+			}
+			else {
+				$list_attributes = sprintf(' data-autocomplete="%s"', $params['datalist']);
 			}
 
-			$type = 'text';
 			$attributes['list'] = 'list-' . $attributes['id'];
-			$suffix = sprintf('<datalist id="%s">%s</datalist>', $attributes['list'], $list);
+			$suffix = sprintf('<datalist id="%s"%s>%s</datalist>', $attributes['list'], $list_attributes, $list);
 		}
 
 		// Create attributes string
@@ -708,9 +714,8 @@ class CommonFunctions
 			'disabled' => !empty($params['disabled']),
 			'required' => $field->required,
 			'help'     => $field->help,
-			// Fix for autocomplete, lpignore is for Lastpass
+			// Fix for autocomplete
 			'autocomplete' => 'off',
-			'data-lpignore' => 'true',
 		];
 
 		// Multiple choice checkboxes is a specific thingy
@@ -785,8 +790,13 @@ class CommonFunctions
 			$params['type'] = 'number';
 			$params['step'] = 'any';
 		}
+		elseif ($type === 'address') {
+			$params['datalist'] = 'address';
+			$params['type'] = 'textarea';
+		}
 		elseif ($type === 'datalist') {
-			$params['options'] = $field->options;
+			$params['datalist'] = $field->options ?? [];
+			$params['type'] = 'text';
 		}
 
 		if ($field->default_value === 'NOW()') {

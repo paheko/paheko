@@ -929,3 +929,21 @@ namespace Paheko;
  * @var null|string
  */
 //const ALERT_MESSAGE = 'Ceci est un compte de test.';
+
+/**
+ * Chemin vers le répertoire contenant les bases de données d'adresses
+ * locales.
+ *
+ * Cela permet d'auto-compléter l'adresse d'un membre quand on crée
+ * ou modifie sa fiche membre, sans faire appel à un service externe.
+ *
+ * Dans ce répertoire, chaque pays correspond à une BDD SQLite contenant
+ * la liste de toutes les adresses du pays.
+ *
+ * Par exemple 'fr.sqlite' pour la France.
+ *
+ * Défaut : null
+ *
+ * @var null|string
+ */
+//const LOCAL_ADDRESSES_ROOT = ROOT . '/local_addresses/';

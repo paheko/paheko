@@ -980,6 +980,49 @@ dl.share dt, dl.share dd {
     margin: 1rem;
 }
 
+.datalist {
+    display: inline-flex;
+    align-items: flex-start;
+}
+
+.datalist span {
+    position: relative;
+}
+
+.datalist.open datalist:has(option) {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    left: 0;
+    right: 0;
+    border: 1px solid rgb(var(--gMainColor));
+    border-radius: .25rem;
+    background: rgb(var(--gBgColor));
+    color: rgb(var(--gTextColor));
+    box-shadow: 0 0 5px .2rem rgba(var(--gMainColor), 0.5);
+    overflow: hidden;
+}
+
+.datalist.open option {
+    display: block;
+    padding: .2rem .6rem;
+    cursor: pointer;
+    user-select: none;
+    font-size: .9em;
+}
+
+.datalist.open option:nth-of-type(even) {
+    background: var(--gLightBackgroundColor);
+}
+
+.datalist.open option:hover, .datalist.open option.focus {
+    background: rgba(var(--gHoverLinkColor), 0.2);
+}
+
+.datalist.open .match {
+    font-weight: bold;
+}
+
 @media screen and (max-width: 1279px) {
     #queryBuilder tbody tr {
         display: flex;

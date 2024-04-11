@@ -48,3 +48,8 @@ CREATE TABLE IF NOT EXISTS files_shares
 CREATE UNIQUE INDEX IF NOT EXISTS files_shares_hash ON files_shares (hash_id);
 CREATE INDEX IF NOT EXISTS files_shares_file ON files_shares (id_file);
 CREATE INDEX IF NOT EXISTS files_shares_expiry ON files_shares (expiry);
+
+UPDATE config_users_fields SET type = 'address' WHERE name = 'adresse' AND type = 'textarea' AND (system & (0x01 << 5))
+	AND (SELECT 1 FROM config_users_fields WHERE name = 'code_postal' AND type = 'text')
+	AND (SELECT 1 FROM config_users_fields WHERE name = 'ville' AND type = 'text')
+	AND (SELECT 1 FROM config_users_fields WHERE name = 'pays' AND type = 'country');
