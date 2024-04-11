@@ -101,7 +101,21 @@ var q = document.querySelector('.quick-search input[type=text]');
 var qr = document.querySelector('.quick-search button[type=reset]');
 
 if (q && qr) {
-	q.addEventListener('keyup', filterTableList);
+	var t;
+
+	q.addEventListener('keyup', (e) => {
+		if (e.key === 'Enter' && (first = document.querySelector('tbody tr.focused:not(.hidden) button'))) {
+			first.click();
+			e.preventDefault();
+			return false;
+		}
+	});
+
+	q.addEventListener('input', () => {
+		window.clearTimeout(t);
+		t = window.setTimeout(filterTableList, 200);
+	});
+
 	qr.onclick = (e) => {
 		q.value = '';
 		q.focus();
@@ -111,15 +125,16 @@ if (q && qr) {
 	q.focus();
 }
 
-function filterTableList(e) {
+function filterTableList() {
+	window.clearTimeout(t);
 	var query = g.normalizeString(q.value);
 
 	rows.forEach((elm) => {
-		if (elm.getAttribute('data-search-label').match(query)) {
-			g.toggle(elm, true);
+		if (elm.getAttribute('data-search-label').includes(query)) {
+			g.toggle(elm, true, false);
 		}
 		else {
-			g.toggle(elm, false);
+			g.toggle(elm, false, false);
 		}
 	});
 
@@ -130,11 +145,5 @@ function filterTableList(e) {
 		first.classList.add('focused');
 	}
 
-	if (e.key == 'Enter') {
-		if (first = document.querySelector('tbody tr.focused:not(.hidden) button')) {
-			first.click();
-		}
-	}
-
-	return false;
+	g.resizeParentDialog();
 }
