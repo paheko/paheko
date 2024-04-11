@@ -130,7 +130,7 @@ class DynamicField extends Entity
 	const SQL_TYPES = [
 		'email'    => 'TEXT',
 		'url'      => 'TEXT',
-		'addres'   => 'TEXT',
+		'address'  => 'TEXT',
 		'checkbox' => 'INTEGER NOT NULL DEFAULT 0',
 		'date'     => 'TEXT',
 		'datetime' => 'TEXT',
