@@ -276,8 +276,15 @@
 				}
 
 				input.value = option.dataset.address;
-				$('#f_code_postal').value = option.dataset.code;
-				$('#f_ville').value = option.dataset.city;
+
+				if (a = $('#f_code_postal')) {
+					a.value = option.dataset.code;
+				}
+
+				if (a = $('#f_ville')) {
+					a.value = option.dataset.city;
+				}
+
 				close();
 			};
 		}
