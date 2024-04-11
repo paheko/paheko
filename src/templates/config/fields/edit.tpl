@@ -12,7 +12,7 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 	<legend>{$title}</legend>
 	<dl>
 	{if !$field->isPreset() && !$field->exists()}
-		{input type="select" name="type" options=$field::TYPES source=$field label="Type" default="text" help="Il ne sera plus possible de modifier le type une fois le champ créé." required=true}
+		{input type="select" name="type" options=$user_field_types source=$field label="Type" default="text" help="Il ne sera plus possible de modifier le type une fois le champ créé." required=true}
 	{else}
 		<dd class="help">Le type et l'identifiant ne sont pas modifiables.</dd>
 		{input type="select" name="type" options=$field::TYPES source=$field label="Type" disabled=true}
