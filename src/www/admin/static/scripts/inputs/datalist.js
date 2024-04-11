@@ -32,65 +32,114 @@
 
 		var open = () => {
 			container.classList.add('open');
+			let current = getSelectedOptionIndex();
 		};
 
 		var close = () => {
 			container.classList.remove('open');
 		};
 
+		var selectOption = (option) => {
+			if (!option) {
+				var i = getSelectedOptionIndex();
+				if (i === null) {
+					return;
+				}
+				option = list.options[i];
+			}
+
+			input.value = option.getAttribute('value') ?? option.innerText;
+			container.classList.remove('open');
+		};
+
+		var getSelectedOptionIndex = () => {
+			if (current !== null) {
+				return current;
+			}
+			else if (!input.value) {
+				return null;
+			}
+
+			for (var i = 0; i < list.options.length; i++) {
+				var option = list.options[i];
+				if (input.value === option.getAttribute('value') ?? option.innerText) {
+					current = i;
+					return current;
+				}
+			}
+
+			return null;
+		};
+
 		var current = null;
 
-		input.addEventListener('keyup', e => {
+		input.addEventListener('keydown', e => {
 			let move;
 
-			if (e.key === 'ArrowDown') {
+			if (e.key === 'Enter') {
+				if (!container.classList.contains('open')) {
+					return;
+				}
+				selectOption();
+				e.preventDefault();
+				return false;
+			}
+			else if (e.key === 'ArrowDown') {
 				move = 1;
 			}
 			else if (e.key === 'ArrowUp') {
 				move = -1;
 			}
-
-			if (move) {
-				e.preventDefault();
-				var options = list.options;
-				var next = null;
-
-				if (!options.length) {
-					return;
-				}
-
-				if (current !== null) {
-					for (var i = 0; i < options.length; i++) {
-						if (options[i] === current) {
-							next = i + move;
-							break;
-						}
-					}
-
-					options[current].classList.remove('focus');
-				}
-				else if (move === -1) {
-					next = options.length - 1;
-				}
-				else {
-					next = 0;
-				}
-
-				if (next >= options.length) {
-					return;
-				}
-				else if (next < 0) {
-					return;
-				}
-
-				console.log(current, next);
-
-				options[next].classList.add('focus');
-				current = next;
-
+			else {
 				return;
 			}
+
+			open();
+			e.preventDefault();
+			var options = list.options;
+			var next = null;
+
+			if (!options.length) {
+				return;
+			}
+
+			if (current === null && input.value) {
+				for (var i = 0; i < options.length; i++) {
+					if (input.value === option.getAttribute('value') ?? option.innerText) {
+						current = i;
+						break;
+					}
+				}
+			}
+
+			if (current === null) {
+				next = 0;
+			}
+			else {
+				next = current + move;
+			}
+
+			if (next >= options.length || next < 0) {
+				return;
+			}
+
+			if (c = list.querySelector('.focus')) {
+				c.classList.remove('focus');
+			}
+
+			options[next].classList.add('focus');
+			current = next;
 		});
+
+		input.addEventListener('input', e => {
+			console.log('ok');
+			open();
+			var new_options = [];
+			// TODO: store original order of options
+			// TODO: put matching options at top of list, with <mark> matching others 
+		});
+
+		input.addEventListener('click', open);
 		input.addEventListener('focus', open);
 		input.addEventListener('blur', close);
 
@@ -99,6 +148,7 @@
 			btn.dataset.icon = '↓';
 			btn.type = 'button';
 			btn.setAttribute('tabindex', '-1');
+
 			// Don't use onclick or it won't be handled because of blur
 			btn.onmousedown = (e) => {
 				if (container.classList.contains('open')) {
@@ -111,14 +161,20 @@
 				open();
 				return false;
 			};
+
 			container.appendChild(btn);
 		}
+
+		list.addEventListener('mouseover', (e) => {
+			if (c = list.querySelector('.focus')) {
+				c.classList.remove('focus');
+			}
+		});
 
 		list.querySelectorAll('option').forEach(option => {
 			// Don't use click or it won't be handled because of blur
 			option.addEventListener('mousedown', (e) => {
-				input.value = option.getAttribute('value') ?? option.innerText;
-				container.classList.remove('open');
+				selectOption(option);
 				e.preventDefault();
 				return false;
 			});
