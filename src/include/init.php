@@ -211,6 +211,7 @@ static $default_config = [
 	'DISABLE_INSTALL_PING'  => false,
 	'WOPI_DISCOVERY_URL'    => null,
 	'SQLITE_JOURNAL_MODE'   => 'TRUNCATE',
+	'LOCAL_ADDRESSES_ROOT'  => null,
 ];
 
 foreach ($default_config as $const => $value)

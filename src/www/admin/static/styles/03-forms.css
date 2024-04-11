@@ -1011,12 +1011,16 @@ dl.share dt, dl.share dd {
     font-size: .9em;
 }
 
-.datalist.open option:nth-child(even) {
+.datalist.open option:nth-of-type(even) {
     background: var(--gLightBackgroundColor);
 }
 
 .datalist.open option:hover, .datalist.open option.focus {
     background: rgba(var(--gHoverLinkColor), 0.2);
+}
+
+.datalist.open .match {
+    font-weight: bold;
 }
 
 @media screen and (max-width: 1279px) {

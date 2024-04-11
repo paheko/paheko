@@ -191,7 +191,7 @@ class CommonFunctions
 				}
 			}
 			else {
-				$list_attributes = sprintf(' data-target="%s"', $params['datalist']);
+				$list_attributes = sprintf(' data-autocomplete="%s"', $params['datalist']);
 			}
 
 			$attributes['list'] = 'list-' . $attributes['id'];

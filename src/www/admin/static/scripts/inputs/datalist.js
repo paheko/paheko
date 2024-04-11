@@ -6,6 +6,19 @@
 			return;
 		}
 
+		var mode;
+
+		// Only autocomplete address for France right now
+		if (list.hasAttribute('data-autocomplete') && list.dataset.autocomplete === 'address') {
+			mode = 'address';
+		}
+		else if (list.options.length) {
+			mode = 'static';
+		}
+		else {
+			return;
+		}
+
 		var container = document.createElement('span');
 		container.className = 'datalist';
 
@@ -49,7 +62,7 @@
 			}
 
 			input.value = option.getAttribute('value') ?? option.innerText;
-			container.classList.remove('open');
+			close();
 		};
 
 		var getSelectedOptionIndex = () => {
@@ -105,6 +118,7 @@
 
 			if (current === null && input.value) {
 				for (var i = 0; i < options.length; i++) {
+					var option = options[i];
 					if (input.value === option.getAttribute('value') ?? option.innerText) {
 						current = i;
 						break;
@@ -131,19 +145,12 @@
 			current = next;
 		});
 
-		input.addEventListener('input', e => {
-			console.log('ok');
-			open();
-			var new_options = [];
-			// TODO: store original order of options
-			// TODO: put matching options at top of list, with <mark> matching others 
-		});
-
-		input.addEventListener('click', open);
+		input.addEventListener('mousedown', open);
 		input.addEventListener('focus', open);
 		input.addEventListener('blur', close);
 
-		if (list.querySelector('option')) {
+		// If it's a static list of items, autocomplete
+		if (mode === 'static') {
 			var btn = document.createElement('button');
 			btn.dataset.icon = '↓';
 			btn.type = 'button';
@@ -163,6 +170,116 @@
 			};
 
 			container.appendChild(btn);
+
+			var initial_options = [];
+
+			Object.values(list.options).forEach(option => {
+				option.dataset.search = g.normalizeString(option.getAttribute('value') ?? option.innerText);
+				initial_options.push(option);
+			});
+
+			var options_search = null;
+
+			input.addEventListener('input', e => {
+				var value = g.normalizeString(input.value);
+				var matching_options = [];
+				var other_options = [];
+
+				initial_options.forEach(option => {
+					option.classList.remove('focus');
+
+					if (value && option.dataset.search.includes(value)) {
+						option.classList.add('match');
+						matching_options.push(option);
+					}
+					else {
+						option.classList.remove('match');
+						other_options.push(option);
+					}
+				});
+
+				list.innerHTML = '';
+
+				matching_options.forEach(option => list.appendChild(option));
+				other_options.forEach(option => list.appendChild(option));
+
+				current = 0;
+				list.options[0].classList.add('focus');
+				open();
+			});
+		}
+		// If the list autocompletes an address
+		else if (mode === 'address') {
+			var t;
+
+			var autocomplete = () => {
+				clearTimeout(t);
+				list.innerHTML = '';
+
+				if (!input.value.trim()) {
+					close();
+					return;
+				}
+
+				var country = $('#f_pays');
+
+				if (!country || country.value !== 'FR') {
+					return;
+				}
+
+				var fd = new FormData;
+				fd.append('search', g.normalizeString(input.value));
+
+				fetch(g.admin_url + 'common/autocomplete_address.php', {
+					method: 'POST',
+					cache: 'no-cache',
+					body: fd
+				}).then(r => r.json()).then(r => {
+					list.innerHTML = '';
+
+					if (!r.length) {
+						return;
+					}
+
+					Object.values(r).forEach(e => {
+						var o = new Option(e.label, e.label);
+						Object.assign(o.dataset, e);
+
+						// Don't use click or it won't be handled because of blur
+						o.addEventListener('mousedown', (e) => {
+							selectOption(o);
+							e.preventDefault();
+							return false;
+						});
+
+						list.appendChild(o);
+					});
+
+					current = 0;
+					list.options[0].classList.add('focus');
+					open();
+				});
+			};
+
+			input.addEventListener('input', () => {
+				window.clearTimeout(t);
+				t = window.setTimeout(autocomplete, 500);
+			});
+
+			selectOption = (option) => {
+				if (!option) {
+					var i = getSelectedOptionIndex();
+					if (i === null) {
+						return;
+					}
+					option = list.options[i];
+				}
+
+				input.value = option.dataset.address;
+				$('#f_code_postal').value = option.dataset.code;
+				$('#f_ville').value = option.dataset.city;
+				close();
+			};
 		}
 
 		list.addEventListener('mouseover', (e) => {
