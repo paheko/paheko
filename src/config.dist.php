@@ -466,13 +466,13 @@ namespace Paheko;
 
 
 /**
- * Hôte du serveur SMTP, mettre à false (défaut) pour utiliser la fonction
+ * Hôte du serveur SMTP, mettre à null (défaut) pour utiliser la fonction
  * mail() de PHP
  *
- * Défaut : false
+ * Défaut : null
  */
 
-//const SMTP_HOST = false;
+//const SMTP_HOST = null;
 
 /**
  * Port du serveur SMTP
