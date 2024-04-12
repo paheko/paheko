@@ -989,7 +989,7 @@ dl.share dt, dl.share dd {
     position: relative;
 }
 
-.datalist.open datalist:has(option) {
+.datalist.open datalist {
     display: flex;
     flex-direction: column;
     position: absolute;
