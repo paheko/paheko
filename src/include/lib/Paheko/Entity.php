@@ -158,7 +158,6 @@ class Entity extends AbstractEntity
 
 		if (!$date) {
 			$e = new ValidationException('Format de date invalide (merci d\'utiliser le format JJ/MM/AAAA) : ' . $value);
-			ErrorManager::reportExceptionSilent($e); // FIXME: don't report invalid dates
 			throw $e;
 		}
 
