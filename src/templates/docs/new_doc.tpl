@@ -16,7 +16,8 @@
 </form>
 
 <script type="text/javascript">
-var ext = {$ext|escape:json};
+var ext = {$ext|escape:'json'};
+var path = {$parent|escape:'json'}
 {literal}
 var f = document.forms[0];
 f.addEventListener('submit', () => {
@@ -25,7 +26,7 @@ f.addEventListener('submit', () => {
 	}
 
 	window.parent.g.toggleDialogFullscreen();
-	window.parent.g.dialog_on_close = "!docs/?f=" + encodeURIComponent('documents/' + f['name'].value + '.' + ext);
+	window.parent.g.dialog_on_close = "!docs/?f=" + encodeURIComponent(path + '/' + f['name'].value + '.' + ext);
 });
 {/literal}
 </script>

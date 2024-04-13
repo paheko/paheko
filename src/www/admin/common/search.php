@@ -124,7 +124,17 @@ $schema = $s->schema();
 $columns = $s->getAdvancedSearch()->columns();
 $columns = array_filter($columns, fn($c) => $c['label'] ?? null && $c['type'] ?? null); // remove columns only for dynamiclist
 
-$tpl->assign(compact('s', 'list', 'header', 'results', 'columns', 'count', 'is_admin', 'schema', 'can_sql', 'can_sql_unprotected'));
+if ($s->exists()) {
+	$title = $s->label;
+}
+elseif (CURRENT_SEARCH_TARGET === SE::TARGET_USERS) {
+	$title = 'Recherche de membre';
+}
+else {
+	$title = 'Recherche dans la comptabilité';
+}
+
+$tpl->assign(compact('s', 'list', 'header', 'results', 'columns', 'count', 'is_admin', 'schema', 'can_sql', 'can_sql_unprotected', 'title'));
 
 if ($s->target == $s::TARGET_ACCOUNTING) {
 	$tpl->display('acc/search.tpl');

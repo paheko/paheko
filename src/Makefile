@@ -1,4 +1,4 @@
-.PHONY: dev-server release deps publish check-dependencies test minify phpstan www htaccess modules installer plugins
+.PHONY: dev-server release deps publish check-dependencies test-syntax tests minify phpstan www htaccess modules installer plugins
 KD2FW_BRANCH := trunk
 MODULES_BRANCH := trunk
 PLUGINS_BRANCH := trunk
@@ -31,8 +31,11 @@ plugins:
 dev-server:
 	php -S localhost:8082 -d upload_max_filesize=256M -d post_max_size=256M -t www www/_route.php
 
-test:
+test-syntax:
 	find . -name '*.php' -not -path './data/*' -print0 | xargs -0 -n1 php -l > /dev/null
+
+tests:
+	cd ../tests && php run.php
 
 phpstan:
 	phpstan.phar analyze -c ../tests/phpstan.neon include www
@@ -73,7 +76,7 @@ verify:
 	@echo "Verifying KD2fw..."
 	@cd ${ROOT}/include/lib/KD2 && bash ${ROOT}/../tools/fossil_verify.sh ${KD2FW_BRANCH} ${KD2FW_URL} src/lib/KD2
 
-release: test minify doc
+release: test-syntax minify doc
 	$(eval VERSION=$(shell cat VERSION))
 	$(eval KD2FW_VERSION=$(shell cat ../build/kd2fw.version))
 	$(eval MODULES_VERSION=$(shell cat ../build/modules.version))

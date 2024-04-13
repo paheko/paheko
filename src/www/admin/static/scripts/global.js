@@ -112,54 +112,43 @@
 		return document.head.appendChild(link);
 	};
 
+	g.normalizeString = function (str) {
+		return str.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
+	};
+
 	g.dialog = null;
 	g.dialog_title = null;
 	g.focus_before_dialog = null;
 	g.dialog_on_close = false;
 
 	g.openDialog = function (content, options) {
-		var close = true,
-			callback = null,
-			caption = null,
-			classname = null;
-
-		if (typeof options === "object" && options !== null) {
-			callback = options.callback ?? null;
-			classname = options.classname ?? null;
-			close = options.close ?? true;
-			caption = options.caption ?? null;
-			g.dialog_on_close = options.on_close || false;
-		}
-		else {
-			var options = {};
-		}
-
 		if (null !== g.dialog) {
 			g.closeDialog();
 		}
+		return g.replaceDialog(content, options);
+	};
+
+	g.createDialog = function (content, options) {
+		options = g.getDialogOptions(options);
 
 		g.focus_before_dialog = document.activeElement;
 
 		g.dialog = document.createElement('dialog');
 		g.dialog.id = 'dialog';
 		g.dialog.open = true;
-		g.dialog.className = classname || '';
-		g.dialog.dataset.caption = caption || '';
+		g.dialog.className = options.classname || '';
+		g.dialog.dataset.caption = options.caption || '';
 
 		var toolbar = document.createElement('header');
 		toolbar.className = 'toolbar';
 
 		var t = document.createElement('h4');
 		t.className = 'title';
-		t.innerText = caption || '';
 		toolbar.appendChild(t);
 
-		if (caption) {
-			g.dialog_title = document.title;
-			document.title = caption + ' — ' + document.title;
-		}
+		g.dialog_title = document.title;
 
-		if (close) {
+		if (options.close) {
 			var btn = document.createElement('button');
 			btn.className = 'icn-btn closeBtn main';
 			btn.setAttribute('data-icon', '✘');
@@ -167,28 +156,83 @@
 			btn.innerHTML = 'Fermer';
 			btn.onclick = g.closeDialog;
 			toolbar.appendChild(btn);
-
-			window.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
 		}
 
+		g.dialog.style.opacity = 0;
 		g.dialog.appendChild(toolbar);
+		document.body.appendChild(g.dialog);
+
+		// Remove ability to scoll background when dialog is open
+		// Avoid having the page "jumping" because the scrollbar has been removed
+		document.body.style.width = document.body.clientWidth + 'px';
+		document.body.style.overflow = 'hidden';
+	};
+
+	g.getDialogOptions = function (options) {
+		if (typeof options !== 'object' || options === null) {
+			options = {};
+		}
+
+		options.callback = options.callback ?? null;
+		options.classname = options.classname ?? null;
+		options.close = options.close ?? true;
+		options.caption = options.caption ?? null;
+		options.click_to_close = options.click_to_close ?? false;
+		g.dialog_on_close = options.on_close || false;
+		return options;
+	};
+
+	g.replaceDialog = function (content, options) {
+		if (!g.dialog) {
+			g.createDialog(content, options);
+		}
+		else {
+			g.dialog.style.opacity = 0;
+			g.dialog.classList.remove('loaded');
+			g.dialog.lastElementChild.remove();
+			g.resetDialogEvents();
+		}
+
+		options = g.getDialogOptions(options);
+
+		var t = g.dialog.querySelector('h4.title');
+
+		if (!t) {
+			return;
+		}
+
+		t.innerText = options.caption || '';
+
+		if (options.caption) {
+			document.title = options.caption + ' — ' + g.dialog_title;
+		}
+
+		g.setDialogKey('Escape', g.closeDialog);
 
 		if (typeof content == 'string') {
 			var container = document.createElement('div');
+			container.className = 'content';
 			container.innerHTML = content;
 			content = container;
 		}
 		else if (content instanceof DocumentFragment) {
 			var container = document.createElement('div');
+			container.className = 'content';
 			container.appendChild(content.cloneNode(true));
 			content = container;
 		}
 
-		g.dialog.appendChild(content);
-
-		g.dialog.style.opacity = 0;
-
 		let tag = content.tagName.toLowerCase();
+
+		if (tag !== 'iframe' && tag !== 'div') {
+			var container = document.createElement('div');
+			container.className = 'preview';
+			container.appendChild(content);
+			g.dialog.appendChild(container);
+		}
+		else {
+			g.dialog.appendChild(content);
+		}
 
 		if (tag == 'img' || tag == 'iframe') {
 			event = 'load';
@@ -197,28 +241,30 @@
 			event = 'canplaythrough';
 		}
 
-		if (tag === 'img') {
-			content.onclick = g.closeDialog;
-		}
-
 		if (event) {
 			content.addEventListener(event, () => { if (g.dialog) g.dialog.classList.add('loaded'); });
 
-			if (event && callback) {
-				content.addEventListener(event, callback);
+			if (event && options.callback) {
+				content.addEventListener(event, options.callback);
 			}
 		}
 		else {
 			g.dialog.classList.add('loaded');
 		}
 
-		document.body.appendChild(g.dialog);
-
 		// Restore CSS defaults
 		window.setTimeout(() => { g.dialog.style.opacity = ''; }, 50);
 
+		if (options.click_to_close) {
+			g.dialog.onclick = (e) => {
+				if (e.target === g.dialog) {
+					g.closeDialog();
+				}
+			};
+		}
+
 		return content;
-	}
+	};
 
 	g.openFrameDialog = function (url, options) {
 		options = options ?? {};
@@ -286,13 +332,17 @@
 			return;
 		}
 
-		if (!dialog.dataset.caption) {
+		if (!dialog.dataset.caption && document.title) {
 			var title = document.title.replace(/^([^—-]+).*$/, "$1");
 			dialog.querySelector('.title').innerText = title;
 			p.g.dialog_title = p.document.title;
 			p.document.title = document.title + ' — ' + p.g.dialog_title;
 
 			window.addEventListener('beforeunload', () => {
+				if (!p.g.dialog_title) {
+					return;
+				}
+
 				p.document.title = p.g.dialog_title;
 				p.g.dialog_title = null;
 			});
@@ -319,6 +369,8 @@
 	};
 
 	g.closeDialog = function () {
+		g.resetDialogEvents();
+
 		if (null === g.dialog) {
 			return;
 		}
@@ -334,7 +386,7 @@
 
 		var d = g.dialog;
 		d.style.opacity = 0;
-		window.onkeyup = g.dialog = null;
+		g.dialog = null;
 
 		window.setTimeout(() => { d.parentNode.removeChild(d); }, 500);
 
@@ -346,6 +398,9 @@
 			document.title = g.dialog_title;
 			g.dialog_title = null;
 		}
+
+		document.body.style.overflow = null;
+		document.body.style.width = null;
 	};
 
 	g.openFormInDialog = (form) => {
@@ -568,7 +623,7 @@
 		}
 	});
 
-	// Sélecteurs de listes
+	// List selectors, using an iframe for list
 	g.onload(() => {
 		var inputs = $('form .input-list > button');
 
@@ -650,60 +705,7 @@
 
 		// Open links in dialog
 		$('a[target*="_dialog"]').forEach((e) => {
-			e.onclick = () => {
-				let type = e.getAttribute('data-mime');
-				let caption = e.getAttribute('data-caption');
-
-				if (!type) {
-					let url = e.href + (e.href.indexOf('?') > 0 ? '&' : '?') + '_dialog';
-
-					if (m = e.getAttribute('target').match(/_dialog=(.*)/)) {
-						url += '=' + m[1];
-					}
-
-					if (location.href.match(/_dialog/)) {
-						location.href = url;
-						return false;
-					}
-
-					g.openFrameDialog(url, {
-						'height': e.getAttribute('data-dialog-height') || 'auto',
-						'classname': e.getAttribute('data-dialog-class'),
-						'on_close': e.getAttribute('data-dialog-on-close') == 1,
-						caption
-					});
-					return false;
-				}
-
-				if (type.match(/^image\//)) {
-					var i = document.createElement('img');
-					i.src = e.href;
-					i.draggable = false;
-				}
-				else if (type.match(/^audio\//)) {
-					var i = document.createElement('audio');
-					i.autoplay = true;
-					i.controls = true;
-					i.src = e.href;
-					i.draggable = false;
-				}
-				else if (type.match(/^video\/|^application\/ogg$/)) {
-					var i = document.createElement('video');
-					i.autoplay = true;
-					i.controls = true;
-					i.src = e.href;
-					i.draggable = false;
-				}
-				else {
-					let url = e.href + (e.href.indexOf('?') > 0 ? '&' : '?') + '_dialog';
-					g.openFrameDialog(url, {height: '90%', caption});
-					return false;
-				}
-
-				g.openDialog(i, {caption});
-
-				return false;
-			};
+			e.onclick = () => g.openPreview(e);
 		});
 
 		$('form[target="_dialog"]').forEach((e) => {
@@ -711,21 +713,160 @@
 		});
 	});
 
+	g.dialog_events = [];
+	g.setDialogKey = function (key, callback) {
+		g.addDialogEvent('keyup', (e) => {
+			if (e.key !== key) {
+				return;
+			}
+
+			e.preventDefault();
+			callback();
+			return false;
+		});
+
+		if (key === 'ArrowLeft') {
+			g.addDialogEvent('swipeleft', callback);
+		}
+		else if (key === 'ArrowRight') {
+			g.addDialogEvent('swiperight', callback);
+		}
+	};
+
+	g.addDialogEvent = function (event, callback) {
+		window.addEventListener(event, callback, true);
+		g.dialog_events.push([event, callback]);
+	};
+
+	g.resetDialogEvents = function () {
+		var e;
+
+		while (e = g.dialog_events.pop()) {
+			window.removeEventListener(e[0], e[1], true);
+		}
+	};
+
+	/**
+	 * Open file preview
+	 */
+	g.openPreview = function (e) {
+		let type = e.getAttribute('data-mime');
+		let caption = e.getAttribute('data-caption');
+
+		if (!type) {
+			let url = e.href + (e.href.indexOf('?') > 0 ? '&' : '?') + '_dialog';
+
+			if (m = e.getAttribute('target').match(/_dialog=(.*)/)) {
+				url += '=' + m[1];
+			}
+
+			if (location.href.match(/_dialog/)) {
+				location.href = url;
+				return false;
+			}
+
+			g.openFrameDialog(url, {
+				'height': e.getAttribute('data-dialog-height') || 'auto',
+				'classname': e.getAttribute('data-dialog-class'),
+				'on_close': e.getAttribute('data-dialog-on-close') == 1,
+				caption
+			});
+			return false;
+		}
+
+		if (type.match(/^image\//)) {
+			var i = document.createElement('img');
+			i.src = e.href;
+			i.draggable = false;
+			i.onclick = () => g.navigateToPreview(e);
+		}
+		else if (type.match(/^audio\//)) {
+			var i = document.createElement('audio');
+			i.autoplay = true;
+			i.controls = true;
+			i.src = e.href;
+			i.draggable = false;
+		}
+		else if (type.match(/^video\/|^application\/ogg$/)) {
+			var i = document.createElement('video');
+			i.autoplay = true;
+			i.controls = true;
+			i.src = e.href;
+			i.draggable = false;
+		}
+		else {
+			let url = e.href + (e.href.indexOf('?') > 0 ? '&' : '?') + '_dialog';
+			g.openFrameDialog(url, {height: '90%', caption});
+			return false;
+		}
+
+		g.replaceDialog(i, {caption, 'click_to_close': true});
+
+		g.setDialogKey('ArrowLeft', () => g.navigateToPreview(e, true));
+		g.setDialogKey('ArrowRight', () => g.navigateToPreview(e));
+
+		var evt = e => { e.stopPropagation(); e.preventDefault(); g.closeDialog(); };
+		g.addDialogEvent('swipeup', evt);
+		i.addEventListener('swipeup', evt);
+
+		return false;
+	};
+
+	/**
+	 * Navigate between elements to preview (eg. images)
+	 */
+	g.navigateToPreview = function (element, to_prev) {
+		var preview_items = document.querySelectorAll('a[target="_dialog"][data-mime]');
+		preview_items = Array.from(preview_items).filter((e) => e.dataset.mime.match(/^(audio|video|image)\//));
+		var next = null;
+		var prev = null;
+
+		for (var i = 0; i < preview_items.length; i++) {
+			var item = preview_items[i];
+
+			if (item.href === element.href) {
+				if (to_prev) {
+					next = prev;
+					break;
+				}
+
+				next = false;
+				continue;
+			}
+
+			if (next === false) {
+				next = item;
+				break;
+			}
+
+			prev = item;
+		}
+
+		if (!next) {
+			g.closeDialog();
+			return;
+		}
+
+		g.openPreview(next);
+		return false;
+	};
+
 	g.onload(() => {
 		document.querySelectorAll('input[data-input="date"]').forEach((e) => {
 			g.enhanceDateField(e);
 		});
-	});
 
-	g.onload(() => {
 		document.querySelectorAll('input[type="password"]:not([readonly]):not([disabled]):not(.hidden)').forEach((e) => {
 			g.enhancePasswordField(e);
 		});
-	});
 
-	g.onload(() => {
+		// Enhance file inputs to add image preview, paste support, etc.
 		if (document.querySelector('input[type="file"][data-enhanced]')) {
-			g.script('scripts/file_input.js');
+			g.script('scripts/inputs/file.js');
+		}
+
+		if (document.querySelector('input[list], textarea[list]')) {
+			g.script('scripts/inputs/datalist.js');
 		}
 	});
 
@@ -826,4 +967,54 @@
 		document.body.classList.add('accesskeys');
 	});
 	window.addEventListener('keyup', () => { document.body.classList.remove('accesskeys'); });
+
+	// Implement swipeleft/swiperight events
+	let touch_start_x = 0;
+	let touch_start_y = 0;
+	let touch_start_el = null;
+
+	window.addEventListener('touchstart', e => {
+		touch_start_el = e.target;
+		touch_start_x = e.changedTouches[0].screenX;
+		touch_start_y = e.changedTouches[0].screenY;
+	});
+
+	window.addEventListener('touchend', e => {
+		if (touch_start_el !== e.target) {
+			return;
+		}
+
+		var touch_end_x = e.changedTouches[0].screenX;
+		var touch_end_y = e.changedTouches[0].screenY;
+		var distance_x = touch_end_x - touch_start_x;
+		var distance_y = touch_end_y - touch_start_y;
+		var direction = null;
+
+		if (Math.abs(distance_x) > Math.abs(distance_y)) {
+			if (distance_x < -20) {
+				direction = 'left';
+			}
+			else if (distance_x > 20) {
+				direction = 'right';
+			}
+		}
+		else {
+			if (distance_y < -20) {
+				direction = 'up';
+			}
+			else if (distance_y > 20) {
+				direction = 'down';
+			}
+		}
+
+		if (!direction) {
+			return;
+		}
+
+		touch_start_el.dispatchEvent(new CustomEvent('swipe' + direction, {
+			bubbles: true,
+			cancelable: true,
+			detail: {direction, distance_x, distance_y}
+		}));
+	})
 })();

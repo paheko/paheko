@@ -33,9 +33,9 @@ $upload_here = $context_specific_root ? null : $dir->path;
 		</form>
 	{if !$context_specific_root}
 		{if $gallery}
-			{linkbutton shape="menu" label="Afficher en liste" href="?path=%s&gallery=0"|args:$dir_uri}
+			{linkbutton shape="menu" label="Afficher en liste" href="?id=%s&gallery=0"|args:$dir.hash_id}
 		{else}
-			{linkbutton shape="gallery" label="Afficher en galerie" href="?path=%s&gallery=1"|args:$dir_uri}
+			{linkbutton shape="gallery" label="Afficher en galerie" href="?id=%s&gallery=1"|args:$dir.hash_id}
 		{/if}
 	{/if}
 	{if $dir->canCreateDirHere() || $dir->canCreateHere()}
@@ -43,14 +43,14 @@ $upload_here = $context_specific_root ? null : $dir->path;
 			{if $dir->canCreateHere()}
 				{linkbutton shape="upload" label="Depuis mon ordinateur" target="_dialog" href="!common/files/upload.php?p=%s"|args:$dir_uri}
 			{if $dir->canCreateDirHere()}
-				{linkbutton shape="folder" label="Dossier" target="_dialog" href="!docs/new_dir.php?path=%s"|args:$dir_uri}
+				{linkbutton shape="folder" label="Dossier" target="_dialog" href="!docs/new_dir.php?p=%s"|args:$dir_uri}
 			{/if}
-				{linkbutton shape="text" label="Fichier texte" target="_dialog" href="!docs/new_file.php?path=%s"|args:$dir_uri}
 				{if WOPI_DISCOVERY_URL}
-					{linkbutton shape="document" label="Document" target="_dialog" href="!docs/new_doc.php?ext=odt&path=%s"|args:$dir_uri}
-					{linkbutton shape="table" label="Tableur" target="_dialog" href="!docs/new_doc.php?ext=ods&path=%s"|args:$dir_uri}
-					{linkbutton shape="gallery" label="Présentation" target="_dialog" href="!docs/new_doc.php?ext=odp&path=%s"|args:$dir_uri}
+					{linkbutton shape="document" label="Document" target="_dialog" href="!docs/new_doc.php?ext=odt&p=%s"|args:$dir_uri}
+					{linkbutton shape="table" label="Tableur" target="_dialog" href="!docs/new_doc.php?ext=ods&p=%s"|args:$dir_uri}
+					{linkbutton shape="gallery" label="Présentation" target="_dialog" href="!docs/new_doc.php?ext=odp&p=%s"|args:$dir_uri}
 				{/if}
+				{linkbutton shape="text" label="Fichier texte" target="_dialog" href="!docs/new_file.php?p=%s"|args:$dir_uri}
 			{/if}
 		{/linkmenu}
 	{/if}
@@ -69,8 +69,8 @@ $upload_here = $context_specific_root ? null : $dir->path;
 			{else}
 				Fichiers joints aux fiches des membres
 			{/if}
-		{elseif $parent_uri}
-			{$dir->name}
+		{elseif $dir.parent}
+			{$dir.name}
 		{else}
 			Documents
 		{/if}
@@ -78,10 +78,10 @@ $upload_here = $context_specific_root ? null : $dir->path;
 </nav>
 
 
-{if $parent_uri}
+{if $dir.parent}
 	<nav class="breadcrumbs">
 	{if $context_ref}
-		{linkbutton href="?path=%s"|args:$parent_uri label="Retour au dossier parent" shape="left"}
+		{linkbutton href="?id=%s"|args:$parent_uri label="Retour au dossier parent" shape="left"}
 		{if $context == File::CONTEXT_TRANSACTION}
 			{linkbutton href="!acc/transactions/details.php?id=%d"|args:$context_ref|local_url label="Détails de l'écriture" shape="menu"}
 		{elseif $context == File::CONTEXT_USER}
@@ -127,7 +127,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 			<tr>
 				{if $can_check}
 					<td class="check">
-						{input type="checkbox" name="check[]" value=$item.path}
+						{input type="checkbox" name="check[]" value=$item.hash_id}
 					</td>
 				{/if}
 				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$item.id}">#{$item.id}</a></td>
@@ -144,14 +144,14 @@ $upload_here = $context_specific_root ? null : $dir->path;
 			<tr>
 				{if $can_check}
 					<td class="check">
-						{input type="checkbox" name="check[]" value=$item.path}
+						{input type="checkbox" name="check[]" value=$item.hash_id}
 					</td>
 				{/if}
 				<td class="num"><a href="{$admin_url}users/details.php?id={$item.id}">{$item.number}</a></td>
 				<th><a href="?path={$item.path}">{$item.identity}</a></th>
 				<td class="actions">
 					{linkbutton href="!docs/?path=%s"|args:$item.path label="Fichiers" shape="menu"}
-					{linkbutton href="!users/details.php?id=%d"|args:$item.id label="Fiche membre" shape="user"}
+					{linkbutton href="!users/details.php?=%d"|args:$item.id label="Fiche membre" shape="user"}
 				</td>
 			</tr>
 			{else}
@@ -162,13 +162,16 @@ $upload_here = $context_specific_root ? null : $dir->path;
 								{input type="checkbox" name="check[]" value=$item.path}
 							</td>
 						{/if}
-						<td class="icon"><a href="?path={$item->path_uri()}">{icon shape="folder"}</a></td>
-						<th colspan="3"><a href="?path={$item->path_uri()}">{$item.name}</a></th>
+						<td class="icon"><a href="?id={$item.hash_id}">{icon shape="folder"}</a></td>
+						<th colspan="3"><a href="?id={$item.hash_id}">{$item.name}</a></th>
 						<td class="actions">
 						{if $dir->canCreateHere() || $item->canDelete()}
 							{linkmenu label="Modifier…" shape="edit"}
 								{if $item->canRename()}
-									{linkbutton href="!common/files/rename.php?p=%s"|args:$item->path_uri() label="Renommer" shape="minus" target="_dialog"}
+									{linkbutton href="!common/files/rename.php?id=%s"|args:$item.hash_id label="Renommer" shape="reload" target="_dialog"}
+								{/if}
+								{if $item->canMove()}
+									{linkbutton href="!docs/move.php?p=%s"|args:$item->path_uri() label="Déplacer" shape="export" target="_dialog"}
 								{/if}
 								{if $item->canDelete()}
 									{linkbutton href="!common/files/delete.php?p=%s"|args:$item->path_uri() label="Supprimer" shape="trash" target="_dialog"}
@@ -199,7 +202,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 						<td class="actions">
 							{linkbutton href=$item->url(true) label="Télécharger" shape="download" title="Télécharger"}
 							{if $item->canShare()}
-								{linkbutton href="!common/files/share.php?p=%s"|args:$item->path_uri() label="Partager" shape="export" target="_dialog" title="Partager"}
+								{linkbutton href="!common/files/share.php?h=%s"|args:$item->hash_id label="Partager" shape="export" target="_dialog" title="Partager"}
 							{/if}
 							{if $item->canRename() || $item->canDelete() || ($item->canWrite() && $item->editorType())}
 								{linkmenu label="Modifier…" shape="edit" right=true}
@@ -208,13 +211,16 @@ $upload_here = $context_specific_root ? null : $dir->path;
 										{linkbutton href="!common/files/edit.php?p=%s"|args:$item->path_uri() label="Éditer" shape="edit" target="_dialog" data-dialog-class="fullscreen" data-caption=$item->name}
 									{/if}
 									{if $item->canRename()}
-										{linkbutton href="!common/files/rename.php?p=%s"|args:$item->path_uri() label="Renommer" shape="reload" target="_dialog"}
+										{linkbutton href="!common/files/rename.php?id=%s"|args:$item.hash_id label="Renommer" shape="reload" target="_dialog"}
+									{/if}
+									{if $item->canMove()}
+										{linkbutton href="!docs/move.php?p=%s"|args:$item->path_uri() label="Déplacer" shape="export" target="_dialog"}
 									{/if}
 									{if $item->canDelete()}
 										{linkbutton href="!common/files/delete.php?p=%s"|args:$item->path_uri() label="Supprimer" shape="trash" target="_dialog"}
 									{/if}
 									{if !(FILE_VERSIONING_POLICY === 'none' || $config.file_versioning_policy === 'none') && $can_write}
-										{linkbutton shape="history" href="!common/files/history.php?p=%s"|args:$item->path_uri() label="Historique" target="_dialog"}
+										{linkbutton shape="history" href="!common/files/history.php?id=%s"|args:$item.hash_id label="Historique" target="_dialog"}
 									{/if}
 								{/linkmenu}
 							{/if}

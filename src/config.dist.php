@@ -466,13 +466,13 @@ namespace Paheko;
 
 
 /**
- * Hôte du serveur SMTP, mettre à false (défaut) pour utiliser la fonction
+ * Hôte du serveur SMTP, mettre à null (défaut) pour utiliser la fonction
  * mail() de PHP
  *
- * Défaut : false
+ * Défaut : null
  */
 
-//const SMTP_HOST = false;
+//const SMTP_HOST = null;
 
 /**
  * Port du serveur SMTP
@@ -533,7 +533,7 @@ namespace Paheko;
 
 /**
  * Adresse e-mail destinée à recevoir les erreurs de mail
- * (adresses invalides etc.) — Return-Path
+ * (adresses invalides etc.) — Return-Path / MAIL FROM
  *
  * Si laissé NULL, alors l'adresse e-mail de l'association sera utilisée.
  * En cas d'hébergement de plusieurs associations, il est conseillé
@@ -541,6 +541,9 @@ namespace Paheko;
  *
  * Voir la documentation de configuration sur des exemples de scripts
  * permettant de traiter les mails reçus à cette adresse.
+ *
+ * Si renseigné, cette adresse sera utilisée également comme "MAIL FROM"
+ * lors de la session avec le serveur SMTP.
  *
  * Défaut : null
  */
@@ -929,3 +932,21 @@ namespace Paheko;
  * @var null|string
  */
 //const ALERT_MESSAGE = 'Ceci est un compte de test.';
+
+/**
+ * Chemin vers le répertoire contenant les bases de données d'adresses
+ * locales.
+ *
+ * Cela permet d'auto-compléter l'adresse d'un membre quand on crée
+ * ou modifie sa fiche membre, sans faire appel à un service externe.
+ *
+ * Dans ce répertoire, chaque pays correspond à une BDD SQLite contenant
+ * la liste de toutes les adresses du pays.
+ *
+ * Par exemple 'fr.sqlite' pour la France.
+ *
+ * Défaut : null
+ *
+ * @var null|string
+ */
+//const LOCAL_ADDRESSES_ROOT = ROOT . '/local_addresses/';

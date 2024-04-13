@@ -177,7 +177,7 @@ class Sections
 		return '<?php '
 			. 'endforeach; '
 			. '} catch (\Paheko\UserException $e) { '
-			. '$this->assign(\'form_errors\', [$e->getMessage()]); '
+			. '$this->assign(\'form_errors\', [$e]); '
 			. '$fail = true; '
 			. '?>';
 	}
@@ -1176,6 +1176,14 @@ class Sections
 
 		$assign = $params['assign'] ?? null;
 		unset($params['assign']);
+
+		if (empty($params['order'])) {
+			$params['order'] = 'title';
+		}
+
+		if ($params['order'] == 'title') {
+			$params['order'] .= ' COLLATE U_NOCASE';
+		}
 
 		foreach (self::sql($params, $tpl, $line, $allowed_tables) as $row) {
 			if (empty($params['count'])) {

@@ -1502,7 +1502,7 @@ class Transaction extends Entity
 
 		// dt = date
 		if (isset($_GET['dt'])) {
-			$date = Entity::filterUserDateValue($_GET['dt']);
+			$date = Entity::filterUserDateValue($_GET['dt'], Date::class);
 
 			if (null !== $date && $date instanceof Date) {
 				$this->set('date', $date);

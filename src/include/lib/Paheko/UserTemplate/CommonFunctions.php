@@ -39,7 +39,7 @@ class CommonFunctions
 
 	static public function input(array $params)
 	{
-		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit', 'copy', 'suffix', 'prefix_label', 'prefix_help', 'prefix_required'];
+		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit', 'copy', 'suffix', 'prefix_label', 'prefix_help', 'prefix_required', 'datalist'];
 
 		// Extract params and keep attributes separated
 		$attributes = array_diff_key($params, array_flip($params_list));
@@ -132,6 +132,10 @@ class CommonFunctions
 		}
 
 		if ($type == 'radio' || $type == 'checkbox' || $type == 'radio-btn') {
+			if (!isset($value)) {
+				throw new \InvalidArgumentException('radio/checkbox has no "value" parameter');
+			}
+
 			$attributes['id'] .= '_' . (strlen($value) > 30 ? md5($value) : preg_replace('![^a-z0-9_-]!i', '', $value));
 
 			if ($current_value == $value && $current_value !== null) {
@@ -175,6 +179,23 @@ class CommonFunctions
 		}
 		elseif ($type == 'money') {
 			$attributes['class'] = rtrim('money ' . ($attributes['class'] ?? ''));
+		}
+
+		if (!empty($params['datalist'])) {
+			$list = '';
+			$list_attributes = '';
+
+			if (is_array($params['datalist'])) {
+				foreach ($params['datalist'] as $value) {
+					$list .= sprintf('<option>%s</option>', htmlspecialchars($value));
+				}
+			}
+			else {
+				$list_attributes = sprintf(' data-autocomplete="%s"', $params['datalist']);
+			}
+
+			$attributes['list'] = 'list-' . $attributes['id'];
+			$suffix = sprintf('<datalist id="%s"%s>%s</datalist>', $attributes['list'], $list_attributes, $list);
 		}
 
 		// Create attributes string
@@ -695,9 +716,8 @@ class CommonFunctions
 			'disabled' => !empty($params['disabled']),
 			'required' => $field->required,
 			'help'     => $field->help,
-			// Fix for autocomplete, lpignore is for Lastpass
+			// Fix for autocomplete
 			'autocomplete' => 'off',
-			'data-lpignore' => 'true',
 		];
 
 		// Multiple choice checkboxes is a specific thingy
@@ -772,16 +792,13 @@ class CommonFunctions
 			$params['type'] = 'number';
 			$params['step'] = 'any';
 		}
+		elseif ($type === 'address') {
+			$params['datalist'] = 'address';
+			$params['type'] = 'textarea';
+		}
 		elseif ($type === 'datalist') {
-			$options = '';
-
-			foreach ($field->options as $value) {
-				$options .= sprintf('<option>%s</option>', htmlspecialchars($value));
-			}
-
+			$params['datalist'] = $field->options ?? [];
 			$params['type'] = 'text';
-			$params['list'] = 'list-' . $params['name'];
-			$params['suffix'] = sprintf('<datalist id="%s">%s</datalist>', $params['list'], $options);
 		}
 
 		if ($field->default_value === 'NOW()') {

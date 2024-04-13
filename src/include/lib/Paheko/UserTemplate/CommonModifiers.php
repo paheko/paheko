@@ -107,6 +107,7 @@ class CommonModifiers
 		'date',
 		'strftime',
 		'size_in_bytes' => [Utils::class, 'format_bytes'],
+		'weight' => [Utils::class, 'format_weight'],
 		'typo',
 		'css_hex_to_rgb',
 		'css_hex_extract_hsv',
@@ -335,8 +336,12 @@ class CommonModifiers
 
 	static public function typo($str, $locale = 'fr')
 	{
+		if (empty($str)) {
+			return $str;
+		}
+
 		$str = preg_replace('/[\h]*([?!:»;])(?=\s|$)/us', "\xc2\xa0\\1", $str);
-		$str = preg_replace('/(?<=^|\s)([«])[\h]*/u', "\\1\xc2\xa0", $str);
+		$str = preg_replace('/(?<=^|\s)([«])[\h]*/u', "\\1\xc2\xa0", (string)$str);
 		return $str;
 	}
 

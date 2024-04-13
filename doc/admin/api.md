@@ -999,7 +999,7 @@ Liste les écritures liées à une écriture.
 
 _(Depuis la version 1.3.7)_
 
-### accounting/transaction/{ID_TRANSACTION}/transactions (POST)
+### POST accounting/transaction/{ID_TRANSACTION}/transactions
 
 Met à jour la liste des écritures liées à une écriture, en utilisant les ID des écritures, passées dans un tableau nommé `transactions`.
 
@@ -1016,7 +1016,7 @@ Exemple de requête :
  curl -v "http://…/api/accounting/transaction/9337/transactions"  -F 'transactions[]=2'
 ```
 
-### accounting/transaction/{ID_TRANSACTION}/transactions (DELETE)
+### DELETE accounting/transaction/{ID_TRANSACTION}/transactions
 
 Efface la liste des écritures liées à une écriture.
 

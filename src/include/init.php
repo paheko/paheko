@@ -8,7 +8,9 @@ use KD2\Form;
 use KD2\Translate;
 use KD2\DB\EntityManager;
 
-const CONFIG_FILE = 'config.local.php';
+if (!defined('Paheko\CONFIG_FILE')) {
+	define('Paheko\CONFIG_FILE', __DIR__ . '/../config.local.php');
+}
 
 require_once __DIR__ . '/lib/KD2/ErrorManager.php';
 
@@ -63,14 +65,13 @@ if (!defined('\SQLITE3_OPEN_READWRITE')) {
  */
 
 // Configuration externalisée
-if (file_exists(__DIR__ . '/../' . CONFIG_FILE)) {
-	require __DIR__ . '/../' . CONFIG_FILE;
+if (null !== CONFIG_FILE && file_exists(CONFIG_FILE)) {
+	require CONFIG_FILE;
 }
 
 // Configuration par défaut, si les constantes ne sont pas définies dans CONFIG_FILE
 // (fallback)
-if (!defined('Paheko\ROOT'))
-{
+if (!defined('Paheko\ROOT')) {
 	define('Paheko\ROOT', dirname(__DIR__));
 }
 
@@ -109,8 +110,7 @@ if (!defined('Paheko\DATA_ROOT')) {
 	define('Paheko\DATA_ROOT', ROOT . '/data');
 }
 
-if (!defined('Paheko\WWW_URI'))
-{
+if (!defined('Paheko\WWW_URI')) {
 	try {
 		$uri = \KD2\HTTP::getRootURI(ROOT);
 	}
@@ -175,7 +175,7 @@ static $default_config = [
 	'USE_CRON'              => false,
 	'ENABLE_XSENDFILE'      => false,
 	'DISABLE_EMAIL'         => false,
-	'SMTP_HOST'             => false,
+	'SMTP_HOST'             => null,
 	'SMTP_USER'             => null,
 	'SMTP_PASSWORD'         => null,
 	'SMTP_PORT'             => 587,
@@ -211,6 +211,7 @@ static $default_config = [
 	'DISABLE_INSTALL_PING'  => false,
 	'WOPI_DISCOVERY_URL'    => null,
 	'SQLITE_JOURNAL_MODE'   => 'TRUNCATE',
+	'LOCAL_ADDRESSES_ROOT'  => null,
 ];
 
 foreach ($default_config as $const => $value)

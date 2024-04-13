@@ -301,7 +301,7 @@ class Files
 	static public function list(?string $parent = null): array
 	{
 		$where = self::_getParentClause($parent);
-		$sql = sprintf('SELECT * FROM @TABLE WHERE %s ORDER BY type DESC, name COLLATE NOCASE ASC;', $where);
+		$sql = sprintf('SELECT * FROM @TABLE WHERE %s ORDER BY type DESC, name COLLATE U_NOCASE ASC;', $where);
 
 		return EM::getInstance(File::class)->allAssoc($sql, 'path');
 	}
@@ -386,17 +386,17 @@ class Files
 
 		@ini_set('max_execution_time', 3600);
 
-		Files::zip($target, array_keys(File::CONTEXTS_NAMES), null);
+		Files::zip(array_keys(File::CONTEXTS_NAMES), $target, null);
 	}
 
 	/**
 	 * Creates a ZIP file archive from multiple paths
 	 * @param null|string $target Target file name, if left NULL, then will be sent to browser
-	 * @param  array $paths List of paths to append to ZIP file
+	 * @param  array $files List of file paths to append to ZIP file
 	 * @param  Session $session Logged-in user session, if set access rights to the path will be checked,
 	 * if left NULL, then no check will be made (!).
 	 */
-	static public function zip(?string $target, array $paths, ?Session $session, ?string $download_name = null): void
+	static public function zip(array $files, ?string $target, ?Session $session, ?string $download_name = null): void
 	{
 		if (!$target) {
 			$download_name ??= Config::getInstance()->org_name . ' - Documents';
@@ -408,20 +408,30 @@ class Files
 		$zip = new ZipWriter($target);
 		$zip->setCompression(0);
 
-		foreach ($paths as $path) {
-			foreach (Files::listRecursive($path, $session, false) as $file) {
-				if ($file->isDir()) {
+		$i = 0;
+
+		foreach ($files as $file) {
+			$file = Files::get($file);
+
+			if (!$file) {
+				continue;
+			}
+
+			foreach ($file->iterateRecursive() as $f) {
+				if ($f->isDir()) {
+					// Don't add directories to zip file
 					continue;
 				}
 
-				$pointer = $file->getReadOnlyPointer();
-				$path = !$pointer ? $file->getLocalFilePath() : null;
+				$pointer = $f->getReadOnlyPointer();
+				$path = !$pointer ? $f->getLocalFilePath() : null;
 
-				if (!$path && !$pointer) {
+				if (!$pointer && !$path) {
+					// File content is not available, skip
 					continue;
 				}
 
-				$zip->add($file->path, null, $path, $pointer);
+				$zip->add($f->path, null, $path, $pointer);
 
 				if ($pointer) {
 					fclose($pointer);
@@ -512,6 +522,16 @@ class Files
 		}
 	}
 
+	static public function getByID(int $id): ?File
+	{
+		return EM::findOneById(File::class, $id);
+	}
+
+	static public function getByHashID(string $id): ?File
+	{
+		return EM::findOne(File::class, 'SELECT * FROM @TABLE WHERE hash_id = ? LIMIT 1;', $id);
+	}
+
 	/**
 	 * Returns a file, if it doesn't exist, NULL is returned
 	 * If the file exists in DB but not in storage, it is deleted from DB
@@ -599,8 +619,12 @@ class Files
 		return $ref ?: null;
 	}
 
-	static public function getBreadcrumbs(string $path): array
+	static public function getBreadcrumbs(?string $path): array
 	{
+		if (empty($path)) {
+			return [];
+		}
+
 		$parts = explode('/', $path);
 		$breadcrumbs = [];
 		$path = '';
@@ -963,7 +987,7 @@ class Files
 			$tree = trim($tree . '/' . $part, '/');
 
 			// Make sure directory exists AND is not in trash
-			$db->preparedQuery('INSERT OR IGNORE INTO files (path, parent, name, type) VALUES (?, ?, ?, ?);',
+			$db->preparedQuery('INSERT OR IGNORE INTO files (hash_id, path, parent, name, type) VALUES (random_string(12), ?, ?, ?, ?);',
 				$tree, $parent, $part, File::TYPE_DIRECTORY);
 		}
 

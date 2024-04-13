@@ -11,14 +11,6 @@ $('button[name*=bookmark]').forEach((b) => {
 	};
 });
 
-RegExp.escape = function(string) {
-  return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
-};
-
-function normalizeString(str) {
-	return str.normalize('NFD').replace(/[\u0300-\u036f]/g, "")
-}
-
 var q = document.querySelector('.quick-search input[type=text]');
 
 if (q) {
@@ -26,7 +18,7 @@ if (q) {
 
 	rows.forEach((e, k) => {
 		var l = e.querySelector('td.num').innerText + ' ' + e.querySelector('th').innerText;
-		e.setAttribute('data-search-label', normalizeString(l));
+		e.setAttribute('data-search-label', g.normalizeString(l));
 	});
 
 	q.addEventListener('keyup', (e) => {
@@ -42,7 +34,7 @@ if (q) {
 }
 
 function filterTableList() {
-	var query = new RegExp(RegExp.escape(normalizeString(q.value)), 'i');
+	var query = g.normalizeString(q.value);
 
 	rows.forEach((elm) => {
 		if (elm.getAttribute('data-search-label').match(query)) {

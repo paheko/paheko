@@ -123,6 +123,33 @@ class DynamicList implements \Countable
 	 */
 	private ?int $count_result = null;
 
+	/**
+	 * Allow to navigate in list using prev(), first(), last() and next()
+	 * This will use more memory.
+	 */
+	protected bool $allow_navigation = false;
+
+	/**
+	 * Save first row in this property
+	 */
+	protected $first = null;
+
+	/**
+	 * Save previous row in this property
+	 */
+	protected $prev = null;
+
+	/**
+	 * Save next iterations in this property
+	 * @var array
+	 */
+	protected array $next = [];
+
+	/**
+	 * Iteration generator
+	 */
+	protected \Generator $iterator;
+
 	public function __construct(array $columns, string $tables, string $conditions = '1')
 	{
 		$this->columns = $columns;
@@ -139,6 +166,12 @@ class DynamicList implements \Countable
 	public function __get($key)
 	{
 		return $this->$key;
+	}
+
+	public function toggleNavigation(bool $enable): void
+	{
+		$this->allow_navigation = $enable;
+		$this->setPageSize(null);
 	}
 
 	public function togglePreferenceHashElement(string $name, bool $enable): void
@@ -183,6 +216,19 @@ class DynamicList implements \Countable
 	public function setConditions(string $conditions)
 	{
 		$this->conditions = $conditions;
+	}
+
+	public function setColumns(array $columns)
+	{
+		$this->columns = $columns;
+	}
+
+	/**
+	 * Enable or disable prev() next() navigation when using iterate()
+	 */
+	public function togglePrevNext(bool $enable)
+	{
+		$this->enable_prev_next = $enable;
 	}
 
 	/**
@@ -312,32 +358,30 @@ class DynamicList implements \Countable
 	public function iterate(bool $include_hidden = true)
 	{
 		if ($this->entity) {
-			$list = EM::getInstance($this->entity)->iterate($this->SQL());
+			$this->iterator = EM::getInstance($this->entity)->iterate($this->SQL());
 		}
 		else {
-			$list = DB::getInstance()->iterate($this->SQL(), $this->parameters);
+			$this->iterator = DB::getInstance()->iterate($this->SQL(), $this->parameters);
 		}
 
 		$row = null;
 
-		foreach ($list as $row_key => $row) {
-			if ($this->modifier) {
-				$r = call_user_func_array($this->modifier, [&$row]);
-				if (is_array($r) || $r instanceof \Generator) {
-					yield from $r;
-				}
+		while ($this->iterator->valid()) {
+			// If there were some calls to next(), then use them
+			foreach ($this->next as $key => $row) {
+				yield $key => $row;
+				unset($this->next[$key]);
 			}
 
-			// Hide columns without a label in results
-			if (!$this->entity) {
-				foreach ($this->columns as $key => $config) {
-					if (empty($config['label']) && !$include_hidden) {
-						unset($row->$key);
-					}
-				}
+			foreach ($this->current($include_hidden) as $key => $row) {
+				yield $key => $row;
 			}
 
-			yield $row_key => $row;
+			$this->iterator->next();
+
+			if ($this->allow_navigation) {
+				$this->prev = $row;
+			}
 		}
 
 		if ($this->final_generator) {
@@ -347,6 +391,95 @@ class DynamicList implements \Countable
 				yield from $r;
 			}
 		}
+	}
+
+	public function current(bool $include_hidden = true): \Generator
+	{
+		$row = $this->iterator->current();
+
+		if ($this->modifier) {
+			$r = call_user_func_array($this->modifier, [&$row]);
+			if (is_array($r) || $r instanceof \Generator) {
+				yield from $r;
+			}
+		}
+
+		// Hide columns without a label in results
+		if (!$this->entity) {
+			foreach ($this->columns as $key => $config) {
+				if (empty($config['label']) && !$include_hidden) {
+					unset($row->$key);
+				}
+			}
+		}
+
+		if ($this->allow_navigation && !isset($this->first)) {
+			$this->first = $row;
+		}
+
+		yield $this->iterator->key() => $row;
+	}
+
+	public function prev()
+	{
+		if (!$this->allow_navigation) {
+			throw new \LogicException('Cannot navigate in list if navigation is disabled');
+		}
+
+		$row = $this->prev;
+		$this->prev = null;
+		return $row;
+	}
+
+	public function next()
+	{
+		if (!$this->allow_navigation) {
+			throw new \LogicException('Cannot navigate in list if navigation is disabled');
+		}
+
+		$this->iterator->next();
+		$row = null;
+
+		foreach ($this->current() as $key => $row) {
+			$this->next[$key] = $row;
+		}
+
+		return $row;
+	}
+
+	public function first()
+	{
+		if (!$this->allow_navigation) {
+			throw new \LogicException('Cannot navigate in list if navigation is disabled');
+		}
+
+		return $this->first ?? $this->current();
+	}
+
+	public function last()
+	{
+		if (!$this->allow_navigation) {
+			throw new \LogicException('Cannot navigate in list if navigation is disabled');
+		}
+
+		$row = null;
+
+		foreach ($this->iterate() as $row) {
+			// Just skip to end
+		}
+
+		return $row;
+	}
+
+	public function iterateUntilCondition(string $column, $value)
+	{
+		foreach ($this->iterate() as $key => $row) {
+			if (isset($row->{$column}) && $row->{$column} === $value) {
+				return $row;
+			}
+		}
+
+		return null;
 	}
 
 	public function SQL()

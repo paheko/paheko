@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Recherche" current="acc"}
+{include file="_head.tpl" title=$title current="acc"}
 
 <nav class="tabs">
 	<ul>

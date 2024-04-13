@@ -47,7 +47,7 @@ class DynamicFields
 		return self::$_instance;
 	}
 
-	static public function get(string $key)
+	static public function get(string $key): ?DynamicField
 	{
 		return self::getInstance()->fieldByKey($key);
 	}
@@ -197,6 +197,16 @@ class DynamicFields
 		return $fields;
 	}
 
+	static public function listUserFieldTypes(): array
+	{
+		$types = DynamicField::TYPES;
+
+		// Address type can only be used by presets
+		unset($types['address']);
+
+		return $types;
+	}
+
 	protected function __construct(bool $load = true)
 	{
 		if ($load) {
@@ -250,7 +260,8 @@ class DynamicFields
 
 		foreach ($data->depends ?? [] as $depends) {
 			if (!$this->fieldByKey($depends)) {
-				throw new \LogicException(sprintf('Cannot add "%s" preset if "%s" preset is not installed.', $name, $depends));
+				$this->addFieldFromPreset($depends);
+				//throw new \LogicException(sprintf('Cannot add "%s" preset if "%s" preset is not installed.', $name, $depends));
 			}
 		}
 
@@ -369,17 +380,6 @@ class DynamicFields
 	{
 		$list = array_diff_key($this->getPresets(), $this->_fields);
 		$installed =& $this->_fields;
-		array_walk($list, function (&$p) use ($installed) {
-			$p->disabled = false;
-
-			foreach ($p->depends ?? [] as $d) {
-				if (!array_key_exists($d, $installed)) {
-					$p->disabled = true;
-					break;
-				}
-			}
-		});
-
 		uasort($list, fn($a, $b) => strnatcasecmp($a->label, $b->label));
 
 		return $list;

@@ -82,30 +82,32 @@ class DynamicField extends Entity
 	const PRESET   = 0x01 << 5;
 
 	const TYPES = [
-		'email'		=>	'Adresse E-Mail',
-		'url'		=>	'Adresse URL',
-		'checkbox'	=>	'Case à cocher',
-		'date'		=>	'Date',
-		'datetime'	=>	'Date et heure',
-		'month'     =>  'Mois et année',
-		'year'      =>  'Année',
-		'file'      =>  'Fichier',
-		'password'  =>  'Mot de passe',
-		'number'	=>	'Nombre',
-		'decimal'	=>	'Nombre à virgule',
-		'tel'		=>	'Numéro de téléphone',
-		'select'	=>	'Sélecteur à choix unique',
-		'multiple'  =>  'Sélecteur à choix multiple',
-		'country'	=>	'Sélecteur de pays',
-		'text'		=>	'Texte libre, une ligne',
-		'datalist'  =>  'Texte libre, une ligne, à choix multiple',
-		'textarea'	=>	'Texte libre, plusieurs lignes',
-		'virtual' =>  'Calculé',
+		'email'    => 'Adresse E-Mail',
+		'url'      => 'Adresse URL',
+		'address'  => 'Adresse postale',
+		'checkbox' => 'Case à cocher',
+		'date'     => 'Date',
+		'datetime' => 'Date et heure',
+		'month'    => 'Mois et année',
+		'year'     => 'Année',
+		'file'     => 'Fichier',
+		'password' => 'Mot de passe',
+		'number'   => 'Nombre',
+		'decimal'  => 'Nombre à virgule',
+		'tel'      => 'Numéro de téléphone',
+		'select'   => 'Sélecteur à choix unique',
+		'multiple' => 'Sélecteur à choix multiple',
+		'country'  => 'Sélecteur de pays',
+		'text'     => 'Texte libre, une ligne',
+		'datalist' => 'Texte libre, une ligne, à choix multiple',
+		'textarea' => 'Texte libre, plusieurs lignes',
+		'virtual'  => 'Calculé',
 	];
 
 	const PHP_TYPES = [
 		'email'    => '?string',
 		'url'      => '?string',
+		'address'  => '?string',
 		'checkbox' => 'bool',
 		'date'     => '?' . Date::class,
 		'datetime' => '?DateTime',
@@ -128,6 +130,7 @@ class DynamicField extends Entity
 	const SQL_TYPES = [
 		'email'    => 'TEXT',
 		'url'      => 'TEXT',
+		'address'  => 'TEXT',
 		'checkbox' => 'INTEGER NOT NULL DEFAULT 0',
 		'date'     => 'TEXT',
 		'datetime' => 'TEXT',
@@ -149,9 +152,11 @@ class DynamicField extends Entity
 
 	const SEARCH_TYPES = [
 		'email',
+		'url',
+		'address',
 		'text',
 		'textarea',
-		'url',
+		'datalist',
 	];
 
 	const LOGIN_FIELD_TYPES = [
@@ -216,6 +221,12 @@ class DynamicField extends Entity
 			throw new ValidationException('Ce champ est utilisé en interne, il n\'est pas possible de le supprimer');
 		}
 
+		$dependents = $this->listDependentFields();
+
+		if (count($dependents)) {
+			throw new ValidationException(sprintf('Ce champ ne peut être supprimé car des champs en ont besoin pour fonctionner (%s)', implode($dependents)));
+		}
+
 		foreach (DynamicFields::getVirtualFields() as $field) {
 			if ($field->isReferencing($this->name)) {
 				throw new ValidationException(sprintf('Ce champ ne peut être supprimé, car le champ calculé "%s" en a besoin pour fonctionner.', $field->label));
@@ -271,6 +282,24 @@ class DynamicField extends Entity
 		return $this->isVirtual() && preg_match('/\b' . $name . '\b/', $this->sql);
 	}
 
+	public function listDependentFields(): array
+	{
+		$presets = DynamicFields::getInstance()->getPresets();
+		$out = [];
+
+		foreach ($presets as $name => $preset) {
+			if (!DynamicFields::get($name)) {
+				continue;
+			}
+
+			if (in_array($this->name, $preset->depends ?? [])) {
+				$out[$name] = $preset->label;
+			}
+		}
+
+		return $out;
+	}
+
 	public function canDelete(): bool
 	{
 		if ($this->system & self::PASSWORD || $this->system & self::NUMBER || $this->system & self::NAMES || $this->system & self::LOGIN) {
@@ -322,10 +351,6 @@ class DynamicField extends Entity
 			$this->assert(!$db->test(self::TABLE, 'name = ? AND id != ?', $this->name, $this->id()), 'Ce nom de champ est déjà utilisé par un autre champ.');
 		}
 
-		if ($this->exists()) {
-			$this->assert($this->system & self::PRESET || !array_key_exists($this->name, DynamicFields::getInstance()->getPresets()), 'Ce nom de champ est déjà utilisé par un champ pré-défini.');
-		}
-
 		if ($this->type === 'virtual') {
 			$this->assert(null !== $this->sql && strlen(trim($this->sql)), 'Le code SQL est manquant');
 
@@ -335,6 +360,22 @@ class DynamicField extends Entity
 			catch (\KD2\DB\DB_Exception $e) {
 				throw new ValidationException('Le code SQL du champ calculé est invalide: ' . $e->getMessage(), 0, $e);
 			}
+		}
+
+		$presets = DynamicFields::getInstance()->getPresets();
+
+		if ($this->system & self::PRESET) {
+			$preset = $presets[$this->name] ?? null;
+
+			// Check that this preset exists
+			$this->assert($preset !== null);
+
+			foreach ($preset->depends ?? [] as $dependency) {
+				$this->assert(null !== DynamicFields::get($dependency), sprintf('Le champ "%s" est requis pour le champ "%s"', $dependency, $this->name));
+			}
+		}
+		elseif ($this->exists()) {
+			$this->assert(!array_key_exists($this->name, $presets), 'Ce nom de champ est déjà utilisé par un champ pré-défini.');
 		}
 	}
 

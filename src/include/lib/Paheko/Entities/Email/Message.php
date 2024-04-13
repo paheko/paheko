@@ -185,6 +185,15 @@ class Message extends Entity
 		return $this->save();
 	}
 
+	public function queueToArray(array $recipients): void
+	{
+		foreach ($recipients as $address) {
+			$msg = clone $this;
+			$msg->setRecipient($address);
+			$msg->queue();
+		}
+	}
+
 	public function createSMTPMessage(): Mail_Message
 	{
 

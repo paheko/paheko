@@ -23,6 +23,8 @@ $categories = Categories::listAssocSafe($session);
 $csrf_key = 'user_edit_' . $user->id;
 $can_change_category = array_key_exists($user->id_category, $categories);
 
+$list_category = isset($_GET['list_category']) && strlen($_GET['list_category']) ? intval($_GET['list_category']) : null;
+
 $form->runIf('save', function () use ($user, $session, $can_change_category) {
 	$user->importForm();
 	$myself = $user->id == $session::getUserId();
@@ -45,10 +47,10 @@ $form->runIf('save', function () use ($user, $session, $can_change_category) {
 			Utils::redirect('!');
 		}
 	}
-}, $csrf_key, '!users/details.php?id=' . $user->id);
+}, $csrf_key, sprintf('!users/details.php?id=%d&list_category=%s', $user->id, qg('list_category')));
 
 $fields = DF::getInstance()->all();
 
-$tpl->assign(compact('user', 'categories', 'fields', 'csrf_key', 'can_change_category'));
+$tpl->assign(compact('list_category', 'user', 'categories', 'fields', 'csrf_key', 'can_change_category'));
 
 $tpl->display('users/edit.tpl');

@@ -11,6 +11,7 @@ use KD2\DB\EntityManager as EM;
 class Trash
 {
 	const LIST_COLUMNS = [
+		'hash_id' => [],
 		'type' => [
 			'label' => 'Type',
 			'header_icon' => 'folder',

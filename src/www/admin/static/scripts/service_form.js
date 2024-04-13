@@ -50,7 +50,7 @@ function selectFee(elm) {
 		$('#f_amount').value = g.formatMoney(amount);
 	}
 
-	if ('project' in elm.dataset) {
+	if ('project' in elm.dataset && $('#f_id_project')) {
 		$('#f_id_project').value = elm.dataset.project;
 	}
 }

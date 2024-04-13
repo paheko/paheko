@@ -58,17 +58,26 @@ trait FileThumbnailTrait
 			$pointer = $path !== null ? null : $this->getReadOnlyPointer();
 		}
 
-		if ($path) {
-			$i = new Image($path);
-		}
-		elseif ($pointer) {
-			$i = Image::createFromPointer($pointer, null, true);
-		}
-		else {
-			return null;
-		}
+		try {
+			if ($path) {
+				$i = new Image($path);
+			}
+			elseif ($pointer) {
+				$i = Image::createFromPointer($pointer, null, true);
+			}
+			else {
+				return null;
+			}
 
-		return $i;
+			return $i;
+		}
+		catch (\Exception $e) {
+			if (strstr($e->getMessage(), 'Invalid image format')) {
+				return null;
+			}
+
+			throw $e;
+		}
 	}
 
 	public function thumb_uri($size = null, bool $with_hash = true): ?string
@@ -336,7 +345,8 @@ trait FileThumbnailTrait
 					);
 				}
 				elseif ($command === 'ffmpeg') {
-					$cmd = sprintf('ffmpeg -ss 00:00:02 -i %s -frames:v 1 -f image2 -c png -vf scale="min(900\, iw)":-1 %s 2>&1',
+					$cmd = sprintf('ffmpeg -hide_banner -loglevel error -ss 00:00:02 -i %s '
+						. '-frames:v 1 -f image2 -c png -vf scale="min(900\, iw)":-1 %s 2>&1',
 						Utils::escapeshellarg($tmpfile ?? $local_path),
 						Utils::escapeshellarg($destination)
 					);
@@ -346,20 +356,23 @@ trait FileThumbnailTrait
 				$code = null;
 				$output = Utils::quick_exec($cmd, 5, $code);
 
+				// If command is not found, this means we have a configuration error
+				if ($code === 127) {
+					Utils::safe_unlink($destination);
+					throw new \LogicException(sprintf('Command "%s" failed as it wasn\'t found. Disable this command or install it. %s', $cmd, $output));
+				}
+
 				// Don't trust code as it can return != 0 even if generation was OK
 				if (!file_exists($destination) || filesize($destination) < 10) {
 					Utils::safe_unlink($destination);
 					$e = new \RuntimeException($command . ' execution failed with code: ' . $code . "\n" . $output);
 
-					if ($command === 'mupdf' && $code === 0) {
-						// MuPDF can fail for a number of reasons: password protection, broken document, etc.
-						// Usually when error is zero it means that calling mupdf works, but not the conversion
-						// so just ignore it, no need to report it, just log it
-						ErrorManager::logException($e);
-						return null;
-					}
-
-					throw $e;
+					// MuPDF can fail for a number of reasons: password protection, broken document, etc.
+					// ffmpeg can fail if the file is a video format but with no video, etc.
+					// So don't throw an error in these cases, just log it.
+					// Or we might get a lot of reported exceptions for weird files.
+					ErrorManager::logException($e);
+					return null;
 				}
 			}
 		}

@@ -13,6 +13,7 @@ use Paheko\Config;
 use Paheko\Plugins;
 use Paheko\UserException;
 use Paheko\Utils;
+use Paheko\Users\Users;
 use Paheko\UserTemplate\Modules;
 
 use Paheko\Users\Session;
@@ -84,6 +85,17 @@ class Router
 			echo "User-agent: GPTBot\nDisallow: /\n";
 			return;
 		}
+		// Private file sharing
+		elseif ($first === 's') {
+			$_GET['uri'] = substr($uri, 2);
+			require ROOT . '/www/admin/share.php';
+			return;
+		}
+		// Users avatars
+		elseif ($first === 'user' && strpos($uri, 'user/avatar/') !== false) {
+			Users::serveAvatar((int)substr($uri, strlen('user/avatar/')));
+			return;
+		}
 		// Add trailing slash to URLs if required
 		elseif (($first === 'p' || $first === 'm') && preg_match('!^(?:admin/p|p|m)/\w+$!', $uri)) {
 			Utils::redirect('/' . $uri . '/');
@@ -151,6 +163,14 @@ class Router
 
 	static public function routeFile(string $uri): bool
 	{
+		// Redirect old sharing links (pre 1.3.7), FIXME: remove this after 1.5.0
+		if (isset($_GET['s'])) {
+			$_GET['path'] = $uri;
+			$_GET['hash'] = $_GET['s'];
+			require ROOT . '/www/admin/share_legacy.php';
+			return true;
+		}
+
 		$context = strtok($uri, '/');
 		strtok('');
 
@@ -197,7 +217,7 @@ class Router
 			return true;
 		}
 
-		$file->validateCanRead($session, $_GET['s'] ?? null, $_POST['p'] ?? null);
+		$file->validateCanRead($session);
 
 		if ($size) {
 			$file->serveThumbnail($size);

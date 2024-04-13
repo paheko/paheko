@@ -4,6 +4,7 @@ namespace Paheko;
 
 use Paheko\Services\Reminders;
 use Paheko\Files\Files;
+use Paheko\Files\Shares;
 use Paheko\Files\Trash;
 
 if (PHP_SAPI != 'cli' && !defined('\Paheko\ROOT')) {
@@ -29,5 +30,8 @@ if (Files::getVersioningPolicy() !== 'none') {
 
 // Make sure we are cleaning the trash
 Trash::clean();
+
+// Remove expired file sharing links
+Shares::prune();
 
 Plugins::fire('cron');

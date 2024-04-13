@@ -246,6 +246,7 @@ class DB extends SQLite3
 		$db->createFunction('email_hash', [Addresses::class, 'hash']);
 		$db->createFunction('md5', 'md5');
 		$db->createFunction('uuid', [Utils::class, 'uuid']);
+		$db->createFunction('random_string', [Utils::class, 'random_string']);
 		$db->createFunction('print_binary', fn($value) => sprintf('%032d', decbin($value)));
 
 		$db->createFunction('print_dynamic_field', function($name, $value) {

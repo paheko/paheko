@@ -7,11 +7,11 @@ use Paheko\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
 
-$parent = qg('path');
 $default_ext = qg('ext') ?? 'md';
+$parent = qg('p');
 
 if (!File::canCreate($parent)) {
-	throw new UserException('Vous n\'avez pas le droit de créer de fichier ici.');
+	throw new UserException('Vous n\'avez pas le droit de créer de fichier ici.', 403);
 }
 
 $csrf_key = 'create_file';

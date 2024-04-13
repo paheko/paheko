@@ -76,6 +76,7 @@ class Utils
 		'pdf'             => 'P',
 		'trash'           => '🗑',
 		'history'         => '⌚',
+		'link'            => '🔗',
 	];
 
 	const FRENCH_DATE_NAMES = [
@@ -925,6 +926,22 @@ class Utils
 		return sscanf($hex, '#%02x%02x%02x');
 	}
 
+	static public function rgbDecToHex(array $rgb)
+	{
+		foreach ($rgb as &$v) {
+			if ($v > 255) {
+				$v = 255;
+			}
+			elseif ($v < 0) {
+				$v = 0;
+			}
+		}
+
+		unset($v);
+
+		return vsprintf('#%02x%02x%02x', $rgb);
+	}
+
 	/**
 	 * Converts an RGB color value to HSV. Conversion formula
 	 * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
@@ -1468,6 +1485,13 @@ class Utils
 			$n -= pow(26, $i);
 		}
 		return $r;
+	}
+
+	static public function random_string(int $length): string
+	{
+		$bytes = ceil($length * 0.7);
+		$str = base_convert(bin2hex(random_bytes($bytes)), 16, 36);
+		return substr($str, 0, $length);
 	}
 
 	static public function uuid(): string

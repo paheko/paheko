@@ -35,10 +35,10 @@ $is_unprotected = $s->type == $s::TYPE_SQL_UNPROTECTED;
 			{button type="submit" name="run" label="Exécuter" shape="search" class="main"}
 			<input type="hidden" name="id" value="{$s.id}" />
 			{if $s->exists()}
-				{button name="save" value=1 type="submit" label="Enregistrer : %s"|args:$s.label|truncate:40:"…":true shape="upload"}
-				{button name="save_new" value=1 type="submit" label="Enregistrer nouvelle recherche" shape="plus"}
+				{button name="save" value=1 type="submit" label="Enregistrer" shape="upload"}
+				{button name="save_new" value=1 type="submit" label="Enregistrer sous un nouveau nom" shape="plus"}
 			{else}
-				{button name="save" value=1 type="submit" label="Enregistrer cette recherche" shape="upload"}
+				{button name="save" value=1 type="submit" label="Enregistrer nouvelle recherche" shape="plus"}
 			{/if}
 			{if $can_sql_unprotected}
 				{linkbutton href="!config/advanced/sql.php" target="_blank" shape="menu" label="Voir le schéma SQL complet"}
@@ -54,13 +54,13 @@ $is_unprotected = $s->type == $s::TYPE_SQL_UNPROTECTED;
 		<input type="hidden" name="q" id="jsonQuery" />
 		<input type="hidden" name="id" value="{$s.id}" />
 		{if $s.id}
-			{button name="save" value=1 type="submit" label="Enregistrer : %s"|args:$s.label|truncate:40:"…":true shape="upload"}
-			{button name="save_new" value=1 type="submit" label="Enregistrer nouvelle recherche" shape="plus"}
+			{button name="save" value=1 type="submit" label="Enregistrer" shape="upload"}
+			{button name="save_new" value=1 type="submit" label="Enregistrer sous un nouveau nom" shape="plus"}
 		{else}
-			{button name="save" value=1 type="submit" label="Enregistrer cette recherche" shape="upload"}
+			{button name="save" value=1 type="submit" label="Enregistrer nouvelle recherche" shape="plus"}
 		{/if}
 		{if $can_sql}
-			{button name="to_sql" value=1 type="submit" label="Recherche SQL" shape="edit"}
+			{button name="to_sql" value=1 type="submit" label="Transformer en recherche SQL" shape="edit"}
 		{/if}
 	</p>
 	<script type="text/javascript" src="{$admin_url}static/scripts/advanced_search.js"></script>

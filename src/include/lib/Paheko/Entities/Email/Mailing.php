@@ -307,12 +307,17 @@ class Mailing extends Entity
 			return '';
 		}
 
-		if (false !== strpos($this->body, '{{')) {
+		if ($this->isTemplate()) {
 			return UserTemplate::createFromUserString($this->body);
 		}
 		else {
 			return $this->body;
 		}
+	}
+
+	public function isTemplate()
+	{
+		return false !== strpos($this->body, '{{') && false !== strpos($this->body, '}}');
 	}
 
 	public function getPreview(int $id = null): string
@@ -371,6 +376,10 @@ class Mailing extends Entity
 			throw new UserException('Le corps du message est vide.');
 		}
 
+		if ($this->sent) {
+			throw new UserException('Le message a déjà été envoyé');
+		}
+
 		$sender = null;
 
 		if (isset($this->sender_name, $this->sender_email)) {
@@ -387,6 +396,26 @@ class Mailing extends Entity
 		$this->set('sent', new DateTime);
 
 		$this->save();
+
+		// Remove useless data from extra_data field
+		$db = DB::getInstance();
+		$fields = [
+			'id',
+			DynamicFields::getNumberField(),
+		];
+
+		foreach (DynamicFields::getNameFields() as $field) {
+			$fields[] = $field;
+		}
+
+		foreach ($fields as &$field) {
+			$field = sprintf('%s, json_extract(extra_data, %s)', $db->quote($field), $db->quote('$.' . $field));
+		}
+
+		unset($field);
+		$sql = sprintf('UPDATE mailings_recipients SET extra_data = json_object(%s) WHERE id_mailing = ?;', implode(', ', $fields));
+
+		DB::getInstance()->preparedQuery($sql, $this->id());
 
 		Log::add(Log::SENT, ['entity' => get_class($this), 'id' => $this->id()]);
 	}

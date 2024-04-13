@@ -21,7 +21,7 @@ elseif (!$trash && !$file->canDelete()) {
 	throw new UserException('Vous n\'avez pas le droit de supprimer ce fichier.');
 }
 
-$csrf_key = 'file_delete_' . $file->pathHash();
+$csrf_key = 'file_delete_' . $file->hash_id;
 $parent = $file->parent;
 
 $form->runIf('delete', function () use ($file, $trash) {

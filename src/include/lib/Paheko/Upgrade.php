@@ -54,7 +54,7 @@ class Upgrade
 
 		// Rename namespace in config file, before starting any upgrade
 		if (version_compare($v, '1.3.0', '<')) {
-			$config_path = ROOT . '/' . CONFIG_FILE;
+			$config_path = CONFIG_FILE;
 
 			if (file_exists($config_path) && is_writable($config_path)) {
 				$contents = file_get_contents($config_path);
@@ -224,6 +224,12 @@ class Upgrade
 			if (version_compare($v, '1.3.5', '<')) {
 				$db->beginSchemaUpdate();
 				$db->import(ROOT . '/include/migrations/1.3/1.3.5.sql');
+				$db->commitSchemaUpdate();
+			}
+
+			if (version_compare($v, '1.3.7', '<')) {
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/migrations/1.3/1.3.7.sql');
 				$db->commitSchemaUpdate();
 			}
 

@@ -22,6 +22,10 @@ use Paheko\ValidationException;
 use KD2\SMTP;
 use KD2\DB\EntityManager as EM;
 
+use KD2\Graphics\SVG\Avatar;
+
+use const Paheko\{ADMIN_COLOR1, ADMIN_COLOR2};
+
 class Users
 {
 	const IMPORT_MODE_AUTO = 'auto';
@@ -604,5 +608,29 @@ class Users
 				throw $e;
 			}
 		}
+	}
+
+	static public function serveAvatar(int $id): void
+	{
+		$config = Config::getInstance();
+		$name = (string)($id ?: Utils::getIp());
+
+		$colors = [$config->color1 ?? ADMIN_COLOR1, $config->color2 ?? ADMIN_COLOR2];
+
+		// Add more random colors
+		foreach ($colors as $color) {
+			$rgb = Utils::rgbHexToDec($color);
+			$rgb[0] += 25;
+			$rgb[1] -= 25;
+			$rgb[2] += 25;
+			$colors[] = Utils::rgbDecToHex($rgb);
+			$rgb[0] -= 50;
+			$rgb[1] += 50;
+			$rgb[2] -= 50;
+			$colors[] = Utils::rgbDecToHex($rgb);
+		}
+
+		header('Content-Type: image/svg+xml; charset=utf-8');
+		echo Avatar::beam($name, ['colors' => $colors, 'size' => 128, 'square' => true]);
 	}
 }

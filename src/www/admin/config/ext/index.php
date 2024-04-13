@@ -23,7 +23,7 @@ $form->runIf(f('enable') !== null || f('disable') !== null, function () {
 	$name = current($ext);
 
 	Extensions::toggle($type, $name, $enabled);
-	Utils::redirect('!config/ext/?focus=' . $name);
+	Utils::redirect('!config/ext/details.php?type=' . $type . '&name=' . $name);
 }, $csrf_key);
 
 if (qg('install')) {

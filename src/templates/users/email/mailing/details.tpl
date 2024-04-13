@@ -49,10 +49,14 @@
 		<dd><pre class="preview"><code>{$mailing.body}</code></pre></dd>
 		{if $count}
 			<dt>Prévisualisation</dt>
-			<dd>{linkbutton shape="eye" label="Prévisualiser le message" href="?id=%d&preview"|args:$mailing.id target="_dialog"}<br />
-				<small class="help">(Un destinataire sera choisi au hasard.)</small></dd>
-			<dt></dt>
-			<dd class="help">Note : la prévisualisation peut différer du rendu final, selon le logiciel utilisé par vos destinataires pour lire leurs messages.</dd>
+			{if $mailing->isTemplate() && $mailing.sent}
+				<dd>La prévisualisation est indisponible pour ce message car il a été envoyé.</dd>
+			{else}
+				<dd>{linkbutton shape="eye" label="Prévisualiser le message" href="?id=%d&preview"|args:$mailing.id target="_dialog"}<br />
+				 <small class="help">(Un destinataire sera choisi au hasard.)</small></dd>
+				 <dt></dt>
+				 <dd class="help">Note : la prévisualisation peut différer du rendu final, selon le logiciel utilisé par vos destinataires pour lire leurs messages.</dd>
+			{/if}
 		{/if}
 	</dl>
 	{csrf_field key=$csrf_key}

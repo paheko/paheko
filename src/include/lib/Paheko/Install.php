@@ -404,16 +404,18 @@ class Install
 
 	static public function setLocalConfig(string $key, $value, bool $overwrite = true): void
 	{
-		$path = ROOT . DIRECTORY_SEPARATOR . CONFIG_FILE;
+		if (null === CONFIG_FILE) {
+			return;
+		}
 
-		if (!is_writable(ROOT)) {
-			throw new \RuntimeException('Impossible de créer le fichier de configuration "'. CONFIG_FILE .'". Le répertoire "'. ROOT . '" n\'est pas accessible en écriture.');
+		if (!is_writable(dirname(CONFIG_FILE))) {
+			throw new \RuntimeException('Impossible de créer le fichier de configuration "'. CONFIG_FILE .'". Le répertoire "'. dirname(CONFIG_FILE) . '" n\'est pas accessible en écriture.');
 		}
 
 		$new_line = sprintf('const %s = %s;', $key, var_export($value, true));
 
-		if (@filesize($path)) {
-			$config = file_get_contents($path);
+		if (@filesize(CONFIG_FILE)) {
+			$config = file_get_contents(CONFIG_FILE);
 
 			$pattern = sprintf('/^.*(?:const\s+%s|define\s*\(.*%1$s).*$/m', $key);
 
@@ -434,7 +436,7 @@ class Install
 				. $new_line . PHP_EOL;
 		}
 
-		file_put_contents($path, $config);
+		file_put_contents(CONFIG_FILE, $config);
 	}
 
 	static public function showProgressSpinner(?string $next = null, string $message = '')
