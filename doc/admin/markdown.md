@@ -419,6 +419,8 @@ Il est aussi possible d'utiliser la syntaxe avec des paramètres nommés :
 
 Les images qui ne sont pas mentionnées dans le texte seront affichées après le texte sous forme de galerie.
 
+Cette extension ne fonctionne que dans les pages du site web.
+
 ## Galerie d'images
 
 Il est possible d'afficher une galerie d'images (sous forme d'images miniatures) avec la balise `<<gallery` qui contient la liste des images à mettre dans la galerie :
@@ -436,6 +438,8 @@ Si aucun nom de fichier n'est indiqué, alors toutes les images jointes à la pa
 <<gallery>>
 ```
 
+Cette extension ne fonctionne que dans les pages du site web.
+
 ### Diaporama d'images
 
 On peut également afficher cette galerie sous forme de diaporama. Dans ce cas une seule image est affichée, et on peut passer de l'une à l'autre.
@@ -449,6 +453,8 @@ Nom_fichier_2.jpg
 >>
 ```
 
+Cette extension ne fonctionne que dans les pages du site web.
+
 ## Fichiers joints
 
 Pour créer un bouton permettant de voir ou télécharger un fichier joint à la page web, il suffit d'utiliser la syntaxe suivante :
@@ -459,6 +465,8 @@ Pour créer un bouton permettant de voir ou télécharger un fichier joint à la
 
 * `Nom_fichier.ext` : remplacer par le nom du fichier  (parmi les fichiers joints à la page)
 * `Libellé` : indique le libellé du qui sera affiché sur le bouton, si aucun libellé n'est indiqué alors c'est le nom du fichier qui sera affiché
+
+Cette extension ne fonctionne que dans les pages du site web.
 
 ## Vidéos
 
@@ -481,6 +489,8 @@ Exemple :
 ```
 <<video file="Ma_video.webm" poster="Ma_video_poster.jpg" width="640" height="360" subtitles="Ma_video_sous_titres.vtt">>
 ```
+
+Cette extension ne fonctionne que dans les pages du site web.
 
 ## Sommaire / table des matières automatique
 
