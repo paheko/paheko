@@ -57,5 +57,3 @@ UPDATE config_users_fields SET type = 'address' WHERE name = 'adresse' AND type 
 -- Remove useless data from mailings recipients
 UPDATE mailings_recipients SET extra_data = json_object('id', json_extract(extra_data, '$.id'), 'numero', json_extract(extra_data, '$.numero'), 'nom', json_extract(extra_data, '$.nom'))
 	WHERE id_mailing IN (SELECT id FROM mailings WHERE sent IS NOT NULL);
-
-VACUUM;
