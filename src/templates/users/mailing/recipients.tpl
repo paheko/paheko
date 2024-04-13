@@ -38,7 +38,7 @@
 				{/if}
 			</td>
 			<td class="actions">
-				{if $r.has_extra_data}
+				{if $r.has_extra_data && !$mailing.sent}
 					{linkbutton shape="menu" label="Données" href="recipient_data.php?id=%d&r=%d"|args:$mailing.id:$r.id target="_dialog"}
 				{/if}
 				{if $r.id_user}
@@ -47,7 +47,7 @@
 				{if !$mailing.sent}
 					{button shape="delete" label="Supprimer" name="delete" value=$r.id type="submit"}
 				{/if}
-				{if !$mailing.anonymous && $r.email}
+				{if !$mailing.anonymous && $r.email && !$mailing.sent}
 					{linkbutton href="details.php?id=%d&preview=%d"|args:$mailing.id:$r.id label="Prévisualiser" shape="eye" target="_dialog"}
 				{/if}
 			</td>
