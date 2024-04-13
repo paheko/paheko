@@ -533,7 +533,7 @@ namespace Paheko;
 
 /**
  * Adresse e-mail destinée à recevoir les erreurs de mail
- * (adresses invalides etc.) — Return-Path
+ * (adresses invalides etc.) — Return-Path / MAIL FROM
  *
  * Si laissé NULL, alors l'adresse e-mail de l'association sera utilisée.
  * En cas d'hébergement de plusieurs associations, il est conseillé
@@ -541,6 +541,9 @@ namespace Paheko;
  *
  * Voir la documentation de configuration sur des exemples de scripts
  * permettant de traiter les mails reçus à cette adresse.
+ *
+ * Si renseigné, cette adresse sera utilisée également comme "MAIL FROM"
+ * lors de la session avec le serveur SMTP.
  *
  * Défaut : null
  */
