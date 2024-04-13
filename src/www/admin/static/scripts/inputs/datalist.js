@@ -216,7 +216,7 @@
 				clearTimeout(t);
 				list.innerHTML = '';
 
-				if (!input.value.trim()) {
+				if (input.value.trim().length <= 2) {
 					close();
 					return;
 				}

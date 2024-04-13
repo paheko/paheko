@@ -19,7 +19,7 @@ class LocalAddressFinder
 
 	static public function search(string $country, string $search): ?array
 	{
-		if (!LOCAL_ADDRESSES_ROOT) {
+		if (!LOCAL_ADDRESSES_ROOT || !trim($search)) {
 			return null;
 		}
 
