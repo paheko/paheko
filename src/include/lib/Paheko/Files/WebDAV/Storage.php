@@ -482,6 +482,7 @@ class Storage extends AbstractStorage
 			WOPI::PROP_USER_NAME   => $user ? $user->name() : 'Anonyme',
 			WOPI::PROP_USER_ID     => $user ? $user->id() : null,
 			WOPI::PROP_USER_AVATAR => $user ? $user->avatar_url() : null,
+			WOPI::PROP_LAST_MODIFIED => $file->modified,
 		];
 	}
 }
