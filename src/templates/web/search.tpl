@@ -18,18 +18,7 @@
 	<section class="search-results">
 	{foreach from=$results item="result"}
 		<article>
-			<h3><a href="{"!web/?uri=%s"|local_url|args:$result.uri}" target="_parent">{$result.title}</a></h3>
-			{*
-			<h4>
-				<nav class="breadcrumbs">
-					<ul>
-						{foreach from=$result.breadcrumbs key="id" item="title"}
-							<li><a href="{"!web/?p=%s"|local_url|args:$id}" target="_parent">{$title}</a></li>
-						{/foreach}
-					</ul>
-				</nav>
-			</h4>
-			*}
+			<h3><a href="{"!web/?uri=%s"|local_url|args:$result.uri}" target="_parent">{$result.title_snippet|escape|restore_snippet_markup}</a></h3>
 			<p>{$result.snippet|escape|restore_snippet_markup}</p>
 		</article>
 	{/foreach}

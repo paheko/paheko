@@ -250,7 +250,9 @@ class Files
 		$query = sprintf('SELECT
 			*,
 			dirname(path) AS parent,
+			REPLACE(path, \'/\', \' / \') AS breadcrumbs,
 			snippet(files_search, \'<mark>\', \'</mark>\', \'…\', 2, -30) AS snippet,
+			snippet(files_search, \'<mark>\', \'</mark>\', \'…\', 1, -30) AS title_snippet,
 			rank(matchinfo(files_search), 0, 1.0, 1.0) AS points
 			FROM files_search
 			WHERE files_search MATCH ? %s
@@ -260,14 +262,7 @@ class Files
 		$out = [];
 
 		try {
-			$db = DB::getInstance();
-			$db->begin();
-
-			foreach ($db->iterate($query, ...$params) as $row) {
-				$out[] = $row;
-			}
-
-			$db->commit();
+			return DB::getInstance()->get($query, ...$params);
 		}
 		catch (DB_Exception $e) {
 			if (strpos($e->getMessage(), 'malformed MATCH') !== false) {
@@ -276,8 +271,6 @@ class Files
 
 			throw $e;
 		}
-
-		return $out;
 	}
 
 	static protected function _getParentClause(?string $parent = null): string

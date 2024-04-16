@@ -13,3 +13,7 @@ CREATE TABLE IF NOT EXISTS acc_charts
 
 INSERT INTO acc_charts SELECT * FROM acc_charts_old;
 DROP TABLE acc_charts_old;
+
+UPDATE files_search
+	SET title = (SELECT title FROM web_pages WHERE path = 'web/' || uri)
+	WHERE EXISTS (SELECT title FROM web_pages WHERE path = 'web/' || uri);

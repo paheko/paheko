@@ -28,7 +28,9 @@ class Web
 		$results = Files::search($search, File::CONTEXT_WEB . '%');
 
 		foreach ($results as &$result) {
-			$result->uri = substr($result->path, strlen(File::CONTEXT_WEB) + 1);
+			$path = substr($result->path, strlen(File::CONTEXT_WEB) + 1);
+			$result->uri = strtok($path, '/');
+			strtok('');
 		}
 
 		unset($result);
