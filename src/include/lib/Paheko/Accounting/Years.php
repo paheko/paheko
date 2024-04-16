@@ -121,6 +121,22 @@ class Years
 		return $out;
 	}
 
+	static public function create(?int $id_chart = null): Year
+	{
+		$year = new Year;
+
+		$new_dates = Years::getNewYearDates();
+		$year->start_date = $new_dates[0];
+		$year->end_date = $new_dates[1];
+		$year->label = sprintf('Exercice %s', $year->label_years());
+
+		if ($id_chart) {
+			$year->id_chart = $id_chart;
+		}
+
+		return $year;
+	}
+
 	static public function getNewYearDates(): array
 	{
 		$last_year = EntityManager::findOne(Year::class, 'SELECT * FROM @TABLE ORDER BY end_date DESC LIMIT 1;');
