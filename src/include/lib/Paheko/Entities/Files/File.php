@@ -1025,7 +1025,7 @@ class File extends Entity
 		elseif ($this->mime && ($this->mime === 'application/ogg' || strpos($this->mime, 'video/') === 0)) {
 			return sprintf('<video draggable="false" autoplay="false" controls="true" src="%s" />', $url);
 		}
-		elseif ($this->mime && strpos($this->mine, 'audio/') === 0) {
+		elseif ($this->mime && strpos($this->mime, 'audio/') === 0) {
 			return sprintf('<audio draggable="false" autoplay="false" controls="true" src="%s" />', $url);
 		}
 		elseif ($this->renderFormat()) {
@@ -1212,6 +1212,7 @@ class File extends Entity
 		else {
 			header('HTTP/1.1 404 Not Found', true, 404);
 			header('Content-Type: text/html', true);
+			header_remove('Content-Disposition');
 			throw new UserException('Le contenu de ce fichier est introuvable', 404);
 		}
 	}
