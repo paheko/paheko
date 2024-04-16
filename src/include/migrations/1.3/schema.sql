@@ -334,7 +334,7 @@ CREATE TABLE IF NOT EXISTS acc_charts
 -- Accounting charts (plans comptables)
 (
 	id INTEGER NOT NULL PRIMARY KEY,
-	country TEXT NOT NULL,
+	country TEXT NULL,
 	code TEXT NULL, -- the code is NULL if the chart is user-created or imported
 	label TEXT NOT NULL,
 	archived INTEGER NOT NULL DEFAULT 0 -- 1 = archived, cannot be changed
