@@ -226,8 +226,6 @@ code,label,description,position,bookmark
 51,"BANQUES, ÉTABLISSEMENTS FINANCIERS ET ASSIMILÉS",,Actif,
 511,Valeurs à l’encaissement,,Actif ou passif,Favori
 512,Banques,,Actif ou passif,
-512A,Compte courant,,Actif ou passif,Favori
-514,Chèques postaux,,Actif ou passif,Favori
 515,« Caisses » du Trésor et des établissements publics,,Actif ou passif,
 516,Sociétés de bourse,,Actif,
 517,Autres organismes financiers,,Actif ou passif,

@@ -532,7 +532,6 @@ code,label,description,position,bookmark
 5112,Chèques à encaisser,,Actif ou passif,Favori
 5115,Paiements par carte à encaisser,,Actif ou passif,
 512,Banques,,Actif,
-514,Chèques postaux,,Actif,
 515,"""Caisses"" du Trésor et des établissements publics",,Actif,
 516,Sociétés de bourse,,Actif,
 517,Autres organismes financiers,,Actif,
