@@ -29,34 +29,124 @@ use const Paheko\{WWW_URL, WWW_URI, ADMIN_URL, BASE_URL, SHARED_USER_TEMPLATES_C
 
 class UserTemplate extends \KD2\Brindille
 {
+	/**
+	 * Path where local modules templates are stored
+	 */
 	const DIST_ROOT = ROOT . '/modules/';
 
-	public $_tpl_path;
-	protected $content_type = null;
-	protected $modified;
+	/**
+	 * Relative template path, passed in __construct()
+	 */
+	public ?string $_tpl_path = null;
+
+	/**
+	 * Last modification timestamp of code
+	 */
+	protected int $modified;
+
+	/**
+	 * Local File object containing the source code
+	 * (see __construct)
+	 */
 	protected ?File $file = null;
+
+	/**
+	 * Template source code, if template is created from a string
+	 * (see __construct)
+	 */
 	protected ?string $code = null;
-	protected string $cache_path;
+
+	/**
+	 * Local path to template file
+	 * (see __construct)
+	 */
 	protected ?string $path = null;
+
+	/**
+	 * Local filesystem path to cached compiled PHP code
+	 * This can either be in a shared cache (cached code is shared between all organizations)
+	 * if the source code comes from a DIST template, or in a cache root specific to this organization.
+	 */
+	protected string $cache_path;
+
+	/**
+	 * Parent template object, in case this template is included from another one.
+	 */
 	protected ?UserTemplate $parent = null;
+
+	/**
+	 * Related module object. This can be NULL if the template is not related to a module.
+	 * (for example template from a string, used when sending newsletters)
+	 */
 	public ?Module $module = null;
+
+	/**
+	 * List of HTTP headers. The template can set some HTTP headers through the 'http'
+	 * function. These headers are then returned to the HTTP client when the template
+	 * is displayed.
+	 */
 	protected array $headers = [];
 
+	/**
+	 * Default escaping used for displayed variables.
+	 * ("auto-escaping")
+	 */
 	protected $escape_default = 'html';
 
-	static protected $root_variables;
+	/**
+	 * Return TRUE if the filename is probably Brindille template code
+	 * and should be treated as a UserTemplate
+	 */
+	static public function isTemplate(string $filename): bool
+	{
+		$dot = strrpos($filename, '.');
 
+		// Templates with no extension are returned as HTML by default
+		// unless {{:http type=...}} is used
+		if ($dot === false) {
+			return true;
+		}
+
+		$ext = substr($filename, $dot+1);
+
+		switch ($ext) {
+			case 'html':
+			case 'htm':
+			case 'tpl':
+			case 'btpl':
+			case 'b':
+			case 'skel':
+			case 'xml':
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	/**
+	 * Create a UserTemplate object from a string.
+	 *
+	 * This is used for example when creating a newsletter, where
+	 * the user can set tags and conditions to format the contents
+	 * of the newsletter.
+	 *
+	 * UserTemplate objects created with this method always
+	 * have auto-escaping turned off, and safe mode turned on,
+	 * as it is mostly used for e-mailing.
+	 */
 	static public function createFromUserString(string $content): ?self
 	{
 		static $templates = [];
 
-		// Create UserTemplate
-		if (false === strpos($content, '{{')) {
+		// Don't create a UserTemplate instance if the string
+		// doesn't contain any Brindille code
+		if (false === strpos($content, '{{') || false === strpos($content, '}}')) {
 			return null;
 		}
 
 		$hash = md5($content);
 
+		// re-use a local cache of template instances
 		if (isset($templates[$hash])) {
 			return $templates[$hash];
 		}
@@ -64,16 +154,25 @@ class UserTemplate extends \KD2\Brindille
 		$tpl = new UserTemplate(null);
 		$tpl->setCode($content);
 		$tpl->toggleSafeMode(true);
+
+		// Disabling escape must be done after safe mode, or it will re-enable htmlspecialchars
 		$tpl->setEscapeDefault(null);
+
 		$templates[$hash] = $tpl;
 
 		return $tpl;
 	}
 
+	/**
+	 * Return an array of all root variables assigned to a template by default
+	 */
 	static public function getRootVariables()
 	{
-		if (null !== self::$root_variables) {
-			return self::$root_variables;
+		static $root_variables = null;
+
+		// Use local cache, don't recreate the array for every loaded template
+		if (null !== $root_variables) {
+			return $root_variables;
 		}
 
 		static $keys = ['color1', 'color2', 'site_disabled', 'org_name', 'org_address', 'org_email', 'org_phone', 'org_web', 'org_infos', 'currency', 'country', 'files'];
@@ -91,7 +190,7 @@ class UserTemplate extends \KD2\Brindille
 		$cfg['files'] = $files;
 
 		// @deprecated
-		// FIXME: remove in a future version
+		// FIXME: remove these legacy variables in a future version (1.4?)
 		$cfg['nom_asso'] = $cfg['org_name'];
 		$cfg['adresse_asso'] = $cfg['org_address'];
 		$cfg['email_asso'] = $cfg['org_email'];
@@ -108,7 +207,7 @@ class UserTemplate extends \KD2\Brindille
 		$session = Session::getInstance();
 		$is_logged = $session->isLogged();
 
-		self::$root_variables = [
+		$root_variables = [
 			'version_hash' => Utils::getVersionHash(),
 			'root_url'     => WWW_URL,
 			'root_uri'     => WWW_URI,
@@ -127,27 +226,44 @@ class UserTemplate extends \KD2\Brindille
 			'pdf_enabled'  => PDF_COMMAND !== null,
 		];
 
-		return self::$root_variables;
+		return $root_variables;
 	}
 
+	/**
+	 * Constructs a new UserTemplate object for a module template path.
+	 *
+	 * The source code of the template will be taken either:
+	 * 1. from the code imported into the organization, and stored inside
+	 * the organization files (see File entity).
+	 * 2. if a file of this path does not exist in the organization files,
+	 * then we will try to use the default (DIST = distributed) modules
+	 * files.
+	 *
+	 * Example: new UserTemplates('bookings/index.html')
+	 * will try to load the org. file in "modules/bookings/index.html" if it
+	 * exists. If not it will try to load ROOT . "/modules/bookings.html"
+	 * from the local filesystem.
+	 *
+	 * If $path is left NULL, we assume we want to supply the source code
+	 * using another method, eg. by using 'createFromUserString' method
+	 */
 	public function __construct(?string $path = null)
 	{
-		if ($path) {
+		if ($path !== null) {
 			$path = trim($path, '/');
+			$this->_tpl_path = $path;
+
+			if ($file = Files::get(File::CONTEXT_MODULES . '/' . $path)) {
+				$this->setLocalSource($file);
+			}
+			else {
+				$this->setSource(self::DIST_ROOT . $path);
+			}
+
+			$this->assignArray(self::getRootVariables());
+
+			$this->registerAll();
 		}
-
-		$this->_tpl_path = $path ?? '';
-
-		if ($path && $file = Files::get(File::CONTEXT_MODULES . '/' . $path)) {
-			$this->setLocalSource($file);
-		}
-		elseif ($path) {
-			$this->setSource(self::DIST_ROOT . $path);
-		}
-
-		$this->assignArray(self::getRootVariables());
-
-		$this->registerAll();
 
 		Plugins::fire('usertemplate.init', false, ['template' => $this]);
 	}
@@ -165,11 +281,14 @@ class UserTemplate extends \KD2\Brindille
 	public function toggleSafeMode(bool $safe_mode): void
 	{
 		if ($safe_mode) {
+			// Make sure there are zero modifiers, functions, sections or compile blocks enabled
 			$this->_functions = [];
 			$this->_sections = [];
 			$this->_blocks = [];
+			$this->_modifiers = [];
+			$this->_modifiers_with_instance = [];
 
-			// Register default Brindille modifiers
+			// Register default Brindille modifiers instead
 			$this->registerDefaults();
 		}
 		else {
@@ -177,6 +296,9 @@ class UserTemplate extends \KD2\Brindille
 		}
 	}
 
+	/**
+	 * Set default escaping modifier
+	 */
 	public function setEscapeDefault(?string $default): void
 	{
 		$this->escape_default = $default;
@@ -263,10 +385,17 @@ class UserTemplate extends \KD2\Brindille
 		$this->file = null;
 		$this->path = $path;
 
-		// Use shared cache for default templates
+		// Use shared cache for default (DIST) templates
 		$this->cache_path = SHARED_USER_TEMPLATES_CACHE_ROOT;
 	}
 
+	/**
+	 * Return TRUE if template code comes from a local DIST file and not from
+	 * a user-supplied string (either a user-created template file or string).
+	 *
+	 * This allows us to remove restrictions on the number of recipients of
+	 * emails sent using the {{:mail ...}} function.
+	 */
 	public function isTrusted(): bool
 	{
 		return isset($this->path) && !isset($this->code) && !isset($this->file);
@@ -275,7 +404,7 @@ class UserTemplate extends \KD2\Brindille
 	/**
 	 * Load template code from a string
 	 */
-	public function setCode(string $code)
+	public function setCode(string $code): void
 	{
 		$this->code = $code;
 		$this->file = null;
@@ -285,50 +414,37 @@ class UserTemplate extends \KD2\Brindille
 		$this->cache_path = USER_TEMPLATES_CACHE_ROOT;
 	}
 
-	protected function _getCachePath()
+	/**
+	 * Return compiled cache path
+	 */
+	protected function _getCachePath(): string
 	{
 		$hash = sha1($this->file ? $this->file->path : ($this->code ?: $this->path));
 		return sprintf('%s/%s.php', $this->cache_path, $hash);
+	}
+
+	/**
+	 * Return template code
+	 */
+	public function fetchCode(): string
+	{
+		if ($this->code) {
+			return $this->code;
+		}
+		elseif ($this->file) {
+			return $this->file->fetch();
+		}
+		else {
+			return file_get_contents($this->path);
+		}
 	}
 
 	public function display(): void
 	{
 		$compiled_path = $this->_getCachePath();
 
-		if (!is_dir(dirname($compiled_path))) {
-			// Force cache directory mkdir
-			Utils::safe_mkdir(dirname($compiled_path), 0777, true);
-		}
-
 		try {
-			if (file_exists($compiled_path) && filemtime($compiled_path) >= $this->modified) {
-				$return = include($compiled_path);
-
-				if ($return === 'STOP') {
-					exit;
-				}
-
-				return;
-			}
-
-			$tmp_path = $compiled_path . '.tmp';
-
-			if ($this->code) {
-				$source = $this->code;
-			}
-			elseif ($this->file) {
-				$source = $this->file->fetch();
-			}
-			else {
-				$source = file_get_contents($this->path);
-			}
-
-			$code = $this->compile($source);
-			file_put_contents($tmp_path, $code);
-
-			$return = include($tmp_path);
-
-			@rename($tmp_path, $compiled_path);
+			$return = $this->displayUsingCache([$this, 'fetchCode'], $compiled_path, $this->modified);
 		}
 		catch (Brindille_Exception $e) {
 			$path = $this->file ? $this->file->path : ($this->code ? 'code' : str_replace(ROOT, '…', $this->path));
@@ -351,13 +467,12 @@ class UserTemplate extends \KD2\Brindille
 			}
 		}
 		catch (\Throwable $e) {
-			// Don't delete temporary file as it can be used to debug
 			throw $e;
 		}
-		finally {
-			@unlink($tmp_path);
-		}
 
+		// If template returned 'STOP' string (eg. from the redirect function),
+		// call exit now. Don't call exit in Brindille functions, or it might mess
+		// with execution of other stuff, for example commitring a DB transaction
 		if ($return === 'STOP') {
 			exit;
 		}
@@ -378,6 +493,9 @@ class UserTemplate extends \KD2\Brindille
 		return ob_get_clean();
 	}
 
+	/**
+	 * Export template to PDF or HTML, and store it in files
+	 */
 	public function fetchAsAttachment(?string $type = null): File
 	{
 		$content = $this->fetch();
@@ -409,6 +527,13 @@ class UserTemplate extends \KD2\Brindille
 		return $file;
 	}
 
+	/**
+	 * Simulate fetching a template as if it was requested by a HTTP GET request,
+	 * just by supplying its URI address.
+	 *
+	 * This is used to attach a template to an email for example:
+	 * {{:mail to="me@example.org" attach_from="/m/welcome/page.html?id=45"}}
+	 */
 	public function fetchToAttachment(string $uri): File
 	{
 		$parts = explode('?', $uri, 2);
@@ -422,109 +547,9 @@ class UserTemplate extends \KD2\Brindille
 		return $ut->fetchAsAttachment();
 	}
 
-	static public function isTemplate(string $filename): bool
-	{
-		$dot = strrpos($filename, '.');
-
-		// Templates with no extension are returned as HTML by default
-		// unless {{:http type=...}} is used
-		if ($dot === false) {
-			return true;
-		}
-
-		$ext = substr($filename, $dot+1);
-
-		switch ($ext) {
-			case 'html':
-			case 'htm':
-			case 'tpl':
-			case 'btpl':
-			case 'b':
-			case 'skel':
-			case 'xml':
-				return true;
-			default:
-				return false;
-		}
-	}
-
-	public function getStatusCode(): int
-	{
-		return (int) ($this->headers['code'] ?? 200);
-	}
-
-	public function getContentType(): string
-	{
-		return $this->headers['type'] ?? 'text/html';
-	}
-
-	public function serve(): void
-	{
-		$path = $this->path ?? $this->file->path;
-
-		if (!self::isTemplate($path)) {
-			throw new \InvalidArgumentException('Not a valid template file extension: ' . $this->path);
-		}
-
-		$content = $this->fetch();
-
-		$this->dumpHeaders();
-
-		if ($this->getContentType() == 'application/pdf') {
-			Utils::streamPDF($content);
-		}
-		else {
-			echo $content;
-		}
-	}
-
-	public function error(\Exception $e, string $message)
-	{
-		$header = ini_get('error_prepend_string');
-		$header = preg_replace('!<if\((sent|logged|report|email|log)\)>(.*?)</if>!is', '', $header);
-		echo $header;
-
-		$name = strtok($this->_tpl_path, '/');
-		strtok('');
-
-		$path = $this->file->name ?? $this->path;
-		$location = sprintf('Dans le code du module "%s"', $name);
-
-		printf('<section><header><h1>%s</h1><h2>%s</h2></header>',
-			$location, nl2br(htmlspecialchars($message)));
-
-		if ($this->code || !preg_match('/Line (\d+)\s*:/i', $message, $match)) {
-			return;
-		}
-
-		$line = $match[1] - 1;
-
-		if ($this->file) {
-			$file = explode("\n", $this->file->fetch());
-		}
-		else {
-			$file = file($path);
-		}
-
-		$start = max(0, $line - 5);
-		$max = min(count($file), $line + 6);
-
-		echo '<pre><code>';
-
-		for ($i = $start; $i < $max; $i++) {
-			$code = sprintf('<b>%d</b>%s', $i + 1, htmlspecialchars($file[$i]));
-
-			if ($i == $line) {
-				$code = sprintf('<u>%s</u>', $code);
-			}
-
-			echo rtrim($code) . "\n";
-		}
-
-		echo '</code></pre>';
-		exit;
-	}
-
+	/**
+	 * Set template HTTP header
+	 */
 	public function setHeader(string $name, string $value): void
 	{
 		if ($this->parent) {
@@ -537,11 +562,17 @@ class UserTemplate extends \KD2\Brindille
 		}
 	}
 
+	/**
+	 * Return template HTTP header
+	 */
 	public function getHeader(string $name): ?string
 	{
 		return $this->headers[$name] ?? null;
 	}
 
+	/**
+	 * Dump saved HTTP headers to current HTTP client
+	 */
 	public function dumpHeaders(): void
 	{
 		if (isset($this->headers['code'])) {
@@ -630,6 +661,101 @@ class UserTemplate extends \KD2\Brindille
 		}
 	}
 
+	/**
+	 * Return status code of the current template,
+	 * set by {{:http code=XXX}}
+	 */
+	public function getStatusCode(): int
+	{
+		return (int) ($this->headers['code'] ?? 200);
+	}
+
+	/**
+	 * Return HTTP Content-Type header, as set by
+	 * {{:http type=XXX}}
+	 */
+	public function getContentType(): string
+	{
+		return $this->headers['type'] ?? 'text/html';
+	}
+
+	/**
+	 * Will serve the current template file, as if requested
+	 * from a HTTP request.
+	 */
+	public function serve(): void
+	{
+		$path = $this->path ?? $this->file->path;
+
+		if (!self::isTemplate($path)) {
+			throw new \InvalidArgumentException('Not a valid template file extension: ' . $this->path);
+		}
+
+		$content = $this->fetch();
+
+		$this->dumpHeaders();
+
+		if ($this->getContentType() == 'application/pdf') {
+			Utils::streamPDF($content);
+		}
+		else {
+			echo $content;
+		}
+	}
+
+	/**
+	 * Display custom error page for Brindille errors.
+	 * Because we want to give the admin enough information on the issue
+	 * so they can fix the issue in the code.
+	 */
+	public function error(\Exception $e, string $message)
+	{
+		// Fetch HTML error header from error_prepend_string (see ErrorManager)
+		$header = ini_get('error_prepend_string');
+		$header = preg_replace('!<if\((sent|logged|report|email|log)\)>(.*?)</if>!is', '', $header);
+		echo $header;
+
+		$name = strtok($this->_tpl_path, '/');
+		strtok('');
+
+		$path = $this->file->name ?? $this->path;
+		$location = sprintf('Dans le code du module "%s"', $name);
+
+		printf('<section><header><h1>%s</h1><h2>%s</h2></header>',
+			$location, nl2br(htmlspecialchars($message)));
+
+		if ($this->code || !preg_match('/Line (\d+)\s*:/i', $message, $match)) {
+			return;
+		}
+
+		$line = $match[1] - 1;
+
+		if ($this->file) {
+			$file = explode("\n", $this->file->fetch());
+		}
+		else {
+			$file = file($path);
+		}
+
+		$start = max(0, $line - 5);
+		$max = min(count($file), $line + 6);
+
+		echo '<pre><code>';
+
+		for ($i = $start; $i < $max; $i++) {
+			$code = sprintf('<b>%d</b>%s', $i + 1, htmlspecialchars($file[$i]));
+
+			if ($i == $line) {
+				$code = sprintf('<u>%s</u>', $code);
+			}
+
+			echo rtrim($code) . "\n";
+		}
+
+		echo '</code></pre>';
+		exit;
+	}
+
 	public function _callFunction(string $name, array $params, int $line) {
 		try {
 			return call_user_func($this->_functions[$name], $params, $this, $line);
@@ -642,12 +768,19 @@ class UserTemplate extends \KD2\Brindille
 		}
 	}
 
-	public function setParent(UserTemplate $tpl)
+	/**
+	 * This is used by the include template function, to establish
+	 * where an included template is included from
+	 */
+	public function setParent(UserTemplate $tpl): void
 	{
 		$this->parent = $tpl;
 		$this->setModule($tpl->module);
 	}
 
+	/**
+	 * Set additional variables specific to modules
+	 */
 	public function setModule(?Module $module): void
 	{
 		if (!$module) {
