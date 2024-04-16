@@ -25,7 +25,7 @@ if (!$file->canWrite()) {
 }
 
 // Handle all the file editor
-$saved = $file->editor(Session::getInstance());
+$saved = $file->editor($content, Session::getInstance());
 
 if ($saved) {
 	Utils::redirect(Utils::getSelfURI());

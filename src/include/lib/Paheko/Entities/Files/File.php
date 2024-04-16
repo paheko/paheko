@@ -1069,7 +1069,7 @@ class File extends Entity
 		}
 	}
 
-	public function editor(?Session $session = null): bool
+	public function editor(string $content = null, ?Session $session = null): bool
 	{
 		$editor = $this->editorType() ?? 'code';
 		$csrf_key = 'edit_file_' . $this->pathHash();
