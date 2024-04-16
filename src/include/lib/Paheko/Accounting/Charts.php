@@ -16,7 +16,7 @@ class Charts
 {
 	const BUNDLED_CHARTS = [
 		'fr_pca_1999' => 'Plan comptable associatif 1999',
-		'fr_pca_2018' => 'Plan comptable associatif 2025 (Règlement ANC n° 2022-06)',
+		'fr_pca_2018' => 'Plan comptable associatif (2018, révision 2025)',
 		'fr_pcc_2020' => 'Plan comptable des copropriétés (2005 révisé en 2024)',
 		'fr_cse_2015' => 'Plan comptable des CSE (Comité Social et Économique) (Règlement ANC n°2015-01)',
 		'fr_pcg_2014' => 'Plan comptable général, pour entreprises (Règlement ANC n° 2014-03, consolidé 2024)',
@@ -40,6 +40,10 @@ class Charts
 
 	static public function updateInstalled(string $chart_code): ?Chart
 	{
+		if (!isset(self::BUNDLED_CHARTS[$chart_code])) {
+			throw new \LogicException('This chart code does not exist: ' . $chart_code);
+		}
+
 		$file = sprintf('%s/include/data/charts/%s.csv', ROOT, $chart_code);
 		$country = strtoupper(substr($chart_code, 0, 2));
 		$code = strtoupper(substr($chart_code, 3));
@@ -49,6 +53,9 @@ class Charts
 		if (!$chart) {
 			return null;
 		}
+
+		$chart->set('label', self::BUNDLED_CHARTS[$chart_code]);
+		$chart->save();
 
 		$chart->importCSV($file, true);
 		return $chart;
