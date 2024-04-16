@@ -320,12 +320,12 @@ class Module extends Entity
 
 	public function getDataSize(): int
 	{
-		return DB::getInstance()->getTableSize(sprintf('module_data_%s', $this->name));
+		return (int) DB::getInstance()->getTableSize(sprintf('module_data_%s', $this->name));
 	}
 
 	public function getConfigSize(): int
 	{
-		return DB::getInstance()->firstColumn('SELECT LENGTH(config) FROM modules WHERE id = ?;', $this->id()) ?: 0;
+		return (int) DB::getInstance()->firstColumn('SELECT LENGTH(config) FROM modules WHERE id = ?;', $this->id());
 	}
 
 	public function getCodeSize(): int
