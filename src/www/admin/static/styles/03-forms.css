@@ -1002,7 +1002,7 @@ dl.share dt, dl.share dd {
     box-shadow: 0 0 5px .2rem rgba(var(--gMainColor), 0.5);
     overflow: hidden;
     overflow-y: auto;
-    max-height: 250px;
+    max-height: 20em;
     z-index: 1000;
 }
 
