@@ -296,6 +296,9 @@ class Config extends Entity
 		if (!array_key_exists($this->timezone, $tzlist)) {
 			$this->set('timezone', key($tzlist));
 		}
+
+		$this->assert(null === $this->color1 || preg_match('/^#[a-f0-9]{6}$/i', $this->color1));
+		$this->assert(null === $this->color2 || preg_match('/^#[a-f0-9]{6}$/i', $this->color2));
 	}
 
 	public function getSiteURL(): ?string

@@ -17,3 +17,5 @@ DROP TABLE acc_charts_old;
 UPDATE files_search
 	SET title = (SELECT title FROM web_pages WHERE path = 'web/' || uri)
 	WHERE EXISTS (SELECT title FROM web_pages WHERE path = 'web/' || uri);
+
+UPDATE config SET value = NULL WHERE value = '' AND key IN ('color1', 'color2');
