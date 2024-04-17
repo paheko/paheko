@@ -473,6 +473,25 @@ Note : seul les fichiers de la section site web sont accessibles, les fichiers d
 
 # Sections relatives aux modules
 
+## module
+
+Permet de charger les informations d'un autre module. Utile pour récupérer ses infos, ou vérifier si un module est activé.
+
+Si un module est désactivé, la section ne renverra aucun résultat.
+
+| Paramètre | Optionnel / obligatoire ? | Fonction |
+| :- | :- | :- |
+| `module` | **obligatoire** | Nom unique du module |
+
+```
+{{#module name="bookings"}}
+	Le module réservations est activé.
+	Sa configuration est : {{:debug config=$config}}
+{{else}}
+	Le module réservations est désactivé.
+{{/if}}
+```
+
 ## form
 
 Permet de gérer la soumission d'un formulaire (`<form method="post"…>` en HTML).
