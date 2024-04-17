@@ -254,15 +254,11 @@ class UserTemplate extends \KD2\Brindille
 			$this->_tpl_path = $path;
 
 			if ($file = Files::get(File::CONTEXT_MODULES . '/' . $path)) {
-				$this->setLocalSource($file);
+				$this->setSourceFile($file);
 			}
 			else {
-				$this->setSource(self::DIST_ROOT . $path);
+				$this->setSourcePath(self::DIST_ROOT . $path);
 			}
-
-			$this->assignArray(self::getRootVariables());
-
-			$this->registerAll();
 		}
 
 		Plugins::fire('usertemplate.init', false, ['template' => $this]);
@@ -290,6 +286,8 @@ class UserTemplate extends \KD2\Brindille
 
 			// Register default Brindille modifiers instead
 			$this->registerDefaults();
+
+			$this->assignArray(self::getRootVariables());
 		}
 		else {
 			$this->registerAll();
@@ -313,6 +311,8 @@ class UserTemplate extends \KD2\Brindille
 
 	public function registerAll()
 	{
+		$this->assignArray(self::getRootVariables());
+
 		// Register default Brindille modifiers
 		$this->registerDefaults();
 
@@ -361,7 +361,7 @@ class UserTemplate extends \KD2\Brindille
 	/**
 	 * Load template code from a user-stored file
 	 */
-	public function setLocalSource(File $file)
+	public function setSourceFile(File $file)
 	{
 		if ($file->type != $file::TYPE_FILE) {
 			throw new \LogicException('Cannot construct a UserTemplate with a directory');
@@ -371,12 +371,14 @@ class UserTemplate extends \KD2\Brindille
 		$this->modified = $file->modified->getTimestamp();
 
 		$this->cache_path = USER_TEMPLATES_CACHE_ROOT;
+
+		$this->registerAll();
 	}
 
 	/**
 	 * Load template code from a filesystem file
 	 */
-	public function setSource(string $path)
+	public function setSourcePath(string $path)
 	{
 		if (!($this->modified = @filemtime($path))) {
 			throw new \InvalidArgumentException('File not found: ' . $path);
@@ -387,6 +389,8 @@ class UserTemplate extends \KD2\Brindille
 
 		// Use shared cache for default (DIST) templates
 		$this->cache_path = SHARED_USER_TEMPLATES_CACHE_ROOT;
+
+		$this->registerAll();
 	}
 
 	/**
