@@ -85,8 +85,8 @@
 		<tbody>
 			{foreach from=$results item="row"}
 			<tr>
-			{if $is_admin && $id_column !== false}
-				<td class="check">{input type="checkbox" name="selected[]" value=$row[$id_column]}</td>
+			{if $is_admin && $id_column !== false && ($value = $row[$id_column] ?? null)}
+				<td class="check">{input type="checkbox" name="selected[]" value=$value}</td>
 			{/if}
 				{foreach from=$header key="i" item="label"}
 				<td>
