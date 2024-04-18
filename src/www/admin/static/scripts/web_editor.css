@@ -90,7 +90,7 @@ nav.te .save-label {
 }
 
 .textEditor.iframe nav button.close {
-    display: block;
+    display: inline-flex;
     margin: 0 auto;
 }
 
