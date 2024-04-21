@@ -44,6 +44,11 @@
 		list = list2;
 
 		var open = () => {
+			if (!list.options.length) {
+				close();
+				return;
+			}
+
 			container.classList.add('open');
 			let current = getSelectedOptionIndex();
 		};
