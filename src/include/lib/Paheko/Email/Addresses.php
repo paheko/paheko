@@ -117,6 +117,8 @@ class Addresses
 		elseif ($r === 'blocked') {
 			return 'Adresse e-mail invalide : impossible d\'envoyer des mails à un service (de type mailinblack ou spamenmoins) qui demande une validation manuelle de l\'expéditeur. Merci de choisir une autre adresse e-mail.';
 		}
+
+		return null;
 	}
 
 	static public function isValid(string $address, bool $check_mx = true): bool
