@@ -77,6 +77,7 @@ class Utils
 		'trash'           => '🗑',
 		'history'         => '⌚',
 		'link'            => '🔗',
+		'party'           => '🎉',
 	];
 
 	const FRENCH_DATE_NAMES = [

@@ -89,13 +89,19 @@ if (ALERT_MESSAGE && !$dialog) {
 			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
 				<li{if $current == 'users/new'} class="current"{/if}><a href="{$admin_uri}users/new.php" accesskey="A">Ajouter</a></li>
 			{/if}
-				<li{if $current == 'users/services'} class="current"{/if}><a href="{$admin_uri}services/">Activités &amp; cotisations</a></li>
 			{if !DISABLE_EMAIL && $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
 				<li{if $current == 'users/mailing'} class="current"{/if}><a href="{$admin_uri}users/email/mailing/">Messages collectifs</a></li>
 			{/if}
 			</ul>
 			</li>
 		{/if}
+		<li class="{if $current === 'services'} current{elseif $current_parent === 'services'} current_parent{/if}"><h3><a href="{$admin_uri}services/">{icon shape="party"}<b>Activités</b></a></h3>
+			<ul>
+				<li><a href="#" accesskey="E">Encaisser</a></li>
+				<li><a href="#">Paiements</a></li>
+				<li><a href="#">Produits et stock</a></li>
+			</ul>
+		</li>
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
 			<li class="{if $current == 'acc'} current{elseif $current_parent == 'acc'} current_parent{/if}"><h3><a href="{$admin_uri}acc/">{icon shape="money"}<b>Comptabilité</b></a></h3>
 			<ul>
