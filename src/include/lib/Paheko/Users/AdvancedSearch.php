@@ -27,10 +27,10 @@ class AdvancedSearch extends A_S
 		$order = $fields::getFirstSearchableNameField();
 
 		if ($order === null) {
-			$order = 'u.' . $fields::getFirstNameField();
+			$order = 'u.' . $db->quote($fields::getFirstNameField());
 		}
 		else {
-			$order = 'us.' . $order;
+			$order = 'us.' . $db->quote($order);
 		}
 
 		$order .= ' %s';
@@ -85,7 +85,7 @@ class AdvancedSearch extends A_S
 			];
 
 			if ($fields->isText($name)) {
-				$column['order'] = sprintf('%s COLLATE U_NOCASE %%s', $name);
+				$column['order'] = sprintf('%s COLLATE U_NOCASE %%s', $identifier);
 			}
 
 			if ($field->type == 'checkbox')

@@ -88,6 +88,7 @@
 		</ol></li>
 		<li><a href="#sections-relatives-aux-modules">Sections relatives aux modules</a>
 		<ol>
+			<li><a href="#module">module</a></li>
 			<li><a href="#form">form</a></li>
 			<li><a href="#load-sup-sql-sup">load <sup>(sql)</sup></a></li>
 			<li><a href="#list">list</a>
@@ -779,6 +780,31 @@ Il y a {{$result.count}} articles.
 </tbody>
 </table>
 <h1 id="sections-relatives-aux-modules">Sections relatives aux modules</h1>
+<h2 id="module">module</h2>
+<p>Permet de charger les informations d'un autre module. Utile pour récupérer ses infos, ou vérifier si un module est activé.</p>
+<p>Si un module est désactivé, la section ne renverra aucun résultat.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Optionnel / obligatoire ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>module</code></td>
+<td style="text-align: left;"><strong>obligatoire</strong></td>
+<td style="text-align: left;">Nom unique du module</td>
+</tr>
+</tbody>
+</table>
+<pre><code>{{#module name="bookings"}}
+    Le module réservations est activé.
+    Sa configuration est : {{:debug config=$config}}
+{{else}}
+    Le module réservations est désactivé.
+{{/if}}</code></pre>
 <h2 id="form">form</h2>
 <p>Permet de gérer la soumission d'un formulaire (<code>&lt;form method="post"…&gt;</code> en HTML).</p>
 <p>Si l'élément dont le nom spécifié dans le paramètre <code>on</code> a été envoyé en <code>POST</code>, alors le code à l'intérieur de la section est exécuté.</p>

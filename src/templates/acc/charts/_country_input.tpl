@@ -6,7 +6,7 @@ $country_list = Chart::COUNTRY_LIST + ['' => '— Autre'];
 
 if (!isset($chart)) {
 	$chart = new Chart;
-	$chart->country = Config::getInstance()->pays;
+	$chart->country = Config::getInstance()->country;
 }
 
 $name ??= 'country';

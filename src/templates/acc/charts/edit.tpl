@@ -6,7 +6,7 @@
 	<fieldset>
 		<legend>Modifier un plan comptable</legend>
 		<dl>
-			{input type="text" name="label" label="Libellé" required=1 source=$chart}
+			{input type="text" name="label" label="Libellé" required=1 source=$chart disabled=$chart.code}
 			{if !$chart.code && !$chart.country}
 				{include file="./_country_input.tpl"}
 			{/if}

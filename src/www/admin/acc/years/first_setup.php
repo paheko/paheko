@@ -7,7 +7,6 @@ use Paheko\Accounting\Charts;
 use Paheko\Accounting\Transactions;
 use Paheko\Accounting\Years;
 use Paheko\Entities\Accounting\Account;
-use Paheko\Entities\Accounting\Year;
 
 require_once __DIR__ . '/../../_inc.php';
 
@@ -15,7 +14,7 @@ $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
 $csrf_key = 'first_setup';
 
-$year = new Year;
+$year = Years::create();
 
 $config = Config::getInstance();
 $default_chart = Charts::getFirstForCountry($config->country);
@@ -30,10 +29,6 @@ elseif ($selected_chart) {
 elseif ($default_chart) {
 	$year->id_chart = $default_chart->id;
 }
-
-$new_dates = Years::getNewYearDates();
-$year->start_date = $new_dates[0];
-$year->end_date = $new_dates[1];
 
 $new_accounts = f('accounts');
 

@@ -397,6 +397,7 @@ code,label,description,position,bookmark
 6481,Indemnités du personnel de culte,,Charge,
 6485,Charges sociales sur indemnités de culte,,Charge,
 6488,Autres charges de personnel,,Charge,
+649,Remboursements de charges de personnel,,Charge,
 65,AUTRES CHARGES DE GESTION COURANTE,,Charge,
 6511,"Redevances pour concessions, brevets, licences",,Charge,
 6516,Droits d'auteur et de reproduction,,Charge,
@@ -409,6 +410,7 @@ code,label,description,position,bookmark
 657,Aides financières,,Charge,
 6571,Aides financières octroyées,,Charge,
 6572,Quotes-parts de générosité reversée,,Charge,
+6573,Apports ou affectations en numéraire,,Charge,
 658,Charges diverses de gestion courante,,Charge,Favori
 6586,Cotisations (vie statutaire),,Charge,
 6588,Charges diverses de gestion courante,,Charge,
@@ -482,7 +484,8 @@ code,label,description,position,bookmark
 722,Production immobilisée corporelle,,Produit,
 73,CONCOURS PUBLICS,,Produit,
 730,Concours publics,,Produit,
-74,SUBVENTION D'EXPLOITATION,,Produit,
+74,SUBVENTIONS D'EXPLOITATION,,Produit,
+747,"Quote-part des subventions d’investissement virée au résultat de l’exercice",,Produit,
 740,Subventions reçues,,Produit,Favori
 7403,Autres subventions,,Produit,Favori
 748,Subventions d'exploitation diverses,,Produit,
@@ -510,6 +513,7 @@ code,label,description,position,bookmark
 756202,Contribution reçue de l'employeur,Produits affectés à la section « Activités sociales et culturelles »,Produit,Favori
 757,Gains de change / créances et dettes d’exploitation,,Produit,
 758,Produits divers de gestion courante,,Produit,
+7587,"Indemnités d’assurance",,Produit,
 7588,Autres produits divers de gestion courante,,Produit,
 76,PRODUITS FINANCIERS,,Produit,
 761,Produits des participations,,Produit,
@@ -550,10 +554,6 @@ code,label,description,position,bookmark
 7894,Utilisations des fonds dédiés / subventions,,Produit,
 7895,Utilisations des fonds dédiés / contributions,,Produit,
 7896,Utilisations des fonds dédiés / générosité,,Produit,
-79,TRANSFERT DE CHARGES,,Produit,
-791,Transferts de charges d'exploitation,,Produit,
-796,Transferts de charges financières,,Produit,
-797,Transferts de charges exceptionnelles,,Produit,
 8,Classe 8 ­— Comptes spéciaux,,,
 80,ENGAGEMENTS,,,
 801,Engagements donnés par l’entité,,,

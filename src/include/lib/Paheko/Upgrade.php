@@ -233,6 +233,13 @@ class Upgrade
 				$db->commitSchemaUpdate();
 			}
 
+			if (version_compare($v, '1.3.8', '<')) {
+				require ROOT . '/include/migrations/1.3/1.3.8.php';
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/migrations/1.3/1.3.8.sql');
+				$db->commitSchemaUpdate();
+			}
+
 			if (version_compare($v, '1.4.0', '<')) {
 				require ROOT . '/include/migrations/1.4/1.4.0.php';
 			}

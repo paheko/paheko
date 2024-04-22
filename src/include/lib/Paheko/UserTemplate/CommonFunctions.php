@@ -16,7 +16,7 @@ use Paheko\Files\Files;
 
 use KD2\Form;
 
-use const Paheko\{ADMIN_URL, BASE_URL, CALC_CONVERT_COMMAND};
+use const Paheko\{ADMIN_URL, BASE_URL, CALC_CONVERT_COMMAND, LOCAL_ADDRESSES_ROOT};
 
 /**
  * Common functions used by Template (Smartyer) and UserTemplate
@@ -190,7 +190,10 @@ class CommonFunctions
 					$list .= sprintf('<option>%s</option>', htmlspecialchars($value));
 				}
 			}
-			else {
+			elseif ($params['datalist'] === 'address' && LOCAL_ADDRESSES_ROOT && file_exists(LOCAL_ADDRESSES_ROOT . '/fr.sqlite')) {
+				$list_attributes = ' data-autocomplete="address"';
+			}
+			elseif ($params['datalist'] !== 'address') {
 				$list_attributes = sprintf(' data-autocomplete="%s"', $params['datalist']);
 			}
 

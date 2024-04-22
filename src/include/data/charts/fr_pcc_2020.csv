@@ -76,6 +76,7 @@ code,label,description,position,bookmark
 641,Salaires,,Charge,Favori
 642,Charges sociales et organismes sociaux,,Charge,Favori
 644,"Autres (médecine du travail, mutuelle, etc.)",,Charge,Favori
+649,Remboursements de charges de personnel,,Charge,
 65,MONTANT SPÉCIFIQUE ALLOUÉ AU CONSEIL SYNDICAL,"Montant spécifique alloué au conseil syndical, au sein du budget prévisionnel, pour l'exercice de sa délégation de pouvoirs",Charge,
 66,"CHARGES FINANCIÈRES DES EMPRUNTS, AGIOS OU AUTRES",,Charge,
 661,Remboursements d'annuités d'emprunt,,Charge,Favori

@@ -275,7 +275,7 @@ class Page extends Entity
 			$this->set('modified', new \DateTime);
 		}
 
-		$update_search = $this->isModified('content') || $this->isModified('format');
+		$update_search = $this->isModified('content') || $this->isModified('title');
 
 		parent::save($selfcheck);
 

@@ -615,7 +615,7 @@ class Users
 		$config = Config::getInstance();
 		$name = (string)($id ?: Utils::getIp());
 
-		$colors = [$config->color1 ?? ADMIN_COLOR1, $config->color2 ?? ADMIN_COLOR2];
+		$colors = [$config->color1 ?: ADMIN_COLOR1, $config->color2 ?: ADMIN_COLOR2];
 
 		// Add more random colors
 		foreach ($colors as $color) {

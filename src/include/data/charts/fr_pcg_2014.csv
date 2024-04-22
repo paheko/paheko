@@ -226,8 +226,6 @@ code,label,description,position,bookmark
 51,"BANQUES, ÉTABLISSEMENTS FINANCIERS ET ASSIMILÉS",,Actif,
 511,Valeurs à l’encaissement,,Actif ou passif,Favori
 512,Banques,,Actif ou passif,
-512A,Compte courant,,Actif ou passif,Favori
-514,Chèques postaux,,Actif ou passif,Favori
 515,« Caisses » du Trésor et des établissements publics,,Actif ou passif,
 516,Sociétés de bourse,,Actif,
 517,Autres organismes financiers,,Actif ou passif,
@@ -286,6 +284,7 @@ code,label,description,position,bookmark
 646,Cotisations sociales personnelles de l’exploitant,,Charge,Favori
 647,Autres charges sociales,,Charge,
 648,Autres charges de personnel,,Charge,
+649,Remboursements de charges de personnel,,Charge,
 65,AUTRES CHARGES DE GESTION COURANTE,,Charge,
 651,"Redevances pour concessions, brevets, licences, marques, procédés, logiciels, droits et valeurs similaires",,Charge,
 653,Jetons de présence,,Charge,
@@ -339,6 +338,8 @@ code,label,description,position,bookmark
 754,Ristournes perçues des coopératives (provenant des excédents),,Produit,
 755,Quotes-parts de résultat sur opérations faites en commun,,Produit,
 758,Produits divers de gestion courante,,Produit,
+7583,"Rentrées sur créances amorties et gains de change sur créances et dettes d’exploitation",,Produit,
+7587,"Indemnités d’assurance",,Produit,
 76,PRODUITS FINANCIERS,,Produit,
 761,PRODUITS DE PARTICIPATIONS,,Produit,
 762,Produits des autres immobilisations financières,,Produit,
@@ -358,10 +359,6 @@ code,label,description,position,bookmark
 781,Reprises sur amortissements et provisions (à inscrire dans les produits d’exploitation),,Produit,
 786,Reprises sur provisions pour risques (à inscrire dans les produits financiers),,Produit,
 787,Reprises sur provisions (à inscrire dans les produits exceptionnels),,Produit,
-79,TRANSFERTS DE CHARGES,,Produit,
-791,Transferts de charges d’exploitation,,Produit,
-796,Transferts de charges financières,,Produit,
-797,Transferts de charges exceptionnelles,,Produit,
 89,COMPTES DE BILAN,,,
 890,Bilan d'ouverture,,Actif ou passif,
 891,Bilan de clôture,,Actif ou passif,

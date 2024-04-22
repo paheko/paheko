@@ -316,6 +316,8 @@ class Sections
 			throw new Brindille_Exception('Unique module name could not be found');
 		}
 
+		unset($params['module']);
+
 		$table = 'module_data_' . $name;
 		$params['tables'] = $table;
 
