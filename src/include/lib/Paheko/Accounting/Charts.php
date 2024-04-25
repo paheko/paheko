@@ -135,15 +135,20 @@ class Charts
 		return $out;
 	}
 
-	static public function get(int $id)
+	static public function get(int $id): ?Chart
 	{
 		return EntityManager::findOneById(Chart::class, $id);
 	}
 
-	static public function list()
+	static public function list(): array
 	{
 		$em = EntityManager::getInstance(Chart::class);
 		return $em->all('SELECT * FROM @TABLE ORDER BY country, label;');
+	}
+
+	static public function count(): int
+	{
+		return EntityManager::getInstance(Chart::class)->count();
 	}
 
 	static public function listForCountry(string $country): array

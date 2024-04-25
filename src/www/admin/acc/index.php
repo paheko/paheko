@@ -1,14 +1,15 @@
 <?php
 namespace Paheko;
 
-use Paheko\Accounting\Years;
+use Paheko\Accounting\Charts;
 use Paheko\Accounting\Graph;
+use Paheko\Accounting\Years;
 
 require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ);
 
-if (!Years::count()) {
+if (!Charts::count()) {
 	Utils::redirect('!acc/years/first_setup.php');
 }
 

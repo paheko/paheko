@@ -4,15 +4,6 @@
 	{include file="./_nav.tpl" current="charts"}
 {/if}
 
-{if $_GET.msg == 'OPEN'}
-<p class="block alert">
-	Il n'existe aucun exercice ouvert.
-	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-		Merci d'en <a href="{$admin_url}acc/years/new.php">créer un nouveau</a> pour pouvoir saisir des écritures.
-	{/if}
-</p>
-{/if}
-
 {form_errors}
 
 {if count($list)}
