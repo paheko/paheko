@@ -642,7 +642,7 @@ class Emails
 			$message->addPart('text/html', $content_html);
 		}
 
-		$message->setHeader('Return-Path', MAIL_RETURN_PATH ?? $config->org_email);
+		$message->setHeader('Return-Path', MAIL_RETURN_PATH ?? (MAIL_SENDER ?? $config->org_email));
 		$message->setHeader('X-Auto-Response-Suppress', 'All'); // This is to avoid getting auto-replies from Exchange servers
 
 		foreach ($attachments as $path) {
