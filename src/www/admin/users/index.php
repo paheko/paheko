@@ -23,7 +23,7 @@ if (!array_key_exists($current_cat, $categories)) {
 	$current_cat = null;
 }
 
-$can_edit = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
+$can_check = $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 
 $list = Users::listByCategory($current_cat, $session);
 $list->loadFromQueryString();
@@ -38,6 +38,6 @@ else {
 	$title = sprintf('Liste des membres — %s', $categories[$current_cat]->label ?? '');
 }
 
-$tpl->assign(compact('can_edit', 'list', 'current_cat', 'categories', 'title'));
+$tpl->assign(compact('can_check', 'list', 'current_cat', 'categories', 'title'));
 
 $tpl->display('users/index.tpl');

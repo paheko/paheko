@@ -7,7 +7,7 @@ use Paheko\Users\Session;
 
 require_once __DIR__ . '/_inc.php';
 
-Session::getInstance()->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
+Session::getInstance()->requireAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 
 if (!f('selected') || !is_array(f('selected')) || !count(f('selected'))) {
 	throw new UserException("Aucun membre sélectionné.");
@@ -26,6 +26,8 @@ elseif ($action === 'subscribe') {
 	Utils::redirect('!services/user/subscribe.php?users=' . implode(',', $list));
 }
 elseif ($action === 'move' || $action === 'delete' || $action === 'delete_files') {
+	Session::getInstance()->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
+
 	$logged_user_id = Session::getUserId();
 
 	// Don't allow to change or delete the currently logged-in user

@@ -48,12 +48,12 @@
 {if $list->count()}
 	{$list->getHTMLPagination()|raw}
 
-	{include file="common/dynamic_list_head.tpl" check=$can_edit}
+	{include file="common/dynamic_list_head.tpl" check=$can_check}
 
 	{foreach from=$list->iterate() item="row"}
 		<?php $url = sprintf('details.php?id=%d&list_category=%d', $row->_user_id, $current_cat); ?>
 		<tr>
-			{if $can_edit}
+			{if $can_check}
 				<td class="check">{input type="checkbox" name="selected[]" value=$row._user_id}</td>
 			{/if}
 			{foreach from=$list->getHeaderColumns() key="key" item="value"}
@@ -94,8 +94,8 @@
 
 	</tbody>
 
-	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
-		{include file="users/_list_actions.tpl" colspan=count($list->getHeaderColumns())+$can_edit+1}
+	{if $can_check}
+		{include file="users/_list_actions.tpl" colspan=count($list->getHeaderColumns())+$can_check+1}
 	{/if}
 
 	</table>

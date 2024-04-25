@@ -8,7 +8,7 @@
 						<option value="">— Choisir une action à effectuer —</option>
 						<option value="move">Changer de catégorie</option>
 						<option value="subscribe">Inscrire à une activité</option>
-						{if empty($hide_delete)}
+						{if empty($hide_delete) && $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
 							<option value="delete">Supprimer les membres</option>
 							<option value="delete_files">Supprimer les fichiers du membre</option>
 						{/if}
