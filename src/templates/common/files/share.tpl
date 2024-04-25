@@ -29,7 +29,7 @@
 		<dl>
 			{input type="select" required=true name="option" options=$sharing_options label="Que pourront faire les personnes qui auront ce lien de partage ?" default=1}
 			{input type="select" name="ttl" required=true label="Durée de validité du lien" options=$ttl_options default=$default_ttl help="Après ce délai, le lien cessera de fonctionner."}
-			{input type="password" name="password" label="Demander un mot de passe" help="Si renseigné, alors les personnes devront entrer ce mot de passe pour accéder au fichier partagé."}
+			{input type="password" name="password" label="Demander un mot de passe" help="Si renseigné, alors les personnes devront entrer ce mot de passe pour accéder au fichier partagé." autocomplete="new-password"}
 		</dl>
 		<p class="submit">
 			{csrf_field key=$csrf_key}
