@@ -381,7 +381,7 @@ class Emails
 			try {
 				$attachments = $db->getAssoc('SELECT id, path FROM emails_queue_attachments WHERE id_queue = ?;', $row->id);
 				$all_attachments = array_merge($all_attachments, $attachments);
-				$sent = self::send($row->context, $row->recipient_hash, $headers, $row->content, $row->content_html, $row->recipient_pgp_key, $attachments);
+				$sent = self::send($row->context, $row->recipient_hash, $headers, $row->content, $row->content_html, $row->recipient_pgp_key, $attachments, true);
 
 				// Keep waiting until email is sent
 				if (!$sent) {
@@ -604,7 +604,7 @@ class Emails
 		return $html;
 	}
 
-	static protected function send(int $context, string $recipient_hash, array $headers, string $content, ?string $content_html, ?string $pgp_key = null, array $attachments = []): bool
+	static protected function send(int $context, string $recipient_hash, array $headers, string $content, ?string $content_html, ?string $pgp_key = null, array $attachments = [], bool $in_queue = false): bool
 	{
 		$config = Config::getInstance();
 		$message = new Mail_Message;
@@ -666,10 +666,10 @@ class Emails
 			$message->encrypt($pgp_key);
 		}
 
-		return self::sendMessage($context, $message);
+		return self::sendMessage($context, $message, $in_queue);
 	}
 
-	static public function sendMessage(int $context, Mail_Message $message): bool
+	static public function sendMessage(int $context, Mail_Message $message, bool $in_queue = false): bool
 	{
 		if (DISABLE_EMAIL) {
 			return false;
@@ -682,12 +682,22 @@ class Emails
 		}
 
 		if (SMTP_HOST) {
-			$const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
-			$secure = constant($const);
+			static $smtp = null;
 
-			$smtp = new SMTP(SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, $secure, SMTP_HELO_HOSTNAME);
+			// Re-use SMTP connection
+			if (null === $smtp) {
+				$const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
+				$secure = constant($const);
+
+				$smtp = new SMTP(SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, $secure, SMTP_HELO_HOSTNAME);
+			}
 
 			$smtp->send($message);
+
+			if ($in_queue) {
+				$smtp->disconnect();
+				$smtp = null;
+			}
 		}
 		else {
 			$message->send();
