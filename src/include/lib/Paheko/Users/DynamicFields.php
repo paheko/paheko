@@ -71,9 +71,15 @@ class DynamicFields
 		return key(self::getInstance()->fieldsBySystemUse('number'));
 	}
 
-	static public function getNumberFieldSQL(): string
+	static public function getNumberFieldSQL(?string $prefix = null): string
 	{
-		return DB::getInstance()->quoteIdentifier(self::getNumberField());
+		$db = DB::getInstance();
+
+		if (null !== $prefix) {
+			$prefix = $db->quoteIdentifier($prefix) . '.';
+		}
+
+		return $prefix . $db->quoteIdentifier(self::getNumberField());
 	}
 
 	static public function getLoginField(): string

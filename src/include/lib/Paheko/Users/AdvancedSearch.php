@@ -44,6 +44,13 @@ class AdvancedSearch extends A_S
 			'order'    => $order,
 		];
 
+		$columns['number'] = [
+			'label'    => 'Numéro du membre',
+			'type'     => 'integer',
+			'null'     => false,
+			'select'   => $fields::getNumberFieldSQL('u'),
+		];
+
 		$columns['is_parent'] = [
 			'label' => 'Est responsable',
 			'type' => 'boolean',
@@ -62,15 +69,9 @@ class AdvancedSearch extends A_S
 
 		foreach ($fields->all() as $name => $field)
 		{
-			/*
-			// already included in identity
-			if ($field->system & $field::NAME) {
-				continue;
-			}
-			*/
-
-			// nope
-			if ($field->system & $field::PASSWORD) {
+			// Skip password/number as it's already in the list
+			if ($field->system & $field::PASSWORD
+				|| $field->system & $field::NUMBER) {
 				continue;
 			}
 
@@ -280,15 +281,15 @@ class AdvancedSearch extends A_S
 
 		return (object) [
 			'groups' => $query,
-			'order' => $column,
-			'desc'  => false,
+			'order'  => $column,
+			'desc'   => false,
 		];
 	}
 
 	public function make(string $query): DynamicList
 	{
 		$tables = 'users_view AS u INNER JOIN users_search AS us USING (id)';
-		$list = $this->makeList($query, $tables, 'identity', false, ['id', 'identity']);
+		$list = $this->makeList($query, $tables, 'identity', false, ['id', 'identity', 'number']);
 
 		$list->setExportCallback([Users::class, 'exportRowCallback']);
 		return $list;
