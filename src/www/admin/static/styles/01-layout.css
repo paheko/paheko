@@ -267,6 +267,15 @@ header.summary {
     margin-bottom: 1em;
     border-bottom: 2px solid #999;
     text-align: center;
+    min-height: 60px;
+}
+
+header.summary figure.logo {
+    float: left;
+}
+
+header.summary figure.logo img {
+    max-height: 55px;
 }
 
 #sticky-alert {

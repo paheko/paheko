@@ -6,9 +6,8 @@
 	</p>
 
 	<p>
-	{if $config.site_asso || !$config.site_disabled}
-		<?php $url = $config->site_asso ?? $www_url; ?>
-		{linkbutton href=$url label="Retour au site" shape="left"}
+	{if $site_url}
+		{linkbutton href=$site_url label="Retour au site" shape="left"}
 	{else}
 		{linkbutton href=$admin_url label="Connexion" shape="left"}
 	{/if}

@@ -28,7 +28,10 @@
 </nav>
 
 <header class="summary print-only">
-	<h2>{$config.nom_asso}</h2>
+	{if $config.files.logo}
+	<figure class="logo print-only"><img src="{$config->fileURL('logo', '150px')}" alt="" /></figure>
+	{/if}
+	<h2>{$config.org_name}</h2>
 	<h3>{"Écriture n°%d"|args:$transaction.id}</h3>
 </header>
 
