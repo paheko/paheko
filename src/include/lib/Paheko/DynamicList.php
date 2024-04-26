@@ -220,6 +220,17 @@ class DynamicList implements \Countable
 		$this->columns = $columns;
 	}
 
+	public function addColumn(string $name, array $column, int $position = -1)
+	{
+		if ($position === -1) {
+			$this->columns[$name] = $column;
+		}
+		else {
+			$this->columns = array_slice($this->columns, 0, $position, true) + [$name => $column] + array_slice($this->columns, $position, null, true);
+		}
+	}
+
+
 	/**
 	 * Enable or disable prev() next() navigation when using iterate()
 	 */
@@ -252,6 +263,11 @@ class DynamicList implements \Countable
 	public function groupBy(string $value)
 	{
 		$this->group = $value;
+	}
+
+	public function getGroupBy(): ?string
+	{
+		return $this->group;
 	}
 
 	public function count(): int
