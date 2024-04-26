@@ -170,7 +170,7 @@ function recalculateTable()
 {
 	var checkboxes = $('tbody.lines input[type=checkbox]');
 	var diff = document.querySelector('[data-sum-end-diff]');
-	var sum_start = parseInt(document.querySelector('[data-sum]').dataset.sum, 10);
+	var sum_start = parseInt(document.querySelector('[data-reconciled-sum]').dataset.reconciledSum, 10);
 	var sum_end = document.querySelectorAll('[data-reconciled-sum]')[1];
 	var sum = sum_start;
 

@@ -665,7 +665,7 @@ class Account extends Entity
 
 		foreach ($rows as $row) {
 			if (!$start_sum) {
-				yield (object) ['sum' => $sum, 'date' => $start_date];
+				yield (object) ['sum' => $sum, 'reconciled_sum' => $reconciled_sum, 'date' => $start_date];
 				$start_sum = true;
 			}
 
