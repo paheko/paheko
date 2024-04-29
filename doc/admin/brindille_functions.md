@@ -551,6 +551,10 @@ Note : il est possible de combiner l'usage de la fonction `csv` avec le paramèt
 {{/if}}
 ```
 
+## signature
+
+Affiche la signature de l'association (en HTML), ou son logo si aucune signature n'a été choisie.
+
 # Fonctions relatives aux Modules
 
 ## save

@@ -605,14 +605,12 @@ class Functions
 
 	static public function signature(): string
 	{
-		$file = Config::getInstance()->file('signature');
+		$config = Config::getInstance();
+		$file = $config->fileURL('signature') ?? $config->fileURL('logo');
 
 		if (!$file) {
 			return '';
 		}
-
-		// We can't just use the image URL as it would not be accessible by PDF programs
-		$url = 'data:image/png;base64,' . base64_encode($file->fetch());
 
 		return sprintf('<figure class="signature"><img src="%s" alt="Signature" /></figure>', $url);
 	}
