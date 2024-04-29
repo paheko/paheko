@@ -1360,7 +1360,7 @@ class File extends Entity
 	static public function validateFileName(string $name): void
 	{
 		if (0 === strpos($name, '.ht') || $name == '.user.ini') {
-			throw new ValidationException('Nom de fichier interdit');
+			throw new ValidationException('Nom de fichier invalide');
 		}
 
 		if (strlen($name) > 250) {
