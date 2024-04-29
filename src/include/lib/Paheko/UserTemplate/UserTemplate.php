@@ -807,19 +807,13 @@ class UserTemplate extends \KD2\Brindille
 			return;
 		}
 
-		$table_name = 'module_data_' . $module->name;
-
-		if (!DB::getInstance()->test('sqlite_master', 'type = \'table\' AND name = ?', $table_name)) {
-			$table_name = null;
-		}
-
 		$this->module = $module;
 		$this->assign('module', array_merge($module->asArray(false), [
 			'config'       => json_decode(json_encode($module->config), true),
 			'url'          => $module->url(),
 			'public_url'   => $module->public_url(),
 			'storage_root' => $module->storage_root(),
-			'table'        => $table_name,
+			'table'        => $module->hasTable() ? $module->table_name : null,
 		]));
 	}
 

@@ -407,23 +407,28 @@ class Sections
 
 	static public function load(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		$name = $params['module'] ?? ($tpl->module->name ?? null);
+		$db = DB::getInstance();
 
-		if (!$name) {
+		if (isset($params['module'])) {
+			$name = $params['module'];
+			$table = 'module_data_' . $name;
+			$has_table = $db->test('sqlite_master', 'type = \'table\' AND name = ?', $table);
+		}
+		elseif (isset($tpl->module->name)) {
+			$name = $tpl->module->name;
+			$table = $tpl->module->table_name();
+			$has_table = $tpl->module->hasTable();
+		}
+		else {
 			throw new Brindille_Exception('Unique module name could not be found');
 		}
-
-		unset($params['module']);
-
-		$table = 'module_data_' . $name;
-		$params['tables'] = $table;
-
-		$db = DB::getInstance();
-		$has_table = $db->test('sqlite_master', 'type = \'table\' AND name = ?', $table);
 
 		if (!$has_table) {
 			return;
 		}
+
+		unset($params['module']);
+		$params['tables'] = $table;
 
 		$delete_table = null;
 
@@ -606,17 +611,21 @@ class Sections
 		if (empty($params['schema']) && empty($params['select'])) {
 			throw new Brindille_Exception('Missing schema parameter');
 		}
+		$db = DB::getInstance();
 
-		$name = $params['module'] ?? ($tpl->module->name ?? null);
-
-		if (!$name) {
+		if (isset($params['module'])) {
+			$name = $params['module'];
+			$table = 'module_data_' . $name;
+			$has_table = $db->test('sqlite_master', 'type = \'table\' AND name = ?', $table);
+		}
+		elseif (isset($tpl->module->name)) {
+			$name = $tpl->module->name;
+			$table = $tpl->module->table_name();
+			$has_table = $tpl->module->hasTable();
+		}
+		else {
 			throw new Brindille_Exception('Unique module name could not be found');
 		}
-
-		$table = 'module_data_' . $name;
-
-		$db = DB::getInstance();
-		$has_table = $db->test('sqlite_master', 'type = \'table\' AND name = ?', $table);
 
 		if (!$has_table) {
 			return;

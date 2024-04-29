@@ -76,6 +76,8 @@ class Module extends Entity
 	 */
 	protected bool $system;
 
+	protected bool $_table_exists;
+
 	public function selfCheck(): void
 	{
 		$this->assert(preg_match(self::VALID_NAME_REGEXP, $this->name), 'Nom unique de module invalide: ' . $this->name);
@@ -313,9 +315,15 @@ class Module extends Entity
 		return DB::getInstance()->test('modules_templates', 'id_module = ? AND name = ?', $this->id(), self::CONFIG_FILE);
 	}
 
-	public function hasData(): bool
+	public function table_name(): string
 	{
-		return DB::getInstance()->test('sqlite_master', 'type = \'table\' AND name = ?', sprintf('module_data_%s', $this->name));
+		return sprintf('module_data_%s', $this->name);
+	}
+
+	public function hasTable(): bool
+	{
+		$this->_table_exists ??= DB::getInstance()->test('sqlite_master', 'type = \'table\' AND name = ?', $this->table_name());
+		return $this->_table_exists;
 	}
 
 	public function getDataSize(): int
@@ -362,7 +370,7 @@ class Module extends Entity
 
 	public function canDeleteData(): bool
 	{
-		return !empty($this->config) || $this->hasData();
+		return !empty($this->config) || $this->hasTable();
 	}
 
 	public function listFiles(?string $path = null): array

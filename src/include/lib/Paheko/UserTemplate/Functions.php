@@ -347,7 +347,7 @@ class Functions
 		$table = 'module_data_' . $tpl->module->name;
 
 		// No table? No problem!
-		if (!$db->test('sqlite_master', 'name = ? AND type = \'table\'', $table)) {
+		if (!$tpl->module->hasTable()) {
 			return;
 		}
 
