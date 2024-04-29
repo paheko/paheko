@@ -103,7 +103,7 @@
 		{input type="hidden" name="start_date" default=$year.start_date}
 		{input type="hidden" name="end_date" default=$year.end_date}
 		{input type="hidden" name="id_chart" default=$year.id_chart}
-		{button type="submit" name="step" value="0" label="Retour" shape="left" }
+		{linkbutton label="Retour" shape="left" href="?"}
 		{button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
 	</p>
 {/if}

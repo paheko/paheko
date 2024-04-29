@@ -12,7 +12,7 @@
 <fieldset>
 	<legend>Informations sur l'association</legend>
 	<dl>
-		{input type="select" required=true label="Pays (pour la comptabilité)" options=$countries default="FR" help="Ce choix permet de configurer les règles comptables en fonction du pays de l'association." name="country"}
+		{input type="select" required=true label="Pays (pour la comptabilité)" options=$countries default="FR" help="Ce choix permet de configurer les règles comptables en fonction du pays. Il sera possible de choisir plus tard un autre pays dans la configuration." name="country"}
 		{input type="text" label="Nom de l'association" required=true name="name"}
 	</dl>
 </fieldset>
