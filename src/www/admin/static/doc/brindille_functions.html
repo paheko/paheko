@@ -69,7 +69,11 @@
 			<li><a href="#include">include</a></li>
 			<li><a href="#captcha">captcha</a></li>
 			<li><a href="#mail">mail</a></li>
-			<li><a href="#redirect">redirect</a></li>
+			<li><a href="#redirect">redirect</a>
+			<ol>
+				<li><a href="#fonctionnement-simple">Fonctionnement simple</a></li>
+				<li><a href="#fonctionnement-avance-fenetre-modale">Fonctionnement avancé (fenêtre modale)</a>
+			</ol></li>
 			<li><a href="#api">api</a></li>
 			<li><a href="#csv">csv</a></li>
 			<li><a href="#signature"> signature</a>
@@ -267,8 +271,6 @@
 <p>Note : si le type <code>application/pdf</code> est indiqué (ou juste <code>pdf</code>), la page sera convertie en PDF à la volée. Il est possible de forcer le téléchargement du fichier en utilisant le paramètre <code>download</code>.</p>
 <p>Exemples :</p>
 <pre><code>{{:http code=404}}
-{{:http redirect="/Nos-Activites/"}}
-{{:http redirect="https://mon-site-web.tld/"}}
 {{:http type="application/svg+xml"}}
 {{:http type="pdf" download="liste_membres_ca.pdf"}}</code></pre>
 <h2 id="include">include</h2>
@@ -491,10 +493,10 @@
 &lt;p&gt;&lt;input type="submit" name="send" value="Envoyer !" /&gt;&lt;/p&gt;
 &lt;/form&gt;</code></pre>
 <h2 id="redirect">redirect</h2>
-<p>Redirige vers une nouvelle page immédiatement. Le code situé après cette fonction ne sera pas exécuté. </p>
-<p>Avec le paramètre <code>force</code>, si la page actuelle est ouverte dans une fenêtre modale (grâce à la cible <code>_dialog</code>), alors la fenêtre modale est fermée, et la redirection se passe dans la page parente.</p>
-<p>Avec le paramètre <code>to</code>, si la page actuelle est ouverte dans une fenêtre modal (grâce à la cible <code>_dialog</code>), alors la fenêtre modale est fermée, et  la page parente est rechargée. Si la page n'est pas ouverte dans dans une fenêtre modale, la redirection est effectuée.</p>
-<p>Seules les adresses internes sont acceptées, il n'est pas possible de rediriger vers une adresse extérieure.</p>
+<p>Redirige vers une nouvelle page immédiatement.</p>
+<p>Le code situé après cette fonction ne sera pas exécuté. Il est donc important, dans un bloc <code>#form</code> de placer cette instruction à la fin, après l'enregistrement (<code>:save</code>).</p>
+<h3 id="fonctionnement-simple">Fonctionnement simple</h3>
+<p>Pour simplement rediriger vers une adresse HTTPS interne ou externe. Utile par exemple pour rediriger une page du site vers une autre adresse.</p>
 <table>
 <thead>
 <tr>
@@ -505,14 +507,9 @@
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><code>force</code></td>
-<td style="text-align: left;">optionnel</td>
-<td style="text-align: left;">Adresse de redirection forcée</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>to</code></td>
-<td style="text-align: left;">optionnel</td>
-<td style="text-align: left;">Adresse de redirection si pas dans une fenêtre modale</td>
+<td style="text-align: left;"><code>url</code></td>
+<td style="text-align: left;">obligatoire</td>
+<td style="text-align: left;">Adresse vers laquelle rediriger</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>permanent</code></td>
@@ -521,7 +518,39 @@
 </tr>
 </tbody>
 </table>
-<p>Si <code>to=null</code> est utilisé (ou aucun paramètre n'est passé), alors la fenêtre modale sera fermée. Ou, si la page n'est pas dans une fenêtre modale, la page courante sera simplement rechargée.</p>
+<pre><code>{{:redirect url="https://kd2.org/" permanent=true}}</code></pre>
+<h3 id="fonctionnement-avance-fenetre-modale">Fonctionnement avancé (fenêtre modale)</h3>
+<p>Dans l'administration de Paheko, une page peut être ouverte dans une <code>iframe</code> (fenêtre modale), appelée <strong>dialogue</strong>. Pour cela on utilise <code>target="_dialog"</code> sur le lien ou le formulaire, pour que la page s'ouvre dans cette fenêtre modale.</p>
+<p>Si le code exécuté se situe dans une fenêtre modale, les paramètres suivants peuvent être utilisés à la place du paramètre <code>url</code> :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>self</code></td>
+<td style="text-align: left;">Redirige à l'intérieur de la fenêtre modale.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>parent</code></td>
+<td style="text-align: left;">Ferme la fenêtre modale et redirige la fenêtre parente vers l'adresse indiquée.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>reload</code></td>
+<td style="text-align: left;">Ferme la fenêtre modale, et recharge la page parente.</td>
+</tr>
+</tbody>
+</table>
+<p>Cette fonction permet une dégradation progressive : si la page a été ouverte en dehors d'une fenêtre modale (par exemple si l'utilisateur a ouvert le lien dans un nouvel onglet, via un clic droit), alors ces paramètres ne font aucune différence : la page est redirigée vers l'adresse indiquée dans le paramètre.</p>
+<p>Si aucun paramètre n'est fourni, cela revient au même que de faire <code>{{:redirect reload=null}}</code>.</p>
+<p>Il est important de passer quand même une adresse au paramètre <code>reload</code>, car si Javascript n'est pas disponible, il faut que l'utilisateur soit bien redirigé vers la page voulue :</p>
+<pre><code>{{:redirect reload="./details.html?id=%d"|args:$doc.id}}</code></pre>
+<p>Dans cet exemple, la page sera redirigée </p>
+<p>Il est possible d'utiliser un point d'exclamation au début de l'URL (<code>!</code>) pour indiquer une adresse se situant dans l'administration :</p>
+<pre><code>{{:redirect parent="!users/"}}</code></pre>
 <h2 id="api">api</h2>
 <p>Permet d'appeler l'API de Paheko, que ça soit sur l'instance locale, en cours, ou une autre instance externe.</p>
 <p>Voir la <a href="https://paheko.cloud/api" rel="noreferrer noopener external" target="_blank">documentation de l'API</a> pour la liste des fonctions disponibles.</p>

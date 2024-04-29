@@ -355,21 +355,52 @@ Exemple de formulaire de contact :
 
 ## redirect
 
-Redirige vers une nouvelle page immédiatement. Le code situé après cette fonction ne sera pas exécuté. 
+Redirige vers une nouvelle page immédiatement.
 
-Avec le paramètre `force`, si la page actuelle est ouverte dans une fenêtre modale (grâce à la cible `_dialog`), alors la fenêtre modale est fermée, et la redirection se passe dans la page parente.
+Le code situé après cette fonction ne sera pas exécuté. Il est donc important, dans un bloc `#form` de placer cette instruction à la fin, après l'enregistrement (`:save`).
 
-Avec le paramètre `to`, si la page actuelle est ouverte dans une fenêtre modal (grâce à la cible `_dialog`), alors la fenêtre modale est fermée, et  la page parente est rechargée. Si la page n'est pas ouverte dans dans une fenêtre modale, la redirection est effectuée.
+### Fonctionnement simple
 
-Seules les adresses internes sont acceptées, il n'est pas possible de rediriger vers une adresse extérieure.
+Pour simplement rediriger vers une adresse HTTPS interne ou externe. Utile par exemple pour rediriger une page du site vers une autre adresse.
 
 | Paramètre | Obligatoire ou optionnel ? | Fonction |
 | :- | :- | :- |
-| `force` | optionnel | Adresse de redirection forcée |
-| `to` | optionnel | Adresse de redirection si pas dans une fenêtre modale |
+| `url` | obligatoire | Adresse vers laquelle rediriger |
 | `permanent` | optionnel | (booléen) Indiquer `TRUE` à ce paramètre pour indiquer une redirection permanente (code HTTP 301). |
 
-Si `to=null` est utilisé (ou aucun paramètre n'est passé), alors la fenêtre modale sera fermée. Ou, si la page n'est pas dans une fenêtre modale, la page courante sera simplement rechargée.
+```
+{{:redirect url="https://kd2.org/" permanent=true}}
+```
+
+### Fonctionnement avancé (fenêtre modale)
+
+Dans l'administration de Paheko, une page peut être ouverte dans une `iframe` (fenêtre modale), appelée **dialogue**. Pour cela on utilise `target="_dialog"` sur le lien ou le formulaire, pour que la page s'ouvre dans cette fenêtre modale.
+
+Si le code exécuté se situe dans une fenêtre modale, les paramètres suivants peuvent être utilisés à la place du paramètre `url` :
+
+| Paramètre | Fonction |
+| :- | :- |
+| `self` | Redirige à l'intérieur de la fenêtre modale. |
+| `parent` | Ferme la fenêtre modale et redirige la fenêtre parente vers l'adresse indiquée. |
+| `reload` | Ferme la fenêtre modale, et recharge la page parente. |
+
+Cette fonction permet une dégradation progressive : si la page a été ouverte en dehors d'une fenêtre modale (par exemple si l'utilisateur a ouvert le lien dans un nouvel onglet, via un clic droit), alors ces paramètres ne font aucune différence : la page est redirigée vers l'adresse indiquée dans le paramètre.
+
+Si aucun paramètre n'est fourni, cela revient au même que de faire `{{:redirect reload=null}}`.
+
+Il est important de passer quand même une adresse au paramètre `reload`, car si Javascript n'est pas disponible, il faut que l'utilisateur soit bien redirigé vers la page voulue :
+
+```
+{{:redirect reload="./details.html?id=%d"|args:$doc.id}}
+```
+
+Dans cet exemple, la page sera redirigée 
+
+Il est possible d'utiliser un point d'exclamation au début de l'URL (`!`) pour indiquer une adresse se situant dans l'administration :
+
+```
+{{:redirect parent="!users/"}}
+```
 
 ## api
 

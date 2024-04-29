@@ -833,7 +833,7 @@ class UserTemplate extends \KD2\Brindille
 		}
 
 		if (!array_key_exists($name, $this->{'user_' . $context . 's'})) {
-			throw new Brindille_Exception(sprintf('call to undefined %s \'%s\'', $context, $name));
+			throw new Brindille_Exception(sprintf('call to undefined user %s \'%s\'', $context, $name));
 		}
 
 		return $this->{'user_' . $context . 's'}[$name]($params, $line);
@@ -860,13 +860,13 @@ class UserTemplate extends \KD2\Brindille
 	 * This is so that a user-defined function defined in an included template
 	 * can be called by the parent template.
 	 */
-	public function copyUserFunctions(UserTemplate $target): void
+	public function copyUserFunctionsTo(UserTemplate $target): void
 	{
 		$contexts = ['modifier', 'function', 'section'];
 
 		foreach ($contexts as $context) {
 			foreach ($this->{'user_' . $context . 's'} as $name => $function) {
-				$target->registerUserFunction($context, $name, $function);
+				$target->registerUserFunction($context, $name, $function->bindTo($target));
 			}
 		}
 	}

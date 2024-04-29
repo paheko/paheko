@@ -148,17 +148,30 @@ class Functions
 	static public function redirect(array $params): string
 	{
 		if (!empty($params['permanent']) && !isset($_GET['_dialog'])) {
-			http_response_code(301);
+			@http_response_code(301);
 		}
 
-		if (isset($params['force'])) {
-			Utils::redirectDialog($params['force'], false);
+		$self = $params['url'] ?? ($params['self'] ?? null);
+		// Legacy force/to parameters TODO remove
+		$parent = $params['parent'] ?? ($params['force'] ?? null);
+		$reload = $params['reload'] ?? ($params['to'] ?? null);
+
+		// Redirect inside dialog
+		if ($self) {
+			Utils::redirect($self, false);
+		}
+		elseif ($parent) {
+			Utils::redirectDialog($parent, false);
 		}
 		elseif (isset($_GET['_dialog'])) {
 			Utils::reloadParentFrame(null, false);
 		}
 		else {
-			Utils::redirectDialog($params['to'] ?? null, false);
+			if ($reload === true) {
+				$reload = null;
+			}
+
+			Utils::redirectDialog($reload, false);
 		}
 
 		return 'STOP';
@@ -689,7 +702,7 @@ class Functions
 		}
 
 		// Copy/overwrite user-defined functions to parent template
-		$ut->copyUserFunctions($include);
+		$include->copyUserFunctionsTo($ut);
 
 		// Transmit nocache to parent template
 		if ($include->get('nocache')) {
