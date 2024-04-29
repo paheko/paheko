@@ -355,12 +355,12 @@ class Utils
 		}
 	}
 
-	static public function getRequestURI()
+	static public function getRequestURI(): ?string
 	{
 		if (!empty($_SERVER['REQUEST_URI']))
 			return $_SERVER['REQUEST_URI'];
 		else
-			return false;
+			return null;
 	}
 
 	static public function getSelfURL($qs = true)

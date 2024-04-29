@@ -96,7 +96,7 @@ class DB extends SQLite3
 
 		$user = $_SESSION['userSession']->id ?? null;
 
-		$db->insert('sessions', ['script' => str_replace(ROOT, '', $_SERVER['SCRIPT_NAME']), 'user' => $user]);
+		$db->insert('sessions', ['script' => Utils::getRequestURI() ?? str_replace(ROOT, '', $_SERVER['SCRIPT_NAME']), 'user' => $user]);
 		$id = $db->lastInsertId();
 
 		$db->begin();
