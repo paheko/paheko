@@ -277,15 +277,17 @@ class Sections
 		$tpl->_push($tpl::SECTION, 'define', compact('context', 'name'));
 
 		return sprintf('<?php '
-			. '$this->registerUserFunction(%s, %s, function ($params, $line) { '
+			. '$this->registerUserFunction(%s, %s, function (array $params, int $line) { '
 			// Store function name here, might be useful for handling errors
 			. '$context = %1$s; $name = %2$s; '
-			// Pass variables to template
-			. '$this->_variables[] = compact(\'context\', \'name\', \'params\', \'line\'); '
+			// Pass variables to template, either as '$params' variable for modifiers,
+			// or extract all parameters as variables for functions/sections
+			. '$this->_variables[] = %s; '
 			// Put all function body in a try
 			. 'try { ?>',
 			var_export($context, true),
-			var_export($name, true)
+			var_export($name, true),
+			$context === 'modifier' ? 'compact(\'params\')' : '$params'
 		);
 	}
 
@@ -306,9 +308,10 @@ class Sections
 
 		return '<?php } '
 			// Prepend function name to error
-			. 'catch (Brindille_Exception $e) { throw new Brindille_Exception(sprintf("Error in \'%s\' function: %s", $name, $e->getMessage())); } '
+			. 'catch (Brindille_Exception $e) { throw new Brindille_Exception(sprintf("Error in \'%s\' %s: %s", $name, $context, $e->getMessage())); } '
 			// Always remove current context variables even if return was used
-			. 'finally { array_pop($this->_variables); } }); ?>';
+			. 'finally { array_pop($this->_variables); } '
+			. '}); ?>';
 	}
 
 	static protected function _debug(string $str): void

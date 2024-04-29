@@ -129,7 +129,7 @@ Le mieux est de mettre ce code au début d'un squelette.
 <!--
 ## define
 
-Créer une fonction réutilisable. Permet de définir une fonction, un filtre, ou une section, qui pourra être ensuite ré-exécutée selon les besoins.
+Permet de définir une fonction, un filtre, ou une section, qui pourra être ensuite ré-exécutée selon les besoins.
 
 | Paramètre | Fonction |
 | :- | :- |
@@ -137,13 +137,15 @@ Créer une fonction réutilisable. Permet de définir une fonction, un filtre, o
 | `function` | Nom de la fonction |
 | `section` | Nom de la section |
 
-Un seul paramètre peut être utilisé à la fois. Le nom du paramètre définit le type de bloc qui sera concerné.
+Un seul des 3 paramètres peut être utilisé à la fois. Le nom du paramètre définit le type de bloc qui sera concerné.
 
 Les fonctions, filtres et sections définies avec `#define` peuvent ensuite être appelées avec le modifieur `call`, la fonction `call`, ou la section `call`.
 
 La section `#define` ne peut être utilisée qu'à la racine d'un squelette. Il est ainsi impossible de placer un bloc `#define` dans un bloc `if`, ou une autre section.
 
-À l'intérieur de la section `#define` il faut écrire le code qu'on souhaite être exécuté. Celui-ci sera différent selon le type de fonction qu'on veut définir. Dans tous les cas la variable `$params` est disponible. Elle contient les paramètres passés lors de l'appel de la fonction.
+À l'intérieur de la section `#define` il faut écrire le code qu'on souhaite voir exécuté à chaque appel suivant. Celui-ci sera différent selon le type de fonction qu'on veut définir.
+
+Lors de l'exécution d'une fonction définie, celle-ci aura accès aux variables du contexte d'exécution.
 
 Cette fonctionnalité est très puissante, et peut demander du temps à être maîtrisée.
 
@@ -175,15 +177,19 @@ pizzAAAAA
 
 ### Définir une fonction
 
-Dans ce cas la variable `$params` contiendra les paramètres passés à la fonction, avec leur nom.
+Dans ce cas les paramètres passés à la fonction lors de son appel seront disponibles sous la forme de variables.
 
 Tout texte inclus dans la fonction sera affiché tel quel lors de son exécution.
 
 ```
 {{#define function="get_status_label"}}
-	{{if $params.status === 'paid'}}
+	{{if $status === null}}
+		{{:error admin="Le paramètre 'status' est manquant"}}
+	{{/if}}
+
+	{{if $status === 'paid'}}
 		Facture payée
-	{{elseif $params.status === 'payable'}}
+	{{elseif $status === 'payable'}}
 		À payer
 	{{else}}
 		En attente
@@ -195,7 +201,7 @@ Tout texte inclus dans la fonction sera affiché tel quel lors de son exécution
 
 ### Définir une section
 
-Dans ce cas la variable `$params` contiendra les paramètres passés à la section, avec leur nom.
+Dans ce cas les paramètres passés à la fonction lors de son appel seront disponibles sous la forme de variables.
 
 Il faut utiliser la fonction `{{:yield …}}` pour indiquer ce qui doit générer une itération. Cette fonction ne peut pas être utilisée ailleurs que dans ce bloc.
 
@@ -203,12 +209,12 @@ Tout texte inclus dans la fonction sera affiché tel quel lors de son exécution
 
 ```
 {{#define section="list_users"}}
-	{{if !$params.cat}}
+	{{if !$cat}}
 		{{:error admin="Aucune catégorie n'a été passée en paramètre"}}
 	{{/if}}
 	<ul>
 		<li>…</li>
-	{{#users limit=10 id_category=$params.cat}}
+	{{#users limit=10 id_category=$cat}}
 		{{:yield nom_complet="%s %s"|args:$nom:$prenom}}
 	{{/users}}
 		<li>…</li>
