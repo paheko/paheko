@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS plugins
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS plugins_name ON plugins (name);
+CREATE INDEX IF NOT EXISTS plugins_menu ON plugins(menu, enabled);
 
 CREATE TABLE IF NOT EXISTS plugins_signals
 -- Link between plugins and signals
@@ -75,6 +76,7 @@ CREATE TABLE IF NOT EXISTS modules
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS modules_name ON modules (name);
+CREATE INDEX IF NOT EXISTS modules_menu ON modules(menu, enabled);
 
 CREATE TABLE IF NOT EXISTS modules_templates
 -- List of forms special templates
