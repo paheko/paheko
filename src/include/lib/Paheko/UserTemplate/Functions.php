@@ -606,9 +606,9 @@ class Functions
 	static public function signature(): string
 	{
 		$config = Config::getInstance();
-		$file = $config->fileURL('signature') ?? $config->fileURL('logo');
+		$url = $config->fileURL('signature') ?? $config->fileURL('logo');
 
-		if (!$file) {
+		if (!$url) {
 			return '';
 		}
 
