@@ -452,7 +452,7 @@ class UserTemplate extends \KD2\Brindille
 		}
 		catch (Brindille_Exception $e) {
 			$path = $this->file ? $this->file->path : ($this->code ? 'code' : str_replace(ROOT, '…', $this->path));
-			$is_user_code = $this->file || $this->code || ($this->module && $this->module->hasLocal());
+			$is_user_code = !$this->path;
 
 			$message = sprintf("Erreur dans '%s' :\n%s", $path, $e->getMessage());
 
