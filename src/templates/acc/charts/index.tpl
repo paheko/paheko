@@ -46,8 +46,10 @@
 		<fieldset>
 			<legend>Créer un nouveau plan comptable</legend>
 			<dl>
-				{input type="radio-btn" name="type" value="install" label="Ajouter un autre plan comptable officiel"}
-				{input type="radio-btn" name="type" value="copy" label="Recopier un plan comptable pour le modifier"}
+				{input type="radio-btn" name="type" value="install" label="Ajouter un plan comptable officiel"}
+				{if !empty($charts_grouped)}
+					{input type="radio-btn" name="type" value="copy" label="Recopier un plan comptable pour le modifier"}
+				{/if}
 				{input type="radio-btn" name="type" value="import" label="Importer un plan comptable personnel" help="À partir d'un tableau (CSV, Office, etc.)"}
 			</dl>
 		</fieldset>
