@@ -184,8 +184,6 @@ Exemples :
 
 ```
 {{:http code=404}}
-{{:http redirect="/Nos-Activites/"}}
-{{:http redirect="https://mon-site-web.tld/"}}
 {{:http type="application/svg+xml"}}
 {{:http type="pdf" download="liste_membres_ca.pdf"}}
 ```
