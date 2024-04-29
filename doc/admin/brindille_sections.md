@@ -126,6 +126,101 @@ Pour bloquer l'accès aux membres non connectés, ou qui n'ont pas accès en éc
 
 Le mieux est de mettre ce code au début d'un squelette.
 
+<!--
+## define
+
+Créer une fonction réutilisable. Permet de définir une fonction, un filtre, ou une section, qui pourra être ensuite ré-exécutée selon les besoins.
+
+| Paramètre | Fonction |
+| :- | :- |
+| `modifier` | Nom du filtre |
+| `function` | Nom de la fonction |
+| `section` | Nom de la section |
+
+Un seul paramètre peut être utilisé à la fois. Le nom du paramètre définit le type de bloc qui sera concerné.
+
+Les fonctions, filtres et sections définies avec `#define` peuvent ensuite être appelées avec le modifieur `call`, la fonction `call`, ou la section `call`.
+
+La section `#define` ne peut être utilisée qu'à la racine d'un squelette. Il est ainsi impossible de placer un bloc `#define` dans un bloc `if`, ou une autre section.
+
+À l'intérieur de la section `#define` il faut écrire le code qu'on souhaite être exécuté. Celui-ci sera différent selon le type de fonction qu'on veut définir. Dans tous les cas la variable `$params` est disponible. Elle contient les paramètres passés lors de l'appel de la fonction.
+
+Cette fonctionnalité est très puissante, et peut demander du temps à être maîtrisée.
+
+### Définir un filtre
+
+Dans ce cas la variable `$params` contiendra les paramètres passés au filtre, numérotés à partir de zéro. Zéro sera le premier paramètre (valeur avant le slash).
+
+Il faut utiliser la fonction `{{:return value=…}}` pour indiquer ce qui doit être renvoyé. Cette fonction ne peut pas être utilisée ailleurs que dans ce bloc.
+
+Tout autre texte dans le corps de `#define` ne s'affichera pas. Seul la valeur retournée par `return` sera utilisée.
+
+```
+{{#define modifier="scream"}}
+	Coucou ! {{* <-- Ce texte ne s'affichera pas *}}
+	{{#foreach count=5}}
+		{{:assign scream=$scream|cat:$params.1|toupper}}
+	{{/foreach}}
+	{{:return value=$params.0|replace:"a":$scream}}
+{{/define}}
+
+{{"pizza"|call:"scream":"a"}}
+```
+
+Affichera :
+
+```
+pizzAAAAA
+```
+
+### Définir une fonction
+
+Dans ce cas la variable `$params` contiendra les paramètres passés à la fonction, avec leur nom.
+
+Tout texte inclus dans la fonction sera affiché tel quel lors de son exécution.
+
+```
+{{#define function="get_status_label"}}
+	{{if $params.status === 'paid'}}
+		Facture payée
+	{{elseif $params.status === 'payable'}}
+		À payer
+	{{else}}
+		En attente
+	{{/if}}
+{{/define}}
+
+{{:call function="get_status_label" status=$invoice.status}}
+```
+
+### Définir une section
+
+Dans ce cas la variable `$params` contiendra les paramètres passés à la section, avec leur nom.
+
+Il faut utiliser la fonction `{{:yield …}}` pour indiquer ce qui doit générer une itération. Cette fonction ne peut pas être utilisée ailleurs que dans ce bloc.
+
+Tout texte inclus dans la fonction sera affiché tel quel lors de son exécution.
+
+```
+{{#define section="list_users"}}
+	{{if !$params.cat}}
+		{{:error admin="Aucune catégorie n'a été passée en paramètre"}}
+	{{/if}}
+	<ul>
+		<li>…</li>
+	{{#users limit=10 id_category=$params.cat}}
+		{{:yield nom_complet="%s %s"|args:$nom:$prenom}}
+	{{/users}}
+		<li>…</li>
+	</ul>
+{{/define}}
+
+{{#call section="list_users" cat=1}}
+	<li>{{$nom_complet}}</li>
+{{/call}}
+```
+-->
+
 # Requêtes SQL
 
 ## select

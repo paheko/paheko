@@ -66,10 +66,29 @@ class Modifiers
 	];
 
 	const MODIFIERS_WITH_INSTANCE_LIST = [
+		'call',
 		'map',
 	];
 
 	const LEADING_NUMBER_REGEXP = '/^([\d.]+)\s*[.\)]\s*/';
+
+	/**
+	 * Call a user-defined function
+	 * @example {{$variable|call:"my_test_function":$param1|escape}}
+	 */
+	static public function call(UserTemplate $tpl, int $line, $src, string $name, ...$params)
+	{
+		// Prepend first argument to list of arguments:
+		// "string"|call:"test_function":42 => ["string", 42]
+		array_unshift($params, $src);
+
+		// Suppress any output
+		ob_start();
+		$r = $tpl->callUserFunction('modifier', $name, $params, $line);
+		ob_end_clean();
+
+		return $r;
+	}
 
 	static public function replace($str, $find, $replace = null): string
 	{

@@ -53,12 +53,14 @@ class Functions
 		'delete_file',
 		'api',
 		'csv',
+		'call',
 	];
 
 	const COMPILE_FUNCTIONS_LIST = [
-		':break' => [self::class, 'compile_break'],
+		':break'    => [self::class, 'compile_break'],
 		':continue' => [self::class, 'compile_continue'],
-		':return' => [self::class, 'compile_return'],
+		':return'   => [self::class, 'compile_return'],
+		':yield'    => [self::class, 'compile_yield'],
 		':redirect' => [self::class, 'compile_redirect'],
 	];
 
@@ -97,21 +99,48 @@ class Functions
 		$i = ctype_digit(trim($params)) ? (int)$params : 1;
 
 		if ($in_loop < $i) {
-			throw new Brindille_Exception(sprintf('Error on line %d: continue can only be used inside a section', $line));
+			throw new Brindille_Exception('"continue" function can only be used inside a section');
 		}
 
 		return sprintf('<?php continue(%d); ?>', $i);
 	}
 
-	static public function compile_return(string $name, string $params, UserTemplate $tpl, int $line): string
+	static public function compile_return(string $name, string $params_str, UserTemplate $tpl, int $line): string
 	{
+		$parent = $tpl->_getStack($tpl::SECTION, 'define');
+
+		// Allow {{:return value="test"}} inside a user-defined modifier only
+		if ($parent && ($parent[2]['context'] ?? null) === 'modifier') {
+			$params = $tpl->_parseArguments($params_str, $line);
+
+			return sprintf('<?php return %s; ?>', $params['value'] ?? 'null');
+		}
+		// But not outside
+		elseif (!empty($params_str)) {
+			throw new Brindille_Exception('"return" function cannot have parameters in this context');
+		}
+
 		return '<?php return; ?>';
+	}
+
+	static public function compile_yield(string $name, string $params_str, UserTemplate $tpl, int $line): string
+	{
+		$parent = $tpl->_getStack($tpl::SECTION, 'define');
+
+		// Only allow {{:yield}} inside a user-defined function
+		if (!$parent || ($parent[2]['context'] ?? null) !== 'section') {
+			throw new Brindille_Exception('"yield" can only be used inside a "define" section');
+		}
+
+		$params = $tpl->_parseArguments($params_str, $line);
+
+		return sprintf('<?php yield %s; ?>', $tpl->_exportArguments($params));
 	}
 
 	static public function compile_redirect(string $name, string $params, UserTemplate $tpl, int $line): string
 	{
 		$params = $tpl->_parseArguments($params, $line);
-		$params = $tpl->_exportArguments($params, true);
+		$params = $tpl->_exportArguments($params);
 
 		return sprintf('<?php return %s::redirect(%s); ?>', self::class, $params);
 	}
@@ -659,6 +688,9 @@ class Functions
 			}
 		}
 
+		// Copy/overwrite user-defined functions to parent template
+		$ut->copyUserFunctions($include);
+
 		// Transmit nocache to parent template
 		if ($include->get('nocache')) {
 			$ut::__assign(['nocache' => true], $ut, $line);
@@ -1043,4 +1075,16 @@ class Functions
 
 		return '';
 	}
+
+	static public function call(array $params, UserTemplate $tpl, int $line): void
+	{
+		if (empty($params['function'])) {
+			throw new Brindille_Exception('Missing "function" parameter for "call" function');
+		}
+
+		$name = $params['function'];
+		unset($params['function']);
+		$tpl->callUserFunction('function', $name, $params, $line);
+	}
+
 }
