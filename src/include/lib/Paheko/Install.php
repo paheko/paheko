@@ -2,7 +2,6 @@
 
 namespace Paheko;
 
-use Paheko\Accounting\Charts;
 use Paheko\Entities\Accounting\Account;
 use Paheko\Entities\Accounting\Year;
 use Paheko\Entities\Users\Category;
@@ -285,9 +284,6 @@ class Install
 		$welcome_text = sprintf("Bienvenue dans l'administration de %s !\n\nUtilisez le menu à gauche pour accéder aux différentes sections.\n\nSi vous êtes perdu, n'hésitez pas à consulter l'aide :-)", $name);
 
 		$config->setFile('admin_homepage', $welcome_text);
-
-        // Import accounting chart
-        $chart = Charts::installCountryDefault($country_code);
 
 		// Create an example saved search (users)
 		$query = (object) [

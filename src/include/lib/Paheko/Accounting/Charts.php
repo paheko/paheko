@@ -15,7 +15,6 @@ use const Paheko\ROOT;
 class Charts
 {
 	const BUNDLED_CHARTS = [
-		'fr_pca_1999' => 'Plan comptable associatif 1999',
 		'fr_pca_2018' => 'Plan comptable associatif (2018, révision 2025)',
 		'fr_pcc_2020' => 'Plan comptable des copropriétés (2005 révisé en 2024)',
 		'fr_cse_2015' => 'Plan comptable des CSE (Comité Social et Économique) (Règlement ANC n°2015-01)',
@@ -23,19 +22,18 @@ class Charts
 		'fr_pcs_2018' => 'Plan comptable des syndicats (2018, révisé 2024)',
 		'be_pcmn_2019' => 'Plan comptable minimum normalisé des associations et fondations 2019',
 		'ch_asso' => 'Plan comptable associatif',
+		'fr_pca_1999' => 'Plan comptable associatif 1999',
 	];
 
-	static public function getFirstForCountry(string $country): ?Chart
+	static public function getFirstForCountry(string $country): ?string
 	{
-		$db = DB::getInstance();
-
-		$chart = EntityManager::findOne(Chart::class, 'SELECT * FROM acc_charts WHERE archived = 0 AND country = ? AND code IS NOT NULL LIMIT 1;', $country);
-
-		if (!$chart) {
-			$chart = EntityManager::findOne(Chart::class, 'SELECT * FROM acc_charts LIMIT 1;',);
+		foreach (self::BUNDLED_CHARTS as $code => $label) {
+			if (substr($code, 0, 2) === strtolower($country)) {
+				return $code;
+			}
 		}
 
-		return $chart;
+		return null;
 	}
 
 	static public function updateInstalled(string $chart_code): ?Chart

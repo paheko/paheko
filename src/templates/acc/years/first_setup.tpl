@@ -20,10 +20,10 @@
 			<dt>Pays</dt>
 			<dd>{$config.country|get_country_name} {linkbutton href="!config/" shape="settings" label="Modifier le pays dans la configuration"}</dd>
 		</dl>
-		{if $default_chart && $year.id_chart == $default_chart.id}
+		{if $default_chart_code}
 		<dl class="chart-default">
 			<dt><label for="f_change_chart">Plan comptable recommandé</label></dt>
-			<dd>{$default_chart.label} {button id="f_change_chart" shape="edit" label="Choisir un autre plan comptable" onclick="g.toggle('.chart-default', false); g.toggle('.charts', true);"}</dd>
+			<dd>{$default_chart_label} {button id="f_change_chart" shape="edit" label="Choisir un autre plan comptable" onclick="g.toggle('.chart-default', false); g.toggle('.charts', true);"}</dd>
 			<dd class="help">Le choix du plan comptable ne peut être modifié une fois que l'exercice sera ouvert.<br />Mais il sera possible d'y ajouter de nouveaux comptes si nécessaire.</dd>
 		</dl>
 		<dl class="charts hidden">

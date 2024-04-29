@@ -17,7 +17,8 @@ $csrf_key = 'first_setup';
 $year = Years::create();
 
 $config = Config::getInstance();
-$default_chart = Charts::getFirstForCountry($config->country);
+$default_chart_code = Charts::getFirstForCountry($config->country);
+$default_chart_label = Charts::BUNDLED_CHARTS[$default_chart_code];
 $selected_chart = f('chart');
 
 if ($id_chart = (int) f('id_chart')) {
@@ -25,9 +26,6 @@ if ($id_chart = (int) f('id_chart')) {
 }
 elseif ($selected_chart) {
 	$year->id_chart = Charts::getOrInstall($selected_chart);
-}
-elseif ($default_chart) {
-	$year->id_chart = $default_chart->id;
 }
 
 $new_accounts = f('accounts');
@@ -93,7 +91,6 @@ if (!count($new_accounts)) {
 
 $step = (int)f('step');
 $charts_list = Charts::listForCountry($config->country);
-$default_chart_code = $default_chart ? $default_chart->country_code() : null;
-$tpl->assign(compact('year', 'new_accounts', 'csrf_key', 'appropriation_account', 'charts_list', 'default_chart', 'default_chart_code', 'step'));
+$tpl->assign(compact('year', 'new_accounts', 'csrf_key', 'appropriation_account', 'charts_list', 'default_chart_label', 'default_chart_code', 'step'));
 
 $tpl->display('acc/years/first_setup.tpl');
