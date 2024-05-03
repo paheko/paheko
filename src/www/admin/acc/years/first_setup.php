@@ -18,7 +18,7 @@ $year = Years::create();
 
 $config = Config::getInstance();
 $default_chart_code = Charts::getFirstForCountry($config->country);
-$default_chart_label = Charts::BUNDLED_CHARTS[$default_chart_code];
+$default_chart_label = Charts::BUNDLED_CHARTS[$default_chart_code] ?? null;
 $selected_chart = f('chart');
 
 if ($id_chart = (int) f('id_chart')) {
