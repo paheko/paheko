@@ -272,5 +272,8 @@ class Email extends Entity
 			$this->set('fail_count', $this->fail_count+1);
 			$this->appendFailLog($message);
 		}
+		else {
+			throw new \LogicException('Invalid bounce type: ' . $return['type']);
+		}
 	}
 }

@@ -21,6 +21,7 @@ use const Paheko\{USE_CRON, MAIL_SENDER, MAIL_RETURN_PATH, DISABLE_EMAIL};
 use const Paheko\{SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURITY, SMTP_HELO_HOSTNAME};
 
 use KD2\SMTP;
+use KD2\SMTP_Exception;
 use KD2\Security;
 use KD2\Mail_Message;
 use KD2\DB\EntityManager as EM;
@@ -683,7 +684,7 @@ class Emails
 		if (SMTP_HOST) {
 			static $smtp = null;
 
-			// Re-use SMTP connection
+			// Re-use SMTP connection in queues
 			if (null === $smtp) {
 				$const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
 				$secure = constant($const);
@@ -691,9 +692,32 @@ class Emails
 				$smtp = new SMTP(SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, $secure, SMTP_HELO_HOSTNAME);
 			}
 
-			$smtp->send($message);
+			try {
+				$return = $smtp->send($message);
+				// TODO: store return message from SMTP server
+			}
+			catch (SMTP_Exception $e) {
+				// Handle invalid recipients addresses
+				if ($r = $e->getRecipient()) {
+					if ($e->getCode() >= 500) {
+						self::handleManualBounce($r, 'hard', $e->getMessage());
+						// Don't retry delivering this email
+						return true;
+					}
+					elseif ($e->getCode() === SMTP::GRELISTING_CODE) {
+						// Resend later (FIXME: only retry for X times)
+						return false;
+					}
+					elseif ($e->getCode() >= 400) {
+						self::handleManualBounce($r, 'soft', $e->getMessage());
+						return true;
+					}
+				}
 
-			if ($in_queue) {
+				throw $e;
+			}
+
+			if (!$in_queue) {
 				$smtp->disconnect();
 				$smtp = null;
 			}
@@ -728,11 +752,11 @@ class Emails
 			return null;
 		}
 
-		if ($return['type'] == 'autoreply') {
+		if ($return['type'] === 'autoreply') {
 			// Ignore auto-responders
 			return $return;
 		}
-		elseif ($return['type'] == 'genuine') {
+		elseif ($return['type'] === 'genuine') {
 			// Forward emails that are not automatic to the organization email
 			$config = Config::getInstance();
 
@@ -748,6 +772,12 @@ class Emails
 
 			self::sendMessage(self::CONTEXT_SYSTEM, $new);
 			return $return;
+		}
+		elseif ($return['type']=== 'permanent') {
+			$return['type'] = 'hard';
+		}
+		elseif ($return['type']=== 'temporary') {
+			$return['type'] = 'soft';
 		}
 
 		return self::handleManualBounce($return['recipient'], $return['type'], $return['message']);
