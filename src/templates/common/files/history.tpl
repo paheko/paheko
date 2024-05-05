@@ -51,8 +51,8 @@
 						{button shape="delete" label="Supprimer cette version" name="delete" value=$v.version type="submit"}
 					{/if}
 					{button shape="history" label="Restaurer" name="restore" value=$v.version type="submit"}
-					{linkbutton shape="edit" label="Nommer" href="?p=%s&rename=%d"|args:$file->path_uri():$v.version}
-					{linkbutton shape="download" label="Télécharger" href="?p=%s&download=%d"|args:$file->path_uri():$v.version target="_blank"}
+					{linkbutton shape="edit" label="Nommer" href="?id=%s&rename=%d"|args:$file.hash_id:$v.version}
+					{linkbutton shape="download" label="Télécharger" href="?id=%s&download=%d"|args:$file.hash_id:$v.version target="_blank"}
 				</td>
 			</tr>
 			{/foreach}

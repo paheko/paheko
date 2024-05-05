@@ -24,16 +24,19 @@ if ($v = (int)qg('download')) {
 $csrf_key = 'file_history_' . $file->pathHash();
 
 $form->runIf('restore', function () use ($file) {
-	$file->restoreVersion((int)f('restore'));
-}, $csrf_key, '!common/files/history.php?msg=RESTORED&p=' . $file->path);
+	$new = $file->restoreVersion((int)f('restore'));
+	Utils::redirectSelf('!common/files/history.php?msg=RESTORED&id=' . $new->hash_id);
+}, $csrf_key);
 
 $form->runIf('rename', function () use ($file) {
 	$file->renameVersion((int)f('rename'), f('new_name'));
-}, $csrf_key, '!common/files/history.php?msg=RENAMED&p=' . $file->path);
+	Utils::redirectSelf('!common/files/history.php?msg=RENAMED&id=' . $file->hash_id);
+}, $csrf_key);
 
 $form->runIf('delete', function () use ($file) {
 	$file->deleteVersion((int)f('delete'));
-}, $csrf_key, '!common/files/history.php?msg=DELETED&p=' . $file->path);
+	Utils::redirectSelf('!common/files/history.php?msg=DELETED&id=' . $file->hash_id);
+}, $csrf_key);
 
 if (qg('rename')) {
 	$version = $file->getVersion((int)qg('rename'));

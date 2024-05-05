@@ -204,12 +204,13 @@ trait FileVersionsTrait
 		$v->changeFileName($new_name);
 	}
 
-	public function restoreVersion(int $v): void
+	public function restoreVersion(int $v): File
 	{
 		$v = $this->getVersion($v);
 
 		$this->createVersion();
 		$v->rename($this->path);
+		return $v;
 	}
 
 	public function deleteVersion(int $v): void

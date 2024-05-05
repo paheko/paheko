@@ -397,6 +397,16 @@ class Utils
 		return HTTP::mergeURLs(self::getSelfURI(), $new);
 	}
 
+	static public function redirectSelf(?string $destination = null, bool $exit = true): void
+	{
+		self::redirect($destination, $exit);
+	}
+
+	static public function redirectParent(?string $destination = null, bool $exit = true): void
+	{
+		self::redirectDialog($destination, $exit);
+	}
+
 	static public function redirectDialog(?string $destination = null, bool $exit = true): void
 	{
 		if (isset($_GET['_dialog'])) {
