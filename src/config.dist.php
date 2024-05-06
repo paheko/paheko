@@ -360,8 +360,6 @@ namespace Paheko;
  * Si cette constante est renseignée par un fichier texte, *TOUTES* les requêtes HTTP
  * ainsi que leur contenu y sera enregistré.
  *
- * C'est surtout utile pour débuguer les problèmes de WebDAV par exemple.
- *
  * ATTENTION : cela signifie que des informations personnelles (mot de passe etc.)
  * peuvent se retrouver dans le log. Ne pas utiliser à moins de tester en développement.
  *
@@ -369,6 +367,32 @@ namespace Paheko;
  * @var string|null
  */
 // const HTTP_LOG_FILE = __DIR__ . '/http.log';
+
+/**
+ * Activation du log WOPI
+ *
+ * Si cette constante est renseignée par un fichier texte, les requêtes HTTP reçues par
+ * le serveur WOPI seront enregistrées dans ce fichier.
+ *
+ * C'est surtout utile pour débuguer les problèmes de WebDAV par exemple.
+ *
+ * Default : null (= désactivé)
+ * @var string|null
+ */
+// const WOPI_LOG_FILE = __DIR__ . '/wopi.log';
+
+/**
+ * Activation du log WebDAV
+ *
+ * Si cette constante est renseignée par un fichier texte, les requêtes HTTP reçues par
+ * le serveur WebDAV seront enregistrées dans ce fichier.
+ *
+ * C'est surtout utile pour débuguer les problèmes de WebDAV par exemple.
+ *
+ * Default : null (= désactivé)
+ * @var string|null
+ */
+// const WEBDAV_LOG_FILE = __DIR__ . '/webdav.log';
 
 /**
  * Activer la possibilité de faire une mise à jour semi-automatisée

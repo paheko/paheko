@@ -8,7 +8,7 @@ use Paheko\Web\Router;
 use KD2\WebDAV\Server as KD2_WebDAV;
 use KD2\WebDAV\Exception;
 
-use const Paheko\{WOPI_DISCOVERY_URL, WWW_URL, ADMIN_URL};
+use const Paheko\{WOPI_DISCOVERY_URL, WWW_URL, ADMIN_URL, WEBDAV_LOG_FILE, WOPI_LOG_FILE};
 
 class WebDAV extends KD2_WebDAV
 {
@@ -41,6 +41,21 @@ class WebDAV extends KD2_WebDAV
 
 	public function log(string $message, ...$params)
 	{
-		Router::log('DAV: ' . $message, ...$params);
+		$is_wopi = substr($message, 0, 5) === 'WOPI:';
+
+		if ($is_wopi) {
+			if (!WOPI_LOG_FILE) {
+				return;
+			}
+
+			$message = substr($message, 6);
+		}
+		elseif (!$is_wopi) {
+			if (!WEBDAV_LOG_FILE) {
+				return;
+			}
+		}
+
+		Router::log($is_wopi ? 'WOPI' : 'WEBDAV', $message, ...$params);
 	}
 }

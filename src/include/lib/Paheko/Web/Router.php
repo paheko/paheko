@@ -20,7 +20,7 @@ use Paheko\Users\Session;
 
 use \KD2\HTML\Markdown;
 
-use const Paheko\{WWW_URI, ADMIN_URL, BASE_URL, WWW_URL, HELP_URL, ROOT, HTTP_LOG_FILE, ENABLE_XSENDFILE};
+use const Paheko\{WWW_URI, ADMIN_URL, BASE_URL, WWW_URL, HELP_URL, ROOT, HTTP_LOG_FILE, WEBDAV_LOG_FILE, WOPI_LOG_FILE, ENABLE_XSENDFILE};
 
 class Router
 {
@@ -55,16 +55,15 @@ class Router
 			$qs = $_SERVER['QUERY_STRING'] ?? null;
 			$headers = apache_request_headers();
 
-			self::log("===== ROUTER: Got new request: %s from %s =====", date('d/m/Y H:i:s'), $_SERVER['REMOTE_ADDR']);
-
-			self::log("ROUTER: <= %s %s\nRequest headers:\n  %s",
+			self::log('ROUTER', "<= %s %s\nFrom: %s\nRequest headers:\n  %s",
 				$method,
 				$uri . ($qs ? '?' : '') . $qs,
+				$_SERVER['REMOTE_ADDR'],
 				implode("\n  ", array_map(fn ($v, $k) => $k . ': ' . $v, $headers, array_keys($headers)))
 			);
 
 			if ($method != 'GET' && $method != 'OPTIONS' && $method != 'HEAD') {
-				self::log("ROUTER: <= Request body:\n%s", file_get_contents('php://input'));
+				//self::log('ROUTER', "<= Request body:\n%s", file_get_contents('php://input'));
 			}
 		}
 
@@ -231,21 +230,41 @@ class Router
 		return true;
 	}
 
-	static public function log(string $message, ...$params)
+	static public function log(string $type, string $message, ...$params)
 	{
-		if (!HTTP_LOG_FILE) {
+		$file = null;
+
+		if ($type === 'ROUTER') {
+			$file = HTTP_LOG_FILE;
+		}
+		elseif ($type === 'WEBDAV') {
+			$file = WEBDAV_LOG_FILE;
+		}
+		elseif ($type === 'WOPI') {
+			$file = WOPI_LOG_FILE;
+		}
+
+		if (!$file) {
 			return;
 		}
 
-		static $log = '';
+		static $logs = null;
 
-		if (!$log) {
-			register_shutdown_function(function () use (&$log) {
-				file_put_contents(HTTP_LOG_FILE, $log, FILE_APPEND);
+		if (!$logs) {
+			$logs = [];
+			register_shutdown_function(function () use (&$logs) {
+				foreach ($logs as $file => $content) {
+					if (!$content) {
+						continue;
+					}
+
+					file_put_contents($file, $content . "\n", FILE_APPEND);
+				}
 			});
 		}
 
-		$log .= vsprintf($message, $params) . "\n\n";
+		$logs[$file] ??= date('[d/m/Y H:i:s]') . "\n";
+		$logs[$file] .= vsprintf($message, $params) . "\n";
 	}
 
 	static public function isXSendFileEnabled(): bool
