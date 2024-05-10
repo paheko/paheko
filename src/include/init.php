@@ -403,7 +403,7 @@ if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) && !empty($_SERVE
 if (!defined('Paheko\INSTALL_PROCESS')) {
 	$exists = file_exists(DB_FILE);
 
-	if (!$exists || !file_size(DB_FILE)) {
+	if (!$exists || !filesize(DB_FILE)) {
 		if (in_array('install.php', get_included_files())) {
 			die('Erreur de redirection en boucle : problème de configuration ?');
 		}
