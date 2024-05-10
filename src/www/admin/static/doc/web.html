@@ -107,6 +107,7 @@
 <p>Autre exemple : <code>https://monsite.paheko.cloud/atom.xml</code> appellera le squelette <code>atom.xml</code> s'il existe.</p>
 <p>Ceci vous permet de créer de nouvelles pages dynamiques sur le site, par exemple pour notre atelier vélo nous avons une page <code>https://larustine.org/velos</code> qui appelle le squelette <code>velos</code> (sans extension), qui va afficher la liste des vélos actuellement en stock dans notre hangar.</p>
 <p>Le type de fichier étant déterminé selon l'extension (<code>.html, .css, etc.</code>) pour les fichiers traités par Brindille, un fichier sans extension sera considéré comme un fichier texte par le navigateur. Si on veut que le squelette <code>velos</code> (sans extension) s'affiche comme du HTML il faut forcer le type en mettant le code <code>{{:http type="text/html"}}</code> au début du squelette (première ligne).</p>
+<p>Note : les squelettes dont le nom commence par un tiret bas (<em>underscore</em>, exemple : <code>_documents.html</code>) ne peuvent être affichés directement en appelant leur adresse URL, ils ne peuvent qu'être inclus par un un autre squelette.</p>
 <h2 id="fichier-content-css">Fichier content.css</h2>
 <p>Ce fichier est particulier, car il définit le style du contenu des pages et des catégories.</p>
 <p>Ainsi il est également utilisé quand vous éditez un contenu dans l'administration. Donc si vous souhaitez modifier le style d'un élément du texte, il vaux mieux modifier ce fichier, sinon le rendu sera différent entre l'administration et le site public.</p>
