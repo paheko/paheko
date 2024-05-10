@@ -11,6 +11,7 @@ use Paheko\Web\Web;
 use Paheko\API;
 use Paheko\Config;
 use Paheko\Plugins;
+use Paheko\Entities\Plugin;
 use Paheko\UserException;
 use Paheko\Utils;
 use Paheko\Users\Users;
@@ -104,6 +105,13 @@ class Router
 			&& Plugins::exists($match[1])) {
 			$uri = ($first === 'admin' ? 'admin/' : 'public/') . $match[2];
 
+			$name = Utils::basename($uri);
+
+			// Do not expose templates if the name begins with an underscore
+			// this is not really a security issue, but they will probably fail
+			if (substr($name, 0, 1) === '_' || $name === Plugin::META_FILE) {
+				throw new UserException('This address is private', 403);
+			}
 
 			if ($match[2] === 'icon.svg' || substr($uri, -3) === '.md') {
 				$r = Plugins::routeStatic($match[1], $uri);
