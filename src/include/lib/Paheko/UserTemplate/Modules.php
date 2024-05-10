@@ -297,7 +297,7 @@ class Modules
 
 		// Do not expose templates if the name begins with an underscore
 		// this is not really a security issue, but they will probably fail
-		if (substr($name, 0, 1) === '_') {
+		if (substr($name, 0, 1) === '_' || $name === Module::META_FILE) {
 			throw new UserException('This address is private', 403);
 		}
 
