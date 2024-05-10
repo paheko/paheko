@@ -15,6 +15,7 @@
 		$code_size = $module->getCodeSize();
 		$files_size = $module->getFilesSize();
 		$total = $data_size + $code_size + $files_size + $config_size;
+		$code_sloc = $module->getCodeSLOC();
 		?>
 		<table class="list meter-map auto">
 			<tr>
@@ -59,6 +60,7 @@
 			</tr>
 			<caption>Utilisation de l'espace disque</caption>
 		</table>
+		<p class="help">Nombre de lignes de code : {$code_sloc}</p>
 	</article>
 {else}
 	{if !$ext.enabled}

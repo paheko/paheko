@@ -299,9 +299,14 @@ class Module extends Entity
 		return $this->fetchDistFile($path);
 	}
 
+	public function getLocalFile(string $path): ?File
+	{
+		return Files::get($this->path($path));
+	}
+
 	public function fetchLocalFile(string $path): ?string
 	{
-		$file = Files::get($this->path($path));
+		$file = $this->getLocalFile($path);
 		return !$file ? null : $file->fetch();
 	}
 
@@ -345,6 +350,63 @@ class Module extends Entity
 		}
 
 		return 0;
+	}
+
+	public function getCodeSLOC(?string $path = null): int
+	{
+		$count = 0;
+
+		foreach ($this->listFiles($path) as $file) {
+			if ($file->dir) {
+				$count += $this->getCodeSLOC($file->path);
+				continue;
+			}
+			elseif (!$file->editable) {
+				continue;
+			}
+
+			if (!empty($file->dist_path)) {
+				$fp = fopen($file->dist_path, 'r');
+			}
+			else {
+				$file = Files::get($file->file_path);
+				$fp = $file->getReadOnlyPointer();
+			}
+
+			if (!$fp) {
+				continue;
+			}
+
+			$in_comment = false;
+
+			while (!feof($fp)) {
+				$line = trim(fgets($fp));
+
+				// Skip blank lines
+				if ($line === '') {
+					continue;
+				}
+
+				if (false !== strpos($line, '{{*') || false !== strpos($line, '/*')) {
+					$in_comment = true;
+				}
+
+				if (false !== strpos($line, '*}}') || false !== strpos($line, '*/')) {
+					$in_comment = false;
+				}
+
+				// Skip comments
+				if ($in_comment || substr($line, 0, 2) === '//') {
+					continue;
+				}
+
+				$count++;
+			}
+
+			fclose($fp);
+		}
+
+		return $count;
 	}
 
 	public function getFilesSize(): int
