@@ -160,6 +160,7 @@ class File extends Entity
 		'..', // double dot
 		"\0", // NUL
 		'/', // slash
+		'\\', // anti-slash
 		// invalid characters in Windows
 		'\\', ':', '*', '?', '"', '<', '>', '|',
 	];
@@ -1365,6 +1366,10 @@ class File extends Entity
 
 		if (strlen($name) > 250) {
 			throw new ValidationException('Nom de fichier trop long');
+		}
+
+		if (strlen($name) < 1) {
+			throw new ValidationException('Nom de fichier trop court');
 		}
 
 		foreach (self::FORBIDDEN_CHARACTERS as $char) {

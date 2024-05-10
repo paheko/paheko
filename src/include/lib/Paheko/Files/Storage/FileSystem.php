@@ -60,6 +60,7 @@ class FileSystem implements StorageInterface
 	static public function storePath(File $file, string $source_path): bool
 	{
 		$target = self::getLocalFilePath($file);
+		Utils::deleteRecursive($target, true);
 		self::ensureParentDirectoryExists($target);
 
 		Utils::safe_mkdir(CACHE_ROOT, null, true);
@@ -77,6 +78,7 @@ class FileSystem implements StorageInterface
 	static public function storeContent(File $file, string $source_content): bool
 	{
 		$target = self::getLocalFilePath($file);
+		Utils::deleteRecursive($target, true);
 		self::ensureParentDirectoryExists($target);
 
 		Utils::safe_mkdir(CACHE_ROOT, null, true);
@@ -94,6 +96,7 @@ class FileSystem implements StorageInterface
 	static public function storePointer(File $file, $pointer): bool
 	{
 		$target = self::getLocalFilePath($file);
+		Utils::deleteRecursive($target, true);
 		self::ensureParentDirectoryExists($target);
 
 		Utils::safe_mkdir(CACHE_ROOT, null, true);
