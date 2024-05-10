@@ -280,8 +280,7 @@ class Modules
 			$module = self::get($name);
 
 			if (!$module) {
-				http_response_code(404);
-				throw new UserException('This page does not exist.');
+				throw new UserException('This page does not exist.', 404);
 			}
 		}
 		// Or: we are looking for the "web" module
@@ -292,6 +291,14 @@ class Modules
 		// If path ends with trailing slash, then ask for index.html
 		if (!$path || substr($path, -1) == '/') {
 			$path .= 'index.html';
+		}
+
+		$name = Utils::basename($uri);
+
+		// Do not expose templates if the name begins with an underscore
+		// this is not really a security issue, but they will probably fail
+		if (substr($name, 0, 1) === '_') {
+			throw new UserException('This address is private', 403);
 		}
 
 		// Find out web path
