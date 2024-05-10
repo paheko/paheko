@@ -131,9 +131,11 @@ class Log
 
 		$columns = [
 			'id_user' => [
+				'select' => 'l.id_user',
 			],
 			'created' => [
-				'label' => 'Date'
+				'label' => 'Date',
+				'select' => 'l.created',
 			],
 			'identity' => [
 				'label' => isset($params['id_self']) ? null : (isset($params['history']) ? 'Membre à l\'origine de la modification' : 'Membre'),
@@ -146,25 +148,28 @@ class Log
 			],
 			'type' => [
 				'label' => 'Action',
+				'select' => 'l.type',
 			],
 			'details' => [
 				'label' => 'Détails',
+				'select' => 'l.details',
 			],
 			'ip_address' => [
 				'label' => 'Adresse IP',
+				'select' => 'l.ip_address',
 			],
 		];
 
-		$tables = 'logs LEFT JOIN users u ON u.id = logs.id_user';
+		$tables = 'logs l LEFT JOIN users u ON u.id = l.id_user';
 
 		if (isset($params['id_user'])) {
-			$conditions = 'logs.id_user = ' . (int)$params['id_user'];
+			$conditions = 'l.id_user = ' . (int)$params['id_user'];
 		}
 		elseif (isset($params['id_self'])) {
-			$conditions = sprintf('logs.id_user = %d AND type < 10', (int)$params['id_self']);
+			$conditions = sprintf('l.id_user = %d AND l.type < 10', (int)$params['id_self']);
 		}
 		elseif (isset($params['history'])) {
-			$conditions = sprintf('logs.type IN (%d, %d, %d) AND json_extract(logs.details, \'$.entity\') = \'Users\\User\' AND json_extract(logs.details, \'$.id\') = %d', self::CREATE, self::EDIT, self::DELETE, (int)$params['history']);
+			$conditions = sprintf('l.type IN (%d, %d, %d) AND json_extract(l.details, \'$.entity\') = \'Users\\User\' AND json_extract(l.details, \'$.id\') = %d', self::CREATE, self::EDIT, self::DELETE, (int)$params['history']);
 		}
 		else {
 			$conditions = '1';
@@ -172,7 +177,7 @@ class Log
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('created', true);
-		$list->setCount('COUNT(logs.id)');
+		$list->setCount('COUNT(l.id)');
 		$list->setModifier(function (&$row) {
 			$row->details = $row->details ? json_decode($row->details) : null;
 			$row->type_label = $row->type == self::MESSAGE ? ($row->details->message ?? '') : self::ACTIONS[$row->type];
