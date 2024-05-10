@@ -240,9 +240,10 @@ class Upgrade
 				$db->commitSchemaUpdate();
 			}
 
-			if (version_compare($v, '1.3.10', '<')) {
+			if (version_compare($v, '1.3.9', '<')) {
+				require ROOT . '/include/migrations/1.3/1.3.9.php';
 				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/migrations/1.3/1.3.10.sql');
+				$db->import(ROOT . '/include/migrations/1.3/1.3.9.sql');
 				$db->commitSchemaUpdate();
 			}
 
