@@ -2,7 +2,7 @@
 
 <nav class="tabs">
 	<aside>
-		{exportmenu}
+		{exportmenu right=true}
 	</aside>
 	<ul>
 		<li><a href="./">Messages collectifs</a></li>
