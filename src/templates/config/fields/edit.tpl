@@ -97,6 +97,6 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 
 </form>
 
-<script type="text/javascript" src="{$admin_url}static/scripts/config_fields.js"></script>
+<script type="text/javascript" src="{$admin_url}static/scripts/config_fields.js?2024"></script>
 
 {include file="_foot.tpl"}
