@@ -1247,10 +1247,19 @@ class Utils
 	}
 
 	/**
-	 * Execute a system command with a timeout, handling STDIN, STDOUT and STDERR with callbacks
+	 * Execute a system command with a timeout, handling STDIN, STDOUT and STDERR with callbacks (asynchronous)
+	 *
+	 * @var string $cmd Command to run
+	 * @var integer $timeout Timeout after which the command should be killed (in seconds)
+	 * @var string|null|callable $stdin If this is a callback function, then it will be called until it returns NULL,
+	 * and its return will be sent to STDIN. If this is a string, it will be sent as STDIN. If NULL, no STDIN will be sent.
+	 * @var null|callable $stdout STDOUT callback, receiving output string as first parameter.
+	 * @var null|callable $stdout STDERR callback, receiving error string as first parameter.
+	 * @return int Command status code
+	 *
 	 * @see https://blog.dubbelboer.com/2012/08/24/execute-with-timeout.html
 	 */
-	static public function exec(string $cmd, int $timeout, ?callable $stdin, ?callable $stdout, ?callable $stderr = null): int
+	function exec(string $cmd, int $timeout, $stdin, ?callable $stdout, ?callable $stderr = null): int
 	{
 		if (!function_exists('proc_open') || !function_exists('proc_terminate')
 			|| preg_match('/proc_(?:open|terminate|get_status|close)/', ini_get('disable_functions'))) {
@@ -1280,31 +1289,73 @@ class Utils
 
 		$timeout_ms = $timeout * 1000000; // in microseconds
 
-		if (null !== $stdin) {
-			// Send STDIN
-			fwrite($pipes[0], $stdin());
-		}
-
-		fclose($pipes[0]);
 		$code = 0;
+		$stdin_buffer = null;
+
+		// Nothing for STDIN, close the pipe
+		if (null === $stdin) {
+			fclose($pipes[0]);
+			$pipes[0] = null;
+		}
 
 		while ($timeout_ms > 0) {
 			$start = microtime(true);
 
-			// Wait until we have output or the timer expired.
+			// Wait until we can read or write, or until the timer expires
 			$read  = [$pipes[1]];
-			$other = [];
+			$write = $pipes[0] !== null ? [$pipes[0]] : null;
+			$other = null;
 
 			if (null !== $stderr) {
 				$read[] = $pipes[2];
 			}
 
 			// Wait every 0.5 seconds
-			stream_select($read, $other, $other, 0, 500000);
+			if (!stream_select($read, $write, $other, 0, 500000)) {
+				continue;
+			}
+
+			// Write to STDIN
+			if ($write && count($write)) {
+				if (null === $stdin_buffer) {
+					if (is_callable($stdin)) {
+						$stdin_buffer = $stdin();
+					}
+					elseif (null === $stdin) {
+						throw new \LogicException('STDIN string has been sent');
+					}
+					else {
+						$stdin_buffer = $stdin;
+						$stdin = null;
+					}
+				}
+
+				// Close pipe if STDIN function returned NULL,
+				// or if STDIN string has been written
+				$close = $stdin_buffer === null;
+
+				// Progressively write to STDIN, until input is empty
+				if (null !== $stdin_buffer) {
+					$written = fwrite($pipes[0], $stdin_buffer);
+
+					if ($written !== strlen($stdin_buffer)) {
+						$stdin_buffer = substr($stdin_buffer, $written);
+					}
+					else {
+						$close = true;
+					}
+				}
+
+				if ($close) {
+					fclose($pipes[0]);
+					$pipes[0] = null;
+					$stdin_buffer = null;
+				}
+			}
 
 			// Get the status of the process.
 			// Do this before we read from the stream,
-			// this way we can't lose the last bit of output if the process dies between these     functions.
+			// this way we can't lose the last bit of output if the process dies between these functions.
 			$status = proc_get_status($process);
 
 			// We must get the exit code when it is sent, or we won't be able to get it later
@@ -1314,12 +1365,20 @@ class Utils
 
 			// Read the contents from the buffer.
 			// This function will always return immediately as the stream is non-blocking.
-			if (null !== $stdout) {
-				$stdout(stream_get_contents($pipes[1]));
+			if (in_array($pipes[1], $read, true)) {
+				$value = stream_get_contents($pipes[1]);
+
+				if (null !== $stdout) {
+					$stdout($value);
+				}
 			}
 
-			if (null !== $stderr) {
-				$stderr(stream_get_contents($pipes[2]));
+			if (in_array($pipes[2], $read, true)) {
+				$value = stream_get_contents($pipes[2]);
+
+				if (null !== $stderr) {
+					$stderr($value);
+				}
 			}
 
 			if (!$status['running']) {
