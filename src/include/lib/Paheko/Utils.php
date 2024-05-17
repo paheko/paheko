@@ -1259,7 +1259,7 @@ class Utils
 	 *
 	 * @see https://blog.dubbelboer.com/2012/08/24/execute-with-timeout.html
 	 */
-	function exec(string $cmd, int $timeout, $stdin, ?callable $stdout, ?callable $stderr = null): int
+	static public function exec(string $cmd, int $timeout, $stdin, ?callable $stdout, ?callable $stderr = null): int
 	{
 		if (!function_exists('proc_open') || !function_exists('proc_terminate')
 			|| preg_match('/proc_(?:open|terminate|get_status|close)/', ini_get('disable_functions'))) {
