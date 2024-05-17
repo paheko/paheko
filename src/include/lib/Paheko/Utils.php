@@ -1441,7 +1441,7 @@ class Utils
 		$cmd = 'prince --http-timeout=3 --pdf-profile="PDF/A-3b" -o - -';
 
 		// Prince is fast, right? Fingers crossed
-		self::exec($cmd, 10, fn () => $str, fn ($data) => print($data));
+		self::exec($cmd, 10, $str, fn ($data) => print($data));
 
 		if (PDF_USAGE_LOG) {
 			file_put_contents(PDF_USAGE_LOG, date("Y-m-d H:i:s\n"), FILE_APPEND);
