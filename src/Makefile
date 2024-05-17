@@ -37,6 +37,10 @@ test-syntax:
 tests:
 	cd ../tests && php run.php
 
+selenium-tests:
+	cd ../tests/selenium && \
+		selenium-side-runner -c "goog:chromeOptions.args=[--headless,--nogpu] browserName=chrome" *.side
+
 phpstan:
 	phpstan.phar analyze -c ../tests/phpstan.neon include www
 
