@@ -58,6 +58,7 @@ class Search extends Entity
 
 	protected $_result = null;
 	protected $_as = null;
+	protected ?DynamicList $_list = null;
 
 	public function selfCheck(): void
 	{
@@ -84,8 +85,13 @@ class Search extends Entity
 
 	public function getDynamicList(): DynamicList
 	{
+		if (isset($this->_list)) {
+			return $this->_list;
+		}
+
 		if ($this->type == self::TYPE_JSON) {
-			return $this->getAdvancedSearch()->make($this->content);
+			$this->_list = $this->getAdvancedSearch()->make($this->content);
+			return $this->_list;
 		}
 		else {
 			throw new \LogicException('SQL search cannot be used as dynamic list');
@@ -327,10 +333,16 @@ class Search extends Entity
 		return json_decode($this->content, true)['groups'];
 	}
 
-	public function quick(string $query): DynamicList
+	public function simple(string $query, array $options = []): self
 	{
-		$this->content = json_encode($this->getAdvancedSearch()->simple($query, false));
-		$this->type = self::TYPE_JSON;
-		return $this->getDynamicList();
+		$this->_list = null;
+		$this->set('content', json_encode($this->getAdvancedSearch()->simple($query, $options)));
+		$this->set('type', self::TYPE_JSON);
+		return $this;
+	}
+
+	public function redirect(string $query, array $options = []): bool
+	{
+		return $this->getAdvancedSearch()->redirect($query, $options);
 	}
 }

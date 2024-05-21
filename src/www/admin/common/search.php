@@ -50,8 +50,11 @@ $json_query = f('q') ? json_decode(f('q'), true) : null;
 $default = false;
 
 if ($text_query !== '') {
-	$s->content = json_encode($s->getAdvancedSearch()->simple($text_query, true));
-	$s->type = SE::TYPE_JSON;
+	if ($s->redirect($text_query)) {
+		return;
+	}
+
+	$s->simple($text_query, ['id_year' => qg('year')]);
 }
 elseif ($sql_query !== '') {
 	// Only admins can run custom queries, others can only run saved queries

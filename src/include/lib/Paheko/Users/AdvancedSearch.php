@@ -220,14 +220,48 @@ class AdvancedSearch extends A_S
 		]);
 	}
 
-	public function simple(string $query, bool $allow_redirect = false): \stdClass
+	public function redirect(string $query, array $options = []): bool
+	{
+		$db = DB::getInstance();
+		$query = trim($query);
+		$sql  = null;
+
+		if (ctype_digit($query)) {
+			$column = DynamicFields::getNumberField();
+			$query = (int) $query;
+		}
+		elseif (false !== strpos($query, '@')) {
+			$column = DynamicFields::getFirstEmailField();
+		}
+		else {
+			$column = DynamicFields::getNameFieldsSearchableSQL();
+
+			if (!$column) {
+				throw new UserException('Aucun champ texte n\'est indiqué comme identité des membres, il n\'est pas possible de faire une recherche.');
+			}
+
+			$sql = sprintf('SELECT id, COUNT(*) AS count FROM users_search WHERE %s LIKE ? ESCAPE \'\\\';', $column);
+			$query = $db->escapeLike($query, '\\');
+		}
+
+		$sql ??= sprintf('SELECT id, COUNT(*) AS count FROM users WHERE %s = ?;', $db->quoteIdentifier($column));
+
+		if (($row = $db->first($sql, $query)) && $row->count == 1) {
+			Utils::redirect('!users/details.php?id=' . $row->id);
+			return true;
+		}
+
+		return false;
+	}
+
+	public function simple(string $query, array $options = []): \stdClass
 	{
 		$operator = 'LIKE %?%';
 		$db = DB::getInstance();
 
 		if (is_numeric(trim($query)))
 		{
-			$column = DynamicFields::getNumberField();
+			$column = 'number';
 			$operator = '= ?';
 		}
 		elseif (strpos($query, '@') !== false)
@@ -237,35 +271,6 @@ class AdvancedSearch extends A_S
 		else
 		{
 			$column = 'identity';
-		}
-
-		if ($allow_redirect) {
-			$c = $column;
-			$table = 'users';
-
-			if ($column == 'identity') {
-				$c = DynamicFields::getNameFieldsSearchableSQL();
-
-				if (!$c) {
-					throw new UserException('Aucun champ texte n\'est indiqué comme identité des membres, il n\'est pas possible de faire une recherche.');
-				}
-
-				$table = 'users_search';
-			}
-
-			// Try to redirect to user if there is only one user
-			if ($operator == '= ?') {
-				$sql = sprintf('SELECT id, COUNT(*) AS count FROM %s WHERE %s = ?;', $table, $c);
-				$single_query = (int) $query;
-			}
-			else {
-				$sql = sprintf('SELECT id, COUNT(*) AS count FROM %s WHERE %s LIKE ?;', $table, $c);
-				$single_query = '%' . trim($query) . '%';
-			}
-
-			if (($row = $db->first($sql, $single_query)) && $row->count == 1) {
-				Utils::redirect('!users/details.php?id=' . $row->id);
-			}
 		}
 
 		$query = [[

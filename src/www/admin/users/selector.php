@@ -12,7 +12,7 @@ $list = null;
 
 // Recherche simple
 if ($query !== '') {
-	$list = Search::quick(SE::TARGET_USERS, $query);
+	$list = Search::simpleList(SE::TARGET_USERS, $query);
 }
 
 $tpl->assign(compact('query', 'list'));

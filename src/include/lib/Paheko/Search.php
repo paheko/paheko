@@ -41,11 +41,17 @@ class Search
 		return EM::findOneById(SE::class, $id);
 	}
 
-	static public function quick(string $target, string $query): DynamicList
+	static public function simple(string $target, string $query): SE
 	{
 		$s = new SE;
 		$s->target = $target;
-		return $s->quick($query);
+		$s->simple($query);
+		return $s;
+	}
+
+	static public function simpleList(string $target, string $query): DynamicList
+	{
+		return self::simple($target, $query)->getDynamicList();
 	}
 
 	static public function fromSQL(string $sql): SE

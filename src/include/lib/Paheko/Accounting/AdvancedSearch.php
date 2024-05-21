@@ -151,9 +151,31 @@ class AdvancedSearch extends A_S
 		];
 	}
 
-	public function simple(string $text, bool $allow_redirect = false, ?int $id_year = null): \stdClass
+	public function redirect(string $query, array $options = []): bool
+	{
+		$query = trim($query);
+		$id_year = $options['id_year'] ?? null;
+
+		// Match account number
+		if ($id_year && preg_match('/^[0-9]+[A-Z]*$/', $query)
+			&& ($year = Years::get($id_year))
+			&& ($id = (new Accounts($year->id_chart))->getIdFromCode($text))) {
+			Utils::redirect(sprintf('!acc/accounts/journal.php?id=%d&year=%d', $id, $id_year));
+			return true;
+		}
+		// Match transaction ID
+		elseif (substr($query, 0, 1) === '#' && ctype_digit(substr($query, 1))) {
+			Utils::redirect(sprintf('!acc/transactions/details.php?id=%d', (int)substr($query, 1)));
+			return true;
+		}
+
+		return false;
+	}
+
+	public function simple(string $text, array $options = []): \stdClass
 	{
 		$query = [];
+		$id_year = $options['id_year'] ?? null;
 
 		$text = trim($text);
 
@@ -194,12 +216,6 @@ class AdvancedSearch extends A_S
 				],
 			];
 		}
-		// Match account number
-		elseif ($allow_redirect && $id_year && preg_match('/^[0-9]+[A-Z]*$/', $text)
-			&& ($year = Years::get($id_year))
-			&& ($id = (new Accounts($year->id_chart))->getIdFromCode($text))) {
-			Utils::redirect(sprintf('!acc/accounts/journal.php?id=%d&year=%d', $id, $id_year));
-		}
 		// Match date
 		elseif (preg_match('!^\d{2}/\d{2}/\d{4}$!', $text) && ($d = Utils::get_datetime($text)))
 		{
@@ -213,10 +229,6 @@ class AdvancedSearch extends A_S
 					],
 				],
 			];
-		}
-		// Match transaction ID
-		elseif ($allow_redirect && preg_match('/^#[0-9]+$/', $text)) {
-			Utils::redirect(sprintf('!acc/transactions/details.php?id=%d', (int)substr($text, 1)));
 		}
 		// Or search in label or reference
 		else
