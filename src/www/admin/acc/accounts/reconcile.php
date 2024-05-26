@@ -99,11 +99,19 @@ $prev->modify('-1 month');
 $next->modify('+1 month');
 
 if ($next > $current_year->end_date) {
-	$next = null;
+	$next = $current_year->end_date;
 }
 
 if ($prev < $current_year->start_date) {
+	$prev = $current_year->start_date;
+}
+
+if ($start == $current_year->start_date) {
 	$prev = null;
+}
+
+if ($end == $current_year->end_date) {
+	$next = null;
 }
 
 $self_uri = Utils::getSelfURI(false);

@@ -47,6 +47,8 @@
 			{button type="submit" label="Afficher"}
 		</p>
 	</fieldset>
+</form>
+<form method="get" action="{$self_url_no_qs}" class="noprint">
 	<fieldset class="shortFormLeft advanced-filters {if !$has_advanced_options}hidden{/if}">
 		<legend>Configuration du rapprochement</legend>
 		<dl>
