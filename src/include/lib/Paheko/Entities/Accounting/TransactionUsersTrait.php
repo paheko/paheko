@@ -2,7 +2,9 @@
 
 namespace Paheko\Entities\Accounting;
 
+use KD2\DB\DB_Exception;
 use KD2\DB\EntityManager;
+use Paheko\ValidationException;
 use Paheko\Users\DynamicFields;
 
 trait TransactionUsersTrait
@@ -29,7 +31,16 @@ trait TransactionUsersTrait
 		$this->deleteLinkedUsers();
 
 		foreach ($users as $id) {
-			$db->preparedQuery('INSERT OR IGNORE INTO acc_transactions_users (id_transaction, id_user, id_service_user) VALUES (?, ?, NULL);', $this->id(), (int)$id);
+			try {
+				$db->preparedQuery('INSERT OR IGNORE INTO acc_transactions_users (id_transaction, id_user, id_service_user) VALUES (?, ?, NULL);', $this->id(), (int)$id);
+			}
+			catch (DB_Exception $e) {
+				if (false !== strpos($e->getMessage(), 'FOREIGN KEY constraint failed')) {
+					throw new ValidationException('User ID does not exist: ' . (int)$id);
+				}
+
+				throw $e;
+			}
 		}
 
 		$db->commit();
