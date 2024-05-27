@@ -15,7 +15,7 @@ use Paheko\Files\Storage;
 use Paheko\Plugins;
 use Paheko\UserTemplate\Modules;
 
-use Paheko\{LOCAL_LOGIN, DISABLE_INSTALL_PING, FILE_STORAGE_BACKEND, FILE_STORAGE_CONFIG, CONFIG_FILE, ROOT, WWW_URL, SECRET_KEY, CACHE_ROOT, DATA_ROOT, DB_FILE};
+use Paheko\{LOCAL_LOGIN, DISABLE_INSTALL_PING, FILE_STORAGE_BACKEND, FILE_STORAGE_CONFIG, ROOT, WWW_URL, SECRET_KEY, CACHE_ROOT, DATA_ROOT, DB_FILE};
 
 use KD2\HTTP;
 
@@ -398,24 +398,31 @@ class Install
 		return true;
 	}
 
-	static public function setLocalConfig(string $key, $value, bool $overwrite = true): void
+	static public function setConfig(?string $file, string $key, $value, bool $overwrite = true): void
 	{
-		if (null === CONFIG_FILE) {
+		if (null === $file) {
 			return;
 		}
 
-		if (!is_writable(dirname(CONFIG_FILE))) {
-			throw new \RuntimeException('Impossible de créer le fichier de configuration "'. CONFIG_FILE .'". Le répertoire "'. dirname(CONFIG_FILE) . '" n\'est pas accessible en écriture.');
+		if (!is_writable(dirname($file))) {
+			throw new \RuntimeException('Impossible de créer le fichier de configuration "'. $file .'". Le répertoire "'. dirname($file) . '" n\'est pas accessible en écriture.');
 		}
 
 		$new_line = sprintf('const %s = %s;', $key, var_export($value, true));
 
-		if (@filesize(CONFIG_FILE)) {
-			$config = file_get_contents(CONFIG_FILE);
+		if (@filesize($file)) {
+			$config = file_get_contents($file);
 
 			$pattern = sprintf('/^.*(?:const\s+%s|define\s*\(.*%1$s).*$/m', $key);
 
-			$config = preg_replace($pattern, $new_line, $config, -1, $count);
+			$config = preg_replace_callback($pattern, function ($match) use ($new_line, $key, $value) {
+				if (false !== strpos($match[0], 'define')) {
+					return 'define(\'Paheko\\' . $key . '\', ' . var_export($value, true) . ');';
+				}
+				else {
+					return $new_line;
+				}
+			}, $config, -1, $count);
 
 			if ($count && !$overwrite) {
 				return;
@@ -432,7 +439,13 @@ class Install
 				. $new_line . PHP_EOL;
 		}
 
-		file_put_contents(CONFIG_FILE, $config);
+		file_put_contents($file . '.tmp', $config);
+		rename($file . '.tmp', $file);
+
+		// Make sure we reset the cached file, or the changes might take a few seconds to be reloaded
+		if (function_exists('opcache_reset')) {
+			opcache_reset();
+		}
 	}
 
 	static public function showProgressSpinner(?string $next = null, string $message = '')

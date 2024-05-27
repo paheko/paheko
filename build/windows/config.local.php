@@ -11,7 +11,15 @@ if (!empty(getenv('LOCALAPPDATA'))) {
 	}
 }
 
-define('Paheko\PLUGINS_ROOT', __DIR__ . '/data/plugins');
+const USER_CONFIG_FILE = DATA_ROOT . '/config.local.php';
+
+if (file_exists(USER_CONFIG_FILE)) {
+	require USER_CONFIG_FILE;
+}
+
+if (!defined('Paheko\PLUGINS_ROOT')) {
+	define('Paheko\PLUGINS_ROOT', __DIR__ . '/data/plugins');
+}
 
 // Store secret key in user directory
 if (!defined('Paheko\SECRET_KEY')) {
@@ -24,11 +32,17 @@ if (!defined('Paheko\SECRET_KEY')) {
 	}
 }
 
-// Always log in as admin user
-const LOCAL_LOGIN = -1;
+if (!defined('Paheko\LOCAL_LOGIN')) {
+	// Always log in as admin user
+	define('Paheko\LOCAL_LOGIN', -1);
+}
 
-// Disable PDF export
-const PDF_COMMAND = null;
+if (!defined('Paheko\PDF_COMMAND')) {
+	// Always log in as admin user
+	define('Paheko\PDF_COMMAND', null);
+}
 
-// Disable e-mails as Windows is not able to send e-mails
-const DISABLE_EMAIL = true;
+if (!defined('Paheko\DISABLE_EMAIL')) {
+	// Disable e-mails as Windows is not able to send e-mails
+	define('Paheko\DISABLE_EMAIL', true);
+}

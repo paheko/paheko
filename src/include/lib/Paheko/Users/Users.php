@@ -24,7 +24,7 @@ use KD2\DB\EntityManager as EM;
 
 use KD2\Graphics\SVG\Avatar;
 
-use const Paheko\{ADMIN_COLOR1, ADMIN_COLOR2};
+use const Paheko\{ADMIN_COLOR1, ADMIN_COLOR2, LOCAL_LOGIN, USER_CONFIG_FILE};
 
 class Users
 {
@@ -600,5 +600,22 @@ class Users
 
 		header('Content-Type: image/svg+xml; charset=utf-8');
 		echo Avatar::beam($name, ['colors' => $colors, 'size' => 128, 'square' => true]);
+	}
+
+	static public function canConfigureLocalLogin(): bool
+	{
+		if (LOCAL_LOGIN === null || !USER_CONFIG_FILE) {
+			return false;
+		}
+
+		return (bool) DB::getInstance()->firstColumn('SELECT 1 FROM users WHERE password IS NOT NULL
+			AND id_category IN (SELECT id FROM users_categories WHERE perm_config >= ? AND perm_connect >= ?) LIMIT 1;',
+			Session::ACCESS_ADMIN, Session::ACCESS_READ);
+	}
+
+	static public function getFirstAdmin(): ?User
+	{
+		return EM::findOne(User::class, 'SELECT * FROM @TABLE WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config >= ?) LIMIT 1;',
+			Session::ACCESS_ADMIN);
 	}
 }

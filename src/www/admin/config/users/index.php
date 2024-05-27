@@ -23,10 +23,16 @@ $form->runIf('save', function() use ($df, $config) {
 	if (!empty($_POST['name_fields'])) {
 		$df->changeNameFields(array_keys($_POST['name_fields']));
 	}
+
+	if (isset($_POST['local_login']) && USER_CONFIG_FILE) {
+		Install::setConfig(USER_CONFIG_FILE, 'LOCAL_LOGIN', (int)$_POST['local_login']);
+	}
 }, $csrf_key, Utils::getSelfURI(['ok' => 1]));
 
 $names = $df->listAssocNames();
 $name_fields = array_intersect_key($names, array_flip(DynamicFields::getNameFields()));
+
+$first_admin_user = LOCAL_LOGIN !== null ? Users::getFirstAdmin() : null;
 
 $tpl->assign([
 	'has_parents'      => Users::hasParents(),
@@ -35,6 +41,9 @@ $tpl->assign([
 	'login_field'      => DynamicFields::getLoginField(),
 	'login_fields_list' => $df->listEligibleLoginFields(),
 	'name_fields'      => $name_fields,
+	'local_login'      => LOCAL_LOGIN,
+	'can_configure_local_login' => Users::canConfigureLocalLogin(),
+	'first_admin_user_name' => $first_admin_user ? $first_admin_user->name() : null,
 	'log_retention_options' => [
 		0 => 'Ne pas enregistrer de journaux',
 		7 => 'Une semaine',
