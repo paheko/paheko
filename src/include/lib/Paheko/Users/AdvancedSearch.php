@@ -164,6 +164,15 @@ class AdvancedSearch extends A_S
 			'where'  => 'id IN (SELECT id_user FROM services_users WHERE id_service %s)',
 		];
 
+		$columns['fee'] = [
+			'label'  => 'Est inscrit au tarif',
+			'type'   => 'enum',
+			'null'   => false,
+			'values' => $db->getAssoc('SELECT f.id, s.label || \' — \' || f.label FROM services_fees f INNER JOIN services s ON s.id = f.id_service ORDER BY s.label COLLATE U_NOCASE, f.label COLLATE U_NOCASE;'),
+			'select' => '\'Inscrit\'',
+			'where'  => 'id IN (SELECT id_user FROM services_users WHERE id_fee %s)',
+		];
+
 		$columns['service_not'] = [
 			'label'  => 'N\'est pas inscrit à l\'activité',
 			'type'   => 'enum',
