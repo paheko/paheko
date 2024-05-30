@@ -36,6 +36,10 @@ if ($list_category !== null) {
 			$row = $list->prev() ?? $list->last();
 		}
 
+		if (empty($row->_user_id)) {
+			throw new \LogicException('No previous/next user was found');
+		}
+
 		$url = sprintf('?id=%d&list_category=%d', $row->_user_id, $list_category);
 		Utils::redirect($url);
 	});

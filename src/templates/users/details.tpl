@@ -2,6 +2,8 @@
 
 {include file="users/_nav_user.tpl" id=$user.id current="details"}
 
+{form_errors}
+
 <dl class="cotisation">
 	<dt>Activités et cotisations</dt>
 	{foreach from=$services item="service"}
