@@ -38,8 +38,7 @@ tests:
 	cd ../tests && php run.php
 
 selenium-tests:
-	cd ../tests/selenium && \
-		selenium-side-runner -c "goog:chromeOptions.args=[--headless,--nogpu] browserName=chrome" *.side
+	cd ../tests/selenium && make
 
 phpstan:
 	phpstan.phar analyze -c ../tests/phpstan.neon include www
