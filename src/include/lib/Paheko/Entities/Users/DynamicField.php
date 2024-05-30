@@ -75,16 +75,16 @@ class DynamicField extends Entity
 	 */
 	protected int $system = 0;
 
-	const PASSWORD = 0x01 << 1;
-	const LOGIN    = 0x01 << 2;
-	const NUMBER   = 0x01 << 3;
-	const NAMES    = 0x01 << 4;
-	const PRESET   = 0x01 << 5;
+	const PASSWORD     = 0x01 << 1;
+	const LOGIN        = 0x01 << 2;
+	const NUMBER       = 0x01 << 3;
+	const NAMES        = 0x01 << 4;
+	const PRESET       = 0x01 << 5;
+	const AUTOCOMPLETE = 0x01 << 6;
 
 	const TYPES = [
 		'email'    => 'Adresse E-Mail',
 		'url'      => 'Adresse URL',
-		'address'  => 'Adresse postale',
 		'checkbox' => 'Case à cocher',
 		'date'     => 'Date',
 		'datetime' => 'Date et heure',
@@ -107,7 +107,6 @@ class DynamicField extends Entity
 	const PHP_TYPES = [
 		'email'    => '?string',
 		'url'      => '?string',
-		'address'  => '?string',
 		'checkbox' => 'bool',
 		'date'     => '?' . Date::class,
 		'datetime' => '?DateTime',
@@ -130,7 +129,6 @@ class DynamicField extends Entity
 	const SQL_TYPES = [
 		'email'    => 'TEXT',
 		'url'      => 'TEXT',
-		'address'  => 'TEXT',
 		'checkbox' => 'INTEGER NOT NULL DEFAULT 0',
 		'date'     => 'TEXT',
 		'datetime' => 'TEXT',
@@ -153,7 +151,6 @@ class DynamicField extends Entity
 	const SEARCH_TYPES = [
 		'email',
 		'url',
-		'address',
 		'text',
 		'textarea',
 		'datalist',

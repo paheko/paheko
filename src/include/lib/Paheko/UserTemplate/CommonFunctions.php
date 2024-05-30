@@ -793,13 +793,14 @@ class CommonFunctions
 			$params['type'] = 'number';
 			$params['step'] = 'any';
 		}
-		elseif ($type === 'address') {
-			$params['datalist'] = 'address';
-			$params['type'] = 'textarea';
-		}
 		elseif ($type === 'datalist') {
 			$params['datalist'] = $field->options ?? [];
 			$params['type'] = 'text';
+		}
+
+		if ($field->system & $field::AUTOCOMPLETE && $field->name === 'adresse') {
+			$params['datalist'] = 'address';
+			$params['data-default-country'] = Config::getInstance()->get('country');
 		}
 
 		if ($field->default_value === 'NOW()') {
