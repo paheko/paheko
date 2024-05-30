@@ -52,7 +52,9 @@ $form->runIf('save', function () use ($user, $session, $can_change_category, $li
 	if ($list_category > 0) {
 		$list_category = $user->id_category;
 	}
-}, $csrf_key, sprintf('!users/details.php?id=%d&list_category=%s', $user->id, $list_category));
+
+	Utils::redirect(sprintf('!users/details.php?id=%d&list_category=%s', $user->id, $list_category));
+}, $csrf_key);
 
 $fields = DF::getInstance()->all();
 
