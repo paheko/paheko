@@ -49,10 +49,6 @@ $form->runIf('save', function () use ($year) {
 
 	$db->commit();
 
-	if (f('appropriation')) {
-		Utils::redirect('!acc/reports/journal.php?year=' . $year->id());
-	}
-
 	Utils::redirect('!acc/transactions/details.php?id=' . $transaction->id());
 }, $csrf_key);
 
