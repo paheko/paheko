@@ -2,19 +2,25 @@
 
 namespace Paheko;
 
-if (!empty(getenv('LOCALAPPDATA'))) {
-	// Store data in user AppData directory
-	define('Paheko\DATA_ROOT', trim(getenv('LOCALAPPDATA'), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'Paheko');
+$local_app_data_root = null;
 
-	if (!file_exists(DATA_ROOT)) {
-		@mkdir(DATA_ROOT, 0700, true);
-	}
+if (!empty(getenv('LOCALAPPDATA'))) {
+	$local_app_data_root = trim(getenv('LOCALAPPDATA'), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'Paheko';
 }
 
 const USER_CONFIG_FILE = DATA_ROOT . '/config.local.php';
 
 if (file_exists(USER_CONFIG_FILE)) {
 	require USER_CONFIG_FILE;
+}
+
+if (!defined('Paheko\DATA_ROOT')) {
+	// Store data in user AppData directory
+	define('Paheko\DATA_ROOT', $local_app_data_root);
+
+	if (!file_exists(DATA_ROOT)) {
+		@mkdir(DATA_ROOT, 0700, true);
+	}
 }
 
 if (!defined('Paheko\PLUGINS_ROOT')) {
