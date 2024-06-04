@@ -231,37 +231,12 @@ class AdvancedSearch extends A_S
 
 	public function redirect(string $query, array $options = []): bool
 	{
-		$db = DB::getInstance();
-		$query = trim($query);
-		$sql  = null;
-
-		if (ctype_digit($query)) {
-			$column = DynamicFields::getNumberField();
-			$query = (int) $query;
-		}
-		elseif (false !== strpos($query, '@')) {
-			$column = DynamicFields::getFirstEmailField();
-		}
-		else {
-			$column = DynamicFields::getNameFieldsSearchableSQL();
-
-			if (!$column) {
-				throw new UserException('Aucun champ texte n\'est indiqué comme identité des membres, il n\'est pas possible de faire une recherche.');
-			}
-
-			$db->toggleUnicodeLike(true);
-			$sql = sprintf('SELECT id, COUNT(*) AS count FROM users_search WHERE %s LIKE ? ESCAPE \'\\\';', $column);
-			$query = $db->escapeLike($query, '\\');
-		}
-
-		$sql ??= sprintf('SELECT id, COUNT(*) AS count FROM users WHERE %s = ?;', $db->quoteIdentifier($column));
-
-		if (($row = $db->first($sql, $query)) && $row->count == 1) {
-			Utils::redirect('!users/details.php?id=' . $row->id);
-			return true;
-		}
-
 		return false;
+	}
+
+	public function redirectResult(\stdClass $result): void
+	{
+		Utils::redirect(sprintf('!users/details.php?id=%d', $result->id));
 	}
 
 	public function simple(string $query, array $options = []): \stdClass

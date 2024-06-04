@@ -13,9 +13,15 @@ abstract class AdvancedSearch
 	abstract public function simple(string $query, array $options = []): \stdClass;
 
 	/**
-	 * Redirect to a page if the text query matches only one single result
+	 * Redirect to a page if the text query matches a specific text
+	 * This is performed before the actual search query is built.
 	 */
 	abstract public function redirect(string $query, array $options = []): bool;
+
+	/**
+	 * Redirect to a page for the passed result row
+	 */
+	abstract public function redirectResult(\stdClass $result): void;
 
 	/**
 	 * Return list of columns. The format is similar to the one accepted in DynamicList.

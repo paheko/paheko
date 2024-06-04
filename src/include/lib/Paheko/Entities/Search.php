@@ -345,4 +345,14 @@ class Search extends Entity
 	{
 		return $this->getAdvancedSearch()->redirect($query, $options);
 	}
+
+	public function redirectIfSingleResult(): bool
+	{
+		if ($this->getDynamicList()->count() !== 1) {
+			return false;
+		}
+
+		$this->getAdvancedSearch()->redirectResult($this->getDynamicList()->iterate()->current());
+		return true;
+	}
 }

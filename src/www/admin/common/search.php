@@ -50,11 +50,17 @@ $json_query = f('q') ? json_decode(f('q'), true) : null;
 $default = false;
 
 if ($text_query !== '') {
-	if ($s->redirect($text_query)) {
+	$options = ['id_year' => qg('year')];
+
+	if ($s->redirect($text_query, $options)) {
 		return;
 	}
 
-	$s->simple($text_query, ['id_year' => qg('year')]);
+	$s->simple($text_query, $options);
+
+	if ($s->redirectIfSingleResult()) {
+		return;
+	}
 }
 elseif ($sql_query !== '') {
 	// Only admins can run custom queries, others can only run saved queries

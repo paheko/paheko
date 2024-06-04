@@ -159,7 +159,7 @@ class AdvancedSearch extends A_S
 		// Match account number
 		if ($id_year && preg_match('/^[0-9]+[A-Z]*$/', $query)
 			&& ($year = Years::get($id_year))
-			&& ($id = (new Accounts($year->id_chart))->getIdFromCode($text))) {
+			&& ($id = (new Accounts($year->id_chart))->getIdFromCode($query))) {
 			Utils::redirect(sprintf('!acc/accounts/journal.php?id=%d&year=%d', $id, $id_year));
 			return true;
 		}
@@ -170,6 +170,11 @@ class AdvancedSearch extends A_S
 		}
 
 		return false;
+	}
+
+	public function redirectResult(\stdClass $result): void
+	{
+		Utils::redirect(sprintf('!acc/transactions/details.php?id=%d', $result->id));
 	}
 
 	public function simple(string $text, array $options = []): \stdClass
