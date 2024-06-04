@@ -249,6 +249,7 @@ class AdvancedSearch extends A_S
 				throw new UserException('Aucun champ texte n\'est indiqué comme identité des membres, il n\'est pas possible de faire une recherche.');
 			}
 
+			$db->toggleUnicodeLike(true);
 			$sql = sprintf('SELECT id, COUNT(*) AS count FROM users_search WHERE %s LIKE ? ESCAPE \'\\\';', $column);
 			$query = $db->escapeLike($query, '\\');
 		}
