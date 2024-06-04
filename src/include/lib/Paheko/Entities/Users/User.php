@@ -377,9 +377,8 @@ class User extends Entity
 
 	public function importForm(array $source = null)
 	{
-		if (null === $source) {
-			$source = $_POST;
-		}
+		$source ??= $_POST;
+
 
 		// Don't allow changing security credentials from form
 		unset($source['id_category'], $source['password'], $source['otp_secret'], $source['pgp_key']);
@@ -430,6 +429,15 @@ class User extends Entity
 			}
 
 			$source[$f->name] = $source[$f->name] ?: null;
+		}
+
+		// Append time to date
+		foreach (DynamicFields::getInstance()->fieldsByType('datetime') as $f) {
+			if (!isset($source[$f->name])) {
+				continue;
+			}
+
+			$source[$f->name] .= ' ' . ($source[$f->name . '_time'] ?? '');
 		}
 
 		return parent::importForm($source);
