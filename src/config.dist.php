@@ -306,6 +306,18 @@ namespace Paheko;
 //const ENABLE_TECH_DETAILS = true;
 
 /**
+ * Activation du profilage (option de développement)
+ *
+ * Si cette option est activée, une barre sera affichée en bas des pages
+ * indiquant les performances du code, des requêtes SQL, et la liste
+ * des requêtes exécutées.
+ *
+ * Défaut : false
+ * @var bool
+ */
+//const ENABLE_PROFILER = true;
+
+/**
  * Activation du log SQL (option de développement)
  *
  * Si cette constante est renseignée par un chemin de fichier SQLite valide,
@@ -326,7 +338,6 @@ namespace Paheko;
  */
 // const SQL_DEBUG = __DIR__ . '/debug_sql.sqlite';
 
-/**
 /**
  * Mode de journalisation de SQLite
  *

@@ -8,6 +8,8 @@ use KD2\Form;
 use KD2\Translate;
 use KD2\DB\EntityManager;
 
+$start_timer = microtime(true);
+
 if (!defined('Paheko\CONFIG_FILE')) {
 	define('Paheko\CONFIG_FILE', __DIR__ . '/../config.local.php');
 }
@@ -207,6 +209,7 @@ static $default_config = [
 	'CALC_CONVERT_COMMAND'  => null,
 	'DOCUMENT_THUMBNAIL_COMMANDS' => null,
 	'SQL_DEBUG'             => null,
+	'ENABLE_PROFILER'       => false,
 	'SYSTEM_SIGNALS'        => [],
 	'LOCAL_LOGIN'           => null,
 	'LEGAL_HOSTING_DETAILS' => null,
@@ -257,6 +260,12 @@ if (isset($_SERVER['HTTP_X_OVHREQUEST_ID'])) {
 }
 else {
 	define('Paheko\HOSTING_PROVIDER', null);
+}
+
+if (ENABLE_PROFILER) {
+	define('Paheko\PROFILER_START_TIME', $start_timer);
+
+	register_shutdown_function([Utils::class, 'showProfiler']);
 }
 
 // PHP devrait être assez intelligent pour chopper la TZ système mais nan

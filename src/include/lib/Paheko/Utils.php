@@ -1747,4 +1747,109 @@ class Utils
 
 		return false;
 	}
+
+	static public function showProfiler(): void
+	{
+		$is_html = false;
+
+		foreach (headers_list() as $header) {
+			if (false !== stripos($header, 'Content-Type: text/html')) {
+				$is_html = true;
+				break;
+			}
+		}
+
+		if (!$is_html) {
+			return;
+		}
+
+		$now = microtime(true);
+		$start_time = round((PROFILER_START_TIME - $_SERVER['REQUEST_TIME_FLOAT']) * 1000);
+		$time = round(($now - PROFILER_START_TIME) * 1000);
+		$mem = round(memory_get_peak_usage(true) / 1024 / 1024, 2);
+
+		$db = DB::getInstance();
+		$db_log = $db->getLog();
+		$db_time = 0;
+		$has_slow_queries = false;
+
+		foreach ($db_log as &$item) {
+			$db_time += $item['duration'];
+
+			$item['plan'] = '';
+			try {
+				$explain = DB::getInstance()->get('EXPLAIN QUERY PLAN ' . $item['sql']);
+
+				foreach ($db->get('EXPLAIN QUERY PLAN ' . $item['sql']) as $e) {
+					$item['plan'] .= $e->detail . "\n";
+				}
+			}
+			catch (DB_Exception $e) {
+				$item['plan'] = 'Error: ' . $e->getMessage();
+			}
+
+			if ($item['duration'] >= 4000) {
+				$has_slow_queries = true;
+			}
+		}
+
+		unset($item);
+
+		printf('<style type="text/css">
+			body { padding-bottom: 3em; }
+			#__profiler * { margin: 0; padding: 0; }
+			#__profiler { position: fixed; bottom: 0; left: 0; right: 0; z-index: 30000; }
+			#__profiler header { display: flex; cursor: pointer; background: #000; color: #fff; height: 3em; }
+			#__profiler header:hover { background: #600; }
+			#__profiler span { display: flex; align-items: center; padding: .2em .7em; font-size: 1.2em; border-right: 1px solid #666; }
+			#__profiler span i { display: block; font-size: 1.8em; font-style: normal; margin-right: .5em; line-height: 1em; }
+			#__profiler.log { top: 0; }
+			#__profiler table { display: none; }
+			#__profiler.log table { display: block; background: #fff; width: 100%%; height: calc(100%% - 3em); color: #000; border-collapse: collapse; overflow: auto; }
+			#__profiler.log td, #__profiler.log th { padding: .5em; vertical-align: top; font-weight: normal; text-align: left; }
+			#__profiler.log th { white-space: pre-wrap; font-family: monospace; }
+			#__profiler.log tbody tr:nth-child(even) { background: #eee; }
+			#__profiler.log thead td { font-weight: bold; background: #ddd; }
+			#__profiler span.slow { background: darkred; }
+			#__profiler.log tbody tr.slow { background: #fcc; }
+			</style>
+			<div id="__profiler">
+				<header onclick="this.parentNode.classList.toggle(\'log\');">
+					<span title="Time before start of Paheko"><i>⇥</i>%d ms</span>
+					<span title="Time taken by Paheko" class="%s"><i>🕑</i> %s ms</span>
+					<span title="RAM usage"><i>🍔</i>%s MiB</span>
+					<span title="SQL" class="%s"><i>⛁</i> %d in %d ms</span>
+				</header>
+				<table>
+					<thead><tr><td>Time</td><td>SQL</td><td>EXPLAIN</td><td></td></tr></thead>
+					<tbody>',
+			$start_time,
+			$time > 150 ? 'slow' : '',
+			$time,
+			$mem,
+			$has_slow_queries ? 'slow' : '',
+			count($db_log),
+			round($db_time / 1000)
+		);
+
+		$sql_url = self::getLocalURL('!config/advanced/sql.php') . '?query=';
+
+		foreach ($db_log as $item) {
+			$plan = htmlspecialchars($item['plan']);
+			$plan = preg_replace('/\bSCAN\b(?:(?!\s+USING).)*$/m', '<b style="color:red">$0</b>', $plan);
+
+			printf('<tr class="%s"><td>%s&nbsp;ms</td><th>%s</th><th>%s</th><td><a href="%s">[Replay]</a></td></tr>',
+				$item['duration'] >= 4000 ? 'slow' : '',
+				round($item['duration'] / 1000, 2),
+				htmlspecialchars($item['sql']),
+				$plan,
+				$sql_url . rawurlencode($item['sql'])
+			);
+		}
+
+		echo '</tbody></table></div>';
+
+		@ob_end_flush();
+		@flush();
+	}
 }
