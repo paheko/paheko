@@ -1799,13 +1799,13 @@ class Utils
 			body { padding-bottom: 3em; }
 			#__profiler * { margin: 0; padding: 0; }
 			#__profiler { position: fixed; bottom: 0; left: 0; right: 0; z-index: 30000; }
-			#__profiler header { display: flex; cursor: pointer; background: #000; color: #fff; height: 3em; }
+			#__profiler header { display: flex; cursor: pointer; background: #000; color: #fff; height: 2em; }
 			#__profiler header:hover { background: #600; }
-			#__profiler span { display: flex; align-items: center; padding: .2em .7em; font-size: 1.2em; border-right: 1px solid #666; }
+			#__profiler span { display: flex; align-items: center; padding: .2em .7em; font-size: 1em; border-right: 1px solid #666; }
 			#__profiler span i { display: block; font-size: 1.8em; font-style: normal; margin-right: .5em; line-height: 1em; }
 			#__profiler.log { top: 0; }
 			#__profiler table { display: none; }
-			#__profiler.log table { display: block; background: #fff; width: 100%%; height: calc(100%% - 3em); color: #000; border-collapse: collapse; overflow: auto; }
+			#__profiler.log table { display: block; background: #fff; width: 100%%; height: calc(100%% - 2em); color: #000; border-collapse: collapse; overflow: auto; }
 			#__profiler.log td, #__profiler.log th { padding: .5em; vertical-align: top; font-weight: normal; text-align: left; }
 			#__profiler.log th { white-space: pre-wrap; font-family: monospace; }
 			#__profiler.log tbody tr:nth-child(even) { background: #eee; }
