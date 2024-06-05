@@ -170,6 +170,7 @@ class Users
 		$df = DynamicFields::getInstance();
 		$number_field = $df->getNumberField();
 		$name_fields = $df->getNameFields();
+		$number_field_sql = 'u.' . $db->quoteIdentifier($number_field);
 
 		$columns = [
 			'_user_id' => [
@@ -188,7 +189,7 @@ class Users
 		$identity_column = [
 			'label' => $df->getNameLabel(),
 			'select' => $df->getNameFieldsSQL('u'),
-			'order' => '_user_name_index %s',
+			'order' => '_user_name_index %s, ' . $number_field_sql . ' %1$s',
 		];
 
 		$fields = $df->getListedFields();
@@ -220,11 +221,18 @@ class Users
 			$columns[$key] = [
 				'label'  => $config->label,
 				'select' => 'u.' . $db->quoteIdentifier($key),
+				'order' => $key,
 			];
 
 			if ($config->hasSearchCache($key)) {
-				$columns[$key]['order'] = sprintf('s.%s %%s', $db->quoteIdentifier($key));
+				$columns[$key]['order'] = 's.' . $db->quoteIdentifier($key);
 			}
+
+			$columns[$key]['order'] = sprintf(
+				'%s IS NULL %%s, %1$s %%1$s, %s %%1$s',
+				$columns[$key]['order'],
+				$number_field_sql
+			);
 
 			if ($config->type == 'file') {
 				$columns[$key]['select'] = sprintf('(SELECT json_group_array(f.path)
@@ -251,7 +259,7 @@ class Users
 				$columns['id_parent'] = [
 					'label'  => 'Rattaché à',
 					'select' => 'u.id_parent',
-					'order'  => 'u.id_parent IS NULL, _parent_name COLLATE U_NOCASE %s, _user_name_index %1$s',
+					'order'  => 'u.id_parent IS NULL, _parent_name COLLATE U_NOCASE %s, _user_name_index %1$s, ' . $number_field_sql . ' %1$s',
 				];
 
 				$columns['_parent_name'] = [
@@ -263,7 +271,7 @@ class Users
 				$columns['is_parent'] = [
 					'label' => 'Responsable',
 					'select' => 'u.is_parent',
-					'order' => 'u.is_parent DESC, _user_name_index %1$s',
+					'order' => 'u.is_parent DESC, _user_name_index %1$s, ' . $number_field_sql . ' %1$s',
 				];
 			}
 		}
