@@ -26,10 +26,8 @@ if ($user->id == $logged_user_id) {
 // Protection contre la modification des admins par des membres moins puissants
 $category = $user->category();
 
-if ($category->perm_users == $session::ACCESS_ADMIN
-	&& !$session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)) {
-	throw new UserException("Seul un membre administrateur peut modifier un autre membre administrateur.");
-}
+// Protect against admin users being deleted/modified by less powerful users
+$user->validateCanChange($session);
 
 $csrf_key = 'user_security_' . $user->id;
 
