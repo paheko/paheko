@@ -221,7 +221,7 @@ class Users
 			$columns[$key] = [
 				'label'  => $config->label,
 				'select' => 'u.' . $db->quoteIdentifier($key),
-				'order' => $key,
+				'order'  => 'u.' . $db->quoteIdentifier($key),
 			];
 
 			if ($config->hasSearchCache($key)) {
