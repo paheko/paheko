@@ -1778,8 +1778,6 @@ class Utils
 
 			$item['plan'] = '';
 			try {
-				$explain = DB::getInstance()->get('EXPLAIN QUERY PLAN ' . $item['sql']);
-
 				foreach ($db->get('EXPLAIN QUERY PLAN ' . $item['sql']) as $e) {
 					$item['plan'] .= $e->detail . "\n";
 				}
