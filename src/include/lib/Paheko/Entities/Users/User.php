@@ -33,7 +33,7 @@ use KD2\DB\EntityManager as EM;
 use KD2\DB\Date;
 use KD2\ZipWriter;
 
-use const Paheko\{WWW_URL};
+use const Paheko\{WWW_URL, LOCAL_LOGIN};
 
 /**
  * WARNING: do not use $user->property = 'value' to set a property value on this class
@@ -61,6 +61,7 @@ class User extends Entity
 	];
 
 	protected bool $_loading = false;
+	protected Category $_category;
 
 	public function __construct()
 	{
@@ -319,7 +320,8 @@ class User extends Entity
 
 	public function category(): Category
 	{
-		return Categories::get($this->id_category);
+		$this->_category ??= Categories::get($this->id_category);
+		return $this->_category;
 	}
 
 	public function attachmentsDirectory(): string
@@ -725,14 +727,73 @@ class User extends Entity
 		$zip->close();
 	}
 
-	public function validateCanChange(?Session $session = null): void
+	public function isSuperAdmin(): bool
+	{
+		$category = $this->category();
+		return $category->perm_config === Session::ACCESS_ADMIN;
+	}
+
+	/**
+	 * Make sure a super-admin (access to config) can only be modified
+	 * by another super-admin.
+	 *
+	 * Or a users admin can only be modified by another users admin.
+	 */
+	public function canBeModifiedBy(?Session $session = null): bool
 	{
 		$category = $this->category();
 
-		if (($category->perm_config == Session::ACCESS_ADMIN)
+		if (($category->perm_config === Session::ACCESS_ADMIN)
 			&& (!$session || !$session->canAccess(Session::SECTION_CONFIG, Session::ACCESS_ADMIN))) {
+			return false;
+		}
+
+		if (($category->perm_users === Session::ACCESS_ADMIN)
+			&& (!$session || !$session->canAccess(Session::SECTION_USERS, Session::ACCESS_ADMIN))) {
+			return false;
+		}
+
+		return true;
+	}
+
+	public function validateCanBeModifiedBy(?Session $session = null): void
+	{
+		if (!$this->canBeModifiedBy($session)) {
 			throw new UserException("Seul un membre administrateur peut modifier un autre membre administrateur.");
 		}
+	}
+
+	public function canLoginBy(Session $session): bool
+	{
+		// Cannot login if we can't manage sessions
+		if (LOCAL_LOGIN) {
+			return false;
+		}
+
+		// Cannot login if not a superadmin
+		if (!$session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
+			return false;
+		}
+
+		$logged_user = $session->getUser();
+
+		// Cannot self-login
+		if ($logged_user->id === $this->id) {
+			return false;
+		}
+
+		// Cannot login as same category
+		if ($this->id_category === $logged_user->id_category) {
+			return false;
+		}
+
+		// Cannot login as a super-admin
+		if ($this->isSuperAdmin()) {
+			return false;
+		}
+
+
+		return true;
 	}
 
 	/**

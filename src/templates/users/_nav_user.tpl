@@ -6,11 +6,13 @@
 		{button type="submit" name="goto" value="next" label="Membre suivant" shape="right"}
 	{/if}
 
-	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE) && $current == 'details'}
-		{linkbutton href="edit.php?id=%d&list_category=%s"|args:$id:$list_category shape="edit" label="Modifier" accesskey="M"}
-	{/if}
-	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && $logged_user.id != $id && $current == 'details'}
-		{linkbutton href="delete.php?id=%d"|args:$id shape="delete" label="Supprimer" target="_dialog" accesskey="S"}
+	{if !isset($can_be_modified) || $can_be_modified === true}
+		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE) && $current === 'details'}
+			{linkbutton href="edit.php?id=%d&list_category=%s"|args:$id:$list_category shape="edit" label="Modifier" accesskey="M"}
+		{/if}
+		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && $logged_user.id !== $id && $current == 'details'}
+			{linkbutton href="delete.php?id=%d"|args:$id shape="delete" label="Supprimer" target="_dialog" accesskey="S"}
+		{/if}
 	{/if}
 	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE) && $current == 'services'}
 		{linkbutton href="!services/user/subscribe.php?user=%d"|args:$id label="Inscrire à une activité" shape="plus" target="_dialog" accesskey="K"}

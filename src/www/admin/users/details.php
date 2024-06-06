@@ -47,23 +47,21 @@ if ($list_category !== null) {
 
 $category = $user->category();
 $csrf_key = 'user_' . $user->id();
+$can_login = $user->canLoginBy($session);
+$can_be_modified = $user->canBeModifiedBy($session);
 
-$form->runIf('login_as', function () use ($user, $category, $session) {
+$form->runIf('login_as', function () use ($user, $session, $can_login) {
 	if (!$session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
 		throw new \RuntimeException('Security alert: attempt to login as a different user, but does not hold the right to do so.');
 	}
 
-	$logged_user = $session->getUser();
-
-	// Cannot login as same category, cannot login in an admin category
-	if ($user->id_category == $logged_user->id_category || $category->perm_config >= $session::ACCESS_ADMIN) {
+	if (!$can_login) {
 		throw new UserException('Accès interdit');
 	}
 
 	$session->logout();
 	$session->forceLogin($user->id);
-	Log::add(Log::LOGIN_AS, ['admin' => $logged_user->name()]);
-
+	Log::add(Log::LOGIN_AS, ['admin' => $session->user()->name()]);
 }, $csrf_key, '!?login_as=1');
 
 $services = Services_User::listDistinctForUser($user->id);
@@ -79,7 +77,9 @@ $parent_name = $user->getParentName();
 $children = $user->listChildren();
 $siblings = $user->listSiblings();
 
-$variables += compact('list_category', 'services', 'user', 'category', 'children', 'siblings', 'parent_name', 'csrf_key');
+$variables += compact('list_category', 'services', 'user', 'category',
+	'children', 'siblings', 'parent_name', 'csrf_key',
+	'can_be_modified', 'can_login');
 
 $tpl->assign($variables);
 $tpl->assign('snippets', Modules::snippetsAsString(Modules::SNIPPET_USER, $variables));

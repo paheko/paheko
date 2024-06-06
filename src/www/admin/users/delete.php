@@ -13,12 +13,12 @@ if (!$user) {
 	throw new UserException("Ce membre n'existe pas.");
 }
 
-if ($user->id == $session->getUser()->id) {
+if ($user->id === $session->getUser()->id) {
 	throw new UserException("Il n'est pas possible de supprimer votre propre compte, merci de demander à un administrateur de le faire.");
 }
 
 // Protect against admin users being deleted/modified by less powerful users
-$user->validateCanChange($session);
+$user->validateCanBeModifiedBy($session);
 
 $csrf_key = 'delete_user_' . $user->id;
 

@@ -250,7 +250,7 @@ class API
 				$this->requireAccess(Session::ACCESS_WRITE);
 
 				try {
-					$user->validateCanChange();
+					$user->validateCanBeModifiedBy(null);
 				}
 				catch (UserException $e) {
 					throw new APIException($e->getMessage(), 403, $e);
@@ -263,7 +263,7 @@ class API
 				$this->requireAccess(Session::ACCESS_ADMIN);
 
 				try {
-					$user->validateCanChange();
+					$user->validateCanBeModifiedBy(null);
 				}
 				catch (UserException $e) {
 					throw new APIException($e->getMessage(), 403, $e);

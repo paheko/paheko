@@ -85,20 +85,18 @@
 				{/if}
 			{/if}
 		</dd>
-		<dd>
-		{if $logged_user.id == $user.id}
-			{linkbutton shape="settings" label="Modifier mon mot de passe" href="!me/security.php"}
-		{elseif $user.password}
-			{linkbutton shape="settings" label="Modifier le mot de passe" href="edit_security.php?id=%d"|args:$user.id target="_dialog"}
-		{else}
-			{linkbutton shape="settings" label="Définir un mot de passe" href="edit_security.php?id=%d"|args:$user.id target="_dialog"}
+		{if $can_be_modified}
+			<dd>
+			{if $logged_user.id == $user.id}
+				{linkbutton shape="settings" label="Modifier mon mot de passe" href="!me/security.php"}
+			{elseif $user.password}
+				{linkbutton shape="settings" label="Modifier le mot de passe" href="edit_security.php?id=%d"|args:$user.id target="_dialog"}
+			{else}
+				{linkbutton shape="settings" label="Définir un mot de passe" href="edit_security.php?id=%d"|args:$user.id target="_dialog"}
+			{/if}
+			</dd>
 		{/if}
-		</dd>
-		{if !LOCAL_LOGIN
-			&& $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)
-			&& $user.id != $logged_user.id
-			&& $user.id_category != $logged_user.id_category
-			&& $category.perm_config < $session::ACCESS_ADMIN}
+		{if $can_login}
 		<dd>
 			<form method="post" action="" onsubmit="return confirm(&quot;Cela va vous déconnecter et vous reconnecter comme si vous étiez ce membre. Continuer ?&quot);">
 				{csrf_field key=$csrf_key}

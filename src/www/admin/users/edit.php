@@ -17,7 +17,7 @@ if (!$user) {
 }
 
 // Protect against admin users being deleted/modified by less powerful users
-$user->validateCanChange($session);
+$user->validateCanBeModifiedBy($session);
 
 $categories = Categories::listAssocSafe($session);
 $csrf_key = 'user_edit_' . $user->id;

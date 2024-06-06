@@ -18,16 +18,15 @@ if (!$user) {
 
 $logged_user_id = $session->getUser()->id;
 
-// Ne pas modifier le membre courant, on risque de se tirer une balle dans le pied
-if ($user->id == $logged_user_id) {
+// Don't edit password of current user directly, force them to use the correct form instead
+// This is to make sure the user does not change their password without
+// being able to remember it
+if ($user->id === $logged_user_id) {
 	Utils::redirect('!me/security.php');
 }
 
-// Protection contre la modification des admins par des membres moins puissants
-$category = $user->category();
-
 // Protect against admin users being deleted/modified by less powerful users
-$user->validateCanChange($session);
+$user->validateCanBeModifiedBy($session);
 
 $csrf_key = 'user_security_' . $user->id;
 
