@@ -66,7 +66,7 @@ freeze:
 	php ../tools/fossil_get_branch_hash.php ${KD2FW_URL} ${KD2FW_BRANCH} > ../build/kd2fw.version
 	php ../tools/fossil_get_branch_hash.php ${MODULES_URL} ${MODULES_BRANCH} > ../build/modules.version
 	php ../tools/fossil_get_branch_hash.php ${PLUGINS_URL} ${PLUGINS_BRANCH} > ../build/plugins.version
-	$(shell [[ $(fossil diff ../build/) != "" ]] && commit ../build/*.version --tag ${VERSION})
+	fossil commit ../build/*.version --tag ${VERSION}
 
 verify:
 	$(eval ROOT=$(shell pwd))
