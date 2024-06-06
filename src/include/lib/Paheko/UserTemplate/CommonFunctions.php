@@ -75,22 +75,23 @@ class CommonFunctions
 
 		$current_value = null;
 		$current_value_from_user = false;
+		$source_name = ($type === 'time') ? str_replace('_time', '', $name) : $name;
 
 		if (isset($_POST[$name])) {
 			$current_value = $_POST[$name];
 			$current_value_from_user = true;
 		}
-		elseif (isset($source) && is_object($source) && isset($source->$name) && !is_null($source->$name)) {
-			$current_value = $source->$name;
+		elseif (isset($source) && is_object($source) && isset($source->$source_name) && !is_null($source->$source_name)) {
+			$current_value = $source->$source_name;
 		}
-		elseif (isset($source) && is_array($source) && isset($source[$name])) {
-			$current_value = $source[$name];
+		elseif (isset($source) && is_array($source) && isset($source[$source_name])) {
+			$current_value = $source[$source_name];
 		}
 		elseif (isset($default) && ($type != 'checkbox' || empty($_POST))) {
 			$current_value = $default;
 		}
 
-		if ($type == 'date' || $type === 'time') {
+		if ($type === 'date' || $type === 'time') {
 			if ((is_string($current_value) && !preg_match('!^\d+:\d+$!', $current_value)) || is_int($current_value)) {
 				try {
 					$current_value = Entity::filterUserDateValue((string)$current_value);
@@ -101,7 +102,7 @@ class CommonFunctions
 			}
 
 			if (is_object($current_value) && $current_value instanceof \DateTimeInterface) {
-				if ($type == 'date') {
+				if ($type === 'date') {
 					$current_value = $current_value->format('d/m/Y');
 				}
 				else {
@@ -109,19 +110,8 @@ class CommonFunctions
 				}
 			}
 		}
-		elseif ($type == 'time' && is_object($current_value) && $current_value instanceof \DateTimeInterface) {
-			$current_value = $current_value->format('H:i');
-		}
 		elseif ($type == 'password') {
 			$current_value = null;
-		}
-		elseif ($type == 'time' && is_string($current_value)) {
-			if ($v = \DateTime::createFromFormat('!Y-m-d H:i:s', $current_value)) {
-				$current_value = $v->format('H:i');
-			}
-			elseif ($v = \DateTime::createFromFormat('!Y-m-d H:i', $current_value)) {
-				$current_value = $v->format('H:i');
-			}
 		}
 
 		$attributes['id'] = 'f_' . preg_replace('![^a-z0-9_-]!i', '', $name);
