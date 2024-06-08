@@ -212,9 +212,17 @@ class Session extends \KD2\UserSession
 		}
 
 		// Logout if data_root doesn't match, to forbid one session being used with another organization
-		if ($logged && ($root = $this->get('data_root')) && $root !== DATA_ROOT) {
-			$this->logout();
-			return false;
+		if ($logged) {
+			$root = $this->get('data_root');
+
+			if (!$root) {
+				$this->set('data_root', DATA_ROOT);
+				$this->save();
+			}
+			elseif ($root !== DATA_ROOT) {
+				$this->logout();
+				return false;
+			}
 		}
 
 		return $logged;
