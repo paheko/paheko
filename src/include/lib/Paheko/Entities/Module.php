@@ -28,7 +28,6 @@ class Module extends Entity
 	const ICON_FILE = 'icon.svg';
 	const CONFIG_FILE = 'config.html';
 	const INDEX_FILE = 'index.html';
-	const README_FILE = 'README.md';
 
 	// Snippets, don't forget to create alias constant in UserTemplate\Modules class
 	const SNIPPET_TRANSACTION = 'snippets/transaction_details.html';
@@ -78,6 +77,8 @@ class Module extends Entity
 
 	protected bool $_table_exists;
 
+	protected ?\stdClass $_ini;
+
 	public function selfCheck(): void
 	{
 		$this->assert(preg_match(self::VALID_NAME_REGEXP, $this->name), 'Nom unique de module invalide: ' . $this->name);
@@ -104,11 +105,13 @@ class Module extends Entity
 
 		parent::importForm($source);
 	}
-	/**
-	 * Fills information from module.ini file
-	 */
-	public function updateFromINI(bool $use_local = true): bool
+
+	public function getINIProperties(bool $use_local = true): ?\stdClass
 	{
+		if (isset($this->_ini) && $use_local) {
+			return $this->_ini;
+		}
+
 		if ($use_local && ($file = Files::get($this->path(self::META_FILE)))) {
 			$ini = $file->fetch();
 			$from_dist = false;
@@ -118,7 +121,7 @@ class Module extends Entity
 			$from_dist = true;
 		}
 		else {
-			return false;
+			return null;
 		}
 
 		try {
@@ -129,12 +132,35 @@ class Module extends Entity
 		}
 
 		if (empty($ini)) {
-			return false;
+			return null;
 		}
 
 		$ini = (object) $ini;
 
 		if (!isset($ini->name)) {
+			return null;
+		}
+
+		// Don't allow user code to set itself as a system module
+		if (!$from_dist) {
+			unset($ini->system);
+		}
+
+		if ($use_local) {
+			$this->_ini = $ini;
+		}
+
+		return $ini;
+	}
+
+	/**
+	 * Fills information from module.ini file
+	 */
+	public function updateFromINI(bool $use_local = true): bool
+	{
+		$ini = $this->getINIProperties();
+
+		if (!$ini) {
 			return false;
 		}
 
@@ -158,7 +184,7 @@ class Module extends Entity
 		$this->set('restrict_section', $restrict_section);
 		$this->set('restrict_level', $restrict_level);
 
-		if ($from_dist && !empty($ini->system)) {
+		if (!empty($ini->system)) {
 			$this->set('system', true);
 		}
 

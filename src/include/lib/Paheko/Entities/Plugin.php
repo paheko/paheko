@@ -27,7 +27,6 @@ class Plugin extends Entity
 	const INSTALL_FILE = 'install.php';
 	const UPGRADE_FILE = 'upgrade.php';
 	const UNINSTALL_FILE = 'uninstall.php';
-	const README_FILE = 'admin/README.md';
 
 	const PROTECTED_FILES = [
 		self::META_FILE,
@@ -62,6 +61,8 @@ class Plugin extends Entity
 
 	protected ?string $_broken_message = null;
 
+	protected ?\stdClass $_ini;
+
 	public function hasCode(): bool
 	{
 		return Plugins::exists($this->name);
@@ -94,13 +95,14 @@ class Plugin extends Entity
 		return $this->_broken_message;
 	}
 
-	/**
-	 * Fills information from plugin.ini file
-	 */
-	public function updateFromINI(): bool
+	public function getINIProperties(): ?\stdClass
 	{
+		if (isset($this->_ini)) {
+			return $this->_ini;
+		}
+
 		if (!$this->hasFile(self::META_FILE)) {
-			return false;
+			return null;
 		}
 
 		try {
@@ -111,12 +113,28 @@ class Plugin extends Entity
 		}
 
 		if (empty($ini)) {
-			return false;
+			return null;
 		}
 
 		$ini = (object) $ini;
 
 		if (!isset($ini->name)) {
+			return null;
+		}
+
+		$this->_ini = $ini;
+
+		return $ini;
+	}
+
+	/**
+	 * Fills information from plugin.ini file
+	 */
+	public function updateFromINI(): bool
+	{
+		$ini = $this->getINIProperties();
+
+		if (!$ini) {
 			return false;
 		}
 

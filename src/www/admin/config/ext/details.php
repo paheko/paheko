@@ -26,12 +26,6 @@ $form->runIf(f('enable') || f('disable'), function () use ($ext) {
 if (isset($_GET['disk'])) {
 	$mode = 'disk';
 }
-elseif (isset($_GET['readme'])) {
-	$mode = 'readme';
-	$ext_object = $module ?? $plugin;
-	$tpl->assign('content', $ext_object->fetchFile($ext_object::README_FILE));
-	$tpl->assign('custom_css', ['config.css', '/content.css']);
-}
 else {
 	$mode = 'details';
 

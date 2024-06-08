@@ -67,7 +67,6 @@ Dans ce répertoire le module peut avoir autant de fichiers qu'il veut, mais cer
 * `module.ini` : contient les informations sur le module, voir ci-dessous pour les détails
 * `config.html` : si ce squelette existe, un bouton "Configurer" apparaîtra dans la liste des modules (Configuration -> Modules) et affichera ce squelette dans un dialogue
 * `icon.svg` : icône du module, qui sera utilisée sur la page d'accueil, si le bouton est activé, et dans la liste des modules. Attention l'élément racine du fichier doit porter l'id `img` pour que l'icône fonctionne (`<svg id="img"...>`), notamment pour que les couleurs du thème s'appliquent à l'icône.
-* `README.md` : si ce fichier existe, son contenu sera affiché dans les détails du module
 
 ## Snippets
 
@@ -133,6 +132,8 @@ Ce fichier décrit le module, au format INI (`clé=valeur`), en utilisant les cl
 * `menu` : indique si ce module doit être listé dans le menu de gauche (`true` ou `false`)
 * `restrict_section` : indique la section auquel le membre doit avoir accès pour pouvoir voir le menu de ce module, parmi `web, documents, users, accounting, connect, config`
 * `restrict_level` : indique le niveau d'accès que le membre doit avoir dans la section indiquée pour pouvoir voir le menu de ce module, parmi `read, write, admin`.
+* `restrict_details` : petit texte d'explication supplémentaire (qui sera affiché dans la page des détails de l'extension) sur les droits d'accès requis pour accéder à certaines parties du module.
+* `doc_url` : adresse web HTTP menant à la documentation du module
 
 Attention : les directives `restrict_section` et `restrict_level` ne contrôlent *que* l'affichage du lien vers le module dans le menu et dans les boutons de la page d'accueil, mais pas l'accès aux pages du module.
 

@@ -133,7 +133,6 @@
 <li><code>module.ini</code> : contient les informations sur le module, voir ci-dessous pour les détails</li>
 <li><code>config.html</code> : si ce squelette existe, un bouton "Configurer" apparaîtra dans la liste des modules (Configuration -&gt; Modules) et affichera ce squelette dans un dialogue</li>
 <li><code>icon.svg</code> : icône du module, qui sera utilisée sur la page d'accueil, si le bouton est activé, et dans la liste des modules. Attention l'élément racine du fichier doit porter l'id <code>img</code> pour que l'icône fonctionne (<code>&lt;svg id="img"...&gt;</code>), notamment pour que les couleurs du thème s'appliquent à l'icône.</li>
-<li><code>README.md</code> : si ce fichier existe, son contenu sera affiché dans les détails du module</li>
 </ul>
 <h2 id="snippets">Snippets</h2>
 <p>Les modules peuvent également avoir des <code>snippets</code>, ce sont des squelettes qui seront inclus à des endroits précis de l'interface, permettant de rajouter des fonctionnalités, ils sont situés dans le sous-répertoire <code>snippets</code> du module :</p>
@@ -181,6 +180,8 @@ $block = FALSE</code></pre>
 <li><code>menu</code> : indique si ce module doit être listé dans le menu de gauche (<code>true</code> ou <code>false</code>)</li>
 <li><code>restrict_section</code> : indique la section auquel le membre doit avoir accès pour pouvoir voir le menu de ce module, parmi <code>web, documents, users, accounting, connect, config</code></li>
 <li><code>restrict_level</code> : indique le niveau d'accès que le membre doit avoir dans la section indiquée pour pouvoir voir le menu de ce module, parmi <code>read, write, admin</code>.</li>
+<li><code>restrict_details</code> : petit texte d'explication supplémentaire (qui sera affiché dans la page des détails de l'extension) sur les droits d'accès requis pour accéder à certaines parties du module.</li>
+<li><code>doc_url</code> : adresse web HTTP menant à la documentation du module</li>
 </ul>
 <p>Attention : les directives <code>restrict_section</code> et <code>restrict_level</code> ne contrôlent <em>que</em> l'affichage du lien vers le module dans le menu et dans les boutons de la page d'accueil, mais pas l'accès aux pages du module.</p>
 <h1 id="variables-speciales">Variables spéciales</h1>

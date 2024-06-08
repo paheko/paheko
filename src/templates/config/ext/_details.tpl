@@ -61,8 +61,10 @@
 				{if $item.type === 'module'}
 					{linkbutton label="Modifier le code" href="edit.php?module=%s"|args:$item.name shape="edit"}
 				{/if}
-				{if $item.readme}
-					{linkbutton label="Documentation" href="details.php?type=%s&name=%s&readme"|args:$item.type:$item.name shape="help"}
+				{if $item.ini.doc_url && stristr($item.ini.doc_url, 'paheko.cloud')}
+					{linkbutton label="Documentation" href=$item.ini.doc_url shape="help" target="_dialog"}
+				{elseif $item.ini.doc_url}
+					{linkbutton label="Documentation" href=$item.ini.doc_url shape="help" target="_blank"}
 				{/if}
 			</p>
 

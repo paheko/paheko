@@ -3,11 +3,7 @@
 {include file="config/_menu.tpl" current="ext"}
 {include file="./_nav.tpl" current=$mode ext=$ext}
 
-{if $mode === 'readme'}
-	<article class="web-content">
-		{$content|raw|markdown}
-	</article>
-{elseif $mode === 'disk' && $module}
+{if $mode === 'disk' && $module}
 	<article class="ext-more">
 		<?php
 		$data_size = $module->getDataSize();
@@ -109,6 +105,9 @@
 		{/if}
 
 		<ul>
+			{if $ext.ini.restrict_details}
+				<li>{$ext.ini.restrict_details|escape|nl2br}</li>
+			{/if}
 			{foreach from=$access_details item="label"}
 				<li>{$label|raw}</li>
 			{/foreach}
