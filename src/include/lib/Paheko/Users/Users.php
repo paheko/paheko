@@ -591,19 +591,24 @@ class Users
 		$config = Config::getInstance();
 		$name = (string)($id ?: Utils::getIp());
 
-		$colors = [$config->color1 ?: ADMIN_COLOR1, $config->color2 ?: ADMIN_COLOR2];
+		if (ctype_digit($name)) {
+			$colors = [$config->color1 ?: ADMIN_COLOR1, $config->color2 ?: ADMIN_COLOR2];
 
-		// Add more random colors
-		foreach ($colors as $color) {
-			$rgb = Utils::rgbHexToDec($color);
-			$rgb[0] += 25;
-			$rgb[1] -= 25;
-			$rgb[2] += 25;
-			$colors[] = Utils::rgbDecToHex($rgb);
-			$rgb[0] -= 50;
-			$rgb[1] += 50;
-			$rgb[2] -= 50;
-			$colors[] = Utils::rgbDecToHex($rgb);
+			// Add more random colors
+			foreach ($colors as $color) {
+				$rgb = Utils::rgbHexToDec($color);
+				$rgb[0] += 25;
+				$rgb[1] -= 25;
+				$rgb[2] += 25;
+				$colors[] = Utils::rgbDecToHex($rgb);
+				$rgb[0] -= 50;
+				$rgb[1] += 50;
+				$rgb[2] -= 50;
+				$colors[] = Utils::rgbDecToHex($rgb);
+			}
+		}
+		else {
+			$colors = ['#999999', '#cccccc', '#666666'];
 		}
 
 		header('Content-Type: image/svg+xml; charset=utf-8');
