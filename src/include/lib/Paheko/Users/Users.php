@@ -586,7 +586,7 @@ class Users
 		}
 	}
 
-	static public function serveAvatar(int $id): void
+	static public function serveAvatar($id): void
 	{
 		$config = Config::getInstance();
 		$name = (string)($id ?: Utils::getIp());

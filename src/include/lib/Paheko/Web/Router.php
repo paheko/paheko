@@ -93,7 +93,7 @@ class Router
 		}
 		// Users avatars
 		elseif ($first === 'user' && strpos($uri, 'user/avatar/') !== false) {
-			Users::serveAvatar((int)substr($uri, strlen('user/avatar/')));
+			Users::serveAvatar(substr($uri, strlen('user/avatar/')));
 			return;
 		}
 		// Add trailing slash to URLs if required
