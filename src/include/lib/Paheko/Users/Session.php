@@ -24,7 +24,8 @@ use const Paheko\{
 	SECRET_KEY,
 	WWW_URL,
 	ADMIN_URL,
-	LOCAL_LOGIN
+	LOCAL_LOGIN,
+	DATA_ROOT
 };
 
 use KD2\Security;
@@ -210,7 +211,24 @@ class Session extends \KD2\UserSession
 			$logged = $this->forceLogin(LOCAL_LOGIN);
 		}
 
+		// Logout if data_root doesn't match, to forbid one session being used with another organization
+		if ($logged && ($root = $this->get('data_root')) && $root !== DATA_ROOT) {
+			$this->logout();
+			return false;
+		}
+
 		return $logged;
+	}
+
+	protected function create($user_id): bool
+	{
+		$r = parent::create($user_id);
+
+		// Make sure we cannot use the same login for another organization, by linking it to the data root
+		$this->set('data_root', DATA_ROOT);
+		$this->save();
+
+		return $r;
 	}
 
 	public function forceLogin($login)
