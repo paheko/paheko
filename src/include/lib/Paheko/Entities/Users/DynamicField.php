@@ -167,7 +167,6 @@ class DynamicField extends Entity
 	const NAME_FIELD_TYPES = [
 		'text',
 		'select',
-		'number',
 		'url',
 		'email',
 	];

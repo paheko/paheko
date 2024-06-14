@@ -19,6 +19,11 @@ class AdvancedSearch extends A_S
 	{
 		$db = DB::getInstance();
 		$fields = DynamicFields::getInstance();
+		$identity_search_fields = $fields::getNameFieldsSearchableSQL('us');
+
+		if (!$identity_search_fields) {
+			throw new UserException('Aucun champ texte de la fiche membre n\'a été sélectionné comme identité du membre. La recherche de membre ne peut donc pas fonctionner.');
+		}
 
 		$columns = [];
 
@@ -40,7 +45,7 @@ class AdvancedSearch extends A_S
 			'type'     => 'text',
 			'null'     => true,
 			'select'   => $fields::getNameFieldsSQL('u'),
-			'where'    => $fields::getNameFieldsSearchableSQL('us') . ' %s',
+			'where'    => $identify_search_fields . ' %s',
 			'order'    => $order,
 		];
 
