@@ -66,7 +66,7 @@ Dans ce répertoire le module peut avoir autant de fichiers qu'il veut, mais cer
 
 * `module.ini` : contient les informations sur le module, voir ci-dessous pour les détails
 * `config.html` : si ce squelette existe, un bouton "Configurer" apparaîtra dans la liste des modules (Configuration -> Modules) et affichera ce squelette dans un dialogue
-* `icon.svg` : icône du module, qui sera utilisée sur la page d'accueil, si le bouton est activé, et dans la liste des modules. Attention l'élément racine du fichier doit porter l'id `img` pour que l'icône fonctionne (`<svg id="img"...>`), notamment pour que les couleurs du thème s'appliquent à l'icône.
+* `icon.svg` : icône du module, qui sera utilisée sur la page d'accueil, si le bouton est activé, et dans la liste des modules. L'élément racine du fichier SVG (`<svg …>`) doit comporter les attributs suivants : `id="img" width="100%" height="100%"`.
 
 ## Snippets
 
@@ -136,6 +136,21 @@ Ce fichier décrit le module, au format INI (`clé=valeur`), en utilisant les cl
 * `doc_url` : adresse web HTTP menant à la documentation du module
 
 Attention : les directives `restrict_section` et `restrict_level` ne contrôlent *que* l'affichage du lien vers le module dans le menu et dans les boutons de la page d'accueil, mais pas l'accès aux pages du module.
+
+Il est possible d'ajouter un commentaire dans ce fichier, pour cela il faut que la ligne commence par un point virgule.
+
+### Exemple de module.ini
+
+```
+; Exemple de commentaire
+name="Reçu de don"
+description="Reçu de don simple, sans valeur fiscale"
+author="Paheko"
+author_url="https://paheko.cloud/"
+restrict_section="accounting"
+restrict_level="read"
+doc_url="https://paheko.cloud/extension-recu-don"
+```
 
 # Variables spéciales
 

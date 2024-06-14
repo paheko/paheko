@@ -68,7 +68,10 @@
 				<li><a href="#snippets-markdown">Snippets MarkDown</a>
 			</ol></li>
 			<li><a href="#fichier-module-ini">Fichier module.ini</a>
-		</ol></li>
+			<ol>
+				<li><a href="#exemple-de-module-ini">Exemple de module.ini</a>
+			</ol></li>
+</ol></li>
 		<li><a href="#variables-speciales">Variables spéciales</a></li>
 		<li><a href="#stockage-de-donnees">Stockage de données</a>
 		<ol>
@@ -132,7 +135,7 @@
 <ul>
 <li><code>module.ini</code> : contient les informations sur le module, voir ci-dessous pour les détails</li>
 <li><code>config.html</code> : si ce squelette existe, un bouton "Configurer" apparaîtra dans la liste des modules (Configuration -&gt; Modules) et affichera ce squelette dans un dialogue</li>
-<li><code>icon.svg</code> : icône du module, qui sera utilisée sur la page d'accueil, si le bouton est activé, et dans la liste des modules. Attention l'élément racine du fichier doit porter l'id <code>img</code> pour que l'icône fonctionne (<code>&lt;svg id="img"...&gt;</code>), notamment pour que les couleurs du thème s'appliquent à l'icône.</li>
+<li><code>icon.svg</code> : icône du module, qui sera utilisée sur la page d'accueil, si le bouton est activé, et dans la liste des modules. L'élément racine du fichier SVG (<code>&lt;svg …&gt;</code>) doit comporter les attributs suivants : <code>id="img" width="100%" height="100%"</code>.</li>
 </ul>
 <h2 id="snippets">Snippets</h2>
 <p>Les modules peuvent également avoir des <code>snippets</code>, ce sont des squelettes qui seront inclus à des endroits précis de l'interface, permettant de rajouter des fonctionnalités, ils sont situés dans le sous-répertoire <code>snippets</code> du module :</p>
@@ -184,6 +187,16 @@ $block = FALSE</code></pre>
 <li><code>doc_url</code> : adresse web HTTP menant à la documentation du module</li>
 </ul>
 <p>Attention : les directives <code>restrict_section</code> et <code>restrict_level</code> ne contrôlent <em>que</em> l'affichage du lien vers le module dans le menu et dans les boutons de la page d'accueil, mais pas l'accès aux pages du module.</p>
+<p>Il est possible d'ajouter un commentaire dans ce fichier, pour cela il faut que la ligne commence par un point virgule.</p>
+<h3 id="exemple-de-module-ini">Exemple de module.ini</h3>
+<pre><code>; Exemple de commentaire
+name="Reçu de don"
+description="Reçu de don simple, sans valeur fiscale"
+author="Paheko"
+author_url="https://paheko.cloud/"
+restrict_section="accounting"
+restrict_level="read"
+doc_url="https://paheko.cloud/extension-recu-don"</code></pre>
 <h1 id="variables-speciales">Variables spéciales</h1>
 <p>Toutes les pages d'un module disposent de la variable <code>$module</code> qui contient l'entité du module en cours :</p>
 <ul>
