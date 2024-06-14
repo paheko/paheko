@@ -17,6 +17,7 @@ use Paheko\Web\Router;
 use KD2\ZipWriter;
 
 use Paheko\Entities\Files\File;
+use Paheko\Entities\Users\Category;
 
 use const Paheko\{ROOT, WWW_URL, BASE_URL};
 
@@ -86,6 +87,11 @@ class Module extends Entity
 		$this->assert(!isset($this->author_url) || preg_match('!^(?:https?://|mailto:)!', $this->author_url), 'L\'adresse du site de l\'auteur est invalide');
 		$this->assert(!isset($this->restrict_section) || in_array($this->restrict_section, Session::SECTIONS, true), 'Restriction de section invalide');
 		$this->assert(!isset($this->restrict_level) || in_array($this->restrict_level, Session::ACCESS_LEVELS, true), 'Restriction de niveau invalide');
+
+		if (isset($this->restrict_section, $this->restrict_level)) {
+			$this->assert(array_key_exists($this->restrict_level, Category::PERMISSIONS[$this->restrict_section]['options']),
+				'This restricted access level doesn\'t exist for this section');
+		}
 
 		if (!$this->exists()) {
 			$this->assert(!DB::getInstance()->test(self::TABLE, 'name = ?', $this->name), 'Un module existe déjà avec ce nom unique');
@@ -167,11 +173,9 @@ class Module extends Entity
 		$restrict_section = null;
 		$restrict_level = null;
 
-		if (isset($ini->restrict_section, $ini->restrict_level)
-			&& array_key_exists($ini->restrict_level, Session::ACCESS_LEVELS)
-			&& in_array($ini->restrict_section, Session::SECTIONS)) {
+		if (isset($ini->restrict_section, $ini->restrict_level)) {
 			$restrict_section = $ini->restrict_section;
-			$restrict_level = Session::ACCESS_LEVELS[$ini->restrict_level];
+			$restrict_level = Session::ACCESS_LEVELS[$ini->restrict_level] ?? null;
 		}
 
 		$this->set('label', $ini->name);

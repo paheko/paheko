@@ -414,9 +414,12 @@ class Template extends Smartyer
 		}
 
 		foreach ($list as $name => $config) {
-			$access = $perms->{'perm_' . $name};
-			$label = sprintf('%s : %s', $config['label'], $config['options'][$access]);
-			$out[$name] = sprintf('<b class="access_%s %s" title="%s">%s</b>', $access, $name, htmlspecialchars($label), $config['shape']);
+			$level = $perms->{'perm_' . $name};
+			if (!isset($config['options'][$level])) {
+				throw new \LogicException('This level does not exist: ' . $level);
+			}
+			$label = sprintf('%s : %s', $config['label'], $config['options'][$level]);
+			$out[$name] = sprintf('<b class="access_%s %s" title="%s">%s</b>', $level, $name, htmlspecialchars($label), $config['shape']);
 		}
 
 		return implode(' ', $out);
