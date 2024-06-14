@@ -45,7 +45,7 @@ class AdvancedSearch extends A_S
 			'type'     => 'text',
 			'null'     => true,
 			'select'   => $fields::getNameFieldsSQL('u'),
-			'where'    => $identify_search_fields . ' %s',
+			'where'    => $identity_search_fields . ' %s',
 			'order'    => $order,
 		];
 
