@@ -75,12 +75,14 @@ class DynamicField extends Entity
 	 */
 	protected int $system = 0;
 
-	const PASSWORD     = 0x01 << 1;
-	const LOGIN        = 0x01 << 2;
-	const NUMBER       = 0x01 << 3;
-	const NAMES        = 0x01 << 4;
-	const PRESET       = 0x01 << 5;
-	const AUTOCOMPLETE = 0x01 << 6;
+	const PASSWORD = 0x01 << 1;
+	const LOGIN    = 0x01 << 2;
+	const NUMBER   = 0x01 << 3;
+	const NAMES    = 0x01 << 4;
+	const PRESET   = 0x01 << 5;
+	const ADDRESS  = 0x01 << 6;
+	const POSTCODE = 0x01 << 7;
+	const CITY     = 0x01 << 8;
 
 	const TYPES = [
 		'email'    => 'Adresse E-Mail',

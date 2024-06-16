@@ -788,7 +788,7 @@ class CommonFunctions
 			$params['type'] = 'text';
 		}
 
-		if ($field->system & $field::AUTOCOMPLETE && $field->name === 'adresse') {
+		if ($field->system & $field::ADDRESS) {
 			$params['datalist'] = 'address';
 			$params['data-default-country'] = Config::getInstance()->get('country');
 		}

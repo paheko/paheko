@@ -472,7 +472,15 @@ class DynamicFields
 			}
 
 			if ($name == 'adresse') {
-				$field->system |= $field::AUTOCOMPLETE;
+				$field->system |= $field::ADDRESS;
+			}
+
+			if ($name == 'ville') {
+				$field->system |= $field::CITY;
+			}
+
+			if ($name == 'code_postal') {
+				$field->system |= $field::POSTCODE;
 			}
 
 			$data = array_merge($defaults, $data);
