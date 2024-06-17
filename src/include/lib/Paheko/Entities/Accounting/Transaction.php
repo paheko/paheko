@@ -1501,6 +1501,11 @@ class Transaction extends Entity
 			$this->set('reference', $_GET['r']);
 		}
 
+		// n = notes
+		if (isset($_GET['n'])) {
+			$this->set('notes', $_GET['n']);
+		}
+
 		// dt = date
 		if (isset($_GET['dt'])) {
 			$date = Entity::filterUserDateValue($_GET['dt'], Date::class);
