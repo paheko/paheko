@@ -226,7 +226,9 @@
 					return;
 				}
 
-				var country = $('#f_pays');
+				var country = $('#f_' + input.dataset.countryField);
+				var postcode = 'postcodeField' in input.dataset ? $('#f_' + input.dataset.postcodeField) : null;
+				var city = 'cityField' in input.dataset ? $('#f_' + input.dataset.cityField) : null;
 
 				if (country) {
 					country = country.value;
@@ -240,8 +242,16 @@
 					return;
 				}
 
+				var search = input.value;
+
+				if (postcode && postcode.value) {
+					search += ' ' + postcode.value;
+				}
+
+				console.log(postcode, search, input.dataset);
+
 				var fd = new FormData;
-				fd.append('search', g.normalizeString(input.value));
+				fd.append('search', g.normalizeString(search));
 
 				fetch(g.admin_url + 'common/autocomplete_address.php', {
 					method: 'POST',
@@ -290,14 +300,14 @@
 
 				input.value = option.dataset.address;
 
-				if (a = $('#f_code_postal')) {
+				if ('postcodeField' in input.dataset && (a = $('#f_' + input.dataset.postcodeField))) {
 					a.value = option.dataset.code;
 				}
 				else {
 					input.value += "\n" + option.dataset.code + " " + option.dataset.city;
 				}
 
-				if (a = $('#f_ville')) {
+				if ('cityField' in input.dataset && (a = $('#f_'+ input.dataset.cityField))) {
 					a.value = option.dataset.city;
 				}
 

@@ -26,10 +26,6 @@ class DynamicFields
 	protected array $_fields = [];
 	protected array $_fields_by_type = [];
 	protected array $_fields_by_system_use = [
-		'login' => [],
-		'password' => [],
-		'name' => [],
-		'number' => [],
 	];
 
 	protected array $_presets;
@@ -89,7 +85,7 @@ class DynamicFields
 
 	static public function getNameFields(): array
 	{
-		return array_keys(self::getInstance()->fieldsBySystemUse('name'));
+		return array_keys(self::getInstance()->fieldsBySystemUse('names'));
 	}
 
 	static public function getVirtualFields(): array
@@ -97,11 +93,21 @@ class DynamicFields
 		return self::getInstance()->fieldsByType('virtual');
 	}
 
+	static public function getFieldsBySystemUse($flag): array
+	{
+		return self::getInstance()->fieldsBySystemUse($flag);
+	}
+
+	static public function getFieldsByType(string $type): array
+	{
+		return self::getInstance()->fieldsByType($type);
+	}
+
 	static public function getNameFromArray($in): ?string
 	{
 		$out = [];
 
-		foreach (array_keys(self::getInstance()->fieldsBySystemUse('name')) as $f) {
+		foreach (array_keys(self::getInstance()->fieldsBySystemUse('names')) as $f) {
 			if (is_array($in) && array_key_exists($f, $in)) {
 				$out[] = $in[$f];
 			}
@@ -115,7 +121,7 @@ class DynamicFields
 
 	static public function getNameLabel(): string
 	{
-		$list = self::getInstance()->fieldsBySystemUse('name');
+		$list = self::getInstance()->fieldsBySystemUse('names');
 		$labels = [];
 
 		foreach ($list as $field) {
@@ -127,12 +133,12 @@ class DynamicFields
 
 	static public function getFirstNameField(): string
 	{
-		return key(self::getInstance()->fieldsBySystemUse('name'));
+		return key(self::getInstance()->fieldsBySystemUse('names'));
 	}
 
 	static public function getFirstSearchableNameField(): ?string
 	{
-		foreach (self::getInstance()->fieldsBySystemUse('name') as $field) {
+		foreach (self::getInstance()->fieldsBySystemUse('names') as $field) {
 			if ($field->hasSearchCache()) {
 				return $field->name;
 			}
@@ -169,7 +175,7 @@ class DynamicFields
 	{
 		$fields = [];
 
-		foreach (self::getInstance()->fieldsBySystemUse('name') as $field) {
+		foreach (self::getInstance()->fieldsBySystemUse('names') as $field) {
 			if (!$field->hasSearchCache()) {
 				continue;
 			}
@@ -278,11 +284,9 @@ class DynamicFields
 	{
 		$this->_fields_by_type = [];
 
-		foreach ($this->_fields_by_system_use as &$list) {
-			$list = [];
+		foreach (DynamicField::SYSTEM_FLAGS as $key => $bit) {
+			$this->_fields_by_system_use[$key] = [];
 		}
-
-		unset($list);
 
 		foreach ($this->_fields as $key => $field) {
 			if (!isset($this->_fields_by_type[$field->type])) {
@@ -295,20 +299,10 @@ class DynamicFields
 				continue;
 			}
 
-			if ($field->system & $field::PASSWORD) {
-				$this->_fields_by_system_use['password'][$key] = $field;
-			}
-
-			if ($field->system & $field::NAMES) {
-				$this->_fields_by_system_use['name'][$key] = $field;
-			}
-
-			if ($field->system & $field::NUMBER) {
-				$this->_fields_by_system_use['number'][$key] = $field;
-			}
-
-			if ($field->system & $field::LOGIN) {
-				$this->_fields_by_system_use['login'][$key] = $field;
+			foreach (DynamicField::SYSTEM_FLAGS as $flag => $bit) {
+				if ($field->system & $bit) {
+					$this->_fields_by_system_use[$flag][$key] = $field;
+				}
 			}
 		}
 	}
@@ -334,9 +328,13 @@ class DynamicFields
 		return null;
 	}
 
-	public function fieldsBySystemUse(string $use): array
+	public function fieldsBySystemUse($use): array
 	{
-		return $this->_fields_by_system_use[$use] ?? [];
+		if (is_int($use)) {
+			$use = array_search($use, DynamicField::SYSTEM_FLAGS, true);
+		}
+
+		return $this->_fields_by_system_use[$use];
 	}
 
 	public function getEntityTypes(): array
@@ -934,7 +932,7 @@ class DynamicFields
 			throw new ValidationException('Un seul champ peut être défini comme numéro');
 		}
 
-		if (empty($this->_fields_by_system_use['name'])) {
+		if (empty($this->_fields_by_system_use['names'])) {
 			throw new ValidationException('Aucun champ de nom de membre n\'existe');
 		}
 

@@ -791,6 +791,9 @@ class CommonFunctions
 		if ($field->system & $field::ADDRESS) {
 			$params['datalist'] = 'address';
 			$params['data-default-country'] = Config::getInstance()->get('country');
+			$params['data-city-field'] = key(DynamicFields::getFieldsBySystemUse('city'));
+			$params['data-postcode-field'] = key(DynamicFields::getFieldsBySystemUse('postcode'));
+			$params['data-country-field'] = key(DynamicFields::getFieldsByType('country'));
 		}
 
 		if ($field->default_value === 'NOW()') {

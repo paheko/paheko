@@ -84,6 +84,17 @@ class DynamicField extends Entity
 	const POSTCODE = 0x01 << 7;
 	const CITY     = 0x01 << 8;
 
+	const SYSTEM_FLAGS = [
+		'password' => self::PASSWORD,
+		'login'    => self::LOGIN,
+		'number'   => self::NUMBER,
+		'names'    => self::NAMES,
+		'preset'   => self::PRESET,
+		'address'  => self::ADDRESS,
+		'postcode' => self::POSTCODE,
+		'city'     => self::CITY,
+	];
+
 	const TYPES = [
 		'email'    => 'Adresse E-Mail',
 		'url'      => 'Adresse URL',
