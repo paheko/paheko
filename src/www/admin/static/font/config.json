@@ -603,6 +603,30 @@
       "css": "link",
       "code": 128279,
       "src": "fontawesome"
+    },
+    {
+      "uid": "21f6a88daf13c62e5a70f5ef6ad9e23f",
+      "css": "chat",
+      "code": 128172,
+      "src": "websymbols"
+    },
+    {
+      "uid": "d862a10e1448589215be19702f98f2c1",
+      "css": "smile",
+      "code": 9786,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "0f99ab40ab0b4d64a74f2d0deeb03e42",
+      "css": "videocam",
+      "code": 128249,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "19c50c52858a81de58f9db488aba77bc",
+      "css": "mic",
+      "code": 127908,
+      "src": "fontawesome"
     }
   ]
 }

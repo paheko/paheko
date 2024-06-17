@@ -29,19 +29,17 @@ $number_regexp = '^\d+[a-z]?(?: (?:bis|ter|quater))?\b';
 $street_regexp = '(?:impasse|rue|place|chemin|route|residence|avenue|montee|allee|lotissement)\s+(?:(?:du|de la|des|de l\'|de) )?[^ ]+';
 
 // Just make sure regexp is OK
-if (false === preg_match($number_regexp, '')) {
+if (false === preg_match('#' . $number_regexp . '#', '')) {
 	exit(1);
 }
 
-if (false === preg_match($street_regexp, '')) {
+if (false === preg_match('#' . $street_regexp . '#', '')) {
 	exit(1);
 }
 
 $number_regexp = $db->escapeString($number_regexp);
 $street_regexp = $db->escapeString($street_regexp);
 
-$db->createFunction('gzdeflate', 'gzdeflate');
-$db->createFunction('gzinflate', 'gzinflate');
 $db->exec('
 	CREATE TABLE config (number_regexp TEXT NOT NULL, street_regexp TEXT NOT NULL);
 	INSERT INTO config VALUES (\'' . $number_regexp . '\', \'' . $street_regexp. '\');
@@ -104,13 +102,6 @@ while (!feof($fp)) {
 		if (!empty($line[2])) {
 			$current_street = $line[2];
 			$name = $current_street;
-			$prefix = null;
-
-			if (false && preg_match($prefixes_regexp, strtolower($name), $match)) {
-				$p = trim($match[0]);
-				$name = ltrim(substr($name, strlen($match[0])));
-				$prefix = insert('prefixes', ['name' => trim($p)]);
-			}
 
 			$street = insert('streets', ['city' => (int) $city, 'name' => $name]);
 		}
@@ -131,19 +122,9 @@ while (!feof($fp)) {
 
 $db->exec('END;');
 
-/*
 $db->exec('
-	CREATE VIRTUAL TABLE streets_search USING fts5 (tokenize = \'unicode61\', name, content=streets);
-	INSERT INTO streets_search SELECT name FROM streets;
-	CREATE VIRTUAL TABLE cities_search USING fts5 (tokenize = \'unicode61\', name, content=cities);
-	INSERT INTO cities_search SELECT name FROM cities;
-	VACUUM;
-');
-*/
-
-$db->exec('
-	CREATE VIRTUAL TABLE search USING fts5 (tokenize = \'unicode61\', numbers, street, code, city);
-	INSERT INTO search SELECT GROUP_CONCAT(n.number, \' \'), s.name, c.code, c.name
+	CREATE VIRTUAL TABLE search USING fts5 (tokenize = \'unicode61\', numbers, street, code, city, lat, lon);
+	INSERT INTO search SELECT GROUP_CONCAT(n.number, \' \'), s.name, c.code, c.name, AVG(n.lat), AVG(n.lon)
 		FROM streets s
 		INNER JOIN cities c ON s.city = c.rowid
 		INNER JOIN numbers n ON n.street = s.rowid

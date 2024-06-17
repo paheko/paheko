@@ -77,6 +77,10 @@ class Utils
 		'trash'           => '🗑',
 		'history'         => '⌚',
 		'link'            => '🔗',
+		'chat'            => '💬',
+		'smile'           => '☺',
+		'camera'          => '📹',
+		'microphone'      => '🎤',
 	];
 
 	const FRENCH_DATE_NAMES = [
