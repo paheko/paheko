@@ -426,17 +426,29 @@ class Transaction extends Entity
 		return $new;
 	}
 
-	public function payment_reference(): ?string
+	public function getPaymentReference(): ?string
 	{
-		$line = current($this->getLines());
-
-		if (!$line) {
-			return null;
+		foreach ($this->getLines() as $line) {
+			if ($line->reference) {
+				return $line->reference;
+			}
 		}
 
-		return $line->reference;
+		return null;
 	}
 
+	public function setPaymentReference(string $ref): void
+	{
+		foreach ($this->getLines() as $line) {
+			$line->set('reference', $ref);
+		}
+
+		if (!isset($line)) {
+			$line = new Line;
+			$line->set('reference', $ref);
+			$this->addLine($line);
+		}
+	}
 
 	public function getHash(): string
 	{
@@ -1455,17 +1467,6 @@ class Transaction extends Entity
 		return compact('id', 'name');
 	}
 
-	public function getPaymentReference(): ?string
-	{
-		foreach ($this->getLines() as $line) {
-			if ($line->reference) {
-				return $line->reference;
-			}
-		}
-
-		return null;
-	}
-
 	/**
 	 * Quick-fill transaction from query parameters
 	 */
@@ -1594,8 +1595,8 @@ class Transaction extends Entity
 			}
 		}
 
-		if (isset($_GET['pr'])) {
-			$_POST['payment_reference'] = trim($_GET['pr']);
+		if (isset($_GET['pr']) && !$this->getPaymentReference()) {
+			$this->setPaymentReference($_GET['pr']);
 		}
 
 		return compact('lines', 'id_project', 'amount', 'linked_users');
