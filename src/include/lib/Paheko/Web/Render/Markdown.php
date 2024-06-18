@@ -30,7 +30,7 @@ class Markdown extends AbstractRender
 
 	static protected $md = null;
 
-	public function render(string $content = null): string
+	public function renderUncached(string $content = null): string
 	{
 		if (empty($content)) {
 			return '';
@@ -50,9 +50,7 @@ class Markdown extends AbstractRender
 
 		Extensions::setRenderer($this);
 
-		$content = self::$md->text($content);
-
-		return $this->outputHTML($content);
+		return self::$md->text($content);
 	}
 
 	static public function defaultExtensionCallback(bool $block, array $params, ?string $content, string $name, KD2_Markdown $md): string

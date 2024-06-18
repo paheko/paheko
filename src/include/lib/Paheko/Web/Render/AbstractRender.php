@@ -21,6 +21,9 @@ abstract class AbstractRender
 
 	protected array $links = [];
 
+	protected string $html;
+	protected string $content_hash;
+
 	public function __construct(?string $path, ?string $user_prefix)
 	{
 		$this->path = $path;
@@ -53,7 +56,28 @@ abstract class AbstractRender
 		}
 	}
 
-	abstract public function render(string $content): string;
+	public function render(string $content): string
+	{
+		$hash = md5($content);
+
+		if (isset($this->html, $this->content_hash) && $hash === $this->content_hash) {
+			$out = $this->html;
+		}
+		else {
+			$out = $this->renderUncached($content);
+
+			if ($hash) {
+				$this->html = $out;
+				$this->content_hash = $hash;
+			}
+		}
+
+		$out = $this->outputHTML($out);
+
+		return $out;
+	}
+
+	abstract public function renderUncached(string $content): string;
 
 	public function hasPath(): bool
 	{
