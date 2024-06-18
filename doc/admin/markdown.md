@@ -671,9 +671,31 @@ Texte centré
 
 On peut procéder de même avec `<<left>>` et `<<right>>` pour aligner à gauche ou à droite.
 
+## Boutons
+
+Il est possible de créer des liens sous la forme de boutons.
+
+Pour cela on utilise l'extension `<<button>>` et ses paramètres :
+
+* `color` : couleur du texte
+* `bgcolor` : couleur du fond
+* `href` : lien du bouton
+* `label` : texte du bouton
+* `block=1` : en ajoutant ce paramètre, le bouton prendra toute la largeur de la ligne (bloc)
+
+Il est possible d'utiliser les couleurs avec [leur nom](https://developer.mozilla.org/en-US/docs/Web/CSS/named-color) ou leur code hexadécimal (exemple : `#ff0000` pour rouge).
+
+```
+<<button href="https://paheko.cloud/" label="👋 Cliquez ici !" size=20 color="white" bgcolor="darkred">>
+```
+
+Donnera le bouton suivant :
+
+<<button href="https://paheko.cloud/" label="👋 Cliquez ici !" size=20 color="white" bgcolor="darkred">>
+
 ## Couleurs
 
-Comme sur les [Skyblogs](https://decoblog.skyrock.com/), il est possible de mettre en couleur le texte et le fond, et même de créer des dégradés !
+Comme sur les [Skyblogs](http://web.archive.org/web/20230821114216/https://decoblog.skyrock.com/), il est possible de mettre en couleur le texte et le fond, et même de créer des dégradés !
 
 Utiliser la syntaxe `<<color COULEUR>>...texte...<</color>>` pour changer la couleur du texte, ou `<<bgcolor COULEUR>>...texte...<</bgcolor>>` pour la couleur du fond.
 

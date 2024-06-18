@@ -100,6 +100,7 @@
 			</ol></li>
 			<li><a href="#grilles-et-colonnes">Grilles et colonnes</a></li>
 			<li><a href="#alignement-du-texte">Alignement du texte</a></li>
+			<li><a href="#boutons">Boutons</a></li>
 			<li><a href="#couleurs">Couleurs</a>
 </li></ol></li></ol></aside><h1 id="syntaxe-markdown">Syntaxe MarkDown</h1>
 <p>Paheko permet d'utiliser la syntaxe <a href="https://fr.wikipedia.org/wiki/Markdown" rel="noreferrer noopener external" target="_blank">MarkDown</a> dans les pages du site web.</p>
@@ -525,6 +526,7 @@ Nom_fichier_2.jpg
 			</ol></li>
 			<li><a href="#grilles-et-colonnes">Grilles et colonnes</a></li>
 			<li><a href="#alignement-du-texte">Alignement du texte</a></li>
+			<li><a href="#boutons">Boutons</a></li>
 			<li><a href="#couleurs">Couleurs</a>
 </li></ol></li></ol></div><p>Il est possible de limiter les niveaux en utilisant le paramètre <code>level</code> comme ceci :</p>
 <pre><code>&lt;&lt;toc level=1&gt;&gt;</code></pre>
@@ -601,8 +603,20 @@ D
 Texte centré
 &lt;&lt;/center&gt;&gt;</code></pre>
 <p>On peut procéder de même avec <code>&lt;&lt;left&gt;&gt;</code> et <code>&lt;&lt;right&gt;&gt;</code> pour aligner à gauche ou à droite.</p>
-<h2 id="couleurs">Couleurs</h2>
-<p>Comme sur les <a href="https://decoblog.skyrock.com/" rel="noreferrer noopener external" target="_blank">Skyblogs</a>, il est possible de mettre en couleur le texte et le fond, et même de créer des dégradés !</p>
+<h2 id="boutons">Boutons</h2>
+<p>Il est possible de créer des liens sous la forme de boutons.</p>
+<p>Pour cela on utilise l'extension <code>&lt;&lt;button&gt;&gt;</code> et ses paramètres :</p>
+<ul>
+<li><code>color</code> : couleur du texte</li>
+<li><code>bgcolor</code> : couleur du fond</li>
+<li><code>href</code> : lien du bouton</li>
+<li><code>label</code> : texte du bouton</li>
+<li><code>block=1</code> : en ajoutant ce paramètre, le bouton prendra toute la largeur de la ligne (bloc)</li>
+</ul>
+<p>Il est possible d'utiliser les couleurs avec <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/named-color" rel="noreferrer noopener external" target="_blank">leur nom</a> ou leur code hexadécimal (exemple : <code>#ff0000</code> pour rouge).</p>
+<pre><code>&lt;&lt;button href="https://paheko.cloud/" label="👋 Cliquez ici !" size=20 color="white" bgcolor="darkred"&gt;&gt;</code></pre>
+<p>Donnera le bouton suivant :</p><a href="https://paheko.cloud/" target="_blank" style="padding: 6pt 12pt; display: inline-block; color: white; background-color: darkred; box-shadow: 0px 0px 5px #000; margin: 6pt; border-radius: 6pt; text-decoration: none; font-size: 20pt; text-align: center;">👋 Cliquez ici !</a><h2 id="couleurs">Couleurs</h2>
+<p>Comme sur les <a href="http://web.archive.org/web/20230821114216/https://decoblog.skyrock.com/" rel="noreferrer noopener external" target="_blank">Skyblogs</a>, il est possible de mettre en couleur le texte et le fond, et même de créer des dégradés !</p>
 <p>Utiliser la syntaxe <code>&lt;&lt;color COULEUR&gt;&gt;...texte...&lt;&lt;/color&gt;&gt;</code> pour changer la couleur du texte, ou <code>&lt;&lt;bgcolor COULEUR&gt;&gt;...texte...&lt;&lt;/bgcolor&gt;&gt;</code> pour la couleur du fond.</p>
 <p>Il est possible d'indiquer plusieurs couleurs, séparées par des espaces, pour créer des dégradés.</p>
 <pre><code>&lt;&lt;color red&gt;&gt;Rouge !&lt;&lt;/color&gt;&gt;
