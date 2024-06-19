@@ -957,13 +957,12 @@ class File extends Entity
 	 */
 	public function link(Session $session, ?string $thumb = null, bool $allow_edit = false, ?string $url = null): string
 	{
-		if ($thumb == 'auto') {
-			if ($this->hasThumbnail()) {
-				$thumb = '150px';
-			}
-			else {
-				$thumb = 'icon';
-			}
+		if ($thumb === 'auto') {
+			$thumb = '150px';
+		}
+
+		if ($thumb && !$this->hasThumbnail()) {
+			$thumb = 'icon';
 		}
 
 		if ($thumb === 'icon') {
