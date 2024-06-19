@@ -97,9 +97,13 @@
 			return;
 		}
 
+		if (!file.match(/^https?:\/\//)) {
+			file = this.static_url + file + '?' + g.version;
+		}
+
 		var script = g.loaded[file] = document.createElement('script');
 		script.type = 'text/javascript';
-		script.src = this.static_url + file + '?' + g.version;
+		script.src = file;
 		script.onload = callback;
 		document.head.appendChild(script);
 	};
