@@ -56,8 +56,12 @@ abstract class AbstractRender
 		}
 	}
 
-	public function render(string $content): string
+	public function render(?string $content): string
 	{
+		if (null === $content || $content === '') {
+			return '';
+		}
+
 		$hash = md5($content);
 
 		if (isset($this->html, $this->content_hash) && $hash === $this->content_hash) {
