@@ -610,7 +610,9 @@ class Session extends \KD2\UserSession
 					$ext = Modules::get($name);
 				}
 
-				$read = $write = $ext->restrict_section ? $this->canAccess($ext->restrict_section, $ext->restrict_level) : false;
+				$read = $write = $ext->restrict_section ? $this->canAccess($ext->restrict_section, $ext->restrict_level) : null;
+				$read ??= true;
+				$write ??= false;
 			}
 
 			$this->_files_permissions[$base] = [
