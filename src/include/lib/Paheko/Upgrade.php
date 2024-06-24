@@ -12,7 +12,7 @@ use KD2\FossilInstaller;
 
 class Upgrade
 {
-	const MIN_REQUIRED_VERSION = '1.1.19';
+	const MIN_REQUIRED_VERSION = '1.3.0';
 
 	static protected $installer = null;
 
