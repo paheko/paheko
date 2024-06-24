@@ -393,7 +393,7 @@ class Users
 		$db = DB::getInstance();
 
 		$ids = array_map('intval', $ids);
-		$where = $db->where('id', $ids);
+		$where = 'u.' . $db->where('id', $ids);
 		$name = sprintf('Liste de %d membres', count($ids));
 		self::exportWhere($format, $name, $where);
 	}
@@ -406,7 +406,7 @@ class Users
 		}
 		elseif (!$id_category) {
 			$name = 'Membres sauf catégories cachées';
-			$where = 'id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)';
+			$where = 'u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)';
 		}
 		else {
 			$cat = Categories::get($id_category);
@@ -416,7 +416,7 @@ class Users
 			}
 
 			$name = sprintf('Membres - %s', $cat->name);
-			$where = sprintf('id_category = %d', $id_category);
+			$where = sprintf('u.id_category = %d', $id_category);
 		}
 
 		self::exportWhere($format, $name, $where);
@@ -432,13 +432,28 @@ class Users
 		$df = DynamicFields::getInstance();
 		$db = DB::getInstance();
 
+		$tables = 'users_view u';
 		$header = $df->listAssocNames();
 		$columns = array_keys($header);
 		$columns = array_map([$db, 'quoteIdentifier'], $columns);
+
+		if (self::hasParents()) {
+			$columns = array_map(fn($a) => 'u.' . $a, $columns);
+			$tables .= ' LEFT JOIN users b ON b.id = u.id_parent';
+			$tables .= ' LEFT JOIN users c ON c.id_parent = u.id';
+			$config = Config::getInstance();
+
+			$columns[] = sprintf('CASE WHEN u.id_parent IS NOT NULL THEN %s ELSE NULL END AS parent_name', $df->getNameFieldsSQL('b'));
+			$columns[] = sprintf('CASE WHEN u.is_parent THEN GROUP_CONCAT(%s, \'%s\') ELSE NULL END AS children_names', $df->getNameFieldsSQL('c'), "\n");
+
+			$header['parent_name'] = 'Rattaché à';
+			$header['children_names'] = 'Membres rattachés';
+		}
+
 		$columns = implode(', ', $columns);
 		$header['category'] = 'Catégorie';
 
-		$i = $db->iterate(sprintf('SELECT %s, (SELECT name FROM users_categories WHERE id = u.id_category) AS category FROM users_view u WHERE %s;', $columns, $where));
+		$i = $db->iterate(sprintf('SELECT %s, (SELECT name FROM users_categories WHERE id = u.id_category) AS category FROM %s WHERE %s GROUP BY u.id;', $columns, $tables, $where));
 
 		CSV::export($format, $name, $i, $header, [self::class, 'exportRowCallback']);
 	}
