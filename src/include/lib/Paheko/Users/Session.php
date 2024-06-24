@@ -155,6 +155,7 @@ class Session extends \KD2\UserSession
 		$r = parent::rememberMeAutoLogin();
 
 		if ($r) {
+			$user_id = $this->getUser()->id;
 			Plugins::fire('user.login.auto', false, compact('user_id'));
 
 			// Update login date as well
