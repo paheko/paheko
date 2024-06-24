@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Rapprochement : %s — %s"|args:$account.code:$account.label current="acc/accounts"}
+{include file="_head.tpl" title="Rapprochement : %s — %s"|args:$account.code:$account.label current="acc/accounts" prefer_landscape=true}
 
 {include file="acc/_year_select.tpl"}
 

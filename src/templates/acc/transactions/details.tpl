@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Écriture n°%d"|args:$transaction.id current="acc"}
+{include file="_head.tpl" title="Écriture n°%d"|args:$transaction.id current="acc" prefer_landscape=true}
 
 
 {if isset($_GET['created'])}

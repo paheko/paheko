@@ -1419,6 +1419,7 @@ class Utils
 		}
 
 		$str = self::appendCookieToURLs($str);
+		$str = preg_replace('!(<html.*?)class="!s', '$1class="pdf ', $str);
 
 		if (PDF_COMMAND == 'auto') {
 			// Try to see if there's a plugin
@@ -1469,6 +1470,7 @@ class Utils
 		$target = str_replace('.html', '.pdf', $source);
 
 		$str = self::appendCookieToURLs($str);
+		$str = preg_replace('!(<html.*?)class="!s', '$1class="pdf ', $str);
 
 		Utils::safe_mkdir(CACHE_ROOT, null, true);
 		file_put_contents($source, $str);
