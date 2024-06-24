@@ -150,6 +150,20 @@ class Session extends \KD2\UserSession
 		return $id;
 	}
 
+	protected function rememberMeAutoLogin(): bool
+	{
+		$r = parent::rememberMeAutoLogin();
+
+		if ($r) {
+			Plugins::fire('user.login.auto', false, compact('user_id'));
+
+			// Update login date as well
+			$this->db->preparedQuery('UPDATE users SET date_login = ? WHERE id = ?;', [new \DateTime, $user_id]);
+		}
+
+		return $r;
+	}
+
 	protected function storeRememberMeSelector($selector, $hash, $expiry, $user_id)
 	{
 		$selector = $this->cookie_name . '_' . $selector;
@@ -317,7 +331,7 @@ class Session extends \KD2\UserSession
 			Log::add(Log::LOGIN_SUCCESS, $details, $user_id);
 
 			// Mettre à jour la date de connexion
-			$this->db->preparedQuery('UPDATE users SET date_login = ? WHERE id = ?;', [new \DateTime, $user_id]);
+			$this->db->preparedQuery('UPDATE users SET date_login = ? WHERE id = ?;', [new \DateTime, $this->getUser()->id]);
 		}
 		else {
 			Log::add(Log::LOGIN_FAIL, $details, $user_id);
