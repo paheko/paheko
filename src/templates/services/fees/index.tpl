@@ -2,6 +2,9 @@
 
 {include file="services/_nav.tpl" current="index" current_service=$service service_page="index"}
 
+{if $service.description}
+<p class="help">{$service.description|escape|nl2br}</p>
+{/if}
 
 {if $list->count()}
 	{include file="common/dynamic_list_head.tpl"}
