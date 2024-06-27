@@ -608,7 +608,7 @@ class DynamicList implements \Countable
 			}
 		}
 
-		if ($order) {
+		if ($order && array_key_exists($order, $this->columns)) {
 			$this->orderBy($order, $desc);
 		}
 
