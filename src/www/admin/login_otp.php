@@ -36,7 +36,11 @@ $form->runIf('login', function () use ($session, $args) {
 	if ($args) {
 		Utils::redirect('!login_app.php' . $args);
 	}
-}, $csrf_key, '!');
+
+	$url = Utils::getTrustedURL(qg('r'));
+	$url ??= ADMIN_URL;
+	Utils::redirect($url);
+}, $csrf_key);
 
 $tpl->assign(compact('csrf_key', 'layout'));
 

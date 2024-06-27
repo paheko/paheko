@@ -1117,8 +1117,7 @@ class Sections
 		if (!$session->isLogged()) {
 			if (!empty($params['block'])) {
 				if (!headers_sent()) {
-					// FIXME: implement redirect to correct URL after login
-					Utils::redirect('!login.php');
+					Utils::redirect('!login.php?r=' . Utils::getSelfURI());
 				}
 
 				throw new UserException('Vous n\'avez pas accès à cette page.');

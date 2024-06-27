@@ -401,6 +401,37 @@ class Utils
 		return HTTP::mergeURLs(self::getSelfURI(), $new);
 	}
 
+	static public function getTrustedURL(?string $url): ?string
+	{
+		if (!$url) {
+			return null;
+		}
+
+		$url = rawurldecode($url);
+
+		// If URL contains another URL, something is weird, abort
+		if (false !== strpos(substr($url, 8), '://')) {
+			return null;
+		}
+
+		if (0 === strpos($url, ADMIN_URL)) {
+			return $url;
+		}
+		elseif (0 === strpos($url, WWW_URL)) {
+			return $url;
+		}
+		// Other external domain: not allowed
+		elseif (false !== strpos($url, '//')) {
+			return null;
+		}
+		elseif (0 === strpos($url, 'admin/')) {
+			return ADMIN_URL . substr($url, 6);
+		}
+		else {
+			return WWW_URL . ltrim($url, '/');
+		}
+	}
+
 	static public function redirectSelf(?string $destination = null, bool $exit = true): void
 	{
 		self::redirect($destination, $exit);

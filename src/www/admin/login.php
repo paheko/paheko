@@ -40,6 +40,10 @@ if (qg('keepSessionAlive') !== null)
 $args = $app_token ? '?app=' . rawurlencode($app_token) : '';
 $layout = $app_token ? 'public' : null;
 
+if (qg('r')) {
+	$args .= ($args ? '&' : '?') . 'r=' . rawurlencode(qg('r'));
+}
+
 // L'utilisateur est déjà connecté
 if ($session->isLogged()) {
 	if ($app_token) {
@@ -54,7 +58,7 @@ $id_field = DynamicFields::get(DynamicFields::getLoginField());
 $id_field_name = $id_field->label;
 $lock = Log::isLocked();
 
-$form->runIf('login', function () use ($id_field_name, $session, $lock, $args) {
+$form->runIf('login', function () use ($id_field_name, $session, $lock, $args, $app_token) {
 	if ($lock == 1) {
 		throw new UserException(sprintf("Vous avez dépassé la limite de tentatives de connexion.\nMerci d'attendre %d minutes avant de ré-essayer de vous connecter.", Log::LOCKOUT_DELAY/60));
 	}
@@ -81,16 +85,21 @@ $form->runIf('login', function () use ($id_field_name, $session, $lock, $args) {
 	if ($session::REQUIRE_OTP === $ok) {
 		Utils::redirect('!login_otp.php' . $args);
 	}
-	elseif ($args) {
+	elseif ($app_token) {
 		Utils::redirect('!login_app.php' . $args);
 	}
-}, 'login', ADMIN_URL);
+
+	$url = Utils::getTrustedURL(qg('r'));
+	$url ??= ADMIN_URL;
+	Utils::redirect($url);
+}, 'login');
 
 $captcha = $lock == -1 ? Security::createCaptcha(SECRET_KEY, 'fr_FR') : null;
 
 $ssl_enabled = HTTP::getScheme() == 'https';
 $changed = qg('changed') !== null;
+$redirect = qg('r');
 
-$tpl->assign(compact('id_field', 'ssl_enabled', 'changed', 'app_token', 'layout', 'captcha'));
+$tpl->assign(compact('id_field', 'ssl_enabled', 'changed', 'app_token', 'layout', 'captcha', 'redirect'));
 
 $tpl->display('login.tpl');
