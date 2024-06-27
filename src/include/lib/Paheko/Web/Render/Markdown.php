@@ -3,11 +3,12 @@
 namespace Paheko\Web\Render;
 
 use Paheko\UserTemplate\CommonModifiers;
+use Paheko\UserTemplate\Modules;
+use Paheko\Utils;
+use Paheko\Users\Session;
 
 use KD2\HTML\Markdown as KD2_Markdown;
 use KD2\HTML\Markdown_Extensions;
-
-use Paheko\UserTemplate\Modules;
 
 class Markdown_Parser extends KD2_Markdown
 {
@@ -34,6 +35,27 @@ class Markdown extends AbstractRender
 	{
 		if (empty($content)) {
 			return '';
+		}
+
+		static $is_logged = Session::getInstance()->isLogged();
+
+		// Slick hack: restricted content calls an extension to generate the correct HTML code
+		$content = preg_replace_callback(':(?<!\\\\)<<restrict>>(.*?)<</restrict>>:s', function (array $match) use ($is_logged): string {
+			if (!$is_logged) {
+				return '<<restrict_message>>';
+			}
+			else {
+				return $match[1];
+			}
+		}, $content);
+
+		if (false !== strpos($content, '<<restrict>>') && preg_match(':(?<!\\\\)<<restrict>>:', $content)) {
+			if ($is_logged) {
+				$content = str_replace('<<restrict>>', '', $content);
+			}
+			else {
+				$content = '<<restrict_message>>';
+			}
 		}
 
 		if (!isset(self::$md)) {

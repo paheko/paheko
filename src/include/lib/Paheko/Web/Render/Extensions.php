@@ -6,7 +6,6 @@ use Paheko\Entities\Files\File;
 
 use Paheko\Plugins;
 use Paheko\Utils;
-use Paheko\Users\Session;
 use KD2\SkrivLite;
 
 use const Paheko\{ADMIN_URL, ROOT};
@@ -38,7 +37,7 @@ class Extensions
 			'gallery'  => [self::class, 'gallery'],
 			'video'    => [self::class, 'video'],
 			'paheko'   => [self::class, 'paheko'],
-			'restrict' => [self::class, 'restrict'],
+			'restrict_message' => [self::class, 'restrict_message'],
 		];
 
 		$signal = Plugins::fire('render.extensions.init', false, $list);
@@ -50,14 +49,12 @@ class Extensions
 		return $list;
 	}
 
-	static public function restrict(bool $block, array $args, ?string $content): string
+	/**
+	 * This is a slight hack, see MarkDown renderer for details
+	 */
+	static public function restrict_message(bool $block, array $args, ?string $content): string
 	{
-		if (Session::getInstance()->isLogged()) {
-			return '<p style="border: 1px solid #cc0; background: #ffc; padding: .5rem; border-radius: .5rem; margin: 1rem 0;">Cette page est réservée aux membres connectés.</p>';
-		}
-
-		Utils::redirect('!login.php?r=' . Utils::getSelfURI());
-		return '';
+		return sprintf('<p class="alert block">Ce contenu est réservé aux membres connectés.<br /><a href="%s">Cliquez ici pour vous connecter</a></p>', Utils::getLocalURL('!login.php?r=' . Utils::getSelfURI()));
 	}
 
 	static public function paheko(bool $block, array $args, ?string $content): string
