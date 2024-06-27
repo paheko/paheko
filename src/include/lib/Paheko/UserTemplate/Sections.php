@@ -1117,7 +1117,7 @@ class Sections
 		if (!$session->isLogged()) {
 			if (!empty($params['block'])) {
 				if (!headers_sent()) {
-					Utils::redirect('!login.php?r=' . Utils::getSelfURI());
+					Utils::redirect('!login.php?r=' . rawurlencode(Utils::getSelfURI()));
 				}
 
 				throw new UserException('Vous n\'avez pas accès à cette page.');
