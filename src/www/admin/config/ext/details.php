@@ -17,6 +17,10 @@ $csrf_key = 'ext_' . $ext->name;
 $module = $ext->module ?? null;
 $plugin = $ext->plugin ?? null;
 
+if ($ext->broken_message) {
+	throw new UserException($ext->broken_message);
+}
+
 $form->runIf(f('enable') || f('disable'), function () use ($ext) {
 	$enabled = f('enable') ? true : false;
 	Extensions::toggle($ext->type, $ext->name, $enabled);

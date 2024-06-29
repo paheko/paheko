@@ -89,6 +89,8 @@ class Plugin extends Entity
 			$this->assert(array_key_exists($this->restrict_level, Category::PERMISSIONS[$this->restrict_section]['options']),
 				sprintf('This restricted access level doesn\'t exist for this section: %s', $this->restrict_level));
 		}
+
+		$this->assert(!self::isAllowed($this->name), 'Cette extension est désactivée par l\'hébergeur.');
 	}
 
 	public function setBrokenMessage(string $str)
