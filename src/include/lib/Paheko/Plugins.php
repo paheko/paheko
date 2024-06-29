@@ -154,6 +154,10 @@ class Plugins
 		static $plugins = [];
 
 		foreach ($list as $row) {
+			if (!self::isAllowed($row->plugin)) {
+				continue;
+			}
+
 			$plugins[$row->plugin] ??= Plugins::get($row->plugin);
 			$plugin = $plugins[$row->plugin];
 
