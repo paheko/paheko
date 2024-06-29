@@ -211,6 +211,11 @@ class Plugins
 					$p->setBrokenMessage($e->getMessage());
 				}
 			}
+
+
+			if (!self::isAllowed($p->name)) {
+				$p->setBrokenMessage('Cette extension est désactivée au niveau du système.');
+			}
 		}
 
 		return $list;
