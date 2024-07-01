@@ -205,7 +205,7 @@ class Router
 		}
 
 		if ($file->trash) {
-			throw new UserException('Cette page n\'existe pas.', 404);
+			throw new UserException('Cette adresse a été supprimée.', 410);
 		}
 
 		foreach ($_GET as $key => $v) {
