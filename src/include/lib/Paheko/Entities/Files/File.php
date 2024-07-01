@@ -2,7 +2,7 @@
 
 namespace Paheko\Entities\Files;
 
-use KD2\HTTP;
+use KD2\HTTP\Server;
 use KD2\Graphics\Image;
 use KD2\Graphics\Blob;
 use KD2\Office\ToText;
@@ -1164,56 +1164,38 @@ class File extends Entity
 			throw new UserException('Le contenu du fichier est introuvable.');
 		}
 
-		// Use X-SendFile, if available, and storage has a local copy
-		if (Router::isXSendFileEnabled()) {
-			$local_path = $path ?? Files::callStorage('getLocalFilePath', $this);
+		$path ??= $this->getLocalFilePath();
 
-			if ($local_path) {
-				Router::xSendFile($local_path);
-				return;
-			}
-		}
-
-		// Disable gzip, against buffering issues
-		if (function_exists('apache_setenv')) {
-			@apache_setenv('no-gzip', 1);
-		}
-
-		@ini_set('zlib.output_compression', 'Off');
-
-		// Don't return Content-Length on OVH, as their HTTP 2.0 proxy is buggy
-		// @see https://fossil.kd2.org/paheko/tktview/8b342877cda6ef7023b16277daa0ec8e39d949f8
-		if (HOSTING_PROVIDER !== 'OVH') {
-			header(sprintf('Content-Length: %d', $path ? filesize($path) : $this->size));
-		}
-
-		if (@ob_get_length()) {
-			@ob_clean();
-		}
+		$size = $path ? filesize($path) : $this->size;
 
 		if (null === $path) {
 			$pointer = $this->getReadOnlyPointer();
-
-			if (null === $pointer) {
-				$path = $this->getLocalFilePath();
-			}
-		}
-
-		if (null !== $path) {
-			readfile($path);
-		}
-		elseif (null !== $pointer) {
-			while (!feof($pointer)) {
-				echo fread($pointer, 32*1024);
-			}
-
-			fclose($pointer);
 		}
 		else {
+			$pointer = fopen($path, 'rb');
+		}
+
+		if (!$pointer) {
 			header('HTTP/1.1 404 Not Found', true, 404);
 			header('Content-Type: text/html', true);
 			header_remove('Content-Disposition');
 			throw new UserException('Le contenu de ce fichier est introuvable', 404);
+		}
+
+		try {
+			Server::serveFile(null, null, $pointer, [
+				'xsendfile' => ENABLE_XSENDFILE,
+				'ranges'    => true,
+				'gzip'      => true,
+				'name'      => $this->name,
+				'size'      => $size,
+			]);
+		}
+		catch (\LogicException $e) {
+			throw new UserException($e->getMessage(), $e->getCode());
+		}
+		finally {
+			fclose($pointer);
 		}
 	}
 

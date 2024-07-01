@@ -21,7 +21,7 @@ use Paheko\Users\Session;
 
 use \KD2\HTML\Markdown;
 
-use const Paheko\{WWW_URI, ADMIN_URL, BASE_URL, WWW_URL, HELP_URL, ROOT, HTTP_LOG_FILE, WEBDAV_LOG_FILE, WOPI_LOG_FILE, ENABLE_XSENDFILE};
+use const Paheko\{WWW_URI, ADMIN_URL, BASE_URL, WWW_URL, HELP_URL, ROOT, HTTP_LOG_FILE, WEBDAV_LOG_FILE, WOPI_LOG_FILE};
 
 class Router
 {
@@ -273,28 +273,5 @@ class Router
 
 		$logs[$file] ??= date('[d/m/Y H:i:s]') . "\n";
 		$logs[$file] .= vsprintf($message, $params) . "\n";
-	}
-
-	static public function isXSendFileEnabled(): bool
-	{
-		if (!ENABLE_XSENDFILE || !isset($_SERVER['SERVER_SOFTWARE'])) {
-			return false;
-		}
-
-		if (stristr($_SERVER['SERVER_SOFTWARE'], 'apache')
-			&& function_exists('apache_get_modules')
-			&& in_array('mod_xsendfile', apache_get_modules())) {
-			return true;
-		}
-		else if (stristr($_SERVER['SERVER_SOFTWARE'], 'lighttpd')) {
-			return true;
-		}
-
-		return false;
-	}
-
-	static public function xSendFile(string $path): void
-	{
-		header('X-Sendfile: ' . $path);
 	}
 }

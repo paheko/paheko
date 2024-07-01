@@ -124,25 +124,8 @@ class Storage extends AbstractStorage
 			return null;
 		}
 
-		$path = $file->getLocalFilePath();
-
-		if ($path && Router::isXSendFileEnabled()) {
-			Router::xSendFile($path);
-			return ['stop' => true];
-		}
-
-		$pointer = $file->getReadOnlyPointer();
-
-		// We trust the WebDAV server to be more efficient that File::serve
-		// with serving a file for WebDAV clients
-		if (!$pointer && $path) {
-			return ['path' => $path];
-		}
-		elseif (!$pointer) {
-			throw new WebDAV_Exception('File Content not found', 404);
-		}
-
-		return ['resource' => $pointer];
+		$file->serve();
+		return ['stop' => true];
 	}
 
 	/**
