@@ -54,7 +54,7 @@ class Page extends Entity
 	const STATUS_LIST = [
 		self::STATUS_DRAFT => 'Brouillon',
 		self::STATUS_ONLINE => 'En ligne',
-		self::STATUS_PRIVATE => 'Réservé aux membres',
+		self::STATUS_PRIVATE => 'Réservée aux membres',
 	];
 
 	const TYPE_CATEGORY = 1;
