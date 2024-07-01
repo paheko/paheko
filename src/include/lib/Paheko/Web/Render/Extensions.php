@@ -6,7 +6,6 @@ use Paheko\Entities\Files\File;
 
 use Paheko\Plugins;
 use Paheko\Utils;
-use Paheko\Users\Session;
 use KD2\SkrivLite;
 
 use const Paheko\{ADMIN_URL, ROOT};
@@ -38,7 +37,6 @@ class Extensions
 			'gallery'  => [self::class, 'gallery'],
 			'video'    => [self::class, 'video'],
 			'paheko'   => [self::class, 'paheko'],
-			'restrict' => [self::class, 'restrict'],
 		];
 
 		$signal = Plugins::fire('render.extensions.init', false, $list);
@@ -48,15 +46,6 @@ class Extensions
 		}
 
 		return $list;
-	}
-
-	static public function restrict(bool $block, array $args, ?string $content): string
-	{
-		if (!Session::getInstance()->isLogged()) {
-			Utils::redirect('!login.php?r=' . rawurlencode(Utils::getSelfURI()));
-		}
-
-		return '';
 	}
 
 	static public function paheko(bool $block, array $args, ?string $content): string

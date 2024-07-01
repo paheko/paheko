@@ -75,7 +75,8 @@ class Web
 	static public function getDraftsList(?int $id_parent): DynamicList
 	{
 		$list = self::getPagesList($id_parent);
-		$list->setParameter('status', Page::STATUS_DRAFT);
+		$conditions = self::getParentClause($id_parent) . ' AND type = :type AND status = :status';
+		$list->setConditions($conditions);
 		$list->setPageSize(1000);
 		return $list;
 	}
@@ -99,11 +100,11 @@ class Web
 		];
 
 		$tables = Page::TABLE;
-		$conditions = self::getParentClause($id_parent) . ' AND type = :type AND status = :status';
+		$conditions = self::getParentClause($id_parent) . ' AND type = :type AND status != :status';
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->setParameter('type', Page::TYPE_PAGE);
-		$list->setParameter('status', Page::STATUS_ONLINE);
+		$list->setParameter('status', Page::STATUS_DRAFT);
 		$list->orderBy('title', false);
 		return $list;
 	}

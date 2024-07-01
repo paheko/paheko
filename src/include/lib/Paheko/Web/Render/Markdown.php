@@ -5,6 +5,7 @@ namespace Paheko\Web\Render;
 use Paheko\UserTemplate\CommonModifiers;
 use Paheko\UserTemplate\Modules;
 use Paheko\Utils;
+use Paheko\Users\Session;
 
 use KD2\HTML\Markdown as KD2_Markdown;
 use KD2\HTML\Markdown_Extensions;

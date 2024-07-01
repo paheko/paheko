@@ -48,11 +48,13 @@ class Page extends Entity
 	];
 
 	const STATUS_ONLINE = 'online';
+	const STATUS_PRIVATE = 'private';
 	const STATUS_DRAFT = 'draft';
 
 	const STATUS_LIST = [
-		self::STATUS_ONLINE => 'En ligne',
 		self::STATUS_DRAFT => 'Brouillon',
+		self::STATUS_ONLINE => 'En ligne',
+		self::STATUS_PRIVATE => 'Réservé aux membres',
 	];
 
 	const TYPE_CATEGORY = 1;
@@ -523,6 +525,6 @@ class Page extends Entity
 
 	public function isOnline(): bool
 	{
-		return $this->status == self::STATUS_ONLINE;
+		return $this->status !== self::STATUS_DRAFT;
 	}
 }

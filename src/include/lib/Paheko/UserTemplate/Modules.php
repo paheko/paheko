@@ -301,6 +301,8 @@ class Modules
 			throw new UserException('This address is private', 403);
 		}
 
+		$session = Session::getInstance();
+
 		// Find out web path
 		if ($module->web && $module->enabled && substr($uri, 0, 2) !== 'm/') {
 			$uri = rawurldecode($uri);
@@ -316,7 +318,11 @@ class Modules
 				$path = $uri;
 				$has_dist_file = true;
 			}
-			elseif (($page = Web::getByURI($uri)) && $page->status == Page::STATUS_ONLINE) {
+			elseif (($page = Web::getByURI($uri)) && $page->status !== Page::STATUS_DRAFT) {
+				if ($page->status === Page::STATUS_PRIVATE && !$session->isLogged()) {
+					Utils::redirect('!login.php?r=' . Utils::getRequestURI());
+				}
+
 				$path = $page->template();
 				$page = $page->asTemplateArray();
 			}
@@ -332,8 +338,6 @@ class Modules
 
 		// Restrict access
 		if (isset($module->restrict_section, $module->restrict_level)) {
-			$session = Session::getInstance();
-
 			if (!$session->isLogged()) {
 				Utils::redirect('!login.php');
 			}

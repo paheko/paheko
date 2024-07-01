@@ -18,7 +18,7 @@
 			<dl>{input type="list" name="id_parent" label="Catégorie" default=$parent target="!web/_selector.php?id_parent=%d&id_page=%d"|args:$page.id_parent:$page.id required=true}</dl>
 			<dl>{input type="datetime" name="date" label="Date" required=true default=$page.published}</dl>
 			<dl>{input type="select" name="format" required=true options=$formats source=$page label="Format"}</dl>
-			<dl>{input type="checkbox" name="status" value=$page::STATUS_DRAFT label="Brouillon" source=$page}</dl>
+			<dl>{input type="select" name="status" label="Statut" source=$page options=$page::STATUS_LIST required=true}</dl>
 		</ul>
 	</fieldset>
 

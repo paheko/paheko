@@ -1201,8 +1201,8 @@ class Sections
 		$params['where'] ??= '';
 		$params['select'] = 'w.*';
 		$params['tables'] = 'web_pages w';
-		$params['where'] .= ' AND status = :status';
-		$params[':status'] = Page::STATUS_ONLINE;
+		$params['where'] .= ' AND status != :status';
+		$params[':status'] = Page::STATUS_DRAFT;
 
 		$allowed_tables = self::SQL_TABLES;
 
