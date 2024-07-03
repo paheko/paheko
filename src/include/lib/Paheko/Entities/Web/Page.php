@@ -40,6 +40,7 @@ class Page extends Entity
 	protected string $content;
 
 	protected string $_path;
+	protected array $_breadcrumbs;
 
 	const FORMATS_LIST = [
 		Render::FORMAT_MARKDOWN => 'MarkDown',
@@ -174,6 +175,20 @@ class Page extends Entity
 		}
 
 		return $this->_path;
+	}
+
+	/**
+	 * Get page status, trying to find it from parent pages if different from online
+	 */
+	public function getRealStatus(): ?string
+	{
+		foreach (array_reverse($this->getBreadcrumbs()) as $page) {
+			if ($page->status !== self::STATUS_ONLINE) {
+				return $page->status;
+			}
+		}
+
+		return $page->status ?? null;
 	}
 
 	public function listVersions(): DynamicList
@@ -369,7 +384,8 @@ class Page extends Entity
 
 	public function getBreadcrumbs(): array
 	{
-		return Web::getBreadcrumbs($this->id());
+		$this->_breadcrumbs ??= Web::getBreadcrumbs($this->id());
+		return $this->_breadcrumbs;
 	}
 
 	public function listAttachments(): array

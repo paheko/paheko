@@ -306,6 +306,7 @@ class Modules
 		// Find out web path
 		if ($module->web && $module->enabled && substr($uri, 0, 2) !== 'm/') {
 			$uri = rawurldecode($uri);
+			$path = '404.html';
 
 			if ($uri == '') {
 				$path = 'index.html';
@@ -318,16 +319,19 @@ class Modules
 				$path = $uri;
 				$has_dist_file = true;
 			}
-			elseif (($page = Web::getByURI($uri)) && $page->status !== Page::STATUS_DRAFT) {
-				if ($page->status === Page::STATUS_PRIVATE && !$session->isLogged()) {
+			elseif ($page = Web::getByURI($uri)) {
+				$status = $page->getRealStatus();
+
+				if ($status === Page::STATUS_DRAFT) {
+					$path = '404.html';
+				}
+				elseif ($status === Page::STATUS_PRIVATE && !$session->isLogged()) {
 					Utils::redirect('!login.php?p=1&r=' . Utils::getRequestURI());
 				}
-
-				$path = $page->template();
-				$page = $page->asTemplateArray();
-			}
-			else {
-				$path = '404.html';
+				else {
+					$path = $page->template();
+					$page = $page->asTemplateArray();
+				}
 			}
 		}
 		// 404 if module is not enabled, except for icon

@@ -14,14 +14,14 @@ use KD2\DB\EntityManager as EM;
 class Web
 {
 	const BREADCRUMBS_SQL = '
-		WITH RECURSIVE parents(title, id_parent, uri, id, level) AS (
-			SELECT title, id_parent, uri, id, 1 FROM web_pages WHERE id = %s
+		WITH RECURSIVE parents(title, status, id_parent, uri, id, level) AS (
+			SELECT title, status, id_parent, uri, id, 1 FROM web_pages WHERE id = %s
 			UNION ALL
-			SELECT p.title, p.id_parent, p.uri, p.id, level + 1
+			SELECT p.title, p.status, p.id_parent, p.uri, p.id, level + 1
 			FROM web_pages p
 				JOIN parents ON parents.id_parent = p.id
 		)
-		SELECT id, title, uri FROM parents ORDER BY level DESC;';
+		SELECT id, title, uri, status FROM parents ORDER BY level DESC;';
 
 	static public function search(string $search): array
 	{
