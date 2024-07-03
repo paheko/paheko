@@ -55,7 +55,7 @@ use Paheko\Entities\Accounting\Account;
 						{/if}
 						{if $account.type === Account::TYPE_BANK && $account.reconciled_balance}
 							{if $account.reconciled_balance != $account.balance}
-								{tag small=true preset="reconcilition_required"}
+								{tag small=true preset="reconciliation_required"}
 							{else}
 								{tag small=true preset="reconciled"}
 							{/if}
