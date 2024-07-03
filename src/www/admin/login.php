@@ -38,7 +38,7 @@ if (qg('keepSessionAlive') !== null)
 }
 
 $args = $app_token ? '?app=' . rawurlencode($app_token) : '';
-$layout = $app_token ? 'public' : null;
+$layout = $app_token || qg('p') ? 'public' : null;
 
 if (qg('r')) {
 	$args .= ($args ? '&' : '?') . 'r=' . rawurlencode(qg('r'));

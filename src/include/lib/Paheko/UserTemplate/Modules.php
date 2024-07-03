@@ -320,7 +320,7 @@ class Modules
 			}
 			elseif (($page = Web::getByURI($uri)) && $page->status !== Page::STATUS_DRAFT) {
 				if ($page->status === Page::STATUS_PRIVATE && !$session->isLogged()) {
-					Utils::redirect('!login.php?r=' . Utils::getRequestURI());
+					Utils::redirect('!login.php?p=1&r=' . Utils::getRequestURI());
 				}
 
 				$path = $page->template();
