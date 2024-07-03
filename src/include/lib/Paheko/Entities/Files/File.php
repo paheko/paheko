@@ -1023,7 +1023,7 @@ class File extends Entity
 			return sprintf('<img src="%s" alt="%s" />', $url, htmlspecialchars($this->name));
 		}
 		elseif ($this->mime && ($this->mime === 'application/ogg' || strpos($this->mime, 'video/') === 0)) {
-			return sprintf('<video draggable="false" autoplay="false" controls="true" src="%s" />', $url);
+			return sprintf('<video draggable="false" autoplay="false" controls="true" src="%s" preload="metadata" />', $url);
 		}
 		elseif ($this->mime && strpos($this->mime, 'audio/') === 0) {
 			return sprintf('<audio draggable="false" autoplay="false" controls="true" src="%s" />', $url);
