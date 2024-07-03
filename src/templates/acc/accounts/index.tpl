@@ -45,19 +45,19 @@ use Paheko\Entities\Accounting\Account;
 					</td>
 					<td>
 						{if $account.type == Account::TYPE_THIRD_PARTY && $account.balance > 0}
-							{if $account.position == Account::LIABILITY}{tag label="Dette" color="DarkSalmon"}</em>
-							{elseif $account.position == Account::ASSET}{tag label="Créance" color="darkkhaki"}</em>
+							{if $account.position == Account::LIABILITY}{tag preset="debt"}</em>
+							{elseif $account.position == Account::ASSET}{tag preset="credit"}</em>
 							{/if}
 						{elseif $account.type == Account::TYPE_BANK && $account.balance > 0 && $account.position == Account::LIABILITY}
-							{tag label="Découvert" color="darkred"}
+							{tag preset="overdraft"}
 						{elseif $account.type == Account::TYPE_CASH && $account.balance > 0 && $account.position == Account::LIABILITY}
-							{tag label="Anomalie" color="darkred"}
+							{tag preset="anomaly"}
 						{/if}
 						{if $account.type === Account::TYPE_BANK && $account.reconciled_balance}
 							{if $account.reconciled_balance != $account.balance}
-								{tag small=true label="À rapprocher" color="indianred"}
+								{tag small=true preset="reconcilition_required"}
 							{else}
-								{tag small=true label="Rapproché" color="#999"}
+								{tag small=true preset="reconciled"}
 							{/if}
 						{/if}
 					</td>

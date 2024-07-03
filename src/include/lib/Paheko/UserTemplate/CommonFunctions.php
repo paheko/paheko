@@ -920,8 +920,23 @@ class CommonFunctions
 		return $out;
 	}
 
+	const TAG_PRESETS = [
+		'debt' => ['Dette', 'DarkSalmon'],
+		'credit' => ['Créance', 'DarkKhaki'],
+		'overdraft' => ['Découvert', 'darkred'],
+		'anomaly' => ['Anomalie', 'darkred'],
+		'reconciliation_required' => ['À rapprocher', 'indianred'],
+		'reconciled' => ['Rapproché', '#999'],
+	];
+
 	static public function tag(array $params): string
 	{
+		if (!empty($params['preset'])) {
+			$p = $params['preset'];
+			$params['label'] = self::TAG_PRESETS[$p][0];
+			$params['color'] = self::TAG_PRESETS[$p][1];
+		}
+
 		return sprintf('<span class="tag%s" style="--tag-color: %s;">%s</span>',
 			!empty($params['small']) ? ' small' : '',
 			htmlspecialchars($params['color'] ?? '#999'),

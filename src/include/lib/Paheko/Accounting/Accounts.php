@@ -269,7 +269,7 @@ class Accounts
 		return $this->getIdForType(Account::TYPE_CLOSING);
 	}
 
-	public function listUserAccounts(int $year_id): DynamicList
+	public function listUserAccounts(int $year_id, bool $only_third_party): DynamicList
 	{
 		$columns = [
 			'id' => [
@@ -283,15 +283,27 @@ class Accounts
 				'select' => DynamicFields::getNameFieldsSQL('u'),
 				'label' => 'Membre',
 			],
-			'balance' => [
-				'select' => 'SUM(l.debit - l.credit)',
-				'label'  => 'Solde',
-				//'order'  => 'balance != 0 %s, balance < 0 %1$s',
-			],
-			'status' => [
-				'select' => null,
-				'label' => 'Statut',
-			],
+		];
+
+		if (!$only_third_party) {
+			$columns['products'] = [
+				'select' => sprintf('SUM(CASE WHEN a.type = %d THEN l.credit ELSE 0 END)', Account::TYPE_REVENUE),
+				'label'  => 'Total produits',
+			];
+			$columns['expenses'] = [
+				'select' => sprintf('SUM(CASE WHEN a.type = %d THEN l.debit ELSE 0 END)', Account::TYPE_EXPENSE),
+				'label'  => 'Total charges',
+			];
+		}
+
+		$columns['balance'] = [
+			'select' => sprintf('SUM(CASE WHEN a.type = %d THEN l.debit - l.credit ELSE 0 END)', Account::TYPE_THIRD_PARTY),
+			'label'  => 'Solde comptes de tiers',
+		];
+
+		$columns['status'] = [
+			'select' => null,
+			'label' => 'Statut',
 		];
 
 		$tables = 'acc_transactions_users tu
@@ -300,7 +312,11 @@ class Accounts
 			INNER JOIN acc_transactions_lines l ON t.id = l.id_transaction
 			INNER JOIN acc_accounts a ON a.id = l.id_account';
 
-		$conditions = 'a.type = ' . Account::TYPE_THIRD_PARTY . ' AND t.id_year = ' . $year_id;
+		$conditions = 't.id_year = ' . $year_id;
+
+		if ($only_third_party) {
+			$conditions .= ' AND a.type = ' . Account::TYPE_THIRD_PARTY;
+		}
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('balance', false);
