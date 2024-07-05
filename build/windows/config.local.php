@@ -8,7 +8,7 @@ if (!empty(getenv('LOCALAPPDATA'))) {
 	$local_app_data_root = trim(getenv('LOCALAPPDATA'), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'Paheko';
 }
 
-const USER_CONFIG_FILE = DATA_ROOT . '/config.local.php';
+define('Paheko\USER_CONFIG_FILE', $local_app_data_root . '/config.local.php');
 
 if (file_exists(USER_CONFIG_FILE)) {
 	require USER_CONFIG_FILE;
