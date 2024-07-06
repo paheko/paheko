@@ -374,7 +374,7 @@ class Plugins
 
 		foreach (self::listInstalled() as $plugin) {
 			// Ignore plugins if code is no longer available
-			if (!$plugin->isAvailable()) {
+			if (!$plugin->isAvailable() || !self::isAllowed($plugin->name)) {
 				continue;
 			}
 
