@@ -565,7 +565,8 @@ class Functions
 		$out = sprintf('<pre style="background: yellow; color: black; padding: 5px; overflow: auto">%s</pre>', $dump);
 
 		if (!empty($params['stop'])) {
-			echo $out; exit;
+			echo $out;
+			exit;
 		}
 
 		return $out;
