@@ -262,12 +262,15 @@ class Upgrade
 			Utils::resetCache(USER_TEMPLATES_CACHE_ROOT);
 			Utils::resetCache(STATIC_CACHE_ROOT);
 
+			// Make sure the shared cache is linked to the current version, and not
+			// reset every time a single organization is upgraded
 			$cache_version_file = SHARED_CACHE_ROOT . '/version';
 			$cache_version = file_exists($cache_version_file) ? trim(file_get_contents($cache_version_file)) : null;
 
 			// Only delete system cache when it's required
 			if (paheko_version() !== $cache_version) {
 				Utils::resetCache(SMARTYER_CACHE_ROOT);
+				Utils::resetCache(SHARED_USER_TEMPLATES_CACHE_ROOT);
 			}
 
 			file_put_contents($cache_version_file, paheko_version());
