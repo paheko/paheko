@@ -188,6 +188,10 @@ form#f_upload fieldset {
     text-decoration: underline;
 }
 
+.web.category-list li a:hover span {
+    text-decoration: none;
+}
+
 .web.category-list .draft a {
     background: var(--gLightBackgroundColor);
     text-decoration-color: unset;
