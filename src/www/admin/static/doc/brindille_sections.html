@@ -77,7 +77,8 @@
 			<li><a href="#accounts">accounts</a></li>
 			<li><a href="#balances">balances</a></li>
 			<li><a href="#transactions">transactions</a></li>
-			<li><a href="#years">years</a>
+			<li><a href="#years">years</a></li>
+			<li><a href="#projects">projects</a>
 		</ol></li>
 		<li><a href="#pour-le-site-web">Pour le site web</a>
 		<ol>
@@ -543,6 +544,26 @@ Il y a {{$result.count}} articles.
 <tr>
 <td style="text-align: left;"><code>closed</code> (optionel)</td>
 <td style="text-align: left;">Mettre <code>closed=true</code> pour ne lister que les exercices clôturés, ou <code>closed=false</code> pour ne lister que les exercices ouverts.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="projects">projects</h2>
+<p>Liste les projets analytiques</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>archived</code> (optionel)</td>
+<td style="text-align: left;">Mettre <code>archived=true</code> pour ne lister que les projets archivés, ou <code>archived=false</code> pour ne lister que les projets non archivés. Par défaut seuls les projets non archivés sont listés.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>assign_list</code> (optionel)</td>
+<td style="text-align: left;">Indiquer ici le nom d'une variable dans laquelle sera assigné un tableau associatif ayant l'ID en clé, et le code et libellé du projet en valeur.</td>
 </tr>
 </tbody>
 </table>

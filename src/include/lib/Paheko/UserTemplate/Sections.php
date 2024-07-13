@@ -37,6 +37,7 @@ class Sections
 		'accounts',
 		'balances',
 		'years',
+		'projects',
 		'sql',
 		'restrict',
 		'module',
@@ -869,6 +870,41 @@ class Sections
 			$params['where'] .= sprintf(' AND closed = %d', $params['closed']);
 			unset($params['closed']);
 		}
+
+		return self::sql($params, $tpl, $line);
+	}
+
+	static public function projects(array $params, UserTemplate $tpl, int $line): ?\Generator
+	{
+		$params['tables'] = 'acc_projects';
+		$params['archived'] ??= false;
+
+		if (!empty($params['assign_list'])) {
+			$list = [];
+			$db = DB::getInstance();
+			$sql = sprintf('SELECT id, label, code FROM %s WHERE archived = %d ORDER BY code, label COLLATE U_NOCASE;',
+				$params['tables'],
+				$params['archived']
+			);
+
+			foreach ($db->iterate($sql) as $row) {
+				$label = '';
+
+				if ($row->code) {
+					$label = $row->code . ' — ';
+				}
+
+				$list[$row->id] = $label . $row->label;
+			}
+
+			$tpl->assign($params['assign_list'], $list);
+			return null;
+		}
+
+		$params['where'] ??= '';
+
+		$params['where'] .= sprintf(' AND archived = %d', $params['archived']);
+		unset($params['archived']);
 
 		return self::sql($params, $tpl, $line);
 	}

@@ -470,6 +470,15 @@ Liste les exercices comptables
 | :- | :- |
 | `closed` (optionel) | Mettre `closed=true` pour ne lister que les exercices clôturés, ou `closed=false` pour ne lister que les exercices ouverts. |
 
+## projects
+
+Liste les projets analytiques
+
+| Paramètre | Fonction |
+| :- | :- |
+| `archived` (optionel) | Mettre `archived=true` pour ne lister que les projets archivés, ou `archived=false` pour ne lister que les projets non archivés. Par défaut seuls les projets non archivés sont listés. |
+| `assign_list` (optionel) | Indiquer ici le nom d'une variable dans laquelle sera assigné un tableau associatif ayant l'ID en clé, et le code et libellé du projet en valeur. |
+
 # Pour le site web
 
 ## breadcrumbs
