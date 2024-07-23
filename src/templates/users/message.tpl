@@ -7,8 +7,12 @@
 		<legend>Message</legend>
 		<dl>
 			<dt>Expéditeur</dt>
+		{if $is_admin}
 			{input type="radio" name="sender" value="self" default="self" required=true label="Membre : %s"|args:$self->getNameAndEmail()}
 			{input type="radio" name="sender" value="org" default="self" required=true label='Association : "%s" <%s>'|args:$config.org_name:$config.org_email}
+		{else}
+			<dd>{$self->getNameAndEmail()}</dd>
+		{/if}
 			<dt>Destinataire</dt>
 			<dd>{$recipient->getNameAndEmail()}</dd>
 			{input type="text" name="subject" required=true label="Sujet" class="full-width"}
