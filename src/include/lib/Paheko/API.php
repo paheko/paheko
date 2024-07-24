@@ -647,7 +647,7 @@ class API
 					$account = $a->getWithCode($this->params['code']);
 				}
 				else {
-					$account = $a->get((int)$this->params['code'] ?? null);
+					$account = $a->get(intval($this->params['id'] ?? null));
 				}
 
 				if (!$account) {
