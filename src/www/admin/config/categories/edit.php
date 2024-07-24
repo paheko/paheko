@@ -21,14 +21,21 @@ $admin_safe = $session->isAdmin() && $cat->id == $user->id_category;
 $form->runIf('save', function () use ($cat, $session) {
 	$user = $session->getUser();
 	$cat->importForm();
-	$cat->hidden = (bool) f('hidden');
 
 	// Ne pas permettre de modifier la connexion, l'accès à la config et à la gestion des membres
 	// pour la catégorie du membre qui édite les catégories, sinon il pourrait s'empêcher
 	// de se connecter ou n'avoir aucune catégorie avec le droit de modifier les catégories !
-	if ($cat->id() == $user->id_category) {
+	if ($cat->id() === $user->id_category) {
 		$cat->set('perm_connect', Session::ACCESS_READ);
 		$cat->set('perm_config', Session::ACCESS_ADMIN);
+
+		if ($cat->force_otp && !$user->otp_secret) {
+			throw new UserException('Vous ne pouvez pas forcer le second facteur car vous n\'avez pas configuré de second facteur pour votre compte.');
+		}
+
+		if ($cat->force_otp && !$user->otp_recovery_codes) {
+			throw new UserException('Vous ne pouvez pas forcer le second facteur car vous n\'avez pas généré de codes de récupération.');
+		}
 	}
 
 	$cat->save();

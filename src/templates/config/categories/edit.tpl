@@ -44,6 +44,20 @@
 		</dl>
 	</fieldset>
 
+	<fieldset>
+		<legend>Sécurité</legend>
+		<dl>
+			{input type="checkbox" name="allow_passwordless_login" value=1 source=$cat label="Permettre la connexion sans mot de passe"}
+			<dd class="help">Si cette case est cochée, les membres pourront se connecter sans utiliser de mot de passe, simplement via un lien à usage unique qui leur sera envoyé par e-mail.</dd>
+			{input type="checkbox" name="force_otp" value=1 source=$cat label="Forcer la connexion à deux facteurs"}
+			<dd class="help">Si cette case est cochée, les membres de cette catégorie seront obligés de configurer un second facteur de sécurité (code unique généré sur téléphone avec TOTP) lors de leur première connexion pour pouvoir se connecter. Conseillé pour les administrateurs.</dd>
+			{if $has_encryption}
+			{input type="checkbox" name="force_pgp" value=1 source=$cat label="Forcer le chiffrement des e-mails avec PGP"}
+			<dd class="help">Si coché, un membre ne pourra se connecter que s'il indique une clé PGP publique valide, permettant de chiffrer tous les e-mails qui lui sont envoyés. Cette fonctionnalité permet d'empêcher la connexion si la boîte mail du membre est piratée.</dd>
+			{/if}
+		</dl>
+	</fieldset>
+
 	<p class="submit">
 		{csrf_field key=$csrf_key}
 		{button type="submit" name="save" label="Enregistrer" shape="right" class="main"}

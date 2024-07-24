@@ -83,7 +83,7 @@ class Sections
 		// Allow access to all tables
 		'*' => null,
 		// Restrict access to private fields in users
-		'users' => ['~password', '~pgp_key', '~otp_secret'],
+		'users' => ['~password', '~pgp_key', '~otp_secret', '~otp_recovery_codes'],
 		// Restrict access to some private tables
 		'!emails' => null,
 		'!emails_queue' => null,

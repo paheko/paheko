@@ -179,15 +179,16 @@ class DynamicField extends Entity
 	];
 
 	const SYSTEM_FIELDS = [
-		'id'           => '?int',
-		'id_category'  => 'int',
-		'pgp_key'      => '?string',
-		'otp_secret'   => '?string',
-		'date_login'   => '?DateTime',
-		'date_updated' => '?DateTime',
-		'id_parent'    => '?int',
-		'is_parent'    => 'bool',
-		'preferences'  => '?stdClass',
+		'id'                 => '?int',
+		'id_category'        => 'int',
+		'pgp_key'            => '?string',
+		'otp_secret'         => '?string',
+		'otp_recovery_codes' => '?array',
+		'date_login'         => '?DateTime',
+		'date_updated'       => '?DateTime',
+		'id_parent'          => '?int',
+		'is_parent'          => 'bool',
+		'preferences'        => '?stdClass',
 	];
 
 	const SYSTEM_FIELDS_SQL = [
@@ -196,6 +197,7 @@ class DynamicField extends Entity
 		'date_login TEXT NULL CHECK (date_login IS NULL OR datetime(date_login) = date_login),',
 		'date_updated TEXT NULL CHECK (date_updated IS NULL OR datetime(date_updated) = date_updated),',
 		'otp_secret TEXT NULL,',
+		'otp_recovery_codes TEXT NULL,',
 		'pgp_key TEXT NULL,',
 		'id_parent INTEGER NULL REFERENCES users(id) ON DELETE SET NULL CHECK (id_parent IS NULL OR is_parent = 0),',
 		'is_parent INTEGER NOT NULL DEFAULT 0,',

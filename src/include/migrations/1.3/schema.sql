@@ -212,7 +212,10 @@ CREATE TABLE IF NOT EXISTS users_categories
 	perm_connect INTEGER NOT NULL DEFAULT 1,
 	perm_config INTEGER NOT NULL DEFAULT 0,
 
-	hidden INTEGER NOT NULL DEFAULT 0
+	hidden INTEGER NOT NULL DEFAULT 0,
+	allow_passwordless_login INTEGER NOT NULL DEFAULT 0,
+	force_otp INTEGER NOT NULL DEFAULT 0,
+	force_pgp INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE INDEX IF NOT EXISTS users_categories_hidden ON users_categories (hidden);

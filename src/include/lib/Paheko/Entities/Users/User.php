@@ -381,9 +381,8 @@ class User extends Entity
 	{
 		$source ??= $_POST;
 
-
 		// Don't allow changing security credentials from form
-		unset($source['id_category'], $source['password'], $source['otp_secret'], $source['pgp_key']);
+		unset($source['id_category'], $source['password'], $source['otp_secret'], $source['otp_recovery_codes'], $source['pgp_key']);
 
 		if (isset($source['id_parent']) && is_array($source['id_parent'])) {
 			$source['id_parent'] = Form::getSelectorValue($source['id_parent']);
@@ -445,6 +444,19 @@ class User extends Entity
 		return parent::importForm($source);
 	}
 
+	public function generateOTPRecoveryCodes(): array
+	{
+		$codes = [];
+
+		for ($i = 0; $i < 10; $i++) {
+			$codes[] = Security::getRandomPassword(6);
+		}
+
+		$this->set('otp_recovery_codes', $codes);
+
+		return $codes;
+	}
+
 	public function importSecurityForm(bool $user_mode = true, array $source = null, Session $session = null)
 	{
 		$source ??= $_POST;
@@ -478,6 +490,7 @@ class User extends Entity
 
 		if (!empty($source['otp_disable'])) {
 			$source['otp_secret'] = null;
+			$source['otp_recovery_codes'] = null;
 		}
 		elseif (isset($source['otp_secret'])) {
 			$this->assert(trim($source['otp_code'] ?? '') !== '', 'Le code TOTP doit être renseigné pour confirmer l\'opération');
@@ -834,7 +847,7 @@ class User extends Entity
 		$prefix['has_password'] = !empty($out['password']);
 		$prefix['has_otp'] = !empty($out['otp_secret']);
 		$prefix['has_pgp_key'] = !empty($out['pgp_key']);
-		unset($out['password'], $out['otp_secret'], $out['pgp_key']);
+		unset($out['password'], $out['otp_secret'], $out['otp_recovery_codes'], $out['pgp_key']);
 
 		foreach ($out as $key => &$value) {
 			if ($value instanceof Date || $value instanceof \DateTimeInterface) {

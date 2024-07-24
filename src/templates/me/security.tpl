@@ -79,8 +79,8 @@
 		{else}
 			<dd class="alert">Vous n'avez pas le droit de modifier votre mot de passe. Vous devez contacter un administrateur pour qu'il change votre mot de passe.</dd>
 		{/if}
-		<dt>Authentification à deux facteurs</dt>
-			<dd>
+		<dt>Authentification à deux facteurs (TOTP)</dt>
+		<dd>
 			{if $user.otp_secret}
 				<span class="confirm">{icon shape="check"} Activée</span>
 				{linkbutton href="?edit=otp_disable" label="Désactiver" shape="delete"}
@@ -88,8 +88,21 @@
 				<span class="alert">Désactivée</span>
 				{linkbutton href="?edit=otp" label="Activer" shape="check"}
 			{/if}
-			</dd>
+		</dd>
 		<dd class="help">Permet de protéger votre compte en cas de vol de votre mot de passe, en utilisant votre téléphone pour générer un code à usage unique.</dd>
+		{if $user.otp_secret}
+			<dt>Codes de secours</dt>
+			<dd>
+				{if $user.otp_recovery_codes}
+					<span class="confirm">{icon shape="check"} Oui</span>
+					{linkbutton href="?edit=otp_recovery" label="Voir" shape="eye"}
+				{else}
+					<span class="alert">Non</span>
+					{linkbutton href="?edit=otp_recovery" label="Générer" shape="reload"}
+				{/if}
+			</dd>
+			<dd class="help">Les codes de secours peuvent être utilisés pour récupérer l'accès à votre compte si vous n'avez plus accès à votre téléphone pour le second facteur.</dd>
+		{/if}
 		{if $can_use_pgp}
 			<dt>Chiffrer les e-mails qui me sont envoyés avec PGP</dt>
 			<dd>

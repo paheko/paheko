@@ -21,6 +21,10 @@ class Category extends Entity
 
 	protected bool $hidden = false;
 
+	protected bool $allow_passwordless_login = false;
+	protected bool $force_otp = false;
+	protected bool $force_pgp = false;
+
 	protected int $perm_web = 0;
 	protected int $perm_documents = 0;
 	protected int $perm_users = 0;
@@ -95,9 +99,24 @@ class Category extends Entity
 
 		$this->assert(trim($this->name) !== '', 'Le nom de catégorie ne peut rester vide.');
 
+		$this->assert(!($this->allow_passwordless_login && $this->perm_config >= Session::ACCESS_ADMIN), 'Il n\'est pas possible de permettre la connexion sans mot de passe pour une catégorie ayant accès à la configuration, pour des raisons de sécurité.');
+
 		foreach (self::PERMISSIONS as $key => $perm) {
 			$this->assert(array_key_exists($this->{'perm_' . $key}, $perm['options']), 'Invalid value for perm_' . $key);
 		}
+	}
+
+	public function importForm(?array $source = null)
+	{
+		$source ??= $_POST;
+
+		foreach (['allow_passwordless_login', 'hidden', 'force_otp', 'force_pgp'] as $key) {
+			if (isset($source[$key . '_present'])) {
+				$source[$key] = boolval($source[$key] ?? false);
+			}
+		}
+
+		parent::importForm($source);
 	}
 
 	public function delete(): bool
