@@ -6,10 +6,8 @@
 
 <form method="post" action="{$self_url}" data-focus="1">
 
-{if $pgp_fingerprint}
-	<dd class="help">L'empreinte de votre clé publique est&nbsp;: <code>{$pgp_fingerprint}</code></dd>
-
-	<h3>Désactiver le chiffrement des e-mails ?</h3>
+{if $user.pgp_key}
+	<h3 class="warning">Désactiver le chiffrement des e-mails ?</h3>
 
 	{include file="./_security_confirm_password.tpl"}
 {else}

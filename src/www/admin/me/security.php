@@ -23,8 +23,8 @@ if ($edit == 'otp') {
 	$otp = $session->getNewOTPSecret();
 }
 
-$tpl->assign('can_use_pgp', \KD2\Security::canUseEncryption());
-$tpl->assign('pgp_fingerprint', $user->pgp_key ? $session->getPGPFingerprint($user->pgp_key, true) : null);
+$can_use_pgp = \KD2\Security::canUseEncryption();
+$pgp_fingerprint = $user->pgp_key && $can_use_pgp ? $session->getPGPFingerprint($user->pgp_key, true) : null;
 
 $tpl->assign('ok', qg('ok') !== null);
 $sessions_count = $session->countActiveSessions();
@@ -33,6 +33,6 @@ $id_field = current(DynamicFields::getInstance()->fieldsBySystemUse('login'));
 $id = $user->{$id_field->name};
 $can_change_password = $user->canChangePassword($session);
 
-$tpl->assign(compact('id', 'edit', 'id_field', 'user', 'csrf_key', 'sessions_count', 'can_change_password', 'otp'));
+$tpl->assign(compact('id', 'edit', 'id_field', 'user', 'csrf_key', 'sessions_count', 'can_change_password', 'otp', 'can_use_pgp', 'pgp_fingerprint'));
 
 $tpl->display('me/security.tpl');

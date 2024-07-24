@@ -53,6 +53,9 @@
 				{linkbutton href="security_pgp.php" label="Modifier" shape="edit"}
 			{/if}
 		</dd>
+		{if $pgp_fingerprint}
+			<dd>L'empreinte de votre clé publique est&nbsp;: <code>{$pgp_fingerprint}</code></dd>
+		{/if}
 		<dd class="help">Permet de chiffrer les messages qui vous sont envoyés par e-mail, notamment les messages de récupération de mot de passe, pour empêcher un attaquant de prendre contrôle de votre compte si votre adresse e-mail est piratée.</dd>
 	{/if}
 	<dt>Déconnecter toutes mes sessions</dt>

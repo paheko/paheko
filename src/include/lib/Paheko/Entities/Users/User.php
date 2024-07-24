@@ -444,6 +444,35 @@ class User extends Entity
 		return parent::importForm($source);
 	}
 
+	public function verifyPassword(?string $password)
+	{
+		$this->assert(
+			Session::getInstance()->checkPassword($password, $this->password),
+			'Le mot de passe fourni ne correspond pas au mot de passe actuel. Merci de bien vouloir renseigner votre mot de passe courant pour confirmer les changements.'
+		);
+	}
+
+	public function setPGPKey(?string $key)
+	{
+		$this->assert($session->getPGPFingerprint($key), 'Clé PGP invalide : impossible de récupérer l\'empreinte de la clé.');
+		$this->set('pgp_key', $key);
+	}
+
+	public function setOTPSecret(?string $secret, ?string $code = null)
+	{
+		if ($secret === null) {
+			$this->set('otp_secret', null);
+			$this->set('otp_recovery_codes', null);
+		}
+		else {
+			$this->assert(trim($code ?? '') !== '', 'Le code doit être renseigné pour confirmer l\'opération');
+			$this->assert(Session::getInstance()->checkOTP($secret, $code), 'Le code entré n\'est pas valide.');
+
+			$this->set('otp_secret', $secret);
+			$this->generateOTPRecoveryCodes();
+		}
+	}
+
 	public function generateOTPRecoveryCodes(): array
 	{
 		$codes = [];
@@ -457,20 +486,69 @@ class User extends Entity
 		return $codes;
 	}
 
+	public function verifyOTP(?string $code)
+	{
+		if (Security_OTP::TOTP($this->otp_secret, $code)) {
+			return true;
+		}
+
+		// Try to use one of the recovery codes
+		if ($this->otp_recovery_codes) {
+			$found = array_search($code, $this->otp_recovery_codes, true);
+
+			if ($found !== false) {
+				$codes = $this->otp_recovery_codes;
+				unset($codes[$found]);
+				$this->set('otp_recovery_codes', $codes);
+
+				if (count($this->_modified) === 1) {
+					parent::save(false);
+				}
+
+				// FIXME: notify a recovery code was used!
+
+				return true;
+			}
+		}
+
+		// Vérifier encore, mais avec le temps NTP
+		// au cas où l'horloge du serveur n'est pas à l'heure
+		if (\Paheko\NTP_SERVER
+			&& ($time = Security_OTP::getTimeFromNTP(\Paheko\NTP_SERVER))
+			&& Security_OTP::TOTP($this->otp_secret, $code, $time)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	public function createOTPSecret(): array
+	{
+		$config = Config::getInstance();
+		$out = [];
+		$out['secret'] = Security_OTP::getRandomSecret();
+		$out['secret_display'] = implode(' ', str_split($out['secret'], 4));
+
+		$icon = $config->fileURL('icon');
+		$out['url'] = Security_OTP::getOTPAuthURL($config->org_name, $out['secret'], 'totp', $icon);
+
+		$qrcode = new QRCode($out['url']);
+		$out['qrcode'] = 'data:image/svg+xml;base64,' . base64_encode($qrcode->toSVG());
+
+		return $out;
+	}
+
 	public function importSecurityForm(bool $user_mode = true, array $source = null, Session $session = null)
 	{
 		$source ??= $_POST;
 
-		$allowed = ['password', 'password_check', 'password_confirmed', 'password_delete', 'otp_secret', 'otp_disable', 'pgp_key', 'otp_code'];
+		$allowed = ['password', 'password_check', 'password_confirmed', 'password_delete', 'otp_secret', 'otp_disable', 'otp_code'];
 		$source = array_intersect_key($source, array_flip($allowed));
 
 		$session = Session::getInstance();
 
-		if ($user_mode && !Session::getInstance()->checkPassword($source['password_check'] ?? null, $this->password)) {
-			$this->assert(
-				$session->checkPassword($source['password_check'] ?? null, $this->password),
-				'Le mot de passe fourni ne correspond pas au mot de passe actuel. Merci de bien vouloir renseigner votre mot de passe courant pour confirmer les changements.'
-			);
+		if ($user_mode) {
+			$this->verifyPassword($source['password_check']);
 		}
 
 		if (!empty($source['password_delete'])) {
@@ -486,19 +564,6 @@ class User extends Entity
 			$this->assert(!$session->isPasswordCompromised($source['password']), 'Le mot de passe choisi figure dans une liste de mots de passe compromis (piratés), il ne peut donc être utilisé ici. Si vous l\'avez utilisé sur d\'autres sites il est recommandé de le changer sur ces autres sites également.');
 
 			$source['password'] = $session::hashPassword($source['password']);
-		}
-
-		if (!empty($source['otp_disable'])) {
-			$source['otp_secret'] = null;
-			$source['otp_recovery_codes'] = null;
-		}
-		elseif (isset($source['otp_secret'])) {
-			$this->assert(trim($source['otp_code'] ?? '') !== '', 'Le code TOTP doit être renseigné pour confirmer l\'opération');
-			$this->assert($session->checkOTP($source['otp_secret'], $source['otp_code']), 'Le code TOTP entré n\'est pas valide.');
-		}
-
-		if (!empty($source['pgp_key'])) {
-			$this->assert($session->getPGPFingerprint($source['pgp_key']), 'Clé PGP invalide : impossible de récupérer l\'empreinte de la clé.');
 		}
 
 		// Don't allow user to change password if the password field cannot be changed by user
