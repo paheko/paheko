@@ -41,10 +41,6 @@ $start = $end = null;
 if (null !== qg('start') && null !== qg('end')) {
 	$start = \DateTime::createFromFormat('!d/m/Y', qg('start'));
 	$end = \DateTime::createFromFormat('!d/m/Y', qg('end'));
-
-	if (!$start || !$end) {
-		$form->addError('La date donnée est invalide.');
-	}
 }
 else {
 	try {
@@ -54,6 +50,10 @@ else {
 		$form->addError($e->getMessage());
 		$csv->clear();
 	}
+}
+
+if (!$start || !$end) {
+	$form->addError('La date donnée est invalide.');
 }
 
 $journal = null;
@@ -68,17 +68,13 @@ if ($start && $end) {
 	}
 
 	$journal = $account->getReconcileJournal(CURRENT_YEAR_ID, $start, $end);
+
+	// Enregistrement des cases cochées
+	$form->runIf('save', function () use ($journal, $csv) {
+		Transactions::saveReconciled($journal, f('reconcile'));
+		$csv->clear();
+	}, $csrf_key, '!acc/accounts/reconcile_assist.php?id=' . $account->id . '&msg=OK');
 }
-
-// Enregistrement des cases cochées
-$form->runIf('save', function () use ($journal, $csv) {
-	if (!$journal) {
-		throw new UserException('No transaction was available for reconciliation.', 400);
-	}
-
-	Transactions::saveReconciled($journal, f('reconcile'));
-	$csv->clear();
-}, $csrf_key, '!acc/accounts/reconcile_assist.php?id=' . $account->id . '&msg=OK');
 
 $lines = null;
 
