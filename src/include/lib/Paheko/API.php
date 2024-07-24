@@ -622,7 +622,7 @@ class API
 			$year = Years::get($id_year);
 
 			if (!$year) {
-				throw new APIException('Invalid year.', 400, $e);
+				throw new APIException('Invalid year.', 400);
 			}
 
 			if ($p2 === 'journal') {
