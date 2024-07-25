@@ -88,7 +88,11 @@ class Session extends \KD2\UserSession
 		throw new \LogicException('Cannot clone');
 	}
 
-	public function __construct()
+	/**
+	 * final is for phpstan warning
+	 * @see https://phpstan.org/blog/solving-phpstan-error-unsafe-usage-of-new-static
+	 */
+	final public function __construct()
 	{
 		if (static::$_instance !== null) {
 			throw new \LogicException('Wrong call, use getInstance');
@@ -124,6 +128,11 @@ class Session extends \KD2\UserSession
 		return parent::isPasswordCompromised($password);
 	}
 
+	/**
+	 * Returns user details for login
+	 * @param  string $login
+	 * @return object|null
+	 */
 	protected function getUserForLogin($login)
 	{
 		$id_field = DynamicFields::getLoginField();
@@ -465,8 +474,8 @@ class Session extends \KD2\UserSession
 
 		list($id, $expire, $email_hash) = explode('.', $query);
 
-		$id = base_convert($id, 36, 10);
-		$expire = base_convert($expire, 36, 10);
+		$id = (int) base_convert($id, 36, 10);
+		$expire = (int) base_convert($expire, 36, 10);
 
 		$expire_timestamp = ($expire * 3600) + strtotime('2017-01-01');
 

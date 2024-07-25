@@ -203,16 +203,6 @@ class DynamicFields
 		return $fields;
 	}
 
-	static public function listUserFieldTypes(): array
-	{
-		$types = DynamicField::TYPES;
-
-		// Address type can only be used by presets
-		unset($types['address']);
-
-		return $types;
-	}
-
 	protected function __construct(bool $load = true)
 	{
 		if ($load) {

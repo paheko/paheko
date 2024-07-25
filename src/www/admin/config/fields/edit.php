@@ -31,7 +31,7 @@ $form->runIf('save', function () use ($field, $fields) {
 	$fields->save();
 }, $csrf_key, '!config/fields/?msg=SAVED');
 
-$user_field_types = DynamicFields::listUserFieldTypes();
+$user_field_types = DynamicField::TYPES;
 
 $tpl->assign(compact('csrf_key', 'field', 'user_field_types'));
 

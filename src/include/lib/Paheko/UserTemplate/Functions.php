@@ -387,6 +387,8 @@ class Functions
 	static public function captcha(array $params, UserTemplate $tpl, int $line)
 	{
 		$secret = md5(SECRET_KEY . Utils::getSelfURL(false));
+		$hash = null;
+		$number = null;
 
 		if (isset($params['html'])) {
 			$c = Security::createCaptcha($secret, $params['lang'] ?? 'fr');
@@ -502,8 +504,8 @@ class Functions
 		if (!$ut->isTrusted()) {
 			$db = DB::getInstance();
 			$email_field = DynamicFields::getFirstEmailField();
-			$internal_count = $db->count('users', $db->where($email_field, 'IN', $params['to']));
-			$external_count = count($params['to']) - $internal_count;
+			$internal_count = (int) $db->count('users', $db->where($email_field, 'IN', $params['to']));
+			$external_count = intval(count($params['to']) - $internal_count);
 
 			if (($external_count + $external) > 1) {
 				throw new Brindille_Exception(sprintf('Ligne %d: l\'envoi d\'email à une adresse externe est limité à un envoi par page', $line));
@@ -619,7 +621,7 @@ class Functions
 
 	static public function _readFile(string $file, string $arg_name, UserTemplate $ut, int $line): string
 	{
-		$path = self::getFilePath($file ?? null, $arg_name, $ut, $line);
+		$path = self::getFilePath($file, $arg_name, $ut, $line);
 
 		$file = Files::get(File::CONTEXT_MODULES . '/' . $path);
 
@@ -805,7 +807,7 @@ class Functions
 		return '<div class="block error"><ul><li>' . implode('</li><li>', $errors) . '</li></ul></div>';
 	}
 
-	static public function admin_files(array $params, UserTemplate $ut): string
+	static public function admin_files(array $params, UserTemplate $ut, int $line): string
 	{
 		if (empty($ut->module)) {
 			throw new Brindille_Exception('Module could not be found');
@@ -894,6 +896,7 @@ class Functions
 		}
 
 		$code = null;
+		$return = null;
 
 		// External HTTP request
 		if ($url) {
@@ -988,7 +991,7 @@ class Functions
 				throw new Brindille_Exception('"columns" parameter is missing or is empty');
 			}
 
-			$sheets[$name] = new CSV_Custom($session, $name);
+			$csv = $sheets[$name] = new CSV_Custom($session, $name);
 
 			$csv->setColumns($params['columns']);
 

@@ -241,6 +241,9 @@ class CommonFunctions
 			$label = preg_replace_callback('!\[icon=([\w-]+)\]!', fn ($match) => self::icon(['shape' => $match[1]]), $label);
 		}
 
+		$label ??= null;
+		$options ??= null;
+
 		if ($type === 'radio-btn') {
 			if (!empty($attributes['disabled'])) {
 				$attributes['class'] = ($attributes['class'] ?? '') . ' disabled';
@@ -820,6 +823,7 @@ class CommonFunctions
 	{
 		if (isset($params['field'])) {
 			$field = $params['field'];
+			$name = $field->name;
 		}
 		else {
 			$name = $params['name'] ?? $params['key'] ?? null;

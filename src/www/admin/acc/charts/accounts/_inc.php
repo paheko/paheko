@@ -19,7 +19,7 @@ if (qg('types')) {
 	$types = array_map('intval', $types);
 	$types_arg = 'types=' . implode(':', $types);
 
-	$types_names = !empty($types) ? array_intersect_key(Account::TYPES_NAMES, array_flip($types)) : [];
+	$types_names = count($types) ? array_intersect_key(Account::TYPES_NAMES, array_flip($types)) : [];
 	$types_names = implode(', ', $types_names);
 }
 

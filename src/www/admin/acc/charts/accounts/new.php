@@ -54,7 +54,7 @@ $form->runIf('toggle_bookmark', function () use ($accounts, $chart) {
 	chart_reload_or_redirect('!acc/charts/accounts/?id=' . $chart->id());
 }, $csrf_key);
 
-$form->runIf('save', function () use ($account, $accounts, $chart, $current_year) {
+$form->runIf('save', function () use ($account, $chart, $current_year) {
 	$db = DB::getInstance();
 
 	$db->begin();

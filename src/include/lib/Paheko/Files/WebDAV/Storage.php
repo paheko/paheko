@@ -54,7 +54,7 @@ class Storage extends AbstractStorage
 		}
 	}
 
-	protected function load(string $uri)
+	protected function load(string $uri): ?File
 	{
 		$this->populateRootCache();
 
@@ -185,7 +185,7 @@ class Storage extends AbstractStorage
 				return WebDAV::EMPTY_PROP_VALUE;
 			case NextCloud::PROP_OC_DOWNLOADURL:
 				return $this->nextcloud->getDirectDownloadURL($uri, $this->session::getUserId());
-			case Nextcloud::PROP_NC_RICH_WORKSPACE:
+			case NextCloud::PROP_NC_RICH_WORKSPACE:
 				return '';
 			case NextCloud::PROP_OC_ID:
 				// fileId is required by NextCloud desktop client
@@ -194,7 +194,7 @@ class Storage extends AbstractStorage
 					return 10000000;
 				}
 
-				return $file->id();
+				return $file->id;
 			case NextCloud::PROP_OC_PERMISSIONS:
 				$permissions = [
 					NextCloud::PERM_READ => $file->canRead($this->session),

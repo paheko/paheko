@@ -1327,6 +1327,7 @@ class Utils
 
 		$code = 0;
 		$stdin_buffer = null;
+		$status = null;
 
 		// Nothing for STDIN, close the pipe
 		if (null === $stdin) {
@@ -1788,6 +1789,10 @@ class Utils
 
 	static public function showProfiler(): void
 	{
+		if (!defined('Paheko\PROFILER_START_TIME')) {
+			return;
+		}
+
 		$is_html = false;
 
 		foreach (headers_list() as $header) {

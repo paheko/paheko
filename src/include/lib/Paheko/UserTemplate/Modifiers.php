@@ -377,6 +377,8 @@ EOS;
 
 		$stack = [];
 		$expression = '';
+		$value = null;
+		$token = null;
 
 		foreach ($tokens as $i => $token) {
 			if ($token->type == 'function') {
