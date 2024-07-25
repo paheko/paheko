@@ -20,6 +20,7 @@ use Paheko\Users\Users;
 use Paheko\Files\Files;
 
 use KD2\ErrorManager;
+use KD2\DB\DB_Exception;
 
 class API
 {
@@ -89,7 +90,7 @@ class API
 	public function setFilePointer($pointer): void
 	{
 		if (!is_resource($pointer)) {
-			throw new InvalidArgumentException('Invalid argument: not a file resource');
+			throw new \InvalidArgumentException('Invalid argument: not a file resource');
 		}
 
 		$this->file_pointer = $pointer;
@@ -154,7 +155,7 @@ class API
 				return null;
 			}
 			elseif (!$this->is_http_client) {
-				return ['count' => $s->countResults, 'results' => iterator_to_array($result)];
+				return ['count' => $s->countResults(), 'results' => iterator_to_array($result)];
 			}
 			else {
 				// Stream results to client, in case request is slow
@@ -651,7 +652,7 @@ class API
 				}
 
 				if (!$account) {
-					throw new APIException('Unknown account id or code.', 400, $e);
+					throw new APIException('Unknown account id or code.', 400);
 				}
 
 				$list = $account->listJournal($year->id, false);

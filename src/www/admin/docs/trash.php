@@ -19,7 +19,7 @@ $count = $check ? count($check) : null;
 
 $tpl->assign(compact('csrf_key', 'extra', 'count'));
 
-$form->runIf('confirm_delete', function () use ($check, $session) {
+$form->runIf('confirm_delete', function () use ($check) {
 	if (empty($check)) {
 		throw new UserException('Aucun fichier sélectionné');
 	}

@@ -2,11 +2,11 @@
 
 namespace Paheko;
 
-use KD2\UserSession;
+use Paheko\Users\Session;
 
 class CSV_Custom
 {
-	protected ?UserSession $session;
+	protected ?Session $session;
 	protected ?string $key;
 	protected ?array $csv = null;
 	protected ?array $translation = null;
@@ -18,7 +18,7 @@ class CSV_Custom
 	protected array $_default;
 	protected ?string $cache_key = null;
 
-	public function __construct(?UserSession $session = null, ?string $key = null)
+	public function __construct(?Session $session = null, ?string $key = null)
 	{
 		$this->session = $session;
 		$this->key = $key;

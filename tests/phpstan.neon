@@ -25,6 +25,12 @@ parameters:
         -
           message: '#Constant CURRENT_YEAR_ID not found#'
           path: ../src/www/admin/acc/*
+        -
+          message: '#Variable \$criterias might not be defined#'
+          path: ../src/www/admin/acc/reports/*.php
+        -
+          message: '#Variable \$db might not be defined#'
+          path: ../src/include/migrations/*.php
 
 includes:
 	- phar://phpstan.phar/conf/bleedingEdge.neon
