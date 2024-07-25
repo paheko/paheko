@@ -27,8 +27,14 @@ $csrf_key = 'login_otp';
 
 $args = $app_token ? '?app=' . rawurlencode($app_token) : '';
 $layout = $app_token ? 'public' : null;
+$lock = Log::isLocked();
 
-$form->runIf('login', function () use ($session, $args) {
+$form->runIf('login', function () use ($lock, $session, $args) {
+	if ($lock == 1) {
+		$session->logout();
+		throw new UserException(sprintf("Vous avez dépassé la limite de tentatives de connexion.\nMerci d'attendre %d minutes avant de ré-essayer de vous connecter.", Log::LOCKOUT_DELAY/60));
+	}
+
 	if (!$session->loginOTP(f('code'))) {
 		throw new UserException(sprintf('Code incorrect. Vérifiez que votre téléphone est à l\'heure (heure du serveur : %s).', date('d/m/Y H:i:s')));
 	}
