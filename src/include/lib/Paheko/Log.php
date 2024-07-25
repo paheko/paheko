@@ -13,13 +13,15 @@ class Log
 	 * How many seconds in the past should we look for failed attempts?
 	 * @var int
 	 */
-	const LOCKOUT_DELAY = 20*60;
+	const LOCKOUT_DELAY = 15*60;
 
 	/**
 	 * Number of maximum login attempts in that delay
 	 * @var int
 	 */
 	const LOCKOUT_ATTEMPTS = 10;
+
+	const OTP_LOCKOUT_ATTEMPTS = 5;
 
 	const SOFT_LOCKOUT_ATTEMPTS = 3;
 
@@ -31,6 +33,9 @@ class Log
 	const LOGIN_PASSWORD_CHANGE = 4;
 	const LOGIN_CHANGE = 5;
 	const LOGIN_AS = 6;
+	const LOGIN_FAIL_OTP = 7;
+	const OTP_CHANGED = 8;
+	const OTP_RECOVERY_USED = 9;
 
 	const CREATE = 10;
 	const DELETE = 11;
@@ -44,6 +49,9 @@ class Log
 		self::LOGIN_PASSWORD_CHANGE => 'Modification de mot de passe',
 		self::LOGIN_CHANGE => 'Modification d\'identifiant',
 		self::LOGIN_AS => 'Connexion par un administrateur',
+		self::LOGIN_FAIL_OTP => 'Code TOTP invalide',
+		self::OTP_CHANGED => 'Modification de la double authentification TOTP',
+		self::OTP_RECOVERY_USED => 'Utilisation d\'un code de secours',
 
 		self::CREATE => 'Création',
 		self::DELETE => 'Suppression',
@@ -123,6 +131,20 @@ class Log
 		}
 
 		return 0;
+	}
+
+	/**
+	 * Returns TRUE if the current IP address has done too many failed OTP codes
+	 */
+	static public function isOTPLocked(): bool
+	{
+		$ip = Utils::getIP();
+
+		// is IP locked out?
+		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE type = ? AND ip_address = ? AND created > datetime(\'now\', \'-%d seconds\');', self::LOCKOUT_DELAY);
+		$count = DB::getInstance()->firstColumn($sql, self::LOGIN_FAIL_OTP, $ip);
+
+		return $count >= self::OTP_LOCKOUT_ATTEMPTS;
 	}
 
 	static public function list(array $params = []): DynamicList
