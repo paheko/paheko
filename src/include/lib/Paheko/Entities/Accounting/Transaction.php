@@ -659,7 +659,7 @@ class Transaction extends Entity
 
 	public function hasStatus(int $property): bool
 	{
-		return $this->status & $property;
+		return boolval($this->status & $property);
 	}
 
 	public function isPaid(): bool
@@ -683,7 +683,7 @@ class Transaction extends Entity
 
 	public function delete(): bool
 	{
-		if ($this->validated) {
+		if ($this->hash) {
 			throw new ValidationException('Il n\'est pas possible de supprimer une écriture qui a été validée');
 		}
 
@@ -1281,23 +1281,6 @@ class Transaction extends Entity
 			'left' => $details[$this->type]->accounts[0],
 			'right' => $details[$this->type]->accounts[1],
 		];
-	}
-
-	public function payOffFrom(Transaction $transaction): ?\stdClass
-	{
-		$this->_related = $transaction;
-		$this->id_related = $this->_related->id();
-		$this->label = ($this->_related->type == Transaction::TYPE_DEBT ? 'Règlement de dette : ' : 'Règlement de créance : ') . $this->_related->label;
-		$this->type = self::TYPE_ADVANCED;
-
-		$out = (object) [
-			'id'         => $this->_related->id,
-			'amount'     => $this->_related->sum(),
-			'id_project' => $this->_related->getProjectId(),
-			'type'       => $this->_related->type,
-		];
-
-		return $out;
 	}
 
 	public function getTypeName(): string

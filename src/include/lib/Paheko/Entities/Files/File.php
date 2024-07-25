@@ -805,6 +805,7 @@ class File extends Entity
 			}
 
 			$tmpfile = null;
+			$tmpdest = null;
 
 			try {
 				// mutool convert doesn't handle stdin/stdout :(
@@ -845,12 +846,15 @@ class File extends Entity
 				// PDF extraction was longer than 2 seconds: PDF file is likely too large
 				$content = null;
 			}
+			finally {
+				if ($tmpfile) {
+					Utils::safe_unlink($tmpfile);
+				}
 
-			if ($tmpfile) {
-				Utils::safe_unlink($tmpfile);
+				if ($tmpdest) {
+					Utils::safe_unlink($tmpdest);
+				}
 			}
-
-			Utils::safe_unlink($tmpdest);
 		}
 		elseif (in_array($ext, self::EXTENSIONS_TEXT_CONVERT) && is_array($source)) {
 
@@ -1511,8 +1515,8 @@ class File extends Entity
 
 	public function getRecursiveLastModified(): int
 	{
-		if ($this->type == self::TYPE_FILE) {
-			return $this->modified;
+		if ($this->type === self::TYPE_FILE) {
+			return $this->modified->getTimestamp();
 		}
 
 		$db = DB::getInstance();

@@ -403,7 +403,7 @@ class DB extends SQLite3
 			throw new \InvalidArgumentException('Invalid version number: ' . $version);
 		}
 
-		$version = ($match[1] * 100 * 100 * 100) + ($match[2] * 100 * 100) + ($match[3] * 100);
+		$version = ((int)$match[1] * 100 * 100 * 100) + ((int)$match[2] * 100 * 100) + ((int)$match[3] * 100);
 
 		if (isset($match[5])) {
 			if ($match[5] > 24) {
@@ -411,16 +411,16 @@ class DB extends SQLite3
 			}
 
 			if ($match[4] == 'rc') {
-				$version += $match[5] + 50;
+				$version += (int)$match[5] + 50;
 			}
 			elseif ($match[4] == 'beta') {
-				$version += $match[5] + 25;
+				$version += (int)$match[5] + 25;
 			}
 			elseif ($match[4] == 'alpha') {
-				$version += $match[5];
+				$version += (int)$match[5];
 			}
 			else {
-				$version += $match[5] + 75;
+				$version += (int)$match[5] + 75;
 			}
 		}
 

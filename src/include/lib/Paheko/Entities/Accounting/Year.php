@@ -80,7 +80,7 @@ class Year extends Entity
 		$this->save();
 
 		Log::add(Log::MESSAGE, [
-			'message' => sprintf('Réouverture de l\'exercice', $this->label),
+			'message' => 'Réouverture de l\'exercice',
 			'entity'  => self::class,
 			'id'      => $this->id(),
 		]);

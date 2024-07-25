@@ -48,6 +48,7 @@ trait FileThumbnailTrait
 	{
 		if (!$this->image) {
 			$path = $this->createDocumentThumbnail();
+			$pointer = null;
 
 			if (!$path) {
 				return null;
@@ -350,6 +351,9 @@ trait FileThumbnailTrait
 						Utils::escapeshellarg($tmpfile ?? $local_path),
 						Utils::escapeshellarg($destination)
 					);
+				}
+				else {
+					throw new \LogicException('No command found');
 				}
 
 				$output = '';

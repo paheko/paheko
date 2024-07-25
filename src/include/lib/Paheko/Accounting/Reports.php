@@ -225,7 +225,7 @@ class Reports
 			$parts['inner_group'] ?? 'a.code, t.id_year',
 			isset($parts['where']) ? 'WHERE ' . $parts['where'] : '',
 			isset($parts['group']) ? 'GROUP BY ' . $parts['group'] : '',
-			$order ?? 'code'
+			'code'
 		);
 	}
 

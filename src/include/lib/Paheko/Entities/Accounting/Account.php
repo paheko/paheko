@@ -2,7 +2,7 @@
 
 namespace Paheko\Entities\Accounting;
 
-use DateTimeInterface;
+use DateTime;
 use KD2\DB\Date;
 use Paheko\Config;
 use Paheko\CSV_Custom;
@@ -506,7 +506,7 @@ class Account extends Entity
 		return self::LOCAL_TYPES[$country][$this->type];
 	}
 
-	public function listJournal(int $year_id, bool $simple = false, ?DateTimeInterface $start = null, ?DateTimeInterface $end = null)
+	public function listJournal(int $year_id, bool $simple = false, ?DateTime $start = null, ?DateTime $end = null)
 	{
 		$db = DB::getInstance();
 		$columns = self::LIST_COLUMNS;
@@ -556,11 +556,12 @@ class Account extends Entity
 		$list->setPageSize(null); // Because with paging we can't calculate the running sum
 		$list->setModifier(function (&$row) use (&$sum, &$list, $reverse, $year_id, $start, $end) {
 			if (property_exists($row, 'sum')) {
+				$desc = $list->getOrderIsDesc();
 				// Reverse running sum needs the last sum, first
-				if ($list->desc && null === $sum) {
+				if ($desc && null === $sum) {
 					$sum = $this->getSumAtDate($year_id, ($end ?? new \DateTime($row->date))->modify('+1 day')) * -1 * $reverse;
 				}
-				elseif (!$list->desc) {
+				elseif (!$desc) {
 					if (null === $sum && $start) {
 						$sum = $this->getSumAtDate($year_id, $start) * -1 * $reverse;
 					}
@@ -570,7 +571,7 @@ class Account extends Entity
 
 				$row->sum = $sum;
 
-				if ($list->desc) {
+				if ($desc) {
 					$sum -= $row->change;
 				}
 			}
@@ -625,7 +626,7 @@ class Account extends Entity
 		return $position;
 	}
 
-	public function hasUnreconciledLinesBefore(int $year_id, DateTimeInterface $start_date): bool
+	public function hasUnreconciledLinesBefore(int $year_id, DateTime $start_date): bool
 	{
 		return (bool) DB::getInstance()->firstColumn('SELECT 1 FROM acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
@@ -634,7 +635,7 @@ class Account extends Entity
 			$this->id(), $year_id, Date::createFromInterface($start_date));
 	}
 
-	public function getReconcileJournal(int $year_id, DateTimeInterface $start_date, DateTimeInterface $end_date, int $filter = self::RECONCILE_ALL, bool $desc = false)
+	public function getReconcileJournal(int $year_id, DateTime $start_date, DateTime $end_date, int $filter = self::RECONCILE_ALL, bool $desc = false)
 	{
 		if ($end_date < $start_date) {
 			throw new ValidationException('La date de début ne peut être avant la date de fin.');
@@ -787,7 +788,7 @@ class Account extends Entity
 	}
 
 
-	public function getSumAtDate(int $year_id, DateTimeInterface $date, bool $reconciled_only = false): int
+	public function getSumAtDate(int $year_id, DateTime $date, bool $reconciled_only = false): int
 	{
 		$sql = sprintf('SELECT SUM(l.credit) - SUM(l.debit)
 			FROM acc_transactions_lines l

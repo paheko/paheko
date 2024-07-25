@@ -7,6 +7,7 @@ use KD2\Form;
 use KD2\HTTP;
 use KD2\Translate;
 use KD2\SMTP;
+use KD2\DB\DB_Exception;
 
 use Paheko\Users\Session;
 

@@ -131,10 +131,10 @@ class Module extends Entity
 		}
 
 		try {
-			$ini = Utils::parse_ini_string($ini, false, \INI_SCANNER_TYPED);
+			$ini = Utils::parse_ini_string($ini, false);
 		}
 		catch (\RuntimeException $e) {
-			throw new ValidationException(sprintf('Le fichier module.ini est invalide pour "%s" : %s', $this->name, $e->getMessage(), 0, $e));
+			throw new ValidationException(sprintf('Le fichier module.ini est invalide pour "%s" : %s', $this->name, $e->getMessage()), 0, $e);
 		}
 
 		if (empty($ini)) {

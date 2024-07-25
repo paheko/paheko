@@ -251,6 +251,11 @@ class DynamicList implements \Countable
 		$this->desc = $desc;
 	}
 
+	public function getOrderIsDesc(): bool
+	{
+		return $this->desc;
+	}
+
 	public function groupBy(string $value)
 	{
 		$this->group = $value;

@@ -2,11 +2,12 @@ parameters:
     bootstrapFiles:
       - phpstan.config.php
       - ../src/include/init.php
+      - ../src/include/lib/KD2/Brindille.php
     level: 3
     scanDirectories:
-      - ../src/include
-      - ../src/www
-      - ../src/scripts
+      - ../src/
+      - ../build/debian
+      - ../build/windows
     excludePaths:
       - ../src/include/lib/KD2
       - ../src/include/lib/Parsedown.php

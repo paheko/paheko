@@ -211,14 +211,13 @@ class Years
 			$sum -= abs($account->balance);
 		}
 
-		if ($sum == 0) {
+		if ($sum === 0) {
 			return null;
 		}
-
-		if ($sum > 0) {
+		elseif ($sum > 0) {
 			$line = Line::create($appropriation_account, 0, $sum);
 		}
-		elseif ($sum < 0) {
+		else {
 			$line = Line::create($appropriation_account, abs($sum), 0);
 		}
 
