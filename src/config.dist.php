@@ -24,6 +24,8 @@ namespace Paheko;
  *
  * Si cette constante n'est définie, Paheko ajoutera automatiquement
  * une valeur aléatoire dans le fichier config.local.php.
+ *
+ * @var  string
  */
 
 //const SECRET_KEY = '3xUhIgGwuovRKOjVsVPQ5yUMfXUSIOX2GKzcebsz5OINrYC50r';
@@ -54,6 +56,7 @@ namespace Paheko;
  * ];
  *
  * Défault : null (connexion automatique désactivée)
+ * @var int|array|null
  */
 
 //const LOCAL_LOGIN = null;
@@ -70,6 +73,7 @@ namespace Paheko;
  * la recopiant à la place du fichier association.sqlite
  *
  * Défaut : true
+ * @var  bool
  */
 
 //const ALLOW_MODIFIED_IMPORT = true;
@@ -78,6 +82,7 @@ namespace Paheko;
  * Répertoire où se situe le code source de Paheko
  *
  * Défaut : répertoire racine de Paheko (__DIR__)
+ * @var  string
  */
 
 //const ROOT = __DIR__;
@@ -87,6 +92,7 @@ namespace Paheko;
  * (incluant la base de données SQLite, les sauvegardes, le cache, les fichiers locaux et les plugins)
  *
  * Défaut : sous-répertoire "data" de la racine
+ * @var  string
  */
 
 //const DATA_ROOT = ROOT . '/data';
@@ -96,6 +102,7 @@ namespace Paheko;
  * exemples : graphiques de statistiques, templates Brindille, etc.
  *
  * Défaut : sous-répertoire 'cache' de DATA_ROOT
+ * @var  string
  */
 
 //const CACHE_ROOT = DATA_ROOT . '/cache';
@@ -106,6 +113,7 @@ namespace Paheko;
  * le code PHP généré à partir des templates Smartyer.
  *
  * Défaut : sous-répertoire 'shared' de CACHE_ROOT
+ * @var  string
  */
 
 //const SHARED_CACHE_ROOT = CACHE_ROOT . '/shared';
@@ -135,6 +143,7 @@ namespace Paheko;
  * Emplacement du fichier de base de données de Paheko
  *
  * Défaut : DATA_ROOT . '/association.sqlite'
+ * @var  string
  */
 
 //const DB_FILE = DATA_ROOT . '/association.sqlite';
@@ -143,6 +152,7 @@ namespace Paheko;
  * Emplacement de stockage des plugins
  *
  * Défaut : DATA_ROOT . '/plugins'
+ * @var  string
  */
 
 //const PLUGINS_ROOT = DATA_ROOT . '/plugins';
@@ -184,6 +194,7 @@ namespace Paheko;
  * La clé est le nom du signal, et la valeur est la fonction.
  *
  * Défaut: [] (tableau vide)
+ * @var array
  */
 //const SYSTEM_SIGNALS = [['files.delete' => 'MyNamespace\Signals::deleteFile'], ['entity.Accounting\Transaction.save.before' => 'MyNamespace\Signals::saveTransaction']];
 
@@ -224,6 +235,7 @@ namespace Paheko;
  * Défaut : TRUE (pour aider le debug de l'auto-hébergement)
  *
  * Il est fortement conseillé de mettre cette valeur à FALSE en production !
+ * @var bool
  */
 
 //const SHOW_ERRORS = false;
@@ -237,6 +249,7 @@ namespace Paheko;
  * Note : les erreurs sont déjà toutes loguées dans error.log à la racine de DATA_ROOT
  *
  * Défaut : false
+ * @var bool
  */
 
 //const MAIL_ERRORS = false;
@@ -258,6 +271,7 @@ namespace Paheko;
  * Configuration -> Fonctions avancées -> Journal d'erreurs
  *
  * Défaut : null
+ * @var string|null
  */
 
 //const ERRORS_REPORT_URL = null;
@@ -269,6 +283,7 @@ namespace Paheko;
  * est affiché. Il est possible de personnaliser ce message avec cette constante.
  *
  * Voir include/init.php pour le template par défaut.
+ * @var string|null
  */
 
 // const ERRORS_TEMPLATE = null;
@@ -301,6 +316,7 @@ namespace Paheko;
  *
  * Défaut : true
  * (Afin d'aider au rapport de bugs des instances auto-hébergées)
+ * @var bool
  */
 
 //const ENABLE_TECH_DETAILS = true;
@@ -476,9 +492,10 @@ namespace Paheko;
  * Serveur NTP utilisé pour les connexions avec TOTP
  * (utilisé seulement si le code OTP fourni est faux)
  *
- * Désactiver (false) si vous êtes sûr que votre serveur est toujours à l'heure.
+ * Désactiver (NULL) si vous êtes sûr que votre serveur est toujours à l'heure.
  *
  * Défaut : fr.pool.ntp.org
+ * @var string|null
  */
 
 //const NTP_SERVER = 'fr.pool.ntp.org';
@@ -505,6 +522,7 @@ namespace Paheko;
  * mail() de PHP
  *
  * Défaut : null
+ * @var string|null
  */
 
 //const SMTP_HOST = null;
@@ -516,6 +534,7 @@ namespace Paheko;
  * 587 = port standard pour connexion SSL
  *
  * Défaut : 587
+ * @var int|null
  */
 
 //const SMTP_PORT = 587;
@@ -526,6 +545,7 @@ namespace Paheko;
  * mettre à null pour utiliser un serveur local ou anonyme
  *
  * Défaut : null
+ * @var string|null
  */
 
 //const SMTP_USER = 'paheko@monserveur.com';
@@ -536,6 +556,7 @@ namespace Paheko;
  * mettre à null pour utiliser un serveur local ou anonyme
  *
  * Défaut : null
+ * @var string|null
  */
 
 //const SMTP_PASSWORD = 'abcd';
@@ -549,6 +570,7 @@ namespace Paheko;
  * STARTTLS = utilisation de STARTTLS (moyennement sécurisé)
  *
  * Défaut : STARTTLS
+ * @var string
  */
 
 //const SMTP_SECURITY = 'STARTTLS';
@@ -581,6 +603,7 @@ namespace Paheko;
  * lors de la session avec le serveur SMTP.
  *
  * Défaut : null
+ * @var string|null
  */
 
 //const MAIL_RETURN_PATH = 'returns@monserveur.com';
@@ -599,6 +622,7 @@ namespace Paheko;
  * qui sera utilisée.
  *
  * Défaut : null
+ * @var string|null
  */
 
 //const MAIL_SENDER = 'associations@monserveur.com';
@@ -622,7 +646,7 @@ namespace Paheko;
  *
  * Défaut : null (l'API handlebounce est désactivée)
  *
- * @type string|null
+ * @var string|null
  */
 
 //const MAIL_BOUNCE_PASSWORD = null;
@@ -632,6 +656,7 @@ namespace Paheko;
  * (peut être personnalisée dans la configuration)
  *
  * Défaut : #20787a
+ * @var string
  */
 
 //const ADMIN_COLOR1 = '#20787a';
@@ -639,6 +664,7 @@ namespace Paheko;
 /**
  * Couleur secondaire de l'interface admin
  * Défaut : #85b9ba
+ * @var string
  */
 
 //const ADMIN_COLOR2 = '#85b9ba';
@@ -654,6 +680,7 @@ namespace Paheko;
  * sinon la personnalisation des couleurs ne fonctionnera pas
  *
  * Défaut : [ADMIN_URL]static/bg.png
+ * @var string
  */
 
 //const ADMIN_BACKGROUND_IMAGE = 'https://mon-asso.fr/fond_paheko.png';
@@ -701,6 +728,7 @@ namespace Paheko;
  * pas correctement le répertoire de stockage des fichiers !
  *
  * Défaut : null
+ * @var string|null
  */
 
 //const FILE_STORAGE_BACKEND = null;
@@ -719,6 +747,7 @@ namespace Paheko;
  * voir Configuration > Avancé (accessible uniquement si ENABLE_TECH_DETAILS est à true)
  *
  * Défaut : null
+ * @var string|null
  */
 
 //const FILE_STORAGE_CONFIG = null;
@@ -731,6 +760,7 @@ namespace Paheko;
  * Tout envoi de fichier sera refusé.
  *
  * Défaut : null (dans ce cas c'est le stockage qui détermine la taille disponible, donc généralement l'espace dispo sur le disque dur !)
+ * @var int|null
  */
 
 //const FILE_STORAGE_QUOTA = 10*1024*1024; // Forcer le quota alloué à 10 Mo, quel que soit le backend de stockage
@@ -780,6 +810,7 @@ namespace Paheko;
  * Si NULL, alors l'édition de documents est désactivée.
  *
  * Défaut : null
+ * @var string|null
  */
 
 //const WOPI_DISCOVERY_URL = 'http://localhost:9980/hosting/discovery';
@@ -897,6 +928,7 @@ namespace Paheko;
  * Toute autre commande sera ignorée.
  *
  * Défaut : null (= fonctionnalité désactivée)
+ * @var string|null
  */
 //const PDFTOTEXT_COMMAND = 'mupdf';
 
@@ -914,6 +946,7 @@ namespace Paheko;
  * identifiants d'accès à l'API, et aura accès à TOUT en écriture/administration.
  *
  * Défaut: null
+ * @var string|null
  */
 //const API_USER = 'coraline';
 //const API_PASSWORD = 'thisIsASecretPassword42';
@@ -937,6 +970,7 @@ namespace Paheko;
  * Pour désactiver cet envoi il suffit de placer cette constante à TRUE.
  *
  * Défaut : false
+ * @var bool
  */
 //const DISABLE_INSTALL_PING = false;
 
