@@ -272,10 +272,10 @@ class Install
 			'pays'        => 'FR',
 		]);
 
-		$user->importSecurityForm(false, [
+		$user->setNewPassword([
 			'password' => $user_password,
 			'password_confirmed' => $user_password,
-		]);
+		], false);
 
 		$user->save();
 

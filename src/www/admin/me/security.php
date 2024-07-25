@@ -9,22 +9,8 @@ require_once __DIR__ . '/_inc.php';
 
 $user = Session::getLoggedUser();
 
-$csrf_key = 'edit_security_' . md5($user->password);
-$edit = qg('edit');
-
-$form->runIf('confirm', function () use ($user, $session) {
-	$user->importSecurityForm(true, null, $session);
-	$user->save(false);
-}, $csrf_key, '!me/security.php?ok');
-
-$otp = null;
-
-if ($edit == 'otp') {
-	$otp = $session->getNewOTPSecret();
-}
-
 $can_use_pgp = \KD2\Security::canUseEncryption();
-$pgp_fingerprint = $user->pgp_key && $can_use_pgp ? $session->getPGPFingerprint($user->pgp_key, true) : null;
+$pgp_fingerprint = $user->getPGPKeyFingerprint(null, true);
 
 $tpl->assign('ok', qg('ok') !== null);
 $sessions_count = $session->countActiveSessions();

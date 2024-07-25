@@ -232,7 +232,7 @@ class API
 			}
 
 			if (isset($this->params['password'])) {
-				$user->importSecurityForm(false, ['password' => $this->params['password'], 'password_confirmed' => $this->params['password']]);
+				$user->setNewPassword(['password' => $this->params['password'], 'password_confirmed' => $this->params['password']], false);
 			}
 
 			$user->save();

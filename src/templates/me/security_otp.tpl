@@ -19,16 +19,13 @@
 			<dt>Votre clé secrète est&nbsp;:</dt>
 			<dd class="help">{input name="otp_secret" default=$otp.secret_display type="text" readonly="readonly" copy=true onclick="this.select();"}</code></dd>
 			<dd class="help">Recopiez la clé secrète ou scannez le QR code pour configurer votre application TOTP, puis utilisez celle-ci pour générer un code d'accès et confirmer l'activation.</dd>
-			{input name="otp_code" type="text" class="otp" minlength=6 maxlength=6 label="Code TOTP" help="Entrez ici le code donné par l'application d'authentification double facteur." required=true}
+			{input name="otp_code" type="text" class="otp" minlength=6 maxlength=6 label="Code TOTP" help="Entrez ici le code donné par l'application de double authentification." required=true}
 		</dl>
 	</fieldset>
 
-	{include file="./_security_confirm_password.tpl"}
+	{include file="./_security_confirm_password.tpl" name="enable"}
 {else}
-	<p class="block alert">
-		Confirmez la désactivation de l'authentification à double facteur TOTP.
-	</p>
-	{include file="./_security_confirm_password.tpl"}
+	{include file="./_security_confirm_password.tpl" warning="Confirmez la désactivation de la double authentification" name="disable"}
 {/if}
 </form>
 

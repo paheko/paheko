@@ -11,17 +11,23 @@ $user = Session::getLoggedUser();
 
 $csrf_key = 'edit_otp_' . md5($user->password);
 
-$form->runIf('confirm', function () use ($user, $session) {
-	$user->importSecurityForm(true, null, $session);
-	$user->save(false);
+$form->runIf('disable', function () use ($user) {
+	$user->setOTPSecret(null);
+	$user->save(false); // Don't self-check other fields
+}, $csrf_key, '!me/security.php?ok');
+
+$form->runIf('enable', function () use ($user) {
+	$user->verifyPassword(f('password_check'));
+	$user->setOTPSecret(f('otp_secret'), f('otp_code'));
+	$user->save(false); // Don't self-check other fields
 }, $csrf_key, '!me/security.php?ok');
 
 $otp = null;
 
-if ($edit == 'otp') {
-	$otp = $session->getNewOTPSecret();
+if (!$user->otp_secret) {
+	$otp = $user->createOTPSecret();
 }
 
-$tpl->assign(compact('id', 'edit', 'id_field', 'user', 'csrf_key', 'otp'));
+$tpl->assign(compact('user', 'csrf_key', 'otp'));
 
-$tpl->display('me/security.tpl');
+$tpl->display('me/security_otp.tpl');

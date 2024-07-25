@@ -7,19 +7,17 @@
 <form method="post" action="{$self_url}" data-focus="1">
 
 {if $user.pgp_key}
-	<h3 class="warning">Désactiver le chiffrement des e-mails ?</h3>
-
-	{include file="./_security_confirm_password.tpl"}
+	{include file="./_security_confirm_password.tpl" warning="Désactiver le chiffrement des e-mails ?"}
 {else}
 	<fieldset>
 		<legend>Chiffrer les e-mails qui me sont envoyés avec PGP/GnuPG</legend>
 		<p class="help">En inscrivant ici votre clé publique, tous les e-mails qui vous seront envoyés seront chiffrés (cryptés) avec cette clé&nbsp;: messages collectifs, messages envoyés par les membres, rappels de cotisation, procédure de récupération de mot de passe, etc.</p>
+		<p class="help">Cela permet de conserver la confidentialité des messages envoyés, mais aussi d'empêcher d'accéder à ce compte si votre boîte mail se fait pirater.</p>
 		<dl>
 			{input name="pgp_key" source=$user label="Ma clé publique PGP" type="textarea" cols=90 rows=5 required=true}
 		</dl>
 		<p class="block alert">
-			Attention&nbsp;: en inscrivant ici votre clé PGP, les emails de récupération de mot de passe perdu vous seront envoyés chiffrés
-			et ne pourront donc être lus si vous n'avez pas le le mot de passe protégeant la clé privée correspondante.
+			Attention&nbsp;: les emails de récupération de mot de passe perdu vous seront envoyés chiffrés avec votre clé PGP. Ces messages ne  pourront donc pas être lus si vous perdez le mot de passe protégeant cette clé.
 		</p>
 	</fieldset>
 
