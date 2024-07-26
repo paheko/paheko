@@ -201,7 +201,7 @@ orange</code></pre>
 <p>Attention : la syntaxe de cette section est différente des autres sections Brindille. En effet après le début (<code>{{#select</code>) doit suivre la suite de la requête, et non pas les paramètres :</p>
 <pre><code>Liste des membres inscrits à la lettre d'informations :
 {{#select nom, prenom FROM users WHERE lettre_infos = 1;}}
-    - {{prenom}} {{$nom}}&lt;br /&gt;
+    - {{$prenom}} {{$nom}}&lt;br /&gt;
 {{else}}
     Aucun membre n'est inscrit à la lettre d'information.
 {{/select}}</code></pre>
