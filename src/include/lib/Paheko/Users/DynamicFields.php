@@ -220,7 +220,7 @@ class DynamicFields
 		}
 	}
 
-	protected function reload()
+	public function reload()
 	{
 		$db = DB::getInstance();
 		$i = EM::getInstance(DynamicField::class)->iterate('SELECT * FROM @TABLE ORDER BY sort_order;');
