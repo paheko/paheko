@@ -37,6 +37,7 @@ class Modifiers
 		'math',
 		'money_int' => [Utils::class, 'moneyToInteger'],
 		'array_transpose' => [Utils::class, 'array_transpose'],
+		'check_siret_number' => [Utils::class, 'checkSIRET'],
 		'check_email',
 		'gettype',
 		'arrayval',

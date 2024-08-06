@@ -241,6 +241,11 @@ class CommonFunctions
 			$label = preg_replace_callback('!\[icon=([\w-]+)\]!', fn ($match) => self::icon(['shape' => $match[1]]), $label);
 		}
 
+		if ($type === 'country') {
+			$type = 'select';
+			$options = Utils::getCountryList();
+		}
+
 		if ($type === 'radio-btn') {
 			if (!empty($attributes['disabled'])) {
 				$attributes['class'] = ($attributes['class'] ?? '') . ' disabled';
@@ -762,8 +767,6 @@ class CommonFunctions
 			$params['default_empty'] = '—';
 		}
 		elseif ($type == 'country') {
-			$params['type'] = 'select';
-			$params['options'] = Utils::getCountryList();
 			$params['default'] = Config::getInstance()->get('country');
 		}
 		elseif ($type == 'checkbox') {

@@ -26,6 +26,7 @@ use Paheko\Entities\Email\Email;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
 
+use Paheko\Accounting\FacturX;
 use Paheko\Entities\Accounting\Transaction;
 
 use const Paheko\{ROOT, WWW_URL, BASE_URL, SECRET_KEY};
@@ -54,6 +55,7 @@ class Functions
 		'api',
 		'csv',
 		'call',
+		'facturx',
 	];
 
 	const COMPILE_FUNCTIONS_LIST = [
@@ -1101,4 +1103,30 @@ class Functions
 		$tpl->callUserFunction('function', $name, $params, $line);
 	}
 
+	static public function facturx(array $params, UserTemplate $ut, int $line): void
+	{
+		$template_file = $params['template'] ?? null;
+		$invoice = $params['invoice'] ?? null;
+		$download = !empty($params['download']) ? true : false;
+
+		unset($params['template'], $params['download']);
+
+		$path = self::getFilePath($template_file, 'file', $ut, $line);
+
+		try {
+			$tpl = new UserTemplate($template_file);
+			$tpl->setParent($ut);
+		}
+		catch (\InvalidArgumentException $e) {
+			throw new Brindille_Exception(sprintf('Ligne %d : fonction "facturx" : le fichier à inclure "%s" n\'existe pas', $line, $path));
+		}
+
+		$tpl->assignArray($params);
+		$html = $tpl->fetch();
+		unset($tpl);
+
+		$f = new FacturX;
+		$f->import((array)$invoice);
+		$f->stream($download);
+	}
 }

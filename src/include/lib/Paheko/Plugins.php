@@ -113,6 +113,18 @@ class Plugins
 		return self::getPath($name) !== null;
 	}
 
+	static public function hasSignal(string $name): bool
+	{
+		foreach (SYSTEM_SIGNALS as $system_signal) {
+			if (key($system_signal) === $name) {
+				return true;
+			}
+		}
+
+		return (bool) DB::getInstance()->firstSignal('SELECT 1 FROM plugins_signals AS s INNER JOIN plugins p ON p.name = s.plugin
+			WHERE s.signal = ? AND p.enabled = 1 LIMIT 1;', $name);
+	}
+
 	/**
 	 * Fire a plugin signal
 	 * @param  string $name      Signal name
