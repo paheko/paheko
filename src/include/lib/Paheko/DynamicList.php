@@ -230,15 +230,6 @@ class DynamicList implements \Countable
 		}
 	}
 
-
-	/**
-	 * Enable or disable prev() next() navigation when using iterate()
-	 */
-	public function togglePrevNext(bool $enable)
-	{
-		$this->enable_prev_next = $enable;
-	}
-
 	/**
 	 * If an entity is set, then each row will return the specified entity
 	 * (using the SELECT clause passed) instead of the specified columns.
