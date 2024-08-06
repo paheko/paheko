@@ -744,6 +744,17 @@ Exemple pour voir si le texte contient les mots "Bonjour" ou "Au revoir" (insens
 
 # Autres filtres
 
+## get_country_name
+
+Renvoie le nom d'un pays à partir de son code ISO-3166.
+
+```
+{{:assign code="FR"}}
+{{$code|get_country_name}}
+```
+
+Donnera : `France`
+
 ## math
 
 Réalise un calcul mathématique. Cette fonction accepte :
