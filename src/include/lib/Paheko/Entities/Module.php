@@ -232,7 +232,6 @@ class Module extends Entity
 	public function updateTemplates(): void
 	{
 		$check = self::SNIPPETS + [self::CONFIG_FILE => 'Config'];
-		$templates = [];
 		$db = DB::getInstance();
 
 		$db->begin();
@@ -240,7 +239,6 @@ class Module extends Entity
 
 		foreach ($check as $file => $label) {
 			if (Files::exists($this->path($file)) || file_exists($this->distPath($file))) {
-				$templates[] = $file;
 				$db->insert('modules_templates', ['id_module' => $this->id(), 'name' => $file]);
 			}
 		}
