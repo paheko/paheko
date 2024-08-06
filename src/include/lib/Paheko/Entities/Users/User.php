@@ -696,7 +696,7 @@ class User extends Entity
 
 		$export_data = [
 			'user'     => $this,
-			'services' => $services_list->asArray(true),
+			'services' => $services_list->asArray(),
 		];
 
 		$tpl = Template::getInstance();

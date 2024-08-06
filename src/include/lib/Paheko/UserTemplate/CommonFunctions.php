@@ -422,7 +422,7 @@ class CommonFunctions
 
 	static public function icon(array $params): string
 	{
-		if (isset($params['shape']) && isset($params['html']) && $params['html'] == false) {
+		if (isset($params['shape']) && isset($params['html']) && !$params['html']) {
 			return Utils::iconUnicode($params['shape']);
 		}
 
