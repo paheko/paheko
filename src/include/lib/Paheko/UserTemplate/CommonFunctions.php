@@ -241,6 +241,11 @@ class CommonFunctions
 			$label = preg_replace_callback('!\[icon=([\w-]+)\]!', fn ($match) => self::icon(['shape' => $match[1]]), $label);
 		}
 
+		if ($type === 'country') {
+			$type = 'select';
+			$options = Utils::getCountryList();
+		}
+
 		$label ??= null;
 		$options ??= null;
 
@@ -420,7 +425,7 @@ class CommonFunctions
 
 	static public function icon(array $params): string
 	{
-		if (isset($params['shape']) && isset($params['html']) && $params['html'] == false) {
+		if (isset($params['shape']) && isset($params['html']) && !$params['html']) {
 			return Utils::iconUnicode($params['shape']);
 		}
 
@@ -765,8 +770,6 @@ class CommonFunctions
 			$params['default_empty'] = '—';
 		}
 		elseif ($type == 'country') {
-			$params['type'] = 'select';
-			$params['options'] = Utils::getCountryList();
 			$params['default'] = Config::getInstance()->get('country');
 		}
 		elseif ($type == 'checkbox') {

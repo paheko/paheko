@@ -52,29 +52,6 @@ class Upgrade
 		$db = DB::getInstance();
 		$v = $db->version();
 
-		// Rename namespace in config file, before starting any upgrade
-		if (version_compare($v, '1.3.0', '<')) {
-			$config_path = CONFIG_FILE;
-
-			if (file_exists($config_path) && is_writable($config_path)) {
-				$contents = file_get_contents($config_path);
-
-				$new = strtr($contents, [
-					'namespace Garradin' => 'namespace Paheko',
-					' Garradin\\' => ' Paheko\\',
-					'\'Garradin\\' => '\'Paheko\\',
-					'"Garradin\\' => '"Paheko\\',
-					'\\Garradin\\' => '\\Paheko\\',
-				]);
-
-				if ($new !== $contents) {
-					file_put_contents($config_path, $new);
-					Install::showProgressSpinner('!upgrade.php?a=' . time(), 'Suite de la mise à jour…');
-					exit;
-				}
-			}
-		}
-
 		Plugins::toggleSignals(false);
 
 		Static_Cache::store('upgrade', 'Updating');
@@ -91,126 +68,6 @@ class Upgrade
 		@ini_set('max_execution_time', 600);
 
 		try {
-			if (version_compare($v, '1.1.21', '<')) {
-				$db->beginSchemaUpdate();
-				// Add id_analytical column to services_fees
-				$db->import(ROOT . '/include/data/1.1.21_migration.sql');
-				$db->commitSchemaUpdate();
-			}
-
-			if (version_compare($v, '1.1.22', '<')) {
-				$db->beginSchemaUpdate();
-				// Create acc_accounts_balances view
-				$db->import(ROOT . '/include/data/1.1.0_schema.sql');
-				$db->commitSchemaUpdate();
-			}
-
-			if (version_compare($v, '1.1.23', '<')) {
-				$db->begin();
-				// Create acc_accounts_projects_balances view
-				$db->import(ROOT . '/include/data/1.1.0_schema.sql');
-				$db->commit();
-			}
-
-			if (version_compare($v, '1.1.24', '<')) {
-				$db->begin();
-
-				// Delete acc_accounts_projects_ebalances view
-				$db->exec('DROP VIEW IF EXISTS acc_accounts_projects_balances;');
-
-				$db->commit();
-			}
-
-			if (version_compare($v, '1.1.25', '<')) {
-				$db->begin();
-
-				// Just add email tables
-				$db->import(ROOT . '/include/data/1.1.0_schema.sql');
-
-				// Rename signals
-				$db->import(ROOT . '/include/data/1.1.25_migration.sql');
-
-				$db->commit();
-			}
-
-			if (version_compare($v, '1.1.27', '<')) {
-				// Just add api_credentials tables
-				$db->import(ROOT . '/include/data/1.1.0_schema.sql');
-			}
-
-			if (version_compare($v, '1.1.28', '<')) {
-				$db->createFunction('html_decode', 'htmlspecialchars_decode');
-				$db->exec('UPDATE files_search SET content = html_decode(content) WHERE content IS NOT NULL;');
-			}
-
-			if (version_compare($v, '1.1.29', '<')) {
-				$db->import(ROOT . '/include/data/1.1.29_migration.sql');
-			}
-
-			if (version_compare($v, '1.1.30', '<')) {
-				require ROOT . '/include/migrations/1.1/30.php';
-			}
-
-			if (version_compare($v, '1.1.31', '<')) {
-				$db->import(ROOT . '/include/migrations/1.1/31.sql');
-			}
-
-			if (version_compare($v, '1.2.0', '<')) {
-				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/migrations/1.2/1.2.0.sql');
-				Charts::updateInstalled('fr_pca_2018');
-				Charts::updateInstalled('fr_pca_1999');
-				Charts::updateInstalled('fr_pcc_2020');
-				Charts::updateInstalled('fr_pcg_2014');
-				Charts::updateInstalled('be_pcmn_2019');
-				$db->commitSchemaUpdate();
-			}
-
-			if (version_compare($v, '1.2.1', '<')) {
-				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/migrations/1.2/1.2.1.sql');
-				Charts::resetRules(['FR', 'CH', 'BE']);
-				$db->commitSchemaUpdate();
-			}
-
-			if (version_compare($v, '1.2.2', '<')) {
-				require ROOT . '/include/migrations/1.2/1.2.2.php';
-			}
-
-			if (version_compare($v, '1.3.0-rc1', '<')) {
-				require ROOT . '/include/migrations/1.3/1.3.0.php';
-			}
-
-			if (version_compare($v, '1.3.0-alpha1', '>=') && version_compare($v, '1.3.0-rc2', '<')) {
-				require ROOT . '/include/migrations/1.3/1.3.0-rc2.php';
-			}
-
-			if (version_compare($v, '1.3.0-alpha1', '>=') && version_compare($v, '1.3.0-rc5', '<')) {
-				require ROOT . '/include/migrations/1.3/1.3.0-rc5.php';
-			}
-
-			if (version_compare($v, '1.3.0-rc7', '<')) {
-				require ROOT . '/include/migrations/1.3/1.3.0-rc7.php';
-			}
-
-			if (version_compare($v, '1.3.0-rc12', '<')) {
-				$db->import(ROOT . '/include/migrations/1.3/1.3.0-rc12.sql');
-			}
-
-			if (version_compare($v, '1.3.0-alpha1', '>=') && version_compare($v, '1.3.0-rc13', '<')) {
-				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/migrations/1.3/1.3.0-rc13.sql');
-				$db->commitSchemaUpdate();
-			}
-
-			if (version_compare($v, '1.3.0-alpha1', '>=') && version_compare($v, '1.3.0-rc14', '<')) {
-				require ROOT . '/include/migrations/1.3/1.3.0-rc14.php';
-			}
-
-			if (version_compare($v, '1.3.0-rc15', '<')) {
-				$db->import(ROOT . '/include/migrations/1.3/1.3.0-rc15.sql');
-			}
-
 			if (version_compare($v, '1.3.2', '<')) {
 				$db->import(ROOT . '/include/migrations/1.3/1.3.2.sql');
 			}
@@ -254,8 +111,12 @@ class Upgrade
 			}
 
 			if (version_compare($v, '1.3.11', '<')) {
+				require ROOT . '/include/migrations/1.3/1.3.11.php';
+			}
+
+			if (version_compare($v, '1.3.12', '<')) {
 				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/migrations/1.3/1.3.11.sql');
+				$db->import(ROOT . '/include/migrations/1.3/1.3.12.sql');
 				$db->commitSchemaUpdate();
 			}
 

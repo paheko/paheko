@@ -39,12 +39,12 @@ interface StorageInterface
 	/**
 	 * Stores a file in this backend from a local path
 	 */
-	static public function storePath(File $file, string $source_path): bool;
+	static public function storePath(File $file, string $path): bool;
 
 	/**
 	 * Stores a file from a content binary string
 	 */
-	static public function storeContent(File $file, string $source_content): bool;
+	static public function storeContent(File $file, string $content): bool;
 
 	/**
 	 * Stores a file from a file pointer

@@ -627,6 +627,18 @@
       "css": "mic",
       "code": 127908,
       "src": "fontawesome"
+    },
+    {
+      "uid": "b622423405bcc984de6553e2f23c9fb6",
+      "css": "barcode",
+      "code": 9474,
+      "src": "elusive"
+    },
+    {
+      "uid": "dc3f1d5b1d006f7f7b3b6295eccab9da",
+      "css": "camera",
+      "code": 128247,
+      "src": "fontawesome"
     }
   ]
 }

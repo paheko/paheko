@@ -240,7 +240,7 @@ Attention : la syntaxe de cette section est différente des autres sections Brin
 ```
 Liste des membres inscrits à la lettre d'informations :
 {{#select nom, prenom FROM users WHERE lettre_infos = 1;}}
-    - {{prenom}} {{$nom}}<br />
+    - {{$prenom}} {{$nom}}<br />
 {{else}}
     Aucun membre n'est inscrit à la lettre d'information.
 {{/select}}

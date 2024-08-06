@@ -121,7 +121,7 @@ nav.tabs aside form {
     text-align: left;
 }
 
-.menu-btn:hover b, .menu-btn:active b, .menu-btn.active b,  {
+.menu-btn:hover b, .menu-btn:active b, .menu-btn.active b {
     background-color: rgba(var(--gSecondColor), .7);
 }
 

@@ -118,6 +118,7 @@ class CommonModifiers
 		'lcfirst',
 		'abs',
 		'format_phone_number',
+		'get_country_name' => [Utils::class, 'getCountryName'],
 	];
 
 	static public function protect_contact(?string $contact, ?string $type = null): string

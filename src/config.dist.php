@@ -863,6 +863,22 @@ namespace Paheko;
 //const PDF_USAGE_LOG = null;
 
 /**
+ * FACTURX_COMMAND
+ * Outil permettant de créer un fichier PDF conforme au format Factur-X
+ * (factures électroniques)
+ *
+ * Seul Ghostscript est géré pour le moment.
+ *
+ * Pour activer la création de factures au format Factur-X, inscrire ici
+ * la chaîne 'gs'. Ghostscript devra être installé sur le serveur
+ * (apt install ghostscript).
+ *
+ * Défault : NULL
+ * @var null|string
+ */
+//const FACTURX_COMMAND = 'gs';
+
+/**
  * CALC_CONVERT_COMMAND
  * Outil de conversion de formats de tableur vers un format propriétaire
  *

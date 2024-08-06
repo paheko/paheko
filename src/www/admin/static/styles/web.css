@@ -137,7 +137,7 @@ fieldset.content {
     background: var(--gLightBackgroundColor);
 }
 
-web-edit dd.help {
+.web-edit dd.help {
     font-size: .9em;
 }
 

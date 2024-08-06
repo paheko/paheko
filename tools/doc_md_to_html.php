@@ -64,7 +64,7 @@ foreach (glob(__DIR__ . '/../doc/admin/*.md') as $file) {
 			padding: 0;
 		}
 		body {
-			font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
+			font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
 			padding: .8em;
 			background: #eee;
 		}
