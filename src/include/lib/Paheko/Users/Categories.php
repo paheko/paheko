@@ -72,8 +72,6 @@ class Categories
 			];
 		}
 
-		$format = '%s (%d membres)';
-
 		return $categories + $db->getGrouped(sprintf(
 			'SELECT id, name AS label, (SELECT COUNT(*) FROM %s WHERE %1$s.id_category = %s.id) AS count
 			FROM %2$s

@@ -77,7 +77,7 @@ class CSV
 
 		$cmd = sprintf($cmd, Utils::escapeshellarg($from), Utils::escapeshellarg($to));
 		$cmd .= ' 2>&1';
-		$return = Utils::quick_exec($cmd, 10);
+		Utils::quick_exec($cmd, 10);
 
 		if (!file_exists($to)) {
 			throw new UserException('Impossible de convertir le fichier. Vérifier que le fichier est un format supporté.');
@@ -274,7 +274,7 @@ class CSV
 			foreach ($iterator as $row) {
 				$row = self::rowToArray($row, $row_map_callback);
 
-				foreach ($row as $key => &$v) {
+				foreach ($row as &$v) {
 					if (is_object($v) && $v instanceof \DateTimeInterface) {
 						if ($v->format('His') == '000000') {
 							$v = $v->format('d/m/Y');
@@ -441,7 +441,7 @@ class CSV
 				$columns_is_list = is_int(key($columns));
 
 				// Check for columns
-				foreach ($header as $key => $label) {
+				foreach ($header as $label) {
 					// try to find with string key
 					if (!$columns_is_list && array_key_exists($label, $columns)) {
 						$columns_map[] = $label;

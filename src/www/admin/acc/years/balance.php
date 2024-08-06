@@ -114,7 +114,7 @@ if ($previous_year) {
 		'is_debt' => $result < 0,
 	];
 
-	foreach ($lines as $k => &$line) {
+	foreach ($lines as &$line) {
 		$line->credit = !$line->is_debt ? abs($line->balance) : 0;
 		$line->debit = $line->is_debt ? abs($line->balance) : 0;
 

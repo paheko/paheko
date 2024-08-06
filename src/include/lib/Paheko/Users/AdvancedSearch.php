@@ -247,7 +247,6 @@ class AdvancedSearch extends A_S
 	public function simple(string $query, array $options = []): \stdClass
 	{
 		$operator = 'LIKE %?%';
-		$db = DB::getInstance();
 
 		if (is_numeric(trim($query)))
 		{

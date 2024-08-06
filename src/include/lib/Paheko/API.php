@@ -82,11 +82,6 @@ class API
 		}
 	}
 
-	public function setAccessLevel(int $level): void
-	{
-		$this->access = $level;
-	}
-
 	public function setFilePointer($pointer): void
 	{
 		if (!is_resource($pointer)) {
@@ -277,8 +272,6 @@ class API
 			return $user->exportAPI();
 		}
 		elseif ($fn === 'import') {
-			$fp = null;
-
 			if ($this->method === 'PUT') {
 				$params = $this->params;
 			}
@@ -679,8 +672,6 @@ class API
 
 		// CSV import
 		if ($fn === 'subscriptions' && $fn2 === 'import') {
-			$fp = null;
-
 			if ($this->method === 'PUT') {
 				$params = $this->params;
 			}
@@ -743,9 +734,6 @@ class API
 
 	public function errors(string $uri)
 	{
-		$fn = strtok($uri, '/');
-		strtok('');
-
 		if (!ini_get('error_log')) {
 			throw new APIException('The error log is disabled', 404);
 		}

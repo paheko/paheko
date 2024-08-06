@@ -251,11 +251,10 @@ class CommonModifiers
 
 	static public function relative_date($ts, bool $with_hour = false): string
 	{
-		$day = null;
-
 		if (null === $ts) {
 			return '';
-		}
+		}		$types = array_flip(Account::TYPES_NAMES);
+
 
 		$date = Utils::get_datetime($ts);
 

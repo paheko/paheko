@@ -8,7 +8,6 @@ use Paheko\Entities\API_Credentials AS API_Entity;
 require_once __DIR__ . '/../_inc.php';
 
 $csrf_key = 'api_edit';
-$secret = null;
 
 $form->runIf('add', function () {
 	API_Credentials::create();

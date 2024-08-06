@@ -238,7 +238,6 @@ class Backup
 		$tmp_file = null;
 
 		if (null === $file) {
-			$file = DB_FILE;
 			$name = sprintf('%s - Sauvegarde données - %s.sqlite', $config->get('org_name'), date('Y-m-d'));
 
 			$tmp_file = tempnam(sys_get_temp_dir(), 'gdin');

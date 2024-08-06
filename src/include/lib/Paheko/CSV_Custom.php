@@ -352,7 +352,7 @@ class CSV_Custom
 
 		$out = [];
 
-		foreach ($this->translation as $i => $name) {
+		foreach ($this->translation as $name) {
 			$out[$name] = $this->columns[$name];
 		}
 
