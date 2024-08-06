@@ -283,17 +283,6 @@ class DynamicList implements \Countable
 	public function export(string $name, string $format = 'csv')
 	{
 		$this->setPageSize(null);
-		$columns = [];
-
-		foreach ($this->columns as $key => $column) {
-			if (empty($column['label'])) {
-				$columns[] = $key;
-				continue;
-			}
-
-			$columns[] = $column['label'];
-		}
-
 		CSV::export($format, $name, $this->iterate(false), $this->getExportHeaderColumns(), $this->export_callback);
 	}
 

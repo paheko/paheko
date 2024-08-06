@@ -100,7 +100,6 @@ abstract class AdvancedSearch
 		$columns = $this->columns();
 
 		$select_columns = [];
-		$query_columns = [];
 		$query_groups = '';
 		$invalid = 0;
 
@@ -145,7 +144,6 @@ abstract class AdvancedSearch
 					continue;
 				}
 
-				$query_columns[] = $condition['column'];
 				$column = $columns[$condition['column']];
 
 				if (isset($column['where'])) {
