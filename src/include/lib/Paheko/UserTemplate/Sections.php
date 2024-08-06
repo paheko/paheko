@@ -244,7 +244,7 @@ class Sections
 
 		$tpl->_pop();
 
-		return sprintf('<?php $this->assign(array_pop($capture_assign), ob_get_clean()); ?>');
+		return '<?php $this->assign(array_pop($capture_assign), ob_get_clean()); ?>';
 	}
 
 	/**
@@ -961,7 +961,7 @@ class Sections
 				throw new Brindille_Exception('Le paramètre "search" n\'est pas un tableau');
 			}
 
-			$params['tables'] .= sprintf(' INNER JOIN users_search AS us ON us.id = u.id');
+			$params['tables'] .= ' INNER JOIN users_search AS us ON us.id = u.id';
 			$i = 0;
 
 			foreach ($params['search'] as $field => $value) {
@@ -1119,7 +1119,7 @@ class Sections
 
 		$id_field = DynamicFields::getNameFieldsSQL('u');
 
-		$params['select'] = sprintf('l.*, a.code AS account_code, a.label AS account_label');
+		$params['select'] = 'l.*, a.code AS account_code, a.label AS account_label';
 		$params['tables'] = 'acc_transactions_lines AS l
 			INNER JOIN acc_accounts AS a ON l.id_account = a.id';
 

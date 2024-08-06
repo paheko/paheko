@@ -277,7 +277,7 @@ class Users
 		}
 
 		if (!$id_category) {
-			$conditions = sprintf('u.id_category IN (SELECT id FROM users_categories WHERE hidden = 0)');
+			$conditions = 'u.id_category IN (SELECT id FROM users_categories WHERE hidden = 0)';
 		}
 		elseif ($id_category > 0) {
 			$conditions = sprintf('u.id_category = %d', $id_category);
