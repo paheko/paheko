@@ -1368,7 +1368,7 @@ class File extends Entity
 
 	static public function validatePath(string $path): array
 	{
-		if (false != strpos($path, '..')) {
+		if (false !== strpos($path, '..')) {
 			throw new ValidationException('Chemin invalide: ' . $path);
 		}
 
