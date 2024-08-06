@@ -79,8 +79,10 @@ class Utils
 		'link'            => '🔗',
 		'chat'            => '💬',
 		'smile'           => '☺',
-		'camera'          => '📹',
+		'camera'          => '📷',
+		'videocam'        => '📹',
 		'microphone'      => '🎤',
+		'barcode'         => '│',
 	];
 
 	const FRENCH_DATE_NAMES = [
@@ -688,6 +690,41 @@ class Utils
 	static public function normalizePhoneNumber($n)
 	{
 		return preg_replace('![^\d\+\(\)p#,;-]!', '', trim($n));
+	}
+
+	static public function normalizeSIRET(string $n): string
+	{
+		$n = trim($n);
+		$n = str_replace(' ', '', $n);
+		return $n;
+	}
+
+	static public function checkSIRET(string $n): bool
+	{
+		$n = self::normalizeSIRET($n);
+
+		if (strlen($n) !== 14) {
+			return false;
+		}
+
+		if (!ctype_digit($n)) {
+			return false;
+		}
+
+		$sum = 0;
+
+		for ($i = 0; $i < 14; ++$i) {
+			if ($i % 2 === 0) {
+				$tmp = ((int) $n[$i]) * 2;
+				$tmp = $tmp > 9 ? $tmp - 9 : $tmp;
+			} else {
+				$tmp = $n[$i];
+			}
+
+			$sum += $tmp;
+		}
+
+		return !($sum % 10 !== 0);
 	}
 
 	static public function write_ini_string($in)
@@ -1452,7 +1489,7 @@ class Utils
 		$str = self::appendCookieToURLs($str);
 		$str = preg_replace('!(<html.*?)class="!s', '$1class="pdf ', $str);
 
-		if (PDF_COMMAND == 'auto') {
+		if (PDF_COMMAND === 'auto') {
 			// Try to see if there's a plugin
 			$in = ['string' => $str];
 
@@ -1506,7 +1543,7 @@ class Utils
 		Utils::safe_mkdir(CACHE_ROOT, null, true);
 		file_put_contents($source, $str);
 
-		if ($cmd == 'auto') {
+		if ($cmd === 'auto') {
 			// Try to see if there's a plugin
 			$in = ['source' => $source, 'target' => $target];
 
