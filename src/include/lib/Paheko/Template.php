@@ -191,7 +191,6 @@ class Template extends Smartyer
 
 		$this->register_modifier('strlen', fn($a) => strlen($a ?? ''));
 		$this->register_modifier('dump', ['KD2\ErrorManager', 'dump']);
-		$this->register_modifier('get_country_name', ['Paheko\Utils', 'getCountryName']);
 		$this->register_modifier('abs', function($a) { return abs($a ?? 0); });
 		$this->register_modifier('percent_of', function($a, $b) { return !$b ? $b : round($a / $b * 100); });
 
