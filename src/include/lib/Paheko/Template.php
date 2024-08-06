@@ -140,6 +140,8 @@ class Template extends Smartyer
 			{
 				return 'continue;';
 			}
+
+			return null;
 		});
 
 		$this->register_compile_function('use', function (Smartyer $s, $pos, $block, $name, $raw_args) {
@@ -147,6 +149,8 @@ class Template extends Smartyer
 			{
 				return sprintf('use %s;', $raw_args);
 			}
+
+			return null;
 		});
 
 		$this->register_function('form_errors', [$this, 'formErrors']);

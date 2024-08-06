@@ -384,7 +384,7 @@ class Functions
 		$db->delete($table, $where, $args);
 	}
 
-	static public function captcha(array $params, UserTemplate $tpl, int $line)
+	static public function captcha(array $params, UserTemplate $tpl, int $line): string
 	{
 		$secret = md5(SECRET_KEY . Utils::getSelfURL(false));
 
@@ -422,6 +422,8 @@ class Functions
 				throw new UserException($error);
 			}
 		}
+
+		return '';
 	}
 
 	static public function mail(array $params, UserTemplate $ut, int $line)
