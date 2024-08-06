@@ -373,6 +373,19 @@
 	};
 
 	g.closeDialog = function () {
+		for (var i in g.dialog_events) {
+			if (!g.dialog_events.hasOwnProperty(i)) {
+				continue;
+			}
+
+			var evt = g.dialog_events[i];
+			if (evt[0] !== 'close') {
+				continue;
+			}
+
+			evt[1]();
+		}
+
 		g.resetDialogEvents();
 
 		if (null === g.dialog) {
@@ -738,7 +751,9 @@
 	};
 
 	g.addDialogEvent = function (event, callback) {
-		window.addEventListener(event, callback, true);
+		if (event !== 'close') {
+			window.addEventListener(event, callback, true);
+		}
 		g.dialog_events.push([event, callback]);
 	};
 
@@ -746,6 +761,10 @@
 		var e;
 
 		while (e = g.dialog_events.pop()) {
+			if (e[0] === 'close') {
+				continue;
+			}
+
 			window.removeEventListener(e[0], e[1], true);
 		}
 	};
