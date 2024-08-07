@@ -2,6 +2,8 @@
 
 namespace Paheko\Accounting;
 
+use Paheko\Entity;
+use Paheko\Plugins;
 use Paheko\Utils;
 use Paheko\Static_Cache;
 use KD2\DB\Date;
@@ -149,8 +151,6 @@ class FacturX extends Entity
 		Static_Cache::store($id, $xml);
 		$tmp_xml_file = Static_Cache::getPath($id);
 		$tmp_pdf_file = Utils::filePDF($this->html);
-
-		$paths = self::ROOT . ':' . STATIC_CACHE_ROOT;
 
 		$cmd = sprintf('gs --permit-file-read=%s'
 			. ' -sDEVICE=pdfwrite'
