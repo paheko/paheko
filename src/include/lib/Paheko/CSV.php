@@ -396,15 +396,6 @@ class CSV
 		}
 	}
 
-	static public function importUpload(array $file, array $expected_columns): \Generator
-	{
-		if (empty($file['size']) || empty($file['tmp_name'])) {
-			throw new UserException('Fichier invalide');
-		}
-
-		return self::import($file['tmp_name'], $expected_columns);
-	}
-
 	static public function import(string $file, ?array $columns = null, array $required_columns = []): \Generator
 	{
 		$delete_after = is_uploaded_file($file);
