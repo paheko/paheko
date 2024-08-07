@@ -164,7 +164,7 @@ class Module extends Entity
 	 */
 	public function updateFromINI(bool $use_local = true): bool
 	{
-		$ini = $this->getINIProperties();
+		$ini = $this->getINIProperties($use_local);
 
 		if (!$ini) {
 			return false;
@@ -694,7 +694,6 @@ class Module extends Entity
 		$uri = $params['uri'] ?? null;
 
 		// Fire signal before display of a web page
-		$plugin_params = ['path' => $path, 'uri' => $uri, 'module' => $this];
 		$module = $this;
 
 		$signal = Plugins::fire('web.request.before', true, compact('path', 'uri', 'module'));
@@ -704,8 +703,6 @@ class Module extends Entity
 		}
 
 		unset($signal);
-
-		$type = null;
 
 		$ut = $this->template($path);
 		$ut->assignArray($params);
@@ -805,7 +802,7 @@ class Module extends Entity
 		}
 	}
 
-	public function export(Session $session): void
+	public function export(): void
 	{
 		$download_name = 'module_' . $this->name;
 
