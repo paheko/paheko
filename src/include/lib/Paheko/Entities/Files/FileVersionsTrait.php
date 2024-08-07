@@ -228,7 +228,6 @@ trait FileVersionsTrait
 	public function listVersions(): array
 	{
 		$out = [];
-		$i = 1;
 
 		foreach (Files::list(self::CONTEXT_VERSIONS . '/' . $this->path) as $v) {
 			$out[$v->name] = $this->getVersionMetadata($v);

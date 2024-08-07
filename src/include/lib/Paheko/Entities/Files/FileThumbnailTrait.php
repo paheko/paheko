@@ -356,7 +356,6 @@ trait FileThumbnailTrait
 					throw new \LogicException('No command found');
 				}
 
-				$output = '';
 				$code = null;
 				$output = Utils::quick_exec($cmd, 5, $code);
 

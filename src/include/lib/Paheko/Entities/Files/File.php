@@ -332,7 +332,7 @@ class File extends Entity
 		return false;
 	}
 
-	public function moveToTrash(bool $mark_as_trash = true): void
+	public function moveToTrash(): void
 	{
 		if ($this->context() === self::CONTEXT_TRASH) {
 			return;
@@ -490,7 +490,7 @@ class File extends Entity
 	 * @param  string $target New directory path
 	 * @return bool
 	 */
-	public function move(string $target, bool $check_session = true, bool $check_exists = false): bool
+	public function move(string $target, bool $check_session = true): bool
 	{
 		$v = $this->getVersionsDirectory();
 
@@ -638,7 +638,6 @@ class File extends Entity
 
 		Files::assertStorageIsUnlocked();
 
-		$delete_after = false;
 		$path = $source['path'] ?? null;
 		$content = $source['content'] ?? null;
 		$pointer = $source['pointer'] ?? null;
@@ -707,7 +706,7 @@ class File extends Entity
 					unset($i);
 				}
 			}
-			elseif ($type = Blob::getType($blob)) {
+			elseif (Blob::getType($blob)) {
 				// WebP is fine, but we cannot get its size
 			}
 			else {
@@ -1081,7 +1080,7 @@ class File extends Entity
 		$done = false;
 		$file = $this;
 
-		$form->runIf('content', function () use ($file, $done) {
+		$form->runIf('content', function () use ($file, &$done) {
 			$file->setContent($_POST['content'] ?? null);
 			$done = true;
 		}, $csrf_key);
