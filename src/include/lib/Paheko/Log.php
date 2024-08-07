@@ -81,7 +81,6 @@ class Log
 		}
 
 		$ip = Utils::getIP();
-		$session = Session::getInstance();
 		$id_user ??= Session::getUserId();
 
 		DB::getInstance()->insert('logs', [
