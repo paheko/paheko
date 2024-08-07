@@ -304,7 +304,7 @@ class Storage extends AbstractStorage
 		rewind($pointer);
 
 		if ($new) {
-			$target = Files::createFromPointer($uri, $pointer);
+			Files::createFromPointer($uri, $pointer);
 		}
 		else {
 			$target->store(compact('pointer'));

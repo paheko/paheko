@@ -55,7 +55,7 @@ class Server
 
 		$nc->setServer($dav);
 
-		if ($r = $nc->route($uri)) {
+		if ($nc->route($uri)) {
 			// NextCloud route already replied something, stop here
 			return true;
 		}

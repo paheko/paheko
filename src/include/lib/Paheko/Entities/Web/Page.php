@@ -127,7 +127,7 @@ class Page extends Entity
 		$out['parent'] = Utils::dirname($out['path']);
 		$out['url'] = $this->url();
 		$out['html'] = trim($this->content) !== '' ? $this->render() : '';
-		$row['has_attachments'] = $this->hasAttachments();
+		$out['has_attachments'] = $this->hasAttachments();
 		return $out;
 	}
 
@@ -363,8 +363,6 @@ class Page extends Entity
 				$source['uri'] = strtolower($source['uri']);
 			}
 		}
-
-		$uri = $source['uri'] ?? ($this->uri ?? null);
 
 		if (array_key_exists('id_parent', $source) && is_array($source['id_parent'])) {
 			$source['id_parent'] = Form::getSelectorValue($source['id_parent']) ?: null;
