@@ -68,21 +68,6 @@ class Charts
 		}
 	}
 
-	static public function installCountryDefault(string $country_code): Chart
-	{
-		if ($country_code == 'CH') {
-			$chart_code = 'ch_asso';
-		}
-		elseif ($country_code == 'BE') {
-			$chart_code = 'be_pcmn_2019';
-		}
-		else {
-			$chart_code = 'fr_pca_2018';
-		}
-
-		return self::install($chart_code);
-	}
-
 	static public function install(string $chart_code): Chart
 	{
 		if (!array_key_exists($chart_code, self::BUNDLED_CHARTS)) {
