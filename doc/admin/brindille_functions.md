@@ -584,17 +584,6 @@ Note : il est possible de combiner l'usage de la fonction `csv` avec le paramèt
 
 Affiche la signature de l'association (en HTML), ou son logo si aucune signature n'a été choisie.
 
-## facturx
-
-Génère et renvoie une facture électronique au format Factur-X : fichier PDF avec un fichier XML intégré, contenant les informations sur la facture.
-
-| Paramètre | Obligatoire ou optionnel ? | Fonction |
-| :- | :- | :- |
-| `template` | obligatoire | Chemin du squelette HTML qui sera utilisé pour générer la facture en PDF |
-| `invoice` | obligatoire | Données de la facture, pour Factur-X |
-
-Il est possible de passer d'autres paramètres, qui seront transmis au squelette.
-
 # Fonctions relatives aux Modules
 
 ## save
