@@ -158,7 +158,7 @@ class Sections
 		}
 
 		unset($params['on']);
-		$params = $tpl->_exportArguments($params);
+		//$params = $tpl->_exportArguments($params);
 
 		return sprintf('<?php if (!empty(%s)): ', $if)
 			. 'try { '
@@ -432,8 +432,6 @@ class Sections
 
 		unset($params['module']);
 		$params['tables'] = $table;
-
-		$delete_table = null;
 
 		// Cannot use json_each with authorizer before SQLite 3.41.0
 		// @see https://sqlite.org/forum/forumpost/d28110be11
@@ -773,9 +771,6 @@ class Sections
 		$tpl = Template::getInstance();
 
 		if (!empty($params['export'])) {
-			$export_url = Utils::getSelfURI();
-			$export_url .= strstr($export_url, '?') ? '&' : '?';
-
 			$export_params = ['right' => true];
 			//$export_params['table'] = $params['export'] === 'table'; // Table export is currently not working in modules FIXME
 
@@ -814,8 +809,6 @@ class Sections
 
 	static public function balances(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		$db = DB::getInstance();
-
 		$params['where'] ??= '';
 		$params['tables'] = 'acc_accounts_balances';
 
@@ -1014,9 +1007,6 @@ class Sections
 	{
 		$params['where'] ??= '';
 
-		$number_field = DynamicFields::getNumberField();
-		$db = DB::getInstance();
-
 		$params['select'] = 'su.expiry_date, su.date, s.label, su.paid, su.expected_amount,
 			CASE WHEN su.expiry_date >= date() THEN 1 WHEN su.expiry_date IS NOT NULL THEN -1 ELSE NULL END AS status';
 		$params['tables'] = 'services_users su INNER JOIN services s ON s.id = su.id_service';
@@ -1118,8 +1108,6 @@ class Sections
 			$params[':transaction'] = (int) $params['transaction'];
 			unset($params['transaction']);
 		}
-
-		$id_field = DynamicFields::getNameFieldsSQL('u');
 
 		$params['select'] = 'l.*, a.code AS account_code, a.label AS account_label';
 		$params['tables'] = 'acc_transactions_lines AS l
@@ -1384,8 +1372,6 @@ class Sections
 
 	static public function attachments(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		$id = null;
-
 		if (!empty($params['id_page'])) {
 			$id = (int)$params['id_page'];
 		}

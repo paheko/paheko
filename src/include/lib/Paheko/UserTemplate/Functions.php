@@ -1133,6 +1133,7 @@ class Functions
 		unset($tpl);
 
 		$f = new FacturX;
+		$f->set('html', $html);
 		$f->import((array)$invoice);
 		$f->stream($download);
 	}

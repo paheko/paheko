@@ -252,7 +252,7 @@ EOS;
 
 	static public function get_leading_number($str): ?string
 	{
-		$match = preg_match(self::LEADING_NUMBER_REGEXP, $str, $match);
+		preg_match(self::LEADING_NUMBER_REGEXP, $str, $match);
 		return $match[1] ?? null;
 	}
 
@@ -430,8 +430,6 @@ EOS;
 		if (!is_array($array)) {
 			throw new Brindille_Exception('Supplied argument is not an array');
 		}
-
-		$callback = null;
 
 		if (!$tpl->checkModifierExists($modifier)) {
 			throw new Brindille_Exception('Unknown modifier: ' . $modifier);
