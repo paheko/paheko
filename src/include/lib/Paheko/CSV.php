@@ -86,11 +86,6 @@ class CSV
 		return $to;
 	}
 
-	static public function supportsXLSExport(): bool
-	{
-		return CALC_CONVERT_COMMAND ? true : false;
-	}
-
 	static public function readAsArray(string $path)
 	{
 		if (!file_exists($path) || !is_readable($path))
