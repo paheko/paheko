@@ -723,8 +723,6 @@ class Session extends \KD2\UserSession
 			}
 
 			// Always match by field name
-			$path_level = $context . '//' . $c;
-
 			$field = DynamicFields::get($c);
 
 			if (!$field) {

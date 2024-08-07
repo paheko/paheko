@@ -441,7 +441,6 @@ class Users
 			$columns = array_map(fn($a) => 'u.' . $a, $columns);
 			$tables .= ' LEFT JOIN users b ON b.id = u.id_parent';
 			$tables .= ' LEFT JOIN users c ON c.id_parent = u.id';
-			$config = Config::getInstance();
 
 			$columns[] = sprintf('CASE WHEN u.id_parent IS NOT NULL THEN %s ELSE NULL END AS parent_name', $df->getNameFieldsSQL('b'));
 			$columns[] = sprintf('CASE WHEN u.is_parent THEN GROUP_CONCAT(%s, \'%s\') ELSE NULL END AS children_names', $df->getNameFieldsSQL('c'), "\n");

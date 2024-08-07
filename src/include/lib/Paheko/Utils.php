@@ -341,7 +341,7 @@ class Utils
 			$base = $base ? $base . '/' : '';
 			return '/' . $base . substr($url, 2);
 		}
-		elseif (substr($url, 0, 1) == '/' && ($pos = strpos($url, WWW_URI)) === 0) {
+		elseif (substr($url, 0, 1) == '/' && strpos($url, WWW_URI) === 0) {
 			return WWW_URL . substr($url, strlen(WWW_URI));
 		}
 		elseif (substr($url, 0, 1) == '/') {
@@ -837,7 +837,6 @@ class Utils
 		}
 		elseif ($size > (1024 * 1024)) {
 			$size = $size / 1024 / 1024;
-			$decimals = $size == (int) $size ? 0 : 2;
 			return ceil($size) . ' Mo';
 		}
 		elseif ($size > 1024) {
@@ -1031,12 +1030,12 @@ class Utils
 	 * Assumes r, g, and b are contained in the set [0, 255] and
 	 * returns h, s, and v in the set [0, 1].
 	 *
-	 * @param   Number  r       The red color value
-	 * @param   Number  g       The green color value
-	 * @param   Number  b       The blue color value
-	 * @return  Array           The HSV representation
+	 * @param   int|string  r       The red color value
+	 * @param   int|null  g       The green color value
+	 * @param   int|null  b       The blue color value
+	 * @return  array           The HSV representation
 	 */
-	static public function rgbToHsv($r, $g = null, $b = null)
+	static public function rgbToHsv($r, $g = null, $b = null): array
 	{
 		if (is_string($r) && is_null($g) && is_null($b))
 		{
@@ -1770,7 +1769,7 @@ class Utils
 
 	static protected function _resolve_ini_types(array $ini)
 	{
-		foreach ($ini as $key => &$value) {
+		foreach ($ini as &$value) {
 			if (is_array($value)) {
 				$value = self::_resolve_ini_types($value);
 			}

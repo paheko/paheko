@@ -212,7 +212,6 @@ class DynamicFields
 
 	public function reload()
 	{
-		$db = DB::getInstance();
 		$i = EM::getInstance(DynamicField::class)->iterate('SELECT * FROM @TABLE ORDER BY sort_order;');
 
 		foreach ($i as $field) {
@@ -227,7 +226,7 @@ class DynamicFields
 		$presets = $this->getDefaultPresets();
 
 		foreach ($presets as $name => $preset) {
-			$field = $this->addFieldFromPreset($name);
+			$this->addFieldFromPreset($name);
 		}
 
 		$this->save();
@@ -362,7 +361,6 @@ class DynamicFields
 	public function getInstallablePresets(): array
 	{
 		$list = array_diff_key($this->getPresets(), $this->_fields);
-		$installed =& $this->_fields;
 
 		// Remove fields that require another one
 		foreach ($list as $name => $field) {
@@ -655,7 +653,7 @@ class DynamicFields
 	public function getSearchColumns(): array
 	{
 		$c = array_keys(array_filter($this->_fields, fn ($f) => $f->hasSearchCache()));
-		return $c = array_combine($c, $c);
+		return array_combine($c, $c);
 	}
 
 	public function getSQLCopy(string $old_table_name, string $new_table_name = User::TABLE, array $fields = null, string $function = null): string
@@ -703,7 +701,6 @@ class DynamicFields
 
 	public function createIndexes(string $table_name = User::TABLE): void
 	{
-		$id_field = null;
 		$db = DB::getInstance();
 
 		if ($id_field = $this->getLoginField()) {
