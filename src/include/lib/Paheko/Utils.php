@@ -603,24 +603,6 @@ class Utils
 		return $str;
 	}
 
-	/**
-	 * Transforme les tags HTML basiques en tags SkrivML
-	 * @param  string $str Texte d'entrée
-	 * @return string      Texte transformé
-	 */
-	static public function HTMLToSkriv($str)
-	{
-		$str = preg_replace('/<h3>(\V*?)<\/h3>/', '=== $1 ===', $str);
-		$str = preg_replace('/<b>(\V*)<\/b>/', '**$1**', $str);
-		$str = preg_replace('/<strong>(\V*?)<\/strong>/', '**$1**', $str);
-		$str = preg_replace('/<i>(\V*?)<\/i>/', '\'\'$1\'\'', $str);
-		$str = preg_replace('/<em>(\V*?)<\/em>/', '\'\'$1\'\'', $str);
-		$str = preg_replace('/<li>(\V*?)<\/li>/', '* $1', $str);
-		$str = preg_replace('/<ul>|<\/ul>/', '', $str);
-		$str = preg_replace('/<a href="([^"]*?)">(\V*?)<\/a>/', '[[$2 | $1]]', $str);
-		return $str;
-	}
-
 	static public function safe_unlink(string $path): bool
 	{
 		if (!@unlink($path))
