@@ -1,4 +1,4 @@
-<?php /** @noinspection ALL */
+<?php
 
 namespace Paheko;
 
@@ -21,7 +21,6 @@ if ($year->closed) {
 
 $csrf_key = 'acc_years_close_' . $year->id();
 
-/** @noinspection PhpUndefinedConstantInspection */
 $form->runIf('close', function () use ($year, $user, $session) {
 	$year->close($user->id);
 	$year->save();
