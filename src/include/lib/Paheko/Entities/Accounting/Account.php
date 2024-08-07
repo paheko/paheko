@@ -778,7 +778,7 @@ class Account extends Entity
 		return $account_balance - $deposit_balance;
 	}
 
-	public function getSum(int $year_id, bool $simple = false): ?\stdClass
+	public function getSum(int $year_id): ?\stdClass
 	{
 		$sum = DB::getInstance()->first('SELECT balance, credit, debit
 			FROM acc_accounts_balances

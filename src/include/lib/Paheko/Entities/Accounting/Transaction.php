@@ -737,7 +737,6 @@ class Transaction extends Entity
 		$this->assert($count >= 2, 'Cette écriture comporte moins de deux lignes.');
 		$this->assert($count == 2 ||  $this->type == self::TYPE_ADVANCED, sprintf('Une écriture de type "%s" ne peut comporter que deux lignes au maximum.', self::TYPES_NAMES[$this->type]));
 
-		$accounts_ids = [];
 		$chart_id = $db->firstColumn('SELECT id_chart FROM acc_years WHERE id = ?;', $this->id_year);
 
 		foreach ($lines as $k => $line) {
@@ -1220,7 +1219,7 @@ class Transaction extends Entity
 		// Find out which lines are credit and debit
 		$current_accounts = [];
 
-		foreach ($this->getLinesWithAccounts() as $i => $l) {
+		foreach ($this->getLinesWithAccounts() as $l) {
 			if ($l->debit) {
 				$current_accounts['debit'] = $l->account_selector;
 			}
@@ -1409,7 +1408,7 @@ class Transaction extends Entity
 		}
 
 		// Append new lines and changed lines
-		foreach ($new_lines as $i => $new_line) {
+		foreach ($new_lines as $new_line) {
 			if (!in_array($new_line, $old_lines)) {
 				$new_line['account'] = Accounts::getCodeAndLabel($new_line['id_account']);
 				$new_line['project'] = Projects::getName($new_line['id_project']);
@@ -1418,7 +1417,7 @@ class Transaction extends Entity
 		}
 
 		// Append removed lines
-		foreach ($old_lines as $i => $old_line) {
+		foreach ($old_lines as $old_line) {
 			if (!in_array($old_line, $new_lines)) {
 				$old_line['account'] = Accounts::getCodeAndLabel($old_line['id_account']);
 				$old_line['project'] = Projects::getName($old_line['id_project']);
@@ -1571,9 +1570,8 @@ class Transaction extends Entity
 
 		if (isset($_GET['u'])) {
 			$linked_users = [];
-			$i = 0;
 
-			foreach ((array) $_GET['u'] as $key => $value) {
+			foreach ((array) $_GET['u'] as $value) {
 				$id = (int) $value;
 				$name = Users::getName($id);
 
