@@ -59,15 +59,6 @@ class Charts
 		return $chart;
 	}
 
-	static public function resetRules(array $country_list): void
-	{
-		foreach (self::list() as $c) {
-			if (in_array($c->country, $country_list)) {
-				$c->resetAccountsRules();
-			}
-		}
-	}
-
 	static public function install(string $chart_code): Chart
 	{
 		if (!array_key_exists($chart_code, self::BUNDLED_CHARTS)) {
