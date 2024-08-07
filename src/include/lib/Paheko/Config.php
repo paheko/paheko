@@ -255,20 +255,6 @@ class Config extends Entity
 		parent::importForm($source);
 	}
 
-	protected function _filterType(string $key, $value)
-	{
-		switch ($this->_types[$key]) {
-			case 'int':
-				return (int) $value;
-			case 'bool':
-				return (bool) $value;
-			case 'string':
-				return (string) $value;
-			default:
-				throw new \InvalidArgumentException(sprintf('"%s" has unknown type "%s"', $key, $this->_types[$key]));
-		}
-	}
-
 	public function selfCheck(): void
 	{
 		$this->assert(trim($this->org_name) != '', 'Le nom de l\'association ne peut rester vide.');
