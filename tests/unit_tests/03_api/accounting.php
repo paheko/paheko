@@ -9,8 +9,10 @@ use KD2\Test;
 
 require __DIR__ . '/_inc.php';
 
+$chart_id = Charts::getOrInstall('fr_pca_2018');
+
 $year = new Year;
-$year->import(['id_chart' => 1, 'label' => 'Test 1', 'start_date' => '2024-01-01', 'end_date' => '2024-12-31']);
+$year->import(['id_chart' => $chart_id, 'label' => 'Test 1', 'start_date' => '2024-01-01', 'end_date' => '2024-12-31']);
 $year->save();
 $id = $year->id();
 
