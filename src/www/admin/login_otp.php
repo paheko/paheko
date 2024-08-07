@@ -27,7 +27,6 @@ if (Log::isOTPLocked()) {
 	throw new UserException(sprintf("Vous avez dépassé la limite de tentatives de connexion.\nMerci d'attendre %d minutes avant de ré-essayer de vous connecter.", Log::LOCKOUT_DELAY/60));
 }
 
-$login = null;
 $csrf_key = 'login_otp';
 
 $args = $app_token ? '?app=' . rawurlencode($app_token) : '';

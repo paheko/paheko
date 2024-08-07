@@ -9,7 +9,6 @@ use Paheko\Users\Session;
 require_once __DIR__ . '/../_inc.php';
 
 $csrf_key = 'ext';
-$session = Session::getInstance();
 
 $form->runIf(f('enable') !== null || f('disable') !== null, function () {
 	$ext = f('enable') ?? f('disable');

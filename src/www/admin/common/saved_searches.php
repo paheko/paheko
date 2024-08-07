@@ -17,8 +17,6 @@ if (empty($search_url)) {
 
 $access_section = CURRENT_SEARCH_TARGET == 'accounting' ? $session::SECTION_ACCOUNTING : $session::SECTION_USERS;
 
-$mode = null;
-
 if (qg('edit') || qg('delete'))
 {
 	$s = Search::get(qg('edit') ?: qg('delete'));
