@@ -517,13 +517,4 @@ class Backup
 
 		return $size;
 	}
-
-	/**
-	 * Return size of all files in database
-	 */
-	static public function getDBFilesSize(): int
-	{
-		$db = DB::getInstance();
-		return (int) $db->firstColumn('SELECT SUM(size) FROM files;');
-	}
 }
