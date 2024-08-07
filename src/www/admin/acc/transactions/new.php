@@ -47,7 +47,6 @@ if (qg('copy')) {
 
 	if (empty($_POST)) {
 		$lines = $transaction->getLinesWithAccounts();
-		$types_details = $transaction->getTypesDetails();
 	}
 
 	$id_project = $old->getProjectId();

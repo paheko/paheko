@@ -22,7 +22,6 @@ $transaction->assertCanBeModified();
 
 $year = Years::get($transaction->id_year);
 $chart = $year->chart();
-$accounts = $chart->accounts();
 
 $csrf_key = 'acc_transaction_edit_' . $transaction->id();
 
@@ -33,8 +32,6 @@ $form->runIf('save', function() use ($transaction) {
 	$transaction->save();
 	$transaction->saveLinks();
 }, $csrf_key, '!acc/transactions/details.php?id=' . $transaction->id());
-
-$types_accounts = [];
 
 $lines = null;
 
