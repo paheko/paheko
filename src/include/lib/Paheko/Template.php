@@ -411,9 +411,12 @@ class Template extends Smartyer
 			$list = [$params['section'] => Category::PERMISSIONS[$params['section']]];
 			$perms = (object) ['perm_' . $params['section'] => $params['level']];
 		}
-		else {
+		elseif (isset($params['permissions'])) {
 			$perms = $params['permissions'];
 			$list = Category::PERMISSIONS;
+		}
+		else {
+			return '';
 		}
 
 		foreach ($list as $name => $config) {
