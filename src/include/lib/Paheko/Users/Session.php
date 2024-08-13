@@ -104,7 +104,7 @@ class Session extends \KD2\UserSession
 		$this->sid_in_url_secret = '&spko=' . sha1(SECRET_KEY);
 	}
 
-	public function isPasswordCompromised($password)
+	public function isPasswordCompromised(string $password): bool
 	{
 		if (!isset($this->http)) {
 			$this->http = new \KD2\HTTP;
