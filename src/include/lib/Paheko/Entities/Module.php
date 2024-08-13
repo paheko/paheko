@@ -85,10 +85,11 @@ class Module extends Entity
 		$this->assert(preg_match(self::VALID_NAME_REGEXP, $this->name), 'Nom unique de module invalide: ' . $this->name);
 		$this->assert(trim($this->label) !== '', 'Le libellé ne peut rester vide');
 		$this->assert(!isset($this->author_url) || preg_match('!^(?:https?://|mailto:)!', $this->author_url), 'L\'adresse du site de l\'auteur est invalide');
-		$this->assert(!isset($this->restrict_section) || in_array($this->restrict_section, Session::SECTIONS, true), 'Restriction de section invalide');
-		$this->assert(!isset($this->restrict_level) || in_array($this->restrict_level, Session::ACCESS_LEVELS, true), 'Restriction de niveau invalide');
 
-		if (isset($this->restrict_section, $this->restrict_level)) {
+		$this->assert(!isset($this->restrict_section) || in_array($this->restrict_section, Session::SECTIONS, true), 'Restriction de section invalide');
+
+		if (isset($this->restrict_section)) {
+			$this->assert(isset($this->restrict_level) && in_array($this->restrict_level, Session::ACCESS_LEVELS, true), 'Restriction de niveau invalide');
 			$this->assert(array_key_exists($this->restrict_level, Category::PERMISSIONS[$this->restrict_section]['options']),
 				'This restricted access level doesn\'t exist for this section');
 		}
@@ -173,7 +174,7 @@ class Module extends Entity
 		$restrict_section = null;
 		$restrict_level = null;
 
-		if (isset($ini->restrict_section, $ini->restrict_level)) {
+		if (isset($ini->restrict_section)) {
 			$restrict_section = $ini->restrict_section;
 			$restrict_level = Session::ACCESS_LEVELS[$ini->restrict_level] ?? null;
 		}
