@@ -374,7 +374,7 @@ class DynamicField extends Entity
 				$this->assert(null !== DynamicFields::get($dependency), sprintf('Le champ "%s" est requis pour le champ "%s"', $dependency, $this->name));
 			}
 		}
-		elseif ($this->exists()) {
+		elseif (!$this->exists()) {
 			$this->assert(!array_key_exists($this->name, $presets), 'Ce nom de champ est déjà utilisé par un champ pré-défini.');
 		}
 	}
