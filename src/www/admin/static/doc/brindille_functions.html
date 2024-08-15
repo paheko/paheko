@@ -9,7 +9,7 @@
 			padding: 0;
 		}
 		body {
-			font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
+			font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
 			padding: .8em;
 			background: #eee;
 		}
@@ -76,7 +76,8 @@
 			</ol></li>
 			<li><a href="#api">api</a></li>
 			<li><a href="#csv">csv</a></li>
-			<li><a href="#signature"> signature</a>
+			<li><a href="#signature"> signature</a></li>
+			<li><a href="#facturx">facturx</a>
 		</ol></li>
 		<li><a href="#fonctions-relatives-aux-modules">Fonctions relatives aux Modules</a>
 		<ol>
@@ -779,6 +780,30 @@ L'écriture n°{{$result.id}} a été créée.</code></pre>
 {{/if}}</code></pre>
 <h2 id="signature"> signature</h2>
 <p>Affiche la signature de l'association (en HTML), ou son logo si aucune signature n'a été choisie.</p>
+<h2 id="facturx">facturx</h2>
+<p>Génère et renvoie une facture électronique au format Factur-X : fichier PDF avec un fichier XML intégré, contenant les informations sur la facture.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Obligatoire ou optionnel ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>template</code></td>
+<td style="text-align: left;">obligatoire</td>
+<td style="text-align: left;">Chemin du squelette HTML qui sera utilisé pour générer la facture en PDF</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>invoice</code></td>
+<td style="text-align: left;">obligatoire</td>
+<td style="text-align: left;">Données de la facture, pour Factur-X</td>
+</tr>
+</tbody>
+</table>
+<p>Il est possible de passer d'autres paramètres, qui seront transmis au squelette.</p>
 <h1 id="fonctions-relatives-aux-modules">Fonctions relatives aux Modules</h1>
 <h2 id="save">save</h2>
 <p>Enregistre des données, sous la forme d'un document, dans la base de données, pour le module courant.</p>
@@ -908,11 +933,11 @@ Le document n°{{$id}} a bien été enregistré.</code></pre>
 </table>
 <p>Si le paramètre <code>assign</code> n'est pas utilisé, le contenu du fichier sera affiché directement.</p>
 <p>Exemple pour lire un fichier JSON :</p>
-<pre><code>{{#read file="baremes.json" assign="baremes"}}
+<pre><code>{{:read file="baremes.json" assign="baremes"}}
 {{:assign baremes=$baremes|json_decode}}
 Barème kilométrique pour une voiture de 3 CV : {{$baremes.voiture.3cv}}</code></pre>
 <p>Exemple pour lire un fichier CSV :</p>
-<pre><code>{{#read file="baremes.csv" assign="baremes"}}
+<pre><code>{{:read file="baremes.csv" assign="baremes"}}
 {{:assign baremes=$baremes|trim|explode:"\n"}}
 
 {{#foreach from=$baremes item="line"}}

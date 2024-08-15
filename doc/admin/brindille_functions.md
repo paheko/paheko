@@ -699,7 +699,7 @@ Si le paramètre `assign` n'est pas utilisé, le contenu du fichier sera affich�
 Exemple pour lire un fichier JSON :
 
 ```
-{{#read file="baremes.json" assign="baremes"}}
+{{:read file="baremes.json" assign="baremes"}}
 {{:assign baremes=$baremes|json_decode}}
 Barème kilométrique pour une voiture de 3 CV : {{$baremes.voiture.3cv}}
 ```
@@ -707,7 +707,7 @@ Barème kilométrique pour une voiture de 3 CV : {{$baremes.voiture.3cv}}
 Exemple pour lire un fichier CSV :
 
 ```
-{{#read file="baremes.csv" assign="baremes"}}
+{{:read file="baremes.csv" assign="baremes"}}
 {{:assign baremes=$baremes|trim|explode:"\n"}}
 
 {{#foreach from=$baremes item="line"}}
