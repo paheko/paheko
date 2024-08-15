@@ -132,11 +132,27 @@ class Export
 			throw new \InvalidArgumentException('Unknown type: ' . $type);
 		}
 
+		$name = sprintf('%s - Export comptable - %s - %s', Config::getInstance()->org_name, self::NAMES[$type], $year->label);
+		$options = [];
+
+		if ($format === self::FEC && $format === 'fec') {
+			$options = [
+				'separator' => "\t",
+				'quote'     => '',
+				'extension' => 'txt',
+			];
+
+			$name = 'ASSOFEC' . $year->end_date->format('Ymd');
+			$format = 'csv';
+		}
+
 		CSV::export(
 			$format,
-			sprintf('%s - Export comptable - %s - %s', Config::getInstance()->org_name, self::NAMES[$type], $year->label),
+			$name,
 			self::iterateExport($year->id(), $type),
-			array_keys(self::COLUMNS[$type])
+			array_keys(self::COLUMNS[$type]),
+			null,
+			$options
 		);
 	}
 
@@ -193,17 +209,22 @@ class Export
 			// |EcritureLet|DateLet|ValidDate|MontantDevise|Idevise
 
 			$sql = 'SELECT
-				printf(\'%02d\', t.type) AS type_id, t.type,
-				t.id, t.date,
-				a.code AS account, a.label AS account_label,
-				NULL AS CompAuxNum, NULL AS CompAuxLib,
-				t.reference,
-				strftime(\'%Y%m%d\', t.date) AS ref_date,
-				t.label,
-				l.debit, l.credit,
+				printf(\'%02d\', t.type) AS type_id, -- JournalCode
+				t.type, --JournalLib
+				t.id, -- EcritureNum
+				date, --EcritureDate
+				a.code AS account, --CompteNum
+				a.label AS account_label, --CompteLib
+				NULL AS CompAuxNum,
+				NULL AS CompAuxLib,
+				COALESCE(t.reference, \'ECRITURE-\' || t.id) AS reference, -- PieceRef
+				strftime(\'%Y%m%d\', t.date) AS PieceDate,
+				t.label, -- EcritureLib
+				l.debit, -- Debit
+				l.credit, -- Credit
 				NULL AS EcritureLet,
 				NULL AS DateLet,
-				NULL AS ValidDate,
+				strftime(\'%Y%m%d\', t.date) AS ValidDate,
 				NULL AS MontantDevise,
 				NULL AS Idevise
 				FROM acc_transactions t
