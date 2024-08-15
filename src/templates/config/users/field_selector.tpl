@@ -47,7 +47,7 @@ rows.forEach((e) => {
 	};
 });
 
-document.querySelector('input').focus();
+document.querySelector('button').focus();
 </script>
 {/literal}
 
