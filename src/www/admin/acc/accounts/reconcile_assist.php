@@ -41,6 +41,10 @@ $start = $end = null;
 if (null !== qg('start') && null !== qg('end')) {
 	$start = \DateTime::createFromFormat('!d/m/Y', qg('start'));
 	$end = \DateTime::createFromFormat('!d/m/Y', qg('end'));
+
+	if (!$start || !$end) {
+		$form->addError('La date donnée est invalide.');
+	}
 }
 else {
 	try {
@@ -50,10 +54,6 @@ else {
 		$form->addError($e->getMessage());
 		$csv->clear();
 	}
-}
-
-if (!$start || !$end) {
-	$form->addError('La date donnée est invalide.');
 }
 
 $journal = null;
