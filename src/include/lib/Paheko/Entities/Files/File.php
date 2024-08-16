@@ -1015,7 +1015,7 @@ class File extends Entity
 		return $this->isImage() ? $this->url() : Utils::getLocalURL('!common/files/preview.php?p=') . rawurlencode($this->path);
 	}
 
-	public function previewHTML(?string $url, ?Session $session = null): ?string
+	public function previewHTML(?string $url = null, ?Session $session = null): ?string
 	{
 		$url ??= $this->url();
 
@@ -1420,7 +1420,7 @@ class File extends Entity
 		elseif (substr($this->name, -3) == '.md') {
 			$format = Render::FORMAT_MARKDOWN;
 		}
-		elseif (substr($this->mime, 0, 5) == 'text/' && $this->mime != 'text/html') {
+		elseif ($this->mime && substr($this->mime, 0, 5) == 'text/' && $this->mime != 'text/html') {
 			$format = 'text';
 		}
 		else {
@@ -1481,6 +1481,18 @@ class File extends Entity
 	public function getReadOnlyPointer()
 	{
 		return Files::callStorage('getReadOnlyPointer', $this);
+	}
+
+	public function iterate(): \Generator
+	{
+		yield $this;
+
+		if (!$this->isDir()) {
+			return;
+		}
+
+		$db = DB::getInstance();
+		yield from EntityManager::getInstance(self::class)->iterate('SELECT * FROM files WHERE parent = ? ORDER BY type DESC, name COLLATE NOCASE ASC;', $this->path);
 	}
 
 	public function iterateRecursive(): \Generator

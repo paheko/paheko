@@ -41,6 +41,7 @@ class Sections
 		'sql',
 		'restrict',
 		'module',
+		'files',
 	];
 
 	const COMPILE_SECTIONS_LIST = [
@@ -1501,6 +1502,48 @@ class Sections
 		$out['public_url'] = $module->public_url();
 
 		yield $out;
+	}
+
+	static public function files(array $params, UserTemplate $ut, int $line): \Generator
+	{
+		if (empty($ut->module)) {
+			throw new Brindille_Exception('Module could not be found');
+		}
+
+		$path = $ut->module->storage_root();
+
+		if (isset($params['path'])) {
+			if (preg_match('!/\.|\.\.|//|\\\\!', $path)) {
+				throw new Brindille_Exception(sprintf('"path" parameter is invalid: "%s"', $params['path']));
+			}
+
+			$path .= '/' . $params['path'];
+		}
+
+		$parent = Files::get($path);
+
+		if (!$parent) {
+			return null;
+		}
+
+		if (!empty($params['recursive'])) {
+			$i = $parent->iterateRecursive();
+		}
+		else {
+			$i = $parent->iterate();
+		}
+
+		foreach ($i as $file) {
+			$extra = [
+				'is_dir'        => $file->isDir(),
+				'url'           => $file->url(),
+				'download_url'  => $file->isDir() ? null : $file->url(true),
+				'thumbnail_url' => $file->thumb_url(),
+				'preview_html'  => $file->previewHTML(),
+			];
+
+			yield array_merge($file->asArray(), $extra);
+		}
 	}
 
 	static public function sql(array $params, UserTemplate $tpl, int $line, ?array $allowed_tables = self::SQL_TABLES): \Generator

@@ -91,7 +91,8 @@
 			<li><a href="#module">module</a></li>
 			<li><a href="#form">form</a></li>
 			<li><a href="#load-sup-sql-sup">load <sup>(sql)</sup></a></li>
-			<li><a href="#list">list</a>
+			<li><a href="#list">list</a></li>
+			<li><a href="#files">files</a>
 </li></ol></li></ol></aside><h1 id="sections-generalistes">Sections généralistes</h1>
 <h2 id="foreach">foreach</h2>
 <p>Permet d'itérer sur un tableau par exemple. Ainsi chaque élément du tableau exécutera une fois le contenu de la section.</p>
@@ -1085,4 +1086,54 @@ Le document n°{{$id}} est celui qui parle de Greta.
     &lt;p class="alert block"&gt;Aucun reçu n'a été trouvé.&lt;/p&gt;
 {{/list}}</code></pre>
 <p>On peut utiliser le nom des clés du document JSON, mais sinon pour faire référence à la valeur d'une colonne spécifique dans la boucle, il faut utiliser son numéro d'ordre (qui commence à <code>1</code>, pas zéro). Ici on veut afficher l'année, donc la seconde colonne, donc <code>$col1</code>.</p>
-<p>Noter aussi l'utilisation du numéro de la colonne de l'année (<code>2</code>) pour le paramètre <code>order</code>, qui avec <code>select</code> doit indiquer le numéro de la colonne à utiliser pour l'ordre.</p></div></body></html>
+<p>Noter aussi l'utilisation du numéro de la colonne de l'année (<code>2</code>) pour le paramètre <code>order</code>, qui avec <code>select</code> doit indiquer le numéro de la colonne à utiliser pour l'ordre.</p>
+<h2 id="files">files</h2>
+<p>Liste les fichiers du module courant, éventuellement limité à un sous-répertoire designé.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Optionnel / obligatoire ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>path</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Désigne le sous-répertoire éventuel pour limiter la liste.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>recursive</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Booléen. Indique si on veut aussi lister les fichiers dans les sous-répertoires. Défaut : <code>false</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Exemple :</p>
+<pre><code>&lt;table&gt;
+{{#files path="facture43" recursive=false}}
+    &lt;tr&gt;
+        &lt;td&gt;{{if $is_dir}}Répertoire{{else}}{{$mime}}{{/if}}&lt;/td&gt;
+        &lt;td&gt;{{$name}}&lt;/td&gt;
+        &lt;td&gt;{{$size|size_in_bytes}}&lt;/td&gt;
+    &lt;/tr&gt;
+{{/files}}
+&lt;/table&gt;</code></pre>
+<p>Données disponibles :</p>
+<ul>
+<li><code>size</code></li>
+<li><code>mime</code></li>
+<li><code>is_dir</code></li>
+<li><code>name</code></li>
+<li><code>path</code></li>
+<li><code>parent</code></li>
+<li><code>type</code></li>
+<li><code>modified</code></li>
+<li><code>image</code></li>
+<li><code>md5</code></li>
+<li><code>url</code></li>
+<li><code>thumbnail_url</code></li>
+<li><code>download_url</code></li>
+<li><code>preview_html</code></li>
+</ul></div></body></html>
