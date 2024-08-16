@@ -15,10 +15,17 @@ if (!$transaction) {
 
 $csrf_key = 'details_' . $transaction->id();
 
-$form->runIf('mark_paid', function () use ($transaction) {
-	$transaction->markPaid();
-	$transaction->save();
-}, $csrf_key, Utils::getSelfURI());
+if ($session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)) {
+	$form->runIf('mark_paid', function () use ($transaction) {
+		$transaction->markPaid();
+		$transaction->save();
+	}, $csrf_key, Utils::getSelfURI());
+
+	$form->runIf('mark_waiting', function () use ($transaction) {
+		$transaction->markWaiting();
+		$transaction->save();
+	}, $csrf_key, Utils::getSelfURI());
+}
 
 $expert = !empty($session->user()->preferences->accounting_expert);
 

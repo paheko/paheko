@@ -77,9 +77,14 @@
 			{if $transaction.type == $transaction::TYPE_DEBT || $transaction.type == $transaction::TYPE_CREDIT}
 				<dt>Statut</dt>
 				<dd>
-					{if $transaction.status & $transaction::STATUS_PAID}
+					{if $transaction->isPaid()}
+						<form method="post" action="">
 						<span class="confirm">{icon shape="check"}</span> Réglée
-					{elseif $transaction.status & $transaction::STATUS_WAITING}
+						{button type="submit" label="Marquer comme en attente de paiement" name="mark_waiting" value="1"}
+						{csrf_field key=$csrf_key}
+					</form>
+
+					{elseif $transaction->isWaiting()}
 						<span class="alert">{icon shape="alert"}</span> En attente de règlement
 					{/if}
 				</dd>
