@@ -397,7 +397,7 @@ class CSV
 		$tmpfile2 = substr($tmpfile1, 0, -3) . 'xlsx';
 
 		try {
-			self::toODS($name, $iterator, $header, $row_map_callback, $tmpfile1);
+			self::toODS($name, $iterator, $header, $row_map_callback, ['output_path' => $tmpfile1]);
 
 			self::convertXLSX($tmpfile1, $tmpfile2);
 
