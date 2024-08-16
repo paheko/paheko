@@ -92,7 +92,7 @@
 				<td>
 					<?php $value = $row[$i]; $name = $header[$i]; ?>
 					{if $id_column !== false}
-						{user_field name=$name value=$value}
+						{user_field name=$name value=$value files_href="!users/details.php?id=%d"|args:$row[$id_column]}
 					{else}
 						{$value}
 					{/if}
