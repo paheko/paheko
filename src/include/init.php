@@ -158,6 +158,10 @@ if (!defined('Paheko\WWW_URL') && $host !== null) {
 }
 
 static $default_config = [
+	// USER_CONFIG_FILE is used in single-user setup (Debian/Windows)
+	// to be able to add user-specific config constants, even though we already
+	// have a config.local.php for OS-specific stuff, this also allows
+	// to remove LOCAL_USER and have a multi-user setup on a single computer
 	'USER_CONFIG_FILE'      => null,
 	'CACHE_ROOT'            => DATA_ROOT . '/cache',
 	'SHARED_CACHE_ROOT'     => DATA_ROOT . '/cache/shared',
