@@ -1,21 +1,6 @@
 <?php
 
-namespace Paheko;
+fwrite(STDERR, "This command is deprecated, please use bin/paheko instead\n"); //FIXME 1.4
 
-use Paheko\Email\Emails;
-
-require_once __DIR__ . '/../include/init.php';
-
-if (PHP_SAPI != 'cli') {
-	echo "This command can only be called from the command-line.\n";
-	exit(1);
-}
-
-$message = file_get_contents('php://stdin');
-
-if (empty($message)) {
-	echo "No STDIN content was provided.\nPlease provide the email message on STDIN.\n";
-	exit(2);
-}
-
-Emails::handleBounce($message);
+$_SERVER['argv'] = ['paheko', 'queue', 'bounce'];
+require __DIR__ . '/../bin/paheko';

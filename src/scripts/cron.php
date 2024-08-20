@@ -1,37 +1,6 @@
 <?php
 
-namespace Paheko;
+fwrite(STDERR, "This command is deprecated, please use bin/paheko instead\n"); //FIXME 1.4
 
-use Paheko\Services\Reminders;
-use Paheko\Files\Files;
-use Paheko\Files\Shares;
-use Paheko\Files\Trash;
-
-if (PHP_SAPI != 'cli' && !defined('\Paheko\ROOT')) {
-	die("Wrong call");
-}
-
-require_once __DIR__ . '/../include/init.php';
-
-// Exécution des tâches automatiques
-
-$config = Config::getInstance();
-
-if ($config->backup_frequency && $config->backup_limit) {
-	Backup::auto();
-}
-
-// Send pending reminders
-Reminders::sendPending();
-
-if (Files::getVersioningPolicy() !== 'none') {
-	Files::pruneOldVersions();
-}
-
-// Make sure we are cleaning the trash
-Trash::clean();
-
-// Remove expired file sharing links
-Shares::prune();
-
-Plugins::fire('cron');
+$_SERVER['argv'] = ['paheko', 'cron'];
+require __DIR__ . '/../bin/paheko';
