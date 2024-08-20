@@ -80,6 +80,7 @@ class Modules
 			try {
 				$f = self::get($name);
 				$f->updateFromINI();
+				$f->selfCheck();
 				$f->save();
 				$f->updateTemplates();
 			}

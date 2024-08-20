@@ -56,7 +56,7 @@ class Markdown extends AbstractRender
 
 	static public function defaultExtensionCallback(bool $block, array $params, ?string $content, string $name, KD2_Markdown $md): string
 	{
-		$args = array_merge($params, compact('block', 'params', 'content'));
+		$args = compact('block', 'params', 'content');
 
 		$out = Modules::snippetsAsString(sprintf(Modules::SNIPPET_MARKDOWN_EXTENSION, $name), $args);
 

@@ -69,7 +69,7 @@ class AdvancedSearch extends A_S
 			'type' => 'boolean',
 			'null' => false,
 			'select' => 'CASE WHEN u.id_parent IS NOT NULL THEN \'Oui\' ELSE \'Non\' END',
-			'where' => 'u.id_parent IS NOT NULL',
+			'where' => 'u.id_parent IS NOT NULL %s',
 		];
 
 		foreach ($fields->all() as $name => $field)

@@ -187,18 +187,26 @@ class CSV
 		}
 	}
 
-	static public function row($row): string
+	static public function row($row, string $separator = ',', string $quote = '"'): string
 	{
 		$row = (array) $row;
 
-		array_walk($row, function (&$field) {
-			$field = strtr((string) $field, ['"' => '""', "\r\n" => "\n"]);
+		array_walk($row, function (&$field) use ($quote, $separator) {
+			$field = str_replace("\r\n", "\n", (string) $field);
+
+			if ($quote === '') {
+				$field = str_replace($separator, '', $field);
+			}
+			else {
+				$field = str_replace($quote, $quote . $quote, $field);
+			}
 		});
 
-		return sprintf("\"%s\"\r\n", implode('","', $row));
+		$join = $quote . $separator . $quote;
+		return $quote . implode($join, $row) . $quote . "\r\n";
 	}
 
-	static public function export(string $format, string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null): void
+	static public function export(string $format, string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, ?array $options = null): void
 	{
 		// Flush any previous output, such as module HTML code etc.
 		@ob_end_clean();
@@ -249,11 +257,15 @@ class CSV
 		return $row;
 	}
 
-	static public function toCSV(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, string $output = null): void
+	static public function toCSV(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, array $options = null): void
 	{
+		$output = $options['output_path'] ?? null;
+		$separator = $options['separator'] ?? ',';
+		$quote = $options['quote'] ?? '"';
+
 		if (null === $output) {
 			header('Content-type: application/csv');
-			header(sprintf('Content-Disposition: attachment; filename="%s.csv"', $name));
+			header(sprintf('Content-Disposition: attachment; filename="%s.%s"', $name, $options['extension'] ?? 'csv'));
 
 			$fp = fopen('php://output', 'w');
 		}
@@ -262,7 +274,7 @@ class CSV
 		}
 
 		if ($header) {
-			fputs($fp, self::row($header));
+			fputs($fp, self::row($header, $separator, $quote));
 		}
 
 		if (!($iterator instanceof \Iterator) || $iterator->valid()) {
@@ -282,19 +294,21 @@ class CSV
 
 				if (!$header)
 				{
-					fputs($fp, self::row(array_keys($row)));
+					fputs($fp, self::row(array_keys($row), $separator, $quote));
 					$header = true;
 				}
 
-				fputs($fp, self::row($row));
+				fputs($fp, self::row($row, $separator, $quote));
 			}
 		}
 
 		fclose($fp);
 	}
 
-	static public function toODS(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, string $output = null): void
+	static public function toODS(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, array $options = null): void
 	{
+		$output = $options['output_path'] ?? null;
+
 		if (null === $output) {
 			header('Content-type: application/vnd.oasis.opendocument.spreadsheet');
 			header(sprintf('Content-Disposition: attachment; filename="%s.ods"', $name));
@@ -324,8 +338,10 @@ class CSV
 		$ods->output($output);
 	}
 
-	static public function toJSON(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, string $output = null): void
+	static public function toJSON(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, array $options = null): void
 	{
+		$output = $options['output_path'] ?? null;
+
 		if (null === $output) {
 			header('Content-type: application/json');
 			header(sprintf('Content-Disposition: attachment; filename="%s.json"', $name));
@@ -376,7 +392,7 @@ class CSV
 		$tmpfile2 = substr($tmpfile1, 0, -3) . 'xlsx';
 
 		try {
-			self::toODS($name, $iterator, $header, $row_map_callback, $tmpfile1);
+			self::toODS($name, $iterator, $header, $row_map_callback, ['output_path' => $tmpfile1]);
 
 			self::convertXLSX($tmpfile1, $tmpfile2);
 

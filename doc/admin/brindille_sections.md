@@ -941,8 +941,6 @@ On peut utiliser le nom des clés du document JSON, mais sinon pour faire réfé
 
 Noter aussi l'utilisation du numéro de la colonne de l'année (`2`) pour le paramètre `order`, qui avec `select` doit indiquer le numéro de la colonne à utiliser pour l'ordre.
 
-<!--
-TODO:
 ## files
 
 Liste les fichiers du module courant, éventuellement limité à un sous-répertoire designé.
@@ -965,4 +963,20 @@ Exemple :
 {{/files}}
 </table>
 ```
--->
+
+Données disponibles :
+
+* `size`
+* `mime`
+* `is_dir`
+* `name`
+* `path`
+* `parent`
+* `type`
+* `modified`
+* `image`
+* `md5`
+* `url`
+* `thumbnail_url`
+* `download_url`
+* `preview_html`

@@ -9,7 +9,7 @@
 			padding: 0;
 		}
 		body {
-			font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
+			font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
 			padding: .8em;
 			background: #eee;
 		}
@@ -136,6 +136,7 @@
 		</ol></li>
 		<li><a href="#autres-filtres">Autres filtres</a>
 		<ol>
+			<li><a href="#get_country_name">get_country_name</a></li>
 			<li><a href="#math">math</a></li>
 			<li><a href="#or">or</a></li>
 			<li><a href="#size_in_bytes">size_in_bytes</a></li>
@@ -670,6 +671,11 @@ Ceci n'est pas un t</code></pre>
     Rien trouvé :-(
 {{/if}}</code></pre>
 <h1 id="autres-filtres">Autres filtres</h1>
+<h2 id="get_country_name">get_country_name</h2>
+<p>Renvoie le nom d'un pays à partir de son code ISO-3166.</p>
+<pre><code>{{:assign code="FR"}}
+{{$code|get_country_name}}</code></pre>
+<p>Donnera : <code>France</code></p>
 <h2 id="math">math</h2>
 <p>Réalise un calcul mathématique. Cette fonction accepte :</p>
 <ul>
