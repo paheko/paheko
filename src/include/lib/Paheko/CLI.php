@@ -75,6 +75,7 @@ class CLI
 					$commands[] = $arg;
 
 					if (count($commands) === $limit) {
+						$i = $i ?: 1;
 						break;
 					}
 
@@ -103,7 +104,7 @@ class CLI
 				}
 			}
 			else {
-				if (!$opt['value']) {
+				if ($value !== false) {
 					$this->fail('Options "%s" does not allow for a value', $name);
 				}
 
@@ -243,6 +244,9 @@ class CLI
 	 *   Deliver messages waiting in the queue.
 	 *   Will exit with status code 2 if there are still messages waiting in the queue.
 	 *   If the queue is empty, the status code will be 0.
+	 *
+	 * paheko queue bounce
+	 *   Read received bounce message from STDIN.
 	 */
 	public function queue(array $args): void
 	{
@@ -258,8 +262,17 @@ class CLI
 			echo $count . PHP_EOL;
 			$this->success();
 		}
+		elseif ($command === 'bounce') {
+			$message = file_get_contents('php://stdin');
+
+			if (empty($message)) {
+				$this->fail('No STDIN content was provided. Please provide the email message on STDIN.');
+			}
+
+			Emails::handleBounce($message);
+			$this->success();
+		}
 		elseif ($command === 'run') {
-			var_dump($command, $args); exit;
 			$o = $this->parseOptions($args, ['--quiet|-q'], 0);
 
 			// Send messages in queue
@@ -279,7 +292,10 @@ class CLI
 				exit(2);
 			}
 
-			exit(0);
+			$this->success();
+		}
+		else {
+			$this->fail('Unknown subcommand: paheko queue %s', $command);
 		}
 	}
 
