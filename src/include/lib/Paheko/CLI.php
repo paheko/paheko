@@ -29,6 +29,7 @@ class CLI
 		'storage',
 		'cron',
 		'queue',
+		'env',
 	];
 
 	public function parseOptions(array &$args, array $options, int $limit = 0)
@@ -376,6 +377,17 @@ class CLI
 	public function config(array $args)
 	{
 		echo json_encode(Config::getInstance()->asArray(), JSON_PRETTY_PRINT) . PHP_EOL;
+		$this->success();
+	}
+
+	/**
+	 * Return local environment configuration.
+	 */
+	public function env(array $args)
+	{
+		foreach (Install::getConstants() as $key => $value) {
+			echo $key . ": " . var_export($value, true) . PHP_EOL;
+		}
 		$this->success();
 	}
 

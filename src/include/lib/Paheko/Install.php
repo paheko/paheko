@@ -25,6 +25,32 @@ use KD2\HTTP;
  */
 class Install
 {
+	static public function getConstants(): array
+	{
+		$constants = [];
+
+		foreach (get_defined_constants(false) as $key => $value) {
+			if (strpos($key, 'Paheko\\') !== 0) {
+				continue;
+			}
+
+			$key = str_replace('Paheko\\', '', $key);
+
+			// Hide potentially secret values
+			if ($key === 'SECRET_KEY') {
+				$value = '***HIDDEN***';
+			}
+			elseif (is_string($value)) {
+				$value = preg_replace('!(https?://)([^@]+@)!', '$1***HIDDEN***@', $value);
+			}
+
+			$constants[$key] = $value;
+		}
+
+		ksort($constants);
+		return $constants;
+	}
+
 	/**
 	 * This sends the current installed version, as well as the PHP and SQLite versions
 	 * for statistics purposes.
