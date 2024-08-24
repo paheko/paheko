@@ -44,8 +44,8 @@ class Graph
 			'En attente' => ['type' => Account::TYPE_OUTSTANDING, 'exclude_position' => [Account::LIABILITY]],
 		],
 		'result' => [
-			'Recettes' => ['position' => Account::REVENUE],
-			'Dépenses' => ['position' => Account::EXPENSE],
+			'Recettes' => ['position' => Account::REVENUE, 'exclude_type' => Account::TYPE_VOLUNTEERING_REVENUE],
+			'Dépenses' => ['position' => Account::EXPENSE, 'exclude_type' => Account::TYPE_VOLUNTEERING_EXPENSE],
 		],
 		'debts' => [
 			'Comptes de tiers' => ['type' => Account::TYPE_THIRD_PARTY],
