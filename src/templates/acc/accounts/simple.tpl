@@ -86,7 +86,7 @@
 					{csrf_field key="projects_action"}
 					<select name="action">
 						<option value="">— Choisir une action à effectuer —</option>
-						{if $has_debt_or_credit}
+						{if $type == Transaction::TYPE_DEBT}
 							<option value="payoff">Régler ces dettes</option>
 						{elseif $type == Transaction::TYPE_CREDIT}
 							<option value="payoff">Régler ces créances</option>
