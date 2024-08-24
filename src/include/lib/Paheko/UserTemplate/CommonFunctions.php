@@ -156,6 +156,12 @@ class CommonFunctions
 			$attributes['maxlength'] = 4;
 			$attributes['pattern'] = '\d';
 		}
+		elseif ($type == 'month') {
+			$attributes['size'] = 7;
+			$attributes['maxlength'] = 7;
+			$attributes['pattern'] = '\d{4}-\d{2}';
+			$attributes['placeholder'] = 'AAAA-MM';
+		}
 		elseif ($type == 'weight') {
 			$type = 'number';
 			$attributes['placeholder'] = '1,312';
@@ -910,6 +916,10 @@ class CommonFunctions
 		}
 		elseif ($field->type === 'number' || $field->type === 'decimal') {
 			$out = str_replace('.', ',', htmlspecialchars($v));
+		}
+		elseif ($field->type === 'month') {
+			$date = \DateTime::createFromFormat('!Y-m', $v);
+			$out = Utils::strftime_fr($date, '%B %Y');
 		}
 		else {
 			$v = $field->getStringValue($v);

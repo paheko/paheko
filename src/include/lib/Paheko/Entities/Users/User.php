@@ -137,20 +137,11 @@ class User extends Entity
 		foreach ($df->all() as $field) {
 			$value = $this->{$field->name};
 
-			if (null !== $value) {
-				if ($field->type === 'email') {
-					$this->assert($value === null || SMTP::checkEmailIsValid($value, false), sprintf('"%s" : l\'adresse e-mail "%s" n\'est pas valide.', $field->label, $value));
-				}
-				elseif ($field->type === 'checkbox') {
-					$this->assert($value === false || $value === true, sprintf('"%s" : la valeur de ce champ n\'est pas valide.', $field->label));
-				}
-			}
-
 			if ($is_admin && empty($value) && $field->isLogin() && !empty($this->getModifiedProperty($field->name))) {
 				throw new ValidationException(sprintf('Le champ "%s" est vide. Cette action aurait pour effet d\'empêcher cet administrateur de se connecter. Si vous souhaitez empêcher ce membre de se connecter, modifiez sa catégorie.', $field->label));
 			}
 
-			if (!$field->required || $field->system & $field::PASSWORD) {
+			if ($field->system & $field::PASSWORD) {
 				continue;
 			}
 
@@ -159,21 +150,36 @@ class User extends Entity
 				continue;
 			}
 
-			$this->assert(null !== $value, sprintf('"%s" : ce champ est requis', $field->label));
+			if ($field->required) {
+				$this->assert(null !== $value, sprintf('"%s" : ce champ est requis', $field->label));
 
-			if (is_bool($value) && $field->required) {
-				$this->assert($value === true, sprintf('"%s" : ce champ doit être coché', $field->label));
-			}
-			elseif (!is_array($value) && !is_object($value) && !is_bool($value)) {
-				$this->assert('' !== trim((string)$value), sprintf('"%s" : ce champ ne peut être vide', $field->label));
+				if (is_bool($value)) {
+					$this->assert($value === true, sprintf('"%s" : ce champ doit être coché', $field->label));
+				}
+				elseif (!is_array($value) && !is_object($value) && !is_bool($value)) {
+					$this->assert('' !== trim((string)$value), sprintf('"%s" : ce champ ne peut être vide', $field->label));
+				}
 			}
 
-			if ($field->type === 'select') {
+			if (!isset($value)) {
+				continue;
+			}
+
+			if ($field->type === 'email') {
+				$this->assert($value === null || SMTP::checkEmailIsValid($value, false), sprintf('"%s" : l\'adresse e-mail "%s" n\'est pas valide.', $field->label, $value));
+			}
+			elseif ($field->type === 'checkbox') {
+				$this->assert($value === false || $value === true, sprintf('"%s" : la valeur de ce champ n\'est pas valide.', $field->label));
+			}
+			elseif ($field->type === 'select') {
 				$this->assert(in_array($value, $field->options), sprintf('"%s" : la valeur "%s" ne fait pas partie des options possibles', $field->label, $value));
 			}
 			elseif ($field->type === 'country') {
 				$this->assert(strlen($value) === 2, sprintf('"%s" : un champ pays ne peut contenir que deux lettres', $field->label));
 				$this->assert(Utils::getCountryName($value) !== null, sprintf('"%s" : pays inconnu : "%s"', $field->label, $value));
+			}
+			elseif ($field->type === 'month') {
+				$this->assert(preg_match('/^\d{4}-\d{2}$/', $value), sprintf('"%s" : le format attendu est de la forme AAAA-MM', $field->label));
 			}
 		}
 
