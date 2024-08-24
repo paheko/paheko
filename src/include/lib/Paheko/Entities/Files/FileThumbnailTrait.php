@@ -10,6 +10,7 @@ use KD2\ErrorManager;
 use Paheko\Static_Cache;
 use Paheko\UserException;
 use Paheko\Utils;
+use Paheko\Plugins;
 use Paheko\Web\Cache as Web_Cache;
 
 use const Paheko\{DOCUMENT_THUMBNAIL_COMMANDS, WOPI_DISCOVERY_URL, CACHE_ROOT, WWW_URL, BASE_URL, ADMIN_URL};
@@ -149,6 +150,13 @@ trait FileThumbnailTrait
 
 		$ext = $this->extension();
 
+		if (in_array('plugin', DOCUMENT_THUMBNAIL_COMMANDS)
+			&& Plugins::hasSignal('file.thumbnail.create')
+			&& $signal = Plugins::fire('file.thumbnail.supports', true, ['file' => $this, 'extension' => $ext])
+			&& $signal->isStopped()) {
+			return 'plugin';
+		}
+
 		if (in_array('mupdf', DOCUMENT_THUMBNAIL_COMMANDS) && in_array($ext, $mupdf_extensions)) {
 			return 'mupdf';
 		}
@@ -285,7 +293,18 @@ trait FileThumbnailTrait
 		}
 
 		try {
-			if ($command === 'collabora') {
+			if ($command === 'plugin') {
+				$signal = Plugins::fire('file.thumbnail.create', true, ['file' => $this, 'destination' => $destination]);
+
+				if ($signal->isStopped()) {
+					if (!file_exists($destination)) {
+						throw new \LogicException('Thumbnail creation from plugin failed');
+					}
+
+					return $destination;
+				}
+			}
+			elseif ($command === 'collabora') {
 				$url = parse_url(WOPI_DISCOVERY_URL);
 				$url = sprintf('%s://%s:%s/lool/convert-to', $url['scheme'], $url['host'], $url['port'] ?? ($url['scheme'] === 'https' ? 443 : 80));
 
@@ -350,6 +369,9 @@ trait FileThumbnailTrait
 						Utils::escapeshellarg($tmpfile ?? $local_path),
 						Utils::escapeshellarg($destination)
 					);
+				}
+				else {
+					throw new \LogicException('Unknown thumbnail command: ' . $command);
 				}
 
 				$output = '';
