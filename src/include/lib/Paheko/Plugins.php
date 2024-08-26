@@ -121,7 +121,7 @@ class Plugins
 			}
 		}
 
-		return (bool) DB::getInstance()->firstSignal('SELECT 1 FROM plugins_signals AS s INNER JOIN plugins p ON p.name = s.plugin
+		return (bool) DB::getInstance()->firstColumn('SELECT 1 FROM plugins_signals AS s INNER JOIN plugins p ON p.name = s.plugin
 			WHERE s.signal = ? AND p.enabled = 1 LIMIT 1;', $name);
 	}
 

@@ -51,6 +51,9 @@ class Shares
 		$columns = [
 			'id' => ['select' => 's.id'],
 			'hash_id' => ['select' => 's.hash_id'],
+			'file_hash_id' => [
+				'select' => 'f.hash_id',
+			],
 			'file_name' => [
 				'label' => 'Nom du fichier',
 				'select' => 'f.name',
@@ -106,6 +109,7 @@ class Shares
 		$list = self::getList();
 		$list->setColumns(self::getListedColumns(false));
 		$list->setConditions('id_file = ' . (int)$file->id());
+		$list->setPageSize(null);
 		return $list;
 	}
 }

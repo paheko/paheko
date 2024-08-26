@@ -53,3 +53,5 @@
 
 {/if}
 </form>
+
+{include file="_foot.tpl"}

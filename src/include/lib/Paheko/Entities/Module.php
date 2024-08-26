@@ -174,7 +174,7 @@ class Module extends Entity
 		$restrict_section = null;
 		$restrict_level = null;
 
-		if (isset($ini->restrict_section)) {
+		if (isset($ini->restrict_section, $ini->restrict_level)) {
 			$restrict_section = $ini->restrict_section;
 			$restrict_level = Session::ACCESS_LEVELS[$ini->restrict_level] ?? null;
 		}

@@ -897,11 +897,13 @@ namespace Paheko;
  * Les options possibles sont (par ordre de rapidité) :
  * - mupdf : les miniatures PDF/SVG/XPS/EPUB sont générées avec mutool
  *   (apt install mupdf-tools)
+ * - ffmpeg : les miniatures de vidéos seront générées avec ffmpeg
  * - collabora : les miniatures de documents bureautiques sont générées
- *   par le serveur Collabora, via l'API dont l'URL est  indiquée dans WOPI_DISCOVERY_URL
+ *   par le serveur Collabora, via l'API dont l'URL est indiquée dans WOPI_DISCOVERY_URL
  * - unoconvert : les miniatures des documents Office/LO sont générées
  *   avec unoconvert <https://github.com/unoconv/unoserver/>
- * - ffmpeg : les miniatures de vidéos seront générées avec ffmpeg
+ * - plugins : permet à un plugin optionnel d'être appelé pour générer une miniature.
+ *   (par exemple OnlyOffice)
  *
  * Bien que Collabora/Unoconvert puissent générer des miniatures de PDF, il est plutôt
  * conseillé d'utiliser mupdf quand même, il est plus rapide et léger.
