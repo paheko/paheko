@@ -1241,6 +1241,12 @@ class Sections
 		$params['where'] .= ' AND status != :status';
 		$params[':status'] = Page::STATUS_DRAFT;
 
+		if (empty($params['private']) && !Session::getInstance()->isLogged()) {
+			$params['where'] .= ' AND status != :status2';
+			$params[':status2'] = Page::STATUS_PRIVATE;
+			unset($params['private']);
+		}
+
 		$allowed_tables = self::SQL_TABLES;
 
 		if (array_key_exists('search', $params)) {
