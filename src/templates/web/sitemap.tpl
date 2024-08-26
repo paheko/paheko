@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Carte du site" current="web"}
+{include file="_head.tpl" title="Plan du site" current="web"}
 
 <nav class="tabs">
 	{linkbutton shape="left" href="./" label="Retour à la gestion du site"}
