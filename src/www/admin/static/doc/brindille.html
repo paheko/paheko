@@ -252,12 +252,12 @@ $nom_de_variable_long</code></pre>
 <pre><code>{{:assign var='type_whitelist.%s'|args:$type value=1}}</code></pre>
 <h2 id="conditions">Conditions</h2>
 <p>Il est possible d'utiliser des conditions de type <strong>"si"</strong> (<code>if</code>), <strong>"sinon si"</strong> (<code>elseif</code>) et <strong>"sinon"</strong> (<code>else</code>). Celles-ci sont terminées par un block <strong>"fin si"</strong> (<code>/if</code>).</p>
-<pre><code>{{if $date|date:"%Y" &gt; 2020}}
-    La date est en 2020
-{{elseif $article.status == 'draft'}}
-    La page est un brouillon
+<pre><code>{{if $date|date:"%Y" &gt;= 2020}}
+    La date est dans les années 2020
+{{elseif $date|date:"%Y" &gt;= 2010}}
+    La date est dans les années 2010-2019
 {{else}}
-    Autre chose.
+    Autre date.
 {{/if}}</code></pre>
 <p>Une condition peut être évaluée comme <em>vraie</em>, dans ce cas la partie qui suit le bloc <code>{{if …}}</code> sera exécutée.</p>
 <p>Si la condition est évaluée comme <em>fausse</em>, alors la partie qui suit le bloc <code>{{if …}}</code> ne sera pas exécutée. Dans ce cas, soit une condition <code>{{elseif …}}</code> suivante est vraie et exécutée, mais sinon c'est le contenu du bloc <code>{{else}}</code> qui est exécuté et affiché.</p>
