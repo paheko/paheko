@@ -14,38 +14,57 @@ use KD2\DB\EntityManager as EM;
 class Web
 {
 	const BREADCRUMBS_SQL = '
-		WITH RECURSIVE parents(title, status, id_parent, uri, id, level) AS (
-			SELECT title, status, id_parent, uri, id, 1 FROM web_pages WHERE id = %s
+		WITH RECURSIVE parents(title, status, inherited_status, id_parent, uri, id, level) AS (
+			SELECT title, status, inherited_status, id_parent, uri, id, 1 FROM web_pages WHERE id = %s
 			UNION ALL
-			SELECT p.title, p.status, p.id_parent, p.uri, p.id, level + 1
+			SELECT p.title, p.status, p.inherited_status, p.id_parent, p.uri, p.id, level + 1
 			FROM web_pages p
 				JOIN parents ON parents.id_parent = p.id
 		)
-		SELECT id, title, uri, status FROM parents ORDER BY level DESC;';
+		SELECT id, title, uri, status, inherited_status FROM parents ORDER BY level DESC;';
 
-	static public function listAllChildren(?int $id, string $order = 'title')
+	/**
+	 * Updates inherited_status column by using a recusive SQL function
+	 * SQLite does not write to database if there is nothing to change,
+	 * so this shouldn't take too much resource.
+	 */
+	static public function updateChildrenInheritedStatus(): void
 	{
-		$sql = '
-			WITH RECURSIVE children(published, modified, title, status, id_parent, uri, id, level) AS (
-				%s
+		$sql = 'WITH RECURSIVE children(status, inherited_status, id_parent, id, level, new_status) AS (
+				SELECT status, inherited_status, id_parent, id, 1, status FROM web_pages WHERE id_parent IS NULL
 				UNION ALL
-				SELECT p.published, p.modified, p.title, p.status, p.id_parent, p.uri, p.id, level + 1
+				SELECT p.status, p.inherited_status, p.id_parent, p.id, level + 1, CASE WHEN p.status < children.new_status THEN p.status ELSE children.new_status END
 				FROM web_pages p
 					JOIN children ON children.id = p.id_parent
 			)
-			SELECT id, title, published, modified, id_parent, level, uri, status FROM children ORDER BY %s;';
+			UPDATE web_pages SET inherited_status = (SELECT new_status FROM children WHERE id = web_pages.id);';
+
+		DB::getInstance()->exec($sql);
+	}
+
+	static public function listAllChildren(?int $id, string $order = 'title'): \Generator
+	{
+		$sql = '
+			WITH RECURSIVE children(published, modified, title, status, inherited_status, id_parent, uri, id, level) AS (
+				%s
+				UNION ALL
+				SELECT p.published, p.modified, p.title, p.status, p.inherited_status, p.id_parent, p.uri, p.id, level + 1
+				FROM web_pages p
+					JOIN children ON children.id = p.id_parent
+			)
+			SELECT id, title, published, modified, id_parent, level, uri, status, inherited_status FROM children ORDER BY %s;';
 
 		if ($id) {
-			$union = sprintf('SELECT published, modified, title, status, id_parent, uri, id, 1 FROM web_pages WHERE id = %d', $id);
+			$union = sprintf('SELECT published, modified, title, status, inherited_status, id_parent, uri, id, 1 FROM web_pages WHERE id = %d', $id);
 		}
 		else {
-			$union = 'SELECT published, modified, title, status, id_parent, uri, id, 1 FROM web_pages WHERE id_parent IS NULL';
+			$union = 'SELECT published, modified, title, status, inherited_status, id_parent, uri, id, 1 FROM web_pages WHERE id_parent IS NULL';
 		}
 
 		if ($order === 'title') {
 			$order = 'title COLLATE U_NOCASE ASC';
 		}
-		elseif ($order === 'published' || $order === 'modified') {
+		elseif ($order === 'published' || $order === 'modified' || $order === 'id') {
 			$order .= ' ASC';
 		}
 		else {
@@ -199,7 +218,13 @@ class Web
 			}
 
 			$all[$item->id_parent]->children[] = $item;
-			unset($all[$item->id]);
+		}
+
+		// Remove children from top level
+		foreach ($all as $item) {
+			if ($item->id_parent) {
+				unset($all[$item->id]);
+			}
 		}
 
 		return $all;

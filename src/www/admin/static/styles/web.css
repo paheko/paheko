@@ -44,11 +44,11 @@
     font-weight: normal;
 }
 
-.web-sitemap .status-draft > a {
+.web-sitemap .status-0 > a {
     color: var(--gBorderColor);
 }
 
-.web-sitemap .status-private > a {
+.web-sitemap .status-1 > a {
     color: rgb(var(--gHoverLinkColor));
 }
 

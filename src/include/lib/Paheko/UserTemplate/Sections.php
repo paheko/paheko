@@ -1228,11 +1228,11 @@ class Sections
 		$params['where'] ??= '';
 		$params['select'] = 'w.*';
 		$params['tables'] = 'web_pages w';
-		$params['where'] .= ' AND status != :status';
+		$params['where'] .= ' AND inherited_status != :status';
 		$params[':status'] = Page::STATUS_DRAFT;
 
 		if (empty($params['private']) && !Session::getInstance()->isLogged()) {
-			$params['where'] .= ' AND status != :status2';
+			$params['where'] .= ' AND inherited_status != :status2';
 			$params[':status2'] = Page::STATUS_PRIVATE;
 			unset($params['private']);
 		}

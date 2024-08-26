@@ -18,7 +18,7 @@ function display_sitemap($list, $level = 3): string
 {
 	$out = '<ul>';
 	foreach ($list as $item) {
-		$out .= sprintf('<li><h%d class="status-%s"><a href="./?id=%d">%s</a></%1$d>', min($level, 6), $item->status, $item->id, htmlspecialchars($item->title));
+		$out .= sprintf('<li><h%d class="status-%s"><a href="./?id=%d">%s</a></%1$d>', min($level, 6), $item->inherited_status, $item->id, htmlspecialchars($item->title));
 
 		if (!empty($item->children)) {
 			$out .= display_sitemap($item->children, $level + 1);
