@@ -15,4 +15,4 @@ WITH RECURSIVE children(status, inherited_status, id_parent, id, level, new_stat
 	FROM web_pages p
 		JOIN children ON children.id = p.id_parent
 )
-UPDATE web_pages SET inherited_status = new_status FROM children;
+UPDATE web_pages SET inherited_status = (SELECT new_status FROM children WHERE id = web_pages.id);
