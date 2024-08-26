@@ -23,6 +23,39 @@ class Web
 		)
 		SELECT id, title, uri, status FROM parents ORDER BY level DESC;';
 
+	static public function listAllChildren(?int $id, string $order = 'title')
+	{
+		$sql = '
+			WITH RECURSIVE children(published, modified, title, status, id_parent, uri, id, level) AS (
+				%s
+				UNION ALL
+				SELECT p.published, p.modified, p.title, p.status, p.id_parent, p.uri, p.id, level + 1
+				FROM web_pages p
+					JOIN children ON children.id = p.id_parent
+			)
+			SELECT id, title, published, modified, id_parent, level, uri, status FROM children ORDER BY %s;';
+
+		if ($id) {
+			$union = sprintf('SELECT published, modified, title, status, id_parent, uri, id, 1 FROM web_pages WHERE id = %d', $id);
+		}
+		else {
+			$union = 'SELECT published, modified, title, status, id_parent, uri, id, 1 FROM web_pages WHERE id_parent IS NULL';
+		}
+
+		if ($order === 'title') {
+			$order = 'title COLLATE U_NOCASE ASC';
+		}
+		elseif ($order === 'published' || $order === 'modified') {
+			$order .= ' ASC';
+		}
+		else {
+			throw new \InvalidArgumentException('Unknown order: ' . $order);
+		}
+
+		$sql = sprintf($sql, $union, $order);
+		return DB::getInstance()->iterate($sql);
+	}
+
 	static public function search(string $search): array
 	{
 		$results = Files::search($search, File::CONTEXT_WEB . '%');
@@ -147,6 +180,29 @@ class Web
 		$list->orderBy('title', false);
 		$list->setPageSize(null);
 		return $list;
+	}
+
+	static public function getSitemap(): array
+	{
+		$list = self::listAllChildren(null, 'title');
+		$all = [];
+
+		foreach ($list as $item) {
+			$item->children = [];
+			$all[$item->id] = $item;
+		}
+
+		// Populate children arrays
+		foreach ($all as $item) {
+			if (!$item->id_parent) {
+				continue;
+			}
+
+			$all[$item->id_parent]->children[] = $item;
+			unset($all[$item->id]);
+		}
+
+		return $all;
 	}
 
 	static public function getByURI(string $uri): ?Page
