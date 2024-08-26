@@ -254,21 +254,6 @@
 				</tr>
 			{/foreach}
 			</tbody>
-			{if ($transaction.status & $transaction::STATUS_WAITING || $transaction.status & $transaction::STATUS_PAID) || count($linked_transactions) > 1}
-			<tfoot>
-				<tr>
-					<td colspan="3">Total</td>
-					<td class="money">{$amount|money_currency|raw}</td>
-				</tr>
-				{if $transaction.status & $transaction::STATUS_WAITING || $transaction.status & $transaction::STATUS_PAID}
-					<?php $left = max(0, $transaction->sum() - $amount); ?>
-					<tr>
-						<td colspan="3"><em>Reste à régler</em></td>
-						<td class="money">{$left|money_currency:false|raw}</td>
-					</tr>
-				{/if}
-			</tfoot>
-			{/if}
 		</table>
 	{/if}
 	</aside>
