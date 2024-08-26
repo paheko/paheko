@@ -528,6 +528,7 @@ Note : ces sections héritent de `sql` (voir plus haut).
 | `uri` | Adresse unique de la page/catégorie à retourner. |
 | `id_parent` | Numéro unique (ID) de la catégorie parente. Utiliser `null` pour n'afficher que les articles ou catégories de la racine du site. |
 | `parent` | Adresse unique (URI) de la catégorie parente. Exemple pour renvoyer la liste des articles de la sous-catégorie "Événements" de la catégorie "Notre atelier" :  `evenements`. Utiliser `null` pour n'afficher que les articles ou catégories de la racine du site. Ajouter un point d'exclamation au début de la valeur pour inverser la condition. |
+| `private` | Indiquer `private=true` en paramètre permet de renvoyer les pages privées, même si le visiteur n'est pas connecté. |
 
 Par exemple lister 5 articles de la catégorie "Actualité", qui ne sont pas dans le futur, triés du plus récent au plus ancien :
 
