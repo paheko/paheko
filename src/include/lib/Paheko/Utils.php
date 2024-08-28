@@ -1353,7 +1353,7 @@ class Utils
 			$pipes[0] = null;
 		}
 
-		while ($timeout_ms > 0) {
+		while (!$timeout || $timeout_ms > 0) {
 			$start = microtime(true);
 
 			// Wait until we can read or write, or until the timer expires
