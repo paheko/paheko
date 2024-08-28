@@ -30,6 +30,8 @@ class CLI
 		'cron',
 		'queue',
 		'env',
+		'ui',
+		'server',
 	];
 
 	public function parseOptions(array &$args, array $options, int $limit = 0)
@@ -125,7 +127,7 @@ class CLI
 	protected function fail(string $message = '', ...$args): void
 	{
 		if ($message !== '') {
-			vprintf($message, $args);
+			echo $this->color('red', vsprintf($message, $args));
 			echo PHP_EOL;
 		}
 
@@ -135,11 +137,27 @@ class CLI
 	protected function success(string $message = '', ...$args): void
 	{
 		if ($message !== '') {
-			vprintf($message, $args);
+			echo $this->color('green', vsprintf($message, $args));
 			echo PHP_EOL;
 		}
 
 		exit(0);
+	}
+
+	protected function alert(string $message, ...$args): void
+	{
+		$message =  str_repeat('-', 50) . PHP_EOL . vsprintf($message, $args) . PHP_EOL . str_repeat('-', 50) . PHP_EOL;
+		fwrite(STDERR, $this->color('yellow', $message));
+	}
+
+	protected function color(string $color, string $str): string
+	{
+		static $codes = [
+			'red' => 91,
+			'green' => 92,
+			'yellow' => 93,
+		];
+		return sprintf("\e[%dm%s\e[0m", $codes[$color], $str);
 	}
 
 	/**
@@ -376,7 +394,9 @@ class CLI
 	 */
 	public function config(array $args)
 	{
-		echo json_encode(Config::getInstance()->asArray(), JSON_PRETTY_PRINT) . PHP_EOL;
+		foreach (Config::getInstance()->asArray() as $key => $value) {
+			echo $key . ": " . self::var_export($value) . PHP_EOL;
+		}
 		$this->success();
 	}
 
@@ -386,9 +406,40 @@ class CLI
 	public function env(array $args)
 	{
 		foreach (Install::getConstants() as $key => $value) {
-			echo $key . ": " . var_export($value, true) . PHP_EOL;
+			echo $key . ": " . self::var_export($value) . PHP_EOL;
 		}
 		$this->success();
+	}
+
+	protected function var_export($v)
+	{
+		if (is_array($v) || is_object($v)) {
+			$out = '[';
+			$keys = !array_key_exists(0, $v);
+
+			foreach ($v as $k => $v) {
+				if ($keys) {
+					$out .= $k . ': ';
+				}
+
+				$out .= self::var_export($v) . ', ';
+			}
+
+			$out = (strlen($out) > 1 ? substr($out, 0, -2) : $out) . ']';
+		}
+		elseif (is_bool($v)) {
+			$out = $v ? 'true' : 'false';
+		}
+		elseif (is_null($v)) {
+			$out = 'null';
+		}
+		elseif (is_string($v)) {
+			$out = '"' . strtr($v, ['"' => '\\"', "\n" => "\\n", "\r" => "\\r"]) . '"';
+		}
+		else {
+			$out = $v;
+		}
+		return $out;
 	}
 
 	/**
@@ -445,6 +496,95 @@ class CLI
 		$this->success();
 	}
 
+	/**
+	 * Usage: paheko server OPTIONS...
+	 * Launch a web server for Paheko on the specified port and IP address.
+	 *
+	 * By default, 127.0.0.1 and port 8081 are used if nothing is specified.
+	 *
+	 * Options:
+	 *   --bind|-b ADDRESS
+	 *     IP address of the web server
+	 *
+	 *   --port|-p PORT
+	 *     Port of the web server
+	 *
+	 *   --verbose|-v
+	 *     If this option is specified, the web server requests will be logged
+	 *     on the terminal.
+	 */
+	public function server(array $args, bool $browser = false): void
+	{
+		$o = $this->parseOptions($args, ['--port|-p=', '--bind|-b=', '--verbose|-v'], 0);
+
+		$address = $o['bind'] ?? '127.0.0.1';
+		$port = intval($o['port'] ?? 8081);
+		$verbose = array_key_exists('verbose', $o);
+		$root = ROOT . '/www';
+		$router = $root . '/_route.php';
+
+		$cmd = sprintf('PHP_CLI_SERVER_WORKERS=3 php -S %s:%d -t %s -d variables_order=EGPCS %s',
+			escapeshellarg($address),
+			$port,
+			$root,
+			$router
+		);
+
+		$launched = false;
+
+		if ($browser) {
+			$url = sprintf('http://%s:%d/admin/', $address, $port);
+
+			if (($_SERVER['DISPLAY'] ?? '') !== '') {
+				$browser = 'sensible-browser %s &';
+			}
+			else {
+				$browser = 'www-browser %s';
+			}
+
+			$browser = sprintf($browser, escapeshellarg($url));
+		}
+		else {
+			$browser = null;
+		}
+
+		$print = function ($str) use ($verbose, &$browser) {
+			if ($verbose) {
+				echo $str;
+			}
+
+			if ($browser) {
+				passthru($browser);
+				$browser = null;
+			}
+		};
+
+		Utils::exec($cmd, 0, null, $print, $print);
+	}
+
+	/**
+	 * Usage: paheko ui OPTIONS...
+	 * Launch a web server for Paheko on the specified port and IP address,
+	 * and open a web browser directly.
+	 *
+	 * By default, 127.0.0.1 and port 8081 are used if nothing is specified.
+	 *
+	 * Options:
+	 *   --bind|-b ADDRESS
+	 *     IP address of the web server
+	 *
+	 *   --port|-p PORT
+	 *     Port of the web server
+	 *
+	 *   --verbose|-v
+	 *     If this option is specified, the web server requests will be logged
+	 *     on the terminal.
+	 */
+	public function ui(array $args)
+	{
+		$this->server($args, true);
+	}
+
 	public function help(array $args)
 	{
 		@list($command) = $this->parseOptions($args, [], 1);
@@ -463,7 +603,7 @@ class CLI
 		}
 
 		if (!in_array($command, self::COMMANDS)) {
-			$this->fail('Unknown command "%s". Use "paheko help" to get list of commands.', $command);
+			$this->fail('Unknown command "%s".' . PHP_EOL . 'Use "paheko help" to get list of commands.', $command);
 		}
 
 		$ref = new \ReflectionMethod(self::class, $command);
@@ -484,16 +624,15 @@ class CLI
 		}
 
 		if (!in_array($command, self::COMMANDS)) {
-			$this->fail('Unknown command "%s". Use "paheko help" to get list of commands.', $command);
-		}
-
-		$config = $options['config'] ?? null;
-
-		if (isset($config)) {
-			define('\Paheko\CONFIG_FILE', $config);
+			$this->fail('Unknown command "%s".' . PHP_EOL . 'Use "paheko help" to get list of commands.', $command);
 		}
 
 		$constants = [];
+		$root = dirname(__DIR__, 3);
+
+		if (isset($options['config'])) {
+			$constants['CONFIG_FILE'] = $options['config'];
+		}
 
 		if (isset($options['db'])) {
 			$constants['DB_FILE'] = $options['db'];
@@ -513,10 +652,19 @@ class CLI
 			define('Paheko\\' . $name, $value);
 		}
 
-
 		define('Paheko\INSTALL_PROCESS', true);
 
-		require_once __DIR__ . '/../../init.php';
+		// Make sure we have a host/root to specify if
+		// WWW_URL/WWW_URI are not specified
+		$_SERVER['HTTP_HOST'] = 'localhost';
+		$_SERVER['DOCUMENT_ROOT'] = $root . '/www';
+
+		require_once $root . '/include/init.php';
+
+		if (WWW_URL === 'http://localhost/') {
+			$this->alert("Warning: WWW_URL constant is not specified!\nhttp://localhost/ will be used instead.\n"
+				. "Any e-mail sent will not include the correct web server URL.");
+		}
 
 		try {
 			$this->$command($args);
