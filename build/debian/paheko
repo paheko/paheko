@@ -1,7 +1,6 @@
 #!/bin/sh
 
 BIN=/usr/share/paheko/bin/paheko
-BIN=/home/bohwaz/fossil/paheko/src/bin/paheko
 
 export PAHEKO_STANDALONE=1
 
@@ -12,4 +11,5 @@ then
   ARGS="ui"
 fi
 
+chmod +x ${BIN}
 ${BIN} $ARGS
