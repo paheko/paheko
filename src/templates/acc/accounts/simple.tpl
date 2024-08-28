@@ -54,10 +54,10 @@
 				<td class="num">{if $line.files}{$line.files}{/if}</td>
 				{if property_exists($line, 'status_label')}
 				<td>
-					{if $line.status & Entities\Accounting\Transaction::STATUS_WAITING}
-						<span class="alert">{$line.status_label}</span>
-					{else}
-						<span class="confirm">{$line.status_label}</span>
+					{if $line.status & Entities\Accounting\Transaction::STATUS_WAITING && $line.status_label}
+						{tag color="darkred" label=$line.status_label}
+					{elseif $line.status_label}
+						{tag color="DarkSeaGreen" label=$line.status_label}
 					{/if}
 				</td>
 				{/if}

@@ -79,7 +79,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td>{if $year.closed}<em>Clôturé</em>{else}<strong class="confirm">En cours</strong>{/if}</td>
+				<td>{if $year.closed}{tag label="Clôturé"}{else}{tag label="En cours" color="darkgreen"}{/if}</td>
 				<td>
 				{linkbutton label="Export" shape="export" href="export.php?year=%d"|args:$year.id}
 				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$year.closed}
