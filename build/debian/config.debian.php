@@ -80,11 +80,7 @@ if (!empty($_ENV['PAHEKO_STANDALONE']))
 	if (!defined('Paheko\DB_FILE')) {
 		$last_file = $_ENV['XDG_CONFIG_HOME'] . '/paheko/last';
 
-		if ($_ENV['PAHEKO_STANDALONE'] != 1)
-		{
-			$last_sqlite = trim($_ENV['PAHEKO_STANDALONE']);
-		}
-		else if (file_exists($last_file))
+		if (file_exists($last_file))
 		{
 			$last_sqlite = trim(file_get_contents($last_file));
 			$last_sqlite = str_replace('.local/share/garradin', '.local/share/paheko', $last_sqlite);

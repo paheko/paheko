@@ -1,123 +1,15 @@
 #!/bin/sh
 
-ROOT=/usr/share/paheko/www
-#ROOT=~/fossil/paheko/src/www
-ROUTER=${ROOT}/_route.php
-PORT=8081
-ADDRESS="127.0.0.1"
-VERBOSE=0
-PID_FILE="${XDG_RUNTIME_DIR}/paheko/pid"
+BIN=/usr/share/paheko/bin/paheko
+BIN=/home/bohwaz/fossil/paheko/src/bin/paheko
 
-[ ! -d `dirname $PID_FILE` ] && mkdir -p `dirname $PID_FILE`
+export PAHEKO_STANDALONE=1
 
-# Execute getopt
-ARGS=`getopt -o "pb:vh" -l "port:,bind:,verbose,help" -n "paheko" -- "$@"`
+ARGS="$@"
 
-# Bad arguments
-if [ $? -ne 0 ];
+if [ "$ARGS" = "" ]
 then
-  exit 1
+  ARGS="ui"
 fi
 
-# A little magic
-eval set -- "$ARGS"
-
-# Now go through all the options
-while true;
-do
-  case "$1" in
-    -p|--port)
-      PORT=$2
-      shift;;
-
-    -b|--bind)
-      ADDRESS=$2
-      shift;;
-
-    -v|--verbose)
-      VERBOSE=1
-      shift;;
-
-    -h|--help)
-      cat <<EOF
-Usage : $0 [COMMANDE] [PROJET]
-
-Où COMMANDE peut être :
-
-        server [-p|--port PORT] [-b|--bind IP]
-                Démarre un serveur web Paheko sur le port spécifié
-                (8081 par défaut) et l'IP spécifiée (127.0.0.1 par défaut)
-
-        ui [-p|--port PORT] [-b|--bind IP]
-                Idem que 'server' mais démarre ensuite le navigateur web par défaut
-                et connecte automatiquement avec le premier administrateur
-                de l'association.
-
-Si aucune COMMANDE n'est donnée, Paheko utilisera 'ui' par défaut.
-
-PROJET est le chemin menant à un projet Paheko précis
-        (fichier .sqlite). Si aucun projet n'est indiqué, le
-        dernier projet ouvert sera rouvert. Si aucun projet n'a jamais été
-        ouvert un nouveau projet sera créé.
-
-Options :
-
-        -p|--port PORT
-                Spécifie le port pour le mode ui ou le mode serveur.
-
-        -b|--bind IP
-                Spécifie l'adresse IP du serveur web.
-
-        -v|--verbose
-                Affiche les requêtes reçues sur le serveur web.
-
-        -h|--help
-                Affiche ce message.
-EOF
-      exit
-      shift;;
-
-    --)
-      shift
-      break;;
-  esac
-done
-
-CMD="$1"
-
-[ "$CMD" = "" ] && {
-    CMD="ui"
-}
-
-PROJECT="$2"
-
-[ "$PROJECT" = "" ] && PROJECT="1"
-
-export PAHEKO_STANDALONE="$PROJECT"
-
-[ -f $PID_FILE ] && kill `cat $PID_FILE` > /dev/null 2>&1 && rm -f $PID_FILE
-
-PHP_CLI_SERVER_WORKER=2
-
-[ $VERBOSE = 1 ] && {
-    php -S ${ADDRESS}:${PORT} -t ${ROOT} -d variables_order=EGPCS ${ROUTER} &
-} || {
-    php -S ${ADDRESS}:${PORT} -t ${ROOT} -d variables_order=EGPCS ${ROUTER} > /dev/null 2>&1 &
-}
-
-php_pid=$!
-
-echo $php_pid > $PID_FILE
-
-sleep .5
-
-[ "$CMD" = "ui" ] && {
-    URL="http://${ADDRESS}:${PORT}/admin/"
-    [ "$DISPLAY" != "" ] && {
-        sensible-browser ${URL} &
-    } || {
-        www-browser ${URL} &
-    }
-} || {
-    wait $php_pid
-}
+${BIN} $ARGS

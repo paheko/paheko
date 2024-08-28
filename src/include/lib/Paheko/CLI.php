@@ -661,7 +661,7 @@ class CLI
 
 		require_once $root . '/include/init.php';
 
-		if (WWW_URL === 'http://localhost/') {
+		if (WWW_URL === 'http://localhost/' && $command !== 'ui') {
 			$this->alert("Warning: WWW_URL constant is not specified!\nhttp://localhost/ will be used instead.\n"
 				. "Any e-mail sent will not include the correct web server URL.");
 		}
