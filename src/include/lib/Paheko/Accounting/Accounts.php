@@ -306,8 +306,8 @@ class Accounts
 			'label' => 'Statut',
 		];
 
-		$tables = 'acc_transactions_users tu
-			INNER JOIN users u ON u.id = tu.id_user
+		$tables = 'users u
+			INNER JOIN (SELECT * FROM acc_transactions_users GROUP BY id_transaction, id_user) AS tu ON tu.id_user = u.id
 			INNER JOIN acc_transactions t ON tu.id_transaction = t.id
 			INNER JOIN acc_transactions_lines l ON t.id = l.id_transaction
 			INNER JOIN acc_accounts a ON a.id = l.id_account';
@@ -320,7 +320,7 @@ class Accounts
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('balance', false);
-		$list->groupBy('u.id');
+		$list->groupBy('tu.id_user, tu.id_transaction');
 		$list->setCount('COUNT(*)');
 		$list->setPageSize(null);
 		$list->setExportCallback(function (&$row) {
