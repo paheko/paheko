@@ -136,10 +136,15 @@ class Extensions
 			}
 
 			$img = strtok($line, '|');
-			$label = strtok('');
+			$label = trim(strtok(''));
 			$size = $type === 'slideshow' ? File::THUMB_SIZE_LARGE : File::THUMB_SIZE_TINY;
+			$caption = '';
 
-			$out .= sprintf('<figure>%s</figure>', self::img($img, $size, $label ?: null));
+			if ($label) {
+				$caption = sprintf('<figcaption>%s</figcaption>', htmlspecialchars($label));
+			}
+
+			$out .= sprintf('<figure>%s%s</figure>', self::img($img, $size, $label ?: null), $caption);
 		}
 
 		$out .= '</div></div>';
