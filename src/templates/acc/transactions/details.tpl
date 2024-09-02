@@ -262,22 +262,27 @@
 
 {literal}
 <script type="text/javascript">
-var a = $('.transaction-details-toggle li a')[0];
-var b = $('.transaction-details-toggle li a')[1];
-a.onclick = () => {
-	g.toggle('.transaction-details', true);
-	g.toggle('.transaction-details-advanced', false);
-	a.parentNode.classList.add('current');
-	b.parentNode.classList.remove('current');
-	return false;
-};
-b.onclick = () => {
-	g.toggle('.transaction-details', false);
-	g.toggle('.transaction-details-advanced', true);
-	b.parentNode.classList.add('current');
-	a.parentNode.classList.remove('current');
-	return false;
-};
+var list = $('.transaction-details-toggle li a');
+
+if (list.length == 2) {
+	var a = list[0];
+	var b = list[1];
+
+	a.onclick = () => {
+		g.toggle('.transaction-details', true);
+		g.toggle('.transaction-details-advanced', false);
+		a.parentNode.classList.add('current');
+		b.parentNode.classList.remove('current');
+		return false;
+	};
+	b.onclick = () => {
+		g.toggle('.transaction-details', false);
+		g.toggle('.transaction-details-advanced', true);
+		b.parentNode.classList.add('current');
+		a.parentNode.classList.remove('current');
+		return false;
+	};
+}
 </script>
 {/literal}
 
