@@ -395,7 +395,7 @@ class Search extends Entity
 		$default = false;
 
 		if ($text_query !== '') {
-			$options = ['id_year' => qg('year')];
+			$options = ['id_year' => $_GET['year'] ?? null];
 
 			if ($this->redirect($text_query, $options)) {
 				return;
