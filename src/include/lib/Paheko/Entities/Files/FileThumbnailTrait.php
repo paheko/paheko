@@ -246,8 +246,9 @@ trait FileThumbnailTrait
 	{
 		$cache_id = sprintf(self::THUMB_CACHE_ID, $this->md5, 'document');
 		$destination = Static_Cache::getPath($cache_id);
+		$ext = $this->extension();
 
-		if (in_array($this->extension(), self::$_opendocument_extensions) && $this->extractOpenDocumentThumbnail($destination)) {
+		if (in_array($ext, self::$_opendocument_extensions) && $this->extractOpenDocumentThumbnail($destination)) {
 			return $destination;
 		}
 
@@ -280,7 +281,7 @@ trait FileThumbnailTrait
 				return null;
 			}
 
-			$tmpfile = tempnam(CACHE_ROOT, 'thumb-');
+			$tmpfile = tempnam(CACHE_ROOT, 'thumb-') . '.' . $ext;
 			$fp = fopen($tmpfile, 'wb');
 
 			while (!feof($p)) {
@@ -323,7 +324,7 @@ trait FileThumbnailTrait
 				curl_setopt($curl, CURLOPT_POSTFIELDS, [
 					'format' => 'png',
 					//'options' => json_encode($options),
-					'file' => new \CURLFile($tmpfile ?? $local_path, $this->mime, md5($this->name) . '.' . $this->extension()),
+					'file' => new \CURLFile($tmpfile ?? $local_path, $this->mime, md5($this->name) . '.' . $ext),
 				]);
 
 				$fp = fopen($destination, 'wb');
