@@ -148,16 +148,25 @@ abstract class AbstractRender
 		$uri = ltrim($uri, '/');
 		$path = $uri;
 
+		$attachment = null;
+		$context = strtok($this->path, '/');
+		strtok('');
 		$uri = explode('/', $uri);
+
+		if (count($uri) === 2 && !array_key_exists($uri[0], File::CONTEXTS_NAMES) && $context === File::CONTEXT_WEB) {
+			list($page_uri, $file_uri) = $uri;
+		}
+		else {
+			$page_uri = $file_uri = null;
+		}
+
 		$uri = array_map('rawurlencode', $uri);
 		$uri = implode('/', $uri);
 
-		$context = strtok($this->path, '/');
-		strtok('');
-
-		$attachment = null;
-
-		if ($context === File::CONTEXT_WEB) {
+		if ($page_uri) {
+			$attachment = Files::get(File::CONTEXT_WEB . '/' . $page_uri . '/' . $file_uri);
+		}
+		elseif ($context === File::CONTEXT_WEB) {
 			foreach ($this->listAttachments() as $file) {
 				if ($file->uri() === $uri) {
 					$attachment = $file;
