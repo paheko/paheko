@@ -164,7 +164,7 @@ abstract class AbstractRender
 		$uri = implode('/', $uri);
 
 		if ($page_uri) {
-			$attachment = Files::get(File::CONTEXT_WEB . '/' . $page_uri . '/' . $file_uri);
+			$attachment = Files::get(File::CONTEXT_WEB . '/' . rawurldecode($page_uri) . '/' . rawurldecode($file_uri));
 		}
 		elseif ($context === File::CONTEXT_WEB) {
 			foreach ($this->listAttachments() as $file) {
