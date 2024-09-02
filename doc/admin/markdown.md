@@ -438,7 +438,25 @@ Si aucun nom de fichier n'est indiqué, alors toutes les images jointes à la pa
 <<gallery>>
 ```
 
-Cette extension ne fonctionne que dans les pages du site web.
+Il est également possible de rajouter une légende à chaque image :
+
+```
+<<gallery
+Nom_fichier.jpg|Joli dessin
+Nom_fichier_2.jpg|Photo du lavoir
+>>
+```
+
+Note : **cette extension ne fonctionne que dans les pages du site web.**
+
+Par défaut la galerie est sous forme de grille (lignes de hauteur équivalente, les images trop grandes ou trop larges sont tronquées). Pour ne pas tronquer les images, il est possible d'utiliser le style de galerie centrée :
+
+```
+<<gallery center
+Nom_fichier.jpg
+Nom_fichier_2.jpg
+>>
+```
 
 ### Diaporama d'images
 
