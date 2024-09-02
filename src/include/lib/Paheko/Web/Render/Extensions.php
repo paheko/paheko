@@ -106,17 +106,14 @@ class Extensions
 
 	static public function gallery(bool $block, array $args, ?string $content): string
 	{
-		$type = 'gallery';
+		$type = $args['type'] ?? $args[0] ?? 'grid';
 
-		if (isset($args['type'])) {
-			$type = $args['type'];
-		}
-		elseif (isset($args[0])) {
-			$type = $args[0];
+		if (!in_array($type, ['slideshow', 'center', 'grid'])) {
+			$type = 'grid';
 		}
 
-		if (!in_array($type, ['gallery', 'slideshow'])) {
-			$type = 'gallery';
+		if ($type !== 'slideshow') {
+			$type = 'gallery ' . $type;
 		}
 
 		$out = sprintf('<div class="%s"><div class="images">', $type);
