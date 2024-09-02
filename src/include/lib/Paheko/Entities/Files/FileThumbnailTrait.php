@@ -271,26 +271,29 @@ trait FileThumbnailTrait
 		}
 
 		$local_path = $this->getLocalFilePath();
+		$pointer = null;
 		$tmpfile = null;
 
-		if (!$local_path) {
-			$p = $this->getReadOnlyPointer();
+		if (null === $local_path) {
+			$pointer = $this->getReadOnlyPointer();
 
-			if (!$p) {
+			if (!$pointer) {
 				// File does not exist in storage backend, we can't generate a thumbnail
 				return null;
 			}
 
+			// mupdf cannot correctly identify file type unless the correct file extension is used
+			// @see https://bugs.ghostscript.com/show_bug.cgi?id=708002
 			$tmpfile = tempnam(CACHE_ROOT, 'thumb-') . '.' . $ext;
 			$fp = fopen($tmpfile, 'wb');
 
-			while (!feof($p)) {
-				fwrite($fp, fread($p, 8192));
+			while (!feof($pointer)) {
+				fwrite($fp, fread($pointer, 8192));
 			}
 
-			fclose($p);
+			fclose($pointer);
 			fclose($fp);
-			unset($p, $fp);
+			unset($pointer, $fp);
 		}
 
 		try {
