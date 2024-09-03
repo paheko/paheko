@@ -682,12 +682,41 @@ class Utils
 		return $list;
 	}
 
-	static public function suggestPassword()
+	static public function suggestPassword(): string
 	{
 		return Security::getRandomPassphrase(ROOT . '/include/data/locales/fr/dictionary.txt');
 	}
 
-	static public function normalizePhoneNumber($n)
+	/**
+	 * Validate URL, allowing IDN domain names
+	 */
+	static public function validateURL(string $url): bool
+	{
+		$url = parse_url($url);
+
+		if (empty($url['host']) || empty($url['scheme'])) {
+			return false;
+		}
+
+		$url['host'] = idn_to_ascii($url['host']);
+		$n = $url['scheme'] . '://' . $url['host'];
+
+		if (!empty($url['port'])
+			&& !($url['port'] == 80 && $url['scheme'] === 'http')
+			&& !($url['port'] == 443 && $url['scheme'] === 'https')) {
+			$n .= ':' . $url['port'];
+		}
+
+		$n .= $url['path'];
+
+		if (!empty($url['query'])) {
+			$n .= '?' . $url['query'];
+		}
+
+		return filter_var($n, FILTER_VALIDATE_URL) !== false;
+	}
+
+	static public function normalizePhoneNumber(string $n): string
 	{
 		return preg_replace('![^\d\+\(\)p#,;-]!', '', trim($n));
 	}
