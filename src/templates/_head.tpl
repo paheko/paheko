@@ -43,6 +43,7 @@ $current ??= '';
 	<link rel="manifest" href="{$admin_uri}manifest.php" />
 	{if isset($config)}
 		<link rel="icon" type="image/png" href="{$config->fileURL('favicon')}" />
+		<link rel="apple-touch-icon" href="{$config->fileURL('icon')}" />
 	{/if}
 	{custom_colors config=$config}
 </head>
