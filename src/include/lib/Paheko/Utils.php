@@ -707,7 +707,7 @@ class Utils
 			$n .= ':' . $url['port'];
 		}
 
-		$n .= $url['path'];
+		$n .= $url['path'] ?? '/';
 
 		if (!empty($url['query'])) {
 			$n .= '?' . $url['query'];
