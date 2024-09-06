@@ -12,7 +12,7 @@
 {include file="common/search/advanced.tpl" legend="Rechercher des écritures…"}
 
 {if $list !== null}
-	<p class="help">{$list->count()} écritures trouvées pour cette recherche.</p>
+	<p class="help">{$list->count()} résultats trouvés pour cette recherche.</p>
 
 	{if $list->count() > 0}
 		<p class="actions">{exportmenu form=true name="_dl_export" class="menu-btn-right"}</p>
