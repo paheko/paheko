@@ -394,20 +394,7 @@ class Search extends Entity
 		$json_query = isset($_POST['q']) ? json_decode($_POST['q'], true) : null;
 		$default = false;
 
-		if ($text_query !== '') {
-			$options = ['id_year' => $_GET['year'] ?? null];
-
-			if ($this->redirect($text_query, $options)) {
-				return;
-			}
-
-			$this->simple($text_query, $options);
-
-			if ($this->redirectIfSingleResult()) {
-				return;
-			}
-		}
-		elseif ($sql_query !== '') {
+		if ($sql_query !== '') {
 			// Only admins can run custom SQL queries, others can only run existing SQL queries
 			$session->requireAccess($access_section, $session::ACCESS_ADMIN);
 
@@ -423,6 +410,19 @@ class Search extends Entity
 		elseif ($json_query !== null) {
 			$this->content = json_encode(['groups' => $json_query]);
 			$this->type = self::TYPE_JSON;
+		}
+		elseif ($text_query !== '') {
+			$options = ['id_year' => $_GET['year'] ?? null];
+
+			if ($this->redirect($text_query, $options)) {
+				return;
+			}
+
+			$this->simple($text_query, $options);
+
+			if ($this->redirectIfSingleResult()) {
+				return;
+			}
 		}
 		elseif (!isset($this->content)) {
 			$this->content = json_encode($this->getAdvancedSearch()->defaults());
