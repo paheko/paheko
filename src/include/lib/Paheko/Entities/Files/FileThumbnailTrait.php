@@ -152,7 +152,7 @@ trait FileThumbnailTrait
 
 		if (in_array('plugin', DOCUMENT_THUMBNAIL_COMMANDS)
 			&& Plugins::hasSignal('file.thumbnail.create')
-			&& $signal = Plugins::fire('file.thumbnail.supports', true, ['file' => $this, 'extension' => $ext])
+			&& ($signal = Plugins::fire('file.thumbnail.supports', true, ['file' => $this, 'extension' => $ext]))
 			&& $signal->isStopped()) {
 			return 'plugin';
 		}
