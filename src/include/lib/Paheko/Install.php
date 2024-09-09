@@ -195,7 +195,7 @@ class Install
 		if (is_array(LOCAL_LOGIN)) {
 			$source['user_name'] = LOCAL_LOGIN['user']['_name'] ?? 'Administrateur';
 			$source['password'] = sha1(random_bytes(10));
-			$source['user_email'] = 'administrateur@association.example';
+			$source['user_email'] = LOCAL_LOGIN['user']['_email'] ?? 'administrateur@association.example';
 		}
 		else {
 			self::assert(isset($source['user_name']) && trim($source['user_name']) !== '', 'Le nom du membre n\'est pas renseigné');
