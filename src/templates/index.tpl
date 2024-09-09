@@ -6,10 +6,12 @@
 	<aside>
 		{button id="homescreen-btn" label="Installer comme application sur l'écran d'accueil" class="hidden" shape="plus"}
 	</aside>
+	{if $logged_user && $logged_user->exists()}
 	<ul>
 		<li><a href="{$admin_url}me/">Mes informations personnelles</a></li>
 		<li><a href="{$admin_url}me/services.php">Suivi de mes activités et cotisations</a></li>
 	</ul>
+	{/if}
 </nav>
 
 <aside class="describe">
