@@ -600,10 +600,7 @@ class CommonFunctions
 		else {
 			$out  = self::linkButton(['href' => $url . 'csv', 'label' => 'Export CSV', 'shape' => 'export']);
 			$out .= ' ' . self::linkButton(['href' => $url . 'ods', 'label' => 'Export LibreOffice', 'shape' => 'export']);
-
-			if ($xlsx !== false) {
-				$out .= ' ' . self::linkButton(['href' => $url . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']);
-			}
+			$out .= ' ' . self::linkButton(['href' => $url . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']);
 		}
 
 		unset($params['table'], $params['suffix']);
