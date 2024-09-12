@@ -309,46 +309,7 @@ trait FileThumbnailTrait
 				}
 			}
 			elseif ($command === 'collabora') {
-				$url = parse_url(WOPI_DISCOVERY_URL);
-				$url = sprintf('%s://%s:%s/lool/convert-to', $url['scheme'], $url['host'], $url['port'] ?? ($url['scheme'] === 'https' ? 443 : 80));
-
-				// see https://vmiklos.hu/blog/pdf-convert-to.html
-				// but does not seem to be working right now (limited to PDF export?)
-				/*
-				$options = [
-					'PageRange' => ['type' => 'string', 'value' => '1'],
-					'PixelWidth' => ['type' => 'int', 'value' => 10],
-					'PixelHeight' => ['type' => 'int', 'value' => 10],
-				];
-				*/
-
-				$curl = \curl_init($url);
-				curl_setopt($curl, CURLOPT_POST, 1);
-				curl_setopt($curl, CURLOPT_POSTFIELDS, [
-					'format' => 'png',
-					//'options' => json_encode($options),
-					'file' => new \CURLFile($tmpfile ?? $local_path, $this->mime, md5($this->name) . '.' . $ext),
-				]);
-
-				$fp = fopen($destination, 'wb');
-				curl_setopt($curl, CURLOPT_FILE, $fp);
-
-				curl_exec($curl);
-				$info = curl_getinfo($curl);
-
-				if ($error = curl_error($curl)) {
-					Utils::safe_unlink($destination);
-					throw new \RuntimeException(sprintf('cURL error on "%s": %s', $url, $error));
-				}
-
-				curl_close($curl);
-				fclose($fp);
-				unset($curl);
-
-				if (($code = $info['http_code']) != 200 || @filesize($destination) < 10) {
-					Utils::safe_unlink($destination);
-					throw new \RuntimeException('Cannot fetch thumbnail from Collabora: code ' . $code . "\n" . json_encode($info));
-				}
+				Conversion::collabora($tmpfile ?? $local_path, $destination, 'png', $this->name, $this->mime);
 			}
 			else {
 				if ($command === 'mupdf') {

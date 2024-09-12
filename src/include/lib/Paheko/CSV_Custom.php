@@ -3,6 +3,7 @@
 namespace Paheko;
 
 use KD2\UserSession;
+use Paheko\Files\Conversion;
 
 class CSV_Custom
 {
@@ -63,7 +64,7 @@ class CSV_Custom
 	public function loadFile(string $path): void
 	{
 		if (CALC_CONVERT_COMMAND && strtolower(substr($path, -4)) != '.csv') {
-			$path = CSV::convertUploadIfRequired($path, true);
+			$path = Conversion::toCSVAuto($path, true);
 		}
 
 		$this->csv = CSV::readAsArray($path);

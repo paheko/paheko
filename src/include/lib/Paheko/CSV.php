@@ -2,6 +2,8 @@
 
 namespace Paheko;
 
+use Paheko\Files\Conversion;
+
 use KD2\HTML\TableExport;
 use KD2\HTML\TableToODS;
 use KD2\HTML\TableToXLSX;
@@ -10,84 +12,6 @@ use KD2\HTML\AbstractTable;
 
 class CSV
 {
-	/**
-	 * Convert a file to CSV if required (and if CALC_CONVERT_COMMAND is set)
-	 */
-	static public function convertUploadIfRequired(string $path, bool $delete_original = false): string
-	{
-		if (!CALC_CONVERT_COMMAND) {
-			return $path;
-		}
-
-		$mime = @mime_content_type($path);
-
-		// XLSX
-		if ($mime == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-			$ext = 'xlsx';
-		}
-		elseif ($mime == 'application/vnd.ms-excel') {
-			$ext = 'xls';
-		}
-		elseif ($mime == 'application/vnd.oasis.opendocument.spreadsheet') {
-			$ext = 'ods';
-		}
-		// Assume raw CSV
-		else {
-			return $path;
-		}
-
-		$r = md5(random_bytes(10));
-		$a = sprintf('%s/convert_%s.%s', CACHE_ROOT, $r, $ext);
-		$b = sprintf('%s/convert_%s.csv', CACHE_ROOT, $r);
-		$is_upload = is_uploaded_file($path);
-
-		try {
-			if ($is_upload) {
-				move_uploaded_file($path, $a);
-			}
-			else {
-				copy($path, $a);
-			}
-
-			self::convertXLSX($a, $b);
-
-			return $b;
-		}
-		finally {
-			if ($delete_original) {
-				@unlink($a);
-			}
-		}
-	}
-
-	static public function convertXLSX(string $from, string $to): string
-	{
-		$tool = substr(CALC_CONVERT_COMMAND, 0, strpos(CALC_CONVERT_COMMAND, ' ') ?: strlen(CALC_CONVERT_COMMAND));
-
-		if ($tool == 'unoconv') {
-			$cmd = CALC_CONVERT_COMMAND . ' -i FilterOptions=44,34,76 -o %2$s %1$s';
-		}
-		elseif ($tool == 'ssconvert') {
-			$cmd = CALC_CONVERT_COMMAND . ' %1$s %2$s';
-		}
-		elseif ($tool == 'unoconvert') {
-			$cmd = CALC_CONVERT_COMMAND . ' %1$s %2$s';
-		}
-		else {
-			throw new \LogicException(sprintf('Conversion tool "%s" is not supported', $tool));
-		}
-
-		$cmd = sprintf($cmd, Utils::escapeshellarg($from), Utils::escapeshellarg($to));
-		$cmd .= ' 2>&1';
-		$return = Utils::quick_exec($cmd, 10);
-
-		if (!file_exists($to)) {
-			throw new UserException('Impossible de convertir le fichier. Vérifier que le fichier est un format supporté.');
-		}
-
-		return $to;
-	}
-
 	static public function readAsArray(string $path)
 	{
 		if (!file_exists($path) || !is_readable($path))
@@ -350,7 +274,7 @@ class CSV
 	static public function import(string $file, ?array $columns = null, array $required_columns = []): \Generator
 	{
 		$delete_after = is_uploaded_file($file);
-		$file = self::convertUploadIfRequired($file, $delete_after);
+		$file = Conversion::toCSVAuto($file, $delete_after);
 
 		try {
 			$fp = fopen($file, 'r');

@@ -863,13 +863,16 @@ namespace Paheko;
  * Note : installer ces commandes peut introduire des risques de sécurité sur le serveur.
  *
  * Les outils supportés sont :
- * - ssconvert (apt install gnumeric) (plus rapide)
+ * - collabora : serveur Collabora externe, via l'API dont l'URL est indiquée
+ *   dans WOPI_DISCOVERY_URL
+ * - ssconvert (apt install gnumeric) (plus léger, recommandé)
  * - unoconv (apt install unoconv) (utilise LibreOffice)
  * - unoconvert (https://github.com/unoconv/unoserver/) en spécifiant l'interface
  *
  * Défault : null (= fonctionnalité désactivée)
  * @var string|null
  */
+//const CALC_CONVERT_COMMAND = 'collabora';
 //const CALC_CONVERT_COMMAND = 'unoconv';
 //const CALC_CONVERT_COMMAND = 'ssconvert';
 //const CALC_CONVERT_COMMAND = 'unoconvert --interface localhost --port 2022';
