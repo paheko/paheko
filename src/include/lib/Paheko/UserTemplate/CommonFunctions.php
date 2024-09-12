@@ -591,20 +591,11 @@ class CommonFunctions
 
 		$url .= $suffix;
 
-		$xlsx = $params['xlsx'] ?? null;
-
-		if (null === $xlsx) {
-			$xlsx = !empty(CALC_CONVERT_COMMAND);
-		}
-
 		if (!empty($params['form'])) {
 			$name = $params['name'] ?? 'export';
 			$out = self::button(['value' => 'csv', 'shape' => 'export', 'label' => 'Export CSV', 'name' => $name, 'type' => 'submit']);
 			$out .= self::button(['value' => 'ods', 'shape' => 'export', 'label' => 'Export LibreOffice', 'name' => $name, 'type' => 'submit']);
-
-			if ($xlsx) {
-				$out .= self::button(['value' => 'xlsx', 'shape' => 'export', 'label' => 'Export Excel', 'name' => $name, 'type' => 'submit']);
-			}
+			$out .= self::button(['value' => 'xlsx', 'shape' => 'export', 'label' => 'Export Excel', 'name' => $name, 'type' => 'submit']);
 		}
 		else {
 			$out  = self::linkButton(['href' => $url . 'csv', 'label' => 'Export CSV', 'shape' => 'export']);

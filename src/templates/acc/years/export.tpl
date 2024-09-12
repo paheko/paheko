@@ -44,9 +44,7 @@
 		<dt>Format d'export</dt>
 		{input type="radio" name="format" value="ods" default="ods" label="LibreOffice" help="également lisible par Excel, Google Docs, etc."}
 		{input type="radio" name="format" value="csv" label="CSV"}
-		{if CALC_CONVERT_COMMAND}
-			{input type="radio" name="format" value="xlsx" label="Excel"}
-		{/if}
+		{input type="radio" name="format" value="xlsx" label="Excel"}
 	</dl>
 	<dl class="format_fec">
 		{input type="radio" name="format" value="fec" label="Fichier conforme FEC" help="Pour transmettre à un expert-comptable par exemple"}

@@ -849,16 +849,16 @@ namespace Paheko;
 
 /**
  * CALC_CONVERT_COMMAND
- * Outil de conversion de formats de tableur vers un format propriétaire
+ * Outil de conversion de formats de tableur
  *
- * Paheko gère nativement les exports en ODS (OpenDocument : LibreOffice)
- * et CSV, et imports en CSV.
+ * Paheko gère nativement les exports en ODS (OpenDocument : LibreOffice),
+ * CSV et XLSX (OOXML, Excel), ainsi que les imports depuis le format CSV.
  *
  * En indiquant ici le nom d'un outil, Paheko autorisera aussi
- * l'import en XLSX, XLS et ODS, et l'export en XLSX.
+ * l'import en XLSX, XLS et ODS.
  *
- * Pour cela il procédera simplement à une conversion entre les formats natifs
- * ODS/CSV et XLSX ou XLS.
+ * Pour cela il procédera simplement à une conversion entre XLSX, XLSX ou ODS,
+ * vers CSV, avant d'importer le fichier.
  *
  * Note : installer ces commandes peut introduire des risques de sécurité sur le serveur.
  *

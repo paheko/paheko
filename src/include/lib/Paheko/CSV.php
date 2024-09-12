@@ -2,9 +2,11 @@
 
 namespace Paheko;
 
-use KD2\Office\Calc\Writer as ODSWriter;
-
 use KD2\HTML\TableExport;
+use KD2\HTML\TableToODS;
+use KD2\HTML\TableToXLSX;
+use KD2\HTML\TableToCSV;
+use KD2\HTML\AbstractTable;
 
 class CSV
 {
@@ -84,11 +86,6 @@ class CSV
 		}
 
 		return $to;
-	}
-
-	static public function supportsXLSExport(): bool
-	{
-		return CALC_CONVERT_COMMAND ? true : false;
 	}
 
 	static public function readAsArray(string $path)
@@ -192,25 +189,6 @@ class CSV
 		}
 	}
 
-	static public function row($row, string $separator = ',', string $quote = '"'): string
-	{
-		$row = (array) $row;
-
-		array_walk($row, function (&$field) use ($quote, $separator) {
-			$field = str_replace("\r\n", "\n", (string) $field);
-
-			if ($quote === '') {
-				$field = str_replace($separator, '', $field);
-			}
-			else {
-				$field = str_replace($quote, $quote . $quote, $field);
-			}
-		});
-
-		$join = $quote . $separator . $quote;
-		return $quote . implode($join, $row) . $quote . "\r\n";
-	}
-
 	static public function export(string $format, string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, ?array $options = null): void
 	{
 		// Flush any previous output, such as module HTML code etc.
@@ -219,7 +197,7 @@ class CSV
 		if ('csv' == $format) {
 			self::toCSV(... array_slice(func_get_args(), 1));
 		}
-		elseif ('xlsx' == $format && CALC_CONVERT_COMMAND) {
+		elseif ('xlsx' == $format) {
 			self::toXLSX(... array_slice(func_get_args(), 1));
 		}
 		elseif ('ods' == $format) {
@@ -240,7 +218,7 @@ class CSV
 		exit;
 	}
 
-	static protected function rowToArray($row, ?callable $row_map_callback)
+	static protected function rowToArray($row, ?callable $row_map_callback): array
 	{
 		if (null !== $row_map_callback) {
 			call_user_func_array($row_map_callback, [&$row]);
@@ -264,83 +242,57 @@ class CSV
 
 	static public function toCSV(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, array $options = null): void
 	{
-		$output = $options['output_path'] ?? null;
-		$separator = $options['separator'] ?? ',';
-		$quote = $options['quote'] ?? '"';
+		$csv = new TableToCSV;
+		$csv->setShortDateFormat('d/m/Y');
+		$csv->setLongDateFormat('d/m/Y H:i:s');
+		$csv->setSeparator($options['separator'] ?? ',');
+		$csv->setQuote($options['quote'] ?? '"');
+		self::toTable($csv, $name, $iterator, $header, $row_map_callback, $options);
+	}
 
-		if (null === $output) {
-			header('Content-type: application/csv');
-			header(sprintf('Content-Disposition: attachment; filename="%s.%s"', $name, $options['extension'] ?? 'csv'));
-
-			$fp = fopen('php://output', 'w');
-		}
-		else {
-			$fp = fopen($output, 'w');
-		}
-
-		if ($header) {
-			fputs($fp, self::row($header, $separator, $quote));
-		}
-
-		if (!($iterator instanceof \Iterator) || $iterator->valid()) {
-			foreach ($iterator as $row) {
-				$row = self::rowToArray($row, $row_map_callback);
-
-				foreach ($row as $key => &$v) {
-					if (is_object($v) && $v instanceof \DateTimeInterface) {
-						if ($v->format('His') == '000000') {
-							$v = $v->format('d/m/Y');
-						}
-						else {
-							$v = $v->format('d/m/Y H:i:s');
-						}
-					}
-				}
-
-				if (!$header)
-				{
-					fputs($fp, self::row(array_keys($row), $separator, $quote));
-					$header = true;
-				}
-
-				fputs($fp, self::row($row, $separator, $quote));
-			}
-		}
-
-		fclose($fp);
+	static public function toXLSX(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null): void
+	{
+		self::toTable(new TableToXLSX, $name, $iterator, $header, $row_map_callback);
 	}
 
 	static public function toODS(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, array $options = null): void
 	{
+		self::toTable(new TableToODS, $name, $iterator, $header, $row_map_callback);
+	}
+
+	static public function toTable(AbstractTable $t, string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, array $options = null): void
+	{
 		$output = $options['output_path'] ?? null;
+		$default_style = ['border' => '0.05pt solid #999999'];
+		$header_style = ['font-weight' => 'bold', 'background-color' => '#cccccc', 'border' => '0.05pt solid #999999'];
 
-		if (null === $output) {
-			header('Content-type: application/vnd.oasis.opendocument.spreadsheet');
-			header(sprintf('Content-Disposition: attachment; filename="%s.ods"', $name));
-		}
-
-		$ods = new ODSWriter;
-		$ods->table_name = $name;
+		$t->openTable($name, $default_style);
 
 		if ($header) {
-			$ods->add((array) $header);
+			$t->addRow($header, $header_style);
 		}
 
 		if (!($iterator instanceof \Iterator) || $iterator->valid()) {
 			foreach ($iterator as $row) {
 				$row = self::rowToArray($row, $row_map_callback);
 
-				if (!$header)
-				{
-					$ods->add(array_keys($row));
-					$header = true;
+				if ($header === null) {
+					$t->addRow(array_keys($row), $header_style);
+					$header = [];
 				}
 
-				$ods->add((array) $row);
+				$t->addRow($row, $default_style);
 			}
 		}
 
-		$ods->output($output);
+		$t->closeTable();
+
+		if (null === $output) {
+			$t->download($name);
+		}
+		else {
+			$t->save($output);
+		}
 	}
 
 	static public function toJSON(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, array $options = null): void
@@ -384,32 +336,6 @@ class CSV
 
 		fputs($fp, ']');
 		fclose($fp);
-	}
-
-	static public function toXLSX(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null): void
-	{
-		if (!CALC_CONVERT_COMMAND) {
-			throw new \LogicException('CALC_CONVERT_COMMAND is not set');
-		}
-
-		Utils::safe_mkdir(STATIC_CACHE_ROOT, null, true);
-		$tmpfile1 = sprintf('%s/export_%s.ods', STATIC_CACHE_ROOT, md5(random_bytes(10)));
-		$tmpfile2 = substr($tmpfile1, 0, -3) . 'xlsx';
-
-		try {
-			self::toODS($name, $iterator, $header, $row_map_callback, ['output_path' => $tmpfile1]);
-
-			self::convertXLSX($tmpfile1, $tmpfile2);
-
-			header('Content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-			header(sprintf('Content-Disposition: attachment; filename="%s.xlsx"', $name));
-
-			readfile($tmpfile2);
-		}
-		finally {
-			@unlink($tmpfile1);
-			@unlink($tmpfile2);
-		}
 	}
 
 	static public function importUpload(array $file, array $expected_columns): \Generator

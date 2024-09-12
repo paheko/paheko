@@ -17,6 +17,7 @@ KD2/Graphics/SVG/Plot.php
 KD2/Graphics/SVG/Bar.php
 KD2/JSONSchema.php
 KD2/HTML/CSSParser.php
+KD2/HTML/AbstractTable.php
 KD2/HTML/TableExport.php
 KD2/HTML/TableToCSV.php
 KD2/HTML/TableToODS.php
