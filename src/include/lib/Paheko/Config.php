@@ -417,7 +417,7 @@ class Config extends Entity
 					$f->setContent($i->output($format, true));
 				}
 			}
-			catch (\Exception $e) {
+			catch (\UnexpectedValueException $e) {
 				throw new UserException('Cet format d\'image n\'est pas supporté.', 0, $e);
 			}
 		}
