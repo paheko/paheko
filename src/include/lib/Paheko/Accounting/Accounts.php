@@ -25,6 +25,19 @@ class Accounts
 		$this->em = EntityManager::getInstance(Account::class);
 	}
 
+	public function createAuto(string $code, ?string $label = null)
+	{
+		$account = new Account;
+		$account->import([
+			'id_chart' => $this->chart_id,
+			'user' => true,
+			'code' => $code,
+			'label' => $label ?? $code,
+		]);
+		$account->setLocalRules();
+		return $account;
+	}
+
 	static public function get(int $id)
 	{
 		return EntityManager::findOneById(Account::class, $id);
