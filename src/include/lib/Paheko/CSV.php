@@ -70,7 +70,16 @@ class CSV
 
 	static public function open(string $file)
 	{
-		return fopen($file, 'r');
+		$fp = fopen($file, 'r');
+		$line = fread($fp, 4096);
+
+		if (false !== strpos($line, "\r") && false === strpos($line, "\r\n")) {
+			fclose($fp);
+			throw new UserException('Le format de retour de ligne de ce fichier (MacOS 9) est obsolète et non supporté. Merci de convertir le fichier avec LibreOffice.');
+		}
+
+		rewind($fp);
+		return $fp;
 	}
 
 	static public function findDelimiter(&$fp)
