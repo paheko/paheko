@@ -36,9 +36,10 @@ $csrf_key = 'acc_years_import_' . $year->id();
 $examples = null;
 $csv = new CSV_Custom($session, 'acc_import_year');
 $ignore_ids = (bool) (f('ignore_ids') ?? qg('ignore_ids'));
+$auto_create_accounts = (bool) (bool) (f('auto_create_accounts') ?? qg('auto_create_accounts'));
 $report = [];
 
-$params = compact('ignore_ids', 'type') + ['year' => $year->id()];
+$params = compact('ignore_ids', 'type', 'auto_create_accounts') + ['year' => $year->id()];
 
 if (f('cancel')) {
 	$csv->clear();
@@ -53,7 +54,7 @@ if ($type && $type_name) {
 	$columns = array_filter($columns);
 	$columns_table = $columns = array_flip($columns);
 
-	if ($type == Export::FEC) {
+	if ($type === Export::FEC) {
 		// Fill with labels
 		$columns_table = array_intersect_key(array_flip(Export::COLUMNS_FULL), $columns);
 	}
@@ -73,7 +74,7 @@ if ($type && $type_name) {
 
 	if (!f('import') && $csv->ready()) {
 		try {
-			$report = Import::import($type, $year, $csv, $user->id, compact('ignore_ids') + ['dry_run' => true, 'return_report' => true]);
+			$report = Import::import($type, $year, $csv, $user->id, compact('ignore_ids', 'auto_create_accounts') + ['dry_run' => true, 'return_report' => true]);
 		}
 		catch (UserException $e) {
 			$csv->clear();
@@ -81,9 +82,9 @@ if ($type && $type_name) {
 		}
 	}
 
-	$form->runIf(f('import') && $csv->loaded(), function () use ($type, &$csv, $year, $user, $ignore_ids) {
+	$form->runIf(f('import') && $csv->loaded(), function () use ($type, &$csv, $year, $user, $ignore_ids, $auto_create_accounts) {
 		try {
-			Import::import($type, $year, $csv, $user->id, compact('ignore_ids'));
+			Import::import($type, $year, $csv, $user->id, compact('ignore_ids', 'auto_create_accounts'));
 		}
 		finally {
 			$csv->clear();
@@ -116,6 +117,6 @@ $types = [
 
 $with_linked_users = ($table = $csv->getTranslationTable()) && in_array('linked_users', $table);
 
-$tpl->assign(compact('csv', 'year', 'csrf_key', 'examples', 'type', 'type_name', 'ignore_ids', 'types', 'report', 'with_linked_users'));
+$tpl->assign(compact('csv', 'year', 'csrf_key', 'examples', 'type', 'type_name', 'ignore_ids', 'auto_create_accounts', 'types', 'report', 'with_linked_users'));
 
 $tpl->display('acc/years/import.tpl');
