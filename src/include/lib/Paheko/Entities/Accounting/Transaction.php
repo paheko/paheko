@@ -1334,8 +1334,8 @@ class Transaction extends Entity
 			'Date'            => isset($src['date']) ? $src['date']->format('d/m/Y') : null,
 			'Pièce comptable' => $src['reference'] ?? null,
 			'Remarques'       => $src['notes'] ?? null,
-			'Total crédit'    => Utils::money_format($debit),
-			'Total débit'     => Utils::money_format($credit),
+			'Total crédit'    => Utils::money_format($credit),
+			'Total débit'     => Utils::money_format($debit),
 			'Lignes'          => $lines,
 		];
 	}
