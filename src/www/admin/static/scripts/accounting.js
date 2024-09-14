@@ -4,6 +4,7 @@ function initTransactionForm(is_new) {
 	form.addEventListener('submit', (e) => {
 		var type = document.querySelector('input[name=type]:checked');
 
+		// Ignore duplicate account check if this is a simplified type
 		if (type.value) {
 			return true;
 		}

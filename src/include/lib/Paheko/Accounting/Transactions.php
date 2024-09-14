@@ -208,8 +208,8 @@ class Transactions
 		$columns['line_reference']['label'] = 'Réf. paiement';
 		$columns['change']['select'] = sprintf('SUM(l.credit) * %d', $reverse);
 		$columns['change']['label'] = 'Montant';
-		$columns['project_code']['select'] = 'json_group_array(IFNULL(b.code, SUBSTR(b.label, 1, 10) || \'…\'))';
-		$columns['id_project']['select'] = 'json_group_array(l.id_project)';
+		$columns['project_code']['select'] = 'json_group_array(IFNULL(b.code, SUBSTR(b.label, 1, 10) || \'…\')) FILTER (WHERE l.id_project IS NOT NULL)';
+		$columns['id_project']['select'] = 'json_group_array(l.id_project) FILTER (WHERE l.id_project IS NOT NULL)';
 
 		if ($type == Transaction::TYPE_CREDIT || $type == Transaction::TYPE_DEBT) {
 

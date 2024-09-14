@@ -88,8 +88,8 @@ class Export
 
 	const MANDATORY_COLUMNS = [
 		self::FULL => [
-			'id',
-			'type',
+			['id', 'reference'], // Group either by ID or by reference
+			//'type', // Assume advanced transaction if no type is provided
 			'label',
 			'date',
 			'account',
@@ -97,7 +97,7 @@ class Export
 			'debit',
 		],
 		self::GROUPED => [
-			'type',
+			//'type', // Assume advanced transaction if no type is provided
 			'label',
 			'date',
 			'account',

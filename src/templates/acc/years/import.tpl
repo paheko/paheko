@@ -24,6 +24,22 @@ use Paheko\Accounting\Export;
 		Voici un résumé des changements qui seront apportés par cet import&nbsp;:
 	</p>
 
+	{if $report.accounts_count}
+	<details>
+		<summary>
+			<h2>{{%n compte sera créé}{%n comptes seront créées} n=$report.accounts_count}</h2>
+		</summary>
+		<table class="list auto">
+		{foreach from=$report.accounts item="account"}
+			<tr>
+				<th>{$account.code}</th>
+				<td>{$account.label}</td>
+			</tr>
+		{/foreach}
+		</table>
+	</details>
+	{/if}
+
 	{if $report.created_count}
 	<details>
 		<summary>
@@ -120,6 +136,9 @@ use Paheko\Accounting\Export;
 				<dd><p class="alert block">Avec le format FEC, cette option effacera certaines données des écritures mises à jour : référence du paiement et projet analytique.</p></dd>
 			{/if}
 
+			<dt><label for="f_auto_create_accounts_1">Création de comptes</label> <i>(facultatif)</i></dt>
+			{input type="checkbox" name="auto_create_accounts" value="1" label="Créer les comptes qui n'existent pas dans le plan comptable" default=$auto_create_accounts}
+			<dd class="help">Si cette case est cochée, si un numéro de compte dans une écriture importée n'existe pas, alors le compte sera automatiquement ajouté au plan comptable.</dd>
 		</dl>
 	</fieldset>
 

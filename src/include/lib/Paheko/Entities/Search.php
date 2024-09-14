@@ -8,6 +8,7 @@ use Paheko\DB;
 use Paheko\DynamicList;
 use Paheko\Entity;
 use Paheko\UserException;
+use Paheko\Users\Session;
 
 use Paheko\Accounting\AdvancedSearch as Accounting_AdvancedSearch;
 use Paheko\Users\AdvancedSearch as Users_AdvancedSearch;
@@ -354,5 +355,85 @@ class Search extends Entity
 
 		$this->getAdvancedSearch()->redirectResult($this->getDynamicList()->iterate()->current());
 		return true;
+	}
+
+	public function importForm(array $source = null)
+	{
+		$source ??= $_POST;
+
+		if (!empty($source['public'])) {
+			$source['id_user'] = null;
+		}
+		elseif (!empty($source['public_present'])) {
+			$source['id_user'] = Session::getUserId();
+		}
+
+		parent::importForm($source);
+	}
+
+	public function populate(Session $session)
+	{
+		$access_section = $this->target === self::TARGET_ACCOUNTING ? $session::SECTION_ACCOUNTING : $session::SECTION_USERS;
+		$session->requireAccess($access_section, Session::ACCESS_READ);
+
+		$is_admin = $session->canAccess($access_section, Session::ACCESS_ADMIN);
+		$can_sql_unprotected = $session->canAccess(Session::SECTION_CONFIG, Session::ACCESS_ADMIN);
+
+		if ($access_section === $session::SECTION_USERS) {
+			// Only admins of user section can do custom SQL queries
+			// to protect access-restricted user fields from being read
+			$can_sql = $is_admin;
+		}
+		else {
+			// anyone can do custom SQL queries in accounting
+			$can_sql = true;
+		}
+
+		$text_query = trim($_GET['qt'] ?? '');
+		$sql_query = trim($_POST['sql'] ?? '');
+		$json_query = isset($_POST['q']) ? json_decode($_POST['q'], true) : null;
+		$default = false;
+
+		if ($sql_query !== '') {
+			// Only admins can run custom SQL queries, others can only run existing SQL queries
+			$session->requireAccess($access_section, $session::ACCESS_ADMIN);
+
+			if ($can_sql_unprotected && !empty($_POST['unprotected'])) {
+				$this->type = self::TYPE_SQL_UNPROTECTED;
+			}
+			else {
+				$this->type = self::TYPE_SQL;
+			}
+
+			$this->content = $sql_query;
+		}
+		elseif ($json_query !== null) {
+			$this->content = json_encode(['groups' => $json_query]);
+			$this->type = self::TYPE_JSON;
+		}
+		elseif ($text_query !== '') {
+			$options = ['id_year' => $_GET['year'] ?? null];
+
+			if ($this->redirect($text_query, $options)) {
+				return;
+			}
+
+			$this->simple($text_query, $options);
+
+			if ($this->redirectIfSingleResult()) {
+				return;
+			}
+		}
+		elseif (!isset($this->content)) {
+			$this->content = json_encode($this->getAdvancedSearch()->defaults());
+			$this->type = self::TYPE_JSON;
+			$default = true;
+		}
+
+		if (!empty($_POST['to_sql'])) {
+			$this->transformToSQL();
+		}
+
+		return compact('can_sql_unprotected', 'can_sql', 'is_admin', 'default');
 	}
 }

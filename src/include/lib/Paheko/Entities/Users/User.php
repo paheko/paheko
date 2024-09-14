@@ -184,6 +184,9 @@ class User extends Entity
 			elseif ($field->type === 'month') {
 				$this->assert(preg_match('/^\d{4}-\d{2}$/', $value), sprintf('"%s" : le format attendu est de la forme AAAA-MM', $field->label));
 			}
+			elseif ($field->type === 'url') {
+				$this->assert(Utils::validateURL($value), sprintf('"%s" : adresse invalide', $field->label));
+			}
 		}
 
 		// check user number

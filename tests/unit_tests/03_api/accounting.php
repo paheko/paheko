@@ -9,6 +9,8 @@ use KD2\Test;
 
 require __DIR__ . '/_inc.php';
 
+Charts::installCountryDefault('FR');
+
 $chart_id = Charts::getOrInstall('fr_pca_2018');
 
 $year = new Year;

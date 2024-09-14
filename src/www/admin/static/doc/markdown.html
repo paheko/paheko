@@ -445,7 +445,17 @@ Nom_fichier_2.jpg
 &gt;&gt;</code></pre>
 <p>Si aucun nom de fichier n'est indiqué, alors toutes les images jointes à la page seront affichées :</p>
 <pre><code>&lt;&lt;gallery&gt;&gt;</code></pre>
-<p>Cette extension ne fonctionne que dans les pages du site web.</p>
+<p>Il est également possible de rajouter une légende à chaque image :</p>
+<pre><code>&lt;&lt;gallery
+Nom_fichier.jpg|Joli dessin
+Nom_fichier_2.jpg|Photo du lavoir
+&gt;&gt;</code></pre>
+<p>Note : <strong>cette extension ne fonctionne que dans les pages du site web.</strong></p>
+<p>Par défaut la galerie est sous forme de grille (lignes de hauteur équivalente, les images trop grandes ou trop larges sont tronquées). Pour ne pas tronquer les images, il est possible d'utiliser le style de galerie centrée :</p>
+<pre><code>&lt;&lt;gallery center
+Nom_fichier.jpg
+Nom_fichier_2.jpg
+&gt;&gt;</code></pre>
 <h3 id="diaporama-d-images">Diaporama d'images</h3>
 <p>On peut également afficher cette galerie sous forme de diaporama. Dans ce cas une seule image est affichée, et on peut passer de l'une à l'autre.</p>
 <p>La syntaxe est la même, mais on ajoute le mot <code>slideshow</code> après le mot <code>gallery</code> :</p>

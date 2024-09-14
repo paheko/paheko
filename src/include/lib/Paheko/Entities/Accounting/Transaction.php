@@ -762,6 +762,8 @@ class Transaction extends Entity
 
 			foreach ($details as $detail) {
 				$line = $detail->direction == 'credit' ? $this->getCreditLine() : $this->getDebitLine();
+				$this->assert($line !== null, 'Il manque une ligne dans cette écriture');
+
 				$ok = $db->test(Account::TABLE, 'id = ? AND ' . $db->where('type', $detail->targets), $line->id_account);
 
 				if (!$ok) {
@@ -1314,8 +1316,8 @@ class Transaction extends Entity
 			'Date'            => isset($src['date']) ? $src['date']->format('d/m/Y') : null,
 			'Pièce comptable' => $src['reference'] ?? null,
 			'Remarques'       => $src['notes'] ?? null,
-			'Total crédit'    => Utils::money_format($debit),
-			'Total débit'     => Utils::money_format($credit),
+			'Total crédit'    => Utils::money_format($credit),
+			'Total débit'     => Utils::money_format($debit),
 			'Lignes'          => $lines,
 		];
 	}

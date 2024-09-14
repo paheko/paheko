@@ -35,10 +35,9 @@ $is_unprotected = $s->type == $s::TYPE_SQL_UNPROTECTED;
 			{button type="submit" name="run" label="Exécuter" shape="search" class="main"}
 			<input type="hidden" name="id" value="{$s.id}" />
 			{if $s->exists()}
-				{button name="save" value=1 type="submit" label="Enregistrer" shape="upload"}
-				{button name="save_new" value=1 type="submit" label="Enregistrer sous un nouveau nom" shape="plus"}
+				{button name="edit" value=1 type="submit" label="Enregistrer" shape="upload" formaction=$save_action_url}
 			{else}
-				{button name="save" value=1 type="submit" label="Enregistrer nouvelle recherche" shape="plus"}
+				{button name="edit" value=1 type="submit" label="Enregistrer nouvelle recherche" shape="plus" formaction=$save_action_url}
 			{/if}
 			{if $can_sql_unprotected}
 				{linkbutton href="!config/advanced/sql.php" target="_blank" shape="menu" label="Voir le schéma SQL complet"}
@@ -52,12 +51,11 @@ $is_unprotected = $s->type == $s::TYPE_SQL_UNPROTECTED;
 	<p class="submit">
 		{button name="search" value=1 type="submit" label="Chercher" shape="search" id="send" class="main"}
 		<input type="hidden" name="q" id="jsonQuery" />
-		<input type="hidden" name="id" value="{$s.id}" />
+		<input type="hidden" name="type" value="{$s.type}" />
 		{if $s.id}
-			{button name="save" value=1 type="submit" label="Enregistrer" shape="upload"}
-			{button name="save_new" value=1 type="submit" label="Enregistrer sous un nouveau nom" shape="plus"}
+			{button name="edit" value=1 type="submit" label="Enregistrer" shape="upload" formaction=$save_action_url}
 		{else}
-			{button name="save" value=1 type="submit" label="Enregistrer nouvelle recherche" shape="plus"}
+			{button name="edit" value=1 type="submit" label="Enregistrer nouvelle recherche" shape="plus" formaction=$save_action_url}
 		{/if}
 		{if $can_sql}
 			{button name="to_sql" value=1 type="submit" label="Transformer en recherche SQL" shape="edit"}

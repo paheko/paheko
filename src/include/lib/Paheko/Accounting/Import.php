@@ -126,6 +126,7 @@ class Import
 			'ignore_ids'      => false,
 			'dry_run'         => false,
 			'return_report'   => false,
+			'auto_create_accounts' => false,
 		];
 
 		$o = (object) array_merge($options_default, $options);
@@ -147,9 +148,10 @@ class Import
 		$transaction = null;
 		$linked_users = null;
 		$types = array_flip(Transaction::TYPES_NAMES);
+		$group = $csv->hasSelectedColumn('id') ? 'id' : 'reference';
 
 		if ($o->return_report) {
-			$report = ['created' => [], 'modified' => [], 'unchanged' => []];
+			$report = ['created' => [], 'modified' => [], 'unchanged' => [], 'accounts' => []];
 		}
 		else {
 			$report = null;
@@ -187,14 +189,14 @@ class Import
 					}
 				}
 				else {
-					if (!empty($row->id) && $row->id != $current_id) {
+					if (!empty($row->$group) && $row->$group != $current_id) {
 						if (null !== $transaction) {
 							self::saveImportedTransaction($transaction, $linked_users, $dry_run, $report);
 							$transaction = null;
 							$linked_users = null;
 						}
 
-						$current_id = $row->id;
+						$current_id = $row->$group;
 					}
 				}
 
@@ -215,7 +217,7 @@ class Import
 							throw new UserException(sprintf('l\'écriture #%d est validée et ne peut être modifiée', $row->id));
 						}
 
-						if ($type != Export::SIMPLE) {
+						if ($type !== Export::SIMPLE) {
 							$transaction->resetLines();
 						}
 					}
@@ -331,7 +333,16 @@ class Import
 				else {
 					$id_account = $accounts->getIdFromCode($row->account);
 
-					if (!$id_account) {
+					if (!$id_account && $row->account && $o->auto_create_accounts) {
+						$account = $accounts->createAuto($row->account, $row->account_label ?? $row->account . ' — Compte créé automatiquement');
+						$account->save();
+						$id_account = $account->id();
+
+						if ($report !== null) {
+							$report['accounts'][] = $account;
+						}
+					}
+					elseif (!$id_account) {
 						throw new UserException(sprintf('le compte "%s" n\'existe pas dans le plan comptable', $row->account));
 					}
 
@@ -384,14 +395,18 @@ class Import
 			throw $e;
 		}
 
-		$db->commit();
+		if ($dry_run) {
+			$db->rollback();
+		}
+		else {
+			$db->commit();
+		}
 
 		if ($report) {
 			foreach ($report as $type => $entries) {
 				$report[$type . '_count'] = count($entries);
 			}
 		}
-
 
 		return $report;
 	}

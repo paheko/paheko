@@ -18,9 +18,7 @@
 						<optgroup label="Exporter au format…">
 							<option value="csv" data-no-dialog="true">CSV</option>
 							<option value="ods" data-no-dialog="true">LibreOffice</option>
-							{if CALC_CONVERT_COMMAND}
-								<option value="xlsx" data-no-dialog="true">Excel</option>
-							{/if}
+							<option value="xlsx" data-no-dialog="true">Excel</option>
 						</optgroup>
 						{/if}
 					</select>

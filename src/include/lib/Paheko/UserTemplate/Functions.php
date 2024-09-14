@@ -3,11 +3,11 @@
 namespace Paheko\UserTemplate;
 
 use KD2\Brindille_Exception;
+use KD2\DB\DB_Exception;
 use KD2\ErrorManager;
 use KD2\HTTP;
 use KD2\JSONSchema;
 use KD2\Security;
-use KD2\DB\DB_Exception;
 
 use Paheko\API;
 use Paheko\APIException;
@@ -27,8 +27,6 @@ use Paheko\Entities\Module;
 use Paheko\Entities\Email\Email;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
-
-use Paheko\Entities\Accounting\Transaction;
 
 use const Paheko\{ROOT, WWW_URL, BASE_URL, SECRET_KEY};
 

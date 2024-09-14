@@ -3,6 +3,7 @@
 namespace Paheko;
 
 use Paheko\Users\Session;
+use Paheko\Files\Conversion;
 
 class CSV_Custom
 {
@@ -60,10 +61,16 @@ class CSV_Custom
 		@unlink($path);
 	}
 
+	public function canConvert(): bool
+	{
+		return Conversion::canConvert('ods') && Conversion::canConvert('xlsx');
+	}
+
 	public function loadFile(string $path): void
 	{
-		if (CALC_CONVERT_COMMAND && strtolower(substr($path, -4)) != '.csv') {
-			$path = CSV::convertUploadIfRequired($path, true);
+		// Automatically convert
+		if (strtolower(substr($path, -4)) !== '.csv' && $this->canConvert()) {
+			$path = Conversion::toCSVAuto($path);
 		}
 
 		$this->csv = CSV::readAsArray($path);
@@ -222,15 +229,42 @@ class CSV_Custom
 		$this->setIndexedTable($translation);
 	}
 
+	public function hasSelectedColumn(string $column): bool
+	{
+		return in_array($column, $this->translation, true);
+	}
+
 	public function setIndexedTable(array $table): void
 	{
 		if (!count($table)) {
 			throw new UserException('Aucune colonne n\'a été sélectionnée');
 		}
 
-		foreach ($this->mandatory_columns as $key) {
-			if (!in_array($key, $table, true)) {
-				throw new UserException(sprintf('La colonne "%s" est obligatoire mais n\'a pas été sélectionnée ou n\'existe pas.', $this->columns[$key]));
+		foreach ($this->mandatory_columns as $column) {
+			// Either one of these columns is mandatory
+			if (is_array($column)) {
+				$found = false;
+				$names = [];
+
+				foreach ($column as $c) {
+					if (in_array($c, $table, true)) {
+						$found = true;
+						break;
+					}
+					else {
+						$names[] = $this->columns[$c];
+					}
+				}
+
+				if (!$found) {
+					$names = array_map(fn($a) => '"' . $a . '"', $column);
+					throw new UserException(sprintf('Une des colonnes (%s) est obligatoire, mais aucune n\'a été sélectionnée ou n\'existe.', implode(', ', $names)));
+				}
+			}
+			else {
+				if (!in_array($column, $table, true)) {
+					throw new UserException(sprintf('La colonne "%s" est obligatoire mais n\'a pas été sélectionnée ou n\'existe pas.', $this->columns[$column]));
+				}
 			}
 		}
 
@@ -300,7 +334,25 @@ class CSV_Custom
 			$c = $this->columns;
 		}
 
-		return implode(', ', array_intersect_key($c, array_flip($this->getMandatoryColumns())));
+		$names = [];
+
+		foreach ($this->getMandatoryColumns() as $column) {
+			if (is_array($column)) {
+				$list = [];
+
+				foreach ($column as $column2) {
+					$list[] = $c[$column2];
+				}
+
+				$names[] = implode(' ou ', $list);
+				unset($list, $column2);
+			}
+			else {
+				$names[] = $c[$column];
+			}
+		}
+
+		return implode(', ', $names);
 	}
 
 	public function getColumns(): array

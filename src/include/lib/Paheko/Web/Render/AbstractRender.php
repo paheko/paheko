@@ -146,18 +146,40 @@ abstract class AbstractRender
 		$this->loadAttachments();
 
 		$uri = ltrim($uri, '/');
-		$path = $uri;
 
+		$attachment = null;
+		$context = strtok($this->path, '/');
+		strtok('');
 		$uri = explode('/', $uri);
+		$uri = array_map('rawurldecode', $uri);
+		$path = implode('/', $uri);
+
+		$is_context = count($uri) !== 1 && array_key_exists($uri[0], File::CONTEXTS_NAMES);
+
+		// Attachment is in another page of the website: /page-name/file-name.jpg
+		// => add web context to path
+		if (count($uri) === 2 && !$is_context) {
+			$attachment = Files::get(File::CONTEXT_WEB . '/' . $path);
+		}
+
+		if (count($uri) === 1 && $context === File::CONTEXT_WEB) {
+			$attachment = $this->attachments[$path] ?? null;
+		}
+		// Attachment is one of the contexts
+		elseif (count($uri) !== 1 && !$attachment && $is_context) {
+			$attachment = Files::get($path);
+		}
+		// Attachment is in none of the contexts, consider it is inside the web module
+		// (legacy files)
+		elseif (count($uri) !== 1 && !$is_context && !$attachment) {
+			$attachment = Files::get(File::CONTEXT_MODULES . '/web/' . $path);
+		}
+
 		$uri = array_map('rawurlencode', $uri);
 		$uri = implode('/', $uri);
 
-		$context = strtok($this->path, '/');
-		strtok('');
-
-		$attachment = null;
-
-		if ($context === File::CONTEXT_WEB) {
+		// Try to match with URL-encoded path
+		if (!$attachment && $prefix === File::CONTEXT_WEB) {
 			foreach ($this->listAttachments() as $file) {
 				if ($file->uri() === $uri) {
 					$attachment = $file;
@@ -165,8 +187,9 @@ abstract class AbstractRender
 				}
 			}
 		}
-		else {
-			$attachment = $this->attachments[$path] ?? null;
+
+		if (!$attachment) {
+			return null;
 		}
 
 		$this->registerAttachment($uri);

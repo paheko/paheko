@@ -729,10 +729,13 @@ class Session extends \KD2\UserSession
 				return $default[$permission];
 			}
 
-			if ($this->isLogged() && (int)$b === $this::getUserId()) {
+			// Respect field access level, if this is the users files, and he/she is not an admin
+			// As if the user is an admin, then they can do anything
+			if ($this->isLogged() && (int)$b === $this::getUserId() && !$this->canAccess(self::SECTION_USERS, self::ACCESS_ADMIN)) {
 				$read = $field->user_access_level >= self::ACCESS_READ;
 				$write = $field->user_access_level >= self::ACCESS_WRITE;
 			}
+			// If this is not the users files, use the field access level to see if the user category level matches
 			else {
 				$read = $this->canAccess(self::SECTION_USERS, $field->management_access_level);
 				$write = $this->canAccess(self::SECTION_USERS, self::ACCESS_WRITE) && $this->canAccess(self::SECTION_USERS, $field->management_access_level);
