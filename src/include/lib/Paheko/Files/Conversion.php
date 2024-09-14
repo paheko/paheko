@@ -495,6 +495,7 @@ class Conversion
 			return;
 		}
 
+		header('Content-Type: application/octet-stream', true);
 		Server::serveFile(null, $path, null);
 	}
 
@@ -520,12 +521,12 @@ class Conversion
 		}
 
 		$id = 'convert00' . sha1(random_bytes(16));
-		$path = Static_Cache::create($id, new \DateTime('+5 minutes'));
-		copy($source, $path);
+		$path = Static_Cache::storeCopy($id, $source, new \DateTime('+5 minutes'));
 		$t = hash_hmac('SHA1', $id . filemtime($path), SECRET_KEY);
+		$file_url = ADMIN_URL . 'convert.php?i=' . $id . '&t=' . $t;
 
 		$params = [
-			'url'        => ADMIN_URL . 'convert.php?i=' . $id . '&t=' . $t,
+			'url'        => $file_url,
 			'async'      => false,
 			'filetype'   => $ext,
 			'key'        => $id,
@@ -568,7 +569,13 @@ class Conversion
 			$json = json_decode($r->body);
 
 			if (!$json || !empty($json->error) || empty($json->fileUrl)) {
-				throw new \RuntimeException('Error returned by OnlyOffice: ' . ($json->error ?? '??'));
+				$error = $json->error ?? '??';
+
+				if ($error === -4) {
+					$error .= ' -- URL was: ' . $file_url;
+				}
+
+				throw new \RuntimeException('Error returned by OnlyOffice: ' . $error);
 			}
 
 			// Download converted document from provided URL
@@ -588,13 +595,10 @@ class Conversion
 	/**
 	 * Convert a file to CSV if required
 	 */
-	static public function toCSVAuto(string $path, bool $delete_original = false): string
+	static public function toCSVAuto(string $source): ?string
 	{
-		if (!self::canConvertDocuments()) {
-			return $path;
-		}
-
-		$mime = @mime_content_type($path);
+		$mime = @mime_content_type($source);
+		$ext = null;
 
 		// XLSX
 		if ($mime == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
@@ -607,31 +611,36 @@ class Conversion
 			$ext = 'ods';
 		}
 		// Assume raw CSV
-		else {
-			return $path;
+		elseif (preg_match('!/csv|text/', $mime)) {
+			return $source;
 		}
 
-		$r = md5(random_bytes(10));
-		$a = sprintf('%s/convert_%s.%s', CACHE_ROOT, $r, $ext);
-		$b = sprintf('%s/convert_%s.csv', CACHE_ROOT, $r);
-		$is_upload = is_uploaded_file($path);
-
-		try {
-			if ($is_upload) {
-				move_uploaded_file($path, $a);
-			}
-			else {
-				copy($path, $a);
-			}
-
-			self::convert($a, $b, 'csv', filesize($path), $mime);
-
-			return $b;
+		if (!$ext || !self::canConvert($ext)) {
+			return null;
 		}
-		finally {
-			if ($delete_original) {
-				@unlink($a);
-			}
+
+		// Only keep CSV file for a short time
+		$id = 'csv_' . md5(random_bytes(10));
+		$id2 = null;
+		$destination = Static_Cache::create($id, new \DateTime('+5 minutes'));
+
+		if (is_uploaded_file($source)) {
+			$id2 = $id . '_in';
+			$new_path = Static_Cache::create($id . '_in', new \DateTime('+5 minutes'));
+			move_uploaded_file($source, $new_path);
+			$source = $new_path;
 		}
+
+		$ok = self::convert($source, $destination, 'csv', filesize($source), $mime);
+
+		if (!$ok) {
+			if ($id2) {
+				Static_Cache::remove($id2);
+			}
+
+			return null;
+		}
+
+		return $destination;
 	}
 }

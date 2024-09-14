@@ -287,8 +287,11 @@ class CSV
 
 	static public function import(string $file, ?array $columns = null, array $required_columns = []): \Generator
 	{
-		$delete_after = is_uploaded_file($file);
-		$file = Conversion::toCSVAuto($file, $delete_after);
+		$file = Conversion::toCSVAuto($file);
+
+		if (!$file) {
+			throw new UserException('Le type de fichier reçu n\'est pas un tableur dans un format accepté.');
+		}
 
 		try {
 			$fp = fopen($file, 'r');

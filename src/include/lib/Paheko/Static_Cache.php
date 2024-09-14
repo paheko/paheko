@@ -55,6 +55,14 @@ class Static_Cache
 			&& self::setExpiry($id, $expiry);
 	}
 
+	static public function storeCopy(string $id, string $source, ?DateTime $expiry = null): ?string
+	{
+		$path = self::getPath($id);
+		return (bool) copy($source, $path)
+			&& self::setExpiry($id, $expiry)
+			? $path : null;
+	}
+
 	static public function storeFromPointer(string $id, $pointer, ?DateTime $expiry = null): bool
 	{
 		$path = self::getPath($id);
