@@ -16,12 +16,14 @@ table.statement td, table.statement th {
 	vertical-align: top;
 }
 
-table.statement thead td, table.statement thead th {
-	border: none;
+table.statement thead tr {
+	position: fixed;
+	background-color: #cccccc;
+	font-weight: bold;
 }
 
 table.statement tbody tr.even td, table.statement tbody tr.even th {
-	background: #eeeeee;
+	background-color: #eeeeee;
 }
 
 table.statement .money {
@@ -69,7 +71,7 @@ td.money, th.money {
 }
 
 table.statement tfoot td, table.statement tfoot th {
-	background: #dddddd;
+	background-color: #dddddd;
 }
 
 table.statement tr.spacer td {
