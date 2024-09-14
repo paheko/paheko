@@ -156,7 +156,7 @@ class Storage
 
 			$db->commit();
 		}
-		catch (RuntimeException $e) {
+		catch (\RuntimeException $e) {
 			throw new \RuntimeException('Migration failed', 0, $e);
 		}
 		finally {

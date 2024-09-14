@@ -2,6 +2,7 @@
 
 namespace Paheko\Accounting;
 
+use Paheko\Entity;
 use Paheko\Utils;
 use Paheko\Static_Cache;
 use KD2\DB\Date;

@@ -347,7 +347,7 @@ class Conversion
 		// Don't trust code as it can return != 0 even if generation was OK
 		if (!file_exists($destination) || filesize($destination) < 10) {
 			Utils::safe_unlink($destination);
-			$e = new \RuntimeException($command . ' execution failed with code: ' . $code . "\n" . $output);
+			$e = new \RuntimeException($cmd . ' execution failed with code: ' . $code . "\n" . $output);
 
 			// MuPDF can fail for a number of reasons: password protection, broken document, etc.
 			// ffmpeg can fail if the file is a video format but with no video, etc.
@@ -446,11 +446,6 @@ class Conversion
 		];
 		*/
 
-		$mime ??= mime_content_type($source);
-		$name ??= basename($source);
-		$ext = substr($name, strrpos($name, '.') + 1);
-		$name = md5($name) . '.' . ($ext ?: 'unknown');
-
 		$in = fopen($source, 'rb');
 		$out = fopen($destination, 'wb');
 		$body = [
@@ -545,7 +540,7 @@ class Conversion
 		$url = sprintf('%s://%s%s/ConvertService.ashx',
 			$parts['scheme'],
 			$parts['host'],
-			!empty($parts['port']) ? ':' . $parts['port'] : ''
+			isset($parts['port']) ? ':' . $parts['port'] : ''
 		);
 
 		$b64 = fn($str) => str_replace('=', '', strtr(base64_encode($str), '+/', '-_'));

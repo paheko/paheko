@@ -46,6 +46,7 @@ trait FileThumbnailTrait
 	{
 		if (!$this->image) {
 			$path = $this->createDocumentThumbnail();
+			$pointer = null;
 
 			if (!$path) {
 				return null;

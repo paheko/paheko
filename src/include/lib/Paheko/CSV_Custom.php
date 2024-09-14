@@ -2,12 +2,12 @@
 
 namespace Paheko;
 
-use KD2\UserSession;
+use Paheko\Users\Session;
 use Paheko\Files\Conversion;
 
 class CSV_Custom
 {
-	protected ?UserSession $session;
+	protected ?Session $session;
 	protected ?string $key;
 	protected ?array $csv = null;
 	protected ?array $translation = null;
@@ -19,7 +19,7 @@ class CSV_Custom
 	protected array $_default;
 	protected ?string $cache_key = null;
 
-	public function __construct(?UserSession $session = null, ?string $key = null)
+	public function __construct(?Session $session = null, ?string $key = null)
 	{
 		$this->session = $session;
 		$this->key = $key;
@@ -70,7 +70,7 @@ class CSV_Custom
 	{
 		// Automatically convert
 		if (strtolower(substr($path, -4)) !== '.csv' && $this->canConvert()) {
-			$path = Conversion::toCSVAuto($path, true);
+			$path = Conversion::toCSVAuto($path);
 		}
 
 		$this->csv = CSV::readAsArray($path);
@@ -257,7 +257,7 @@ class CSV_Custom
 				}
 
 				if (!$found) {
-					$names = array_map(fn($a) => '"' . $a . '"', $columns);
+					$names = array_map(fn($a) => '"' . $a . '"', $column);
 					throw new UserException(sprintf('Une des colonnes (%s) est obligatoire, mais aucune n\'a été sélectionnée ou n\'existe.', implode(', ', $names)));
 				}
 			}

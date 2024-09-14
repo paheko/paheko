@@ -4,6 +4,7 @@ namespace Paheko\Entities\Accounting;
 
 use KD2\DB\EntityManager;
 use Paheko\Users\DynamicFields;
+use Paheko\ValidationException;
 
 /**
  * Manage links between service subscriptions and accounting transactions
