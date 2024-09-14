@@ -197,7 +197,12 @@ class CSV
 	{
 		$output = $options['output_path'] ?? null;
 		$default_style = ['border' => '0.05pt solid #999999'];
-		$header_style = ['font-weight' => 'bold', 'background-color' => '#cccccc', 'border' => '0.05pt solid #999999'];
+		$header_style = ['font-weight' => 'bold', 'background-color' => '#cccccc', 'border' => '0.05pt solid #999999', 'padding' => '3pt'];
+
+		if ($header) {
+			$default_style['-spreadsheet-autofilter'] = 'true';
+			$header_style['position'] = 'fixed';
+		}
 
 		$t->openTable($name, $default_style);
 
