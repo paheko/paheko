@@ -79,12 +79,12 @@ class Conversion
 	{
 		static $tools = null;
 
-		if (null === $tools) {
+		if (null === $tools && CONVERSION_TOOLS !== null) {
 			$tools = array_merge(array_values(CONVERSION_TOOLS), array_keys(CONVERSION_TOOLS));
 			$tools = array_filter($tools, 'is_string');
 		}
 
-		return $tools;
+		return $tools ?? [];
 	}
 
 	static public function canConvert(string $extension): bool
@@ -611,7 +611,7 @@ class Conversion
 			$ext = 'ods';
 		}
 		// Assume raw CSV
-		elseif (preg_match('!/csv|text/', $mime)) {
+		elseif (preg_match('!/csv|text/!', $mime)) {
 			return $source;
 		}
 

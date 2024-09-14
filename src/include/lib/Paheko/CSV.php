@@ -293,87 +293,80 @@ class CSV
 			throw new UserException('Le type de fichier reçu n\'est pas un tableur dans un format accepté.');
 		}
 
-		try {
-			$fp = fopen($file, 'r');
+		$fp = fopen($file, 'r');
 
-			if (!$fp) {
-				throw new UserException('Le fichier ne peut être ouvert');
+		if (!$fp) {
+			throw new UserException('Le fichier ne peut être ouvert');
+		}
+
+		// Find the delimiter
+		$delim = self::findDelimiter($fp);
+		self::skipBOM($fp);
+
+		$line = 0;
+
+		$header = fgetcsv($fp, 4096, $delim);
+
+		if ($header === false) {
+			throw new UserException('Impossible de trouver l\'entête du tableau');
+		}
+
+		// Make sure the data is UTF-8 encoded
+		$header = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $header);
+
+		$columns_map = [];
+
+		if (null === $columns) {
+			$columns_map = $header;
+		}
+		else {
+			$columns_is_list = is_int(key($columns));
+
+			// Check for columns
+			foreach ($header as $key => $label) {
+				// try to find with string key
+				if (!$columns_is_list && array_key_exists($label, $columns)) {
+					$columns_map[] = $label;
+				}
+				// Or with label
+				elseif (in_array($label, $columns)) {
+					$columns_map[] = $columns_is_list ? $label : array_search($label, $columns);
+				}
+				else {
+					$columns_map[] = null;
+				}
+			}
+		}
+
+		foreach ($required_columns as $key) {
+			if (!in_array($key, $columns_map)) {
+				throw new UserException(sprintf('La colonne "%s" est absente du fichier importé', $columns[$key] ?? $key));
+			}
+		}
+
+		while (!feof($fp))
+		{
+			$row = fgetcsv($fp, 4096, $delim);
+			$line++;
+
+			// Empty line, skip
+			if (empty($row)) {
+				continue;
 			}
 
-			// Find the delimiter
-			$delim = self::findDelimiter($fp);
-			self::skipBOM($fp);
-
-			$line = 0;
-
-			$header = fgetcsv($fp, 4096, $delim);
-
-			if ($header === false) {
-				throw new UserException('Impossible de trouver l\'entête du tableau');
+			if (count($row) != count($header))
+			{
+				throw new UserException('Erreur sur la ligne ' . $line . ' : le nombre de colonnes est incorrect.');
 			}
 
 			// Make sure the data is UTF-8 encoded
-			$header = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $header);
+			$row = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $row);
 
-			$columns_map = [];
+			$row = array_combine($columns_map, $row);
 
-			if (null === $columns) {
-				$columns_map = $header;
-			}
-			else {
-				$columns_is_list = is_int(key($columns));
-
-				// Check for columns
-				foreach ($header as $key => $label) {
-					// try to find with string key
-					if (!$columns_is_list && array_key_exists($label, $columns)) {
-						$columns_map[] = $label;
-					}
-					// Or with label
-					elseif (in_array($label, $columns)) {
-						$columns_map[] = $columns_is_list ? $label : array_search($label, $columns);
-					}
-					else {
-						$columns_map[] = null;
-					}
-				}
-			}
-
-			foreach ($required_columns as $key) {
-				if (!in_array($key, $columns_map)) {
-					throw new UserException(sprintf('La colonne "%s" est absente du fichier importé', $columns[$key] ?? $key));
-				}
-			}
-
-			while (!feof($fp))
-			{
-				$row = fgetcsv($fp, 4096, $delim);
-				$line++;
-
-				// Empty line, skip
-				if (empty($row)) {
-					continue;
-				}
-
-				if (count($row) != count($header))
-				{
-					throw new UserException('Erreur sur la ligne ' . $line . ' : le nombre de colonnes est incorrect.');
-				}
-
-				// Make sure the data is UTF-8 encoded
-				$row = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $row);
-
-				$row = array_combine($columns_map, $row);
-
-				yield $line => $row;
-			}
-
-			fclose($fp);
+			yield $line => $row;
 		}
-		finally {
-			if ($delete_after) {
-				@unlink($file);
-			}
-		}
+
+		fclose($fp);
 	}
 }
