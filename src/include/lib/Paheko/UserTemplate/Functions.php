@@ -54,7 +54,6 @@ class Functions
 		'api',
 		'csv',
 		'call',
-		'facturx',
 	];
 
 	const COMPILE_FUNCTIONS_LIST = [
