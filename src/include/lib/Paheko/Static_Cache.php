@@ -144,6 +144,13 @@ class Static_Cache
 		return file_get_contents($path);
 	}
 
+	static public function getAndRemove(string $id): ?string
+	{
+		$out = self::get($id);
+		self::remove($id);
+		return $out;
+	}
+
 	static public function display(string $id): bool
 	{
 		if (self::hasExpired($id)) {

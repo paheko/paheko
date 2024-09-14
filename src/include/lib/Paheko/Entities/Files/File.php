@@ -11,8 +11,10 @@ use KD2\DB\EntityManager;
 use Paheko\Config;
 use Paheko\DB;
 use Paheko\Entity;
+use Paheko\Files\Conversion;
 use Paheko\Form;
 use Paheko\Plugins;
+use Paheko\Static_Cache;
 use Paheko\Template;
 use Paheko\UserException;
 use Paheko\ValidationException;
@@ -27,7 +29,7 @@ use Paheko\UserTemplate\CommonFunctions;
 
 use Paheko\Files\Files;
 
-use const Paheko\{WWW_URL, BASE_URL, ENABLE_XSENDFILE, WOPI_DISCOVERY_URL, PDFTOTEXT_COMMAND, STATIC_CACHE_ROOT, HOSTING_PROVIDER};
+use const Paheko\{WWW_URL, BASE_URL, ENABLE_XSENDFILE, WOPI_DISCOVERY_URL, HOSTING_PROVIDER};
 
 class File extends Entity
 {
@@ -38,7 +40,6 @@ class File extends Entity
 	use FileWOPITrait;
 
 	const TABLE = 'files';
-	const EXTENSIONS_TEXT_CONVERT = ['ods', 'odt', 'odp', 'pptx', 'xlsx', 'docx', 'pdf'];
 
 	protected ?int $id;
 
@@ -261,6 +262,25 @@ class File extends Entity
 		return $path;
 	}
 
+	public function getLocalOrCacheFilePath(): string
+	{
+		$path = $this->getLocalFilePath();
+
+		// If the file is not stored locally, copy the file to a local cache, using pointer
+		if (null === $path) {
+			$id = 'file-cache-' . $this->hash_id;
+			$path = Static_Cache::getPath($id);
+
+			if (!Static_Cache::hasExpired($id)) {
+				return $path;
+			}
+
+			Static_Cache::storeFromPointer($id, $this->getReadOnlyPointer());
+		}
+
+		return $path;
+	}
+
 	public function etag(): string
 	{
 		if (isset($this->md5)) {
@@ -394,11 +414,19 @@ class File extends Entity
 		$db->commit();
 	}
 
+	public function deleteLocalFileCache(): void
+	{
+		// Remove any local file cache
+		$id = 'file-cache-' . $this->hash_id;
+		Static_Cache::remove($id);
+	}
+
 	public function deleteCache(): void
 	{
 		// This also deletes thumbnail links
 		Web_Cache::delete($this->uri());
 		$this->deleteThumbnails();
+		$this->deleteLocalFileCache();
 	}
 
 	/**
@@ -759,12 +787,12 @@ class File extends Entity
 
 			$this->deleteCache();
 
+			$db->commit();
+
 			// Index regular files, not directories
 			if ($this->type == self::TYPE_FILE) {
-				$this->indexForSearch(compact('content', 'path', 'pointer'));
+				$this->indexForSearch($content);
 			}
-
-			$db->commit();
 
 			return $this;
 		}
@@ -779,87 +807,25 @@ class File extends Entity
 		}
 	}
 
-	public function indexForSearch(?array $source = null, ?string $title = null, ?string $forced_mime = null): void
+	public function indexForSearch(?string $content = null, ?string $title = null, ?string $forced_mime = null): void
 	{
 		$mime = $forced_mime ?? $this->mime;
 		$ext = $this->extension();
-		$content = null;
 
-		if ($this->isDir() && (!$mime || !isset($source['content']))) {
+		if ($this->isDir() && (!$mime || !$content)) {
 			return;
 		}
 
 		// Store content in search table
 		if (substr($mime, 0, 5) == 'text/') {
-			$content = $source['content'] ?? $this->fetch();
+			$content ??= $this->fetch();
 
 			if ($mime === 'text/html' || $mime == 'text/xml') {
 				$content = html_entity_decode(strip_tags($content),  ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401);
 			}
 		}
-		elseif ($ext == 'pdf' && PDFTOTEXT_COMMAND === 'mupdf') {
-			if (empty($source)) {
-				// Prefer path to pointer
-				$source['path'] = $this->getLocalFilePath();
-				$source['pointer'] = $source['path'] ? null : $this->getReadOnlyPointer();
-			}
-
-			$tmpfile = null;
-
-			try {
-				// mutool convert doesn't handle stdin/stdout :(
-				if (isset($source['pointer'])) {
-					fseek($source['pointer'], 0, SEEK_END);
-					$size = ftell($source['pointer']);
-					rewind($source['pointer']);
-
-					if ($size >= 500*1024*1024) {
-						throw new \OverflowException('PDF file is too large');
-					}
-
-					$tmpfile = tempnam(STATIC_CACHE_ROOT, 'pdftotext-');
-					$fp = fopen($tmpfile, 'wb');
-
-					while (!feof($source['pointer'])) {
-						fwrite($fp, fread($source['pointer'], 8192));
-					}
-
-					fclose($fp);
-				}
-				elseif (isset($source['content'])) {
-					$tmpfile = tempnam(STATIC_CACHE_ROOT, 'pdftotext-');
-					file_put_contents($tmpfile, $source['content']);
-				}
-
-				$tmpdest = tempnam(STATIC_CACHE_ROOT, 'pdftotext-out-');
-
-				$cmd = sprintf('mutool convert -F text -o %s %s',
-					Utils::escapeshellarg($tmpdest),
-					Utils::escapeshellarg($tmpfile ?? $source['path'])
-				);
-
-				Utils::quick_exec($cmd, 2);
-				$content = file_get_contents($tmpdest);
-			}
-			catch (\OverflowException $e) {
-				// PDF extraction was longer than 2 seconds: PDF file is likely too large
-				$content = null;
-			}
-
-			if ($tmpfile) {
-				Utils::safe_unlink($tmpfile);
-			}
-
-			Utils::safe_unlink($tmpdest);
-		}
-		elseif (in_array($ext, self::EXTENSIONS_TEXT_CONVERT) && is_array($source)) {
-
-			if (empty($source)) {
-				$source['pointer'] = $this->getReadOnlyPointer();
-				$source['path'] = $source['pointer'] ? null : $this->getLocalFilePath();
-			}
-
-			$content = ToText::from($source);
+		elseif (Conversion::canConvertToText($ext)) {
+			$content = Conversion::fileToText($this, $content);
 		}
 		else {
 			$content = null;
@@ -867,8 +833,8 @@ class File extends Entity
 
 		// Only index valid UTF-8
 		if (isset($content) && preg_match('//u', $content)) {
-			// Truncate text at 150KB
-			$content = substr(trim($content), 0, 150*1024);
+			// Truncate text at 500KB
+			$content = substr(trim($content), 0, 500*1024);
 		}
 		else {
 			$content = null;

@@ -209,9 +209,6 @@ static $default_config = [
 	'API_PASSWORD'          => null,
 	'PDF_COMMAND'           => 'auto',
 	'PDF_USAGE_LOG'         => null,
-	'PDFTOTEXT_COMMAND'     => null,
-	'CALC_CONVERT_COMMAND'  => null,
-	'DOCUMENT_THUMBNAIL_COMMANDS' => null,
 	'SQL_DEBUG'             => null,
 	'ENABLE_PROFILER'       => false,
 	'SYSTEM_SIGNALS'        => [],
@@ -232,6 +229,35 @@ foreach ($default_config as $const => $value)
 	{
 		define($const, $value);
 	}
+}
+
+/**
+ * @deprecated Remove DOCUMENT_THUMBNAIL_COMMANDS constant in 1.4.0
+ */
+if (!defined('Paheko\ENABLE_FILE_THUMBNAILS')) {
+	define('Paheko\ENABLE_FILE_THUMBNAILS', defined('Paheko\DOCUMENT_THUMBNAIL_COMMANDS') && constant('Paheko\DOCUMENT_THUMBNAIL_COMMANDS') !== null);
+}
+
+/**
+ * @deprecated Remove CALC_CONVERT_COMMAND/PDFTOTEXT_COMMAND/DOCUMENT_THUMBNAIL_COMMANDS constants in 1.4.0
+ */
+if (!defined('Paheko\CONVERSION_TOOLS')) {
+	$tools = [];
+
+	if (defined('Paheko\CALC_CONVERT_COMMAND') && constant('Paheko\CALC_CONVERT_COMMAND') !== null) {
+		$tools[] = constant('Paheko\CALC_CONVERT_COMMAND');
+	}
+
+	if (defined('Paheko\PDFTOTEXT_COMMAND') && constant('Paheko\PDFTOTEXT_COMMAND') !== null) {
+		$tools[] = constant('Paheko\PDFTOTEXT_COMMAND');
+	}
+
+	if (defined('Paheko\DOCUMENT_THUMBNAIL_COMMANDS') && constant('Paheko\DOCUMENT_THUMBNAIL_COMMANDS') !== null) {
+		$tools[] = array_merge($tools, constant('Paheko\DOCUMENT_THUMBNAIL_COMMANDS'));
+	}
+
+	define('Paheko\CONVERSION_TOOLS', count($tools) ? $tools : null);
+	unset($tools);
 }
 
 // Check SMTP_SECURITY value

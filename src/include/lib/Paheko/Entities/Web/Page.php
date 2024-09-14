@@ -242,7 +242,7 @@ class Page extends Entity
 			$content = $this->render();
 		}
 
-		$this->dir()->indexForSearch(compact('content'), $this->title, 'text/html');
+		$this->dir()->indexForSearch($content, $this->title, 'text/html');
 	}
 
 	public function saveNewVersion(?int $user_id): bool

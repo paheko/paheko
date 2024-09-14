@@ -61,9 +61,15 @@ class CSV_Custom
 		@unlink($path);
 	}
 
+	public function canConvert(): bool
+	{
+		return Conversion::canConvert('ods') && Conversion::canConvert('xlsx');
+	}
+
 	public function loadFile(string $path): void
 	{
-		if (CALC_CONVERT_COMMAND && strtolower(substr($path, -4)) != '.csv') {
+		// Automatically convert
+		if (strtolower(substr($path, -4)) !== '.csv' && $this->canConvert()) {
 			$path = Conversion::toCSVAuto($path, true);
 		}
 

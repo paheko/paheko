@@ -12,11 +12,12 @@ use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
 use Paheko\Entities\Users\DynamicField;
 use Paheko\Entities\Users\User;
+use Paheko\Files\Conversion;
 use Paheko\Files\Files;
 
 use KD2\Form;
 
-use const Paheko\{ADMIN_URL, BASE_URL, CALC_CONVERT_COMMAND, LOCAL_ADDRESSES_ROOT};
+use const Paheko\{ADMIN_URL, BASE_URL, LOCAL_ADDRESSES_ROOT};
 
 /**
  * Common functions used by Template (Smartyer) and UserTemplate
@@ -65,7 +66,7 @@ class CommonFunctions
 			$attributes['accept'] = '.csv,text/csv,application/csv,.CSV';
 			$help = ($help ?? '') . PHP_EOL . 'Format accepté : CSV';
 
-			if (CALC_CONVERT_COMMAND) {
+			if (Conversion::canConvert('ods')) {
 				$help .= ', LibreOffice Calc (ODS), ou Excel (XLSX)';
 				$attributes['accept'] .= ',.ods,.ODS,application/vnd.oasis.opendocument.spreadsheet'
 					. ',.xls,.XLS,application/vnd.ms-excel'

@@ -3,22 +3,19 @@
 namespace Paheko\Entities\Files;
 
 use KD2\Graphics\Image;
-use KD2\ZipReader;
 use KD2\HTML\Markdown;
 use KD2\ErrorManager;
 
+use Paheko\Files\Conversion;
 use Paheko\Static_Cache;
 use Paheko\UserException;
 use Paheko\Utils;
-use Paheko\Plugins;
 use Paheko\Web\Cache as Web_Cache;
 
-use const Paheko\{DOCUMENT_THUMBNAIL_COMMANDS, WOPI_DISCOVERY_URL, CACHE_ROOT, WWW_URL, BASE_URL, ADMIN_URL};
+use const Paheko\{WWW_URL, BASE_URL, ENABLE_FILE_THUMBNAILS};
 
 trait FileThumbnailTrait
 {
-	static protected array $_opendocument_extensions = ['odt', 'ods', 'odp', 'odg'];
-
 	protected function deleteThumbnails(): void
 	{
 		if (!$this->image && !$this->hasThumbnail()) {
@@ -83,27 +80,9 @@ trait FileThumbnailTrait
 
 	public function thumb_uri($size = null, bool $with_hash = true): ?string
 	{
-		// Don't try to generate thumbnails for large files (> 25 MB), except if it's a video
-		if ($this->size > 1024*1024*25 && substr($this->mime ?? '', 0, 6) !== 'video/') {
-			return null;
-		}
+		$ext = $this->getThumbnailExtension();
 
-		$ext = $this->extension();
-
-		if ($this->image) {
-			$ext = 'webp';
-		}
-		elseif ($ext === 'md' || $ext === 'txt') {
-			$ext = 'svg';
-		}
-		// We expect opendocument files to have an embedded thumbnail
-		elseif (in_array($ext, self::$_opendocument_extensions)) {
-			$ext = 'webp';
-		}
-		elseif (null !== $this->getDocumentThumbnailCommand()) {
-			$ext = 'webp';
-		}
-		else {
+		if (null === $ext) {
 			return null;
 		}
 
@@ -133,110 +112,36 @@ trait FileThumbnailTrait
 		return $base . $uri;
 	}
 
-	public function hasThumbnail(): bool
+	public function getThumbnailExtension(): ?string
 	{
-		return $this->thumb_url() !== null;
-	}
-
-	protected function getDocumentThumbnailCommand(): ?string
-	{
-		if (!DOCUMENT_THUMBNAIL_COMMANDS || !is_array(DOCUMENT_THUMBNAIL_COMMANDS)) {
+		// Don't try to generate thumbnails for large files (> 25 MB), except if it's a video
+		if ($this->size > 1024*1024*25 && substr($this->mime ?? '', 0, 6) !== 'video/') {
 			return null;
 		}
 
-		static $libreoffice_extensions = ['doc', 'docx', 'ods', 'xls', 'xlsx', 'odp', 'odt', 'ppt', 'pptx', 'odg'];
-		static $mupdf_extensions = ['pdf', 'xps', 'cbz', 'epub', 'svg'];
-		static $collabora_extensions = ['doc', 'docx', 'ods', 'xls', 'xlsx', 'odp', 'odt', 'ppt', 'pptx', 'odg', 'pdf', 'svg'];
+		if ($this->image) {
+			return 'webp';
+		}
 
 		$ext = $this->extension();
 
-		if (in_array('plugin', DOCUMENT_THUMBNAIL_COMMANDS)
-			&& Plugins::hasSignal('file.thumbnail.create')
-			&& ($signal = Plugins::fire('file.thumbnail.supports', true, ['file' => $this, 'extension' => $ext]))
-			&& $signal->isStopped()) {
-			return 'plugin';
+		if ($ext === 'md' || $ext === 'txt') {
+			$ext = 'svg';
 		}
-
-		if (in_array('mupdf', DOCUMENT_THUMBNAIL_COMMANDS) && in_array($ext, $mupdf_extensions)) {
-			return 'mupdf';
+		// We expect opendocument files to have an embedded thumbnail
+		elseif (ENABLE_FILE_THUMBNAILS && Conversion::canExtractThumbnail($ext)) {
+			$ext = 'webp';
 		}
-		elseif (in_array('unoconvert', DOCUMENT_THUMBNAIL_COMMANDS) && in_array($ext, $libreoffice_extensions)) {
-			return 'unoconvert';
-		}
-		elseif (in_array('collabora', DOCUMENT_THUMBNAIL_COMMANDS)
-			&& class_exists('CurlFile')
-			&& in_array($ext, $collabora_extensions)
-			&& $this->getWopiURL()) {
-			return 'collabora';
-		}
-		// Generate video thumbnails, for up to 1GB in size
-		elseif (in_array('ffmpeg', DOCUMENT_THUMBNAIL_COMMANDS)
-			&& $this->mime
-			&& substr($this->mime, 0, 6) === 'video/'
-			&& $this->size < 1024*1024*1024) {
-			return 'ffmpeg';
+		elseif (ENABLE_FILE_THUMBNAILS && Conversion::canConvert($ext)) {
+			$ext = 'webp';
 		}
 
 		return null;
 	}
 
-	/**
-	 * Extract PNG thumbnail from odt/ods/odp/odg ZIP archives.
-	 * This is the most efficient way to get a thumbnail.
-	 */
-	protected function extractOpenDocumentThumbnail(string $destination): bool
+	public function hasThumbnail(): bool
 	{
-		$zip = new ZipReader;
-
-		// We are not going to extract the archive, so it does not matter
-		$zip->enableSecurityCheck(false);
-
-		$pointer = $this->getReadOnlyPointer();
-
-		try {
-			if ($pointer) {
-				$zip->setPointer($pointer);
-			}
-			else {
-				$zip->open($this->getLocalFilePath());
-			}
-
-			$i = 0;
-			$found = false;
-
-			foreach ($zip->iterate() as $path => $entry) {
-				// There should not be more than 100 files in an opendocument archive, surely?
-				if (++$i > 100) {
-					break;
-				}
-
-				// We only care about the thumbnail
-				if ($path !== 'Thumbnails/thumbnail.png') {
-					continue;
-				}
-
-				// Thumbnail is larger than 500KB, abort, it's probably too weird
-				if ($entry['size'] > 1024*500) {
-					break;
-				}
-
-				$zip->extract($entry, $destination);
-				$found = true;
-				break;
-			}
-		}
-		catch (\RuntimeException $e) {
-			// Invalid archive
-			$found = false;
-		}
-
-		unset($zip);
-
-		if ($pointer) {
-			fclose($pointer);
-		}
-
-		return $found;
+		return $this->getThumbnailExtension() !== null;
 	}
 
 	/**
@@ -248,125 +153,21 @@ trait FileThumbnailTrait
 		$destination = Static_Cache::getPath($cache_id);
 		$ext = $this->extension();
 
-		if (in_array($ext, self::$_opendocument_extensions) && $this->extractOpenDocumentThumbnail($destination)) {
+		// Try to extract integrated thumbnail first, for OpenDocument files, if it's available
+		if (Conversion::canExtractThumbnail($ext)
+			&& Conversion::extractFileThumbnail($this, $destination)) {
 			return $destination;
 		}
 
-		$command = $this->getDocumentThumbnailCommand();
-
-		if (!$command) {
+		if (!Conversion::canConvert($ext)) {
 			return null;
 		}
 
-		if (file_exists($destination) && filesize($destination)) {
-			return $destination;
-		}
+		$r = Conversion::convert($this->getLocalOrCacheFilePath(), $destination, 'png', $this->size, $this->mime);
 
-		// Don't overload servers with large documents, this is useless
-		if (($command === 'collabora' || $command === 'unoconvert') && $this->size >= 15*1024*1024) {
+		if (!$r) {
+			Utils::safe_unlink($destination);
 			return null;
-		}
-		elseif ($command === 'mupdf' && $this->size >= 50*1024*1024) {
-			return null;
-		}
-
-		$local_path = $this->getLocalFilePath();
-		$pointer = null;
-		$tmpfile = null;
-
-		if (null === $local_path) {
-			$pointer = $this->getReadOnlyPointer();
-
-			if (!$pointer) {
-				// File does not exist in storage backend, we can't generate a thumbnail
-				return null;
-			}
-
-			// mupdf cannot correctly identify file type unless the correct file extension is used
-			// @see https://bugs.ghostscript.com/show_bug.cgi?id=708002
-			$tmpfile = tempnam(CACHE_ROOT, 'thumb-') . '.' . $ext;
-			$fp = fopen($tmpfile, 'wb');
-
-			while (!feof($pointer)) {
-				fwrite($fp, fread($pointer, 8192));
-			}
-
-			fclose($pointer);
-			fclose($fp);
-			unset($pointer, $fp);
-		}
-
-		try {
-			if ($command === 'plugin') {
-				$signal = Plugins::fire('file.thumbnail.create', true, ['file' => $this, 'destination' => $destination]);
-
-				if ($signal->isStopped()) {
-					if (!file_exists($destination)) {
-						throw new \LogicException('Thumbnail creation from plugin failed');
-					}
-
-					return $destination;
-				}
-			}
-			elseif ($command === 'collabora') {
-				Conversion::collabora($tmpfile ?? $local_path, $destination, 'png', $this->name, $this->mime);
-			}
-			else {
-				if ($command === 'mupdf') {
-					// The single '1' at the end is to tell only to render the first page
-					$cmd = sprintf('mutool draw -i -N -q -F png -o %s -w 500 -h 500 -r 72 %s 1 2>&1',
-						Utils::escapeshellarg($destination),
-						Utils::escapeshellarg($tmpfile ?? $local_path)
-					);
-				}
-				elseif ($command === 'unoconvert') {
-					// --filter-options PixelWidth=500 --filter-options PixelHeight=500
-					// see https://github.com/unoconv/unoserver/issues/85
-					// see https://github.com/unoconv/unoserver/issues/86
-					$cmd = sprintf('unoconvert --convert-to png %s %s 2>&1',
-						Utils::escapeshellarg($tmpfile ?? $local_path),
-						Utils::escapeshellarg($destination)
-					);
-				}
-				elseif ($command === 'ffmpeg') {
-					$cmd = sprintf('ffmpeg -hide_banner -loglevel error -ss 00:00:02 -i %s '
-						. '-frames:v 1 -f image2 -c png -vf scale="min(900\, iw)":-1 %s 2>&1',
-						Utils::escapeshellarg($tmpfile ?? $local_path),
-						Utils::escapeshellarg($destination)
-					);
-				}
-				else {
-					throw new \LogicException('Unknown thumbnail command: ' . $command);
-				}
-
-				$output = '';
-				$code = null;
-				$output = Utils::quick_exec($cmd, 5, $code);
-
-				// If command is not found, this means we have a configuration error
-				if ($code === 127) {
-					Utils::safe_unlink($destination);
-					throw new \LogicException(sprintf('Command "%s" failed as it wasn\'t found. Disable this command or install it. %s', $cmd, $output));
-				}
-
-				// Don't trust code as it can return != 0 even if generation was OK
-				if (!file_exists($destination) || filesize($destination) < 10) {
-					Utils::safe_unlink($destination);
-					$e = new \RuntimeException($command . ' execution failed with code: ' . $code . "\n" . $output);
-
-					// MuPDF can fail for a number of reasons: password protection, broken document, etc.
-					// ffmpeg can fail if the file is a video format but with no video, etc.
-					// So don't throw an error in these cases, just log it.
-					// Or we might get a lot of reported exceptions for weird files.
-					ErrorManager::logException($e);
-					return null;
-				}
-			}
-		}
-		finally {
-			if ($tmpfile) {
-				Utils::safe_unlink($tmpfile);
-			}
 		}
 
 		return $destination;
