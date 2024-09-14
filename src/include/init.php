@@ -235,7 +235,7 @@ foreach ($default_config as $const => $value)
  * @deprecated Remove DOCUMENT_THUMBNAIL_COMMANDS constant in 1.4.0
  */
 if (!defined('Paheko\ENABLE_FILE_THUMBNAILS')) {
-	define('Paheko\ENABLE_FILE_THUMBNAILS', defined('Paheko\DOCUMENT_THUMBNAIL_COMMANDS') && constant('Paheko\DOCUMENT_THUMBNAIL_COMMANDS') !== null);
+	define('Paheko\ENABLE_FILE_THUMBNAILS', defined('Paheko\DOCUMENT_THUMBNAIL_COMMANDS') ? constant('Paheko\DOCUMENT_THUMBNAIL_COMMANDS') !== null : true);
 }
 
 /**

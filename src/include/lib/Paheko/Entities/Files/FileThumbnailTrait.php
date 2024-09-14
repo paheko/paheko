@@ -126,14 +126,14 @@ trait FileThumbnailTrait
 		$ext = $this->extension();
 
 		if ($ext === 'md' || $ext === 'txt') {
-			$ext = 'svg';
+			return 'svg';
 		}
 		// We expect opendocument files to have an embedded thumbnail
 		elseif (ENABLE_FILE_THUMBNAILS && Conversion::canExtractThumbnail($ext)) {
-			$ext = 'webp';
+			return 'webp';
 		}
 		elseif (ENABLE_FILE_THUMBNAILS && Conversion::canConvert($ext)) {
-			$ext = 'webp';
+			return 'webp';
 		}
 
 		return null;
