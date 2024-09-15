@@ -1,0 +1,70 @@
+table.statement {
+    width: 100%;
+}
+
+table.statement td, table.statement th {
+    padding: 4pt;
+    vertical-align: top;
+}
+
+table.statement thead tr {
+    font-weight: bold;
+}
+
+table.statement .money {
+    border-left: none;
+}
+
+table.statement .num {
+    border-right: none;
+}
+
+table.statement tbody th {
+    border-left: none;
+    border-right: none;
+}
+
+table.statement tfoot th {
+    border-right: none;
+}
+
+table.statement tfoot th, table.statement tfoot td {
+    padding: 6pt;
+}
+
+table.statement thead th {
+    text-align: center;
+    font-size: 20pt;
+    font-weight: bold;
+    border: none;
+}
+
+table.statement td.spacer {
+    border: none;
+    padding: 0;
+    width: 10pt;
+}
+
+table.statement tr td.colspan, table.statement tr td.spacer {
+    border: none;
+    background-color: transparent;
+}
+
+td.money, th.money {
+    text-align: right;
+    min-width: 2em;
+}
+
+table.statement tr.spacer td {
+    height: 10pt;
+    border: none !important;
+    background-color: transparent;
+}
+
+table caption {
+    display: none;
+}
+
+table th em {
+    font-weight: normal;
+}
