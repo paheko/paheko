@@ -333,7 +333,7 @@ class Accounts
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('balance', false);
-		$list->groupBy('tu.id_user, tu.id_transaction');
+		$list->groupBy('u.id');
 		$list->setCount('COUNT(*)');
 		$list->setPageSize(null);
 		$list->setExportCallback(function (&$row) {

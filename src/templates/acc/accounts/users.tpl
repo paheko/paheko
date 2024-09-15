@@ -6,7 +6,7 @@
 
 <p class="actions">
 	{if $all}
-		{linkbutton shape="eye-off" label="Seulement les membres qui ont une dette ou une créance" href="?all=0"}
+		{linkbutton shape="eye-off" label="Seulement les membres qui ont eu une dette ou une créance" href="?all=0"}
 	{else}
 		{linkbutton shape="eye" label="Voir tous les membres" href="?"}
 	{/if}
