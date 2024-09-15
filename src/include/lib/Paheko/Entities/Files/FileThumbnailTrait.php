@@ -126,6 +126,10 @@ trait FileThumbnailTrait
 
 		$ext = $this->extension();
 
+		if (!$ext) {
+			return null;
+		}
+
 		if ($ext === 'md' || $ext === 'txt') {
 			return 'svg';
 		}
