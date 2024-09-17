@@ -462,6 +462,11 @@ if (!defined('Paheko\INSTALL_PROCESS')) {
 		Utils::redirect(ADMIN_URL . 'upgrade.php');
 	}
 
+	if (version_compare($v, paheko_version(), '>')) {
+		echo 'Temporairement indisponible. Merci de revenir plus tard.';
+		exit;
+	}
+
 	if (Config::getInstance()->timezone) {
 		@date_default_timezone_set(Config::getInstance()->timezone);
 	}
