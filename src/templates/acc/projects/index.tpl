@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Projets" current="acc/years"}
+{include file="_head.tpl" title="Projets" current="acc/years" prefer_landscape=true}
 
 {include file="./_nav.tpl" current='index'}
 

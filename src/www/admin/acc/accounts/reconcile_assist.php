@@ -68,13 +68,13 @@ if ($start && $end) {
 	}
 
 	$journal = $account->getReconcileJournal(CURRENT_YEAR_ID, $start, $end);
-}
 
-// Enregistrement des cases cochées
-$form->runIf('save', function () use ($journal, $csv) {
-	Transactions::saveReconciled($journal, f('reconcile'));
-	$csv->clear();
-}, $csrf_key, '!acc/accounts/reconcile_assist.php?id=' . $account->id . '&msg=OK');
+	// Enregistrement des cases cochées
+	$form->runIf('save', function () use ($journal, $csv) {
+		Transactions::saveReconciled($journal, f('reconcile'));
+		$csv->clear();
+	}, $csrf_key, '!acc/accounts/reconcile_assist.php?id=' . $account->id . '&msg=OK');
+}
 
 $lines = null;
 

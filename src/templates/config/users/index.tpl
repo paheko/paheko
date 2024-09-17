@@ -13,6 +13,28 @@
 
 <form method="post" action="{$self_url}">
 
+	{if LOCAL_LOGIN !== null && USER_CONFIG_FILE}
+	<fieldset>
+		<legend>Connexion par mot de passe</legend>
+		{if !$can_configure_local_login}
+			<p class="alert block">
+				Aucun membre administrateur ne possède de mot de passe, il n'est donc pas possible d'activer la connexion par mot de passe.<br />
+				Choisissez un mot de passe pour au moins un membre administrateur pour pouvoir modifier cette option.
+			</p>
+		{else}
+			<p class="help">
+				Cette installation de Paheko ne fonctionne que sur un seul ordinateur.<br />On suppose qu'une seule personne y a accès et donc la connexion est désactivée par défaut.
+			</p>
+			<dl>
+				{input type="radio" name="local_login" value=-1 label="Désactiver la connexion par mot de passe" default=$local_login}
+				<dd class="help">Dans ce cas le premier membre administrateur ({$first_admin_user_name}) sera toujours connecté. Il ne sera pas possible de se connecter avec un autre compte de membre.</dd>
+				{input type="radio" name="local_login" value=0 label="Activer la connexion par mot de passe" default=$local_login}
+				<dd class="help">Si cette option est sélectionnée, vous devrez indiquer un identifiant et un mot de passe pour vous connecter à chaque fois.</dd>
+			</dl>
+		{/if}
+	</fieldset>
+	{/if}
+
 	<fieldset>
 		<legend>Préférences des membres</legend>
 		<dl>

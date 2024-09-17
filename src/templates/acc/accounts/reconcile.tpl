@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Rapprochement : %s — %s"|args:$account.code:$account.label current="acc/accounts"}
+{include file="_head.tpl" title="Rapprochement : %s — %s"|args:$account.code:$account.label current="acc/accounts" prefer_landscape=true}
 
 {include file="acc/_year_select.tpl"}
 
@@ -47,6 +47,8 @@
 			{button type="submit" label="Afficher"}
 		</p>
 	</fieldset>
+</form>
+<form method="get" action="{$self_url_no_qs}" class="noprint">
 	<fieldset class="shortFormLeft advanced-filters {if !$has_advanced_options}hidden{/if}">
 		<legend>Configuration du rapprochement</legend>
 		<dl>
@@ -170,7 +172,7 @@ function recalculateTable()
 {
 	var checkboxes = $('tbody.lines input[type=checkbox]');
 	var diff = document.querySelector('[data-sum-end-diff]');
-	var sum_start = parseInt(document.querySelector('[data-sum]').dataset.sum, 10);
+	var sum_start = parseInt(document.querySelector('[data-reconciled-sum]').dataset.reconciledSum, 10);
 	var sum_end = document.querySelectorAll('[data-reconciled-sum]')[1];
 	var sum = sum_start;
 

@@ -11,11 +11,13 @@ if (!CURRENT_YEAR_ID) {
 
 $accounts = new Accounts($current_year->id_chart);
 
-$list = $accounts->listUserAccounts($current_year->id);
+$all = qg('all') !== '0';
+
+$list = $accounts->listUserAccounts($current_year->id, !$all);
 $list->loadFromQueryString();
 
 $tpl->assign('chart_id', $current_year->id_chart);
 
-$tpl->assign(compact('list'));
+$tpl->assign(compact('list', 'all'));
 
 $tpl->display('acc/accounts/users.tpl');

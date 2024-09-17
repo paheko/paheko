@@ -3,11 +3,12 @@
 namespace Paheko\Web\Render;
 
 use Paheko\UserTemplate\CommonModifiers;
+use Paheko\UserTemplate\Modules;
+use Paheko\Utils;
+use Paheko\Users\Session;
 
 use KD2\HTML\Markdown as KD2_Markdown;
 use KD2\HTML\Markdown_Extensions;
-
-use Paheko\UserTemplate\Modules;
 
 class Markdown_Parser extends KD2_Markdown
 {
@@ -30,7 +31,7 @@ class Markdown extends AbstractRender
 
 	static protected $md = null;
 
-	public function render(string $content = null): string
+	public function renderUncached(string $content = null): string
 	{
 		if (empty($content)) {
 			return '';
@@ -50,14 +51,12 @@ class Markdown extends AbstractRender
 
 		Extensions::setRenderer($this);
 
-		$content = self::$md->text($content);
-
-		return $this->outputHTML($content);
+		return self::$md->text($content);
 	}
 
 	static public function defaultExtensionCallback(bool $block, array $params, ?string $content, string $name, KD2_Markdown $md): string
 	{
-		$args = array_merge($params, compact('block', 'params', 'content'));
+		$args = compact('block', 'params', 'content');
 
 		$out = Modules::snippetsAsString(sprintf(Modules::SNIPPET_MARKDOWN_EXTENSION, $name), $args);
 

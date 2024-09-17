@@ -14,14 +14,14 @@ use KD2\DB\EntityManager as EM;
 class Web
 {
 	const BREADCRUMBS_SQL = '
-		WITH RECURSIVE parents(title, id_parent, uri, id, level) AS (
-			SELECT title, id_parent, uri, id, 1 FROM web_pages WHERE id = %s
+		WITH RECURSIVE parents(title, status, id_parent, uri, id, level) AS (
+			SELECT title, status, id_parent, uri, id, 1 FROM web_pages WHERE id = %s
 			UNION ALL
-			SELECT p.title, p.id_parent, p.uri, p.id, level + 1
+			SELECT p.title, p.status, p.id_parent, p.uri, p.id, level + 1
 			FROM web_pages p
 				JOIN parents ON parents.id_parent = p.id
 		)
-		SELECT id, title, uri FROM parents ORDER BY level DESC;';
+		SELECT id, title, uri, status FROM parents ORDER BY level DESC;';
 
 	static public function search(string $search): array
 	{
@@ -75,7 +75,8 @@ class Web
 	static public function getDraftsList(?int $id_parent): DynamicList
 	{
 		$list = self::getPagesList($id_parent);
-		$list->setParameter('status', Page::STATUS_DRAFT);
+		$conditions = self::getParentClause($id_parent) . ' AND type = :type AND status = :status';
+		$list->setConditions($conditions);
 		$list->setPageSize(1000);
 		return $list;
 	}
@@ -99,11 +100,11 @@ class Web
 		];
 
 		$tables = Page::TABLE;
-		$conditions = self::getParentClause($id_parent) . ' AND type = :type AND status = :status';
+		$conditions = self::getParentClause($id_parent) . ' AND type = :type AND status != :status';
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->setParameter('type', Page::TYPE_PAGE);
-		$list->setParameter('status', Page::STATUS_ONLINE);
+		$list->setParameter('status', Page::STATUS_DRAFT);
 		$list->orderBy('title', false);
 		return $list;
 	}

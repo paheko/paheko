@@ -15,6 +15,7 @@ use Paheko\Users\Session;
 use Paheko\Web\Router;
 
 use Paheko\Entities\Files\File;
+use Paheko\Entities\Users\Category;
 
 use const Paheko\{PLUGINS_ROOT, WWW_URL, ROOT, ADMIN_URL};
 
@@ -27,7 +28,6 @@ class Plugin extends Entity
 	const INSTALL_FILE = 'install.php';
 	const UPGRADE_FILE = 'upgrade.php';
 	const UNINSTALL_FILE = 'uninstall.php';
-	const README_FILE = 'admin/README.md';
 
 	const PROTECTED_FILES = [
 		self::META_FILE,
@@ -62,6 +62,8 @@ class Plugin extends Entity
 
 	protected ?string $_broken_message = null;
 
+	protected ?\stdClass $_ini;
+
 	public function hasCode(): bool
 	{
 		return Plugins::exists($this->name);
@@ -82,6 +84,13 @@ class Plugin extends Entity
 
 		$this->assert(!isset($this->restrict_section) || in_array($this->restrict_section, Session::SECTIONS, true), 'Restriction de section invalide');
 		$this->assert(!isset($this->restrict_level) || in_array($this->restrict_level, Session::ACCESS_LEVELS, true), 'Restriction de niveau invalide');
+
+		if (isset($this->restrict_section, $this->restrict_level)) {
+			$this->assert(array_key_exists($this->restrict_level, Category::PERMISSIONS[$this->restrict_section]['options']),
+				sprintf('This restricted access level doesn\'t exist for this section: %s', $this->restrict_level));
+		}
+
+		$this->assert(Plugins::isAllowed($this->name), 'Cette extension est désactivée par l\'hébergeur.');
 	}
 
 	public function setBrokenMessage(string $str)
@@ -94,13 +103,14 @@ class Plugin extends Entity
 		return $this->_broken_message;
 	}
 
-	/**
-	 * Fills information from plugin.ini file
-	 */
-	public function updateFromINI(): bool
+	public function getINIProperties(): ?\stdClass
 	{
+		if (isset($this->_ini)) {
+			return $this->_ini;
+		}
+
 		if (!$this->hasFile(self::META_FILE)) {
-			return false;
+			return null;
 		}
 
 		try {
@@ -111,12 +121,28 @@ class Plugin extends Entity
 		}
 
 		if (empty($ini)) {
-			return false;
+			return null;
 		}
 
 		$ini = (object) $ini;
 
 		if (!isset($ini->name)) {
+			return null;
+		}
+
+		$this->_ini = $ini;
+
+		return $ini;
+	}
+
+	/**
+	 * Fills information from plugin.ini file
+	 */
+	public function updateFromINI(): bool
+	{
+		$ini = $this->getINIProperties();
+
+		if (!$ini) {
 			return false;
 		}
 
@@ -127,11 +153,9 @@ class Plugin extends Entity
 		$restrict_section = null;
 		$restrict_level = null;
 
-		if (isset($ini->restrict_section, $ini->restrict_level)
-			&& array_key_exists($ini->restrict_level, Session::ACCESS_LEVELS)
-			&& in_array($ini->restrict_section, Session::SECTIONS)) {
+		if (isset($ini->restrict_section, $ini->restrict_level)) {
 			$restrict_section = $ini->restrict_section;
-			$restrict_level = Session::ACCESS_LEVELS[$ini->restrict_level];
+			$restrict_level = Session::ACCESS_LEVELS[$ini->restrict_level] ?? null;
 		}
 
 		$this->set('label', $ini->name);

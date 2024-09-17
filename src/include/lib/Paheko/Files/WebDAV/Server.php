@@ -40,7 +40,7 @@ class Server
 		}
 
 		$dav = new WebDAV;
-		$nc = new NextCloud($dav);
+		$nc = new NextCloud;
 		$storage = new Storage(Session::getInstance(), $nc);
 		$dav->setStorage($storage);
 

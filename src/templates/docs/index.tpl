@@ -81,7 +81,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 {if $dir.parent}
 	<nav class="breadcrumbs">
 	{if $context_ref}
-		{linkbutton href="?id=%s"|args:$parent_uri label="Retour au dossier parent" shape="left"}
+		{linkbutton href="?path=%s"|args:$parent_uri label="Retour au dossier parent" shape="left"}
 		{if $context == File::CONTEXT_TRANSACTION}
 			{linkbutton href="!acc/transactions/details.php?id=%d"|args:$context_ref|local_url label="Détails de l'écriture" shape="menu"}
 		{elseif $context == File::CONTEXT_USER}

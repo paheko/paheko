@@ -20,10 +20,10 @@
 			<dt>Pays</dt>
 			<dd>{$config.country|get_country_name} {linkbutton href="!config/" shape="settings" label="Modifier le pays dans la configuration"}</dd>
 		</dl>
-		{if $default_chart && $year.id_chart == $default_chart.id}
+		{if $default_chart_code}
 		<dl class="chart-default">
 			<dt><label for="f_change_chart">Plan comptable recommandé</label></dt>
-			<dd>{$default_chart.label} {button id="f_change_chart" shape="edit" label="Choisir un autre plan comptable" onclick="g.toggle('.chart-default', false); g.toggle('.charts', true);"}</dd>
+			<dd>{$default_chart_label} {button id="f_change_chart" shape="edit" label="Choisir un autre plan comptable" onclick="g.toggle('.chart-default', false); g.toggle('.charts', true);"}</dd>
 			<dd class="help">Le choix du plan comptable ne peut être modifié une fois que l'exercice sera ouvert.<br />Mais il sera possible d'y ajouter de nouveaux comptes si nécessaire.</dd>
 		</dl>
 		<dl class="charts hidden">
@@ -103,7 +103,7 @@
 		{input type="hidden" name="start_date" default=$year.start_date}
 		{input type="hidden" name="end_date" default=$year.end_date}
 		{input type="hidden" name="id_chart" default=$year.id_chart}
-		{button type="submit" name="step" value="0" label="Retour" shape="left" }
+		{linkbutton label="Retour" shape="left" href="?"}
 		{button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
 	</p>
 {/if}

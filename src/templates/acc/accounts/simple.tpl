@@ -54,10 +54,10 @@
 				<td class="num">{if $line.files}{$line.files}{/if}</td>
 				{if property_exists($line, 'status_label')}
 				<td>
-					{if $line.status & Entities\Accounting\Transaction::STATUS_WAITING}
-						<span class="alert">{$line.status_label}</span>
-					{else}
-						<span class="confirm">{$line.status_label}</span>
+					{if $line.status & Entities\Accounting\Transaction::STATUS_WAITING && $line.status_label}
+						{tag color="darkred" label=$line.status_label}
+					{elseif $line.status_label}
+						{tag color="DarkSeaGreen" label=$line.status_label}
 					{/if}
 				</td>
 				{/if}
@@ -86,7 +86,7 @@
 					{csrf_field key="projects_action"}
 					<select name="action">
 						<option value="">— Choisir une action à effectuer —</option>
-						{if $has_debt_or_credit}
+						{if $type == Transaction::TYPE_DEBT}
 							<option value="payoff">Régler ces dettes</option>
 						{elseif $type == Transaction::TYPE_CREDIT}
 							<option value="payoff">Régler ces créances</option>

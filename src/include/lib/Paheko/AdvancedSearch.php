@@ -10,7 +10,18 @@ abstract class AdvancedSearch
 	 * - order
 	 * - desc
 	 */
-	abstract public function simple(string $query, bool $allow_redirect = false): \stdClass;
+	abstract public function simple(string $query, array $options = []): \stdClass;
+
+	/**
+	 * Redirect to a page if the text query matches a specific text
+	 * This is performed before the actual search query is built.
+	 */
+	abstract public function redirect(string $query, array $options = []): bool;
+
+	/**
+	 * Redirect to a page for the passed result row
+	 */
+	abstract public function redirectResult(\stdClass $result): void;
 
 	/**
 	 * Return list of columns. The format is similar to the one accepted in DynamicList.
@@ -83,26 +94,12 @@ abstract class AdvancedSearch
 		return $list;
 	}
 
-	/**
-	 * Redirects to a URL if only one result is found for a simple search
-	 */
-	public function redirect(DynamicList $list): void
-	{
-		if ($list->count() != 1) {
-			return;
-		}
-
-		$item = $list->iterate()->current();
-		Utils::redirect($item->id);
-	}
-
 	public function build(array $groups): \stdClass
 	{
 		$db = DB::getInstance();
 		$columns = $this->columns();
 
 		$select_columns = [];
-		$query_columns = [];
 		$query_groups = '';
 		$invalid = 0;
 
@@ -132,8 +129,7 @@ abstract class AdvancedSearch
 					continue;
 				}
 
-				if (!array_key_exists($condition['column'], $columns))
-				{
+				if (!array_key_exists($condition['column'], $columns)) {
 					// Ignorer une condition qui se rapporte à une colonne
 					// qui n'existe pas, cas possible si on reprend une recherche
 					// après avoir modifié les fiches de membres
@@ -144,11 +140,10 @@ abstract class AdvancedSearch
 				$select_columns[] = $condition['column'];
 
 				// Just append the column to the select
-				if ($condition['operator'] == '1') {
+				if ($condition['operator'] === '1') {
 					continue;
 				}
 
-				$query_columns[] = $condition['column'];
 				$column = $columns[$condition['column']];
 
 				if (isset($column['where'])) {

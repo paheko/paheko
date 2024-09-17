@@ -113,6 +113,18 @@ class Plugins
 		return self::getPath($name) !== null;
 	}
 
+	static public function hasSignal(string $name): bool
+	{
+		foreach (SYSTEM_SIGNALS as $system_signal) {
+			if (key($system_signal) === $name) {
+				return true;
+			}
+		}
+
+		return (bool) DB::getInstance()->firstColumn('SELECT 1 FROM plugins_signals AS s INNER JOIN plugins p ON p.name = s.plugin
+			WHERE s.signal = ? AND p.enabled = 1 LIMIT 1;', $name);
+	}
+
 	/**
 	 * Fire a plugin signal
 	 * @param  string $name      Signal name
@@ -154,6 +166,10 @@ class Plugins
 		static $plugins = [];
 
 		foreach ($list as $row) {
+			if (!self::isAllowed($row->plugin)) {
+				continue;
+			}
+
 			$plugins[$row->plugin] ??= Plugins::get($row->plugin);
 			$plugin = $plugins[$row->plugin];
 
@@ -370,7 +386,7 @@ class Plugins
 
 		foreach (self::listInstalled() as $plugin) {
 			// Ignore plugins if code is no longer available
-			if (!$plugin->isAvailable()) {
+			if (!$plugin->isAvailable() || !self::isAllowed($plugin->name)) {
 				continue;
 			}
 

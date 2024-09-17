@@ -25,6 +25,19 @@ class Accounts
 		$this->em = EntityManager::getInstance(Account::class);
 	}
 
+	public function createAuto(string $code, ?string $label = null)
+	{
+		$account = new Account;
+		$account->import([
+			'id_chart' => $this->chart_id,
+			'user' => true,
+			'code' => $code,
+			'label' => $label ?? $code,
+		]);
+		$account->setLocalRules();
+		return $account;
+	}
+
 	static public function get(int $id)
 	{
 		return EntityManager::findOneById(Account::class, $id);
@@ -269,7 +282,7 @@ class Accounts
 		return $this->getIdForType(Account::TYPE_CLOSING);
 	}
 
-	public function listUserAccounts(int $year_id): DynamicList
+	public function listUserAccounts(int $year_id, bool $only_third_party): DynamicList
 	{
 		$columns = [
 			'id' => [
@@ -283,24 +296,40 @@ class Accounts
 				'select' => DynamicFields::getNameFieldsSQL('u'),
 				'label' => 'Membre',
 			],
-			'balance' => [
-				'select' => 'SUM(l.debit - l.credit)',
-				'label'  => 'Solde',
-				//'order'  => 'balance != 0 %s, balance < 0 %1$s',
-			],
-			'status' => [
-				'select' => null,
-				'label' => 'Statut',
-			],
 		];
 
-		$tables = 'acc_transactions_users tu
-			INNER JOIN users u ON u.id = tu.id_user
+		if (!$only_third_party) {
+			$columns['products'] = [
+				'select' => sprintf('SUM(CASE WHEN a.type = %d THEN l.credit ELSE 0 END)', Account::TYPE_REVENUE),
+				'label'  => 'Total produits',
+			];
+			$columns['expenses'] = [
+				'select' => sprintf('SUM(CASE WHEN a.type = %d THEN l.debit ELSE 0 END)', Account::TYPE_EXPENSE),
+				'label'  => 'Total charges',
+			];
+		}
+
+		$columns['balance'] = [
+			'select' => sprintf('SUM(CASE WHEN a.type = %d THEN l.debit - l.credit ELSE 0 END)', Account::TYPE_THIRD_PARTY),
+			'label'  => 'Solde comptes de tiers',
+		];
+
+		$columns['status'] = [
+			'select' => null,
+			'label' => 'Statut',
+		];
+
+		$tables = 'users u
+			INNER JOIN (SELECT * FROM acc_transactions_users GROUP BY id_transaction, id_user) AS tu ON tu.id_user = u.id
 			INNER JOIN acc_transactions t ON tu.id_transaction = t.id
 			INNER JOIN acc_transactions_lines l ON t.id = l.id_transaction
 			INNER JOIN acc_accounts a ON a.id = l.id_account';
 
-		$conditions = 'a.type = ' . Account::TYPE_THIRD_PARTY . ' AND t.id_year = ' . $year_id;
+		$conditions = 't.id_year = ' . $year_id;
+
+		if ($only_third_party) {
+			$conditions .= ' AND a.type = ' . Account::TYPE_THIRD_PARTY;
+		}
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('balance', false);

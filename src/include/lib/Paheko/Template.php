@@ -140,6 +140,8 @@ class Template extends Smartyer
 			{
 				return 'continue;';
 			}
+
+			return null;
 		});
 
 		$this->register_compile_function('use', function (Smartyer $s, $pos, $block, $name, $raw_args) {
@@ -147,6 +149,8 @@ class Template extends Smartyer
 			{
 				return sprintf('use %s;', $raw_args);
 			}
+
+			return null;
 		});
 
 		$this->register_function('form_errors', [$this, 'formErrors']);
@@ -191,7 +195,6 @@ class Template extends Smartyer
 
 		$this->register_modifier('strlen', fn($a) => strlen($a ?? ''));
 		$this->register_modifier('dump', ['KD2\ErrorManager', 'dump']);
-		$this->register_modifier('get_country_name', ['Paheko\Utils', 'getCountryName']);
 		$this->register_modifier('abs', function($a) { return abs($a ?? 0); });
 		$this->register_modifier('percent_of', function($a, $b) { return !$b ? $b : round($a / $b * 100); });
 
@@ -229,6 +232,7 @@ class Template extends Smartyer
 		// Overwrite default money modifiers
 		$this->register_modifier('money', [CommonModifiers::class, 'money_html']);
 		$this->register_modifier('money_currency', [CommonModifiers::class, 'money_currency_html']);
+		$this->register_modifier('money_currency_text', [CommonModifiers::class, 'money_currency']);
 	}
 
 
@@ -408,15 +412,24 @@ class Template extends Smartyer
 			$list = [$params['section'] => Category::PERMISSIONS[$params['section']]];
 			$perms = (object) ['perm_' . $params['section'] => $params['level']];
 		}
-		else {
+		elseif (isset($params['permissions'])) {
 			$perms = $params['permissions'];
 			$list = Category::PERMISSIONS;
 		}
+		else {
+			return '';
+		}
 
 		foreach ($list as $name => $config) {
-			$access = $perms->{'perm_' . $name};
-			$label = sprintf('%s : %s', $config['label'], $config['options'][$access]);
-			$out[$name] = sprintf('<b class="access_%s %s" title="%s">%s</b>', $access, $name, htmlspecialchars($label), $config['shape']);
+			$level = $perms->{'perm_' . $name};
+
+			if (!isset($config['options'][$level])) {
+				continue;
+				//throw new \LogicException('This level does not exist: ' . $level);
+			}
+
+			$label = sprintf('%s : %s', $config['label'], $config['options'][$level]);
+			$out[$name] = sprintf('<b class="access_%s %s" title="%s">%s</b>', $level, $name, htmlspecialchars($label), $config['shape']);
 		}
 
 		return implode(' ', $out);

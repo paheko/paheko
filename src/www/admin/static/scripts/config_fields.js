@@ -82,13 +82,17 @@ function addPlusButton () {
 	var btn = addBtn.cloneNode();
 	btn.onclick = addOption;
 
-	if (options.length < 30) {
-		let last = options[options.length - 1];
+	var type = $('#f_type').value;
 
-		if (last.querySelector('.add')) {
-			return;
-		}
-
-		last.appendChild(btn);
+	if (type === 'multiple' && options.length >= 32) {
+		return;
 	}
+
+	let last = options[options.length - 1];
+
+	if (last.querySelector('.add')) {
+		return;
+	}
+
+	last.appendChild(btn);
 }

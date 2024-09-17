@@ -24,7 +24,8 @@ use const Paheko\{
 	SECRET_KEY,
 	WWW_URL,
 	ADMIN_URL,
-	LOCAL_LOGIN
+	LOCAL_LOGIN,
+	DATA_ROOT
 };
 
 use KD2\Security;
@@ -103,7 +104,7 @@ class Session extends \KD2\UserSession
 		$this->sid_in_url_secret = '&spko=' . sha1(SECRET_KEY);
 	}
 
-	public function isPasswordCompromised($password)
+	public function isPasswordCompromised(string $password): bool
 	{
 		if (!isset($this->http)) {
 			$this->http = new \KD2\HTTP;
@@ -147,6 +148,21 @@ class Session extends \KD2\UserSession
 		}
 
 		return $id;
+	}
+
+	protected function rememberMeAutoLogin(): bool
+	{
+		$r = parent::rememberMeAutoLogin();
+
+		if ($r) {
+			$user_id = $this->getUser()->id;
+			Plugins::fire('user.login.auto', false, compact('user_id'));
+
+			// Update login date as well
+			$this->db->preparedQuery('UPDATE users SET date_login = ? WHERE id = ?;', [new \DateTime, $user_id]);
+		}
+
+		return $r;
 	}
 
 	protected function storeRememberMeSelector($selector, $hash, $expiry, $user_id)
@@ -210,7 +226,32 @@ class Session extends \KD2\UserSession
 			$logged = $this->forceLogin(LOCAL_LOGIN);
 		}
 
+		// Logout if data_root doesn't match, to forbid one session being used with another organization
+		if ($logged) {
+			$root = $this->get('data_root');
+
+			if (!$root) {
+				$this->set('data_root', DATA_ROOT);
+				$this->save();
+			}
+			elseif ($root !== DATA_ROOT) {
+				$this->logout();
+				return false;
+			}
+		}
+
 		return $logged;
+	}
+
+	protected function create($user_id): bool
+	{
+		$r = parent::create($user_id);
+
+		// Make sure we cannot use the same login for another organization, by linking it to the data root
+		$this->set('data_root', DATA_ROOT);
+		$this->save();
+
+		return $r;
 	}
 
 	public function forceLogin($login)
@@ -291,7 +332,7 @@ class Session extends \KD2\UserSession
 			Log::add(Log::LOGIN_SUCCESS, $details, $user_id);
 
 			// Mettre à jour la date de connexion
-			$this->db->preparedQuery('UPDATE users SET date_login = ? WHERE id = ?;', [new \DateTime, $user_id]);
+			$this->db->preparedQuery('UPDATE users SET date_login = ? WHERE id = ?;', [new \DateTime, $this->getUser()->id]);
 		}
 		else {
 			Log::add(Log::LOGIN_FAIL, $details, $user_id);
@@ -584,7 +625,9 @@ class Session extends \KD2\UserSession
 					$ext = Modules::get($name);
 				}
 
-				$read = $write = $ext->restrict_section ? $this->canAccess($ext->restrict_section, $ext->restrict_level) : false;
+				$read = $write = $ext->restrict_section ? $this->canAccess($ext->restrict_section, $ext->restrict_level) : null;
+				$read ??= true;
+				$write ??= false;
 			}
 
 			$this->_files_permissions[$base] = [
@@ -652,10 +695,13 @@ class Session extends \KD2\UserSession
 				return $default[$permission];
 			}
 
-			if ($this->isLogged() && (int)$b === $this::getUserId()) {
+			// Respect field access level, if this is the users files, and he/she is not an admin
+			// As if the user is an admin, then they can do anything
+			if ($this->isLogged() && (int)$b === $this::getUserId() && !$this->canAccess(self::SECTION_USERS, self::ACCESS_ADMIN)) {
 				$read = $field->user_access_level >= self::ACCESS_READ;
 				$write = $field->user_access_level >= self::ACCESS_WRITE;
 			}
+			// If this is not the users files, use the field access level to see if the user category level matches
 			else {
 				$read = $this->canAccess(self::SECTION_USERS, $field->management_access_level);
 				$write = $this->canAccess(self::SECTION_USERS, self::ACCESS_WRITE) && $this->canAccess(self::SECTION_USERS, $field->management_access_level);

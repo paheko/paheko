@@ -33,9 +33,7 @@
 {if $_GET.msg == 'OPEN'}
 <p class="block error">
 	Il n'existe aucun exercice ouvert.
-	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-		Merci d'en <a href="{$admin_url}acc/years/new.php">créer un nouveau</a> pour pouvoir saisir des écritures.
-	{/if}
+	Merci d'en créer un pour pouvoir saisir des écritures.
 </p>
 {/if}
 
@@ -81,7 +79,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td>{if $year.closed}<em>Clôturé</em>{else}<strong class="confirm">En cours</strong>{/if}</td>
+				<td>{if $year.closed}{tag label="Clôturé"}{else}{tag label="En cours" color="darkgreen"}{/if}</td>
 				<td>
 				{linkbutton label="Export" shape="export" href="export.php?year=%d"|args:$year.id}
 				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$year.closed}
@@ -98,7 +96,11 @@
 	</table>
 {else}
 	<p class="block alert">
-		Il n'y a pas d'exercice en cours.
+		Il n'y a pas d'exercice.
+		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
+			<br />{linkbutton shape="plus" href="!acc/years/new.php" label="Créer un nouvel exercice"}
+		{/if}
+
 	</p>
 {/if}
 

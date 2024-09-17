@@ -94,6 +94,14 @@ class UserTemplate extends \KD2\Brindille
 	protected $escape_default = 'html';
 
 	/**
+	 * List of user-defined functions
+	 * @var array
+	 */
+	protected $user_modifiers = [];
+	protected $user_functions = [];
+	protected $user_sections = [];
+
+	/**
 	 * Return TRUE if the filename is probably Brindille template code
 	 * and should be treated as a UserTemplate
 	 */
@@ -452,7 +460,7 @@ class UserTemplate extends \KD2\Brindille
 		}
 		catch (Brindille_Exception $e) {
 			$path = $this->file ? $this->file->path : ($this->code ? 'code' : str_replace(ROOT, '…', $this->path));
-			$is_user_code = $this->file || $this->code || ($this->module && $this->module->hasLocal());
+			$is_user_code = !$this->path;
 
 			$message = sprintf("Erreur dans '%s' :\n%s", $path, $e->getMessage());
 
@@ -760,12 +768,20 @@ class UserTemplate extends \KD2\Brindille
 		exit;
 	}
 
+	/**
+	 * Override parent Brindille class _callFunction, just to make sure UserException
+	 * (eg. invalid user-entry) are thrown and not converted to Brindille_Exception
+	 * (eg. syntax errors).
+	 */
 	public function _callFunction(string $name, array $params, int $line) {
 		try {
 			return call_user_func($this->_functions[$name], $params, $this, $line);
 		}
 		catch (UserException $e) {
 			throw $e;
+		}
+		catch (Brindille_Exception $e) {
+			throw new Brindille_Exception(sprintf("line %d: %s", $line, $e->getMessage()), 0, $e);
 		}
 		catch (\Exception $e) {
 			throw new Brindille_Exception(sprintf("line %d: function '%s' has returned an error: %s\nParameters: %s", $line, $name, $e->getMessage(), substr(var_export($params, true), 6)), 0, $e);
@@ -791,19 +807,61 @@ class UserTemplate extends \KD2\Brindille
 			return;
 		}
 
-		$table_name = 'module_data_' . $module->name;
-
-		if (!DB::getInstance()->test('sqlite_master', 'type = \'table\' AND name = ?', $table_name)) {
-			$table_name = null;
-		}
-
 		$this->module = $module;
 		$this->assign('module', array_merge($module->asArray(false), [
 			'config'       => json_decode(json_encode($module->config), true),
 			'url'          => $module->url(),
 			'public_url'   => $module->public_url(),
 			'storage_root' => $module->storage_root(),
-			'table'        => $table_name,
+			'table'        => $module->hasTable() ? $module->table_name : null,
 		]));
+	}
+
+	/**
+	 * Call a user-defined function (using {{#define}} and {{:call}} {{#call}} etc.)
+	 */
+	public function callUserFunction(string $context, string $name, array $params, int $line)
+	{
+		if ($context !== 'modifier' && $context !== 'function' && $context !== 'section') {
+			throw new \LogicException('Invalid user function context: ' . $context);
+		}
+
+		if (!array_key_exists($name, $this->{'user_' . $context . 's'})) {
+			throw new Brindille_Exception(sprintf('call to undefined user %s \'%s\'', $context, $name));
+		}
+
+		return $this->{'user_' . $context . 's'}[$name]($params, $line);
+	}
+
+	/**
+	 * Register a new user-defined function (this can either be a modifier, function or section)
+	 */
+	public function registerUserFunction(string $context, string $name, callable $function): void
+	{
+		if ($context !== 'modifier' && $context !== 'function' && $context !== 'section') {
+			throw new \LogicException('Invalid user function context: ' . $context);
+		}
+
+		if (!preg_match(self::RE_VALID_VARIABLE_NAME, $name)) {
+			throw new Brindille_Exception(sprintf('Invalid syntax for function name \'%s\'', $name));
+		}
+
+		$this->{'user_' . $context . 's'}[$name] = $function;
+	}
+
+	/**
+	 * Copy user-defined functions between UserTemplate instances
+	 * This is so that a user-defined function defined in an included template
+	 * can be called by the parent template.
+	 */
+	public function copyUserFunctionsTo(UserTemplate $target): void
+	{
+		$contexts = ['modifier', 'function', 'section'];
+
+		foreach ($contexts as $context) {
+			foreach ($this->{'user_' . $context . 's'} as $name => $function) {
+				$target->registerUserFunction($context, $name, $function->bindTo($target));
+			}
+		}
 	}
 }

@@ -118,6 +118,7 @@ class CommonModifiers
 		'lcfirst',
 		'abs',
 		'format_phone_number',
+		'get_country_name' => [Utils::class, 'getCountryName'],
 	];
 
 	static public function protect_contact(?string $contact, ?string $type = null): string
@@ -340,7 +341,7 @@ class CommonModifiers
 			return $str;
 		}
 
-		$str = preg_replace('/[\h]*([?!:»;])(?=\s|$)/us', "\xc2\xa0\\1", $str);
+		$str = preg_replace('/(?:\h|(?!&\w))([?!:»;])(?=\s|$)/us', "\xc2\xa0\\1", $str);
 		$str = preg_replace('/(?<=^|\s)([«])[\h]*/u', "\\1\xc2\xa0", (string)$str);
 		return $str;
 	}

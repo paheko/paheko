@@ -2,6 +2,7 @@
 namespace Paheko;
 
 use Paheko\Files\Storage;
+use Paheko\Install;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -26,27 +27,7 @@ if (FILE_STORAGE_BACKEND === 'FileSystem') {
 	}, $csrf_key, '?msg=OK');
 }
 
-$constants = [];
-
-foreach (get_defined_constants(false) as $key => $value) {
-	if (strpos($key, 'Paheko\\') !== 0) {
-		continue;
-	}
-
-	$key = str_replace('Paheko\\', '', $key);
-
-	// Hide potentially secret values
-	if ($key === 'SECRET_KEY') {
-		$value = '***HIDDEN***';
-	}
-	elseif (is_string($value)) {
-		$value = preg_replace('!(https?://)([^@]+@)!', '$1***HIDDEN***@', $value);
-	}
-
-	$constants[$key] = $value;
-}
-
-ksort($constants);
+$constants = Install::getConstants();
 
 $db_size = DB::getInstance()->firstColumn('SELECT SUM(LENGTH(content)) FROM files_contents;');
 

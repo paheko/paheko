@@ -105,7 +105,7 @@ class Extensions
 		$item->installed = $type == 'plugin' ? $c->exists() : true;
 		$item->missing = $type == 'plugin' ? !$c->hasCode() : false;
 		$item->broken_message = $type == 'plugin' ? $c->getBrokenMessage() : false;
-		$item->readme = $c->hasFile($c::README_FILE);
+		$item->ini = $c->getINIProperties();
 
 		$item->url = null;
 

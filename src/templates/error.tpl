@@ -19,7 +19,7 @@
 	body {
 		font-size: 100%;
 		color: #000;
-		font-family: "Trebuchet MS", Helvetica, Sans-serif;
+		font-family: "Trebuchet MS", Helvetica, sans-serif;
 		background: #fff;
 		padding: 1em;
 		font-size: 1.5em;

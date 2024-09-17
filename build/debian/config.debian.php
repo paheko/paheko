@@ -31,18 +31,18 @@ if (!empty($_ENV['PAHEKO_STANDALONE']))
 		rename($_ENV['XDG_CONFIG_HOME'] . '/garradin', $_ENV['XDG_CONFIG_HOME'] . '/paheko');
 	}
 
-	if (!file_exists($_ENV['XDG_CONFIG_HOME'] . '/paheko'))
-	{
+	if (!file_exists($_ENV['XDG_CONFIG_HOME'] . '/paheko')) {
 		mkdir($_ENV['XDG_CONFIG_HOME'] . '/paheko', 0700, true);
 	}
 
-	if (file_exists($_ENV['XDG_CONFIG_HOME'] . '/paheko/config.local.php')) {
-		require_once $_ENV['XDG_CONFIG_HOME'] . '/paheko/config.local.php';
+	define('Paheko\USER_CONFIG_FILE', $_ENV['XDG_CONFIG_HOME'] . '/paheko/config.local.php');
+
+	if (file_exists(USER_CONFIG_FILE)) {
+		require_once USER_CONFIG_FILE;
 	}
 
 	// Data directory: where the data will go
-	if (empty($_ENV['XDG_DATA_HOME']))
-	{
+	if (empty($_ENV['XDG_DATA_HOME'])) {
 		$_ENV['XDG_DATA_HOME'] = $home . '/.local/share';
 	}
 

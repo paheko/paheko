@@ -3,11 +3,7 @@
 {include file="config/_menu.tpl" current="ext"}
 {include file="./_nav.tpl" current=$mode ext=$ext}
 
-{if $mode === 'readme'}
-	<article class="web-content">
-		{$content|raw|markdown}
-	</article>
-{elseif $mode === 'disk' && $module}
+{if $mode === 'disk' && $module}
 	<article class="ext-more">
 		<?php
 		$data_size = $module->getDataSize();
@@ -15,6 +11,7 @@
 		$code_size = $module->getCodeSize();
 		$files_size = $module->getFilesSize();
 		$total = $data_size + $code_size + $files_size + $config_size;
+		$code_sloc = $module->getCodeSLOC();
 		?>
 		<table class="list meter-map auto">
 			<tr>
@@ -59,6 +56,7 @@
 			</tr>
 			<caption>Utilisation de l'espace disque</caption>
 		</table>
+		<p class="help">Nombre de lignes de code : {$code_sloc}</p>
 	</article>
 {else}
 	{if !$ext.enabled}
@@ -107,6 +105,9 @@
 		{/if}
 
 		<ul>
+			{if $ext.ini.restrict_details}
+				<li>{$ext.ini.restrict_details|escape|nl2br}</li>
+			{/if}
 			{foreach from=$access_details item="label"}
 				<li>{$label|raw}</li>
 			{/foreach}

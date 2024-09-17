@@ -3,7 +3,9 @@
 namespace Paheko\UserTemplate;
 
 use KD2\Brindille_Exception;
+use KD2\DB\DB_Exception;
 use KD2\ErrorManager;
+use KD2\HTTP;
 use KD2\JSONSchema;
 use KD2\Security;
 
@@ -26,8 +28,6 @@ use Paheko\Entities\Module;
 use Paheko\Entities\Email\Message;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
-
-use Paheko\Entities\Accounting\Transaction;
 
 use const Paheko\{ROOT, WWW_URL, BASE_URL, SECRET_KEY};
 
@@ -54,12 +54,14 @@ class Functions
 		'delete_file',
 		'api',
 		'csv',
+		'call',
 	];
 
 	const COMPILE_FUNCTIONS_LIST = [
-		':break' => [self::class, 'compile_break'],
+		':break'    => [self::class, 'compile_break'],
 		':continue' => [self::class, 'compile_continue'],
-		':return' => [self::class, 'compile_return'],
+		':return'   => [self::class, 'compile_return'],
+		':yield'    => [self::class, 'compile_yield'],
 		':redirect' => [self::class, 'compile_redirect'],
 	];
 
@@ -98,21 +100,48 @@ class Functions
 		$i = ctype_digit(trim($params)) ? (int)$params : 1;
 
 		if ($in_loop < $i) {
-			throw new Brindille_Exception(sprintf('Error on line %d: continue can only be used inside a section', $line));
+			throw new Brindille_Exception('"continue" function can only be used inside a section');
 		}
 
 		return sprintf('<?php continue(%d); ?>', $i);
 	}
 
-	static public function compile_return(string $name, string $params, UserTemplate $tpl, int $line): string
+	static public function compile_return(string $name, string $params_str, UserTemplate $tpl, int $line): string
 	{
+		$parent = $tpl->_getStack($tpl::SECTION, 'define');
+
+		// Allow {{:return value="test"}} inside a user-defined modifier only
+		if ($parent && ($parent[2]['context'] ?? null) === 'modifier') {
+			$params = $tpl->_parseArguments($params_str, $line);
+
+			return sprintf('<?php return %s; ?>', $params['value'] ?? 'null');
+		}
+		// But not outside
+		elseif (!empty($params_str)) {
+			throw new Brindille_Exception('"return" function cannot have parameters in this context');
+		}
+
 		return '<?php return; ?>';
+	}
+
+	static public function compile_yield(string $name, string $params_str, UserTemplate $tpl, int $line): string
+	{
+		$parent = $tpl->_getStack($tpl::SECTION, 'define');
+
+		// Only allow {{:yield}} inside a user-defined function
+		if (!$parent || ($parent[2]['context'] ?? null) !== 'section') {
+			throw new Brindille_Exception('"yield" can only be used inside a "define" section');
+		}
+
+		$params = $tpl->_parseArguments($params_str, $line);
+
+		return sprintf('<?php yield %s; ?>', $tpl->_exportArguments($params));
 	}
 
 	static public function compile_redirect(string $name, string $params, UserTemplate $tpl, int $line): string
 	{
 		$params = $tpl->_parseArguments($params, $line);
-		$params = $tpl->_exportArguments($params, true);
+		$params = $tpl->_exportArguments($params);
 
 		return sprintf('<?php return %s::redirect(%s); ?>', self::class, $params);
 	}
@@ -120,17 +149,30 @@ class Functions
 	static public function redirect(array $params): string
 	{
 		if (!empty($params['permanent']) && !isset($_GET['_dialog'])) {
-			http_response_code(301);
+			@http_response_code(301);
 		}
 
-		if (isset($params['force'])) {
-			Utils::redirectDialog($params['force'], false);
+		$self = $params['url'] ?? ($params['self'] ?? null);
+		// Legacy force/to parameters TODO remove
+		$parent = $params['parent'] ?? ($params['force'] ?? null);
+		$reload = $params['reload'] ?? ($params['to'] ?? null);
+
+		// Redirect inside dialog
+		if ($self) {
+			Utils::redirect($self, false);
+		}
+		elseif ($parent) {
+			Utils::redirectDialog($parent, false);
 		}
 		elseif (isset($_GET['_dialog'])) {
 			Utils::reloadParentFrame(null, false);
 		}
 		else {
-			Utils::redirectDialog($params['to'] ?? null, false);
+			if ($reload === true) {
+				$reload = null;
+			}
+
+			Utils::redirectDialog($reload, false);
 		}
 
 		return 'STOP';
@@ -306,7 +348,7 @@ class Functions
 		$table = 'module_data_' . $tpl->module->name;
 
 		// No table? No problem!
-		if (!$db->test('sqlite_master', 'name = ? AND type = \'table\'', $table)) {
+		if (!$tpl->module->hasTable()) {
 			return;
 		}
 
@@ -341,7 +383,7 @@ class Functions
 		$db->delete($table, $where, $args);
 	}
 
-	static public function captcha(array $params, UserTemplate $tpl, int $line)
+	static public function captcha(array $params, UserTemplate $tpl, int $line): string
 	{
 		$secret = md5(SECRET_KEY . Utils::getSelfURL(false));
 
@@ -379,6 +421,8 @@ class Functions
 				throw new UserException($error);
 			}
 		}
+
+		return '';
 	}
 
 	static public function mail(array $params, UserTemplate $ut, int $line)
@@ -526,7 +570,8 @@ class Functions
 		$out = sprintf('<pre style="background: yellow; color: black; padding: 5px; overflow: auto">%s</pre>', $dump);
 
 		if (!empty($params['stop'])) {
-			echo $out; exit;
+			echo $out;
+			exit;
 		}
 
 		return $out;
@@ -608,14 +653,12 @@ class Functions
 
 	static public function signature(): string
 	{
-		$file = Config::getInstance()->file('signature');
+		$config = Config::getInstance();
+		$url = $config->fileURL('signature') ?? $config->fileURL('logo');
 
-		if (!$file) {
+		if (!$url) {
 			return '';
 		}
-
-		// We can't just use the image URL as it would not be accessible by PDF programs
-		$url = 'data:image/png;base64,' . base64_encode($file->fetch());
 
 		return sprintf('<figure class="signature"><img src="%s" alt="Signature" /></figure>', $url);
 	}
@@ -663,6 +706,9 @@ class Functions
 				$ut::__assign(['var' => $name, 'value' => $include->get($name)], $ut, $line);
 			}
 		}
+
+		// Copy/overwrite user-defined functions to parent template
+		$include->copyUserFunctionsTo($ut);
 
 		// Transmit nocache to parent template
 		if ($include->get('nocache')) {
@@ -1048,4 +1094,16 @@ class Functions
 
 		return '';
 	}
+
+	static public function call(array $params, UserTemplate $tpl, int $line): void
+	{
+		if (empty($params['function'])) {
+			throw new Brindille_Exception('Missing "function" parameter for "call" function');
+		}
+
+		$name = $params['function'];
+		unset($params['function']);
+		$tpl->callUserFunction('function', $name, $params, $line);
+	}
+
 }

@@ -1,4 +1,4 @@
-<table class="list multi statement">
+<table class="list multi statement autofilter">
 	<thead>
 		<tr>
 			<td class="num">N°</td>

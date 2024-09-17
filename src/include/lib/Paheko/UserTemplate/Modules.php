@@ -80,6 +80,7 @@ class Modules
 			try {
 				$f = self::get($name);
 				$f->updateFromINI();
+				$f->selfCheck();
 				$f->save();
 				$f->updateTemplates();
 			}
@@ -280,8 +281,7 @@ class Modules
 			$module = self::get($name);
 
 			if (!$module) {
-				http_response_code(404);
-				throw new UserException('This page does not exist.');
+				throw new UserException('This page does not exist.', 404);
 			}
 		}
 		// Or: we are looking for the "web" module
@@ -294,9 +294,20 @@ class Modules
 			$path .= 'index.html';
 		}
 
+		$name = Utils::basename($uri);
+
+		// Do not expose templates if the name begins with an underscore
+		// this is not really a security issue, but they will probably fail
+		if (substr($name, 0, 1) === '_' || $name === Module::META_FILE) {
+			throw new UserException('This address is private', 403);
+		}
+
+		$session = Session::getInstance();
+
 		// Find out web path
 		if ($module->web && $module->enabled && substr($uri, 0, 2) !== 'm/') {
 			$uri = rawurldecode($uri);
+			$path = '404.html';
 
 			if ($uri == '') {
 				$path = 'index.html';
@@ -309,12 +320,19 @@ class Modules
 				$path = $uri;
 				$has_dist_file = true;
 			}
-			elseif (($page = Web::getByURI($uri)) && $page->status == Page::STATUS_ONLINE) {
-				$path = $page->template();
-				$page = $page->asTemplateArray();
-			}
-			else {
-				$path = '404.html';
+			elseif ($page = Web::getByURI($uri)) {
+				$status = $page->getRealStatus();
+
+				if ($status === Page::STATUS_DRAFT) {
+					$path = '404.html';
+				}
+				elseif ($status === Page::STATUS_PRIVATE && !$session->isLogged()) {
+					Utils::redirect('!login.php?p=1&r=' . Utils::getRequestURI());
+				}
+				else {
+					$path = $page->template();
+					$page = $page->asTemplateArray();
+				}
 			}
 		}
 		// 404 if module is not enabled, except for icon
@@ -325,8 +343,6 @@ class Modules
 
 		// Restrict access
 		if (isset($module->restrict_section, $module->restrict_level)) {
-			$session = Session::getInstance();
-
 			if (!$session->isLogged()) {
 				Utils::redirect('!login.php');
 			}

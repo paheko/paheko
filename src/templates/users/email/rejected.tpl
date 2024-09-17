@@ -8,6 +8,10 @@
 </p>
 {/if}
 
+<p class="help">
+	Note&nbsp;: seules les adresses e-mail actuellement présentes dans une fiche de membre sont affichées ici.
+</p>
+
 {if !$list->count()}
 	<p class="alert block">Aucune adresse e-mail n'a été rejetée pour le moment. Cette page présentera les adresses e-mail invalides ou qui ont demandé à se désinscrire.</p>
 {else}

@@ -440,12 +440,7 @@ class Backup
 
 		// Try to handle case where the admin performing the restore is no longer an admin in the restored database
 		if ($session && $session->isLogged(true)) {
-			if (version_compare($version, '1.3.0-alpha1', '<')) { // FIXME remove in 1.4
-				$sql = 'SELECT 1 FROM users_categories WHERE id = (SELECT id_category FROM membres WHERE id = %d) AND perm_connect >= %d AND perm_config >= %d';
-			}
-			else {
-				$sql = 'SELECT 1 FROM users_categories WHERE id = (SELECT id_category FROM users WHERE id = %d) AND perm_connect >= %d AND perm_config >= %d';
-			}
+			$sql = 'SELECT 1 FROM users_categories WHERE id = (SELECT id_category FROM users WHERE id = %d) AND perm_connect >= %d AND perm_config >= %d';
 
 			$sql = sprintf($sql, $session->getUser()->id, Session::ACCESS_READ, Session::ACCESS_ADMIN);
 			$is_still_admin = $db->querySingle($sql);
@@ -473,13 +468,13 @@ class Backup
 		unlink($backup);
 
 		// Force all categories to be able to manage users
-		if (($return & self::NOT_AN_ADMIN) && version_compare($version, '1.1.0', '>=')) {
+		if ($return & self::NOT_AN_ADMIN) {
 			$db = DB::getInstance();
 			$db->exec(sprintf('UPDATE users_categories SET perm_config = %d, perm_connect = %d;', Session::ACCESS_ADMIN, Session::ACCESS_READ));
 		}
 
 		// Force user to be re-logged as the first admin
-		if ($session && version_compare($version, '1.3.0', '>=') && $session->isLogged(true)) {
+		if ($session && $session->isLogged(true)) {
 			$return |= self::CHANGED_USER;
 		}
 

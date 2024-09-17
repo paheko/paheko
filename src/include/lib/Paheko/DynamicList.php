@@ -223,12 +223,14 @@ class DynamicList implements \Countable
 		$this->columns = $columns;
 	}
 
-	/**
-	 * Enable or disable prev() next() navigation when using iterate()
-	 */
-	public function togglePrevNext(bool $enable)
+	public function addColumn(string $name, array $column, int $position = -1)
 	{
-		$this->enable_prev_next = $enable;
+		if ($position === -1) {
+			$this->columns[$name] = $column;
+		}
+		else {
+			$this->columns = array_slice($this->columns, 0, $position, true) + [$name => $column] + array_slice($this->columns, $position, null, true);
+		}
 	}
 
 	/**
@@ -257,6 +259,11 @@ class DynamicList implements \Countable
 		$this->group = $value;
 	}
 
+	public function getGroupBy(): ?string
+	{
+		return $this->group;
+	}
+
 	public function count(): int
 	{
 		if (null === $this->count_result) {
@@ -270,17 +277,6 @@ class DynamicList implements \Countable
 	public function export(string $name, string $format = 'csv')
 	{
 		$this->setPageSize(null);
-		$columns = [];
-
-		foreach ($this->columns as $key => $column) {
-			if (empty($column['label'])) {
-				$columns[] = $key;
-				continue;
-			}
-
-			$columns[] = $column['label'];
-		}
-
 		CSV::export($format, $name, $this->iterate(false), $this->getExportHeaderColumns(), $this->export_callback);
 	}
 
@@ -595,7 +591,7 @@ class DynamicList implements \Countable
 			}
 		}
 
-		if ($order) {
+		if ($order && array_key_exists($order, $this->columns)) {
 			$this->orderBy($order, $desc);
 		}
 

@@ -17,7 +17,7 @@ if (!$user) {
 }
 
 // Protect against admin users being deleted/modified by less powerful users
-$user->validateCanChange($session);
+$user->validateCanBeModifiedBy($session);
 
 $categories = Categories::listAssocSafe($session);
 $csrf_key = 'user_edit_' . $user->id;
@@ -25,7 +25,7 @@ $can_change_category = array_key_exists($user->id_category, $categories);
 
 $list_category = isset($_GET['list_category']) && strlen($_GET['list_category']) ? intval($_GET['list_category']) : null;
 
-$form->runIf('save', function () use ($user, $session, $can_change_category) {
+$form->runIf('save', function () use ($user, $session, $can_change_category, $list_category) {
 	$user->importForm();
 	$myself = $user->id == $session::getUserId();
 
@@ -47,7 +47,14 @@ $form->runIf('save', function () use ($user, $session, $can_change_category) {
 			Utils::redirect('!');
 		}
 	}
-}, $csrf_key, sprintf('!users/details.php?id=%d&list_category=%s', $user->id, qg('list_category')));
+
+	// Handle case where user id_category was changed
+	if ($list_category > 0) {
+		$list_category = $user->id_category;
+	}
+
+	Utils::redirect(sprintf('!users/details.php?id=%d&list_category=%s', $user->id, $list_category));
+}, $csrf_key);
 
 $fields = DF::getInstance()->all();
 

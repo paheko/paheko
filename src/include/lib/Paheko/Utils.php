@@ -77,6 +77,12 @@ class Utils
 		'trash'           => '🗑',
 		'history'         => '⌚',
 		'link'            => '🔗',
+		'chat'            => '💬',
+		'smile'           => '☺',
+		'camera'          => '📷',
+		'videocam'        => '📹',
+		'microphone'      => '🎤',
+		'barcode'         => '│',
 	];
 
 	const FRENCH_DATE_NAMES = [
@@ -355,12 +361,12 @@ class Utils
 		}
 	}
 
-	static public function getRequestURI()
+	static public function getRequestURI(): ?string
 	{
 		if (!empty($_SERVER['REQUEST_URI']))
 			return $_SERVER['REQUEST_URI'];
 		else
-			return false;
+			return null;
 	}
 
 	static public function getSelfURL($qs = true)
@@ -395,6 +401,47 @@ class Utils
 	static public function getModifiedURL(string $new)
 	{
 		return HTTP::mergeURLs(self::getSelfURI(), $new);
+	}
+
+	static public function getTrustedURL(?string $url): ?string
+	{
+		if (!$url) {
+			return null;
+		}
+
+		$url = rawurldecode($url);
+
+		// If URL contains another URL, something is weird, abort
+		if (false !== strpos(substr($url, 8), '://')) {
+			return null;
+		}
+
+		if (0 === strpos($url, ADMIN_URL)) {
+			return $url;
+		}
+		elseif (0 === strpos($url, WWW_URL)) {
+			return $url;
+		}
+		// Other external domain: not allowed
+		elseif (false !== strpos($url, '//')) {
+			return null;
+		}
+		elseif (0 === strpos($url, 'admin/')) {
+			return ADMIN_URL . substr($url, 6);
+		}
+		else {
+			return WWW_URL . ltrim($url, '/');
+		}
+	}
+
+	static public function redirectSelf(?string $destination = null, bool $exit = true): void
+	{
+		self::redirect($destination, $exit);
+	}
+
+	static public function redirectParent(?string $destination = null, bool $exit = true): void
+	{
+		self::redirectDialog($destination, $exit);
 	}
 
 	static public function redirectDialog(?string $destination = null, bool $exit = true): void
@@ -635,14 +682,78 @@ class Utils
 		return $list;
 	}
 
-	static public function suggestPassword()
+	static public function suggestPassword(): string
 	{
 		return Security::getRandomPassphrase(ROOT . '/include/data/locales/fr/dictionary.txt');
 	}
 
-	static public function normalizePhoneNumber($n)
+	/**
+	 * Validate URL, allowing IDN domain names
+	 */
+	static public function validateURL(string $url): bool
+	{
+		$url = parse_url($url);
+
+		if (empty($url['host']) || empty($url['scheme'])) {
+			return false;
+		}
+
+		$url['host'] = idn_to_ascii($url['host']);
+		$n = $url['scheme'] . '://' . $url['host'];
+
+		if (!empty($url['port'])
+			&& !($url['port'] == 80 && $url['scheme'] === 'http')
+			&& !($url['port'] == 443 && $url['scheme'] === 'https')) {
+			$n .= ':' . $url['port'];
+		}
+
+		$n .= $url['path'] ?? '/';
+
+		if (!empty($url['query'])) {
+			$n .= '?' . $url['query'];
+		}
+
+		return filter_var($n, FILTER_VALIDATE_URL) !== false;
+	}
+
+	static public function normalizePhoneNumber(string $n): string
 	{
 		return preg_replace('![^\d\+\(\)p#,;-]!', '', trim($n));
+	}
+
+	static public function normalizeSIRET(string $n): string
+	{
+		$n = trim($n);
+		$n = str_replace(' ', '', $n);
+		return $n;
+	}
+
+	static public function checkSIRET(string $n): bool
+	{
+		$n = self::normalizeSIRET($n);
+
+		if (strlen($n) !== 14) {
+			return false;
+		}
+
+		if (!ctype_digit($n)) {
+			return false;
+		}
+
+		$sum = 0;
+
+		for ($i = 0; $i < 14; ++$i) {
+			if ($i % 2 === 0) {
+				$tmp = ((int) $n[$i]) * 2;
+				$tmp = $tmp > 9 ? $tmp - 9 : $tmp;
+			} else {
+				$tmp = $n[$i];
+			}
+
+			$sum += $tmp;
+		}
+
+		return !($sum % 10 !== 0);
 	}
 
 	static public function write_ini_string($in)
@@ -1237,10 +1348,19 @@ class Utils
 	}
 
 	/**
-	 * Execute a system command with a timeout, handling STDIN, STDOUT and STDERR with callbacks
+	 * Execute a system command with a timeout, handling STDIN, STDOUT and STDERR with callbacks (asynchronous)
+	 *
+	 * @var string $cmd Command to run
+	 * @var integer $timeout Timeout after which the command should be killed (in seconds)
+	 * @var string|null|callable $stdin If this is a callback function, then it will be called until it returns NULL,
+	 * and its return will be sent to STDIN. If this is a string, it will be sent as STDIN. If NULL, no STDIN will be sent.
+	 * @var null|callable $stdout STDOUT callback, receiving output string as first parameter.
+	 * @var null|callable $stdout STDERR callback, receiving error string as first parameter.
+	 * @return int Command status code
+	 *
 	 * @see https://blog.dubbelboer.com/2012/08/24/execute-with-timeout.html
 	 */
-	static public function exec(string $cmd, int $timeout, ?callable $stdin, ?callable $stdout, ?callable $stderr = null): int
+	static public function exec(string $cmd, int $timeout, $stdin, ?callable $stdout, ?callable $stderr = null): int
 	{
 		if (!function_exists('proc_open') || !function_exists('proc_terminate')
 			|| preg_match('/proc_(?:open|terminate|get_status|close)/', ini_get('disable_functions'))) {
@@ -1270,31 +1390,73 @@ class Utils
 
 		$timeout_ms = $timeout * 1000000; // in microseconds
 
-		if (null !== $stdin) {
-			// Send STDIN
-			fwrite($pipes[0], $stdin());
-		}
-
-		fclose($pipes[0]);
 		$code = 0;
+		$stdin_buffer = null;
+
+		// Nothing for STDIN, close the pipe
+		if (null === $stdin) {
+			fclose($pipes[0]);
+			$pipes[0] = null;
+		}
 
 		while ($timeout_ms > 0) {
 			$start = microtime(true);
 
-			// Wait until we have output or the timer expired.
+			// Wait until we can read or write, or until the timer expires
 			$read  = [$pipes[1]];
-			$other = [];
+			$write = $pipes[0] !== null ? [$pipes[0]] : null;
+			$other = null;
 
 			if (null !== $stderr) {
 				$read[] = $pipes[2];
 			}
 
 			// Wait every 0.5 seconds
-			stream_select($read, $other, $other, 0, 500000);
+			if (!stream_select($read, $write, $other, 0, 500000)) {
+				continue;
+			}
+
+			// Write to STDIN
+			if ($write && count($write)) {
+				if (null === $stdin_buffer) {
+					if (is_callable($stdin)) {
+						$stdin_buffer = $stdin();
+					}
+					elseif (null === $stdin) {
+						throw new \LogicException('STDIN string has been sent');
+					}
+					else {
+						$stdin_buffer = $stdin;
+						$stdin = null;
+					}
+				}
+
+				// Close pipe if STDIN function returned NULL,
+				// or if STDIN string has been written
+				$close = $stdin_buffer === null;
+
+				// Progressively write to STDIN, until input is empty
+				if (null !== $stdin_buffer) {
+					$written = fwrite($pipes[0], $stdin_buffer);
+
+					if ($written !== strlen($stdin_buffer)) {
+						$stdin_buffer = substr($stdin_buffer, $written);
+					}
+					else {
+						$close = true;
+					}
+				}
+
+				if ($close) {
+					fclose($pipes[0]);
+					$pipes[0] = null;
+					$stdin_buffer = null;
+				}
+			}
 
 			// Get the status of the process.
 			// Do this before we read from the stream,
-			// this way we can't lose the last bit of output if the process dies between these     functions.
+			// this way we can't lose the last bit of output if the process dies between these functions.
 			$status = proc_get_status($process);
 
 			// We must get the exit code when it is sent, or we won't be able to get it later
@@ -1304,12 +1466,20 @@ class Utils
 
 			// Read the contents from the buffer.
 			// This function will always return immediately as the stream is non-blocking.
-			if (null !== $stdout) {
-				$stdout(stream_get_contents($pipes[1]));
+			if (in_array($pipes[1], $read, true)) {
+				$value = stream_get_contents($pipes[1]);
+
+				if (null !== $stdout) {
+					$stdout($value);
+				}
 			}
 
-			if (null !== $stderr) {
-				$stderr(stream_get_contents($pipes[2]));
+			if (in_array($pipes[2], $read, true)) {
+				$value = stream_get_contents($pipes[2]);
+
+				if (null !== $stderr) {
+					$stderr($value);
+				}
 			}
 
 			if (!$status['running']) {
@@ -1346,8 +1516,9 @@ class Utils
 		}
 
 		$str = self::appendCookieToURLs($str);
+		$str = preg_replace('!(<html.*?)class="!s', '$1class="pdf ', $str);
 
-		if (PDF_COMMAND == 'auto') {
+		if (PDF_COMMAND === 'auto') {
 			// Try to see if there's a plugin
 			$in = ['string' => $str];
 
@@ -1372,7 +1543,7 @@ class Utils
 		$cmd = 'prince --http-timeout=3 --pdf-profile="PDF/A-3b" -o - -';
 
 		// Prince is fast, right? Fingers crossed
-		self::exec($cmd, 10, fn () => $str, fn ($data) => print($data));
+		self::exec($cmd, 10, $str, fn ($data) => print($data));
 
 		if (PDF_USAGE_LOG) {
 			file_put_contents(PDF_USAGE_LOG, date("Y-m-d H:i:s\n"), FILE_APPEND);
@@ -1396,11 +1567,12 @@ class Utils
 		$target = str_replace('.html', '.pdf', $source);
 
 		$str = self::appendCookieToURLs($str);
+		$str = preg_replace('!(<html.*?)class="!s', '$1class="pdf ', $str);
 
 		Utils::safe_mkdir(CACHE_ROOT, null, true);
 		file_put_contents($source, $str);
 
-		if ($cmd == 'auto') {
+		if ($cmd === 'auto') {
 			// Try to see if there's a plugin
 			$in = ['source' => $source, 'target' => $target];
 
@@ -1677,5 +1849,108 @@ class Utils
 		}
 
 		return false;
+	}
+
+	static public function showProfiler(): void
+	{
+		$is_html = false;
+
+		foreach (headers_list() as $header) {
+			if (false !== stripos($header, 'Content-Type: text/html')) {
+				$is_html = true;
+				break;
+			}
+		}
+
+		if (!$is_html) {
+			return;
+		}
+
+		$now = microtime(true);
+		$start_time = round((PROFILER_START_TIME - $_SERVER['REQUEST_TIME_FLOAT']) * 1000);
+		$time = round(($now - PROFILER_START_TIME) * 1000);
+		$mem = round(memory_get_peak_usage(true) / 1024 / 1024, 2);
+
+		$db = DB::getInstance();
+		$db_log = $db->getLog();
+		$db_time = 0;
+		$has_slow_queries = false;
+
+		foreach ($db_log as &$item) {
+			$db_time += $item['duration'];
+
+			$item['plan'] = '';
+			try {
+				foreach ($db->get('EXPLAIN QUERY PLAN ' . $item['sql']) as $e) {
+					$item['plan'] .= $e->detail . "\n";
+				}
+			}
+			catch (DB_Exception $e) {
+				$item['plan'] = 'Error: ' . $e->getMessage();
+			}
+
+			if ($item['duration'] >= 4000) {
+				$has_slow_queries = true;
+			}
+		}
+
+		unset($item);
+
+		printf('<style type="text/css">
+			body { padding-bottom: 3em; }
+			#__profiler * { margin: 0; padding: 0; }
+			#__profiler { position: fixed; bottom: 0; left: 0; right: 0; z-index: 30000; }
+			#__profiler header { display: flex; cursor: pointer; background: #000; color: #fff; height: 2em; }
+			#__profiler header:hover { background: #600; }
+			#__profiler span { display: flex; align-items: center; padding: .2em .7em; font-size: 1em; border-right: 1px solid #666; }
+			#__profiler span i { display: block; font-size: 1.8em; font-style: normal; margin-right: .5em; line-height: 1em; }
+			#__profiler.log { top: 0; }
+			#__profiler table { display: none; }
+			#__profiler.log table { display: block; background: #fff; width: 100%%; height: calc(100%% - 2em); color: #000; border-collapse: collapse; overflow: auto; }
+			#__profiler.log td, #__profiler.log th { padding: .5em; vertical-align: top; font-weight: normal; text-align: left; }
+			#__profiler.log th { white-space: pre-wrap; font-family: monospace; }
+			#__profiler.log tbody tr:nth-child(even) { background: #eee; }
+			#__profiler.log thead td { font-weight: bold; background: #ddd; }
+			#__profiler span.slow { background: darkred; }
+			#__profiler.log tbody tr.slow { background: #fcc; }
+			</style>
+			<div id="__profiler">
+				<header onclick="this.parentNode.classList.toggle(\'log\');">
+					<span title="Time before start of Paheko"><i>⇥</i>%d ms</span>
+					<span title="Time taken by Paheko" class="%s"><i>🕑</i> %s ms</span>
+					<span title="RAM usage"><i>🍔</i>%s MiB</span>
+					<span title="SQL" class="%s"><i>⛁</i> %d in %d ms</span>
+				</header>
+				<table>
+					<thead><tr><td>Time</td><td>SQL</td><td>EXPLAIN</td><td></td></tr></thead>
+					<tbody>',
+			$start_time,
+			$time > 150 ? 'slow' : '',
+			$time,
+			$mem,
+			$has_slow_queries ? 'slow' : '',
+			count($db_log),
+			round($db_time / 1000)
+		);
+
+		$sql_url = self::getLocalURL('!config/advanced/sql.php') . '?query=';
+
+		foreach ($db_log as $item) {
+			$plan = htmlspecialchars($item['plan']);
+			$plan = preg_replace('/\bSCAN\b(?:(?!\s+USING).)*$/m', '<b style="color:red">$0</b>', $plan);
+
+			printf('<tr class="%s"><td>%s&nbsp;ms</td><th>%s</th><th>%s</th><td><a href="%s">[Replay]</a></td></tr>',
+				$item['duration'] >= 4000 ? 'slow' : '',
+				round($item['duration'] / 1000, 2),
+				htmlspecialchars($item['sql']),
+				$plan,
+				$sql_url . rawurlencode($item['sql'])
+			);
+		}
+
+		echo '</tbody></table></div>';
+
+		@ob_end_flush();
+		@flush();
 	}
 }

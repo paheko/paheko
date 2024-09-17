@@ -50,6 +50,8 @@ Ceci vous permet de créer de nouvelles pages dynamiques sur le site, par exempl
 
 Le type de fichier étant déterminé selon l'extension (`.html, .css, etc.`) pour les fichiers traités par Brindille, un fichier sans extension sera considéré comme un fichier texte par le navigateur. Si on veut que le squelette `velos` (sans extension) s'affiche comme du HTML il faut forcer le type en mettant le code `{{:http type="text/html"}}` au début du squelette (première ligne).
 
+Note : les squelettes dont le nom commence par un tiret bas (*underscore*, exemple : `_documents.html`) ne peuvent être affichés directement en appelant leur adresse URL, ils ne peuvent qu'être inclus par un un autre squelette.
+
 ## Fichier content.css
 
 Ce fichier est particulier, car il définit le style du contenu des pages et des catégories.

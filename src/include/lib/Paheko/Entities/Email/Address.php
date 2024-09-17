@@ -171,6 +171,9 @@ class Address extends Entity
 				$this->set('status', self::STATUS_SOFT_BOUNCE_LIMIT_REACHED);
 			}
 		}
+		else {
+			throw new \LogicException('Invalid bounce type: ' . $type);
+		}
 	}
 
 	public function save(bool $selfcheck = true): bool

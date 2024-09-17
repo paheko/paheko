@@ -41,11 +41,33 @@ class Search
 		return EM::findOneById(SE::class, $id);
 	}
 
-	static public function quick(string $target, string $query): DynamicList
+	static public function create(string $target, ?string $type = null): SE
+	{
+		$s = new SE;
+		$s->set('target', $target);
+		$s->set('created', new \DateTime);
+
+		if ($type !== null) {
+			$s->set('type', $type);
+			$label = $s->type != $s::TYPE_JSON ? 'Recherche SQL du ' : 'Recherche avancée du ';
+			$label .= date('d/m/Y à H:i');
+			$s->set('label', $label);
+		}
+
+		return $s;
+	}
+
+	static public function simple(string $target, string $query): SE
 	{
 		$s = new SE;
 		$s->target = $target;
-		return $s->quick($query);
+		$s->simple($query);
+		return $s;
+	}
+
+	static public function simpleList(string $target, string $query): DynamicList
+	{
+		return self::simple($target, $query)->getDynamicList();
 	}
 
 	static public function fromSQL(string $sql): SE

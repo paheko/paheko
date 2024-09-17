@@ -2,7 +2,6 @@
 
 namespace Paheko;
 
-use Paheko\Accounting\Charts;
 use Paheko\Entities\Accounting\Account;
 use Paheko\Entities\Accounting\Year;
 use Paheko\Entities\Users\Category;
@@ -16,7 +15,7 @@ use Paheko\Files\Storage;
 use Paheko\Plugins;
 use Paheko\UserTemplate\Modules;
 
-use Paheko\{LOCAL_LOGIN, DISABLE_INSTALL_PING, FILE_STORAGE_BACKEND, FILE_STORAGE_CONFIG, CONFIG_FILE, ROOT, WWW_URL, SECRET_KEY, CACHE_ROOT, DATA_ROOT, DB_FILE};
+use Paheko\{LOCAL_LOGIN, DISABLE_INSTALL_PING, FILE_STORAGE_BACKEND, FILE_STORAGE_CONFIG, ROOT, WWW_URL, SECRET_KEY, CACHE_ROOT, DATA_ROOT, DB_FILE};
 
 use KD2\HTTP;
 
@@ -26,6 +25,32 @@ use KD2\HTTP;
  */
 class Install
 {
+	static public function getConstants(): array
+	{
+		$constants = [];
+
+		foreach (get_defined_constants(false) as $key => $value) {
+			if (strpos($key, 'Paheko\\') !== 0) {
+				continue;
+			}
+
+			$key = str_replace('Paheko\\', '', $key);
+
+			// Hide potentially secret values
+			if ($key === 'SECRET_KEY') {
+				$value = '***HIDDEN***';
+			}
+			elseif (is_string($value)) {
+				$value = preg_replace('!(https?://)([^@]+@)!', '$1***HIDDEN***@', $value);
+			}
+
+			$constants[$key] = $value;
+		}
+
+		ksort($constants);
+		return $constants;
+	}
+
 	/**
 	 * This sends the current installed version, as well as the PHP and SQLite versions
 	 * for statistics purposes.
@@ -170,7 +195,7 @@ class Install
 		if (is_array(LOCAL_LOGIN)) {
 			$source['user_name'] = LOCAL_LOGIN['user']['_name'] ?? 'Administrateur';
 			$source['password'] = sha1(random_bytes(10));
-			$source['user_email'] = 'administrateur@association.example';
+			$source['user_email'] = LOCAL_LOGIN['user']['_email'] ?? 'administrateur@association.example';
 		}
 		else {
 			self::assert(isset($source['user_name']) && trim($source['user_name']) !== '', 'Le nom du membre n\'est pas renseigné');
@@ -286,9 +311,6 @@ class Install
 
 		$config->setFile('admin_homepage', $welcome_text);
 
-        // Import accounting chart
-        $chart = Charts::installCountryDefault($country_code);
-
 		// Create an example saved search (users)
 		$query = (object) [
 			'groups' => [[
@@ -402,24 +424,31 @@ class Install
 		return true;
 	}
 
-	static public function setLocalConfig(string $key, $value, bool $overwrite = true): void
+	static public function setConfig(?string $file, string $key, $value, bool $overwrite = true): void
 	{
-		if (null === CONFIG_FILE) {
+		if (null === $file) {
 			return;
 		}
 
-		if (!is_writable(dirname(CONFIG_FILE))) {
-			throw new \RuntimeException('Impossible de créer le fichier de configuration "'. CONFIG_FILE .'". Le répertoire "'. dirname(CONFIG_FILE) . '" n\'est pas accessible en écriture.');
+		if (!is_writable(dirname($file))) {
+			throw new \RuntimeException('Impossible de créer le fichier de configuration "'. $file .'". Le répertoire "'. dirname($file) . '" n\'est pas accessible en écriture.');
 		}
 
 		$new_line = sprintf('const %s = %s;', $key, var_export($value, true));
 
-		if (@filesize(CONFIG_FILE)) {
-			$config = file_get_contents(CONFIG_FILE);
+		if (@filesize($file)) {
+			$config = file_get_contents($file);
 
 			$pattern = sprintf('/^.*(?:const\s+%s|define\s*\(.*%1$s).*$/m', $key);
 
-			$config = preg_replace($pattern, $new_line, $config, -1, $count);
+			$config = preg_replace_callback($pattern, function ($match) use ($new_line, $key, $value) {
+				if (false !== strpos($match[0], 'define')) {
+					return 'define(\'Paheko\\' . $key . '\', ' . var_export($value, true) . ');';
+				}
+				else {
+					return $new_line;
+				}
+			}, $config, -1, $count);
 
 			if ($count && !$overwrite) {
 				return;
@@ -436,7 +465,13 @@ class Install
 				. $new_line . PHP_EOL;
 		}
 
-		file_put_contents(CONFIG_FILE, $config);
+		file_put_contents($file . '.tmp', $config);
+		rename($file . '.tmp', $file);
+
+		// Make sure we reset the cached file, or the changes might take a few seconds to be reloaded
+		if (function_exists('opcache_reset')) {
+			opcache_reset();
+		}
 	}
 
 	static public function showProgressSpinner(?string $next = null, string $message = '')

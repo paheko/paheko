@@ -8,9 +8,10 @@ DirectoryIndex index.php index.html
 	RedirectMatch 403 /include/
 	RedirectMatch 403 /templates/
 	RedirectMatch 403 ^/scripts/
+	RedirectMatch 403 ^/bin/
 	RedirectMatch 403 /data/
 	RedirectMatch 403 /.*\.log
-	RedirectMatch 403 /(README|VERSION|COPYING|Makefile|cron\.php)
+	RedirectMatch 403 /(README|VERSION|COPYING|Makefile|pubkey.asc)
 	RedirectMatch 403 /config\.(.*)\.php
 	RedirectMatch 403 /sous-domaine\.html
 	RedirectMatch 403 _inc\.php

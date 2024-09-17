@@ -28,7 +28,7 @@ if ($user_year) {
 	// Check that the selected year is still valid
 	$current_year = Years::get($user_year);
 
-	if (!$current_year || $current_year->closed) {
+	if (!$current_year) {
 		$current_year = null;
 		$user->setPreference('accounting_year', null);
 	}

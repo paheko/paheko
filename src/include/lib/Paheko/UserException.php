@@ -6,7 +6,7 @@ namespace Paheko;
  * Gestion des erreurs et exceptions
  */
 
-class UserException extends \LogicException
+class UserException extends \RuntimeException
 {
 	protected $details = null;
 	protected ?string $html_message = null;

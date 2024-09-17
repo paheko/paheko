@@ -239,7 +239,7 @@ class Message extends Entity
 			$message->addPart('text/html', $html);
 		}
 
-		$message->setHeader('Return-Path', MAIL_RETURN_PATH ?? $config->org_email);
+		$message->setHeader('Return-Path', MAIL_RETURN_PATH ?? (MAIL_SENDER ?? $config->org_email));
 		$message->setHeader('X-Auto-Response-Suppress', 'All'); // This is to avoid getting auto-replies from Exchange servers
 
 		foreach ($attachments as $path) {
@@ -265,7 +265,7 @@ class Message extends Entity
 		return $message;
 	}
 
-	public function send(): bool
+	public function send(bool $in_queue = false): bool
 	{
 		if (DISABLE_EMAIL) {
 			return false;
@@ -284,12 +284,43 @@ class Message extends Entity
 			}
 
 			if (SMTP_HOST) {
-				$const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
-				$secure = constant($const);
+				// Re-use SMTP connection in queues
+				if (null === $smtp) {
+					$const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
+					$secure = constant($const);
 
-				$smtp = new SMTP(SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, $secure, SMTP_HELO_HOSTNAME);
+					$smtp = new SMTP(SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, $secure, SMTP_HELO_HOSTNAME);
+				}
 
-				$smtp->send($message);
+				try {
+					$return = $smtp->send($message);
+					// TODO: store return message from SMTP server
+				}
+				catch (SMTP_Exception $e) {
+					// Handle invalid recipients addresses
+					if ($r = $e->getRecipient()) {
+						if ($e->getCode() >= 500) {
+							self::handleManualBounce($r, 'hard', $e->getMessage());
+							// Don't retry delivering this email
+							return true;
+						}
+						elseif ($e->getCode() === SMTP::GREYLISTING_CODE) {
+							// Resend later (FIXME: only retry for X times)
+							return false;
+						}
+						elseif ($e->getCode() >= 400) {
+							self::handleManualBounce($r, 'soft', $e->getMessage());
+							return true;
+						}
+					}
+
+					throw $e;
+				}
+
+				if (!$in_queue) {
+					$smtp->disconnect();
+					$smtp = null;
+				}
 			}
 			else {
 				// Send using PHP mail() function

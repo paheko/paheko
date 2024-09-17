@@ -274,7 +274,7 @@ class Config extends Entity
 		$this->assert(trim($this->org_name) != '', 'Le nom de l\'association ne peut rester vide.');
 		$this->assert(trim($this->currency) != '', 'La monnaie ne peut rester vide.');
 		$this->assert(trim($this->country) != '' && Utils::getCountryName($this->country), 'Le pays ne peut rester vide.');
-		$this->assert(!isset($this->org_web) || filter_var($this->org_web, FILTER_VALIDATE_URL), 'L\'adresse URL du site web est invalide.');
+		$this->assert(!isset($this->org_web) || Utils::validateURL($this->org_web), 'L\'adresse URL du site web est invalide.');
 		$this->assert(trim($this->org_email) != '' && SMTP::checkEmailIsValid($this->org_email, false), 'L\'adresse e-mail de l\'association est  invalide.');
 
 		$this->assert($this->log_retention >= 0, 'La durée de rétention doit être égale ou supérieur à zéro.');
@@ -417,7 +417,7 @@ class Config extends Entity
 					$f->setContent($i->output($format, true));
 				}
 			}
-			catch (\Exception $e) {
+			catch (\UnexpectedValueException $e) {
 				throw new UserException('Cet format d\'image n\'est pas supporté.', 0, $e);
 			}
 		}

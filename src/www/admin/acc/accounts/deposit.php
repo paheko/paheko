@@ -13,6 +13,10 @@ if (!CURRENT_YEAR_ID) {
 	Utils::redirect(ADMIN_URL . 'acc/years/?msg=OPEN');
 }
 
+if ($current_year->closed) {
+	Utils::redirect(ADMIN_URL . 'acc/years/select.php?msg=CLOSED');
+}
+
 $account = Accounts::get((int)qg('id'));
 
 if (!$account) {

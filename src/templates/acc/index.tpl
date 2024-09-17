@@ -6,7 +6,7 @@
 		<legend>Recherche rapide</legend>
 		<p>
 			<input type="search" name="qt" value="" />
-			{input type="select" name="year" options=$all_years default=$first_year}
+			{input type="select" name="year" options=$all_years default=$first_year default_empty="— Tous les exercices —"}
 			{button type="submit" shape="search" label="Chercher"}
 		</p>
 		<p class="help">

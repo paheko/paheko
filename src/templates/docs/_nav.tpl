@@ -10,6 +10,7 @@ use Paheko\Entities\Files\File;
 		<li{if $context == File::CONTEXT_USER} class="current"{/if}><a href="./?path=<?=File::CONTEXT_USER?>">{icon shape="users"} Fichiers des membres</a></li>
 	{/if}
 	{if $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_ADMIN)}
+		<li{if $context == 'shares'} class="current"{/if}><a href="shares.php">{icon shape="export"} Partages</a></li>
 		<li{if $context == 'trash'} class="current"{/if}><a href="trash.php">{icon shape="trash"} Fichiers supprimés</a></li>
 	{/if}
 </ul>

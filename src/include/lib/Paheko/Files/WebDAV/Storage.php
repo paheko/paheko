@@ -54,7 +54,7 @@ class Storage extends AbstractStorage
 		}
 	}
 
-	protected function load(string $uri)
+	protected function load(string $uri): ?File
 	{
 		$this->populateRootCache();
 
@@ -124,25 +124,8 @@ class Storage extends AbstractStorage
 			return null;
 		}
 
-		$path = $file->getLocalFilePath();
-
-		if ($path && Router::isXSendFileEnabled()) {
-			Router::xSendFile($path);
-			return ['stop' => true];
-		}
-
-		$pointer = $file->getReadOnlyPointer();
-
-		// We trust the WebDAV server to be more efficient that File::serve
-		// with serving a file for WebDAV clients
-		if (!$pointer && $path) {
-			return ['path' => $path];
-		}
-		elseif (!$pointer) {
-			throw new WebDAV_Exception('File Content not found', 404);
-		}
-
-		return ['resource' => $pointer];
+		$file->serve();
+		return ['stop' => true];
 	}
 
 	/**
@@ -202,7 +185,7 @@ class Storage extends AbstractStorage
 				return WebDAV::EMPTY_PROP_VALUE;
 			case NextCloud::PROP_OC_DOWNLOADURL:
 				return $this->nextcloud->getDirectDownloadURL($uri, $this->session::getUserId());
-			case Nextcloud::PROP_NC_RICH_WORKSPACE:
+			case NextCloud::PROP_NC_RICH_WORKSPACE:
 				return '';
 			case NextCloud::PROP_OC_ID:
 				// fileId is required by NextCloud desktop client

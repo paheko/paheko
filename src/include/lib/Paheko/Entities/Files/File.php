@@ -2,7 +2,7 @@
 
 namespace Paheko\Entities\Files;
 
-use KD2\HTTP;
+use KD2\HTTP\Server;
 use KD2\Graphics\Image;
 use KD2\Graphics\Blob;
 use KD2\Office\ToText;
@@ -11,8 +11,10 @@ use KD2\DB\EntityManager;
 use Paheko\Config;
 use Paheko\DB;
 use Paheko\Entity;
+use Paheko\Files\Conversion;
 use Paheko\Form;
 use Paheko\Plugins;
+use Paheko\Static_Cache;
 use Paheko\Template;
 use Paheko\UserException;
 use Paheko\ValidationException;
@@ -27,7 +29,7 @@ use Paheko\UserTemplate\CommonFunctions;
 
 use Paheko\Files\Files;
 
-use const Paheko\{WWW_URL, BASE_URL, ENABLE_XSENDFILE, WOPI_DISCOVERY_URL, PDFTOTEXT_COMMAND, STATIC_CACHE_ROOT, HOSTING_PROVIDER};
+use const Paheko\{WWW_URL, BASE_URL, ENABLE_XSENDFILE, WOPI_DISCOVERY_URL, HOSTING_PROVIDER};
 
 class File extends Entity
 {
@@ -38,7 +40,6 @@ class File extends Entity
 	use FileWOPITrait;
 
 	const TABLE = 'files';
-	const EXTENSIONS_TEXT_CONVERT = ['ods', 'odt', 'odp', 'pptx', 'xlsx', 'docx', 'pdf'];
 
 	protected ?int $id;
 
@@ -160,6 +161,7 @@ class File extends Entity
 		'..', // double dot
 		"\0", // NUL
 		'/', // slash
+		'\\', // anti-slash
 		// invalid characters in Windows
 		'\\', ':', '*', '?', '"', '<', '>', '|',
 	];
@@ -255,6 +257,25 @@ class File extends Entity
 
 		if (null === $path || !file_exists($path)) {
 			return null;
+		}
+
+		return $path;
+	}
+
+	public function getLocalOrCacheFilePath(): string
+	{
+		$path = $this->getLocalFilePath();
+
+		// If the file is not stored locally, copy the file to a local cache, using pointer
+		if (null === $path) {
+			$id = 'file-cache-' . $this->hash_id;
+			$path = Static_Cache::getPath($id);
+
+			if (!Static_Cache::hasExpired($id)) {
+				return $path;
+			}
+
+			Static_Cache::storeFromPointer($id, $this->getReadOnlyPointer());
 		}
 
 		return $path;
@@ -393,11 +414,19 @@ class File extends Entity
 		$db->commit();
 	}
 
+	public function deleteLocalFileCache(): void
+	{
+		// Remove any local file cache
+		$id = 'file-cache-' . $this->hash_id;
+		Static_Cache::remove($id);
+	}
+
 	public function deleteCache(): void
 	{
 		// This also deletes thumbnail links
 		Web_Cache::delete($this->uri());
 		$this->deleteThumbnails();
+		$this->deleteLocalFileCache();
 	}
 
 	/**
@@ -758,12 +787,12 @@ class File extends Entity
 
 			$this->deleteCache();
 
+			$db->commit();
+
 			// Index regular files, not directories
 			if ($this->type == self::TYPE_FILE) {
-				$this->indexForSearch(compact('content', 'path', 'pointer'));
+				$this->indexForSearch($content);
 			}
-
-			$db->commit();
 
 			return $this;
 		}
@@ -778,87 +807,25 @@ class File extends Entity
 		}
 	}
 
-	public function indexForSearch(?array $source = null, ?string $title = null, ?string $forced_mime = null): void
+	public function indexForSearch(?string $content = null, ?string $title = null, ?string $forced_mime = null): void
 	{
 		$mime = $forced_mime ?? $this->mime;
 		$ext = $this->extension();
-		$content = null;
 
-		if ($this->isDir() && (!$mime || !isset($source['content']))) {
+		if ($this->isDir() && (!$mime || !$content)) {
 			return;
 		}
 
 		// Store content in search table
 		if (substr($mime, 0, 5) == 'text/') {
-			$content = $source['content'] ?? $this->fetch();
+			$content ??= $this->fetch();
 
 			if ($mime === 'text/html' || $mime == 'text/xml') {
 				$content = html_entity_decode(strip_tags($content),  ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401);
 			}
 		}
-		elseif ($ext == 'pdf' && PDFTOTEXT_COMMAND === 'mupdf') {
-			if (empty($source)) {
-				// Prefer path to pointer
-				$source['path'] = $this->getLocalFilePath();
-				$source['pointer'] = $source['path'] ? null : $this->getReadOnlyPointer();
-			}
-
-			$tmpfile = null;
-
-			try {
-				// mutool convert doesn't handle stdin/stdout :(
-				if (isset($source['pointer'])) {
-					fseek($source['pointer'], 0, SEEK_END);
-					$size = ftell($source['pointer']);
-					rewind($source['pointer']);
-
-					if ($size >= 500*1024*1024) {
-						throw new \OverflowException('PDF file is too large');
-					}
-
-					$tmpfile = tempnam(STATIC_CACHE_ROOT, 'pdftotext-');
-					$fp = fopen($tmpfile, 'wb');
-
-					while (!feof($source['pointer'])) {
-						fwrite($fp, fread($source['pointer'], 8192));
-					}
-
-					fclose($fp);
-				}
-				elseif (isset($source['content'])) {
-					$tmpfile = tempnam(STATIC_CACHE_ROOT, 'pdftotext-');
-					file_put_contents($tmpfile, $source['content']);
-				}
-
-				$tmpdest = tempnam(STATIC_CACHE_ROOT, 'pdftotext-out-');
-
-				$cmd = sprintf('mutool convert -F text -o %s %s',
-					Utils::escapeshellarg($tmpdest),
-					Utils::escapeshellarg($tmpfile ?? $source['path'])
-				);
-
-				Utils::quick_exec($cmd, 2);
-				$content = file_get_contents($tmpdest);
-			}
-			catch (\OverflowException $e) {
-				// PDF extraction was longer than 2 seconds: PDF file is likely too large
-				$content = null;
-			}
-
-			if ($tmpfile) {
-				Utils::safe_unlink($tmpfile);
-			}
-
-			Utils::safe_unlink($tmpdest);
-		}
-		elseif (in_array($ext, self::EXTENSIONS_TEXT_CONVERT) && is_array($source)) {
-
-			if (empty($source)) {
-				$source['pointer'] = $this->getReadOnlyPointer();
-				$source['path'] = $source['pointer'] ? null : $this->getLocalFilePath();
-			}
-
-			$content = ToText::from($source);
+		elseif (Conversion::canConvertToText($ext)) {
+			$content = Conversion::fileToText($this, $content);
 		}
 		else {
 			$content = null;
@@ -866,8 +833,8 @@ class File extends Entity
 
 		// Only index valid UTF-8
 		if (isset($content) && preg_match('//u', $content)) {
-			// Truncate text at 150KB
-			$content = substr(trim($content), 0, 150*1024);
+			// Truncate text at 500KB
+			$content = substr(trim($content), 0, 500*1024);
 		}
 		else {
 			$content = null;
@@ -956,13 +923,12 @@ class File extends Entity
 	 */
 	public function link(Session $session, ?string $thumb = null, bool $allow_edit = false, ?string $url = null): string
 	{
-		if ($thumb == 'auto') {
-			if ($this->hasThumbnail()) {
-				$thumb = '150px';
-			}
-			else {
-				$thumb = 'icon';
-			}
+		if ($thumb === 'auto') {
+			$thumb = '150px';
+		}
+
+		if ($thumb && !$this->hasThumbnail()) {
+			$thumb = 'icon';
 		}
 
 		if ($thumb === 'icon') {
@@ -1015,7 +981,7 @@ class File extends Entity
 		return $this->isImage() ? $this->url() : Utils::getLocalURL('!common/files/preview.php?p=') . rawurlencode($this->path);
 	}
 
-	public function previewHTML(?string $url, ?Session $session = null): ?string
+	public function previewHTML(?string $url = null, ?Session $session = null): ?string
 	{
 		$url ??= $this->url();
 
@@ -1023,7 +989,7 @@ class File extends Entity
 			return sprintf('<img src="%s" alt="%s" />', $url, htmlspecialchars($this->name));
 		}
 		elseif ($this->mime && ($this->mime === 'application/ogg' || strpos($this->mime, 'video/') === 0)) {
-			return sprintf('<video draggable="false" autoplay="false" controls="true" src="%s" />', $url);
+			return sprintf('<video draggable="false" autoplay="false" controls="true" src="%s" preload="metadata" />', $url);
 		}
 		elseif ($this->mime && strpos($this->mime, 'audio/') === 0) {
 			return sprintf('<audio draggable="false" autoplay="false" controls="true" src="%s" />', $url);
@@ -1164,56 +1130,38 @@ class File extends Entity
 			throw new UserException('Le contenu du fichier est introuvable.');
 		}
 
-		// Use X-SendFile, if available, and storage has a local copy
-		if (Router::isXSendFileEnabled()) {
-			$local_path = $path ?? Files::callStorage('getLocalFilePath', $this);
+		$path ??= $this->getLocalFilePath();
 
-			if ($local_path) {
-				Router::xSendFile($local_path);
-				return;
-			}
-		}
-
-		// Disable gzip, against buffering issues
-		if (function_exists('apache_setenv')) {
-			@apache_setenv('no-gzip', 1);
-		}
-
-		@ini_set('zlib.output_compression', 'Off');
-
-		// Don't return Content-Length on OVH, as their HTTP 2.0 proxy is buggy
-		// @see https://fossil.kd2.org/paheko/tktview/8b342877cda6ef7023b16277daa0ec8e39d949f8
-		if (HOSTING_PROVIDER !== 'OVH') {
-			header(sprintf('Content-Length: %d', $path ? filesize($path) : $this->size));
-		}
-
-		if (@ob_get_length()) {
-			@ob_clean();
-		}
+		$size = $path ? filesize($path) : $this->size;
 
 		if (null === $path) {
 			$pointer = $this->getReadOnlyPointer();
-
-			if (null === $pointer) {
-				$path = $this->getLocalFilePath();
-			}
-		}
-
-		if (null !== $path) {
-			readfile($path);
-		}
-		elseif (null !== $pointer) {
-			while (!feof($pointer)) {
-				echo fread($pointer, 32*1024);
-			}
-
-			fclose($pointer);
 		}
 		else {
+			$pointer = fopen($path, 'rb');
+		}
+
+		if (!$pointer) {
 			header('HTTP/1.1 404 Not Found', true, 404);
 			header('Content-Type: text/html', true);
 			header_remove('Content-Disposition');
 			throw new UserException('Le contenu de ce fichier est introuvable', 404);
+		}
+
+		try {
+			Server::serveFile(null, null, $pointer, [
+				'xsendfile' => ENABLE_XSENDFILE,
+				'ranges'    => true,
+				'gzip'      => true,
+				'name'      => $this->name,
+				'size'      => $size,
+			]);
+		}
+		catch (\LogicException $e) {
+			throw new UserException($e->getMessage(), $e->getCode());
+		}
+		finally {
+			fclose($pointer);
 		}
 	}
 
@@ -1360,11 +1308,15 @@ class File extends Entity
 	static public function validateFileName(string $name): void
 	{
 		if (0 === strpos($name, '.ht') || $name == '.user.ini') {
-			throw new ValidationException('Nom de fichier interdit');
+			throw new ValidationException('Nom de fichier invalide');
 		}
 
 		if (strlen($name) > 250) {
 			throw new ValidationException('Nom de fichier trop long');
+		}
+
+		if (strlen($name) < 1) {
+			throw new ValidationException('Nom de fichier trop court');
 		}
 
 		foreach (self::FORBIDDEN_CHARACTERS as $char) {
@@ -1382,7 +1334,7 @@ class File extends Entity
 
 	static public function validatePath(string $path): array
 	{
-		if (false != strpos($path, '..')) {
+		if (false !== strpos($path, '..')) {
 			throw new ValidationException('Chemin invalide: ' . $path);
 		}
 
@@ -1434,7 +1386,7 @@ class File extends Entity
 		elseif (substr($this->name, -3) == '.md') {
 			$format = Render::FORMAT_MARKDOWN;
 		}
-		elseif (substr($this->mime, 0, 5) == 'text/' && $this->mime != 'text/html') {
+		elseif ($this->mime && substr($this->mime, 0, 5) == 'text/' && $this->mime != 'text/html') {
 			$format = 'text';
 		}
 		else {
@@ -1495,6 +1447,18 @@ class File extends Entity
 	public function getReadOnlyPointer()
 	{
 		return Files::callStorage('getReadOnlyPointer', $this);
+	}
+
+	public function iterate(): \Generator
+	{
+		yield $this;
+
+		if (!$this->isDir()) {
+			return;
+		}
+
+		$db = DB::getInstance();
+		yield from EntityManager::getInstance(self::class)->iterate('SELECT * FROM files WHERE parent = ? ORDER BY type DESC, name COLLATE NOCASE ASC;', $this->path);
 	}
 
 	public function iterateRecursive(): \Generator

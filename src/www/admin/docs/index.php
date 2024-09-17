@@ -30,8 +30,13 @@ else {
 	$dir = Files::get($path);
 }
 
-if (!$dir || !$dir->isDir()) {
+if (!$dir) {
 	throw new UserException('Ce répertoire n\'existe pas.');
+}
+
+if (!$dir->isDir()) {
+	$highlight = $dir->name;
+	$dir = $dir->parent();
 }
 
 if (!$dir->canRead()) {

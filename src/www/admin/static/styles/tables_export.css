@@ -1,0 +1,31 @@
+td {
+	-spreadsheet-cell-type: string;
+}
+
+td.money {
+	-spreadsheet-cell-type: currency;
+}
+
+table.statement td, table.statement th {
+	border: 1pt solid #666666;
+}
+
+table.autofilter {
+	-spreadsheet-autofilter: true;
+}
+
+table.autofilter thead tr {
+	position: fixed;
+}
+
+table.statement thead th, table.statement thead td {
+	background-color: #cccccc;
+}
+
+table.statement tbody tr.even td, table.statement tbody tr.even th {
+	background-color: #eeeeee;
+}
+
+table.statement tfoot td, table.statement tfoot th {
+	background-color: #dddddd;
+}

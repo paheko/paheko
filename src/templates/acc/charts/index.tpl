@@ -4,15 +4,6 @@
 	{include file="./_nav.tpl" current="charts"}
 {/if}
 
-{if $_GET.msg == 'OPEN'}
-<p class="block alert">
-	Il n'existe aucun exercice ouvert.
-	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-		Merci d'en <a href="{$admin_url}acc/years/new.php">créer un nouveau</a> pour pouvoir saisir des écritures.
-	{/if}
-</p>
-{/if}
-
 {form_errors}
 
 {if count($list)}
@@ -55,8 +46,10 @@
 		<fieldset>
 			<legend>Créer un nouveau plan comptable</legend>
 			<dl>
-				{input type="radio-btn" name="type" value="install" label="Ajouter un autre plan comptable officiel"}
-				{input type="radio-btn" name="type" value="copy" label="Recopier un plan comptable pour le modifier"}
+				{input type="radio-btn" name="type" value="install" label="Ajouter un plan comptable officiel"}
+				{if !empty($charts_grouped)}
+					{input type="radio-btn" name="type" value="copy" label="Recopier un plan comptable pour le modifier"}
+				{/if}
 				{input type="radio-btn" name="type" value="import" label="Importer un plan comptable personnel" help="À partir d'un tableau (CSV, Office, etc.)"}
 			</dl>
 		</fieldset>

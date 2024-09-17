@@ -71,9 +71,15 @@ class DynamicFields
 		return key(self::getInstance()->fieldsBySystemUse('number'));
 	}
 
-	static public function getNumberFieldSQL(): string
+	static public function getNumberFieldSQL(?string $prefix = null): string
 	{
-		return DB::getInstance()->quoteIdentifier(self::getNumberField());
+		$db = DB::getInstance();
+
+		if (null !== $prefix) {
+			$prefix = $db->quoteIdentifier($prefix) . '.';
+		}
+
+		return $prefix . $db->quoteIdentifier(self::getNumberField());
 	}
 
 	static public function getLoginField(): string
@@ -214,7 +220,7 @@ class DynamicFields
 		}
 	}
 
-	protected function reload()
+	public function reload()
 	{
 		$db = DB::getInstance();
 		$i = EM::getInstance(DynamicField::class)->iterate('SELECT * FROM @TABLE ORDER BY sort_order;');
@@ -232,23 +238,6 @@ class DynamicFields
 
 		foreach ($presets as $name => $preset) {
 			$field = $this->addFieldFromPreset($name);
-
-			if ($name == 'password') {
-				$name = 'password';
-				$field->system |= $field::PASSWORD;
-			}
-
-			if ($name == 'email') {
-				$field->system |= $field::LOGIN;
-			}
-
-			if ($name == 'nom') {
-				$field->system |= $field::NAMES;
-			}
-
-			if ($name == 'numero') {
-				$field->system |= $field::NUMBER;
-			}
 		}
 
 		$this->save();
@@ -260,8 +249,7 @@ class DynamicFields
 
 		foreach ($data->depends ?? [] as $depends) {
 			if (!$this->fieldByKey($depends)) {
-				$this->addFieldFromPreset($depends);
-				//throw new \LogicException(sprintf('Cannot add "%s" preset if "%s" preset is not installed.', $name, $depends));
+				throw new \LogicException(sprintf('Cannot add "%s" preset if "%s" preset is not installed.', $name, $depends));
 			}
 		}
 
@@ -271,11 +259,16 @@ class DynamicFields
 		$data->list_table ??= false;
 
 		$field = new DynamicField;
-		$field->system |= $field::PRESET;
+		$system = $field::PRESET;
 		$field->set('name', $name);
 		$field->import((array)$data);
 		$field->sort_order = $this->getLastOrderIndex();
 
+		foreach ($data->system ?? [] as $item) {
+			$system |= constant(DynamicField::class . '::' . strtoupper($item));
+		}
+
+		$field->set('system', $system);
 		$this->add($field);
 
 		return $field;
@@ -380,6 +373,17 @@ class DynamicFields
 	{
 		$list = array_diff_key($this->getPresets(), $this->_fields);
 		$installed =& $this->_fields;
+
+		// Remove fields that require another one
+		foreach ($list as $name => $field) {
+			foreach ($field->depends ?? [] as $depends) {
+				if (!$this->fieldByKey($depends)) {
+					unset($list[$name]);
+					continue;
+				}
+			}
+		}
+
 		uasort($list, fn($a, $b) => strnatcasecmp($a->label, $b->label));
 
 		return $list;
@@ -465,6 +469,10 @@ class DynamicFields
 				$data['help'] = null;
 				$data['mandatory'] = true;
 				$data['editable'] = false;
+			}
+
+			if ($name == 'adresse') {
+				$field->system |= $field::AUTOCOMPLETE;
 			}
 
 			$data = array_merge($defaults, $data);

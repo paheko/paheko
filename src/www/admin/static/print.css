@@ -1,6 +1,13 @@
 @page {
-    size: A4 landscape;
     margin: 1cm;
+}
+
+@page landscape {
+    size: A4 landscape;
+}
+
+.pdf[data-prefer-landscape] {
+    page: landscape;
 }
 
 html {

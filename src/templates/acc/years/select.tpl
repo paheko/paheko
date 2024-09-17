@@ -1,26 +1,28 @@
 {include file="_head.tpl" title="Changer d'exercice" current="acc/years"}
 
-<form method="post" action="{$self_url}" data-focus="1">
-	<fieldset>
-		<legend>Changer l'exercice de travail</legend>
-		<dl>
-			<dd>
-				<select name="year">
-					{foreach from=$list item="year"}
-					<option value="{$year.id}">{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short}</option>
-					{/foreach}
-				</select>
-			</dd>
-			<dd class="help">Ici ne peuvent être sélectionnés que les exercices ouverts, car il n'est pas possible de modifier un exercice clos.
-				Pour consulter les rapports pour les exercices clos, voir <a href="{$www_url}admin/acc/years/">la liste des exercices</a>.</dd>
-		</dl>
-	</fieldset>
+{if $msg === 'CLOSED'}
+	<div class="alert block">
+		<h3>L'exercice sélectionné est clôturé</h3>
+		<p>Il n'est pas possible d'y ajouter d'écriture.</p>
+		<p>Sélectionnez un exercice ouvert pour ajouter une écriture.</p>
+	</div>
+{/if}
 
-	<p class="submit">
-		{csrf_field key="acc_select_year"}
-		<input type="hidden" name="from" value="{$from}" />
-		{button type="submit" name="change" label="Changer" shape="right" class="main"}
-	</p>
+<form method="post" action="{$self_url}" data-focus="1">
+	<table class="list">
+		{foreach from=$years item="year"}
+		<tr{if $current_year && $current_year.id === $year.id} class="checked"{/if}>
+			<td>{if $year.closed}{tag label="Clôturé"}{else}{tag label="En cours" color="darkgreen"}{/if}</td>
+			<th><h3>{$year.label}</h3></th>
+			<td>{$year.start_date|date_short} au {$year.end_date|date_short}</td>
+			<td class="actions">
+				{button type="submit" shape="right" label="Sélectionner" name="switch" value=$year.id}
+			</td>
+		</tr>
+		{/foreach}
+	</table>
+	{csrf_field key=$csrf_key}
+	<input type="hidden" name="from" value="{$from}" />
 </form>
 
 {include file="_foot.tpl"}

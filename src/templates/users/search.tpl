@@ -2,7 +2,7 @@
 
 {include file="users/_nav.tpl" current="search"}
 
-<form method="post" action="{$self_url_no_qs}" id="queryBuilderForm" data-disable-progress="1">
+<form method="post" action="{$self_url}" id="queryBuilderForm" data-disable-progress="1">
 
 {include file="common/search/advanced.tpl"}
 
@@ -92,7 +92,7 @@
 				<td>
 					<?php $value = $row[$i]; $name = $header[$i]; ?>
 					{if $id_column !== false}
-						{user_field name=$name value=$value}
+						{user_field name=$name value=$value files_href="!users/details.php?id=%d"|args:$row[$id_column]}
 					{else}
 						{$value}
 					{/if}

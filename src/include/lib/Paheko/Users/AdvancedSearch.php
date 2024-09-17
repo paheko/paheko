@@ -19,6 +19,11 @@ class AdvancedSearch extends A_S
 	{
 		$db = DB::getInstance();
 		$fields = DynamicFields::getInstance();
+		$identity_search_fields = $fields::getNameFieldsSearchableSQL('us');
+
+		if (!$identity_search_fields) {
+			throw new UserException('Aucun champ texte de la fiche membre n\'a été sélectionné comme identité du membre. La recherche de membre ne peut donc pas fonctionner.');
+		}
 
 		$columns = [];
 
@@ -40,8 +45,15 @@ class AdvancedSearch extends A_S
 			'type'     => 'text',
 			'null'     => true,
 			'select'   => $fields::getNameFieldsSQL('u'),
-			'where'    => $fields::getNameFieldsSearchableSQL('us') . ' %s',
+			'where'    => $identity_search_fields . ' %s',
 			'order'    => $order,
+		];
+
+		$columns['number'] = [
+			'label'    => 'Numéro du membre',
+			'type'     => 'integer',
+			'null'     => false,
+			'select'   => $fields::getNumberFieldSQL('u'),
 		];
 
 		$columns['is_parent'] = [
@@ -57,20 +69,14 @@ class AdvancedSearch extends A_S
 			'type' => 'boolean',
 			'null' => false,
 			'select' => 'CASE WHEN u.id_parent IS NOT NULL THEN \'Oui\' ELSE \'Non\' END',
-			'where' => 'u.id_parent IS NOT NULL',
+			'where' => 'u.id_parent IS NOT NULL %s',
 		];
 
 		foreach ($fields->all() as $name => $field)
 		{
-			/*
-			// already included in identity
-			if ($field->system & $field::NAME) {
-				continue;
-			}
-			*/
-
-			// nope
-			if ($field->system & $field::PASSWORD) {
+			// Skip password/number as it's already in the list
+			if ($field->system & $field::PASSWORD
+				|| $field->system & $field::NUMBER) {
 				continue;
 			}
 
@@ -163,6 +169,15 @@ class AdvancedSearch extends A_S
 			'where'  => 'id IN (SELECT id_user FROM services_subscriptions WHERE id_service %s)',
 		];
 
+		$columns['fee'] = [
+			'label'  => 'Est inscrit au tarif',
+			'type'   => 'enum',
+			'null'   => false,
+			'values' => $db->getAssoc('SELECT f.id, s.label || \' — \' || f.label FROM services_fees f INNER JOIN services s ON s.id = f.id_service ORDER BY s.label COLLATE U_NOCASE, f.label COLLATE U_NOCASE;'),
+			'select' => '\'Inscrit\'',
+			'where'  => 'id IN (SELECT id_user FROM services_users WHERE id_fee %s)',
+		];
+
 		$columns['service_not'] = [
 			'label'  => 'N\'est pas inscrit à l\'activité',
 			'type'   => 'enum',
@@ -219,14 +234,24 @@ class AdvancedSearch extends A_S
 		]);
 	}
 
-	public function simple(string $query, bool $allow_redirect = false): \stdClass
+	public function redirect(string $query, array $options = []): bool
+	{
+		return false;
+	}
+
+	public function redirectResult(\stdClass $result): void
+	{
+		Utils::redirect(sprintf('!users/details.php?id=%d', $result->id));
+	}
+
+	public function simple(string $query, array $options = []): \stdClass
 	{
 		$operator = 'LIKE %?%';
 		$db = DB::getInstance();
 
 		if (is_numeric(trim($query)))
 		{
-			$column = DynamicFields::getNumberField();
+			$column = 'number';
 			$operator = '= ?';
 		}
 		elseif (strpos($query, '@') !== false)
@@ -236,35 +261,6 @@ class AdvancedSearch extends A_S
 		else
 		{
 			$column = 'identity';
-		}
-
-		if ($allow_redirect) {
-			$c = $column;
-			$table = 'users';
-
-			if ($column == 'identity') {
-				$c = DynamicFields::getNameFieldsSearchableSQL();
-
-				if (!$c) {
-					throw new UserException('Aucun champ texte n\'est indiqué comme identité des membres, il n\'est pas possible de faire une recherche.');
-				}
-
-				$table = 'users_search';
-			}
-
-			// Try to redirect to user if there is only one user
-			if ($operator == '= ?') {
-				$sql = sprintf('SELECT id, COUNT(*) AS count FROM %s WHERE %s = ?;', $table, $c);
-				$single_query = (int) $query;
-			}
-			else {
-				$sql = sprintf('SELECT id, COUNT(*) AS count FROM %s WHERE %s LIKE ?;', $table, $c);
-				$single_query = '%' . trim($query) . '%';
-			}
-
-			if (($row = $db->first($sql, $single_query)) && $row->count == 1) {
-				Utils::redirect('!users/details.php?id=' . $row->id);
-			}
 		}
 
 		$query = [[
@@ -280,15 +276,15 @@ class AdvancedSearch extends A_S
 
 		return (object) [
 			'groups' => $query,
-			'order' => $column,
-			'desc'  => false,
+			'order'  => $column,
+			'desc'   => false,
 		];
 	}
 
 	public function make(string $query): DynamicList
 	{
 		$tables = 'users_view AS u INNER JOIN users_search AS us USING (id)';
-		$list = $this->makeList($query, $tables, 'identity', false, ['id', 'identity']);
+		$list = $this->makeList($query, $tables, 'identity', false, ['id', 'identity', 'number']);
 
 		$list->setExportCallback([Users::class, 'exportRowCallback']);
 		return $list;

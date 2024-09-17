@@ -32,7 +32,6 @@ span.money {
 nav.acc-year {
     color: rgb(var(--gTextColor));
     background: rgb(var(--gBgColor));
-    text-align: center;
     border-radius: .5rem;
     border: .2rem solid rgba(var(--gMainColor), 0.5);
     display: flex;
@@ -40,12 +39,26 @@ nav.acc-year {
     margin-bottom: .5rem;
 }
 
+nav.acc-year header div {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+}
+
 nav.acc-year > * {
     padding: .2rem .5rem;
 }
 
-nav.acc-year h4 {
+nav.acc-year strong {
     font-weight: normal;
+    font-size: .8em;
+    display: block;
+    margin-bottom: -.5em;
+    color: var(--gBorderColor);
+}
+
+nav.acc-year footer {
+    margin-left: auto;
 }
 
 .year-header {

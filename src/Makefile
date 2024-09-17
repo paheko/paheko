@@ -29,13 +29,16 @@ plugins:
 	rm -f plugins.zip
 
 dev-server:
-	php -S localhost:8082 -d upload_max_filesize=256M -d post_max_size=256M -t www www/_route.php
+	PHP_CLI_SERVER_WORKERS=4 php -S localhost:8082 -d upload_max_filesize=256M -d post_max_size=256M -t www www/_route.php
 
 test-syntax:
 	find . -name '*.php' -not -path './data/*' -print0 | xargs -0 -n1 php -l > /dev/null
 
 tests:
 	cd ../tests && php run.php
+
+selenium-tests:
+	cd ../tests/selenium && make
 
 phpstan:
 	phpstan.phar analyze -c ../tests/phpstan.neon include www
@@ -63,7 +66,7 @@ freeze:
 	php ../tools/fossil_get_branch_hash.php ${KD2FW_URL} ${KD2FW_BRANCH} > ../build/kd2fw.version
 	php ../tools/fossil_get_branch_hash.php ${MODULES_URL} ${MODULES_BRANCH} > ../build/modules.version
 	php ../tools/fossil_get_branch_hash.php ${PLUGINS_URL} ${PLUGINS_BRANCH} > ../build/plugins.version
-	$(shell [[ $(fossil diff ../build/) != "" ]] && commit ../build/*.version --tag ${VERSION})
+	fossil commit ../build/*.version --tag ${VERSION} || true
 
 verify:
 	$(eval ROOT=$(shell pwd))

@@ -8,6 +8,8 @@ use KD2\Form;
 use KD2\Translate;
 use KD2\DB\EntityManager;
 
+$start_timer = microtime(true);
+
 if (!defined('Paheko\CONFIG_FILE')) {
 	define('Paheko\CONFIG_FILE', __DIR__ . '/../config.local.php');
 }
@@ -156,6 +158,11 @@ if (!defined('Paheko\WWW_URL') && $host !== null) {
 }
 
 static $default_config = [
+	// USER_CONFIG_FILE is used in single-user setup (Debian/Windows)
+	// to be able to add user-specific config constants, even though we already
+	// have a config.local.php for OS-specific stuff, this also allows
+	// to remove LOCAL_USER and have a multi-user setup on a single computer
+	'USER_CONFIG_FILE'      => null,
 	'CACHE_ROOT'            => DATA_ROOT . '/cache',
 	'SHARED_CACHE_ROOT'     => DATA_ROOT . '/cache/shared',
 	'WEB_CACHE_ROOT'        => DATA_ROOT . '/cache/web/%host%',
@@ -171,6 +178,8 @@ static $default_config = [
 	'REPORT_USER_EXCEPTIONS' => 0,
 	'ENABLE_TECH_DETAILS'   => true,
 	'HTTP_LOG_FILE'         => null,
+	'WEBDAV_LOG_FILE'       => null,
+	'WOPI_LOG_FILE'         => null,
 	'ENABLE_UPGRADES'       => true,
 	'USE_CRON'              => false,
 	'ENABLE_XSENDFILE'      => false,
@@ -200,10 +209,8 @@ static $default_config = [
 	'API_PASSWORD'          => null,
 	'PDF_COMMAND'           => 'auto',
 	'PDF_USAGE_LOG'         => null,
-	'PDFTOTEXT_COMMAND'     => null,
-	'CALC_CONVERT_COMMAND'  => null,
-	'DOCUMENT_THUMBNAIL_COMMANDS' => null,
 	'SQL_DEBUG'             => null,
+	'ENABLE_PROFILER'       => false,
 	'SYSTEM_SIGNALS'        => [],
 	'LOCAL_LOGIN'           => null,
 	'LEGAL_HOSTING_DETAILS' => null,
@@ -222,6 +229,35 @@ foreach ($default_config as $const => $value)
 	{
 		define($const, $value);
 	}
+}
+
+/**
+ * @deprecated Remove DOCUMENT_THUMBNAIL_COMMANDS constant in 1.4.0
+ */
+if (!defined('Paheko\ENABLE_FILE_THUMBNAILS')) {
+	define('Paheko\ENABLE_FILE_THUMBNAILS', defined('Paheko\DOCUMENT_THUMBNAIL_COMMANDS') ? constant('Paheko\DOCUMENT_THUMBNAIL_COMMANDS') !== null : true);
+}
+
+/**
+ * @deprecated Remove CALC_CONVERT_COMMAND/PDFTOTEXT_COMMAND/DOCUMENT_THUMBNAIL_COMMANDS constants in 1.4.0
+ */
+if (!defined('Paheko\CONVERSION_TOOLS')) {
+	$tools = [];
+
+	if (defined('Paheko\CALC_CONVERT_COMMAND') && constant('Paheko\CALC_CONVERT_COMMAND') !== null) {
+		$tools[] = constant('Paheko\CALC_CONVERT_COMMAND');
+	}
+
+	if (defined('Paheko\PDFTOTEXT_COMMAND') && constant('Paheko\PDFTOTEXT_COMMAND') !== null) {
+		$tools[] = constant('Paheko\PDFTOTEXT_COMMAND');
+	}
+
+	if (defined('Paheko\DOCUMENT_THUMBNAIL_COMMANDS') && constant('Paheko\DOCUMENT_THUMBNAIL_COMMANDS') !== null) {
+		$tools[] = array_merge($tools, constant('Paheko\DOCUMENT_THUMBNAIL_COMMANDS'));
+	}
+
+	define('Paheko\CONVERSION_TOOLS', count($tools) ? $tools : null);
+	unset($tools);
 }
 
 // Check SMTP_SECURITY value
@@ -254,6 +290,12 @@ if (isset($_SERVER['HTTP_X_OVHREQUEST_ID'])) {
 }
 else {
 	define('Paheko\HOSTING_PROVIDER', null);
+}
+
+if (ENABLE_PROFILER) {
+	define('Paheko\PROFILER_START_TIME', $start_timer);
+
+	register_shutdown_function([Utils::class, 'showProfiler']);
 }
 
 // PHP devrait être assez intelligent pour chopper la TZ système mais nan
@@ -374,10 +416,9 @@ if (REPORT_USER_EXCEPTIONS < 2) {
 }
 
 // Clé secrète utilisée pour chiffrer les tokens CSRF etc.
-if (!defined('Paheko\SECRET_KEY'))
-{
+if (!defined('Paheko\SECRET_KEY')) {
 	$key = base64_encode(random_bytes(64));
-	Install::setLocalConfig('SECRET_KEY', $key);
+	Install::setConfig(CONFIG_FILE, 'SECRET_KEY', $key);
 	define('Paheko\SECRET_KEY', $key);
 }
 
@@ -401,7 +442,7 @@ if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) && !empty($_SERVE
 if (!defined('Paheko\INSTALL_PROCESS')) {
 	$exists = file_exists(DB_FILE);
 
-	if (!$exists) {
+	if (!$exists || !filesize(DB_FILE)) {
 		if (in_array('install.php', get_included_files())) {
 			die('Erreur de redirection en boucle : problème de configuration ?');
 		}

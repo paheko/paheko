@@ -9,6 +9,7 @@ use Paheko\Services\Subscriptions;
 use Paheko\Files\Files;
 
 use KD2\ErrorManager;
+use KD2\DB\DB_Exception;
 
 class API
 {
@@ -93,7 +94,7 @@ class API
 	public function setFilePointer($pointer): void
 	{
 		if (!is_resource($pointer)) {
-			throw new InvalidArgumentException('Invalid argument: not a file resource');
+			throw new \InvalidArgumentException('Invalid argument: not a file resource');
 		}
 
 		$this->file_pointer = $pointer;
@@ -110,6 +111,17 @@ class API
 		if ($this->access < $level) {
 			throw new APIException('You do not have enough rights to make this request', 403);
 		}
+	}
+
+	protected function isSystemUser(): bool
+	{
+		$login = $_SERVER['PHP_AUTH_USER'] ?? null;
+		$password = $_SERVER['PHP_AUTH_PW'] ?? null;
+
+		return API_USER
+			&& API_PASSWORD
+			&& $login === API_USER
+			&& $password === API_PASSWORD;
 	}
 
 	protected function hasParam(string $param): bool
@@ -412,6 +424,11 @@ class API
 
 	public function checkAuth(): void
 	{
+		if ($this->isSystemUser()) {
+			$this->access = Session::ACCESS_ADMIN;
+			return;
+		}
+
 		$login = $_SERVER['PHP_AUTH_USER'] ?? null;
 		$password = $_SERVER['PHP_AUTH_PW'] ?? null;
 

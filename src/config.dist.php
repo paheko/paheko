@@ -306,6 +306,18 @@ namespace Paheko;
 //const ENABLE_TECH_DETAILS = true;
 
 /**
+ * Activation du profilage (option de développement)
+ *
+ * Si cette option est activée, une barre sera affichée en bas des pages
+ * indiquant les performances du code, des requêtes SQL, et la liste
+ * des requêtes exécutées.
+ *
+ * Défaut : false
+ * @var bool
+ */
+//const ENABLE_PROFILER = true;
+
+/**
  * Activation du log SQL (option de développement)
  *
  * Si cette constante est renseignée par un chemin de fichier SQLite valide,
@@ -326,7 +338,6 @@ namespace Paheko;
  */
 // const SQL_DEBUG = __DIR__ . '/debug_sql.sqlite';
 
-/**
 /**
  * Mode de journalisation de SQLite
  *
@@ -360,8 +371,6 @@ namespace Paheko;
  * Si cette constante est renseignée par un fichier texte, *TOUTES* les requêtes HTTP
  * ainsi que leur contenu y sera enregistré.
  *
- * C'est surtout utile pour débuguer les problèmes de WebDAV par exemple.
- *
  * ATTENTION : cela signifie que des informations personnelles (mot de passe etc.)
  * peuvent se retrouver dans le log. Ne pas utiliser à moins de tester en développement.
  *
@@ -369,6 +378,32 @@ namespace Paheko;
  * @var string|null
  */
 // const HTTP_LOG_FILE = __DIR__ . '/http.log';
+
+/**
+ * Activation du log WOPI
+ *
+ * Si cette constante est renseignée par un fichier texte, les requêtes HTTP reçues par
+ * le serveur WOPI seront enregistrées dans ce fichier.
+ *
+ * C'est surtout utile pour débuguer les problèmes de WebDAV par exemple.
+ *
+ * Default : null (= désactivé)
+ * @var string|null
+ */
+// const WOPI_LOG_FILE = __DIR__ . '/wopi.log';
+
+/**
+ * Activation du log WebDAV
+ *
+ * Si cette constante est renseignée par un fichier texte, les requêtes HTTP reçues par
+ * le serveur WebDAV seront enregistrées dans ce fichier.
+ *
+ * C'est surtout utile pour débuguer les problèmes de WebDAV par exemple.
+ *
+ * Default : null (= désactivé)
+ * @var string|null
+ */
+// const WEBDAV_LOG_FILE = __DIR__ . '/webdav.log';
 
 /**
  * Activer la possibilité de faire une mise à jour semi-automatisée
@@ -797,73 +832,84 @@ namespace Paheko;
 //const PDF_USAGE_LOG = null;
 
 /**
- * CALC_CONVERT_COMMAND
- * Outil de conversion de formats de tableur vers un format propriétaire
+ * FACTURX_COMMAND
+ * Outil permettant de créer un fichier PDF conforme au format Factur-X
+ * (factures électroniques)
  *
- * Paheko gère nativement les exports en ODS (OpenDocument : LibreOffice)
- * et CSV, et imports en CSV.
+ * Seul Ghostscript est géré pour le moment.
  *
- * En indiquant ici le nom d'un outil, Paheko autorisera aussi
- * l'import en XLSX, XLS et ODS, et l'export en XLSX.
+ * Pour activer la création de factures au format Factur-X, inscrire ici
+ * la chaîne 'gs'. Ghostscript devra être installé sur le serveur
+ * (apt install ghostscript).
  *
- * Pour cela il procédera simplement à une conversion entre les formats natifs
- * ODS/CSV et XLSX ou XLS.
+ * Défault : NULL
+ * @var null|string
+ */
+//const FACTURX_COMMAND = 'gs';
+
+/**
+ * CONVERSION_TOOLS
+ * Outils de conversion de formats de fichier
  *
- * Note : installer ces commandes peut introduire des risques de sécurité sur le serveur.
+ * Ces outils sont utilisés pour convertir les documents d'un format à l'autre.
+ * Cette fonctionnalité est utilisée :
+ * - pour extraire le texte des documents PDF, XLS, DOC, EPUB et l'indexer
+ *   dans la recherche de documents
+ * - pour générer les images miniatures des documents (dans les listes de documents)
+ * - pour convertir les fichiers XLSX, XLS ou ODS pour l'import de membres,
+ *   d'écritures etc. (sinon seul CSV est accepté)
  *
  * Les outils supportés sont :
- * - ssconvert (apt install gnumeric) (plus rapide)
+ * - collabora : serveur Collabora externe, via l'API HTTP de conversion,
+ *   dont l'URL est indiquée dans WOPI_DISCOVERY_URL
+ * - onlyoffice (plus lent) : serveur OnlyOffice externe, via l'API HTTP de conversion,
+ *   dont l'URL est indiquée dans WOPI_DISCOVERY_URL, et la clé indiquée dans en paramètre
+ *   (voir ci-dessous)
+ * - ssconvert (apt install gnumeric --no-install-recommends) (plus léger, recommandé)
  * - unoconv (apt install unoconv) (utilise LibreOffice)
  * - unoconvert (https://github.com/unoconv/unoserver/) en spécifiant l'interface
- *
- * Défault : null (= fonctionnalité désactivée)
- * @var string|null
- */
-//const CALC_CONVERT_COMMAND = 'unoconv';
-//const CALC_CONVERT_COMMAND = 'ssconvert';
-//const CALC_CONVERT_COMMAND = 'unoconvert --interface localhost --port 2022';
-
-/**
- * DOCUMENT_THUMBNAIL_COMMANDS
- * Indique les commandes à utiliser pour générer des miniatures pour les documents
- * (LibreOffice, OOXML, PDF, SVG, vidéos, etc.)
- *
- * Les options possibles sont (par ordre de rapidité) :
  * - mupdf : les miniatures PDF/SVG/XPS/EPUB sont générées avec mutool
  *   (apt install mupdf-tools)
- * - collabora : les miniatures de documents bureautiques sont générées
- *   par le serveur Collabora, via l'API dont l'URL est  indiquée dans WOPI_DISCOVERY_URL
- * - unoconvert : les miniatures des documents Office/LO sont générées
- *   avec unoconvert <https://github.com/unoconv/unoserver/>
  * - ffmpeg : les miniatures de vidéos seront générées avec ffmpeg
  *
- * Bien que Collabora/Unoconvert puissent générer des miniatures de PDF, il est plutôt
- * conseillé d'utiliser mupdf quand même, il est plus rapide et léger.
+ * Si un outil permettant la conversion de documents bureautique est
+ * spécifié (collabora, unoconvert, unocov, onlyoffice), alors il sera
+ * possible d'importer des fichiers XLSX, XLS et ODS en plus du CSV
+ * (par exemple pour les imports de membres ou d'écritures comptables).
  *
- * Note : cette option créera de nombreux fichiers de cache, et risque d'augmenter
- * la charge serveur de manière importante.
+ * Paheko utilisera automatiquement en priorité l'outil le plus performant :
+ * - mupdf avant toute solution bureautique pour PDF/EPUB
+ * - collabora avant ssconvert, avant unoconvert
  *
- * Défaut : null (fonctionnalité désactivée)
- * @var null|array
+ * Note : installer ces outils sur le serveur peut introduire des risques de sécurité.
+ *
+ * Il est possible de passer des paramètres aux outils, en utilisant la notation
+ * 'nom_outil' => [...].
+ *
+ * Exemple pour spécifier la clé JWT pour OnlyOffice:
+ * ['mupdf', 'onlyoffice' => ['jwt_token' => 'XXX']]
+ *
+ * Pour les outils en ligne de commande il est possible de passer des arguments
+ * supplémentaires :
+ * ['unoconvert' => ['args' => '--interface server.tld --port 2022']]
+ *
+ * Défault : null (= désactivé)
+ * @var array|null
  */
-
-//const DOCUMENT_THUMBNAIL_COMMANDS = ['mupdf', 'collabora', 'ffmpeg'];
+//const CONVERSION_TOOLS = ['mupdf', 'collabora', 'ffmpeg'];
+//const CONVERSION_TOOLS = ['ssconvert'];
 
 /**
- * PDFTOTEXT_COMMAND
- * Outil de conversion de PDF au format texte.
+ * ENABLE_FILE_THUMBNAILS
+ * Activer ou désactiver la génération des miniatures de documents.
  *
- * Utilisé pour indexer un fichier PDF pour pouvoir rechercher dans son contenu
- * parmi les documents.
+ * Note : cette option créera de nombreux fichiers de cache, et risque d'augmenter
+ * la charge serveur.
  *
- * Il est possible de spécifier ici la commande suivante :
- * - mupdf (apt install mupdf-tools)
- *
- * Toute autre commande sera ignorée.
- *
- * Défaut : null (= fonctionnalité désactivée)
+ * Défaut : true
+ * @var bool
  */
-//const PDFTOTEXT_COMMAND = 'mupdf';
+//const ENABLE_FILE_THUMBNAILS = false;
 
 /**
  * API_USER et API_PASSWORD

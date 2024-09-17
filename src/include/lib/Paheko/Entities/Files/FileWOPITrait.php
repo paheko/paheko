@@ -5,6 +5,7 @@ namespace Paheko\Entities\Files;
 
 use Paheko\Files\WebDAV\WebDAV;
 use Paheko\Users\Session;
+use Paheko\Utils;
 
 use KD2\WebDAV\WOPI;
 
@@ -18,6 +19,7 @@ trait FileWOPITrait
 			return null;
 		}
 
+		Utils::safe_mkdir(SHARED_CACHE_ROOT, null, true);
 		$cache_file = sprintf('%s/wopi_%s.json', SHARED_CACHE_ROOT, md5(WOPI_DISCOVERY_URL));
 		static $data = null;
 

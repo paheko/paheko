@@ -228,7 +228,15 @@
 
 				var country = $('#f_pays');
 
-				if (!country || country.value !== 'FR') {
+				if (country) {
+					country = country.value;
+				}
+
+				if (!country) {
+					country = input.dataset.defaultCountry;
+				}
+
+				if (country !== 'FR') {
 					return;
 				}
 
@@ -284,6 +292,9 @@
 
 				if (a = $('#f_code_postal')) {
 					a.value = option.dataset.code;
+				}
+				else {
+					input.value += "\n" + option.dataset.code + " " + option.dataset.city;
 				}
 
 				if (a = $('#f_ville')) {

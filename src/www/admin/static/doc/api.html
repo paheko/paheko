@@ -10,7 +10,7 @@
 			padding: 0;
 		}
 		body {
-			font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
+			font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
 			padding: .8em;
 			background: #eee;
 		}
@@ -1176,7 +1176,7 @@ curl -u test:abcd https://monpaheko.tld/api/services/subscriptions/import -T /tm
 <td style="text-align: left;">ID de l'&eacute;criture.</td>
 </tr>
 </tbody>
-</table><p><em>(Depuis la version 1.4.0)</em></p></details><details class="api"><summary id="post-accounting-transaction-id_transaction-subscriptions" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/accounting/transaction/<u>{ID_TRANSACTION}</u>/subscriptions</code> <span>Met &agrave; jour la liste des inscriptions li&eacute;es &agrave; une &eacute;criture</span></summary><table>
+</table><p><em>(Depuis la version 1.3.6)</em></p></details><details class="api"><summary id="post-accounting-transaction-id_transaction-subscriptions" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/accounting/transaction/<u>{ID_TRANSACTION}</u>/subscriptions</code> <span>Met &agrave; jour la liste des inscriptions li&eacute;es &agrave; une &eacute;criture</span></summary><table>
 <thead>
 <tr>
 <th style="text-align: left;">Param&egrave;tre</th>
@@ -1196,7 +1196,7 @@ curl -u test:abcd https://monpaheko.tld/api/services/subscriptions/import -T /tm
 <td style="text-align: left;">ID des inscriptions.</td>
 </tr>
 </tbody>
-</table><p><em>(Depuis la version 1.4.0)</em></p><p>Exemple de requ&ecirc;te :</p><pre><code> curl -v "https://&hellip;/api/accounting/transaction/9337/subscriptions"  -F 'subscriptions[]=2'</code></pre></details><details class="api"><summary id="delete-accounting-transaction-id_transaction-subscriptions" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-DELETE">DELETE</b> <code>/accounting/transaction/<u>{ID_TRANSACTION}</u>/subscriptions</code> <span>Efface la liste des inscriptions li&eacute;es &agrave; une &eacute;criture</span></summary><table>
+</table><p><em>(Depuis la version 1.3.6)</em></p><p>Exemple de requ&ecirc;te :</p><pre><code> curl -v "https://&hellip;/api/accounting/transaction/9337/subscriptions"  -F 'subscriptions[]=2'</code></pre></details><details class="api"><summary id="delete-accounting-transaction-id_transaction-subscriptions" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-DELETE">DELETE</b> <code>/accounting/transaction/<u>{ID_TRANSACTION}</u>/subscriptions</code> <span>Efface la liste des inscriptions li&eacute;es &agrave; une &eacute;criture</span></summary><table>
 <thead>
 <tr>
 <th style="text-align: left;">Param&egrave;tre</th>
@@ -1211,5 +1211,55 @@ curl -u test:abcd https://monpaheko.tld/api/services/subscriptions/import -T /tm
 <td style="text-align: left;">ID de l'&eacute;criture.</td>
 </tr>
 </tbody>
-</table><p><em>(Depuis la version 1.4.0)</em></p></details>
+</table><p><em>(Depuis la version 1.3.6)</em></p></details><details class="api"><summary id="get-accounting-transaction-id_transaction-transactions" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/accounting/transaction/<u>{ID_TRANSACTION}</u>/transactions</code> <span>Liste les &eacute;critures li&eacute;es &agrave; une &eacute;criture.</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>ID_TRANSACTION</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">ID de l'&eacute;criture.</td>
+</tr>
+</tbody>
+</table><p><em>(Depuis la version 1.3.7)</em></p></details><details class="api"><summary id="post-accounting-transaction-id_transaction-transactions" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/accounting/transaction/<u>{ID_TRANSACTION}</u>/transactions</code> <span>Met &agrave; jour la liste des &eacute;critures li&eacute;es &agrave; une &eacute;criture, en utilisant les ID des &eacute;critures, pass&eacute;es dans un tableau nomm&eacute; transactions.</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>ID_TRANSACTION</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">ID de l'&eacute;criture.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>transactions</code></td>
+<td style="text-align: left;"><code>array(int, &hellip;)</code></td>
+<td style="text-align: left;">ID des inscriptions.</td>
+</tr>
+</tbody>
+</table><p><em>(Depuis la version 1.3.7)</em></p><p>Exemple de requ&ecirc;te :</p><pre><code> curl -v "http://&hellip;/api/accounting/transaction/9337/transactions"  -F 'transactions[]=2'</code></pre></details><details class="api"><summary id="delete-accounting-transaction-id_transaction-transactions" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-DELETE">DELETE</b> <code>/accounting/transaction/<u>{ID_TRANSACTION}</u>/transactions</code> <span>Efface la liste des &eacute;critures li&eacute;es &agrave; une &eacute;criture.</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>ID_TRANSACTION</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">ID de l'&eacute;criture.</td>
+</tr>
+</tbody>
+</table><p><em>(Depuis la version 1.3.7)</em></p></details>
 </div></body></html>

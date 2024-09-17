@@ -1,0 +1,57 @@
+<rsm:CrossIndustryInvoice xmlns:ram="urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100" xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100" xmlns:udt="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100">
+	<rsm:ExchangedDocumentContext>
+		<ram:GuidelineSpecifiedDocumentContextParameter>
+			<ram:ID>urn:factur-x.eu:1p0:minimum</ram:ID>
+		</ram:GuidelineSpecifiedDocumentContextParameter>
+	</rsm:ExchangedDocumentContext>
+	<rsm:ExchangedDocument>
+		<ram:ID>{$number}</ram:ID> <!-- Invoice number, free text -->
+		<!--
+    'invoice': '380', (facture)
+    'refund': '381', (avoir)
+		-->
+		<ram:TypeCode>{$type}</ram:TypeCode>
+		<ram:IssueDateTime>
+			<udt:DateTimeString format="102">{$issue_date}</udt:DateTimeString> <!-- 102 = YYYYMMDD -->
+		</ram:IssueDateTime>
+	</rsm:ExchangedDocument>
+	<rsm:SupplyChainTradeTransaction>
+		<ram:ApplicableHeaderTradeAgreement>
+			<ram:BuyerReference>{$buyer_ref}</ram:BuyerReference> <!-- Référence acheteur. "Service exécutant" Code service pour Chorus Pro. Obligatoire pour les entités publiques marquées « Service obligatoire » dans Chorus Pro. -->
+			<ram:SellerTradeParty>
+				<ram:Name>{$seller_name}</ram:Name>
+				<ram:SpecifiedLegalOrganization>
+					<ram:ID schemeID="0002">{$seller_siret}</ram:ID> <!-- Seller SIRET -->
+				</ram:SpecifiedLegalOrganization>
+				<ram:PostalTradeAddress>
+					<ram:CountryID>{$seller_country}</ram:CountryID>
+				</ram:PostalTradeAddress>
+				<ram:SpecifiedTaxRegistration>
+					<ram:ID schemeID="VA">{$seller_vat_number}</ram:ID> <!-- numéro TVA -->
+				</ram:SpecifiedTaxRegistration>
+			</ram:SellerTradeParty>
+			<ram:BuyerTradeParty>
+				<ram:Name>{$buyer_name}</ram:Name>
+				<ram:SpecifiedLegalOrganization>
+					<ram:ID schemeID="0002">{$buyer_siret}</ram:ID> <!-- Customer SIRET -->
+				</ram:SpecifiedLegalOrganization>
+				<ram:PostalTradeAddress>
+					<ram:CountryID>{$buyer_country}</ram:CountryID>
+				</ram:PostalTradeAddress>
+			</ram:BuyerTradeParty>
+			<ram:BuyerOrderReferencedDocument>
+				<ram:IssuerAssignedID>{$issuer_assigned_id}</ram:IssuerAssignedID><!-- Numéro commande acheteur. "Numéro d'engagement juridique" Texte libre. Pour Chorus Pro, indiquer ici le numéro d'engagement. Obligatoire pour les entités publiques marquées « Engagement obligatoire » dans Chorus Pro. -->
+			</ram:BuyerOrderReferencedDocument>
+		</ram:ApplicableHeaderTradeAgreement>
+		<ram:ApplicableHeaderTradeDelivery/>
+		<ram:ApplicableHeaderTradeSettlement>
+			<ram:InvoiceCurrencyCode>{$currency}</ram:InvoiceCurrencyCode>
+			<ram:SpecifiedTradeSettlementHeaderMonetarySummation>
+				<ram:TaxBasisTotalAmount>{$total_amount}</ram:TaxBasisTotalAmount> <!-- Total HT -->
+				<ram:TaxTotalAmount currencyID="{$currency}">{$vat_amount}</ram:TaxTotalAmount><!-- TVA -->
+				<ram:GrandTotalAmount>{$total_amount_with_tax}</ram:GrandTotalAmount><!-- total TTC -->
+				<ram:DuePayableAmount>{$due_amount}</ram:DuePayableAmount><!-- Reste à payer -->
+			</ram:SpecifiedTradeSettlementHeaderMonetarySummation>
+		</ram:ApplicableHeaderTradeSettlement>
+	</rsm:SupplyChainTradeTransaction>
+</rsm:CrossIndustryInvoice>

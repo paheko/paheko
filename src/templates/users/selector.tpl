@@ -12,6 +12,9 @@
 	<tbody>
 	{foreach from=$list->iterate() item="row"}
 		<tr>
+			<td class="num">
+				{$row.number}
+			</td>
 			<th>
 				{$row.identity}
 			</th>

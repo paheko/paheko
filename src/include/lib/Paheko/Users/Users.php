@@ -24,7 +24,7 @@ use KD2\DB\EntityManager as EM;
 
 use KD2\Graphics\SVG\Avatar;
 
-use const Paheko\{ADMIN_COLOR1, ADMIN_COLOR2};
+use const Paheko\{ADMIN_COLOR1, ADMIN_COLOR2, LOCAL_LOGIN, USER_CONFIG_FILE};
 
 class Users
 {
@@ -202,6 +202,7 @@ class Users
 		$df = DynamicFields::getInstance();
 		$number_field = $df->getNumberField();
 		$name_fields = $df->getNameFields();
+		$number_field_sql = 'u.' . $db->quoteIdentifier($number_field);
 
 		$columns = [
 			'_user_id' => [
@@ -220,7 +221,7 @@ class Users
 		$identity_column = [
 			'label' => $df->getNameLabel(),
 			'select' => $df->getNameFieldsSQL('u'),
-			'order' => '_user_name_index %s',
+			'order' => '_user_name_index %s, ' . $number_field_sql . ' %1$s',
 		];
 
 		$fields = $df->getListedFields();
@@ -252,11 +253,18 @@ class Users
 			$columns[$key] = [
 				'label'  => $config->label,
 				'select' => 'u.' . $db->quoteIdentifier($key),
+				'order'  => 'u.' . $db->quoteIdentifier($key),
 			];
 
 			if ($config->hasSearchCache($key)) {
-				$columns[$key]['order'] = sprintf('s.%s %%s', $db->quoteIdentifier($key));
+				$columns[$key]['order'] = 's.' . $db->quoteIdentifier($key);
 			}
+
+			$columns[$key]['order'] = sprintf(
+				'%s IS NULL %%s, %1$s %%1$s, %s %%1$s',
+				$columns[$key]['order'],
+				$number_field_sql
+			);
 
 			if ($config->type == 'file') {
 				$columns[$key]['select'] = sprintf('(SELECT json_group_array(f.path)
@@ -283,7 +291,7 @@ class Users
 				$columns['id_parent'] = [
 					'label'  => 'Rattaché à',
 					'select' => 'u.id_parent',
-					'order'  => 'u.id_parent IS NULL, _parent_name COLLATE U_NOCASE %s, _user_name_index %1$s',
+					'order'  => 'u.id_parent IS NULL, _parent_name COLLATE U_NOCASE %s, _user_name_index %1$s, ' . $number_field_sql . ' %1$s',
 				];
 
 				$columns['_parent_name'] = [
@@ -295,13 +303,13 @@ class Users
 				$columns['is_parent'] = [
 					'label' => 'Responsable',
 					'select' => 'u.is_parent',
-					'order' => 'u.is_parent DESC, _user_name_index %1$s',
+					'order' => 'u.is_parent DESC, _user_name_index %1$s, ' . $number_field_sql . ' %1$s',
 				];
 			}
 		}
 
 		if (!$id_category) {
-			$conditions = sprintf('u.id_category IN (SELECT id FROM users_categories WHERE hidden = 0)');
+			$conditions = 'u.id_category IN (SELECT id FROM users_categories WHERE hidden = 0)';
 		}
 		elseif ($id_category > 0) {
 			$conditions = sprintf('u.id_category = %d', $id_category);
@@ -417,7 +425,7 @@ class Users
 		$db = DB::getInstance();
 
 		$ids = array_map('intval', $ids);
-		$where = $db->where('id', $ids);
+		$where = 'u.' . $db->where('id', $ids);
 		$name = sprintf('Liste de %d membres', count($ids));
 		self::exportWhere($format, $name, $where);
 	}
@@ -430,7 +438,7 @@ class Users
 		}
 		elseif (!$id_category) {
 			$name = 'Membres sauf catégories cachées';
-			$where = 'id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)';
+			$where = 'u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)';
 		}
 		else {
 			$cat = Categories::get($id_category);
@@ -440,7 +448,7 @@ class Users
 			}
 
 			$name = sprintf('Membres - %s', $cat->name);
-			$where = sprintf('id_category = %d', $id_category);
+			$where = sprintf('u.id_category = %d', $id_category);
 		}
 
 		self::exportWhere($format, $name, $where);
@@ -456,13 +464,28 @@ class Users
 		$df = DynamicFields::getInstance();
 		$db = DB::getInstance();
 
+		$tables = 'users_view u';
 		$header = $df->listAssocNames();
 		$columns = array_keys($header);
 		$columns = array_map([$db, 'quoteIdentifier'], $columns);
+
+		if (self::hasParents()) {
+			$columns = array_map(fn($a) => 'u.' . $a, $columns);
+			$tables .= ' LEFT JOIN users b ON b.id = u.id_parent';
+			$tables .= ' LEFT JOIN users c ON c.id_parent = u.id';
+			$config = Config::getInstance();
+
+			$columns[] = sprintf('CASE WHEN u.id_parent IS NOT NULL THEN %s ELSE NULL END AS parent_name', $df->getNameFieldsSQL('b'));
+			$columns[] = sprintf('CASE WHEN u.is_parent THEN GROUP_CONCAT(%s, \'%s\') ELSE NULL END AS children_names', $df->getNameFieldsSQL('c'), "\n");
+
+			$header['parent_name'] = 'Rattaché à';
+			$header['children_names'] = 'Membres rattachés';
+		}
+
 		$columns = implode(', ', $columns);
 		$header['category'] = 'Catégorie';
 
-		$i = $db->iterate(sprintf('SELECT %s, (SELECT name FROM users_categories WHERE id = u.id_category) AS category FROM users_view u WHERE %s;', $columns, $where));
+		$i = $db->iterate(sprintf('SELECT %s, (SELECT name FROM users_categories WHERE id = u.id_category) AS category FROM %s WHERE %s GROUP BY u.id;', $columns, $tables, $where));
 
 		CSV::export($format, $name, $i, $header, [self::class, 'exportRowCallback']);
 	}
@@ -610,27 +633,49 @@ class Users
 		}
 	}
 
-	static public function serveAvatar(int $id): void
+	static public function serveAvatar($id): void
 	{
 		$config = Config::getInstance();
 		$name = (string)($id ?: Utils::getIp());
 
-		$colors = [$config->color1 ?: ADMIN_COLOR1, $config->color2 ?: ADMIN_COLOR2];
+		if (ctype_digit($name)) {
+			$colors = [$config->color1 ?: ADMIN_COLOR1, $config->color2 ?: ADMIN_COLOR2];
 
-		// Add more random colors
-		foreach ($colors as $color) {
-			$rgb = Utils::rgbHexToDec($color);
-			$rgb[0] += 25;
-			$rgb[1] -= 25;
-			$rgb[2] += 25;
-			$colors[] = Utils::rgbDecToHex($rgb);
-			$rgb[0] -= 50;
-			$rgb[1] += 50;
-			$rgb[2] -= 50;
-			$colors[] = Utils::rgbDecToHex($rgb);
+			// Add more random colors
+			foreach ($colors as $color) {
+				$rgb = Utils::rgbHexToDec($color);
+				$rgb[0] += 25;
+				$rgb[1] -= 25;
+				$rgb[2] += 25;
+				$colors[] = Utils::rgbDecToHex($rgb);
+				$rgb[0] -= 50;
+				$rgb[1] += 50;
+				$rgb[2] -= 50;
+				$colors[] = Utils::rgbDecToHex($rgb);
+			}
+		}
+		else {
+			$colors = ['#999999', '#cccccc', '#666666'];
 		}
 
 		header('Content-Type: image/svg+xml; charset=utf-8');
 		echo Avatar::beam($name, ['colors' => $colors, 'size' => 128, 'square' => true]);
+	}
+
+	static public function canConfigureLocalLogin(): bool
+	{
+		if (LOCAL_LOGIN === null || !USER_CONFIG_FILE) {
+			return false;
+		}
+
+		return (bool) DB::getInstance()->firstColumn('SELECT 1 FROM users WHERE password IS NOT NULL
+			AND id_category IN (SELECT id FROM users_categories WHERE perm_config >= ? AND perm_connect >= ?) LIMIT 1;',
+			Session::ACCESS_ADMIN, Session::ACCESS_READ);
+	}
+
+	static public function getFirstAdmin(): ?User
+	{
+		return EM::findOne(User::class, 'SELECT * FROM @TABLE WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config >= ?) LIMIT 1;',
+			Session::ACCESS_ADMIN);
 	}
 }

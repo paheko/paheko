@@ -23,6 +23,7 @@ $form->runIf('create', function () use ($parent, $default_ext) {
 		$name .= '.' . $default_ext;
 	}
 
+	$name = File::filterName($name);
 	$target = $parent . '/' . $name;
 
 	if (Files::exists($target)) {

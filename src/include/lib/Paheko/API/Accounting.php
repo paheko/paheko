@@ -201,12 +201,12 @@ trait Accounting
 			$year = Years::get($id_year);
 
 			if (!$year) {
-				throw new APIException('Invalid year.', 400, $e);
+				throw new APIException('Invalid year.', 400);
 			}
 
 			if ($p2 === 'journal') {
 				try {
-					return Reports::getJournal(['year' => $id_year]);
+					return iterator_to_array(Reports::getJournal(['year' => $id_year]));
 				}
 				catch (\LogicException $e) {
 					throw new APIException('Missing parameter for journal: ' . $e->getMessage(), 400, $e);

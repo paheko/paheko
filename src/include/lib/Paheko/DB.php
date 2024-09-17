@@ -57,7 +57,7 @@ class DB extends SQLite3
 		parent::__construct($driver, $params);
 
 		// Enable SQL debug log if configured
-		if (SQL_DEBUG) {
+		if (SQL_DEBUG || ENABLE_PROFILER) {
 			$this->callback = [$this, 'log'];
 			$this->_log_start = $_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true);
 		}
@@ -67,7 +67,7 @@ class DB extends SQLite3
 	{
 		parent::__destruct();
 
-		if (null !== $this->callback) {
+		if (SQL_DEBUG && null !== $this->callback) {
 			$this->saveLog();
 		}
 	}
@@ -79,6 +79,11 @@ class DB extends SQLite3
 	public function disableLog(): void {
 		$this->callback = null;
 		$this->_log_store = [];
+	}
+
+	public function getLog(): array
+	{
+		return $this->_log_store;
 	}
 
 	/**
@@ -96,7 +101,7 @@ class DB extends SQLite3
 
 		$user = $_SESSION['userSession']->id ?? null;
 
-		$db->insert('sessions', ['script' => str_replace(ROOT, '', $_SERVER['SCRIPT_NAME']), 'user' => $user]);
+		$db->insert('sessions', ['script' => Utils::getRequestURI() ?? str_replace(ROOT, '', $_SERVER['SCRIPT_NAME']), 'user' => $user]);
 		$id = $db->lastInsertId();
 
 		$db->begin();

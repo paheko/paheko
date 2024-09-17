@@ -137,7 +137,7 @@ fieldset.content {
     background: var(--gLightBackgroundColor);
 }
 
-web-edit dd.help {
+.web-edit dd.help {
     font-size: .9em;
 }
 
@@ -186,6 +186,10 @@ form#f_upload fieldset {
     color: rgb(var(--gHoverLinkColor));
     text-decoration-color: rgba(var(--gHoverLinkColor), 0.5);
     text-decoration: underline;
+}
+
+.web.category-list li a:hover span {
+    text-decoration: none;
 }
 
 .web.category-list .draft a {

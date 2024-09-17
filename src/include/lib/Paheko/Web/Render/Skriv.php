@@ -13,7 +13,7 @@ class Skriv extends AbstractRender
 {
 	static protected $skriv = null;
 
-	public function render(string $content): string
+	public function renderUncached(string $content): string
 	{
 		$str = $content;
 
@@ -34,6 +34,6 @@ class Skriv extends AbstractRender
 		$str = CommonModifiers::typo($str);
 		$str = self::$skriv->render($str);
 
-		return $this->outputHTML($str);
+		return $str;
 	}
 }

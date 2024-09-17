@@ -297,11 +297,11 @@ class Addresses
 			return null;
 		}
 
-		if ($return['type'] == 'autoreply') {
+		if ($return['type'] === 'autoreply') {
 			// Ignore auto-responders
 			return $return;
 		}
-		elseif ($return['type'] == 'genuine') {
+		elseif ($return['type'] === 'genuine') {
 			// Forward emails that are not automatic to the organization email
 			$config = Config::getInstance();
 
@@ -317,6 +317,12 @@ class Addresses
 
 			self::sendMessage(self::CONTEXT_SYSTEM, $new);
 			return $return;
+		}
+		elseif ($return['type']=== 'permanent') {
+			$return['type'] = 'hard';
+		}
+		elseif ($return['type']=== 'temporary') {
+			$return['type'] = 'soft';
 		}
 
 		return self::handleManualBounce($return['recipient'], $return['type'], $return['message']);

@@ -25,10 +25,12 @@
 					{icon shape="document"} Page
 				{/if}
 			</span>
-			{if $page.status == $page::STATUS_ONLINE}
-				<strong>{icon shape="eye"} En ligne</strong>
-			{else}
+			{if $page.status === $page::STATUS_DRAFT}
 				<em>{icon shape="eye-off"} Brouillon</em>
+			{elseif $page.status === $page::STATUS_PRIVATE}
+				<strong>{icon shape="user"} Réservée aux membres</strong>
+			{else}
+				<strong>{icon shape="eye"} En ligne</strong>
 			{/if}
 			<span>Publié&nbsp;: {$page.published|relative_date:true}</span>
 			<span>Modifié&nbsp;: {$page.modified|relative_date:true}</span>

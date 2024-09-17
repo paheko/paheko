@@ -45,6 +45,11 @@ class Categories
 		$conditions = self::getHiddenClause($hidden);
 
 		foreach ($perms as $section => $level) {
+			// Don't match login permission if logged-in user doesn't exist
+			if ($section === 'connect' && \Paheko\LOCAL_LOGIN && !$session->user()->exists()) {
+				continue;
+			}
+
 			$conditions .= sprintf(' AND perm_%s <= %d', $section, $level);
 		}
 

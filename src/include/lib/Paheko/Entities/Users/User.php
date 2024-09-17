@@ -33,7 +33,7 @@ use KD2\DB\EntityManager as EM;
 use KD2\DB\Date;
 use KD2\ZipWriter;
 
-use const Paheko\{WWW_URL};
+use const Paheko\{WWW_URL, LOCAL_LOGIN};
 
 /**
  * WARNING: do not use $user->property = 'value' to set a property value on this class
@@ -61,6 +61,7 @@ class User extends Entity
 	];
 
 	protected bool $_loading = false;
+	protected Category $_category;
 
 	public function __construct()
 	{
@@ -136,20 +137,11 @@ class User extends Entity
 		foreach ($df->all() as $field) {
 			$value = $this->{$field->name};
 
-			if (null !== $value) {
-				if ($field->type === 'email') {
-					$this->assert($value === null || SMTP::checkEmailIsValid($value, false), sprintf('"%s" : l\'adresse e-mail "%s" n\'est pas valide.', $field->label, $value));
-				}
-				elseif ($field->type === 'checkbox') {
-					$this->assert($value === false || $value === true, sprintf('"%s" : la valeur de ce champ n\'est pas valide.', $field->label));
-				}
-			}
-
 			if ($is_admin && empty($value) && $field->isLogin() && !empty($this->getModifiedProperty($field->name))) {
 				throw new ValidationException(sprintf('Le champ "%s" est vide. Cette action aurait pour effet d\'empêcher cet administrateur de se connecter. Si vous souhaitez empêcher ce membre de se connecter, modifiez sa catégorie.', $field->label));
 			}
 
-			if (!$field->required || $field->system & $field::PASSWORD) {
+			if ($field->system & $field::PASSWORD) {
 				continue;
 			}
 
@@ -158,21 +150,39 @@ class User extends Entity
 				continue;
 			}
 
-			$this->assert(null !== $value, sprintf('"%s" : ce champ est requis', $field->label));
+			if ($field->required) {
+				$this->assert(null !== $value, sprintf('"%s" : ce champ est requis', $field->label));
 
-			if (is_bool($value) && $field->required) {
-				$this->assert($value === true, sprintf('"%s" : ce champ doit être coché', $field->label));
-			}
-			elseif (!is_array($value) && !is_object($value) && !is_bool($value)) {
-				$this->assert('' !== trim((string)$value), sprintf('"%s" : ce champ ne peut être vide', $field->label));
+				if (is_bool($value)) {
+					$this->assert($value === true, sprintf('"%s" : ce champ doit être coché', $field->label));
+				}
+				elseif (!is_array($value) && !is_object($value) && !is_bool($value)) {
+					$this->assert('' !== trim((string)$value), sprintf('"%s" : ce champ ne peut être vide', $field->label));
+				}
 			}
 
-			if ($field->type === 'select') {
+			if (!isset($value)) {
+				continue;
+			}
+
+			if ($field->type === 'email') {
+				$this->assert($value === null || SMTP::checkEmailIsValid($value, false), sprintf('"%s" : l\'adresse e-mail "%s" n\'est pas valide.', $field->label, $value));
+			}
+			elseif ($field->type === 'checkbox') {
+				$this->assert($value === false || $value === true, sprintf('"%s" : la valeur de ce champ n\'est pas valide.', $field->label));
+			}
+			elseif ($field->type === 'select') {
 				$this->assert(in_array($value, $field->options), sprintf('"%s" : la valeur "%s" ne fait pas partie des options possibles', $field->label, $value));
 			}
 			elseif ($field->type === 'country') {
 				$this->assert(strlen($value) === 2, sprintf('"%s" : un champ pays ne peut contenir que deux lettres', $field->label));
 				$this->assert(Utils::getCountryName($value) !== null, sprintf('"%s" : pays inconnu : "%s"', $field->label, $value));
+			}
+			elseif ($field->type === 'month') {
+				$this->assert(preg_match('/^\d{4}-\d{2}$/', $value), sprintf('"%s" : le format attendu est de la forme AAAA-MM', $field->label));
+			}
+			elseif ($field->type === 'url') {
+				$this->assert(Utils::validateURL($value), sprintf('"%s" : adresse invalide', $field->label));
 			}
 		}
 
@@ -319,7 +329,8 @@ class User extends Entity
 
 	public function category(): Category
 	{
-		return Categories::get($this->id_category);
+		$this->_category ??= Categories::get($this->id_category);
+		return $this->_category;
 	}
 
 	public function attachmentsDirectory(): string
@@ -377,9 +388,8 @@ class User extends Entity
 
 	public function importForm(array $source = null)
 	{
-		if (null === $source) {
-			$source = $_POST;
-		}
+		$source ??= $_POST;
+
 
 		// Don't allow changing security credentials from form
 		unset($source['id_category'], $source['password'], $source['otp_secret'], $source['pgp_key']);
@@ -430,6 +440,15 @@ class User extends Entity
 			}
 
 			$source[$f->name] = $source[$f->name] ?: null;
+		}
+
+		// Append time to date
+		foreach (DynamicFields::getInstance()->fieldsByType('datetime') as $f) {
+			if (!isset($source[$f->name])) {
+				continue;
+			}
+
+			$source[$f->name] .= ' ' . ($source[$f->name . '_time'] ?? '');
 		}
 
 		return parent::importForm($source);
@@ -693,7 +712,7 @@ class User extends Entity
 
 		$export_data = [
 			'user'     => $this,
-			'services' => $services_list->asArray(true),
+			'services' => $services_list->asArray(),
 		];
 
 		$tpl = Template::getInstance();
@@ -724,14 +743,73 @@ class User extends Entity
 		$zip->close();
 	}
 
-	public function validateCanChange(?Session $session = null): void
+	public function isSuperAdmin(): bool
+	{
+		$category = $this->category();
+		return $category->perm_config === Session::ACCESS_ADMIN;
+	}
+
+	/**
+	 * Make sure a super-admin (access to config) can only be modified
+	 * by another super-admin.
+	 *
+	 * Or a users admin can only be modified by another users admin.
+	 */
+	public function canBeModifiedBy(?Session $session = null): bool
 	{
 		$category = $this->category();
 
-		if (($category->perm_config == Session::ACCESS_ADMIN)
+		if (($category->perm_config === Session::ACCESS_ADMIN)
 			&& (!$session || !$session->canAccess(Session::SECTION_CONFIG, Session::ACCESS_ADMIN))) {
+			return false;
+		}
+
+		if (($category->perm_users === Session::ACCESS_ADMIN)
+			&& (!$session || !$session->canAccess(Session::SECTION_USERS, Session::ACCESS_ADMIN))) {
+			return false;
+		}
+
+		return true;
+	}
+
+	public function validateCanBeModifiedBy(?Session $session = null): void
+	{
+		if (!$this->canBeModifiedBy($session)) {
 			throw new UserException("Seul un membre administrateur peut modifier un autre membre administrateur.");
 		}
+	}
+
+	public function canLoginBy(Session $session): bool
+	{
+		// Cannot login if we can't manage sessions
+		if (LOCAL_LOGIN) {
+			return false;
+		}
+
+		// Cannot login if not a superadmin
+		if (!$session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
+			return false;
+		}
+
+		$logged_user = $session->getUser();
+
+		// Cannot self-login
+		if ($logged_user->id === $this->id) {
+			return false;
+		}
+
+		// Cannot login as same category
+		if ($this->id_category === $logged_user->id_category) {
+			return false;
+		}
+
+		// Cannot login as a super-admin
+		if ($this->isSuperAdmin()) {
+			return false;
+		}
+
+
+		return true;
 	}
 
 	/**

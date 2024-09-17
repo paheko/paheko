@@ -94,7 +94,7 @@ $is_quick = count(array_intersect_key($_GET, array_flip(['a', 'l', 'd', 't', 'ac
 	<fieldset{if $is_new} class="hidden"{/if}>
 		<legend>Détails facultatifs</legend>
 		<dl data-types="t{$transaction::TYPE_REVENUE} t{$transaction::TYPE_EXPENSE} t{$transaction::TYPE_TRANSFER} t99">
-			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc." default=$transaction->payment_reference()}
+			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc." default=$transaction->getPaymentReference()}
 		</dl>
 		<dl>
 			{input type="list" multiple=true name="users" label="Membres associés" target="!users/selector.php" default=$linked_users}

@@ -17,6 +17,7 @@ use Paheko\Web\Router;
 use KD2\ZipWriter;
 
 use Paheko\Entities\Files\File;
+use Paheko\Entities\Users\Category;
 
 use const Paheko\{ROOT, WWW_URL, BASE_URL};
 
@@ -28,7 +29,6 @@ class Module extends Entity
 	const ICON_FILE = 'icon.svg';
 	const CONFIG_FILE = 'config.html';
 	const INDEX_FILE = 'index.html';
-	const README_FILE = 'README.md';
 
 	// Snippets, don't forget to create alias constant in UserTemplate\Modules class
 	const SNIPPET_TRANSACTION = 'snippets/transaction_details.html';
@@ -76,13 +76,23 @@ class Module extends Entity
 	 */
 	protected bool $system;
 
+	protected bool $_table_exists;
+
+	protected ?\stdClass $_ini;
+
 	public function selfCheck(): void
 	{
 		$this->assert(preg_match(self::VALID_NAME_REGEXP, $this->name), 'Nom unique de module invalide: ' . $this->name);
 		$this->assert(trim($this->label) !== '', 'Le libellé ne peut rester vide');
 		$this->assert(!isset($this->author_url) || preg_match('!^(?:https?://|mailto:)!', $this->author_url), 'L\'adresse du site de l\'auteur est invalide');
+
 		$this->assert(!isset($this->restrict_section) || in_array($this->restrict_section, Session::SECTIONS, true), 'Restriction de section invalide');
-		$this->assert(!isset($this->restrict_level) || in_array($this->restrict_level, Session::ACCESS_LEVELS, true), 'Restriction de niveau invalide');
+
+		if (isset($this->restrict_section)) {
+			$this->assert(isset($this->restrict_level) && in_array($this->restrict_level, Session::ACCESS_LEVELS, true), 'Restriction de niveau invalide');
+			$this->assert(array_key_exists($this->restrict_level, Category::PERMISSIONS[$this->restrict_section]['options']),
+				'This restricted access level doesn\'t exist for this section');
+		}
 
 		if (!$this->exists()) {
 			$this->assert(!DB::getInstance()->test(self::TABLE, 'name = ?', $this->name), 'Un module existe déjà avec ce nom unique');
@@ -102,11 +112,13 @@ class Module extends Entity
 
 		parent::importForm($source);
 	}
-	/**
-	 * Fills information from module.ini file
-	 */
-	public function updateFromINI(bool $use_local = true): bool
+
+	public function getINIProperties(bool $use_local = true): ?\stdClass
 	{
+		if (isset($this->_ini) && $use_local) {
+			return $this->_ini;
+		}
+
 		if ($use_local && ($file = Files::get($this->path(self::META_FILE)))) {
 			$ini = $file->fetch();
 			$from_dist = false;
@@ -116,34 +128,55 @@ class Module extends Entity
 			$from_dist = true;
 		}
 		else {
-			return false;
+			return null;
 		}
 
 		try {
-			$ini = Utils::parse_ini_string($ini, false, \INI_SCANNER_TYPED);
+			$ini = Utils::parse_ini_string($ini, false);
 		}
 		catch (\RuntimeException $e) {
 			throw new ValidationException(sprintf('Le fichier module.ini est invalide pour "%s" : %s', $this->name, $e->getMessage(), 0, $e));
 		}
 
 		if (empty($ini)) {
-			return false;
+			return null;
 		}
 
 		$ini = (object) $ini;
 
 		if (!isset($ini->name)) {
+			return null;
+		}
+
+		// Don't allow user code to set itself as a system module
+		if (!$from_dist) {
+			unset($ini->system);
+		}
+
+		if ($use_local) {
+			$this->_ini = $ini;
+		}
+
+		return $ini;
+	}
+
+	/**
+	 * Fills information from module.ini file
+	 */
+	public function updateFromINI(bool $use_local = true): bool
+	{
+		$ini = $this->getINIProperties();
+
+		if (!$ini) {
 			return false;
 		}
 
 		$restrict_section = null;
 		$restrict_level = null;
 
-		if (isset($ini->restrict_section, $ini->restrict_level)
-			&& array_key_exists($ini->restrict_level, Session::ACCESS_LEVELS)
-			&& in_array($ini->restrict_section, Session::SECTIONS)) {
+		if (isset($ini->restrict_section, $ini->restrict_level)) {
 			$restrict_section = $ini->restrict_section;
-			$restrict_level = Session::ACCESS_LEVELS[$ini->restrict_level];
+			$restrict_level = Session::ACCESS_LEVELS[$ini->restrict_level] ?? null;
 		}
 
 		$this->set('label', $ini->name);
@@ -156,7 +189,7 @@ class Module extends Entity
 		$this->set('restrict_section', $restrict_section);
 		$this->set('restrict_level', $restrict_level);
 
-		if ($from_dist && !empty($ini->system)) {
+		if (!empty($ini->system)) {
 			$this->set('system', true);
 		}
 
@@ -200,7 +233,6 @@ class Module extends Entity
 	public function updateTemplates(): void
 	{
 		$check = self::SNIPPETS + [self::CONFIG_FILE => 'Config'];
-		$templates = [];
 		$db = DB::getInstance();
 
 		$db->begin();
@@ -208,7 +240,6 @@ class Module extends Entity
 
 		foreach ($check as $file => $label) {
 			if (Files::exists($this->path($file)) || file_exists($this->distPath($file))) {
-				$templates[] = $file;
 				$db->insert('modules_templates', ['id_module' => $this->id(), 'name' => $file]);
 			}
 		}
@@ -297,9 +328,14 @@ class Module extends Entity
 		return $this->fetchDistFile($path);
 	}
 
+	public function getLocalFile(string $path): ?File
+	{
+		return Files::get($this->path($path));
+	}
+
 	public function fetchLocalFile(string $path): ?string
 	{
-		$file = Files::get($this->path($path));
+		$file = $this->getLocalFile($path);
 		return !$file ? null : $file->fetch();
 	}
 
@@ -313,9 +349,15 @@ class Module extends Entity
 		return DB::getInstance()->test('modules_templates', 'id_module = ? AND name = ?', $this->id(), self::CONFIG_FILE);
 	}
 
-	public function hasData(): bool
+	public function table_name(): string
 	{
-		return DB::getInstance()->test('sqlite_master', 'type = \'table\' AND name = ?', sprintf('module_data_%s', $this->name));
+		return sprintf('module_data_%s', $this->name);
+	}
+
+	public function hasTable(): bool
+	{
+		$this->_table_exists ??= DB::getInstance()->test('sqlite_master', 'type = \'table\' AND name = ?', $this->table_name());
+		return $this->_table_exists;
 	}
 
 	public function getDataSize(): int
@@ -337,6 +379,63 @@ class Module extends Entity
 		}
 
 		return 0;
+	}
+
+	public function getCodeSLOC(?string $path = null): int
+	{
+		$count = 0;
+
+		foreach ($this->listFiles($path) as $file) {
+			if ($file->dir) {
+				$count += $this->getCodeSLOC($file->path);
+				continue;
+			}
+			elseif (!$file->editable) {
+				continue;
+			}
+
+			if (!empty($file->dist_path)) {
+				$fp = fopen($file->dist_path, 'r');
+			}
+			else {
+				$file = Files::get($file->file_path);
+				$fp = $file->getReadOnlyPointer();
+			}
+
+			if (!$fp) {
+				continue;
+			}
+
+			$in_comment = false;
+
+			while (!feof($fp)) {
+				$line = trim(fgets($fp));
+
+				// Skip blank lines
+				if ($line === '') {
+					continue;
+				}
+
+				if (false !== strpos($line, '{{*') || false !== strpos($line, '/*')) {
+					$in_comment = true;
+				}
+
+				if (false !== strpos($line, '*}}') || false !== strpos($line, '*/')) {
+					$in_comment = false;
+				}
+
+				// Skip comments
+				if ($in_comment || substr($line, 0, 2) === '//') {
+					continue;
+				}
+
+				$count++;
+			}
+
+			fclose($fp);
+		}
+
+		return $count;
 	}
 
 	public function getFilesSize(): int
@@ -362,7 +461,7 @@ class Module extends Entity
 
 	public function canDeleteData(): bool
 	{
-		return !empty($this->config) || $this->hasData();
+		return !empty($this->config) || $this->hasTable();
 	}
 
 	public function listFiles(?string $path = null): array
@@ -549,7 +648,8 @@ class Module extends Entity
 				}
 				else {
 					$ut = $this->template($path);
-					$ut->serve($params);
+					$ut->assignArray($params);
+					$ut->serve();
 				}
 			}
 			catch (\LogicException $e) {

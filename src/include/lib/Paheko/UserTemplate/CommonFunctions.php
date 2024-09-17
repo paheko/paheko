@@ -12,11 +12,12 @@ use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
 use Paheko\Entities\Users\DynamicField;
 use Paheko\Entities\Users\User;
+use Paheko\Files\Conversion;
 use Paheko\Files\Files;
 
 use KD2\Form;
 
-use const Paheko\{ADMIN_URL, BASE_URL, CALC_CONVERT_COMMAND, LOCAL_ADDRESSES_ROOT};
+use const Paheko\{ADMIN_URL, BASE_URL, LOCAL_ADDRESSES_ROOT};
 
 /**
  * Common functions used by Template (Smartyer) and UserTemplate
@@ -65,7 +66,7 @@ class CommonFunctions
 			$attributes['accept'] = '.csv,text/csv,application/csv,.CSV';
 			$help = ($help ?? '') . PHP_EOL . 'Format accepté : CSV';
 
-			if (CALC_CONVERT_COMMAND) {
+			if (Conversion::canConvert('ods')) {
 				$help .= ', LibreOffice Calc (ODS), ou Excel (XLSX)';
 				$attributes['accept'] .= ',.ods,.ODS,application/vnd.oasis.opendocument.spreadsheet'
 					. ',.xls,.XLS,application/vnd.ms-excel'
@@ -75,22 +76,23 @@ class CommonFunctions
 
 		$current_value = null;
 		$current_value_from_user = false;
+		$source_name = ($type === 'time') ? str_replace('_time', '', $name) : $name;
 
 		if (isset($_POST[$name])) {
 			$current_value = $_POST[$name];
 			$current_value_from_user = true;
 		}
-		elseif (isset($source) && is_object($source) && isset($source->$name) && !is_null($source->$name)) {
-			$current_value = $source->$name;
+		elseif (isset($source) && is_object($source) && isset($source->$source_name) && !is_null($source->$source_name)) {
+			$current_value = $source->$source_name;
 		}
-		elseif (isset($source) && is_array($source) && isset($source[$name])) {
-			$current_value = $source[$name];
+		elseif (isset($source) && is_array($source) && isset($source[$source_name])) {
+			$current_value = $source[$source_name];
 		}
 		elseif (isset($default) && ($type != 'checkbox' || empty($_POST))) {
 			$current_value = $default;
 		}
 
-		if ($type == 'date' || $type === 'time') {
+		if ($type === 'date' || $type === 'time') {
 			if ((is_string($current_value) && !preg_match('!^\d+:\d+$!', $current_value)) || is_int($current_value)) {
 				try {
 					$current_value = Entity::filterUserDateValue((string)$current_value);
@@ -101,7 +103,7 @@ class CommonFunctions
 			}
 
 			if (is_object($current_value) && $current_value instanceof \DateTimeInterface) {
-				if ($type == 'date') {
+				if ($type === 'date') {
 					$current_value = $current_value->format('d/m/Y');
 				}
 				else {
@@ -109,19 +111,8 @@ class CommonFunctions
 				}
 			}
 		}
-		elseif ($type == 'time' && is_object($current_value) && $current_value instanceof \DateTimeInterface) {
-			$current_value = $current_value->format('H:i');
-		}
 		elseif ($type == 'password') {
 			$current_value = null;
-		}
-		elseif ($type == 'time' && is_string($current_value)) {
-			if ($v = \DateTime::createFromFormat('!Y-m-d H:i:s', $current_value)) {
-				$current_value = $v->format('H:i');
-			}
-			elseif ($v = \DateTime::createFromFormat('!Y-m-d H:i', $current_value)) {
-				$current_value = $v->format('H:i');
-			}
 		}
 
 		$attributes['id'] = 'f_' . preg_replace('![^a-z0-9_-]!i', '', $name);
@@ -165,6 +156,12 @@ class CommonFunctions
 			$attributes['size'] = 4;
 			$attributes['maxlength'] = 4;
 			$attributes['pattern'] = '\d';
+		}
+		elseif ($type == 'month') {
+			$attributes['size'] = 7;
+			$attributes['maxlength'] = 7;
+			$attributes['pattern'] = '\d{4}-\d{2}';
+			$attributes['placeholder'] = 'AAAA-MM';
 		}
 		elseif ($type == 'weight') {
 			$type = 'number';
@@ -265,6 +262,11 @@ class CommonFunctions
 			$prefix .= sprintf('<dd class="help">%s</dd>',
 				htmlspecialchars($params['prefix_help'])
 			);
+		}
+
+		if ($type === 'country') {
+			$type = 'select';
+			$options = Utils::getCountryList();
 		}
 
 		if ($type === 'radio-btn') {
@@ -429,7 +431,7 @@ class CommonFunctions
 
 	static public function icon(array $params): string
 	{
-		if (isset($params['shape']) && isset($params['html']) && $params['html'] == false) {
+		if (isset($params['shape']) && isset($params['html']) && !$params['html']) {
 			return Utils::iconUnicode($params['shape']);
 		}
 
@@ -592,28 +594,16 @@ class CommonFunctions
 
 		$url .= $suffix;
 
-		$xlsx = $params['xlsx'] ?? null;
-
-		if (null === $xlsx) {
-			$xlsx = !empty(CALC_CONVERT_COMMAND);
-		}
-
 		if (!empty($params['form'])) {
 			$name = $params['name'] ?? 'export';
 			$out = self::button(['value' => 'csv', 'shape' => 'export', 'label' => 'Export CSV', 'name' => $name, 'type' => 'submit']);
 			$out .= self::button(['value' => 'ods', 'shape' => 'export', 'label' => 'Export LibreOffice', 'name' => $name, 'type' => 'submit']);
-
-			if ($xlsx) {
-				$out .= self::button(['value' => 'xlsx', 'shape' => 'export', 'label' => 'Export Excel', 'name' => $name, 'type' => 'submit']);
-			}
+			$out .= self::button(['value' => 'xlsx', 'shape' => 'export', 'label' => 'Export Excel', 'name' => $name, 'type' => 'submit']);
 		}
 		else {
 			$out  = self::linkButton(['href' => $url . 'csv', 'label' => 'Export CSV', 'shape' => 'export']);
 			$out .= ' ' . self::linkButton(['href' => $url . 'ods', 'label' => 'Export LibreOffice', 'shape' => 'export']);
-
-			if ($xlsx !== false) {
-				$out .= ' ' . self::linkButton(['href' => $url . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']);
-			}
+			$out .= ' ' . self::linkButton(['href' => $url . 'xlsx', 'label' => 'Export Excel', 'shape' => 'export']);
 		}
 
 		unset($params['table'], $params['suffix']);
@@ -774,8 +764,6 @@ class CommonFunctions
 			$params['default_empty'] = '—';
 		}
 		elseif ($type == 'country') {
-			$params['type'] = 'select';
-			$params['options'] = Utils::getCountryList();
 			$params['default'] = Config::getInstance()->get('country');
 		}
 		elseif ($type == 'checkbox') {
@@ -795,13 +783,14 @@ class CommonFunctions
 			$params['type'] = 'number';
 			$params['step'] = 'any';
 		}
-		elseif ($type === 'address') {
-			$params['datalist'] = 'address';
-			$params['type'] = 'textarea';
-		}
 		elseif ($type === 'datalist') {
 			$params['datalist'] = $field->options ?? [];
 			$params['type'] = 'text';
+		}
+
+		if ($field->system & $field::AUTOCOMPLETE && $field->name === 'adresse') {
+			$params['datalist'] = 'address';
+			$params['data-default-country'] = Config::getInstance()->get('country');
 		}
 
 		if ($field->default_value === 'NOW()') {
@@ -919,6 +908,10 @@ class CommonFunctions
 		elseif ($field->type === 'number' || $field->type === 'decimal') {
 			$out = str_replace('.', ',', htmlspecialchars($v));
 		}
+		elseif ($field->type === 'month') {
+			$date = \DateTime::createFromFormat('!Y-m', $v);
+			$out = Utils::strftime_fr($date, '%B %Y');
+		}
 		else {
 			$v = $field->getStringValue($v);
 			$out = nl2br(htmlspecialchars((string) $v));
@@ -931,8 +924,23 @@ class CommonFunctions
 		return $out;
 	}
 
+	const TAG_PRESETS = [
+		'debt' => ['Dette', 'DarkSalmon'],
+		'credit' => ['Créance', 'DarkKhaki'],
+		'overdraft' => ['Découvert', 'darkred'],
+		'anomaly' => ['Anomalie', 'darkred'],
+		'reconciliation_required' => ['À rapprocher', 'indianred'],
+		'reconciled' => ['Rapproché', '#999'],
+	];
+
 	static public function tag(array $params): string
 	{
+		if (!empty($params['preset'])) {
+			$p = $params['preset'];
+			$params['label'] = self::TAG_PRESETS[$p][0];
+			$params['color'] = self::TAG_PRESETS[$p][1];
+		}
+
 		return sprintf('<span class="tag%s" style="--tag-color: %s;">%s</span>',
 			!empty($params['small']) ? ' small' : '',
 			htmlspecialchars($params['color'] ?? '#999'),

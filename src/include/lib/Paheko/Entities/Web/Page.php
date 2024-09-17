@@ -40,6 +40,7 @@ class Page extends Entity
 	protected string $content;
 
 	protected string $_path;
+	protected array $_breadcrumbs;
 
 	const FORMATS_LIST = [
 		Render::FORMAT_MARKDOWN => 'MarkDown',
@@ -48,11 +49,13 @@ class Page extends Entity
 	];
 
 	const STATUS_ONLINE = 'online';
+	const STATUS_PRIVATE = 'private';
 	const STATUS_DRAFT = 'draft';
 
 	const STATUS_LIST = [
-		self::STATUS_ONLINE => 'En ligne',
 		self::STATUS_DRAFT => 'Brouillon',
+		self::STATUS_ONLINE => 'En ligne',
+		self::STATUS_PRIVATE => 'Réservée aux membres',
 	];
 
 	const TYPE_CATEGORY = 1;
@@ -174,6 +177,20 @@ class Page extends Entity
 		return $this->_path;
 	}
 
+	/**
+	 * Get page status, trying to find it from parent pages if different from online
+	 */
+	public function getRealStatus(): ?string
+	{
+		foreach (array_reverse($this->getBreadcrumbs()) as $page) {
+			if ($page->status !== self::STATUS_ONLINE) {
+				return $page->status;
+			}
+		}
+
+		return $page->status ?? null;
+	}
+
 	public function listVersions(): DynamicList
 	{
 		$name_field = DynamicFields::getNameFieldsSQL('u');
@@ -225,7 +242,7 @@ class Page extends Entity
 			$content = $this->render();
 		}
 
-		$this->dir()->indexForSearch(compact('content'), $this->title, 'text/html');
+		$this->dir()->indexForSearch($content, $this->title, 'text/html');
 	}
 
 	public function saveNewVersion(?int $user_id): bool
@@ -367,7 +384,8 @@ class Page extends Entity
 
 	public function getBreadcrumbs(): array
 	{
-		return Web::getBreadcrumbs($this->id());
+		$this->_breadcrumbs ??= Web::getBreadcrumbs($this->id());
+		return $this->_breadcrumbs;
 	}
 
 	public function listAttachments(): array
@@ -523,6 +541,6 @@ class Page extends Entity
 
 	public function isOnline(): bool
 	{
-		return $this->status == self::STATUS_ONLINE;
+		return $this->status !== self::STATUS_DRAFT;
 	}
 }

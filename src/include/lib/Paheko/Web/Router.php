@@ -11,6 +11,7 @@ use Paheko\Web\Web;
 use Paheko\API;
 use Paheko\Config;
 use Paheko\Plugins;
+use Paheko\Entities\Plugin;
 use Paheko\UserException;
 use Paheko\Utils;
 use Paheko\Users\Users;
@@ -20,7 +21,7 @@ use Paheko\Users\Session;
 
 use \KD2\HTML\Markdown;
 
-use const Paheko\{WWW_URI, ADMIN_URL, BASE_URL, WWW_URL, HELP_URL, ROOT, HTTP_LOG_FILE, ENABLE_XSENDFILE};
+use const Paheko\{WWW_URI, ADMIN_URL, BASE_URL, WWW_URL, HELP_URL, ROOT, HTTP_LOG_FILE, WEBDAV_LOG_FILE, WOPI_LOG_FILE};
 
 class Router
 {
@@ -55,16 +56,15 @@ class Router
 			$qs = $_SERVER['QUERY_STRING'] ?? null;
 			$headers = apache_request_headers();
 
-			self::log("===== ROUTER: Got new request: %s from %s =====", date('d/m/Y H:i:s'), $_SERVER['REMOTE_ADDR']);
-
-			self::log("ROUTER: <= %s %s\nRequest headers:\n  %s",
+			self::log('ROUTER', "<= %s %s\nFrom: %s\nRequest headers:\n  %s",
 				$method,
 				$uri . ($qs ? '?' : '') . $qs,
+				$_SERVER['REMOTE_ADDR'],
 				implode("\n  ", array_map(fn ($v, $k) => $k . ': ' . $v, $headers, array_keys($headers)))
 			);
 
 			if ($method != 'GET' && $method != 'OPTIONS' && $method != 'HEAD') {
-				self::log("ROUTER: <= Request body:\n%s", file_get_contents('php://input'));
+				//self::log('ROUTER', "<= Request body:\n%s", file_get_contents('php://input'));
 			}
 		}
 
@@ -93,7 +93,7 @@ class Router
 		}
 		// Users avatars
 		elseif ($first === 'user' && strpos($uri, 'user/avatar/') !== false) {
-			Users::serveAvatar((int)substr($uri, strlen('user/avatar/')));
+			Users::serveAvatar(substr($uri, strlen('user/avatar/')));
 			return;
 		}
 		// Add trailing slash to URLs if required
@@ -105,6 +105,13 @@ class Router
 			&& Plugins::exists($match[1])) {
 			$uri = ($first === 'admin' ? 'admin/' : 'public/') . $match[2];
 
+			$name = Utils::basename($uri);
+
+			// Do not expose templates if the name begins with an underscore
+			// this is not really a security issue, but they will probably fail
+			if (substr($name, 0, 1) === '_' || $name === Plugin::META_FILE) {
+				throw new UserException('This address is private', 403);
+			}
 
 			if ($match[2] === 'icon.svg' || substr($uri, -3) === '.md') {
 				$r = Plugins::routeStatic($match[1], $uri);
@@ -198,7 +205,7 @@ class Router
 		}
 
 		if ($file->trash) {
-			throw new UserException('Cette page n\'existe pas.', 404);
+			throw new UserException('Cette adresse a été supprimée.', 410);
 		}
 
 		foreach ($_GET as $key => $v) {
@@ -231,43 +238,40 @@ class Router
 		return true;
 	}
 
-	static public function log(string $message, ...$params)
+	static public function log(string $type, string $message, ...$params)
 	{
-		if (!HTTP_LOG_FILE) {
+		$file = null;
+
+		if ($type === 'ROUTER') {
+			$file = HTTP_LOG_FILE;
+		}
+		elseif ($type === 'WEBDAV') {
+			$file = WEBDAV_LOG_FILE;
+		}
+		elseif ($type === 'WOPI') {
+			$file = WOPI_LOG_FILE;
+		}
+
+		if (!$file) {
 			return;
 		}
 
-		static $log = '';
+		static $logs = null;
 
-		if (!$log) {
-			register_shutdown_function(function () use (&$log) {
-				file_put_contents(HTTP_LOG_FILE, $log, FILE_APPEND);
+		if (!$logs) {
+			$logs = [];
+			register_shutdown_function(function () use (&$logs) {
+				foreach ($logs as $file => $content) {
+					if (!$content) {
+						continue;
+					}
+
+					file_put_contents($file, $content . "\n", FILE_APPEND);
+				}
 			});
 		}
 
-		$log .= vsprintf($message, $params) . "\n\n";
-	}
-
-	static public function isXSendFileEnabled(): bool
-	{
-		if (!ENABLE_XSENDFILE || !isset($_SERVER['SERVER_SOFTWARE'])) {
-			return false;
-		}
-
-		if (stristr($_SERVER['SERVER_SOFTWARE'], 'apache')
-			&& function_exists('apache_get_modules')
-			&& in_array('mod_xsendfile', apache_get_modules())) {
-			return true;
-		}
-		else if (stristr($_SERVER['SERVER_SOFTWARE'], 'lighttpd')) {
-			return true;
-		}
-
-		return false;
-	}
-
-	static public function xSendFile(string $path): void
-	{
-		header('X-Sendfile: ' . $path);
+		$logs[$file] ??= date('[d/m/Y H:i:s]') . "\n";
+		$logs[$file] .= vsprintf($message, $params) . "\n";
 	}
 }

@@ -21,6 +21,8 @@
 <form method="post" action="{$self_url}" data-focus="{if $_POST}2{else}1{/if}">
 	{if $app_token}
 		<p class="alert block">Une application tiers demande à accéder aux fichiers de l'association.<br />Connectez-vous pour pouvoir confirmer l'accès.</p>
+	{elseif $redirect}
+		<p class="alert block">Connectez-vous pour accéder à la page demandée.</p>
 	{/if}
 
 	<fieldset>

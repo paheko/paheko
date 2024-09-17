@@ -19,6 +19,7 @@ use Paheko\Users\DynamicFields;
 class Sections
 {
 	const SECTIONS_LIST = [
+		'call',
 		'load',
 		'list',
 		'categories',
@@ -36,19 +37,24 @@ class Sections
 		'accounts',
 		'balances',
 		'years',
+		'projects',
 		'sql',
 		'restrict',
 		'module',
+		'files',
 	];
 
 	const COMPILE_SECTIONS_LIST = [
-		'#select'  => [self::class, 'selectStart'],
-		'/select'   => [self::class, 'selectEnd'],
-		'#form'     => [self::class, 'formStart'],
-		'/form'     => [self::class, 'formEnd'],
-		'else:form' => [self::class, 'formElse'],
-		'#capture'  => [self::class, 'captureStart'],
-		'/capture'  => [self::class, 'captureEnd'],
+		'#select'     => [self::class, 'selectStart'],
+		'/select'     => [self::class, 'selectEnd'],
+		'#form'       => [self::class, 'formStart'],
+		'/form'       => [self::class, 'formEnd'],
+		'else:form'   => [self::class, 'formElse'],
+		'#capture'    => [self::class, 'captureStart'],
+		'/capture'    => [self::class, 'captureEnd'],
+		'#define'     => [self::class, 'defineStart'],
+		'else:define' => [self::class, 'defineElse'],
+		'/define'     => [self::class, 'defineEnd'],
 	];
 
 	const SQL_RESERVED_PARAMS = [
@@ -239,7 +245,75 @@ class Sections
 
 		$tpl->_pop();
 
-		return sprintf('<?php $this->assign(array_pop($capture_assign), ob_get_clean()); ?>');
+		return '<?php $this->assign(array_pop($capture_assign), ob_get_clean()); ?>';
+	}
+
+	/**
+	 * Start of user-defined function block
+	 */
+	static public function defineStart(string $name, string $params_str, UserTemplate $tpl, int $line): string
+	{
+		$params = $tpl->_parseArguments($params_str, $line);
+		$context = array_intersect_key(['modifier' => null, 'function' => null, 'section' => null], $params);
+
+		if (count($context) > 1) {
+			throw new Brindille_Exception('"define" only allows one of "modifier", "function" or "section" parameters');
+		}
+		elseif (!count($context)) {
+			throw new Brindille_Exception('"define": missing "modifier", "function" or "section" parameter');
+		}
+
+		$context = key($context);
+		$name = $tpl->getValueFromArgument($params[$context]);
+
+		if (!preg_match($tpl::RE_VALID_VARIABLE_NAME, $name)) {
+			throw new Brindille_Exception(sprintf('Invalid syntax for %s name \'%s\'', $context, $name));
+		}
+
+		// Avoid weird stuff (like defining a function inside a function):
+		// only allow functions to be defined at the root level
+		if (count($tpl->_stack)) {
+			throw new Brindille_Exception(sprintf('%s cannot be defined inside a condition or section', $context));
+		}
+
+		$tpl->_push($tpl::SECTION, 'define', compact('context', 'name'));
+
+		return sprintf('<?php '
+			. '$this->registerUserFunction(%s, %s, function (array $params, int $line) { '
+			// Store function name here, might be useful for handling errors
+			. '$context = %1$s; $name = %2$s; '
+			// Pass variables to template, either as '$params' variable for modifiers,
+			// or extract all parameters as variables for functions/sections
+			. '$this->_variables[] = %s; '
+			// Put all function body in a try
+			. 'try { ?>',
+			var_export($context, true),
+			var_export($name, true),
+			$context === 'modifier' ? 'compact(\'params\')' : '$params'
+		);
+	}
+
+	static public function defineElse(string $name, string $params_str, UserTemplate $tpl, int $line): void
+	{
+		throw new Brindille_Exception('\'else\' cannot be used with #define sections');
+	}
+
+	static public function defineEnd(string $name, string $params_str, UserTemplate $tpl, int $line): string
+	{
+		$last = $tpl->_lastName();
+
+		if ($last !== 'define') {
+			throw new Brindille_Exception(sprintf('"%s": block closing does not match last block "%s" opened', $name . $params_str, $last));
+		}
+
+		$tpl->_pop();
+
+		return '<?php } '
+			// Prepend function name to error
+			. 'catch (Brindille_Exception $e) { throw new Brindille_Exception(sprintf("Error in \'%s\' %s: %s", $name, $context, $e->getMessage())); } '
+			// Always remove current context variables even if return was used
+			. 'finally { array_pop($this->_variables); } '
+			. '}); ?>';
 	}
 
 	static protected function _debug(string $str): void
@@ -272,6 +346,31 @@ class Sections
 		}
 
 		return self::$_cache[$id];
+	}
+
+	static public function call(array $params, UserTemplate $tpl, int $line): ?\Generator
+	{
+		if (empty($params['section'])) {
+			throw new Brindille_Exception('Missing "section" parameter for "call" section');
+		}
+
+		$name = $params['section'];
+		unset($params['section']);
+
+		$r = $tpl->callUserFunction('section', $name, $params, $line);
+
+		if (!is_iterable($r)) {
+			return null;
+		}
+
+		foreach ($r as $key => $value) {
+			if (is_array($value)) {
+				yield $value;
+			}
+			else {
+				yield compact('key', 'value');
+			}
+		}
 	}
 
 	/**
@@ -310,23 +409,28 @@ class Sections
 
 	static public function load(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		$name = $params['module'] ?? ($tpl->module->name ?? null);
+		$db = DB::getInstance();
 
-		if (!$name) {
+		if (isset($params['module'])) {
+			$name = $params['module'];
+			$table = 'module_data_' . $name;
+			$has_table = $db->test('sqlite_master', 'type = \'table\' AND name = ?', $table);
+		}
+		elseif (isset($tpl->module->name)) {
+			$name = $tpl->module->name;
+			$table = $tpl->module->table_name();
+			$has_table = $tpl->module->hasTable();
+		}
+		else {
 			throw new Brindille_Exception('Unique module name could not be found');
 		}
-
-		unset($params['module']);
-
-		$table = 'module_data_' . $name;
-		$params['tables'] = $table;
-
-		$db = DB::getInstance();
-		$has_table = $db->test('sqlite_master', 'type = \'table\' AND name = ?', $table);
 
 		if (!$has_table) {
 			return;
 		}
+
+		unset($params['module']);
+		$params['tables'] = $table;
 
 		$delete_table = null;
 
@@ -354,7 +458,7 @@ class Sections
 			$params['where'] = '1';
 		}
 		else {
-			$params['where'] = self::_moduleReplaceJSONExtract($params['where'], $table);
+			$params['where'] = '(' . self::_moduleReplaceJSONExtract($params['where'], $table) . ')';
 		}
 
 		if (array_key_exists('key', $params)) {
@@ -509,17 +613,21 @@ class Sections
 		if (empty($params['schema']) && empty($params['select'])) {
 			throw new Brindille_Exception('Missing schema parameter');
 		}
+		$db = DB::getInstance();
 
-		$name = $params['module'] ?? ($tpl->module->name ?? null);
-
-		if (!$name) {
+		if (isset($params['module'])) {
+			$name = $params['module'];
+			$table = 'module_data_' . $name;
+			$has_table = $db->test('sqlite_master', 'type = \'table\' AND name = ?', $table);
+		}
+		elseif (isset($tpl->module->name)) {
+			$name = $tpl->module->name;
+			$table = $tpl->module->table_name();
+			$has_table = $tpl->module->hasTable();
+		}
+		else {
 			throw new Brindille_Exception('Unique module name could not be found');
 		}
-
-		$table = 'module_data_' . $name;
-
-		$db = DB::getInstance();
-		$has_table = $db->test('sqlite_master', 'type = \'table\' AND name = ?', $table);
 
 		if (!$has_table) {
 			return;
@@ -767,6 +875,41 @@ class Sections
 		return self::sql($params, $tpl, $line);
 	}
 
+	static public function projects(array $params, UserTemplate $tpl, int $line): ?\Generator
+	{
+		$params['tables'] = 'acc_projects';
+		$params['archived'] ??= false;
+
+		if (!empty($params['assign_list'])) {
+			$list = [];
+			$db = DB::getInstance();
+			$sql = sprintf('SELECT id, label, code FROM %s WHERE archived = %d ORDER BY code, label COLLATE U_NOCASE;',
+				$params['tables'],
+				$params['archived']
+			);
+
+			foreach ($db->iterate($sql) as $row) {
+				$label = '';
+
+				if ($row->code) {
+					$label = $row->code . ' — ';
+				}
+
+				$list[$row->id] = $label . $row->label;
+			}
+
+			$tpl->assign($params['assign_list'], $list);
+			return null;
+		}
+
+		$params['where'] ??= '';
+
+		$params['where'] .= sprintf(' AND archived = %d', $params['archived']);
+		unset($params['archived']);
+
+		return self::sql($params, $tpl, $line);
+	}
+
 	static public function users(array $params, UserTemplate $tpl, int $line): \Generator
 	{
 		$params['where'] ??= '';
@@ -819,7 +962,7 @@ class Sections
 				throw new Brindille_Exception('Le paramètre "search" n\'est pas un tableau');
 			}
 
-			$params['tables'] .= sprintf(' INNER JOIN users_search AS us ON us.id = u.id');
+			$params['tables'] .= ' INNER JOIN users_search AS us ON us.id = u.id';
 			$i = 0;
 
 			foreach ($params['search'] as $field => $value) {
@@ -977,7 +1120,7 @@ class Sections
 
 		$id_field = DynamicFields::getNameFieldsSQL('u');
 
-		$params['select'] = sprintf('l.*, a.code AS account_code, a.label AS account_label');
+		$params['select'] = 'l.*, a.code AS account_code, a.label AS account_label';
 		$params['tables'] = 'acc_transactions_lines AS l
 			INNER JOIN acc_accounts AS a ON l.id_account = a.id';
 
@@ -1011,8 +1154,7 @@ class Sections
 		if (!$session->isLogged()) {
 			if (!empty($params['block'])) {
 				if (!headers_sent()) {
-					// FIXME: implement redirect to correct URL after login
-					Utils::redirect('!login.php');
+					Utils::redirect('!login.php?r=' . rawurlencode(Utils::getSelfURI()));
 				}
 
 				throw new UserException('Vous n\'avez pas accès à cette page.');
@@ -1096,8 +1238,14 @@ class Sections
 		$params['where'] ??= '';
 		$params['select'] = 'w.*';
 		$params['tables'] = 'web_pages w';
-		$params['where'] .= ' AND status = :status';
-		$params[':status'] = Page::STATUS_ONLINE;
+		$params['where'] .= ' AND status != :status';
+		$params[':status'] = Page::STATUS_DRAFT;
+
+		if (empty($params['private']) && !Session::getInstance()->isLogged()) {
+			$params['where'] .= ' AND status != :status2';
+			$params[':status2'] = Page::STATUS_PRIVATE;
+			unset($params['private']);
+		}
 
 		$allowed_tables = self::SQL_TABLES;
 
@@ -1360,6 +1508,48 @@ class Sections
 		$out['public_url'] = $module->public_url();
 
 		yield $out;
+	}
+
+	static public function files(array $params, UserTemplate $ut, int $line): \Generator
+	{
+		if (empty($ut->module)) {
+			throw new Brindille_Exception('Module could not be found');
+		}
+
+		$path = $ut->module->storage_root();
+
+		if (isset($params['path'])) {
+			if (preg_match('!/\.|\.\.|//|\\\\!', $path)) {
+				throw new Brindille_Exception(sprintf('"path" parameter is invalid: "%s"', $params['path']));
+			}
+
+			$path .= '/' . $params['path'];
+		}
+
+		$parent = Files::get($path);
+
+		if (!$parent) {
+			return null;
+		}
+
+		if (!empty($params['recursive'])) {
+			$i = $parent->iterateRecursive();
+		}
+		else {
+			$i = $parent->iterate();
+		}
+
+		foreach ($i as $file) {
+			$extra = [
+				'is_dir'        => $file->isDir(),
+				'url'           => $file->url(),
+				'download_url'  => $file->isDir() ? null : $file->url(true),
+				'thumbnail_url' => $file->thumb_url(),
+				'preview_html'  => $file->previewHTML(),
+			];
+
+			yield array_merge($file->asArray(), $extra);
+		}
 	}
 
 	static public function sql(array $params, UserTemplate $tpl, int $line, ?array $allowed_tables = self::SQL_TABLES): \Generator

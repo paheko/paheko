@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Écriture n°%d"|args:$transaction.id current="acc"}
+{include file="_head.tpl" title="Écriture n°%d"|args:$transaction.id current="acc" prefer_landscape=true}
 
 
 {if isset($_GET['created'])}
@@ -28,7 +28,10 @@
 </nav>
 
 <header class="summary print-only">
-	<h2>{$config.nom_asso}</h2>
+	{if $config.files.logo}
+	<figure class="logo print-only"><img src="{$config->fileURL('logo', '150px')}" alt="" /></figure>
+	{/if}
+	<h2>{$config.org_name}</h2>
 	<h3>{"Écriture n°%d"|args:$transaction.id}</h3>
 </header>
 
@@ -74,9 +77,14 @@
 			{if $transaction.type == $transaction::TYPE_DEBT || $transaction.type == $transaction::TYPE_CREDIT}
 				<dt>Statut</dt>
 				<dd>
-					{if $transaction.status & $transaction::STATUS_PAID}
+					{if $transaction->isPaid()}
+						<form method="post" action="">
 						<span class="confirm">{icon shape="check"}</span> Réglée
-					{elseif $transaction.status & $transaction::STATUS_WAITING}
+						{button type="submit" label="Marquer comme en attente de paiement" name="mark_waiting" value="1"}
+						{csrf_field key=$csrf_key}
+					</form>
+
+					{elseif $transaction->isWaiting()}
 						<span class="alert">{icon shape="alert"}</span> En attente de règlement
 					{/if}
 				</dd>
@@ -247,21 +255,6 @@
 				</tr>
 			{/foreach}
 			</tbody>
-			{if ($transaction.status & $transaction::STATUS_WAITING || $transaction.status & $transaction::STATUS_PAID) || count($linked_transactions) > 1}
-			<tfoot>
-				<tr>
-					<td colspan="3">Total</td>
-					<td class="money">{$amount|money_currency|raw}</td>
-				</tr>
-				{if $transaction.status & $transaction::STATUS_WAITING || $transaction.status & $transaction::STATUS_PAID}
-					<?php $left = max(0, $transaction->sum() - $amount); ?>
-					<tr>
-						<td colspan="3"><em>Reste à régler</em></td>
-						<td class="money">{$left|money_currency:false|raw}</td>
-					</tr>
-				{/if}
-			</tfoot>
-			{/if}
 		</table>
 	{/if}
 	</aside>
@@ -270,22 +263,27 @@
 
 {literal}
 <script type="text/javascript">
-var a = $('.transaction-details-toggle li a')[0];
-var b = $('.transaction-details-toggle li a')[1];
-a.onclick = () => {
-	g.toggle('.transaction-details', true);
-	g.toggle('.transaction-details-advanced', false);
-	a.parentNode.classList.add('current');
-	b.parentNode.classList.remove('current');
-	return false;
-};
-b.onclick = () => {
-	g.toggle('.transaction-details', false);
-	g.toggle('.transaction-details-advanced', true);
-	b.parentNode.classList.add('current');
-	a.parentNode.classList.remove('current');
-	return false;
-};
+var list = $('.transaction-details-toggle li a');
+
+if (list.length == 2) {
+	var a = list[0];
+	var b = list[1];
+
+	a.onclick = () => {
+		g.toggle('.transaction-details', true);
+		g.toggle('.transaction-details-advanced', false);
+		a.parentNode.classList.add('current');
+		b.parentNode.classList.remove('current');
+		return false;
+	};
+	b.onclick = () => {
+		g.toggle('.transaction-details', false);
+		g.toggle('.transaction-details-advanced', true);
+		b.parentNode.classList.add('current');
+		a.parentNode.classList.remove('current');
+		return false;
+	};
+}
 </script>
 {/literal}
 

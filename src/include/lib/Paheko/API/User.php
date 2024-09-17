@@ -42,7 +42,7 @@ trait User
 				throw new APIException('This user seems to be a duplicate of an existing one', 409);
 			}
 
-			if (!empty($this->params['id_category']) && !$user->setCategorySafeNoConfig($this->params['id_category'])) {
+			if (!$this->isSystemUser() && !empty($this->params['id_category']) && !$user->setCategorySafeNoConfig($this->params['id_category'])) {
 				throw new APIException('You are not allowed to create a user in this category', 403);
 			}
 
@@ -65,7 +65,7 @@ trait User
 				$this->requireAccess(Session::ACCESS_WRITE);
 
 				try {
-					$user->validateCanChange();
+					$user->validateCanBeModifiedBy(null);
 				}
 				catch (UserException $e) {
 					throw new APIException($e->getMessage(), 403, $e);
@@ -78,7 +78,7 @@ trait User
 				$this->requireAccess(Session::ACCESS_ADMIN);
 
 				try {
-					$user->validateCanChange();
+					$user->validateCanBeModifiedBy(null);
 				}
 				catch (UserException $e) {
 					throw new APIException($e->getMessage(), 403, $e);

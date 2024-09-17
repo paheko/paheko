@@ -42,7 +42,7 @@ html {
 body {
     font-size: 100%;
     color: rgb(var(--gTextColor));
-    font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
     padding-bottom: 1em;
     background: rgb(var(--gBgColor)) var(--gBgImage) no-repeat 0px 0px fixed;
 }
@@ -232,7 +232,7 @@ body.public .header .menu, body.raw .header .menu {
 
 body.preview {
     color: rgb(var(--gTextColor));
-    font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
     background: rgb(var(--gBgColor));
     padding: 1em;
 }
@@ -267,6 +267,15 @@ header.summary {
     margin-bottom: 1em;
     border-bottom: 2px solid #999;
     text-align: center;
+    min-height: 60px;
+}
+
+header.summary figure.logo {
+    float: left;
+}
+
+header.summary figure.logo img {
+    max-height: 55px;
 }
 
 #sticky-alert {

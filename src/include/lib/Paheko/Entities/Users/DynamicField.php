@@ -75,16 +75,16 @@ class DynamicField extends Entity
 	 */
 	protected int $system = 0;
 
-	const PASSWORD = 0x01 << 1;
-	const LOGIN    = 0x01 << 2;
-	const NUMBER   = 0x01 << 3;
-	const NAMES    = 0x01 << 4;
-	const PRESET   = 0x01 << 5;
+	const PASSWORD     = 0x01 << 1;
+	const LOGIN        = 0x01 << 2;
+	const NUMBER       = 0x01 << 3;
+	const NAMES        = 0x01 << 4;
+	const PRESET       = 0x01 << 5;
+	const AUTOCOMPLETE = 0x01 << 6;
 
 	const TYPES = [
 		'email'    => 'Adresse E-Mail',
 		'url'      => 'Adresse URL',
-		'address'  => 'Adresse postale',
 		'checkbox' => 'Case à cocher',
 		'date'     => 'Date',
 		'datetime' => 'Date et heure',
@@ -107,7 +107,6 @@ class DynamicField extends Entity
 	const PHP_TYPES = [
 		'email'    => '?string',
 		'url'      => '?string',
-		'address'  => '?string',
 		'checkbox' => 'bool',
 		'date'     => '?' . Date::class,
 		'datetime' => '?DateTime',
@@ -130,7 +129,6 @@ class DynamicField extends Entity
 	const SQL_TYPES = [
 		'email'    => 'TEXT',
 		'url'      => 'TEXT',
-		'address'  => 'TEXT',
 		'checkbox' => 'INTEGER NOT NULL DEFAULT 0',
 		'date'     => 'TEXT',
 		'datetime' => 'TEXT',
@@ -153,7 +151,6 @@ class DynamicField extends Entity
 	const SEARCH_TYPES = [
 		'email',
 		'url',
-		'address',
 		'text',
 		'textarea',
 		'datalist',
@@ -170,7 +167,6 @@ class DynamicField extends Entity
 	const NAME_FIELD_TYPES = [
 		'text',
 		'select',
-		'number',
 		'url',
 		'email',
 	];
@@ -337,9 +333,13 @@ class DynamicField extends Entity
 			$this->assert($this->type == 'password', 'Le champ mot de passe ne peut être d\'un type différent de mot de passe.');
 		}
 
-		if ($this->type == 'multiple' || $this->type == 'select') {
+		if ($this->type === 'multiple' || $this->type === 'select') {
 			$this->options = array_filter($this->options);
 			$this->assert(is_array($this->options) && count($this->options) >= 1 && trim((string)current($this->options)) !== '', 'Ce champ nécessite de comporter au moins une option possible: ' . $this->name);
+
+			if ($this->type === 'multiple') {
+				$this->assert(count($this->options) <= 32, 'Ce champ nécessite ne peut comporter plus de 32 options possibles : ' . $this->name);
+			}
 		}
 
 		$db = DB::getInstance();
@@ -374,7 +374,7 @@ class DynamicField extends Entity
 				$this->assert(null !== DynamicFields::get($dependency), sprintf('Le champ "%s" est requis pour le champ "%s"', $dependency, $this->name));
 			}
 		}
-		elseif ($this->exists()) {
+		elseif (!$this->exists()) {
 			$this->assert(!array_key_exists($this->name, $presets), 'Ce nom de champ est déjà utilisé par un champ pré-défini.');
 		}
 	}
