@@ -416,9 +416,11 @@ class File extends Entity
 
 	public function deleteLocalFileCache(): void
 	{
-		// Remove any local file cache
-		$id = 'file-cache-' . $this->hash_id;
-		Static_Cache::remove($id);
+		if (isset($this->hash_id)) {
+			// Remove any local file cache
+			$id = 'file-cache-' . $this->hash_id;
+			Static_Cache::remove($id);
+		}
 	}
 
 	public function deleteCache(): void
