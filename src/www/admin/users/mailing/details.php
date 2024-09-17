@@ -17,13 +17,7 @@ if (qg('preview') !== null) {
 	return;
 }
 
-$csrf_key = 'mailing_details';
-
-$form->runIf('send', function() use ($mailing) {
-	$mailing->send();
-}, $csrf_key, '!users/mailing/details.php?sent&id=' . $mailing->id);
-
-$tpl->assign(compact('mailing', 'csrf_key'));
+$tpl->assign(compact('mailing'));
 
 $tpl->assign('custom_css', [BASE_URL . 'content.css']);
 $tpl->assign('sent', null !== qg('sent'));
