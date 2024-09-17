@@ -463,8 +463,7 @@ if (!defined('Paheko\INSTALL_PROCESS')) {
 	}
 
 	if (version_compare($v, paheko_version(), '>')) {
-		echo 'Temporairement indisponible. Merci de revenir plus tard.';
-		exit;
+		throw new \LogicException('Database version is higher than installed version.');
 	}
 
 	if (Config::getInstance()->timezone) {
