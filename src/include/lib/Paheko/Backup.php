@@ -35,7 +35,11 @@ class Backup
 				continue;
 			}
 
-			if ($file == basename(DB_FILE)) {
+			if ($file === basename(DB_FILE)) {
+				continue;
+			}
+
+			if (0 !== strpos($file, 'association.')) {
 				continue;
 			}
 
