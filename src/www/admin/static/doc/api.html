@@ -214,6 +214,11 @@
 <td style="text-align: left;"><code>string</code></td>
 <td style="text-align: left;">Requ&ecirc;te SQL &agrave; ex&eacute;cuter.</td>
 </tr>
+<tr>
+<td style="text-align: left;"><code>header</code></td>
+<td style="text-align: left;"><code>bool</code></td>
+<td style="text-align: left;">Indiquer <code>header=false</code> pour ne pas avoir une premi&egrave;re ligne d'en-t&ecirc;te dans les formats CSV, ODS ou XLSX.</td>
+</tr>
 </tbody>
 </table><p>Si aucun format n'est pass&eacute; (exemple : <code>&hellip;/api/sql</code>, sans point ni extension), <code>json</code> sera utilis&eacute;.</p><p>Permet d'ex&eacute;cuter une requ&ecirc;te SQL <code>SELECT</code> (uniquement, pas de requ&ecirc;te <code>UPDATE</code>, <code>DELETE</code>, <code>INSERT</code>, etc.) sur la base de donn&eacute;es. La requ&ecirc;te SQL doit &ecirc;tre pass&eacute;e dans le corps de la requ&ecirc;te HTTP, ou dans le param&egrave;tre <code>sql</code>.</p><p>S'il n'y a pas de limite &agrave; la requ&ecirc;te, une limite &agrave; 1000 r&eacute;sultats sera ajout&eacute;e obligatoirement.</p><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/sql \
   -d 'SELECT nom, code_postal FROM users LIMIT 2;'</code></pre><p>Exemple de r&eacute;ponse :</p><pre><code class="language-response">{

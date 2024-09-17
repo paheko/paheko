@@ -89,6 +89,7 @@ Exécute une requête SQL en lecture
 | :- | :- | :- |
 | `FORMAT` | `string` | Format de retour : `json`, `csv`, `ods` ou `xlsx` |
 | `sql` | `string` | Requête SQL à exécuter. |
+| `header` | `bool` | Indiquer `header=false` pour ne pas avoir une première ligne d'en-tête dans les formats CSV, ODS ou XLSX. |
 
 Si aucun format n'est passé (exemple : `…/api/sql`, sans point ni extension), `json` sera utilisé.
 

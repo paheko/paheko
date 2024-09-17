@@ -210,6 +210,10 @@ class API
 
 	public function export($in): ?array
 	{
+		if (null === $in) {
+			return null;
+		}
+
 		if (!$this->is_http_client) {
 			$in = $this->toArray($in);
 			return json_encode($in);
@@ -260,7 +264,8 @@ class API
 			$header = $s->getHeader();
 
 			if ($format !== 'json') {
-				$s->export($format);
+				$return_header = !isset($this->params['header']) || $this->params['header'] !== 'false';
+				$s->export($format, 'sql', $return_header);
 				return null;
 			}
 			elseif (!$this->is_http_client) {
@@ -518,12 +523,7 @@ class API
 				throw new APIException($e->getMessage(), 400, $e);
 			}
 
-			$return = $api->export($return);
-
-			if (null !== $return) {
-				header("Content-Type: application/json; charset=utf-8", true);
-				echo json_encode($return, JSON_PRETTY_PRINT);
-			}
+			return $api->export($return);
 		}
 		catch (APIException $e) {
 			http_response_code($e->getCode());
