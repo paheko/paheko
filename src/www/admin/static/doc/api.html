@@ -133,7 +133,7 @@
 <h2 id="sql-post">sql (POST)</h2>
 <p>Permet d'exécuter une requête SQL <code>SELECT</code> (uniquement, pas de requête UPDATE, DELETE, INSERT, etc.) sur la base de données. La requête SQL doit être passée dans le corps de la requête HTTP, ou dans le paramètre <code>sql</code>. Le résultat est retourné dans la clé <code>results</code> de l'objet JSON.</p>
 <p>S'il n'y a pas de limite à la requête, une limite à 1000 résultats sera ajoutée obligatoirement.</p>
-<pre><code>curl https://test:abcd@paheko.monasso.tld/api/sql/ -d 'SELECT * FROM membres LIMIT 5;'</code></pre>
+<pre><code>curl https://test:abcd@paheko.monasso.tld/api/sql/ -d 'SELECT * FROM users LIMIT 5;'</code></pre>
 <p><strong>ATTENTION :</strong> Les requêtes en écriture (<code>INSERT, DELETE, UPDATE, CREATE TABLE</code>, etc.) ne sont pas acceptées, il n'est pas possible de modifier la base de données directement via Paheko, afin d'éviter les soucis de données corrompues.</p>
 <p>Depuis la version 1.2.8, il est possible d'utiliser le paramètre <code>format</code> pour choisir le format renvoyé :</p>
 <ul>
@@ -143,7 +143,7 @@
 <li><code>xlsx</code> : renvoie un tableau Excel (XLSX)</li>
 </ul>
 <p>Exemple :</p>
-<pre><code>curl https://test:abcd@paheko.monasso.tld/api/sql/ -F sql='SELECT * FROM membres LIMIT 5;' -F format=csv</code></pre>
+<pre><code>curl https://test:abcd@paheko.monasso.tld/api/sql/ -F sql='SELECT * FROM users LIMIT 5;' -F format=csv</code></pre>
 <h2 id="telechargements">Téléchargements</h2>
 <h3 id="download-get">download (GET)</h3>
 <p>Télécharger la base de données complète. Renvoie directement le fichier SQLite de la base de données.</p>

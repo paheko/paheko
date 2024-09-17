@@ -62,7 +62,7 @@ Permet d'exécuter une requête SQL `SELECT` (uniquement, pas de requête UPDATE
 S'il n'y a pas de limite à la requête, une limite à 1000 résultats sera ajoutée obligatoirement.
 
 ```
-curl https://test:abcd@paheko.monasso.tld/api/sql/ -d 'SELECT * FROM membres LIMIT 5;'
+curl https://test:abcd@paheko.monasso.tld/api/sql/ -d 'SELECT * FROM users LIMIT 5;'
 ```
 
 **ATTENTION :** Les requêtes en écriture (`INSERT, DELETE, UPDATE, CREATE TABLE`, etc.) ne sont pas acceptées, il n'est pas possible de modifier la base de données directement via Paheko, afin d'éviter les soucis de données corrompues.
@@ -77,7 +77,7 @@ Depuis la version 1.2.8, il est possible d'utiliser le paramètre `format` pour 
 Exemple :
 
 ```
-curl https://test:abcd@paheko.monasso.tld/api/sql/ -F sql='SELECT * FROM membres LIMIT 5;' -F format=csv
+curl https://test:abcd@paheko.monasso.tld/api/sql/ -F sql='SELECT * FROM users LIMIT 5;' -F format=csv
 ```
 
 ## Téléchargements
