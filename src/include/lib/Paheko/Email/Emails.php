@@ -704,7 +704,7 @@ class Emails
 						// Don't retry delivering this email
 						return true;
 					}
-					elseif ($e->getCode() === SMTP::GRELISTING_CODE) {
+					elseif ($e->getCode() === SMTP::GREYLISTING_CODE) {
 						// Resend later (FIXME: only retry for X times)
 						return false;
 					}
