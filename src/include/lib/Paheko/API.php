@@ -245,7 +245,7 @@ class API
 
 	protected function sql(string $format)
 	{
-		if ($this->method === 'POST' && $this->method === 'GET') {
+		if ($this->method !== 'POST' && $this->method !== 'GET') {
 			throw new APIException('Wrong request method', 405);
 		}
 
