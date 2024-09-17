@@ -74,6 +74,10 @@ class Backup
 				$error = $db ? $db->lastErrorMsg() : $e->getMessage();
 			}
 
+			if ($version && version_compare($version, paheko_version(), '<')) {
+				continue;
+			}
+
 			$out[$file] = (object) [
 				'filename'    => $file,
 				'date'        => filemtime(DATA_ROOT . '/' . $file),
