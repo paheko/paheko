@@ -245,7 +245,9 @@ class API
 
 	protected function sql(string $format)
 	{
-		$this->requireMethod('POST');
+		if ($this->method === 'POST' && $this->method === 'GET') {
+			throw new APIException('Wrong request method', 405);
+		}
 
 		$body = $this->params['sql'] ?? self::getRequestInput();
 		$format = $format ?: ($this->params['format'] ?? 'json');

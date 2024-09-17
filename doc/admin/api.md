@@ -81,7 +81,7 @@ En cas d'erreur un code HTTP 4XX sera fourni, et le contenu sera un objet JSON a
 
 ## Requêtes SQL
 
-### POST sql.{FORMAT}
+### GET sql.{FORMAT}
 
 Exécute une requête SQL en lecture
 
@@ -93,7 +93,7 @@ Exécute une requête SQL en lecture
 
 Si aucun format n'est passé (exemple : `…/api/sql`, sans point ni extension), `json` sera utilisé.
 
-Permet d'exécuter une requête SQL `SELECT` (uniquement, pas de requête `UPDATE`, `DELETE`, `INSERT`, etc.) sur la base de données. La requête SQL doit être passée dans le corps de la requête HTTP, ou dans le paramètre `sql`.
+Permet d'exécuter une requête SQL `SELECT` sur la base de données.
 
 S'il n'y a pas de limite à la requête, une limite à 1000 résultats sera ajoutée obligatoirement.
 
@@ -101,7 +101,7 @@ Exemple de requête :
 
 ```request
 curl -u test:abcd https://paheko.monasso.tld/api/sql \
-  -d 'SELECT nom, code_postal FROM users LIMIT 2;'
+  -G --data-urlencode sql='SELECT nom, code_postal FROM users LIMIT 2;'
 ```
 
 Exemple de réponse :
@@ -124,6 +124,15 @@ Exemple de réponse :
 ```
 
 **Attention :** Les requêtes en écriture (`INSERT, DELETE, UPDATE, CREATE TABLE`, etc.) ne sont pas acceptées, il n'est pas possible de modifier la base de données directement via Paheko, afin d'éviter les soucis de données corrompues.
+
+### POST sql.{FORMAT}
+
+Idem que la méthode en `GET`, mais le la requête peut être passée dans le corps de la requête HTTP :
+
+```request
+curl -u test:abcd https://paheko.monasso.tld/api/sql \
+  -d 'SELECT nom, code_postal FROM users LIMIT 2;'
+```
 
 ## Téléchargements
 
@@ -608,7 +617,7 @@ Exemple de réponse :
 
 Prévisualise un import de membres, sans modifier les membres
 
-Idem quel la méthode en `POST` mais les paramètres doivent être passés dans l'URL, et le fichier dans le corps de la requête.
+Idem que la méthode en `POST` mais les paramètres doivent être passés dans l'URL, et le fichier dans le corps de la requête.
 
 ## Activités
 
