@@ -10,6 +10,7 @@ use Paheko\Users\Users;
 use Paheko\Users\Session;
 use Paheko\Entities\Files\File;
 
+// We don't need to restrict access here, it is done below, using File::canRead()
 require_once __DIR__ . '/../_inc.php';
 
 $highlight = null;
