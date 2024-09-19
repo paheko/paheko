@@ -15,9 +15,7 @@ if (!$year) {
 	throw new UserException('Exercice inconnu.');
 }
 
-if ($year->closed) {
-	throw new UserException('Impossible de modifier un exercice clôturé.');
-}
+$year->assertCanBeModified(false);
 
 $csrf_key = 'acc_years_edit_' . $year->id();
 

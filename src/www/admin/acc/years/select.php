@@ -22,7 +22,7 @@ $form->runIf('switch', function () {
 	$user->save();
 }, $csrf_key, $url);
 
-$tpl->assign('years', $years->list(true));
+$tpl->assign('years', Years::list());
 $tpl->assign('from', qg('from'));
 $tpl->assign('msg', qg('msg'));
 $tpl->assign(compact('csrf_key'));

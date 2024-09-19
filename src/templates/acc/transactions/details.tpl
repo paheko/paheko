@@ -9,7 +9,7 @@
 
 <nav class="tabs">
 	<aside>
-		{if !$transaction.hash && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
+		{if !$transaction.hash && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && $transaction_year->isOpen()}
 			{linkbutton href="lock.php?id=%d"|args:$transaction.id shape="lock" label="Verrouiller" target="_dialog"}
 		{/if}
 {if PDF_COMMAND}
@@ -17,7 +17,7 @@
 {/if}
 	</aside>
 	<nav>
-	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$transaction->validated && !$transaction_year->closed}
+	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$transaction->validated && $transaction_year->isOpen()}
 		{linkbutton href="edit.php?id=%d"|args:$transaction.id shape="edit" label="Modifier cette écriture" accesskey="M"}
 		{linkbutton href="delete.php?id=%d"|args:$transaction.id shape="delete" label="Supprimer cette écriture" accesskey="S"}
 	{/if}
@@ -97,7 +97,7 @@
 			<dd>
 				<strong>{link href="!acc/reports/ledger.php?year=%d"|args:$transaction.id_year label=$transaction_year.label}</strong>
 				— Du {$transaction_year.start_date|date_short} au {$transaction_year.end_date|date_short}
-				— <strong>{if $transaction_year.closed}Clôturé{else}En cours{/if}</strong>
+				{tag preset=$transaction_year->getStatusTagPreset()}
 				</small>
 			</dd>
 

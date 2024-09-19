@@ -421,12 +421,12 @@ CREATE TABLE IF NOT EXISTS acc_years
 	start_date TEXT NOT NULL CHECK (date(start_date) IS NOT NULL AND date(start_date) = start_date),
 	end_date TEXT NOT NULL CHECK (date(end_date) IS NOT NULL AND date(end_date) = end_date),
 
-	closed INTEGER NOT NULL DEFAULT 0, -- 0 = open, 1 = closed
+	status INTEGER NOT NULL DEFAULT 0, -- 0 = open, 1 = closed, 2 = locked
 
 	id_chart INTEGER NOT NULL REFERENCES acc_charts (id)
 );
 
-CREATE INDEX IF NOT EXISTS acc_years_closed ON acc_years (closed);
+CREATE INDEX IF NOT EXISTS acc_years_status ON acc_years (status);
 
 -- Make sure id_account is reset when a year is deleted
 CREATE TRIGGER IF NOT EXISTS acc_years_delete BEFORE DELETE ON acc_years BEGIN

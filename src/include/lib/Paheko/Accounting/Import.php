@@ -137,9 +137,7 @@ class Import
 			throw new \InvalidArgumentException('Invalid type value');
 		}
 
-		if ($year->closed) {
-			throw new \InvalidArgumentException('Closed year');
-		}
+		$year->assertCanBeModified();
 
 		$db = DB::getInstance();
 		$db->begin();

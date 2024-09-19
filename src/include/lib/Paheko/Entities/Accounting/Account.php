@@ -839,8 +839,8 @@ class Account extends Entity
 		$sql = sprintf('SELECT 1 FROM %s l
 			INNER JOIN %s t ON t.id = l.id_transaction
 			INNER JOIN %s y ON y.id = t.id_year
-			WHERE l.id_account = ? AND y.closed = 1
-			LIMIT 1;', Line::TABLE, Transaction::TABLE, Year::TABLE);
+			WHERE l.id_account = ? AND y.status = %d
+			LIMIT 1;', Line::TABLE, Transaction::TABLE, Year::TABLE, Year::CLOSED);
 		$has_transactions_in_closed_year = $db->firstColumn($sql, $this->id());
 
 		if ($has_transactions_in_closed_year) {

@@ -14,6 +14,7 @@ use Paheko\Entities\Web\Page;
 use Paheko\Web\Web;
 use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
+use Paheko\Entities\Accounting\Year;
 use Paheko\Users\DynamicFields;
 
 class Sections
@@ -863,7 +864,7 @@ class Sections
 		$params['where'] ??= '';
 
 		if (isset($params['closed'])) {
-			$params['where'] .= sprintf(' AND closed = %d', $params['closed']);
+			$params['where'] .= sprintf(' AND status = %d', $params['closed'] ? Year::CLOSED : Year::OPEN);
 			unset($params['closed']);
 		}
 

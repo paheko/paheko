@@ -20,7 +20,7 @@ if (!$transaction) {
 
 $transaction->assertCanBeModified();
 
-$year = Years::get($transaction->id_year);
+$year = $transaction->year();
 $chart = $year->chart();
 
 $csrf_key = 'acc_transaction_edit_' . $transaction->id();

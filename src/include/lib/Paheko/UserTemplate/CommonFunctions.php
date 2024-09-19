@@ -933,6 +933,9 @@ class CommonFunctions
 		'anomaly' => ['Anomalie', 'darkred'],
 		'reconciliation_required' => ['À rapprocher', 'indianred'],
 		'reconciled' => ['Rapproché', '#999'],
+		'closed' => ['Clôturé', '#999'],
+		'locked' => ['Verrouillé', 'indianred'],
+		'open' => ['En cours', 'darkgreen'],
 	];
 
 	static public function tag(array $params): string

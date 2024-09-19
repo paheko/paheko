@@ -5,17 +5,13 @@
 	<h3>{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short}</h3>
 </nav>
 
-{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$year.closed}
-
-<nav class="tabs">
-	<ul>
-		{if !$year.closed}
-		<li><a href="{$admin_url}acc/years/import.php?year={$year.id}">Import</a></li>
-		{/if}
-		<li class="current"><a href="{$admin_url}acc/years/import.php?year={$year.id}">Export</a></li>
-	</ul>
-</nav>
-
+{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && $year->isOpen()}
+	<nav class="tabs">
+		<ul>
+			<li><a href="{$admin_url}acc/years/import.php?year={$year.id}">Import</a></li>
+			<li class="current"><a href="{$admin_url}acc/years/import.php?year={$year.id}">Export</a></li>
+		</ul>
+	</nav>
 {/if}
 
 {form_errors}

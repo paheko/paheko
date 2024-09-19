@@ -102,6 +102,8 @@ class Transaction extends Entity
 	protected $_accounts = [];
 	protected $_default_selector = [];
 
+	protected Year $_year;
+
 	static public function getTypeFromAccountType(int $account_type)
 	{
 		switch ($account_type) {
@@ -536,11 +538,11 @@ class Transaction extends Entity
 			throw new ValidationException('Il n\'est pas possible de modifier une écriture qui a été verrouillée');
 		}
 
-		$db = DB::getInstance();
-
-		if (isset($this->id_year) && $db->test(Year::TABLE, 'id = ? AND closed = 1', $this->id_year)) {
-			throw new ValidationException('Il n\'est pas possible de créer ou modifier une écriture dans un exercice clôturé');
+		if (!isset($this->id_year)) {
+			return;
 		}
+
+		$this->year()->assertCanBeModified();
 	}
 
 	public function verify(): bool
@@ -692,11 +694,7 @@ class Transaction extends Entity
 			throw new ValidationException('Il n\'est pas possible de supprimer une écriture qui a été validée');
 		}
 
-		$db = DB::getInstance();
-
-		if ($db->test(Year::TABLE, 'id = ? AND closed = 1', $this->id_year)) {
-			throw new ValidationException('Il n\'est pas possible de supprimer une écriture qui fait partie d\'un exercice clôturé');
-		}
+		$this->year()->assertCanBeModified();
 
 		// FIXME when lettering is properly implemented: mark parent transaction non-deposited when deleting a deposit transaction
 
@@ -1079,7 +1077,8 @@ class Transaction extends Entity
 
 	public function year()
 	{
-		return EntityManager::findOneById(Year::class, $this->id_year);
+		$this->_year ??= EntityManager::findOneById(Year::class, $this->id_year);
+		return $this->_year;
 	}
 
 	public function listFiles()
