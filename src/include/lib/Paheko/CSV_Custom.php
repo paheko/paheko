@@ -73,6 +73,10 @@ class CSV_Custom
 			$path = Conversion::toCSVAuto($path);
 		}
 
+		if (!$path) {
+			throw new UserException('Ce fichier n\'est pas dans un format accepté.');
+		}
+
 		$this->csv = CSV::readAsArray($path);
 
 		if (!count($this->csv)) {
