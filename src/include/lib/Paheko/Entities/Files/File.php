@@ -1512,4 +1512,25 @@ class File extends Entity
 	{
 		return BASE_URL . 'dav/' . $this->context() . '/';
 	}
+
+	public function mkdir(string $name, ?Session $session): File
+	{
+		if (!$this->isDir()) {
+			throw new \LogicException('Cannot create a directory inside a file');
+		}
+
+		$name = trim($name);
+
+		if (substr_count($name, '/') !== 0) {
+			throw new \LogicException('Directory name cannot contain a slash');
+		}
+
+		$path = $this->path . '/' . $name;
+
+		if (null !== $session && !$this->canCreateDir($path, $session)) {
+			throw new \LogicException('Cannot create a directory here');
+		}
+
+		return Files::mkdir($path);
+	}
 }
