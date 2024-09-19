@@ -110,13 +110,7 @@ trait FilePermissionsTrait
 			return false;
 		}
 
-		$session ??= Session::getInstance();
-
-		if (!$session->isLogged()) {
-			return false;
-		}
-
-		return $session->checkFilePermission($this->path, 'mkdir');
+		return self::canCreateDir($this->path . '/example', $session);
 	}
 
 	static public function canCreateDir(string $path, Session $session = null)

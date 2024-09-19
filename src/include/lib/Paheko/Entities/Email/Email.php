@@ -11,7 +11,7 @@ use Paheko\Email\Templates as EmailsTemplates;
 
 use KD2\SMTP;
 
-use const Paheko\{WWW_URL, SECRET_KEY};
+use const Paheko\{WWW_URL, LOCAL_SECRET_KEY};
 
 class Email extends Entity
 {
@@ -64,7 +64,7 @@ class Email extends Entity
 
 	public function getVerificationCode(): string
 	{
-		$code = sha1($this->hash . SECRET_KEY);
+		$code = sha1($this->hash . LOCAL_SECRET_KEY);
 		return substr($code, 0, 10);
 	}
 

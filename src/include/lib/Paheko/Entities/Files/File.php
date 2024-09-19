@@ -416,9 +416,11 @@ class File extends Entity
 
 	public function deleteLocalFileCache(): void
 	{
-		// Remove any local file cache
-		$id = 'file-cache-' . $this->hash_id;
-		Static_Cache::remove($id);
+		if (isset($this->hash_id)) {
+			// Remove any local file cache
+			$id = 'file-cache-' . $this->hash_id;
+			Static_Cache::remove($id);
+		}
 	}
 
 	public function deleteCache(): void
@@ -1508,5 +1510,26 @@ class File extends Entity
 	public function webdav_root_url(): string
 	{
 		return BASE_URL . 'dav/' . $this->context() . '/';
+	}
+
+	public function mkdir(string $name, ?Session $session): File
+	{
+		if (!$this->isDir()) {
+			throw new \LogicException('Cannot create a directory inside a file');
+		}
+
+		$name = trim($name);
+
+		if (substr_count($name, '/') !== 0) {
+			throw new \LogicException('Directory name cannot contain a slash');
+		}
+
+		$path = $this->path . '/' . $name;
+
+		if (null !== $session && !$this->canCreateDir($path, $session)) {
+			throw new \LogicException('Cannot create a directory here');
+		}
+
+		return Files::mkdir($path);
 	}
 }

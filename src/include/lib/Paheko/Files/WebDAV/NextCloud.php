@@ -11,7 +11,7 @@ use Paheko\UserException;
 use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
 
-use const Paheko\{SECRET_KEY, ADMIN_URL, CACHE_ROOT, WWW_URL, ROOT};
+use const Paheko\{LOCAL_SECRET_KEY, ADMIN_URL, CACHE_ROOT, WWW_URL, ROOT};
 
 class NextCloud extends WebDAV_NextCloud
 {
@@ -101,7 +101,7 @@ class NextCloud extends WebDAV_NextCloud
 
 	public function getDirectDownloadSecret(string $uri, string $login): string
 	{
-		return hash_hmac('sha1', $uri, SECRET_KEY);
+		return hash_hmac('sha1', $uri, LOCAL_SECRET_KEY);
 	}
 
 	protected function cleanChunks(): void

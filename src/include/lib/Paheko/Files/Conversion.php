@@ -5,8 +5,9 @@ namespace Paheko\Files;
 use Paheko\Entities\Files\File;
 use Paheko\Static_Cache;
 use Paheko\Utils;
+use Paheko\UserException;
 
-use const Paheko\{WOPI_DISCOVERY_URL, CONVERSION_TOOLS, CACHE_ROOT, SECRET_KEY, ADMIN_URL};
+use const Paheko\{WOPI_DISCOVERY_URL, CONVERSION_TOOLS, CACHE_ROOT, LOCAL_SECRET_KEY, ADMIN_URL};
 
 use KD2\ErrorManager;
 use KD2\HTTP;
@@ -108,6 +109,11 @@ class Conversion
 
 		if (in_array('onlyoffice', $tools, true)
 			&& in_array($extension, self::ONLYOFFICE_FORMATS, true)) {
+			return true;
+		}
+
+		if (in_array('ssconvert', $tools, true)
+			&& in_array($extension, self::GNUMERIC_FORMATS, true)) {
 			return true;
 		}
 
@@ -302,8 +308,8 @@ class Conversion
 		// Use ssconvert from Gnumeric to convert to CSV
 		if ($format === 'csv'
 			&& in_array('ssconvert', $tools, true)
-			&& in_array($extension, self::LIBREOFFICE_FORMATS, true)) {
-			$cmd = 'ssconvert';
+			&& in_array($extension, self::GNUMERIC_FORMATS, true)) {
+			$cmd = 'ssconvert --export-type="Gnumeric_stf:stf_csv" %s %s %s 2>&1';
 		}
 
 		if ($cmd === null
@@ -312,7 +318,7 @@ class Conversion
 		}
 
 		if (in_array('unoconv', $tools, true)) {
-			$cmd = 'unoconv %s -i FilterOptions=44,34,76 -o %2$s %1$s 2>&1';
+			$cmd = 'unoconv %s -i FilterOptions=44,34,76 -o %3$s %2$s 2>&1';
 		}
 		elseif (in_array('unoconvert', $tools, true)) {
 			// --filter-options PixelWidth=500 --filter-options PixelHeight=500
@@ -483,7 +489,7 @@ class Conversion
 			return;
 		}
 
-		$truth = hash_hmac('SHA1', $id . filemtime($path), SECRET_KEY);
+		$truth = hash_hmac('SHA1', $id . filemtime($path), LOCAL_SECRET_KEY);
 
 		if (!hash_equals($truth, $token)) {
 			http_response_code(403);
@@ -517,7 +523,7 @@ class Conversion
 
 		$id = 'convert00' . sha1(random_bytes(16));
 		$path = Static_Cache::storeCopy($id, $source, new \DateTime('+5 minutes'));
-		$t = hash_hmac('SHA1', $id . filemtime($path), SECRET_KEY);
+		$t = hash_hmac('SHA1', $id . filemtime($path), LOCAL_SECRET_KEY);
 		$file_url = ADMIN_URL . 'convert.php?i=' . $id . '&t=' . $t;
 
 		$params = [
@@ -633,7 +639,7 @@ class Conversion
 				Static_Cache::remove($id2);
 			}
 
-			return null;
+			throw new UserException(sprintf('La conversion du fichier depuis le format "%s" a échoué', $ext));
 		}
 
 		return $destination;

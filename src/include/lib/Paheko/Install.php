@@ -37,7 +37,7 @@ class Install
 			$key = str_replace('Paheko\\', '', $key);
 
 			// Hide potentially secret values
-			if ($key === 'SECRET_KEY') {
+			if ($key === 'SECRET_KEY' || $key === 'LOCAL_SECRET_KEY') {
 				$value = '***HIDDEN***';
 			}
 			elseif (is_string($value)) {

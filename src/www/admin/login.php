@@ -62,7 +62,7 @@ $form->runIf('login', function () use ($id_field_name, $session, $lock, $args, $
 	if ($lock == 1) {
 		throw new UserException(sprintf("Vous avez dépassé la limite de tentatives de connexion.\nMerci d'attendre %d minutes avant de ré-essayer de vous connecter.", Log::LOCKOUT_DELAY/60));
 	}
-	elseif ($lock == -1 && !Security::checkCaptcha(SECRET_KEY, f('c_hash'), f('c_answer'))) {
+	elseif ($lock == -1 && !Security::checkCaptcha(LOCAL_SECRET_KEY, f('c_hash'), f('c_answer'))) {
 		throw new UserException('Le code de vérification entré n\'est pas correct.');
 	}
 
@@ -94,7 +94,7 @@ $form->runIf('login', function () use ($id_field_name, $session, $lock, $args, $
 	Utils::redirect($url);
 }, 'login');
 
-$captcha = $lock == -1 ? Security::createCaptcha(SECRET_KEY, 'fr_FR') : null;
+$captcha = $lock == -1 ? Security::createCaptcha(LOCAL_SECRET_KEY, 'fr_FR') : null;
 
 $ssl_enabled = HTTP::getScheme() == 'https';
 $changed = qg('changed') !== null;

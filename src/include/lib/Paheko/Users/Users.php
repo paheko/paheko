@@ -249,7 +249,7 @@ class Users
 		}
 
 		$tables = 'users_view u';
-		$tables .= ' INNER JOIN users_search s ON s.id = u.id';
+		$tables .= ' LEFT JOIN users_search s ON s.id = u.id';
 
 		if (self::hasParents()) {
 			$tables .= ' LEFT JOIN users b ON b.id = u.id_parent';

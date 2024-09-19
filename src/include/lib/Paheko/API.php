@@ -104,6 +104,17 @@ class API
 		}
 	}
 
+	protected function isSystemUser(): bool
+	{
+		$login = $_SERVER['PHP_AUTH_USER'] ?? null;
+		$password = $_SERVER['PHP_AUTH_PW'] ?? null;
+
+		return API_USER
+			&& API_PASSWORD
+			&& $login === API_USER
+			&& $password === API_PASSWORD;
+	}
+
 	protected function hasParam(string $param): bool
 	{
 		return array_key_exists($param, $this->params);
@@ -130,7 +141,7 @@ class API
 
 	protected function sql()
 	{
-		if ($this->method != 'POST') {
+		if ($this->method !== 'POST' && $this->method !== 'GET') {
 			throw new APIException('Wrong request method', 400);
 		}
 
@@ -223,7 +234,7 @@ class API
 				throw new APIException('This user seems to be a duplicate of an existing one', 409);
 			}
 
-			if (!empty($this->params['id_category']) && !$user->setCategorySafeNoConfig($this->params['id_category'])) {
+			if (!$this->isSystemUser() && !empty($this->params['id_category']) && !$user->setCategorySafeNoConfig($this->params['id_category'])) {
 				throw new APIException('You are not allowed to create a user in this category', 403);
 			}
 
@@ -779,6 +790,11 @@ class API
 
 	public function checkAuth(): void
 	{
+		if ($this->isSystemUser()) {
+			$this->access = Session::ACCESS_ADMIN;
+			return;
+		}
+
 		$login = $_SERVER['PHP_AUTH_USER'] ?? null;
 		$password = $_SERVER['PHP_AUTH_PW'] ?? null;
 

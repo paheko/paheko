@@ -35,7 +35,11 @@ class Backup
 				continue;
 			}
 
-			if ($file == basename(DB_FILE)) {
+			if ($file === basename(DB_FILE)) {
+				continue;
+			}
+
+			if (0 !== strpos($file, 'association.')) {
 				continue;
 			}
 
@@ -72,6 +76,10 @@ class Backup
 			}
 			catch (\Exception $e) {
 				$error = $db ? $db->lastErrorMsg() : $e->getMessage();
+			}
+
+			if ($version && version_compare($version, paheko_version(), '>')) {
+				continue;
 			}
 
 			$out[$file] = (object) [

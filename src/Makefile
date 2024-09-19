@@ -1,4 +1,5 @@
 .PHONY: dev-server release deps publish check-dependencies test-syntax tests minify phpstan www htaccess modules installer plugins
+SHELL := /bin/bash
 KD2FW_BRANCH := trunk
 MODULES_BRANCH := trunk
 PLUGINS_BRANCH := trunk
@@ -155,3 +156,14 @@ minify:
 	cat `ls www/admin/static/styles/[0-9]*.css` | sed 's/\.\.\///' > www/admin/static/mini.css
 	@# Minify is only gaining 500 gzipped bytes (4kB uncompressed) but making things hard to read/hack
 	@#yui-compressor --nomunge www/admin/static/mini.css -o www/admin/static/mini.css
+
+stable:
+	@echo -n "Checking branch... "; \
+	if [[ ! -n $$(fossil status | grep -E 'tags:\s*trunk') ]]; \
+	then echo ; \
+		echo "!!! FAIL: not in trunk !!!"; \
+		echo && exit 1; \
+	else echo "OK"; \
+	fi
+	fossil tag add stable trunk
+	fossil sync

@@ -3,9 +3,11 @@ namespace Paheko;
 
 use Paheko\Entities\Files\File;
 use Paheko\Files\Files;
+use Paheko\Users\Session;
 
 require __DIR__ . '/../../_inc.php';
 
+$session = Session::getInstance();
 $file = Files::getByHashID(qg('id'));
 
 if (!$file) {
@@ -14,7 +16,7 @@ if (!$file) {
 
 $parent = $file->parent();
 
-if (!$parent->canCreateHere()) {
+if (!$file->canRename($session)) {
 	throw new UserException('Vous n\'avez pas le droit de modifier ce fichier.');
 }
 

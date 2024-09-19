@@ -349,11 +349,13 @@ class Import
 					$line_label = $row->line_label ?? null;
 					$line_reference = $row->line_reference ?? null;
 
-					// Try to use label/reference if it changes from line to line
-					if (null === $line_label && isset($row->label) && $row->label != $transaction->label) {
+					// Try to have a line label, if there is no line label but there is a label
+					// This is actually important for imports where there is only a line label, but it is used as a generic label
+					if (null === $line_label && isset($row->label)) {
 						$line_label = $row->label;
 					}
 
+					// Try to use reference as line reference, if it changes from line to line
 					if (null === $line_reference && isset($row->reference) && $row->reference != $transaction->reference) {
 						$line_reference = $row->reference;
 					}

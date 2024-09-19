@@ -2,7 +2,7 @@
 
 {include file="acc/reports/_header.tpl" current="trial_balance" title="Balance générale" allow_filter=true}
 
-<table class="list statement">
+<table class="list statement autofilter">
 	<thead>
 		<tr>
 			<td>Numéro</td>
