@@ -165,4 +165,5 @@ stable:
 		echo && exit 1; \
 	else echo "OK"; \
 	fi
-	fossil ci --tag stable
+	fossil tag add stable trunk
+	fossil sync
