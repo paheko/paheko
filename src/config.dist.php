@@ -37,7 +37,8 @@ namespace Paheko;
  * numéro sera connecté (sans besoin de mot de passe).
  *
  * Exemple: LOCAL_LOGIN = 42 connectera automatiquement le membre avec id = 42
- * Attention à ne pas utiliser en production !
+ * Attention aucune vérification ne sera faite, n'importe qui aura accès
+ * sans avoir à se connecter !
  *
  * Si le nombre spécifié est -1, alors c'est le premier membre trouvé qui
  * peut gérer la configuration (et donc modifier les droits des membres)
