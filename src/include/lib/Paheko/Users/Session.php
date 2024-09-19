@@ -21,7 +21,7 @@ use Paheko\Entities\Users\Category;
 use Paheko\Entities\Users\User;
 
 use const Paheko\{
-	SECRET_KEY,
+	LOCAL_SECRET_KEY,
 	WWW_URL,
 	ADMIN_URL,
 	LOCAL_LOGIN,
@@ -101,7 +101,7 @@ class Session extends \KD2\UserSession
 			'cookie_secure' => HTTP::getScheme() == 'https' ? true : false,
 		]);
 
-		$this->sid_in_url_secret = '&spko=' . sha1(SECRET_KEY);
+		$this->sid_in_url_secret = '&spko=' . sha1(LOCAL_SECRET_KEY);
 	}
 
 	public function isPasswordCompromised(string $password): bool
@@ -412,7 +412,7 @@ class Session extends \KD2\UserSession
 		// valide pour 1 heure minimum
 		$expire = $expire ?? ceil((time() - strtotime('2017-01-01')) / 3600) + 1;
 
-		$hash = hash_hmac('sha256', $user->email . $user->id . $user->password . $expire, SECRET_KEY, true);
+		$hash = hash_hmac('sha256', $user->email . $user->id . $user->password . $expire, LOCAL_SECRET_KEY, true);
 		$hash = substr(Security::base64_encode_url_safe($hash), 0, 16);
 		return $hash;
 	}

@@ -422,8 +422,13 @@ if (!defined('Paheko\SECRET_KEY')) {
 	define('Paheko\SECRET_KEY', $key);
 }
 
+// Define a local secret key derived of the main secret key and the data root
+// This is to make sure that in a multi-instance setup you don't reuse the same secret
+// between instances.
+define('Paheko\LOCAL_SECRET_KEY', sha1(SECRET_KEY . DATA_ROOT));
+
 // Intégration du secret pour les tokens CSRF
-Form::tokenSetSecret(SECRET_KEY);
+Form::tokenSetSecret(LOCAL_SECRET_KEY);
 
 EntityManager::setGlobalDB(DB::getInstance());
 

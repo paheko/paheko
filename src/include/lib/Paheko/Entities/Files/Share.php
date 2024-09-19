@@ -8,7 +8,7 @@ use Paheko\Entity;
 
 use DateTime;
 
-use const Paheko\{WWW_URL, SECRET_KEY};
+use const Paheko\{WWW_URL, LOCAL_SECRET_KEY};
 
 class Share extends Entity
 {
@@ -87,7 +87,7 @@ class Share extends Entity
 	public function generateToken(?string $hash = null): string
 	{
 		$hash ??= sha1(random_bytes(16));
-		return $hash . ':' . hash_hmac('sha256', $hash, SECRET_KEY . $this->password . $this->id());
+		return $hash . ':' . hash_hmac('sha256', $hash, LOCAL_SECRET_KEY . $this->password . $this->id());
 	}
 
 	public function importForm(?array $source = null)

@@ -28,7 +28,7 @@ use Paheko\Entities\Email\Email;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
 
-use const Paheko\{ROOT, WWW_URL, BASE_URL, SECRET_KEY};
+use const Paheko\{ROOT, WWW_URL, BASE_URL, LOCAL_SECRET_KEY};
 
 class Functions
 {
@@ -384,7 +384,7 @@ class Functions
 
 	static public function captcha(array $params, UserTemplate $tpl, int $line): string
 	{
-		$secret = md5(SECRET_KEY . Utils::getSelfURL(false));
+		$secret = md5(LOCAL_SECRET_KEY . Utils::getSelfURL(false));
 
 		if (isset($params['html'])) {
 			$c = Security::createCaptcha($secret, $params['lang'] ?? 'fr');

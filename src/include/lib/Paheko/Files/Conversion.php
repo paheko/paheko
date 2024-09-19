@@ -6,7 +6,7 @@ use Paheko\Entities\Files\File;
 use Paheko\Static_Cache;
 use Paheko\Utils;
 
-use const Paheko\{WOPI_DISCOVERY_URL, CONVERSION_TOOLS, CACHE_ROOT, SECRET_KEY, ADMIN_URL};
+use const Paheko\{WOPI_DISCOVERY_URL, CONVERSION_TOOLS, CACHE_ROOT, LOCAL_SECRET_KEY, ADMIN_URL};
 
 use KD2\ErrorManager;
 use KD2\HTTP;
@@ -483,7 +483,7 @@ class Conversion
 			return;
 		}
 
-		$truth = hash_hmac('SHA1', $id . filemtime($path), SECRET_KEY);
+		$truth = hash_hmac('SHA1', $id . filemtime($path), LOCAL_SECRET_KEY);
 
 		if (!hash_equals($truth, $token)) {
 			http_response_code(403);
@@ -517,7 +517,7 @@ class Conversion
 
 		$id = 'convert00' . sha1(random_bytes(16));
 		$path = Static_Cache::storeCopy($id, $source, new \DateTime('+5 minutes'));
-		$t = hash_hmac('SHA1', $id . filemtime($path), SECRET_KEY);
+		$t = hash_hmac('SHA1', $id . filemtime($path), LOCAL_SECRET_KEY);
 		$file_url = ADMIN_URL . 'convert.php?i=' . $id . '&t=' . $t;
 
 		$params = [

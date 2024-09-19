@@ -16,7 +16,7 @@ use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
 use Paheko\Web\Router;
 
-use const Paheko\{SECRET_KEY};
+use const Paheko\{LOCAL_SECRET_KEY};
 
 class Storage extends AbstractStorage
 {
@@ -437,7 +437,7 @@ class Storage extends AbstractStorage
 		$user_id = (int) strtok('');
 
 		$hash_data = compact('hash_id', 'ttl', 'random', 'readonly', 'user_id');
-		$check = WebDAV::hmac($hash_data, SECRET_KEY);
+		$check = WebDAV::hmac($hash_data, LOCAL_SECRET_KEY);
 
 		if (!hash_equals($hash, $check)) {
 			return null;
