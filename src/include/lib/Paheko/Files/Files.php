@@ -416,6 +416,11 @@ class Files
 					continue;
 				}
 
+				// Don't allow to download files that you can't read
+				if (null !== $session && !$f->canRead($session)) {
+					continue;
+				}
+
 				$pointer = $f->getReadOnlyPointer();
 				$path = !$pointer ? $f->getLocalFilePath() : null;
 
