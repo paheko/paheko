@@ -10,7 +10,11 @@ use Paheko\Entities\Files\File;
 require_once __DIR__ . '/../_inc.php';
 
 $session = Session::getInstance();
-$session->requireAccess($session::SECTION_DOCUMENTS, $session::ACCESS_ADMIN);
+
+// Allow access to documents administrators or config administrators
+if (!$session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
+	$session->requireAccess($session::SECTION_DOCUMENTS, $session::ACCESS_ADMIN);
+}
 
 $csrf_key = 'trash_action';
 $check = f('check');

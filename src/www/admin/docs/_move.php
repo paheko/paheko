@@ -5,7 +5,7 @@ namespace Paheko;
 use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
 
-require_once __DIR__ . '/_inc.php';
+require_once __DIR__ . '/../_inc.php';
 
 if (empty($check) || !is_array($check)) {
 	throw new UserException('Invalid call', 400);
@@ -45,7 +45,7 @@ $current = f('current') ?? f('parent');
 if (!$current) {
 	$first_file = Files::get(current($check));
 
-	if (!$first_file) {
+	if (!$first_file || !$first_file->canRead($session)) {
 		throw new UserException('Fichier introuvable');
 	}
 
