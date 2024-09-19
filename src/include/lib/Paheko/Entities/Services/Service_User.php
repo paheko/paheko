@@ -137,7 +137,7 @@ class Service_User extends Entity
 		return $this->_fee;
 	}
 
-	public function addPayment(int $user_id, ?array $source = null): Transaction
+	public function addPayment(?int $user_id, ?array $source = null): Transaction
 	{
 		if (null === $source) {
 			$source = $_POST;
@@ -202,7 +202,7 @@ class Service_User extends Entity
 		}
 	}
 
-	static public function createFromForm(array &$users, int $creator_id, bool $from_copy = false, ?array $source = null): self
+	static public function createFromForm(array &$users, ?int $creator_id, bool $from_copy = false, ?array $source = null): self
 	{
 		if (null === $source) {
 			$source = $_POST;
