@@ -799,7 +799,10 @@ class File extends Entity
 			return $this;
 		}
 		catch (\Exception $e) {
-			$db->rollback();
+			if ($db->inTransaction()) {
+				$db->rollback();
+			}
+
 			throw $e;
 		}
 		finally {
