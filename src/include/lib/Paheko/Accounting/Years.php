@@ -80,7 +80,9 @@ class Years
 
 	static public function listClosedAssoc()
 	{
-		return DB::getInstance()->getAssoc('SELECT id, label FROM acc_years WHERE status = ? ORDER BY end_date;', Year::CLOSED);
+		$list = self::listClosed();
+		$list = array_map(fn($y) => $y->getLabelWithYearsAndStatus(), $list);
+		return $list;
 	}
 
 	static public function listClosedAssocExcept(int $id)
