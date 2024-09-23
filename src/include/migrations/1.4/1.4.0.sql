@@ -137,6 +137,7 @@ CREATE TABLE IF NOT EXISTS emails_queue (
 -- List of emails waiting to be sent
 	id INTEGER NOT NULL PRIMARY KEY,
 	sender TEXT NULL,
+	reply_to TEXT NULL,
 	recipient TEXT NOT NULL,
 	recipient_hash TEXT NOT NULL,
 	recipient_pgp_key TEXT NULL,
@@ -149,7 +150,7 @@ CREATE TABLE IF NOT EXISTS emails_queue (
 	context INTEGER NOT NULL
 );
 
-INSERT INTO emails_queue SELECT id, sender, recipient, recipient_hash,
+INSERT INTO emails_queue SELECT id, sender, NULL, recipient, recipient_hash,
 	recipient_pgp_key, subject, content, content_html, datetime(), sending,
 	sending_started, context FROM emails_queue_old;
 

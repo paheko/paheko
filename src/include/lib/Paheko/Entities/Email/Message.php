@@ -19,17 +19,18 @@ class Message extends Entity
 	protected int $context;
 	protected int $status = self::WAITING;
 
-	protected ?string $sender;
+	protected ?string $sender = null;
+	protected ?string $reply_to = null;
 	protected string $recipient;
 	protected string $recipient_hash;
-	protected ?string $recipient_pgp_key;
+	protected ?string $recipient_pgp_key = null;
 
 	protected string $subject;
 	protected string $body;
 	protected string $html_body;
 	protected array $attachments;
 
-	protected ?string $context_optout;
+	protected ?string $context_optout = null;
 
 	const STATUS_WAITING = 0;
 	const STATUS_SENDING = 1;
@@ -180,6 +181,11 @@ class Message extends Entity
 		$this->set('recipient_pgp_key', $pgp_key);
 	}
 
+	public function setReplyTo(string $email)
+	{
+		$this->set('repy_to', $email);
+	}
+
 	public function queue(): bool
 	{
 		return $this->save();
@@ -211,6 +217,10 @@ class Message extends Entity
 		if (MAIL_SENDER) {
 			$message->setHeader('Reply-To', $message->getFromAddress());
 			$message->setHeader('From', self::getFromHeader($message->getFromName(), MAIL_SENDER));
+		}
+
+		if ($this->reply_to) {
+			$message->setHeader('Reply-To', $this->reply_to);
 		}
 
 		$message->setMessageId();

@@ -149,6 +149,7 @@ CREATE TABLE IF NOT EXISTS emails_queue (
 -- List of emails waiting to be sent
 	id INTEGER NOT NULL PRIMARY KEY,
 	sender TEXT NULL,
+	reply_to TEXT NULL,
 	recipient TEXT NOT NULL,
 	recipient_hash TEXT NOT NULL,
 	recipient_pgp_key TEXT NULL,

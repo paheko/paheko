@@ -321,6 +321,7 @@ Note : il est également conseillé d'utiliser la fonction `captcha` pour empêc
 | `attach_file` | *optionnel* | Chemin vers un ou plusieurs documents à joindre au message (situé dans les documents) |
 | `attach_from` | *optionnel* | Chemin vers un ou plusieurs squelettes à joindre au message (par exemple pour joindre un document généré) |
 | `notification` | *optionnel* | Indique que le message est une notification, et non pas un message personnel ou collectif. |
+| `replyto` | *optionnel* | Indique l'adresse e-mail qui sera utilisée pour les réponses au mail. |
 
 Pour le destinataire, il est possible de spécifier un tableau :
 

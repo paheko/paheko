@@ -552,6 +552,10 @@ class Functions
 		$message->setAttachments($attachments);
 		$message->queueToArray($params['to']);
 
+		if ($params['replyto'] ?? null) {
+			$message->queueToArray($params['replyto']);
+		}
+
 		if (!$ut->isTrusted()) {
 			$internal += $internal_count;
 			$external_count += $external_count;
