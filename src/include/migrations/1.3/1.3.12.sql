@@ -22,3 +22,6 @@ DROP INDEX IF EXISTS acc_years_closed;
 ALTER TABLE acc_years RENAME COLUMN closed TO status;
 
 CREATE INDEX IF NOT EXISTS acc_years_status ON acc_years (status);
+
+-- Fix typo in account name
+UPDATE acc_accounts SET label = 'Malus sur emballages' WHERE label = 'Malis sur emballages';
