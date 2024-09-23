@@ -470,8 +470,8 @@ class CommonFunctions
 		}
 
 		// propagate _dialog param if we are in an iframe
-		if (isset($_GET['_dialog']) && !isset($params['target'])) {
-			$href .= (strpos($href, '?') === false ? '?' : '&') . '_dialog';
+		if (!isset($params['target']) && ($dialog = Utils::getDialogTarget())) {
+			$href .= (strpos($href, '?') === false ? '?' : '&') . '_dialog=' . $dialog;
 		}
 
 		if (!isset($params['class'])) {

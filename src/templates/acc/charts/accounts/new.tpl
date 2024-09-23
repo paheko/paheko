@@ -6,7 +6,7 @@
 
 {if !isset($account->type)}
 
-<form method="post" action="{$self_url}" data-focus="1">
+<form method="get" action="{$self_url}" data-focus="1">
 	<fieldset>
 		<legend>Créer un nouveau compte</legend>
 		<dl>
@@ -17,6 +17,9 @@
 	</fieldset>
 	<p class="submit">
 		<input type="hidden" name="id" value="{$chart.id}" />
+		{if $dialog}
+		<input type="hidden" name="_dialog" value="{$dialog}" />
+		{/if}
 		{button type="submit" label="Continuer" shape="right" class="main"}
 	</p>
 </form>
@@ -96,11 +99,11 @@
 				<tr class="account account-level-{$item.level}">
 					<td>{if $item.already_listed}{icon shape="star" title="Ce compte est déjà favori"}{/if}</td>
 					<td class="num">{$item.code}</td>
-					<th>{linkbutton href="?id=%d&type=%d&ask=%d&%s"|args:$account.id_chart,$account.type,$item.id,$types_arg label=$item.label}
+					<th>{linkbutton href="?id=%d&type=%d&ask=%d&%s"|args:$account.id_chart:$account.type:$item.id:$types_arg label=$item.label}
 						{if $item.description}<span class="help">{$item.description|escape|nl2br}</span>{/if}
 					</th>
 					<td class="actions">
-						{linkbutton href="?id=%d&type=%d&ask=%d&%s"|args:$account.id_chart,$account.type,$item.id,$types_arg label="Sélectionner" shape="right"}
+						{linkbutton href="?id=%d&type=%d&ask=%d&%s"|args:$account.id_chart:$account.type:$item.id:$types_arg label="Sélectionner" shape="right"}
 					</td>
 				</tr>
 			{/foreach}

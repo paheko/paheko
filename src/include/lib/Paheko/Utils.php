@@ -434,6 +434,21 @@ class Utils
 		}
 	}
 
+	static public function getDialogTarget(): ?string
+	{
+		$dialog = $_GET['_dialog'] ?? null;
+
+		if (null === $dialog) {
+			return null;
+		}
+
+		if ($dialog !== '' && !ctype_alnum($dialog)) {
+			return null;
+		}
+
+		return $dialog ?: '1';
+	}
+
 	static public function redirectSelf(?string $destination = null, bool $exit = true): void
 	{
 		self::redirect($destination, $exit);
@@ -454,6 +469,22 @@ class Utils
 		}
 	}
 
+	static public function reloadSelfFrame(?string $destination = null, bool $exit = true): void
+	{
+		if (!Utils::getDialogTarget()) {
+			self::redirect($destination, $exit);
+		}
+
+		$url = self::getLocalURL($destination ?? '!');
+		$js = 'location.href = window.parent.g.dialog.querySelector("iframe").getAttribute("src");';
+
+		echo self::getFrameRedirectHTML($js, $url);
+
+		if ($exit) {
+			exit;
+		}
+	}
+
 	static public function reloadParentFrameIfDialog(?string $destination = null): void
 	{
 		if (!isset($_GET['_dialog'])) {
@@ -467,23 +498,30 @@ class Utils
 	{
 		$url = self::getLocalURL($destination ?? '!');
 
-		echo '
+		if (null === $destination) {
+			$js = 'window.parent.location.reload();';
+		}
+		else {
+			$js = sprintf('window.parent.location.href = %s;', json_encode($url));
+		}
+
+		echo self::getFrameRedirectHTML($js, $url);
+
+		if ($exit) {
+			exit;
+		}
+	}
+
+	static public function getFrameRedirectHTML(string $js, string $url): string
+	{
+		return '
 			<!DOCTYPE html>
 			<html>
 			<head>
 				<script type="text/javascript">
 				if (window.top !== window) {
 					document.write(\'<style type="text/css">p { display: none; }</style>\');
-					';
-
-		if (null === $destination) {
-			echo 'window.parent.location.reload();';
-		}
-		else {
-			printf('window.parent.location.href = %s;', json_encode($url));
-		}
-
-		echo '
+					' . $js . '
 				}
 				</script>
 			</head>
@@ -492,10 +530,6 @@ class Utils
 			<p><a href="' . htmlspecialchars($url) . '">Cliquer ici pour continuer</a>
 			</body>
 			</html>';
-
-		if ($exit) {
-			exit;
-		}
 	}
 
 	public static function redirect(?string $destination = null, bool $exit = true)

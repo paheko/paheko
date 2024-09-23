@@ -6,8 +6,7 @@ use Paheko\Entities\Accounting\Account;
 
 require_once __DIR__ . '/../../_inc.php';
 
-// Only open edit/delete/new actions in a dialog if we are not already in a dialog
-$dialog_target = !isset($_GET['_dialog']) ? '_dialog=manage' : null;
+$dialog_target = '_dialog=' . (Utils::getDialogTarget() ?? 'manage');
 
 $types = null;
 $types_arg = null;
@@ -29,14 +28,16 @@ function chart_reload_or_redirect(string $url)
 {
 	global $types_arg;
 
-	if (($_GET['_dialog'] ?? null) === 'manage') {
-		Utils::reloadParentFrame();
-		return;
-	}
+	$dialog = Utils::getDialogTarget();
 
 	if ($types_arg) {
 		$url .= '&' . $types_arg;
 	}
 
-	Utils::redirect($url);
+	if ($dialog === 'manage') {
+		Utils::reloadParentFrame($url);
+	}
+	else {
+		Utils::reloadSelfFrame($url);
+	}
 }
