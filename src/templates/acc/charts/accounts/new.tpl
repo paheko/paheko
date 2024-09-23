@@ -122,6 +122,10 @@
 
 	<fieldset>
 		<legend>Créer un nouveau compte</legend>
+		<p class="help">
+			Attention : le libellé, numéro et position du compte ne pourront plus être modifiés une fois que le compte sera utilisé dans un exercice clôturé.
+		</p>
+
 		{include file="acc/charts/accounts/_account_form.tpl" can_edit=true create=true}
 	</fieldset>
 

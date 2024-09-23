@@ -818,9 +818,8 @@ class Account extends Entity
 
 	/**
 	 * An account properties (position, label and code) can only be changed if:
-	 * * it's either a user-created account or an account part of a user-created chart
-	 * * has no transactions in a closed year
-	 * @return bool
+	 * - it's either a user-created account or an account part of a user-created chart
+	 * - has no transactions in a closed year
 	 */
 	public function canEdit(): bool
 	{
