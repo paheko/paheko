@@ -92,7 +92,9 @@
 			Si vous aviez déjà réalisé une comptabilité auparavant, merci de reporter ci-dessous le résultat de l'exercice précédent.
 		</p>
 		<dl>
-			{input type="money" label="Résultat de l'exercice précédent" name="previous_result" help="Si le résultat était en déficit, ajouter un signe moins (-) au début du nombre." name="result"}
+			{input type="money" label="Résultat de l'exercice précédent" name="result"}
+			{input type="radio" name="negative" value="0" label="Résultat excédentaire (positif)" default=0}
+			{input type="radio" name="negative" value="1" label="Résultat déficitaire (négatif)"}
 		</dl>
 
 	</fieldset>
