@@ -2,7 +2,7 @@
 
 {include file="acc/reports/_header.tpl" current="statement" title="Compte de résultat" allow_compare=true allow_filter=true}
 
-<p class="help noprint">Le compte de résultat indique les recettes (produits) et dépenses (charges), ainsi que le résultat réalisé.</p>
+<p class="help noprint">Le compte de résultat indique les dépenses (charges) et recettes (produits), ainsi que le résultat réalisé.</p>
 
 {include file="acc/reports/_statement.tpl" statement=$general}
 
