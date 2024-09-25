@@ -1135,15 +1135,16 @@ class Utils
 		return array($h * 360, $s, $l);
 	}
 
-	static public function HTTPCache(?string $hash, ?int $last_change, int $max_age = 3600): bool
+	static public function HTTPCache(?string $hash, ?int $last_change, int $max_age = 3600, bool $immutable = false): bool
 	{
 		$etag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH'], '"\' ') : null;
 		$last_modified = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : null;
 
 		$etag = $etag ? str_replace('-gzip', '', $etag) : null;
 
-		header(sprintf('Cache-Control: private, max-age=%d', $max_age), true);
+		header(sprintf('Cache-Control: private, max-age=%d%s', $max_age, $immutable ? ', immutable' : ''), true);
 		header_remove('Expires');
+		header_remove('Pragma');
 
 		if ($last_change) {
 			header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $last_change)), true);

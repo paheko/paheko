@@ -1015,7 +1015,7 @@ class File extends Entity
 			return $html;
 		}
 		else {
-			return sprintf('<iframe src="%s"></iframe>', $url);
+			return sprintf('<iframe src="%s?preview"></iframe>', $url);
 		}
 	}
 
@@ -1102,7 +1102,9 @@ class File extends Entity
 
 	protected function _serve(?string $path = null, $download = null): void
 	{
-		Utils::HTTPCache($this->etag(), $this->modified->getTimestamp(), 24*3600);
+		$is_versioned_url = !empty($_GET['h']);
+
+		Utils::HTTPCache($this->etag(), $this->modified->getTimestamp(), 24*3600, $is_versioned_url);
 		header('X-Powered-By: Paheko/PHP');
 
 		// Security: disable running scripts from SVG images and HTML documents
