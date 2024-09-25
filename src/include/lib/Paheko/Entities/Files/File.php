@@ -1102,16 +1102,7 @@ class File extends Entity
 
 	protected function _serve(?string $path = null, $download = null): void
 	{
-		if ($this->isPublic()) {
-			Utils::HTTPCache($this->etag(), $this->modified->getTimestamp());
-		}
-		else {
-			// Disable browser cache
-			header('Pragma: private');
-			header('Expires: -1');
-			header('Cache-Control: private, must-revalidate, post-check=0, pre-check=0');
-		}
-
+		Utils::HTTPCache($this->etag(), $this->modified->getTimestamp(), 24*3600);
 		header('X-Powered-By: Paheko/PHP');
 
 		// Security: disable running scripts from SVG images and HTML documents
