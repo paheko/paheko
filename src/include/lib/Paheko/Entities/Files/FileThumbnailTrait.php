@@ -168,7 +168,12 @@ trait FileThumbnailTrait
 			return null;
 		}
 
-		$r = Conversion::convert($this->getLocalOrCacheFilePath(), $destination, 'png', $this->size, $this->mime);
+		$source = $this->getLocalOrCacheFilePath();
+		$r = null;
+
+		if ($source) {
+			$r = Conversion::convert($source, $destination, 'png', $this->size, $this->mime);
+		}
 
 		if (!$r) {
 			Utils::safe_unlink($destination);

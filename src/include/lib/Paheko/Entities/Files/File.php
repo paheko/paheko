@@ -262,7 +262,10 @@ class File extends Entity
 		return $path;
 	}
 
-	public function getLocalOrCacheFilePath(): string
+	/**
+	 * Will return NULL if file contents are not found in storage
+	 */
+	public function getLocalOrCacheFilePath(): ?string
 	{
 		$path = $this->getLocalFilePath();
 
@@ -273,6 +276,12 @@ class File extends Entity
 
 			if (!Static_Cache::hasExpired($id)) {
 				return $path;
+			}
+
+			$pointer = $this->getReadOnlyPointer();
+
+			if (!$pointer) {
+				return null;
 			}
 
 			Static_Cache::storeFromPointer($id, $this->getReadOnlyPointer());
