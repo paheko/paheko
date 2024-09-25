@@ -812,7 +812,7 @@ class Transaction extends Entity
 		$this->importForm($source);
 	}
 
-	public function importForm(array $source = null)
+	public function importForm(?array $source = null)
 	{
 		$source ??= $_POST;
 

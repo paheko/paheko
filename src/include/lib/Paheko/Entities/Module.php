@@ -99,7 +99,7 @@ class Module extends Entity
 		}
 	}
 
-	public function importForm(array $source = null)
+	public function importForm(?array $source = null)
 	{
 		if (null === $source) {
 			$source = $_POST;
@@ -274,12 +274,12 @@ class Module extends Entity
 		return File::CONTEXT_EXTENSIONS . '/m/' . $this->name;
 	}
 
-	public function path(string $file = null): string
+	public function path(?string $file = null): string
 	{
 		return self::ROOT . '/' . $this->name . ($file ? '/' . $file : '');
 	}
 
-	public function distPath(string $file = null): string
+	public function distPath(?string $file = null): string
 	{
 		return self::DIST_ROOT . '/' . $this->name . ($file ? '/' . $file : '');
 	}
@@ -294,7 +294,7 @@ class Module extends Entity
 		return Files::get($this->storage_root());
 	}
 
-	public function hasFile(string $file): bool
+	public function hasFile(?string $file): bool
 	{
 		return $this->hasLocalFile($file) || $this->hasDistFile($file);
 	}
@@ -572,7 +572,7 @@ class Module extends Entity
 		}
 	}
 
-	public function url(string $file = '', array $params = null)
+	public function url(string $file = '', ?array $params = null)
 	{
 		if (null !== $params) {
 			$params = '?' . http_build_query($params);
@@ -585,7 +585,7 @@ class Module extends Entity
 		return sprintf('%sm/%s/%s%s', BASE_URL, $this->name, $file, $params);
 	}
 
-	public function public_url(string $file = '', array $params = null)
+	public function public_url(string $file = '', ?array $params = null)
 	{
 		return str_replace(BASE_URL, WWW_URL, $this->url($file, $params));
 	}

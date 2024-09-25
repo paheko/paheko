@@ -261,7 +261,7 @@ trait FileThumbnailTrait
 	/**
 	 * Envoie une miniature à la taille indiquée au client HTTP
 	 */
-	public function serveThumbnail(string $size = null): void
+	public function serveThumbnail(?string $size = null): void
 	{
 		if (!$this->hasThumbnail()) {
 			throw new UserException('Il n\'est pas possible de fournir une miniature pour ce fichier.', 404);

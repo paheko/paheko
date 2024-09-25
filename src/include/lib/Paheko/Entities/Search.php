@@ -357,7 +357,7 @@ class Search extends Entity
 		return true;
 	}
 
-	public function importForm(array $source = null)
+	public function importForm(?array $source = null)
 	{
 		$source ??= $_POST;
 

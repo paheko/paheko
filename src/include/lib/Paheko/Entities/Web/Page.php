@@ -342,7 +342,7 @@ class Page extends Entity
 		$this->assert($this->exists() || !$db->test(self::TABLE, 'uri = ?', $this->uri), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre : ' . $this->uri, self::DUPLICATE_URI_ERROR);
 	}
 
-	public function importForm(array $source = null)
+	public function importForm(?array $source = null)
 	{
 		if (null === $source) {
 			$source = $_POST;

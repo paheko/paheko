@@ -16,7 +16,7 @@ trait FilePermissionsTrait
 		}
 	}
 
-	public function canRead(Session $session = null): bool
+	public function canRead(?Session $session = null): bool
 	{
 		// Web pages and config files are always public
 		if ($this->isPublic()) {
@@ -28,7 +28,7 @@ trait FilePermissionsTrait
 		return $session->checkFilePermission($this->path, 'read');
 	}
 
-	public function canShare(Session $session = null): bool
+	public function canShare(?Session $session = null): bool
 	{
 		$session ??= Session::getInstance();
 
@@ -39,7 +39,7 @@ trait FilePermissionsTrait
 		return $session->checkFilePermission($this->path, 'share');
 	}
 
-	public function canWrite(Session $session = null): bool
+	public function canWrite(?Session $session = null): bool
 	{
 		$session ??= Session::getInstance();
 
@@ -50,7 +50,7 @@ trait FilePermissionsTrait
 		return $session->checkFilePermission($this->path, 'write');
 	}
 
-	public function canDelete(Session $session = null): bool
+	public function canDelete(?Session $session = null): bool
 	{
 		$session ??= Session::getInstance();
 
@@ -66,7 +66,7 @@ trait FilePermissionsTrait
 		return $session->checkFilePermission($this->path, 'delete');
 	}
 
-	public function canMoveToTrash(Session $session = null): bool
+	public function canMoveToTrash(?Session $session = null): bool
 	{
 		$session ??= Session::getInstance();
 
@@ -77,7 +77,7 @@ trait FilePermissionsTrait
 		return $session->checkFilePermission($this->path, 'trash');
 	}
 
-	public function canMoveTo(string $destination, Session $session = null): bool
+	public function canMoveTo(string $destination, ?Session $session = null): bool
 	{
 		return self::canMove($session) && $this->canDelete() && self::canCreate($destination);
 	}
@@ -93,7 +93,7 @@ trait FilePermissionsTrait
 		return $session->checkFilePermission($this->path, 'move');
 	}
 
-	public function canCopyTo(string $destination, Session $session = null): bool
+	public function canCopyTo(string $destination, ?Session $session = null): bool
 	{
 		$session ??= Session::getInstance();
 
@@ -113,7 +113,7 @@ trait FilePermissionsTrait
 		return self::canCreateDir($this->path . '/example', $session);
 	}
 
-	static public function canCreateDir(string $path, Session $session = null)
+	static public function canCreateDir(string $path, ?Session $session = null)
 	{
 		$session ??= Session::getInstance();
 
@@ -124,7 +124,7 @@ trait FilePermissionsTrait
 		return $session->checkFilePermission($path, 'mkdir');
 	}
 
-	public function canCreateHere(Session $session = null): bool
+	public function canCreateHere(?Session $session = null): bool
 	{
 		if (!$this->isDir()) {
 			return false;
@@ -139,12 +139,12 @@ trait FilePermissionsTrait
 		return $session->checkFilePermission($this->path, 'create');
 	}
 
-	public function canRename(Session $session = null): bool
+	public function canRename(?Session $session = null): bool
 	{
 		return $this->canCreate($this->parent ?? '', $session);
 	}
 
-	static public function canCreate(string $path, Session $session = null): bool
+	static public function canCreate(string $path, ?Session $session = null): bool
 	{
 		$session ??= Session::getInstance();
 

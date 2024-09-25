@@ -156,7 +156,7 @@ class Accounts
 		return $list;
 	}
 
-	public function listAll(array $types = null): array
+	public function listAll(?array $types = null): array
 	{
 		$condition = '';
 
@@ -180,7 +180,7 @@ class Accounts
 	 * List common accounts, grouped by type
 	 * @return array
 	 */
-	public function listCommonGrouped(array $types = null, bool $hide_empty = false): array
+	public function listCommonGrouped(?array $types = null, bool $hide_empty = false): array
 	{
 		if (null === $types) {
 			// If we want all types, then we will get used or bookmarked accounts in common types

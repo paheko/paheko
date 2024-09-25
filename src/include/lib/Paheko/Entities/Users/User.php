@@ -386,7 +386,7 @@ class User extends Entity
 		return (string)$this->$field ?: null;
 	}
 
-	public function importForm(array $source = null)
+	public function importForm(?array $source = null)
 	{
 		$source ??= $_POST;
 

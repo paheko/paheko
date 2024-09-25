@@ -44,7 +44,7 @@ class Reminder extends Entity
 		return EntityManager::findOneById(Service::class, $this->id_service);
 	}
 
-	public function importForm(array $source = null)
+	public function importForm(?array $source = null)
 	{
 		if (null === $source) {
 			$source = $_POST;

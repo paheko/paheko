@@ -112,7 +112,7 @@ class Services_User
 		return $list;
 	}
 
-	static protected function iterateImport(CSV_Custom $csv, array &$errors = null): \Generator
+	static protected function iterateImport(CSV_Custom $csv, ?array &$errors = null): \Generator
 	{
 		$number_field = DynamicFields::getNumberField();
 		$services = Services::listAssoc();

@@ -55,7 +55,7 @@ class Chart extends Entity
 		return new Accounts($this->id());
 	}
 
-	public function importForm(array $source = null)
+	public function importForm(?array $source = null)
 	{
 		if (null === $source) {
 			$source = $_POST;

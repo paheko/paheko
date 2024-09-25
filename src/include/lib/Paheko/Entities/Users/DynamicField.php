@@ -379,7 +379,7 @@ class DynamicField extends Entity
 		}
 	}
 
-	public function importForm(array $source = null)
+	public function importForm(?array $source = null)
 	{
 		if (null === $source) {
 			$source = $_POST;

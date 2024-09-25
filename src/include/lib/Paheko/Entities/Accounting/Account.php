@@ -344,7 +344,7 @@ class Account extends Entity
 	 * if the chart is linked to a country, but only
 	 * if the account is user-created, or if the chart is non-official
 	 */
-	protected function getLocalPosition(string $country = null): ?int
+	protected function getLocalPosition(?string $country = null): ?int
 	{
 		if (!func_num_args()) {
 			$country = $this->getCountry();
@@ -370,7 +370,7 @@ class Account extends Entity
 		return null;
 	}
 
-	protected function getLocalType(string $country = null): int
+	protected function getLocalType(?string $country = null): int
 	{
 		if (!func_num_args()) {
 			$country = $this->getCountry();
@@ -389,7 +389,7 @@ class Account extends Entity
 		return self::TYPE_NONE;
 	}
 
-	protected function matchType(int $type, string $country = null): bool
+	protected function matchType(int $type, ?string $country = null): bool
 	{
 		if (func_num_args() < 2) {
 			$country = $this->getCountry();
@@ -411,7 +411,7 @@ class Account extends Entity
 		return (bool) preg_match($pattern, $this->code);
 	}
 
-	public function setLocalRules(string $country = null): void
+	public function setLocalRules(?string $country = null): void
 	{
 		if (!func_num_args()) {
 			$country = $this->getCountry();
@@ -931,7 +931,7 @@ class Account extends Entity
 		return self::TYPES_NAMES[$this->type];
 	}
 
-	public function importForm(array $source = null)
+	public function importForm(?array $source = null)
 	{
 		if (null === $source) {
 			$source = $_POST;
