@@ -23,7 +23,7 @@ class Template extends Smartyer
 		return self::$_instance ?: self::$_instance = new Template;
 	}
 
-	public function display($template = null)
+	public function display(?string $template = null): self
 	{
 		$session = Session::getInstance();
 		$this->assign('table_export', false);
@@ -76,7 +76,7 @@ class Template extends Smartyer
 	{
 	}
 
-	public function __construct($template = null, Template &$parent = null)
+	public function __construct(?string $template = null, ?Template &$parent = null)
 	{
 		parent::__construct($template, $parent);
 
