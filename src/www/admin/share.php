@@ -10,7 +10,8 @@ const LOGIN_PROCESS = true;
 require_once __DIR__ . '/_inc.php';
 
 $id = strtok($_GET['uri'] ?? '', '/');
-$download = !empty(strtok(''));
+$preview = isset($_GET['preview']);
+$download = !empty(strtok('')) && !$preview;
 $share = Shares::getByHashID($id);
 
 if (!$share) {
@@ -48,6 +49,7 @@ $download_url = $share->download_url($file);
 
 if ($share->option === $share::DOWNLOAD
 	|| $download
+	|| $preview
 	|| !empty($_SERVER['PHP_AUTH_PW']))
 {
 	$file->serve($download ?: null);
