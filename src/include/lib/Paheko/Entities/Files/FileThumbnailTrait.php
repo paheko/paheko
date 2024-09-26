@@ -137,7 +137,7 @@ trait FileThumbnailTrait
 		elseif (ENABLE_FILE_THUMBNAILS && Conversion::canExtractThumbnail($ext)) {
 			return 'webp';
 		}
-		elseif (ENABLE_FILE_THUMBNAILS && Conversion::canConvert($ext)) {
+		elseif (ENABLE_FILE_THUMBNAILS && Conversion::canConvert($ext, 'png')) {
 			return 'webp';
 		}
 
@@ -164,7 +164,7 @@ trait FileThumbnailTrait
 			return $destination;
 		}
 
-		if (!Conversion::canConvert($ext)) {
+		if (!Conversion::canConvert($ext, 'png')) {
 			return null;
 		}
 

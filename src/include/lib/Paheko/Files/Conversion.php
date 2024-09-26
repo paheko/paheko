@@ -88,36 +88,46 @@ class Conversion
 		return $tools ?? [];
 	}
 
-	static public function canConvert(string $extension): bool
+	static public function canConvert(string $extension, string $to): bool
 	{
 		$tools = self::getToolsList();
 
 		if (in_array('mupdf', $tools, true)
+			&& ($to === 'png' || $to === 'txt')
 			&& in_array($extension, self::MUPDF_FORMATS, true)) {
 			return true;
 		}
 
 		if (in_array('ffmpeg', $tools, true)
+			&& $to === 'png'
 			&& in_array($extension, self::FFMPEG_EXTENSIONS, true)) {
 			return true;
 		}
 
 		if ((in_array('collabora', $tools, true) || in_array('unoconv', $tools, true) || in_array('unoconvert', $tools, true))
+			&& ($to === 'csv' || $to === 'pdf' || $to === 'png' || $to === 'txt')
 			&& in_array($extension, self::LIBREOFFICE_FORMATS, true)) {
 			return true;
 		}
 
 		if (in_array('onlyoffice', $tools, true)
+			&& ($to === 'csv' || $to === 'pdf' || $to === 'png' || $to === 'txt')
 			&& in_array($extension, self::ONLYOFFICE_FORMATS, true)) {
 			return true;
 		}
 
 		if (in_array('ssconvert', $tools, true)
+			&& ($to === 'csv' || $to === 'pdf' || $to === 'png' || $to === 'txt')
 			&& in_array($extension, self::GNUMERIC_FORMATS, true)) {
 			return true;
 		}
 
 		return false;
+	}
+
+	static public function canConvertToCSV(): bool
+	{
+		return self::canConvert('ods', 'csv') && self::canConvert('xlsx', 'csv');
 	}
 
 	static public function canConvertToText(string $extension): bool
@@ -126,7 +136,7 @@ class Conversion
 			return true;
 		}
 
-		return self::canConvert($extension);
+		return self::canConvert($extension, 'txt');
 	}
 
 	static public function canExtractThumbnail(string $extension): bool
@@ -616,7 +626,7 @@ class Conversion
 			return $source;
 		}
 
-		if (!$ext || !self::canConvert($ext)) {
+		if (!$ext || !self::canConvert($ext, 'csv')) {
 			return null;
 		}
 

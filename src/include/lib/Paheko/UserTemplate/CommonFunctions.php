@@ -66,7 +66,7 @@ class CommonFunctions
 			$attributes['accept'] = '.csv,text/csv,application/csv,.CSV';
 			$help = ($help ?? '') . PHP_EOL . 'Format accepté : CSV';
 
-			if (Conversion::canConvert('ods')) {
+			if (Conversion::canConvertToCSV()) {
 				$help .= ', LibreOffice Calc (ODS), ou Excel (XLSX)';
 				$attributes['accept'] .= ',.ods,.ODS,application/vnd.oasis.opendocument.spreadsheet'
 					. ',.xls,.XLS,application/vnd.ms-excel'
