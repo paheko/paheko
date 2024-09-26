@@ -61,6 +61,11 @@ class CSV_Custom
 		@unlink($path);
 	}
 
+	public function canConvert(): bool
+	{
+		return Conversion::canConvertToCSV();
+	}
+
 	public function loadFile(string $path): void
 	{
 		// Automatically convert
