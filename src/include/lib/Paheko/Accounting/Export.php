@@ -286,11 +286,11 @@ class Export
 			}
 
 			if ($type == self::SIMPLE) {
-				$row->amount = Utils::money_format($row->amount, ',', '');
+				$row->amount = Utils::money_format($row->amount, ',', '', false);
 			}
 			else {
-				$row->credit = Utils::money_format($row->credit, ',', '');
-				$row->debit = Utils::money_format($row->debit, ',', '');
+				$row->credit = Utils::money_format($row->credit, ',', '', false);
+				$row->debit = Utils::money_format($row->debit, ',', '', false);
 			}
 
 			yield $row;
