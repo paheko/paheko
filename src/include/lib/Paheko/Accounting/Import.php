@@ -243,6 +243,11 @@ class Import
 
 					$transaction->importForm($fields);
 
+					// Don't consider notes field as changed if it only removes line breaks (eg. conversion to CSV removed line breaks)
+					if ($transaction->isModified('notes') && str_replace(["\r", "\n"], '', $transaction->getModifiedProperty('notes')) === $row->notes) {
+						$transaction->clearModifiedProperties(['notes']);
+					}
+
 					// Set status
 					if (!empty($row->status)) {
 						$status_list = array_map('trim', explode(',', $row->status));
