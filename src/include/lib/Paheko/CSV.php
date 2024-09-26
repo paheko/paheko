@@ -176,9 +176,10 @@ class CSV
 
 	static public function toCSV(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, array $options = null): void
 	{
+		$options['date_format'] ??= 'd/m/Y';
 		$csv = new TableToCSV;
-		$csv->setShortDateFormat('d/m/Y');
-		$csv->setLongDateFormat('d/m/Y H:i:s');
+		$csv->setShortDateFormat($options['date_format']);
+		$csv->setLongDateFormat($options['date_format'] . ' H:i:s');
 		$csv->setSeparator($options['separator'] ?? ',');
 		$csv->setQuote($options['quote'] ?? '"');
 		self::toTable($csv, $name, $iterator, $header, $row_map_callback, $options);

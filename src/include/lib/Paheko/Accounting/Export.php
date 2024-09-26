@@ -137,9 +137,10 @@ class Export
 
 		if ($format === self::FEC && $format === 'fec') {
 			$options = [
-				'separator' => "\t",
-				'quote'     => '',
-				'extension' => 'txt',
+				'separator'   => "\t",
+				'quote'       => '',
+				'extension'   => 'txt',
+				'date_format' => 'Ymd',
 			];
 
 			$name = 'ASSOFEC' . $year->end_date->format('Ymd');
@@ -280,8 +281,6 @@ class Export
 					$row->status = implode(', ', $status);
 				}
 
-				$row->date = \DateTime::createFromFormat('Y-m-d', $row->date);
-				$row->date = $row->date->format($type == self::FEC ? 'Ymd' : 'd/m/Y');
 				$previous_id = $row->id;
 			}
 

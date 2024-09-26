@@ -319,7 +319,8 @@ class Conversion
 		if ($format === 'csv'
 			&& in_array('ssconvert', $tools, true)
 			&& in_array($extension, self::GNUMERIC_FORMATS, true)) {
-			$cmd = 'ssconvert --export-type="Gnumeric_stf:stf_csv" %s %s %s 2>&1';
+			// format=preserve will keep original date format
+			$cmd = 'ssconvert --export-type="Gnumeric_stf:stf_assistant" -O format=preserve %s %s %s 2>&1';
 		}
 
 		if ($cmd === null
