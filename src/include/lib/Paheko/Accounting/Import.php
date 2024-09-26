@@ -14,7 +14,7 @@ use KD2\SimpleDiff;
 
 class Import
 {
-	static protected function saveImportedTransaction(Transaction $transaction, ?array $linked_users, bool $dry_run = false, array &$report = null): void
+	static protected function saveImportedTransaction(Transaction $transaction, ?array $linked_users, bool $dry_run = false, ?array &$report = null): void
 	{
 		static $users = [];
 		$found_users = null;

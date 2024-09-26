@@ -237,6 +237,14 @@ class Utils
 			return 0;
 		}
 
+		// Remove whitespace characters
+		$value = preg_replace('/\h/u', '', $value);
+
+		// Remove US thousands separator, if cents separator is a point
+		if (strpos($value, '.') === strlen($value) - 3) {
+			$value = str_replace(',', '', $value);
+		}
+
 		if (!preg_match('/^(-?)(\d+)(?:[,.](\d{1,3}))?/', $value, $match)) {
 			throw new UserException(sprintf('Le montant est invalide : %s. Exemple de format accepté : 142,02', $value));
 		}
