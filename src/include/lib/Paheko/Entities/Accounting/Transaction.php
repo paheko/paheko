@@ -1586,6 +1586,7 @@ class Transaction extends Entity
 					'account_selector' => $accounts->getSelectorFromCode($l['a'] ?? null),
 					'label'            => $l['l'] ?? null,
 					'reference'        => $l['r'] ?? null,
+					'id_project'       => $l['p'] ?? null,
 				];
 			}
 
