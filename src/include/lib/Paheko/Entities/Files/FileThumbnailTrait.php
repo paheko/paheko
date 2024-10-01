@@ -95,7 +95,7 @@ trait FileThumbnailTrait
 		$uri = sprintf('%s.%s.%s', $this->uri(), $size, $ext);
 
 		if ($with_hash) {
-			$uri .= '?h=' . substr($this->etag(), 0, 10);
+			$uri .= '?h=' . $this->getShortEtag();
 		}
 
 		return $uri;
