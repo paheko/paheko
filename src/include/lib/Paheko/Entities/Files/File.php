@@ -303,6 +303,11 @@ class File extends Entity
 		}
 	}
 
+	public function getShortEtag(): string
+	{
+		return substr($this->etag(), 0, 10);
+	}
+
 	public function rehash($pointer = null): void
 	{
 		if ($this->isDir()) {
@@ -1102,7 +1107,7 @@ class File extends Entity
 
 	protected function _serve(?string $path = null, $download = null): void
 	{
-		$is_versioned_url = !empty($_GET['h']);
+		$is_versioned_url = !empty($_GET['h']) && $_GET['h'] === $this->getShortEtag();
 
 		Utils::HTTPCache($this->etag(), $this->modified->getTimestamp(), 24*3600, $is_versioned_url);
 		header('X-Powered-By: Paheko/PHP');
