@@ -30,7 +30,7 @@
 			<fieldset>
 				<legend>Changer la catégorie des membres sélectionnés</legend>
 				<dl>
-					{input type="select" name="new_category_id" label="Nouvelle catégorie" options=$categories required=true default_empty=""}
+					{input type="select" name="new_category_id" label="Nouvelle catégorie" options=$categories required=true default_empty="— Sélectionner une catégorie —"}
 				</dl>
 			</fieldset>
 

@@ -40,10 +40,10 @@ else {
 
 if ($action == 'move') {
 	$form->runIf('confirm', function () use ($list) {
-		Users::changeCategorySelected((int)f('new_category_id'), $list);
+		Users::changeCategorySelected((int)f('new_category_id'), $list, Session::getInstance());
 	}, $csrf_key, '!users/?msg=CATEGORY_CHANGED');
 
-	$tpl->assign('categories', Categories::listAssoc());
+	$tpl->assign('categories', Categories::listAssocSafe($session));
 }
 elseif ($action == 'delete') {
 	$form->runIf('delete', function () use ($list) {

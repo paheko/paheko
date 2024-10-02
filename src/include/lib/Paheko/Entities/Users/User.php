@@ -827,6 +827,12 @@ class User extends Entity
 	 */
 	public function setCategorySafeNoConfig(int $id_category): bool
 	{
+		$safe_categories = Categories::listAssocSafe($session);
+
+		if (!array_key_exists($id_category, $safe_categories)) {
+			throw new UserException('Vous n\'avez pas le droit de placer ce membre dans cette catégorie');
+		}
+
 		$is_safe = DB::getInstance()->test(Category::TABLE, 'id = ? AND perm_config = 0', $id_category);
 
 		if ($is_safe) {
