@@ -278,9 +278,8 @@ class CLI
 			$this->help(['queue']);
 		}
 
-		$count = Emails::countQueue();
-
 		if ($command === 'count') {
+			$count = Emails::countQueue();
 			echo $count . PHP_EOL;
 			$this->success();
 		}
@@ -303,6 +302,7 @@ class CLI
 
 			// Send messages in queue
 			$sent = Emails::runQueue();
+			$count = Emails::countQueue();
 
 			if (!array_key_exists('quiet', $o)) {
 				if ($sent) {
