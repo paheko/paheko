@@ -461,7 +461,7 @@ class User extends Entity
 		$allowed = ['password', 'password_check', 'password_confirmed', 'password_delete', 'otp_secret', 'otp_disable', 'pgp_key', 'otp_code'];
 		$source = array_intersect_key($source, array_flip($allowed));
 
-		$session = Session::getInstance();
+		$session ??= Session::getInstance();
 
 		if ($user_mode && !Session::getInstance()->checkPassword($source['password_check'] ?? null, $this->password)) {
 			$this->assert(
@@ -473,7 +473,7 @@ class User extends Entity
 		if (!empty($source['password_delete'])) {
 			$source['password'] = null;
 		}
-		elseif (isset($source['password'])) {
+		elseif (!empty($source['password'])) {
 			$source['password'] = trim($source['password']);
 
 			// Maximum bcrypt password length

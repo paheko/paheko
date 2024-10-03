@@ -22,7 +22,7 @@
 		<legend>Options de sécurité</legend>
 		<dl>
 		{if $user.otp_secret}
-			{input type="checkbox" name="otp_delete" value="1" label="Désactiver l'authentification à double facteur TOTP"}
+			{input type="checkbox" name="otp_disable" value="1" label="Désactiver l'authentification à double facteur TOTP"}
 		{/if}
 		{if $user.pgp_key}
 			{input type="checkbox" name="pgp_key" value="" label="Supprimer la clé PGP associée au membre"}

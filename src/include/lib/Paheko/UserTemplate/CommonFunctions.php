@@ -231,8 +231,11 @@ class CommonFunctions
 		if (!empty($attributes['required']) || !empty($params['prefix_required'])) {
 			$required_label =  ' <b title="Champ obligatoire">(obligatoire)</b>';
 		}
-		else {
+		elseif ($type !== 'password') {
 			$required_label =  ' <i>(facultatif)</i>';
+		}
+		else {
+			$required_label = '';
 		}
 
 		$attributes_string = $attributes;
