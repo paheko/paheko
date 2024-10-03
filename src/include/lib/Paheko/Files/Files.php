@@ -1002,6 +1002,7 @@ class Files
 		}
 
 		$list = [];
+		$access = [];
 
 		if ($session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
 			$access[] = File::CONTEXT_CONFIG;
