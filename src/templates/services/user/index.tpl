@@ -27,9 +27,6 @@
 	<dt>Nombre d'inscriptions pour ce membre</dt>
 	<dd>
 		{$list->count()}
-		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
-			{exportmenu href="?id=%d"|args:$user_id}
-		{/if}
 	</dd>
 	{/if}
 </dl>
