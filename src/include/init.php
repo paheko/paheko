@@ -446,7 +446,7 @@ if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) && !empty($_SERVE
  * Vérifications pour enclencher le processus d'installation ou de mise à jour
  */
 
-if (!defined('Paheko\INSTALL_PROCESS')) {
+if (empty($skip_startup_check) && !defined('Paheko\INSTALL_PROCESS')) {
 	$exists = file_exists(DB_FILE);
 
 	if (!$exists || !filesize(DB_FILE)) {

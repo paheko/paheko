@@ -659,13 +659,12 @@ class CLI
 			define('Paheko\\' . $name, $value);
 		}
 
-		define('Paheko\INSTALL_PROCESS', true);
-
 		// Make sure we have a host/root to specify if
 		// WWW_URL/WWW_URI are not specified
 		$_SERVER['HTTP_HOST'] = 'localhost';
 		$_SERVER['DOCUMENT_ROOT'] = $root . '/www';
 
+		$skip_startup_check = true;
 		require_once $root . '/include/init.php';
 
 		if (WWW_URL === 'http://localhost/' && $command !== 'ui') {
