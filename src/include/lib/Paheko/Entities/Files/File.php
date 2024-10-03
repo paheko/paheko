@@ -1036,7 +1036,7 @@ class File extends Entity
 	public function preview(?Session $session = null): void
 	{
 		if (!$this->canPreview()) {
-			throw new \LogicException('This file cannot be previewed');
+			throw new UserException('This file cannot be previewed');
 		}
 
 		if ($this->renderFormat()) {
