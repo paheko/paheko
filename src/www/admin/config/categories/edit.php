@@ -5,6 +5,8 @@ use Paheko\Entities\Users\Category;
 use Paheko\Users\Categories;
 use Paheko\Users\Session;
 
+use KD2\Security;
+
 require_once __DIR__ . '/../_inc.php';
 
 $cat = Categories::get((int) qg('id'));
@@ -56,6 +58,7 @@ foreach ($permissions as $key => &$config) {
 
 unset($config);
 
-$tpl->assign(compact('csrf_key', 'cat', 'permissions'));
+$has_encryption = Security::canUseEncryption();
+$tpl->assign(compact('csrf_key', 'cat', 'permissions', 'has_encryption'));
 
 $tpl->display('config/categories/edit.tpl');
