@@ -615,8 +615,8 @@ CREATE TABLE IF NOT EXISTS web_pages
 	id_parent INTEGER NULL REFERENCES web_pages(id) ON DELETE CASCADE,
 	uri TEXT NOT NULL, -- Page identifier
 	type INTEGER NOT NULL, -- 1 = Category, 2 = Page
-	status TEXT NOT NULL,
-	inherited_status TEXT NOT NULL,
+	status INTEGER NOT NULL,
+	inherited_status INTEGER NOT NULL,
 	format TEXT NOT NULL,
 	published TEXT NOT NULL CHECK (datetime(published) IS NOT NULL AND datetime(published) = published),
 	modified TEXT NOT NULL CHECK (datetime(modified) IS NOT NULL AND datetime(modified) = modified),
