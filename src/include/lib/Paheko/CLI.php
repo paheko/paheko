@@ -298,7 +298,7 @@ class CLI
 			$o = $this->parseOptions($args, ['--quiet|-q', '--force|-f'], 0);
 
 			if (array_key_exists('force', $o)) {
-				Emails::resetFailed();
+				Emails::resetFailed(true);
 			}
 
 			// Send messages in queue
