@@ -162,6 +162,7 @@ class Addresses
 	 * Normalize an email addresse before creating its hash
 	 * This means that failing to send to name.surname+alias@gmail.com
 	 * will also fail namesurname@gmail.com and name.surname@gmail.com
+	 * @see https://github.com/MioVisman/NormEmail/blob/master/src/NormEmail.php
 	 */
 	static public function normalize(string $address, ?string &$local_part = null, ?string &$host = null): ?string
 	{
