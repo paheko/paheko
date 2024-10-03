@@ -232,7 +232,7 @@ class Config extends Entity
 		throw new \LogicException('Cannot delete config');
 	}
 
-	public function importForm($source = null): void
+	public function importForm(?array $source = null): void
 	{
 		$source ??= $_POST;
 

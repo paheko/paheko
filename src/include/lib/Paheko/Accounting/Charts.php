@@ -99,7 +99,7 @@ class Charts
 		$code = strtoupper(substr($chart_code, 3));
 
 		if (DB::getInstance()->test(Chart::TABLE, 'country = ? AND code = ?', $country, $code)) {
-			throw new \RuntimeException('Ce plan comptable est déjà installé');
+			throw new UserException('Ce plan comptable est déjà installé');
 		}
 
 		$db = DB::getInstance();

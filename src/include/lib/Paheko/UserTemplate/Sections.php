@@ -1226,6 +1226,8 @@ class Sections
 
 	static public function pages(array $params, UserTemplate $tpl, int $line): \Generator
 	{
+		static $listed = [];
+
 		$params['where'] ??= '';
 		$params['select'] = 'w.*';
 		$params['tables'] = 'web_pages w';
@@ -1326,6 +1328,12 @@ class Sections
 			$params['order'] .= ' COLLATE U_NOCASE';
 		}
 
+		if (!($params['duplicates'] ?? true)) {
+			$params['where'] .= ' AND w.' . DB::getInstance()->where('id', 'NOT IN', $listed);
+		}
+
+		unset($params['duplicates']);
+
 		foreach (self::sql($params, $tpl, $line, $allowed_tables) as $row) {
 			if (empty($params['count'])) {
 				$data = $row;
@@ -1334,6 +1342,7 @@ class Sections
 				$page = new Page;
 				$page->exists(true);
 				$page->load($data);
+				$listed[] = $page->id;
 
 				if (isset($row['snippet'])) {
 					$row['snippet'] = preg_replace('!</mark>(\s*)<mark>!', '$1', $row['snippet']);
@@ -1628,6 +1637,10 @@ class Sections
 			$db->setReadOnly(false);
 		}
 		catch (DB_Exception $e) {
+			if (strpos($e->getMessage(), 'malformed MATCH') !== false) {
+				throw new UserException('Motif de recherche invalide', 0, $e);
+			}
+
 			throw new Brindille_Exception(sprintf("à la ligne %d erreur SQL :\n%s\n\nRequête exécutée :\n%s", $line, $e->getMessage(), $sql));
 		}
 

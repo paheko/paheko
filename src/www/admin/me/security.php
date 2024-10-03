@@ -9,6 +9,10 @@ require_once __DIR__ . '/_inc.php';
 
 $user = Session::getLoggedUser();
 
+if (!$user->password) {
+	throw new UserException('You cannot change your security settings');
+}
+
 $can_use_pgp = \KD2\Security::canUseEncryption();
 $pgp_fingerprint = $user->getPGPKeyFingerprint(null, true);
 

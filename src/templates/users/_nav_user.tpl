@@ -15,6 +15,9 @@
 		{/if}
 	{/if}
 	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE) && $current == 'services'}
+		{if isset($list) && $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
+			{exportmenu href="?id=%d"|args:$user_id}
+		{/if}
 		{linkbutton href="!services/user/subscribe.php?user=%d"|args:$id label="Inscrire à une activité" shape="plus" target="_dialog" accesskey="K"}
 	{/if}
 

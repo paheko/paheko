@@ -262,7 +262,10 @@ class File extends Entity
 		return $path;
 	}
 
-	public function getLocalOrCacheFilePath(): string
+	/**
+	 * Will return NULL if file contents are not found in storage
+	 */
+	public function getLocalOrCacheFilePath(): ?string
 	{
 		$path = $this->getLocalFilePath();
 
@@ -273,6 +276,12 @@ class File extends Entity
 
 			if (!Static_Cache::hasExpired($id)) {
 				return $path;
+			}
+
+			$pointer = $this->getReadOnlyPointer();
+
+			if (!$pointer) {
+				return null;
 			}
 
 			Static_Cache::storeFromPointer($id, $this->getReadOnlyPointer());
@@ -292,6 +301,11 @@ class File extends Entity
 		else {
 			return md5($this->path . $this->getRecursiveSize() . $this->getRecursiveLastModified());
 		}
+	}
+
+	public function getShortEtag(): string
+	{
+		return substr($this->etag(), 0, 10);
 	}
 
 	public function rehash($pointer = null): void
@@ -798,7 +812,10 @@ class File extends Entity
 			return $this;
 		}
 		catch (\Exception $e) {
-			$db->rollback();
+			if ($db->inTransaction()) {
+				$db->rollback();
+			}
+
 			throw $e;
 		}
 		finally {
@@ -1002,7 +1019,7 @@ class File extends Entity
 			return $html;
 		}
 		else {
-			return sprintf('<iframe src="%s"></iframe>', $url);
+			return sprintf('<iframe src="%s?preview"></iframe>', $url);
 		}
 	}
 
@@ -1018,7 +1035,7 @@ class File extends Entity
 	public function preview(?Session $session = null): void
 	{
 		if (!$this->canPreview()) {
-			throw new \LogicException('This file cannot be previewed');
+			throw new UserException('This file cannot be previewed');
 		}
 
 		if ($this->renderFormat()) {
@@ -1036,7 +1053,7 @@ class File extends Entity
 		}
 	}
 
-	public function editor(string $content = null, ?Session $session = null): bool
+	public function editor(?string $content = null, ?Session $session = null): bool
 	{
 		$editor = $this->editorType() ?? 'code';
 		$csrf_key = 'edit_file_' . $this->pathHash();
@@ -1089,16 +1106,9 @@ class File extends Entity
 
 	protected function _serve(?string $path = null, $download = null): void
 	{
-		if ($this->isPublic()) {
-			Utils::HTTPCache($this->etag(), $this->modified->getTimestamp());
-		}
-		else {
-			// Disable browser cache
-			header('Pragma: private');
-			header('Expires: -1');
-			header('Cache-Control: private, must-revalidate, post-check=0, pre-check=0');
-		}
+		$is_versioned_url = !empty($_GET['h']) && $_GET['h'] === $this->getShortEtag();
 
+		Utils::HTTPCache($this->etag(), $this->modified->getTimestamp(), 24*3600, $is_versioned_url);
 		header('X-Powered-By: Paheko/PHP');
 
 		// Security: disable running scripts from SVG images and HTML documents
@@ -1521,7 +1531,7 @@ class File extends Entity
 		$name = trim($name);
 
 		if (substr_count($name, '/') !== 0) {
-			throw new \LogicException('Directory name cannot contain a slash');
+			throw new UserException('Le nom du répertoire ne peut pas contenir de "/"');
 		}
 
 		$path = $this->path . '/' . $name;

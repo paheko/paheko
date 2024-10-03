@@ -45,7 +45,7 @@
 	<dt>Message</dt>
 	<dd><pre class="preview"><code>{$mailing.body}</code></pre></dd>
 	<dt>Prévisualisation</dt>
-	{if $mailing->isTemplate() && $mailing.sent}
+	{if $mailing.sent && $mailing->isTemplate()}
 		<dd>La prévisualisation est indisponible pour ce message car il a été envoyé.</dd>
 	{else}
 		<dd>{linkbutton shape="eye" label="Prévisualiser le message" href="?id=%d&preview"|args:$mailing.id target="_dialog"}<br />

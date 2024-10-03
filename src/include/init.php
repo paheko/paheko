@@ -384,12 +384,12 @@ function user_error(UserException $e)
 		\Paheko\Form::reportUserException($e);
 	}
 
-	if (PHP_SAPI == 'cli')
-	{
+	if (PHP_SAPI == 'cli') {
 		echo $e->getMessage();
+		exit;
 	}
-	else
-	{
+
+	try {
 		// Flush any previous output, such as module HTML code etc.
 		@ob_end_clean();
 
@@ -405,6 +405,9 @@ function user_error(UserException $e)
 		$tpl->assign('html_error', $e->getHTMLMessage());
 		$tpl->assign('admin_url', ADMIN_URL);
 		$tpl->display();
+	}
+	catch (\Throwable $e) {
+		ErrorManager::reportException($e, true);
 	}
 
 	exit;

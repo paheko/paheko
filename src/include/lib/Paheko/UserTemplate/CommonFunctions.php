@@ -66,7 +66,7 @@ class CommonFunctions
 			$attributes['accept'] = '.csv,text/csv,application/csv,.CSV';
 			$help = ($help ?? '') . PHP_EOL . 'Format accepté : CSV';
 
-			if (Conversion::canConvert('ods')) {
+			if (Conversion::canConvertToCSV()) {
 				$help .= ', LibreOffice Calc (ODS), ou Excel (XLSX)';
 				$attributes['accept'] .= ',.ods,.ODS,application/vnd.oasis.opendocument.spreadsheet'
 					. ',.xls,.XLS,application/vnd.ms-excel'
@@ -231,8 +231,11 @@ class CommonFunctions
 		if (!empty($attributes['required']) || !empty($params['prefix_required'])) {
 			$required_label =  ' <b title="Champ obligatoire">(obligatoire)</b>';
 		}
-		else {
+		elseif ($type !== 'password') {
 			$required_label =  ' <i>(facultatif)</i>';
+		}
+		else {
+			$required_label = '';
 		}
 
 		$attributes_string = $attributes;
@@ -473,8 +476,8 @@ class CommonFunctions
 		}
 
 		// propagate _dialog param if we are in an iframe
-		if (isset($_GET['_dialog']) && !isset($params['target'])) {
-			$href .= (strpos($href, '?') === false ? '?' : '&') . '_dialog';
+		if (!isset($params['target']) && ($dialog = Utils::getDialogTarget())) {
+			$href .= (strpos($href, '?') === false ? '?' : '&') . '_dialog=' . $dialog;
 		}
 
 		if (!isset($params['class'])) {

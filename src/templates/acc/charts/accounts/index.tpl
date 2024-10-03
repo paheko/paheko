@@ -21,7 +21,7 @@
 			<td colspan="4"><h2 class="ruler">{$group.label}</h2></td>
 			<td class="actions">
 				{if !$chart.archived && $group.type}
-					{linkbutton label="Ajouter un compte" shape="plus" href="!acc/charts/accounts/new.php?id=%d&type=%d&%s"|args:$chart.id,$group.type,$types_arg  target=$dialog_target}
+					{linkbutton label="Ajouter un compte" shape="plus" href="!acc/charts/accounts/new.php?id=%d&type=%d&%s"|args:$chart.id:$group.type:$types_arg target=$dialog_target}
 				{/if}
 			</td>
 		</tr>
@@ -41,9 +41,9 @@
 			<td class="actions">
 				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$chart.archived}
 					{if (!$chart->code || $account->user) && $account->canDelete()}
-						{linkbutton shape="delete" label="Supprimer" href="!acc/charts/accounts/delete.php?id=%d&%s"|args:$account.id,$types_arg  target=$dialog_target}
+						{linkbutton shape="delete" label="Supprimer" href="!acc/charts/accounts/delete.php?id=%d&%s"|args:$account.id:$types_arg  target=$dialog_target}
 					{/if}
-					{linkbutton shape="edit" label="Modifier" href="!acc/charts/accounts/edit.php?id=%d&%s"|args:$account.id,$types_arg  target=$dialog_target}
+					{linkbutton shape="edit" label="Modifier" href="!acc/charts/accounts/edit.php?id=%d&%s"|args:$account.id:$types_arg  target=$dialog_target}
 				{/if}
 			</td>
 		</tr>

@@ -57,7 +57,7 @@ trait FileWOPITrait
 		return $url;
 	}
 
-	public function getWOPIEditorHTML(Session $session = null, bool $readonly = false, bool $frame_only = false): ?string
+	public function getWOPIEditorHTML(?Session $session = null, bool $readonly = false, bool $frame_only = false): ?string
 	{
 		$url = $this->getWopiURL('edit');
 

@@ -95,7 +95,7 @@ trait FileThumbnailTrait
 		$uri = sprintf('%s.%s.%s', $this->uri(), $size, $ext);
 
 		if ($with_hash) {
-			$uri .= '?h=' . substr($this->etag(), 0, 10);
+			$uri .= '?h=' . $this->getShortEtag();
 		}
 
 		return $uri;
@@ -137,7 +137,7 @@ trait FileThumbnailTrait
 		elseif (ENABLE_FILE_THUMBNAILS && Conversion::canExtractThumbnail($ext)) {
 			return 'webp';
 		}
-		elseif (ENABLE_FILE_THUMBNAILS && Conversion::canConvert($ext)) {
+		elseif (ENABLE_FILE_THUMBNAILS && Conversion::canConvert($ext, 'png')) {
 			return 'webp';
 		}
 
@@ -165,11 +165,16 @@ trait FileThumbnailTrait
 			return $destination;
 		}
 
-		if (!Conversion::canConvert($ext)) {
+		if (!Conversion::canConvert($ext, 'png')) {
 			return null;
 		}
 
-		$r = Conversion::convert($this->getLocalOrCacheFilePath(), $destination, 'png', $this->size, $this->mime);
+		$source = $this->getLocalOrCacheFilePath();
+		$r = null;
+
+		if ($source) {
+			$r = Conversion::convert($source, $destination, 'png', $this->size, $this->mime);
+		}
 
 		if (!$r) {
 			Utils::safe_unlink($destination);
@@ -262,7 +267,7 @@ trait FileThumbnailTrait
 	/**
 	 * Envoie une miniature à la taille indiquée au client HTTP
 	 */
-	public function serveThumbnail(string $size = null): void
+	public function serveThumbnail(?string $size = null): void
 	{
 		if (!$this->hasThumbnail()) {
 			throw new UserException('Il n\'est pas possible de fournir une miniature pour ce fichier.', 404);

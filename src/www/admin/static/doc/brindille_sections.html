@@ -659,6 +659,10 @@ Il y a {{$result.count}} articles.
 <td style="text-align: left;"><code>parent</code></td>
 <td style="text-align: left;">Adresse unique (URI) de la catégorie parente. Exemple pour renvoyer la liste des articles de la sous-catégorie "Événements" de la catégorie "Notre atelier" :  <code>evenements</code>. Utiliser <code>null</code> pour n'afficher que les articles ou catégories de la racine du site. Ajouter un point d'exclamation au début de la valeur pour inverser la condition.</td>
 </tr>
+<tr>
+<td style="text-align: left;"><code>duplicates</code></td>
+<td style="text-align: left;">Renseigner ce paramètre à <code>false</code> pour ne pas que la liste inclue des pages qui ont déjà été listées dans la même page (suppression des doublons).</td>
+</tr>
 </tbody>
 </table>
 <p>Par exemple lister 5 articles de la catégorie "Actualité", qui ne sont pas dans le futur, triés du plus récent au plus ancien :</p>

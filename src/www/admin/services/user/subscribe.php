@@ -81,7 +81,7 @@ $form->runIf('save', function () use ($session, &$users, $copy_service, $copy_fe
 		$users = $copy_fee->getUsers($copy_only_paid);
 	}
 
-	$su = Service_User::createFromForm($users, $session->getUser()->id, $copy_service ? true : false);
+	$su = Service_User::createFromForm($users, $session::getUserId(), $copy_service ? true : false);
 
 	Utils::reloadParentFrameIfDialog();
 

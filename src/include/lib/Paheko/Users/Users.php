@@ -368,22 +368,24 @@ class Users
 		}
 	}
 
-	static public function changeCategorySelected(int $category_id, array $ids): void
+	static public function changeCategorySelected(int $id_category, array $ids, Session $session): void
 	{
 		$db = DB::getInstance();
 
-		if (!$db->test(Category::TABLE, 'id = ?', $category_id)) {
-			throw new \InvalidArgumentException('Invalid category ID: ' . $category_id);
+		$safe_categories = Categories::listAssocSafe($session);
+
+		if (!array_key_exists($id_category, $safe_categories)) {
+			throw new UserException('Vous n\'avez pas le droit de placer ce membre dans cette catégorie');
 		}
 
 		$ids = array_map('intval', $ids);
 
 		// Don't allow current user ID to change his/her category
-		$logged_user_id = Session::getUserId();
+		$logged_user_id = $session->user()->id();
 		$ids = array_filter($ids, fn($a) => $a != $logged_user_id);
 
 		$db->update(User::TABLE,
-			['id_category' => $category_id],
+			['id_category' => $id_category],
 			$db->where('id', $ids)
 		);
 	}

@@ -277,7 +277,7 @@ class Mailing extends Entity
 
 	public function isTemplate()
 	{
-		return false !== strpos($this->body, '{{') && false !== strpos($this->body, '}}');
+		return isset($this->body) && false !== strpos($this->body, '{{') && false !== strpos($this->body, '}}');
 	}
 
 	public function getPreview(int $id = null): string
