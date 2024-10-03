@@ -16,8 +16,6 @@
 			<tbody{if $parent.archived} class="archived"{/if}>
 				<tr class="title">
 					<th colspan="8">
-						{$parent.id}
-						{$parent.id_year}
 						<h2 class="ruler">{$parent.label}{if $parent.archived} <em>(archivé)</em>{/if}</h2>
 						{if $parent.description}<p class="help">{$parent.description|escape|nl2br}</p>{/if}
 					{if !$table_export && !$by_year && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
@@ -36,7 +34,7 @@
 			{foreach from=$parent.items item="item"}
 				<?php $result = $item->sum_revenue - $item->sum_expense; ?>
 				<tr class="{if $item.label == 'Total'}total{/if} {if $item.archived}archived{/if}">
-					<th>{$item.id_project} {$item.label}{if $item.archived} <em>(archivé)</em>{/if}</th>
+					<th>{$item.label}{if $item.archived} <em>(archivé)</em>{/if}</th>
 					<td>
 					{if !$table_export}
 					<?php
