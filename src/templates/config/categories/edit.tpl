@@ -44,6 +44,7 @@
 		</dl>
 	</fieldset>
 
+	{*
 	<fieldset>
 		<legend>Sécurité</legend>
 		<dl>
@@ -57,6 +58,7 @@
 			{/if}
 		</dl>
 	</fieldset>
+	*}
 
 	<p class="submit">
 		{csrf_field key=$csrf_key}
