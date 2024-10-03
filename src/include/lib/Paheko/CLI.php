@@ -259,10 +259,13 @@ class CLI
 	 * paheko queue count
 	 *   Display number of messages in e-mail queue.
 	 *
-	 * paheko queue run [--quiet|-q]
+	 * paheko queue run [--quiet|-q] [--force|-f]
 	 *   Deliver messages waiting in the queue.
 	 *   Will exit with status code 2 if there are still messages waiting in the queue.
 	 *   If the queue is empty, the status code will be 0.
+	 *   If --quiet is not specified, will print the number of messages sent, and still in queue.
+	 *   If --force is specified, messages which have been marked for sending but failed,
+	 *   will be sent now.
 	 *
 	 * paheko queue bounce
 	 *   Read received bounce message from STDIN.
@@ -292,12 +295,16 @@ class CLI
 			$this->success();
 		}
 		elseif ($command === 'run') {
-			$o = $this->parseOptions($args, ['--quiet|-q'], 0);
+			$o = $this->parseOptions($args, ['--quiet|-q', '--force|-f'], 0);
+
+			if (array_key_exists('force', $o)) {
+				Emails::resetFailed();
+			}
 
 			// Send messages in queue
 			$sent = Emails::runQueue();
 
-			if (array_key_exists('quiet', $o)) {
+			if (!array_key_exists('quiet', $o)) {
 				if ($sent) {
 					printf("%d messages sent\n", $sent);
 				}
