@@ -177,7 +177,7 @@ class CLI
 	/**
 	 * Run daily cron tasks.
 	 */
-	public function cron(array $args): void
+	public function cron(): void
 	{
 		$config = Config::getInstance();
 
