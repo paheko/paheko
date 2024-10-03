@@ -11,5 +11,4 @@ then
   ARGS="ui"
 fi
 
-chmod +x ${BIN}
-${BIN} $ARGS
+php -d variables_order=EGPCS ${BIN} $ARGS
