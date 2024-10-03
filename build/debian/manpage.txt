@@ -10,7 +10,7 @@ paheko - Gestionnaire d'association à but non lucratif
 
 SYNOPSIS
 --------
-*paheko* ['OPTIONS'] ['COMMANDE'] ['BASE']
+*paheko* ['OPTIONS'] ['COMMANDE']
 
 
 DESCRIPTION
@@ -18,38 +18,7 @@ DESCRIPTION
 Lancer paheko(1) sans argument lance le serveur web intégré sur
 l'adresse localhost:8081 et le navigateur web par défaut.
 
-*BASE* défini le chemin de la base de données (fichier .sqlite) à
-utiliser. Par défaut, si aucune base n'est spécifiée, c'est le fichier
-'association.sqlite' situé dans le répertoire des données qui est
-utilisé.
-
-OPTIONS
--------
-*-p, --port*='PORT'::
-Défini le port utilisé par le serveur web.
-Par défaut c'est le port 8081 qui est utilisé.
-
-*-b, --bind*='IP'::
-Adresse IP où sera exposé le serveur web.
-Par défaut c'est 127.0.0.1 qui est utilisé.
-
-Utiliser 0.0.0.0 pour que le serveur web soit accessible d'autres
-machines. (Attention cela peut présenter un risque de sécurité.)
-
-*-v, --verbose*::
-Affiche les messages du serveur web.
-
-*-h, --help*::
-Affiche un message d'aide sur l'utilisation de la commande.
-
-COMMANDES
----------
-*server*::
-Lance le serveur web autonome de Paheko sans lancer de navigateur
-web.
-
-*ui*::
-Lance le serveur web autonome et le navigateur par défaut.
+Lancer "paheko help" pour obtenir une liste des options et commandes.
 
 EXIT STATUS
 -----------
@@ -85,7 +54,7 @@ Les données et plugins seront stockés dans le répertoire
 
 BUGS
 ----
-Voir https://fossil.kd2.org/paheko/ pour un accès au bugtracker.
+Rapporter un bug : https://fossil.kd2.org/paheko/wiki?name=Rapporter%20un%20bug
 
 
 AUTEUR
@@ -101,6 +70,6 @@ Site principal : <https://fossil.kd2.org/paheko/>
 
 COPYING
 -------
-Copyright \(C) 2011-2023 BohwaZ. Free use of this software is
+Copyright \(C) 2011-2025 BohwaZ. Free use of this software is
 granted under the terms of the GNU Affero General Public License v3
 (AGPL).
