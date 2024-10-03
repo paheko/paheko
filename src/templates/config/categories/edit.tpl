@@ -44,7 +44,7 @@
 		</dl>
 	</fieldset>
 
-	{*
+	{*TODO: advanced category security options
 	<fieldset>
 		<legend>Sécurité</legend>
 		<dl>
