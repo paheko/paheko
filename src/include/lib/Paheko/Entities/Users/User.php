@@ -484,6 +484,9 @@ class User extends Entity
 
 			$source['password'] = $session::hashPassword($source['password']);
 		}
+		else {
+			unset($source['password']);
+		}
 
 		if (!empty($source['otp_disable'])) {
 			$source['otp_secret'] = null;

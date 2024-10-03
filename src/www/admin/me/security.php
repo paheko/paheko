@@ -9,6 +9,10 @@ require_once __DIR__ . '/_inc.php';
 
 $user = Session::getLoggedUser();
 
+if (!$user->password) {
+	throw new UserException('You cannot change your security settings');
+}
+
 $csrf_key = 'edit_security_' . md5($user->password);
 $edit = qg('edit');
 
