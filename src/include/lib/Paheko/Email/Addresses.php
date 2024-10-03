@@ -31,6 +31,29 @@ class Addresses
 	const COMMON_DOMAINS = ['laposte.net', 'gmail.com', 'hotmail.fr', 'hotmail.com', 'wanadoo.fr', 'free.fr', 'sfr.fr', 'yahoo.fr', 'orange.fr', 'live.fr', 'outlook.fr', 'yahoo.com', 'neuf.fr', 'outlook.com', 'icloud.com', 'riseup.net', 'vivaldi.net', 'aol.com', 'gmx.de', 'lilo.org', 'mailo.com', 'protonmail.com', 'proton.me', 'zaclys.net', 'pm.me'];
 
 	/**
+	 * List of domains aliases for large providers.
+	 * This is when john@alias.com is the same as john@provider.com
+	 * domain-name => main domain name
+	 */
+	const DOMAINS_ALIASES = [
+		'googlemail.com' => 'gmail.com',
+		'protonmail.com' => 'proton.me',
+		'pm.me'          => 'proton.me',
+		'protonmail.ch'  => 'proton.me',
+		'me.com'         => 'icloud.com',
+		'mac.com'        => 'icloud.com',
+		'wanadoo.fr'     => 'orange.fr', // https://communaute.orange.fr/t5/mon-mail-Orange/Cr%C3%A9er-un-alias-en-WANADOO-FR/td-p/2928201
+	];
+
+	/**
+	 * List of domains where name.surname@ === namesurname@
+	 */
+	const DOMAINS_REMOVE_DOT_FROM_LOCAL_PART = [
+		'gmail.com',
+		'live.com',
+	];
+
+	/**
 	 * Return NULL if address is valid, or a string for an error message if invalid
 	 */
 	static public function checkForErrors(string $email, bool $mx_check = true): ?string
@@ -135,6 +158,11 @@ class Addresses
 		}
 	}
 
+	/**
+	 * Normalize an email addresse before creating its hash
+	 * This means that failing to send to name.surname+alias@gmail.com
+	 * will also fail namesurname@gmail.com and name.surname@gmail.com
+	 */
 	static public function normalize(string $address, ?string &$local_part = null, ?string &$host = null): ?string
 	{
 		$address = strtolower(trim($address));
@@ -148,6 +176,30 @@ class Addresses
 		$local_part = substr($address, 0, $pos);
 		$host = substr($address, $pos + 1);
 		$host = idn_to_ascii($host);
+
+		// aliases
+		if (array_key_exists($host, self::DOMAINS_ALIASES)) {
+			$host = self::DOMAINS_ALIASES[$host];
+		}
+
+		// Remove dots . from gmail/live.com addresses
+		if (array_key_exists($host, self::DOMAINS_REMOVE_DOT_FROM_LOCAL_PART)) {
+			$local_part = str_replace('.', '', $local_part);
+		}
+
+		// Yahoo is the only known provider where dash is the alias separator
+		if (strpos($host, 'yahoo.') !== false || $host === 'rocketmail.com') {
+			$separator = '-';
+		}
+		else {
+			$separator = '+';
+		}
+
+		// Remove alias part of address:
+		// name-alias@yahoo.com => name@yahoo.com
+		// name+alias@gmail.com => name@gmail.com
+		$local_part = strtok($local_part, $separator);
+		strtok('');
 
 		$address = $local_part . '@' . $host;
 		return $address;
