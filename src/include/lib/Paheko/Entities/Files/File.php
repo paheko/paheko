@@ -1532,7 +1532,7 @@ class File extends Entity
 		$name = trim($name);
 
 		if (substr_count($name, '/') !== 0) {
-			throw new \LogicException('Directory name cannot contain a slash');
+			throw new UserException('Le nom du répertoire ne peut pas contenir de "/"');
 		}
 
 		$path = $this->path . '/' . $name;
