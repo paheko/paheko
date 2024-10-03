@@ -1648,6 +1648,10 @@ class Sections
 			$db->setReadOnly(false);
 		}
 		catch (DB_Exception $e) {
+			if (strpos($e->getMessage(), 'malformed MATCH') !== false) {
+				throw new UserException('Motif de recherche invalide', 0, $e);
+			}
+
 			throw new Brindille_Exception(sprintf("à la ligne %d erreur SQL :\n%s\n\nRequête exécutée :\n%s", $line, $e->getMessage(), $sql));
 		}
 
