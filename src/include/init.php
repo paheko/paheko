@@ -277,7 +277,6 @@ const HELP_URL = 'https://paheko.cloud/aide?from=%s';
 const HELP_PATTERN_URL = 'https://paheko.cloud/%s';
 const WEBSITE = 'https://fossil.kd2.org/paheko/';
 const PING_URL = 'https://paheko.cloud/ping/';
-const PLUGINS_URL = 'https://paheko.cloud/plugins/list.json';
 
 const USER_TEMPLATES_CACHE_ROOT = CACHE_ROOT . '/utemplates';
 const STATIC_CACHE_ROOT = CACHE_ROOT . '/static';
