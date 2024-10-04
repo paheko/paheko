@@ -99,7 +99,7 @@ class Year extends Entity
 	{
 		$this->assertCanBeModified();
 
-		$this->set('status', self::LOCKED);
+		$this->set('status', self::CLOSED);
 		$this->save();
 	}
 
