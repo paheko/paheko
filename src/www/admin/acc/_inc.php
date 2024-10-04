@@ -36,7 +36,7 @@ if ($user_year) {
 
 // Or just select the first open year
 if (!$current_year) {
-	$current_year = Years::getCurrentOpenYear();
+	$current_year = Years::getFirstYear();
 }
 
 define('Paheko\CURRENT_YEAR_ID', $current_year ? $current_year->id() : null);

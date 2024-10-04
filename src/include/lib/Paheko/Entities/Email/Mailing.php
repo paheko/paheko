@@ -141,7 +141,7 @@ class Mailing extends Entity
 		}
 
 		// Just in case the password has another column name
-		foreach ($data as $key => $value) {
+		foreach ((array) $data as $key => $value) {
 			if (is_string($value) && substr($value, 0, 2) === '$2') {
 				unset($data->$key);
 			}

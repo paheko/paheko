@@ -33,7 +33,21 @@ $csrf_key = 'user_security_' . $user->id;
 $login_field = DF::getLoginField();
 
 $form->runIf('save', function () use ($user) {
-	$user->importSecurityForm(false);
+	if (f('password_delete')) {
+		$user->deletePassword();
+	}
+	elseif (f('password')) {
+		$user->setNewPassword(null, false);
+	}
+
+	if (f('otp_delete')) {
+		$user->setOTPSecret(null);
+	}
+
+	if (f('pgp_delete')) {
+		$user->setPGPKey(null);
+	}
+
 	$user->save(false);
 }, $csrf_key, '!users/details.php?id=' . $user->id);
 

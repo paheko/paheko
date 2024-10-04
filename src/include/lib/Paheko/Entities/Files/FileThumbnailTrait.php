@@ -156,6 +156,7 @@ trait FileThumbnailTrait
 	{
 		$cache_id = sprintf(self::THUMB_CACHE_ID, $this->md5, 'document');
 		$destination = Static_Cache::getPath($cache_id);
+
 		$ext = $this->extension();
 
 		// Try to extract integrated thumbnail first, for OpenDocument files, if it's available

@@ -246,7 +246,6 @@ class Backup
 		$tmp_file = null;
 
 		if (null === $file) {
-			$file = DB_FILE;
 			$name = sprintf('%s - Sauvegarde données - %s.sqlite', $config->get('org_name'), date('Y-m-d'));
 
 			$tmp_file = tempnam(sys_get_temp_dir(), 'gdin');
@@ -525,14 +524,5 @@ class Backup
 		}
 
 		return $size;
-	}
-
-	/**
-	 * Return size of all files in database
-	 */
-	static public function getDBFilesSize(): int
-	{
-		$db = DB::getInstance();
-		return (int) $db->firstColumn('SELECT SUM(size) FROM files;');
 	}
 }

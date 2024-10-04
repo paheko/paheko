@@ -273,7 +273,7 @@ class Email extends Entity
 			$this->appendFailLog($message);
 		}
 		else {
-			throw new \LogicException('Invalid bounce type: ' . $return['type']);
+			throw new \LogicException('Invalid bounce type: ' . $type);
 		}
 	}
 }

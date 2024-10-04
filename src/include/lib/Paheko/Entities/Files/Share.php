@@ -79,7 +79,7 @@ class Share extends Entity
 	public function verifyToken(string $token): bool
 	{
 		$random_hash = strtok($token, ':') ?: '';
-		$hmac = strtok('') ?: '';
+		strtok('') ?: '';
 
 		return hash_equals($token, $this->generateToken($random_hash));
 	}

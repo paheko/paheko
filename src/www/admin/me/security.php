@@ -13,22 +13,8 @@ if (!$user->password) {
 	throw new UserException('You cannot change your security settings');
 }
 
-$csrf_key = 'edit_security_' . md5($user->password);
-$edit = qg('edit');
-
-$form->runIf('confirm', function () use ($user, $session) {
-	$user->importSecurityForm(true, null, $session);
-	$user->save(false);
-}, $csrf_key, '!me/security.php?ok');
-
-$otp = null;
-
-if ($edit == 'otp') {
-	$otp = $session->getNewOTPSecret();
-}
-
-$tpl->assign('can_use_pgp', \KD2\Security::canUseEncryption());
-$tpl->assign('pgp_fingerprint', $user->pgp_key ? $session->getPGPFingerprint($user->pgp_key, true) : null);
+$can_use_pgp = \KD2\Security::canUseEncryption();
+$pgp_fingerprint = $user->getPGPKeyFingerprint(null, true);
 
 $tpl->assign('ok', qg('ok') !== null);
 $sessions_count = $session->countActiveSessions();
@@ -37,6 +23,6 @@ $id_field = current(DynamicFields::getInstance()->fieldsBySystemUse('login'));
 $id = $user->{$id_field->name};
 $can_change_password = $user->canChangePassword($session);
 
-$tpl->assign(compact('id', 'edit', 'id_field', 'user', 'csrf_key', 'sessions_count', 'can_change_password', 'otp'));
+$tpl->assign(compact('id', 'id_field', 'user', 'sessions_count', 'can_change_password', 'can_use_pgp', 'pgp_fingerprint'));
 
 $tpl->display('me/security.tpl');

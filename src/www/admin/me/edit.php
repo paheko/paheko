@@ -6,6 +6,7 @@ use Paheko\Users\Session;
 
 require_once __DIR__ . '/_inc.php';
 
+$user = Session::getInstance()->user();
 $csrf_key = 'edit_my_info';
 
 $form->runIf('save', function () use ($user) {

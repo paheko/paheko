@@ -18,16 +18,23 @@ class Years
 		return EntityManager::findOneById(Year::class, $year_id);
 	}
 
+	static public function getFirstYear(): ?Year
+	{
+		return EntityManager::findOne(Year::class, 'SELECT * FROM @TABLE
+			ORDER BY status = ? DESC, status = ? DESC, start_date <= date() AND end_date >= date() DESC, start_date DESC LIMIT 1;',
+			Year::OPEN, Year::LOCKED);
+	}
+
 	static public function getCurrentOpenYear()
 	{
-		return EntityManager::findOne(Year::class, 'SELECT * FROM @TABLE WHERE closed = 0
-			ORDER BY start_date <= date() AND end_date >= date() DESC, start_date DESC LIMIT 1;');
+		return EntityManager::findOne(Year::class, 'SELECT * FROM @TABLE WHERE status = ?
+			ORDER BY start_date <= date() AND end_date >= date() DESC, start_date DESC LIMIT 1;', Year::OPEN);
 	}
 
 	static public function getCurrentOpenYearId()
 	{
-		return EntityManager::getInstance(Year::class)->col('SELECT id FROM @TABLE WHERE closed = 0
-			ORDER BY start_date <= date() AND end_date >= date() DESC, start_date DESC LIMIT 1;');
+		return EntityManager::getInstance(Year::class)->col('SELECT id FROM @TABLE WHERE status = ?
+			ORDER BY start_date <= date() AND end_date >= date() DESC, start_date DESC LIMIT 1;', Year::OPEN);
 	}
 
 	static public function getMatchingOpenYearId(?\DateTimeInterface $date = null)
@@ -36,26 +43,29 @@ class Years
 			return self::getCurrentOpenYearId();
 		}
 
-		return EntityManager::getInstance(Year::class)->col('SELECT id FROM @TABLE WHERE closed = 0 AND start_date <= ? AND end_date >= ? ORDER BY start_date LIMIT 1;', $date, $date);
+		return EntityManager::getInstance(Year::class)->col('SELECT id FROM @TABLE
+			WHERE status = ? AND start_date <= ? AND end_date >= ?
+			ORDER BY start_date LIMIT 1;',
+			Year::OPEN, $date, $date);
 	}
 
 	static public function listOpen($with_stats = false)
 	{
 		$db = EntityManager::getInstance(Year::class)->DB();
 		$stats = $with_stats ? ', (SELECT COUNT(*) FROM acc_transactions WHERE id_year = acc_years.id) AS nb_transactions' : '';
-		return $db->getGrouped(sprintf('SELECT id, * %s FROM acc_years WHERE closed = 0 ORDER BY end_date;', $stats));
+		return $db->getGrouped(sprintf('SELECT id, * %s FROM acc_years WHERE status = %d ORDER BY end_date;', $stats, Year::OPEN));
 	}
 
 	static public function listOpenAssocExcept(int $id)
 	{
 		$db = EntityManager::getInstance(Year::class)->DB();
-		return $db->getAssoc('SELECT id, label FROM acc_years WHERE closed = 0 AND id != ? ORDER BY end_date;', $id);
+		return $db->getAssoc('SELECT id, label FROM acc_years WHERE status = ? AND id != ? ORDER BY end_date;', Year::OPEN, $id);
 	}
 
 	static public function listOpenAssoc()
 	{
 		$db = EntityManager::getInstance(Year::class)->DB();
-		return $db->getAssoc('SELECT id, label FROM acc_years WHERE closed = 0 ORDER BY end_date DESC;');
+		return $db->getAssoc('SELECT id, label FROM acc_years WHERE status = ? ORDER BY end_date DESC;', Year::OPEN);
 	}
 
 	static public function listAssoc()
@@ -70,42 +80,57 @@ class Years
 
 	static public function listClosedAssoc()
 	{
-		return DB::getInstance()->getAssoc('SELECT id, label FROM acc_years WHERE closed = 1 ORDER BY end_date;');
+		$list = self::listClosed();
+		$list = array_map(fn($y) => $y->getLabelWithYearsAndStatus(), $list);
+		return $list;
 	}
 
 	static public function listClosedAssocExcept(int $id)
 	{
-		return DB::getInstance()->getAssoc('SELECT id, label FROM acc_years WHERE closed = 1 AND id != ? ORDER BY end_date DESC;', $id);
+		return DB::getInstance()->getAssoc('SELECT id, label FROM acc_years WHERE status = ? AND id != ? ORDER BY end_date DESC;', Year::CLOSED, $id);
 	}
 
-	static public function listClosed()
+	static public function listClosed(): array
 	{
 		$em = EntityManager::getInstance(Year::class);
-		return $em->all('SELECT * FROM @TABLE WHERE closed = 1 ORDER BY end_date;');
+		return $em->all('SELECT * FROM @TABLE WHERE status = ? ORDER BY end_date;', Year::CLOSED);
 	}
 
-	static public function countClosed()
+	static public function countClosed(): int
 	{
-		return DB::getInstance()->count(Year::TABLE, 'closed = 1');
+		return DB::getInstance()->count(Year::TABLE, 'status = ' . Year::CLOSED);
 	}
 
-	static public function count()
+	static public function count(): int
 	{
 		return DB::getInstance()->count(Year::TABLE);
 	}
 
-	static public function list(bool $reverse = false, ?int $except_id = null)
+	static public function list(): array
 	{
-		$desc = $reverse ? 'DESC' : '';
-		$except = $except_id ? ' AND y.id != ' . (int)$except_id : '';
-		$sql = sprintf('SELECT y.*,
+		$em = EntityManager::getInstance(Year::class);
+		return $em->all('SELECT * FROM @TABLE ORDER BY end_date DESC;');
+	}
+
+	static public function listExcept(int $id): array
+	{
+		$em = EntityManager::getInstance(Year::class);
+		return $em->all('SELECT * FROM @TABLE WHERE id != ? ORDER BY end_date DESC;', $id);
+	}
+
+	static public function listWithStats(): \Generator
+	{
+		$sql = 'SELECT y.*,
 			(SELECT COUNT(*) FROM acc_transactions WHERE id_year = y.id) AS nb_transactions,
 			c.label AS chart_name
 			FROM acc_years y
 			INNER JOIN acc_charts c ON c.id = y.id_chart
-			WHERE 1 %s
-			ORDER BY end_date %s;', $except, $desc);
-		return DB::getInstance()->get($sql);
+			ORDER BY end_date DESC;';
+
+		foreach (DB::getInstance()->iterate($sql) as $row) {
+			$row->status_tag_preset = Year::STATUS_TAG_PRESETS[$row->status];
+			yield $row;
+		}
 	}
 
 	static public function listLastTransactions(int $count, array $years): array
@@ -211,14 +236,13 @@ class Years
 			$sum -= abs($account->balance);
 		}
 
-		if ($sum == 0) {
+		if ($sum === 0) {
 			return null;
 		}
-
-		if ($sum > 0) {
+		elseif ($sum > 0) {
 			$line = Line::create($appropriation_account, 0, $sum);
 		}
-		elseif ($sum < 0) {
+		else {
 			$line = Line::create($appropriation_account, abs($sum), 0);
 		}
 

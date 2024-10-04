@@ -277,12 +277,12 @@ Exemple :
 Il est possible d'utiliser des conditions de type **"si"** (`if`), **"sinon si"** (`elseif`) et **"sinon"** (`else`). Celles-ci sont terminées par un block **"fin si"** (`/if`).
 
 ```
-{{if $date|date:"%Y" > 2020}}
-    La date est en 2020
-{{elseif $article.status == 'draft'}}
-    La page est un brouillon
+{{if $date|date:"%Y" >= 2020}}
+    La date est dans les années 2020
+{{elseif $date|date:"%Y" >= 2010}}
+    La date est dans les années 2010-2019
 {{else}}
-    Autre chose.
+    Autre date.
 {{/if}}
 ```
 

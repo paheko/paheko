@@ -50,10 +50,10 @@ class Entity extends AbstractEntity
 			if ($value instanceof $class) {
 				return $value;
 			}
-			elseif ($class === Date::class && $value instanceof \DateTimeInterface) {
+			elseif ($class === Date::class && $value instanceof \DateTime) {
 				return Date::createFromInterface($value);
 			}
-			elseif ($class === \DateTime::class && $value instanceof \DateTimeInterface) {
+			elseif ($class === \DateTime::class && $value instanceof \DateTime) {
 				return $value;
 			}
 			else {

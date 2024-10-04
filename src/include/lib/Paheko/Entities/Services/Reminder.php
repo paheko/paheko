@@ -69,7 +69,6 @@ class Reminder extends Entity
 	public function sentList(): DynamicList
 	{
 		$id_field = DynamicFields::getNameFieldsSQL('u');
-		$db = DB::getInstance();
 
 		$columns = [
 			'id_user' => [
@@ -97,8 +96,6 @@ class Reminder extends Entity
 
 	public function pendingList(): DynamicList
 	{
-		$db = DB::getInstance();
-
 		$columns = [
 			'id_user' => [
 				'select' => 'id',

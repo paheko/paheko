@@ -80,7 +80,7 @@ verify:
 	@echo "Verifying KD2fw..."
 	@cd ${ROOT}/include/lib/KD2 && bash ${ROOT}/../tools/fossil_verify.sh ${KD2FW_BRANCH} ${KD2FW_URL} src/lib/KD2
 
-release: freeze test-syntax minify doc
+release: test-syntax doc minify freeze
 	$(eval VERSION=$(shell cat VERSION))
 	$(eval KD2FW_VERSION=$(shell cat ../build/kd2fw.version))
 	$(eval MODULES_VERSION=$(shell cat ../build/modules.version))

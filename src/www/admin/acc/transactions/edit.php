@@ -20,21 +20,18 @@ if (!$transaction) {
 
 $transaction->assertCanBeModified();
 
-$year = Years::get($transaction->id_year);
+$year = $transaction->year();
 $chart = $year->chart();
-$accounts = $chart->accounts();
 
 $csrf_key = 'acc_transaction_edit_' . $transaction->id();
 
 $tpl->assign('chart', $chart);
 
-$form->runIf('save', function() use ($transaction, $session) {
+$form->runIf('save', function() use ($transaction) {
 	$transaction->importFromNewForm();
 	$transaction->save();
 	$transaction->saveLinks();
 }, $csrf_key, '!acc/transactions/details.php?id=' . $transaction->id());
-
-$types_accounts = [];
 
 $lines = null;
 

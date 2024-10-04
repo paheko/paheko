@@ -8,6 +8,13 @@
 		<legend>Modifier un exercice</legend>
 		<dl>
 			{input type="text" label="Libellé" name="label" source=$year required=true}
+			{input type="checkbox" label="Verrouiller cet exercice" source=$year name="locked" value=1 default=$year->isLocked()}
+			<dd class="help">Si cette case est cochée, l'exercice ne pourra pas être supprimé, et ses écritures ne pourront pas être modifiées ni supprimées. Il faudra déverrouiller l'exercice avant toute modification. Cela permet de préparer la clôture de l'exercice, en s'assurant qu'il n'est pas modifié par erreur si on travaille sur plusieurs exercices en même temps.</dd>
+		</dl>
+	</fieldset>
+	<fieldset>
+		<legend>Dates</legend>
+		<dl>
 			{input type="date" label="Début de l'exercice" name="start_date" source=$year required=true}
 			{input type="date" label="Fin de l'exercice" name="end_date" source=$year required=true}
 			{input type="checkbox" label="Déplacer les écritures postérieures dans un autre exercice" value=1 name="split"}

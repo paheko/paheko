@@ -43,7 +43,7 @@ if ($account->id_chart != $year->id_chart) {
 	Utils::redirect(ADMIN_URL . 'acc/accounts/?chart_change');
 }
 
-$can_edit = $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$year->closed;
+$can_edit = $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && $year->isOpen();
 $simple = !empty($session->user()->preferences->accounting_expert) ? false : true;
 
 // Use simplified view for favourite accounts

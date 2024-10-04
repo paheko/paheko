@@ -240,7 +240,6 @@ class Transactions
 			$conditions .= sprintf(' AND t.type = %s', $type);
 		}
 
-		$sum = 0;
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('date', true);

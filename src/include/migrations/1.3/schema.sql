@@ -212,7 +212,10 @@ CREATE TABLE IF NOT EXISTS users_categories
 	perm_connect INTEGER NOT NULL DEFAULT 1,
 	perm_config INTEGER NOT NULL DEFAULT 0,
 
-	hidden INTEGER NOT NULL DEFAULT 0
+	hidden INTEGER NOT NULL DEFAULT 0,
+	allow_passwordless_login INTEGER NOT NULL DEFAULT 0,
+	force_otp INTEGER NOT NULL DEFAULT 0,
+	force_pgp INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE INDEX IF NOT EXISTS users_categories_hidden ON users_categories (hidden);
@@ -418,12 +421,12 @@ CREATE TABLE IF NOT EXISTS acc_years
 	start_date TEXT NOT NULL CHECK (date(start_date) IS NOT NULL AND date(start_date) = start_date),
 	end_date TEXT NOT NULL CHECK (date(end_date) IS NOT NULL AND date(end_date) = end_date),
 
-	closed INTEGER NOT NULL DEFAULT 0, -- 0 = open, 1 = closed
+	status INTEGER NOT NULL DEFAULT 0, -- 0 = open, 1 = closed, 2 = locked
 
 	id_chart INTEGER NOT NULL REFERENCES acc_charts (id)
 );
 
-CREATE INDEX IF NOT EXISTS acc_years_closed ON acc_years (closed);
+CREATE INDEX IF NOT EXISTS acc_years_status ON acc_years (status);
 
 -- Make sure id_account is reset when a year is deleted
 CREATE TRIGGER IF NOT EXISTS acc_years_delete BEFORE DELETE ON acc_years BEGIN
@@ -613,6 +616,7 @@ CREATE TABLE IF NOT EXISTS web_pages
 	uri TEXT NOT NULL, -- Page identifier
 	type INTEGER NOT NULL, -- 1 = Category, 2 = Page
 	status TEXT NOT NULL,
+	inherited_status TEXT NOT NULL,
 	format TEXT NOT NULL,
 	published TEXT NOT NULL CHECK (datetime(published) IS NOT NULL AND datetime(published) = published),
 	modified TEXT NOT NULL CHECK (datetime(modified) IS NOT NULL AND datetime(modified) = modified),

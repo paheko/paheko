@@ -24,8 +24,24 @@ class Year extends Entity
 	protected string $label;
 	protected Date $start_date;
 	protected Date $end_date;
-	protected bool $closed = false;
+	protected int $status = self::OPEN;
 	protected int $id_chart;
+
+	const OPEN = 0;
+	const CLOSED = 1;
+	const LOCKED = 2;
+
+	const STATUS_TAG_PRESETS = [
+		self::OPEN   => 'open',
+		self::CLOSED => 'closed',
+		self::LOCKED => 'locked',
+	];
+
+	const STATUS_LABELS = [
+		self::OPEN   => 'en cours',
+		self::CLOSED => 'clôturé',
+		self::LOCKED => 'verrouillé',
+	];
 
 	public function selfCheck(): void
 	{
@@ -54,19 +70,42 @@ class Year extends Entity
 		}
 	}
 
+	public function isOpen(): bool
+	{
+		return $this->status === self::OPEN;
+	}
+
+	public function isClosed(): bool
+	{
+		return $this->status === self::CLOSED;
+	}
+
+	public function isLocked(): bool
+	{
+		return $this->status === self::LOCKED;
+	}
+
+	public function getStatusTagPreset(): string
+	{
+		return self::STATUS_TAG_PRESETS[$this->status];
+	}
+
+	public function getStatusLabel(): string
+	{
+		return self::STATUS_LABELS[$this->status];
+	}
+
 	public function close(int $user_id): void
 	{
-		if ($this->closed) {
-			throw new \LogicException('Cet exercice est déjà clôturé');
-		}
+		$this->assertCanBeModified();
 
-		$this->set('closed', true);
+		$this->set('status', self::LOCKED);
 		$this->save();
 	}
 
 	public function reopen(int $user_id): void
 	{
-		if (!$this->closed) {
+		if (!$this->isOpen()) {
 			throw new \LogicException('This year is already open');
 		}
 
@@ -76,11 +115,11 @@ class Year extends Entity
 			throw new UserException('Aucun compte n\'est indiqué comme compte de clôture dans le plan comptable');
 		}
 
-		$this->set('closed', false);
+		$this->set('status', self::OPEN);
 		$this->save();
 
 		Log::add(Log::MESSAGE, [
-			'message' => sprintf('Réouverture de l\'exercice', $this->label),
+			'message' => 'Réouverture de l\'exercice',
 			'entity'  => self::class,
 			'id'      => $this->id(),
 		]);
@@ -124,13 +163,8 @@ class Year extends Entity
 	 */
 	public function split(\DateTime $date, Year $target): void
 	{
-		if ($this->closed) {
-			throw new \LogicException('Cet exercice est déjà clôturé');
-		}
-
-		if ($target->closed) {
-			throw new \LogicException('L\'exercice cible est déjà clôturé');
-		}
+		$this->assertCanBeModified();
+		$target->assertCanBeModified();
 
 		DB::getInstance()->preparedQuery('UPDATE acc_transactions SET id_year = ? WHERE id_year = ? AND date > ?;',
 			$target->id(), $this->id(), $date->format('Y-m-d'));
@@ -176,6 +210,15 @@ class Year extends Entity
 		return $start == $end ? $start : sprintf('%s-%s', $start, substr($end, -2));
 	}
 
+	public function getLabelWithYearsAndStatus()
+	{
+		return sprintf('%s — %s au %s (%s)',
+			$this->label,
+			Utils::shortDate($this->start_date),
+			Utils::shortDate($this->end_date),
+			$this->getStatusLabel()
+		);
+	}
 
 	/**
 	 * List common accounts used in this year, grouped by type
@@ -255,5 +298,29 @@ class Year extends Entity
 		foreach ($list as $t) {
 			$t->delete();
 		}
+	}
+
+	public function assertCanBeModified(bool $locked_check = true): void
+	{
+		if ($locked_check && $this->isLocked()) {
+			throw new UserException('Impossible de modifier un exercice verrouillé.');
+		}
+
+		if ($this->isClosed()) {
+			throw new UserException('Impossible de modifier un exercice clôturé.');
+		}
+	}
+
+	public function importForm(array $source = null)
+	{
+		$this->assertCanBeModified(false);
+
+		$source ??= $_POST;
+
+		if (!empty($source['locked_present'])) {
+			$source['status'] = !empty($source['locked']) ? self::LOCKED : self::OPEN;
+		}
+
+		return parent::importForm($source);
 	}
 }

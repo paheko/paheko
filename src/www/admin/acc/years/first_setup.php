@@ -76,8 +76,11 @@ $form->runIf('save', function () use ($year, $new_accounts, $appropriation_accou
 		}
 	}
 
-	if (f('result') && $appropriation_account) {
-		$t = $appropriation_account->createOpeningBalance($year, Utils::moneyToInteger(f('result')) * -1, 'Report du résultat de l\'exercice précédent');
+	$result = abs(Utils::moneyToInteger($_POST['result'] ?? 0));
+
+	if ($result && $appropriation_account) {
+		$result = ($_POST['negative'] ?? null) ? $result : $result * -1;
+		$t = $appropriation_account->createOpeningBalance($year, $result, 'Report du résultat de l\'exercice précédent');
 		$t->id_creator = Session::getUserId();
 		$t->save();
 	}

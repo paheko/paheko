@@ -7,6 +7,7 @@ use KD2\Form;
 use KD2\HTTP;
 use KD2\Translate;
 use KD2\SMTP;
+use KD2\DB\DB_Exception;
 
 use Paheko\Users\Session;
 
@@ -348,7 +349,7 @@ class Utils
 			$base = $base ? $base . '/' : '';
 			return '/' . $base . substr($url, 2);
 		}
-		elseif (substr($url, 0, 1) == '/' && ($pos = strpos($url, WWW_URI)) === 0) {
+		elseif (substr($url, 0, 1) == '/' && strpos($url, WWW_URI) === 0) {
 			return WWW_URL . substr($url, strlen(WWW_URI));
 		}
 		elseif (substr($url, 0, 1) == '/') {
@@ -644,24 +645,6 @@ class Utils
 		return $str;
 	}
 
-	/**
-	 * Transforme les tags HTML basiques en tags SkrivML
-	 * @param  string $str Texte d'entrée
-	 * @return string      Texte transformé
-	 */
-	static public function HTMLToSkriv($str)
-	{
-		$str = preg_replace('/<h3>(\V*?)<\/h3>/', '=== $1 ===', $str);
-		$str = preg_replace('/<b>(\V*)<\/b>/', '**$1**', $str);
-		$str = preg_replace('/<strong>(\V*?)<\/strong>/', '**$1**', $str);
-		$str = preg_replace('/<i>(\V*?)<\/i>/', '\'\'$1\'\'', $str);
-		$str = preg_replace('/<em>(\V*?)<\/em>/', '\'\'$1\'\'', $str);
-		$str = preg_replace('/<li>(\V*?)<\/li>/', '* $1', $str);
-		$str = preg_replace('/<ul>|<\/ul>/', '', $str);
-		$str = preg_replace('/<a href="([^"]*?)">(\V*?)<\/a>/', '[[$2 | $1]]', $str);
-		return $str;
-	}
-
 	static public function safe_unlink(string $path): bool
 	{
 		if (!@unlink($path))
@@ -907,7 +890,6 @@ class Utils
 		}
 		elseif ($size > (1024 * 1024)) {
 			$size = $size / 1024 / 1024;
-			$decimals = $size == (int) $size ? 0 : 2;
 			return ceil($size) . ' Mo';
 		}
 		elseif ($size > 1024) {
@@ -1101,12 +1083,12 @@ class Utils
 	 * Assumes r, g, and b are contained in the set [0, 255] and
 	 * returns h, s, and v in the set [0, 1].
 	 *
-	 * @param   Number  r       The red color value
-	 * @param   Number  g       The green color value
-	 * @param   Number  b       The blue color value
-	 * @return  Array           The HSV representation
+	 * @param   int|string  r       The red color value
+	 * @param   int|null  g       The green color value
+	 * @param   int|null  b       The blue color value
+	 * @return  array           The HSV representation
 	 */
-	static public function rgbToHsv($r, $g = null, $b = null)
+	static public function rgbToHsv($r, $g = null, $b = null): array
 	{
 		if (is_string($r) && is_null($g) && is_null($b))
 		{
@@ -1435,6 +1417,7 @@ class Utils
 
 		$code = 0;
 		$stdin_buffer = null;
+		$status = null;
 
 		// Nothing for STDIN, close the pipe
 		if (null === $stdin) {
@@ -1442,7 +1425,7 @@ class Utils
 			$pipes[0] = null;
 		}
 
-		while ($timeout_ms > 0) {
+		while (!$timeout || $timeout_ms > 0) {
 			$start = microtime(true);
 
 			// Wait until we can read or write, or until the timer expires
@@ -1840,7 +1823,7 @@ class Utils
 
 	static protected function _resolve_ini_types(array $ini)
 	{
-		foreach ($ini as $key => &$value) {
+		foreach ($ini as &$value) {
 			if (is_array($value)) {
 				$value = self::_resolve_ini_types($value);
 			}
@@ -1896,6 +1879,10 @@ class Utils
 
 	static public function showProfiler(): void
 	{
+		if (!defined('Paheko\PROFILER_START_TIME')) {
+			return;
+		}
+
 		$is_html = false;
 
 		foreach (headers_list() as $header) {

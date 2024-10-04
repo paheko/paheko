@@ -321,7 +321,7 @@ class Modules
 				$has_dist_file = true;
 			}
 			elseif ($page = Web::getByURI($uri)) {
-				$status = $page->getRealStatus();
+				$status = $page->inherited_status;
 
 				if ($status === Page::STATUS_DRAFT) {
 					$path = '404.html';

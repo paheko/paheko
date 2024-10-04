@@ -15,9 +15,7 @@ if (!$year) {
 	throw new UserException('Exercice inconnu.');
 }
 
-if ($year->closed) {
-	throw new UserException('Impossible de modifier un exercice clôturé.');
-}
+$year->assertCanBeModified(false);
 
 $csrf_key = 'acc_years_edit_' . $year->id();
 
@@ -36,7 +34,8 @@ $form->runIf('edit', function () use ($year) {
 		}
 		else {
 			$target = new Year;
-			$new_start = (clone $date)->modify('+1 day');
+			$new_start = Date::createFromInterface($date);
+			$new_start->modify('+1 day');
 	        $target->label = sprintf('Exercice %d', $date->format('Y'));
 	        $target->start_date = $new_start;
 	        $target->end_date = (clone $new_start)->modify('+1 year');

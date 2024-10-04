@@ -27,6 +27,7 @@ span.money {
 
 .transaction-lines input.money {
     min-width: 3.5rem !important;
+    width: auto;
 }
 
 nav.acc-year {

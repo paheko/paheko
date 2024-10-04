@@ -28,10 +28,13 @@ use Paheko\Services\Services_User;
 
 use Paheko\Entities\Files\File;
 
+use KD2\Security;
+use KD2\Security_OTP;
 use KD2\SMTP;
 use KD2\DB\EntityManager as EM;
 use KD2\DB\Date;
 use KD2\ZipWriter;
+use KD2\Graphics\QRCode;
 
 use const Paheko\{WWW_URL, LOCAL_LOGIN};
 
@@ -390,9 +393,8 @@ class User extends Entity
 	{
 		$source ??= $_POST;
 
-
 		// Don't allow changing security credentials from form
-		unset($source['id_category'], $source['password'], $source['otp_secret'], $source['pgp_key']);
+		unset($source['id_category'], $source['password'], $source['otp_secret'], $source['otp_recovery_codes'], $source['pgp_key']);
 
 		if (isset($source['id_parent']) && is_array($source['id_parent'])) {
 			$source['id_parent'] = Form::getSelectorValue($source['id_parent']);
@@ -454,60 +456,119 @@ class User extends Entity
 		return parent::importForm($source);
 	}
 
-	public function importSecurityForm(bool $user_mode = true, array $source = null, Session $session = null)
+	public function verifyPassword(?string $password)
+	{
+		$this->assert(
+			Session::getInstance()->checkPassword($password, $this->password),
+			'Le mot de passe fourni ne correspond pas au mot de passe actuel. Merci de bien vouloir renseigner votre mot de passe courant pour confirmer les changements.'
+		);
+	}
+
+	public function getPGPKeyFingerprint(?string $key = null, bool $display = false): ?string
+	{
+		$key ??= $this->pgp_key;
+
+		if (!$key) {
+			return null;
+		}
+
+		if (!Security::canUseEncryption()) {
+			return null;
+		}
+
+		$fingerprint = Security::getEncryptionKeyFingerprint($key);
+
+		if (!$fingerprint) {
+			return null;
+		}
+
+		if ($display) {
+			$fingerprint = str_split($fingerprint, 4);
+			$fingerprint = implode(' ', $fingerprint);
+		}
+
+		return $fingerprint;
+	}
+
+	public function setPGPKey(?string $key)
+	{
+		if ($key !== null) {
+			$this->assert($this->getPGPKeyFingerprint($key) !== null, 'Clé PGP invalide : impossible de récupérer l\'empreinte de la clé.');
+		}
+
+		$this->set('pgp_key', $key);
+	}
+
+	public function setOTPSecret(?string $secret, ?string $code = null)
+	{
+		if ($secret === null) {
+			Log::add(Log::OTP_CHANGED, ['action' => 'disabled'], $this->id);
+			$this->set('otp_secret', null);
+			$this->set('otp_recovery_codes', null);
+		}
+		else {
+			Log::add(Log::OTP_CHANGED, ['action' => 'enabled'], $this->id);
+			$this->assert(trim($code ?? '') !== '', 'Le code doit être renseigné pour confirmer l\'opération');
+			$this->assert(Security_OTP::TOTP($secret, $code), 'Le code entré n\'est pas valide.');
+
+			$this->set('otp_secret', $secret);
+			$this->generateOTPRecoveryCodes();
+		}
+	}
+
+	public function generateOTPRecoveryCodes(): array
+	{
+		$codes = [];
+
+		for ($i = 0; $i < 10; $i++) {
+			$codes[] = Security::getRandomPassword(6, 'ABCDEFGHJKLMNPQRSTUVWXYZ123456789');
+		}
+
+		$this->set('otp_recovery_codes', $codes);
+
+		return $codes;
+	}
+
+	public function createOTPSecret(): array
+	{
+		$config = Config::getInstance();
+		$out = [];
+		$out['secret'] = Security_OTP::getRandomSecret();
+		$out['secret_display'] = implode(' ', str_split($out['secret'], 4));
+
+		$icon = $config->fileURL('icon');
+		$out['url'] = Security_OTP::getOTPAuthURL($config->org_name, $out['secret'], 'totp', $icon);
+
+		$qrcode = new QRCode($out['url']);
+		$out['qrcode'] = 'data:image/svg+xml;base64,' . base64_encode($qrcode->toSVG());
+
+		return $out;
+	}
+
+	public function deletePassword(): void
+	{
+		$this->set('password', null);
+		$this->set('otp_secret', null);
+		$this->set('otp_recovery_codes', null);
+	}
+
+	public function setNewPassword(?array $source, bool $require_password_confirmation)
 	{
 		$source ??= $_POST;
 
-		$allowed = ['password', 'password_check', 'password_confirmed', 'password_delete', 'otp_secret', 'otp_disable', 'pgp_key', 'otp_code'];
-		$source = array_intersect_key($source, array_flip($allowed));
-
-		$session ??= Session::getInstance();
-
-		if ($user_mode && !Session::getInstance()->checkPassword($source['password_check'] ?? null, $this->password)) {
-			$this->assert(
-				$session->checkPassword($source['password_check'] ?? null, $this->password),
-				'Le mot de passe fourni ne correspond pas au mot de passe actuel. Merci de bien vouloir renseigner votre mot de passe courant pour confirmer les changements.'
-			);
+		if ($require_password_confirmation) {
+			$this->verifyPassword($source['password_check']);
 		}
 
-		if (!empty($source['password_delete'])) {
-			$source['password'] = null;
-		}
-		elseif (!empty($source['password'])) {
-			$source['password'] = trim($source['password']);
+		$source['password'] = trim($source['password']);
 
-			// Maximum bcrypt password length
-			$this->assert(strlen($source['password']) <= 72, sprintf('Le mot de passe doit faire moins de %d caractères.', 72));
-			$this->assert(strlen($source['password']) >= self::MINIMUM_PASSWORD_LENGTH, sprintf('Le mot de passe doit faire au moins %d caractères.', self::MINIMUM_PASSWORD_LENGTH));
-			$this->assert(hash_equals($source['password'], trim($source['password_confirmed'] ?? '')), 'La vérification du mot de passe doit être identique au mot de passe.');
-			$this->assert(!$session->isPasswordCompromised($source['password']), 'Le mot de passe choisi figure dans une liste de mots de passe compromis (piratés), il ne peut donc être utilisé ici. Si vous l\'avez utilisé sur d\'autres sites il est recommandé de le changer sur ces autres sites également.');
+		// Maximum bcrypt password length
+		$this->assert(strlen($source['password']) <= 72, sprintf('Le mot de passe doit faire moins de %d caractères.', 72));
+		$this->assert(strlen($source['password']) >= self::MINIMUM_PASSWORD_LENGTH, sprintf('Le mot de passe doit faire au moins %d caractères.', self::MINIMUM_PASSWORD_LENGTH));
+		$this->assert(hash_equals($source['password'], trim($source['password_confirmed'] ?? '')), 'La vérification du mot de passe doit être identique au mot de passe.');
+		$this->assert(!$session->isPasswordCompromised($source['password']), 'Le mot de passe choisi figure dans une liste de mots de passe compromis (piratés), il ne peut donc être utilisé ici. Si vous l\'avez utilisé sur d\'autres sites il est recommandé de le changer sur ces autres sites également.');
 
-			$source['password'] = $session::hashPassword($source['password']);
-		}
-		else {
-			unset($source['password']);
-		}
-
-		if (!empty($source['otp_disable'])) {
-			$source['otp_secret'] = null;
-		}
-		elseif (isset($source['otp_secret'])) {
-			$this->assert(trim($source['otp_code'] ?? '') !== '', 'Le code TOTP doit être renseigné pour confirmer l\'opération');
-			$this->assert($session->checkOTP($source['otp_secret'], $source['otp_code']), 'Le code TOTP entré n\'est pas valide.');
-		}
-
-		if (!empty($source['pgp_key'])) {
-			$this->assert($session->getPGPFingerprint($source['pgp_key']), 'Clé PGP invalide : impossible de récupérer l\'empreinte de la clé.');
-		}
-
-		// Don't allow user to change password if the password field cannot be changed by user
-		if ($user_mode && !$this->canChangePassword($session)) {
-			unset($source['password']);
-		}
-
-		unset($source['password_confirmed'], $source['password_check']);
-
-		parent::importForm($source);
+		$this->set('password', $session->hashPassword($source['password']));
 	}
 
 	public function getEmails(): array
@@ -852,7 +913,7 @@ class User extends Entity
 		$prefix['has_password'] = !empty($out['password']);
 		$prefix['has_otp'] = !empty($out['otp_secret']);
 		$prefix['has_pgp_key'] = !empty($out['pgp_key']);
-		unset($out['password'], $out['otp_secret'], $out['pgp_key']);
+		unset($out['password'], $out['otp_secret'], $out['otp_recovery_codes'], $out['pgp_key']);
 
 		foreach ($out as $key => &$value) {
 			if ($value instanceof Date || $value instanceof \DateTimeInterface) {

@@ -32,7 +32,7 @@ $list = Transactions::listByType(CURRENT_YEAR_ID, $type == -1 ? null : $type);
 $list->setTitle(sprintf('Suivi - %s', $types[$type]));
 $list->loadFromQueryString();
 
-$can_edit = $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$year->closed;
+$can_edit = $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && $year->isOpen();
 
 $pending_count = null;
 

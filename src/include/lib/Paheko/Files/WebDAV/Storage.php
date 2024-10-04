@@ -194,7 +194,7 @@ class Storage extends AbstractStorage
 					return 10000000;
 				}
 
-				return $file->id();
+				return $file->id;
 			case NextCloud::PROP_OC_PERMISSIONS:
 				$permissions = [
 					NextCloud::PERM_READ => $file->canRead($this->session),
@@ -304,7 +304,7 @@ class Storage extends AbstractStorage
 		rewind($pointer);
 
 		if ($new) {
-			$target = Files::createFromPointer($uri, $pointer);
+			Files::createFromPointer($uri, $pointer);
 		}
 		else {
 			$target->store(compact('pointer'));

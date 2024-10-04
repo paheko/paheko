@@ -126,8 +126,6 @@ class Export
 	 */
 	static public function export(Year $year, string $format, string $type): void
 	{
-		$header = null;
-
 		if (!array_key_exists($type, self::COLUMNS)) {
 			throw new \InvalidArgumentException('Unknown type: ' . $type);
 		}

@@ -135,7 +135,7 @@ class Module extends Entity
 			$ini = Utils::parse_ini_string($ini, false);
 		}
 		catch (\RuntimeException $e) {
-			throw new ValidationException(sprintf('Le fichier module.ini est invalide pour "%s" : %s', $this->name, $e->getMessage(), 0, $e));
+			throw new ValidationException(sprintf('Le fichier module.ini est invalide pour "%s" : %s', $this->name, $e->getMessage()), 0, $e);
 		}
 
 		if (empty($ini)) {
@@ -165,7 +165,7 @@ class Module extends Entity
 	 */
 	public function updateFromINI(bool $use_local = true): bool
 	{
-		$ini = $this->getINIProperties();
+		$ini = $this->getINIProperties($use_local);
 
 		if (!$ini) {
 			return false;
@@ -695,7 +695,6 @@ class Module extends Entity
 		$uri = $params['uri'] ?? null;
 
 		// Fire signal before display of a web page
-		$plugin_params = ['path' => $path, 'uri' => $uri, 'module' => $this];
 		$module = $this;
 
 		$signal = Plugins::fire('web.request.before', true, compact('path', 'uri', 'module'));
@@ -705,8 +704,6 @@ class Module extends Entity
 		}
 
 		unset($signal);
-
-		$type = null;
 
 		$ut = $this->template($path);
 		$ut->assignArray($params);
@@ -806,7 +803,7 @@ class Module extends Entity
 		}
 	}
 
-	public function export(Session $session): void
+	public function export(): void
 	{
 		$download_name = 'module_' . $this->name;
 

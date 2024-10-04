@@ -82,11 +82,6 @@ class API
 		}
 	}
 
-	public function setAccessLevel(int $level): void
-	{
-		$this->access = $level;
-	}
-
 	public function setFilePointer($pointer): void
 	{
 		if (!is_resource($pointer)) {
@@ -244,7 +239,7 @@ class API
 			}
 
 			if (isset($this->params['password'])) {
-				$user->importSecurityForm(false, ['password' => $this->params['password'], 'password_confirmed' => $this->params['password']]);
+				$user->setNewPassword(['password' => $this->params['password'], 'password_confirmed' => $this->params['password']], false);
 			}
 
 			$user->save();
@@ -288,8 +283,6 @@ class API
 			return $user->exportAPI();
 		}
 		elseif ($fn === 'import') {
-			$fp = null;
-
 			if ($this->method === 'PUT') {
 				$params = $this->params;
 			}
@@ -615,7 +608,7 @@ class API
 			}
 
 			if (!$p1 && !$p2) {
-				return Years::list();
+				return Years::listWithStats();
 			}
 
 			$id_year = null;
@@ -690,8 +683,6 @@ class API
 
 		// CSV import
 		if ($fn === 'subscriptions' && $fn2 === 'import') {
-			$fp = null;
-
 			if ($this->method === 'PUT') {
 				$params = $this->params;
 			}
@@ -754,9 +745,6 @@ class API
 
 	public function errors(string $uri)
 	{
-		$fn = strtok($uri, '/');
-		strtok('');
-
 		if (!ini_get('error_log')) {
 			throw new APIException('The error log is disabled', 404);
 		}

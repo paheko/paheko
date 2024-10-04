@@ -1,3 +1,57 @@
+.web-sitemap > ul {
+    display: grid;
+    grid-template-columns: repeat(3, .33fr);
+    margin: 1em 0;
+    gap: 1em;
+}
+
+.web-sitemap > ul > li {
+    border: 2px solid var(--gLightBackgroundColor);
+    padding: 1em;
+    border-radius: .5em;
+}
+
+.web-sitemap > ul ul {
+    margin-top: .5em;
+    list-style-type: disc;
+}
+
+.web-sitemap > ul ul li::marker {
+    color: var(--gBorderColor);
+}
+
+.web-sitemap ul {
+    margin-left: 1em;
+    margin-bottom: 1em;
+}
+
+.web-sitemap h3 {
+    font-size: 14pt;
+}
+
+.web-sitemap h4 {
+    font-size: 12pt;
+    font-weight: normal;
+}
+
+.web-sitemap h5 {
+    font-size: 10pt;
+    font-weight: normal;
+}
+
+.web-sitemap h6 {
+    font-size: 9pt;
+    font-weight: normal;
+}
+
+.web-sitemap .status-0 > a {
+    color: var(--gBorderColor);
+}
+
+.web-sitemap .status-1 > a {
+    color: rgb(var(--gHoverLinkColor));
+}
+
 .web-edit {
     display: grid;
     grid-template-columns: 1fr 30%;

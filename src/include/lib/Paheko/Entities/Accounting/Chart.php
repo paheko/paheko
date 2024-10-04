@@ -80,7 +80,6 @@ class Chart extends Entity
 	{
 		$db = DB::getInstance();
 		$positions = array_flip(Account::POSITIONS_NAMES);
-		$types = array_flip(Account::TYPES_NAMES);
 
 		$db->begin();
 
