@@ -14,7 +14,6 @@ use Paheko\Services\Services;
 use Paheko\Services\Fees;
 use Paheko\Users\Users;
 use Paheko\Email\Emails;
-use Paheko\UserException;
 
 use KD2\DB\Date;
 use stdClass;

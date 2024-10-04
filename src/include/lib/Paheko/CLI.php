@@ -177,7 +177,7 @@ class CLI
 	/**
 	 * Run daily cron tasks.
 	 */
-	public function cron(array $args): void
+	public function cron(): void
 	{
 		$config = Config::getInstance();
 
@@ -259,10 +259,13 @@ class CLI
 	 * paheko queue count
 	 *   Display number of messages in e-mail queue.
 	 *
-	 * paheko queue run [--quiet|-q]
+	 * paheko queue run [--quiet|-q] [--force|-f]
 	 *   Deliver messages waiting in the queue.
 	 *   Will exit with status code 2 if there are still messages waiting in the queue.
 	 *   If the queue is empty, the status code will be 0.
+	 *   If --quiet is not specified, will print the number of messages sent, and still in queue.
+	 *   If --force is specified, messages which have been marked for sending but failed,
+	 *   will be sent now.
 	 *
 	 * paheko queue bounce
 	 *   Read received bounce message from STDIN.
@@ -275,9 +278,8 @@ class CLI
 			$this->help(['queue']);
 		}
 
-		$count = Emails::countQueue();
-
 		if ($command === 'count') {
+			$count = Emails::countQueue();
 			echo $count . PHP_EOL;
 			$this->success();
 		}
@@ -292,12 +294,17 @@ class CLI
 			$this->success();
 		}
 		elseif ($command === 'run') {
-			$o = $this->parseOptions($args, ['--quiet|-q'], 0);
+			$o = $this->parseOptions($args, ['--quiet|-q', '--force|-f'], 0);
+
+			if (array_key_exists('force', $o)) {
+				Emails::resetFailed(true);
+			}
 
 			// Send messages in queue
 			$sent = Emails::runQueue();
+			$count = Emails::countQueue();
 
-			if (array_key_exists('quiet', $o)) {
+			if (!array_key_exists('quiet', $o)) {
 				if ($sent) {
 					printf("%d messages sent\n", $sent);
 				}
@@ -652,13 +659,12 @@ class CLI
 			define('Paheko\\' . $name, $value);
 		}
 
-		define('Paheko\INSTALL_PROCESS', true);
-
 		// Make sure we have a host/root to specify if
 		// WWW_URL/WWW_URI are not specified
 		$_SERVER['HTTP_HOST'] = 'localhost';
 		$_SERVER['DOCUMENT_ROOT'] = $root . '/www';
 
+		$skip_startup_check = true;
 		require_once $root . '/include/init.php';
 
 		if (WWW_URL === 'http://localhost/' && $command !== 'ui') {

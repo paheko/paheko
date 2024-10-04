@@ -504,10 +504,12 @@ class Emails
 	/**
 	 * If emails have been marked as sending but sending failed, mark them for resend after a while
 	 */
-	static protected function resetFailed(): void
+	static public function resetFailed(bool $force = false): void
 	{
-		$sql = 'UPDATE emails_queue SET sending = 0, sending_started = NULL
-			WHERE sending = 1 AND sending_started < datetime(\'now\', \'-3 hours\');';
+		$condition = $force ? '' : 'AND sending_started < datetime(\'now\', \'-3 hours\')';
+
+		$sql = sprintf('UPDATE emails_queue SET sending = 0, sending_started = NULL
+			WHERE sending = 1 %s;', $condition);
 		DB::getInstance()->exec($sql);
 	}
 

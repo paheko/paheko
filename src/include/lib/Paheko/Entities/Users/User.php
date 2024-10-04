@@ -561,6 +561,7 @@ class User extends Entity
 		}
 
 		$source['password'] = trim($source['password']);
+		$session = Session::getInstance();
 
 		// Maximum bcrypt password length
 		$this->assert(strlen($source['password']) <= 72, sprintf('Le mot de passe doit faire moins de %d caractères.', 72));
