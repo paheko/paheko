@@ -411,7 +411,7 @@ class DynamicField extends Entity
 		return (bool) $db->firstColumn(sprintf('SELECT 1 FROM users_view WHERE %1$s IS NULL LIMIT 1;', $db->quoteIdentifier($this->name)));
 	}
 
-	public function getStringValue($value): ?string
+	public function getStringValue($value)
 	{
 		if (null === $value) {
 			return null;
@@ -441,6 +441,8 @@ class DynamicField extends Entity
 				return CommonModifiers::date_short($value, true);
 			case 'country':
 				return Utils::getCountryName($value);
+			case 'number':
+				return $value;
 			default:
 				return (string) $value;
 		}
