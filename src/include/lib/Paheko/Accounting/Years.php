@@ -81,8 +81,13 @@ class Years
 	static public function listClosedAssoc()
 	{
 		$list = self::listClosed();
-		$list = array_map(fn($y) => $y->getLabelWithYearsAndStatus(), $list);
-		return $list;
+		$out = [];
+
+		foreach ($list as $year) {
+			$out[$year->id()] = $year->getLabelWithYearsAndStatus();
+		}
+
+		return $out;
 	}
 
 	static public function listClosedAssocExcept(int $id)
