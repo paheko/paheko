@@ -19,7 +19,6 @@ $form->runIf('reopen_ok', function () use ($session) {
 	$year->reopen($session->getUser()->id);
 }, 'reopen_year', '!config/advanced/?msg=REOPEN');
 
-var_dump(Years::listClosedAssoc()); exit;
 $tpl->assign('closed_years', Years::listClosedAssoc());
 
 $tpl->display('config/advanced/reopen.tpl');
