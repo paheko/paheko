@@ -459,7 +459,8 @@ class Users
 		$columns = implode(', ', $columns);
 		$header['category'] = 'Catégorie';
 
-		$i = $db->iterate(sprintf('SELECT %s, (SELECT name FROM users_categories WHERE id = u.id_category) AS category FROM %s WHERE %s GROUP BY u.id;', $columns, $tables, $where));
+		$i = $db->iterate(sprintf('SELECT %s, (SELECT name FROM users_categories WHERE id = u.id_category) AS category
+			FROM %s WHERE %s GROUP BY u.id ORDER BY %s;', $columns, $tables, $where, $df->getNameFieldsSQL('u')));
 
 		CSV::export($format, $name, $i, $header, [self::class, 'exportRowCallback']);
 	}
