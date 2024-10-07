@@ -400,7 +400,7 @@ class Users
 		self::exportWhere($format, $name, $where);
 	}
 
-	static public function exportCategory(string $format, int $id_category): void
+	static public function exportCategory(string $format, int $id_category, bool $with_id = false): void
 	{
 		if ($id_category == -1) {
 			$name = 'Tous les membres';
@@ -421,21 +421,26 @@ class Users
 			$where = sprintf('u.id_category = %d', $id_category);
 		}
 
-		self::exportWhere($format, $name, $where);
+		self::exportWhere($format, $name, $where, $with_id);
 	}
 
-	static public function export(string $format): void
+	static public function export(string $format, bool $with_id = false): void
 	{
-		self::exportWhere($format, 'Tous les membres', '1');
+		self::exportWhere($format, 'Tous les membres', '1', $with_id);
 	}
 
-	static protected function exportWhere(string $format, string $name, string $where): void
+	static protected function exportWhere(string $format, string $name, string $where, bool $with_id = false): void
 	{
 		$df = DynamicFields::getInstance();
 		$db = DB::getInstance();
 
 		$tables = 'users_view u';
 		$header = $df->listAssocNames();
+
+		if ($with_id) {
+			$header = array_merge(['id' => 'id'], $header);
+		}
+
 		$columns = array_keys($header);
 		$columns = array_map([$db, 'quoteIdentifier'], $columns);
 
