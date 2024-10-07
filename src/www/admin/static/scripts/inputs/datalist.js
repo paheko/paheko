@@ -250,7 +250,7 @@
 				}).then(r => r.json()).then(r => {
 					list.innerHTML = '';
 
-					if (!r.length) {
+					if (!r || !r.length) {
 						return;
 					}
 
