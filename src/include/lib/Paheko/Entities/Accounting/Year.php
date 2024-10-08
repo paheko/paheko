@@ -105,7 +105,7 @@ class Year extends Entity
 
 	public function reopen(int $user_id): void
 	{
-		if (!$this->isOpen()) {
+		if ($this->isOpen()) {
 			throw new \LogicException('This year is already open');
 		}
 
