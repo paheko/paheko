@@ -608,7 +608,7 @@ class API
 			}
 
 			if (!$p1 && !$p2) {
-				return Years::listWithStats();
+				return iterator_to_array(Years::listWithStats());
 			}
 
 			$id_year = null;
