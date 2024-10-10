@@ -842,7 +842,7 @@ class File extends Entity
 				$content = html_entity_decode(strip_tags($content),  ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401);
 			}
 		}
-		elseif (Conversion::canConvertToText($ext)) {
+		elseif ($ext && Conversion::canConvertToText($ext)) {
 			$content = Conversion::fileToText($this, $content);
 		}
 		else {
