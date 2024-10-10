@@ -307,7 +307,7 @@ class Install
 
 		$config->set('files', array_map(fn () => null, $config::FILES));
 
-		$welcome_text = sprintf("Bienvenue dans l'administration de %s !\n\nUtilisez le menu à gauche pour accéder aux différentes sections.\n\nSi vous êtes perdu, n'hésitez pas à consulter l'aide :-)", $name);
+		$welcome_text = sprintf("Bienvenue dans l'administration de %s !\n\nUtilisez le menu à gauche pour accéder aux différentes sections.\n\nSi vous êtes perdu⋅e, n'hésitez pas à consulter l'aide :-)", $name);
 
 		$config->setFile('admin_homepage', $welcome_text);
 
