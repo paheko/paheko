@@ -1,5 +1,7 @@
 # La gestion d'association libre et simple
 
+<link rel="stylesheet" type="text/css" href="./index.css" />
+
 <div id="prez">
 	<figure>
 		<img src="./selfhost2.png" alt="Illustration d'une personne aidant une autre à installer Paheko sur un ordinateur" />
