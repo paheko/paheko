@@ -591,8 +591,8 @@ class Transaction extends Entity
 			$this->removeStatus(self::STATUS_WAITING);
 		}
 
-		$this->assertCanBeModified();
 		$this->selfCheck();
+		$this->assertCanBeModified();
 
 		$lines = $this->getLinesWithAccounts();
 
