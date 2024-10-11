@@ -34,14 +34,6 @@ class CLI
 		'server',
 	];
 
-	const SKIP_STARTUP_CHECK_COMMANDS = [
-		'help',
-		'init',
-		'upgrade',
-		'ui',
-		'server',
-	];
-
 	public function parseOptions(array &$args, array $options, int $limit = 0)
 	{
 		$all_aliases = [];
