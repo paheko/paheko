@@ -34,6 +34,14 @@ class CLI
 		'server',
 	];
 
+	const SKIP_STARTUP_CHECK_COMMANDS = [
+		'help',
+		'init',
+		'upgrade',
+		'ui',
+		'server',
+	];
+
 	public function parseOptions(array &$args, array $options, int $limit = 0)
 	{
 		$all_aliases = [];
@@ -331,6 +339,14 @@ class CLI
 	 *
 	 * All options are mandatory.
 	 *
+	 * Options can also be passed as a list from STDIN. Example:
+	 * cat <<<EOF
+	 * country=FR
+	 * orgname="My org"
+	 * password="SECRET!!!"
+	 * …
+	 * EOF | bin/paheko init -
+	 *
 	 * Options:
 	 *   --country CODE
 	 *     Organization country code (2 letters, eg. FR, BE…)
@@ -346,7 +362,7 @@ class CLI
 	 *
 	 *   --password PASSWORD
 	 *     User password (NOT RECOMMENDED, as the password can leak in your history)
-	 *     use --password-file instead if possible, or config file as STDIN'
+	 *     use --password-file instead if possible, or config file as STDIN
 	 *
 	 *   --password-file FILE
 	 *     Path to a file containing the user password
@@ -655,6 +671,8 @@ class CLI
 			}
 		}
 
+		$constants['SKIP_STARTUP_CHECK'] = true;
+
 		foreach ($constants as $name => $value) {
 			define('Paheko\\' . $name, $value);
 		}
@@ -664,12 +682,21 @@ class CLI
 		$_SERVER['HTTP_HOST'] = 'localhost';
 		$_SERVER['DOCUMENT_ROOT'] = $root . '/www';
 
-		$skip_startup_check = true;
 		require_once $root . '/include/init.php';
 
 		if (WWW_URL === 'http://localhost/' && $command !== 'ui') {
 			$this->alert("Warning: WWW_URL constant is not specified!\nhttp://localhost/ will be used instead.\n"
 				. "Any e-mail sent will not include the correct web server URL.");
+		}
+
+		if (!in_array($command, ['help', 'init', 'ui', 'server'])) {
+			if (!DB::isInstalled()) {
+				$this->fail('Database does not exist. Run "init" command first.');
+			}
+
+			if ($command !== 'upgrade' && DB::isUpgradeRequired()) {
+				$this->fail('The database requires an upgrade. Run "upgrade" command first.');
+			}
 		}
 
 		try {

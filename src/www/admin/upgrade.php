@@ -2,7 +2,7 @@
 
 namespace Paheko;
 
-const INSTALL_PROCESS = true;
+const SKIP_STARTUP_CHECK = true;
 
 require_once __DIR__ . '/../../include/test_required.php';
 require_once __DIR__ . '/../../include/init.php';

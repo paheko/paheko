@@ -442,14 +442,9 @@ if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) && !empty($_SERVE
 	@list($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) = explode(':', base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));
 }
 
-/*
- * Vérifications pour enclencher le processus d'installation ou de mise à jour
- */
-
-if (empty($skip_startup_check) && !defined('Paheko\INSTALL_PROCESS')) {
-	$exists = file_exists(DB_FILE);
-
-	if (!$exists || !filesize(DB_FILE)) {
+// Check if we need to redirect to install or upgrade pages
+if (!defined('Paheko\SKIP_STARTUP_CHECK')) {
+	if (!DB::isInstalled()) {
 		if (in_array('install.php', get_included_files())) {
 			die('Erreur de redirection en boucle : problème de configuration ?');
 		}
@@ -457,9 +452,7 @@ if (empty($skip_startup_check) && !defined('Paheko\INSTALL_PROCESS')) {
 		Utils::redirect(ADMIN_URL . 'install.php');
 	}
 
-	$v = DB::getInstance()->version();
-
-	if (version_compare($v, paheko_version(), '<')) {
+	if (DB::isUpgradeRequired()) {
 		if (!empty($_POST)) {
 			http_response_code(500);
 			readfile(ROOT . '/templates/static/upgrade_post.html');
@@ -469,8 +462,8 @@ if (empty($skip_startup_check) && !defined('Paheko\INSTALL_PROCESS')) {
 		Utils::redirect(ADMIN_URL . 'upgrade.php');
 	}
 
-	if (version_compare($v, paheko_version(), '>')) {
-		throw new \LogicException('Database version is higher than installed version.');
+	if (DB::isVersionTooNew()) {
+		throw new \LogicException('Database version is higher than installed version of code.');
 	}
 
 	if (Config::getInstance()->timezone) {

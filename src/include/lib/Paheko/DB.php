@@ -43,6 +43,23 @@ class DB extends SQLite3
 		self::$_instance = null;
 	}
 
+	static public function isInstalled(): bool
+	{
+		return file_exists(DB_FILE) && filesize(DB_FILE);
+	}
+
+	static public function isUpgradeRequired(): bool
+	{
+		$v = self::getInstance()->version();
+		return version_compare($v, paheko_version(), '<');
+	}
+
+	static public function isVersionTooNew(): bool
+	{
+		$v = self::getInstance()->version();
+		return version_compare($v, paheko_version(), '>');
+	}
+
 	private function __clone()
 	{
 		// Désactiver le clonage, car on ne veut qu'une seule instance

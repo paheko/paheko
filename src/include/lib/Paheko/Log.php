@@ -63,7 +63,8 @@ class Log
 
 	static public function add(int $type, ?array $details = null, int $id_user = null): void
 	{
-		if (defined('Paheko\INSTALL_PROCESS')) {
+		// Don't log during install/upgrade
+		if (defined('Paheko\SKIP_STARTUP_CHECK')) {
 			return;
 		}
 

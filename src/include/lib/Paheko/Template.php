@@ -119,7 +119,7 @@ class Template extends Smartyer
 
 		$session = null;
 
-		if (!defined('Paheko\INSTALL_PROCESS')) {
+		if (!defined('Paheko\SKIP_STARTUP_CHECK')) {
 			$session = Session::getInstance();
 			$config = Config::getInstance();
 			$this->assign('config', $config);
@@ -283,7 +283,7 @@ class Template extends Smartyer
 
 	protected function customColors()
 	{
-		$config = defined('Paheko\INSTALL_PROCESS') ? null : Config::getInstance();
+		$config = defined('Paheko\SKIP_STARTUP_CHECK') ? null : Config::getInstance();
 
 		$c1 = ADMIN_COLOR1;
 		$c2 = ADMIN_COLOR2;
