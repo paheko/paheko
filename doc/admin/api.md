@@ -383,6 +383,18 @@ Exporte la liste des membres d'une catégorie
 
 _(Depuis la version 1.4.0)_
 
+### GET user/search
+
+Recherche simple de membre.
+
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `q` | `string` | Texte à rechercher. |
+
+Si le texte contient une arobase (`@`), la recherche s'effectuera sur l'adresse e-mail.
+Si le texte contient uniquement des chiffres, la recherche se fera sur le numéro de membre.
+Sinon, la recherche se fera sur l'identité du membre (telle que configurée).
+
 ### POST user/new
 
 Créer un nouveau membre

@@ -510,7 +510,24 @@
 <td style="text-align: left;">Format de sortie : <code>json</code>, <code>csv</code>, <code>ods</code> ou <code>xlsx</code></td>
 </tr>
 </tbody>
-</table><p><em>(Depuis la version 1.4.0)</em></p></details><details class="api"><summary id="post-user-new" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/user/new</code> <span>Cr&eacute;er un nouveau membre</span></summary><table>
+</table><p><em>(Depuis la version 1.4.0)</em></p></details><details class="api"><summary id="get-user-search" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/user/search</code> <span>Recherche simple de membre.</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>q</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Texte &agrave; rechercher.</td>
+</tr>
+</tbody>
+</table><p>Si le texte contient une arobase (<code>@</code>), la recherche s'effectuera sur l'adresse e-mail.<br>
+Si le texte contient uniquement des chiffres, la recherche se fera sur le num&eacute;ro de membre.<br>
+Sinon, la recherche se fera sur l'identit&eacute; du membre (telle que configur&eacute;e).</p></details><details class="api"><summary id="post-user-new" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/user/new</code> <span>Cr&eacute;er un nouveau membre</span></summary><table>
 <thead>
 <tr>
 <th style="text-align: left;">Param&egrave;tre</th>

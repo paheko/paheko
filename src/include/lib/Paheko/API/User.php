@@ -5,6 +5,8 @@ namespace Paheko\API;
 use Paheko\Users\Categories;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Users;
+use Paheko\Search;
+use Paheko\Entities\Search as SE;
 use Paheko\APIException;
 
 trait User
@@ -30,6 +32,17 @@ trait User
 			}
 
 			return null;
+		}
+		elseif ($fn === 'search') {
+			$q = $this->params['q'] ?? '';
+
+			if (!$q) {
+				return [];
+			}
+
+			$list = Search::simpleList(SE::TARGET_USERS, $q);
+			$list->setPageSize(null);
+			return iterator_to_array($list->iterate());
 		}
 		elseif ($fn === 'new') {
 			$this->requireAccess(Session::ACCESS_WRITE);
