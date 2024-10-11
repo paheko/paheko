@@ -90,19 +90,6 @@ class Accounts
 		return [$a->id => $a->label];
 	}
 
-	/**
-	 * Return common accounting accounts from current chart
-	 * (will not return analytical and volunteering accounts)
-	 */
-	public function listCommonTypes(): array
-	{
-		$sql = sprintf('SELECT * FROM @TABLE WHERE id_chart = %d AND %s ORDER BY code COLLATE NOCASE;',
-			$this->chart_id,
-			DB::getInstance()->where('type', Account::COMMON_TYPES)
-		);
-		return $this->em->all($sql);
-	}
-
 	public function list(?array $types = null): DynamicList
 	{
 		$columns = [
@@ -156,7 +143,7 @@ class Accounts
 		return $list;
 	}
 
-	public function listAll(array $types = null): array
+	public function listAll(?array $types = null): array
 	{
 		$condition = '';
 
@@ -180,7 +167,7 @@ class Accounts
 	 * List common accounts, grouped by type
 	 * @return array
 	 */
-	public function listCommonGrouped(array $types = null, bool $hide_empty = false): array
+	public function listCommonGrouped(?array $types = null, bool $hide_empty = false): array
 	{
 		if (null === $types) {
 			// If we want all types, then we will get used or bookmarked accounts in common types

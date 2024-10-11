@@ -83,7 +83,7 @@ class Subscriptions
 			'amount' => [
 				'label' => 'Reste à régler',
 				'select' => 'CASE WHEN sub.paid = 1 AND COUNT(tl.debit) = 0 THEN NULL
-					ELSE MAX(0, expected_amount - IFNULL(SUM(tl.debit), 0)) END',
+					ELSE expected_amount - IFNULL(SUM(tl.debit), 0) END',
 			],
 			'expected_amount' => [],
 		];
@@ -116,7 +116,7 @@ class Subscriptions
 		return $list;
 	}
 
-	static protected function iterateImport(CSV_Custom $csv, array &$errors = null): \Generator
+	static protected function iterateImport(CSV_Custom $csv, ?array &$errors = null): \Generator
 	{
 		$number_field = DynamicFields::getNumberField();
 		$services = Services::listAssoc();

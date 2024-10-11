@@ -281,7 +281,7 @@ class Users
 		}
 
 		$tables = 'users_view u';
-		$tables .= ' INNER JOIN users_search s ON s.id = u.id';
+		$tables .= ' LEFT JOIN users_search s ON s.id = u.id';
 
 		if (self::hasParents()) {
 			$tables .= ' LEFT JOIN users b ON b.id = u.id_parent';
@@ -400,22 +400,24 @@ class Users
 		}
 	}
 
-	static public function changeCategorySelected(int $category_id, array $ids): void
+	static public function changeCategorySelected(int $id_category, array $ids, Session $session): void
 	{
 		$db = DB::getInstance();
 
-		if (!$db->test(Category::TABLE, 'id = ?', $category_id)) {
-			throw new \InvalidArgumentException('Invalid category ID: ' . $category_id);
+		$safe_categories = Categories::listAssocSafe($session);
+
+		if (!array_key_exists($id_category, $safe_categories)) {
+			throw new UserException('Vous n\'avez pas le droit de placer ce membre dans cette catégorie');
 		}
 
 		$ids = array_map('intval', $ids);
 
 		// Don't allow current user ID to change his/her category
-		$logged_user_id = Session::getUserId();
+		$logged_user_id = $session->user()->id();
 		$ids = array_filter($ids, fn($a) => $a != $logged_user_id);
 
 		$db->update(User::TABLE,
-			['id_category' => $category_id],
+			['id_category' => $id_category],
 			$db->where('id', $ids)
 		);
 	}
@@ -430,7 +432,7 @@ class Users
 		self::exportWhere($format, $name, $where);
 	}
 
-	static public function exportCategory(string $format, int $id_category): void
+	static public function exportCategory(string $format, int $id_category, bool $with_id = false): void
 	{
 		if ($id_category == -1) {
 			$name = 'Tous les membres';
@@ -451,21 +453,26 @@ class Users
 			$where = sprintf('u.id_category = %d', $id_category);
 		}
 
-		self::exportWhere($format, $name, $where);
+		self::exportWhere($format, $name, $where, $with_id);
 	}
 
-	static public function export(string $format): void
+	static public function export(string $format, bool $with_id = false): void
 	{
-		self::exportWhere($format, 'Tous les membres', '1');
+		self::exportWhere($format, 'Tous les membres', '1', $with_id);
 	}
 
-	static protected function exportWhere(string $format, string $name, string $where): void
+	static protected function exportWhere(string $format, string $name, string $where, bool $with_id = false): void
 	{
 		$df = DynamicFields::getInstance();
 		$db = DB::getInstance();
 
 		$tables = 'users_view u';
 		$header = $df->listAssocNames();
+
+		if ($with_id) {
+			$header = array_merge(['id' => 'id'], $header);
+		}
+
 		$columns = array_keys($header);
 		$columns = array_map([$db, 'quoteIdentifier'], $columns);
 
@@ -473,7 +480,6 @@ class Users
 			$columns = array_map(fn($a) => 'u.' . $a, $columns);
 			$tables .= ' LEFT JOIN users b ON b.id = u.id_parent';
 			$tables .= ' LEFT JOIN users c ON c.id_parent = u.id';
-			$config = Config::getInstance();
 
 			$columns[] = sprintf('CASE WHEN u.id_parent IS NOT NULL THEN %s ELSE NULL END AS parent_name', $df->getNameFieldsSQL('b'));
 			$columns[] = sprintf('CASE WHEN u.is_parent THEN GROUP_CONCAT(%s, \'%s\') ELSE NULL END AS children_names', $df->getNameFieldsSQL('c'), "\n");
@@ -485,7 +491,8 @@ class Users
 		$columns = implode(', ', $columns);
 		$header['category'] = 'Catégorie';
 
-		$i = $db->iterate(sprintf('SELECT %s, (SELECT name FROM users_categories WHERE id = u.id_category) AS category FROM %s WHERE %s GROUP BY u.id;', $columns, $tables, $where));
+		$i = $db->iterate(sprintf('SELECT %s, (SELECT name FROM users_categories WHERE id = u.id_category) AS category
+			FROM %s WHERE %s GROUP BY u.id ORDER BY %s;', $columns, $tables, $where, $df->getNameFieldsSQL('u')));
 
 		CSV::export($format, $name, $i, $header, [self::class, 'exportRowCallback']);
 	}

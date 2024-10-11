@@ -102,6 +102,8 @@ class Transaction extends Entity
 	protected $_accounts = [];
 	protected $_default_selector = [];
 
+	protected Year $_year;
+
 	static public function getTypeFromAccountType(int $account_type)
 	{
 		switch ($account_type) {
@@ -536,11 +538,11 @@ class Transaction extends Entity
 			throw new ValidationException('Il n\'est pas possible de modifier une écriture qui a été verrouillée');
 		}
 
-		$db = DB::getInstance();
-
-		if (isset($this->id_year) && $db->test(Year::TABLE, 'id = ? AND closed = 1', $this->id_year)) {
-			throw new ValidationException('Il n\'est pas possible de créer ou modifier une écriture dans un exercice clôturé');
+		if (!isset($this->id_year)) {
+			return;
 		}
+
+		$this->year()->assertCanBeModified();
 	}
 
 	public function verify(): bool
@@ -589,8 +591,8 @@ class Transaction extends Entity
 			$this->removeStatus(self::STATUS_WAITING);
 		}
 
-		$this->assertCanBeModified();
 		$this->selfCheck();
+		$this->assertCanBeModified();
 
 		$lines = $this->getLinesWithAccounts();
 
@@ -659,7 +661,7 @@ class Transaction extends Entity
 
 	public function hasStatus(int $property): bool
 	{
-		return $this->status & $property;
+		return boolval($this->status & $property);
 	}
 
 	public function isPaid(): bool
@@ -688,15 +690,11 @@ class Transaction extends Entity
 
 	public function delete(): bool
 	{
-		if ($this->validated) {
+		if ($this->hash) {
 			throw new ValidationException('Il n\'est pas possible de supprimer une écriture qui a été validée');
 		}
 
-		$db = DB::getInstance();
-
-		if ($db->test(Year::TABLE, 'id = ? AND closed = 1', $this->id_year)) {
-			throw new ValidationException('Il n\'est pas possible de supprimer une écriture qui fait partie d\'un exercice clôturé');
-		}
+		$this->year()->assertCanBeModified();
 
 		// FIXME when lettering is properly implemented: mark parent transaction non-deposited when deleting a deposit transaction
 
@@ -742,7 +740,6 @@ class Transaction extends Entity
 		$this->assert($count >= 2, 'Cette écriture comporte moins de deux lignes.');
 		$this->assert($count == 2 ||  $this->type == self::TYPE_ADVANCED, sprintf('Une écriture de type "%s" ne peut comporter que deux lignes au maximum.', self::TYPES_NAMES[$this->type]));
 
-		$accounts_ids = [];
 		$chart_id = $db->firstColumn('SELECT id_chart FROM acc_years WHERE id = ?;', $this->id_year);
 
 		foreach ($lines as $k => $line) {
@@ -812,7 +809,7 @@ class Transaction extends Entity
 		$this->importForm($source);
 	}
 
-	public function importForm(array $source = null)
+	public function importForm(?array $source = null)
 	{
 		$source ??= $_POST;
 
@@ -1080,7 +1077,8 @@ class Transaction extends Entity
 
 	public function year()
 	{
-		return EntityManager::findOneById(Year::class, $this->id_year);
+		$this->_year ??= EntityManager::findOneById(Year::class, $this->id_year);
+		return $this->_year;
 	}
 
 	public function listFiles()
@@ -1227,7 +1225,7 @@ class Transaction extends Entity
 		// Find out which lines are credit and debit
 		$current_accounts = [];
 
-		foreach ($this->getLinesWithAccounts() as $i => $l) {
+		foreach ($this->getLinesWithAccounts() as $l) {
 			if ($l->debit) {
 				$current_accounts['debit'] = $l->account_selector;
 			}
@@ -1288,23 +1286,6 @@ class Transaction extends Entity
 			'left' => $details[$this->type]->accounts[0],
 			'right' => $details[$this->type]->accounts[1],
 		];
-	}
-
-	public function payOffFrom(Transaction $transaction): ?\stdClass
-	{
-		$this->_related = $transaction;
-		$this->id_related = $this->_related->id();
-		$this->label = ($this->_related->type == Transaction::TYPE_DEBT ? 'Règlement de dette : ' : 'Règlement de créance : ') . $this->_related->label;
-		$this->type = self::TYPE_ADVANCED;
-
-		$out = (object) [
-			'id'         => $this->_related->id,
-			'amount'     => $this->_related->sum(),
-			'id_project' => $this->_related->getProjectId(),
-			'type'       => $this->_related->type,
-		];
-
-		return $out;
 	}
 
 	public function getTypeName(): string
@@ -1433,7 +1414,7 @@ class Transaction extends Entity
 		}
 
 		// Append new lines and changed lines
-		foreach ($new_lines as $i => $new_line) {
+		foreach ($new_lines as $new_line) {
 			if (!in_array($new_line, $old_lines)) {
 				$new_line['account'] = Accounts::getCodeAndLabel($new_line['id_account']);
 				$new_line['project'] = Projects::getName($new_line['id_project']);
@@ -1442,7 +1423,7 @@ class Transaction extends Entity
 		}
 
 		// Append removed lines
-		foreach ($old_lines as $i => $old_line) {
+		foreach ($old_lines as $old_line) {
 			if (!in_array($old_line, $new_lines)) {
 				$old_line['account'] = Accounts::getCodeAndLabel($old_line['id_account']);
 				$old_line['project'] = Projects::getName($old_line['id_project']);
@@ -1586,6 +1567,7 @@ class Transaction extends Entity
 					'account_selector' => $accounts->getSelectorFromCode($l['a'] ?? null),
 					'label'            => $l['l'] ?? null,
 					'reference'        => $l['r'] ?? null,
+					'id_project'       => $l['p'] ?? null,
 				];
 			}
 
@@ -1595,9 +1577,8 @@ class Transaction extends Entity
 
 		if (isset($_GET['u'])) {
 			$linked_users = [];
-			$i = 0;
 
-			foreach ((array) $_GET['u'] as $key => $value) {
+			foreach ((array) $_GET['u'] as $value) {
 				$id = (int) $value;
 				$name = Users::getName($id);
 

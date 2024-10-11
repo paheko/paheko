@@ -15,7 +15,7 @@ use Paheko\Files\Storage;
 use Paheko\Plugins;
 use Paheko\UserTemplate\Modules;
 
-use Paheko\{LOCAL_LOGIN, DISABLE_INSTALL_PING, FILE_STORAGE_BACKEND, FILE_STORAGE_CONFIG, ROOT, WWW_URL, SECRET_KEY, CACHE_ROOT, DATA_ROOT, DB_FILE};
+use const Paheko\{LOCAL_LOGIN, DISABLE_INSTALL_PING, FILE_STORAGE_BACKEND, FILE_STORAGE_CONFIG, ROOT, WWW_URL, SECRET_KEY, CACHE_ROOT, DATA_ROOT, DB_FILE};
 
 use KD2\HTTP;
 
@@ -37,7 +37,7 @@ class Install
 			$key = str_replace('Paheko\\', '', $key);
 
 			// Hide potentially secret values
-			if ($key === 'SECRET_KEY') {
+			if ($key === 'SECRET_KEY' || $key === 'LOCAL_SECRET_KEY') {
 				$value = '***HIDDEN***';
 			}
 			elseif (is_string($value)) {
@@ -298,16 +298,16 @@ class Install
 			'pays'        => 'FR',
 		]);
 
-		$user->importSecurityForm(false, [
+		$user->setNewPassword([
 			'password' => $user_password,
 			'password_confirmed' => $user_password,
-		]);
+		], false);
 
 		$user->save();
 
 		$config->set('files', array_map(fn () => null, $config::FILES));
 
-		$welcome_text = sprintf("Bienvenue dans l'administration de %s !\n\nUtilisez le menu à gauche pour accéder aux différentes sections.\n\nSi vous êtes perdu, n'hésitez pas à consulter l'aide :-)", $name);
+		$welcome_text = sprintf("Bienvenue dans l'administration de %s !\n\nUtilisez le menu à gauche pour accéder aux différentes sections.\n\nSi vous êtes perdu⋅e, n'hésitez pas à consulter l'aide :-)", $name);
 
 		$config->setFile('admin_homepage', $welcome_text);
 

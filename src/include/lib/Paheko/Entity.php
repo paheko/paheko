@@ -26,7 +26,7 @@ class Entity extends AbstractEntity
 	 * Valider les champs avant enregistrement
 	 * @throws ValidationException Si une erreur de validation survient
 	 */
-	public function importForm(array $source = null)
+	public function importForm(?array $source = null)
 	{
 		$source ??= $_POST;
 
@@ -50,10 +50,10 @@ class Entity extends AbstractEntity
 			if ($value instanceof $class) {
 				return $value;
 			}
-			elseif ($class === Date::class && $value instanceof \DateTimeInterface) {
+			elseif ($class === Date::class && $value instanceof \DateTime) {
 				return Date::createFromInterface($value);
 			}
-			elseif ($class === \DateTime::class && $value instanceof \DateTimeInterface) {
+			elseif ($class === \DateTime::class && $value instanceof \DateTime) {
 				return $value;
 			}
 			else {
@@ -182,7 +182,7 @@ class Entity extends AbstractEntity
 		return parent::filterUserValue($type, $value, $key);
 	}
 
-	protected function assert($test, string $message = null, int $code = 0): void
+	protected function assert($test, ?string $message = null, int $code = 0): void
 	{
 		if ($test) {
 			return;

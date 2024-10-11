@@ -23,7 +23,7 @@ class Template extends Smartyer
 		return self::$_instance ?: self::$_instance = new Template;
 	}
 
-	public function display($template = null)
+	public function display(?string $template = null): self
 	{
 		$session = Session::getInstance();
 		$this->assign('table_export', false);
@@ -32,7 +32,8 @@ class Template extends Smartyer
 		if ($session->isLogged(true)) {
 			if (isset($_GET['_pdf'])) {
 				$this->assign('pdf_export', true);
-				return $this->PDF($template);
+				$this->PDF($template);
+				return $this;
 			}
 			elseif (isset($_GET['_export']) && $_GET['_export'] === 'test') {
 				$this->assign('table_export', true);
@@ -51,11 +52,13 @@ class Template extends Smartyer
 					$title = html_entity_decode(trim($match[1]));
 				}
 
-				return CSV::exportHTML($_GET['_export'], $html, $title);
+				CSV::exportHTML($_GET['_export'], $html, $title);
+				return $this;
 			}
 		}
 
-		return parent::display($template);
+		parent::display($template);
+		return $this;
 	}
 
 	public function PDF(?string $template = null, ?string $title = null)
@@ -76,7 +79,7 @@ class Template extends Smartyer
 	{
 	}
 
-	public function __construct($template = null, Template &$parent = null)
+	public function __construct(?string $template = null, ?Template &$parent = null)
 	{
 		parent::__construct($template, $parent);
 
@@ -88,7 +91,7 @@ class Template extends Smartyer
 		// For included templates just return a new instance,
 		// the singleton is only to get the 'master' Template object
 		else {
-			return $this;
+			return;
 		}
 
 		Translate::extendSmartyer($this);
@@ -116,7 +119,7 @@ class Template extends Smartyer
 
 		$session = null;
 
-		if (!defined('Paheko\INSTALL_PROCESS')) {
+		if (!defined('Paheko\SKIP_STARTUP_CHECK')) {
 			$session = Session::getInstance();
 			$config = Config::getInstance();
 			$this->assign('config', $config);
@@ -133,7 +136,9 @@ class Template extends Smartyer
 		$this->assign('is_logged', $is_logged);
 		$this->assign('logged_user', $is_logged ? $session->getUser() : null);
 
-		$this->assign('dialog', isset($_GET['_dialog']) ? ($_GET['_dialog'] ?: true) : false);
+		$dialog = Utils::getDialogTarget();
+		$this->assign('dialog', $dialog);
+		$this->assign('dialog_qs', $dialog ? '&_dialog=' . $dialog : '');
 
 		$this->register_compile_function('continue', function (Smartyer $s, $pos, $block, $name, $raw_args) {
 			if ($block == 'continue')
@@ -278,7 +283,7 @@ class Template extends Smartyer
 
 	protected function customColors()
 	{
-		$config = defined('Paheko\INSTALL_PROCESS') ? null : Config::getInstance();
+		$config = defined('Paheko\SKIP_STARTUP_CHECK') ? null : Config::getInstance();
 
 		$c1 = ADMIN_COLOR1;
 		$c2 = ADMIN_COLOR2;

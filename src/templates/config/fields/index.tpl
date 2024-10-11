@@ -39,7 +39,7 @@
 					<input type="hidden" name="sort_order[]" value="{$field.name}" />
 				</td>
 				<th>{$field.label}</th>
-				<td>{if $field.list_table}Oui{/if}</td>
+				<td>{if $field.list_table || $field->isName()}Oui{/if}</td>
 				<td>{if $field.required}Obligatoire{/if}</td>
 				<td>
 					{if $field.user_access_level === $session::ACCESS_NONE}

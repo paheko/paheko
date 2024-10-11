@@ -26,9 +26,7 @@ if (!$year) {
 	throw new UserException("L'exercice demandé n'existe pas.");
 }
 
-if ($year->closed) {
-	throw new UserException('Impossible de modifier un exercice clôturé.');
-}
+$year->assertCanBeModified();
 
 $type = qg('type');
 $type_name = Export::NAMES[$type] ?? null;

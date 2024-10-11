@@ -7,6 +7,7 @@ use KD2\Form;
 use KD2\HTTP;
 use KD2\Translate;
 use KD2\SMTP;
+use KD2\DB\DB_Exception;
 
 use Paheko\Users\Session;
 
@@ -237,6 +238,14 @@ class Utils
 			return 0;
 		}
 
+		// Remove whitespace characters
+		$value = preg_replace('/\h/u', '', $value);
+
+		// Remove US thousands separator, if cents separator is a point
+		if (strpos($value, '.') === strlen($value) - 3) {
+			$value = str_replace(',', '', $value);
+		}
+
 		if (!preg_match('/^(-?)(\d+)(?:[,.](\d{1,3}))?/', $value, $match)) {
 			throw new UserException(sprintf('Le montant est invalide : %s. Exemple de format accepté : 142,02', $value));
 		}
@@ -340,7 +349,7 @@ class Utils
 			$base = $base ? $base . '/' : '';
 			return '/' . $base . substr($url, 2);
 		}
-		elseif (substr($url, 0, 1) == '/' && ($pos = strpos($url, WWW_URI)) === 0) {
+		elseif (substr($url, 0, 1) == '/' && strpos($url, WWW_URI) === 0) {
 			return WWW_URL . substr($url, strlen(WWW_URI));
 		}
 		elseif (substr($url, 0, 1) == '/') {
@@ -434,6 +443,21 @@ class Utils
 		}
 	}
 
+	static public function getDialogTarget(): ?string
+	{
+		$dialog = $_GET['_dialog'] ?? null;
+
+		if (null === $dialog) {
+			return null;
+		}
+
+		if ($dialog !== '' && !ctype_alnum($dialog)) {
+			return null;
+		}
+
+		return $dialog ?: '1';
+	}
+
 	static public function redirectSelf(?string $destination = null, bool $exit = true): void
 	{
 		self::redirect($destination, $exit);
@@ -454,6 +478,22 @@ class Utils
 		}
 	}
 
+	static public function reloadSelfFrame(?string $destination = null, bool $exit = true): void
+	{
+		if (!Utils::getDialogTarget()) {
+			self::redirect($destination, $exit);
+		}
+
+		$url = self::getLocalURL($destination ?? '!');
+		$js = 'location.href = window.parent.g.dialog.querySelector("iframe").getAttribute("src");';
+
+		echo self::getFrameRedirectHTML($js, $url);
+
+		if ($exit) {
+			exit;
+		}
+	}
+
 	static public function reloadParentFrameIfDialog(?string $destination = null): void
 	{
 		if (!isset($_GET['_dialog'])) {
@@ -467,23 +507,30 @@ class Utils
 	{
 		$url = self::getLocalURL($destination ?? '!');
 
-		echo '
+		if (null === $destination) {
+			$js = 'window.parent.location.reload();';
+		}
+		else {
+			$js = sprintf('window.parent.location.href = %s;', json_encode($url));
+		}
+
+		echo self::getFrameRedirectHTML($js, $url);
+
+		if ($exit) {
+			exit;
+		}
+	}
+
+	static public function getFrameRedirectHTML(string $js, string $url): string
+	{
+		return '
 			<!DOCTYPE html>
 			<html>
 			<head>
 				<script type="text/javascript">
 				if (window.top !== window) {
 					document.write(\'<style type="text/css">p { display: none; }</style>\');
-					';
-
-		if (null === $destination) {
-			echo 'window.parent.location.reload();';
-		}
-		else {
-			printf('window.parent.location.href = %s;', json_encode($url));
-		}
-
-		echo '
+					' . $js . '
 				}
 				</script>
 			</head>
@@ -492,10 +539,6 @@ class Utils
 			<p><a href="' . htmlspecialchars($url) . '">Cliquer ici pour continuer</a>
 			</body>
 			</html>';
-
-		if ($exit) {
-			exit;
-		}
 	}
 
 	public static function redirect(?string $destination = null, bool $exit = true)
@@ -599,24 +642,6 @@ class Utils
 		$str = preg_replace('#&[^;]+;#', '', $str); // supprime les autres caractères
 		$str = preg_replace('![^[:ascii:]]+!', '', $str);
 
-		return $str;
-	}
-
-	/**
-	 * Transforme les tags HTML basiques en tags SkrivML
-	 * @param  string $str Texte d'entrée
-	 * @return string      Texte transformé
-	 */
-	static public function HTMLToSkriv($str)
-	{
-		$str = preg_replace('/<h3>(\V*?)<\/h3>/', '=== $1 ===', $str);
-		$str = preg_replace('/<b>(\V*)<\/b>/', '**$1**', $str);
-		$str = preg_replace('/<strong>(\V*?)<\/strong>/', '**$1**', $str);
-		$str = preg_replace('/<i>(\V*?)<\/i>/', '\'\'$1\'\'', $str);
-		$str = preg_replace('/<em>(\V*?)<\/em>/', '\'\'$1\'\'', $str);
-		$str = preg_replace('/<li>(\V*?)<\/li>/', '* $1', $str);
-		$str = preg_replace('/<ul>|<\/ul>/', '', $str);
-		$str = preg_replace('/<a href="([^"]*?)">(\V*?)<\/a>/', '[[$2 | $1]]', $str);
 		return $str;
 	}
 
@@ -865,7 +890,6 @@ class Utils
 		}
 		elseif ($size > (1024 * 1024)) {
 			$size = $size / 1024 / 1024;
-			$decimals = $size == (int) $size ? 0 : 2;
 			return ceil($size) . ' Mo';
 		}
 		elseif ($size > 1024) {
@@ -1059,12 +1083,12 @@ class Utils
 	 * Assumes r, g, and b are contained in the set [0, 255] and
 	 * returns h, s, and v in the set [0, 1].
 	 *
-	 * @param   Number  r       The red color value
-	 * @param   Number  g       The green color value
-	 * @param   Number  b       The blue color value
-	 * @return  Array           The HSV representation
+	 * @param   int|string  r       The red color value
+	 * @param   int|null  g       The green color value
+	 * @param   int|null  b       The blue color value
+	 * @return  array           The HSV representation
 	 */
-	static public function rgbToHsv($r, $g = null, $b = null)
+	static public function rgbToHsv($r, $g = null, $b = null): array
 	{
 		if (is_string($r) && is_null($g) && is_null($b))
 		{
@@ -1101,15 +1125,16 @@ class Utils
 		return array($h * 360, $s, $l);
 	}
 
-	static public function HTTPCache(?string $hash, ?int $last_change, int $max_age = 3600): bool
+	static public function HTTPCache(?string $hash, ?int $last_change, int $max_age = 3600, bool $immutable = false): bool
 	{
 		$etag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH'], '"\' ') : null;
 		$last_modified = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : null;
 
 		$etag = $etag ? str_replace('-gzip', '', $etag) : null;
 
-		header(sprintf('Cache-Control: private, max-age=%d', $max_age), true);
+		header(sprintf('Cache-Control: private, max-age=%d%s', $max_age, $immutable ? ', immutable' : ''), true);
 		header_remove('Expires');
+		header_remove('Pragma');
 
 		if ($last_change) {
 			header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $last_change)), true);
@@ -1392,6 +1417,7 @@ class Utils
 
 		$code = 0;
 		$stdin_buffer = null;
+		$status = null;
 
 		// Nothing for STDIN, close the pipe
 		if (null === $stdin) {
@@ -1399,7 +1425,7 @@ class Utils
 			$pipes[0] = null;
 		}
 
-		while ($timeout_ms > 0) {
+		while (!$timeout || $timeout_ms > 0) {
 			$start = microtime(true);
 
 			// Wait until we can read or write, or until the timer expires
@@ -1797,7 +1823,7 @@ class Utils
 
 	static protected function _resolve_ini_types(array $ini)
 	{
-		foreach ($ini as $key => &$value) {
+		foreach ($ini as &$value) {
 			if (is_array($value)) {
 				$value = self::_resolve_ini_types($value);
 			}
@@ -1853,6 +1879,10 @@ class Utils
 
 	static public function showProfiler(): void
 	{
+		if (!defined('Paheko\PROFILER_START_TIME')) {
+			return;
+		}
+
 		$is_html = false;
 
 		foreach (headers_list() as $header) {

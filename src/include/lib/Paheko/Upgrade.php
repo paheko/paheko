@@ -115,6 +115,12 @@ class Upgrade
 				require ROOT . '/include/migrations/1.3/1.3.11.php';
 			}
 
+			if (version_compare($v, '1.3.12', '<')) {
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/migrations/1.3/1.3.12.sql');
+				$db->commitSchemaUpdate();
+			}
+
 			if (version_compare($v, '1.4.0', '<')) {
 				require ROOT . '/include/migrations/1.4/1.4.0.php';
 			}
@@ -233,15 +239,15 @@ class Upgrade
 			$i = new FossilInstaller(WEBSITE, ROOT, CACHE_ROOT, '!^paheko-(.*)\.tar\.gz$!');
 			$i->setPublicKeyFile(ROOT . '/pubkey.asc');
 
-			if (0 === ($pos = strpos(CACHE_ROOT, ROOT))) {
+			if (0 === strpos(CACHE_ROOT, ROOT)) {
 				$i->addIgnoredPath(substr(CACHE_ROOT, strlen(ROOT) + 1));
 			}
 
-			if (0 === ($pos = strpos(DATA_ROOT, ROOT))) {
+			if (0 === strpos(DATA_ROOT, ROOT)) {
 				$i->addIgnoredPath(substr(DATA_ROOT, strlen(ROOT) + 1));
 			}
 
-			if (0 === ($pos = strpos(SHARED_CACHE_ROOT, ROOT))) {
+			if (0 === strpos(SHARED_CACHE_ROOT, ROOT)) {
 				$i->addIgnoredPath(substr(SHARED_CACHE_ROOT, strlen(ROOT) + 1));
 			}
 

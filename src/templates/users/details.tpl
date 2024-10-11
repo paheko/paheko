@@ -72,16 +72,17 @@
 		<dd>
 			{linkbutton shape="menu" label="Journal d'audit" href="!users/log.php?id=%d"|args:$user.id}
 		</dd>
-		<dt>Mot de passe</dt>
+		<dt>Sécurité</dt>
 		<dd>
 			{if empty($user.password)}
-				Pas de mot de passe configuré
+				{tag color="darkgrey" label="Pas de mot de passe"}
 			{else}
-				{icon shape="check"} Oui
-				{if !empty($user.otp_secret)}
-					({icon shape="lock"} avec second facteur)
-				{else}
-					({icon shape="unlock"} sans second facteur)
+				{tag color="darksalmon" label="Mot de passe configuré"}
+				{if $user.otp_secret}
+					{tag color="darkgreen" label="2FA"}
+				{/if}
+				{if $user.pgp_key}
+					{tag color="olive" label="PGP"}
 				{/if}
 			{/if}
 		</dd>

@@ -254,6 +254,11 @@ class DynamicList implements \Countable
 		$this->desc = $desc;
 	}
 
+	public function getOrderIsDesc(): bool
+	{
+		return $this->desc;
+	}
+
 	public function groupBy(string $value)
 	{
 		$this->group = $value;
@@ -469,7 +474,7 @@ class DynamicList implements \Countable
 
 	public function iterateUntilCondition(string $column, $value)
 	{
-		foreach ($this->iterate() as $key => $row) {
+		foreach ($this->iterate() as $row) {
 			if (isset($row->{$column}) && $row->{$column} === $value) {
 				return $row;
 			}
@@ -544,7 +549,6 @@ class DynamicList implements \Countable
 		$desc = null;
 		$hash = null;
 		$preferences = null;
-		$u = null;
 
 		if ($u = Session::getLoggedUser()) {
 			$elements = [];

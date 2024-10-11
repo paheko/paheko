@@ -29,6 +29,8 @@
 	</tbody>
 </table>
 
+{form_errors}
+
 <form method="post" action="{$self_url}">
 
 	<fieldset>

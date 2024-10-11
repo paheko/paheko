@@ -126,8 +126,6 @@ class Export
 	 */
 	static public function export(Year $year, string $format, string $type): void
 	{
-		$header = null;
-
 		if (!array_key_exists($type, self::COLUMNS)) {
 			throw new \InvalidArgumentException('Unknown type: ' . $type);
 		}
@@ -137,9 +135,10 @@ class Export
 
 		if ($format === self::FEC && $format === 'fec') {
 			$options = [
-				'separator' => "\t",
-				'quote'     => '',
-				'extension' => 'txt',
+				'separator'   => "\t",
+				'quote'       => '',
+				'extension'   => 'txt',
+				'date_format' => 'Ymd',
 			];
 
 			$name = 'ASSOFEC' . $year->end_date->format('Ymd');
@@ -280,17 +279,15 @@ class Export
 					$row->status = implode(', ', $status);
 				}
 
-				$row->date = \DateTime::createFromFormat('Y-m-d', $row->date);
-				$row->date = $row->date->format($type == self::FEC ? 'Ymd' : 'd/m/Y');
 				$previous_id = $row->id;
 			}
 
 			if ($type == self::SIMPLE) {
-				$row->amount = Utils::money_format($row->amount, ',', '');
+				$row->amount = Utils::money_format($row->amount, ',', '', false);
 			}
 			else {
-				$row->credit = Utils::money_format($row->credit, ',', '');
-				$row->debit = Utils::money_format($row->debit, ',', '');
+				$row->credit = Utils::money_format($row->credit, ',', '', false);
+				$row->debit = Utils::money_format($row->debit, ',', '', false);
 			}
 
 			yield $row;

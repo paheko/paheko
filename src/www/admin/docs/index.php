@@ -10,8 +10,10 @@ use Paheko\Users\Users;
 use Paheko\Users\Session;
 use Paheko\Entities\Files\File;
 
+// We don't need to restrict access here, it is done below, using File::canRead()
 require_once __DIR__ . '/../_inc.php';
 
+$session = Session::getInstance();
 $highlight = null;
 
 if ($id = qg('id')) {
@@ -24,7 +26,19 @@ else {
 		$highlight = substr(qg('f'), $pos + 1);
 	}
 	else {
-		$path = qg('path') ?: File::CONTEXT_DOCUMENTS;
+		$path = qg('path');
+
+		if (!$path) {
+			if ($session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_READ)) {
+				$path = File::CONTEXT_DOCUMENTS;
+			}
+			elseif ($session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)) {
+				$path = File::CONTEXT_TRANSACTION;
+			}
+			else {
+				$path = File::CONTEXT_USER;
+			}
+		}
 	}
 
 	$dir = Files::get($path);

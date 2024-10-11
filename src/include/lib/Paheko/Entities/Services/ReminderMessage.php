@@ -4,6 +4,7 @@ namespace Paheko\Entities\Services;
 
 use Paheko\Plugins;
 use Paheko\Entity;
+use Paheko\UserException;
 use Paheko\Users\DynamicFields;
 use Paheko\UserTemplate\UserTemplate;
 use Paheko\UserTemplate\CommonModifiers;
@@ -13,7 +14,6 @@ use Paheko\Services\Services;
 use Paheko\Services\Fees;
 use Paheko\Users\Users;
 use Paheko\Email\Emails;
-use Paheko\UserException;
 
 use KD2\DB\Date;
 use stdClass;

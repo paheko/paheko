@@ -182,7 +182,7 @@ trait Accounting
 			$this->requireMethod('GET');
 
 			if (!$p1 && !$p2) {
-				return Years::list();
+				return iterator_to_array(Years::listWithStats());
 			}
 
 			$id_year = null;

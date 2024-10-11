@@ -13,9 +13,7 @@ if (!$year) {
 	throw new UserException('Exercice inconnu.');
 }
 
-if ($year->closed) {
-	throw new UserException('Impossible de supprimer un exercice clôturé.');
-}
+$year->assertCanBeModified();
 
 $form->runIf(f('delete') && f('confirm_delete'), function () use ($year) {
 	$year->delete();

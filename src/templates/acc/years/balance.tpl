@@ -36,7 +36,7 @@
 			<dd>
 				<select id="f_from_year" name="from_year">
 					{foreach from=$years item="year"}
-					<option value="{$year.id}"{if $year.id == $_GET.from} selected="selected"{/if} data-closed="{$year.closed}">{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short} ({if $year.closed}clôturé{else}en cours{/if})</option>
+						<option value="{$year.id}"{if $year.id == $_GET.from} selected="selected"{/if} data-open="{$year->isOpen()}">{$year->getLabelWithYearsAndStatus()}</option>
 					{/foreach}
 					<option value="">— Saisie manuelle —</option>
 				</select>
@@ -49,8 +49,8 @@
 		<script type="text/javascript" async="async">
 		let s = document.querySelector('#f_from_year');
 		const checkOpen = function() {
-			let v = s.options[s.selectedIndex].dataset.closed;
-			g.toggle('.warn-not-closed', v === '0' ? true : false);
+			let v = s.options[s.selectedIndex].dataset.open;
+			g.toggle('.warn-not-closed', v === '' ? true : false);
 		};
 		s.onchange = checkOpen;
 		checkOpen();
@@ -122,11 +122,10 @@
 	<p class="submit">
 		{if null === $previous_year}
 			{button type="submit" name="next" label="Continuer" shape="right" class="main"}
-			{if $_GET.from}
-				— ou —
-				{linkbutton shape="reset" href="!acc/years/" label="Passer cet étape"}
-				<i class="help">(Il sera toujours possible de reprendre la balance d'ouverture plus tard.)</i>
-			{/if}
+			— ou —
+			{linkbutton shape="reset" href="!acc/years/" label="Passer cet étape"}
+			<br />
+			<i class="help">(Il sera toujours possible de reprendre la balance d'ouverture plus tard.)</i>
 		{else}
 			{csrf_field key=$csrf_key}
 			{if $previous_year}

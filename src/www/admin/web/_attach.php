@@ -33,7 +33,7 @@ $form->runIf('delete', function () use ($page) {
 
 
 $form->runIf('upload', function () use ($page) {
-	$new_file = Files::uploadMultiple($page->dir_path(), 'file');
+	Files::uploadMultiple($page->dir_path(), 'file');
 }, $csrf_key);
 
 $files = null;

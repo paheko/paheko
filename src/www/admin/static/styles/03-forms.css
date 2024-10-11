@@ -416,6 +416,20 @@ input.otp {
     background-repeat:no-repeat;
 }
 
+.otp-recovery {
+    text-align: center;
+}
+
+.otp-recovery textarea {
+    text-align: center;
+    font-size: 20px;
+    font-family: monospace;
+    width: auto;
+    min-width: 0;
+    display: block;
+    margin: 1em auto;
+}
+
 /* Radio button lists (eg. new transaction) */
 form .radio-btn {
     display: table;

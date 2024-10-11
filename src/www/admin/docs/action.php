@@ -6,7 +6,8 @@ use Paheko\Files\Files;
 use Paheko\Files\Trash;
 use Paheko\Entities\Files\File;
 
-require_once __DIR__ . '/_inc.php';
+// Don't restrict access
+require_once __DIR__ . '/../_inc.php';
 
 $check = f('check');
 $action = f('action');
@@ -61,7 +62,7 @@ elseif ($action == 'zip') {
 	foreach ($check as $selected) {
 		$file = Files::get($selected);
 
-		if (!$file) {
+		if (!$file || !$file->canRead($session)) {
 			continue;
 		}
 

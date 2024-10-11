@@ -110,7 +110,9 @@ if (ALERT_MESSAGE && !$dialog) {
 			</li>
 		{/if}
 
-		{if $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_READ)}
+		{if $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_READ)
+			|| $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)
+			|| $session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)}
 			<li class="{if $current == 'docs'} current{elseif $current_parent == 'docs'} current_parent{/if}"><h3><a href="{$admin_uri}docs/" accesskey="D">{icon shape="folder"}<b>Documents</b></a></h3>
 			</li>
 		{/if}
@@ -144,7 +146,7 @@ if (ALERT_MESSAGE && !$dialog) {
 		</li>
 		{/if}
 
-	{elseif !defined('Paheko\INSTALL_PROCESS')}
+	{elseif !defined('Paheko\SKIP_STARTUP_CHECK')}
 		{if $config.org_web || !$config.site_disabled}
 		<li><h3><a href="{$site_url}">{icon shape="left"}<b>Retour au site</b></a></h3></li>
 		{/if}

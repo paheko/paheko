@@ -41,7 +41,7 @@ class Fee extends Entity
 		return $value;
 	}
 
-	public function importForm(array $source = null)
+	public function importForm(?array $source = null)
 	{
 		if (null === $source) {
 			$source = $_POST;

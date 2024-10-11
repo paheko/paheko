@@ -14,6 +14,7 @@ use Paheko\Entities\Web\Page;
 use Paheko\Web\Web;
 use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
+use Paheko\Entities\Accounting\Year;
 use Paheko\Users\DynamicFields;
 
 class Sections
@@ -84,7 +85,7 @@ class Sections
 		// Allow access to all tables
 		'*' => null,
 		// Restrict access to private fields in users
-		'users' => ['~password', '~pgp_key', '~otp_secret'],
+		'users' => ['~password', '~pgp_key', '~otp_secret', '~otp_recovery_codes'],
 		// Restrict access to some private tables
 		'!emails' => null,
 		'!emails_queue' => null,
@@ -159,7 +160,7 @@ class Sections
 		}
 
 		unset($params['on']);
-		$params = $tpl->_exportArguments($params);
+		//$params = $tpl->_exportArguments($params);
 
 		return sprintf('<?php if (!empty(%s)): ', $if)
 			. 'try { '
@@ -399,8 +400,10 @@ class Sections
 
 		$db = DB::getInstance();
 
+		$sql = sprintf('CREATE INDEX IF NOT EXISTS %s_auto_%s ON %1$s (%s);', $table, $hash, implode(', ', $search_params));
+
 		try {
-			$db->exec(sprintf('CREATE INDEX IF NOT EXISTS %s_auto_%s ON %1$s (%s);', $table, $hash, implode(', ', $search_params)));
+			$db->exec($sql);
 		}
 		catch (DB_Exception $e) {
 			throw new Brindille_Exception(sprintf("Impossible de créer l'index, erreur SQL :\n%s\n\nRequête exécutée :\n%s", $db->lastErrorMsg(), $sql));
@@ -431,8 +434,6 @@ class Sections
 
 		unset($params['module']);
 		$params['tables'] = $table;
-
-		$delete_table = null;
 
 		// Cannot use json_each with authorizer before SQLite 3.41.0
 		// @see https://sqlite.org/forum/forumpost/d28110be11
@@ -772,9 +773,6 @@ class Sections
 		$tpl = Template::getInstance();
 
 		if (!empty($params['export'])) {
-			$export_url = Utils::getSelfURI();
-			$export_url .= strstr($export_url, '?') ? '&' : '?';
-
 			$export_params = ['right' => true];
 			//$export_params['table'] = $params['export'] === 'table'; // Table export is currently not working in modules FIXME
 
@@ -813,8 +811,6 @@ class Sections
 
 	static public function balances(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		$db = DB::getInstance();
-
 		$params['where'] ??= '';
 		$params['tables'] = 'acc_accounts_balances';
 
@@ -868,7 +864,7 @@ class Sections
 		$params['where'] ??= '';
 
 		if (isset($params['closed'])) {
-			$params['where'] .= sprintf(' AND closed = %d', $params['closed']);
+			$params['where'] .= sprintf(' AND status = %d', $params['closed'] ? Year::CLOSED : Year::OPEN);
 			unset($params['closed']);
 		}
 
@@ -1013,9 +1009,6 @@ class Sections
 	{
 		$params['where'] ??= '';
 
-		$number_field = DynamicFields::getNumberField();
-		$db = DB::getInstance();
-
 		$params['select'] = 'sub.expiry_date, sub.date, s.label, sub.paid, sub.expected_amount,
 			CASE WHEN sub.expiry_date >= date() THEN 1 WHEN sub.expiry_date IS NOT NULL THEN -1 ELSE NULL END AS status';
 		$params['tables'] = 'services_subscriptions sub INNER JOIN services s ON s.id = sub.id_service';
@@ -1117,8 +1110,6 @@ class Sections
 			$params[':transaction'] = (int) $params['transaction'];
 			unset($params['transaction']);
 		}
-
-		$id_field = DynamicFields::getNameFieldsSQL('u');
 
 		$params['select'] = 'l.*, a.code AS account_code, a.label AS account_label';
 		$params['tables'] = 'acc_transactions_lines AS l
@@ -1235,14 +1226,16 @@ class Sections
 
 	static public function pages(array $params, UserTemplate $tpl, int $line): \Generator
 	{
+		static $listed = [];
+
 		$params['where'] ??= '';
 		$params['select'] = 'w.*';
 		$params['tables'] = 'web_pages w';
-		$params['where'] .= ' AND status != :status';
+		$params['where'] .= ' AND inherited_status != :status';
 		$params[':status'] = Page::STATUS_DRAFT;
 
 		if (empty($params['private']) && !Session::getInstance()->isLogged()) {
-			$params['where'] .= ' AND status != :status2';
+			$params['where'] .= ' AND inherited_status != :status2';
 			$params[':status2'] = Page::STATUS_PRIVATE;
 			unset($params['private']);
 		}
@@ -1335,6 +1328,12 @@ class Sections
 			$params['order'] .= ' COLLATE U_NOCASE';
 		}
 
+		if (!($params['duplicates'] ?? true)) {
+			$params['where'] .= ' AND w.' . DB::getInstance()->where('id', 'NOT IN', $listed);
+		}
+
+		unset($params['duplicates']);
+
 		foreach (self::sql($params, $tpl, $line, $allowed_tables) as $row) {
 			if (empty($params['count'])) {
 				$data = $row;
@@ -1343,6 +1342,7 @@ class Sections
 				$page = new Page;
 				$page->exists(true);
 				$page->load($data);
+				$listed[] = $page->id;
 
 				if (isset($row['snippet'])) {
 					$row['snippet'] = preg_replace('!</mark>(\s*)<mark>!', '$1', $row['snippet']);
@@ -1389,8 +1389,6 @@ class Sections
 
 	static public function attachments(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		$id = null;
-
 		if (!empty($params['id_page'])) {
 			$id = (int)$params['id_page'];
 		}
@@ -1639,6 +1637,10 @@ class Sections
 			$db->setReadOnly(false);
 		}
 		catch (DB_Exception $e) {
+			if (strpos($e->getMessage(), 'malformed MATCH') !== false) {
+				throw new UserException('Motif de recherche invalide', 0, $e);
+			}
+
 			throw new Brindille_Exception(sprintf("à la ligne %d erreur SQL :\n%s\n\nRequête exécutée :\n%s", $line, $e->getMessage(), $sql));
 		}
 

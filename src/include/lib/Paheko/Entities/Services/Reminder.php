@@ -46,7 +46,7 @@ class Reminder extends Entity
 		return EntityManager::findOneById(Service::class, $this->id_service);
 	}
 
-	public function importForm(array $source = null)
+	public function importForm(?array $source = null)
 	{
 		if (null === $source) {
 			$source = $_POST;
@@ -78,7 +78,6 @@ class Reminder extends Entity
 	public function sentList(): DynamicList
 	{
 		$id_field = DynamicFields::getNameFieldsSQL('u');
-		$db = DB::getInstance();
 
 		$columns = [
 			'id_user' => [
@@ -106,8 +105,6 @@ class Reminder extends Entity
 
 	public function pendingList(): DynamicList
 	{
-		$db = DB::getInstance();
-
 		$columns = [
 			'id_user' => [
 				'select' => 'id',

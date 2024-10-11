@@ -55,7 +55,7 @@ class Chart extends Entity
 		return new Accounts($this->id());
 	}
 
-	public function importForm(array $source = null)
+	public function importForm(?array $source = null)
 	{
 		if (null === $source) {
 			$source = $_POST;
@@ -80,7 +80,6 @@ class Chart extends Entity
 	{
 		$db = DB::getInstance();
 		$positions = array_flip(Account::POSITIONS_NAMES);
-		$types = array_flip(Account::TYPES_NAMES);
 
 		$db->begin();
 

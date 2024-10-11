@@ -46,6 +46,18 @@
 				{else}
 					{$transaction.label}
 				{/if}
+				{if $transaction.notes}
+					<br />
+					<small>
+						<strong>Notes&nbsp;:</strong>
+						{if $diff.transaction.notes}
+							<del>{$diff.transaction.notes[0]|escape|nl2br}</del><br />
+							<ins>{$diff.transaction.notes[1]|escape|nl2br}</ins>
+						{else}
+							{$transaction.notes|escape|nl2br}
+						{/if}
+					</small>
+				{/if}
 			</th>
 			{if !empty($with_linked_users)}
 			<td rowspan="{$lines_count}">

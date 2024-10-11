@@ -18,9 +18,7 @@ if (!$year) {
 	throw new UserException('Exercice inconnu.');
 }
 
-if ($year->closed) {
-	throw new UserException('Impossible de modifier un exercice clôturé.');
-}
+$year->assertCanBeModified();
 
 $csrf_key = 'acc_years_balance_' . $year->id();
 $accounts = $year->accounts();
@@ -57,7 +55,7 @@ $previous_year = null;
 $year_selected = f('from_year') !== null;
 $chart_change = false;
 $lines = [[]];
-$years = Years::list(true, $year->id);
+$years = Years::listExcept($year->id);
 
 // Empty balance
 if (!count($years) || f('from_year') === '') {
@@ -114,7 +112,7 @@ if ($previous_year) {
 		'is_debt' => $result < 0,
 	];
 
-	foreach ($lines as $k => &$line) {
+	foreach ($lines as &$line) {
 		$line->credit = !$line->is_debt ? abs($line->balance) : 0;
 		$line->debit = $line->is_debt ? abs($line->balance) : 0;
 

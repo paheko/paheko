@@ -117,7 +117,6 @@ class Extensions
 		}
 
 		$out = sprintf('<div class="%s"><div class="images">', $type);
-		$index = '';
 
 		if (trim((string)$content) === '') {
 			$images = self::$renderer->listImagesFilenames();
@@ -125,8 +124,6 @@ class Extensions
 		else {
 			$images = explode("\n", $content);
 		}
-
-		$i = 1;
 
 		foreach ($images as $line) {
 			$line = trim($line);
@@ -292,7 +289,6 @@ class Extensions
 		}
 
 		$svg = substr($name, -4) == '.svg';
-		$thumb_url = null;
 		$url = $file->url();
 
 		if ($svg || !$thumb_size) {

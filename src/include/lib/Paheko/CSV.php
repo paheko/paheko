@@ -176,9 +176,10 @@ class CSV
 
 	static public function toCSV(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, array $options = null): void
 	{
+		$options['date_format'] ??= 'd/m/Y';
 		$csv = new TableToCSV;
-		$csv->setShortDateFormat('d/m/Y');
-		$csv->setLongDateFormat('d/m/Y H:i:s');
+		$csv->setShortDateFormat($options['date_format']);
+		$csv->setLongDateFormat($options['date_format'] . ' H:i:s');
 		$csv->setSeparator($options['separator'] ?? ',');
 		$csv->setQuote($options['quote'] ?? '"');
 		self::toTable($csv, $name, $iterator, $header, $row_map_callback, $options);
@@ -275,15 +276,6 @@ class CSV
 
 		fputs($fp, ']');
 		fclose($fp);
-	}
-
-	static public function importUpload(array $file, array $expected_columns): \Generator
-	{
-		if (empty($file['size']) || empty($file['tmp_name'])) {
-			throw new UserException('Fichier invalide');
-		}
-
-		return self::import($file['tmp_name'], $expected_columns);
 	}
 
 	static public function import(string $file, ?array $columns = null, array $required_columns = []): \Generator

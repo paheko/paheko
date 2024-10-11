@@ -81,7 +81,7 @@
 		<h3>Projet&nbsp;: {if $project.code}{$project.code} — {/if}{$project.label}{if $project.archived} <em>(archivé)</em>{/if}</h3>
 	{/if}
 	{if isset($year)}
-		<p>Exercice&nbsp;: {$year.label} ({if $year.closed}clôturé{else}<strong>en cours</strong>{/if})
+		<p>Exercice&nbsp;: {$year.label} ({if $year->isClosed()}clôturé{else}<strong>en cours</strong>{/if})
 			— du {$year.start_date|date_short}
 			— au {$year.end_date|date_short}<br />
 			<small><em>Document généré le {$now|date_short}</em></small>

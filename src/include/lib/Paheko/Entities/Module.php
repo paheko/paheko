@@ -99,7 +99,7 @@ class Module extends Entity
 		}
 	}
 
-	public function importForm(array $source = null)
+	public function importForm(?array $source = null)
 	{
 		if (null === $source) {
 			$source = $_POST;
@@ -135,7 +135,7 @@ class Module extends Entity
 			$ini = Utils::parse_ini_string($ini, false);
 		}
 		catch (\RuntimeException $e) {
-			throw new ValidationException(sprintf('Le fichier module.ini est invalide pour "%s" : %s', $this->name, $e->getMessage(), 0, $e));
+			throw new ValidationException(sprintf('Le fichier module.ini est invalide pour "%s" : %s', $this->name, $e->getMessage()), 0, $e);
 		}
 
 		if (empty($ini)) {
@@ -165,7 +165,7 @@ class Module extends Entity
 	 */
 	public function updateFromINI(bool $use_local = true): bool
 	{
-		$ini = $this->getINIProperties();
+		$ini = $this->getINIProperties($use_local);
 
 		if (!$ini) {
 			return false;
@@ -274,12 +274,12 @@ class Module extends Entity
 		return File::CONTEXT_EXTENSIONS . '/m/' . $this->name;
 	}
 
-	public function path(string $file = null): string
+	public function path(?string $file = null): string
 	{
 		return self::ROOT . '/' . $this->name . ($file ? '/' . $file : '');
 	}
 
-	public function distPath(string $file = null): string
+	public function distPath(?string $file = null): string
 	{
 		return self::DIST_ROOT . '/' . $this->name . ($file ? '/' . $file : '');
 	}
@@ -294,7 +294,7 @@ class Module extends Entity
 		return Files::get($this->storage_root());
 	}
 
-	public function hasFile(string $file): bool
+	public function hasFile(?string $file): bool
 	{
 		return $this->hasLocalFile($file) || $this->hasDistFile($file);
 	}
@@ -572,7 +572,7 @@ class Module extends Entity
 		}
 	}
 
-	public function url(string $file = '', array $params = null)
+	public function url(string $file = '', ?array $params = null)
 	{
 		if (null !== $params) {
 			$params = '?' . http_build_query($params);
@@ -585,7 +585,7 @@ class Module extends Entity
 		return sprintf('%sm/%s/%s%s', BASE_URL, $this->name, $file, $params);
 	}
 
-	public function public_url(string $file = '', array $params = null)
+	public function public_url(string $file = '', ?array $params = null)
 	{
 		return str_replace(BASE_URL, WWW_URL, $this->url($file, $params));
 	}
@@ -695,7 +695,6 @@ class Module extends Entity
 		$uri = $params['uri'] ?? null;
 
 		// Fire signal before display of a web page
-		$plugin_params = ['path' => $path, 'uri' => $uri, 'module' => $this];
 		$module = $this;
 
 		$signal = Plugins::fire('web.request.before', true, compact('path', 'uri', 'module'));
@@ -705,8 +704,6 @@ class Module extends Entity
 		}
 
 		unset($signal);
-
-		$type = null;
 
 		$ut = $this->template($path);
 		$ut->assignArray($params);
@@ -806,7 +803,7 @@ class Module extends Entity
 		}
 	}
 
-	public function export(Session $session): void
+	public function export(): void
 	{
 		$download_name = 'module_' . $this->name;
 

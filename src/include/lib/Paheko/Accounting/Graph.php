@@ -68,10 +68,7 @@ class Graph
 		}
 
 		$plot = new Plot($width, 300);
-
-		if ($type === 'result') {
-			$plot->setLegendPosition($plot::POSITION_BOTTOM_RIGHT);
-		}
+		$plot->setLegendPosition($plot::POSITION_BOTTOM_RIGHT);
 
 		$lines = self::PLOT_TYPES[$type];
 		$data = [];

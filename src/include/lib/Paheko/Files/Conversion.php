@@ -5,8 +5,9 @@ namespace Paheko\Files;
 use Paheko\Entities\Files\File;
 use Paheko\Static_Cache;
 use Paheko\Utils;
+use Paheko\UserException;
 
-use const Paheko\{WOPI_DISCOVERY_URL, CONVERSION_TOOLS, CACHE_ROOT, SECRET_KEY, ADMIN_URL};
+use const Paheko\{WOPI_DISCOVERY_URL, CONVERSION_TOOLS, CACHE_ROOT, LOCAL_SECRET_KEY, ADMIN_URL};
 
 use KD2\ErrorManager;
 use KD2\HTTP;
@@ -87,31 +88,46 @@ class Conversion
 		return $tools ?? [];
 	}
 
-	static public function canConvert(string $extension): bool
+	static public function canConvert(string $extension, string $to): bool
 	{
 		$tools = self::getToolsList();
 
 		if (in_array('mupdf', $tools, true)
+			&& ($to === 'png' || $to === 'txt')
 			&& in_array($extension, self::MUPDF_FORMATS, true)) {
 			return true;
 		}
 
 		if (in_array('ffmpeg', $tools, true)
+			&& $to === 'png'
 			&& in_array($extension, self::FFMPEG_EXTENSIONS, true)) {
 			return true;
 		}
 
 		if ((in_array('collabora', $tools, true) || in_array('unoconv', $tools, true) || in_array('unoconvert', $tools, true))
+			&& ($to === 'csv' || $to === 'pdf' || $to === 'png' || $to === 'txt')
 			&& in_array($extension, self::LIBREOFFICE_FORMATS, true)) {
 			return true;
 		}
 
 		if (in_array('onlyoffice', $tools, true)
+			&& ($to === 'csv' || $to === 'pdf' || $to === 'png' || $to === 'txt')
 			&& in_array($extension, self::ONLYOFFICE_FORMATS, true)) {
 			return true;
 		}
 
+		if (in_array('ssconvert', $tools, true)
+			&& ($to === 'csv' || $to === 'pdf' || $to === 'png' || $to === 'txt')
+			&& in_array($extension, self::GNUMERIC_FORMATS, true)) {
+			return true;
+		}
+
 		return false;
+	}
+
+	static public function canConvertToCSV(): bool
+	{
+		return self::canConvert('ods', 'csv') && self::canConvert('xlsx', 'csv');
 	}
 
 	static public function canConvertToText(string $extension): bool
@@ -120,7 +136,7 @@ class Conversion
 			return true;
 		}
 
-		return self::canConvert($extension);
+		return self::canConvert($extension, 'txt');
 	}
 
 	static public function canExtractThumbnail(string $extension): bool
@@ -302,8 +318,9 @@ class Conversion
 		// Use ssconvert from Gnumeric to convert to CSV
 		if ($format === 'csv'
 			&& in_array('ssconvert', $tools, true)
-			&& in_array($extension, self::LIBREOFFICE_FORMATS, true)) {
-			$cmd = 'ssconvert';
+			&& in_array($extension, self::GNUMERIC_FORMATS, true)) {
+			// format=preserve will keep original date format, locale=fr_FR will make sure numbers are correctly formatted
+			$cmd = 'ssconvert --export-type="Gnumeric_stf:stf_assistant" -O "format=preserve locale=fr_FR.UTF-8" %s %s %s 2>&1';
 		}
 
 		if ($cmd === null
@@ -312,7 +329,7 @@ class Conversion
 		}
 
 		if (in_array('unoconv', $tools, true)) {
-			$cmd = 'unoconv %s -i FilterOptions=44,34,76 -o %2$s %1$s 2>&1';
+			$cmd = 'unoconv %s -i FilterOptions=44,34,76 -o %3$s %2$s 2>&1';
 		}
 		elseif (in_array('unoconvert', $tools, true)) {
 			// --filter-options PixelWidth=500 --filter-options PixelHeight=500
@@ -483,7 +500,7 @@ class Conversion
 			return;
 		}
 
-		$truth = hash_hmac('SHA1', $id . filemtime($path), SECRET_KEY);
+		$truth = hash_hmac('SHA1', $id . filemtime($path), LOCAL_SECRET_KEY);
 
 		if (!hash_equals($truth, $token)) {
 			http_response_code(403);
@@ -517,7 +534,7 @@ class Conversion
 
 		$id = 'convert00' . sha1(random_bytes(16));
 		$path = Static_Cache::storeCopy($id, $source, new \DateTime('+5 minutes'));
-		$t = hash_hmac('SHA1', $id . filemtime($path), SECRET_KEY);
+		$t = hash_hmac('SHA1', $id . filemtime($path), LOCAL_SECRET_KEY);
 		$file_url = ADMIN_URL . 'convert.php?i=' . $id . '&t=' . $t;
 
 		$params = [
@@ -610,7 +627,7 @@ class Conversion
 			return $source;
 		}
 
-		if (!$ext || !self::canConvert($ext)) {
+		if (!$ext || !self::canConvert($ext, 'csv')) {
 			return null;
 		}
 
@@ -633,7 +650,7 @@ class Conversion
 				Static_Cache::remove($id2);
 			}
 
-			return null;
+			throw new UserException(sprintf('La conversion du fichier depuis le format "%s" a échoué', $ext));
 		}
 
 		return $destination;

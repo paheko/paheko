@@ -33,7 +33,8 @@ class Page extends Entity
 	protected string $uri;
 	protected string $title;
 	protected int $type;
-	protected string $status;
+	protected int $status;
+	protected int $inherited_status;
 	protected string $format;
 	protected \DateTime $published;
 	protected \DateTime $modified;
@@ -48,9 +49,9 @@ class Page extends Entity
 		Render::FORMAT_SKRIV => 'SkrivML',
 	];
 
-	const STATUS_ONLINE = 'online';
-	const STATUS_PRIVATE = 'private';
-	const STATUS_DRAFT = 'draft';
+	const STATUS_DRAFT = 0;
+	const STATUS_PRIVATE = 1;
+	const STATUS_ONLINE = 2;
 
 	const STATUS_LIST = [
 		self::STATUS_DRAFT => 'Brouillon',
@@ -127,7 +128,7 @@ class Page extends Entity
 		$out['parent'] = Utils::dirname($out['path']);
 		$out['url'] = $this->url();
 		$out['html'] = trim($this->content) !== '' ? $this->render() : '';
-		$row['has_attachments'] = $this->hasAttachments();
+		$out['has_attachments'] = $this->hasAttachments();
 		return $out;
 	}
 
@@ -180,7 +181,7 @@ class Page extends Entity
 	/**
 	 * Get page status, trying to find it from parent pages if different from online
 	 */
-	public function getRealStatus(): ?string
+	public function getInheritedStatus(): ?string
 	{
 		foreach (array_reverse($this->getBreadcrumbs()) as $page) {
 			if ($page->status !== self::STATUS_ONLINE) {
@@ -189,6 +190,15 @@ class Page extends Entity
 		}
 
 		return $page->status ?? null;
+	}
+
+	public function getStatus(): string
+	{
+		if ($this->status !== self::STATUS_ONLINE) {
+			return $this->status;
+		}
+
+		return $this->inherited_status;
 	}
 
 	public function listVersions(): DynamicList
@@ -283,6 +293,10 @@ class Page extends Entity
 	{
 		$dir = null;
 
+		if (!$this->exists()) {
+			$this->set('inherited_status', $this->status);
+		}
+
 		if ($this->isModified('uri')) {
 			$dir = Files::get(File::CONTEXT_WEB . '/' . $this->getModifiedProperty('uri'));
 		}
@@ -293,11 +307,16 @@ class Page extends Entity
 		}
 
 		$update_search = $this->isModified('content') || $this->isModified('title');
+		$update_children = ($this->isModified('status') && $this->type === self::TYPE_CATEGORY) || $this->isModified('id_parent');
 
 		parent::save($selfcheck);
 
 		if ($dir) {
 			$dir->rename($this->dir_path());
+		}
+
+		if ($update_children) {
+			Web::updateChildrenInheritedStatus();
 		}
 
 		if ($update_search) {
@@ -342,7 +361,7 @@ class Page extends Entity
 		$this->assert($this->exists() || !$db->test(self::TABLE, 'uri = ?', $this->uri), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre : ' . $this->uri, self::DUPLICATE_URI_ERROR);
 	}
 
-	public function importForm(array $source = null)
+	public function importForm(?array $source = null)
 	{
 		if (null === $source) {
 			$source = $_POST;
@@ -364,8 +383,6 @@ class Page extends Entity
 			}
 		}
 
-		$uri = $source['uri'] ?? ($this->uri ?? null);
-
 		if (array_key_exists('id_parent', $source) && is_array($source['id_parent'])) {
 			$source['id_parent'] = Form::getSelectorValue($source['id_parent']) ?: null;
 		}
@@ -376,8 +393,6 @@ class Page extends Entity
 		elseif (empty($source['format'])) {
 			$this->set('format', Render::FORMAT_MARKDOWN);
 		}
-
-		$this->set('status', empty($source['status']) ? self::STATUS_ONLINE : $source['status']);
 
 		return parent::importForm($source);
 	}

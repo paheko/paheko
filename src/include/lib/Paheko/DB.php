@@ -43,6 +43,23 @@ class DB extends SQLite3
 		self::$_instance = null;
 	}
 
+	static public function isInstalled(): bool
+	{
+		return file_exists(DB_FILE) && filesize(DB_FILE);
+	}
+
+	static public function isUpgradeRequired(): bool
+	{
+		$v = self::getInstance()->version();
+		return version_compare($v, paheko_version(), '<');
+	}
+
+	static public function isVersionTooNew(): bool
+	{
+		$v = self::getInstance()->version();
+		return version_compare($v, paheko_version(), '>');
+	}
+
 	private function __clone()
 	{
 		// Désactiver le clonage, car on ne veut qu'une seule instance
@@ -403,7 +420,7 @@ class DB extends SQLite3
 			throw new \InvalidArgumentException('Invalid version number: ' . $version);
 		}
 
-		$version = ($match[1] * 100 * 100 * 100) + ($match[2] * 100 * 100) + ($match[3] * 100);
+		$version = ((int)$match[1] * 100 * 100 * 100) + ((int)$match[2] * 100 * 100) + ((int)$match[3] * 100);
 
 		if (isset($match[5])) {
 			if ($match[5] > 24) {
@@ -411,16 +428,16 @@ class DB extends SQLite3
 			}
 
 			if ($match[4] == 'rc') {
-				$version += $match[5] + 50;
+				$version += (int)$match[5] + 50;
 			}
 			elseif ($match[4] == 'beta') {
-				$version += $match[5] + 25;
+				$version += (int)$match[5] + 25;
 			}
 			elseif ($match[4] == 'alpha') {
-				$version += $match[5];
+				$version += (int)$match[5];
 			}
 			else {
-				$version += $match[5] + 75;
+				$version += (int)$match[5] + 75;
 			}
 		}
 

@@ -81,7 +81,7 @@ $form->runIf('save', function () use ($session, &$users, $copy_service, $copy_fe
 		$users = $copy_fee->getUsers($copy_only_paid);
 	}
 
-	$su = Subscription::createFromForm($users, $session->getUser()->id, $copy_service ? true : false);
+	$su = Subscription::createFromForm($users, $session::getUserId(), $copy_service ? true : false);
 
 	Utils::reloadParentFrameIfDialog();
 

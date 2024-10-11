@@ -11,7 +11,7 @@ use Paheko\Email\Templates as EmailsTemplates;
 
 use KD2\SMTP;
 
-use const Paheko\{WWW_URL, SECRET_KEY};
+use const Paheko\{WWW_URL, LOCAL_SECRET_KEY};
 
 class Address extends Entity
 {
@@ -72,7 +72,7 @@ class Address extends Entity
 
 	public function getVerificationCode(): string
 	{
-		$code = sha1($this->hash . SECRET_KEY);
+		$code = sha1($this->hash . LOCAL_SECRET_KEY);
 		return substr($code, 0, 10);
 	}
 
@@ -161,11 +161,11 @@ class Address extends Entity
 		elseif ($type == 'hard') {
 			$this->set('status', self::STATUS_HARD_BOUNCE);
 			$this->set('bounce_count', $this->bounce_count+1);
-			$this->log($return['message']);
+			$this->log($message);
 		}
 		elseif ($type == 'soft') {
 			$this->set('bounce_count', $this->bounce_count+1);
-			$this->log($return['message']);
+			$this->log($message);
 
 			if ($this->bounce_count > self::SOFT_BOUNCE_LIMIT) {
 				$this->set('status', self::STATUS_SOFT_BOUNCE_LIMIT_REACHED);

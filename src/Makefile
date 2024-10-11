@@ -1,4 +1,5 @@
 .PHONY: dev-server release deps publish check-dependencies test-syntax tests minify phpstan www htaccess modules installer plugins
+SHELL := /bin/bash
 KD2FW_BRANCH := trunk
 MODULES_BRANCH := trunk
 PLUGINS_BRANCH := trunk
@@ -79,7 +80,7 @@ verify:
 	@echo "Verifying KD2fw..."
 	@cd ${ROOT}/include/lib/KD2 && bash ${ROOT}/../tools/fossil_verify.sh ${KD2FW_BRANCH} ${KD2FW_URL} src/lib/KD2
 
-release: freeze test-syntax minify doc
+release: test-syntax doc minify freeze
 	$(eval VERSION=$(shell cat VERSION))
 	$(eval KD2FW_VERSION=$(shell cat ../build/kd2fw.version))
 	$(eval MODULES_VERSION=$(shell cat ../build/modules.version))
@@ -155,3 +156,14 @@ minify:
 	cat `ls www/admin/static/styles/[0-9]*.css` | sed 's/\.\.\///' > www/admin/static/mini.css
 	@# Minify is only gaining 500 gzipped bytes (4kB uncompressed) but making things hard to read/hack
 	@#yui-compressor --nomunge www/admin/static/mini.css -o www/admin/static/mini.css
+
+stable:
+	@echo -n "Checking branch... "; \
+	if [[ ! -n $$(fossil status | grep -E 'tags:\s*trunk') ]]; \
+	then echo ; \
+		echo "!!! FAIL: not in trunk !!!"; \
+		echo && exit 1; \
+	else echo "OK"; \
+	fi
+	fossil tag add stable trunk
+	fossil sync

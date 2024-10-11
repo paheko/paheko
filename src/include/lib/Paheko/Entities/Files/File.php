@@ -262,7 +262,10 @@ class File extends Entity
 		return $path;
 	}
 
-	public function getLocalOrCacheFilePath(): string
+	/**
+	 * Will return NULL if file contents are not found in storage
+	 */
+	public function getLocalOrCacheFilePath(): ?string
 	{
 		$path = $this->getLocalFilePath();
 
@@ -273,6 +276,12 @@ class File extends Entity
 
 			if (!Static_Cache::hasExpired($id)) {
 				return $path;
+			}
+
+			$pointer = $this->getReadOnlyPointer();
+
+			if (!$pointer) {
+				return null;
 			}
 
 			Static_Cache::storeFromPointer($id, $this->getReadOnlyPointer());
@@ -292,6 +301,11 @@ class File extends Entity
 		else {
 			return md5($this->path . $this->getRecursiveSize() . $this->getRecursiveLastModified());
 		}
+	}
+
+	public function getShortEtag(): string
+	{
+		return substr($this->etag(), 0, 10);
 	}
 
 	public function rehash($pointer = null): void
@@ -352,7 +366,7 @@ class File extends Entity
 		return false;
 	}
 
-	public function moveToTrash(bool $mark_as_trash = true): void
+	public function moveToTrash(): void
 	{
 		if ($this->context() === self::CONTEXT_TRASH) {
 			return;
@@ -520,7 +534,7 @@ class File extends Entity
 	 * @param  string $target New directory path
 	 * @return bool
 	 */
-	public function move(string $target, bool $check_session = true, bool $check_exists = false): bool
+	public function move(string $target, bool $check_session = true): bool
 	{
 		$v = $this->getVersionsDirectory();
 
@@ -668,7 +682,6 @@ class File extends Entity
 
 		Files::assertStorageIsUnlocked();
 
-		$delete_after = false;
 		$path = $source['path'] ?? null;
 		$content = $source['content'] ?? null;
 		$pointer = $source['pointer'] ?? null;
@@ -737,7 +750,7 @@ class File extends Entity
 					unset($i);
 				}
 			}
-			elseif ($type = Blob::getType($blob)) {
+			elseif (Blob::getType($blob)) {
 				// WebP is fine, but we cannot get its size
 			}
 			else {
@@ -799,7 +812,10 @@ class File extends Entity
 			return $this;
 		}
 		catch (\Exception $e) {
-			$db->rollback();
+			if ($db->inTransaction()) {
+				$db->rollback();
+			}
+
 			throw $e;
 		}
 		finally {
@@ -826,7 +842,7 @@ class File extends Entity
 				$content = html_entity_decode(strip_tags($content),  ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401);
 			}
 		}
-		elseif (Conversion::canConvertToText($ext)) {
+		elseif ($ext && Conversion::canConvertToText($ext)) {
 			$content = Conversion::fileToText($this, $content);
 		}
 		else {
@@ -1003,7 +1019,7 @@ class File extends Entity
 			return $html;
 		}
 		else {
-			return sprintf('<iframe src="%s"></iframe>', $url);
+			return sprintf('<iframe src="%s?preview"></iframe>', $url);
 		}
 	}
 
@@ -1019,7 +1035,7 @@ class File extends Entity
 	public function preview(?Session $session = null): void
 	{
 		if (!$this->canPreview()) {
-			throw new \LogicException('This file cannot be previewed');
+			throw new UserException('This file cannot be previewed');
 		}
 
 		if ($this->renderFormat()) {
@@ -1037,7 +1053,7 @@ class File extends Entity
 		}
 	}
 
-	public function editor(string $content = null, ?Session $session = null): bool
+	public function editor(?string $content = null, ?Session $session = null): bool
 	{
 		$editor = $this->editorType() ?? 'code';
 		$csrf_key = 'edit_file_' . $this->pathHash();
@@ -1045,7 +1061,7 @@ class File extends Entity
 		$done = false;
 		$file = $this;
 
-		$form->runIf('content', function () use ($file, $done) {
+		$form->runIf('content', function () use ($file, &$done) {
 			$file->setContent($_POST['content'] ?? null);
 			$done = true;
 		}, $csrf_key);
@@ -1090,16 +1106,9 @@ class File extends Entity
 
 	protected function _serve(?string $path = null, $download = null): void
 	{
-		if ($this->isPublic()) {
-			Utils::HTTPCache($this->etag(), $this->modified->getTimestamp());
-		}
-		else {
-			// Disable browser cache
-			header('Pragma: private');
-			header('Expires: -1');
-			header('Cache-Control: private, must-revalidate, post-check=0, pre-check=0');
-		}
+		$is_versioned_url = !empty($_GET['h']) && $_GET['h'] === $this->getShortEtag();
 
+		Utils::HTTPCache($this->etag(), $this->modified->getTimestamp(), 24*3600, $is_versioned_url);
 		header('X-Powered-By: Paheko/PHP');
 
 		// Security: disable running scripts from SVG images and HTML documents
@@ -1491,8 +1500,8 @@ class File extends Entity
 
 	public function getRecursiveLastModified(): int
 	{
-		if ($this->type == self::TYPE_FILE) {
-			return $this->modified;
+		if ($this->type === self::TYPE_FILE) {
+			return $this->modified->getTimestamp();
 		}
 
 		$db = DB::getInstance();
@@ -1511,5 +1520,26 @@ class File extends Entity
 	public function webdav_root_url(): string
 	{
 		return BASE_URL . 'dav/' . $this->context() . '/';
+	}
+
+	public function mkdir(string $name, ?Session $session): File
+	{
+		if (!$this->isDir()) {
+			throw new \LogicException('Cannot create a directory inside a file');
+		}
+
+		$name = trim($name);
+
+		if (substr_count($name, '/') !== 0) {
+			throw new UserException('Le nom du répertoire ne peut pas contenir de "/"');
+		}
+
+		$path = $this->path . '/' . $name;
+
+		if (null !== $session && !$this->canCreateDir($path, $session)) {
+			throw new \LogicException('Cannot create a directory here');
+		}
+
+		return Files::mkdir($path);
 	}
 }

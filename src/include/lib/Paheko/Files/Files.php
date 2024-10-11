@@ -259,8 +259,6 @@ class Files
 			ORDER BY points DESC
 			LIMIT 0,50;', $where);
 
-		$out = [];
-
 		try {
 			return DB::getInstance()->get($query, ...$params);
 		}
@@ -401,8 +399,6 @@ class Files
 		$zip = new ZipWriter($target);
 		$zip->setCompression(0);
 
-		$i = 0;
-
 		foreach ($files as $file) {
 			$file = Files::get($file);
 
@@ -413,6 +409,11 @@ class Files
 			foreach ($file->iterateRecursive() as $f) {
 				if ($f->isDir()) {
 					// Don't add directories to zip file
+					continue;
+				}
+
+				// Don't allow to download files that you can't read
+				if (null !== $session && !$f->canRead($session)) {
 					continue;
 				}
 
@@ -954,7 +955,7 @@ class Files
 		$file = new File;
 		$type = $file::TYPE_DIRECTORY;
 		$file->import(compact('path', 'name', 'parent') + [
-			'type'     => file::TYPE_DIRECTORY,
+			'type'     => $type,
 			'image'    => false,
 		]);
 
@@ -996,7 +997,8 @@ class Files
 			return [];
 		}
 
-		$list = [];
+		$access = [];
+		$access = [];
 
 		if ($session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
 			$access[] = File::CONTEXT_CONFIG;

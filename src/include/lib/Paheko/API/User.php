@@ -23,7 +23,7 @@ trait User
 			$format = strtok('');
 
 			try {
-				Users::exportCategory($format ?: 'json', $id);
+				Users::exportCategory($format ?: 'json', $id, true);
 			}
 			catch (\InvalidArgumentException $e) {
 				throw new APIException($e->getMessage(), 400, $e);

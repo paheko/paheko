@@ -117,7 +117,7 @@ class Plugin extends Entity
 			$ini = Utils::parse_ini_file($this->path(self::META_FILE), false);
 		}
 		catch (\RuntimeException $e) {
-			throw new ValidationException(sprintf('Le fichier plugin.ini est invalide pour "%s" : %s', $this->name, $e->getMessage(), 0, $e));
+			throw new ValidationException(sprintf('Le fichier plugin.ini est invalide pour "%s" : %s', $this->name, $e->getMessage()), 0, $e);
 		}
 
 		if (empty($ini)) {

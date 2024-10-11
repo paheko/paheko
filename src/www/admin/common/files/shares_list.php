@@ -19,8 +19,6 @@ if (!$file->canShare()) {
 }
 
 $csrf_key = 'file_share_' . $file->hash_id;
-$share = null;
-$list = null;
 
 $form->runIf('delete', function () {
 	$share = Shares::getByHashID($_POST['delete']);

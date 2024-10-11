@@ -9,7 +9,7 @@ use Paheko\Utils;
 
 use KD2\WebDAV\WOPI;
 
-use const Paheko\{WOPI_DISCOVERY_URL, SHARED_CACHE_ROOT, BASE_URL, SECRET_KEY};
+use const Paheko\{WOPI_DISCOVERY_URL, SHARED_CACHE_ROOT, BASE_URL, LOCAL_SECRET_KEY};
 
 trait FileWOPITrait
 {
@@ -57,7 +57,7 @@ trait FileWOPITrait
 		return $url;
 	}
 
-	public function getWOPIEditorHTML(Session $session = null, bool $readonly = false, bool $frame_only = false): ?string
+	public function getWOPIEditorHTML(?Session $session = null, bool $readonly = false, bool $frame_only = false): ?string
 	{
 		$url = $this->getWopiURL('edit');
 
@@ -94,7 +94,7 @@ trait FileWOPITrait
 		$hash_id = $this->hash_id;
 		$user_id = (int) $user_id;
 		$hash_data = compact('hash_id', 'ttl', 'random', 'readonly', 'user_id');
-		$hash = WebDAV::hmac($hash_data, SECRET_KEY);
+		$hash = WebDAV::hmac($hash_data, LOCAL_SECRET_KEY);
 		$data = sprintf('%s_%s_%s_%d_%d', $hash, $ttl, $random, $readonly, $user_id);
 
 		return WOPI::base64_encode_url_safe($data);

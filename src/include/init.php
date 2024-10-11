@@ -277,7 +277,6 @@ const HELP_URL = 'https://paheko.cloud/aide?from=%s';
 const HELP_PATTERN_URL = 'https://paheko.cloud/%s';
 const WEBSITE = 'https://fossil.kd2.org/paheko/';
 const PING_URL = 'https://paheko.cloud/ping/';
-const PLUGINS_URL = 'https://paheko.cloud/plugins/list.json';
 
 const USER_TEMPLATES_CACHE_ROOT = CACHE_ROOT . '/utemplates';
 const STATIC_CACHE_ROOT = CACHE_ROOT . '/static';
@@ -384,12 +383,12 @@ function user_error(UserException $e)
 		\Paheko\Form::reportUserException($e);
 	}
 
-	if (PHP_SAPI == 'cli')
-	{
+	if (PHP_SAPI == 'cli') {
 		echo $e->getMessage();
+		exit;
 	}
-	else
-	{
+
+	try {
 		// Flush any previous output, such as module HTML code etc.
 		@ob_end_clean();
 
@@ -405,6 +404,9 @@ function user_error(UserException $e)
 		$tpl->assign('html_error', $e->getHTMLMessage());
 		$tpl->assign('admin_url', ADMIN_URL);
 		$tpl->display();
+	}
+	catch (\Throwable $e) {
+		ErrorManager::reportException($e, true);
 	}
 
 	exit;
@@ -422,8 +424,13 @@ if (!defined('Paheko\SECRET_KEY')) {
 	define('Paheko\SECRET_KEY', $key);
 }
 
+// Define a local secret key derived of the main secret key and the data root
+// This is to make sure that in a multi-instance setup you don't reuse the same secret
+// between instances.
+define('Paheko\LOCAL_SECRET_KEY', sha1(SECRET_KEY . DATA_ROOT));
+
 // Intégration du secret pour les tokens CSRF
-Form::tokenSetSecret(SECRET_KEY);
+Form::tokenSetSecret(LOCAL_SECRET_KEY);
 
 EntityManager::setGlobalDB(DB::getInstance());
 
@@ -435,14 +442,9 @@ if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) && !empty($_SERVE
 	@list($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) = explode(':', base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));
 }
 
-/*
- * Vérifications pour enclencher le processus d'installation ou de mise à jour
- */
-
-if (!defined('Paheko\INSTALL_PROCESS')) {
-	$exists = file_exists(DB_FILE);
-
-	if (!$exists || !filesize(DB_FILE)) {
+// Check if we need to redirect to install or upgrade pages
+if (!defined('Paheko\SKIP_STARTUP_CHECK')) {
+	if (!DB::isInstalled()) {
 		if (in_array('install.php', get_included_files())) {
 			die('Erreur de redirection en boucle : problème de configuration ?');
 		}
@@ -450,9 +452,7 @@ if (!defined('Paheko\INSTALL_PROCESS')) {
 		Utils::redirect(ADMIN_URL . 'install.php');
 	}
 
-	$v = DB::getInstance()->version();
-
-	if (version_compare($v, paheko_version(), '<')) {
+	if (DB::isUpgradeRequired()) {
 		if (!empty($_POST)) {
 			http_response_code(500);
 			readfile(ROOT . '/templates/static/upgrade_post.html');
@@ -460,6 +460,10 @@ if (!defined('Paheko\INSTALL_PROCESS')) {
 		}
 
 		Utils::redirect(ADMIN_URL . 'upgrade.php');
+	}
+
+	if (DB::isVersionTooNew()) {
+		throw new \LogicException('Database version is higher than installed version of code.');
 	}
 
 	if (Config::getInstance()->timezone) {

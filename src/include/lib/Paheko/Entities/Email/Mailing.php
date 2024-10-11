@@ -177,7 +177,7 @@ class Mailing extends Entity
 		}
 
 		// Just in case the password has another column name
-		foreach ($data as $key => $value) {
+		foreach ((array) $data as $key => $value) {
 			if (is_string($value) && substr($value, 0, 2) === '$2') {
 				unset($data->$key);
 			}
@@ -317,7 +317,7 @@ class Mailing extends Entity
 
 	public function isTemplate()
 	{
-		return false !== strpos($this->body, '{{') && false !== strpos($this->body, '}}');
+		return isset($this->body) && false !== strpos($this->body, '{{') && false !== strpos($this->body, '}}');
 	}
 
 	public function getPreview(int $id = null): string

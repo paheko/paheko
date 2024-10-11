@@ -25,7 +25,7 @@
 {else}
 
 	<p class="help">
-		Ce formulaire permet d'importer les inscriptions des membres aux activités.
+		Ce formulaire permet d'importer les inscriptions des membres aux activités. <strong>Aucune écriture comptable ne sera créée.</strong>
 	</p>
 
 	<fieldset>

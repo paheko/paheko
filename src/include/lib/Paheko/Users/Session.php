@@ -21,11 +21,12 @@ use Paheko\Entities\Users\Category;
 use Paheko\Entities\Users\User;
 
 use const Paheko\{
-	SECRET_KEY,
+	LOCAL_SECRET_KEY,
 	WWW_URL,
 	ADMIN_URL,
 	LOCAL_LOGIN,
-	DATA_ROOT
+	DATA_ROOT,
+	NTP_SERVER
 };
 
 use KD2\Security;
@@ -87,7 +88,11 @@ class Session extends \KD2\UserSession
 		throw new \LogicException('Cannot clone');
 	}
 
-	public function __construct()
+	/**
+	 * final is for phpstan warning
+	 * @see https://phpstan.org/blog/solving-phpstan-error-unsafe-usage-of-new-static
+	 */
+	final public function __construct()
 	{
 		if (static::$_instance !== null) {
 			throw new \LogicException('Wrong call, use getInstance');
@@ -101,7 +106,7 @@ class Session extends \KD2\UserSession
 			'cookie_secure' => HTTP::getScheme() == 'https' ? true : false,
 		]);
 
-		$this->sid_in_url_secret = '&spko=' . sha1(SECRET_KEY);
+		$this->sid_in_url_secret = '&spko=' . sha1(LOCAL_SECRET_KEY);
 	}
 
 	public function isPasswordCompromised(string $password): bool
@@ -123,12 +128,17 @@ class Session extends \KD2\UserSession
 		return parent::isPasswordCompromised($password);
 	}
 
+	/**
+	 * Returns user details for login
+	 * @param  string $login
+	 * @return object|null
+	 */
 	protected function getUserForLogin($login)
 	{
 		$id_field = DynamicFields::getLoginField();
 
 		// Ne renvoie un membre que si celui-ci a le droit de se connecter
-		$query = 'SELECT u.id, u.%1$s AS login, u.password, u.otp_secret
+		$query = 'SELECT u.id, u.%1$s AS login, u.password, u.otp_secret, u.otp_recovery_codes
 			FROM users AS u
 			INNER JOIN users_categories AS c ON c.id = u.id_category
 			WHERE u.%1$s = ? COLLATE NOCASE AND c.perm_connect >= %2$d
@@ -136,7 +146,13 @@ class Session extends \KD2\UserSession
 
 		$query = sprintf($query, $id_field, self::ACCESS_READ);
 
-		return $this->db->first($query, $login);
+		$user = $this->db->first($query, $login);
+
+		if ($user && isset($user->otp_recovery_codes)) {
+			$user->otp_recovery_codes = json_decode($user->otp_recovery_codes);
+		}
+
+		return $user;
 	}
 
 	protected function getUserDataForSession($id)
@@ -319,14 +335,17 @@ class Session extends \KD2\UserSession
 		return $success;
 	}
 
-	public function loginOTP(string $code): bool
+	/**
+	 * @overrides
+	 */
+	public function loginOTP(string $code, ?string $ntp_server = null): bool
 	{
 		$this->start();
 		$user_id = $_SESSION['userSessionRequireOTP']->user->id ?? null;
 		$user_agent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 150) ?: null;
 		$details = compact('user_agent') + ['otp' => true];
 
-		$success = parent::loginOTP($code);
+		$success = parent::loginOTP($code, NTP_SERVER ?: null);
 
 		if ($success) {
 			Log::add(Log::LOGIN_SUCCESS, $details, $user_id);
@@ -335,7 +354,7 @@ class Session extends \KD2\UserSession
 			$this->db->preparedQuery('UPDATE users SET date_login = ? WHERE id = ?;', [new \DateTime, $this->getUser()->id]);
 		}
 		else {
-			Log::add(Log::LOGIN_FAIL, $details, $user_id);
+			Log::add(Log::LOGIN_FAIL_OTP, $details, $user_id);
 		}
 
 		Plugins::fire('user.login.otp', false, compact('success', 'user_id'));
@@ -343,6 +362,23 @@ class Session extends \KD2\UserSession
 		return $success;
 	}
 
+	/**
+	 * @overrides
+	 */
+	public function markRecoveryCodeAsUsed(string $code, \stdClass $user): void
+	{
+		$codes = $user->otp_recovery_codes;
+		$key = array_search($code, $codes, true);
+		unset($codes[$key]);
+
+		DB::getInstance()->preparedQuery('UPDATE users SET otp_recovery_codes = ? WHERE id = ?;', json_encode($codes), $user->id);
+
+		Log::add(Log::OTP_RECOVERY_USED, null, $user->id);
+	}
+
+	/**
+	 * @overrides
+	 */
 	public function logout(bool $all = false)
 	{
 		$this->_user = null;
@@ -412,7 +448,7 @@ class Session extends \KD2\UserSession
 		// valide pour 1 heure minimum
 		$expire = $expire ?? ceil((time() - strtotime('2017-01-01')) / 3600) + 1;
 
-		$hash = hash_hmac('sha256', $user->email . $user->id . $user->password . $expire, SECRET_KEY, true);
+		$hash = hash_hmac('sha256', $user->email . $user->id . $user->password . $expire, LOCAL_SECRET_KEY, true);
 		$hash = substr(Security::base64_encode_url_safe($hash), 0, 16);
 		return $hash;
 	}
@@ -438,8 +474,8 @@ class Session extends \KD2\UserSession
 
 		list($id, $expire, $email_hash) = explode('.', $query);
 
-		$id = base_convert($id, 36, 10);
-		$expire = base_convert($expire, 36, 10);
+		$id = (int) base_convert($id, 36, 10);
+		$expire = (int) base_convert($expire, 36, 10);
 
 		$expire_timestamp = ($expire * 3600) + strtotime('2017-01-01');
 
@@ -474,7 +510,7 @@ class Session extends \KD2\UserSession
 		}
 
 		$ue = Users::get($user->id);
-		$ue->importSecurityForm(false, compact('password', 'password_confirmed'));
+		$ue->setNewPassword(compact('password', 'password_confirmed'), false);
 		$ue->save(false);
 		EmailsTemplates::passwordChanged($ue);
 	}
@@ -687,8 +723,6 @@ class Session extends \KD2\UserSession
 			}
 
 			// Always match by field name
-			$path_level = $context . '//' . $c;
-
 			$field = DynamicFields::get($c);
 
 			if (!$field) {
@@ -750,42 +784,6 @@ class Session extends \KD2\UserSession
 		}
 	}
 
-	// Ici checkOTP utilise NTP en second recours
-	public function checkOTP($secret, $code)
-	{
-		if (Security_OTP::TOTP($secret, $code))
-		{
-			return true;
-		}
-
-		// Vérifier encore, mais avec le temps NTP
-		// au cas où l'horloge du serveur n'est pas à l'heure
-		if (\Paheko\NTP_SERVER
-			&& ($time = Security_OTP::getTimeFromNTP(\Paheko\NTP_SERVER))
-			&& Security_OTP::TOTP($secret, $code, $time))
-		{
-			return true;
-		}
-
-		return false;
-	}
-
-	public function getNewOTPSecret()
-	{
-		$config = Config::getInstance();
-		$out = [];
-		$out['secret'] = Security_OTP::getRandomSecret();
-		$out['secret_display'] = implode(' ', str_split($out['secret'], 4));
-
-		$icon = $config->fileURL('icon');
-		$out['url'] = Security_OTP::getOTPAuthURL($config->org_name, $out['secret'], 'totp', $icon);
-
-		$qrcode = new QRCode($out['url']);
-		$out['qrcode'] = 'data:image/svg+xml;base64,' . base64_encode($qrcode->toSVG());
-
-		return $out;
-	}
-
 	public function countActiveSessions(): int
 	{
 		$selector = $this->getRememberMeCookie()->selector ?? null;
@@ -795,7 +793,6 @@ class Session extends \KD2\UserSession
 
 	public function isAdmin(): bool
 	{
-		return $this->canAccess(self::SECTION_CONNECT, self::ACCESS_READ)
-			&& $this->canAccess(self::SECTION_CONFIG, self::ACCESS_ADMIN);
+		return $this->canAccess(self::SECTION_CONFIG, self::ACCESS_ADMIN);
 	}
 }

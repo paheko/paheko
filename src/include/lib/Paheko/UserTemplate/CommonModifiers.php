@@ -251,8 +251,6 @@ class CommonModifiers
 
 	static public function relative_date($ts, bool $with_hour = false): string
 	{
-		$day = null;
-
 		if (null === $ts) {
 			return '';
 		}
@@ -294,8 +292,6 @@ class CommonModifiers
 
 	static public function relative_date_short($ts, bool $with_hour = false): string
 	{
-		$day = null;
-
 		if (null === $ts) {
 			return '';
 		}

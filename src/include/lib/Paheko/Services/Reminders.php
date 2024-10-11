@@ -138,7 +138,6 @@ class Reminders
 		$date = new \DateTime;
 
 		$db->begin();
-		$body = null;
 
 		foreach ($db->iterate($sql) as $row) {
 			$m = self::createMessage($row);

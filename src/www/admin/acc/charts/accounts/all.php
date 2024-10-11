@@ -3,6 +3,8 @@ namespace Paheko;
 
 use Paheko\Accounting\Charts;
 
+$types = null; // Just to silence phpstan
+
 require_once __DIR__ . '/_inc.php';
 
 $chart = null;

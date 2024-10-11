@@ -117,7 +117,7 @@ class Sync
 		if (!isset($page->type) || $page->type != $page::TYPE_CATEGORY) {
 			$type = $page::TYPE_PAGE;
 
-			foreach (Files::list($page->dir_path) as $file) {
+			foreach (Files::list($page->dir_path()) as $file) {
 				if ($file->isDir()) {
 					$type = $page::TYPE_CATEGORY;
 					break;

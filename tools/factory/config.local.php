@@ -112,6 +112,7 @@ $web_cache_public = __DIR__ . '/www/.cache';
 
 if (!file_exists($web_cache_public)) {
 	$web_cache_root = dirname(WEB_CACHE_ROOT);
+	@mkdir($web_cache_root, fileperms(DATA_ROOT), true);
 
 	if (!@symlink($web_cache_root, $web_cache_public)) {
 		echo "<h2>Impossible de créer le lien symbolique pour le cache web partagé</h2>";
