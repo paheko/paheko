@@ -385,7 +385,7 @@ _(Depuis la version 1.4.0)_
 
 ### GET user/search
 
-Recherche simple de membre.
+Recherche simple de membre
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
