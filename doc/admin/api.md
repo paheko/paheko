@@ -18,18 +18,15 @@ Des exemples sont donnés pour l'utilisation de l'outil `curl` en ligne de comma
 
 Les paramètres peuvent être fournis sous les formes suivantes :
 
-* dans les paramètres de l'URL (query string) : pour toutes les méthodes
+* dans les paramètres de l'URL (query string) : pour toutes les méthodes : `…/api/{route}?param1=value1&param2=valeur2`
 * formulaire HTTP classique pour les requêtes `POST` :
   * `Content-Type: application/x-www-form-urlencoded`
   * ou `Content-Type: multipart/form-data`
-* objet JSON pour les requêtes POST :
-  * `Content-Type: application/json`
+* objet JSON pour les requêtes `POST`. Il faut alors indiquer `Content-Type: application/json` dans la requête.
 
 Les réponses sont renvoyées en JSON par défaut, sauf quand la route permet de choisir un autre format.
 
 Les formats ODS et XLSX ne sont disponibles à l'import que si le serveur est configuré pour convertir ces formats.
-
-De la même manière, le format XLSX n'est disponible que si le serveur est configuré pour générer ce format.
 
 ### Utiliser l'API
 
@@ -394,6 +391,8 @@ Recherche simple de membre
 Si le texte contient une arobase (`@`), la recherche s'effectuera sur l'adresse e-mail.
 Si le texte contient uniquement des chiffres, la recherche se fera sur le numéro de membre.
 Sinon, la recherche se fera sur l'identité du membre (telle que configurée).
+
+_(Depuis la version 1.4.0)_
 
 ### POST user/new
 
