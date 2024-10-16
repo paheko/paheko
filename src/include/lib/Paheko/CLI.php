@@ -654,7 +654,7 @@ class CLI
 		}
 
 		if (isset($options['root'])) {
-			$constants['ROOT'] = $options['root'];
+			$constants['DATA_ROOT'] = $options['root'];
 		}
 
 		foreach ($options as $name => $value) {
