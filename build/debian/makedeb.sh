@@ -37,7 +37,8 @@ cp ${THISDIR}/paheko.desktop "${DEBLOCALPREFIX}/share/applications/"
 CODEDIR=${DEBLOCALPREFIX}/share/${PACKAGE_DEBNAME}
 mkdir -p ${CODEDIR}
 cp -r ${SRCDIR}/* ${CODEDIR}
-cp ${THISDIR}/config.debian.php ${CODEDIR}/config.local.php
+cp ${THISDIR}/config.system.php ${CODEDIR}/config.local.php
+cp ${THISDIR}/config.user.php ${CODEDIR}/config.user.php
 mv ${CODEDIR}/data/plugins ${CODEDIR}/plugins
 rm -rf ${CODEDIR}/*.sqlite ${CODEDIR}/data
 cp ${THISDIR}/paheko.png "${CODEDIR}"
