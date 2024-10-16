@@ -29,6 +29,8 @@ class DB extends SQLite3
 
 	protected $_schema_update = 0;
 
+	protected bool $_install_check = true;
+
 	static public function getInstance()
 	{
 		if (null === self::$_instance) {
@@ -227,10 +229,19 @@ class DB extends SQLite3
 		return $s;
 	}
 
+	public function disableInstallCheck(bool $disable)
+	{
+		$this->_install_check = !$disable;
+	}
+
 	public function connect(): void
 	{
 		if (null !== $this->db) {
 			return;
+		}
+
+		if ($this->_install_check && !self::isInstalled()) {
+			throw new \LogicException('Database has not been installed!');
 		}
 
 		parent::connect();

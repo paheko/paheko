@@ -220,13 +220,14 @@ class Install
 
 	static public function install(string $country_code, string $name, string $user_name, string $user_email, string $user_password): void
 	{
-		if (file_exists(DB_FILE)) {
+		if (DB::isInstalled()) {
 			throw new UserException('La base de données existe déjà.');
 		}
 
 		self::checkAndCreateDirectories();
 		Files::disableQuota();
 		$db = DB::getInstance();
+		$db->disableInstallCheck(true);
 
 		$db->requireFeatures('cte', 'json_patch', 'fts4', 'date_functions_in_constraints', 'index_expressions', 'rename_column', 'upsert');
 
