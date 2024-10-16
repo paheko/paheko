@@ -10,6 +10,13 @@ use KD2\DB\EntityManager;
 
 $start_timer = microtime(true);
 
+foreach ($_ENV as $key => $value) {
+	if (strpos($key, 'PAHEKO_') === 0) {
+		$key = substr($key, strlen('PAHEKO_'));
+		define('Paheko\\' . $key, $value);
+	}
+}
+
 if (!defined('Paheko\CONFIG_FILE')) {
 	define('Paheko\CONFIG_FILE', __DIR__ . '/../config.local.php');
 }

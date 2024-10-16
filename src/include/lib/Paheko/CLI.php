@@ -34,6 +34,8 @@ class CLI
 		'server',
 	];
 
+	protected array $defaults = [];
+
 	public function parseOptions(array &$args, array $options, int $limit = 0)
 	{
 		$all_aliases = [];
@@ -538,7 +540,15 @@ class CLI
 		$root = ROOT . '/www';
 		$router = $root . '/_route.php';
 
-		$cmd = sprintf('PHP_CLI_SERVER_WORKERS=3 php -S %s:%d -t %s -d variables_order=EGPCS %s',
+		$env = '';
+
+		// Pass command-line constants as environment variables
+		foreach ($this->defaults as $key => $value) {
+			$env .= sprintf('PAHEKO_%s=%s ', $key, escapeshellarg($value));
+		}
+
+		$cmd = sprintf('%s PHP_CLI_SERVER_WORKERS=3 php -S %s:%d -t %s -d variables_order=EGPCS %s',
+			$env,
 			escapeshellarg($address),
 			$port,
 			$root,
@@ -662,6 +672,8 @@ class CLI
 				$constants[substr($name, 1)] = $value;
 			}
 		}
+
+		$this->defaults = $constants;
 
 		$constants['SKIP_STARTUP_CHECK'] = true;
 
