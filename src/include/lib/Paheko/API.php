@@ -234,8 +234,13 @@ class API
 				throw new APIException('This user seems to be a duplicate of an existing one', 409);
 			}
 
-			if (!$this->isSystemUser() && !empty($this->params['id_category']) && !$user->setCategorySafeNoConfig($this->params['id_category'])) {
-				throw new APIException('You are not allowed to create a user in this category', 403);
+			if (!empty($this->params['id_category'])) {
+				if ($this->isSystemUser()) {
+					$user->set('id_category', (int)$this->params['id_category']);
+				}
+				elseif (!$user->setCategorySafeNoConfig($this->params['id_category'])) {
+					throw new APIException('You are not allowed to create a user in this category', 403);
+				}
 			}
 
 			if (isset($this->params['password'])) {
