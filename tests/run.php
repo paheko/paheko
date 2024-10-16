@@ -9,7 +9,7 @@ function paheko_init(?string $db_path = ':memory:')
 	define('Paheko\DB_FILE', $db_path ?? ':memory:');
 
 	if ($db_path === null || $create_db) {
-		define('Paheko\INSTALL_PROCESS', true);
+		define('Paheko\SKIP_STARTUP_CHECK', true);
 	}
 
 	require __DIR__ . '/../src/include/init.php';
