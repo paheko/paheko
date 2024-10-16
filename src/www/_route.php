@@ -27,8 +27,7 @@ if (PHP_SAPI === 'cli-server' && $uri !== '/' && file_exists(__DIR__ . $uri)) {
 	return false;
 }
 
-
-// Include init.php in a function namespace so that its variables definitions don't affect us
+// Include init.php in a function so that its variables definitions don't affect us
 // (eg. $uri)
 (function () { require(__DIR__ . '/../include/init.php'); })();
 
