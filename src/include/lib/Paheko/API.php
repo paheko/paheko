@@ -238,7 +238,7 @@ class API
 				if ($this->isSystemUser()) {
 					$user->set('id_category', (int)$this->params['id_category']);
 				}
-				elseif (!$user->setCategorySafeNoConfig($this->params['id_category'])) {
+				elseif (!$user->setCategorySafeNoConfig((int)$this->params['id_category'])) {
 					throw new APIException('You are not allowed to create a user in this category', 403);
 				}
 			}
