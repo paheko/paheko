@@ -293,7 +293,7 @@ class Page extends Entity
 	{
 		$dir = null;
 
-		if (!$this->exists()) {
+		if (!$this->exists() || $this->isModified('status')) {
 			$this->set('inherited_status', $this->status);
 		}
 
