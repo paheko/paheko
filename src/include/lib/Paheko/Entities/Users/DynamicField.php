@@ -442,6 +442,9 @@ class DynamicField extends Entity
 			case 'country':
 				return Utils::getCountryName($value);
 			case 'number':
+				if ($this->isNumber()) {
+					return (string) $value;
+				}
 				return $value;
 			default:
 				return (string) $value;

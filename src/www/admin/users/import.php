@@ -45,7 +45,7 @@ $form->runIf(f('preview') && $csv->loaded(), function () use (&$csv) {
 }, $csrf_key);
 
 if (!f('import') && $csv->ready()) {
-	$report = Users::importReport($csv, $mode, Session::getUserId());
+	$report = Users::importReport($csv, $mode, Session::getInstance());
 
 	if (count($report['errors'])) {
 		$csv->clear();
@@ -64,7 +64,7 @@ $form->runIf('import', function () use ($csv, $mode) {
 			throw new UserException('Erreur dans le chargement du CSV');
 		}
 
-		Users::import($csv, $mode, Session::getUserId());
+		Users::import($csv, $mode, Session::getInstance());
 	}
 	finally {
 		$csv->clear();
