@@ -79,7 +79,7 @@ class Template extends Smartyer
 	{
 	}
 
-	public function __construct(?string $template = null, ?Template &$parent = null)
+	public function __construct(?string $template = null, ?Template $parent = null)
 	{
 		parent::__construct($template, $parent);
 
