@@ -213,7 +213,7 @@ class Import
 							throw new UserException(sprintf('l\'écriture #%d appartient à un autre exercice', $row_id));
 						}
 
-						if ($transaction->validated) {
+						if ($transaction->isLocked()) {
 							throw new UserException(sprintf('l\'écriture #%d est validée et ne peut être modifiée', $row_id));
 						}
 
