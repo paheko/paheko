@@ -14,7 +14,8 @@ if (!count($services_list)) {
 	Utils::redirect(ADMIN_URL . 'services/?CREATE');
 }
 
-$list = Reminders::list();
+$list = Reminders::getList();
+$list->loadFromQueryString();
 
 $tpl->assign(compact('list'));
 
