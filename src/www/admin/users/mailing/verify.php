@@ -15,7 +15,7 @@ if (!$email->canSendVerificationAfterFail()) {
 		$message = 'Il n\'est pas possible de renvoyer une vérification à cette adresse pour le moment, il faut attendre 3 jours.';
 	}
 	else {
-		$message = 'Il n\'est pas possible de renvoyer une vérification à cette adresse pour le moment, il faut attendre un mois.';
+		$message = 'Il n\'est pas possible de renvoyer une vérification à cette adresse pour le moment, il faut attendre 15 jours.';
 	}
 
     throw new UserException($message);
