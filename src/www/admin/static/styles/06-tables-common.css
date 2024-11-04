@@ -47,7 +47,7 @@ table.statement td.spacer {
 
 table.statement tr td.colspan, table.statement tr td.spacer {
     border: none;
-    background-color: transparent;
+    background-color: transparent !important;
 }
 
 td.money, th.money {
