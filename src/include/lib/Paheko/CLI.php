@@ -462,17 +462,18 @@ class CLI
 	/**
 	 * Usage: paheko sql OPTIONS… STATEMENT
 	 * Run SQL statement and display result.
-	 *
-	 * Options:
-	 *   --rw
-	 *     Specify this option to allow the statement to modify the database.
-	 *     If this is absent, the statement will be executed in read-only.
+	 * Only read-only queries are supported (SELECT).
+	 * INSERT, CREATE, ALTER, and other queries that would change the database are not supported.
 	 */
 	public function sql(array $args)
 	{
 		$rw = false;
 
-		if (($args[0] ?? null) === '--rw') {
+		// This is a hidden parameter, by design! **DO NOT USE THIS!**
+		// This is intended to be used in *VERY* specific cases,
+		// mainly for debug use.
+		// You shouldn't modify the database yourself!
+		if (($args[0] ?? null) === '--write') {
 			$rw = true;
 			unset($args[0]);
 		}
@@ -486,11 +487,11 @@ class CLI
 		$db = DB::getInstance();
 
 		if ($rw) {
-			echo "[RW] " . $sql . PHP_EOL;
+			echo "[WRITE] " . $sql . PHP_EOL;
 			$st = $db->prepare($sql);
 		}
 		else {
-			echo "[RO] " . $sql . PHP_EOL;
+			echo "[SQL] " . $sql . PHP_EOL;
 			$st = $db->protectSelect(null, $sql);
 		}
 
