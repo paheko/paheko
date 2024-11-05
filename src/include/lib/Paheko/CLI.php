@@ -472,7 +472,7 @@ class CLI
 	{
 		$rw = false;
 
-		if ($args[0] === '--rw') {
+		if (($args[0] ?? null) === '--rw') {
 			$rw = true;
 			unset($args[0]);
 		}
@@ -495,6 +495,13 @@ class CLI
 		}
 
 		$r = $st->execute();
+
+		if ($rw) {
+			$r->finalize();
+			printf("%d row(s) changed\n", $db->changes());
+			$this->success();
+			return;
+		}
 
 		$columns = [];
 
