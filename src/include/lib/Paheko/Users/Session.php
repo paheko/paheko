@@ -719,6 +719,12 @@ class Session extends \KD2\UserSession
 					$file_permissions['read'] = true;
 				}
 
+				if ($this->canAccess(self::SECTION_USERS, self::ACCESS_WRITE)) {
+					$file_permissions['write'] = true;
+					$file_permissions['delete'] = true;
+					$file_permissions['trash'] = true;
+				}
+
 				return $file_permissions[$permission];
 			}
 
