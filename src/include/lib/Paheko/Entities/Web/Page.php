@@ -201,53 +201,6 @@ class Page extends Entity
 		return $this->inherited_status;
 	}
 
-	static protected function updateChildrenStatusRecursive(array $children, string $parent_status, array &$update): void
-	{
-		foreach ($children as $child) {
-			if ($child->status !== self::STATUS_ONLINE) {
-				$status = $child->status;
-			}
-			else {
-				$status = $parent_status;
-			}
-
-			if (count($child->children)) {
-				self::updateChildrenStatusRecursive($child->children, $status, $update);
-			}
-
-			if ($child->inherited_status === $status) {
-				continue;
-			}
-
-			$update[$child->id] = $status;
-		}
-	}
-
-	public function updateChildrenStatus(): void
-	{
-		return;
-		if ($this->type === self::TYPE_PAGE) {
-			return;
-		}
-
-		$update = [];
-		$list = Web::getSitemap($this->id);
-		self::updateChildrenStatusRecursive($list, $this->status, $update);
-
-		if (!count($update)) {
-			return;
-		}
-
-		$db = DB::getInstance();
-		$db->begin();
-
-		foreach ($update as $id => $status) {
-			$db->preparedQuery('UPDATE web_pages SET inherited_status = ? WHERE id = ?;', $status, $id);
-		}
-
-		$db->commit();
-	}
-
 	public function listVersions(): DynamicList
 	{
 		$name_field = DynamicFields::getNameFieldsSQL('u');
@@ -339,6 +292,10 @@ class Page extends Entity
 	public function save(bool $selfcheck = true): bool
 	{
 		$dir = null;
+
+		if (!$this->exists() || $this->isModified('status')) {
+			$this->set('inherited_status', $this->status);
+		}
 
 		if ($this->isModified('uri')) {
 			$dir = Files::get(File::CONTEXT_WEB . '/' . $this->getModifiedProperty('uri'));

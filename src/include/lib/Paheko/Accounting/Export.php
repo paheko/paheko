@@ -290,6 +290,9 @@ class Export
 				$row->debit = Utils::money_format($row->debit, ',', '', false);
 			}
 
+			// Always treat the transaction ID as a string
+			$row->id = (string) $row->id;
+
 			yield $row;
 		}
 	}

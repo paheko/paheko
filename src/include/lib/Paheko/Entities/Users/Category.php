@@ -49,7 +49,7 @@ class Category extends Entity
 			'options' => [
 				Session::ACCESS_NONE => 'Pas d\'accès',
 				Session::ACCESS_READ => 'Lecture uniquement (peut voir les informations personnelles de tous les membres, y compris leurs inscriptions à des activités)',
-				Session::ACCESS_WRITE => 'Lecture & écriture (peut ajouter et modifier des membres, mais pas les supprimer ni les changer de catégorie, peut inscrire des membres à des activités, peut envoyer des messages collectifs)',
+				Session::ACCESS_WRITE => 'Lecture & écriture (peut ajouter et modifier des membres, mais pas les supprimer, peut inscrire des membres à des activités, peut envoyer des messages collectifs)',
 				Session::ACCESS_ADMIN => 'Administration (peut tout faire)',
 			],
 		],
@@ -104,6 +104,17 @@ class Category extends Entity
 		foreach (self::PERMISSIONS as $key => $perm) {
 			$this->assert(array_key_exists($this->{'perm_' . $key}, $perm['options']), 'Invalid value for perm_' . $key);
 		}
+
+		$db = DB::getInstance();
+
+		if ($this->exists()) {
+			$has_duplicate = $db->test(self::TABLE, 'name = ? AND id != ?', $this->name, $this->id());
+		}
+		else {
+			$has_duplicate = $db->test(self::TABLE, 'name = ?', $this->name);
+		}
+
+		$this->assert(!$has_duplicate, 'Une catégorie existe déjà avec ce nom');
 	}
 
 	public function importForm(?array $source = null)

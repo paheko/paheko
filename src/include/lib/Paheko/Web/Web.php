@@ -36,8 +36,8 @@ class Web
 				SELECT p.status, p.inherited_status, p.id_parent, p.id, level + 1, CASE WHEN p.status < children.new_status THEN p.status ELSE children.new_status END
 				FROM web_pages p
 					JOIN children ON children.id = p.id_parent
-			)
-			UPDATE web_pages SET inherited_status = (SELECT new_status FROM children WHERE id = web_pages.id);';
+				)
+				UPDATE web_pages SET inherited_status = IFNULL((SELECT new_status FROM children WHERE id = web_pages.id), status);';
 
 		DB::getInstance()->exec($sql);
 	}

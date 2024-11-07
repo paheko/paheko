@@ -146,7 +146,7 @@ if (ALERT_MESSAGE && !$dialog) {
 		</li>
 		{/if}
 
-	{elseif !defined('Paheko\INSTALL_PROCESS')}
+	{elseif !defined('Paheko\SKIP_STARTUP_CHECK')}
 		{if $config.org_web || !$config.site_disabled}
 		<li><h3><a href="{$site_url}">{icon shape="left"}<b>Retour au site</b></a></h3></li>
 		{/if}

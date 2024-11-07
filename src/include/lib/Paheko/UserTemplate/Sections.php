@@ -770,7 +770,7 @@ class Sections
 			throw new Brindille_Exception(sprintf("Line %d: invalid SQL query: %s\nQuery: %s", $line, $e->getMessage(), $list->SQL()));
 		}
 
-		$tpl = Template::getInstance();
+		$tpl = new Template('common/dynamic_list_head.tpl', Template::getInstance());
 
 		if (!empty($params['export'])) {
 			$export_params = ['right' => true];
@@ -782,7 +782,7 @@ class Sections
 		$tpl->assign(compact('list'));
 		$tpl->assign('check', $params['check'] ?? false);
 		$tpl->assign('disable_user_ordering', $params['disable_user_ordering'] ?? false);
-		$tpl->display('common/dynamic_list_head.tpl');
+		$tpl->display();
 
 		yield from $i;
 

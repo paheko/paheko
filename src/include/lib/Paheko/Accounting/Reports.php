@@ -481,6 +481,8 @@ class Reports
 		$out->body_left = self::getAccountsBalances($criterias + ['position' => Account::ASSET]);
 		$out->body_right = self::getAccountsBalances($criterias + ['position' => Account::LIABILITY]);
 
+		// Remove volunteering accounts from result
+		$criterias = array_merge($criterias, ['exclude_type' => [Account::TYPE_VOLUNTEERING_REVENUE, Account::TYPE_VOLUNTEERING_EXPENSE]]);
 		// Append result to liability
 		$r = self::getResultLine($criterias);
 		$out->body_right[] = $r;

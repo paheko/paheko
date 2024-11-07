@@ -29,6 +29,8 @@ class DB extends SQLite3
 
 	protected $_schema_update = 0;
 
+	protected bool $_install_check = true;
+
 	static public function getInstance()
 	{
 		if (null === self::$_instance) {
@@ -41,6 +43,23 @@ class DB extends SQLite3
 	static public function deleteInstance()
 	{
 		self::$_instance = null;
+	}
+
+	static public function isInstalled(): bool
+	{
+		return file_exists(DB_FILE) && filesize(DB_FILE);
+	}
+
+	static public function isUpgradeRequired(): bool
+	{
+		$v = self::getInstance()->version();
+		return version_compare($v, paheko_version(), '<');
+	}
+
+	static public function isVersionTooNew(): bool
+	{
+		$v = self::getInstance()->version();
+		return version_compare($v, paheko_version(), '>');
 	}
 
 	private function __clone()
@@ -210,10 +229,19 @@ class DB extends SQLite3
 		return $s;
 	}
 
+	public function disableInstallCheck(bool $disable)
+	{
+		$this->_install_check = !$disable;
+	}
+
 	public function connect(): void
 	{
 		if (null !== $this->db) {
 			return;
+		}
+
+		if ($this->_install_check && !self::isInstalled()) {
+			throw new \LogicException('Database has not been installed!');
 		}
 
 		parent::connect();

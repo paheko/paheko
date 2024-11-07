@@ -242,7 +242,10 @@ $upload_here = $context_specific_root ? null : $dir->path;
 					<select name="action">
 						<option value="">— Choisir une action à effectuer —</option>
 						{if $context == File::CONTEXT_DOCUMENTS}
-						<option value="move">Déplacer</option>
+							<option value="move">Déplacer</option>
+							{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
+								<option value="move_to_transaction">Déplacer vers une écriture</option>
+							{/if}
 						{/if}
 						<option value="delete">Supprimer</option>
 						<option value="zip">Télécharger dans un fichier ZIP</option>

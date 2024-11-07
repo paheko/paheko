@@ -17,7 +17,7 @@ class Email extends Entity
 {
 	const TABLE = 'emails';
 
-	const RESEND_VERIFICATION_DELAY = '1 month ago';
+	const RESEND_VERIFICATION_DELAY = '15 days ago';
 	const RESEND_VERIFICATION_DELAY_OPTOUT = '3 days ago';
 
 	/**

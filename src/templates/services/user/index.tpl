@@ -47,13 +47,8 @@
 			<td>{$row.date|date_short}</td>
 			<td>{$row.expiry|date_short}</td>
 			<td>{if $row.paid}<b class="confirm">Oui</b>{else}<b class="error">Non</b>{/if}</td>
-			<td class="money">
-				{if $row.expected_amount}
-					{if $row.amount < 0}
-						{tag label="Trop perçu" color="darkred"}
-					{/if}
-					{$row.amount|raw|abs|money_currency:false}
-					{if $row.amount}<br /><small class="help">(sur {$row.expected_amount|raw|money_currency:false})</small>{/if}
+			<td class="money">{if $row.expected_amount}{$row.amount|raw|money_currency:false}
+				{if $row.amount}<br /><small class="help">(sur {$row.expected_amount|raw|money_currency:false})</small>{/if}
 				{/if}
 			</td>
 			<td class="actions">

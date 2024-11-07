@@ -111,6 +111,10 @@ span.alert, b.alert {
     color: var(--gBorderColor);
 }
 
+.help a span {
+    text-decoration: underline;
+}
+
 
 p.help:not(.block) {
     margin: 1em;

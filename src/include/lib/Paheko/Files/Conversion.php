@@ -249,7 +249,7 @@ class Conversion
 				break;
 			}
 		}
-		catch (\RuntimeException|\OutOfBoundsException $e) {
+		catch (\InvalidArgumentException|\RuntimeException|\OutOfBoundsException $e) {
 			// Invalid archive
 			$found = false;
 		}

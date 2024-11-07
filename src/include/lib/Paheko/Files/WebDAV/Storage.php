@@ -20,12 +20,6 @@ use const Paheko\{LOCAL_SECRET_KEY};
 
 class Storage extends AbstractStorage
 {
-	/**
-	 * These file names will be ignored when doing a PUT
-	 * as they are garbage, coming from some OS
-	 */
-	const PUT_IGNORE_PATTERN = '!^~(?:lock\.|^\._)|^(?:\.DS_Store|Thumbs\.db|desktop\.ini)$!';
-
 	protected ?array $cache = null;
 	protected array $root = [];
 
@@ -255,6 +249,7 @@ class Storage extends AbstractStorage
 			throw new WebDAV_Exception('Impossible de créer un fichier ici', 403);
 		}
 
+		// Ignore temporary files
 		if (preg_match(self::PUT_IGNORE_PATTERN, basename($uri))) {
 			return false;
 		}

@@ -215,7 +215,7 @@ class API
 			$format = strtok('');
 
 			try {
-				Users::exportCategory($format ?: 'json', $id);
+				Users::exportCategory($format ?: 'json', $id, true);
 			}
 			catch (\InvalidArgumentException $e) {
 				throw new APIException($e->getMessage(), 400, $e);
@@ -234,8 +234,13 @@ class API
 				throw new APIException('This user seems to be a duplicate of an existing one', 409);
 			}
 
-			if (!$this->isSystemUser() && !empty($this->params['id_category']) && !$user->setCategorySafeNoConfig($this->params['id_category'])) {
-				throw new APIException('You are not allowed to create a user in this category', 403);
+			if (!empty($this->params['id_category'])) {
+				if ($this->isSystemUser()) {
+					$user->set('id_category', (int)$this->params['id_category']);
+				}
+				elseif (!$user->setCategorySafeNoConfig((int)$this->params['id_category'])) {
+					throw new APIException('You are not allowed to create a user in this category', 403);
+				}
 			}
 
 			if (isset($this->params['password'])) {
@@ -608,7 +613,7 @@ class API
 			}
 
 			if (!$p1 && !$p2) {
-				return Years::listWithStats();
+				return iterator_to_array(Years::listWithStats());
 			}
 
 			$id_year = null;

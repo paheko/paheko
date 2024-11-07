@@ -17,7 +17,7 @@
 {/if}
 	</aside>
 	<nav>
-	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$transaction->validated && $transaction_year->isOpen()}
+	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$transaction->isLocked() && $transaction_year->isOpen()}
 		{linkbutton href="edit.php?id=%d"|args:$transaction.id shape="edit" label="Modifier cette écriture" accesskey="M"}
 		{linkbutton href="delete.php?id=%d"|args:$transaction.id shape="delete" label="Supprimer cette écriture" accesskey="S"}
 	{/if}

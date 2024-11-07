@@ -44,6 +44,10 @@ class LocalAddressFinder
 		$search = preg_replace('/[^\da-z\p{L}\s]+/iu', ' ', $search);
 		$search = trim($search);
 
+		if (!$search) {
+			return null;
+		}
+
 		// Put all strings between quotes, as required by FTS5
 		// see https://www.sqlite.org/fts5.html#full_text_query_syntax
 		$regexp = sprintf('/%s|%s|[^\s]+/i', $config['number_regexp'], $config['street_regexp']);
@@ -51,11 +55,20 @@ class LocalAddressFinder
 		$query = preg_replace('/\s{2,}/', ' ', $query);
 		$query = trim($query);
 
-		self::$statements[$country] ??= $db->prepare('SELECT *, rank FROM search WHERE search MATCH ? ORDER BY rank DESC LIMIT 10;');
-		$st = self::$statements[$country];
-		$st->bindValue(1, $query);
+		try {
+			self::$statements[$country] ??= $db->prepare('SELECT *, rank FROM search WHERE search MATCH ? ORDER BY rank DESC LIMIT 10;');
+			$st = self::$statements[$country];
+			$st->bindValue(1, $query);
 
-		$result = $st->execute();
+			$result = $st->execute();
+		}
+		catch (DB_Exception $e) {
+			if (strpos($e->getMessage(), 'fts5: syntax error') !== false) {
+				return null;
+			}
+
+			throw $e;
+		}
 
 		$number = null;
 

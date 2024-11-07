@@ -34,6 +34,8 @@ class CLI
 		'server',
 	];
 
+	protected array $defaults = [];
+
 	public function parseOptions(array &$args, array $options, int $limit = 0)
 	{
 		$all_aliases = [];
@@ -331,6 +333,14 @@ class CLI
 	 *
 	 * All options are mandatory.
 	 *
+	 * Options can also be passed as a list from STDIN. Example:
+	 * cat <<<EOF
+	 * country=FR
+	 * orgname="My org"
+	 * password="SECRET!!!"
+	 * …
+	 * EOF | bin/paheko init -
+	 *
 	 * Options:
 	 *   --country CODE
 	 *     Organization country code (2 letters, eg. FR, BE…)
@@ -346,7 +356,7 @@ class CLI
 	 *
 	 *   --password PASSWORD
 	 *     User password (NOT RECOMMENDED, as the password can leak in your history)
-	 *     use --password-file instead if possible, or config file as STDIN'
+	 *     use --password-file instead if possible, or config file as STDIN
 	 *
 	 *   --password-file FILE
 	 *     Path to a file containing the user password
@@ -452,17 +462,18 @@ class CLI
 	/**
 	 * Usage: paheko sql OPTIONS… STATEMENT
 	 * Run SQL statement and display result.
-	 *
-	 * Options:
-	 *   --rw
-	 *     Specify this option to allow the statement to modify the database.
-	 *     If this is absent, the statement will be executed in read-only.
+	 * Only read-only queries are supported (SELECT).
+	 * INSERT, CREATE, ALTER, and other queries that would change the database are not supported.
 	 */
 	public function sql(array $args)
 	{
 		$rw = false;
 
-		if ($args[0] === '--rw') {
+		// This is a hidden parameter, by design! **DO NOT USE THIS!**
+		// This is intended to be used in *VERY* specific cases,
+		// mainly for debug use.
+		// You shouldn't modify the database yourself!
+		if (($args[0] ?? null) === '--write') {
 			$rw = true;
 			unset($args[0]);
 		}
@@ -476,15 +487,22 @@ class CLI
 		$db = DB::getInstance();
 
 		if ($rw) {
-			echo "[RW] " . $sql . PHP_EOL;
+			echo "[WRITE] " . $sql . PHP_EOL;
 			$st = $db->prepare($sql);
 		}
 		else {
-			echo "[RO] " . $sql . PHP_EOL;
+			echo "[SQL] " . $sql . PHP_EOL;
 			$st = $db->protectSelect(null, $sql);
 		}
 
 		$r = $st->execute();
+
+		if ($rw) {
+			$r->finalize();
+			printf("%d row(s) changed\n", $db->changes());
+			$this->success();
+			return;
+		}
 
 		$columns = [];
 
@@ -530,7 +548,15 @@ class CLI
 		$root = ROOT . '/www';
 		$router = $root . '/_route.php';
 
-		$cmd = sprintf('PHP_CLI_SERVER_WORKERS=3 php -S %s:%d -t %s -d variables_order=EGPCS %s',
+		$env = '';
+
+		// Pass command-line constants as environment variables
+		foreach ($this->defaults as $key => $value) {
+			$env .= sprintf('PAHEKO_%s=%s ', $key, escapeshellarg($value));
+		}
+
+		$cmd = sprintf('%s PHP_CLI_SERVER_WORKERS=3 php -S %s:%d -t %s -d variables_order=EGPCS %s',
+			$env,
 			escapeshellarg($address),
 			$port,
 			$root,
@@ -646,7 +672,7 @@ class CLI
 		}
 
 		if (isset($options['root'])) {
-			$constants['ROOT'] = $options['root'];
+			$constants['DATA_ROOT'] = $options['root'];
 		}
 
 		foreach ($options as $name => $value) {
@@ -654,6 +680,10 @@ class CLI
 				$constants[substr($name, 1)] = $value;
 			}
 		}
+
+		$this->defaults = $constants;
+
+		$constants['SKIP_STARTUP_CHECK'] = true;
 
 		foreach ($constants as $name => $value) {
 			define('Paheko\\' . $name, $value);
@@ -664,12 +694,21 @@ class CLI
 		$_SERVER['HTTP_HOST'] = 'localhost';
 		$_SERVER['DOCUMENT_ROOT'] = $root . '/www';
 
-		$skip_startup_check = true;
 		require_once $root . '/include/init.php';
 
 		if (WWW_URL === 'http://localhost/' && $command !== 'ui') {
 			$this->alert("Warning: WWW_URL constant is not specified!\nhttp://localhost/ will be used instead.\n"
 				. "Any e-mail sent will not include the correct web server URL.");
+		}
+
+		if (!in_array($command, ['help', 'init', 'ui', 'server'])) {
+			if (!DB::isInstalled()) {
+				$this->fail('Database does not exist. Run "init" command first.');
+			}
+
+			if ($command !== 'upgrade' && DB::isUpgradeRequired()) {
+				$this->fail('The database requires an upgrade. Run "upgrade" command first.');
+			}
 		}
 
 		try {

@@ -201,18 +201,20 @@ class Import
 				// Find or create transaction
 				if (null === $transaction) {
 					if (!empty($row->id) && !$o->ignore_ids) {
-						$transaction = Transactions::get((int)$row->id);
+						// Make sure we remove any weird stuff from transaction ID
+						$row_id = preg_replace('/[^\d]/', '', $row->id);
+						$transaction = Transactions::get((int)$row_id);
 
 						if (!$transaction) {
-							throw new UserException(sprintf('l\'écriture #%d est introuvable', $row->id));
+							throw new UserException(sprintf('l\'écriture #%d est introuvable', $row_id));
 						}
 
 						if ($transaction->id_year != $year->id()) {
-							throw new UserException(sprintf('l\'écriture #%d appartient à un autre exercice', $row->id));
+							throw new UserException(sprintf('l\'écriture #%d appartient à un autre exercice', $row_id));
 						}
 
-						if ($transaction->validated) {
-							throw new UserException(sprintf('l\'écriture #%d est validée et ne peut être modifiée', $row->id));
+						if ($transaction->isLocked()) {
+							throw new UserException(sprintf('l\'écriture #%d est validée et ne peut être modifiée', $row_id));
 						}
 
 						if ($type !== Export::SIMPLE) {
