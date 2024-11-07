@@ -609,6 +609,7 @@ class File extends Entity
 		// Move each file to the new target
 		if ($is_dir) {
 			foreach ($list as $file) {
+				$file->set('trash', $this->trash);
 				$file->move($new_path . trim(substr($file->parent, strlen($old->path)), '/'), $check_session);
 			}
 		}
