@@ -82,7 +82,6 @@ class Search
 	{
 		$s = new SE;
 		$s->set('target', $target);
-		$s->set('created', new \DateTime);
 
 		if ($type !== null) {
 			$s->set('type', $type);
