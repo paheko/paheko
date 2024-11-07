@@ -7,6 +7,12 @@ $is_unprotected = $s->type == $s::TYPE_SQL_UNPROTECTED;
 
 {form_errors}
 
+{if $s.description}
+<p class="help block">
+	{$s.description|escape|nl2br}
+</p>
+{/if}
+
 <fieldset>
 {if $s.type !== $s::TYPE_JSON}
 	{if !$can_sql}

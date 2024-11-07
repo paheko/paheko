@@ -20,7 +20,8 @@
 		<fieldset>
 			<legend>Modifier une recherche enregistrée</legend>
 			<dl>
-				{input type="text" name="label" label="Intitulé" required=1 source=$search}
+				{input type="text" name="label" label="Intitulé" required=true source=$search}
+				{input type="textarea" name="description" label="Commentaire" required=false source=$search cols=70 rows=5 help="Sera affiché au dessus du champ de recherche."}
 				<dt>Statut</dt>
 				<?php $public = (int) (null === $search->id_user); ?>
 				{input type="radio" name="public" value="0" default=$public label="Recherche privée" help="Visible seulement par moi-même"}
