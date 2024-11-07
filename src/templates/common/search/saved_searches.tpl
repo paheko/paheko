@@ -65,26 +65,18 @@
 		csrf_key=$csrf_key
 	}
 
-{elseif count($list) == 0}
+{elseif !$list->count()}
 	<p class="block alert">Aucune recherche enregistrée. <a href="{$search_url}">Faire une nouvelle recherche</a></p>
 {else}
-	<table class="list">
-		<thead>
-			<tr>
-				<th>Recherche</th>
-				<th>Type</th>
-				<th>Statut</th>
-				<th></th>
-			</tr>
-		</thead>
-		<tbody>
-			{foreach from=$list item="search"}
+	{include file="common/dynamic_list_head.tpl"}
+			{foreach from=$list->iterate() item="search"}
 			<tr>
 				<th><a href="{$search_url}?id={$search.id}">{$search.label}</a></th>
-				<td>{if $search.type == $search::TYPE_JSON}Avancée{else}SQL{/if}</td>
+				<td>{$search.type}</td>
 				<td>{if !$search.id_user}Publique{else}Privée{/if}</td>
+				<td>{$search.updated|relative_date}</td>
 				<td class="actions">
-					{linkbutton href="%s?id=%d"|args:$search_url,$search.id shape="search" label="Rechercher"}
+					{linkbutton href="%s?id=%d"|args:$search_url:$search.id shape="search" label="Rechercher"}
 					{if $search.id_user || $session->canAccess($access_section, $session::ACCESS_ADMIN)}
 						{linkbutton href="?edit=%d"|args:$search.id shape="edit" label="Modifier" target="_dialog"}
 						{linkbutton href="?delete=%d"|args:$search.id shape="delete" label="Supprimer" target="_dialog"}
@@ -94,6 +86,8 @@
 			{/foreach}
 		</tbody>
 	</table>
+
+	{$list->getHTMLPagination()|raw}
 {/if}
 
 {include file="_foot.tpl"}

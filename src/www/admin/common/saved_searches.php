@@ -70,7 +70,9 @@ elseif (qg('edit') !== null) {
 	$mode = 'edit';
 }
 else {
-	$tpl->assign('list', Search::list(CURRENT_SEARCH_TARGET, Session::getUserId()));
+	$list = Search::getList(CURRENT_SEARCH_TARGET, Session::getUserId());
+	$list->loadFromQueryString();
+	$tpl->assign(compact('list'));
 	$mode = 'list';
 }
 

@@ -1,0 +1,1 @@
+ALTER TABLE searches RENAME COLUMN created TO updated;
