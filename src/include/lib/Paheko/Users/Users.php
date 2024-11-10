@@ -385,7 +385,7 @@ class Users
 		$ids = array_filter($ids, fn($a) => $a != $logged_user_id);
 
 		$db->update(User::TABLE,
-			['id_category' => $id_category],
+			['id_category' => $id_category, 'date_updated' => new \DateTime],
 			$db->where('id', $ids)
 		);
 	}
