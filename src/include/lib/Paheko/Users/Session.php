@@ -149,7 +149,7 @@ class Session extends \KD2\UserSession
 		$user = $this->db->first($query, $login);
 
 		if ($user && isset($user->otp_recovery_codes)) {
-			$user->otp_recovery_codes = json_decode($user->otp_recovery_codes);
+			$user->otp_recovery_codes = json_decode($user->otp_recovery_codes, true);
 		}
 
 		return $user;
