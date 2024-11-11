@@ -2,12 +2,10 @@ function changeType() {
 	var type = $('#f_type').value;
 	g.toggle('.type-select, .type-multiple, .type-virtual', false);
 	g.toggle('.type-' + type, true);
-	g.toggle('.type-not-virtual', false);
-	g.toggle('.type-not-password', false);
-	g.toggle('.type-not-virtual', type !== 'virtual');
-	g.toggle('.type-not-password', type !== 'password');
-	g.toggle('.type-not-file', type !== 'file');
-	g.toggle('.type-not-password.type-not-virtual', type !== 'password' && type !== 'virtual');
+	g.toggle('.type-not-virtual', true);
+	g.toggle('.type-not-password', true);
+	g.toggle('.type-not-file', true);
+	g.toggle('.type-not-' + type, false);
 }
 
 $('#f_type').onchange = changeType;
