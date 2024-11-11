@@ -468,7 +468,7 @@ class UserTemplate extends \KD2\Brindille
 				// We want errors in shipped code to be reported, it is not normal
 				throw new \RuntimeException($message, 0, $e);
 			}
-			elseif (Session::getInstance()->isAdmin()) {
+			elseif ($path !== 'code' && Session::getInstance()->isAdmin()) {
 				// Report error to admin with the highlighted line
 				$this->error($e, $message);
 				return;
