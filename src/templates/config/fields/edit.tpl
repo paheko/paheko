@@ -43,7 +43,7 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 	{/if}
 	{if !$field->isNumber()}
 	{* User number is always mandatory *}
-	<dl class="type-not-virtual type-not-password">
+	<dl class="type-not-virtual type-not-password type-not-file">
 		{input type="checkbox" name="required" value=1 label="Champ obligatoire" help="Si coché, une fiche membre ne pourra pas être enregistrée si ce champ n'est pas renseigné." source=$field}
 		{input type="text" name="default_value" source=$field label="Valeur par défaut" help="Si renseigné, le champ aura cette valeur par défaut lors de l'ajout d'un nouveau membre"}
 	</dl>
