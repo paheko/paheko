@@ -290,12 +290,15 @@ class UserTemplate extends \KD2\Brindille
 			$this->_sections = [];
 			$this->_blocks = [];
 			$this->_modifiers = [];
-			$this->_modifiers_with_instance = [];
 
-			// Register default Brindille modifiers instead
 			$this->registerDefaults();
 
-			$this->assignArray(self::getRootVariables());
+			// Disable some advanced modifiers that could be used badly
+			$this->_modifiers_with_instance = [];
+
+			unset($this->_modifiers['sql_user_fields']);
+			unset($this->_modifiers['markdown']);
+			unset($this->_modifiers['sql_where']);
 		}
 		else {
 			$this->registerAll();
@@ -317,20 +320,14 @@ class UserTemplate extends \KD2\Brindille
 		}
 	}
 
-	public function registerAll()
+	public function registerDefaults(): void
 	{
+		parent::registerDefaults();
 		$this->assignArray(self::getRootVariables());
-
-		// Register default Brindille modifiers
-		$this->registerDefaults();
 
 		// Common modifiers
 		foreach (CommonModifiers::MODIFIERS_LIST as $key => $name) {
 			$this->registerModifier(is_int($key) ? $name : $key, is_int($key) ? [CommonModifiers::class, $name] : $name);
-		}
-
-		foreach (CommonFunctions::FUNCTIONS_LIST as $key => $name) {
-			$this->registerFunction(is_int($key) ? $name : $key, is_int($key) ? [CommonFunctions::class, $name] : $name);
 		}
 
 		// PHP modifiers
@@ -345,6 +342,15 @@ class UserTemplate extends \KD2\Brindille
 
 		foreach (Modifiers::MODIFIERS_WITH_INSTANCE_LIST as $key => $name) {
 			$this->registerModifier(is_int($key) ? $name : $key, is_int($key) ? [Modifiers::class, $name] : $name, true);
+		}
+	}
+
+	public function registerAll()
+	{
+		$this->registerDefaults();
+
+		foreach (CommonFunctions::FUNCTIONS_LIST as $key => $name) {
+			$this->registerFunction(is_int($key) ? $name : $key, is_int($key) ? [CommonFunctions::class, $name] : $name);
 		}
 
 		// Local functions
