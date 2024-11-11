@@ -6,6 +6,7 @@ function changeType() {
 	g.toggle('.type-not-password', false);
 	g.toggle('.type-not-virtual', type !== 'virtual');
 	g.toggle('.type-not-password', type !== 'password');
+	g.toggle('.type-not-file', type !== 'file');
 	g.toggle('.type-not-password.type-not-virtual', type !== 'password' && type !== 'virtual');
 }
 

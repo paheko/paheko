@@ -48,7 +48,7 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 		{input type="text" name="default_value" source=$field label="Valeur par défaut" help="Si renseigné, le champ aura cette valeur par défaut lors de l'ajout d'un nouveau membre"}
 	</dl>
 	{/if}
-	<dl class="type-not-virtual">
+	<dl class="type-not-virtual type-not-file">
 		{input type="text" name="help" label="Texte d'aide" help="Apparaîtra dans les formulaires de manière identique à ce texte." source=$field}
 	</dl>
 	<dl class="type-virtual">
