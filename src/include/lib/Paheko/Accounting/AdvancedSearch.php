@@ -155,6 +155,13 @@ class AdvancedSearch extends A_S
 				'select' => '(SELECT 1 FROM acc_transactions_users tu WHERE tu.id_transaction = t.id AND tu.id_service_user IS NOT NULL) IS NOT NULL',
 				'where'  => '(SELECT 1 FROM acc_transactions_users tu WHERE tu.id_transaction = t.id AND tu.id_service_user IS NOT NULL) IS NOT NULL %s',
 			],
+			'reconciled' => [
+				'type'   => 'boolean',
+				'label'  => 'Est rapprochée',
+				'null'   => false,
+				'select' => 'l.reconciled',
+				'where'  => 'l.reconciled %s',
+			],
 		];
 	}
 
