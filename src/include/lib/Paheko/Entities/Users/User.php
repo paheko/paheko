@@ -202,7 +202,7 @@ class User extends Entity
 			$number_exists = $db->test(self::TABLE, sprintf('%s = ? AND id != ?', $db->quoteIdentifier($field)), $this->$field, $this->id());
 		}
 
-		$this->assert(!$number_exists, 'Ce numéro de membre est déjà attribué à un autre membre.');
+		$this->assert(!$number_exists, sprintf('Le numéro de membre %d est déjà attribué à un autre membre.', $this->$field));
 
 		$field = DynamicFields::getLoginField();
 		if ($this->$field !== null) {

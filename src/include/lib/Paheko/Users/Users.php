@@ -563,10 +563,12 @@ class Users
 			}
 
 			try {
-				if ($mode === 'create' || empty($user->$number_field)) {
+				if (empty($user->$number_field)) {
 					$user->$number_field = null;
+				}
+
+				if ($mode === 'create' || empty($user->$number_field)) {
 					$user->setNumberIfEmpty();
-					unset($row->$number_field);
 				}
 
 				$user->save();
