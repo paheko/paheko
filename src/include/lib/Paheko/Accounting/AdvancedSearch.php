@@ -302,7 +302,7 @@ class AdvancedSearch extends A_S
 		]);
 	}
 
-	public function make(string $query): DynamicList
+	public function make(array $query): DynamicList
 	{
 		$tables = 'acc_transactions AS t
 			INNER JOIN acc_transactions_lines AS l ON l.id_transaction = t.id

@@ -90,8 +90,14 @@ class Search extends Entity
 			return $this->_list;
 		}
 
-		if ($this->type == self::TYPE_JSON) {
-			$this->_list = $this->getAdvancedSearch()->make($this->content);
+		if ($this->type === self::TYPE_JSON) {
+			$query = json_decode($this->content, true);
+
+			if (null === $query) {
+				throw new \LogicException('Invalid JSON search object');
+			}
+
+			$this->_list = $this->getAdvancedSearch()->make($query);
 			return $this->_list;
 		}
 		else {

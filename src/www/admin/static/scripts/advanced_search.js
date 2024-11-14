@@ -30,6 +30,7 @@ g.script('scripts/lib/query_builder.js', () => {
 		"is false": "non",
 		"Matches ALL of the following conditions:": "Correspond à TOUS les critères suivants :",
 		"Matches ANY of the following conditions:": "Correspond à UN des critères suivants :",
+		"Doesn't match ANY of the following conditions:": "Ne correspond à AUCUN des critères suivants :",
 		"Add a new set of conditions below this one": "— Ajouter un groupe de critères",
 		"Remove this set of conditions": "— Supprimer ce groupe de critères",
 		"AND": "ET",
@@ -47,6 +48,10 @@ g.script('scripts/lib/query_builder.js', () => {
 	q.operators["1"] = "afficher cette colonne";
 
 	for (var i in q.types_operators) {
+		if (i === 'enum_equal') {
+			continue;
+		}
+
 		q.types_operators[i]["1"] = q.operators["1"];
 	}
 

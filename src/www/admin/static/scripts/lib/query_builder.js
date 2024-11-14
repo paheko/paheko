@@ -45,6 +45,7 @@
 		this.types_operators = {
 			"integer": ["= ?", "!= ?", "IN (??)", "NOT IN (??)", "> ?", ">= ?", "< ?", "<= ?", "BETWEEN ? AND ?", "NOT BETWEEN ? AND ?"],
 			"enum": ["= ?", "!= ?", "IN (??)", "NOT IN (??)"],
+			"enum_equal": ["= ?", "!= ?"],
 			"boolean": ["= 1", "= 0"],
 			"text": ["= ?", "!= ?", "IN (??)", "NOT IN (??)", "LIKE ?%", "NOT LIKE ?%", "LIKE %?", "NOT LIKE %?", "LIKE %?%", "NOT LIKE %?%"],
 			"bitwise": ["&", "NOT &"],
@@ -98,6 +99,7 @@
 		var s = this.buildSelect({
 			"AND": this.__("Matches ALL of the following conditions:"),
 			"OR": this.__("Matches ANY of the following conditions:"),
+			//"NOT AND": this.__("Doesn't match ANY of the following conditions:"),
 			"ADD": this.__("Add a new set of conditions below this one"),
 			"DEL": this.__("Remove this set of conditions"),
 		});
@@ -110,17 +112,15 @@
 		var _self = this;
 
 		s.onchange = function () {
-			if (this.value == 'DEL')
-			{
-				if (targetParent.childNodes.length == 1)
-				{
+			if (this.value === 'DEL') {
+				if (targetParent.childNodes.length == 1) {
 					this.value = this.oldValue;
 					return;
 				}
+
 				targetParent.removeChild(f);
 			}
-			else if (this.value == 'ADD')
-			{
+			else if (this.value === 'ADD') {
 				var n = _self.addGroup(targetParent, 'AND');
 				_self.addRow(n);
 				this.value = this.oldValue;
@@ -132,7 +132,7 @@
 			o.name = 'join_operator';
 			l.appendChild(o);
 			l.appendChild(document.createTextNode(" "));
-			o.value = join_operator;
+			o.value = join_operator || 'AND';
 		}
 
 		l.appendChild(s);
@@ -342,8 +342,7 @@
 	};
 
 	qb.prototype.addMatchField = function (targetParent, prev, column, operator) {
-		if (column.type == 'enum')
-		{
+		if (column.type === 'enum' || column.type === 'enum_equal') {
 			var field = this.buildSelect(column.values);
 		}
 		else if (column.type == 'bitwise')

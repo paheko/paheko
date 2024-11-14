@@ -46,21 +46,15 @@ abstract class AdvancedSearch
 	/**
 	 * Builds a DynamicList object from the supplied search groups
 	 */
-	abstract public function make(string $query): DynamicList;
+	abstract public function make(array $query): DynamicList;
 
 	/**
 	 * Returns default empty search groups
 	 */
 	abstract public function defaults(): \stdClass;
 
-	public function makeList(string $query, string $tables, string $default_order, bool $default_desc, array $mandatory_columns = ['id']): DynamicList
+	public function makeList(array $query, string $tables, string $default_order, bool $default_desc, array $mandatory_columns = ['id']): DynamicList
 	{
-		$query = json_decode($query, true);
-
-		if (null === $query) {
-			throw new \InvalidArgumentException('Invalid JSON search object');
-		}
-
 		$query = (object) $query;
 
 		if (!isset($query->groups) || !is_array($query->groups)) {
@@ -68,26 +62,33 @@ abstract class AdvancedSearch
 		}
 
 		$conditions = $this->build($query->groups);
-		array_unshift($conditions->select, $default_order); // Always include default order
+		$select = $conditions->select;
+		$columns = $this->columns();
+
+		$pre = [];
+
+		// Always include default order
+		if (!array_key_exists($default_order, $select)) {
+			$pre[$default_order] = $columns[$default_order];
+		}
 
 		foreach ($mandatory_columns as $c) {
-			if (!in_array($c, $conditions->select)) {
-				array_unshift($conditions->select, $c); // Always include
+			if (!array_key_exists($c, $select) && !array_key_exists($c, $pre)) {
+				$pre[$c] = $columns[$c];
 			}
 		}
 
-		// Only select columns that we want
-		$select_columns = array_intersect_key($this->columns(), array_flip($conditions->select));
+		$select = array_merge($pre, $select);
 
 		$order = $query->order ?? $default_order;
 
-		if (!in_array($order, $select_columns)) {
+		if (!in_array($order, $select)) {
 			$order = $default_order;
 		}
 
 		DB::getInstance()->toggleUnicodeLike(true);
 
-		$list = new DynamicList($select_columns, $tables, $conditions->where);
+		$list = new DynamicList($select, $tables, $conditions->where);
 
 		$list->orderBy($order, $query->desc ?? $default_desc);
 		$list->setTitle('Recherche');
@@ -102,13 +103,14 @@ abstract class AdvancedSearch
 		$select_columns = [];
 		$query_groups = '';
 		$invalid = 0;
+		$group_operators = ['AND', 'OR', 'NOT AND'];
 
 		foreach ($groups as $group)
 		{
 			if (empty($group['conditions'])
 				|| empty($group['operator'])
 				|| !is_array($group['conditions'])
-				|| !($group['operator'] === 'AND' || $group['operator'] === 'OR'))
+				|| !in_array($group['operator'], $group_operators, true))
 			{
 				// Ignorer les groupes de conditions invalides
 				continue;
@@ -137,16 +139,24 @@ abstract class AdvancedSearch
 					continue;
 				}
 
-				$select_columns[] = $condition['column'];
+				$column = $columns[$condition['column']];
+
+				// Overwrite default column SELECT clause with custom one
+				if (isset($condition['select'])) {
+					$column['select'] = $condition['select'];
+				}
+
+				$select_columns[$condition['column']] = $column;
 
 				// Just append the column to the select
 				if ($condition['operator'] === '1') {
 					continue;
 				}
 
-				$column = $columns[$condition['column']];
-
-				if (isset($column['where'])) {
+				if (isset($condition['where'])) {
+					$query = sprintf($condition['where'], $condition['operator']);
+				}
+				elseif (isset($column['where'])) {
 					$query = sprintf($column['where'], $condition['operator']);
 				}
 				else {
@@ -224,14 +234,22 @@ abstract class AdvancedSearch
 				$query_group_conditions[] = $query;
 			}
 
-			if (count($query_group_conditions))
-			{
-				if ($query_groups !== '') {
-					$query_groups .= ' ' . ($group['join_operator'] ?? 'AND') . ' ';
-				}
-
-				$query_groups.= '(' . implode(' ' . $group['operator'] . ' ', $query_group_conditions) . ')';
+			if (!count($query_group_conditions)) {
+				continue;
 			}
+
+			if ($query_groups !== '') {
+				$query_groups .= ' ' . ($group['join_operator'] ?? 'AND') . ' ';
+			}
+
+			$o = $group['operator'];
+
+			if ($o === 'NOT AND') {
+				$query_groups .= ' NOT ';
+				$o = 'AND';
+			}
+
+			$query_groups.= '(' . implode(' ' . $o . ' ', $query_group_conditions) . ')';
 		}
 
 		if (!strlen($query_groups) && count($groups) && $invalid) {

@@ -17,6 +17,12 @@ class AdvancedSearch extends A_S
 	 */
 	public function columns(): array
 	{
+		static $columns = null;
+
+		if ($columns !== null) {
+			return $columns;
+		}
+
 		$db = DB::getInstance();
 		$fields = DynamicFields::getInstance();
 		$identity_search_fields = $fields::getNameFieldsSearchableSQL('us');
@@ -27,7 +33,7 @@ class AdvancedSearch extends A_S
 
 		$columns = [];
 
-		$columns['id'] = [];
+		$columns['id'] = ['select' => 'u.id'];
 
 		$order = $fields::getFirstSearchableNameField();
 
@@ -160,55 +166,43 @@ class AdvancedSearch extends A_S
 			'where'  => 'id_category %s',
 		];
 
-		$columns['service'] = [
-			'label'  => 'Est inscrit à l\'activité',
-			'type'   => 'enum',
-			'null'   => false,
-			'values' => $db->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE U_NOCASE;'),
-			'select' => '\'Inscrit\'',
-			'where'  => 'id IN (SELECT id_user FROM services_users WHERE id_service %s)',
-		];
-
-		$columns['fee'] = [
-			'label'  => 'Est inscrit au tarif',
-			'type'   => 'enum',
-			'null'   => false,
-			'values' => $db->getAssoc('SELECT f.id, s.label || \' — \' || f.label FROM services_fees f INNER JOIN services s ON s.id = f.id_service ORDER BY s.label COLLATE U_NOCASE, f.label COLLATE U_NOCASE;'),
-			'select' => '\'Inscrit\'',
-			'where'  => 'id IN (SELECT id_user FROM services_users WHERE id_fee %s)',
-		];
-
-		$columns['service_not'] = [
-			'label'  => 'N\'est pas inscrit à l\'activité',
-			'type'   => 'enum',
-			'null'   => false,
-			'values' => $db->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE U_NOCASE;'),
-			'select' => '\'Inscrit\'',
-			'where'  => 'id NOT IN (SELECT id_user FROM services_users WHERE id_service %s)',
-		];
-
-		$columns['service_active'] = [
-			'label'  => 'Est à jour de l\'activité',
-			'type'   => 'enum',
-			'null'   => false,
-			'values' => $db->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE U_NOCASE;'),
-			'select' => '\'À jour\'',
-			'where'  => 'id IN (SELECT id_user FROM (SELECT id_user, MAX(expiry_date) AS edate FROM services_users WHERE id_service %s GROUP BY id_user) WHERE edate >= date())',
-		];
-
-		$columns['service_expired'] = [
-			'label'  => 'N\'est pas à jour de l\'activité',
-			'type'   => 'enum',
-			'null'   => false,
-			'values' => $db->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE U_NOCASE;'),
-			'select' => '\'Expiré\'',
-			'where'  => 'id IN (SELECT id_user FROM (SELECT id_user, MAX(expiry_date) AS edate FROM services_users WHERE id_service %s GROUP BY id_user) WHERE edate < date())',
-		];
-
 		$columns['date_login'] = [
 			'label' => 'Date de dernière connexion',
 			'type'  => 'date',
 			'null'  => true,
+		];
+
+		$list = $db->getAssoc('SELECT \'service_\' || id, label FROM services
+			UNION ALL
+			SELECT \'fee_\' || f.id AS id, s.label || \' — \' || f.label AS label
+				FROM services_fees f
+				INNER JOIN services s ON s.id = f.id_service
+			ORDER BY label COLLATE U_NOCASE;');
+
+		$columns['subscription'] = [
+			'label'  => 'Est inscrit à',
+			'only_if' => 'service',
+			'type'   => 'enum_equal',
+			'null'   => false,
+			'values' => $list,
+			'select' => 'CASE WHEN su.id IS NOT NULL THEN \'Inscrit\' ELSE \'Non inscrit\' END',
+			'where'  => null,
+		];
+
+		$columns['subscription_active'] = [
+			'label'  => 'Inscription à jour',
+			'type'   => 'boolean',
+			'null'   => false,
+			'select' => 'CASE WHEN su.expiry_date >= date() THEN \'À jour\' ELSE \'Expiré\' END',
+			'where'  => '(su.expiry_date >= date()) %s',
+		];
+
+		$columns['subscription_paid'] = [
+			'label'  => 'Inscription payée',
+			'type'   => 'boolean',
+			'null'   => false,
+			'select' => 'CASE WHEN su.paid = 1 THEN \'Payée\' ELSE \'Non payée\' END',
+			'where'  => 'su.paid %s',
 		];
 
 		return $columns;
@@ -280,10 +274,10 @@ class AdvancedSearch extends A_S
 		];
 	}
 
-	public function make(string $query): DynamicList
+	public function make(array $query): DynamicList
 	{
 		$tables = 'users_view AS u INNER JOIN users_search AS us USING (id)';
-		$list = $this->makeList($query, $tables, 'identity', false, ['id', 'identity', 'number']);
+		$list = $this->makeList($query, $tables, 'identity', false, ['id', 'identity']);
 
 		$list->setExportCallback([Users::class, 'exportRowCallback']);
 		return $list;
@@ -302,5 +296,82 @@ class AdvancedSearch extends A_S
 				],
 			],
 		]]];
+	}
+
+	/**
+	 * Override parent makeList method to add specific tables for subscription joins
+	 */
+	public function makeList(array $query, string $tables, string $default_order, bool $default_desc, array $mandatory_columns = ['id']): DynamicList
+	{
+		if (!isset($query['groups']) || !is_array($query['groups'])) {
+			throw new \InvalidArgumentException('Invalid JSON search object: missing groups');
+		}
+
+		$columns = $this->columns();
+		$subscription_columns = ['subscription_active', 'subscription_paid'];
+		$i = 0;
+
+		// We will look on all conditions for subscription conditions
+		foreach ($query['groups'] as &$group) {
+			if (empty($group['conditions'])) {
+				continue;
+			}
+
+			$subscription_table = null;
+			$subscription_operator = null;
+
+			foreach ($group['conditions'] as &$condition) {
+				if (empty($condition['column'])) {
+					continue;
+				}
+
+				if ($condition['column'] === 'subscription') {
+					if (empty($condition['values'])) {
+						throw new \InvalidArgumentException('Invalid JSON search object: missing "values" for subscription');
+					}
+
+					$subscription_table = 'su' . ($i++);
+					$value = current($condition['values']);
+					$type = strtok($value, '_');
+					$id = strtok('');
+
+					if ($type !== 'service' && $type !== 'fee') {
+						throw new \InvalidArgumentException('Invalid subscription type: ' . $type);
+					}
+
+					$t = sprintf(' LEFT JOIN (SELECT MAX(expiry_date), * FROM services_users WHERE %s = %d GROUP BY id_user) AS %s ON %3$s.id_user = u.id',
+						'id_' . $type,
+						$id,
+						$subscription_table
+					);
+
+					$tables .= $t;
+					$subscription_operator = $condition['operator'];
+					$condition['where'] = sprintf('%s.id IS %s', $subscription_table, $condition['operator'] === '= ?' ? 'NOT NULL' : 'NULL');
+					$condition['select'] = str_replace('su.', $subscription_table . '.', $columns['subscription']['select']);
+				}
+				elseif (in_array($condition['column'], $subscription_columns)) {
+					$column = $columns[$condition['column']];
+
+					if (!$subscription_table) {
+						throw new UserException(sprintf('Le critère "%s" nécessite d\'avoir également sélectionné le critère "%s" précédemment.', $column['label'], $columns['subscription']['label']));
+					}
+
+					if ($subscription_operator !== '= ?') {
+						throw new UserException(sprintf('Le critère "%s" nécessite d\'avoir sélectionné "est égal à" pour le critère "%s" précédent.', $column['label'], $columns['subscription']['label']));
+					}
+
+					$condition['where'] = str_replace('su.', $subscription_table . '.', $column['where']);
+					$condition['select'] = str_replace('su.', $subscription_table . '.', $column['select']);
+				}
+			}
+
+			unset($condition);
+		}
+
+		unset($group);
+
+		$list = parent::makeList($query, $tables, $default_order, $default_desc, $mandatory_columns);
+		return $list;
 	}
 }
