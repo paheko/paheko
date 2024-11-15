@@ -2,13 +2,11 @@
 
 {if !$dialog}
 <p>
-	{linkbutton href="!users/details.php?id=%d"|args:$transaction_user.id label="Retour à la fiche membre" shape="user"}
+	{linkbutton href="!users/details.php?id=%d"|args:$transaction_user.id label="Retour à la fiche membre" shape="left"}
 </p>
 {/if}
 
-<p class="help">
-	De la plus récente à la plus ancienne.
-</p>
+<h2 class="ruler">Toutes les écritures liées</h2>
 
 {include file="acc/reports/_journal.tpl"}
 
@@ -61,5 +59,9 @@
 	{/foreach}
 	</tbody>
 </table>
+
+<p class="actions">
+	{linkbutton shape="menu" href="!acc/reports/ledger.php?year=%d&user=%d"|args:$year:$transaction_user.id label="Grand livre de ce membre"}
+</p>
 
 {include file="_foot.tpl"}
