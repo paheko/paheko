@@ -11,6 +11,7 @@ use Paheko\ValidationException;
 use Paheko\Utils;
 use Paheko\Users\DynamicFields;
 use Paheko\Services\Fees;
+use Paheko\Services\Services;
 
 class Service extends Entity
 {
