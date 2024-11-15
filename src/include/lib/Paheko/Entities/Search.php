@@ -364,7 +364,7 @@ class Search extends Entity
 		if (!empty($source['public'])) {
 			$source['id_user'] = null;
 		}
-		elseif (!empty($source['public_present'])) {
+		elseif (isset($source['public'])) {
 			$source['id_user'] = Session::getUserId();
 		}
 
