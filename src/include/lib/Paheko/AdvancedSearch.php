@@ -53,6 +53,14 @@ abstract class AdvancedSearch
 	 */
 	abstract public function defaults(): \stdClass;
 
+	/**
+	 * Eventually update query containing old criterias, to new criterias
+	 */
+	public function update(array $query): array
+	{
+		return $query;
+	}
+
 	public function makeList(array $query, string $tables, string $default_order, bool $default_desc, array $mandatory_columns = ['id']): DynamicList
 	{
 		$query = (object) $query;
@@ -146,7 +154,21 @@ abstract class AdvancedSearch
 					$column['select'] = $condition['select'];
 				}
 
-				$select_columns[$condition['column']] = $column;
+				// Overwrite default column SELECT clause with custom one
+				if (isset($condition['label'])) {
+					$column['label'] = $condition['label'];
+				}
+
+				$cname = $condition['column'];
+				$i = 1;
+
+				// Avoid overwriting existing columns, in case same column name is used multiple times
+				while (array_key_exists($cname, $select_columns)) {
+					$cname = rtrim($cname, '0123456789');
+					$cname .= $i++;
+				}
+
+				$select_columns[$cname] = $column;
 
 				// Just append the column to the select
 				if ($condition['operator'] === '1') {

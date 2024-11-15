@@ -97,6 +97,13 @@ class Search extends Entity
 				throw new \LogicException('Invalid JSON search object');
 			}
 
+			$updated = $this->getAdvancedSearch()->update($query);
+
+			if ($updated !== $query) {
+				$this->content = json_encode($updated);
+				throw new UserException("La recherche utilisait des critères qui ont été automatiquement modifiés ou supprimés.\nMerci de vérifier les critères et relancer.");
+			}
+
 			$this->_list = $this->getAdvancedSearch()->make($query);
 			return $this->_list;
 		}

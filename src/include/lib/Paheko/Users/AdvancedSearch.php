@@ -182,7 +182,7 @@ class AdvancedSearch extends A_S
 		$columns['subscription'] = [
 			'label'  => 'Est inscrit à',
 			'only_if' => 'service',
-			'type'   => 'enum_equal',
+			'type'   => 'enum_restricted',
 			'null'   => false,
 			'values' => $list,
 			'select' => 'CASE WHEN su.id IS NOT NULL THEN \'Inscrit\' ELSE \'Non inscrit\' END',
@@ -298,6 +298,72 @@ class AdvancedSearch extends A_S
 		]]];
 	}
 
+	public function update(array $query): array
+	{
+		$old_columns = [
+			'service'         => ['service_', '= ?'],
+			'service_not'     => ['service_', '!= ?'],
+			'fee'             => ['fee_', '= ?'],
+			'service_active'  => ['service_', '= ?'],
+			'service_expired' => ['service_', '= ?'],
+		];
+
+		// We will look on all conditions for subscription conditions
+		foreach ($query['groups'] as &$group) {
+			if (empty($group['conditions'])) {
+				continue;
+			}
+
+			// Migrate old service/fee conditions (TODO: remove in 1.6.0)
+			// see https://fossil.kd2.org/paheko/info/c0ec40a74dc5715f
+			foreach ($group['conditions'] as $key => $condition) {
+				if (!isset($condition['column'], $condition['operator'], $condition['values'])) {
+					continue;
+				}
+
+				$o = $old_columns[$condition['column']] ?? null;
+
+				if (null === $o) {
+					continue;
+				}
+
+				$new = [];
+
+				foreach ($condition['values'] as $v) {
+					$new[] = [
+						'column' => 'subscription',
+						'values' => [$o[0] . $v],
+						'operator' => $o[1],
+					];
+
+					if ($condition['column'] === 'service_active') {
+						$new[] = [
+							'column' => 'subscription_active',
+							'operator' => '= 1',
+						];
+					}
+					elseif ($condition['column'] === 'service_expired') {
+						$new[] = [
+							'column' => 'subscription_active',
+							'operator' => '= 0',
+						];
+					}
+				}
+
+				unset($group['conditions'][$key]);
+				$query['groups'][] = [
+					'join_operator' => 'AND',
+					'operator' => 'OR',
+					'conditions' => $new,
+				];
+			}
+		}
+
+		unset($group);
+
+		return $query;
+	}
+
 	/**
 	 * Override parent makeList method to add specific tables for subscription joins
 	 */
@@ -309,7 +375,9 @@ class AdvancedSearch extends A_S
 
 		$columns = $this->columns();
 		$subscription_columns = ['subscription_active', 'subscription_paid'];
+
 		$i = 0;
+		$db = DB::getInstance();
 
 		// We will look on all conditions for subscription conditions
 		foreach ($query['groups'] as &$group) {
@@ -325,6 +393,9 @@ class AdvancedSearch extends A_S
 					continue;
 				}
 
+				$column = $columns[$condition['column']];
+
+				// Transform subscription condition into table join
 				if ($condition['column'] === 'subscription') {
 					if (empty($condition['values'])) {
 						throw new \InvalidArgumentException('Invalid JSON search object: missing "values" for subscription');
@@ -339,7 +410,7 @@ class AdvancedSearch extends A_S
 						throw new \InvalidArgumentException('Invalid subscription type: ' . $type);
 					}
 
-					$t = sprintf(' LEFT JOIN (SELECT MAX(expiry_date), * FROM services_users WHERE %s = %d GROUP BY id_user) AS %s ON %3$s.id_user = u.id',
+					$t = sprintf("\n" . ' LEFT JOIN (SELECT MAX(expiry_date), * FROM services_users WHERE %s = %d GROUP BY id_user) AS %s ON %3$s.id_user = u.id',
 						'id_' . $type,
 						$id,
 						$subscription_table
@@ -349,14 +420,15 @@ class AdvancedSearch extends A_S
 					$subscription_operator = $condition['operator'];
 					$condition['where'] = sprintf('%s.id IS %s', $subscription_table, $condition['operator'] === '= ?' ? 'NOT NULL' : 'NULL');
 					$condition['select'] = str_replace('su.', $subscription_table . '.', $columns['subscription']['select']);
+					$condition['label'] = $column['values'][$value] ?? $value;
 				}
+				// For conditions related to subscription, link them to previously selected subscription
 				elseif (in_array($condition['column'], $subscription_columns)) {
-					$column = $columns[$condition['column']];
-
 					if (!$subscription_table) {
 						throw new UserException(sprintf('Le critère "%s" nécessite d\'avoir également sélectionné le critère "%s" précédemment.', $column['label'], $columns['subscription']['label']));
 					}
 
+					// You can't have paid == no if criteria is id_service != X, as this doesn't make sense
 					if ($subscription_operator !== '= ?') {
 						throw new UserException(sprintf('Le critère "%s" nécessite d\'avoir sélectionné "est égal à" pour le critère "%s" précédent.', $column['label'], $columns['subscription']['label']));
 					}

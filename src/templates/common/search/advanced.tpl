@@ -61,6 +61,6 @@ $is_unprotected = $s->type == $s::TYPE_SQL_UNPROTECTED;
 			{button name="to_sql" value=1 type="submit" label="Transformer en recherche SQL" shape="edit"}
 		{/if}
 	</p>
-	<script type="text/javascript" src="{$admin_url}static/scripts/advanced_search.js"></script>
+	<script type="text/javascript" src="{$admin_url}static/scripts/advanced_search.js?{$version_hash}"></script>
 {/if}
 </fieldset>

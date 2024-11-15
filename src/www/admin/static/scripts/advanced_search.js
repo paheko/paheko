@@ -42,13 +42,17 @@ g.script('scripts/lib/query_builder.js', () => {
 		return translations[str] ?? str;
 	};
 	q.loadDefaultOperators();
+	q.types_operators['enum_restricted'] = {
+		"= ?": q.__("is equal to"),
+		"!= ?": q.__("is not equal to"),
+	};
 	q.default_operator = "LIKE %?%";
 
 	// Add specific condition just to have the column show up in result
 	q.operators["1"] = "afficher cette colonne";
 
 	for (var i in q.types_operators) {
-		if (i === 'enum_equal') {
+		if (i === 'enum_noselect') {
 			continue;
 		}
 
