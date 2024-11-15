@@ -5,6 +5,7 @@ namespace Paheko\Services;
 use Paheko\Config;
 use Paheko\DB;
 use Paheko\DynamicList;
+use Paheko\Utils;
 use Paheko\Users\Categories;
 use Paheko\Entities\Services\Service;
 use KD2\DB\EntityManager;
