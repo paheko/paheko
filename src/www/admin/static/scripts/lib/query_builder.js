@@ -45,7 +45,6 @@
 		this.types_operators = {
 			"integer": ["= ?", "!= ?", "IN (??)", "NOT IN (??)", "> ?", ">= ?", "< ?", "<= ?", "BETWEEN ? AND ?", "NOT BETWEEN ? AND ?"],
 			"enum": ["= ?", "!= ?", "IN (??)", "NOT IN (??)"],
-			"enum_equal": ["= ?", "!= ?"],
 			"boolean": ["= 1", "= 0"],
 			"text": ["= ?", "!= ?", "IN (??)", "NOT IN (??)", "LIKE ?%", "NOT LIKE ?%", "LIKE %?", "NOT LIKE %?", "LIKE %?%", "NOT LIKE %?%"],
 			"bitwise": ["&", "NOT &"],
@@ -342,7 +341,7 @@
 	};
 
 	qb.prototype.addMatchField = function (targetParent, prev, column, operator) {
-		if (column.type === 'enum' || column.type === 'enum_equal') {
+		if (column.type.indexOf('enum') === 0) {
 			var field = this.buildSelect(column.values);
 		}
 		else if (column.type == 'bitwise')
