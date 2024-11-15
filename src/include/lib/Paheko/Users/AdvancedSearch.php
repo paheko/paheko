@@ -172,7 +172,10 @@ class AdvancedSearch extends A_S
 			'null'  => true,
 		];
 
-		$list = $db->getAssoc('SELECT \'service_\' || id, label FROM services
+		$list = $db->getAssoc('
+			SELECT NULL, \'— Aucune activité —\'
+			UNION ALL
+			SELECT \'service_\' || id, label FROM services
 			UNION ALL
 			SELECT \'fee_\' || f.id AS id, s.label || \' — \' || f.label AS label
 				FROM services_fees f
@@ -185,7 +188,7 @@ class AdvancedSearch extends A_S
 			'type'   => 'enum_restricted',
 			'null'   => false,
 			'values' => $list,
-			'select' => 'CASE WHEN su.id IS NOT NULL THEN \'Inscrit\' ELSE \'Non inscrit\' END',
+			'select' => 'CASE WHEN su.id IS NOT NULL THEN \'Inscrit\' ELSE \'\' END',
 			'where'  => null,
 		];
 
@@ -387,6 +390,7 @@ class AdvancedSearch extends A_S
 
 			$subscription_table = null;
 			$subscription_operator = null;
+			$subscription_value = null;
 
 			foreach ($group['conditions'] as &$condition) {
 				if (empty($condition['column'])) {
@@ -402,25 +406,36 @@ class AdvancedSearch extends A_S
 					}
 
 					$subscription_table = 'su' . ($i++);
-					$value = current($condition['values']);
-					$type = strtok($value, '_');
+					$subscription_value = current($condition['values']);
+					$type = strtok($subscription_value, '_');
 					$id = strtok('');
 
-					if ($type !== 'service' && $type !== 'fee') {
+					$t = "\n ";
+
+					if ($subscription_value === '') {
+						$t .= sprintf('LEFT JOIN (SELECT MAX(expiry_date), * FROM services_users GROUP BY id_user) AS %s ON %1$s.id_user = u.id', $subscription_table);
+
+						// Invert actual operator here
+						$condition['operator'] = $condition['operator'] === '= ?' ? '!= ?' : '= ?';
+						$condition['label'] = 'Inscription';
+					}
+					elseif ($type === 'service' || $type === 'fee') {
+						$t = sprintf("\n" . ' LEFT JOIN (SELECT MAX(expiry_date), * FROM services_users WHERE id_%s = %d GROUP BY id_user) AS %s ON %3$s.id_user = u.id',
+							$type,
+							$id,
+							$subscription_table
+						);
+
+						$condition['label'] = $column['values'][$subscription_value] ?? $subscription_value;
+					}
+					else {
 						throw new \InvalidArgumentException('Invalid subscription type: ' . $type);
 					}
-
-					$t = sprintf("\n" . ' LEFT JOIN (SELECT MAX(expiry_date), * FROM services_users WHERE %s = %d GROUP BY id_user) AS %s ON %3$s.id_user = u.id',
-						'id_' . $type,
-						$id,
-						$subscription_table
-					);
 
 					$tables .= $t;
 					$subscription_operator = $condition['operator'];
 					$condition['where'] = sprintf('%s.id IS %s', $subscription_table, $condition['operator'] === '= ?' ? 'NOT NULL' : 'NULL');
 					$condition['select'] = str_replace('su.', $subscription_table . '.', $columns['subscription']['select']);
-					$condition['label'] = $column['values'][$value] ?? $value;
 				}
 				// For conditions related to subscription, link them to previously selected subscription
 				elseif (in_array($condition['column'], $subscription_columns)) {
@@ -429,8 +444,12 @@ class AdvancedSearch extends A_S
 					}
 
 					// You can't have paid == no if criteria is id_service != X, as this doesn't make sense
-					if ($subscription_operator !== '= ?') {
+					if ($subscription_operator !== '= ?' && $subscription_value) {
 						throw new UserException(sprintf('Le critère "%s" nécessite d\'avoir sélectionné "est égal à" pour le critère "%s" précédent.', $column['label'], $columns['subscription']['label']));
+					}
+					// You can't have paid == yes if criteria is id_service IS NULL
+					elseif ($subscription_operator !== '= ?') {
+						throw new UserException(sprintf('Le critère "%s" nécessite d\'avoir sélectionné "n\'est pas égal à" pour le critère "%s" précédent.', $column['label'], $columns['subscription']['label']));
 					}
 
 					$condition['where'] = str_replace('su.', $subscription_table . '.', $column['where']);
