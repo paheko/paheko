@@ -304,7 +304,18 @@ class CommonFunctions
 			}
 
 			foreach ($options as $optgroup => $suboptions) {
-				if (is_array($suboptions)) {
+				// Accept [['label' => 'optgroup label', 'options' => ['key1' => 'option 1']]]
+				if (isset($suboptions['options'])) {
+					$input .= sprintf('<optgroup label="%s">', htmlspecialchars((string)$suboptions['label']));
+
+					foreach ($suboptions['options'] as $_key => $_value) {
+						$input .= sprintf('<option value="%s"%s>%s</option>', $_key, $current_value == $_key ? ' selected="selected"' : '', htmlspecialchars((string)$_value));
+					}
+
+					$input .= '</optgroup>';
+				}
+				// Accept ['optgroup label' => ['key1' => 'option 1']]
+				elseif (is_array($suboptions)) {
 					$input .= sprintf('<optgroup label="%s">', htmlspecialchars((string)$optgroup));
 
 					foreach ($suboptions as $_key => $_value) {
@@ -313,6 +324,7 @@ class CommonFunctions
 
 					$input .= '</optgroup>';
 				}
+				// Accept ['key1' => 'option 1']
 				else {
 					$input .= sprintf('<option value="%s"%s>%s</option>', $optgroup, $current_value == $optgroup ? ' selected="selected"' : '', htmlspecialchars((string)$suboptions));
 				}

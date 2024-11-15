@@ -21,18 +21,23 @@ class Services
 		return DB::getInstance()->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE U_NOCASE;');
 	}
 
-	static public function listAssocWithFees()
+	static public function listGroupedWithFeesForSelect()
 	{
 		$out = [];
 
 		foreach (self::listGroupedWithFees(null, 2) as $service) {
-			$out[$service->label] = [
-				's' . $service->id => '— Tous les tarifs —',
+			$s = [
+				'label' => $service->label,
+				'options' => [
+					's' . $service->id => '— Tous les tarifs —',
+				],
 			];
 
 			foreach ($service->fees as $fee) {
-				$out[$service->label]['f' . $fee->id] = $fee->label;
+				$s['options']['f' . $fee->id] = $fee->label;
 			}
+
+			$out[] = $s;
 		}
 
 		return $out;
