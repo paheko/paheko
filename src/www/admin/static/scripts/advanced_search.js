@@ -52,7 +52,7 @@ g.script('scripts/lib/query_builder.js', () => {
 	q.operators["1"] = "afficher cette colonne";
 
 	for (var i in q.types_operators) {
-		if (i === 'enum_noselect') {
+		if (i === 'enum_restricted') {
 			continue;
 		}
 
