@@ -4,6 +4,7 @@ namespace Paheko\Users;
 
 use Paheko\DynamicList;
 use Paheko\Users\DynamicFields;
+use Paheko\Services\Services;
 use Paheko\AdvancedSearch as A_S;
 use Paheko\DB;
 use Paheko\Utils;
@@ -172,15 +173,9 @@ class AdvancedSearch extends A_S
 			'null'  => true,
 		];
 
-		$list = $db->getAssoc('
-			SELECT NULL, \'— Aucune activité —\'
-			UNION ALL
-			SELECT \'service_\' || id, label FROM services
-			UNION ALL
-			SELECT \'fee_\' || f.id AS id, s.label || \' — \' || f.label AS label
-				FROM services_fees f
-				INNER JOIN services s ON s.id = f.id_service
-			ORDER BY label COLLATE U_NOCASE;');
+		$list = Services::listGroupedWithFeesForSelect();
+		array_unshift($list, '— Aucune activité —');
+		$list = array_values($list);
 
 		$columns['subscription'] = [
 			'label'  => 'Est inscrit à',
@@ -407,12 +402,12 @@ class AdvancedSearch extends A_S
 
 					$subscription_table = 'su' . ($i++);
 					$subscription_value = current($condition['values']);
-					$type = strtok($subscription_value, '_');
-					$id = strtok('');
+					$type = substr($subscription_value, 0, 1) === 's' ? 'service' : 'fee';
+					$id = substr($subscription_value, 1);
 
 					$t = "\n ";
 
-					if ($subscription_value === '') {
+					if (empty($subscription_value)) {
 						$t .= sprintf('LEFT JOIN (SELECT MAX(expiry_date), * FROM services_users GROUP BY id_user) AS %s ON %1$s.id_user = u.id', $subscription_table);
 
 						// Invert actual operator here
@@ -426,7 +421,23 @@ class AdvancedSearch extends A_S
 							$subscription_table
 						);
 
-						$condition['label'] = $column['values'][$subscription_value] ?? $subscription_value;
+						foreach ($column['values'] as $g) {
+							if (!is_array($g)) {
+								continue;
+							}
+
+							foreach ($g['options'] ?? [] as $id => $label) {
+								if ($id == $subscription_value) {
+									if ($type === 'service') {
+										$condition['label'] = $g['label'];
+									}
+									else {
+										$condition['label'] = $g['label'] . ' — ' . $label;
+									}
+									break;
+								}
+							}
+						}
 					}
 					else {
 						throw new \InvalidArgumentException('Invalid subscription type: ' . $type);

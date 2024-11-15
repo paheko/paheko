@@ -382,12 +382,29 @@
 	qb.prototype.buildSelect = function (options) {
 		var select = document.createElement('select');
 
-		for (var i in options)
-		{
-			var option = document.createElement('option');
-			option.value = i;
-			option.innerHTML = options[i];
-			select.appendChild(option);
+		for (var i in options) {
+			var o = options[i];
+
+			if (typeof o === 'string') {
+				var option = document.createElement('option');
+				option.value = i;
+				option.innerText = o;
+				select.appendChild(option);
+			}
+			else {
+				var sub_options = o.options ?? o;
+				var optgroup = document.createElement('optgroup');
+				optgroup.label = o.label ?? i;
+
+				for (var j in sub_options) {
+					var option = document.createElement('option');
+					option.value = j;
+					option.innerText = sub_options[j];
+					optgroup.appendChild(option);
+				}
+
+				select.appendChild(optgroup);
+			}
 		}
 
 		return select;

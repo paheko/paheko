@@ -21,21 +21,40 @@ class Services
 		return DB::getInstance()->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE U_NOCASE;');
 	}
 
-	static public function listAssocWithFees()
+	static public function listGroupedWithFeesForSelect(): array
 	{
 		$out = [];
 
 		foreach (self::listGroupedWithFees(null, 2) as $service) {
-			$out[$service->label] = [
-				's' . $service->id => '— Tous les tarifs —',
+			$s = [
+				'label' => self::getLongLabel($service),
+				'options' => [
+					's' . $service->id => '— Tous les tarifs —',
+				],
 			];
 
 			foreach ($service->fees as $fee) {
-				$out[$service->label]['f' . $fee->id] = $fee->label;
+				$s['options']['f' . $fee->id] = $fee->label;
 			}
+
+			$out[] = $s;
 		}
 
 		return $out;
+	}
+
+	static public function getLongLabel(\stdClass $service)
+	{
+		if ($service->duration) {
+			$duration = sprintf('%d jours', $service->duration);
+		}
+		elseif ($service->start_date)
+			$duration = sprintf('du %s au %s', $service->start_date->format('d/m/Y'), $service->end_date->format('d/m/Y'));
+		else {
+			$duration = 'ponctuelle';
+		}
+
+		return sprintf('%s — %s', $service->label, $duration);
 	}
 
 	static public function count()
