@@ -43,7 +43,7 @@ class Services
 		return $out;
 	}
 
-	static public function getLongLabel(\stdClass $service)
+	static public function getLongLabel(object $service)
 	{
 		if ($service->duration) {
 			$duration = sprintf('%d jours', $service->duration);
