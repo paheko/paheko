@@ -174,8 +174,6 @@ class AdvancedSearch extends A_S
 		];
 
 		$list = Services::listGroupedWithFeesForSelect();
-		array_unshift($list, '— Aucune activité —');
-		$list = array_values($list);
 
 		$columns['subscription'] = [
 			'label'  => 'Est inscrit à',
@@ -185,14 +183,16 @@ class AdvancedSearch extends A_S
 			'values' => $list,
 			'select' => 'CASE WHEN su.id IS NOT NULL THEN \'Inscrit\' ELSE \'\' END',
 			'where'  => null,
+			'force' => ['subscription_active', 'subscription_paid'],
 		];
 
 		$columns['subscription_active'] = [
 			'label'  => 'Inscription à jour',
 			'type'   => 'boolean',
 			'null'   => false,
-			'select' => 'CASE WHEN su.expiry_date >= date() THEN \'À jour\' ELSE \'Expiré\' END',
+			'select' => 'CASE WHEN su.expiry_date >= date() THEN \'À jour\' ELSE \'Expirée\' END',
 			'where'  => '(su.expiry_date >= date()) %s',
+			'hidden' => 'true',
 		];
 
 		$columns['subscription_paid'] = [
@@ -201,6 +201,7 @@ class AdvancedSearch extends A_S
 			'null'   => false,
 			'select' => 'CASE WHEN su.paid = 1 THEN \'Payée\' ELSE \'Non payée\' END',
 			'where'  => 'su.paid %s',
+			'hidden' => true,
 		];
 
 		return $columns;
@@ -454,17 +455,20 @@ class AdvancedSearch extends A_S
 						throw new UserException(sprintf('Le critère "%s" nécessite d\'avoir également sélectionné le critère "%s" précédemment.', $column['label'], $columns['subscription']['label']));
 					}
 
-					// You can't have paid == no if criteria is id_service != X, as this doesn't make sense
-					if ($subscription_operator !== '= ?' && $subscription_value) {
-						throw new UserException(sprintf('Le critère "%s" nécessite d\'avoir sélectionné "est égal à" pour le critère "%s" précédent.', $column['label'], $columns['subscription']['label']));
-					}
-					// You can't have paid == yes if criteria is id_service IS NULL
-					elseif ($subscription_operator !== '= ?') {
-						throw new UserException(sprintf('Le critère "%s" nécessite d\'avoir sélectionné "n\'est pas égal à" pour le critère "%s" précédent.', $column['label'], $columns['subscription']['label']));
-					}
-
-					$condition['where'] = str_replace('su.', $subscription_table . '.', $column['where']);
 					$condition['select'] = str_replace('su.', $subscription_table . '.', $column['select']);
+
+					if (($condition['operator'] ?? '') !== '1') {
+						// You can't have paid == no if criteria is id_service != X, as this doesn't make sense
+						if ($subscription_operator !== '= ?' && $subscription_value) {
+							throw new UserException(sprintf('Le critère "%s" nécessite d\'avoir sélectionné "est égal à" pour le critère "%s" précédent.', $column['label'], $columns['subscription']['label']));
+						}
+						// You can't have paid == yes if criteria is id_service IS NULL
+						elseif ($subscription_operator !== '= ?') {
+							throw new UserException(sprintf('Le critère "%s" nécessite d\'avoir sélectionné "n\'est pas égal à" pour le critère "%s" précédent.', $column['label'], $columns['subscription']['label']));
+						}
+
+						$condition['where'] = str_replace('su.', $subscription_table . '.', $column['where']);
+					}
 				}
 			}
 

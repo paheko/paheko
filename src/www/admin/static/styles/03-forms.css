@@ -357,7 +357,8 @@ input.resetButton {
 }
 
 input[readonly], input.disabled, input[disabled], textarea[disabled], select[disabled], button[disabled],
-fieldset[disabled], fieldset[disabled] input, fieldset[disabled] textarea, fieldset[disabled] select, .radio-btn.disabled div {
+fieldset[disabled], fieldset[disabled] input, fieldset[disabled] textarea, fieldset[disabled] select,
+.radio-btn.disabled div, select[aria-readonly] {
     cursor: not-allowed;
     color: var(--gBorderColor);
     background-color: var(--gLightBackgroundColor);
@@ -368,10 +369,14 @@ fieldset[disabled] {
     background: none;
 }
 
-input[disabled]:hover, input[readonly]:hover {
+input[disabled]:hover, input[readonly]:hover, select[aria-readonly]:hover {
     background-color: unset;
     color: unset;
     border-color: unset;
+}
+
+select[aria-readonly] {
+    pointer-events: none;
 }
 
 input[disabled] + label {
@@ -686,6 +691,10 @@ dialog.datepicker {
 
 #queryBuilderForm textarea {
     width: calc(100% - 2em);
+}
+
+#queryBuilder tr.forced .buttons button {
+    display: none;
 }
 
 #queryBuilder .column select, #queryBuilderForm .actions select {

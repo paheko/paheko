@@ -90,6 +90,15 @@
 		}
 
 		this.columnSelect = this.buildSelect(options);
+
+		// Hide columns
+		for (var i = 0; i < this.columnSelect.options.length; i++) {
+			var o = this.columnSelect.options[i];
+
+			if (this.columns[o.value].hidden ?? null) {
+				o.hidden = true;
+			}
+		}
 	};
 
 	qb.prototype.addGroup = function (targetParent, operator, join_operator) {
@@ -204,13 +213,16 @@
 		var row = columnSelect.parentNode.parentNode;
 		var current_operator = row.cells[2].firstChild ? row.cells[2].firstChild.value : null;
 		var current_values = this.getValues(row);
+		var old_value = columnSelect.dataset.oldValue ?? null;
+		var value = columnSelect.value;
+		columnSelect.dataset.oldValue = value;
 		row.childNodes[2].innerHTML = '';
 
-		if (!columnSelect.value) {
+		if (!value) {
 			return;
 		}
 
-		var column = this.columns[columnSelect.value];
+		var column = this.columns[value];
 		var o = this.addOperator(row, column);
 		var operators = this.types_operators[column.type];
 
@@ -219,8 +231,17 @@
 			o.value = current_operator;
 		}
 		else {
-			if (this.default_operator && operators.hasOwnProperty(this.default_operator)) {
+			if (this.default_operator && typeof this.default_operator === 'string' && operators.hasOwnProperty(this.default_operator)) {
 				o.value = this.default_operator;
+			}
+			// Multiple default_operator, take the first available one
+			else if (this.default_operator) {
+				for (var i = 0; i < this.default_operator.length; i++) {
+					if (operators.hasOwnProperty(this.default_operator[i])) {
+						o.value = this.default_operator[i];
+						break;
+					}
+				}
 			}
 			else {
 				o.value = o.children[1].value;
@@ -230,6 +251,25 @@
 		}
 
 		this.switchOperator(o, current_values);
+
+		// Add forced columns
+		if (column.force ?? null) {
+			for (var i = 0; i < column.force.length; i++) {
+				var f = column.force[i];
+				row = this.addRow(findAncestor(row, 'fieldset'), row);
+				var o = row.querySelector('.column select option[value="' + f + '"]');
+				o.hidden = false;
+				o.parentNode.value = f;
+				this.switchColumn(o.parentNode);
+				o.parentNode.setAttribute('aria-readonly', 'true');
+				row.classList.add('forced');
+			}
+		}
+		else if (old_value && (this.columns[old_value].force ?? null)) {
+			for (var i = 0; i < this.columns[old_value].force.length; i++) {
+				row.nextElementSibling.remove();
+			}
+		}
 	};
 
 	qb.prototype.addOperator = function (targetRow, column) {
@@ -420,21 +460,36 @@
 			}
 
 			var groupElement = this.addGroup(this.parent, groups[g].operator, groups[g].join_operator ?? null);
+			var forced = 0;
 
 			for (var i in groups[g].conditions)
 			{
 				var condition = groups[g].conditions[i];
 				var row = this.addRow(groupElement);
-				row.childNodes[1].firstChild.value = condition.column;
+				var select = row.childNodes[1].firstChild;
+				select.value = condition.column;
+				select.dataset.oldValue = select.value;
 
-				if (!this.columns[condition.column]) {
+				var column = this.columns[condition.column] ?? null;
+
+				if (!column) {
 					continue;
 				}
 
-				var operator = this.addOperator(row, this.columns[condition.column]);
+				var operator = this.addOperator(row, column);
 				operator.value = condition.operator;
 
 				this.switchOperator(operator, condition.values);
+
+				// Handle forced columns
+				if (column.force) {
+					forced = column.force.length;
+				}
+				else if (forced && forced--) {
+					select.options[select.selectedIndex].hidden = false;
+					select.setAttribute('aria-readonly', 'true');
+					row.classList.add('forced');
+				}
 			}
 		}
 	};

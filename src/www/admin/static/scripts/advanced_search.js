@@ -44,9 +44,8 @@ g.script('scripts/lib/query_builder.js', () => {
 	q.loadDefaultOperators();
 	q.types_operators['enum_restricted'] = {
 		"= ?": q.__("is equal to"),
-		"!= ?": q.__("is not equal to"),
 	};
-	q.default_operator = "LIKE %?%";
+	q.default_operator = ["LIKE %?%", "1"];
 
 	// Add specific condition just to have the column show up in result
 	q.operators["1"] = "afficher cette colonne";
