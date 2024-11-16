@@ -5,6 +5,7 @@ namespace Paheko\Services;
 use Paheko\Config;
 use Paheko\DB;
 use Paheko\DynamicList;
+use Paheko\Utils;
 use Paheko\Users\Categories;
 use Paheko\Entities\Services\Service;
 use KD2\DB\EntityManager;
@@ -48,8 +49,9 @@ class Services
 		if ($service->duration) {
 			$duration = sprintf('%d jours', $service->duration);
 		}
-		elseif ($service->start_date)
-			$duration = sprintf('du %s au %s', $service->start_date->format('d/m/Y'), $service->end_date->format('d/m/Y'));
+		elseif ($service->start_date) {
+			$duration = sprintf('du %s au %s', Utils::shortDate($service->start_date), Utils::shortDate($service->end_date));
+		}
 		else {
 			$duration = 'ponctuelle';
 		}
