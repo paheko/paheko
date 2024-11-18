@@ -80,6 +80,9 @@
 	{if isset($project)}
 		<h3>Projet&nbsp;: {if $project.code}{$project.code} — {/if}{$project.label}{if $project.archived} <em>(archivé)</em>{/if}</h3>
 	{/if}
+	{if isset($selected_user)}
+		<h3>Uniquement pour le membre&nbsp;: {$selected_user->name()}</h3>
+	{/if}
 	{if isset($year)}
 		<p>Exercice&nbsp;: {$year.label} ({if $year->isClosed()}clôturé{else}<strong>en cours</strong>{/if})
 			— du {$year.start_date|date_short}
