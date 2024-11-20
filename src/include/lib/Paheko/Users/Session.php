@@ -229,17 +229,12 @@ class Session extends \KD2\UserSession
 		return $v;
 	}
 
-	public function isLogged(bool $disable_local_login = false)
+	public function isLogged(bool $allow_new_session = true)
 	{
 		$logged = parent::isLogged();
 
-		if ($logged && !$disable_local_login && LOCAL_LOGIN && LOCAL_LOGIN !== -1 && LOCAL_LOGIN !== $this->user) {
-			$logged = false;
-		}
-
-		// Ajout de la gestion de LOCAL_LOGIN
-		if (!$logged && !$disable_local_login && LOCAL_LOGIN) {
-			$logged = $this->forceLogin(LOCAL_LOGIN);
+		if (!$logged && LOCAL_LOGIN) {
+			$logged = $this->forceLogin(LOCAL_LOGIN, $allow_new_session);
 		}
 
 		// Logout if data_root doesn't match, to forbid one session being used with another organization
@@ -270,7 +265,7 @@ class Session extends \KD2\UserSession
 		return $r;
 	}
 
-	public function forceLogin($login)
+	public function forceLogin($login, bool $allow_new_session = true): bool
 	{
 		// Force login with a static user, that is not in the local database
 		// this is useful for using a SSO like LDAP for example
@@ -289,6 +284,11 @@ class Session extends \KD2\UserSession
 			}
 
 			return true;
+		}
+
+		// Don't allow creating a session in some cases (eg. install / backup)
+		if (!$allow_new_session) {
+			return false;
 		}
 
 		// Look for the first user with the permission to manage the configuration

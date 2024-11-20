@@ -29,7 +29,7 @@ class Template extends Smartyer
 		$this->assign('table_export', false);
 		$this->assign('pdf_export', false);
 
-		if ($session->isLogged(true)) {
+		if ($session->isLogged(false)) {
 			if (isset($_GET['_pdf'])) {
 				$this->assign('pdf_export', true);
 				$this->PDF($template);

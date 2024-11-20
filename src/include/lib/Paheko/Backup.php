@@ -446,7 +446,7 @@ class Backup
 		}
 
 		// Try to handle case where the admin performing the restore is no longer an admin in the restored database
-		if ($session && $session->isLogged(true)) {
+		if ($session && $session->isLogged(false)) {
 			$sql = 'SELECT 1 FROM users_categories WHERE id = (SELECT id_category FROM users WHERE id = %d) AND perm_connect >= %d AND perm_config >= %d';
 
 			$sql = sprintf($sql, $session->getUser()->id, Session::ACCESS_READ, Session::ACCESS_ADMIN);
@@ -481,7 +481,7 @@ class Backup
 		}
 
 		// Force user to be re-logged as the first admin
-		if ($session && $session->isLogged(true)) {
+		if ($session && $session->isLogged(false)) {
 			$return |= self::CHANGED_USER;
 		}
 
