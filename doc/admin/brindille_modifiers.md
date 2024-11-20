@@ -445,6 +445,10 @@ Formatte un texte selon les règles typographiques françaises : ajoute des espa
 
 Encode une chaîne de texte pour utilisation dans une adresse URL (alias de `rawurlencode` en PHP).
 
+## cdata_escape
+
+Échappe le contenu pour un usage dans une balise `<![CDATA[…]]>` d'un document XML.
+
 ## xml_escape
 
 Échappe le contenu pour un usage dans un document XML.
