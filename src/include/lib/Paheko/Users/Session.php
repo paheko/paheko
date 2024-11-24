@@ -470,7 +470,7 @@ class Session extends \KD2\UserSession
 	 * Check that the supplied query is valid, if so, return the user information
 	 * @param  string $query User-supplied query
 	 */
-	public function checkRecoveryPasswordQuery(string $query): ?\stdClass
+	public function checkRecoveryPasswordQuery(string $query): ?User
 	{
 		if (substr_count($query, '.') !== 2) {
 			return null;
@@ -509,14 +509,13 @@ class Session extends \KD2\UserSession
 	{
 		$user = $this->checkRecoveryPasswordQuery($query);
 
-		if (null === $user) {
+		if (!$user) {
 			throw new UserException('Le code permettant de changer le mot de passe a expiré. Merci de bien vouloir recommencer la procédure.');
 		}
 
-		$ue = Users::get($user->id);
-		$ue->setNewPassword(compact('password', 'password_confirmed'), false);
-		$ue->save(false);
-		EmailsTemplates::passwordChanged($ue);
+		$user->setNewPassword(compact('password', 'password_confirmed'), false);
+		$user->save(false);
+		EmailsTemplates::passwordChanged($user);
 	}
 
 	public function user(): ?User
