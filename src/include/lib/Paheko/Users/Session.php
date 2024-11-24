@@ -400,7 +400,7 @@ class Session extends \KD2\UserSession
 			throw new UserException('Ce membre n\'a pas le droit de se connecter.');
 		}
 
-		if (!$user->canChangePassword(null)) {
+		if (!$user->canRecoverPassword()) {
 			throw new UserException('Vous n\'avez pas le droit de changer votre mot de passe. Merci de demander à un⋅e administrateur⋅trice.');
 		}
 

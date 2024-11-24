@@ -686,6 +686,16 @@ class User extends Entity
 		return $password_field->user_access_level === Session::ACCESS_WRITE;
 	}
 
+	public function canRecoverPassword(): bool
+	{
+		// Admins can recover their password all the time
+		if ($this->isSuperAdmin()) {
+			return true;
+		}
+
+		return $this->canChangePassword(null);
+	}
+
 	public function checkDuplicate(): ?int
 	{
 		$id_field = DynamicFields::getNameFieldsSQL();
