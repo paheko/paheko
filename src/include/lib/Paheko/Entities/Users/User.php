@@ -676,9 +676,9 @@ class User extends Entity
 		throw new UserException("Le champ identifiant ne peut être laissé vide pour un administrateur, sinon vous ne pourriez plus vous connecter.");
 	}
 
-	public function canChangePassword(Session $session): bool
+	public function canChangePassword(?Session $session): bool
 	{
-		if ($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)) {
+		if ($session && $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)) {
 			return true;
 		}
 
@@ -799,6 +799,12 @@ class User extends Entity
 		}
 
 		$zip->close();
+	}
+
+	public function canLogin(): bool
+	{
+		$category = $this->category();
+		return $category->perm_connect >= Session::ACCESS_READ;
 	}
 
 	public function isSuperAdmin(): bool

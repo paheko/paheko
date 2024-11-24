@@ -388,21 +388,25 @@ class Session extends \KD2\UserSession
 		return parent::logout();
 	}
 
-	public function recoverPasswordSend(string $id): void
+	public function recoverPasswordSend(string $login): void
 	{
-		$user = $this->fetchUserForPasswordRecovery($id);
+		$user = Users::getFromLogin($login);
 
 		if (!$user) {
-			throw new UserException('Aucun membre trouvé avec cette adresse e-mail, ou le membre trouvé n\'a pas le droit de se connecter.');
+			throw new UserException('Aucun membre trouvé avec cet identifiant.');
 		}
 
-		if ($user->perm_connect == self::ACCESS_NONE) {
+		if (!$user->canLogin()) {
 			throw new UserException('Ce membre n\'a pas le droit de se connecter.');
 		}
 
-		$email = DynamicFields::getFirstEmailField();
+		if (!$user->canChangePassword(null)) {
+			throw new UserException('Vous n\'avez pas le droit de changer votre mot de passe. Merci de demander à un⋅e administrateur⋅trice.');
+		}
 
-		if (!trim($user->$email)) {
+		$email = $user->email();
+
+		if (!trim($email)) {
 			throw new UserException('Ce membre n\'a pas d\'adresse e-mail renseignée dans son profil.');
 		}
 
@@ -413,10 +417,10 @@ class Session extends \KD2\UserSession
 
 		$url = ADMIN_URL . 'password.php?c=' . $query;
 
-		EmailsTemplates::passwordRecovery($user->$email, $url, $user->pgp_key);
+		EmailsTemplates::passwordRecovery($email, $url, $user->pgp_key);
 	}
 
-	protected function fetchUserForPasswordRecovery(string $identifier, ?string $identifier_field = null): ?\stdClass
+	protected function fetchUserForPasswordRecovery(string $identifier, ?string $identifier_field = null): ?User
 	{
 		$db = DB::getInstance();
 
@@ -443,21 +447,21 @@ class Session extends \KD2\UserSession
 		return $db->first($sql, $identifier) ?: null;
 	}
 
-	protected function makePasswordRecoveryHash(\stdClass $user, ?int $expire = null): string
+	protected function makePasswordRecoveryHash(User $user, ?int $expire = null): string
 	{
 		// valide pour 1 heure minimum
 		$expire = $expire ?? ceil((time() - strtotime('2017-01-01')) / 3600) + 1;
 
-		$hash = hash_hmac('sha256', $user->email . $user->id . $user->password . $expire, LOCAL_SECRET_KEY, true);
+		$hash = hash_hmac('sha256', $user->email() . $user->id() . $user->password . $expire, LOCAL_SECRET_KEY, true);
 		$hash = substr(Security::base64_encode_url_safe($hash), 0, 16);
 		return $hash;
 	}
 
-	protected function makePasswordRecoveryQuery(\stdClass $user): string
+	protected function makePasswordRecoveryQuery(User $user): string
 	{
 		$expire = ceil((time() - strtotime('2017-01-01')) / 3600) + 1;
 		$hash = $this->makePasswordRecoveryHash($user, $expire);
-		$id = base_convert($user->id, 10, 36);
+		$id = base_convert($user->id(), 10, 36);
 		$expire = base_convert($expire, 10, 36);
 		return sprintf('%s.%s.%s', $id, $expire, $hash);
 	}
@@ -485,7 +489,7 @@ class Session extends \KD2\UserSession
 		}
 
 		// Fetch user info
-		$user = $this->fetchUserForPasswordRecovery($id, 'id');
+		$user = Users::get($id, 'id');
 
 		if (!$user) {
 			return null;
