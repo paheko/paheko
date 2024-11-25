@@ -34,13 +34,37 @@ class Import
 			if (count($found_users) != count($linked_users)) {
 				$db = DB::getInstance();
 				$id_field = DynamicFields::getNameFieldsSQL();
-				$linked_users_sql = array_map([$db, 'quote'], $linked_users);
+
+				// Fetch users by name
+				$linked_users_sql = array_filter($linked_users, fn($a) => !ctype_digit($a));
+				$linked_users_sql = array_map([$db, 'quote'], $linked_users_sql);
 				$linked_users_sql = implode(',', $linked_users_sql);
-				$sql = sprintf('SELECT %s AS name, id FROM users WHERE %1$s IN (%s);', $id_field, $linked_users_sql);
+
+				$number_field = DynamicFields::getNumberFieldSQL();
+				$linked_numbers = array_filter($linked_users, 'ctype_digit');
+				$linked_numbers_sql = '';
+
+				// Fetch also users by number
+				if (count($linked_numbers)) {
+					$linked_numbers = array_map('intval', $linked_numbers);
+					$linked_numbers_sql = array_map([$db, 'quote'], $linked_numbers);
+					$linked_numbers_sql = implode(',', $linked_numbers_sql);
+					$linked_numbers_sql = sprintf(' OR %s IN (%s)', $number_field, $linked_numbers_sql);
+				}
+
+				$sql = sprintf('SELECT %s AS name, %s AS number, id
+					FROM users WHERE %1$s IN (%s) %s;',
+					$id_field,
+					$number_field,
+					$linked_users_sql,
+					$linked_numbers_sql
+				);
 
 				foreach ($db->iterate($sql) as $row) {
 					$found_users[$row->name] = $row->id;
 					$users[$row->name] = $row->id;
+					$found_users[$row->number] = $row->number;
+					$users[$row->number] = $row->id;
 				}
 
 				// Fill array with NULL for missing user names, so that we won't go fetch them again
