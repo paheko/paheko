@@ -178,11 +178,8 @@ class Web
 				'select' => sprintf('(SELECT GROUP_CONCAT(title, \' > \') FROM (%s))',
 					rtrim(sprintf(Web::BREADCRUMBS_SQL, 'p.id_parent'), '; ')),
 			],
-			'draft' => [
-				'label' => 'Brouillon',
-				'select' => sprintf('CASE WHEN p.status = %s THEN 1 ELSE 0 END',
-					$db->quote(Page::STATUS_DRAFT),
-				),
+			'status' => [
+				'label' => 'Statut',
 				'order' => 'status %s, title COLLATE U_NOCASE %1$s',
 			],
 			'published' => [

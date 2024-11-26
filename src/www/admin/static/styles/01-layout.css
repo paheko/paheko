@@ -275,3 +275,8 @@ header.summary figure.logo img {
 body.sticky, body.sticky .header .menu {
     padding-top: 2em;
 }
+
+/* View transitions between page loads */
+@view-transition {
+    navigation: auto;
+}

@@ -95,7 +95,7 @@ class Reports
 
 	static public function countTransactions(array $criterias): int
 	{
-		$where = self::getWhereClause($criterias);
+		$where = self::getWhereClause($criterias, 't');
 		return DB::getInstance()->firstColumn('SELECT COUNT(DISTINCT t.id)
 			FROM acc_transactions_lines l INNER JOIN acc_transactions t ON t.id = l.id_transaction WHERE ' .$where);
 	}
@@ -543,7 +543,7 @@ class Reports
 	 */
 	static public function getGeneralLedger(array $criterias, bool $simple = false): \Generator
 	{
-		$where = self::getWhereClause($criterias);
+		$where = self::getWhereClause($criterias, 't', 'l', 'a');
 
 		$db = DB::getInstance();
 

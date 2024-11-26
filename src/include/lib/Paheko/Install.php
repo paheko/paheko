@@ -374,7 +374,8 @@ class Install
 		$has_welcome_plugin = Plugins::exists('welcome') && Plugins::isAllowed('welcome');
 
 		if ($has_welcome_plugin) {
-			Plugins::install('welcome');
+			$ext = Extensions::get('welcome');
+			$ext->enable();
 		}
 
 		if (FILE_STORAGE_BACKEND != 'SQLite') {

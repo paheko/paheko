@@ -408,7 +408,7 @@ class Conversion
 			$link = $source . '.' . $extension;
 
 			// Create a symlink containing the file extension
-			if (!@symlink($link, $source)) {
+			if (!@symlink($source, $link)) {
 				return false;
 			}
 		}

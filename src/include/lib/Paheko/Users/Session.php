@@ -149,7 +149,7 @@ class Session extends \KD2\UserSession
 		$user = $this->db->first($query, $login);
 
 		if ($user && isset($user->otp_recovery_codes)) {
-			$user->otp_recovery_codes = json_decode($user->otp_recovery_codes);
+			$user->otp_recovery_codes = json_decode($user->otp_recovery_codes, true);
 		}
 
 		return $user;
@@ -229,17 +229,12 @@ class Session extends \KD2\UserSession
 		return $v;
 	}
 
-	public function isLogged(bool $disable_local_login = false)
+	public function isLogged(bool $allow_new_session = true)
 	{
 		$logged = parent::isLogged();
 
-		if ($logged && !$disable_local_login && LOCAL_LOGIN && LOCAL_LOGIN !== -1 && LOCAL_LOGIN !== $this->user) {
-			$logged = false;
-		}
-
-		// Ajout de la gestion de LOCAL_LOGIN
-		if (!$logged && !$disable_local_login && LOCAL_LOGIN) {
-			$logged = $this->forceLogin(LOCAL_LOGIN);
+		if (!$logged && LOCAL_LOGIN) {
+			$logged = $this->forceLogin(LOCAL_LOGIN, $allow_new_session);
 		}
 
 		// Logout if data_root doesn't match, to forbid one session being used with another organization
@@ -270,7 +265,7 @@ class Session extends \KD2\UserSession
 		return $r;
 	}
 
-	public function forceLogin($login)
+	public function forceLogin($login, bool $allow_new_session = true): bool
 	{
 		// Force login with a static user, that is not in the local database
 		// this is useful for using a SSO like LDAP for example
@@ -289,6 +284,11 @@ class Session extends \KD2\UserSession
 			}
 
 			return true;
+		}
+
+		// Don't allow creating a session in some cases (eg. install / backup)
+		if (!$allow_new_session) {
+			return false;
 		}
 
 		// Look for the first user with the permission to manage the configuration
@@ -388,21 +388,25 @@ class Session extends \KD2\UserSession
 		return parent::logout();
 	}
 
-	public function recoverPasswordSend(string $id): void
+	public function recoverPasswordSend(string $login): void
 	{
-		$user = $this->fetchUserForPasswordRecovery($id);
+		$user = Users::getFromLogin($login);
 
 		if (!$user) {
-			throw new UserException('Aucun membre trouvé avec cette adresse e-mail, ou le membre trouvé n\'a pas le droit de se connecter.');
+			throw new UserException('Aucun membre trouvé avec cet identifiant.');
 		}
 
-		if ($user->perm_connect == self::ACCESS_NONE) {
+		if (!$user->canLogin()) {
 			throw new UserException('Ce membre n\'a pas le droit de se connecter.');
 		}
 
-		$email = DynamicFields::getFirstEmailField();
+		if (!$user->canRecoverPassword()) {
+			throw new UserException('Vous n\'avez pas le droit de changer votre mot de passe. Merci de demander à un⋅e administrateur⋅trice.');
+		}
 
-		if (!trim($user->$email)) {
+		$email = $user->email();
+
+		if (!trim($email)) {
 			throw new UserException('Ce membre n\'a pas d\'adresse e-mail renseignée dans son profil.');
 		}
 
@@ -413,10 +417,10 @@ class Session extends \KD2\UserSession
 
 		$url = ADMIN_URL . 'password.php?c=' . $query;
 
-		EmailsTemplates::passwordRecovery($user->$email, $url, $user->pgp_key);
+		EmailsTemplates::passwordRecovery($email, $url, $user->pgp_key);
 	}
 
-	protected function fetchUserForPasswordRecovery(string $identifier, ?string $identifier_field = null): ?\stdClass
+	protected function fetchUserForPasswordRecovery(string $identifier, ?string $identifier_field = null): ?User
 	{
 		$db = DB::getInstance();
 
@@ -443,21 +447,21 @@ class Session extends \KD2\UserSession
 		return $db->first($sql, $identifier) ?: null;
 	}
 
-	protected function makePasswordRecoveryHash(\stdClass $user, ?int $expire = null): string
+	protected function makePasswordRecoveryHash(User $user, ?int $expire = null): string
 	{
 		// valide pour 1 heure minimum
 		$expire = $expire ?? ceil((time() - strtotime('2017-01-01')) / 3600) + 1;
 
-		$hash = hash_hmac('sha256', $user->email . $user->id . $user->password . $expire, LOCAL_SECRET_KEY, true);
+		$hash = hash_hmac('sha256', $user->email() . $user->id() . $user->password . $expire, LOCAL_SECRET_KEY, true);
 		$hash = substr(Security::base64_encode_url_safe($hash), 0, 16);
 		return $hash;
 	}
 
-	protected function makePasswordRecoveryQuery(\stdClass $user): string
+	protected function makePasswordRecoveryQuery(User $user): string
 	{
 		$expire = ceil((time() - strtotime('2017-01-01')) / 3600) + 1;
 		$hash = $this->makePasswordRecoveryHash($user, $expire);
-		$id = base_convert($user->id, 10, 36);
+		$id = base_convert($user->id(), 10, 36);
 		$expire = base_convert($expire, 10, 36);
 		return sprintf('%s.%s.%s', $id, $expire, $hash);
 	}
@@ -466,7 +470,7 @@ class Session extends \KD2\UserSession
 	 * Check that the supplied query is valid, if so, return the user information
 	 * @param  string $query User-supplied query
 	 */
-	public function checkRecoveryPasswordQuery(string $query): ?\stdClass
+	public function checkRecoveryPasswordQuery(string $query): ?User
 	{
 		if (substr_count($query, '.') !== 2) {
 			return null;
@@ -485,7 +489,7 @@ class Session extends \KD2\UserSession
 		}
 
 		// Fetch user info
-		$user = $this->fetchUserForPasswordRecovery($id, 'id');
+		$user = Users::get($id, 'id');
 
 		if (!$user) {
 			return null;
@@ -505,14 +509,13 @@ class Session extends \KD2\UserSession
 	{
 		$user = $this->checkRecoveryPasswordQuery($query);
 
-		if (null === $user) {
+		if (!$user) {
 			throw new UserException('Le code permettant de changer le mot de passe a expiré. Merci de bien vouloir recommencer la procédure.');
 		}
 
-		$ue = Users::get($user->id);
-		$ue->setNewPassword(compact('password', 'password_confirmed'), false);
-		$ue->save(false);
-		EmailsTemplates::passwordChanged($ue);
+		$user->setNewPassword(compact('password', 'password_confirmed'), false);
+		$user->save(false);
+		EmailsTemplates::passwordChanged($user);
 	}
 
 	public function user(): ?User
@@ -717,6 +720,12 @@ class Session extends \KD2\UserSession
 			if (!$c) {
 				if ($this->canAccess(self::SECTION_USERS, self::ACCESS_READ)) {
 					$file_permissions['read'] = true;
+				}
+
+				if ($this->canAccess(self::SECTION_USERS, self::ACCESS_WRITE)) {
+					$file_permissions['write'] = true;
+					$file_permissions['delete'] = true;
+					$file_permissions['trash'] = true;
 				}
 
 				return $file_permissions[$permission];

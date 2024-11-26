@@ -8,14 +8,11 @@
 
 {form_errors}
 
-<form method="post" action="">
-	<section class="ext-list">
-	{foreach from=$list item="item"}
-		{include file="./_details.tpl" item=$item}
-	{/foreach}
-	</section>
-	{csrf_field key=$csrf_key}
-</form>
+<section class="ext-list">
+{foreach from=$list item="item"}
+	{include file="./_details.tpl" item=$item}
+{/foreach}
+</section>
 
 <p class="help">
 	La mention <em class="tag">Modifiable</em> indique que cette extension est un module que vous pouvez modifier.

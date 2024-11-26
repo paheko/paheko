@@ -339,6 +339,21 @@ class Users
 		return $found ?: null;
 	}
 
+	static public function getFromLogin(string $login): ?User
+	{
+		$db = DB::getInstance();
+		$field = $db->quoteIdentifier(DynamicFields::getLoginField());
+
+		if ($field === 'id') {
+			$login = (int) $login;
+		}
+		else {
+			$login = trim($login);
+		}
+
+		return EM::findOne(User::class, 'SELECT * FROM @TABLE_view WHERE ' . $field . ' = ? COLLATE U_NOCASE LIMIT 1;', $login);
+	}
+
 	static public function deleteSelected(array $ids): void
 	{
 		$ids = array_map('intval', $ids);
@@ -385,7 +400,7 @@ class Users
 		$ids = array_filter($ids, fn($a) => $a != $logged_user_id);
 
 		$db->update(User::TABLE,
-			['id_category' => $id_category],
+			['id_category' => $id_category, 'date_updated' => new \DateTime],
 			$db->where('id', $ids)
 		);
 	}
@@ -563,10 +578,12 @@ class Users
 			}
 
 			try {
-				if ($mode === 'create' || empty($user->$number_field)) {
+				if (empty($user->$number_field)) {
 					$user->$number_field = null;
+				}
+
+				if ($mode === 'create' || empty($user->$number_field)) {
 					$user->setNumberIfEmpty();
-					unset($row->$number_field);
 				}
 
 				$user->save();

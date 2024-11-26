@@ -2,6 +2,7 @@
 
 namespace Paheko;
 
+use Paheko\Entities\Extension;
 use Paheko\Entities\Module;
 use Paheko\Entities\Plugin;
 
@@ -41,79 +42,32 @@ class Extensions
 		return $list;
 	}
 
-	static public function get(string $type, string $name)
+	static public function get(string $name): ?Extension
 	{
-		if ($type === 'module') {
-			return Modules::get($name);
+		$ext = Plugins::get($name);
+		$ext ??= Plugins::getInstallable($name);
+		$ext ??= Modules::get($name);
+
+		if (null === $ext) {
+			return null;
 		}
-		elseif ($type === 'plugin') {
-			$ext = Plugins::get($name);
-			$ext ??= Plugins::getInstallable($name);
-			return $ext;
-		}
-		else {
-			throw new \InvalidArgumentException('Invalid type: ' . $type);
-		}
+
+		$e = new Extension;
+		$e->normalize($ext);
+		return $e;
 	}
 
-	static public function toggle(string $type, string $name, bool $enabled)
+	static public function normalize($item): Extension
 	{
-		if ($type === 'plugin') {
-			$plugin = Plugins::get($name);
-
-			if (!$plugin && $enabled) {
-				$plugin = Plugins::install($name);
-			}
-			elseif ($plugin) {
-				$plugin->set('enabled', $enabled);
-				$plugin->save();
-			}
-			else {
-				return null;
-			}
-
-			return $plugin;
-		}
-		elseif ($type === 'module') {
-			$m = Modules::get($name);
-
-			if (!$m) {
-				return null;
-			}
-
-			$m->set('enabled', $enabled);
-			$m->save();
-
-			return $m;
-		}
-		else {
-			throw new \InvalidArgumentException('Invalid type: ' . $type);
-		}
+		$e = new Extension;
+		$e->normalize($item);
+		return $e;
 	}
 
-	static public function normalize($item): \stdClass
+	static public function toggle(string $name, bool $enabled)
 	{
-		$type = $item instanceof Plugin ? 'plugin' : 'module';
-		$c = $item;
-		$item = (object) $c->asArray();
-		$item->$type = $c;
-		$item->type = $type;
-		$item->label = $c->label ?? $c->name;
-		$item->icon_url = $c->icon_url();
-		$item->details_url = sprintf('details.php?type=%s&name=%s', $type, $c->name);
-		$item->config_url = $c->hasConfig() ? $c->url($c::CONFIG_FILE) : null;
-		$item->installed = $type == 'plugin' ? $c->exists() : true;
-		$item->missing = $type == 'plugin' ? !$c->hasCode() : false;
-		$item->broken_message = $type == 'plugin' ? $c->getBrokenMessage() : false;
-		$item->ini = $c->getINIProperties();
-
-		$item->url = null;
-
-		if ($c->hasFile($c::INDEX_FILE)) {
-			$item->url = $c->url($type == 'plugin' ? 'admin/' : '');
-		}
-
-		return $item;
+		$ext = self::get($name);
+		$ext->toggle($enabled);
 	}
 
 	static protected function filterList(array &$list): void

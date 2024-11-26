@@ -182,6 +182,18 @@ class Files
 			'trash'  => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_WRITE),
 		];
 
+		// You can also delete transaction subdirectories
+		$p[File::CONTEXT_TRANSACTION . '/'] = [
+			'mkdir'  => false,
+			'move'   => false,
+			'create' => false,
+			'read'   => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_READ),
+			'write'  => false,
+			'delete' => false,
+			'share'  => false,
+			'trash'  => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_WRITE),
+		];
+
 		// But not in root
 		$p[File::CONTEXT_TRANSACTION] = [
 			'mkdir'  => false,

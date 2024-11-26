@@ -6,6 +6,7 @@ use Paheko\Entity;
 use Paheko\Accounting\Years;
 use Paheko\Accounting\Projects;
 use Paheko\Accounting\Accounts;
+use Paheko\Users\Users;
 
 require_once __DIR__ . '/../../_inc.php';
 
@@ -50,6 +51,17 @@ if (qg('year'))
 	$tpl->assign('year', $year);
 	$tpl->assign('before_default', $criterias['before'] ?? $year->end_date);
 	$tpl->assign('after_default', $criterias['after'] ?? $year->start_date);
+}
+
+if ($id = intval($_GET['user'] ?? 0)) {
+	$user = Users::get($id);
+
+	if (!$user) {
+		throw new UserException('Ce membre n\'existe pas');
+	}
+
+	$criterias['user'] = $id;
+	$tpl->assign('selected_user', $user);
 }
 
 if (!count($criterias))

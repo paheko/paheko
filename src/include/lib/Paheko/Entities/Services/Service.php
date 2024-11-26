@@ -11,6 +11,7 @@ use Paheko\ValidationException;
 use Paheko\Utils;
 use Paheko\Users\DynamicFields;
 use Paheko\Services\Fees;
+use Paheko\Services\Services;
 
 class Service extends Entity
 {
@@ -188,15 +189,6 @@ class Service extends Entity
 
 	public function long_label(): string
 	{
-		if ($this->duration) {
-			$duration = sprintf('%d jours', $this->duration);
-		}
-		elseif ($this->start_date)
-			$duration = sprintf('du %s au %s', $this->start_date->format('d/m/Y'), $this->end_date->format('d/m/Y'));
-		else {
-			$duration = 'ponctuelle';
-		}
-
-		return sprintf('%s — %s', $this->label, $duration);
+		return Services::getLongLabel($this);
 	}
 }

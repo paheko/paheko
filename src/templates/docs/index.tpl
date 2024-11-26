@@ -106,10 +106,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 		<?php
 		$class = $gallery && !$context_specific_root ? 'files gallery' : 'files';
 
-		if ($context_specific_root) {
-			$can_check = false;
-		}
-		elseif ($context === File::CONTEXT_USER) {
+		if ($context === File::CONTEXT_USER) {
 			$can_check = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
 		}
 		elseif ($context === File::CONTEXT_TRANSACTION) {
@@ -127,7 +124,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 			<tr>
 				{if $can_check}
 					<td class="check">
-						{input type="checkbox" name="check[]" value=$item.hash_id}
+						{input type="checkbox" name="check[]" value=$item.path}
 					</td>
 				{/if}
 				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$item.id}">#{$item.id}</a></td>
@@ -144,7 +141,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 			<tr>
 				{if $can_check}
 					<td class="check">
-						{input type="checkbox" name="check[]" value=$item.hash_id}
+						{input type="checkbox" name="check[]" value=$item.path}
 					</td>
 				{/if}
 				<td class="num"><a href="{$admin_url}users/details.php?id={$item.id}">{$item.number}</a></td>

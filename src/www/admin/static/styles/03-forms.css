@@ -692,12 +692,12 @@ dialog.datepicker {
     max-width: 15em;
 }
 
-#queryBuilder tbody td {
+#queryBuilder td {
     vertical-align: top;
     padding: .1em .2em;
 }
 
-#queryBuilder tbody td.buttons {
+#queryBuilder td.buttons {
     white-space: nowrap;
 }
 
