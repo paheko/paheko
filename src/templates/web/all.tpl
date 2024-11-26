@@ -1,3 +1,4 @@
+{use Paheko\Entities\Web\Page}
 {include file="_head.tpl" title="Toutes les pages du site web" current="web"}
 
 <nav class="tabs">
@@ -14,7 +15,7 @@
 			<tr>
 				<th>{link label=$p.title href="./?id=%d"|args:$p.id}</th>
 				<td>{$p.path}</td>
-				<td>{if $p.draft}<em>Brouillon</em>{/if}</td>
+				<td><?=Page::STATUS_LIST[$p->status]?></td>
 				<td>{$p.published|relative_date}</td>
 				<td>{$p.modified|relative_date:true}</td>
 				<td class="actions">
