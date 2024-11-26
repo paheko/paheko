@@ -107,7 +107,7 @@ $is_quick = count(array_intersect_key($_GET, array_flip(['a', 'l', 'd', 't', 'ac
 		{/if}
 		<dl data-types="all-but-advanced">
 			{if !empty($projects)}
-				{input type="select" name="id_project" label="Projet (analytique)" options=$projects default=$id_project default_empty="— Aucun —"}
+				{input type="select" name="id_project" label="Projet (analytique)" options=$projects default=$id_project default_empty="— Aucun —" required=$config.analytical_mandatory}
 			{/if}
 		</dl>
 	</fieldset>

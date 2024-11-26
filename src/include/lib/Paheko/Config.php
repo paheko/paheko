@@ -137,6 +137,7 @@ class Config extends Entity
 
 	protected int $log_retention;
 	protected bool $analytical_set_all;
+	protected bool $analytical_mandatory;
 
 	protected ?string $file_versioning_policy = null;
 	protected int $file_versioning_max_size = 0;
