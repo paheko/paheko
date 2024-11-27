@@ -29,7 +29,7 @@ html.dark {
     --gHoverLinkColor: 250, 127, 127;
 }
 
-html.dark .header .menu, html.dark .header .menu a, html.dark .header .menu li.current h3 span[data-icon]::before, html.dark nav.tabs .current a {
+html.dark #menu, html.dark #menu a, html.dark #menu li.current h3 span[data-icon]::before, html.dark nav.tabs .current a {
     color: rgb(var(--gTextColor)) !important;
     text-shadow: 0px 0px 5px rgb(var(--gBgColor)) !important;
 }
@@ -43,12 +43,12 @@ body {
     font-size: 100%;
     color: rgb(var(--gTextColor));
     font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-    padding-bottom: 1em;
     background: rgb(var(--gBgColor)) var(--gBgImage) no-repeat 0px 0px fixed;
 }
 
 main {
-    margin: 0px 1em 1em 180px;
+    margin-left: 170px;
+    padding: .2em 1em 1em 1em;
     position: relative;
 }
 
@@ -98,22 +98,21 @@ footer.public a {
     color: darkblue;
 }
 
-.header h1 {
+main h1.main {
     color: rgb(var(--gMainColor));
-    margin-left: 180px;
     margin-bottom: 0.4em;
 }
 
-.header .menu .logo {
+#menu .logo {
     padding: 0;
     min-height: 100px;
 }
 
-.header .menu .logo img {
+#menu .logo img {
     transition: opacity .2s;
 }
 
-.header .menu .logo a {
+#menu .logo a {
     padding: 10px;
     padding-bottom: 0;
     display: inline-block;
@@ -122,7 +121,7 @@ footer.public a {
     width: 150px;
 }
 
-.header .menu {
+#menu {
     position: fixed;
     overflow: hidden;
     overflow-y: auto;
@@ -133,23 +132,23 @@ footer.public a {
     background: rgb(var(--gMainColor)) var(--gBgImage) no-repeat 0px 0px;
 }
 
-.header .menu::-webkit-scrollbar {
+#menu::-webkit-scrollbar {
     width: 8px;
     background: rgba(var(--gBgColor), 0.25);
     box-shadow: inset 0px 0px 10px #666;
 }
 
-.header .menu::-webkit-scrollbar-thumb {
+#menu::-webkit-scrollbar-thumb {
     background: rgba(var(--gBgColor), 0.5);
     border-radius: 10px;
 }
 
-.header .menu h3 {
+#menu h3 {
     font-weight: bold;
     font-size: inherit;
 }
 
-.header .menu a {
+#menu a {
     color: #fff;
     color: rgb(var(--gBgColor));
     font-weight: bold;
@@ -159,26 +158,26 @@ footer.public a {
     transition: background .3s;
 }
 
-.header .menu a:hover {
+#menu a:hover {
     text-decoration: underline;
     background: rgba(var(--gSecondColor), 0.5);
 }
 
-.header .menu li li a {
+#menu li li a {
     font-size: 0.8em;
     padding-left: 2em;
 }
 
-.header .menu li.current h3 a, .header .menu ul ul li.current a {
+#menu li.current h3 a, #menu ul ul li.current a {
     background: rgb(var(--gBgColor));
     color: rgb(var(--gMainColor));
 }
 
-.header .menu h3 a {
+#menu h3 a {
     position: relative;
 }
 
-.header .menu h3 span[data-icon]::before {
+#menu h3 span[data-icon]::before {
     position: absolute;
     right: .4rem;
     display: block;
@@ -191,7 +190,7 @@ footer.public a {
     font-weight: normal;
 }
 
-.header .menu li.current h3 span[data-icon]::before {
+#menu li.current h3 span[data-icon]::before {
     color: rgba(var(--gMainColor));
 }
 
@@ -226,7 +225,7 @@ body.public main p.block.error, body.public main p.block.alert {
     font-size: 1.2em;
 }
 
-body.public .header .menu, body.raw .header .menu {
+body.public #menu, body.raw #menu {
     display: none;
 }
 
@@ -272,7 +271,7 @@ header.summary figure.logo img {
     text-align: center;
 }
 
-body.sticky, body.sticky .header .menu {
+body.sticky, body.sticky #menu {
     padding-top: 2em;
 }
 
