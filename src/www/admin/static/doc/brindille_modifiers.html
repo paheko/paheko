@@ -89,7 +89,9 @@
 			<li><a href="#excerpt">excerpt</a></li>
 			<li><a href="#extract_leading_number">extract_leading_number</a></li>
 			<li><a href="#format_phone_number">format_phone_number</a></li>
+			<li><a href="#get_leading_number">get_leading_number</a></li>
 			<li><a href="#markdown">markdown</a></li>
+			<li><a href="#minify">minify</a></li>
 			<li><a href="#raw">raw</a></li>
 			<li><a href="#replace">replace</a></li>
 			<li><a href="#regexp_replace">regexp_replace</a></li>
@@ -97,6 +99,7 @@
 			<li><a href="#truncate">truncate</a></li>
 			<li><a href="#typo">typo</a></li>
 			<li><a href="#urlencode">urlencode</a></li>
+			<li><a href="#cdata_escape">cdata_escape</a></li>
 			<li><a href="#xml_escape">xml_escape</a></li>
 			<li><a href="#autres-filtres-de-texte">Autres filtres de texte</a>
 		</ol></li>
@@ -299,7 +302,7 @@
 <p>Transforme un tableau en liste textuelle, par exemple pour envoyer dans un e-mail.</p>
 <pre><code>{{:assign var="table" a="blue" b="cyan"}}
 {{:assign var="table.c" color1="darkred" color2="darkgreen"}}
-{{$table|array}}</code></pre>
+{{$table|array_to_list}}</code></pre>
 <pre><code>a = blue
 b = cyan
 c =
@@ -443,10 +446,17 @@ bleu - orange</code></pre>
 {{$number|format_phone_number}}</code></pre>
 <p>Affichera :</p>
 <pre><code>01 02 03 04 05</code></pre>
+<h2 id="get_leading_number">get_leading_number</h2>
+<p>Renvoie le numéro au début d'un titre.</p>
+<pre><code>{{"03. Beau titre"|get_leading_number}}
+3</code></pre>
 <h2 id="markdown">markdown</h2>
 <p>Transforme un texte en HTML en utilisant la syntaxe Markdown.</p>
 <p>Il est conseillé de rajouter le filtre <code>|raw</code> pour ne pas échapper le HTML produit, si on veut afficher le texte formatté dans une page HTML.</p>
 <pre><code>{{$texte|markdown|raw}}</code></pre>
+<h2 id="minify">minify</h2>
+<p>Supprime les retours à la ligne et espaces inutiles dans le code CSS ou Javascript.</p>
+<pre><code>{{$code|minify:'js'}}</code></pre>
 <h2 id="raw">raw</h2>
 <p>Passer ce filtre désactive la protection automatique contre le HTML (échappement) dans le texte. À utiliser en connaissance de cause avec les contenus qui contiennent du HTML et sont déjà filtrés !</p>
 <pre><code>{{"&lt;b&gt;Test"}} = &amp;lt;b&amp;gt;Test
@@ -502,6 +512,8 @@ Ceci n'est pas un t</code></pre>
 <p>Formatte un texte selon les règles typographiques françaises : ajoute des espaces insécables devant ou derrière les ponctuations françaises (<code>« » ? ! :</code>).</p>
 <h2 id="urlencode">urlencode</h2>
 <p>Encode une chaîne de texte pour utilisation dans une adresse URL (alias de <code>rawurlencode</code> en PHP).</p>
+<h2 id="cdata_escape">cdata_escape</h2>
+<p>Échappe le contenu pour un usage dans une balise <code>&lt;![CDATA[…]]&gt;</code> d'un document XML.</p>
 <h2 id="xml_escape">xml_escape</h2>
 <p>Échappe le contenu pour un usage dans un document XML.</p>
 <h2 id="autres-filtres-de-texte">Autres filtres de texte</h2>

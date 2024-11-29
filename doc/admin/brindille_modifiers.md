@@ -70,7 +70,7 @@ Transforme un tableau en liste textuelle, par exemple pour envoyer dans un e-mai
 ```
 {{:assign var="table" a="blue" b="cyan"}}
 {{:assign var="table.c" color1="darkred" color2="darkgreen"}}
-{{$table|array}}
+{{$table|array_to_list}}
 ```
 
 ```
@@ -363,6 +363,15 @@ Affichera :
 01 02 03 04 05
 ```
 
+## get_leading_number
+
+Renvoie le numéro au début d'un titre.
+
+```
+{{"03. Beau titre"|get_leading_number}}
+3
+```
+
 ## markdown
 
 Transforme un texte en HTML en utilisant la syntaxe Markdown.
@@ -371,6 +380,14 @@ Il est conseillé de rajouter le filtre `|raw` pour ne pas échapper le HTML pro
 
 ```
 {{$texte|markdown|raw}}
+```
+
+## minify
+
+Supprime les retours à la ligne et espaces inutiles dans le code CSS ou Javascript.
+
+```
+{{$code|minify:'js'}}
 ```
 
 ## raw
