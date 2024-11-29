@@ -568,9 +568,7 @@ class File extends Entity
 		}
 
 		if (0 === strpos($new_path . '/', $this->path . '/')) {
-			if ($this->type != self::TYPE_DIRECTORY) {
-				throw new UserException(sprintf('Impossible de renommer "%s" vers "%s"', $this->path, $new_path));
-			}
+			throw new UserException(sprintf('Impossible de renommer "%s" vers "%s"', $this->path, $new_path));
 		}
 
 		$parent = Utils::dirname($new_path);
