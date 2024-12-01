@@ -43,8 +43,8 @@ use Paheko\Entities\Accounting\Account;
 
 <p class="help">
 	Note : n'apparaissent ici que les comptes qui ont été utilisés dans cet exercice (au moins une écriture).<br />
-	Les lignes grisées correspondent aux comptes soldés.<br />
-	Pour voir la liste complète des comptes, même ceux qui n'ont pas été utilisés, se référer au <a href="{$admin_url}acc/charts/accounts/?id={$current_year.id_chart}">plan comptable</a>.
+	Les lignes grisées correspondent aux comptes soldés (le solde est à zéro).<br />
+	Pour voir la liste complète des comptes, même ceux qui n'ont pas été utilisés, se référer au <a href="{$admin_url}acc/charts/accounts/all.php?id={$current_year.id_chart}">plan comptable</a>.
 </p>
 
 {include file="_foot.tpl"}
