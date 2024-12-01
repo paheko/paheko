@@ -117,7 +117,7 @@ tr.account button[value="1"] { opacity: 1; }
 tr.account td.bookmark { width: 2%; }
 tr.account td.bookmark span[data-icon] { color: var(--gBorderColor); font-size: .9em; }
 
-table.projects tr.title p.help { font-weight: normal; text-align: center; }
+table.projects tr.title p.help {font-weight: normal;margin: .5em 0;}
 table.projects tr.title p.actions {
     text-align: center;
     margin: 0;
