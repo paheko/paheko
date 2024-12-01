@@ -205,6 +205,7 @@ static $default_config = [
 	'ADMIN_COLOR1'          => '#20787a',
 	'ADMIN_COLOR2'          => '#85b9ba',
 	'ADMIN_BACKGROUND_IMAGE' => WWW_URL . 'admin/static/bg.png',
+	'ADMIN_CUSTOM_CSS'      => null,
 	'FORCE_CUSTOM_COLORS'   => false,
 	'DISABLE_INSTALL_FORM'  => false,
 	'FILE_STORAGE_BACKEND'  => 'SQLite',

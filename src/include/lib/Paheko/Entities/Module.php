@@ -866,4 +866,20 @@ class Module extends Entity
 
 		return $out;
 	}
+
+	public function enable(): void
+	{
+		$this->set('enabled', true);
+		$this->save();
+	}
+
+	public function disable(): void
+	{
+		if ($this->web) {
+			throw new \LogicException('Cannot disable web module');
+		}
+
+		$this->set('enabled', false);
+		$this->save();
+	}
 }

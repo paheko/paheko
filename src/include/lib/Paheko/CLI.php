@@ -32,6 +32,7 @@ class CLI
 		'env',
 		'ui',
 		'server',
+		'ext',
 	];
 
 	protected array $defaults = [];
@@ -202,6 +203,83 @@ class CLI
 
 		Plugins::fire('cron');
 
+	}
+
+	/**
+	 * Usage: paheko ext NAME SUBCOMMAND
+	 *
+	 * paheko ext list [--disabled]
+	 *   List enabled extensions, use --disabled to only list disabled extensions.
+	 *
+	 * paheko ext NAME
+	 *   Display informations on specified extension.
+	 *
+	 * paheko ext NAME enable
+	 *   Enable the specified extension.
+	 *
+	 * paheko ext NAME disable
+	 *   Disable the specified extension.
+     *
+	 * paheko ext NAME delete
+	 *   Delete all extension data from database.
+	 *   The extension needs to be disabled first.
+	 *   (No confirmation asked!)
+	 */
+	public function ext(array $args): void
+	{
+		@list($name) = $this->parseOptions($args, [], 1);
+
+		if (!$name) {
+			$this->help(['ext']);
+		}
+
+		if ($name === 'list') {
+			$o = $this->parseOptions($args, ['--disabled'], 0);
+			$list = array_key_exists('disabled', $o) ? Extensions::listDisabled() : Extensions::listEnabled();
+
+			foreach ($list as $ext) {
+				echo $ext->name . PHP_EOL;
+			}
+
+			$this->success();
+			return;
+		}
+
+		@list($command) = $this->parseOptions($args, [], 1);
+
+		$ext = Extensions::get($name);
+
+		if (!$ext) {
+			$this->fail("This extension does not exist");
+		}
+
+		if (!$command) {
+			printf("Name: %s\nType: %s\nEnabled: %s\nLabel: %s\nDescription: %s\n",
+				$ext->name,
+				$ext->type,
+				$ext->enabled ? 'yes' : 'no',
+				$ext->label,
+				$ext->description
+			);
+		}
+		elseif ($command === 'enable') {
+			$ext->enable();
+		}
+		elseif ($command === 'disable') {
+			$ext->disable();
+		}
+		elseif ($command === 'delete') {
+			if ($ext->enabled) {
+				$this->fail('This extension is enabled: cannot delete an enabled extension.');
+			}
+
+			$ext->delete();
+		}
+		else {
+			$this->fail('Unknown subcommand: paheko ext %s %s', $name, $command);
+		}
+
+		$this->success();
 	}
 
 	/**

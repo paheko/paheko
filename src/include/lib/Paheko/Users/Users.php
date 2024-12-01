@@ -339,6 +339,21 @@ class Users
 		return $found ?: null;
 	}
 
+	static public function getFromLogin(string $login): ?User
+	{
+		$db = DB::getInstance();
+		$field = $db->quoteIdentifier(DynamicFields::getLoginField());
+
+		if ($field === 'id') {
+			$login = (int) $login;
+		}
+		else {
+			$login = trim($login);
+		}
+
+		return EM::findOne(User::class, 'SELECT * FROM @TABLE_view WHERE ' . $field . ' = ? COLLATE U_NOCASE LIMIT 1;', $login);
+	}
+
 	static public function deleteSelected(array $ids): void
 	{
 		$ids = array_map('intval', $ids);

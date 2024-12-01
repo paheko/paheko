@@ -24,7 +24,7 @@
 				<td class="size"><nobr>{$config_size|size_in_bytes}</nobr></td>
 				<td class="actions">
 					{if !$data_size && $config_size && $module->canDeleteData()}
-						{linkbutton shape="delete" label="Supprimer les données" href="delete.php?module=%s&mode=data"|args:$ext.name target="_dialog"}
+						{linkbutton shape="delete" label="Supprimer les données" href="delete.php?name=%s&mode=data"|args:$ext.name target="_dialog"}
 					{/if}
 				</td>
 			</tr>
@@ -36,7 +36,7 @@
 						{linkbutton href="!config/advanced/sql.php?table=module_data_%s"|args:$ext.name shape="table" label="Voir les données brutes"}<br />
 					{/if}
 					{if $data_size && $module->canDeleteData()}
-						{linkbutton shape="delete" label="Supprimer les données" href="delete.php?module=%s&mode=data"|args:$ext.name target="_dialog"}
+						{linkbutton shape="delete" label="Supprimer les données" href="delete.php?name=%s&mode=data"|args:$ext.name target="_dialog"}
 					{/if}
 				</td>
 			</tr>
@@ -45,7 +45,7 @@
 				<td class="size"><nobr>{$code_size|size_in_bytes}</nobr></td>
 				<td class="actions">
 					{if $code_size && $ext.module->hasDist()}
-						{linkbutton label="Supprimer toutes les modifications" href="delete.php?module=%s&mode=reset"|args:$ext.name shape="delete" target="_dialog"}
+						{linkbutton label="Supprimer toutes les modifications" href="delete.php?name=%s&mode=reset"|args:$ext.name shape="delete" target="_dialog"}
 					{/if}
 				</td>
 			</tr>
@@ -72,13 +72,13 @@
 	{if $module}
 		{if !$module.enabled && $module->canDelete()}
 		<p class="actions">
-			{linkbutton label="Supprimer ce module" href="delete.php?module=%s&mode=delete"|args:$module.name shape="delete" target="_dialog"}<br />
+			{linkbutton label="Supprimer ce module" href="delete.php?name=%s&mode=delete"|args:$module.name shape="delete" target="_dialog"}<br />
 		</p>
 		{/if}
 	{else}
 		{if !$plugin.enabled && $plugin->exists()}
 		<p class="actions">
-			{linkbutton label="Supprimer les données" href="delete.php?plugin=%s"|args:$plugin.name shape="delete" target="_dialog"}
+			{linkbutton label="Supprimer les données" href="delete.php?name=%s"|args:$plugin.name shape="delete" target="_dialog"}
 		</p>
 		{/if}
 	{/if}

@@ -457,4 +457,41 @@ class Plugin extends Entity
 	{
 		return $this->hasFile(self::META_FILE);
 	}
+
+	public function assertCanBeEnabled(): void
+	{
+		if (!Plugins::isAllowed($this->name)) {
+			throw new \RuntimeException('This plugin is not allowed: ' . $this->name);
+		}
+
+		if (!$this->hasFile(self::META_FILE)) {
+			throw new UserException(sprintf('Le plugin "%s" n\'est pas une extension Paheko : fichier plugin.ini manquant.', $this->name));
+		}
+
+		$this->updateFromINI();
+	}
+
+	public function enable(): void
+	{
+		$this->assertCanBeEnabled();
+
+		$db = DB::getInstance();
+		$db->begin();
+		$exists = $this->exists();
+
+		$this->set('enabled', true);
+		$this->save();
+
+		if (!$exists && $this->hasFile(self::INSTALL_FILE)) {
+			$this->call(self::INSTALL_FILE, true);
+		}
+
+		$db->commit();
+	}
+
+	public function disable(): void
+	{
+		$this->set('enabled', false);
+		$this->save();
+	}
 }

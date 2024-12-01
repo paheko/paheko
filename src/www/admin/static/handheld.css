@@ -53,7 +53,7 @@ nav.breadcrumbs ul {
 	font-size: 1.2em;
 }
 
-.header .menu {
+#menu {
 	background: none !important;
 	position: fixed;
 	overflow: visible;
@@ -69,16 +69,16 @@ nav.breadcrumbs ul {
 	right: 0;
 }
 
-.header .menu .logo {
+#menu .logo {
 	display: none;
 }
 
-.header .menu *, .header .menu a {
+#menu *, #menu a {
 	margin: 0;
 	padding: 0;
 }
 
-.header .menu > ul {
+#menu > ul {
 	background: rgb(var(--gMainColor));
 	flex-wrap: nowrap;
 	grid-template: none / repeat(auto-fit, minmax(20px, 1fr));
@@ -86,25 +86,25 @@ nav.breadcrumbs ul {
 	align-items: center;
 }
 
-.header .menu > ul > li > h3 {
+#menu > ul > li > h3 {
 	display: inline;
 }
 
-.header .menu > ul > li > h3 a b {
+#menu > ul > li > h3 a b {
 	display: none;
 }
 
-.header .menu > ul > li > ul {
+#menu > ul > li > ul {
 	display: none;
 }
 
-.header .menu h3 a {
+#menu h3 a {
 	text-align: center;
 	text-decoration: none !important;
 	font-weight: normal;
 }
 
-.header .menu h3 span[data-icon]::before {
+#menu h3 span[data-icon]::before {
 	float: none;
 	display: block;
 	position: relative;
@@ -118,17 +118,17 @@ nav.breadcrumbs ul {
 	text-shadow: none;
 }
 
-.header .menu li.current_parent h3 a, .header .menu li.current h3 a {
+#menu li.current_parent h3 a, #menu li.current h3 a {
 	background: rgb(var(--gSecondColor));
 }
 
-.header .menu li.current h3 span[data-icon]::before,
-.header .menu > ul > li.current_parent h3 span[data-icon]::before {
+#menu li.current h3 span[data-icon]::before,
+#menu > ul > li.current_parent h3 span[data-icon]::before {
 	color: rgb(var(--gBgColor));
 	text-shadow: 0px 0px 5px rgb(var(--gTextColor)), 0px 0px 5px rgb(var(--gTextColor));
 }
 
-.header .menu > ul > li.current > ul, .header .menu > ul > li.current_parent > ul {
+#menu > ul > li.current > ul, #menu > ul > li.current_parent > ul {
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: center;
@@ -139,13 +139,13 @@ nav.breadcrumbs ul {
 	background: rgb(var(--gSecondColor));
 }
 
-.header .menu > ul > li.current > ul li, .header .menu > ul > li.current_parent > ul li {
+#menu > ul > li.current > ul li, #menu > ul > li.current_parent > ul li {
 	text-align: center;
 	display: block;
 	margin: .3rem;
 }
 
-.header .menu > ul > li.current > ul a, .header .menu > ul > li.current_parent > ul a {
+#menu > ul > li.current > ul a, #menu > ul > li.current_parent > ul a {
 	background: rgb(var(--gBgColor));
 	border-radius: .5em;
 	color: rgb(var(--gMainColor));
@@ -154,7 +154,7 @@ nav.breadcrumbs ul {
 	font-weight: normal;
 }
 
-.header .menu > ul > li > ul li.current a {
+#menu > ul > li > ul li.current a {
 	background: rgb(var(--gMainColor));
 	color: rgb(var(--gBgColor));
 }

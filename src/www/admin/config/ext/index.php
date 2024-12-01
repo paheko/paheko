@@ -10,21 +10,6 @@ require_once __DIR__ . '/../_inc.php';
 
 $csrf_key = 'ext';
 
-$form->runIf(f('enable') !== null || f('disable') !== null, function () {
-	$ext = f('enable') ?? f('disable');
-
-	if (!is_array($ext)) {
-		throw new UserException('Unknown action.');
-	}
-
-	$enabled = f('enable') ? true : false;
-	$type = key($ext);
-	$name = current($ext);
-
-	Extensions::toggle($type, $name, $enabled);
-	Utils::redirect('!config/ext/details.php?type=' . $type . '&name=' . $name);
-}, $csrf_key);
-
 if (qg('install')) {
 	foreach (Modules::refresh() as $error) {
 		// Errors are not used currently

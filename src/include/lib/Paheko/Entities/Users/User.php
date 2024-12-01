@@ -676,14 +676,24 @@ class User extends Entity
 		throw new UserException("Le champ identifiant ne peut être laissé vide pour un administrateur, sinon vous ne pourriez plus vous connecter.");
 	}
 
-	public function canChangePassword(Session $session): bool
+	public function canChangePassword(?Session $session): bool
 	{
-		if ($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)) {
+		if ($session && $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)) {
 			return true;
 		}
 
 		$password_field = current(DynamicFields::getInstance()->fieldsBySystemUse('password'));
 		return $password_field->user_access_level === Session::ACCESS_WRITE;
+	}
+
+	public function canRecoverPassword(): bool
+	{
+		// Admins can recover their password all the time
+		if ($this->isSuperAdmin()) {
+			return true;
+		}
+
+		return $this->canChangePassword(null);
 	}
 
 	public function checkDuplicate(): ?int
@@ -799,6 +809,12 @@ class User extends Entity
 		}
 
 		$zip->close();
+	}
+
+	public function canLogin(): bool
+	{
+		$category = $this->category();
+		return $category->perm_connect >= Session::ACCESS_READ;
 	}
 
 	public function isSuperAdmin(): bool

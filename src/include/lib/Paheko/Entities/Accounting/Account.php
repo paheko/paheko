@@ -239,6 +239,7 @@ class Account extends Entity
 		'label' => [
 			'select' => 't.label',
 			'label' => 'Libellé',
+			'order' => 't.label COLLATE U_NOCASE %s',
 		],
 		'line_label' => [
 			'select' => 'l.label',

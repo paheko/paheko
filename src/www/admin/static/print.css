@@ -22,15 +22,16 @@ body {
     font-size: 10pt;
 }
 
-header.header {
+#menu {
     display: none;
 }
 
 main {
     margin: 0;
+    background: none;
 }
 
-.header h1 {
+main h1.main {
     margin: 0;
     text-align: center;
 }
