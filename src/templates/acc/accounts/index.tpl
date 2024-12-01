@@ -32,8 +32,9 @@ use Paheko\Entities\Accounting\Account;
 		</thead>
 		{foreach from=$grouped_accounts item="group"}
 		<tbody>
-			<tr>
-				<td colspan="6"><h2 class="ruler">{$group.label}</h2></td>
+			<tr class="no-border">
+				<td colspan="2"><span class="ruler-left"></span></td>
+				<td colspan="4"><h2 class="ruler-left">{$group.label}</h2></td>
 			</tr>
 			{foreach from=$group.accounts item="account"}
 				<tr class="account">
