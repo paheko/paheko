@@ -52,15 +52,24 @@ if (!$current) {
 	$current = $first_file->parent;
 }
 
+$parent = Utils::dirname($current);
+
 $directories = Files::list($current);
-$directories = array_filter($directories, function (File $file) {
-	return $file->type == File::TYPE_DIRECTORY;
+$directories = array_filter($directories, function (File $file) use ($check) {
+	if ($file->type !== File::TYPE_DIRECTORY) {
+		return false;
+	}
+
+	if (in_array($file->path, $check)) {
+		return false;
+	}
+
+	return true;
 });
 
 $breadcrumbs = Files::getBreadcrumbs($current);
-$parent = Utils::dirname($current);
-$current_path = $current;
 $current_path_name = Utils::basename($current);
+$current_path = $current;
 
 $count = count($check);
 

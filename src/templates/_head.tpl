@@ -46,6 +46,9 @@ $current ??= '';
 		<link rel="apple-touch-icon" href="{$config->fileURL('icon')}" />
 	{/if}
 	{custom_colors config=$config}
+	{if ADMIN_CUSTOM_CSS}
+	<link rel="stylesheet" type="text/css" href="<?=ADMIN_CUSTOM_CSS?>" media="handheld,screen" />
+	{/if}
 </head>
 
 <?php
@@ -63,13 +66,12 @@ if (ALERT_MESSAGE && !$dialog) {
 {/if}
 
 {if !array_key_exists('_dialog', $_GET) && empty($layout)}
-<header class="header">
-	<nav class="menu">
-		<figure class="logo">
-		{if isset($config) && ($url = $config->fileURL('logo', '150px'))}
-				<a href="{$admin_uri}"><img src="{$url}" alt="" /></a>
-		{/if}
-		</figure>
+<nav id="menu">
+	<figure class="logo">
+	{if isset($config) && ($url = $config->fileURL('logo', '150px'))}
+			<a href="{$admin_uri}"><img src="{$url}" alt="" /></a>
+	{/if}
+	</figure>
 	<ul>
 	{if $is_logged}
 	<?php
@@ -153,12 +155,8 @@ if (ALERT_MESSAGE && !$dialog) {
 		<li{if $current == 'login'} class="current"{/if}><h3><a href="{$admin_url}">{icon shape="login"}<b>Connexion</b></a></h3></li>
 	{/if}
 	</ul>
-	</nav>
+</nav>
 
-	{if empty($hide_title)}
-	<h1>{$title}</h1>
-	{/if}
-</header>
 {elseif $layout === 'public'}
 <header class="public">
 	<h1><a href="{$site_url}">{if $config.files.logo}<img src="{$config->fileURL('logo', '150px')}" alt="" />{else}{$config.org_name}{/if}</a></h1>
@@ -166,3 +164,6 @@ if (ALERT_MESSAGE && !$dialog) {
 {/if}
 
 <main>
+	{if empty($hide_title)}
+	<h1 class="main">{$title}</h1>
+	{/if}

@@ -231,7 +231,12 @@ class Session extends \KD2\UserSession
 
 	public function isLogged(bool $allow_new_session = true)
 	{
-		$logged = parent::isLogged();
+		if (is_array(LOCAL_LOGIN)) {
+			$logged = false;
+		}
+		else {
+			$logged = parent::isLogged();
+		}
 
 		if (!$logged && LOCAL_LOGIN) {
 			$logged = $this->forceLogin(LOCAL_LOGIN, $allow_new_session);
@@ -263,6 +268,18 @@ class Session extends \KD2\UserSession
 		$this->save();
 
 		return $r;
+	}
+
+	public function start(bool $write = false)
+	{
+		// Override parent session start, we don't want to start a session
+		// when LOCAL_LOGIN is an array (eg. inside the NextCloud app,
+		// this can override the NC session and cause issues)
+		if (is_array(LOCAL_LOGIN)) {
+			return true;
+		}
+
+		return parent::start($write);
 	}
 
 	public function forceLogin($login, bool $allow_new_session = true): bool
