@@ -44,6 +44,7 @@ g.script('scripts/lib/query_builder.js', () => {
 	q.loadDefaultOperators();
 	q.types_operators['enum_restricted'] = {
 		"= ?": q.__("is equal to"),
+		"!= ?": q.__("is not equal to"),
 	};
 	q.default_operator = ["LIKE %?%", "1"];
 
@@ -83,6 +84,21 @@ g.script('scripts/lib/query_builder.js', () => {
 
 		return i;
 	};
+
+	q.addEventListener('operatorSelect', function (select) {
+		var row = select.parentNode.parentNode;
+		var columnSelect = row.childNodes[1].firstChild;
+		var column = this.columns[select.value];
+
+		if (select.value === 'subscription' && column.force) {
+			var next = row.nextElementSibling;
+				console.log(row, next);
+			for (var i = 0; i < column.force.length && next; i++) {
+				next.hidden = operatorSelect.value === '!= ?';
+				next = next.nextElementSibling;
+			}
+		}
+	});
 
 	q.init(div);
 

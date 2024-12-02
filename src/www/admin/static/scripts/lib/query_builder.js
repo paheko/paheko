@@ -1,6 +1,7 @@
 (function () {
 	var qb = function (columns) {
 		this.columns = columns;
+		this.events = {};
 	};
 
 	function findAncestor (el, sel) {
@@ -311,8 +312,7 @@
 		var operator = operatorSelect.value;
 		var column = this.columns[columnSelect.value];
 
-		if (!operator)
-		{
+		if (!operator) {
 			return;
 		}
 
@@ -377,6 +377,26 @@
 			};
 
 			parent.appendChild(btn);
+		}
+
+		this.dispatchEvent('operatorSelect', operatorSelect);
+	};
+
+	qb.prototype.addEventListener = function (name, callback) {
+		if (typeof this.events[name] === 'undefined') {
+			this.events[name] = [];
+		}
+
+		this.events[name].push(callback);
+	};
+
+	qb.prototype.dispatchEvent = function (name, ...args) {
+		if (!(this.events[name] ?? null)) {
+			return;
+		}
+
+		for (var i = 0; i < this.events[name].length; i++) {
+			this.events[name][i].call(this, ...args);
 		}
 	};
 
@@ -451,6 +471,8 @@
 	};
 
 	qb.prototype.import = function (groups) {
+		var operators = [];
+
 		for (var g in groups)
 		{
 			if (groups[g].conditions.length == 0)
@@ -479,7 +501,7 @@
 				var operator = this.addOperator(row, column);
 				operator.value = condition.operator;
 
-				this.switchOperator(operator, condition.values);
+				operators.push([operator, condition.values]);
 
 				// Handle forced columns
 				if (column.force) {
@@ -491,6 +513,11 @@
 					row.classList.add('forced');
 				}
 			}
+		}
+
+		// Switch all operators after all columns have been added, required for events
+		for (var i = 0; i < operators.length; i++) {
+			this.switchOperator(operators[i][0], operators[i][1]);
 		}
 	};
 

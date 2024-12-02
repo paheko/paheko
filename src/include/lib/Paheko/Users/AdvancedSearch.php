@@ -174,6 +174,8 @@ class AdvancedSearch extends A_S
 		];
 
 		$list = Services::listGroupedWithFeesForSelect();
+		array_unshift($list, '— Aucune activité —');
+		$list = array_values($list);
 
 		$columns['subscription'] = [
 			'label'  => 'Est inscrit à',
