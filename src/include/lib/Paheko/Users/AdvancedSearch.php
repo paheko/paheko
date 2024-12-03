@@ -337,17 +337,19 @@ class AdvancedSearch extends A_S
 						'operator' => $o[1],
 					];
 
-					if ($condition['column'] === 'service_active') {
-						$new[] = [
-							'column' => 'subscription_active',
-							'operator' => '= 1',
-						];
-					}
-					elseif ($condition['column'] === 'service_expired') {
-						$new[] = [
-							'column' => 'subscription_active',
-							'operator' => '= 0',
-						];
+					if ($operator === '= ?') {
+						if ($condition['column'] === 'service_active') {
+							$new[] = [
+								'column' => 'subscription_active',
+								'operator' => '= 1',
+							];
+						}
+						elseif ($condition['column'] === 'service_expired') {
+							$new[] = [
+								'column' => 'subscription_active',
+								'operator' => '= 0',
+							];
+						}
 					}
 				}
 

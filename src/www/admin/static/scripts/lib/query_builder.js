@@ -4,10 +4,10 @@
 		this.events = {};
 	};
 
-	function findAncestor (el, sel) {
+	qb.prototype.findAncestor = (el, sel) => {
 		while ((el = el.parentElement) && !((el.matches || el.matchesSelector).call(el,sel)));
 		return el;
-	}
+	};
 
 	window.SQLQueryBuilder = qb;
 
@@ -96,6 +96,7 @@
 		for (var i = 0; i < this.columnSelect.options.length; i++) {
 			var o = this.columnSelect.options[i];
 
+			// Hide some columns by default
 			if (this.columns[o.value].hidden ?? null) {
 				o.hidden = true;
 			}
@@ -164,7 +165,7 @@
 
 		var btn = this.buildInput('button', '+');
 		btn.onclick = function () {
-			_self.addRow(findAncestor(this, 'fieldset'), this.parentNode.parentNode);
+			_self.addRow(_self.findAncestor(this, 'fieldset'), this.parentNode.parentNode);
 		};
 
 		cell.appendChild(btn);
@@ -202,6 +203,8 @@
 			targetTable.insertBefore(row, after.nextSibling);
 		}
 
+		this.switchColumn(select);
+
 		return row;
 	};
 
@@ -210,10 +213,12 @@
 		row.parentNode.removeChild(row);
 	}
 
-	qb.prototype.switchColumn = function (columnSelect) {
+	qb.prototype.switchColumn = function (columnSelect, operator, current_values) {
 		var row = columnSelect.parentNode.parentNode;
+		this.dispatchEvent('columnchange', columnSelect, row);
+
 		var current_operator = row.cells[2].firstChild ? row.cells[2].firstChild.value : null;
-		var current_values = this.getValues(row);
+		var current_values = current_values ?? this.getValues(row);
 		var old_value = columnSelect.dataset.oldValue ?? null;
 		var value = columnSelect.value;
 		columnSelect.dataset.oldValue = value;
@@ -227,8 +232,11 @@
 		var o = this.addOperator(row, column);
 		var operators = this.types_operators[column.type];
 
+		if (operator) {
+			o.value = operator;
+		}
 		// Select same operator if it exists
-		if (current_operator && operators.hasOwnProperty(current_operator)) {
+		else if (current_operator && operators.hasOwnProperty(current_operator)) {
 			o.value = current_operator;
 		}
 		else {
@@ -252,25 +260,6 @@
 		}
 
 		this.switchOperator(o, current_values);
-
-		// Add forced columns
-		if (column.force ?? null) {
-			for (var i = 0; i < column.force.length; i++) {
-				var f = column.force[i];
-				row = this.addRow(findAncestor(row, 'fieldset'), row);
-				var o = row.querySelector('.column select option[value="' + f + '"]');
-				o.hidden = false;
-				o.parentNode.value = f;
-				this.switchColumn(o.parentNode);
-				o.parentNode.setAttribute('aria-readonly', 'true');
-				row.classList.add('forced');
-			}
-		}
-		else if (old_value && (this.columns[old_value].force ?? null)) {
-			for (var i = 0; i < this.columns[old_value].force.length; i++) {
-				row.nextElementSibling.remove();
-			}
-		}
 	};
 
 	qb.prototype.addOperator = function (targetRow, column) {
@@ -316,6 +305,8 @@
 			return;
 		}
 
+		this.dispatchEvent('operatorchange', operatorSelect, row, column);
+
 		var number = 1;
 		var buttons = false;
 		var prev = null;
@@ -339,26 +330,23 @@
 			return;
 		}
 
-		for (var i = 0; i < number; i++)
-		{
-			prev = this.addMatchField(parent, prev, column, operator);
+		for (var i = 0; i < number; i++) {
+			prev = this.addMatchField(parent, prev, column, row);
 
-			if (column.type == 'bitwise' && values)
-			{
+			if (column.type == 'bitwise' && values) {
 				// Check the boxes!
-				for (var j = 0; j < column.values.length; j++)
-				{
+				for (var j = 0; j < column.values.length; j++) {
 					parent.querySelectorAll('input')[j].checked = values.indexOf(j.toString()) != -1;
 				}
 			}
-			else if (values)
-			{
+			else if (values) {
 				prev.value = values[i];
 			}
+
+			this.dispatchEvent('valuechange', prev, row);
 		}
 
-		if (buttons)
-		{
+		if (buttons) {
 			// append add/remove values button
 			var btn = this.buildInput('button', '-');
 			btn.onclick = function () {
@@ -373,13 +361,11 @@
 			var _self = this;
 
 			btn.onclick = function () {
-				_self.addMatchField(parent, this.previousSibling.previousSibling, column, operator);
+				_self.addMatchField(parent, this.previousSibling.previousSibling, column, row);
 			};
 
 			parent.appendChild(btn);
 		}
-
-		this.dispatchEvent('operatorSelect', operatorSelect);
 	};
 
 	qb.prototype.addEventListener = function (name, callback) {
@@ -400,16 +386,14 @@
 		}
 	};
 
-	qb.prototype.addMatchField = function (targetParent, prev, column, operator) {
+	qb.prototype.addMatchField = function (targetParent, prev, column, row) {
 		if (column.type.indexOf('enum') === 0) {
 			var field = this.buildSelect(column.values);
 		}
-		else if (column.type == 'bitwise')
-		{
+		else if (column.type == 'bitwise') {
 			var field = document.createElement('span');
 
-			for (var v in column.values)
-			{
+			for (var v in column.values) {
 				var checkbox = this.buildInput('checkbox', v);
 				var label = document.createElement('label');
 				label.appendChild(checkbox);
@@ -417,17 +401,17 @@
 				field.appendChild(label.cloneNode(true));
 			}
 		}
-		else
-		{
+		else {
 			var field = this.buildInput(column.type, '', column);
 		}
 
 		field = targetParent.insertBefore(field, prev ? prev.nextSibling : null);
 
-		if (prev)
-		{
+		if (prev) {
 			targetParent.insertBefore(document.createElement('br'), field);
 		}
+
+		field.addEventListener('change', () => this.dispatchEvent('valuechange', field, row));
 
 		return field;
 	};
@@ -471,7 +455,7 @@
 	};
 
 	qb.prototype.import = function (groups) {
-		var operators = [];
+		var rows = [];
 
 		for (var g in groups)
 		{
@@ -482,27 +466,30 @@
 			}
 
 			var groupElement = this.addGroup(this.parent, groups[g].operator, groups[g].join_operator ?? null);
-			var forced = 0;
 
-			for (var i in groups[g].conditions)
-			{
+			for (var i in groups[g].conditions) {
 				var condition = groups[g].conditions[i];
-				var row = this.addRow(groupElement);
-				var select = row.childNodes[1].firstChild;
-				select.value = condition.column;
-				select.dataset.oldValue = select.value;
-
 				var column = this.columns[condition.column] ?? null;
 
+				// Skip columns that don't exist anymore
 				if (!column) {
 					continue;
 				}
 
-				var operator = this.addOperator(row, column);
-				operator.value = condition.operator;
+				var row = this.addRow(groupElement);
+				var columnSelect = row.childNodes[1].firstChild;
+				columnSelect.value = condition.column;
+				columnSelect.dataset.oldValue = columnSelect.value;
+				rows.push({row, columnSelect, condition});
+			}
+		}
 
-				operators.push([operator, condition.values]);
+		// Switch columns once they have all been added
+		for (var i = 0; i < rows.length; i++) {
+			this.switchColumn(rows[i].columnSelect, rows[i].condition.operator, rows[i].condition.values);
+		}
 
+/*
 				// Handle forced columns
 				if (column.force) {
 					forced = column.force.length;
@@ -514,11 +501,7 @@
 				}
 			}
 		}
-
-		// Switch all operators after all columns have been added, required for events
-		for (var i = 0; i < operators.length; i++) {
-			this.switchOperator(operators[i][0], operators[i][1]);
-		}
+		*/
 	};
 
 	// Fetch all values in an array
@@ -553,11 +536,10 @@
 			var rows = g.rows;
 			var conditions = [];
 
-			for (var i = 0; i < rows.length; i++)
-			{
+			for (var i = 0; i < rows.length; i++) {
 				var r = rows[i];
-				if (!r.getElementsByTagName('select')[0].value)
-				{
+
+				if (!r.getElementsByTagName('select')[0].value) {
 					// Ignore rows where the operator has not been selected
 					continue;
 				}

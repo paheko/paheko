@@ -85,20 +85,60 @@ g.script('scripts/lib/query_builder.js', () => {
 		return i;
 	};
 
-	q.addEventListener('operatorSelect', function (select) {
-		var row = select.parentNode.parentNode;
-		var columnSelect = row.childNodes[1].firstChild;
-		var column = this.columns[select.value];
+	// This is for handling specific behaviour of subscription search!
+	// If subscription column is selected, two more columns are added: subscription_active and subscription_paid
+	// If subscription column criteria is not '= ?', then they disappear
+	// If subscription criteria is "none" then they disappear
+	function rowChanged(row) {
+		var select = row.querySelector('td.column select');
+		var name = select.value;
+		var values_select = row.querySelector('td.values select');
+		var column = q.columns['subscription'];
 
-		if (select.value === 'subscription' && column.force) {
-			var next = row.nextElementSibling;
-				console.log(row, next);
-			for (var i = 0; i < column.force.length && next; i++) {
-				next.hidden = operatorSelect.value === '!= ?';
+		// Don't interact
+		if (!((name === 'subscription' || select.dataset.oldValue === 'subscription') && values_select)) {
+			return;
+		}
+
+		var operator = row.querySelector('td.operator select').value;
+		var value = values_select.value;
+		var hidden = name !== 'subscription' || operator === '!= ?' || value === '' || value === '0';
+		var next = row.nextElementSibling;
+
+		for (var i = 0; i < column.force.length; i++) {
+			// Make existing criterias (from import) read-only
+			if (!hidden && next && next.querySelector('select').value === column.force[i]) {
+				var select = next.querySelector('td.column select');
+				select.options[select.selectedIndex].hidden = false;
+				select.setAttribute('aria-readonly', 'true');
+				next.classList.add('forced');
 				next = next.nextElementSibling;
 			}
+			// Add rows for forced columns
+			else if (!hidden) {
+				var f = column.force[i];
+				row = q.addRow(q.findAncestor(row, 'fieldset'), row);
+				var o = row.querySelector('.column select option[value="' + f + '"]');
+				o.parentNode.value = f;
+				q.switchColumn(o.parentNode);
+				o.parentNode.setAttribute('aria-readonly', 'true');
+				row.classList.add('forced');
+				next = row.nextElementSibling;
+			}
+			// remove forced columns
+			else {
+				if (next && next.classList.contains('forced')) {
+					next.remove();
+				}
+
+				next = row.nextElementSibling;
+			}
 		}
-	});
+	}
+
+	q.addEventListener('columnchange', (select, row) => rowChanged(row));
+	q.addEventListener('operatorchange', (select, row) => rowChanged(row));
+	q.addEventListener('valuechange', (select, row) => rowChanged(row));
 
 	q.init(div);
 
