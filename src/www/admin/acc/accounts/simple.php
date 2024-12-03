@@ -19,7 +19,7 @@ $types = [
 	Transaction::TYPE_TRANSFER => 'Virements',
 	Transaction::TYPE_DEBT => 'Dettes',
 	Transaction::TYPE_CREDIT => 'Créances',
-	Transaction::TYPE_ADVANCED => 'Saisies avancées',
+	Transaction::TYPE_ADVANCED => 'Avancées',
 ];
 
 $type = qg('type');

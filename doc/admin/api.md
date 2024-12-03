@@ -382,7 +382,7 @@ Exporte l'exercice indiqué au format indiqué. Les formats suivants sont dispon
 
 * `full` : complet
 * `grouped` : complet groupé
-* `simple` : simple (ne comporte pas les saisies avancées)
+* `simple` : simple (ne comporte pas les écritures avancées, car seules les écritures comportant simplifiées sont concernées)
 * `fec` : format FEC (Fichier des Écritures Comptables)
 
 L'extension indique le type de fichier :
