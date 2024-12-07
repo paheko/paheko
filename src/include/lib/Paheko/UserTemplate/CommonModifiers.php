@@ -409,7 +409,7 @@ class CommonModifiers
 			return $n;
 		}
 
-		if ($n[0] === '0' && strlen($n) === 10) {
+		if (strlen($n) === 10 && $n[0] === '0') {
 			$n = preg_replace('!(\d{2})!', '\\1 ', $n);
 		}
 
