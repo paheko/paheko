@@ -31,4 +31,4 @@ if ($target_type) {
 
 $tpl->assign(compact('csrf_key', 'target_type', 'list'));
 
-$tpl->display('users/email/mailing/new.tpl');
+$tpl->display('users/email/mailing/populate.tpl');
