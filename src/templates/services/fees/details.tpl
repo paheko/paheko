@@ -7,7 +7,7 @@ $can_action = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMI
 ?>
 
 <form method="get" action="">
-	<input type="hidden" name="id" value="{$service.id}" />
+	<input type="hidden" name="id" value="{$fee.id}" />
 	<input type="hidden" name="type" value="{$type}" />
 
 	<dl class="cotisation">
