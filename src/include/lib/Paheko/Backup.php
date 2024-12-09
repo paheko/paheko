@@ -397,7 +397,6 @@ class Backup
 				'Message d\'erreur de SQLite : ' . $e->getMessage(), self::NOT_A_DB);
 		}
 
-		DB::registerCustomFunctions($db);
 
 		// see https://www.sqlite.org/security.html
 		$db->exec('PRAGMA cell_size_check = ON;');
@@ -406,6 +405,9 @@ class Backup
 		if ($db->version()['versionNumber'] >= 3041000) {
 			$db->exec('PRAGMA trusted_schema = OFF;');
 		}
+
+		DB::toggleAuthorizer($db, true);
+		DB::registerCustomFunctions($db);
 
 		try {
 			// Now let's check integrity
