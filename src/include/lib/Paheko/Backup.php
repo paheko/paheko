@@ -399,6 +399,14 @@ class Backup
 
 		DB::registerCustomFunctions($db);
 
+		// see https://www.sqlite.org/security.html
+		$db->exec('PRAGMA cell_size_check = ON;');
+		$db->exec('PRAGMA mmap_size = 0;');
+
+		if ($db->version()['versionNumber'] >= 3041000) {
+			$db->exec('PRAGMA trusted_schema = OFF;');
+		}
+
 		try {
 			// Now let's check integrity
 			$check = $db->querySingle('PRAGMA integrity_check;', false);
