@@ -294,7 +294,9 @@ class DB extends SQLite3
 			// Only allow some PRAGMA statements
 			static $allowed = ['integrity_check', 'foreign_key_check', 'application_id',
 				'user_version', 'compile_options', 'legacy_alter_table', 'foreign_keys',
-				'query_only', 'index_list', 'foreign_key_list', 'table_info'];
+				'query_only', 'index_list', 'foreign_key_list', 'table_info',
+				'index_xinfo',
+			];
 
 			if (!in_array($args[0], $allowed, true)) {
 				return \SQLite3::DENY;
