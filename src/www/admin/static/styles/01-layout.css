@@ -203,6 +203,11 @@ body.raw main {
     padding: 0;
 }
 
+body.raw h1.main {
+    margin: 0;
+    padding: .5rem;
+}
+
 body.preview {
     padding: .8rem;
     background: rgb(var(--gBgColor));
