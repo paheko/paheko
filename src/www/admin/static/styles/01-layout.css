@@ -200,6 +200,7 @@ body.public, body.raw {
 
 body.raw main {
     margin: 0;
+    padding: 0;
 }
 
 body.preview {
@@ -236,9 +237,6 @@ body.preview {
     padding: 1em;
 }
 
-body.raw main {
-    margin: 0;
-}
 
 .print-only {
     display: none;
