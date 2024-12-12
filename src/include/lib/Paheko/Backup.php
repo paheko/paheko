@@ -133,8 +133,14 @@ class Backup
 		Utils::safe_unlink($dest);
 
 		if ($version['versionNumber'] >= 3027000) {
-			// use VACUUM INTO instead when SQLite 3.27+ is required
+			// We need to allow ATTACH here, as VACUUM INTO is using ATTACH,
+			// so we disable the authorizer
+			DB::toggleAuthorizer($db, false);
+
+			// use VACUUM INTO instead when SQLite 3.27+ is available
 			$db->exec(sprintf('VACUUM INTO %s;', $db->quote($dest)));
+
+			DB::toggleAuthorizer($db, true);
 		}
 		else {
 			// use ::backup since PHP 7.4.0+
