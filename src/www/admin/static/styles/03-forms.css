@@ -121,11 +121,6 @@ input:not(:placeholder-shown):focus:invalid, textarea:not(:placeholder-shown):fo
     box-shadow: 0 0 5px .3rem rgba(var(--gHoverLinkColor), 0.5);
 }
 
-input.time {
-    text-align: center;
-    padding: .2em 0;
-}
-
 /* Fake checkbox and radio buttons */
 input[type=checkbox], input[type=radio] {
     position: absolute;
@@ -383,11 +378,12 @@ input[disabled] + label::before {
     cursor: not-allowed;
 }
 
-select, input[size], input[type=color], button, input[type=button], input[type=submit] {
+select, tbody select, input[size], tbody input[size], input[type=color], button, input[type=button], input[type=submit] {
     min-width: 0;
+    width: auto;
 }
 
-input[type=number] {
+input[type=number], tbody input[size] {
     min-width: 3em;
 }
 
