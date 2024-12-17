@@ -65,7 +65,7 @@ if (ALERT_MESSAGE && !$dialog) {
 	<div id="sticky-alert"><?=ALERT_MESSAGE?></div>
 {/if}
 
-{if !array_key_exists('_dialog', $_GET) && empty($layout)}
+{if !array_key_exists('_dialog', $_GET) && $layout !== 'public' && $layout !== 'raw'}
 <nav id="menu">
 	<figure class="logo">
 	{if isset($config) && ($url = $config->fileURL('logo', '150px'))}

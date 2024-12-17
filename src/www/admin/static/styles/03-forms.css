@@ -241,7 +241,7 @@ b.btn {
     border-bottom: 1px dashed rgba(var(--gMainColor), 0.5);
 }
 
-[data-icon]:before, .main[data-icon]:after {
+[data-icon]:before, .main[data-icon]:after, [data-icon].right:after {
     display: block;
     font-family: "paheko", sans-serif;
     text-shadow: 1px 1px 1px var(--gLightBorderColor);
@@ -283,11 +283,11 @@ button.main, .icn-btn.main {
     padding: .5em 1em;
 }
 
-button.main[data-icon]:before, .icn-btn.main:before {
+button.main[data-icon]:before, .icn-btn.main:before, .icn-btn.right:before {
     display: none;
 }
 
-button.main[data-icon]:after, .icn-btn[data-icon]:after {
+button.main[data-icon]:after, .icn-btn.main[data-icon]:after {
     padding: 0;
     color: rgba(var(--gSecondColor));
     font-size: 1.5rem;
