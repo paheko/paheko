@@ -17,8 +17,9 @@ if (!$check || !is_array($check)) {
 
 $transactions = array_unique(array_values($check));
 $lines = array_keys($check);
+$action = $_POST['action'] ?? null;
 
-if (f('action') === 'payoff') {
+if ($action === 'payoff') {
 	Utils::redirect('!acc/transactions/new.php?payoff=' . implode(',', $transactions));
 }
 
@@ -26,6 +27,10 @@ $csrf_key = 'acc_actions';
 
 // Delete transactions
 $form->runIf('delete', function () use ($transactions) {
+	if (empty($_POST['confirm_delete'])) {
+		throw new UserException('Merci de cocher la case pour confirmer.');
+	}
+
 	foreach ($transactions as $id) {
 		$transaction = Transactions::get((int) $id);
 
@@ -53,15 +58,13 @@ $form->runIf('change_project', function () use ($transactions, $lines) {
 
 $from = f('from');
 $count = count($check);
-$extra = compact('check', 'from');
+$extra = compact('check', 'from', 'action');
 $tpl->assign(compact('csrf_key', 'check', 'count', 'extra'));
 
-if (f('action') == 'delete')
-{
+if ($action === 'delete') {
 	$tpl->display('acc/transactions/actions_delete.tpl');
 }
-else
-{
+else {
 	$tpl->assign('projects', Projects::listAssoc());
 
 	$tpl->display('acc/transactions/action_project.tpl');

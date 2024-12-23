@@ -337,7 +337,7 @@ class CommonModifiers
 			return $str;
 		}
 
-		$str = preg_replace('/(?:\h|(?!&\w))([?!:»;])(?=\s|$)/us', "\xc2\xa0\\1", $str);
+		$str = preg_replace('/(?:\h|(?!&\w))([?!:»;€])(?=\s|$)/us', "\xc2\xa0\\1", $str);
 		$str = preg_replace('/(?<=^|\s)([«])[\h]*/u', "\\1\xc2\xa0", (string)$str);
 		return $str;
 	}
@@ -409,7 +409,7 @@ class CommonModifiers
 			return $n;
 		}
 
-		if ($n[0] === '0' && strlen($n) === 10) {
+		if (strlen($n) === 10 && $n[0] === '0') {
 			$n = preg_replace('!(\d{2})!', '\\1 ', $n);
 		}
 

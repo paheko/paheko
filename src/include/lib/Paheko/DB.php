@@ -268,6 +268,42 @@ class DB extends SQLite3
 		}
 
 		self::registerCustomFunctions($this->db);
+		self::toggleAuthorizer($this->db, true);
+	}
+
+	static public function toggleAuthorizer($db, bool $enable): void
+	{
+		if (!method_exists($db, 'setAuthorizer')) {
+			return;
+		}
+
+		$db->setAuthorizer($enable ? [self::class, 'safetyAuthorizer'] : null);
+	}
+
+	/**
+	 * Basic authorizer to make sure dangerous functions cannot be used:
+	 * ATTACH, PRAGMA
+	 */
+	static public function safetyAuthorizer(int $action, ...$args)
+	{
+		if ($action === \SQLite3::ATTACH) {
+			return \SQLite3::DENY;
+		}
+
+		if ($action === \SQLite3::PRAGMA) {
+			// Only allow some PRAGMA statements
+			static $allowed = ['integrity_check', 'foreign_key_check', 'application_id',
+				'user_version', 'compile_options', 'legacy_alter_table', 'foreign_keys',
+				'query_only', 'index_list', 'foreign_key_list', 'table_info',
+				'index_xinfo',
+			];
+
+			if (!in_array($args[0], $allowed, true)) {
+				return \SQLite3::DENY;
+			}
+		}
+
+		return \SQLite3::OK;
 	}
 
 	static public function registerCustomFunctions($db)

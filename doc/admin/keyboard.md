@@ -39,6 +39,6 @@ Depuis l'aide ou l'insertion de fichier :
 
 # Ajouter un fichier ou une image
 
-Il est aussi possible de faire glisser et déposer une image ou un fichier sur le champ d'édition du texte pour l'envoyer et l'insérer.
+Dans les pages et catégories du site web il est aussi possible de faire glisser et déposer une image ou un fichier sur le champ d'édition du texte pour l'envoyer et l'insérer.
 
 De même, il est aussi possible d'utiliser le copier/coller dans le texte pour insérer un fichier ou une image.
