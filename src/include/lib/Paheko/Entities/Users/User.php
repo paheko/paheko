@@ -853,6 +853,22 @@ class User extends Entity
 		}
 	}
 
+	/**
+	 * Return true if a manager can change a users password
+	 */
+	public function canChangePasswordBy(Session $session): bool
+	{
+		$password_field = current(DynamicFields::getInstance()->fieldsBySystemUse('password'));
+		return $session->canAccess($session::SECTION_USERS, $password_field->management_access_level);
+	}
+
+	public function validatePasswordCanBeChangedBy(Session $session): void
+	{
+		if (!$this->canChangePasswordBy($session)) {
+			throw new UserException("Vous n'avez pas le droit de modifier le mot de passe de ce membre, merci de contacter un administrateur.");
+		}
+	}
+
 	public function canLoginBy(Session $session): bool
 	{
 		// Cannot login if we can't manage sessions

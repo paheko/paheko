@@ -86,7 +86,7 @@
 				{/if}
 			{/if}
 		</dd>
-		{if $can_be_modified}
+		{if $can_change_password}
 			<dd>
 			{if $logged_user.id == $user.id}
 				{linkbutton shape="settings" label="Modifier mon mot de passe" href="!me/security.php"}
