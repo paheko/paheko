@@ -69,9 +69,11 @@
 		<dd><span class="permissions">{display_permissions permissions=$category}</span></dd>
 		<dt>Dernière connexion</dt>
 		<dd>{if empty($user.date_login)}Jamais{else}{$user.date_login|date_short:true}{/if}</dd>
+		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
 		<dd>
 			{linkbutton shape="menu" label="Journal d'audit" href="!users/log.php?id=%d"|args:$user.id}
 		</dd>
+		{/if}
 		<dt>Sécurité</dt>
 		<dd>
 			{if empty($user.password)}

@@ -9,9 +9,11 @@ require_once __DIR__ . '/../_inc.php';
 $params = [];
 
 if ($id = (int)qg('history')) {
+	$session->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
 	$params['history'] = $id;
 }
-elseif (($id = (int)qg('id')) && $session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)) {
+elseif (($id = (int)qg('id'))) {
+	$session->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
 	$params['id_user'] = $id;
 }
 else {
