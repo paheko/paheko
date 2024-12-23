@@ -80,6 +80,12 @@ class AdvancedSearch extends A_S
 				continue;
 			}
 
+			// Skip fields where you don't have access
+			// Note that this doesn't block access to fields using existing saved searches
+			if ($this->session && !$this->session->canAccess($this->session::SECTION_USERS, $field->management_access_level)) {
+				continue;
+			}
+
 			$identifier = $db->quoteIdentifier($name);
 
 			$column = [

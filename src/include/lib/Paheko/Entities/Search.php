@@ -425,6 +425,7 @@ class Search extends Entity
 			}
 		}
 		elseif (!isset($this->content)) {
+			$this->getAdvancedSearch()->setSession($session);
 			$this->content = json_encode($this->getAdvancedSearch()->defaults());
 			$this->type = self::TYPE_JSON;
 			$default = true;
