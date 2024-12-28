@@ -1,7 +1,6 @@
 {include file="_head.tpl" title="Sélectionner un compte"}
 
 <div class="selector">
--{$key}-
 
 	<nav class="tabs">
 	{if !$chart.archived && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
