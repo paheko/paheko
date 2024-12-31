@@ -164,6 +164,6 @@ if (ALERT_MESSAGE && !$dialog) {
 {/if}
 
 <main>
-	{if empty($hide_title)}
+	{if empty($hide_title) && !$dialog}
 	<h1 class="main">{$title}</h1>
 	{/if}
