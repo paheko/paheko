@@ -809,11 +809,13 @@ class CommonFunctions
 			$params['data-default-country'] = Config::getInstance()->get('country');
 		}
 
-		if ($field->default_value === 'NOW()') {
-			$params['default'] = new \DateTime;
-		}
-		elseif (!empty($field->default_value)) {
-			$params['default'] = $field->default_value;
+		if ($context === 'admin_new') {
+			if ($field->default_value === 'NOW()') {
+				$params['default'] = new \DateTime;
+			}
+			elseif (!empty($field->default_value)) {
+				$params['default'] = $field->default_value;
+			}
 		}
 
 		$out = CommonFunctions::input($params);
