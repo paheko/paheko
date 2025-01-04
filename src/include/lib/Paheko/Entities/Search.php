@@ -52,7 +52,7 @@ class Search extends Entity
 	protected ?int $id;
 	protected ?int $id_user = null;
 	protected string $label;
-	protected ?string $description;
+	protected ?string $description = null;
 	protected \DateTime $updated;
 	protected string $target;
 	protected string $type;

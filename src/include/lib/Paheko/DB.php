@@ -234,13 +234,13 @@ class DB extends SQLite3
 		$this->_install_check = !$disable;
 	}
 
-	public function connect(): void
+	public function connect(bool $check_installed = true): void
 	{
 		if (null !== $this->db) {
 			return;
 		}
 
-		if ($this->_install_check && !self::isInstalled()) {
+		if ($check_installed && $this->_install_check && !self::isInstalled()) {
 			throw new \LogicException('Database has not been installed!');
 		}
 
