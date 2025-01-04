@@ -27,6 +27,7 @@ if ($user->id === $logged_user_id) {
 
 // Protect against admin users being deleted/modified by less powerful users
 $user->validateCanBeModifiedBy($session);
+$user->validatePasswordCanBeChangedBy($session);
 
 $csrf_key = 'user_security_' . $user->id;
 

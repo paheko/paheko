@@ -2,8 +2,12 @@
 
 namespace Paheko;
 
+use Paheko\Users\Session;
+
 abstract class AdvancedSearch
 {
+	protected ?Session $session = null;
+
 	/**
 	 * From a single search string, returns a search object (stdClass) containing 3 properties:
 	 * - query (array, list of search conditions)
@@ -242,5 +246,10 @@ abstract class AdvancedSearch
 			'select' => $select_columns,
 			'where' => $query_groups ?: '1',
 		];
+	}
+
+	public function setSession(?Session $session)
+	{
+		$this->session = $session;
 	}
 }

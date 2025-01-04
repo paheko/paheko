@@ -8,6 +8,7 @@ use Paheko\Entities\Accounting\Year;
 use Paheko\CSV_Custom;
 use Paheko\Users\DynamicFields;
 use Paheko\DB;
+use Paheko\Log;
 use Paheko\UserException;
 
 use KD2\SimpleDiff;
@@ -165,6 +166,7 @@ class Import
 
 		$db = DB::getInstance();
 		$db->begin();
+		Log::add(Log::MESSAGE, ['message' => 'Import d\'écritures comptables'], $user_id);
 
 		$accounts = $year->accounts();
 		$transaction = null;

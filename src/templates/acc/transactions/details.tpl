@@ -19,7 +19,7 @@
 	<nav>
 	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$transaction->isLocked() && $transaction_year->isOpen()}
 		{linkbutton href="edit.php?id=%d"|args:$transaction.id shape="edit" label="Modifier cette écriture" accesskey="M"}
-		{linkbutton href="delete.php?id=%d"|args:$transaction.id shape="delete" label="Supprimer cette écriture" accesskey="S"}
+		{linkbutton href="delete.php?id=%d"|args:$transaction.id shape="delete" label="Supprimer cette écriture" accesskey="S" target="_dialog"}
 	{/if}
 	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
 		{linkbutton href="new.php?copy=%d"|args:$transaction.id shape="plus" label="Dupliquer cette écriture" accesskey="D"}

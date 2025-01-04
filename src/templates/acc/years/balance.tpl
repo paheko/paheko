@@ -50,7 +50,7 @@
 		let s = document.querySelector('#f_from_year');
 		const checkOpen = function() {
 			let v = s.options[s.selectedIndex].dataset.open;
-			g.toggle('.warn-not-closed', v === '' ? true : false);
+			g.toggle('.warn-not-closed', v === 'open' ? true : false);
 		};
 		s.onchange = checkOpen;
 		checkOpen();

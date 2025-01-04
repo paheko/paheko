@@ -111,6 +111,14 @@ table.list tr:nth-child(even).disabled {
     background-image: linear-gradient(rgba(var(--gMainColor), .5), rgba(var(--gMainColor), .5));
 }
 
+.userOrder {
+    height: fit-content;
+}
+
+.userOrder tr, .userOrder td, .userOrder th {
+    height: 100%;
+}
+
 .userOrder a, .userOrder button {
     text-decoration: none;
     display: inline-flex;
@@ -119,10 +127,10 @@ table.list tr:nth-child(even).disabled {
     justify-content: flex-start;
     box-shadow: none;
     margin: 0;
-    width: calc(100% - .4rem);
-    height: calc(100% - .4rem);
+    width: calc(100% - .6rem);
+    height: calc(100% - .6rem);
     color: inherit;
-    padding: .2rem;
+    padding: .3rem;
     text-align: left;
     border-radius: .5em;
     border: none;
@@ -145,7 +153,7 @@ table.list tr:nth-child(even).disabled {
 
 table.list .userOrder td, table.list .userOrder th {
     padding: .2rem;
-    height: 2rem;
+    min-height: 2rem;
 }
 
 table.list .userOrder .check {

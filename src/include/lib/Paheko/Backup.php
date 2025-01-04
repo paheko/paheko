@@ -133,8 +133,14 @@ class Backup
 		Utils::safe_unlink($dest);
 
 		if ($version['versionNumber'] >= 3027000) {
-			// use VACUUM INTO instead when SQLite 3.27+ is required
+			// We need to allow ATTACH here, as VACUUM INTO is using ATTACH,
+			// so we disable the authorizer
+			DB::toggleAuthorizer($db, false);
+
+			// use VACUUM INTO instead when SQLite 3.27+ is available
 			$db->exec(sprintf('VACUUM INTO %s;', $db->quote($dest)));
+
+			DB::toggleAuthorizer($db, true);
 		}
 		else {
 			// use ::backup since PHP 7.4.0+
@@ -397,6 +403,16 @@ class Backup
 				'Message d\'erreur de SQLite : ' . $e->getMessage(), self::NOT_A_DB);
 		}
 
+
+		// see https://www.sqlite.org/security.html
+		$db->exec('PRAGMA cell_size_check = ON;');
+		$db->exec('PRAGMA mmap_size = 0;');
+
+		if ($db->version()['versionNumber'] >= 3041000) {
+			$db->exec('PRAGMA trusted_schema = OFF;');
+		}
+
+		DB::toggleAuthorizer($db, true);
 		DB::registerCustomFunctions($db);
 
 		try {
@@ -495,6 +511,10 @@ class Backup
 			// Re-sync files cache with storage, if necessary
 			Storage::sync();
 		}
+
+		$name = Utils::basename($file);
+		$name = str_replace(['.sqlite', 'association.'], '', $name);
+		Log::add(Log::MESSAGE, ['message' => 'Sauvegarde restaurée : ' . $name], $session::getUserId());
 
 		return $return;
 	}

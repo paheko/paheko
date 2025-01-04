@@ -109,8 +109,7 @@ if ($prev < $current_year->start_date) {
 if ($start == $current_year->start_date) {
 	$prev = null;
 }
-
-if ($end == $current_year->end_date) {
+elseif ($end == $current_year->end_date) {
 	$next = null;
 }
 

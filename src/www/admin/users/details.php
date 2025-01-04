@@ -49,6 +49,7 @@ $category = $user->category();
 $csrf_key = 'user_' . $user->id();
 $can_login = $user->canLoginBy($session);
 $can_be_modified = $user->canBeModifiedBy($session);
+$can_change_password = $user->canChangePasswordBy($session);
 
 $form->runIf('login_as', function () use ($user, $session, $can_login) {
 	if (!$session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
@@ -79,7 +80,7 @@ $siblings = $user->listSiblings();
 
 $variables += compact('list_category', 'services', 'user', 'category',
 	'children', 'siblings', 'parent_name', 'csrf_key',
-	'can_be_modified', 'can_login');
+	'can_be_modified', 'can_login', 'can_change_password');
 
 $tpl->assign($variables);
 $tpl->assign('snippets', Modules::snippetsAsString(Modules::SNIPPET_USER, $variables));

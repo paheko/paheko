@@ -25,8 +25,6 @@ $form->runIf('save', function () use ($user, $session, &$is_duplicate) {
 
 	$user->importForm();
 
-	$user->setNumberIfEmpty();
-
 	if (f('save') != 'anyway' && ($is_duplicate = $user->checkDuplicate())) {
 		return;
 	}

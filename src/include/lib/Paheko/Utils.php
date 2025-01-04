@@ -1910,13 +1910,16 @@ class Utils
 			$db_time += $item['duration'];
 
 			$item['plan'] = '';
-			try {
-				foreach ($db->get('EXPLAIN QUERY PLAN ' . $item['sql']) as $e) {
-					$item['plan'] .= $e->detail . "\n";
+
+			if (preg_match('!^\s*SELECT\s+!i', $item['sql'])) {
+				try {
+					foreach ($db->get('EXPLAIN QUERY PLAN ' . $item['sql']) as $e) {
+						$item['plan'] .= $e->detail . "\n";
+					}
 				}
-			}
-			catch (DB_Exception $e) {
-				$item['plan'] = 'Error: ' . $e->getMessage();
+				catch (DB_Exception $e) {
+					$item['plan'] = 'Error: ' . $e->getMessage();
+				}
 			}
 
 			if ($item['duration'] >= 4000) {

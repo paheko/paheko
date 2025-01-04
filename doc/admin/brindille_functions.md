@@ -841,6 +841,8 @@ Note : le paramètre `value` n'est pas supporté sauf pour checkbox et radio.
   * `!acc/charts/accounts/selector.php?targets=X` pour sélectionner un compte du plan comptable, où X est une liste de types de comptes qu'il faut permettre de choisir (séparés par des `:`)
   * `!users/selector.php` pour sélectionner un membre
 
+Note : pour les champs de type `select` et `select_groups` il est possible de spécifier le paramètre `default_empty` pour la valeur vide par défaut du champ. `default_empty="Tous"` affichera ainsi la valeur `Tous` en première option du select. Si cette option est sélectionnée une chaîne vide sera envoyée.
+
 ## button
 
 Affiche un bouton, similaire à `<button>` en HTML, mais permet d'ajouter une icône par exemple.

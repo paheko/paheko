@@ -73,7 +73,7 @@ namespace Paheko;
  * il est toujours possible de restaurer une base de données non signée en
  * la recopiant à la place du fichier association.sqlite
  *
- * Défaut : true
+ * Défaut : false
  * @var  bool
  */
 

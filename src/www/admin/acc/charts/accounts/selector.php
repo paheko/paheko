@@ -20,11 +20,13 @@ $targets_str = implode(':', $targets);
 
 $year = null;
 $filter = qg('filter');
+$key = ($_GET['key'] ?? null) === 'code' ? 'code' : 'id';
 
 $this_url = '?' . http_build_query([
 	'targets' => $targets_str,
-	'chart' => $chart_id,
-	'year' => $year_id,
+	'chart'   => $chart_id,
+	'year'    => $year_id,
+	'key'     => $key,
 ]);
 
 if (qg('_dialog') !== null) {
@@ -84,7 +86,7 @@ $new_url = sprintf('!acc/charts/accounts/new.php?id=%d&types=%s', $chart->id(), 
 $targets_names = !empty($targets) ? array_intersect_key(Account::TYPES_NAMES, array_flip($targets)) : [];
 $targets_names = implode(', ', $targets_names);
 
-$tpl->assign(compact('chart', 'targets', 'targets_str', 'filter', 'new_url', 'edit_url', 'targets_names', 'this_url'));
+$tpl->assign(compact('chart', 'targets', 'targets_str', 'filter', 'new_url', 'edit_url', 'targets_names', 'this_url', 'key'));
 
 if ($filter == 'all') {
 	$tpl->assign('accounts', $accounts->listAll($targets));

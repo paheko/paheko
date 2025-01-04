@@ -22,7 +22,6 @@
 			{* We can't use input type="search" because Firefox sucks *}
 		</h2>
 	</header>
-
 {if empty($grouped_accounts) && empty($accounts)}
 	<p class="block alert">
 		Il n'existe aucun compte dans la catégorie «&nbsp;{$targets_names}&nbsp;» dans le plan comptable.
@@ -49,7 +48,7 @@
 					<th>{$account.label}</th>
 					<td class="desc">{$account.description}</td>
 					<td class="actions">
-						<?php $v = ($_GET['key'] ?? null) == 'code' ? $account->code : $account->id; ?>
+						<?php $v = $account->$key; ?>
 						{button shape="right" value=$v data-label="%s — %s"|args:$account.code,$account.label label="Sélectionner"}
 					</td>
 				</tr>
@@ -78,7 +77,7 @@
 				<td class="num">{$account.code}</td>
 				<th>{$account.label}</th>
 				<td class="actions">
-					<?php $v = ($_GET['key'] ?? null) == 'code' ? $account->code : $account->id; ?>
+					<?php $v = $account->$key; ?>
 					{button shape="right" value=$v data-label="%s — %s"|args:$account.code,$account.label label="Sélectionner"}
 				</td>
 			</tr>

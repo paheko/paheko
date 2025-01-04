@@ -10,6 +10,7 @@ use Paheko\Utils;
 use Paheko\ValidationException;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
+use Paheko\Users\Users;
 use Paheko\Entities\Users\DynamicField;
 use Paheko\Entities\Users\User;
 use Paheko\Files\Conversion;
@@ -375,7 +376,7 @@ class CommonFunctions
 			}
 
 			$currency = Config::getInstance()->currency;
-			$input = sprintf('<nobr><input type="text" pattern="-?[0-9]+([.,][0-9]{1,2})?" inputmode="decimal" size="8" %s value="%s" /><b>%s</b></nobr>', $attributes_string, htmlspecialchars((string) $current_value), $currency);
+			$input = sprintf('<nobr><input type="text" pattern="\s*-?[0-9 ]+([.,][0-9]{1,2})?\s*" inputmode="decimal" size="8" %s value="%s" /><b>%s</b></nobr>', $attributes_string, htmlspecialchars((string) $current_value), $currency);
 		}
 		else {
 			$value = isset($attributes['value']) ? '' : sprintf(' value="%s"', htmlspecialchars((string)$current_value));
@@ -787,8 +788,8 @@ class CommonFunctions
 			$params['label'] = 'Oui';
 			$params['prefix_title'] = $field->label;
 		}
-		elseif ($field->system & $field::NUMBER && $context === 'admin_new') {
-			$params['default'] = DB::getInstance()->firstColumn(sprintf('SELECT MAX(%s) + 1 FROM %s;', $name, User::TABLE));
+		elseif ($field->isNumber() && $field->type === 'number' && $context === 'admin_new') {
+			$params['default'] = Users::getNewNumber();
 			$params['required'] = false;
 		}
 		elseif ($type === 'number') {
@@ -809,11 +810,13 @@ class CommonFunctions
 			$params['data-default-country'] = Config::getInstance()->get('country');
 		}
 
-		if ($field->default_value === 'NOW()') {
-			$params['default'] = new \DateTime;
-		}
-		elseif (!empty($field->default_value)) {
-			$params['default'] = $field->default_value;
+		if ($context === 'admin_new') {
+			if ($field->default_value === 'NOW()') {
+				$params['default'] = new \DateTime;
+			}
+			elseif (!empty($field->default_value)) {
+				$params['default'] = $field->default_value;
+			}
 		}
 
 		$out = CommonFunctions::input($params);
@@ -822,10 +825,13 @@ class CommonFunctions
 			$out .= '<dd class="help"><small>(Sera utilisé comme identifiant de connexion si le membre a le droit de se connecter.)</small></dd>';
 		}
 
-		if ($context === 'admin_new' && $field->system & $field::NUMBER) {
+		if ($context === 'admin_new'
+			&& $field->isNumber()
+			&& $field->type === 'number') {
 			$out .= '<dd class="help"><small>Doit être unique, laisser vide pour que le numéro soit attribué automatiquement.</small></dd>';
 		}
-		elseif ($context === 'admin_edit' && $field->system & $field::NUMBER) {
+		elseif (($context === 'admin_edit' || $context === 'admin_new')
+			&& $field->isNumber()) {
 			$out .= '<dd class="help"><small>Doit être unique pour chaque membre.</small></dd>';
 		}
 

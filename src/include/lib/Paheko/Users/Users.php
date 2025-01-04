@@ -14,6 +14,7 @@ use Paheko\CSV;
 use Paheko\CSV_Custom;
 use Paheko\DB;
 use Paheko\DynamicList;
+use Paheko\Log;
 use Paheko\Search;
 use Paheko\Utils;
 use Paheko\UserException;
@@ -568,6 +569,8 @@ class Users
 		$db = DB::getInstance();
 		$db->begin();
 
+		Log::add(Log::MESSAGE, ['message' => 'Import de membres'], $session::getUserId());
+
 		foreach (self::iterateImport($csv, $mode) as $i => $user) {
 			// Skip logged user, to avoid changing own login field
 			if ($logged_user_id && $user->id == $logged_user_id) {
@@ -686,5 +689,18 @@ class Users
 	{
 		return EM::findOne(User::class, 'SELECT * FROM @TABLE WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config >= ?) LIMIT 1;',
 			Session::ACCESS_ADMIN);
+	}
+
+	static public function getNewNumber(): ?int
+	{
+		$field = DynamicFields::getNumberFieldSQL();
+		$db = DB::getInstance();
+		$r = $db->firstColumn(sprintf('SELECT MAX(%s) FROM %s;', $field, User::TABLE));
+
+		if (!is_int($r) && !ctype_digit($r)) {
+			return null;
+		}
+
+		return intval($r) + 1;
 	}
 }

@@ -1,4 +1,4 @@
-{include file="_head.tpl" title=$file.name current=null layout="raw"}
+{include file="_head.tpl" title=$file.name current=null layout="raw" hide_title=true}
 
 <style type="text/css">
 {literal}

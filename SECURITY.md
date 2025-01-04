@@ -57,6 +57,9 @@ Note: users inside Paheko have different permissions, according to the category 
   * this means that accessing the SQL tables in read-only mode inside forms designed to make `SELECT` queries is not a security issue, unless accessing a table/column outside of the authorizer scope is possible
 * Paheko allows users with "admin" permission in "config" to create custom HTML documents in Modules, this is by design
   * an administrator injecting a XSS is not a security issue, as they already have access to everything
+* Paheko allows users with "admin" permission in "config" to restore a SQLite database form their own file. Some integrity checks are performed when doing that, but it is still possible to import a database with a broken schema or data that will trigger bugs.
+  * importing a broken database file is not a security issue
+  * but if importing this broken database may trigger PHP code execution, or opening of database files (eg. on the server filesystem) other than the main database, are security issues.
 * Spam
 * Social engineering techniques
 * Denial-of-service attacks

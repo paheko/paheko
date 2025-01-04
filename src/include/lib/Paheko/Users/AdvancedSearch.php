@@ -51,7 +51,7 @@ class AdvancedSearch extends A_S
 
 		$columns['number'] = [
 			'label'    => 'Numéro du membre',
-			'type'     => 'integer',
+			'type'     => $fields::isNumberFieldANumber() ? 'integer' : 'text',
 			'null'     => false,
 			'select'   => $fields::getNumberFieldSQL('u'),
 		];
@@ -75,8 +75,14 @@ class AdvancedSearch extends A_S
 		foreach ($fields->all() as $name => $field)
 		{
 			// Skip password/number as it's already in the list
-			if ($field->system & $field::PASSWORD
-				|| $field->system & $field::NUMBER) {
+			if ($field->isPassword()
+				|| $field->isNumber()) {
+				continue;
+			}
+
+			// Skip fields where you don't have access
+			// Note that this doesn't block access to fields using existing saved searches
+			if ($this->session && !$this->session->canAccess($this->session::SECTION_USERS, $field->management_access_level)) {
 				continue;
 			}
 
@@ -262,8 +268,8 @@ class AdvancedSearch extends A_S
 			$column = 'identity';
 		}
 
-		$query = [[
-			'operator' => 'AND',
+		$groups = [[
+			'operator' => 'OR',
 			'conditions' => [
 				[
 					'column'   => $column,
@@ -273,8 +279,16 @@ class AdvancedSearch extends A_S
 			],
 		]];
 
+		if (!DynamicFields::isNumberFieldANumber()) {
+			$groups[0]['conditions'][] = [
+				'column'   => 'number',
+				'operator' => '= ?',
+				'values'   => [$query],
+			];
+		}
+
 		return (object) [
-			'groups' => $query,
+			'groups' => $groups,
 			'order'  => $column,
 			'desc'   => false,
 		];
