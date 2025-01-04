@@ -687,4 +687,17 @@ class Users
 		return EM::findOne(User::class, 'SELECT * FROM @TABLE WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config >= ?) LIMIT 1;',
 			Session::ACCESS_ADMIN);
 	}
+
+	static public function getNewNumber(): ?int
+	{
+		$field = DynamicFields::getNumberFieldSQL();
+		$db = DB::getInstance();
+		$r = $db->firstColumn(sprintf('SELECT MAX(%s) FROM %s;', $field, User::TABLE));
+
+		if (!is_int($r) && !ctype_digit($r)) {
+			return null;
+		}
+
+		return intval($r) + 1;
+	}
 }

@@ -148,7 +148,7 @@ class User extends Entity
 				continue;
 			}
 
-			if (empty($value) && ($field->system & $field::NUMBER)) {
+			if (empty($value) && $field->isNumber() && $field->type === 'number') {
 				$this->setNumberIfEmpty();
 				continue;
 			}
@@ -191,8 +191,6 @@ class User extends Entity
 
 		// check user number
 		$field = DynamicFields::getNumberField();
-		$this->assert($this->$field !== null && ctype_digit((string)$this->$field), 'Numéro de membre invalide : ne peut contenir que des chiffres');
-
 		$db = DB::getInstance();
 
 		if (!$this->exists()) {
@@ -202,7 +200,7 @@ class User extends Entity
 			$number_exists = $db->test(self::TABLE, sprintf('%s = ? AND id != ?', $db->quoteIdentifier($field)), $this->$field, $this->id());
 		}
 
-		$this->assert(!$number_exists, sprintf('Le numéro de membre %d est déjà attribué à un autre membre.', $this->$field));
+		$this->assert(!$number_exists, sprintf('Le numéro de membre %s est déjà attribué à un autre membre.', $this->$field));
 
 		$field = DynamicFields::getLoginField();
 		if ($this->$field !== null) {
@@ -366,10 +364,13 @@ class User extends Entity
 			return;
 		}
 
-		$db = DB::getInstance();
-		$new = $db->firstColumn(sprintf('SELECT MAX(%s) + 1 FROM %s WHERE %1$s IS NOT NULL;', $db->quoteIdentifier($field), User::TABLE));
-		$new = $new ?: $db->count(User::TABLE);
-		$this->set($field, (int)$new);
+		$n = Users::getNewNumber();
+
+		if (null === $n) {
+			throw new UserException("Le dernier numéro de membre ne comporte pas que des chiffres.\nImpossible d'attribuer automatiquement un numéro de membre.");
+		}
+
+		$this->set($field, $n);
 	}
 
 	public function name(): string

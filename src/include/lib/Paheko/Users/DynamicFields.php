@@ -71,6 +71,12 @@ class DynamicFields
 		return key(self::getInstance()->fieldsBySystemUse('number'));
 	}
 
+	static public function isNumberFieldANumber(): bool
+	{
+		$field = current(self::getInstance()->fieldsBySystemUse('number'));
+		return $field->type === 'number';
+	}
+
 	static public function getNumberFieldSQL(?string $prefix = null): string
 	{
 		$db = DB::getInstance();
@@ -574,7 +580,7 @@ class DynamicFields
 				continue;
 			}
 
-			if (!$require_number && $field->system & $field::NUMBER) {
+			if (!$require_number && $field->isNumber()) {
 				continue;
 			}
 
@@ -969,7 +975,7 @@ class DynamicFields
 		$this->_deleted = [];
 
 		if ($rebuild && $allow_rebuild) {
-			// FIXME/TODO: use ALTER TABLE ... DROP COLUMN for SQLite 3.35.0+
+			// TODO: use ALTER TABLE ... DROP COLUMN for SQLite 3.35.0+
 			// some conditions apply
 			// https://www.sqlite.org/lang_altertable.html#altertabdropcol
 			$this->rebuildUsersTable($copy);

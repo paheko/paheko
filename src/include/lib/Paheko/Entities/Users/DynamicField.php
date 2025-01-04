@@ -270,6 +270,11 @@ class DynamicField extends Entity
 		return (bool) ($this->system & self::NUMBER);
 	}
 
+	public function isPassword(): bool
+	{
+		return (bool) ($this->system & self::PASSWORD);
+	}
+
 	public function isVirtual(): bool
 	{
 		return $this->type == 'virtual';
@@ -309,15 +314,23 @@ class DynamicField extends Entity
 
 	public function hasSearchCache(): bool
 	{
-		return in_array($this->type, DynamicField::SEARCH_TYPES);
+		return in_array($this->type, DynamicField::SEARCH_TYPES) && !$this->isNumber();
 	}
 
 	public function selfCheck(): void
 	{
-		// Disallow name change if the field exists
 		if ($this->exists()) {
+			// Disallow name change if the field exists
 			$this->assert(!$this->isModified('name'));
-			$this->assert(!$this->isModified('type'));
+
+			// Forbid type change unless it's the number
+			if (!$this->isNumber()) {
+				$this->assert(!$this->isModified('type'));
+			}
+		}
+
+		if ($this->isNumber()) {
+			$this->assert($this->type === 'number' || $this->type === 'text');
 		}
 
 		$this->name = strtolower($this->name);
@@ -383,12 +396,21 @@ class DynamicField extends Entity
 
 	public function importForm(?array $source = null)
 	{
-		if (null === $source) {
-			$source = $_POST;
+		$source ??= $_POST;
+
+		if (isset($source['required']) || isset($source['required_present'])) {
+			$source['required'] = !empty($source['required']);
 		}
 
-		$source['required'] = !empty($source['required']) ? true : false;
-		$source['list_table'] = !empty($source['list_table']) ? true : false;
+		if (isset($source['list_table']) || isset($source['list_table_present'])) {
+			$source['list_table'] = !empty($source['list_table_present']);
+		}
+
+		if ($this->isNumber()) {
+			if (isset($source['type']) || isset($source['type_present'])) {
+				$source['type'] = $source['type'] ?? 'text';
+			}
+		}
 
 		return parent::importForm($source);
 	}

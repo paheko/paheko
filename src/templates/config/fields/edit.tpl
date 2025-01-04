@@ -1,7 +1,7 @@
 <?php
 $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 ?>
-{include file="_head.tpl" current="config" title=$title}
+{include file="_head.tpl" current="config" title=$title custom_js=['config_fields.js']}
 
 {include file="config/_menu.tpl" current="fields"}
 
@@ -11,13 +11,26 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 <fieldset>
 	<legend>{$title}</legend>
 	<dl>
-	{if !$field->isPreset() && !$field->exists()}
-		{input type="select" name="type" options=$user_field_types source=$field label="Type" default="text" help="Il ne sera plus possible de modifier le type une fois le champ créé." required=true}
+	{if !$field->isNumber()}
+		{if !$field->isPreset() && !$field->exists()}
+			{input type="select" name="type" options=$user_field_types source=$field label="Type" default="text" help="Il ne sera plus possible de modifier le type une fois le champ créé." required=true}
+		{else}
+			<dd class="help">Le type et l'identifiant ne sont pas modifiables.</dd>
+			{input type="select" name="type" options=$field::TYPES source=$field label="Type" disabled=true}
+		{/if}
 	{else}
-		<dd class="help">Le type et l'identifiant ne sont pas modifiables.</dd>
-		{input type="select" name="type" options=$field::TYPES source=$field label="Type" disabled=true}
+		<input type="hidden" id="f_type" value="{$field.type}" />
 	{/if}
+
 		{input type="text" name="label" label="Libellé" required=true source=$field}
+
+	{if $field->isNumber()}
+		{input type="checkbox" name="type" value="number" source=$field label="Le numéro de membre ne comporte que des chiffres"}
+		<dd class="help">
+			Décocher cette case si vos numéros de membres comprennent des lettres (exemple : <samp>ABCD1234</samp>).<br />
+			Dans ce cas l'attribution automatique de numéro pour les nouveaux membres sera désactivée.
+		</dd>
+	{/if}
 	</dl>
 </fieldset>
 
@@ -36,7 +49,7 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 
 <fieldset>
 	<legend>Préférences</legend>
-	{if !$field->isName()}
+	{if !$field->isName() && !$field->isNumber()}
 	<dl class="type-not-password">
 		{input type="checkbox" name="list_table" value=1 label="Afficher dans la liste des membres" source=$field}
 	</dl>
@@ -87,10 +100,13 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 		{input type="radio" name="user_access_level" value=$session::ACCESS_READ label="Seulement voir ce champ" source=$field default=$session::ACCESS_READ}
 		{input type="radio" name="user_access_level" value=$session::ACCESS_NONE label="Rien, cette information ne doit pas être visible par le membre" source=$field}
 		<dd class="help">Attention&nbsp;: conformément à la réglementation (RGPD), quel que soit votre choix, le membre pourra voir le contenu de ce champ en effectuant un export de ses données personnelles (s'il a le droit de se connecter).</dd>
+{if !$field->isNumber() && !$field->isName()}
+{* You can always see user name and number, is is not relevant *}
 		<dt><label for="f_management_access_level_1">Un autre membre peut voir ce champ…</label></dt>
 		{input type="radio" name="management_access_level" value=$session::ACCESS_READ label="S'il a accès à la gestion des membres (en lecture, écriture, ou administration)" source=$field default=$session::ACCESS_READ}
 		{input type="radio" name="management_access_level" value=$session::ACCESS_WRITE label="Seulement s'il a accès en écriture à la gestion des membres" source=$field}
 		{input type="radio" name="management_access_level" value=$session::ACCESS_ADMIN label="Seulement s'il a accès en administration à la gestion des membres" source=$field}
+{/if}
 	</dl>
 </fieldset>
 
@@ -101,7 +117,5 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 </p>
 
 </form>
-
-<script type="text/javascript" src="{$admin_url}static/scripts/config_fields.js?2024"></script>
 
 {include file="_foot.tpl"}
