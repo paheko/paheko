@@ -8,6 +8,7 @@ use KD2\WebDAV\Exception as WebDAV_Exception;
 use Paheko\Config;
 use Paheko\Utils;
 use Paheko\UserException;
+use Paheko\Users;
 use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
 
