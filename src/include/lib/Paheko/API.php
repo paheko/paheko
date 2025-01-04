@@ -203,7 +203,7 @@ class API
 
 	protected function user(string $uri): ?array
 	{
-		$fn = strtok($uri, '/');
+		$fn = (string) strtok($uri, '/');
 		$fn2 = strtok('/');
 		strtok('');
 
