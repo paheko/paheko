@@ -14,6 +14,7 @@ use Paheko\CSV;
 use Paheko\CSV_Custom;
 use Paheko\DB;
 use Paheko\DynamicList;
+use Paheko\Log;
 use Paheko\Search;
 use Paheko\Utils;
 use Paheko\UserException;
@@ -567,6 +568,8 @@ class Users
 		$number_field = DynamicFields::getNumberField();
 		$db = DB::getInstance();
 		$db->begin();
+
+		Log::add(Log::MESSAGE, ['message' => 'Import de membres'], $session::getUserId());
 
 		foreach (self::iterateImport($csv, $mode) as $i => $user) {
 			// Skip logged user, to avoid changing own login field
