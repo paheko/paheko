@@ -164,8 +164,8 @@ class User extends Entity
 				}
 			}
 
-			if ($field->isNumber()) {
-				$this->assert(null === $value || strlen($value) <= 100, sprintf('"%s" : ce champ dépasse la taille autorisée de %d caractères', $field->label, 100));
+			if ($field->isNumber() && !empty($value)) {
+				$this->assert(strlen($value) <= 100, sprintf('"%s" : ce champ dépasse la taille autorisée de %d caractères', $field->label, 100));
 			}
 
 			if (!isset($value)) {
