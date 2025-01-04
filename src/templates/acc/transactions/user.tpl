@@ -1,5 +1,9 @@
 {include file="_head.tpl" title="Écritures liées à %s"|args:$transaction_user->name() current="acc/accounts"}
 
+<nav class="tabs">
+	<aside>{exportmenu right=true table=true}</aside>
+</nav>
+
 {if !$dialog}
 <p>
 	{linkbutton href="!users/details.php?id=%d"|args:$transaction_user.id label="Retour à la fiche membre" shape="left"}
@@ -28,6 +32,7 @@
 <p class="block help">Cette liste représente le solde des comptes uniquement pour les écritures liées à ce membre.</p>
 
 <table class="list">
+	<caption>Solde des comptes</caption>
 	<thead>
 		<tr>
 			<td class="num">Numéro</td>
