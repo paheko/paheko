@@ -512,6 +512,10 @@ class Backup
 			Storage::sync();
 		}
 
+		$name = Utils::basename($file);
+		$name = str_replace(['.sqlite', 'association.'], '', $name);
+		Log::add(Log::MESSAGE, ['message' => 'Sauvegarde restaurée : ' . $name], $session::getUserId());
+
 		return $return;
 	}
 
