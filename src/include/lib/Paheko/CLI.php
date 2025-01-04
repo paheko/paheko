@@ -25,6 +25,7 @@ class CLI
 		'upgrade',
 		'version',
 		'config',
+		'db',
 		'sql',
 		'storage',
 		'cron',
@@ -538,10 +539,68 @@ class CLI
 	}
 
 	/**
-	 * Usage: paheko sql OPTIONS… STATEMENT
-	 * Run SQL statement and display result.
-	 * Only read-only queries are supported (SELECT).
-	 * INSERT, CREATE, ALTER, and other queries that would change the database are not supported.
+	 * Usage: paheko db COMMAND
+	 *
+	 * paheko db backup FILE
+	 *   Create a backup of the database to the provided file path.
+	 *
+	 * paheko db check
+	 *   Check database integrity and foreign keys.
+	 *
+	 * paheko db fkfix
+	 *   WARNING: this may result in data loss!
+	 *   Will try to fix foreign keys issues by DELETING the rows pointing
+	 *   to non-existing rows. Usually foreign key issues come from a parent
+	 *   row having been deleted but not the linked rows. So it's often safe,
+	 *   but you SHOULD make a backup before and verify with the 'check'
+	 *   command.
+	 */
+	public function db(array $args)
+	{
+		@list($command) = $this->parseOptions($args, [], 1);
+		$db = DB::getInstance();
+
+		if ($command === 'check') {
+			printf("Integrity: %s\n", $db->firstColumn('PRAGMA integrity_check;'));
+
+			$fk = 0;
+
+			foreach ($db->iterate('PRAGMA foreign_key_check;') as $row) {
+				$fk++;
+				echo $this->color('red', sprintf("Foreign key FAIL: %s:%d -> %s:%d", $row->table, $row->rowid, $row->parent, $row->fkid));
+				echo PHP_EOL;
+			}
+
+			if (!$fk) {
+				echo "Foreign keys: ok\n";
+			}
+			else {
+				$this->fail("Foreign keys: %d rows failed!", $fk);
+			}
+		}
+		elseif ($command === 'fkfix') {
+			$db->begin();
+			foreach ($db->iterate('PRAGMA foreign_key_check;') as $row) {
+				$db->delete($row->table, 'id = ' . (int)$row->rowid);
+			}
+			$db->commit();
+		}
+		elseif ($command === 'backup') {
+			@list($file) = $this->parseOptions($args, [], 1);
+			Backup::make($file);
+		}
+		else {
+			$this->help(['db']);
+		}
+
+		$this->success();
+	}
+
+	/**
+	 * Usage: paheko sql STATEMENT
+	 *   Run SQL statement and display result.
+	 *   Only read-only queries are supported (SELECT).
+	 *   INSERT, CREATE, ALTER, and other queries that would change the database are not supported.
 	 */
 	public function sql(array $args)
 	{
@@ -779,7 +838,7 @@ class CLI
 				. "Any e-mail sent will not include the correct web server URL.");
 		}
 
-		if (!in_array($command, ['help', 'init', 'ui', 'server'])) {
+		if (!in_array($command, ['help', 'init', 'ui', 'server', 'db'])) {
 			if (!DB::isInstalled()) {
 				$this->fail('Database does not exist. Run "init" command first.');
 			}
