@@ -151,7 +151,13 @@ dd.help li {
     overflow: hidden;
 }
 
-.ruler:before, .ruler:after {
+.ruler-left {
+    margin: .5em 0;
+    overflow: hidden;
+    display: block;
+}
+
+.ruler:before, .ruler:after, .ruler-left:after {
     background-color: var(--gLightBorderColor);
     content: "";
     display: inline-block;
@@ -166,9 +172,14 @@ dd.help li {
     margin-left: -50%;
 }
 
-.ruler:after {
+.ruler:after, .ruler-left:after {
     left: 0.5em;
     margin-right: -50%;
+}
+
+.ruler-left:after {
+    width: 100%;
+    margin-right: -100%;
 }
 
 .num a, a.num {

@@ -395,3 +395,7 @@ table.schema caption {
 table.list th a {
     text-decoration: none;
 }
+
+table.list tr.no-border {
+    border: none;
+}

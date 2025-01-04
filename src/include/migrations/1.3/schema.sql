@@ -107,7 +107,8 @@ CREATE TABLE IF NOT EXISTS searches
 	id INTEGER NOT NULL PRIMARY KEY,
 	id_user INTEGER NULL REFERENCES users (id) ON DELETE CASCADE, -- If not NULL, then search will only be visible by this user
 	label TEXT NOT NULL,
-	created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(created) IS NOT NULL AND datetime(created) = created),
+	description TEXT NULL,
+	updated TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(updated) IS NOT NULL AND datetime(updated) = updated),
 	target TEXT NOT NULL, -- "users" ou "accounting"
 	type TEXT NOT NULL, -- "json" ou "sql"
 	content TEXT NOT NULL

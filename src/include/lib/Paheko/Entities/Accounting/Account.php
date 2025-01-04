@@ -78,6 +78,8 @@ class Account extends Entity
 	const TYPE_CREDIT_REPORT = 14;
 	const TYPE_DEBIT_REPORT = 15;
 
+	const TYPE_INTERNAL = 16;
+
 	const TYPES_NAMES = [
 		'',
 		'Banque',
@@ -95,6 +97,7 @@ class Account extends Entity
 		'Affectation du résultat',
 		'Report à nouveau créditeur',
 		'Report à nouveau débiteur',
+		'Mouvements internes',
 	];
 
 	/**
@@ -104,6 +107,7 @@ class Account extends Entity
 		self::TYPE_BANK,
 		self::TYPE_CASH,
 		self::TYPE_OUTSTANDING,
+		self::TYPE_INTERNAL,
 		self::TYPE_THIRD_PARTY,
 		self::TYPE_EXPENSE,
 		self::TYPE_REVENUE,
@@ -154,6 +158,7 @@ class Account extends Entity
 			self::TYPE_BANK => '512',
 			self::TYPE_CASH => '53',
 			self::TYPE_OUTSTANDING => '511',
+			self::TYPE_INTERNAL => '580',
 			self::TYPE_THIRD_PARTY => '4',
 			self::TYPE_EXPENSE => '6',
 			self::TYPE_REVENUE => '7',

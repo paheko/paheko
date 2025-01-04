@@ -52,7 +52,8 @@ class Search extends Entity
 	protected ?int $id;
 	protected ?int $id_user = null;
 	protected string $label;
-	protected \DateTime $created;
+	protected ?string $description;
+	protected \DateTime $updated;
 	protected string $target;
 	protected string $type;
 	protected string $content;
@@ -65,8 +66,9 @@ class Search extends Entity
 	{
 		parent::selfCheck();
 
-		$this->assert(strlen('label') > 0, 'Le champ libellé doit être renseigné');
-		$this->assert(strlen('label') <= 500, 'Le champ libellé est trop long');
+		$this->assert(strlen($this->label) > 0, 'Le champ libellé doit être renseigné');
+		$this->assert(strlen($this->label) <= 500, 'Le champ libellé est trop long');
+		$this->assert(is_null($this->description) || strlen($this->description) <= 50000, 'Le champ description est trop long');
 
 		$db = DB::getInstance();
 
@@ -436,5 +438,14 @@ class Search extends Entity
 		}
 
 		return compact('can_sql_unprotected', 'can_sql', 'is_admin', 'default');
+	}
+
+	public function save(bool $selfcheck = true): bool
+	{
+		if ($this->isModified()) {
+			$this->set('updated', new \DateTime);
+		}
+
+		return parent::save($selfcheck);
 	}
 }

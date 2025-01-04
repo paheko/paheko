@@ -17,8 +17,9 @@
 <table class="list">
 {foreach from=$accounts_grouped item="group"}
 	<tbody>
-		<tr>
-			<td colspan="4"><h2 class="ruler">{$group.label}</h2></td>
+		<tr class="no-border">
+			<td><span class="ruler-left"></span></td>
+			<td colspan="3"><h2 class="ruler-left">{$group.label}</h2></td>
 			<td class="actions">
 				{if !$chart.archived && $group.type}
 					{linkbutton label="Ajouter un compte" shape="plus" href="!acc/charts/accounts/new.php?id=%d&type=%d&%s"|args:$chart.id:$group.type:$types_arg target=$dialog_target}

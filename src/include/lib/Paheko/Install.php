@@ -336,7 +336,6 @@ class Install
 			'type'    => $search::TYPE_JSON,
 			'content' => json_encode($query),
 		]);
-		$search->created = new \DateTime;
 		$search->save();
 
 		// Create an example saved search (accounting)
@@ -364,7 +363,6 @@ class Install
 			'type'    => $search::TYPE_JSON,
 			'content' => json_encode($query),
 		]);
-		$search->created = new \DateTime;
 		$search->save();
 
 		$config->save();
