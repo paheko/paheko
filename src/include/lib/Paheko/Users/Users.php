@@ -569,7 +569,7 @@ class Users
 		$db = DB::getInstance();
 		$db->begin();
 
-		Log::add(Log::MESSAGE, ['message' => 'Import de membres'], $session::getUserId());
+		Log::add(Log::MESSAGE, ['message' => 'Import de membres'], $session ? $session->user()->id : null);
 
 		foreach (self::iterateImport($csv, $mode) as $i => $user) {
 			// Skip logged user, to avoid changing own login field
