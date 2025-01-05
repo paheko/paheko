@@ -63,7 +63,39 @@ class Log
 
 	static public function add(int $type, ?array $details = null, int $id_user = null): void
 	{
-		// Don't log during install/upgrade
+		if (isset($details['entity'])) {
+			$details['entity'] = str_replace('Paheko\Entities\\', '', $details['entity']);
+		}
+
+		$ip = Utils::getIP();
+
+		// Log to text file
+		if (AUDIT_LOG_FILE) {
+			file_put_contents(AUDIT_LOG_FILE, sprintf('[%s] %s (USER=%d, IP=%s) %s' . PHP_EOL,
+				date('Y-m-d H:i:s'),
+				self::ACTIONS[$type] ?? 'Action',
+				$id_user,
+				$ip,
+				json_encode($details)
+			), FILE_APPEND);
+
+			$i = random_int(0, 100);
+
+			// Also log database file size, to see if something happens there
+			if ($i % 10 == 0) {
+				file_put_contents(AUDIT_LOG_FILE, sprintf("[INFO] DB size = %d\n", filesize(DB_FILE)), FILE_APPEND);
+			}
+
+			// Limit size of audit log from time to time
+			if ($i % 50 == 0
+				&& filesize(AUDIT_LOG_FILE) > AUDIT_LOG_SIZE) {
+				$log = file_get_contents(AUDIT_LOG_FILE, false, null, AUDIT_LOG_SIZE);
+				file_put_contents(AUDIT_LOG_FILE, sprintf("(Cut on %s)\n...", date('Y-m-d H:i:s')) . $log);
+				unset($log);
+			}
+		}
+
+		// Don't log to DB during install/upgrade (it might not be installed/migrated yet)
 		if (defined('Paheko\SKIP_STARTUP_CHECK')) {
 			return;
 		}
@@ -77,11 +109,6 @@ class Log
 			}
 		}
 
-		if (isset($details['entity'])) {
-			$details['entity'] = str_replace('Paheko\Entities\\', '', $details['entity']);
-		}
-
-		$ip = Utils::getIP();
 		$id_user ??= Session::getUserId();
 
 		DB::getInstance()->insert('logs', [

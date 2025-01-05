@@ -383,6 +383,31 @@ namespace Paheko;
 //const SQLITE_JOURNAL_MODE = 'TRUNCATE';
 
 /**
+ * Activation du journal d'audit séparé
+ *
+ * Si cette constante est renseignée par un fichier texte, le journal d'audit y sera
+ * également enregistré.
+ *
+ * Cela permet d'enregistrer le journal d'audit en dehors de la base de données.
+ *
+ * Default : null (= désactivé)
+ * @var string|null
+ */
+// const AUDIT_LOG_FILE = __DIR__ . '/audit.log';
+
+/**
+ * Taille maximale du journal d'audit séparé (en octets)
+ *
+ * Une fois que le journal d'audit atteint cette taille, il est coupé en deux,
+ * afin de supprimer les anciennes entrées. Exemple : une limite de 200 Ko, quand
+ * elle est atteinte les premiers 100 Ko sont remplacés par "(cut...)".
+ *
+ * Default : 1024*1024 (1 Mo)
+ * @var int
+ */
+// const AUDIT_LOG_LIMIT = 1024*1024;
+
+/**
  * Activation du log HTTP (option de développement)
  *
  * Si cette constante est renseignée par un fichier texte, *TOUTES* les requêtes HTTP
