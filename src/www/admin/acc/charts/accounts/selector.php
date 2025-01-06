@@ -99,7 +99,7 @@ else {
 }
 
 $tpl->register_modifier('make_account_searchable', function ($account, ...$keys) {
-	$account = (array) $account;
+	$account = $account instanceof Account ? $account->asArray() : (array)$account;
 	$txt = implode(' ', array_intersect_key($account, array_flip($keys)));
 	$txt = strtolower(Utils::transliterateToAscii($txt));
 	return $txt;
