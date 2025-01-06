@@ -1,11 +1,14 @@
 (function () {
-	let d = document.documentElement.dataset;
+	let d = document.documentElement;
 	window.g = window.garradin = {
-		admin_url: d.url,
-		static_url: d.url + 'static/',
-		version: d.version,
+		admin_url: d.dataset.url,
+		static_url: d.dataset.url + 'static/',
+		version: d.dataset.version,
 		loaded: {}
 	};
+
+	d.classList.remove('nojs');
+	d.classList.add('js');
 
 	window.$ = function(selector) {
 		if (!selector.match(/^[.#]?[a-z0-9_-]+$/i))
@@ -891,6 +894,37 @@
 		if (document.querySelector('input[list], textarea[list]')) {
 			g.script('scripts/inputs/datalist.js');
 		}
+
+		var dropdown;
+
+		var closeDropdownEvent = (evt) => {
+			if ((close = evt.type === 'keydown' && evt.key === 'Escape')
+				|| (evt.type === 'click' && !dropdown.contains(evt.target))) {
+				closeDropdown();
+				evt.preventDefault();
+				return false;
+			}
+		};
+
+		var closeDropdown = () => {
+			dropdown.classList.remove('open');
+			dropdown.setAttribute('aria-expanded', 'false');
+			dropdown = null;
+			window.removeEventListener('keydown', closeDropdownEvent, {'capture': true});
+			window.removeEventListener('click', closeDropdownEvent, {'capture': true});
+		};
+
+		var openDropdown = (e) => {
+			dropdown = e;
+			e.classList.add('open');
+			e.setAttribute('aria-expanded', 'true');
+			window.addEventListener('keydown', closeDropdownEvent, {'capture': true});
+			window.addEventListener('click', closeDropdownEvent, {'capture': true});
+		}
+
+		document.querySelectorAll('nav.dropdown').forEach(e => {
+			e.onclick = () => openDropdown(e);
+		});
 	});
 
 	g.onload(() => {

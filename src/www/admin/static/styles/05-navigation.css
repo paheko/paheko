@@ -225,17 +225,26 @@ nav.dropdown ul::after {
     font-size: 1.5em;
     content: "↓";
     font-family: "paheko";
+    cursor: pointer;
 }
 
 nav.dropdown li {
     display: none;
 }
 
-nav.dropdown li.selected, nav.dropdown:hover li {
+html.js nav.dropdown:not(.open) {
+    cursor: pointer;
+}
+
+nav.dropdown li.selected, html.nojs nav.dropdown:hover li, nav.dropdown.open li {
     display: block;
 }
 
-nav.dropdown li a {
+html.js nav.dropdown:not(.open) li a {
+    pointer-events: none;
+}
+
+nav.dropdown li a, nav.dropdown li span {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -243,6 +252,7 @@ nav.dropdown li a {
     text-decoration: none;
     height: 1.5em;
     color: unset;
+    cursor: pointer;
 }
 
 nav.dropdown li a strong {
@@ -257,39 +267,39 @@ nav.dropdown li a small {
     white-space: pre;
 }
 
-nav.dropdown li:nth-child(1) {
+nav.dropdown li.label {
     display: none;
 }
 
-nav.dropdown:hover {
+nav.dropdown.open {
     border-color: transparent;
 }
 
-nav.dropdown:hover li:nth-child(even) a {
+nav.dropdown.open li:nth-child(even) a {
     background: rgba(var(--gSecondColor), 0.2);
 }
 
-nav.dropdown:hover ul {
+nav.dropdown.open ul {
     box-shadow: 0 0 5px .2rem rgba(var(--gMainColor), 0.5);
     border-radius: .25rem;
 }
 
-nav.dropdown:hover .selected a {
+nav.dropdown.open .selected a {
     box-shadow: 0 0 5px .2rem rgba(var(--gMainColor), 0.5);
     color: rgb(var(--gHoverLinkColor));
 }
 
-nav.dropdown:hover li a strong {
+nav.dropdown.open li a strong {
     font-weight: bold;
 }
 
-nav.dropdown:hover li a:hover {
+nav.dropdown.open li a:hover {
     background: rgba(var(--gMainColor), 0.2);
     color: rgb(var(--gHoverLinkColor));
 }
 
 @media handheld, screen and (max-width:981px) {
-    nav.dropdown:hover li:nth-child(1) {
+    nav.dropdown.open li.default {
         display: block;
     }
 
