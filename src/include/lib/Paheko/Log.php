@@ -71,10 +71,9 @@ class Log
 
 		// Log to text file
 		if (AUDIT_LOG_FILE) {
-			file_put_contents(AUDIT_LOG_FILE, sprintf('[%s] %s (USER=%d, IP=%s) %s' . PHP_EOL,
+			file_put_contents(AUDIT_LOG_FILE, sprintf('[%s] %s (IP=%s) %s' . PHP_EOL,
 				date('Y-m-d H:i:s'),
 				self::ACTIONS[$type] ?? 'Action',
-				$id_user,
 				$ip,
 				json_encode($details)
 			), FILE_APPEND);
