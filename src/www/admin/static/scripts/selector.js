@@ -127,10 +127,12 @@ if (q && qr) {
 function filterTableList() {
 	window.clearTimeout(t);
 	var query = g.normalizeString(q.value).toLowerCase();
+	var found = 0;
 
 	rows.forEach((elm) => {
 		if (elm.getAttribute('data-search-label').includes(query)) {
 			g.toggle(elm, true, false);
+			found++;
 		}
 		else {
 			g.toggle(elm, false, false);
@@ -143,6 +145,12 @@ function filterTableList() {
 		}
 		first.classList.add('focused');
 	}
+
+	document.querySelectorAll('section.accounts-group').forEach(e => {
+		g.toggle(e, !e.querySelectorAll('tr:not(.hidden)').length == 0, false);
+	});
+
+	g.toggle('.alert.no-results', found == 0);
 
 	g.resizeParentDialog();
 }

@@ -36,6 +36,7 @@
 {elseif isset($grouped_accounts)}
 	<?php $index = 1; ?>
 	{foreach from=$grouped_accounts item="group"}
+	<section class="accounts-group">
 		<h2 class="ruler">{$group.label}</h2>
 
 		{if count($group.accounts)}
@@ -59,6 +60,7 @@
 		{else}
 			<p class="help">Le plan comptable ne comporte aucun compte de ce type.</p>
 		{/if}
+	</section>
 	{/foreach}
 	{if $index == 1 && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 	<p class="help">
@@ -87,6 +89,8 @@
 	</table>
 
 {/if}
+
+<p class="alert block no-results hidden">Aucun compte ne correspond à la recherche.</p>
 
 </div>
 
