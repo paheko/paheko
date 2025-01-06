@@ -1530,6 +1530,12 @@ class Utils
 		return $code;
 	}
 
+	static protected function getPrinceCommand(): string
+	{
+		$org_name = Config::getInstance()->org_name;
+		return sprintf('prince --http-timeout=3 --pdf-profile="PDF/A-3b" --pdf-author=%s', Utils::escapeshellarg($org_name));
+	}
+
 	/**
 	 * Displays a PDF from a string, only works when PDF_COMMAND constant is set to "prince"
 	 * @param  string $str HTML string
@@ -1566,7 +1572,7 @@ class Utils
 		}
 
 		// 3 seconds is plenty enough to fetch resources, right?
-		$cmd = 'prince --http-timeout=3 --pdf-profile="PDF/A-3b" -o - -';
+		$cmd = self::getPrinceCommand() . ' -o - -';
 
 		// Prince is fast, right? Fingers crossed
 		self::exec($cmd, 10, $str, fn ($data) => print($data));
@@ -1630,23 +1636,19 @@ class Utils
 
 		$timeout = 25;
 
-		switch ($cmd) {
-			case 'prince':
-				$timeout = 10;
-				$cmd = 'prince --http-timeout=3 --pdf-profile="PDF/A-3b" -o %2$s %1$s';
-				break;
-			case 'chromium':
-				$cmd = 'chromium --headless --timeout=5000 --disable-gpu --run-all-compositor-stages-before-draw --print-to-pdf-no-header --print-to-pdf=%2$s %1$s';
-				break;
-			case 'wkhtmltopdf':
-				$cmd = 'wkhtmltopdf -q --print-media-type --enable-local-file-access --disable-smart-shrinking --encoding "UTF-8" %s %s';
-				break;
-			case 'weasyprint':
-				$timeout = 60;
-				$cmd = 'weasyprint %1$s %2$s';
-				break;
-			default:
-				break;
+		if ($cmd === 'prince') {
+			$timeout = 10;
+			$cmd = self::getPrinceCommand() . ' -o %2$s %1$s';
+		}
+		elseif ($cmd === 'chromium') {
+			$cmd = 'chromium --headless --timeout=5000 --disable-gpu --run-all-compositor-stages-before-draw --print-to-pdf-no-header --print-to-pdf=%2$s %1$s';
+		}
+		elseif ($cmd === 'wkhtmltopdf') {
+			$cmd = 'wkhtmltopdf -q --print-media-type --enable-local-file-access --disable-smart-shrinking --encoding "UTF-8" %s %s';
+		}
+		elseif ($cmd === 'weasyprint') {
+			$timeout = 60;
+			$cmd = 'weasyprint %1$s %2$s';
 		}
 
 		$cmd = sprintf($cmd, self::escapeshellarg($source), self::escapeshellarg($target));
