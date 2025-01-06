@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="%sBalance générale"|args:$project_title current="acc/years" prefer_landscape=true}
+{include file="_head.tpl" title="%sBalance générale"|args:$title current="acc/years" prefer_landscape=true}
 
 {include file="acc/reports/_header.tpl" current="trial_balance" title="Balance générale" allow_filter=true}
 
