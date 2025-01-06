@@ -44,9 +44,9 @@
 			{foreach from=$group.accounts item="account"}
 				<tr data-idx="{$index}" class="account">
 					<td class="bookmark">{if $account.bookmark}{icon shape="star" title="Compte favori"}{/if}</td>
-					<td class="num">{$account.code}</td>
-					<th>{$account.label}</th>
-					<td class="desc">{$account.description}</td>
+					<td class="num" data-search="1">{$account.code}</td>
+					<th data-search="1">{$account.label}</th>
+					<td class="desc" data-search="1">{$account.description}</td>
 					<td class="actions">
 						<?php $v = $account->$key; ?>
 						{button shape="right" value=$v data-label="%s — %s"|args:$account.code,$account.label label="Sélectionner"}
@@ -74,8 +74,8 @@
 		{foreach from=$accounts item="account"}
 			<tr data-idx="{$iteration}" class="account account-level-{$account->level()}">
 				<td class="bookmark">{if $account.bookmark}{icon shape="star" title="Compte favori"}{/if}</td>
-				<td class="num">{$account.code}</td>
-				<th>{$account.label}</th>
+				<td class="num" data-search="1">{$account.code}</td>
+				<th data-search="1">{$account.label}</th>
 				<td class="actions">
 					<?php $v = $account->$key; ?>
 					{button shape="right" value=$v data-label="%s — %s"|args:$account.code,$account.label label="Sélectionner"}

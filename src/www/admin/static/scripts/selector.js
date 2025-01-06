@@ -10,7 +10,9 @@ var rows = document.querySelectorAll('table tr');
 
 rows.forEach((e, k) => {
 	e.classList.add('clickable');
-	var l = e.querySelector('td.num').innerText + ' ' + e.querySelector('th').innerText;
+	var l = '';
+
+	e.querySelectorAll('[data-search]').forEach((s) => l += s.innerText + ' ');
 	e.setAttribute('data-search-label', g.normalizeString(l));
 
 	e.querySelector('button').onfocus = () => {
