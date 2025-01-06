@@ -793,6 +793,36 @@ Exemple :
 }}
 ```
 
+## dropdown
+
+Crée un champ qui ressemble à un `<select>` en HTML, mais permet une formattage plus avancé, et est utilisé pour de la navigation.
+
+Ce n'est pas un champ de formulaire, aucune valeur n'est retournée s'il est utilisé dans un formulaire.
+
+| Paramètre | Obligatoire ou optionnel ? | Fonction |
+| :- | :- | :- |
+| `options` | **obligatoire** | Tableau des options |
+| `title` | **obligatoire** | Libellé |
+| `value` | facultatif | Valeur de l'option actuellement sélectionnée |
+
+Chaque option peut contenir les clés suivantes :
+
+| Paramètre | Fonction |
+| :- | :- |
+| `value` | Valeur de l'élément |
+| `html` | Contenu HTML de l'élément |
+| `label` | Libellé de l'élément (utilisé si `html` n'est pas renseigné) |
+| `aside` | Élément à afficher en petit, à droite du libellé. |
+| `href` | Si renseigné, le contenu sera dans un lien pointant vers cette adresse. |
+
+Exemple :
+
+```
+{{:assign var="options." value="42" label="Membres cachés" aside="525 membres" href="?cat=42"}}
+{{:assign var="options." value="43" label="Tous les membres" aside="1234 membres" href="?cat=43"}}
+{{:dropdown value=42 options=$options title="Choisir une catégorie de membres"}}
+```
+
 ## input
 
 Crée un champ de formulaire HTML. Cette fonction est une extension à la balise `<input>` en HTML, mais permet plus de choses.

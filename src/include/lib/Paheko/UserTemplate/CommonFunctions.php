@@ -37,6 +37,7 @@ class CommonFunctions
 		'edit_user_field',
 		'user_field',
 		'tag',
+		'dropdown',
 	];
 
 	static public function input(array $params)
@@ -944,6 +945,45 @@ class CommonFunctions
 			$out = sprintf('<a href="%s">%s</a>', Utils::getLocalURL('!users/details.php?id=' . (int)$params['link_name_id']), $out);
 		}
 
+		return $out;
+	}
+
+	static public function dropdown(array $params): string
+	{
+		if (!isset($params['options'], $params['title'])) {
+			throw new \InvalidArgumentException('Missing parameter for "dropdown"');
+		}
+
+		$out = sprintf('<nav class="dropdown" aria-role="listbox" aria-expanded="false" tabindex="0" title="%s"><ul>',
+			htmlspecialchars($params['title']));
+
+		foreach ($params['options'] as $option) {
+			$selected = '';
+			$link = '';
+			$aside = '';
+			$content = $option['html'] ?? ($option['label'] ?? null);
+
+			if (null === $content) {
+				throw new \InvalidArgumentException('dropdown: missing "html" or "label" parameter for option: ' . json_encode($option));
+			}
+
+			if (isset($option['aside'])) {
+				$aside = sprintf('<small>%s</small>', htmlspecialchars($option['aside']));
+			}
+
+			if (isset($option['value']) && $option['value'] == $params['value']) {
+				$selected = 'aria-selected="true" class="selected"';
+			}
+
+			if (isset($option['href'])) {
+				$content = sprintf('<a href="%s"><strong>%s</strong> %s</a>', htmlspecialchars($option['href']), $content, $aside);
+				$aside = '';
+			}
+
+			$out .= sprintf('<li %s aria-role="option">%s%s</li>', $selected, $content, $aside);
+		}
+
+		$out .= '</ul></nav>';
 		return $out;
 	}
 

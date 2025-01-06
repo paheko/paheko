@@ -422,6 +422,13 @@ function user_error(UserException $e)
 	exit;
 }
 
+function ngettext(string $singular, string $plural, int $count): string
+{
+	$str = $count > 1 ? $plural : $singular;
+	$str = str_replace('%n', $count, $str);
+	return $str;
+}
+
 if (REPORT_USER_EXCEPTIONS < 2) {
 	// Message d'erreur simple pour les erreurs de l'utilisateur
 	ErrorManager::setCustomExceptionHandler('\Paheko\UserException', '\Paheko\user_error');

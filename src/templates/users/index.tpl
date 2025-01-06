@@ -16,22 +16,10 @@
 	<p class="block confirm">Les membres sélectionnés ont bien été changés de catégorie.</p>
 {/if}
 
-{if !empty($categories)}
+{if !empty($categories_list)}
 	<fieldset class="shortFormRight">
 		<legend>Filtrer par catégorie</legend>
-		<nav class="dropdown">
-			<ul>
-				<li><a></a></li>
-			{foreach from=$categories key="c" item="category"}
-			<li class="{if $c === $current_cat}selected{/if}">
-				<a href="?cat={$c}">
-					<strong>{$category.label}</strong>
-					<small>{{%n membre}{%n membres} n=$category.count}</small>
-				</a>
-			</li>
-			{/foreach}
-			</ul>
-		</nav>
+		{dropdown value=$current_cat options=$categories_list title="Sélectionner une catégorie de membres"}
 	</fieldset>
 {/if}
 

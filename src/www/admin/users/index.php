@@ -38,6 +38,17 @@ else {
 	$title = sprintf('Liste des membres — %s', $categories[$current_cat]->label ?? '');
 }
 
-$tpl->assign(compact('can_check', 'list', 'current_cat', 'categories', 'title'));
+$categories_list = [];
+
+foreach ($categories as $id => $category) {
+	$categories_list[] = [
+		'label' => $category->label,
+		'value' => $id,
+		'href' => '?cat=' . $id,
+		'aside' => ngettext('%n membre', '%n membres', $category->count),
+	];
+}
+
+$tpl->assign(compact('can_check', 'list', 'current_cat', 'categories_list', 'title'));
 
 $tpl->display('users/index.tpl');
