@@ -12,9 +12,6 @@ rows.forEach((e, k) => {
 	e.classList.add('clickable');
 	var l = '';
 
-	e.querySelectorAll('[data-search]').forEach((s) => l += s.innerText + ' ');
-	e.setAttribute('data-search-label', g.normalizeString(l));
-
 	e.querySelector('button').onfocus = () => {
 		if (f = document.querySelector('tr.focused')) {
 			f.classList.remove('focused');
@@ -129,7 +126,7 @@ if (q && qr) {
 
 function filterTableList() {
 	window.clearTimeout(t);
-	var query = g.normalizeString(q.value);
+	var query = g.normalizeString(q.value).toLowerCase();
 
 	rows.forEach((elm) => {
 		if (elm.getAttribute('data-search-label').includes(query)) {

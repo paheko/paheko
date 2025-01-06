@@ -98,4 +98,10 @@ else {
 	$tpl->assign('grouped_accounts', $accounts->listCommonGrouped($targets));
 }
 
+$tpl->register_modifier('make_account_searchable', function (Account $account, ...$keys) {
+	$txt = implode(' ', array_intersect_key($account->asArray(), array_flip($keys)));
+	$txt = strtolower(Utils::transliterateToAscii($txt));
+	return $txt;
+});
+
 $tpl->display('acc/charts/accounts/selector.tpl');
