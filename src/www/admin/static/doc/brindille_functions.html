@@ -89,6 +89,7 @@
 			<li><a href="#admin_header">admin_header</a></li>
 			<li><a href="#admin_footer">admin_footer</a></li>
 			<li><a href="#delete_form">delete_form</a></li>
+			<li><a href="#dropdown">dropdown</a></li>
 			<li><a href="#input">input</a>
 			<ol>
 				<li><a href="#valeur-du-champ">Valeur du champ</a></li>
@@ -1038,6 +1039,70 @@ Barème kilométrique pour une voiture de 3 CV : {{$baremes.voiture.3cv}}</code>
   alert="La facture sera définitivement perdue !"
   confirm="Cocher cette case pour confirmer la suppression de la facture"
 }}</code></pre>
+<h2 id="dropdown">dropdown</h2>
+<p>Crée un champ qui ressemble à un <code>&lt;select&gt;</code> en HTML, mais permet une formattage plus avancé, et est utilisé pour de la navigation.</p>
+<p>Ce n'est pas un champ de formulaire, aucune valeur n'est retournée s'il est utilisé dans un formulaire.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Obligatoire ou optionnel ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>options</code></td>
+<td style="text-align: left;"><strong>obligatoire</strong></td>
+<td style="text-align: left;">Tableau des options</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>title</code></td>
+<td style="text-align: left;"><strong>obligatoire</strong></td>
+<td style="text-align: left;">Libellé</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>value</code></td>
+<td style="text-align: left;">facultatif</td>
+<td style="text-align: left;">Valeur de l'option actuellement sélectionnée</td>
+</tr>
+</tbody>
+</table>
+<p>Chaque option peut contenir les clés suivantes :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>value</code></td>
+<td style="text-align: left;">Valeur de l'élément</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>html</code></td>
+<td style="text-align: left;">Contenu HTML de l'élément</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>label</code></td>
+<td style="text-align: left;">Libellé de l'élément (utilisé si <code>html</code> n'est pas renseigné)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>aside</code></td>
+<td style="text-align: left;">Élément à afficher en petit, à droite du libellé.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>href</code></td>
+<td style="text-align: left;">Si renseigné, le contenu sera dans un lien pointant vers cette adresse.</td>
+</tr>
+</tbody>
+</table>
+<p>Exemple :</p>
+<pre><code>{{:assign var="options." value="42" label="Membres cachés" aside="525 membres" href="?cat=42"}}
+{{:assign var="options." value="43" label="Tous les membres" aside="1234 membres" href="?cat=43"}}
+{{:dropdown value=42 options=$options title="Choisir une catégorie de membres"}}</code></pre>
 <h2 id="input">input</h2>
 <p>Crée un champ de formulaire HTML. Cette fonction est une extension à la balise <code>&lt;input&gt;</code> en HTML, mais permet plus de choses.</p>
 <table>
@@ -1117,6 +1182,7 @@ Barème kilométrique pour une voiture de 3 CV : {{$baremes.voiture.3cv}}</code>
 </ul>
 </li>
 </ul>
+<p>Note : pour les champs de type <code>select</code> et <code>select_groups</code> il est possible de spécifier le paramètre <code>default_empty</code> pour la valeur vide par défaut du champ. <code>default_empty="Tous"</code> affichera ainsi la valeur <code>Tous</code> en première option du select. Si cette option est sélectionnée une chaîne vide sera envoyée.</p>
 <h2 id="button">button</h2>
 <p>Affiche un bouton, similaire à <code>&lt;button&gt;</code> en HTML, mais permet d'ajouter une icône par exemple.</p>
 <pre><code>{{:button type="submit" name="save" label="Créer ce membre" shape="plus" class="main"}}</code></pre>
