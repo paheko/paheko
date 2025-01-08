@@ -126,11 +126,13 @@ if (q && qr) {
 
 function filterTableList() {
 	window.clearTimeout(t);
+	var code = q.value.trim().match(/^\d/) ? q.value.trim().toLowerCase() : null;
 	var query = g.normalizeString(q.value).toLowerCase();
 	var found = 0;
 
 	rows.forEach((elm) => {
-		if (elm.getAttribute('data-search-label').includes(query)) {
+		if ((code && elm.dataset.searchCode.startsWith(code))
+			|| elm.dataset.searchLabel.includes(query)) {
 			g.toggle(elm, true, false);
 			found++;
 		}
