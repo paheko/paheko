@@ -14,7 +14,7 @@ if (!CURRENT_YEAR_ID) {
 }
 
 if (!$current_year->isOpen()) {
-	Utils::redirect(ADMIN_URL . 'acc/years/select.php?msg=CLOSED');
+	Utils::redirect(ADMIN_URL . 'acc/years/select.php?msg=CLOSED&from=' . rawurlencode(Utils::getSelfURI()));
 }
 
 $account = Accounts::get((int)qg('id'));
