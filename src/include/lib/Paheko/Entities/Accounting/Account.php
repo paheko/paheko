@@ -447,6 +447,11 @@ class Account extends Entity
 	{
 		$country = $this->getCountry();
 
+		if ($country === 'FR') {
+			$classe = substr($this->code, 0, 1);
+			$this->assert($classe >= 1 && $classe <= 8, 'Seuls les comptes de classe 1 à 8 sont autorisés dans le plan comptable français');
+		}
+
 		if (!$this->type) {
 			return;
 		}
@@ -923,9 +928,9 @@ class Account extends Entity
 	public function save(bool $selfcheck = true): bool
 	{
 		$this->setLocalRules();
+		$ok = parent::save($selfcheck);
 		DB::getInstance()->exec(sprintf('REPLACE INTO config (key, value) VALUES (\'last_chart_change\', %d);', time()));
-
-		return parent::save($selfcheck);
+		return $ok;
 	}
 
 	public function position_name(): string
