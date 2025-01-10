@@ -43,11 +43,11 @@
 	</fieldset>
 
 	<fieldset>
-		<legend>Champs spéciaux des fiches de membres</legend>
+		<legend>Champs spéciaux de la fiche de membre</legend>
 		<dl>
-			{input type="select" name="login_field" default=$login_field options=$login_fields_list required=true label="Champ utilisé comme identifiant de connexion" help="Ce champ des fiches membres sera utilisé comme identifiant pour se connecter à l'administration de l'association."}
+			{input type="select" name="login_field" default=$login_field options=$login_fields_list required=true label="Champ utilisé comme identifiant de connexion" help="Ce champ de la fiche de membre sera utilisé comme identifiant pour se connecter à l'administration de l'association."}
 			<dd class="help">Ce champ doit être unique : il ne peut pas y avoir deux membres ayant la même valeur dans ce champ.</dd>
-			{input type="list" name="name_fields" required=true label="Champs utilisés pour définir l'identité des membres" help="Ces champs des fiches membres seront utilisés comme identité (nom) du membre dans les emails, les fiches, les pages, etc." target="!config/users/field_selector.php" multiple=true default=$name_fields}
+			{input type="list" name="name_fields" required=true label="Champs utilisés pour définir l'identité des membres" help="Ces champs seront utilisés comme identité (nom) du membre dans les e-mails, les fiches, les pages, etc." target="!config/users/field_selector.php" multiple=true default=$name_fields}
 			<dd class="help">Il est possible d'utiliser plusieurs champs, par exemple en choisissant les champs <em>Nom</em> et <em>Prénom</em>, l'identité des membres apparaîtra comme <tt>Nom Prénom</tt>.<br />Dans ce cas l'ordre des champs dans l'identité est déterminé selon l'ordre des champs dans la fiche membre.</dd>
 		</dl>
 	</fieldset>
@@ -63,14 +63,15 @@
 	{/if}
 
 	<fieldset>
-		<legend>Journaux d'activité</legend>
+		<legend>Journal d'audit</legend>
 		<p class="help">
 			Les actions de création, modification ou suppression dans la base de données peuvent être enregistrées pour chaque membre.
-			Cela permet de garder une trace, pour savoir qui à fait quoi.
+			Cela permet de garder une trace, pour savoir qui à fait quoi.<br />
+			Ces actions sont disponibles dans le <a href="{$admin_url}config/advanced/audit.php">journal d'audit global</a>, ou dans le journal d'audit de chaque membre pouvant se connecter, accessible depuis sa fiche de membre.
 		</p>
 
 		<dl>
-			{input type="select" options=$log_retention_options source=$config name="log_retention" required=true label="Durée de conservation des journaux d'activité" help="Après ce délai, les journaux seront supprimés."}
+			{input type="select" options=$log_retention_options source=$config name="log_retention" required=true label="Durée de conservation du journal d'audit" help="Les actions qui sont plus anciennes que ce délai seront supprimés."}
 		</dl>
 	</fieldset>
 

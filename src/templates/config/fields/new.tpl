@@ -1,4 +1,4 @@
-{include file="_head.tpl" current="config" title="Ajouter un champ aux fiches des membres" current="config"}
+{include file="_head.tpl" current="config" title="Ajouter un champ à la fiche de membre" current="config"}
 
 {include file="config/_menu.tpl" current="users" sub_current="fields"}
 

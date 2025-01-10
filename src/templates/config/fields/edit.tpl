@@ -57,7 +57,7 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 	{if !$field->isNumber()}
 	{* User number is always mandatory *}
 	<dl class="type-not-virtual type-not-password type-not-file">
-		{input type="checkbox" name="required" value=1 label="Champ obligatoire" help="Si coché, une fiche membre ne pourra pas être enregistrée si ce champ n'est pas renseigné." source=$field}
+		{input type="checkbox" name="required" value=1 label="Champ obligatoire" help="Si coché, une fiche de membre ne pourra pas être enregistrée si ce champ n'est pas renseigné." source=$field}
 		{input type="text" name="default_value" source=$field label="Valeur par défaut" help="Si renseigné, le champ aura cette valeur par défaut lors de l'ajout d'un nouveau membre"}
 	</dl>
 	{/if}
@@ -76,7 +76,7 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 <fieldset class="type-select type-multiple type-datalist">
 	<legend>Options possibles</legend>
 
-	<p class="alert block type-select type-datalist">Attention renommer ou supprimer une option n'affecte pas ce qui a déjà été enregistré dans les fiches des membres.</p>
+	<p class="alert block type-select type-datalist">Attention renommer ou supprimer une option n'affecte pas ce qui a déjà été enregistré dans la fiche des membres existants.</p>
 	<p class="alert block type-multiple">Attention changer l'ordre des options peut avoir des effets indésirables.</p>
 
 	<dl class="type-multiple type-select type-datalist options">

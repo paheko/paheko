@@ -45,7 +45,7 @@ $tpl->assign([
 	'can_configure_local_login' => Users::canConfigureLocalLogin(),
 	'first_admin_user_name' => $first_admin_user ? $first_admin_user->name() : null,
 	'log_retention_options' => [
-		0 => 'Ne pas enregistrer de journaux',
+		0 => 'Aucune — Ne rien enregistrer',
 		7 => 'Une semaine',
 		30 => 'Un mois',
 		90 => '3 mois',
