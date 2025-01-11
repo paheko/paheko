@@ -237,6 +237,7 @@ class Account extends Entity
 		'reference' => [
 			'label' => 'Pièce comptable',
 			'select' => 't.reference',
+			'order' => 't.reference COLLATE NAT_NOCASE %s',
 		],
 		'type' => [
 			'select' => 't.type',

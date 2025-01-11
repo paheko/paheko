@@ -377,6 +377,7 @@ class DB extends SQLite3
 		});
 
 		$db->createCollation('U_NOCASE', [Utils::class, 'unicodeCaseComparison']);
+		$db->createCollation('NAT_NOCASE', 'strnatcasecmp');
 	}
 
 	public function toggleUnicodeLike(bool $enable): void
