@@ -33,8 +33,6 @@ caption, th {
 }
 article, aside, figure, section, header, footer, main { display: block; }
 
-span {display: inline-block;}
-
 h1  { font-size: 2em; }
 h2  { font-size: 1.5em; }
 h3  { font-size: 1.2em; }
