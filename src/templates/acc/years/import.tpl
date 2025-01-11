@@ -176,7 +176,7 @@ use Paheko\Accounting\Export;
 	</fieldset>
 
 	<p class="help">
-		Il est conseillé de procéder à une <a href="../../config/backup/save.php">sauvegarde</a> avant de faire un import,
+		Il est conseillé de procéder à une <a href="{$admin_url}config/backup/">sauvegarde</a> avant de faire un import,
 		cela vous permettra de revenir en arrière en cas d'erreur.
 	</p>
 
