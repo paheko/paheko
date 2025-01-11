@@ -87,6 +87,7 @@ class Service extends Entity
 			'identity' => [
 				'label' => 'Membre',
 				'select' => $id_field,
+				'order' => '_user_name_index %s',
 			],
 			'status' => [
 				'label' => 'Statut',
@@ -109,10 +110,14 @@ class Service extends Entity
 				'label' => 'Date d\'inscription',
 				'select' => 'su.date',
 			],
+			'_user_name_index' => [
+				'select' => DynamicFields::getNameFieldsSearchableSQL('us'),
+			],
 		];
 
 		$tables = 'services_users su
 			INNER JOIN users u ON u.id = su.id_user
+			INNER JOIN users_search us ON us.id = u.id
 			INNER JOIN services s ON s.id = su.id_service
 			LEFT JOIN services_fees sf ON sf.id = su.id_fee
 			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_service) AS su2 ON su2.id = su.id';
