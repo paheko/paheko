@@ -8,27 +8,6 @@ use KD2\Form;
 use KD2\Translate;
 use KD2\DB\EntityManager;
 
-// Block agressive+AI bots
-if (isset($_SERVER['HTTP_USER_AGENT'])) {
-	// Abusive bots, see https://github.com/ai-robots-txt/ai.robots.txt/issues/69
-	$bad_bots = '/LRX21T|MRA58N|OPD3\.170816\.012|CPU iPhone OS 11_0 like Mac OS X.*Chrome|Bytedance|Bytespider'
-		. '|Petalbot|mj12bot|\bahrefsbot|semrush|Barkrowler|MauiBot|dotbot|rogerbot|paloaltonetworks\.com'
-
-		// AI bots, see https://github.com/ai-robots-txt/ai.robots.txt/blob/main/table-of-bot-metrics.md
-		. '|amazonbot|chatgpt|gptbot|applebot|AI2Bot|CCBot|claudebot|Claude-Web|\bcohere-'
-		. '|\bmeta-|googleother|google-extended|facebookbot|FriendlyCrawler|iaskspider'
-		. '|ICC-Crawler|ImagesiftBot|img2dataset|ISSCyberRiskCrawler|Kangaroo Bot'
-		. '|OAI-SearchBot|omgili|PanguBot|PerplexityBot|PetalBot|Scrapy|Sidetrade'
-		. '|Timpibot|VelenPublicWebCrawler|Webzio-Extended|Youbot/i';
-
-	if (preg_match($bad_bots, $_SERVER['HTTP_USER_AGENT'])) {
-		header("HTTP/1.1 418 I'm a teapot", true);
-		echo "<h1>I'm a teapot</h1>\n";
-		echo "<h2>You are a robot</h2>";
-		exit;
-	}
-}
-
 $start_timer = microtime(true);
 
 foreach ($_ENV as $key => $value) {
