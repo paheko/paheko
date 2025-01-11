@@ -10,6 +10,7 @@ use Paheko\Users\DynamicFields;
 use Paheko\DB;
 use Paheko\Log;
 use Paheko\UserException;
+use Paheko\ValidationException;
 
 use KD2\SimpleDiff;
 
@@ -62,10 +63,11 @@ class Import
 				);
 
 				foreach ($db->iterate($sql) as $row) {
-					$found_users[$row->name] = $row->id;
-					$users[$row->name] = $row->id;
-					$found_users[$row->number] = $row->number;
-					$users[$row->number] = $row->id;
+					$found_users[$row->name]
+						= $users[$row->name]
+						= $found_users[$row->number]
+						= $users[$row->number]
+						= $row->id;
 				}
 
 				// Fill array with NULL for missing user names, so that we won't go fetch them again
@@ -421,7 +423,8 @@ class Import
 		}
 		catch (UserException $e) {
 			$db->rollback();
-			$e->setMessage(sprintf('Erreur sur la ligne %d : %s', $l - 1, $e->getMessage()));
+			$l -= 1 + $csv->getSkippedLines();
+			$e->setMessage(sprintf('Erreur sur la ligne %d : %s', $l, $e->getMessage()));
 
 			if (null !== $transaction) {
 				$e->setDetails($transaction->asDetailsArray());

@@ -306,6 +306,11 @@ class CSV_Custom
 		$this->skip = $count;
 	}
 
+	public function getSkippedLines(): int
+	{
+		return $this->skip;
+	}
+
 	public function setColumns(array $columns, array $defaults = []): void
 	{
 		$this->columns = array_filter($columns);
