@@ -434,6 +434,10 @@ class Plugin extends Entity
 				Utils::redirect('!login.php');
 			}
 
+			if ($uri === 'admin/config.php') {
+				$session->requireAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
+			}
+
 			// Restrict access
 			if (isset($this->restrict_section, $this->restrict_level)) {
 				$session->requireAccess($this->restrict_section, $this->restrict_level);
