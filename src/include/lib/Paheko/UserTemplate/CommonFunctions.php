@@ -301,8 +301,8 @@ class CommonFunctions
 		elseif ($type === 'select_groups') {
 			$input = sprintf('<select %s>', $attributes_string);
 
-			if (empty($attributes['required'])) {
-				$input .= '<option value=""></option>';
+			if (empty($attributes['required']) || isset($attributes['default_empty'])) {
+				$input .= sprintf('<option value="">%s</option>', $attributes['default_empty'] ?? '');
 			}
 
 			foreach ($options as $optgroup => $suboptions) {

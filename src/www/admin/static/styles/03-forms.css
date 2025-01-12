@@ -1036,6 +1036,10 @@ dl.share dt, dl.share dd {
     font-weight: bold;
 }
 
+aside dt {
+    margin-left: 1em;
+}
+
 @media screen and (max-width: 1279px) {
     #queryBuilder tbody tr {
         display: flex;
