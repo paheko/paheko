@@ -22,7 +22,7 @@ class Services
 		return DB::getInstance()->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE U_NOCASE;');
 	}
 
-	static public function listGroupedWithFeesForSelect(): array
+	static public function listGroupedWithFeesForSelect(bool $with_all_fees = true): array
 	{
 		$out = [];
 
@@ -30,12 +30,16 @@ class Services
 			$s = [
 				'label' => self::getLongLabel($service),
 				'options' => [
-					's' . $service->id => '— Tous les tarifs —',
 				],
 			];
 
+			if ($with_all_fees) {
+				$s['options']['s' . $service->id] = '— Tous les tarifs —';
+			}
+
 			foreach ($service->fees as $fee) {
-				$s['options']['f' . $fee->id] = $fee->label;
+				$key = $with_all_fees ? 'f' . $fee->id : $fee->id;
+				$s['options'][$key] = $fee->label;
 			}
 
 			$out[] = $s;
