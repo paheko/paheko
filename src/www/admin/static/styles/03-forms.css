@@ -237,7 +237,7 @@ b.btn {
 }
 
 [data-icon]:before, .main[data-icon]:after, [data-icon].right:after {
-    display: block;
+    display: inline-block;
     font-family: "paheko", sans-serif;
     text-shadow: 1px 1px 1px var(--gLightBorderColor);
     font-size: 1.2em;
