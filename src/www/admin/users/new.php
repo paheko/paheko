@@ -30,6 +30,15 @@ $form->runIf('save', function () use ($user, $session, &$is_duplicate) {
 	}
 
 	$user->save();
+
+	if (!empty($_GET['tab'])) {
+		printf('<!DOCTYPE html><script type="text/javascript">window.parent.renameTabUser(%d, %s);</script>Redirection en cours...',
+			$user->id(),
+			json_encode($user->name())
+		);
+		exit;
+	}
+
 	Utils::redirect('!users/details.php?id=' . $user->id());
 }, $csrf_key);
 
