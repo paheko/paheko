@@ -49,7 +49,7 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 
 <fieldset>
 	<legend>Préférences</legend>
-	{if !$field->isName() && !$field->isNumber()}
+	{if !$field->isName()}
 	<dl class="type-not-password">
 		{input type="checkbox" name="list_table" value=1 label="Afficher dans la liste des membres" source=$field}
 	</dl>

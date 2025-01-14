@@ -403,7 +403,7 @@ class DynamicField extends Entity
 		}
 
 		if (isset($source['list_table']) || isset($source['list_table_present'])) {
-			$source['list_table'] = !empty($source['list_table_present']);
+			$source['list_table'] = !empty($source['list_table']);
 		}
 
 		if ($this->isNumber()) {
