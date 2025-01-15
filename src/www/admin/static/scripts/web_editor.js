@@ -305,6 +305,92 @@
 			}
 		};
 
+		let pasteHTML = function (html) {
+			var dom = (new DOMParser).parseFromString(html, 'text/html');
+			var body = dom.documentElement.querySelector('body');
+			var text = HTMLToMarkdown(body);
+
+			text = text.replace(/^\h+|\h+$/mg, '', text);
+			text = text.replace(/\n\n+/g, "\n\n", text);
+
+			if (text === '') {
+				return;
+			}
+
+			t.insert(text.trim());
+		};
+
+		let HTMLToMarkdown = function(node, parent) {
+			if (node.nodeType === node.TEXT_NODE) {
+				return node.nodeValue.replace(/\r|\n/g, '').trim();
+			}
+
+			var name = node.nodeName.toLowerCase();
+			var parent_name = parent ? parent.nodeName.toLowerCase() : null;
+			var start = '';
+			var end = '';
+
+			if (name === 'strong' || name === 'b') {
+				start = ' **';
+				end = '** ';
+			}
+			else if (name === 'em' || name === 'i') {
+				start = ' _';
+				end = '_ ';
+			}
+			else if (name === 'td' || name === 'th') {
+				start = '| ';
+				end = ' ';
+			}
+			else if (name === 'tr') {
+				end = "|\n";
+			}
+			else if (name === 'br' && parent_name === 'body') {
+				end = "\n";
+			}
+			else if (name === 'p' && parent_name === 'body') {
+				end = "\n\n";
+			}
+			else if (name === 'ol' || name === 'ul') {
+				end = "\n";
+			}
+			else if (name.match(/h\d+/)) {
+				start = '#'.repeat(name.substr(1)) + ' ';
+			}
+			else if (name === 'a') {
+				start = ' [';
+				end = '](' + node.getAttribute('href') + ') ';
+			}
+			else if (name === 'li' && parent_name === 'ul') {
+				start = '* ';
+				end = "\n";
+			}
+			else if (name === 'li' && parent_name === 'ol') {
+				start = '1. ';
+				end = "\n";
+			}
+
+			var text = start;
+
+			for (var i = 0; i < node.childNodes.length; i++) {
+				text += HTMLToMarkdown(node.childNodes[i], node);
+			}
+
+			if (name === 'tr') {
+				text = text.replace(/\n+/g, " ", text);
+				text = text.replace(/\s{2,}/g, ' ', text);
+			}
+			else if (name === 'table') {
+				var rows = text.split("\n");
+				text = rows[0] + "\n";
+				var columns = (rows[0].match(/\|/g) || []).length || 1;
+				text += '| --- '.repeat(columns - 1) + "|\n";
+				text += rows.slice(1).join("\n");
+			}
+
+			return text + end;
+		};
+
 		let save = async function (callback) {
 			const data = new URLSearchParams();
 
@@ -501,11 +587,19 @@
 		if (config.attachments) {
 			// Paste images
 			t.textarea.addEventListener('paste', (e) => {
+				if (e.clipboardData.types.includes('text/html')) {
+					pasteHTML(e.clipboardData.getData('text/html'));
+					e.preventDefault();
+					return false;
+				}
+
 				let items = e.clipboardData.items;
 				let files = [];
 
 				for (var i = 0; i < items.length; i++) {
-					if (items[i].kind != 'file') {
+					var item = items[i];
+
+					if (item.kind !== 'file') {
 						continue;
 					}
 
@@ -558,7 +652,6 @@
 			}
 
 			localStorage.setItem(backup_key, t.textarea.value);
-			console.log('Saved');
 		}, 10000);
 
 	}
