@@ -925,7 +925,7 @@ class Functions
 		}
 		// Internal request
 		else {
-			$api = new API($method, $path, $params);
+			$api = new API($method, $path, $params, false);
 
 			if ($access_level) {
 				$api->setAccessLevelByName($access_level);

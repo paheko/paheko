@@ -410,11 +410,13 @@ Voir la [documentation de l'API](https://paheko.cloud/api) pour la liste des fon
 
 | Paramètre | Obligatoire ou optionnel ? | Fonction |
 | :- | :- | :- |
-| `method` | obligatoire | Méthode de requête : `GET`, `POST`, etc. |
+| `method` | obligatoire | Méthode de requête : `GET` ou `POST` |
 | `path` | obligatoire | Chemin de la méthode de l'API à appeler. |
 | `fail` | optionnel | Booléen. Si `true`, alors une erreur sera affichée si la requête échoue. Si `false`, aucune erreur ne sera affichée. Défaut : `true`. |
 | `assign` | optionnel | Capturer le résultat dans cette variable. |
 | `assign_code` | optionnel | Capturer le code de retour dans cette variable. |
+
+Note : les requêtes de type `PUT` ou `POST` qui nécessitent l'envoi d'un fichier (`import`) ne sont pas fonctionnelles pour le moment.
 
 Par défaut, les requêtes sont réalisées sur la base de données locale, dans ce cas les paramètres suivants sont également disponibles :
 
