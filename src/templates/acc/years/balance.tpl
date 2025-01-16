@@ -123,7 +123,7 @@
 		{if null === $previous_year}
 			{button type="submit" name="next" label="Continuer" shape="right" class="main"}
 			— ou —
-			{linkbutton shape="reset" href="!acc/years/" label="Passer cet étape"}
+			{linkbutton shape="reset" href="!acc/years/" label="Passer cette étape"}
 			<br />
 			<i class="help">(Il sera toujours possible de reprendre la balance d'ouverture plus tard.)</i>
 		{else}
