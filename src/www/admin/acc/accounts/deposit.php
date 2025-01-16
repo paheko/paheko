@@ -3,6 +3,7 @@ namespace Paheko;
 
 use Paheko\Accounting\Accounts;
 use Paheko\Accounting\Transactions;
+use Paheko\Accounting\Years;
 use Paheko\Entities\Accounting\Transaction;
 
 require_once __DIR__ . '/../_inc.php';
@@ -18,14 +19,16 @@ if (!$current_year->isOpen()) {
 }
 
 $account = Accounts::get((int)qg('id'));
+$year_id = intval($_GET['from_year'] ?? 0);
+$year = Years::get($year_id);
 
-if (!$account) {
+if (!$account || !$year) {
 	throw new UserException("Le compte demandé n'existe pas.");
 }
 
 $checked = f('deposit') ?: [];
 
-$journal = $account->getDepositJournal(CURRENT_YEAR_ID, $checked);
+$journal = $account->getDepositJournal($year_id, $checked);
 $transaction = new Transaction;
 $transaction->id_year = CURRENT_YEAR_ID;
 $transaction->id_creator = $session->getUser()->id;
@@ -43,7 +46,7 @@ $form->runIf('save', function () use ($checked, $transaction, $journal) {
 
 // Uncheck everything if there was an error
 if ($form->hasErrors()) {
-	$journal = $account->getDepositJournal(CURRENT_YEAR_ID);
+	$journal = $account->getDepositJournal($year_id);
 }
 
 $date = new \DateTime;
@@ -54,7 +57,7 @@ if ($date > $current_year->end_date) {
 
 $target = $account::TYPE_BANK;
 
-$missing_balance = $account->getDepositMissingBalance(CURRENT_YEAR_ID);
+$missing_balance = $account->getDepositMissingBalance($year_id);
 
 $journal->loadFromQueryString();
 
@@ -65,7 +68,8 @@ $tpl->assign(compact(
 	'target',
 	'checked',
 	'missing_balance',
-	'transaction'
+	'transaction',
+	'year'
 ));
 
 $tpl->display('acc/accounts/deposit.tpl');

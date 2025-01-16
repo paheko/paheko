@@ -1,5 +1,11 @@
 {include file="_head.tpl" title="Dépôt en banque : %s — %s"|args:$account.code,$account.label current="acc/accounts"}
 
+{if $year.id !== $current_year.id}
+	<p class="alert block">
+		Note : les montants à déposer proviennent d'un précédent exercice ({$year->getLabelWithYearsAndStatus()}).
+	</p>
+{/if}
+
 {form_errors}
 
 {if $missing_balance > 0}
