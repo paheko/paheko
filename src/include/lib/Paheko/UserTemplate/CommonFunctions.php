@@ -506,7 +506,8 @@ class CommonFunctions
 
 		$params = implode(' ', $params);
 
-		$label = $label ? sprintf('<span>%s</span>', htmlspecialchars($label)) : '';
+		$label = (string)$label;
+		$label = $label === '' ? '' : sprintf('<span>%s</span>', htmlspecialchars((string) $label));
 
 		return sprintf('<a href="%s" %s>%s%s</a>', htmlspecialchars($href), $params, $prefix, $label);
 	}
