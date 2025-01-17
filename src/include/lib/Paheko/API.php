@@ -48,7 +48,7 @@ class API
 
 	public function requireHttpClient(): void
 	{
-		if ($is_http_client) {
+		if ($this->is_http_client) {
 			return;
 		}
 
