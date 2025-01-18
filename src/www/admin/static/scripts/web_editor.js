@@ -305,6 +305,115 @@
 			}
 		};
 
+		let findTableCells = function (line) {
+			line = line.split('|');
+			var out = [];
+			var start = 0;
+
+			for (var i = 0; i < line.length; i++) {
+				out.push({'start': start, 'end': start + line[i].length + 1});
+				start += line[i].length + 1;
+			}
+
+			// remove first and last empty items
+			return out.slice(1, -1);
+		};
+
+		let handleTableNavigation = function (e) {
+			var reverse = e.shiftKey;
+			var caret = t.getSelection().end;
+
+			if (navigateInTable(t.getSelection().end, e.shiftKey ? -1 : 1)) {
+				e.preventDefault();
+				return false;
+			}
+
+			return true;
+		};
+
+		let insertNewRowInTable = function (position, columns_count) {
+			t.insertAtPosition(position, "\n" + "|  ".repeat(columns_count + 1).trim(), position + 3);
+		};
+
+		let navigateInTable = function (caret, move, insert) {
+			var line_start = caret;
+			var value = t.textarea.value;
+
+			if (line_start < 0) {
+				return false;
+			}
+
+			while (line_start > 0 && value.charAt(line_start) !== "\n") {
+				line_start--;
+			}
+
+			line_start = line_start ? line_start + 1 : 0;
+			var line_end = value.indexOf("\n", line_start);
+
+			if (line_end === -1) {
+				line_end = value.length;
+			}
+
+			var line = value.substring(line_start, line_end);
+
+			if (!line.trim().match(/^\|/) || !line.trim().match(/\|$/)) {
+				if (insert) {
+					insertNewRowInTable(line_start - 2, insert);
+				}
+
+				return false;
+			}
+
+			var cells = findTableCells(line);
+
+			// Not a table
+			if (!cells.length) {
+				return false;
+			}
+
+			for (var i = 0; i < cells.length; i++) {
+				if (cells[i].start + line_start >= caret) {
+					break;
+				}
+			}
+
+			i = i - 1 + move;
+
+			// previous line
+			if (i < 0) {
+				line_start -= 3;
+
+				if (line_start <= 0) {
+					return false;
+				}
+
+				return navigateInTable(line_start, 0);
+			}
+			// next line
+			else if (i === cells.length) {
+				if (insert) {
+					insertNewRowInTable(line_end, insert);
+					return false;
+				}
+
+				return navigateInTable(line_end + 1, 1, cells.length);
+			}
+
+			var sel_start = line_start + cells[i].start;
+			var sel_end = line_start + cells[i].end - 1;
+
+			if (value.charAt(sel_start) === ' ') {
+				sel_start++;
+			}
+
+			if (value.charAt(sel_end - 1) === ' ' && sel_end > sel_start) {
+				sel_end--;
+			}
+
+			t.setSelection(sel_start, sel_end);
+			return true;
+		};
+
 		let pasteHTML = function (html) {
 			var dom = (new DOMParser).parseFromString(html, 'text/html');
 			var body = dom.documentElement.querySelector('body');
@@ -524,6 +633,8 @@
 		t.shortcuts.push({ctrl: true, key: 's', callback: quicksave});
 		t.shortcuts.push({ctrl: true, key: 'p', callback: openPreview});
 		t.shortcuts.push({key: 'F1', callback: openSyntaxHelp});
+		t.shortcuts.push({key: 'Tab', callback: handleTableNavigation});
+		t.shortcuts.push({shift: true, key: 'Tab', callback: handleTableNavigation});
 
 		g.setParentDialogHeight('90%');
 
@@ -657,6 +768,6 @@
 	}
 
 	g.onload(() => {
-		g.script('scripts/lib/text_editor.min.js', init);
+		g.script('scripts/lib/text_editor.js', init);
 	});
 }());
