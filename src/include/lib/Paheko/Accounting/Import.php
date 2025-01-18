@@ -423,7 +423,7 @@ class Import
 		}
 		catch (UserException $e) {
 			$db->rollback();
-			$l -= 1 + $csv->getSkippedLines();
+			$l -= 1; // Decrement line number, as when we reach this, it has been incremented?
 			$e->setMessage(sprintf('Erreur sur la ligne %d : %s', $l, $e->getMessage()));
 
 			if (null !== $transaction) {
