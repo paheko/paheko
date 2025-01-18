@@ -166,6 +166,14 @@ class AdvancedSearch extends A_S
 			'where'  => 'id_category %s',
 		];
 
+		$columns['hidden'] = [
+			'label'  => 'Membre d\'une catégorie cachée',
+			'type'   => 'boolean',
+			'null'   => false,
+			'select' => 'CASE WHEN id_category IN (SELECT id FROM users_categories WHERE hidden = 1) THEN \'Oui\' ELSE \'Non\' END',
+			'where'  => 'id_category IN (SELECT id FROM users_categories WHERE hidden = 1) %s',
+		];
+
 		$columns['service'] = [
 			'label'  => 'Est inscrit à l\'activité',
 			'type'   => 'enum',
@@ -269,6 +277,14 @@ class AdvancedSearch extends A_S
 		}
 
 		$groups = [[
+			'operator' => 'AND',
+			'conditions' => [
+				[
+					'column'   => 'hidden',
+					'operator' => '= 0',
+				],
+			],
+		], [
 			'operator' => 'OR',
 			'conditions' => [
 				[

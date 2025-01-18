@@ -22,11 +22,17 @@
 		Ce membre n'est inscrit à aucune activité ou cotisation.
 	</dd>
 	{/foreach}
-	<dd>
-		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-			{linkbutton href="!services/user/subscribe.php?user=%d"|args:$user.id label="Inscrire à une activité" shape="plus" target="_dialog" accesskey="V"}
+	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
+		{if !$user->isHidden()}
+			<dd>
+				{linkbutton href="!services/user/subscribe.php?user=%d"|args:$user.id label="Inscrire à une activité" shape="plus" target="_dialog" accesskey="V"}
+			</dd>
+		{else}
+			<dd class="help">
+				Ce membre est dans une catégorie caché, il n'est plus possible de l'inscrire à une activité.
+			</dd>
 		{/if}
-	</dd>
+	{/if}
 	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)}
 		{if !empty($transactions_linked)}
 			<dt>Écritures comptables liées</dt>
@@ -65,6 +71,9 @@
 		{/if}
 		<dt>Catégorie</dt>
 		<dd>{$category.name}</dd>
+		{if $user->isHidden()}
+			<dd>{tag color="darkred" label="Catégorie cachée"}</dd>
+		{/if}
 		<dt>Droits</dt>
 		<dd><span class="permissions">{display_permissions permissions=$category}</span></dd>
 		<dt>Dernière connexion</dt>

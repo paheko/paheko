@@ -11,9 +11,9 @@ require_once __DIR__ . '/../_inc.php';
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_READ);
 
 $user_id = (int) qg('id');
-$user_name = Users::getName($user_id);
+$user = Users::get($user_id);
 
-if (!$user_name) {
+if (!$user) {
 	throw new UserException("Ce membre est introuvable");
 }
 
@@ -35,12 +35,13 @@ if ($after = qg('after')) {
 }
 
 $only_service = !$only ? null : Services::get($only);
+$user_name = $user->name();
 
 $list = Services_User::perUserList($user_id, $only, $after);
 $list->setTitle(sprintf('Inscriptions — %s', $user_name));
 $list->loadFromQueryString();
 
 $tpl->assign('services', Services_User::listDistinctForUser($user_id));
-$tpl->assign(compact('list', 'user_id', 'user_name', 'only', 'only_service', 'after'));
+$tpl->assign(compact('list', 'user_id', 'user_name', 'user', 'only', 'only_service', 'after'));
 
 $tpl->display('services/user/index.tpl');

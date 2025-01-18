@@ -577,6 +577,17 @@ class User extends Entity
 		$this->set('password', $session->hashPassword($source['password']));
 	}
 
+	public function isHidden(): bool
+	{
+		static $hidden_categories = null;
+
+		if (null === $hidden_categories) {
+			$hidden_categories = DB::getInstance()->getAssoc('SELECT id, id FROM users_categories WHERE hidden = 1;');
+		}
+
+		return in_array($this->id_category, $hidden_categories);
+	}
+
 	public function getEmails(): array
 	{
 		$out = [];
