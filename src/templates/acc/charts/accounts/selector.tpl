@@ -11,8 +11,8 @@
 	{/if}
 
 		<ul>
-			<li{if $filter == 'usual'} class="current"{/if}><a href="{$this_url}&filter=usual">Comptes favoris et usuels</a></li>
-			<li{if $filter == 'all'} class="current"{/if}><a href="{$this_url}&filter=all">Tous les comptes</a></li>
+			<li{if $filter == 'favorites'} class="current"{/if}><a href="{$filter_favorites_url}">Comptes favoris et usuels</a></li>
+			<li{if $filter == 'all'} class="current"{/if}><a href="{$filter_all_url}">Tous les comptes</a></li>
 		</ul>
 	</nav>
 
@@ -24,7 +24,7 @@
 	</header>
 {if empty($grouped_accounts) && empty($accounts)}
 	<p class="block alert">
-		Il n'existe aucun compte dans la catégorie «&nbsp;{$targets_names}&nbsp;» dans le plan comptable.
+		Il n'existe aucun compte dans la catégorie «&nbsp;{$types_names}&nbsp;» dans le plan comptable.
 	</p>
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 		<p class="help">

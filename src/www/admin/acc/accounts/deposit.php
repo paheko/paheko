@@ -55,7 +55,7 @@ if ($date > $current_year->end_date) {
 	$date = $current_year->end_date;
 }
 
-$target = $account::TYPE_BANK;
+$types = $account::TYPE_BANK;
 
 $missing_balance = $account->getDepositMissingBalance($year_id);
 
@@ -65,7 +65,7 @@ $tpl->assign(compact(
 	'account',
 	'journal',
 	'date',
-	'target',
+	'types',
 	'checked',
 	'missing_balance',
 	'transaction',

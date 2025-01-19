@@ -14,7 +14,7 @@
 			{input type="checkbox" name="paid" value="1" default=$su.paid label="Marquer cette inscription comme payée"}
 			{input type="date" name="date" label="Date" required=1 source=$su}
 			{input type="money" name="amount" label="Montant réglé par le membre" required=1}
-			{input type="list" target="!acc/charts/accounts/selector.php?targets=%s&year=%d"|args:$account_targets,$fee.id_year name="account_selector" label="Compte de règlement" required=1}
+			{input type="list" target="!acc/charts/accounts/selector.php?types=%s&id_year=%d"|args:$account_types:$fee.id_year name="account_selector" label="Compte de règlement" required=1}
 			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de reçu, de note de frais, etc."}
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc."}
 			{if count($projects) > 0}

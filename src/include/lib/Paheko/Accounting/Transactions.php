@@ -306,7 +306,7 @@ class Transactions
 			'linked_users'        => [],
 			'linked_transactions' => [],
 			'type_label'          => null,
-			'targets'             => implode(':', [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]),
+			'selector_types'      => implode('|', [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]),
 			'id_project'          => null,
 			'payment_line'        => null,
 		];

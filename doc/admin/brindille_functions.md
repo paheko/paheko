@@ -870,7 +870,8 @@ Note : le paramètre `value` n'est pas supporté sauf pour checkbox et radio.
 * `select` crée un sélecteur de type `<select>`. Dans ce cas il convient d'indiquer un tableau associatif dans le paramètre `options`.
 * `select_groups` crée un sélecteur de type `<select>`, mais avec des `<optgroup>`. Dans ce cas il convient d'indiquer un tableau associatif à deux niveaux dans le paramètre `options`.
 * `list` crée un champ permettant de sélectionner un ou des éléments (selon si le paramètre `multiple` est `true` ou `false`) dans un formulaire externe. Le paramètre `can_delete` indique si l'utilisateur peut supprimer l'élément déjà sélectionné (si `multiple=false`). La sélection se fait à partir d'un  formulaire  dont l'URL doit être spécifiée dans le paramètre `target`. Les formulaires actuellement supportés sont :
-  * `!acc/charts/accounts/selector.php?targets=X` pour sélectionner un compte du plan comptable, où X est une liste de types de comptes qu'il faut permettre de choisir (séparés par des `:`)
+  * `!acc/charts/accounts/selector.php?types=X` pour sélectionner un compte du plan comptable, où X est une liste de types de comptes qu'il faut permettre de choisir (séparés par des `|`)
+  * `!acc/charts/accounts/selector.php?codes=X` pour sélectionner un compte du plan comptable, où X est une liste de codes de comptes qu'il faut permettre de choisir (séparés par des `|`). Il est possible d'utiliser une astérisque pour inclure les sous-comptes : `codes=512*|580*`
   * `!users/selector.php` pour sélectionner un membre
 
 Note : pour les champs de type `select` et `select_groups` il est possible de spécifier le paramètre `default_empty` pour la valeur vide par défaut du champ. `default_empty="Tous"` affichera ainsi la valeur `Tous` en première option du select. Si cette option est sélectionnée une chaîne vide sera envoyée.
