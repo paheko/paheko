@@ -10,10 +10,10 @@
 		</aside>
 	{/if}
 
-	{if $filter !== 'no_favorites'}
+	{if $filter !== 'no_bookmarks'}
 		<ul>
-			<li{if $filter === 'favorites'} class="current"{/if}><a href="{$filter_favorites_url}">Comptes favoris et usuels</a></li>
-			<li{if $filter !== 'favorites'} class="current"{/if}><a href="{$filter_all_url}">Tous les comptes</a></li>
+			<li{if $filter === 'bookmarks'} class="current"{/if}><a href="{$filter_bookmarks_url}">Comptes favoris et usuels</a></li>
+			<li{if $filter !== 'bookmarks'} class="current"{/if}><a href="{$filter_all_url}">Tous les comptes</a></li>
 		</ul>
 	{/if}
 	</nav>
@@ -39,7 +39,7 @@
 		{/if}
 	</p>
 
-{elseif $filter === 'favorites'}
+{elseif $filter === 'bookmarks'}
 	<?php $index = 1; ?>
 	{foreach from=$grouped_accounts item="group"}
 	<section class="accounts-group">

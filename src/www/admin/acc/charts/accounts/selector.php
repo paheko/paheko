@@ -33,17 +33,17 @@ $key = ($_GET['key'] ?? null) === 'code' ? 'code' : 'id';
 
 $saved_filter = $session->get('account_selector_filter');
 $filter = $_GET['filter'] ?? $saved_filter;
-$filter = in_array($filter, ['all', 'no_favorites', 'favorites'], true) ? $filter : 'favorites';
+$filter = in_array($filter, ['all', 'no_bookmarks', 'bookmarks'], true) ? $filter : 'bookmarks';
 
 // Save filter in session if it did change
-if ($saved_filter !== $filter && $filter !== 'no_favorites') {
+if ($saved_filter !== $filter && $filter !== 'no_bookmarks') {
 	$session->set('account_selector_filter', $filter);
 	$session->save();
 }
 
 // Create self URL
 $filter_all_url = Utils::getModifiedURL('?filter=all');
-$filter_favorites_url = Utils::getModifiedURL('?filter=favorites');
+$filter_bookmarks_url = Utils::getModifiedURL('?filter=bookmarks');
 
 // Cache the page until the charts have changed
 $last_change = Config::getInstance()->get('last_chart_change') ?: time();
@@ -52,7 +52,7 @@ $params['filter'] = $filter;
 $hash = sha1(http_build_query($params));
 
 // This method will exit here if the list has already been cached by the client
-Utils::HTTPCache($hash, null, 10);
+Utils::HTTPCache($hash, null, 1);
 
 // Find the chart we need to use
 $chart = null;
@@ -83,10 +83,15 @@ if (!$chart->country) {
 
 $accounts = $chart->accounts();
 
-$chart_params = http_build_query(['id' => $chart->id(), 'codes' => $_GET['codes'] ?? '', 'types' => $_GET['types'] ?? '']);
+$chart_params = http_build_query([
+	'id' => $chart->id(),
+	'types' => $_GET['types'] ?? '',
+]);
 
-$edit_url = sprintf('!acc/charts/accounts/%s?', $filter !== 'favorites' ? 'all.php' : '', $chart_params);
+$edit_url = sprintf('!acc/charts/accounts/%s?%s', $filter !== 'bookmarks' ? 'all.php' : '', $chart_params);
+$edit_url = Utils::getLocalURL($edit_url);
 $new_url = sprintf('!acc/charts/accounts/new.php?%s', $chart_params);
+$new_url = Utils::getLocalURL($new_url);
 
 $types_names = !empty($types) ? array_intersect_key(Account::TYPES_NAMES, array_flip($types)) : [];
 $types_names = implode(', ', $types_names);
@@ -95,7 +100,7 @@ $criterias = compact('types', 'codes');
 $criterias = array_filter($criterias);
 $grouped_accounts = $all_accounts = null;
 
-if ($filter === 'favorites') {
+if ($filter === 'bookmarks') {
 	$grouped_accounts = $accounts->listCommonGrouped($criterias);
 }
 else {
@@ -110,7 +115,7 @@ $tpl->assign(compact(
 	'new_url',
 	'edit_url',
 	'types_names',
-	'filter_favorites_url',
+	'filter_bookmarks_url',
 	'filter_all_url',
 	'key',
 	'grouped_accounts',
