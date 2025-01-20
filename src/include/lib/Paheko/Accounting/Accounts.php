@@ -230,12 +230,11 @@ class Accounts
 
 		$sql = sprintf('SELECT a.* FROM @TABLE a
 			LEFT JOIN acc_transactions_lines b ON b.id_account = a.id
-			WHERE a.id_chart = %d AND ((%s AND (a.bookmark = 1 OR b.id IS NOT NULL)) %s)
+			WHERE a.id_chart = %d AND %s AND (a.bookmark = 1 OR b.id IS NOT NULL)
 			GROUP BY a.id
 			ORDER BY type, code COLLATE NOCASE;',
 			$this->chart_id,
-			$where,
-			(null === $types) ? 'OR (a.bookmark = 1)' : ''
+			$where
 		);
 
 		$query = $this->em->iterate($sql);

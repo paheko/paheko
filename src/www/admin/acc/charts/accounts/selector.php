@@ -33,10 +33,10 @@ $key = ($_GET['key'] ?? null) === 'code' ? 'code' : 'id';
 
 $saved_filter = $session->get('account_selector_filter');
 $filter = $_GET['filter'] ?? $saved_filter;
-$filter = $filter === 'all' ? 'all' : 'favorites';
+$filter = in_array($filter, ['all', 'no_favorites', 'favorites'], true) ? $filter : 'favorites';
 
 // Save filter in session if it did change
-if ($saved_filter !== $filter) {
+if ($saved_filter !== $filter && $filter !== 'no_favorites') {
 	$session->set('account_selector_filter', $filter);
 	$session->save();
 }
@@ -85,33 +85,37 @@ $accounts = $chart->accounts();
 
 $chart_params = http_build_query(['id' => $chart->id(), 'codes' => $_GET['codes'] ?? '', 'types' => $_GET['types'] ?? '']);
 
-$edit_url = sprintf('!acc/charts/accounts/%s?', $filter === 'all' ? 'all.php' : '', $chart_params);
+$edit_url = sprintf('!acc/charts/accounts/%s?', $filter !== 'favorites' ? 'all.php' : '', $chart_params);
 $new_url = sprintf('!acc/charts/accounts/new.php?%s', $chart_params);
 
 $types_names = !empty($types) ? array_intersect_key(Account::TYPES_NAMES, array_flip($types)) : [];
 $types_names = implode(', ', $types_names);
 
+$criterias = compact('types', 'codes');
+$criterias = array_filter($criterias);
+$grouped_accounts = $all_accounts = null;
+
+if ($filter === 'favorites') {
+	$grouped_accounts = $accounts->listCommonGrouped($criterias);
+}
+else {
+	$all_accounts = $accounts->listAll($criterias);
+}
+
 $tpl->assign(compact(
 	'chart',
 	'types',
+	'codes',
 	'filter',
 	'new_url',
 	'edit_url',
 	'types_names',
 	'filter_favorites_url',
 	'filter_all_url',
-	'key'
+	'key',
+	'grouped_accounts',
+	'all_accounts'
 ));
-
-$criterias = compact('types', 'codes');
-$criterias = array_filter($criterias);
-
-if ($filter === 'all') {
-	$tpl->assign('accounts', $accounts->listAll($criterias));
-}
-else {
-	$tpl->assign('grouped_accounts', $accounts->listCommonGrouped($criterias));
-}
 
 $tpl->register_modifier('make_label_searchable', function ($account, ...$keys) {
 	$account = $account instanceof Account ? $account->asArray() : (array)$account;
