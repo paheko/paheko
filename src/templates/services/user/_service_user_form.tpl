@@ -4,7 +4,7 @@ assert(isset($has_past_services) && is_bool($has_past_services));
 assert(isset($current_only) && is_bool($current_only));
 assert(isset($form_url) && is_string($form_url));
 assert(isset($today) && $today instanceof \DateTimeInterface);
-assert($create === false || isset($account_targets));
+assert($create === false || isset($account_types));
 assert(isset($grouped_services) && is_array($grouped_services));
 ?>
 
@@ -152,7 +152,7 @@ assert(isset($grouped_services) && is_array($grouped_services));
 		{/if}
 
 			{input type="money" name="amount" label="Montant réglé par le membre" required=true help="En cas de règlement en plusieurs fois il sera possible d'ajouter des règlements via la page de suivi des activités de ce membre."}
-			{input type="list" target="!acc/charts/accounts/selector.php?targets=%s&year=0"|args:$account_targets name="account_selector" label="Compte de règlement" required=true}
+			{input type="list" target="!acc/charts/accounts/selector.php?types=%s"|args:$account_types name="account_selector" label="Compte de règlement" required=true}
 			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de reçu, de note de frais, etc."}
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc."}
 			{input type="textarea" name="notes" label="Remarques"}

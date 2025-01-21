@@ -10,55 +10,58 @@ const ALLOW_ACCOUNTS_ACCESS = true;
 
 require_once __DIR__ . '/../../_inc.php';
 
-$targets = qg('targets');
-$targets = $targets ? explode(':', $targets) : [];
-$chart_id = (int) qg('chart') ?: null;
-$year_id = (int)qg('year') ?: null;
+// List accounts by types
+$types = $_GET['types'] ?? '';
+$types = explode('|', (string) $types);
+$types = array_map('intval', $types);
+$types = array_filter($types);
 
-$targets = array_map('intval', $targets);
-$targets_str = implode(':', $targets);
+// List accounts by codes
+$codes = $_GET['codes'] ?? '';
+$codes = explode('|', (string) $codes);
+$codes = array_filter($codes);
 
-$year = null;
-$filter = qg('filter');
+// List only for given chart or given year
+$id_chart = intval($_GET['id_chart'] ?? 0);
+$id_year = intval($_GET['id_year'] ?? 0);
+
+if ($id_chart && $id_year) {
+	throw new UserException('Invalid call: id_chart and id_year cannot be specified at the same time', 400);
+}
+
 $key = ($_GET['key'] ?? null) === 'code' ? 'code' : 'id';
 
-$this_url = '?' . http_build_query([
-	'targets' => $targets_str,
-	'chart'   => $chart_id,
-	'year'    => $year_id,
-	'key'     => $key,
-]);
+$saved_filter = $session->get('account_selector_filter');
+$filter = $_GET['filter'] ?? $saved_filter;
+$filter = in_array($filter, ['all', 'no_bookmarks', 'bookmarks'], true) ? $filter : 'bookmarks';
 
-if (qg('_dialog') !== null) {
-	$this_url .= '&_dialog';
-}
-
-if (!count($targets)) {
-	$targets = null;
-}
-
-if (null !== $filter) {
+// Save filter in session if it did change
+if ($saved_filter !== $filter && $filter !== 'no_bookmarks') {
 	$session->set('account_selector_filter', $filter);
 	$session->save();
 }
 
-$filter = $session->get('account_selector_filter') ?? 'usual';
-
+// Create self URL
+$filter_all_url = Utils::getModifiedURL('?filter=all');
+$filter_bookmarks_url = Utils::getModifiedURL('?filter=bookmarks');
 
 // Cache the page until the charts have changed
 $last_change = Config::getInstance()->get('last_chart_change') ?: time();
-$hash = sha1($targets_str . $chart_id . $year_id . $last_change . '=' . $filter);
+$params = $_GET;
+$params['filter'] = $filter;
+$hash = sha1(http_build_query($params));
 
-// Exit if there's no need to reload
-Utils::HTTPCache($hash, null, 10);
+// This method will exit here if the list has already been cached by the client
+Utils::HTTPCache($hash, null, 1);
 
+// Find the chart we need to use
 $chart = null;
 
-if ($chart_id) {
-	$chart = Charts::get($chart_id);
+if ($id_chart) {
+	$chart = Charts::get($id_chart);
 }
-elseif ($year_id) {
-	$year = Years::get($year_id);
+elseif ($id_year) {
+	$year = Years::get($id_year);
 
 	if ($year) {
 		$chart = $year->chart();
@@ -66,37 +69,58 @@ elseif ($year_id) {
 }
 elseif ($current_year) {
 	$chart = $current_year->chart();
-	$year = $current_year;
 }
 
 if (!$chart) {
-	throw new UserException('Aucun exercice ouvert disponible');
+	throw new UserException('Aucun exercice n\'est ouvert.');
 }
 
-// Charts with no country don't allow to use types
+// Charts with no country don't allow to use types,
+// so we can't filter by type here
 if (!$chart->country) {
-	$targets = null;
+	$types = [];
 }
 
 $accounts = $chart->accounts();
 
-$edit_url = sprintf('!acc/charts/accounts/%s?id=%d&types=%s', isset($grouped_accounts) ? '' : 'all.php', $chart->id(), $targets_str);
-$new_url = sprintf('!acc/charts/accounts/new.php?id=%d&types=%s', $chart->id(), $targets_str);
+$chart_params = http_build_query([
+	'id' => $chart->id(),
+	'types' => $_GET['types'] ?? '',
+]);
 
-$targets_names = !empty($targets) ? array_intersect_key(Account::TYPES_NAMES, array_flip($targets)) : [];
-$targets_names = implode(', ', $targets_names);
+$edit_url = sprintf('!acc/charts/accounts/%s?%s', $filter !== 'bookmarks' ? 'all.php' : '', $chart_params);
+$edit_url = Utils::getLocalURL($edit_url);
+$new_url = sprintf('!acc/charts/accounts/new.php?%s', $chart_params);
+$new_url = Utils::getLocalURL($new_url);
 
-$tpl->assign(compact('chart', 'targets', 'targets_str', 'filter', 'new_url', 'edit_url', 'targets_names', 'this_url', 'key'));
+$types_names = !empty($types) ? array_intersect_key(Account::TYPES_NAMES, array_flip($types)) : [];
+$types_names = implode(', ', $types_names);
 
-if ($filter == 'all') {
-	$tpl->assign('accounts', $accounts->listAll($targets));
-}
-elseif ($year) {
-	$tpl->assign('grouped_accounts', $year->listCommonAccountsGrouped($targets));
+$criterias = compact('types', 'codes');
+$criterias = array_filter($criterias);
+$grouped_accounts = $all_accounts = null;
+
+if ($filter === 'bookmarks') {
+	$grouped_accounts = $accounts->listCommonGrouped($criterias);
 }
 else {
-	$tpl->assign('grouped_accounts', $accounts->listCommonGrouped($targets));
+	$all_accounts = $accounts->listAll($criterias);
 }
+
+$tpl->assign(compact(
+	'chart',
+	'types',
+	'codes',
+	'filter',
+	'new_url',
+	'edit_url',
+	'types_names',
+	'filter_bookmarks_url',
+	'filter_all_url',
+	'key',
+	'grouped_accounts',
+	'all_accounts'
+));
 
 $tpl->register_modifier('make_label_searchable', function ($account, ...$keys) {
 	$account = $account instanceof Account ? $account->asArray() : (array)$account;

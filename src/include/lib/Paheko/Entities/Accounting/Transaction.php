@@ -762,7 +762,7 @@ class Transaction extends Entity
 				$line = $detail->direction == 'credit' ? $this->getCreditLine() : $this->getDebitLine();
 				$this->assert($line !== null, 'Il manque une ligne dans cette écriture');
 
-				$ok = $db->test(Account::TABLE, 'id = ? AND ' . $db->where('type', $detail->targets), $line->id_account);
+				$ok = $db->test(Account::TABLE, 'id = ? AND ' . $db->where('type', $detail->types), $line->id_account);
 
 				if (!$ok) {
 					$this->set('type', self::TYPE_ADVANCED);
@@ -1110,7 +1110,7 @@ class Transaction extends Entity
 				'accounts' => [
 					[
 						'label' => 'Type de recette',
-						'targets' => [Account::TYPE_REVENUE],
+						'types' => [Account::TYPE_REVENUE],
 						'direction' => 'credit',
 						'defaults' => [
 							self::TYPE_CREDIT => 'credit',
@@ -1118,7 +1118,7 @@ class Transaction extends Entity
 					],
 					[
 						'label' => 'Compte d\'encaissement',
-						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
+						'types' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
 						'direction' => 'debit',
 						'defaults' => [
 							self::TYPE_EXPENSE => 'credit',
@@ -1132,7 +1132,7 @@ class Transaction extends Entity
 				'accounts' => [
 					[
 						'label' => 'Type de dépense',
-						'targets' => [Account::TYPE_EXPENSE],
+						'types' => [Account::TYPE_EXPENSE],
 						'direction' => 'debit',
 						'defaults' => [
 							self::TYPE_DEBT => 'debit',
@@ -1140,7 +1140,7 @@ class Transaction extends Entity
 					],
 					[
 						'label' => 'Compte de décaissement',
-						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
+						'types' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
 						'direction' => 'credit',
 						'defaults' => [
 							self::TYPE_REVENUE => 'debit',
@@ -1155,7 +1155,7 @@ class Transaction extends Entity
 				'accounts' => [
 					[
 						'label' => 'De',
-						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
+						'types' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
 						'direction' => 'credit',
 						'defaults' => [
 							self::TYPE_EXPENSE => 'credit',
@@ -1164,7 +1164,7 @@ class Transaction extends Entity
 					],
 					[
 						'label' => 'Vers',
-						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
+						'types' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
 						'direction' => 'debit',
 					],
 				],
@@ -1175,7 +1175,7 @@ class Transaction extends Entity
 				'accounts' => [
 					[
 						'label' => 'Type de dette (dépense)',
-						'targets' => [Account::TYPE_EXPENSE],
+						'types' => [Account::TYPE_EXPENSE],
 						'direction' => 'debit',
 						'defaults' => [
 							self::TYPE_EXPENSE => 'debit',
@@ -1183,7 +1183,7 @@ class Transaction extends Entity
 					],
 					[
 						'label' => 'Compte de tiers',
-						'targets' => [Account::TYPE_THIRD_PARTY],
+						'types' => [Account::TYPE_THIRD_PARTY],
 						'direction' => 'credit',
 						'defaults' => [
 							self::TYPE_CREDIT => 'debit',
@@ -1197,7 +1197,7 @@ class Transaction extends Entity
 				'accounts' => [
 					[
 						'label' => 'Type de créance (recette)',
-						'targets' => [Account::TYPE_REVENUE],
+						'types' => [Account::TYPE_REVENUE],
 						'direction' => 'credit',
 						'defaults' => [
 							self::TYPE_REVENUE => 'credit',
@@ -1205,7 +1205,7 @@ class Transaction extends Entity
 					],
 					[
 						'label' => 'Compte de tiers',
-						'targets' => [Account::TYPE_THIRD_PARTY],
+						'types' => [Account::TYPE_THIRD_PARTY],
 						'direction' => 'debit',
 						'defaults' => [
 							self::TYPE_DEBT => 'credit',
@@ -1243,7 +1243,7 @@ class Transaction extends Entity
 			$type->id = $key;
 			foreach ($type->accounts as &$account) {
 				$account = (object) $account;
-				$account->targets_string = implode(':', $account->targets);
+				$account->types_string = implode('|', $account->types);
 				$account->selector_name = sprintf('simple[%s][%s]', $key, $account->direction);
 
 				$d = null;

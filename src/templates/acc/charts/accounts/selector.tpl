@@ -10,10 +10,12 @@
 		</aside>
 	{/if}
 
+	{if $filter !== 'no_bookmarks'}
 		<ul>
-			<li{if $filter == 'usual'} class="current"{/if}><a href="{$this_url}&filter=usual">Comptes favoris et usuels</a></li>
-			<li{if $filter == 'all'} class="current"{/if}><a href="{$this_url}&filter=all">Tous les comptes</a></li>
+			<li{if $filter === 'bookmarks'} class="current"{/if}><a href="{$filter_bookmarks_url}">Comptes favoris et usuels</a></li>
+			<li{if $filter !== 'bookmarks'} class="current"{/if}><a href="{$filter_all_url}">Tous les comptes</a></li>
 		</ul>
+	{/if}
 	</nav>
 
 	<header>
@@ -22,9 +24,13 @@
 			{* We can't use input type="search" because Firefox sucks *}
 		</h2>
 	</header>
-{if empty($grouped_accounts) && empty($accounts)}
+{if empty($grouped_accounts) && empty($all_accounts)}
 	<p class="block alert">
-		Il n'existe aucun compte dans la catégorie «&nbsp;{$targets_names}&nbsp;» dans le plan comptable.
+		{if !empty($types_names)}
+			Il n'existe aucun compte dans la catégorie «&nbsp;{$types_names}&nbsp;» dans le plan comptable.
+		{else}
+			Il n'existe aucun compte correspondant au critère demandé.
+		{/if}
 	</p>
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 		<p class="help">
@@ -33,7 +39,7 @@
 		{/if}
 	</p>
 
-{elseif isset($grouped_accounts)}
+{elseif $filter === 'bookmarks'}
 	<?php $index = 1; ?>
 	{foreach from=$grouped_accounts item="group"}
 	<section class="accounts-group">
@@ -73,7 +79,7 @@
 
 	<table class="list">
 		<tbody>
-		{foreach from=$accounts item="account"}
+		{foreach from=$all_accounts item="account"}
 			<tr data-idx="{$iteration}" class="account account-level-{$account->level()}" data-search-code="{$account.code|tolower}" data-search-label="{$account|make_label_searchable:'label':'description'}">
 				<td class="bookmark">{if $account.bookmark}{icon shape="star" title="Compte favori"}{/if}</td>
 				<td class="num">{$account.code}</td>

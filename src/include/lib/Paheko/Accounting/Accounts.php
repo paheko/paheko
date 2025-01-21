@@ -143,16 +143,15 @@ class Accounts
 		return $list;
 	}
 
-	public function listAll(?array $types = null): array
+	public function listAll(?array $criterias = null): array
 	{
-		$condition = '';
+		$where = $this->getListFilterClause($criterias);
 
-		if (!empty($types)) {
-			$types = array_map('intval', $types);
-			$condition = ' AND ' . DB::getInstance()->where('type', $types);
-		}
+		$sql = sprintf('SELECT * FROM @TABLE
+			WHERE id_chart = %d AND %s
+			ORDER BY code COLLATE NOCASE;',
+			$this->chart_id, $where);
 
-		$sql = sprintf('SELECT * FROM @TABLE WHERE id_chart = %d %s ORDER BY code COLLATE NOCASE;', $this->chart_id, $condition);
 		return $this->em->all($sql);
 	}
 
@@ -163,24 +162,54 @@ class Accounts
 		return $db->getGrouped($sql);
 	}
 
+	protected function getListFilterClause(array $criterias, string $prefix = ''): string
+	{
+		$db = $this->em->DB();
+		$where = '';
+
+		if (!empty($criterias['types'])) {
+			$where .= $prefix . $db->where('type', $criterias['types']); // Always restrict type here
+		}
+
+		if (!empty($criterias['codes']) && !empty($criterias['types'])) {
+			$where .= ' AND ';
+		}
+
+		// Build LIKE condition for codes
+		if (!empty($criterias['codes'])) {
+			$where .= '(';
+
+			foreach ($criterias['codes'] as $code) {
+				$fuzzy = substr($code, -1) === '*' ? '%' : '';
+				$code = trim($code, '*');
+				$code = $db->escapeLike($code, '\\');
+				$where .= $prefix . $db->where('code', 'LIKE', $code . $fuzzy) . ' OR ';
+			}
+
+			$where = substr($where, 0, -4) . ')';
+		}
+
+		return $where === '' ? '1' : $where;
+	}
+
 	/**
-	 * List common accounts, grouped by type
+	 * List common accounts (favorites + used this year), grouped by type
 	 * @return array
 	 */
-	public function listCommonGrouped(?array $types = null, bool $hide_empty = false): array
+	public function listCommonGrouped(array $criterias): array
 	{
-		if (null === $types) {
+		$types = $criterias['types'] ?? null;
+		$codes = $criterias['codes'] ?? null;
+
+		if (empty($criterias['types'])) {
 			// If we want all types, then we will get used or bookmarked accounts in common types
 			// and only bookmarked accounts for other types, grouped in "Others"
-			$target = Account::COMMON_TYPES;
-		}
-		else {
-			$target = $types;
+			$criterias['types'] = Account::COMMON_TYPES;
 		}
 
 		$out = [];
 
-		foreach ($target as $type) {
+		foreach ($criterias['types'] as $type) {
 			$out[$type] = (object) [
 				'label'    => Account::TYPES_NAMES[$type],
 				'type'     => $type,
@@ -197,25 +226,25 @@ class Accounts
 		}
 
 		$db = $this->em->DB();
+		$where = $this->getListFilterClause($criterias, 'a.');
 
 		$sql = sprintf('SELECT a.* FROM @TABLE a
 			LEFT JOIN acc_transactions_lines b ON b.id_account = a.id
-			WHERE a.id_chart = %d AND ((a.%s AND (a.bookmark = 1 OR b.id IS NOT NULL)) %s)
+			WHERE a.id_chart = %d AND %s AND (a.bookmark = 1 OR b.id IS NOT NULL)
 			GROUP BY a.id
 			ORDER BY type, code COLLATE NOCASE;',
 			$this->chart_id,
-			$db->where('type', $target),
-			(null === $types) ? 'OR (a.bookmark = 1)' : ''
+			$where
 		);
 
 		$query = $this->em->iterate($sql);
 
 		foreach ($query as $row) {
-			$t = in_array($row->type, $target) ? $row->type : 0;
+			$t = in_array($row->type, $criterias['types']) ? $row->type : 0;
 			$out[$t]->accounts[] = $row;
 		}
 
-		if ($hide_empty) {
+		if (!empty($criterias['codes'])) {
 			foreach ($out as $key => $v) {
 				if (!count($v->accounts)) {
 					unset($out[$key]);

@@ -1178,7 +1178,8 @@ Barème kilométrique pour une voiture de 3 CV : {{$baremes.voiture.3cv}}</code>
 <li><code>select</code> crée un sélecteur de type <code>&lt;select&gt;</code>. Dans ce cas il convient d'indiquer un tableau associatif dans le paramètre <code>options</code>.</li>
 <li><code>select_groups</code> crée un sélecteur de type <code>&lt;select&gt;</code>, mais avec des <code>&lt;optgroup&gt;</code>. Dans ce cas il convient d'indiquer un tableau associatif à deux niveaux dans le paramètre <code>options</code>.</li>
 <li><code>list</code> crée un champ permettant de sélectionner un ou des éléments (selon si le paramètre <code>multiple</code> est <code>true</code> ou <code>false</code>) dans un formulaire externe. Le paramètre <code>can_delete</code> indique si l'utilisateur peut supprimer l'élément déjà sélectionné (si <code>multiple=false</code>). La sélection se fait à partir d'un  formulaire  dont l'URL doit être spécifiée dans le paramètre <code>target</code>. Les formulaires actuellement supportés sont :<ul>
-<li><code>!acc/charts/accounts/selector.php?targets=X</code> pour sélectionner un compte du plan comptable, où X est une liste de types de comptes qu'il faut permettre de choisir (séparés par des <code>:</code>)</li>
+<li><code>!acc/charts/accounts/selector.php?types=X</code> pour sélectionner un compte du plan comptable, où X est une liste de types de comptes qu'il faut permettre de choisir (séparés par des <code>|</code>)</li>
+<li><code>!acc/charts/accounts/selector.php?codes=X</code> pour sélectionner un compte du plan comptable, où X est une liste de codes de comptes qu'il faut permettre de choisir (séparés par des <code>|</code>). Il est possible d'utiliser une astérisque pour inclure les sous-comptes : <code>codes=512*|580*</code></li>
 <li><code>!users/selector.php</code> pour sélectionner un membre</li>
 </ul>
 </li>

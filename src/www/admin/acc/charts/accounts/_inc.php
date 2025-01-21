@@ -14,9 +14,9 @@ $types_names = null;
 
 // Filter only some types (if coming from a selector)
 if (qg('types')) {
-	$types = explode(':', qg('types'));
+	$types = explode('|', qg('types'));
 	$types = array_map('intval', $types);
-	$types_arg = 'types=' . implode(':', $types);
+	$types_arg = 'types=' . implode('|', $types);
 
 	$types_names = count($types) ? array_intersect_key(Account::TYPES_NAMES, array_flip($types)) : [];
 	$types_names = implode(', ', $types_names);
