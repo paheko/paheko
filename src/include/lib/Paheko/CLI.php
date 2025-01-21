@@ -491,7 +491,7 @@ class CLI
 	public function config(array $args)
 	{
 		foreach (Config::getInstance()->asArray() as $key => $value) {
-			echo $key . ": " . self::var_export($value) . PHP_EOL;
+			echo $key . ": " . Utils::var_export($value) . PHP_EOL;
 		}
 		$this->success();
 	}
@@ -502,40 +502,9 @@ class CLI
 	public function env(array $args)
 	{
 		foreach (Install::getConstants() as $key => $value) {
-			echo $key . ": " . self::var_export($value) . PHP_EOL;
+			echo $key . ": " . Utils::var_export($value) . PHP_EOL;
 		}
 		$this->success();
-	}
-
-	protected function var_export($v)
-	{
-		if (is_array($v) || is_object($v)) {
-			$out = '[';
-			$keys = !array_key_exists(0, $v);
-
-			foreach ($v as $k => $v) {
-				if ($keys) {
-					$out .= $k . ': ';
-				}
-
-				$out .= self::var_export($v) . ', ';
-			}
-
-			$out = (strlen($out) > 1 ? substr($out, 0, -2) : $out) . ']';
-		}
-		elseif (is_bool($v)) {
-			$out = $v ? 'true' : 'false';
-		}
-		elseif (is_null($v)) {
-			$out = 'null';
-		}
-		elseif (is_string($v)) {
-			$out = '"' . strtr($v, ['"' => '\\"', "\n" => "\\n", "\r" => "\\r"]) . '"';
-		}
-		else {
-			$out = $v;
-		}
-		return $out;
 	}
 
 	/**

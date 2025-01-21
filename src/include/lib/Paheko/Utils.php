@@ -1802,6 +1802,37 @@ class Utils
 		return $out;
 	}
 
+	static public function var_export($v)
+	{
+		if (is_array($v) || is_object($v)) {
+			$out = '[';
+			$keys = !array_key_exists(0, $v);
+
+			foreach ($v as $k => $v) {
+				if ($keys) {
+					$out .= $k . ': ';
+				}
+
+				$out .= self::var_export($v) . ', ';
+			}
+
+			$out = (strlen($out) > 1 ? substr($out, 0, -2) : $out) . ']';
+		}
+		elseif (is_bool($v)) {
+			$out = $v ? 'true' : 'false';
+		}
+		elseif (is_null($v)) {
+			$out = 'null';
+		}
+		elseif (is_string($v)) {
+			$out = '"' . strtr($v, ['"' => '\\"', "\n" => "\\n", "\r" => "\\r"]) . '"';
+		}
+		else {
+			$out = $v;
+		}
+		return $out;
+	}
+
 	static public function parse_ini_file(string $path, bool $sections = false)
 	{
 		return self::parse_ini_string(file_get_contents($path), $sections);
