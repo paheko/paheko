@@ -165,11 +165,11 @@ if (!defined('Paheko\WWW_URL') && $host !== null) {
 }
 
 static $default_config = [
-	// USER_CONFIG_FILE is used in single-user setup (Debian/Windows)
+	// DESKTOP_CONFIG_FILE is used in single-user setup (Debian/Windows)
 	// to be able to add user-specific config constants, even though we already
 	// have a config.local.php for OS-specific stuff, this also allows
 	// to remove LOCAL_USER and have a multi-user setup on a single computer
-	'USER_CONFIG_FILE'      => null,
+	'DESKTOP_CONFIG_FILE'   => null,
 	'CACHE_ROOT'            => DATA_ROOT . '/cache',
 	'SHARED_CACHE_ROOT'     => DATA_ROOT . '/cache/shared',
 	'WEB_CACHE_ROOT'        => DATA_ROOT . '/cache/web/%host%',
@@ -437,7 +437,7 @@ if (REPORT_USER_EXCEPTIONS < 2) {
 // Clé secrète utilisée pour chiffrer les tokens CSRF etc.
 if (!defined('Paheko\SECRET_KEY')) {
 	$key = base64_encode(random_bytes(64));
-	Install::setConfig(CONFIG_FILE, 'SECRET_KEY', $key);
+	Install::setConfig(CONFIG_FILE, ['SECRET_KEY' => $key]);
 	define('Paheko\SECRET_KEY', $key);
 }
 

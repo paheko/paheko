@@ -949,7 +949,6 @@ namespace Paheko;
  *
  * Défaut : true
  * @var bool
- * @var string|null
  */
 //const ENABLE_FILE_THUMBNAILS = false;
 

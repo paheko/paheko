@@ -405,19 +405,12 @@ class DB extends SQLite3
 	static public function getVersion($db)
 	{
 		$v = (int) $db->querySingle('PRAGMA user_version;');
-		$v = self::parseVersion($v);
 
-		if (null === $v) {
-			try {
-				// For legacy version before 1.1.0
-				$v = $db->querySingle('SELECT valeur FROM config WHERE cle = \'version\';');
-			}
-			catch (\Exception $e) {
-				throw new \RuntimeException('Cannot find application version', 0, $e);
-			}
+		if (empty($v)) {
+			throw new \LogicException('Cannot find application version');
 		}
 
-		return $v ?: null;
+		return self::parseVersion($v);
 	}
 
 	static public function parseVersion(int $v): ?string

@@ -25,7 +25,7 @@ use KD2\DB\EntityManager as EM;
 
 use KD2\Graphics\SVG\Avatar;
 
-use const Paheko\{ADMIN_COLOR1, ADMIN_COLOR2, LOCAL_LOGIN, USER_CONFIG_FILE};
+use const Paheko\{ADMIN_COLOR1, ADMIN_COLOR2, LOCAL_LOGIN, DESKTOP_CONFIG_FILE};
 
 class Users
 {
@@ -674,9 +674,9 @@ class Users
 		echo Avatar::beam($name, ['colors' => $colors, 'size' => 128, 'square' => true]);
 	}
 
-	static public function canConfigureLocalLogin(): bool
+	static public function canConfigureDesktopLogin(): bool
 	{
-		if (LOCAL_LOGIN === null || !USER_CONFIG_FILE) {
+		if (!DESKTOP_CONFIG_FILE) {
 			return false;
 		}
 

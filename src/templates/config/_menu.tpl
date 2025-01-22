@@ -3,6 +3,9 @@
 <nav class="tabs">
 	<ul>
 		<li{if $current == 'index'} class="current"{/if}><a href="{$admin_url}config/">Configuration</a></li>
+		{if DESKTOP_CONFIG_FILE}
+			<li{if $current === 'desktop'} class="current"{/if}><a href="{$admin_url}config/desktop.php">Ordinateur</a></li>
+		{/if}
 		<li{if $current == 'custom'} class="current"{/if}><a href="{$admin_url}config/custom.php">Personnalisation</a></li>
 		<li{if $current == 'users'} class="current"{/if}><a href="{$admin_url}config/users/">Membres</a></li>
 		<li{if $current == 'backup'} class="current"{/if}><a href="{$admin_url}config/backup/">Sauvegardes</a></li>
