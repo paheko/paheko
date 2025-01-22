@@ -119,8 +119,8 @@
 
 			const reader = new FileReader();
 			reader.onload = (e) => {
+				img.onload = g.resizeParentDialog;
 				img.src = e.target.result;
-				g.resizeParentDialog();
 			};
 			reader.readAsDataURL(f);
 		};

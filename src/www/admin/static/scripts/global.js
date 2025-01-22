@@ -36,8 +36,9 @@
 
 	g.onload = function(callback, dom)
 	{
-		if (typeof dom == 'undefined')
+		if (typeof dom == 'undefined') {
 			dom = true;
+		}
 
 		var eventName = dom ? 'DOMContentLoaded' : 'load';
 
@@ -210,7 +211,7 @@
 
 		t.innerText = options.caption || '';
 
-		if (options.caption) {
+		if (options.caption && !document.title.match(options.caption)) {
 			document.title = options.caption + ' — ' + g.dialog_title;
 		}
 
@@ -342,17 +343,7 @@
 		if (!dialog.dataset.caption && document.title) {
 			var title = document.title.replace(/^([^—-]+).*$/, "$1");
 			dialog.querySelector('.title').innerText = title;
-			p.g.dialog_title = p.document.title;
 			p.document.title = document.title + ' — ' + p.g.dialog_title;
-
-			window.addEventListener('beforeunload', () => {
-				if (!p.g.dialog_title) {
-					return;
-				}
-
-				p.document.title = p.g.dialog_title;
-				p.g.dialog_title = null;
-			});
 		}
 
 		let height;
@@ -1000,9 +991,9 @@
 		});
 	});
 
-	g.onload(() => {
-		g.resizeParentDialog();
+	g.onload(g.resizeParentDialog, false);
 
+	g.onload(() => {
 		// File drag and drop support
 		if ($('[data-upload-url]').length) {
 			g.script('scripts/file_drag.js');
