@@ -83,7 +83,7 @@ foreach ($conversion_commands as $cmd) {
 	}
 }
 
-if (count($pdf_commands) === 2) {
+if (count($pdf_commands) === 1) {
 	unset($pdf_commands['auto']);
 }
 
