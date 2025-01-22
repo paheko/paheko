@@ -1,5 +1,11 @@
 {include file="_head.tpl" title="Démarrer avec Paheko" menu=false}
 
+{if DESKTOP_CONFIG_FILE}
+<p class="actions">
+	{linkbutton shape="reset" label="Ouvrir une base de données existante" href="!open_db.php"}
+</p>
+{/if}
+
 <p class="help">
 	<strong>Bienvenue dans Paheko !</strong><br />
 	Veuillez remplir les informations suivantes pour démarrer la gestion de votre association.
