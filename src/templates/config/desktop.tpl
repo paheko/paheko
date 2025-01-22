@@ -47,13 +47,16 @@
 	<fieldset>
 		<legend>Logiciels externes</legend>
 		<dl>
-			{input type="select" name="PDF_COMMAND" label="Logiciel de génération de PDF" options=$pdf_commands source=$constants required=true}
+			{input type="select" name="PDF_COMMAND" label="Logiciel de génération de PDF" options=$pdf_commands source=$constants default_empty="— Désactiver la génération de PDF —"}
+			{if empty($pdf_commands)}
+				<dd class="help">Aucun programme de génération de PDF n'est installé.</dd>
+			{/if}
 			<dt>Logiciels utilisés pour la conversion de fichiers, et la génération d'images miniatures</dt>
-			{foreach from=$conversion_commands item="cmd"}
-				<?php $checked = in_array($cmd, $constants['CONVERSION_TOOLS']); ?>
+			{foreach from=$available_conversion_commands item="cmd"}
+				<?php $checked = in_array($cmd, $constants['CONVERSION_TOOLS'] ?? []); ?>
 				{input type="checkbox" name="CONVERSION_TOOLS[%s]"|args:$cmd value=$cmd label=$cmd default=$checked}
 			{foreachelse}
-				<dd>Aucun programme n'est installé sur cet ordinateur.</dd>
+				<dd class="help">Aucun programme n'est installé sur cet ordinateur.</dd>
 			{/foreach}
 		</dl>
 	</fieldset>
@@ -61,7 +64,7 @@
 	<fieldset>
 		<legend>Configuration envoi d'e-mails</legend>
 		<dl>
-			{input type="select" name="email" options=$email_options default=$current_email_option label="Envoi d'e-mails" required=true}
+			{input type="select" name="email" options=$email_options default=$current_email_option label="Envoi d'e-mails" default_empty="— Désactivé —"}
 		</dl>
 		<dl class="email-smtp">
 			{input type="text" name="SMTP_HOST" label="Adresse du serveur SMTP" source=$constants required=true}

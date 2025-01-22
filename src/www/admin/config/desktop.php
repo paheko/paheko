@@ -12,7 +12,7 @@ if (!DESKTOP_CONFIG_FILE) {
 
 function has_command(string $command) {
 	if (PHP_OS_FAMILY === 'Windows') {
-		$result = strtok(shell_exec('where ' . $command, "\n"));
+		$result = strtok(shell_exec('where ' . $command) ?? '', "\n");
 	}
 	else {
 		$result = shell_exec('which ' . $command);
@@ -61,7 +61,6 @@ $form->runIf('save', function() {
 $first_admin_user = Users::getFirstAdmin();
 
 $pdf_commands = [
-	''            => '— Désactiver la création de PDF —',
 	'auto'        => 'Automatique',
 	'prince'      => 'PrinceXML (recommandé)',
 	'chromium'    => 'Chromium (recommandé)',
@@ -96,7 +95,6 @@ $tpl->assign([
 
 $constants = Install::getConstants();
 $email_options = [
-	'' => '— Envoi désactivé —',
 	'php' => 'Fonction mail() de PHP',
 	'smtp' => 'Serveur SMTP',
 ];
