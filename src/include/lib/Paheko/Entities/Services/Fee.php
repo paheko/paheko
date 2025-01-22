@@ -102,7 +102,7 @@ class Fee extends Entity
 		if ($this->amount) {
 			return $this->amount;
 		}
-		elseif ($this->formula) {
+		elseif (null !== $this->formula) {
 			$db = DB::getInstance();
 			return (int) $db->firstColumn($this->getFormulaSQL(), $user_id);
 		}
