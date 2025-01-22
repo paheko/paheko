@@ -105,8 +105,8 @@ assert(isset($grouped_services) && is_array($grouped_services));
 					<div>
 						<h3>{$fee.label}</h3>
 						<p>
-							{if $fee.user_amount && $fee.formula}
-								<strong>{$fee.user_amount|raw|money_currency}</strong> (montant calculé)
+							{if $fee.formula !== null && isset($fee.user_amount)}
+								<strong>{$fee.user_amount|raw|money_currency:false}</strong> (montant calculé)
 							{elseif $fee.formula}
 								montant calculé, variable selon les membres
 							{elseif $fee.user_amount}
