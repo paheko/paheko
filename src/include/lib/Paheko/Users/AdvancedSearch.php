@@ -277,14 +277,6 @@ class AdvancedSearch extends A_S
 		}
 
 		$groups = [[
-			'operator' => 'AND',
-			'conditions' => [
-				[
-					'column'   => 'hidden',
-					'operator' => '= 0',
-				],
-			],
-		], [
 			'operator' => 'OR',
 			'conditions' => [
 				[
@@ -294,6 +286,42 @@ class AdvancedSearch extends A_S
 				],
 			],
 		]];
+
+		$exclude_hidden = true;
+
+		// Don't include hidden users in search result,
+		// unless we want a specific category or ALL users
+		if (intval($options['id_category'] ?? 0) === -1) {
+			$exclude_hidden = false;
+		}
+		elseif (!empty($options['id_category'])) {
+			$exclude_hidden = false;
+
+			$groups[] = [
+				'operator' => 'AND',
+				'join_operator' => 'AND',
+				'conditions' => [
+					[
+						'column'   => 'id_category',
+						'operator' => '= ?',
+						'values'   => [intval($options['id_category'])],
+					],
+				],
+			];
+		}
+
+		if ($exclude_hidden) {
+			$groups[] = [
+				'operator' => 'AND',
+				'join_operator' => 'AND',
+				'conditions' => [
+					[
+						'column'   => 'hidden',
+						'operator' => '= 0',
+					],
+				],
+			];
+		}
 
 		if (!DynamicFields::isNumberFieldANumber()) {
 			$groups[0]['conditions'][] = [

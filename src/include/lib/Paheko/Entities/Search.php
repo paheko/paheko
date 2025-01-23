@@ -414,7 +414,10 @@ class Search extends Entity
 			$this->type = self::TYPE_JSON;
 		}
 		elseif ($text_query !== '') {
-			$options = ['id_year' => $_GET['year'] ?? null];
+			$options = [
+				'id_year' => $_GET['year'] ?? null,
+				'id_category' => $_GET['id_category'] ?? null,
+			];
 
 			if ($this->redirect($text_query, $options)) {
 				return;
