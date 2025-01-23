@@ -36,13 +36,17 @@
 
 	g.onload = function(callback, dom)
 	{
-		if (typeof dom == 'undefined') {
+		if (typeof dom === 'undefined') {
 			dom = true;
 		}
 
 		var eventName = dom ? 'DOMContentLoaded' : 'load';
 
-		document.addEventListener(eventName, callback, false);
+		window.addEventListener(eventName, callback);
+
+		if (!dom && document.readyState === 'complete') {
+			callback();
+		}
 	};
 
 	g.toggle = function(selector, visibility, resize_parent)
@@ -991,7 +995,7 @@
 		});
 	});
 
-	g.onload(g.resizeParentDialog, false);
+	g.onload(() => g.resizeParentDialog(), false);
 
 	g.onload(() => {
 		// File drag and drop support
