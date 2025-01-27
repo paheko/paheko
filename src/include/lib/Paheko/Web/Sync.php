@@ -163,7 +163,7 @@ class Sync
 				self::flatten($file->path);
 
 				if (substr_count($file->path, '/') >= 2) {
-					$file->rename(File::CONTEXT_WEB . '/' . $file->name, false);
+					$file->rename(File::CONTEXT_WEB . '/' . $file->name);
 				}
 			}
 		}

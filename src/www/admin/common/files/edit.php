@@ -12,9 +12,12 @@ $path = qg('p');
 $file = Files::get($path);
 $content = null;
 
-if (!$file && Files::getContext($path) == File::CONTEXT_MODULES && File::canCreate($path)
-	&& ($content = Modules::fetchDistFile($path)) && null !== $content) {
-	$file = Files::createObject($path);
+if (!$file
+	&& Files::getContext($path) == File::CONTEXT_MODULES
+	&& File::canCreate($path)
+	&& ($content = Modules::fetchDistFile($path))
+	&& null !== $content) {
+	$file = Files::createObject($path, Session::getInstance());
 }
 elseif (!$file) {
 	throw new UserException('Fichier inconnu');

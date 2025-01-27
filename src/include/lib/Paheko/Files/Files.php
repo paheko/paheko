@@ -701,14 +701,14 @@ class Files
 		}
 	}
 
-	static protected function create(string $parent, string $name, array $source = []): File
+	static protected function create(string $parent, string $name, array $source = [], ?Session $session = null): File
 	{
 		Files::checkQuota();
 
 		File::validateFileName($name);
 		File::validatePath($parent);
 
-		File::validateCanHTML($name, $parent);
+		File::validateCanHTML($name, $parent, $session);
 
 		$target = $parent . '/' . $name;
 
@@ -762,7 +762,7 @@ class Files
 	 * We need to make a file from an empty template, or Collabora will create a flat-XML file
 	 * @see https://github.com/nextcloud/richdocuments/tree/2338e2ff7078040d54fc0c70a96c8a1b860f43a0/emptyTemplates
 	 */
-	static public function createDocument(string $parent, string $name, string $extension): File
+	static public function createDocument(string $parent, string $name, string $extension, ?Session $session): File
 	{
 		// Spreadsheet
 		if ($extension === 'ods') {
@@ -788,22 +788,22 @@ class Files
 			throw new ValidationException('Un document existe déjà avec ce nom : ' . $name . '.' .$extension);
 		}
 
-		return Files::createFromString($target, base64_decode($tpl));
+		return Files::createFromString($target, base64_decode($tpl), $session);
 	}
 
-	static public function createObject(string $target)
+	static public function createObject(string $target, ?Session $session = null)
 	{
 		$parent = Utils::dirname($target);
 		$name = Utils::basename($target);
-		return self::create($parent, $name);
+		return self::create($parent, $name, [], $session);
 	}
 
-	static public function createFrom(string $target, array $source): File
+	static public function createFrom(string $target, array $source, ?Session $session = null): File
 	{
 		$target = preg_replace('!\.\.|//!', '', $target);
 		$parent = Utils::dirname($target);
 		$name = Utils::basename($target);
-		$file = self::create($parent, $name, $source);
+		$file = self::create($parent, $name, $source, $session);
 		$file->store($source);
 		return $file;
 	}
@@ -814,9 +814,9 @@ class Files
 	 * @param  string $path    Source file path
 	 * @return File
 	 */
-	static public function createFromPath(string $target, string $path): File
+	static public function createFromPath(string $target, string $path, ?Session $session = null): File
 	{
-		return self::createFrom($target, compact('path'));
+		return self::createFrom($target, compact('path'), $session);
 	}
 
 	/**
@@ -825,14 +825,14 @@ class Files
 	 * @param  string $content    Source file contents
 	 * @return File
 	 */
-	static public function createFromString(string $target, string $content): File
+	static public function createFromString(string $target, string $content, ?Session $session = null): File
 	{
-		return self::createFrom($target, compact('content'));
+		return self::createFrom($target, compact('content'), $session);
 	}
 
-	static public function createFromPointer(string $target, $pointer): File
+	static public function createFromPointer(string $target, $pointer, ?Session $session = null): File
 	{
-		return self::createFrom($target, compact('pointer'));
+		return self::createFrom($target, compact('pointer'), $session);
 	}
 
 	/**
@@ -841,11 +841,11 @@ class Files
 	 * @param  string $key  The name of the file input in the HTML form (this MUST have a '[]' at the end of the name)
 	 * @return array list of File objects created
 	 */
-	static public function uploadMultiple(string $parent, string $key): array
+	static public function uploadMultiple(string $parent, string $key, ?Session $session): array
 	{
 		// Detect if it's actually a single file
 		if (isset($_FILES[$key]['name']) && !is_array($_FILES[$key]['name'])) {
-			return [self::upload($parent, $key)];
+			return [self::upload($parent, $key, $session)];
 		}
 
 		if (!isset($_FILES[$key]['name'][0])) {
@@ -875,7 +875,7 @@ class Files
 		// Then create files
 		foreach ($files as $file) {
 			$name = File::filterName($file['name']);
-			$out[] = self::createFromPath($parent . '/' . $name, $file['tmp_name']);
+			$out[] = self::createFromPath($parent . '/' . $name, $file['tmp_name'], $session);
 		}
 
 		return $out;
@@ -887,7 +887,7 @@ class Files
 	 * @param  string $key  The name of the file input in the HTML form
 	 * @return self Created file object
 	 */
-	static public function upload(string $parent, string $key, ?string $name = null): File
+	static public function upload(string $parent, string $key, ?Session $session, ?string $name = null): File
 	{
 		if (!isset($_FILES[$key]) || !is_array($_FILES[$key])) {
 			throw new UserException('Aucun fichier reçu');
@@ -909,7 +909,7 @@ class Files
 
 		$name = File::filterName($name ?? $file['name']);
 
-		return self::createFromPath($parent . '/' . $name, $file['tmp_name']);
+		return self::createFromPath($parent . '/' . $name, $file['tmp_name'], $session);
 	}
 
 
