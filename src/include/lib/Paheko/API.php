@@ -34,7 +34,7 @@ class API
 
 	protected array $allowed_methods = ['GET', 'POST', 'PUT', 'DELETE'];
 
-	public function __construct(string $method, string $path, array $params, bool $is_http_client)
+	public function __construct(string $method, string $path, array $params, bool $is_http_client = false)
 	{
 		if (!in_array($method, $this->allowed_methods)) {
 			throw new APIException('Invalid request method: ' . $method, 405);
