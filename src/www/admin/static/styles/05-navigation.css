@@ -138,6 +138,14 @@ nav.tabs aside form {
     left: unset !important;
 }
 
+.menu-btn h4 {
+    font-weight: normal;
+    font-size: .9em;
+    margin: .2rem .5rem;
+    margin-top: .8rem;
+    color: var(--gBorderColor);
+}
+
 main .menu-btn button {
     text-align: left;
 }
