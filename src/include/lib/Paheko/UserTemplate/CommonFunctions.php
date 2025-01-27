@@ -256,6 +256,12 @@ class CommonFunctions
 		if ($type === 'country') {
 			$type = 'select';
 			$options = Utils::getCountryList();
+
+			// In case $current_value holds the country name instead of the country code
+			if ($current_value
+				&& ($code = array_search($current_value, $options, true))) {
+				$current_value = $code;
+			}
 		}
 
 		$label ??= null;
@@ -778,14 +784,14 @@ class CommonFunctions
 
 			return $out;
 		}
-		elseif ($type == 'select') {
+		elseif ($type === 'select') {
 			$params['options'] = array_combine($field->options, $field->options);
 			$params['default_empty'] = '—';
 		}
-		elseif ($type == 'country') {
-			$params['default'] = Config::getInstance()->get('country');
+		elseif ($type === 'country') {
+			$params['default'] ??= Config::getInstance()->get('country');
 		}
-		elseif ($type == 'checkbox') {
+		elseif ($type === 'checkbox') {
 			$params['value'] = 1;
 			$params['label'] = 'Oui';
 			$params['prefix_title'] = $field->label;
