@@ -742,6 +742,9 @@ class Transaction extends Entity
 
 		$chart_id = $db->firstColumn('SELECT id_chart FROM acc_years WHERE id = ?;', $this->id_year);
 
+		$analytical_mandatory = Config::getInstance()->analytical_mandatory;
+		$has_analytical = false;
+
 		foreach ($lines as $k => $line) {
 			$k = $k+1;
 			$this->assert(!empty($line->id_account), sprintf('Ligne %d: aucun compte n\'est défini', $k));
@@ -750,8 +753,16 @@ class Transaction extends Entity
 			$this->assert(($line->credit * $line->debit) === 0 && ($line->credit + $line->debit) > 0, sprintf('Ligne %d: non équilibrée, crédit ou débit doit valoir zéro.', $k));
 			$this->assert($db->test(Account::TABLE, 'id = ? AND id_chart = ?', $line->id_account, $chart_id), sprintf('Ligne %d: le compte spécifié n\'est pas lié au bon plan comptable', $k));
 
+			if ($line->id_project) {
+				$has_analytical = true;
+			}
+
 			$total += $line->credit;
 			$total -= $line->debit;
+		}
+
+		if (Config::getInstance()->analytical_mandatory) {
+			$this->assert($has_analytical, 'Aucun projet analytique n\'a été choisi, hors l\'affectation d\'un projet est obligatoire pour toutes les écritures.');
 		}
 
 		// check that transaction type is respected, or fall back to advanced
