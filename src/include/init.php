@@ -438,8 +438,12 @@ if (REPORT_USER_EXCEPTIONS < 2) {
 // Clé secrète utilisée pour chiffrer les tokens CSRF etc.
 if (!defined('Paheko\SECRET_KEY')) {
 	$key = base64_encode(random_bytes(64));
-	Install::setConfig(CONFIG_FILE, ['SECRET_KEY' => $key]);
 	define('Paheko\SECRET_KEY', $key);
+
+	// CONFIG_FILE may be NULL (eg. in unit tests)
+	if (null !== CONFIG_FILE) {
+		Install::setConfig(CONFIG_FILE, ['SECRET_KEY' => $key]);
+	}
 }
 
 // Define a local secret key derived of the main secret key and the data root
