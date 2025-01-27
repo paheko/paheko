@@ -374,7 +374,7 @@ class Config extends Entity
 			$f = null;
 		}
 		elseif ($upload) {
-			$f = Files::upload(Utils::dirname($path), $value, Utils::basename($path));
+			$f = Files::upload(Utils::dirname($path), $value, null, Utils::basename($path));
 
 			if ($type === 'image' && !$f->image) {
 				$this->setFile($key, null);
