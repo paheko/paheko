@@ -2,9 +2,20 @@
 
 {$banner|raw}
 
+{if !$has_extensions && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
+	<div class="block help">
+		<h2>Besoin d'autres fonctionnalités&nbsp;?</h2>
+		<p>Paheko dispose d'autres fonctionnalités sous forme d'extensions optionnelles : caisse, carte de membre, reçus fiscaux, notes de frais, réservations, etc.</p>
+		<p>{linkbutton href="!config/ext/?install=1" label="Activer des extensions" shape="check"}</p>
+	</div>
+{/if}
+
 <nav class="tabs">
 	<aside>
-		{button id="homescreen-btn" label="Installer comme application sur l'écran d'accueil" class="hidden" shape="plus"}
+		{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
+			{linkbutton shape="edit" label="Modifier le texte de l'accueil" href="!config/edit_file.php?k=admin_homepage" target="_dialog"}
+		{/if}
+		{button id="homescreen-btn" label="Installer comme application web" class="hidden" shape="plus"}
 	</aside>
 	{if $logged_user && $logged_user->exists()}
 	<ul>
@@ -38,20 +49,7 @@
 	{/if}
 </aside>
 
-{if !$has_extensions && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
-<div class="expose-extensions block">
-	<h2>Besoin d'autres fonctionnalités&nbsp;?</h2>
-	<p>Découvrez ces extensions dans le menu <strong>Configuration</strong>, onglet <strong>Extensions</strong>&nbsp;:</p>
-
-	<nav class="home">
-		<ul>
-		{foreach from=$buttons item="button"}
-			<li>{$button|raw}</li>
-		{/foreach}
-		</ul>
-	</nav>
-</div>
-{elseif !empty($buttons)}
+{if !empty($buttons)}
 	<nav class="home">
 		<ul>
 		{foreach from=$buttons item="button"}
@@ -62,7 +60,7 @@
 {/if}
 
 {if $homepage}
-	<article class="web-content">
+	<article class="web-content home-text">
 		{$homepage|raw}
 	</article>
 {/if}

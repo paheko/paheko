@@ -192,15 +192,6 @@ nav.home ul li a::before, nav.home ul li a .icon {
     text-shadow: none;
 }
 
-.expose-extensions nav.home {
-    font-size: .9em;
-}
-
-.expose-extensions nav.home ul li {
-    width: 12em;
-}
-
-
 /**
  * Dropdown, eg. interactive <select>
  */
