@@ -1128,6 +1128,8 @@ class Files
 			case 'docx':
 			case 'rtf':
 				return 'document';
+			case 'odg':
+				return 'edit';
 			case 'pdf':
 				return 'pdf';
 			case 'odp':
