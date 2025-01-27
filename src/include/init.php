@@ -344,6 +344,7 @@ ErrorManager::setContext([
 	'root_directory'   => ROOT,
 	'paheko_data_root' => DATA_ROOT,
 	'paheko_version'   => paheko_version(),
+	'sqlite_journal'   => SQLITE_JOURNAL_MODE,
 ]);
 
 
