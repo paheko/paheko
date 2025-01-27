@@ -743,7 +743,6 @@ class Transaction extends Entity
 		$chart_id = $db->firstColumn('SELECT id_chart FROM acc_years WHERE id = ?;', $this->id_year);
 
 		$analytical_mandatory = Config::getInstance()->analytical_mandatory;
-		$has_analytical = false;
 
 		foreach ($lines as $k => $line) {
 			$k = $k+1;
@@ -753,16 +752,8 @@ class Transaction extends Entity
 			$this->assert(($line->credit * $line->debit) === 0 && ($line->credit + $line->debit) > 0, sprintf('Ligne %d: non équilibrée, crédit ou débit doit valoir zéro.', $k));
 			$this->assert($db->test(Account::TABLE, 'id = ? AND id_chart = ?', $line->id_account, $chart_id), sprintf('Ligne %d: le compte spécifié n\'est pas lié au bon plan comptable', $k));
 
-			if ($line->id_project) {
-				$has_analytical = true;
-			}
-
 			$total += $line->credit;
 			$total -= $line->debit;
-		}
-
-		if (Config::getInstance()->analytical_mandatory) {
-			$this->assert($has_analytical, 'Aucun projet analytique n\'a été choisi, hors l\'affectation d\'un projet est obligatoire pour toutes les écritures.');
 		}
 
 		// check that transaction type is respected, or fall back to advanced
@@ -838,6 +829,24 @@ class Transaction extends Entity
 
 		if (isset($source['type'])) {
 			$this->set('type', (int)$source['type']);
+		}
+
+		// Check for analytical projects here, and not in selfCheck
+		// or we won't be able to create project-less transactions
+		// from plugins etc.
+		if (self::TYPE_ADVANCED === $this->type
+			&& Config::getInstance()->analytical_mandatory
+			&& isset($source['lines'])
+			&& is_array($source['lines'])) {
+			$has_project = false;
+
+			foreach ($source['lines'] as $line) {
+				if (!empty($line['id_project'])) {
+					$has_project = true;
+				}
+			}
+
+			$this->assert($has_project, 'Aucun projet analytique n\'a été choisi, hors l\'affectation d\'un projet est obligatoire pour toutes les écritures.');
 		}
 
 		// Simple two-lines transaction
@@ -957,9 +966,9 @@ class Transaction extends Entity
 	{
 		$source ??= $_POST;
 
-		$type = $source['type'] ?? ($this->type ?? self::TYPE_ADVANCED);
+		$type = intval($source['type'] ?? ($this->type ?? self::TYPE_ADVANCED));
 
-		if (self::TYPE_ADVANCED != $type && !isset($source['amount'])) {
+		if (self::TYPE_ADVANCED !== $type && !isset($source['amount'])) {
 			throw new UserException('Montant non précisé');
 		}
 
