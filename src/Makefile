@@ -1,4 +1,4 @@
-.PHONY: dev-server release deps publish check-dependencies test-syntax tests minify phpstan www htaccess modules installer plugins
+.PHONY: dev-server release deps publish check-dependencies test-syntax tests minify phpstan www htaccess modules installer plugins doc
 SHELL := /bin/bash
 KD2FW_BRANCH := trunk
 MODULES_BRANCH := trunk

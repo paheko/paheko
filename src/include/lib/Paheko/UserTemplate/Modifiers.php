@@ -60,7 +60,9 @@ class Modifiers
 		'quote_sql',
 		'sql_where',
 		'sql_user_fields',
-		'urlencode',
+		'url_encode',
+		'url_decode',
+		'urlencode' => [self::class, 'url_encode'],
 		'count_words',
 		'or',
 		'uuid',
@@ -647,9 +649,14 @@ EOS;
 		return sprintf('LTRIM(%s, %s)', implode(' || ', $out), $glue);
 	}
 
-	static public function urlencode($str): string
+	static public function url_encode($str): string
 	{
 		return rawurlencode($str ?? '');
+	}
+
+	static public function url_decode($str): string
+	{
+		return rawurldecode($str ?? '');
 	}
 
 	static public function count_words($str): int
