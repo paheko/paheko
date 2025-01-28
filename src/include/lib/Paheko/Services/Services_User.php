@@ -26,13 +26,13 @@ class Services_User
 		return DB::getInstance()->count(Service_User::TABLE, 'id_user = ?', $user_id);
 	}
 
-	static public function createFromFee(int $id_fee, int $id_user, ?int $expected_amount, bool $paid): Service_User
+	static public function createFromFee(int $id_fee, int $id_user, ?int $expected_amount, bool $paid, int $multiple = 1): Service_User
 	{
 		$su = new Service_User;
 		$su->date = new Date;
 		// Required, also to calculate expiry date
 		$id_service = DB::getInstance()->firstColumn('SELECT id_service FROM services_fees WHERE id = ?;', $id_fee);
-		$su->importForm(compact('id_service', 'id_fee', 'id_user', 'paid', 'expected_amount'));
+		$su->importForm(compact('id_service', 'id_fee', 'id_user', 'paid', 'expected_amount', 'multiple'));
 		return $su;
 	}
 
