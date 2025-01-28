@@ -915,6 +915,7 @@
 			e.setAttribute('aria-expanded', 'true');
 			window.addEventListener('keydown', closeDropdownEvent, {'capture': true});
 			window.addEventListener('click', closeDropdownEvent, {'capture': true});
+			return false;
 		}
 
 		document.querySelectorAll('nav.dropdown').forEach(e => {
