@@ -163,6 +163,19 @@ Exemple :
 {{/if}}
 ```
 
+## exit
+
+Arrête l'exécution du code immédiatement.
+
+Utile pour le debug principalement :
+
+```
+{{if $condition == 1}}
+  {{:debug a=42}}
+  {{:exit}}
+{{/if}}
+```
+
 ## form_errors
 
 Affiche les erreurs du formulaire courant (au format HTML).

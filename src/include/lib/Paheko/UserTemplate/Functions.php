@@ -60,6 +60,7 @@ class Functions
 		':break'    => [self::class, 'compile_break'],
 		':continue' => [self::class, 'compile_continue'],
 		':return'   => [self::class, 'compile_return'],
+		':exit'     => [self::class, 'compile_exit'],
 		':yield'    => [self::class, 'compile_yield'],
 		':redirect' => [self::class, 'compile_redirect'],
 	];
@@ -113,11 +114,22 @@ class Functions
 		if ($parent && ($parent[2]['context'] ?? null) === 'modifier') {
 			$params = $tpl->_parseArguments($params_str, $line);
 
-			return sprintf('<?php return %s; ?>', $params['value'] ?? 'null');
+			return sprintf('<?php return %s; ?>', $tpl->_exportArgument($params['value'] ?? 'null'));
 		}
 		// But not outside
 		elseif (!empty($params_str)) {
 			throw new Brindille_Exception('"return" function cannot have parameters in this context');
+		}
+
+		return '<?php return; ?>';
+	}
+
+	static public function compile_exit(string $name, string $params_str, UserTemplate $tpl, int $line): string
+	{
+		$parent = $tpl->_getStack($tpl::SECTION, 'define');
+
+		if (!$parent) {
+			throw new Brindille_Exception('"exit" function cannot be called in this context');
 		}
 
 		return '<?php return; ?>';

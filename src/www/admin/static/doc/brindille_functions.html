@@ -64,6 +64,7 @@
 			<li><a href="#continue">continue</a></li>
 			<li><a href="#debug">debug</a></li>
 			<li><a href="#error">error</a></li>
+			<li><a href="#exit">exit</a></li>
 			<li><a href="#form_errors">form_errors</a></li>
 			<li><a href="#http">http</a></li>
 			<li><a href="#include">include</a></li>
@@ -233,6 +234,13 @@
 <p>Exemple :</p>
 <pre><code>{{if $_POST.nombre != 42}}
     {{:error message="Le nombre indiqué n'est pas 42"}}
+{{/if}}</code></pre>
+<h2 id="exit">exit</h2>
+<p>Arrête l'exécution du code immédiatement.</p>
+<p>Utile pour le debug principalement :</p>
+<pre><code>{{if $condition == 1}}
+  {{:debug a=42}}
+  {{:exit}}
 {{/if}}</code></pre>
 <h2 id="form_errors">form_errors</h2>
 <p>Affiche les erreurs du formulaire courant (au format HTML).</p>
