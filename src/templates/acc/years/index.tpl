@@ -79,18 +79,18 @@
 		<tr>
 			<td>{tag preset=$year.status_tag_preset}</td>
 			<td>
-				{linkbutton label="Export" shape="export" href="export.php?year=%d"|args:$year.id}
-				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && $year.status === Year::OPEN}
+			{linkbutton label="Export" shape="export" href="export.php?year=%d"|args:$year.id}
+			{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
+				{if $year.status === Year::OPEN}
 					{linkbutton label="Import" shape="upload" href="import.php?year=%d"|args:$year.id}
+					{linkbutton label="Balance d'ouverture" shape="reset" href="balance.php?id=%d"|args:$year.id}
+					{linkbutton label="Modifier" shape="edit" href="edit.php?id=%d"|args:$year.id}
+					{linkbutton label="Clôturer" shape="lock" href="close.php?id=%d"|args:$year.id}
+					{linkbutton label="Supprimer" shape="delete" href="delete.php?id=%d"|args:$year.id}
+				{elseif $year.status === Year::LOCKED}
+					{linkbutton label="Modifier" shape="edit" href="edit.php?id=%d"|args:$year.id}
 				{/if}
-				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-					{if $year.status === Year::OPEN}
-						{linkbutton label="Balance d'ouverture" shape="reset" href="balance.php?id=%d"|args:$year.id}
-						{linkbutton label="Modifier" shape="edit" href="edit.php?id=%d"|args:$year.id}
-					{elseif $year.status === Year::LOCKED}
-						{linkbutton label="Modifier" shape="edit" href="edit.php?id=%d"|args:$year.id}
-					{/if}
-				{/if}
+			{/if}
 			</td>
 		</tr>
 	</tbody>
