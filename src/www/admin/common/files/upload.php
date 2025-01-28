@@ -3,6 +3,7 @@ namespace Paheko;
 
 use Paheko\Entities\Files\File;
 use Paheko\Files\Files;
+use Paheko\Users\Session;
 
 require __DIR__ . '/../../_inc.php';
 

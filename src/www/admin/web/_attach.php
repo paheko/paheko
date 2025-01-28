@@ -7,6 +7,7 @@ use Paheko\Web\Web;
 use Paheko\Entities\Web\Page;
 use Paheko\Entities\Files\File;
 use Paheko\Files\Files;
+use Paheko\Users\Session;
 
 require_once __DIR__ . '/_inc.php';
 
