@@ -893,7 +893,7 @@
 		var dropdown;
 
 		var closeDropdownEvent = (evt) => {
-			if ((close = evt.type === 'keydown' && evt.key === 'Escape')
+			if ((evt.type === 'keydown' && evt.key === 'Escape')
 				|| (evt.type === 'click' && !dropdown.contains(evt.target))) {
 				closeDropdown();
 				evt.preventDefault();
