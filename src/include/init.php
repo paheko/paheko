@@ -10,6 +10,11 @@ use KD2\DB\EntityManager;
 
 $start_timer = microtime(true);
 
+// Disable output buffering, if enabled
+// as some hosting providers do enable it by default
+@ini_set('output_buffering', false);
+@ob_end_clean();
+
 foreach ($_ENV as $key => $value) {
 	if (strpos($key, 'PAHEKO_') === 0) {
 		$key = substr($key, strlen('PAHEKO_'));
