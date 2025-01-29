@@ -566,10 +566,14 @@ class CLI
 	}
 
 	/**
-	 * Usage: paheko sql STATEMENT
+	 * Usage: paheko sql [STATEMENT]
 	 *   Run SQL statement and display result.
 	 *   Only read-only queries are supported (SELECT).
-	 *   INSERT, CREATE, ALTER, and other queries that would change the database are not supported.
+	 *   INSERT, CREATE, ALTER, and other queries that would change
+	 *   the database are not supported.
+	 *
+	 *   If STATEMENT is omitted, then the 'sqlite3' program will be executed
+	 *   using the Paheko database file, in interactive mode.
 	 */
 	public function sql(array $args)
 	{
@@ -587,7 +591,24 @@ class CLI
 		$sql = implode(' ', $args);
 
 		if (trim($sql) === '') {
-			$this->fail('No statement was provided.');
+			if (!shell_exec('which sqlite3')) {
+				$this->fail('No statement was provided and the "sqlite3" command is not installed.');
+			}
+
+			$args = [
+				'-header',
+				'-markdown',
+				'-nullvalue "*NULL*"'
+			];
+
+			if (!$rw) {
+				$args[] = '-readonly';
+			}
+
+			$args[] = escapeshellarg(DB_FILE);
+			$args = implode(' ', $args);
+			passthru('sqlite3 ' . $args);
+			return;
 		}
 
 		$db = DB::getInstance();
