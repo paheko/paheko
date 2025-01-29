@@ -910,6 +910,10 @@
 		};
 
 		var openDropdown = (e) => {
+			if (e.classList.contains('open')) {
+				return true;
+			}
+
 			dropdown = e;
 			e.classList.add('open');
 			e.setAttribute('aria-expanded', 'true');
