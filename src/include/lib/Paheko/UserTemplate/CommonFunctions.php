@@ -299,6 +299,10 @@ class CommonFunctions
 
 			foreach ($options as $_key => $_value) {
 				$selected = null !== $current_value && ($current_value == $_key);
+				if (is_array($_value) && array_key_exists('label', $_value)) {
+					$_value = $_value['label'];
+				}
+
 				$input .= sprintf('<option value="%s"%s>%s</option>', htmlspecialchars($_key), $selected ? ' selected="selected"' : '', htmlspecialchars((string)$_value));
 			}
 
