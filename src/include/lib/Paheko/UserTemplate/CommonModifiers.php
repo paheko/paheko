@@ -108,6 +108,7 @@ class CommonModifiers
 		'strftime',
 		'size_in_bytes' => [Utils::class, 'format_bytes'],
 		'weight' => [Utils::class, 'format_weight'],
+		'weightval' => [Utils::class, 'weightToInteger'],
 		'typo',
 		'css_hex_to_rgb',
 		'css_hex_extract_hsv',
