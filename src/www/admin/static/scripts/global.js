@@ -993,7 +993,7 @@
 			elm.addEventListener('change', g.checkUncheck);
 		});
 
-		document.querySelectorAll('table tbody input[type=checkbox]').forEach((elm) => {
+		document.querySelectorAll('table tbody td.check input[type=checkbox]').forEach((elm) => {
 			elm.addEventListener('change', () => {
 				elm.parentNode.parentNode.classList.toggle('checked', elm.checked);
 			});
