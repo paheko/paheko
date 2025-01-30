@@ -521,6 +521,19 @@ class Utils
 		}
 	}
 
+	static public function closeFrameIfDialog(?string $destination = null, bool $exit = true): void
+	{
+		$url = self::getLocalURL($destination ?? '!');
+
+		$js = 'window.parent.g.closeDialog();';
+
+		echo self::getFrameRedirectHTML($js, $url);
+
+		if ($exit) {
+			exit;
+		}
+	}
+
 	static public function getFrameRedirectHTML(string $js, string $url): string
 	{
 		return '
