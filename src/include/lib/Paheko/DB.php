@@ -313,7 +313,7 @@ class DB extends SQLite3
 		$db->createFunction('unicode_like', [self::class, 'unicodeLike']);
 		$db->createFunction('transliterate_to_ascii', [Utils::class, 'unicodeTransliterate']);
 		$db->createFunction('email_hash', [Email::class, 'getHash']);
-		$db->createFunction('md5', 'md5');
+		$db->createFunction('md5', fn ($v) => is_null($v) ? null : md5($v));
 		$db->createFunction('uuid', [Utils::class, 'uuid']);
 		$db->createFunction('random_string', [Utils::class, 'random_string']);
 		$db->createFunction('print_binary', fn($value) => sprintf('%032d', decbin($value)));
