@@ -6,6 +6,7 @@ use KD2\Brindille_Exception;
 use KD2\DB\DB_Exception;
 use Paheko\DB;
 use Paheko\DynamicList;
+use Paheko\Extensions;
 use Paheko\Template;
 use Paheko\Utils;
 use Paheko\UserException;
@@ -42,6 +43,7 @@ class Sections
 		'sql',
 		'restrict',
 		'module',
+		'extension',
 		'files',
 	];
 
@@ -1505,6 +1507,24 @@ class Sections
 		$out['url'] = $module->url();
 		$out['public_url'] = $module->public_url();
 
+		yield $out;
+	}
+
+	static public function extension(array $params, UserTemplate $tpl, int $line): \Generator
+	{
+		if (empty($params['name'])) {
+			throw new Brindille_Exception('Missing parameter "name"');
+		}
+
+		$ext = Extensions::get($params['name']);
+
+		if (!$ext || !$ext->enabled) {
+			return null;
+		}
+
+		$out = $ext->asArray();
+		$out['config'] = ($ext->module ?? $ext->plugin)->config;
+		unset($out['module'], $out['plugin']);
 		yield $out;
 	}
 
