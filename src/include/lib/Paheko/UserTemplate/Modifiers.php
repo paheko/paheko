@@ -67,6 +67,7 @@ class Modifiers
 		'or',
 		'uuid',
 		'key',
+		'filter',
 	];
 
 	const MODIFIERS_WITH_INSTANCE_LIST = [
@@ -470,6 +471,11 @@ EOS;
 			default:
 				return $type;
 		}
+	}
+
+	static public function filter($v): array
+	{
+		return array_filter((array) $v);
 	}
 
 	static public function arrayval($v): array
