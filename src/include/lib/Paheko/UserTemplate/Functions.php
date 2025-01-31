@@ -103,7 +103,7 @@ class Functions
 			throw new Brindille_Exception('"continue" function can only be used inside a section');
 		}
 
-		return sprintf('<?php continue(%d); ?>', $i);
+		return sprintf('<?php array_pop($this->_variables); continue(%d); ?>', $i);
 	}
 
 	static public function compile_return(string $name, string $params_str, UserTemplate $tpl, int $line): string
@@ -273,22 +273,30 @@ class Functions
 		$assign_new_id = $params['assign_new_id'] ?? null;
 		$validate = $params['validate_schema'] ?? null;
 		$validate_only = $params['validate_only'] ?? null;
+		$replace = !empty($params['replace']);
 
-		unset($params['key'], $params['id'], $params['assign_new_id'], $params['validate_schema'], $params['validate_only']);
+		unset($params['key'], $params['id'], $params['assign_new_id'], $params['validate_schema'],
+			$params['validate_only'], $params['replace']);
 
 		if ($key == 'config') {
 			$result = $db->firstColumn(sprintf('SELECT config FROM %s WHERE name = ?;', Module::TABLE), $tpl->module->name);
 		}
 		else {
-			$db->exec(sprintf('
-				CREATE TABLE IF NOT EXISTS %s (
-					id INTEGER NOT NULL PRIMARY KEY,
-					key TEXT NULL,
-					document TEXT NOT NULL
-				);
-				CREATE UNIQUE INDEX IF NOT EXISTS %1$s_key ON %1$s (key);', $table));
+			static $modules_tables = [];
 
-			if ($field) {
+			// Don't try to create table for each save statement
+			if (!in_array($table, $modules_tables)) {
+				$db->exec(sprintf('
+					CREATE TABLE IF NOT EXISTS %s (
+						id INTEGER NOT NULL PRIMARY KEY,
+						key TEXT NULL,
+						document TEXT NOT NULL
+					);
+					CREATE UNIQUE INDEX IF NOT EXISTS %1$s_key ON %1$s (key);', $table));
+				$modules_tables[] = $table;
+			}
+
+			if ($field && !$replace) {
 				$result = $db->firstColumn(sprintf('SELECT document FROM %s WHERE %s;', $table, ($field . ' = ?')), $where_value);
 			}
 			else {
@@ -303,19 +311,30 @@ class Functions
 		}
 
 		if (!empty($validate)) {
-			$schema = self::_readFile($validate, 'validate_schema', $tpl, $line);
+			static $schemas = [];
 
-			if ($validate_only && is_string($validate_only)) {
-				$validate_only = explode(',', $validate_only);
-				$validate_only = array_map('trim', $validate_only);
+			if (!isset($schemas[$validate])) {
+				$schema = self::_readFile($validate, 'validate_schema', $tpl, $line);
+
+				if ($validate_only && is_string($validate_only)) {
+					$validate_only = explode(',', $validate_only);
+					$validate_only = array_map('trim', $validate_only);
+				}
+				else {
+					$validate_only = null;
+				}
+
+				try {
+					$schemas[$validate] = JSONSchema::fromString($schema);
+				}
+				catch (\LogicException $e) {
+					throw new Brindille_Exception($e->getMessage(), 0, $e);
+				}
 			}
-			else {
-				$validate_only = null;
-			}
+
+			$s = $schemas[$validate];
 
 			try {
-				$s = JSONSchema::fromString($schema);
-
 				if ($validate_only) {
 					$s->validateOnly($params, $validate_only);
 				}
@@ -324,8 +343,8 @@ class Functions
 				}
 			}
 			catch (\RuntimeException $e) {
-				throw new Brindille_Exception(sprintf("ligne %d: impossible de valider le schéma:\n%s\n\n%s",
-					$line, $e->getMessage(), json_encode($params, JSON_PRETTY_PRINT)));
+				throw new Brindille_Exception(sprintf("impossible de valider le schéma:\n%s\n\n%s",
+					$e->getMessage(), json_encode($params, JSON_PRETTY_PRINT)));
 			}
 		}
 
