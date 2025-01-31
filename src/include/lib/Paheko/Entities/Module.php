@@ -641,19 +641,14 @@ class Module extends Entity
 				}
 			}
 
-			try {
-				if ($this->web) {
-					$this->serveWeb($path, $params);
-					return;
-				}
-				else {
-					$ut = $this->template($path);
-					$ut->assignArray($params);
-					$ut->serve();
-				}
+			if ($this->web) {
+				$this->serveWeb($path, $params);
+				return;
 			}
-			catch (\LogicException $e) {
-				throw new UserException('This address is invalid.', 404);
+			else {
+				$ut = $this->template($path);
+				$ut->assignArray($params);
+				$ut->serve();
 			}
 
 			return;
