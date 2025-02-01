@@ -770,4 +770,9 @@
 	g.onload(() => {
 		g.script('scripts/lib/text_editor.js', init);
 	});
+
+	// If in a dialog, always set to fullscreen
+	if (typeof window.parent.g !== 'undefined' && window.parent.g.dialog) {
+		window.parent.g.toggleDialogFullscreen();
+	}
 }());
