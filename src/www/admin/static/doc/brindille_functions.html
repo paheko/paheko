@@ -83,6 +83,9 @@
 		<ol>
 			<li><a href="#save">save</a>
 			<ol>
+				<li><a href="#mise-a-jour">Mise à jour</a></li>
+				<li><a href="#recuperer-l-identifiant-du-document-ajoute">Récupérer l'identifiant du document ajouté</a></li>
+				<li><a href="#enregistrer-plusieurs-documents-en-une-fois">Enregistrer plusieurs documents en une fois</a></li>
 				<li><a href="#validation-avec-un-schema-json">Validation avec un schéma JSON</a>
 			</ol></li>
 			<li><a href="#delete">delete</a></li>
@@ -832,6 +835,11 @@ L'écriture n°{{$result.id}} a été créée.</code></pre>
 <td style="text-align: left;">Si renseigné avec un tableau, chaque entrée du tableau sera traitée comme un élément à enregistrer.</td>
 </tr>
 <tr>
+<td style="text-align: left;"><code>replace</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">(Booléen) Si ce paramètre vaut <code>true</code>, alors le contenu du document sera écrasé, au lieu d'être fusionné.</td>
+</tr>
+<tr>
 <td style="text-align: left;">…</td>
 <td style="text-align: left;">optionnel</td>
 <td style="text-align: left;">Autres paramètres : traités comme des valeurs à enregistrer dans le document</td>
@@ -839,15 +847,24 @@ L'écriture n°{{$result.id}} a été créée.</code></pre>
 </tbody>
 </table>
 <p>Si ni <code>key</code> ni <code>id</code> ne sont indiqués, un nouveau document sera créé avec un nouveau numéro (ID) unique.</p>
+<h3 id="mise-a-jour">Mise à jour</h3>
 <p>Si le document indiqué existe déjà, il sera mis à jour. Les valeurs nulles (<code>NULL</code>) seront effacées.</p>
 <pre><code>{{:save key="facture_43" nom="Atelier mobile" montant=250}}</code></pre>
 <p>Enregistrera dans la base de données le document suivant sous la clé <code>facture_43</code> :</p>
 <pre><code>{"nom": "Atelier mobile", "montant": 250}</code></pre>
 <p>Exemple de mise à jour :</p>
 <pre><code>{{:save key="facture_43" montant=300}}</code></pre>
+<p>Seul le montant sera modifié, le nom ne sera pas modifié.</p>
+<p>Par contre en utilisant le paramètre <code>replace</code>, le document sera écrasé :</p>
+<pre><code>{{:save key="facture_43" replace=true nom="Vente de vélo"}}</code></pre>
+<p>Donnera :</p>
+<pre><code>{"nom": "Vente de vélo"}</code></pre>
+<p>Le montant est donc supprimé.</p>
+<h3 id="recuperer-l-identifiant-du-document-ajoute">Récupérer l'identifiant du document ajouté</h3>
 <p>Exemple de récupération du nouvel ID :</p>
 <pre><code>{{:save titre="Coucou !" assign_new_id="id"}}
 Le document n°{{$id}} a bien été enregistré.</code></pre>
+<h3 id="enregistrer-plusieurs-documents-en-une-fois">Enregistrer plusieurs documents en une fois</h3>
 <p>Le paramètre <code>from</code> est équivalent à appeler la fonction <code>save</code> dans une boucle. Ainsi au lieu de :</p>
 <pre><code>{{:assign var="documents." title="Titre 1"}}
 {{:assign var="documents." title="Titre 2"}}

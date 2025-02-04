@@ -74,6 +74,7 @@
 			<li><a href="#values">values</a></li>
 			<li><a href="#count">count</a></li>
 			<li><a href="#explode">explode</a></li>
+			<li><a href="#filter">filter</a></li>
 			<li><a href="#implode">implode</a></li>
 			<li><a href="#map">map</a></li>
 			<li><a href="#ksort-sort">ksort, sort</a></li>
@@ -374,6 +375,14 @@ b = orange
 <pre><code>- a
 - b
 - c</code></pre>
+<h2 id="filter">filter</h2>
+<p>Supprime les éléments vides d'un tableau.</p>
+<pre><code>{{:assign var="table" a=0 b="coucou" c=""}}
+{{:debug table=$table|filter}}</code></pre>
+<p>Affichera :</p>
+<pre><code>[
+    "b" =&gt; "coucou"
+]</code></pre>
 <h2 id="implode">implode</h2>
 <p>Réunit un tableau sous forme de chaîne de texte en utilisant éventuellement une chaîne de liaison entre chaque élément du tableau.</p>
 <pre><code>{{:assign var="table" a="bleu" b="orange"}}

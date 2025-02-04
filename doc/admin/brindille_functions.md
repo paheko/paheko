@@ -613,9 +613,12 @@ Enregistre des données, sous la forme d'un document, dans la base de données, 
 | `validate_only` | optionnel | Liste des paramètres à valider (par exemple pour ne faire qu'une mise à jour partielle), séparés par des virgules. |
 | `assign_new_id` | optionnel | Si renseigné, le nouveau numéro unique du document sera indiqué dans cette variable. |
 | `from` | optionnel | Si renseigné avec un tableau, chaque entrée du tableau sera traitée comme un élément à enregistrer. |
+| `replace` | optionnel | (Booléen) Si ce paramètre vaut `true`, alors le contenu du document sera écrasé, au lieu d'être fusionné. |
 | … | optionnel | Autres paramètres : traités comme des valeurs à enregistrer dans le document |
 
 Si ni `key` ni `id` ne sont indiqués, un nouveau document sera créé avec un nouveau numéro (ID) unique.
+
+### Mise à jour
 
 Si le document indiqué existe déjà, il sera mis à jour. Les valeurs nulles (`NULL`) seront effacées.
 
@@ -635,12 +638,32 @@ Exemple de mise à jour :
 {{:save key="facture_43" montant=300}}
 ```
 
+Seul le montant sera modifié, le nom ne sera pas modifié.
+
+Par contre en utilisant le paramètre `replace`, le document sera écrasé :
+
+```
+{{:save key="facture_43" replace=true nom="Vente de vélo"}}
+```
+
+Donnera :
+
+```
+{"nom": "Vente de vélo"}
+```
+
+Le montant est donc supprimé.
+
+### Récupérer l'identifiant du document ajouté
+
 Exemple de récupération du nouvel ID :
 
 ```
 {{:save titre="Coucou !" assign_new_id="id"}}
 Le document n°{{$id}} a bien été enregistré.
 ```
+
+### Enregistrer plusieurs documents en une fois
 
 Le paramètre `from` est équivalent à appeler la fonction `save` dans une boucle. Ainsi au lieu de :
 

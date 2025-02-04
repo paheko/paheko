@@ -585,6 +585,25 @@ Note : seul les fichiers de la section site web sont accessibles, les fichiers d
 
 # Sections relatives aux modules
 
+## extension
+
+Permet de charger les informations d'une extension (que ça soit un module ou un plugin). Utile pour récupérer ses infos, ou vérifier si une extension est activée.
+
+Si une extension est désactivée, la section ne renverra aucun résultat.
+
+| Paramètre | Optionnel / obligatoire ? | Fonction |
+| :- | :- | :- |
+| `name` | **obligatoire** | Nom unique du module |
+
+```
+{{#extension name="caisse"}}
+	L'extension est activée : {{$label}}
+	(C'est un {{$type}})
+{{else}}
+	L'extension caisse est désactivée.
+{{/if}}
+```
+
 ## module
 
 Permet de charger les informations d'un autre module. Utile pour récupérer ses infos, ou vérifier si un module est activé.
@@ -593,7 +612,7 @@ Si un module est désactivé, la section ne renverra aucun résultat.
 
 | Paramètre | Optionnel / obligatoire ? | Fonction |
 | :- | :- | :- |
-| `module` | **obligatoire** | Nom unique du module |
+| `name` | **obligatoire** | Nom unique du module |
 
 ```
 {{#module name="bookings"}}
@@ -840,7 +859,8 @@ Cette section est très puissante et permet de générer des listes simplement, 
 | `module` | *optionnel* | Nom unique du module lié (par exemple : `recu_don`). Si non spécifié, alors le nom du module courant sera utilisé. |
 | `columns` | *optionnel* | Permet de n'afficher que certaines colonnes du schéma. Indiquer ici le nom des colonnes, séparées par des virgules. |
 | `order` | *optionnel* | Colonne utilisée par défaut pour le tri (si l'utilisateur n'a pas choisi le tri sur une autre colonne). Si `select` est utilisé, il faut alors indiquer ici le numéro de la colonne, et non pas son nom. |
-| `group` | *optionnel* | Expression SQL utilisée par défaut pour le groupement des résultats (`GROUP BY`). |
+| `group` | *optionnel* | Expression SQL utilisée pour le groupement des résultats (`GROUP BY`). |
+| `count` | *optionnel* | Expression SQL utilisée pour le décompte des résultats. Défaut : `COUNT(*)`. Principalement utile avec la clause `group`. |
 | `desc` | *optionnel* | Si ce paramètre est à `true`, l'ordre de tri sera inversé. |
 | `max` | *optionnel* | Nombre d'éléments à afficher sur chaque page. Mettre à `null` pour ne pas paginer la liste. |
 | `where` | *optionnel* | Condition `WHERE` de la requête SQL. |

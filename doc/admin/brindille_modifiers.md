@@ -201,6 +201,23 @@ Affichera :
 - c
 ```
 
+## filter
+
+Supprime les éléments vides d'un tableau.
+
+```
+{{:assign var="table" a=0 b="coucou" c=""}}
+{{:debug table=$table|filter}}
+```
+
+Affichera :
+
+```
+[
+	"b" => "coucou"
+]
+```
+
 ## implode
 
 Réunit un tableau sous forme de chaîne de texte en utilisant éventuellement une chaîne de liaison entre chaque élément du tableau.
