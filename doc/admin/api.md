@@ -201,7 +201,7 @@ Notes :
 * il n'est pas possible de modifier un membre appartenant à une catégorie ayant accès à la configuration.
 * il n'est pas possible de modifier le mot de passe, l'OTP ou la clé PGP du membre créé
 * il n'est pas possible de modifier des membres ayant accès à la configuration
-* seul un identifiant d'API ayant l'accès en "Administartion" pourra modifier un membre administrateur
+* seul un identifiant d'API ayant l'accès en "Administration" pourra modifier un membre administrateur
 
 ### user/import (PUT)
 
@@ -479,6 +479,7 @@ Crée une nouvelle écriture, renvoie les détails si l'écriture a été créé
 Les champs à spécifier pour créer ou modifier une écriture sont les suivants :
 
 * `id_year`
+* `label` : libellé de l'écriture
 * `date` (format YYYY-MM-DD)
 * `type` peut être un type d'écriture simplifié (2 lignes) : `EXPENSE` (dépense), `REVENUE` (recette), `TRANSFER` (virement), `DEBT` (dette), `CREDIT` (créance), ou `ADVANCED` pour une écriture multi-ligne
 * `amount` (uniquement pour les écritures simplifiées) : contient le montant de l'écriture
