@@ -179,6 +179,10 @@ class Services_User
 					$row->paid = true;
 				}
 
+				if (!empty($row->expected_amount)) {
+					$row->expected_amount = Utils::moneyToInteger($row->expected_amount);
+				}
+
 				$su->import((array)$row);
 
 				yield $i => $su;
