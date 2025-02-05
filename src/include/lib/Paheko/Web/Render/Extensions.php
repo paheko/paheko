@@ -304,7 +304,7 @@ class Extensions
 		return sprintf('<a href="%s" %s><img src="%s" alt="%s" loading="lazy" /></a>',
 			htmlspecialchars($href),
 			$url ? ' target="_blank"' : 'class="internal-image" target="_image"',
-			htmlspecialchars($thumb_url ?? $url),
+			htmlspecialchars($thumb_url ?? $file->url()),
 			htmlspecialchars($caption ?? '')
 		);
 	}
