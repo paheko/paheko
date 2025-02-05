@@ -292,10 +292,11 @@ class Extensions
 		}
 
 		$svg = substr($name, -4) == '.svg';
-		$href = $url ?? $file->url();
+		$file_url = $file->url();
+		$href = $url ?? $file_url;
 
 		if ($svg || !$thumb_size) {
-			$thumb_url = $url;
+			$thumb_url = $file_url;
 		}
 		else {
 			$thumb_url = $file->thumb_url($thumb_size);
@@ -304,7 +305,7 @@ class Extensions
 		return sprintf('<a href="%s" %s><img src="%s" alt="%s" loading="lazy" /></a>',
 			htmlspecialchars($href),
 			$url ? ' target="_blank"' : 'class="internal-image" target="_image"',
-			htmlspecialchars($thumb_url ?? $file->url()),
+			htmlspecialchars($thumb_url ?? $file_url),
 			htmlspecialchars($caption ?? '')
 		);
 	}
