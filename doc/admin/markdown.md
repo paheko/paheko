@@ -419,16 +419,16 @@ Note : cette extension ne fonctionne que dans les pages du site web.
 
 Il est aussi possible d'utiliser la syntaxe avec les paramètres nommés suivants :
 
-* `file` : nom du fichier de l'image (obligatoire)
+* `src` : nom du fichier de l'image (obligatoire)
 * `align` : alignement de l'image
 * `caption` : légende qui apparaîtra en dessous de l'image
-* `link` : adresse du lien de l'image
+* `href` : adresse du lien de l'image
 * `alt` : description textuelle de l'image (utile si on ne veut pas de légende en dessous de l'image)
 
 Si le paramètre `link` est fourni, un clic sur l'image ouvrira ce lien, au lieu d'ouvrir l'image en grand.
 
 ```
-<<image file="Nom_fichier.jpg" align="center" alt="Ceci est une photo d'une fougère très jolie" link="https://paheko.cloud/">>
+<<image src="Nom_fichier.jpg" align="center" alt="Ceci est une photo d'une fougère très jolie" href="https://paheko.cloud/">>
 ```
 
 ## Galerie d'images

@@ -247,11 +247,11 @@ class Extensions
 	{
 		static $align_replace = ['gauche' => 'left', 'droite' => 'right', 'centre' => 'center'];
 
-		$name = $args['file'] ?? ($args[0] ?? null);
+		$name = $args['src'] ?? ($args['file'] ?? ($args[0] ?? null));
 		$align = $args['align'] ?? ($args[1] ?? null);
 		$caption = $args['caption'] ?? (isset($args[2]) ? implode(' ', array_slice($args, 2)) : null);
 		$alt = $args['alt'] ?? null;
-		$url = $args['link'] ?? null;
+		$url = $args['href'] ?? null;
 
 		$align = strtr((string)$align, $align_replace);
 
