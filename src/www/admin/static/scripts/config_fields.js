@@ -20,7 +20,7 @@ g.onload(() => {
 			return;
 		}
 
-		n.value = g.normalizeString(label.value).replace(/[^a-z0-9_]+/g, '_');
+		n.value = g.normalizeString(label.value).replace(/[^a-z0-9_]+/g, '_').replace(/^_+|_+$/g, '');
 	};
 
 	var addBtn = document.createElement('button');

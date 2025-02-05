@@ -63,6 +63,19 @@ class CommonFunctions
 			unset($tparams['label']);
 			$suffix = self::input($tparams);
 		}
+		elseif ($type === 'boolean') {
+			$type = 'select';
+			$attributes['default_empty'] = '— Sélectionner —';
+			$options = [1 => 'Oui', 0 => 'Non'];
+
+			$attributes['boolean_text_value'] ??= false;
+
+			if ($attributes['boolean_text_value']) {
+				$options = array_combine(array_values($options), $options);
+			}
+
+			unset($attributes['boolean_text_value']);
+		}
 
 		if ($type == 'file' && isset($attributes['accept']) && $attributes['accept'] == 'csv') {
 			$attributes['accept'] = '.csv,text/csv,application/csv,.CSV';
@@ -877,7 +890,8 @@ class CommonFunctions
 		if (!$field) {
 			$out = htmlspecialchars((string)$v);
 		}
-		elseif ($field->type == 'checkbox') {
+		elseif ($field->type === 'checkbox'
+			|| $field->type === 'boolean') {
 			$out = $v ? 'Oui' : 'Non';
 		}
 		elseif (null === $v) {

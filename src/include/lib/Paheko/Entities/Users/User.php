@@ -156,8 +156,11 @@ class User extends Entity
 			if ($field->required) {
 				$this->assert(null !== $value, sprintf('"%s" : ce champ est requis', $field->label));
 
-				if (is_bool($value)) {
+				if ($field->type === 'checkbox') {
 					$this->assert($value === true, sprintf('"%s" : ce champ doit être coché', $field->label));
+				}
+				elseif ($field->type === 'boolean') {
+					$this->assert($value === true || $value === false, sprintf('"%s" : ce champ doit être sélectionné', $field->label));
 				}
 				elseif (!is_array($value) && !is_object($value) && !is_bool($value)) {
 					$this->assert('' !== trim((string)$value), sprintf('"%s" : ce champ ne peut être vide', $field->label));
@@ -177,6 +180,9 @@ class User extends Entity
 			}
 			elseif ($field->type === 'checkbox') {
 				$this->assert($value === false || $value === true, sprintf('"%s" : la valeur de ce champ n\'est pas valide.', $field->label));
+			}
+			elseif ($field->type === 'boolean') {
+				$this->assert($value === false || $value === true || $value === null, sprintf('"%s" : la valeur de ce champ n\'est pas valide.', $field->label));
 			}
 			elseif ($field->type === 'select') {
 				$this->assert(in_array($value, $field->options), sprintf('"%s" : la valeur "%s" ne fait pas partie des options possibles', $field->label, $value));
@@ -435,6 +441,15 @@ class User extends Entity
 			}
 
 			$source[$f->name] = !empty($source[$f->name]);
+		}
+
+		// Handle boolean fields
+		foreach (DynamicFields::getInstance()->fieldsByType('boolean') as $f) {
+			if (!array_key_exists($f->name, $source)) {
+				continue;
+			}
+
+			$source[$f->name] = $source[$f->name] === '' ? null : (bool) $source[$f->name];
 		}
 
 		foreach (DynamicFields::getInstance()->fieldsByType('country') as $f) {
