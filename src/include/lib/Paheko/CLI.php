@@ -695,7 +695,10 @@ class CLI
 		if ($browser) {
 			$url = sprintf('http://%s:%d/admin/', $address, $port);
 
-			if (($_SERVER['DISPLAY'] ?? '') !== '') {
+			if (shell_exec('which xdg-open')) {
+				$browser = 'xdg-open %s';
+			}
+			elseif (shell_exec('which sensible-browser')) {
 				$browser = 'sensible-browser %s &';
 			}
 			else {
