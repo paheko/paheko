@@ -395,7 +395,7 @@ Toutes ces extensions se présentent sous la forme d'un code situé entre deux s
 Il est possible d'intégrer une image jointe à la page web en plaçant le code suivant sur une ligne (sans autre texte) :
 
 ```
-<<image|Nom_fichier.jpg|Alignement|Légende>>
+<<image|Nom_fichier.jpg|Alignement|Légende|Lien>>
 ```
 
 * `Nom_fichier.jpg` : remplacer par le nom du fichier de l'image (parmi les images jointes à la page)
@@ -411,15 +411,25 @@ Exemple :
 <<image|mon_image.png|center|Ceci est une belle image>>
 ```
 
-Il est aussi possible d'utiliser la syntaxe avec des paramètres nommés :
-
-```
-<<image file="Nom_fichier.jpg" align="center" caption="Légende">>
-```
-
 Les images qui ne sont pas mentionnées dans le texte seront affichées après le texte sous forme de galerie.
 
-Cette extension ne fonctionne que dans les pages du site web.
+Note : cette extension ne fonctionne que dans les pages du site web.
+
+### Utilisation avancée
+
+Il est aussi possible d'utiliser la syntaxe avec les paramètres nommés suivants :
+
+* `file` : nom du fichier de l'image (obligatoire)
+* `align` : alignement de l'image
+* `caption` : légende qui apparaîtra en dessous de l'image
+* `link` : adresse du lien de l'image
+* `alt` : description textuelle de l'image (utile si on ne veut pas de légende en dessous de l'image)
+
+Si le paramètre `link` est fourni, un clic sur l'image ouvrira ce lien, au lieu d'ouvrir l'image en grand.
+
+```
+<<image file="Nom_fichier.jpg" align="center" alt="Ceci est une photo d'une fougère très jolie" link="https://paheko.cloud/">>
+```
 
 ## Galerie d'images
 
