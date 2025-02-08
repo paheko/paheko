@@ -504,6 +504,85 @@
 		};
 	};
 
+	g.enhanceHueField = (input) => {
+		var container = document.createElement('span');
+		container.className = 'hue-selector';
+
+		var c = input.cloneNode(true);
+		var gradient = document.createElement('span');
+		gradient.className = 'gradient';
+
+		if (c.dataset.grey) {
+			var grey = document.createElement('span');
+			grey.className = 'grey';
+			gradient.appendChild(grey);
+		}
+
+		var color = document.createElement('span');
+		color.className = 'color';
+		gradient.appendChild(color);
+
+		var handle = document.createElement('span');
+		handle.className = 'handle';
+
+		container.appendChild(gradient);
+		container.appendChild(handle);
+		container.appendChild(c);
+
+		var s = c.dataset.saturation ?? '100%';
+		var l = c.dataset.lightness ?? '50%';
+
+		container.style = '--sl: ' + s + ', ' + l;
+
+		var range = 360;
+
+		// Add 60 shades of grey
+		if (c.dataset.grey) {
+			container.className += ' hue-grey';
+			c.min = '-60';
+			range += 60;
+		}
+
+		var updateHandle = () => {
+			var v = parseInt(c.value, 10);
+
+			if (v > -10 && v < 0) {
+				v = -1; // White
+			}
+			else if (v < -50) {
+				v = -60; // Black
+			}
+
+			if (v >= 0) {
+				var cs = s,
+					cl = l,
+					h = c.value,
+					pos = (c.dataset.grey ? 60 + v : v) / range;
+			}
+			// For grey colors
+			else {
+				var cs = '0%',
+					cl = (Math.abs(v) / 60) * 100 + '%',
+					h = 0,
+					pos = (v + 60) / range;
+			}
+
+			c.value = v;
+			pos *= 100;
+			var hsl = h + ', ' + cs + ', ' + cl;
+
+			handle.style = '--position: ' + pos + '%; --hsl: hsl(' + hsl + ')';
+		};
+
+		c.addEventListener('input', updateHandle);
+		updateHandle();
+
+		c.addEventListener('focus', () => container.classList.add('focus'));
+		c.addEventListener('blur', () => container.classList.remove('focus'));
+
+		input.replaceWith(container);
+	};
+
 	g.enhanceDateField = (input) => {
 		var span = document.createElement('span');
 		span.className = 'datepicker-parent';
@@ -875,6 +954,10 @@
 	g.onload(() => {
 		document.querySelectorAll('input[data-input="date"]').forEach((e) => {
 			g.enhanceDateField(e);
+		});
+
+		document.querySelectorAll('input[data-input="hue"]').forEach((e) => {
+			g.enhanceHueField(e);
 		});
 
 		document.querySelectorAll('input[type="password"]:not([readonly]):not([disabled]):not(.hidden)').forEach((e) => {

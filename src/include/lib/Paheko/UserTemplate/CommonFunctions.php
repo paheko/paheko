@@ -76,6 +76,14 @@ class CommonFunctions
 
 			unset($attributes['boolean_text_value']);
 		}
+		elseif ($type === 'hue') {
+			$type = 'range';
+			$attributes['data-input'] = 'hue';
+			$attributes['min'] = !empty($attributes['data-grey']) ? -60 : 0;
+			$attributes['max'] = 360;
+			$attributes['step'] = 1;
+			$attributes['aria-label'] = 'Color hue selector';
+		}
 
 		if ($type == 'file' && isset($attributes['accept']) && $attributes['accept'] == 'csv') {
 			$attributes['accept'] = '.csv,text/csv,application/csv,.CSV';
