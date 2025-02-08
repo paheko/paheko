@@ -72,6 +72,14 @@ class AdvancedSearch extends A_S
 			'where' => 'u.id_parent IS NOT NULL %s',
 		];
 
+		$columns['has_password'] = [
+			'label' => 'A un mot de passe',
+			'type' => 'boolean',
+			'null' => false,
+			'select' => 'CASE WHEN u.password IS NOT NULL THEN \'Oui\' ELSE \'Non\' END',
+			'where' => 'u.password IS NOT NULL %s',
+		];
+
 		foreach ($fields->all() as $name => $field)
 		{
 			// Skip password/number as it's already in the list
