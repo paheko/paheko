@@ -385,7 +385,13 @@ class Plugin extends Entity
 		$path = $this->path($file);
 
 		if (!file_exists($path)) {
-			throw new UserException(sprintf('Le fichier "%s" n\'existe pas dans le plugin "%s"', $file, $this->name));
+			if (file_exists($this->path('router.php'))) {
+				$this->call('router.php');
+				return;
+			}
+			else {
+				throw new UserException(sprintf('Le fichier "%s" n\'existe pas dans le plugin "%s"', $file, $this->name));
+			}
 		}
 
 		if (is_dir($path)) {
