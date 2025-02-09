@@ -59,7 +59,7 @@ if (ALERT_MESSAGE && !$dialog) {
 }
 ?>
 
-<body{if !empty($class)} class="{$class}"{/if}{if !empty($upload_here)}{enable_upload_here path=$upload_here}{/if}>
+<body{if !empty($class)} class="{$class}"{/if}{if !empty($upload_here)}{enable_upload_here path=$upload_here}{elseif !empty($upload_here_url)}{enable_upload_here url=$upload_here_url}{/if}>
 
 {if ALERT_MESSAGE && !$dialog}
 	<div id="sticky-alert"><?=ALERT_MESSAGE?></div>
