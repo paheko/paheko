@@ -400,9 +400,25 @@ class Users
 		$logged_user_id = $session->user()->id();
 		$ids = array_filter($ids, fn($a) => $a != $logged_user_id);
 
+		$conditions = [];
+		$conditions[] = $db->where('id', $ids);
+
+		// Only change categories of users that are in a "safe category" (category that has the same or lower permissions)
+		// This is to avoid being able to promote a user to have more rights than the current user
+		// But also to prevent moving an admin to a regular category
+		$conditions[] = $db->where('id_category', array_keys($safe_categories));
+		$conditions = implode(' AND ', $conditions);
+
+		if ($db->count(User::TABLE, $conditions) !== count($ids)) {
+			throw new UserException('Dans les membres sélectionnés, certains sont dans une catégorie ayant plus de droits que vous. Il n\'est pas possible de modifier leur catégorie.');
+		}
+
 		$db->update(User::TABLE,
-			['id_category' => $id_category, 'date_updated' => new \DateTime],
-			$db->where('id', $ids)
+			[
+				'id_category' => $id_category,
+				'date_updated' => new \DateTime
+			],
+			$conditions
 		);
 	}
 
