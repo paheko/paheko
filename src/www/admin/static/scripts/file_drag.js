@@ -36,7 +36,7 @@
 		p.appendChild(bg);
 
 		if (p === document.body) {
-			window.addEventListener('paste', (e) => {
+			window.addEventListener('paste', async (e) => {
 				const files = [...e.clipboardData.items]
 					.filter(isItemFile)
 					.map(item => item.getAsFile());
@@ -55,7 +55,7 @@
 
 					msg.innerText = 'Envoi de ' + name + '…';
 
-					var r = upload(upload_url, upload_token_name, upload_token_value, f, name);
+					var r = await upload(upload_url, upload_token_name, upload_token_value, f, name);
 
 					if (!r) {
 						break;
@@ -123,7 +123,7 @@
 					var f = files[i];
 					msg.innerText = 'Envoi de ' + f.name + '…';
 
-					var r = upload(upload_url, upload_token_name, upload_token_value, f);
+					var r = await upload(upload_url, upload_token_name, upload_token_value, f);
 
 					if (!r) {
 						break;
