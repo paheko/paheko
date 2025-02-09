@@ -1023,6 +1023,7 @@ class Functions
 			}
 
 			$csv = $sheets[$name] = new CSV_Custom($session, $name);
+			$csv->setMaxFileSize(1024*1024*2);
 
 			$csv->setColumns($params['columns']);
 

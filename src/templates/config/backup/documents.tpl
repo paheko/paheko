@@ -22,7 +22,7 @@
 		Sélectionner ici une sauvegarde (archive ZIP) des documents pour les restaurer.
 	</p>
 	<dl>
-		{input type="file" name="file" label="Archive ZIP à restaurer" no_size_limit=true required=true}
+		{input type="file" name="file" label="Archive ZIP à restaurer" max_file_size=0 required=true}
 	</dl>
 	<p class="alert block">
 		Les fichiers existants qui portent le même nom seront écrasés. Les documents existants qui ne figurent pas dans la sauvegarde ne seront pas affectés.

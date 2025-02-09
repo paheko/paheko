@@ -42,7 +42,7 @@ class CommonFunctions
 
 	static public function input(array $params)
 	{
-		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit', 'copy', 'suffix', 'prefix_title', 'prefix_help', 'prefix_required', 'datalist'];
+		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'max_file_size', 'copy', 'suffix', 'prefix_title', 'prefix_help', 'prefix_required', 'datalist'];
 
 		// Extract params and keep attributes separated
 		$attributes = array_diff_key($params, array_flip($params_list));
@@ -84,21 +84,24 @@ class CommonFunctions
 			$attributes['step'] = 1;
 			$attributes['aria-label'] = 'Color hue selector';
 		}
+		elseif ($type === 'file') {
+			$max_file_size ??= Utils::return_bytes(Utils::getMaxUploadSize());
 
-		if ($type == 'file' && isset($attributes['accept']) && $attributes['accept'] == 'csv') {
-			$attributes['accept'] = '.csv,text/csv,application/csv,.CSV';
-			$help = ($help ?? '') . PHP_EOL . 'Format accepté : CSV';
+			if (isset($attributes['accept']) && $attributes['accept'] == 'csv') {
+				$attributes['accept'] = '.csv,text/csv,application/csv,.CSV';
+				$help = ($help ?? '') . PHP_EOL . 'Format accepté : CSV';
 
-			if (Conversion::canConvertToCSV()) {
-				$help .= ', LibreOffice Calc (ODS), ou Excel (XLSX)';
-				$attributes['accept'] .= ',.ods,.ODS,application/vnd.oasis.opendocument.spreadsheet'
-					. ',.xls,.XLS,application/vnd.ms-excel'
-					. ',.xlsx,.XLSX,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+				if (Conversion::canConvertToCSV()) {
+					$help .= ', LibreOffice Calc (ODS), ou Excel (XLSX)';
+					$attributes['accept'] .= ',.ods,.ODS,application/vnd.oasis.opendocument.spreadsheet'
+						. ',.xls,.XLS,application/vnd.ms-excel'
+						. ',.xlsx,.XLSX,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+				}
 			}
-		}
-		elseif ($type == 'file' && isset($attributes['accept']) && $attributes['accept'] === 'image') {
-			$attributes['accept'] = '.jpg,.JPG,.JPEG,.jpeg,.webp,.WEBP,.gif,.GIF,.png,.PNG,.svg,image/svg+xml,image/png,image/gif,image/jpeg,image/webp';
-			$help = ($help ?? '') . PHP_EOL . 'Format accepté : images';
+			elseif (isset($attributes['accept']) && $attributes['accept'] === 'image') {
+				$attributes['accept'] = '.jpg,.JPG,.JPEG,.jpeg,.webp,.WEBP,.gif,.GIF,.png,.PNG,.svg,image/svg+xml,image/png,image/gif,image/jpeg,image/webp';
+				$help = ($help ?? '') . PHP_EOL . 'Format accepté : images';
+			}
 		}
 
 		$current_value = null;
@@ -419,8 +422,8 @@ class CommonFunctions
 			$input = sprintf('<input type="%s" %s %s />', $type, $attributes_string, $value);
 		}
 
-		if ($type === 'file') {
-			$input .= sprintf('<input type="hidden" name="MAX_FILE_SIZE" value="%d" id="f_maxsize" />', Utils::return_bytes(Utils::getMaxUploadSize()));
+		if ($type === 'file' && $max_file_size) {
+			$input .= sprintf('<input type="hidden" name="MAX_FILE_SIZE" value="%d" id="f_maxsize" />', $max_file_size);
 		}
 		elseif ($type === 'checkbox') {
 			$input = sprintf('<input type="hidden" name="%s" value="1" />', preg_replace('/(?=\[|$)/', '_present', $name, 1)) . $input;
@@ -470,8 +473,8 @@ class CommonFunctions
 		else {
 			$out .= sprintf('<dt>%s%s</dt><dd>%s</dd>', $label, $required_label, $input);
 
-			if ($type == 'file' && empty($params['no_size_limit'])) {
-				$out .= sprintf('<dd class="help"><small>Taille maximale : %s</small></dd>', Utils::format_bytes(Utils::getMaxUploadSize()));
+			if ($type === 'file' && $max_file_size) {
+				$out .= sprintf('<dd class="help"><small>Taille maximale : %s</small></dd>', Utils::format_bytes($max_file_size));
 			}
 
 			if (isset($help)) {

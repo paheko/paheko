@@ -18,6 +18,7 @@ class CSV_Custom
 	protected $modifier = null;
 	protected array $_default;
 	protected ?string $cache_key = null;
+	protected int $max_file_size = 1024*1024*10;
 
 	public function __construct(?Session $session = null, ?string $key = null)
 	{
@@ -75,6 +76,10 @@ class CSV_Custom
 
 		if (!$path) {
 			throw new UserException('Ce fichier n\'est pas dans un format accepté.');
+		}
+
+		if (filesize($path) > $this->max_file_size) {
+			throw new UserException(sprintf('Ce fichier CSV est trop gros (taille maximale : %s)', Utils::format_bytes($this->max_file_size)));
 		}
 
 		$this->csv = CSV::readAsArray($path);
@@ -320,6 +325,11 @@ class CSV_Custom
 	public function setMandatoryColumns(array $columns): void
 	{
 		$this->mandatory_columns = $columns;
+	}
+
+	public function setMaxFileSize(int $size)
+	{
+		$this->max_file_size = $size;
 	}
 
 	public function getColumnsString(): string
