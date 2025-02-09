@@ -187,8 +187,9 @@ class Template extends Smartyer
 		});
 
 		$this->register_function('enable_upload_here', function ($params) {
-			$csrf_key = 'upload_file_' . md5($params['path']);
-			$url = Utils::getLocalURL('!common/files/upload.php?p=' . rawurlencode($params['path']));
+			$url = $params['url'] ?? null;
+			$url ??= Utils::getLocalURL('!common/files/upload.php?p=' . rawurlencode($params['path']));
+			$csrf_key = 'upload_file';
 			return sprintf(' data-upload-url="%s" data-upload-token-value="%s" data-upload-token-name="%s" ',
 				htmlspecialchars($url),
 				Form::tokenGenerate($csrf_key),
