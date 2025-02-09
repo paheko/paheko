@@ -96,6 +96,10 @@ class CommonFunctions
 					. ',.xlsx,.XLSX,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 			}
 		}
+		elseif ($type == 'file' && isset($attributes['accept']) && $attributes['accept'] === 'image') {
+			$attributes['accept'] = '.jpg,.JPG,.JPEG,.jpeg,.webp,.WEBP,.gif,.GIF,.png,.PNG,.svg,image/svg+xml,image/png,image/gif,image/jpeg,image/webp';
+			$help = ($help ?? '') . PHP_EOL . 'Format accepté : images';
+		}
 
 		$current_value = null;
 		$current_value_from_user = false;
