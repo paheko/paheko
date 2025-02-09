@@ -400,7 +400,7 @@ class CSV_Custom
 			'columns'           => $this->columns,
 			'mandatory_columns' => $this->mandatory_columns,
 			'translation_table' => $this->translation,
-			'rows'              => $this->ready() ? $this->iterate() : null,
+			'rows'              => $this->ready() ? iterator_to_array($this->iterate()) : null,
 			'header'            => $this->getHeader(),
 		];
 	}

@@ -223,7 +223,7 @@ class Functions
 		$db = DB::getInstance();
 
 		if (isset($params['from'])) {
-			if (!is_array($params['from']) && !is_object($params['from'])) {
+			if (!is_array($params['from'])) {
 				throw new Brindille_Exception('"from" parameter is not an array');
 			}
 
