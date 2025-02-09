@@ -13,7 +13,7 @@ if (!File::canCreate($parent)) {
 	throw new UserException('Vous n\'avez pas le droit de créer de fichier ici.', 403);
 }
 
-$csrf_key = 'upload_file_' . md5($parent);
+$csrf_key = 'upload_file';
 
 $form->runIf('upload', function () use ($parent) {
 	Files::uploadMultiple($parent, 'file', Session::getInstance());
