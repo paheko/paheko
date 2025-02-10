@@ -114,7 +114,14 @@ class Functions
 		if ($parent && ($parent[2]['context'] ?? null) === 'modifier') {
 			$params = $tpl->_parseArguments($params_str, $line);
 
-			return sprintf('<?php return %s; ?>', $tpl->_exportArgument($params['value'] ?? 'null'));
+			if (!isset($params['value'])) {
+				$params = 'null';
+			}
+			else {
+				$params = $params['value'];
+			}
+
+			return sprintf('<?php return %s; ?>', $params);
 		}
 		// But not outside
 		elseif (!empty($params_str)) {
@@ -596,13 +603,11 @@ class Functions
 
 		$dump = htmlspecialchars(ErrorManager::dump($params));
 
+		// Show objects as arrays
+		$dump = str_replace('object(stdClass) (', 'array(', $dump);
+
 		// FIXME: only send back HTML when content-type is text/html, or send raw text
 		$out = sprintf('<pre style="background: yellow; color: black; padding: 5px; overflow: auto">%s</pre>', $dump);
-
-		if (!empty($params['stop'])) {
-			echo $out;
-			exit;
-		}
 
 		return $out;
 	}
@@ -1030,6 +1035,30 @@ class Functions
 			if (!empty($params['mandatory_columns']) && is_array($params['mandatory_columns'])) {
 				$csv->setMandatoryColumns($params['mandatory_columns']);
 			}
+
+			/* TODO: not perfect, also user-defined functions are still alpha
+			if (!empty($params['modifier'])) {
+				$mod_name = $params['modifier'];
+				$csv->setModifier(function ($row) use ($mod_name, $line, $ut) {
+					// Suppress any output
+					ob_start();
+					$row = (array) $row;
+					$row = $ut->callUserFunction('modifier', $mod_name, $row, $line);
+					$out = ob_get_clean();
+
+					// If there is any non empty input (eg. debug), display it
+					if (trim($out) !== '') {
+						echo $out;
+					}
+
+					if (!is_array($row)) {
+						throw new Brindille_Exception(sprintf('CSV modifier "%s" function returned "%s", but "array" expected', $mod_name, gettype($row)));
+					}
+
+					return (object)$row;
+				});
+			}
+			*/
 
 			if (!empty($_POST['csv_cancel'])) {
 				$csv->clear();
