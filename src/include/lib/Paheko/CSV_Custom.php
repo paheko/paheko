@@ -115,7 +115,7 @@ class CSV_Custom
 		}
 
 		if (!isset($this->_default)) {
-			$this->_default = array_fill_keys(array_flip($this->translation), null);
+			$this->_default = array_fill_keys($this->translation, null);
 		}
 
 		$row = $this->_default;
