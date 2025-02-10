@@ -408,17 +408,16 @@ class Plugin extends Entity
 				define('Paheko\PLUGIN_ADMIN_URL', ADMIN_URL .'p/' . $this->name . '/');
 				define('Paheko\PLUGIN_QSP', '?');
 
-				$tpl = Template::getInstance();
-
 				if ($is_private) {
 					require ROOT . '/www/admin/_inc.php';
+					$tpl = Template::getInstance();
 					$tpl->assign('current', 'plugin_' . $this->name);
-				}
 
-				$tpl->assign('plugin', $this);
-				$tpl->assign('plugin_url', \Paheko\PLUGIN_URL);
-				$tpl->assign('plugin_admin_url', \Paheko\PLUGIN_ADMIN_URL);
-				$tpl->assign('plugin_root', \Paheko\PLUGIN_ROOT);
+					$tpl->assign('plugin', $this);
+					$tpl->assign('plugin_url', \Paheko\PLUGIN_URL);
+					$tpl->assign('plugin_admin_url', \Paheko\PLUGIN_ADMIN_URL);
+					$tpl->assign('plugin_root', \Paheko\PLUGIN_ROOT);
+				}
 			}
 
 			$plugin = $this;
