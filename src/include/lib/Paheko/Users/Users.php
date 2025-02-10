@@ -719,4 +719,22 @@ class Users
 
 		return intval($r) + 1;
 	}
+
+	static public function getWithLoginAndPassword(string $login, string $password): ?User
+	{
+		$db = DB::getInstance();
+		$login_field = $db->quoteIdentifier(DynamicFields::getLoginField());
+		$sql = sprintf('SELECT * FROM @TABLE WHERE %s = ? LIMIT 1;', $login_field);
+		$user = EM::findOne(User::class, $sql, $login);
+
+		if (!$user || !$user->password) {
+			return null;
+		}
+
+		if (!password_verify($password, $user->password)) {
+			return null;
+		}
+
+		return $user;
+	}
 }
