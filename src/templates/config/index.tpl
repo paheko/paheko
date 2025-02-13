@@ -17,10 +17,12 @@
 		<dl>
 			<dt>Version installée</dt>
 			<dd>Paheko {$paheko_version}</dd>
+			{if $donate_url}
 			<dd class="help">
 				Le développement et le support de Paheko ne sont possibles que grâce à votre soutien&nbsp;!<br />
-				{linkbutton href="https://paheko.cloud/don/" label="Faire un don pour soutenir le développement" target="_blank" shape="export"} :-)
+				{linkbutton href=$donate_url label="Faire un don pour soutenir le développement" target="_blank" shape="export"} :-)
 			</dd>
+			{/if}
 			{if $new_version}
 			<dd><p class="block alert">
 				Une nouvelle version <strong>{$new_version}</strong> est disponible !<br />

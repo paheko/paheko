@@ -234,6 +234,7 @@ static $default_config = [
 	'WOPI_DISCOVERY_URL'    => null,
 	'SQLITE_JOURNAL_MODE'   => 'TRUNCATE',
 	'LOCAL_ADDRESSES_ROOT'  => null,
+	'DONATE_URL'            => 'https://paheko.cloud/don/',
 ];
 
 foreach ($default_config as $const => $value)
