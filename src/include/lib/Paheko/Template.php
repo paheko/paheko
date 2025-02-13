@@ -16,6 +16,7 @@ use Paheko\Files\Files;
 
 class Template extends Smartyer
 {
+	protected bool $init = false;
 	static protected $_instance = null;
 
 	static public function getInstance()
@@ -61,6 +62,12 @@ class Template extends Smartyer
 		return $this;
 	}
 
+	public function fetch(?string $template = null): string
+	{
+		$this->init();
+		return parent::fetch($template);
+	}
+
 	public function PDF(?string $template = null, ?string $title = null)
 	{
 		$out = $this->fetch($template);
@@ -91,6 +98,13 @@ class Template extends Smartyer
 		// For included templates just return a new instance,
 		// the singleton is only to get the 'master' Template object
 		else {
+			return;
+		}
+	}
+
+	protected function init(): void
+	{
+		if ($this->init) {
 			return;
 		}
 
@@ -239,6 +253,8 @@ class Template extends Smartyer
 		$this->register_modifier('money', [CommonModifiers::class, 'money_html']);
 		$this->register_modifier('money_currency', [CommonModifiers::class, 'money_currency_html']);
 		$this->register_modifier('money_currency_text', [CommonModifiers::class, 'money_currency']);
+
+		$this->init = true;
 	}
 
 
