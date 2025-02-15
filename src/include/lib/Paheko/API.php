@@ -659,8 +659,14 @@ class API
 				strtok($p2, '/');
 				$type = strtok('.');
 				$format = strtok('');
-				Export::export($year, $format, $type);
-				return null;
+
+				try {
+					Export::export($year, $format, $type);
+					return null;
+				}
+				catch (\InvalidArgumentException $e) {
+					throw new APIException($e->getMessage(), 400, $e);
+				}
 			}
 			elseif ($p2 === 'account/journal') {
 				$a = $year->chart()->accounts();
