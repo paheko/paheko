@@ -700,7 +700,21 @@ class Module extends Entity
 
 		unset($signal);
 
-		$ut = $this->template($path);
+		try {
+			$ut = $this->template($path);
+		}
+		catch (\InvalidArgumentException $e) {
+			try {
+				// In case template path does not exist, or is a directory,
+				// we expect 404.html to exist
+				$ut = $this->template('404.html');
+			}
+			catch (\InvalidArgumentException $e) {
+				// Fallback if 404.html does not exist
+				throw new UserException('Page non trouvée. De plus, le squelette "404.html" n\'existe pas.', 404);
+			}
+		}
+
 		$ut->assignArray($params);
 		$content = $ut->fetch();
 		$type = $ut->getContentType();

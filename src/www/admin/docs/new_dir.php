@@ -25,6 +25,8 @@ $form->runIf('create', function () use ($session, $parent) {
 		throw new UserException('Vous n\'avez pas le droit de créer de répertoire ici.', 403);
 	}
 
+	// We actually have to use Files::mkdir here, as $parent->mkdir cannot
+	// work if $parent path does not exist currently
 	$dir = Files::mkdir($path);
 
 	$url = '!docs/?path=' . $dir->path;
