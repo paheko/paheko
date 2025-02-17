@@ -172,7 +172,7 @@ class Accounts
 		}
 
 		if (!empty($criterias['codes']) && !empty($criterias['types'])) {
-			$where .= ' AND ';
+			$where .= ' OR ';
 		}
 
 		// Build LIKE condition for codes
@@ -198,18 +198,15 @@ class Accounts
 	 */
 	public function listCommonGrouped(array $criterias): array
 	{
+		// If we want all types, then we will get used or bookmarked accounts in common types
+		// and only bookmarked accounts for other types, grouped in "Others"
 		$types = $criterias['types'] ?? null;
 		$codes = $criterias['codes'] ?? null;
 
-		if (empty($criterias['types'])) {
-			// If we want all types, then we will get used or bookmarked accounts in common types
-			// and only bookmarked accounts for other types, grouped in "Others"
-			$criterias['types'] = Account::COMMON_TYPES;
-		}
-
 		$out = [];
+		$types = $criterias['types'] ?? Account::COMMON_TYPES;
 
-		foreach ($criterias['types'] as $type) {
+		foreach ($types as $type) {
 			$out[$type] = (object) [
 				'label'    => Account::TYPES_NAMES[$type],
 				'type'     => $type,
@@ -217,20 +214,18 @@ class Accounts
 			];
 		}
 
-		if (null === $types) {
-			$out[0] = (object) [
-				'label'    => 'Autres',
-				'type'     => 0,
-				'accounts' => [],
-			];
-		}
+		$out[0] = (object) [
+			'label'    => 'Autres',
+			'type'     => 0,
+			'accounts' => [],
+		];
 
 		$db = $this->em->DB();
 		$where = $this->getListFilterClause($criterias, 'a.');
 
 		$sql = sprintf('SELECT a.* FROM @TABLE a
 			LEFT JOIN acc_transactions_lines b ON b.id_account = a.id
-			WHERE a.id_chart = %d AND %s AND (a.bookmark = 1 OR b.id IS NOT NULL)
+			WHERE a.id_chart = %d AND (%s) AND (a.bookmark = 1 OR b.id IS NOT NULL)
 			GROUP BY a.id
 			ORDER BY type, code COLLATE NOCASE;',
 			$this->chart_id,
@@ -240,10 +235,11 @@ class Accounts
 		$query = $this->em->iterate($sql);
 
 		foreach ($query as $row) {
-			$t = in_array($row->type, $criterias['types']) ? $row->type : 0;
+			$t = array_key_exists($row->type, $types) ? $row->type : 0;
 			$out[$t]->accounts[] = $row;
 		}
 
+		// Remove empty types from return
 		if (!empty($criterias['codes'])) {
 			foreach ($out as $key => $v) {
 				if (!count($v->accounts)) {
