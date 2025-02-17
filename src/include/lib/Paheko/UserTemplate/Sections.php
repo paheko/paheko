@@ -687,7 +687,7 @@ class Sections
 
 		$list = new DynamicList($columns, $table);
 
-		static $reserved_keywords = ['max', 'order', 'desc', 'debug', 'explain', 'schema', 'columns', 'select', 'where', 'module', 'disable_user_ordering', 'check', 'export', 'group', 'count'];
+		static $reserved_keywords = ['max', 'order', 'desc', 'debug', 'explain', 'schema', 'columns', 'select', 'where', 'module', 'disable_user_ordering', 'disable_user_sort', 'check', 'export', 'group', 'count'];
 
 		foreach ($params as $key => $value) {
 			if ($key[0] == ':') {
@@ -752,7 +752,8 @@ class Sections
 		// Try to create an index if required
 		self::_createModuleIndexes($table, $where);
 
-		if (empty($params['disable_user_ordering'])) {
+		if (empty($params['disable_user_ordering'])
+			&& empty($params['disable_user_sort'])) {
 			$list->loadFromQueryString();
 		}
 
@@ -787,7 +788,7 @@ class Sections
 
 		$tpl->assign(compact('list'));
 		$tpl->assign('check', $params['check'] ?? false);
-		$tpl->assign('disable_user_ordering', $params['disable_user_ordering'] ?? false);
+		$tpl->assign('disable_user_sort', boolval($params['disable_user_sort'] ?? ($params['disable_user_ordering'] ?? false)));
 		$tpl->display();
 
 		yield from $i;
