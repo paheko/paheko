@@ -1204,7 +1204,9 @@ class Utils
 			header(sprintf('Etag: "%s"', $hash), true);
 		}
 
-		if (($etag && $etag === $hash) || ($last_modified && $last_modified >= $last_change)) {
+		// Stop here if nothing changed
+		if (($etag && $hash && $etag === $hash)
+			|| ($last_modified && $last_change && $last_modified >= $last_change)) {
 			http_response_code(304);
 			exit;
 		}

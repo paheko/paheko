@@ -46,10 +46,11 @@ $filter_all_url = Utils::getModifiedURL('?filter=all');
 $filter_bookmarks_url = Utils::getModifiedURL('?filter=bookmarks');
 
 // Cache the page until the charts have changed
-$last_change = Config::getInstance()->get('last_chart_change') ?: time();
+$last_change = Config::getInstance()->get('last_chart_change');
 $params = $_GET;
 $params['filter'] = $filter;
-$hash = sha1(http_build_query($params));
+
+$hash = sha1(http_build_query($params) . $last_change);
 
 // This method will exit here if the list has already been cached by the client
 Utils::HTTPCache($hash, null, 1);
