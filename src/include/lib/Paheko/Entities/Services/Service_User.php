@@ -5,6 +5,7 @@ namespace Paheko\Entities\Services;
 use Paheko\DB;
 use Paheko\Entity;
 use Paheko\Form;
+use Paheko\UserException;
 use Paheko\ValidationException;
 use Paheko\Services\Fees;
 use Paheko\Services\Services;
