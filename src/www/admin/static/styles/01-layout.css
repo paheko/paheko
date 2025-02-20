@@ -28,6 +28,10 @@ html.dark main {
     filter: invert(100%) hue-rotate(180deg);
 }
 
+html.dark main img, html.dark main video {
+    filter: invert(100%) hue-rotate(180deg);
+}
+
 /* End of dark theme specifics */
 
 html {
