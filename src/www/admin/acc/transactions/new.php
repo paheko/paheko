@@ -131,6 +131,8 @@ $form->runIf('save', function () use ($transaction, $session, $payoff) {
 		$transaction->importFromNewForm();
 	}
 
+	$transaction->validateUsingConfig(Config::getInstance());
+
 	$transaction->id_creator = $session->getUser()->id;
 	$transaction->save();
 	$transaction->saveLinks();

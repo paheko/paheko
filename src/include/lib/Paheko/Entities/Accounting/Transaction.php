@@ -742,8 +742,6 @@ class Transaction extends Entity
 
 		$chart_id = $db->firstColumn('SELECT id_chart FROM acc_years WHERE id = ?;', $this->id_year);
 
-		$analytical_mandatory = Config::getInstance()->analytical_mandatory;
-
 		foreach ($lines as $k => $line) {
 			$k = $k+1;
 			$this->assert(!empty($line->id_account), sprintf('Ligne %d: aucun compte n\'est défini', $k));
@@ -811,6 +809,30 @@ class Transaction extends Entity
 		$this->importForm($source);
 	}
 
+	/**
+	 * This is only supposed to be used when creating / editing a transaction
+	 * directly by the user (eg. transaction form), and not in other places.
+	 */
+	public function validateUsingConfig(Config $config): void
+	{
+		// Check for analytical projects here, and not in selfCheck
+		// or we won't be able to create project-less transactions
+		// from plugins etc.
+		if (self::TYPE_ADVANCED === $this->type
+			&& $config->analytical_mandatory) {
+			$has_project = false;
+
+			foreach ($this->getLines() as $line) {
+				if ($line->id_project) {
+					$has_project = true;
+					break;
+				}
+			}
+
+			$this->assert($has_project, 'Aucun projet analytique n\'a été choisi, hors l\'affectation d\'un projet est obligatoire pour toutes les écritures.');
+		}
+	}
+
 	public function importForm(?array $source = null)
 	{
 		$source ??= $_POST;
@@ -829,24 +851,6 @@ class Transaction extends Entity
 
 		if (isset($source['type'])) {
 			$this->set('type', (int)$source['type']);
-		}
-
-		// Check for analytical projects here, and not in selfCheck
-		// or we won't be able to create project-less transactions
-		// from plugins etc.
-		if (self::TYPE_ADVANCED === $this->type
-			&& Config::getInstance()->analytical_mandatory
-			&& isset($source['lines'])
-			&& is_array($source['lines'])) {
-			$has_project = false;
-
-			foreach ($source['lines'] as $line) {
-				if (!empty($line['id_project'])) {
-					$has_project = true;
-				}
-			}
-
-			$this->assert($has_project, 'Aucun projet analytique n\'a été choisi, hors l\'affectation d\'un projet est obligatoire pour toutes les écritures.');
 		}
 
 		// Simple two-lines transaction
