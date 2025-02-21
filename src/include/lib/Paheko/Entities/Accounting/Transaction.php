@@ -829,7 +829,7 @@ class Transaction extends Entity
 				}
 			}
 
-			$this->assert($has_project, 'Aucun projet analytique n\'a été choisi, hors l\'affectation d\'un projet est obligatoire pour toutes les écritures.');
+			$this->assert($has_project, 'Aucun projet analytique n\'a été choisi, mais l\'affectation d\'un projet est obligatoire pour toutes les écritures.');
 		}
 	}
 
