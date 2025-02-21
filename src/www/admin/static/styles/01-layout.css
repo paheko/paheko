@@ -20,7 +20,7 @@
 
 /* Dark colors */
 html.dark body {
-    background: linear-gradient(135deg, #222 10%, #000);
+    background-color: #222;
 }
 
 /* Very simple, but works better than making sure there are no "fixed" colors anywhere */
