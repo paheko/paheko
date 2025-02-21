@@ -214,6 +214,58 @@ table.statement tfoot td, table.statement tfoot th {
     background: rgba(var(--gSecondColor), 0.2);
 }
 
+section.years article {
+    margin-bottom: 1em;
+    border: 1px solid rgba(var(--gSecondColor), 0.5);
+    border-radius: .5em;
+    padding: 1em;
+}
+
+section.years article header {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+}
+
+section.years article header h3 {
+    font-weight: normal;
+    font-size: 1em;
+    color: var(--gBorderColor);
+}
+
+section.years article header h2 .tag {
+    font-size: 1rem;
+    vertical-align: middle;
+    font-weight: normal;
+    margin-left: 1em;
+}
+
+section.years article header .details {
+    text-align: right;
+}
+
+section.years article header .chart a {
+    font-size: .9em;
+    color: var(--gBorderColor);
+}
+
+section.years article .reports {
+    margin-top: .5em;
+}
+
+section.years article .reports a {
+    margin-left: 0;
+}
+
+section.years article .reports {
+    color: var(--gLightBorderColor);
+}
+
+section.years article .actions {
+    margin: 0;
+    margin-top: .5em;
+}
+
 @media handheld, screen and (max-width: 980px) {
     .transaction-details-container {
         grid-template-columns: 1fr;
