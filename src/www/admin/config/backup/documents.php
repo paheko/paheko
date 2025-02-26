@@ -9,17 +9,23 @@ use Paheko\Users\Session;
 require_once __DIR__ . '/../_inc.php';
 
 $form->runIf('restore', function () {
+	$target = $_POST['target'] ?? null;
+
 	try {
+		if (!$target) {
+			throw new UserException('Erreur à la décompression du fichier : javascript doit être activé.');
+		}
+
 		// Decompress (inflate) raw data
 		if (empty($_FILES['file1']['error']) && !empty($_FILES['file1']['tmp_name']) && f('compressed')) {
 			$f = $_FILES['file1']['tmp_name'];
 			file_put_contents($f, gzinflate(file_get_contents($f), 1024*1024*1024));
 		}
 
-		Files::upload(Utils::dirname(f('target')), 'file1', Session::getInstance());
+		Files::upload(Utils::dirname($target), 'file1', Session::getInstance());
 	}
 	catch (UserException $e) {
-		die(json_encode(['success' => false, 'error' => f('target') . ': '. $e->getMessage()]));
+		die(json_encode(['success' => false, 'error' => $target . ': '. $e->getMessage()]));
 	}
 
 	die(json_encode(['success' => true, 'error' => null]));
