@@ -162,6 +162,9 @@ class CommonFunctions
 			if ($current_value == $value && $current_value !== null) {
 				$attributes['checked'] = 'checked';
 			}
+			elseif (array_key_exists('checked', $attributes) && !$attributes['checked']) {
+				unset($attributes['checked']);
+			}
 
 			$attributes['value'] = $value;
 		}
