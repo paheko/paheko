@@ -88,7 +88,7 @@
 					{/linkmenu}
 				{/if}
 			{/if}
-			{*linkbutton label="Télécharger" shape="download" href="download.php?year=%d"|args:$year.id target="_dialog"*}
+			{linkbutton label="Télécharger" shape="download" href="download.php?year=%d"|args:$year.id target="_dialog"}
 			{linkbutton label="Exporter" shape="export" href="export.php?year=%d"|args:$year.id target="_dialog"}
 		</p>
 		{if !$year.nb_transactions}

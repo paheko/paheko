@@ -13,6 +13,7 @@ use Paheko\ValidationException;
 use Paheko\Accounting\Accounts;
 use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
+use Paheko\Users\Session;
 
 class Year extends Entity
 {
@@ -199,6 +200,21 @@ class Year extends Entity
 		$db->preparedQuery('DELETE FROM acc_transactions WHERE id_year = ?;', $this->id());
 
 		return parent::delete();
+	}
+
+	public function zipAllAttachments(?string $target, ?Session $session): void
+	{
+		$db = DB::getInstance();
+		$dirs = $db->getAssoc('SELECT t.id, ? || \'/\' || t.id
+			FROM acc_transactions t
+			INNER JOIN acc_transactions_files f ON f.id_transaction = t.id
+			WHERE t.id_year = ?
+			GROUP BY t.id;',
+			File::CONTEXT_TRANSACTION,
+			$this->id()
+		);
+
+		Files::zip($dirs, $target, $session, $this->label .' - Fichiers joints');
 	}
 
 	public function countTransactions(): int
