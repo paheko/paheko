@@ -8,13 +8,6 @@ use Paheko\Accounting\Export;
 	<h3>{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short}</h3>
 </nav>
 
-<nav class="tabs">
-	<ul>
-		<li class="current"><a href="{$admin_url}acc/years/import.php?year={$year.id}">Import</a></li>
-		<li><a href="{$admin_url}acc/years/export.php?year={$year.id}">Export</a></li>
-	</ul>
-</nav>
-
 {form_errors}
 
 {if $type_name && $csv->ready()}
