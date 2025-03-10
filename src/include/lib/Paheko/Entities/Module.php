@@ -604,7 +604,7 @@ class Module extends Entity
 
 	public function template(string $file)
 	{
-		if ($file == self::CONFIG_FILE) {
+		if ($file === self::CONFIG_FILE) {
 			Session::getInstance()->requireAccess(Session::SECTION_CONFIG, Session::ACCESS_ADMIN);
 		}
 
