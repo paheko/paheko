@@ -1591,6 +1591,11 @@ class Utils
 		return $code;
 	}
 
+	static public function canDoPDF(): bool
+	{
+		return PDF_COMMAND || Plugins::hasSignal('pdf.create');
+	}
+
 	static protected function getPrinceCommand(): string
 	{
 		$org_name = Config::getInstance()->org_name;
