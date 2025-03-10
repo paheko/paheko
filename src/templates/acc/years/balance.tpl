@@ -23,6 +23,10 @@
 	{/if}
 {/if}
 
+<div class="help block">
+	<p>La balance d'ouverture permet de reporter en début d'exercice les soldes des comptes provenant d'un exercice précédent.</p>
+	<p>Si votre association commence son premier exercice, ce formulaire ne doit pas être utilisé.</p>
+</div>
 
 <form method="post" action="{$self_url}">
 
