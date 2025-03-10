@@ -394,8 +394,8 @@ class Files
 
 	/**
 	 * Creates a ZIP file archive from multiple paths
-	 * @param null|string $target Target file name, if left NULL, then will be sent to browser
 	 * @param  array $files List of file paths to append to ZIP file
+	 * @param null|string $target Target file name, if left NULL, then will be sent to browser
 	 * @param  Session $session Logged-in user session, if set access rights to the path will be checked,
 	 * if left NULL, then no check will be made (!).
 	 */
