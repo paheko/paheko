@@ -6,7 +6,8 @@
 	<fieldset>
 		<legend>Verrouiller un exercice</legend>
 		<h3 class="warning">Verrouiller l'exercice « {$year.label} » ?</h3>
-		<p class="help">L'exercice ne pourra plus être modifié, aucune écriture ne pourra être modifiée ou supprimée. Mais il pourra être déverrouillé à tout moment. Cette action est utile pour préparer la clôture définitive.</p>
+		<p class="alert block">L'exercice ne pourra plus être modifié, aucune écriture ne pourra être modifiée ou supprimée. Mais il pourra être déverrouillé à tout moment.</p>
+		<p class="help">Le verrouillage de préparer la clôture de l'exercice, en s'assurant qu'il n'est pas modifié par erreur si on travaille sur plusieurs exercices en même temps.</p>
 	</fieldset>
 	<p class="submit">
 		{csrf_field key=$csrf_key}

@@ -122,10 +122,6 @@
 	<p class="submit">
 		{if null === $previous_year}
 			{button type="submit" name="next" label="Continuer" shape="right" class="main"}
-			— ou —
-			{linkbutton shape="reset" href="!acc/years/" label="Passer cette étape"}
-			<br />
-			<i class="help">(Il sera toujours possible de reprendre la balance d'ouverture plus tard.)</i>
 		{else}
 			{csrf_field key=$csrf_key}
 			{if $previous_year}

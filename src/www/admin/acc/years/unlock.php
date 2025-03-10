@@ -6,6 +6,8 @@ use Paheko\Users\Session;
 
 require_once __DIR__ . '/../_inc.php';
 
+$session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
+
 $year = Years::get((int)qg('id'));
 
 if (!$year) {

@@ -257,6 +257,18 @@ section.years article .reports a {
     margin-left: 0;
 }
 
+section.years article .links {
+    margin: .5em 0;
+}
+
+section.years article .links a {
+    background: rgba(var(--gSecondColor), 0.2);
+    padding: .2em .4em;
+    border-radius: .5em;
+    display: inline-block;
+    color: rgb(var(--gTextColor));
+}
+
 section.years article .reports {
     color: var(--gLightBorderColor);
 }
@@ -264,6 +276,14 @@ section.years article .reports {
 section.years article .actions {
     margin: 0;
     margin-top: .5em;
+}
+
+section.years article p.main a {
+    margin: 0;
+}
+
+section.years article p.main {
+    margin-top: .8em;
 }
 
 @media handheld, screen and (max-width: 980px) {

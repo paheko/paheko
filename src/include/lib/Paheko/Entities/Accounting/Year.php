@@ -9,6 +9,7 @@ use Paheko\Entity;
 use Paheko\Log;
 use Paheko\UserException;
 use Paheko\Utils;
+use Paheko\ValidationException;
 use Paheko\Accounting\Accounts;
 use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
@@ -159,15 +160,28 @@ class Year extends Entity
 
 	/**
 	 * Splits an accounting year between the current year and another one, at a given date
-	 * Any transaction after the given date will be moved to the target year.
+	 * Any transaction between the given dates will be moved to the target year.
 	 */
-	public function split(\DateTime $date, Year $target): void
+	public function split(\DateTime $start, \DateTime $end, Year $target): void
 	{
 		$this->assertCanBeModified();
 		$target->assertCanBeModified();
 
-		DB::getInstance()->preparedQuery('UPDATE acc_transactions SET id_year = ? WHERE id_year = ? AND date > ?;',
-			$target->id(), $this->id(), $date->format('Y-m-d'));
+		if ($start < $target->start_date || $start > $target->end_date) {
+			throw new ValidationException('La date de début ne correspond pas à l\'exercice cible choisi.');
+		}
+		elseif ($end < $target->start_date || $end > $target->end_date) {
+			throw new ValidationException('La date de fin ne correspond pas à l\'exercice cible choisi.');
+		}
+
+		DB::getInstance()->preparedQuery('UPDATE acc_transactions
+			SET id_year = ?
+			WHERE id_year = ? AND date >= ? AND date <= ?;',
+			$target->id(),
+			$this->id(),
+			$start->format('Y-m-d'),
+			$end->format('Y-m-d')
+		);
 	}
 
 	public function delete(): bool

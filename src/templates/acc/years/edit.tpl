@@ -8,8 +8,6 @@
 		<legend>Modifier un exercice</legend>
 		<dl>
 			{input type="text" label="Libellé" name="label" source=$year required=true}
-			{input type="checkbox" label="Verrouiller cet exercice" source=$year name="locked" value=1 default=$year->isLocked()}
-			<dd class="help">Si cette case est cochée, l'exercice ne pourra pas être supprimé, et ses écritures ne pourront pas être modifiées ni supprimées. Il faudra déverrouiller l'exercice avant toute modification. Cela permet de préparer la clôture de l'exercice, en s'assurant qu'il n'est pas modifié par erreur si on travaille sur plusieurs exercices en même temps.</dd>
 		</dl>
 	</fieldset>
 	<fieldset>
@@ -17,30 +15,14 @@
 		<dl>
 			{input type="date" label="Début de l'exercice" name="start_date" source=$year required=true}
 			{input type="date" label="Fin de l'exercice" name="end_date" source=$year required=true}
-			{input type="checkbox" label="Déplacer les écritures postérieures dans un autre exercice" value=1 name="split"}
-		</dl>
-		<dl class="split_year">
-			<dd class="help">En cochant cette case, toute écriture située <em>après</em> la date de fin indiquée ci-dessus sera déplacée dans l'exercice sélectionné ci-dessous.</dd>
-			{input type="select" name="split_year" options=$split_years label="Nouvel exercice à utiliser" help="Les écritures situées après la date de fin seront transférées dans cet exercice"}
 		</dl>
 	</fieldset>
 
 	<p class="submit">
-		{csrf_field key="acc_years_edit_%s"|args:$year.id}
+		{csrf_field key=$csrf_key}
 		{button type="submit" name="edit" label="Enregistrer" shape="right" class="main"}
 	</p>
 
 </form>
-
-{literal}
-<script type="text/javascript">
-let split = $('#f_split_1');
-g.toggle('.split_year', split.checked);
-
-split.onchange = () => {
-	g.toggle('.split_year', split.checked);
-};
-</script>
-{/literal}
 
 {include file="_foot.tpl"}

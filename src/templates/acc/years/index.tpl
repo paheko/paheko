@@ -3,10 +3,10 @@
 
 <nav class="tabs">
 	<aside>
+		{linkbutton shape="search" href="!acc/search.php" label="Recherche"}
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 			{linkbutton shape="plus" href="!acc/years/new.php" label="Nouvel exercice"}
 		{/if}
-		{linkbutton shape="search" href="!acc/search.php" label="Recherche"}
 	</aside>
 	<ul>
 		<li class="current"><a href="{$self_url}">Exercices</a></li>
@@ -21,10 +21,6 @@
 	<p class="block confirm">
 		L'import s'est bien déroulé.
 	</p>
-{else if $_GET.msg == 'REOPEN'}
-	<p class="block confirm">
-		L'exercice sélectionné a été réouvert.
-	</p>
 {elseif $_GET.msg == 'WELCOME'}
 	<div class="block confirm">
 		<h3>Votre premier exercice a été créé&nbsp;!</h3>
@@ -35,11 +31,6 @@
 	<p class="block error">
 		Il n'existe aucun exercice ouvert.
 		Merci d'en créer un pour pouvoir saisir des écritures.
-	</p>
-{elseif $_GET.msg == 'UPDATE_FEES'}
-	<p class="block error">
-		Des tarifs d'activité étaient associés à l'ancien exercice clôturé.
-		Ces tarifs ont été déconnectés de la comptabilité à cause du changement de plan comptable, il vous faudra les reconnecter manuellement au nouvel exercice.
 	</p>
 {/if}
 
@@ -69,22 +60,29 @@
 			</div>
 			<div class="details">
 				<p class="chart">{link href="../charts/accounts/?id=%d"|args:$year.id_chart label=$year.chart_name}</p>
-				<p class="count">{$year.nb_transactions} écritures</p>
+				<p class="count">
+					{$year.nb_transactions} écritures
+				</p>
 			</div>
 		</header>
+		{if $year.nb_fees && $year.status === Year::OPEN}
+		<p class="links">
+			<a href="links.php?id={$year.id}">{{%n tarif d'activité est lié à cet exercice}{%n tarifs d'activité sont liés à cette exercice} n=$year.nb_fees}</a>
+		</p>
+		{/if}
 		<p class="actions">
 			{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 				{if $year.status === Year::CLOSED}
 					{linkbutton label="Ré-ouvrir" shape="reset" href="reopen.php?id=%d"|args:$year.id target="_dialog"}
 				{elseif $year.status === Year::LOCKED}
-					{linkbutton label="Déverrouiller" shape="unlock" href="edit.php?id=%d"|args:$year.id target="_dialog"}
+					{linkbutton label="Déverrouiller" shape="unlock" href="unlock.php?id=%d"|args:$year.id target="_dialog"}
 				{else}
-					{linkmenu label="Modifier…" shape="edit"}
+					{linkmenu label="Gérer…" shape="edit"}
 						{linkbutton label="Modifier" shape="edit" href="edit.php?id=%d"|args:$year.id target="_dialog"}
 						{linkbutton label="Balance d'ouverture" shape="money" href="balance.php?id=%d"|args:$year.id}
 						{linkbutton label="Importer" shape="import" href="import.php?year=%d"|args:$year.id}
-						{*linkbutton label="Déplacer des écritures" shape="reload" href="lock.php?id=%d"|args:$year.id target="_dialog"*}
-						{*linkbutton label="Verrouiller temporairement" shape="lock" href="lock.php?id=%d"|args:$year.id target="_dialog"*}
+						{linkbutton label="Déplacer des écritures" shape="reload" href="split.php?id=%d"|args:$year.id target="_dialog"}
+						{linkbutton label="Verrouiller temporairement" shape="lock" href="lock.php?id=%d"|args:$year.id target="_dialog"}
 						{linkbutton label="Clôturer définitivement" shape="delete" href="close.php?id=%d"|args:$year.id target="_dialog"}
 						{linkbutton label="Supprimer" shape="trash" href="delete.php?id=%d"|args:$year.id target="_dialog"}
 					{/linkmenu}
@@ -93,14 +91,27 @@
 			{*linkbutton label="Télécharger" shape="download" href="download.php?year=%d"|args:$year.id target="_dialog"*}
 			{linkbutton label="Exporter" shape="export" href="export.php?year=%d"|args:$year.id}
 		</p>
-		<p class="reports">
-			{linkbutton href="!acc/reports/graphs.php?year=%d"|args:$year.id label="Graphiques"}
-			{linkbutton href="!acc/reports/trial_balance.php?year=%d"|args:$year.id label="Balance générale"}
-			{linkbutton href="!acc/reports/journal.php?year=%d"|args:$year.id label="Journal général"}
-			{linkbutton href="!acc/reports/ledger.php?year=%d"|args:$year.id label="Grand livre"}
-			{linkbutton href="!acc/reports/statement.php?year=%d"|args:$year.id label="Compte de résultat"}
-			{linkbutton href="!acc/reports/balance_sheet.php?year=%d"|args:$year.id label="Bilan"}
-		</p>
+		{if !$year.nb_transactions}
+			<p class="main">
+				{linkbutton shape="right" label="Renseigner la balance d'ouverture" href="balance.php?id=%d"|args:$year.id}
+			</p>
+		{else}
+			<p class="reports">
+				{linkbutton href="!acc/reports/graphs.php?year=%d"|args:$year.id label="Graphiques"}
+				{linkbutton href="!acc/reports/trial_balance.php?year=%d"|args:$year.id label="Balance générale"}
+				{linkbutton href="!acc/reports/journal.php?year=%d"|args:$year.id label="Journal général"}
+				{linkbutton href="!acc/reports/ledger.php?year=%d"|args:$year.id label="Grand livre"}
+				{linkbutton href="!acc/reports/statement.php?year=%d"|args:$year.id label="Compte de résultat"}
+				{linkbutton href="!acc/reports/balance_sheet.php?year=%d"|args:$year.id label="Bilan"}
+			</p>
+		{/if}
+		{if $year.nb_fees && $year.status !== Year::OPEN}
+			<p class="alert block">
+				Des tarifs d'activité sont liés à cet exercice.<br />
+				Pour pouvoir inscrire des membres à ces tarifs, il est nécessaire de les modifier pour les lier à un autre exercice ouvert.<br />
+				{linkbutton shape="menu" href="links.php?id=%d"|args:$year.id label="Liste des tarifs liés à cet exercice"}
+			</p>
+		{/if}
 	</article>
 {/foreach}
 </section>

@@ -28,7 +28,7 @@ $form->runIf('reopen', function () use ($year) {
 	}
 
 	$year->reopen(Session::getUserId());
-}, $csrf_key, '!acc/years/?msg=REOPEN');
+}, $csrf_key, '!acc/years/');
 
 $tpl->assign(compact('year', 'csrf_key'));
 
