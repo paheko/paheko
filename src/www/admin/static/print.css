@@ -6,6 +6,16 @@
     size: A4 landscape;
 }
 
+@page {
+    @bottom {
+        text-align: center;
+        content: counter(page) " / " counter(pages);
+        font-size: 9pt;
+        font-family: sans-serif;
+        margin-bottom: .5cm;
+    }
+}
+
 .pdf[data-prefer-landscape] {
     page: landscape;
 }
