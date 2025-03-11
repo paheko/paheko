@@ -7,6 +7,7 @@ use KD2\Security;
 use KD2\Form;
 use KD2\Translate;
 use KD2\DB\EntityManager;
+use Paheko\Web\Cache as WebCache;
 
 $start_timer = microtime(true);
 
@@ -235,6 +236,7 @@ static $default_config = [
 	'SQLITE_JOURNAL_MODE'   => 'TRUNCATE',
 	'LOCAL_ADDRESSES_ROOT'  => null,
 	'DONATE_URL'            => 'https://paheko.cloud/don/',
+	'OPEN_BASEDIR_HARDENING' => false,
 ];
 
 foreach ($default_config as $const => $value)
@@ -311,6 +313,42 @@ if (ENABLE_PROFILER) {
 	define('Paheko\PROFILER_START_TIME', $start_timer);
 
 	register_shutdown_function([Utils::class, 'showProfiler']);
+}
+
+// Open_basedir hardening
+if (OPEN_BASEDIR_HARDENING) {
+	$paths = [ROOT,
+		// Just in case KD2 is a symlink
+		ROOT . '/include/lib/KD2',
+		// Same with modules
+		ROOT . '/modules',
+		DATA_ROOT,
+		CACHE_ROOT,
+		SHARED_CACHE_ROOT,
+		PLUGINS_ROOT,
+		WebCache::getRoot(),
+		LOCAL_ADDRESSES_ROOT
+	];
+
+	foreach ($paths as &$path) {
+		// Make sure the path exists, or errors might be returned
+		Utils::safe_mkdir($path, null, true);
+
+		$r = realpath($path);
+
+		if (!$r) {
+			throw new \LogicException('This path does not exist: ' . $path);
+		}
+
+		$path = $r;
+	}
+
+	unset($path);
+	sort($paths);
+
+	$basedir = ini_get('open_basedir');
+	$basedir .= PATH_SEPARATOR . implode(PATH_SEPARATOR, $paths);
+	ini_set('open_basedir', ltrim($basedir, PATH_SEPARATOR));
 }
 
 // PHP devrait être assez intelligent pour chopper la TZ système mais nan
