@@ -319,8 +319,9 @@ class Conversion
 		if ($format === 'csv'
 			&& in_array('ssconvert', $tools, true)
 			&& in_array($extension, self::GNUMERIC_FORMATS, true)) {
-			// format=preserve will keep original date format, locale=fr_FR will make sure numbers are correctly formatted
-			$cmd = 'ssconvert --export-type="Gnumeric_stf:stf_assistant" -O "format=preserve locale=fr_FR.UTF-8" %s %s %s 2>&1';
+			// format=automatic *should* produce YYYY/MM/DD format
+			// locale=fr_FR will make sure numbers are correctly formatted
+			$cmd = 'ssconvert --export-type="Gnumeric_stf:stf_assistant" -O "format=automatic locale=fr_FR.UTF-8" %s %s %s 2>&1';
 		}
 
 		if ($cmd === null
