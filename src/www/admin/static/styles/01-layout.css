@@ -18,18 +18,20 @@
     --gBgImage: url("../bg.png");
 }
 
-/* Dark colors */
-html.dark body {
-    background-color: #222;
-}
+@media screen {
+    /* Dark colors */
+    html.dark body {
+        background-color: #222;
+    }
 
-/* Very simple, but works better than making sure there are no "fixed" colors anywhere */
-html.dark main {
-    filter: invert(100%) hue-rotate(180deg);
-}
+    /* Very simple, but works better than making sure there are no "fixed" colors anywhere */
+    html.dark main {
+        filter: invert(100%) hue-rotate(180deg);
+    }
 
-html.dark main img, html.dark main video {
-    filter: invert(100%) hue-rotate(180deg);
+    html.dark main img, html.dark main video {
+        filter: invert(100%) hue-rotate(180deg);
+    }
 }
 
 /* End of dark theme specifics */
