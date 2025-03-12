@@ -320,7 +320,8 @@ if (OPEN_BASEDIR) {
 	$paths = explode(':', OPEN_BASEDIR);
 
 	if (isset($paths[0]) && $paths[0] === 'auto') {
-		$paths += [ROOT,
+		unset($paths[0]);
+		$paths = array_merge($paths, [ROOT,
 			// Just in case KD2 is a symlink
 			ROOT . '/include/lib/KD2',
 			// Same with modules
@@ -331,7 +332,7 @@ if (OPEN_BASEDIR) {
 			PLUGINS_ROOT,
 			WebCache::getRoot(),
 			LOCAL_ADDRESSES_ROOT
-		];
+		]);
 	}
 
 	foreach ($paths as &$path) {
