@@ -24,7 +24,10 @@ $df = DynamicFields::getInstance();
 
 $params = compact('mode');
 
-$csv->setColumns($df->listImportAssocNames());
+$columns = $df->listImportAssocNames();
+$columns += ['parent_number' => 'Numéro du membre responsable'];
+
+$csv->setColumns($columns);
 
 $required_fields = $df->listImportRequiredAssocNames($mode === 'update' ? true : false);
 

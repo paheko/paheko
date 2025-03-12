@@ -410,6 +410,9 @@ class User extends Entity
 		if (isset($source['id_parent']) && is_array($source['id_parent'])) {
 			$source['id_parent'] = Form::getSelectorValue($source['id_parent']);
 		}
+		elseif (isset($source['parent_number'])) {
+			$source['id_parent'] = Users::getIdFromNumber($source['parent_number']);
+		}
 
 		foreach (DynamicFields::getInstance()->fieldsByType('multiple') as $f) {
 			if (!(isset($source[$f->name . '_present']) || isset($source[$f->name]))) {
