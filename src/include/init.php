@@ -236,7 +236,7 @@ static $default_config = [
 	'SQLITE_JOURNAL_MODE'   => 'TRUNCATE',
 	'LOCAL_ADDRESSES_ROOT'  => null,
 	'DONATE_URL'            => 'https://paheko.cloud/don/',
-	'OPEN_BASEDIR_HARDENING' => false,
+	'OPEN_BASEDIR'          => null,
 ];
 
 foreach ($default_config as $const => $value)
@@ -316,19 +316,23 @@ if (ENABLE_PROFILER) {
 }
 
 // Open_basedir hardening
-if (OPEN_BASEDIR_HARDENING) {
-	$paths = [ROOT,
-		// Just in case KD2 is a symlink
-		ROOT . '/include/lib/KD2',
-		// Same with modules
-		ROOT . '/modules',
-		DATA_ROOT,
-		CACHE_ROOT,
-		SHARED_CACHE_ROOT,
-		PLUGINS_ROOT,
-		WebCache::getRoot(),
-		LOCAL_ADDRESSES_ROOT
-	];
+if (OPEN_BASEDIR) {
+	$paths = explode(':', OPEN_BASEDIR);
+
+	if (isset($paths[0]) && $paths[0] === 'auto') {
+		$paths += [ROOT,
+			// Just in case KD2 is a symlink
+			ROOT . '/include/lib/KD2',
+			// Same with modules
+			ROOT . '/modules',
+			DATA_ROOT,
+			CACHE_ROOT,
+			SHARED_CACHE_ROOT,
+			PLUGINS_ROOT,
+			WebCache::getRoot(),
+			LOCAL_ADDRESSES_ROOT
+		];
+	}
 
 	foreach ($paths as &$path) {
 		// Make sure the path exists, or errors might be returned
