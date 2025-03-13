@@ -325,16 +325,9 @@ class Import
 						throw new UserException('Compte de crédit non renseigné');
 					}
 
-					$credit_account = $accounts->getIdFromCode($row->credit_account);
+					$credit_account = self::getOrCreateAccountId($accounts, $row->credit_account, null, $o, $report);
+					$debit_account = self::getOrCreateAccountId($accounts, $row->debit_account, null, $o, $report);
 					$debit_account = $accounts->getIdFromCode($row->debit_account);
-
-					if (!$credit_account) {
-						throw new UserException(sprintf('Compte de crédit "%s" inconnu dans le plan comptable', $row->credit_account));
-					}
-
-					if (!$debit_account) {
-						throw new UserException(sprintf('Compte de débit "%s" inconnu dans le plan comptable', $row->debit_account));
-					}
 
 					$data['reference'] = isset($row->p_reference) ? $row->p_reference : null;
 
@@ -366,20 +359,7 @@ class Import
 					$linked_users = null;
 				}
 				else {
-					$id_account = $accounts->getIdFromCode($row->account);
-
-					if (!$id_account && $row->account && $o->auto_create_accounts) {
-						$account = $accounts->createAuto($row->account, $row->account_label ?? $row->account . ' — Compte créé automatiquement');
-						$account->save();
-						$id_account = $account->id();
-
-						if ($report !== null) {
-							$report['accounts'][] = $account;
-						}
-					}
-					elseif (!$id_account) {
-						throw new UserException(sprintf('le compte "%s" n\'existe pas dans le plan comptable', $row->account));
-					}
+					$id_account = self::getOrCreateAccountId($accounts, $row->account, $row->account_label, $o, $report);
 
 					$line_label = $row->line_label ?? null;
 					$line_reference = $row->line_reference ?? null;
@@ -447,5 +427,28 @@ class Import
 		}
 
 		return $report;
+	}
+
+	static protected function getOrCreateAccountId(Accounts $accounts, string $account, ?string $account_label, \stdClass $options, ?array &$report): int
+	{
+		$id_account = $accounts->getIdFromCode($account);
+
+		if ($id_account) {
+			return $id_account;
+		}
+
+		if (!$account || !$options->auto_create_accounts) {
+			throw new UserException(sprintf('le compte "%s" n\'existe pas dans le plan comptable', $account));
+		}
+
+		$a = $accounts->createAuto($account, $account_label ?? ($account . ' — Compte créé automatiquement'));
+		$a->save();
+		$id_account = $a->id();
+
+		if ($report !== null) {
+			$report['accounts'][] = $a;
+		}
+
+		return $id_account;
 	}
 }
