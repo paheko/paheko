@@ -25,7 +25,7 @@ $df = DynamicFields::getInstance();
 $params = compact('mode');
 
 $columns = $df->listImportAssocNames();
-$columns += ['parent_number' => 'Numéro du membre responsable'];
+$columns += ['parent_number' => 'Numéro du membre responsable', 'category' => 'Catégorie'];
 
 $csv->setColumns($columns);
 

@@ -531,6 +531,7 @@ class Users
 
 		$logged_user_id = $session ? $session::getUserId() : null;
 		$is_logged = $session ? $session->isLogged() : null;
+		$safe_categories = array_flip(Categories::listAssocSafe($session, false));
 
 		if ($logged_user_id) {
 			$report['has_logged_user'] = false;
@@ -540,7 +541,7 @@ class Users
 			$report['has_admin_users'] = true;
 		}
 
-		foreach (self::iterateImport($csv, $mode, $report['errors']) as $line => $user) {
+		foreach (self::iterateImport($csv, $mode, $safe_categories, $report['errors']) as $line => $user) {
 			if ($logged_user_id && $user->id == $logged_user_id) {
 				$report['has_logged_user'] = true;
 				continue;
@@ -585,9 +586,11 @@ class Users
 		$db = DB::getInstance();
 		$db->begin();
 
+		$safe_categories = array_flip(Categories::listAssocSafe($session, false));
+
 		Log::add(Log::MESSAGE, ['message' => 'Import de membres'], $session ? $session->user()->id : null);
 
-		foreach (self::iterateImport($csv, $mode) as $i => $user) {
+		foreach (self::iterateImport($csv, $mode, $safe_categories) as $i => $user) {
 			// Skip logged user, to avoid changing own login field
 			if ($logged_user_id && $user->id == $logged_user_id) {
 				continue;
@@ -615,7 +618,7 @@ class Users
 		$db->commit();
 	}
 
-	static public function iterateImport(CSV_Custom $csv, string $mode, ?array &$errors = null): \Generator
+	static public function iterateImport(CSV_Custom $csv, string $mode, ?array $safe_categories, ?array &$errors = null): \Generator
 	{
 		if (!in_array($mode, self::IMPORT_MODES)) {
 			throw new \InvalidArgumentException('Invalid import mode: ' . $mode);
@@ -648,6 +651,17 @@ class Users
 				}
 
 				$user->importForm((array)$row);
+
+				// Set category, if safe to do so
+				if (!empty($row->category) && $safe_categories !== null) {
+					if (array_key_exists($row->category, $safe_categories)) {
+						$user->set('id_category', $safe_categories[$row->category]);
+					}
+					else {
+						throw new UserException(sprintf('La catégorie "%s" n\'existe pas ou n\'est pas autorisée pour les imports.', $row->category));
+					}
+				}
+
 				yield $i => $user;
 			}
 			catch (UserException $e) {
