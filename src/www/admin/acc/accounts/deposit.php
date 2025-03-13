@@ -8,7 +8,7 @@ use Paheko\Entities\Accounting\Transaction;
 
 require_once __DIR__ . '/../_inc.php';
 
-$session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
+$session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE);
 
 if (!CURRENT_YEAR_ID) {
 	Utils::redirect(ADMIN_URL . 'acc/years/?msg=OPEN');
