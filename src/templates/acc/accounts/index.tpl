@@ -67,7 +67,6 @@ use Paheko\Entities\Accounting\Account;
 							&& $account.type === Entities\Accounting\Account::TYPE_BANK
 							&& ($account.debit || $account.credit)}
 							{linkbutton label="Rapprochement" shape="check" href="reconcile.php?id=%d"|args:$account.id}
-						{/if}
 						{elseif $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)
 							&& $account.type === Entities\Accounting\Account::TYPE_OUTSTANDING
 							&& $account.debit}
