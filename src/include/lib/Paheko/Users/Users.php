@@ -531,7 +531,7 @@ class Users
 
 		$logged_user_id = $session ? $session::getUserId() : null;
 		$is_logged = $session ? $session->isLogged() : null;
-		$safe_categories = array_flip(Categories::listAssocSafe($session, false));
+		$safe_categories = $session ? array_flip(Categories::listAssocSafe($session, false)) : null;
 
 		if ($logged_user_id) {
 			$report['has_logged_user'] = false;
@@ -581,12 +581,11 @@ class Users
 
 		$logged_user_id = $session ? $session::getUserId() : null;
 		$is_logged = $session ? $session->isLogged() : null;
+		$safe_categories = $session ? array_flip(Categories::listAssocSafe($session, false)) : null;
 
 		$number_field = DynamicFields::getNumberField();
 		$db = DB::getInstance();
 		$db->begin();
-
-		$safe_categories = array_flip(Categories::listAssocSafe($session, false));
 
 		Log::add(Log::MESSAGE, ['message' => 'Import de membres'], $session ? $session->user()->id : null);
 
