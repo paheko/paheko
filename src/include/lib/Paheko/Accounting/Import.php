@@ -359,7 +359,7 @@ class Import
 					$linked_users = null;
 				}
 				else {
-					$id_account = self::getOrCreateAccountId($accounts, $row->account, $row->account_label, $o, $report);
+					$id_account = self::getOrCreateAccountId($accounts, $row->account, $row->account_label ?? null, $o, $report);
 
 					$line_label = $row->line_label ?? null;
 					$line_reference = $row->line_reference ?? null;
