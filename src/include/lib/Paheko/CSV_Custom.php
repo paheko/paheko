@@ -34,6 +34,7 @@ class CSV_Custom
 			$this->csv = $data['csv'];
 			$this->translation = $data['translation'];
 			$this->skip = $data['skip'];
+			$this->file_name = $data['file_name'];
 		}
 	}
 
@@ -41,7 +42,12 @@ class CSV_Custom
 	{
 		if ($this->session && $this->cache_key && ($this->csv || $this->translation || $this->skip !== 1)) {
 			Static_Cache::export($this->cache_key,
-				['csv' => $this->csv, 'translation' => $this->translation, 'skip' => $this->skip],
+				[
+					'csv'         => $this->csv,
+					'translation' => $this->translation,
+					'skip'        => $this->skip,
+					'file_name'   => $this->file_name,
+				],
 				new \DateTime('+3 hours')
 			);
 
@@ -58,6 +64,7 @@ class CSV_Custom
 		$path = $file['tmp_name'];
 
 		$this->loadFile($path);
+		$this->file_name = $file['name'];
 
 		@unlink($path);
 	}
@@ -412,6 +419,7 @@ class CSV_Custom
 			'translation_table' => $this->translation,
 			'rows'              => $this->ready() ? iterator_to_array($this->iterate()) : null,
 			'header'            => $this->getHeader(),
+			'file_name'         => $this->file_name,
 		];
 	}
 

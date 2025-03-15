@@ -541,6 +541,7 @@ La variable `$csv` contiendra ensuite les informations sur le fichier CSV actuel
 * `loaded` (booléen) : vaut `true` quand le fichier est chargé
 * `columns` (tableau) : les colonnes, définies dans l'appel avec l'action `initialize`
 * `mandatory_columns` (tableau) : les colonnes requises, définies dans l'appel avec l'action `initialize`
+* `file_name` (texte) : le nom du fichier uploadé
 
 Les clés suivantes ne sont renseignées que quand `ready` vaut `true` :
 
