@@ -19,7 +19,7 @@ class CSV_Custom
 	protected array $_default;
 	protected ?string $cache_key = null;
 	protected int $max_file_size = 1024*1024*10;
-	protected ?string $file_name;
+	protected ?string $file_name = null;
 
 	public function __construct(?Session $session = null, ?string $key = null)
 	{
