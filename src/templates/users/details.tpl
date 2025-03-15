@@ -29,7 +29,7 @@
 			</dd>
 		{else}
 			<dd class="help">
-				Ce membre est dans une catégorie caché, il n'est plus possible de l'inscrire à une activité.
+				Ce membre est dans une catégorie cachée, il n'est plus possible de l'inscrire à une activité.
 			</dd>
 		{/if}
 	{/if}

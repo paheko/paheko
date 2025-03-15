@@ -7,7 +7,15 @@ use Paheko\Users\Users;
 
 require_once __DIR__ . '/_inc.php';
 
-$current_cat = (int) qg('cat');
+$user = Session::getLoggedUser();
+
+if (isset($_GET['cat'])) {
+	$current_cat = (int) $_GET['cat'];
+	$user->setPreference('users_category', $current_cat);
+}
+else {
+	$current_cat = $user->getPreference('users_category') ?? 0;
+}
 
 if ($format = qg('export')) {
 	Session::getInstance()->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);

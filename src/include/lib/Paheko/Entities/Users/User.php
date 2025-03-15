@@ -61,6 +61,8 @@ class User extends Entity
 		'accounting_expert' => false,
 		'dark_theme'        => false,
 		'force_handheld'	=> false,
+		// Category displayed when going to users list
+		'users_category'    => 0,
 	];
 
 	protected bool $_loading = false;
