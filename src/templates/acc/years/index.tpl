@@ -34,18 +34,22 @@
 	</p>
 {/if}
 
-<section class="year-infos">
-	<section class="graphs">
-		<figure>
-			<img src="{$admin_url}acc/reports/graph_plot_all.php?type=assets" alt="" />
-			<figcaption>Soldes des banques et caisses par exercice</figcaption>
-		</figure>
-		<figure>
-			<img src="{$admin_url}acc/reports/graph_plot_all.php?type=result" alt="" />
-			<figcaption>Recettes et dépenses par exercice</figcaption>
-		</figure>
+{if $has_enough_transactions}
+	<section class="year-infos">
+		<section class="graphs">
+			<figure>
+				<img src="{$admin_url}acc/reports/graph_plot_all.php?type=assets" alt="" />
+				<figcaption>Soldes des banques et caisses par exercice</figcaption>
+			</figure>
+			<figure>
+				<img src="{$admin_url}acc/reports/graph_plot_all.php?type=result" alt="" />
+				<figcaption>Recettes et dépenses par exercice</figcaption>
+			</figure>
+		</section>
 	</section>
-</section>
+{else}
+	<p class="help">(Ici s'afficheront des graphiques quand il y aura au moins 3 écritures dans la comptabilité.)</p>
+{/if}
 
 <section class="years">
 {foreach from=$list item="year"}

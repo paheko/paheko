@@ -235,6 +235,8 @@ class Template extends Smartyer
 			return preg_replace('!&lt;(/?mark)&gt;!', '<$1>', $str);
 		});
 
+		$this->register_modifier('html_hidden_inputs', [self::class, 'htmlHiddenInputs']);
+
 		foreach (CommonModifiers::PHP_MODIFIERS_LIST as $name => $params) {
 			$this->register_modifier($name, [CommonModifiers::class, $name]);
 		}
@@ -498,6 +500,24 @@ class Template extends Smartyer
 		);
 
 		$out .= sprintf('</%s>', $params['tag'] ?? 'span');
+		return $out;
+	}
+
+	static protected function htmlHiddenInputs(array $data, ?string $prefix = null)
+	{
+		$out = '';
+
+		foreach ($data as $key => $value) {
+			if (is_array($value)) {
+				$name = $prefix ? $prefix . '[' . $key . ']' : $key;
+				$out .= self::htmlHiddenInputs($value, $name);
+			}
+			else {
+				$name = $prefix ? $prefix . '[' . $key . ']' : $key;
+				$out .= sprintf('<input type="hidden" name="%s" value="%s" />', htmlspecialchars($name), htmlspecialchars($value));
+			}
+		}
+
 		return $out;
 	}
 }

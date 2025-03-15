@@ -25,16 +25,21 @@ class Charts
 		'fr_pca_1999' => 'Plan comptable associatif 1999',
 	];
 
-	static public function getFirstForCountry(string $country): ?string
-	{
-		foreach (self::BUNDLED_CHARTS as $code => $label) {
-			if (substr($code, 0, 2) === strtolower($country)) {
-				return $code;
-			}
-		}
-
-		return null;
-	}
+	const COUNTRIES_CHARTS = [
+		'FR' => [
+			'fr_pca_2018' => 'Association ou fondation',
+			'fr_cse_2015' => 'CSE (Comité Social et Économique)',
+			'fr_pcs_2018' => 'Syndicat',
+			'fr_pcc_2020' => 'Copropriété',
+			'fr_pcg_2014' => 'Entreprise',
+		],
+		'CH' => [
+			'ch_asso' => 'Association',
+		],
+		'BE' => [
+			'be_pcmn_2019' => 'Association ou fondation',
+		],
+	];
 
 	static public function updateInstalled(string $chart_code): ?Chart
 	{

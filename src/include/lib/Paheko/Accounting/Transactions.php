@@ -101,6 +101,11 @@ class Transactions
 		return DB::getInstance()->count('acc_transactions', 'id_creator = ?', $user_id);
 	}
 
+	static public function countAll(): int
+	{
+		return DB::getInstance()->count('acc_transactions');
+	}
+
 	/**
 	 * Returns a dynamic list of all waiting credit and debt transactions for closed years
 	 */

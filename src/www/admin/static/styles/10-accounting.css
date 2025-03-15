@@ -286,6 +286,21 @@ section.years article p.main {
     margin-top: .8em;
 }
 
+h2.step {
+    border: 2px solid rgba(var(--gSecondColor), 0.8);
+    border-radius: .5em;
+    overflow: hidden;
+    margin: 1em 0;
+}
+
+h2.step strong {
+    background: rgba(var(--gSecondColor), 0.8);
+    padding: .5em;
+    display: inline-block;
+    height: 1em;
+    width: 1em;
+}
+
 @media handheld, screen and (max-width: 980px) {
     .transaction-details-container {
         grid-template-columns: 1fr;
