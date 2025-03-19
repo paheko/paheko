@@ -466,6 +466,10 @@ class Backup
 			throw new UserException(sprintf('Ce fichier a été créé avec une version trop ancienne (%s), il n\'est pas possible de le restaurer.', $version));
 		}
 
+		if ($version && version_compare($version, paheko_version(), '>')) {
+			throw new UserException(sprintf('Ce fichier provient d\'une version plus récente de Paheko (%s), que celle qui est installée (%s), il n\'est pas possible de le restaurer.', $version, paheko_version()));
+		}
+
 		// Check for AppID
 		$appid = $db->querySingle('PRAGMA application_id;', false);
 
