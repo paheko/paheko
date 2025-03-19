@@ -406,7 +406,6 @@ table.dragging tbody td {
 
 table.schema caption {
     background: rgba(var(--gSecondColor), 0.2);
-
 }
 
 table.list th a {
@@ -415,4 +414,8 @@ table.list th a {
 
 table.list tr.no-border {
     border: none;
+}
+
+table.list img {
+    pointer-events: none;
 }
