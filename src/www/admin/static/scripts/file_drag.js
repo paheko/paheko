@@ -73,6 +73,11 @@
 			e.stopPropagation();
 		});
 
+		p.addEventListener('dragstart', (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+		});
+
 		p.addEventListener('dragenter', (e) => {
 			drag_elements.push(e.target);
 

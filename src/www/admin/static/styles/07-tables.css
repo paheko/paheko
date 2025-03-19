@@ -415,7 +415,3 @@ table.list th a {
 table.list tr.no-border {
     border: none;
 }
-
-table.list img {
-    pointer-events: none;
-}
