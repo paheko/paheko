@@ -628,7 +628,7 @@
 		t.shortcuts.push({ctrl: true, key: 'b', callback: applyBold });
 		t.shortcuts.push({ctrl: true, key: 'g', callback: applyBold });
 		t.shortcuts.push({ctrl: true, key: 'i', callback: applyItalic });
-		t.shortcuts.push({ctrl: true, key: 't', callback: applyHeader });
+		t.shortcuts.push({ctrl: true, shift: true, key: 't', callback: applyHeader });
 		t.shortcuts.push({ctrl: true, key: 'l', callback: insertURL});
 		t.shortcuts.push({ctrl: true, key: 's', callback: quicksave});
 		t.shortcuts.push({ctrl: true, key: 'p', callback: openPreview});
