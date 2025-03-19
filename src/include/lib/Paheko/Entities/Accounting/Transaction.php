@@ -1125,9 +1125,7 @@ class Transaction extends Entity
 	 */
 	public function getTypesDetails(?array $source = null)
 	{
-		if (null === $source) {
-			$source = $_POST;
-		}
+		$source ??= $_POST;
 
 		$details = [
 			self::TYPE_REVENUE => [
@@ -1277,7 +1275,7 @@ class Transaction extends Entity
 					$d = $account->direction;
 				}
 				else {
-					$d = $account->defaults[$this->type] ?? null;
+					$d = $account->defaults[$type->id] ?? null;
 				}
 
 				if ($d) {
