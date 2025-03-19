@@ -81,7 +81,7 @@ if ($type && $type_name) {
 		}
 	}
 
-	$form->runIf(f('import') && $csv->loaded(), function () use ($type, &$csv, $year, $user, $ignore_ids, $auto_create_accounts) {
+	$form->runIf(f('import') && $csv->loaded(), function () use ($type, &$csv, $year, $user, $ignore_ids, $auto_create_accounts, $fec_number_per_journal) {
 		try {
 			Import::import($type, $year, $csv, $user->id, compact('ignore_ids', 'auto_create_accounts', 'fec_number_per_journal'));
 		}
