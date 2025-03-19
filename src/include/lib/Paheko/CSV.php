@@ -35,7 +35,7 @@ class CSV
 
 		while (!feof($fp))
 		{
-			$row = fgetcsv($fp, 4096, $delim);
+			$row = fgetcsv($fp, 4096, $delim, '"', '\\');
 			$line++;
 
 			if (empty($row))
