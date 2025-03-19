@@ -154,6 +154,7 @@ class Import
 			'dry_run'         => false,
 			'return_report'   => false,
 			'auto_create_accounts' => false,
+			'fec_number_per_journal' => false,
 		];
 
 		$o = (object) array_merge($options_default, $options);
@@ -174,7 +175,11 @@ class Import
 		$transaction = null;
 		$linked_users = null;
 		$types = array_flip(Transaction::TYPES_NAMES);
-		$group = $csv->hasSelectedColumn('id') ? 'id' : 'reference';
+		$group = $csv->hasSelectedColumn('id') ? ['id'] : ['reference'];
+
+		if ($o->fec_number_per_journal) {
+			$group[] = 'journal';
+		}
 
 		if ($o->return_report) {
 			$report = ['created' => [], 'modified' => [], 'unchanged' => [], 'accounts' => []];
@@ -192,7 +197,7 @@ class Import
 				$row = (object) $row;
 
 				// Import grouped transactions
-				if ($type == Export::GROUPED) {
+				if ($type === Export::GROUPED) {
 					// If a line doesn't have any transaction info: this is a line following the previous transaction
 					$has_transaction = !(empty($row->id)
 						&& empty($row->type)
@@ -215,14 +220,20 @@ class Import
 					}
 				}
 				else {
-					if (!empty($row->$group) && $row->$group != $current_id) {
+					$id = '';
+
+					foreach ($group as $key) {
+						$id .= $row->$key ?? '';
+					}
+
+					if (!empty($id) && $id != $current_id) {
 						if (null !== $transaction) {
 							self::saveImportedTransaction($transaction, $linked_users, $dry_run, $report);
 							$transaction = null;
 							$linked_users = null;
 						}
 
-						$current_id = $row->$group;
+						$current_id = $id;
 					}
 				}
 
@@ -316,7 +327,7 @@ class Import
 				}
 
 				// Add two transaction lines for each CSV line
-				if ($type == Export::SIMPLE) {
+				if ($type === Export::SIMPLE) {
 					if (empty($row->credit_account)) {
 						throw new UserException('Compte de crédit non renseigné');
 					}
@@ -373,6 +384,17 @@ class Import
 					// Try to use reference as line reference, if it changes from line to line
 					if (null === $line_reference && isset($row->reference) && $row->reference != $transaction->reference) {
 						$line_reference = $row->reference;
+					}
+
+					// If amount is signed, just reverse debit/credit
+					// (eg. in FEC files, it can happen)
+					if (substr(ltrim($row->credit), 0, 1) === '-') {
+						$row->debit = $row->credit;
+						$row->credit = 0;
+					}
+					elseif (substr(ltrim($row->debit), 0, 1) === '-') {
+						$row->credit = $row->debit;
+						$row->debit = 0;
 					}
 
 					$data = $data + [

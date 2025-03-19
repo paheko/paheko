@@ -113,6 +113,11 @@ use Paheko\Accounting\Export;
 	<fieldset>
 		<legend>Configuration de l'import</legend>
 		<dl>
+			{if $type === Export::FEC}
+				{input type="radio" name="fec_number_per_journal" value=0 default=0 label="Le numéro d'écriture est unique" help="recommandé en général" prefix_title="Numéros d'écriture du fichier FEC" prefix_required=true}
+				{input type="radio" name="fec_number_per_journal" value=1 label="Le numéro d'écriture est propre à chaque journal" help="pour certains logiciels inhabituels"}
+			{/if}
+
 			<dt><label for="f_ignore_ids_1">Mode d'import</label> <b>(obligatoire)</b></dt>
 
 			{input type="radio" name="ignore_ids" value="1" label="Créer toutes les écritures" required=true}
@@ -125,7 +130,7 @@ use Paheko\Accounting\Export;
 				Les écritures qui ne mentionnent pas de numéro seront créées.
 			</dd>
 
-			{if $type == Export::FEC}
+			{if $type === Export::FEC}
 				<dd><p class="alert block">Avec le format FEC, cette option effacera certaines données des écritures mises à jour : référence du paiement et projet analytique.</p></dd>
 			{/if}
 

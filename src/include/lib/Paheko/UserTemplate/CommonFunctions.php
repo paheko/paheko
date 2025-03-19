@@ -88,7 +88,7 @@ class CommonFunctions
 			$max_file_size ??= Utils::return_bytes(Utils::getMaxUploadSize());
 
 			if (isset($attributes['accept']) && $attributes['accept'] == 'csv') {
-				$attributes['accept'] = '.csv,text/csv,application/csv,.CSV';
+				$attributes['accept'] = '.csv,text/csv,application/csv,.CSV,.txt,.TXT';
 				$help = ($help ?? '') . PHP_EOL . 'Format accepté : CSV';
 
 				if (Conversion::canConvertToCSV()) {
