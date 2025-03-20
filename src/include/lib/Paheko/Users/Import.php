@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Paheko\Users;
 
 use Paheko\CSV_Custom;
+use Paheko\DB;
 use Paheko\Log;
 use Paheko\UserException;
 
