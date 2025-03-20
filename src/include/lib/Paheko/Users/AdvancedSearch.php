@@ -351,7 +351,7 @@ class AdvancedSearch extends A_S
 		$tables = 'users_view AS u INNER JOIN users_search AS us USING (id)';
 		$list = $this->makeList($query, $tables, 'identity', false, ['id', 'identity', 'number']);
 
-		$list->setExportCallback([Users::class, 'exportRowCallback']);
+		$list->setExportCallback([Export::class, 'exportRowCallback']);
 		return $list;
 	}
 
