@@ -61,7 +61,7 @@ class Log
 		self::MESSAGE => '',
 	];
 
-	static public function add(int $type, ?array $details = null, int $id_user = null): void
+	static public function add(int $type, ?array $details = null, ?int $id_user = null): void
 	{
 		if (isset($details['entity'])) {
 			$details['entity'] = str_replace('Paheko\Entities\\', '', $details['entity']);
