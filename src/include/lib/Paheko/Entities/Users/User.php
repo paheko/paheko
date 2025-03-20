@@ -351,7 +351,7 @@ class User extends Entity
 		return File::CONTEXT_USER . '/' . $this->id();
 	}
 
-	public function listFiles(string $field_name = null): array
+	public function listFiles(?string $field_name = null): array
 	{
 		return Files::listForUser($this->id, $field_name);
 	}
