@@ -36,7 +36,7 @@ class Import
 		}
 
 		if ($is_logged) {
-			$report['has_admin_users'] = true;
+			$report['has_admin_users'] = false;
 		}
 
 		foreach (self::iterateImport($csv, $mode, $safe_categories, $report['errors']) as $line => $user) {
