@@ -13,6 +13,8 @@ $csrf_key = 'users_new';
 $user = Users::create();
 $is_duplicate = null;
 
+$user->importForm($_GET);
+
 $form->runIf('save', function () use ($user, $session, &$is_duplicate) {
 	$id_category = (int)f('id_category');
 
