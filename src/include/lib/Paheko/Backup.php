@@ -512,11 +512,6 @@ class Backup
 			$db->exec(sprintf('UPDATE users_categories SET perm_config = %d, perm_connect = %d;', Session::ACCESS_ADMIN, Session::ACCESS_READ));
 		}
 
-		// Force user to be re-logged as the first admin
-		if ($session && $session->isLogged(false)) {
-			$return |= self::CHANGED_USER;
-		}
-
 		if ($version != paheko_version()) {
 			$return |= self::NEED_UPGRADE;
 		}
