@@ -17,6 +17,8 @@ use Paheko\Services\Services_User;
 use Paheko\Users\Categories;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Users;
+use Paheko\Users\Export as UsersExport;
+use Paheko\Users\Import as UsersImport;
 use Paheko\Files\Files;
 
 use KD2\ErrorManager;
@@ -225,7 +227,7 @@ class API
 			$format = strtok('');
 
 			try {
-				Users::exportCategory($format ?: 'json', $id, true);
+				UsersExport::exportCategory($format ?: 'json', $id, true);
 			}
 			catch (\InvalidArgumentException $e) {
 				throw new APIException($e->getMessage(), 400, $e);
@@ -359,7 +361,7 @@ class API
 				}
 
 				if ($fn2 === 'preview') {
-					$report = Users::importReport($csv, $mode);
+					$report = UsersImport::report($csv, $mode);
 
 					$report['unchanged'] = array_map(
 						fn($user) => ['id' => $user->id(), 'name' => $user->name()],
@@ -388,7 +390,7 @@ class API
 					return $report;
 				}
 				else {
-					Users::import($csv, $mode);
+					UsersImport::import($csv, $mode);
 					return null;
 				}
 			}

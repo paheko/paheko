@@ -3,6 +3,8 @@
 namespace Paheko;
 
 use Paheko\Users\DynamicFields;
+use Paheko\Users\Export;
+use Paheko\Users\Import;
 use Paheko\Users\Session;
 use Paheko\Users\Users;
 
@@ -11,13 +13,13 @@ require_once __DIR__ . '/_inc.php';
 Session::getInstance()->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
 
 if ($format = qg('export')) {
-	Users::export($format);
+	Export::export($format);
 	return;
 }
 
 $csrf_key = 'user_import';
 $csv = new CSV_Custom($session, 'users_import');
-$mode = f('mode') ?? (qg('mode') ?? Users::IMPORT_MODE_AUTO);
+$mode = f('mode') ?? (qg('mode') ?? Import::MODE_AUTO);
 $report = [];
 
 $df = DynamicFields::getInstance();
@@ -48,7 +50,7 @@ $form->runIf(f('preview') && $csv->loaded(), function () use (&$csv) {
 }, $csrf_key);
 
 if (!f('import') && $csv->ready()) {
-	$report = Users::importReport($csv, $mode, Session::getInstance());
+	$report = Import::report($csv, $mode, Session::getInstance());
 
 	if (count($report['errors'])) {
 		$csv->clear();
@@ -67,7 +69,7 @@ $form->runIf('import', function () use ($csv, $mode) {
 			throw new UserException('Erreur dans le chargement du CSV');
 		}
 
-		Users::import($csv, $mode, Session::getInstance());
+		Import::import($csv, $mode, Session::getInstance());
 	}
 	finally {
 		$csv->clear();

@@ -2,6 +2,7 @@
 namespace Paheko;
 
 use Paheko\Users\Categories;
+use Paheko\Users\Export;
 use Paheko\Users\Session;
 use Paheko\Users\Users;
 
@@ -19,7 +20,7 @@ else {
 
 if ($format = qg('export')) {
 	Session::getInstance()->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
-	Users::exportCategory($format, $current_cat);
+	Export::exportCategory($format, $current_cat);
 	return;
 }
 
