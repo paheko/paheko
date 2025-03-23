@@ -4,6 +4,7 @@ namespace Paheko;
 
 use Paheko\Users\Session;
 use Paheko\Files\Conversion;
+use Paheko\Files\Files;
 
 class CSV_Custom
 {
@@ -75,12 +76,12 @@ class CSV_Custom
 		$file = Files::get($path);
 
 		if (!$file) {
-			throw new UserException('Chemin invalide : ce fichier source n\'existe pas');
+			throw new \InvalidArgumentException('Chemin invalide : ce fichier source n\'existe pas');
 		}
 
 		$this->file_name = Utils::basename($path);
 
-		$path = !$file->getLocalOrCacheFilePath();
+		$path = $file->getLocalOrCacheFilePath();
 
 		if (!$path) {
 			throw new \LogicException('File contents not found');

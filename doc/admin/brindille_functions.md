@@ -498,6 +498,7 @@ Permet de demander à l'utilisateur de charger un fichier CSV (ou XLSX/ODS, selo
 | action | obligatoire | Action à réaliser : `initialize`, `form`, `cancel_button`, `clear` |
 | name | optionnel | Définit le nom du fichier, utile s'il y a plusieurs fichiers CSV dans le même module. |
 | assign | optionnel | Assigner le tableau indiquant les informations du fichier CSV à la variable donnée en valeur. |
+| file | optionnel | Si ce paramètre est renseigné, le fichier correspondant sera chargé depuis les documents, sinon un formulaire d'upload sera proposé. |
 
 Paramètres pour l'action `initialize` :
 
@@ -595,6 +596,22 @@ Note : il est possible de combiner l'usage de la fonction `csv` avec le paramèt
   {{:redirect to="./"}}
 {{/if}}
 ```
+
+### Chargement d'un fichier local
+
+Si le paramètre `file` n'est pas spécifié, un formulaire d'envoi de fichier sera affiché. S'il est renseigné avec le chemin vers un fichier stocké dans Paheko, c'est ce fichier qui sera chargé en mémoire lors de l'exécution de l'action `initialize`. Exemple :
+
+```
+{{:csv action="initialize" file="documents/test.ods" columns=$columns assign="csv"}}
+
+{{if !$csv.ready}}
+  {{:csv action="form"}}
+{{else}}
+  {{:debug csv=$csv}}
+{{/if}}
+```
+
+Comme le fichier est chargé en mémoire lors de la première exécution de l'action `initialize`, si le fichier est modifié après cette première exécution, les modifications ne seront pas visibles. Il faut donc exécuter `{{:csv action="clear"}}` pour pouvoir "recharger" le fichier en mémoire à partir des documents.
 
 ## signature
 

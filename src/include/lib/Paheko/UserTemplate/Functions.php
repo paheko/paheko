@@ -1064,9 +1064,13 @@ class Functions
 				$csv->clear();
 				Utils::redirect(Utils::getSelfURI());
 			}
+			elseif (!$csv->loaded() && !empty($params['file'])) {
+				$csv->loadFromStoredFile($params['file']);
+				Utils::redirect(Utils::getSelfURI());
+			}
 			elseif (($key = self::_getFormKey()) && \KD2\Form::tokenCheck($key)) {
 				if (!empty($_POST['csv_upload'])) {
-					$csv->load($_FILES['csv'] ?? []);
+					$csv->upload($_FILES['csv'] ?? []);
 					Utils::redirect(Utils::getSelfURI());
 				}
 				elseif (!empty($_POST['translation_table'])) {

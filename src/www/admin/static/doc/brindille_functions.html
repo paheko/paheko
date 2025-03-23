@@ -76,7 +76,10 @@
 				<li><a href="#fonctionnement-avance-fenetre-modale">Fonctionnement avancé (fenêtre modale)</a>
 			</ol></li>
 			<li><a href="#api">api</a></li>
-			<li><a href="#csv">csv</a></li>
+			<li><a href="#csv">csv</a>
+			<ol>
+				<li><a href="#chargement-d-un-fichier-local">Chargement d'un fichier local</a>
+			</ol></li>
 			<li><a href="#signature"> signature</a>
 		</ol></li>
 		<li><a href="#fonctions-relatives-aux-modules">Fonctions relatives aux Modules</a>
@@ -710,6 +713,11 @@ L'écriture n°{{$result.id}} a été créée.</code></pre>
 <td style="text-align: left;">optionnel</td>
 <td style="text-align: left;">Assigner le tableau indiquant les informations du fichier CSV à la variable donnée en valeur.</td>
 </tr>
+<tr>
+<td style="text-align: left;">file</td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Si ce paramètre est renseigné, le fichier correspondant sera chargé depuis les documents, sinon un formulaire d'upload sera proposé.</td>
+</tr>
 </tbody>
 </table>
 <p>Paramètres pour l'action <code>initialize</code> :</p>
@@ -791,6 +799,16 @@ L'écriture n°{{$result.id}} a été créée.</code></pre>
   {{:csv action="clear"}}
   {{:redirect to="./"}}
 {{/if}}</code></pre>
+<h3 id="chargement-d-un-fichier-local">Chargement d'un fichier local</h3>
+<p>Si le paramètre <code>file</code> n'est pas spécifié, un formulaire d'envoi de fichier sera affiché. S'il est renseigné avec le chemin vers un fichier stocké dans Paheko, c'est ce fichier qui sera chargé en mémoire lors de l'exécution de l'action <code>initialize</code>. Exemple :</p>
+<pre><code>{{:csv action="initialize" file="documents/test.ods" columns=$columns assign="csv"}}
+
+{{if !$csv.ready}}
+  {{:csv action="form"}}
+{{else}}
+  {{:debug csv=$csv}}
+{{/if}}</code></pre>
+<p>Comme le fichier est chargé en mémoire lors de la première exécution de l'action <code>initialize</code>, si le fichier est modifié après cette première exécution, les modifications ne seront pas visibles. Il faut donc exécuter <code>{{:csv action="clear"}}</code> pour pouvoir "recharger" le fichier en mémoire à partir des documents.</p>
 <h2 id="signature"> signature</h2>
 <p>Affiche la signature de l'association (en HTML), ou son logo si aucune signature n'a été choisie.</p>
 <h1 id="fonctions-relatives-aux-modules">Fonctions relatives aux Modules</h1>
