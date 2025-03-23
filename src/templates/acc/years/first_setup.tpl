@@ -18,7 +18,7 @@
 	<div class="help block">
 		<p>La comptabilité utilise des exercices.</p>
 		<p>Un exercice, c'est une période comptable, généralement d'une année (12 mois), souvent une année civile, du 1<sup>er</sup> janvier au 31 décembre, mais d'autres choix sont possibles.</p>
-		<p>{linkbutton shape="help" href=$help_pattern_url|args:"premier-exercice" target="_dialog" label="Qu'est-ce qu'un exercice comptable ?"}</p>
+		<p>{linkbutton shape="help" href=$help_pattern_url|args:"exercice-comptable" target="_dialog" label="Qu'est-ce qu'un exercice comptable ?"}</p>
 	</div>
 	<fieldset>
 		<legend>Configuration du premier exercice</legend>
