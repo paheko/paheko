@@ -717,26 +717,29 @@
 		}
 	});
 
+	g.listSelectorButtonClicked = (e) => {
+		var i = e.target;
+		i.setCustomValidity('');
+		g.current_list_input = i.parentNode;
+		var max = i.getAttribute('data-max');
+
+		if (max && max <= i.parentNode.querySelectorAll('span').length) {
+			alert('Il n\'est pas possible de faire plus de ' + max + ' choix.');
+			return false;
+		}
+
+		let url = i.value + (i.value.indexOf('?') > 0 ? '&' : '?') + '_dialog';
+		var caption = i.dataset.caption || null;
+		g.openFrameDialog(url, {caption});
+		return false;
+	};
+
 	// List selectors, using an iframe for list
 	g.onload(() => {
 		var inputs = $('form .input-list > button');
 
 		inputs.forEach((i) => {
-			i.onclick = () => {
-				i.setCustomValidity('');
-				g.current_list_input = i.parentNode;
-				var max = i.getAttribute('data-max');
-
-				if (max && max <= i.parentNode.querySelectorAll('span').length) {
-					alert('Il n\'est pas possible de faire plus de ' + max + ' choix.');
-					return false;
-				}
-
-				let url = i.value + (i.value.indexOf('?') > 0 ? '&' : '?') + '_dialog';
-				var caption = i.dataset.caption || null;
-				g.openFrameDialog(url, {caption});
-				return false;
-			};
+			i.onclick = g.listSelectorButtonClicked;
 		});
 
 		// Set custom error message if required list is not selected
