@@ -128,9 +128,10 @@ class Upgrade
 
 			if (version_compare($v, '1.3.14', '<')) {
 				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/migrations/1.3/1.3.14.sql');
 
 				if ($db->hasTable('module_data_recus_fiscaux')) {
-					$db->import(ROOT . '/include/migrations/1.3/1.3.14.sql');
+					$db->import(ROOT . '/include/migrations/1.3/1.3.14_recus.sql');
 				}
 
 				$db->commitSchemaUpdate();
