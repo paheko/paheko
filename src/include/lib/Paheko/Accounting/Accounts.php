@@ -235,7 +235,7 @@ class Accounts
 		$query = $this->em->iterate($sql);
 
 		foreach ($query as $row) {
-			$t = array_key_exists($row->type, $types) ? $row->type : 0;
+			$t = in_array($row->type, $types) ? $row->type : 0;
 			$out[$t]->accounts[] = $row;
 		}
 
@@ -246,6 +246,10 @@ class Accounts
 					unset($out[$key]);
 				}
 			}
+		}
+
+		if (count($types) && empty($out[0]->accounts)) {
+			unset($out[0]);
 		}
 
 		return $out;
