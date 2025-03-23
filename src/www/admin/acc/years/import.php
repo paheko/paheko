@@ -62,7 +62,7 @@ if ($type && $type_name) {
 	$csv->setMandatoryColumns(Export::MANDATORY_COLUMNS[$type]);
 
 	$form->runIf(f('load') && isset($_FILES['file']['tmp_name']), function () use ($csv, $params) {
-		$csv->load($_FILES['file']);
+		$csv->upload($_FILES['file']);
 		Utils::redirect(Utils::getSelfURI($params));
 	}, $csrf_key);
 

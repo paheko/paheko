@@ -56,7 +56,7 @@ class CSV_Custom
 		}
 	}
 
-	public function load(?array $file): void
+	public function upload(?array $file): void
 	{
 		if (empty($file['size']) || empty($file['tmp_name']) || empty($file['name'])) {
 			throw new UserException('Fichier invalide, ou aucun fichier fourni');
@@ -68,6 +68,25 @@ class CSV_Custom
 		$this->file_name = $file['name'];
 
 		@unlink($path);
+	}
+
+	public function loadFromStoredFile(string $path): void
+	{
+		$file = Files::get($path);
+
+		if (!$file) {
+			throw new UserException('Chemin invalide : ce fichier source n\'existe pas');
+		}
+
+		$this->file_name = Utils::basename($path);
+
+		$path = !$file->getLocalOrCacheFilePath();
+
+		if (!$path) {
+			throw new \LogicException('File contents not found');
+		}
+
+		$this->loadFile($path);
 	}
 
 	public function canConvert(): bool
