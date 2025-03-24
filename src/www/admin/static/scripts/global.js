@@ -631,8 +631,8 @@
 			throw Error('Parent input list not found');
 		}
 
-		var can_delete = i.firstChild.getAttribute('data-can-delete');
-		var multiple = i.firstChild.getAttribute('data-multiple');
+		var can_delete = i.firstChild.getAttribute('data-can-delete') == 1;
+		var multiple = i.firstChild.getAttribute('data-multiple') == 1;
 		var name = i.firstChild.getAttribute('data-name');
 
 		var span = document.createElement('span');
@@ -723,7 +723,7 @@
 		g.current_list_input = i.parentNode;
 		var max = i.getAttribute('data-max');
 
-		if (max && max <= i.parentNode.querySelectorAll('span').length) {
+		if (max > 0 && max <= i.parentNode.querySelectorAll('span').length) {
 			alert('Il n\'est pas possible de faire plus de ' + max + ' choix.');
 			return false;
 		}

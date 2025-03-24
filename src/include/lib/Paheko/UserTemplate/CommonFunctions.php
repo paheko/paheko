@@ -588,7 +588,7 @@ class CommonFunctions
 		$params['class'] .= ' icn-btn';
 
 		// Remove NULL params
-		$params = array_filter($params);
+		$params = array_filter($params, fn($a) => !is_null($a));
 
 		array_walk($params, function (&$v, $k) {
 			$v = sprintf('%s="%s"', $k, htmlspecialchars((string)$v));
