@@ -42,8 +42,7 @@ main {
 }
 
 main h1.main {
-    margin: 0;
-    text-align: center;
+    display: none;
 }
 
 table.list thead {
@@ -117,7 +116,7 @@ td.actions *, nav.tabs, .icn-btn, .pagination, a.icn {
     display: none !important;
 }
 
-td.num a {
+td.num a, a.num {
     border: none;
     padding: 0;
     background: none;

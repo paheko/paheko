@@ -84,6 +84,7 @@
 					{linkmenu label="Gérer…" shape="edit"}
 						{linkbutton label="Modifier" shape="edit" href="edit.php?id=%d"|args:$year.id target="_dialog"}
 						{linkbutton label="Balance d'ouverture" shape="money" href="balance.php?id=%d"|args:$year.id}
+						{linkbutton label="Budget prévisionnel" shape="table" href="provisional.php?id=%d"|args:$year.id}
 						{linkbutton label="Importer" shape="import" href="import.php?year=%d"|args:$year.id}
 						{linkbutton label="Déplacer des écritures" shape="reload" href="split.php?id=%d"|args:$year.id target="_dialog"}
 						{linkbutton label="Verrouiller temporairement" shape="lock" href="lock.php?id=%d"|args:$year.id target="_dialog"}

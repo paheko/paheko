@@ -73,6 +73,9 @@ if ($y2 = Years::get((int)qg('compare_year'))) {
 	$tpl->assign('year2', $y2);
 	$criterias['compare_year'] = $y2->id;
 }
+elseif (!empty($_GET['provisional'])) {
+	$criterias['provisional'] = true;
+}
 
 $tpl->assign('criterias', $criterias);
 $criterias_query = $criterias;
@@ -86,6 +89,8 @@ foreach ($criterias_query as &$c) {
 $tpl->assign('criterias_query', http_build_query($criterias_query));
 unset($criterias_query['compare_year']);
 $tpl->assign('criterias_query_no_compare', http_build_query($criterias_query));
+unset($criterias_query['provisional']);
+$tpl->assign('criterias_query_no_provisional', http_build_query($criterias_query));
 
 $tpl->assign('now', new \DateTime);
 

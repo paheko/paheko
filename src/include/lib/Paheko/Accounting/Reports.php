@@ -340,6 +340,29 @@ class Reports
 
 			$sql = sprintf($sql_union, $table_name, $criterias['compare_year'], $criterias['year']);
 		}
+		elseif (!empty($criterias['provisional'])) {
+			$table_name = md5(random_bytes(10));
+			$sql_create = 'CREATE TEMP TABLE temp_acc_provisional_%s (id_year, id, label, code, type, debit, credit, position, balance, is_debt);
+				INSERT INTO temp_acc_provisional_%1$s %s;';
+
+			// Create a temporary table, this makes things easier and faster
+			$db->exec(sprintf($sql_create, $table_name, $sql));
+
+			// We also need to use UNION ALL here as we want to have accounts
+			// from the provisional balance that don't have any transaction this year (yet)
+			$sql = 'SELECT a.*, IFNULL(b.amount, 0) AS provisional, balance - IFNULL(b.amount, 0) AS change
+				FROM temp_acc_provisional_%1$s a
+				LEFT JOIN acc_years_provisional b ON a.id = b.id_account AND a.id_year = b.id_year
+				UNION ALL
+				SELECT p.id_year, p.id_account AS id, a.label, a.code, a.type, NULL AS debit, NULL AS credit, a.position, 0 AS balance, NULL AS is_debt, p.amount AS provisional, 0 - p.amount AS change
+				FROM acc_years_provisional p
+				INNER JOIN acc_accounts a ON a.id = p.id_account
+				LEFT JOIN temp_acc_provisional_%s t ON t.id = p.id_account AND t.id_year = p.id_year
+				WHERE %s
+					AND t.id IS NULL
+				ORDER BY code COLLATE NOCASE;';
+			$sql = sprintf($sql, $table_name, self::getWhereClause($criterias, 'p', '', 'a'));
+		}
 
 		$out = $db->get($sql);
 
@@ -381,7 +404,8 @@ class Reports
 		$balance = self::getResult($criterias);
 		$balance2 = null;
 		$change = null;
-		$label = $balance > 0 ? 'Résultat de l\'exercice courant (excédent)' : 'Résultat de l\'exercice courant (perte)';
+		$provisional = null;
+		$label = $balance > 0 ? 'Résultat de l\'exercice (excédent)' : 'Résultat de l\'exercice (perte)';
 
 		if (!empty($criterias['compare_year'])) {
 			$balance2 = self::getResult(array_merge($criterias, ['year' => $criterias['compare_year']]));
@@ -392,7 +416,20 @@ class Reports
 			$label = 'Résultat de l\'exercice';
 		}
 
-		return (object) compact('balance', 'balance2', 'label', 'change');
+		if (!empty($criterias['provisional'])) {
+			$sql = 'SELECT SUM(p.amount) FROM acc_years_provisional p INNER JOIN acc_accounts a ON a.id = p.id_account WHERE id_year = %d AND a.position = %d';
+			$sql = sprintf('SELECT (%s) - (%s);',
+				sprintf($sql, $criterias['year'], Account::REVENUE),
+				sprintf($sql, $criterias['year'], Account::EXPENSE)
+			);
+
+			$db = DB::getInstance();
+			$provisional = $db->firstColumn($sql);
+			$change = $balance - $provisional;
+			$label = 'Résultat de l\'exercice';
+		}
+
+		return (object) compact('balance', 'balance2', 'label', 'change', 'provisional');
 	}
 
 	/**
@@ -403,14 +440,16 @@ class Reports
 		$balance = 0;
 		$balance2 = 0;
 		$change = 0;
+		$provisional = 0;
 
 		foreach ($rows as $row) {
 			$balance += $row->balance;
 			$balance2 += $row->balance2 ?? 0;
 			$change += $row->change ?? 0;
+			$provisional += $row->provisional ?? 0;
 		}
 
-		return (object) compact('label', 'balance', 'balance2', 'change');
+		return (object) compact('label', 'balance', 'balance2', 'change', 'provisional');
 	}
 
 	/**

@@ -276,7 +276,7 @@ class Year extends Entity
 		}
 	}
 
-	public function importForm(array $source = null)
+	public function importForm(?array $source = null)
 	{
 		$this->assertCanBeModified(false);
 
@@ -287,5 +287,60 @@ class Year extends Entity
 		}
 
 		return parent::importForm($source);
+	}
+
+	public function saveProvisional(array $lines)
+	{
+		$db = DB::getInstance();
+		$db->begin();
+
+		$db->preparedQuery('DELETE FROM acc_years_provisional WHERE id_year = ?;', $this->id());
+
+		foreach ($lines as $row) {
+			if (empty($row['id_account'])) {
+				continue;
+			}
+
+			$db->insert('acc_years_provisional', [
+				'id_year'    => $this->id(),
+				'id_account' => $row['id_account'],
+				'amount'     => $row['amount'],
+			], 'OR IGNORE');
+		}
+
+		$db->commit();
+	}
+
+	public function getProvisional(): array
+	{
+		$db = DB::getInstance();
+		$sql = 'SELECT p.amount, a.code, a.label, a.code || \' — \' || a.label AS selector_label, a.id AS id_account
+			FROM acc_years_provisional p
+			INNER JOIN acc_accounts a ON a.id = p.id_account
+			WHERE p.id_year = ? AND a.position = ?
+			ORDER BY a.code COLLATE NOCASE;';
+
+		$out = [
+			'expense'       => $db->get($sql, $this->id(), Account::EXPENSE),
+			'revenue'       => $db->get($sql, $this->id(), Account::REVENUE),
+			'expense_total' => 0,
+			'revenue_total' => 0,
+			'result'        => 0,
+		];
+
+		foreach ($out as $key => $list) {
+			if (!is_array($list)) {
+				continue;
+			}
+
+			foreach ($list as $i => $item) {
+				$out[$key][$i]->account_selector = [$item->id_account => $item->selector_label];
+				$out[$key . '_total'] += $item->amount;
+			}
+		}
+
+		$out['result'] = $out['revenue_total'] - $out['expense_total'];
+
+		return $out;
 	}
 }
