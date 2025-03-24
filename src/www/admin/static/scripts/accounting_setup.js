@@ -2,7 +2,7 @@ function initLine(row)
 {
 	var removeBtn = row.querySelector('button[name="remove_line"]');
 	removeBtn.onclick = () => {
-		var count = $('tbody tr').length;
+		var count = $('main tbody tr').length;
 
 		if (count <= 1) {
 			if (confirm('Ne créer aucun compte bancaire ?')) {
