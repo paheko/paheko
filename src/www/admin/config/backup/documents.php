@@ -12,7 +12,7 @@ $form->runIf('restore', function () {
 	$target = $_POST['target'] ?? null;
 
 	try {
-		if (!$target) {
+		if (empty($target)) {
 			throw new UserException('Erreur à la décompression du fichier : javascript doit être activé.');
 		}
 
