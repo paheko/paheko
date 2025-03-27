@@ -5,7 +5,7 @@
 			{if $criterias.provisional}
 				{linkbutton shape="eye-off" href="?%s"|args:$criterias_query_no_provisional label="Cacher le prévisionnel"}
 				{linkbutton shape="edit" href="!acc/years/provisional.php?id=%d"|args:$year.id label="Modifier le provisionnel"}
-			{elseif !$criterias.before && !$criterias.compare_year && $current === 'statement'}
+			{elseif !$criterias.before && !$criterias.compare_year && $current === 'statement' && !$criterias.project}
 				{linkbutton shape="eye" href="?%s&provisional=1"|args:$criterias_query_no_compare label="Afficher le prévisionnel"}
 			{/if}
 			{if !$criterias.provisional && !$criterias.before && !$criterias.compare_year && !empty($allow_compare) && !empty($other_years)}
