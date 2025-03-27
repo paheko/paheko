@@ -10,6 +10,7 @@ require_once __DIR__ . '/../_inc.php';
 
 $form->runIf('restore', function () {
 	$target = $_POST['target'] ?? null;
+		header('Content-Type: application/json');
 
 	try {
 		if (empty($target)) {
@@ -25,10 +26,12 @@ $form->runIf('restore', function () {
 		Files::upload(Utils::dirname($target), 'file1', Session::getInstance());
 	}
 	catch (UserException $e) {
-		die(json_encode(['success' => false, 'error' => $target . ': '. $e->getMessage()]));
+		echo json_encode(['success' => false, 'error' => $target . ': '. $e->getMessage()]);
+		exit;
 	}
 
-	die(json_encode(['success' => true, 'error' => null]));
+	echo json_encode(['success' => true, 'error' => null]);
+	exit;
 }, 'files_restore');
 
 

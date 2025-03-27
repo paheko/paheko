@@ -425,8 +425,9 @@ class CommonFunctions
 			$input = sprintf('<input type="%s" %s %s />', $type, $attributes_string, $value);
 		}
 
-		if ($type === 'file' && $max_file_size) {
-			$input .= sprintf('<input type="hidden" name="MAX_FILE_SIZE" value="%d" id="f_maxsize" />', $max_file_size);
+		if ($type === 'file') {
+			$real_max_file_size = $max_file_size ?: Utils::return_bytes(Utils::getMaxUploadSize());
+			$input .= sprintf('<input type="hidden" name="MAX_FILE_SIZE" value="%d" id="f_maxsize" />', $real_max_file_size);
 		}
 		elseif ($type === 'checkbox') {
 			$input = sprintf('<input type="hidden" name="%s" value="1" />', preg_replace('/(?=\[|$)/', '_present', $name, 1)) . $input;
