@@ -30,6 +30,10 @@ if (!$file->canWrite()) {
 // Handle all the file editor
 $saved = $file->editor($content, Session::getInstance());
 
-if ($saved) {
+if ($saved && ($_SERVER['HTTP_ACCEPT'] ?? null) === 'application/json') {
+	http_response_code(204);
+	return;
+}
+elseif ($saved) {
 	Utils::redirect(Utils::getSelfURI());
 }
