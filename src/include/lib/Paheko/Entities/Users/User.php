@@ -378,8 +378,9 @@ class User extends Entity
 
 		$n = Users::getNewNumber();
 
-		if (null === $n) {
-			throw new UserException("Le dernier numéro de membre ne comporte pas que des chiffres.\nImpossible d'attribuer automatiquement un numéro de membre.");
+		if (null === $n
+			|| !DynamicFields::isNumberFieldANumber()) {
+			throw new UserException("Le numéro de membre n'est pas numérique.\nImpossible d'attribuer automatiquement un numéro de membre quand le numéro de membre peut contenir du texte.");
 		}
 
 		$this->set($field, $n);
