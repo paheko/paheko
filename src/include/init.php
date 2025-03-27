@@ -315,8 +315,8 @@ if (ENABLE_PROFILER) {
 	register_shutdown_function([Utils::class, 'showProfiler']);
 }
 
-// Open_basedir hardening
-if (OPEN_BASEDIR) {
+// Open_basedir hardening, but only in a web context
+if (OPEN_BASEDIR && PHP_SAPI !== 'cli') {
 	$paths = explode(':', OPEN_BASEDIR);
 
 	if (isset($paths[0]) && $paths[0] === 'auto') {
