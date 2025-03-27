@@ -18,24 +18,6 @@
     --gBgImage: url("../bg.png");
 }
 
-@media screen {
-    /* Dark colors */
-    html.dark body {
-        background-color: #222;
-    }
-
-    /* Very simple, but works better than making sure there are no "fixed" colors anywhere */
-    html.dark main {
-        filter: invert(100%) hue-rotate(180deg);
-    }
-
-    html.dark main img, html.dark main video {
-        filter: invert(100%) hue-rotate(180deg);
-    }
-}
-
-/* End of dark theme specifics */
-
 html {
     width: 100%;
     height: 100%;
@@ -283,4 +265,24 @@ body.sticky, body.sticky #menu {
 /* View transitions between page loads */
 @view-transition {
     navigation: auto;
+}
+
+@media screen {
+    /* Dark colors */
+    html.dark {
+        background-color: #ddd;
+        filter: invert(100%) hue-rotate(180deg);
+    }
+
+    html.dark body {
+        background-color: #ddd;
+    }
+
+    html.dark nav#menu, html.dark #dialog {
+        filter: invert(100%) hue-rotate(180deg);
+    }
+
+    html.dark main img, html.dark main video {
+        filter: invert(100%) hue-rotate(180deg);
+    }
 }
