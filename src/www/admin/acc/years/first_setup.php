@@ -45,7 +45,12 @@ if (!empty($data['accounts'])
 
 $appropriation_account = $year->id_chart ? $year->chart()->accounts()->getSingleAccountForType(Account::TYPE_APPROPRIATION_RESULT) : null;
 
-$form->runIf('save', function () use ($data, $year, $appropriation_account, $accounts) {
+$form->runIf('save', function () use ($data, $year, $appropriation_account, $accounts, &$step) {
+	if (empty($year->id_chart)) {
+		$step = 2;
+		throw new UserException('Aucun plan comptable n\'a été sélectionné');
+	}
+
 	$db = DB::getInstance();
 
 	$db->begin();

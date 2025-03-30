@@ -56,7 +56,7 @@ class Year extends Entity
 
 		$db = DB::getInstance();
 
-		$this->assert($this->id_chart !== null);
+		$this->assert(isset($this->id_chart));
 		parent::selfCheck();
 
 		if ($this->exists()) {
