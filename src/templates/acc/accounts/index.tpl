@@ -14,7 +14,7 @@ use Paheko\Entities\Accounting\Account;
 </p>
 {/if}
 
-{if $pending_count}
+{if $pending_count || !empty($pending_deposit_accounts)}
 	{include file="acc/transactions/_pending_message.tpl"}
 {/if}
 

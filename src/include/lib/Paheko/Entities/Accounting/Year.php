@@ -343,4 +343,26 @@ class Year extends Entity
 
 		return $out;
 	}
+
+	public function listAccountsWithMissingDepositsFromOtherYears(): array
+	{
+		$sql = 'SELECT a.label, a.code, a.id
+			FROM acc_transactions t
+			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
+			INNER JOIN acc_accounts a ON a.id = l.id_account
+			WHERE t.id_year != ?
+				AND a.type = ?
+				AND l.credit = 0
+				AND NOT (t.status & ?)
+				AND NOT (t.status & ?)
+			GROUP BY a.id
+			ORDER BY a.label COLLATE U_NOCASE;';
+
+		return DB::getInstance()->get($sql,
+			$this->id(),
+			Account::TYPE_OUTSTANDING,
+			Transaction::STATUS_DEPOSITED,
+			Transaction::STATUS_OPENING_BALANCE
+		);
+	}
 }
