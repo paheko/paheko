@@ -785,7 +785,7 @@ class Account extends Entity
 			Transaction::STATUS_OPENING_BALANCE
 		);
 
-		$account_balance = $this->getSum($year_id)->balance;
+		$account_balance = $this->getSum($year_id)->balance ?? 0;
 
 		return $account_balance - $deposit_balance;
 	}
