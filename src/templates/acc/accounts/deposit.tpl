@@ -1,11 +1,15 @@
-{include file="_head.tpl" title="Dépôt en banque : %s — %s"|args:$account.code,$account.label current="acc/accounts"}
+{include file="_head.tpl" title="Dépôt en banque : %s — %s"|args:$account.code:$account.label current="acc/accounts"}
 
 {include file="acc/_year_select.tpl"}
 
-{if $year.id !== $current_year.id}
-	<p class="alert block">
-		Note : les montants à déposer proviennent d'un précédent exercice ({$year->getLabelWithYearsAndStatus()}).
-	</p>
+{if $has_transactions_from_other_years}
+<p class="actions">
+	{if !$only_this_year}
+		{linkbutton shape="eye-off" label="Cacher les écritures d'autres exercices" href="?id=%d&only=1"|args:$account.id}
+	{else}
+		{linkbutton shape="eye-off" label="Afficher les écritures de tous les exercices" href="?id=%d&only=0"|args:$account.id}
+	{/if}
+</p>
 {/if}
 
 {form_errors}

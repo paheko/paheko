@@ -19,16 +19,15 @@ if (!$current_year->isOpen()) {
 }
 
 $account = Accounts::get((int)qg('id'));
-$year_id = intval($_GET['from_year'] ?? 0);
-$year = Years::get($year_id);
 
-if (!$account || !$year) {
+if (!$account) {
 	throw new UserException("Le compte demandé n'existe pas.");
 }
 
-$checked = f('deposit') ?: [];
+$checked = $_POST['deposit'] ?? [];
+$only_this_year = boolval($_GET['only'] ?? false);
 
-$journal = $account->getDepositJournal($year_id, $checked);
+$journal = $account->getDepositJournal(CURRENT_YEAR_ID, $only_this_year, $checked);
 $transaction = new Transaction;
 $transaction->id_year = CURRENT_YEAR_ID;
 $transaction->id_creator = $session->getUser()->id;
@@ -46,7 +45,7 @@ $form->runIf('save', function () use ($checked, $transaction, $journal) {
 
 // Uncheck everything if there was an error
 if ($form->hasErrors()) {
-	$journal = $account->getDepositJournal($year_id);
+	$journal = $account->getDepositJournal(CURRENT_YEAR_ID, $only_this_year);
 }
 
 $date = new \DateTime;
@@ -57,11 +56,14 @@ if ($date > $current_year->end_date) {
 
 $types = $account::TYPE_BANK;
 
-$missing_balance = $account->getDepositMissingBalance($year_id);
+$missing_balance = $account->getDepositMissingBalance(CURRENT_YEAR_ID, $only_this_year);
+$has_transactions_from_other_years = $account->hasMissingDepositsFromOtherYears(CURRENT_YEAR_ID);
 
 $journal->loadFromQueryString();
 
 $tpl->assign(compact(
+	'has_transactions_from_other_years',
+	'only_this_year',
 	'account',
 	'journal',
 	'date',
@@ -69,7 +71,6 @@ $tpl->assign(compact(
 	'checked',
 	'missing_balance',
 	'transaction',
-	'year'
 ));
 
 $tpl->display('acc/accounts/deposit.tpl');

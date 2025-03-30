@@ -70,7 +70,7 @@ use Paheko\Entities\Accounting\Account;
 						{elseif $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)
 							&& $account.type === Entities\Accounting\Account::TYPE_OUTSTANDING
 							&& $account.debit}
-							{linkbutton label="Dépôt en banque" shape="check" href="deposit.php?id=%d&from_year=%d"|args:$account.id:$current_year.id}
+							{linkbutton label="Dépôt en banque" shape="check" href="deposit.php?id=%d&"|args:$account.id}
 						{/if}
 						{linkbutton label="Journal" shape="menu" href="journal.php?id=%d&year=%d"|args:$account.id,$current_year.id}
 					</td>

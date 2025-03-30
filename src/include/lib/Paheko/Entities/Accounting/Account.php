@@ -700,7 +700,7 @@ class Account extends Entity
 		}
 	}
 
-	public function getDepositJournal(int $year_id, array $checked = []): DynamicList
+	public function getDepositJournal(int $id_year, bool $only_this_year, array $checked = []): DynamicList
 	{
 		$columns = [
 			'id' => [
@@ -751,12 +751,15 @@ class Account extends Entity
 		];
 
 		$tables = 'acc_transactions_lines l INNER JOIN acc_transactions t ON t.id = l.id_transaction';
-		$conditions = sprintf('t.id_year = %d AND l.id_account = %d AND l.credit = 0 AND NOT (t.status & %d) AND NOT (t.status & %d)',
-			$year_id,
+		$conditions = sprintf('l.id_account = %d AND l.credit = 0 AND NOT (t.status & %d) AND NOT (t.status & %d)',
 			$this->id(),
 			Transaction::STATUS_DEPOSITED,
 			Transaction::STATUS_OPENING_BALANCE
 		);
+
+		if ($only_this_year) {
+			$conditions .= ' AND t.id_year = ' . (int)$id_year;
+		}
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->setPageSize(null);
@@ -770,22 +773,38 @@ class Account extends Entity
 		return $list;
 	}
 
-	public function getDepositMissingBalance(int $year_id): int
+	public function hasMissingDepositsFromOtherYears(int $id_year): bool
 	{
-		$deposit_balance = DB::getInstance()->firstColumn('SELECT SUM(l.debit)
+		$db = DB::getInstance();
+		return (bool) $db->firstColumn('SELECT 1 FROM acc_transactions_lines l
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			WHERE t.id_year != ? AND l.credit = 0  AND NOT (t.status & ?) AND NOT (t.status & ?)
+			LIMIT 1;',
+			$id_year,
+			Transaction::STATUS_DEPOSITED,
+			Transaction::STATUS_OPENING_BALANCE
+		);
+	}
+
+	public function getDepositMissingBalance(int $id_year, bool $only_this_year): int
+	{
+		$sql = 'SELECT SUM(l.debit)
 			FROM acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
-			WHERE t.id_year = ? AND l.id_account = ? AND l.credit = 0
+			WHERE %s l.id_account = ? AND l.credit = 0
 				AND NOT (t.status & ?)
 				AND NOT (t.status & ?)
-			ORDER BY t.date, t.id;',
-			$year_id,
+			ORDER BY t.date, t.id;';
+
+		$sql = sprintf($sql, $only_this_year ? sprintf('t.id_year = %s AND ', $id_year) : '');
+
+		$deposit_balance = DB::getInstance()->firstColumn($sql,
 			$this->id(),
 			Transaction::STATUS_DEPOSITED,
 			Transaction::STATUS_OPENING_BALANCE
 		);
 
-		$account_balance = $this->getSum($year_id)->balance ?? 0;
+		$account_balance = $this->getSum($id_year)->balance ?? 0;
 
 		return $account_balance - $deposit_balance;
 	}
