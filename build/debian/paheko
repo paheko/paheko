@@ -1,9 +1,6 @@
 #!/bin/sh
 
 BIN=/usr/share/paheko/bin/paheko
-
-export PAHEKO_STANDALONE=1
-
 ARGS="$@"
 
 if [ "$ARGS" = "" ]
@@ -11,4 +8,4 @@ then
   ARGS="ui"
 fi
 
-php -d variables_order=EGPCS ${BIN} $ARGS
+php -d variables_order=EGPCS $BIN -c=/usr/share/paheko/config.user.php $ARGS

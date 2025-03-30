@@ -51,7 +51,7 @@ class AdvancedSearch extends A_S
 
 		$columns['number'] = [
 			'label'    => 'Numéro du membre',
-			'type'     => 'integer',
+			'type'     => $fields::isNumberFieldANumber() ? 'integer' : 'text',
 			'null'     => false,
 			'select'   => $fields::getNumberFieldSQL('u'),
 		];
@@ -72,11 +72,25 @@ class AdvancedSearch extends A_S
 			'where' => 'u.id_parent IS NOT NULL %s',
 		];
 
+		$columns['has_password'] = [
+			'label' => 'A un mot de passe',
+			'type' => 'boolean',
+			'null' => false,
+			'select' => 'CASE WHEN u.password IS NOT NULL THEN \'Oui\' ELSE \'Non\' END',
+			'where' => 'u.password IS NOT NULL %s',
+		];
+
 		foreach ($fields->all() as $name => $field)
 		{
 			// Skip password/number as it's already in the list
-			if ($field->system & $field::PASSWORD
-				|| $field->system & $field::NUMBER) {
+			if ($field->isPassword()
+				|| $field->isNumber()) {
+				continue;
+			}
+
+			// Skip fields where you don't have access
+			// Note that this doesn't block access to fields using existing saved searches
+			if ($this->session && !$this->session->canAccess($this->session::SECTION_USERS, $field->management_access_level)) {
 				continue;
 			}
 
@@ -158,6 +172,14 @@ class AdvancedSearch extends A_S
 			'values' => $db->getAssoc('SELECT id, name FROM users_categories ORDER BY name COLLATE U_NOCASE;'),
 			'select' => '(SELECT name FROM users_categories WHERE id = id_category)',
 			'where'  => 'id_category %s',
+		];
+
+		$columns['hidden'] = [
+			'label'  => 'Membre d\'une catégorie cachée',
+			'type'   => 'boolean',
+			'null'   => false,
+			'select' => 'CASE WHEN id_category IN (SELECT id FROM users_categories WHERE hidden = 1) THEN \'Oui\' ELSE \'Non\' END',
+			'where'  => 'id_category IN (SELECT id FROM users_categories WHERE hidden = 1) %s',
 		];
 
 		$columns['service'] = [
@@ -262,8 +284,8 @@ class AdvancedSearch extends A_S
 			$column = 'identity';
 		}
 
-		$query = [[
-			'operator' => 'AND',
+		$groups = [[
+			'operator' => 'OR',
 			'conditions' => [
 				[
 					'column'   => $column,
@@ -273,8 +295,52 @@ class AdvancedSearch extends A_S
 			],
 		]];
 
+		$exclude_hidden = true;
+
+		// Don't include hidden users in search result,
+		// unless we want a specific category or ALL users
+		if (intval($options['id_category'] ?? 0) === -1) {
+			$exclude_hidden = false;
+		}
+		elseif (!empty($options['id_category'])) {
+			$exclude_hidden = false;
+
+			$groups[] = [
+				'operator' => 'AND',
+				'join_operator' => 'AND',
+				'conditions' => [
+					[
+						'column'   => 'id_category',
+						'operator' => '= ?',
+						'values'   => [intval($options['id_category'])],
+					],
+				],
+			];
+		}
+
+		if ($exclude_hidden) {
+			$groups[] = [
+				'operator' => 'AND',
+				'join_operator' => 'AND',
+				'conditions' => [
+					[
+						'column'   => 'hidden',
+						'operator' => '= 0',
+					],
+				],
+			];
+		}
+
+		if (!DynamicFields::isNumberFieldANumber()) {
+			$groups[0]['conditions'][] = [
+				'column'   => 'number',
+				'operator' => '= ?',
+				'values'   => [$query],
+			];
+		}
+
 		return (object) [
-			'groups' => $query,
+			'groups' => $groups,
 			'order'  => $column,
 			'desc'   => false,
 		];
@@ -285,7 +351,7 @@ class AdvancedSearch extends A_S
 		$tables = 'users_view AS u INNER JOIN users_search AS us USING (id)';
 		$list = $this->makeList($query, $tables, 'identity', false, ['id', 'identity', 'number']);
 
-		$list->setExportCallback([Users::class, 'exportRowCallback']);
+		$list->setExportCallback([Export::class, 'exportRowCallback']);
 		return $list;
 	}
 

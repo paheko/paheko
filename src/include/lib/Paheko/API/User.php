@@ -5,6 +5,8 @@ namespace Paheko\API;
 use Paheko\Users\Categories;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Users;
+use Paheko\Users\Export as UsersExport;
+use Paheko\Users\Import as UsersImport;
 use Paheko\Search;
 use Paheko\Entities\Search as SE;
 use Paheko\APIException;
@@ -25,7 +27,7 @@ trait User
 			$format = strtok('');
 
 			try {
-				Users::exportCategory($format ?: 'json', $id, true);
+				UsersExport::exportCategory($format ?: 'json', $id, true);
 			}
 			catch (\InvalidArgumentException $e) {
 				throw new APIException($e->getMessage(), 400, $e);
@@ -55,8 +57,13 @@ trait User
 				throw new APIException('This user seems to be a duplicate of an existing one', 409);
 			}
 
-			if (!$this->isSystemUser() && !empty($this->params['id_category']) && !$user->setCategorySafeNoConfig($this->params['id_category'])) {
-				throw new APIException('You are not allowed to create a user in this category', 403);
+			if (!empty($this->params['id_category'])) {
+				if ($this->isSystemUser()) {
+					$user->set('id_category', (int)$this->params['id_category']);
+				}
+				elseif (!$user->setCategorySafeNoConfig($this->params['id_category'])) {
+					throw new APIException('You are not allowed to create a user in this category', 403);
+				}
 			}
 
 			if (isset($this->params['password'])) {
@@ -104,6 +111,7 @@ trait User
 			return $user->exportAPI();
 		}
 		elseif ($fn === 'import') {
+			$this->requireHttpClient();
 			$fp = null;
 
 			if ($this->method === 'PUT') {
@@ -165,7 +173,7 @@ trait User
 				}
 
 				if ($fn2 === 'preview') {
-					$report = Users::importReport($csv, $mode);
+					$report = UsersImport::report($csv, $mode);
 
 					$report['unchanged'] = array_map(
 						fn($user) => ['id' => $user->id(), 'name' => $user->name()],
@@ -194,7 +202,7 @@ trait User
 					return $report;
 				}
 				else {
-					Users::import($csv, $mode);
+					UsersImport::import($csv, $mode);
 					return null;
 				}
 			}

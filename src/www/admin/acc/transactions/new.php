@@ -22,7 +22,7 @@ if (!CURRENT_YEAR_ID) {
 }
 
 if (!$current_year->isOpen()) {
-	Utils::redirect(ADMIN_URL . 'acc/years/select.php?msg=CLOSED');
+	Utils::redirect(ADMIN_URL . 'acc/years/select.php?msg=CLOSED&from=' . rawurlencode(Utils::getSelfURI()));
 }
 
 $chart = $current_year->chart();
@@ -51,7 +51,6 @@ if (qg('copy')) {
 
 	if (empty($_POST)) {
 		$lines = $transaction->getLinesWithAccounts();
-		$types_details = $transaction->getTypesDetails();
 	}
 
 	$id_project = $old->getProjectId();
@@ -81,12 +80,18 @@ else {
 	}
 }
 
-$form->runIf(f('lines') !== null, function () use (&$lines) {
+$form->runIf(($_POST['lines'] ?? null) !== null, function () use (&$lines) {
 	$lines = Transaction::getFormLines();
 });
 
 // Keep this line here, as the transaction can be overwritten by copy
 $transaction->id_year = $current_year->id();
+
+// This is required for fetching the account selector value
+if (isset($_POST['type'])) {
+	$transaction->type = intval($_POST['type']);
+}
+
 $types_details = $transaction->getTypesDetails();
 
 // Set last used date
@@ -130,6 +135,8 @@ $form->runIf('save', function () use ($transaction, $session, $payoff) {
 	else {
 		$transaction->importFromNewForm();
 	}
+
+	$transaction->validateUsingConfig(Config::getInstance());
 
 	$transaction->id_creator = $session->getUser()->id;
 	$transaction->save();

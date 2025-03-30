@@ -1,5 +1,17 @@
 <?php
-$colspan = empty($year2) ? 3 : 5;
+$year2 ??= null;
+$provisional = !empty($criterias['provisional']);
+
+if ($year2) {
+	$colspan = 5;
+}
+elseif ($provisional) {
+	$colspan = 5;
+}
+else {
+	$colspan = 3;
+}
+
 $max = max(count($statement->body_left), count($statement->body_right));
 ?>
 <table class="statement">
@@ -24,6 +36,20 @@ $max = max(count($statement->body_left), count($statement->body_right));
 			<td class="money" width="10%">{$year->label_years()}</td>
 			<td class="money" width="10%">Écart</td>
 		</tr>
+	{elseif $provisional}
+		<tr>
+			<td></td>
+			<td></td>
+			<td class="money" width="10%">Prévisionnel</td>
+			<td class="money" width="10%">Réalisé</td>
+			<td class="money" width="10%">Écart</td>
+			<td class="spacer"></td>
+			<td></td>
+			<td></td>
+			<td class="money" width="10%">Prévisionnel</td>
+			<td class="money" width="10%">Réalisé</td>
+			<td class="money" width="10%">Écart</td>
+		</tr>
 	{/if}
 	</thead>
 	<tbody>
@@ -41,11 +67,13 @@ $max = max(count($statement->body_left), count($statement->body_right));
 					{/if}
 				</td>
 				<th>{$row.label}</th>
-				{if isset($year2)}
+				{if $year2}
 					<td class="money">{$row.balance2|raw|money:false}</td>
+				{elseif $provisional}
+					<td class="money">{$row.provisional|raw|money:false}</td>
 				{/if}
 				<td class="money">{$row.balance|raw|money:false}</td>
-				{if isset($year2)}
+				{if $year2 || $provisional}
 					<td class="money">{$row.change|raw|money:false:true}</td>
 				{/if}
 			{else}
@@ -62,11 +90,13 @@ $max = max(count($statement->body_left), count($statement->body_right));
 					{/if}
 				</td>
 				<th>{$row.label}</th>
-				{if isset($year2)}
+				{if $year2}
 					<td class="money">{$row.balance2|raw|money:false}</td>
+				{elseif $provisional}
+					<td class="money">{$row.provisional|raw|money:false}</td>
 				{/if}
 				<td class="money">{$row.balance|raw|money:false}</td>
-				{if isset($year2)}
+				{if $year2 || $provisional}
 					<td class="money">{$row.change|raw|money:false:true}</td>
 				{/if}
 			{else}
@@ -77,7 +107,7 @@ $max = max(count($statement->body_left), count($statement->body_right));
 	</tbody>
 	<tfoot>
 
-		<tr class="spacer"><td colspan="{if !empty($year2)}11{else}7{/if}" class="colspan"></td></tr>
+		<tr class="spacer"><td colspan="{if !empty($year2) || $criterias.provisional}11{else}7{/if}" class="colspan"></td></tr>
 	<?php $max = max(count($statement->foot_left), count($statement->foot_right)); ?>
 	<?php for ($i = 0; $i < $max; $i++):
 		$row = $statement->foot_left[$i] ?? null;
@@ -86,12 +116,14 @@ $max = max(count($statement->body_left), count($statement->body_right));
 		<tr class="{$class}">
 		{if $row}
 			<th colspan="2">{$row.label}</th>
-			{if $row.balance2 || $row.change}
-			<td class="money" width="10%">{$row.balance2|raw|money:false}</td>
+			{if $year2}
+				<td class="money" width="10%">{$row.balance2|raw|money:false}</td>
+			{elseif $provisional}
+				<td class="money">{$row.provisional|raw|money:false}</td>
 			{/if}
 			<td class="money" width="10%">{$row.balance|raw|money:false}</td>
-			{if $row.balance2 || $row.change}
-			<td class="money" width="10%">{$row.change|raw|money:false:true}</td>
+			{if $year2 || $provisional}
+				<td class="money" width="10%">{$row.change|raw|money:false:true}</td>
 			{/if}
 		{else}
 			<td colspan="{$colspan}" class="colspan"></td>
@@ -100,12 +132,14 @@ $max = max(count($statement->body_left), count($statement->body_right));
 		<?php $row = $statement->foot_right[$i] ?? null; ?>
 		{if $row}
 			<th colspan="2">{$row.label}</th>
-			{if $row.balance2 || $row.change}
-			<td class="money" width="10%">{$row.balance2|raw|money:false}</td>
+			{if $year2}
+				<td class="money" width="10%">{$row.balance2|raw|money:false}</td>
+			{elseif $provisional}
+				<td class="money">{$row.provisional|raw|money:false}</td>
 			{/if}
 			<td class="money" width="10%">{$row.balance|raw|money:false}</td>
-			{if $row.balance2 || $row.change}
-			<td class="money" width="10%">{$row.change|raw|money:false:true}</td>
+			{if $year2 || $provisional}
+				<td class="money" width="10%">{$row.change|raw|money:false:true}</td>
 			{/if}
 		{else}
 			<td colspan="{$colspan}" class="colspan"></td>

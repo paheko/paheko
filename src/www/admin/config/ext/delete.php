@@ -6,23 +6,26 @@ use Paheko\Plugins;
 
 require_once __DIR__ . '/../_inc.php';
 
-$csrf_key = 'ext_delete';
-$plugin = $module = null;
+$ext = Extensions::get(qg('name'));
+
+if (!$ext) {
+	throw new UserException('Extension inconnue');
+}
+
 $mode = qg('mode');
+$csrf_key = 'ext_delete_' . $ext->name;
 
-if (qg('plugin')) {
-	$plugin = Plugins::get(qg('plugin'));
-
-	if ($plugin->enabled) {
+if ($ext->type === 'plugin') {
+	if ($ext->enabled) {
 		throw new UserException('Impossible de supprimer une extension activée');
 	}
 
-	$form->runIf(f('delete') && f('confirm_delete'), function () use ($plugin) {
-		$plugin->delete();
+	$form->runIf(f('delete') && f('confirm_delete'), function () use ($ext) {
+		$ext->delete();
 	}, $csrf_key, '!config/ext/');
 }
 else {
-	$module = Modules::get(qg('module'));
+	$module = $ext->module;
 
 	if ($mode === 'data' && !$module->canDeleteData()) {
 		throw new UserException('Impossible de supprimer les données de ce module.');
@@ -48,6 +51,6 @@ else {
 	}, $csrf_key, '!config/ext/');
 }
 
-$tpl->assign(compact('plugin', 'module', 'csrf_key', 'mode'));
+$tpl->assign(compact('ext', 'csrf_key', 'mode'));
 
 $tpl->display('config/ext/delete.tpl');

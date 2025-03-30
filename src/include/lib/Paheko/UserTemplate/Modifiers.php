@@ -25,6 +25,7 @@ class Modifiers
 		'excerpt',
 		'atom_date',
 		'xml_escape',
+		'cdata_escape',
 		'json_decode',
 		'json_encode',
 		'minify',
@@ -59,11 +60,14 @@ class Modifiers
 		'quote_sql',
 		'sql_where',
 		'sql_user_fields',
-		'urlencode',
+		'url_encode',
+		'url_decode',
+		'urlencode' => [self::class, 'url_encode'],
 		'count_words',
 		'or',
 		'uuid',
 		'key',
+		'filter',
 	];
 
 	const MODIFIERS_WITH_INSTANCE_LIST = [
@@ -166,6 +170,11 @@ class Modifiers
 	static public function xml_escape($str)
 	{
 		return htmlspecialchars($str, ENT_XML1 | ENT_QUOTES);
+	}
+
+	static public function cdata_escape($str)
+	{
+		return str_replace(']]>', ']]]]><![CDATA[>', (string)$str);
 	}
 
 	static public function json_decode($str)
@@ -453,6 +462,11 @@ EOS;
 		}
 	}
 
+	static public function filter($v): array
+	{
+		return array_filter((array) $v);
+	}
+
 	static public function arrayval($v): array
 	{
 		return (array) $v;
@@ -630,9 +644,14 @@ EOS;
 		return sprintf('LTRIM(%s, %s)', implode(' || ', $out), $glue);
 	}
 
-	static public function urlencode($str): string
+	static public function url_encode($str): string
 	{
 		return rawurlencode($str ?? '');
+	}
+
+	static public function url_decode($str): string
+	{
+		return rawurldecode($str ?? '');
 	}
 
 	static public function count_words($str): int

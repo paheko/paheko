@@ -1,4 +1,4 @@
-.PHONY: dev-server release deps publish check-dependencies test-syntax tests minify phpstan www htaccess modules installer plugins
+.PHONY: dev-server release deps publish check-dependencies test-syntax tests minify phpstan www htaccess modules installer plugins doc
 SHELL := /bin/bash
 KD2FW_BRANCH := trunk
 MODULES_BRANCH := trunk
@@ -54,11 +54,12 @@ doc:
 	php ../tools/doc_md_to_html.php
 
 htaccess:
-	# Removing DOCUMENT_ROOT is important for the cache when using .htaccess, keep it!
+	cat apache-bots.conf > www/.htaccess
+	# Removing DOCUMENT_ROOT is important for the cache when using .htaccess!
 	cat apache-vhost.conf \
 		| sed 's/#RewriteBase/RewriteBase/' \
 		| sed 's/RewriteCond %{DOCUMENT_ROOT}%{REQUEST_/RewriteCond %{REQUEST_/' \
-		> www/.htaccess
+		>> www/.htaccess
 	cat apache-htaccess.conf >> www/.htaccess
 
 # Freeze versions before release

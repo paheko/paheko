@@ -1,14 +1,16 @@
 {include file="_head.tpl" title="Écritures liées à %s"|args:$transaction_user->name() current="acc/accounts"}
 
+<nav class="tabs">
+	<aside>{exportmenu right=true table=true}</aside>
+</nav>
+
 {if !$dialog}
 <p>
-	{linkbutton href="!users/details.php?id=%d"|args:$transaction_user.id label="Retour à la fiche membre" shape="user"}
+	{linkbutton href="!users/details.php?id=%d"|args:$transaction_user.id label="Retour à la fiche membre" shape="left"}
 </p>
 {/if}
 
-<p class="help">
-	De la plus récente à la plus ancienne.
-</p>
+<h2 class="ruler">Toutes les écritures liées</h2>
 
 {include file="acc/reports/_journal.tpl"}
 
@@ -30,6 +32,7 @@
 <p class="block help">Cette liste représente le solde des comptes uniquement pour les écritures liées à ce membre.</p>
 
 <table class="list">
+	<caption>Solde des comptes</caption>
 	<thead>
 		<tr>
 			<td class="num">Numéro</td>
@@ -61,5 +64,9 @@
 	{/foreach}
 	</tbody>
 </table>
+
+<p class="actions">
+	{linkbutton shape="menu" href="!acc/reports/ledger.php?year=%d&user=%d"|args:$year:$transaction_user.id label="Grand livre de ce membre"}
+</p>
 
 {include file="_foot.tpl"}

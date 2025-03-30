@@ -61,6 +61,7 @@ class Functions
 		':break'    => [self::class, 'compile_break'],
 		':continue' => [self::class, 'compile_continue'],
 		':return'   => [self::class, 'compile_return'],
+		':exit'     => [self::class, 'compile_exit'],
 		':yield'    => [self::class, 'compile_yield'],
 		':redirect' => [self::class, 'compile_redirect'],
 	];
@@ -103,7 +104,7 @@ class Functions
 			throw new Brindille_Exception('"continue" function can only be used inside a section');
 		}
 
-		return sprintf('<?php continue(%d); ?>', $i);
+		return sprintf('<?php array_pop($this->_variables); continue(%d); ?>', $i);
 	}
 
 	static public function compile_return(string $name, string $params_str, UserTemplate $tpl, int $line): string
@@ -114,11 +115,29 @@ class Functions
 		if ($parent && ($parent[2]['context'] ?? null) === 'modifier') {
 			$params = $tpl->_parseArguments($params_str, $line);
 
-			return sprintf('<?php return %s; ?>', $params['value'] ?? 'null');
+			if (!isset($params['value'])) {
+				$params = 'null';
+			}
+			else {
+				$params = $params['value'];
+			}
+
+			return sprintf('<?php return %s; ?>', $params);
 		}
 		// But not outside
 		elseif (!empty($params_str)) {
 			throw new Brindille_Exception('"return" function cannot have parameters in this context');
+		}
+
+		return '<?php return; ?>';
+	}
+
+	static public function compile_exit(string $name, string $params_str, UserTemplate $tpl, int $line): string
+	{
+		$parent = $tpl->_getStack($tpl::SECTION, 'define');
+
+		if (!$parent) {
+			throw new Brindille_Exception('"exit" function cannot be called in this context');
 		}
 
 		return '<?php return; ?>';
@@ -262,22 +281,30 @@ class Functions
 		$assign_new_id = $params['assign_new_id'] ?? null;
 		$validate = $params['validate_schema'] ?? null;
 		$validate_only = $params['validate_only'] ?? null;
+		$replace = !empty($params['replace']);
 
-		unset($params['key'], $params['id'], $params['assign_new_id'], $params['validate_schema'], $params['validate_only']);
+		unset($params['key'], $params['id'], $params['assign_new_id'], $params['validate_schema'],
+			$params['validate_only'], $params['replace']);
 
 		if ($key == 'config') {
 			$result = $db->firstColumn(sprintf('SELECT config FROM %s WHERE name = ?;', Module::TABLE), $tpl->module->name);
 		}
 		else {
-			$db->exec(sprintf('
-				CREATE TABLE IF NOT EXISTS %s (
-					id INTEGER NOT NULL PRIMARY KEY,
-					key TEXT NULL,
-					document TEXT NOT NULL
-				);
-				CREATE UNIQUE INDEX IF NOT EXISTS %1$s_key ON %1$s (key);', $table));
+			static $modules_tables = [];
 
-			if ($field) {
+			// Don't try to create table for each save statement
+			if (!in_array($table, $modules_tables)) {
+				$db->exec(sprintf('
+					CREATE TABLE IF NOT EXISTS %s (
+						id INTEGER NOT NULL PRIMARY KEY,
+						key TEXT NULL,
+						document TEXT NOT NULL
+					);
+					CREATE UNIQUE INDEX IF NOT EXISTS %1$s_key ON %1$s (key);', $table));
+				$modules_tables[] = $table;
+			}
+
+			if ($field && !$replace) {
 				$result = $db->firstColumn(sprintf('SELECT document FROM %s WHERE %s;', $table, ($field . ' = ?')), $where_value);
 			}
 			else {
@@ -292,19 +319,30 @@ class Functions
 		}
 
 		if (!empty($validate)) {
-			$schema = self::_readFile($validate, 'validate_schema', $tpl, $line);
+			static $schemas = [];
 
-			if ($validate_only && is_string($validate_only)) {
-				$validate_only = explode(',', $validate_only);
-				$validate_only = array_map('trim', $validate_only);
+			if (!isset($schemas[$validate])) {
+				$schema = self::_readFile($validate, 'validate_schema', $tpl, $line);
+
+				if ($validate_only && is_string($validate_only)) {
+					$validate_only = explode(',', $validate_only);
+					$validate_only = array_map('trim', $validate_only);
+				}
+				else {
+					$validate_only = null;
+				}
+
+				try {
+					$schemas[$validate] = JSONSchema::fromString($schema);
+				}
+				catch (\LogicException $e) {
+					throw new Brindille_Exception($e->getMessage(), 0, $e);
+				}
 			}
-			else {
-				$validate_only = null;
-			}
+
+			$s = $schemas[$validate];
 
 			try {
-				$s = JSONSchema::fromString($schema);
-
 				if ($validate_only) {
 					$s->validateOnly($params, $validate_only);
 				}
@@ -313,8 +351,8 @@ class Functions
 				}
 			}
 			catch (\RuntimeException $e) {
-				throw new Brindille_Exception(sprintf("ligne %d: impossible de valider le schéma:\n%s\n\n%s",
-					$line, $e->getMessage(), json_encode($params, JSON_PRETTY_PRINT)));
+				throw new Brindille_Exception(sprintf("impossible de valider le schéma:\n%s\n\n%s",
+					$e->getMessage(), json_encode($params, JSON_PRETTY_PRINT)));
 			}
 		}
 
@@ -572,13 +610,11 @@ class Functions
 
 		$dump = htmlspecialchars(ErrorManager::dump($params));
 
+		// Show objects as arrays
+		$dump = str_replace('object(stdClass) (', 'array(', $dump);
+
 		// FIXME: only send back HTML when content-type is text/html, or send raw text
 		$out = sprintf('<pre style="background: yellow; color: black; padding: 5px; overflow: auto">%s</pre>', $dump);
-
-		if (!empty($params['stop'])) {
-			echo $out;
-			exit;
-		}
 
 		return $out;
 	}
@@ -932,7 +968,7 @@ class Functions
 		}
 		// Internal request
 		else {
-			$api = new API($method, $path, $params);
+			$api = new API($method, $path, $params, false);
 
 			if ($access_level) {
 				$api->setAccessLevelByName($access_level);
@@ -999,6 +1035,7 @@ class Functions
 			}
 
 			$csv = $sheets[$name] = new CSV_Custom($session, $name);
+			$csv->setMaxFileSize(1024*1024*2);
 
 			$csv->setColumns($params['columns']);
 
@@ -1006,13 +1043,41 @@ class Functions
 				$csv->setMandatoryColumns($params['mandatory_columns']);
 			}
 
+			/* TODO: not perfect, also user-defined functions are still alpha
+			if (!empty($params['modifier'])) {
+				$mod_name = $params['modifier'];
+				$csv->setModifier(function ($row) use ($mod_name, $line, $ut) {
+					// Suppress any output
+					ob_start();
+					$row = (array) $row;
+					$row = $ut->callUserFunction('modifier', $mod_name, $row, $line);
+					$out = ob_get_clean();
+
+					// If there is any non empty input (eg. debug), display it
+					if (trim($out) !== '') {
+						echo $out;
+					}
+
+					if (!is_array($row)) {
+						throw new Brindille_Exception(sprintf('CSV modifier "%s" function returned "%s", but "array" expected', $mod_name, gettype($row)));
+					}
+
+					return (object)$row;
+				});
+			}
+			*/
+
 			if (!empty($_POST['csv_cancel'])) {
 				$csv->clear();
 				Utils::redirect(Utils::getSelfURI());
 			}
+			elseif (!$csv->loaded() && !empty($params['file'])) {
+				$csv->loadFromStoredFile($params['file']);
+				Utils::redirect(Utils::getSelfURI());
+			}
 			elseif (($key = self::_getFormKey()) && \KD2\Form::tokenCheck($key)) {
 				if (!empty($_POST['csv_upload'])) {
-					$csv->load($_FILES['csv'] ?? []);
+					$csv->upload($_FILES['csv'] ?? []);
 					Utils::redirect(Utils::getSelfURI());
 				}
 				elseif (!empty($_POST['translation_table'])) {

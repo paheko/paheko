@@ -1,3 +1,4 @@
+<form method="post" action="{"!config/ext/details.php?name=%s"|args:$item.name|local_url}">
 <article class="ext-details {if $_GET.focus == $item.name} highlight{/if}" id="{$item.name}">
 	<header>
 	{if $item.broken_message || $item.missing}
@@ -52,7 +53,7 @@
 			</p>
 
 			<p class="actions">
-				{if $item.enabled && $item.url && !$item.web}
+				{if $item.enabled && $item.url && !$item.module.web}
 					{linkbutton shape="right" label="Ouvrir" href=$item.url}
 				{/if}
 				{if $item.config_url && $item.enabled}
@@ -61,20 +62,18 @@
 				{if $item.type === 'module'}
 					{linkbutton label="Modifier le code" href="edit.php?module=%s"|args:$item.name shape="edit"}
 				{/if}
-				{if $item.ini.doc_url && stristr($item.ini.doc_url, 'paheko.cloud')}
-					{linkbutton label="Documentation" href=$item.ini.doc_url shape="help" target="_dialog"}
-				{elseif $item.ini.doc_url}
-					{linkbutton label="Documentation" href=$item.ini.doc_url shape="help" target="_blank"}
+				{if $item.doc_url}
+					{linkbutton label="Documentation" href=$item.doc_url shape="help" target=$item->getDocTarget()}
 				{/if}
 			</p>
 
 		</div>
 
 		<div class="toggle">
-			{if $item.enabled && !$item.web}
-				{button type="submit" label="Désactiver" shape="eye-off" name="disable[%s]"|args:$item.type value=$item.name}
+			{if $item.enabled && !$item.module.web}
+				{button type="submit" label="Désactiver" shape="eye-off" name="disable" value=1}
 			{elseif !$item.enabled}
-				{button type="submit" label="Activer" shape="eye" name="enable[%s]"|args:$item.type value=$item.name}
+				{button type="submit" label="Activer" shape="eye" name="enable" value=1}
 			{/if}
 
 			{if empty($hide_details)}
@@ -84,6 +83,10 @@
 						<figcaption>Accès limité</figcaption>
 						<span class="permissions">{display_permissions section=$item.restrict_section level=$item.restrict_level}</span>
 					</figure>
+				{elseif $item.ini.restrict_details}
+					<figure class="permissions">
+						<figcaption>Accès limité<br /><em>(voir détails)</em></figcaption>
+					</figure>
 				{/if}
 			{/if}
 
@@ -92,3 +95,5 @@
 	{/if}
 	</header>
 </article>
+{csrf_field key='ext_%s'|args:$item.name}
+</form>

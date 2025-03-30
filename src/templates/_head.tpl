@@ -4,7 +4,7 @@ $title ??= '';
 $current ??= '';
 ?>
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr" class="{if $dialog}dialog{/if}{if $logged_user.preferences.dark_theme} dark{/if}" data-version="{$version_hash}" data-url="{$admin_url}"{if !empty($prefer_landscape)} data-prefer-landscape="1"{/if}>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr" class="nojs{if $dialog} dialog{/if}{if $logged_user.preferences.dark_theme} dark{/if}" data-version="{$version_hash}" data-url="{$admin_url}"{if !empty($prefer_landscape)} data-prefer-landscape="1"{/if}>
 <head>
 	<meta charset="utf-8" />
 	<meta name="v" content="{$version_hash}" />
@@ -46,6 +46,9 @@ $current ??= '';
 		<link rel="apple-touch-icon" href="{$config->fileURL('icon')}" />
 	{/if}
 	{custom_colors config=$config}
+	{if ADMIN_CUSTOM_CSS}
+	<link rel="stylesheet" type="text/css" href="<?=ADMIN_CUSTOM_CSS?>" media="handheld,screen" />
+	{/if}
 </head>
 
 <?php
@@ -56,20 +59,19 @@ if (ALERT_MESSAGE && !$dialog) {
 }
 ?>
 
-<body{if !empty($class)} class="{$class}"{/if}{if !empty($upload_here)}{enable_upload_here path=$upload_here}{/if}>
+<body{if !empty($class)} class="{$class}"{/if}{if !empty($upload_here)}{enable_upload_here path=$upload_here}{elseif !empty($upload_here_url)}{enable_upload_here url=$upload_here_url}{/if}>
 
 {if ALERT_MESSAGE && !$dialog}
 	<div id="sticky-alert"><?=ALERT_MESSAGE?></div>
 {/if}
 
-{if !array_key_exists('_dialog', $_GET) && empty($layout)}
-<header class="header">
-	<nav class="menu">
-		<figure class="logo">
-		{if isset($config) && ($url = $config->fileURL('logo', '150px'))}
-				<a href="{$admin_uri}"><img src="{$url}" alt="" /></a>
-		{/if}
-		</figure>
+{if !array_key_exists('_dialog', $_GET) && $layout !== 'public' && $layout !== 'raw'}
+<nav id="menu">
+	<figure class="logo">
+	{if isset($config) && ($url = $config->fileURL('logo', '150px'))}
+			<a href="{$admin_uri}"><img src="{$url}" alt="" /></a>
+	{/if}
+	</figure>
 	<ul>
 	{if $is_logged}
 	<?php
@@ -153,16 +155,14 @@ if (ALERT_MESSAGE && !$dialog) {
 		<li{if $current == 'login'} class="current"{/if}><h3><a href="{$admin_url}">{icon shape="login"}<b>Connexion</b></a></h3></li>
 	{/if}
 	</ul>
-	</nav>
+</nav>
 
-	{if empty($hide_title)}
-	<h1>{$title}</h1>
-	{/if}
-</header>
 {elseif $layout === 'public'}
 <header class="public">
 	<h1><a href="{$site_url}">{if $config.files.logo}<img src="{$config->fileURL('logo', '150px')}" alt="" />{else}{$config.org_name}{/if}</a></h1>
 </header>
 {/if}
 
-<main>
+<main>	{if empty($hide_title) && !$dialog}
+	<h1 class="main">{$title}</h1>
+	{/if}

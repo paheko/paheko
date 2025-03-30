@@ -1,5 +1,11 @@
 {include file="_head.tpl" title="Dépôt en banque : %s — %s"|args:$account.code,$account.label current="acc/accounts"}
 
+{if $year.id !== $current_year.id}
+	<p class="alert block">
+		Note : les montants à déposer proviennent d'un précédent exercice ({$year->getLabelWithYearsAndStatus()}).
+	</p>
+{/if}
+
 {form_errors}
 
 {if $missing_balance > 0}
@@ -42,12 +48,13 @@
 		<fieldset>
 			<legend>Détails de l'écriture de dépôt</legend>
 			<dl>
-				<dt><strong>Nombre de chèques</strong></dt>
+				<dt><strong>Nombre de lignes cochées</strong></dt>
 				<dd><mark id="cheques_count">0</mark></dd>
+				<dd class="alert block empty_selection_message">Aucune ligne n'a été cochée.</dd>
 				{input type="text" name="label" label="Libellé" required=1 default="Dépôt en banque"}
 				{input type="date" name="date" default=$date label="Date" required=1}
 				{input type="money" name="amount" label="Montant" required=1}
-				{input type="list" target="!acc/charts/accounts/selector.php?chart=%d&targets=%d"|args:$account.id_chart,$target name="account_transfer" label="Compte de dépôt" required=1}
+				{input type="list" target="!acc/charts/accounts/selector.php?id_chart=%d&types=%d"|args:$account.id_chart:$types name="account_transfer" label="Compte de dépôt" required=1}
 				{input type="text" name="reference" label="Numéro de pièce comptable"}
 				{input type="textarea" name="notes" label="Remarques" rows=4 cols=30}
 			</dl>
@@ -74,6 +81,7 @@
 			}
 			$('#f_amount').value = g.formatMoney(total);
 			$('#cheques_count').innerText = count;
+			g.toggle('dd.empty_selection_message', count == 0);
 		});
 	});
 

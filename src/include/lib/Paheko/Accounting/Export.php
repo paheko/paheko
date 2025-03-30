@@ -65,7 +65,7 @@ class Export
 			'Membres associés'       => 'linked_users',
 		],
 		self::FEC => [
-			'JournalCode'   => null,
+			'JournalCode'   => 'journal',
 			'JournalLib'    => null,
 			'EcritureNum'   => 'id',
 			'EcritureDate'  => 'date',
@@ -289,6 +289,9 @@ class Export
 				$row->credit = Utils::money_format($row->credit, ',', '', false);
 				$row->debit = Utils::money_format($row->debit, ',', '', false);
 			}
+
+			// Always treat the transaction ID as a string
+			$row->id = (string) $row->id;
 
 			yield $row;
 		}

@@ -23,7 +23,7 @@ if (!$file->canRename($session)) {
 $csrf_key = 'file_rename_' . $file->pathHash();
 
 $form->runIf('rename', function () use ($file) {
-	$file->changeFileName(f('new_name'), true, true);
+	$file->changeFileName(f('new_name'), Session::getInstance(), true);
 }, $csrf_key, '!docs/?id=' . $file->getParentHashID());
 
 $tpl->assign(compact('file', 'csrf_key'));

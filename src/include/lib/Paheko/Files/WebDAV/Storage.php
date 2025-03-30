@@ -20,12 +20,6 @@ use const Paheko\{LOCAL_SECRET_KEY};
 
 class Storage extends AbstractStorage
 {
-	/**
-	 * These file names will be ignored when doing a PUT
-	 * as they are garbage, coming from some OS
-	 */
-	const PUT_IGNORE_PATTERN = '!^~(?:lock\.|^\._)|^(?:\.DS_Store|Thumbs\.db|desktop\.ini)$!';
-
 	protected ?array $cache = null;
 	protected array $root = [];
 
@@ -107,6 +101,32 @@ class Storage extends AbstractStorage
 	 */
 	public function get(string $uri): ?array
 	{
+		$file = $this->getFile($uri);
+
+		if (!$file) {
+			return null;
+		}
+
+		$file->serve();
+		return ['stop' => true];
+	}
+
+	/**
+	 * @extends
+	 */
+	public function fetch(string $uri): ?string
+	{
+		$file = $this->getFile($uri);
+
+		if (!$file) {
+			return null;
+		}
+
+		return $file->fetch();
+	}
+
+	protected function getFile(string $uri): ?File
+	{
 		$file = $this->load($uri);
 
 		if (!$file) {
@@ -124,8 +144,7 @@ class Storage extends AbstractStorage
 			return null;
 		}
 
-		$file->serve();
-		return ['stop' => true];
+		return $file;
 	}
 
 	/**
@@ -255,6 +274,7 @@ class Storage extends AbstractStorage
 			throw new WebDAV_Exception('Impossible de créer un fichier ici', 403);
 		}
 
+		// Ignore temporary files
 		if (preg_match(self::PUT_IGNORE_PATTERN, basename($uri))) {
 			return false;
 		}
@@ -304,7 +324,7 @@ class Storage extends AbstractStorage
 		rewind($pointer);
 
 		if ($new) {
-			Files::createFromPointer($uri, $pointer);
+			Files::createFromPointer($uri, $pointer, $this->session);
 		}
 		else {
 			$target->store(compact('pointer'));

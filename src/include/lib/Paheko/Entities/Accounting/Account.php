@@ -78,7 +78,7 @@ class Account extends Entity
 	const TYPE_CREDIT_REPORT = 14;
 	const TYPE_DEBIT_REPORT = 15;
 
-	const TYPE_TEMPORARY_TRANSFER = 16;
+	const TYPE_INTERNAL = 16;
 
 	const TYPES_NAMES = [
 		'',
@@ -97,7 +97,7 @@ class Account extends Entity
 		'Affectation du résultat',
 		'Report à nouveau créditeur',
 		'Report à nouveau débiteur',
-		'Virements internes',
+		'Mouvements internes',
 	];
 
 	/**
@@ -107,6 +107,7 @@ class Account extends Entity
 		self::TYPE_BANK,
 		self::TYPE_CASH,
 		self::TYPE_OUTSTANDING,
+		self::TYPE_INTERNAL,
 		self::TYPE_THIRD_PARTY,
 		self::TYPE_EXPENSE,
 		self::TYPE_REVENUE,
@@ -155,9 +156,9 @@ class Account extends Entity
 	const LOCAL_TYPES = [
 		'FR' => [
 			self::TYPE_BANK => '512',
-			self::TYPE_TEMPORARY_TRANSFER => '580',
 			self::TYPE_CASH => '53',
 			self::TYPE_OUTSTANDING => '511',
+			self::TYPE_INTERNAL => '580',
 			self::TYPE_THIRD_PARTY => '4',
 			self::TYPE_EXPENSE => '6',
 			self::TYPE_REVENUE => '7',
@@ -236,6 +237,7 @@ class Account extends Entity
 		'reference' => [
 			'label' => 'Pièce comptable',
 			'select' => 't.reference',
+			'order' => 't.reference COLLATE NAT_NOCASE %s',
 		],
 		'type' => [
 			'select' => 't.type',
@@ -243,6 +245,7 @@ class Account extends Entity
 		'label' => [
 			'select' => 't.label',
 			'label' => 'Libellé',
+			'order' => 't.label COLLATE U_NOCASE %s',
 		],
 		'line_label' => [
 			'select' => 'l.label',
@@ -444,6 +447,11 @@ class Account extends Entity
 	public function checkLocalRules(): void
 	{
 		$country = $this->getCountry();
+
+		if ($country === 'FR') {
+			$classe = substr($this->code, 0, 1);
+			$this->assert($classe >= 1 && $classe <= 8, 'Seuls les comptes de classe 1 à 8 sont autorisés dans le plan comptable français');
+		}
 
 		if (!$this->type) {
 			return;
@@ -921,9 +929,9 @@ class Account extends Entity
 	public function save(bool $selfcheck = true): bool
 	{
 		$this->setLocalRules();
+		$ok = parent::save($selfcheck);
 		DB::getInstance()->exec(sprintf('REPLACE INTO config (key, value) VALUES (\'last_chart_change\', %d);', time()));
-
-		return parent::save($selfcheck);
+		return $ok;
 	}
 
 	public function position_name(): string

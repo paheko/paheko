@@ -34,7 +34,7 @@ $fields = DF::getInstance()->all();
 	{/if}
 
 	<dd>
-		{if $field.type == 'checkbox'}
+		{if $field.type === 'checkbox'}
 			{if $value}
 				{icon shape="check"} Oui
 			{else}
@@ -45,7 +45,7 @@ $fields = DF::getInstance()->all();
 			$edit = ($field->user_access_level === Session::ACCESS_WRITE || $context === 'manage');
 			?>
 			{include file="common/files/_context_list.tpl" path="%s/%s"|args:$user_files_path:$key}
-		{elseif empty($value)}
+		{elseif null === $value}
 			<em>(Non renseigné)</em>
 		{elseif $field.type == 'email'}
 			<a href="mailto:{$value|escape:'url'}">{$value}</a>

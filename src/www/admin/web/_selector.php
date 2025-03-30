@@ -31,11 +31,11 @@ else {
 	$breadcrumbs = [];
 }
 
-$breadcrumbs = [null => 'Racine du site'] + $breadcrumbs;
-$categories = Web::listCategories($current_cat_id);
-
 // used to avoid being able to put a category inside itself
 $id_page = (int) qg('id_page');
+
+$breadcrumbs = [null => 'Racine du site'] + $breadcrumbs;
+$categories = Web::listCategories($current_cat_id, $id_page);
 
 $tpl->assign(compact('breadcrumbs', 'parent_id', 'categories', 'current_cat_id', 'current_cat_title', 'id_page'));
 

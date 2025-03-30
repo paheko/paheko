@@ -25,6 +25,7 @@ class CLI
 		'upgrade',
 		'version',
 		'config',
+		'db',
 		'sql',
 		'storage',
 		'cron',
@@ -32,7 +33,10 @@ class CLI
 		'env',
 		'ui',
 		'server',
+		'ext',
 	];
+
+	protected array $defaults = [];
 
 	public function parseOptions(array &$args, array $options, int $limit = 0)
 	{
@@ -200,6 +204,83 @@ class CLI
 
 		Plugins::fire('cron');
 
+	}
+
+	/**
+	 * Usage: paheko ext NAME SUBCOMMAND
+	 *
+	 * paheko ext list [--disabled]
+	 *   List enabled extensions, use --disabled to only list disabled extensions.
+	 *
+	 * paheko ext NAME
+	 *   Display informations on specified extension.
+	 *
+	 * paheko ext NAME enable
+	 *   Enable the specified extension.
+	 *
+	 * paheko ext NAME disable
+	 *   Disable the specified extension.
+     *
+	 * paheko ext NAME delete
+	 *   Delete all extension data from database.
+	 *   The extension needs to be disabled first.
+	 *   (No confirmation asked!)
+	 */
+	public function ext(array $args): void
+	{
+		@list($name) = $this->parseOptions($args, [], 1);
+
+		if (!$name) {
+			$this->help(['ext']);
+		}
+
+		if ($name === 'list') {
+			$o = $this->parseOptions($args, ['--disabled'], 0);
+			$list = array_key_exists('disabled', $o) ? Extensions::listDisabled() : Extensions::listEnabled();
+
+			foreach ($list as $ext) {
+				echo $ext->name . PHP_EOL;
+			}
+
+			$this->success();
+			return;
+		}
+
+		@list($command) = $this->parseOptions($args, [], 1);
+
+		$ext = Extensions::get($name);
+
+		if (!$ext) {
+			$this->fail("This extension does not exist");
+		}
+
+		if (!$command) {
+			printf("Name: %s\nType: %s\nEnabled: %s\nLabel: %s\nDescription: %s\n",
+				$ext->name,
+				$ext->type,
+				$ext->enabled ? 'yes' : 'no',
+				$ext->label,
+				$ext->description
+			);
+		}
+		elseif ($command === 'enable') {
+			$ext->enable();
+		}
+		elseif ($command === 'disable') {
+			$ext->disable();
+		}
+		elseif ($command === 'delete') {
+			if ($ext->enabled) {
+				$this->fail('This extension is enabled: cannot delete an enabled extension.');
+			}
+
+			$ext->delete();
+		}
+		else {
+			$this->fail('Unknown subcommand: paheko ext %s %s', $name, $command);
+		}
+
+		$this->success();
 	}
 
 	/**
@@ -410,7 +491,7 @@ class CLI
 	public function config(array $args)
 	{
 		foreach (Config::getInstance()->asArray() as $key => $value) {
-			echo $key . ": " . self::var_export($value) . PHP_EOL;
+			echo $key . ": " . Utils::var_export($value) . PHP_EOL;
 		}
 		$this->success();
 	}
@@ -421,56 +502,88 @@ class CLI
 	public function env(array $args)
 	{
 		foreach (Install::getConstants() as $key => $value) {
-			echo $key . ": " . self::var_export($value) . PHP_EOL;
+			echo $key . ": " . Utils::var_export($value) . PHP_EOL;
 		}
 		$this->success();
 	}
 
-	protected function var_export($v)
+	/**
+	 * Usage: paheko db COMMAND
+	 *
+	 * paheko db backup FILE
+	 *   Create a backup of the database to the provided file path.
+	 *
+	 * paheko db check
+	 *   Check database integrity and foreign keys.
+	 *
+	 * paheko db fkfix
+	 *   WARNING: this may result in data loss!
+	 *   Will try to fix foreign keys issues by DELETING the rows pointing
+	 *   to non-existing rows. Usually foreign key issues come from a parent
+	 *   row having been deleted but not the linked rows. So it's often safe,
+	 *   but you SHOULD make a backup before and verify with the 'check'
+	 *   command.
+	 */
+	public function db(array $args)
 	{
-		if (is_array($v) || is_object($v)) {
-			$out = '[';
-			$keys = !array_key_exists(0, $v);
+		@list($command) = $this->parseOptions($args, [], 1);
+		$db = DB::getInstance();
 
-			foreach ($v as $k => $v) {
-				if ($keys) {
-					$out .= $k . ': ';
-				}
+		if ($command === 'check') {
+			printf("Integrity: %s\n", $db->firstColumn('PRAGMA integrity_check;'));
 
-				$out .= self::var_export($v) . ', ';
+			$fk = 0;
+
+			foreach ($db->iterate('PRAGMA foreign_key_check;') as $row) {
+				$fk++;
+				echo $this->color('red', sprintf("Foreign key FAIL: %s:%d -> %s:%d", $row->table, $row->rowid, $row->parent, $row->fkid));
+				echo PHP_EOL;
 			}
 
-			$out = (strlen($out) > 1 ? substr($out, 0, -2) : $out) . ']';
+			if (!$fk) {
+				echo "Foreign keys: ok\n";
+			}
+			else {
+				$this->fail("Foreign keys: %d rows failed!", $fk);
+			}
 		}
-		elseif (is_bool($v)) {
-			$out = $v ? 'true' : 'false';
+		elseif ($command === 'fkfix') {
+			$db->begin();
+			foreach ($db->iterate('PRAGMA foreign_key_check;') as $row) {
+				$db->delete($row->table, 'id = ' . (int)$row->rowid);
+			}
+			$db->commit();
 		}
-		elseif (is_null($v)) {
-			$out = 'null';
-		}
-		elseif (is_string($v)) {
-			$out = '"' . strtr($v, ['"' => '\\"', "\n" => "\\n", "\r" => "\\r"]) . '"';
+		elseif ($command === 'backup') {
+			@list($file) = $this->parseOptions($args, [], 1);
+			Backup::make($file);
 		}
 		else {
-			$out = $v;
+			$this->help(['db']);
 		}
-		return $out;
+
+		$this->success();
 	}
 
 	/**
-	 * Usage: paheko sql OPTIONS… STATEMENT
-	 * Run SQL statement and display result.
+	 * Usage: paheko sql [STATEMENT]
+	 *   Run SQL statement and display result.
+	 *   Only read-only queries are supported (SELECT).
+	 *   INSERT, CREATE, ALTER, and other queries that would change
+	 *   the database are not supported.
 	 *
-	 * Options:
-	 *   --rw
-	 *     Specify this option to allow the statement to modify the database.
-	 *     If this is absent, the statement will be executed in read-only.
+	 *   If STATEMENT is omitted, then the 'sqlite3' program will be executed
+	 *   using the Paheko database file, in interactive mode.
 	 */
 	public function sql(array $args)
 	{
 		$rw = false;
 
-		if ($args[0] === '--rw') {
+		// This is a hidden parameter, by design! **DO NOT USE THIS!**
+		// This is intended to be used in *VERY* specific cases,
+		// mainly for debug use.
+		// You shouldn't modify the database yourself!
+		if (($args[0] ?? null) === '--write') {
 			$rw = true;
 			unset($args[0]);
 		}
@@ -478,21 +591,45 @@ class CLI
 		$sql = implode(' ', $args);
 
 		if (trim($sql) === '') {
-			$this->fail('No statement was provided.');
+			if (!shell_exec('which sqlite3')) {
+				$this->fail('No statement was provided and the "sqlite3" command is not installed.');
+			}
+
+			$args = [
+				'-header',
+				'-markdown',
+				'-nullvalue "*NULL*"'
+			];
+
+			if (!$rw) {
+				$args[] = '-readonly';
+			}
+
+			$args[] = escapeshellarg(DB_FILE);
+			$args = implode(' ', $args);
+			passthru('sqlite3 ' . $args);
+			return;
 		}
 
 		$db = DB::getInstance();
 
 		if ($rw) {
-			echo "[RW] " . $sql . PHP_EOL;
+			echo "[WRITE] " . $sql . PHP_EOL;
 			$st = $db->prepare($sql);
 		}
 		else {
-			echo "[RO] " . $sql . PHP_EOL;
+			echo "[SQL] " . $sql . PHP_EOL;
 			$st = $db->protectSelect(null, $sql);
 		}
 
 		$r = $st->execute();
+
+		if ($rw) {
+			$r->finalize();
+			printf("%d row(s) changed\n", $db->changes());
+			$this->success();
+			return;
+		}
 
 		$columns = [];
 
@@ -538,7 +675,15 @@ class CLI
 		$root = ROOT . '/www';
 		$router = $root . '/_route.php';
 
-		$cmd = sprintf('PHP_CLI_SERVER_WORKERS=3 php -S %s:%d -t %s -d variables_order=EGPCS %s',
+		$env = '';
+
+		// Pass command-line constants as environment variables
+		foreach ($this->defaults as $key => $value) {
+			$env .= sprintf('PAHEKO_%s=%s ', $key, escapeshellarg($value));
+		}
+
+		$cmd = sprintf('%s PHP_CLI_SERVER_WORKERS=3 php -S %s:%d -t %s -d variables_order=EGPCS %s',
+			$env,
 			escapeshellarg($address),
 			$port,
 			$root,
@@ -550,7 +695,10 @@ class CLI
 		if ($browser) {
 			$url = sprintf('http://%s:%d/admin/', $address, $port);
 
-			if (($_SERVER['DISPLAY'] ?? '') !== '') {
+			if (shell_exec('which xdg-open')) {
+				$browser = 'xdg-open %s';
+			}
+			elseif (shell_exec('which sensible-browser')) {
 				$browser = 'sensible-browser %s &';
 			}
 			else {
@@ -654,7 +802,7 @@ class CLI
 		}
 
 		if (isset($options['root'])) {
-			$constants['ROOT'] = $options['root'];
+			$constants['DATA_ROOT'] = $options['root'];
 		}
 
 		foreach ($options as $name => $value) {
@@ -662,6 +810,8 @@ class CLI
 				$constants[substr($name, 1)] = $value;
 			}
 		}
+
+		$this->defaults = $constants;
 
 		$constants['SKIP_STARTUP_CHECK'] = true;
 
@@ -681,7 +831,7 @@ class CLI
 				. "Any e-mail sent will not include the correct web server URL.");
 		}
 
-		if (!in_array($command, ['help', 'init', 'ui', 'server'])) {
+		if (!in_array($command, ['help', 'init', 'ui', 'server', 'db'])) {
 			if (!DB::isInstalled()) {
 				$this->fail('Database does not exist. Run "init" command first.');
 			}

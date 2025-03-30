@@ -15,21 +15,19 @@
 		{foreach from=$list item="parent"}
 			<tbody{if $parent.archived} class="archived"{/if}>
 				<tr class="title">
-					<th colspan="8">
-						<h2 class="ruler">{$parent.label}{if $parent.archived} <em>(archivé)</em>{/if}</h2>
+					<td colspan="4">
+						<h2 class="ruler-left">{$parent.label}{if $parent.archived} <em>(archivé)</em>{/if}</h2>
 						{if $parent.description}<p class="help">{$parent.description|escape|nl2br}</p>{/if}
+					</td>
+					<td colspan="4" class="actions">
 					{if !$table_export && !$by_year && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-					<p class="actions">
 						{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$parent.id target="_dialog"}
 						{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$parent.id target="_dialog"}
-					</p>
 					{/if}
 					{if !$table_export && $by_year}
-					<p class="actions">
 						{linkbutton href="!acc/reports/ledger.php?project=all&year=%d"|args:$parent.id_year label="Grand livre analytique"}
-					</p>
 					{/if}
-					</th>
+					</td>
 				</tr>
 			{foreach from=$parent.items item="item"}
 				<?php $result = $item->sum_revenue - $item->sum_expense; ?>

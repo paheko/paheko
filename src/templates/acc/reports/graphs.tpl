@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="%sGraphiques"|args:$project_title current="acc/years"  prefer_landscape=true}
+{include file="_head.tpl" title="%sGraphiques"|args:$title current="acc/years"  prefer_landscape=true}
 
 {include file="acc/reports/_header.tpl" current="graphs" title="Graphiques" allow_filter=false}
 

@@ -32,8 +32,9 @@ use Paheko\Entities\Accounting\Account;
 		</thead>
 		{foreach from=$grouped_accounts item="group"}
 		<tbody>
-			<tr>
-				<td colspan="6"><h2 class="ruler">{$group.label}</h2></td>
+			<tr class="no-border">
+				<td colspan="2"><span class="ruler-left"></span></td>
+				<td colspan="4"><h2 class="ruler-left">{$group.label}</h2></td>
 			</tr>
 			{foreach from=$group.accounts item="account"}
 				<tr class="account">
@@ -62,14 +63,16 @@ use Paheko\Entities\Accounting\Account;
 						{/if}
 					</td>
 					<td class="actions">
-						{linkbutton label="Journal" shape="menu" href="journal.php?id=%d&year=%d"|args:$account.id,$current_year.id}
-						{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-							{if $account.type === Entities\Accounting\Account::TYPE_BANK && ($account.debit || $account.credit)}
-								{linkbutton label="Rapprochement" shape="check" href="reconcile.php?id=%d"|args:$account.id}
-							{elseif $current_year->isOpen() && $account.type === Entities\Accounting\Account::TYPE_OUTSTANDING && $account.debit}
-								{linkbutton label="Dépôt en banque" shape="check" href="deposit.php?id=%d"|args:$account.id}
-							{/if}
+						{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)
+							&& $account.type === Entities\Accounting\Account::TYPE_BANK
+							&& ($account.debit || $account.credit)}
+							{linkbutton label="Rapprochement" shape="check" href="reconcile.php?id=%d"|args:$account.id}
+						{elseif $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)
+							&& $account.type === Entities\Accounting\Account::TYPE_OUTSTANDING
+							&& $account.debit}
+							{linkbutton label="Dépôt en banque" shape="check" href="deposit.php?id=%d&from_year=%d"|args:$account.id:$current_year.id}
 						{/if}
+						{linkbutton label="Journal" shape="menu" href="journal.php?id=%d&year=%d"|args:$account.id,$current_year.id}
 					</td>
 				</tr>
 			{/foreach}
@@ -86,8 +89,8 @@ use Paheko\Entities\Accounting\Account;
 {/if}
 
 <p class="help">
-	Note : n'apparaissent ici que les comptes qui ont été utilisés dans cet exercice (au moins une écriture) de types banque, caisse, tiers, dépenses ou recettes. Les autres comptes n'apparaissent que s'ils ont été utilisés et sont marqués comme favoris.<br />
-	Pour voir le solde de tous les comptes, se référer à la <a href="all.php">liste de tous les comptes de l'exercice</a>.<br />
+	Note : n'apparaissent ici que les comptes favoris qui ont été utilisés dans cet exercice (au moins une écriture).<br />
+	Pour voir le solde des comptes qui ne sont pas marqués comme favoris, se référer à la <a href="all.php">liste de tous les comptes de l'exercice</a>.<br />
 	Pour voir la liste complète des comptes, même ceux qui n'ont pas été utilisés, se référer au <a href="{$admin_url}acc/charts/accounts/?id={$current_year.id_chart}">plan comptable</a>.
 </p>
 

@@ -29,6 +29,7 @@ $tpl->assign('chart', $chart);
 
 $form->runIf('save', function() use ($transaction) {
 	$transaction->importFromNewForm();
+	$transaction->validateUsingConfig(Config::getInstance());
 	$transaction->save();
 	$transaction->saveLinks();
 }, $csrf_key, '!acc/transactions/details.php?id=' . $transaction->id());

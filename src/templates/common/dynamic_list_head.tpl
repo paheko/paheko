@@ -5,7 +5,7 @@
 			<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all" /><label for="f_all" title="Tout cocher / décocher"></label></td>
 			{/if}
 			{foreach from=$list->getHeaderColumns() key="key" item="column"}
-			{if empty($disable_user_ordering) && (!array_key_exists('select', $column) || !is_null($column['select'])) && !(array_key_exists('order', $column) && null === $column['order'])}
+			{if empty($disable_user_sort) && (!array_key_exists('select', $column) || !is_null($column['select'])) && !(array_key_exists('order', $column) && null === $column['order'])}
 				<td class="{if $list->order == $key}cur{/if}{if $column.header_icon} icon-header{/if}">
 					{if !empty($use_buttons)}
 						<button type="submit" name="_dl_order" value="{if $list.desc}&lt;{else}&gt;{/if}{$key}" title="{if $list->order == $key}Cliquer pour inverser le tri{else}Cliquer pour trier avec cette colonne{/if}">

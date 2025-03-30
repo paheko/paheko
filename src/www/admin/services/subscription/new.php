@@ -102,11 +102,11 @@ if (null !== $users && !count($users)) {
 $t = new Transaction;
 $t->type = $t::TYPE_REVENUE;
 $types_details = $t->getTypesDetails();
-$account_targets = $types_details[Transaction::TYPE_REVENUE]->accounts[1]->targets_string;
+$account_types = $types_details[Transaction::TYPE_REVENUE]->accounts[1]->types_string;
 
 $subscription = null;
 
-$tpl->assign(compact('csrf_key', 'users', 'account_targets', 'subscription', 'allow_users_edit', 'copy_service', 'copy_fee', 'copy_only_paid'));
+$tpl->assign(compact('csrf_key', 'users', 'account_types', 'subscription', 'allow_users_edit', 'copy_service', 'copy_fee', 'copy_only_paid'));
 $tpl->assign('projects', Projects::listAssoc());
 
 $tpl->display('services/subscription/new.tpl');

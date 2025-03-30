@@ -182,6 +182,18 @@ class Files
 			'trash'  => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_WRITE),
 		];
 
+		// You can also delete transaction subdirectories
+		$p[File::CONTEXT_TRANSACTION . '/'] = [
+			'mkdir'  => false,
+			'move'   => false,
+			'create' => false,
+			'read'   => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_READ),
+			'write'  => false,
+			'delete' => false,
+			'share'  => false,
+			'trash'  => $s->canAccess($s::SECTION_ACCOUNTING, $s::ACCESS_WRITE),
+		];
+
 		// But not in root
 		$p[File::CONTEXT_TRANSACTION] = [
 			'mkdir'  => false,
@@ -382,8 +394,8 @@ class Files
 
 	/**
 	 * Creates a ZIP file archive from multiple paths
-	 * @param null|string $target Target file name, if left NULL, then will be sent to browser
 	 * @param  array $files List of file paths to append to ZIP file
+	 * @param null|string $target Target file name, if left NULL, then will be sent to browser
 	 * @param  Session $session Logged-in user session, if set access rights to the path will be checked,
 	 * if left NULL, then no check will be made (!).
 	 */
@@ -689,14 +701,14 @@ class Files
 		}
 	}
 
-	static protected function create(string $parent, string $name, array $source = []): File
+	static protected function create(string $parent, string $name, array $source = [], ?Session $session = null): File
 	{
 		Files::checkQuota();
 
 		File::validateFileName($name);
 		File::validatePath($parent);
 
-		File::validateCanHTML($name, $parent);
+		File::validateCanHTML($name, $parent, $session);
 
 		$target = $parent . '/' . $name;
 
@@ -745,16 +757,26 @@ class Files
 		return $file;
 	}
 
-	static public function createDocument(string $parent, string $name, string $extension): File
+	/**
+	 * Create LibreOffice document
+	 * We need to make a file from an empty template, or Collabora will create a flat-XML file
+	 * @see https://github.com/nextcloud/richdocuments/tree/2338e2ff7078040d54fc0c70a96c8a1b860f43a0/emptyTemplates
+	 */
+	static public function createDocument(string $parent, string $name, string $extension, ?Session $session): File
 	{
-		// From https://github.com/nextcloud/richdocuments/tree/2338e2ff7078040d54fc0c70a96c8a1b860f43a0/emptyTemplates
-		// We need to copy an empty template, or Collabora will create flat-XML file
-		if ($extension == 'ods') {
+		// Spreadsheet
+		if ($extension === 'ods') {
 			$tpl = 'UEsDBBQAAAAAAOw6wVCFbDmKLgAAAC4AAAAIAAAAbWltZXR5cGVhcHBsaWNhdGlvbi92bmQub2FzaXMub3BlbmRvY3VtZW50LnNwcmVhZHNoZWV0UEsDBBQAAAAIABxZFFFL43PrmgAAAEABAAAVAAAATUVUQS1JTkYvbWFuaWZlc3QueG1slVDRDoMgDHz3KwjvwvZK1H9poEYSKETqon8vLpluWfawPrXXy921XQTyIxY2r0asMVA5x14uM5kExRdDELEYtiZlJJfsEpHYfPLNXd2kGBpRqzvB0QdsK3nexIUtIbQZeOqllhcc0XloecvYS8g5eAvsE+kHOfWMod7dVckzgisTIkv9p61NxIdGveBHAMaV9bGu0p3++tXQ7FBLAwQUAAAACAAAWRRRA4GGVIkAAAD/AAAACwAAAGNvbnRlbnQueG1sXY/RCsIwDEWf9SvG3uv0Ncz9S01TLLTNWFJwf29xbljzEu49N1wysvcBCRxjSZTVIGetu3ulmAU2eu/LkoGtBIFsEwkoAs+U9yv4TcPtcu2nc1dn/DqCS5hVuqG1fe0y3iIZRxg/+LQzW5ST1YBGdI3Uwge7tcpDy7yQdfIk0i03NMFD/n85vQFQSwECFAMUAAAAAADsOsFQhWw5ii4AAAAuAAAACAAAAAAAAAAAAAAAtIEAAAAAbWltZXR5cGVQSwECFAMUAAAACAAcWRRRS+Nz65oAAABAAQAAFQAAAAAAAAAAAAAAtIFUAAAATUVUQS1JTkYvbWFuaWZlc3QueG1sUEsBAhQDFAAAAAgAAFkUUQOBhlSJAAAA/wAAAAsAAAAAAAAAAAAAALSBIQEAAGNvbnRlbnQueG1sUEsFBgAAAAADAAMAsgAAANMBAAAAAA==';
 		}
-		elseif ($extension == 'odp') {
+		// Presentation
+		elseif ($extension === 'odp') {
 			$tpl = 'UEsDBBQAAAAAAC6dVEszJqyoLwAAAC8AAAAIAAAAbWltZXR5cGVhcHBsaWNhdGlvbi92bmQub2FzaXMub3BlbmRvY3VtZW50LnByZXNlbnRhdGlvblBLAwQUAAAACAAsYRRRP7fJFJoAAABBAQAAFQAAAE1FVEEtSU5GL21hbmlmZXN0LnhtbJVQwQqDMAy97ytK77bbNaj/EmpkhTYtNg79+1VhujF2WC5JXh7vJWkjsh+pCLwKtcTA5Wg7PU8MCYsvwBipgDhImXhIbo7EAp98uJmrVv1F1WgPcPSBmkqeVnVicwhNRrl32uoTjjR4bGTN1GnMOXiH4hPbBw9mX8O8u5s8Ual552j7p69LLJtIPeHHBkKL2G1cpVv79az+8gRQSwMEFAAAAAgAMl4UUXz4vRWJAAAA/gAAAAsAAABjb250ZW50LnhtbF2P0QqDMAxFn+dXiO+d22tw/ksXUyjYpJgI8+8tOGVdXsK994Qkg4QQkWASXBOxORS20ttPmlnhSF/dujCI16jAPpGCIUgmPqfgl4bn/dGNTVtq+DqKS8ymbT82t9MLZZELHslNhHOd+dUkeYvo1LaZ6vAt01bkpfNCWm4ouPAB9hV5yf8fx2YHUEsBAhQDFAAAAAAALp1USzMmrKgvAAAALwAAAAgAAAAAAAAAAAAAALSBAAAAAG1pbWV0eXBlUEsBAhQDFAAAAAgALGEUUT+3yRSaAAAAQQEAABUAAAAAAAAAAAAAALSBVQAAAE1FVEEtSU5GL21hbmlmZXN0LnhtbFBLAQIUAxQAAAAIADJeFFF8+L0ViQAAAP4AAAALAAAAAAAAAAAAAAC0gSIBAABjb250ZW50LnhtbFBLBQYAAAAAAwADALIAAADUAQAAAAA=';
 		}
+		// Drawing
+		elseif ($extension === 'odg') {
+			$tpl = 'UEsDBBQAAAAAAE8+S1PfJa3pNAAAADQAAAAIAAAAbWltZXR5cGVhcHBsaWNhdGlvbi92bmQub2FzaXMub3BlbmRvY3VtZW50LmdyYXBoaWNzLXRlbXBsYXRlUEsDBBQAAAAIALZDh1ScUI71nQAAAEEBAAAVAAAATUVUQS1JTkYvbWFuaWZlc3QueG1slVDNDoIwDD7LU5Ddt+l1Ad+lGUWWbF3DioG3F0kEjfHgrf365ftpk4BCj0Xca6jnFKnsa6umkVyGEoojSFiceJcZqct+SkjiPvnuYs7qWp2aHehDRL0Sx6U+sClGzSBDq6w64IRdAC0LY6uAOQYPEjLZO3Vmi2Denc1tBB6CL1owcQRBVdt/rH0meeqsDX6EEJzFbudVuLFfz7pWD1BLAwQUAAAACADDQ4dUUZP77oMAAAD2AAAACwAAAGNvbnRlbnQueG1sXY9BCoNADEXX9RTifmq7Dda7TDOZMjCTiIlUb1/BVrSr8PJ+CL+TGBMSBMGpEJtDYVtnPZfMCpt9NNPIIF6TAvtCCoYgA/HvCo5puF9vTV9dui8qjmkwrdvDLq5fXPRILhDms/OTSfGW0Kktmc7yKWFZcecw+nfi15ZpT6Ed/7v11QdQSwECFAMUAAAAAABPPktT3yWt6TQAAAA0AAAACAAAAAAAAAAAAAAAtIEAAAAAbWltZXR5cGVQSwECFAMUAAAACAC2Q4dUnFCO9Z0AAABBAQAAFQAAAAAAAAAAAAAAtIFaAAAATUVUQS1JTkYvbWFuaWZlc3QueG1sUEsBAhQDFAAAAAgAw0OHVFGT++6DAAAA9gAAAAsAAAAAAAAAAAAAALSBKgEAAGNvbnRlbnQueG1sUEsFBgAAAAADAAMAsgAAANYBAAAAAA==';
+		}
+		// Text
 		else {
 			$extension = 'odt';
 			$tpl = 'UEsDBBQAAAAAAPMbH0texjIMJwAAACcAAAAIAAAAbWltZXR5cGVhcHBsaWNhdGlvbi92bmQub2FzaXMub3BlbmRvY3VtZW50LnRleHRQSwMEFAAAAAgA3U0SUeqX5meSAAAAMQEAABUAAABNRVRBLUlORi9tYW5pZmVzdC54bWyVUEEOgzAMu+8VqHfa7Rq1/CUqQavUphUNE/wemDTYNO2wW2I7thWbkMNAVeA1NHOKXI/VqWlkyFhDBcZEFcRDLsR99lMiFvjUw01fVXdp7AEMIVK7CcelObEpxrag3J0y6oQT9QFbWQo5haXE4FFCZvPgXj8r6PdkLTSLMv+E+cyyX26df8TunmanN19rvr7TrVBLAwQUAAAACACQThJRWmJBaH8AAADjAAAACwAAAGNvbnRlbnQueG1sXY/RCsMgDEXf+xWj767ba+j8FxcjCGpKE6H9+wlbRfYUbs69uWTlECISeMaaqahBLtrm7cipCHzpa657AXYSBYrLJKAIvFG5UjC64Xl/zHZaf0pwj5vKYq9FaA0mOCTjCdMAXFXOTiMa0TNRI/3Im/3ZfUqHttQysqnL/0/sB1BLAQIUAxQAAAAAAPMbH0texjIMJwAAACcAAAAIAAAAAAAAAAAAAACkgQAAAABtaW1ldHlwZVBLAQIUAxQAAAAIAN1NElHql+ZnkgAAADEBAAAVAAAAAAAAAAAAAACkgU0AAABNRVRBLUlORi9tYW5pZmVzdC54bWxQSwECFAMUAAAACACQThJRWmJBaH8AAADjAAAACwAAAAAAAAAAAAAApIESAQAAY29udGVudC54bWxQSwUGAAAAAAMAAwCyAAAAugEAAAAA';
@@ -766,22 +788,22 @@ class Files
 			throw new ValidationException('Un document existe déjà avec ce nom : ' . $name . '.' .$extension);
 		}
 
-		return Files::createFromString($target, base64_decode($tpl));
+		return Files::createFromString($target, base64_decode($tpl), $session);
 	}
 
-	static public function createObject(string $target)
+	static public function createObject(string $target, ?Session $session = null)
 	{
 		$parent = Utils::dirname($target);
 		$name = Utils::basename($target);
-		return self::create($parent, $name);
+		return self::create($parent, $name, [], $session);
 	}
 
-	static public function createFrom(string $target, array $source): File
+	static public function createFrom(string $target, array $source, ?Session $session = null): File
 	{
 		$target = preg_replace('!\.\.|//!', '', $target);
 		$parent = Utils::dirname($target);
 		$name = Utils::basename($target);
-		$file = self::create($parent, $name, $source);
+		$file = self::create($parent, $name, $source, $session);
 		$file->store($source);
 		return $file;
 	}
@@ -792,9 +814,9 @@ class Files
 	 * @param  string $path    Source file path
 	 * @return File
 	 */
-	static public function createFromPath(string $target, string $path): File
+	static public function createFromPath(string $target, string $path, ?Session $session = null): File
 	{
-		return self::createFrom($target, compact('path'));
+		return self::createFrom($target, compact('path'), $session);
 	}
 
 	/**
@@ -803,14 +825,14 @@ class Files
 	 * @param  string $content    Source file contents
 	 * @return File
 	 */
-	static public function createFromString(string $target, string $content): File
+	static public function createFromString(string $target, string $content, ?Session $session = null): File
 	{
-		return self::createFrom($target, compact('content'));
+		return self::createFrom($target, compact('content'), $session);
 	}
 
-	static public function createFromPointer(string $target, $pointer): File
+	static public function createFromPointer(string $target, $pointer, ?Session $session = null): File
 	{
-		return self::createFrom($target, compact('pointer'));
+		return self::createFrom($target, compact('pointer'), $session);
 	}
 
 	/**
@@ -819,11 +841,11 @@ class Files
 	 * @param  string $key  The name of the file input in the HTML form (this MUST have a '[]' at the end of the name)
 	 * @return array list of File objects created
 	 */
-	static public function uploadMultiple(string $parent, string $key): array
+	static public function uploadMultiple(string $parent, string $key, ?Session $session): array
 	{
 		// Detect if it's actually a single file
 		if (isset($_FILES[$key]['name']) && !is_array($_FILES[$key]['name'])) {
-			return [self::upload($parent, $key)];
+			return [self::upload($parent, $key, $session)];
 		}
 
 		if (!isset($_FILES[$key]['name'][0])) {
@@ -853,7 +875,7 @@ class Files
 		// Then create files
 		foreach ($files as $file) {
 			$name = File::filterName($file['name']);
-			$out[] = self::createFromPath($parent . '/' . $name, $file['tmp_name']);
+			$out[] = self::createFromPath($parent . '/' . $name, $file['tmp_name'], $session);
 		}
 
 		return $out;
@@ -865,7 +887,7 @@ class Files
 	 * @param  string $key  The name of the file input in the HTML form
 	 * @return self Created file object
 	 */
-	static public function upload(string $parent, string $key, ?string $name = null): File
+	static public function upload(string $parent, string $key, ?Session $session, ?string $name = null): File
 	{
 		if (!isset($_FILES[$key]) || !is_array($_FILES[$key])) {
 			throw new UserException('Aucun fichier reçu');
@@ -887,7 +909,7 @@ class Files
 
 		$name = File::filterName($name ?? $file['name']);
 
-		return self::createFromPath($parent . '/' . $name, $file['tmp_name']);
+		return self::createFromPath($parent . '/' . $name, $file['tmp_name'], $session);
 	}
 
 
@@ -1106,6 +1128,8 @@ class Files
 			case 'docx':
 			case 'rtf':
 				return 'document';
+			case 'odg':
+				return 'edit';
 			case 'pdf':
 				return 'pdf';
 			case 'odp':

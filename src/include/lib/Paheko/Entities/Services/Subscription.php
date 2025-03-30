@@ -5,6 +5,7 @@ namespace Paheko\Entities\Services;
 use Paheko\DB;
 use Paheko\Entity;
 use Paheko\Form;
+use Paheko\UserException;
 use Paheko\ValidationException;
 use Paheko\Services\Fees;
 use Paheko\Services\Services;
@@ -88,15 +89,25 @@ class Subscription extends Entity
 				throw new \LogicException('The requested service is not found');
 			}
 
+			$multiple = intval($source['multiple'] ?? 1);
+
 			if ($service->duration) {
 				$dt = new Date;
-				$dt->modify(sprintf('+%d days', $service->duration));
+				$dt->modify(sprintf('+%d days', $service->duration * $multiple));
 				$this->set('expiry_date', $dt);
 			}
 			elseif ($service->end_date) {
+				if ($multiple > 1) {
+					throw new UserException('Il n\'est pas possible d\'inscrire plusieurs fois un membre à une activité à date fixe.');
+				}
+
 				$this->set('expiry_date', $service->end_date);
 			}
 			else {
+				if ($multiple > 1) {
+					throw new UserException('Il n\'est pas possible d\'inscrire plusieurs fois un membre à une activité sans durée.');
+				}
+
 				$this->set('expiry_date', null);
 			}
 		}

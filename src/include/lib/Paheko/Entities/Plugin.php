@@ -90,7 +90,7 @@ class Plugin extends Entity
 				sprintf('This restricted access level doesn\'t exist for this section: %s', $this->restrict_level));
 		}
 
-		$this->assert(Plugins::isAllowed($this->name), 'Cette extension est désactivée par l\'hébergeur.');
+		$this->assert(Plugins::isAllowed($this->name), 'Cette extension est désactivée par l\'hébergeur');
 	}
 
 	public function setBrokenMessage(string $str)
@@ -385,7 +385,13 @@ class Plugin extends Entity
 		$path = $this->path($file);
 
 		if (!file_exists($path)) {
-			throw new UserException(sprintf('Le fichier "%s" n\'existe pas dans le plugin "%s"', $file, $this->name));
+			if (file_exists($this->path('router.php'))) {
+				$this->call('router.php');
+				return;
+			}
+			else {
+				throw new UserException(sprintf('Le fichier "%s" n\'existe pas dans le plugin "%s"', $file, $this->name));
+			}
 		}
 
 		if (is_dir($path)) {
@@ -402,17 +408,16 @@ class Plugin extends Entity
 				define('Paheko\PLUGIN_ADMIN_URL', ADMIN_URL .'p/' . $this->name . '/');
 				define('Paheko\PLUGIN_QSP', '?');
 
-				$tpl = Template::getInstance();
-
 				if ($is_private) {
 					require ROOT . '/www/admin/_inc.php';
+					$tpl = Template::getInstance();
 					$tpl->assign('current', 'plugin_' . $this->name);
-				}
 
-				$tpl->assign('plugin', $this);
-				$tpl->assign('plugin_url', \Paheko\PLUGIN_URL);
-				$tpl->assign('plugin_admin_url', \Paheko\PLUGIN_ADMIN_URL);
-				$tpl->assign('plugin_root', \Paheko\PLUGIN_ROOT);
+					$tpl->assign('plugin', $this);
+					$tpl->assign('plugin_url', \Paheko\PLUGIN_URL);
+					$tpl->assign('plugin_admin_url', \Paheko\PLUGIN_ADMIN_URL);
+					$tpl->assign('plugin_root', \Paheko\PLUGIN_ROOT);
+				}
 			}
 
 			$plugin = $this;
@@ -432,6 +437,10 @@ class Plugin extends Entity
 		if (0 === strpos($uri, 'admin/')) {
 			if (!$session->isLogged()) {
 				Utils::redirect('!login.php');
+			}
+
+			if ($uri === 'admin/config.php') {
+				$session->requireAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
 			}
 
 			// Restrict access
@@ -456,5 +465,42 @@ class Plugin extends Entity
 	public function isAvailable(): bool
 	{
 		return $this->hasFile(self::META_FILE);
+	}
+
+	public function assertCanBeEnabled(): void
+	{
+		if (!Plugins::isAllowed($this->name)) {
+			throw new \RuntimeException('This plugin is not allowed: ' . $this->name);
+		}
+
+		if (!$this->hasFile(self::META_FILE)) {
+			throw new UserException(sprintf('Le plugin "%s" n\'est pas une extension Paheko : fichier plugin.ini manquant.', $this->name));
+		}
+
+		$this->updateFromINI();
+	}
+
+	public function enable(): void
+	{
+		$this->assertCanBeEnabled();
+
+		$db = DB::getInstance();
+		$db->begin();
+		$exists = $this->exists();
+
+		$this->set('enabled', true);
+		$this->save();
+
+		if (!$exists && $this->hasFile(self::INSTALL_FILE)) {
+			$this->call(self::INSTALL_FILE, true);
+		}
+
+		$db->commit();
+	}
+
+	public function disable(): void
+	{
+		$this->set('enabled', false);
+		$this->save();
 	}
 }

@@ -60,7 +60,9 @@ $form->runIf('save', function () use ($page, $editing_started, &$show_diff, &$my
 	$url = Utils::getLocalURL('!web/?id=' . $page->id);
 
 	if ($js) {
-		die(json_encode(['success' => true, 'modified' => $page->modified->getTimestamp(), 'redirect' => $url]));
+		header('Content-Type: application/json');
+		echo json_encode(['success' => true, 'modified' => $page->modified->getTimestamp(), 'redirect' => $url]);
+		exit;
 	}
 
 	Utils::redirect($url);

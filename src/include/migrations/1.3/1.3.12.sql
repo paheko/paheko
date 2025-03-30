@@ -14,8 +14,9 @@ WITH RECURSIVE children(status, inherited_status, id_parent, id, level, new_stat
 	SELECT p.status, p.inherited_status, p.id_parent, p.id, level + 1, CASE WHEN p.status < children.new_status THEN p.status ELSE children.new_status END
 	FROM web_pages p
 		JOIN children ON children.id = p.id_parent
-	)
-	UPDATE web_pages SET inherited_status = IFNULL((SELECT new_status FROM children WHERE id = web_pages.id), status);
+	LIMIT 100000
+)
+UPDATE web_pages SET inherited_status = IFNULL((SELECT new_status FROM children WHERE id = web_pages.id), status);
 
 DROP INDEX IF EXISTS acc_years_closed;
 ALTER TABLE acc_years RENAME COLUMN closed TO status;

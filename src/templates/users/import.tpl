@@ -20,6 +20,12 @@
 		Pour modifier vos informations de membre, utilisez la page {linkbutton shape="user" label="Mes informations personnelles" href="!me/"} ou demandez à un autre administrateur de modifier votre fiche.
 	</p>
 	{/if}
+	{if $report.has_admin_users}
+	<p class="alert block">
+		Ce fichier comporte des modifications à des fiches d'administrateurs.
+		Celles-ci ont été ignorées. Seul un administrateur peut modifier un autre administrateur.
+	</p>
+	{/if}
 
 	<p class="help block">
 		Aucun problème n'a été détecté.<br />

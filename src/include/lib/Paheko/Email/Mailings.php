@@ -20,23 +20,26 @@ class Mailings
 	{
 		$columns = [
 			'id' => [
+				'select' => 'm.id',
 			],
 			'subject' => [
 				'label' => 'Sujet',
+				'select' => 'm.subject',
 			],
 			'nb_recipients' => [
 				'label' => 'Destinataires',
-				'select' => '(SELECT COUNT(*) FROM mailings_recipients WHERE id_mailing = mailings.id)',
+				'select' => 'COUNT(r.id)',
 			],
 			'sent' => [
 				'label' => 'Date d\'envoi',
-				'order' => 'id %s',
+				'order' => 'm.id %s',
 			],
 		];
 
-		$tables = 'mailings';
+		$tables = 'mailings m LEFT JOIN mailings_recipients r ON r.id_mailing = m.id';
 
 		$list = new DynamicList($columns, $tables);
+		$list->groupBy('m.id');
 		$list->orderBy('sent', true);
 		return $list;
 	}

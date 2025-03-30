@@ -11,7 +11,7 @@ require_once __DIR__ . '/_inc.php';
 
 $session = Session::getInstance();
 
-if ($session->isLogged(true)) {
+if ($session->isLogged()) {
 	Utils::redirect('!');
 }
 

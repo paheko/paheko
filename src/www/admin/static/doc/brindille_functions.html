@@ -65,6 +65,7 @@
 			<li><a href="#continue">continue</a></li>
 			<li><a href="#debug">debug</a></li>
 			<li><a href="#error">error</a></li>
+			<li><a href="#exit">exit</a></li>
 			<li><a href="#form_errors">form_errors</a></li>
 			<li><a href="#http">http</a></li>
 			<li><a href="#include">include</a></li>
@@ -76,13 +77,19 @@
 				<li><a href="#fonctionnement-avance-fenetre-modale">Fonctionnement avancé (fenêtre modale)</a>
 			</ol></li>
 			<li><a href="#api">api</a></li>
-			<li><a href="#csv">csv</a></li>
+			<li><a href="#csv">csv</a>
+			<ol>
+				<li><a href="#chargement-d-un-fichier-local">Chargement d'un fichier local</a>
+			</ol></li>
 			<li><a href="#signature"> signature</a>
 		</ol></li>
 		<li><a href="#fonctions-relatives-aux-modules">Fonctions relatives aux Modules</a>
 		<ol>
 			<li><a href="#save">save</a>
 			<ol>
+				<li><a href="#mise-a-jour">Mise à jour</a></li>
+				<li><a href="#recuperer-l-identifiant-du-document-ajoute">Récupérer l'identifiant du document ajouté</a></li>
+				<li><a href="#enregistrer-plusieurs-documents-en-une-fois">Enregistrer plusieurs documents en une fois</a></li>
 				<li><a href="#validation-avec-un-schema-json">Validation avec un schéma JSON</a>
 			</ol></li>
 			<li><a href="#delete">delete</a></li>
@@ -90,6 +97,7 @@
 			<li><a href="#admin_header">admin_header</a></li>
 			<li><a href="#admin_footer">admin_footer</a></li>
 			<li><a href="#delete_form">delete_form</a></li>
+			<li><a href="#dropdown">dropdown</a></li>
 			<li><a href="#input">input</a>
 			<ol>
 				<li><a href="#valeur-du-champ">Valeur du champ</a></li>
@@ -233,6 +241,13 @@
 <p>Exemple :</p>
 <pre><code>{{if $_POST.nombre != 42}}
     {{:error message="Le nombre indiqué n'est pas 42"}}
+{{/if}}</code></pre>
+<h2 id="exit">exit</h2>
+<p>Arrête l'exécution du code immédiatement.</p>
+<p>Utile pour le debug principalement :</p>
+<pre><code>{{if $condition == 1}}
+  {{:debug a=42}}
+  {{:exit}}
 {{/if}}</code></pre>
 <h2 id="form_errors">form_errors</h2>
 <p>Affiche les erreurs du formulaire courant (au format HTML).</p>
@@ -572,7 +587,7 @@
 <tr>
 <td style="text-align: left;"><code>method</code></td>
 <td style="text-align: left;">obligatoire</td>
-<td style="text-align: left;">Méthode de requête : <code>GET</code>, <code>POST</code>, etc.</td>
+<td style="text-align: left;">Méthode de requête : <code>GET</code> ou <code>POST</code></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>path</code></td>
@@ -596,6 +611,7 @@
 </tr>
 </tbody>
 </table>
+<p>Note : les requêtes de type <code>PUT</code> ou <code>POST</code> qui nécessitent l'envoi d'un fichier (<code>import</code>) ne sont pas fonctionnelles pour le moment.</p>
 <p>Par défaut, les requêtes sont réalisées sur la base de données locale, dans ce cas les paramètres suivants sont également disponibles :</p>
 <table>
 <thead>
@@ -703,6 +719,11 @@ L'écriture n°{{$result.id}} a été créée.</code></pre>
 <td style="text-align: left;">optionnel</td>
 <td style="text-align: left;">Assigner le tableau indiquant les informations du fichier CSV à la variable donnée en valeur.</td>
 </tr>
+<tr>
+<td style="text-align: left;">file</td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Si ce paramètre est renseigné, le fichier correspondant sera chargé depuis les documents, sinon un formulaire d'upload sera proposé.</td>
+</tr>
 </tbody>
 </table>
 <p>Paramètres pour l'action <code>initialize</code> :</p>
@@ -747,6 +768,7 @@ L'écriture n°{{$result.id}} a été créée.</code></pre>
 <li><code>loaded</code> (booléen) : vaut <code>true</code> quand le fichier est chargé</li>
 <li><code>columns</code> (tableau) : les colonnes, définies dans l'appel avec l'action <code>initialize</code></li>
 <li><code>mandatory_columns</code> (tableau) : les colonnes requises, définies dans l'appel avec l'action <code>initialize</code></li>
+<li><code>file_name</code> (texte) : le nom du fichier uploadé</li>
 </ul>
 <p>Les clés suivantes ne sont renseignées que quand <code>ready</code> vaut <code>true</code> :</p>
 <ul>
@@ -783,6 +805,16 @@ L'écriture n°{{$result.id}} a été créée.</code></pre>
   {{:csv action="clear"}}
   {{:redirect to="./"}}
 {{/if}}</code></pre>
+<h3 id="chargement-d-un-fichier-local">Chargement d'un fichier local</h3>
+<p>Si le paramètre <code>file</code> n'est pas spécifié, un formulaire d'envoi de fichier sera affiché. S'il est renseigné avec le chemin vers un fichier stocké dans Paheko, c'est ce fichier qui sera chargé en mémoire lors de l'exécution de l'action <code>initialize</code>. Exemple :</p>
+<pre><code>{{:csv action="initialize" file="documents/test.ods" columns=$columns assign="csv"}}
+
+{{if !$csv.ready}}
+  {{:csv action="form"}}
+{{else}}
+  {{:debug csv=$csv}}
+{{/if}}</code></pre>
+<p>Comme le fichier est chargé en mémoire lors de la première exécution de l'action <code>initialize</code>, si le fichier est modifié après cette première exécution, les modifications ne seront pas visibles. Il faut donc exécuter <code>{{:csv action="clear"}}</code> pour pouvoir "recharger" le fichier en mémoire à partir des documents.</p>
 <h2 id="signature"> signature</h2>
 <p>Affiche la signature de l'association (en HTML), ou son logo si aucune signature n'a été choisie.</p>
 <h1 id="fonctions-relatives-aux-modules">Fonctions relatives aux Modules</h1>
@@ -828,6 +860,11 @@ L'écriture n°{{$result.id}} a été créée.</code></pre>
 <td style="text-align: left;">Si renseigné avec un tableau, chaque entrée du tableau sera traitée comme un élément à enregistrer.</td>
 </tr>
 <tr>
+<td style="text-align: left;"><code>replace</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">(Booléen) Si ce paramètre vaut <code>true</code>, alors le contenu du document sera écrasé, au lieu d'être fusionné.</td>
+</tr>
+<tr>
 <td style="text-align: left;">…</td>
 <td style="text-align: left;">optionnel</td>
 <td style="text-align: left;">Autres paramètres : traités comme des valeurs à enregistrer dans le document</td>
@@ -835,15 +872,24 @@ L'écriture n°{{$result.id}} a été créée.</code></pre>
 </tbody>
 </table>
 <p>Si ni <code>key</code> ni <code>id</code> ne sont indiqués, un nouveau document sera créé avec un nouveau numéro (ID) unique.</p>
+<h3 id="mise-a-jour">Mise à jour</h3>
 <p>Si le document indiqué existe déjà, il sera mis à jour. Les valeurs nulles (<code>NULL</code>) seront effacées.</p>
 <pre><code>{{:save key="facture_43" nom="Atelier mobile" montant=250}}</code></pre>
 <p>Enregistrera dans la base de données le document suivant sous la clé <code>facture_43</code> :</p>
 <pre><code>{"nom": "Atelier mobile", "montant": 250}</code></pre>
 <p>Exemple de mise à jour :</p>
 <pre><code>{{:save key="facture_43" montant=300}}</code></pre>
+<p>Seul le montant sera modifié, le nom ne sera pas modifié.</p>
+<p>Par contre en utilisant le paramètre <code>replace</code>, le document sera écrasé :</p>
+<pre><code>{{:save key="facture_43" replace=true nom="Vente de vélo"}}</code></pre>
+<p>Donnera :</p>
+<pre><code>{"nom": "Vente de vélo"}</code></pre>
+<p>Le montant est donc supprimé.</p>
+<h3 id="recuperer-l-identifiant-du-document-ajoute">Récupérer l'identifiant du document ajouté</h3>
 <p>Exemple de récupération du nouvel ID :</p>
 <pre><code>{{:save titre="Coucou !" assign_new_id="id"}}
 Le document n°{{$id}} a bien été enregistré.</code></pre>
+<h3 id="enregistrer-plusieurs-documents-en-une-fois">Enregistrer plusieurs documents en une fois</h3>
 <p>Le paramètre <code>from</code> est équivalent à appeler la fonction <code>save</code> dans une boucle. Ainsi au lieu de :</p>
 <pre><code>{{:assign var="documents." title="Titre 1"}}
 {{:assign var="documents." title="Titre 2"}}
@@ -1044,6 +1090,70 @@ Barème kilométrique pour une voiture de 3 CV : {{$baremes.voiture.3cv}}</code>
   alert="La facture sera définitivement perdue !"
   confirm="Cocher cette case pour confirmer la suppression de la facture"
 }}</code></pre>
+<h2 id="dropdown">dropdown</h2>
+<p>Crée un champ qui ressemble à un <code>&lt;select&gt;</code> en HTML, mais permet une formattage plus avancé, et est utilisé pour de la navigation.</p>
+<p>Ce n'est pas un champ de formulaire, aucune valeur n'est retournée s'il est utilisé dans un formulaire.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Obligatoire ou optionnel ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>options</code></td>
+<td style="text-align: left;"><strong>obligatoire</strong></td>
+<td style="text-align: left;">Tableau des options</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>title</code></td>
+<td style="text-align: left;"><strong>obligatoire</strong></td>
+<td style="text-align: left;">Libellé</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>value</code></td>
+<td style="text-align: left;">facultatif</td>
+<td style="text-align: left;">Valeur de l'option actuellement sélectionnée</td>
+</tr>
+</tbody>
+</table>
+<p>Chaque option peut contenir les clés suivantes :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>value</code></td>
+<td style="text-align: left;">Valeur de l'élément</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>html</code></td>
+<td style="text-align: left;">Contenu HTML de l'élément</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>label</code></td>
+<td style="text-align: left;">Libellé de l'élément (utilisé si <code>html</code> n'est pas renseigné)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>aside</code></td>
+<td style="text-align: left;">Élément à afficher en petit, à droite du libellé.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>href</code></td>
+<td style="text-align: left;">Si renseigné, le contenu sera dans un lien pointant vers cette adresse.</td>
+</tr>
+</tbody>
+</table>
+<p>Exemple :</p>
+<pre><code>{{:assign var="options." value="42" label="Membres cachés" aside="525 membres" href="?cat=42"}}
+{{:assign var="options." value="43" label="Tous les membres" aside="1234 membres" href="?cat=43"}}
+{{:dropdown value=42 options=$options title="Choisir une catégorie de membres"}}</code></pre>
 <h2 id="input">input</h2>
 <p>Crée un champ de formulaire HTML. Cette fonction est une extension à la balise <code>&lt;input&gt;</code> en HTML, mais permet plus de choses.</p>
 <table>
@@ -1118,11 +1228,13 @@ Barème kilométrique pour une voiture de 3 CV : {{$baremes.voiture.3cv}}</code>
 <li><code>select</code> crée un sélecteur de type <code>&lt;select&gt;</code>. Dans ce cas il convient d'indiquer un tableau associatif dans le paramètre <code>options</code>.</li>
 <li><code>select_groups</code> crée un sélecteur de type <code>&lt;select&gt;</code>, mais avec des <code>&lt;optgroup&gt;</code>. Dans ce cas il convient d'indiquer un tableau associatif à deux niveaux dans le paramètre <code>options</code>.</li>
 <li><code>list</code> crée un champ permettant de sélectionner un ou des éléments (selon si le paramètre <code>multiple</code> est <code>true</code> ou <code>false</code>) dans un formulaire externe. Le paramètre <code>can_delete</code> indique si l'utilisateur peut supprimer l'élément déjà sélectionné (si <code>multiple=false</code>). La sélection se fait à partir d'un  formulaire  dont l'URL doit être spécifiée dans le paramètre <code>target</code>. Les formulaires actuellement supportés sont :<ul>
-<li><code>!acc/charts/accounts/selector.php?targets=X</code> pour sélectionner un compte du plan comptable, où X est une liste de types de comptes qu'il faut permettre de choisir (séparés par des <code>:</code>)</li>
+<li><code>!acc/charts/accounts/selector.php?types=X</code> pour sélectionner un compte du plan comptable, où X est une liste de types de comptes qu'il faut permettre de choisir (séparés par des <code>|</code>)</li>
+<li><code>!acc/charts/accounts/selector.php?codes=X</code> pour sélectionner un compte du plan comptable, où X est une liste de codes de comptes qu'il faut permettre de choisir (séparés par des <code>|</code>). Il est possible d'utiliser une astérisque pour inclure les sous-comptes : <code>codes=512*|580*</code></li>
 <li><code>!users/selector.php</code> pour sélectionner un membre</li>
 </ul>
 </li>
 </ul>
+<p>Note : pour les champs de type <code>select</code> et <code>select_groups</code> il est possible de spécifier le paramètre <code>default_empty</code> pour la valeur vide par défaut du champ. <code>default_empty="Tous"</code> affichera ainsi la valeur <code>Tous</code> en première option du select. Si cette option est sélectionnée une chaîne vide sera envoyée.</p>
 <h2 id="button">button</h2>
 <p>Affiche un bouton, similaire à <code>&lt;button&gt;</code> en HTML, mais permet d'ajouter une icône par exemple.</p>
 <pre><code>{{:button type="submit" name="save" label="Créer ce membre" shape="plus" class="main"}}</code></pre>

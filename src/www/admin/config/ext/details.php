@@ -6,13 +6,12 @@ use Paheko\Users\Session;
 
 require_once __DIR__ . '/../_inc.php';
 
-$type = qg('type');
+$ext = Extensions::get(qg('name'));
 
-if (!$type || !($ext = Extensions::get($type, qg('name')))) {
+if (!$ext) {
 	throw new UserException('Extension inconnue');
 }
 
-$ext = Extensions::normalize($ext);
 $csrf_key = 'ext_' . $ext->name;
 $module = $ext->module ?? null;
 $plugin = $ext->plugin ?? null;
@@ -21,11 +20,13 @@ if ($ext->broken_message) {
 	throw new UserException($ext->broken_message);
 }
 
-$form->runIf(f('enable') || f('disable'), function () use ($ext) {
-	$enabled = f('enable') ? true : false;
-	Extensions::toggle($ext->type, $ext->name, $enabled);
-	Utils::redirect(sprintf('!config/ext/details.php?type=%s&name=%s&toggle=%d', $ext->type, $ext->name, $enabled));
-}, $csrf_key);
+$form->runIf('enable', function () use ($ext) {
+	$ext->enable();
+}, $csrf_key, $ext->details_url);
+
+$form->runIf('disable', function () use ($ext) {
+	$ext->disable();
+}, $csrf_key, $ext->details_url);
 
 if (isset($_GET['disk'])) {
 	$mode = 'disk';
@@ -33,11 +34,12 @@ if (isset($_GET['disk'])) {
 else {
 	$mode = 'details';
 
-	$snippets = $module ? $module->listSnippets() : [];
+	$snippets = $ext->listSnippets();
 	$access_details = [];
 
 	if ($ext->config_url) {
-		$access_details[] = sprintf('Cette extension a une <a href="%s">page de configuration</a>', $ext->config_url);
+		$access_details[] = sprintf('Cette extension a une <a href="%s">page de configuration</a>.', $ext->config_url)
+			. '<br /><em>(Seuls les administrateurs ayant accès à la configuration générale pourront accéder à cette page de configuration.)</em>';
 	}
 
 	if (!empty($ext->menu)) {

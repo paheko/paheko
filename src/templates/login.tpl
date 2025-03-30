@@ -1,5 +1,11 @@
 {include file="_head.tpl" title="Connexion" current="login"}
 
+{if DESKTOP_CONFIG_FILE}
+<nav class="tabs">
+	{linkbutton shape="reset" label="Ouvrir une autre base de données" href="!open_db.php"}
+</nav>
+{/if}
+
 {form_errors}
 
 {if $changed}

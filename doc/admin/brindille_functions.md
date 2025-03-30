@@ -163,6 +163,19 @@ Exemple :
 {{/if}}
 ```
 
+## exit
+
+Arrête l'exécution du code immédiatement.
+
+Utile pour le debug principalement :
+
+```
+{{if $condition == 1}}
+  {{:debug a=42}}
+  {{:exit}}
+{{/if}}
+```
+
 ## form_errors
 
 Affiche les erreurs du formulaire courant (au format HTML).
@@ -411,11 +424,13 @@ Voir la [documentation de l'API](https://paheko.cloud/api) pour la liste des fon
 
 | Paramètre | Obligatoire ou optionnel ? | Fonction |
 | :- | :- | :- |
-| `method` | obligatoire | Méthode de requête : `GET`, `POST`, etc. |
+| `method` | obligatoire | Méthode de requête : `GET` ou `POST` |
 | `path` | obligatoire | Chemin de la méthode de l'API à appeler. |
 | `fail` | optionnel | Booléen. Si `true`, alors une erreur sera affichée si la requête échoue. Si `false`, aucune erreur ne sera affichée. Défaut : `true`. |
 | `assign` | optionnel | Capturer le résultat dans cette variable. |
 | `assign_code` | optionnel | Capturer le code de retour dans cette variable. |
+
+Note : les requêtes de type `PUT` ou `POST` qui nécessitent l'envoi d'un fichier (`import`) ne sont pas fonctionnelles pour le moment.
 
 Par défaut, les requêtes sont réalisées sur la base de données locale, dans ce cas les paramètres suivants sont également disponibles :
 
@@ -484,6 +499,7 @@ Permet de demander à l'utilisateur de charger un fichier CSV (ou XLSX/ODS, selo
 | action | obligatoire | Action à réaliser : `initialize`, `form`, `cancel_button`, `clear` |
 | name | optionnel | Définit le nom du fichier, utile s'il y a plusieurs fichiers CSV dans le même module. |
 | assign | optionnel | Assigner le tableau indiquant les informations du fichier CSV à la variable donnée en valeur. |
+| file | optionnel | Si ce paramètre est renseigné, le fichier correspondant sera chargé depuis les documents, sinon un formulaire d'upload sera proposé. |
 
 Paramètres pour l'action `initialize` :
 
@@ -527,6 +543,7 @@ La variable `$csv` contiendra ensuite les informations sur le fichier CSV actuel
 * `loaded` (booléen) : vaut `true` quand le fichier est chargé
 * `columns` (tableau) : les colonnes, définies dans l'appel avec l'action `initialize`
 * `mandatory_columns` (tableau) : les colonnes requises, définies dans l'appel avec l'action `initialize`
+* `file_name` (texte) : le nom du fichier uploadé
 
 Les clés suivantes ne sont renseignées que quand `ready` vaut `true` :
 
@@ -581,6 +598,22 @@ Note : il est possible de combiner l'usage de la fonction `csv` avec le paramèt
 {{/if}}
 ```
 
+### Chargement d'un fichier local
+
+Si le paramètre `file` n'est pas spécifié, un formulaire d'envoi de fichier sera affiché. S'il est renseigné avec le chemin vers un fichier stocké dans Paheko, c'est ce fichier qui sera chargé en mémoire lors de l'exécution de l'action `initialize`. Exemple :
+
+```
+{{:csv action="initialize" file="documents/test.ods" columns=$columns assign="csv"}}
+
+{{if !$csv.ready}}
+  {{:csv action="form"}}
+{{else}}
+  {{:debug csv=$csv}}
+{{/if}}
+```
+
+Comme le fichier est chargé en mémoire lors de la première exécution de l'action `initialize`, si le fichier est modifié après cette première exécution, les modifications ne seront pas visibles. Il faut donc exécuter `{{:csv action="clear"}}` pour pouvoir "recharger" le fichier en mémoire à partir des documents.
+
 ## signature
 
 Affiche la signature de l'association (en HTML), ou son logo si aucune signature n'a été choisie.
@@ -599,9 +632,12 @@ Enregistre des données, sous la forme d'un document, dans la base de données, 
 | `validate_only` | optionnel | Liste des paramètres à valider (par exemple pour ne faire qu'une mise à jour partielle), séparés par des virgules. |
 | `assign_new_id` | optionnel | Si renseigné, le nouveau numéro unique du document sera indiqué dans cette variable. |
 | `from` | optionnel | Si renseigné avec un tableau, chaque entrée du tableau sera traitée comme un élément à enregistrer. |
+| `replace` | optionnel | (Booléen) Si ce paramètre vaut `true`, alors le contenu du document sera écrasé, au lieu d'être fusionné. |
 | … | optionnel | Autres paramètres : traités comme des valeurs à enregistrer dans le document |
 
 Si ni `key` ni `id` ne sont indiqués, un nouveau document sera créé avec un nouveau numéro (ID) unique.
+
+### Mise à jour
 
 Si le document indiqué existe déjà, il sera mis à jour. Les valeurs nulles (`NULL`) seront effacées.
 
@@ -621,12 +657,32 @@ Exemple de mise à jour :
 {{:save key="facture_43" montant=300}}
 ```
 
+Seul le montant sera modifié, le nom ne sera pas modifié.
+
+Par contre en utilisant le paramètre `replace`, le document sera écrasé :
+
+```
+{{:save key="facture_43" replace=true nom="Vente de vélo"}}
+```
+
+Donnera :
+
+```
+{"nom": "Vente de vélo"}
+```
+
+Le montant est donc supprimé.
+
+### Récupérer l'identifiant du document ajouté
+
 Exemple de récupération du nouvel ID :
 
 ```
 {{:save titre="Coucou !" assign_new_id="id"}}
 Le document n°{{$id}} a bien été enregistré.
 ```
+
+### Enregistrer plusieurs documents en une fois
 
 Le paramètre `from` est équivalent à appeler la fonction `save` dans une boucle. Ainsi au lieu de :
 
@@ -794,6 +850,36 @@ Exemple :
 }}
 ```
 
+## dropdown
+
+Crée un champ qui ressemble à un `<select>` en HTML, mais permet une formattage plus avancé, et est utilisé pour de la navigation.
+
+Ce n'est pas un champ de formulaire, aucune valeur n'est retournée s'il est utilisé dans un formulaire.
+
+| Paramètre | Obligatoire ou optionnel ? | Fonction |
+| :- | :- | :- |
+| `options` | **obligatoire** | Tableau des options |
+| `title` | **obligatoire** | Libellé |
+| `value` | facultatif | Valeur de l'option actuellement sélectionnée |
+
+Chaque option peut contenir les clés suivantes :
+
+| Paramètre | Fonction |
+| :- | :- |
+| `value` | Valeur de l'élément |
+| `html` | Contenu HTML de l'élément |
+| `label` | Libellé de l'élément (utilisé si `html` n'est pas renseigné) |
+| `aside` | Élément à afficher en petit, à droite du libellé. |
+| `href` | Si renseigné, le contenu sera dans un lien pointant vers cette adresse. |
+
+Exemple :
+
+```
+{{:assign var="options." value="42" label="Membres cachés" aside="525 membres" href="?cat=42"}}
+{{:assign var="options." value="43" label="Tous les membres" aside="1234 membres" href="?cat=43"}}
+{{:dropdown value=42 options=$options title="Choisir une catégorie de membres"}}
+```
+
 ## input
 
 Crée un champ de formulaire HTML. Cette fonction est une extension à la balise `<input>` en HTML, mais permet plus de choses.
@@ -839,8 +925,11 @@ Note : le paramètre `value` n'est pas supporté sauf pour checkbox et radio.
 * `select` crée un sélecteur de type `<select>`. Dans ce cas il convient d'indiquer un tableau associatif dans le paramètre `options`.
 * `select_groups` crée un sélecteur de type `<select>`, mais avec des `<optgroup>`. Dans ce cas il convient d'indiquer un tableau associatif à deux niveaux dans le paramètre `options`.
 * `list` crée un champ permettant de sélectionner un ou des éléments (selon si le paramètre `multiple` est `true` ou `false`) dans un formulaire externe. Le paramètre `can_delete` indique si l'utilisateur peut supprimer l'élément déjà sélectionné (si `multiple=false`). La sélection se fait à partir d'un  formulaire  dont l'URL doit être spécifiée dans le paramètre `target`. Les formulaires actuellement supportés sont :
-  * `!acc/charts/accounts/selector.php?targets=X` pour sélectionner un compte du plan comptable, où X est une liste de types de comptes qu'il faut permettre de choisir (séparés par des `:`)
+  * `!acc/charts/accounts/selector.php?types=X` pour sélectionner un compte du plan comptable, où X est une liste de types de comptes qu'il faut permettre de choisir (séparés par des `|`)
+  * `!acc/charts/accounts/selector.php?codes=X` pour sélectionner un compte du plan comptable, où X est une liste de codes de comptes qu'il faut permettre de choisir (séparés par des `|`). Il est possible d'utiliser une astérisque pour inclure les sous-comptes : `codes=512*|580*`
   * `!users/selector.php` pour sélectionner un membre
+
+Note : pour les champs de type `select` et `select_groups` il est possible de spécifier le paramètre `default_empty` pour la valeur vide par défaut du champ. `default_empty="Tous"` affichera ainsi la valeur `Tous` en première option du select. Si cette option est sélectionnée une chaîne vide sera envoyée.
 
 ## button
 

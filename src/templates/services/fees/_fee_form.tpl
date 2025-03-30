@@ -2,7 +2,7 @@
 assert(isset($legend));
 assert(isset($csrf_key));
 assert(isset($submit_label));
-$targets = Entities\Accounting\Account::TYPE_REVENUE;
+$types = Entities\Accounting\Account::TYPE_REVENUE;
 ?>
 
 {form_errors}
@@ -55,7 +55,7 @@ $targets = Entities\Accounting\Account::TYPE_REVENUE;
 					{/foreach}
 				</select>
 			</dd>
-			{input type="list" target="!acc/charts/accounts/selector.php?targets=%s&year=%d"|args:$targets,$fee.id_year name="account" label="Compte de recettes à utiliser" default=$account required=true}
+			{input type="list" target="!acc/charts/accounts/selector.php?types=%s&id_year=%d"|args:$types:$fee.id_year name="account" label="Compte de recettes à utiliser" default=$account required=true}
 			{if count($projects) > 0}
 				{input type="select" options=$projects name="id_project" label="Projet analytique" default=$fee.id_project required=false default_empty="— Aucun —"}
 			{/if}

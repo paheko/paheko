@@ -2,6 +2,7 @@
 namespace Paheko;
 
 use Paheko\Users\Categories;
+use Paheko\Users\Export;
 use Paheko\Users\Users;
 use Paheko\Users\Session;
 
@@ -19,7 +20,7 @@ $list = array_map('intval', $list);
 $csrf_key = 'users_actions';
 
 if ($action === 'ods' || $action === 'csv' || $action === 'xlsx') {
-	Users::exportSelected($action, $list);
+	Export::exportSelected($action, $list);
 	return;
 }
 elseif ($action === 'subscribe') {

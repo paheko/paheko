@@ -41,7 +41,7 @@ class Graph
 			'Total' => ['type' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING], 'exclude_position' => [Account::LIABILITY]],
 			'Banques' => ['type' => Account::TYPE_BANK],
 			'Caisses' => ['type' => Account::TYPE_CASH],
-			'En attente' => ['type' => Account::TYPE_OUTSTANDING, 'exclude_position' => [Account::LIABILITY]],
+			'Attente d\'encaissement' => ['type' => Account::TYPE_OUTSTANDING, 'exclude_position' => [Account::LIABILITY]],
 		],
 		'result' => [
 			'Recettes' => ['position' => Account::REVENUE, 'exclude_type' => Account::TYPE_VOLUNTEERING_REVENUE],

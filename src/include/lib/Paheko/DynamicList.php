@@ -18,6 +18,9 @@ class DynamicList implements \Countable
 	 * - If the key 'select' exists, then it will be used as the SELECT clause
 	 * - If the key 'label' exists, it will be used in the HTML table as its header
 	 * (if not, the result will still be available in the loop, just it will not generate a column in the HTML table)
+	 * - If the key 'order' exists and is NULL, then this column will not have sort buttons
+	 * - If the key 'order' exists and is a string it will be used for the ORDER BY clause when the
+	 *   column sort buttons are clicked. '%s' will be replaced by either ASC or DESC.
 	 * - If the key 'export' is TRUE, then the column will ONLY be included in CSV/ODS/XLSX exports
 	 * - If the key 'export' is FALSE, then the column will NOT be included in exports
 	 * (if the key `export` is NULL, or not set, then the column will be included both in HTML and in exports)

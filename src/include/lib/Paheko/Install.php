@@ -220,13 +220,14 @@ class Install
 
 	static public function install(string $country_code, string $name, string $user_name, string $user_email, string $user_password): void
 	{
-		if (file_exists(DB_FILE)) {
+		if (DB::isInstalled()) {
 			throw new UserException('La base de données existe déjà.');
 		}
 
 		self::checkAndCreateDirectories();
 		Files::disableQuota();
 		$db = DB::getInstance();
+		$db->disableInstallCheck(true);
 
 		$db->requireFeatures('cte', 'json_patch', 'fts4', 'date_functions_in_constraints', 'index_expressions', 'rename_column', 'upsert');
 
@@ -335,7 +336,6 @@ class Install
 			'type'    => $search::TYPE_JSON,
 			'content' => json_encode($query),
 		]);
-		$search->created = new \DateTime;
 		$search->save();
 
 		// Create an example saved search (accounting)
@@ -363,7 +363,6 @@ class Install
 			'type'    => $search::TYPE_JSON,
 			'content' => json_encode($query),
 		]);
-		$search->created = new \DateTime;
 		$search->save();
 
 		$config->save();
@@ -375,7 +374,8 @@ class Install
 		$has_welcome_plugin = Plugins::exists('welcome') && Plugins::isAllowed('welcome');
 
 		if ($has_welcome_plugin) {
-			Plugins::install('welcome');
+			$ext = Extensions::get('welcome');
+			$ext->enable();
 		}
 
 		if (FILE_STORAGE_BACKEND != 'SQLite') {
@@ -424,49 +424,54 @@ class Install
 		return true;
 	}
 
-	static public function setConfig(?string $file, string $key, $value, bool $overwrite = true): void
+	static public function setConfig(string $file, array $constants): void
 	{
-		if (null === $file) {
-			return;
-		}
-
 		if (!is_writable(dirname($file))) {
 			throw new \RuntimeException('Impossible de créer le fichier de configuration "'. $file .'". Le répertoire "'. dirname($file) . '" n\'est pas accessible en écriture.');
 		}
 
-		$new_line = sprintf('const %s = %s;', $key, var_export($value, true));
-
 		if (@filesize($file)) {
 			$config = file_get_contents($file);
 
-			$pattern = sprintf('/^.*(?:const\s+%s|define\s*\(.*%1$s).*$/m', $key);
+			$pattern = '/(^\s*)(?:const\s+([A-Z_]+)\s?=|\s*define\s*\(.*?Paheko\\\([A-Z_]+).*?\)).*(\s*$)/m';
 
-			$config = preg_replace_callback($pattern, function ($match) use ($new_line, $key, $value) {
-				if (false !== strpos($match[0], 'define')) {
-					return 'define(\'Paheko\\' . $key . '\', ' . var_export($value, true) . ');';
+			$config = preg_replace_callback($pattern, function ($match) use (&$constants) {
+				$key = $match[3] ?: $match[2];
+
+				if (!array_key_exists($key, $constants)) {
+					return $match[0];
+				}
+
+				$value = Utils::var_export($constants[$key]);
+				unset($constants[$key]);
+
+				if (!empty($match[3])) {
+					$replace = 'define(\'Paheko\\%s\', %s);';
 				}
 				else {
-					return $new_line;
+					$replace = 'const %s = %s;';
 				}
-			}, $config, -1, $count);
 
-			if ($count && !$overwrite) {
-				return;
-			}
+				return $match[1] . sprintf($replace, $key, $value) . $match[4];
+			}, $config);
 
-			if (!$count) {
-				$config = preg_replace('/\?>.*/s', '', $config);
-				$config .= PHP_EOL . $new_line . PHP_EOL;
+			if (count($constants)) {
+				$config = preg_replace('/\?>.*$|\s+$/s', '', $config);
+				$config .= PHP_EOL;
 			}
 		}
 		else {
 			$config = '<?php' . PHP_EOL
-				. 'namespace Paheko;' . PHP_EOL . PHP_EOL
-				. $new_line . PHP_EOL;
+				. 'namespace Paheko;' . PHP_EOL . PHP_EOL;
+		}
+
+		foreach ($constants as $key => $value) {
+			$config .= sprintf('const %s = %s;' . PHP_EOL, $key, Utils::var_export($value));
 		}
 
 		file_put_contents($file . '.tmp', $config);
 		rename($file . '.tmp', $file);
+		@clearstatcache($file);
 
 		// Make sure we reset the cached file, or the changes might take a few seconds to be reloaded
 		if (function_exists('opcache_reset')) {

@@ -19,7 +19,7 @@ if (!$count_all) {
 	Utils::redirect(ADMIN_URL . 'services/?CREATE');
 }
 
-$services = Services::listAssocWithFees();
+$services = Services::listGroupedWithFeesForSelect();
 $categories = Categories::listAssoc();
 
 $tpl->assign(compact('services', 'categories'));

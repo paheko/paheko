@@ -11,6 +11,7 @@ use Paheko\ValidationException;
 use Paheko\Utils;
 use Paheko\Users\DynamicFields;
 use Paheko\Services\Fees;
+use Paheko\Services\Services;
 
 class Service extends Entity
 {
@@ -91,6 +92,7 @@ class Service extends Entity
 			'identity' => [
 				'label' => 'Membre',
 				'select' => $id_field,
+				'order' => '_user_name_index %s',
 			],
 			'status' => [
 				'label' => 'Statut',
@@ -118,10 +120,14 @@ class Service extends Entity
 				'label' => 'Date d\'inscription',
 				'select' => 'sub.date',
 			],
+			'_user_name_index' => [
+				'select' => DynamicFields::getNameFieldsSearchableSQL('us'),
+			],
 		];
 
 		$tables = 'services_subscriptions AS sub
 			INNER JOIN users u ON u.id = sub.id_user
+			INNER JOIN users_search us ON us.id = u.id
 			INNER JOIN services s ON s.id = sub.id_service
 			LEFT JOIN services_fees sf ON sf.id = sub.id_fee
 			INNER JOIN (SELECT id, MAX(date) FROM services_subscriptions GROUP BY id_user, id_service) AS su2 ON su2.id = sub.id';
@@ -204,15 +210,6 @@ class Service extends Entity
 
 	public function long_label(): string
 	{
-		if ($this->duration) {
-			$duration = sprintf('%d jours', $this->duration);
-		}
-		elseif ($this->start_date)
-			$duration = sprintf('du %s au %s', $this->start_date->format('d/m/Y'), $this->end_date->format('d/m/Y'));
-		else {
-			$duration = 'ponctuelle';
-		}
-
-		return sprintf('%s — %s', $this->label, $duration);
+		return Services::getLongLabel($this);
 	}
 }

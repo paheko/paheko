@@ -108,6 +108,7 @@ class CommonModifiers
 		'strftime',
 		'size_in_bytes' => [Utils::class, 'format_bytes'],
 		'weight' => [Utils::class, 'format_weight'],
+		'weightval' => [Utils::class, 'weightToInteger'],
 		'typo',
 		'css_hex_to_rgb',
 		'css_hex_extract_hsv',
@@ -337,7 +338,8 @@ class CommonModifiers
 			return $str;
 		}
 
-		$str = preg_replace('/(?:\h|(?!&\w))([?!:»;])(?=\s|$)/us', "\xc2\xa0\\1", $str);
+		$str = preg_replace('/(?:\h|(?!&\w))([?!:»;€])(?=\s|$)/us', "\xc2\xa0\\1", $str);
+		$str = preg_replace('/(\d) +(\d{3})/', "\\1\xc2\xa0\\2", $str);
 		$str = preg_replace('/(?<=^|\s)([«])[\h]*/u', "\\1\xc2\xa0", (string)$str);
 		return $str;
 	}
@@ -409,7 +411,7 @@ class CommonModifiers
 			return $n;
 		}
 
-		if ($n[0] === '0' && strlen($n) === 10) {
+		if (strlen($n) === 10 && $n[0] === '0') {
 			$n = preg_replace('!(\d{2})!', '\\1 ', $n);
 		}
 

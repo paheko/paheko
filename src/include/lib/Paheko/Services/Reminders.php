@@ -15,10 +15,30 @@ use const Paheko\ADMIN_URL;
 
 class Reminders
 {
-	static public function list()
+	static public function getList(): DynamicList
 	{
-		return DB::getInstance()->get('SELECT s.label AS service_label, sr.* FROM services_reminders sr INNER JOIN services s ON s.id = sr.id_service
-			ORDER BY s.label COLLATE U_NOCASE;');
+		$columns = [
+			'service_label' => [
+				'select' => 's.label',
+				'label' => 'Activité',
+				'order' => 's.label COLLATE U_NOCASE %s',
+			],
+			'delay' => [
+				'select' => 'sr.delay',
+				'label' => 'Délai de rappel',
+			],
+			'subject' => [
+				'select' => 'sr.subject',
+				'label' => 'Sujet',
+				'order' => 'sr.subject COLLATE U_NOCASE %s',
+			],
+			'id' => ['select' => 'sr.id'],
+		];
+
+		$tables = 'services_reminders sr INNER JOIN services s ON s.id = sr.id_service';
+		$list = new DynamicList($columns, $tables);
+		$list->orderBy('service_label', false);
+		return $list;
 	}
 
 	static public function get(int $id)

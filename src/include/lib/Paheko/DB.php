@@ -29,6 +29,8 @@ class DB extends SQLite3
 
 	protected $_schema_update = 0;
 
+	protected bool $_install_check = true;
+
 	static public function getInstance()
 	{
 		if (null === self::$_instance) {
@@ -227,10 +229,19 @@ class DB extends SQLite3
 		return $s;
 	}
 
-	public function connect(): void
+	public function disableInstallCheck(bool $disable)
+	{
+		$this->_install_check = !$disable;
+	}
+
+	public function connect(bool $check_installed = true): void
 	{
 		if (null !== $this->db) {
 			return;
+		}
+
+		if ($check_installed && $this->_install_check && !self::isInstalled()) {
+			throw new \LogicException('Database has not been installed!');
 		}
 
 		parent::connect();
@@ -257,6 +268,42 @@ class DB extends SQLite3
 		}
 
 		self::registerCustomFunctions($this->db);
+		self::toggleAuthorizer($this->db, true);
+	}
+
+	static public function toggleAuthorizer($db, bool $enable): void
+	{
+		if (!method_exists($db, 'setAuthorizer')) {
+			return;
+		}
+
+		$db->setAuthorizer($enable ? [self::class, 'safetyAuthorizer'] : null);
+	}
+
+	/**
+	 * Basic authorizer to make sure dangerous functions cannot be used:
+	 * ATTACH, PRAGMA
+	 */
+	static public function safetyAuthorizer(int $action, ...$args)
+	{
+		if ($action === \SQLite3::ATTACH) {
+			return \SQLite3::DENY;
+		}
+
+		if ($action === \SQLite3::PRAGMA) {
+			// Only allow some PRAGMA statements
+			static $allowed = ['integrity_check', 'foreign_key_check', 'application_id',
+				'user_version', 'compile_options', 'legacy_alter_table', 'foreign_keys',
+				'query_only', 'index_list', 'foreign_key_list', 'table_info',
+				'index_xinfo',
+			];
+
+			if (!in_array($args[0], $allowed, true)) {
+				return \SQLite3::DENY;
+			}
+		}
+
+		return \SQLite3::OK;
 	}
 
 	static public function registerCustomFunctions($db)
@@ -266,7 +313,7 @@ class DB extends SQLite3
 		$db->createFunction('unicode_like', [self::class, 'unicodeLike']);
 		$db->createFunction('transliterate_to_ascii', [Utils::class, 'unicodeTransliterate']);
 		$db->createFunction('email_hash', [Addresses::class, 'hash']);
-		$db->createFunction('md5', 'md5');
+		$db->createFunction('md5', fn ($v) => is_null($v) ? null : md5($v));
 		$db->createFunction('uuid', [Utils::class, 'uuid']);
 		$db->createFunction('random_string', [Utils::class, 'random_string']);
 		$db->createFunction('print_binary', fn($value) => sprintf('%032d', decbin($value)));
@@ -330,6 +377,7 @@ class DB extends SQLite3
 		});
 
 		$db->createCollation('U_NOCASE', [Utils::class, 'unicodeCaseComparison']);
+		$db->createCollation('NAT_NOCASE', 'strnatcasecmp');
 	}
 
 	public function toggleUnicodeLike(bool $enable): void
@@ -357,19 +405,12 @@ class DB extends SQLite3
 	static public function getVersion($db)
 	{
 		$v = (int) $db->querySingle('PRAGMA user_version;');
-		$v = self::parseVersion($v);
 
-		if (null === $v) {
-			try {
-				// For legacy version before 1.1.0
-				$v = $db->querySingle('SELECT valeur FROM config WHERE cle = \'version\';');
-			}
-			catch (\Exception $e) {
-				throw new \RuntimeException('Cannot find application version', 0, $e);
-			}
+		if (empty($v)) {
+			throw new \LogicException('Cannot find application version');
 		}
 
-		return $v ?: null;
+		return self::parseVersion($v);
 	}
 
 	static public function parseVersion(int $v): ?string

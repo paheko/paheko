@@ -101,6 +101,11 @@ class Transactions
 		return DB::getInstance()->count('acc_transactions', 'id_creator = ?', $user_id);
 	}
 
+	static public function countAll(): int
+	{
+		return DB::getInstance()->count('acc_transactions');
+	}
+
 	/**
 	 * Returns a dynamic list of all waiting credit and debt transactions for closed years
 	 */
@@ -306,7 +311,7 @@ class Transactions
 			'linked_users'        => [],
 			'linked_transactions' => [],
 			'type_label'          => null,
-			'targets'             => implode(':', [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]),
+			'selector_types'      => implode('|', [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]),
 			'id_project'          => null,
 			'payment_line'        => null,
 		];

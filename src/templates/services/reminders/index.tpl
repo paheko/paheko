@@ -10,18 +10,11 @@
 	{/if}
 </p>
 
-{if empty($list)}
+{if !$list->count()}
 	<p class="alert block">Aucun rappel automatique n'est configuré.</p>
 {else}
-	<table class="list">
-		<thead>
-			<td>Activité</td>
-			<td>Délai de rappel</td>
-			<th>Sujet</th>
-			<td></td>
-		</thead>
-		<tbody>
-			{foreach from=$list item="reminder"}
+	{include file="common/dynamic_list_head.tpl"}
+			{foreach from=$list->iterate() item="reminder"}
 				<tr>
 					<td>
 						{$reminder.service_label}
@@ -46,6 +39,8 @@
 			{/foreach}
 		</tbody>
 	</table>
+
+	{$list->getHTMLPagination()|raw}
 {/if}
 
 {include file="_foot.tpl"}

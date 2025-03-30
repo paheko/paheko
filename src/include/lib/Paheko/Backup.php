@@ -5,6 +5,8 @@ namespace Paheko;
 use Paheko\Users\Session;
 use Paheko\Files\Storage;
 
+use stdClass;
+
 class Backup
 {
 	const NEED_UPGRADE = 0x01 << 2;
@@ -14,6 +16,60 @@ class Backup
 	const INTEGRITY_FAIL = 41;
 	const NOT_A_DB = 42;
 	const NO_APP_ID = 43;
+
+	static public function getDBDetails(string $path): stdClass
+	{
+		$file = Utils::basename($path);
+		$name = preg_replace('/^association\.(.*)\.sqlite$/', '$1', $file);
+		$auto = null;
+
+		if (substr($name, 0, 5) == 'auto.') {
+			$auto = (int) substr($name, 5);
+			$name = sprintf('Automatique n°%d', $auto);
+		}
+		elseif (0 === strpos($name, 'pre-upgrade-')) {
+			$name = sprintf('Avant mise à jour %s', substr($name, strlen('pre-upgrade-')));
+		}
+		elseif (preg_match('/^\d{4}-/', $name)) {
+			$name = 'Sauvegarde manuelle';
+		}
+		else {
+			$name = str_replace('.sqlite', '', $name);
+		}
+
+		$error = null;
+		$version = null;
+		$db = null;
+
+		try {
+			$db = new \SQLite3($path, \SQLITE3_OPEN_READONLY);
+			$version = DB::getVersion($db);
+			$db->close();
+		}
+		catch (\LogicException $e) {
+			$error = $e->getMessage();
+		}
+		catch (\Exception $e) {
+			$error = $db ? $db->lastErrorMsg() : $e->getMessage();
+		}
+
+		if ($version && version_compare($version, paheko_version(), '>')) {
+			$error = 'Cette version est trop récente';
+		}
+
+		$can_restore = $version && !$error ? version_compare($version, Upgrade::MIN_REQUIRED_VERSION, '>=') : false;
+
+		return (object) [
+			'filename'    => $file,
+			'date'        => filemtime($path),
+			'name'        => $name != $file ? $name : null,
+			'version'     => $version,
+			'can_restore' => $can_restore,
+			'auto'        => $auto,
+			'size'        => filesize($path),
+			'error'       => $error,
+		];
+	}
 
 	/**
 	 * Returns the list of SQLite backups
@@ -27,8 +83,7 @@ class Backup
 		$out = [];
 		$dir = dir(DATA_ROOT);
 
-		while ($file = $dir->read())
-		{
+		while ($file = $dir->read()) {
 			// Keep only backup files
 			if ($file[0] == '.' || !is_file(DATA_ROOT . '/' . $file)
 				|| !preg_match('![\w\d._-]+\.' . $ext . '$!i', $file) && $file != basename(DB_FILE)) {
@@ -43,55 +98,12 @@ class Backup
 				continue;
 			}
 
-			$name = preg_replace('/^association\.(.*)\.sqlite$/', '$1', $file);
-			$auto = null;
-
-			if (substr($name, 0, 5) == 'auto.') {
-				$auto = (int) substr($name, 5);
-				$name = sprintf('Automatique n°%d', $auto);
-			}
-			elseif (0 === strpos($name, 'pre-upgrade-')) {
-				$name = sprintf('Avant mise à jour %s', substr($name, strlen('pre-upgrade-')));
-			}
-			elseif (preg_match('/^\d{4}-/', $name)) {
-				$name = 'Sauvegarde manuelle';
-			}
-			else {
-				$name = str_replace('.sqlite', '', $file);
-			}
-
 			// Skip non-auto files
-			if ($auto_only && !$auto) {
+			if ($auto_only && 0 !== strpos($file, 'association.auto.')) {
 				continue;
 			}
 
-			$error = null;
-			$version = null;
-			$db = null;
-
-			try {
-				$db = new \SQLite3(DATA_ROOT . '/' . $file, \SQLITE3_OPEN_READONLY);
-				$version = DB::getVersion($db);
-				$db->close();
-			}
-			catch (\Exception $e) {
-				$error = $db ? $db->lastErrorMsg() : $e->getMessage();
-			}
-
-			if ($version && version_compare($version, paheko_version(), '>')) {
-				continue;
-			}
-
-			$out[$file] = (object) [
-				'filename'    => $file,
-				'date'        => filemtime(DATA_ROOT . '/' . $file),
-				'name'        => $name != $file ? $name : null,
-				'version'     => $version,
-				'can_restore' => $version ? version_compare($version, Upgrade::MIN_REQUIRED_VERSION, '>=') : false,
-				'auto'        => $auto,
-				'size'        => filesize(DATA_ROOT . '/' . $file),
-				'error'       => $error,
-			];
+			$out[$file] = self::getDBDetails(DATA_ROOT . '/' . $file);
 		}
 
 		$dir->close();
@@ -133,8 +145,14 @@ class Backup
 		Utils::safe_unlink($dest);
 
 		if ($version['versionNumber'] >= 3027000) {
-			// use VACUUM INTO instead when SQLite 3.27+ is required
+			// We need to allow ATTACH here, as VACUUM INTO is using ATTACH,
+			// so we disable the authorizer
+			DB::toggleAuthorizer($db, false);
+
+			// use VACUUM INTO instead when SQLite 3.27+ is available
 			$db->exec(sprintf('VACUUM INTO %s;', $db->quote($dest)));
+
+			DB::toggleAuthorizer($db, true);
 		}
 		else {
 			// use ::backup since PHP 7.4.0+
@@ -397,6 +415,16 @@ class Backup
 				'Message d\'erreur de SQLite : ' . $e->getMessage(), self::NOT_A_DB);
 		}
 
+
+		// see https://www.sqlite.org/security.html
+		$db->exec('PRAGMA cell_size_check = ON;');
+		$db->exec('PRAGMA mmap_size = 0;');
+
+		if ($db->version()['versionNumber'] >= 3041000) {
+			$db->exec('PRAGMA trusted_schema = OFF;');
+		}
+
+		DB::toggleAuthorizer($db, true);
 		DB::registerCustomFunctions($db);
 
 		try {
@@ -438,6 +466,10 @@ class Backup
 			throw new UserException(sprintf('Ce fichier a été créé avec une version trop ancienne (%s), il n\'est pas possible de le restaurer.', $version));
 		}
 
+		if ($version && version_compare($version, paheko_version(), '>')) {
+			throw new UserException(sprintf('Ce fichier provient d\'une version plus récente de Paheko (%s), que celle qui est installée (%s), il n\'est pas possible de le restaurer.', $version, paheko_version()));
+		}
+
 		// Check for AppID
 		$appid = $db->querySingle('PRAGMA application_id;', false);
 
@@ -446,7 +478,7 @@ class Backup
 		}
 
 		// Try to handle case where the admin performing the restore is no longer an admin in the restored database
-		if ($session && $session->isLogged(true)) {
+		if ($session && $session->isLogged(false)) {
 			$sql = 'SELECT 1 FROM users_categories WHERE id = (SELECT id_category FROM users WHERE id = %d) AND perm_connect >= %d AND perm_config >= %d';
 
 			$sql = sprintf($sql, $session->getUser()->id, Session::ACCESS_READ, Session::ACCESS_ADMIN);
@@ -480,11 +512,6 @@ class Backup
 			$db->exec(sprintf('UPDATE users_categories SET perm_config = %d, perm_connect = %d;', Session::ACCESS_ADMIN, Session::ACCESS_READ));
 		}
 
-		// Force user to be re-logged as the first admin
-		if ($session && $session->isLogged(true)) {
-			$return |= self::CHANGED_USER;
-		}
-
 		if ($version != paheko_version()) {
 			$return |= self::NEED_UPGRADE;
 		}
@@ -495,6 +522,10 @@ class Backup
 			// Re-sync files cache with storage, if necessary
 			Storage::sync();
 		}
+
+		$name = Utils::basename($file);
+		$name = str_replace(['.sqlite', 'association.'], '', $name);
+		Log::add(Log::MESSAGE, ['message' => 'Sauvegarde restaurée : ' . $name], $session::getUserId());
 
 		return $return;
 	}

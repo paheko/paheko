@@ -247,9 +247,11 @@ class Extensions
 	{
 		static $align_replace = ['gauche' => 'left', 'droite' => 'right', 'centre' => 'center'];
 
-		$name = $args['file'] ?? ($args[0] ?? null);
+		$name = $args['src'] ?? ($args['file'] ?? ($args[0] ?? null));
 		$align = $args['align'] ?? ($args[1] ?? null);
 		$caption = $args['caption'] ?? (isset($args[2]) ? implode(' ', array_slice($args, 2)) : null);
+		$alt = $args['alt'] ?? null;
+		$url = $args['href'] ?? null;
 
 		$align = strtr((string)$align, $align_replace);
 
@@ -267,8 +269,9 @@ class Extensions
 			$size = null;
 		}
 
-		$out = self::img($name, $align ? $size : null, $caption);
+		$out = self::img($name, $align ? $size : null, $alt ?? $caption, $url);
 
+		// Linked image
 		if (!empty($align)) {
 			if ($caption) {
 				$caption = sprintf('<figcaption>%s</figcaption>', htmlspecialchars($caption));
@@ -280,7 +283,7 @@ class Extensions
 		return $out;
 	}
 
-	static protected function img(string $name, ?string $thumb_size = File::THUMB_SIZE_TINY, ?string $caption = null): string
+	static protected function img(string $name, ?string $thumb_size = File::THUMB_SIZE_TINY, ?string $caption = null, ?string $url = null): string
 	{
 		$file = self::$renderer->resolveAttachment($name);
 
@@ -289,18 +292,20 @@ class Extensions
 		}
 
 		$svg = substr($name, -4) == '.svg';
-		$url = $file->url();
+		$file_url = $file->url();
+		$href = $url ?? $file_url;
 
 		if ($svg || !$thumb_size) {
-			$thumb_url = $url;
+			$thumb_url = $file_url;
 		}
 		else {
 			$thumb_url = $file->thumb_url($thumb_size);
 		}
 
-		return sprintf('<a href="%s" class="internal-image" target="_image"><img src="%s" alt="%s" loading="lazy" /></a>',
-			htmlspecialchars($url),
-			htmlspecialchars($thumb_url ?? $url),
+		return sprintf('<a href="%s" %s><img src="%s" alt="%s" loading="lazy" /></a>',
+			htmlspecialchars($href),
+			$url ? '' : 'class="internal-image" target="_image"',
+			htmlspecialchars($thumb_url ?? $file_url),
 			htmlspecialchars($caption ?? '')
 		);
 	}

@@ -257,7 +257,7 @@ Exemple plus complexe :
 {{:assign var='type_whitelist.html' value=1}}
 
 {{#foreach from=$documents item='document'}}
-  {{:assign var='allowed' value='type_whitelist.%s'|args:$document->type}}
+  {{:assign var='allowed' value='type_whitelist.%s'|args:$document.type}}
   {{if $allowed !== null}}
     {{:include file='document/'|cat:$type:'.tpl' keep='document'}}
   {{/if}}

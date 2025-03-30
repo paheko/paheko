@@ -89,6 +89,7 @@
 		</ol></li>
 		<li><a href="#sections-relatives-aux-modules">Sections relatives aux modules</a>
 		<ol>
+			<li><a href="#extension">extension</a></li>
 			<li><a href="#module">module</a></li>
 			<li><a href="#form">form</a></li>
 			<li><a href="#load-sup-sql-sup">load <sup>(sql)</sup></a></li>
@@ -809,6 +810,31 @@ Il y a {{$result.count}} articles.
 </tbody>
 </table>
 <h1 id="sections-relatives-aux-modules">Sections relatives aux modules</h1>
+<h2 id="extension">extension</h2>
+<p>Permet de charger les informations d'une extension (que ça soit un module ou un plugin). Utile pour récupérer ses infos, ou vérifier si une extension est activée.</p>
+<p>Si une extension est désactivée, la section ne renverra aucun résultat.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Optionnel / obligatoire ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>name</code></td>
+<td style="text-align: left;"><strong>obligatoire</strong></td>
+<td style="text-align: left;">Nom unique du module</td>
+</tr>
+</tbody>
+</table>
+<pre><code>{{#extension name="caisse"}}
+    L'extension est activée : {{$label}}
+    (C'est un {{$type}})
+{{else}}
+    L'extension caisse est désactivée.
+{{/if}}</code></pre>
 <h2 id="module">module</h2>
 <p>Permet de charger les informations d'un autre module. Utile pour récupérer ses infos, ou vérifier si un module est activé.</p>
 <p>Si un module est désactivé, la section ne renverra aucun résultat.</p>
@@ -822,7 +848,7 @@ Il y a {{$result.count}} articles.
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><code>module</code></td>
+<td style="text-align: left;"><code>name</code></td>
 <td style="text-align: left;"><strong>obligatoire</strong></td>
 <td style="text-align: left;">Nom unique du module</td>
 </tr>
@@ -980,7 +1006,12 @@ Le document n°{{$id}} est celui qui parle de Greta.
 <tr>
 <td style="text-align: left;"><code>group</code></td>
 <td style="text-align: left;"><em>optionnel</em></td>
-<td style="text-align: left;">Expression SQL utilisée par défaut pour le groupement des résultats (<code>GROUP BY</code>).</td>
+<td style="text-align: left;">Expression SQL utilisée pour le groupement des résultats (<code>GROUP BY</code>).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>count</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Expression SQL utilisée pour le décompte des résultats. Défaut : <code>COUNT(*)</code>. Principalement utile avec la clause <code>group</code>.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>desc</code></td>
@@ -1008,7 +1039,7 @@ Le document n°{{$id}} est celui qui parle de Greta.
 <td style="text-align: left;">Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle.</td>
 </tr>
 <tr>
-<td style="text-align: left;"><code>disable_user_ordering</code></td>
+<td style="text-align: left;"><code>disable_user_sort</code></td>
 <td style="text-align: left;"><em>optionnel</em></td>
 <td style="text-align: left;">Booléen. Si ce paramètre est <code>true</code>, il ne sera pas possible à l'utilisateur d'ordonner les colonnes.</td>
 </tr>

@@ -31,7 +31,30 @@ namespace Paheko;
 //const SECRET_KEY = '3xUhIgGwuovRKOjVsVPQ5yUMfXUSIOX2GKzcebsz5OINrYC50r';
 
 /**
- * @var null|int|array
+ * OPEN_BASEDIR
+ *
+ * PHP propose la directive de configuration "open_basedir" pour
+ * améliorer la sécurité de l'installation.
+ *
+ * Indiquer `auto` pour ce réglage fait que Paheko va automatiquement
+ * ajouter à cette directive les chemins qu'il utilise.
+ *
+ * Il est possible d'ajouter d'autres chemins à la directive open_basedir
+ * en utilisant le caractère `:` comme séparateur :
+ * 'auto:/var/www/other:/var/lib/test'
+ *
+ * Avertissement : activer ce réglage désactive le cache realpath
+ * de PHP, risquant de rendre l'application plus lente.
+ *
+ * @see https://www.php.net/manual/en/ini.core.php#ini.open-basedir
+ * @var string|null
+ * @default null
+ */
+
+//const OPEN_BASEDIR = 'auto';
+
+/**
+ * LOCAL_LOGIN
  *
  * Forcer la connexion locale
  *
@@ -73,7 +96,7 @@ namespace Paheko;
  * il est toujours possible de restaurer une base de données non signée en
  * la recopiant à la place du fichier association.sqlite
  *
- * Défaut : true
+ * Défaut : false
  * @var  bool
  */
 
@@ -381,6 +404,31 @@ namespace Paheko;
  * @var string
  */
 //const SQLITE_JOURNAL_MODE = 'TRUNCATE';
+
+/**
+ * Activation du journal d'audit séparé
+ *
+ * Si cette constante est renseignée par un fichier texte, le journal d'audit y sera
+ * également enregistré.
+ *
+ * Cela permet d'enregistrer le journal d'audit en dehors de la base de données.
+ *
+ * Default : null (= désactivé)
+ * @var string|null
+ */
+// const AUDIT_LOG_FILE = __DIR__ . '/audit.log';
+
+/**
+ * Taille maximale du journal d'audit séparé (en octets)
+ *
+ * Une fois que le journal d'audit atteint cette taille, il est coupé en deux,
+ * afin de supprimer les anciennes entrées. Exemple : une limite de 200 Ko, quand
+ * elle est atteinte les premiers 100 Ko sont remplacés par "(cut...)".
+ *
+ * Default : 1024*1024 (1 Mo)
+ * @var int
+ */
+// const AUDIT_LOG_LIMIT = 1024*1024;
 
 /**
  * Activation du log HTTP (option de développement)
@@ -924,7 +972,6 @@ namespace Paheko;
  *
  * Défaut : true
  * @var bool
- * @var string|null
  */
 //const ENABLE_FILE_THUMBNAILS = false;
 

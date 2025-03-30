@@ -70,7 +70,7 @@ Transforme un tableau en liste textuelle, par exemple pour envoyer dans un e-mai
 ```
 {{:assign var="table" a="blue" b="cyan"}}
 {{:assign var="table.c" color1="darkred" color2="darkgreen"}}
-{{$table|array}}
+{{$table|array_to_list}}
 ```
 
 ```
@@ -199,6 +199,23 @@ Affichera :
 - a
 - b
 - c
+```
+
+## filter
+
+Supprime les éléments vides d'un tableau.
+
+```
+{{:assign var="table" a=0 b="coucou" c=""}}
+{{:debug table=$table|filter}}
+```
+
+Affichera :
+
+```
+[
+	"b" => "coucou"
+]
 ```
 
 ## implode
@@ -363,6 +380,15 @@ Affichera :
 01 02 03 04 05
 ```
 
+## get_leading_number
+
+Renvoie le numéro au début d'un titre.
+
+```
+{{"03. Beau titre"|get_leading_number}}
+3
+```
+
 ## markdown
 
 Transforme un texte en HTML en utilisant la syntaxe Markdown.
@@ -371,6 +397,14 @@ Il est conseillé de rajouter le filtre `|raw` pour ne pas échapper le HTML pro
 
 ```
 {{$texte|markdown|raw}}
+```
+
+## minify
+
+Supprime les retours à la ligne et espaces inutiles dans le code CSS ou Javascript.
+
+```
+{{$code|minify:'js'}}
 ```
 
 ## raw
@@ -441,9 +475,17 @@ Ceci n'est pas un t
 
 Formatte un texte selon les règles typographiques françaises : ajoute des espaces insécables devant ou derrière les ponctuations françaises (`« » ? ! :`).
 
-## urlencode
+## url_encode
 
 Encode une chaîne de texte pour utilisation dans une adresse URL (alias de `rawurlencode` en PHP).
+
+## url_decode
+
+Décode une chaîne de texte venant d'une URL (alias de `rawurldecode` en PHP).
+
+## cdata_escape
+
+Échappe le contenu pour un usage dans une balise `<![CDATA[…]]>` d'un document XML.
 
 ## xml_escape
 

@@ -27,7 +27,7 @@ $form->runIf('save', function () use ($fee) {
 if ($fee->amount) {
 	$amount_type = 1;
 }
-elseif ($fee->formula) {
+elseif ($fee->formula !== null) {
 	$amount_type = 2;
 }
 else {

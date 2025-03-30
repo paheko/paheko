@@ -8,10 +8,10 @@ if (!empty(getenv('LOCALAPPDATA'))) {
 	$local_app_data_root = trim(getenv('LOCALAPPDATA'), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'Paheko';
 }
 
-define('Paheko\USER_CONFIG_FILE', $local_app_data_root . '/config.local.php');
+define('Paheko\DESKTOP_CONFIG_FILE', $local_app_data_root . '/config.local.php');
 
-if (file_exists(USER_CONFIG_FILE)) {
-	require USER_CONFIG_FILE;
+if (file_exists(DESKTOP_CONFIG_FILE)) {
+	require DESKTOP_CONFIG_FILE;
 }
 
 if (!defined('Paheko\DATA_ROOT')) {
@@ -30,12 +30,14 @@ if (!defined('Paheko\PLUGINS_ROOT')) {
 // Store secret key in user directory
 if (!defined('Paheko\SECRET_KEY')) {
 	if (file_exists(DATA_ROOT . '/key')) {
-		define('Paheko\SECRET_KEY', trim(file_get_contents(DATA_ROOT . '/key')));
+		$key = trim(file_get_contents(DATA_ROOT . '/key'));
 	}
 	else {
-		define('Paheko\SECRET_KEY', base64_encode(random_bytes(16)));
-		file_put_contents(DATA_ROOT . '/key', SECRET_KEY);
+		$key = base64_encode(random_bytes(64));
+		file_put_contents(DATA_ROOT . '/key', $key);
 	}
+
+	define('Paheko\SECRET_KEY', $key);
 }
 
 if (!defined('Paheko\LOCAL_LOGIN')) {
@@ -44,7 +46,7 @@ if (!defined('Paheko\LOCAL_LOGIN')) {
 }
 
 if (!defined('Paheko\PDF_COMMAND')) {
-	// Always log in as admin user
+	// Disable PDF by default
 	define('Paheko\PDF_COMMAND', null);
 }
 

@@ -6,6 +6,16 @@
     size: A4 landscape;
 }
 
+@page {
+    @bottom {
+        text-align: center;
+        content: counter(page) " / " counter(pages);
+        font-size: 9pt;
+        font-family: sans-serif;
+        margin-bottom: .5cm;
+    }
+}
+
 .pdf[data-prefer-landscape] {
     page: landscape;
 }
@@ -22,17 +32,17 @@ body {
     font-size: 10pt;
 }
 
-header.header {
+#menu {
     display: none;
 }
 
 main {
     margin: 0;
+    background: none;
 }
 
-.header h1 {
-    margin: 0;
-    text-align: center;
+main h1.main {
+    display: none;
 }
 
 table.list thead {
@@ -106,7 +116,7 @@ td.actions *, nav.tabs, .icn-btn, .pagination, a.icn {
     display: none !important;
 }
 
-td.num a {
+td.num a, a.num {
     border: none;
     padding: 0;
     background: none;

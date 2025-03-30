@@ -55,7 +55,7 @@ $button_label ??= "Ajouter un fichier";
 		<span class="actions">
 			{linkbutton shape="download" href=$file->url(true) target="_blank" label="Télécharger"}
 			{if $delete_shape}
-				{linkbutton shape=$delete_shape target="_dialog" href="!common/files/delete.php?p=%s%s"|args:$file.path:$trash label="Supprimer"}
+				{linkbutton shape=$delete_shape target="_dialog" href="!common/files/delete.php?p=%s%s"|args:$file->path_uri():$trash label="Supprimer"}
 			{/if}
 		</span>
 	</figure>

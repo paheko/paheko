@@ -10,8 +10,6 @@ use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
 
 use Paheko\Config;
-use Paheko\CSV;
-use Paheko\CSV_Custom;
 use Paheko\DB;
 use Paheko\DynamicList;
 use Paheko\Search;
@@ -24,20 +22,10 @@ use KD2\DB\EntityManager as EM;
 
 use KD2\Graphics\SVG\Avatar;
 
-use const Paheko\{ADMIN_COLOR1, ADMIN_COLOR2, LOCAL_LOGIN, USER_CONFIG_FILE};
+use const Paheko\{ADMIN_COLOR1, ADMIN_COLOR2, DESKTOP_CONFIG_FILE};
 
 class Users
 {
-	const IMPORT_MODE_AUTO = 'auto';
-	const IMPORT_MODE_CREATE = 'create';
-	const IMPORT_MODE_UPDATE= 'update';
-
-	const IMPORT_MODES = [
-		self::IMPORT_MODE_AUTO,
-		self::IMPORT_MODE_CREATE,
-		self::IMPORT_MODE_UPDATE,
-	];
-
 	static public function create(): User
 	{
 		$default_category = Config::getInstance()->default_category;
@@ -371,6 +359,21 @@ class Users
 		return $found ?: null;
 	}
 
+	static public function getFromLogin(string $login): ?User
+	{
+		$db = DB::getInstance();
+		$field = $db->quoteIdentifier(DynamicFields::getLoginField());
+
+		if ($field === 'id') {
+			$login = (int) $login;
+		}
+		else {
+			$login = trim($login);
+		}
+
+		return EM::findOne(User::class, 'SELECT * FROM @TABLE_view WHERE ' . $field . ' = ? COLLATE U_NOCASE LIMIT 1;', $login);
+	}
+
 	static public function deleteSelected(array $ids): void
 	{
 		$ids = array_map('intval', $ids);
@@ -416,228 +419,26 @@ class Users
 		$logged_user_id = $session->user()->id();
 		$ids = array_filter($ids, fn($a) => $a != $logged_user_id);
 
+		$conditions = [];
+		$conditions[] = $db->where('id', $ids);
+
+		// Only change categories of users that are in a "safe category" (category that has the same or lower permissions)
+		// This is to avoid being able to promote a user to have more rights than the current user
+		// But also to prevent moving an admin to a regular category
+		$conditions[] = $db->where('id_category', array_keys($safe_categories));
+		$conditions = implode(' AND ', $conditions);
+
+		if ($db->count(User::TABLE, $conditions) !== count($ids)) {
+			throw new UserException('Dans les membres sélectionnés, certains sont dans une catégorie ayant plus de droits que vous. Il n\'est pas possible de modifier leur catégorie.');
+		}
+
 		$db->update(User::TABLE,
-			['id_category' => $id_category],
-			$db->where('id', $ids)
+			[
+				'id_category' => $id_category,
+				'date_updated' => new \DateTime
+			],
+			$conditions
 		);
-	}
-
-	static public function exportSelected(string $format, array $ids): void
-	{
-		$db = DB::getInstance();
-
-		$ids = array_map('intval', $ids);
-		$where = 'u.' . $db->where('id', $ids);
-		$name = sprintf('Liste de %d membres', count($ids));
-		self::exportWhere($format, $name, $where);
-	}
-
-	static public function exportCategory(string $format, int $id_category, bool $with_id = false): void
-	{
-		if ($id_category == -1) {
-			$name = 'Tous les membres';
-			$where = '1';
-		}
-		elseif (!$id_category) {
-			$name = 'Membres sauf catégories cachées';
-			$where = 'u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)';
-		}
-		else {
-			$cat = Categories::get($id_category);
-
-			if (!$cat) {
-				throw new \InvalidArgumentException('This category does not exist');
-			}
-
-			$name = sprintf('Membres - %s', $cat->name);
-			$where = sprintf('u.id_category = %d', $id_category);
-		}
-
-		self::exportWhere($format, $name, $where, $with_id);
-	}
-
-	static public function export(string $format, bool $with_id = false): void
-	{
-		self::exportWhere($format, 'Tous les membres', '1', $with_id);
-	}
-
-	static protected function exportWhere(string $format, string $name, string $where, bool $with_id = false): void
-	{
-		$df = DynamicFields::getInstance();
-		$db = DB::getInstance();
-
-		$tables = 'users_view u';
-		$header = $df->listAssocNames();
-
-		if ($with_id) {
-			$header = array_merge(['id' => 'id'], $header);
-		}
-
-		$columns = array_keys($header);
-		$columns = array_map([$db, 'quoteIdentifier'], $columns);
-
-		if (self::hasParents()) {
-			$columns = array_map(fn($a) => 'u.' . $a, $columns);
-			$tables .= ' LEFT JOIN users b ON b.id = u.id_parent';
-			$tables .= ' LEFT JOIN users c ON c.id_parent = u.id';
-
-			$columns[] = sprintf('CASE WHEN u.id_parent IS NOT NULL THEN %s ELSE NULL END AS parent_name', $df->getNameFieldsSQL('b'));
-			$columns[] = sprintf('CASE WHEN u.is_parent THEN GROUP_CONCAT(%s, \'%s\') ELSE NULL END AS children_names', $df->getNameFieldsSQL('c'), "\n");
-
-			$header['parent_name'] = 'Rattaché à';
-			$header['children_names'] = 'Membres rattachés';
-		}
-
-		$columns = implode(', ', $columns);
-		$header['category'] = 'Catégorie';
-
-		$i = $db->iterate(sprintf('SELECT %s, (SELECT name FROM users_categories WHERE id = u.id_category) AS category
-			FROM %s WHERE %s GROUP BY u.id ORDER BY %s;', $columns, $tables, $where, $df->getNameFieldsSQL('u')));
-
-		CSV::export($format, $name, $i, $header, [self::class, 'exportRowCallback']);
-	}
-
-	static public function exportRowCallback(&$row) {
-		$df = DynamicFields::getInstance();
-
-		foreach ($row as $key => &$value) {
-			$field = $df->get($key);
-
-			if (!$field || null === $value) {
-				continue;
-			}
-
-			if ($field->type === 'date' && is_string($value)) {
-				$value = \DateTime::createFromFormat('!Y-m-d', $value);
-			}
-			elseif ($field->type === 'datetime' && is_string($value)) {
-				$value = \DateTime::createFromFormat('!Y-m-d', $value);
-			}
-			else {
-				$value = $field->getStringValue($value);
-			}
-		}
-
-		unset($value);
-	}
-
-	static public function importReport(CSV_Custom $csv, string $mode, ?int $logged_user_id = null): array
-	{
-		if (!in_array($mode, self::IMPORT_MODES)) {
-			throw new \InvalidArgumentException('Invalid import mode: ' . $mode);
-		}
-
-		$report = ['created' => [], 'modified' => [], 'unchanged' => [], 'errors' => []];
-
-		if ($logged_user_id) {
-			$report['has_logged_user'] = false;
-		}
-
-		foreach (self::iterateImport($csv, $mode, $report['errors']) as $line => $user) {
-			if ($logged_user_id && $user->id == $logged_user_id) {
-				$report['has_logged_user'] = true;
-				continue;
-			}
-
-			try {
-				$user->selfCheck();
-			}
-			catch (UserException $e) {
-				$report['errors'][] = sprintf('Ligne %d (%s) : %s', $line, $user->name(), $e->getMessage());
-				continue;
-			}
-
-			if (!$user->exists()) {
-				$report['created'][] = $user;
-			}
-			elseif ($user->isModified()) {
-				$report['modified'][] = $user;
-			}
-			else {
-				$report['unchanged'][] = $user;
-			}
-		}
-
-		return $report;
-	}
-
-	static public function import(CSV_Custom $csv, string $mode, ?int $logged_user_id = null): void
-	{
-		if (!in_array($mode, self::IMPORT_MODES)) {
-			throw new \InvalidArgumentException('Invalid import mode: ' . $mode);
-		}
-
-		$number_field = DynamicFields::getNumberField();
-		$db = DB::getInstance();
-		$db->begin();
-
-		foreach (self::iterateImport($csv, $mode) as $i => $user) {
-			// Skip logged user, to avoid changing own login field
-			if ($logged_user_id && $user->id == $logged_user_id) {
-				continue;
-			}
-
-			try {
-				if ($mode === 'create' || empty($user->$number_field)) {
-					$user->$number_field = null;
-					$user->setNumberIfEmpty();
-					unset($row->$number_field);
-				}
-
-				$user->save();
-			}
-			catch (UserException $e) {
-				throw new UserException(sprintf('Ligne %d : %s', $i, $e->getMessage()), 0, $e);
-			}
-		}
-
-		$db->commit();
-	}
-
-	static public function iterateImport(CSV_Custom $csv, string $mode, ?array &$errors = null): \Generator
-	{
-		if (!in_array($mode, self::IMPORT_MODES)) {
-			throw new \InvalidArgumentException('Invalid import mode: ' . $mode);
-		}
-
-		$number_field = DynamicFields::getNumberField();
-
-		foreach ($csv->iterate() as $i => $row) {
-			$user = null;
-
-			try {
-				if ($mode === 'update') {
-					if (empty($row->$number_field)) {
-						throw new UserException('Aucun numéro de membre n\'a été indiqué');
-					}
-
-					$user = self::getFromNumber($row->$number_field);
-
-					if (!$user) {
-						$msg = sprintf('Le membre avec le numéro "%s" n\'existe pas.', $row->$number_field);
-						throw new UserException($msg);
-					}
-				}
-				elseif ($mode === 'auto' && !empty($row->$number_field)) {
-					$user = self::getFromNumber($row->$number_field);
-				}
-
-				if (!$user) {
-					$user = self::create();
-				}
-
-				$user->importForm((array)$row);
-				yield $i => $user;
-			}
-			catch (UserException $e) {
-				if (null !== $errors) {
-					$errors[] = sprintf('Ligne %d : %s', $i, $e->getMessage());
-					continue;
-				}
-
-				throw $e;
-			}
-		}
 	}
 
 	static public function serveAvatar($id): void
@@ -669,9 +470,9 @@ class Users
 		echo Avatar::beam($name, ['colors' => $colors, 'size' => 128, 'square' => true]);
 	}
 
-	static public function canConfigureLocalLogin(): bool
+	static public function canConfigureDesktopLogin(): bool
 	{
-		if (LOCAL_LOGIN === null || !USER_CONFIG_FILE) {
+		if (!DESKTOP_CONFIG_FILE) {
 			return false;
 		}
 
@@ -684,5 +485,36 @@ class Users
 	{
 		return EM::findOne(User::class, 'SELECT * FROM @TABLE WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config >= ?) LIMIT 1;',
 			Session::ACCESS_ADMIN);
+	}
+
+	static public function getNewNumber(): ?int
+	{
+		$field = DynamicFields::getNumberFieldSQL();
+		$db = DB::getInstance();
+		$r = $db->firstColumn(sprintf('SELECT MAX(%s) FROM %s;', $field, User::TABLE));
+
+		if (!is_int($r) && !ctype_digit($r)) {
+			return null;
+		}
+
+		return intval($r) + 1;
+	}
+
+	static public function getWithLoginAndPassword(string $login, string $password): ?User
+	{
+		$db = DB::getInstance();
+		$login_field = $db->quoteIdentifier(DynamicFields::getLoginField());
+		$sql = sprintf('SELECT * FROM @TABLE WHERE %s = ? LIMIT 1;', $login_field);
+		$user = EM::findOne(User::class, $sql, $login);
+
+		if (!$user || !$user->password) {
+			return null;
+		}
+
+		if (!password_verify($password, $user->password)) {
+			return null;
+		}
+
+		return $user;
 	}
 }

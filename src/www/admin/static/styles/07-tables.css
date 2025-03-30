@@ -61,9 +61,26 @@ table.multi tr {
 }
 
 table.list tbody tr.checked {
-    color: #633 !important;
-    background: #ffc !important;
+    color: #633;
+    background: rgba(255, 255, 200, 0.2);
 }
+
+table.list tbody tr.clickable:hover, table.list tbody tr.clickable:nth-child(even):hover {
+    cursor: pointer;
+    color: #633;
+    background: #ffc;
+}
+
+table.list tbody tr.clickable:hover button, table.list tbody tr.focused button {
+    color: rgb(var(--gHoverLinkColor));
+}
+
+table.list tbody tr.focused {
+    color: rgb(100, 100, 50);
+    background: rgb(255, 255, 200);
+    box-shadow: 0 0 5px .2rem #990;
+}
+
 
 table.list tbody tr.highlight {
     box-shadow: 0px 0px 5px 5px rgba(var(--gSecondColor), 1);
@@ -111,6 +128,14 @@ table.list tr:nth-child(even).disabled {
     background-image: linear-gradient(rgba(var(--gMainColor), .5), rgba(var(--gMainColor), .5));
 }
 
+.userOrder {
+    height: fit-content;
+}
+
+.userOrder tr, .userOrder td, .userOrder th {
+    height: 100%;
+}
+
 .userOrder a, .userOrder button {
     text-decoration: none;
     display: inline-flex;
@@ -119,10 +144,10 @@ table.list tr:nth-child(even).disabled {
     justify-content: flex-start;
     box-shadow: none;
     margin: 0;
-    width: calc(100% - .4rem);
-    height: calc(100% - .4rem);
+    width: calc(100% - .6rem);
+    height: calc(100% - .6rem);
     color: inherit;
-    padding: .2rem;
+    padding: .3rem;
     text-align: left;
     border-radius: .5em;
     border: none;
@@ -145,7 +170,7 @@ table.list tr:nth-child(even).disabled {
 
 table.list .userOrder td, table.list .userOrder th {
     padding: .2rem;
-    height: 2rem;
+    min-height: 2rem;
 }
 
 table.list .userOrder .check {
@@ -381,9 +406,12 @@ table.dragging tbody td {
 
 table.schema caption {
     background: rgba(var(--gSecondColor), 0.2);
-
 }
 
 table.list th a {
     text-decoration: none;
+}
+
+table.list tr.no-border {
+    border: none;
 }

@@ -32,10 +32,6 @@ else {
 $buttons = Extensions::listHomeButtons($session);
 $has_extensions = empty($buttons) ? Extensions::isAnyExtensionEnabled() : true;
 
-if (!$has_extensions && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
-	$buttons = Extensions::listAvailableButtons();
-}
-
 $tpl->assign(compact('homepage', 'banner', 'buttons', 'has_extensions'));
 
 $tpl->assign('custom_css', [BASE_URL . 'content.css']);

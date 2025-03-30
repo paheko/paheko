@@ -2,7 +2,7 @@
 	{include file="_head.tpl" title="Grand livre analytique" current="acc/years" prefer_landscape=true}
 	{include file="acc/reports/_header.tpl" current="analytical_ledger" title="Grand livre analytique" allow_filter=true}
 {else}
-	{include file="_head.tpl" title="%sGrand livre"|args:$project_title current="acc/years" prefer_landscape=true}
+	{include file="_head.tpl" title="%sGrand livre"|args:$title current="acc/years" prefer_landscape=true}
 	{include file="acc/reports/_header.tpl" current="ledger" title="Grand livre" allow_filter=true}
 {/if}
 

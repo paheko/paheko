@@ -272,6 +272,11 @@ class Plugins
 
 		$p = new Plugin;
 		$p->name = $name;
+
+		if (!$p->hasFile($p::META_FILE)) {
+			throw new UserException(sprintf('Le plugin "%s" n\'est pas une extension Paheko : fichier plugin.ini manquant.', $name));
+		}
+
 		$p->updateFromINI();
 
 		try {
@@ -346,34 +351,6 @@ class Plugins
 		}
 
 		return true;
-	}
-
-	static public function install(string $name): Plugin
-	{
-		if (!self::isAllowed($name)) {
-			throw new \RuntimeException('This plugin is not allowed: ' . $name);
-		}
-
-		$p = new Plugin;
-		$p->name = $name;
-
-		if (!$p->hasFile($p::META_FILE)) {
-			throw new UserException(sprintf('Le plugin "%s" n\'est pas une extension Paheko : fichier plugin.ini manquant.', $name));
-		}
-
-		$p->updateFromINI();
-
-		$db = DB::getInstance();
-		$db->begin();
-		$p->set('enabled', true);
-		$p->save();
-
-		if ($p->hasFile($p::INSTALL_FILE)) {
-			$p->call($p::INSTALL_FILE, true);
-		}
-
-		$db->commit();
-		return $p;
 	}
 
 	/**

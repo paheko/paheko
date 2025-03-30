@@ -12,6 +12,7 @@ use Paheko\Users\DynamicFields;
 use Paheko\Users\Users;
 
 use KD2\DB\EntityManager;
+use KD2\DB\Date;
 
 class Subscriptions
 {
@@ -23,6 +24,16 @@ class Subscriptions
 	static public function countForUser(int $user_id)
 	{
 		return DB::getInstance()->count(Subscription::TABLE, 'id_user = ?', $user_id);
+	}
+
+	static public function createFromFee(int $id_fee, int $id_user, ?int $expected_amount, bool $paid, int $multiple = 1): Service_User
+	{
+		$su = new Service_User;
+		$su->date = new Date;
+		// Required, also to calculate expiry date
+		$id_service = DB::getInstance()->firstColumn('SELECT id_service FROM services_fees WHERE id = ?;', $id_fee);
+		$su->importForm(compact('id_service', 'id_fee', 'id_user', 'paid', 'expected_amount', 'multiple'));
+		return $su;
 	}
 
 	static public function listDistinctForUser(int $user_id)
@@ -83,7 +94,7 @@ class Subscriptions
 			'amount' => [
 				'label' => 'Reste à régler',
 				'select' => 'CASE WHEN sub.paid = 1 AND COUNT(tl.debit) = 0 THEN NULL
-					ELSE expected_amount - IFNULL(SUM(tl.debit), 0) END',
+					ELSE MAX(0, expected_amount - IFNULL(SUM(tl.debit), 0)) END',
 			],
 			'expected_amount' => [],
 		];
@@ -180,6 +191,10 @@ class Subscriptions
 				}
 				else {
 					$row->paid = true;
+				}
+
+				if (!empty($row->expected_amount)) {
+					$row->expected_amount = Utils::moneyToInteger($row->expected_amount);
 				}
 
 				$su->importForm((array)$row);

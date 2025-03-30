@@ -1,11 +1,14 @@
 (function () {
-	let d = document.documentElement.dataset;
+	let d = document.documentElement;
 	window.g = window.garradin = {
-		admin_url: d.url,
-		static_url: d.url + 'static/',
-		version: d.version,
+		admin_url: d.dataset.url,
+		static_url: d.dataset.url + 'static/',
+		version: d.dataset.version,
 		loaded: {}
 	};
+
+	d.classList.remove('nojs');
+	d.classList.add('js');
 
 	window.$ = function(selector) {
 		if (!selector.match(/^[.#]?[a-z0-9_-]+$/i))
@@ -33,12 +36,17 @@
 
 	g.onload = function(callback, dom)
 	{
-		if (typeof dom == 'undefined')
+		if (typeof dom === 'undefined') {
 			dom = true;
+		}
 
 		var eventName = dom ? 'DOMContentLoaded' : 'load';
 
-		document.addEventListener(eventName, callback, false);
+		window.addEventListener(eventName, callback);
+
+		if (!dom && document.readyState === 'complete') {
+			callback();
+		}
 	};
 
 	g.toggle = function(selector, visibility, resize_parent)
@@ -207,7 +215,7 @@
 
 		t.innerText = options.caption || '';
 
-		if (options.caption) {
+		if (options.caption && !document.title.match(options.caption)) {
 			document.title = options.caption + ' — ' + g.dialog_title;
 		}
 
@@ -339,17 +347,7 @@
 		if (!dialog.dataset.caption && document.title) {
 			var title = document.title.replace(/^([^—-]+).*$/, "$1");
 			dialog.querySelector('.title').innerText = title;
-			p.g.dialog_title = p.document.title;
 			p.document.title = document.title + ' — ' + p.g.dialog_title;
-
-			window.addEventListener('beforeunload', () => {
-				if (!p.g.dialog_title) {
-					return;
-				}
-
-				p.document.title = p.g.dialog_title;
-				p.g.dialog_title = null;
-			});
 		}
 
 		let height;
@@ -506,6 +504,85 @@
 		};
 	};
 
+	g.enhanceHueField = (input) => {
+		var container = document.createElement('span');
+		container.className = 'hue-selector';
+
+		var c = input.cloneNode(true);
+		var gradient = document.createElement('span');
+		gradient.className = 'gradient';
+
+		if (c.dataset.grey) {
+			var grey = document.createElement('span');
+			grey.className = 'grey';
+			gradient.appendChild(grey);
+		}
+
+		var color = document.createElement('span');
+		color.className = 'color';
+		gradient.appendChild(color);
+
+		var handle = document.createElement('span');
+		handle.className = 'handle';
+
+		container.appendChild(gradient);
+		container.appendChild(handle);
+		container.appendChild(c);
+
+		var s = c.dataset.saturation ?? '100%';
+		var l = c.dataset.lightness ?? '50%';
+
+		container.style = '--sl: ' + s + ', ' + l;
+
+		var range = 360;
+
+		// Add 60 shades of grey
+		if (c.dataset.grey) {
+			container.className += ' hue-grey';
+			c.min = '-60';
+			range += 60;
+		}
+
+		var updateHandle = () => {
+			var v = parseInt(c.value, 10);
+
+			if (v > -10 && v < 0) {
+				v = -1; // White
+			}
+			else if (v < -50) {
+				v = -60; // Black
+			}
+
+			if (v >= 0) {
+				var cs = s,
+					cl = l,
+					h = c.value,
+					pos = (c.dataset.grey ? 60 + v : v) / range;
+			}
+			// For grey colors
+			else {
+				var cs = '0%',
+					cl = (Math.abs(v) / 60) * 100 + '%',
+					h = 0,
+					pos = (v + 60) / range;
+			}
+
+			c.value = v;
+			pos *= 100;
+			var hsl = h + ', ' + cs + ', ' + cl;
+
+			handle.style = '--position: ' + pos + '%; --hsl: hsl(' + hsl + ')';
+		};
+
+		c.addEventListener('input', updateHandle);
+		updateHandle();
+
+		c.addEventListener('focus', () => container.classList.add('focus'));
+		c.addEventListener('blur', () => container.classList.remove('focus'));
+
+		input.replaceWith(container);
+	};
+
 	g.enhanceDateField = (input) => {
 		var span = document.createElement('span');
 		span.className = 'datepicker-parent';
@@ -554,8 +631,8 @@
 			throw Error('Parent input list not found');
 		}
 
-		var can_delete = i.firstChild.getAttribute('data-can-delete');
-		var multiple = i.firstChild.getAttribute('data-multiple');
+		var can_delete = i.firstChild.getAttribute('data-can-delete') == 1;
+		var multiple = i.firstChild.getAttribute('data-multiple') == 1;
 		var name = i.firstChild.getAttribute('data-name');
 
 		var span = document.createElement('span');
@@ -640,26 +717,29 @@
 		}
 	});
 
+	g.listSelectorButtonClicked = (e) => {
+		var i = e.target;
+		i.setCustomValidity('');
+		g.current_list_input = i.parentNode;
+		var max = i.getAttribute('data-max');
+
+		if (max > 0 && max <= i.parentNode.querySelectorAll('span').length) {
+			alert('Il n\'est pas possible de faire plus de ' + max + ' choix.');
+			return false;
+		}
+
+		let url = i.value + (i.value.indexOf('?') > 0 ? '&' : '?') + '_dialog';
+		var caption = i.dataset.caption || null;
+		g.openFrameDialog(url, {caption});
+		return false;
+	};
+
 	// List selectors, using an iframe for list
 	g.onload(() => {
 		var inputs = $('form .input-list > button');
 
 		inputs.forEach((i) => {
-			i.onclick = () => {
-				i.setCustomValidity('');
-				g.current_list_input = i.parentNode;
-				var max = i.getAttribute('data-max');
-
-				if (max && max <= i.parentNode.querySelectorAll('span').length) {
-					alert('Il n\'est pas possible de faire plus de ' + max + ' choix.');
-					return false;
-				}
-
-				let url = i.value + (i.value.indexOf('?') > 0 ? '&' : '?') + '_dialog';
-				var caption = i.dataset.caption || null;
-				g.openFrameDialog(url, {caption});
-				return false;
-			};
+			i.onclick = g.listSelectorButtonClicked;
 		});
 
 		// Set custom error message if required list is not selected
@@ -879,6 +959,10 @@
 			g.enhanceDateField(e);
 		});
 
+		document.querySelectorAll('input[data-input="hue"]').forEach((e) => {
+			g.enhanceHueField(e);
+		});
+
 		document.querySelectorAll('input[type="password"]:not([readonly]):not([disabled]):not(.hidden)').forEach((e) => {
 			g.enhancePasswordField(e);
 		});
@@ -891,6 +975,42 @@
 		if (document.querySelector('input[list], textarea[list]')) {
 			g.script('scripts/inputs/datalist.js');
 		}
+
+		var dropdown;
+
+		var closeDropdownEvent = (evt) => {
+			if ((evt.type === 'keydown' && evt.key === 'Escape')
+				|| (evt.type === 'click' && !dropdown.contains(evt.target))) {
+				closeDropdown();
+				evt.preventDefault();
+				return false;
+			}
+		};
+
+		var closeDropdown = () => {
+			dropdown.classList.remove('open');
+			dropdown.setAttribute('aria-expanded', 'false');
+			dropdown = null;
+			window.removeEventListener('keydown', closeDropdownEvent, {'capture': true});
+			window.removeEventListener('click', closeDropdownEvent, {'capture': true});
+		};
+
+		var openDropdown = (e) => {
+			if (e.classList.contains('open')) {
+				return true;
+			}
+
+			dropdown = e;
+			e.classList.add('open');
+			e.setAttribute('aria-expanded', 'true');
+			window.addEventListener('keydown', closeDropdownEvent, {'capture': true});
+			window.addEventListener('click', closeDropdownEvent, {'capture': true});
+			return false;
+		}
+
+		document.querySelectorAll('nav.dropdown').forEach(e => {
+			e.onclick = () => openDropdown(e);
+		});
 	});
 
 	g.onload(() => {
@@ -959,16 +1079,16 @@
 			elm.addEventListener('change', g.checkUncheck);
 		});
 
-		document.querySelectorAll('table tbody input[type=checkbox]').forEach((elm) => {
+		document.querySelectorAll('table tbody td.check input[type=checkbox]').forEach((elm) => {
 			elm.addEventListener('change', () => {
 				elm.parentNode.parentNode.classList.toggle('checked', elm.checked);
 			});
 		});
 	});
 
-	g.onload(() => {
-		g.resizeParentDialog();
+	g.onload(() => g.resizeParentDialog(), false);
 
+	g.onload(() => {
 		// File drag and drop support
 		if ($('[data-upload-url]').length) {
 			g.script('scripts/file_drag.js');

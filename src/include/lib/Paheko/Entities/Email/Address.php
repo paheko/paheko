@@ -89,7 +89,8 @@ class Address extends Entity
 	public function canSendVerificationAfterFail(): bool
 	{
 		$limit_date = Addresses::getVerificationLimitDate();
-		return isset($this->last_sent) ? $this->last_sent < $limit_date : false;
+		$date = $this->last_sent ?? $this->added;
+		return $date < $limit_date;
 	}
 
 	public function verify(string $code): bool

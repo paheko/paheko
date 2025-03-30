@@ -16,6 +16,7 @@ use Paheko\Files\Files;
 
 class Template extends Smartyer
 {
+	protected bool $init = false;
 	static protected $_instance = null;
 
 	static public function getInstance()
@@ -29,7 +30,7 @@ class Template extends Smartyer
 		$this->assign('table_export', false);
 		$this->assign('pdf_export', false);
 
-		if ($session->isLogged(true)) {
+		if ($session->isLogged(false)) {
 			if (isset($_GET['_pdf'])) {
 				$this->assign('pdf_export', true);
 				$this->PDF($template);
@@ -61,6 +62,12 @@ class Template extends Smartyer
 		return $this;
 	}
 
+	public function fetch(?string $template = null): string
+	{
+		$this->init();
+		return parent::fetch($template);
+	}
+
 	public function PDF(?string $template = null, ?string $title = null)
 	{
 		$out = $this->fetch($template);
@@ -79,7 +86,7 @@ class Template extends Smartyer
 	{
 	}
 
-	public function __construct(?string $template = null, ?Template &$parent = null)
+	public function __construct(?string $template = null, ?Template $parent = null)
 	{
 		parent::__construct($template, $parent);
 
@@ -91,6 +98,13 @@ class Template extends Smartyer
 		// For included templates just return a new instance,
 		// the singleton is only to get the 'master' Template object
 		else {
+			return;
+		}
+	}
+
+	protected function init(): void
+	{
+		if ($this->init) {
 			return;
 		}
 
@@ -187,8 +201,9 @@ class Template extends Smartyer
 		});
 
 		$this->register_function('enable_upload_here', function ($params) {
-			$csrf_key = 'upload_file_' . md5($params['path']);
-			$url = Utils::getLocalURL('!common/files/upload.php?p=' . rawurlencode($params['path']));
+			$url = $params['url'] ?? null;
+			$url ??= Utils::getLocalURL('!common/files/upload.php?p=' . rawurlencode($params['path']));
+			$csrf_key = 'upload_file';
 			return sprintf(' data-upload-url="%s" data-upload-token-value="%s" data-upload-token-name="%s" ',
 				htmlspecialchars($url),
 				Form::tokenGenerate($csrf_key),
@@ -220,6 +235,8 @@ class Template extends Smartyer
 			return preg_replace('!&lt;(/?mark)&gt;!', '<$1>', $str);
 		});
 
+		$this->register_modifier('html_hidden_inputs', [self::class, 'htmlHiddenInputs']);
+
 		foreach (CommonModifiers::PHP_MODIFIERS_LIST as $name => $params) {
 			$this->register_modifier($name, [CommonModifiers::class, $name]);
 		}
@@ -238,6 +255,8 @@ class Template extends Smartyer
 		$this->register_modifier('money', [CommonModifiers::class, 'money_html']);
 		$this->register_modifier('money_currency', [CommonModifiers::class, 'money_currency_html']);
 		$this->register_modifier('money_currency_text', [CommonModifiers::class, 'money_currency']);
+
+		$this->init = true;
 	}
 
 
@@ -481,6 +500,24 @@ class Template extends Smartyer
 		);
 
 		$out .= sprintf('</%s>', $params['tag'] ?? 'span');
+		return $out;
+	}
+
+	static protected function htmlHiddenInputs(array $data, ?string $prefix = null)
+	{
+		$out = '';
+
+		foreach ($data as $key => $value) {
+			if (is_array($value)) {
+				$name = $prefix ? $prefix . '[' . $key . ']' : $key;
+				$out .= self::htmlHiddenInputs($value, $name);
+			}
+			else {
+				$name = $prefix ? $prefix . '[' . $key . ']' : $key;
+				$out .= sprintf('<input type="hidden" name="%s" value="%s" />', htmlspecialchars($name), htmlspecialchars($value));
+			}
+		}
+
 		return $out;
 	}
 }

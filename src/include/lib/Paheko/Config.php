@@ -136,7 +136,8 @@ class Config extends Entity
 	protected bool $site_disabled;
 
 	protected int $log_retention;
-	protected bool $analytical_set_all;
+	protected bool $analytical_set_all = false;
+	protected bool $analytical_mandatory = false;
 
 	protected ?string $file_versioning_policy = null;
 	protected int $file_versioning_max_size = 0;
@@ -373,7 +374,7 @@ class Config extends Entity
 			$f = null;
 		}
 		elseif ($upload) {
-			$f = Files::upload(Utils::dirname($path), $value, Utils::basename($path));
+			$f = Files::upload(Utils::dirname($path), $value, null, Utils::basename($path));
 
 			if ($type === 'image' && !$f->image) {
 				$this->setFile($key, null);

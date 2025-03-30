@@ -88,7 +88,10 @@
 		</ol></li>
 		<li><a href="#extensions">Extensions</a>
 		<ol>
-			<li><a href="#images-jointes">Images jointes</a></li>
+			<li><a href="#images-jointes">Images jointes</a>
+			<ol>
+				<li><a href="#utilisation-avancee">Utilisation avancée</a>
+			</ol></li>
 			<li><a href="#galerie-d-images">Galerie d'images</a>
 			<ol>
 				<li><a href="#diaporama-d-images">Diaporama d'images</a>
@@ -421,7 +424,7 @@ Paragraphe
 <p>Toutes ces extensions se présentent sous la forme d'un code situé entre deux signes <strong>inférieur à</strong> (<code>&lt;&lt;</code>) et deux signes <strong>supérieur à</strong> (<code>&gt;&gt;</code>), à ne pas confondre avec les guillements français (<code>«</code> et <code>»</code>).</p>
 <h2 id="images-jointes">Images jointes</h2>
 <p>Il est possible d'intégrer une image jointe à la page web en plaçant le code suivant sur une ligne (sans autre texte) :</p>
-<pre><code>&lt;&lt;image|Nom_fichier.jpg|Alignement|Légende&gt;&gt;</code></pre>
+<pre><code>&lt;&lt;image|Nom_fichier.jpg|Alignement|Légende|Lien&gt;&gt;</code></pre>
 <ul>
 <li><code>Nom_fichier.jpg</code> : remplacer par le nom du fichier de l'image (parmi les images jointes à la page)</li>
 <li><code>Alignement</code> : remplacer par l'alignement :<ul>
@@ -434,10 +437,19 @@ Paragraphe
 </ul>
 <p>Exemple :</p>
 <pre><code>&lt;&lt;image|mon_image.png|center|Ceci est une belle image&gt;&gt;</code></pre>
-<p>Il est aussi possible d'utiliser la syntaxe avec des paramètres nommés :</p>
-<pre><code>&lt;&lt;image file="Nom_fichier.jpg" align="center" caption="Légende"&gt;&gt;</code></pre>
 <p>Les images qui ne sont pas mentionnées dans le texte seront affichées après le texte sous forme de galerie.</p>
-<p>Cette extension ne fonctionne que dans les pages du site web.</p>
+<p>Note : cette extension ne fonctionne que dans les pages du site web.</p>
+<h3 id="utilisation-avancee">Utilisation avancée</h3>
+<p>Il est aussi possible d'utiliser la syntaxe avec les paramètres nommés suivants :</p>
+<ul>
+<li><code>src</code> : nom du fichier de l'image (obligatoire)</li>
+<li><code>align</code> : alignement de l'image</li>
+<li><code>caption</code> : légende qui apparaîtra en dessous de l'image</li>
+<li><code>href</code> : adresse du lien de l'image</li>
+<li><code>alt</code> : description textuelle de l'image (utile si on ne veut pas de légende en dessous de l'image)</li>
+</ul>
+<p>Si le paramètre <code>link</code> est fourni, un clic sur l'image ouvrira ce lien, au lieu d'ouvrir l'image en grand.</p>
+<pre><code>&lt;&lt;image src="Nom_fichier.jpg" align="center" alt="Ceci est une photo d'une fougère très jolie" href="https://paheko.cloud/"&gt;&gt;</code></pre>
 <h2 id="galerie-d-images">Galerie d'images</h2>
 <p>Il est possible d'afficher une galerie d'images (sous forme d'images miniatures) avec la balise <code>&lt;&lt;gallery</code> qui contient la liste des images à mettre dans la galerie :</p>
 <pre><code>&lt;&lt;gallery
@@ -524,7 +536,10 @@ Nom_fichier_2.jpg
 		</ol></li>
 		<li><a href="#extensions">Extensions</a>
 		<ol>
-			<li><a href="#images-jointes">Images jointes</a></li>
+			<li><a href="#images-jointes">Images jointes</a>
+			<ol>
+				<li><a href="#utilisation-avancee">Utilisation avancée</a>
+			</ol></li>
 			<li><a href="#galerie-d-images">Galerie d'images</a>
 			<ol>
 				<li><a href="#diaporama-d-images">Diaporama d'images</a>

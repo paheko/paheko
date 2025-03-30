@@ -121,8 +121,8 @@
 			}
 			else if (this.value == 'ADD')
 			{
-				var n = _self.addGroup(targetParent, 'AND');
-				_self.addRow(n);
+				var n = _self.addGroup(targetParent, 'AND', 'AND');
+				_self.addRow(n, null, true);
 				this.value = this.oldValue;
 			}
 		};
@@ -145,7 +145,7 @@
 		return f;
 	};
 
-	qb.prototype.addRow = function (targetGroup, after) {
+	qb.prototype.addRow = function (targetGroup, after, toggle) {
 		var targetTable = targetGroup.getElementsByTagName('table')[0];
 		var row = document.createElement('tr');
 		var cell = document.createElement('td');
@@ -155,14 +155,14 @@
 
 		var btn = this.buildInput('button', '+');
 		btn.onclick = function () {
-			_self.addRow(findAncestor(this, 'fieldset'), this.parentNode.parentNode);
+			_self.addRow(findAncestor(this, 'fieldset'), this.parentNode.parentNode, true);
 		};
 
 		cell.appendChild(btn);
 
 		var btn = this.buildInput('button', '-');
 		btn.onclick = function () {
-			_self.deleteRow(this.parentNode.parentNode);
+			_self.deleteRow(this.parentNode.parentNode, true);
 		};
 
 		cell.appendChild(btn);
@@ -184,13 +184,15 @@
 		cell.className = 'values';
 		row.appendChild(cell);
 
-		if (typeof after == 'undefined')
-		{
+		if (after) {
+			targetTable.insertBefore(row, after.nextSibling);
+		}
+		else {
 			targetTable.appendChild(row);
 		}
-		else
-		{
-			targetTable.insertBefore(row, after.nextSibling);
+
+		if (toggle) {
+			this.switchColumn(select);
 		}
 
 		return row;
@@ -409,7 +411,7 @@
 			for (var i in groups[g].conditions)
 			{
 				var condition = groups[g].conditions[i];
-				var row = this.addRow(groupElement);
+				var row = this.addRow(groupElement, null, false);
 				row.childNodes[1].firstChild.value = condition.column;
 
 				if (!this.columns[condition.column]) {

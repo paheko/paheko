@@ -52,7 +52,8 @@ class Search extends Entity
 	protected ?int $id;
 	protected ?int $id_user = null;
 	protected string $label;
-	protected \DateTime $created;
+	protected ?string $description = null;
+	protected \DateTime $updated;
 	protected string $target;
 	protected string $type;
 	protected string $content;
@@ -65,8 +66,9 @@ class Search extends Entity
 	{
 		parent::selfCheck();
 
-		$this->assert(strlen('label') > 0, 'Le champ libellé doit être renseigné');
-		$this->assert(strlen('label') <= 500, 'Le champ libellé est trop long');
+		$this->assert(strlen($this->label) > 0, 'Le champ libellé doit être renseigné');
+		$this->assert(strlen($this->label) <= 500, 'Le champ libellé est trop long');
+		$this->assert(is_null($this->description) || strlen($this->description) <= 50000, 'Le champ description est trop long');
 
 		$db = DB::getInstance();
 
@@ -364,7 +366,7 @@ class Search extends Entity
 		if (!empty($source['public'])) {
 			$source['id_user'] = null;
 		}
-		elseif (!empty($source['public_present'])) {
+		elseif (isset($source['public'])) {
 			$source['id_user'] = Session::getUserId();
 		}
 
@@ -412,7 +414,10 @@ class Search extends Entity
 			$this->type = self::TYPE_JSON;
 		}
 		elseif ($text_query !== '') {
-			$options = ['id_year' => $_GET['year'] ?? null];
+			$options = [
+				'id_year' => $_GET['year'] ?? null,
+				'id_category' => $_GET['id_category'] ?? null,
+			];
 
 			if ($this->redirect($text_query, $options)) {
 				return;
@@ -425,6 +430,7 @@ class Search extends Entity
 			}
 		}
 		elseif (!isset($this->content)) {
+			$this->getAdvancedSearch()->setSession($session);
 			$this->content = json_encode($this->getAdvancedSearch()->defaults());
 			$this->type = self::TYPE_JSON;
 			$default = true;
@@ -435,5 +441,14 @@ class Search extends Entity
 		}
 
 		return compact('can_sql_unprotected', 'can_sql', 'is_admin', 'default');
+	}
+
+	public function save(bool $selfcheck = true): bool
+	{
+		if ($this->isModified()) {
+			$this->set('updated', new \DateTime);
+		}
+
+		return parent::save($selfcheck);
 	}
 }

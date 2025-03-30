@@ -31,7 +31,7 @@ class API
 
 	const SUCCESS = ['success' => true];
 
-	public function __construct(string $method, string $path, array $params)
+	public function __construct(string $method, string $path, array $params, bool $is_http_client = false)
 	{
 		if (!in_array($method, self::ALLOWED_METHODS)) {
 			throw new APIException('Invalid request method: ' . $method, 405);
@@ -40,6 +40,16 @@ class API
 		$this->path = trim($path, '/');
 		$this->method = $method;
 		$this->params = $params;
+		$this->is_http_client = $is_http_client;
+	}
+
+	public function requireHttpClient(): void
+	{
+		if ($this->is_http_client) {
+			return;
+		}
+
+		throw new APIException('This request is not yet supported in Brindille', 501);
 	}
 
 	public function __destruct()
@@ -314,6 +324,8 @@ class API
 
 		// CSV import
 		if ($fn === 'subscriptions' && $fn2 === 'import') {
+			$this->requireHttpClient();
+
 			if ($this->method === 'PUT') {
 				$params = $this->params;
 			}
@@ -499,8 +511,7 @@ class API
 		http_response_code(200);
 
 		try {
-			$api = new self($method, $uri, $params);
-			$api->is_http_client = true;
+			$api = new self($method, $uri, $params, true);
 
 			if ($method === 'PUT') {
 				$api->setFilePointer(fopen('php://input', 'rb'));

@@ -61,6 +61,8 @@ class User extends Entity
 		'accounting_expert' => false,
 		'dark_theme'        => false,
 		'force_handheld'	=> false,
+		// Category displayed when going to users list
+		'users_category'    => 0,
 	];
 
 	protected bool $_loading = false;
@@ -148,7 +150,7 @@ class User extends Entity
 				continue;
 			}
 
-			if (empty($value) && ($field->system & $field::NUMBER)) {
+			if (empty($value) && $field->isNumber() && $field->type === 'number') {
 				$this->setNumberIfEmpty();
 				continue;
 			}
@@ -156,12 +158,19 @@ class User extends Entity
 			if ($field->required) {
 				$this->assert(null !== $value, sprintf('"%s" : ce champ est requis', $field->label));
 
-				if (is_bool($value)) {
+				if ($field->type === 'checkbox') {
 					$this->assert($value === true, sprintf('"%s" : ce champ doit être coché', $field->label));
+				}
+				elseif ($field->type === 'boolean') {
+					$this->assert($value === true || $value === false, sprintf('"%s" : ce champ doit être sélectionné', $field->label));
 				}
 				elseif (!is_array($value) && !is_object($value) && !is_bool($value)) {
 					$this->assert('' !== trim((string)$value), sprintf('"%s" : ce champ ne peut être vide', $field->label));
 				}
+			}
+
+			if ($field->isNumber()) {
+				$this->assert(strlen((string) $value) <= 100, sprintf('"%s" : ce champ dépasse la taille autorisée de %d caractères', $field->label, 100));
 			}
 
 			if (!isset($value)) {
@@ -173,6 +182,9 @@ class User extends Entity
 			}
 			elseif ($field->type === 'checkbox') {
 				$this->assert($value === false || $value === true, sprintf('"%s" : la valeur de ce champ n\'est pas valide.', $field->label));
+			}
+			elseif ($field->type === 'boolean') {
+				$this->assert($value === false || $value === true || $value === null, sprintf('"%s" : la valeur de ce champ n\'est pas valide.', $field->label));
 			}
 			elseif ($field->type === 'select') {
 				$this->assert(in_array($value, $field->options), sprintf('"%s" : la valeur "%s" ne fait pas partie des options possibles', $field->label, $value));
@@ -191,8 +203,6 @@ class User extends Entity
 
 		// check user number
 		$field = DynamicFields::getNumberField();
-		$this->assert($this->$field !== null && ctype_digit((string)$this->$field), 'Numéro de membre invalide : ne peut contenir que des chiffres');
-
 		$db = DB::getInstance();
 
 		if (!$this->exists()) {
@@ -202,7 +212,7 @@ class User extends Entity
 			$number_exists = $db->test(self::TABLE, sprintf('%s = ? AND id != ?', $db->quoteIdentifier($field)), $this->$field, $this->id());
 		}
 
-		$this->assert(!$number_exists, 'Ce numéro de membre est déjà attribué à un autre membre.');
+		$this->assert(!$number_exists, sprintf('Le numéro de membre %s est déjà attribué à un autre membre.', $this->$field));
 
 		$field = DynamicFields::getLoginField();
 		if ($this->$field !== null) {
@@ -341,7 +351,7 @@ class User extends Entity
 		return File::CONTEXT_USER . '/' . $this->id();
 	}
 
-	public function listFiles(string $field_name = null): array
+	public function listFiles(?string $field_name = null): array
 	{
 		return Files::listForUser($this->id, $field_name);
 	}
@@ -366,10 +376,14 @@ class User extends Entity
 			return;
 		}
 
-		$db = DB::getInstance();
-		$new = $db->firstColumn(sprintf('SELECT MAX(%s) + 1 FROM %s WHERE %1$s IS NOT NULL;', $db->quoteIdentifier($field), User::TABLE));
-		$new = $new ?: $db->count(User::TABLE);
-		$this->set($field, (int)$new);
+		$n = Users::getNewNumber();
+
+		if (null === $n
+			|| !DynamicFields::isNumberFieldANumber()) {
+			throw new UserException("Le numéro de membre n'est pas numérique.\nImpossible d'attribuer automatiquement un numéro de membre quand le numéro de membre peut contenir du texte.");
+		}
+
+		$this->set($field, $n);
 	}
 
 	public function name(): string
@@ -398,6 +412,9 @@ class User extends Entity
 
 		if (isset($source['id_parent']) && is_array($source['id_parent'])) {
 			$source['id_parent'] = Form::getSelectorValue($source['id_parent']);
+		}
+		elseif (isset($source['parent_number'])) {
+			$source['id_parent'] = Users::getIdFromNumber($source['parent_number']);
 		}
 
 		foreach (DynamicFields::getInstance()->fieldsByType('multiple') as $f) {
@@ -430,6 +447,15 @@ class User extends Entity
 			}
 
 			$source[$f->name] = !empty($source[$f->name]);
+		}
+
+		// Handle boolean fields
+		foreach (DynamicFields::getInstance()->fieldsByType('boolean') as $f) {
+			if (!array_key_exists($f->name, $source)) {
+				continue;
+			}
+
+			$source[$f->name] = $source[$f->name] === '' ? null : (bool) $source[$f->name];
 		}
 
 		foreach (DynamicFields::getInstance()->fieldsByType('country') as $f) {
@@ -572,6 +598,17 @@ class User extends Entity
 		$this->set('password', $session->hashPassword($source['password']));
 	}
 
+	public function isHidden(): bool
+	{
+		static $hidden_categories = null;
+
+		if (null === $hidden_categories) {
+			$hidden_categories = DB::getInstance()->getAssoc('SELECT id, id FROM users_categories WHERE hidden = 1;');
+		}
+
+		return in_array($this->id_category, $hidden_categories);
+	}
+
 	public function getEmails(): array
 	{
 		$out = [];
@@ -683,14 +720,24 @@ class User extends Entity
 		throw new UserException("Le champ identifiant ne peut être laissé vide pour un administrateur, sinon vous ne pourriez plus vous connecter.");
 	}
 
-	public function canChangePassword(Session $session): bool
+	public function canChangePassword(?Session $session): bool
 	{
-		if ($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)) {
+		if ($session && $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)) {
 			return true;
 		}
 
 		$password_field = current(DynamicFields::getInstance()->fieldsBySystemUse('password'));
 		return $password_field->user_access_level === Session::ACCESS_WRITE;
+	}
+
+	public function canRecoverPassword(): bool
+	{
+		// Admins can recover their password all the time
+		if ($this->isSuperAdmin()) {
+			return true;
+		}
+
+		return $this->canChangePassword(null);
 	}
 
 	public function checkDuplicate(): ?int
@@ -808,6 +855,12 @@ class User extends Entity
 		$zip->close();
 	}
 
+	public function canLogin(): bool
+	{
+		$category = $this->category();
+		return $category->perm_connect >= Session::ACCESS_READ;
+	}
+
 	public function isSuperAdmin(): bool
 	{
 		$category = $this->category();
@@ -841,6 +894,22 @@ class User extends Entity
 	{
 		if (!$this->canBeModifiedBy($session)) {
 			throw new UserException("Seul un membre administrateur peut modifier un autre membre administrateur.");
+		}
+	}
+
+	/**
+	 * Return true if a manager can change a users password
+	 */
+	public function canChangePasswordBy(Session $session): bool
+	{
+		$password_field = current(DynamicFields::getInstance()->fieldsBySystemUse('password'));
+		return $session->canAccess($session::SECTION_USERS, $password_field->management_access_level);
+	}
+
+	public function validatePasswordCanBeChangedBy(Session $session): void
+	{
+		if (!$this->canChangePasswordBy($session)) {
+			throw new UserException("Vous n'avez pas le droit de modifier le mot de passe de ce membre, merci de contacter un administrateur.");
 		}
 	}
 
@@ -894,17 +963,11 @@ class User extends Entity
 	}
 
 	/**
-	 * Set category if it doesn't have access to config
+	 * Set user category, only if the category doesn't give access to config
 	 * @throws UserException
 	 */
 	public function setCategorySafeNoConfig(int $id_category): bool
 	{
-		$safe_categories = Categories::listAssocSafe($session);
-
-		if (!array_key_exists($id_category, $safe_categories)) {
-			throw new UserException('Vous n\'avez pas le droit de placer ce membre dans cette catégorie');
-		}
-
 		$is_safe = DB::getInstance()->test(Category::TABLE, 'id = ? AND perm_config = 0', $id_category);
 
 		if ($is_safe) {

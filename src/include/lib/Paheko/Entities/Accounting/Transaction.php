@@ -762,7 +762,7 @@ class Transaction extends Entity
 				$line = $detail->direction == 'credit' ? $this->getCreditLine() : $this->getDebitLine();
 				$this->assert($line !== null, 'Il manque une ligne dans cette écriture');
 
-				$ok = $db->test(Account::TABLE, 'id = ? AND ' . $db->where('type', $detail->targets), $line->id_account);
+				$ok = $db->test(Account::TABLE, 'id = ? AND ' . $db->where('type', $detail->types), $line->id_account);
 
 				if (!$ok) {
 					$this->set('type', self::TYPE_ADVANCED);
@@ -807,6 +807,30 @@ class Transaction extends Entity
 		$this->addLine($line);
 
 		$this->importForm($source);
+	}
+
+	/**
+	 * This is only supposed to be used when creating / editing a transaction
+	 * directly by the user (eg. transaction form), and not in other places.
+	 */
+	public function validateUsingConfig(Config $config): void
+	{
+		// Check for analytical projects here, and not in selfCheck
+		// or we won't be able to create project-less transactions
+		// from plugins etc.
+		if (self::TYPE_ADVANCED === $this->type
+			&& $config->analytical_mandatory) {
+			$has_project = false;
+
+			foreach ($this->getLines() as $line) {
+				if ($line->id_project) {
+					$has_project = true;
+					break;
+				}
+			}
+
+			$this->assert($has_project, 'Aucun projet analytique n\'a été choisi, mais l\'affectation d\'un projet est obligatoire pour toutes les écritures.');
+		}
 	}
 
 	public function importForm(?array $source = null)
@@ -946,9 +970,9 @@ class Transaction extends Entity
 	{
 		$source ??= $_POST;
 
-		$type = $source['type'] ?? ($this->type ?? self::TYPE_ADVANCED);
+		$type = intval($source['type'] ?? ($this->type ?? self::TYPE_ADVANCED));
 
-		if (self::TYPE_ADVANCED != $type && !isset($source['amount'])) {
+		if (self::TYPE_ADVANCED !== $type && !isset($source['amount'])) {
 			throw new UserException('Montant non précisé');
 		}
 
@@ -1101,16 +1125,14 @@ class Transaction extends Entity
 	 */
 	public function getTypesDetails(?array $source = null)
 	{
-		if (null === $source) {
-			$source = $_POST;
-		}
+		$source ??= $_POST;
 
 		$details = [
 			self::TYPE_REVENUE => [
 				'accounts' => [
 					[
 						'label' => 'Type de recette',
-						'targets' => [Account::TYPE_REVENUE],
+						'types' => [Account::TYPE_REVENUE],
 						'direction' => 'credit',
 						'defaults' => [
 							self::TYPE_CREDIT => 'credit',
@@ -1118,7 +1140,7 @@ class Transaction extends Entity
 					],
 					[
 						'label' => 'Compte d\'encaissement',
-						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
+						'types' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
 						'direction' => 'debit',
 						'defaults' => [
 							self::TYPE_EXPENSE => 'credit',
@@ -1132,7 +1154,7 @@ class Transaction extends Entity
 				'accounts' => [
 					[
 						'label' => 'Type de dépense',
-						'targets' => [Account::TYPE_EXPENSE],
+						'types' => [Account::TYPE_EXPENSE],
 						'direction' => 'debit',
 						'defaults' => [
 							self::TYPE_DEBT => 'debit',
@@ -1140,7 +1162,7 @@ class Transaction extends Entity
 					],
 					[
 						'label' => 'Compte de décaissement',
-						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
+						'types' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
 						'direction' => 'credit',
 						'defaults' => [
 							self::TYPE_REVENUE => 'debit',
@@ -1155,7 +1177,7 @@ class Transaction extends Entity
 				'accounts' => [
 					[
 						'label' => 'De',
-						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING, Account::TYPE_TEMPORARY_TRANSFER],
+						'types' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING, Account::TYPE_INTERNAL],
 						'direction' => 'credit',
 						'defaults' => [
 							self::TYPE_EXPENSE => 'credit',
@@ -1164,7 +1186,7 @@ class Transaction extends Entity
 					],
 					[
 						'label' => 'Vers',
-						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING, Account::TYPE_TEMPORARY_TRANSFER],
+						'types' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING, Account::TYPE_INTERNAL],
 						'direction' => 'debit',
 					],
 				],
@@ -1175,7 +1197,7 @@ class Transaction extends Entity
 				'accounts' => [
 					[
 						'label' => 'Type de dette (dépense)',
-						'targets' => [Account::TYPE_EXPENSE],
+						'types' => [Account::TYPE_EXPENSE],
 						'direction' => 'debit',
 						'defaults' => [
 							self::TYPE_EXPENSE => 'debit',
@@ -1183,7 +1205,7 @@ class Transaction extends Entity
 					],
 					[
 						'label' => 'Compte de tiers',
-						'targets' => [Account::TYPE_THIRD_PARTY],
+						'types' => [Account::TYPE_THIRD_PARTY],
 						'direction' => 'credit',
 						'defaults' => [
 							self::TYPE_CREDIT => 'debit',
@@ -1197,7 +1219,7 @@ class Transaction extends Entity
 				'accounts' => [
 					[
 						'label' => 'Type de créance (recette)',
-						'targets' => [Account::TYPE_REVENUE],
+						'types' => [Account::TYPE_REVENUE],
 						'direction' => 'credit',
 						'defaults' => [
 							self::TYPE_REVENUE => 'credit',
@@ -1205,7 +1227,7 @@ class Transaction extends Entity
 					],
 					[
 						'label' => 'Compte de tiers',
-						'targets' => [Account::TYPE_THIRD_PARTY],
+						'types' => [Account::TYPE_THIRD_PARTY],
 						'direction' => 'debit',
 						'defaults' => [
 							self::TYPE_DEBT => 'credit',
@@ -1243,7 +1265,7 @@ class Transaction extends Entity
 			$type->id = $key;
 			foreach ($type->accounts as &$account) {
 				$account = (object) $account;
-				$account->targets_string = implode(':', $account->targets);
+				$account->types_string = implode('|', $account->types);
 				$account->selector_name = sprintf('simple[%s][%s]', $key, $account->direction);
 
 				$d = null;
@@ -1253,7 +1275,7 @@ class Transaction extends Entity
 					$d = $account->direction;
 				}
 				else {
-					$d = $account->defaults[$this->type] ?? null;
+					$d = $account->defaults[$type->id] ?? null;
 				}
 
 				if ($d) {

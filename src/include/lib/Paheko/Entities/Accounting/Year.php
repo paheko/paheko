@@ -9,9 +9,11 @@ use Paheko\Entity;
 use Paheko\Log;
 use Paheko\UserException;
 use Paheko\Utils;
+use Paheko\ValidationException;
 use Paheko\Accounting\Accounts;
 use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
+use Paheko\Users\Session;
 
 class Year extends Entity
 {
@@ -159,15 +161,28 @@ class Year extends Entity
 
 	/**
 	 * Splits an accounting year between the current year and another one, at a given date
-	 * Any transaction after the given date will be moved to the target year.
+	 * Any transaction between the given dates will be moved to the target year.
 	 */
-	public function split(\DateTime $date, Year $target): void
+	public function split(\DateTime $start, \DateTime $end, Year $target): void
 	{
 		$this->assertCanBeModified();
 		$target->assertCanBeModified();
 
-		DB::getInstance()->preparedQuery('UPDATE acc_transactions SET id_year = ? WHERE id_year = ? AND date > ?;',
-			$target->id(), $this->id(), $date->format('Y-m-d'));
+		if ($start < $target->start_date || $start > $target->end_date) {
+			throw new ValidationException('La date de début ne correspond pas à l\'exercice cible choisi.');
+		}
+		elseif ($end < $target->start_date || $end > $target->end_date) {
+			throw new ValidationException('La date de fin ne correspond pas à l\'exercice cible choisi.');
+		}
+
+		DB::getInstance()->preparedQuery('UPDATE acc_transactions
+			SET id_year = ?
+			WHERE id_year = ? AND date >= ? AND date <= ?;',
+			$target->id(),
+			$this->id(),
+			$start->format('Y-m-d'),
+			$end->format('Y-m-d')
+		);
 	}
 
 	public function delete(): bool
@@ -185,6 +200,21 @@ class Year extends Entity
 		$db->preparedQuery('DELETE FROM acc_transactions WHERE id_year = ?;', $this->id());
 
 		return parent::delete();
+	}
+
+	public function zipAllAttachments(?string $target, ?Session $session): void
+	{
+		$db = DB::getInstance();
+		$dirs = $db->getAssoc('SELECT t.id, ? || \'/\' || t.id
+			FROM acc_transactions t
+			INNER JOIN acc_transactions_files f ON f.id_transaction = t.id
+			WHERE t.id_year = ?
+			GROUP BY t.id;',
+			File::CONTEXT_TRANSACTION,
+			$this->id()
+		);
+
+		Files::zip($dirs, $target, $session, $this->label .' - Fichiers joints');
 	}
 
 	public function countTransactions(): int
@@ -220,71 +250,6 @@ class Year extends Entity
 		);
 	}
 
-	/**
-	 * List common accounts used in this year, grouped by type
-	 * @return array
-	 */
-	public function listCommonAccountsGrouped(array $types = null, bool $hide_empty = false): array
-	{
-		if (null === $types) {
-			// If we want all types, then we will get used or bookmarked accounts in common types
-			// and only bookmarked accounts for other types, grouped in "Others"
-			$target = Account::COMMON_TYPES;
-		}
-		else {
-			$target = $types;
-		}
-
-		$out = [];
-
-		foreach ($target as $type) {
-			$out[$type] = (object) [
-				'label'    => Account::TYPES_NAMES[$type],
-				'type'     => $type,
-				'accounts' => [],
-			];
-		}
-
-		if (null === $types) {
-			$out[0] = (object) [
-				'label'    => 'Autres',
-				'type'     => 0,
-				'accounts' => [],
-			];
-		}
-
-		$db = DB::getInstance();
-
-		$sql = sprintf('SELECT a.* FROM acc_accounts a
-			LEFT JOIN acc_transactions_lines b ON b.id_account = a.id
-			LEFT JOIN acc_transactions c ON c.id = b.id_transaction AND c.id_year = %d
-			WHERE a.id_chart = %d AND ((a.%s AND (a.bookmark = 1 OR a.user = 1 OR c.id IS NOT NULL)) %s)
-			GROUP BY a.id
-			ORDER BY type, code COLLATE NOCASE;',
-			$this->id(),
-			$this->id_chart,
-			$db->where('type', $target),
-			(null === $types) ? 'OR (a.bookmark = 1)' : ''
-		);
-
-		$query = $db->iterate($sql);
-
-		foreach ($query as $row) {
-			$t = in_array($row->type, $target, true) ? $row->type : 0;
-			$out[$t]->accounts[] = $row;
-		}
-
-		if ($hide_empty) {
-			foreach ($out as $key => $v) {
-				if (!count($v->accounts)) {
-					unset($out[$key]);
-				}
-			}
-		}
-
-		return $out;
-	}
-
 	public function hasOpeningBalance(): bool
 	{
 		return DB::getInstance()->test(Transaction::TABLE, 'id_year = ? AND status & ?', $this->id(), Transaction::STATUS_OPENING_BALANCE);
@@ -311,7 +276,7 @@ class Year extends Entity
 		}
 	}
 
-	public function importForm(array $source = null)
+	public function importForm(?array $source = null)
 	{
 		$this->assertCanBeModified(false);
 
@@ -322,5 +287,60 @@ class Year extends Entity
 		}
 
 		return parent::importForm($source);
+	}
+
+	public function saveProvisional(array $lines)
+	{
+		$db = DB::getInstance();
+		$db->begin();
+
+		$db->preparedQuery('DELETE FROM acc_years_provisional WHERE id_year = ?;', $this->id());
+
+		foreach ($lines as $row) {
+			if (empty($row['id_account'])) {
+				continue;
+			}
+
+			$db->insert('acc_years_provisional', [
+				'id_year'    => $this->id(),
+				'id_account' => $row['id_account'],
+				'amount'     => $row['amount'],
+			], 'OR IGNORE');
+		}
+
+		$db->commit();
+	}
+
+	public function getProvisional(): array
+	{
+		$db = DB::getInstance();
+		$sql = 'SELECT p.amount, a.code, a.label, a.code || \' — \' || a.label AS selector_label, a.id AS id_account
+			FROM acc_years_provisional p
+			INNER JOIN acc_accounts a ON a.id = p.id_account
+			WHERE p.id_year = ? AND a.position = ?
+			ORDER BY a.code COLLATE NOCASE;';
+
+		$out = [
+			'expense'       => $db->get($sql, $this->id(), Account::EXPENSE),
+			'revenue'       => $db->get($sql, $this->id(), Account::REVENUE),
+			'expense_total' => 0,
+			'revenue_total' => 0,
+			'result'        => 0,
+		];
+
+		foreach ($out as $key => $list) {
+			if (!is_array($list)) {
+				continue;
+			}
+
+			foreach ($list as $i => $item) {
+				$out[$key][$i]->account_selector = [$item->id_account => $item->selector_label];
+				$out[$key . '_total'] += $item->amount;
+			}
+		}
+
+		$out['result'] = $out['revenue_total'] - $out['expense_total'];
+
+		return $out;
 	}
 }

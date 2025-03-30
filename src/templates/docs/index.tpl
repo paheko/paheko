@@ -45,12 +45,14 @@ $upload_here = $context_specific_root ? null : $dir->path;
 			{if $dir->canCreateDirHere()}
 				{linkbutton shape="folder" label="Dossier" target="_dialog" href="!docs/new_dir.php?p=%s"|args:$dir_uri}
 			{/if}
+				{linkbutton shape="text" label="Texte MarkDown" target="_dialog" href="!docs/new_file.php?p=%s"|args:$dir_uri}
 				{if WOPI_DISCOVERY_URL}
+					<h4 class="ruler-left">Édition collaborative</h4>
 					{linkbutton shape="document" label="Document" target="_dialog" href="!docs/new_doc.php?ext=odt&p=%s"|args:$dir_uri}
 					{linkbutton shape="table" label="Tableur" target="_dialog" href="!docs/new_doc.php?ext=ods&p=%s"|args:$dir_uri}
 					{linkbutton shape="gallery" label="Présentation" target="_dialog" href="!docs/new_doc.php?ext=odp&p=%s"|args:$dir_uri}
+					{linkbutton shape="edit" label="Dessin" target="_dialog" href="!docs/new_doc.php?ext=odg&p=%s"|args:$dir_uri}
 				{/if}
-				{linkbutton shape="text" label="Fichier texte" target="_dialog" href="!docs/new_file.php?p=%s"|args:$dir_uri}
 			{/if}
 		{/linkmenu}
 	{/if}
@@ -106,10 +108,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 		<?php
 		$class = $gallery && !$context_specific_root ? 'files gallery' : 'files';
 
-		if ($context_specific_root) {
-			$can_check = false;
-		}
-		elseif ($context === File::CONTEXT_USER) {
+		if ($context === File::CONTEXT_USER) {
 			$can_check = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
 		}
 		elseif ($context === File::CONTEXT_TRANSACTION) {
@@ -127,7 +126,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 			<tr>
 				{if $can_check}
 					<td class="check">
-						{input type="checkbox" name="check[]" value=$item.hash_id}
+						{input type="checkbox" name="check[]" value=$item.path}
 					</td>
 				{/if}
 				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$item.id}">#{$item.id}</a></td>
@@ -144,7 +143,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 			<tr>
 				{if $can_check}
 					<td class="check">
-						{input type="checkbox" name="check[]" value=$item.hash_id}
+						{input type="checkbox" name="check[]" value=$item.path}
 					</td>
 				{/if}
 				<td class="num"><a href="{$admin_url}users/details.php?id={$item.id}">{$item.number}</a></td>
@@ -242,7 +241,10 @@ $upload_here = $context_specific_root ? null : $dir->path;
 					<select name="action">
 						<option value="">— Choisir une action à effectuer —</option>
 						{if $context == File::CONTEXT_DOCUMENTS}
-						<option value="move">Déplacer</option>
+							<option value="move">Déplacer</option>
+							{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
+								<option value="move_to_transaction">Déplacer vers une écriture</option>
+							{/if}
 						{/if}
 						<option value="delete">Supprimer</option>
 						<option value="zip">Télécharger dans un fichier ZIP</option>

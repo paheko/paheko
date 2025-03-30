@@ -22,11 +22,17 @@
 		Ce membre n'est actuellement inscrit à aucune activité ou cotisation.
 	</dd>
 	{/foreach}
-	<dd>
-		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-			{linkbutton href="!services/subscription/new.php?user=%d"|args:$user.id label="Inscrire à une activité" shape="plus" target="_dialog" accesskey="V"}
+	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
+		{if !$user->isHidden()}
+			<dd>
+				{linkbutton href="!services/subscription/new.php?user=%d"|args:$user.id label="Inscrire à une activité" shape="plus" target="_dialog" accesskey="V"}
+			</dd>
+		{else}
+			<dd class="help">
+				Ce membre est dans une catégorie cachée, il n'est plus possible de l'inscrire à une activité.
+			</dd>
 		{/if}
-	</dd>
+	{/if}
 	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)}
 		{if !empty($transactions_linked)}
 			<dt>Écritures comptables liées</dt>
@@ -65,13 +71,18 @@
 		{/if}
 		<dt>Catégorie</dt>
 		<dd>{$category.name}</dd>
+		{if $user->isHidden()}
+			<dd>{tag color="darkred" label="Catégorie cachée"}</dd>
+		{/if}
 		<dt>Droits</dt>
 		<dd><span class="permissions">{display_permissions permissions=$category}</span></dd>
 		<dt>Dernière connexion</dt>
 		<dd>{if empty($user.date_login)}Jamais{else}{$user.date_login|date_short:true}{/if}</dd>
+		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
 		<dd>
 			{linkbutton shape="menu" label="Journal d'audit" href="!users/log.php?id=%d"|args:$user.id}
 		</dd>
+		{/if}
 		<dt>Sécurité</dt>
 		<dd>
 			{if empty($user.password)}
@@ -86,7 +97,7 @@
 				{/if}
 			{/if}
 		</dd>
-		{if $can_be_modified}
+		{if $can_change_password}
 			<dd>
 			{if $logged_user.id == $user.id}
 				{linkbutton shape="settings" label="Modifier mon mot de passe" href="!me/security.php"}
