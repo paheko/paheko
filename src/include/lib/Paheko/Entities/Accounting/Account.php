@@ -712,6 +712,10 @@ class Account extends Entity
 				'label' => 'Date',
 				'order' => 't.date %s, t.id %1$s',
 			],
+			'year_label' => [
+				'select' => 'y.label',
+				'label' => 'Exercice',
+			],
 			'reference' => [
 				'select' => 't.reference',
 				'label' => 'Réf. écriture',
@@ -760,6 +764,10 @@ class Account extends Entity
 
 		if ($only_this_year) {
 			$conditions .= ' AND t.id_year = ' . (int)$id_year;
+			unset($columns['year_label']);
+		}
+		else {
+			$tables .= ' INNER JOIN acc_years y ON y.id = t.id_year';
 		}
 
 		$list = new DynamicList($columns, $tables, $conditions);

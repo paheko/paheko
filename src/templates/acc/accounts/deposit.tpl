@@ -41,6 +41,9 @@
 					</td>
 					<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
 					<td>{$line.date|date_short}</td>
+					{if !$only_this_year}
+						<td>{$line.year_label}</td>
+					{/if}
 					<td>{$line.reference}</td>
 					<td>{$line.line_reference}</td>
 					<th>{$line.label}</th>
