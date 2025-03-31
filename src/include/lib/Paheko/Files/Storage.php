@@ -26,7 +26,7 @@ class Storage
 	 */
 	static public function sync(?string $path = null, ?callable $callback = null): void
 	{
-		if (FILE_STORAGE_BACKEND == 'SQLite') {
+		if (FILE_STORAGE_BACKEND === 'SQLite') {
 			return;
 		}
 
