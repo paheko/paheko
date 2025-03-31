@@ -355,7 +355,7 @@ class Year extends Entity
 				AND l.credit = 0
 				AND NOT (t.status & ?)
 				AND NOT (t.status & ?)
-			GROUP BY a.id
+			GROUP BY a.code
 			ORDER BY a.label COLLATE U_NOCASE;';
 
 		return DB::getInstance()->get($sql,
