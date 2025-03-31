@@ -9,6 +9,7 @@
 	</p>
 {/if}
 
+{* DISABLED for now
 {if !empty($pending_deposit_accounts)}
 	<div class="alert block">
 		<p>Des écritures d'autres exercices sont en attente de dépôt&nbsp;:</p>
@@ -19,3 +20,4 @@
 		</ul>
 	</div>
 {/if}
+*}
