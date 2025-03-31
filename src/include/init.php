@@ -331,7 +331,8 @@ if (OPEN_BASEDIR && PHP_SAPI !== 'cli') {
 			SHARED_CACHE_ROOT,
 			PLUGINS_ROOT,
 			WebCache::getRoot(),
-			LOCAL_ADDRESSES_ROOT
+			LOCAL_ADDRESSES_ROOT,
+			sys_get_temp_dir(),
 		]);
 	}
 
