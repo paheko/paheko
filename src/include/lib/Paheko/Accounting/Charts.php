@@ -18,12 +18,13 @@ class Charts
 		'fr_pca_2025' => 'Plan comptable associatif (révision 2025)',
 		'fr_pcc_2020' => 'Plan comptable des copropriétés (2005 révisé en 2024)',
 		'fr_cse_2015' => 'Plan comptable des CSE (Comité Social et Économique) (Règlement ANC n°2015-01)',
-		'fr_pcg_2014' => 'Plan comptable général, pour entreprises (Règlement ANC n° 2014-03, consolidé 2024)',
+		'fr_pcg_2025' => 'Plan comptable général, pour entreprises (révision 2025)',
 		'fr_pcs_2018' => 'Plan comptable des syndicats (2018, révisé 2024)',
 		'be_pcmn_2019' => 'Plan comptable minimum normalisé des associations et fondations 2019',
 		'ch_asso' => 'Plan comptable associatif',
 		'fr_pca_1999' => 'Plan comptable associatif 1999',
 		'fr_pca_2018' => 'Plan comptable associatif (2018, révision 2024)',
+		'fr_pcg_2014' => 'Plan comptable général, pour entreprises (Règlement ANC n° 2014-03, consolidé 2024)',
 	];
 
 	const COUNTRIES_CHARTS = [
@@ -32,7 +33,7 @@ class Charts
 			'fr_cse_2015' => 'CSE (Comité Social et Économique)',
 			'fr_pcs_2018' => 'Syndicat',
 			'fr_pcc_2020' => 'Copropriété',
-			'fr_pcg_2014' => 'Entreprise',
+			'fr_pcg_2025' => 'Entreprise',
 		],
 		'CH' => [
 			'ch_asso' => 'Association',

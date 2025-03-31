@@ -1,7 +1,7 @@
 <?php
 
 $plan = <<<EOF_PLAN
-CLASSE 1 : COMPTES DE CAPITAUX
+Classe 1 — Comptes de capitaux (Fonds propres, emprunts et dettes assimilés)
 10 Capital et réserves
 101 Capital
 1011 Capital souscrit - non appelé
@@ -96,7 +96,7 @@ CLASSE 1 : COMPTES DE CAPITAUX
 187 Biens et prestations de services échangés entre établissements - produits
 188 Comptes de liaison des sociétés en participation
 
-CLASSE 2 : COMPTES D'IMMOBILISATIONS
+Classe 2 — Comptes d'immobilisations
 20 Immobilisations incorporelles et frais d’établissement
 201 Frais d'établissement
 2011 Frais de constitution
@@ -210,8 +210,7 @@ CLASSE 2 : COMPTES D'IMMOBILISATIONS
 280121 Frais de prospection
 280122 Frais de publicité
 2803 Frais de développement
-2805 Concessions et droits similaires, brevets, licences, solutions informatiques,
-droits et valeurs similaires
+2805 Concessions et droits similaires, brevets, licences, solutions informatiques, droits et valeurs similaires
 2806 Droit au bail
 2807 Fonds commercial
 2808 Autres immobilisations incorporelles
@@ -258,7 +257,7 @@ droits et valeurs similaires
 2975 Dépôts et cautionnements versés
 2976 Autres créances immobilisées
 
-CLASSE 3 : COMPTES DE STOCKS ET EN-COURS
+Classe 3 — Comptes de stocks et en-cours
 31 Matières premières et fournitures
 32 Autres approvisionnements
 321 Matières consommables
@@ -296,69 +295,69 @@ CLASSE 3 : COMPTES DE STOCKS ET EN-COURS
 395 Dépréciations des stocks de produits
 397 Dépréciations des stocks de marchandises
 
-CLASSE 4 : COMPTES DE TIERS
+Classe 4 — Comptes de tiers
 40 Fournisseurs et comptes rattachés
 401 Fournisseurs
 4011 Fournisseurs - Achats de biens et prestations de services
 4017 Fournisseurs - Retenues de garantie
-403 Fournisseurs - Effets à payer
+403 Fournisseurs - Effets à payer [Passif]
 404 Fournisseurs d'immobilisations
 4041 Fournisseurs - Achats d'immobilisations
 4047 Fournisseurs d'immobilisations - Retenues de garantie
-405 Fournisseurs d'immobilisations - Effets à payer
-408 Fournisseurs - Factures non parvenues
+405 Fournisseurs d'immobilisations - Effets à payer [Passif]
+408 Fournisseurs - Factures non parvenues [Passif]
 4081 Fournisseurs
 4084 Fournisseurs d'immobilisations
 4088 Fournisseurs - Intérêts courus
-409 Fournisseurs débiteurs
+409 Fournisseurs débiteurs [Actif]
 4091 Fournisseurs - Avances et acomptes versés sur commandes
 4096 Fournisseurs - Créances pour emballages et matériel à rendre
 4097 Fournisseurs - Autres avoirs
 40971 Fournisseurs d'exploitation
 40974 Fournisseurs d'immobilisations
-4098 Rabais, remises, ristournes à obtenir et autres avoirs non encore reçus
+4098 RRR à obtenir et autres avoirs non encore reçus
 41 Clients et comptes rattachés
 411 Clients
 4111 Clients - Ventes de biens ou de prestations de services
 4117 Clients - Retenues de garantie
-413 Clients - Effets à recevoir
-416 Clients douteux ou litigieux
-418 Clients - Produits non encore facturés
+413 Clients - Effets à recevoir [Actif]
+416 Clients douteux ou litigieux [Actif]
+418 Clients - Produits non encore facturés [Actif]
 4181 Clients - Factures à établir
 4188 Clients - Intérêts courus
-419 Clients créditeurs
+419 Clients créditeurs [Passif]
 4191 Clients - Avances et acomptes reçus sur commandes
 4196 Clients - Dettes sur emballages et matériels consignés
 4197 Clients - Autres avoirs
-4198 Rabais, remises, ristournes à accorder et autres avoirs à établir
+4198 RRR à accorder et autres avoirs à établir
 42 Personnel et comptes rattachés
-421 Personnel - Rémunérations dues
+421 Personnel - Rémunérations dues [Passif]
 422 Comité social et économique
-424 Participation des salariés aux résultats
+424 Participation des salariés aux résultats [Actif]
 4246 Réserve spéciale
 4248 Comptes courants
-425 Personnel - Avances et acomptes et autres comptes débiteurs
-426 Personnel - Dépôts
-427 Personnel - Oppositions
-428 Personnel - Charges à payer
+425 Personnel - Avances et acomptes et autres comptes débiteurs [Actif]
+426 Personnel - Dépôts [Passif]
+427 Personnel - Oppositions [Passif]
+428 Personnel - Charges à payer [Passif]
 4282 Dettes provisionnées pour congés à payer
 4284 Dettes provisionnées pour participation des salariés aux résultats
 4286 Autres charges à payer
-43 Sécurité sociale et autres organismes sociaux
-431 Sécurité sociale
-437 Autres organismes sociaux
-438 Organismes sociaux - Charges à payer
+43 Sécurité sociale et autres organismes sociaux [Passif]
+431 Sécurité sociale [Passif]
+437 Autres organismes sociaux [Passif]
+438 Organismes sociaux - Charges à payer [Passif]
 4382 Charges sociales sur congés à payer
 4386 Autres charges à payer
 439 Organismes sociaux - Produits à recevoir
-44 État et autres collectivités publiques
-441 État - Subventions et aides à recevoir
-442 Contributions, impôts et taxes recouvrés pour le compte de l'État
+44 État et autres collectivités publiques [Actif]
+441 État - Subventions et aides à recevoir [Actif]
+442 Contributions, impôts et taxes recouvrés pour le compte de l'État [Passif]
 4421 Prélèvements à la source (Impôt sur le revenu)
 4422 Prélèvements forfaitaires non libératoires
 4423 Retenues et prélèvements sur les distributions
 444 État - Impôts sur les bénéfices
-445 État - Taxes sur le chiffre d'affaires
+445 État - Taxes sur le chiffre d'affaires [Actif]
 4452 TVA due intracommunautaire
 4455 Taxes sur le chiffre d'affaires à décaisser
 44551 TVA à décaisser
@@ -378,20 +377,20 @@ CLASSE 4 : COMPTES DE TIERS
 44584 TVA récupérée d’avance
 44586 Taxes sur le chiffre d’affaires sur factures non parvenues
 44587 Taxes sur le chiffre d’affaires sur factures à établir
-446 Obligations cautionnées
-447 Autres impôts, taxes et versements assimilés
+446 Obligations cautionnées [Actif]
+447 Autres impôts, taxes et versements assimilés [Actif]
 448 État - Charges à payer et produits à recevoir
 4481 État - Charges à Payer
 44811 Charges fiscales sur congés à payer
 44812 Charges à payer
 4482 État - Produits à recevoir
-449 Quotas d’émission à acquérir
+449 Quotas d’émission à acquérir [Passif]
 45 Groupe et associés
 451 Groupe
 455 Associés - Comptes courants
 4551 Principal
 4558 Intérêts courus
-456 Associés - Opérations sur le capital
+456 Associés - Opérations sur le capital [Actif]
 4561 Associés - Comptes d'apport en société
 45611 Apports en nature
 45615 Apports en numéraire
@@ -402,62 +401,60 @@ CLASSE 4 : COMPTES DE TIERS
 4564 Associés - Versements anticipés
 4566 Actionnaires défaillants
 4567 Associés - Capital à rembourser
-457 Associés - Dividendes à payer
+457 Associés - Dividendes à payer [Passif]
 458 Associés - Opérations faites en commun et en GIE
 4581 Opérations courantes
 4588 Intérêts courus
 46 Débiteurs divers et créditeurs divers
-462 Créances sur cessions d'immobilisations
-464 Dettes sur acquisitions de valeurs mobilières de placement
-465 Créances sur cessions de valeurs mobilières de placement
+462 Créances sur cessions d'immobilisations [Actif]
+464 Dettes sur acquisitions de valeurs mobilières de placement [Passif]
+465 Créances sur cessions de valeurs mobilières de placement [Actif]
 467 Divers comptes débiteurs et produits à recevoir
 468 Divers comptes créditeurs et charges à payer
 47 Comptes transitoires ou d'attente
 471 à 473 Comptes d'attente
-474 Différences d’évaluation – Actif
-4741 Différences d'évaluation sur instruments financiers à terme - Actif
-4742 Différences d'évaluation sur jetons détenus - Actif
-4746 Différences d’évaluation de jetons sur des passifs - Actif
-475 Différences d’évaluation – Passif
-4751 Différences d'évaluation sur instruments financiers à terme - Passif
-4752 Différences d'évaluation sur jetons détenus - Passif
-4756 Différences d’évaluation de jetons sur des passifs - Passif
-476 Différence de conversion - Actif
+474 Différences d’évaluation – Actif [Actif]
+4741 Différences d'évaluation sur instruments financiers à terme - Actif [Actif]
+4742 Différences d'évaluation sur jetons détenus - Actif [Actif]
+4746 Différences d’évaluation de jetons sur des passifs - Actif [Actif]
+475 Différences d’évaluation – Passif [Passif]
+4751 Différences d'évaluation sur instruments financiers à terme - Passif [Passif]
+4752 Différences d'évaluation sur jetons détenus - Passif [Passif]
+4756 Différences d’évaluation de jetons sur des passifs - Passif [Passif]
+476 Différence de conversion - Actif [Actif]
 4761 Diminution des créances
 4762 Augmentation des dettes
 4768 Différences compensées par couverture de change
-477 Différences de conversion - Passif
+477 Différences de conversion - Passif [Passif]
 4771 Augmentation des créances
 4772 Diminution des dettes
 4778 Différences compensées par couverture de change
 478 Autres comptes transitoires
 4781 Mali de fusion sur actif circulant
 48 Comptes de régularisation
-481 Frais d’émission des emprunts
-486 Charges constatées d'avance
-487 Produits constatés d'avance
+481 Frais d’émission des emprunts [Passif]
+486 Charges constatées d'avance [Actif]
+487 Produits constatés d'avance [Passif]
 4871 Produits constatés d’avance sur jetons émis
 488 Comptes de répartition périodique des charges et des produits
 4886 Charges
 4887 Produits
 49 Dépréciations des comptes de tiers
-491 Dépréciations des comptes de clients
-495 Dépréciations des comptes du groupe et des associés
+491 Dépréciations des comptes de clients [Passif]
+495 Dépréciations des comptes du groupe et des associés [Passif]
 4951 Comptes du groupe
 4955 Comptes courants des associés
 4958 Opérations faites en commun et en GIE
-496 Dépréciations des comptes de débiteurs divers
+496 Dépréciations des comptes de débiteurs divers [Passif]
 4962 Créances sur cessions d'immobilisations
 4965 Créances sur cessions de valeurs mobilières de placement
 4967 Autres comptes débiteurs
 
-CLASSE 5 : COMPTES FINANCIERS
+Classe 5 — Comptes financiers
 50 Valeurs mobilières de placement
 502 Actions propres
-5021 Actions destinées à être attribuées aux employés et affectées à des plans
-déterminés
-5022 Actions disponibles pour être attribuées aux employés ou pour la régularisation
-des cours de bourse
+5021 Actions destinées à être attribuées aux employés et affectées à des plans déterminés
+5022 Actions disponibles pour être attribuées aux employés ou pour la régularisation des cours de bourse
 503 Actions
 5031 Titres cotés
 5035 Titres non cotés
@@ -473,36 +470,35 @@ des cours de bourse
 5088 Intérêts courus sur obligations, bons et valeurs assimilés
 509 Versements restant à effectuer sur valeurs mobilières de placement non libérées
 51 Banques, établissements financiers et assimilés
-511 Valeurs à l'encaissement
+511 Valeurs à l'encaissement [Actif ou passif]
 5111 Coupons échus à l'encaissement
 5112 Chèques à encaisser
 5113 Effets à l'encaissement
 5114 Effets à l'escompte
-512 Banques
-5121 Comptes en euros
-5124 Comptes en devises
-518 Intérêts courus
+512 Banques [Actif ou passif]
+518 Intérêts courus [Actif ou passif]
 5181 Intérêts courus à payer
 5188 Intérêts courus à recevoir
-519 Concours bancaires courants
+519 Concours bancaires courants [Actif ou passif]
 5191 Crédit de mobilisation de créances commerciales
 5193 Mobilisation de créances nées à l'étranger
 5198 Intérêts courus sur concours bancaires courants
-52 Instruments financiers à terme et jetons détenus
+52 Instruments financiers à terme et jetons détenus [Actif ou passif]
 521 Instruments financiers à terme
 522 Jetons détenus
 523 Jetons auto-détenus
 524 Jetons empruntés
-53 Caisse
-58 Virements internes
-59 Dépréciations des comptes financiers
-590 Dépréciations des valeurs mobilières de placement
+53 Caisse [Actif ou passif]
+530 Caisse
+58 Virements internes [Actif ou passif]
+59 Dépréciations des comptes financiers [Passif]
+590 Dépréciations des valeurs mobilières de placement [Passif]
 5903 Actions
 5904 Autres titres conférant un droit de propriété
 5906 Obligations
 5908 Autres valeurs mobilières de placement et créances assimilées
 
-CLASSE 6 : COMPTES DE CHARGES
+Classe 6 — Comptes de charges
 60 Achats
 601 Achats stockés - Matières premières et fournitures
 602 Achats stockés - Autres approvisionnements
@@ -528,12 +524,11 @@ CLASSE 6 : COMPTES DE CHARGES
 607 Achats de marchandises
 608 Regroupement des frais accessoires incorporés aux achats
 609 Rabais, remises et ristournes obtenus sur achats
-6098 Rabais, remises et ristournes non affectés
+6098 RRR non affectés
 603 Variation des stocks d'approvisionnements et de marchandises
 6031 Variation des stocks de matières premières et fournitures
 6032 Variation des stocks des autres approvisionnements
 6037 Variation des stocks de marchandises
-61/62 Autres charges externes
 61 Services extérieurs
 611 Sous-traitance générale
 612 Redevances de crédit-bail
@@ -658,10 +653,8 @@ CLASSE 6 : COMPTES DE CHARGES
 648 Autres charges de personnel
 649 Remboursements de charges de personnel
 65 Autres charges de gestion courante
-651 Redevances pour concessions, brevets, licences, marques, procédés, solutions
-informatiques, droits et valeurs similaires
-6511 Redevances pour concessions, brevets, licences, marques, procédés, solutions
-informatiques
+651 Redevances pour concessions, brevets, licences, marques, procédés, solutions informatiques, droits et valeurs similaires
+6511 Redevances pour concessions, brevets, licences, marques, procédés, solutions informatiques
 6516 Droits d'auteur et de reproduction
 6518 Autres droits et valeurs similaires
 653 Rémunérations de l’activité des administrateurs et des gérants
@@ -700,7 +693,7 @@ informatiques
 6673 Charges nettes sur cessions de valeurs mobilières de placement
 6674 Charges nettes sur cessions de jetons
 668 Autres charges financières
-6683 Mali provenant du rachat par l’entité d’actions et obligations émises par ellemême
+6683 Mali provenant du rachat par l’entité d’actions et obligations émises par elle-même
 67 Charges exceptionnelles
 672 Charges sur exercices antérieurs
 678 Autres charges exceptionnelles
@@ -743,7 +736,7 @@ informatiques
 6989 Intégration fiscale - Produits
 699 Produits - Reports en arrière des déficits
 
-CLASSE 7 : COMPTES DE PRODUITS
+Classe 7 — Comptes de produits
 70 Ventes de produits fabriqués, prestations de services, marchandises
 701 Ventes de produits finis
 702 Ventes de produits intermédiaires
@@ -762,13 +755,13 @@ CLASSE 7 : COMPTES DE PRODUITS
 7087 Bonifications obtenues des clients et primes sur ventes
 7088 Autres produits d'activités annexes (cessions d'approvisionnements)
 709 Rabais, remises et ristournes accordés
-7091 Rabais, remises et ristournes accordés sur ventes de produits finis
-7092 Rabais, remises et ristournes accordés sur ventes de produits intermédiaires
-7094 Rabais, remises et ristournes accordés sur travaux
-7095 Rabais, remises et ristournes accordés sur études
-7096 Rabais, remises et ristournes accordés sur prestations de services
-7097 Rabais, remises et ristournes accordés sur ventes de marchandises
-7098 Rabais, remises et ristournes accordés sur produits des activités annexes
+7091 RRR accordés sur ventes de produits finis
+7092 RRR accordés sur ventes de produits intermédiaires
+7094 RRR accordés sur travaux
+7095 RRR accordés sur études
+7096 RRR accordés sur prestations de services
+7097 RRR accordés sur ventes de marchandises
+7098 RRR accordés sur produits des activités annexes
 71 Production stockée (ou déstockage)
 713 Variation des stocks des en-cours de production et de produits
 7133 Variation des en-cours de production de biens
@@ -860,6 +853,12 @@ CLASSE 7 : COMPTES DE PRODUITS
 7874 Reprises sur autres provisions réglementées
 7875 Reprises sur provisions exceptionnelles
 7876 Reprises sur dépréciations exceptionnelles
+
+Classe 8 — Comptes spéciaux
+89 Comptes de bilan
+890 Bilan d'ouverture
+891 Bilan de clôture
+
 EOF_PLAN;
 
 $plan = preg_replace("/\r/", '', $plan);
@@ -872,6 +871,11 @@ fputcsv(STDOUT, ['code','label','description','position','bookmark'], ',', '"', 
 foreach ($src as $line)
 {
 	$line = trim($line);
+
+	if (empty($line)) {
+		continue;
+	}
+
 	if (preg_match('!^(\d+)\s+(.+)$!', $line, $match))
 	{
 		$code = (int)$match[1];
@@ -890,7 +894,7 @@ foreach ($src as $line)
 		continue;
 	}
 
-	if (preg_match('/^(.+?)\s+\[(Actif|Passif)\]\s*$/', $nom, $match)) {
+	if (preg_match('/^(.+?)\s+\[(Actif|Passif|Actif ou passif)\]\s*$/i', $nom, $match)) {
 		$position = $match[2];
 		$nom = $match[1];
 	}
@@ -901,32 +905,37 @@ foreach ($src as $line)
 	$classe = substr((string)$code, 0, 1);
 
 	if ($classe == 1) {
-		$position = 'Passif';
+		$position ??= 'Passif';
 	}
 	elseif ($classe == 2 || $classe == 3 || $classe == 5) {
-		$position = 'Actif';
+		$position ??= 'Actif';
 	}
 	// Comptes de classe 4, c'est compliqué là
 	elseif ($classe == 4) {
 		if ($position === null) {
-			$position = 'Actif ou passif';
+			$position ??= 'Actif ou passif';
 		}
 	}
 	elseif ($classe == 6) {
-		$position = 'Charge';
+		$position ??= 'Charge';
 	}
 	elseif ($classe == 7) {
-		$position = 'Produit';
+		$position ??= 'Produit';
 	}
 	elseif ($classe == 8) {
 		if (substr($code, 0, 2) == 86) {
-			$position = 'Charge';
+			$position ??= 'Charge';
 		}
 		elseif (substr($code, 0, 2) == 87) {
-			$position = 'Produit';
+			$position ??= 'Produit';
+		}
+		else {
+			$position ??= 'Actif ou passif';
 		}
 	}
 
-	fputcsv(STDOUT, [$code, $nom, '', $position, ''], ',', '"', '\\');
+	$position ??= '';
+
+	fputcsv(STDOUT, [$code, trim($nom), '', $position, ''], ',', '"', '\\');
 }
 
