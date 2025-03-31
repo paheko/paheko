@@ -15,7 +15,7 @@ use const Paheko\ROOT;
 class Charts
 {
 	const BUNDLED_CHARTS = [
-		'fr_pca_2018' => 'Plan comptable associatif (2018, révision 2025)',
+		'fr_pca_2025' => 'Plan comptable associatif (révision 2025)',
 		'fr_pcc_2020' => 'Plan comptable des copropriétés (2005 révisé en 2024)',
 		'fr_cse_2015' => 'Plan comptable des CSE (Comité Social et Économique) (Règlement ANC n°2015-01)',
 		'fr_pcg_2014' => 'Plan comptable général, pour entreprises (Règlement ANC n° 2014-03, consolidé 2024)',
@@ -23,6 +23,7 @@ class Charts
 		'be_pcmn_2019' => 'Plan comptable minimum normalisé des associations et fondations 2019',
 		'ch_asso' => 'Plan comptable associatif',
 		'fr_pca_1999' => 'Plan comptable associatif 1999',
+		'fr_pca_2018' => 'Plan comptable associatif (2018, révision 2024)',
 	];
 
 	const COUNTRIES_CHARTS = [
