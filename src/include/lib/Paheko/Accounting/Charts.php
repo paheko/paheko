@@ -28,7 +28,7 @@ class Charts
 
 	const COUNTRIES_CHARTS = [
 		'FR' => [
-			'fr_pca_2018' => 'Association ou fondation',
+			'fr_pca_2025' => 'Association ou fondation',
 			'fr_cse_2015' => 'CSE (Comité Social et Économique)',
 			'fr_pcs_2018' => 'Syndicat',
 			'fr_pcc_2020' => 'Copropriété',
