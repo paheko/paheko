@@ -26,8 +26,8 @@ class Chart extends Entity
 	protected bool $archived = false;
 
 	const COUNTRY_LIST = [
-		'BE' => 'Belgique',
 		'FR' => 'France',
+		'BE' => 'Belgique',
 		'CH' => 'Suisse',
 	];
 

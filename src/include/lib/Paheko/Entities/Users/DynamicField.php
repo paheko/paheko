@@ -97,6 +97,7 @@ class DynamicField extends Entity
 		'tel'      => 'Numéro de téléphone',
 		'select'   => 'Sélecteur à choix unique',
 		'multiple' => 'Sélecteur à choix multiple',
+		'boolean'  => 'Sélecteur booléen (oui/non)',
 		'country'  => 'Sélecteur de pays',
 		'text'     => 'Texte libre, une ligne',
 		'datalist' => 'Texte libre, une ligne, à choix multiple',
@@ -118,6 +119,7 @@ class DynamicField extends Entity
 		'decimal'  => '?float',
 		'tel'      => '?string',
 		'select'   => '?string',
+		'boolean'  => '?bool',
 		'multiple' => '?int',
 		'country'  => '?string',
 		'text'     => '?string',
@@ -140,6 +142,7 @@ class DynamicField extends Entity
 		'decimal'  => 'FLOAT',
 		'tel'      => 'TEXT',
 		'select'   => 'TEXT',
+		'boolean'  => 'INTEGER',
 		'multiple' => 'INTEGER',
 		'country'  => 'TEXT',
 		'text'     => 'TEXT',
@@ -173,6 +176,7 @@ class DynamicField extends Entity
 
 	const SQL_CONSTRAINTS = [
 		'checkbox' => '%1s = 1 OR %1s = 0',
+		'boolean'  => '%1s IS NULL OR %1s = 1 OR %1s = 0',
 		'date'     => '%1s IS NULL OR (date(%1$s) IS NOT NULL AND date(%1s) = %1$s)',
 		'datetime' => '%1s IS NULL OR (date(%1$s) IS NOT NULL AND date(%1s) = %1$s)',
 		'month'    => '%1s IS NULL OR (date(%1s || \'-03\') = %1$s || \'-03\')', // Use 3rd day to avoid any potential issue with timezones
@@ -206,7 +210,7 @@ class DynamicField extends Entity
 
 	public function sql_type(): string
 	{
-		if ($this->type == 'checkbox') {
+		if ($this->type === 'checkbox') {
 			return 'INTEGER';
 		}
 
@@ -403,7 +407,7 @@ class DynamicField extends Entity
 		}
 
 		if (isset($source['list_table']) || isset($source['list_table_present'])) {
-			$source['list_table'] = !empty($source['list_table_present']);
+			$source['list_table'] = !empty($source['list_table']);
 		}
 
 		if ($this->isNumber()) {

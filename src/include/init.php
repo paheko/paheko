@@ -7,8 +7,14 @@ use KD2\Security;
 use KD2\Form;
 use KD2\Translate;
 use KD2\DB\EntityManager;
+use Paheko\Web\Cache as WebCache;
 
 $start_timer = microtime(true);
+
+// Disable output buffering, if enabled
+// as some hosting providers do enable it by default
+@ini_set('output_buffering', false);
+@ob_end_clean();
 
 foreach ($_ENV as $key => $value) {
 	if (strpos($key, 'PAHEKO_') === 0) {
@@ -165,11 +171,11 @@ if (!defined('Paheko\WWW_URL') && $host !== null) {
 }
 
 static $default_config = [
-	// USER_CONFIG_FILE is used in single-user setup (Debian/Windows)
+	// DESKTOP_CONFIG_FILE is used in single-user setup (Debian/Windows)
 	// to be able to add user-specific config constants, even though we already
 	// have a config.local.php for OS-specific stuff, this also allows
 	// to remove LOCAL_USER and have a multi-user setup on a single computer
-	'USER_CONFIG_FILE'      => null,
+	'DESKTOP_CONFIG_FILE'   => null,
 	'CACHE_ROOT'            => DATA_ROOT . '/cache',
 	'SHARED_CACHE_ROOT'     => DATA_ROOT . '/cache/shared',
 	'WEB_CACHE_ROOT'        => DATA_ROOT . '/cache/web/%host%',
@@ -184,6 +190,8 @@ static $default_config = [
 	'ERRORS_REPORT_URL'     => null,
 	'REPORT_USER_EXCEPTIONS' => 0,
 	'ENABLE_TECH_DETAILS'   => true,
+	'AUDIT_LOG_FILE'        => null,
+	'AUDIT_LOG_SIZE'        => 1024*1024,
 	'HTTP_LOG_FILE'         => null,
 	'WEBDAV_LOG_FILE'       => null,
 	'WOPI_LOG_FILE'         => null,
@@ -227,6 +235,8 @@ static $default_config = [
 	'WOPI_DISCOVERY_URL'    => null,
 	'SQLITE_JOURNAL_MODE'   => 'TRUNCATE',
 	'LOCAL_ADDRESSES_ROOT'  => null,
+	'DONATE_URL'            => 'https://paheko.cloud/don/',
+	'OPEN_BASEDIR'          => null,
 ];
 
 foreach ($default_config as $const => $value)
@@ -305,6 +315,47 @@ if (ENABLE_PROFILER) {
 	register_shutdown_function([Utils::class, 'showProfiler']);
 }
 
+// Open_basedir hardening, but only in a web context
+if (OPEN_BASEDIR && PHP_SAPI !== 'cli') {
+	$paths = explode(':', OPEN_BASEDIR);
+
+	if (isset($paths[0]) && $paths[0] === 'auto') {
+		unset($paths[0]);
+		$paths = array_merge($paths, [ROOT,
+			// Just in case KD2 is a symlink
+			ROOT . '/include/lib/KD2',
+			// Same with modules
+			ROOT . '/modules',
+			DATA_ROOT,
+			CACHE_ROOT,
+			SHARED_CACHE_ROOT,
+			PLUGINS_ROOT,
+			WebCache::getRoot(),
+			LOCAL_ADDRESSES_ROOT
+		]);
+	}
+
+	foreach ($paths as &$path) {
+		// Make sure the path exists, or errors might be returned
+		Utils::safe_mkdir($path, null, true);
+
+		$r = realpath($path);
+
+		if (!$r) {
+			throw new \LogicException('This path does not exist: ' . $path);
+		}
+
+		$path = $r;
+	}
+
+	unset($path);
+	sort($paths);
+
+	$basedir = ini_get('open_basedir');
+	$basedir .= PATH_SEPARATOR . implode(PATH_SEPARATOR, $paths);
+	ini_set('open_basedir', ltrim($basedir, PATH_SEPARATOR));
+}
+
 // PHP devrait être assez intelligent pour chopper la TZ système mais nan
 // il sait pas faire (sauf sur Debian qui a le bon patch pour ça), donc pour
 // éviter le message d'erreur à la con on définit une timezone par défaut
@@ -342,6 +393,7 @@ ErrorManager::setContext([
 	'root_directory'   => ROOT,
 	'paheko_data_root' => DATA_ROOT,
 	'paheko_version'   => paheko_version(),
+	'sqlite_journal'   => SQLITE_JOURNAL_MODE,
 ]);
 
 
@@ -420,6 +472,13 @@ function user_error(UserException $e)
 	exit;
 }
 
+function ngettext(string $singular, string $plural, int $count): string
+{
+	$str = $count > 1 ? $plural : $singular;
+	$str = str_replace('%n', $count, $str);
+	return $str;
+}
+
 if (REPORT_USER_EXCEPTIONS < 2) {
 	// Message d'erreur simple pour les erreurs de l'utilisateur
 	ErrorManager::setCustomExceptionHandler('\Paheko\UserException', '\Paheko\user_error');
@@ -428,8 +487,12 @@ if (REPORT_USER_EXCEPTIONS < 2) {
 // Clé secrète utilisée pour chiffrer les tokens CSRF etc.
 if (!defined('Paheko\SECRET_KEY')) {
 	$key = base64_encode(random_bytes(64));
-	Install::setConfig(CONFIG_FILE, 'SECRET_KEY', $key);
 	define('Paheko\SECRET_KEY', $key);
+
+	// CONFIG_FILE may be NULL (eg. in unit tests)
+	if (null !== CONFIG_FILE) {
+		Install::setConfig(CONFIG_FILE, ['SECRET_KEY' => $key]);
+	}
 }
 
 // Define a local secret key derived of the main secret key and the data root

@@ -13,6 +13,7 @@ use KD2\DB\EntityManager as EM;
 
 class Web
 {
+	// Always have a LIMIT for recursive queries, or we might stay in a recursive loop
 	const BREADCRUMBS_SQL = '
 		WITH RECURSIVE parents(title, status, inherited_status, id_parent, uri, id, level) AS (
 			SELECT title, status, inherited_status, id_parent, uri, id, 1 FROM web_pages WHERE id = %s
@@ -20,6 +21,7 @@ class Web
 			SELECT p.title, p.status, p.inherited_status, p.id_parent, p.uri, p.id, level + 1
 			FROM web_pages p
 				JOIN parents ON parents.id_parent = p.id
+			LIMIT 100
 		)
 		SELECT id, title, uri, status, inherited_status FROM parents ORDER BY level DESC;';
 
@@ -36,8 +38,9 @@ class Web
 				SELECT p.status, p.inherited_status, p.id_parent, p.id, level + 1, CASE WHEN p.status < children.new_status THEN p.status ELSE children.new_status END
 				FROM web_pages p
 					JOIN children ON children.id = p.id_parent
-				)
-				UPDATE web_pages SET inherited_status = IFNULL((SELECT new_status FROM children WHERE id = web_pages.id), status);';
+				LIMIT 100000
+			)
+			UPDATE web_pages SET inherited_status = IFNULL((SELECT new_status FROM children WHERE id = web_pages.id), status);';
 
 		DB::getInstance()->exec($sql);
 	}
@@ -51,6 +54,7 @@ class Web
 				SELECT p.published, p.modified, p.title, p.status, p.inherited_status, p.id_parent, p.uri, p.id, level + 1
 				FROM web_pages p
 					JOIN children ON children.id = p.id_parent
+				LIMIT 100000
 			)
 			SELECT id, title, published, modified, id_parent, level, uri, status, inherited_status FROM children ORDER BY %s;';
 
@@ -105,9 +109,16 @@ class Web
 		}
 	}
 
-	static public function listCategories(?int $id_parent): array
+	static public function listCategories(?int $id_parent, ?int $except = null): array
 	{
-		$sql = sprintf('SELECT * FROM @TABLE WHERE %s AND type = %d ORDER BY title COLLATE U_NOCASE;', self::getParentClause($id_parent), Page::TYPE_CATEGORY);
+		$except_clause = $except ? ' AND id != ' . (int)$except : '';
+		$sql = sprintf('SELECT * FROM @TABLE
+			WHERE %s AND type = %d %s
+			ORDER BY title COLLATE U_NOCASE;',
+			self::getParentClause($id_parent),
+			Page::TYPE_CATEGORY,
+			$except_clause
+		);
 		return EM::getInstance(Page::class)->all($sql);
 	}
 

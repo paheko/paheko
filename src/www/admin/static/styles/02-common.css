@@ -478,6 +478,12 @@ aside.describe dd a.icn-btn, aside.secondary a.icn-btn, aside.secondary button, 
         padding: 0;
         border: none;
     }
+
+    aside.secondary p.actions {
+        text-align: center;
+        float: none;
+        padding: 1em;
+    }
 }
 
 .hidden {

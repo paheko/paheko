@@ -23,6 +23,10 @@
 	{/if}
 {/if}
 
+<div class="help block">
+	<p>La balance d'ouverture permet de reporter en début d'exercice les soldes des comptes provenant d'un exercice précédent.</p>
+	<p>Si votre association commence son premier exercice, ce formulaire ne doit pas être utilisé.</p>
+</div>
 
 <form method="post" action="{$self_url}">
 
@@ -90,7 +94,7 @@
 						</td>
 					{/if}
 					<th>
-						{input type="list" target="!acc/charts/accounts/selector.php?chart=%d"|args:$year.id_chart name="lines[account_selector][]" default=$line.account_selector}
+						{input type="list" target="!acc/charts/accounts/selector.php?id_chart=%d"|args:$year.id_chart name="lines[account_selector][]" default=$line.account_selector}
 					</th>
 					<td>{input type="money" name="lines[debit][]" default=$line.debit size=5}</td>
 					<td>{input type="money" name="lines[credit][]" default=$line.credit size=5}</td>
@@ -122,10 +126,6 @@
 	<p class="submit">
 		{if null === $previous_year}
 			{button type="submit" name="next" label="Continuer" shape="right" class="main"}
-			— ou —
-			{linkbutton shape="reset" href="!acc/years/" label="Passer cet étape"}
-			<br />
-			<i class="help">(Il sera toujours possible de reprendre la balance d'ouverture plus tard.)</i>
 		{else}
 			{csrf_field key=$csrf_key}
 			{if $previous_year}

@@ -45,12 +45,14 @@ $upload_here = $context_specific_root ? null : $dir->path;
 			{if $dir->canCreateDirHere()}
 				{linkbutton shape="folder" label="Dossier" target="_dialog" href="!docs/new_dir.php?p=%s"|args:$dir_uri}
 			{/if}
+				{linkbutton shape="text" label="Texte MarkDown" target="_dialog" href="!docs/new_file.php?p=%s"|args:$dir_uri}
 				{if WOPI_DISCOVERY_URL}
+					<h4 class="ruler-left">Édition collaborative</h4>
 					{linkbutton shape="document" label="Document" target="_dialog" href="!docs/new_doc.php?ext=odt&p=%s"|args:$dir_uri}
 					{linkbutton shape="table" label="Tableur" target="_dialog" href="!docs/new_doc.php?ext=ods&p=%s"|args:$dir_uri}
 					{linkbutton shape="gallery" label="Présentation" target="_dialog" href="!docs/new_doc.php?ext=odp&p=%s"|args:$dir_uri}
+					{linkbutton shape="edit" label="Dessin" target="_dialog" href="!docs/new_doc.php?ext=odg&p=%s"|args:$dir_uri}
 				{/if}
-				{linkbutton shape="text" label="Fichier texte" target="_dialog" href="!docs/new_file.php?p=%s"|args:$dir_uri}
 			{/if}
 		{/linkmenu}
 	{/if}

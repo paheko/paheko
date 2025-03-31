@@ -61,9 +61,26 @@ table.multi tr {
 }
 
 table.list tbody tr.checked {
-    color: #633 !important;
-    background: #ffc !important;
+    color: #633;
+    background: rgba(255, 255, 200, 0.2);
 }
+
+table.list tbody tr.clickable:hover, table.list tbody tr.clickable:nth-child(even):hover {
+    cursor: pointer;
+    color: #633;
+    background: #ffc;
+}
+
+table.list tbody tr.clickable:hover button, table.list tbody tr.focused button {
+    color: rgb(var(--gHoverLinkColor));
+}
+
+table.list tbody tr.focused {
+    color: rgb(100, 100, 50);
+    background: rgb(255, 255, 200);
+    box-shadow: 0 0 5px .2rem #990;
+}
+
 
 table.list tbody tr.highlight {
     box-shadow: 0px 0px 5px 5px rgba(var(--gSecondColor), 1);
@@ -389,7 +406,6 @@ table.dragging tbody td {
 
 table.schema caption {
     background: rgba(var(--gSecondColor), 0.2);
-
 }
 
 table.list th a {

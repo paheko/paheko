@@ -12,6 +12,7 @@ use Paheko\Users\DynamicFields;
 use Paheko\Users\Users;
 
 use KD2\DB\EntityManager;
+use KD2\DB\Date;
 
 class Services_User
 {
@@ -23,6 +24,16 @@ class Services_User
 	static public function countForUser(int $user_id)
 	{
 		return DB::getInstance()->count(Service_User::TABLE, 'id_user = ?', $user_id);
+	}
+
+	static public function createFromFee(int $id_fee, int $id_user, ?int $expected_amount, bool $paid, int $multiple = 1): Service_User
+	{
+		$su = new Service_User;
+		$su->date = new Date;
+		// Required, also to calculate expiry date
+		$id_service = DB::getInstance()->firstColumn('SELECT id_service FROM services_fees WHERE id = ?;', $id_fee);
+		$su->importForm(compact('id_service', 'id_fee', 'id_user', 'paid', 'expected_amount', 'multiple'));
+		return $su;
 	}
 
 	static public function listDistinctForUser(int $user_id)
@@ -166,6 +177,10 @@ class Services_User
 				}
 				else {
 					$row->paid = true;
+				}
+
+				if (!empty($row->expected_amount)) {
+					$row->expected_amount = Utils::moneyToInteger($row->expected_amount);
 				}
 
 				$su->import((array)$row);

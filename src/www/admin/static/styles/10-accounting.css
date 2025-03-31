@@ -214,6 +214,121 @@ table.statement tfoot td, table.statement tfoot th {
     background: rgba(var(--gSecondColor), 0.2);
 }
 
+section.years article {
+    margin-bottom: 1em;
+    border: 1px solid rgba(var(--gSecondColor), 0.5);
+    border-radius: .5em;
+    padding: 1em;
+}
+
+section.years article header {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+}
+
+section.years article header h3 {
+    font-weight: normal;
+    font-size: 1em;
+    color: var(--gBorderColor);
+}
+
+section.years article header h2 .tag {
+    font-size: 1rem;
+    vertical-align: middle;
+    font-weight: normal;
+    margin-left: 1em;
+}
+
+section.years article header .details {
+    text-align: right;
+}
+
+section.years article header .chart a {
+    font-size: .9em;
+    color: var(--gBorderColor);
+}
+
+section.years article .reports {
+    margin-top: .5em;
+}
+
+section.years article .reports a {
+    margin-left: 0;
+}
+
+section.years article .links {
+    margin: .5em 0;
+}
+
+section.years article .links a {
+    background: rgba(var(--gSecondColor), 0.2);
+    padding: .2em .4em;
+    border-radius: .5em;
+    display: inline-block;
+    color: rgb(var(--gTextColor));
+}
+
+section.years article .reports {
+    color: var(--gLightBorderColor);
+}
+
+section.years article .actions {
+    margin: 0;
+    margin-top: .5em;
+}
+
+section.years article p.main a {
+    margin: 0;
+}
+
+section.years article p.main {
+    margin-top: .8em;
+}
+
+h2.step {
+    border: 2px solid rgba(var(--gSecondColor), 0.8);
+    border-radius: .5em;
+    overflow: hidden;
+    margin: 1em 0;
+}
+
+h2.step strong {
+    background: rgba(var(--gSecondColor), 0.8);
+    padding: .5em;
+    display: inline-block;
+    height: 1em;
+    width: 1em;
+}
+
+table.provisional > tbody > tr > td {
+    padding: 0;
+    vertical-align: top;
+}
+
+table.provisional table, table.provisional table tr {
+    border: none;
+}
+
+table.provisional tbody .spacer {
+    border: 1px solid rgba(var(--gSecondColor), 0.5);
+}
+
+table.provisional > thead th, table.provisional > thead td {
+    background: none;
+    text-align: center;
+    font-size: 20pt;
+    font-weight: bold;
+}
+
+table.provisional > thead tr {
+    border: none;
+}
+
+table.provisional tbody table tbody tr:first-child td.actions button {
+    display: none;
+}
+
 @media handheld, screen and (max-width: 980px) {
     .transaction-details-container {
         grid-template-columns: 1fr;

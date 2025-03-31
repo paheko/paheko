@@ -34,10 +34,11 @@ $csrf_key = 'acc_years_import_' . $year->id();
 $examples = null;
 $csv = new CSV_Custom($session, 'acc_import_year');
 $ignore_ids = (bool) (f('ignore_ids') ?? qg('ignore_ids'));
-$auto_create_accounts = (bool) (bool) (f('auto_create_accounts') ?? qg('auto_create_accounts'));
+$auto_create_accounts = (bool) (f('auto_create_accounts') ?? qg('auto_create_accounts'));
+$fec_number_per_journal = boolval(f('fec_number_per_journal') ?? qg('fec_number_per_journal'));
 $report = [];
 
-$params = compact('ignore_ids', 'type', 'auto_create_accounts') + ['year' => $year->id()];
+$params = compact('ignore_ids', 'type', 'auto_create_accounts', 'fec_number_per_journal') + ['year' => $year->id()];
 
 if (f('cancel')) {
 	$csv->clear();
@@ -54,14 +55,14 @@ if ($type && $type_name) {
 
 	if ($type === Export::FEC) {
 		// Fill with labels
-		$columns_table = array_intersect_key(array_flip(Export::COLUMNS_FULL), $columns);
+		$columns_table = array_intersect_key(array_flip(Export::COLUMNS_FULL + ['Code du journal' => 'journal']), $columns);
 	}
 
 	$csv->setColumns($columns_table, $columns);
 	$csv->setMandatoryColumns(Export::MANDATORY_COLUMNS[$type]);
 
 	$form->runIf(f('load') && isset($_FILES['file']['tmp_name']), function () use ($csv, $params) {
-		$csv->load($_FILES['file']);
+		$csv->upload($_FILES['file']);
 		Utils::redirect(Utils::getSelfURI($params));
 	}, $csrf_key);
 
@@ -72,7 +73,7 @@ if ($type && $type_name) {
 
 	if (!f('import') && $csv->ready()) {
 		try {
-			$report = Import::import($type, $year, $csv, $user->id, compact('ignore_ids', 'auto_create_accounts') + ['dry_run' => true, 'return_report' => true]);
+			$report = Import::import($type, $year, $csv, $user->id, compact('ignore_ids', 'auto_create_accounts', 'fec_number_per_journal') + ['dry_run' => true, 'return_report' => true]);
 		}
 		catch (UserException $e) {
 			$csv->clear();
@@ -80,9 +81,9 @@ if ($type && $type_name) {
 		}
 	}
 
-	$form->runIf(f('import') && $csv->loaded(), function () use ($type, &$csv, $year, $user, $ignore_ids, $auto_create_accounts) {
+	$form->runIf(f('import') && $csv->loaded(), function () use ($type, &$csv, $year, $user, $ignore_ids, $auto_create_accounts, $fec_number_per_journal) {
 		try {
-			Import::import($type, $year, $csv, $user->id, compact('ignore_ids', 'auto_create_accounts'));
+			Import::import($type, $year, $csv, $user->id, compact('ignore_ids', 'auto_create_accounts', 'fec_number_per_journal'));
 		}
 		finally {
 			$csv->clear();

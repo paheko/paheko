@@ -35,14 +35,20 @@ class Router
 		'avatars',
 	];
 
-	static public function route(string $uri = null): void
+	static public function getRequestURI(string $uri = null): string
 	{
 		$uri ??= !empty($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
-
 		$uri = parse_url($uri, \PHP_URL_PATH);
 
 		// WWW_URI inclus toujours le slash final, mais on veut le conserver ici
 		$uri = substr($uri, strlen(WWW_URI) - 1);
+
+		return $uri;
+	}
+
+	static public function route(string $uri = null): void
+	{
+		$uri = self::getRequestURI($uri);
 
 		// This might be changed later
 		http_response_code(200);

@@ -4,6 +4,7 @@ namespace Paheko;
 
 use Paheko\Users\Session;
 use Paheko\Files\Conversion;
+use Paheko\Files\Files;
 
 class CSV_Custom
 {
@@ -18,6 +19,8 @@ class CSV_Custom
 	protected $modifier = null;
 	protected array $_default;
 	protected ?string $cache_key = null;
+	protected int $max_file_size = 1024*1024*10;
+	protected ?string $file_name = null;
 
 	public function __construct(?Session $session = null, ?string $key = null)
 	{
@@ -33,6 +36,7 @@ class CSV_Custom
 			$this->csv = $data['csv'];
 			$this->translation = $data['translation'];
 			$this->skip = $data['skip'];
+			$this->file_name = $data['file_name'];
 		}
 	}
 
@@ -40,7 +44,12 @@ class CSV_Custom
 	{
 		if ($this->session && $this->cache_key && ($this->csv || $this->translation || $this->skip !== 1)) {
 			Static_Cache::export($this->cache_key,
-				['csv' => $this->csv, 'translation' => $this->translation, 'skip' => $this->skip],
+				[
+					'csv'         => $this->csv,
+					'translation' => $this->translation,
+					'skip'        => $this->skip,
+					'file_name'   => $this->file_name,
+				],
 				new \DateTime('+3 hours')
 			);
 
@@ -48,7 +57,7 @@ class CSV_Custom
 		}
 	}
 
-	public function load(?array $file): void
+	public function upload(?array $file): void
 	{
 		if (empty($file['size']) || empty($file['tmp_name']) || empty($file['name'])) {
 			throw new UserException('Fichier invalide, ou aucun fichier fourni');
@@ -57,8 +66,28 @@ class CSV_Custom
 		$path = $file['tmp_name'];
 
 		$this->loadFile($path);
+		$this->file_name = $file['name'];
 
 		@unlink($path);
+	}
+
+	public function loadFromStoredFile(string $path): void
+	{
+		$file = Files::get($path);
+
+		if (!$file) {
+			throw new \InvalidArgumentException('Chemin invalide : ce fichier source n\'existe pas');
+		}
+
+		$this->file_name = Utils::basename($path);
+
+		$path = $file->getLocalOrCacheFilePath();
+
+		if (!$path) {
+			throw new \LogicException('File contents not found');
+		}
+
+		$this->loadFile($path);
 	}
 
 	public function canConvert(): bool
@@ -75,6 +104,10 @@ class CSV_Custom
 
 		if (!$path) {
 			throw new UserException('Ce fichier n\'est pas dans un format accepté.');
+		}
+
+		if (filesize($path) > $this->max_file_size) {
+			throw new UserException(sprintf('Ce fichier CSV est trop gros (taille maximale : %s)', Utils::format_bytes($this->max_file_size)));
 		}
 
 		$this->csv = CSV::readAsArray($path);
@@ -110,7 +143,7 @@ class CSV_Custom
 		}
 
 		if (!isset($this->_default)) {
-			$this->_default = array_fill_keys(array_flip($this->translation), null);
+			$this->_default = array_fill_keys($this->translation, null);
 		}
 
 		$row = $this->_default;
@@ -306,6 +339,11 @@ class CSV_Custom
 		$this->skip = $count;
 	}
 
+	public function getSkippedLines(): int
+	{
+		return $this->skip;
+	}
+
 	public function setColumns(array $columns, array $defaults = []): void
 	{
 		$this->columns = array_filter($columns);
@@ -315,6 +353,11 @@ class CSV_Custom
 	public function setMandatoryColumns(array $columns): void
 	{
 		$this->mandatory_columns = $columns;
+	}
+
+	public function setMaxFileSize(int $size)
+	{
+		$this->max_file_size = $size;
 	}
 
 	public function getColumnsString(): string
@@ -395,8 +438,9 @@ class CSV_Custom
 			'columns'           => $this->columns,
 			'mandatory_columns' => $this->mandatory_columns,
 			'translation_table' => $this->translation,
-			'rows'              => $this->ready() ? $this->iterate() : null,
+			'rows'              => $this->ready() ? iterator_to_array($this->iterate()) : null,
 			'header'            => $this->getHeader(),
+			'file_name'         => $this->file_name,
 		];
 	}
 

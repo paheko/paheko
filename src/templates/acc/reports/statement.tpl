@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="%sCompte de résultat"|args:$project_title current="acc/years"  prefer_landscape=true}
+{include file="_head.tpl" title="%sCompte de résultat"|args:$title current="acc/years"  prefer_landscape=true}
 
 {include file="acc/reports/_header.tpl" current="statement" title="Compte de résultat" allow_compare=true allow_filter=true}
 

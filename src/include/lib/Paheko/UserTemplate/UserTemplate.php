@@ -378,7 +378,7 @@ class UserTemplate extends \KD2\Brindille
 	public function setSourceFile(File $file)
 	{
 		if ($file->type != $file::TYPE_FILE) {
-			throw new \LogicException('Cannot construct a UserTemplate with a directory');
+			throw new \InvalidArgumentException('Cannot construct a UserTemplate with a directory');
 		}
 
 		$this->file = $file;

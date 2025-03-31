@@ -1,4 +1,16 @@
-{include file="_head.tpl" title="Dépôt en banque : %s — %s"|args:$account.code,$account.label current="acc/accounts"}
+{include file="_head.tpl" title="Dépôt en banque : %s — %s"|args:$account.code:$account.label current="acc/accounts"}
+
+{include file="acc/_year_select.tpl"}
+
+{if $has_transactions_from_other_years}
+<p class="actions">
+	{if !$only_this_year}
+		{linkbutton shape="eye-off" label="Cacher les écritures d'autres exercices" href="?id=%d&only=1"|args:$account.id}
+	{else}
+		{linkbutton shape="eye-off" label="Afficher les écritures de tous les exercices" href="?id=%d&only=0"|args:$account.id}
+	{/if}
+</p>
+{/if}
 
 {form_errors}
 
@@ -42,12 +54,13 @@
 		<fieldset>
 			<legend>Détails de l'écriture de dépôt</legend>
 			<dl>
-				<dt><strong>Nombre de chèques</strong></dt>
+				<dt><strong>Nombre de lignes cochées</strong></dt>
 				<dd><mark id="cheques_count">0</mark></dd>
+				<dd class="alert block empty_selection_message">Aucune ligne n'a été cochée.</dd>
 				{input type="text" name="label" label="Libellé" required=1 default="Dépôt en banque"}
 				{input type="date" name="date" default=$date label="Date" required=1}
 				{input type="money" name="amount" label="Montant" required=1}
-				{input type="list" target="!acc/charts/accounts/selector.php?chart=%d&targets=%d"|args:$account.id_chart,$target name="account_transfer" label="Compte de dépôt" required=1}
+				{input type="list" target="!acc/charts/accounts/selector.php?id_chart=%d&types=%d"|args:$account.id_chart:$types name="account_transfer" label="Compte de dépôt" required=1}
 				{input type="text" name="reference" label="Numéro de pièce comptable"}
 				{input type="textarea" name="notes" label="Remarques" rows=4 cols=30}
 			</dl>
@@ -74,6 +87,7 @@
 			}
 			$('#f_amount').value = g.formatMoney(total);
 			$('#cheques_count').innerText = count;
+			g.toggle('dd.empty_selection_message', count == 0);
 		});
 	});
 

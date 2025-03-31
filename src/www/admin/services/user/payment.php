@@ -42,10 +42,10 @@ $t = new Transaction;
 $t->type = $t::TYPE_REVENUE;
 $types_details = $t->getTypesDetails();
 
-$account_targets = $types_details[Transaction::TYPE_REVENUE]->accounts[1]->targets_string;
+$account_types = $types_details[Transaction::TYPE_REVENUE]->accounts[1]->types_string;
 
 $tpl->assign('projects', Projects::listAssoc());
 
-$tpl->assign(compact('csrf_key', 'account_targets', 'user_name', 'su', 'fee'));
+$tpl->assign(compact('csrf_key', 'account_types', 'user_name', 'su', 'fee'));
 
 $tpl->display('services/user/payment.tpl');

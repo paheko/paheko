@@ -14,25 +14,9 @@ $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ);
 
 $criterias = [];
 
-$tpl->assign('project_title', null);
+$title = [];
 
-if (qg('project') === 'all') {
-	$criterias['projects_only'] = true;
-}
-elseif (qg('project')) {
-	$project = Projects::get((int) qg('project'));
-
-	if (!$project) {
-		throw new UserException('Numéro de projet inconnu.');
-	}
-
-	$criterias['project'] = $project->id();
-	$tpl->assign('project', $project);
-	$tpl->assign('project_title', sprintf('%s - ', $project->label));
-}
-
-if (qg('year'))
-{
+if (qg('year')) {
 	$year = Years::get((int) qg('year'));
 
 	if (!$year) {
@@ -47,10 +31,26 @@ if (qg('year'))
 		$criterias['after'] = $a;
 	}
 
+	$title[] = $year->label;
 	$criterias['year'] = $year->id();
 	$tpl->assign('year', $year);
 	$tpl->assign('before_default', $criterias['before'] ?? $year->end_date);
 	$tpl->assign('after_default', $criterias['after'] ?? $year->start_date);
+}
+
+if (qg('project') === 'all') {
+	$criterias['projects_only'] = true;
+}
+elseif (qg('project')) {
+	$project = Projects::get((int) qg('project'));
+
+	if (!$project) {
+		throw new UserException('Numéro de projet inconnu.');
+	}
+
+	$criterias['project'] = $project->id();
+	$tpl->assign('project', $project);
+	$title[] = sprintf('%s - ', $project->label);
 }
 
 if ($id = intval($_GET['user'] ?? 0)) {
@@ -73,6 +73,9 @@ if ($y2 = Years::get((int)qg('compare_year'))) {
 	$tpl->assign('year2', $y2);
 	$criterias['compare_year'] = $y2->id;
 }
+elseif (!empty($_GET['provisional'])) {
+	$criterias['provisional'] = true;
+}
 
 $tpl->assign('criterias', $criterias);
 $criterias_query = $criterias;
@@ -86,5 +89,16 @@ foreach ($criterias_query as &$c) {
 $tpl->assign('criterias_query', http_build_query($criterias_query));
 unset($criterias_query['compare_year']);
 $tpl->assign('criterias_query_no_compare', http_build_query($criterias_query));
+unset($criterias_query['provisional']);
+$tpl->assign('criterias_query_no_provisional', http_build_query($criterias_query));
 
 $tpl->assign('now', new \DateTime);
+
+if (count($title)) {
+	$title = implode(' — ', $title) . ' — ';
+}
+else {
+	$title = '';
+}
+
+$tpl->assign('title', $title);

@@ -201,6 +201,23 @@ Affichera :
 - c
 ```
 
+## filter
+
+Supprime les éléments vides d'un tableau.
+
+```
+{{:assign var="table" a=0 b="coucou" c=""}}
+{{:debug table=$table|filter}}
+```
+
+Affichera :
+
+```
+[
+	"b" => "coucou"
+]
+```
+
 ## implode
 
 Réunit un tableau sous forme de chaîne de texte en utilisant éventuellement une chaîne de liaison entre chaque élément du tableau.
@@ -458,9 +475,13 @@ Ceci n'est pas un t
 
 Formatte un texte selon les règles typographiques françaises : ajoute des espaces insécables devant ou derrière les ponctuations françaises (`« » ? ! :`).
 
-## urlencode
+## url_encode
 
 Encode une chaîne de texte pour utilisation dans une adresse URL (alias de `rawurlencode` en PHP).
+
+## url_decode
+
+Décode une chaîne de texte venant d'une URL (alias de `rawurldecode` en PHP).
 
 ## cdata_escape
 

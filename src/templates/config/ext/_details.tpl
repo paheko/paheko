@@ -83,6 +83,10 @@
 						<figcaption>Accès limité</figcaption>
 						<span class="permissions">{display_permissions section=$item.restrict_section level=$item.restrict_level}</span>
 					</figure>
+				{elseif $item.ini.restrict_details}
+					<figure class="permissions">
+						<figcaption>Accès limité<br /><em>(voir détails)</em></figcaption>
+					</figure>
 				{/if}
 			{/if}
 

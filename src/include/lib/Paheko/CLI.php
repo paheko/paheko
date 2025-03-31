@@ -25,6 +25,7 @@ class CLI
 		'upgrade',
 		'version',
 		'config',
+		'db',
 		'sql',
 		'storage',
 		'cron',
@@ -490,7 +491,7 @@ class CLI
 	public function config(array $args)
 	{
 		foreach (Config::getInstance()->asArray() as $key => $value) {
-			echo $key . ": " . self::var_export($value) . PHP_EOL;
+			echo $key . ": " . Utils::var_export($value) . PHP_EOL;
 		}
 		$this->success();
 	}
@@ -501,47 +502,78 @@ class CLI
 	public function env(array $args)
 	{
 		foreach (Install::getConstants() as $key => $value) {
-			echo $key . ": " . self::var_export($value) . PHP_EOL;
+			echo $key . ": " . Utils::var_export($value) . PHP_EOL;
 		}
 		$this->success();
 	}
 
-	protected function var_export($v)
+	/**
+	 * Usage: paheko db COMMAND
+	 *
+	 * paheko db backup FILE
+	 *   Create a backup of the database to the provided file path.
+	 *
+	 * paheko db check
+	 *   Check database integrity and foreign keys.
+	 *
+	 * paheko db fkfix
+	 *   WARNING: this may result in data loss!
+	 *   Will try to fix foreign keys issues by DELETING the rows pointing
+	 *   to non-existing rows. Usually foreign key issues come from a parent
+	 *   row having been deleted but not the linked rows. So it's often safe,
+	 *   but you SHOULD make a backup before and verify with the 'check'
+	 *   command.
+	 */
+	public function db(array $args)
 	{
-		if (is_array($v) || is_object($v)) {
-			$out = '[';
-			$keys = !array_key_exists(0, $v);
+		@list($command) = $this->parseOptions($args, [], 1);
+		$db = DB::getInstance();
 
-			foreach ($v as $k => $v) {
-				if ($keys) {
-					$out .= $k . ': ';
-				}
+		if ($command === 'check') {
+			printf("Integrity: %s\n", $db->firstColumn('PRAGMA integrity_check;'));
 
-				$out .= self::var_export($v) . ', ';
+			$fk = 0;
+
+			foreach ($db->iterate('PRAGMA foreign_key_check;') as $row) {
+				$fk++;
+				echo $this->color('red', sprintf("Foreign key FAIL: %s:%d -> %s:%d", $row->table, $row->rowid, $row->parent, $row->fkid));
+				echo PHP_EOL;
 			}
 
-			$out = (strlen($out) > 1 ? substr($out, 0, -2) : $out) . ']';
+			if (!$fk) {
+				echo "Foreign keys: ok\n";
+			}
+			else {
+				$this->fail("Foreign keys: %d rows failed!", $fk);
+			}
 		}
-		elseif (is_bool($v)) {
-			$out = $v ? 'true' : 'false';
+		elseif ($command === 'fkfix') {
+			$db->begin();
+			foreach ($db->iterate('PRAGMA foreign_key_check;') as $row) {
+				$db->delete($row->table, 'id = ' . (int)$row->rowid);
+			}
+			$db->commit();
 		}
-		elseif (is_null($v)) {
-			$out = 'null';
-		}
-		elseif (is_string($v)) {
-			$out = '"' . strtr($v, ['"' => '\\"', "\n" => "\\n", "\r" => "\\r"]) . '"';
+		elseif ($command === 'backup') {
+			@list($file) = $this->parseOptions($args, [], 1);
+			Backup::make($file);
 		}
 		else {
-			$out = $v;
+			$this->help(['db']);
 		}
-		return $out;
+
+		$this->success();
 	}
 
 	/**
-	 * Usage: paheko sql OPTIONS… STATEMENT
-	 * Run SQL statement and display result.
-	 * Only read-only queries are supported (SELECT).
-	 * INSERT, CREATE, ALTER, and other queries that would change the database are not supported.
+	 * Usage: paheko sql [STATEMENT]
+	 *   Run SQL statement and display result.
+	 *   Only read-only queries are supported (SELECT).
+	 *   INSERT, CREATE, ALTER, and other queries that would change
+	 *   the database are not supported.
+	 *
+	 *   If STATEMENT is omitted, then the 'sqlite3' program will be executed
+	 *   using the Paheko database file, in interactive mode.
 	 */
 	public function sql(array $args)
 	{
@@ -559,7 +591,24 @@ class CLI
 		$sql = implode(' ', $args);
 
 		if (trim($sql) === '') {
-			$this->fail('No statement was provided.');
+			if (!shell_exec('which sqlite3')) {
+				$this->fail('No statement was provided and the "sqlite3" command is not installed.');
+			}
+
+			$args = [
+				'-header',
+				'-markdown',
+				'-nullvalue "*NULL*"'
+			];
+
+			if (!$rw) {
+				$args[] = '-readonly';
+			}
+
+			$args[] = escapeshellarg(DB_FILE);
+			$args = implode(' ', $args);
+			passthru('sqlite3 ' . $args);
+			return;
 		}
 
 		$db = DB::getInstance();
@@ -646,7 +695,10 @@ class CLI
 		if ($browser) {
 			$url = sprintf('http://%s:%d/admin/', $address, $port);
 
-			if (($_SERVER['DISPLAY'] ?? '') !== '') {
+			if (shell_exec('which xdg-open')) {
+				$browser = 'xdg-open %s';
+			}
+			elseif (shell_exec('which sensible-browser')) {
 				$browser = 'sensible-browser %s &';
 			}
 			else {
@@ -779,7 +831,7 @@ class CLI
 				. "Any e-mail sent will not include the correct web server URL.");
 		}
 
-		if (!in_array($command, ['help', 'init', 'ui', 'server'])) {
+		if (!in_array($command, ['help', 'init', 'ui', 'server', 'db'])) {
 			if (!DB::isInstalled()) {
 				$this->fail('Database does not exist. Run "init" command first.');
 			}

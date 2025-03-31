@@ -23,7 +23,7 @@ $form->runIf('cancel', function() use ($csv) {
 }, $csrf_key, Utils::getSelfURI());
 
 $form->runIf(f('load') && isset($_FILES['file']['tmp_name']), function () use ($csv) {
-	$csv->load($_FILES['file']);
+	$csv->upload($_FILES['file']);
 }, $csrf_key, Utils::getSelfURI());
 
 $form->runIf(f('import') && $csv->loaded(), function () use (&$csv) {

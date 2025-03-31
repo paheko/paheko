@@ -242,7 +242,7 @@ $nom_de_variable_long</code></pre>
 {{:assign var='type_whitelist.html' value=1}}
 
 {{#foreach from=$documents item='document'}}
-  {{:assign var='allowed' value='type_whitelist.%s'|args:$document-&gt;type}}
+  {{:assign var='allowed' value='type_whitelist.%s'|args:$document.type}}
   {{if $allowed !== null}}
     {{:include file='document/'|cat:$type:'.tpl' keep='document'}}
   {{/if}}

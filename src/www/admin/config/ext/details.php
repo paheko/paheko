@@ -38,7 +38,8 @@ else {
 	$access_details = [];
 
 	if ($ext->config_url) {
-		$access_details[] = sprintf('Cette extension a une <a href="%s">page de configuration</a>', $ext->config_url);
+		$access_details[] = sprintf('Cette extension a une <a href="%s">page de configuration</a>.', $ext->config_url)
+			. '<br /><em>(Seuls les administrateurs ayant accès à la configuration générale pourront accéder à cette page de configuration.)</em>';
 	}
 
 	if (!empty($ext->menu)) {

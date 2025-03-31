@@ -11,8 +11,9 @@ if (!CURRENT_YEAR_ID) {
 }
 
 $pending_count = Transactions::listPendingCreditAndDebtForOtherYears(CURRENT_YEAR_ID)->count();
+$pending_deposit_accounts = $current_year->listAccountsWithMissingDepositsFromOtherYears();
 
-$tpl->assign(compact('pending_count'));
+$tpl->assign(compact('pending_count', 'pending_deposit_accounts'));
 
 $tpl->assign('chart_id', $current_year->id_chart);
 $tpl->assign('grouped_accounts', Reports::getClosingSumsFavoriteAccounts(['year' => CURRENT_YEAR_ID]));

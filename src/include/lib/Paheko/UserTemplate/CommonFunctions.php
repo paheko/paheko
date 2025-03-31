@@ -37,11 +37,12 @@ class CommonFunctions
 		'edit_user_field',
 		'user_field',
 		'tag',
+		'dropdown',
 	];
 
 	static public function input(array $params)
 	{
-		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit', 'copy', 'suffix', 'prefix_title', 'prefix_help', 'prefix_required', 'datalist'];
+		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'max_file_size', 'copy', 'suffix', 'prefix_title', 'prefix_help', 'prefix_required', 'datalist'];
 
 		// Extract params and keep attributes separated
 		$attributes = array_diff_key($params, array_flip($params_list));
@@ -62,16 +63,44 @@ class CommonFunctions
 			unset($tparams['label']);
 			$suffix = self::input($tparams);
 		}
+		elseif ($type === 'boolean') {
+			$type = 'select';
+			$attributes['default_empty'] = '— Sélectionner —';
+			$options = [1 => 'Oui', 0 => 'Non'];
 
-		if ($type == 'file' && isset($attributes['accept']) && $attributes['accept'] == 'csv') {
-			$attributes['accept'] = '.csv,text/csv,application/csv,.CSV';
-			$help = ($help ?? '') . PHP_EOL . 'Format accepté : CSV';
+			$attributes['boolean_text_value'] ??= false;
 
-			if (Conversion::canConvertToCSV()) {
-				$help .= ', LibreOffice Calc (ODS), ou Excel (XLSX)';
-				$attributes['accept'] .= ',.ods,.ODS,application/vnd.oasis.opendocument.spreadsheet'
-					. ',.xls,.XLS,application/vnd.ms-excel'
-					. ',.xlsx,.XLSX,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+			if ($attributes['boolean_text_value']) {
+				$options = array_combine(array_values($options), $options);
+			}
+
+			unset($attributes['boolean_text_value']);
+		}
+		elseif ($type === 'hue') {
+			$type = 'range';
+			$attributes['data-input'] = 'hue';
+			$attributes['min'] = !empty($attributes['data-grey']) ? -60 : 0;
+			$attributes['max'] = 360;
+			$attributes['step'] = 1;
+			$attributes['aria-label'] = 'Color hue selector';
+		}
+		elseif ($type === 'file') {
+			$max_file_size ??= Utils::return_bytes(Utils::getMaxUploadSize());
+
+			if (isset($attributes['accept']) && $attributes['accept'] == 'csv') {
+				$attributes['accept'] = '.csv,text/csv,application/csv,.CSV,.txt,.TXT';
+				$help = ($help ?? '') . PHP_EOL . 'Format accepté : CSV';
+
+				if (Conversion::canConvertToCSV()) {
+					$help .= ', LibreOffice Calc (ODS), ou Excel (XLSX)';
+					$attributes['accept'] .= ',.ods,.ODS,application/vnd.oasis.opendocument.spreadsheet'
+						. ',.xls,.XLS,application/vnd.ms-excel'
+						. ',.xlsx,.XLSX,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+				}
+			}
+			elseif (isset($attributes['accept']) && $attributes['accept'] === 'image') {
+				$attributes['accept'] = '.jpg,.JPG,.JPEG,.jpeg,.webp,.WEBP,.gif,.GIF,.png,.PNG,.svg,image/svg+xml,image/png,image/gif,image/jpeg,image/webp';
+				$help = ($help ?? '') . PHP_EOL . 'Format accepté : images';
 			}
 		}
 
@@ -132,6 +161,9 @@ class CommonFunctions
 
 			if ($current_value == $value && $current_value !== null) {
 				$attributes['checked'] = 'checked';
+			}
+			elseif (array_key_exists('checked', $attributes) && !$attributes['checked']) {
+				unset($attributes['checked']);
 			}
 
 			$attributes['value'] = $value;
@@ -255,6 +287,12 @@ class CommonFunctions
 		if ($type === 'country') {
 			$type = 'select';
 			$options = Utils::getCountryList();
+
+			// In case $current_value holds the country name instead of the country code
+			if ($current_value
+				&& ($code = array_search($current_value, $options, true))) {
+				$current_value = $code;
+			}
 		}
 
 		$label ??= null;
@@ -292,6 +330,10 @@ class CommonFunctions
 
 			foreach ($options as $_key => $_value) {
 				$selected = null !== $current_value && ($current_value == $_key);
+				if (is_array($_value) && array_key_exists('label', $_value)) {
+					$_value = $_value['label'];
+				}
+
 				$input .= sprintf('<option value="%s"%s>%s</option>', htmlspecialchars($_key), $selected ? ' selected="selected"' : '', htmlspecialchars((string)$_value));
 			}
 
@@ -300,8 +342,8 @@ class CommonFunctions
 		elseif ($type === 'select_groups') {
 			$input = sprintf('<select %s>', $attributes_string);
 
-			if (empty($attributes['required'])) {
-				$input .= '<option value=""></option>';
+			if (empty($attributes['required']) || isset($attributes['default_empty'])) {
+				$input .= sprintf('<option value="">%s</option>', $attributes['default_empty'] ?? '');
 			}
 
 			foreach ($options as $optgroup => $suboptions) {
@@ -384,7 +426,8 @@ class CommonFunctions
 		}
 
 		if ($type === 'file') {
-			$input .= sprintf('<input type="hidden" name="MAX_FILE_SIZE" value="%d" id="f_maxsize" />', Utils::return_bytes(Utils::getMaxUploadSize()));
+			$real_max_file_size = $max_file_size ?: Utils::return_bytes(Utils::getMaxUploadSize());
+			$input .= sprintf('<input type="hidden" name="MAX_FILE_SIZE" value="%d" id="f_maxsize" />', $real_max_file_size);
 		}
 		elseif ($type === 'checkbox') {
 			$input = sprintf('<input type="hidden" name="%s" value="1" />', preg_replace('/(?=\[|$)/', '_present', $name, 1)) . $input;
@@ -434,8 +477,8 @@ class CommonFunctions
 		else {
 			$out .= sprintf('<dt>%s%s</dt><dd>%s</dd>', $label, $required_label, $input);
 
-			if ($type == 'file' && empty($params['no_size_limit'])) {
-				$out .= sprintf('<dd class="help"><small>Taille maximale : %s</small></dd>', Utils::format_bytes(Utils::getMaxUploadSize()));
+			if ($type === 'file' && $max_file_size) {
+				$out .= sprintf('<dd class="help"><small>Taille maximale : %s</small></dd>', Utils::format_bytes($max_file_size));
 			}
 
 			if (isset($help)) {
@@ -505,7 +548,8 @@ class CommonFunctions
 
 		$params = implode(' ', $params);
 
-		$label = $label ? sprintf('<span>%s</span>', htmlspecialchars($label)) : '';
+		$label = (string)$label;
+		$label = $label === '' ? '' : sprintf('<span>%s</span>', htmlspecialchars((string) $label));
 
 		return sprintf('<a href="%s" %s>%s%s</a>', htmlspecialchars($href), $params, $prefix, $label);
 	}
@@ -545,7 +589,7 @@ class CommonFunctions
 		$params['class'] .= ' icn-btn';
 
 		// Remove NULL params
-		$params = array_filter($params);
+		$params = array_filter($params, fn($a) => !is_null($a));
 
 		array_walk($params, function (&$v, $k) {
 			$v = sprintf('%s="%s"', $k, htmlspecialchars((string)$v));
@@ -776,14 +820,14 @@ class CommonFunctions
 
 			return $out;
 		}
-		elseif ($type == 'select') {
+		elseif ($type === 'select') {
 			$params['options'] = array_combine($field->options, $field->options);
 			$params['default_empty'] = '—';
 		}
-		elseif ($type == 'country') {
-			$params['default'] = Config::getInstance()->get('country');
+		elseif ($type === 'country') {
+			$params['default'] ??= Config::getInstance()->get('country');
 		}
-		elseif ($type == 'checkbox') {
+		elseif ($type === 'checkbox') {
 			$params['value'] = 1;
 			$params['label'] = 'Oui';
 			$params['prefix_title'] = $field->label;
@@ -865,7 +909,8 @@ class CommonFunctions
 		if (!$field) {
 			$out = htmlspecialchars((string)$v);
 		}
-		elseif ($field->type == 'checkbox') {
+		elseif ($field->type === 'checkbox'
+			|| $field->type === 'boolean') {
 			$out = $v ? 'Oui' : 'Non';
 		}
 		elseif (null === $v) {
@@ -944,6 +989,45 @@ class CommonFunctions
 			$out = sprintf('<a href="%s">%s</a>', Utils::getLocalURL('!users/details.php?id=' . (int)$params['link_name_id']), $out);
 		}
 
+		return $out;
+	}
+
+	static public function dropdown(array $params): string
+	{
+		if (!isset($params['options'], $params['title'])) {
+			throw new \InvalidArgumentException('Missing parameter for "dropdown"');
+		}
+
+		$out = sprintf('<nav class="dropdown" aria-role="listbox" aria-expanded="false" tabindex="0" title="%s"><ul>',
+			htmlspecialchars($params['title']));
+
+		foreach ($params['options'] as $option) {
+			$selected = '';
+			$link = '';
+			$aside = '';
+			$content = $option['html'] ?? ($option['label'] ?? null);
+
+			if (null === $content) {
+				throw new \InvalidArgumentException('dropdown: missing "html" or "label" parameter for option: ' . json_encode($option));
+			}
+
+			if (isset($option['aside'])) {
+				$aside = sprintf('<small>%s</small>', htmlspecialchars($option['aside']));
+			}
+
+			if (isset($option['value']) && $option['value'] == $params['value']) {
+				$selected = 'aria-selected="true" class="selected"';
+			}
+
+			if (isset($option['href'])) {
+				$content = sprintf('<a href="%s"><strong>%s</strong> %s</a>', htmlspecialchars($option['href']), $content, $aside);
+				$aside = '';
+			}
+
+			$out .= sprintf('<li %s aria-role="option">%s%s</li>', $selected, $content, $aside);
+		}
+
+		$out .= '</ul></nav>';
 		return $out;
 	}
 

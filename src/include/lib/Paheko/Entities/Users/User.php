@@ -61,6 +61,8 @@ class User extends Entity
 		'accounting_expert' => false,
 		'dark_theme'        => false,
 		'force_handheld'	=> false,
+		// Category displayed when going to users list
+		'users_category'    => 0,
 	];
 
 	protected bool $_loading = false;
@@ -156,8 +158,11 @@ class User extends Entity
 			if ($field->required) {
 				$this->assert(null !== $value, sprintf('"%s" : ce champ est requis', $field->label));
 
-				if (is_bool($value)) {
+				if ($field->type === 'checkbox') {
 					$this->assert($value === true, sprintf('"%s" : ce champ doit être coché', $field->label));
+				}
+				elseif ($field->type === 'boolean') {
+					$this->assert($value === true || $value === false, sprintf('"%s" : ce champ doit être sélectionné', $field->label));
 				}
 				elseif (!is_array($value) && !is_object($value) && !is_bool($value)) {
 					$this->assert('' !== trim((string)$value), sprintf('"%s" : ce champ ne peut être vide', $field->label));
@@ -177,6 +182,9 @@ class User extends Entity
 			}
 			elseif ($field->type === 'checkbox') {
 				$this->assert($value === false || $value === true, sprintf('"%s" : la valeur de ce champ n\'est pas valide.', $field->label));
+			}
+			elseif ($field->type === 'boolean') {
+				$this->assert($value === false || $value === true || $value === null, sprintf('"%s" : la valeur de ce champ n\'est pas valide.', $field->label));
 			}
 			elseif ($field->type === 'select') {
 				$this->assert(in_array($value, $field->options), sprintf('"%s" : la valeur "%s" ne fait pas partie des options possibles', $field->label, $value));
@@ -343,7 +351,7 @@ class User extends Entity
 		return File::CONTEXT_USER . '/' . $this->id();
 	}
 
-	public function listFiles(string $field_name = null): array
+	public function listFiles(?string $field_name = null): array
 	{
 		return Files::listForUser($this->id, $field_name);
 	}
@@ -370,8 +378,9 @@ class User extends Entity
 
 		$n = Users::getNewNumber();
 
-		if (null === $n) {
-			throw new UserException("Le dernier numéro de membre ne comporte pas que des chiffres.\nImpossible d'attribuer automatiquement un numéro de membre.");
+		if (null === $n
+			|| !DynamicFields::isNumberFieldANumber()) {
+			throw new UserException("Le numéro de membre n'est pas numérique.\nImpossible d'attribuer automatiquement un numéro de membre quand le numéro de membre peut contenir du texte.");
 		}
 
 		$this->set($field, $n);
@@ -404,6 +413,9 @@ class User extends Entity
 		if (isset($source['id_parent']) && is_array($source['id_parent'])) {
 			$source['id_parent'] = Form::getSelectorValue($source['id_parent']);
 		}
+		elseif (isset($source['parent_number'])) {
+			$source['id_parent'] = Users::getIdFromNumber($source['parent_number']);
+		}
 
 		foreach (DynamicFields::getInstance()->fieldsByType('multiple') as $f) {
 			if (!(isset($source[$f->name . '_present']) || isset($source[$f->name]))) {
@@ -435,6 +447,15 @@ class User extends Entity
 			}
 
 			$source[$f->name] = !empty($source[$f->name]);
+		}
+
+		// Handle boolean fields
+		foreach (DynamicFields::getInstance()->fieldsByType('boolean') as $f) {
+			if (!array_key_exists($f->name, $source)) {
+				continue;
+			}
+
+			$source[$f->name] = $source[$f->name] === '' ? null : (bool) $source[$f->name];
 		}
 
 		foreach (DynamicFields::getInstance()->fieldsByType('country') as $f) {
@@ -575,6 +596,17 @@ class User extends Entity
 		$this->assert(!$session->isPasswordCompromised($source['password']), 'Le mot de passe choisi figure dans une liste de mots de passe compromis (piratés), il ne peut donc être utilisé ici. Si vous l\'avez utilisé sur d\'autres sites il est recommandé de le changer sur ces autres sites également.');
 
 		$this->set('password', $session->hashPassword($source['password']));
+	}
+
+	public function isHidden(): bool
+	{
+		static $hidden_categories = null;
+
+		if (null === $hidden_categories) {
+			$hidden_categories = DB::getInstance()->getAssoc('SELECT id, id FROM users_categories WHERE hidden = 1;');
+		}
+
+		return in_array($this->id_category, $hidden_categories);
 	}
 
 	public function getEmails(): array

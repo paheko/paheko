@@ -359,6 +359,18 @@ class Page extends Entity
 
 		$this->assert(!$this->exists() || !$db->test(self::TABLE, 'uri = ? AND id != ?', $this->uri, $this->id()), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre : ' . $this->uri, self::DUPLICATE_URI_ERROR);
 		$this->assert($this->exists() || !$db->test(self::TABLE, 'uri = ?', $this->uri), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre : ' . $this->uri, self::DUPLICATE_URI_ERROR);
+
+		if (isset($this->id_parent) && $this->exists()) {
+			$this->assert($this->id_parent !== $this->id());
+
+			$breadcrumbs = Web::getBreadcrumbs($this->id_parent);
+
+			foreach ($breadcrumbs as $bc) {
+				$this->assert($bc->id != $this->id, 'Il n\'est pas possible de mettre une page dans une sous-catégorie d\'elle-même.');
+			}
+
+			$this->assert(count($breadcrumbs) < 50, 'Il n\'est pas possible d\'avoir plus de 50 niveaux de sous-catégories.');
+		}
 	}
 
 	public function importForm(?array $source = null)

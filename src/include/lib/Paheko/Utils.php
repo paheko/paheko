@@ -521,6 +521,19 @@ class Utils
 		}
 	}
 
+	static public function closeFrameIfDialog(?string $destination = null, bool $exit = true): void
+	{
+		$url = self::getLocalURL($destination ?? '!');
+
+		$js = 'window.parent.g.closeDialog();';
+
+		echo self::getFrameRedirectHTML($js, $url);
+
+		if ($exit) {
+			exit;
+		}
+	}
+
 	static public function getFrameRedirectHTML(string $js, string $url): string
 	{
 		return '
@@ -1125,6 +1138,52 @@ class Utils
 		return array($h * 360, $s, $l);
 	}
 
+    static public function hsl2rgb (int $h, int $s, int $l): string
+    {
+        $h /= 60;
+        if ($h < 0) $h = 6 - fmod(-$h, 6);
+        $h = fmod($h, 6);
+
+        $s = max(0, min(1, $s / 100));
+        $l = max(0, min(1, $l / 100));
+
+        $c = (1 - abs((2 * $l) - 1)) * $s;
+        $x = $c * (1 - abs(fmod($h, 2) - 1));
+
+        if ($h < 1) {
+            $r = $c;
+            $g = $x;
+            $b = 0;
+        } elseif ($h < 2) {
+            $r = $x;
+            $g = $c;
+            $b = 0;
+        } elseif ($h < 3) {
+            $r = 0;
+            $g = $c;
+            $b = $x;
+        } elseif ($h < 4) {
+            $r = 0;
+            $g = $x;
+            $b = $c;
+        } elseif ($h < 5) {
+            $r = $x;
+            $g = 0;
+            $b = $c;
+        } else {
+            $r = $c;
+            $g = 0;
+            $b = $x;
+        }
+
+        $m = $l - $c / 2;
+        $r = round(($r + $m) * 255);
+        $g = round(($g + $m) * 255);
+        $b = round(($b + $m) * 255);
+
+        return '#' . dechex($r) . dechex($g) . dechex($b);
+    }
+
 	static public function HTTPCache(?string $hash, ?int $last_change, int $max_age = 3600, bool $immutable = false): bool
 	{
 		$etag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH'], '"\' ') : null;
@@ -1145,7 +1204,9 @@ class Utils
 			header(sprintf('Etag: "%s"', $hash), true);
 		}
 
-		if (($etag && $etag === $hash) || ($last_modified && $last_modified >= $last_change)) {
+		// Stop here if nothing changed
+		if (($etag && $hash && $etag === $hash)
+			|| ($last_modified && $last_change && $last_modified >= $last_change)) {
 			http_response_code(304);
 			exit;
 		}
@@ -1530,6 +1591,17 @@ class Utils
 		return $code;
 	}
 
+	static public function canDoPDF(): bool
+	{
+		return PDF_COMMAND || Plugins::hasSignal('pdf.create');
+	}
+
+	static protected function getPrinceCommand(): string
+	{
+		$org_name = Config::getInstance()->org_name;
+		return sprintf('prince --http-timeout=3 --pdf-profile="PDF/A-3b" --pdf-author=%s', Utils::escapeshellarg($org_name));
+	}
+
 	/**
 	 * Displays a PDF from a string, only works when PDF_COMMAND constant is set to "prince"
 	 * @param  string $str HTML string
@@ -1566,7 +1638,7 @@ class Utils
 		}
 
 		// 3 seconds is plenty enough to fetch resources, right?
-		$cmd = 'prince --http-timeout=3 --pdf-profile="PDF/A-3b" -o - -';
+		$cmd = self::getPrinceCommand() . ' -o - -';
 
 		// Prince is fast, right? Fingers crossed
 		self::exec($cmd, 10, $str, fn ($data) => print($data));
@@ -1630,23 +1702,19 @@ class Utils
 
 		$timeout = 25;
 
-		switch ($cmd) {
-			case 'prince':
-				$timeout = 10;
-				$cmd = 'prince --http-timeout=3 --pdf-profile="PDF/A-3b" -o %2$s %1$s';
-				break;
-			case 'chromium':
-				$cmd = 'chromium --headless --timeout=5000 --disable-gpu --run-all-compositor-stages-before-draw --print-to-pdf-no-header --print-to-pdf=%2$s %1$s';
-				break;
-			case 'wkhtmltopdf':
-				$cmd = 'wkhtmltopdf -q --print-media-type --enable-local-file-access --disable-smart-shrinking --encoding "UTF-8" %s %s';
-				break;
-			case 'weasyprint':
-				$timeout = 60;
-				$cmd = 'weasyprint %1$s %2$s';
-				break;
-			default:
-				break;
+		if ($cmd === 'prince') {
+			$timeout = 10;
+			$cmd = self::getPrinceCommand() . ' -o %2$s %1$s';
+		}
+		elseif ($cmd === 'chromium') {
+			$cmd = 'chromium --headless --timeout=5000 --disable-gpu --run-all-compositor-stages-before-draw --print-to-pdf-no-header --print-to-pdf=%2$s %1$s';
+		}
+		elseif ($cmd === 'wkhtmltopdf') {
+			$cmd = 'wkhtmltopdf -q --print-media-type --enable-local-file-access --disable-smart-shrinking --encoding "UTF-8" %s %s';
+		}
+		elseif ($cmd === 'weasyprint') {
+			$timeout = 60;
+			$cmd = 'weasyprint %1$s %2$s';
 		}
 
 		$cmd = sprintf($cmd, self::escapeshellarg($source), self::escapeshellarg($target));
@@ -1797,6 +1865,37 @@ class Utils
 			$out[] = ['id' => $current + 1, 'label' => 'Page suivante' . ' »', 'class' => 'next', 'accesskey' => 'z'];
 		}
 
+		return $out;
+	}
+
+	static public function var_export($v)
+	{
+		if (is_array($v) || is_object($v)) {
+			$out = '[';
+			$keys = !array_key_exists(0, $v);
+
+			foreach ($v as $k => $v) {
+				if ($keys) {
+					$out .= $k . ': ';
+				}
+
+				$out .= self::var_export($v) . ', ';
+			}
+
+			$out = (strlen($out) > 1 ? substr($out, 0, -2) : $out) . ']';
+		}
+		elseif (is_bool($v)) {
+			$out = $v ? 'true' : 'false';
+		}
+		elseif (is_null($v)) {
+			$out = 'null';
+		}
+		elseif (is_string($v)) {
+			$out = '"' . strtr($v, ['"' => '\\"', "\n" => "\\n", "\r" => "\\r"]) . '"';
+		}
+		else {
+			$out = $v;
+		}
 		return $out;
 	}
 

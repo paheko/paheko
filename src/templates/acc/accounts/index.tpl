@@ -14,7 +14,7 @@ use Paheko\Entities\Accounting\Account;
 </p>
 {/if}
 
-{if $pending_count}
+{if $pending_count || !empty($pending_deposit_accounts)}
 	{include file="acc/transactions/_pending_message.tpl"}
 {/if}
 
@@ -63,14 +63,16 @@ use Paheko\Entities\Accounting\Account;
 						{/if}
 					</td>
 					<td class="actions">
-						{linkbutton label="Journal" shape="menu" href="journal.php?id=%d&year=%d"|args:$account.id,$current_year.id}
-						{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-							{if $account.type === Entities\Accounting\Account::TYPE_BANK && ($account.debit || $account.credit)}
-								{linkbutton label="Rapprochement" shape="check" href="reconcile.php?id=%d"|args:$account.id}
-							{elseif $current_year->isOpen() && $account.type === Entities\Accounting\Account::TYPE_OUTSTANDING && $account.debit}
-								{linkbutton label="Dépôt en banque" shape="check" href="deposit.php?id=%d"|args:$account.id}
-							{/if}
+						{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)
+							&& $account.type === Entities\Accounting\Account::TYPE_BANK
+							&& ($account.debit || $account.credit)}
+							{linkbutton label="Rapprochement" shape="check" href="reconcile.php?id=%d"|args:$account.id}
+						{elseif $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)
+							&& $account.type === Entities\Accounting\Account::TYPE_OUTSTANDING
+							&& $account.debit}
+							{linkbutton label="Dépôt en banque" shape="check" href="deposit.php?id=%d&"|args:$account.id}
 						{/if}
+						{linkbutton label="Journal" shape="menu" href="journal.php?id=%d&year=%d"|args:$account.id,$current_year.id}
 					</td>
 				</tr>
 			{/foreach}

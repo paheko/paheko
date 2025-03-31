@@ -12,7 +12,7 @@
 				<tr>
 					<th><a href="details.php?id={$row.id}">{$row.label}</a></th>
 					<td>
-						{if $row.formula}
+						{if $row.amount === -1}
 							Formule
 						{elseif $row.amount}
 							{$row.amount|money_currency|raw}

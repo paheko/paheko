@@ -4,6 +4,7 @@ namespace Paheko;
 
 use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
+use Paheko\Users\Session;
 
 require_once __DIR__ . '/_inc.php';
 
@@ -23,7 +24,7 @@ $csrf_key = 'create_doc';
 $form->runIf('create', function () use ($parent, $ext) {
 	$name = trim((string) f('name'));
 	$name = preg_replace('/\.\w+$/', '', $name);
-	$file = Files::createDocument($parent, $name, $ext);
+	$file = Files::createDocument($parent, $name, $ext, Session::getInstance());
 	Utils::redirect('!common/files/edit.php?p=' . rawurlencode($file->path));
 }, $csrf_key);
 

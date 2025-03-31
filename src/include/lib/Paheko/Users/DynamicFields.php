@@ -594,7 +594,7 @@ class DynamicFields
 	{
 		$fields = array_filter(
 			$this->_fields,
-			fn ($a, $b) => empty($a->list_table) ? false : true,
+			fn ($a, $b) => !empty($a->list_table) || $a->isName() || $a->isNumber(),
 			ARRAY_FILTER_USE_BOTH
 		);
 

@@ -1,4 +1,4 @@
-{include file="_head.tpl" current="config" title="Fiche des membres"}
+{include file="_head.tpl" current="config" title="Fiche de membre"}
 
 {include file="config/_menu.tpl" current="users" sub_current="fields"}
 

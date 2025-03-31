@@ -3,9 +3,9 @@
 {if $_GET.msg === 'CLOSED'}
 	<div class="alert block">
 	{if $current_year->isClosed()}
-		<h3>L'exercice sélectionné est clôturé</h3>
+		<h3>L'exercice actuellement sélectionné est clôturé</h3>
 	{elseif $current_year->isLocked()}
-		<h3>L'exercice sélectionné est verrouillé</h3>
+		<h3>L'exercice actuellement sélectionné est verrouillé</h3>
 	{/if}
 		<p>Il n'est pas possible d'y ajouter d'écriture.</p>
 		<p>Sélectionnez un exercice ouvert pour ajouter une écriture.</p>

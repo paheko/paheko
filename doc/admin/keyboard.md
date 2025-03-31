@@ -14,8 +14,8 @@ Depuis l'édition du texte :
 | :- | :- |
 | <kbd>Ctrl</kbd> + <kbd>G</kbd> | Mettre en gras |
 | <kbd>Ctrl</kbd> + <kbd>I</kbd> | Mettre en italique |
-| <kbd>Ctrl</kbd> + <kbd>T</kbd> | Mettre en titre |
 | <kbd>Ctrl</kbd> + <kbd>L</kbd> | Transformer en lien |
+| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>T</kbd> | Mettre en titre |
 | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd> | Insérer une image |
 | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd> | Insérer un fichier |
 | <kbd>Ctrl</kbd> + <kbd>P</kbd> | Prévisualiser |

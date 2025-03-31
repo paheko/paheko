@@ -434,6 +434,16 @@ CREATE TRIGGER IF NOT EXISTS acc_years_delete BEFORE DELETE ON acc_years BEGIN
 	UPDATE services_fees SET id_account = NULL, id_year = NULL WHERE id_year = OLD.id;
 END;
 
+CREATE TABLE IF NOT EXISTS acc_years_provisional
+-- Provisional (prévisionnel)
+(
+	id_year INTEGER NOT NULL REFERENCES acc_years (id) ON DELETE CASCADE,
+	id_account INTEGER NOT NULL REFERENCES acc_accounts (id) ON DELETE CASCADE,
+	amount INTEGER NOT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS acc_years_provisional_id_year ON acc_years_provisional (id_year, id_account);
+
 CREATE TABLE IF NOT EXISTS acc_transactions
 -- Transactions (écritures comptables)
 (
@@ -462,6 +472,7 @@ CREATE INDEX IF NOT EXISTS acc_transactions_type ON acc_transactions (type, id_y
 CREATE INDEX IF NOT EXISTS acc_transactions_status ON acc_transactions (status);
 CREATE INDEX IF NOT EXISTS acc_transactions_hash ON acc_transactions (hash);
 CREATE INDEX IF NOT EXISTS acc_transactions_reference ON acc_transactions (reference);
+CREATE INDEX IF NOT EXISTS acc_transactions_creator ON acc_transactions (id_creator);
 
 CREATE TABLE IF NOT EXISTS acc_transactions_lines
 -- Transactions lines (lignes des écritures)

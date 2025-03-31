@@ -7,6 +7,7 @@ use KD2\Test;
 paheko_init(null);
 
 $db = DB::getInstance();
+$db->connect(false);
 
 // test exec
 Test::assert($db->exec('CREATE TABLE test (a, b);'));

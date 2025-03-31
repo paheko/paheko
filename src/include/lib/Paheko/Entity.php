@@ -50,11 +50,17 @@ class Entity extends AbstractEntity
 			if ($value instanceof $class) {
 				return $value;
 			}
-			elseif ($class === Date::class && $value instanceof \DateTime) {
+			elseif ($class === Date::class && $value instanceof \DateTimeInterface) {
 				return Date::createFromInterface($value);
 			}
 			elseif ($class === \DateTime::class && $value instanceof \DateTime) {
 				return $value;
+			}
+			elseif ($class === \DateTime::class && $value instanceof \DateTimeImmutable) {
+				return \DateTime::createFromImmutable($value);
+			}
+			elseif ($class === Date::class && $value instanceof \DateTimeImmutable) {
+				return Date::createFromImmutable($value);
 			}
 			else {
 				throw new \InvalidArgumentException('Invalid argument, not a valid date object: ' . get_class($value));

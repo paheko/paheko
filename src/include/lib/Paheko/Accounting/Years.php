@@ -127,6 +127,7 @@ class Years
 	{
 		$sql = 'SELECT y.*,
 			(SELECT COUNT(*) FROM acc_transactions WHERE id_year = y.id) AS nb_transactions,
+			(SELECT COUNT(*) FROM services_fees WHERE id_year = y.id) AS nb_fees,
 			c.label AS chart_name
 			FROM acc_years y
 			INNER JOIN acc_charts c ON c.id = y.id_chart

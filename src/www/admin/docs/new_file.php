@@ -4,6 +4,7 @@ namespace Paheko;
 
 use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
+use Paheko\Users\Session;
 
 require_once __DIR__ . '/_inc.php';
 
@@ -30,7 +31,7 @@ $form->runIf('create', function () use ($parent, $default_ext) {
 		throw new UserException('Un fichier existe déjà avec ce nom : ' . $name);
 	}
 
-	$file = Files::createFromString($target, '');
+	$file = Files::createFromString($target, '', Session::getInstance());
 
 	Utils::redirect('!common/files/edit.php?fallback=code&p=' . rawurlencode($file->path));
 }, $csrf_key);

@@ -73,7 +73,11 @@ elseif (null !== f('from_year')) {
 $matching_accounts = null;
 
 if ($previous_year) {
-	$lines = Reports::getAccountsBalances(['year' => $previous_year->id(), 'exclude_position' => [Account::EXPENSE, Account::REVENUE]]);
+	$lines = Reports::getAccountsBalances([
+		'year' => $previous_year->id(),
+		'exclude_position' => [Account::EXPENSE, Account::REVENUE],
+		'exclude_type' => [Account::TYPE_OPENING, Account::TYPE_CLOSING],
+	]);
 
 	if ($previous_year->id_chart != $year->id_chart) {
 		$chart_change = true;

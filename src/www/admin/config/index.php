@@ -47,6 +47,7 @@ $tpl->assign([
 	'countries'        => Utils::getCountryList(),
 	'timezones'        => TimeZones::listForCountry($config->country),
 	'paheko_website'   => WEBSITE,
+	'donate_url'       => DONATE_URL,
 ]);
 
 $tpl->display('config/index.tpl');

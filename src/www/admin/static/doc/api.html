@@ -217,7 +217,7 @@
 <li>il n'est pas possible de modifier un membre appartenant à une catégorie ayant accès à la configuration.</li>
 <li>il n'est pas possible de modifier le mot de passe, l'OTP ou la clé PGP du membre créé</li>
 <li>il n'est pas possible de modifier des membres ayant accès à la configuration</li>
-<li>seul un identifiant d'API ayant l'accès en "Administartion" pourra modifier un membre administrateur</li>
+<li>seul un identifiant d'API ayant l'accès en "Administration" pourra modifier un membre administrateur</li>
 </ul>
 <h3 id="user-import-put">user/import (PUT)</h3>
 <p>Permet d'importer un fichier de tableur (CSV/XLSX/ODS) de la liste des membres, comme si c'était fait depuis l'interface de Paheko.</p>
@@ -360,7 +360,7 @@ curl https://test:abcd@monpaheko.tld/api/services/subscriptions/import -T /tmp/i
 <ul>
 <li><code>full</code> : complet</li>
 <li><code>grouped</code> : complet groupé</li>
-<li><code>simple</code> : simple (ne comporte pas les saisies avancées)</li>
+<li><code>simple</code> : simple (ne comporte pas les écritures avancées, car seules les écritures comportant simplifiées sont concernées)</li>
 <li><code>fec</code> : format FEC (Fichier des Écritures Comptables)</li>
 </ul>
 <p>L'extension indique le type de fichier :</p>
@@ -412,6 +412,7 @@ curl https://test:abcd@monpaheko.tld/api/services/subscriptions/import -T /tmp/i
 <p>Les champs à spécifier pour créer ou modifier une écriture sont les suivants :</p>
 <ul>
 <li><code>id_year</code></li>
+<li><code>label</code> : libellé de l'écriture</li>
 <li><code>date</code> (format YYYY-MM-DD)</li>
 <li><code>type</code> peut être un type d'écriture simplifié (2 lignes) : <code>EXPENSE</code> (dépense), <code>REVENUE</code> (recette), <code>TRANSFER</code> (virement), <code>DEBT</code> (dette), <code>CREDIT</code> (créance), ou <code>ADVANCED</code> pour une écriture multi-ligne</li>
 <li><code>amount</code> (uniquement pour les écritures simplifiées) : contient le montant de l'écriture</li>

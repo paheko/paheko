@@ -2,12 +2,11 @@
 
 namespace Paheko;
 
+use Paheko\Files\Storage;
 use Paheko\Users\Session;
-
 use Paheko\Accounting\Charts;
 
 use KD2\HTTP;
-
 use KD2\FossilInstaller;
 
 class Upgrade
@@ -126,6 +125,17 @@ class Upgrade
 				$db->commitSchemaUpdate();
 			}
 
+			if (version_compare($v, '1.3.14', '<')) {
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/migrations/1.3/1.3.14.sql');
+
+				if ($db->hasTable('module_data_recus_fiscaux')) {
+					$db->import(ROOT . '/include/migrations/1.3/1.3.14_recus.sql');
+				}
+
+				$db->commitSchemaUpdate();
+			}
+
 			Plugins::upgradeAllIfRequired();
 
 			// Vérification de la cohérence des clés étrangères
@@ -153,6 +163,9 @@ class Upgrade
 			$db->exec('UPDATE config SET value = NULL WHERE key = \'last_version_check\';');
 
 			Static_Cache::remove('upgrade');
+
+			// Re-sync files cache with storage, if necessary (eg. if we are upgrading after a DB restore)
+			Storage::sync();
 		}
 		catch (\Throwable $e)
 		{

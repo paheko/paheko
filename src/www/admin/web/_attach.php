@@ -7,6 +7,7 @@ use Paheko\Web\Web;
 use Paheko\Entities\Web\Page;
 use Paheko\Entities\Files\File;
 use Paheko\Files\Files;
+use Paheko\Users\Session;
 
 require_once __DIR__ . '/_inc.php';
 
@@ -33,7 +34,7 @@ $form->runIf('delete', function () use ($page) {
 
 
 $form->runIf('upload', function () use ($page) {
-	Files::uploadMultiple($page->dir_path(), 'file');
+	Files::uploadMultiple($page->dir_path(), 'file', Session::getInstance());
 }, $csrf_key);
 
 $files = null;

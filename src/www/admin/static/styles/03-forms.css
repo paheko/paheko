@@ -27,23 +27,6 @@ fieldset.header p input {
     font-size: 1.5em;
 }
 
-/* Override selector in 06-tables.css */
-tbody tr.clickable:hover, tbody tr.clickable:nth-child(even):hover {
-    cursor: pointer;
-    color: #633;
-    background: #ffc;
-}
-
-tbody tr.clickable:hover button, tbody tr.focused button {
-    color: rgb(var(--gHoverLinkColor));
-}
-
-tbody tr.focused {
-    color: #633;
-    background: #ffc !important;
-    box-shadow: 0 0 5px .2rem #990;
-}
-
 dl dt label {
     font-weight: bold;
 }
@@ -237,7 +220,7 @@ b.btn {
 }
 
 [data-icon]:before, .main[data-icon]:after, [data-icon].right:after {
-    display: block;
+    display: inline-block;
     font-family: "paheko", sans-serif;
     text-shadow: 1px 1px 1px var(--gLightBorderColor);
     font-size: 1.2em;
@@ -324,6 +307,77 @@ input[type=color]::-moz-color-swatch {
     box-shadow: 0  0 5px #000;
 }
 
+span.hue-selector {
+    display: inline-block;
+    position: relative;
+    height: 2em;
+    min-width: 10em;
+    max-width: 30em;
+    width: calc(100% - 1em);
+}
+
+span.hue-selector .gradient {
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 1em;
+    margin: .5em 0;
+    border-radius: 1em;
+    border: 1px solid #fff;
+    outline: 1px solid #ccc;
+    overflow: hidden;
+}
+
+
+span.hue-selector .gradient span {
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+
+span.hue-selector .gradient .color {
+    background: linear-gradient(to right, hsl(0, var(--sl)), hsl(60, var(--sl)), hsl(120, var(--sl)), hsl(180, var(--sl)), hsl(240, var(--sl)), hsl(300, var(--sl)), hsl(0, var(--sl)));
+}
+
+span.hue-selector.hue-grey .gradient .grey {
+    width: 15%;
+    background: linear-gradient(to right, hsl(0, 0%, 100%), hsl(0, 0%, 0%));
+}
+
+/* Hide range input */
+span.hue-selector input {
+    width: 100%;
+    height: 100%;
+    display: block;
+    opacity: 0;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+}
+
+span.hue-selector .handle {
+    display: block;
+    position: absolute;
+    border-radius: 100%;
+    left: var(--position);
+    top: .125em;
+    margin-left: -1em;
+    background-color: var(--hsl);
+    height: 1.5em;
+    width: 1.5em;
+    border: 3px solid #fff;
+    pointer-events: none;
+    box-shadow: 0px 0px 5px #999;
+}
+
+span.hue-selector.focus .gradient, span.hue-selector:hover .handle {
+    box-shadow: 0 0 5px .2rem rgba(var(--gMainColor), 0.5);
+}
+
 .accesskeys a[accesskey]::after,
 .accesskeys button[accesskey]:not(.main)::after,
 .accesskeys button.main[data-icon]::before {
@@ -388,7 +442,7 @@ input[type=number], tbody input[size] {
 }
 
 select {
-    max-width: calc(100% - 1.5em);
+    max-width: calc(100%);
 }
 
 select option[value=""] {
@@ -1034,6 +1088,10 @@ dl.share dt, dl.share dd {
 
 .datalist.open .match {
     font-weight: bold;
+}
+
+aside dt {
+    margin-left: 1em;
 }
 
 @media screen and (max-width: 1279px) {

@@ -18,22 +18,6 @@
     --gBgImage: url("../bg.png");
 }
 
-/* Dark colors */
-html.dark {
-    --gBgColor: 30, 30, 30;
-    --gTextColor: 225, 225, 225;
-    --gBorderColor: #999;
-    --gLightBorderColor: #333;
-    --gLightBackgroundColor: #222;
-    --gLinkColor: #99f;
-    --gHoverLinkColor: 250, 127, 127;
-}
-
-html.dark #menu, html.dark #menu a, html.dark #menu li.current h3 span[data-icon]::before, html.dark nav.tabs .current a {
-    color: rgb(var(--gTextColor)) !important;
-    text-shadow: 0px 0px 5px rgb(var(--gBgColor)) !important;
-}
-
 html {
     width: 100%;
     height: 100%;
@@ -281,4 +265,24 @@ body.sticky, body.sticky #menu {
 /* View transitions between page loads */
 @view-transition {
     navigation: auto;
+}
+
+@media screen {
+    /* Dark colors */
+    html.dark {
+        background-color: #ddd;
+        filter: invert(100%) hue-rotate(180deg);
+    }
+
+    html.dark body {
+        background-color: #ddd;
+    }
+
+    html.dark nav#menu, html.dark #dialog {
+        filter: invert(100%) hue-rotate(180deg);
+    }
+
+    html.dark main img, html.dark main video {
+        filter: invert(100%) hue-rotate(180deg);
+    }
 }

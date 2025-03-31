@@ -65,7 +65,7 @@ class Export
 			'Membres associés'       => 'linked_users',
 		],
 		self::FEC => [
-			'JournalCode'   => null,
+			'JournalCode'   => 'journal',
 			'JournalLib'    => null,
 			'EcritureNum'   => 'id',
 			'EcritureDate'  => 'date',

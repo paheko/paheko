@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Sélectionner un compte"}
+{include file="_head.tpl" title="Rechercher un membre"}
 
 <form method="post" action="{$self_url}">
 	<h2 class="ruler">

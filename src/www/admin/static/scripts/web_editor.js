@@ -305,6 +305,201 @@
 			}
 		};
 
+		let findTableCells = function (line) {
+			line = line.split('|');
+			var out = [];
+			var start = 0;
+
+			for (var i = 0; i < line.length; i++) {
+				out.push({'start': start, 'end': start + line[i].length + 1});
+				start += line[i].length + 1;
+			}
+
+			// remove first and last empty items
+			return out.slice(1, -1);
+		};
+
+		let handleTableNavigation = function (e) {
+			var reverse = e.shiftKey;
+			var caret = t.getSelection().end;
+
+			if (navigateInTable(t.getSelection().end, e.shiftKey ? -1 : 1)) {
+				e.preventDefault();
+				return false;
+			}
+
+			return true;
+		};
+
+		let insertNewRowInTable = function (position, columns_count) {
+			t.insertAtPosition(position, "\n" + "|  ".repeat(columns_count + 1).trim(), position + 3);
+		};
+
+		let navigateInTable = function (caret, move, insert) {
+			var line_start = caret;
+			var value = t.textarea.value;
+
+			if (line_start < 0) {
+				return false;
+			}
+
+			while (line_start > 0 && value.charAt(line_start) !== "\n") {
+				line_start--;
+			}
+
+			line_start = line_start ? line_start + 1 : 0;
+			var line_end = value.indexOf("\n", line_start);
+
+			if (line_end === -1) {
+				line_end = value.length;
+			}
+
+			var line = value.substring(line_start, line_end);
+
+			if (!line.trim().match(/^\|/) || !line.trim().match(/\|$/)) {
+				if (insert) {
+					insertNewRowInTable(line_start - 2, insert);
+				}
+
+				return false;
+			}
+
+			var cells = findTableCells(line);
+
+			// Not a table
+			if (!cells.length) {
+				return false;
+			}
+
+			for (var i = 0; i < cells.length; i++) {
+				if (cells[i].start + line_start >= caret) {
+					break;
+				}
+			}
+
+			i = i - 1 + move;
+
+			// previous line
+			if (i < 0) {
+				line_start -= 3;
+
+				if (line_start <= 0) {
+					return false;
+				}
+
+				return navigateInTable(line_start, 0);
+			}
+			// next line
+			else if (i === cells.length) {
+				if (insert) {
+					insertNewRowInTable(line_end, insert);
+					return false;
+				}
+
+				return navigateInTable(line_end + 1, 1, cells.length);
+			}
+
+			var sel_start = line_start + cells[i].start;
+			var sel_end = line_start + cells[i].end - 1;
+
+			if (value.charAt(sel_start) === ' ') {
+				sel_start++;
+			}
+
+			if (value.charAt(sel_end - 1) === ' ' && sel_end > sel_start) {
+				sel_end--;
+			}
+
+			t.setSelection(sel_start, sel_end);
+			return true;
+		};
+
+		let pasteHTML = function (html) {
+			var dom = (new DOMParser).parseFromString(html, 'text/html');
+			var body = dom.documentElement.querySelector('body');
+			var text = HTMLToMarkdown(body);
+
+			text = text.replace(/^\h+|\h+$/mg, '', text);
+			text = text.replace(/\n\n+/g, "\n\n", text);
+
+			if (text === '') {
+				return;
+			}
+
+			t.insert(text.trim());
+		};
+
+		let HTMLToMarkdown = function(node, parent) {
+			if (node.nodeType === node.TEXT_NODE) {
+				return node.nodeValue.replace(/\r|\n/g, '').trim();
+			}
+
+			var name = node.nodeName.toLowerCase();
+			var parent_name = parent ? parent.nodeName.toLowerCase() : null;
+			var start = '';
+			var end = '';
+
+			if (name === 'strong' || name === 'b') {
+				start = ' **';
+				end = '** ';
+			}
+			else if (name === 'em' || name === 'i') {
+				start = ' _';
+				end = '_ ';
+			}
+			else if (name === 'td' || name === 'th') {
+				start = '| ';
+				end = ' ';
+			}
+			else if (name === 'tr') {
+				end = "|\n";
+			}
+			else if (name === 'br' && parent_name === 'body') {
+				end = "\n";
+			}
+			else if (name === 'p' && parent_name === 'body') {
+				end = "\n\n";
+			}
+			else if (name === 'ol' || name === 'ul') {
+				end = "\n";
+			}
+			else if (name.match(/h\d+/)) {
+				start = '#'.repeat(name.substr(1)) + ' ';
+			}
+			else if (name === 'a') {
+				start = ' [';
+				end = '](' + node.getAttribute('href') + ') ';
+			}
+			else if (name === 'li' && parent_name === 'ul') {
+				start = '* ';
+				end = "\n";
+			}
+			else if (name === 'li' && parent_name === 'ol') {
+				start = '1. ';
+				end = "\n";
+			}
+
+			var text = start;
+
+			for (var i = 0; i < node.childNodes.length; i++) {
+				text += HTMLToMarkdown(node.childNodes[i], node);
+			}
+
+			if (name === 'tr') {
+				text = text.replace(/\n+/g, " ", text);
+				text = text.replace(/\s{2,}/g, ' ', text);
+			}
+			else if (name === 'table') {
+				var rows = text.split("\n");
+				text = rows[0] + "\n";
+				var columns = (rows[0].match(/\|/g) || []).length || 1;
+				text += '| --- '.repeat(columns - 1) + "|\n";
+				text += rows.slice(1).join("\n");
+			}
+
+			return text + end;
+		};
+
 		let save = async function (callback) {
 			const data = new URLSearchParams();
 
@@ -433,11 +628,13 @@
 		t.shortcuts.push({ctrl: true, key: 'b', callback: applyBold });
 		t.shortcuts.push({ctrl: true, key: 'g', callback: applyBold });
 		t.shortcuts.push({ctrl: true, key: 'i', callback: applyItalic });
-		t.shortcuts.push({ctrl: true, key: 't', callback: applyHeader });
+		t.shortcuts.push({ctrl: true, shift: true, key: 't', callback: applyHeader });
 		t.shortcuts.push({ctrl: true, key: 'l', callback: insertURL});
 		t.shortcuts.push({ctrl: true, key: 's', callback: quicksave});
 		t.shortcuts.push({ctrl: true, key: 'p', callback: openPreview});
 		t.shortcuts.push({key: 'F1', callback: openSyntaxHelp});
+		t.shortcuts.push({key: 'Tab', callback: handleTableNavigation});
+		t.shortcuts.push({shift: true, key: 'Tab', callback: handleTableNavigation});
 
 		g.setParentDialogHeight('90%');
 
@@ -501,11 +698,19 @@
 		if (config.attachments) {
 			// Paste images
 			t.textarea.addEventListener('paste', (e) => {
+				if (e.clipboardData.types.includes('text/html')) {
+					pasteHTML(e.clipboardData.getData('text/html'));
+					e.preventDefault();
+					return false;
+				}
+
 				let items = e.clipboardData.items;
 				let files = [];
 
 				for (var i = 0; i < items.length; i++) {
-					if (items[i].kind != 'file') {
+					var item = items[i];
+
+					if (item.kind !== 'file') {
 						continue;
 					}
 
@@ -558,12 +763,16 @@
 			}
 
 			localStorage.setItem(backup_key, t.textarea.value);
-			console.log('Saved');
 		}, 10000);
 
 	}
 
 	g.onload(() => {
-		g.script('scripts/lib/text_editor.min.js', init);
+		g.script('scripts/lib/text_editor.js', init);
 	});
+
+	// If in a dialog, always set to fullscreen
+	if (typeof window.parent.g !== 'undefined' && window.parent.g.dialog) {
+		window.parent.g.toggleDialogFullscreen();
+	}
 }());

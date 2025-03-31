@@ -234,13 +234,13 @@ class DB extends SQLite3
 		$this->_install_check = !$disable;
 	}
 
-	public function connect(): void
+	public function connect(bool $check_installed = true): void
 	{
 		if (null !== $this->db) {
 			return;
 		}
 
-		if ($this->_install_check && !self::isInstalled()) {
+		if ($check_installed && $this->_install_check && !self::isInstalled()) {
 			throw new \LogicException('Database has not been installed!');
 		}
 
@@ -268,7 +268,19 @@ class DB extends SQLite3
 		}
 
 		self::registerCustomFunctions($this->db);
+		$this->enableSafetyAuthorizer();
+	}
+
+	public function enableSafetyAuthorizer(): void
+	{
+		$this->connect();
 		self::toggleAuthorizer($this->db, true);
+	}
+
+	public function disableSafetyAuthorizer(): void
+	{
+		$this->connect();
+		self::toggleAuthorizer($this->db, false);
 	}
 
 	static public function toggleAuthorizer($db, bool $enable): void
@@ -313,7 +325,7 @@ class DB extends SQLite3
 		$db->createFunction('unicode_like', [self::class, 'unicodeLike']);
 		$db->createFunction('transliterate_to_ascii', [Utils::class, 'unicodeTransliterate']);
 		$db->createFunction('email_hash', [Email::class, 'getHash']);
-		$db->createFunction('md5', 'md5');
+		$db->createFunction('md5', fn ($v) => is_null($v) ? null : md5($v));
 		$db->createFunction('uuid', [Utils::class, 'uuid']);
 		$db->createFunction('random_string', [Utils::class, 'random_string']);
 		$db->createFunction('print_binary', fn($value) => sprintf('%032d', decbin($value)));
@@ -377,6 +389,7 @@ class DB extends SQLite3
 		});
 
 		$db->createCollation('U_NOCASE', [Utils::class, 'unicodeCaseComparison']);
+		$db->createCollation('NAT_NOCASE', 'strnatcasecmp');
 	}
 
 	public function toggleUnicodeLike(bool $enable): void
@@ -404,19 +417,12 @@ class DB extends SQLite3
 	static public function getVersion($db)
 	{
 		$v = (int) $db->querySingle('PRAGMA user_version;');
-		$v = self::parseVersion($v);
 
-		if (null === $v) {
-			try {
-				// For legacy version before 1.1.0
-				$v = $db->querySingle('SELECT valeur FROM config WHERE cle = \'version\';');
-			}
-			catch (\Exception $e) {
-				throw new \RuntimeException('Cannot find application version', 0, $e);
-			}
+		if (empty($v)) {
+			throw new \LogicException('Cannot find application version');
 		}
 
-		return $v ?: null;
+		return self::parseVersion($v);
 	}
 
 	static public function parseVersion(int $v): ?string

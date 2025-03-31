@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="%sJournal général"|args:$project_title current="acc/years" prefer_landscape=true}
+{include file="_head.tpl" title="%sJournal général"|args:$title current="acc/years" prefer_landscape=true}
 
 {include file="acc/reports/_header.tpl" current="journal" title="Journal général" allow_filter=true}
 

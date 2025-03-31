@@ -6,14 +6,8 @@ use Paheko\Accounting\Years;
 
 require_once __DIR__ . '/../_inc.php';
 
-$year_id = (int) qg('year') ?: CURRENT_YEAR_ID;
-
-if ($year_id === CURRENT_YEAR_ID) {
-	$year = $current_year;
-}
-else {
-	$year = Years::get($year_id);
-}
+$year_id = intval($_GET['year'] ?? 0);
+$year = Years::get($year_id);
 
 if (!$year) {
 	throw new UserException("L'exercice demandé n'existe pas.");
@@ -26,8 +20,6 @@ if (null !== $format && null !== $type) {
 	Export::export($year, $format, $type);
 	exit;
 }
-
-$examples = Export::getExamples($year);
 
 $types = [
 	Export::FULL => [
@@ -48,6 +40,6 @@ $types = [
 	],
 ];
 
-$tpl->assign(compact('year', 'examples', 'types'));
+$tpl->assign(compact('year', 'types'));
 
 $tpl->display('acc/years/export.tpl');

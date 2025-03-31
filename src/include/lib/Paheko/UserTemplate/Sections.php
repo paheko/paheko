@@ -6,6 +6,7 @@ use KD2\Brindille_Exception;
 use KD2\DB\DB_Exception;
 use Paheko\DB;
 use Paheko\DynamicList;
+use Paheko\Extensions;
 use Paheko\Template;
 use Paheko\Utils;
 use Paheko\UserException;
@@ -42,6 +43,7 @@ class Sections
 		'sql',
 		'restrict',
 		'module',
+		'extension',
 		'files',
 	];
 
@@ -685,7 +687,7 @@ class Sections
 
 		$list = new DynamicList($columns, $table);
 
-		static $reserved_keywords = ['max', 'order', 'desc', 'debug', 'explain', 'schema', 'columns', 'select', 'where', 'module', 'disable_user_ordering', 'check', 'export', 'group'];
+		static $reserved_keywords = ['max', 'order', 'desc', 'debug', 'explain', 'schema', 'columns', 'select', 'where', 'module', 'disable_user_ordering', 'disable_user_sort', 'check', 'export', 'group', 'count'];
 
 		foreach ($params as $key => $value) {
 			if ($key[0] == ':') {
@@ -706,6 +708,10 @@ class Sections
 
 		if (isset($params['order'])) {
 			$list->orderBy($params['order'], $params['desc'] ?? false);
+		}
+
+		if (isset($params['count'])) {
+			$list->setCount(self::_moduleReplaceJSONExtract($params['count'], $table));
 		}
 
 		if (isset($params['group'])) {
@@ -746,7 +752,8 @@ class Sections
 		// Try to create an index if required
 		self::_createModuleIndexes($table, $where);
 
-		if (empty($params['disable_user_ordering'])) {
+		if (empty($params['disable_user_ordering'])
+			&& empty($params['disable_user_sort'])) {
 			$list->loadFromQueryString();
 		}
 
@@ -781,7 +788,7 @@ class Sections
 
 		$tpl->assign(compact('list'));
 		$tpl->assign('check', $params['check'] ?? false);
-		$tpl->assign('disable_user_ordering', $params['disable_user_ordering'] ?? false);
+		$tpl->assign('disable_user_sort', boolval($params['disable_user_sort'] ?? ($params['disable_user_ordering'] ?? false)));
 		$tpl->display();
 
 		yield from $i;
@@ -1505,6 +1512,24 @@ class Sections
 		$out['url'] = $module->url();
 		$out['public_url'] = $module->public_url();
 
+		yield $out;
+	}
+
+	static public function extension(array $params, UserTemplate $tpl, int $line): \Generator
+	{
+		if (empty($params['name'])) {
+			throw new Brindille_Exception('Missing parameter "name"');
+		}
+
+		$ext = Extensions::get($params['name']);
+
+		if (!$ext || !$ext->enabled) {
+			return null;
+		}
+
+		$out = $ext->asArray();
+		$out['config'] = ($ext->module ?? $ext->plugin)->config;
+		unset($out['module'], $out['plugin']);
 		yield $out;
 	}
 

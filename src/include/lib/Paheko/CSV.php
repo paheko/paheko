@@ -35,7 +35,7 @@ class CSV
 
 		while (!feof($fp))
 		{
-			$row = fgetcsv($fp, 4096, $delim);
+			$row = fgetcsv($fp, 4096, $delim, '"', '\\');
 			$line++;
 
 			if (empty($row))
@@ -174,7 +174,7 @@ class CSV
 		return $row;
 	}
 
-	static public function toCSV(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, array $options = null): void
+	static public function toCSV(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, ?array $options = null): void
 	{
 		$options['date_format'] ??= 'd/m/Y';
 		$csv = new TableToCSV;
@@ -190,12 +190,12 @@ class CSV
 		self::toTable(new TableToXLSX, $name, $iterator, $header, $row_map_callback);
 	}
 
-	static public function toODS(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, array $options = null): void
+	static public function toODS(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, ?array $options = null): void
 	{
 		self::toTable(new TableToODS, $name, $iterator, $header, $row_map_callback);
 	}
 
-	static public function toTable(AbstractTable $t, string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, array $options = null): void
+	static public function toTable(AbstractTable $t, string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, ?array $options = null): void
 	{
 		$output = $options['output_path'] ?? null;
 		$default_style = ['border' => '0.05pt solid #999999'];
@@ -235,7 +235,7 @@ class CSV
 		}
 	}
 
-	static public function toJSON(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, array $options = null): void
+	static public function toJSON(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, ?array $options = null): void
 	{
 		$output = $options['output_path'] ?? null;
 
@@ -298,7 +298,7 @@ class CSV
 
 		$line = 0;
 
-		$header = fgetcsv($fp, 4096, $delim);
+		$header = fgetcsv($fp, 4096, $delim, '"', '\\');
 
 		if ($header === false) {
 			throw new UserException('Impossible de trouver l\'entête du tableau');
@@ -339,7 +339,7 @@ class CSV
 
 		while (!feof($fp))
 		{
-			$row = fgetcsv($fp, 4096, $delim);
+			$row = fgetcsv($fp, 4096, $delim, '"', '\\');
 			$line++;
 
 			// Empty line, skip
