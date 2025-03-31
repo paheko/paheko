@@ -519,15 +519,14 @@ class Backup
 			// Check and upgrade plugins, if a software upgrade is necessary, plugins will be upgraded after the upgrade
 			Plugins::upgradeAllIfRequired();
 
+			// Re-sync files cache with storage, if necessary
+			Storage::sync();
 		}
 
 		// Make sure we delete files stored in database if we don't store files in database
 		if (FILE_STORAGE_BACKEND !== 'SQLite') {
 			Storage::truncate('SQLite', null);
 		}
-
-		// Re-sync files cache with storage, if necessary
-		Storage::sync();
 
 		$name = Utils::basename($file);
 		$name = str_replace(['.sqlite', 'association.'], '', $name);
