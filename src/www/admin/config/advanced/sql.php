@@ -75,9 +75,11 @@ elseif (($pragma = qg('pragma')) || isset($query)) {
 				$result = $db->get('PRAGMA foreign_key_check;') ?: [['no errors']];
 			}
 			elseif (ENABLE_TECH_DETAILS && $pragma == 'vacuum') {
+				$db->disableSafetyAuthorizer();
 				$result[] = ['Size before VACUUM: ' . Backup::getDBSize()];
 				$db->exec('VACUUM;');
 				$result[] = ['Size after VACUUM: ' . Backup::getDBSize()];
+				$db->enableSafetyAuthorizer();
 			}
 
 			$result_count = count($result);
