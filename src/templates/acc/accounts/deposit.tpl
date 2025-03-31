@@ -7,7 +7,7 @@
 	{if !$only_this_year}
 		{linkbutton shape="eye-off" label="Cacher les écritures d'autres exercices" href="?id=%d&only=1"|args:$account.id}
 	{else}
-		{linkbutton shape="eye-off" label="Afficher les écritures de tous les exercices" href="?id=%d&only=0"|args:$account.id}
+		{linkbutton shape="eye" label="Afficher les écritures de tous les exercices" href="?id=%d&only=0"|args:$account.id}
 	{/if}
 </p>
 {/if}
