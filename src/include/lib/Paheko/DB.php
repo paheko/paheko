@@ -273,11 +273,13 @@ class DB extends SQLite3
 
 	public function enableSafetyAuthorizer(): void
 	{
+		$this->connect();
 		self::toggleAuthorizer($this->db, true);
 	}
 
 	public function disableSafetyAuthorizer(): void
 	{
+		$this->connect();
 		self::toggleAuthorizer($this->db, false);
 	}
 
