@@ -15,7 +15,7 @@
 		<p>Des écritures d'autres exercices sont en attente de dépôt&nbsp;:</p>
 		<ul>
 			{foreach from=$pending_deposit_accounts item="account"}
-			<li>{link label="%s — %s"|args:$account.code:$account.label href="!acc/accounts/deposit.php?id=%d"|args:$account.id}</li>
+			<li>{link label="%s — %s"|args:$account.code:$account.label href="!acc/accounts/deposit.php?id=%d&only=0"|args:$account.id}</li>
 			{/foreach}
 		</ul>
 	</div>

@@ -25,7 +25,7 @@ if (!$account) {
 }
 
 $checked = $_POST['deposit'] ?? [];
-$only_this_year = boolval($_GET['only'] ?? false);
+$only_this_year = boolval($_GET['only'] ?? true);
 
 $journal = $account->getDepositJournal(CURRENT_YEAR_ID, $only_this_year, $checked);
 $transaction = new Transaction;
