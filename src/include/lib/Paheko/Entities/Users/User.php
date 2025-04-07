@@ -596,6 +596,10 @@ class User extends Entity
 		$this->assert(!$session->isPasswordCompromised($source['password']), 'Le mot de passe choisi figure dans une liste de mots de passe compromis (piratés), il ne peut donc être utilisé ici. Si vous l\'avez utilisé sur d\'autres sites il est recommandé de le changer sur ces autres sites également.');
 
 		$this->set('password', $session->hashPassword($source['password']));
+
+		if ($session->isLogged()) {
+			$session->clearSessionVerifier();
+		}
 	}
 
 	public function isHidden(): bool
