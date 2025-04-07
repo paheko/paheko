@@ -25,6 +25,8 @@ class Log
 
 	const SOFT_LOCKOUT_ATTEMPTS = 3;
 
+	const PASSWORD_LOCKOUT_ATTEMPTS = 2;
+
 	const MESSAGE = 0;
 
 	const LOGIN_FAIL = 1;
@@ -171,6 +173,20 @@ class Log
 		$count = DB::getInstance()->firstColumn($sql, self::LOGIN_FAIL_OTP, $ip);
 
 		return $count >= self::OTP_LOCKOUT_ATTEMPTS;
+	}
+
+	/**
+	 * Returns TRUE if the current IP address has done too many password recovery requests
+	 */
+	static public function isPasswordRecoveryLocked(): bool
+	{
+		$ip = Utils::getIP();
+
+		// is IP locked out?
+		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE type = ? AND ip_address = ? AND created > datetime(\'now\', \'-%d seconds\');', self::LOCKOUT_DELAY);
+		$count = DB::getInstance()->firstColumn($sql, self::LOGIN_RECOVER, $ip);
+
+		return $count >= self::PASSWORD_LOCKOUT_ATTEMPTS;
 	}
 
 	static public function list(array $params = []): DynamicList

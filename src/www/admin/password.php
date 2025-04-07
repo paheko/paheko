@@ -4,6 +4,7 @@ namespace Paheko;
 
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
+use Paheko\Log;
 
 const LOGIN_PROCESS = true;
 
@@ -20,7 +21,6 @@ $form->runIf(qg('c') !== null, function () use ($session, $form, $tpl) {
 		throw new UserException('Le lien que vous avez suivi est invalide ou a expiré.');
 	}
 
-
 	$csrf_key = 'password_change_' . md5(qg('c'));
 
 	$form->runIf('change', function () use ($session) {
@@ -36,6 +36,10 @@ $csrf_key = 'recover_password';
 $new = qg('new') !== null;
 
 $form->runIf('recover', function () use ($session) {
+	if (Log::isPasswordRecoveryLocked()) {
+		throw new UserException(sprintf("Vous avez dépassé la limite de demandes de récupération de mot de passe perdu.\nSi vous n'avez pas reçu l'e-mail de récupération de mot de passe, vérifiez votre dossier Spam ou indésirables.\nSinon merci d'attendre %d minutes avant de ré-essayer.", Log::LOCKOUT_DELAY/60));
+	}
+
 	$session->recoverPasswordSend(f('id'));
 }, $csrf_key, '!password.php?sent' . ($new ? '&new' : ''));
 
