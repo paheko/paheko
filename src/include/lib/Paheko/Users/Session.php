@@ -178,7 +178,7 @@ class Session extends \KD2\UserSession
 		}
 
 		// Logout if data_root doesn't match, to forbid one session being used with another organization
-		return $user->password . DATA_ROOT;
+		return strval($user->password) . strval($user->otp_secret) . DATA_ROOT;
 	}
 
 	protected function rememberMeAutoLogin(): bool
