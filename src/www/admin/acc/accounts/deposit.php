@@ -32,13 +32,13 @@ $transaction = new Transaction;
 $transaction->id_year = CURRENT_YEAR_ID;
 $transaction->id_creator = $session->getUser()->id;
 
-$form->runIf('save', function () use ($checked, $transaction, $journal) {
+$form->runIf('save', function () use ($account, $checked, $transaction, $journal) {
 	if (!count($checked)) {
 		throw new UserException('Aucune ligne n\'a été cochée, impossible de créer un dépôt. Peut-être vouliez-vous saisir un virement ?');
 	}
 
 	$transaction->importFromDepositForm();
-	Transactions::saveDeposit($transaction, $journal->iterate(), $checked);
+	Transactions::saveDeposit($account, $transaction, $journal->iterate(), $checked);
 
 	Utils::redirect(ADMIN_URL . 'acc/transactions/details.php?id=' . $transaction->id());
 }, 'acc_deposit_' . $account->id());
