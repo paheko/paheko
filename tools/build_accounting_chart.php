@@ -104,7 +104,7 @@ Classe 2 — Comptes d'immobilisations
 20121 Frais de prospection
 20122 Frais de publicité
 2013 Frais d'augmentation de capital et d'opérations diverses - fusions, scissions, transformations
-203 Frais de développement
+203 Frais de recherche et développement
 205 Concessions et droits similaires, brevets, licences, marques, procédés, solutions informatiques, droits et valeurs similaires
 206 Droit au bail
 207 Fonds commercial
@@ -154,8 +154,8 @@ Classe 2 — Comptes d'immobilisations
 23 Immobilisations en cours, avances et acomptes
 231 Immobilisations corporelles en cours
 232 Immobilisations incorporelles en cours
-237 Avances et acomptes versés sur commandes d'immobilisations incorporelles
-238 Avances et acomptes versés sur commandes d'immobilisations corporelles
+237 Avances et acomptes versés sur immobilisations incorporelles
+238 Avances et acomptes versés sur immobilisations corporelles
 26 Participations et créances rattachées à des participations
 261 Titres de participation
 2611 Actions
@@ -405,7 +405,7 @@ Classe 4 — Comptes de tiers
 458 Associés - Opérations faites en commun et en GIE
 4581 Opérations courantes
 4588 Intérêts courus
-46 Débiteurs divers et créditeurs divers
+46 Débiteurs et créditeurs divers
 462 Créances sur cessions d'immobilisations [Actif]
 464 Dettes sur acquisitions de valeurs mobilières de placement [Passif]
 465 Créances sur cessions de valeurs mobilières de placement [Actif]

@@ -16,8 +16,7 @@ while (!feof($fp)) {
 
 	$code = $line[0];
 	$lines[$code] ??= [];
-	$lines[$code]['src_label'] = $line[1];
-	$lines[$code]['src_position'] = $line[3];
+	$lines[$code]['src'] = $line;
 }
 
 fclose($fp);
@@ -35,8 +34,7 @@ while (!feof($fp)) {
 
 	$code = $line[0];
 	$lines[$code] ??= [];
-	$lines[$code]['dst_label'] = $line[1];
-	$lines[$code]['dst_position'] = $line[3];
+	$lines[$code]['dst'] = $line;
 }
 
 fclose($fp);
@@ -44,36 +42,40 @@ fclose($fp);
 uksort($lines, fn($a, $b) => strcmp(str_pad($a, 6, '0'), str_pad($b, 6, '0')));
 //ksort($lines);
 
+$columns = ['code', 'label', 'description', 'position', 'bookmark'];
+
 foreach ($lines as $code => $line) {
-	$change = [];
+	$changed = [];
 
-	if (isset($line['dst_label']) && isset($line['src_label']) && compare_labels($line['src_label'], $line['dst_label'])) {
-		$change[] = 'label';
+	if (isset($line['src']) && !isset($line['dst'])) {
+		$changed[] = 'deleted';
+	}
+	elseif (isset($line['dst']) && !isset($line['src'])) {
+		$changed[] = 'new';
+	}
+	else {
+		for ($i = 0; $i < 5; $i++) {
+			if (compare_labels($line['src'][$i], $line['dst'][$i])) {
+				$changed[] = $columns[$i];
+			}
+		}
 	}
 
-	if (isset($line['dst_position']) && isset($line['src_position']) && compare_labels($line['src_position'], $line['dst_position'])) {
-		$change[] = 'position';
+	if (empty($changed)) {
+		$changed[] = '=';
 	}
 
-	if (isset($line['dst_label']) && !isset($line['src_label'])) {
-		$change[] = 'new';
-	}
-	elseif (!isset($line['dst_label']) && isset($line['src_label'])) {
-		$change[] = 'deleted';
+	$row = [$code, implode(',', $changed)];
+
+	foreach ($line['src'] ?? ['', '', '', '', ''] as $v) {
+		$row[] = $v;
 	}
 
-	if (empty($change)) {
-		continue;
+	foreach ($line['dst'] ?? ['', '', '', '', ''] as $v) {
+		$row[] = $v;
 	}
 
-	fputcsv(STDOUT, [
-		$code,
-		implode(',', $change),
-		$line['src_label'] ?? '',
-		$line['src_position'] ?? '',
-		$line['dst_label'] ?? '',
-		$line['dst_position'] ?? '',
-	]);
+	fputcsv(STDOUT, $row);
 }
 
 function compare_labels(string $a, string $b): bool {
