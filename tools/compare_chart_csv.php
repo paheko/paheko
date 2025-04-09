@@ -55,7 +55,7 @@ foreach ($lines as $code => $line) {
 	}
 	else {
 		for ($i = 0; $i < 5; $i++) {
-			if (compare_labels($line['src'][$i], $line['dst'][$i])) {
+			if (compare_labels($line['src'][$i] ?? '', $line['dst'][$i] ?? '')) {
 				$changed[] = $columns[$i];
 			}
 		}
