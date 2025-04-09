@@ -78,7 +78,7 @@ class CSV
 
 		copy($file, ROOT . '/test.csv');
 
-		$eol_macos = strpos($line, "\r");
+		$line = preg_replace("!\r$|\r\n$!", '', $line);
 
 		if (false !== strpos($line, "\r")) {
 			fclose($fp);
