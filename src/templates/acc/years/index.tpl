@@ -71,7 +71,7 @@
 		</header>
 		{if $year.nb_fees && $year.status === Year::OPEN}
 		<p class="links">
-			<a href="links.php?id={$year.id}">{{%n tarif d'activité est lié à cet exercice}{%n tarifs d'activité sont liés à cette exercice} n=$year.nb_fees}</a>
+			<a href="links.php?id={$year.id}">{{%n tarif d'activité est lié à cet exercice}{%n tarifs d'activité sont liés à cet exercice} n=$year.nb_fees}</a>
 		</p>
 		{/if}
 		<p class="actions">
