@@ -154,7 +154,7 @@ class CommonFunctions
 
 		if ($type == 'radio' || $type == 'checkbox' || $type == 'radio-btn') {
 			if (!isset($value)) {
-				throw new \InvalidArgumentException('radio/checkbox has no "value" parameter');
+				throw new \RuntimeException('radio/checkbox has no "value" parameter');
 			}
 
 			$attributes['id'] .= '_' . (strlen($value) > 30 ? md5($value) : preg_replace('![^a-z0-9_-]!i', '', $value));
