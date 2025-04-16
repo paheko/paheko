@@ -124,7 +124,7 @@ abstract class AdvancedSearch
 
 			$query_group_conditions = [];
 
-			foreach ($group['conditions'] as $condition)
+			foreach ($group['conditions'] as $position => $condition)
 			{
 				if (!isset($condition['column'], $condition['operator'])
 					|| (isset($condition['values']) && !is_array($condition['values'])))
@@ -214,8 +214,10 @@ abstract class AdvancedSearch
 					$expected = substr_count($query, '?');
 					$found = count($values);
 
-					if ($expected != $found)
-					{
+					if (!$found && $expected) {
+						throw new UserException(sprintf('Choix manquant pour le critère n°%d', $position));
+					}
+					elseif ($expected != $found) {
 						throw new \RuntimeException(sprintf('Operator %s expects at least %d parameters, only %d supplied', $condition['operator'], $expected, $found));
 					}
 
