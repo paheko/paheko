@@ -1159,5 +1159,5 @@
 			cancelable: true,
 			detail: {direction, distance_x, distance_y}
 		}));
-	})
+	});
 })();
