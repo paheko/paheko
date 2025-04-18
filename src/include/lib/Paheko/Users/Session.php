@@ -329,10 +329,11 @@ class Session extends \KD2\UserSession
 		$user_agent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 150) ?: null;
 
 		if (true === $success) {
-			Log::add(Log::LOGIN_SUCCESS, compact('user_agent'));
+			$id_user = $this->getUser()->id;
+			Log::add(Log::LOGIN_SUCCESS, compact('user_agent'), $id_user);
 
 			// Mettre à jour la date de connexion
-			$this->db->preparedQuery('UPDATE users SET date_login = ? WHERE id = ?;', [new \DateTime, $this->getUser()->id]);
+			$this->db->preparedQuery('UPDATE users SET date_login = ? WHERE id = ?;', [new \DateTime, $id_user]);
 		}
 		// $success can be 'OTP' as well
 		elseif (!$success) {
@@ -368,7 +369,7 @@ class Session extends \KD2\UserSession
 			Log::add(Log::LOGIN_SUCCESS, $details, $user_id);
 
 			// Mettre à jour la date de connexion
-			$this->db->preparedQuery('UPDATE users SET date_login = ? WHERE id = ?;', [new \DateTime, $this->getUser()->id]);
+			$this->db->preparedQuery('UPDATE users SET date_login = ? WHERE id = ?;', [new \DateTime, $user_id]);
 		}
 		else {
 			Log::add(Log::LOGIN_FAIL_OTP, $details, $user_id);
