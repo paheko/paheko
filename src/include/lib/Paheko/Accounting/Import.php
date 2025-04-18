@@ -7,6 +7,7 @@ use Paheko\Entities\Accounting\Transaction;
 use Paheko\Entities\Accounting\Year;
 use Paheko\CSV_Custom;
 use Paheko\Users\DynamicFields;
+use Paheko\Users\Session;
 use Paheko\DB;
 use Paheko\Log;
 use Paheko\UserException;
@@ -143,11 +144,11 @@ class Import
 	 * @param  string     $type    Type of CSV format
 	 * @param  Year       $year    Target year where transactions should be updated or created
 	 * @param  CSV_Custom $csv     CSV object
-	 * @param  int        $user_id Current user ID, the one running the import
+	 * @param  ?Session   $session Current user session, the one running the import
 	 * @param  array      $options array of options
 	 * @return ?array
 	 */
-	static public function import(string $type, Year $year, CSV_Custom $csv, int $user_id, array $options = []): ?array
+	static public function import(string $type, Year $year, CSV_Custom $csv, ?Session $session = null, array $options = []): ?array
 	{
 		$options_default = [
 			'ignore_ids'      => false,
@@ -169,7 +170,7 @@ class Import
 
 		$db = DB::getInstance();
 		$db->begin();
-		Log::add(Log::MESSAGE, ['message' => 'Import d\'écritures comptables'], $user_id);
+		Log::add(Log::MESSAGE, ['message' => 'Import d\'écritures comptables'], $session::getUserId());
 
 		$accounts = $year->accounts();
 		$transaction = null;
@@ -262,7 +263,7 @@ class Import
 					}
 					else {
 						$transaction = new Transaction;
-						$transaction->id_creator = $user_id;
+						$transaction->setCreatorFromSession($session);
 						$transaction->id_year = $year->id();
 					}
 

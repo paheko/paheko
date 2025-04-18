@@ -69,7 +69,8 @@ class Log
 
 		$ip = Utils::getIP();
 
-		if (null === $id_user && $session->isLogged()) {
+		if (null === $id_user
+			&& $session->isLogged()) {
 			$user = $session->user();
 			$id_user ??= $user->id;
 			$user_name = $user->name();

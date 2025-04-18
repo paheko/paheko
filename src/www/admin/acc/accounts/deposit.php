@@ -8,6 +8,7 @@ use Paheko\Entities\Accounting\Transaction;
 
 require_once __DIR__ . '/../_inc.php';
 
+$session = Session::getInstance();
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE);
 
 if (!CURRENT_YEAR_ID) {
@@ -31,7 +32,7 @@ $checked = f('deposit') ?: [];
 $journal = $account->getDepositJournal($year_id, $checked);
 $transaction = new Transaction;
 $transaction->id_year = CURRENT_YEAR_ID;
-$transaction->id_creator = $session->getUser()->id;
+$transaction->setCreatorFromSession($session);
 
 $form->runIf('save', function () use ($checked, $transaction, $journal) {
 	if (!count($checked)) {

@@ -120,11 +120,12 @@
 			<dd>{if $transaction.notes}{$transaction.notes|escape|nl2br|linkify_transactions}{else}—{/if}</dd>
 
 
-			{if $transaction.id_creator}
+			{if $creator_name}
 				<dt>Écriture créée par</dt>
 				<dd>
-					{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
-						<a href="{$admin_url}users/details.php?id={$transaction.id_creator}">{$creator_name}</a>
+					{if $transaction.id_creator
+						&& $session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)}
+						{link href="!users/details.php?id=%d"|args:$transaction.id_creator label=$creator_name}
 					{else}
 						{$creator_name}
 					{/if}

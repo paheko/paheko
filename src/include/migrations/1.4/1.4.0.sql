@@ -209,3 +209,6 @@ ALTER TABLE logs RENAME TO logs_old;
 
 -- Store user name in audit logs
 ALTER TABLE logs ADD COLUMN user_name TEXT NULL;
+
+-- Store user name for transaction creation
+ALTER TABLE acc_transactions ADD COLUMN creator_name TEXT NULL;

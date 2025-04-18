@@ -30,6 +30,7 @@ $accounts = $chart->accounts();
 
 $csrf_key = 'acc_transaction_new';
 $transaction = new Transaction;
+$transaction->setCreatorFromSession($session);
 
 $amount = 0;
 $id_project = null;
@@ -138,7 +139,6 @@ $form->runIf('save', function () use ($transaction, $session, $payoff) {
 
 	$transaction->validateUsingConfig(Config::getInstance());
 
-	$transaction->id_creator = $session->getUser()->id;
 	$transaction->save();
 	$transaction->saveLinks();
 

@@ -148,11 +148,9 @@ class Subscription extends Entity
 		return $this->_fee;
 	}
 
-	public function addPayment(?int $user_id, ?array $source = null): Transaction
+	public function addPayment(?Session $session, ?array $source = null): Transaction
 	{
-		if (null === $source) {
-			$source = $_POST;
-		}
+		$source ??= $_POST;
 
 		if (!$this->id_fee) {
 			throw new \RuntimeException('Cannot add a payment to a subscription that is not linked to a fee');
@@ -191,7 +189,7 @@ class Subscription extends Entity
 			'id_year' => $this->fee()->id_year,
 		]));
 
-		$transaction->id_creator = $user_id;
+		$transaction->setCreatorFromSession($session);
 		$transaction->id_year = $this->fee()->id_year;
 		$transaction->type = Transaction::TYPE_REVENUE;
 
@@ -213,11 +211,9 @@ class Subscription extends Entity
 		}
 	}
 
-	static public function createFromForm(array &$users, ?int $creator_id, bool $from_copy = false, ?array $source = null): self
+	static public function createFromForm(array &$users, ?Session $session, bool $from_copy = false, ?array $source = null): self
 	{
-		if (null === $source) {
-			$source = $_POST;
-		}
+		$source ??= $_POST;
 
 		$db = DB::getInstance();
 		$db->begin();
@@ -263,7 +259,7 @@ class Subscription extends Entity
 				&& !empty($source['amount'])
 				&& !empty($source['create_payment'])) {
 				try {
-					$su->addPayment($creator_id, $source);
+					$su->addPayment($session, $source);
 				}
 				catch (ValidationException $e) {
 					if ($e->getMessage() == 'Il n\'est pas possible de créer ou modifier une écriture dans un exercice clôturé') {

@@ -23,7 +23,7 @@ $year->assertCanBeModified();
 $csrf_key = 'acc_years_balance_' . $year->id();
 $accounts = $year->accounts();
 
-$form->runIf('save', function () use ($year) {
+$form->runIf('save', function () use ($year, $session) {
 	$db = DB::getInstance();
 	// Fail everything if appropriation failed
 	$db->begin();
@@ -31,7 +31,7 @@ $form->runIf('save', function () use ($year) {
 	$year->deleteOpeningBalance();
 
 	$transaction = new Transaction;
-	$transaction->id_creator = Session::getUserId();
+	$transaction->setCreatorFromSession($session);
 	$transaction->importFromBalanceForm($year);
 	$transaction->save();
 
@@ -40,7 +40,7 @@ $form->runIf('save', function () use ($year) {
 		$t2 = Years::makeAppropriation($year);
 
 		if ($t2) {
-			$t2->id_creator = $transaction->id_creator;
+			$t2->setCreatorFromSession($session);
 			$t2->save();
 		}
 	}

@@ -95,6 +95,7 @@ class Transaction extends Entity
 
 	protected int $id_year;
 	protected ?int $id_creator = null;
+	protected ?string $creator_name = null;
 
 	protected $_lines;
 	protected $_old_lines = [];
@@ -1103,6 +1104,26 @@ class Transaction extends Entity
 	{
 		$this->_year ??= EntityManager::findOneById(Year::class, $this->id_year);
 		return $this->_year;
+	}
+
+	public function setCreatorFromSession(Session $session): void
+	{
+		if (!$session->isLogged()) {
+			return;
+		}
+
+		$user = $session->user();
+		$this->set('id_creator', $user->id);
+		$this->set('creator_name', $user->id ? null : $user->name());
+	}
+
+	public function getCreatorName(): ?string
+	{
+		if ($this->id_creator) {
+			return Users::getName($this->id_creator);
+		}
+
+		return $this->creator_name;
 	}
 
 	public function listFiles()

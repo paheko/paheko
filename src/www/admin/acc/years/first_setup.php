@@ -11,6 +11,7 @@ use Paheko\Entities\Accounting\Chart;
 
 require_once __DIR__ . '/../../_inc.php';
 
+$session = Session::getInstance();
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
 $csrf_key = 'first_setup';
@@ -45,7 +46,7 @@ if (!empty($data['accounts'])
 
 $appropriation_account = $year->id_chart ? $year->chart()->accounts()->getSingleAccountForType(Account::TYPE_APPROPRIATION_RESULT) : null;
 
-$form->runIf('save', function () use ($data, $year, $appropriation_account, $accounts) {
+$form->runIf('save', function () use ($data, $year, $appropriation_account, $accounts, $session) {
 	$db = DB::getInstance();
 
 	$db->begin();
@@ -70,7 +71,7 @@ $form->runIf('save', function () use ($data, $year, $appropriation_account, $acc
 
 		if (trim($row['balance'] ?? '')) {
 			$t = $account->createOpeningBalance($year, Utils::moneyToInteger($row['balance']));
-			$t->id_creator = Session::getUserId();
+			$t->setCreatorFromSession($session);
 			$t->save();
 		}
 	}
@@ -81,7 +82,7 @@ $form->runIf('save', function () use ($data, $year, $appropriation_account, $acc
 	if ($result && $appropriation_account) {
 		$result = ($data['negative'] ?? null) ? $result : $result * -1;
 		$t = $appropriation_account->createOpeningBalance($year, $result, 'Report du résultat de l\'exercice précédent');
-		$t->id_creator = Session::getUserId();
+		$t->setCreatorFromSession($session);
 		$t->save();
 	}
 

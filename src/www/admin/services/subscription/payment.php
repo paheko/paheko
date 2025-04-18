@@ -30,7 +30,7 @@ $user_name = Users::getName($su->id_user);
 $csrf_key = 'service_pay';
 
 $form->runIf(f('save') || f('save_and_add_payment'), function () use ($su, $session) {
-	$su->addPayment($session->getUser()->id);
+	$su->addPayment($session);
 
 	if ($su->paid != (bool) f('paid')) {
 		$su->paid = (bool) f('paid');
