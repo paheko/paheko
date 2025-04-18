@@ -281,7 +281,7 @@ class Utils
 		$w = explode('.', str_replace(',', '.', $number));
 		$a = $w[0] ?: '0';
 		$b = substr(($w[1] ?? '0') . '000', 0, 3);
-		return intval($a . $b);
+		return abs(intval($a . $b));
 	}
 
 	static public function format_weight($number, bool $empty_is_zero = false, bool $append_unit = false): string
