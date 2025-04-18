@@ -166,6 +166,21 @@ class Session extends \KD2\UserSession
 		return $id;
 	}
 
+	/**
+	 * @overrides
+	 */
+	protected function getUserSessionVerifier(): ?string
+	{
+		$user = $this->getUserObject();
+
+		if (null === $user) {
+			return null;
+		}
+
+		// Logout if data_root doesn't match, to forbid one session being used with another organization
+		return strval($user->password) . strval($user->otp_secret) . DATA_ROOT;
+	}
+
 	protected function rememberMeAutoLogin(): bool
 	{
 		$r = parent::rememberMeAutoLogin();
@@ -242,32 +257,7 @@ class Session extends \KD2\UserSession
 			$logged = $this->forceLogin(LOCAL_LOGIN, $allow_new_session);
 		}
 
-		// Logout if data_root doesn't match, to forbid one session being used with another organization
-		if ($logged) {
-			$root = $this->get('data_root');
-
-			if (!$root) {
-				$this->set('data_root', DATA_ROOT);
-				$this->save();
-			}
-			elseif ($root !== DATA_ROOT) {
-				$this->logout();
-				return false;
-			}
-		}
-
 		return $logged;
-	}
-
-	protected function create($user_id): bool
-	{
-		$r = parent::create($user_id);
-
-		// Make sure we cannot use the same login for another organization, by linking it to the data root
-		$this->set('data_root', DATA_ROOT);
-		$this->save();
-
-		return $r;
 	}
 
 	public function start(bool $write = false)
@@ -558,6 +548,16 @@ class Session extends \KD2\UserSession
 		return $s->getUser();
 	}
 
+	public function getUserObject(): ?User
+	{
+		if (isset($this->_user)) {
+			return $this->_user;
+		}
+
+		$this->_user = Users::get($this->user);
+		return $this->_user;
+	}
+
 	/**
 	 * Returns cookie string for PDF printing
 	 */
@@ -583,15 +583,14 @@ class Session extends \KD2\UserSession
 			return $this->_user;
 		}
 
-		if (!$this->isLogged())
-		{
+		if (!$this->isLogged()) {
 			throw new \LogicException('User is not logged in.');
 		}
 
-		$this->_user = Users::get($this->user);
+		$user = $this->getUserObject();
 
 		// If user does not exist anymore
-		if (!$this->_user) {
+		if (!$user) {
 			$this->logout();
 		}
 

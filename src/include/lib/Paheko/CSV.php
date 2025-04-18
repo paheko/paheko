@@ -70,10 +70,17 @@ class CSV
 
 	static public function open(string $file)
 	{
-		$fp = fopen($file, 'r');
-		$line = fread($fp, 4096);
+		// Make sure this is disabled, so that old MacOS lines are not detected by mistake in PHP < 8.1
+		@ini_set('auto_detect_line_endings', false);
 
-		if (false !== strpos($line, "\r") && false === strpos($line, "\r\n")) {
+		$fp = fopen($file, 'r');
+		$line = fgets($fp, 4096);
+
+		copy($file, ROOT . '/test.csv');
+
+		$line = preg_replace("!\r$|\r\n$!", '', $line);
+
+		if (false !== strpos($line, "\r")) {
 			fclose($fp);
 			throw new UserException('Le format de retour de ligne de ce fichier (MacOS 9) est obsolète et non supporté. Merci de convertir le fichier avec LibreOffice.');
 		}

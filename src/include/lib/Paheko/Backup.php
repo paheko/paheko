@@ -523,6 +523,11 @@ class Backup
 			Storage::sync();
 		}
 
+		// Make sure we delete files stored in database if we don't store files in database
+		if (FILE_STORAGE_BACKEND !== 'SQLite') {
+			Storage::truncate('SQLite', null);
+		}
+
 		$name = Utils::basename($file);
 		$name = str_replace(['.sqlite', 'association.'], '', $name);
 		Log::add(Log::MESSAGE, ['message' => 'Sauvegarde restaurée : ' . $name], $session::getUserId());

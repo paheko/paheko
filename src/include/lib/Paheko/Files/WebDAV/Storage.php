@@ -415,7 +415,7 @@ class Storage extends AbstractStorage
 			throw new WebDAV_Exception('Impossible de créer un répertoire ici', 403);
 		}
 
-		if (!File::canCreateDir($uri)) {
+		if (!File::canCreateDir($uri, $this->session)) {
 			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de créer un répertoire ici', 403);
 		}
 

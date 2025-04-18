@@ -53,7 +53,7 @@ class Transactions
 		$db->commit();
 	}
 
-	static public function saveDeposit(Transaction $transaction, \Generator $journal, array $checked)
+	static public function saveDeposit(Account $account, Transaction $transaction, \Generator $journal, array $checked)
 	{
 		$db = DB::getInstance();
 		$db->begin();
@@ -71,7 +71,7 @@ class Transactions
 				$line->importForm([
 					'reference'  => $row->line_reference,
 					'label'      => $row->line_label ?? $row->label,
-					'id_account' => $row->id_account,
+					'id_account' => $account->id(),
 					'id_project' => $row->id_project,
 				]);
 
