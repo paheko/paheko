@@ -254,7 +254,8 @@ CREATE TABLE IF NOT EXISTS logs
 	type INTEGER NOT NULL,
 	details TEXT NULL,
 	created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(created) IS NOT NULL AND datetime(created) = created),
-	ip_address TEXT NULL
+	ip_address TEXT NULL,
+	user_name TEXT NULL
 );
 
 CREATE INDEX IF NOT EXISTS logs_ip ON logs (ip_address, type, created);

@@ -69,12 +69,19 @@ class Log
 
 		$ip = Utils::getIP();
 
+		if (null === $id_user && $session->isLogged()) {
+			$user = $session->user();
+			$id_user ??= $user->id;
+			$user_name = $user->name();
+		}
+
 		// Log to text file
 		if (AUDIT_LOG_FILE) {
-			file_put_contents(AUDIT_LOG_FILE, sprintf('[%s] %s (IP=%s) %s' . PHP_EOL,
+			file_put_contents(AUDIT_LOG_FILE, sprintf('[%s] %s (IP=%s, USER=%s) %s' . PHP_EOL,
 				date('Y-m-d H:i:s'),
 				self::ACTIONS[$type] ?? 'Action',
 				$ip,
+				$id_user ?? '[' . $user_name . ']',
 				json_encode($details)
 			), FILE_APPEND);
 
@@ -108,13 +115,12 @@ class Log
 			}
 		}
 
-		$id_user ??= Session::getUserId();
-
 		DB::getInstance()->insert('logs', [
 			'id_user'    => $id_user,
 			'type'       => $type,
 			'details'    => $details ? json_encode($details) : null,
 			'ip_address' => $ip,
+			'user_name'  => $user_name,
 			'created'    => new \DateTime,
 		]);
 	}
@@ -187,7 +193,8 @@ class Log
 			],
 			'identity' => [
 				'label' => isset($params['id_self']) ? null : (isset($params['history']) ? 'Membre à l\'origine de la modification' : 'Membre'),
-				'select' => $id_field,
+				'select' => sprintf('CASE WHEN u.id IS NOT NULL THEN %s ELSE user_name END', $id_field),
+				'order' => null,
 			],
 			'type_icon' => [
 				'select' => null,
