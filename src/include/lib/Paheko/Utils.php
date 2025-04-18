@@ -344,6 +344,8 @@ class Utils
 		}
 		elseif (substr($url, 0, 2) == './') {
 			$base = self::getSelfURI();
+			$base = strtok($base, '?');
+			strtok('');
 			$base = preg_replace('!/[^/]*$!', '/', $base);
 			$base = trim($base, '/');
 			$base = $base ? $base . '/' : '';
