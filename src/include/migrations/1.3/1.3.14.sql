@@ -9,3 +9,6 @@ CREATE TABLE IF NOT EXISTS acc_years_provisional
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS acc_years_provisional_id_year ON acc_years_provisional (id_year, id_account);
+
+UPDATE acc_charts SET label = 'Plan comptable associatif (2018, révision 2024)' WHERE code = 'fr_pca_2018';
+UPDATE acc_charts SET label = 'Plan comptable général, pour entreprises (2014, révision 2024)' WHERE code = 'fr_pcg_2014';

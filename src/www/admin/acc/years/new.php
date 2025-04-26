@@ -10,6 +10,9 @@ require_once __DIR__ . '/../../_inc.php';
 
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
+// FIXME: remove in 1.3.15 (move to upgrade)
+Charts::migrateTo2025();
+
 $year = new Year;
 
 $form->runIf('new', function () use ($year) {
