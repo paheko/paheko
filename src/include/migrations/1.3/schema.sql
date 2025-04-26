@@ -359,7 +359,7 @@ CREATE TABLE IF NOT EXISTS acc_accounts
 
 	position INTEGER NOT NULL, -- position in the balance sheet (position actif/passif/charge/produit)
 	type INTEGER NOT NULL DEFAULT 0, -- type (category) of favourite account: bank, cash, third party, etc.
-	user INTEGER NOT NULL DEFAULT 1, -- 0 = is part of the original chart, 0 = has been added by the user
+	user INTEGER NOT NULL DEFAULT 1, -- 0 = is part of the original chart, 1 = has been added by the user
 	bookmark INTEGER NOT NULL DEFAULT 0 -- 1 = is marked as favorite
 );
 
