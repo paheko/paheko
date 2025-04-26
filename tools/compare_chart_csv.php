@@ -63,6 +63,7 @@ foreach ($lines as $code => $line) {
 
 	if (empty($changed)) {
 		$changed[] = '=';
+		//continue;
 	}
 
 	$row = [$code, implode(',', $changed)];
