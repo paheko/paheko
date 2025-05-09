@@ -41,7 +41,9 @@ KD2/UserSession.php
 KD2/WebDAV/AbstractStorage.php
 KD2/WebDAV/Exception.php
 KD2/WebDAV/NextCloud.php
+KD2/WebDAV/NextCloudNotes.php
 KD2/WebDAV/Server.php
+KD2/WebDAV/TrashInterface.php
 KD2/WebDAV/WOPI.php
 KD2/ZipReader.php
 KD2/ZipWriter.php
