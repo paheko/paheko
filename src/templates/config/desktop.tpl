@@ -71,6 +71,7 @@
 			{input type="number" name="SMTP_PORT" label="Port du serveur SMTP" source=$constants required=true size=3}
 			{input type="text" name="SMTP_USER" label="Nom d'utilisateur du serveur SMTP" source=$constants autocomplete="off"}
 			{input type="password" name="SMTP_PASSWORD" label="Mot de passe du serveur SMTP" autocomplete="off"}
+			{input type="select" name="SMTP_SECURITY" label="Chiffrement de la connexion au serveur SMTP" options=$smtp_security_options default=$constants.SMTP_SECURITY required=true}
 		</dl>
 	</fieldset>
 

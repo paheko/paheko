@@ -15,23 +15,25 @@ use const Paheko\ROOT;
 class Charts
 {
 	const BUNDLED_CHARTS = [
-		'fr_pca_2018' => 'Plan comptable associatif (2018, révision 2025)',
+		'fr_pca_2025' => 'Plan comptable associatif (révision 2025)',
 		'fr_pcc_2020' => 'Plan comptable des copropriétés (2005 révisé en 2024)',
 		'fr_cse_2015' => 'Plan comptable des CSE (Comité Social et Économique) (Règlement ANC n°2015-01)',
-		'fr_pcg_2014' => 'Plan comptable général, pour entreprises (Règlement ANC n° 2014-03, consolidé 2024)',
+		'fr_pcg_2025' => 'Plan comptable général, pour entreprises (révision 2025)',
 		'fr_pcs_2018' => 'Plan comptable des syndicats (2018, révisé 2024)',
 		'be_pcmn_2019' => 'Plan comptable minimum normalisé des associations et fondations 2019',
 		'ch_asso' => 'Plan comptable associatif',
 		'fr_pca_1999' => 'Plan comptable associatif 1999',
+		'fr_pca_2018' => 'Plan comptable associatif (2018, révision 2024)',
+		'fr_pcg_2014' => 'Plan comptable général, pour entreprises (2014, révision 2024)',
 	];
 
 	const COUNTRIES_CHARTS = [
 		'FR' => [
-			'fr_pca_2018' => 'Association ou fondation',
+			'fr_pca_2025' => 'Association ou fondation',
 			'fr_cse_2015' => 'CSE (Comité Social et Économique)',
 			'fr_pcs_2018' => 'Syndicat',
 			'fr_pcc_2020' => 'Copropriété',
-			'fr_pcg_2014' => 'Entreprise',
+			'fr_pcg_2025' => 'Entreprise',
 		],
 		'CH' => [
 			'ch_asso' => 'Association',
@@ -82,7 +84,7 @@ class Charts
 			$chart_code = 'be_pcmn_2019';
 		}
 		else {
-			$chart_code = 'fr_pca_2018';
+			$chart_code = 'fr_pca_2025';
 		}
 
 		return self::install($chart_code);
@@ -141,6 +143,13 @@ class Charts
 	static public function get(int $id): ?Chart
 	{
 		return EntityManager::findOneById(Chart::class, $id);
+	}
+
+	static public function getByCode(string $chart_code): ?Chart
+	{
+		$country = strtoupper(substr($chart_code, 0, 2));
+		$code = strtoupper(substr($chart_code, 3));
+		return EntityManager::findOne(Chart::class, 'SELECT * FROM @TABLE WHERE code = ? AND country = ?;', $code, $country);
 	}
 
 	static public function list(): array
@@ -240,5 +249,36 @@ class Charts
 		$chart->importCSV($_FILES[$file_key]['tmp_name']); // This will save everything
 
 		$db->commit();
+	}
+
+	/**
+	 * Migrate old accounting charts to 2025
+	 * @todo FIXME: Put this in Upgrade migration for 1.3.15 version
+	 */
+	static public function migrateTo2025(): void
+	{
+		$db = DB::getInstance();
+
+		if (!self::getByCode('fr_pca_2025')
+			&& ($old_chart = self::getByCode('fr_pca_2018'))) {
+			$new_chart = self::install('fr_pca_2025');
+
+			// Copy old accounts
+			$db->exec(sprintf('INSERT OR IGNORE INTO acc_accounts (id_chart, code, label, description, position, type, user, bookmark)
+				SELECT %d, code, label, description, position, type, user, bookmark
+				FROM acc_accounts
+				WHERE id_chart = %d AND user = 1;', $new_chart->id(), $old_chart->id()));
+		}
+
+		if (!self::getByCode('fr_pcg_2025')
+			&& ($old_chart = self::getByCode('fr_pcg_2014'))) {
+			$new_chart = self::install('fr_pcg_2025');
+
+			// Copy old accounts
+			$db->exec(sprintf('INSERT OR IGNORE INTO acc_accounts (id_chart, code, label, description, position, type, user, bookmark)
+				SELECT %d, code, label, description, position, type, user, bookmark
+				FROM acc_accounts
+				WHERE id_chart = %d AND user = 1;', $new_chart->id(), $old_chart->id()));
+		}
 	}
 }
