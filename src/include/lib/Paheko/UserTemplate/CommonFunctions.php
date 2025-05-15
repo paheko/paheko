@@ -413,10 +413,6 @@ class CommonFunctions
 				$current_value = Utils::money_format($current_value, ',', '');
 			}
 
-			if ((string) $current_value === '0') {
-				$current_value = '';
-			}
-
 			$currency = Config::getInstance()->currency;
 			$input = sprintf('<nobr><input type="text" pattern="\s*-?[0-9 ]+([.,][0-9]{1,2})?\s*" inputmode="decimal" size="8" %s value="%s" /><b>%s</b></nobr>', $attributes_string, htmlspecialchars((string) $current_value), $currency);
 		}
