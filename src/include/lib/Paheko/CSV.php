@@ -76,8 +76,6 @@ class CSV
 		$fp = fopen($file, 'r');
 		$line = fgets($fp, 4096);
 
-		copy($file, ROOT . '/test.csv');
-
 		$line = preg_replace("!\r$|\r\n$!", '', $line);
 
 		if (false !== strpos($line, "\r")) {
