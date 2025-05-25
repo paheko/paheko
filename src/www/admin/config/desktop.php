@@ -12,10 +12,10 @@ if (!DESKTOP_CONFIG_FILE) {
 
 function has_command(string $command) {
 	if (PHP_OS_FAMILY === 'Windows') {
-		$result = strtok(shell_exec('where ' . $command) ?? '', "\n");
+		$result = strtok(Utils::quick_exec('where ' . $command) ?? '', "\n");
 	}
 	else {
-		$result = shell_exec('which ' . $command);
+		$result = Utils::quick_exec('which ' . $command);
 	}
 
 	return trim((string)$result) !== '';
