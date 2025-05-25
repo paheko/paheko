@@ -722,6 +722,26 @@ class Utils
 		return $list;
 	}
 
+	static public function recursiveIterate(string $path): \Generator
+	{
+		$dir = dir($path);
+
+		while ($file = $dir->read()) {
+			if ($file === '.' || $file === '..') {
+				continue;
+			}
+
+			$file_path = $path . DIRECTORY_SEPARATOR . $file;
+			yield $file_path;
+
+			if (is_directory($file_path)) {
+				yield from self::recursiveIterate($file_path);
+			}
+		}
+
+		$dir->close();
+	}
+
 	static public function suggestPassword(): string
 	{
 		return Security::getRandomPassphrase(ROOT . '/include/data/locales/fr/dictionary.txt');
@@ -1428,7 +1448,7 @@ class Utils
 	/**
 	 * Execute a system command with a timeout, just returning a string from stdout
 	 */
-	static public function quick_exec(string $cmd, int $timeout, ?int &$code = null): string
+	static public function quick_exec(string $cmd, int $timeout = 20, ?int &$code = null): string
 	{
 		$output = '';
 		$code = self::exec($cmd, $timeout, null, function($data) use (&$output) { $output .= $data; });
