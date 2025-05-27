@@ -199,6 +199,7 @@ static $default_config = [
 	'USE_CRON'              => false,
 	'ENABLE_XSENDFILE'      => false,
 	'DISABLE_EMAIL'         => false,
+	'DISABLE_EMAIL_SENDING_API' => true,
 	'SMTP_HOST'             => null,
 	'SMTP_USER'             => null,
 	'SMTP_PASSWORD'         => null,

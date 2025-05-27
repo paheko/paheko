@@ -14,6 +14,7 @@ use KD2\DB\DB_Exception;
 class API
 {
 	use API\Accounting;
+	use API\Email;
 	use API\User;
 	use API\Web;
 

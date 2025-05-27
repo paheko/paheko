@@ -168,6 +168,66 @@ Exemple de requête :
 curl -u test:abcd https://paheko.monasso.tld/api/download/files -o backup_files.zip
 ```
 
+## E-mails
+
+_(Depuis la version 1.4.0)_
+
+### POST email/queue
+
+Ajoute un ou des messages à la file d'attente.
+
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `context` | `string` | Indique le contexte du message : `bulk` pour les envois en masse, `notification`, ou `private` pour les messages individuels. |
+| `subject` | `string`  | Sujet du message. |
+| `to` | `array`  | Liste des destinataires (voir ci-dessous). |
+| `body` | `string`  | Corps du message texte brut. |
+| `html_body` | `string`  | Corps du message HTML. Si `body` n'est pas spécifié, le HTML sera transformé en texte brut, pour que le message ait toujours une partie texte brut lisible. |
+| `template` | `string`  | Modèle Brindille du message texte brut, permettant d'utiliser des balises définies pour chaque destinataire. |
+| `html_template` | `string`  | Modèle Brindille du message en HTML. |
+| `markdown` | `bool`  | Mettre cette valeur à `true` pour indiquer que `body` ou `template` est du Markdown, et que le corps HTML du message doit être généré en transformant ce Markdown en HTML. |
+| `wrap` | `bool` | Par défaut le message HTML est contenu (wrapped) dans le modèle Brindille des emails de l'organisation. Si ce paramètre est fourni et est `false`, le HTML dans le message sera tel qu'il a été fourni dans `html_body` ou `html_template`. |
+
+Attention : cette fonction est désactivée par défaut, contre les risques d'abus, et doit être activée manuellement dans la configuration de Paheko, via la directive `DISABLE_EMAIL_SENDING_API`. Sur Paheko.cloud, cette fonction ne sera pas activée.
+
+L'envoi se fera dès que la file d'attente sera appelée, par exemple via une tâche automatisée (cron).
+
+Notes :
+
+* Il n'est pas possible de spécifier à la fois un corps de message (`body` ou `html_body`) et un modèle (`html_template` ou `template`).
+* Il est possible de spécifier à la fois un corps de message en HTML et en texte brut.
+* Un lien de désinscription sera automatiquement inséré en fin de messages, et ne peut être désactivé.
+
+Le tableau des destinataires peut être sous la forme d'un tableau simple, ou chaque élément est une adresse e-mail :
+
+```
+{
+    "ada@lovelace.org",
+    "pyg@framamailles.net"
+}
+```
+
+Ou alors, en relation avec l'utilisation d'un modèle (`template` ou `html_template`), dans ce cas indiquer l'adresse e-mail en clé, et les champs à utiliser dans le modèle en valeur, sous forme de tableau :
+
+```
+{
+    "ada@lovelace.org": {
+        "name": "Ada Lovelace",
+        "has_children": false
+    }
+}
+```
+
+Avec un modèle cela permettra d'utiliser les éléments qui ont été passés, par exemple :
+
+```
+Bonjour {{$name}} !
+
+{{if !$has_children}}
+    Vous êtes child-free ! Génial !
+{{/if}}
+```
+
 ## Site web
 
 _(Depuis la version 1.4.0)_

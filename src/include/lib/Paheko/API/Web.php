@@ -9,9 +9,6 @@ trait Web
 {
 	protected function web(string $uri): ?array
 	{
-		if ($this->method != 'GET') {
-			throw new APIException('Wrong request method', 400);
-		}
 
 		$fn = strtok($uri, '/');
 		$param = strtok('');

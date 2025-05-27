@@ -565,6 +565,22 @@ namespace Paheko;
 
 //const DISABLE_EMAIL = false;
 
+/**
+ * Désactiver l'envoi d'e-mails via l'API
+ *
+ * Par défaut l'envoi de messages via l'API est désactivé pour éviter les abus.
+ *
+ * Si votre organisation a besoin d'envoyer des messages via l'API, mettre ce
+ * réglage à FALSE.
+ *
+ * Attention : tout identifiant ayant un accès en écriture à l'API pourra
+ * alors envoyer des e-mails, sans limitation.
+ *
+ * Défaut : true
+ * @var bool
+ */
+
+//const DISABLE_EMAIL_SENDING_API = false;
 
 /**
  * Hôte du serveur SMTP, mettre à null (défaut) pour utiliser la fonction

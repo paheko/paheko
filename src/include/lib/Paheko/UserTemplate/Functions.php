@@ -590,11 +590,12 @@ class Functions
 
 		$message = Queue::createMessage($context, $params['subject'], $params['body'], $attachments);
 		$message->setAttachments($attachments);
-		$message->queueToArray($params['to']);
 
 		if ($params['replyto'] ?? null) {
-			$message->queueToArray($params['replyto']);
+			$message->setReplyTo($params['replyto']);
 		}
+
+		$message->queueTo($params['to']);
 
 		if (!$ut->isTrusted()) {
 			$internal += $internal_count;

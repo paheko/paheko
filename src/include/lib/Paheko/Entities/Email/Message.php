@@ -84,6 +84,16 @@ class Message extends Entity
 		}
 	}
 
+	public function setHTMLBodyFromUserTemplate(UserTemplate $template, array $data = []): void
+	{
+		// Replace placeholders: {{$name}}, etc.
+		$template->assignArray((array) $data, null, false);
+
+		// Disable HTML escaping for plaintext emails
+		$template->setEscapeDefault(null);
+		$this->html_body = $template->fetch();
+	}
+
 	public function markdownToHTML(): void
 	{
 		$this->body_html = Render::render(Render::FORMAT_MARKDOWN, null, $this->body);
@@ -191,7 +201,7 @@ class Message extends Entity
 		return $this->save();
 	}
 
-	public function queueToArray(array $recipients): void
+	public function queueTo(array $recipients): void
 	{
 		foreach ($recipients as $address) {
 			$msg = clone $this;
@@ -246,7 +256,7 @@ class Message extends Entity
 		$message->setBody($text);
 
 		if (null !== $html) {
-			$message->addPart('text/html', $html);
+			$message->setHTMLBody($html);
 		}
 
 		$message->setHeader('Return-Path', MAIL_RETURN_PATH ?? (MAIL_SENDER ?? $config->org_email));

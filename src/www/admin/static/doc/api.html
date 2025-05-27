@@ -241,7 +241,78 @@
 <li>corbeille</li>
 <li>configuration : logo, ic&ocirc;nes, etc.</li>
 <li>anciennes versions des fichiers</li>
-</ul><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/download/files -o backup_files.zip</code></pre></details><h2 id="site-web">Site web</h2><p><em>(Depuis la version 1.4.0)</em></p><details class="api"><summary id="get-web" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/web</code> <span>Liste de toutes les pages du site web</span></summary></details><details class="api"><summary id="get-web-page_uri" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/web/<u>{PAGE_URI}</u></code> <span>M&eacute;tadonn&eacute;es de la page du site web</span></summary><table>
+</ul><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/download/files -o backup_files.zip</code></pre></details><h2 id="e-mails">E-mails</h2><p><em>(Depuis la version 1.4.0)</em></p><details class="api"><summary id="post-email-queue" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/email/queue</code> <span>Ajoute un ou des messages &agrave; la file d'attente.</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>context</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Indique le contexte du message : <code>bulk</code> pour les envois en masse, <code>notification</code>, ou <code>private</code> pour les messages individuels.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>subject</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Sujet du message.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>to</code></td>
+<td style="text-align: left;"><code>array</code></td>
+<td style="text-align: left;">Liste des destinataires (voir ci-dessous).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>body</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Corps du message texte brut.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>html_body</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Corps du message HTML. Si <code>body</code> n'est pas sp&eacute;cifi&eacute;, le HTML sera transform&eacute; en texte brut, pour que le message ait toujours une partie texte brut lisible.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>template</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Mod&egrave;le Brindille du message texte brut, permettant d'utiliser des balises d&eacute;finies pour chaque destinataire.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>html_template</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Mod&egrave;le Brindille du message en HTML.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>markdown</code></td>
+<td style="text-align: left;"><code>bool</code></td>
+<td style="text-align: left;">Mettre cette valeur &agrave; <code>true</code> pour indiquer que <code>body</code> ou <code>template</code> est du Markdown, et que le corps HTML du message doit &ecirc;tre g&eacute;n&eacute;r&eacute; en transformant ce Markdown en HTML.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>wrap</code></td>
+<td style="text-align: left;"><code>bool</code></td>
+<td style="text-align: left;">Par d&eacute;faut le message HTML est contenu (wrapped) dans le mod&egrave;le Brindille des emails de l'organisation. Si ce param&egrave;tre est fourni et est <code>false</code>, le HTML dans le message sera tel qu'il a &eacute;t&eacute; fourni dans <code>html_body</code> ou <code>html_template</code>.</td>
+</tr>
+</tbody>
+</table><p>Attention : cette fonction est d&eacute;sactiv&eacute;e par d&eacute;faut, contre les risques d'abus, et doit &ecirc;tre activ&eacute;e manuellement dans la configuration de Paheko, via la directive <code>DISABLE_EMAIL_SENDING_API</code>. Sur Paheko.cloud, cette fonction ne sera pas activ&eacute;e.</p><p>L'envoi se fera d&egrave;s que la file d'attente sera appel&eacute;e, par exemple via une t&acirc;che automatis&eacute;e (cron).</p><p>Notes :</p><ul>
+<li>Il n'est pas possible de sp&eacute;cifier &agrave; la fois un corps de message (<code>body</code> ou <code>html_body</code>) et un mod&egrave;le (<code>html_template</code> ou <code>template</code>).</li>
+<li>Il est possible de sp&eacute;cifier &agrave; la fois un corps de message en HTML et en texte brut.</li>
+<li>Un lien de d&eacute;sinscription sera automatiquement ins&eacute;r&eacute; en fin de messages, et ne peut &ecirc;tre d&eacute;sactiv&eacute;.</li>
+</ul><p>Le tableau des destinataires peut &ecirc;tre sous la forme d'un tableau simple, ou chaque &eacute;l&eacute;ment est une adresse e-mail :</p><pre><code>{
+    "ada@lovelace.org",
+    "pyg@framamailles.net"
+}</code></pre><p>Ou alors, en relation avec l'utilisation d'un mod&egrave;le (<code>template</code> ou <code>html_template</code>), dans ce cas indiquer l'adresse e-mail en cl&eacute;, et les champs &agrave; utiliser dans le mod&egrave;le en valeur, sous forme de tableau :</p><pre><code>{
+    "ada@lovelace.org": {
+        "name": "Ada Lovelace",
+        "has_children": false
+    }
+}</code></pre><p>Avec un mod&egrave;le cela permettra d'utiliser les &eacute;l&eacute;ments qui ont &eacute;t&eacute; pass&eacute;s, par exemple :</p><pre><code>Bonjour {{$name}} !
+
+{{if !$has_children}}
+    Vous &ecirc;tes child-free ! G&eacute;nial !
+{{/if}}</code></pre></details><h2 id="site-web">Site web</h2><p><em>(Depuis la version 1.4.0)</em></p><details class="api"><summary id="get-web" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/web</code> <span>Liste de toutes les pages du site web</span></summary></details><details class="api"><summary id="get-web-page_uri" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/web/<u>{PAGE_URI}</u></code> <span>M&eacute;tadonn&eacute;es de la page du site web</span></summary><table>
 <thead>
 <tr>
 <th style="text-align: left;">Param&egrave;tre</th>
