@@ -162,7 +162,7 @@ class Accounts
 		return $db->getGrouped($sql);
 	}
 
-	protected function getListFilterClause(array $criterias, string $prefix = ''): string
+	protected function getListFilterClause(?array $criterias, string $prefix = ''): string
 	{
 		$db = $this->em->DB();
 		$where = '';

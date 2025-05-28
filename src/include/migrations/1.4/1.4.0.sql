@@ -205,8 +205,6 @@ CREATE INDEX IF NOT EXISTS mailings_recipients_id ON mailings_recipients (id);
 
 DROP TABLE mailings_recipients_old;
 
-ALTER TABLE logs RENAME TO logs_old;
-
 -- Store user name in audit logs
 ALTER TABLE logs ADD COLUMN user_name TEXT NULL;
 
