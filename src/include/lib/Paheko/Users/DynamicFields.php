@@ -662,7 +662,7 @@ class DynamicFields
 		return array_combine($c, $c);
 	}
 
-	public function getSQLCopy(string $old_table_name, string $new_table_name = User::TABLE, array $fields = null, string $function = null): string
+	public function getSQLCopy(string $old_table_name, string $new_table_name = User::TABLE, ?array $fields = null, ?string $function = null): string
 	{
 		$db = DB::getInstance();
 		unset($fields['id']);

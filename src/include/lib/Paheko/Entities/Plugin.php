@@ -180,7 +180,7 @@ class Plugin extends Entity
 		return $this->url(self::ICON_FILE);
 	}
 
-	public function path(string $file = null): ?string
+	public function path(?string $file = null): ?string
 	{
 		$path = Plugins::getPath($this->name);
 
@@ -216,7 +216,7 @@ class Plugin extends Entity
 		return file_get_contents($this->path($path));
 	}
 
-	public function url(string $file = '', array $params = null)
+	public function url(string $file = '', ?array $params = null)
 	{
 		if (null !== $params) {
 			$params = '?' . http_build_query($params);
@@ -238,7 +238,7 @@ class Plugin extends Entity
 		return File::CONTEXT_EXTENSIONS . '/p/' . $this->name;
 	}
 
-	public function getConfig(string $key = null)
+	public function getConfig(?string $key = null)
 	{
 		if (is_null($key)) {
 			return $this->config;

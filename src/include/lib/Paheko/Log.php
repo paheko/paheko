@@ -70,6 +70,7 @@ class Log
 		}
 
 		$ip = Utils::getIP();
+		$session = Session::getInstance();
 
 		if (null === $id_user
 			&& $session->isLogged()) {

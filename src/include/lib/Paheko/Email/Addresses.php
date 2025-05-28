@@ -392,7 +392,7 @@ class Addresses
 		return compact('type', 'message', 'raw_address');
 	}
 
-	static public function getFromHeader(string $name = null, string $email = null): string
+	static public function getFromHeader(?string $name = null, ?string $email = null): string
 	{
 		$config = Config::getInstance();
 

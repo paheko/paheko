@@ -184,7 +184,7 @@ class Install
 		}
 	}
 
-	static public function installFromForm(array $source = null): void
+	static public function installFromForm(?array $source = null): void
 	{
 		if (null === $source) {
 			$source = $_POST;
