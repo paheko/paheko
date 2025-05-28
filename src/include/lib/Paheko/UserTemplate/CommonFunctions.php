@@ -148,6 +148,10 @@ class CommonFunctions
 		$attributes['id'] = 'f_' . preg_replace('![^a-z0-9_-]!i', '', $name);
 		$attributes['name'] = $name;
 
+		if (!empty($help)) {
+			$attributes['aria-describedby'] = 'help_' . $attributes['id'];
+		}
+
 		if (!isset($attributes['autocomplete']) && ($type == 'money' || $type == 'password')) {
 			$attributes['autocomplete'] = 'off';
 		}
@@ -312,7 +316,7 @@ class CommonFunctions
 				$radio,
 				$attributes['id'],
 				$label,
-				isset($params['help']) ? '<p class="help">' . nl2br(htmlspecialchars($params['help'])) . '</p>' : ''
+				isset($params['help']) ? sprintf('<p class="help" id="%s">%</p>', 'help_' . $attributes['id'], nl2br(htmlspecialchars($params['help']))) : ''
 			);
 
 			unset($help, $label);
@@ -465,7 +469,7 @@ class CommonFunctions
 			$out .= sprintf('<dd>%s %s', $input, $label);
 
 			if (isset($help)) {
-				$out .= sprintf(' <em class="help">(%s)</em>', htmlspecialchars($help));
+				$out .= sprintf(' <em class="help" id="%s">(%s)</em>', 'help_' . $attributes['id'], htmlspecialchars($help));
 			}
 
 			$out .= '</dd>';
@@ -478,7 +482,7 @@ class CommonFunctions
 			}
 
 			if (isset($help)) {
-				$out .= sprintf('<dd class="help">%s</dd>', nl2br(htmlspecialchars($help)));
+				$out .= sprintf('<dd class="help" id="%s">%s</dd>', 'help_' . $attributes['id'], nl2br(htmlspecialchars($help)));
 			}
 		}
 
