@@ -453,7 +453,7 @@ class Utils
 			return null;
 		}
 
-		if ($dialog !== '' && !ctype_alnum($dialog)) {
+		if ($dialog !== '' && !ctype_alnum((string) $dialog)) {
 			return null;
 		}
 
