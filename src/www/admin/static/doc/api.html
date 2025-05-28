@@ -702,7 +702,57 @@ Sinon, la recherche se fera sur l'identit&eacute; du membre (telle que configur&
 <li>il n'est pas possible de modifier le mot de passe, l'OTP ou la cl&eacute; PGP du membre cr&eacute;&eacute;</li>
 <li>il n'est pas possible de modifier des membres ayant acc&egrave;s &agrave; la configuration</li>
 <li>seul un identifiant d'API ayant l'acc&egrave;s en "Administration" pourra modifier un membre administrateur</li>
-</ul></details><details class="api"><summary id="post-user-import" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/user/import</code> <span>Importer un fichier de tableur de la liste des membres</span></summary><p>Formats de fichiers accept&eacute;s : CSV, ODS, XLSX.</p><table>
+</ul></details><details class="api"><summary id="post-user-id-subscribe" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/user/<u>{ID}</u>/subscribe</code> <span>Inscrit un membre &agrave; une activit&eacute;.</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>ID</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">Identifiant unique du membre (diff&eacute;rent du num&eacute;ro).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>id_service</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">Identifiant de l'activit&eacute;.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>id_fee</code></td>
+<td style="text-align: left;"><code>int</code> (facultatif)</td>
+<td style="text-align: left;">Identifiant du tarif de l'activit&eacute;.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>paid</code></td>
+<td style="text-align: left;"><code>bool</code> (facultatif)</td>
+<td style="text-align: left;">Si l'inscription doit &ecirc;tre marqu&eacute;e comme r&eacute;gl&eacute;e ou non.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>date</code></td>
+<td style="text-align: left;"><code>string</code> (facultatif)</td>
+<td style="text-align: left;">Date de l'inscription &agrave; l'activit&eacute;.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>expiry_date</code></td>
+<td style="text-align: left;"><code>string</code> (facultatif)</td>
+<td style="text-align: left;">Date de l'expiration de l'inscription &agrave; l'activit&eacute;. Si non sp&eacute;cifi&eacute;, sera calcul&eacute; &agrave; partir de l'activit&eacute;. N'aura aucun effet si l'activit&eacute; est ponctuelle.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>expected_amount</code></td>
+<td style="text-align: left;"><code>string</code> (facultatif)</td>
+<td style="text-align: left;">Montant attendu en paiement de l'inscription &agrave; cette activit&eacute;, en nombre flottant (exemple : <code>42,99</code>). Si non sp&eacute;cifi&eacute;, il sera calcul&eacute; &agrave; partir du tarif fourni.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>force_duplicate</code></td>
+<td style="text-align: left;"><code>bool</code> (facultatif)</td>
+<td style="text-align: left;">Par d&eacute;faut, si une inscription existe d&eacute;j&agrave; pour la m&ecirc;me activit&eacute;, le m&ecirc;me jour et le m&ecirc;me membre, une erreur sera renvoy&eacute;e. Pour pouvoir inscrire le membre &agrave; la m&ecirc;me activit&eacute; et le m&ecirc;me jour plusieurs fois, passer <code>TRUE</code> &agrave; ce param&egrave;tre.</td>
+</tr>
+</tbody>
+</table><p><em>(Depuis la version 1.4.0)</em></p></details><details class="api"><summary id="post-user-import" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/user/import</code> <span>Importer un fichier de tableur de la liste des membres</span></summary><p>Formats de fichiers accept&eacute;s : CSV, ODS, XLSX.</p><table>
 <thead>
 <tr>
 <th style="text-align: left;">Param&egrave;tre</th>

@@ -561,6 +561,23 @@ Notes :
 * il n'est pas possible de modifier des membres ayant accès à la configuration
 * seul un identifiant d'API ayant l'accès en "Administration" pourra modifier un membre administrateur
 
+### POST user/{ID}/subscribe
+
+Inscrit un membre à une activité.
+
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `ID` | `int` | Identifiant unique du membre (différent du numéro). |
+| `id_service` | `int` | Identifiant de l'activité. |
+| `id_fee` | `int` (facultatif) | Identifiant du tarif de l'activité. |
+| `paid` | `bool` (facultatif) | Si l'inscription doit être marquée comme réglée ou non. |
+| `date` | `string` (facultatif) | Date de l'inscription à l'activité. |
+| `expiry_date` | `string` (facultatif) | Date de l'expiration de l'inscription à l'activité. Si non spécifié, sera calculé à partir de l'activité. N'aura aucun effet si l'activité est ponctuelle. |
+| `expected_amount` | `string` (facultatif) | Montant attendu en paiement de l'inscription à cette activité, en nombre flottant (exemple : `42,99`). Si non spécifié, il sera calculé à partir du tarif fourni. |
+| `force_duplicate` | `bool` (facultatif) | Par défaut, si une inscription existe déjà pour la même activité, le même jour et le même membre, une erreur sera renvoyée. Pour pouvoir inscrire le membre à la même activité et le même jour plusieurs fois, passer `TRUE` à ce paramètre. |
+
+_(Depuis la version 1.4.0)_
+
 ### POST user/import
 
 Importer un fichier de tableur de la liste des membres

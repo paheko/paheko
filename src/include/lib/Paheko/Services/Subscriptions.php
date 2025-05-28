@@ -26,13 +26,13 @@ class Subscriptions
 		return DB::getInstance()->count(Subscription::TABLE, 'id_user = ?', $user_id);
 	}
 
-	static public function createFromFee(int $id_fee, int $id_user, ?int $expected_amount, bool $paid, int $multiple = 1): Service_User
+	static public function createFromFee(int $id_fee, int $id_user, ?int $expected_amount, bool $paid, int $qty = 1): Service_User
 	{
 		$su = new Service_User;
 		$su->date = new Date;
 		// Required, also to calculate expiry date
 		$id_service = DB::getInstance()->firstColumn('SELECT id_service FROM services_fees WHERE id = ?;', $id_fee);
-		$su->importForm(compact('id_service', 'id_fee', 'id_user', 'paid', 'expected_amount', 'multiple'));
+		$su->importForm(compact('id_service', 'id_fee', 'id_user', 'paid', 'expected_amount', 'qty'));
 		return $su;
 	}
 
@@ -178,10 +178,7 @@ class Subscriptions
 					}
 				}
 				else {
-					$su = new Subscription;
-					$su->set('id_user', $id_user);
-					$su->set('id_service', $id_service);
-					$su->set('id_fee', $id_fee);
+					$su = self::create($id_user, $id_service, $id_fee);
 				}
 
 				unset($row->fee, $row->service, $row->$number_field, $row->id_service, $row->id_fee, $row->id);
@@ -210,6 +207,15 @@ class Subscriptions
 				throw $e;
 			}
 		}
+	}
+
+	static public function create(int $id_user, int $id_service, ?int $id_fee): Subscription
+	{
+		$su = new Subscription;
+		$su->set('id_user', $id_user);
+		$su->set('id_service', $id_service);
+		$su->set('id_fee', $id_fee);
+		return $su;
 	}
 
 	static public function import(CSV_Custom $csv): void

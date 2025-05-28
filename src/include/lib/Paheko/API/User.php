@@ -10,6 +10,9 @@ use Paheko\Users\Import as UsersImport;
 use Paheko\Search;
 use Paheko\Entities\Search as SE;
 use Paheko\APIException;
+use Paheko\Services\Subscriptions;
+use Paheko\Users\Session;
+use Paheko\Entity;
 
 trait User
 {
@@ -74,41 +77,72 @@ trait User
 
 			return $user->exportAPI();
 		}
+		// Actions for a specific user
 		elseif (ctype_digit($fn)) {
 			$user = Users::get((int)$fn);
 
 			if (!$user) {
-				throw new APIException('The requested user ID does not exist', 404);
+				throw new APIException('The requested user does not exist', 404);
 			}
 
-			if ($this->method === 'POST') {
+			// Subscriptions
+			if ($fn2 === 'subscribe') {
+				$this->requireMethod('POST');
 				$this->requireAccess(Session::ACCESS_WRITE);
 
-				try {
-					$user->validateCanBeModifiedBy(null);
-				}
-				catch (UserException $e) {
-					throw new APIException($e->getMessage(), 403, $e);
+				if (!$this->hasParam('id_service')) {
+					throw new APIException('Missing "id_service" parameter', 400);
 				}
 
-				$user->importForm($this->params);
-				$user->save();
+				$params = $this->params;
+				unset($params['id_user']);
+				$id_service = intval($this->params['id_service']);
+				$id_fee = intval($this->params['id_fee'] ?? 0) ?: null;
+
+				$su = Subscriptions::create($user->id(), $id_service, $id_fee);
+				$su->importForm($params);
+
+				if (!$this->hasParamTrue('force_duplicate')
+					&& $su->isDuplicate()) {
+					throw new APIException('This user already has been subscribed to this service at this date.', 409);
+				}
+
+				$su->save();
+				return $su->asArray();
 			}
-			elseif ($this->method === 'DELETE') {
-				$this->requireAccess(Session::ACCESS_ADMIN);
-
-				try {
-					$user->validateCanBeModifiedBy(null);
-				}
-				catch (UserException $e) {
-					throw new APIException($e->getMessage(), 403, $e);
-				}
-
-				$user->delete();
-				return self::SUCCESS;
+			elseif (!empty($fn2)) {
+				throw new APIException('Unknown route', 404);
 			}
+			else {
+				if ($this->method === 'POST') {
+					$this->requireAccess(Session::ACCESS_WRITE);
 
-			return $user->exportAPI();
+					try {
+						$user->validateCanBeModifiedBy(null);
+					}
+					catch (UserException $e) {
+						throw new APIException($e->getMessage(), 403, $e);
+					}
+
+					$user->importForm($this->params);
+					$user->save();
+				}
+				elseif ($this->method === 'DELETE') {
+					$this->requireAccess(Session::ACCESS_ADMIN);
+
+					try {
+						$user->validateCanBeModifiedBy(null);
+					}
+					catch (UserException $e) {
+						throw new APIException($e->getMessage(), 403, $e);
+					}
+
+					$user->delete();
+					return self::SUCCESS;
+				}
+
+				return $user->exportAPI();
+			}
 		}
 		elseif ($fn === 'import') {
 			$this->requireHttpClient();

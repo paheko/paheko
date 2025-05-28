@@ -196,6 +196,11 @@ class Service extends Entity
 		return DB::getInstance()->test('services_subscriptions', 'id_service = ?', $this->id());
 	}
 
+	public function isOneOff(): bool
+	{
+		return !$this->end_date && !$this->duration;
+	}
+
 	public function getUsers(bool $paid_only = false) {
 		$where = $paid_only ? 'AND paid = 1' : '';
 		$id_field = DynamicFields::getNameFieldsSQL('u');

@@ -166,7 +166,7 @@ class API
 		return $in;
 	}
 
-	public function exportJSON($in, $level = 2): void
+	public function exportJSON($in, int $level = 2): void
 	{
 		$is_list = null;
 		$in = $this->toArray($in, false);
@@ -192,7 +192,10 @@ class API
 				echo json_encode((string)$key) . ': ';
 			}
 
-			if (is_array($value) || is_object($value)) {
+			if (is_object($value) && $value instanceof \DateTimeInterface) {
+				echo json_encode($value->format(\DATE_ATOM));
+			}
+			elseif (is_array($value) || is_object($value)) {
 				$this->exportJSON($value, $level+2);
 			}
 			else {
