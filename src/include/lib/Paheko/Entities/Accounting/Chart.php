@@ -151,15 +151,14 @@ class Chart extends Entity
 		$db = DB::getInstance();
 		$db->begin();
 
-		try {
-			foreach ($this->accounts()->listAll() as $account) {
+		foreach ($this->accounts()->listAll() as $account) {
+			try {
 				$account->setLocalRules($this->country);
 				$account->save();
 			}
-		}
-		catch (UserException $e) {
-			$db->rollback();
-			throw $e;
+			catch (UserException $e) {
+				// Ignore
+			}
 		}
 
 		$db->commit();
