@@ -291,7 +291,7 @@ body.sticky, body.sticky #menu {
         background-color: #ddd;
     }
 
-    html.dark nav#menu, html.dark #dialog {
+    html.dark nav#menu {
         filter: invert(100%) hue-rotate(180deg);
     }
 

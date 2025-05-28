@@ -147,7 +147,6 @@
 
 		g.dialog = document.createElement('dialog');
 		g.dialog.id = 'dialog';
-		g.dialog.open = true;
 		g.dialog.className = options.classname || '';
 		g.dialog.dataset.caption = options.caption || '';
 
@@ -173,6 +172,7 @@
 		g.dialog.style.opacity = 0;
 		g.dialog.appendChild(toolbar);
 		document.body.appendChild(g.dialog);
+		g.dialog.showModal();
 
 		// Remove ability to scoll background when dialog is open
 		// Avoid having the page "jumping" because the scrollbar has been removed
@@ -302,7 +302,18 @@
 
 			// We need to wait a bit for the height to be correct, not sure why
 			window.setTimeout(() => {
-				iframe.style.height = iframe.dataset.height == 'auto' && iframe.contentWindow.document.body ? iframe.contentWindow.document.body.offsetHeight + 'px' : iframe.dataset.height;
+				var height = iframe.dataset.height;
+
+				if (iframe.dataset.height == 'auto'
+					&& iframe.contentWindow.document.body
+					&& iframe.contentWindow.document.body.offsetHeight < g.dialog.offsetHeight) {
+					height = iframe.contentWindow.document.body.offsetHeight + 'px';
+				}
+				else if (!height || height == 'auto') {
+					height = '90%';
+				}
+
+				iframe.style.height = height;
 			}, 200);
 		});
 
