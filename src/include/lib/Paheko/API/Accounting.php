@@ -11,6 +11,7 @@ use Paheko\Accounting\Years;
 use Paheko\Entities\Accounting\Transaction;
 use Paheko\APIException;
 use Paheko\Utils;
+use Paheko\Users\Session;
 
 trait Accounting
 {
