@@ -437,7 +437,7 @@ class CommonFunctions
 		// No label? then we only want the input without the widget
 		if (empty($label)) {
 			if (!array_key_exists('label', $params) && ($type == 'radio' || $type == 'checkbox')) {
-				$input .= sprintf('<label for="%s"></label>', $attributes['id']);
+				$input .= sprintf('<label for="%s" aria-label="%s"></label>', $attributes['id'], htmlspecialchars($attributes['title'] ?? ''));
 			}
 
 			return $input;
