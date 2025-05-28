@@ -8,7 +8,7 @@ use Paheko\APIException;
 
 use const Paheko\DISABLE_EMAIL_SENDING_API;
 
-trait Web
+trait Email
 {
 	protected function email(string $uri): ?array
 	{
