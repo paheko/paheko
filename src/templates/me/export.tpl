@@ -37,7 +37,7 @@
 	<thead>
 		<tr>
 		{foreach from=$services_list->getHeaderColumns() key="key" item="column"}
-			<th>{$column.label}</th>
+			<th scope="row">{$column.label}</th>
 		{/foreach}
 		</tr>
 	</thead>
@@ -46,7 +46,7 @@
 
 	{foreach from=$services_list->iterate() item="row"}
 		<tr>
-			<th>{$row.label}</th>
+			<th scope="row">{$row.label}</th>
 			<td>{$row.date|date_short}</td>
 			<td>{$row.expiry|date_short}</td>
 			<td>{$row.fee}</td>

@@ -99,7 +99,7 @@
 				<tr class="account account-level-{$item.level}">
 					<td>{if $item.already_listed}{icon shape="star" title="Ce compte est déjà favori"}{/if}</td>
 					<td class="num">{$item.code}</td>
-					<th>{linkbutton href="?id=%d&type=%d&ask=%d&%s"|args:$account.id_chart:$account.type:$item.id:$types_arg label=$item.label}
+					<th scope="row">{linkbutton href="?id=%d&type=%d&ask=%d&%s"|args:$account.id_chart:$account.type:$item.id:$types_arg label=$item.label}
 						{if $item.description}<span class="help">{$item.description|escape|nl2br}</span>{/if}
 					</th>
 					<td class="actions">

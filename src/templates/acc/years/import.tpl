@@ -25,7 +25,7 @@ use Paheko\Accounting\Export;
 		<table class="list auto">
 		{foreach from=$report.accounts item="account"}
 			<tr>
-				<th>{$account.code}</th>
+				<th scope="row">{$account.code}</th>
 				<td>{$account.label}</td>
 			</tr>
 		{/foreach}

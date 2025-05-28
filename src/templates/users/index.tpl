@@ -52,7 +52,7 @@
 						{link href=$url label=$value}
 					</td>
 				{elseif $key == 'identity'}
-					<th>{link href=$url label=$value}</th>
+					<th scope="row">{link href=$url label=$value}</th>
 				{elseif $key == 'id_parent'}
 					<td>
 						{if $value}

@@ -85,7 +85,7 @@
 		<table class="auto list">
 			<thead>
 				<tr>
-					<th>Nom du compte</th>
+					<th scope="col">Nom du compte</th>
 					<td>Solde du compte</td>
 					<td></td>
 				</tr>
@@ -93,7 +93,7 @@
 			<tbody>
 				{foreach from=$accounts item="account"}
 				<tr>
-					<th>{input type="text" name="accounts[label][]" default=$account.label required=false}</th>
+					<th scope="row">{input type="text" name="accounts[label][]" default=$account.label required=false}</th>
 					<td>{input type="money" name="accounts[balance][]" default=$account.balance required=false}</td>
 					<td class="actions">{button label="Enlever" title="Enlever la ligne" shape="minus" min="2" name="remove_line"}</td>
 				</tr>

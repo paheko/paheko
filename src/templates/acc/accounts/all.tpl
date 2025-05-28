@@ -12,7 +12,7 @@ use Paheko\Entities\Accounting\Account;
 	<thead>
 		<tr>
 			<td>Numéro</td>
-			<th>Compte</th>
+			<th scope="col">Compte</th>
 			<td class="money">Total des débits</td>
 			<td class="money">Total des crédits</td>
 			<td class="money">Solde</td>
@@ -24,7 +24,7 @@ use Paheko\Entities\Accounting\Account;
 			<td class="num">
 				<a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$current_year.id}">{$account.code}</a>
 			</td>
-			<th>{$account.label}</th>
+			<th scope="row">{$account.label}</th>
 			<td class="money{if !$account.debit} disabled{/if}">{$account.debit|raw|money:false}</td>
 			<td class="money{if !$account.credit} disabled{/if}">{$account.credit|raw|money:false}</td>
 			<td class="money">{if $account.balance !== null}<b>{$account.balance|escape|money:false}</b>{/if}</td>

@@ -10,7 +10,7 @@
 	{include file="common/dynamic_list_head.tpl"}
 			{foreach from=$list->iterate() item="row"}
 				<tr>
-					<th><a href="details.php?id={$row.id}">{$row.label}</a></th>
+					<th scope="row"><a href="details.php?id={$row.id}">{$row.label}</a></th>
 					<td>
 						{if $row.amount === -1}
 							Formule

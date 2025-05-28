@@ -32,7 +32,7 @@
 			{foreach from=$parent.items item="item"}
 				<?php $result = $item->sum_revenue - $item->sum_expense; ?>
 				<tr class="{if $item.label == 'Total'}total{/if} {if $item.archived}archived{/if}">
-					<th>{$item.label}{if $item.archived} <em>(archivé)</em>{/if}</th>
+					<th scope="row">{$item.label}{if $item.archived} <em>(archivé)</em>{/if}</th>
 					<td>
 					{if !$table_export}
 					<?php

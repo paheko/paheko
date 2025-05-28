@@ -6,7 +6,7 @@ use Paheko\Entities\Web\Page;
 
 	{foreach from=$list->iterate() item="p"}
 		<tr>
-			<th>{link label=$p.title href="?id=%d"|args:$p.id}</th>
+			<th scope="row">{link label=$p.title href="?id=%d"|args:$p.id}</th>
 			<td>{$p.published|relative_date}</td>
 			<td>{$p.modified|relative_date:true}</td>
 			<td class="actions">

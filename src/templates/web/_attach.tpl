@@ -63,7 +63,7 @@
 	<tbody>
 	{foreach from=$files item="file"}
 		<tr>
-			<th>{$file.name}</th>
+			<th scope="row">{$file.name}</th>
 			<td>{$file.mime}, {$file.size|size_in_bytes}</td>
 			<td class="actions">
 				<form class="actions" method="post" action="{$self_url}">

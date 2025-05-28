@@ -74,9 +74,9 @@
 				<tr>
 					{if $chart_change}
 						<td>Ancien compte</td>
-						<th>Nouveau compte</th>
+						<th scope="col">Nouveau compte</th>
 					{else}
-						<th>Compte</th>
+						<th scope="col">Compte</th>
 					{/if}
 					<td>Débit</td>
 					<td>Crédit</td>
@@ -93,7 +93,7 @@
 							<input type="hidden" name="lines[label][]" value="{$line.label}" />
 						</td>
 					{/if}
-					<th>
+					<th scope="row">
 						{input type="list" target="!acc/charts/accounts/selector.php?id_chart=%d"|args:$year.id_chart name="lines[account_selector][]" default=$line.account_selector}
 					</th>
 					<td>{input type="money" name="lines[debit][]" default=$line.debit size=5}</td>
@@ -104,7 +104,7 @@
 			</tbody>
 			<tfoot>
 				<tr>
-					<th>Total</th>
+					<th scope="row">Total</th>
 					{if $chart_change}
 						<td></td>
 					{/if}

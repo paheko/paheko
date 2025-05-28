@@ -4,7 +4,7 @@
 	<tbody>
 	{foreach from=$list item="label" key="key"}
 		<tr>
-			<th>
+			<th scope="row">
 				{$label}
 			</th>
 			<td class="actions">

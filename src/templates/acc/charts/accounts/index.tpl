@@ -30,7 +30,7 @@
 	{foreach from=$group.accounts item="account"}
 		<tr class="account">
 			<td class="num">{$account.code}</td>
-			<th>{$account.label}</th>
+			<th scope="row">{$account.label}</th>
 			<td class="desc">{$account.description}</td>
 			<td>
 				<?php

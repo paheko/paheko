@@ -65,7 +65,7 @@
 <table class="list">
 	{foreach from=$constants key="key" item="value"}
 	<tr>
-		<th>{$key}</th>
+		<th scope="row">{$key}</th>
 		<td>
 			{if $value === true}<samp>TRUE</samp>
 			{elseif $value === false}<samp>FALSE</samp>

@@ -14,7 +14,7 @@
 		{include file="common/dynamic_list_head.tpl"}
 		{foreach from=$list->iterate() item="row"}
 			<tr>
-				<th>{$row.file_name}</th>
+				<th scope="row">{$row.file_name}</th>
 				<td>{link href="!docs/?id=%s"|args:$row.file_hash_id label=$row.file_parent}</td>
 				<td>{$row.user_name}</td>
 				<td>{$sharing_options[$row.option]}</td>

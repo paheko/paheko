@@ -171,7 +171,7 @@
 				<thead>
 					<tr>
 						<td class="num">N° compte</td>
-						<th>Compte</th>
+						<th scope="col">Compte</th>
 						<td class="money">Débit</td>
 						<td class="money">Crédit</td>
 						<td>Libellé ligne</td>

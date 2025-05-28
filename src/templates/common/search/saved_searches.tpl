@@ -72,7 +72,7 @@
 	{include file="common/dynamic_list_head.tpl"}
 			{foreach from=$list->iterate() item="search"}
 			<tr>
-				<th><a href="{$search_url}?id={$search.id}">{$search.label}</a></th>
+				<th scope="row"><a href="{$search_url}?id={$search.id}">{$search.label}</a></th>
 				<td>{$search.type}</td>
 				<td>{if !$search.id_user}Publique{else}Privée{/if}</td>
 				<td>{$search.updated|relative_date}</td>

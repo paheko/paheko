@@ -42,7 +42,7 @@
 
 	{foreach from=$list->iterate() item="row"}
 		<tr>
-			<th>{$row.label}</th>
+			<th scope="row">{$row.label}</th>
 			<td>{$row.fee}</td>
 			<td>{$row.date|date_short}</td>
 			<td>{$row.expiry|date_short}</td>

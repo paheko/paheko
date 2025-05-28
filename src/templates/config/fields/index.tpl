@@ -23,7 +23,7 @@
 		<thead>
 			<tr>
 				<td>Ordre</td>
-				<th>Libellé</th>
+				<th scope="col">Libellé</th>
 				<td>Liste des membres</td>
 				<td>Obligatoire&nbsp;?</td>
 				<td>Accès membre</td>
@@ -38,7 +38,7 @@
 					<span class="draggable" title="Cliquer, glisser et déposer pour modifier l'ordre">{button shape="menu"}</span>
 					<input type="hidden" name="sort_order[]" value="{$field.name}" />
 				</td>
-				<th>{$field.label}</th>
+				<th scope="row">{$field.label}</th>
 				<td>{if $field.list_table || $field->isName()}Oui{/if}</td>
 				<td>{if $field.required}Obligatoire{/if}</td>
 				<td>

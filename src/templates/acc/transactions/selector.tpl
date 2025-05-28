@@ -14,7 +14,7 @@
 		{foreach from=$list item="row"}
 			<tr>
 				<td class="num"><a>#{$row.id}</a></td>
-				<th>
+				<th scope="row">
 					{$row.label}
 				</th>
 				<td>

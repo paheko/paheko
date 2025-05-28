@@ -18,7 +18,7 @@
 	<thead>
 		<tr>
 			<td></td>
-			<th>Description</th>
+			<th scope="col">Description</th>
 			<td>Identifiant</td>
 			<td>Accès</td>
 			<td>Création</td>
@@ -31,7 +31,7 @@
 			<td class="check">
 				{input type="radio" name="id" value=$c.id}
 			</td>
-			<th>{$c.label}</th>
+			<th scope="row">{$c.label}</th>
 			<td>{$c.key}</td>
 			<td class="help">{$access_levels[$c.access_level]}</td>
 			<td>{$c.created|date_short}</td>

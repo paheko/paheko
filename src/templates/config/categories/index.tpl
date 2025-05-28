@@ -4,7 +4,7 @@
 
 <table class="list">
 	<thead>
-		<th>Nom</th>
+		<th scope="col">Nom</th>
 		<td class="num">Membres</td>
 		<td>Droits</td>
 		<td></td>
@@ -12,7 +12,7 @@
 	<tbody>
 		{foreach from=$list item="cat"}
 			<tr>
-				<th>{$cat.name}</th>
+				<th scope="row">{$cat.name}</th>
 				<td class="num">{$cat.count}</td>
 				<td class="permissions">
 					{display_permissions permissions=$cat}

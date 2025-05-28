@@ -27,7 +27,7 @@
 					{if count($years)}
 						<td class="check">{input type="checkbox" name="check[]" value=$row.id}</td>
 					{/if}
-					<th>{$row.service_label} — {$row.fee_label}</th>
+					<th scope="row">{$row.service_label} — {$row.fee_label}</th>
 					<td class="actions">
 						{linkbutton shape="users" href="!services/fees/details.php?id=%d"|args:$row.id label="Liste des inscrits"}
 						{linkbutton shape="edit" href="!services/fees/edit.php?id=%d"|args:$row.id label="Modifier"}

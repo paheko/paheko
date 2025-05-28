@@ -23,7 +23,7 @@
 		{foreach from=$list->iterate() item="account"}
 			<tr class="account account-level-{$account.level}">
 				<td class="num">{$account.code}</td>
-				<th{if !$account.description} colspan=2{/if}>{$account.label}</th>
+				<th scope="row"{if !$account.description} colspan=2{/if}>{$account.label}</th>
 				{if $account.description}
 				<td class="help">{$account.description|escape|nl2br}</td>
 				{/if}

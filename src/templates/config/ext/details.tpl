@@ -15,12 +15,12 @@
 		?>
 		<table class="list meter-map auto">
 			<tr>
-				<th>Total</th>
+				<th scope="row">Total</th>
 				<td class="size"><nobr>{$total|size_in_bytes}</nobr></td>
 				<td></td>
 			</tr>
 			<tr height="{$config_size|percent_of:$total}%">
-				<th>Configuration</th>
+				<th scope="row">Configuration</th>
 				<td class="size"><nobr>{$config_size|size_in_bytes}</nobr></td>
 				<td class="actions">
 					{if !$data_size && $config_size && $module->canDeleteData()}
@@ -29,7 +29,7 @@
 				</td>
 			</tr>
 			<tr height="{$data_size|percent_of:$total}%">
-				<th>Données seules</th>
+				<th scope="row">Données seules</th>
 				<td class="size"><nobr>{$data_size|size_in_bytes}</nobr></td>
 				<td class="actions">
 					{if $data_size}
@@ -41,7 +41,7 @@
 				</td>
 			</tr>
 			<tr height="{$code_size|percent_of:$total}%">
-				<th>Code source</th>
+				<th scope="row">Code source</th>
 				<td class="size"><nobr>{$code_size|size_in_bytes}</nobr></td>
 				<td class="actions">
 					{if $code_size && $ext.module->hasDist()}
@@ -50,7 +50,7 @@
 				</td>
 			</tr>
 			<tr height="{$files_size|percent_of:$total}%">
-				<th>Fichiers stockés</th>
+				<th scope="row">Fichiers stockés</th>
 				<td class="size"><nobr>{$files_size|size_in_bytes}</nobr></td>
 				<td class="actions"></td>
 			</tr>

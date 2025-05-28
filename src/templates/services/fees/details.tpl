@@ -38,7 +38,7 @@ $can_action = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMI
 			{if $can_action}
 			<td class="check">{input type="checkbox" name="selected[]" value=$row.id_user}</td>
 			{/if}
-			<th>{link href="!users/details.php?id=%d"|args:$row.id_user label=$row.identity}</th>
+			<th scope="row">{link href="!users/details.php?id=%d"|args:$row.id_user label=$row.identity}</th>
 			<td>{if $row.paid}<b class="confirm">Oui</b>{else}<b class="error">Non</b>{/if}</td>
 			<td class="money">{if null === $row.paid_amount}<em title="Aucune écriture n'est liée à cette inscription">—</em>{else}{$row.paid_amount|raw|money_currency}{/if}</td>
 			<td>{$row.date|date_short}</td>

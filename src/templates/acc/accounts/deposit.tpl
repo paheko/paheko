@@ -46,7 +46,7 @@
 					{/if}
 					<td>{$line.reference}</td>
 					<td>{$line.line_reference}</td>
-					<th>{$line.label}</th>
+					<th scope="row">{$line.label}</th>
 					<td class="money">{$line.debit|raw|money}</td>
 					<td class="money">{if $line.running_sum > 0}-{/if}{$line.running_sum|abs|raw|money:false}</td>
 				</tr>

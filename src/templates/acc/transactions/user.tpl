@@ -36,7 +36,7 @@
 	<thead>
 		<tr>
 			<td class="num">Numéro</td>
-			<th>Compte</th>
+			<th scope="col">Compte</th>
 			{if $simple}
 				<td class="money">Solde</td>
 			{else}
@@ -51,7 +51,7 @@
 	{foreach from=$balance item="account"}
 		<tr class="{if $account.balance === 0}disabled{/if}">
 			<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}">{$account.code}</a></td>
-			<th>{$account.label}</th>
+			<th scope="row">{$account.label}</th>
 			{if $simple}
 				<td class="money">{show_balance account=$account}</td>
 			{else}
