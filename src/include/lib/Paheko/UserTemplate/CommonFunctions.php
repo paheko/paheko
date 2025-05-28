@@ -507,6 +507,8 @@ class CommonFunctions
 
 		self::setIconAttribute($params);
 
+		$params['aria-hidden'] = 'true';
+
 		$attributes = array_diff_key($params, ['shape']);
 		$attributes = array_map(fn($v, $k) => sprintf('%s="%s"', $k, htmlspecialchars($v)),
 			$attributes, array_keys($attributes));
