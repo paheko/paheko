@@ -43,7 +43,7 @@
 		<?php $url = sprintf('details.php?id=%d&list_category=%d', $row->_user_id, $current_cat); ?>
 		<tr>
 			{if $can_check}
-				<td class="check">{input type="checkbox" name="selected[]" value=$row._user_id}</td>
+				<td class="check">{input type="checkbox" name="selected[]" value=$row._user_id title=$row.identity}</td>
 			{/if}
 			{foreach from=$list->getHeaderColumns() key="key" item="value"}
 				<?php $value = $row->$key; ?>
