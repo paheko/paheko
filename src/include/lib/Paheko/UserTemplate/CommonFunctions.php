@@ -505,9 +505,16 @@ class CommonFunctions
 		$html .= htmlspecialchars($params['label'] ?? '');
 		unset($params['label']);
 
-		self::setIconAttribute($params);
+		// Set aria-label when title is defined, for screen readers
+		// aria-label
+		if (!empty($params['title'])) {
+			$params['aria-label'] = $params['title'];
+		}
+		else {
+			$params['aria-hidden'] = 'true';
+		}
 
-		$params['aria-hidden'] = 'true';
+		self::setIconAttribute($params);
 
 		$attributes = array_diff_key($params, ['shape']);
 		$attributes = array_map(fn($v, $k) => sprintf('%s="%s"', $k, htmlspecialchars($v)),
