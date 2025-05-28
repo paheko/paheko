@@ -66,6 +66,10 @@ if (ALERT_MESSAGE && !$dialog) {
 {/if}
 
 {if !array_key_exists('_dialog', $_GET) && $layout !== 'public' && $layout !== 'raw'}
+<nav id="skip">
+	<a href="#content">Aller au contenu</a>
+</nav>
+
 <nav id="menu">
 	<figure class="logo">
 	{if isset($config) && ($url = $config->fileURL('logo', '150px'))}
@@ -163,7 +167,7 @@ if (ALERT_MESSAGE && !$dialog) {
 </header>
 {/if}
 
-<main>
+<main id="content">
 	{if empty($hide_title) && !$dialog}
 	<h1 class="main">{$title}</h1>
 	{/if}
