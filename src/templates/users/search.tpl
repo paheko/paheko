@@ -72,7 +72,7 @@
 		<thead>
 			<tr>
 				{if $is_admin && $id_column !== false}
-					<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>
+					<td class="check"><input type="checkbox" title="Tout cocher / décocher" aria-label="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>
 				{/if}
 				{foreach from=$header item="column"}
 					<td>{$column}</td>

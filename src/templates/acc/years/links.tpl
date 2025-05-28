@@ -15,7 +15,7 @@
 			<thead>
 				<tr>
 					{if count($years)}
-						<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all" /><label for="f_all" title="Tout cocher / décocher"></label></td>
+						<td class="check"><input type="checkbox" title="Tout cocher / décocher" aria-label="Tout cocher / décocher" id="f_all" /><label for="f_all" title="Tout cocher / décocher"></label></td>
 					{/if}
 					<th scope="col">Tarif</th>
 					<td></td>

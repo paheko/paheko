@@ -593,6 +593,10 @@ class CommonFunctions
 
 		$params['class'] .= ' icn-btn';
 
+		if (isset($params['title'])) {
+			$params['aria-label'] = $params['title'];
+		}
+
 		// Remove NULL params
 		$params = array_filter($params, fn($a) => !is_null($a));
 
