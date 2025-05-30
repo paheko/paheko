@@ -316,7 +316,7 @@ class CommonFunctions
 				$radio,
 				$attributes['id'],
 				$label,
-				isset($params['help']) ? sprintf('<p class="help" id="%s">%</p>', 'help_' . $attributes['id'], nl2br(htmlspecialchars($params['help']))) : ''
+				isset($params['help']) ? sprintf('<p class="help" id="%s">%s</p>', 'help_' . $attributes['id'], nl2br(htmlspecialchars($params['help']))) : ''
 			);
 
 			unset($help, $label);
