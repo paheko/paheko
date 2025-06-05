@@ -336,13 +336,13 @@ class Utils
 
 	static public function getLocalURL(string $url = '', ?string $default_prefix = null): string
 	{
-		if (substr($url, 0, 1) == '!') {
+		if (substr($url, 0, 1) === '!') {
 			return ADMIN_URL . substr($url, 1);
 		}
-		elseif (substr($url, 0, 7) == '/admin/') {
+		elseif (substr($url, 0, 7) === '/admin/') {
 			return ADMIN_URL . substr($url, 7);
 		}
-		elseif (substr($url, 0, 2) == './') {
+		elseif (substr($url, 0, 2) === './') {
 			$base = self::getSelfURI();
 			$base = strtok($base, '?');
 			strtok('');
@@ -351,16 +351,21 @@ class Utils
 			$base = $base ? $base . '/' : '';
 			return '/' . $base . substr($url, 2);
 		}
+		elseif (substr($url, 0, 3) === '../') {
+			$base = self::getSelfURI();
+			$base = preg_replace('![^/]+/[^/]*$!', '/', $base);
+			return rtrim($base, '/') . '/' . substr($url, 3);
+		}
 		elseif (substr($url, 0, 1) == '/' && strpos($url, WWW_URI) === 0) {
 			return WWW_URL . substr($url, strlen(WWW_URI));
 		}
-		elseif (substr($url, 0, 1) == '/') {
+		elseif (substr($url, 0, 1) === '/') {
 			return WWW_URL . substr($url, 1);
 		}
-		elseif (substr($url, 0, 5) == 'http:' || substr($url, 0, 6) == 'https:') {
+		elseif (substr($url, 0, 5) === 'http:' || substr($url, 0, 6) === 'https:') {
 			return $url;
 		}
-		elseif ($url == '') {
+		elseif ($url === '') {
 			return ADMIN_URL;
 		}
 		else {
