@@ -61,7 +61,7 @@ class DynamicFields
 		return array_keys(self::getInstance()->fieldsByType('email'));
 	}
 
-	static public function getFirstEmailField(): string
+	static public function getFirstEmailField(): ?string
 	{
 		return key(self::getInstance()->fieldsByType('email'));
 	}
