@@ -21,6 +21,8 @@ use const Paheko\{PLUGINS_ROOT, WWW_URL, ROOT, ADMIN_URL};
 
 class Plugin extends Entity
 {
+	const VALID_NAME_REGEXP = '/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/';
+
 	const META_FILE = 'plugin.ini';
 	const CONFIG_FILE = 'admin/config.php';
 	const INDEX_FILE = 'admin/index.php';
@@ -71,7 +73,7 @@ class Plugin extends Entity
 
 	public function selfCheck(): void
 	{
-		$this->assert(preg_match('/^' . Plugins::NAME_REGEXP . '$/', $this->name), 'Nom unique d\'extension invalide: ' . $this->name);
+		$this->assert(preg_match(self::VALID_NAME_REGEXP, $this->name), 'Nom unique d\'extension invalide: ' . $this->name);
 
 		$this->assert($this->hasFile(self::META_FILE), 'Le code du plugin n\'est pas disponible (fichier plugin.ini absent)');
 

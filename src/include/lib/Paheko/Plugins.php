@@ -17,8 +17,6 @@ use const Paheko\{SYSTEM_SIGNALS, ADMIN_URL, WWW_URL, PLUGINS_ROOT, HOSTING_PROV
 
 class Plugins
 {
-	const NAME_REGEXP = '[a-z][a-z0-9]*(?:_[a-z0-9]+)*';
-
 	const MIME_TYPES = [
 		'css'  => 'text/css',
 		'gif'  => 'image/gif',
@@ -60,7 +58,7 @@ class Plugins
 
 	static public function getPath(string $name): ?string
 	{
-		if (!preg_match(self::NAME_REGEXP, $name)) {
+		if (!preg_match(Plugin::VALID_NAME_REGEXP, $name)) {
 			return null;
 		}
 
@@ -263,7 +261,7 @@ class Plugins
 
 	static public function getInstallable(string $name): ?Plugin
 	{
-		if (!preg_match(self::NAME_REGEXP, $name)) {
+		if (!preg_match(Plugin::VALID_NAME_REGEXP, $name)) {
 			return null;
 		}
 
@@ -299,13 +297,13 @@ class Plugins
 			}
 
 			if (is_dir($file)
-				&& preg_match(self::NAME_REGEXP, $file)
+				&& preg_match(Plugin::VALID_NAME_REGEXP, $file)
 				&& file_exists($file . '/' . Plugin::META_FILE)) {
 				$file = basename($file);
 				$name = $file;
 			}
 			elseif (substr($file, -7) == '.tar.gz'
-				&& preg_match(self::NAME_REGEXP, substr($file, 0, -7))
+				&& preg_match(Plugin::VALID_NAME_REGEXP, substr($file, 0, -7))
 				&& file_exists('phar://' . $file . '/' . Plugin::META_FILE)) {
 				$file = basename($file);
 				$name = substr($file, 0, -7);
