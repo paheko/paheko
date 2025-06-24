@@ -211,7 +211,7 @@ class Plugins
 		if (!preg_match(Plugin::VALID_NAME_REGEXP, $name)) {
 			return null;
 		}
-<
+
 		return EM::findOne(Plugin::class, 'SELECT * FROM @TABLE WHERE name = ?;', $name);
 	}
 
