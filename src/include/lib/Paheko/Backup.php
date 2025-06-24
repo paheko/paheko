@@ -477,6 +477,14 @@ class Backup
 			throw new UserException('Ce fichier n\'est pas une sauvegarde Paheko (application_id ne correspond pas).', self::NO_APP_ID);
 		}
 
+		// module and plugins names should never contain a slash
+		$malicious_modules = $db->querySingle('SELECT 1 FROM modules WHERE name LIKE \'%/%\' OR name LIKE \'%\\%\';', false);
+		$malicious_plugins = $db->querySingle('SELECT 1 FROM plugins WHERE name LIKE \'%/%\' OR name LIKE \'%\\%\';', false);
+
+		if ($malicious_plugins || $malicious_modules) {
+			throw new UserException('Malicious database detected (path traversal attempt)');
+		}
+
 		// Try to handle case where the admin performing the restore is no longer an admin in the restored database
 		if ($session && $session->isLogged(false)) {
 			$sql = 'SELECT 1 FROM users_categories WHERE id = (SELECT id_category FROM users WHERE id = %d) AND perm_connect >= %d AND perm_config >= %d';
