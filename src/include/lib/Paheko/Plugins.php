@@ -60,6 +60,10 @@ class Plugins
 
 	static public function getPath(string $name): ?string
 	{
+		if (!preg_match(self::NAME_REGEXP, $name)) {
+			return null;
+		}
+
 		if (file_exists(PLUGINS_ROOT . '/' . $name)) {
 			return PLUGINS_ROOT . '/' . $name;
 		}
@@ -259,7 +263,12 @@ class Plugins
 
 	static public function getInstallable(string $name): ?Plugin
 	{
-		if (!file_exists(PLUGINS_ROOT . '/' . $name) && !file_exists(PLUGINS_ROOT . '/' . $name . '.tar.gz')) {
+		if (!preg_match(self::NAME_REGEXP, $name)) {
+			return null;
+		}
+
+		if (!file_exists(PLUGINS_ROOT . '/' . $name)
+			&& !file_exists(PLUGINS_ROOT . '/' . $name . '.tar.gz')) {
 			return null;
 		}
 
@@ -289,11 +298,15 @@ class Plugins
 				continue;
 			}
 
-			if (is_dir($file) && file_exists($file . '/' . Plugin::META_FILE)) {
+			if (is_dir($file)
+				&& preg_match(self::NAME_REGEXP, $file)
+				&& file_exists($file . '/' . Plugin::META_FILE)) {
 				$file = basename($file);
 				$name = $file;
 			}
-			elseif (substr($file, -7) == '.tar.gz' && file_exists('phar://' . $file . '/' . Plugin::META_FILE)) {
+			elseif (substr($file, -7) == '.tar.gz'
+				&& preg_match(self::NAME_REGEXP, substr($file, 0, -7))
+				&& file_exists('phar://' . $file . '/' . Plugin::META_FILE)) {
 				$file = basename($file);
 				$name = substr($file, 0, -7);
 			}
