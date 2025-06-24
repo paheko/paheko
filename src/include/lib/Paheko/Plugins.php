@@ -17,6 +17,8 @@ use const Paheko\{SYSTEM_SIGNALS, ADMIN_URL, WWW_URL, PLUGINS_ROOT, HOSTING_PROV
 
 class Plugins
 {
+	const NAME_REGEXP = '[a-z][a-z0-9]*(?:_[a-z0-9]+)*';
+
 	const MIME_TYPES = [
 		'css'  => 'text/css',
 		'gif'  => 'image/gif',

@@ -21,7 +21,7 @@ use const Paheko\{PLUGINS_ROOT, WWW_URL, ROOT, ADMIN_URL};
 
 class Plugin extends Entity
 {
-	const VALID_NAME_REGEXP = '/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/';
+	const VALID_NAME_REGEXP = '/^' . Plugins::NAME_REGEXP . '$/';
 
 	const META_FILE = 'plugin.ini';
 	const CONFIG_FILE = 'admin/config.php';
