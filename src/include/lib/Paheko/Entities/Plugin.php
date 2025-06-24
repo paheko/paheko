@@ -72,10 +72,16 @@ class Plugin extends Entity
 	public function selfCheck(): void
 	{
 		$this->assert(preg_match('/^' . Plugins::NAME_REGEXP . '$/', $this->name), 'Nom unique d\'extension invalide: ' . $this->name);
+
+		$this->assert($this->hasFile(self::META_FILE), 'Le code du plugin n\'est pas disponible (fichier plugin.ini absent)');
+
+		if (0 !== strpos(realpath($this->path(self::META_FILE)), realpath(PLUGINS_ROOT))) {
+			throw new \RuntimeException('Security alert: plugin.ini file seems to be outside PLUGINS_ROOT');
+		}
+
 		$this->assert(isset($this->label) && trim($this->label) !== '', sprintf('%s : le nom de l\'extension ("name") ne peut rester vide', $this->name));
 		$this->assert(isset($this->label) && trim($this->version) !== '', sprintf('%s : la version ne peut rester vide', $this->name));
 
-		$this->assert($this->hasFile(self::META_FILE), 'Le code du plugin n\'est pas disponible (fichier plugin.ini absent)');
 		$this->assert(!$this->menu || $this->hasFile(self::INDEX_FILE), 'Le fichier admin/index.php n\'existe pas alors que la directive "menu" est activée.');
 		$this->assert(!$this->home_button || $this->hasFile(self::INDEX_FILE), 'Le fichier admin/index.php n\'existe pas alors que la directive "home_button" est activée.');
 		$this->assert(!$this->home_button || $this->hasFile(self::ICON_FILE), 'Le fichier admin/icon.svg n\'existe pas alors que la directive "home_button" est activée.');
