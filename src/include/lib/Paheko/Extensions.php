@@ -42,8 +42,12 @@ class Extensions
 		return $list;
 	}
 
-	static public function get(string $name): ?Extension
+	static public function get(?string $name): ?Extension
 	{
+		if (!$name) {
+			return null;
+		}
+
 		$ext = Plugins::get($name);
 		$ext ??= Plugins::getInstallable($name);
 		$ext ??= Modules::get($name);
