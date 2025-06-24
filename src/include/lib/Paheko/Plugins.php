@@ -253,6 +253,11 @@ class Plugins
 
 		foreach ($existing as $name) {
 			$f = self::get($name);
+
+			if (!$f) {
+				continue;
+			}
+
 			try {
 				$f->updateFromINI();
 				$f->save();
