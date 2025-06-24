@@ -116,15 +116,15 @@ class Extensions
 		$list = [];
 
 		foreach (EM::getInstance(Module::class)->iterate('SELECT * FROM @TABLE WHERE enabled = 1;') as $m) {
+			if (!$m->isValid()) {
+				continue;
+			}
+
 			$list[$m->name] = $m;
 		}
 
 		foreach (Plugins::listInstalled() as $p) {
-			if (!$p->enabled) {
-				continue;
-			}
-
-			if (!$p->hasCode()) {
+			if ($p->isBroken()) {
 				$p->set('enabled', false);
 				$p->save(false);
 				continue;

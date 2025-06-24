@@ -208,6 +208,10 @@ class Plugins
 
 	static public function get(string $name): ?Plugin
 	{
+		if (!preg_match(Plugin::VALID_NAME_REGEXP, $name)) {
+			return null;
+		}
+<
 		return EM::findOne(Plugin::class, 'SELECT * FROM @TABLE WHERE name = ?;', $name);
 	}
 
