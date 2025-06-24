@@ -212,16 +212,9 @@ class Plugins
 		$list = EM::getInstance(Plugin::class)->all('SELECT * FROM @TABLE ORDER BY label COLLATE NOCASE ASC;');
 
 		foreach ($list as $key => $p) {
-			try {
-				$p->selfCheck();
-			}
-			catch (ValidationException $e) {
-				if (self::removeBroken($p->name)) {
-					unset($list[$key]);
-				}
-				else {
-					$p->setBrokenMessage($e->getMessage());
-				}
+			// Remove old broken plugins from list
+			if (self::removeBroken($p->name)) {
+				unset($list[$key]);
 			}
 		}
 
@@ -272,20 +265,7 @@ class Plugins
 
 		$p = new Plugin;
 		$p->name = $name;
-
-		if (!$p->hasFile($p::META_FILE)) {
-			throw new UserException(sprintf('Le plugin "%s" n\'est pas une extension Paheko : fichier plugin.ini manquant.', $name));
-		}
-
-		$p->updateFromINI();
-
-		try {
-			$p->selfCheck();
-		}
-		catch (ValidationException $e) {
-			$p->setBrokenMessage($e->getMessage());
-		}
-
+		$p->checkCanBeEnabled();
 		return $p;
 	}
 
@@ -362,8 +342,8 @@ class Plugins
 		$i = 0;
 
 		foreach (self::listInstalled() as $plugin) {
-			// Ignore plugins if code is no longer available
-			if (!$plugin->isAvailable() || !self::isAllowed($plugin->name)) {
+			// Ignore plugins if code is no longer available, broken, or not allowed
+			if ($plugin->isBroken()) {
 				continue;
 			}
 
