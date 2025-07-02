@@ -136,6 +136,17 @@ class Upgrade
 				$db->commitSchemaUpdate();
 			}
 
+			if (version_compare($v, '1.3.16', '<')) {
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/migrations/1.3/1.3.16.sql');
+
+				if ($db->hasTable('module_data_recus_fiscaux')) {
+					$db->import(ROOT . '/include/migrations/1.3/1.3.16.sql');
+				}
+
+				$db->commitSchemaUpdate();
+			}
+
 			Plugins::upgradeAllIfRequired();
 
 			// Vérification de la cohérence des clés étrangères
