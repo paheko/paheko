@@ -3,8 +3,10 @@
 namespace Paheko\UserTemplate;
 
 use Paheko\DB;
+use Paheko\Entity;
 use Paheko\Utils;
 use Paheko\UserException;
+use Paheko\ValidationException;
 
 use Paheko\Users\DynamicFields;
 use Paheko\Entities\Email\Email;
@@ -305,23 +307,31 @@ EOS;
 		}
 	}
 
-	static public function parse_datetime($value)
+	static public function parse_datetime($value, ?string $format = '')
 	{
+		if ($format === 'RFC3339') {
+			$format = DATE_RFC3339;
+		}
+		elseif ($format === 'LOCAL') {
+			$format = 'Y-m-d\TH:i';
+		}
+		else {
+			$format = 'Y-m-d H:i';
+		}
+
 		if ($value instanceof \DateTimeInterface) {
-			return $value->format('Y-m-d H:i:s');
+			return $value->format($format);
 		}
 
 		if (empty($value) || !is_string($value)) {
 			return null;
 		}
 
-		if (preg_match('!^\d{2}/\d{2}/\d{4}$\s+\d{2}:\d{2}!', $value)) {
-			return \DateTime::createFromFormat('!d/m/Y', $value)->format('Y-m-d H:i');
+		try {
+			$value = Entity::filterUserDateValue($value);
+			return $value->format($format);
 		}
-		elseif (preg_match('!^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}(:\d{2})?$!', $value, $match)) {
-			return $value . (isset($match[1]) ? '' : ':00');
-		}
-		else {
+		catch (ValidationException $e) {
 			return false;
 		}
 	}

@@ -204,6 +204,7 @@ class UserTemplate extends \KD2\Brindille
 		$cfg['email_asso'] = $cfg['org_email'];
 		$cfg['telephone_asso'] = $cfg['org_phone'];
 		$cfg['site_asso'] = $cfg['org_web'];
+
 		$cfg['user_fields'] = [
 			'number'   => DynamicFields::getNumberField(),
 			'login'    => DynamicFields::getLoginField(),

@@ -134,6 +134,10 @@ class Entity extends AbstractEntity
 			if ($l === 19) {
 				$format = '!Y-m-d H:i:s';
 			}
+			// YYYY-MM-DDTHH:MM
+			elseif ($l === 16 && substr($value, 10, 1) === 'T') {
+				$format = '!Y-m-d\TH:i';
+			}
 			// YYYY-MM-DD HH:MM
 			elseif ($l === 16) {
 				$format = '!Y-m-d H:i';
