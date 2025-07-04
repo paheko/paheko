@@ -403,7 +403,7 @@ class Plugin extends Entity
 		}
 
 		if (!$this->enabled) {
-			throw new \RuntimeException('The file cannot be opened as the plugin is disabled: ' . $this->name);
+			throw new UserException('The file cannot be opened as the plugin is disabled: ' . $this->name);
 		}
 
 		$file = ltrim($file, './');
