@@ -308,13 +308,13 @@ class Plugins
 			}
 
 			if (is_dir($file)
-				&& preg_match(Plugin::VALID_NAME_REGEXP, $file)
+				&& preg_match(Plugin::VALID_NAME_REGEXP, Utils::basename($file))
 				&& file_exists($file . '/' . Plugin::META_FILE)) {
 				$file = basename($file);
 				$name = $file;
 			}
 			elseif (substr($file, -7) == '.tar.gz'
-				&& preg_match(Plugin::VALID_NAME_REGEXP, substr($file, 0, -7))
+				&& preg_match(Plugin::VALID_NAME_REGEXP, substr(Utils::basename($file), 0, -7))
 				&& file_exists('phar://' . $file . '/' . Plugin::META_FILE)) {
 				$file = basename($file);
 				$name = substr($file, 0, -7);
