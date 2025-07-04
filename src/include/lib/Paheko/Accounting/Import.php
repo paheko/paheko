@@ -143,11 +143,11 @@ class Import
 	 * @param  string     $type    Type of CSV format
 	 * @param  Year       $year    Target year where transactions should be updated or created
 	 * @param  CSV_Custom $csv     CSV object
-	 * @param  int        $user_id Current user ID, the one running the import
+	 * @param  ?int        $user_id Current user ID, the one running the import
 	 * @param  array      $options array of options
 	 * @return ?array
 	 */
-	static public function import(string $type, Year $year, CSV_Custom $csv, int $user_id, array $options = []): ?array
+	static public function import(string $type, Year $year, CSV_Custom $csv, ?int $user_id, array $options = []): ?array
 	{
 		$options_default = [
 			'ignore_ids'      => false,
