@@ -97,7 +97,7 @@ class Year extends Entity
 		return self::STATUS_LABELS[$this->status];
 	}
 
-	public function close(int $user_id): void
+	public function close(): void
 	{
 		$this->assertCanBeModified();
 
@@ -105,7 +105,7 @@ class Year extends Entity
 		$this->save();
 	}
 
-	public function reopen(int $user_id): void
+	public function reopen(?int $user_id): void
 	{
 		if ($this->isOpen()) {
 			throw new \LogicException('This year is already open');
