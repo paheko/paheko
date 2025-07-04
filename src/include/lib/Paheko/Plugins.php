@@ -369,6 +369,11 @@ class Plugins
 				continue;
 			}
 
+			// Don't upgrade disabled plugins
+			if (!$plugin->enabled) {
+				continue;
+			}
+
 			if ($plugin->needUpgrade()) {
 				$plugin->upgrade();
 				$i++;
