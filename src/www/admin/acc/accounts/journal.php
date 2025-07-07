@@ -52,8 +52,8 @@ if (null === $simple) {
 }
 
 $filter = new \stdClass;
-$filter->start = Utils::get_datetime(qg('start'));
-$filter->end = Utils::get_datetime(qg('end'));
+$filter->start = Utils::parseDateTime(qg('start'));
+$filter->end = Utils::parseDateTime(qg('end'));
 
 $list = $account->listJournal($year_id, $simple, $filter->start, $filter->end);
 $list->setTitle(sprintf('Journal - %s - %s', $account->code, $account->label));

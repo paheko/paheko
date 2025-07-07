@@ -7,9 +7,11 @@ use KD2\Form;
 use KD2\HTTP;
 use KD2\Translate;
 use KD2\SMTP;
+use KD2\DB\Date;
 use KD2\DB\DB_Exception;
 
 use Paheko\Users\Session;
+use Paheko\ValidationException;
 
 class Utils
 {
@@ -126,43 +128,152 @@ class Utils
 		'Sun' => 'dim',
 	];
 
-	static public function get_datetime($ts)
+	static public function parseDateTime($value, string $class = \DateTime::class, bool $throw_on_invalid_date = false): ?\DateTime
 	{
-		if (null === $ts) {
+		if (null === $value) {
+			return null;
+		}
+		elseif ('' === $value) {
+			return null;
+		}
+		elseif (is_object($value)) {
+			if ($value instanceof $class) {
+				return $value;
+			}
+			elseif ($class === Date::class && $value instanceof \DateTimeInterface) {
+				return Date::createFromInterface($value);
+			}
+			elseif ($class === \DateTime::class && $value instanceof \DateTime) {
+				return $value;
+			}
+			elseif ($class === \DateTime::class && $value instanceof \DateTimeImmutable) {
+				return \DateTime::createFromImmutable($value);
+			}
+			elseif ($class === Date::class && $value instanceof \DateTimeImmutable) {
+				return Date::createFromImmutable($value);
+			}
+			else {
+				throw new \InvalidArgumentException('Invalid argument, not a valid date object: ' . get_class($value));
+			}
+		}
+
+		$value = trim((string) $value);
+
+		if (!$value) {
 			return null;
 		}
 
-		if (is_object($ts) && $ts instanceof \DateTimeInterface) {
-			return $ts;
+		$format = null;
+		$date = null;
+
+		$a = substr($value, 2, 1);
+		$b = substr($value, 4, 1);
+		$c = substr($value, 1, 1);
+		$l = strlen($value);
+
+		if ($c === '/' && ($l === 8 || $l === 9)) {
+			// D/MM/YYY, D/M/YYYY
+			$format = '!d/m/Y';
 		}
-		elseif (is_numeric($ts)) {
-			$ts = new \DateTime('@' . $ts);
-			$ts->setTimezone(new \DateTimeZone(date_default_timezone_get()));
-			return $ts;
+		elseif ($a === '/') {
+			// DD/MM/YY
+			if ($l === 8) {
+				$year = substr($value, -2);
+
+				// Make sure recent years are in the 21st century
+				if ($year < date('y') + 10) {
+					$year = sprintf('20%02d', $year);
+				}
+				// while old dates remain in the old one
+				else {
+					$year = sprintf('19%02d', $year);
+				}
+
+				$format = '!d/m/Y';
+				$value = substr($value, 0, -2) . $year;
+			}
+			// DD/MM/YYYY, DD/M/YYYY
+			elseif ($l === 10 || $l === 9) {
+				$format = '!d/m/Y';
+			}
+			// DD/MM/YYYY HH:MM
+			elseif ($l === 16) {
+				$format = '!d/m/Y H:i';
+			}
+			// DD/MM/YYYY HH:MM:SS
+			elseif ($l === 19) {
+				$format = '!d/m/Y H:i:s';
+			}
 		}
-		elseif (preg_match('!^\d{2}/\d{2}/\d{4}$!', $ts)) {
-			return \DateTime::createFromFormat('!d/m/Y', $ts);
+		elseif ($b === '/') {
+			// YYYY/MM/DD
+			if ($l === 10) {
+				$format = '!Y/m/d';
+			}
+			// YYYY/MM/DD HH:MM
+			elseif ($l === 16) {
+				$format = '!Y/m/d H:i';
+			}
+			// YYYY/MM/DD HH:MM:SS
+			elseif ($l === 19) {
+				$format = '!Y/m/d H:i:s';
+			}
 		}
-		elseif (preg_match('!^\d{2}/\d{2}/\d{2}$!', $ts)) {
-			return \DateTime::createFromFormat('!d/m/y', $ts);
+		elseif ($b === '-') {
+			// YYYY-MM-DD HH:MM:SS
+			if ($l === 19) {
+				$format = '!Y-m-d H:i:s';
+			}
+			// YYYY-MM-DDTHH:MM
+			elseif ($l === 16 && substr($value, 10, 1) === 'T') {
+				$format = '!Y-m-d\TH:i';
+			}
+			// YYYY-MM-DD HH:MM
+			elseif ($l === 16) {
+				$format = '!Y-m-d H:i';
+			}
+			// YYYY-MM-DD
+			elseif ($l === 10) {
+				$format = '!Y-m-d';
+			}
 		}
-		elseif (strlen($ts) == 10) {
-			return \DateTime::createFromFormat('!Y-m-d', $ts);
+		elseif (ctype_digit($value)) {
+			// YYYYMMDD
+			if ($l === 8 && preg_match('!^20\d{2}[01]\d[0123]\d$!', $value)) {
+				$format = '!Ymd';
+			}
+			else {
+				$format = 'U';
+			}
 		}
-		elseif (strlen($ts) == 19) {
-			return \DateTime::createFromFormat('Y-m-d H:i:s', $ts);
+
+		if (null !== $format) {
+			if ($class === Date::class) {
+				$date = Date::createFromFormat($format, $value);
+			}
+			else {
+				$date = \DateTime::createFromFormat($format, $value);
+			}
 		}
-		elseif (strlen($ts) == 16) {
-			return \DateTime::createFromFormat('!Y-m-d H:i', $ts);
+
+		if ($throw_on_invalid_date) {
+			if (!$date) {
+				$e = new ValidationException('Format de date invalide (merci d\'utiliser le format JJ/MM/AAAA) : ' . $value);
+				throw $e;
+			}
+
+			$y = $date->format('Y');
+			if ($y < 1900 || $y > 2100) {
+				throw new ValidationException(sprintf('Date invalide (%s) : doit être entre 1900 et 2100', $value));
+			}
 		}
-		else {
-			return null;
-		}
+
+		return $date;
 	}
 
 	static public function strftime_fr($ts, $format): string
 	{
-		$ts = self::get_datetime($ts);
+		$ts = self::parseDateTime($ts);
 
 		if (null === $ts) {
 			return '';
@@ -174,7 +285,7 @@ class Utils
 
 	static public function date_fr($ts, $format = null): string
 	{
-		$ts = self::get_datetime($ts);
+		$ts = self::parseDateTime($ts);
 
 		if (!$ts) {
 			return '';

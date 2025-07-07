@@ -8,7 +8,6 @@ use Paheko\Utils;
 use Paheko\Users\Session;
 use Paheko\Entities\Accounting\Account;
 use Paheko\Entities\Accounting\Transaction;
-use Paheko\Entity;
 
 /**
  * Provides assisted reconciliation
@@ -37,7 +36,7 @@ class AssistedReconciliation
 		$this->csv->setColumns(self::COLUMNS);
 		$this->csv->setMandatoryColumns(['label', 'date']);
 		$this->csv->setModifier(function (\stdClass $line) use ($account) {
-			$date = Entity::filterUserDateValue($line->date);
+			$date = Utils::parseDateTime($line->date);
 
 			$line->date = $date;
 

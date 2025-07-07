@@ -4,7 +4,6 @@ namespace Paheko\UserTemplate;
 
 use Paheko\Config;
 use Paheko\DB;
-use Paheko\Entity;
 use Paheko\Template;
 use Paheko\Utils;
 use Paheko\ValidationException;
@@ -124,12 +123,7 @@ class CommonFunctions
 
 		if ($type === 'date' || $type === 'time') {
 			if ((is_string($current_value) && !preg_match('!^\d+:\d+$!', $current_value)) || is_int($current_value)) {
-				try {
-					$current_value = Entity::filterUserDateValue((string)$current_value);
-				}
-				catch (ValidationException $e) {
-					$current_value = null;
-				}
+				$current_value = Utils::parseDateTime((string)$current_value);
 			}
 
 			if (is_object($current_value) && $current_value instanceof \DateTimeInterface) {

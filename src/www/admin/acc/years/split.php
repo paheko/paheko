@@ -23,8 +23,8 @@ $form->runIf('split', function () use ($year) {
 	$start = $_POST['start'] ?? null;
 	$end = $_POST['end'] ?? null;
 
-	$start = Entity::filterUserDateValue($start, Date::class);
-	$end = Entity::filterUserDateValue($end, Date::class);
+	$start = Utils::parseDateTime($start, Date::class);
+	$end = Utils::parseDateTime($end, Date::class);
 
 	if (!$start) {
 		throw new UserException('Date de début invalide');

@@ -3,7 +3,6 @@
 namespace Paheko\UserTemplate;
 
 use Paheko\DB;
-use Paheko\Entity;
 use Paheko\Utils;
 use Paheko\UserException;
 use Paheko\ValidationException;
@@ -327,13 +326,13 @@ EOS;
 			return null;
 		}
 
-		try {
-			$value = Entity::filterUserDateValue($value);
-			return $value->format($format);
-		}
-		catch (ValidationException $e) {
+		$value = Utils::parseDateTime($value);
+
+		if ($value === null) {
 			return false;
 		}
+
+		return $value->format($format);
 	}
 
 	static public function parse_time($value)

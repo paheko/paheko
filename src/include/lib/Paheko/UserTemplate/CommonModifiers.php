@@ -204,17 +204,17 @@ class CommonModifiers
 
 	static public function date_hour($ts, bool $minutes_only_if_required = false): ?string
 	{
-		$ts = Utils::get_datetime($ts);
+		$date = Utils::parseDateTime($ts);
 
-		if (null === $ts) {
+		if (null === $date) {
 			return null;
 		}
 
-		if ($minutes_only_if_required && $ts->format('i') == '00') {
-			return $ts->format('H\h');
+		if ($minutes_only_if_required && $date->format('i') == '00') {
+			return $date->format('H\h');
 		}
 		else {
-			return $ts->format('H\hi');
+			return $date->format('H\hi');
 		}
 	}
 
@@ -224,7 +224,7 @@ class CommonModifiers
 			return Utils::strftime_fr($ts, $format);
 		}
 
-		$ts = Utils::get_datetime($ts);
+		$ts = Utils::parseDateTime($ts);
 
 		if (!$ts) {
 			return $ts;
@@ -246,7 +246,7 @@ class CommonModifiers
 			return Utils::date_fr($ts, $format);
 		}
 
-		$ts = Utils::get_datetime($ts);
+		$ts = Utils::parseDateTime($ts);
 		return date($format, $ts);
 	}
 
@@ -256,7 +256,7 @@ class CommonModifiers
 			return '';
 		}
 
-		$date = Utils::get_datetime($ts);
+		$date = Utils::parseDateTime($ts);
 
 		if ($date->format('Ymd') == date('Ymd'))
 		{
@@ -297,7 +297,7 @@ class CommonModifiers
 			return '';
 		}
 
-		$date = Utils::get_datetime($ts);
+		$date = Utils::parseDateTime($ts);
 
 		if ($date->format('Ymd') == date('Ymd'))
 		{

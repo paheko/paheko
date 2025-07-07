@@ -236,7 +236,7 @@ class AdvancedSearch extends A_S
 			];
 		}
 		// Match date
-		elseif (preg_match('!^\d{2}/\d{2}/\d{4}$!', $text) && ($d = Utils::get_datetime($text)))
+		elseif (preg_match('!^\d{2}/\d{2}/\d{4}$!', $text) && ($d = Utils::parseDateTime($text)))
 		{
 			$query[] = [
 				'operator' => 'OR',
