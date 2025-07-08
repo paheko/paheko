@@ -286,6 +286,11 @@ class Users
 		return $list;
 	}
 
+	static public function exists(int $id): bool
+	{
+		return DB::getInstance()->test(User::TABLE, 'id = ?', $id);
+	}
+
 	static public function get(int $id): ?User
 	{
 		return EM::findOneById(User::class, $id, 'users_view');
