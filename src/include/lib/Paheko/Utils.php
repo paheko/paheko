@@ -254,6 +254,11 @@ class Utils
 			else {
 				$date = \DateTime::createFromFormat($format, $value);
 			}
+
+			// Make sure UNIX timestamps are returned with local timezone
+			if ($format === 'U') {
+				$date->setTimezone(new \DateTimeZone(date_default_timezone_get()));
+			}
 		}
 
 		if ($throw_on_invalid_date) {
