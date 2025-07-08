@@ -170,14 +170,18 @@ class Session extends \KD2\UserSession
 	 */
 	protected function getUserSessionVerifier(): ?string
 	{
-		$user = $this->user;
+		// FIXME: remove in 1.4.0
+		if (is_int($this->user)) {
+			// upgrade old sessions which didn't have a User object
+			$this->create($this->user);
+		}
 
-		if (null === $user) {
+		if (null === $this->user) {
 			return null;
 		}
 
 		// Logout if data_root doesn't match, to forbid one session being used with another organization
-		return strval($user->password) . strval($user->otp_secret) . DATA_ROOT;
+		return strval($this->user->password) . strval($this->user->otp_secret) . DATA_ROOT;
 	}
 
 	protected function rememberMeAutoLogin(): bool
