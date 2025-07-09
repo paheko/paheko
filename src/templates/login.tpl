@@ -64,6 +64,9 @@
 	<p class="submit">
 		{csrf_field key="login"}
 		{button type="submit" name="login" label="Se connecter" shape="right" class="main"}
+		{if $oidc_button}
+			{linkbutton href="?oidc" label=$oidc_button shape="login"}
+		{/if}
 		{if !DISABLE_EMAIL && !$app_token}
 			{linkbutton href="!password.php" label="Mot de passe perdu ?" shape="help"}
 			{linkbutton href="!password.php?new" label="Première connexion ?" shape="user"}

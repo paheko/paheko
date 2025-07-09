@@ -66,7 +66,8 @@ class User extends Entity
 	];
 
 	protected bool $_loading = false;
-	protected Category $_category;
+	protected ?Category $_category = null;
+	protected ?array $_permissions = null;
 
 	public function __construct()
 	{
@@ -340,8 +341,12 @@ class User extends Entity
 		return true;
 	}
 
-	public function category(): Category
+	public function category(): ?Category
 	{
+		if (!$this->id_category) {
+			return null;
+		}
+
 		$this->_category ??= Categories::get($this->id_category);
 		return $this->_category;
 	}
@@ -992,5 +997,19 @@ class User extends Entity
 		unset($value);
 
 		return array_merge($prefix, $out);
+	}
+
+	public function getPermissions(): array
+	{
+		if ($this->id_category) {
+			$this->_permissions ??= $this->category()->getPermissions();
+		}
+
+		return $this->_permissions ?? [];
+	}
+
+	public function setPermissions(array $permissions): void
+	{
+		$this->_permissions = $permissions;
 	}
 }
