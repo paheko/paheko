@@ -233,7 +233,7 @@ class CSV
 		$t->closeTable();
 
 		if (null === $output) {
-			$t->download($name);
+			$t->download($name, $options['extension'] ?? null);
 		}
 		else {
 			$t->save($output);
