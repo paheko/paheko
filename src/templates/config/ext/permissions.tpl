@@ -29,9 +29,11 @@
 				{input type="radio" name="restrict" value="web_2" default=$current_permission label="… en lecture et écriture"}
 				{input type="radio" name="restrict" value="web_9" default=$current_permission label="… en administration"}
 			</dl>
-			{csrf_field key=$csrf_key}
-			{button type="submit" class="main" label="Enregistrer" name="save"}
 		</fieldset>
+		<p class="submit">
+			{csrf_field key=$csrf_key}
+			{button type="submit" class="main" label="Enregistrer" name="save" shape="right"}
+		</p>
 	</form>
 {/if}
 
