@@ -477,11 +477,17 @@ class Backup
 			throw new UserException('Ce fichier n\'est pas une sauvegarde Paheko (application_id ne correspond pas).', self::NO_APP_ID);
 		}
 
-		// module and plugins names should never contain a slash
-		$malicious_modules = $db->querySingle('SELECT 1 FROM modules WHERE name LIKE \'%/%\' OR name LIKE \'%\\%\';', false);
+		// module and plugins names should never contain a slash, if it does it might be a malicious database
 		$malicious_plugins = $db->querySingle('SELECT 1 FROM plugins WHERE name LIKE \'%/%\' OR name LIKE \'%\\%\';', false);
+		$malicious_modules = $db->querySingle('SELECT 1 FROM modules WHERE name LIKE \'%/%\' OR name LIKE \'%\\%\';', false);
 
-		if ($malicious_plugins || $malicious_modules) {
+		// File names or paths must never try to do path traversal, or it might be malicious
+		$malicious_modules_templates = $db->querySingle('SELECT 1 FROM modules_templates WHERE name LIKE \'%..%\';', false);
+		$malicious_files = $db->querySingle('SELECT 1 FROM files WHERE name LIKE \'%../%\' OR name LIKE \'%..\\%\'
+			OR path LIKE \'%../%\' OR path LIKE \'%..\\%\'
+			OR parent LIKE \'%../%\' OR parent LIKE \'%..\\%\';', false);
+
+		if ($malicious_plugins || $malicious_modules || $malicious_modules_templates || $malicious_files) {
 			throw new UserException('Malicious database detected (path traversal attempt)');
 		}
 
