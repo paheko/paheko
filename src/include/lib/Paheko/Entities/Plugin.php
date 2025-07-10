@@ -190,8 +190,13 @@ class Plugin extends Entity
 		$this->set('author_url', $ini->author_url ?? null);
 		$this->set('home_button', !empty($ini->home_button));
 		$this->set('menu', !empty($ini->menu));
-		$this->set('restrict_section', $restrict_section);
-		$this->set('restrict_level', $restrict_level);
+
+		// Only set restricted access if user didn't set it
+		if (!isset($this->restrict_section) && !isset($this->restrict_level)) {
+			$this->set('restrict_section', $restrict_section);
+			$this->set('restrict_level', $restrict_level);
+		}
+
 		$this->_broken_message = null;
 
 		return true;

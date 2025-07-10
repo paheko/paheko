@@ -41,7 +41,7 @@ class CommonFunctions
 
 	static public function input(array $params)
 	{
-		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'max_file_size', 'copy', 'suffix', 'prefix_title', 'prefix_help', 'prefix_required', 'datalist'];
+		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'max_file_size', 'copy', 'suffix', 'prefix_title', 'prefix_help', 'prefix_required', 'datalist', 'html_label'];
 
 		// Extract params and keep attributes separated
 		$attributes = array_diff_key($params, array_flip($params_list));

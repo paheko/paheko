@@ -82,6 +82,13 @@ class Extension extends Entity
 		return $this->{$this->type}->delete();
 	}
 
+	public function changeRestrictedAccess(string $section, int $level)
+	{
+		$this->{$this->type}->set('restrict_section', $section);
+		$this->{$this->type}->set('restrict_level', $level);
+		$this->{$this->type}->save();
+	}
+
 	public function normalize($item)
 	{
 		$type = $item instanceof Plugin ? 'plugin' : 'module';

@@ -25,13 +25,11 @@
 		{/if}
 		<ul class="sub">
 			<li class="title"><strong>{$ext.label}</strong></li>
-			<li{if $current === 'details'} class="current"{/if}><a href="details.php?type={if $ext.type}{$ext.type}{else}module{/if}&amp;name={$ext.name}">Détails</a></li>
-			{if $module}
-				<li{if $current === 'disk'} class="current"{/if}><a href="details.php?type=module&amp;name={$module.name}&disk">Espace disque</a></li>
-				<li{if $current === 'edit'} class="current"{/if}><a href="edit.php?module={$module.name}">Code source</a></li>
-			{/if}
-			{if $ext.readme}
-				<li{if $current === 'readme'} class="current"{/if}><a href="details.php?type={$ext.type}&amp;name={$ext.name}&readme">Documentation</a></li>
+			<li{if $current === 'details'} class="current"{/if}><a href="details.php?name={$ext.name}">Détails</a></li>
+			<li{if $current === 'permissions'} class="current"{/if}><a href="permissions.php?name={$ext.name}">Permissions</a></li>
+			{if $ext.type === 'module'}
+				<li{if $current === 'disk'} class="current"{/if}><a href="disk.php?name={$ext.name}">Espace disque</a></li>
+				<li{if $current === 'edit'} class="current"{/if}><a href="edit.php?module={$ext.name}">Code source</a></li>
 			{/if}
 		</ul>
 	{else}

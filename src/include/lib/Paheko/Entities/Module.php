@@ -196,8 +196,11 @@ class Module extends Entity
 		$this->set('web', !empty($ini->web));
 		$this->set('home_button', !empty($ini->home_button));
 		$this->set('menu', !empty($ini->menu));
-		$this->set('restrict_section', $restrict_section);
-		$this->set('restrict_level', $restrict_level);
+
+		if (!isset($this->restrict_section) && !isset($this->restrict_level)) {
+			$this->set('restrict_section', $restrict_section);
+			$this->set('restrict_level', $restrict_level);
+		}
 
 		if (!empty($ini->system)) {
 			$this->set('system', true);
