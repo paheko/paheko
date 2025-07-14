@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../_inc.php';
 
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ);
 
+// Redirect to first setup if there are no years
 if (!Years::count()) {
 	Utils::redirect('!acc/years/first_setup.php');
 }
