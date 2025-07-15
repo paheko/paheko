@@ -318,7 +318,7 @@ class Session extends \KD2\UserSession
 				WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config = ?)
 				LIMIT 1', self::ACCESS_ADMIN);
 		}
-		elseif ($login <= 0 || !is_int($login)) {
+		elseif ($login <= 0 || !is_numeric($login)) {
 			throw new \LogicException('Invalid value for LOCAL_LOGIN: ' . $login);
 		}
 
