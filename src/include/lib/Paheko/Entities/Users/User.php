@@ -338,6 +338,15 @@ class User extends Entity
 			Plugins::fire('user.change.login.after', false, ['user' => $this, 'old_login' => $login_modified]);
 		}
 
+		$session = Session::getInstance();
+
+		// Reload session data if the modified user is the logged-in user
+		if ($session->isLogged(false)
+			&& $session->user()
+			&& $session->user()->id === $this->id) {
+			$session->refresh();
+		}
+
 		return true;
 	}
 
