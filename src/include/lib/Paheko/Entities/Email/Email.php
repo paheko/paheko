@@ -53,7 +53,7 @@ class Email extends Entity
 		return sha1($email);
 	}
 
-	static public function getOptoutURL(string $hash = null): string
+	static public function getOptoutURL(?string $hash = null): string
 	{
 		$hash = hex2bin($hash);
 		$hash = base64_encode($hash);
@@ -239,7 +239,7 @@ class Email extends Entity
 		$this->set('sent_count', $this->sent_count+1);
 	}
 
-	public function setOptout(string $message = null): void
+	public function setOptout(?string $message = null): void
 	{
 		$this->set('optout', true);
 		$this->appendFailLog($message ?? 'Demande de désinscription');
@@ -257,7 +257,7 @@ class Email extends Entity
 		$this->set('fail_log', $log);
 	}
 
-	public function hasBounced(string $type, string $message = null): void
+	public function hasBounced(string $type, ?string $message = null): void
 	{
 		// Treat complaints as opt-out
 		if ($type == 'complaint') {
