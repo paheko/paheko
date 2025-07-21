@@ -855,7 +855,7 @@ class Utils
 			$file_path = $path . DIRECTORY_SEPARATOR . $file;
 			yield $file_path;
 
-			if (is_directory($file_path)) {
+			if (is_dir($file_path)) {
 				yield from self::recursiveIterate($file_path);
 			}
 		}
