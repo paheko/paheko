@@ -272,6 +272,9 @@ class Utils
 				throw new ValidationException(sprintf('Date invalide (%s) : doit être entre 1900 et 2100', $value));
 			}
 		}
+		elseif ($date === false) {
+			$date = null;
+		}
 
 		return $date;
 	}
