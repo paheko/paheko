@@ -298,7 +298,7 @@ class Transactions
 		return DB::getInstance()->iterate($sql, ...$params);
 	}
 
-	static public function createPayoffFrom(array $transactions): ?\stdClass
+	static public function createPayoffFrom(array $transactions, Year $year): ?\stdClass
 	{
 		$new = new Transaction;
 
@@ -317,6 +317,7 @@ class Transactions
 		];
 
 		$labels = [];
+		$accounts = $year->accounts();
 
 		foreach ($transactions as $id) {
 			$id = (int) $id;
@@ -370,11 +371,19 @@ class Transactions
 
 			if ($out->type === Transaction::TYPE_CREDIT) {
 				$line->credit = $sum;
-				$line->id_account = $t->getDebitLine()->id_account;
+				$id_account = $t->getDebitLine()->id_account;
 			}
 			else {
 				$line->debit = $sum;
-				$line->id_account = $t->getCreditLine()->id_account;
+				$id_account = $t->getCreditLine()->id_account;
+			}
+
+			// Make sure account ID is valid for this chart
+			$line->id_account = $accounts->getValidAccountId($id_account);
+
+			if (!$line->id_account) {
+				$account = $accounts::get($id_account);
+				throw new UserException(sprintf('Le compte "%s — %s" n\'existe pas dans le plan comptable de l\'année sélectionnée.', $account->code, $account->label));
 			}
 
 			$new->addLine($line);
