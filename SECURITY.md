@@ -41,7 +41,7 @@ Example of security issues that will be inside our scope:
 * KD2 libraries used by the project ([repo](https://fossil.kd2.org/kd2fw/)), but not the ones not used by Paheko (obviously)
 * etc.
 
-We also welcome security findings on Paheko.cloud as well as other hosted Paheko services.
+We also welcome security findings on our Paheko.cloud SaaS as well as other hosted Paheko services.
 
 Issues found inside the Windows packaging will be welcome, but they might have a lower priority to us.
 
@@ -71,3 +71,4 @@ Note: users inside Paheko have different permissions, according to the category 
 * Flaws impacting out-of-date browsers
 * Self-injection of code when having root access
 * Unofficial (community) plugins and modules (but please report issues to their authors)
+* Missing HTTP headers on `https://paheko.cloud/`
