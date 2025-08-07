@@ -575,7 +575,7 @@ class Sections
 			$rule = $schema['properties'][$key] ?? null;
 
 			// This column is not in the schema
-			if (!$rule) {
+			if (!$rule || !isset($rule['type'])) {
 				continue;
 			}
 
