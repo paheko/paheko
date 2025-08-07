@@ -258,6 +258,10 @@ class CommonModifiers
 
 		$date = Utils::parseDateTime($ts);
 
+		if (!$date) {
+			return '';
+		}
+
 		if ($date->format('Ymd') == date('Ymd'))
 		{
 			$day = 'aujourd\'hui';
