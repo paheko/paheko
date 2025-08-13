@@ -369,7 +369,7 @@ EOS;
 	static public function math(string $expression, ... $params)
 	{
 		static $tokens_list = [
-			'function'  => '(?:round|ceil|floor|cos|sin|tan|asin|acos|atan|sinh|cosh|tanh|abs|max|min|exp|sqrt|log10|log|pi|random_int)\(',
+			'function'  => '(?:round|ceil|floor|cos|sin|tan|asin|acos|atan2?|deg2rad|sinh|cosh|tanh|abs|max|min|exp|sqrt|log10|log|pi|random_int)\(',
 			'open'      => '\(',
 			'close'     => '\)',
 			'number'    => '-?\d+(?:[\.]\d+)?',
