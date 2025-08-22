@@ -79,7 +79,7 @@
 			<dd>Le service destinataire a renvoyé une erreur temporaire plus de {$max_fail_count} fois.<br />Cela arrive par exemple si vos messages sont vus comme du spam trop souvent, ou si la boîte mail destinataire est pleine. Cette adresse ne recevra plus de message.</dd>
 		</dl>
 		<p class="help">
-			Il est possible de rétablir la réception de messages pour les adresses invalides après un délai d'un mois, et les adresses désinscrites immédiatement, en cliquant sur le bouton "Rétablir" qui enverra un message de validation à la personne.
+			Il est possible de rétablir la réception de messages pour les adresses invalides après un délai de 15 jours, et les adresses désinscrites immédiatement, en cliquant sur le bouton "Rétablir" qui enverra un message de validation à la personne.
 		</p>
 	</div>
 
