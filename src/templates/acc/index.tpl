@@ -52,7 +52,7 @@
 	{if $year.nb_transactions}
 	<?php $list = $last_transactions[$year->id]; ?>
 	<h3 class="ruler">Dernières écritures</h3>
-	{include file="common/dynamic_list_head.tpl" check=false disable_user_ordering=true}
+	{include file="common/dynamic_list_head.tpl" check=false disable_user_sort=true}
 			{foreach from=$list->iterate() item="line"}
 			<tr>
 				<td>{$line.type_label}</td>
