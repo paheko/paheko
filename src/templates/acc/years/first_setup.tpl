@@ -45,18 +45,21 @@
 			{foreach from=$countries key="code" item="name"}
 				{input type="radio-btn" name="country" value=$code label=$name default=$config.country required=true}
 			{/foreach}
+			{if !empty($charts_per_country.other)}
+				{input type="radio-btn" name="country" value="other" label="Autre" default=$config.country required=true}
+			{/if}
 		</dl>
 	</fieldset>
 	<fieldset class="chart hidden">
 		<legend>Plan comptable</legend>
-		{foreach from=$countries_charts key="country" item="charts"}
+		{foreach from=$charts_per_country key="country" item="charts"}
 		<dl class="charts-{$country} hidden">
 			{foreach from=$charts key="code" item="name"}
 				{input type="radio-btn" name="chart" value=$code label=$name required=true}
 			{/foreach}
-			{if isset($countries_users_charts[$country])}
+			{if isset($user_charts[$country])}
 				<dt>Plan comptable personnalisé</dt>
-				{foreach from=$countries_users_charts[$country] key="id" item="name"}
+				{foreach from=$user_charts[$country] key="id" item="name"}
 					{input type="radio-btn" name="chart" value=$id label=$name required=true}
 				{/foreach}
 			{/if}

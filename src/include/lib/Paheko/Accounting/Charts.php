@@ -163,23 +163,32 @@ class Charts
 		return EntityManager::getInstance(Chart::class)->count();
 	}
 
-	static public function listForCountry(string $country): array
+	static public function listByCountryFirstSetup(): array
 	{
-		$installed = DB::getInstance()->getAssoc(sprintf('SELECT id, label FROM %s WHERE country = ? AND code IS NULL ORDER BY label COLLATE U_NOCASE;', Chart::TABLE), $country);
-		$country = strtolower($country);
+		$db = DB::getInstance();
 
-		$list = [];
+		$out = self::COUNTRIES_CHARTS;
 
-		foreach (self::BUNDLED_CHARTS as $code => $label) {
-			if (substr($code, 0, 2) != $country) {
-				continue;
+		$sql = sprintf('SELECT id, country, code, label FROM %s ORDER BY label COLLATE U_NOCASE;', Chart::TABLE);
+
+		foreach ($db->iterate($sql) as $chart) {
+			$country = strtoupper($chart->country ?? '') ?: 'other';
+
+			if (!isset($out[$country])) {
+				$out[$country] = [];
 			}
 
-			$list[$code] = $label;
+			$key = $chart->code ? strtolower($chart->country . '_' . $chart->code) : $chart->id;
+
+			$out[$country][$key] = $chart->label;
 		}
 
-		// Don't use array_merge here, or it will erase ID keys
-		return $list + $installed;
+		return $out;
+	}
+
+	static public function hasCustomCharts(): bool
+	{
+		return DB::getInstance()->test(Chart::TABLE, 'country IS NULL OR code IS NULL');
 	}
 
 	static public function getOrInstall(string $id_or_code): int
