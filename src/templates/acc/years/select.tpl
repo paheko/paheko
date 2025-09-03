@@ -12,6 +12,8 @@
 	</div>
 {/if}
 
+{form_errors}
+
 <form method="post" action="{$self_url}" data-focus="1">
 	<table class="list">
 		{foreach from=$years item="year"}

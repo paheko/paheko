@@ -338,6 +338,13 @@ class User extends Entity
 			Plugins::fire('user.change.login.after', false, ['user' => $this, 'old_login' => $login_modified]);
 		}
 
+		$this->reloadSessionIfNeeded();
+
+		return true;
+	}
+
+	protected function reloadSessionIfNeeded(): void
+	{
 		$session = Session::getInstance();
 
 		// Reload session data if the modified user is the logged-in user
@@ -346,8 +353,6 @@ class User extends Entity
 			&& $session->user()->id === $this->id) {
 			$session->refresh();
 		}
-
-		return true;
 	}
 
 	public function category(): ?Category
@@ -787,10 +792,15 @@ class User extends Entity
 		$this->_modified['preferences'] = null;
 	}
 
+	public function __destruct()
+	{
+		$this->savePreferences();
+	}
+
 	/**
 	 * Save preferences if they have been modified
 	 */
-	public function __destruct()
+	public function savePreferences(): void
 	{
 		// We can't save preferences if user does not exist (eg. LDAP/Forced Login via LOCAL_LOGIN)
 		if (!$this->exists()) {
@@ -802,9 +812,9 @@ class User extends Entity
 			return;
 		}
 
-
 		DB::getInstance()->update(self::TABLE, ['preferences' => json_encode($this->preferences)], 'id = ' . $this->id());
 		$this->clearModifiedProperties(['preferences']);
+		$this->reloadSessionIfNeeded();
 	}
 
 	public function url(): string
