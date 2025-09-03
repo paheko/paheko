@@ -238,7 +238,9 @@ class Session extends \KD2\UserSession
 
 	public function refresh(): bool
 	{
-		$v = parent::refresh();
+		if (!$this->isLogged()) {
+			throw new \LogicException('User is not logged in.');
+		}
 
 		// Reload user object from DB
 		if ($this->user->exists()) {
@@ -247,7 +249,7 @@ class Session extends \KD2\UserSession
 
 		$this->_files_permissions = null;
 
-		return $v;
+		return true;
 	}
 
 	public function isLogged(bool $allow_new_session = true)
