@@ -28,6 +28,7 @@ $form->runIf('close', function () use ($year, $user, $session) {
 	// Year is closed, remove it from preferences
 	if ($user->getPreference('accounting_year') == $year->id()) {
 		$user->setPreference('accounting_year', null);
+		$user->savePreferences();
 	}
 	$session->save();
 }, $csrf_key, ADMIN_URL . 'acc/years/new.php?from=' . $year->id());

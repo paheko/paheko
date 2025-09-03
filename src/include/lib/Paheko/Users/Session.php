@@ -242,12 +242,16 @@ class Session extends \KD2\UserSession
 			throw new \LogicException('User is not logged in.');
 		}
 
+		$this->start(true);
+
 		// Reload user object from DB
 		if ($this->user->exists()) {
-			$this->user = Users::get($this->user->id());
+			$_SESSION['userSession'] = $this->user = Users::get($this->user->id());
 		}
 
 		$this->_files_permissions = null;
+
+		$this->close();
 
 		return true;
 	}

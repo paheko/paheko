@@ -13,6 +13,7 @@ $user = Session::getLoggedUser();
 if (isset($_GET['cat'])) {
 	$current_cat = (int) $_GET['cat'];
 	$user->setPreference('users_category', $current_cat);
+	$user->savePreferences();
 }
 else {
 	$current_cat = $user->getPreference('users_category') ?? 0;

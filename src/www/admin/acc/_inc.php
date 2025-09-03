@@ -19,6 +19,7 @@ $user_year = $user->getPreference('accounting_year');
 
 if (!empty($_GET['set_year'])) {
 	$user->setPreference('accounting_year', (int)$_GET['set_year']);
+	$user->savePreferences();
 }
 
 $current_year = null;
@@ -31,6 +32,7 @@ if ($user_year) {
 	if (!$current_year) {
 		$current_year = null;
 		$user->setPreference('accounting_year', null);
+		$user->savePreferences();
 	}
 }
 

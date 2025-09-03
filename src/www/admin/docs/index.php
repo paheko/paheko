@@ -101,7 +101,9 @@ if (null !== qg('gallery')) {
 }
 
 if ($gallery !== $pref) {
-	Session::getLoggedUser()->setPreference('folders_gallery', $gallery);
+	$user = Session::getLoggedUser();
+	$user->setPreference('folders_gallery', $gallery);
+	$user->savePreferences();
 }
 
 $parent_uri = $dir->parent_uri();

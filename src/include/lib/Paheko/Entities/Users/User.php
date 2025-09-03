@@ -792,11 +792,6 @@ class User extends Entity
 		$this->_modified['preferences'] = null;
 	}
 
-	public function __destruct()
-	{
-		$this->savePreferences();
-	}
-
 	/**
 	 * Save preferences if they have been modified
 	 */

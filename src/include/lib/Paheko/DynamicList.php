@@ -598,6 +598,8 @@ class DynamicList implements \Countable
 			else {
 				$u->setPreference('list_' . $hash, ['o' => $order, 'd' => $desc]);
 			}
+
+			$u->savePreferences();
 		}
 
 		if ($order && array_key_exists($order, $this->columns)) {
