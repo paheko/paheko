@@ -34,6 +34,7 @@ class CLI
 		'ui',
 		'server',
 		'ext',
+		'security',
 	];
 
 	protected array $defaults = [];
@@ -504,6 +505,154 @@ class CLI
 		foreach (Install::getConstants() as $key => $value) {
 			echo $key . ": " . Utils::var_export($value) . PHP_EOL;
 		}
+		$this->success();
+	}
+
+	/**
+	 * Perform a security check and report for anything unusual, or misconfiguration.
+	 */
+	public function security(array $args)
+	{
+		$o = $this->parseOptions($args, ['--verbose|-v', '--version=']);
+		$verbose = array_key_exists('verbose', $o);
+		$report = Security::getReport($o['version'] ?? null);
+
+		echo 'Restricted open_basedir: ';
+
+		if ($report->open_basedir) {
+			echo $this->color('green', 'enabled');
+			printf(' (%s)', OPEN_BASEDIR);
+		}
+		else {
+			echo $this->color('red', 'DISABLED');
+			echo ' (enabling this helps againts potential issues)';
+		}
+
+		echo "\n";
+
+		echo 'Write permissions: ';
+
+		if (!count($report->write_permissions)) {
+			echo $this->color('green', 'OK');
+			echo ' (no source code file is writeable)';
+		}
+		else {
+			echo $this->color('red', sprintf('%d files from the source code can be written', count($report->write_permissions)));
+
+			if ($verbose) {
+				echo '  ' . implode("\n  ", $report->write_permissions);
+			}
+			else {
+				echo "\n -> Consider using chmod to make all source code files read-only";
+				echo "\n    Use --verbose option to see the list of files.";
+			}
+		}
+
+		echo "\n";
+
+		echo 'Suspicious files found in local file storage: ';
+
+		if (!count($report->files_suspicious)) {
+			echo $this->color('green', '0');
+		}
+		else {
+			echo $this->color('red', sprintf('%d files have suspicious PHP code in local file storage', count($report->files_suspicious)));
+
+			if ($verbose) {
+				echo '  ' . implode("\n  ", $report->files_suspicious);
+			}
+			else {
+				echo "\n -> This should not be dangerous if there is no security flaw in Paheko, but this";
+				echo "\n    might indicate an attempted attack. Further investigation is recommended.";
+				echo "\n    Use --verbose option to see the list of files.";
+			}
+		}
+
+		echo "\n";
+
+		echo 'Suspicious files found in cache: ';
+
+		if (!count($report->cache_suspicious)) {
+			echo $this->color('green', '0');
+		}
+		else {
+			echo $this->color('red', sprintf('%d cache files have suspicious PHP code', count($report->cache_suspicious)));
+
+			if ($verbose) {
+				foreach ($report->cache_suspicious as $path => $code) {
+					echo "\n  - " . $path . ": " . $code;
+				}
+			}
+			else {
+				echo "\n -> This is highly suspicious and suggests an unknown security flaw has been used!";
+				echo "\n    Use --verbose option to see the list of files.";
+			}
+		}
+
+		echo "\n";
+
+		echo 'Private files exposed to public: ';
+
+		if (!count($report->private_exposed)) {
+			echo $this->color('green', '0');
+		}
+		else {
+			echo $this->color('red', sprintf('%d private files are publicly accessible!', count($report->private_exposed)));
+
+			if ($verbose) {
+				foreach ($report->private_exposed as $path => $code) {
+					echo "\n  - " . $path . ": HTTP code " . $code;
+				}
+			}
+			else {
+				echo "\n -> This probably means your webserver is misconfigured!";
+				echo "\n    Use --verbose option to see the list of files.";
+			}
+		}
+
+		echo "\n";
+
+		echo 'Manifest verification: ';
+		echo "\n - ";
+
+		if (!count($report->manifest->extra)) {
+			echo "no extra new file has been found in the source directory\n";
+		}
+		else {
+			echo $this->color('red', sprintf('%d extra files have been found in the source code directory!', count($report->manifest->extra)));
+
+			if ($verbose) {
+				foreach ($report->manifest->extra as $path) {
+					echo "\n   " . $path;
+				}
+			}
+			else {
+				echo "\n -> This might mean someone has modified the source code directory!";
+				echo "\n    Use --verbose option to see the list of files.";
+			}
+		}
+
+		echo "\n - ";
+
+		if (!count($report->manifest->mismatch)) {
+			echo "no file has been modified\n";
+		}
+		else {
+			echo $this->color('red', sprintf('%d files have been modified compared to the manifest!', count($report->manifest->mismatch)));
+
+			if ($verbose) {
+				foreach ($report->manifest->mismatch as $path) {
+					echo "\n   " . $path;
+				}
+			}
+			else {
+				echo "\n -> This might mean someone has modified the source code directory!";
+				echo "\n    Use --verbose option to see the list of files.";
+			}
+		}
+
+		echo "\n";
+
 		$this->success();
 	}
 
