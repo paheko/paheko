@@ -350,29 +350,6 @@ Exemple de requête :
 curl -u test:abcd https://paheko.monasso.tld/api/web/actualite/children
 ```
 
-Exemple de réponse :
-
-```response
-{
-    "categories": [],
-    "pages": [
-        {
-            "id": 86,
-            "id_parent": 13,
-            "uri": "bourse-aux-velos-le-30-septembre-et-1er-octobre",
-            "title": "Bourse aux v\u00e9los 30 septembre et 1er octobre",
-            "type": 2,
-            "status": "online",
-            "format": "skriv",
-            "published": "2023-10-01 18:00:00",
-            "modified": "2023-09-11 23:41:41",
-            "content": "…"
-        },
-        …
-    ]
-}
-```
-
 ### GET web/{PAGE_URI}/attachments
 
 Liste des fichiers joints à la page

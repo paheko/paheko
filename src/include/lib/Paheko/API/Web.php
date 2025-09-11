@@ -71,10 +71,9 @@ trait Web
 		}
 		elseif ($param === 'children') {
 			$this->requireMethod('GET');
-			return [
-				'categories' => array_map(fn($p) => $p->asArray(true), PWeb::listCategories($page->id())),
-				'pages' => array_map(fn($p) => $p->asArray(true), PWeb::listPages($page->id())),
-			];
+			$list = PWeb::getAllList($page->id());
+			$list->setPageSize(null);
+			return $this->export($list->iterate());
 		}
 		elseif ($param === 'attachments') {
 			$this->requireMethod('GET');

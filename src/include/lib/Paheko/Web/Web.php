@@ -172,7 +172,7 @@ class Web
 		return $list;
 	}
 
-	static public function getAllList(): DynamicList
+	static public function getAllList(?int $parent_id = null): DynamicList
 	{
 		$db = DB::getInstance();
 
@@ -199,6 +199,9 @@ class Web
 			'modified' => [
 				'label' => 'Modification',
 			],
+			'type' => [
+				'select' => sprinf('CASE WHEN %d THEN \'category\' ELSE \'page\' END', Page::TYPE_CATEGORY),
+			],
 		];
 
 		$tables = Page::TABLE . ' AS p';
@@ -206,6 +209,11 @@ class Web
 		$list = new DynamicList($columns, $tables);
 		$list->orderBy('title', false);
 		$list->setPageSize(null);
+
+		if ($parent_id !== null) {
+			$list->setConditions('id_parent = ' . (int)$parent_id);
+		}
+
 		return $list;
 	}
 
