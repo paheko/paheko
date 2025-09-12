@@ -1014,7 +1014,7 @@ class User extends Entity
 				$value = [];
 
 				foreach ($this->listFiles($key) as $file) {
-					$value[] = $file->url();
+					$value[] = $file->name;
 				}
 			}
 		}
