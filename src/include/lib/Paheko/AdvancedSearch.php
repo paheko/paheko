@@ -118,7 +118,7 @@ abstract class AdvancedSearch
 				continue;
 			}
 
-			if (isset($group['join_operator']) && $group['join_operator'] !== 'AND' && $group['join_operator'] !== 'OR') {
+			if (!empty($group['join_operator']) && $group['join_operator'] !== 'AND' && $group['join_operator'] !== 'OR') {
 				continue;
 			}
 
@@ -233,7 +233,7 @@ abstract class AdvancedSearch
 			if (count($query_group_conditions))
 			{
 				if ($query_groups !== '') {
-					$query_groups .= ' ' . ($group['join_operator'] ?? 'AND') . ' ';
+					$query_groups .= ' ' . (empty($group['join_operator']) ? 'AND' : $group['join_operator']) . ' ';
 				}
 
 				$query_groups.= '(' . implode(' ' . $group['operator'] . ' ', $query_group_conditions) . ')';
