@@ -646,6 +646,7 @@ class Session extends \KD2\UserSession
 		// If user does not exist anymore
 		if ($this->user->exists() && !Users::exists($this->user->id())) {
 			$this->logout();
+			return null;
 		}
 
 		return $this->user;
@@ -659,7 +660,13 @@ class Session extends \KD2\UserSession
 			return null;
 		}
 
-		return $i->getUser()->id;
+		$user = $i->getUser();
+
+		if (!$user) {
+			return null;
+		}
+
+		return $user->id;
 	}
 
 	public function canAccess(string $section, int $required): bool
