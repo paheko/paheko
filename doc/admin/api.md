@@ -417,6 +417,8 @@ Exporte la liste des membres d'une catégorie
 
 _(Depuis la version 1.4.0)_
 
+Les champs de type fichier retournent une liste (séparée par des retours à la ligne) des noms des fichiers de ce champ. Il est ensuite possible de télécharger le fichier via l'URL `https://monpaheko.example.com/user/{ID}/{NOM_CHAMP}/{NOM_FICHIER}`, en utilisant les même identifiants d'authentification HTTP que pour l'API.
+
 ### GET user/search
 
 Recherche simple de membre
@@ -477,6 +479,8 @@ Plusieurs clés supplémentaires sont retournées, en plus des champs de la fich
 * `has_pgp_key`
 * `has_otp`
 
+Les champs de type fichier retournent un tableau JSON contenant la liste des noms des fichiers de ce champ. Il est ensuite possible de télécharger le fichier via l'URL `https://monpaheko.example.com/user/{ID}/{NOM_CHAMP}/{NOM_FICHIER}`, en utilisant les même identifiants d'authentification HTTP que pour l'API.
+
 Exemple de réponse :
 
 ```response
@@ -502,7 +506,8 @@ Exemple de réponse :
     "code_postal": "21000",
     "ville": "DIJON",
     "pays": "FR",
-    "date_inscription": "2012-02-25"
+    "date_inscription": "2012-02-25",
+    "photo": ["ma_photo.jpg"]
 }
 ```
 
