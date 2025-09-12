@@ -1002,9 +1002,20 @@ class User extends Entity
 		$prefix['has_pgp_key'] = !empty($out['pgp_key']);
 		unset($out['password'], $out['otp_secret'], $out['otp_recovery_codes'], $out['pgp_key']);
 
+		$file_fields = array_keys(DynamicFields::getInstance()->fieldsByType('file'));
+
 		foreach ($out as $key => &$value) {
+			// Export date field as string
 			if ($value instanceof Date || $value instanceof \DateTimeInterface) {
 				$value = $this->getAsString($key);
+			}
+			// Export file field as URLs
+			elseif (in_array($key, $file_fields)) {
+				$value = [];
+
+				foreach ($this->listFiles($key) as $file) {
+					$value[] = $file->url();
+				}
 			}
 		}
 
