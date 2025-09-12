@@ -245,7 +245,7 @@ class Files
 		return $p;
 	}
 
-	static public function search(string $search, string $path = null): array
+	static public function search(string $search, ?string $path = null): array
 	{
 		if (strlen($search) > 100) {
 			throw new ValidationException('Recherche trop longue : maximum 100 caractères');
@@ -341,7 +341,7 @@ class Files
 		return $list;
 	}
 
-	static public function listForUser(int $id, string $field_name = null): array
+	static public function listForUser(int $id, ?string $field_name = null): array
 	{
 		$files = [];
 		$path = (string) $id;
@@ -678,7 +678,7 @@ class Files
 		return (float) DB::getInstance()->firstColumn('SELECT SUM(size) FROM files;');
 	}
 
-	static public function getRemainingQuota(float $used_quota = null): float
+	static public function getRemainingQuota(?float $used_quota = null): float
 	{
 		if (FILE_STORAGE_QUOTA) {
 			return max(0, FILE_STORAGE_QUOTA - ($used_quota ?? self::getUsedQuota()));
