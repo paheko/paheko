@@ -59,7 +59,7 @@ class Export
 			$header = array_merge(['id' => 'id'], $header);
 		}
 
-		$columns = array_keys($header);
+		$columns = array_combine(array_keys($header), array_keys($header));
 		$columns = array_map([$db, 'quoteIdentifier'], $columns);
 
 		if (Users::hasParents()) {
@@ -72,6 +72,10 @@ class Export
 
 			$header['parent_name'] = 'Rattaché à';
 			$header['children_names'] = 'Membres rattachés';
+		}
+
+		foreach ($df->fieldsByType('file') as $name => $field) {
+			$columns[$name] = sprintf('(SELECT GROUP_CONCAT(name, x\'0a\') FROM files AS f INNER JOIN users_files uf ON uf.id_file = f.id WHERE uf.field = %s AND uf.id_user = u.id) AS %s', $db->quote($name), $db->quoteIdentifier($name));
 		}
 
 		$columns = implode(', ', $columns);
