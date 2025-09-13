@@ -338,7 +338,7 @@
         "uri": "actualite",
         "title": "Actualit\u00e9",
         "path": null,
-        "draft": 0,
+        "status": 2,
         "published": "2019-04-22 18:00:00",
         "modified": "2023-09-12 15:44:55"
     },
@@ -347,7 +347,7 @@
         "uri": "Affiches-des-bourses-aux-velos",
         "title": "Affiches des bourses aux v\u00e9los",
         "path": "Nos activit\u00e9s",
-        "draft": 0,
+        "status": 0,
         "published": "2019-07-18 19:05:00",
         "modified": "2023-04-04 14:44:04"
     },
@@ -404,7 +404,7 @@
 <tr>
 <td style="text-align: left;"><code>status</code></td>
 <td style="text-align: left;"><code>string</code></td>
-<td style="text-align: left;">Statut de la page. <code>online</code> si la page est en ligne, <code>draft</code> si la page est en brouillon.</td>
+<td style="text-align: left;">Statut de la page. <code>2</code> si la page est en ligne, <code>0</code> si la page est en brouillon, et <code>1</code> si la page est r&eacute;serv&eacute;e aux membres connect&eacute;s.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>format</code></td>
@@ -472,24 +472,7 @@
 <td style="text-align: left;">Adresse unique de la page.</td>
 </tr>
 </tbody>
-</table><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/web/actualite/children</code></pre><p>Exemple de r&eacute;ponse :</p><pre><code class="language-response">{
-    "categories": [],
-    "pages": [
-        {
-            "id": 86,
-            "id_parent": 13,
-            "uri": "bourse-aux-velos-le-30-septembre-et-1er-octobre",
-            "title": "Bourse aux v\u00e9los 30 septembre et 1er octobre",
-            "type": 2,
-            "status": "online",
-            "format": "skriv",
-            "published": "2023-10-01 18:00:00",
-            "modified": "2023-09-11 23:41:41",
-            "content": "&hellip;"
-        },
-        &hellip;
-    ]
-}</code></pre></details><details class="api"><summary id="get-web-page_uri-attachments" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/web/<u>{PAGE_URI}</u>/attachments</code> <span>Liste des fichiers joints &agrave; la page</span></summary><table>
+</table><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/web/actualite/children</code></pre></details><details class="api"><summary id="get-web-page_uri-attachments" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/web/<u>{PAGE_URI}</u>/attachments</code> <span>Liste des fichiers joints &agrave; la page</span></summary><table>
 <thead>
 <tr>
 <th style="text-align: left;">Param&egrave;tre</th>
@@ -578,7 +561,7 @@
 <td style="text-align: left;">Format de sortie : <code>json</code>, <code>csv</code>, <code>ods</code> ou <code>xlsx</code></td>
 </tr>
 </tbody>
-</table><p><em>(Depuis la version 1.4.0)</em></p></details><details class="api"><summary id="get-user-search" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/user/search</code> <span>Recherche simple de membre</span></summary><table>
+</table><p><em>(Depuis la version 1.4.0)</em></p><p>Les champs de type fichier retournent une liste (s&eacute;par&eacute;e par des retours &agrave; la ligne) des noms des fichiers de ce champ. Il est ensuite possible de t&eacute;l&eacute;charger le fichier via l'URL <code>https://monpaheko.example.com/user/{ID}/{NOM_CHAMP}/{NOM_FICHIER}</code>, en utilisant les m&ecirc;me identifiants d'authentification HTTP que pour l'API.</p></details><details class="api"><summary id="get-user-search" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/user/search</code> <span>Recherche simple de membre</span></summary><table>
 <thead>
 <tr>
 <th style="text-align: left;">Param&egrave;tre</th>
@@ -643,7 +626,7 @@ Sinon, la recherche se fera sur l'identit&eacute; du membre (telle que configur&
 <li><code>has_password</code></li>
 <li><code>has_pgp_key</code></li>
 <li><code>has_otp</code></li>
-</ul><p>Exemple de r&eacute;ponse :</p><pre><code class="language-response">{
+</ul><p>Les champs de type fichier retournent un tableau JSON contenant la liste des noms des fichiers de ce champ. Il est ensuite possible de t&eacute;l&eacute;charger le fichier via l'URL <code>https://monpaheko.example.com/user/{ID}/{NOM_CHAMP}/{NOM_FICHIER}</code>, en utilisant les m&ecirc;me identifiants d'authentification HTTP que pour l'API.</p><p>Exemple de r&eacute;ponse :</p><pre><code class="language-response">{
     "has_password": true,
     "has_otp": false,
     "has_pgp_key": false,
@@ -665,7 +648,8 @@ Sinon, la recherche se fera sur l'identit&eacute; du membre (telle que configur&
     "code_postal": "21000",
     "ville": "DIJON",
     "pays": "FR",
-    "date_inscription": "2012-02-25"
+    "date_inscription": "2012-02-25",
+    "photo": ["ma_photo.jpg"]
 }</code></pre></details><details class="api"><summary id="delete-user-id" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-DELETE">DELETE</b> <code>/user/<u>{ID}</u></code> <span>Supprime un membre</span></summary><table>
 <thead>
 <tr>
