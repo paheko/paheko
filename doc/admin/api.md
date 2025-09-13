@@ -254,7 +254,7 @@ Exemple de réponse :
         "uri": "actualite",
         "title": "Actualit\u00e9",
         "path": null,
-        "draft": 0,
+        "status": 2,
         "published": "2019-04-22 18:00:00",
         "modified": "2023-09-12 15:44:55"
     },
@@ -263,7 +263,7 @@ Exemple de réponse :
         "uri": "Affiches-des-bourses-aux-velos",
         "title": "Affiches des bourses aux v\u00e9los",
         "path": "Nos activit\u00e9s",
-        "draft": 0,
+        "status": 0,
         "published": "2019-07-18 19:05:00",
         "modified": "2023-04-04 14:44:04"
     },
@@ -296,7 +296,7 @@ Modifie les métadonnées de la page
 | `uri` | `string` | Nouvelle adresse unique de la page. |
 | `title` | `string` | Titre de la page. |
 | `type` | `int` | Type de page. `1` pour les catégories, `2` pour les pages simples. |
-| `status` | `string` | Statut de la page. `online` si la page est en ligne, `draft` si la page est en brouillon. |
+| `status` | `string` | Statut de la page. `2` si la page est en ligne, `0` si la page est en brouillon, et `1` si la page est réservée aux membres connectés. |
 | `format` | `string` | Format de la page : `markdown`, `encrypted` ou `skriv` |
 | `published` | `string` | Date et heure de publication au format `YYYY-MM-DD HH:mm:ss`. |
 | `modified` | `string` | Date et heure de modification au format `YYYY-MM-DD HH:mm:ss`. |

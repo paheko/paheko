@@ -200,7 +200,6 @@ class Web
 				'label' => 'Modification',
 			],
 			'type' => [
-				'select' => sprintf('CASE WHEN type = %d THEN \'category\' ELSE \'page\' END', Page::TYPE_CATEGORY),
 			],
 		];
 

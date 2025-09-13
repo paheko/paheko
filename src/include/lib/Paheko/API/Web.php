@@ -35,8 +35,6 @@ trait Web
 			if ($this->method === 'GET') {
 				$out = $page->asArray(true);
 
-				$out['type'] = $out['type'] === $page::TYPE_CATEGORY ? 'category' : 'page';
-
 				if ($this->hasParamTrue('html')) {
 					$out['html'] = $page->render();
 				}
