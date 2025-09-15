@@ -656,18 +656,6 @@ namespace Paheko;
 //const ENABLE_XSENDFILE = false;
 
 /**
- * Serveur NTP utilisé pour les connexions avec TOTP
- * (utilisé seulement si le code OTP fourni est faux)
- *
- * Désactiver (NULL) si vous êtes sûr que votre serveur est toujours à l'heure.
- *
- * Défaut : fr.pool.ntp.org
- * @var string|null
- */
-
-//const NTP_SERVER = 'fr.pool.ntp.org';
-
-/**
  * Désactiver l'envoi d'e-mails
  *
  * Si positionné à TRUE, l'envoi d'e-mail ne sera pas proposé, et il ne sera

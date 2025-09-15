@@ -26,7 +26,6 @@ use const Paheko\{
 	ADMIN_URL,
 	LOCAL_LOGIN,
 	DATA_ROOT,
-	NTP_SERVER,
 	OIDC_CLIENT_URL,
 	OIDC_CLIENT_ID,
 	OIDC_CLIENT_SECRET,
@@ -367,14 +366,14 @@ class Session extends \KD2\UserSession
 	/**
 	 * @overrides
 	 */
-	public function loginOTP(string $code, ?string $ntp_server = null): bool
+	public function loginOTP(string $code): bool
 	{
 		$this->start();
 		$user_id = $_SESSION['userSessionRequireOTP']->user->id ?? null;
 		$user_agent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 150) ?: null;
 		$details = compact('user_agent') + ['otp' => true];
 
-		$success = parent::loginOTP($code, NTP_SERVER ?: null);
+		$success = parent::loginOTP($code);
 
 		if ($success) {
 			Log::add(Log::LOGIN_SUCCESS, $details, $user_id);
