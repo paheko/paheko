@@ -25,6 +25,7 @@ class API
 	protected int $access;
 	protected $file_pointer = null;
 	protected ?string $allowed_files_root = null;
+	protected ?string $input = null;
 
 	const ALLOWED_METHODS = ['GET', 'POST', 'PUT', 'DELETE'];
 
@@ -106,8 +107,24 @@ class API
 		$this->file_pointer = $pointer;
 	}
 
+	public function getFilePointer()
+	{
+		if (isset($this->input) && !isset($this->file_pointer)) {
+			$this->file_pointer = fopen('php://temp', 'r+b');
+			fwrite($this->file_pointer, $this->input);
+			fseek($this->file_pointer, 0, SEEK_SET);
+			$this->input = null;
+		}
+
+		return $this->file_pointer;
+	}
+
 	public function closeFilePointer(): void
 	{
+		if (!is_resource($this->file_pointer)) {
+			return;
+		}
+
 		@fclose($this->file_pointer);
 		$this->file_pointer = null;
 	}
@@ -225,7 +242,7 @@ class API
 
 		if (!$this->is_http_client) {
 			$in = $this->toArray($in);
-			return json_encode($in);
+			return $in;
 		}
 
 		header("Content-Type: application/json; charset=utf-8", true);
@@ -258,7 +275,7 @@ class API
 			throw new APIException('Wrong request method', 405);
 		}
 
-		$body = $this->params['sql'] ?? self::getRequestInput();
+		$body = $this->params['sql'] ?? $this->getInput();
 		$format = $format ?: ($this->params['format'] ?? 'json');
 
 		if (!in_array($format, self::EXPORT_FORMATS, true)) {
@@ -407,7 +424,7 @@ class API
 
 			$this->requireAccess(Session::ACCESS_ADMIN);
 
-			$body = self::getRequestInput();
+			$body = $this->getInput();
 			$report = json_decode($body);
 
 			if (!isset($report->context->id)) {
@@ -487,11 +504,32 @@ class API
 		}
 	}
 
-	static public function getRequestInput(): string
+	public function getInput(): string
 	{
-		static $input = null;
-		$input ??= trim(file_get_contents('php://input'));
-		return $input;
+		// If there is no input but a file pointer was opened
+		// (eg. php://input for reading the request body)
+		// then fill input with the contents from the pointer
+		if (!isset($this->input) && isset($this->file_pointer)) {
+			$this->input = '';
+
+			while (!feof($this->file_pointer)) {
+				$this->input .= fread($this->file_pointer, 4096);
+			}
+
+			$this->closeFilePointer();
+		}
+
+		return $this->input;
+	}
+
+	public function setInput(?string $input): void
+	{
+		$this->input = $input;
+	}
+
+	public function setParams(array $params): void
+	{
+		$this->params = $params;
 	}
 
 	static public function routeHttpRequest(string $uri)
@@ -500,25 +538,20 @@ class API
 		$type ??= $_SERVER['HTTP_CONTENT_TYPE'] ?? '';
 		$method = $_SERVER['REQUEST_METHOD'] ?? null;
 
-		if ($method === 'POST') {
-			if (false !== strpos($type, '/json')) {
-				$params = (array) json_decode(self::getRequestInput(), true);
-			}
-			else {
-				$params = array_merge($_GET, $_POST);
-			}
-		}
-		else {
-			$params = $_GET;
-		}
-
 		http_response_code(200);
 
 		try {
-			$api = new self($method, $uri, $params, true);
+			$api = new self($method, $uri, $_GET, true);
 
 			if ($method === 'PUT') {
 				$api->setFilePointer(fopen('php://input', 'rb'));
+			}
+			// Parse JSON passed as request body
+			elseif ($method === 'POST' && false !== strpos($type, '/json')) {
+				$api->setParams((array) json_decode(trim(file_get_contents('php://input')), true));
+			}
+			elseif ($method === 'POST') {
+				$api->setParams(array_merge($_GET, $_POST));
 			}
 
 			$api->checkAuth();
