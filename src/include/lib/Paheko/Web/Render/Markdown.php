@@ -31,7 +31,7 @@ class Markdown extends AbstractRender
 
 	static protected $md = null;
 
-	public function renderUncached(string $content = null): string
+	public function renderUncached(?string $content = null): string
 	{
 		if (empty($content)) {
 			return '';
