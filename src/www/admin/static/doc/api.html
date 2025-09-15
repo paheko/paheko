@@ -367,7 +367,7 @@
 <td style="text-align: left;">Adresse unique de la page.</td>
 </tr>
 </tbody>
-</table><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/web/bourse-28-septembre -X PUT -d 'La bourse aura lieu le 28 septembre'</code></pre></details><details class="api"><summary id="post-web-page_uri" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/web/<u>{PAGE_URI}</u></code> <span>Modifie les m&eacute;tadonn&eacute;es de la page</span></summary><table>
+</table><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/web/bourse-28-septembre -X PUT -d 'La bourse aura lieu le 28 septembre'</code></pre></details><details class="api"><summary id="post-web-page_uri" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/web/<u>{PAGE_URI}</u></code> <span>Modifie les m&eacute;tadonn&eacute;es de la page. Si la page n'existe pas, elle sera cr&eacute;&eacute;e.</span></summary><table>
 <thead>
 <tr>
 <th style="text-align: left;">Param&egrave;tre</th>
@@ -457,7 +457,7 @@
 <td style="text-align: left;">Adresse unique de la page.</td>
 </tr>
 </tbody>
-</table><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/web/bourse-28-septembre.html</code></pre></details><details class="api"><summary id="get-web-page_uri-children" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/web/<u>{PAGE_URI}</u>/children</code> <span>Liste des pages et sous-cat&eacute;gories dans cette cat&eacute;gorie</span></summary><table>
+</table><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/web/bourse-28-septembre.html</code></pre></details><details class="api"><summary id="get-web-page_uri-children" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/web/<u>{PAGE_URI}</u>/children</code> <span>Liste les pages et sous-cat&eacute;gories de la cat&eacute;gorie indiqu&eacute;e</span></summary><table>
 <thead>
 <tr>
 <th style="text-align: left;">Param&egrave;tre</th>
@@ -472,7 +472,7 @@
 <td style="text-align: left;">Adresse unique de la page.</td>
 </tr>
 </tbody>
-</table><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/web/actualite/children</code></pre></details><details class="api"><summary id="get-web-page_uri-attachments" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/web/<u>{PAGE_URI}</u>/attachments</code> <span>Liste des fichiers joints &agrave; la page</span></summary><table>
+</table><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/web/actualite/children</code></pre></details><details class="api"><summary id="get-web-page_uri-attachments" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/web/<u>{PAGE_URI}</u>/attachments</code> <span>Liste les fichiers joints &agrave; la page</span></summary><table>
 <thead>
 <tr>
 <th style="text-align: left;">Param&egrave;tre</th>
@@ -487,7 +487,27 @@
 <td style="text-align: left;">Adresse unique de la page.</td>
 </tr>
 </tbody>
-</table></details><details class="api"><summary id="get-web-page_uri-file_name" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/web/<u>{PAGE_URI}</u>/<u>{FILE_NAME}</u></code> <span>R&eacute;cup&eacute;rer le fichier joint &agrave; la page</span></summary><table>
+</table></details><details class="api"><summary id="get-web-page_uri-file_name" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/web/<u>{PAGE_URI}</u>/<u>{FILE_NAME}</u></code> <span>Renvoie le contenu du fichier joint &agrave; la page</span></summary><table>
+<thead>
+<tr>
+<th style="text-align: left;">Param&egrave;tre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>PAGE_URI</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Adresse unique de la page.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>FILENAME</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Nom du fichier.</td>
+</tr>
+</tbody>
+</table></details><details class="api"><summary id="put-web-page_uri-file_name" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-PUT">PUT</b> <code>/web/<u>{PAGE_URI}</u>/<u>{FILE_NAME}</u></code> <span>Cr&eacute;e ou &eacute;crase un fichier joint &agrave; la page</span></summary><table>
 <thead>
 <tr>
 <th style="text-align: left;">Param&egrave;tre</th>
@@ -527,7 +547,7 @@
 <td style="text-align: left;">Nom du fichier.</td>
 </tr>
 </tbody>
-</table></details><h2 id="membres">Membres</h2><details class="api"><summary id="get-user-categories" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/user/categories</code> <span>Liste des cat&eacute;gories de membres</span></summary><p><em>(Depuis la version 1.4.0)</em></p><p>La liste est tri&eacute;e par nom, et inclue le nombre de membres de la cat&eacute;gorie dans la cl&eacute; <code>count</code>.</p><p>Exemple de r&eacute;ponse :</p><pre><code class="language-response">{
+</table></details><h2 id="membres">Membres</h2><details class="api"><summary id="get-user-categories" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/user/categories</code> <span>Liste les cat&eacute;gories de membres</span></summary><p><em>(Depuis la version 1.4.0)</em></p><p>La liste est tri&eacute;e par nom, et inclue le nombre de membres de la cat&eacute;gorie dans la cl&eacute; <code>count</code>.</p><p>Exemple de r&eacute;ponse :</p><pre><code class="language-response">{
     "12": {
         "id": 12,
         "name": "Administration technique",

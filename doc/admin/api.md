@@ -287,7 +287,7 @@ curl -u test:abcd https://paheko.monasso.tld/api/web/bourse-28-septembre -X PUT 
 
 ### POST web/{PAGE_URI}
 
-Modifie les métadonnées de la page
+Modifie les métadonnées de la page. Si la page n'existe pas, elle sera créée.
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
@@ -338,7 +338,7 @@ curl -u test:abcd https://paheko.monasso.tld/api/web/bourse-28-septembre.html
 
 ### GET web/{PAGE_URI}/children
 
-Liste des pages et sous-catégories dans cette catégorie
+Liste les pages et sous-catégories de la catégorie indiquée
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
@@ -352,7 +352,7 @@ curl -u test:abcd https://paheko.monasso.tld/api/web/actualite/children
 
 ### GET web/{PAGE_URI}/attachments
 
-Liste des fichiers joints à la page
+Liste les fichiers joints à la page
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
@@ -360,7 +360,16 @@ Liste des fichiers joints à la page
 
 ### GET web/{PAGE_URI}/{FILE_NAME}
 
-Récupérer le fichier joint à la page
+Renvoie le contenu du fichier joint à la page
+
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `PAGE_URI` | `string` | Adresse unique de la page. |
+| `FILENAME` | `string` | Nom du fichier. |
+
+### PUT web/{PAGE_URI}/{FILE_NAME}
+
+Crée ou écrase un fichier joint à la page
 
 | Paramètre | Type | Description |
 | :- | :- | :- |
@@ -380,7 +389,7 @@ Supprime le fichier joint à la page
 
 ### GET user/categories
 
-Liste des catégories de membres
+Liste les catégories de membres
 
 _(Depuis la version 1.4.0)_
 
