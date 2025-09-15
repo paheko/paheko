@@ -3,13 +3,16 @@
 namespace Paheko\API;
 
 use Paheko\Web\Web as PWeb;
+use Paheko\Files\Files;
+use Paheko\Entities\Web\Page;
+use Paheko\Entities\Files\File;
+use Paheko\Users\Session;
 use Paheko\APIException;
 
 trait Web
 {
 	protected function web(string $uri): ?array
 	{
-
 		$fn = strtok($uri, '/');
 		$param = strtok('');
 
@@ -20,14 +23,14 @@ trait Web
 			return $this->export($list->iterate());
 		}
 
-		if (substr($fn, 0, -5) === '.html') {
+		if (substr($fn, -5) === '.html') {
 			$fn = substr($fn, 0, -5);
 			$param = 'html';
 		}
 
 		$page = PWeb::getByURI($fn);
 
-		if (!$page) {
+		if (!$page && !($this->method === 'POST' && !$param)) {
 			throw new APIException('Page not found', 404);
 		}
 
@@ -48,15 +51,21 @@ trait Web
 			}
 			elseif ($this->method === 'PUT') {
 				$this->requireAccess(Session::ACCESS_WRITE);
-				$page->set('content', self::getRequestInput());
+				$page->set('content', $this->getInput());
 				$page->saveNewVersion();
-				return self::SUCCESS;
+				return $page->asArray(true);
 			}
 			elseif ($this->method === 'POST') {
 				$this->requireAccess(Session::ACCESS_WRITE);
+
+				if (!$page) {
+					$page = new Page;
+					$this->params['uri'] = $fn;
+				}
+
 				$page->importForm($this->params);
 				$page->saveNewVersion();
-				return self::SUCCESS;
+				return $page->asArray(true);
 			}
 			else {
 				throw new APIException('Invalid request method', 405);
@@ -64,9 +73,14 @@ trait Web
 		}
 		elseif ($param === 'html') {
 			$this->requireMethod('GET');
+
+			if (!$this->is_http_client) {
+				return $this->export($page->render());
+			}
+
 			http_response_code(200);
 			header('Content-Type: text/html; charset=utf-8', true);
-			echo $page->html();
+			echo $page->render();
 			return null;
 		}
 		elseif ($param === 'children') {
@@ -77,27 +91,51 @@ trait Web
 		}
 		elseif ($param === 'attachments') {
 			$this->requireMethod('GET');
-			return $page->listAttachments();
+			$out = [];
+
+			foreach ($page->listAttachments() as $file) {
+				$a = $file->asArray(true);
+				$a['url'] = $file->url();
+				$out[] = $a;
+			}
+
+			return $out;
 		}
 		else {
-			$this->requireMethod('GET');
-			$attachment = Files::get(File::CONTEXT_WEB . '/' . $page->uri . '/' . $param);
-
-			if (!$attachment) {
-				throw new APIException('Attachment not found', 404);
+			try {
+				File::validateFileName($param);
+			}
+			catch (ValidationException $e) {
+				throw new APIException($e->getMessage(), 400, $e);
 			}
 
-			if ($this->method === 'GET') {
-				$attachment->serve();
-				return null;
-			}
-			elseif ($this->method === 'DELETE') {
+			$path = File::CONTEXT_WEB . '/' . $page->uri . '/' . $param;
+
+			if ($this->method === 'PUT') {
 				$this->requireAccess(Session::ACCESS_WRITE);
-				$attachment->delete();
+				Files::createFromPointer($path, $this->getFilePointer(), null);
+				$this->closeFilePointer();
 				return self::SUCCESS;
 			}
 			else {
-				throw new APIException('Invalid method', 405);
+				$attachment = Files::get($path);
+
+				if (!$attachment) {
+					throw new APIException('Attachment not found', 404);
+				}
+
+				if ($this->method === 'GET') {
+					$attachment->serve();
+					return null;
+				}
+				elseif ($this->method === 'DELETE') {
+					$this->requireAccess(Session::ACCESS_WRITE);
+					$attachment->delete();
+					return self::SUCCESS;
+				}
+				else {
+					throw new APIException('Invalid method', 405);
+				}
 			}
 		}
 	}
