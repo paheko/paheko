@@ -233,7 +233,7 @@ class CommonModifiers
 		return @strftime($format, $ts->getTimestamp());
 	}
 
-	static public function date($ts, string $format = null, string $locale = 'fr'): ?string
+	static public function date($ts, ?string $format = null, string $locale = 'fr'): ?string
 	{
 		if (null === $format) {
 			$format = 'd/m/Y à H:i';
