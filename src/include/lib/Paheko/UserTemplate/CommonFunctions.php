@@ -52,6 +52,7 @@ class CommonFunctions
 			throw new \RuntimeException('Missing name or type');
 		}
 
+		$max_file_size ??= null;
 		$suffix = isset($suffix) ? ' ' . $suffix : null;
 
 		if ($type === 'datetime') {

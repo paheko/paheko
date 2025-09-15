@@ -40,9 +40,9 @@ $form->runIf('split', function () use ($year) {
 	}
 	else {
 		$target = new Year;
-		$new_start = Date::createFromInterface($date);
+		$new_start = Date::createFromInterface($start);
 		$new_start->modify('+1 day');
-		$target->label = sprintf('Exercice %d', $date->format('Y'));
+		$target->label = sprintf('Exercice %d', $new_start->format('Y'));
 		$target->start_date = $new_start;
 		$target->end_date = (clone $new_start)->modify('+1 year');
 		$target->id_chart = $year->id_chart;

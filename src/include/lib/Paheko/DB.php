@@ -189,7 +189,7 @@ class DB extends SQLite3
 		$db = new SQLite3('sqlite', ['file' => SQL_DEBUG]);
 		$s = $db->first('SELECT * FROM sessions WHERE id = ?;', $id);
 
-		if ($s) {
+		if (is_object($s)) {
 			$s->list = $db->get('SELECT * FROM log WHERE session = ? ORDER BY time;', $id);
 
 			foreach ($s->list as &$row) {

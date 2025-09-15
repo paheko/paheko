@@ -76,7 +76,7 @@ elseif ($action == 'zip') {
 elseif ($action === 'move_to_transaction') {
 	$session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE);
 
-	$form->runIf('move', function() use ($check, $session) {
+	$form->runIf('move', function() use ($check) {
 		$id = (int)f('id');
 		if (!Transactions::get($id)) {
 			throw new UserException('Cette écriture n\'existe pas.');

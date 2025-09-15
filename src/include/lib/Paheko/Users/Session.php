@@ -566,7 +566,7 @@ class Session extends \KD2\UserSession
 		}
 
 		// Fetch user info
-		$user = Users::get($id, 'id');
+		$user = Users::get($id);
 
 		if (!$user) {
 			return null;

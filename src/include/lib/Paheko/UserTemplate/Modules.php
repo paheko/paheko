@@ -262,7 +262,7 @@ class Modules
 	static public function isEnabled(string $name): bool
 	{
 		if (!preg_match(Module::VALID_NAME_REGEXP, $name)) {
-			return null;
+			return false;
 		}
 
 		return (bool) EM::getInstance(Module::class)->col('SELECT 1 FROM @TABLE WHERE name = ? AND enabled = 1;', $name);
