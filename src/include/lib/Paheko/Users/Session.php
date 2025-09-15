@@ -26,13 +26,19 @@ use const Paheko\{
 	ADMIN_URL,
 	LOCAL_LOGIN,
 	DATA_ROOT,
-	NTP_SERVER
+	NTP_SERVER,
+	OIDC_CLIENT_URL,
+	OIDC_CLIENT_ID,
+	OIDC_CLIENT_SECRET,
+	OIDC_CLIENT_MATCH_EMAIL,
+	OIDC_CLIENT_DEFAULT_PERMISSIONS
 };
 
 use KD2\Security;
 use KD2\Security_OTP;
 use KD2\Graphics\QRCode;
 use KD2\HTTP;
+use KD2\OpenIDConnect;
 
 class Session extends \KD2\UserSession
 {
@@ -71,9 +77,8 @@ class Session extends \KD2\UserSession
 	protected $remember_me_cookie_name = 'pkop';
 	protected $remember_me_expiry = '+3 months';
 
-	protected ?User $_user;
-	protected ?array $_permissions;
-	protected ?array $_files_permissions;
+	protected ?array $_permissions = null;
+	protected ?array $_files_permissions = null;
 
 	static protected $_instance = null;
 
@@ -157,13 +162,7 @@ class Session extends \KD2\UserSession
 
 	protected function getUserDataForSession($id)
 	{
-		$user = Users::get($id);
-
-		if (!$user) {
-			return null;
-		}
-
-		return $id;
+		return Users::get($id);
 	}
 
 	/**
@@ -171,14 +170,18 @@ class Session extends \KD2\UserSession
 	 */
 	protected function getUserSessionVerifier(): ?string
 	{
-		$user = $this->getUserObject();
+		// FIXME: remove in 1.4.0
+		if (is_int($this->user)) {
+			// upgrade old sessions which didn't have a User object
+			$this->create($this->user);
+		}
 
-		if (null === $user) {
+		if (null === $this->user) {
 			return null;
 		}
 
 		// Logout if data_root doesn't match, to forbid one session being used with another organization
-		return strval($user->password) . strval($user->otp_secret) . DATA_ROOT;
+		return strval($this->user->password) . strval($this->user->otp_secret) . DATA_ROOT;
 	}
 
 	protected function rememberMeAutoLogin(): bool
@@ -235,13 +238,22 @@ class Session extends \KD2\UserSession
 
 	public function refresh(): bool
 	{
-		$v = parent::refresh();
+		if (!$this->isLogged()) {
+			throw new \LogicException('User is not logged in.');
+		}
 
-		$this->_user = null;
-		$this->_permissions = null;
+		$this->start(true);
+
+		// Reload user object from DB
+		if ($this->user->exists()) {
+			$_SESSION['userSession'] = $this->user = Users::get($this->user->id());
+		}
+
 		$this->_files_permissions = null;
 
-		return $v;
+		$this->close();
+
+		return true;
 	}
 
 	public function isLogged(bool $allow_new_session = true)
@@ -277,17 +289,25 @@ class Session extends \KD2\UserSession
 		// Force login with a static user, that is not in the local database
 		// this is useful for using a SSO like LDAP for example
 		if (is_array($login)) {
-			$this->_user = (new User)->import($login['user'] ?? []);
+			$this->user = (new User)->import($login['user'] ?? []);
 
 			if (isset($login['user']['_name'])) {
 				$name = DynamicFields::getFirstNameField();
-				$this->_user->$name = $login['user']['_name'];
+				$this->user->$name = $login['user']['_name'];
 			}
 
-			$this->_permissions = [];
+			$permissions = [];
 
 			foreach (Category::PERMISSIONS as $perm => $data) {
-				$this->_permissions[$perm] = $login['permissions'][$perm] ?? self::ACCESS_NONE;
+				$permissions[$perm] = $login['permissions'][$perm] ?? self::ACCESS_NONE;
+			}
+
+			$this->user->setPermissions($permissions);
+
+			if (!empty($login['save']) && $allow_new_session) {
+				$this->start(true);
+				$_SESSION['userSession'] = $this->user;
+				$this->close();
 			}
 
 			return true;
@@ -304,9 +324,11 @@ class Session extends \KD2\UserSession
 				WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config = ?)
 				LIMIT 1', self::ACCESS_ADMIN);
 		}
+		elseif ($login <= 0 || !is_numeric($login)) {
+			throw new \LogicException('Invalid value for LOCAL_LOGIN: ' . $login);
+		}
 
-		// Only login if required
-		if ($login > 0 && ($this->user ?? null) != $login) {
+		if (!$this->user || ($this->user->exists() && $this->user->id() !== $login)) {
 			return $this->create($login);
 		}
 
@@ -370,6 +392,55 @@ class Session extends \KD2\UserSession
 		return $success;
 	}
 
+	public function loginOIDC(): void
+	{
+		$oid = new OpenIDConnect(
+			OIDC_CLIENT_URL,
+			OIDC_CLIENT_ID,
+			OIDC_CLIENT_SECRET,
+			ADMIN_URL . 'login.php?oidc'
+		);
+
+		try {
+			// authenticate with openid connect
+			if (!$oid->authenticate()) {
+				return;
+			}
+		}
+		catch (\RuntimeException $e) {
+			throw new UserException('Erreur dans la connexion OIDC : ' . $e->getMessage(), 0, $e);
+		}
+
+		// fetch user info
+		$info = $oid->getUserInfo();
+
+		$user = ['save' => true,
+			'user' => ['_name' => $info->profile->name ?? ($info->email ?? '')]
+		];
+
+		if (OIDC_CLIENT_MATCH_EMAIL) {
+			if (empty($info->email)) {
+				throw new UserException('Le fournisseur OpenID Connect n\'a pas fourni d\'adresse e-mail dans sa réponse.');
+			}
+
+			$user = Users::getFromLogin($info->email);
+
+			if (!$user) {
+				throw new UserException('Aucun membre trouvé avec l\'adresse e-mail fournie : ' . $info->email);
+			}
+
+			$user = $user->id();
+		}
+		elseif (OIDC_CLIENT_DEFAULT_PERMISSIONS) {
+			$user['permissions'] = OIDC_CLIENT_DEFAULT_PERMISSIONS;
+		}
+		else {
+			$user['permissions'] = ['connect' => self::ACCESS_READ];
+		}
+
+		$this->forceLogin($user);
+	}
+
 	/**
 	 * @overrides
 	 */
@@ -389,7 +460,7 @@ class Session extends \KD2\UserSession
 	 */
 	public function logout(bool $all = false)
 	{
-		$this->_user = null;
+		$this->user = null;
 		$this->_permissions = null;
 		$this->_files_permissions = null;
 
@@ -548,16 +619,6 @@ class Session extends \KD2\UserSession
 		return $s->getUser();
 	}
 
-	public function getUserObject(): ?User
-	{
-		if (isset($this->_user)) {
-			return $this->_user;
-		}
-
-		$this->_user = Users::get($this->user);
-		return $this->_user;
-	}
-
 	/**
 	 * Returns cookie string for PDF printing
 	 */
@@ -579,22 +640,17 @@ class Session extends \KD2\UserSession
 
 	public function getUser(): ?User
 	{
-		if (isset($this->_user)) {
-			return $this->_user;
-		}
-
 		if (!$this->isLogged()) {
 			throw new \LogicException('User is not logged in.');
 		}
 
-		$user = $this->getUserObject();
-
 		// If user does not exist anymore
-		if (!$user) {
+		if ($this->user->exists() && !Users::exists($this->user->id())) {
 			$this->logout();
+			return null;
 		}
 
-		return $this->_user;
+		return $this->user;
 	}
 
 	static public function getUserId(): ?int
@@ -605,16 +661,13 @@ class Session extends \KD2\UserSession
 			return null;
 		}
 
-		return $i->getUser()->id;
-	}
+		$user = $i->getUser();
 
-	public function getPermissions(): array
-	{
-		if (!isset($this->_permissions)) {
-			$this->_permissions = $this->user()->category()->getPermissions();
+		if (!$user) {
+			return null;
 		}
 
-		return $this->_permissions;
+		return $user->id;
 	}
 
 	public function canAccess(string $section, int $required): bool
@@ -623,11 +676,7 @@ class Session extends \KD2\UserSession
 			return false;
 		}
 
-		if (!isset($this->_permissions)) {
-			$this->getPermissions();
-		}
-
-		$perm = $this->_permissions[$section] ?? null;
+		$perm = $this->user->getPermissions()[$section] ?? null;
 
 		if (null === $perm) {
 			throw new \InvalidArgumentException('Unknown section: ' . $section);

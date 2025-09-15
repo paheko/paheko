@@ -15,7 +15,7 @@
 			<td class="num">
 				{$row.number}
 			</td>
-			<th>
+			<th scope="row">
 				{$row.identity}
 			</th>
 			<td class="actions">

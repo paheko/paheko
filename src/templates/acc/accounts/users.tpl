@@ -26,7 +26,7 @@
 	{foreach from=$list->iterate() item="row"}
 		<tr>
 			<td class="num"><a href="{$admin_url}acc/transactions/user.php?id={$row.id}&amp;year={$current_year.id}">{$row.user_number}</a></td>
-			<th><a href="{$admin_url}acc/transactions/user.php?id={$row.id}&amp;year={$current_year.id}">{$row.user_identity}</a></th>
+			<th scope="row"><a href="{$admin_url}acc/transactions/user.php?id={$row.id}&amp;year={$current_year.id}">{$row.user_identity}</a></th>
 			{if $all}
 			<td class="money">
 				{$row.products|raw|money_currency:false}

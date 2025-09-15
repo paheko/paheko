@@ -24,7 +24,7 @@
 					{icon shape="folder"}
 				{/if}
 			</td>
-			<th>
+			<th scope="row">
 				{if $file.dir}
 					{link href="?module=%s&p=%s"|args:$module.name:$file.path label=$file.name}
 				{elseif $file.editable}

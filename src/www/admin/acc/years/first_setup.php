@@ -14,9 +14,13 @@ require_once __DIR__ . '/../../_inc.php';
 $session = Session::getInstance();
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
-$csrf_key = 'first_setup';
+// This form is only for noobs, people who know how to create an accounting chart
+// will have to create their bank accounts manually
+if (Charts::hasCustomCharts()) {
+	Utils::redirect('!acc/years/new.php');
+}
 
-$year = Years::create();
+$csrf_key = 'first_setup';
 
 $data = !empty($_POST) ? $_POST : $_GET;
 $step = $data['step'] = intval($data['step'] ?? 1);
@@ -94,11 +98,9 @@ $form->runIf('save', function () use ($data, $year, $appropriation_account, $acc
 	$db->commit();
 }, $csrf_key, '!acc/years/?msg=WELCOME');
 
-
 if ($step === 2) {
 	$tpl->assign('countries', Chart::COUNTRY_LIST);
-	$tpl->assign('countries_charts', Charts::COUNTRIES_CHARTS);
-	$charts_list = Charts::listForCountry($config->country);
+	$tpl->assign('charts_per_country', Charts::listByCountryFirstSetup());
 }
 elseif ($step === 3) {
 	$accounts ??= [['label' => 'Compte courant', 'balance' => 0]];

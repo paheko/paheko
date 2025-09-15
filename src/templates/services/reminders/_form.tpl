@@ -40,55 +40,55 @@
 				{literal}
 				<table class="list auto">
 					<tr>
-						<th>{{$label}}</th>
+						<th scope="row">{{$label}}</th>
 						<td>Nom de l'activité concernée par le rappel</td>
 					</tr>
 					<tr>
-						<th>{{$fee_label}}</th>
+						<th scope="row">{{$fee_label}}</th>
 						<td>Nom du tarif utilisé lors de la dernière inscription du membre à cette activité</td>
 					</tr>
 					<tr>
-						<th>{{$id_user}}</th>
+						<th scope="row">{{$id_user}}</th>
 						<td>ID du membre concerné par le rappel</td>
 					</tr>
 					<tr>
-						<th>{{$identity}}</th>
+						<th scope="row">{{$identity}}</th>
 						<td>Nom du membre</td>
 					</tr>
 					<tr>
-						<th>{{$email}}</th>
+						<th scope="row">{{$email}}</th>
 						<td>Adresse e-mail utilisée pour l'envoi du rappel au membre</td>
 					</tr>
 					<tr>
-						<th>{{$nb_days}}</th>
+						<th scope="row">{{$nb_days}}</th>
 						<td>Nombre de jours restants avant (ou après) expiration de l'inscription</td>
 					</tr>
 					<tr>
-						<th>{{$reminder_date}}</th>
+						<th scope="row">{{$reminder_date}}</th>
 						<td>Date d'envoi du rappel</td>
 					</tr>
 					<tr>
-						<th>{{$expiry_date}}</th>
+						<th scope="row">{{$expiry_date}}</th>
 						<td>Date d'expiration de l'inscription</td>
 					</tr>
 					<tr>
-						<th>{{$user_amount}}</th>
+						<th scope="row">{{$user_amount}}</th>
 						<td>Montant dû par le membre pour se réinscrire à cette activité</td>
 					</tr>
 					<tr>
-						<th>{{$delay}}</th>
+						<th scope="row">{{$delay}}</th>
 						<td>Nombre de jours défini dans le rappel</td>
 					</tr>
 					<tr>
-						<th>{{$config.org_name}}</th>
+						<th scope="row">{{$config.org_name}}</th>
 						<td>Nom de l'association</td>
 					</tr>
 					<tr>
-						<th>{{$config.org_address}}</th>
+						<th scope="row">{{$config.org_address}}</th>
 						<td>Adresse postale de l'association</td>
 					</tr>
 					<tr>
-						<th>{{$site_url}}</th>
+						<th scope="row">{{$site_url}}</th>
 						<td>Adresse du site web de l'association</td>
 					</tr>
 				</table>

@@ -190,6 +190,7 @@
 		if (window.parent && window.parent.g.dialog) {
 			// Always fullscreen in dialogs
 			code.toggleFullscreen();
+			window.parent.g.toggleDialogFullscreen();
 
 			// Display error message in editor
 			if (msg = document.querySelector('p.error, p.confirm'))

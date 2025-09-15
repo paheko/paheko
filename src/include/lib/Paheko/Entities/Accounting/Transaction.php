@@ -996,7 +996,7 @@ class Transaction extends Entity
 			}
 			elseif ($source['id_year'] === 'match') {
 				if (isset($source['date'])) {
-					$date = self::filterUserDateValue($source['date']);
+					$date = Utils::parseDateTime($source['date'], Date::class);
 				}
 				else {
 					$date = null;
@@ -1539,7 +1539,7 @@ class Transaction extends Entity
 
 		// dt = date
 		if (isset($_GET['dt'])) {
-			$date = Entity::filterUserDateValue($_GET['dt'], Date::class);
+			$date = Utils::parseDateTime($_GET['dt'], Date::class);
 
 			if (null !== $date && $date instanceof Date) {
 				$this->set('date', $date);

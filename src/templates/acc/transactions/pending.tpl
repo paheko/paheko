@@ -22,7 +22,7 @@
 				<td>{$line.date|date_short}</td>
 				<td class="money">{$line.change|abs|raw|money}</td>
 				<td>{$line.reference}</td>
-				<th>{$line.label}</th>
+				<th scope="row">{$line.label}</th>
 				<td class="actions">
 					{if $line.type == Entities\Accounting\Transaction::TYPE_DEBT && ($line.status & Entities\Accounting\Transaction::STATUS_WAITING)}
 						{linkbutton shape="check" label="Régler cette dette" href="!acc/transactions/new.php?payoff=%d"|args:$line.id}

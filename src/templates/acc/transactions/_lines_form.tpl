@@ -37,7 +37,7 @@ assert(!isset($lines_accounts) || is_array($lines_accounts));
 	</tbody>
 	<tfoot>
 		<tr>
-			<th>Total</th>
+			<th scope="row">Total</th>
 			<td class="money">{input type="money" name="debit_total" readonly="readonly" tabindex="-1" }</td>
 			<td class="money">{input type="money" name="credit_total" readonly="readonly" tabindex="-1" }</td>
 			<td colspan="{if count($projects) > 0}3{else}2{/if}" id="lines_message"></td>

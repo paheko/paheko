@@ -18,9 +18,9 @@ $max = max(count($statement->body_left), count($statement->body_right));
 	{if !empty($caption)}<caption>{$caption}</caption>{/if}
 	<thead>
 		<tr>
-			<th colspan="{$colspan}" class="colspan" width="49%">{$statement.caption_left}</th>
+			<th scope="col" colspan="{$colspan}" class="colspan" width="49%">{$statement.caption_left}</th>
 			<td class="spacer"></td>
-			<th colspan="{$colspan}" class="colspan" width="49%">{$statement.caption_right}</th>
+			<th scope="col" colspan="{$colspan}" class="colspan" width="49%">{$statement.caption_right}</th>
 		</tr>
 	{if !empty($year2)}
 		<tr>
@@ -66,7 +66,7 @@ $max = max(count($statement->body_left), count($statement->body_right));
 						{$row.code}
 					{/if}
 				</td>
-				<th>{$row.label}</th>
+				<th scope="row">{$row.label}</th>
 				{if $year2}
 					<td class="money">{$row.balance2|raw|money:false}</td>
 				{elseif $provisional}
@@ -89,7 +89,7 @@ $max = max(count($statement->body_left), count($statement->body_right));
 						{$row.code}
 					{/if}
 				</td>
-				<th>{$row.label}</th>
+				<th scope="row">{$row.label}</th>
 				{if $year2}
 					<td class="money">{$row.balance2|raw|money:false}</td>
 				{elseif $provisional}
@@ -115,7 +115,7 @@ $max = max(count($statement->body_left), count($statement->body_right));
 		?>
 		<tr class="{$class}">
 		{if $row}
-			<th colspan="2">{$row.label}</th>
+			<th colspan="2" scope="row">{$row.label}</th>
 			{if $year2}
 				<td class="money" width="10%">{$row.balance2|raw|money:false}</td>
 			{elseif $provisional}
@@ -131,7 +131,7 @@ $max = max(count($statement->body_left), count($statement->body_right));
 			<td class="spacer"></td>
 		<?php $row = $statement->foot_right[$i] ?? null; ?>
 		{if $row}
-			<th colspan="2">{$row.label}</th>
+			<th colspan="2" scope="row">{$row.label}</th>
 			{if $year2}
 				<td class="money" width="10%">{$row.balance2|raw|money:false}</td>
 			{elseif $provisional}

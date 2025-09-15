@@ -664,12 +664,22 @@ Ceci n'est pas un t</code></pre>
 <li><code>JJ/MM/AA</code></li>
 </ul>
 <h2 id="parse_datetime">parse_datetime</h2>
-<p>Vérifie le format d'une chaîne de texte représentant la date et l'heure et la transforme en chaîne de date et heure standardisée au format <code>AAAA-MM-JJ HH:mm</code>.</p>
+<p>Vérifie le format d'une chaîne de texte représentant la date et l'heure et la transforme en chaîne de date et heure standardisée au format <code>AAAA-MM-JJ HH:mm:ss</code>.</p>
+<p>Renvoie <code>NULL</code> si la variable passée était vide, et <code>FALSE</code> si la date était invalide.</p>
 <p>Les formats acceptés sont :</p>
 <ul>
 <li><code>AAAA-MM-JJ HH:mm:ss</code></li>
+<li><code>AAAA-MM-JJ\THH:mm:ss</code></li>
 <li><code>AAAA-MM-JJ HH:mm</code></li>
 <li><code>JJ/MM/AAAA HH:mm</code></li>
+</ul>
+<p>Il est possible de modifier le format de sortie avec le second argument :</p>
+<pre><code>{{:assign date=$_POST.datetime|parse_datetime:"RFC3339"}}</code></pre>
+<p>Les formats de sortie possibles sont :</p>
+<ul>
+<li><code>DEFAULT</code> (exemple : <code>2005-08-15 15:52</code>)</li>
+<li><code>RFC3339</code> (exemple : <code>2005-08-15T15:52:01+00:00</code>)</li>
+<li><code>LOCAL</code> (exemple : <code>2005-08-15T15:52</code>, utile pour les éléments de formulaire de type datetime-local)</li>
 </ul>
 <h2 id="parse_time">parse_time</h2>
 <p>Vérifie le format d'une chaîne de texte représentant l'heure et la transforme en chaîne de date standardisée au format <code>HH:MM</code>.</p>

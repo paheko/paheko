@@ -136,6 +136,10 @@ table.list tr:nth-child(even).disabled {
     height: 100%;
 }
 
+table.list thead.userOrder th {
+    font-weight: normal;
+}
+
 .userOrder a, .userOrder button {
     text-decoration: none;
     display: inline-flex;

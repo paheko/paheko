@@ -80,9 +80,19 @@ class Module extends Entity
 
 	protected ?\stdClass $_ini;
 
+	public function assertIsValid(): void
+	{
+		$this->assert($this->isValid(), 'Nom unique de module invalide: ' . $this->name);
+	}
+
+	public function isValid(): bool
+	{
+		return (bool) preg_match(self::VALID_NAME_REGEXP, $this->name);
+	}
+
 	public function selfCheck(): void
 	{
-		$this->assert(preg_match(self::VALID_NAME_REGEXP, $this->name), 'Nom unique de module invalide: ' . $this->name);
+		$this->assertIsValid();
 		$this->assert(trim($this->label) !== '', 'Le libellé ne peut rester vide');
 		$this->assert(!isset($this->author_url) || preg_match('!^(?:https?://|mailto:)!', $this->author_url), 'L\'adresse du site de l\'auteur est invalide');
 
@@ -186,8 +196,11 @@ class Module extends Entity
 		$this->set('web', !empty($ini->web));
 		$this->set('home_button', !empty($ini->home_button));
 		$this->set('menu', !empty($ini->menu));
-		$this->set('restrict_section', $restrict_section);
-		$this->set('restrict_level', $restrict_level);
+
+		if (!isset($this->restrict_section) && !isset($this->restrict_level)) {
+			$this->set('restrict_section', $restrict_section);
+			$this->set('restrict_level', $restrict_level);
+		}
 
 		if (!empty($ini->system)) {
 			$this->set('system', true);
@@ -362,7 +375,7 @@ class Module extends Entity
 
 	public function getDataSize(): int
 	{
-		return (int) DB::getInstance()->getTableSize(sprintf('module_data_%s', $this->name));
+		return (int) DB::getInstance()->getTableSize($this->table_name());
 	}
 
 	public function getConfigSize(): int
@@ -564,7 +577,9 @@ class Module extends Entity
 
 	public function deleteData(): void
 	{
-		DB::getInstance()->exec(sprintf('DROP TABLE IF EXISTS module_data_%s; UPDATE modules SET config = NULL WHERE name = \'%1$s\';', $this->name));
+		$db = DB::getInstance();
+		$table_name = $db->quoteIdentifier($this->table_name());
+		$db->exec(sprintf('DROP TABLE IF EXISTS %s; UPDATE modules SET config = NULL WHERE name = %s;', $table_name, $db->quote($this->name)));
 
 		// Delete all files
 		if ($dir = Files::get($this->storage_root())) {

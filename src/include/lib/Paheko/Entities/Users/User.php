@@ -66,7 +66,8 @@ class User extends Entity
 	];
 
 	protected bool $_loading = false;
-	protected Category $_category;
+	protected ?Category $_category = null;
+	protected ?array $_permissions = null;
 
 	public function __construct()
 	{
@@ -337,11 +338,29 @@ class User extends Entity
 			Plugins::fire('user.change.login.after', false, ['user' => $this, 'old_login' => $login_modified]);
 		}
 
+		$this->reloadSessionIfNeeded();
+
 		return true;
 	}
 
-	public function category(): Category
+	protected function reloadSessionIfNeeded(): void
 	{
+		$session = Session::getInstance();
+
+		// Reload session data if the modified user is the logged-in user
+		if ($session->isLogged(false)
+			&& $session->user()
+			&& $session->user()->id === $this->id) {
+			$session->refresh();
+		}
+	}
+
+	public function category(): ?Category
+	{
+		if (!$this->id_category) {
+			return null;
+		}
+
 		$this->_category ??= Categories::get($this->id_category);
 		return $this->_category;
 	}
@@ -783,7 +802,7 @@ class User extends Entity
 	/**
 	 * Save preferences if they have been modified
 	 */
-	public function __destruct()
+	public function savePreferences(): void
 	{
 		// We can't save preferences if user does not exist (eg. LDAP/Forced Login via LOCAL_LOGIN)
 		if (!$this->exists()) {
@@ -795,9 +814,9 @@ class User extends Entity
 			return;
 		}
 
-
 		DB::getInstance()->update(self::TABLE, ['preferences' => json_encode($this->preferences)], 'id = ' . $this->id());
 		$this->clearModifiedProperties(['preferences']);
+		$this->reloadSessionIfNeeded();
 	}
 
 	public function url(): string
@@ -990,14 +1009,39 @@ class User extends Entity
 		$prefix['has_pgp_key'] = !empty($out['pgp_key']);
 		unset($out['password'], $out['otp_secret'], $out['otp_recovery_codes'], $out['pgp_key']);
 
+		$file_fields = array_keys(DynamicFields::getInstance()->fieldsByType('file'));
+
 		foreach ($out as $key => &$value) {
+			// Export date field as string
 			if ($value instanceof Date || $value instanceof \DateTimeInterface) {
 				$value = $this->getAsString($key);
+			}
+			// Export file field as URLs
+			elseif (in_array($key, $file_fields)) {
+				$value = [];
+
+				foreach ($this->listFiles($key) as $file) {
+					$value[] = $file->name;
+				}
 			}
 		}
 
 		unset($value);
 
 		return array_merge($prefix, $out);
+	}
+
+	public function getPermissions(): array
+	{
+		if ($this->id_category) {
+			$this->_permissions ??= $this->category()->getPermissions();
+		}
+
+		return $this->_permissions ?? [];
+	}
+
+	public function setPermissions(array $permissions): void
+	{
+		$this->_permissions = $permissions;
 	}
 }

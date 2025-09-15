@@ -36,7 +36,7 @@
 
 		{foreach from=$list->iterate() item="row"}
 			<tr>
-				<th>{link href="!users/details.php?id=%d"|args:$row.id_user label=$row.identity}</th>
+				<th scope="row">{link href="!users/details.php?id=%d"|args:$row.id_user label=$row.identity}</th>
 				{if $current_list === 'pending'}
 					<td>{$row.expiry_date|date_short}</td>
 				{/if}

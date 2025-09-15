@@ -48,6 +48,20 @@ class Accounts
 		return EntityManager::findOne(Account::class, 'SELECT * FROM @TABLE WHERE code = ? AND id_chart = ?', $code, $this->chart_id);
 	}
 
+	/**
+	 * Return the account ID that is valid for the current chart.
+	 */
+	public function getValidAccountId(int $id): ?int
+	{
+		$db = DB::getInstance();
+
+		if ($db->test(Account::TABLE, 'id = ? AND id_chart = ?', $id, $this->chart_id)) {
+			return $id;
+		}
+
+		return $db->firstColumn('SELECT id FROM acc_accounts WHERE code = (SELECT code FROM acc_accounts WHERE id = ?) AND id_chart = ?;', $id, $this->chart_id) ?: null;
+	}
+
 	static public function getSelector(?int $id): ?array
 	{
 		if (!$id) {

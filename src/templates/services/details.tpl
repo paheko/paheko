@@ -41,7 +41,7 @@ $can_action = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMI
 			<td class="check">{input type="checkbox" name="selected[]" value=$row.id_user}</td>
 			{/if}
 
-			<th><a href="../users/details.php?id={$row.id_user}">{$row.identity}</a></th>
+			<th scope="row"><a href="../users/details.php?id={$row.id_user}">{$row.identity}</a></th>
 			<td>
 				{if $row.status == 1 && $row.end_date}
 					En cours

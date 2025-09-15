@@ -58,6 +58,11 @@ $id_field = DynamicFields::get(DynamicFields::getLoginField());
 $id_field_name = $id_field->label;
 $lock = Log::isLocked();
 
+$form->runIf(OIDC_CLIENT_URL && (isset($_GET['oidc']) || OIDC_CLIENT_BUTTON === null), function () use($session) {
+	$session->loginOIDC();
+	Utils::redirect(ADMIN_URL);
+});
+
 $form->runIf('login', function () use ($id_field_name, $session, $lock, $args, $app_token) {
 	if ($lock == 1) {
 		throw new UserException(sprintf("Vous avez dépassé la limite de tentatives de connexion.\nMerci d'attendre %d minutes avant de ré-essayer de vous connecter.", Log::LOCKOUT_DELAY/60));
@@ -99,7 +104,12 @@ $captcha = $lock == -1 ? Security::createCaptcha(LOCAL_SECRET_KEY, 'fr_FR') : nu
 $ssl_enabled = HTTP::getScheme() == 'https';
 $changed = qg('changed') !== null;
 $redirect = qg('r');
+$oidc_button = null;
 
-$tpl->assign(compact('id_field', 'ssl_enabled', 'changed', 'app_token', 'layout', 'captcha', 'redirect'));
+if (OIDC_CLIENT_BUTTON && OIDC_CLIENT_URL) {
+	$oidc_button = str_replace('%hostname%', parse_url(OIDC_CLIENT_URL, PHP_URL_HOST), OIDC_CLIENT_BUTTON);
+}
+
+$tpl->assign(compact('id_field', 'ssl_enabled', 'changed', 'app_token', 'layout', 'captcha', 'redirect', 'oidc_button'));
 
 $tpl->display('login.tpl');

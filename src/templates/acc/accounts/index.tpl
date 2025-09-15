@@ -24,7 +24,7 @@ use Paheko\Entities\Accounting\Account;
 			<tr>
 				<td></td>
 				<td class="num">Numéro</td>
-				<th>Compte</th>
+				<th scope="col">Compte</th>
 				<td class="money">Solde</td>
 				<td></td>
 				<td></td>
@@ -40,7 +40,7 @@ use Paheko\Entities\Accounting\Account;
 				<tr class="account">
 					<td class="bookmark">{if $account.bookmark}{icon shape="star" title="Compte favori"}{/if}</td>
 					<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$current_year.id}">{$account.code}</a></td>
-					<th><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$current_year.id}">{$account.label}</a></th>
+					<th scope="row"><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$current_year.id}">{$account.label}</a></th>
 					<td class="money">
 						{show_balance account=$account}
 					</td>

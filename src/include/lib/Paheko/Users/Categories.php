@@ -41,7 +41,7 @@ class Categories
 	 */
 	static public function listAssocSafe(Session $session, bool $allow_config = true): array
 	{
-		$perms = $session->getPermissions();
+		$perms = $session->user()->getPermissions();
 		$conditions = '';
 
 		foreach ($perms as $section => $level) {

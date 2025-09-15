@@ -52,7 +52,7 @@
 				<tr data-idx="{$index}" class="account" data-search-code="{$account.code|tolower}" data-search-label="{$account|make_label_searchable:'label':'description'}">
 					<td class="bookmark">{if $account.bookmark}{icon shape="star" title="Compte favori"}{/if}</td>
 					<td class="num">{$account.code}</td>
-					<th>{$account.label}</th>
+					<th scope="row">{$account.label}</th>
 					<td class="desc">{$account.description}</td>
 					<td class="actions">
 						<?php $v = $account->$key; ?>
@@ -83,7 +83,7 @@
 			<tr data-idx="{$iteration}" class="account account-level-{$account->level()}" data-search-code="{$account.code|tolower}" data-search-label="{$account|make_label_searchable:'label':'description'}">
 				<td class="bookmark">{if $account.bookmark}{icon shape="star" title="Compte favori"}{/if}</td>
 				<td class="num">{$account.code}</td>
-				<th>{$account.label}</th>
+				<th scope="row">{$account.label}</th>
 				<td class="desc" width="25%">{$account.description}</td>
 				<td class="actions">
 					<?php $v = $account->$key; ?>

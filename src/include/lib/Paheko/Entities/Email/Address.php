@@ -61,7 +61,7 @@ class Address extends Entity
 	protected \DateTime $added;
 	protected ?\DateTime $last_sent;
 
-	static public function getOptoutURL(string $hash = null): string
+	static public function getOptoutURL(?string $hash = null): string
 	{
 		$hash = hex2bin($hash);
 		$hash = base64_encode($hash);
@@ -134,7 +134,7 @@ class Address extends Entity
 		$this->set('sent_count', $this->sent_count+1);
 	}
 
-	public function setOptout(string $message = null): void
+	public function setOptout(?string $message = null): void
 	{
 		$this->set('status', self::STATUS_OPTOUT);
 		$this->log($message ?? 'Demande de désinscription');
@@ -152,7 +152,7 @@ class Address extends Entity
 		$this->set('log', $log);
 	}
 
-	public function hasBounced(string $type, string $message = null): void
+	public function hasBounced(string $type, ?string $message = null): void
 	{
 		// Treat complaints as opt-out
 		if ($type == 'complaint') {

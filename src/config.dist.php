@@ -54,6 +54,124 @@ namespace Paheko;
 //const OPEN_BASEDIR = 'auto';
 
 /**
+ * Client OpenID Connect
+ *
+ * Ces paramètres permettent de configurer un fournisseur de SSO en utilisant
+ * OpenID Connect (OIDC).
+ *
+ * Note : en cas de connexion via OIDC, aucune authentification à double facteur TOTP
+ * ne sera effectuée.
+ *
+ * Attention à ne pas confondre "Client OIDC" et "Serveur OIDC" :
+ * - Client OIDC : les membres peuvent se connecter à Paheko via un service externe
+ * - Serveur OIDC : les membres peuvent utiliser Paheko pour se connecter à un service externe
+ */
+
+/**
+ * OIDC_CLIENT_BUTTON
+ *
+ * Indique le libellé du bouton de connexion au fournisseur SSO.
+ *
+ * La chaîne `%hostname%` sera remplacée par le nom d'hôte présent dans OIDC_CLIENT_URL
+ *
+ * Si `null` est indiqué, alors l'utilisateur sera obligatoirement renvoyé vers le SSO pour
+ * se connecter (avec une redirection automatique), aucun bouton ne sera affiché.
+ *
+ * @default "Se connecter avec %hostname%"
+ * @var string
+ */
+
+//const OIDC_CLIENT_BUTTON = 'Se connecter avec Google';
+
+/**
+ * OIDC_CLIENT_URL
+ *
+ * Adresse URL du fournisseur SSO OpenID Connect.
+ *
+ * La valeur `null` indique que la connexion via OIDC est désactivée.
+ *
+ * @default null
+ * @var string|null
+ */
+
+//const OIDC_CLIENT_URL = 'https://accounts.google.com/';
+
+/**
+ * OIDC_CLIENT_ID
+ *
+ * Identifiant client pour le fournisseur SSO OpenID Connect.
+ *
+ * @default null
+ * @var string|null
+ */
+
+//const OIDC_CLIENT_ID = 'xxx';
+
+/**
+ * OIDC_CLIENT_SECRET
+ *
+ * Clé secrète du client pour le fournisseur SSO OpenID Connect.
+ *
+ * @default null
+ * @var string|null
+ */
+
+//const OIDC_CLIENT_SECRET = 'yyy';
+
+/**
+ * OIDC_CLIENT_MATCH_EMAIL
+ *
+ * Indiquer `true` ici pour faire correspondre l'adresse e-mail
+ * indiquée par le fournisseur SSO OIDC avec le champ indiqué comme
+ * identifiant de connexion des membres (dans la configuration, par
+ * défaut c'est l'adresse e-mail).
+ *
+ * Si aucun membre ne correspond, la connexion sera refusée.
+ *
+ * Si un membre correspond, alors la connexion sera traitée comme si
+ * le membre s'était connecté de lui-même via la connexion Paheko.
+ * Il aura donc les droits de gestion donnés à sa catégorie de membre.
+ *
+ * Si le membre fait partie d'une catégorie qui n'a pas le droit de se
+ * connecter, la connexion sera refusée.
+ *
+ * Si `false` est indiqué, aucune correspondance ne sera effectuée,
+ * toute connexion via le SSO sera acceptée, et les permissions
+ * spécifiées dans OIDC_CLIENT_DEFAULT_PERMISSIONS seront appliquées.
+ *
+ * @default true
+ * @var bool
+ */
+
+//const OIDC_CLIENT_MATCH_EMAIL = false;
+
+/**
+ * OIDC_CLIENT_DEFAULT_PERMISSIONS
+ *
+ * Indiquer ici un tableau tel que suit pour déterminer les droits
+ * donnés à un membre qui se connecte via le SSO, si OIDC_CLIENT_MATCH_EMAIL
+ * est désactivé. Si OIDC_CLIENT_MATCH_EMAIL est activé, alors cette constante
+ * n'a aucun effet.
+ *
+ * Si OIDC_CLIENT_MATCH_EMAIL est désactivé et que OIDC_CLIENT_DEFAULT_PERMISSIONS
+ * vaut null, alors l'utilisateur pourra se connecter mais n'aura accès à rien.
+ *
+ * Les catégories de permissions sont : users, accounting, documents, web, config.
+ *
+ * Les permissions possibles sont : admin, write, read, none. Une catégorie de
+ * permissions non spécifiée vaut `none`.
+ *
+ * Exemple :
+ * `['users' => 'admin', 'config' => 'admin', 'accounting' => 'read',
+ * 'web' => 'write', 'documents' => 'read']`
+ *
+ * @default null
+ * @var array
+ */
+
+// const OIDC_CLIENT_DEFAULT_PERMISSIONS = ['users' => 'admin', 'config' => 'admin'];
+
+/**
  * LOCAL_LOGIN
  *
  * Forcer la connexion locale

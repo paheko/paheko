@@ -34,6 +34,12 @@ Note : pour des raisons de performances, cette comparaison n'est effectuée que 
 
 # Fonctions
 
+## Fonction haversine_distance
+
+Syntaxe : `haversine_distance(lat1, lon1, lat2, lon2)`
+
+Renvoie la distance en kilomètres entre deux points sur le globe terrestre.
+
 ## Fonction transliterate_to_ascii
 
 Syntaxe : `transliterate_to_ascii(string value)`

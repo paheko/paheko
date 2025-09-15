@@ -2,11 +2,11 @@
 
 namespace Paheko;
 
-use Paheko\Entity;
 use Paheko\Accounting\Years;
 use Paheko\Accounting\Projects;
 use Paheko\Accounting\Accounts;
 use Paheko\Users\Users;
+use Paheko\Utils;
 
 require_once __DIR__ . '/../../_inc.php';
 
@@ -23,11 +23,11 @@ if (qg('year')) {
 		throw new UserException('Exercice inconnu.');
 	}
 
-	if (qg('before') && ($b = Entity::filterUserDateValue(qg('before')))) {
+	if (qg('before') && ($b = Utils::parseDateTime(qg('before')))) {
 		$criterias['before'] = $b;
 	}
 
-	if (qg('after') && ($a = Entity::filterUserDateValue(qg('after')))) {
+	if (qg('after') && ($a = Utils::parseDateTime(qg('after')))) {
 		$criterias['after'] = $a;
 	}
 

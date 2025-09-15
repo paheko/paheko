@@ -87,19 +87,19 @@
 		<table class="list">
 			<thead>
 				<tr>
-					<th colspan="6">Journal du compte (compta)</th>
+					<th scope="col colspan="6">Journal du compte (compta)</th>
 					<td class="separator"></td>
-					<th colspan="4" class="separator">Extrait de compte (banque)</th>
+					<th scope="col" colspan="4" class="separator">Extrait de compte (banque)</th>
 				</tr>
 				<tr>
-					<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>
+					<td class="check"><input type="checkbox" title="Tout cocher / décocher" aria-label="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>
 					<td></td>
 					<td>Date</td>
 					<td class="money">Mouvement</td>
 					<td class="money">Solde cumulé</td>
-					<th style="text-align: right">Libellé</th>
+					<th scope="col" style="text-align: right">Libellé</th>
 					<td class="separator"></td>
-					<th class="separator">Libellé</th>
+					<th scope="col" class="separator">Libellé</th>
 					<td class="money">Mouvement</td>
 					<td class="money">Solde cumulé</td>
 					<td>Date</td>
@@ -111,7 +111,7 @@
 				<tr>
 					<td colspan="4"></td>
 					<td class="money">{if $line.journal.sum > 0}-{/if}{$line.journal.sum|abs|raw|money:false}</td>
-					<th style="text-align: right">Solde au {$line.journal.date|date_short}</th>
+					<th scope="row" style="text-align: right">Solde au {$line.journal.date|date_short}</th>
 					<td class="separator"></td>
 					<td class="separator"></td>
 					<td colspan="3"></td>
@@ -133,7 +133,7 @@
 							{/if}
 						</td>
 						<td class="money">{if $line.journal.running_sum > 0}-{/if}{$line.journal.running_sum|abs|raw|money:false}</td>
-						<th style="text-align: right">{$line.journal.label}</th>
+						<th scope="row" style="text-align: right">{$line.journal.label}</th>
 					{else}
 						<td colspan="5"></td>
 						<td class="actions">
@@ -150,7 +150,7 @@
 						{/if}
 						</td>
 					{if isset($line->csv)}
-						<th class="separator">{$line.csv.label}</th>
+						<th scope="row" class="separator">{$line.csv.label}</th>
 						<td class="money">
 							{$line.csv.amount|raw|money:true:true}
 						</td>

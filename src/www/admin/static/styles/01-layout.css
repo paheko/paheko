@@ -87,6 +87,19 @@ main h1.main {
     margin-bottom: 0.4em;
 }
 
+#skip a {
+    position: fixed;
+    left: -99999rem;
+    z-index: 10000;
+    padding: .5em;
+    background: #fff;
+    color: darkblue;
+}
+
+#skip a:hover, #skip a:focus, #skip a:active {
+    left: 0;
+}
+
 #menu .logo {
     padding: 0;
     min-height: 100px;
@@ -278,7 +291,7 @@ body.sticky, body.sticky #menu {
         background-color: #ddd;
     }
 
-    html.dark nav#menu, html.dark #dialog {
+    html.dark nav#menu {
         filter: invert(100%) hue-rotate(180deg);
     }
 

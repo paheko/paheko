@@ -64,7 +64,7 @@ elseif (qg('payoff')) {
 	$list = explode(',', qg('payoff'));
 
 	// Quick pay-off for debts and credits, directly from a debt/credit details page
-	$payoff = Transactions::createPayoffFrom($list);
+	$payoff = Transactions::createPayoffFrom($list, $current_year);
 	$transaction = $payoff->transaction;
 	$linked_users = $payoff->linked_users;
 	$linked_transactions = $payoff->linked_transactions;

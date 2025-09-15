@@ -5,6 +5,7 @@ namespace Paheko\UserTemplate;
 use Paheko\DB;
 use Paheko\Utils;
 use Paheko\UserException;
+use Paheko\ValidationException;
 
 use Paheko\Users\DynamicFields;
 use Paheko\Email\Addresses;
@@ -294,25 +295,33 @@ EOS;
 		}
 	}
 
-	static public function parse_datetime($value)
+	static public function parse_datetime($value, ?string $format = '')
 	{
+		if ($format === 'RFC3339') {
+			$format = DATE_RFC3339;
+		}
+		elseif ($format === 'LOCAL') {
+			$format = 'Y-m-d\TH:i';
+		}
+		else {
+			$format = 'Y-m-d H:i';
+		}
+
 		if ($value instanceof \DateTimeInterface) {
-			return $value->format('Y-m-d H:i:s');
+			return $value->format($format);
 		}
 
 		if (empty($value) || !is_string($value)) {
 			return null;
 		}
 
-		if (preg_match('!^\d{2}/\d{2}/\d{4}$\s+\d{2}:\d{2}!', $value)) {
-			return \DateTime::createFromFormat('!d/m/Y', $value)->format('Y-m-d H:i');
-		}
-		elseif (preg_match('!^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}(:\d{2})?$!', $value, $match)) {
-			return $value . (isset($match[1]) ? '' : ':00');
-		}
-		else {
+		$value = Utils::parseDateTime($value);
+
+		if ($value === null) {
 			return false;
 		}
+
+		return $value->format($format);
 	}
 
 	static public function parse_time($value)
@@ -349,7 +358,7 @@ EOS;
 	static public function math(string $expression, ... $params)
 	{
 		static $tokens_list = [
-			'function'  => '(?:round|ceil|floor|cos|sin|tan|asin|acos|atan|sinh|cosh|tanh|abs|max|min|exp|sqrt|log10|log|pi|random_int)\(',
+			'function'  => '(?:round|ceil|floor|cos|sin|tan|asin|acos|atan2?|deg2rad|sinh|cosh|tanh|abs|max|min|exp|sqrt|log10|log|pi|random_int)\(',
 			'open'      => '\(',
 			'close'     => '\)',
 			'number'    => '-?\d+(?:[\.]\d+)?',

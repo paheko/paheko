@@ -73,7 +73,7 @@ class Modules
 		}
 
 		foreach ($delete as $name) {
-			self::get($name)->delete();
+			self::get($name, true)->delete();
 		}
 
 		foreach ($existing as $name) {
@@ -191,7 +191,16 @@ class Modules
 	 */
 	static public function list(): array
 	{
-		return EM::getInstance(Module::class)->all('SELECT * FROM @TABLE ORDER BY label COLLATE NOCASE ASC;');
+		$out = [];
+		$i = EM::getInstance(Module::class)->iterate('SELECT * FROM @TABLE ORDER BY label COLLATE NOCASE ASC;');
+
+		foreach ($i as $module) {
+			if ($module->isValid()) {
+				$out[] = $module;
+			}
+		}
+
+		return $out;
 	}
 
 	static public function snippetsAsString(string $snippet, array $variables = []): string
@@ -225,19 +234,37 @@ class Modules
 
 	static public function listForSnippet(string $snippet): array
 	{
-		return EM::getInstance(Module::class)->all('SELECT f.* FROM @TABLE f
+		$out = [];
+
+		$i = EM::getInstance(Module::class)->iterate('SELECT f.* FROM @TABLE f
 			INNER JOIN modules_templates t ON t.id_module = f.id
 			WHERE t.name = ? AND f.enabled = 1
 			ORDER BY f.label COLLATE NOCASE ASC;', $snippet);
+
+		foreach ($i as $module) {
+			if ($module->isValid()) {
+				$out[] = $module;
+			}
+		}
+
+		return $out;
 	}
 
-	static public function get(string $name): ?Module
+	static public function get(string $name, bool $return_invalid = false): ?Module
 	{
+		if (!$return_invalid && !preg_match(Module::VALID_NAME_REGEXP, $name)) {
+			return null;
+		}
+
 		return EM::findOne(Module::class, 'SELECT * FROM @TABLE WHERE name = ?;', $name);
 	}
 
 	static public function isEnabled(string $name): bool
 	{
+		if (!preg_match(Module::VALID_NAME_REGEXP, $name)) {
+			return null;
+		}
+
 		return (bool) EM::getInstance(Module::class)->col('SELECT 1 FROM @TABLE WHERE name = ? AND enabled = 1;', $name);
 	}
 
@@ -262,6 +289,8 @@ class Modules
 			$module->set('enabled', true);
 			$module->save();
 		}
+
+		$module->assertIsValid();
 
 		return $module;
 	}
@@ -288,6 +317,9 @@ class Modules
 		else {
 			$module = self::getWeb();
 		}
+
+		// Make sure the module name is valid
+		$module->assertIsValid();
 
 		// If path ends with trailing slash, then ask for index.html
 		if (!$path || substr($path, -1) == '/') {

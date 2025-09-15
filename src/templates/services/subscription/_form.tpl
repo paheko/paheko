@@ -28,7 +28,7 @@ assert(isset($grouped_services) && is_array($grouped_services));
 								{button shape="delete" onclick="this.parentNode.parentNode.remove();" title="Supprimer de la liste"}
 								{/if}
 							</td>
-							<th>
+							<th scope="row">
 								{$name}
 							</th>
 						</tr>

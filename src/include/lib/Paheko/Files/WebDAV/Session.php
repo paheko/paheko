@@ -30,9 +30,8 @@ class Session extends UserSession
 		}
 
 		$name = DynamicFields::getFirstNameField();
-		$this->_user = (new User)->import([$name => $login . ' (API)']);
+		$this->user = (new User)->import([$name => $login . ' (API)']);
 
-		$this->user = -1;
 		$this->_permissions = [];
 
 		foreach (Category::PERMISSIONS as $perm => $data) {
@@ -151,14 +150,12 @@ class Session extends UserSession
 			return null;
 		}
 
-		$this->_user = Users::get($selector->user_id);
+		$this->user = Users::get($selector->user_id);
 
-		if (!$this->_user) {
+		if (!$this->user) {
 			return null;
 		}
 
-		$this->user = $selector->user_id;
-
-		return $this->_user;
+		return $this->user;
 	}
 }

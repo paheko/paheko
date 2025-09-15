@@ -129,7 +129,13 @@ class Static_Cache
 			$dir = dir($path);
 
 			while($file = $dir->read()) {
-				if (substr($file, 0, 1) === '.' || is_dir($file)) {
+				if (substr($file, 0, 1) === '.') {
+					continue;
+				}
+
+				$file = $path . '/' . $file;
+
+				if (is_dir($file)) {
 					continue;
 				}
 

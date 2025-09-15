@@ -15,7 +15,7 @@
 			<thead>
 				<tr>
 					{if count($years)}
-						<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all" /><label for="f_all" title="Tout cocher / décocher"></label></td>
+						<td class="check"><input type="checkbox" title="Tout cocher / décocher" aria-label="Tout cocher / décocher" id="f_all" /><label for="f_all" title="Tout cocher / décocher"></label></td>
 					{/if}
 					<th scope="col">Tarif</th>
 					<td></td>
@@ -27,7 +27,7 @@
 					{if count($years)}
 						<td class="check">{input type="checkbox" name="check[]" value=$row.id}</td>
 					{/if}
-					<th>{$row.service_label} — {$row.fee_label}</th>
+					<th scope="row">{$row.service_label} — {$row.fee_label}</th>
 					<td class="actions">
 						{linkbutton shape="users" href="!services/fees/details.php?id=%d"|args:$row.id label="Liste des inscrits"}
 						{linkbutton shape="edit" href="!services/fees/edit.php?id=%d"|args:$row.id label="Modifier"}

@@ -1,0 +1,104 @@
+%YAML 1.2
+---
+# http://www.sublimetext.com/docs/3/syntax.html
+# Syntax highlighting for Brindille templates (Paheko)
+name: Brindille
+file_extensions:
+  - tpl
+  - html
+scope: text.html.brindille
+
+contexts:
+  main:
+    - match: ''
+      push: scope:text.html.basic
+      with_prototype:
+        - match: '(\{\{%?)\*'
+          captures:
+            1: punctuation.definition.comment.brindille
+          push:
+            - meta_scope: comment.block.brindille
+            - match: '\*(%?\}\})'
+              pop: true
+        - match: '(\{\{(?!\s)|\{%\s?)'
+          captures:
+            1: punctuation.section.embedded.begin.brindille
+          push:
+            - clear_scopes: 1
+            - meta_scope: source.brindille
+            - match: '(\s%\}\}|(?!\s)\}\})'
+              captures:
+                1: punctuation.section.embedded.end.brindille
+              pop: true
+            - include: strings
+            - include: variables
+            - include: lang
+
+  lang:
+    - match: '\+|\-|\*|:|#'
+      scope: keyword.operator.math.brindille
+    - match: '\&(?=\s)'
+      scope: keyword.operator.bitwise.brindille
+    - match: '(!==|!=|!|=>|<=|>=|<|>|===|==|%|&&|\|\|)'
+      scope: keyword.operator.brindille
+    - match: '\,'
+      scope: punctuation.separator.brindille
+    - match: '\b(TRUE|FALSE|true|false|null|NULL)\b'
+      scope: constant.language.brindille
+    - match: '\b(if|else|elseif)\b'
+      scope: keyword.control.brindille
+    - match: '\b([0-9]+)\b'
+      scope: constant.numeric.brindille
+    - match: '\b([a-zA-Z0-9_\[\]\.]+)(=)'
+      scope: meta.attribute.brindille
+      captures:
+        0: variable.parameter.brindille
+        2: keyword.operator.assignment.brindille
+    - match: '\b([a-z_]+)\b'
+      scope: support.function.built-in.brindille
+    - match: '='
+      scope: keyword.operator.assignment.brindille
+
+    - match: '(\|)([a-z-_]+)'
+      captures:
+        1: keyword.operator.logical.pipe.brindille
+        2: support.function.variable-modifier.custom.brindille
+
+  strings:
+    - match: "'"
+      captures:
+        0: punctuation.definition.string.begin.brindille
+      push:
+        - meta_scope: string.quoted.single.brindille
+        - match: "'"
+          captures:
+            0: punctuation.definition.string.end.brindille
+          pop: true
+        - match: '\\.'
+          scope: constant.character.escape.brindille
+    - match: '"'
+      captures:
+        0: punctuation.definition.string.begin.brindille
+      push:
+        - meta_scope: string.quoted.double.brindille
+        - match: '"'
+          captures:
+            0: punctuation.definition.string.end.brindille
+          pop: true
+        - match: '\\.'
+          scope: constant.character.escape.brindille
+
+  variables:
+    - match: '\b(\$)(_POST|_GET)\.'
+      scope: variable.other.global.brindille
+      captures:
+        1: punctuation.definition.variable.brindille
+    - match: '(\$)([a-zA-Z0-9_]+)\b'
+      scope: variable.other.brindille
+      captures:
+        1: punctuation.definition.variable.brindille
+    - match: '(\.)([a-zA-Z0-9_]+)\b'
+      scope: variable.other.brindille
+      captures:
+        1: punctuation.accessor.brindille
+        2: meta.property.object.brindille

@@ -42,7 +42,7 @@
 
 	{foreach from=$list->iterate() item="row"}
 		<tr{if $row.archived} class="disabled"{/if}>
-			<th>{$row.label} {if $row.archived}<em>(archivée)</em>{/if}</th>
+			<th scope="row">{$row.label} {if $row.archived}<em>(archivée)</em>{/if}</th>
 			<td>{$row.fee}</td>
 			<td>{$row.date|date_short}</td>
 			<td>{$row.expiry|date_short}</td>

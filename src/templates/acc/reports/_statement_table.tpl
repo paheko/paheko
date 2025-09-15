@@ -21,7 +21,7 @@
 				{else}{$account.code}
 				{/if}
 			</td>
-			<th>{$account.label}</th>
+			<th scope="row">{$account.label}</th>
 			{if isset($year2)}
 				<td class="money">{$account.balance2|raw|money:false}</td>
 			{/if}

@@ -79,7 +79,7 @@ trait FilePermissionsTrait
 
 	public function canMoveTo(string $destination, ?Session $session = null): bool
 	{
-		return self::canMove($session) && $this->canDelete() && self::canCreate($destination);
+		return self::canMove($session) && self::canCreate($destination);
 	}
 
 	public function canMove(?Session $session = null): bool

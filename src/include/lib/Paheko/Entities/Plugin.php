@@ -21,6 +21,8 @@ use const Paheko\{PLUGINS_ROOT, WWW_URL, ROOT, ADMIN_URL};
 
 class Plugin extends Entity
 {
+	const VALID_NAME_REGEXP = '/^' . Plugins::NAME_REGEXP . '$/';
+
 	const META_FILE = 'plugin.ini';
 	const CONFIG_FILE = 'admin/config.php';
 	const INDEX_FILE = 'admin/index.php';
@@ -71,16 +73,20 @@ class Plugin extends Entity
 
 	public function selfCheck(): void
 	{
-		$this->assert(preg_match('/^' . Plugins::NAME_REGEXP . '$/', $this->name), 'Nom unique d\'extension invalide: ' . $this->name);
+		$this->assert(preg_match(self::VALID_NAME_REGEXP, $this->name), 'Nom unique d\'extension invalide: ' . $this->name);
+
+		$this->assert($this->hasFile(self::META_FILE), 'Le code du plugin n\'est pas disponible (fichier plugin.ini absent)');
+
+		if (0 !== strpos(realpath($this->path(self::META_FILE)), realpath(PLUGINS_ROOT))) {
+			throw new \RuntimeException('Security alert: plugin.ini file seems to be outside PLUGINS_ROOT');
+		}
+
 		$this->assert(isset($this->label) && trim($this->label) !== '', sprintf('%s : le nom de l\'extension ("name") ne peut rester vide', $this->name));
 		$this->assert(isset($this->label) && trim($this->version) !== '', sprintf('%s : la version ne peut rester vide', $this->name));
 
-		if ($this->hasCode() || $this->enabled) {
-			$this->assert($this->hasFile(self::META_FILE), 'Le fichier plugin.ini est absent');
-			$this->assert(!$this->menu || $this->hasFile(self::INDEX_FILE), 'Le fichier admin/index.php n\'existe pas alors que la directive "menu" est activée.');
-			$this->assert(!$this->home_button || $this->hasFile(self::INDEX_FILE), 'Le fichier admin/index.php n\'existe pas alors que la directive "home_button" est activée.');
-			$this->assert(!$this->home_button || $this->hasFile(self::ICON_FILE), 'Le fichier admin/icon.svg n\'existe pas alors que la directive "home_button" est activée.');
-		}
+		$this->assert(!$this->menu || $this->hasFile(self::INDEX_FILE), 'Le fichier admin/index.php n\'existe pas alors que la directive "menu" est activée.');
+		$this->assert(!$this->home_button || $this->hasFile(self::INDEX_FILE), 'Le fichier admin/index.php n\'existe pas alors que la directive "home_button" est activée.');
+		$this->assert(!$this->home_button || $this->hasFile(self::ICON_FILE), 'Le fichier admin/icon.svg n\'existe pas alors que la directive "home_button" est activée.');
 
 		$this->assert(!isset($this->restrict_section) || in_array($this->restrict_section, Session::SECTIONS, true), 'Restriction de section invalide');
 		$this->assert(!isset($this->restrict_level) || in_array($this->restrict_level, Session::ACCESS_LEVELS, true), 'Restriction de niveau invalide');
@@ -93,14 +99,33 @@ class Plugin extends Entity
 		$this->assert(Plugins::isAllowed($this->name), 'Cette extension est désactivée par l\'hébergeur');
 	}
 
-	public function setBrokenMessage(string $str)
-	{
-		$this->_broken_message = $str;
-	}
-
 	public function getBrokenMessage(): ?string
 	{
+		$this->checkIfBroken();
 		return $this->_broken_message;
+	}
+
+	public function checkIfBroken(): void
+	{
+		if ($this->_broken_message !== null) {
+			return;
+		}
+
+		try {
+			$this->selfCheck();
+		}
+		catch (ValidationException $e) {
+			$this->_broken_message = $e->getMessage();
+			return;
+		}
+
+		$this->_broken_message = '';
+	}
+
+	public function isBroken(): bool
+	{
+		$this->checkIfBroken();
+		return $this->_broken_message !== '';
 	}
 
 	public function getINIProperties(): ?\stdClass
@@ -165,8 +190,14 @@ class Plugin extends Entity
 		$this->set('author_url', $ini->author_url ?? null);
 		$this->set('home_button', !empty($ini->home_button));
 		$this->set('menu', !empty($ini->menu));
-		$this->set('restrict_section', $restrict_section);
-		$this->set('restrict_level', $restrict_level);
+
+		// Only set restricted access if user didn't set it
+		if (!isset($this->restrict_section) && !isset($this->restrict_level)) {
+			$this->set('restrict_section', $restrict_section);
+			$this->set('restrict_level', $restrict_level);
+		}
+
+		$this->_broken_message = null;
 
 		return true;
 	}
@@ -372,14 +403,22 @@ class Plugin extends Entity
 
 	public function call(string $file, bool $allow_protected = false): void
 	{
+		if ($this->isBroken()) {
+			throw new UserException(sprintf('The "%s" file cannot be opened as the plugin is broken: %s', $file, $this->getBrokenMessage()));
+		}
+
+		if (!$this->enabled) {
+			throw new UserException('The file cannot be opened as the plugin is disabled: ' . $this->name);
+		}
+
 		$file = ltrim($file, './');
 
 		if (preg_match('!(?:\.\.|[/\\\\]\.|\.[/\\\\])!', $file)) {
-			throw new UserException('Chemin de fichier incorrect.');
+			throw new UserException('Invalid file path', 403);
 		}
 
 		if (!$allow_protected && in_array($file, self::PROTECTED_FILES)) {
-			throw new UserException('Le fichier ' . $file . ' ne peut être appelé par cette méthode.');
+			throw new UserException('This file cannot be called with this method', 403);
 		}
 
 		$path = $this->path($file);
@@ -390,12 +429,12 @@ class Plugin extends Entity
 				return;
 			}
 			else {
-				throw new UserException(sprintf('Le fichier "%s" n\'existe pas dans le plugin "%s"', $file, $this->name));
+				throw new UserException(sprintf('Le fichier "%s" n\'existe pas dans le plugin "%s"', $file, $this->name), 404);
 			}
 		}
 
 		if (is_dir($path)) {
-			throw new UserException(sprintf('Sécurité : impossible de lister le répertoire "%s" du plugin "%s".', $file, $this->name));
+			throw new UserException('Cannot list directory of plugin', 403);
 		}
 
 		$is_private = (0 === strpos($file, 'admin/'));
@@ -462,22 +501,22 @@ class Plugin extends Entity
 		}
 	}
 
-	public function isAvailable(): bool
+	public function checkCanBeEnabled(): bool
 	{
-		return $this->hasFile(self::META_FILE);
+		$this->updateFromINI();
+
+		if ($this->isBroken()) {
+			return false;
+		}
+
+		return true;
 	}
 
 	public function assertCanBeEnabled(): void
 	{
-		if (!Plugins::isAllowed($this->name)) {
-			throw new \RuntimeException('This plugin is not allowed: ' . $this->name);
+		if (!$this->checkCanBeEnabled()) {
+			throw new UserException($this->getBrokenMessage());
 		}
-
-		if (!$this->hasFile(self::META_FILE)) {
-			throw new UserException(sprintf('Le plugin "%s" n\'est pas une extension Paheko : fichier plugin.ini manquant.', $this->name));
-		}
-
-		$this->updateFromINI();
 	}
 
 	public function enable(): void

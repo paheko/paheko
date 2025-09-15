@@ -28,7 +28,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 <nav class="tabs">
 	<aside>
 		<form method="post" action="search.php" target="_dialog" data-disable-progress="1">
-			{input type="text" name="q" size=25 placeholder="Rechercher un document" title="Rechercher dans les documents"}
+			{input type="text" name="q" size=25 placeholder="Rechercher un document" title="Rechercher dans les documents" aria-label="Rechercher dans les documents"}
 			{button shape="search" type="submit" title="Rechercher"}
 		</form>
 	{if !$context_specific_root}
@@ -130,7 +130,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 					</td>
 				{/if}
 				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$item.id}">#{$item.id}</a></td>
-				<th><a href="?path={$item.path}">{$item.label}</a></th>
+				<th scope="row"><a href="?path={$item.path}">{$item.label}</a></th>
 				<td>{$item.date|date_short}</td>
 				<td>{$item.reference}</td>
 				<td>{$item.year}</td>
@@ -147,7 +147,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 					</td>
 				{/if}
 				<td class="num"><a href="{$admin_url}users/details.php?id={$item.id}">{$item.number}</a></td>
-				<th><a href="?path={$item.path}">{$item.identity}</a></th>
+				<th scope="row"><a href="?path={$item.path}">{$item.identity}</a></th>
 				<td class="actions">
 					{linkbutton href="!docs/?path=%s"|args:$item.path label="Fichiers" shape="menu"}
 					{linkbutton href="!users/details.php?=%d"|args:$item.id label="Fiche membre" shape="user"}
@@ -162,7 +162,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 							</td>
 						{/if}
 						<td class="icon"><a href="?id={$item.hash_id}">{icon shape="folder"}</a></td>
-						<th colspan="3"><a href="?id={$item.hash_id}">{$item.name}</a></th>
+						<th scope="row" colspan="3"><a href="?id={$item.hash_id}">{$item.name}</a></th>
 						<td class="actions">
 						{if $dir->canCreateHere() || $item->canDelete()}
 							{linkmenu label="Modifier…" shape="edit"}
@@ -193,7 +193,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 							{$item->link($session, 'icon', false)|raw}
 						</td>
 					{/if}
-						<th>
+						<th scope="row">
 							{$item->link($session, null, false)|raw}
 						</th>
 						<td class="size">{$item.size|size_in_bytes}</td>
@@ -234,7 +234,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 		{if $can_check}
 		<tfoot>
 			<tr>
-				<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all2" /><label title="Tout cocher / décocher" for="f_all2"></label></td>
+				<td class="check"><input type="checkbox" title="Tout cocher / décocher" aria-label="Tout cocher / décocher" id="f_all2" /><label title="Tout cocher / décocher" for="f_all2"></label></td>
 				<td class="actions" colspan="6">
 					<em>Pour les fichiers sélectionnés&nbsp;:</em>
 					<input type="hidden" name="parent" value="{$dir.path}" />

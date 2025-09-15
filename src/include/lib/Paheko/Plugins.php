@@ -60,6 +60,10 @@ class Plugins
 
 	static public function getPath(string $name): ?string
 	{
+		if (!preg_match(Plugin::VALID_NAME_REGEXP, $name)) {
+			return null;
+		}
+
 		if (file_exists(PLUGINS_ROOT . '/' . $name)) {
 			return PLUGINS_ROOT . '/' . $name;
 		}
@@ -204,6 +208,10 @@ class Plugins
 
 	static public function get(string $name): ?Plugin
 	{
+		if (!preg_match(Plugin::VALID_NAME_REGEXP, $name)) {
+			return null;
+		}
+
 		return EM::findOne(Plugin::class, 'SELECT * FROM @TABLE WHERE name = ?;', $name);
 	}
 
@@ -212,16 +220,9 @@ class Plugins
 		$list = EM::getInstance(Plugin::class)->all('SELECT * FROM @TABLE ORDER BY label COLLATE NOCASE ASC;');
 
 		foreach ($list as $key => $p) {
-			try {
-				$p->selfCheck();
-			}
-			catch (ValidationException $e) {
-				if (self::removeBroken($p->name)) {
-					unset($list[$key]);
-				}
-				else {
-					$p->setBrokenMessage($e->getMessage());
-				}
+			// Remove old broken plugins from list
+			if (self::removeBroken($p->name)) {
+				unset($list[$key]);
 			}
 		}
 
@@ -252,6 +253,11 @@ class Plugins
 
 		foreach ($existing as $name) {
 			$f = self::get($name);
+
+			if (!$f) {
+				continue;
+			}
+
 			try {
 				$f->updateFromINI();
 				$f->save();
@@ -266,26 +272,18 @@ class Plugins
 
 	static public function getInstallable(string $name): ?Plugin
 	{
-		if (!file_exists(PLUGINS_ROOT . '/' . $name) && !file_exists(PLUGINS_ROOT . '/' . $name . '.tar.gz')) {
+		if (!preg_match(Plugin::VALID_NAME_REGEXP, $name)) {
+			return null;
+		}
+
+		if (!file_exists(PLUGINS_ROOT . '/' . $name)
+			&& !file_exists(PLUGINS_ROOT . '/' . $name . '.tar.gz')) {
 			return null;
 		}
 
 		$p = new Plugin;
 		$p->name = $name;
-
-		if (!$p->hasFile($p::META_FILE)) {
-			throw new UserException(sprintf('Le plugin "%s" n\'est pas une extension Paheko : fichier plugin.ini manquant.', $name));
-		}
-
-		$p->updateFromINI();
-
-		try {
-			$p->selfCheck();
-		}
-		catch (ValidationException $e) {
-			$p->setBrokenMessage($e->getMessage());
-		}
-
+		$p->checkCanBeEnabled();
 		return $p;
 	}
 
@@ -309,11 +307,15 @@ class Plugins
 				continue;
 			}
 
-			if (is_dir($file) && file_exists($file . '/' . Plugin::META_FILE)) {
+			if (is_dir($file)
+				&& preg_match(Plugin::VALID_NAME_REGEXP, Utils::basename($file))
+				&& file_exists($file . '/' . Plugin::META_FILE)) {
 				$file = basename($file);
 				$name = $file;
 			}
-			elseif (substr($file, -7) == '.tar.gz' && file_exists('phar://' . $file . '/' . Plugin::META_FILE)) {
+			elseif (substr($file, -7) == '.tar.gz'
+				&& preg_match(Plugin::VALID_NAME_REGEXP, substr(Utils::basename($file), 0, -7))
+				&& file_exists('phar://' . $file . '/' . Plugin::META_FILE)) {
 				$file = basename($file);
 				$name = substr($file, 0, -7);
 			}
@@ -362,8 +364,13 @@ class Plugins
 		$i = 0;
 
 		foreach (self::listInstalled() as $plugin) {
-			// Ignore plugins if code is no longer available
-			if (!$plugin->isAvailable() || !self::isAllowed($plugin->name)) {
+			// Ignore plugins if code is no longer available, broken, or not allowed
+			if ($plugin->isBroken()) {
+				continue;
+			}
+
+			// Don't upgrade disabled plugins
+			if (!$plugin->enabled) {
 				continue;
 			}
 

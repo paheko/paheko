@@ -221,6 +221,11 @@ class DynamicList implements \Countable
 		$this->conditions = $conditions;
 	}
 
+	public function addConditions(string $conditions)
+	{
+		$this->conditions .= $conditions;
+	}
+
 	public function setColumns(array $columns)
 	{
 		$this->columns = $columns;
@@ -596,6 +601,8 @@ class DynamicList implements \Countable
 			else {
 				$u->setPreference('list_' . $hash, ['o' => $order, 'd' => $desc]);
 			}
+
+			$u->savePreferences();
 		}
 
 		if ($order && array_key_exists($order, $this->columns)) {

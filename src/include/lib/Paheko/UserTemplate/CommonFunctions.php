@@ -4,7 +4,6 @@ namespace Paheko\UserTemplate;
 
 use Paheko\Config;
 use Paheko\DB;
-use Paheko\Entity;
 use Paheko\Template;
 use Paheko\Utils;
 use Paheko\ValidationException;
@@ -42,7 +41,7 @@ class CommonFunctions
 
 	static public function input(array $params)
 	{
-		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'max_file_size', 'copy', 'suffix', 'prefix_title', 'prefix_help', 'prefix_required', 'datalist'];
+		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'max_file_size', 'copy', 'suffix', 'prefix_title', 'prefix_help', 'prefix_required', 'datalist', 'html_label'];
 
 		// Extract params and keep attributes separated
 		$attributes = array_diff_key($params, array_flip($params_list));
@@ -124,12 +123,7 @@ class CommonFunctions
 
 		if ($type === 'date' || $type === 'time') {
 			if ((is_string($current_value) && !preg_match('!^\d+:\d+$!', $current_value)) || is_int($current_value)) {
-				try {
-					$current_value = Entity::filterUserDateValue((string)$current_value);
-				}
-				catch (ValidationException $e) {
-					$current_value = null;
-				}
+				$current_value = Utils::parseDateTime((string)$current_value);
 			}
 
 			if (is_object($current_value) && $current_value instanceof \DateTimeInterface) {
@@ -147,6 +141,10 @@ class CommonFunctions
 
 		$attributes['id'] = 'f_' . preg_replace('![^a-z0-9_-]!i', '', $name);
 		$attributes['name'] = $name;
+
+		if (!empty($help)) {
+			$attributes['aria-describedby'] = 'help_' . $attributes['id'];
+		}
 
 		if (!isset($attributes['autocomplete']) && ($type == 'money' || $type == 'password')) {
 			$attributes['autocomplete'] = 'off';
@@ -328,7 +326,7 @@ class CommonFunctions
 				$radio,
 				$attributes['id'],
 				$label,
-				isset($params['help']) ? '<p class="help">' . nl2br(htmlspecialchars($params['help'])) . '</p>' : ''
+				isset($params['help']) ? sprintf('<p class="help" id="%s">%s</p>', 'help_' . $attributes['id'], nl2br(htmlspecialchars($params['help']))) : ''
 			);
 
 			return $prefix . $input;
@@ -402,7 +400,7 @@ class CommonFunctions
 
 			if (null !== $current_value && (is_array($current_value) || is_object($current_value))) {
 				foreach ($current_value as $v => $l) {
-					if (empty($l) || trim($l) === '') {
+					if (empty($l) || is_array($l) || is_object($l) || trim((string)$l) === '') {
 						continue;
 					}
 
@@ -429,10 +427,6 @@ class CommonFunctions
 				$current_value = Utils::money_format($current_value, ',', '');
 			}
 
-			if ((string) $current_value === '0') {
-				$current_value = '';
-			}
-
 			$currency = Config::getInstance()->currency;
 			$input = sprintf('<nobr><input type="text" pattern="\s*-?[0-9 ]+([.,][0-9]{1,2})?\s*" inputmode="decimal" size="8" %s value="%s" /><b>%s</b></nobr>', $attributes_string, htmlspecialchars((string) $current_value), $currency);
 		}
@@ -457,7 +451,7 @@ class CommonFunctions
 		// No label? then we only want the input without the widget
 		if (empty($label)) {
 			if (!array_key_exists('label', $params) && ($type == 'radio' || $type == 'checkbox')) {
-				$input .= sprintf('<label for="%s"></label>', $attributes['id']);
+				$input .= sprintf('<label for="%s" aria-label="%s"></label>', $attributes['id'], htmlspecialchars($attributes['title'] ?? ''));
 			}
 
 			return $input;
@@ -471,7 +465,7 @@ class CommonFunctions
 			$out .= sprintf('<dd>%s %s', $input, $label);
 
 			if (isset($help)) {
-				$out .= sprintf(' <em class="help">(%s)</em>', htmlspecialchars($help));
+				$out .= sprintf(' <em class="help" id="%s">(%s)</em>', 'help_' . $attributes['id'], htmlspecialchars($help));
 			}
 
 			$out .= '</dd>';
@@ -484,7 +478,7 @@ class CommonFunctions
 			}
 
 			if (isset($help)) {
-				$out .= sprintf('<dd class="help">%s</dd>', nl2br(htmlspecialchars($help)));
+				$out .= sprintf('<dd class="help" id="%s">%s</dd>', 'help_' . $attributes['id'], nl2br(htmlspecialchars($help)));
 			}
 		}
 
@@ -510,6 +504,15 @@ class CommonFunctions
 
 		$html .= htmlspecialchars($params['label'] ?? '');
 		unset($params['label']);
+
+		// Set aria-label when title is defined, for screen readers
+		// aria-label
+		if (!empty($params['title'])) {
+			$params['aria-label'] = $params['title'];
+		}
+		else {
+			$params['aria-hidden'] = 'true';
+		}
 
 		self::setIconAttribute($params);
 
@@ -590,6 +593,10 @@ class CommonFunctions
 
 		$params['class'] .= ' icn-btn';
 
+		if (isset($params['title'])) {
+			$params['aria-label'] = $params['title'];
+		}
+
 		// Remove NULL params
 		$params = array_filter($params, fn($a) => !is_null($a));
 
@@ -626,7 +633,7 @@ class CommonFunctions
 			return '<i class="icon">' . $params['icon_html'] . '</i>';
 		}
 
-		return sprintf('<svg class="icon"><use xlink:href="%s#img" href="%1$s#img"></use></svg> ',
+		return sprintf('<svg class="icon" aria-hidden="true"><use xlink:href="%s#img" href="%1$s#img"></use></svg> ',
 			htmlspecialchars(Utils::getLocalURL($params['icon']))
 		);
 	}

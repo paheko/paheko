@@ -233,6 +233,12 @@ class AdvancedSearch extends A_S
 			'null'  => true,
 		];
 
+		$columns['date_updated'] = [
+			'label' => 'Date de modification de la fiche',
+			'type'  => 'date',
+			'null'  => true,
+		];
+
 		return $columns;
 	}
 

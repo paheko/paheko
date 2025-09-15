@@ -21,7 +21,7 @@
 			<td rowspan="{$transaction.lines|count}" class="num" data-spreadsheet-type="string">{if $transaction.id}<a href="{$admin_url}acc/transactions/details.php?id={$transaction.id}">#{$transaction.id}</a>{/if}</td>
 			<td rowspan="{$transaction.lines|count}" data-spreadsheet-type="string">{$transaction.reference}</td>
 			<td rowspan="{$transaction.lines|count}" data-spreadsheet-type="date" data-spreadsheet-value="{$transaction.date|date:'Y-m-d'}">{$transaction.date|date_short}</td>
-			<th rowspan="{$transaction.lines|count}" data-spreadsheet-type="string">{$transaction.label}</th>
+			<th scope="row" rowspan="{$transaction.lines|count}" data-spreadsheet-type="string">{$transaction.label}</th>
 			{if !empty($with_linked_users)}<td rowspan="{$transaction.lines|count}">{$transaction.linked_users}</td>{/if}
 		{foreach from=$transaction.lines key="k" item="line"}
 			{if $k > 0}<tr>{/if}

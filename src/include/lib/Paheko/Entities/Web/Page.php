@@ -293,7 +293,10 @@ class Page extends Entity
 	{
 		$dir = null;
 
-		if (!$this->exists() || $this->isModified('status')) {
+		// Set default inherited status value
+		// This might be overwritten by updateChildrenInheritedStatus just after save
+		// as we don't know the status of the parent category at this point.
+		if (!isset($this->inherited_status)) {
 			$this->set('inherited_status', $this->status);
 		}
 
@@ -307,7 +310,9 @@ class Page extends Entity
 		}
 
 		$update_search = $this->isModified('content') || $this->isModified('title');
-		$update_children = ($this->isModified('status') && $this->type === self::TYPE_CATEGORY) || $this->isModified('id_parent');
+		$update_children = $this->isModified('status')
+			|| $this->isModified('id_parent')
+			|| !$this->exists();
 
 		parent::save($selfcheck);
 

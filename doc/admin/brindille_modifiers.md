@@ -735,13 +735,28 @@ Les formats acceptés sont :
 
 ## parse_datetime
 
-Vérifie le format d'une chaîne de texte représentant la date et l'heure et la transforme en chaîne de date et heure standardisée au format `AAAA-MM-JJ HH:mm`.
+Vérifie le format d'une chaîne de texte représentant la date et l'heure et la transforme en chaîne de date et heure standardisée au format `AAAA-MM-JJ HH:mm:ss`.
+
+Renvoie `NULL` si la variable passée était vide, et `FALSE` si la date était invalide.
 
 Les formats acceptés sont :
 
 * `AAAA-MM-JJ HH:mm:ss`
+* `AAAA-MM-JJ\THH:mm:ss`
 * `AAAA-MM-JJ HH:mm`
 * `JJ/MM/AAAA HH:mm`
+
+Il est possible de modifier le format de sortie avec le second argument :
+
+```
+{{:assign date=$_POST.datetime|parse_datetime:"RFC3339"}}
+```
+
+Les formats de sortie possibles sont :
+
+* `DEFAULT` (exemple : `2005-08-15 15:52`)
+* `RFC3339` (exemple : `2005-08-15T15:52:01+00:00`)
+* `LOCAL` (exemple : `2005-08-15T15:52`, utile pour les éléments de formulaire de type datetime-local)
 
 ## parse_time
 
