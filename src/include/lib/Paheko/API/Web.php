@@ -8,6 +8,7 @@ use Paheko\Entities\Web\Page;
 use Paheko\Entities\Files\File;
 use Paheko\Users\Session;
 use Paheko\APIException;
+use Paheko\ValidationException;
 
 trait Web
 {

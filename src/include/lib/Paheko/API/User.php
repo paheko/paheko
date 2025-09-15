@@ -13,6 +13,9 @@ use Paheko\APIException;
 use Paheko\Services\Subscriptions;
 use Paheko\Users\Session;
 use Paheko\Entity;
+use Paheko\Utils;
+use Paheko\CSV_Custom;
+use const Paheko\CACHE_ROOT;
 
 trait User
 {
