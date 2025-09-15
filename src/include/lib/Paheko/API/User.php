@@ -10,6 +10,8 @@ use Paheko\Users\Import as UsersImport;
 use Paheko\Search;
 use Paheko\Entities\Search as SE;
 use Paheko\APIException;
+use Paheko\UserException;
+use Paheko\ValidationException;
 use Paheko\Services\Subscriptions;
 use Paheko\Users\Session;
 use Paheko\Entity;
@@ -73,7 +75,12 @@ trait User
 			}
 
 			if (isset($this->params['password'])) {
-				$user->importSecurityForm(false, ['password' => $this->params['password'], 'password_confirmed' => $this->params['password']]);
+				try {
+					$user->setNewPassword([$this->params['password']], false);
+				}
+				catch (ValidationException $e) {
+					throw new APIException($e->getMessage(), 400, $e);
+				}
 			}
 
 			$user->save();

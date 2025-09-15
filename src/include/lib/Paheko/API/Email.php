@@ -5,6 +5,7 @@ namespace Paheko\API;
 use Paheko\Email\Queue;
 use Paheko\Entities\Email\Message;
 use Paheko\APIException;
+use Paheko\Users\Session;
 
 use const Paheko\DISABLE_EMAIL_SENDING_API;
 

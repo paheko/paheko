@@ -246,7 +246,7 @@ class API
 		}
 
 		header("Content-Type: application/json; charset=utf-8", true);
-		echo $this->exportJSON($in);
+		$this->exportJSON($in);
 		return null;
 	}
 

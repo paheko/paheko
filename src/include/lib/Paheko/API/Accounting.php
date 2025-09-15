@@ -12,6 +12,7 @@ use Paheko\Entities\Accounting\Transaction;
 use Paheko\APIException;
 use Paheko\Utils;
 use Paheko\Users\Session;
+use Paheko\Files\Files;
 
 trait Accounting
 {
@@ -225,7 +226,7 @@ trait Accounting
 				}
 
 				if (!$account) {
-					throw new APIException('Unknown account id or code.', 400, $e);
+					throw new APIException('Unknown account id or code.', 400);
 				}
 
 				$list = $account->listJournal($year->id, false);
