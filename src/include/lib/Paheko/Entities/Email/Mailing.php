@@ -280,7 +280,7 @@ class Mailing extends Entity
 		return isset($this->body) && false !== strpos($this->body, '{{') && false !== strpos($this->body, '}}');
 	}
 
-	public function getPreview(int $id = null): string
+	public function getPreview(?int $id = null): string
 	{
 		$db = DB::getInstance();
 
@@ -313,7 +313,7 @@ class Mailing extends Entity
 		return Render::render($render, null, $body);
 	}
 
-	public function getHTMLPreview(int $recipient = null, bool $append_footer = false): string
+	public function getHTMLPreview(?int $recipient = null, bool $append_footer = false): string
 	{
 		$html = $this->getPreview($recipient);
 		$tpl = new UserTemplate('web/email.html');

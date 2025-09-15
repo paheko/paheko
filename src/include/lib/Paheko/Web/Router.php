@@ -35,7 +35,7 @@ class Router
 		'avatars',
 	];
 
-	static public function getRequestURI(string $uri = null): string
+	static public function getRequestURI(?string $uri = null): string
 	{
 		$uri ??= !empty($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
 		$uri = parse_url($uri, \PHP_URL_PATH);
@@ -46,7 +46,7 @@ class Router
 		return $uri;
 	}
 
-	static public function route(string $uri = null): void
+	static public function route(?string $uri = null): void
 	{
 		$uri = self::getRequestURI($uri);
 
