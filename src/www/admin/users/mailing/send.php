@@ -18,11 +18,17 @@ if ($mailing->sent) {
 }
 
 $csrf_key = 'mailing_send';
+$is_similar = $mailing->isSimilarToOtherRecentMailing();
 
-$form->runIf('send', function() use ($mailing) {
+$form->runIf('send', function() use ($mailing, $is_similar) {
+	if ($is_similar
+		&& empty($_POST['confirm_send'])) {
+		throw new UserException('La case de confirmation doit être cochée pour effectuer l\'envoi.');
+	}
+
 	$mailing->send();
 }, $csrf_key, '!users/mailing/details.php?sent&id=' . $mailing->id);
 
-$tpl->assign(compact('mailing', 'csrf_key'));
+$tpl->assign(compact('mailing', 'csrf_key', 'is_similar'));
 
 $tpl->display('users/mailing/send.tpl');

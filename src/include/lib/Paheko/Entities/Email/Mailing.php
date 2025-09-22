@@ -183,6 +183,39 @@ class Mailing extends Entity
 		return $out;
 	}
 
+	public function isSimilarToOtherRecentMailing(): bool
+	{
+		$total = $this->countRecipients();
+
+		if ($total <= 20) {
+			$delay = 7;
+		}
+		elseif ($total <= 50) {
+			$delay = 10;
+		}
+		else {
+			$delay = 14;
+		}
+
+		// If 70% of recipients are the same, it's likely this mailing targets the same recipients
+		$threshold = intval($total * 0.70);
+
+		$sql = sprintf('SELECT COUNT(r1.id) AS count
+			FROM mailings_recipients r1
+			INNER JOIN mailings m ON m.id = r1.id_mailing
+			INNER JOIN mailings_recipients r2 ON r2.id_email = r1.id_email AND r2.id_mailing = %d
+			WHERE m.sent >= datetime(\'now\', \'-%d days\')
+			GROUP BY m.id', $this->id(), $delay);
+
+		foreach (DB::getInstance()->iterate($sql) as $row) {
+			if ($row->count >= $threshold) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	public function getRecipientsList(): DynamicList
 	{
 		$db = DB::getInstance();
