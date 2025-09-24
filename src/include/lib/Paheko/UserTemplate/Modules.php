@@ -21,6 +21,7 @@ use const Paheko\ADMIN_URL;
 
 use KD2\DB\EntityManager as EM;
 use KD2\ZipReader;
+use KD2\ErrorManager;
 
 class Modules
 {
@@ -226,7 +227,15 @@ class Modules
 				continue;
 			}
 
-			$out[$module->name] = $module->fetch($snippet, $variables);
+			try {
+				$content = $module->fetch($snippet, $variables);
+			}
+			catch (\RuntimeException $e) {
+				ErrorManager::reportExceptionSilent($e);
+				$content = sprintf('Le module "%s" a rencontré une erreur.', $module->name);
+			}
+
+			$out[$module->name] = $content;
 		}
 
 		return array_filter($out, fn($a) => trim($a) !== '');
