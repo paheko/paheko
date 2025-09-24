@@ -53,6 +53,25 @@ if ((empty($uri) || $uri === '/') && !empty($_GET['un'])) {
 	Utils::redirect('!optout.php?' . http_build_query($params));
 	return;
 }
+// Handle redirect (rd) URLs for emails: .../?rd=XXXXX
+elseif ((empty($uri) || $uri === '/') && !empty($_GET['rd'])) {
+	$r = Emails::redirectURL($_GET['rd']);
+
+	$header = '<!DOCTYPE html><meta charset="utf-8" /><style type="text/css">html { height: 100vh; display: flex; justify-content: center; align-items: center; text-align: center; } body { font-family: sans-serif;  }</style><body>';
+
+	if ($r === null) {
+		http_response_code(400);
+		echo $header;
+		echo '<h1>Adresse invalide</h1>';
+	}
+	else {
+		echo $header;
+		echo '<h2>Merci de bien vouloir cliquer sur l\'adresse suivante pour être redirigé à l\'adresse demandée&nbsp;:</h2>';
+		printf('<h1><a href="%s" rel="noreferrer noopener nofollow">%1$s</a></h1>', htmlspecialchars($r));
+	}
+
+	return;
+}
 
 // Call router
 Router::route();

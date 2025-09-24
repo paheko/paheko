@@ -17,7 +17,7 @@ use Paheko\Web\Render\Render;
 
 use Paheko\Files\Files;
 
-use const Paheko\{USE_CRON, MAIL_SENDER, MAIL_RETURN_PATH, DISABLE_EMAIL};
+use const Paheko\{USE_CRON, MAIL_SENDER, MAIL_RETURN_PATH, DISABLE_EMAIL, WWW_URL, ADMIN_URL, SECRET_KEY};
 use const Paheko\{SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURITY, SMTP_HELO_HOSTNAME};
 
 use KD2\SMTP;
@@ -190,6 +190,10 @@ class Emails
 			}
 			else {
 				$content_html = $html;
+			}
+
+			if ($context === self::CONTEXT_BULK) {
+				$content_html = self::replaceExternalLinksInHTML($content_html);
 			}
 
 			if (!$is_system) {
@@ -814,4 +818,83 @@ class Emails
 		return sprintf('"%s" <%s>', $name, $email);
 	}
 
+	/**
+	 * Redirect to external resource
+	 * @return exit|null|string Will return a string if the signed link has expired but is still valid
+	 */
+	static public function redirectURL(string $str): ?string
+	{
+		$params = explode(':', $str, 3);
+
+		if (count($params) !== 3) {
+			return null;
+		}
+
+		if (!ctype_digit($params[1])) {
+			return null;
+		}
+
+		if (strlen($params[0]) !== 40) {
+			return null;
+		}
+
+		$hash = hash_hmac('sha1', $params[1] . $params[2], SECRET_KEY);
+
+		$url = 'https://' . $params[2];
+
+		if ($hash !== $params[0]) {
+			return null;
+		}
+
+		// If the link has expired, the user should be prompted to redirect
+		if ($params[1] < time()) {
+			return $url;
+		}
+
+		Utils::redirect($url);
+		return null;
+	}
+
+	/**
+	 * Sign (HMAC) external links in mailing body,
+	 * to make sure that we are using the same URL everywhere
+	 * and limit the number of external domains used.
+	 */
+	static public function encodeURL(string $url): string
+	{
+		$parts = parse_url($url);
+
+		if (empty($parts['scheme'])
+			|| ($parts['scheme'] !== 'http' && $parts['scheme'] !== 'https')) {
+			return $url;
+		}
+
+		$config = Config::getInstance();
+
+		$my_hosts = [
+			parse_url(WWW_URL, PHP_URL_HOST),
+			parse_url(ADMIN_URL, PHP_URL_HOST),
+		];
+
+		// Don't do redirects for URLs from the same domain name
+		if (in_array($parts['host'], $my_hosts)) {
+			return $url;
+		}
+
+		$url = preg_replace('!^https?://!', '', $url);
+		$expiry = time() + 3600*24*365;
+		$hash = hash_hmac('sha1', $expiry . $url, SECRET_KEY);
+
+		$param = sprintf('%s:%s:%s', $hash, $expiry, $url);
+		return WWW_URL . '?rd=' . rawurlencode($param);
+	}
+
+	static public function replaceExternalLinksInHTML(string $html): string
+	{
+		$html = preg_replace_callback('!(?<=\b(?:href|src)=")(https?://.*?)(?=")!', function ($match) {
+			return self::encodeURL($match[1]);
+		}, $html);
+
+		return $html;
+	}
 }
