@@ -891,8 +891,8 @@ class Emails
 
 	static public function replaceExternalLinksInHTML(string $html): string
 	{
-		$html = preg_replace_callback('!(?<=\b(?:href|src)=")(https?://.*?)(?=")!', function ($match) {
-			return self::encodeURL($match[1]);
+		$html = preg_replace_callback('!(\b(?:href|src)=")(https?://.*?)(?=")!', function ($match) {
+			return $match[1] . self::encodeURL($match[2]);
 		}, $html);
 
 		return $html;
