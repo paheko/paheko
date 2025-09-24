@@ -323,11 +323,9 @@ class Mailing extends Entity
 
 		$r = $db->firstColumn($sql, ...$args);
 
-		if (!$r) {
-			throw new UserException('Cette adresse ne fait pas partie des destinataires');
+		if ($r) {
+			$r = json_decode($r, true);
 		}
-
-		$r = json_decode($r, true);
 
 		$body = $this->getBody();
 
