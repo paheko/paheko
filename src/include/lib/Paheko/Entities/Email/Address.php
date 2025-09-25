@@ -30,7 +30,7 @@ class Address extends Entity
 	const STATUS_SOFT_BOUNCE_LIMIT_REACHED = -2;
 	const STATUS_HARD_BOUNCE = -3;
 	const STATUS_OPTOUT = -4;
-	const STATUS_SPAM = -5;
+	const STATUS_COMPLAINT = -5;
 
 	const STATUS_LIST = [
 		self::STATUS_UNKNOWN => 'OK',
@@ -39,7 +39,7 @@ class Address extends Entity
 		self::STATUS_SOFT_BOUNCE_LIMIT_REACHED => 'Trop d\'erreurs',
 		self::STATUS_HARD_BOUNCE => 'Échec',
 		self::STATUS_OPTOUT => 'Refus',
-		self::STATUS_SPAM => 'Spam',
+		self::STATUS_COMPLAINT => 'Plainte',
 	];
 
 	const STATUS_COLORS = [
@@ -49,7 +49,7 @@ class Address extends Entity
 		self::STATUS_SOFT_BOUNCE_LIMIT_REACHED => 'darkorange',
 		self::STATUS_HARD_BOUNCE => 'darkred',
 		self::STATUS_OPTOUT => 'palevioletred',
-		self::STATUS_SPAM => 'darkmagenta',
+		self::STATUS_COMPLAINT => 'darkmagenta',
 	];
 
 	protected int $id;
@@ -57,7 +57,9 @@ class Address extends Entity
 	protected int $status = self::STATUS_UNKNOWN;
 	protected int $sent_count = 0;
 	protected int $bounce_count = 0;
-	protected ?string $log;
+	protected bool $accepts_messages = true;
+	protected bool $accepts_reminders = true;
+	protected bool $accepts_mailings = false;
 	protected \DateTime $added;
 	protected ?\DateTime $last_sent;
 
@@ -138,6 +140,9 @@ class Address extends Entity
 	{
 		$this->set('status', self::STATUS_OPTOUT);
 		$this->log($message ?? 'Demande de désinscription');
+		$this->set('accepts_messages', false);
+		$this->set('accepts_reminders', false);
+		$this->set('accepts_mailings', false);
 	}
 
 	public function log(string $message): void
@@ -156,7 +161,7 @@ class Address extends Entity
 	{
 		// Treat complaints as opt-out
 		if ($type == 'complaint') {
-			$this->set('optout', true);
+			$this->set('status', self::STATUS_COMPLAINT);
 			$this->appendFailLog($message ?? "Un signalement de spam a été envoyé par le destinataire.");
 		}
 		elseif ($type == 'hard') {
@@ -181,14 +186,14 @@ class Address extends Entity
 	{
 		$optout = false;
 
-		if ($this->isModified('optout')) {
+		if ($this->isModified('accepts_mailings') && !$this->accepts_mailings) {
 			$optout = true;
 		}
 
 		$return = parent::save($selfcheck);
 
 		if ($return && $optout) {
-			// Delete all specific optouts when opting out of everything
+			// Delete all specific optouts when opting out of mailings
 			DB::getInstance()->preparedQuery('DELETE FROM mailings_optouts WHERE email_hash = ?;', $this->hash);
 		}
 

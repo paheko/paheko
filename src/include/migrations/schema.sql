@@ -110,20 +110,20 @@ CREATE TABLE IF NOT EXISTS searches
 	label TEXT NOT NULL,
 	description TEXT NULL,
 	updated TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(updated) IS NOT NULL AND datetime(updated) = updated),
-	target TEXT NOT NULL, -- "users" ou "accounting"
-	type TEXT NOT NULL, -- "json" ou "sql"
+	target TEXT NOT NULL, -- "users" or "accounting"
+	type TEXT NOT NULL, -- "json" or "sql"
 	content TEXT NOT NULL
 );
 
 
 CREATE TABLE IF NOT EXISTS compromised_passwords_cache
--- Cache des hash de mots de passe compromis
+-- Cache of compromised passwords from HIBP
 (
 	hash TEXT NOT NULL PRIMARY KEY
 );
 
 CREATE TABLE IF NOT EXISTS compromised_passwords_cache_ranges
--- Cache des préfixes de mots de passe compromis
+-- Cache of ranges of compromised passwords from HIBP
 (
 	prefix TEXT NOT NULL PRIMARY KEY,
 	date INTEGER NOT NULL
@@ -139,12 +139,26 @@ CREATE TABLE IF NOT EXISTS emails_addresses (
 	status INTEGER NOT NULL,
 	bounce_count INTEGER NOT NULL DEFAULT 0,
 	sent_count INTEGER NOT NULL DEFAULT 0,
-	log TEXT NULL,
 	last_sent TEXT NULL,
+	accepts_messages INTEGER NOT NULL DEFAULT 1,
+	accepts_reminders INTEGER NOT NULL DEFAULT 1,
+	accepts_mailings INTEGER NOT NULL DEFAULT 0,
 	added TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS emails_hash ON emails_addresses (hash);
+
+CREATE TABLE IF NOT EXISTS emails_addresses_events (
+-- Events for each email address (message sent, bounce, optout, etc.)
+	id INTEGER NOT NULL PRIMARY KEY,
+	id_email INTEGER NOT NULL REFERENCES emails_addresses(id) ON DELETE CASCADE,
+	date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(date) IS NOT NULL AND datetime(date) = date),
+	type TEXT NULL,
+	details TEXT NULL,
+	details_encoded TEXT NULL -- JSON details for when consent has been granted or removed
+);
+
+CREATE INDEX IF NOT EXISTS emails_addresses_events_id ON emails_addresses_events (id_email);
 
 CREATE TABLE IF NOT EXISTS emails_queue (
 -- List of emails waiting to be sent
