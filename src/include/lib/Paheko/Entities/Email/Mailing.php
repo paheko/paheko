@@ -9,6 +9,7 @@ use Paheko\DynamicList;
 use Paheko\Entity;
 use Paheko\Log;
 use Paheko\UserException;
+use Paheko\Utils;
 use Paheko\Email\Emails;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Users;
@@ -16,6 +17,8 @@ use Paheko\UserTemplate\UserTemplate;
 use Paheko\Web\Render\Render;
 
 use Paheko\Entities\Users\DynamicField;
+
+use const Paheko\{WWW_URL, ADMIN_URL};
 
 use DateTime;
 use stdClass;
@@ -59,6 +62,21 @@ class Mailing extends Entity
 			$this->assert(trim($this->sender_email) !== '', 'L\'adresse e-mail de l\'expéditeur est manquante.');
 			$this->assert(Email::isAddressValid($this->sender_email), 'L\'adresse e-mail de l\'expéditeur est invalide.');
 		}
+	}
+
+	public function importForm(?array $source = null)
+	{
+		$source ??= $_POST;
+
+		if (isset($source['subject'])) {
+			$this->assert(mb_strlen($source['subject']) >= 8, 'Le sujet ne peut faire moins de 8 caractères.');
+
+			// Remove characters that might look like spammy stuff at the end and start of string
+			$source['subject'] = trim($source['subject'], ' -#!$=_"\'.?*');
+		}
+
+
+		parent::importForm($source);
 	}
 
 	public function populate(string $target, ?int $target_id = null): void
@@ -409,5 +427,68 @@ class Mailing extends Entity
 		DB::getInstance()->preparedQuery($sql, $this->id());
 
 		Log::add(Log::SENT, ['entity' => get_class($this), 'id' => $this->id()]);
+	}
+
+	public function getDelivrabilityHints(): array
+	{
+		if (!$this->body) {
+			return [];
+		}
+
+		$html = $this->getPreview();
+		$out = [];
+
+		$regexp = sprintf('/\bhref="(?!%s|%s)/', preg_quote(WWW_URL, '/'), preg_quote(ADMIN_URL, '/'));
+		$count = preg_match_all($regexp, $html);
+
+		if ($count > 3) {
+			$out['too_many_links'] = 'Il y a plus de 3 liens dans le corps du message. Il vaux mieux limiter à 3 liens maximum.';
+		}
+
+		$regexp = '!\bhref="https?://(?:www\.)?(tinyurl\.com|t\.co|bit\.ly|buff\.ly|short\.io|goo\.gl)!';
+
+		if (preg_match($regexp, $html, $match)) {
+			$out['url_shorteners'] = sprintf('Il semble que le message contienne un lien utilisant le raccourcisseur d\'adresse "%s".', $match[1]);
+		}
+
+		$uppercase = preg_match_all('!\p{Lu}{4,}!u', $this->subject);
+
+		if ($uppercase) {
+			$out['caps'] = 'Le sujet contient des mots en majuscule.';
+		}
+
+		if (substr_count($this->subject, '!')) {
+			$out['exclamation_mark'] = 'Le sujet contient des points d\'exclamation.';
+		}
+
+		$regexp = '!danger|urgent|alert|gratuit|cadeau|cado|rabais|r[ée]duction|cash|bravo|gagn|vite|promo'
+			. '|bitcoin|crypto|ethereum|btc|free|win|gift!iu';
+
+		if (preg_match($regexp, $this->subject, $match)) {
+			$out['spam_word'] = sprintf('Le sujet contient le mot "%s" qui est souvent utilisé dans les spams.', $match[0]);
+		}
+
+		if (!preg_match('/^[^\p{Ll}]*?(\p{Lu})/u', $this->subject)) {
+			$out['no_uppercase'] = 'Le sujet ne contient pas de majuscule sur le premier mot.';
+		}
+
+		$count = preg_match_all('!src="(https?://[^"]*)"!', $html, $matches);
+
+		if ($count > 3) {
+			$out['too_many_images'] = 'Le message contient plus de 3 images.';
+		}
+
+		foreach ($matches[1] as $match) {
+			if (!Utils::isLocalURL($match[1])) {
+				$out['external_image'] = 'Le message contient des images provenant de sites externes.';
+				break;
+			}
+		}
+
+		if (preg_match('!alt=""!', $html)) {
+			$out['missing_alt'] = 'Au moins une image n\'a pas de texte alternatif.';
+		}
+
+		return $out;
 	}
 }

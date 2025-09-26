@@ -17,7 +17,8 @@ if (qg('preview') !== null) {
 	return;
 }
 
-$tpl->assign(compact('mailing'));
+$hints = $mailing->sent ? null : $mailing->getDelivrabilityHints();
+$tpl->assign(compact('mailing', 'hints'));
 
 $tpl->assign('custom_css', [BASE_URL . 'content.css']);
 $tpl->assign('sent', null !== qg('sent'));

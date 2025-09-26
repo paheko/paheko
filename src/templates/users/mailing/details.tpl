@@ -12,6 +12,16 @@
 
 {if $sent}
 	<p class="confirm block">L'envoi du message a bien commencé. Il peut prendre quelques minutes avant d'avoir été expédié à tous les destinataires.</p>
+{elseif !empty($hints)}
+	<div class="alert block">
+		<h3>Il y a des problèmes dans ce message&nbsp;:</h3>
+		<ul>
+		{foreach from=$hints item="message"}
+			<li>{$message}</li>
+		{/foreach}
+		</ul>
+		<p>Ces problèmes peuvent mener à ce que ce message termine dans le dossier <em>Indésirables</em> de vos destinataires, ou même à ce que le message soit refusé ou supprimé.<br /><strong>Cela peut aussi mener au blocage de vos futurs envois.</strong></p>
+	</div>
 {/if}
 
 {form_errors}
