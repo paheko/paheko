@@ -869,18 +869,8 @@ class Emails
 			return $url;
 		}
 
-		$config = Config::getInstance();
-
-		$my_hosts = [
-			parse_url(WWW_URL, PHP_URL_HOST),
-			parse_url(ADMIN_URL, PHP_URL_HOST),
-			$config->org_web ? parse_url($config->org_web, PHP_URL_HOST) : null,
-		];
-
-		$my_hosts = array_filter($my_hosts);
-
 		// Don't do redirects for URLs from the same domain name
-		if (in_array($parts['host'], $my_hosts)) {
+		if (Utils::isLocalURL($url)) {
 			return $url;
 		}
 

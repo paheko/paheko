@@ -496,6 +496,22 @@ class Utils
 		}
 	}
 
+	static public function isLocalURL(string $url): bool
+	{
+		$config = Config::getInstance();
+
+		$my_hosts = [
+			parse_url(WWW_URL, PHP_URL_HOST),
+			parse_url(ADMIN_URL, PHP_URL_HOST),
+			$config->org_web ? parse_url($config->org_web, PHP_URL_HOST) : null,
+		];
+
+		$my_hosts = array_filter($my_hosts);
+		$host = parse_url($url, PHP_URL_HOST);
+
+		return in_array($host, $my_hosts);
+	}
+
 	static public function getRequestURI(): ?string
 	{
 		if (!empty($_SERVER['REQUEST_URI']))
