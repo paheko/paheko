@@ -614,12 +614,12 @@ namespace Paheko;
  * Utilisation de cron pour les tâches automatiques
  *
  * Si "true" on s'attend à ce qu'une tâche automatisée appelle
- * les scripts suivants:
- * - scripts/cron.php toutes les 24 heures (envoi des rappels de cotisation,
+ * les commandes suivants:
+ * - bin/paheko cron toutes les 24 heures (envoi des rappels de cotisation,
  * création des sauvegardes)
- * - scripts/emails.php toutes les 5 minutes environ (envoi des emails en attente)
+ * - bin/paheko queue run toutes les minutes (envoi des emails en attente)
  *
- * Si "false", les actions de scripts/cron.php seront effectuées quand une personne
+ * Si "false", les actions de la commande "cron" seront effectuées quand une personne
  * se connecte. Et les emails seront envoyés instantanément (ce qui peut ralentir ou
  * planter si un message a beaucoup de destinataires).
  *
@@ -796,8 +796,8 @@ namespace Paheko;
  * Si on définit 'abcd' ici, il faudra faire une requête comme ceci :
  * curl -F 'message=@/tmp/message.eml' https://bounce:abcd@monasso.com/admin/handle_bounce.php
  *
- * En alternative le serveur de mail peut aussi appeler le script
- * 'scripts/handle_bounce.php'
+ * En alternative le serveur de mail peut aussi appeler la commande
+ * "bin/paheko queue bounce" avec le contenu du message en STDIN.
  *
  * Défaut : null (l'API handlebounce est désactivée)
  *
