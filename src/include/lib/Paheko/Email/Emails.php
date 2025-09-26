@@ -874,7 +874,10 @@ class Emails
 		$my_hosts = [
 			parse_url(WWW_URL, PHP_URL_HOST),
 			parse_url(ADMIN_URL, PHP_URL_HOST),
+			$config->org_web ? parse_url($config->org_web, PHP_URL_HOST) : null,
 		];
+
+		$my_hosts = array_filter($my_hosts);
 
 		// Don't do redirects for URLs from the same domain name
 		if (in_array($parts['host'], $my_hosts)) {
@@ -891,8 +894,24 @@ class Emails
 
 	static public function replaceExternalLinksInHTML(string $html): string
 	{
-		$html = preg_replace_callback('!(\b(?:href|src)=")(https?://.*?)(?=")!', function ($match) {
-			return $match[1] . self::encodeURL($match[2]);
+		// Replace external links with redirect URL
+		// But don't trigger phishing detection for external links
+		// eg. <a href="https://example.org/">https://example.org/</a>
+		// shouldn't be changed to
+		// <a href="https://paheko.example.org/?rd=example.org">https://example.org/</a>
+		// so we are replacing the text of the link as well
+		$html = preg_replace_callback('!(<a[^>]*href=")([^"]*)("[^>]*>)(.*)</a>!U', function ($match) {
+			$text = $match[4];
+
+			$url = self::encodeURL($match[2]);
+
+			// Only replace content if URL is external
+			if ($match[2] === $match[4]
+				&& $match[2] !== $url) {
+				$text = '[cliquer ici]';
+			}
+
+			return $match[1] . $url . $match[3] . $text . '</a>';
 		}, $html);
 
 		return $html;
