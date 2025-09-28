@@ -204,7 +204,7 @@ CREATE TABLE IF NOT EXISTS mailings_recipients (
 	id INTEGER NOT NULL PRIMARY KEY,
 	id_mailing INTEGER NOT NULL REFERENCES mailings (id) ON DELETE CASCADE,
 	email TEXT NULL,
-	id_email TEXT NULL REFERENCES emails_addresses (id) ON DELETE CASCADE,
+	id_email INTEGER NULL REFERENCES emails_addresses (id) ON DELETE CASCADE,
 	extra_data TEXT NULL
 );
 
