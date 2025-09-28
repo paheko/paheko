@@ -348,7 +348,9 @@ class Mailing extends Entity
 		$body = $this->getBody();
 
 		if ($body instanceof UserTemplate) {
-			$body->assignArray($r, null, false);
+			if (is_array($r)) {
+				$body->assignArray($r, null, false);
+			}
 
 			try {
 				$body = $body->fetch();
