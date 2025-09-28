@@ -850,7 +850,13 @@ class Transaction extends Entity
 		}
 
 		if (isset($source['type'])) {
-			$this->set('type', (int)$source['type']);
+			$type = (int)$source['type'];
+
+			if (!array_key_exists($type, self::TYPES_NAMES)) {
+				throw new ValidationException('Invalid type');
+			}
+
+			$this->set('type', $type);
 		}
 
 		// Simple two-lines transaction
@@ -859,7 +865,13 @@ class Transaction extends Entity
 				throw new ValidationException('Montant non précisé');
 			}
 
-			$accounts = $this->getTypesDetails($source)[$this->type]->accounts;
+			$details = $this->getTypesDetails($source)[$this->type] ?? null;
+
+			if (!isset($details)) {
+				throw new \LogicException('No details found for type: ' . $this->type);
+			}
+
+			$accounts = $details->accounts;
 
 			// either supply debit/credit keys or simple accounts
 			if (!isset($source['debit'], $source['credit'])) {
