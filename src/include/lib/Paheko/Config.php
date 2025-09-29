@@ -326,7 +326,7 @@ class Config extends Entity
 			return null;
 		}
 
-		$url = WWW_URI . self::FILES[$key];
+		$url = WWW_URL . self::FILES[$key];
 
 		if ($thumb_size) {
 			$url .= '.' . $thumb_size . '.webp';
