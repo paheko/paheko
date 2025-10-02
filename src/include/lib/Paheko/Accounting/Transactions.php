@@ -81,6 +81,7 @@ class Transactions
 			}
 
 			$transaction->save();
+			$transaction->updateLinkedTransactions($ids);
 			$ids = implode(',', $ids);
 			$db->exec(sprintf('UPDATE acc_transactions SET status = (status | %d) WHERE id IN (%s);', Transaction::STATUS_DEPOSITED, $ids));
 			$db->commit();
