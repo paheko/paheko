@@ -135,6 +135,7 @@ class Plugin extends Entity
 		}
 
 		if (!$this->hasFile(self::META_FILE)) {
+			$this->_broken_message = 'Le fichier plugin.ini est absent';
 			return null;
 		}
 
@@ -142,7 +143,8 @@ class Plugin extends Entity
 			$ini = Utils::parse_ini_file($this->path(self::META_FILE), false);
 		}
 		catch (\RuntimeException $e) {
-			throw new ValidationException(sprintf('Le fichier plugin.ini est invalide pour "%s" : %s', $this->name, $e->getMessage()), 0, $e);
+			$this->_broken_message = sprintf('Le fichier plugin.ini est invalide : %s', $e->getMessage());
+			return null;
 		}
 
 		if (empty($ini)) {
@@ -171,8 +173,10 @@ class Plugin extends Entity
 			return false;
 		}
 
-		if (!empty($ini->min_version)) {
-			$this->assert(version_compare(\Paheko\paheko_version(), $ini->min_version, '>='), sprintf('L\'extension "%s" nécessite Paheko version %s ou supérieure.', $this->name, $ini->min_version));
+		if (!empty($ini->min_version)
+			&& !version_compare(\Paheko\paheko_version(), $ini->min_version, '>=')) {
+			$this->_broken_message = sprintf('L\'extension "%s" nécessite Paheko version %s ou supérieure.', $this->name, $ini->min_version);
+			return false;
 		}
 
 		$restrict_section = null;
