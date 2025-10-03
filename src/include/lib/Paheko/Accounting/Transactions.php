@@ -380,12 +380,14 @@ class Transactions
 			}
 
 			// Make sure account ID is valid for this chart
-			$line->id_account = $accounts->getValidAccountId($id_account);
+			$valid_id_account = $accounts->getValidAccountId($id_account);
 
-			if (!$line->id_account) {
+			if (!$valid_id_account) {
 				$account = $accounts::get($id_account);
 				throw new UserException(sprintf('Le compte "%s — %s" n\'existe pas dans le plan comptable de l\'année sélectionnée.', $account->code, $account->label));
 			}
+
+			$line->id_account = $valid_id_account;
 
 			$new->addLine($line);
 		}
