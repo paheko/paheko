@@ -334,6 +334,7 @@ class Files
 
 		$list->orderBy('name', false);
 		$list->setEntity(File::class);
+		$list->setPageSize(500);
 
 		// Don't take conditions for saving preferences hash
 		$list->togglePreferenceHashElement('conditions', false);
