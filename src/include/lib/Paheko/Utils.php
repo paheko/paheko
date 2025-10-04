@@ -1764,73 +1764,9 @@ class Utils
 		return sprintf('prince --http-timeout=3 --pdf-profile="PDF/A-3b" --pdf-author=%s', Utils::escapeshellarg($org_name));
 	}
 
-	/**
-	 * Displays a PDF from a string, only works when PDF_COMMAND constant is set to "prince"
-	 * @param  string $str HTML string
-	 * @return void
-	 */
-	static public function streamPDF(string $str): void
-	{
-		if (!PDF_COMMAND) {
-			throw new \LogicException('PDF generation is disabled');
-		}
-
-		$str = self::appendCookieToURLs($str);
-		$str = preg_replace('!(<html.*?)class="!s', '$1class="pdf ', $str);
-
-		if (PDF_COMMAND === 'auto') {
-			// Try to see if there's a plugin
-			$in = ['string' => $str];
-
-			$signal = Plugins::fire('pdf.stream', true, $in);
-
-			if ($signal && $signal->isStopped()) {
-				return;
-			}
-
-			unset($signal, $in);
-		}
-
-		// Only Prince handles using STDIN and STDOUT
-		if (PDF_COMMAND != 'prince') {
-			$file = self::filePDF($str);
-			readfile($file);
-			unlink($file);
-			return;
-		}
-
-		// 3 seconds is plenty enough to fetch resources, right?
-		$cmd = self::getPrinceCommand() . ' -o - -';
-
-		// Prince is fast, right? Fingers crossed
-		self::exec($cmd, 10, $str, fn ($data) => print($data));
-
-		if (PDF_USAGE_LOG) {
-			file_put_contents(PDF_USAGE_LOG, date("Y-m-d H:i:s\n"), FILE_APPEND);
-		}
-	}
-
-	/**
-	 * Creates a PDF file from a HTML string
-	 * @param  string $str HTML string
-	 * @return string File path of the PDF file (temporary), you must delete or move it
-	 */
-	static public function filePDF(string $str): ?string
+	static public function getPDFCommand(): ?string
 	{
 		$cmd = PDF_COMMAND;
-
-		if (!$cmd) {
-			throw new \LogicException('PDF generation is disabled');
-		}
-
-		$source = sprintf('%s/print-%s.html', CACHE_ROOT, md5(random_bytes(16)));
-		$target = str_replace('.html', '.pdf', $source);
-
-		$str = self::appendCookieToURLs($str);
-		$str = preg_replace('!(<html.*?)class="!s', '$1class="pdf ', $str);
-
-		Utils::safe_mkdir(CACHE_ROOT, null, true);
-		file_put_contents($source, $str);
 
 		if ($cmd === 'auto') {
 			// Try to see if there's a plugin
@@ -1858,9 +1794,87 @@ class Utils
 
 			// We still haven't found anything
 			if (!$cmd) {
-				throw new \LogicException('Aucun programme de création de PDF trouvé, merci d\'en installer un : https://fossil.kd2.org/paheko/wiki?name=Configuration');
+				return null;
 			}
 		}
+
+		return $cmd;
+	}
+
+	/**
+	 * Displays a PDF from a string, only works when PDF_COMMAND constant is set to "prince"
+	 * @param  string $str HTML string
+	 * @return void
+	 */
+	static public function streamPDF(string $str): void
+	{
+		if (!PDF_COMMAND) {
+			throw new \LogicException('PDF generation is disabled');
+		}
+
+		$str = self::appendCookieToURLs($str);
+		$str = preg_replace('!(<html.*?)class="!s', '$1class="pdf ', $str);
+
+		$cmd = self::getPDFCommand();
+
+		// If there is no program found, try to see if there's a plugin
+		if (!$cmd && PDF_COMMAND === 'auto') {
+			$in = ['string' => $str];
+
+			$signal = Plugins::fire('pdf.stream', true, $in);
+
+			if ($signal && $signal->isStopped()) {
+				return;
+			}
+
+			unset($signal, $in);
+		}
+
+		// Only Prince can handle using STDIN and STDOUT and stream PDF
+		// If the program is not Prince, store PDF in temporary file
+		if ($cmd !== 'prince') {
+			$file = self::filePDF($str);
+			readfile($file);
+			unlink($file);
+			return;
+		}
+
+		// 3 seconds is plenty enough to fetch resources, right?
+		$cmd = self::getPrinceCommand() . ' -o - -';
+
+		// Prince is fast, right? Fingers crossed
+		self::exec($cmd, 10, $str, fn ($data) => print($data));
+
+		if (PDF_USAGE_LOG) {
+			file_put_contents(PDF_USAGE_LOG, date("Y-m-d H:i:s\n"), FILE_APPEND);
+		}
+	}
+
+	/**
+	 * Creates a PDF file from a HTML string
+	 * @param  string $str HTML string
+	 * @return string File path of the PDF file (temporary), you must delete or move it
+	 */
+	static public function filePDF(string $str): ?string
+	{
+		if (!PDF_COMMAND) {
+			throw new \LogicException('PDF generation is disabled');
+		}
+
+		$cmd = self::getPDFCommand();
+
+		if (!$cmd) {
+			throw new \LogicException('Aucun programme de création de PDF trouvé, merci d\'en installer un : https://fossil.kd2.org/paheko/wiki?name=Configuration');
+		}
+
+		$source = sprintf('%s/print-%s.html', CACHE_ROOT, md5(random_bytes(16)));
+		$target = str_replace('.html', '.pdf', $source);
+
+		$str = self::appendCookieToURLs($str);
+		$str = preg_replace('!(<html.*?)class="!s', '$1class="pdf ', $str);
+
+		Utils::safe_mkdir(CACHE_ROOT, null, true);
+		file_put_contents($source, $str);
 
 		$timeout = 25;
 
