@@ -37,6 +37,7 @@ class Mailing extends Entity
 	protected ?int $id = null;
 	protected string $subject;
 	protected ?string $body;
+	protected ?string $preheader = null;
 
 	/**
 	 * We need to store these in order to have opt-out per-target
@@ -68,6 +69,7 @@ class Mailing extends Entity
 
 		$this->assert(trim($this->subject) !== '', 'Le sujet ne peut rester vide.');
 		$this->assert(!isset($this->body) || trim($this->body) !== '', 'Le corps du message ne peut rester vide.');
+		$this->assert(!isset($this->preheader) || strlen($this->preheader) <= 80, 'Le chapô du message doit faire moins de 80 caractères.');
 
 		if (isset($this->sender_name) || isset($this->sender_email)) {
 			$this->assert(trim($this->sender_name) !== '', 'Le nom d\'expéditeur est vide.');

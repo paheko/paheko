@@ -105,6 +105,7 @@ CREATE TABLE IF NOT EXISTS mailings (
 	id INTEGER NOT NULL PRIMARY KEY,
 	subject TEXT NOT NULL,
 	body TEXT NULL,
+	preheader TEXT NULL,
 	target_type TEXT NULL,
 	target_value TEXT NULL,
 	target_label TEXT NULL,
