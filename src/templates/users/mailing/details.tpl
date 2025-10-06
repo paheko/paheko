@@ -56,7 +56,7 @@
 	<dd><pre class="preview"><code>{$mailing.body}</code></pre></dd>
 	<dt>Prévisualisation</dt>
 	{if $mailing.sent && $mailing->isTemplate()}
-		<dd class="help">La prévisualisation est indisponible pour ce message, car il utilise des balises de données liées aux destinataires. Une fois envoyé, les données personnelles des destinataires sont supprimées, en conformité avec le RGPD, il n'est donc plus possible de prévisualiser le message.</dd>
+		<dd class="help">La prévisualisation est indisponible pour ce message, car il utilise des balises de données liées aux destinataires. Une fois le message envoyé, les données personnelles des destinataires sont supprimées, en conformité avec le RGPD, il n'est donc plus possible de prévisualiser le message.</dd>
 	{else}
 		<dd>{linkbutton shape="eye" label="Prévisualiser le message" href="?id=%d&preview"|args:$mailing.id target="_dialog"}<br />
 		 <small class="help">(Un destinataire sera choisi au hasard.)</small></dd>
