@@ -411,7 +411,7 @@ class Plugin extends Entity
 			throw new UserException(sprintf('The "%s" file cannot be opened as the plugin is broken: %s', $file, $this->getBrokenMessage()));
 		}
 
-		if (!$this->enabled) {
+		if (!$this->enabled && $file !== self::UNINSTALL_FILE) {
 			throw new UserException('The file cannot be opened as the plugin is disabled: ' . $this->name);
 		}
 
