@@ -98,7 +98,7 @@ class ReminderMessage extends Entity
 			$data['data']['email'] = $email;
 
 			// Envoi du mail
-			Emails::queue(Emails::CONTEXT_PRIVATE, [$email => $data], null, $reminder->subject, $body);
+			Emails::queue(Emails::CONTEXT_REMINDER, [$email => $data], null, $reminder->subject, $body);
 		}
 
 		$this->save();
