@@ -6,7 +6,7 @@ $file = DATA_ROOT . '/association.pre_upgrade-1.3.16.sqlite';
 
 // Re-import file shares from previous save, if it exists
 // as they might have been deleted by the file storage sync method
-if (!file_exists($file)) {
+if (FILE_STORAGE_BACKEND === 'SQLite' || !file_exists($file)) {
 	return;
 }
 
