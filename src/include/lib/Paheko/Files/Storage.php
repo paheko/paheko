@@ -62,7 +62,8 @@ class Storage
 			}
 
 			if ($cache) {
-				$cache->deleteSafe();
+				$cache->loadFromEntity($file);
+				$file = $cache;
 			}
 			else {
 				$file->deleteCache();
