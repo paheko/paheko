@@ -35,6 +35,11 @@ class Email extends Entity
 	protected int $sent_count = 0;
 	protected int $fail_count = 0;
 	protected ?string $fail_log;
+
+	protected bool $accepts_messages = true;
+	protected bool $accepts_reminders = true;
+	protected bool $accepts_mailings = false;
+
 	protected \DateTime $added;
 	protected ?\DateTime $last_sent;
 
