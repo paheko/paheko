@@ -8,7 +8,7 @@ use Paheko\DynamicList;
 use Paheko\Plugins;
 use Paheko\UserException;
 use Paheko\Utils;
-use Paheko\Entities\Email\Email;
+use Paheko\Entities\Email\Address;
 use Paheko\Entities\Files\File;
 use Paheko\Entities\Users\User;
 use Paheko\Users\DynamicFields;
@@ -175,7 +175,7 @@ class Emails
 
 			// We won't try to reject invalid/optout recipients here,
 			// it's done in the queue clearing (more efficient)
-			$recipient_hash = Email::getHash($recipient);
+			$recipient_hash = Addresses::hash($recipient);
 
 			// Replace placeholders: {{$name}}, etc.
 			if ($template) {
@@ -251,69 +251,6 @@ class Emails
 	}
 
 	/**
-	 * Return an Email entity from the optout code
-	 */
-	static public function getEmailFromOptout(string $code): ?Email
-	{
-		$hash = base64_decode(str_pad(strtr($code, '-_', '+/'), strlen($code) % 4, '=', STR_PAD_RIGHT));
-
-		if (!$hash) {
-			return null;
-		}
-
-		$hash = bin2hex($hash);
-		return EM::findOne(Email::class, 'SELECT * FROM @TABLE WHERE hash = ?;', $hash);
-	}
-
-	/**
-	 * Sets the address as invalid (no email can be sent to this address ever)
-	 */
-	static public function markAddressAsInvalid(string $address): void
-	{
-		$e = self::getEmail($address);
-
-		if (!$e) {
-			return;
-		}
-
-		$e->set('invalid', true);
-		$e->set('optout', false);
-		$e->set('verified', false);
-		$e->save();
-	}
-
-	/**
-	 * Return an Email entity from an email address
-	 */
-	static public function getEmail(string $address): ?Email
-	{
-		return EM::findOne(Email::class, 'SELECT * FROM @TABLE WHERE hash = ?;', Email::getHash(strtolower($address)));
-	}
-
-	/**
-	 * Return or create a new email entity
-	 */
-	static public function getOrCreateEmail(string $address): Email
-	{
-		$hash = Email::getHash($address);
-
-		$e = EM::findOne(Email::class, 'SELECT * FROM @TABLE WHERE hash = ?;', $hash);
-		$e ??= self::createEmail($address, $hash);
-
-		return $e;
-	}
-
-	static public function createEmail(string $address, string $hash): Email
-	{
-		$e = new Email;
-		$e->set('added', new \DateTime);
-		$e->set('hash', $hash);
-		$e->validate($address);
-		$e->save();
-		return $e;
-	}
-
-	/**
 	 * Run the queue of emails that are waiting to be sent
 	 */
 	static public function runQueue(?int $context = null): ?int
@@ -350,7 +287,7 @@ class Emails
 			$fail_message = null;
 
 			try {
-				Email::validateAddress($row->recipient, true);
+				Addresses::validate($row->recipient, true);
 			}
 			catch (UserException $e) {
 				$fail = 'hard';
@@ -421,7 +358,7 @@ class Emails
 				WHERE hash IN (SELECT recipient_hash FROM emails_queue WHERE sending = 2);
 			DELETE FROM emails_queue WHERE sending = 2;',
 			$db->where('id', $ids),
-			Email::TABLE));
+			Address::TABLE));
 		$db->commit();
 
 		$unused_attachments = array_diff($all_attachments, $db->getAssoc('SELECT id, path FROM emails_queue_attachments;'));

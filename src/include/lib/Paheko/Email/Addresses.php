@@ -233,7 +233,7 @@ class Addresses
 	/**
 	 * Sets the address as invalid (no email can be sent to this address ever)
 	 */
-	static public function markAddressAsInvalid(string $address): void
+	static public function markAsInvalid(string $address): void
 	{
 		$e = self::get($address);
 

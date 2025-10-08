@@ -18,6 +18,7 @@ class Address extends Entity
 	const TABLE = 'emails_addresses';
 
 	const RESEND_VERIFICATION_DELAY = 15;
+	const RESEND_VERIFICATION_DELAY_STRING = self::RESEND_VERIFICATION_DELAY . ' days ago';
 
 	/**
 	 * When we reach that number of fails, the address is treated as permanently invalid, unless reset by a verification.

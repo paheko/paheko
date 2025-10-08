@@ -533,7 +533,7 @@ class Functions
 
 		foreach ($params['to'] as &$to) {
 			$to = trim($to);
-			Email::validateAddress($to);
+			Addresses::validate($to);
 		}
 
 		unset($to);

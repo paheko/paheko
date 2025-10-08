@@ -2,13 +2,13 @@
 namespace Paheko;
 
 use Paheko\Email\Emails;
-use Paheko\Entities\Email\Email;
+use Paheko\Entities\Email\Address;
 
 require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 
-$limit_date = new \DateTime(Email::RESEND_VERIFICATION_DELAY);
+$limit_date = new \DateTime(Address::RESEND_VERIFICATION_DELAY_STRING);
 
 $form->runIf(f('force_queue') && !USE_CRON, function () use ($session) {
 	$session->requireAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
