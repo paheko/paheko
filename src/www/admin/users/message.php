@@ -21,8 +21,14 @@ if (!$user) {
 	throw new UserException("Ce membre n'existe pas.");
 }
 
-if (!$user->canEmail()) {
+$email = $user->getEmailObject();
+
+if (!$email) {
 	throw new UserException('Ce membre n\'a pas d\'adresse e-mail renseignée dans sa fiche membre.');
+}
+
+if (!$email->accepts_messages) {
+	throw new UserException('Ce destinataire n\'accepte pas les messages personnels');
 }
 
 $csrf_key = 'send_message_' . $user->id;

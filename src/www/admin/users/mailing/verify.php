@@ -11,7 +11,7 @@ $address = qg('address');
 $email = Emails::getOrCreateEmail($address);
 
 if (!$email->canSendVerificationAfterFail()) {
-	if ($email->optout) {
+	if (!$email->accepts_mailings) {
 		$message = 'Il n\'est pas possible de renvoyer une vérification à cette adresse pour le moment, il faut attendre 3 jours.';
 	}
 	else {

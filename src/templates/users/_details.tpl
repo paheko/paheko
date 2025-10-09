@@ -50,7 +50,7 @@ $fields = DF::getInstance()->all();
 		{elseif $field.type == 'email'}
 			<a href="mailto:{$value|escape:'url'}">{$value}</a>
 			{if !DISABLE_EMAIL && $show_message_button && !$email_button++}
-				{linkbutton href="!users/message.php?id=%d"|args:$data.id label="Envoyer un message" shape="mail"}
+				<br />{linkbutton href="!users/message.php?id=%d"|args:$data.id label="Envoyer un message" shape="mail"}
 			{/if}
 		{elseif $field.type == 'multiple'}
 			<ul>
@@ -67,7 +67,7 @@ $fields = DF::getInstance()->all();
 		{/if}
 	</dd>
 		{if $field.type == 'email' && $value}
-		<?php $email = Email\Emails::getEmail($value); ?>
+		<?php $email = Email\Emails::getOrCreateEmail($value); ?>
 		<dt>Statut e-mail</dt>
 		<dd>
 			{if $email.optout}
@@ -85,12 +85,17 @@ $fields = DF::getInstance()->all();
 			{elseif $email.verified}
 				<b class="confirm">{icon shape="check" class="confirm"}</b> Adresse vérifiée
 			{else}
-				{* Adresse non vérifiée *}
-				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-					{linkbutton target="_dialog" label="Désinscrire de tous les envois" href="!users/mailing/block.php?address=%s"|args:$value shape="delete"}
-				{/if}
+				Adresse non vérifiée
 			{/if}
 		</dd>
+		<dt>Préférences d'envoi</dt>
+		<dd>
+			{if $email.accepts_messages}{icon shape="check"}{else}{icon shape="uncheck"}{/if} Messages personnels<br />
+			{if $email.accepts_reminders}{icon shape="check"}{else}{icon shape="uncheck"}{/if} Rappels de cotisation et d'activité<br />
+			{if $email.accepts_mailings}{icon shape="check"}{else}{icon shape="uncheck"}{/if} Messages collectifs<br />
+			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
+				{linkbutton target="_dialog" label="Modifier les préférences d'envoi" href="!users/mailing/block.php?address=%s"|args:$value shape="edit"}
+			{/if}
 		{/if}
 	{/foreach}
 </dl>

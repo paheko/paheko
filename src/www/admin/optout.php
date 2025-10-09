@@ -12,6 +12,8 @@ if (empty($_GET['un'])) {
 }
 
 $code = $_GET['un'];
+$context = $_GET['c'] ?? null;
+$prefs = $_GET['p'] ?? null;
 $email = Emails::getEmailFromOptout($code);
 $verify = null;
 
@@ -37,14 +39,16 @@ $form->runIf('confirm_resub', function () use ($email) {
 	$email->sendVerification($_POST['email']);
 }, 'optout', '!optout.php?resub_ok&un=' . $code);
 
-$form->runIf('optout', function () use ($email) {
-	$email->setOptout();
+$form->runIf('optout', function () use ($email, $context) {
+	$email->setOptout($context);
 	$email->save();
 }, 'optout', '!optout.php?ok&un=' . $code);
 
 $ok = isset($_GET['ok']);
 $resub_ok = isset($_GET['resub_ok']);
 
-$tpl->assign(compact('email', 'ok', 'resub_ok', 'code', 'verify'));
+$prefs_url = $email->getUserPreferencesURL();
+
+$tpl->assign(compact('email', 'ok', 'resub_ok', 'code', 'verify', 'context', 'prefs', 'prefs_url'));
 
 $tpl->display('optout.tpl');
