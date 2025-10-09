@@ -474,20 +474,21 @@ class Mailing extends Entity
 			$out['no_uppercase'] = 'Le sujet ne contient pas de majuscule sur le premier mot.';
 		}
 
-		$count = preg_match_all('!src="(https?://[^"]*)"!', $html, $matches);
+		$count = preg_match_all('!src="(https?://[^"]+?)"!', $html, $matches);
 
 		if ($count > 3) {
 			$out['too_many_images'] = 'Le message contient plus de 3 images.';
 		}
 
 		foreach ($matches[1] as $match) {
-			if (!Utils::isLocalURL($match[1])) {
+			if (!Utils::isLocalURL($match)) {
 				$out['external_image'] = 'Le message contient des images provenant de sites externes.';
 				break;
 			}
 		}
 
-		if (preg_match('!alt=""!', $html)) {
+		// Not sure if this is very relevant so disabling it for now
+		if (false && preg_match('!alt=""!', $html)) {
 			$out['missing_alt'] = 'Au moins une image n\'a pas de texte alternatif.';
 		}
 
