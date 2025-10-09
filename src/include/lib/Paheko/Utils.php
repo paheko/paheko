@@ -1769,18 +1769,6 @@ class Utils
 		$cmd = PDF_COMMAND;
 
 		if ($cmd === 'auto') {
-			// Try to see if there's a plugin
-			$in = ['source' => $source, 'target' => $target];
-
-			$signal = Plugins::fire('pdf.create', true, $in);
-
-			if ($signal && $signal->isStopped()) {
-				Utils::safe_unlink($source);
-				return $target;
-			}
-
-			unset($in, $signal);
-
 			// Try to find a local executable
 			$list = ['prince', 'chromium', 'wkhtmltopdf', 'weasyprint'];
 			$cmd = null;
@@ -1859,6 +1847,20 @@ class Utils
 	{
 		if (!PDF_COMMAND) {
 			throw new \LogicException('PDF generation is disabled');
+		}
+
+		// Try to see if there's a plugin first, if PDF_COMMAND is auto
+		if (PDF_COMMAND === 'auto') {
+			$in = ['source' => $source, 'target' => $target];
+
+			$signal = Plugins::fire('pdf.create', true, $in);
+
+			if ($signal && $signal->isStopped()) {
+				Utils::safe_unlink($source);
+				return $target;
+			}
+
+			unset($in, $signal);
 		}
 
 		$cmd = self::getPDFCommand();
