@@ -84,15 +84,16 @@
 		</thead>
 		<tbody>
 			{foreach from=$results item="row"}
+			<?php $id = $id_column !== false ? ($row[$id_column] ?? null) : null; ?>
 			<tr>
-			{if $is_admin && $id_column !== false && ($value = $row[$id_column] ?? null)}
-				<td class="check">{input type="checkbox" name="selected[]" value=$value}</td>
+			{if $is_admin && $id}
+				<td class="check">{input type="checkbox" name="selected[]" value=$id}</td>
 			{/if}
 				{foreach from=$header key="i" item="label"}
 				<td>
 					<?php $value = $row[$i]; $name = $header[$i]; ?>
 					{if $id_column !== false}
-						{user_field name=$name value=$value files_href="!users/details.php?id=%d"|args:$row[$id_column]}
+						{user_field name=$name value=$value files_href="!users/details.php?id=%d"|args:$row[$id_column] link_name_id=$id}
 					{else}
 						{$value}
 					{/if}
