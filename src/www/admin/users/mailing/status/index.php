@@ -14,13 +14,27 @@ $form->runIf(f('force_queue') && !USE_CRON, function () use ($session) {
 	$session->requireAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
 
 	Emails::runQueue();
-}, null, '!membres/emails.php?forced');
+}, null, '!./?forced');
 
-$list = Emails::listRejectedUsers();
-$list->loadFromQueryString();
+$p = $_GET['p'] ?? null;
+$list = null;
+$queue_count = null;
+
+if ($p === 'invalid') {
+	$list = Emails::listInvalidUsers();
+}
+elseif ($p === 'optout') {
+	$list = Emails::listOptoutUsers();
+}
+else {
+	$queue_count = Emails::countQueue();
+}
+
+if (null !== $list) {
+	$list->loadFromQueryString();
+}
 
 $max_fail_count = Emails::FAIL_LIMIT;
-$queue_count = Emails::countQueue();
-$tpl->assign(compact('list', 'max_fail_count', 'queue_count', 'limit_date'));
+$tpl->assign(compact('list', 'max_fail_count', 'queue_count', 'limit_date', 'p'));
 
-$tpl->display('users/mailing/rejected.tpl');
+$tpl->display('users/mailing/status/index.tpl');

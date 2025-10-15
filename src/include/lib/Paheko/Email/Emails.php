@@ -538,7 +538,7 @@ class Emails
 		END', $prefix, self::FAIL_LIMIT);
 	}
 
-	static public function listRejectedUsers(): DynamicList
+	static public function listInvalidUsers(): DynamicList
 	{
 		$db = DB::getInstance();
 		$email_field = 'u.' . $db->quoteIdentifier(DynamicFields::getFirstEmailField());
@@ -579,13 +579,20 @@ class Emails
 
 		$tables = sprintf('emails e INNER JOIN users u ON %s IS NOT NULL AND %1$s != \'\' AND e.hash = email_hash(%1$s)', $email_field);
 
-		$conditions = sprintf('e.accepts_messages = 0 OR e.invalid = 1 OR e.fail_count >= %d', self::FAIL_LIMIT);
+		$conditions = sprintf('e.invalid = 1 OR e.fail_count >= %d', self::FAIL_LIMIT);
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('last_sent', true);
 		$list->setModifier(function (&$row) {
 			$row->last_sent = $row->last_sent ? new \DateTime($row->last_sent) : null;
 		});
+		return $list;
+	}
+
+	static public function listOptoutUsers(): DynamicList
+	{
+		$list = self::listInvalidUsers();
+		$list->setConditions('e.accepts_messages = 0 OR e.accepts_reminders = 0 OR e.accepts_mailings = 0');
 		return $list;
 	}
 
