@@ -238,6 +238,13 @@ class DynamicList implements \Countable
 		}
 	}
 
+	public function removeColumns(array $columns)
+	{
+		foreach ($columns as $name) {
+			unset($this->columns[$name]);
+		}
+	}
+
 	/**
 	 * If an entity is set, then each row will return the specified entity
 	 * (using the SELECT clause passed) instead of the specified columns.
