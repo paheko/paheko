@@ -27,6 +27,6 @@ INSERT INTO emails SELECT
 	added
 	FROM emails_old;
 
-CREATE UNIQUE INDEX IF NOT EXISTS emails_hash ON emails (hash);
-
 DROP TABLE emails_old;
+
+CREATE UNIQUE INDEX IF NOT EXISTS emails_hash ON emails (hash);

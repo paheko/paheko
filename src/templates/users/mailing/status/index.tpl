@@ -12,19 +12,32 @@
 	</ul>
 
 	<ul class="sub">
-		<li{if !$p} class="current"{/if}><a href="./">Messages en attente</a></li>
-		<li{if $p === 'invalid'} class="current"{/if}><a href="./?p=invalid">Adresses invalides</a></li>
-		<li{if $p === 'optout'} class="current"{/if}><a href="./?p=optout">Désinscriptions</a></li>
+		<li{if !$status} class="current"{/if}><a href="./">Messages en attente</a></li>
+		<li{if $status === 'invalid'} class="current"{/if}><a href="?status=invalid">Adresses invalides</a></li>
+		<li{if $status === 'optout'} class="current"{/if}><a href="?status=optout">Désinscriptions</a></li>
 	</ul>
+
+	{if $status === 'optout'}
+	<ul class="sub">
+		<li{if $type === 'mailings'} class="current"{/if}><a href="?status=optout">Messages collectifs</a></li>
+		<li{if $type === 'reminders'} class="current"{/if}><a href="?status=optout&amp;type=reminders">Rappels</a></li>
+		<li{if $type === 'messages'} class="current"{/if}><a href="?status=optout&amp;type=messages">Messages personnels</a></li>
+	</ul>
+	{/if}
 </nav>
 
-{if $p}
+{if $status}
+	{if isset($_GET['sent'])}
+	<p class="confirm block">
+		Un message de demande de confirmation a bien été envoyé. Le destinataire doit désormais cliquer sur le lien dans ce message.
+	</p>
+	{/if}
 
 	<p class="help">
 		Seules les adresses e-mail actuellement présentes dans une fiche de membre sont affichées ici.
 	</p>
 
-	{if $p === 'invalid'}
+	{if $status === 'invalid'}
 		<div class="block help">
 			<h3>Statuts possibles d'une adresse e-mail&nbsp;:</h3>
 			<dl class="cotisation">
@@ -34,7 +47,7 @@
 				<dd>Le service destinataire a renvoyé une erreur temporaire plus de {$max_fail_count} fois.<br />Cela arrive par exemple si vos messages sont vus comme du spam trop souvent, ou si la boîte mail destinataire est pleine. Cette adresse ne recevra plus de message.</dd>
 			</dl>
 			<p class="help">
-				Il est possible de rétablir la réception de messages pour les adresses invalides après un délai de 15 jours en cliquant sur le bouton "Rétablir" qui enverra un message de validation à la personne.
+				Il est possible de rétablir la réception de messages après un délai de 15 jours en cliquant sur le bouton "Rétablir" qui enverra un message de validation à la personne.
 			</p>
 		</div>
 	{/if}
@@ -47,16 +60,18 @@
 
 			{foreach from=$list->iterate() item="row"}
 			<tr{if $_GET.hl == $row.id} class="highlight"{/if} id="e_{$row.id}">
-				<th>{link href="!users/details.php?id=%d"|args:$row.user_id label=$row.identity}</th>
+				<th>{$row.id} {link href="!users/details.php?id=%d"|args:$row.user_id label=$row.identity}</th>
 				<td>{$row.email}</td>
+				{if $status === 'invalid'}
 				<td>{$row.status}</td>
+				{/if}
 				<td class="num">{$row.sent_count}</td>
 				<td>{$row.fail_log|escape|nl2br}</td>
 				<td>{$row.last_sent|date}</td>
 				<td>
 					{if $row.email && ($row.optout || $row.last_sent < $limit_date)}
 						<?php $email = rawurlencode($row->email); ?>
-						{linkbutton target="_dialog" label="Rétablir" href="!users/mailing/verify.php?address=%s"|args:$email shape="check"}
+						{linkbutton target="_dialog" label="Rétablir" href="verify.php?address=%s"|args:$email shape="check"}
 					{/if}
 				</td>
 			</tr>
@@ -70,11 +85,7 @@
 	{/if}
 
 {else}
-	{if isset($_GET['sent'])}
-	<p class="confirm block">
-		Un message de demande de confirmation a bien été envoyé. Le destinataire doit désormais cliquer sur le lien dans ce message.
-	</p>
-	{elseif isset($_GET['forced'])}
+	{if isset($_GET['forced'])}
 	<p class="confirm block">
 		La file d'attente a été envoyée.
 	</p>

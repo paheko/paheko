@@ -16,15 +16,17 @@ $form->runIf(f('force_queue') && !USE_CRON, function () use ($session) {
 	Emails::runQueue();
 }, null, '!./?forced');
 
-$p = $_GET['p'] ?? null;
+$status = $_GET['status'] ?? null;
 $list = null;
 $queue_count = null;
+$type = null;
 
-if ($p === 'invalid') {
+if ($status === 'invalid') {
 	$list = Emails::listInvalidUsers();
 }
-elseif ($p === 'optout') {
-	$list = Emails::listOptoutUsers();
+elseif ($status === 'optout') {
+	$type = $_GET['type'] ?? 'mailings';
+	$list = Emails::listOptoutUsers($type);
 }
 else {
 	$queue_count = Emails::countQueue();
@@ -35,6 +37,6 @@ if (null !== $list) {
 }
 
 $max_fail_count = Emails::FAIL_LIMIT;
-$tpl->assign(compact('list', 'max_fail_count', 'queue_count', 'limit_date', 'p'));
+$tpl->assign(compact('list', 'max_fail_count', 'queue_count', 'limit_date', 'status', 'type'));
 
 $tpl->display('users/mailing/status/index.tpl');

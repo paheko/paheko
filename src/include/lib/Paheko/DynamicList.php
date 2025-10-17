@@ -228,6 +228,16 @@ class DynamicList implements \Countable
 		$this->columns = $columns;
 	}
 
+	public function setColumnProperty(string $column, string $property, $value)
+	{
+		$this->columns[$column][$property] = $value;
+	}
+
+	public function removeColumn(string $column)
+	{
+		unset($this->columns[$column]);
+	}
+
 	public function addColumn(string $name, array $column, int $position = -1)
 	{
 		if ($position === -1) {

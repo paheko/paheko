@@ -589,10 +589,17 @@ class Emails
 		return $list;
 	}
 
-	static public function listOptoutUsers(): DynamicList
+	static public function listOptoutUsers(string $type): DynamicList
 	{
+		if (!in_array($type, ['messages', 'reminders', 'mailings'], true)) {
+			throw new \InvalidArgumentException('Invalid type: ' . $type);
+		}
+
 		$list = self::listInvalidUsers();
-		$list->setConditions('e.accepts_messages = 0 OR e.accepts_reminders = 0 OR e.accepts_mailings = 0');
+		$list->setConditions(sprintf('e.accepts_%s = 0', $type));
+		$list->setColumnProperty('fail_log', 'label', 'Historique');
+		$list->removeColumn('status');
+
 		return $list;
 	}
 

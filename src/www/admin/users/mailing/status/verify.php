@@ -25,7 +25,7 @@ $csrf_key = 'send_verification';
 
 $form->runIf('send', function () use ($email, $address) {
     $email->sendVerification($address);
-}, $csrf_key, '!users/mailing/rejected.php?sent', true);
+}, $csrf_key, '!users/mailing/status/?status=invalid&sent', true);
 
 $tpl->assign(compact('csrf_key', 'email'));
-$tpl->display('users/mailing/verify.tpl');
+$tpl->display('users/mailing/status/verify.tpl');
