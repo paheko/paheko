@@ -142,7 +142,7 @@ class UserTemplate extends \KD2\Brindille
 	 * have auto-escaping turned off, and safe mode turned on,
 	 * as it is mostly used for e-mailing.
 	 */
-	static public function createFromUserString(string $content): ?self
+	static public function createFromUserString(string $content, ?string $escape = null): ?self
 	{
 		static $templates = [];
 
@@ -164,7 +164,7 @@ class UserTemplate extends \KD2\Brindille
 		$tpl->toggleSafeMode(true);
 
 		// Disabling escape must be done after safe mode, or it will re-enable htmlspecialchars
-		$tpl->setEscapeDefault(null);
+		$tpl->setEscapeDefault($escape);
 
 		$templates[$hash] = $tpl;
 

@@ -2231,4 +2231,32 @@ class Utils
 		@ob_end_flush();
 		@flush();
 	}
+
+	static public function skrivToMarkdown(string $text): string
+	{
+		$text = strtr($text, [
+			"''"  => '*', // Italic
+			'--'  => '~~', // strikethrough
+			'##'  => '`', // monospace
+			'[[[' => '```',
+			']]]' => '```',
+		]);
+
+		// Headings
+		$text = preg_replace_callback('/^(=+)\s*(.*?)\s*(\1)?$/m', function (array $m): string {
+			return str_repeat('#', strlen($m[1])) . ' ' . $m[2];
+		}, $text);
+
+		// Links
+		$text = preg_replace_callback('/\[\[(.+?)(?:\|(.+?))?\]\]/', function (array $m): string {
+			$href = $m[2] ?? $m[1];
+			return sprintf('[%s](%s)', trim($m[1]), trim($href));
+		}, $text);
+
+		// Images
+		$text = preg_replace('/\{\{(.+?)\|(.+?)\}\}/', '![$1]($2)', $text);
+		$text = preg_replace('/\{\{(.+?)\}\}/', '![]($1)', $text);
+
+		return $text;
+	}
 }

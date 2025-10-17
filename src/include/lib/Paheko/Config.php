@@ -5,6 +5,8 @@ namespace Paheko;
 use Paheko\Log;
 use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
+use Paheko\Web\Render\Render;
+use Paheko\UserTemplate\UserTemplate;
 
 use KD2\SMTP;
 use KD2\Graphics\Image;
@@ -14,7 +16,7 @@ class Config extends Entity
 {
 	const FILES = [
 		'admin_background' => File::CONTEXT_CONFIG . '/admin_bg.png',
-		'admin_homepage'   => File::CONTEXT_CONFIG . '/admin_homepage.skriv',
+		'admin_homepage'   => File::CONTEXT_CONFIG . '/admin_homepage.md',
 		'admin_css'        => File::CONTEXT_CONFIG . '/admin.css',
 		'logo'             => File::CONTEXT_CONFIG . '/logo.png',
 		'icon'             => File::CONTEXT_CONFIG . '/icon.png',
@@ -419,5 +421,25 @@ class Config extends Entity
 		$this->set('files', $files);
 
 		return $f;
+	}
+
+	public function renderHomepage(): ?string
+	{
+		$file = $this->file('admin_homepage');
+
+		if (!$file) {
+			return null;
+		}
+
+		$text = $file->fetch();
+
+		if (false !== strpos('{{', $text)) {
+			$template = UserTemplate::createFromUserString($text, 'html');
+			$text = $template->fetch();
+		}
+
+		$html = Render::render(Render::FORMAT_MARKDOWN, null, $text);
+
+		return $html;
 	}
 }

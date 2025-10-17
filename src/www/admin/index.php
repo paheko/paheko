@@ -20,14 +20,7 @@ if ($signal) {
 	$banner = implode('', $signal->getOut());
 }
 
-$homepage = Config::getInstance()->file('admin_homepage');
-
-if ($homepage) {
-	$homepage = $homepage->render();
-}
-else {
-	$homepage = null;
-}
+$homepage = Config::getInstance()->renderHomepage();
 
 $buttons = Extensions::listHomeButtons($session);
 $has_extensions = empty($buttons) ? Extensions::isAnyExtensionEnabled() : true;
