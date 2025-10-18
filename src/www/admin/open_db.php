@@ -62,8 +62,9 @@ catch (UserException $e) {
 
 $parent = realpath(Utils::dirname($path));
 $parent_uri = rawurlencode($parent);
+$path_uri = rawurlencode($path);
 
-$tpl->assign(compact('path', 'list', 'parent_uri', 'error'));
+$tpl->assign(compact('path', 'path_uri', 'list', 'parent_uri', 'error'));
 $tpl->assign('current_db', DB_FILE);
 
 $tpl->display('open_db.tpl');
