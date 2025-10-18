@@ -20,4 +20,4 @@ $form->runIf('send', function () use ($email) {
 $user_prefs_url = $email->getUserPreferencesURL();
 
 $tpl->assign(compact('csrf_key', 'email', 'address', 'user_prefs_url'));
-$tpl->display('users/mailing/block.tpl');
+$tpl->display('users/mailing/status/block.tpl');

@@ -11,20 +11,13 @@ $address = qg('address');
 $email = Emails::getOrCreateEmail($address);
 
 if (!$email->canSendVerificationAfterFail()) {
-	if (!$email->accepts_mailings) {
-		$message = 'Il n\'est pas possible de renvoyer une vérification à cette adresse pour le moment, il faut attendre 3 jours.';
-	}
-	else {
-		$message = 'Il n\'est pas possible de renvoyer une vérification à cette adresse pour le moment, il faut attendre 15 jours.';
-	}
-
-    throw new UserException($message);
+	throw new UserException(sprintf('Il n\'est pas possible de renvoyer une vérification à cette adresse pour le moment, il faut attendre %d jours.', Email::RESEND_VERIFICATION_DELAY));
 }
 
 $csrf_key = 'send_verification';
 
 $form->runIf('send', function () use ($email, $address) {
-    $email->sendVerification($address);
+	$email->sendVerification($address);
 }, $csrf_key, '!users/mailing/status/?status=invalid&sent', true);
 
 $tpl->assign(compact('csrf_key', 'email'));
