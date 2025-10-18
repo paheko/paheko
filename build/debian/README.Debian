@@ -1,0 +1,19 @@
+# Paheko Debian package
+
+Quick summary: this package allows for using Paheko as a "desktop app" (with a web browser) or as a "server app".
+
+In desktop mode, the `config.user.php` is used. It will configure Paheko to store its files in:
+
+* ~/.cache/paheko (XDG_CACHE_HOME): all the cache
+* ~/.local/share/paheko (XDG_DATA_HOME): database files
+* ~/.config/paheko (XDG_CONFIG_HOME): configuration (config.local.php)
+
+The desktop app can be launched with the `paheko` command. It will start its own web server and then launch the default web browser of the current user. The Debian package also creates a "Paheko" item in the desktop environment app menu.
+
+In server mode, the `config.local.php` is used. It will configure Paheko to store its files in:
+
+* /var/cache/paheko: cache files
+* /var/lib/paheko: database files
+* /etc/paheko/config.php: config file
+
+The sysadmin will have to configure a virtualhost, with Apache or nginx. See <https://fossil.kd2.org/paheko/wiki?name=Installation%20sous%20Debian-Ubuntu> for details.

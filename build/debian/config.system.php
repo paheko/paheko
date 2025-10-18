@@ -23,6 +23,10 @@ if (!defined('Paheko\CACHE_ROOT')) {
 	define('Paheko\CACHE_ROOT', '/var/cache/paheko');
 }
 
+if (!defined('Paheko\PLUGINS_ROOT')) {
+	define('Paheko\PLUGINS_ROOT', __DIR__ . '/plugins');
+}
+
 if (!defined('Paheko\SECRET_KEY')) {
 	if (file_exists(CACHE_ROOT . '/key')) {
 		define('Paheko\SECRET_KEY', trim(file_get_contents(CACHE_ROOT . '/key')));
