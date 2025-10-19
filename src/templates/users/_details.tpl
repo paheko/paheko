@@ -94,7 +94,7 @@ $fields = DF::getInstance()->all();
 			{if $email.accepts_reminders}{icon shape="check"}{else}{icon shape="uncheck"}{/if} Rappels de cotisation et d'activité<br />
 			{if $email.accepts_mailings}{icon shape="check"}{else}{icon shape="uncheck"}{/if} Messages collectifs<br />
 			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-				{linkbutton target="_dialog" label="Modifier les préférences d'envoi" href="!users/mailing/status/block.php?address=%s"|args:$value shape="edit"}
+				{linkbutton target="_dialog" label="Modifier les préférences d'envoi" href="!users/mailing/status/preferences.php?address=%s"|args:$value shape="settings"}
 			{/if}
 		{/if}
 	{/foreach}

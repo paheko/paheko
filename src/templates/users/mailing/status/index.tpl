@@ -69,8 +69,10 @@
 				<td>{$row.fail_log|escape|nl2br}</td>
 				<td>{$row.last_sent|date}</td>
 				<td>
-					{if $row.email && ($row.optout || $row.last_sent < $limit_date)}
-						<?php $email = rawurlencode($row->email); ?>
+					<?php $email = rawurlencode($row->email); ?>
+					{if $status === 'optout'}
+						{linkbutton target="_dialog" label="Préférences d'envoi" href="preferences.php?address=%s"|args:$email shape="settings"}
+					{elseif $row.email && ($row.optout || $row.last_sent < $limit_date)}
 						{linkbutton target="_dialog" label="Rétablir" href="verify.php?address=%s"|args:$email shape="check"}
 					{/if}
 				</td>
