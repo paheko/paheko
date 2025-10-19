@@ -37,12 +37,12 @@ $form->runIf('confirm_resub', function () use ($email) {
 	}
 
 	$email->sendVerification($_POST['email']);
-}, $csrf_key, '!optout.php?resub_ok&un=' . $code);
+}, $csrf_key, '!email_optout.php?resub_ok&un=' . $code);
 
 $form->runIf('optout', function () use ($email, $context) {
-	$email->setOptout($context);
+	$email->setOptout((int)$context);
 	$email->save();
-}, $csrf_key, '!optout.php?ok&un=' . $code);
+}, $csrf_key, '!email_optout.php?ok&un=' . $code);
 
 $ok = isset($_GET['ok']);
 $resub_ok = isset($_GET['resub_ok']);

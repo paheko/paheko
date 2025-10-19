@@ -78,7 +78,7 @@ class Email extends Entity
 		}
 
 		// Never send to invalid or bounced recipients
-		if (!$r->invalid
+		if ($r->invalid
 			|| $r->fail_count >= Emails::FAIL_LIMIT) {
 			return false;
 		}
@@ -86,7 +86,7 @@ class Email extends Entity
 		switch ($r->context) {
 			case Emails::CONTEXT_BULK:
 				return $r->accepts_mailings;
-			case Email::CONTEXT_REMINDER;
+			case Emails::CONTEXT_REMINDER;
 				return $r->accepts_reminders;
 			default:
 				return $r->accepts_messages;
@@ -284,7 +284,7 @@ class Email extends Entity
 		$keys = ['accepts_messages', 'accepts_reminders', 'accepts_mailings'];
 
 		foreach ($keys as $name) {
-			if (!isset($source[$name])) {
+			if (!array_key_exist($key . '_present', $source)) {
 				continue;
 			}
 
@@ -293,6 +293,8 @@ class Email extends Entity
 				unset($source[$name]);
 				continue;
 			}
+
+			$source[$name] ??= false;
 		}
 
 		$this->setPreferences($source, 'administrateur');
@@ -310,7 +312,7 @@ class Email extends Entity
 		$who ??= 'destinataire';
 
 		foreach ($options as $key => $label) {
-			if (!isset($preferences[$key . '_present'])) {
+			if (!array_key_exist($key, $preferences)) {
 				continue;
 			}
 
@@ -332,7 +334,7 @@ class Email extends Entity
 		$this->appendFailLog(implode(" ; ", $log));
 	}
 
-	public function setOptout(?int $context = null): void
+	public function setOptout(int $context): void
 	{
 		if ($context === Emails::CONTEXT_BULK) {
 			$this->setPreferences(['accepts_mailings' => false]);
@@ -413,7 +415,7 @@ class Email extends Entity
 			return false;
 		}
 		else {
-			$this->import($preferences);
+			$this->setPreferences($preferences);
 			$this->save();
 			return true;
 		}

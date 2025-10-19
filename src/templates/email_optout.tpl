@@ -25,7 +25,9 @@
 	</p>
 
 	<p class="help">
-		Vous pouvez vous réinscrire à tout moment en cliquant à nouveau sur le lien de désinscription présent à la fin de nos e-mails.<br />
+		Vous pouvez vous réinscrire à tout moment en cliquant à nouveau sur le lien de désinscription présent à la fin de nos e-mails.
+	</p>
+	<p>
 		{linkbutton shape="edit" label="Modifier mes préférences d'envoi" href=$prefs_url}
 	</p>
 
