@@ -7,7 +7,7 @@ use Paheko\Entity;
 use Paheko\Plugins;
 use Paheko\UserException;
 use Paheko\Email\Emails;
-use Paheko\Email\Templates as EmailsTemplates;
+use Paheko\Email\Templates as EmailTemplates;
 
 use KD2\SMTP;
 
@@ -95,7 +95,7 @@ class Email extends Entity
 
 	public function getUserPreferencesURL()
 	{
-		return self::getOptoutURL($this->hash) . '&p=1';
+		return self::getOptoutURL($this->hash) . '&h=1';
 	}
 
 	public function getVerificationCode(): string
@@ -111,7 +111,7 @@ class Email extends Entity
 		}
 
 		$verify_url = self::getOptoutURL($this->hash) . '&v=' . $this->getVerificationCode();
-		EmailsTemplates::verifyAddress($email, $verify_url);
+		EmailTemplates::verifyAddress($email, $verify_url);
 	}
 
 	public function canSendVerificationAfterFail(): bool
@@ -377,5 +377,91 @@ class Email extends Entity
 		else {
 			throw new \LogicException('Invalid bounce type: ' . $type);
 		}
+	}
+
+	public function savePreferencesFromUserForm(?array $source = null): bool
+	{
+		$source ??= $_POST;
+		$address = $source['email'] ?? '';
+
+		if (self::getHash($address) !== $this->hash) {
+			throw new UserException('L\'adresse e-mail indiquée ne correspond pas à celle que nous avons enregistré. Merci de vérifier l\'adresse e-mail saisie.');
+		}
+
+		$keys = ['reminders', 'messages', 'mailings'];
+		$preferences = [];
+		$require_confirm = false;
+
+		foreach ($keys as $key) {
+			$name = 'accepts_' . $key;
+			$value = boolval($source[$name] ?? false);
+
+			// Require double opt-in if re-subscribing to an unsubscribed item
+			if ($value !== $this->$name
+				&& $value === true
+				&& $this->$name === false) {
+				$require_confirm = true;
+			}
+
+			$preferences[$name] = $value;
+		}
+
+		if ($require_confirm) {
+			$url = $this->getSignedUserPreferencesURL($preferences);
+			$preferences = array_filter($preferences);
+			EmailTemplates::verifyPreferences($address, $url, $preferences);
+			return false;
+		}
+		else {
+			$this->import($preferences);
+			$this->save();
+			return true;
+		}
+	}
+
+	public function getSignedUserPreferencesURL(array $preferences): string
+	{
+		$expiry = time() + 24*3600;
+		$values = [
+			'r' => intval($preferences['accepts_reminders'] ?? 0),
+			'l' => intval($preferences['accepts_mailings'] ?? 0),
+			'm' => intval($preferences['accepts_messages'] ?? 0),
+			'e' => $expiry,
+		];
+
+		ksort($values);
+		$values = http_build_query($values);
+		$hash = hash_hmac('sha1', $values . $this->hash, LOCAL_SECRET_KEY);
+		$values .= '&h=' . $hash;
+
+		$url = self::getOptoutURL($this->hash);
+		$url .= '&' . $values;
+		return $url;
+	}
+
+	public function confirmPreferences(array $qs): bool
+	{
+		if (!isset($qs['h'], $qs['e'])) {
+			return false;
+		}
+
+		$values = array_intersect_key($qs, array_flip(['r', 'l', 'm', 'e']));
+		ksort($values);
+
+		$hash = hash_hmac('sha1', http_build_query($values) . $this->hash, LOCAL_SECRET_KEY);
+
+		if ($hash !== $qs['h']) {
+			return false;
+		}
+
+		if ($qs['e'] < time()) {
+			return false;
+		}
+
+		$this->set('accepts_reminders', boolval($values['r'] ?? false));
+		$this->set('accepts_mailings', boolval($values['l'] ?? false));
+		$this->set('accepts_messages', boolval($values['m'] ?? false));
+		$this->save();
+		return true;
 	}
 }

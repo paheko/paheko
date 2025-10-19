@@ -5,11 +5,11 @@
 		<legend>Préférences de l'adresse {$address}</legend>
 		<dl>
 			<?php $disabled = !$email->accepts_messages; $help = $disabled ? '*' : null; ?>
-			{input type="checkbox" disabled=$disabled name="accepts_messages" source=$email value=1 label="Messages personnels" prefix_title="Ce destinataire accepte les messages suivants" prefix_required=true help=$help}
+			{input type="checkbox" disabled=$disabled name="accepts_messages" source=$email value=1 label="Messages personnels et notifications" prefix_title="Ce destinataire accepte les messages suivants" prefix_required=true help=$help}
 			<?php $disabled = !$email->accepts_reminders; $help = $disabled ? '*' : null; ?>
 			{input type="checkbox" disabled=$disabled source=$email name="accepts_reminders" value=1 label="Rappels de cotisation" help=$help}
 			<?php $disabled = !$email->accepts_mailings; $help = $disabled ? '*' : null; ?>
-			{input type="checkbox" disabled=$disabled source=$email name="accepts_mailings" value=1 label="Messages collectifs" help=$help}
+			{input type="checkbox" disabled=$disabled source=$email name="accepts_mailings" value=1 label="Messages collectifs (lettres d'information)" help=$help}
 		</dl>
 		<p class="help">(*) Les cases décochées ne peuvent être ré-activées que par la personne destinataire, conformément au RGPD.<br />
 			Voici le lien à transmettre au destinataire pour qu'iel puisse se réinscrire aux envois :<br />

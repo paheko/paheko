@@ -254,7 +254,7 @@ class Emails
 	/**
 	 * Return an Email entity from the optout code
 	 */
-	static public function getEmailFromOptout(string $code): ?Email
+	static public function getEmailFromQueryStringValue(string $code): ?Email
 	{
 		$hash = base64_decode(str_pad(strtr($code, '-_', '+/'), strlen($code) % 4, '=', STR_PAD_RIGHT));
 

@@ -1,3 +1,4 @@
+{use Paheko\Email\Emails}
 {include file="_head.tpl" title="Désinscription" layout="public" hide_title=true}
 
 {if $verify === true}
@@ -28,52 +29,6 @@
 		{linkbutton shape="edit" label="Modifier mes préférences d'envoi" href=$prefs_url}
 	</p>
 
-{elseif $prefs == 2}
-
-	{form_errors}
-
-	<form method="post" action="{$self_url}">
-	<fieldset>
-		<legend>Mes préférences d'envoi</legend>
-
-		<dl>
-			{input type="checkbox" name="accepts_messages" source=$email value=1 label="Tous les messages" prefix_title="Je souhaite recevoir les types de messages suivants :" prefix_required=true}
-			{input type="checkbox" name="accepts_reminders" source=$email value=1 label="Rappels de cotisation et d'activité"}
-			{input type="checkbox" name="accepts_mailings" source=$email value=1 label="Messages collectifs (lettres d'information)"}
-		</dl>
-
-		<p class="submit">
-			{csrf_field key="optout"}
-			{button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
-		</p>
-	</fieldset>
-	</form>
-{elseif $resub_ok}
-	<p class="block confirm">
-		Un e-mail vous a été envoyé, merci de cliquer sur le lien dans le message reçu pour terminer.
-	</p>
-{elseif $prefs == 1}
-
-	<p class="block alert">
-		Votre adresse e-mail est déjà désinscrite. Pour demander à vous réinscrire, renseignez le formulaire ci-dessous.
-	</p>
-
-	{form_errors}
-
-	<form method="post" action="{$self_url}">
-
-		<fieldset>
-
-			<dl>
-				{input type="email" required=true name="email" label="Adresse e-mail"}
-			</dl>
-		</fieldset>
-
-		<p class="submit">
-			{csrf_field key="optout"}
-			{button type="submit" name="resub" label="Modifier mes préférences" shape="right" class="main"}
-		</p>
-	</form>
 {else}
 
 	{form_errors}
