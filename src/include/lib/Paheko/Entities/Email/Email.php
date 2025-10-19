@@ -38,7 +38,7 @@ class Email extends Entity
 
 	protected bool $accepts_messages = true;
 	protected bool $accepts_reminders = true;
-	protected bool $accepts_mailings = false;
+	protected bool $accepts_mailings = true;
 
 	/**
 	 * Normalize email address and create a hash from this

@@ -33,10 +33,6 @@
 	</p>
 	{/if}
 
-	<p class="help">
-		Seules les adresses e-mail actuellement présentes dans une fiche de membre sont affichées ici.
-	</p>
-
 	{if $status === 'invalid'}
 		<div class="block help">
 			<h3>Statuts possibles d'une adresse e-mail&nbsp;:</h3>
@@ -60,7 +56,7 @@
 
 			{foreach from=$list->iterate() item="row"}
 			<tr{if $_GET.hl == $row.id} class="highlight"{/if} id="e_{$row.id}">
-				<th>{$row.id} {link href="!users/details.php?id=%d"|args:$row.user_id label=$row.identity}</th>
+				<th>{link href="!users/details.php?id=%d"|args:$row.user_id label=$row.identity}</th>
 				<td>{$row.email}</td>
 				{if $status === 'invalid'}
 				<td>{$row.status}</td>
