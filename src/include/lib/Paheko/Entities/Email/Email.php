@@ -125,19 +125,16 @@ class Email extends Entity
 		return $date < $limit_date;
 	}
 
-	public function verify(string $code, bool $accepts_mailings = false): bool
+	public function verify(string $code): bool
 	{
 		if ($code !== $this->getVerificationCode()) {
 			return false;
 		}
 
 		$this->set('verified', true);
-		$this->set('accepts_messages', true);
-		$this->set('accepts_reminders', true);
-		$this->set('accepts_mailings', $accepts_mailings);
 		$this->set('invalid', false);
 		$this->set('fail_count', 0);
-		$this->set('fail_log', null);
+		$this->appendFailLog('Adresse vérifiée');
 
 		Plugins::fire('email.address.verified', false, ['address' => $this]);
 
