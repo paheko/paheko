@@ -27,26 +27,6 @@
 </nav>
 
 {if $status}
-	{if isset($_GET['sent'])}
-	<p class="confirm block">
-		Un message de demande de confirmation a bien été envoyé. Le destinataire doit désormais cliquer sur le lien dans ce message.
-	</p>
-	{/if}
-
-	{if $status === 'invalid'}
-		<div class="block help">
-			<h3>Statuts possibles d'une adresse e-mail&nbsp;:</h3>
-			<dl class="cotisation">
-				<dt>Invalide</dt>
-				<dd>L'adresse n'existe pas ou plus. Il n'est pas possible de lui envoyer des messages.</dd>
-				<dt>Trop d'erreurs</dt>
-				<dd>Le service destinataire a renvoyé une erreur temporaire plus de {$max_fail_count} fois.<br />Cela arrive par exemple si vos messages sont vus comme du spam trop souvent, ou si la boîte mail destinataire est pleine. Cette adresse ne recevra plus de message.</dd>
-			</dl>
-			<p class="help">
-				Il est possible de rétablir la réception de messages après un délai de 15 jours en cliquant sur le bouton "Rétablir" qui enverra un message de validation à la personne.
-			</p>
-		</div>
-	{/if}
 
 	{if !$list->count()}
 		<p class="alert block">Aucune adresse e-mail à afficher ici.</p>
@@ -55,22 +35,18 @@
 		{include file="common/dynamic_list_head.tpl"}
 
 			{foreach from=$list->iterate() item="row"}
-			<tr{if $_GET.hl == $row.id} class="highlight"{/if} id="e_{$row.id}">
+			<tr>
 				<th>{link href="!users/details.php?id=%d"|args:$row.user_id label=$row.identity}</th>
 				<td>{$row.email}</td>
 				{if $status === 'invalid'}
 				<td>{$row.status}</td>
 				{/if}
 				<td class="num">{$row.sent_count}</td>
-				<td>{$row.fail_log|escape|nl2br}</td>
 				<td>{$row.last_sent|date}</td>
-				<td>
+				<td class="actions">
 					<?php $email = rawurlencode($row->email); ?>
-					{if $status === 'optout'}
-						{linkbutton target="_dialog" label="Préférences d'envoi" href="preferences.php?address=%s"|args:$email shape="settings"}
-					{elseif $row.email && ($row.optout || $row.last_sent < $limit_date)}
-						{linkbutton target="_dialog" label="Rétablir" href="verify.php?address=%s"|args:$email shape="check"}
-					{/if}
+					{linkbutton href="!users/details.php?id=%d"|args:$row.user_id label="Fiche membre" shape="user"}
+					{linkbutton label="Détails" href="address.php?address=%s"|args:$email shape="menu"}
 				</td>
 			</tr>
 

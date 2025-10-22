@@ -569,6 +569,7 @@ class Emails
 			],
 			'fail_log' => [
 				'label' => 'Journal d\'erreurs',
+				'export' => true,
 			],
 			'last_sent' => [
 				'label' => 'Dernière tentative d\'envoi',

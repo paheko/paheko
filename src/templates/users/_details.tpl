@@ -49,9 +49,6 @@ $fields = DF::getInstance()->all();
 			<em>(Non renseigné)</em>
 		{elseif $field.type == 'email'}
 			<a href="mailto:{$value|escape:'url'}">{$value}</a>
-			{if !DISABLE_EMAIL && $show_message_button && !$email_button++}
-				<br />{linkbutton href="!users/message.php?id=%d"|args:$data.id label="Envoyer un message" shape="mail"}
-			{/if}
 		{elseif $field.type == 'multiple'}
 			<ul>
 			{foreach from=$field.options key="b" item="name"}
@@ -65,28 +62,22 @@ $fields = DF::getInstance()->all();
 			{user_field field=$field value=$value user_id=$user.id}
 			{if in_array($key, $id_fields)}</strong>{/if}
 		{/if}
-	</dd>
-		{if $field.type == 'email' && $value}
+		{if $field.type === 'email' && $value}
 		<?php $email = Email\Emails::getOrCreateEmail($value); ?>
-		<dt>Statut e-mail</dt>
-		<dd>
-			{if $email.optout}
-				<b class="alert">{icon shape="alert"}</b> Ne souhaite plus recevoir de messages
-				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-					<?php $value = rawurlencode($value); ?>
-					<br/>{linkbutton target="_dialog" label="Rétablir les envois à cette adresse" href="!users/mailing/status/verify.php?address=%s"|args:$value shape="check"}
-				{/if}
-			{elseif $email.invalid}
-				<b class="error">{icon shape="alert"} Adresse invalide</b>
-				{linkbutton href="!users/mailing/status/?status=invalid&hl=%d#e_%1\$d"|args:$email.id label="Détails de l'erreur" shape="help"}
-			{elseif $email && $email->hasReachedFailLimit()}
-				<b class="error">{icon shape="alert"} Trop d'erreurs</b>
-				{linkbutton href="!users/mailing/status/?status=invalid&hl=%d#e_%1\$d"|args:$email.id label="Détails de l'erreur" shape="help"}
-			{elseif $email.verified}
-				<b class="confirm">{icon shape="check" class="confirm"}</b> Adresse vérifiée
-			{else}
-				Adresse non vérifiée
+			{if !DISABLE_EMAIL && $show_message_button && !$email_button++ && $email->canSend() && $email.accepts_messages}
+				{linkbutton href="!users/message.php?id=%d"|args:$data.id label="Envoyer un message" shape="mail"}
 			{/if}
+			<br />
+			{if $email.invalid}
+				{tag label="Adresse invalide" color="darkred"}
+			{elseif $email && $email->hasReachedFailLimit()}
+				{tag label="Adresse bloquée" color="darkorange"}
+			{elseif $email.verified}
+				{tag label="Adresse vérifiée" color="darkgreen"}
+			{else}
+				{tag label="Adresse non vérifiée" color="darkgrey"}
+			{/if}
+			{linkbutton href="!users/mailing/status/address.php?address=%s"|args:$value label="Détails de l'adresse e-mail" shape="history"}
 		</dd>
 		<dt>Préférences d'envoi</dt>
 		<dd>
@@ -97,5 +88,6 @@ $fields = DF::getInstance()->all();
 				{linkbutton target="_dialog" label="Modifier les préférences d'envoi" href="!users/mailing/status/preferences.php?address=%s"|args:$value shape="settings"}
 			{/if}
 		{/if}
+	</dd>
 	{/foreach}
 </dl>

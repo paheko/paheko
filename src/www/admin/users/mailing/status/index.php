@@ -36,7 +36,6 @@ if (null !== $list) {
 	$list->loadFromQueryString();
 }
 
-$max_fail_count = Emails::FAIL_LIMIT;
-$tpl->assign(compact('list', 'max_fail_count', 'queue_count', 'limit_date', 'status', 'type'));
+$tpl->assign(compact('list', 'queue_count', 'limit_date', 'status', 'type'));
 
 $tpl->display('users/mailing/status/index.tpl');

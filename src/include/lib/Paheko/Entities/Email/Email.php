@@ -281,7 +281,7 @@ class Email extends Entity
 		$keys = ['accepts_messages', 'accepts_reminders', 'accepts_mailings'];
 
 		foreach ($keys as $name) {
-			if (!array_key_exist($key . '_present', $source)) {
+			if (!array_key_exists($name . '_present', $source)) {
 				continue;
 			}
 
@@ -309,7 +309,7 @@ class Email extends Entity
 		$who ??= 'destinataire';
 
 		foreach ($options as $key => $label) {
-			if (!array_key_exist($key, $preferences)) {
+			if (!array_key_exists($key, $preferences)) {
 				continue;
 			}
 

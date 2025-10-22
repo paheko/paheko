@@ -1629,6 +1629,12 @@ class Sections
 			);
 		}
 
+		if (isset($tpl->module->name)) {
+			$name = $tpl->module->name;
+			$table = $tpl->module->table_name();
+			$sql = self::_moduleReplaceJSONExtract($sql, $table);
+		}
+
 		$db = DB::getInstance();
 
 		try {
