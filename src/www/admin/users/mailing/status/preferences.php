@@ -13,9 +13,11 @@ $email = Emails::getOrCreateEmail($address);
 $csrf_key = 'block_email';
 
 $form->runIf('send', function () use ($email) {
-    $email->setOptout('Désinscription manuelle par un administrateur');
+	$email->adminSetPreferences();
     $email->save();
 }, $csrf_key, '!users/');
 
-$tpl->assign(compact('csrf_key', 'email', 'address'));
-$tpl->display('users/mailing/block.tpl');
+$user_prefs_url = $email->getUserPreferencesURL();
+
+$tpl->assign(compact('csrf_key', 'email', 'address', 'user_prefs_url'));
+$tpl->display('users/mailing/status/preferences.tpl');

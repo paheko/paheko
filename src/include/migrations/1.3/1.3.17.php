@@ -2,6 +2,52 @@
 
 namespace Paheko;
 
+use Paheko\Users\DynamicFields;
+use Paheko\Email\Emails;
+use Paheko\Entities\Email\Email;
+
+$db = DB::getInstance();
+
+$db->beginSchemaUpdate();
+$db->import(__DIR__ . '/1.3.17.sql');
+$db->commitSchemaUpdate();
+
+// Create an entry in the email table for all existing emails,
+// as we want to allow them to have opt-out instead of double opt-in
+$db->begin();
+$email_fields = DynamicFields::getEmailFields();
+$email_fields = array_map([$db, 'quoteIdentifier'], $email_fields);
+
+$sql = sprintf('SELECT %s FROM users;', implode(', ', $email_fields));
+
+foreach ($db->iterate($sql) as $row) {
+
+	foreach ($row as $address) {
+		if (null === $address) {
+			continue;
+		}
+
+		$message = null;
+
+		try {
+			Email::validateAddress($address, false);
+		}
+		catch (UserException $e) {
+			$message = $e->getMessage();
+		}
+
+		$email = Emails::getOrCreateEmail($address);
+
+		if ($message) {
+			$email->hasBounced('hard', $message);
+		}
+
+		$email->save();
+	}
+}
+
+$db->commit();
+
 $file = DATA_ROOT . '/association.pre_upgrade-1.3.16.sqlite';
 
 // Re-import file shares from previous save, if it exists

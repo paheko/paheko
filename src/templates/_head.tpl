@@ -163,7 +163,7 @@ if (ALERT_MESSAGE && !$dialog) {
 
 {elseif $layout === 'public'}
 <header class="public">
-	<h1><a href="{$site_url}">{if $config.files.logo}<img src="{$config->fileURL('logo', '150px')}" alt="" />{else}{$config.org_name}{/if}</a></h1>
+	<h1><a href="{$site_url}">{if $config.files.logo}<img src="{$config->fileURL('logo', '150px')}" alt="{$config.org_name}" />{else}{$config.org_name}{/if}</a></h1>
 </header>
 {/if}
 

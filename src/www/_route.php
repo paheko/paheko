@@ -33,7 +33,7 @@ if (PHP_SAPI === 'cli-server' && $uri !== '/' && file_exists(__DIR__ . $uri)) {
 
 // Handle __un__subscribe URL: .../?un=XXXX
 if ((empty($uri) || $uri === '/') && !empty($_GET['un'])) {
-	$params = array_intersect_key($_GET, ['un' => null, 'v' => null]);
+	$params = array_intersect_key($_GET, ['un' => null, 'v' => null, 'c' => null]);
 
 	// RFC 8058
 	if (!empty($_POST['Unsubscribe']) && $_POST['Unsubscribe'] == 'Yes') {
@@ -43,14 +43,19 @@ if ((empty($uri) || $uri === '/') && !empty($_GET['un'])) {
 			throw new UserException('Adresse email introuvable.');
 		}
 
-		$email->setOptout();
+		$email->setOptout((int) $params['c']);
 		$email->save();
 		http_response_code(200);
 		echo 'Unsubscribe successful';
 		return;
 	}
+	elseif (isset($_GET['h'])) {
+		Utils::redirect('!email_preferences.php?' . http_build_query($_GET));
+	}
+	else {
+		Utils::redirect('!email_optout.php?' . http_build_query($params));
+	}
 
-	Utils::redirect('!optout.php?' . http_build_query($params));
 	return;
 }
 // Handle redirect (rd) URLs for emails: .../?rd=XXXXX

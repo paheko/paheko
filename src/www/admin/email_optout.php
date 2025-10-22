@@ -12,8 +12,10 @@ if (empty($_GET['un'])) {
 }
 
 $code = $_GET['un'];
-$email = Emails::getEmailFromOptout($code);
+$context = $_GET['c'] ?? null;
+$email = Emails::getEmailFromQueryStringValue($code);
 $verify = null;
+$csrf_key = 'optout';
 
 if (!$email) {
 	throw new UserException('Adresse email introuvable.');
@@ -35,16 +37,18 @@ $form->runIf('confirm_resub', function () use ($email) {
 	}
 
 	$email->sendVerification($_POST['email']);
-}, 'optout', '!optout.php?resub_ok&un=' . $code);
+}, $csrf_key, '!email_optout.php?resub_ok&un=' . $code);
 
-$form->runIf('optout', function () use ($email) {
-	$email->setOptout();
+$form->runIf('optout', function () use ($email, $context) {
+	$email->setOptout((int)$context);
 	$email->save();
-}, 'optout', '!optout.php?ok&un=' . $code);
+}, $csrf_key, '!email_optout.php?ok&un=' . $code);
 
 $ok = isset($_GET['ok']);
 $resub_ok = isset($_GET['resub_ok']);
 
-$tpl->assign(compact('email', 'ok', 'resub_ok', 'code', 'verify'));
+$prefs_url = $email->getUserPreferencesURL();
 
-$tpl->display('optout.tpl');
+$tpl->assign(compact('email', 'ok', 'resub_ok', 'code', 'verify', 'context', 'prefs_url', 'csrf_key'));
+
+$tpl->display('email_optout.tpl');

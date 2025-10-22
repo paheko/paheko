@@ -254,7 +254,7 @@ class Emails
 	/**
 	 * Return an Email entity from the optout code
 	 */
-	static public function getEmailFromOptout(string $code): ?Email
+	static public function getEmailFromQueryStringValue(string $code): ?Email
 	{
 		$hash = base64_decode(str_pad(strtr($code, '-_', '+/'), strlen($code) % 4, '=', STR_PAD_RIGHT));
 
@@ -339,12 +339,10 @@ class Emails
 
 		// listQueue nettoie déjà la queue
 		foreach ($queue as $row) {
-			// We allow system emails to be sent to invalid addresses after a while, and to optout addresses all the time
-			if ($row->optout || $row->invalid || $row->fail_count >= self::FAIL_LIMIT) {
-				if ($row->context != self::CONTEXT_SYSTEM || (!$row->optout && $row->last_sent > $limit_time)) {
-					self::deleteFromQueue($row->id);
-					continue;
-				}
+			// See if we need to avoid this recipient
+			if (!Email::acceptsThisMessage($row)) {
+				self::deleteFromQueue($row->id);
+				continue;
 			}
 
 			$fail = null;
@@ -481,7 +479,7 @@ class Emails
 
 		$condition = null === $context ? '' : sprintf(' AND context = %d', $context);
 
-		return DB::getInstance()->get(sprintf('SELECT q.*, e.optout, e.verified, e.hash AS email_hash,
+		return DB::getInstance()->get(sprintf('SELECT q.*, e.accepts_messages, e.accepts_mailings, e.accepts_reminders, e.verified, e.hash AS email_hash,
 				e.invalid, e.fail_count, strftime(\'%%s\', e.last_sent) AS last_sent
 			FROM emails_queue q
 			LEFT JOIN emails e ON e.hash = q.recipient_hash
@@ -533,14 +531,14 @@ class Emails
 		$prefix .= '.';
 
 		return sprintf('CASE
-			WHEN %1$soptout = 1 THEN \'Désinscription\'
+			WHEN %1$saccepts_messages = 0 THEN \'Désinscription\'
 			WHEN %1$sinvalid = 1 THEN \'Invalide\'
 			WHEN %1$sfail_count >= %2$d THEN \'Trop d\'\'erreurs\'
 			ELSE \'\'
 		END', $prefix, self::FAIL_LIMIT);
 	}
 
-	static public function listRejectedUsers(): DynamicList
+	static public function listInvalidUsers(): DynamicList
 	{
 		$db = DB::getInstance();
 		$email_field = 'u.' . $db->quoteIdentifier(DynamicFields::getFirstEmailField());
@@ -571,17 +569,18 @@ class Emails
 			],
 			'fail_log' => [
 				'label' => 'Journal d\'erreurs',
+				'export' => true,
 			],
 			'last_sent' => [
 				'label' => 'Dernière tentative d\'envoi',
 			],
-			'optout' => [],
+			'accepts_messages' => [],
 			'fail_count' => [],
 		];
 
 		$tables = sprintf('emails e INNER JOIN users u ON %s IS NOT NULL AND %1$s != \'\' AND e.hash = email_hash(%1$s)', $email_field);
 
-		$conditions = sprintf('e.optout = 1 OR e.invalid = 1 OR e.fail_count >= %d', self::FAIL_LIMIT);
+		$conditions = sprintf('e.invalid = 1 OR e.fail_count >= %d', self::FAIL_LIMIT);
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('last_sent', true);
@@ -591,10 +590,24 @@ class Emails
 		return $list;
 	}
 
+	static public function listOptoutUsers(string $type): DynamicList
+	{
+		if (!in_array($type, ['messages', 'reminders', 'mailings'], true)) {
+			throw new \InvalidArgumentException('Invalid type: ' . $type);
+		}
+
+		$list = self::listInvalidUsers();
+		$list->setConditions(sprintf('e.accepts_%s = 0', $type));
+		$list->setColumnProperty('fail_log', 'label', 'Historique');
+		$list->removeColumn('status');
+
+		return $list;
+	}
+
 	static public function getOptoutText(): string
 	{
 		return "Vous recevez ce message car vous êtes dans nos contacts.\n"
-			. "Pour ne plus jamais recevoir de message de notre part cliquez ici :\n";
+			. "Pour ne plus recevoir ces messages cliquez ici :\n";
 	}
 
 	static public function appendHTMLOptoutFooter(string $html, string $url): string
@@ -631,7 +644,7 @@ class Emails
 
 		// Append unsubscribe, except for password reminders
 		if ($context != self::CONTEXT_SYSTEM) {
-			$url = Email::getOptoutURL($recipient_hash);
+			$url = Email::getOptoutURL($recipient_hash, $context);
 
 			// RFC 8058
 			$message->setHeader('List-Unsubscribe', sprintf('<%s>', $url));

@@ -6,7 +6,7 @@
 	</aside>
 	<ul>
 		<li><a href="./">Messages collectifs</a></li>
-		<li><a href="rejected.php">Adresses rejetées</a></li>
+		<li><a href="status/">Statut des envois</a></li>
 	</ul>
 </nav>
 
