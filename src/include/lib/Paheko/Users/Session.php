@@ -322,6 +322,11 @@ class Session extends \KD2\UserSession
 			$login = $this->db->firstColumn('SELECT id FROM users
 				WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config = ?)
 				LIMIT 1', self::ACCESS_ADMIN);
+
+			// Cannot auto-login, as there is no admin user
+			if (!$login) {
+				return false;
+			}
 		}
 		elseif ($login <= 0 || !is_numeric($login)) {
 			throw new \LogicException('Invalid value for LOCAL_LOGIN: ' . $login);

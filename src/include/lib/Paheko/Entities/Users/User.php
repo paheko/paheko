@@ -616,7 +616,7 @@ class User extends Entity
 
 		$this->set('password', $session->hashPassword($source['password']));
 
-		if ($session->isLogged()) {
+		if ($session->isLogged(false)) {
 			$session->clearSessionVerifier();
 		}
 	}
