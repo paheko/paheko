@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Merge\sOptout\spreferences\sof\s1.3.17
-D 2025-10-22T17:10:59.682
+C Some\sorganizations\sdon't\shave\san\semail\saddress\sfield
+D 2025-10-22T17:45:46.964
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -213,7 +213,7 @@ F src/include/migrations/1.3/1.3.13.sql d3325350ab30317f14fc9af626c96eda757c19d3
 F src/include/migrations/1.3/1.3.14.sql ac69b89378e44d062a255eb81b0e39b3a04fa2324817aa3d53cfa042e9d24ce5
 F src/include/migrations/1.3/1.3.14_recus.sql a3f2d894d8bf8859cf5f8d14c15a5532ad7c7457ac23ef76259293e41d322f98
 F src/include/migrations/1.3/1.3.16.sql f49264f9b1b7ee8b0ed9b9a50381709c6fdcdf8ee7b74797f61a268e67521196
-F src/include/migrations/1.3/1.3.17.php b687e2fd45e70f2e8ea7c9f43cec333183e5de61a4da120fc96052495f864e57
+F src/include/migrations/1.3/1.3.17.php 1f8b7a1b23a82238c3b10f62200f4425252eb477ed0d9b095bac744825cfb0c2
 F src/include/migrations/1.3/1.3.17.sql 5c559fc8a0e296aa5224115d2347289a9fc64cac43754937b660ca4e3678b7ee
 F src/include/migrations/1.3/1.3.2.sql 3a81504a4d49d8226aba81aadf40a0bc1955fcecd3ab5d009186080c70ce4318
 F src/include/migrations/1.3/1.3.3.sql 765f1b91b165f2d806c00e2673491a76be9c78b37eaf82b2da06691443e403d6
@@ -389,7 +389,7 @@ F src/templates/docs/search.tpl c364d51de8128cd2557e7976a41f35f6535432a303621b4b
 F src/templates/docs/shares.tpl a5ed2806b6fa00564686edf774abfc884d90fe1c37e6538646901b8b6e0376a0
 F src/templates/docs/trash.tpl 4ee250f6f80985d45ff2428a73e34cc711f17e631cc3b750acd3a0589a6cea3d
 F src/templates/docs/trash_delete.tpl 09f17d3438bc7406f8b7b8fbc32c5849a66c293b1d5ede463be41cccf413b777
-F src/templates/email_optout.tpl c449254df56259f15869913fb8990a9991abf33febc0e3db598576b266765fab w src/templates/optout.tpl
+F src/templates/email_optout.tpl c449254df56259f15869913fb8990a9991abf33febc0e3db598576b266765fab
 F src/templates/email_preferences.tpl bb5bec68146ebe2b5bf670279287d339675b04661f3c658b89465621cfa3f1cf
 F src/templates/emails/login_changed.tpl aaf10e05bad319868dacd8a9fbfa9a321e41adcb46d2d106eba45312db5e396b
 F src/templates/emails/password_changed.tpl f2ac7406d790310e1854bc428cbc77f533ee662957b696b29c4d5b739d06766e
@@ -474,9 +474,9 @@ F src/templates/users/mailing/recipient_data.tpl d5ad4ec244404a0c1371d98a7740949
 F src/templates/users/mailing/recipients.tpl 02e02c8671bc36edc068fb4dc62af04fe0b34bc407eb342a1d62b150435dc43c
 F src/templates/users/mailing/send.tpl 938bde843954a367467f05950d3a82aabb0a90ee1d9c582ec09a140117c99ba0
 F src/templates/users/mailing/status/address.tpl 82548961eb737526faffad8b5420016b699c5d48d9bc7ed68a225be1a23018c8
-F src/templates/users/mailing/status/index.tpl b7ca7dfd81601a532b6df4cf143d637ac9895bfa5d2029a727f6026f31a5e000 w src/templates/users/mailing/rejected.tpl
-F src/templates/users/mailing/status/preferences.tpl a86723c47c3f56521b74331014fadeb1f6f1b57da5c1fac2588ff91ad98c11fb w src/templates/users/mailing/block.tpl
-F src/templates/users/mailing/status/verify.tpl 3380d3fc0bc4b18c8158eb6c7ed41ad2d2e65dffa3b0ecd068f8e571a0cd09bf w src/templates/users/mailing/verify.tpl
+F src/templates/users/mailing/status/index.tpl b7ca7dfd81601a532b6df4cf143d637ac9895bfa5d2029a727f6026f31a5e000
+F src/templates/users/mailing/status/preferences.tpl a86723c47c3f56521b74331014fadeb1f6f1b57da5c1fac2588ff91ad98c11fb
+F src/templates/users/mailing/status/verify.tpl 3380d3fc0bc4b18c8158eb6c7ed41ad2d2e65dffa3b0ecd068f8e571a0cd09bf
 F src/templates/users/mailing/write.tpl a5ee5946c0ad554aae8c68da54a26372b5f34f3b99c52f95fada058036f365b2
 F src/templates/users/message.tpl cfcf06f17062a3df764c6e3893522576f62bf1958b987fb411a17653e4c8c830
 F src/templates/users/new.tpl 5682893ad4b4a9768e4a77851b6304beaa4d257a8c6def8fcc65005c70d33951
@@ -626,7 +626,7 @@ F src/www/admin/docs/new_file.php ef48582c25106209af13d979614733f7f73f94293b638a
 F src/www/admin/docs/search.php 60c138d0ec74854f837509f53a7cf89051107b80005b4eb936a89c83dc5c7fb0
 F src/www/admin/docs/shares.php 8b260baa272f2313206255b6440992de62da744cf606105df5178dba0816f0a4
 F src/www/admin/docs/trash.php 03f92ce4889c83fa83153dfcd109ed2be8fcb26347ad4d68b1bd229df1e9f4e4
-F src/www/admin/email_optout.php efbfed410d62c5c6667c139a15ee8da4705c6724704a1e6f7572c2d7765187c1 w src/www/admin/optout.php
+F src/www/admin/email_optout.php efbfed410d62c5c6667c139a15ee8da4705c6724704a1e6f7572c2d7765187c1
 F src/www/admin/email_preferences.php 586a680d23a4d82de2c7b311e611b11a7ffb4a05f63616c0bf80cb0a9b99b8de
 F src/www/admin/handle_bounce.php ac546e03a21ec3687a12482fed3753a8e4632fab632297807c72afa9ef5394d6
 F src/www/admin/index.php 47d294442d8677011edf5f56a3d7d04dcd3b1883590d262b4227dc614dae9035
@@ -774,9 +774,9 @@ F src/www/admin/users/mailing/recipient_data.php 7eb9cf0ebd67d3d7626e6dcee9faa36
 F src/www/admin/users/mailing/recipients.php 0eab354cfc17b56a7eb2dbdd126b957464eac120fcd0add5ca840f71c75af2bd
 F src/www/admin/users/mailing/send.php 18d75bf7b36f3936d263de72e7dc434213ffb82fedd1a7efc17e70d490c71d71
 F src/www/admin/users/mailing/status/address.php ac80dd8100a9c33da04528a2f66ea9dc2d4d5ec17903044a75589f21d8018968
-F src/www/admin/users/mailing/status/index.php b83c82ffb07b20506febe7a4e0b6a7e48a8a403bc6f8bebdb3450a7bddb7cd86 w src/www/admin/users/mailing/rejected.php
-F src/www/admin/users/mailing/status/preferences.php 444b5e1a0159442455e9a8fa343a4cf25294ee6b9b1363282d02536ad4ec5eb8 w src/www/admin/users/mailing/block.php
-F src/www/admin/users/mailing/status/verify.php 6b9ccdf7ed65936538b6031454298ae4363b50cd5de9dc60152fb3a2f3d0af59 w src/www/admin/users/mailing/verify.php
+F src/www/admin/users/mailing/status/index.php b83c82ffb07b20506febe7a4e0b6a7e48a8a403bc6f8bebdb3450a7bddb7cd86
+F src/www/admin/users/mailing/status/preferences.php 444b5e1a0159442455e9a8fa343a4cf25294ee6b9b1363282d02536ad4ec5eb8
+F src/www/admin/users/mailing/status/verify.php 6b9ccdf7ed65936538b6031454298ae4363b50cd5de9dc60152fb3a2f3d0af59
 F src/www/admin/users/mailing/write.php 70659ff0aaffb58ea98585036a4c6f975ef71ae61abd0d2bdf94dc9b1a6f4246
 F src/www/admin/users/message.php ead6908940d38fe90ecce6b8aa1aa33c836b737503af8cd2bcb362146d516b16
 F src/www/admin/users/new.php 3a4bc78ae37632aefe26bb04eac46bae9481ecb454ca0bb9200d9cac51093261
@@ -825,25 +825,24 @@ F tools/fossil_get_branch_hash.php 8d5c38926cf0763039ede9c88745e890b44beb33a64e5
 F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f931f721784d x
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 67b55495492f0e7f8a44d649fd287d0ae4cb804209c9506534327e3b21f095ed fdfd2a500eb310ab8981aff385a34d73528073fac46769db260aea8e23abd326
-R 8469378ed048d2dac55a5a21d013c19d
-T +closed fdfd2a500eb310ab8981aff385a34d73528073fac46769db260aea8e23abd326
+P 042450751f851fce8159d37607610329ed57403e79c6e8c94f95b047042371b6
+R 69b02ced31a495dca2f7e581b4fb4c1d
 U bohwaz
-Z 2dea6858c63d9a64ef13c5a7674abdcf
+Z e461b434dac18b5bbc804d5534ed3a02
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmj5ECMACgkQksnacbiI
-6jRjqxAApJZOuXKeCObrZ4vpr8l70NyTMFraGKqQrCAKysc4vyN71zaCElRV7aPp
-b11cgQEf4398hPyGz1S2FHeiRLqln021/7r9AVjXGo/1zb8u3pG3mpBYrWIZJXlv
-uXx7WYJZklst+9Sq+Bq2B6IoddsxuL4CgMnU4diTBL+6x0MPYGVmTssC9MbMSkiO
-v1A9H4DEiu6rI2lxvBx+KPhx9Mz9f/UZytdnEsbJ94DgHqXsQ7ljPnP498elCr7+
-6D7rVnAMcCuaIDgFrl6NuoxqEPbf6xmFQIo41vGEAWedv+2W0TmZWXep0bC68102
-C4sfxjcDEyguLpsZ92+7o1QeyrLmCrLZbH+xr9032sG1gdTBZvGX9kl/pga6lLOD
-RXGWVnEU+sYmyQwJfEkMJJishydwNwxvyWbFMpXJtqYgK5RGXTXr2bRzGyiRFBgU
-Sx2w0Y+Ya9t+dyOdwv+sxaGnV3pOajXvo7/f/Sm/zmtVXg4QE5ylKdg6LdoAOKVO
-WL/SQ+mKf241bSvXWWLirMhrakM08yXG8j15AuENpbFKdr9pa55ZrHVGiJkNTNAZ
-taTgSMCPyjeNQTJS5JfJN8U2LHCHafmrG1T+V1n9ZubuFg3Fsj50/OrzkGgSFkD1
-gUzp3fn+L4R33ipzL6TKhPt3XPVEVptMWTNFvPOM+2NUCH/BIFI=
-=P2EL
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmj5GEoACgkQksnacbiI
+6jTBqhAAlWIyVXxG/+AhJuqzETm7Ksw94Ot0lh+rV2WVwo8zMW8Ssj7ZbRaM2fc8
+6j40RTzACHcGLHRRyxh6Zc0Kaa5onAPkPfAP+QpLvbYVPaOBpvyTwTZScf0o8IJj
+6iOs+OXhz7kclqt3qyYHaTYk1FUL3SYntpy4/TTMOxEZOkLiSTgdQsmqEXMmjR1P
+SCF75hbRrVYnTHyYgLIELjxCai8lDPScdZDVUxL6Ji1EADJkiL9o8sDMEuaAikGi
+IXAwXsrQ83jRu18TCU2ByphU8on5YSi6DDa+E6vrFobMbCh9SWBUJtqKEQLj2MkX
+rpXASthqyr85fhHSvlaNxHncU5o6OWEJKzXUxp6QlCkRdsFOmIjGc6VKSP3yubde
+mBu7lT2C7O9/cQHgxk4MZlzsmWDN/azcZjazwmp12ogvvwgbMAnQKKnxGK79XwEl
+3wqH8fvMOfRd3vAkuGU2cwPJK/vEwsBlir2woI8WoNTvbluY6bUYaCChldXAZHW0
+C1qkKBfMenmn1fI+pDNiqy+XLduAJjlcMX7C8Y0Qan3PI48RN5t0T9SThIzs6eyM
+MJfjOtS4kABzN1ivXpND5XpRFNeyLthDyyd9Tc/y72sfWmBAgVxl/VGf+VV1cD2M
+SWiG9OxAWdk7g9Cxtuyq21rN6uaw22Qp226El3Xi++4Gp/1Ibjk=
+=QqtS
 -----END PGP SIGNATURE-----
