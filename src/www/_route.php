@@ -31,13 +31,27 @@ if (PHP_SAPI === 'cli-server' && $uri !== '/' && file_exists(__DIR__ . $uri)) {
 // (eg. $uri)
 (function () { require(__DIR__ . '/../include/init.php'); })();
 
-// Handle __un__subscribe URL: .../?un=XXXX
+// Handle __un__subscribe URL: .../?un=XXXX / re-subscribe
 if ((empty($uri) || $uri === '/') && !empty($_GET['un'])) {
-	$params = array_intersect_key($_GET, ['un' => null, 'v' => null, 'c' => null]);
+	$params = array_intersect_key($_GET, [
+		'c'  => Emails::CONTEXT_BULK, // Optout context
+		'un' => null, // Contains email hash
+		'v'  => null, // Verification hash for double opt-in
+		'e'  => null, // Expiry of verification hash for double opt-in
+		'r'  => null, // accepts_reminders
+		'l'  => null, // accepts_mailings
+		'm'  => null, // accepts_messages
+		'y'  => null, // Verification hash for verifying email address
+	]);
+
+	$params['h'] = $params['un'];
+	unset($params['un']);
+
+	$params = array_filter($params);
 
 	// RFC 8058
 	if (!empty($_POST['Unsubscribe']) && $_POST['Unsubscribe'] == 'Yes') {
-		$email = Emails::getEmailFromOptout($params['un']);
+		$email = Emails::getEmailFromOptout($params['h']);
 
 		if (!$email) {
 			throw new UserException('Adresse email introuvable.');
@@ -49,11 +63,11 @@ if ((empty($uri) || $uri === '/') && !empty($_GET['un'])) {
 		echo 'Unsubscribe successful';
 		return;
 	}
-	elseif (isset($_GET['h'])) {
-		Utils::redirect('!email_preferences.php?' . http_build_query($_GET));
+	elseif (!empty($params['y'])) {
+		Utils::redirect('!email_verify.php?' . http_build_query($params));
 	}
 	else {
-		Utils::redirect('!email_optout.php?' . http_build_query($params));
+		Utils::redirect('!email_preferences.php?' . http_build_query($params));
 	}
 
 	return;

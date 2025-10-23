@@ -110,7 +110,7 @@ class Email extends Entity
 			throw new UserException('Adresse email inconnue');
 		}
 
-		$verify_url = self::getOptoutURL($this->hash) . '&v=' . $this->getVerificationCode();
+		$verify_url = self::getOptoutURL($this->hash) . '&y=' . $this->getVerificationCode();
 		EmailTemplates::verifyAddress($email, $verify_url);
 	}
 
@@ -334,13 +334,13 @@ class Email extends Entity
 	public function setOptout(int $context): void
 	{
 		if ($context === Emails::CONTEXT_BULK) {
-			$this->setPreferences(['accepts_mailings' => false]);
+			$this->set('accepts_mailings', false);
 		}
 		elseif ($context === Emails::CONTEXT_REMINDER) {
-			$this->setPreferences(['accepts_reminders' => false]);
+			$this->set('accepts_reminders', false);
 		}
 		else {
-			$this->setPreferences(['accepts_messages' => false]);
+			$this->set('accepts_messages', false);
 		}
 	}
 
@@ -378,13 +378,16 @@ class Email extends Entity
 		}
 	}
 
-	public function savePreferencesFromUserForm(?array $source = null): bool
+	public function savePreferencesFromUserForm(?array $source = null, ?int $optout_context = null): bool
 	{
 		$source ??= $_POST;
-		$address = $source['email'] ?? '';
 
-		if (self::getHash($address) !== $this->hash) {
-			throw new UserException('L\'adresse e-mail indiquée ne correspond pas à celle que nous avons enregistré. Merci de vérifier l\'adresse e-mail saisie.');
+		if (!$optout_context) {
+			$address = $source['email'] ?? '';
+
+			if (!$address || self::getHash($address) !== $this->hash) {
+				throw new UserException('L\'adresse e-mail indiquée ne correspond pas à celle que nous avons enregistré. Merci de vérifier l\'adresse e-mail saisie.');
+			}
 		}
 
 		$keys = ['reminders', 'messages', 'mailings'];
@@ -405,7 +408,9 @@ class Email extends Entity
 			$preferences[$name] = $value;
 		}
 
-		if ($require_confirm) {
+		// Don't require double opt-in if the user is coming from the optout link
+		// at the bottom of a message
+		if ($require_confirm && !$optout_context) {
 			$url = $this->getSignedUserPreferencesURL($preferences);
 			$preferences = array_filter($preferences);
 			EmailTemplates::verifyPreferences($address, $url, $preferences);
@@ -431,7 +436,7 @@ class Email extends Entity
 		ksort($values);
 		$values = http_build_query($values);
 		$hash = hash_hmac('sha1', $values . $this->hash, LOCAL_SECRET_KEY);
-		$values .= '&h=' . $hash;
+		$values .= '&v=' . $hash;
 
 		$url = self::getOptoutURL($this->hash);
 		$url .= '&' . $values;
@@ -440,7 +445,7 @@ class Email extends Entity
 
 	public function confirmPreferences(array $qs): bool
 	{
-		if (!isset($qs['h'], $qs['e'])) {
+		if (!isset($qs['v'], $qs['e'])) {
 			return false;
 		}
 
@@ -449,7 +454,7 @@ class Email extends Entity
 
 		$hash = hash_hmac('sha1', http_build_query($values) . $this->hash, LOCAL_SECRET_KEY);
 
-		if ($hash !== $qs['h']) {
+		if ($hash !== $qs['v']) {
 			return false;
 		}
 
