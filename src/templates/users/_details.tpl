@@ -77,7 +77,7 @@ $fields = DF::getInstance()->all();
 			{else}
 				{tag label="Adresse non vérifiée" color="darkgrey"}
 			{/if}
-			{linkbutton href="!users/mailing/status/address.php?address=%s"|args:$value label="Détails de l'adresse e-mail" shape="history"}
+			{linkbutton href="!users/mailing/status/address.php?address=%s"|args:$value label="Détails de l'adresse e-mail" shape="history" target="_dialog"}
 		</dd>
 		<dt>Préférences d'envoi</dt>
 		<dd>

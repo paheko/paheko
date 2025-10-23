@@ -16,20 +16,21 @@ $form->runIf(f('force_queue') && !USE_CRON, function () use ($session) {
 	Emails::runQueue();
 }, null, '!./?forced');
 
-$status = $_GET['status'] ?? null;
+$status = $_GET['status'] ?? 'invalid';
 $list = null;
 $queue_count = null;
 $type = null;
 
-if ($status === 'invalid') {
-	$list = Emails::listInvalidUsers();
+if ($status === 'queue') {
+	$queue_count = Emails::countQueue();
 }
 elseif ($status === 'optout') {
 	$type = $_GET['type'] ?? 'mailings';
 	$list = Emails::listOptoutUsers($type);
 }
 else {
-	$queue_count = Emails::countQueue();
+	$list = Emails::listInvalidUsers();
+	$status = 'invalid';
 }
 
 if (null !== $list) {

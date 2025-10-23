@@ -1,17 +1,4 @@
-{include file="_head.tpl" title="Adresse e-mail : %s"|args:$address current="users/mailing"}
-
-<nav class="tabs">
-	<ul>
-		<li><a href="../">Messages collectifs</a></li>
-		<li class="current"><a href="./">Statut des envois</a></li>
-	</ul>
-</li>
-
-{if isset($_GET['sent'])}
-<p class="confirm block">
-	Un message de demande de confirmation a bien été envoyé. Le destinataire doit désormais cliquer sur le lien dans ce message.
-</p>
-{/if}
+{include file="_head.tpl" title=$address current="users/mailing"}
 
 <dl class="describe">
 	<dt>Adresse e-mail</dt>

@@ -9,7 +9,7 @@ require_once __DIR__ . '/../_inc.php';
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 
 $address = qg('address');
-$email = Emails::getOrCreateEmail($address);
+$email = Emails::getEmail($address);
 
 if (!$email) {
 	throw new UserException('Adresse invalide');

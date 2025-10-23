@@ -12,9 +12,9 @@
 	</ul>
 
 	<ul class="sub">
-		<li{if !$status} class="current"{/if}><a href="./">Messages en attente</a></li>
 		<li{if $status === 'invalid'} class="current"{/if}><a href="?status=invalid">Adresses invalides</a></li>
 		<li{if $status === 'optout'} class="current"{/if}><a href="?status=optout">Désinscriptions</a></li>
+		<li{if $status === 'queue'} class="current"{/if}><a href="./?status=queue">Messages en attente</a></li>
 	</ul>
 
 	{if $status === 'optout'}
@@ -26,39 +26,8 @@
 	{/if}
 </nav>
 
-{if $status}
+{if $status === 'queue'}
 
-	{if !$list->count()}
-		<p class="alert block">Aucune adresse e-mail à afficher ici.</p>
-	{else}
-		{$list->getHTMLPagination()|raw}
-		{include file="common/dynamic_list_head.tpl"}
-
-			{foreach from=$list->iterate() item="row"}
-			<tr>
-				<th>{link href="!users/details.php?id=%d"|args:$row.user_id label=$row.identity}</th>
-				<td>{$row.email}</td>
-				{if $status === 'invalid'}
-				<td>{$row.status}</td>
-				{/if}
-				<td class="num">{$row.sent_count}</td>
-				<td>{$row.last_sent|date}</td>
-				<td class="actions">
-					<?php $email = rawurlencode($row->email); ?>
-					{linkbutton href="!users/details.php?id=%d"|args:$row.user_id label="Fiche membre" shape="user"}
-					{linkbutton label="Détails" href="address.php?address=%s"|args:$email shape="menu"}
-				</td>
-			</tr>
-
-			{/foreach}
-		</tbody>
-		</table>
-
-		{$list->getHTMLPagination()|raw}
-
-	{/if}
-
-{else}
 	{if isset($_GET['forced'])}
 	<p class="confirm block">
 		La file d'attente a été envoyée.
@@ -77,6 +46,44 @@
 			{/if}
 		</p>
 	</form>
+
+{else}
+
+	{if isset($_GET['sent'])}
+	<p class="confirm block">
+		Un message de demande de confirmation a bien été envoyé. Le destinataire doit désormais cliquer sur le lien dans ce message.
+	</p>
+	{/if}
+
+	{if !$list->count()}
+		<p class="alert block">Aucune adresse e-mail à afficher ici.</p>
+	{else}
+		{$list->getHTMLPagination()|raw}
+		{include file="common/dynamic_list_head.tpl"}
+
+			{foreach from=$list->iterate() item="row"}
+			<tr>
+				<?php $email = rawurlencode($row->email); ?>
+				<th>{link href="!users/details.php?id=%d"|args:$row.user_id label=$row.identity}</th>
+				<td>{link href="address.php?address=%s"|args:$row.email args=$email label=$row.email target="_dialog"}</td>
+				{if $status === 'invalid'}
+				<td>{$row.status}</td>
+				{/if}
+				<td class="num">{$row.sent_count}</td>
+				<td>{$row.last_sent|date}</td>
+				<td class="actions">
+					{linkbutton href="!users/details.php?id=%d"|args:$row.user_id label="Fiche membre" shape="user"}
+					{linkbutton label="Détails" href="address.php?address=%s"|args:$email shape="history" target="_dialog"}
+				</td>
+			</tr>
+
+			{/foreach}
+		</tbody>
+		</table>
+
+		{$list->getHTMLPagination()|raw}
+
+	{/if}
 
 {/if}
 
