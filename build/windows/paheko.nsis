@@ -6,7 +6,7 @@
 !define COPYRIGHT "Paheko"
 !define DESCRIPTION "Gestion d'association simple et efficace"
 !define INSTALLER_NAME "paheko-${VERSION}.exe"
-!define MAIN_APP_EXE "launch.bat"
+!define MAIN_APP_EXE "launch.vbs"
 !define ICON "paheko.ico"
 #!define BANNER "[CHANGEME Installer Banner Filename .bmp]"
 #!define LICENSE_TXT "[CHANGEME License Text Document]"
@@ -107,7 +107,7 @@ WriteUninstaller "$INSTDIR\uninstall.exe"
 CreateDirectory "$SMPROGRAMS\$SM_Folder"
 CreateShortCut "$SMPROGRAMS\$SM_Folder\${APP_NAME}.lnk" "$INSTDIR\${MAIN_APP_EXE}" "" "$INSTDIR\paheko.ico"
 CreateShortCut "$DESKTOP\${APP_NAME}.lnk" "$INSTDIR\${MAIN_APP_EXE}" "" "$INSTDIR\paheko.ico"
-CreateShortCut "$SMPROGRAMS\$SM_Folder\Desinstaller ${APP_NAME}.lnk" "$INSTDIR\uninstall.exe"
+CreateShortCut "$SMPROGRAMS\$SM_Folder\D${U+E9}sinstaller ${APP_NAME}.lnk" "$INSTDIR\uninstall.exe"
 
 !ifdef WEB_SITE
 WriteIniStr "$INSTDIR\${APP_NAME} website.url" "InternetShortcut" "URL" "${WEB_SITE}"
