@@ -120,7 +120,7 @@ CreateShortCut "$SMPROGRAMS\$SM_Folder\${APP_NAME} Website.lnk" "$INSTDIR\${APP_
 CreateDirectory "$SMPROGRAMS\${APP_NAME}"
 CreateShortCut "$SMPROGRAMS\${APP_NAME}\${APP_NAME}.lnk" "$INSTDIR\${MAIN_APP_EXE}" "" "$INSTDIR\paheko.ico"
 CreateShortCut "$DESKTOP\${APP_NAME}.lnk" "$INSTDIR\${MAIN_APP_EXE}" "" "$INSTDIR\paheko.ico"
-CreateShortCut "$SMPROGRAMS\${APP_NAME}\Desinstaller ${APP_NAME}.lnk" "$INSTDIR\uninstall.exe"
+CreateShortCut "$SMPROGRAMS\${APP_NAME}\D${U+E9}sinstaller ${APP_NAME}.lnk" "$INSTDIR\uninstall.exe"
 
 !ifdef WEB_SITE
 WriteIniStr "$INSTDIR\${APP_NAME} website.url" "InternetShortcut" "URL" "${WEB_SITE}"
@@ -150,7 +150,7 @@ RmDir /r "$INSTDIR"
 !ifdef REG_START_MENU
 !insertmacro MUI_STARTMENU_GETFOLDER "Application" $SM_Folder
 Delete "$SMPROGRAMS\$SM_Folder\${APP_NAME}.lnk"
-Delete "$SMPROGRAMS\$SM_Folder\Desinstaller ${APP_NAME}.lnk"
+Delete "$SMPROGRAMS\$SM_Folder\D${U+E9}sinstaller ${APP_NAME}.lnk"
 !ifdef WEB_SITE
 Delete "$SMPROGRAMS\$SM_Folder\${APP_NAME} Website.lnk"
 !endif
@@ -161,7 +161,7 @@ RmDir "$SMPROGRAMS\$SM_Folder"
 
 !ifndef REG_START_MENU
 Delete "$SMPROGRAMS\${APP_NAME}\${APP_NAME}.lnk"
-Delete "$SMPROGRAMS\${APP_NAME}\Desinstaller ${APP_NAME}.lnk"
+Delete "$SMPROGRAMS\${APP_NAME}\D${U+E9}sinstaller ${APP_NAME}.lnk"
 !ifdef WEB_SITE
 Delete "$SMPROGRAMS\${APP_NAME}\${APP_NAME} Website.lnk"
 !endif

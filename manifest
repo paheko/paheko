@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Use\sVBscript\sinstead\sof\sBatch\sto\srun\sPHP\sserver\sin\sbackground\son\sWindows
-D 2025-10-23T19:18:53.252
+C Fix\sunicode\sin\suninstall\slink\son\sWindows
+D 2025-10-23T19:23:56.860
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -44,7 +44,7 @@ F build/windows/config.local.php d43b92cf75dfd0bde554a01ea8f62ddfba4eeba24c509cd
 F build/windows/launch.bat 429587446b4e37146a9b6d06ac08dabe07dfe6d0f5fa52362368fcc80e51822e
 F build/windows/launch.vbs c3776046878a6b72b37775460d8ed5e75335803bc521a9e5a071bd6ae5b8d828
 F build/windows/paheko.ico 969b2f968c7bc5f8474f2fbdbadf515be1ed1798da2fd845faf6f42240f0fece
-F build/windows/paheko.nsis f3c136dcdfd8a8cf18ac3715766edc5767618a21a60906ac528fb6f76643b22e
+F build/windows/paheko.nsis 08d6f3f92cfcb3fa1eed55c6161f1538c43fdf9c85e2f5ef53e1613f58711048
 F build/windows/php.ini 43ac89d6777fa71801cac6eb1d6515ce5f3bd460b022f328b75df0c27f2313be
 F doc/admin/api.md 94a5ed07ec35f503d5bb15f636466960c7a5656bee289e54f2d2b38dd33fa918
 F doc/admin/brindille.md 62565048ae59c201d8c168bf4d1b861d5d2f689860719f04b946f05de9ff6624
@@ -826,24 +826,24 @@ F tools/fossil_get_branch_hash.php 8d5c38926cf0763039ede9c88745e890b44beb33a64e5
 F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f931f721784d x
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P fdedc9e561d069a20cd8bce75bc14f94505ae54bd5c04b57c9920a8e8df39917
-R 7ab981b6e9edb06f5f05285464a24ccf
+P c1f7f586f3f35ffc3366af4d3dd23540a0f1f17f5b85b93ef5f660614665f050
+R dd8c58d6237b7441fb899ffa12c9724c
 U bohwaz
-Z 76bba48940a8d7d4100752b090883342
+Z fa1c2db38ef925a002a3c0a9016a03d6
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmj6f50ACgkQksnacbiI
-6jSlghAAn6LpQqHjYefOXIngs9ple/FTQEJR3sB3ZS1iktUN+VpyCuMObtMsctN5
-DaDgcYO9FRZ1rYidLUuT7XLOoOUgI2LDpV9rsZrttL0y5dRKsDwZQqeVMU20ARpW
-umlK64W4kXJYfRrmzEgIElrqLZc4c9cJ8+qZMdncZi8FvOfnOkNL0g1m1VWRGXLF
-S5LhD8Cl0fXi0qtF882ulhQhlCYKcXrX0uRXs3G/p/fmj9Iwhl+fV7aBGHwuyCIf
-XyfnIXdQ97vQvPBahpcPb03rf0NQ2kIaJn8LS6ZJFK/hKsvp+nLNlU/Ilds9cgNL
-huZ8S7Qrx5ywtJs4y+4d7a8Iul/6LuOPrYSmNgVA44XavKeW6Ab8SWPRjt2cAws3
-ihlldCVtbKbpDr+V1yxpGLLLydtIJRqmzwv8QGHx9hd3qd0WOcEjgh+r0gtZe7y4
-KL4LstfWQZhdkiAHhhyf+rtMyB5Ol95nVXx4M9deFaGRVfk7fSY6YM0s97CLU4Ow
-MliKLBs2KtDaSZFJNS0JPkclITac+uBEho/EJAljuumlrlAZ0yIjK+taeoOPKuxi
-O22OJg/guFvCZ0epPeVrBkiGyMy5K4Pv4KQTIWmn9jbxfoEQLNn6YuYG88PNCfuJ
-4BV7+6CmXj+gHfFNVEbAnNgEa8QKbLjbZ+BtNb1cbqbU4snrbbE=
-=W7LE
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmj6gMwACgkQksnacbiI
+6jSsMA//dndapl9adYwhaMclxY5WacFC6IL5zX2EsojtbieIAhDYvmFZZJdZPZNW
+TqgdpYO33CFOW51vgXQH7fDcUMnKMQWh75cMLy4054RxCvslDRxAJziD4Y603kLQ
+MCO9dTmGgzrNigsVJeNcFs8Uh1uCUTWu/jLn7sxqkuT4yJiXZVBhtuPsQZZmZiCp
+kh1FTB/4axwThk16hs1U4RP7pOsiWfph+SFXnw5i5Y+biEsNAdmvfySGC2mkBpyM
+Oz8Jk/E11MtmS2CehsPWI7tY7Q0R65S6YY0tyFJacP4/lzkPFqIBuPxhWBXqcLVG
+BAhvnbd4r++UK3zd97RI7n+Z2pFbKrOkxtq50fBfhxWqfzM+al5X978j0aH/UoGH
+o12NB2jhGn12RRPSpyf7ghkQtjObKqfkCVr6TX39RsXlNQz8LdU7MpRROPfwhDP9
+5N7le5kefMGUK1G31HCihhp1LJ3max73OzakIceMFkkKtcBwikW/EPSQJDC61TAv
+qmQtkzEA0fFMnPl3lDKNohfN8djeFq0GYzng4d/u8DXe2yj+2MaHA/Vm4Oz51/cn
+g/4rc6TDv6BNWsHbrtQntA09yiv2T/UHFe6uNNJsX/jGcmpo4vabqZ147RYT72vH
+d+sKvrkUEVTt2/2rXLV7mqXfVqv/XFMcN5eoyHFfBoVOCe24npY=
+=qchg
 -----END PGP SIGNATURE-----
