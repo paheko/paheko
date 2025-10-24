@@ -61,7 +61,7 @@ class Transactions
 		try {
 			$ids = [];
 			foreach ($journal as $row) {
-				if (!array_key_exists($row->id_line, $checked)) {
+				if (!in_array($row->id_line, $checked)) {
 					continue;
 				}
 
@@ -82,8 +82,7 @@ class Transactions
 
 			$transaction->save();
 			$transaction->updateLinkedTransactions($ids);
-			$ids = implode(',', $ids);
-			$db->exec(sprintf('UPDATE acc_transactions SET status = (status | %d) WHERE id IN (%s);', Transaction::STATUS_DEPOSITED, $ids));
+			$account->markTransactionsAsDeposited($ids);
 			$db->commit();
 		}
 		catch (\Exception $e) {
