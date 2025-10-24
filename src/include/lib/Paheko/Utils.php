@@ -1803,10 +1803,9 @@ class Utils
 		$str = self::appendCookieToURLs($str);
 		$str = preg_replace('!(<html.*?)class="!s', '$1class="pdf ', $str);
 
-		$cmd = self::getPDFCommand();
-
 		// If there is no program found, try to see if there's a plugin
-		if (!$cmd && PDF_COMMAND === 'auto') {
+		if (PDF_COMMAND === 'auto'
+			&& Plugins::hasSignal('pdf.create')) {
 			$in = ['string' => $str];
 
 			$signal = Plugins::fire('pdf.stream', true, $in);
@@ -1817,6 +1816,8 @@ class Utils
 
 			unset($signal, $in);
 		}
+
+		$cmd = self::getPDFCommand();
 
 		// Only Prince can handle using STDIN and STDOUT and stream PDF
 		// If the program is not Prince, store PDF in temporary file
@@ -1849,8 +1850,18 @@ class Utils
 			throw new \LogicException('PDF generation is disabled');
 		}
 
+		$source = sprintf('%s/print-%s.html', CACHE_ROOT, md5(random_bytes(16)));
+		$target = str_replace('.html', '.pdf', $source);
+
+		$str = self::appendCookieToURLs($str);
+		$str = preg_replace('!(<html.*?)class="!s', '$1class="pdf ', $str);
+
+		Utils::safe_mkdir(CACHE_ROOT, null, true);
+		file_put_contents($source, $str);
+
 		// Try to see if there's a plugin first, if PDF_COMMAND is auto
-		if (PDF_COMMAND === 'auto') {
+		if (PDF_COMMAND === 'auto'
+			&& Plugins::hasSignal('pdf.create')) {
 			$in = ['source' => $source, 'target' => $target];
 
 			$signal = Plugins::fire('pdf.create', true, $in);
@@ -1868,15 +1879,6 @@ class Utils
 		if (!$cmd) {
 			throw new \LogicException('Aucun programme de création de PDF trouvé, merci d\'en installer un : https://fossil.kd2.org/paheko/wiki?name=Configuration');
 		}
-
-		$source = sprintf('%s/print-%s.html', CACHE_ROOT, md5(random_bytes(16)));
-		$target = str_replace('.html', '.pdf', $source);
-
-		$str = self::appendCookieToURLs($str);
-		$str = preg_replace('!(<html.*?)class="!s', '$1class="pdf ', $str);
-
-		Utils::safe_mkdir(CACHE_ROOT, null, true);
-		file_put_contents($source, $str);
 
 		$timeout = 25;
 
