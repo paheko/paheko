@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Préférences d'envoi" current="users/mailing"}
+{include file="_head.tpl" title="Préférences de réception de messages" current="users/mailing"}
 
 <form method="post" action="{$self_url}">
 	<fieldset>

@@ -79,13 +79,13 @@ $fields = DF::getInstance()->all();
 			{/if}
 			{linkbutton href="!users/mailing/status/address.php?address=%s"|args:$value label="Détails de l'adresse e-mail" shape="history" target="_dialog"}
 		</dd>
-		<dt>Préférences d'envoi</dt>
+		<dt>Préférences de réception</dt>
 		<dd>
 			{if $email.accepts_messages}{icon shape="check"}{else}{icon shape="uncheck"}{/if} Messages personnels<br />
 			{if $email.accepts_reminders}{icon shape="check"}{else}{icon shape="uncheck"}{/if} Rappels de cotisation et d'activité<br />
 			{if $email.accepts_mailings}{icon shape="check"}{else}{icon shape="uncheck"}{/if} Messages collectifs<br />
 			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-				{linkbutton target="_dialog" label="Modifier les préférences d'envoi" href="!users/mailing/status/preferences.php?address=%s"|args:$value shape="settings"}
+				{linkbutton target="_dialog" label="Modifier les préférences" href="!users/mailing/status/preferences.php?address=%s"|args:$value shape="settings"}
 			{/if}
 		{/if}
 	</dd>

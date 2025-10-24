@@ -1,5 +1,5 @@
 {use Paheko\Email\Emails}
-{include file="_head.tpl" title="Préférences d'envoi" layout="public" hide_title=true}
+{include file="_head.tpl" title="Préférences de réception de messages" layout="public" hide_title=true}
 
 {if isset($_GET['saved'])}
 	<p class="block confirm">
@@ -28,7 +28,7 @@
 	<form method="post" action="{$self_url}">
 
 		<fieldset>
-			<legend>Préférences d'envoi</legend>
+			<legend>Préférences de réception de messages</legend>
 
 			<dl>
 			{if !$optout_context}
@@ -45,7 +45,7 @@
 			{button type="submit" name="validate" label="Enregistrer" shape="right" class="main"}
 		</p>
 		{if !$optout_context}
-		<p class="help">Vous recevrez un message par e-mail avec un lien à cliquer, vous permettant de confirmer vos préférences d'envoi.</p>
+		<p class="help">Vous recevrez un message par e-mail avec un lien à cliquer, vous permettant de confirmer vos préférences de réception.</p>
 		{/if}
 	</form>
 {/if}

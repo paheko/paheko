@@ -37,7 +37,7 @@
 	<dd>{$email.fail_count}</dd>
 	<dt>Dernier message envoyé</dt>
 	<dd>{if $email.last_sent}{$email.last_sent|date_short:true}{else}<em>(Aucun historique)</em>{/if}</dd>
-	<dt>Préférences d'envoi</dt>
+	<dt>Préférences de réception</dt>
 	<dd>
 		{if $email.accepts_messages}{icon shape="check"}{else}{icon shape="uncheck"}{/if} Messages personnels<br />
 		{if $email.accepts_reminders}{icon shape="check"}{else}{icon shape="uncheck"}{/if} Rappels de cotisation et d'activité<br />
