@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Allow\sfor\sversion\snumbers\swith\s4\sparts
-D 2025-10-27T11:01:31.533
+C Remove\sHTTP\scaching\sof\sgraphs\sas\swe\swant\sto\shave\sthe\sinformation\sin\slive
+D 2025-10-27T19:37:08.102
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -524,9 +524,9 @@ F src/www/admin/acc/projects/edit.php 6c31beb81d04cc73658103b84812cf1e07d8f3376c
 F src/www/admin/acc/projects/index.php 1273ca37f5f9a6c28131e0d9d9451d7ca83f3fe47d71c32921ca9805aaac1df1
 F src/www/admin/acc/reports/_inc.php c6e37bd91f298bfdf73af710a3b3abdbf1520fa206facd44b1a53ba2b13bd879
 F src/www/admin/acc/reports/balance_sheet.php 204cbe9a7b7962aa0b2c9bdd64a8ad15c5921210dd7505a19e14a269b832d6e3
-F src/www/admin/acc/reports/graph_pie.php 754cacd3890ee75e14c511bef556ad4e2903605c16d5e988416448da6fd0caa6
-F src/www/admin/acc/reports/graph_plot.php fa120f9c68b525c42cdd5ffbe8af37b77f94b22e8f19a304eba20c156b8aefb8
-F src/www/admin/acc/reports/graph_plot_all.php df40ccf7889494d01e2d5ed8a35bc1fac196f8a8176f9fdb17d76494ab86931f
+F src/www/admin/acc/reports/graph_pie.php e5cdbd85470a9b049a312607a007083418dd2c04cde3674a3b33bf8d4ec3d222
+F src/www/admin/acc/reports/graph_plot.php 5ccdf5dd1a56c125e1131e5e5085f1f01df3cb1f5eac3c64aa0c41869c443a28
+F src/www/admin/acc/reports/graph_plot_all.php cda70e985e16260844595444da7fdd9b3c596d96495d541ed559a645cd3ef8d3
 F src/www/admin/acc/reports/graphs.php a0d771f15c29963fb4800625de9972da4767e520136295123d39aa5edd67f124
 F src/www/admin/acc/reports/journal.php a71fc0c396b22a9dd154f342943e54590f07f492a1ea5b8520d025367b9adee9
 F src/www/admin/acc/reports/ledger.php 110c942871607429aeebb96b06ff3578534718e1768536ff35ca4372d3426bb9
@@ -825,24 +825,24 @@ F tools/fossil_get_branch_hash.php 8d5c38926cf0763039ede9c88745e890b44beb33a64e5
 F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f931f721784d x
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 03679e80badf1eb16a9ece82ceb0fe27252e34caa1d7ecce66190996f8096bfa
-R 05c3052dcd499ea036812e640412ef68
+P 76fbc50807f917db9c27e181d7fbb39cef1d57b39b8ba398d7fb4805c0a144e5
+R 9318a3ed6234320510e2833d2fbe3496
 U bohwaz
-Z 89632f8c85233228c239710920ff00cf
+Z 22d291d01e96d06fd9ad1b9b115ed71f
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmj/UQsACgkQksnacbiI
-6jTUqA//ZoO3lbLuz15iXJk4J9byJFvua3dQuag1mn0blHEGIjRHNjX917hqQFWO
-VxO7+IyfdpM59mJWrP8wIpKnScfaKJbMyiirTYgzjJwRTIY9w4VBP2QHpGy5ibVB
-FstGuJgxv4kR4cvuVxl1Ady7jNwimO8/OQO0x7s61GVheG469vLYYTeKDB3Llpuk
-ss9nLRhUWZFP1lQ53UsXG2lsJ5GwbEsXDlmo+c8ky3JSG48wK8CJ/icuJSWdPdr6
-GvmjQcVtbicN4Z9pXEbkPJqUnJqIsSeq9574THcE6exZVETPqdPzjdEOt2aAJA0N
-LdjSANktMHFExB9JlddXr+3jvq8/cUH5cvXZXE2m89GREBFW/890dSvQ0UrrvLkr
-8SUEZ/LwglTDqTEWNUX2xz2ozPsxJhmzGrDEIbr/BUJ7A2yqlMz7/C8Yprvvg41L
-9l88TRmPwnPNkwiYIQ51TXUooAqXon1kjQZcw7K7uGFZ0Khf5v3eGMRVzzHFltrA
-tgvyfkmjnuUQAmPf+cPMEKC0rNM7YU6f5J4jmoqUENrgywXRjWDxFSjJ20De/0MO
-cPSomWGatvjOa0EEN5HelG0pzxpdZiC4twphIGmpsBwdgPlrB6Oertzi0QsqYRfZ
-CfrXp3uUKVBj1xsFEHDZXSWKTSMm0Y5zudJKG5Jnyn/SidO3VWI=
-=mEjb
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmj/yeQACgkQksnacbiI
+6jQOYA/+LhsXJvVs/4271Qliy/yKxlisjSIEcBpD7kzO6DmQeCN6YFQ/PERH0eoR
+WeB7Qp8P/B2eNgZK3zSAF8iyVh0h7bRAtZL63bZMa//cx46SD3LuEn+iWOchHi/p
+HJY9NzHai1Zvxq3b1gOR2J+GjNPer4E08Dt6l8meAQKI6JFT4TM9WQ9DHmuGQ/uR
+rK6/P/1z3lN6NBWtzQDiN9S8GdzZ+ziKI+iOY8iA1qh52w7HLb2PXc8ugKxczvCt
+bg3A3XpxrEVLVdpnw7u5zYRcdDdgWjWxl7019ztcN4JVQ/8BMTCm1DxpSld4E8Tr
+sqGw1rNYaMsrCCDX3bDDp2OaGTRfW/QGMvzqlUEqyokqnPN6lM7wydz0N4MHSCe+
+pTXQrpoL5qP7Hd0TGSM0BIpAJah6XPng6YfNKyWkg7K0eKNyObFg0BdPtH2HiRwY
+wRBSSYNSkqQkhJqpaWML8ophUHjE6X8nMAvfcz3G9FKFhYsYa59FUUG9/EAbe4Ol
+fRPEO2tWXLouhhY971S4YK0rJvVxHGU9MpjixGTmFOfJewxRXeEiOPQzYXBfBH7x
+LwmTYtXDk4rQ03mclEYCQWtK1DOjSJe4kcXvCyGa1+VoIpu5r8Bnk3mD0n+uRLjL
+osJCY0GLcvyDfHzz5hrpWw7dtdbP5C4fRSyHCW2jjrnIgE3xZgA=
+=ON6o
 -----END PGP SIGNATURE-----

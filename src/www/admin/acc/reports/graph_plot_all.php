@@ -13,9 +13,4 @@ if (!$type) {
 
 header('Content-Type: image/svg+xml');
 
-$expiry = time() - 30;
-$hash = sha1('graph_plot_all');
-
-if (!Utils::HTTPCache($hash, $expiry)) {
-	echo Graph::bar($type, []);
-}
+echo Graph::bar($type, []);
