@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C DynamicList:\sallow\sto\sadd\stables\sto\san\sexisting\slist
-D 2025-10-27T20:41:33.561
+C Fix\slabels\sof\saccounting\schart\sfor\sunions\sin\sFrance
+D 2025-10-27T22:29:10.322
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -85,7 +85,7 @@ F src/include/data/charts/fr_pca_2025.csv 0e5ba268b78a53931a64e10b1ea2ddb7836c57
 F src/include/data/charts/fr_pcc_2020.csv f40b5df00d9100c40e2850702667bfb6539281fefc01e78c45f1702aea68aa54
 F src/include/data/charts/fr_pcg_2014.csv 8a4d2809489f6cd856e86212844a421a480315771fe4db4f6c53d05a0e66c749
 F src/include/data/charts/fr_pcg_2025.csv e815a44c87e4e5c6800139e3f789c0a6160872b7bc2175fce0c5262822c53b19
-F src/include/data/charts/fr_pcs_2018.csv b95c958788edd07a00f4e091d42095a1619e8053141f0edc22d22a926699c416
+F src/include/data/charts/fr_pcs_2018.csv f853138b67da0bdb63d6d5efe24a80914bc78c5c8deb086648f57fd207453d2b
 F src/include/data/locales/fr/dictionary.txt d3245db784b299707cf47379ab48d82dd75439a3c5a77bfdf33f5c54408a3548
 F src/include/data/schema.sql 57116110a23d96f4be9c8593b2e031930774e4234783612ba48ac1b4f3d17735 l
 F src/include/data/users_fields_presets.ini 3a9bd9343d8f73c8377d620f9b5eb7e976afec1d7c6099ae3b15d8cc69dd9c78
@@ -215,6 +215,7 @@ F src/include/migrations/1.3/1.3.14_recus.sql a3f2d894d8bf8859cf5f8d14c15a5532ad
 F src/include/migrations/1.3/1.3.16.sql f49264f9b1b7ee8b0ed9b9a50381709c6fdcdf8ee7b74797f61a268e67521196
 F src/include/migrations/1.3/1.3.17.php 1f8b7a1b23a82238c3b10f62200f4425252eb477ed0d9b095bac744825cfb0c2
 F src/include/migrations/1.3/1.3.17.sql 5c559fc8a0e296aa5224115d2347289a9fc64cac43754937b660ca4e3678b7ee
+F src/include/migrations/1.3/1.3.18.sql e5624e9a5a573919a0c4ff6acd0a8c58046d8a244e1d4c6bc556d01fea8dc474
 F src/include/migrations/1.3/1.3.2.sql 3a81504a4d49d8226aba81aadf40a0bc1955fcecd3ab5d009186080c70ce4318
 F src/include/migrations/1.3/1.3.3.sql 765f1b91b165f2d806c00e2673491a76be9c78b37eaf82b2da06691443e403d6
 F src/include/migrations/1.3/1.3.5.sql 0f6116f331fe383330e803d0261b16e0abf3123e088de8c9e427c85ba7899af6
@@ -825,24 +826,24 @@ F tools/fossil_get_branch_hash.php 8d5c38926cf0763039ede9c88745e890b44beb33a64e5
 F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f931f721784d x
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 85eb6586697acedc88de41aaaa9c8cbc0683c10e5c2a45cfcdc3c4219ba161f4
-R 9665af88e33858beec2ab5e69604b774
+P af03b1f4d2a125cc24078a70857acbb6db65d0a5ea216faa02ff73f83811de08
+R 7ca116b08b759508584bcb986a73436b
 U bohwaz
-Z 8a337748c1c75cf301e130f831bb653c
+Z 24755bd65422f41912636406f13b81f1
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmj/2P0ACgkQksnacbiI
-6jQGoBAAqDd3B19N7qI4gYEfOTHccXng0cKg8IrD9cWWbE7CV872ZJ/dmCDvbBpj
-cEClNIecHDE4fU7u9Yhi2OOK+HgEc2zkKj6shV45CbZwBbdR9ZIh8PcbjyCTTrUG
-1h3NTegfkzgen2o4czP0asP+tt2jjDJw73c/UcKhsfPEE2jhjMoqnMAeRZESklWm
-cSKc7x2nYVkEF2wFdHORenwCoN65Pz/a6t48VyiqT6xUgDJMIqL+tt4jjkOU9Js/
-SOuYrX7MCAf2pjb5CxhAyIlwXhx/L5FPao+3cHA7BSlIhgc/dj/VAPFQitZvNptD
-6KhUbhq+jIvg0RDX3Jxw/UVV5vuySwubw4QkxUw+/f48obwkcWE1jyKDHS0A+2gZ
-9cRgffxnOYja2ODy6vHobdhq8XtPZlXjA+zdbRxb446GGCGhVpOzEKl8pG3h0esP
-ynmC5xGy6ZS00GCS4f7u4XTIeMq99RTtZA1yBx15gPz9IEeSnBTnFqn+GW2me6xJ
-2WWIn6fNQkh3S30e6UgNh5cWSXPr2FePuiB9J9gTqLWQXgwzbEHo9D9+nZnHLkuY
-bUV2tpFSEk6jpJlsctTHScGNN+LK5300WHlQQOVAiLgW9AzgTY/GL/NgvPOpIINc
-jvF9O4/4Z1e/XM6x7FobHX5RS9gt8QN/q9L3n74zuRJxMqZ2YYg=
-=LF3U
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmj/8jYACgkQksnacbiI
+6jQ22w//cSJry+nnoocHslw/RqCwvgDyCzYlDQwtr8zBPh0pjeG347EiXHsnyTXL
+CliJy36PnjeW13uUlfYdPEPaaaTkh05oZbyzKbKjBe8d5dab0I3vtKi3BAgSlNg6
+viAfrKVx6YMdUbS2ZoK9OTRC33l7DaTIvkOzNa/QsBFirZ6LXCjXFodTZBdDVRnb
+DD9o1zGq/62pheZSWC14Z6WlPXZ8LrZR+gbI6jkjQ7nizT4BtvwsivhDrjAC4R7Z
++7b/SAgIqFdJBCf0TZ3jQ0S/jiVHw3iyW50GKCKaKrDBuG4E/BfxIfmW/Z8cBowN
+ADY4SR6xWLmB4z2831+LXyoh7RBIxmtDANxbr3B4TTQoaNTjCOUWY0eOHXRhxwfV
+cSEKkxmBjj6Gs444UzWuHUZPezldCFLfSSkgetewzZAekC+rMcAYDm2fyq0W4uaK
+t4plcSv/ZtG1HFu+JrnAD9eHR9YN4+RWroWFJxHGtLl5sO+g4Uh6BYQ2t+G9VbIx
+F/oSOy5c2abUTqSJ5mbpbScDv0q73oq5mD6lOhMeplr5Gm9VHwcG83pxDlJ7lm71
+UmlS0K+GY8YTiu5hm4opSDljltdgPJW16HVXni51p/e/HewuJibPEIGUoZyNoDmB
+ytwS6dY9j6wWvlvJA6cMALz6Fj6woF3VRXHN35ZvS7IBsSyD6QE=
+=D+S1
 -----END PGP SIGNATURE-----
