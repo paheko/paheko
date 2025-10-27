@@ -220,7 +220,7 @@ class DynamicList implements \Countable
 
 	public function addConditions(string $conditions)
 	{
-		$this->conditions .= $conditions;
+		$this->conditions .= ' ' . ltrim($conditions);
 	}
 
 	public function setColumns(array $columns)
@@ -253,6 +253,11 @@ class DynamicList implements \Countable
 		foreach ($columns as $name) {
 			unset($this->columns[$name]);
 		}
+	}
+
+	public function addTables(string $tables)
+	{
+		$this->tables .= ' ' . ltrim($tables);
 	}
 
 	/**
