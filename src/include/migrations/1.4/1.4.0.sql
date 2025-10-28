@@ -188,9 +188,9 @@ INSERT INTO emails_addresses SELECT id,
 	fail_count,
 	sent_count,
 	last_sent,
-	CASE WHEN optout = 1 THEN 0 ELSE 1 END,
-	CASE WHEN optout = 1 THEN 0 ELSE 1 END,
-	CASE WHEN optout = 1 THEN 0 ELSE 1 END,
+	accepts_messages,
+	accepts_reminders,
+	accepts_mailings,
 	added
 	FROM emails;
 

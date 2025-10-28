@@ -218,7 +218,7 @@ class Addresses
 	/**
 	 * Return an Email entity from the optout code
 	 */
-	static public function getFromOptout(string $code): ?Address
+	static public function getEmailFromQueryStringValue(string $code): ?Address
 	{
 		$hash = base64_decode(str_pad(strtr($code, '-_', '+/'), strlen($code) % 4, '=', STR_PAD_RIGHT));
 
@@ -281,7 +281,7 @@ class Addresses
 		return $e;
 	}
 
-	static public function listRejectedUsers(): DynamicList
+	static public function listInvalidUsers(): DynamicList
 	{
 		$db = DB::getInstance();
 		$email_field = 'u.' . $db->quoteIdentifier(DynamicFields::getFirstEmailField());
@@ -312,7 +312,7 @@ class Addresses
 			'last_sent' => [
 				'label' => 'Dernière tentative d\'envoi',
 			],
-			'optout' => [],
+			'accepts_messages' => [],
 			'fail_count' => [],
 		];
 
@@ -325,6 +325,20 @@ class Addresses
 		$list->setModifier(function (&$row) {
 			$row->last_sent = $row->last_sent ? new \DateTime($row->last_sent) : null;
 		});
+		return $list;
+	}
+
+	static public function listOptoutUsers(string $type): DynamicList
+	{
+		if (!in_array($type, ['messages', 'reminders', 'mailings'], true)) {
+			throw new \InvalidArgumentException('Invalid type: ' . $type);
+		}
+
+		$list = self::listInvalidUsers();
+		$list->setConditions(sprintf('e.accepts_%s = 0', $type));
+		$list->setColumnProperty('fail_log', 'label', 'Historique');
+		$list->removeColumn('status');
+
 		return $list;
 	}
 
@@ -413,5 +427,94 @@ class Addresses
 	{
 		$delay = Address::RESEND_VERIFICATION_DELAY . ' hours ago';
 		return new \DateTime($delay);
+	}
+
+	/**
+	 * Redirect to external resource
+	 * @return exit|null|string Will return a string if the signed link has expired but is still valid
+	 */
+	static public function redirectURL(string $str): ?string
+	{
+		$params = explode(':', $str, 3);
+
+		if (count($params) !== 3) {
+			return null;
+		}
+
+		if (!ctype_digit($params[1])) {
+			return null;
+		}
+
+		if (strlen($params[0]) !== 40) {
+			return null;
+		}
+
+		$hash = hash_hmac('sha1', $params[1] . $params[2], SECRET_KEY);
+
+		$url = 'https://' . $params[2];
+
+		if ($hash !== $params[0]) {
+			return null;
+		}
+
+		// If the link has expired, the user should be prompted to redirect
+		if ($params[1] < time()) {
+			return $url;
+		}
+
+		Utils::redirect($url);
+		return null;
+	}
+
+	/**
+	 * Sign (HMAC) external links in mailing body,
+	 * to make sure that we are using the same URL everywhere
+	 * and limit the number of external domains used.
+	 */
+	static public function encodeURL(string $url): string
+	{
+		$parts = parse_url($url);
+
+		if (empty($parts['scheme'])
+			|| ($parts['scheme'] !== 'http' && $parts['scheme'] !== 'https')) {
+			return $url;
+		}
+
+		// Don't do redirects for URLs from the same domain name
+		if (Utils::isLocalURL($url)) {
+			return $url;
+		}
+
+		$url = preg_replace('!^https?://!', '', $url);
+		$expiry = time() + 3600*24*365;
+		$hash = hash_hmac('sha1', $expiry . $url, SECRET_KEY);
+
+		$param = sprintf('%s:%s:%s', $hash, $expiry, $url);
+		return WWW_URL . '?rd=' . rawurlencode($param);
+	}
+
+	static public function replaceExternalLinksInHTML(string $html): string
+	{
+		// Replace external links with redirect URL
+		// But don't trigger phishing detection for external links
+		// eg. <a href="https://example.org/">https://example.org/</a>
+		// shouldn't be changed to
+		// <a href="https://paheko.example.org/?rd=example.org">https://example.org/</a>
+		// so we are replacing the text of the link as well
+		$html = preg_replace_callback('!(<a[^>]*href=")([^"]*)("[^>]*>)(.*)</a>!U', function ($match) {
+			$text = $match[4];
+
+			$url = self::encodeURL($match[2]);
+
+			// Only replace content if URL is external
+			if ($match[2] === $match[4]
+				&& $match[2] !== $url) {
+				$text = '[cliquer ici]';
+			}
+
+			return $match[1] . $url . $match[3] . $text . '</a>';
+		}, $html);
+
+		return $html;
 	}
 }

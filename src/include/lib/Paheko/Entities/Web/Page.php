@@ -79,7 +79,7 @@ class Page extends Entity
 	protected ?array $_tagged_attachments = null;
 	protected ?string $_html = null;
 
-	static public function create(int $type, ?int $id_parent, string $title, string $status = self::STATUS_ONLINE): self
+	static public function create(int $type, ?int $id_parent, string $title, int $status = self::STATUS_ONLINE): self
 	{
 		$page = new self;
 		$data = compact('type', 'id_parent', 'title', 'status');
@@ -192,7 +192,7 @@ class Page extends Entity
 		return $page->status ?? null;
 	}
 
-	public function getStatus(): string
+	public function getStatus(): int
 	{
 		if ($this->status !== self::STATUS_ONLINE) {
 			return $this->status;

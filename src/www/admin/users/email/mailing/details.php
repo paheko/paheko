@@ -18,8 +18,9 @@ if (qg('preview') !== null) {
 }
 
 $count = $mailing->countRecipients();
+$hints = $mailing->sent ? null : $mailing->getDelivrabilityHints();
 
-$tpl->assign(compact('mailing', 'count'));
+$tpl->assign(compact('mailing', 'count', 'hints'));
 
 $tpl->assign('custom_css', [BASE_URL . 'content.css']);
 $tpl->assign('sent', null !== qg('sent'));

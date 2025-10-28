@@ -142,7 +142,7 @@ CREATE TABLE IF NOT EXISTS emails_addresses (
 	last_sent TEXT NULL,
 	accepts_messages INTEGER NOT NULL DEFAULT 1,
 	accepts_reminders INTEGER NOT NULL DEFAULT 1,
-	accepts_mailings INTEGER NOT NULL DEFAULT 0,
+	accepts_mailings INTEGER NOT NULL DEFAULT 1,
 	added TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

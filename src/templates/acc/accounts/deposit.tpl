@@ -70,8 +70,9 @@
 		</fieldset>
 
 		<p class="submit">
-			{csrf_field key="acc_deposit_%s"|args:$account.id}
+			{csrf_field key=$csrf_key}
 			{button type="submit" name="save" label="Enregistrer" class="main" shape="check"}
+			{*button type="submit" name="mark" label="Marquer les lignes cochées comme étant déposées" shape="check" class="minor" onclick="return confirm('Les lignes cochées seront marquées comme ayant été déposées. Il ne sera pas possible de les remettre dans cette liste.');" style="float: right"*}
 		</p>
 	</form>
 

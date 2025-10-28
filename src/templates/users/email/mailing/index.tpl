@@ -4,8 +4,6 @@
 
 {if $_GET.msg === 'DELETE'}
 	<p class="confirm block">Le message a bien été supprimé.</p>
-{elseif $_GET.msg === 'FORCED'}
-	<p class="confirm block">La file d'attente a été envoyée.</p>
 {/if}
 
 {if !$list->count()}

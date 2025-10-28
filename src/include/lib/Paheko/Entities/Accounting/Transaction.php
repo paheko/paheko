@@ -47,6 +47,7 @@ class Transaction extends Entity
 	const STATUS_DEPOSITED = 4;
 	const STATUS_ERROR = 8;
 	const STATUS_OPENING_BALANCE = 16;
+	const STATUS_DEPOSIT = 32;
 
 	const STATUS_NAMES = [
 		1 => 'En attente de règlement',
@@ -697,11 +698,23 @@ class Transaction extends Entity
 
 		$this->year()->assertCanBeModified();
 
-		// FIXME when lettering is properly implemented: mark parent transaction non-deposited when deleting a deposit transaction
-
 		Files::delete($this->getAttachementsDirectory());
 
-		return parent::delete();
+		$db = DB::getInstance();
+		$db->begin();
+
+		if ($this->hasStatus(self::STATUS_DEPOSIT)) {
+			// Delete "deposited" status from linked transactions
+			$db->exec(sprintf('UPDATE acc_transactions SET status = (status & ~%d)
+				WHERE id IN (
+					SELECT id_transaction FROM acc_transactions_links WHERE id_related = %d
+					UNION SELECT id_related FROM acc_transactions_links WHERE id_transaction = %2$d);',
+				Transaction::STATUS_DEPOSITED, $this->id()));
+		}
+
+		$r = parent::delete();
+		$db->commit();
+		return $r;
 	}
 
 	public function selfCheck(): void
@@ -790,6 +803,7 @@ class Transaction extends Entity
 		}
 
 		$this->type = self::TYPE_ADVANCED;
+		$this->addStatus(self::STATUS_DEPOSIT);
 		$amount = $source['amount'];
 
 		$account = Form::getSelectorValue($source['account_transfer']);
@@ -851,7 +865,13 @@ class Transaction extends Entity
 		}
 
 		if (isset($source['type'])) {
-			$this->set('type', (int)$source['type']);
+			$type = (int)$source['type'];
+
+			if (!array_key_exists($type, self::TYPES_NAMES)) {
+				throw new ValidationException('Invalid type');
+			}
+
+			$this->set('type', $type);
 		}
 
 		// Simple two-lines transaction
@@ -860,7 +880,13 @@ class Transaction extends Entity
 				throw new ValidationException('Montant non précisé');
 			}
 
-			$accounts = $this->getTypesDetails($source)[$this->type]->accounts;
+			$details = $this->getTypesDetails($source)[$this->type] ?? null;
+
+			if (!isset($details)) {
+				throw new \LogicException('No details found for type: ' . $this->type);
+			}
+
+			$accounts = $details->accounts;
 
 			// either supply debit/credit keys or simple accounts
 			if (!isset($source['debit'], $source['credit'])) {

@@ -49,9 +49,6 @@ $fields = DF::getInstance()->all();
 			<em>(Non renseigné)</em>
 		{elseif $field.type == 'email'}
 			<a href="mailto:{$value|escape:'url'}">{$value}</a>
-			{if !DISABLE_EMAIL && $show_message_button && !$email_button++}
-				{linkbutton href="!users/message.php?id=%d"|args:$data.id label="Envoyer un message" shape="mail" target="_dialog"}
-			{/if}
 		{elseif $field.type == 'multiple'}
 			<ul>
 			{foreach from=$field.options key="b" item="name"}
@@ -75,7 +72,25 @@ $fields = DF::getInstance()->all();
 		<dd>
 			{tag color=$email->getStatusColor() label=$email->getStatusLabel()}
 			{linkbutton target="_dialog" label="Détails" href="!users/email/address.php?address=%s"|args:$address shape="mail"}
+		{if $field.type === 'email' && $value}
+		<?php
+		$email = Email\Addresses::getOrCreateEmail($value); ?>
+			{if !DISABLE_EMAIL && $show_message_button && !$email_button++ && $email->canSend() && $email.accepts_messages}
+				{linkbutton href="!users/message.php?id=%d"|args:$data.id label="Envoyer un message" shape="mail" target="_dialog"}
+			{/if}
+			<br />
+			{tag color=$email->getStatusColor() label=$email->getStatusLabel()}
+			{linkbutton href="!users/mailing/status/address.php?address=%s"|args:$value label="Détails de l'adresse e-mail" shape="history" target="_dialog"}
 		</dd>
+		<dt>Préférences de réception</dt>
+		<dd>
+			{if $email.accepts_messages}{icon shape="check"}{else}{icon shape="uncheck"}{/if} Messages personnels<br />
+			{if $email.accepts_reminders}{icon shape="check"}{else}{icon shape="uncheck"}{/if} Rappels de cotisation et d'activité<br />
+			{if $email.accepts_mailings}{icon shape="check"}{else}{icon shape="uncheck"}{/if} Messages collectifs<br />
+			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
+				{linkbutton target="_dialog" label="Modifier les préférences" href="!users/mailing/status/preferences.php?address=%s"|args:$value shape="settings"}
+			{/if}
 		{/if}
+	</dd>
 	{/foreach}
 </dl>

@@ -211,7 +211,6 @@ static $default_config = [
 	'MAIL_SENDER'           => null,
 	'MAIL_TEST_RECIPIENTS'  => null,
 	'ADMIN_URL'             => WWW_URL . 'admin/',
-	'NTP_SERVER'            => 'fr.pool.ntp.org',
 	'ADMIN_COLOR1'          => '#20787a',
 	'ADMIN_COLOR2'          => '#85b9ba',
 	'ADMIN_BACKGROUND_IMAGE' => WWW_URL . 'admin/static/bg.png',

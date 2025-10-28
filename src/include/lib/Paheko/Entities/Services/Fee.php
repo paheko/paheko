@@ -179,6 +179,20 @@ class Fee extends Entity
 			],
 		];
 
+		$db = DB::getInstance();
+
+		foreach (DynamicFields::getInstance()->all() as $field) {
+			if ($field->isNumber() || $field->isName() || $field->isPassword() || $field->isVirtual()) {
+				continue;
+			}
+
+			$columns['u_' . $field->name] = [
+				'label'  => $field->label,
+				'select' => 'u.' . $db->quote($field->name),
+				'export' => true,
+			];
+		}
+
 		$tables = 'services_subscriptions sub
 			INNER JOIN users u ON u.id = sub.id_user
 			INNER JOIN users_search us ON us.id = u.id

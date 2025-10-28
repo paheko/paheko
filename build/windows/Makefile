@@ -66,7 +66,7 @@ installer: clean php
 	cd install_dir && tar xzf paheko-${VERSION}.tar.gz && mv paheko-${VERSION} paheko
 	cp config.local.php install_dir/paheko/
 	cp php.ini install_dir/php
-	cp launch.bat install_dir
+	cp launch.vbs install_dir
 	cp paheko.ico install_dir
 	rm -f install_dir/paheko-${VERSION}.tar.gz
 	makensis -V3 -DNVERSION=${NSIS_VERSION} -DVERSION=${VERSION} paheko.nsis

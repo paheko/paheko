@@ -25,13 +25,22 @@ if (!$account) {
 	throw new UserException("Le compte demandé n'existe pas.");
 }
 
-$checked = $_POST['deposit'] ?? [];
+$checked = array_keys($_POST['deposit'] ?? []);
 $only_this_year = boolval($_GET['only'] ?? true);
 
 $journal = $account->getDepositJournal(CURRENT_YEAR_ID, $only_this_year, $checked);
 $transaction = new Transaction;
 $transaction->id_year = CURRENT_YEAR_ID;
 $transaction->setCreatorFromSession($session);
+$csrf_key = 'acc_deposit_' . $account->id();
+
+$form->runIf('mark', function () use ($account, $checked) {
+	if (!count($checked)) {
+		throw new UserException('Aucune ligne n\'a été cochée.');
+	}
+
+	$account->markTransactionsLinesAsDeposited($checked);
+}, $csrf_key, '!acc/accounts/deposit.php?id=' . $account->id());
 
 $form->runIf('save', function () use ($account, $checked, $transaction, $journal) {
 	if (!count($checked)) {
@@ -42,7 +51,7 @@ $form->runIf('save', function () use ($account, $checked, $transaction, $journal
 	Transactions::saveDeposit($account, $transaction, $journal->iterate(), $checked);
 
 	Utils::redirect(ADMIN_URL . 'acc/transactions/details.php?id=' . $transaction->id());
-}, 'acc_deposit_' . $account->id());
+}, $csrf_key);
 
 // Uncheck everything if there was an error
 if ($form->hasErrors()) {
@@ -72,6 +81,7 @@ $tpl->assign(compact(
 	'checked',
 	'missing_balance',
 	'transaction',
+	'csrf_key',
 ));
 
 $tpl->display('acc/accounts/deposit.tpl');

@@ -7,7 +7,7 @@ use Paheko\Entity;
 use Paheko\Plugins;
 use Paheko\UserException;
 use Paheko\Email\Addresses;
-use Paheko\Email\Templates as EmailsTemplates;
+use Paheko\Email\Templates as EmailTemplates;
 
 use KD2\SMTP;
 
@@ -17,7 +17,7 @@ class Address extends Entity
 {
 	const TABLE = 'emails_addresses';
 
-	const RESEND_VERIFICATION_DELAY = 24;
+	const RESEND_VERIFICATION_DELAY = 15;
 
 	/**
 	 * When we reach that number of fails, the address is treated as permanently invalid, unless reset by a verification.
@@ -59,17 +59,51 @@ class Address extends Entity
 	protected int $bounce_count = 0;
 	protected bool $accepts_messages = true;
 	protected bool $accepts_reminders = true;
-	protected bool $accepts_mailings = false;
+	protected bool $accepts_mailings = true;
 	protected \DateTime $added;
 	protected ?\DateTime $last_sent;
 
-	static public function getOptoutURL(?string $hash = null): string
+	static public function getOptoutURL(?string $hash = null, ?int $context = null): string
 	{
 		$hash = hex2bin($hash);
 		$hash = base64_encode($hash);
 		// Make base64 hash valid for URLs
 		$hash = rtrim(strtr($hash, '+/', '-_'), '=');
-		return sprintf('%s?un=%s', WWW_URL, $hash);
+		$url = sprintf('%s?un=%s', WWW_URL, $hash);
+
+		if ($context !== null) {
+			$url .= '&c=' . $context;
+		}
+
+		return $url;
+	}
+
+	static public function acceptsThisMessage(\stdClass $r)
+	{
+		// We allow system emails to be sent to any address, even if it is invalid
+		if ($r->context === Emails::CONTEXT_SYSTEM) {
+			return true;
+		}
+
+		// Never send to invalid or bounced recipients
+		if ($r->invalid
+			|| $r->fail_count >= Emails::FAIL_LIMIT) {
+			return false;
+		}
+
+		switch ($r->context) {
+			case Emails::CONTEXT_BULK:
+				return $r->accepts_mailings;
+			case Emails::CONTEXT_REMINDER;
+				return $r->accepts_reminders;
+			default:
+				return $r->accepts_messages;
+		}
+	}
+
+	public function getUserPreferencesURL()
+	{
+		return self::getOptoutURL($this->hash) . '&h=1';
 	}
 
 	public function getVerificationCode(): string
@@ -84,8 +118,8 @@ class Address extends Entity
 			throw new UserException('Adresse email inconnue');
 		}
 
-		$verify_url = self::getOptoutURL($this->hash) . '&v=' . $this->getVerificationCode();
-		EmailsTemplates::verifyAddress($email, $verify_url);
+		$verify_url = self::getOptoutURL($this->hash) . '&y=' . $this->getVerificationCode();
+		EmailTemplates::verifyAddress($email, $verify_url);
 	}
 
 	public function canSendVerificationAfterFail(): bool
@@ -136,13 +170,74 @@ class Address extends Entity
 		$this->set('sent_count', $this->sent_count+1);
 	}
 
-	public function setOptout(?string $message = null): void
+	public function adminSetPreferences(?array $source = null)
 	{
-		$this->set('status', self::STATUS_OPTOUT);
-		$this->log($message ?? 'Demande de désinscription');
-		$this->set('accepts_messages', false);
-		$this->set('accepts_reminders', false);
-		$this->set('accepts_mailings', false);
+		$source ??= $_POST;
+
+		$keys = ['accepts_messages', 'accepts_reminders', 'accepts_mailings'];
+
+		foreach ($keys as $name) {
+			if (!array_key_exists($name . '_present', $source)) {
+				continue;
+			}
+
+			// Don't allow the admin to re-subscribe a user
+			if (!$this->$name) {
+				unset($source[$name]);
+				continue;
+			}
+
+			$source[$name] ??= false;
+		}
+
+		$this->setPreferences($source, 'administrateur');
+	}
+
+	protected function setPreferences(array $preferences, ?string $who = null): void
+	{
+		$options = [
+			'accepts_messages'  => 'messages personnels',
+			'accepts_reminders' => 'rappels',
+			'accepts_mailings'  => 'messages collectifs',
+		];
+
+		$log = [];
+		$who ??= 'destinataire';
+
+		foreach ($options as $key => $label) {
+			if (!array_key_exists($key, $preferences)) {
+				continue;
+			}
+
+			$preferences[$key] ??= false;
+
+			if ((bool) $preferences[$key] === $this->$key) {
+				continue;
+			}
+
+			$this->set($key, (bool)$preferences[$key]);
+			$log[] = sprintf('%s (%s) : %s', $this->$key ? 'Accepte les messages' : 'Refus des messages', $who, $label);
+		}
+
+
+		if (!count($log)) {
+			return;
+		}
+
+		$this->appendFailLog(implode(" ; ", $log));
+	}
+
+	public function setOptout(int $context): void
+	{
+		if ($context === Emails::CONTEXT_BULK) {
+			$this->set('accepts_mailings', false);
+		}
+		elseif ($context === Emails::CONTEXT_REMINDER) {
+			$this->set('accepts_reminders', false);
+		}
+		else {
+			$this->set('accepts_messages', false);
+		}
 	}
 
 	public function log(string $message): void
@@ -163,6 +258,9 @@ class Address extends Entity
 		if ($type == 'complaint') {
 			$this->set('status', self::STATUS_COMPLAINT);
 			$this->appendFailLog($message ?? "Un signalement de spam a été envoyé par le destinataire.");
+			$this->set('accepts_mailings', false);
+			$this->set('accepts_reminders', false);
+			$this->appendFailLog($message ?? "Un signalement de spam a été envoyé par le destinataire, il a été désinscrit des rappels et messages collectifs.");
 		}
 		elseif ($type == 'hard') {
 			$this->set('status', self::STATUS_HARD_BOUNCE);
@@ -208,5 +306,96 @@ class Address extends Entity
 	public function getStatusLabel(): string
 	{
 		return self::STATUS_LIST[$this->status];
+	}
+
+	public function savePreferencesFromUserForm(?array $source = null, ?int $optout_context = null): bool
+	{
+		$source ??= $_POST;
+
+		if (!$optout_context) {
+			$address = $source['email'] ?? '';
+
+			if (!$address || self::getHash($address) !== $this->hash) {
+				throw new UserException('L\'adresse e-mail indiquée ne correspond pas à celle que nous avons enregistré. Merci de vérifier l\'adresse e-mail saisie.');
+			}
+		}
+
+		$keys = ['reminders', 'messages', 'mailings'];
+		$preferences = [];
+		$require_confirm = false;
+
+		foreach ($keys as $key) {
+			$name = 'accepts_' . $key;
+			$value = boolval($source[$name] ?? false);
+
+			// Require double opt-in if re-subscribing to an unsubscribed item
+			if ($value !== $this->$name
+				&& $value === true
+				&& $this->$name === false) {
+				$require_confirm = true;
+			}
+
+			$preferences[$name] = $value;
+		}
+
+		// Don't require double opt-in if the user is coming from the optout link
+		// at the bottom of a message
+		if ($require_confirm && !$optout_context) {
+			$url = $this->getSignedUserPreferencesURL($preferences);
+			$preferences = array_filter($preferences);
+			EmailTemplates::verifyPreferences($address, $url, $preferences);
+			return false;
+		}
+		else {
+			$this->setPreferences($preferences);
+			$this->save();
+			return true;
+		}
+	}
+
+	public function getSignedUserPreferencesURL(array $preferences): string
+	{
+		$expiry = time() + 24*3600;
+		$values = [
+			'r' => intval($preferences['accepts_reminders'] ?? 0),
+			'l' => intval($preferences['accepts_mailings'] ?? 0),
+			'm' => intval($preferences['accepts_messages'] ?? 0),
+			'e' => $expiry,
+		];
+
+		ksort($values);
+		$values = http_build_query($values);
+		$hash = hash_hmac('sha1', $values . $this->hash, LOCAL_SECRET_KEY);
+		$values .= '&v=' . $hash;
+
+		$url = self::getOptoutURL($this->hash);
+		$url .= '&' . $values;
+		return $url;
+	}
+
+	public function confirmPreferences(array $qs): bool
+	{
+		if (!isset($qs['v'], $qs['e'])) {
+			return false;
+		}
+
+		$values = array_intersect_key($qs, array_flip(['r', 'l', 'm', 'e']));
+		ksort($values);
+
+		$hash = hash_hmac('sha1', http_build_query($values) . $this->hash, LOCAL_SECRET_KEY);
+
+		if ($hash !== $qs['v']) {
+			return false;
+		}
+
+		if ($qs['e'] < time()) {
+			return false;
+		}
+
+		$this->set('accepts_reminders', boolval($values['r'] ?? false));
+		$this->set('accepts_mailings', boolval($values['l'] ?? false));
+		$this->set('accepts_messages', boolval($values['m'] ?? false));
+		$this->save();
+		return true;
 	}
 }

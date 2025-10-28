@@ -14,12 +14,14 @@ if (!$email) {
 	throw new UserException('Adresse invalide ou inconnue');
 }
 
-$csrf_key = 'block_email';
+$csrf_key = 'email_preferences_' . $email->hash;
 
 $form->runIf('send', function () use ($email) {
-	$email->setOptout('Désinscription manuelle par un administrateur');
+	$email->adminSetPreferences();
 	$email->save();
 }, $csrf_key, '!users/');
 
-$tpl->assign(compact('csrf_key', 'email', 'address'));
-$tpl->display('users/email/block.tpl');
+$user_prefs_url = $email->getUserPreferencesURL();
+
+$tpl->assign(compact('csrf_key', 'email', 'address', 'user_prefs_url'));
+$tpl->display('users/mailing/status/preferences.tpl');

@@ -46,7 +46,7 @@ class File extends Entity
 	/**
 	 * Unique file identifier as a random string
 	 */
-	protected string $hash_id;
+	protected ?string $hash_id;
 
 	/**
 	 * Parent directory of file

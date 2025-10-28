@@ -61,7 +61,7 @@ class Transactions
 		try {
 			$ids = [];
 			foreach ($journal as $row) {
-				if (!array_key_exists($row->id_line, $checked)) {
+				if (!in_array($row->id_line, $checked)) {
 					continue;
 				}
 
@@ -81,8 +81,8 @@ class Transactions
 			}
 
 			$transaction->save();
-			$ids = implode(',', $ids);
-			$db->exec(sprintf('UPDATE acc_transactions SET status = (status | %d) WHERE id IN (%s);', Transaction::STATUS_DEPOSITED, $ids));
+			$transaction->updateLinkedTransactions($ids);
+			$account->markTransactionsAsDeposited($ids);
 			$db->commit();
 		}
 		catch (\Exception $e) {
@@ -379,12 +379,14 @@ class Transactions
 			}
 
 			// Make sure account ID is valid for this chart
-			$line->id_account = $accounts->getValidAccountId($id_account);
+			$valid_id_account = $accounts->getValidAccountId($id_account);
 
-			if (!$line->id_account) {
+			if (!$valid_id_account) {
 				$account = $accounts::get($id_account);
 				throw new UserException(sprintf('Le compte "%s — %s" n\'existe pas dans le plan comptable de l\'année sélectionnée.', $account->code, $account->label));
 			}
+
+			$line->id_account = $valid_id_account;
 
 			$new->addLine($line);
 		}

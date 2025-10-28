@@ -7,9 +7,14 @@
 		<h2>{$item.label}</h2>
 		{if $item.broken_message}
 			<p class="error block">
-				<strong>Extension cassée : installation impossible</strong><br />
+				<strong>Extension cassée</strong><br />
 				Erreur : {$item.broken_message}
 			</p>
+			{if $item.type === 'module' && $item.module->hasLocal()}
+			<p>
+				{linkbutton shape="edit" href="!config/ext/edit.php?module=%s"|args:$item.name label="Modifier le code"}
+			</p>
+			{/if}
 		{elseif $item.missing}
 			<p class="error block">
 				{if ENABLE_TECH_DETAILS}

@@ -13,7 +13,7 @@ if (!$module) {
 }
 
 if (null !== qg('export')) {
-	$module->export(Session::getInstance());
+	$module->export();
 	return;
 }
 

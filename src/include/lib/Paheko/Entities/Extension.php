@@ -107,8 +107,8 @@ class Extension extends Entity
 		$this->set('config_url', $item->hasConfig() ? $item->url($item::CONFIG_FILE) : null);
 		$this->set('installed', $type === 'plugin' ? $item->exists() : true);
 		$this->set('missing', $type === 'plugin' ? !$item->hasCode() : false);
-		$this->set('broken_message', $type === 'plugin' ? $item->getBrokenMessage() : null);
 		$this->set('ini', $item->getINIProperties());
+		$this->set('broken_message', $item->getBrokenMessage());
 		$this->set('doc_url', $this->ini->doc_url ?? null);
 
 		if ($item->hasFile($item::INDEX_FILE)) {

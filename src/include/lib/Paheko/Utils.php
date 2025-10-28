@@ -496,6 +496,22 @@ class Utils
 		}
 	}
 
+	static public function isLocalURL(string $url): bool
+	{
+		$config = Config::getInstance();
+
+		$my_hosts = [
+			parse_url(WWW_URL, PHP_URL_HOST),
+			parse_url(ADMIN_URL, PHP_URL_HOST),
+			$config->org_web ? parse_url($config->org_web, PHP_URL_HOST) : null,
+		];
+
+		$my_hosts = array_filter($my_hosts);
+		$host = parse_url($url, PHP_URL_HOST);
+
+		return in_array($host, $my_hosts);
+	}
+
 	static public function getRequestURI(): ?string
 	{
 		if (!empty($_SERVER['REQUEST_URI']))
@@ -1748,6 +1764,31 @@ class Utils
 		return sprintf('prince --http-timeout=3 --pdf-profile="PDF/A-3b" --pdf-author=%s', Utils::escapeshellarg($org_name));
 	}
 
+	static public function getPDFCommand(): ?string
+	{
+		$cmd = PDF_COMMAND;
+
+		if ($cmd === 'auto') {
+			// Try to find a local executable
+			$list = ['prince', 'chromium', 'wkhtmltopdf', 'weasyprint'];
+			$cmd = null;
+
+			foreach ($list as $program) {
+				if (self::quick_exec('which ' . $program, 1)) {
+					$cmd = $program;
+					break;
+				}
+			}
+
+			// We still haven't found anything
+			if (!$cmd) {
+				return null;
+			}
+		}
+
+		return $cmd;
+	}
+
 	/**
 	 * Displays a PDF from a string, only works when PDF_COMMAND constant is set to "prince"
 	 * @param  string $str HTML string
@@ -1762,8 +1803,9 @@ class Utils
 		$str = self::appendCookieToURLs($str);
 		$str = preg_replace('!(<html.*?)class="!s', '$1class="pdf ', $str);
 
-		if (PDF_COMMAND === 'auto') {
-			// Try to see if there's a plugin
+		// If there is no program found, try to see if there's a plugin
+		if (PDF_COMMAND === 'auto'
+			&& Plugins::hasSignal('pdf.create')) {
 			$in = ['string' => $str];
 
 			$signal = Plugins::fire('pdf.stream', true, $in);
@@ -1775,8 +1817,11 @@ class Utils
 			unset($signal, $in);
 		}
 
-		// Only Prince handles using STDIN and STDOUT
-		if (PDF_COMMAND != 'prince') {
+		$cmd = self::getPDFCommand();
+
+		// Only Prince can handle using STDIN and STDOUT and stream PDF
+		// If the program is not Prince, store PDF in temporary file
+		if ($cmd !== 'prince') {
 			$file = self::filePDF($str);
 			readfile($file);
 			unlink($file);
@@ -1801,9 +1846,7 @@ class Utils
 	 */
 	static public function filePDF(string $str): ?string
 	{
-		$cmd = PDF_COMMAND;
-
-		if (!$cmd) {
+		if (!PDF_COMMAND) {
 			throw new \LogicException('PDF generation is disabled');
 		}
 
@@ -1816,8 +1859,9 @@ class Utils
 		Utils::safe_mkdir(CACHE_ROOT, null, true);
 		file_put_contents($source, $str);
 
-		if ($cmd === 'auto') {
-			// Try to see if there's a plugin
+		// Try to see if there's a plugin first, if PDF_COMMAND is auto
+		if (PDF_COMMAND === 'auto'
+			&& Plugins::hasSignal('pdf.create')) {
 			$in = ['source' => $source, 'target' => $target];
 
 			$signal = Plugins::fire('pdf.create', true, $in);
@@ -1828,22 +1872,12 @@ class Utils
 			}
 
 			unset($in, $signal);
+		}
 
-			// Try to find a local executable
-			$list = ['prince', 'chromium', 'wkhtmltopdf', 'weasyprint'];
-			$cmd = null;
+		$cmd = self::getPDFCommand();
 
-			foreach ($list as $program) {
-				if (self::quick_exec('which ' . $program, 1)) {
-					$cmd = $program;
-					break;
-				}
-			}
-
-			// We still haven't found anything
-			if (!$cmd) {
-				throw new \LogicException('Aucun programme de création de PDF trouvé, merci d\'en installer un : https://fossil.kd2.org/paheko/wiki?name=Configuration');
-			}
+		if (!$cmd) {
+			throw new \LogicException('Aucun programme de création de PDF trouvé, merci d\'en installer un : https://fossil.kd2.org/paheko/wiki?name=Configuration');
 		}
 
 		$timeout = 25;

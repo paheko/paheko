@@ -80,6 +80,8 @@ class Module extends Entity
 
 	protected ?\stdClass $_ini;
 
+	protected ?string $_broken_message = null;
+
 	public function assertIsValid(): void
 	{
 		$this->assert($this->isValid(), 'Nom unique de module invalide: ' . $this->name);
@@ -123,6 +125,35 @@ class Module extends Entity
 		parent::importForm($source);
 	}
 
+	public function getBrokenMessage(): ?string
+	{
+		$this->checkIfBroken();
+		return $this->_broken_message;
+	}
+
+	public function checkIfBroken(): void
+	{
+		if ($this->_broken_message !== null) {
+			return;
+		}
+
+		try {
+			$this->selfCheck();
+		}
+		catch (ValidationException $e) {
+			$this->_broken_message = $e->getMessage();
+			return;
+		}
+
+		$this->_broken_message = '';
+	}
+
+	public function isBroken(): bool
+	{
+		$this->checkIfBroken();
+		return $this->_broken_message !== '';
+	}
+
 	public function getINIProperties(bool $use_local = true): ?\stdClass
 	{
 		if (isset($this->_ini) && $use_local) {
@@ -138,6 +169,7 @@ class Module extends Entity
 			$from_dist = true;
 		}
 		else {
+			$this->_broken_message = 'Le fichier module.ini est absent';
 			return null;
 		}
 
@@ -145,16 +177,19 @@ class Module extends Entity
 			$ini = Utils::parse_ini_string($ini, false);
 		}
 		catch (\RuntimeException $e) {
-			throw new ValidationException(sprintf('Le fichier module.ini est invalide pour "%s" : %s', $this->name, $e->getMessage()), 0, $e);
+			$this->_broken_message = sprintf('Le fichier module.ini est invalide : %s', $e->getMessage());
+			return null;
 		}
 
 		if (empty($ini)) {
+			$this->_broken_message = 'Le fichier module.ini est vide';
 			return null;
 		}
 
 		$ini = (object) $ini;
 
 		if (!isset($ini->name)) {
+			$this->_broken_message = 'Le fichier module.ini est invalide : la clé "name" n\'existe pas';
 			return null;
 		}
 

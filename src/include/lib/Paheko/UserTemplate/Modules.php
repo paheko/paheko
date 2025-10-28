@@ -21,6 +21,7 @@ use const Paheko\ADMIN_URL;
 
 use KD2\DB\EntityManager as EM;
 use KD2\ZipReader;
+use KD2\ErrorManager;
 
 class Modules
 {
@@ -226,7 +227,15 @@ class Modules
 				continue;
 			}
 
-			$out[$module->name] = $module->fetch($snippet, $variables);
+			try {
+				$content = $module->fetch($snippet, $variables);
+			}
+			catch (\RuntimeException $e) {
+				ErrorManager::reportExceptionSilent($e);
+				$content = sprintf('Le module "%s" a rencontré une erreur.', $module->name);
+			}
+
+			$out[$module->name] = $content;
 		}
 
 		return array_filter($out, fn($a) => trim($a) !== '');
@@ -262,7 +271,7 @@ class Modules
 	static public function isEnabled(string $name): bool
 	{
 		if (!preg_match(Module::VALID_NAME_REGEXP, $name)) {
-			return null;
+			return false;
 		}
 
 		return (bool) EM::getInstance(Module::class)->col('SELECT 1 FROM @TABLE WHERE name = ? AND enabled = 1;', $name);

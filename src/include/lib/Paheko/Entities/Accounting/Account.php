@@ -826,6 +826,31 @@ class Account extends Entity
 		return $account_balance - $deposit_balance;
 	}
 
+	/**
+	 * @todo FIXME move to line-based deposit
+	 */
+	public function markTransactionsAsDeposited(array $ids)
+	{
+		if ($this->type !== self::TYPE_OUTSTANDING) {
+			throw new \LogicException('This account cannot deposit transactions.');
+		}
+
+		$ids = implode(',', array_map('intval', $ids));
+		$sql = sprintf('UPDATE acc_transactions SET status = (status | %d) WHERE id IN (%s);', Transaction::STATUS_DEPOSITED, $ids);
+		DB::getInstance()->exec($sql);
+	}
+
+	public function markTransactionsLinesAsDeposited(array $ids)
+	{
+		if ($this->type !== self::TYPE_OUTSTANDING) {
+			throw new \LogicException('This account cannot deposit transactions.');
+		}
+
+		$ids = implode(',', array_map('intval', $ids));
+		$sql = sprintf('UPDATE acc_transactions SET status = (status | %d) WHERE id IN (SELECT DISTINCT id_transaction FROM acc_transactions_lines WHERE id IN(%s));', Transaction::STATUS_DEPOSITED, $ids);
+		DB::getInstance()->exec($sql);
+	}
+
 	public function getSum(int $year_id): ?\stdClass
 	{
 		$sum = DB::getInstance()->first('SELECT balance, credit, debit

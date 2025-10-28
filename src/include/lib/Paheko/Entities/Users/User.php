@@ -27,6 +27,7 @@ use Paheko\Users\Users;
 use Paheko\Services\Subscriptions;
 
 use Paheko\Entities\Files\File;
+use Paheko\Entities\Email\Email;
 
 use KD2\Security;
 use KD2\Security_OTP;
@@ -616,7 +617,7 @@ class User extends Entity
 
 		$this->set('password', $session->hashPassword($source['password']));
 
-		if ($session->isLogged()) {
+		if ($session->isLogged(false)) {
 			$session->clearSessionVerifier();
 		}
 	}
@@ -644,6 +645,18 @@ class User extends Entity
 
 		return $out;
 	}
+
+	public function getEmailObject(): ?Email
+	{
+		foreach (DynamicFields::getEmailFields() as $f) {
+			if (isset($this->$f) && trim($this->$f)) {
+				return Emails::getOrCreateEmail($this->$f);
+			}
+		}
+
+		return null;
+	}
+
 
 	public function canEmail(): bool
 	{

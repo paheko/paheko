@@ -52,6 +52,15 @@ if (!defined('Paheko\DATA_ROOT')) {
 	define('Paheko\DATA_ROOT', $_ENV['XDG_DATA_HOME'] . '/paheko');
 }
 
+if (!defined('Paheko\PLUGINS_ROOT')) {
+	if (file_exists(DATA_ROOT . '/plugins')) {
+		define('Paheko\PLUGINS_ROOT', DATA_ROOT  . '/plugins');
+	}
+	else {
+		define('Paheko\PLUGINS_ROOT', __DIR__ . '/plugins');
+	}
+}
+
 if (!defined('Paheko\DB_FILE')) {
 	define('Paheko\DB_FILE', $_ENV['XDG_DATA_HOME'] . '/paheko/association.sqlite');
 }

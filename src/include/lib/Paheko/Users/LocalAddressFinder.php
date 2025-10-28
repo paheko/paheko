@@ -5,6 +5,7 @@ namespace Paheko\Users;
 use Paheko\Config;
 use Paheko\Static_Cache;
 use KD2\HTTP;
+use KD2\DB\DB_Exception;
 
 use const Paheko\LOCAL_ADDRESSES_ROOT;
 

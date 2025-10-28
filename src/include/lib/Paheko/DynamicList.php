@@ -223,12 +223,22 @@ class DynamicList implements \Countable
 
 	public function addConditions(string $conditions)
 	{
-		$this->conditions .= $conditions;
+		$this->conditions .= ' ' . ltrim($conditions);
 	}
 
 	public function setColumns(array $columns)
 	{
 		$this->columns = $columns;
+	}
+
+	public function setColumnProperty(string $column, string $property, $value)
+	{
+		$this->columns[$column][$property] = $value;
+	}
+
+	public function removeColumn(string $column)
+	{
+		unset($this->columns[$column]);
 	}
 
 	public function addColumn(string $name, array $column, int $position = -1)
@@ -239,6 +249,18 @@ class DynamicList implements \Countable
 		else {
 			$this->columns = array_slice($this->columns, 0, $position, true) + [$name => $column] + array_slice($this->columns, $position, null, true);
 		}
+	}
+
+	public function removeColumns(array $columns)
+	{
+		foreach ($columns as $name) {
+			unset($this->columns[$name]);
+		}
+	}
+
+	public function addTables(string $tables)
+	{
+		$this->tables .= ' ' . ltrim($tables);
 	}
 
 	/**

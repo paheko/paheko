@@ -68,12 +68,6 @@ class Extensions
 		return $e;
 	}
 
-	static public function toggle(string $name, bool $enabled)
-	{
-		$ext = self::get($name);
-		$ext->toggle($enabled);
-	}
-
 	static protected function filterList(array &$list): void
 	{
 		foreach ($list as &$item) {
