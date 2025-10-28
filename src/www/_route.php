@@ -51,7 +51,7 @@ if ((empty($uri) || $uri === '/') && !empty($_GET['un'])) {
 
 	// RFC 8058
 	if (!empty($_POST['Unsubscribe']) && $_POST['Unsubscribe'] == 'Yes') {
-		$email = Emails::getEmailFromOptout($params['h']);
+		$email = Emails::getEmailFromQueryStringValue($params['h']);
 
 		if (!$email) {
 			throw new UserException('Adresse email introuvable.');
