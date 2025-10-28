@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Merge\strunk\sinto\sdev
-D 2025-10-28T11:58:26.127
+C Remove\sduplicate\sfiles,\smove\ssend\sform
+D 2025-10-28T12:12:14.330
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -402,7 +402,7 @@ F src/templates/docs/shares.tpl a5ed2806b6fa00564686edf774abfc884d90fe1c37e65386
 F src/templates/docs/trash.tpl 4ee250f6f80985d45ff2428a73e34cc711f17e631cc3b750acd3a0589a6cea3d
 F src/templates/docs/trash_delete.tpl 09f17d3438bc7406f8b7b8fbc32c5849a66c293b1d5ede463be41cccf413b777
 F src/templates/email_preferences.tpl 3a9896b37b93420c0ae66d755778aa084dba23f2461fb244be403fa37690dd7c
-F src/templates/email_verify.tpl 6720f32a3e5349a778497d634826664f36e8d1d6b1fd530d8221f6e34d3d8327 w src/templates/optout.tpl
+F src/templates/email_verify.tpl 6720f32a3e5349a778497d634826664f36e8d1d6b1fd530d8221f6e34d3d8327
 F src/templates/emails/login_changed.tpl aaf10e05bad319868dacd8a9fbfa9a321e41adcb46d2d106eba45312db5e396b
 F src/templates/emails/password_changed.tpl f2ac7406d790310e1854bc428cbc77f533ee662957b696b29c4d5b739d06766e
 F src/templates/emails/password_recovery.tpl 6a0f64f4f79cfd6dfc667bc29b71784866f797c762166eb168a1f151f5a99403
@@ -483,16 +483,15 @@ F src/templates/users/email/mailing/index.tpl e4ab331c5be3bc46e483ae4cff79d5cd54
 F src/templates/users/email/mailing/populate.tpl 8dc2925045c064e48694d79e455048bbc6f7764aa7c3eb9df71c098c61514a8f
 F src/templates/users/email/mailing/recipient_data.tpl d5ad4ec244404a0c1371d98a774094939fe7326cea8c4c655543b25fd2d43fa5
 F src/templates/users/email/mailing/recipients.tpl 3f2c2e449ab0f83903de3d4963c30db10f34dcbc6e67b88885af3a9c9b73c45d
-F src/templates/users/email/status/address.tpl 53622e4c178f8ca2d5d7d664423e468e53032fd887c5e996d61b9914be6d2402 w src/templates/users/email/address.tpl
-F src/templates/users/email/status/index.tpl 2123017dedb2732e6149373ad59828484085e6a501ef5955bdc5d3e854f0cabc w src/templates/users/email/rejected.tpl
-F src/templates/users/email/status/preferences.tpl 3e62f0a27a2042c98aa9dac04cac48837294821be9666160d46f46f618303994 w src/templates/users/email/block.tpl
-F src/templates/users/email/status/queue.tpl ffd1e1f707fb5c23c797b01c09b542afbfc8531a8f82416917add46bd4eddcb0 w src/templates/users/email/queue.tpl
-F src/templates/users/email/status/verify.tpl 4df9f63ba5235eedf89918e85b7d6e855a61551bdda54692b9109a4a81b6825f w src/templates/users/email/verify.tpl
+F src/templates/users/email/mailing/send.tpl 938bde843954a367467f05950d3a82aabb0a90ee1d9c582ec09a140117c99ba0 w src/templates/users/mailing/send.tpl
+F src/templates/users/email/status/address.tpl b6f1f34b302fc49f010de2e54307ad6176ec41b548d1b0eb6128f1dbc9d770a9
+F src/templates/users/email/status/index.tpl 2123017dedb2732e6149373ad59828484085e6a501ef5955bdc5d3e854f0cabc
+F src/templates/users/email/status/preferences.tpl 3e62f0a27a2042c98aa9dac04cac48837294821be9666160d46f46f618303994
+F src/templates/users/email/status/queue.tpl ffd1e1f707fb5c23c797b01c09b542afbfc8531a8f82416917add46bd4eddcb0
+F src/templates/users/email/status/verify.tpl 4df9f63ba5235eedf89918e85b7d6e855a61551bdda54692b9109a4a81b6825f
 F src/templates/users/import.tpl 1b879e449d8a9b4e4d58f8dbefbb15d863f5535f61cd41e9b20620bee71af0e3
 F src/templates/users/index.tpl a21cdece526d86ede56e746f16a17d7c73075d246e080568736ea319a82f392d
 F src/templates/users/log.tpl 6a72a51d09deab43fe3caee7d9d333908c4973898afde9023810983fe3da8e94
-F src/templates/users/mailing/send.tpl 938bde843954a367467f05950d3a82aabb0a90ee1d9c582ec09a140117c99ba0
-F src/templates/users/mailing/status/address.tpl 6e33bdc8478812261f30884be06ca6fcfb3ffb6b6062942e08b91a65b180714d
 F src/templates/users/message.tpl 10334c38e9880d24142148040ab04657093ec62aefaa1e0a405ec6a709c40064
 F src/templates/users/new.tpl 5682893ad4b4a9768e4a77851b6304beaa4d257a8c6def8fcc65005c70d33951
 F src/templates/users/search.tpl 7d3b5814116c85ebeb7374d8809dcd7a11e13cd5ed7c20b501f0742650d43759
@@ -643,7 +642,7 @@ F src/www/admin/docs/search.php 60c138d0ec74854f837509f53a7cf89051107b80005b4eb9
 F src/www/admin/docs/shares.php 8b260baa272f2313206255b6440992de62da744cf606105df5178dba0816f0a4
 F src/www/admin/docs/trash.php 03f92ce4889c83fa83153dfcd109ed2be8fcb26347ad4d68b1bd229df1e9f4e4
 F src/www/admin/email_preferences.php ee9475691e2f84ea630a713e4647df598fa1d20ca6822213cd15cf763e783654
-F src/www/admin/email_verify.php 328cb15b80389c1a5d050c52618fcdee03e40685e3c2404f6414428c29b52391 w src/www/admin/optout.php
+F src/www/admin/email_verify.php 328cb15b80389c1a5d050c52618fcdee03e40685e3c2404f6414428c29b52391
 F src/www/admin/handle_bounce.php ac546e03a21ec3687a12482fed3753a8e4632fab632297807c72afa9ef5394d6
 F src/www/admin/index.php dbd36f8463ecdf3494b0b381a614e19ffa6ab1dbd9f3bb905d8d1f66a2ff98e5
 F src/www/admin/install.php 1782ca5c09e74a872eca35ee36cd898eb6dcf0443c88f327bb527550cb62691b
@@ -786,16 +785,15 @@ F src/www/admin/users/email/mailing/index.php 8814739c31607e4ba6ec6891bdd8cc2e20
 F src/www/admin/users/email/mailing/populate.php cf53a64e320b0ae983ccd2bd77ca20ffc47bf27a697635610416f9190b1b8200
 F src/www/admin/users/email/mailing/recipient_data.php baac793801a01b3e0136770d9227f6bacb44223644d133eb77420f6198273267
 F src/www/admin/users/email/mailing/recipients.php 1e8f8312fa67b70c7ca3327c5f9b187af4115abcfead234781bfe59e292d1ebc
-F src/www/admin/users/email/status/address.php 1de4509d633367bb926444550556fcd7397adbec66d4f1fd9fcefca240d72af2 w src/www/admin/users/email/address.php
-F src/www/admin/users/email/status/index.php e53680a84061ea77678986f18356574ad0690b8ff436bf34a6f3399ae827606e w src/www/admin/users/email/rejected.php
-F src/www/admin/users/email/status/preferences.php 4169272a45b84bf6b4950437615b5569a4478ba8e8cb90838fb7f5ffaf70720e w src/www/admin/users/email/block.php
-F src/www/admin/users/email/status/queue.php ea8b44d27f84de92d6bd503d2c0d86d106b7f909e1a5039043f0f597d26d7640 w src/www/admin/users/email/queue.php
-F src/www/admin/users/email/status/verify.php 116b91acd094d2b3edd49c04f68fde3092df9aee30b84125a05b225841684d06 w src/www/admin/users/email/verify.php
+F src/www/admin/users/email/mailing/send.php 18d75bf7b36f3936d263de72e7dc434213ffb82fedd1a7efc17e70d490c71d71 w src/www/admin/users/mailing/send.php
+F src/www/admin/users/email/status/address.php b9f4dbb0e019afb557f97a00ddc22b58c1bdca1ef36ec3f5563b2ab702d38e3e
+F src/www/admin/users/email/status/index.php e53680a84061ea77678986f18356574ad0690b8ff436bf34a6f3399ae827606e
+F src/www/admin/users/email/status/preferences.php 4169272a45b84bf6b4950437615b5569a4478ba8e8cb90838fb7f5ffaf70720e
+F src/www/admin/users/email/status/queue.php ea8b44d27f84de92d6bd503d2c0d86d106b7f909e1a5039043f0f597d26d7640
+F src/www/admin/users/email/status/verify.php 116b91acd094d2b3edd49c04f68fde3092df9aee30b84125a05b225841684d06
 F src/www/admin/users/import.php e1eb48387330c94d6cb18094d16a266a7a1ef69d619b3f41a858114dda5df078
 F src/www/admin/users/index.php 51b3b3d8a175eb3cbfe1052ddfed3c70566d846d92532eb021fc28d685b08022
 F src/www/admin/users/log.php ce86979364c464eb56b987b37d25cfd33cc0a01812747db835ece2c158d5c5bb
-F src/www/admin/users/mailing/send.php 18d75bf7b36f3936d263de72e7dc434213ffb82fedd1a7efc17e70d490c71d71
-F src/www/admin/users/mailing/status/address.php d7e2e822bef3c321e4f09872be432bdf6eb7239d1fa1841a3143b0e6dc33556e
 F src/www/admin/users/message.php ead6908940d38fe90ecce6b8aa1aa33c836b737503af8cd2bcb362146d516b16
 F src/www/admin/users/new.php 3a4bc78ae37632aefe26bb04eac46bae9481ecb454ca0bb9200d9cac51093261
 F src/www/admin/users/saved_searches.php cbae2bdad6c708a6a0af69e1c867c7728315e8bf34a1461c69d1e7d40bfdf71d
@@ -846,24 +844,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php c992d13261138f7cc5d06c20ff5b798418084f67446fb260acaeca5bf040822e
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 2467d1b3b7ca10846ba8ff330f5b1b07fd6a1f53c0c03228994a27a88238d658 2eef98d06de522962deb65fb885ccb72c7de1b07323bf8dd45f38baf658d52a3
-R 41a667ba5862fc711a5ac8d8642d04da
+P 9f0960e2327c0c3d562eeae47f4d5ac27263841ddf948ea3aa7ff08c09ec96c3
+R d85facbd914b8301a69cbe68802696f4
 U bohwaz
-Z 28f14fe4e864e5d5fd2166b4e11e6803
+Z 1a11dd1311f85f8df1ef2fa8a706e2c4
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmkAr+IACgkQksnacbiI
-6jQWTA//Yplv6E9y46vBQ7a2HviD3v8fBx2ziUTMGIzNh/nPCi1Jd5Yw9/Q4qjXW
-1u8IuWne3zNKDA2kyALnDVPg3JwBY0v5brbv0R8tZId81a3UnfK5ouNP1TL0ZctE
-Zqa6zxkIOX05ceciAQV5FfVF9onqQk2fPCFMvRTAzOOyvEeJs2S2oQJ/ZhyOvkio
-8lBWhEKw6q6VXGXG2RWs5bP3ZrCAnygi3qQGKJob2LSJyMeIL9WX7M+SC8XsX9ZF
-danrhllJKfVdYv5i/buXxO0QlQzmluHGFOuVARkiElbIe7JukBlhxjkJlgi7+yO3
-pGWP9YOeDJrDY4lm4y5OFN3jl4zk/upJiCpGMAyna9uQcS34uQw+TK/8qZrMw6e7
-W489WPrkQcIcsVSrdjLR22T1DExGBcR4dunZvuElMetqZ1fmcukT7B1S61IQSOCL
-WmcQrda+fnQedqLwojNV0Fwieq0ND2LiqD6fvNVpwn6IF+2GJQ4WWHpJdkCdsQIE
-U3SVjOVsBeoEr4ZfZhXF5gmdxzWuj+zj8k4KhC/D8m10fJr1xO0boztfUWignGjp
-Oxhzyzcx0BQIsy99nLtnA7NUz+b7AzR0xO09tvjQCyfhWC1JvIyjkuGUD+JUG3yb
-BIxlpfngso4jyv1RhbrwPy24/KtSIijcdu5q3xtypCI8h3kmR5o=
-=7uDe
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmkAsx4ACgkQksnacbiI
+6jTIsA/+I6crRwyD/AeuzGlm7uY0msxPa4Q9YmWpT+ucbXB6I26CsDFQmA5SXs/F
+LNtDtQMdfX4SlK8RIGzEGvc//6MPpuyEE30FWFOTq3mFX9yNpHFPJRCbRzMMWj5q
+zwPXVwJCdjig0Y0YmswTd4MGdjdmW5X1cLG/8POYvYSToaZP5QuG95DFTcXKL2zh
+TOW4a1mHAKBxBFrZ6puxYRGxrXygIZ41TjVX5u73NXLSj8BPBL8YRmdk70xcZtKO
+2jOrHj1ruPcNFH8iCeZ3REbv7rgf6D1nWwNGHlGd8paAzGkR64t3O/YxWizBhDI1
+d6EnQ8IbAOLQukHO0rOPaAJwPsa+oks0cOF0Po5Wv3BAwZQ0m7eat8vHnsvtqjjr
+JprEgCvNlo2s2TXTwK+5IpiKUL0xIZOmclQSu/h3tRW+oYp5y/86QAsubCepP/ip
+pmSKVtmy/pofUpY/vOkDuU7e4+ryztUVu0nhi8v4s1hv46BW+vO+n0vESAmXsz7b
+M5B6akkgBvr4nv5o0NWz+A3oJiiYvu06HnW6fmCEZOJdGiFi35WoJk1h6uDlXmo3
+wjMjSIqSUbwzcEC+SyGz5xpGVHGEA+0q7MV4qQbOjtGhvC6Hcdla564q0vyf0UuF
+UcXQnSI5cM0v31avn5/A7S6CDmVa8ZqO6c3w9a+TAzCmVaQL1CM=
+=I8CK
 -----END PGP SIGNATURE-----
