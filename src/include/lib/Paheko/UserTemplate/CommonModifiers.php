@@ -40,7 +40,6 @@ class CommonModifiers
 		'strval' => ['mixed'],
 		'substr' => ['string', 'int', '?int='],
 		'http_build_query' => ['array', 'string=', '?string=', 'int='],
-		'str_getcsv' => ['string', 'string=', 'string=', 'string='],
 	];
 
 	/**
@@ -120,6 +119,7 @@ class CommonModifiers
 		'abs',
 		'format_phone_number',
 		'get_country_name' => [Utils::class, 'getCountryName'],
+		'str_getcsv',
 	];
 
 	static public function protect_contact(?string $contact, ?string $type = null): string
@@ -420,5 +420,10 @@ class CommonModifiers
 		}
 
 		return $n;
+	}
+
+	static public function str_getcsv(string $string, string $separator = ',', string $enclosure = '"', string $escape = '\\'): array
+	{
+		return str_getcsv($string, $separator, $enclosure, $escape);
 	}
 }
