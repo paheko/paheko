@@ -108,10 +108,12 @@ class AdvancedSearch extends A_S
 				$column['order'] = sprintf('%s COLLATE U_NOCASE %%s', $identifier);
 			}
 
-			if ($field->type == 'checkbox')
-			{
+			if ($field->type == 'checkbox') {
 				$column['type'] = 'boolean';
 				$column['null'] = false;
+			}
+			elseif ($field->type == 'boolean') {
+				$column['type'] = 'boolean';
 			}
 			elseif ($field->type == 'select')
 			{
