@@ -86,6 +86,9 @@ class Utils
 		'videocam'        => '📹',
 		'microphone'      => '🎤',
 		'barcode'         => '│',
+		'reply'           => '↢',
+		'reply-all'       => '⬹',
+		'forward'         => '↣',
 	];
 
 	const FRENCH_DATE_NAMES = [
