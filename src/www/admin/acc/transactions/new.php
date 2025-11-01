@@ -96,7 +96,9 @@ if (isset($_POST['type'])) {
 $types_details = $transaction->getTypesDetails();
 
 // Set last used date
-if (empty($transaction->date) && $session->get('acc_last_date') && $date = Date::createFromFormat('!Y-m-d', $session->get('acc_last_date'))) {
+if (empty($transaction->date)
+	&& $session->get('acc_last_date')
+	&& ($date = Date::createFromFormat('!Y-m-d', $session->get('acc_last_date')))) {
 	$transaction->date = $date;
 }
 // Set date of the day if no date was set
