@@ -783,14 +783,15 @@ class Emails
 			$new = new Mail_Message;
 			$new->setHeaders([
 				'To'      => $config->org_email,
-				'Subject' => 'Fw: ' . $message->get('Subject'),
+				'Subject' => 'Fw: ' . $message->getHeader('Subject'),
+				'From'    => self::getFromHeader(),
 			]);
 
 			$new->setBody('Veuillez trouver ci-joint un message reçu à l\'attention de votre association.');
 
 			$new->attachMessage($message->output());
 
-			self::sendMessage(self::CONTEXT_PRIVATE, $new);
+			self::sendMessage(self::CONTEXT_SYSTEM, $new);
 			return $return;
 		}
 		elseif ($return['type']=== 'permanent') {
