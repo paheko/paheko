@@ -302,7 +302,7 @@ class CommonFunctions
 				$attributes['class'] = ($attributes['class'] ?? '') . ' disabled';
 			}
 
-			$radio = self::input(array_merge($params, ['type' => 'radio', 'label' => null, 'help' => null, 'disabled' => $attributes['disabled'] ?? null]));
+			$radio = self::input(array_merge($params, ['type' => 'radio', 'label' => null, 'help' => null, 'disabled' => $attributes['disabled'] ?? null, 'prefix_title' => null]));
 
 			$input = sprintf('<dd class="radio-btn %s">%s
 				<label for="%s"><div><h3>%s</h3>%s</div></label>
@@ -432,16 +432,6 @@ class CommonFunctions
 		}
 
 		$input .= $suffix;
-
-		// No label? then we only want the input without the widget
-		if (empty($label)) {
-			if (!array_key_exists('label', $params) && ($type == 'radio' || $type == 'checkbox')) {
-				$input .= sprintf('<label for="%s" aria-label="%s"></label>', $attributes['id'], htmlspecialchars($attributes['title'] ?? ''));
-			}
-
-			return $input;
-		}
-
 		$out = '';
 
 		if (!empty($params['prefix_title'])) {
@@ -450,6 +440,15 @@ class CommonFunctions
 				htmlspecialchars($params['prefix_title']),
 				$required_label
 			);
+		}
+
+		// No label? then we only want the input without the widget
+		if (empty($label)) {
+			if (!array_key_exists('label', $params) && ($type == 'radio' || $type == 'checkbox')) {
+				$input .= sprintf('<label for="%s" aria-label="%s"></label>', $attributes['id'], htmlspecialchars($attributes['title'] ?? ''));
+			}
+
+			return $out . $input;
 		}
 
 		if (!empty($params['prefix_help'])) {
