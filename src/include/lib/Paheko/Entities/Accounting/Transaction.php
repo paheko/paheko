@@ -1640,7 +1640,9 @@ class Transaction extends Entity
 			$this->setPaymentReference($_GET['pr']);
 		}
 
-		return compact('lines', 'id_project', 'amount', 'linked_users');
+		$linked_users_is_required = !empty($_GET['ru']);
+
+		return compact('lines', 'id_project', 'amount', 'linked_users', 'linked_users_is_required');
 	}
 
 	public function saveLinks(?array $source = null): void

@@ -97,7 +97,8 @@ $is_quick = count(array_intersect_key($_GET, array_flip(['a', 'l', 'd', 't', 'ac
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc." default=$transaction->getPaymentReference()}
 		</dl>
 		<dl>
-			{input type="list" multiple=true name="users" label="Membres associés" target="!users/selector.php" default=$linked_users}
+			<?php $linked_users_is_required ??= false; ?>
+			{input type="list" multiple=true name="users" label="Membres associés" target="!users/selector.php" default=$linked_users required=$linked_users_is_required}
 			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30 source=$transaction}
 		</dl>
 		{if !isset($payoff)}

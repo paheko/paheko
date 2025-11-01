@@ -36,6 +36,7 @@ $id_project = null;
 $linked_users = null;
 $linked_transactions = null;
 $payoff = null;
+$linked_users_is_required = false;
 
 $lines = [[], []];
 
@@ -165,7 +166,8 @@ $form->runIf('save', function () use ($transaction, $session, $payoff) {
 }, $csrf_key);
 
 $projects = Projects::listAssoc();
-$variables = compact('csrf_key', 'transaction', 'amount', 'lines', 'id_project', 'types_details', 'linked_users', 'linked_transactions', 'chart', 'projects', 'payoff');
+$variables = compact('csrf_key', 'transaction', 'amount', 'lines', 'id_project', 'types_details',
+	'linked_users', 'linked_transactions', 'chart', 'projects', 'payoff', 'linked_users_is_required');
 
 $tpl->assign($variables);
 
