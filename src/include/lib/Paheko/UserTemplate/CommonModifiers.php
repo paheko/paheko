@@ -238,7 +238,13 @@ class CommonModifiers
 		if (null === $format) {
 			$format = 'd/m/Y à H:i';
 		}
-		elseif (preg_match('/^DATE_[\w\d]+$/', $format)) {
+		elseif (preg_match('/^DATE_[A-Z0-9_]+$/', $format)) {
+			$format = str_replace('DATE_', '', $format);
+
+			if (!defined('DateTime::' . $format)) {
+				throw new UserException('Invalid format: ' . $format);
+			}
+
 			$format = constant('DateTime::' . $format);
 		}
 
