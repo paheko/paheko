@@ -618,7 +618,7 @@ class Functions
 			throw new Brindille_Exception($params['admin']);
 		}
 
-		throw new UserException($params['message'] ?? 'Erreur du module');
+		throw new UserException($params['message'] ?? 'Erreur du module', intval($params['code'] ?? 0));
 	}
 
 	static protected function getFilePath(?string $path, string $arg_name, UserTemplate $ut, int $line)
