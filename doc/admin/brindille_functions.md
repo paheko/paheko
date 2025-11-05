@@ -154,6 +154,7 @@ Affiche un message d'erreur et arrête le traitement à cet endroit.
 | Paramètre | Optionnel / obligatoire ? | Fonction |
 | :- | :- | :- |
 | `message` | **obligatoire** | Message d'erreur à afficher |
+| `code` | facultatif | Code d'erreur HTTP à utiliser |
 
 Exemple :
 
