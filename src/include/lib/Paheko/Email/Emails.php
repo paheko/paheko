@@ -610,10 +610,13 @@ class Emails
 			. "Pour ne plus recevoir ces messages cliquez ici :\n";
 	}
 
+	/**
+	 * @see https://www.nngroup.com/articles/unsubscribe-mistakes/
+	 */
 	static public function appendHTMLOptoutFooter(string $html, string $url): string
 	{
-		$footer = '<p style="color: #666; background: #fff; padding: 10px; text-align: center; font-size: 9pt">' . nl2br(htmlspecialchars(self::getOptoutText()));
-		$footer .= sprintf('<br /><a href="%s" style="color: #009; text-decoration: underline; padding: 5px 10px; border-radius: 5px; background: #eee; border: 1px outset #ccc;">Me désinscrire</a></p>', $url);
+		$footer = '<p style="color: #666; background: #fff; padding: 10px; margin: 50px auto 0 auto; max-width: 700px; border-top: 1px solid #ccc; text-align: center; font-size: 9pt">' . nl2br(htmlspecialchars(trim(self::getOptoutText())));
+		$footer .= sprintf('<br /><a href="%s" style="color: #009; text-decoration: underline;">Me désinscrire</a></p>', $url);
 
 		if (stripos($html, '</body>') !== false) {
 			$html = str_ireplace('</body>', $footer . '</body>', $html);
