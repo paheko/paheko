@@ -63,9 +63,6 @@ if ((empty($uri) || $uri === '/') && !empty($_GET['un'])) {
 		echo 'Unsubscribe successful';
 		return;
 	}
-	elseif (!empty($params['y'])) {
-		Utils::redirect('!email_verify.php?' . http_build_query($params));
-	}
 	else {
 		Utils::redirect('!email_preferences.php?' . http_build_query($params));
 	}

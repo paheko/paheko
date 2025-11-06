@@ -21,31 +21,45 @@ if (!$email) {
 	throw new UserException('Adresse e-mail introuvable.');
 }
 
-// Validate and save re-subscribe request
+// Verify e-mail address, and then display preferences to allow the user to change them
+if (isset($_GET['y']) && $_GET['y'] !== 'ok') {
+	if ($email->verify($_GET['y'])) {
+		$email->save();
+		Utils::redirect($email->getUserPreferencesURL() . '&y=ok');
+	}
+	else {
+		throw new UserException('Impossible de vérifier cette adresse e-mail, le lien a expiré ou est invalide.');
+	}
+}
+
+// Validate and save re-subscribe request from confirmation email
 $form->runIf(isset($_GET['v'], $_GET['e']), function () use ($email, $hash) {
 	if (!$email->confirmPreferences($_GET)) {
 		throw new UserException('La requête est invalide, merci de recommencer.');
 	}
 }, null, '!email_preferences.php?saved&h=' . $hash);
 
-// Save preferences, if user is coming from optout link, then don't require double opt-in
-$form->runIf('validate', function () use ($email, $hash, $optout_context) {
-	$saved = $email->savePreferencesFromUserForm($_POST, $optout_context);
+$verified = !empty($_GET['y']);
+$address_required = false;
 
-	if ($saved) {
-		$keyword = 'saved';
-	}
-	else {
-		$keyword = 'sent';
+// Save preferences
+$form->runIf('save', function () use ($email, $verified, $hash, &$address_required) {
+	$r = $email->savePreferencesFromUserForm($_POST, $verified);
+
+	if ($r === 'confirmation_required') {
+		$address_required = true;
+		return;
 	}
 
-	Utils::redirect(sprintf('!email_preferences.php?%s&h=%s&c=%d', $keyword, $hash, $optout_context));
+	Utils::redirect(sprintf('!email_preferences.php?%s&h=%s', $r, $hash));
 }, $csrf_key);
 
 if ($optout_context && !isset($_GET['saved'])) {
 	$email->setOptout($optout_context);
 }
 
-$tpl->assign(compact('email', 'csrf_key', 'optout_context'));
+$form_url = '?h=' . $hash;
+
+$tpl->assign(compact('email', 'csrf_key', 'optout_context', 'verified', 'form_url', 'address_required'));
 
 $tpl->display('email_preferences.tpl');
