@@ -18,7 +18,7 @@ use Paheko\Web\Render\Render;
 use Paheko\Files\Files;
 
 use const Paheko\{USE_CRON, MAIL_SENDER, MAIL_RETURN_PATH, DISABLE_EMAIL, WWW_URL, ADMIN_URL, SECRET_KEY};
-use const Paheko\{SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURITY, SMTP_HELO_HOSTNAME};
+use const Paheko\{SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURITY, SMTP_HELO_HOSTNAME, SMTP_MAX_MESSAGES_PER_SESSION};
 
 use KD2\SMTP;
 use KD2\SMTP_Exception;
@@ -754,6 +754,13 @@ class Emails
 
 		if (SMTP_HOST) {
 			static $smtp = null;
+			static $count = 0;
+
+			// Reset connection when we reach the max number of messages
+			if (null !== $smtp && $count >= SMTP_MAX_MESSAGES_PER_SESSION) {
+				$smtp->disconnect();
+				$smtp = null;
+			}
 
 			// Re-use SMTP connection in queues
 			if (null === $smtp) {
@@ -766,6 +773,7 @@ class Emails
 			try {
 				$return = $smtp->send($message);
 				// TODO: store return message from SMTP server
+				$count++;
 			}
 			catch (SMTP_Exception $e) {
 				// Handle invalid recipients addresses

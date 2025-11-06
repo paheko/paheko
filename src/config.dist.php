@@ -744,6 +744,21 @@ namespace Paheko;
 //const SMTP_HELO_HOSTNAME = 'mail.domain.tld';
 
 /**
+ * SMTP_MAX_MESSAGES_PER_SESSION
+ *
+ * Nombre de messages à envoyer par session SMTP.
+ *
+ * Pour contourner les limitations de certains hébergeurs, comme IONOS,
+ * qui limitent le nombre de messages par session.
+ *
+ * Limite pour IONOS : 20
+ *
+ * Défaut : 50
+ * @var int
+ */
+//const SMTP_MAX_MESSAGES_PER_SESSION = 20;
+
+/**
  * Adresse e-mail destinée à recevoir les erreurs de mail
  * (adresses invalides etc.) — Return-Path / MAIL FROM
  *
