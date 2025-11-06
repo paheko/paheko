@@ -86,6 +86,7 @@ class File extends Entity
 		'500px' => [['resize', 500]],
 		'750px' => [['resize', 750]],
 		'crop-256px' => [['trim'], ['cropResize', 256, 256]],
+		'email-150px' => [['trim'], ['resize', 150]],
 	];
 
 	const THUMB_CACHE_ID = 'file.thumb.%s.%s';

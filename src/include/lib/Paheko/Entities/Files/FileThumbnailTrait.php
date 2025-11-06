@@ -6,6 +6,7 @@ use KD2\Graphics\Image;
 use KD2\HTML\Markdown;
 use KD2\ErrorManager;
 
+use Paheko\Config;
 use Paheko\Files\Conversion;
 use Paheko\Static_Cache;
 use Paheko\UserException;
@@ -256,7 +257,17 @@ trait FileThumbnailTrait
 
 		$format = null;
 
-		if ($i->format() !== 'gif') {
+		if ($size === 'email-150px') {
+			// There is only one file allowed to have this format
+			if ($this->path !== Config::FILES['logo']) {
+				return false;
+			}
+
+			// Force this thumbnail to be a PNG as Gmail sucks with Webp transparency
+			// see https://groups.google.com/a/webmproject.org/g/webp-discuss/c/e1ZzTJOfIyg
+			$format = 'png';
+		}
+		elseif ($i->format() !== 'gif') {
 			$format = ['webp', null];
 		}
 
