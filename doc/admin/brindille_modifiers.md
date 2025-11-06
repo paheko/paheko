@@ -491,6 +491,10 @@ Décode une chaîne de texte venant d'une URL (alias de `rawurldecode` en PHP).
 
 Échappe le contenu pour un usage dans un document XML.
 
+## entities_escape
+
+Échappe le contenu avec des entités HTML, équivalent de `htmlentities` en PHP.
+
 ## Autres filtres de texte
 
 Les filtres suivants modifient la casse (majuscule/minuscules) d'un texte et ne fonctionneront correctement que si l'extension `mbstring` est installée sur le serveur. Sinon les lettres accentuées ne seront pas modifiées.
