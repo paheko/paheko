@@ -25,6 +25,7 @@ use KD2\SMTP_Exception;
 use KD2\Security;
 use KD2\Mail_Message;
 use KD2\DB\EntityManager as EM;
+use KD2\HTML\CSSParser;
 
 class Emails
 {
@@ -46,6 +47,64 @@ class Emails
 	 * When we reach that number of fails, the address is treated as permanently invalid, unless reset by a verification.
 	 */
 	const FAIL_LIMIT = 5;
+
+	/**
+	 * This will wrap the message HTML contents inside
+	 * the main email template, parse the CSS, and apply all
+	 * the CSS rules in the 'style' attribute of each tag.
+	 * Then the style tag is deleted.
+	 * If the CSS parsing fails, the style tag is left as-is.
+	 */
+	static public function applyHTMLTemplate(string $inner_html)
+	{
+		static $template = null;
+		static $css_parser = null;
+
+		$template ??= new UserTemplate('web/email.html');
+
+		$template->assign('html', $inner_html);
+		$html = $template->fetch();
+
+		// If CSS parser is FALSE, this means the parsing of the CSS file failed
+		// then don't try to apply CSS, unless we want to make sure the style
+		if ($css_parser !== false) {
+			libxml_use_internal_errors(true);
+			$doc = new \DOMDocument;
+			$doc->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+
+			// Parse CSS style only once
+			if (null === $css_parser) {
+				try {
+					$css_parser = new CSSParser;
+					$style_tag = $css_parser->xpath($doc, '//style', 0);
+					$css_parser->import($style_tag->textContent);
+				}
+				catch (\InvalidArgumentException $e) {
+					$css_parser = false;
+					unset($doc);
+					libxml_use_internal_errors(false);
+
+					return $html;
+				}
+			}
+
+			// Then apply CSS styles to each tag, by adding a 'style' attribute
+			$css_parser->style($doc->documentElement);
+
+			// Delete the style tag
+			$style_tag = $css_parser->xpath($doc, '//style', 0);
+			$style_tag->parentNode->removeChild($style_tag);
+
+			// Re-export document
+			$html = $doc->saveHTML($doc->documentElement);
+
+			unset($doc);
+
+			libxml_use_internal_errors(false);
+		}
+
+		return $html;
+	}
 
 	/**
 	 * Add a message to the sending queue using templates
@@ -158,15 +217,10 @@ class Emails
 		$db = DB::getInstance();
 		$db->begin();
 		$html = null;
-		$main_tpl = null;
 
-		// Apart from SYSTEM emails, all others should be wrapped in the email.html template
-		if (!$is_system) {
-			$main_tpl = new UserTemplate('web/email.html');
-		}
-
+		// If E-Mail does not have placeholders, we can render the MarkDown just once for HTML
+		// this avoids calling the markdown parser for each recipient
 		if (!$is_system && !$template) {
-			// If E-Mail does not have placeholders, we can render the MarkDown just once for HTML
 			$html = Render::render(Render::FORMAT_MARKDOWN, null, $content);
 		}
 
@@ -178,7 +232,7 @@ class Emails
 			// it's done in the queue clearing (more efficient)
 			$recipient_hash = Email::getHash($recipient);
 
-			// Replace placeholders: {{$name}}, etc.
+			// Replace placeholders in template: {{$name}}, etc.
 			if ($template) {
 				$template->assignArray((array) $data, null, false);
 
@@ -186,28 +240,22 @@ class Emails
 				$template->setEscapeDefault(null);
 				$content = $template->fetch();
 
-				// Add Markdown rendering
+				// Render Markdown to HTML
 				$content_html = Render::render(Render::FORMAT_MARKDOWN, null, $content);
 			}
 			else {
 				$content_html = $html;
 			}
 
-			if ($context === self::CONTEXT_BULK) {
-				$content_html = self::replaceExternalLinksInHTML($content_html);
-			}
-
+			// System emails are sent as plaintext
+			// but personal messages, reminders, and mailings are sent wrapped in the
+			// global HTML template
 			if (!$is_system) {
-				// Wrap HTML content in the email skeleton
-				$main_tpl->assignArray([
-					'html'      => $content_html,
-					'address'   => $recipient,
-					'data'      => $data,
-					'context'   => $context,
-					'from'      => $sender,
-				]);
+				if ($context === self::CONTEXT_BULK) {
+					$content_html = self::replaceExternalLinksInHTML($content_html);
+				}
 
-				$content_html = $main_tpl->fetch();
+				$content_html = self::applyHTMLTemplate($content_html);
 			}
 
 			$signal = Plugins::fire('email.queue.insert', true,

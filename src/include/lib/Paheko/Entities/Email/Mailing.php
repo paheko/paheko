@@ -367,16 +367,13 @@ class Mailing extends Entity
 	public function getHTMLPreview(?int $recipient = null, bool $append_footer = false): string
 	{
 		$html = $this->getPreview($recipient);
-		$tpl = new UserTemplate('web/email.html');
-		$tpl->assignArray(compact('html'), null, false);
-
-		$out = $tpl->fetch();
+		$html = Emails::applyHTMLTemplate($html);
 
 		if ($append_footer) {
-			$out = Emails::appendHTMLOptoutFooter($out, 'javascript:alert(\'--\');');
+			$html = Emails::appendHTMLOptoutFooter($html, 'javascript:alert(\'--\');');
 		}
 
-		return $out;
+		return $html;
 	}
 
 	public function send(): void
