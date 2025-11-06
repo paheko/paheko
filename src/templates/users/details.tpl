@@ -74,8 +74,10 @@
 		{if $user->isHidden()}
 			<dd>{tag color="darkred" label="Catégorie cachée"}</dd>
 		{/if}
+		{if MANAGE_PERMISSIONS}
 		<dt>Droits</dt>
 		<dd><span class="permissions">{display_permissions permissions=$category}</span></dd>
+		{/if}
 		<dt>Dernière connexion</dt>
 		<dd>{if empty($user.date_login)}Jamais{else}{$user.date_login|date_short:true}{/if}</dd>
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}

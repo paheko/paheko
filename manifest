@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Emails:\smove\sverification\sinside\spreferences\scode,\sdon't\sallow\sto\sre-subscribe\swithout\sdouble\sopt-in,\smake\sform\smore\slogic\s(I\shope)
-D 2025-11-06T00:01:03.783
+C Allow\sto\sdisable\spermissions\smanagement\sinside\sPaheko,\sprobably\suseful\sfor\sNextCloud/OIDC
+D 2025-11-06T00:01:42.870
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -89,7 +89,7 @@ F src/include/data/charts/fr_pcs_2018.csv f853138b67da0bdb63d6d5efe24a80914bc78c
 F src/include/data/locales/fr/dictionary.txt d3245db784b299707cf47379ab48d82dd75439a3c5a77bfdf33f5c54408a3548
 F src/include/data/schema.sql 57116110a23d96f4be9c8593b2e031930774e4234783612ba48ac1b4f3d17735 l
 F src/include/data/users_fields_presets.ini 3a9bd9343d8f73c8377d620f9b5eb7e976afec1d7c6099ae3b15d8cc69dd9c78
-F src/include/init.php d18d8476674d526542eb22e320506c4c8836b54fb1f3b32543a488d0746d86a1
+F src/include/init.php 2b8da6f092b1bd2fff50e0168fd668ce4ca1436ff4143001ba94efbd44773421
 F src/include/lib/Paheko/API.php 4967393d7bb86d4abd56c082e68aaf3ad26e7bb43ba1d3af755e2c7ee4d66698
 F src/include/lib/Paheko/API_Credentials.php 080411f723041753e4e39bd4a0b4df7b56948c6887d1c79c4b1ccfaff77d391b
 F src/include/lib/Paheko/Accounting/Accounts.php c15d8930efc70cbf833756464f50fd532cfae2ba4993fecdf9965807a5cf764f
@@ -334,7 +334,7 @@ F src/templates/common/files/shares_list.tpl b6220f97cde4094f78befb2fe82f979c330
 F src/templates/common/files/upload.tpl f4e3d9978c99d9ae9c2f23a008cb1832d1ec55fc93464a94d76d2fa0b69d1826
 F src/templates/common/search/advanced.tpl bffa52a1f5e564374eec1c2baa9ff0dbeba8bc3bd033b47fa99d9da3ee65c18c
 F src/templates/common/search/saved_searches.tpl a592ff7bd15b31811a3130978c103aa22a1e396bdab84d147932159dfaea2254
-F src/templates/config/_menu.tpl 9be5f8acc3f3f60573d54f6f7c4aa08e6cd5f5367a2d603b4a6bf4a79e840e5e
+F src/templates/config/_menu.tpl 69c6a3f55df518cfa79333fb1f78ea011678f1b98a0906a9b12971f2ab12911f
 F src/templates/config/advanced/api.tpl 369e3c4ce61fc8ca4988f9fefa6965918b7e337ad12acdb425e7e297d1ab9d9b
 F src/templates/config/advanced/audit.tpl 5ecb9cb203ffe49626195e86c0101a2f8b4aa16f55b603139fb078de7e700ca6
 F src/templates/config/advanced/errors.tpl 286b66c96854e23a163c99f1869c303fa31db7e0707c5cb921bc2ef57dee32e5
@@ -350,8 +350,8 @@ F src/templates/config/backup/restore.tpl 33d437fa9fbee9e2b3d9a822f8dd591404b1c3
 F src/templates/config/backup/versions.tpl 1c7d54cd7d0586aafc16d2d2c84c8eb6bca5f35b66d0c68baa4a0d924b3db3d6
 F src/templates/config/backup/versions_delete.tpl b02242093c04d66b2e8bf37bc6737711ed8f3420dcbf7c4903cfd2b95bbc0038
 F src/templates/config/categories/delete.tpl d68a5716bd966c99307ba350b5aed3c9128d3cbb1eefe73c444900b473565f86
-F src/templates/config/categories/edit.tpl 06809a77a7a297e794cf3dbc6db90d508e1fc393b61880cff6b799ef90ba0f4a
-F src/templates/config/categories/index.tpl a5078870a3ce0deac8d2fab907084320d3faa1c7238e90902e2a808950a2639c
+F src/templates/config/categories/edit.tpl 8ccd2aff0c973c0eb1e5b76877fdf78f9a46e11b1355399083dbe425e69f7632
+F src/templates/config/categories/index.tpl b581f43eadecd351b2860576d715e9d442d07472bacceb8cf1508e7116038c6f
 F src/templates/config/custom.tpl 852e5f8d66253c11551dfacf54bd663c1107e8d617b09d048d6b55037e3cf215
 F src/templates/config/desktop.tpl fed58ca206133b823fb34f036df84da51517ffb6b7ab3144e5a67f83821e8057
 F src/templates/config/disk_usage.tpl 41fb60af426697cf57c69b121c6567399fe307e2cbab96176f92037fdc39a639
@@ -460,7 +460,7 @@ F src/templates/users/_nav_user.tpl 9365289b0540805934c33f2f06dd69122c3ec097e714
 F src/templates/users/_password_form.tpl fb3df829ba483036bc3e09ab6d87797a787552eff5f1bece6aa67caa59ddc48f
 F src/templates/users/action.tpl 4e30ceb8d88fc1e52f969f0f9a5c6b5c11c31918032640b4c6283db92a342a83
 F src/templates/users/delete.tpl 31f1744fa2732f3a91ea89fc9cec1d0b640ed4b48255651dfbd7338a80800e0e
-F src/templates/users/details.tpl 90cc00f55affcc6fc263fa5dc2c5e90b23902f8145abd3b8204a9725ab48ad20
+F src/templates/users/details.tpl 2c8bd84d016dc5478f683ec9d5770cae430da924f0abd08322ec6a64d9ff04c8
 F src/templates/users/edit.tpl 925401c1d0f3560f39f218dad642eb749d1ebf18a405a804121a2ab1ad43a7b6
 F src/templates/users/edit_security.tpl 9f47b76628e1ffdf7862d1038d4a9afcc7e43f610bea22c472bb27b5b9b4d1eb
 F src/templates/users/import.tpl 1b879e449d8a9b4e4d58f8dbefbb15d863f5535f61cd41e9b20620bee71af0e3
@@ -824,24 +824,27 @@ F tools/fossil_get_branch_hash.php 8d5c38926cf0763039ede9c88745e890b44beb33a64e5
 F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f931f721784d x
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 8e847c8b86043e35e7a1f86911a55d938c2bdda5157c8241c8bf450195184fd1
-R b8a689b19dc544d8c81762e1a9f1fd6a
+P 8c16024f390616d20a85545c92dca8141e150a7dbbbb2d78350858a7e0fbc86d
+R 54588ec7b0c8a551e1b8978a717450a4
+T *branch * disable-permissions
+T *sym-disable-permissions *
+T -sym-trunk *
 U bohwaz
-Z 6be679ce54c9c26ca9c0b8beaa9a06d8
+Z f6fb93e1df7e0a4f5b3be347c6e90d2c
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmkL5T8ACgkQksnacbiI
-6jSaGQ//T/TeDLoT6oDbLDkpfjAqP5PiBM8ous26DvpqZHYkj5SOboIWbZPYsrO0
-D82BvHmxqwwDAp1ljMI0flaXc8BK160/CMnA3Bb9EXSo3CZSUA0X+GeAhp3m+FL2
-8bilylczvn1GrTvimdIgyK6YNjJL2992rg9hHWx/eDEazBQvN8Z+KirAknlEhqN2
-kHC3GvudTeDgJQJzHmaXt690eITgmWV24t9Ra/biL/4zxSViU26PMd5lkbynpvor
-FYo/qnMi1ODCFaayYExBH16tfTCkTKjjNZVhV3co28VNG4ZD1FjDekDQi9qGCBPi
-RPrh77qIO4bSRq9N+MT8MkLhCRySa+JzLhdU/XLfaB6TD4cRAUcigiS7D2KmHXed
-M4SuHZv/4ac6LetrfJXdSHUyXjexMW+mHq43Wn688+wQAe0HZH4xe6Y9rTrO4BoJ
-noj+el+cQPhHYgvrZPJwaj6qY1jK0tYtfUCuDJcWo8bnqW+kUYwVgyoOyDUh9BMH
-1h6J0PikmO1ENPAaaVMYjrm5Yd+VgxUK438yijQUJLyv+cG0x5eDb2P5H+YWo4aN
-aJfx99vYa9fuX9DxQkonR/YoBUNkZqXqrs5KuSgo3dwRuKWm1AJqaTUB0N/2BhF4
-vo19OHIXkVJdZGOtiEe90+f7IBBcUMSWeqYbfnYXiIvJq10EsvM=
-=nDla
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmkL5WYACgkQksnacbiI
+6jS6NRAAliuoruwpqcm7uqyPV+xPPwWXZGc38rtP7BM3K0BOLGpF8Nl2EsXisWnv
+8uEbGKMhBtkei2/Cny2mJ4c55vWO/IodeXrLsvVNGyGin90ZmIuwRMM6a07e1bUP
+E5pkuXWUwoACVKYNDHOorkHmGQ+3U4uSoZbK4gPNG5GIXGQlJzzooc8PEsuCOEFn
+9v7I72RySvmj2eN1o4EI2H3/RQyrZzjxSxfoTK22Und1ooKUb3lmxwUf4lG9PA+L
+Rz1pn/jQEAwgzX+82V6RjbBA4OwwnVrQ8D5z4ahyFtEMC1Wjm3RARfzPz7mCrbMQ
+N08ypClS37wWl1OftcjKvpnAUlkW9W2xLRdSoVH61StZ/w7sJPghKj82ugh/OsgM
+AQu0NaVfqPdZcG1hnWPaTx2NZK+RDm7gP3/z+tpHOKFBPp39rijqGwo/VsfraXbx
+S11JXoukPFfE2ZjIZDw+7Af+1UBAPkYJBX/ufRunqGbGUNPi4LG7LChLAKyYM86Z
+Mb/ma/7c1jj0zu93XSFw7/5CKe+/ifTB2mb4W8Hto/bl4y6P6/lPzvGrC5AtGYf7
+AtamMVdJuOBGsMBGsrJfA/CcvMJ4NRBFaGQFIXoo38tHPtCdH4vkn3CExbEGQwuF
+n/jvB+Ej9vyBYQN/c/XaAlL8Pu9AG/xJpbVLuNolysoaEwXC8N4=
+=7sjW
 -----END PGP SIGNATURE-----
