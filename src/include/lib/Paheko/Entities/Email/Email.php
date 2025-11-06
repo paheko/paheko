@@ -120,6 +120,10 @@ class Email extends Entity
 			return false;
 		}
 
+		if (!$this->last_sent) {
+			return true;
+		}
+
 		$limit_date = new \DateTime(sprintf('%d days ago', self::RESEND_VERIFICATION_DELAY));
 		$date = $this->last_sent ?? $this->added;
 		return $date < $limit_date;
