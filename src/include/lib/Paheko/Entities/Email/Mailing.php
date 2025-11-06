@@ -373,6 +373,17 @@ class Mailing extends Entity
 			$html = Emails::appendHTMLOptoutFooter($html, 'javascript:alert(\'--\');');
 		}
 
+		$html = str_replace('</head>',
+			'<style type="text/css">
+			body {
+				background: #fff;
+				color: #000;
+				margin: 10px;
+				font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+			}
+			</style>',
+			$html);
+
 		return $html;
 	}
 
