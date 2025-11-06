@@ -22,7 +22,6 @@ use Paheko\Users\Session;
 use Paheko\Utils;
 use Paheko\Entities\Web\Page;
 use Paheko\Web\Render\Render;
-use Paheko\Web\Router;
 use Paheko\Web\Cache as Web_Cache;
 use Paheko\Users\DynamicFields;
 use Paheko\UserTemplate\CommonFunctions;
