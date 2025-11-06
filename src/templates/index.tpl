@@ -18,10 +18,12 @@
 		{button id="homescreen-btn" label="Installer comme application web" class="hidden" shape="plus"}
 	</aside>
 	{if $logged_user && $logged_user->exists()}
-	<ul>
-		<li><a href="{$admin_url}me/">Mes informations personnelles</a></li>
-		<li><a href="{$admin_url}me/services.php">Suivi de mes activités et cotisations</a></li>
-	</ul>
+		<ul>
+			<li><a href="{$admin_url}me/">Mes informations personnelles</a></li>
+			<li><a href="{$admin_url}me/services.php">Suivi de mes activités et cotisations</a></li>
+		</ul>
+	{else}
+		<div style="clear: both"></div>
 	{/if}
 </nav>
 
