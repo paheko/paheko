@@ -204,6 +204,7 @@ namespace Paheko;
 //const LOCAL_LOGIN = null;
 
 /**
+ * ALLOW_MODIFIED_IMPORT
  * Autoriser (ou non) l'import de sauvegarde qui a été modifiée ?
  *
  * Si mis à true, un avertissement et une confirmation seront demandés
@@ -213,6 +214,9 @@ namespace Paheko;
  * Ceci ne s'applique qu'à la page "Sauvegarde et restauration" de l'admin,
  * il est toujours possible de restaurer une base de données non signée en
  * la recopiant à la place du fichier association.sqlite
+ *
+ * Ceci n'est *PAS* une mesure de sécurité, mais pour empêcher les utilisateurs
+ * de bidouiller la BDD et casser le logiciel.
  *
  * Défaut : false
  * @var  bool
@@ -230,14 +234,25 @@ namespace Paheko;
 //const ROOT = __DIR__;
 
 /**
+ * DATA_ROOT
  * Répertoire où sont situées les données de Paheko
- * (incluant la base de données SQLite, les sauvegardes, le cache, les fichiers locaux et les plugins)
+ * (incluant la base de données SQLite, les sauvegardes et le cache)
  *
  * Défaut : sous-répertoire "data" de la racine
  * @var  string
  */
 
 //const DATA_ROOT = ROOT . '/data';
+
+/**
+ * BACKUPS_ROOT
+ * Répertoire où son stockées les sauvegardes de la base de données.
+ *
+ * Défaut : DATA_ROOT . '/backups'
+ * @var string
+ */
+
+//const BACKUPS_ROOT = DATA_ROOT . '/backups';
 
 /**
  * Répertoire où est situé le cache,

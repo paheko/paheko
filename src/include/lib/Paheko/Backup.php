@@ -7,6 +7,22 @@ use Paheko\Files\Storage;
 
 use stdClass;
 
+/**
+ * Backup and restore the database in separate files.
+ *
+ * Every backup downloaded by the user (with a browser or via API)
+ * will have a SHA1 hash appended at the end of the SQLite file.
+ *
+ * SQLite doesn't bother, and when the file is changed with another program,
+ * the hash is usually removed.
+ *
+ * When restoring a database uploaded by the user, the hash is checked
+ * (unless ALLOW_MODIFIED_IMPORT is true), and the restore will be aborted
+ * if the hash doesn't match with the contents of the file.
+ *
+ * This is *NOT* a security feature. It's only there to deter users from
+ * tinkering with the database and breaking the software.
+ */
 class Backup
 {
 	const NEED_UPGRADE = 0x01 << 2;
@@ -17,25 +33,73 @@ class Backup
 	const NOT_A_DB = 42;
 	const NO_APP_ID = 43;
 
-	static public function getDBDetails(string $path): stdClass
-	{
-		$file = Utils::basename($path);
-		$name = preg_replace('/^association\.(.*)\.sqlite$/', '$1', $file);
-		$auto = null;
+	const PREFIX = 'pko-';
+	const SUFFIX = '.sqlite';
+	const AUTO_PREFIX = 'auto-';
+	const UPGRADE_PREFIX = 'before-upgrade-';
+	const RESET_PREFIX = 'before-reset-';
+	const RESTORE_PREFIX = 'before-restore-';
 
-		if (substr($name, 0, 5) == 'auto.') {
-			$auto = (int) substr($name, 5);
+	static protected function isFilenameValid(string $name): bool
+	{
+		if (false !== strpos($name, '..')) {
+			return false;
+		}
+
+		if (substr($name, - strlen(self::SUFFIX)) !== self::SUFFIX) {
+			return false;
+		}
+
+		if ($name === basename(DB_FILE)) {
+			return false;
+		}
+
+		if (0 !== strpos($name, self::PREFIX)) {
+			return false;
+		}
+
+		return (bool) preg_match('!^[a-z0-9_-]+(?:\.[a-z0-9_-]+)*$!i', $name);
+	}
+
+	static protected function validateFileName(string $name): void
+	{
+		if (!self::isFilenameValid($name)) {
+			throw new \InvalidArgumentException('Invalid file name');
+		}
+	}
+
+	static protected function getReadableName(string $file): string
+	{
+		$name = substr($file, strlen(self::PREFIX), - strlen(self::SUFFIX));
+
+		if (0 === strpos($name, self::AUTO_PREFIX)) {
+			$auto = (int) substr($name, strlen(self::AUTO_PREFIX));
 			$name = sprintf('Automatique n°%d', $auto);
 		}
-		elseif (0 === strpos($name, 'pre-upgrade-')) {
-			$name = sprintf('Avant mise à jour %s', substr($name, strlen('pre-upgrade-')));
+		elseif (0 === strpos($name, self::UPGRADE_PREFIX)) {
+			$name = sprintf('Avant mise à jour %s', substr($name, strlen(self::UPGRADE_PREFIX)));
+		}
+		elseif (0 === strpos($name, self::RESET_PREFIX)) {
+			$name = 'Avant remise à zéro';
 		}
 		elseif (preg_match('/^\d{4}-/', $name)) {
 			$name = 'Sauvegarde manuelle';
 		}
-		else {
-			$name = str_replace('.sqlite', '', $name);
-		}
+
+		return $name;
+	}
+
+	static protected function isAuto(string $name): bool
+	{
+		return 0 === strpos($name, self::PREFIX . self::AUTO_PREFIX);
+	}
+
+	static public function getDBDetails(string $path): stdClass
+	{
+		$file = Utils::basename($path);
+		self::validateFileName($file);
+		$auto = null;
+		$name = self::getReadableName($file);
 
 		$error = null;
 		$version = null;
@@ -62,10 +126,10 @@ class Backup
 		return (object) [
 			'filename'    => $file,
 			'date'        => filemtime($path),
-			'name'        => $name != $file ? $name : null,
+			'name'        => $name,
 			'version'     => $version,
 			'can_restore' => $can_restore,
-			'auto'        => $auto,
+			'auto'        => self::isAuto($file),
 			'size'        => filesize($path),
 			'error'       => $error,
 		];
@@ -81,29 +145,22 @@ class Backup
 		$ext = $auto_only ? 'auto\.\d+\.sqlite' : 'sqlite';
 
 		$out = [];
-		$dir = dir(DATA_ROOT);
+		$dir = dir(BACKUPS_ROOT);
 
 		while ($file = $dir->read()) {
 			// Keep only backup files
-			if ($file[0] == '.' || !is_file(DATA_ROOT . '/' . $file)
-				|| !preg_match('![\w\d._-]+\.' . $ext . '$!i', $file) && $file != basename(DB_FILE)) {
-				continue;
-			}
-
-			if ($file === basename(DB_FILE)) {
-				continue;
-			}
-
-			if (0 !== strpos($file, 'association.')) {
+			if ($file[0] === '.'
+				|| !self::isFilenameValid($file)
+				|| !is_file(BACKUPS_ROOT . DIRECTORY_SEPARATOR . $file)) {
 				continue;
 			}
 
 			// Skip non-auto files
-			if ($auto_only && 0 !== strpos($file, 'association.auto.')) {
+			if ($auto_only && 0 !== strpos($file, self::PREFIX . self::AUTO_PREFIX)) {
 				continue;
 			}
 
-			$out[$file] = self::getDBDetails(DATA_ROOT . '/' . $file);
+			$out[$file] = self::getDBDetails(BACKUPS_ROOT . DIRECTORY_SEPARATOR . $file);
 		}
 
 		$dir->close();
@@ -116,55 +173,71 @@ class Backup
 		return $out;
 	}
 
-	/**
-	 * Create a new backup
-	 * @param  boolean $auto If TRUE, the file name will be based on automatic backups,
-	 * if FALSE a file name containing the date will be used (manual backup).
-	 * @return string Backup file name
-	 */
-	static public function create(bool $auto = false, ?string $name = null): string
+	static public function create(?string $name = null): string
 	{
-		$suffix = $name ?? ($auto ? 'auto.1' : date('Y-m-d-His'));
+		Utils::safe_mkdir(BACKUPS_ROOT, fileperms(DATA_ROOT), true);
+		$name ??= date('Y-m-d-His');
+		$name = self::PREFIX . $name . self::SUFFIX;
 
-		$backup = str_replace('.sqlite', sprintf('.%s.sqlite', $suffix), DB_FILE);
+		self::make(BACKUPS_ROOT . DIRECTORY_SEPARATOR . $name);
 
-		self::make($backup);
+		return $name;
+	}
 
-		return basename($backup);
+	static public function createBeforeUpgrade(string $version): string
+	{
+		return self::create(self::UPGRADE_PREFIX . $version);
+	}
+
+	static public function createBeforeReset(): string
+	{
+		return self::create(self::RESET_PREFIX . date('Y-m-d-His'));
 	}
 
 	/**
 	 * Actually create a backup
+	 * @param string|null $destination If NULL, then will just create a temporary file and return its path
 	 */
-	static public function make(string $dest): void
+	static public function make(?string $destination): string
 	{
 		// Acquire lock
 		$version = \SQLite3::version();
 		$db = DB::getInstance();
 
-		Utils::safe_unlink($dest);
+		// Use a temporary file so that if BACKUPS_ROOT is on NFS,
+		// we don't have issues with SQLite writing over NFS
+		$tmp = tempnam(CACHE_ROOT, 'sqlite-backup-');
 
+		// use VACUUM INTO when SQLite 3.27+ is available
 		if ($version['versionNumber'] >= 3027000) {
 			// We need to allow ATTACH here, as VACUUM INTO is using ATTACH,
-			// so we disable the authorizer
+			// which is restricted for security reasons, so we disable the authorizer
 			DB::toggleAuthorizer($db, false);
 
-			// use VACUUM INTO instead when SQLite 3.27+ is available
-			$db->exec(sprintf('VACUUM INTO %s;', $db->quote($dest)));
+			$db->exec(sprintf('VACUUM INTO %s;', $db->quote($tmp)));
 
 			DB::toggleAuthorizer($db, true);
+			$dest_db = new \SQLite3($tmp);
 		}
 		else {
 			// use ::backup since PHP 7.4.0+
 			// https://www.php.net/manual/en/sqlite3.backup.php
-			$dest_db = new \SQLite3($dest);
+			$dest_db = new \SQLite3($tmp);
 			$dest_db->createCollation('U_NOCASE', [Utils::class, 'unicodeCaseComparison']);
 
 			$db->backup($dest_db);
-			$dest_db->exec('PRAGMA journal_mode = DELETE;');
-			$dest_db->exec('VACUUM;');
-			$db->close();
 		}
+
+		// Make sure the backup file has DELETE journal mode so the WAL file is squashed
+		$dest_db->exec('PRAGMA journal_mode = DELETE;');
+		$dest_db->exec('VACUUM;');
+		$dest_db->close();
+
+		if (null !== $destination) {
+			rename($tmp, $destination);
+		}
+
+		return $destination ?? $tmp;
 	}
 
 	/**
@@ -197,8 +270,8 @@ class Backup
 
 		// Rotate old backups
 		foreach ($list as $file) {
-			$old = DATA_ROOT . DIRECTORY_SEPARATOR . $file->filename;
-			$new = sprintf('%s/association.auto.%d.sqlite', DATA_ROOT, $i--);
+			$old = BACKUPS_ROOT . DIRECTORY_SEPARATOR . $file->filename;
+			$new = BACKUPS_ROOT . DIRECTORY_SEPARATOR . self::AUTO_PREFIX . $i-- . self::SUFFIX;
 
 			if ($old !== $new) {
 				rename($old, $new);
@@ -244,76 +317,67 @@ class Backup
 	/**
 	 * Delete a local backup
 	 */
-	static public function remove(string $file): void
+	static public function remove(string $name): void
 	{
-		if (preg_match('!\.\.+!', $file)
-			|| !preg_match('!^[\w\d._-]+\.sqlite$!i', $file)
-			|| $file == basename(DB_FILE)) {
-			throw new UserException('Nom de fichier non valide.');
-		}
-
-		Utils::safe_unlink(DATA_ROOT . '/' . $file);
+		self::validateFileName($name);
+		Utils::safe_unlink(BACKUPS_ROOT . DIRECTORY_SEPARATOR . $name);
 	}
 
 	/**
-	 * Download a backup file in the browser. If $file is NULL, then the current database will be dumped.
+	 * Download a backup file in the browser.
+	 * @param $name If NULL, then the current database will be dumped.
 	 */
-	static public function dump(?string $file = null): void
+	static public function dump(?string $name = null): void
 	{
 		$config = Config::getInstance();
 		$tmp_file = null;
 
-		if (null === $file) {
-			$name = sprintf('%s - Sauvegarde données - %s.sqlite', $config->get('org_name'), date('Y-m-d'));
+		if (null === $name) {
+			$download_name = sprintf('%s - Sauvegarde données - %s.sqlite', $config->get('org_name'), date('Y-m-d'));
 
-			$tmp_file = tempnam(sys_get_temp_dir(), 'gdin');
-			self::make($tmp_file);
-
-			$file = $tmp_file;
+			$file = self::make();
 		}
 		else {
-			if (preg_match('!\.\.+!', $file) || !preg_match('!^[\w\d._ -]+\.sqlite$!iu', $file)) {
-				throw new UserException('Nom de fichier non valide.');
-			}
+			self::validateFileName($name);
 
-			$name = sprintf('%s - %s', $config->get('org_name'), str_replace('association.', '', $file));
-			$file = DATA_ROOT . '/' . $file;
+			$file = BACKUPS_ROOT . DIRECTORY_SEPARATOR . $name;
+			$download_name = sprintf('%s - %s', $config->get('org_name'), self::getReadableName($name));
 
 			if (!file_exists($file)) {
 				throw new UserException('Le fichier fourni n\'existe pas.');
 			}
 		}
 
-		$hash_length = strlen(sha1(''));
+		$download_name .= self::SUFFIX;
+		$hash = sha1_file($file);
+		$hash_length = strlen($hash);
 
 		header('Content-type: application/octet-stream');
-		header(sprintf('Content-Disposition: attachment; filename="%s"', $name));
+		header(sprintf('Content-Disposition: attachment; filename="%s"', $download_name));
 		header(sprintf('Content-Length: %d', filesize($file) + $hash_length));
 
 		readfile($file);
 
 		// Append integrity hash
-		echo sha1_file($file);
+		echo $hash;
 
-		if (null !== $tmp_file) {
-			@unlink($tmp_file);
+		if (null !== $name) {
+			Utils::safe_unlink($file);
 		}
 	}
 
 	/**
 	 * Restore from a local backup
 	 */
-	static public function restoreFromLocal(string $file, ?Session $session): int
+	static public function restoreFromLocal(string $name, ?Session $session): int
 	{
-		if (preg_match('!\.\.+!', $file) || !preg_match('!^[\w\d._ -]+\.sqlite$!iu', $file)) {
-			throw new UserException('Nom de fichier non valide.');
-		}
+		self::validateFileName($name);
 
-		if (!file_exists(DATA_ROOT . '/' . $file)) {
+		if (!file_exists(BACKUPS_ROOT . DIRECTORY_SEPARATOR . $name)) {
 			throw new UserException('Le fichier fourni n\'existe pas.');
 		}
 
-		return self::restoreDB(DATA_ROOT . '/' . $file, $session, false);
+		return self::restore(BACKUPS_ROOT . DIRECTORY_SEPARATOR . $name, $session, false);
 	}
 
 	/**
@@ -340,7 +404,7 @@ class Backup
 			}
 		}
 
-		$r = self::restoreDB($file['tmp_name'], $session, true);
+		$r = self::restore($file['tmp_name'], $session, true);
 
 		if ($r) {
 			Utils::safe_unlink($file['tmp_name']);
@@ -393,16 +457,12 @@ class Backup
 
 	/**
 	 * Restore a database
-	 * @param  string $file Absolute path
-	 * @param  int $logged_user_id
-	 * @param  bool $check_foreign_keys
 	 * @return integer:
 	 * - 1 if everything is OK
 	 * - & self::NEED_UPGRADE if database version is older and requires an upgrade
 	 * - & self::NOT_AN_ADMIN if in the restored database the logged user ID passed is not a config admin
-	 * - & self::
 	 */
-	static protected function restoreDB(string $file, ?Session $session, bool $check_foreign_keys = false): int
+	static protected function restore(string $file, ?Session $session = null, bool $check_foreign_keys = false): int
 	{
 		$return = 1;
 
@@ -505,7 +565,7 @@ class Backup
 
 		$db->close();
 
-		$backup = str_replace('.sqlite', date('.Y-m-d-His') . '.avant_restauration.sqlite', DB_FILE);
+		$backup = BACKUPS_ROOT . DIRECTORY_SEPARATOR . self::PREFIX . self::RESTORE_PREFIX . date('Ymd-His') . self::SUFFIX;
 
 		DB::getInstance()->close();
 
@@ -543,7 +603,7 @@ class Backup
 		}
 
 		$name = Utils::basename($file);
-		$name = str_replace(['.sqlite', 'association.'], '', $name);
+		$name = self::getReadableName($name);
 		Log::add(Log::MESSAGE, ['message' => 'Sauvegarde restaurée : ' . $name], $session::getUserId());
 
 		return $return;
@@ -565,8 +625,8 @@ class Backup
 	{
 		$size = 0;
 
-		foreach (glob(DATA_ROOT . '/*.sqlite') as $f) {
-			if ($f === DB_FILE) {
+		foreach (glob(BACKUPS_ROOT . '/*' . self::SUFFIX) as $f) {
+			if ($f === basename(DB_FILE)) {
 				continue;
 			}
 

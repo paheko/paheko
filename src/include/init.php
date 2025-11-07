@@ -176,6 +176,7 @@ static $default_config = [
 	// have a config.local.php for OS-specific stuff, this also allows
 	// to remove LOCAL_USER and have a multi-user setup on a single computer
 	'DESKTOP_CONFIG_FILE'   => null,
+	'BACKUPS_ROOT'          => DATA_ROOT . '/backups',
 	'CACHE_ROOT'            => DATA_ROOT . '/cache',
 	'SHARED_CACHE_ROOT'     => DATA_ROOT . '/cache/shared',
 	'WEB_CACHE_ROOT'        => DATA_ROOT . '/cache/web/%host%',

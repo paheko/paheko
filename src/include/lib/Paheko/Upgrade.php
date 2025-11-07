@@ -56,8 +56,7 @@ class Upgrade
 		Static_Cache::store('upgrade', 'Updating');
 
 		// Créer une sauvegarde automatique
-		$backup_file = sprintf(DATA_ROOT . '/association.pre_upgrade-%s.sqlite', paheko_version());
-		Backup::make($backup_file);
+		$backup_file = Backup::createBeforeUpgrade(paheko_version());
 
 		// Extend execution time, just in case
 		if (false === strpos(@ini_get('disable_functions'), 'set_time_limit')) {
@@ -146,6 +145,10 @@ class Upgrade
 				require ROOT . '/include/migrations/1.3/1.3.17.php';
 			}
 
+			if (version_compare($v, '1.3.18', '<')) {
+				require ROOT . '/include/migrations/1.3/1.3.18.php';
+			}
+
 			Plugins::upgradeAllIfRequired();
 
 			// Vérification de la cohérence des clés étrangères
@@ -184,7 +187,7 @@ class Upgrade
 			}
 
 			$db->close();
-			rename($backup_file, DB_FILE);
+			rename(BACKUPS_ROOT . DIRECTORY_SEPARATOR . $backup_file, DB_FILE);
 
 			Static_Cache::remove('upgrade');
 
