@@ -822,6 +822,23 @@ namespace Paheko;
 //const MAIL_BOUNCE_PASSWORD = null;
 
 /**
+ * MAIL_TEST_RECIPIENTS
+ *
+ * Permet de spécifier une liste d'adresses mail "testeuses" de la réception
+ * des messages collectifs. Chacune des boîtes mails indiquée recevra une copie
+ * de chaque message collectif, comme si elle était dans les destinataires.
+ * Elles n'apparaîtront pas dans la liste des destinataires de l'interface.
+ *
+ * Lire https://fossil.kd2.org/paheko/wiki?name=Configuration%2FMailboxTestAccounts
+ * pour plus d'infos.
+ *
+ * Défaut : null (la fonctionnalité est désactivée)
+ * @var array|null
+ */
+
+//const MAIL_TEST_RECIPIENTS = ['testpaheko@yahoo.fr', 'testpaheko@gmail.com'];
+
+/**
  * Couleur primaire de l'interface admin par défaut
  * (peut être personnalisée dans la configuration)
  *

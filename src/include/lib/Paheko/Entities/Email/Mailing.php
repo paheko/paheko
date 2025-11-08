@@ -405,12 +405,18 @@ class Mailing extends Entity
 			$sender = Emails::getFromHeader($this->sender_name, $this->sender_email);
 		}
 
+		// FIXME: need to be updated
 		Emails::queue(Emails::CONTEXT_BULK,
 			$this->listRecipients(),
 			$sender,
 			$this->subject,
 			$this->getBody()
 		);
+
+		if (MAIL_TEST_RECIPIENTS) {
+			//FIXME: also send to MAIL_TEST_RECIPIENTS, but prefix mailing ID to Message-ID to be able to link message to mailing:
+			//pahekourriel.XXXX.[Message-ID]
+		}
 
 		$this->set('sent', new DateTime);
 
