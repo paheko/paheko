@@ -39,7 +39,7 @@ foreach (glob(DATA_ROOT . '/*.sqlite') as $file) {
 
 	$name = str_replace(['association.', '.sqlite'], '', $file);
 
-	if (preg_match('/^(.*)avant-remise-a-zero$/', $name, $match)) {
+	if (preg_match('/^(.*)-avant-remise-a-zero$/', $name, $match)) {
 		$name = Backup::RESET_PREFIX . $match[1];
 	}
 	elseif (preg_match('/^pre[_-]upgrade[-_](.*)$/', $name, $match)) {
