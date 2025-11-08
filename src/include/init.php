@@ -333,6 +333,7 @@ if (OPEN_BASEDIR && PHP_SAPI !== 'cli') {
 			// Same with modules
 			ROOT . '/modules',
 			DATA_ROOT,
+			BACKUPS_ROOT,
 			CACHE_ROOT,
 			SHARED_CACHE_ROOT,
 			PLUGINS_ROOT,
