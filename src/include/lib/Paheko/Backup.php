@@ -72,9 +72,8 @@ class Backup
 	{
 		$name = substr($file, strlen(self::PREFIX), - strlen(self::SUFFIX));
 
-		if (0 === strpos($name, self::AUTO_PREFIX)) {
-			$auto = (int) substr($name, strlen(self::AUTO_PREFIX));
-			$name = sprintf('Automatique n°%d', $auto);
+		if (self::getAutoDate($file)) {
+			$name = 'Automatique';
 		}
 		elseif (0 === strpos($name, self::UPGRADE_PREFIX)) {
 			$name = sprintf('Avant mise à jour %s', substr($name, strlen(self::UPGRADE_PREFIX)));
@@ -89,16 +88,20 @@ class Backup
 		return $name;
 	}
 
-	static protected function isAuto(string $name): bool
+	static protected function getAutoDate(string $name): ?int
 	{
-		return 0 === strpos($name, self::PREFIX . self::AUTO_PREFIX);
+		if (0 !== strpos($name, self::PREFIX . self::AUTO_PREFIX)) {
+			return null;
+		}
+
+		$name = substr($name, strlen(self::PREFIX . self::AUTO_PREFIX), - strlen(self::SUFFIX));
+		return (int)$name;
 	}
 
 	static public function getDBDetails(string $path): stdClass
 	{
 		$file = Utils::basename($path);
 		self::validateFileName($file);
-		$auto = null;
 		$name = self::getReadableName($file);
 
 		$error = null;
@@ -129,7 +132,7 @@ class Backup
 			'name'        => $name,
 			'version'     => $version,
 			'can_restore' => $can_restore,
-			'auto'        => self::isAuto($file),
+			'auto'        => self::getAutoDate($file),
 			'size'        => filesize($path),
 			'error'       => $error,
 		];
@@ -142,8 +145,6 @@ class Backup
 	 */
 	static public function list(bool $auto_only = false): array
 	{
-		$ext = $auto_only ? 'auto\.\d+\.sqlite' : 'sqlite';
-
 		$out = [];
 		$dir = dir(BACKUPS_ROOT);
 
@@ -156,7 +157,8 @@ class Backup
 			}
 
 			// Skip non-auto files
-			if ($auto_only && 0 !== strpos($file, self::PREFIX . self::AUTO_PREFIX)) {
+			if ($auto_only
+				&& 0 !== strpos($file, self::PREFIX . self::AUTO_PREFIX)) {
 				continue;
 			}
 
@@ -182,6 +184,11 @@ class Backup
 		self::make(BACKUPS_ROOT . DIRECTORY_SEPARATOR . $name);
 
 		return $name;
+	}
+
+	static public function createAuto(): string
+	{
+		return self::create(self::AUTO_PREFIX . date('YmdHis'));
 	}
 
 	static public function createBeforeUpgrade(string $version): string
@@ -242,41 +249,115 @@ class Backup
 
 	/**
 	 * Rotate automatic backups
-	 * association.auto.2.sqlite -> association.auto.3.sqlite
-	 * association.auto.1.sqlite -> association.auto.2.sqlite
 	 * etc.
 	 */
 	static public function rotate(): void
 	{
 		$config = Config::getInstance();
-		$nb = $config->get('backup_limit');
+
+		if ($config->backup_frequency === -1) {
+			$max_daily = 8;
+			$max_weekly = 5;
+			$max_monthly = 12;
+			$limit = $max_daily + $max_weekly + $max_monthly;
+		}
+		else {
+			$limit = $config->backup_limit;
+		}
 
 		$list = self::list(true);
 
-		// Sort backups from oldest to newest
-		usort($list, function ($a, $b) {
-			return $a->auto > $b->auto ? -1 : 1;
-		});
+		// Order by date, newest to oldest
+		krsort($list);
 
-		// Delete oldest backups + 1 as we are about to create a new one
-		$delete = count($list) - ($nb - 1);
+		$keep = array_slice($list, 0, $limit, true);
+		$delete = array_slice($list, $limit, -1, true);
 
-		for ($i = 0; $i < $delete; $i++) {
-			$backup = array_shift($list);
-			self::remove($backup->filename);
+		if ($config->backup_frequency === -1) {
+			$keep2 = self::filterBackups($keep);
+			$delete = array_merge($delete, array_diff_key($keep, $keep2));
+			$keep = $keep2;
 		}
 
-		$i = count($list) + 1;
+		// Delete old backups
+		foreach ($delete as $file) {
+			Utils::safe_unlink(BACKUPS_ROOT . DIRECTORY_SEPARATOR . $file->filename);
+		}
+	}
 
-		// Rotate old backups
-		foreach ($list as $file) {
-			$old = BACKUPS_ROOT . DIRECTORY_SEPARATOR . $file->filename;
-			$new = BACKUPS_ROOT . DIRECTORY_SEPARATOR . self::AUTO_PREFIX . $i-- . self::SUFFIX;
 
-			if ($old !== $new) {
-				rename($old, $new);
+	/**
+	 * Implement Grandfather-Father-Son filtering
+	 */
+	static protected function filterBackups(array $list, int $months = 12, int $weeks = 10, int $days = 6): array
+	{
+		// Always sort by oldest to newest
+		ksort($list);
+
+		$out = [];
+		$keep = [
+			self::filterBackupsBy('Ym', $list, $months),
+			self::filterBackupsBy('YW', $list, $weeks),
+			self::filterBackupsBy('Ymd', $list, $days),
+		];
+
+		foreach ($keep as $period) {
+			foreach ($period as $file) {
+				if (array_key_exists($file->filename, $out)) {
+					continue;
+				}
+
+				$out[$file->filename] = $file;
 			}
 		}
+
+		return $out;
+	}
+
+	static protected function filterBackupsBy(string $format, array $list, int $max): array
+	{
+		$out = [];
+
+		if (!count($list)) {
+			return $out;
+		}
+
+		$now = end($list)->date;
+
+		if ($format === 'Ym') {
+			$delta = 30 * 3600 * 24;
+		}
+		elseif ($format === 'YW') {
+			$delta = 7 * 3600 * 24;
+		}
+		else {
+			$delta = 3600 * 24;
+			$max++;
+		}
+
+		$max_date = $now - ($max - 1) * $delta;
+
+		foreach ($list as $file) {
+			// Skip if it's out of the scope of this filter (important!)
+			if ($file->date <= $max_date) {
+				continue;
+			}
+
+			$date = date($format, $file->date);
+
+			// Stop if we have enough backups
+			if (count($out) > $max) {
+				break;
+			}
+			// Skip if duplicate for the same period, only keep the oldest
+			elseif (array_key_exists($date, $out)) {
+				continue;
+			}
+
+			$out[$date] = $file;
+		}
+
+		return $out;
 	}
 
 	/**
@@ -285,9 +366,17 @@ class Backup
 	static public function auto(): void
 	{
 		$config = Config::getInstance();
+		$frequency = $config->backup_frequency;
+		$limit = $config->backup_limit;
+
+		if ($frequency === -1) {
+			$frequency = 1;
+			$limit = 25;
+		}
 
 		// Pas besoin d'aller plus loin si on ne fait pas de sauvegarde auto
-		if ($config->get('backup_frequency') == 0 || $config->get('backup_limit') == 0) {
+		if (!$frequency
+			|| !$limit) {
 			return;
 		}
 
@@ -300,18 +389,18 @@ class Backup
 			$last = false;
 		}
 
-		// Test de la date de création de la dernière sauvegarde
-		if ($last >= (time() - ($config->get('backup_frequency') * 3600 * 24))) {
+		// If there is no need to create a new backup
+		if ($last >= (time() - ($frequency * 3600 * 24))) {
 			return;
 		}
 
-		// Si pas de modif depuis la dernière sauvegarde, ça sert à rien d'en faire
+		// Don't create a new backup if there were no changes to the DB
 		if ($last >= filemtime(DB_FILE)) {
 			return;
 		}
 
 		self::rotate();
-		self::create(true);
+		self::createAuto();
 	}
 
 	/**

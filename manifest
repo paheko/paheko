@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Fix\srenaming\sof\sreset\sbackups
-D 2025-11-08T01:40:52.487
+C For\sauto-updates,\suse\sa\stimestamp\sinstead\sof\srotating\snumber,\sand\simplement\sGFS\sfor\soptimised\sbackups
+D 2025-11-08T01:42:15.798
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -104,11 +104,11 @@ F src/include/lib/Paheko/Accounting/Reports.php 0a01345caadfba72ad505d2496c22cc5
 F src/include/lib/Paheko/Accounting/Transactions.php 94f6a0ef649cd0cf641e4d960eeb64a6e06db5cd8676f4eb2fc70c410caea9c7
 F src/include/lib/Paheko/Accounting/Years.php 3819734a131993172e07731af4066a6a42437dd2d739ceb2d83bd9d69237b97a
 F src/include/lib/Paheko/AdvancedSearch.php 98f80db1b8faeb9f3ba2d7c660d9fdcbf38d43ff838d06f20ab0c0cbd18a95eb
-F src/include/lib/Paheko/Backup.php 0274fd0fa2a14897198061324ac399d9d04f9d5cf0ebb3fca9899a61afd09c37
+F src/include/lib/Paheko/Backup.php ab7bfd3b4a147dc97fb42abaceb8f1d6f1c825176eed3775dd268cf5e885bd24
 F src/include/lib/Paheko/CLI.php f460ab6d2ba62be9f3a9caffeb01cb128740a8c4daa0dc4f7ca661c37cecf8eb
 F src/include/lib/Paheko/CSV.php e5aaf142ff827887a4d4930a741e29ebb8c6b4efdbafe99b8a5ee5dc02e73443
 F src/include/lib/Paheko/CSV_Custom.php 7121756e1b53473d8c8661833de5ff893d98328892e517869aa4ec32fc7287cc
-F src/include/lib/Paheko/Config.php 262524b30fa3b892724fc092223bfc712e1582f75032e6f3b2ab6a37d84b6ce5
+F src/include/lib/Paheko/Config.php cacc2c757aecb7cb23caf6597a05cfbf909e672926e679c54dea34086275c08d
 F src/include/lib/Paheko/DB.php 1fbb41430a9b4b2de4eea5115d533cfe92b08c3fc7faf3bfdd9c32faa6897831
 F src/include/lib/Paheko/DynamicList.php 7aa92f0ada1920cdbeff2b5fc47993125e45c3d40a67d5c158de01da83e30197
 F src/include/lib/Paheko/Email/Emails.php 12ff1c4cb2b9b9ed8fe7f0c86dc4afe5ce617045172365d45e0728085ff1194c
@@ -215,7 +215,7 @@ F src/include/migrations/1.3/1.3.14_recus.sql a3f2d894d8bf8859cf5f8d14c15a5532ad
 F src/include/migrations/1.3/1.3.16.sql f49264f9b1b7ee8b0ed9b9a50381709c6fdcdf8ee7b74797f61a268e67521196
 F src/include/migrations/1.3/1.3.17.php 1f8b7a1b23a82238c3b10f62200f4425252eb477ed0d9b095bac744825cfb0c2
 F src/include/migrations/1.3/1.3.17.sql 5c559fc8a0e296aa5224115d2347289a9fc64cac43754937b660ca4e3678b7ee
-F src/include/migrations/1.3/1.3.18.php 917c206c9a0999a24851f0c81f6fcfb2fcdea9e6d95badf4745bcbff84a72b8d
+F src/include/migrations/1.3/1.3.18.php 0e09813989e65bfedbd679337da9c7709214aca9ddce69c9d0f7ad0e45593033
 F src/include/migrations/1.3/1.3.18.sql e5624e9a5a573919a0c4ff6acd0a8c58046d8a244e1d4c6bc556d01fea8dc474
 F src/include/migrations/1.3/1.3.2.sql 3a81504a4d49d8226aba81aadf40a0bc1955fcecd3ab5d009186080c70ce4318
 F src/include/migrations/1.3/1.3.3.sql 765f1b91b165f2d806c00e2673491a76be9c78b37eaf82b2da06691443e403d6
@@ -825,24 +825,24 @@ F tools/fossil_get_branch_hash.php 8d5c38926cf0763039ede9c88745e890b44beb33a64e5
 F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f931f721784d x
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 0e05683da11618e5bcc9c52bd7d2634164b3efb0b25d4d4cc7d6e696e4531cce
-R bfb5deee3d94fa5f100b21391ee3f9ec
+P 441e99c0c7eee9aa7c77e4815cd7279a826dfee97b1f10e7ef754963501208c3
+R e0ef445543ffe8be881389461c56d0bd
 U bohwaz
-Z 0f0fbb6c952aa07aa4416d28812d2c90
+Z 7b31dd87a717f6284b5ff9619880dcfe
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmkOn6QACgkQksnacbiI
-6jTviA/9E7Cfv/ssSvIWMKBjh5jwFbMSkcJrbiNGak4rJ5GBp+XYI+CD+bcgKuWC
-vF9TXMbKYWr6QlONpStfAtxM5FqBGsB83BtGJaDwpfLpwsy/TUpCGr1rCjK2XpR3
-g2G8b+OXZ8qQn7V8oFmUaJPCfdh7WfT4xn2vVQyqIhE2T1p8wq8wNLZb+m9qw94o
-4HomizLXEippXnFelqcf0CjUV3hirjUtj34S6RZOXnjI5jj1hrmst5UvswChQ1/r
-ssAXUH+LY/U2ibqMKD51qUUjhu6NBNmOExYlEKlmWfuoUGzog+y0UW71W83xOsiC
-3bWt353kLSPOmGbCdsButaA9H19zQse7i4Y8May0g6xOu03rDRqyXAUA0EQXzN92
-bKDfibe2GLW5kmwr/yXCHT5OIfAEQhYSX/FutofWGQznKaUQIvMgCcji1WDbSiSc
-ofZZ9iWFBCiQbXeohksoNanyICdweb4IrV8coDZHSjP0Av9ZWI9i/GBvxXrJdYp9
-hX3FAkLnrydEWWD6b1aAUtG6VruBWsOTCNSfCFOj327yDGup2RrVsmea84PIVYP3
-NLv1/RaWcKhpgEU5XqH4l3Agcwaygb3sZ4uoHfYMJCcPGnMoNImg0OJDcGNj6teE
-7PAQbCRT8CJH8Hjk9zuxvH+vwacO5ysjMTRBrFgFYpvmajJBqOM=
-=C9vE
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmkOn/cACgkQksnacbiI
+6jSj3xAAmFtNFVj+xlvQzqZ7mSIyLcU8WTro1HWPTgszLp4s2q2SrODk4Z71jcXv
+y9lkTaGemDAjRmQD7AzQUazO2gMzoagKeeaMksMmK6xlqpJkD7k8H/QPL8yvLG6p
+Lry4kJ+u01hzM9fIBnMvAFuLREVjchElkI/ZOeQclnUkVKWrSQzed+wHvX9YGsMJ
+4g32eAklA46CezH1bCOFYJNt6/juO6x+PQsoANiEHmidVWFhHY7ORP06Trj9Ui5u
+0dH0UdTOuX0j4FwwbWkzH9yJ71sVp3kNMYYYAvFxYpbZLDwdUnfoJM0BWNxSKC0U
+lDtLWz3juespQZxmwemJb6mUXkQXQoYSEOdYeIDg+MS7bdv757eegSIaJrid0OMC
+4aXrOEp+CFYsnjedVEHt7pR/ZRMV364HBgGiaexxLnxd59u5sAO7R87UcDObl2Z4
+CZjfCgUL0VYDGs2T7JZD+RLGG6X1XBS3L2C6mgV8OeTOmBLX/7BlFOOxcMvMSmV0
+QcM+RhwKwRsRj4o+/e0yioCkA2TdUrmAFeBWa9wtvVIgf+v/HT3an9fcZQlAI0YO
+scMxIBr42LcYxt1E8d972Q0Vl9ZmEw4CSQH6+lprJl9wqX1qzYMifqCwVOCgV7bO
+KafxN9hFisbdShCyUGVNsPZkILxCr7ruf1E7+vghPGneJ/Qi3VY=
+=j6RC
 -----END PGP SIGNATURE-----

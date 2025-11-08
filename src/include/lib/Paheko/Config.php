@@ -39,6 +39,16 @@ class Config extends Entity
 		'logo', 'icon', 'favicon', 'admin_background', 'admin_css',
 	];
 
+	const BACKUP_FREQUENCIES = [
+		0   => 'Aucune — les sauvegardes automatiques sont désactivées',
+		1   => 'Quotidienne, tous les jours',
+		7   => 'Hebdomadaire, tous les 7 jours',
+		15  => 'Bimensuelle, tous les 15 jours',
+		30  => 'Mensuelle',
+		90  => 'Trimestrielle',
+		365 => 'Annuelle',
+	];
+
 	const VERSIONING_POLICIES = [
 		'none' => [
 			'label' => 'Ne pas conserver les anciennes versions',
@@ -265,6 +275,13 @@ class Config extends Entity
 		$this->assert(trim($this->org_email) != '' && SMTP::checkEmailIsValid($this->org_email, false), 'L\'adresse e-mail de l\'association est  invalide.');
 
 		$this->assert($this->log_retention >= 0, 'La durée de rétention doit être égale ou supérieur à zéro.');
+
+		$this->assert(is_null($this->backup_frequency)
+			|| $this->backup_frequency === -1
+			|| $this->backup_frequency === 0
+			|| !in_array($this->backup_frequency, self::BACKUP_FREQUENCIES, true),
+			'Fréquence de sauvegarde invalide');
+		$this->assert(is_null($this->backup_limit) || ($this->backup_limit >= 0 && $this->backup_limit <= 50), 'Nombre de sauvegardes invalide. Le maximum est de 50 sauvegardes.');
 
 		// Files
 		$this->assert(count($this->files) == count(self::FILES));

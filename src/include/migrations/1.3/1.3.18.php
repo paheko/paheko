@@ -46,7 +46,7 @@ foreach (glob(DATA_ROOT . '/*.sqlite') as $file) {
 		$name = Backup::UPGRADE_PREFIX . $match[1];
 	}
 	elseif (preg_match('/^auto\.(\d+)$/', $name, $match)) {
-		$name = Backup::AUTO_PREFIX . $match[1];
+		$name = Backup::AUTO_PREFIX . date('YmdHis', filemtime($file));
 	}
 
 	$name = Backup::PREFIX . $name . Backup::SUFFIX;
