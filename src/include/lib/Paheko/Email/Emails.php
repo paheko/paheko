@@ -457,6 +457,10 @@ class Emails
 				'Subject' => $row->subject,
 			];
 
+			if (in_array($row->recipient, MAIL_TEST_RECIPIENTS, true)) {
+				$headers['X-Is-Recipient'] = 'Yes';
+			}
+
 			try {
 				$attachments = $db->getAssoc('SELECT id, path FROM emails_queue_attachments WHERE id_queue = ?;', $row->id);
 				$all_attachments = array_merge($all_attachments, $attachments);
@@ -719,6 +723,10 @@ class Emails
 		}
 
 		$message->setMessageId();
+
+		if ($headers['X-Is-Recipient'] ?? null === 'Yes') {
+			$message->setMessageId('pko.' . $message->getMessageId());
+		}
 
 		// Append unsubscribe, except for password reminders
 		if ($context != self::CONTEXT_SYSTEM) {
