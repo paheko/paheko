@@ -457,7 +457,8 @@ class Emails
 				'Subject' => $row->subject,
 			];
 
-			if (in_array($row->recipient, MAIL_TEST_RECIPIENTS, true)) {
+			if (MAIL_TEST_RECIPIENTS
+				&& in_array($row->recipient, MAIL_TEST_RECIPIENTS, true)) {
 				$headers['X-Is-Recipient'] = 'Yes';
 			}
 
