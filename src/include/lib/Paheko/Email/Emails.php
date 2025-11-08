@@ -17,7 +17,7 @@ use Paheko\Web\Render\Render;
 
 use Paheko\Files\Files;
 
-use const Paheko\{USE_CRON, MAIL_SENDER, MAIL_RETURN_PATH, DISABLE_EMAIL, WWW_URL, ADMIN_URL, SECRET_KEY};
+use const Paheko\{USE_CRON, MAIL_SENDER, MAIL_RETURN_PATH, DISABLE_EMAIL, WWW_URL, ADMIN_URL, SECRET_KEY, MAIL_TEST_RECIPIENTS};
 use const Paheko\{SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURITY, SMTP_HELO_HOSTNAME, SMTP_MAX_MESSAGES_PER_SESSION};
 
 use KD2\SMTP;
@@ -120,10 +120,10 @@ class Emails
 	 * @param  UserTemplate|string $content
 	 * @return void
 	 */
-	static public function queue(int $context, iterable $recipients, ?string $sender, string $subject, $content, array $attachments = []): void
+	static public function queue(int $context, iterable $recipients, ?string $sender, string $subject, $content, array $attachments = []): ?array
 	{
 		if (DISABLE_EMAIL) {
-			return;
+			return null;
 		}
 
 		foreach ($attachments as $i => $file) {
@@ -193,7 +193,7 @@ class Emails
 		}
 
 		if (!count($list)) {
-			return;
+			return null;
 		}
 
 		$recipients = $list;
@@ -211,12 +211,13 @@ class Emails
 
 		// queue handling was done by a plugin, stop here
 		if ($signal && $signal->isStopped()) {
-			return;
+			return $signal->getOut('ids');
 		}
 
 		$db = DB::getInstance();
 		$db->begin();
 		$html = null;
+		$ids = [];
 
 		// If E-Mail does not have placeholders, we can render the MarkDown just once for HTML
 		// this avoids calling the markdown parser for each recipient
@@ -270,15 +271,39 @@ class Emails
 
 			$db->insert('emails_queue', compact('sender', 'subject', 'context', 'recipient', 'recipient_pgp_key', 'recipient_hash', 'content', 'content_html'));
 
-			// Clean up memory
-			unset($content_html);
-
 			$id = $db->lastInsertId();
 
 			foreach ($attachments as $file) {
 				$db->insert('emails_queue_attachments', ['id_queue' => $id, 'path' => $file->path]);
 			}
+
+			$ids[] = $id;
 		}
+
+		// Use the last recipient content to forward to MAIL_TEST_RECIPIENTS, just change the recipient
+		if (MAIL_TEST_RECIPIENTS
+			&& $context === self::CONTEXT_BULK
+			&& count($ids)) {
+			$recipient_pgp_key = null;
+
+			foreach (MAIL_TEST_RECIPIENTS as $recipient) {
+				$recipient_hash = Email::getHash($recipient);
+				$signal = Plugins::fire('email.queue.insert', true,
+					compact('context', 'recipient', 'sender', 'subject', 'content', 'recipient_hash', 'recipient_pgp_key', 'content_html', 'attachments'));
+
+				if ($signal && $signal->isStopped()) {
+					// queue insert was done by a plugin, stop here
+					continue;
+				}
+
+				unset($signal);
+
+				$db->insert('emails_queue', compact('sender', 'subject', 'context', 'recipient', 'recipient_pgp_key', 'recipient_hash', 'content', 'content_html'));
+			}
+		}
+
+		// Clean up memory
+		unset($content_html);
 
 		$db->commit();
 
@@ -286,7 +311,7 @@ class Emails
 			compact('context', 'recipients', 'sender', 'subject', 'content', 'attachments'));
 
 		if ($signal && $signal->isStopped()) {
-			return;
+			return $ids;
 		}
 
 		// If no crontab is used, then the queue should be run now
@@ -297,6 +322,8 @@ class Emails
 		elseif ($is_system) {
 			self::runQueue(self::CONTEXT_SYSTEM);
 		}
+
+		return $ids;
 	}
 
 	/**
