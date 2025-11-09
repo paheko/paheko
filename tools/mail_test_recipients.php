@@ -161,8 +161,9 @@ class TestMailbox
 	{
 		$m = $this->mailbox = new Mailbox($this->config->imap);
 		//$m->setLogFilePointer(STDOUT);
-		$m->setLogin($this->config->user, $this->config->password);
+		$m->setLogin($this->config->user, $this->config->password ?? null, $this->config->token ?? null);
 		$this->config->password = null;
+		$this->config->token = null;
 		$folders = $m->listFolders();
 		$report = [];
 
@@ -181,7 +182,7 @@ class TestMailbox
 		return $report;
 	}
 
-	protected function exploreFolder(string $folder, ?DateTime $since = null, array &$report)
+	protected function exploreFolder(string $folder, ?DateTime $since, array &$report)
 	{
 		$since ??= new \DateTime('30 days ago');
 
