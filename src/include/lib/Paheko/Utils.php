@@ -2159,6 +2159,12 @@ class Utils
 		return false;
 	}
 
+	static public function linkifyURLs(string $text, string $target = '_blank'): string
+	{
+		$text = preg_replace(';(?<!")\bhttps?://[^<\s]+\b(?!");', '<a href="$0" target="' . $target . '">$0</a>', $text);
+		return $text;
+	}
+
 	static public function showProfiler(): void
 	{
 		if (!defined('Paheko\PROFILER_START_TIME')) {

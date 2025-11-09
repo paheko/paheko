@@ -319,7 +319,9 @@ class Mailing extends Entity
 		}
 
 		if ($this->isTemplate()) {
-			return UserTemplate::createFromUserString($this->body);
+			// Make sure line breaks are kept
+			$body = '{{**keep_whitespaces**}}' . $this->body;
+			return UserTemplate::createFromUserString($body);
 		}
 		else {
 			return $this->body;
@@ -331,36 +333,41 @@ class Mailing extends Entity
 		return isset($this->body) && false !== strpos($this->body, '{{') && false !== strpos($this->body, '}}');
 	}
 
-	public function getPreview(?int $id = null): string
+	public function getPreview(?int $id = null, bool $html = true): string
 	{
-		$db = DB::getInstance();
+		$body = $this->body;
 
-		$where = $id ? 'id = ?' : '1 ORDER BY RANDOM()';
-		$sql = sprintf('SELECT extra_data FROM mailings_recipients WHERE id_mailing = %d AND %s LIMIT 1;', $this->id(), $where);
-		$args = $id ? (array)$id : [];
+		// The message is sent, we no longer have personal data
+		if (!$this->sent) {
+			$db = DB::getInstance();
 
-		$r = $db->firstColumn($sql, ...$args);
+			$where = $id ? 'id = ?' : '1 ORDER BY RANDOM()';
+			$sql = sprintf('SELECT extra_data FROM mailings_recipients WHERE id_mailing = %d AND %s LIMIT 1;', $this->id(), $where);
+			$args = $id ? (array)$id : [];
 
-		if ($r) {
-			$r = json_decode($r, true);
+			$r = $db->firstColumn($sql, ...$args);
+
+			if ($r) {
+				$r = json_decode($r, true);
+			}
+
+			$body = $this->getBody();
+
+			if ($body instanceof UserTemplate) {
+				if (is_array($r)) {
+					$body->assignArray($r, null, false);
+				}
+
+				try {
+					$body = $body->fetch();
+				}
+				catch (\KD2\Brindille_Exception $e) {
+					throw new UserException('Erreur de syntaxe dans le corps du message :' . PHP_EOL . $e->getPrevious()->getMessage(), 0, $e);
+				}
+			}
 		}
 
-		$body = $this->getBody();
-
-		if ($body instanceof UserTemplate) {
-			if (is_array($r)) {
-				$body->assignArray($r, null, false);
-			}
-
-			try {
-				$body = $body->fetch();
-			}
-			catch (\KD2\Brindille_Exception $e) {
-				throw new UserException('Erreur de syntaxe dans le corps du message :' . PHP_EOL . $e->getPrevious()->getMessage(), 0, $e);
-			}
-		}
-
-		$render = Render::FORMAT_MARKDOWN;
+		$render = $html ? Render::FORMAT_MARKDOWN : Render::FORMAT_PLAINTEXT;
 		return Render::render($render, null, $body);
 	}
 
@@ -468,6 +475,14 @@ class Mailing extends Entity
 			$out['caps'] = 'Le sujet contient des mots en majuscule.';
 		}
 
+		if (count(preg_split('/\s+/', $this->subject)) > 8) {
+			$out['subject_words'] = 'Le sujet contient plus de 8 mots. Les destinataires lisent moins les messages avec un sujet trop long.';
+		}
+
+		if (mb_strlen($this->subject) > 60) {
+			$out['subject_length'] = 'Le sujet contient plus de 60 lettres. Les destinataires lisent moins les messages avec un sujet trop long.';
+		}
+
 		if (substr_count($this->subject, '!')) {
 			$out['exclamation_mark'] = 'Le sujet contient des points d\'exclamation.';
 		}
@@ -485,8 +500,8 @@ class Mailing extends Entity
 
 		$count = preg_match_all('!src="(https?://[^"]+?)"!', $html, $matches);
 
-		if ($count > 3) {
-			$out['too_many_images'] = 'Le message contient plus de 3 images.';
+		if ($count > 5) {
+			$out['too_many_images'] = 'Le message contient plus de 5 images.';
 		}
 
 		foreach ($matches[1] as $match) {
@@ -497,7 +512,7 @@ class Mailing extends Entity
 		}
 
 		// Not sure if this is very relevant so disabling it for now
-		if (false && preg_match('!alt=""!', $html)) {
+		if (preg_match('!alt=""!', $html)) {
 			$out['missing_alt'] = 'Au moins une image n\'a pas de texte alternatif.';
 		}
 
