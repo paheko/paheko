@@ -340,6 +340,10 @@ if (OPEN_BASEDIR && PHP_SAPI !== 'cli') {
 			LOCAL_ADDRESSES_ROOT,
 			sys_get_temp_dir(),
 		]);
+
+		if (FILE_STORAGE_BACKEND === 'FileSystem') {
+			$paths[] = FILE_STORAGE_CONFIG;
+		}
 	}
 
 	foreach ($paths as &$path) {
