@@ -226,6 +226,7 @@ static $default_config = [
 	'PDF_COMMAND'           => 'auto',
 	'PDF_USAGE_LOG'         => null,
 	'SQL_DEBUG'             => null,
+	'DB_READONLY'           => false,
 	'ENABLE_PROFILER'       => false,
 	'SYSTEM_SIGNALS'        => [],
 	'LOCAL_LOGIN'           => null,

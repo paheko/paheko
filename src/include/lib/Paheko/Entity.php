@@ -72,6 +72,10 @@ class Entity extends AbstractEntity
 	// Add plugin signals to save/delete
 	public function save(bool $selfcheck = true): bool
 	{
+		if (DB_READONLY) {
+			throw new UserException('Base de données est en mode lecture seule');
+		}
+
 		$name = get_class($this);
 		$name = str_replace('Paheko\Entities\\', '', $name);
 

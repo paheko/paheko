@@ -34,7 +34,14 @@ class DB extends SQLite3
 	static public function getInstance()
 	{
 		if (null === self::$_instance) {
-			self::$_instance = new DB('sqlite', ['file' => DB_FILE]);
+			self::$_instance = new DB('sqlite', [
+				'file' => DB_FILE,
+				'flags' => DB_READONLY ? \SQLITE3_OPEN_READONLY : null,
+			]);
+
+			if (DB_READONLY) {
+				self::$_instance->silenceReadonlyErrors(true);
+			}
 		}
 
 		return self::$_instance;
@@ -236,7 +243,7 @@ class DB extends SQLite3
 
 	public function connect(bool $check_installed = true): void
 	{
-		if (null !== $this->db) {
+		if (isset($this->db)) {
 			return;
 		}
 

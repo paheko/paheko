@@ -8,6 +8,8 @@ use Paheko\DynamicList;
 
 use KD2\DB\EntityManager;
 
+use const Paheko\DB_READONLY;
+
 class Mailings
 {
 	static public function getList(): DynamicList
@@ -60,6 +62,10 @@ class Mailings
 
 	static public function anonymize(): void
 	{
+		if (DB_READONLY) {
+			return;
+		}
+
 		$em = EntityManager::getInstance(Mailing::class);
 		$db = DB::getInstance();
 
