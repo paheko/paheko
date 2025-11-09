@@ -26,7 +26,7 @@ if ($homepage) {
 	$homepage = $homepage->render();
 }
 else {
-	$homepage = null;
+	$homepage = nl2br("Bienvenue !\n\nUtilisez le menu de gauche pour accéder aux différentes sections.\n\nSi vous êtes perdu⋅e, n'hésitez pas à consulter l'aide :-)");
 }
 
 $buttons = Extensions::listHomeButtons($session);

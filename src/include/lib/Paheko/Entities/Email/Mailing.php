@@ -405,6 +405,7 @@ class Mailing extends Entity
 			$sender = Emails::getFromHeader($this->sender_name, $this->sender_email);
 		}
 
+		// TODO: append mailing identifier to message headers
 		Emails::queue(Emails::CONTEXT_BULK,
 			$this->listRecipients(),
 			$sender,
