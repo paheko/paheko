@@ -389,12 +389,15 @@ class Install
 		$paths = [
 			DATA_ROOT,
 			CACHE_ROOT,
+			BACKUPS_ROOT,
 			SHARED_CACHE_ROOT,
 			USER_TEMPLATES_CACHE_ROOT,
 			STATIC_CACHE_ROOT,
 			SMARTYER_CACHE_ROOT,
 			SHARED_USER_TEMPLATES_CACHE_ROOT,
 		];
+
+		$paths = array_unique($paths);
 
 		foreach ($paths as $path)
 		{
