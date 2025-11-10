@@ -16,6 +16,10 @@ class Cache
 
 	static public function getRoot(): ?string
 	{
+		if (!WEB_CACHE_ROOT) {
+			return null;
+		}
+
 		$host = parse_url(WWW_URL, \PHP_URL_HOST);
 
 		if (!$host) {
