@@ -30,7 +30,7 @@
 
 <main>
 {if $view === 'text'}
-	<p class="help">Ce message sera vu sur les logiciels de mail ne gérant pas le HTML, où dont l'usager⋅usagère préfère ne pas voir le formattage riche.</p>
+	<p class="help">Ce message sera vu sur les logiciels de mail ne gérant pas le HTML, où dont l'usager⋅usagère préfère ne pas voir le formatage riche.</p>
 {/if}
 
 	<pre>{$code|raw}</pre>
