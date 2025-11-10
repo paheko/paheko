@@ -346,6 +346,8 @@ if (OPEN_BASEDIR && PHP_SAPI !== 'cli') {
 		}
 	}
 
+	$paths = array_filter($paths);
+
 	foreach ($paths as &$path) {
 		// Make sure the path exists, or errors might be returned
 		Utils::safe_mkdir($path, null, true);
