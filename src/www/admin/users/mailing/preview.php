@@ -33,7 +33,7 @@ else {
 
 	if ($view === 'handheld') {
 		$text = preg_replace_callback('/<body[^>]*style="[^"]*"/', function ($match) {
-			return trim(substr($match[0], 0, -1), "\t\r\n; ") . '; max-width: 360px; margin: 0 auto; background: #fff; box-shadow: 0px 0px 5px #999"';
+			return trim(substr($match[0], 0, -1), "\t\r\n; ") . '; max-width: 360px; margin: 0 auto; background: #fff; box-shadow: 0px 0px 5px #999" class="pko-preview"';
 		}, $text);
 
 		$text = preg_replace('/<html[^>]*/', '$0 style="background: rgba(255, 255, 255, 0.7);"', $text);

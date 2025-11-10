@@ -318,13 +318,19 @@ class Mailing extends Entity
 			return '';
 		}
 
+		$body = $this->body;
+
+		// Force grid to output as tables
+		$body = preg_replace('/<<grid\s+([^!#].*?)>>/', '<<grid legacy $1>>', $body);
+		$body = preg_replace('/<<grid\s+([!#]+)\s*>>/', '<<grid legacy short="$1">>', $body);
+
 		if ($this->isTemplate()) {
 			// Make sure line breaks are kept
-			$body = '{{**keep_whitespaces**}}' . $this->body;
+			$body = '{{**keep_whitespaces**}}' . $body;
 			return UserTemplate::createFromUserString($body);
 		}
 		else {
-			return $this->body;
+			return $body;
 		}
 	}
 
@@ -337,7 +343,9 @@ class Mailing extends Entity
 	{
 		$body = $this->body;
 
-		// The message is sent, we no longer have personal data
+		// The message is sent, we no longer have personal data,
+		// so handle placeholder replacement just if mailing hasn't been sent
+		// FIXME: remove Brindille use here and only replace?
 		if (!$this->sent) {
 			$db = DB::getInstance();
 
