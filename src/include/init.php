@@ -30,7 +30,7 @@ if (!defined('Paheko\CONFIG_FILE')) {
 require_once __DIR__ . '/lib/KD2/ErrorManager.php';
 
 ErrorManager::enable(ErrorManager::DEVELOPMENT);
-ErrorManager::setLogFile(__DIR__ . '/data/error.log');
+ErrorManager::setLogFile(__DIR__ . '/../data/error.log');
 
 /*
  * Version de Paheko
