@@ -30,7 +30,7 @@ if (!defined('Paheko\CONFIG_FILE')) {
 require_once __DIR__ . '/lib/KD2/ErrorManager.php';
 
 ErrorManager::enable(ErrorManager::DEVELOPMENT);
-ErrorManager::setLogFile(__DIR__ . '/data/error.log');
+ErrorManager::setLogFile(__DIR__ . '/../data/error.log');
 
 /*
  * Version de Paheko
@@ -347,6 +347,8 @@ if (OPEN_BASEDIR && PHP_SAPI !== 'cli') {
 			$paths[] = FILE_STORAGE_CONFIG;
 		}
 	}
+
+	$paths = array_filter($paths);
 
 	foreach ($paths as &$path) {
 		// Make sure the path exists, or errors might be returned

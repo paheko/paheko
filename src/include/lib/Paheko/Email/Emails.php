@@ -120,7 +120,7 @@ class Emails
 	 * @param  UserTemplate|string $content
 	 * @return void
 	 */
-	static public function queue(int $context, iterable $recipients, ?string $sender, string $subject, $content, array $attachments = []): ?array
+	static public function queue(int $context, iterable $recipients, ?string $sender, string $subject, $text, array $attachments = []): ?array
 	{
 		if (DISABLE_EMAIL) {
 			return null;
@@ -200,7 +200,8 @@ class Emails
 		unset($list);
 
 		$is_system = $context === self::CONTEXT_SYSTEM;
-		$template = (!$is_system && $content instanceof UserTemplate) ? $content : null;
+		$template = (!$is_system && $text instanceof UserTemplate) ? $text : null;
+		$content = $text;
 
 		if ($template) {
 			$template->toggleSafeMode(true);
@@ -222,7 +223,8 @@ class Emails
 		// If E-Mail does not have placeholders, we can render the MarkDown just once for HTML
 		// this avoids calling the markdown parser for each recipient
 		if (!$is_system && !$template) {
-			$html = Render::render(Render::FORMAT_MARKDOWN, null, $content);
+			$html = Render::render(Render::FORMAT_MARKDOWN, null, $text);
+			$content = Render::render(Render::FORMAT_PLAINTEXT, null, $text);
 		}
 
 		foreach ($recipients as $recipient => $r) {
@@ -243,9 +245,12 @@ class Emails
 
 				// Render Markdown to HTML
 				$content_html = Render::render(Render::FORMAT_MARKDOWN, null, $content);
+				// Remove markdown code from plaintext email
+				$content = Render::render(Render::FORMAT_PLAINTEXT, null, $content);
 			}
 			else {
 				$content_html = $html;
+				$content = $text;
 			}
 
 			// System emails are sent as plaintext

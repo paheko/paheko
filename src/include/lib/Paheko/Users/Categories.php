@@ -82,7 +82,7 @@ class Categories
 		}
 
 		return $categories + $db->getGrouped(sprintf(
-			'SELECT id, name AS label, (SELECT COUNT(*) FROM %s WHERE %1$s.id_category = %s.id) AS count
+			'SELECT id, name AS label, (SELECT COUNT(*) FROM %s WHERE %1$s.id_category = %s.id) AS count, hidden
 			FROM %2$s
 			WHERE 1 %s
 			ORDER BY name COLLATE U_NOCASE;',

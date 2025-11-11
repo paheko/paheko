@@ -52,10 +52,12 @@ $categories_list = [];
 
 foreach ($categories as $id => $category) {
 	$categories_list[] = [
-		'label' => $category->label,
-		'value' => $id,
-		'href' => '?cat=' . $id,
-		'aside' => ngettext('%n membre', '%n membres', $category->count),
+		'label'       => $category->label,
+		'value'       => $id,
+		'href'        => '?cat=' . $id,
+		'aside'       => ngettext('%n membre', '%n membres', $category->count),
+		'shape'       => !empty($category->hidden) ? 'eye-off' : null,
+		'shape-title' => !empty($category->hidden) ? 'Catégorie cachée' : null,
 	];
 }
 

@@ -1,9 +1,6 @@
 {include file="_head.tpl" title="Message collectif : %s"|args:$mailing.subject current="users/mailing"}
 
 <nav class="tabs">
-	<aside>
-		{linkbutton shape="plus" label="Nouveau message" href="new.php" target="_dialog"}
-	</aside>
 	<ul>
 		<li><a href="./">Messages collectifs</a></li>
 		<li><a href="status/">Statut des envois</a></li>
@@ -12,57 +9,82 @@
 
 {if $sent}
 	<p class="confirm block">L'envoi du message a bien commencé. Il peut prendre quelques minutes avant d'avoir été expédié à tous les destinataires.</p>
-{elseif !empty($hints)}
-	<div class="alert block">
-		<h3>Il y a des problèmes dans ce message&nbsp;:</h3>
-		<ul>
-		{foreach from=$hints item="message"}
-			<li>{$message}</li>
-		{/foreach}
-		</ul>
-		<p>Ces problèmes peuvent mener à ce que ce message termine dans le dossier <em>Indésirables</em> de vos destinataires, ou même à ce que le message soit refusé ou supprimé.<br /><strong>Cela peut aussi mener au blocage de vos futurs envois.</strong></p>
-	</div>
 {/if}
 
 {form_errors}
 
-<dl class="describe">
-	{if $mailing.sent}
-		<dt>Envoyé le</dt>
-		<dd>{$mailing.sent|date_long:true}</dd>
-	{else}
-		<dt>Statut</dt>
-		<dd>
-			Brouillon<br />
-			{linkbutton shape="edit" label="Modifier" href="write.php?id=%d"|args:$mailing.id}
-			{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$mailing.id}
-			{if $mailing.body}
-			{linkbutton shape="right" label="Envoyer" href="send.php?id=%d"|args:$mailing.id target="_dialog"}
+<div class="mailing-preview">
+	<aside>
+		<header>
+			{if !$mailing.sent}
+				{if $mailing.body}
+					<p>{linkbutton shape="right" label="Envoyer" href="send.php?id=%d"|args:$mailing.id target="_dialog" class="main"}</p>
+				{/if}
+				<p>
+					{linkbutton shape="edit" label="Modifier" href="write.php?id=%d"|args:$mailing.id}<br />
+					{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$mailing.id}
+				</p>
 			{/if}
-		</dd>
-		<dt>Expéditeur</dt>
-		<dd>
-			{$mailing->getFrom()}<br/>
-		</dd>
-	{/if}
-	<dt>Destinataires</dt>
-	<dd>
-		{{%n destinataire}{%n destinataires} n=$mailing->countRecipients()}<br />
-		{linkbutton shape="users" label="Voir la liste des destinataires" href="recipients.php?id=%d"|args:$mailing.id}
-	</dd>
-	<dt>Sujet</dt>
-	<dd><strong>{$mailing.subject}</strong></dd>
-	<dt>Message</dt>
-	<dd><pre class="preview"><code>{$mailing.body}</code></pre></dd>
-	<dt>Prévisualisation</dt>
-	{if $mailing.sent && $mailing->isTemplate()}
-		<dd class="help">La prévisualisation est indisponible pour ce message, car il utilise des balises de données liées aux destinataires. Une fois le message envoyé, les données personnelles des destinataires sont supprimées, en conformité avec le RGPD, il n'est donc plus possible de prévisualiser le message.</dd>
-	{else}
-		<dd>{linkbutton shape="eye" label="Prévisualiser le message" href="?id=%d&preview"|args:$mailing.id target="_dialog"}<br />
-		 <small class="help">(Un destinataire sera choisi au hasard.)</small></dd>
-		 <dt></dt>
-		 <dd class="help">Note : la prévisualisation peut différer du rendu final, selon le logiciel utilisé par vos destinataires pour lire leurs messages.</dd>
-	{/if}
-</dl>
+			<p>{linkbutton shape="users" label="Voir la liste des destinataires" href="recipients.php?id=%d"|args:$mailing.id}</p>
+		</header>
+		{if !empty($hints)}
+			<div class="alert block">
+				<h3>Problèmes potentiels détectés&nbsp;!</h3>
+				<ul>
+				{foreach from=$hints item="message"}
+					<li>{$message}</li>
+				{/foreach}
+				</ul>
+				<h4>Pourquoi corriger&nbsp;?</h4>
+				<p>Ces problèmes peuvent mener à ce que le message&nbsp;:</p>
+				<ul>
+					<li>ne soit pas lu,</li>
+					<li>arrive dans le dossier <em>Indésirables</em>,</li>
+					<li>ou même à ce qu'il soit complètement bloqué par certains fournisseurs.</li>
+				</ul>
+				<p>Il est donc recommandé de corriger ces points avant envoi.</p>
+			</div>
+		{/if}
+	</aside>
+	<div class="container">
+		<header>
+			<dl class="describe">
+				<dt>Sujet</dt>
+				<dd><h2>{$mailing.subject}</h2></dd>
+				<dt>De</dt>
+				<dd>{$mailing->getFrom()}</dd>
+				<dt>À</dt>
+				<dd><a href="recipients.php?id={$mailing.id}">{{%n destinataire}{%n destinataires} n=$mailing->countRecipients()}</a></dd>
+				<dt>Envoyé le</dt>
+				<dd>{if $mailing.sent}{$mailing.sent|date_long:true}{else}<em>Brouillon (non envoyé)</em>{/if}</dd>
+			</dl>
+		</header>
+		<div class="preview">
+			<ul class="tabs">
+				<li class="current">{link href="preview.php?id=%d"|args:$mailing.id label="Ordinateur"}</li>
+				<li>{link href="preview.php?id=%d&view=handheld"|args:$mailing.id label="Mobile"}</li>
+				<li>{link href="preview.php?id=%d&view=text"|args:$mailing.id label="Texte"}</li>
+				<li>{link href="preview.php?id=%d&view=code"|args:$mailing.id label="Code"}</li>
+			</ul>
+			<iframe src="preview.php?id={$mailing.id}"></iframe>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+{literal}
+var iframe = $('.preview iframe')[0];
+var tabs = $('.preview .tabs li');
+tabs.forEach(li => {
+	var a = li.querySelector('a');
+	a.onclick = () => {
+		tabs.forEach(li => li.className = '');
+		iframe.src = a.href;
+		a.parentNode.className = 'current';
+		return false;
+	};
+});
+{/literal}
+</script>
 
 {include file="_foot.tpl"}
