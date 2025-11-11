@@ -1012,9 +1012,9 @@ class CommonFunctions
 			$selected = '';
 			$link = '';
 			$aside = '';
-			$content = $option['html'] ?? ($option['label'] ?? null);
+			$content = $option['html'] ?? htmlspecialchars($option['label'] ?? '');
 
-			if (null === $content) {
+			if ('' === $content) {
 				throw new \InvalidArgumentException('dropdown: missing "html" or "label" parameter for option: ' . json_encode($option));
 			}
 
@@ -1027,7 +1027,12 @@ class CommonFunctions
 			}
 
 			if (isset($option['href'])) {
-				$content = sprintf('<a href="%s"><strong>%s</strong> %s</a>', htmlspecialchars($option['href']), $content, $aside);
+				$content = sprintf('<a href="%s"><strong>%s</strong> %s%s</a>',
+					htmlspecialchars($option['href']),
+					$content,
+					$aside,
+					!empty($option['shape']) ? self::icon(['shape' => $option['shape'], 'title' => $option['shape-title'] ?? '']) : '<span></span>',
+				);
 				$aside = '';
 			}
 
