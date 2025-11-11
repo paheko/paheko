@@ -131,6 +131,7 @@ class Config extends Entity
 	protected int $default_category;
 	protected ?bool $show_parent_column = true;
 	protected ?bool $show_has_children_column = true;
+	protected bool $show_category_in_list = true;
 
 	protected ?int $backup_frequency;
 	protected ?int $backup_limit;
@@ -253,6 +254,10 @@ class Config extends Entity
 
 		if (!empty($source['show_has_children_column_present']) && empty($source['show_has_children_column'])) {
 			$source['show_has_children_column'] = false;
+		}
+
+		if (!empty($source['show_category_in_list_present'])) {
+			$source['show_category_in_list'] = boolval($source['show_category_in_list'] ?? false);
 		}
 
 		// N'enregistrer les couleurs que si ce ne sont pas les couleurs par défaut
