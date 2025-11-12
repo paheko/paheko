@@ -352,10 +352,6 @@ class Emails
 				'Subject' => $row->subject,
 			];
 
-			if (MAIL_TEST_RECIPIENTS
-				&& in_array($row->recipient, MAIL_TEST_RECIPIENTS, true)) {
-				$headers['X-Is-Recipient'] = 'Yes';
-			}
 
 			try {
 				$attachments = $db->getAssoc('SELECT id, path FROM emails_queue_attachments WHERE id_queue = ?;', $row->id);

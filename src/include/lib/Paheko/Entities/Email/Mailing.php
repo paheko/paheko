@@ -309,8 +309,7 @@ class Mailing extends Entity
 
 	public function getFrom(): string
 	{
-		$config = Config::getInstance();
-		return sprintf('"%s" <%s>', $this->sender_name ?? $config->org_name, $this->sender_email ?? $config->org_email);
+		return Message::getFromHeader($this->sender_name, $this->sender_email);
 	}
 
 	public function getMessage(): Message
@@ -368,31 +367,29 @@ class Mailing extends Entity
 	{
 		$this->selfCheck();
 
-		if (!isset($this->body)) {
-			throw new UserException('Le corps du message est vide.');
-		}
-
 		if ($this->sent) {
 			throw new UserException('Le message a déjà été envoyé');
 		}
 
-		$sender = null;
-
-		if (isset($this->sender_name, $this->sender_email)) {
-			$sender = Emails::getFromHeader($this->sender_name, $this->sender_email);
+		if (!isset($this->body) || strlen($this->body) < 10) {
+			throw new UserException('Le corps du message est vide ou fait moins de 10 caractères.');
 		}
 
-		// TODO: append mailing identifier to message headers
-		Emails::queue(Emails::CONTEXT_BULK,
-			$this->listRecipients(),
-			$sender,
-			$this->subject,
-			$this->getBody()
-		);
+		$msg = $this->getMessage();
+
+		$db = DB::getInstance();
+		$db->begin();
+
+		foreach ($this->listRecipients() as $r) {
+			$msg->queueTo($r->address, $r->data);
+		}
 
 		$this->set('sent', new DateTime);
-
 		$this->save();
+
+		Log::add(Log::SENT, ['entity' => get_class($this), 'id' => $this->id()]);
+
+		$db->commit();
 
 		// Remove useless data from extra_data field
 		$db = DB::getInstance();

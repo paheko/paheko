@@ -4,20 +4,25 @@ namespace Paheko\Entities\Email;
 
 use Paheko\Config;
 use Paheko\Entity;
+use Paheko\Utils;
 use Paheko\Entities\Files\File;
 use Paheko\Entities\Users\User;
 use Paheko\UserTemplate\UserTemplate;
 use Paheko\Web\Render\Render;
 
-use const Paheko\{DISABLE_EMAIL, MAIL_RETURN_PATH, MAIL_SENDER, MAIL_};
 use const Paheko\{
+	DISABLE_EMAIL,
+	MAIL_RETURN_PATH,
+	MAIL_SENDER,
 	SMTP_HOST,
 	SMTP_PORT,
 	SMTP_USER,
 	SMTP_PASSWORD,
 	SMTP_SECURITY,
 	SMTP_HELO_HOSTNAME,
-	SMTP_MAX_MESSAGES_PER_SESSION
+	SMTP_MAX_MESSAGES_PER_SESSION,
+	LOCAL_SECRET_KEY,
+	WWW_URL
 };
 
 use KD2\DB\EntityManager as EM;
@@ -133,6 +138,13 @@ class Message extends Entity
 		$template ??= new UserTemplate('web/email.html');
 
 		$body = $this->getHTMLBody();
+
+		// For bulk sending, limit the number of external domains
+		// by using redirect URLs
+		if ($this->context === self::CONTEXT_BULK) {
+			$body = self::replaceExternalLinksInHTML($body);
+		}
+
 		$template->assign('html', $body);
 		$html = $template->fetch();
 
@@ -246,12 +258,6 @@ class Message extends Entity
 
 		// Render to HTML
 		$html = Render::render(Render::FORMAT_MARKDOWN, null, $body);
-
-		// For bulk sending, limit the number of external domains
-		// by using redirect URLs
-		if ($this->context === self::CONTEXT_BULK) {
-			$html = self::replaceExternalLinksInHTML($html);
-		}
 
 		$this->set('body_html', $html);
 
@@ -384,6 +390,21 @@ class Message extends Entity
 			$message->setHeaders($this->headers);
 		}
 
+		// Generate a feedback-ID, see https://support.google.com/a/answer/6254652?hl=en
+		$feedback_id = sprintf('%s:id-%d:c-%d:%s',
+			'pko', // unused yet
+			$this->id_mailing ?? 0,
+			$this->context,
+			self::getSenderId()
+		);
+
+		// Add header for test recipients
+		if (MAIL_TEST_RECIPIENTS
+			&& in_array($this->recipient, MAIL_TEST_RECIPIENTS, true)) {
+			$message->setHeader('X-Is-Recipient', 'Yes');
+		}
+
+		$message->setHeader('Feedback-ID', $feedback_id);
 		$message->setHeader('From', $this->sender ?? self::getDefaultFromHeader());
 		$message->setHeader('To', $this->recipient);
 		$message->setHeader('Subject', $this->subject);
@@ -402,10 +423,6 @@ class Message extends Entity
 		}
 
 		$message->setMessageId();
-
-		if ($headers['X-Is-Recipient'] ?? null === 'Yes') {
-			$message->setMessageId('pko.' . $message->getMessageId());
-		}
 
 		$text = $this->body;
 		$html = $this->body_html;
@@ -526,6 +543,18 @@ class Message extends Entity
 		return true;
 	}
 
+	/**
+	 * 15 characters (max) long identifier for the sender
+	 * "It should be consistent across the mail stream."
+	 * @see https://support.google.com/a/answer/6254652?hl=en
+	 */
+	static public function getSenderId(): string
+	{
+		$id = parse_url(WWW_URL, PHP_URL_HOST);
+		$id = trim(substr(str_replace('.', '-', ), 0, 15), '-');
+		return $id;
+	}
+
 	static public function getFromHeader(?string $name = null, ?string $email = null): string
 	{
 		$config = Config::getInstance();
@@ -564,7 +593,7 @@ class Message extends Entity
 			return null;
 		}
 
-		$hash = hash_hmac('sha1', $params[1] . $params[2], SECRET_KEY);
+		$hash = hash_hmac('sha1', $params[1] . $params[2], LOCAL_SECRET_KEY);
 
 		$url = 'https://' . $params[2];
 
@@ -602,7 +631,7 @@ class Message extends Entity
 
 		$url = preg_replace('!^https?://!', '', $url);
 		$expiry = time() + 3600*24*365;
-		$hash = hash_hmac('sha1', $expiry . $url, SECRET_KEY);
+		$hash = hash_hmac('sha1', $expiry . $url, LOCAL_SECRET_KEY);
 
 		$param = sprintf('%s:%s:%s', $hash, $expiry, $url);
 		return WWW_URL . '?rd=' . rawurlencode($param);
