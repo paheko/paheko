@@ -813,6 +813,22 @@ namespace Paheko;
 //const MAIL_SENDER = 'associations@monserveur.com';
 
 /**
+ * MAIL_SENDER_EXPLAIN
+ * Texte d'explication sur l'adresse expéditeur "forcée"
+ *
+ * Sera affiché dans la modification d'un message collectif,
+ * pour expliquer à l'utilisateur pourquoi il ne peut choisir que
+ * l'adresse de réponse (Reply-To) et pas l'adresse d'expédition (From).
+ *
+ * HTML accepté.
+ *
+ * Défault : null
+ * @var string|null
+ */
+
+//const MAIL_SENDER_EXPLAIN = 'Cette adresse ne peut être modifiée directement pour des raisons techniques. Merci de <a href="mailto:sysadmin@hebergeur.org">nous contacter</a> pour choisir une autre adresse.';
+
+/**
  * Mot de passe pour l'accès à l'API permettant de gérer les mails d'erreur
  * (voir MAIL_RETURN_PATH)
  *

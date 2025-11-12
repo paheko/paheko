@@ -209,6 +209,7 @@ static $default_config = [
 	'MAIL_RETURN_PATH'      => null,
 	'MAIL_BOUNCE_PASSWORD'  => null,
 	'MAIL_SENDER'           => null,
+	'MAIL_SENDER_EXPLAIN'   => null,
 	'MAIL_TEST_RECIPIENTS'  => null,
 	'ADMIN_URL'             => WWW_URL . 'admin/',
 	'ADMIN_COLOR1'          => '#20787a',
