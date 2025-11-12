@@ -1,22 +1,24 @@
-html, body {
-	height: 100%;
-}
+@media screen and (min-width: 981px) {
+	html, body {
+		height: 100%;
+	}
 
-main#content {
-	height: calc(100% - 2em);
-	display: flex;
-	flex-direction: column;
-}
+	main#content {
+		height: calc(100% - 2em);
+		display: flex;
+		flex-direction: column;
+	}
 
-.mailing-preview {
-	display: grid;
-	grid-template-columns: minmax(500px, 800px) 30fr;
-	gap: 2em;
-	height: 100%;
-}
+	.mailing-preview {
+		display: grid;
+		grid-template-columns: minmax(500px, 800px) 30fr;
+		gap: 2em;
+		height: 100%;
+	}
 
-.mailing-preview > aside {
-	order: 1;
+	.mailing-preview > aside {
+		order: 1;
+	}
 }
 
 .mailing-preview .container {
@@ -26,6 +28,7 @@ main#content {
 	height: 100%;
 	display: flex;
 	flex-direction: column;
+	overflow: hidden;
 }
 
 .mailing-preview .container header {
@@ -67,6 +70,7 @@ main#content {
 	padding: 0;
 	border: none;
 	border-radius: .5em;
+	min-height: 30em;
 }
 
 .mailing-preview .tabs {
@@ -121,7 +125,7 @@ main#content {
 }
 
 .mobile-preview {
-	display: block;
+	display: flex;
 	width: calc(100% - 2em);
 	border-radius: 1em;
 	border: 5px solid #fff;
@@ -129,6 +133,7 @@ main#content {
 	box-shadow: 0px 0px 10px #999;
 	padding: 0 .5em;
 	margin: 1em 0;
+	overflow: hidden;
 }
 
 .mobile-preview div {
@@ -150,7 +155,7 @@ main#content {
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
-	max-width: 15em;
+	width: 25ch;
 }
 
 .mobile-preview .subject {
@@ -160,7 +165,7 @@ main#content {
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
-	max-width: 18em;
+	width: 35ch;
 }
 
 .mobile-preview .avatar {
@@ -180,8 +185,8 @@ main#content {
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
-	max-width: 21em;
 	font-size: .9em;
+	width: 46ch;
 }
 
 
@@ -191,5 +196,8 @@ main#content {
 	}
 	.mailing-preview aside header {
 		text-align: center;
+	}
+	.metadata {
+		display: block;
 	}
 }

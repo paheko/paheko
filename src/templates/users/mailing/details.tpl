@@ -22,7 +22,7 @@
 		<header>
 			<p>
 			{if !$mailing.sent}
-				{linkbutton shape="edit" label="Modifier le message" href="write.php?id=%d"|args:$mailing.id target="_dialog" class="main"}
+				{linkbutton shape="edit" label="Éditer le message" href="write.php?id=%d"|args:$mailing.id target="_dialog" class="main"}
 				{linkbutton shape="right" label="Envoyer" href="send.php?id=%d"|args:$mailing.id target="_dialog" class="main"}
 			{/if}
 			</p>
@@ -55,6 +55,10 @@
 				<dd><small>{$mailing->getPreheader()}</small></dd>
 				<dt>De</dt>
 				<dd>{$mailing->getFrom()}</dd>
+				{if MAIL_SENDER}
+					<dt>Réponses à</dt>
+					<dd>{$mailing->getReplyTo()}</dd>
+				{/if}
 				<dt>À</dt>
 				<dd><a href="recipients.php?id={$mailing.id}">{{%n destinataire}{%n destinataires} n=$mailing->countRecipients()}</a></dd>
 				<dt>Envoyé le</dt>

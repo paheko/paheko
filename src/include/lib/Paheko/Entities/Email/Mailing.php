@@ -19,7 +19,7 @@ use Paheko\Web\Render\Render;
 use Paheko\Entities\Email\Message;
 use Paheko\Entities\Users\DynamicField;
 
-use const Paheko\{WWW_URL, ADMIN_URL};
+use const Paheko\{WWW_URL, ADMIN_URL, MAIL_SENDER};
 
 use DateTime;
 use stdClass;
@@ -317,12 +317,22 @@ class Mailing extends Entity
 
 	public function getFrom(): string
 	{
-		return Message::getFromHeader($this->sender_name, $this->sender_email);
+		return Message::getFromHeader($this->getFromName(), $this->getFromAddress());
 	}
 
 	public function getFromName(): string
 	{
 		return $this->sender_name ?? Config::getInstance()->org_name;
+	}
+
+	public function getFromAddress(): string
+	{
+		return MAIL_SENDER ?? ($this->sender_email ?? Config::getInstance()->org_email);
+	}
+
+	public function getReplyTo(): string
+	{
+		return $this->sender_email ?? Config::getInstance()->org_email;
 	}
 
 	public function getMessage(): Message
@@ -334,7 +344,7 @@ class Mailing extends Entity
 			'added'      => new \DateTime,
 			'context'    => $m::CONTEXT_BULK,
 			'sender'     => $this->getFrom(),
-			'reply_to'   => $config->org_email,
+			'reply_to'   => $this->getReplyTo(),
 			'subject'    => $this->subject,
 		]);
 
