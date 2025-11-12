@@ -152,17 +152,24 @@ CREATE UNIQUE INDEX IF NOT EXISTS emails_hash ON emails (hash);
 CREATE TABLE IF NOT EXISTS emails_queue (
 -- List of emails waiting to be sent
 	id INTEGER NOT NULL PRIMARY KEY,
+	id_mailing INTEGER NULL REFERENCES mailings (id) ON DELETE CASCADE,
+	context INTEGER NOT NULL,
+	status INTEGER NOT NULL,
+	added TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(added) = added),
+	modified TEXT NULL DEFAULT CURRENT_TIMESTAMP CHECK (modified IS NULL OR datetime(modified) = modified),
 	sender TEXT NULL,
+	reply_to TEXT NULL,
 	recipient TEXT NOT NULL,
-	recipient_hash TEXT NOT NULL,
 	recipient_pgp_key TEXT NULL,
+	id_recipient INTEGER NOT NULL REFERENCES emails (id) ON DELETE CASCADE,
+	id_user INTEGER NULL REFERENCES users (id) ON DELETE CASCADE,
 	subject TEXT NOT NULL,
-	content TEXT NOT NULL,
-	content_html TEXT NULL,
-	sending INTEGER NOT NULL DEFAULT 0, -- Will be changed to 1 when the queue run will start
-	sending_started TEXT NULL, -- Will be filled with the datetime when the email sending was started
-	context INTEGER NOT NULL
+	body TEXT NOT NULL,
+	body_html TEXT NULL,
+	headers TEXT NULL
 );
+
+CREATE INDEX IF NOT EXISTS emails_queue_status ON emails_queue (status);
 
 CREATE TABLE IF NOT EXISTS emails_queue_attachments (
 	id INTEGER NOT NULL PRIMARY KEY,
