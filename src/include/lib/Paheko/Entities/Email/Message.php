@@ -43,17 +43,20 @@ class Message extends Entity
 	const STATUS_WAITING = 0;
 	const STATUS_SENDING = 1;
 	const STATUS_SENT = 2;
+	const STATUS_FAIL = 3;
 
 	const STATUS_LIST = [
 		self::STATUS_WAITING => 'En attente',
 		self::STATUS_SENDING => 'Envoi en cours',
 		self::STATUS_SENT    => 'Envoyé',
+		self::STATUS_FAIL    => 'Échec',
 	];
 
 	const STATUS_COLORS = [
 		self::STATUS_WAITING => 'cadetblue',
 		self::STATUS_SENDING => 'chocolate',
 		self::STATUS_SENT    => 'darkgreen',
+		self::STATUS_FAIL    => 'darkred',
 	];
 
 	const CONTEXT_SYSTEM = 0;
@@ -131,45 +134,19 @@ class Message extends Entity
 		return $main_tpl->fetch();
 	}
 
-	public function getOptoutText(): string
+	static public function getOptoutText(): string
 	{
-		$out = "Vous recevez ce message car vous êtes dans nos contacts.\n";
-
-		if (isset($this->context_optout)) {
-			$out .= "Pour vous désinscrire uniquement de ces envois, cliquez ici :\n";
-			$out .= "[context_optout_url]\n\n";
-		}
-
-		$out .= "Pour ne plus jamais recevoir aucun message de notre part cliquez ici :\n";
-		$out .= "[optout_url]\n\n";
-		return $out;
-
+		return "Vous recevez ce message car vous êtes dans nos contacts.\n"
+			. "Pour ne plus recevoir ces messages cliquez ici :\n";
 	}
 
-	public function getOptoutFooter(): string
+	/**
+	 * @see https://www.nngroup.com/articles/unsubscribe-mistakes/
+	 */
+	static public function appendHTMLOptoutFooter(string $html, string $url): string
 	{
-		return strtr($this->getOptoutText(), [
-			'[context_optout_url]' => $this->getContextSpecificOptoutURL(),
-			'[optout_url]' => $this->getOptoutURL(),
-		]);
-	}
-
-	public function appendHTMLOptoutFooter(): string
-	{
-		$text = nl2br(htmlspecialchars($this->getOptoutText()));
-
-		if (isset($this->context_optout)) {
-			$button = sprintf('<a href="%s" style="color: #009; text-decoration: underline; padding: 5px 10px; border-radius: 5px; background: #eee; border: 1px outset #ccc;">Me désinscrire de ces envois uniquement</a></p>', $this->getContextSpecificOptoutURL());
-			$text = str_replace('[context_optout_url]', $button, $text);
-		}
-
-		$button = sprintf('<a href="%s" style="color: #009; text-decoration: underline; padding: 5px 10px; border-radius: 3px; background: #eee; border: 1px outset #ccc;">Me désinscrire de <b>tous les envois</b></a></p>', $this->getOptoutURL());
-		$text = str_replace('[optout_url]', $button, $text);
-
-		$footer = '<p style="color: #666; background: #fff; padding: 10px; text-align: center; font-size: 9pt">';
-		$footer .= $text;
-
-		$html = $this->body_html;
+		$footer = '<p style="color: #666; background: #fff; padding: 10px; margin: 50px auto 0 auto; max-width: 700px; border-top: 1px solid #ccc; text-align: center; font-size: 9pt">' . nl2br(htmlspecialchars(trim(self::getOptoutText())));
+		$footer .= sprintf('<br /><a href="%s" style="color: #009; text-decoration: underline;">Me désinscrire</a></p>', $url);
 
 		if (stripos($html, '</body>') !== false) {
 			$html = str_ireplace('</body>', $footer . '</body>', $html);
@@ -256,7 +233,7 @@ class Message extends Entity
 			$message->setHeader('List-Unsubscribe', sprintf('<%s>', $url));
 			$message->setHeader('List-Unsubscribe-Post', 'Unsubscribe=Yes');
 
-			$text .= sprintf("\n\n-- \n%s\n\n%s", $config->org_name, $this->getOptoutText());
+			$text .= sprintf("\n\n-- \n%s\n\n%s\n%s", $config->org_name, $this->getOptoutText(), $url);
 
 			if (null !== $html) {
 				$html = $this->appendHTMLOptoutFooter();
@@ -304,69 +281,71 @@ class Message extends Entity
 		$message = $this->createSMTPMessage();
 		$entity = $this;
 		$context = $this->context;
-		$fail = false;
 
-		try {
-			$signal = Plugins::fire('email.send.before', true, compact('message', 'context', 'entity'), ['sent' => null]);
+		$signal = Plugins::fire('email.send.before', true, compact('message', 'context', 'entity'), ['sent' => null]);
 
-			if ($signal && $signal->isStopped()) {
-				return $signal->getOut('sent') ?? true;
+		if ($signal && $signal->isStopped()) {
+			return $signal->getOut('sent') ?? true;
+		}
+
+		if (SMTP_HOST) {
+			static $smtp = null;
+			static $count = 0;
+
+			// Reset connection when we reach the max number of messages
+			if (null !== $smtp && $count >= SMTP_MAX_MESSAGES_PER_SESSION) {
+				$smtp->disconnect();
+				$smtp = null;
 			}
 
-			if (SMTP_HOST) {
-				// Re-use SMTP connection in queues
-				if (null === $smtp) {
-					$const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
-					$secure = constant($const);
+			// Re-use SMTP connection in queues
+			if (null === $smtp) {
+				$const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
+				$secure = constant($const);
 
-					$smtp = new SMTP(SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, $secure, SMTP_HELO_HOSTNAME);
-				}
+				$smtp = new SMTP(SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, $secure, SMTP_HELO_HOSTNAME);
+			}
 
-				try {
-					$return = $smtp->send($message);
-					// TODO: store return message from SMTP server
-				}
-				catch (SMTP_Exception $e) {
-					// Handle invalid recipients addresses
-					if ($r = $e->getRecipient()) {
-						if ($e->getCode() >= 500) {
-							self::handleManualBounce($r, 'hard', $e->getMessage());
-							// Don't retry delivering this email
-							return true;
-						}
-						elseif ($e->getCode() === SMTP::GREYLISTING_CODE) {
-							// Resend later (FIXME: only retry for X times)
-							return false;
-						}
-						elseif ($e->getCode() >= 400) {
-							self::handleManualBounce($r, 'soft', $e->getMessage());
-							return true;
-						}
+			try {
+				$return = $smtp->send($message);
+				// TODO: store return message from SMTP server
+				$count++;
+			}
+			catch (SMTP_Exception $e) {
+				// Handle invalid recipients addresses
+				if ($r = $e->getRecipient()) {
+					if ($e->getCode() >= 500) {
+						// Don't retry delivering this email
+						self::handleManualBounce($r, 'hard', $e->getMessage());
+						$this->set('status', self::STATUS_FAIL);
+						return true;
 					}
-
-					throw $e;
+					elseif ($e->getCode() === SMTP::GREYLISTING_CODE) {
+						// Resend later (FIXME: only retry for X times)
+						return false;
+					}
+					elseif ($e->getCode() >= 400) {
+						self::handleManualBounce($r, 'soft', $e->getMessage());
+						$this->set('status', self::STATUS_FAIL);
+						return true;
+					}
 				}
 
-				if (!$in_queue) {
-					$smtp->disconnect();
-					$smtp = null;
-				}
-			}
-			else {
-				// Send using PHP mail() function
-				$message->send();
+				throw $e;
 			}
 
-			Plugins::fire('email.send.after', false, compact('context', 'message', 'entity'));
-			return true;
-		}
-		catch (\Throwable $e) {
-			$fail = true;
-		}
-		finally {
-			if (!$fail) {
-				$this->set('status', self::STATUS_SENT);
+			if (!$in_queue) {
+				$smtp->disconnect();
+				$smtp = null;
 			}
 		}
+		else {
+			// Send using PHP mail() function
+			$message->send();
+		}
+
+		Plugins::fire('email.send.after', false, compact('context', 'message', 'entity'));
+		$this->set('status', self::STATUS_SENT);
+		return true;
 	}
 }

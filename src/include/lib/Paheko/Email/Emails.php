@@ -675,30 +675,6 @@ class Emails
 		return $list;
 	}
 
-	static public function getOptoutText(): string
-	{
-		return "Vous recevez ce message car vous êtes dans nos contacts.\n"
-			. "Pour ne plus recevoir ces messages cliquez ici :\n";
-	}
-
-	/**
-	 * @see https://www.nngroup.com/articles/unsubscribe-mistakes/
-	 */
-	static public function appendHTMLOptoutFooter(string $html, string $url): string
-	{
-		$footer = '<p style="color: #666; background: #fff; padding: 10px; margin: 50px auto 0 auto; max-width: 700px; border-top: 1px solid #ccc; text-align: center; font-size: 9pt">' . nl2br(htmlspecialchars(trim(self::getOptoutText())));
-		$footer .= sprintf('<br /><a href="%s" style="color: #009; text-decoration: underline;">Me désinscrire</a></p>', $url);
-
-		if (stripos($html, '</body>') !== false) {
-			$html = str_ireplace('</body>', $footer . '</body>', $html);
-		}
-		else {
-			$html .= $footer;
-		}
-
-		return $html;
-	}
-
 	static protected function send(int $context, string $recipient_hash, array $headers, string $content, ?string $content_html, ?string $pgp_key = null, array $attachments = [], bool $in_queue = false): bool
 	{
 		$config = Config::getInstance();
@@ -765,75 +741,6 @@ class Emails
 		}
 
 		return self::sendMessage($context, $message, $in_queue);
-	}
-
-	static public function sendMessage(int $context, Mail_Message $message, bool $in_queue = false): bool
-	{
-		if (DISABLE_EMAIL) {
-			return false;
-		}
-
-		$signal = Plugins::fire('email.send.before', true, compact('context', 'message'), ['sent' => null]);
-
-		if ($signal && $signal->isStopped()) {
-			return $signal->getOut('sent') ?? true;
-		}
-
-		if (SMTP_HOST) {
-			static $smtp = null;
-			static $count = 0;
-
-			// Reset connection when we reach the max number of messages
-			if (null !== $smtp && $count >= SMTP_MAX_MESSAGES_PER_SESSION) {
-				$smtp->disconnect();
-				$smtp = null;
-			}
-
-			// Re-use SMTP connection in queues
-			if (null === $smtp) {
-				$const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
-				$secure = constant($const);
-
-				$smtp = new SMTP(SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, $secure, SMTP_HELO_HOSTNAME);
-			}
-
-			try {
-				$return = $smtp->send($message);
-				// TODO: store return message from SMTP server
-				$count++;
-			}
-			catch (SMTP_Exception $e) {
-				// Handle invalid recipients addresses
-				if ($r = $e->getRecipient()) {
-					if ($e->getCode() >= 500) {
-						self::handleManualBounce($r, 'hard', $e->getMessage());
-						// Don't retry delivering this email
-						return true;
-					}
-					elseif ($e->getCode() === SMTP::GREYLISTING_CODE) {
-						// Resend later (FIXME: only retry for X times)
-						return false;
-					}
-					elseif ($e->getCode() >= 400) {
-						self::handleManualBounce($r, 'soft', $e->getMessage());
-						return true;
-					}
-				}
-
-				throw $e;
-			}
-
-			if (!$in_queue) {
-				$smtp->disconnect();
-				$smtp = null;
-			}
-		}
-		else {
-			$message->send();
-		}
-
-		Plugins::fire('email.send.after', false, compact('context', 'message'));
-		return true;
 	}
 
 	/**
