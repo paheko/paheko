@@ -4,10 +4,6 @@
 	<aside>
 		{linkbutton shape="users" label="Destinataires" href="recipients.php?id=%d"|args:$mailing.id}
 		{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$mailing.id target="_dialog"}
-	{if !$mailing.sent}
-		{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$mailing.id target="_dialog"}
-		{linkbutton shape="right" label="Envoyer" href="send.php?id=%d"|args:$mailing.id target="_dialog" class="main"}
-	{/if}
 	</aside>
 	<ul>
 		<li class="current"><a href="./">Messages collectifs</a></li>
@@ -24,6 +20,12 @@
 <div class="mailing-preview">
 	<aside>
 		<header>
+			<p>
+			{if !$mailing.sent}
+				{linkbutton shape="edit" label="Modifier le message" href="write.php?id=%d"|args:$mailing.id target="_dialog" class="main"}
+				{linkbutton shape="right" label="Envoyer" href="send.php?id=%d"|args:$mailing.id target="_dialog" class="main"}
+			{/if}
+			</p>
 		</header>
 		{if !empty($hints)}
 			<div class="alert block">
@@ -57,6 +59,10 @@
 				<dd><a href="recipients.php?id={$mailing.id}">{{%n destinataire}{%n destinataires} n=$mailing->countRecipients()}</a></dd>
 				<dt>Envoyé le</dt>
 				<dd>{if $mailing.sent}{$mailing.sent|date_long:true}{else}<em>Brouillon (non envoyé)</em>{/if}</dd>
+			{if !$mailing.sent}
+				<dt></dt>
+				<dd>{linkbutton shape="edit" label="Modifier les informations" href="edit.php?id=%d"|args:$mailing.id target="_dialog"}</dd>
+			{/if}
 			</dl>
 		</header>
 		<div class="preview">

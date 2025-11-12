@@ -28,6 +28,7 @@ use const Paheko\{
 use KD2\DB\EntityManager as EM;
 use KD2\HTML\CSSParser;
 use KD2\Mail_Message;
+use KD2\Smartyer;
 use KD2\SMTP;
 use KD2\SMTP_Exception;
 use KD2\Security;
@@ -62,6 +63,9 @@ class Message extends Entity
 
 	protected ?UserTemplate $_template = null;
 	protected bool $_rendered = false;
+
+	// We don't store the preheader as it will be put in the HTML
+	protected ?string $_preheader = null;
 
 	const STATUS_WAITING = 0;
 	const STATUS_SENDING = 1;
@@ -146,6 +150,8 @@ class Message extends Entity
 		}
 
 		$template->assign('html', $body);
+		$template->assign('preheader', $this->getHTMLPreheader());
+
 		$html = $template->fetch();
 
 		// If CSS parser is FALSE, this means the parsing of the CSS file failed
@@ -187,6 +193,45 @@ class Message extends Entity
 
 		return $html;
 	}
+
+	public function setPreheader(string $text): void
+	{
+		$this->_preheader = $text;
+	}
+
+	public function getPreheader(bool $from_html = false): string
+	{
+		$text = $this->_preheader;
+
+		// Create a preheader from the body
+		if ($from_html || null === $text) {
+			$text = $this->getHTMLBody();
+			$text = strip_tags($text);
+			$text = trim(htmlspecialchars_decode($text));
+			$text = preg_replace('/\s+/', ' ', $text);
+		}
+
+		$text = Smartyer::truncate($text, 130, '…', true);
+		return $text;
+	}
+
+	public function getHTMLPreheader(): string
+	{
+		$text = $this->getPreheader();
+
+		// This is important for gmail, see https://github.com/hteumeuleu/email-bugs/issues/41#issuecomment-1321464561
+		$text = htmlentities($text);
+
+		// Add some spacing after pre-header text just in case it is too short,
+		// so that the rest of the email content doesn't show
+		$length = mb_strlen($text);
+		$text .= str_repeat('&#847;&zwnj;&nbsp;', 130 - $length);
+
+		$text = sprintf('<span style="display: none !important; visibility: hidden; mso-hide: all; font-size: 1px; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">%s</span>', $text);
+
+		return $text;
+	}
+
 
 	public function getBody(): string
 	{

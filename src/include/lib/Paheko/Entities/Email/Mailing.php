@@ -21,8 +21,6 @@ use Paheko\Entities\Users\DynamicField;
 
 use const Paheko\{WWW_URL, ADMIN_URL};
 
-use KD2\Smartyer;
-
 use DateTime;
 use stdClass;
 
@@ -59,12 +57,18 @@ class Mailing extends Entity
 		parent::selfCheck();
 
 		$this->assert(trim($this->subject) !== '', 'Le sujet ne peut rester vide.');
+		$this->assert(mb_strlen($this->subject) <= 100, 'Le sujet ne peut faire plus de 100 caractères.');
+		$this->assert(mb_strlen($this->subject) >= 6, 'Le sujet ne peut faire moins de 6 caractères.');
 		$this->assert(!isset($this->body) || trim($this->body) !== '', 'Le corps du message ne peut rester vide.');
 
-		$this->assert(!isset($this->preheader) || mb_strlen($this->preheader) <= 100, 'L\'extrait du message doit faire moins de 100 caractères.');
+		$this->assert(!isset($this->preheader) || mb_strlen($this->preheader) <= 80, 'L\'extrait du message doit faire moins de 100 caractères.');
 
-		if (isset($this->sender_name) || isset($this->sender_email)) {
+		if (isset($this->sender_name)) {
 			$this->assert(trim($this->sender_name) !== '', 'Le nom d\'expéditeur est vide.');
+			$this->assert(mb_strlen($this->sender_name) <= 60, 'Le nom d\'expéditeur ne peut faire plus de 60 caractères.');
+		}
+
+		if (isset($this->sender_email)) {
 			$this->assert(trim($this->sender_email) !== '', 'L\'adresse e-mail de l\'expéditeur est manquante.');
 			$this->assert(Email::isAddressValid($this->sender_email), 'L\'adresse e-mail de l\'expéditeur est invalide.');
 		}
@@ -75,12 +79,9 @@ class Mailing extends Entity
 		$source ??= $_POST;
 
 		if (isset($source['subject'])) {
-			$this->assert(mb_strlen($source['subject']) >= 8, 'Le sujet ne peut faire moins de 8 caractères.');
-
 			// Remove characters that might look like spammy stuff at the end and start of string
 			$source['subject'] = trim($source['subject'], ' -#!$=_"\'.?*');
 		}
-
 
 		parent::importForm($source);
 	}
@@ -309,37 +310,19 @@ class Mailing extends Entity
 		return $value;
 	}
 
-	public function getPreheader(): string
+	public function getPreheader(bool $from_html = false): string
 	{
-		$text = $this->preheader;
-
-		if (null === $text) {
-			$text = $this->getMessage()->getHTMLBody();
-			$text = $this->getMessage()->getHTMLBody();
-			$text = strip_tags($text);
-			$text = trim(htmlspecialchars_decode($text));
-		}
-
-		$text = Smartyer::truncate($text, 130, '…', true);
-		return $text;
-	}
-
-	public function getHTMLPreheader(): string
-	{
-		$text = $this->getPreheader();
-
-		// This is important for gmail, see https://github.com/hteumeuleu/email-bugs/issues/41#issuecomment-1321464561
-		$text = htmlentities($text);
-
-		$length = mb_strlen($text);
-		$text .= str_repeat('&#847;&zwnj;&nbsp;', 130 - $length);
-
-		return $text;
+		return $this->getMessage()->getPreheader($from_html);
 	}
 
 	public function getFrom(): string
 	{
 		return Message::getFromHeader($this->sender_name, $this->sender_email);
+	}
+
+	public function getFromName(): string
+	{
+		return $this->sender_name ?? Config::getInstance()->org_name;
 	}
 
 	public function getMessage(): Message
@@ -356,6 +339,7 @@ class Mailing extends Entity
 		]);
 
 		$m->setBody($this->body, true);
+		$m->setPreheader($this->preheader);
 
 		return $m;
 	}
@@ -477,7 +461,7 @@ class Mailing extends Entity
 		}
 
 		if (mb_strlen($this->subject) > 60) {
-			$out['subject_length'] = 'Le sujet contient plus de 60 lettres. Les destinataires lisent moins les messages avec un sujet trop long.';
+			$out['subject_length'] = 'Le sujet contient plus de 60 caractères. Les destinataires lisent moins les messages avec un sujet trop long.';
 		}
 
 		if (substr_count($this->subject, '!')) {
