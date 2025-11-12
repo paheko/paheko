@@ -28,11 +28,6 @@ use KD2\DB\EntityManager as EM;
 class Emails
 {
 	/**
-	 * When we reach that number of fails, the address is treated as permanently invalid, unless reset by a verification.
-	 */
-	const FAIL_LIMIT = 5;
-
-	/**
 	 * Add a message to the sending queue using templates
 	 * @param  int          $context
 	 * @param  iterable        $recipients List of recipients, this accepts a wide range of types:
@@ -472,7 +467,7 @@ class Emails
 		DB::getInstance()->delete('emails_queue',
 			'recipient_hash IN (SELECT hash FROM emails WHERE (invalid = 1 OR fail_count >= ?)
 			AND last_sent >= datetime(\'now\', \'-1 month\'));',
-			self::FAIL_LIMIT);
+			Email::FAIL_LIMIT);
 	}
 
 	/**
@@ -506,7 +501,7 @@ class Emails
 			WHEN %1$sinvalid = 1 THEN \'Invalide\'
 			WHEN %1$sfail_count >= %2$d THEN \'Trop d\'\'erreurs\'
 			ELSE \'\'
-		END', $prefix, self::FAIL_LIMIT);
+		END', $prefix, Email::FAIL_LIMIT);
 	}
 
 	static public function listInvalidUsers(): DynamicList
@@ -551,7 +546,7 @@ class Emails
 
 		$tables = sprintf('emails e INNER JOIN users u ON %s IS NOT NULL AND %1$s != \'\' AND e.hash = email_hash(%1$s)', $email_field);
 
-		$conditions = sprintf('e.invalid = 1 OR e.fail_count >= %d', self::FAIL_LIMIT);
+		$conditions = sprintf('e.invalid = 1 OR e.fail_count >= %d', Email::FAIL_LIMIT);
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('last_sent', true);

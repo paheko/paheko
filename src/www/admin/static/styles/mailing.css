@@ -10,7 +10,7 @@ main#content {
 
 .mailing-preview {
 	display: grid;
-	grid-template-columns: 70fr 30fr;
+	grid-template-columns: minmax(500px, 800px) 30fr;
 	gap: 2em;
 	height: 100%;
 }
@@ -43,6 +43,10 @@ main#content {
 
 .mailing-preview .container header dl.describe > dd {
 	flex: 0 0 calc(100% - 10rem);
+}
+
+.mailing-preview .container header small {
+	color: var(--gBorderColor);
 }
 
 .mailing-preview .preview {

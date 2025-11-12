@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Statut des envois" current="users/mailing"}
+{include file="_head.tpl" title="Statut des envois" current="users/mailing" hide_title=true}
 
 <nav class="tabs">
 	{if isset($list)}

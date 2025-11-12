@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Destinataires du message collectif : %s"|args:$mailing.subject current="users/mailing"}
+{include file="_head.tpl" title="Destinataires du message collectif : %s"|args:$mailing.subject current="users/mailing" hide_title=true}
 
 <nav class="tabs">
 	<aside>

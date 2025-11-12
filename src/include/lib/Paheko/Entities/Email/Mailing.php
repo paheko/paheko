@@ -21,6 +21,8 @@ use Paheko\Entities\Users\DynamicField;
 
 use const Paheko\{WWW_URL, ADMIN_URL};
 
+use KD2\Smartyer;
+
 use DateTime;
 use stdClass;
 
@@ -305,6 +307,34 @@ class Mailing extends Entity
 
 		$this->cleanExtraData($value);
 		return $value;
+	}
+
+	public function getPreheader(): string
+	{
+		$text = $this->preheader;
+
+		if (null === $text) {
+			$text = $this->getMessage()->getHTMLBody();
+			$text = $this->getMessage()->getHTMLBody();
+			$text = strip_tags($text);
+			$text = trim(htmlspecialchars_decode($text));
+		}
+
+		$text = Smartyer::truncate($text, 130, '…', true);
+		return $text;
+	}
+
+	public function getHTMLPreheader(): string
+	{
+		$text = $this->getPreheader();
+
+		// This is important for gmail, see https://github.com/hteumeuleu/email-bugs/issues/41#issuecomment-1321464561
+		$text = htmlentities($text);
+
+		$length = mb_strlen($text);
+		$text .= str_repeat('&#847;&zwnj;&nbsp;', 130 - $length);
+
+		return $text;
 	}
 
 	public function getFrom(): string

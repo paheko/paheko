@@ -15,7 +15,7 @@ if (!$email) {
 	throw new UserException('Adresse invalide');
 }
 
-$max_fail_count = Emails::FAIL_LIMIT;
+$max_fail_count = Email::FAIL_LIMIT;
 
 $tpl->assign(compact('email', 'address', 'max_fail_count'));
 $tpl->display('users/mailing/status/address.tpl');

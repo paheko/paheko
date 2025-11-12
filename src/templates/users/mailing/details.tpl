@@ -1,8 +1,16 @@
-{include file="_head.tpl" title="Message collectif : %s"|args:$mailing.subject current="users/mailing"}
+{include file="_head.tpl" title="Message collectif : %s"|args:$mailing.subject current="users/mailing" hide_title=true}
 
 <nav class="tabs">
+	<aside>
+		{linkbutton shape="users" label="Destinataires" href="recipients.php?id=%d"|args:$mailing.id}
+		{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$mailing.id target="_dialog"}
+	{if !$mailing.sent}
+		{linkbutton shape="edit" label="Modifier" href="write.php?id=%d"|args:$mailing.id}
+		{linkbutton shape="right" label="Envoyer" href="send.php?id=%d"|args:$mailing.id target="_dialog" class="main"}
+	{/if}
+	</aside>
 	<ul>
-		<li><a href="./">Messages collectifs</a></li>
+		<li class="current"><a href="./">Messages collectifs</a></li>
 		<li><a href="status/">Statut des envois</a></li>
 	</ul>
 </nav>
@@ -16,16 +24,6 @@
 <div class="mailing-preview">
 	<aside>
 		<header>
-			{if !$mailing.sent}
-				{if $mailing.body}
-					<p>{linkbutton shape="right" label="Envoyer" href="send.php?id=%d"|args:$mailing.id target="_dialog" class="main"}</p>
-				{/if}
-				<p>
-					{linkbutton shape="edit" label="Modifier" href="write.php?id=%d"|args:$mailing.id}<br />
-					{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$mailing.id}
-				</p>
-			{/if}
-			<p>{linkbutton shape="users" label="Voir la liste des destinataires" href="recipients.php?id=%d"|args:$mailing.id}</p>
 		</header>
 		{if !empty($hints)}
 			<div class="alert block">
@@ -51,6 +49,8 @@
 			<dl class="describe">
 				<dt>Sujet</dt>
 				<dd><h2>{$mailing.subject}</h2></dd>
+				<dt>Extrait</dt>
+				<dd><small>{$mailing->getPreheader()}</small></dd>
 				<dt>De</dt>
 				<dd>{$mailing->getFrom()}</dd>
 				<dt>À</dt>

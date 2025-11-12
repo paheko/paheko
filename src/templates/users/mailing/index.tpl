@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Messages collectifs" current="users/mailing"}
+{include file="_head.tpl" title="Messages collectifs" current="users/mailing" hide_title=true}
 
 <nav class="tabs">
 	<aside>

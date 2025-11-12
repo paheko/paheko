@@ -17,6 +17,11 @@ class Email extends Entity
 {
 	const TABLE = 'emails';
 
+	/**
+	 * When we reach that number of fails, the address is treated as permanently invalid, unless reset by a verification.
+	 */
+	const FAIL_LIMIT = 5;
+
 	const RESEND_VERIFICATION_DELAY = 15;
 
 	/**
@@ -79,7 +84,7 @@ class Email extends Entity
 
 		// Never send to invalid or bounced recipients
 		if ($r->invalid
-			|| $r->fail_count >= Emails::FAIL_LIMIT) {
+			|| $r->fail_count >= self::FAIL_LIMIT) {
 			return false;
 		}
 
@@ -270,7 +275,7 @@ class Email extends Entity
 
 	public function hasReachedFailLimit(): bool
 	{
-		return !empty($this->fail_count) && ($this->fail_count >= Emails::FAIL_LIMIT);
+		return !empty($this->fail_count) && ($this->fail_count >= self::FAIL_LIMIT);
 	}
 
 	public function incrementSentCount(): void
