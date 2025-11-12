@@ -172,10 +172,11 @@ CREATE TABLE IF NOT EXISTS emails_queue (
 CREATE INDEX IF NOT EXISTS emails_queue_status ON emails_queue (status);
 
 CREATE TABLE IF NOT EXISTS emails_queue_attachments (
-	id INTEGER NOT NULL PRIMARY KEY,
-	id_queue INTEGER NOT NULL REFERENCES emails_queue (id) ON DELETE CASCADE,
-	path TEXT NOT NULL
+	id_message INTEGER NOT NULL REFERENCES emails_queue (id) ON DELETE CASCADE,
+	id_file INTEGER NOT NULL REFERENCES files (id) ON DELETE CASCADE
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS emails_queue_attachments_unique ON emails_queue_attachments (id_message, id_file);
 
 CREATE TABLE IF NOT EXISTS mailings (
 	id INTEGER NOT NULL PRIMARY KEY,

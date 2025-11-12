@@ -45,6 +45,15 @@ DROP TABLE emails_queue_old;
 
 CREATE INDEX IF NOT EXISTS emails_queue_status ON emails_queue (status);
 
+DROP TABLE emails_queue_attachments;
+
+CREATE TABLE IF NOT EXISTS emails_queue_attachments (
+	id_message INTEGER NOT NULL REFERENCES emails_queue (id) ON DELETE CASCADE,
+	id_file INTEGER NOT NULL REFERENCES files (id) ON DELETE CASCADE
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS emails_queue_attachments_unique ON emails_queue_attachments (id_message, id_file);
+
 -- Remove "(voir remarque X)" from account labels
 UPDATE acc_accounts SET label = TRIM(REPLACE(REPLACE(REPLACE(label, '(voir remarque D)', ''), '(voir remarque C)', ''), '(voir remarque A)', ''))
 	WHERE id_chart IN (SELECT id FROM acc_charts WHERE country = 'FR' AND code = 'PCS_2018');

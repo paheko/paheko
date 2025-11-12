@@ -25,7 +25,6 @@ use KD2\SMTP_Exception;
 use KD2\Security;
 use KD2\Mail_Message;
 use KD2\DB\EntityManager as EM;
-use KD2\HTML\CSSParser;
 
 class Emails
 {
@@ -33,64 +32,6 @@ class Emails
 	 * When we reach that number of fails, the address is treated as permanently invalid, unless reset by a verification.
 	 */
 	const FAIL_LIMIT = 5;
-
-	/**
-	 * This will wrap the message HTML contents inside
-	 * the main email template, parse the CSS, and apply all
-	 * the CSS rules in the 'style' attribute of each tag.
-	 * Then the style tag is deleted.
-	 * If the CSS parsing fails, the style tag is left as-is.
-	 */
-	static public function applyHTMLTemplate(string $inner_html)
-	{
-		static $template = null;
-		static $css_parser = null;
-
-		$template ??= new UserTemplate('web/email.html');
-
-		$template->assign('html', $inner_html);
-		$html = $template->fetch();
-
-		// If CSS parser is FALSE, this means the parsing of the CSS file failed
-		// then don't try to apply CSS, unless we want to make sure the style
-		if ($css_parser !== false) {
-			libxml_use_internal_errors(true);
-			$doc = new \DOMDocument;
-			$doc->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-
-			// Parse CSS style only once
-			if (null === $css_parser) {
-				try {
-					$css_parser = new CSSParser;
-					$style_tag = $css_parser->xpath($doc, '//style', 0);
-					$css_parser->import($style_tag->textContent);
-				}
-				catch (\InvalidArgumentException $e) {
-					$css_parser = false;
-					unset($doc);
-					libxml_use_internal_errors(false);
-
-					return $html;
-				}
-			}
-
-			// Then apply CSS styles to each tag, by adding a 'style' attribute
-			$css_parser->style($doc->documentElement);
-
-			// Delete the style tag
-			$style_tag = $css_parser->xpath($doc, '//style', 0);
-			$style_tag->parentNode->removeChild($style_tag);
-
-			// Re-export document
-			$html = $doc->saveHTML($doc->documentElement);
-
-			unset($doc);
-
-			libxml_use_internal_errors(false);
-		}
-
-		return $html;
-	}
 
 	/**
 	 * Add a message to the sending queue using templates
@@ -206,13 +147,6 @@ class Emails
 		$html = null;
 		$ids = [];
 
-		// If E-Mail does not have placeholders, we can render the MarkDown just once for HTML
-		// this avoids calling the markdown parser for each recipient
-		if (!$is_system && !$template) {
-			$html = Render::render(Render::FORMAT_MARKDOWN, null, $text);
-			$content = Render::render(Render::FORMAT_PLAINTEXT, null, $text);
-		}
-
 		foreach ($recipients as $recipient => $r) {
 			$data = $r['data'];
 			$recipient_pgp_key = $r['pgp_key'];
@@ -220,35 +154,6 @@ class Emails
 			// We won't try to reject invalid/optout recipients here,
 			// it's done in the queue clearing (more efficient)
 			$recipient_hash = Email::getHash($recipient);
-
-			// Replace placeholders in template: {{$name}}, etc.
-			if ($template) {
-				$template->assignArray((array) $data, null, false);
-
-				// Disable HTML escaping for plaintext emails
-				$template->setEscapeDefault(null);
-				$content = $template->fetch();
-
-				// Render Markdown to HTML
-				$content_html = Render::render(Render::FORMAT_MARKDOWN, null, $content);
-				// Remove markdown code from plaintext email
-				$content = Render::render(Render::FORMAT_PLAINTEXT, null, $content);
-			}
-			else {
-				$content_html = $html;
-				$content = $text;
-			}
-
-			// System emails are sent as plaintext
-			// but personal messages, reminders, and mailings are sent wrapped in the
-			// global HTML template
-			if (!$is_system) {
-				if ($context === self::CONTEXT_BULK) {
-					$content_html = self::replaceExternalLinksInHTML($content_html);
-				}
-
-				$content_html = self::applyHTMLTemplate($content_html);
-			}
 
 			$signal = Plugins::fire('email.queue.insert', true,
 				compact('context', 'recipient', 'sender', 'subject', 'content', 'recipient_hash', 'recipient_pgp_key', 'content_html', 'attachments'));
@@ -673,74 +578,6 @@ class Emails
 		$list->removeColumn('status');
 
 		return $list;
-	}
-
-	static protected function send(int $context, string $recipient_hash, array $headers, string $content, ?string $content_html, ?string $pgp_key = null, array $attachments = [], bool $in_queue = false): bool
-	{
-		$config = Config::getInstance();
-		$message = new Mail_Message;
-		$message->setHeaders($headers);
-
-		if (!$message->getFrom()) {
-			$message->setHeader('From', self::getFromHeader());
-		}
-
-		if (MAIL_SENDER) {
-			$message->setHeader('Reply-To', $message->getFromAddress());
-			$message->setHeader('From', self::getFromHeader($message->getFromName(), MAIL_SENDER));
-		}
-
-		$message->setMessageId();
-
-		if ($headers['X-Is-Recipient'] ?? null === 'Yes') {
-			$message->setMessageId('pko.' . $message->getMessageId());
-		}
-
-		// Append unsubscribe, except for password reminders
-		if ($context != self::CONTEXT_SYSTEM) {
-			$url = Email::getOptoutURL($recipient_hash, $context);
-
-			// RFC 8058
-			$message->setHeader('List-Unsubscribe', sprintf('<%s>', $url));
-			$message->setHeader('List-Unsubscribe-Post', 'Unsubscribe=Yes');
-
-			$content .= sprintf("\n\n-- \n%s\n\n%s\n%s", $config->org_name, self::getOptoutText(), $url);
-
-			if (null !== $content_html) {
-				$content_html = self::appendHTMLOptoutFooter($content_html, $url);
-			}
-		}
-
-		$message->setBody($content);
-
-		if (null !== $content_html) {
-			$message->addPart('text/html', $content_html);
-		}
-
-		$message->setHeader('Return-Path', MAIL_RETURN_PATH ?? (MAIL_SENDER ?? $config->org_email));
-		$message->setHeader('X-Auto-Response-Suppress', 'All'); // This is to avoid getting auto-replies from Exchange servers
-
-		foreach ($attachments as $path) {
-			$file = Files::get($path);
-
-			if (!$file) {
-				continue;
-			}
-
-			$message->addPart($file->mime, $file->fetch(), $file->name);
-		}
-
-		static $can_use_encryption = null;
-
-		if (null === $can_use_encryption) {
-			$can_use_encryption = Security::canUseEncryption();
-		}
-
-		if ($pgp_key && $can_use_encryption) {
-			$message->encrypt($pgp_key);
-		}
-
-		return self::sendMessage($context, $message, $in_queue);
 	}
 
 	/**

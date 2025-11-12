@@ -4,13 +4,27 @@ namespace Paheko\Entities\Email;
 
 use Paheko\Config;
 use Paheko\Entity;
+use Paheko\Entities\Files\File;
+use Paheko\Entities\Users\User;
+use Paheko\UserTemplate\UserTemplate;
 
-use const Paheko\{DISABLE_EMAIL, MAIL_RETURN_PATH, MAIL_SENDER};
-use const Paheko\{SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURITY, SMTP_HELO_HOSTNAME};
+use const Paheko\{DISABLE_EMAIL, MAIL_RETURN_PATH, MAIL_SENDER, MAIL_};
+use const Paheko\{
+	SMTP_HOST,
+	SMTP_PORT,
+	SMTP_USER,
+	SMTP_PASSWORD,
+	SMTP_SECURITY,
+	SMTP_HELO_HOSTNAME,
+	SMTP_MAX_MESSAGES_PER_SESSION
+};
 
-use KD2\SMTP;
-use KD2\Security;
+use KD2\DB\EntityManager as EM;
+use KD2\HTML\CSSParser;
 use KD2\Mail_Message;
+use KD2\SMTP;
+use KD2\SMTP_Exception;
+use KD2\Security;
 
 use DateTime;
 
@@ -39,6 +53,9 @@ class Message extends Entity
 	protected string $body;
 	protected ?string $body_html = null;
 	protected ?string $headers = null;
+
+	protected ?UserTemplate $_template = null;
+	protected bool $_rendered = false;
 
 	const STATUS_WAITING = 0;
 	const STATUS_SENDING = 1;
@@ -83,55 +100,125 @@ class Message extends Entity
 		$this->assert(strlen($this->recipient_hash) === 40, 'Hash invalide');
 	}
 
-	public function setBodyFromUserTemplate(UserTemplate $template, array $data = [], bool $markdown = false): void
+	public function set(string $key, $value)
 	{
-		// Replace placeholders: {{$name}}, etc.
-		$template->assignArray((array) $data, null, false);
+		parent::set($key, $value);
 
-		// Disable HTML escaping for plaintext emails
-		$template->setEscapeDefault(null);
-		$this->body = $template->fetch();
-
-		if ($markdown) {
-			$this->markdownToHTML();
+		// If we change the body or HTML body, then we need to re-render
+		if (($key === 'body' || $key === 'body_html')
+			&& $this->isModified($key)) {
+			$this->_rendered = false;
 		}
 	}
 
-	public function setHTMLBodyFromUserTemplate(UserTemplate $template, array $data = []): void
+	/**
+	 * This will wrap the message HTML contents inside
+	 * the main email template, parse the CSS, and apply all
+	 * the CSS rules in the 'style' attribute of each tag.
+	 * Then the style tag is deleted.
+	 * If the CSS parsing fails, the style tag is left as-is.
+	 */
+	public function wrapHTMLBody(): void
 	{
-		// Replace placeholders: {{$name}}, etc.
-		$template->assignArray((array) $data, null, false);
+		static $template = null;
+		static $css_parser = null;
 
-		// Disable HTML escaping for plaintext emails
-		$template->setEscapeDefault(null);
-		$this->html_body = $template->fetch();
-	}
-
-	public function markdownToHTML(): void
-	{
-		$this->body_html = Render::render(Render::FORMAT_MARKDOWN, null, $this->body);
-	}
-
-	public function wrapHTML(): ?string
-	{
+		// System emails don't have an HTML part
 		if ($this->context === self::CONTEXT_SYSTEM) {
-			return null;
+			return;
 		}
 
-		if (null === self::$main_tpl) {
-			self::$main_tpl = new UserTemplate('web/email.html');
+		$template ??= new UserTemplate('web/email.html');
+
+		$template->assign('html', $this->getHTMLBody());
+		$html = $template->fetch();
+
+		// If CSS parser is FALSE, this means the parsing of the CSS file failed
+		// then don't try to apply CSS, unless we want to make sure the style
+		if ($css_parser !== false) {
+			libxml_use_internal_errors(true);
+			$doc = new \DOMDocument;
+			$doc->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+
+			// Parse CSS style only once
+			if (null === $css_parser) {
+				try {
+					$css_parser = new CSSParser;
+					$style_tag = $css_parser->xpath($doc, '//style', 0);
+					$css_parser->import($style_tag->textContent);
+				}
+				catch (\InvalidArgumentException $e) {
+					$css_parser = false;
+					unset($doc);
+					libxml_use_internal_errors(false);
+					$this->set('body_html', $html);
+					return;
+				}
+			}
+
+			// Then apply CSS styles to each tag, by adding a 'style' attribute
+			$css_parser->style($doc->documentElement);
+
+			// Delete the style tag
+			$style_tag = $css_parser->xpath($doc, '//style', 0);
+			$style_tag->parentNode->removeChild($style_tag);
+
+			// Re-export document
+			$html = $doc->saveHTML($doc->documentElement);
+
+			unset($doc);
+
+			libxml_use_internal_errors(false);
 		}
 
-		// Wrap HTML content in the email skeleton
-		$main_tpl->assignArray([
-			'html'    => $this->body_html,
-			'address' => $this->recipient,
-			'context' => $this->context,
-			'sender'  => $this->sender,
-			'message' => $this,
-		]);
+		$this->set('body_html', $html);
+	}
 
-		return $main_tpl->fetch();
+	public function setBodyTemplateFromString(string $str)
+	{
+		$str = '{{**keep_whitespaces**}}' . $str;
+		$tpl = UserTemplate::createFromUserString($str);
+
+		// Disable escaping, as the string will be escaped by the Markdown renderer
+		$tpl->setEscapeDefault(null);
+
+		$this->_template = $tpl;
+		$this->_rendered = false;
+	}
+
+	public function createBody(array $user_data = []): void
+	{
+		// Don't render the markdown for each message
+		// when the object has been cloned (eg. for bull messages)
+		if ($this->_rendered) {
+			return;
+		}
+
+		if (null !== $this->_template()) {
+			// Replace placeholders in template: {{$name}}, etc.
+			$this->_template->assignArray($user_data, null, false);
+			$body = $this->_template->fetch();
+		}
+		else {
+			$body = $this->body;
+		}
+
+		// Render to HTML
+		$html = Render::render(Render::FORMAT_MARKDOWN, null, $body);
+
+		// For bulk sending, limit the number of external domains
+		// by using redirect URLs
+		if ($context === self::CONTEXT_BULK) {
+			$content_html = self::replaceExternalLinksInHTML($content_html);
+		}
+
+		$this->set('body_html', $html);
+
+		// Remove some of markdown code from plaintext email
+		$text = Render::render(Render::FORMAT_PLAINTEXT, null, $body);
+		$this->set('body', $body);
+
+		$this->_rendered = true;
 	}
 
 	static public function getOptoutText(): string
@@ -160,27 +247,25 @@ class Message extends Entity
 
 	public function getOptoutURL(): string
 	{
-		return Email::getOptoutURL($this->recipient_hash);
+		return $this->recipient()->getOptoutURL($this->context);
 	}
 
-	public function getContextSpecificOptoutURL(): ?string
-	{
-		if (!isset($this->context_optout)) {
-			return null;
-		}
-
-		return Email::getOptoutURL() . '&c=' . $this->context_optout;
-	}
-
-	public function setRecipient(string $email, ?string $pgp_key = null)
+	public function setRecipient(string $email, ?int $id_user, ?string $pgp_key = null)
 	{
 		$this->set('recipient', $email);
+		$this->set('id_', $email);
 		$this->set('recipient_pgp_key', $pgp_key);
 	}
 
 	public function setReplyTo(string $email)
 	{
-		$this->set('repy_to', $email);
+		$this->set('reply_to', $email);
+	}
+
+	public function listAttachments(): array
+	{
+		$em = EntityManager::getInstance(File::class);
+		return $em->all('SELECT f.* FROM @TABLE f INNER JOIN emails_queue_attachments a ON a.id_file = f.id WHERE a.id_message = ?;', $this->id());
 	}
 
 	public function queue(): bool
@@ -199,9 +284,12 @@ class Message extends Entity
 
 	public function createSMTPMessage(): Mail_Message
 	{
-
 		$config = Config::getInstance();
 		$message = new Mail_Message;
+
+		if (null !== $this->headers) {
+			$message->setHeaders($this->headers);
+		}
 
 		$message->setHeader('From', $this->sender ?? self::getDefaultFromHeader());
 		$message->setHeader('To', $this->recipient);
@@ -222,12 +310,16 @@ class Message extends Entity
 
 		$message->setMessageId();
 
+		if ($headers['X-Is-Recipient'] ?? null === 'Yes') {
+			$message->setMessageId('pko.' . $message->getMessageId());
+		}
+
 		$text = $this->body;
 		$html = $this->body_html;
 
 		// Append unsubscribe, except for password reminders
 		if ($this->context != self::CONTEXT_SYSTEM) {
-			$url = $this->getContextSpecificOptoutURL() ?? $this->getOptoutURL();
+			$url = $this->getOptoutURL();
 
 			// RFC 8058
 			$message->setHeader('List-Unsubscribe', sprintf('<%s>', $url));
@@ -249,23 +341,15 @@ class Message extends Entity
 		$message->setHeader('Return-Path', MAIL_RETURN_PATH ?? (MAIL_SENDER ?? $config->org_email));
 		$message->setHeader('X-Auto-Response-Suppress', 'All'); // This is to avoid getting auto-replies from Exchange servers
 
-		foreach ($attachments as $path) {
-			$file = Files::get($path);
-
-			if (!$file) {
-				continue;
-			}
-
+		foreach ($this->listAttachments() as $file) {
 			$message->addPart($file->mime, $file->fetch(), $file->name);
 		}
 
 		static $can_use_encryption = null;
+		$can_use_encryption ??= Security::canUseEncryption();
 
-		if (null === $can_use_encryption) {
-			$can_use_encryption = Security::canUseEncryption();
-		}
-
-		if ($this->recipient_pgp_key && $can_use_encryption) {
+		if ($this->recipient_pgp_key
+			&& $can_use_encryption) {
 			$message->encrypt($this->recipient_pgp_key);
 		}
 
@@ -347,5 +431,22 @@ class Message extends Entity
 		Plugins::fire('email.send.after', false, compact('context', 'message', 'entity'));
 		$this->set('status', self::STATUS_SENT);
 		return true;
+	}
+
+	static public function getFromHeader(?string $name = null, ?string $email = null): string
+	{
+		$config = Config::getInstance();
+
+		if (null === $name) {
+			$name = $config->org_name;
+		}
+		if (null === $email) {
+			$email = $config->org_email;
+		}
+
+		$name = str_replace('"', '\\"', $name);
+		$name = str_replace(',', '', $name); // Remove commas
+
+		return sprintf('"%s" <%s>', $name, $email);
 	}
 }
