@@ -5,7 +5,7 @@
 		{linkbutton shape="users" label="Destinataires" href="recipients.php?id=%d"|args:$mailing.id}
 		{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$mailing.id target="_dialog"}
 	{if !$mailing.sent}
-		{linkbutton shape="edit" label="Modifier" href="write.php?id=%d"|args:$mailing.id}
+		{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$mailing.id target="_dialog"}
 		{linkbutton shape="right" label="Envoyer" href="send.php?id=%d"|args:$mailing.id target="_dialog" class="main"}
 	{/if}
 	</aside>

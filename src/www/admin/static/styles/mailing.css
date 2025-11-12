@@ -88,6 +88,10 @@ main#content {
 	background: #fff;
 }
 
+#f_subject {
+	font-size: 1.3em;
+}
+
 @media handheld, screen and (max-width:981px) {
 	.mailing-preview {
 		display: block;
@@ -95,3 +99,4 @@ main#content {
 	.mailing-preview aside header {
 		text-align: center;
 	}
+}
