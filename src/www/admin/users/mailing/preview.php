@@ -22,7 +22,7 @@ if ($view === 'code') {
 	$tpl->display('users/mailing/preview.tpl');
 }
 elseif ($view === 'text') {
-	$text = $mailing->getPreview(null, false);
+	$text = $mailing->getTextPreview(null, false);
 	$text = htmlspecialchars($text);
 	$text = Utils::linkifyURLs($text);
 	$tpl->assign('code', $text);

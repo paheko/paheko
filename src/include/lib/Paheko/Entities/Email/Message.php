@@ -7,6 +7,7 @@ use Paheko\Entity;
 use Paheko\Entities\Files\File;
 use Paheko\Entities\Users\User;
 use Paheko\UserTemplate\UserTemplate;
+use Paheko\Web\Render\Render;
 
 use const Paheko\{DISABLE_EMAIL, MAIL_RETURN_PATH, MAIL_SENDER, MAIL_};
 use const Paheko\{
@@ -36,7 +37,7 @@ class Message extends Entity
 	protected ?int $id_mailing = null;
 
 	protected int $context;
-	protected int $status = self::WAITING;
+	protected int $status = self::STATUS_WAITING;
 
 	protected DateTime $added;
 	protected ?DateTime $modified = null;
@@ -97,7 +98,8 @@ class Message extends Entity
 		$this->assert(strlen($this->subject), 'Sujet vide');
 		$this->assert(strlen($this->body), 'Corps vide');
 		$this->assert(strlen($this->recipient), 'Destinataire absent');
-		$this->assert(strlen($this->recipient_hash) === 40, 'Hash invalide');
+
+		$this->assert($this->context !== self::CONTEXT_SYSTEM || !isset($this->body_html));
 	}
 
 	public function set(string $key, $value)
@@ -118,19 +120,20 @@ class Message extends Entity
 	 * Then the style tag is deleted.
 	 * If the CSS parsing fails, the style tag is left as-is.
 	 */
-	public function wrapHTMLBody(): void
+	public function wrapHTMLBody(): string
 	{
 		static $template = null;
 		static $css_parser = null;
 
 		// System emails don't have an HTML part
 		if ($this->context === self::CONTEXT_SYSTEM) {
-			return;
+			throw new \LogicException('System emails don\'t have a HTML body');
 		}
 
 		$template ??= new UserTemplate('web/email.html');
 
-		$template->assign('html', $this->getHTMLBody());
+		$body = $this->getHTMLBody();
+		$template->assign('html', $body);
 		$html = $template->fetch();
 
 		// If CSS parser is FALSE, this means the parsing of the CSS file failed
@@ -151,8 +154,7 @@ class Message extends Entity
 					$css_parser = false;
 					unset($doc);
 					libxml_use_internal_errors(false);
-					$this->set('body_html', $html);
-					return;
+					return $html;
 				}
 			}
 
@@ -171,10 +173,33 @@ class Message extends Entity
 			libxml_use_internal_errors(false);
 		}
 
-		$this->set('body_html', $html);
+		return $html;
 	}
 
-	public function setBodyTemplateFromString(string $str)
+	public function getBody(): string
+	{
+		$this->render();
+		return $this->body;
+	}
+
+	public function getHTMLBody(): string
+	{
+		$this->render();
+		return $this->body_html;
+	}
+
+	public function setBody(string $str, bool $allow_template = false)
+	{
+		if ($allow_template
+			&& false !== strpos($str, '{{')
+			&& strpos($str, '}}') > strpos($str, '{{')) {
+			$this->setBodyTemplateFromString($str);
+		}
+
+		$this->set('body', $str);
+	}
+
+	protected function setBodyTemplateFromString(string $str)
 	{
 		$str = '{{**keep_whitespaces**}}' . $str;
 		$tpl = UserTemplate::createFromUserString($str);
@@ -186,7 +211,7 @@ class Message extends Entity
 		$this->_rendered = false;
 	}
 
-	public function createBody(array $user_data = []): void
+	public function render(array $data = []): void
 	{
 		// Don't render the markdown for each message
 		// when the object has been cloned (eg. for bull messages)
@@ -194,22 +219,38 @@ class Message extends Entity
 			return;
 		}
 
-		if (null !== $this->_template()) {
+		if (null !== $this->_template) {
 			// Replace placeholders in template: {{$name}}, etc.
-			$this->_template->assignArray($user_data, null, false);
-			$body = $this->_template->fetch();
+			$this->_template->assignArray($data, null, false);
+
+			try {
+				$body = $this->_template->fetch();
+			}
+			catch (Brindille_Exception $e) {
+				throw new UserException('Erreur de syntaxe dans le corps du message :' . PHP_EOL . $e->getMessage(), 0, $e);
+			}
 		}
 		else {
 			$body = $this->body;
 		}
+
+		// System messages don't have any rendering
+		if ($this->context === self::CONTEXT_SYSTEM) {
+			$this->_rendered = true;
+			return;
+		}
+
+		// Force grid to output as tables in emails
+		$body = preg_replace('/<<grid\s+([^!#].*?)>>/', '<<grid legacy $1>>', $body);
+		$body = preg_replace('/<<grid\s+([!#]+)\s*>>/', '<<grid legacy short="$1">>', $body);
 
 		// Render to HTML
 		$html = Render::render(Render::FORMAT_MARKDOWN, null, $body);
 
 		// For bulk sending, limit the number of external domains
 		// by using redirect URLs
-		if ($context === self::CONTEXT_BULK) {
-			$content_html = self::replaceExternalLinksInHTML($content_html);
+		if ($this->context === self::CONTEXT_BULK) {
+			$html = self::replaceExternalLinksInHTML($html);
 		}
 
 		$this->set('body_html', $html);
@@ -221,7 +262,45 @@ class Message extends Entity
 		$this->_rendered = true;
 	}
 
-	static public function getOptoutText(): string
+	public function getTextPreview(bool $append_footer = false, array $data = []): string
+	{
+		$this->render($data);
+
+		$text = $this->body;
+
+		if ($append_footer) {
+			$text = $this->appendTextFooter($text, '[lien de désinscription]');
+		}
+
+		return $text;
+	}
+
+	public function getHTMLPreview(bool $append_footer = false, array $data = []): string
+	{
+		$this->render($data);
+
+		$html = $this->body_html;
+		$html = $this->wrapHTMLBody($html);
+
+		if ($append_footer) {
+			$html = $this->appendHTMLFooter($html, 'javascript:alert(\'Le lien de désinscription est désactivé dans la prévisualisation.\');');
+		}
+
+		$html = str_replace('</head>',
+			'<style type="text/css">
+			body {
+				background: #fff;
+				color: #000;
+				margin: 10px;
+				font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+			}
+			</style>',
+			$html);
+
+		return $html;
+	}
+
+	protected function getOptoutText(): string
 	{
 		return "Vous recevez ce message car vous êtes dans nos contacts.\n"
 			. "Pour ne plus recevoir ces messages cliquez ici :\n";
@@ -230,7 +309,7 @@ class Message extends Entity
 	/**
 	 * @see https://www.nngroup.com/articles/unsubscribe-mistakes/
 	 */
-	static public function appendHTMLOptoutFooter(string $html, string $url): string
+	protected function appendHTMLFooter(string $html, string $url): string
 	{
 		$footer = '<p style="color: #666; background: #fff; padding: 10px; margin: 50px auto 0 auto; max-width: 700px; border-top: 1px solid #ccc; text-align: center; font-size: 9pt">' . nl2br(htmlspecialchars(trim(self::getOptoutText())));
 		$footer .= sprintf('<br /><a href="%s" style="color: #009; text-decoration: underline;">Me désinscrire</a></p>', $url);
@@ -243,6 +322,17 @@ class Message extends Entity
 		}
 
 		return $html;
+	}
+
+	protected function appendTextFooter(string $text, string $url)
+	{
+		$config = Config::getInstance();
+
+		return $text . sprintf("\n\n-- \n%s\n\n%s\n%s",
+			$config->org_name,
+			$this->getOptoutText(),
+			$url
+		);
 	}
 
 	public function getOptoutURL(): string
@@ -270,6 +360,9 @@ class Message extends Entity
 
 	public function queue(): bool
 	{
+		// Wrap HTML body inside email HTML template
+		$this->set('body_html', $this->wrapHTMLBody());
+
 		return $this->save();
 	}
 
@@ -319,16 +412,16 @@ class Message extends Entity
 
 		// Append unsubscribe, except for password reminders
 		if ($this->context != self::CONTEXT_SYSTEM) {
-			$url = $this->getOptoutURL();
+			$url = $this->getOptoutURL($this->context);
 
 			// RFC 8058
 			$message->setHeader('List-Unsubscribe', sprintf('<%s>', $url));
 			$message->setHeader('List-Unsubscribe-Post', 'Unsubscribe=Yes');
 
-			$text .= sprintf("\n\n-- \n%s\n\n%s\n%s", $config->org_name, $this->getOptoutText(), $url);
+			$text = $this->appendTextFooter($text, $url);
 
 			if (null !== $html) {
-				$html = $this->appendHTMLOptoutFooter();
+				$html = $this->appendHTMLFooter($html, $url);
 			}
 		}
 
@@ -448,5 +541,95 @@ class Message extends Entity
 		$name = str_replace(',', '', $name); // Remove commas
 
 		return sprintf('"%s" <%s>', $name, $email);
+	}
+
+
+	/**
+	 * Redirect to external resource
+	 * @return exit|null|string Will return a string if the signed link has expired but is still valid
+	 */
+	static public function redirectURL(string $str): ?string
+	{
+		$params = explode(':', $str, 3);
+
+		if (count($params) !== 3) {
+			return null;
+		}
+
+		if (!ctype_digit($params[1])) {
+			return null;
+		}
+
+		if (strlen($params[0]) !== 40) {
+			return null;
+		}
+
+		$hash = hash_hmac('sha1', $params[1] . $params[2], SECRET_KEY);
+
+		$url = 'https://' . $params[2];
+
+		if ($hash !== $params[0]) {
+			return null;
+		}
+
+		// If the link has expired, the user should be prompted to redirect
+		if ($params[1] < time()) {
+			return $url;
+		}
+
+		Utils::redirect($url);
+		return null;
+	}
+
+	/**
+	 * Sign (HMAC) external links in mailing body,
+	 * to make sure that we are using the same URL everywhere
+	 * and limit the number of external domains used.
+	 */
+	static public function encodeURL(string $url): string
+	{
+		$parts = parse_url($url);
+
+		if (empty($parts['scheme'])
+			|| ($parts['scheme'] !== 'http' && $parts['scheme'] !== 'https')) {
+			return $url;
+		}
+
+		// Don't do redirects for URLs from the same domain name
+		if (Utils::isLocalURL($url)) {
+			return $url;
+		}
+
+		$url = preg_replace('!^https?://!', '', $url);
+		$expiry = time() + 3600*24*365;
+		$hash = hash_hmac('sha1', $expiry . $url, SECRET_KEY);
+
+		$param = sprintf('%s:%s:%s', $hash, $expiry, $url);
+		return WWW_URL . '?rd=' . rawurlencode($param);
+	}
+
+	static public function replaceExternalLinksInHTML(string $html): string
+	{
+		// Replace external links with redirect URL
+		// But don't trigger phishing detection for external links
+		// eg. <a href="https://example.org/">https://example.org/</a>
+		// shouldn't be changed to
+		// <a href="https://paheko.example.org/?rd=example.org">https://example.org/</a>
+		// so we are replacing the text of the link as well
+		$html = preg_replace_callback('!(<a[^>]*href=")([^"]*)("[^>]*>)(.*)</a>!U', function ($match) {
+			$text = $match[4];
+
+			$url = self::encodeURL($match[2]);
+
+			// Only replace content if URL is external
+			if ($match[2] === $match[4]
+				&& $match[2] !== $url) {
+				$text = '[cliquer ici]';
+			}
+
+			return $match[1] . $url . $match[3] . $text . '</a>';
+		}, $html);
+
+		return $html;
 	}
 }

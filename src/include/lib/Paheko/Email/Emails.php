@@ -13,7 +13,6 @@ use Paheko\Entities\Files\File;
 use Paheko\Entities\Users\User;
 use Paheko\Users\DynamicFields;
 use Paheko\UserTemplate\UserTemplate;
-use Paheko\Web\Render\Render;
 
 use Paheko\Files\Files;
 
@@ -645,110 +644,4 @@ class Emails
 		return compact('type', 'message', 'raw_address');
 	}
 
-
-	static public function getFromHeader(?string $name = null, ?string $email = null): string
-	{
-		$config = Config::getInstance();
-
-		if (null === $name) {
-			$name = $config->org_name;
-		}
-		if (null === $email) {
-			$email = $config->org_email;
-		}
-
-		$name = str_replace('"', '\\"', $name);
-		$name = str_replace(',', '', $name); // Remove commas
-
-		return sprintf('"%s" <%s>', $name, $email);
-	}
-
-	/**
-	 * Redirect to external resource
-	 * @return exit|null|string Will return a string if the signed link has expired but is still valid
-	 */
-	static public function redirectURL(string $str): ?string
-	{
-		$params = explode(':', $str, 3);
-
-		if (count($params) !== 3) {
-			return null;
-		}
-
-		if (!ctype_digit($params[1])) {
-			return null;
-		}
-
-		if (strlen($params[0]) !== 40) {
-			return null;
-		}
-
-		$hash = hash_hmac('sha1', $params[1] . $params[2], SECRET_KEY);
-
-		$url = 'https://' . $params[2];
-
-		if ($hash !== $params[0]) {
-			return null;
-		}
-
-		// If the link has expired, the user should be prompted to redirect
-		if ($params[1] < time()) {
-			return $url;
-		}
-
-		Utils::redirect($url);
-		return null;
-	}
-
-	/**
-	 * Sign (HMAC) external links in mailing body,
-	 * to make sure that we are using the same URL everywhere
-	 * and limit the number of external domains used.
-	 */
-	static public function encodeURL(string $url): string
-	{
-		$parts = parse_url($url);
-
-		if (empty($parts['scheme'])
-			|| ($parts['scheme'] !== 'http' && $parts['scheme'] !== 'https')) {
-			return $url;
-		}
-
-		// Don't do redirects for URLs from the same domain name
-		if (Utils::isLocalURL($url)) {
-			return $url;
-		}
-
-		$url = preg_replace('!^https?://!', '', $url);
-		$expiry = time() + 3600*24*365;
-		$hash = hash_hmac('sha1', $expiry . $url, SECRET_KEY);
-
-		$param = sprintf('%s:%s:%s', $hash, $expiry, $url);
-		return WWW_URL . '?rd=' . rawurlencode($param);
-	}
-
-	static public function replaceExternalLinksInHTML(string $html): string
-	{
-		// Replace external links with redirect URL
-		// But don't trigger phishing detection for external links
-		// eg. <a href="https://example.org/">https://example.org/</a>
-		// shouldn't be changed to
-		// <a href="https://paheko.example.org/?rd=example.org">https://example.org/</a>
-		// so we are replacing the text of the link as well
-		$html = preg_replace_callback('!(<a[^>]*href=")([^"]*)("[^>]*>)(.*)</a>!U', function ($match) {
-			$text = $match[4];
-
-			$url = self::encodeURL($match[2]);
-
-			// Only replace content if URL is external
-			if ($match[2] === $match[4]
-				&& $match[2] !== $url) {
-				$text = '[cliquer ici]';
-			}
-
-			return $match[1] . $url . $match[3] . $text . '</a>';
-		}, $html);
-
-		return $html;
-	}
 }

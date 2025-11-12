@@ -16,6 +16,7 @@ use Paheko\Users\Users;
 use Paheko\UserTemplate\UserTemplate;
 use Paheko\Web\Render\Render;
 
+use Paheko\Entities\Email\Message;
 use Paheko\Entities\Users\DynamicField;
 
 use const Paheko\{WWW_URL, ADMIN_URL};
@@ -31,6 +32,7 @@ class Mailing extends Entity
 
 	protected ?int $id = null;
 	protected string $subject;
+	protected ?string $preheader = null;
 	protected ?string $body;
 
 	/**
@@ -56,6 +58,8 @@ class Mailing extends Entity
 
 		$this->assert(trim($this->subject) !== '', 'Le sujet ne peut rester vide.');
 		$this->assert(!isset($this->body) || trim($this->body) !== '', 'Le corps du message ne peut rester vide.');
+
+		$this->assert(!isset($this->preheader) || strlen($this->preheader) <= 80, 'L\'extrait du message doit faire moins de 80 caractères.');
 
 		if (isset($this->sender_name) || isset($this->sender_email)) {
 			$this->assert(trim($this->sender_name) !== '', 'Le nom d\'expéditeur est vide.');
@@ -309,97 +313,55 @@ class Mailing extends Entity
 		return sprintf('"%s" <%s>', $this->sender_name ?? $config->org_name, $this->sender_email ?? $config->org_email);
 	}
 
-	/**
-	 * @return UserTemplate|string
-	 */
-	public function getBody()
+	public function getMessage(): Message
 	{
-		if (!isset($this->body)) {
-			return '';
-		}
+		$config = Config::getInstance();
+		$m = new Message;
+		$m->import([
+			'id_mailing' => $this->id(),
+			'added'      => new \DateTime,
+			'context'    => $m::CONTEXT_BULK,
+			'sender'     => $this->getFrom(),
+			'reply_to'   => $config->org_email,
+			'subject'    => $this->subject,
+		]);
 
-		$body = $this->body;
+		$m->setBody($this->body, true);
 
-		// Force grid to output as tables
-		$body = preg_replace('/<<grid\s+([^!#].*?)>>/', '<<grid legacy $1>>', $body);
-		$body = preg_replace('/<<grid\s+([!#]+)\s*>>/', '<<grid legacy short="$1">>', $body);
-
-		if ($this->isTemplate()) {
-			// Make sure line breaks are kept
-			$body = '{{**keep_whitespaces**}}' . $body;
-			return UserTemplate::createFromUserString($body);
-		}
-		else {
-			return $body;
-		}
+		return $m;
 	}
 
-	public function isTemplate()
+	public function getUserData(?int $id = null): ?array
 	{
-		return isset($this->body) && false !== strpos($this->body, '{{') && false !== strpos($this->body, '}}');
-	}
-
-	public function getPreview(?int $id = null, bool $html = true): string
-	{
-		$body = $this->body;
-
-		// The message is sent, we no longer have personal data,
-		// so handle placeholder replacement just if mailing hasn't been sent
-		// FIXME: remove Brindille use here and only replace?
-		if (!$this->sent) {
-			$db = DB::getInstance();
-
-			$where = $id ? 'id = ?' : '1 ORDER BY RANDOM()';
-			$sql = sprintf('SELECT extra_data FROM mailings_recipients WHERE id_mailing = %d AND %s LIMIT 1;', $this->id(), $where);
-			$args = $id ? (array)$id : [];
-
-			$r = $db->firstColumn($sql, ...$args);
-
-			if ($r) {
-				$r = json_decode($r, true);
-			}
-
-			$body = $this->getBody();
-
-			if ($body instanceof UserTemplate) {
-				if (is_array($r)) {
-					$body->assignArray($r, null, false);
-				}
-
-				try {
-					$body = $body->fetch();
-				}
-				catch (\KD2\Brindille_Exception $e) {
-					throw new UserException('Erreur de syntaxe dans le corps du message :' . PHP_EOL . $e->getPrevious()->getMessage(), 0, $e);
-				}
-			}
+		if ($this->sent) {
+			throw new \LogicException('Cannot get user data after mailing is sent');
 		}
 
-		$render = $html ? Render::FORMAT_MARKDOWN : Render::FORMAT_PLAINTEXT;
-		return Render::render($render, null, $body);
-	}
+		$db = DB::getInstance();
 
-	public function getHTMLPreview(?int $recipient = null, bool $append_footer = false): string
-	{
-		$html = $this->getPreview($recipient);
-		$html = Emails::applyHTMLTemplate($html);
+		$where = $id ? 'id = ?' : '1 ORDER BY RANDOM()';
+		$sql = sprintf('SELECT extra_data FROM mailings_recipients WHERE id_mailing = %d AND %s LIMIT 1;', $this->id(), $where);
+		$args = $id ? (array)$id : [];
 
-		if ($append_footer) {
-			$html = Emails::appendHTMLOptoutFooter($html, 'javascript:alert(\'--\');');
+		$r = $db->firstColumn($sql, ...$args);
+
+		if ($r) {
+			$r = json_decode($r, true);
 		}
 
-		$html = str_replace('</head>',
-			'<style type="text/css">
-			body {
-				background: #fff;
-				color: #000;
-				margin: 10px;
-				font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-			}
-			</style>',
-			$html);
+		return $r;
+	}
 
-		return $html;
+	public function getHTMLPreview(?int $id_recipient = null): string
+	{
+		$data = $this->getUserData($id_recipient);
+		return $this->getMessage()->getHTMLPreview(true, $data);
+	}
+
+	public function getTextPreview(?int $id_recipient = null): string
+	{
+		$data = $this->getUserData($id_recipient);
+		return $this->getMessage()->getTextPreview(true, $data);
 	}
 
 	public function send(): void
@@ -461,7 +423,7 @@ class Mailing extends Entity
 			return [];
 		}
 
-		$html = $this->getPreview();
+		$html = $this->getMessage()->getHTMLBody();
 		$out = [];
 
 		$regexp = sprintf('/\bhref="(?!%s|%s)/', preg_quote(WWW_URL, '/'), preg_quote(ADMIN_URL, '/'));

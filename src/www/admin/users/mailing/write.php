@@ -34,7 +34,7 @@ $form->runIf('save', function () use ($mailing) {
 if (!$form->hasErrors()) {
 	$form->runIf('content', function() use ($mailing) {
 		$mailing->set('body', trim(f('content') ?? ''));
-		echo $mailing->getHTMLPreview(null, true);
+		echo $mailing->getHTMLPreview(null);
 		exit;
 	});
 }

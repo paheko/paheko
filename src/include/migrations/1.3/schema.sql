@@ -181,6 +181,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS emails_queue_attachments_unique ON emails_queu
 CREATE TABLE IF NOT EXISTS mailings (
 	id INTEGER NOT NULL PRIMARY KEY,
 	subject TEXT NOT NULL,
+	preheader TEXT NULL,
 	body TEXT NULL,
 	sender_name TEXT NULL,
 	sender_email TEXT NULL,
