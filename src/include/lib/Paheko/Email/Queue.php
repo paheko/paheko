@@ -16,16 +16,13 @@ use Paheko\UserTemplate\UserTemplate;
 
 use Paheko\Files\Files;
 
-use const Paheko\{USE_CRON, MAIL_SENDER, MAIL_RETURN_PATH, DISABLE_EMAIL, WWW_URL, ADMIN_URL, SECRET_KEY, MAIL_TEST_RECIPIENTS};
-use const Paheko\{SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURITY, SMTP_HELO_HOSTNAME, SMTP_MAX_MESSAGES_PER_SESSION};
+use const Paheko\{USE_CRON};
 
-use KD2\SMTP;
-use KD2\SMTP_Exception;
 use KD2\Security;
 use KD2\Mail_Message;
 use KD2\DB\EntityManager as EM;
 
-class Emails
+class Queue
 {
 	/**
 	 * Add a message to the sending queue using templates
