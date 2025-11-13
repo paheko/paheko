@@ -4,6 +4,29 @@ namespace Paheko;
 
 $db->beginSchemaUpdate();
 $db->import(__DIR__ . '/1.3.18.sql');
+
+foreach ($db->iterate('SELECT id, fail_log FROM emails WHERE fail_log IS NOT NULL;') as $row) {
+	$log = explode("\n", $row->fail_log);
+
+	foreach ($log as $line) {
+		$line = explode(' - ', $line, 2);
+		$date = \DateTime::createFromFormat('d/m/Y H:i:s', $line[0]);
+
+		if (!$date) {
+			continue;
+		}
+
+		$db->insert('emails_addresses_events', [
+			'id_email' => $row->id,
+			'date'     => $date,
+			'details'  => str_replace('<CRLF>', "\n", $line[1]),
+			'type'     => null
+		]);
+	}
+}
+
+$db->exec('DROP TABLE emails;');
+
 $db->commitSchemaUpdate();
 
 // Delete all WAL/SHM files by making sure the journal mode is DELETE

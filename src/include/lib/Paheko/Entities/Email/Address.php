@@ -17,12 +17,40 @@ class Email extends Entity
 {
 	const TABLE = 'emails';
 
+	const RESEND_VERIFICATION_DELAY = 15;
+
 	/**
 	 * When we reach that number of fails, the address is treated as permanently invalid, unless reset by a verification.
 	 */
-	const FAIL_LIMIT = 5;
+	const SOFT_BOUNCE_LIMIT = 5;
 
-	const RESEND_VERIFICATION_DELAY = 15;
+	const STATUS_UNKNOWN = 0;
+	const STATUS_VERIFIED = 1;
+	const STATUS_INVALID = -1;
+	const STATUS_SOFT_BOUNCE_LIMIT_REACHED = -2;
+	const STATUS_HARD_BOUNCE = -3;
+	const STATUS_OPTOUT = -4;
+	const STATUS_COMPLAINT = -5;
+
+	const STATUS_LIST = [
+		self::STATUS_UNKNOWN => 'OK',
+		self::STATUS_VERIFIED => 'Vérifiée',
+		self::STATUS_INVALID => 'Invalide',
+		self::STATUS_SOFT_BOUNCE_LIMIT_REACHED => 'Trop d\'erreurs',
+		self::STATUS_HARD_BOUNCE => 'Échec',
+		self::STATUS_OPTOUT => 'Refus',
+		self::STATUS_COMPLAINT => 'Plainte',
+	];
+
+	const STATUS_COLORS = [
+		self::STATUS_UNKNOWN => 'steelblue',
+		self::STATUS_VERIFIED => 'darkgreen',
+		self::STATUS_INVALID => 'crimson',
+		self::STATUS_SOFT_BOUNCE_LIMIT_REACHED => 'darkorange',
+		self::STATUS_HARD_BOUNCE => 'darkred',
+		self::STATUS_OPTOUT => 'palevioletred',
+		self::STATUS_COMPLAINT => 'darkmagenta',
+	];
 
 	/**
 	 * Antispam services that require to do a manual action to accept emails
@@ -33,47 +61,16 @@ class Email extends Entity
 
 	protected int $id;
 	protected string $hash;
-	protected bool $verified = false;
-	protected bool $invalid = false;
+	protected int $status = self::STATUS_UNKNOWN;
 	protected int $sent_count = 0;
-	protected int $fail_count = 0;
-	protected ?string $fail_log;
-	protected \DateTime $added;
-	protected ?\DateTime $last_sent;
+	protected int $bounce_count = 0;
 
 	protected bool $accepts_messages = true;
 	protected bool $accepts_reminders = true;
 	protected bool $accepts_mailings = true;
 
-	/**
-	 * Normalize email address and create a hash from this
-	 */
-	static public function getHash(string $email): string
-	{
-		$email = strtolower(trim($email));
-
-		$host = substr($email, strrpos($email, '@')+1);
-		$host = idn_to_ascii($host);
-
-		$email = substr($email, 0, strrpos($email, '@')+1) . $host;
-
-		return sha1($email);
-	}
-
-	static public function getOptoutURL(?string $hash = null, ?int $context = null): string
-	{
-		$hash = hex2bin($hash);
-		$hash = base64_encode($hash);
-		// Make base64 hash valid for URLs
-		$hash = rtrim(strtr($hash, '+/', '-_'), '=');
-		$url = sprintf('%s?un=%s', WWW_URL, $hash);
-
-		if ($context !== null) {
-			$url .= '&c=' . $context;
-		}
-
-		return $url;
-	}
+	protected \DateTime $added;
+	protected ?\DateTime $last_sent;
 
 	static public function acceptsThisMessage(\stdClass $r)
 	{

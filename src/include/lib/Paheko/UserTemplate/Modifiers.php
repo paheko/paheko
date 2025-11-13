@@ -28,7 +28,6 @@ class Modifiers
 		'atom_date',
 		'xml_escape',
 		'cdata_escape',
-		'entities_escape',
 		'json_decode',
 		'json_encode',
 		'minify',
@@ -159,11 +158,6 @@ class Modifiers
 	static public function cdata_escape($str)
 	{
 		return str_replace(']]>', ']]]]><![CDATA[>', (string)$str);
-	}
-
-	static public function entities_escape($str)
-	{
-		return htmlentities((string)$str);
 	}
 
 	static public function json_decode($str)

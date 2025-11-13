@@ -54,6 +54,37 @@ class Addresses
 	];
 
 	/**
+	 * Normalize email address and create a hash from this
+	 */
+	static public function getHash(string $email): string
+	{
+		$email = strtolower(trim($email));
+
+		$host = substr($email, strrpos($email, '@')+1);
+		$host = idn_to_ascii($host);
+
+		$email = substr($email, 0, strrpos($email, '@')+1) . $host;
+
+		return sha1($email);
+	}
+
+	static public function getOptoutURL(?string $hash = null, ?int $context = null): string
+	{
+		$hash = hex2bin($hash);
+		$hash = base64_encode($hash);
+		// Make base64 hash valid for URLs
+		$hash = rtrim(strtr($hash, '+/', '-_'), '=');
+		$url = sprintf('%s?un=%s', WWW_URL, $hash);
+
+		if ($context !== null) {
+			$url .= '&c=' . $context;
+		}
+
+		return $url;
+	}
+
+
+	/**
 	 * Return NULL if address is valid, or a string for an error message if invalid
 	 */
 	static public function checkForErrors(string $email, bool $mx_check = true): ?string

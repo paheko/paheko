@@ -45,6 +45,60 @@ DROP TABLE emails_queue_old;
 
 CREATE INDEX IF NOT EXISTS emails_queue_status ON emails_queue (status);
 
+
+CREATE TABLE IF NOT EXISTS emails_addresses (
+-- List of emails addresses
+-- We are not storing actual email addresses here for privacy reasons
+-- So that we can keep the record (for opt-out reasons) even when the
+-- email address has been removed from the users table
+	id INTEGER NOT NULL PRIMARY KEY,
+	hash TEXT NOT NULL,
+	status INTEGER NOT NULL,
+	bounce_count INTEGER NOT NULL DEFAULT 0,
+	sent_count INTEGER NOT NULL DEFAULT 0,
+	last_sent TEXT NULL,
+	accepts_messages INTEGER NOT NULL DEFAULT 1,
+	accepts_reminders INTEGER NOT NULL DEFAULT 1,
+	accepts_mailings INTEGER NOT NULL DEFAULT 0,
+	added TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO emails_addresses SELECT id,
+	hash,
+	CASE
+		WHEN invalid = 1 THEN -3
+		WHEN optout = 1 THEN -4
+		WHEN verified = 1 THEN 1
+		WHEN fail_count > 5 THEN -2
+		ELSE 0
+	END,
+	fail_count,
+	sent_count,
+	last_sent,
+	accepts_messages,
+	accepts_reminders,
+	accepts_mailings,
+	added
+	FROM emails;
+
+CREATE UNIQUE INDEX IF NOT EXISTS emails_hash ON emails_addresses (hash);
+
+CREATE TABLE IF NOT EXISTS emails_addresses_events (
+-- Events for each email address (message sent, bounce, optout, etc.)
+	id INTEGER NOT NULL PRIMARY KEY,
+	id_email INTEGER NOT NULL REFERENCES emails_addresses(id) ON DELETE CASCADE,
+	date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(date) IS NOT NULL AND datetime(date) = date),
+	type TEXT NULL,
+	details TEXT NULL,
+	details_encoded TEXT NULL -- JSON details for when consent has been granted or removed
+);
+
+CREATE INDEX IF NOT EXISTS emails_addresses_events_id ON emails_addresses_events (id_email);
+
+-- Transfer of email logs to new table will be done in PHP
+--DROP TABLE emails; -- Deleting this table will also happen in PHP
+
+-- Don't migrate attachments, just delete, as they're not used currently
 DROP TABLE emails_queue_attachments;
 
 CREATE TABLE IF NOT EXISTS emails_queue_attachments (
@@ -55,6 +109,8 @@ CREATE TABLE IF NOT EXISTS emails_queue_attachments (
 CREATE UNIQUE INDEX IF NOT EXISTS emails_queue_attachments_unique ON emails_queue_attachments (id_message, id_file);
 
 ALTER TABLE mailings RENAME TO mailings_old;
+
+DROP INDEX IF EXISTS mailings_sent;
 
 CREATE TABLE IF NOT EXISTS mailings (
 	id INTEGER NOT NULL PRIMARY KEY,

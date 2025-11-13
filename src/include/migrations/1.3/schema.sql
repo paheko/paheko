@@ -128,18 +128,16 @@ CREATE TABLE IF NOT EXISTS compromised_passwords_cache_ranges
 	date INTEGER NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS emails (
+CREATE TABLE IF NOT EXISTS emails_addresses (
 -- List of emails addresses
 -- We are not storing actual email addresses here for privacy reasons
 -- So that we can keep the record (for opt-out reasons) even when the
 -- email address has been removed from the users table
 	id INTEGER NOT NULL PRIMARY KEY,
 	hash TEXT NOT NULL,
-	verified INTEGER NOT NULL DEFAULT 0,
-	invalid INTEGER NOT NULL DEFAULT 0,
-	fail_count INTEGER NOT NULL DEFAULT 0,
+	status INTEGER NOT NULL,
+	bounce_count INTEGER NOT NULL DEFAULT 0,
 	sent_count INTEGER NOT NULL DEFAULT 0,
-	fail_log TEXT NULL,
 	last_sent TEXT NULL,
 	accepts_messages INTEGER NOT NULL DEFAULT 1,
 	accepts_reminders INTEGER NOT NULL DEFAULT 1,
@@ -148,6 +146,18 @@ CREATE TABLE IF NOT EXISTS emails (
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS emails_hash ON emails (hash);
+
+CREATE TABLE IF NOT EXISTS emails_addresses_events (
+-- Events for each email address (message sent, bounce, optout, etc.)
+	id INTEGER NOT NULL PRIMARY KEY,
+	id_email INTEGER NOT NULL REFERENCES emails_addresses(id) ON DELETE CASCADE,
+	date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(date) IS NOT NULL AND datetime(date) = date),
+	type TEXT NULL,
+	details TEXT NULL,
+	details_encoded TEXT NULL -- JSON details for when consent has been granted or removed
+);
+
+CREATE INDEX IF NOT EXISTS emails_addresses_events_id ON emails_addresses_events (id_email);
 
 CREATE TABLE IF NOT EXISTS emails_queue (
 -- List of emails waiting to be sent
