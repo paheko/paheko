@@ -3,7 +3,6 @@
 namespace Paheko\Entities\Email;
 
 use Paheko\Config;
-use Paheko\CSV;
 use Paheko\DB;
 use Paheko\DynamicList;
 use Paheko\Entity;
@@ -13,8 +12,6 @@ use Paheko\Utils;
 use Paheko\Email\Emails;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Users;
-use Paheko\UserTemplate\UserTemplate;
-use Paheko\Web\Render\Render;
 
 use Paheko\Entities\Email\Message;
 use Paheko\Entities\Users\DynamicField;
@@ -45,6 +42,8 @@ class Mailing extends Entity
 	 * NULL when the mailing has not been sent yet
 	 */
 	protected ?DateTime $sent;
+
+	protected int $pixel_count = 0;
 
 	/**
 	 * TRUE when the list of recipients has been anonymized
@@ -173,39 +172,47 @@ class Mailing extends Entity
 		}
 	}
 
-	public function listRecipients(): \Generator
+	public function listRecipients(bool $only_valid, int $id): \Generator
 	{
+		$where = '';
+
+		if ($id) {
+			$where .= sprintf(' AND r.id = %d', $id);
+		}
+
+		if ($only_valid) {
+			$where .= sprintf(' AND %s', Addresses::getValidStatusClause('e'));
+		}
+
 		$db = DB::getInstance();
-		$sql = sprintf('SELECT email, extra_data AS data, %s AS _name FROM mailings_recipients WHERE id_mailing = %d ORDER BY id;',
-			$this->getNameFieldsSQL(),
-			$this->id()
+		$sql = sprintf('SELECT r.id_email, r.email, r.extra_data, u.*
+			FROM mailings_recipients
+			WHERE id_mailing = %d %s ORDER BY id;',
+			$this->id(),
+			$where
 		);
 
 		foreach ($db->iterate($sql) as $row) {
-			$data = $row->data ? json_decode($row->data) : null;
-			yield $row->email => [
-				'email' => $row->email,
-				'data' => $data,
-				'_name' => $row->_name ?? null,
-				'pgp_key' => $data->pgp_key ?? null,
+			$data = $row->data ? json_decode($row->data, true) : null;
+			$email = $row->email;
+			$id_email = $row->id_email;
+			$user = null;
+			unset($row->data, $row->email, $row->id_email);
+
+			if (null !== $row->id) {
+				$user = new User;
+				$user->load((array) $row);
+			}
+
+			unset($row);
+
+			yield $email => [
+				'id_email' => $id_email,
+				'data'     => $data,
+				'user'     => $user,
+				'pgp_key'  => $user->pgp_key ?? null,
 			];
 		}
-	}
-
-	protected function getNameFieldsSQL(string $prefix = ''): string
-	{
-		$prefix = $prefix ? $prefix . '.' : $prefix;
-		$fields = DynamicFields::getNameFields();
-		$db = DB::getInstance();
-		$out = [];
-
-		foreach ($fields as $field) {
-			$field = $db->quote('$.' . $field);
-			$out[] = sprintf('json_extract(%sextra_data, %s)', $prefix, $field);
-		}
-
-		$out = implode(' || \' \' || ', $out);
-		return $out;
 	}
 
 	public function isSimilarToOtherRecentMailing(): bool
@@ -266,7 +273,7 @@ class Mailing extends Entity
 			],
 			'name' => [
 				'label' => 'Nom',
-				'select' => $this->getNameFieldsSQL('r'),
+				'select' => DynamicFields::getNameFieldsSQL('u'),
 			],
 			'status' => [
 				'label' => 'Erreur',
@@ -277,7 +284,9 @@ class Mailing extends Entity
 			],
 		];
 
-		$tables = 'mailings_recipients AS r LEFT JOIN emails e ON e.id = r.id_email';
+		$tables = 'mailings_recipients AS r
+			LEFT JOIN emails e ON e.id = r.id_email
+			LEFT JOIN users u ON u.id = r.id_user';
 		$conditions = 'id_mailing = ' . $this->id;
 
 		$list = new DynamicList($columns, $tables, $conditions);
@@ -356,23 +365,19 @@ class Mailing extends Entity
 
 	public function getUserData(?int $id = null): ?array
 	{
+		if (null === $id) {
+			return [];
+		}
+
 		if ($this->sent) {
 			throw new \LogicException('Cannot get user data after mailing is sent');
 		}
 
-		$db = DB::getInstance();
-
-		$where = $id ? 'id = ?' : '1 ORDER BY RANDOM()';
-		$sql = sprintf('SELECT extra_data FROM mailings_recipients WHERE id_mailing = %d AND %s LIMIT 1;', $this->id(), $where);
-		$args = $id ? (array)$id : [];
-
-		$r = $db->firstColumn($sql, ...$args);
-
-		if ($r) {
-			$r = json_decode($r, true);
+		foreach ($this->listRecipients(false, $id) as $r) {
+			return $r->data;
 		}
 
-		return $r;
+		return [];
 	}
 
 	public function getHTMLPreview(?int $id_recipient = null): string
@@ -395,16 +400,12 @@ class Mailing extends Entity
 			throw new UserException('Le message a déjà été envoyé');
 		}
 
-		if (!isset($this->body) || strlen($this->body) < 10) {
-			throw new UserException('Le corps du message est vide ou fait moins de 10 caractères.');
-		}
-
 		$msg = $this->getMessage();
 
 		$db = DB::getInstance();
 		$db->begin();
 
-		foreach ($this->listRecipients() as $r) {
+		foreach ($this->listRecipients(true) as $r) {
 			$msg->queueTo($r->address, $r->data);
 		}
 
@@ -414,28 +415,6 @@ class Mailing extends Entity
 		Log::add(Log::SENT, ['entity' => get_class($this), 'id' => $this->id()]);
 
 		$db->commit();
-
-		// Remove useless data from extra_data field
-		$db = DB::getInstance();
-		$fields = [
-			'id',
-			DynamicFields::getNumberField(),
-		];
-
-		foreach (DynamicFields::getNameFields() as $field) {
-			$fields[] = $field;
-		}
-
-		foreach ($fields as &$field) {
-			$field = sprintf('%s, json_extract(extra_data, %s)', $db->quote($field), $db->quote('$.' . $field));
-		}
-
-		unset($field);
-		$sql = sprintf('UPDATE mailings_recipients SET extra_data = json_object(%s) WHERE id_mailing = ?;', implode(', ', $fields));
-
-		DB::getInstance()->preparedQuery($sql, $this->id());
-
-		Log::add(Log::SENT, ['entity' => get_class($this), 'id' => $this->id()]);
 	}
 
 	public function getDelivrabilityHints(): array

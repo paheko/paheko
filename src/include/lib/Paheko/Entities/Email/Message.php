@@ -258,6 +258,8 @@ class Message extends Entity
 
 	protected function setBodyTemplateFromString(string $str)
 	{
+		// For email templates, allow {{name}} or {{identity}} without the dollar sign, except {{if}} {{literal}} etc.
+		$str = preg_replace('/\{\{\s*((?:(?!if|else|elseif|literal)[a-z_])+?(?:\s*\|\s*[a-z0-9_]+))\s*\}\}/i', '{{\$\$1}}', $str);
 		$str = '{{**keep_whitespaces**}}' . $str;
 		$tpl = UserTemplate::createFromUserString($str);
 
@@ -268,7 +270,11 @@ class Message extends Entity
 		$this->_rendered = false;
 	}
 
-	public function render(array $data = []): void
+	/**
+	 * Render HTML and plaintext body
+	 * @param  array|null $data If NULL then Brindille code inside the body will not be interpreted
+	 */
+	public function render(?array $data = []): void
 	{
 		// Don't render the markdown for each message
 		// when the object has been cloned (eg. for bull messages)
@@ -276,7 +282,8 @@ class Message extends Entity
 			return;
 		}
 
-		if (null !== $this->_template) {
+		if (null !== $data
+			&& null !== $this->_template) {
 			// Replace placeholders in template: {{$name}}, etc.
 			$this->_template->assignArray($data, null, false);
 

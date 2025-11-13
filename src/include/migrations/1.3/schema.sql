@@ -186,7 +186,8 @@ CREATE TABLE IF NOT EXISTS mailings (
 	sender_name TEXT NULL,
 	sender_email TEXT NULL,
 	sent TEXT NULL CHECK (datetime(sent) IS NULL OR datetime(sent) = sent),
-	anonymous INTEGER NOT NULL DEFAULT 0
+	anonymous INTEGER NOT NULL DEFAULT 0,
+	pixel_count INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE INDEX IF NOT EXISTS mailings_sent ON mailings (sent);
@@ -194,7 +195,8 @@ CREATE INDEX IF NOT EXISTS mailings_sent ON mailings (sent);
 CREATE TABLE IF NOT EXISTS mailings_recipients (
 	id INTEGER NOT NULL PRIMARY KEY,
 	id_mailing INTEGER NOT NULL REFERENCES mailings (id) ON DELETE CASCADE,
-	email TEXT NULL,
+	id_user INTEGER NULL REFERENCES users (id) ON DELETE CASCADE,
+	email TEXT NOT NULL,
 	id_email TEXT NULL REFERENCES emails (id) ON DELETE CASCADE,
 	extra_data TEXT NULL
 );
