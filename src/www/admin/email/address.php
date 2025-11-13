@@ -18,4 +18,4 @@ if (!$email) {
 $max_fail_count = Email::FAIL_LIMIT;
 
 $tpl->assign(compact('email', 'address', 'max_fail_count'));
-$tpl->display('users/mailing/status/address.tpl');
+$tpl->display('email/address.tpl');

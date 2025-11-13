@@ -39,4 +39,4 @@ if (null !== $list) {
 
 $tpl->assign(compact('list', 'queue_count', 'limit_date', 'status', 'type'));
 
-$tpl->display('users/mailing/status/index.tpl');
+$tpl->display('email/index.tpl');

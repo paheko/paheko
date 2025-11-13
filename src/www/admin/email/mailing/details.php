@@ -18,4 +18,4 @@ $tpl->assign(compact('mailing', 'hints'));
 $tpl->assign('custom_css', [BASE_URL . 'content.css', 'mailing.css']);
 $tpl->assign('sent', null !== qg('sent'));
 
-$tpl->display('users/mailing/details.tpl');
+$tpl->display('email/mailing/details.tpl');

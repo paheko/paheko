@@ -16,8 +16,8 @@ $csrf_key = 'mailing_delete';
 
 $form->runIf('delete', function () use ($mailing) {
 	$mailing->delete();
-	Utils::redirectParent('!users/mailing/?msg=DELETE');
+	Utils::redirectParent('!email/mailing/?msg=DELETE');
 }, $csrf_key);
 
 $tpl->assign(compact('mailing', 'csrf_key'));
-$tpl->display('users/mailing/delete.tpl');
+$tpl->display('email/mailing/delete.tpl');

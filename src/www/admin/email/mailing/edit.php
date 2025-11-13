@@ -16,10 +16,10 @@ $csrf_key = 'mailing_edit_' . $mailing->id();
 $form->runIf('save', function () use ($mailing) {
 	$mailing->importForm();
 	$mailing->save();
-}, $csrf_key, '!users/mailing/details.php?id=' . $mailing->id);
+}, $csrf_key, '!email/mailing/details.php?id=' . $mailing->id);
 
 $forced_sender = MAIL_SENDER;
 $tpl->assign('custom_css', ['mailing.css']);
 $tpl->assign(compact('mailing', 'csrf_key', 'forced_sender'));
 
-$tpl->display('users/mailing/edit.tpl');
+$tpl->display('email/mailing/edit.tpl');

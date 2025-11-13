@@ -22,8 +22,8 @@ $csrf_key = 'send_verification';
 
 $form->runIf('send', function () use ($email, $address) {
 	$email->sendVerification($address);
-	Utils::redirectParent('!users/mailing/status/?sent');
+	Utils::redirectParent('!email/?sent');
 }, $csrf_key);
 
 $tpl->assign(compact('csrf_key', 'email'));
-$tpl->display('users/mailing/status/verify.tpl');
+$tpl->display('email/verify.tpl');

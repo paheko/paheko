@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Delete\sor\smove\smethods\sto\sthe\scorrect\sclass
-D 2025-11-13T02:04:50.945
+C Move\smailing\sand\semail\stemplates\sout\sof\susers
+D 2025-11-13T02:12:59.599
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -126,7 +126,7 @@ F src/include/lib/Paheko/Entities/Accounting/TransactionSubscriptionsTrait.php a
 F src/include/lib/Paheko/Entities/Accounting/TransactionUsersTrait.php 8eaf8d44e82256c5b56e231be47eb04eca345912b4f6c3d830cf1de0eaa50677
 F src/include/lib/Paheko/Entities/Accounting/Year.php 564a5c8acc9d57ae4b4de3dfc31cc70eb991e2a74e59543c51a6e6e43656639a
 F src/include/lib/Paheko/Entities/Email/Address.php e5e8ea61b4eadad860690f7599c3fc75b10f57d838d7a2c9bd7ace435a66014b
-F src/include/lib/Paheko/Entities/Email/Mailing.php 30680fbfc01c0087ac1a7bc310edc55ef094443f44a1973ba90f64844952fc61
+F src/include/lib/Paheko/Entities/Email/Mailing.php a8de96925b5077a4d430919bea2a058a467d7590fb2d390d1693798458d9dc65
 F src/include/lib/Paheko/Entities/Email/Message.php 294130a1c9dc77d1423d001e08597de1e75c70d94da9bc5859d346ec51730097
 F src/include/lib/Paheko/Entities/Extension.php 35328d801d1921ba239bc8479c9b62c893ca3914cb2cd28eef09844f533cf5e9
 F src/include/lib/Paheko/Entities/Files/File.php 7d3226f0c536c2512b7b9eff41bf434a48375383c718373fc7475c199520761b
@@ -241,7 +241,7 @@ F src/scripts/storage.php 9a0e7ca50ede1112b469282240c2908d2b26c64a89221cce123893
 F src/scripts/upgrade.php b21dcf46403a5c6363dbaa42268717c073f5fd36b6774a71a519f83f249410a3
 F src/sous-domaine.html 570b1ded6010aa8475f0fbd310916c2f171f02147824731a0f8fdb5c15b19492
 F src/templates/_foot.tpl f2436813e5c1ac633a39a4f57abc2956edd9bf5ad1a644f0c21637a01032fc8f
-F src/templates/_head.tpl d70b959f7ab5af9e039defd9727e8a6bb10661de905a6047788773c6193bafcd
+F src/templates/_head.tpl 570002fb52e3a1a0e01a434ff7b1d9b60b626ac9af86497168694d997b06b364
 F src/templates/acc/_table_actions.tpl b564fc53bc4e9d88b2b9f73fe40fde55c69e1b7ddfb6719a97eaa140a835dedc
 F src/templates/acc/_year_select.tpl c5e952a79763b97a8c2245b3d42f8b1f7a3cb51c8fd2d69eb739c1d526948cab
 F src/templates/acc/accounts/_nav.tpl 84ce1f0f134dd7c3bf3c417e6a49fe1455a6feb75e8ea44e98005fe83cb59952
@@ -394,6 +394,20 @@ F src/templates/docs/search.tpl c364d51de8128cd2557e7976a41f35f6535432a303621b4b
 F src/templates/docs/shares.tpl a5ed2806b6fa00564686edf774abfc884d90fe1c37e6538646901b8b6e0376a0
 F src/templates/docs/trash.tpl 4ee250f6f80985d45ff2428a73e34cc711f17e631cc3b750acd3a0589a6cea3d
 F src/templates/docs/trash_delete.tpl 09f17d3438bc7406f8b7b8fbc32c5849a66c293b1d5ede463be41cccf413b777
+F src/templates/email/address.tpl 6e33bdc8478812261f30884be06ca6fcfb3ffb6b6062942e08b91a65b180714d w src/templates/users/mailing/status/address.tpl
+F src/templates/email/index.tpl 5614ad01e3905209932d6d2eb370fc2d7819c49e6b6a420ac2af5741f52396e5 w src/templates/users/mailing/status/index.tpl
+F src/templates/email/mailing/delete.tpl 287d96382be6517ca133c8c8c97d747d57cd39eb2c276141b352d68f647b8fbd w src/templates/users/mailing/delete.tpl
+F src/templates/email/mailing/details.tpl 291c0fd7d51f3defa844953fc68445e039656f9c897a91d7885701c4d5632b17 w src/templates/users/mailing/details.tpl
+F src/templates/email/mailing/edit.tpl 41f78237e19e55cbdff415b4062ba7984c9040ae8c6bc8e037afa637f5639586 w src/templates/users/mailing/edit.tpl
+F src/templates/email/mailing/index.tpl 68ba00d29fac1a6567177cb99fee054470879fdf340c1627b81ffbfe37673f7b w src/templates/users/mailing/index.tpl
+F src/templates/email/mailing/new.tpl aff296b479a1a23847d8f75f483a2000e21e2968ef16faa70ec449e221d60acf w src/templates/users/mailing/new.tpl
+F src/templates/email/mailing/preview.tpl f5dad7fb0b2db4c9a285e133089a724b2cbde5c086048a6eaf4922d2f1c2f712 w src/templates/users/mailing/preview.tpl
+F src/templates/email/mailing/recipient_data.tpl d5ad4ec244404a0c1371d98a774094939fe7326cea8c4c655543b25fd2d43fa5 w src/templates/users/mailing/recipient_data.tpl
+F src/templates/email/mailing/recipients.tpl ff99aa14a3c162b467c11720ddc48ad48037013dd17731cae8664be6d3791f37 w src/templates/users/mailing/recipients.tpl
+F src/templates/email/mailing/send.tpl 938bde843954a367467f05950d3a82aabb0a90ee1d9c582ec09a140117c99ba0 w src/templates/users/mailing/send.tpl
+F src/templates/email/mailing/write.tpl c01a1f649efe9042b10fc7b14b1eafc84c7edf85c60a0ed1c6074aa0fa85c5b3 w src/templates/users/mailing/write.tpl
+F src/templates/email/preferences.tpl 3e62f0a27a2042c98aa9dac04cac48837294821be9666160d46f46f618303994 w src/templates/users/mailing/status/preferences.tpl
+F src/templates/email/verify.tpl 3380d3fc0bc4b18c8158eb6c7ed41ad2d2e65dffa3b0ecd068f8e571a0cd09bf w src/templates/users/mailing/status/verify.tpl
 F src/templates/email_preferences.tpl 3420ff1e9029ccea51304f1de4330505a5e2a794c8f611ad7f56bd47741dc86d
 F src/templates/emails/login_changed.tpl aaf10e05bad319868dacd8a9fbfa9a321e41adcb46d2d106eba45312db5e396b
 F src/templates/emails/password_changed.tpl f2ac7406d790310e1854bc428cbc77f533ee662957b696b29c4d5b739d06766e
@@ -455,7 +469,7 @@ F src/templates/services/user/subscribe.tpl 956f4af913ed7b1c7356653c774fe96edea4
 F src/templates/share.tpl e6fda139751d28bff7dc4ffc5a29bb2c660105889bf13a9c9def4e443a8c204b
 F src/templates/share_password.tpl 986ff9fcb28967a9527766b3e8e493ed53e37ff9de97fce8613209fdf9741fdf
 F src/templates/static/upgrade_post.html 189bab4a7794569385df112f9227bf928be00fb1071fa658d61a2b898b983fc6
-F src/templates/users/_details.tpl 94a045f1f57e3af366b8ccdf88998c9f0e2088c42c5dc278facda6c7ee17bd1a
+F src/templates/users/_details.tpl 9a8761cdf91d2d645b2adb0957eb53fb3fc374a4947951c25348aa9b5ce76cd6
 F src/templates/users/_import_list.tpl bb09b78656e4ad53f128e1cea51402eca330fd9c3a35ac154860323613c698c9
 F src/templates/users/_list_actions.tpl c218a199970319163dfaaedfde7ce993bf0800eef12d5e89a736174d1be142bc
 F src/templates/users/_log_list.tpl 538c88f96d6e0ff48c59f27c472887c9eb6f74dd6eaf97f2b13ec149525ccf03
@@ -470,20 +484,6 @@ F src/templates/users/edit_security.tpl 9f47b76628e1ffdf7862d1038d4a9afcc7e43f61
 F src/templates/users/import.tpl 1b879e449d8a9b4e4d58f8dbefbb15d863f5535f61cd41e9b20620bee71af0e3
 F src/templates/users/index.tpl a21cdece526d86ede56e746f16a17d7c73075d246e080568736ea319a82f392d
 F src/templates/users/log.tpl 6a72a51d09deab43fe3caee7d9d333908c4973898afde9023810983fe3da8e94
-F src/templates/users/mailing/delete.tpl 287d96382be6517ca133c8c8c97d747d57cd39eb2c276141b352d68f647b8fbd
-F src/templates/users/mailing/details.tpl 291c0fd7d51f3defa844953fc68445e039656f9c897a91d7885701c4d5632b17
-F src/templates/users/mailing/edit.tpl 41f78237e19e55cbdff415b4062ba7984c9040ae8c6bc8e037afa637f5639586
-F src/templates/users/mailing/index.tpl 68ba00d29fac1a6567177cb99fee054470879fdf340c1627b81ffbfe37673f7b
-F src/templates/users/mailing/new.tpl aff296b479a1a23847d8f75f483a2000e21e2968ef16faa70ec449e221d60acf
-F src/templates/users/mailing/preview.tpl f5dad7fb0b2db4c9a285e133089a724b2cbde5c086048a6eaf4922d2f1c2f712
-F src/templates/users/mailing/recipient_data.tpl d5ad4ec244404a0c1371d98a774094939fe7326cea8c4c655543b25fd2d43fa5
-F src/templates/users/mailing/recipients.tpl ff99aa14a3c162b467c11720ddc48ad48037013dd17731cae8664be6d3791f37
-F src/templates/users/mailing/send.tpl 938bde843954a367467f05950d3a82aabb0a90ee1d9c582ec09a140117c99ba0
-F src/templates/users/mailing/status/address.tpl 6e33bdc8478812261f30884be06ca6fcfb3ffb6b6062942e08b91a65b180714d
-F src/templates/users/mailing/status/index.tpl 5614ad01e3905209932d6d2eb370fc2d7819c49e6b6a420ac2af5741f52396e5
-F src/templates/users/mailing/status/preferences.tpl 3e62f0a27a2042c98aa9dac04cac48837294821be9666160d46f46f618303994
-F src/templates/users/mailing/status/verify.tpl 3380d3fc0bc4b18c8158eb6c7ed41ad2d2e65dffa3b0ecd068f8e571a0cd09bf
-F src/templates/users/mailing/write.tpl 4556b60e96eef8d831ebe0b576a15d1bfa3a6baab074aac6aac32fb4fcd216f4
 F src/templates/users/message.tpl 1cb27b1ffa7ed0e9fcd10c3a43ca95529432e2fb80f2d7bbcea247ddbb989dd2
 F src/templates/users/new.tpl 5682893ad4b4a9768e4a77851b6304beaa4d257a8c6def8fcc65005c70d33951
 F src/templates/users/search.tpl 7d3b5814116c85ebeb7374d8809dcd7a11e13cd5ed7c20b501f0742650d43759
@@ -632,6 +632,21 @@ F src/www/admin/docs/new_file.php ef48582c25106209af13d979614733f7f73f94293b638a
 F src/www/admin/docs/search.php 60c138d0ec74854f837509f53a7cf89051107b80005b4eb936a89c83dc5c7fb0
 F src/www/admin/docs/shares.php 8b260baa272f2313206255b6440992de62da744cf606105df5178dba0816f0a4
 F src/www/admin/docs/trash.php 03f92ce4889c83fa83153dfcd109ed2be8fcb26347ad4d68b1bd229df1e9f4e4
+F src/www/admin/email/address.php 484f388e4b183c78f5c1311e3894055c770471b08a0236d49dc32d30c8918641 w src/www/admin/users/mailing/status/address.php
+F src/www/admin/email/index.php f728ff4869ff3f782c951a7e0283b7a5ece799192b961469e2cc2e1106a24648 w src/www/admin/users/mailing/status/index.php
+F src/www/admin/email/mailing/_inc.php 1f2037bdd995ca23626651e2065d5862b70abdf78539a63e03886acda05277eb w src/www/admin/users/mailing/_inc.php
+F src/www/admin/email/mailing/delete.php 93619a8279010ce6253f1659d6bfe69d232b01401a167e9d8d92292d695fb2b5 w src/www/admin/users/mailing/delete.php
+F src/www/admin/email/mailing/details.php 8dde922ec1760bfe5c558d4ef967bd892c5ac5b316c86ef7affb76c28ad4f862 w src/www/admin/users/mailing/details.php
+F src/www/admin/email/mailing/edit.php 3b25f8df38e7768b05506614c08f409e0463ad64a99ba1bc5bb1c85fbf3ca97b w src/www/admin/users/mailing/edit.php
+F src/www/admin/email/mailing/index.php cbbd676eda20bb410e1557004178d1d6dd997e499c42ae293502fafda4ba9011 w src/www/admin/users/mailing/index.php
+F src/www/admin/email/mailing/new.php 465b9c8a3f0c0e75a8a3140c923512e0cb9eb8a138488602d2dddcc049023e2c w src/www/admin/users/mailing/new.php
+F src/www/admin/email/mailing/preview.php b0356137a15c194488e452b33eb6764bc3b4f0293aea35a477ecee0802c3e37e w src/www/admin/users/mailing/preview.php
+F src/www/admin/email/mailing/recipient_data.php 7fea6b930c2a1a4e6ceb671b80d3df3c4bf527e041c7cde555b7fe08a46a4290 w src/www/admin/users/mailing/recipient_data.php
+F src/www/admin/email/mailing/recipients.php eb4adfdeb635b99f3b818f0028def31908cd14f8c46498870a310bd13221735d w src/www/admin/users/mailing/recipients.php
+F src/www/admin/email/mailing/send.php bc673364b4ca2445df4c0190353728f66cda3d1e6e234c68f70511efcafcb3e1 w src/www/admin/users/mailing/send.php
+F src/www/admin/email/mailing/write.php f9f3e4ed891a92d8d004d87d8e349bb231acb37e6f45bde421cd5e65a7126af9 w src/www/admin/users/mailing/write.php
+F src/www/admin/email/preferences.php a51f39d9b8858f9416ee0757fd022863b63589eb208c4a1938216e0d3a0f6600 w src/www/admin/users/mailing/status/preferences.php
+F src/www/admin/email/verify.php 9fb8164a810c02010e176919106d73e0c58f28f436fd14bcf6845d50f2ff277f w src/www/admin/users/mailing/status/verify.php
 F src/www/admin/email_preferences.php c7b9fd14d3f12f115e624a4a3731ebfd2a8105062b44f4268b59062874023dee
 F src/www/admin/handle_bounce.php ac546e03a21ec3687a12482fed3753a8e4632fab632297807c72afa9ef5394d6
 F src/www/admin/index.php fccd42856b5d95f35cf3c0999e2581caa35587f460ad1b99b8e52370d55b0925
@@ -771,21 +786,6 @@ F src/www/admin/users/edit_security.php 3caa72c32ff87e734362fb24ee42a71ee190352c
 F src/www/admin/users/import.php e1eb48387330c94d6cb18094d16a266a7a1ef69d619b3f41a858114dda5df078
 F src/www/admin/users/index.php 8d03fbde555bce58d0559f40e57130f5315bbe450ec4e54937b2d15571bbd4e2
 F src/www/admin/users/log.php ce86979364c464eb56b987b37d25cfd33cc0a01812747db835ece2c158d5c5bb
-F src/www/admin/users/mailing/_inc.php 57578032cef46ba1018a6d63b2a9d5c521215e3f474b3b60943bb931abd1a1a3
-F src/www/admin/users/mailing/delete.php aeb8e65039158b7c8ed19b691206f167835ea1f1ecd168c89ccde6366e4e77cc
-F src/www/admin/users/mailing/details.php 798dd20efe5bbb3cb71b3f35b32dc80779fd00bc8e779ec46fd8b1d14a6e4534
-F src/www/admin/users/mailing/edit.php 48b4d5e3a54120aa80d46cf5686c1591abc6fcb1b38fa03d7b0d68a43d589c1a
-F src/www/admin/users/mailing/index.php 1da23b3440d917cdb0757c036ab7a43e8a16864bc9147b769431db98335e788a
-F src/www/admin/users/mailing/new.php 0ae0ecf4fb0b199d76d0c9104647ffddc89f4175c8a035054de02877bf8e9c6e
-F src/www/admin/users/mailing/preview.php 78e41b2ba63dd8782fd4ca1abb5fdc9439c5c6987473973a102e5598422d7049
-F src/www/admin/users/mailing/recipient_data.php 7eb9cf0ebd67d3d7626e6dcee9faa3607de7fdf292c4437ff205642ed38dc24c
-F src/www/admin/users/mailing/recipients.php 0eab354cfc17b56a7eb2dbdd126b957464eac120fcd0add5ca840f71c75af2bd
-F src/www/admin/users/mailing/send.php 18d75bf7b36f3936d263de72e7dc434213ffb82fedd1a7efc17e70d490c71d71
-F src/www/admin/users/mailing/status/address.php 362a4b64e4b308c06920354c7e9e11837f77a0c32e5e52d04a047e1d492529c5
-F src/www/admin/users/mailing/status/index.php 548f93b7a316b91d7039521624461cfaa849e0b4ddb3076490115ea395cdb115
-F src/www/admin/users/mailing/status/preferences.php 444b5e1a0159442455e9a8fa343a4cf25294ee6b9b1363282d02536ad4ec5eb8
-F src/www/admin/users/mailing/status/verify.php 0102711440329e16eaa98e81b4535b9d33f735d94668be5b499c31f46a2aea19
-F src/www/admin/users/mailing/write.php d4d4b49b040759e8ba19fc3f8831bd147097831bf871b0c9f99b4352049154d8
 F src/www/admin/users/message.php 251568c5036acf787d1ef82113598d8978192150cf73a4a01a3eccdcf1e4b394
 F src/www/admin/users/new.php 3a4bc78ae37632aefe26bb04eac46bae9481ecb454ca0bb9200d9cac51093261
 F src/www/admin/users/saved_searches.php cbae2bdad6c708a6a0af69e1c867c7728315e8bf34a1461c69d1e7d40bfdf71d
@@ -834,24 +834,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php 1af6d536239af53dff1e7c1e5720b6006fd3aeb2c48b3f1d8745d2642881929b
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P b8fc8622bab685c3623d58d6e21e1de8a5f0b22e15e7fc7057c3e4c803b92a08
-R 569d4599c296751f7cd6b7c8c4d1ee9c
+P 506b875247e3bb32d2deddc063fee13c60e56e8ec3de2eb9ed0af3900bc13219
+R 8e28d7bcc325986df1bdffb6085c9ed4
 U bohwaz
-Z f7bba28e928d20c0b538e7a74f219c56
+Z 74e3d14886d45257f50206ac305d52ad
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmkVPMIACgkQksnacbiI
-6jQjmQ//Sbb1KMhjHv2Wtisj4SBAW/y5n3dMWLsGirLXmsfOZXlUuGroMyngNR6j
-S6cusO3fspX2DgdWi6cDDZoRqvGrnZyrZtVaJe7K21fQbGyyDbdhU07hPLTMkEuP
-LzTEWrKqRfm+qNFfSy4wcYMKvnlBAJaYrL8TxQL+qN7L9XpnvpCiLUxOtiIQBHeo
-EEytE3uD98T+rGBuX06yT4tsEZM0RONeV+2eBRLASVHsf6bnkTsXJC/LF4Nx+TVi
-RarUHtB1pv3WzGaO8L5P12LwMwXuDeOYCIkwOixgRbNxYKBQ+dIzmmDG0zkBs6eC
-WUX19MN6ly7/WEDi4YCg9HZl9EI8qmq9Sp2CFat3GIKshXO1VPbypvD7bNeQiGFA
-hQZEcuKQQqBMNP1Tll3tj2mIR0ySZj7wLsoHH6gdSOBVQwcgcfYh4t20j+TuzOYi
-hkRpcmdFk5sWi19q0fTbJLangGsq2cqRy4yw8HmwTZM4Nzs6rVxgRAQik0W36kVi
-4M9G5p9HulxdyqjM+TL0SdPNJ8JnUVsqfaKQSD6imomKmP4/8ALjrXBshA8cfawv
-Kx+ZGLomdsTnWWi56gRAln3lZn42frtZJ4+xaheeXrOrlGecbSps71OObAM7rfbB
-IOz9YBOgPYDJTGUzxrZYVKoFzTybFR6sGp3GcbjOVY+FVdD+v20=
-=dhhG
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmkVPqsACgkQksnacbiI
+6jQX3w/+NxpzL7S/bRCP/X+25tUXKgPtpYENT00k46PAfHz0TuWr79Av0WK1LDhm
+T153d49vzpMJOeZqVKtFlDfLT4WKDgu/GdHaT5PbWgxoetr4r+lHAdeaD10grFWp
+Tps04LdIYk1iyVv7zK8SCnxET4Q5EOEm4tL5RsRAauIVMu1B/rMZbC1lRD9+iLZJ
+vHuYZzDS6RjemzsSTQbmKAwBNFDm7JsSOjIye5kCfM6NMEXvqH2P+VwV8yVYsHCL
+vruKCqC7ldM66O2KsJ7iTopfkmpgfclMYXbOLo1Bfmwey+DC5J9dOypN1u2/oco8
+ZFXaoGnchP5QOlFTJyO2/3+tRPoh9Y7jqRkZMU/lrQ+40KZJugLiTinz3Pf6J9Nc
+Yz6QzNTYKXFxoqRWj53mpsIJKhcxVOgtAk39uUT+U5hHg9PqWgNgqJBnf3LO9L6L
+VjtN/+bgeuatZY2eME2k+RigZcPt/K+anC9LHbhw+i76wICHj6x1k7ETwh6YcJjO
+kwX6sOMyhKNgbYNFyJ4c7if+KHK30tkXjpp5jofvSCRaWwqelslsk0WRIJ1MQCkw
+Eu9oo7wRPxpVykLnM2U5VXpqxnYi8r6FcwzPv25RlZvVMh04MdPT0j2dfpQXistz
+UgIBSDMFOUXiUk/vwBkZqff7Khi4KiFWN1LSqRAkvsusRpD9GQI=
+=GEGW
 -----END PGP SIGNATURE-----

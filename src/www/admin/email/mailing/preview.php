@@ -19,14 +19,14 @@ if ($view === 'code') {
 	$text = $mailing->body;
 	$text = htmlspecialchars($text);
 	$tpl->assign('code', $text);
-	$tpl->display('users/mailing/preview.tpl');
+	$tpl->display('email/mailing/preview.tpl');
 }
 elseif ($view === 'text') {
 	$text = $mailing->getTextPreview(null, false);
 	$text = htmlspecialchars($text);
 	$text = Utils::linkifyURLs($text);
 	$tpl->assign('code', $text);
-	$tpl->display('users/mailing/preview.tpl');
+	$tpl->display('email/mailing/preview.tpl');
 }
 else {
 	$text = $mailing->getHTMLPreview((int)qg('preview') ?: null, true);

@@ -27,8 +27,8 @@ $form->runIf('send', function() use ($mailing, $is_similar) {
 	}
 
 	$mailing->send();
-}, $csrf_key, '!users/mailing/details.php?sent&id=' . $mailing->id);
+}, $csrf_key, '!email/mailing/details.php?sent&id=' . $mailing->id);
 
 $tpl->assign(compact('mailing', 'csrf_key', 'is_similar'));
 
-$tpl->display('users/mailing/send.tpl');
+$tpl->display('email/mailing/send.tpl');

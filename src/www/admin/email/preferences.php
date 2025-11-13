@@ -15,9 +15,9 @@ $csrf_key = 'block_email';
 $form->runIf('send', function () use ($email) {
 	$email->adminSetPreferences();
     $email->save();
-}, $csrf_key, '!users/');
+}, $csrf_key, '!email/');
 
 $user_prefs_url = $email->getUserPreferencesURL();
 
 $tpl->assign(compact('csrf_key', 'email', 'address', 'user_prefs_url'));
-$tpl->display('users/mailing/status/preferences.tpl');
+$tpl->display('email/preferences.tpl');

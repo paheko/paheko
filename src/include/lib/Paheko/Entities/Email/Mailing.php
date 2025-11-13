@@ -25,7 +25,7 @@ class Mailing extends Entity
 {
 	const TABLE = 'mailings';
 	const NAME = 'Message collectif';
-	const PRIVATE_URL = '!users/mailing/details.php?id=%d';
+	const PRIVATE_URL = '!email/mailing/details.php?id=%d';
 
 	protected ?int $id = null;
 	protected string $subject;

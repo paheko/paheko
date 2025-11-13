@@ -21,7 +21,7 @@ $form->runIf('save', function () use ($mailing) {
 
 	$js = false !== strpos($_SERVER['HTTP_ACCEPT'] ?? '', '/json');
 
-	$url = '!users/mailing/details.php?id=' . $mailing->id;
+	$url = '!email/mailing/details.php?id=' . $mailing->id;
 	$url = Utils::getLocalURL($url);
 
 	if ($js) {
@@ -44,4 +44,4 @@ $tpl->assign(compact('mailing', 'csrf_key'));
 $tpl->assign('custom_js', ['web_editor.js']);
 $tpl->assign('custom_css', ['web.css', BASE_URL . 'content.css']);
 
-$tpl->display('users/mailing/write.tpl');
+$tpl->display('email/mailing/write.tpl');

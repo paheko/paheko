@@ -24,7 +24,7 @@ $form->runIf($target == 'all' || f('step3'), function () {
 	}
 
 	$m = Mailings::create(f('subject'), $target, $target_id);
-	Utils::redirectDialog('!users/mailing/write.php?id=' . $m->id());
+	Utils::redirectDialog('!email/mailing/write.php?id=' . $m->id());
 }, $csrf_key);
 
 if ($target == 'category') {
@@ -45,4 +45,4 @@ elseif ($target == 'search') {
 
 $tpl->assign(compact('csrf_key', 'target'));
 
-$tpl->display('users/mailing/new.tpl');
+$tpl->display('email/mailing/new.tpl');
