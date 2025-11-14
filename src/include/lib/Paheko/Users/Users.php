@@ -128,7 +128,19 @@ class Users
 			throw new UserException('La recherche ne comporte pas de colonne "id" ou "_user_id", et donc ne permet pas l\'envoi d\'email.');
 		}
 
-		$columns = array_map([$db, 'quoteIdentifier'], $header);
+		// Make sure the list doesn't have duplicates, or the SQL CREATE TABLE query will fail
+		$columns = [];
+		$i = 1;
+
+		foreach ($header as $value) {
+			if (array_key_exists($value, $header)) {
+				$value = 'col' . $i . '_' . $value;
+			}
+
+			$columns[$value] = null;
+		}
+
+		$columns = array_map([$db, 'quoteIdentifier'], array_keys($columns));
 		$columns = implode(', ', $columns);
 
 		// We only need the user id, store it in a temporary table for now
