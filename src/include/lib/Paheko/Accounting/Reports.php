@@ -342,7 +342,7 @@ class Reports
 		}
 		elseif (!empty($criterias['provisional'])) {
 			// Criterias related to lines table cannot be used here, as it's not part of the select
-			unset($criterias['project'], $criterias['projects_only']);
+			unset($criterias['project'], $criterias['projects_only'], $criterias['user']);
 
 			$table_name = md5(random_bytes(10));
 			$sql_create = 'CREATE TEMP TABLE temp_acc_provisional_%s (id_year, id, label, code, type, debit, credit, position, balance, is_debt);
