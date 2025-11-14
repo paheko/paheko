@@ -67,7 +67,6 @@ INSERT INTO emails_addresses SELECT id,
 	hash,
 	CASE
 		WHEN invalid = 1 THEN -3
-		WHEN optout = 1 THEN -4
 		WHEN verified = 1 THEN 1
 		WHEN fail_count > 5 THEN -2
 		ELSE 0

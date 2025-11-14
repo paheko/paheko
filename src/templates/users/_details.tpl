@@ -63,7 +63,7 @@ $fields = DF::getInstance()->all();
 			{if in_array($key, $id_fields)}</strong>{/if}
 		{/if}
 		{if $field.type === 'email' && $value}
-		<?php $email = Email\Emails::getOrCreateEmail($value); ?>
+		<?php $email = Email\Addresses::getOrCreate($value); ?>
 			{if !DISABLE_EMAIL && $show_message_button && !$email_button++ && $email->canSend() && $email.accepts_messages}
 				{linkbutton href="!users/message.php?id=%d"|args:$data.id label="Envoyer un message" shape="mail"}
 			{/if}

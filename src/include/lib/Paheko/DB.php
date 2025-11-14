@@ -7,7 +7,7 @@ use KD2\DB\DB_Exception;
 use KD2\ErrorManager;
 
 use Paheko\Users\DynamicFields;
-use Paheko\Entities\Email\Email;
+use Paheko\Email\Addresses;
 
 class DB extends SQLite3
 {

@@ -6,17 +6,21 @@
 	<fieldset class="message">
 		<legend>Message</legend>
 		<dl>
-			<dt>Expéditeur</dt>
 		{if $is_admin}
-			{input type="radio" name="sender" value="org" default="org" required=true label='Association : "%s" <%s>'|args:$config.org_name:$config.org_email}
+			{input type="radio-btn" name="sender" value="org" default="org" required=true label=$config.org_name prefix_title="Nom de l'expéditeur"}
 			{if $can_email}
-				{input type="radio" name="sender" value="self" required=true label="Membre : %s"|args:$self->getNameAndEmail()}
+				{input type="radio-btn" name="sender" value="self" required=true label=$self->name()}
+			{/if}
+			<?php $sender_email = MAIL_SENDER ?? $config->org_email; ?>
+			{input type="text" name="" default=$sender_email disabled=true label="Adresse de l'expéditeur" class="full-width" required=true}
+			{if MAIL_SENDER_EXPLAIN}
+				<dd class="help"><?=MAIL_SENDER_EXPLAIN?></dd>
 			{/if}
 		{else}
-			<dd>{$self->getNameAndEmail()}</dd>
+			<dd>{$self->name()}</dd>
 		{/if}
 			<dt>Destinataire</dt>
-			<dd>{$recipient->getNameAndEmail()}</dd>
+			<dd><strong>{$recipient->name()}</strong></dd>
 			{input type="text" name="subject" required=true label="Sujet" class="full-width"}
 			{input type="textarea" name="message" required=true label="Message" rows=15 class="full-width"}
 			{input type="checkbox" name="send_copy" value=1 label="Recevoir par e-mail une copie du message envoyé"}

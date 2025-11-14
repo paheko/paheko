@@ -6,16 +6,16 @@ namespace Paheko\Entities\Email;
 use Paheko\Entity;
 use Paheko\Plugins;
 use Paheko\UserException;
-use Paheko\Email\Emails;
+use Paheko\Email\Addresses;
 use Paheko\Email\Templates as EmailTemplates;
 
 use KD2\SMTP;
 
 use const Paheko\{WWW_URL, LOCAL_SECRET_KEY};
 
-class Email extends Entity
+class Address extends Entity
 {
-	const TABLE = 'emails';
+	const TABLE = 'emails_addresses';
 
 	const RESEND_VERIFICATION_DELAY = 15;
 
@@ -29,8 +29,7 @@ class Email extends Entity
 	const STATUS_INVALID = -1;
 	const STATUS_SOFT_BOUNCE_LIMIT_REACHED = -2;
 	const STATUS_HARD_BOUNCE = -3;
-	const STATUS_OPTOUT = -4;
-	const STATUS_COMPLAINT = -5;
+	const STATUS_COMPLAINT = -4;
 
 	const STATUS_LIST = [
 		self::STATUS_UNKNOWN => 'OK',
@@ -38,7 +37,6 @@ class Email extends Entity
 		self::STATUS_INVALID => 'Invalide',
 		self::STATUS_SOFT_BOUNCE_LIMIT_REACHED => 'Trop d\'erreurs',
 		self::STATUS_HARD_BOUNCE => 'Échec',
-		self::STATUS_OPTOUT => 'Refus',
 		self::STATUS_COMPLAINT => 'Plainte',
 	];
 
@@ -48,7 +46,6 @@ class Email extends Entity
 		self::STATUS_INVALID => 'crimson',
 		self::STATUS_SOFT_BOUNCE_LIMIT_REACHED => 'darkorange',
 		self::STATUS_HARD_BOUNCE => 'darkred',
-		self::STATUS_OPTOUT => 'palevioletred',
 		self::STATUS_COMPLAINT => 'darkmagenta',
 	];
 
@@ -145,6 +142,21 @@ class Email extends Entity
 		Plugins::fire('email.address.verified', false, ['address' => $this]);
 
 		return true;
+	}
+
+	public function setAddress(string $address): bool
+	{
+		$this->set('added', new \DateTime);
+		$this->set('hash', Addresses::hash($address));
+
+		$error = Addresses::checkForErrors($address);
+
+		if (null !== $error) {
+			$this->set('status', self::STATUS_INVALID);
+			$this->log($error);
+		}
+
+		return $error === null;
 	}
 
 	public function validate(string $email): bool
