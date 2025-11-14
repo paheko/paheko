@@ -235,6 +235,14 @@ trait FileThumbnailTrait
 			return false;
 		}
 
+		list($w, $h) = $i->getSize();
+
+		// Don't allow super large images: > 6000x6000
+		// as they can cause memory issues, eg. 'cache resources exhausted'
+		if ($w >= 6000 || $h >= 6000) {
+			return false;
+		}
+
 		// Always autorotate first
 		$i->autoRotate();
 

@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Update\smarkdown\sdoc,\smake\sit\sclearer\sthat\ssome\sextensions\swill\sonly\swork\sin\sthe\swebsite
-D 2025-11-14T07:54:57.107
+C Limit\sthe\ssize\sof\simages\swe\sare\strying\sto\sresize
+D 2025-11-14T11:41:01.854
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -130,7 +130,7 @@ F src/include/lib/Paheko/Entities/Extension.php 35328d801d1921ba239bc8479c9b62c8
 F src/include/lib/Paheko/Entities/Files/File.php 7d3226f0c536c2512b7b9eff41bf434a48375383c718373fc7475c199520761b
 F src/include/lib/Paheko/Entities/Files/FilePermissionsTrait.php 193ad5cfa7bf45cce4d031924f182cce55fc597561e04b392dad0ab1eb0665bf
 F src/include/lib/Paheko/Entities/Files/FileSharingTrait.php 9eb32211adac208e6344cc1eaaf4cf168fd3a63359a89ef94a2fccc147c36def
-F src/include/lib/Paheko/Entities/Files/FileThumbnailTrait.php ada85a64d895aa6b2c3b06ad979411f6dd20ba98c51cc6b3342362267be0f9ea
+F src/include/lib/Paheko/Entities/Files/FileThumbnailTrait.php 0d55e035ba1784a5bf3222e50ab70632f8f472a2c4d1c174bbd8ff5e17a34ca0
 F src/include/lib/Paheko/Entities/Files/FileVersionsTrait.php fc54a29afb134b5d42f7b4783e8712ec8d03c71c3604a7df3d591fd5eab66a4e
 F src/include/lib/Paheko/Entities/Files/FileWOPITrait.php 5d8ad263db382789246bec09553d4000f391e3485a6baaf83f5ff7a4098f1ca6
 F src/include/lib/Paheko/Entities/Files/Share.php 8812be81f0e699af672fed2501ee3ee79a80acf9e96f22eb1a39ac7efbeda573
@@ -829,24 +829,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php 1af6d536239af53dff1e7c1e5720b6006fd3aeb2c48b3f1d8745d2642881929b
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 3cc03c27b77dfc5616f88c62bc7b85b8d04863d893c925d56fcce8e5c9d34506
-R 5e3036bc2390c255b43b825510f14b69
+P fa8d14e0da019842e968dd6e61bda87a1f10a38d560c7498d5d6efbffc50dd49
+R 1177510c8fdc48471ba284fc3894c524
 U bohwaz
-Z c808bbd22b3d782dee55734c011e2ddf
+Z 8392d973ddcb79e448f7c9e8904dc874
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmkW4FEACgkQksnacbiI
-6jRYYw/9Etqkh6eOuVpbv94EXc9qcKkcS8zyCnoJu16Dt5U7MY60xiOU2iOQjGVq
-Wb7WrFuYHOH+hQHJkF2yPUaRLSVg9F7RJo0YUACc4+bJRQXLPM94n3QpOrDTpdvH
-7VgtbfBK5T/pUBbLFjULVNc/Mm14hSzpPl1v6JJiH4UGR5FwZnH6U96R+0eHxv3A
-9xddi2+iHBW08oCWyz4BKA0BDzacy/VsseyGGruwhMeYMO6PlQKhGbF/VgiHeubU
-P+gHw4D0Txj49/7mP0vybqAhhyG1w3Ux5D4ZTNlABeumk+JXOlqrQAgIBhPfyCS2
-xMsUD/uSE+5Y2WgB+PE/9gZPxOiBDTFXG5FKC9+3ICcueqR4SOVQbvGRGHRe0YCp
-6lzkh2/yXjOaG135WHDmauVzqefyCwehRB5Y+fnSdIU8GegSZqOaldZDjgj+Pbgl
-6jJ4qtzjo/P/l2KNoioC/1wkkhvlvm9SvCmEshSGnnLvqLjach60rydm8yXjOOKV
-bdsOoS/hy4PvGZNFqoVYaL3jQOeD+9i5n7ClL9ok6zitIZXs2Z6CuMSqFV+QGedU
-YeQIzlr+YAJ9lqsgolCxeTgSgbllRFjJ8c9778LUfaL0ufNy0kMb9hIQKfFnVjKV
-pqOmsYWRCR5ZBesBR6X0JikzdH3DXFK5VnRvR4+UArCCnp+CoDU=
-=2VyR
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmkXFU0ACgkQksnacbiI
+6jStQw/9ETNsd+7dOsKgb9ap3QhfAPSb8SbfL4lh7Xjzm3CO2MS+YpLaYdTl6BKB
+UZZxlK+pInqmSxX9xQn9qRTAKVAr1Agfxd83hZX3YwslWwo0+jC0ffM2Uvv3+mdU
+0FysI/csXf+r3tQYDWsn5Z549Kn3jJhJDrFmMkKQS05+Bc1CbyK4l3rMHWZwz1FB
+UXrm273luPHHBk3xRY+m58TZWov5FFLeJVONDYV2qEtPBXIcCMa+d9lZetXYfmIb
+FKfayXmLq3al54WPf3W9NmCpQlJTZyB+vHDTfKlueLwCYeXBgfa9AaP9EaoQmF1c
+p+Zug2f+NipxdYXKrqcGUXgCcT2WAtybd2Drw1CTjV8UA6VLZ7iLexpeDe8QiSxO
+gwjRq/NFOfIogNuyLn587yztVQWugSi4PMnpRTcRIya7bhvX5v1W9ORGTjYLPgpD
+nE+ftvfAzQOJMAlEolQAPHyGlSou53+1SpnlPIUWXj5fnPHQTFUpdjfuaovL5ozU
+viHv8j4+56PjxCuUBBClxNyNrSbYMj4Y5rGIs5z03qYbcTAuqOv8EewgqgWtrGTe
+AbauMb7zWypziVXktxw0xuPBZE6k6XhU2X1P8URWjan0aYrdi4NYPDN91eLMlOCr
+FESb33//TBjJGd05RIkfmFt/QG/md4S+qTqGu1VqMXC9+CMrDyo=
+=IT2j
 -----END PGP SIGNATURE-----
