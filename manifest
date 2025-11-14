@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Fix\sconflict\sbetween\sadmin\srules\sand\srendering\srules
-D 2025-11-14T07:32:39.994
+C Update\smarkdown\sdoc,\smake\sit\sclearer\sthat\ssome\sextensions\swill\sonly\swork\sin\sthe\swebsite
+D 2025-11-14T07:54:57.107
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -51,7 +51,7 @@ F doc/admin/brindille_functions.md 9f916c7c32fe51ae1be4af141db56ee471860fddfbb4c
 F doc/admin/brindille_modifiers.md fb26d6d11622951f5adcb17a8ec3c14e80ba01b1c2e30cb6cb6471cb39ec952a
 F doc/admin/brindille_sections.md 56e33e5df8e05e95741e8d9ca1400bf3d9b14ce7343546c7aa8fd74b49ef20f2
 F doc/admin/keyboard.md 2d5ed41b62b15934059ec9e3a2432d6c299d10b1492d52bea45cd9f49269514b
-F doc/admin/markdown.md 41c5f87cab9279ceaaf76a32ccb2cd5ca6e5e693f450429cbb073131eccb0788
+F doc/admin/markdown.md 51b5dcfe12345429721abf89598d4500310f4aa64aba5da78123e130155584da
 F doc/admin/markdown_quickref.md 6205777c597575cb8d3750325251ef59352ac4daa8489f8e75cf518a6eb3107d
 F doc/admin/modules.md bbffc1d7287a8972927638140de596126bcbe15cb5aa3a919d6b204d111d2d54
 F doc/admin/skriv.md 840d985008180b189986c8006760b2945e5e55138429c44b0240bd86d5936a1f
@@ -687,7 +687,7 @@ F src/www/admin/static/doc/brindille_functions.html 3a4cf65a7d3877523d64b7bd1745
 F src/www/admin/static/doc/brindille_modifiers.html c19aaa4fbf58b4ba4a9bb55e1c33fcb404f04eddd9687412eb50a6f57d777c21
 F src/www/admin/static/doc/brindille_sections.html 4a387ac540814359659d27f0b98e47f99963071d1a61c9cebabe993972044352
 F src/www/admin/static/doc/keyboard.html 624d3453026251f6ff900bab725d7237124f6bc5bbafab03e39e7b269e7b1470
-F src/www/admin/static/doc/markdown.html e5e6cdbc99942233f1561897c5c3a51825869b3b97cc998c9420097d5b8e3bc8
+F src/www/admin/static/doc/markdown.html 86ac7584e2e4d36f87822641767f354f14520c542111f4ef706ef470a639fef1
 F src/www/admin/static/doc/markdown_quickref.html 903586f832650a23b0ecaf95c70cf591a6bee74d2c37bd224d164041d03e020b
 F src/www/admin/static/doc/modules.html cda5616669cc5b66de17b08a60672b5375a262c21f3ec22dd91feb933667285f
 F src/www/admin/static/doc/shapes.png cb46b164ccc62541b94dfa202494a947b7147f083701bfe244db5c3243178d9e
@@ -829,24 +829,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php 1af6d536239af53dff1e7c1e5720b6006fd3aeb2c48b3f1d8745d2642881929b
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P f4707da1b1d760f85bc836783fbb618ac08139f56d600cd17634544b52175fc8
-R 328705d1305b2233818f11af67a98eed
+P 3cc03c27b77dfc5616f88c62bc7b85b8d04863d893c925d56fcce8e5c9d34506
+R 5e3036bc2390c255b43b825510f14b69
 U bohwaz
-Z adefb54ba7bdae98d84a0e8300d5783e
+Z c808bbd22b3d782dee55734c011e2ddf
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmkW2xgACgkQksnacbiI
-6jR04A//cwCuUNfNLyQSbdVDemqePDYGGT0hH6vyKkxcrevMGGHzZWNw0K96B5Fu
-Trfq8ia6dqp6IKLgtbUd59/29tzqNC5NSxdB80vmjGdJ6+ESqZzdsisQpXKF+4P+
-d9yy9hioHoNsu4ucbbdiWmNfDgWi9S74X09tJrEP7DrsAMZ5Eyb/iWoYRGLAutnt
-cJnxdH2MfRet/uvVaMpgpiEnXKmu0ZrpROyMXBr2t2jqwAGNuKrBnTaPx/rQvDwh
-8aq90bPWYPK1fsmYcdtjJJasaRFe0bAIOD1hyGO4BHrh9FSmS3l8fKLF6UI01jcE
-QhcCuIF0fQ0BquTi1OgKLdvfDlx+goVio8ctCnQuvnyN0PwBg6OYgcqpzA8awaZ9
-TyWJD3dW58GSnRS+DJvMdyvDWz62mcrqVGnAheR6QxeJ49KvO876Xcm9Hsb31uSH
-NFtOmASWQKkCrfIWBA3/dBvODxIWZBAzraPVmmmFFdbEgK9gQ5hGIg2Yir18fW0F
-1X/I6MwQf5b4fTMQxqJRHjqwuG/iVu9nnl4G+0Dp/TdwY64Dsz7mnOHMTsewT43N
-/EkQqguUgFqdC04WO/6Caci3qNLa34XDSIr2RYYEsrHiHP7vqUrIkDLhHICxrqgL
-F5HVzfPqDN4WjieSGwjrV4qFjHD5gx7zEGLK/XLBYcdqX52o//A=
-=xuIp
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmkW4FEACgkQksnacbiI
+6jRYYw/9Etqkh6eOuVpbv94EXc9qcKkcS8zyCnoJu16Dt5U7MY60xiOU2iOQjGVq
+Wb7WrFuYHOH+hQHJkF2yPUaRLSVg9F7RJo0YUACc4+bJRQXLPM94n3QpOrDTpdvH
+7VgtbfBK5T/pUBbLFjULVNc/Mm14hSzpPl1v6JJiH4UGR5FwZnH6U96R+0eHxv3A
+9xddi2+iHBW08oCWyz4BKA0BDzacy/VsseyGGruwhMeYMO6PlQKhGbF/VgiHeubU
+P+gHw4D0Txj49/7mP0vybqAhhyG1w3Ux5D4ZTNlABeumk+JXOlqrQAgIBhPfyCS2
+xMsUD/uSE+5Y2WgB+PE/9gZPxOiBDTFXG5FKC9+3ICcueqR4SOVQbvGRGHRe0YCp
+6lzkh2/yXjOaG135WHDmauVzqefyCwehRB5Y+fnSdIU8GegSZqOaldZDjgj+Pbgl
+6jJ4qtzjo/P/l2KNoioC/1wkkhvlvm9SvCmEshSGnnLvqLjach60rydm8yXjOOKV
+bdsOoS/hy4PvGZNFqoVYaL3jQOeD+9i5n7ClL9ok6zitIZXs2Z6CuMSqFV+QGedU
+YeQIzlr+YAJ9lqsgolCxeTgSgbllRFjJ8c9778LUfaL0ufNy0kMb9hIQKfFnVjKV
+pqOmsYWRCR5ZBesBR6X0JikzdH3DXFK5VnRvR4+UArCCnp+CoDU=
+=2VyR
 -----END PGP SIGNATURE-----
