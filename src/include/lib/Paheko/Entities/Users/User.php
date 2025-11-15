@@ -20,6 +20,7 @@ use Paheko\Files\Files;
 
 use Paheko\Users\Categories;
 use Paheko\Email\Addresses;
+use Paheko\Email\Queue;
 use Paheko\Email\Templates as EmailTemplates;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
@@ -714,17 +715,34 @@ class User extends Entity
 		return DB::getInstance()->getGrouped(sprintf('SELECT id, %s AS name FROM %s WHERE id_parent = ? AND id != ?;', $name, self::TABLE), $this->id_parent, $this->id());
 	}
 
-	public function sendMessage(string $subject, string $message, bool $send_copy, ?User $from = null)
+	public function sendMessage(string $subject, string $body, bool $send_copy, ?User $from = null)
 	{
 		$config = Config::getInstance();
 		$email_field = DynamicFields::getFirstEmailField();
 
 		$from = $from ? $from->getNameAndEmail() : null;
 
-		Emails::queue(Emails::CONTEXT_PRIVATE, [$this->{$email_field} => ['pgp_key' => $this->pgp_key]], $from, $subject, $message);
+		$message = Queue::createMessage($message::CONTEXT_PRIVATE);
+		$message->import([
+			'subject'        => $subject,
+			'body'           => $body,
+			'id_user'        => $this->id(),
+			'recipient'      => $this->email(),
+			'recipient_name' => $this->name(),
+		]);
+
+		if ($from) {
+			$message->set('sender', $from->getNameAndEmail());
+		}
+
+		$message->queue();
 
 		if ($send_copy) {
-			Emails::queue(Emails::CONTEXT_PRIVATE, [$config->org_email], null, $subject, $message);
+			$address = $from ? $from->email() : $config->org_email;
+			$message = clone $message;
+			$message->set('body', sprintf('Message envoyé à : %s', $this->getNameAndEmail()) . "\n\n" . $body);
+			$message->set('recipient', $address);
+			$message->queue();
 		}
 	}
 

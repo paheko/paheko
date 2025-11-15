@@ -52,6 +52,7 @@ class Message extends Entity
 	protected ?string $reply_to = null;
 
 	protected string $recipient;
+	protected ?string $recipient_name = null;
 	protected ?string $recipient_pgp_key = null;
 	protected int $id_recipient;
 	protected ?int $id_user = null;
@@ -102,8 +103,8 @@ class Message extends Entity
 
 	public function selfCheck(): void
 	{
-		$this->assert(in_array($this->context, self::CONTEXT_LIST), 'Contexte inconnu');
-		$this->assert(in_array($this->status, self::STATUS_LIST), 'Statut inconnu');
+		$this->assert(array_key_exists($this->context, self::CONTEXT_LIST));
+		$this->assert(array_key_exists($this->status, self::STATUS_LIST));
 		$this->assert(strlen($this->subject), 'Sujet vide');
 		$this->assert(strlen($this->body), 'Corps vide');
 		$this->assert(strlen($this->recipient), 'Destinataire absent');
@@ -458,14 +459,21 @@ class Message extends Entity
 
 		$message->setHeader('Feedback-ID', $feedback_id);
 		$message->setHeader('From', $this->sender ?? self::getDefaultFromHeader());
-		$message->setHeader('To', $this->recipient);
 		$message->setHeader('Subject', $this->subject);
+
+		if ($this->recipient_name) {
+			$message->setHeader('To', self::getAddressHeader($this->recipient_name, $this->recipient));
+		}
+		else {
+			$message->setHeader('To', $this->recipient);
+		}
 
 		if (!$message->getFrom()) {
 			$message->setHeader('From', self::getFromHeader());
 		}
 
-		if (MAIL_SENDER) {
+		if (MAIL_SENDER
+			&& false === strpos(MAIL_SENDER, $message->getHeader('From'))) {
 			$message->setHeader('Reply-To', $message->getFromAddress());
 			$message->setHeader('From', self::getFromHeader($message->getFromName(), MAIL_SENDER));
 		}
@@ -607,23 +615,19 @@ class Message extends Entity
 		return $id;
 	}
 
-	static public function getFromHeader(?string $name = null, ?string $email = null): string
+	static public function getAddressHeader(string $name, string $address): string
 	{
-		$config = Config::getInstance();
-
-		if (null === $name) {
-			$name = $config->org_name;
-		}
-		if (null === $email) {
-			$email = $config->org_email;
-		}
-
 		$name = str_replace('"', '\\"', $name);
 		$name = str_replace(',', '', $name); // Remove commas
 
-		return sprintf('"%s" <%s>', $name, $email);
+		return sprintf('"%s" <%s>', $name, $address);
 	}
 
+	static public function getFromHeader(?string $name = null, ?string $email = null): string
+	{
+		$config = Config::getInstance();
+		return self::getAddressHeader($name ?? $config->org_name, $email ?? $config->org_email);
+	}
 
 	/**
 	 * Redirect to external resource

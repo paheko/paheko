@@ -8,7 +8,8 @@ use Paheko\DynamicList;
 use Paheko\Plugins;
 use Paheko\UserException;
 use Paheko\Utils;
-use Paheko\Entities\Email\Email;
+use Paheko\Entities\Email\Address;
+use Paheko\Entities\Email\Message;
 use Paheko\Entities\Files\File;
 use Paheko\Entities\Users\User;
 use Paheko\Users\DynamicFields;
@@ -24,6 +25,14 @@ use KD2\DB\EntityManager as EM;
 
 class Queue
 {
+	static public function createMessage(int $context): Message
+	{
+		$m = new Message;
+		$m->set('context', $context);
+		$m->set('sender', $m::getFromHeader());
+		return $m;
+	}
+
 	/**
 	 * Add a message to the sending queue using templates
 	 * @param  int          $context

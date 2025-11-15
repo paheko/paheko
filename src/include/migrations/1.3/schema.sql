@@ -170,6 +170,7 @@ CREATE TABLE IF NOT EXISTS emails_queue (
 	sender TEXT NULL,
 	reply_to TEXT NULL,
 	recipient TEXT NOT NULL,
+	recipient_name TEXT NULL,
 	recipient_pgp_key TEXT NULL,
 	id_recipient INTEGER NOT NULL REFERENCES emails_addresses (id) ON DELETE CASCADE,
 	id_user INTEGER NULL REFERENCES users (id) ON DELETE CASCADE,
