@@ -4,7 +4,7 @@ namespace Paheko;
 
 use Paheko\Users\DynamicFields;
 use Paheko\Email\Emails;
-use Paheko\Entities\Email\Email;
+use Paheko\Email\Addresses;
 
 $db = DB::getInstance();
 
@@ -18,34 +18,14 @@ $email_fields = DynamicFields::getEmailFields();
 
 if (count($email_fields)) {
 	$db->begin();
-	$email_fields = array_map([$db, 'quoteIdentifier'], $email_fields);
+	$sql = [];
 
-	$sql = sprintf('SELECT %s FROM users;', implode(', ', $email_fields));
+	foreach ($email_fields as $field) {
+		$sql[] = sprintf('INSERT OR IGNORE INTO emails (hash) SELECT email_hash(%s) FROM users WHERE %1$s IS NOT NULL AND %1$s != \'\';', $db->quoteIdentifier($field));
+	}
 
-	foreach ($db->iterate($sql) as $row) {
-
-		foreach ($row as $address) {
-			if (null === $address) {
-				continue;
-			}
-
-			$message = null;
-
-			try {
-				Email::validateAddress($address, false);
-			}
-			catch (UserException $e) {
-				$message = $e->getMessage();
-			}
-
-			$email = Emails::getOrCreateEmail($address);
-
-			if ($message) {
-				$email->hasBounced('hard', $message);
-			}
-
-			$email->save();
-		}
+	if (count($sql)) {
+		$db->exec(implode("\n", $sql));
 	}
 
 	$db->commit();
