@@ -25,6 +25,10 @@ $codes = array_filter($codes);
 $id_chart = intval($_GET['id_chart'] ?? 0);
 $id_year = intval($_GET['id_year'] ?? 0);
 
+if (isset($_GET['year'])) {
+	throw new \InvalidArgumentException('"year" query parameter has been removed, use "id_year" instead');
+}
+
 if ($id_chart && $id_year) {
 	throw new UserException('Invalid call: id_chart and id_year cannot be specified at the same time', 400);
 }
