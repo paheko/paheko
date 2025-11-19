@@ -5,13 +5,13 @@
 			{if $criterias.provisional && $current === 'statement'}
 				{linkbutton shape="eye-off" href="?%s"|args:$criterias_query_no_provisional label="Cacher le prévisionnel"}
 				{linkbutton shape="edit" href="!acc/years/provisional.php?id=%d"|args:$year.id label="Modifier le prévisionnel"}
-			{elseif !$criterias.before && !$criterias.compare_year && $current === 'statement' && !$criterias.project}
+			{elseif !$criterias.before && !$criterias.compare_year && $current === 'statement' && !$criterias.project && !$criterias.user}
 				{linkbutton shape="eye" href="?%s&provisional=1"|args:$criterias_query_no_provisional label="Afficher le prévisionnel"}
 			{/if}
 			{if !$criterias.provisional && !$criterias.before && !$criterias.compare_year && !empty($allow_compare) && !empty($other_years)}
 				{linkbutton shape="list-ol" href="#" id="compareFormButton" label="Comparer" onclick="var a = $('#compareForm'); a.disabled = false; g.toggle(a, true); this.remove(); var a = $('#filterFormButton'); a ? a.remove() : null; return false;"}
 			{/if}
-			{if !$criterias.provisional && !$criterias.compare_year  && !empty($allow_filter) && !$criterias.before && !$criterias.after}
+			{if !$criterias.provisional && !$criterias.compare_year && !empty($allow_filter) && !$criterias.before && !$criterias.after}
 				{linkbutton shape="search" href="#" id="filterFormButton" label="Filtrer" onclick="var a = $('#filterForm'); a.disabled = false; g.toggle(a, true); this.remove(); var a = $('#compareFormButton'); a ? a.remove() : null; return false;"}
 			{/if}
 			{if $current !== 'graphs'}

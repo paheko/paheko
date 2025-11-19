@@ -435,7 +435,7 @@ class Sections
 		}
 
 		unset($params['module']);
-		$params['tables'] = $table;
+		$params['tables'] = sprintf('%s AS a', $table);
 
 		// Cannot use json_each with authorizer before SQLite 3.41.0
 		// @see https://sqlite.org/forum/forumpost/d28110be11
@@ -453,6 +453,7 @@ class Sections
 			unset($params['each']);
 		}
 		elseif (isset($params['each'])) {
+			$params['select'] = 'value';
 			$params['tables'] = sprintf('%s AS a, json_each(a.document, %s)', $table, $db->quote('$.' . trim($params['each'])));
 			unset($params['each']);
 		}
@@ -500,7 +501,7 @@ class Sections
 			unset($params[$key]);
 		}
 
-		$s = 'id, key, document AS json';
+		$s = 'a.id, a.key, a.document AS json';
 
 		if (isset($params['select'])) {
 			$params['select'] = $s . ', ' . self::_moduleReplaceJSONExtract($params['select'], $table);

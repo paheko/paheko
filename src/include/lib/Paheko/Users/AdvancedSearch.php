@@ -153,9 +153,8 @@ class AdvancedSearch extends A_S
 				$column['type'] = $type;
 				$column['null'] = $field->hasNullValues();
 			}
-
-			if ($field->type == 'tel') {
-				$column['normalize'] = 'tel';
+			elseif ($field->type == 'tel') {
+				$column['type'] = 'tel';
 			}
 
 			$columns[$name] = $column;
