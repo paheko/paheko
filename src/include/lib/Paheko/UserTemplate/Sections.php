@@ -448,7 +448,7 @@ class Sections
 				$t, $table, $db->quote('$.' . trim($params['each']))
 			));
 
-			$params['tables'] = $t;
+			$params['tables'] = $t . ' AS a';
 			$params['select'] = 'value';
 			unset($params['each']);
 		}
