@@ -757,8 +757,8 @@ class Account extends Entity
 		$tables = 'acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
 			INNER JOIN acc_accounts a ON a.id = l.id_account';
-		$conditions = sprintf('a.code = :code AND l.credit = 0 AND NOT (t.status & %d) AND NOT (t.status & %d)',
-			Transaction::STATUS_DEPOSITED,
+		$conditions = sprintf('a.code = :code AND l.credit = 0 AND NOT (l.status & %d) AND NOT (t.status & %d)',
+			Line::STATUS_DEPOSITED,
 			Transaction::STATUS_OPENING_BALANCE
 		);
 
@@ -792,12 +792,12 @@ class Account extends Entity
 			WHERE t.id_year != ?
 				AND a.code = ?
 				AND l.credit = 0
-				AND NOT (t.status & ?)
+				AND NOT (l.status & ?)
 				AND NOT (t.status & ?)
 			LIMIT 1;',
 			$id_year,
 			$this->code,
-			Transaction::STATUS_DEPOSITED,
+			Line::STATUS_DEPOSITED,
 			Transaction::STATUS_OPENING_BALANCE
 		);
 	}
@@ -809,7 +809,7 @@ class Account extends Entity
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
 			INNER JOIN acc_accounts a ON a.id = l.id_account
 			WHERE %s a.code = ? AND l.credit = 0
-				AND NOT (t.status & ?)
+				AND NOT (l.status & ?)
 				AND NOT (t.status & ?)
 			ORDER BY t.date, t.id;';
 
@@ -817,7 +817,7 @@ class Account extends Entity
 
 		$deposit_balance = DB::getInstance()->firstColumn($sql,
 			$this->code,
-			Transaction::STATUS_DEPOSITED,
+			Line::STATUS_DEPOSITED,
 			Transaction::STATUS_OPENING_BALANCE
 		);
 
@@ -826,28 +826,14 @@ class Account extends Entity
 		return $account_balance - $deposit_balance;
 	}
 
-	/**
-	 * @todo FIXME move to line-based deposit
-	 */
-	public function markTransactionsAsDeposited(array $ids)
+	public function markLinesAsDeposited(array $ids)
 	{
 		if ($this->type !== self::TYPE_OUTSTANDING) {
 			throw new \LogicException('This account cannot deposit transactions.');
 		}
 
 		$ids = implode(',', array_map('intval', $ids));
-		$sql = sprintf('UPDATE acc_transactions SET status = (status | %d) WHERE id IN (%s);', Transaction::STATUS_DEPOSITED, $ids);
-		DB::getInstance()->exec($sql);
-	}
-
-	public function markTransactionsLinesAsDeposited(array $ids)
-	{
-		if ($this->type !== self::TYPE_OUTSTANDING) {
-			throw new \LogicException('This account cannot deposit transactions.');
-		}
-
-		$ids = implode(',', array_map('intval', $ids));
-		$sql = sprintf('UPDATE acc_transactions SET status = (status | %d) WHERE id IN (SELECT DISTINCT id_transaction FROM acc_transactions_lines WHERE id IN(%s));', Transaction::STATUS_DEPOSITED, $ids);
+		$sql = sprintf('UPDATE acc_transactions_lines SET status = (status | %d) WHERE id IN (%s);', Line::STATUS_DEPOSITED, $ids);
 		DB::getInstance()->exec($sql);
 	}
 

@@ -21,6 +21,10 @@ class Line extends Entity
 	protected ?string $label = null;
 	protected bool $reconciled = false;
 	protected ?int $id_project = null;
+	protected int $status = 0;
+
+	// Moved from transaction
+	const STATUS_DEPOSITED = 4;
 
 	static public function create(int $id_account, int $credit, int $debit, ?string $label = null, ?string $reference = null): Line
 	{
@@ -77,4 +81,24 @@ class Line extends Entity
 		];
 	}
 
+
+	public function removeStatus(int $property): void
+	{
+		$this->set('status', $this->status & ~$property);
+	}
+
+	public function addStatus(int $property): void
+	{
+		$this->set('status', $this->status | $property);
+	}
+
+	public function hasStatus(int $property): bool
+	{
+		return boolval($this->status & $property);
+	}
+
+	public function isDeposited(): bool
+	{
+		return $this->hasStatus(self::STATUS_DEPOSITED);
+	}
 }

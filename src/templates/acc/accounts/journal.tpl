@@ -112,15 +112,6 @@
 			{if isset($line.reconciled)}
 				<td>{if $line.reconciled}{icon title="Rapprochée" shape="check"}{/if}</td>
 			{/if}
-			{* Deposit status, might be consufing
-			<td>
-				{if $account.type === $account::TYPE_OUTSTANDING && $line.debit}
-					{if !($line.status & Entities\Accounting\Transaction::STATUS_DEPOSITED)}
-						{icon shape="alert" title="Cette opération n'a pas été déposée"}
-					{/if}
-				{/if}
-			</td>
-			*}
 			<td class="actions">
 			{if ($line.status & Entities\Accounting\Transaction::STATUS_WAITING)}
 				{if $line.type == Entities\Accounting\Transaction::TYPE_DEBT}

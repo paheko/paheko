@@ -1063,10 +1063,12 @@ class CommonFunctions
 			$params['color'] = self::TAG_PRESETS[$p][1];
 		}
 
+		$label = htmlspecialchars($params['label'] ?? '');
+
 		return sprintf('<span class="tag%s" style="--tag-color: %s;">%s</span>',
 			!empty($params['small']) ? ' small' : '',
 			htmlspecialchars($params['color'] ?? '#999'),
-			htmlspecialchars($params['label'] ?? '')
+			$label
 		);
 	}
 }

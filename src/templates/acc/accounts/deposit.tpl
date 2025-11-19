@@ -12,6 +12,12 @@
 </p>
 {/if}
 
+{if isset($_GET['marked'])}
+<p class="confirm block">
+	Les lignes ont bien été marquées comme déposées.
+</p>
+{/if}
+
 {form_errors}
 
 {if $missing_balance > 0}
@@ -28,10 +34,10 @@
 	</p>
 {else}
 	<p class="help">
-		Cocher les cases correspondant aux montants à déposer, une nouvelle écriture sera générée.
+		Cocher les cases correspondant aux montants à déposer.
 	</p>
 
-	<form method="post" action="{$self_url}" data-focus="1">
+	<form method="post" action="{$self_url_no_qs}?id={$account.id}" data-focus="1">
 		{include file="common/dynamic_list_head.tpl" check=true list=$journal}
 
 		{foreach from=$journal->iterate() item="line"}
@@ -49,58 +55,20 @@
 					<th scope="row">{$line.label}</th>
 					<td class="money">{$line.debit|raw|money}</td>
 					<td class="money">{if $line.running_sum > 0}-{/if}{$line.running_sum|abs|raw|money:false}</td>
+					<td></td>
 				</tr>
 			{/foreach}
 			</tbody>
 		</table>
 
-		<fieldset>
-			<legend>Détails de l'écriture de dépôt</legend>
-			<dl>
-				<dt><strong>Nombre de lignes cochées</strong></dt>
-				<dd><mark id="cheques_count">0</mark></dd>
-				<dd class="alert block empty_selection_message">Aucune ligne n'a été cochée.</dd>
-				{input type="text" name="label" label="Libellé" required=1 default="Dépôt en banque"}
-				{input type="date" name="date" default=$date label="Date" required=1}
-				{input type="money" name="amount" label="Montant" required=1}
-				{input type="list" target="!acc/charts/accounts/selector.php?id_chart=%d&types=%d"|args:$account.id_chart:$types name="account_transfer" label="Compte de dépôt" required=1}
-				{input type="text" name="reference" label="Numéro de pièce comptable"}
-				{input type="textarea" name="notes" label="Remarques" rows=4 cols=30}
-			</dl>
-		</fieldset>
-
+		<p class="actions">
+			{button type="submit" class="minor" name="mark" label="Marquer comme déposées" shape="check" value=1}
+		</p>
 		<p class="submit">
 			{csrf_field key=$csrf_key}
-			{button type="submit" name="save" label="Enregistrer" class="main" shape="check"}
-			{*button type="submit" name="mark" label="Marquer les lignes cochées comme étant déposées" shape="check" class="minor" onclick="return confirm('Les lignes cochées seront marquées comme ayant été déposées. Il ne sera pas possible de les remettre dans cette liste.');" style="float: right"*}
+			{button type="submit" name="create" label="Renseigner le dépôt" class="main" shape="right"}
 		</p>
 	</form>
-
-	{literal}
-	<script type="text/javascript">
-	var total = 0;
-	var count = 0;
-	$('tbody input[type=checkbox]').forEach((e) => {
-		e.addEventListener('change', () => {
-			var v = e.getAttribute('data-debit') || e.getAttribute('data-credit');
-			v = parseInt(v, 10);
-			total += e.checked ? v : -v;
-			count += e.checked ? 1 : -1;
-			if (total < 0) {
-				total = 0;
-			}
-			$('#f_amount').value = g.formatMoney(total);
-			$('#cheques_count').innerText = count;
-			g.toggle('dd.empty_selection_message', count == 0);
-		});
-	});
-
-	$('#f_all').addEventListener('change', (e) => {
-		$('#f_amount').value = '';
-		total = 0;
-	});
-	</script>
-	{/literal}
 {/if}
 
 {include file="_foot.tpl"}

@@ -59,13 +59,16 @@ class Transactions
 		$db->begin();
 
 		try {
-			$ids = [];
+			$transactions_ids = [];
+			$lines_ids = [];
+
 			foreach ($journal as $row) {
 				if (!in_array($row->id_line, $checked)) {
 					continue;
 				}
 
-				$ids[] = (int)$row->id;
+				$transactions_ids[] = (int)$row->id;
+				$lines_ids[] = $row->id_line;
 
 				$line = new Line;
 				$line->importForm([
@@ -81,8 +84,8 @@ class Transactions
 			}
 
 			$transaction->save();
-			$transaction->updateLinkedTransactions($ids);
-			$account->markTransactionsAsDeposited($ids);
+			$transaction->updateLinkedTransactions($transactions_ids);
+			$account->markLinesAsDeposited($lines_ids);
 			$db->commit();
 		}
 		catch (\Exception $e) {

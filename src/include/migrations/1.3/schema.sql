@@ -494,6 +494,8 @@ CREATE TABLE IF NOT EXISTS acc_transactions_lines
 
 	id_project INTEGER NULL REFERENCES acc_projects(id) ON DELETE SET NULL,
 
+	status INTEGER NOT NULL DEFAULT 0, -- bitmask
+
 	CONSTRAINT line_check1 CHECK ((credit * debit) = 0),
 	CONSTRAINT line_check2 CHECK ((credit + debit) > 0)
 );
@@ -502,6 +504,7 @@ CREATE INDEX IF NOT EXISTS acc_transactions_lines_transaction ON acc_transaction
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_account ON acc_transactions_lines (id_account);
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_project ON acc_transactions_lines (id_project);
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_reconciled ON acc_transactions_lines (reconciled);
+CREATE INDEX IF NOT EXISTS acc_transactions_lines_status ON acc_transactions_lines (status);
 
 CREATE TABLE IF NOT EXISTS acc_transactions_links
 (
