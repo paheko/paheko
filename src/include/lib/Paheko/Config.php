@@ -378,7 +378,7 @@ class Config extends Entity
 
 			if ($type === 'image' && !$f->image) {
 				$this->setFile($key, null);
-				throw new UserException('Le fichier n\'est pas une image.');
+				throw new UserException('Le fichier n\'est pas une image (formats autorisés : PNG, JPEG, GIF, WEBP).');
 			}
 
 			try {
