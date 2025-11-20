@@ -22,7 +22,7 @@ namespace Paheko;
  * Cette valeur peut être modifiée sans autre impact que la déconnexion des utilisateurs
  * actuellement connectés.
  *
- * Si cette constante n'est définie, Paheko ajoutera automatiquement
+ * Si cette constante n'est pas définie, Paheko ajoutera automatiquement
  * une valeur aléatoire dans le fichier config.local.php.
  *
  * @var  string

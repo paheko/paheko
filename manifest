@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Make\ssure\sarchived\sservices\sdon't\sshow\sup\sin\ssections
-D 2025-11-20T00:53:38.921
+C Implement\svaults
+D 2025-11-20T01:10:16.512
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -70,7 +70,7 @@ F src/apache-bots.conf d24d844e684db8953d189146219998efaeec5a6a3683107c5a5a895b8
 F src/apache-htaccess.conf b627aebb1852c80ca663e469eecab2401f6af58387fd4e4cf332c366d59a85c1
 F src/apache-vhost.conf f6f869348481746ee6ca3eb93ca12c384725bf2fd015b59d4b537758b2823479
 F src/bin/paheko 1d03ce88e817ebfef9b3b459c7fd490c838ee5b9c996eae9228f4159d7f12912 x
-F src/config.dist.php a4d3a8d32e7841760cb044fcf1fa8179f20fafb7b41021460b6e3a16a1ad19da
+F src/config.dist.php cf49eb796491fdeee0abfe5db57d47feaaa0cf7786590c46f8dbc0e139d0496c
 F src/data/index.html abe89f9bfb756bbdfb2f535420e10bb5625eb4e2
 F src/include/data/1.1.0_schema.sql ab4753bbe0e71c8e5910b94a4c73243191543e942a62304032a77f2060b130ab
 F src/include/data/1.1.21_migration.sql 6a26982b556b4e91cab24c577b94b0d621cbcc6042aea0d1aa220bdb2126c7c0
@@ -831,24 +831,27 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php 1af6d536239af53dff1e7c1e5720b6006fd3aeb2c48b3f1d8745d2642881929b
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 761977d51bec380cf56f74874f2d00bb40e1d7abefdd295e5aafa4c7c4555ecd
-R d0df592f32358bad9ad57bd4781c5db5
+P 632eca74f80ff0f7b2c515cd8502da96c523baf3f901438e8a61586718c6d975
+R 634ce54594047760032dbdf9add83f62
+T *branch * vaults
+T *sym-vaults *
+T -sym-next *
 U bohwaz
-Z 7a45083e1691220ccdbd6d8652f6822b
+Z 4ac22e178eb0fd8638581136b8492100
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmkeZpIACgkQksnacbiI
-6jTkgQ/+Kc3Y/PX9R7VzQNdwwhm19+Feon8brEfXecy4TZTRQw6mC4bzbRPlRyBm
-z7NJ5Gh12E7ZN7QM8NYC4IvouPLuCnHQEaVTtrUb6scpQHJ3Kd6xCWQRfzqZTQzA
-4CqbNFBo/38I8JAzoCmRaoxWQR3yCwiifU7TZO7/VxuNKlf7G59elJg9f5txm1jr
-3K8GFoC/WCqFoFjtmW3R8qIyzn70kvCNZeoYU7x5zr3SBlSGtFUD3joTUH8FarKm
-1mt+zXYtu5hdZhyKxknRfcOR1xsXkZGCWNJ65P36y7CAm3JRzPZTFUQH/75Dh11C
-nQi5NTk+yFI1yHNDYuJGiT1Qwdl8rDjQFnP9CcCK/24hB1YzfCjApmtF1QlqJ2sm
-eVtvRrb07Oev083SSBEBobyAJzgtOhAFHcluFkt82vFaBWWKmyWOEBPhKV5XW+A1
-xHCJzGYiumYVynAPeenBCoOc9n1MRcxkhuoEH6lMLJWkQ4l/YNKn5zYV6jhmUfgl
-Gfchyt4isOJROIYQDB4S5k/iJPnxD+gZxUhgwYyt/NBvjh4KVTpEtBRJobifAj30
-nRQdyMb4iR7UBiEreBdn4M1EjC/RtUi/8LwmuVd2s7XLpk7o2QeKVXKm8R2mp9cH
-wGJ4R6MPnJlWpkE06XjTmCjSDdSxMEEgYl5zeqYvRLcW7kTQ7SM=
-=53KC
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmkeangACgkQksnacbiI
+6jSGGg//cGq/NEjDrU9aTPLjY9S/YlO7k908adL8Uab27SvRv5T24KNxVeOCZkUR
+867/bG4yWk5Y4Pz1q3wgXlazr79oTz+/Sp+eOg6BkNSEORatddpJunBBx4BTD32a
+z6d+V/t6tBWT4G12AjYVgRqy7gAhL93yf/sYnmL3m+WWLctP183KSt2KtkyjjuZ+
+Z2LxN3xT/H9u4qBcaISQRlBCDl06sfs7dQl2YEFORddcEmx4dvU7RJ70h7AOlIUN
+RRydmTXlXK1VWG8I5SDeF0In/Z7QsR1y0542zCJMPynk2GRdkvuR+SeiwGv2GB5O
+DjH9XJTbojbmrkTdayiLdhMpDBhkVNuE+IFbXZeQrTcK0daxtbu5j17GbCQrg1wW
+jl07z/D0mmXMK9NNj/cytd7htvaHewXtq4kI55AmGBqOIf5jsGYD7TjpKjm6tu1d
+y+aoq/8G10YHGgx+GwSdsTVIIgU7GVyc+EzpmHXvrqt2Qa7Tb46DbZEM0miHsAdt
+fsJky9uQtXDrJBB4cyT+SXNxtpM71kFKMqmE0yCCxMEG53txAGy9OL6iQz9dZTYA
+wryeqaVDwXtERisW0EGcTzjmN4SpbzvHgPu0DWgNc9QvmHwx+H/Nu5hvypLTCdpV
+gImAGUtXLTqSVNJLGbs8kH85E17m+0x/Ho89Kh0AuaZrMuh4l+s=
+=ujjf
 -----END PGP SIGNATURE-----
