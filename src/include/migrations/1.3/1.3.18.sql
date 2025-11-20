@@ -1,3 +1,10 @@
+-- Add new column to services
+ALTER TABLE services ADD COLUMN archived INTEGER NOT NULL DEFAULT 0;
+
+UPDATE services SET archived = CASE WHEN end_date IS NOT NULL AND end_date < datetime() THEN 1 ELSE 0 END;
+
+CREATE INDEX IF NOT EXISTS services_archived ON services (archived);
+
 -- Create new config key
 INSERT INTO config (key, value) VALUES ('show_category_in_list', 1);
 

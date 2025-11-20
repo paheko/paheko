@@ -262,8 +262,12 @@ CREATE TABLE IF NOT EXISTS services
 
 	duration INTEGER NULL CHECK (duration IS NULL OR duration > 0), -- En jours
 	start_date TEXT NULL CHECK (start_date IS NULL OR date(start_date) = start_date),
-	end_date TEXT NULL CHECK (end_date IS NULL OR (date(end_date) = end_date AND date(end_date) >= date(start_date)))
+	end_date TEXT NULL CHECK (end_date IS NULL OR (date(end_date) = end_date AND date(end_date) >= date(start_date))),
+
+	archived INTEGER NOT NULL DEFAULT 0
 );
+
+CREATE INDEX IF NOT EXISTS services_archived ON services (archived);
 
 CREATE TABLE IF NOT EXISTS services_fees
 -- Services fees
