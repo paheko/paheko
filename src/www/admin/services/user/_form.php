@@ -36,7 +36,7 @@ $has_past_services = count($grouped_services) != $count_all;
 $today = new \DateTime;
 
 $tpl->assign([
-	'custom_js' => ['service_form.js'],
+	'custom_js' => ['service_form.js?2025'],
 ]);
 
 $tpl->assign(compact('form_url', 'today', 'grouped_services', 'current_only', 'has_past_services',
