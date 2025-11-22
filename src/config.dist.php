@@ -172,6 +172,24 @@ namespace Paheko;
 // const OIDC_CLIENT_DEFAULT_PERMISSIONS = ['users' => 'admin', 'config' => 'admin'];
 
 /**
+ * ENABLE_PERMISSIONS
+ *
+ * Activer ou désactiver la gestion des permissions dans Paheko
+ *
+ * En mode client OIDC, on peut préférer désactiver la gestion des permissions
+ * dans Paheko, car celles-ci sont probablement gérées par le serveur OIDC.
+ *
+ * Si on désactive cette constante (false) on ne pourra plus afficher ou modifier
+ * les permissions pour chaque catégorie de membres. Les permissions d'un membre
+ * ne s'afficheront plus sur sa fiche membre non plus.
+ *
+ * @default true
+ * @var bool
+ */
+
+// const ENABLE_PERMISSIONS = false;
+
+/**
  * LOCAL_LOGIN
  *
  * Forcer la connexion locale
