@@ -24,6 +24,7 @@
 		</dl>
 	</fieldset>
 
+	{if ENABLE_PERMISSIONS}
 	<fieldset>
 		<legend>Droits</legend>
 		<dl class="permissions">
@@ -44,6 +45,7 @@
 		{/foreach}
 		</dl>
 	</fieldset>
+	{/if}
 
 	{*TODO: advanced category security options
 	<fieldset>
