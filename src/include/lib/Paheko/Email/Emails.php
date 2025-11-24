@@ -417,7 +417,6 @@ class Emails
 		$count = 0;
 		$all_attachments = [];
 
-		// listQueue nettoie déjà la queue
 		foreach ($queue as $row) {
 			// See if we need to avoid this recipient
 			if (!Email::acceptsThisMessage($row)) {
@@ -556,9 +555,6 @@ class Emails
 	 */
 	static protected function listQueue(?int $context = null): array
 	{
-		// Clean-up the queue from reject emails
-		self::purgeQueueFromRejected();
-
 		// Reset messages that failed during the queue run
 		self::resetFailed();
 
@@ -574,19 +570,6 @@ class Emails
 	static public function countQueue(): int
 	{
 		return DB::getInstance()->count('emails_queue');
-	}
-
-	/**
-	 * Supprime de la queue les messages liés à des adresses invalides
-	 * ou qui ne souhaitent plus recevoir de message
-	 * @return boolean
-	 */
-	static protected function purgeQueueFromRejected(): void
-	{
-		DB::getInstance()->delete('emails_queue',
-			'recipient_hash IN (SELECT hash FROM emails WHERE (invalid = 1 OR fail_count >= ?)
-			AND last_sent >= datetime(\'now\', \'-1 month\'));',
-			self::FAIL_LIMIT);
 	}
 
 	/**
