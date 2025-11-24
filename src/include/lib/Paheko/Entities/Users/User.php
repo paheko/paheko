@@ -1048,6 +1048,12 @@ class User extends Entity
 
 	public function setPermissions(array $permissions): void
 	{
-		$this->_permissions = $permissions;
+		$all_permissions = [];
+
+		foreach (Category::PERMISSIONS as $perm => $data) {
+			$all_permissions[$perm] = $permissions[$perm] ?? Session::ACCESS_NONE;
+		}
+
+		$this->_permissions = $all_permissions;
 	}
 }

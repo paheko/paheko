@@ -172,6 +172,31 @@ namespace Paheko;
 // const OIDC_CLIENT_DEFAULT_PERMISSIONS = ['users' => 'admin', 'config' => 'admin'];
 
 /**
+ * OIDC_CLIENT_CALLBACK
+ *
+ * Permet d'indiquer le nom d'une fonction PHP qui sera appelée après la connexion
+ * au serveur OIDC.
+ *
+ * Cela permet par exemple de créer ou mettre à jour un membre Paheko à partir des
+ * infos fournies à la connexion OIDC.
+ *
+ * Le premier paramètre passé à cette fonction sera un \stdClass contenant les
+ * informations renvoyées par le serveur OIDC. Le second paramètre sera l'entité
+ * User correspond à l'utilisateur connecté (à la suite de la règle OIDC_CLIENT_MATCH_EMAIL).
+ *
+ * La fonction peut renvoyer une entité User visant à remplacer celle qui est utilisée
+ * actuellement, ou NULL.
+ *
+ * Lire la doc pour plus d'exemples.
+ *
+ * @see https://fossil.kd2.org/paheko/wiki?name=Configuration+SSO+et+LDAP
+ * @default null
+ * @var null|callable
+ */
+
+// const OIDC_CLIENT_CALLBACK = '\Paheko\my_oidc_callback';
+
+/**
  * ENABLE_PERMISSIONS
  *
  * Activer ou désactiver la gestion des permissions dans Paheko
