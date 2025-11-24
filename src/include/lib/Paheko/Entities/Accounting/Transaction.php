@@ -1035,6 +1035,10 @@ class Transaction extends Entity
 			}
 		}
 
+		if (isset($source['date']) && !is_string($source['date'])) {
+			throw new UserException('Invalid date object');
+		}
+
 		$this->importFromNewForm($source);
 	}
 
