@@ -74,47 +74,51 @@
 		{if $user->isHidden()}
 			<dd>{tag color="darkred" label="Catégorie cachée"}</dd>
 		{/if}
-		<dt>Droits</dt>
-		<dd><span class="permissions">{display_permissions permissions=$category}</span></dd>
-		<dt>Dernière connexion</dt>
-		<dd>{if empty($user.date_login)}Jamais{else}{$user.date_login|date_short:true}{/if}</dd>
-		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
-		<dd>
-			{linkbutton shape="menu" label="Journal d'audit" href="!users/log.php?id=%d"|args:$user.id}
-		</dd>
+		{if ENABLE_PERMISSIONS}
+			<dt>Droits</dt>
+			<dd><span class="permissions">{display_permissions permissions=$category}</span></dd>
 		{/if}
-		<dt>Sécurité</dt>
-		<dd>
-			{if empty($user.password)}
-				{tag color="darkgrey" label="Pas de mot de passe"}
-			{else}
-				{tag color="darksalmon" label="Mot de passe configuré"}
-				{if $user.otp_secret}
-					{tag color="darkgreen" label="2FA"}
-				{/if}
-				{if $user.pgp_key}
-					{tag color="olive" label="PGP"}
-				{/if}
-			{/if}
-		</dd>
-		{if $can_change_password}
+		{if $can_login || $user.date_login}
+			<dt>Dernière connexion</dt>
+			<dd>{if empty($user.date_login)}Jamais{else}{$user.date_login|date_short:true}{/if}</dd>
+			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
 			<dd>
-			{if $logged_user.id == $user.id}
-				{linkbutton shape="settings" label="Modifier mon mot de passe" href="!me/security.php"}
-			{elseif $user.password}
-				{linkbutton shape="settings" label="Modifier le mot de passe" href="edit_security.php?id=%d"|args:$user.id target="_dialog"}
-			{else}
-				{linkbutton shape="settings" label="Définir un mot de passe" href="edit_security.php?id=%d"|args:$user.id target="_dialog"}
-			{/if}
+				{linkbutton shape="menu" label="Journal d'audit" href="!users/log.php?id=%d"|args:$user.id}
 			</dd>
+			{/if}
 		{/if}
 		{if $can_login}
-		<dd>
-			<form method="post" action="" onsubmit="return confirm(&quot;Cela va vous déconnecter et vous reconnecter comme si vous étiez ce membre. Continuer ?&quot);">
-				{csrf_field key=$csrf_key}
-				{button name="login_as" type="submit" shape="login" label="Se connecter à sa place"}
-			</form>
-		</dd>
+			<dt>Sécurité</dt>
+			<dd>
+				{if empty($user.password)}
+					{tag color="darkgrey" label="Pas de mot de passe"}
+				{else}
+					{tag color="darksalmon" label="Mot de passe configuré"}
+					{if $user.otp_secret}
+						{tag color="darkgreen" label="2FA"}
+					{/if}
+					{if $user.pgp_key}
+						{tag color="olive" label="PGP"}
+					{/if}
+				{/if}
+			</dd>
+			{if $can_change_password}
+				<dd>
+				{if $logged_user.id == $user.id}
+					{linkbutton shape="settings" label="Modifier mon mot de passe" href="!me/security.php"}
+				{elseif $user.password}
+					{linkbutton shape="settings" label="Modifier le mot de passe" href="edit_security.php?id=%d"|args:$user.id target="_dialog"}
+				{else}
+					{linkbutton shape="settings" label="Définir un mot de passe" href="edit_security.php?id=%d"|args:$user.id target="_dialog"}
+				{/if}
+				</dd>
+			{/if}
+			<dd>
+				<form method="post" action="" onsubmit="return confirm(&quot;Cela va vous déconnecter et vous reconnecter comme si vous étiez ce membre. Continuer ?&quot);">
+					{csrf_field key=$csrf_key}
+					{button name="login_as" type="submit" shape="login" label="Se connecter à sa place"}
+				</form>
+			</dd>
 		{/if}
 	</dl>
 </aside>

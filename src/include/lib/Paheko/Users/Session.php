@@ -30,7 +30,8 @@ use const Paheko\{
 	OIDC_CLIENT_ID,
 	OIDC_CLIENT_SECRET,
 	OIDC_CLIENT_MATCH_EMAIL,
-	OIDC_CLIENT_DEFAULT_PERMISSIONS
+	OIDC_CLIENT_DEFAULT_PERMISSIONS,
+	OIDC_CLIENT_CALLBACK
 };
 
 use KD2\Security;
@@ -295,18 +296,10 @@ class Session extends \KD2\UserSession
 				$this->user->$name = $login['user']['_name'];
 			}
 
-			$permissions = [];
-
-			foreach (Category::PERMISSIONS as $perm => $data) {
-				$permissions[$perm] = $login['permissions'][$perm] ?? self::ACCESS_NONE;
-			}
-
-			$this->user->setPermissions($permissions);
+			$this->user->setPermissions($login['permissions']);
 
 			if (!empty($login['save']) && $allow_new_session) {
-				$this->start(true);
-				$_SESSION['userSession'] = $this->user;
-				$this->close();
+				$this->setUser($this->user);
 			}
 
 			return true;
@@ -442,6 +435,14 @@ class Session extends \KD2\UserSession
 		}
 
 		$this->forceLogin($user);
+
+		if (OIDC_CLIENT_CALLBACK) {
+			$r = call_user_func(OIDC_CLIENT_CALLBACK, $info, $this->user());
+
+			if (is_object($r) && ($r instanceof User) && $r !== $this->user()) {
+				$this->setUser($r);
+			}
+		}
 	}
 
 	/**
@@ -600,6 +601,25 @@ class Session extends \KD2\UserSession
 		EmailsTemplates::passwordChanged($user);
 	}
 
+	/**
+	 * Returns cookie string for PDF printing
+	 */
+	static public function getCookie(): ?string
+	{
+		$i = self::getInstance();
+
+		if (!$i->isLogged()) {
+			return null;
+		}
+
+		return sprintf('%s=%s', $i->cookie_name, $i->id());
+	}
+
+	static public function getCookieSecret(): string
+	{
+		return self::getInstance()->sid_in_url_secret;
+	}
+
 	public function user(): ?User
 	{
 		return $this->getUser();
@@ -622,25 +642,6 @@ class Session extends \KD2\UserSession
 		return $s->getUser();
 	}
 
-	/**
-	 * Returns cookie string for PDF printing
-	 */
-	static public function getCookie(): ?string
-	{
-		$i = self::getInstance();
-
-		if (!$i->isLogged()) {
-			return null;
-		}
-
-		return sprintf('%s=%s', $i->cookie_name, $i->id());
-	}
-
-	static public function getCookieSecret(): string
-	{
-		return self::getInstance()->sid_in_url_secret;
-	}
-
 	public function getUser(): ?User
 	{
 		if (!$this->isLogged()) {
@@ -654,6 +655,14 @@ class Session extends \KD2\UserSession
 		}
 
 		return $this->user;
+	}
+
+	protected function setUser(User $user): void
+	{
+		$this->start(true);
+		$this->user = $user;
+		$_SESSION['userSession'] = $this->user;
+		$this->close();
 	}
 
 	static public function getUserId(): ?int

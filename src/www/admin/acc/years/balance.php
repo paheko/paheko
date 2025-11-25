@@ -79,17 +79,6 @@ if ($previous_year) {
 		'exclude_type' => [Account::TYPE_OPENING, Account::TYPE_CLOSING],
 	]);
 
-	if ($previous_year->id_chart != $year->id_chart) {
-		$chart_change = true;
-		$codes = [];
-
-		foreach ($lines as $line) {
-			$codes[] = $line->code;
-		}
-
-		$matching_accounts = $accounts->listForCodes($codes);
-	}
-
 	// Append result
 	$result = Reports::getResult(['year' => $previous_year->id()]);
 
@@ -109,12 +98,23 @@ if ($previous_year) {
 	}
 
 	$lines[] = (object) [
-		'balance'   => $result,
-		'id'    => $account->id,
-		'code'  => $account->code,
-		'label' => $account->label,
+		'balance' => $result,
+		'id'      => $account->id,
+		'code'    => $account->code,
+		'label'   => $account->label,
 		'is_debt' => $result < 0,
 	];
+
+	if ($previous_year->id_chart != $year->id_chart) {
+		$chart_change = true;
+		$codes = [];
+
+		foreach ($lines as $line) {
+			$codes[] = $line->code;
+		}
+
+		$matching_accounts = $accounts->listForCodes($codes);
+	}
 
 	foreach ($lines as &$line) {
 		$line->credit = !$line->is_debt ? abs($line->balance) : 0;

@@ -159,6 +159,9 @@ class Utils
 				throw new \InvalidArgumentException('Invalid argument, not a valid date object: ' . get_class($value));
 			}
 		}
+		elseif (is_array($value)) {
+			throw new \InvalidArgumentException('Invalid argument, not a valid date');
+		}
 
 		$value = trim((string) $value);
 
