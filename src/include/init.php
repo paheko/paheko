@@ -235,6 +235,7 @@ static $default_config = [
 	'OIDC_CLIENT_SECRET'    => null,
 	'OIDC_CLIENT_MATCH_EMAIL' => true,
 	'OIDC_CLIENT_DEFAULT_PERMISSIONS' => null,
+	'OIDC_CLIENT_CALLBACK'  => null,
 	'ENABLE_PERMISSIONS'    => true,
 	'LEGAL_HOSTING_DETAILS' => null,
 	'ALERT_MESSAGE'         => null,
