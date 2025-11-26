@@ -86,7 +86,7 @@ class Email extends Entity
 		switch ($r->context) {
 			case Emails::CONTEXT_BULK:
 				return $r->accepts_mailings === false ? false : true;
-			case Emails::CONTEXT_REMINDER;
+			case Emails::CONTEXT_REMINDER:
 				return $r->accepts_reminders === false ? false : true;
 			default:
 				return $r->accepts_messages === false ? false : true;

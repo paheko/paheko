@@ -24,7 +24,7 @@ $types = [
 
 $type = qg('type');
 
-if (!array_key_exists($type, $types)) {
+if (null === $type || !array_key_exists($type, $types)) {
 	$type = key($types);
 }
 
