@@ -57,7 +57,7 @@ class CommonFunctions
 
 		if ($type === 'datetime') {
 			$type = 'date';
-			$tparams = func_get_arg(0);
+			$tparams = $params;
 			$tparams['type'] = 'time';
 			$tparams['name'] = sprintf('%s_time', $name);
 			unset($tparams['label']);

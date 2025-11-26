@@ -7,6 +7,8 @@ use Paheko\Utils;
 
 use Paheko\Web\Render\Markdown;
 
+use KD2\Translate;
+
 /**
  * Common modifiers used by Template (Smartyer) and UserTemplate
  */
@@ -230,7 +232,7 @@ class CommonModifiers
 			return $ts;
 		}
 
-		return @strftime($format, $ts->getTimestamp());
+		return Translate::strftime($format, $ts);
 	}
 
 	static public function date($ts, ?string $format = null, string $locale = 'fr'): ?string

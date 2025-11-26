@@ -541,7 +541,7 @@ class Sections
 			}
 
 			if (isset($assign)) {
-				$tpl::__assign(['var' => $assign, 'value' => $row], $tpl, $line);
+				$tpl::_assign(['var' => $assign, 'value' => $row], $tpl, $line);
 			}
 
 			yield $row;
@@ -1366,7 +1366,7 @@ class Sections
 			}
 
 			if ($assign) {
-				$tpl::__assign(['var' => $assign, 'value' => $row], $tpl, $line);
+				$tpl::_assign(['var' => $assign, 'value' => $row], $tpl, $line);
 			}
 
 			yield $row;
@@ -1679,7 +1679,7 @@ class Sections
 		while ($row = $result->fetchArray(\SQLITE3_ASSOC))
 		{
 			if (isset($params['assign'])) {
-				$tpl::__assign(['var' => $params['assign'], 'value' => $row], $tpl, $line);
+				$tpl::_assign(['var' => $params['assign'], 'value' => $row], $tpl, $line);
 			}
 
 			yield $row;

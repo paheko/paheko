@@ -679,7 +679,7 @@ class Functions
 		$content = self::_readFile($params['file'] ?? '', 'file', $ut, $line);
 
 		if (!empty($params['assign'])) {
-			$ut::__assign(['var' => $params['assign'], 'value' => $content], $ut, $line);
+			$ut::_assign(['var' => $params['assign'], 'value' => $content], $ut, $line);
 			return '';
 		}
 
@@ -726,7 +726,7 @@ class Functions
 				throw new Brindille_Exception('Nom de variable invalide : ' . $params['capture']);
 			}
 
-			$ut::__assign([$params['capture'] => $include->fetch()], $ut, $line);
+			$ut::_assign([$params['capture'] => $include->fetch()], $ut, $line);
 		}
 		else {
 			$include->display();
@@ -738,7 +738,7 @@ class Functions
 
 			foreach ($keep as $name) {
 				// Transmit variables
-				$ut::__assign(['var' => $name, 'value' => $include->get($name)], $ut, $line);
+				$ut::_assign(['var' => $name, 'value' => $include->get($name)], $ut, $line);
 			}
 		}
 
@@ -747,7 +747,7 @@ class Functions
 
 		// Transmit nocache to parent template
 		if ($include->get('nocache')) {
-			$ut::__assign(['nocache' => true], $ut, $line);
+			$ut::_assign(['nocache' => true], $ut, $line);
 		}
 	}
 
