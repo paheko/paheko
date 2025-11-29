@@ -255,6 +255,11 @@ class DynamicList implements \Countable
 		}
 	}
 
+	public function hasColumn(string $key)
+	{
+		return array_key_exists($key, $this->columns);
+	}
+
 	public function addTables(string $tables)
 	{
 		$this->tables .= ' ' . ltrim($tables);
