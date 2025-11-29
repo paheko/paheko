@@ -145,3 +145,10 @@ details summary::after {
 .transaction-details-container {
     max-width: initial;
 }
+
+span.tag {
+    color: #000;
+    background: none;
+    text-shadow: none;
+    border: 1px solid #ccc;
+}
