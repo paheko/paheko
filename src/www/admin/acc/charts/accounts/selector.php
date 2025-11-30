@@ -27,7 +27,6 @@ $id_year = intval($_GET['id_year'] ?? 0);
 
 if (isset($_GET['year'])) {
 	$id_year = (int) $_GET['year'];
-	\KD2\ErrorManager::reportExceptionSilent(new \InvalidArgumentException('"year" query parameter has been removed, use "id_year" instead'));
 }
 
 if ($id_chart && $id_year) {
