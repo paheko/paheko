@@ -70,8 +70,10 @@ class CSV
 
 	static public function open(string $file)
 	{
-		// Make sure this is disabled, so that old MacOS lines are not detected by mistake in PHP < 8.1
-		@ini_set('auto_detect_line_endings', false);
+		if (PHP_VERSION_ID < 80100) {
+			// Make sure this is disabled, so that old MacOS lines are not detected by mistake in PHP < 8.1
+			@ini_set('auto_detect_line_endings', false);
+		}
 
 		$fp = fopen($file, 'r');
 		$line = fgets($fp, 4096);

@@ -1488,7 +1488,7 @@ class Utils
 	 */
 	static public function iso8859_1_to_utf8(string $s): string
 	{
-		if (PHP_VERSION_ID < 90000) {
+		if (function_exists('utf8_encode')) {
 			return @utf8_encode($s);
 		}
 

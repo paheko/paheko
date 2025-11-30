@@ -57,7 +57,8 @@ if ((empty($uri) || $uri === '/') && !empty($_GET['un'])) {
 			throw new UserException('Adresse email introuvable.');
 		}
 
-		$email->setOptout((int) $params['c']);
+		$context = $params['c'] ?? null;
+		$email->setOptout($context ? (int) $context : null);
 		$email->save();
 		http_response_code(200);
 		echo 'Unsubscribe successful';

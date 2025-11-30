@@ -32,9 +32,9 @@ class Email extends Entity
 	protected bool $invalid = false;
 	protected int $sent_count = 0;
 	protected int $fail_count = 0;
-	protected ?string $fail_log;
+	protected ?string $fail_log = null;
 	protected \DateTime $added;
-	protected ?\DateTime $last_sent;
+	protected ?\DateTime $last_sent = null;
 
 	protected bool $accepts_messages = true;
 	protected bool $accepts_reminders = true;
@@ -86,7 +86,7 @@ class Email extends Entity
 		switch ($r->context) {
 			case Emails::CONTEXT_BULK:
 				return $r->accepts_mailings === false ? false : true;
-			case Emails::CONTEXT_REMINDER;
+			case Emails::CONTEXT_REMINDER:
 				return $r->accepts_reminders === false ? false : true;
 			default:
 				return $r->accepts_messages === false ? false : true;
@@ -351,7 +351,7 @@ class Email extends Entity
 		$this->appendFailLog(implode(" ; ", $log));
 	}
 
-	public function setOptout(int $context): void
+	public function setOptout(?int $context): void
 	{
 		if ($context === Emails::CONTEXT_BULK) {
 			$this->set('accepts_mailings', false);
@@ -359,8 +359,16 @@ class Email extends Entity
 		elseif ($context === Emails::CONTEXT_REMINDER) {
 			$this->set('accepts_reminders', false);
 		}
-		else {
+		elseif ($context === Emails::CONTEXT_PRIVATE) {
 			$this->set('accepts_messages', false);
+		}
+		elseif ($context === null) {
+			$this->set('accepts_reminders', false);
+			$this->set('accepts_messages', false);
+			$this->set('accepts_mailings', false);
+		}
+		else {
+			throw new \LogicException('Invalid optout context: ' . $context);
 		}
 	}
 

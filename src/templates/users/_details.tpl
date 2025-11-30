@@ -63,7 +63,7 @@ $fields = DF::getInstance()->all();
 			{if in_array($key, $id_fields)}</strong>{/if}
 		{/if}
 		{if $field.type === 'email' && $value}
-		<?php $email = Email\Emails::getOrCreateEmail($value); ?>
+		<?php $email = Email\Emails::getOrCreateEmail($value); $address = rawurlencode($value); ?>
 			{if !DISABLE_EMAIL && $show_message_button && !$email_button++ && $email->canSend() && $email.accepts_messages}
 				{linkbutton href="!users/message.php?id=%d"|args:$data.id label="Envoyer un message" shape="mail"}
 			{/if}
@@ -77,7 +77,7 @@ $fields = DF::getInstance()->all();
 			{else}
 				{tag label="Adresse non vérifiée" color="darkgrey"}
 			{/if}
-			{linkbutton href="!users/mailing/status/address.php?address=%s"|args:$value label="Détails de l'adresse e-mail" shape="history" target="_dialog"}
+			{linkbutton href="!users/mailing/status/address.php?address=%s"|args:$address label="Détails de l'adresse e-mail" shape="history" target="_dialog"}
 		</dd>
 		<dt>Préférences de réception</dt>
 		<dd>
