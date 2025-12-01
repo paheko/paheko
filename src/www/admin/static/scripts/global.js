@@ -356,7 +356,7 @@
 		}
 
 		if (!dialog.dataset.caption && document.title) {
-			var title = document.title.replace(/^([^—-]+).*$/, "$1");
+			var title = document.title.replace(/^(\s[^—-]+\s).*$/, "$1");
 			dialog.querySelector('.title').innerText = title;
 			p.document.title = document.title + ' — ' + p.g.dialog_title;
 		}

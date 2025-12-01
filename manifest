@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Implement\snew\smoney_text\smodifier
-D 2025-12-01T16:38:16.298
+C Fix\scut\sof\snames\sin\sdialog\ssubtitle
+D 2025-12-01T16:38:30.808
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -723,7 +723,7 @@ F src/www/admin/static/scripts/config_fields.js b23758fbe8823d87df0f285a3803c4c6
 F src/www/admin/static/scripts/dragdrop-table.js 40c551bdf2face7682e79fe6c427475563cebe13d2549c4a30ee9d1dc6064d60
 F src/www/admin/static/scripts/erdiagram.js 1a4c2884f12c89a698a454cf141e652a25e11c6674356bef413f2a7f4eb53c50
 F src/www/admin/static/scripts/file_drag.js 3a98205b813e01198b25fac7c9d00cdd99d8993d5275352000d09b5f9b809659
-F src/www/admin/static/scripts/global.js 26cc228719df334f6f11b1602322f87cf25eb619776d23a882a7f656b746002c
+F src/www/admin/static/scripts/global.js 8e874b784a4294ea74771941ed7784e8273e075f6b98bf2d59fb0e17d47242c6
 F src/www/admin/static/scripts/homescreen.js 80dc4e87743bf7061484eb96cb9c546c27fe4b756935eca7851fd5aa53ab1e70
 F src/www/admin/static/scripts/inputs/datalist.js ee50c00b78e382f2dd70aac9c77075ccc017ee75f2ac8b3ecbe4e429bf502cda
 F src/www/admin/static/scripts/inputs/file.js 750b915b8447f96b5314e02958809f1d15b3e17b15d6f52c3c8fc76211a9999b
@@ -831,24 +831,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php 1af6d536239af53dff1e7c1e5720b6006fd3aeb2c48b3f1d8745d2642881929b
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 64a1424f84ec62178d39b98bf78ce35feee49d4cf5d013830851791b75b8621a
-R d7106de2c716d5abafc67824fe69c560
+P b808769dde183d8bdcb7b7f01ca4e1702d70233f4a21ba46f6c203154cf6f7f4
+R 82be2a08c98c222b926628af5b158770
 U bohwaz
-Z 15ca504ad7824e1b19f49406dbc771ae
+Z 3f28bf774eae1da737731ca02add6f85
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmktxHgACgkQksnacbiI
-6jTx5g/+Ji+QqA8rit5vdeKvwbHgv9/dGV2spUKtkUKIMmwFRHBWkdbAOcNQ4Hg5
-Rp9THDig0Lv5VaDwJNx/DcNibrAzIzeHSgID7QuSv/HYDKmTmYMte/Soxmsj5sEQ
-JS4St5ePQYnMY8sB/VgdsG13yTFyK9588kid/TDWb2dg5YHhNV1mvqGWPqpa6U5Y
-bzKvNcMKjam5rZzn0MIosOYB1XLWwTmSIHjLiNENZ46igGN7rMWKVOcRf7owhkYF
-AVjHHMOjMAst9Qd695ANgWYNKlq43k1VB7/Iz041DPi2+t9mbsnJr7ss/ZJL0SvK
-zvtIOgoRVtkgQdw2VQIJRIKNzfg6s9Jqtjaln704QO8bs+ZFmsD9qC9Ym0UbxF79
-ztfINJTZfR4GA60T3HEERghlaNFdiF7sw/ah/HpcC5fPljMF4oKae0FYfWkT3LOS
-nwYwMvTZ1/s6ZbNsOtBi9xRlvZoWoOAm1UynlgvDVCNTiGaiaHfnfp3pUK21FB4n
-II3o3c7Eb9ZfN5RxtbRlVj07T8xjIA11z2ndQU4t6Wc2ZsvB65sf2H2BO5NwitXR
-PkxCUw9dNgIrON5ejqda/4v1jI75+sIpq8toaAiYugIDbSNjjCz5XMFp/hf1FCrA
-ADxl86RSYcqp/VP3MrvYAkkyr9aPGc2MzmYmPdZhsJLEb3tGKug=
-=N8L8
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmktxIYACgkQksnacbiI
+6jRBlw/8CTQWC/3p97qtciBFsbi/1yWjirf7AtnalC2OVFFC8IBo9XvIG4mSvg1q
+xRH8b7SSnvSEISbCvfTTExs08C1m806Q2f7F36DNSVDBORMWBxJo/GSzXBhxewhy
+MYDzUK+i43MJvl3fU0K8dxSAwdB7G74vXdXFksszEP0w50Nt7EI+9wR/GAbAwB5x
+XSrwLwqOUeIV3mhtOG3JVws1cWnc63t/Xt8LJApAWdnzvft0Sv8lnVajpj2KHd/f
+yE5nIRqu+W6bABO6qJwwHM1okfG5jrPmvNKAxIAsojv4dzZck/73qLAyiTogDMi2
+DwV7DrO8XVUOauYLcwCP/tXyGQGVfgB/YJGpu86GzxIdNi7fnjvcN3VJrcA2pPiw
+8lQBfz+C34aOpmC8JDuMXnSDpM2nFWiTg61asHsIOvVMf2c4sDjhWK6tkJb2ywlD
+UyZ6Vxt33Qzi5rb7VW3ujE2fReOo+B1Tr26ry0w/qrAazmdnD6dHS9MwsJc6qPO2
+yROxfbwesZGuRnqhrqq4mA1HXpZuXSNC+n0equceaSUR60MGo9/mDGgLsMoOYAaj
+fifUYEZY5OEARP706jCAQwhHgRy7anwNgGshCM5Zp3CAXmeHzhJl6EiW1GK5+dwo
+Rx83yiZEAnTE1pu9cpOqnahxGfw14adjreXWN4q0B62fo4Il8nA=
+=g77f
 -----END PGP SIGNATURE-----
