@@ -103,7 +103,7 @@ class Functions
 			throw new Brindille_Exception('"continue" function can only be used inside a section');
 		}
 
-		return sprintf('<?php array_pop($this->_variables); continue(%d); ?>', $i);
+		return sprintf('<?php continue(%d); ?>', $i);
 	}
 
 	static public function compile_return(string $name, string $params_str, UserTemplate $tpl, int $line): string
