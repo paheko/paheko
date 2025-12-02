@@ -542,6 +542,10 @@ class Utils
 	{
 		$uri = self::getRequestURI();
 
+		if ($uri === null) {
+			return '';
+		}
+
 		if ($qs !== true && (strpos($uri, '?') !== false))
 		{
 			$uri = substr($uri, 0, strpos($uri, '?'));
