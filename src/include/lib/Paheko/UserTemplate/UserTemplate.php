@@ -4,6 +4,7 @@ namespace Paheko\UserTemplate;
 
 use KD2\Brindille;
 use KD2\Brindille_Exception;
+use KD2\ErrorManager;
 use KD2\Translate;
 
 use Paheko\Config;
@@ -729,6 +730,16 @@ class UserTemplate extends \KD2\Brindille
 	 */
 	public function error(\Exception $e, string $message)
 	{
+		// Make sure we report exceptions outside of Brindille templates
+		$p = $e;
+
+		while ($p = $p->getPrevious()) {
+			if (!($p instanceof Brindille_Exception)
+				&& !($p instanceof UserException)) {
+				throw $p;
+			}
+		}
+
 		// Fetch HTML error header from error_prepend_string (see ErrorManager)
 		$header = ini_get('error_prepend_string');
 		$header = preg_replace('!<if\((sent|logged|report|email|log)\)>(.*?)</if>!is', '', $header);

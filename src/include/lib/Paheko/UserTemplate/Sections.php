@@ -314,8 +314,8 @@ class Sections
 		return '<?php } '
 			// Prepend function name to error
 			. 'catch (Brindille_Exception $e) { throw new Brindille_Exception(sprintf("Error in \'%s\' %s: %s", $name, $context, $e->getMessage())); } '
-			// Always remove current context variables even if return was used
-			. 'finally { array_pop($this->_variables); } '
+			// Always remove current context variables even if return was used (should not be necessary anymore) FIXME
+			//. 'finally { array_pop($this->_variables); } '
 			. '}); ?>';
 	}
 

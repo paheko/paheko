@@ -232,7 +232,9 @@ class Module extends Entity
 		$this->set('home_button', !empty($ini->home_button));
 		$this->set('menu', !empty($ini->menu));
 
-		if (!isset($this->restrict_section) && !isset($this->restrict_level)) {
+		if ((!isset($ini->allow_custom_restrict) || $ini->allow_custom_restrict)
+			&& !isset($this->restrict_section)
+			&& !isset($this->restrict_level)) {
 			$this->set('restrict_section', $restrict_section);
 			$this->set('restrict_level', $restrict_level);
 		}
