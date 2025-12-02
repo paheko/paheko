@@ -202,6 +202,8 @@ class Module extends Entity
 			$this->_ini = $ini;
 		}
 
+		$ini->allow_user_restrict ??= true;
+
 		return $ini;
 	}
 
@@ -232,9 +234,7 @@ class Module extends Entity
 		$this->set('home_button', !empty($ini->home_button));
 		$this->set('menu', !empty($ini->menu));
 
-		if ((!isset($ini->allow_custom_restrict) || $ini->allow_custom_restrict)
-			&& !isset($this->restrict_section)
-			&& !isset($this->restrict_level)) {
+		if (($ini->allow_user_restrict ?? true) == false) {
 			$this->set('restrict_section', $restrict_section);
 			$this->set('restrict_level', $restrict_level);
 		}
