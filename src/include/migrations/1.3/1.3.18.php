@@ -1,8 +1,11 @@
 <?php
 
 namespace Paheko;
+use Paheko\Accounting\Charts;
 
 $db->beginSchemaUpdate();
+Charts::updateInstalled('fr_pca_2025');
+
 $db->import(__DIR__ . '/1.3.18.sql');
 $db->commitSchemaUpdate();
 
