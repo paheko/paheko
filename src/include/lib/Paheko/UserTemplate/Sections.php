@@ -1352,8 +1352,8 @@ class Sections
 				$page->load($data);
 				$listed[] = $page->id;
 
-				if (isset($row['snippet'])) {
-					$row['snippet'] = preg_replace('!</mark>(\s*)<mark>!', '$1', $row['snippet']);
+				if (array_key_exists('snippet', $row)) {
+					$row['snippet'] = preg_replace('!</mark>(\s*)<mark>!', '$1', $row['snippet'] ?? '');
 					if (preg_match('!<mark>(.*?)</mark>!', $row['snippet'], $match)) {
 						$row['url_highlight'] = $page->url() . '#:~:text=' . rawurlencode($match[1]);
 					}
