@@ -76,7 +76,7 @@ if (($v = qg('restore')) && ($version = $page->getVersion((int)$v))) {
 }
 
 $parent_title = $page->id_parent ? Web::get($page->id_parent)->title : 'Racine du site';
-$parent = [$page->id_parent => $parent_title];
+$parent = [$page->id_parent ?? '' => $parent_title];
 $encrypted = f('encrypted') || $page->format == Render::FORMAT_ENCRYPTED;
 
 $formats = $page::FORMATS_LIST;
