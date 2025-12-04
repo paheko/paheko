@@ -77,7 +77,7 @@ class Modifiers
 		'map',
 	];
 
-	const LEADING_NUMBER_REGEXP = '/^(\d{1,3})(?:\s*[.\)])?\s+/';
+	const LEADING_NUMBER_REGEXP = '/^(\d{1,3})(?:\s+|\s*[.\)]\s*)/';
 
 	/**
 	 * Call a user-defined function
