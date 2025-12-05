@@ -424,7 +424,7 @@ class Backup
 		if (null === $name) {
 			$download_name = sprintf('%s - Sauvegarde données - %s.sqlite', $config->get('org_name'), date('Y-m-d'));
 
-			$file = self::make();
+			$file = self::make(null);
 		}
 		else {
 			self::validateFileName($name);
