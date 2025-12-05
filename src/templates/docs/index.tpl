@@ -150,7 +150,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 				<th scope="row"><a href="?path={$item.path}">{$item.identity}</a></th>
 				<td class="actions">
 					{linkbutton href="!docs/?path=%s"|args:$item.path label="Fichiers" shape="menu"}
-					{linkbutton href="!users/details.php?=%d"|args:$item.id label="Fiche membre" shape="user"}
+					{linkbutton href="!users/details.php?id=%d"|args:$item.id label="Fiche membre" shape="user"}
 				</td>
 			</tr>
 			{else}
