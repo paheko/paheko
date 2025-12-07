@@ -463,7 +463,7 @@ code,label,description,position,bookmark
 7516,Droits d'auteur et de reproduction,,Produit,
 7518,Autres droits et valeurs similaires,,Produit,
 754,Ressources liées à la générosité du public,Dons reçus,Produit,Favori
-7541,Dons manuels,,Produit,
+7541,Dons manuels,"Dons importants ou disproportionnés par rapport aux moyens du donateur, qui doivent être déclarés à l'administration fiscale",Produit,
 75411,Dons manuels,,Produit,
 75412,Abandons de frais par les bénévoles,,Produit,
 75413,Abandons express de revenus ou de produits,"Exemple : abandon de droits d’auteurs, prêts de locaux à titres gratuits (abandon de loyer), etc.",Produit,
