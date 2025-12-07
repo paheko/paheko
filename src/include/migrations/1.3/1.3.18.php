@@ -29,8 +29,8 @@ foreach (glob(DATA_ROOT . '/*.sqlite-wal') as $file) {
 }
 
 // Move backups to new subdirectory, and rename them to new naming schema
-foreach (glob(DATA_ROOT . '/*.sqlite') as $file) {
-	$file = Utils::basename($file);
+foreach (glob(DATA_ROOT . '/*.sqlite') as $src) {
+	$file = Utils::basename($src);
 
 	if ($file === basename(DB_FILE)) {
 		continue;
@@ -49,7 +49,7 @@ foreach (glob(DATA_ROOT . '/*.sqlite') as $file) {
 		$name = Backup::UPGRADE_PREFIX . $match[1];
 	}
 	elseif (preg_match('/^auto\.(\d+)$/', $name, $match)) {
-		$name = Backup::AUTO_PREFIX . date('YmdHis', filemtime($file));
+		$name = Backup::AUTO_PREFIX . date('YmdHis', filemtime($src));
 	}
 
 	$name = Backup::PREFIX . $name . Backup::SUFFIX;
