@@ -46,6 +46,7 @@ class Modifiers
 		'arrayval',
 		'explode',
 		'implode',
+		'flip',
 		'keys',
 		'values',
 		'has',
@@ -77,7 +78,7 @@ class Modifiers
 		'map',
 	];
 
-	const LEADING_NUMBER_REGEXP = '/^([\d.]+)\s*[.\)]\s*/';
+	const LEADING_NUMBER_REGEXP = '/^(\d{1,3})(?:\s+|\s*[.\)]\s*)/';
 
 	/**
 	 * Call a user-defined function
@@ -515,6 +516,11 @@ EOS;
 	static public function keys($array)
 	{
 		return array_keys((array)$array);
+	}
+
+	static public function flip($array)
+	{
+		return array_flip((array)$array);
 	}
 
 	static public function key($array, $key)

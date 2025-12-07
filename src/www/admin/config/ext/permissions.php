@@ -16,7 +16,7 @@ if (!$ext) {
 $csrf_key = 'ext_permissions_' . $ext->name;
 
 $form->runIf('save', function() use ($ext) {
-	if (!$ext->restrict_section || !$ext->restrict_level) {
+	if (!$ext->ini->allow_user_restrict || !$ext->restrict_section || !$ext->restrict_level) {
 		throw new UserException('Cette extension ne permet pas de modifier les droits d\'accès.');
 	}
 

@@ -865,7 +865,7 @@ class CommonFunctions
 			if ($field->default_value === 'NOW()') {
 				$params['default'] = new \DateTime;
 			}
-			elseif (!empty($field->default_value)) {
+			elseif (isset($field->default_value) && $field->default_value !== '') {
 				$params['default'] = $field->default_value;
 			}
 		}
