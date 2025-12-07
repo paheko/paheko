@@ -46,6 +46,7 @@ class Modifiers
 		'arrayval',
 		'explode',
 		'implode',
+		'flip',
 		'keys',
 		'values',
 		'has',
@@ -515,6 +516,11 @@ EOS;
 	static public function keys($array)
 	{
 		return array_keys((array)$array);
+	}
+
+	static public function flip($array)
+	{
+		return array_flip((array)$array);
 	}
 
 	static public function key($array, $key)
