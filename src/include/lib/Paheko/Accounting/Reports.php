@@ -671,10 +671,14 @@ class Reports
 		$sql = sprintf('SELECT
 			t.id_year, l.id_account, l.debit, l.credit, t.id, t.date, t.reference,
 			l.reference AS line_reference, t.label, l.label AS line_label,
-			a.label AS account_label, a.code AS account_code
+			a.label AS account_label,
+			a.code AS account_code,
+			l.id_project,
+			COALESCE(p.code, p.label) AS project_code
 			FROM acc_transactions t
 			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
 			INNER JOIN acc_accounts a ON l.id_account = a.id
+			LEFT JOIN acc_projects p ON p.id = l.id_project
 			WHERE %s ORDER BY t.date %s, t.id %2$s;', $where, $reverse_order ? 'DESC' : 'ASC');
 
 		$transaction = null;
@@ -705,6 +709,8 @@ class Reports
 				'credit'        => $row->credit,
 				'debit'         => $row->debit,
 				'id_year'       => $row->id_year,
+				'id_project'    => $row->id_project,
+				'project_code'  => $row->project_code,
 			];
 		}
 

@@ -259,7 +259,7 @@ class Account extends Entity
 			'select' => 'l.id_project',
 		],
 		'project_code' => [
-			'select' => 'IFNULL(p.code, SUBSTR(p.label, 1, 10) || \'…\')',
+			'select' => 'COALESCE(p.code, p.label)',
 			'label' => 'Projet',
 		],
 		'locked' => [
