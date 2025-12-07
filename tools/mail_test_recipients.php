@@ -154,6 +154,52 @@ class TestMailbox
 
 	public function __construct(stdClass $config)
 	{
+		if (isset($config->oauth_refresh_token)) {
+			if (!isset($config->oauth_refresh_url, $config->oauth_client_id)) {
+				throw new \LogicException('Missing option: oauth_refresh_url or oauth_client_id');
+			}
+
+			$file = $_SERVER['XDG_CONFIG_HOME'] ?? ($_SERVER['HOME'] . '/.config');
+			$file .= '/test_mailboxes.json';
+			$data = [];
+
+			if (file_exists($file)) {
+				$data = json_decode(file_get_contents($file), true);
+			}
+
+			$d = $data[$config->address] ?? null;
+
+			// Refresh oauth token if necessary
+			if (!isset($d['expiry'])
+				|| empty($d['access_token'])
+				|| $d['expiry'] <= time()) {
+				$c = curl_init($config->oauth_refresh_url);
+				curl_setopt($c, CURLOPT_POST, true);
+				curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
+				curl_setopt($c, CURLOPT_POSTFIELDS, http_build_query([
+					'grant_type'    => 'refresh_token',
+					'refresh_token' => $d['refresh_token'] ?? $config->oauth_refresh_token,
+					'client_id'     => $config->oauth_client_id,
+					'client_secret' => $config->oauth_client_secret ?? '',
+				]));
+				$r = curl_exec($c);
+				$d = json_decode($r, true);
+
+				if (!$d) {
+					throw new \RuntimeException('Cannot fetch OAuth token: ' . $r);
+				}
+
+				$d['expiry'] = time() + $d['expires_in'];
+				$data[$config->address] = $d;
+
+				// Save current token
+				@mkdir(dirname($file), fileperms(__FILE__), true);
+				file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT));
+			}
+
+			$config->token = $d['access_token'];
+		}
+
 		$this->config = $config;
 	}
 
@@ -221,13 +267,13 @@ class TestMailbox
 				'uid'        => $msg->uid,
 				'message_id' => $msg->message_id,
 				'from'       => $msg->from->address,
-				'sender'     => $msg->sender->address,
+				'sender'     => $msg->sender->address ?? null,
 				'recipient'  => $this->config->address,
 				'provider'   => $this->config->provider,
 				'flags'      => $msg->flags,
 				'diagnostic' => $spam_headers,
 				'headers'    => $parts[0],
-				'body'       => $parts[1],
+				'body'       => $parts[1] ?? '',
 				'size'       => strlen($raw),
 				'actions'    => null,
 			];
@@ -245,7 +291,8 @@ class TestMailbox
 					$actions[] = 'Moved to "Important" folder';
 				}
 			}
-			elseif ($status === 'junk' && $this->config->move_if_spam) {
+
+			if ($status === 'junk' && $this->config->move_if_spam) {
 				$actions[] = $this->removeFlagsFromMessage($r, ['\Junk', 'Junk', 'Spam']);
 				$this->mailbox->move($folder, $msg->uid, 'INBOX');
 				$actions[] = 'Moved to INBOX';
