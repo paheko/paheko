@@ -346,7 +346,8 @@ class Accounts
 
 		$columns['status'] = [
 			'select' => null,
-			'label' => 'Statut',
+			'label'  => 'Statut',
+			'export' => false,
 		];
 
 		$tables = 'users u
@@ -366,8 +367,13 @@ class Accounts
 		$list->groupBy('u.id');
 		$list->setCount('COUNT(*)');
 		$list->setPageSize(null);
-		$list->setExportCallback(function (&$row) {
+		$list->setExportCallback(function (&$row) use ($only_third_party) {
 			$row->balance = Utils::money_format($row->balance, '.', '', false);
+
+			if (!$only_third_party) {
+				$row->products = Utils::money_format($row->products, '.', '', false);
+				$row->expenses = Utils::money_format($row->expenses, '.', '', false);
+			}
 		});
 
 		return $list;
