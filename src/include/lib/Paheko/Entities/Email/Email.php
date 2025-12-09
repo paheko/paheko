@@ -359,7 +359,8 @@ class Email extends Entity
 		elseif ($context === Emails::CONTEXT_REMINDER) {
 			$this->set('accepts_reminders', false);
 		}
-		elseif ($context === Emails::CONTEXT_PRIVATE) {
+		elseif ($context === Emails::CONTEXT_PRIVATE
+			|| $context === Emails::CONTEXT_NOTIFICATION) {
 			$this->set('accepts_messages', false);
 		}
 		elseif ($context === null) {
