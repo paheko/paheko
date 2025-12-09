@@ -87,6 +87,7 @@ class Email extends Entity
 			case Emails::CONTEXT_BULK:
 				return $r->accepts_mailings === false ? false : true;
 			case Emails::CONTEXT_REMINDER:
+			case Emails::CONTEXT_NOTIFICATION:
 				return $r->accepts_reminders === false ? false : true;
 			default:
 				return $r->accepts_messages === false ? false : true;
@@ -356,11 +357,11 @@ class Email extends Entity
 		if ($context === Emails::CONTEXT_BULK) {
 			$this->set('accepts_mailings', false);
 		}
-		elseif ($context === Emails::CONTEXT_REMINDER) {
+		elseif ($context === Emails::CONTEXT_REMINDER
+			|| $context === Emails::CONTEXT_NOTIFICATION) {
 			$this->set('accepts_reminders', false);
 		}
-		elseif ($context === Emails::CONTEXT_PRIVATE
-			|| $context === Emails::CONTEXT_NOTIFICATION) {
+		elseif ($context === Emails::CONTEXT_PRIVATE) {
 			$this->set('accepts_messages', false);
 		}
 		elseif ($context === null) {
