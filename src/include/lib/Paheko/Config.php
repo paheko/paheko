@@ -302,7 +302,7 @@ class Config extends Entity
 		$tzlist = TimeZones::listForCountry($this->country);
 
 		// Make sure we set a valid timezone
-		if (!array_key_exists($this->timezone, $tzlist)) {
+		if (!$this->timezone || !array_key_exists($this->timezone, $tzlist)) {
 			$this->set('timezone', key($tzlist));
 		}
 
