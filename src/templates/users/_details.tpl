@@ -74,8 +74,10 @@ $fields = DF::getInstance()->all();
 				{tag label="Adresse bloquée" color="darkorange"}
 			{elseif $email.verified}
 				{tag label="Adresse vérifiée" color="darkgreen"}
+			{*
 			{else}
 				{tag label="Adresse non vérifiée" color="darkgrey"}
+			*}
 			{/if}
 			{linkbutton href="!users/mailing/status/address.php?address=%s"|args:$address label="Détails de l'adresse e-mail" shape="history" target="_dialog"}
 		</dd>
