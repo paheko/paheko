@@ -61,14 +61,43 @@
 			</tbody>
 		</table>
 
+		<p class="help">
+			<mark id="lines_count">0</mark> lignes sélectionnées<br />
+			Total des montants : <mark id="lines_total">0</mark>
+		</p>
+
 		<p class="actions">
-			{button type="submit" class="minor" name="mark" label="Marquer comme déposées" shape="check" value=1}
+			{button type="submit" class="minor" name="mark" label="Marquer comme déposé" shape="check" value=1}
 		</p>
 		<p class="submit">
 			{csrf_field key=$csrf_key}
 			{button type="submit" name="create" label="Renseigner le dépôt" class="main" shape="right"}
 		</p>
 	</form>
+	{literal}
+	<script type="text/javascript">
+	var total = 0;
+	var count = 0;
+	$('tbody input[type=checkbox]').forEach((e) => {
+		e.addEventListener('change', () => {
+			var v = e.getAttribute('data-debit') || e.getAttribute('data-credit');
+			v = parseInt(v, 10);
+			total += e.checked ? v : -v;
+			count += e.checked ? 1 : -1;
+			if (total < 0) {
+				total = 0;
+			}
+			$('#lines_total').innerText = g.formatMoney(total);
+			$('#lines_count').innerText = count;
+		});
+	});
+
+	$('#f_all').addEventListener('change', (e) => {
+		$('#f_amount').value = '';
+		total = 0;
+	});
+	</script>
+	{/literal}
 {/if}
 
 {include file="_foot.tpl"}
