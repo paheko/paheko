@@ -47,7 +47,7 @@ if ($list_category !== null) {
 
 $category = $user->category();
 $csrf_key = 'user_' . $user->id();
-$can_login = $user->canLogin();
+$can_login = $user->canLoginBy($session);
 $can_be_modified = $user->canBeModifiedBy($session);
 $can_change_password = $can_login && $user->canChangePasswordBy($session);
 

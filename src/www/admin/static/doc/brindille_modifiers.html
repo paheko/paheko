@@ -68,6 +68,7 @@
 			<li><a href="#array_to_list">array_to_list</a></li>
 			<li><a href="#has">has</a></li>
 			<li><a href="#in">in</a></li>
+			<li><a href="#flip">flip</a></li>
 			<li><a href="#has_key">has_key</a></li>
 			<li><a href="#key_in">key_in</a></li>
 			<li><a href="#keys">keys</a></li>
@@ -324,6 +325,17 @@ c =
 {{if "bleu"|in:$table}}
     Oui, il y a du bleu
 {{/if}}</code></pre>
+<h2 id="flip">flip</h2>
+<p>Remplace les clés du tableau par les valeurs, et les valeurs par les clés.</p>
+<pre><code>{{:assign var="table1" a="bleu" b="orange"}}
+{{:debug table2=$table1}}</code></pre>
+<p>Donnera :</p>
+<pre><code>table1:
+ a = bleu
+ b = orange
+table2:
+ bleu = a
+ orange = b</code></pre>
 <h2 id="has_key">has_key</h2>
 <p>Renvoie vrai si le tableau contient la clé passée en paramètre.</p>
 <pre><code>{{:assign var="table" a="bleu" b="orange"}}

@@ -81,18 +81,19 @@ if ($previous_year) {
 
 	// Append result
 	$result = Reports::getResult(['year' => $previous_year->id()]);
-
-	if ($result > 0) {
-		$account = $accounts->getSingleAccountForType(Account::TYPE_POSITIVE_RESULT);
-	}
-	else {
-		$account = $accounts->getSingleAccountForType(Account::TYPE_NEGATIVE_RESULT);
-	}
+	$type = $result > 0 ? Account::TYPE_POSITIVE_RESULT : Account::TYPE_NEGATIVE_RESULT;
+	$account = $accounts->getSingleAccountForType($type);
 
 	if (!$account) {
+		$chart = $year->chart();
+		if ($chart->isOfficial()) {
+			// This should not happen
+			throw new \LogicException('Official chart does not have a result account for type='.$type);
+		}
+
 		$account = (object) [
-			'id' => null,
-			'code' => null,
+			'id'    => null,
+			'code'  => null,
 			'label' => null,
 		];
 	}
@@ -121,7 +122,9 @@ if ($previous_year) {
 		$line->debit = $line->is_debt ? abs($line->balance) : 0;
 
 		if ($chart_change) {
-			if ($matching_accounts && array_key_exists($line->code, $matching_accounts)) {
+			if ($matching_accounts
+				&& $line->code
+				&& array_key_exists($line->code, $matching_accounts)) {
 				$acc = $matching_accounts[$line->code];
 				$line->account_selector = [$acc->id => sprintf('%s — %s', $acc->code, $acc->label)];
 			}

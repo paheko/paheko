@@ -1048,9 +1048,9 @@ class Sections
 			$params['group'] = 's.id';
 		}
 
-		// Hide archived subscriptions (FIXME Paheko 1.4!)
+		// Hide archived subscriptions
 		if (($params['archived'] ?? null) === false) {
-			$params['where'] .= ' AND (s.end_date IS NULL OR s.end_date >= date())';
+			$params['where'] .= ' AND s.archived = 0';
 		}
 
 		if (empty($params['order'])) {

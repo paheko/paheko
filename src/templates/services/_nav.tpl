@@ -16,10 +16,10 @@
 		{/if}
 	</ul>
 
-	{if !empty($has_old_services)}
+	{if !empty($has_archived_services)}
 	<ul class="sub">
-		<li{if !$show_old_services} class="current"{/if}>{link href="!services/" label="Activités courantes"}</li>
-		<li{if $show_old_services} class="current"{/if}>{link href="!services/?old=1" label="Activités passées"}</li>
+		<li{if !$show_archived_services} class="current"{/if}>{link href="!services/" label="Activités courantes"}</li>
+		<li{if $show_archived_services} class="current"{/if}>{link href="!services/?archived=1" label="Activités archivées"}</li>
 	</ul>
 	{/if}
 

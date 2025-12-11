@@ -353,7 +353,7 @@ class Year extends Entity
 			WHERE t.id_year != ?
 				AND a.type = ?
 				AND l.credit = 0
-				AND NOT (t.status & ?)
+				AND NOT (l.status & ?)
 				AND NOT (t.status & ?)
 			GROUP BY a.code
 			ORDER BY a.label COLLATE U_NOCASE;';
@@ -361,7 +361,7 @@ class Year extends Entity
 		return DB::getInstance()->get($sql,
 			$this->id(),
 			Account::TYPE_OUTSTANDING,
-			Transaction::STATUS_DEPOSITED,
+			Line::STATUS_DEPOSITED,
 			Transaction::STATUS_OPENING_BALANCE
 		);
 	}

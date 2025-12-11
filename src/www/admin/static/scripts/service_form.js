@@ -33,7 +33,7 @@ function selectService(elm, first_load) {
 }
 
 function selectFee(elm) {
-	var amount = parseInt(elm.getAttribute('data-user-amount'), 10);
+	var amount = parseInt(elm.getAttribute('data-user-amount') || '0', 10);
 
 	// Toggle accounting part of the form
 	var accounting = elm.getAttribute('data-account') ? true : false;
@@ -46,7 +46,7 @@ function selectFee(elm) {
 	}
 
 	// Fill the amount paid by the user
-	if (amount && create) {
+	if (create) {
 		$('#f_amount').value = g.formatMoney(amount);
 	}
 

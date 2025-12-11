@@ -42,17 +42,38 @@ class Transaction extends Entity
 	const TYPE_DEBT = 4;
 	const TYPE_CREDIT = 5;
 
+	/**
+	 * This transaction is waiting to be paid (eg. debt or credit)
+	 */
 	const STATUS_WAITING = 1;
+
+	/**
+	 * This transactions has been paid
+	 */
 	const STATUS_PAID = 2;
-	const STATUS_DEPOSITED = 4;
+
+	// No longer used, moved to Line entity
+	//const STATUS_DEPOSITED = 4;
+
+	/**
+	 * This transaction has an error (only used after an old migration)
+	 */
 	const STATUS_ERROR = 8;
+
+	/**
+	 * This transaction is *the* opening balance (we don't allow more than one)
+	 * Used to replace existing opening balance, with the opening balance form
+	 */
 	const STATUS_OPENING_BALANCE = 16;
+
+	/**
+	 * This is a deposit transaction, created from the deposit form
+	 */
 	const STATUS_DEPOSIT = 32;
 
 	const STATUS_NAMES = [
-		1 => 'En attente de règlement',
-		2 => 'Réglé',
-		4 => 'Déposé en banque',
+		self::STATUS_WAITING => 'En attente de règlement',
+		self::STATUS_PAID    => 'Réglé',
 	];
 
 	const TYPES_NAMES = [
@@ -188,6 +209,7 @@ class Transaction extends Entity
 			$l['account_position'] = $this->_accounts[$line->id_account]->position ?? null;
 			$l['project_name'] = $line->id_project ? $projects[$line->id_project] : null;
 			$l['account_selector'] = [$line->id_account => sprintf('%s — %s', $l['account_code'], $l['account_label'])];
+			$l['is_deposited'] = $line->isDeposited();
 			$l['line'] =& $line;
 
 			if (!$as_array) {
@@ -652,11 +674,13 @@ class Transaction extends Entity
 		return true;
 	}
 
-	public function removeStatus(int $property) {
+	public function removeStatus(int $property): void
+	{
 		$this->set('status', $this->status & ~$property);
 	}
 
-	public function addStatus(int $property) {
+	public function addStatus(int $property): void
+	{
 		$this->set('status', $this->status | $property);
 	}
 
@@ -670,7 +694,8 @@ class Transaction extends Entity
 		return $this->hasStatus(self::STATUS_PAID);
 	}
 
-	public function markPaid() {
+	public function markPaid(): void
+	{
 		$this->removeStatus(self::STATUS_WAITING);
 		$this->addStatus(self::STATUS_PAID);
 	}
@@ -704,11 +729,11 @@ class Transaction extends Entity
 
 		if ($this->hasStatus(self::STATUS_DEPOSIT)) {
 			// Delete "deposited" status from linked transactions
-			$db->exec(sprintf('UPDATE acc_transactions SET status = (status & ~%d)
-				WHERE id IN (
+			$db->exec(sprintf('UPDATE acc_transactions_lines SET status = (status & ~%d)
+				WHERE id_transaction IN (
 					SELECT id_transaction FROM acc_transactions_links WHERE id_related = %d
 					UNION SELECT id_related FROM acc_transactions_links WHERE id_transaction = %2$d);',
-				Transaction::STATUS_DEPOSITED, $this->id()));
+				Line::STATUS_DEPOSITED, $this->id()));
 		}
 
 		$r = parent::delete();

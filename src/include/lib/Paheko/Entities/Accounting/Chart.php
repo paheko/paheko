@@ -188,4 +188,9 @@ class Chart extends Entity
 
 		return strtolower($this->country . '_' . $this->code);
 	}
+
+	public function isOfficial(): bool
+	{
+		return $this->code !== null;
+	}
 }

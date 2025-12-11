@@ -19,7 +19,7 @@
 	</dd>
 	{foreachelse}
 	<dd>
-		Ce membre n'est inscrit à aucune activité ou cotisation.
+		Ce membre n'est actuellement inscrit à aucune activité ou cotisation.
 	</dd>
 	{/foreach}
 	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}

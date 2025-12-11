@@ -39,6 +39,16 @@ class Config extends Entity
 		'logo', 'icon', 'favicon', 'admin_background', 'admin_css',
 	];
 
+	const BACKUP_FREQUENCIES = [
+		0   => 'Aucune — les sauvegardes automatiques sont désactivées',
+		1   => 'Quotidienne, tous les jours',
+		7   => 'Hebdomadaire, tous les 7 jours',
+		15  => 'Bimensuelle, tous les 15 jours',
+		30  => 'Mensuelle',
+		90  => 'Trimestrielle',
+		365 => 'Annuelle',
+	];
+
 	const VERSIONING_POLICIES = [
 		'none' => [
 			'label' => 'Ne pas conserver les anciennes versions',
@@ -121,6 +131,7 @@ class Config extends Entity
 	protected int $default_category;
 	protected ?bool $show_parent_column = true;
 	protected ?bool $show_has_children_column = true;
+	protected bool $show_category_in_list = true;
 
 	protected ?int $backup_frequency = null;
 	protected ?int $backup_limit = null;
@@ -245,6 +256,10 @@ class Config extends Entity
 			$source['show_has_children_column'] = false;
 		}
 
+		if (!empty($source['show_category_in_list_present'])) {
+			$source['show_category_in_list'] = boolval($source['show_category_in_list'] ?? false);
+		}
+
 		// N'enregistrer les couleurs que si ce ne sont pas les couleurs par défaut
 		if (isset($source['color1'], $source['color2'])
 			&& ($source['color1'] == ADMIN_COLOR1 && $source['color2'] == ADMIN_COLOR2))
@@ -266,6 +281,13 @@ class Config extends Entity
 
 		$this->assert($this->log_retention >= 0, 'La durée de rétention doit être égale ou supérieur à zéro.');
 
+		$this->assert(is_null($this->backup_frequency)
+			|| $this->backup_frequency === -1
+			|| $this->backup_frequency === 0
+			|| !in_array($this->backup_frequency, self::BACKUP_FREQUENCIES, true),
+			'Fréquence de sauvegarde invalide');
+		$this->assert(is_null($this->backup_limit) || ($this->backup_limit >= 0 && $this->backup_limit <= 50), 'Nombre de sauvegardes invalide. Le maximum est de 50 sauvegardes.');
+
 		// Files
 		$this->assert(count($this->files) == count(self::FILES));
 
@@ -280,7 +302,7 @@ class Config extends Entity
 		$tzlist = TimeZones::listForCountry($this->country);
 
 		// Make sure we set a valid timezone
-		if (!array_key_exists($this->timezone, $tzlist)) {
+		if (!$this->timezone || !array_key_exists($this->timezone, $tzlist)) {
 			$this->set('timezone', key($tzlist));
 		}
 

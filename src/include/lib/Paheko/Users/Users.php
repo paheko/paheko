@@ -249,6 +249,7 @@ class Users
 		}
 
 		$tables = 'users_view u';
+		$tables .= ' INNER JOIN users_categories c ON c.id = u.id_category';
 		$tables .= ' LEFT JOIN users_search s ON s.id = u.id';
 
 		if (self::hasParents()) {
@@ -277,13 +278,23 @@ class Users
 		}
 
 		if (!$id_category) {
-			$conditions = 'u.id_category IN (SELECT id FROM users_categories WHERE hidden = 0)';
+			$conditions = 'c.hidden = 0';
 		}
 		elseif ($id_category > 0) {
 			$conditions = sprintf('u.id_category = %d', $id_category);
 		}
 		else {
 			$conditions = '1';
+		}
+
+		$config = Config::getInstance();
+
+		if ($id_category <= 0 && $config->show_category_in_list) {
+			$columns['category'] = [
+				'label'  => 'Catégorie',
+				'select' => 'c.name',
+				'order'  => 'c.name COLLATE U_NOCASE %s',
+			];
 		}
 
 		$order = 'identity';
@@ -294,6 +305,7 @@ class Users
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy($order, false);
+		$list->groupBy('u.id');
 
 		return $list;
 	}

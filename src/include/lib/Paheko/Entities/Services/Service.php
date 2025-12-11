@@ -26,6 +26,7 @@ class Service extends Entity
 	protected ?int $duration = null;
 	protected ?Date $start_date = null;
 	protected ?Date $end_date = null;
+	protected bool $archived = false;
 
 	public function selfCheck(): void
 	{
@@ -56,6 +57,10 @@ class Service extends Entity
 			else {
 				$source['duration'] = $source['start_date'] = $source['end_date'] = null;
 			}
+		}
+
+		if (isset($source['archived_present']) && empty($source['archived'])) {
+			$source['archived'] = false;
 		}
 
 		parent::importForm($source);

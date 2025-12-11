@@ -108,13 +108,11 @@ class Install
 			throw new UserException('L\'utilisateur connecté ne dispose pas d\'adresse e-mail, merci de la renseigner.');
 		}
 
-		$name = date('Y-m-d-His-') . 'avant-remise-a-zero';
-
-		Backup::create($name);
+		Backup::createBeforeReset();
 
 		// Keep a backup file of files
-		if (FILE_STORAGE_BACKEND == 'FileSystem') {
-			$name = 'documents_' . $name . '.zip';
+		if (FILE_STORAGE_BACKEND === 'FileSystem') {
+			$name = 'documents_before_reset_' . date('Ymd-His') . '.zip';
 			Files::zipAll(CACHE_ROOT . '/' . $name);
 			Files::callStorage('truncate');
 			@mkdir(FILE_STORAGE_CONFIG . '/documents');
@@ -133,7 +131,7 @@ class Install
 			'country'      => $config->country,
 		]));
 
-		rename(DB_FILE, sprintf(DATA_ROOT . '/association.%s.sqlite', date('Y-m-d-His-') . 'avant-remise-a-zero'));
+		Utils::safe_unlink(DB_FILE);
 
 		self::showProgressSpinner('!install.php', 'Remise à zéro en cours…');
 		exit;
@@ -387,12 +385,15 @@ class Install
 		$paths = [
 			DATA_ROOT,
 			CACHE_ROOT,
+			BACKUPS_ROOT,
 			SHARED_CACHE_ROOT,
 			USER_TEMPLATES_CACHE_ROOT,
 			STATIC_CACHE_ROOT,
 			SMARTYER_CACHE_ROOT,
 			SHARED_USER_TEMPLATES_CACHE_ROOT,
 		];
+
+		$paths = array_unique($paths);
 
 		foreach ($paths as $path)
 		{

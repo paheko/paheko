@@ -254,6 +254,7 @@ class Template extends Smartyer
 
 		// Overwrite default money modifiers
 		$this->register_modifier('money', [CommonModifiers::class, 'money_html']);
+		$this->register_modifier('money_text', [CommonModifiers::class, 'money']);
 		$this->register_modifier('money_currency', [CommonModifiers::class, 'money_currency_html']);
 		$this->register_modifier('money_currency_text', [CommonModifiers::class, 'money_currency']);
 
