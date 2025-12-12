@@ -66,12 +66,14 @@
 		<li><a href="#filtres-de-tableaux">Filtres de tableaux</a>
 		<ol>
 			<li><a href="#array_to_list">array_to_list</a></li>
+			<li><a href="#flip">flip</a></li>
 			<li><a href="#has">has</a></li>
 			<li><a href="#in">in</a></li>
-			<li><a href="#flip">flip</a></li>
 			<li><a href="#has_key">has_key</a></li>
+			<li><a href="#key"> key</a></li>
 			<li><a href="#key_in">key_in</a></li>
 			<li><a href="#keys">keys</a></li>
+			<li><a href="#value"> value</a></li>
 			<li><a href="#values">values</a></li>
 			<li><a href="#count">count</a></li>
 			<li><a href="#explode">explode</a></li>
@@ -312,6 +314,17 @@ b = cyan
 c =
  color1 = darkred
  color2 = darkgreen</code></pre>
+<h2 id="flip">flip</h2>
+<p>Remplace les clés du tableau par les valeurs, et les valeurs par les clés.</p>
+<pre><code>{{:assign var="table1" a="bleu" b="orange"}}
+{{:debug table2=$table1}}</code></pre>
+<p>Donnera :</p>
+<pre><code>table1:
+ a = bleu
+ b = orange
+table2:
+ bleu = a
+ orange = b</code></pre>
 <h2 id="has">has</h2>
 <p>Renvoie vrai si le tableau contient l'élément passé en paramètre.</p>
 <pre><code>{{:assign var="table" a="bleu" b="orange"}}
@@ -325,25 +338,19 @@ c =
 {{if "bleu"|in:$table}}
     Oui, il y a du bleu
 {{/if}}</code></pre>
-<h2 id="flip">flip</h2>
-<p>Remplace les clés du tableau par les valeurs, et les valeurs par les clés.</p>
-<pre><code>{{:assign var="table1" a="bleu" b="orange"}}
-{{:debug table2=$table1}}</code></pre>
-<p>Donnera :</p>
-<pre><code>table1:
- a = bleu
- b = orange
-table2:
- bleu = a
- orange = b</code></pre>
 <h2 id="has_key">has_key</h2>
 <p>Renvoie vrai si le tableau contient la clé passée en paramètre.</p>
 <pre><code>{{:assign var="table" a="bleu" b="orange"}}
 {{if $table|has_key:"b"}}
     Oui, il y a la clé "b"
 {{/if}}</code></pre>
+<h2 id="key"> key</h2>
+<p>Renvoie la clé du tableau correspondant à la valeur passée en paramètre, ou NULL si la valeur n'est pas trouvée.</p>
+<pre><code>{{:assign var="table" a="bleu" b="orange"}}
+{{$table|key:"orange"}}</code></pre>
+<p>Affichera <code>b</code>, soit la clé correspondant à la valeur <code>orange</code>.</p>
 <h2 id="key_in">key_in</h2>
-<p>Renvoie vrai si la clé fait partie du tableau passé en paramètre.</p>
+<p>Renvoie <code>true</code> si la clé fait partie du tableau passé en paramètre.</p>
 <p>C'est exactement la même chose que <code>has_key</code>, mais exprimé à l'envers.</p>
 <pre><code>{{:assign var="table" a="bleu" b="orange"}}
 {{if "b"|key_in:$table}}
@@ -356,6 +363,11 @@ table2:
 {{$cles|implode:","}}</code></pre>
 <p>Donnera :</p>
 <pre><code>a,b</code></pre>
+<h2 id="value"> value</h2>
+<p>Renvoie la valeur du tableau correspondant à la clé passée en paramètre, ou NULL si la clé n'est pas trouvée.</p>
+<pre><code>{{:assign var="table" a="bleu" b="orange"}}
+{{$table|value:"b"}}</code></pre>
+<p>Affichera <code>orange</code>, soit la valeur correspondant à la clé <code>b</code>.</p>
 <h2 id="values">values</h2>
 <p>Renvoie les valeurs du tableau, sous forme de tableau.</p>
 <p>Cela revient en fait à supprimer les clés associatives.</p>

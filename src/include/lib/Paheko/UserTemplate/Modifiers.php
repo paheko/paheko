@@ -523,7 +523,18 @@ EOS;
 		return array_flip((array)$array);
 	}
 
-	static public function key($array, $key)
+	static public function key($array, $value)
+	{
+		$key = array_search($value, $array, true);
+
+		if ($key === false) {
+			return null;
+		}
+
+		return $key;
+	}
+
+	static public function value($array, $key)
 	{
 		return $array[$key] ?? null;
 	}
