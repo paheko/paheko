@@ -59,7 +59,7 @@ $fields = DF::getInstance()->all();
 			</ul>
 		{else}
 			{if in_array($key, $id_fields)}<strong>{/if}
-			{user_field field=$field value=$value user_id=$user.id}
+			{user_field field=$field value=$value user_id=$user.id context="details"}
 			{if in_array($key, $id_fields)}</strong>{/if}
 		{/if}
 		{if $field.type === 'email' && $value}
