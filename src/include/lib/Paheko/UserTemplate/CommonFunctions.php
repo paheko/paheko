@@ -910,15 +910,13 @@ class CommonFunctions
 		}
 
 		$v = $params['value'] ?? null;
+		$out = '';
+		$linkify = $field && (!$field->isName() || ($params['context'] ?? '') !== 'list');
 
 		if (!$field) {
-			return htmlspecialchars((string)$v);
+			$out = (string) $v;
 		}
-
-		$out = '';
-		$linkify = !$field->isName() || ($params['context'] ?? '') !== 'list';
-
-		if ($field->type === 'checkbox'
+		elseif ($field->type === 'checkbox'
 			|| $field->type === 'boolean') {
 			$out = $v ? 'Oui' : 'Non';
 		}
@@ -994,7 +992,7 @@ class CommonFunctions
 			$out = nl2br(htmlspecialchars((string) $v));
 		}
 
-		if (!empty($params['link_name_id']) && ($name === 'identity' || ($field->isName() && substr($out, 0, 2) !== '<a'))) {
+		if (!empty($params['link_name_id']) && ($name === 'identity' || ($field && $field->isName() && substr($out, 0, 2) !== '<a'))) {
 			$out = sprintf('<a href="%s">%s</a>', Utils::getLocalURL('!users/details.php?id=' . (int)$params['link_name_id']), $out);
 		}
 
