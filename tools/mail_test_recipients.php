@@ -17,6 +17,7 @@ $arg = $argv[3] ?? null;
 
 $r = TestMailbox::all($cfg);
 
+/*
 if ($arg) {
 	$r = find_message($r, $arg);
 }
@@ -33,14 +34,34 @@ elseif ($cmd === 'body' && $arg) {
 elseif ($cmd === 'export' && $arg) {
 	echo $r->headers . "\r\n\r\n" . $r->body;
 }
-else {
-	foreach ($r as $address => $messages) {
-		echo "--- $address ---\n";
+*/
 
-		foreach ($messages as $msg) {
-			display_message_report($msg, false);
-		}
+$current = null;
+$errors = [];
+
+foreach ($r as $msg) {
+	if ($current !== $msg->recipient) {
+		$current = $msg->recipient;
+		echo "\n\n--- $current ---\n";
 	}
+
+	if ($msg->status === 'inbox') {
+		color('green', 'i');
+	}
+	elseif ($msg->status === 'junk') {
+		color('red', 'J');
+		$errors[] = $msg;
+	}
+	elseif ($msg->status === 'promotional') {
+		color('yellow', 'P');
+		$errors[] = $msg;
+	}
+}
+
+echo "\n\n";
+
+foreach ($errors as $msg) {
+	display_message_report($msg, false);
 }
 
 function display_message_report(stdClass $msg)
@@ -56,7 +77,7 @@ function display_message_report(stdClass $msg)
 
 	echo '] ' . $msg->subject . "\n";
 
-	printf("  From: %s\n  Date: %s\n  Message-ID: %s\n  Flags: %s\n  Local ID: %s\n", $msg->from, $msg->date, $msg->message_id, implode(' ', $msg->flags), $msg->id);
+	printf("  To: %s\n  From: %s\n  Date: %s\n  Message-ID: %s\n  Flags: %s\n  Local ID: %s\n", $msg->recipient, $msg->from, $msg->date, $msg->message_id, implode(' ', $msg->flags), $msg->id);
 
 	if ($msg->status !== 'inbox') {
 		echo "  Diagnostic headers:\n";
@@ -125,7 +146,7 @@ class TestMailbox
 	protected stdClass $config;
 	protected Mailbox $mailbox;
 
-	static public function all(string $file, ?DateTime $since = null): array
+	static public function all(string $file, ?DateTime $since = null): \Generator
 	{
 		$ini = parse_ini_file($file, true);
 
@@ -137,8 +158,6 @@ class TestMailbox
 			'move_if_spam'      => true,
 		];
 
-		$reports = [];
-
 		foreach ($ini as $address => $config) {
 			$config = (object) array_merge($defaults, $config);
 			$config->address = $address;
@@ -146,10 +165,8 @@ class TestMailbox
 			$config->provider ??= substr($address, strrpos($address, '@')+1);
 
 			$t = new self($config);
-			$reports[$address] = $t->report($since);
+			yield from $t->report($since);
 		}
-
-		return $reports;
 	}
 
 	public function __construct(stdClass $config)
@@ -203,7 +220,7 @@ class TestMailbox
 		$this->config = $config;
 	}
 
-	public function report(?DateTime $since = null): array
+	public function report(?DateTime $since = null): \Generator
 	{
 		$m = $this->mailbox = new Mailbox($this->config->imap);
 		//$m->setLogFilePointer(STDOUT);
@@ -211,24 +228,21 @@ class TestMailbox
 		$this->config->password = null;
 		$this->config->token = null;
 		$folders = $m->listFolders();
-		$report = [];
 
 		foreach ($folders as $key => $folder) {
 			if (in_array('Junk', $folder->flags)
 				|| $key === 'INBOX'
 				|| in_array($key, self::JUNK_FOLDER_NAMES)) {
-				$this->exploreFolder($key, $since, $report);
+				yield from $this->exploreFolder($key, $since);
 			}
 			else {
 				// Not interested
 				continue;
 			}
 		}
-
-		return $report;
 	}
 
-	protected function exploreFolder(string $folder, ?DateTime $since, array &$report)
+	protected function exploreFolder(string $folder, ?DateTime $since): \Generator
 	{
 		$since ??= new \DateTime('30 days ago');
 
@@ -304,10 +318,8 @@ class TestMailbox
 			$actions = array_filter($actions);
 			$r->actions = $actions;
 
-			$report[$r->id] = $r;
+			yield $r->id => $r;
 		}
-
-		return $report;
 	}
 
 	protected function removeFlagsFromMessage(stdClass $msg, array $flags): ?string
