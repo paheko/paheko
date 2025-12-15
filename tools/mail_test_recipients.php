@@ -244,7 +244,7 @@ class TestMailbox
 
 	protected function exploreFolder(string $folder, ?DateTime $since): \Generator
 	{
-		$since ??= new \DateTime('30 days ago');
+		$since ??= new \DateTime('15 days ago');
 
 		foreach ($this->mailbox->listMessages($folder, ['since' => $since], ['X-Is-Recipient']) as $msg) {
 			// Not one of our messages
