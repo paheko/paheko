@@ -12,7 +12,7 @@ if (empty($_GET['h'])) {
 }
 
 $hash = $_GET['h'];
-$optout_context = $_GET['c'] ?? null;
+$optout_context = isset($_GET['c']) ? intval($_GET['c']) : null;
 
 $email = Emails::getEmailFromQueryStringValue($hash);
 $csrf_key = 'email_preferences';
