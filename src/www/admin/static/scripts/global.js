@@ -555,7 +555,7 @@
 		}
 
 		var updateHandle = () => {
-			var v = parseInt(c.value, 10);
+			var v = parseInt(c.value, 10) || 0;
 
 			if (v > -10 && v < 0) {
 				v = -1; // White
