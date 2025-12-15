@@ -17,8 +17,9 @@
 			Votre adresse e-mail a bien été vérifiée, merci !
 		</p>
 	{elseif $optout_context}
-		<p class="confirm block">
-			Vous avez bien été désinscrit. Vous ne recevrez plus
+		<p class="alert block">
+			Merci de bien vouloir valider le formulaire pour confirmer
+			que vous ne souhaitez plus recevoir
 			{if $optout_context === Emails::CONTEXT_REMINDER}
 			les rappels de cotisation et d'activité.
 			{elseif $optout_context === Emails::CONTEXT_BULK}
