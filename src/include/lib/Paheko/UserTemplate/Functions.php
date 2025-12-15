@@ -238,18 +238,12 @@ class Functions
 			unset($params['from']);
 			$db->begin();
 
-			try {
-				foreach ($from as $key => $row) {
-					if (!is_array($row) && !is_object($row)) {
-						throw new Brindille_Exception('"from" parameter item is not an array on index: ' . $key);
-					}
-
-					self::save(array_merge($params, (array)$row), $tpl, $line);
+			foreach ($from as $key => $row) {
+				if (!is_array($row) && !is_object($row)) {
+					throw new Brindille_Exception('"from" parameter item is not an array on index: ' . $key);
 				}
-			}
-			catch (Brindille_Exception|DB_Exception $e) {
-				$db->rollback();
-				throw $e;
+
+				self::save(array_merge((array)$row, $params), $tpl, $line);
 			}
 
 			$db->commit();
