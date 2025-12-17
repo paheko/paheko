@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Update\sdependency\sfor\sPHP\s8.2\sissue
-D 2025-12-16T14:37:56.255
+C Yahoo\shas\san\sinbox\snamed\s'Inbox'\sinstead\sof\s'INBOX'
+D 2025-12-17T10:38:59.869
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -829,28 +829,27 @@ F tools/factory/factory_cron_emails.sh d876c471c3301be28ddc54517d9b38d68ed8d7a0c
 F tools/factory/factory_upgrade.sh 21327b0cf6c61a5301588ad990664efd5e365a3e6bdb63073a8adb0b6876e2fe
 F tools/fossil_get_branch_hash.php 8d5c38926cf0763039ede9c88745e890b44beb33a64e5e5d6858d20e3a678788
 F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f931f721784d x
-F tools/mail_test_recipients.php b8d2d1a19478e5edd8a50b2711c57b215d2a861abc0aecf7611b6f35ca9e7552
+F tools/mail_test_recipients.php b3a3a122376a784b3d86dac9b14c1e0c7c1b3e2f4ae833e7c5c38561927d1f8d
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P edf91efeb1cae2bfbeb15cdb0f49ac0499c64b75870c4ad4c30b1c48280417cf
-R 4a4d373495decb2f4de1d85b61d1d686
-T +sym-1.3.18 *
+P 0a6f154fbe4322642db15465e3e9d8acbbd11d1114a68a6a4f32e0db00df202d
+R 2427b797d86837b9cf9a3e0694268625
 U bohwaz
-Z c8cf9c46f4095957efadde6d56e5f1e9
+Z 21682f5726360194bfadfc6e9c785b24
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmlBbsQACgkQksnacbiI
-6jRsNg//UXDR8ua4vCRPgiyhpwae+034/vIXIY2NMoIHx0K296rHzkUZNkey2l6E
-CHtsDoIWZSFHLrcT5LR86T9trPffH7tZWf5MnPpXKXZLIO2EZXb1JLAY3VQtOonu
-sNkfYgknh6+DK7gM+5yq55sZAct1ec6bcYtUkPiy8v2Ly//iyqg2JS5w6iAR5rJ1
-3D9b3RVu22zdC3F+J47O0xe0Lh6s2Jx+o0xhKc+RT5JcTbfD9GeX4h3ZucjNT2/b
-yY2klGoodY9BF+abgIVYB1PHceV8XjaxRAhS7hJyFlWmH3srTfz1783wkzouFzSk
-7hxmA3iQ997BVnMB/PCR0oXas0dtav5dVF3Ht9TLsobg9ezjXWo/DG+3p4pJNVgz
-li0iYTh4+08BpDgxALRKHwmE+R+jpMnGpntnFy2H24UNCeoLgmHOFnqHZXzRaKtp
-1E2LrD2ywQB1mXER6p9Da2KcRCyPcCAtO3EeOXJP/bQbdhntgyL7e0tEjsdK7/n2
-rxCZn9roXljj8LJg4Y6M3Q8P/JdXqlS0XmF4OSTLPgdG8/bOgcN2fGZD2ZaetsxI
-FZHyA/jc65O6bRHauJBZJd9v4m2GCUaxAnog7t28rn/7mDuiVkH5RJ8EaUFp7lbP
-UBpg3tK0Eyy3il204jTfNiFFQJQSJ/8XuXaIk8Anowg3LEImvCQ=
-=WKp7
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmlCiEMACgkQksnacbiI
+6jTWmA//VpboSs2raV1CykgLkjsbukYsf4c+JgmfTYaZhKzREJJQVRSjOf7Vfnjr
+vF368tcxe9bLVE036zJD0O3gt6UPZKVhCzI5JzBQbDslK4CIPMGkyVWYaTpidxrK
+hqtjVe/Lh+cDUpO9LVM07b0deLurfFuAkGHbGpId5LARv+m7pPHAtur4/lPYXWLT
+BPZMNScMMcxRNU2HPA+8k+eouseCfmOD/0gk/lfupu/FDj+w1/xnjF/H8nx5qWho
+bakwYzhsbWjscSZuSER9dgq9+R+6PDcUBBKnElzc3QZLvTKU46clFVRF7WuQtJ0C
+N4B3cwRs1vepOGznOAK3OzkFV4avKNUPEiSe6/rMIJ1QqtvfBD2ey5sw4EFryt2u
+sT0dlO0c4NuYnkXwFG+PP/vzP1UFQcpx2lr85su2p33HrOEfUPM7lFQ0wAjE8R4U
+ZfI83zay3l+TiDM9aZXHkU7M+2340aG5jdVQ4EyrJwZSZAMN3hAKkeMx6SUvp6vc
+IQS8I3k2KYp8RfoAb2tEyWL+mFZLGrn72fmM8Ksnn6RxUm7/i/kvJNJ/5LeAgF7g
+dR2CTlZAME0MXYwGxSR9tPrl42eFQGbgvoRviaAixqolp1V8bUeDIlu9GFErBTeU
+TLOk4lSSvC9kOI4/6kNlEDHQIeb5EeC+Azjg9rRjSMQNYGz5cGk=
+=bmso
 -----END PGP SIGNATURE-----
