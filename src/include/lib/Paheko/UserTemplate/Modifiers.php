@@ -10,6 +10,7 @@ use Paheko\ValidationException;
 use Paheko\Users\DynamicFields;
 use Paheko\Entities\Email\Email;
 
+use KD2\Smartyer;
 use KD2\SMTP;
 
 use KD2\Brindille;
@@ -140,34 +141,9 @@ class Modifiers
 		return true;
 	}
 
-	/**
-	 * UTF-8 aware intelligent substr
-	 * @param  string  $str         UTF-8 string
-	 * @param  integer $length      Maximum string length
-	 * @param  string  $placeholder Placeholder text to append at the string if it has been cut
-	 * @param  boolean $strict_cut  If true then will cut in the middle of words
-	 * @return string 				String cut to $length or shorter
-	 * @example |truncate:10:" (click to read more)":true
-	 */
 	static public function truncate($str, $length = 80, $placeholder = '…', $strict_cut = false): string
 	{
-		if (mb_strlen($str) <= $length) {
-			return $str;
-		}
-
-		$str = mb_substr($str, 0, $length);
-
-		if (!$strict_cut) {
-			$cut = preg_replace('/[^\s.,;!?]*$/su', '', $str);
-
-			if (trim($cut) == '') {
-				$cut = $str;
-			}
-
-			$str = $cut;
-		}
-
-		return trim($str) . $placeholder;
+		return Smartyer::truncate((string) $str, $length, $placeholder, $strict_cut);
 	}
 
 	static public function excerpt($str, $length = 600): string
