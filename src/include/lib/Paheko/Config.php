@@ -403,25 +403,33 @@ class Config extends Entity
 				throw new UserException('Le fichier n\'est pas une image (formats autorisés : PNG, JPEG, GIF, WEBP).');
 			}
 
+			$i = null;
+
+			if ($type === 'image') {
+				$i = $f->asImageObject();
+
+				if ($f->isImageTooLarge($i)) {
+					$this->setFile($key, null);
+					throw new UserException('Cette image est trop grande. Taille maximale : 6000x6000.');
+				}
+			}
+
 			try {
 				// Force favicon format
 				if ($key === 'favicon') {
 					$format = 'png';
-					$i = $f->asImageObject();
 					$i->cropResize(32, 32);
 					$f->setContent($i->output($format, true));
 				}
 				// Force icon format
 				else if ($key === 'icon') {
 					$format = 'png';
-					$i = $f->asImageObject();
 					$i->cropResize(512, 512);
 					$f->setContent($i->output($format, true));
 				}
 				// Force signature size
 				else if ($key === 'signature') {
 					$format = 'png';
-					$i = $f->asImageObject();
 					$i->resize(200, 200);
 					$f->setContent($i->output($format, true));
 				}

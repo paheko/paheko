@@ -59,7 +59,7 @@ $fields = DF::getInstance()->all();
 			</ul>
 		{else}
 			{if in_array($key, $id_fields)}<strong>{/if}
-			{user_field field=$field value=$value user_id=$user.id}
+			{user_field field=$field value=$value user_id=$user.id context="details"}
 			{if in_array($key, $id_fields)}</strong>{/if}
 		{/if}
 		{if $field.type === 'email' && $value}
@@ -74,8 +74,10 @@ $fields = DF::getInstance()->all();
 				{tag label="Adresse bloquée" color="darkorange"}
 			{elseif $email.verified}
 				{tag label="Adresse vérifiée" color="darkgreen"}
+			{*
 			{else}
 				{tag label="Adresse non vérifiée" color="darkgrey"}
+			*}
 			{/if}
 			{linkbutton href="!users/mailing/status/address.php?address=%s"|args:$address label="Détails de l'adresse e-mail" shape="history" target="_dialog"}
 		</dd>

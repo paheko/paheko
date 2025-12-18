@@ -910,11 +910,11 @@ class CommonFunctions
 		}
 
 		$v = $params['value'] ?? null;
-
 		$out = '';
+		$linkify = $field && (!$field->isName() || ($params['context'] ?? '') !== 'list');
 
 		if (!$field) {
-			$out = htmlspecialchars((string)$v);
+			$out = (string) $v;
 		}
 		elseif ($field->type === 'checkbox'
 			|| $field->type === 'boolean') {
@@ -971,13 +971,13 @@ class CommonFunctions
 		elseif ($field->type === 'password') {
 			$out = '*****';
 		}
-		elseif ($field->type === 'email' && empty($params['link_name_id'])) {
+		elseif ($field->type === 'email' && $linkify) {
 			$out = '<a href="mailto:' . rawurlencode($v) . '">' . htmlspecialchars($v) . '</a>';
 		}
-		elseif ($field->type === 'tel' && empty($params['link_name_id'])) {
+		elseif ($field->type === 'tel' && $linkify) {
 			$out = '<a href="tel:' . rawurlencode($v) . '">' . htmlspecialchars(CommonModifiers::format_phone_number($v)) . '</a>';
 		}
-		elseif ($field->type === 'url' && empty($params['link_name_id'])) {
+		elseif ($field->type === 'url' && $linkify) {
 			$out ='<a href="' . htmlspecialchars($v) . '" target="_blank">' . htmlspecialchars($v) . '</a>';
 		}
 		elseif ($field->type === 'number' || $field->type === 'decimal') {

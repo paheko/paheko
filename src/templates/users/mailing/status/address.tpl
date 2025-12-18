@@ -15,7 +15,8 @@
 			{tag label="Adressee vérifiée" color="darkgreen"}<br />
 			<span class="help">Cette adresse a été vérifiée par l'envoi d'un message au destinataire contenant un lien à cliquer.</span>
 		{else}
-			{tag label="Adresse non vérifiée"}
+			{*tag label="Adresse non vérifiée"*}
+			aucun
 		{/if}
 	</dd>
 	{if !$email->canSend()}

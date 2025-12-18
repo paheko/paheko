@@ -81,6 +81,26 @@ c =
  color2 = darkgreen
 ```
 
+## flip
+
+Remplace les clés du tableau par les valeurs, et les valeurs par les clés.
+
+```
+{{:assign var="table1" a="bleu" b="orange"}}
+{{:debug table2=$table1}}
+```
+
+Donnera :
+
+```
+table1:
+ a = bleu
+ b = orange
+table2:
+ bleu = a
+ orange = b
+```
+
 ## has
 
 Renvoie vrai si le tableau contient l'élément passé en paramètre.
@@ -105,26 +125,6 @@ C'est exactement la même chose que `has`, mais exprimé à l'envers.
 {{/if}}
 ```
 
-## flip
-
-Remplace les clés du tableau par les valeurs, et les valeurs par les clés.
-
-```
-{{:assign var="table1" a="bleu" b="orange"}}
-{{:debug table2=$table1}}
-```
-
-Donnera :
-
-```
-table1:
- a = bleu
- b = orange
-table2:
- bleu = a
- orange = b
-```
-
 ## has_key
 
 Renvoie vrai si le tableau contient la clé passée en paramètre.
@@ -136,9 +136,20 @@ Renvoie vrai si le tableau contient la clé passée en paramètre.
 {{/if}}
 ```
 
+## key
+
+Renvoie la clé du tableau correspondant à la valeur passée en paramètre, ou NULL si la valeur n'est pas trouvée.
+
+```
+{{:assign var="table" a="bleu" b="orange"}}
+{{$table|key:"orange"}}
+```
+
+Affichera `b`, soit la clé correspondant à la valeur `orange`.
+
 ## key_in
 
-Renvoie vrai si la clé fait partie du tableau passé en paramètre.
+Renvoie `true` si la clé fait partie du tableau passé en paramètre.
 
 C'est exactement la même chose que `has_key`, mais exprimé à l'envers.
 
@@ -164,6 +175,17 @@ Donnera :
 ```
 a,b
 ```
+
+## value
+
+Renvoie la valeur du tableau correspondant à la clé passée en paramètre, ou NULL si la clé n'est pas trouvée.
+
+```
+{{:assign var="table" a="bleu" b="orange"}}
+{{$table|value:"b"}}
+```
+
+Affichera `orange`, soit la valeur correspondant à la clé `b`.
 
 ## values
 
