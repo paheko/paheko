@@ -24,8 +24,7 @@
 <p class="alert block">
 	Il existe une différence de {$missing_balance|raw|money_currency} entre la liste des écritures à déposer
 	et le solde du compte.<br />
-	Cette situation est généralement dûe à des écritures de dépôt qui ont été supprimées.<br />
-	{linkbutton shape="plus" label="Faire un virement pour régulariser" href="!acc/transactions/new.php?0=%d&l=Régularisation%%20dépôt&account=%d"|args:$missing_balance,$account.id}
+	Il y a peut-être des chèques de l'exercice précédent qui n'ont pas été déposés&nbsp;?
 </p>
 {/if}
 
