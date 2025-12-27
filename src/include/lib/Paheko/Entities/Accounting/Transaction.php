@@ -961,7 +961,7 @@ class Transaction extends Entity
 					$line['id_account'] = Form::getSelectorValue($line['account_selector']);
 				}
 				elseif (isset($line['account'])
-					&& is_string($line['account'])) {
+					&& (is_string($line['account']) || is_int($line['account']))) {
 					if (empty($this->id_year) && empty($source['id_year'])) {
 						throw new ValidationException('L\'identifiant de l\'exercice comptable n\'est pas précisé.');
 					}
