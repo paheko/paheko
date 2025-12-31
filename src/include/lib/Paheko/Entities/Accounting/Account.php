@@ -152,6 +152,8 @@ class Account extends Entity
 
 	/**
 	 * Codes that should be enforced according to type (and vice-versa)
+	 * Note: order is important! eg. for BE, putting TYPE_EXPENSE before TYPE_POSITIVE_RESULT
+	 * would make the account an expense instead of a result account.
 	 */
 	const LOCAL_TYPES = [
 		'FR' => [
@@ -179,13 +181,13 @@ class Account extends Entity
 			self::TYPE_BANK => '56',
 			self::TYPE_CASH => '570',
 			self::TYPE_OUTSTANDING => '499',
-			self::TYPE_EXPENSE => '6',
-			self::TYPE_REVENUE => '7',
 			self::TYPE_POSITIVE_RESULT => '692',
 			self::TYPE_NEGATIVE_RESULT => '690',
-			self::TYPE_THIRD_PARTY => '4',
 			self::TYPE_OPENING => '890',
 			self::TYPE_CLOSING => '891',
+			self::TYPE_THIRD_PARTY => '4',
+			self::TYPE_EXPENSE => '6',
+			self::TYPE_REVENUE => '7',
 		],
 		'CH' => [
 			self::TYPE_BANK => '102',
