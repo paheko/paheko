@@ -527,7 +527,13 @@ class Functions
 
 		foreach ($params['to'] as &$to) {
 			$to = trim($to);
-			Email::validateAddress($to);
+
+			try {
+				Email::validateAddress($to);
+			}
+			catch (UserException $e) {
+				throw new UserException($to . ' : ' . $e->getMessage(), $e->getCode(), $e);
+			}
 		}
 
 		unset($to);

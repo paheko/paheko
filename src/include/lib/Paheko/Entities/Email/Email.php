@@ -174,7 +174,7 @@ class Email extends Entity
 		}
 	}
 
-	static public function validateAddress(string $email, bool $mx_check = true): void
+	static public function validateAddress(string $email, bool $mx_check = true, bool $block_captcha_proxies = false): void
 	{
 		$pos = strrpos($email, '@');
 
@@ -215,15 +215,6 @@ class Email extends Entity
 			return;
 		}
 
-		self::checkMX($host);
-	}
-
-	static public function checkMX(string $host)
-	{
-		if (PHP_OS_FAMILY == 'Windows') {
-			return;
-		}
-
 		static $results = [];
 
 		if (array_key_exists($host, $results)) {
@@ -251,7 +242,7 @@ class Email extends Entity
 		if ($r === 'empty') {
 			throw new UserException('Adresse e-mail invalide (le domaine indiqué n\'a pas de service e-mail) : vérifiez que vous n\'avez pas fait une faute de frappe.');
 		}
-		elseif ($r === 'blocked') {
+		elseif ($r === 'blocked' && $block_captcha_proxies) {
 			throw new UserException('Adresse e-mail invalide : impossible d\'envoyer des mails à un service (de type mailinblack ou spamenmoins) qui demande une validation manuelle de l\'expéditeur. Merci de choisir une autre adresse e-mail.');
 		}
 	}
