@@ -858,7 +858,8 @@ class Emails
 			// Ignore auto-responders
 			return $return;
 		}
-		elseif ($return['type'] === 'genuine') {
+		elseif ($return['type'] === 'genuine'
+			|| $return['type'] === 'captcha') {
 			// Forward emails that are not automatic to the organization email
 			$config = Config::getInstance();
 
