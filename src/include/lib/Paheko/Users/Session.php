@@ -16,6 +16,7 @@ use Paheko\Email\Templates as EmailsTemplates;
 use Paheko\Files\Files;
 
 use Paheko\Entities\Files\File;
+use Paheko\Entities\Email\Email;
 
 use Paheko\Entities\Users\Category;
 use Paheko\Entities\Users\User;
@@ -492,6 +493,9 @@ class Session extends \KD2\UserSession
 		if (!trim($email)) {
 			throw new UserException('Ce membre n\'a pas d\'adresse e-mail renseignée dans son profil.');
 		}
+
+		// Make sure we block sending recovery to mailinblack/spamenmoins addresses as they most likely won't be able to receive our email
+		Email::validateAddress($email, true, true);
 
 		$user_agent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 150) ?: null;
 		Log::add(Log::LOGIN_RECOVER, compact('user_agent'), $user->id);

@@ -121,6 +121,7 @@ class Config extends Entity
 	protected ?string $org_infos = null;
 	protected string $org_email;
 	protected ?string $org_address = null;
+	protected ?string $org_address_public = null;
 	protected ?string $org_phone = null;
 	protected ?string $org_web = null;
 

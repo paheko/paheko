@@ -351,7 +351,7 @@ EOS;
 		return sprintf('%02d:%02d', $t[0], $t[1]);
 	}
 
-	static public function math(string $expression, ... $params)
+	static public function math($expression, ... $params)
 	{
 		static $tokens_list = [
 			'function'  => '(?:round|ceil|floor|cos|sin|tan|asin|acos|atan2?|deg2rad|sinh|cosh|tanh|abs|max|min|exp|sqrt|log10|log|pi|random_int)\(',
@@ -362,6 +362,10 @@ EOS;
 			'separator' => ',',
 			'space'     => '\s+',
 		];
+
+		if (is_array($expression) || is_object($expression) || trim((string)$expression) === '') {
+			throw new Brindille_Exception('Invalid empty or array value passed to math modifier');
+		}
 
 		// Treat comma as dot in strings
 		foreach ($params as &$param) {

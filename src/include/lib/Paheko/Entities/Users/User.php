@@ -773,7 +773,7 @@ class User extends Entity
 	{
 		$id_field = DynamicFields::getNameFieldsSQL();
 		$db = DB::getInstance();
-		return $db->firstColumn(sprintf('SELECT id FROM %s WHERE %s = ?;', self::TABLE, $id_field), $this->name()) ?: null;
+		return $db->firstColumn(sprintf('SELECT id FROM %s WHERE %s LIKE ? COLLATE U_NOCASE;', self::TABLE, $id_field), $this->name()) ?: null;
 	}
 
 	public function getPreference(string $key)
