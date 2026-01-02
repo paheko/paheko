@@ -36,7 +36,7 @@
 		Cocher les cases correspondant aux montants à déposer.
 	</p>
 
-	<form method="post" action="{$self_url_no_qs}?id={$account.id}" data-focus="1">
+	<form method="post" action="" data-focus="1">
 		{include file="common/dynamic_list_head.tpl" check=true list=$journal}
 
 		{foreach from=$journal->iterate() item="line"}
@@ -85,6 +85,9 @@
 			count += e.checked ? 1 : -1;
 			if (total < 0) {
 				total = 0;
+			}
+			if (count < 0) {
+				count = 0;
 			}
 			$('#lines_total').innerText = g.formatMoney(total);
 			$('#lines_count').innerText = count;
