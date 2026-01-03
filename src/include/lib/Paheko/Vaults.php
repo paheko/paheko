@@ -24,6 +24,18 @@ class Vaults
 		return EM::findOneById(VaultKey::class, $id);
 	}
 
+	static public function getPluginKey(int $id, int $id_plugin): ?VaultKey
+	{
+		return EM::findOne(VaultKey::class, 'SELECT * FROM @TABLE WHERE id = ? AND id_plugin = ?;', $id);
+	}
+
+	static public function createPluginKey(int $id_plugin): ?VaultKey
+	{
+		$key = new VaultKey;
+		$key->set('id_plugin', $id_plugin);
+		return $key;
+	}
+
 	static public function encryptWithPassword(
 		#[\SensitiveParameter]
 		string $password,

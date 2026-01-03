@@ -216,6 +216,15 @@ class Plugins
 		return EM::findOne(Plugin::class, 'SELECT * FROM @TABLE WHERE name = ?;', $name);
 	}
 
+	static public function getId(string $name): ?int
+	{
+		if (!preg_match(Plugin::VALID_NAME_REGEXP, $name)) {
+			return null;
+		}
+
+		return EM::getInstance(Plugin::class)->col('SELECT id FROM @TABLE WHERE name = ?;', $name);
+	}
+
 	static public function listInstalled(): array
 	{
 		$list = EM::getInstance(Plugin::class)->all('SELECT * FROM @TABLE ORDER BY label COLLATE NOCASE ASC;');

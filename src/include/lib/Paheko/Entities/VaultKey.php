@@ -4,12 +4,16 @@ namespace Paheko\Entities;
 
 use Paheko\Entities\Users\UserKeypair;
 use Paheko\Entity;
+use Paheko\Vaults;
+
+use const Paheko\LOCAL_SECRET_KEY;
 
 class VaultKey extends Entity
 {
 	const TABLE = 'vaults_keys';
 
 	protected ?int $id;
+	protected int $id_vault;
 	protected ?int $id_user = null;
 	protected ?int $id_plugin = null;
 	protected string $key;
@@ -22,6 +26,33 @@ class VaultKey extends Entity
 	public function __destruct()
 	{
 		sodium_memzero($this->_private_key);
+	}
+
+	/**
+	 * Store data inside the vault using the supplied password
+	 */
+	public function storeWithPassword(
+		#[\SensitiveParameter]
+		string $data,
+		#[\SensitiveParameter]
+		?string $password = null
+	): void
+	{
+		// If no password has been supplied, use the secret key
+		$password ??= LOCAL_SECRET_KEY;
+
+		if (!isset($this->key)) {
+			$this->encryptWithPassword($password);
+		}
+		else {
+			$this->decryptWithPassword($password);
+		}
+
+		$vault = $this->vault();
+		$vault->encrypt($this, $data);
+		$vault->save();
+		$this->set('id_vault', $vault->id());
+		$this->save();
 	}
 
 	protected function generatePrivateKey(): string
@@ -98,6 +129,11 @@ class VaultKey extends Entity
 
 	public function vault(): Vault
 	{
-		return Vaults::get($this->id_vault);
+		if (!isset($this->id_vault)) {
+			return new Vault;
+		}
+		else {
+			return Vaults::get($this->id_vault);
+		}
 	}
 }
