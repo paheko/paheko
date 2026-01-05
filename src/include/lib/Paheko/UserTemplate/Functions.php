@@ -278,7 +278,7 @@ class Functions
 		unset($params['key'], $params['id'], $params['assign_new_id'], $params['validate_schema'],
 			$params['validate_only'], $params['replace']);
 
-		if ($key == 'config') {
+		if ($key === 'config') {
 			$result = $db->firstColumn(sprintf('SELECT config FROM %s WHERE name = ?;', Module::TABLE), $tpl->module->name);
 		}
 		else {
@@ -350,7 +350,7 @@ class Functions
 
 		$value = json_encode($params);
 
-		if ($key == 'config') {
+		if ($key === 'config') {
 			$db->update(Module::TABLE, ['config' => $value], 'name = :name', ['name' => $tpl->module->name]);
 			return;
 		}

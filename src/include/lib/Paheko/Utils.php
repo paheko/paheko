@@ -719,7 +719,7 @@ class Utils
 			}
 		}
 
-		if (PHP_SAPI == 'cli') {
+		if (PHP_SAPI === 'cli') {
 			echo 'Please visit ' . $destination . PHP_EOL;
 			exit;
 		}
@@ -740,8 +740,9 @@ class Utils
 			  ' </body>'.
 			  '</html>';
 
-			if ($exit)
-			  exit();
+			if ($exit) {
+				exit;
+			}
 
 			return true;
 		}
