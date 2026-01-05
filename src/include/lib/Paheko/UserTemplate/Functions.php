@@ -701,7 +701,7 @@ class Functions
 
 		$params['included_from'] = array_merge($from, [$path]);
 
-		$include->assignArray(array_merge($ut->getAllVariables(), $params));
+		$include->assignArray(array_merge($ut->getAllVariables(), $params), null, false);
 
 		if (!empty($params['capture'])) {
 			if (!preg_match($ut::RE_VALID_VARIABLE_NAME, $params['capture'])) {

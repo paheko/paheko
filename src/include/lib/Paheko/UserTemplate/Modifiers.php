@@ -40,7 +40,7 @@ class Modifiers
 		'parse_time' => ['?DateTimeInterface|scalar'],
 		'math' => ['scalar+', '...' => 'scalar+'],
 		'money_int' => ['callback' => [Utils::class, 'moneyToInteger'], 'types' => ['scalar+=']],
-		'array_transpose' => ['callback' => [Utils::class, 'array_transpose'], 'types' => ['array=']],
+		'array_transpose' => ['callback' => [Utils::class, 'array_transpose'], 'types' => ['?array']],
 		'check_siret_number' => ['callback' => [Utils::class, 'checkSIRET'], 'types' => ['scalar+=']],
 		'check_email' => ['scalar+='],
 		'gettype' => [null],
