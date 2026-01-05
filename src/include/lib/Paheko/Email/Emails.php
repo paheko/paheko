@@ -240,7 +240,7 @@ class Emails
 				$template->assignArray((array) $data, null, false);
 
 				// Disable HTML escaping for plaintext emails
-				$template->setEscapeDefault(null);
+				$template->setEscapeType(null);
 				$content = $template->fetch();
 
 				// Render Markdown to HTML
