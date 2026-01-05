@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Fix\scode\sstyle
-D 2026-01-05T11:25:28.185
+C Fix\stransaction\sprint
+D 2026-01-05T14:22:01.193
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -711,7 +711,7 @@ F src/www/admin/static/pics/img_center.png c93c143b47b8d5a7e2caf3acce64251c4716b
 F src/www/admin/static/pics/img_flow.png d247e7abf93a2c37d2ba402be08ec432bb0d7bc1
 F src/www/admin/static/pics/img_left.png e43aa44c9fe1b5508a2af6c1ec124654999b6c6b
 F src/www/admin/static/pics/img_right.png e2021d96729d6f28fcc946b5ed6742f6732a967e
-F src/www/admin/static/print.css 5411274c9f76706d8680deca7a441e2dda29ce162c54379af96d17feb3dcf358
+F src/www/admin/static/print.css 835e316dea3cbf388f9eaaa302c3572705271aaf0a5f2d7f5073556bf7be241f
 F src/www/admin/static/scripts/accounting.js 97afa7d8c5eb4f77e4a093c5e3cfe3c98a11c166d97f82047501e22649fc2540
 F src/www/admin/static/scripts/accounting_setup.js f3f556d0335951f674918463b69d65870fa32645c1392136ce694c108dd1fa13
 F src/www/admin/static/scripts/accounts_list.js 80250a1e7dc784163feb643b13814c33faf3a52ac615828582473b18e3e8a57a
@@ -833,24 +833,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php b3a3a122376a784b3d86dac9b14c1e0c7c1b3e2f4ae833e7c5c38561927d1f8d
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 534b8e7905d08e93703b689b2486225e090ab5ea854cc015f1fe9f692f36f88f
-R 9620bb759492295334009c4ee99921f2
+P b67cbd9d5ddfebfb929cba332e74f5b2b9f5d6fc7db1a1668605b55147a215b3
+R b952c1af326cc8ec2bb2ee3147ace577
 U bohwaz
-Z 52086c340f336eb24fc8ce58528a4b34
+Z b28bda42ae85468af2a63e50ff26e817
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmlbn6gACgkQksnacbiI
-6jQhOBAAkzfHeMgQU6u/DDo9UdVFzfJnpWm8n2xPHZ8iQUeOX/dIMI+npfqkP/uq
-JEByYLNWuavop16TmRX4XtFSxFRT6CG8xQTCw+YJbgRSKJq0mYorbdMxhZPCp9/C
-fZ+ku8w6nZiWXaTOnPcDeDb1MopKkwL33DGrfA3dVN/YiAQG1+w15gTKkF4AAs4l
-R8yIwCTUWomGj+H5VVa9Llv9xKtNjbs0dk1mGwm+c5a6W4kdVUD9fX/uNKSOh/th
-A5rHMf3f3Oj4GFRVfvSRHMD8wEG0M/wir/qTgvDry9Cz13snm/A6PTOhnXLA0nt4
-FDu50OAFuGvIvLYtWR2Rwk9G2hn8QeI65mJbv53ku1tatTEj5g+bybAz3laF3Hzm
-/Ah55G/fEmb75uTi1eF8wtZq5o46CzePgAxJ+Wsbn+Ykew0mobpkotck3lhu7oPg
-paOAYOjAiVMOXXcLd0W90SvLXthw7xaT/KEefNt53YMeiBKVroVKWw5xRgzXqboF
-3lt/ZlwimCnisvxar7wF7wej1kx2B1nx5Q1Q1OmGgjaHMZzKN2EwaZ5ZdKCYuuY/
-9R8jE2Kib2PXtOsMJXB/JFM5ihDRsrOlkYAr5cLt374cxEaqQy1Zixbo3LeCfaxe
-/pIRy11BxQyjYQMjwixYYTq018TYKQaH04F+62eNDOkR+IpvNUU=
-=Wm9A
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmlbyQkACgkQksnacbiI
+6jTIbQ//bprPMDDvyNU06N7VQ6cVmQGNfM443J1RXUehHPmAMdzWwRWbqSp+Ielu
+akR4krInq9WH4S1k1olv9S8pvviNgl2dUWNnAZB5UhVw0S2ONjxD1Z5y/Hi/inmn
+lEGe6/+0jTO1qWWYBvCEZ+ULJdwkM3B649cdTuBArYm3thX50OzKoE3yHDuTmRuc
+IodPX0W6P6eiM5yHH9TaP/5LtXMT5xUwIOPaZMVN3Ac/43dHKd6L5a39W4XokWO+
+eqcYY1wD7trnglIiOEM+GSqv/szSq9QCMwJ/w8rQSRKixpFUNdBxerVp35SH7q1Q
+/nVFIEyLpMnwu4HiLw4lil6MPR9f2m5BNAcUZhVMC4pQAvQykdKTu5iRqdYGOmt9
+8CBCzGYlrtcPLGlyZM6CKi6r1niLTP+SNXP1oqshRSFHE7v9O6M85MB5AfTDddqa
+S+Mi3nJuoSo8p8GFwmkY1WJlY4eFAnDs7YBq0wbwSOs96iAfHdnqn4DFHEAeAA1n
+QRNBBpatu323qZQOZwhxO3ceplD6qMt7I2PjrMz4KOghG6jkHyPQmYYgV08k215H
+OIhzZztDUw8H5wY4ZIbnlQdUjZ5CthwFJGroLFn8tOK9T0uaJDUObODPO/sXnFMO
+dhnBIUG14nYuhOpuZuyGdCD4zQAOILoZMoehPhUUBtUhvQIKPI8=
+=D26U
 -----END PGP SIGNATURE-----

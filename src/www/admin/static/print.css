@@ -144,6 +144,12 @@ details summary::after {
 
 .transaction-details-container {
     max-width: initial;
+    display: block;
+}
+
+.transaction-details-container aside {
+    columns: 2;
+    gap: 1em;
 }
 
 span.tag {
