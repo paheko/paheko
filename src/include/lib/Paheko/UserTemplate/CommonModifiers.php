@@ -57,7 +57,7 @@ class CommonModifiers
 		'date_hour' => ['?DateTimeInterface|string|int', 'bool'],
 		'date' => ['?DateTimeInterface|string|int', 'string', 'string'],
 		'size_in_bytes' => ['callback' => [Utils::class, 'format_bytes'], 'types' => ['?numeric']],
-		'weight' => ['callback' => [Utils::class, 'format_weight'], 'types' => ['?numeric']],
+		'weight' => ['callback' => [Utils::class, 'format_weight'], 'types' => ['?numeric', 'bool', 'bool']],
 		'weightval' => ['callback' => [Utils::class, 'weightToInteger'], 'types' => ['?numeric']],
 		'typo' => ['string+'],
 		'css_hex_to_rgb' => ['string'],
