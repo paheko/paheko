@@ -94,7 +94,7 @@ if ($previous_year) {
 		$account = (object) [
 			'id'    => null,
 			'code'  => null,
-			'label' => null,
+			'label' => 'Résultat de l\'exercice',
 		];
 	}
 
