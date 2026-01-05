@@ -89,12 +89,6 @@ class UserTemplate extends \KD2\Brindille
 	protected array $headers = [];
 
 	/**
-	 * Default escaping used for displayed variables.
-	 * ("auto-escaping")
-	 */
-	protected $escape_default = 'html';
-
-	/**
 	 * List of user-defined functions
 	 * @var array
 	 */
@@ -165,7 +159,7 @@ class UserTemplate extends \KD2\Brindille
 		$tpl->toggleSafeMode(true);
 
 		// Disabling escape must be done after safe mode, or it will re-enable htmlspecialchars
-		$tpl->setEscapeDefault(null);
+		$tpl->setEscapeType(null);
 
 		$templates[$hash] = $tpl;
 
@@ -296,29 +290,35 @@ class UserTemplate extends \KD2\Brindille
 			$this->registerDefaults();
 
 			// Disable some advanced modifiers that could be used badly
-			$this->_modifiers_with_instance = [];
-
 			unset($this->_modifiers['sql_user_fields']);
 			unset($this->_modifiers['markdown']);
 			unset($this->_modifiers['sql_where']);
+			unset($this->_modifiers['call']);
+			unset($this->_modifiers['map']);
 		}
 		else {
 			$this->registerAll();
 		}
 	}
 
-	/**
-	 * Set default escaping modifier
-	 */
-	public function setEscapeDefault(?string $default): void
+	protected function registerModifiersArray(array $modifiers, string $class)
 	{
-		$this->escape_default = $default;
+		// Local modifiers
+		foreach ($modifiers as $key => $value) {
+			$modifier = [];
 
-		if (null === $default) {
-			$this->registerModifier('escape', fn($str) => $str);
-		}
-		else {
-			$this->registerModifier('escape', fn ($str) => htmlspecialchars((string)$str) );
+			if (is_string($value)) {
+				$key = $value;
+			}
+			elseif (array_key_exists(0, $value)) {
+				$modifier['types'] = $value;
+			}
+			else {
+				$modifier = $value;
+			}
+
+			$modifier['callback'] ??= [$class, $key];
+			$this->registerModifier($key, $modifier['callback'], $modifier['types'] ?? null, $modifier['pass_object'] ?? false);
 		}
 	}
 
@@ -327,23 +327,12 @@ class UserTemplate extends \KD2\Brindille
 		parent::registerDefaults();
 		$this->assignArray(self::getRootVariables());
 
-		// Common modifiers
-		foreach (CommonModifiers::MODIFIERS_LIST as $key => $name) {
-			$this->registerModifier(is_int($key) ? $name : $key, is_int($key) ? [CommonModifiers::class, $name] : $name);
-		}
+		$this->registerModifiersArray(CommonModifiers::MODIFIERS_LIST, CommonModifiers::class);
+		$this->registerModifiersArray(Modifiers::MODIFIERS_LIST, Modifiers::class);
 
 		// PHP modifiers
-		foreach (CommonModifiers::PHP_MODIFIERS_LIST as $name => $params) {
-			$this->registerModifier($name, [CommonModifiers::class, $name]);
-		}
-
-		// Local modifiers
-		foreach (Modifiers::MODIFIERS_LIST as $key => $name) {
-			$this->registerModifier(is_int($key) ? $name : $key, is_int($key) ? [Modifiers::class, $name] : $name);
-		}
-
-		foreach (Modifiers::MODIFIERS_WITH_INSTANCE_LIST as $key => $name) {
-			$this->registerModifier(is_int($key) ? $name : $key, is_int($key) ? [Modifiers::class, $name] : $name, true);
+		foreach (CommonModifiers::PHP_MODIFIERS_LIST as $name => $types) {
+			$this->registerModifier($name, $name, $types);
 		}
 	}
 
@@ -802,7 +791,7 @@ class UserTemplate extends \KD2\Brindille
 			throw new Brindille_Exception(sprintf("line %d: %s", $line, $e->getMessage()), 0, $e);
 		}
 		catch (\Exception $e) {
-			throw new Brindille_Exception(sprintf("line %d: function '%s' has returned an error: %s\nParameters: %s", $line, $name, $e->getMessage(), substr(var_export($params, true), 6)), 0, $e);
+			throw new Brindille_Exception(sprintf("line %d: function '%s' has returned an error: %s\nParameters: %s", $line, $name, $e->getMessage(), $this->printVariable($params, true)), 0, $e);
 		}
 	}
 

@@ -240,11 +240,12 @@ class Template extends Smartyer
 		$this->register_modifier('html_hidden_inputs', [self::class, 'htmlHiddenInputs']);
 
 		foreach (CommonModifiers::PHP_MODIFIERS_LIST as $name => $params) {
-			$this->register_modifier($name, [CommonModifiers::class, $name]);
+			$this->register_modifier($name, $name);
 		}
 
-		foreach (CommonModifiers::MODIFIERS_LIST as $key => $name) {
-			$this->register_modifier(is_int($key) ? $name : $key, is_int($key) ? [CommonModifiers::class, $name] : $name);
+		foreach (CommonModifiers::MODIFIERS_LIST as $key => $modifier) {
+			$name = is_string($key) ? $key : $modifier;
+			$this->register_modifier($name, $modifier['callback'] ?? [CommonModifiers::class, $name]);
 		}
 
 		foreach (CommonFunctions::FUNCTIONS_LIST as $key => $name) {

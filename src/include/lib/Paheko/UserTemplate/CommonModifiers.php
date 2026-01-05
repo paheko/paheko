@@ -18,110 +18,54 @@ class CommonModifiers
 	 * List of accepted PHP functions as modifiers
 	 *
 	 * Key is name of function, value is list of accepted parameters
-	 * Each parameter is a PHP type, eventually prefixed with '?' if nullable,
-	 * eventually suffixed with '=' if parameter is optional.
+	 * Each parameter is a list of parameters types, see Brindille for details.
 	 */
 	const PHP_MODIFIERS_LIST = [
-		'strtotime' => ['string', '?int='],
-		'htmlentities' => ['string', 'int=', '?string=', 'bool='],
-		'htmlspecialchars' => ['string', 'int=', '?string=', 'bool='],
-		'trim' => ['string', 'string='],
-		'ltrim' => ['string', 'string='],
-		'rtrim' => ['string', 'string='],
-		'md5' => ['string', 'bool='],
-		'sha1' => ['string', 'bool='],
-		'nl2br' => ['string', 'bool='],
-		'strlen' => ['string'],
-		'strpos' => ['string', 'string', 'int='],
-		'strrpos' => ['string', 'string', 'int='],
-		'wordwrap' => ['string', 'int=', 'string=', 'bool='],
-		'strip_tags' => ['string', '?array='],
-		'boolval' => ['mixed'],
-		'intval' => ['mixed'],
-		'floatval' => ['mixed'],
-		'strval' => ['mixed'],
-		'substr' => ['string', 'int', '?int='],
-		'http_build_query' => ['array', 'string=', '?string=', 'int='],
+		'strtotime' => ['scalar+', '?int'],
+		'htmlentities' => ['string+', 'int', '?string', 'bool'],
+		'htmlspecialchars' => ['string+', 'int', '?string', 'bool'],
+		'trim' => ['string+', 'string+'],
+		'ltrim' => ['string+', 'string+'],
+		'rtrim' => ['string+', 'string+'],
+		'md5' => ['string+', 'bool'],
+		'sha1' => ['string+', 'bool'],
+		'nl2br' => ['string+', 'bool'],
+		'strlen' => ['string+'],
+		'strpos' => ['string+', 'string+', 'int'],
+		'strrpos' => ['string+', 'string+', 'int'],
+		'wordwrap' => ['string+', 'int', 'string+', 'bool'],
+		'boolval' => [null],
+		'intval' => [null],
+		'floatval' => [null],
+		'strval' => [null],
+		'substr' => ['string+', 'int', 'int'],
+		'http_build_query' => ['array', 'string', '?string', 'int'],
 	];
 
-	/**
-	 * Used for PHP modifiers
-	 */
-	static public function __callStatic(string $name, array $arguments)
-	{
-		if (!array_key_exists($name, self::PHP_MODIFIERS_LIST)) {
-			throw new \LogicException('Invalid method: ' . $name);
-		}
-
-		// Verify arguments
-		foreach (self::PHP_MODIFIERS_LIST[$name] as $i => $param) {
-			$nullable = false;
-			$optional = false;
-
-			if (substr($param, -1) === '=') {
-				$optional = true;
-				$param = substr($param, 0, -1);
-			}
-
-			if (substr($param, 0, 1) === '?') {
-				$nullable = true;
-				$param = substr($param, 1);
-			}
-
-			if (!array_key_exists($i, $arguments)) {
-				// Stop at first optional and not provided argument
-				if ($optional) {
-					break;
-				}
-
-				throw new \BadMethodCallException(sprintf('Missing parameter %d of type %s', $i+1, $param));
-			}
-
-			$value =& $arguments[$i];
-
-			if ($nullable && (null === $value || '' === $value)) {
-				$value = null;
-			}
-			elseif ($param !== 'mixed') {
-				settype($value, $param);
-			}
-		}
-
-		unset($value, $i, $param);
-
-		return call_user_func_array($name, $arguments);
-	}
-
 	const MODIFIERS_LIST = [
-		'protect_contact',
-		'markdown',
-		'money',
-		'money_raw',
-		'money_currency',
-		'money_html',
-		'money_currency_html',
-		'relative_date',
-		'relative_date_short',
-		'date_short',
-		'date_long',
-		'date_hour',
-		'date',
-		'strftime',
-		'size_in_bytes' => [Utils::class, 'format_bytes'],
-		'weight' => [Utils::class, 'format_weight'],
-		'weightval' => [Utils::class, 'weightToInteger'],
-		'typo',
-		'css_hex_to_rgb',
-		'css_hex_extract_hsv',
-		'toupper',
-		'tolower',
-		'ucwords',
-		'ucfirst',
-		'lcfirst',
-		'abs',
-		'format_phone_number',
-		'get_country_name' => [Utils::class, 'getCountryName'],
-		'str_getcsv',
+		'protect_contact' => ['string+'],
+		'markdown' => ['?string+'],
+		'money' => ['?numeric', 'bool', 'bool', 'bool'],
+		'money_raw' => ['?numeric', 'bool'],
+		'money_currency' => ['?numeric', 'bool', 'bool', 'bool'],
+		'money_html' => ['?numeric', 'bool', 'bool'],
+		'money_currency_html' => ['?numeric', 'bool', 'bool'],
+		'relative_date' => ['?DateTimeInterface|string|int', 'bool'],
+		'relative_date_short' => ['?DateTimeInterface|string|int', 'bool'],
+		'date_short' => ['?DateTimeInterface|string|int', 'bool'],
+		'date_long' => ['?DateTimeInterface|string|int', 'bool'],
+		'date_hour' => ['?DateTimeInterface|string|int', 'bool'],
+		'date' => ['?DateTimeInterface|string|int', 'string', 'string'],
+		'size_in_bytes' => ['callback' => [Utils::class, 'format_bytes'], 'types' => ['?numeric']],
+		'weight' => ['callback' => [Utils::class, 'format_weight'], 'types' => ['?numeric']],
+		'weightval' => ['callback' => [Utils::class, 'weightToInteger'], 'types' => ['?numeric']],
+		'typo' => ['string+'],
+		'css_hex_to_rgb' => ['string'],
+		'css_hex_extract_hsv' => ['string'],
+		'abs' => ['?numeric'],
+		'format_phone_number' => ['string+'],
+		'get_country_name' => ['callback' => [Utils::class, 'getCountryName']],
+		'str_getcsv' => ['string+', 'string', 'string', 'string'],
 	];
 
 	static public function protect_contact(?string $contact, ?string $type = null): string
@@ -372,31 +316,6 @@ class CommonModifiers
 		$s = floor(100 * $s);
 		$v = floor(100 * $v);
 		return compact('h', 's', 'v');
-	}
-
-	static public function toupper($str): string
-	{
-		return function_exists('mb_strtoupper') ? mb_strtoupper($str) : strtoupper($str);
-	}
-
-	static public function tolower($str): string
-	{
-		return function_exists('mb_strtolower') ? mb_strtolower($str) : strtolower($str);
-	}
-
-	static public function ucwords($str): string
-	{
-		return function_exists('mb_convert_case') ? mb_convert_case($str, \MB_CASE_TITLE) : ucwords($str);
-	}
-
-	static public function ucfirst($str): string
-	{
-		return function_exists('mb_strtoupper') ? mb_strtoupper(mb_substr($str, 0, 1)) . mb_substr($str, 1) : ucfirst($str);
-	}
-
-	static public function lcfirst($str): string
-	{
-		return function_exists('mb_strtolower') ? mb_strtolower(mb_substr($str, 0, 1)) . mb_substr($str, 1) : ucfirst($str);
 	}
 
 	static public function abs($in)
