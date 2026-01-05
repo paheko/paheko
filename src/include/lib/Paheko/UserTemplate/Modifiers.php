@@ -46,7 +46,7 @@ class Modifiers
 		'gettype' => [null],
 		'arrayval' => [null],
 		'explode' => ['scalar+', 'scalar+'],
-		'implode' => ['array', 'scalar+'],
+		'implode' => ['?array', 'scalar+'],
 		'flip' => ['array'],
 		'key' => ['array', 'scalar+'],
 		'keys' => ['array'],
