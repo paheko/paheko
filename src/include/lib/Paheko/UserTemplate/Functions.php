@@ -35,7 +35,6 @@ class Functions
 	const FUNCTIONS_LIST = [
 		'include',
 		'http',
-		'debug',
 		'error',
 		'read',
 		'save',
@@ -593,23 +592,6 @@ class Functions
 			$internal += $internal_count;
 			$external_count += $external_count;
 		}
-	}
-
-	static public function debug(array $params, UserTemplate $tpl)
-	{
-		if (!count($params)) {
-			$params = $tpl->getAllVariables();
-		}
-
-		$dump = htmlspecialchars(ErrorManager::dump($params));
-
-		// Show objects as arrays
-		$dump = str_replace('object(stdClass) (', 'array(', $dump);
-
-		// FIXME: only send back HTML when content-type is text/html, or send raw text
-		$out = sprintf('<pre style="background: yellow; color: black; padding: 5px; overflow: auto">%s</pre>', $dump);
-
-		return $out;
 	}
 
 	static public function error(array $params, UserTemplate $tpl, int $line)

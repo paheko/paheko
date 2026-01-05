@@ -512,11 +512,11 @@ details summary:hover {
     background-color: rgba(var(--gMainColor), 0.1);
 }
 
-details summary::-webkit-details-marker {
+details:not(.debug) summary::-webkit-details-marker {
     display: none;
 }
 
-details summary::after {
+details:not(.debug) summary::after {
     content: "↓";
     position: absolute;
     left: 0;
@@ -540,11 +540,11 @@ details summary::after {
     font-size: 1.2em;
 }
 
-details[open] summary::after {
+details[open]:not(.debug) summary::after {
     content: "↑";
 }
 
-details summary:hover::after {
+details:not(.debug) summary:hover::after {
     background-color: rgb(var(--gMainColor));
     color: #fff;
 }
