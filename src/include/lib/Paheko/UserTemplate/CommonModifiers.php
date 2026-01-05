@@ -43,7 +43,7 @@ class CommonModifiers
 	];
 
 	const MODIFIERS_LIST = [
-		'protect_contact' => ['string+'],
+		'protect_contact' => ['string+', '?string'],
 		'markdown' => ['?string+'],
 		'money' => ['?numeric', 'bool', 'bool', 'bool'],
 		'money_raw' => ['?numeric', 'bool'],
