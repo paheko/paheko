@@ -70,7 +70,6 @@ class Modifiers
 		'url_decode' => ['scalar+'],
 		'urlencode' => ['callback' => [self::class, 'url_encode'], 'types' => ['scalar+']],
 		'count_words' => ['scalar+'],
-		'or',
 		'uuid' => [],
 		'key' => ['array', 'scalar+'],
 		'filter' => ['array'],
@@ -692,15 +691,6 @@ EOS;
 	static public function count_words($str): int
 	{
 		return preg_match_all('/\S+/u', $str);
-	}
-
-	static public function or($in, $else)
-	{
-		if (empty($in) || (is_string($in) && trim($in) === '')) {
-			return $else;
-		}
-
-		return $in;
 	}
 
 	static public function uuid()
