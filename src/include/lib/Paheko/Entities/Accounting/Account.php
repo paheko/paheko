@@ -154,13 +154,18 @@ class Account extends Entity
 	 * Codes that should be enforced according to type (and vice-versa)
 	 * Note: order is important! eg. for BE, putting TYPE_EXPENSE before TYPE_POSITIVE_RESULT
 	 * would make the account an expense instead of a result account.
+	 *
+	 * Warning: common account types (see above) matching will only work if account code
+	 * has at least one more character than the code passed here.
+	 *
+	 * Eg: self::TYPE_INTERNAL => '58' will match '580' but not '58'!
 	 */
 	const LOCAL_TYPES = [
 		'FR' => [
 			self::TYPE_BANK => '512',
 			self::TYPE_CASH => '53',
 			self::TYPE_OUTSTANDING => '511',
-			self::TYPE_INTERNAL => '580',
+			self::TYPE_INTERNAL => '58',
 			self::TYPE_THIRD_PARTY => '4',
 			self::TYPE_EXPENSE => '6',
 			self::TYPE_REVENUE => '7',
@@ -404,20 +409,20 @@ class Account extends Entity
 			$country = $this->getCountry();
 		}
 
-		$pattern = self::LOCAL_TYPES[$country][$type] ?? null;
+		$code = self::LOCAL_TYPES[$country][$type] ?? null;
 
-		if (!$pattern) {
+		if ($code === null) {
 			return false;
 		}
 
+		// Common types will not match the parent account, only the children
+		// eg. self::TYPE_INTERNAL => '58' will not match '58', but only '580' and so on
 		if (in_array($type, self::COMMON_TYPES)) {
-			$pattern = sprintf('/^%s.+/', $pattern);
+			return 0 === strpos($this->code, $code) && strlen($this->code) > strlen($code);
 		}
 		else {
-			$pattern = sprintf('/^%s$/', $pattern);
+			return $this->code === $code;
 		}
-
-		return (bool) preg_match($pattern, $this->code);
 	}
 
 	public function setLocalRules(?string $country = null): void
@@ -450,7 +455,7 @@ class Account extends Entity
 	{
 		$country = $this->getCountry();
 
-		if ($country === 'FR') {
+		if ($country === 'FR' && !$this->exists()) {
 			$classe = substr($this->code, 0, 1);
 			$this->assert($classe >= 1 && $classe <= 8, 'Seuls les comptes de classe 1 à 8 sont autorisés dans le plan comptable français');
 		}
