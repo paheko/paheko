@@ -6,6 +6,78 @@ use KD2\HTTP;
 
 class Security
 {
+	static public function encryptWithPassword(
+		#[\SensitiveParameter]
+		?string $password,
+		#[\SensitiveParameter]
+		string $data
+	): string
+	{
+		if (!function_exists('sodium_memzero')) {
+			throw new \LogicException('The "sodium" PHP extension is required');
+		}
+
+		$password ??= LOCAL_SECRET_KEY;
+
+		$salt = random_bytes(SODIUM_CRYPTO_PWHASH_SALTBYTES);
+		$nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+
+		$derived_key = sodium_crypto_pwhash(
+			SODIUM_CRYPTO_SECRETBOX_KEYBYTES,
+			$password,
+			$salt,
+			SODIUM_CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE,
+			SODIUM_CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE
+		);
+
+		$encrypted_data = sodium_crypto_secretbox($data, $nonce, $derived_key);
+
+		sodium_memzero($password);
+		sodium_memzero($derived_key);
+		sodium_memzero($data);
+
+		return sodium_bin2hex($salt . $nonce . $encrypted_data);
+	}
+
+	static public function decryptWithPassword(
+		#[\SensitiveParameter]
+		?string $password,
+		#[\SensitiveParameter]
+		string $encrypted_data
+	): string
+	{
+		if (!function_exists('sodium_memzero')) {
+			throw new \LogicException('The "sodium" PHP extension is required');
+		}
+
+		$password ??= LOCAL_SECRET_KEY;
+
+		$encrypted_data = sodium_hex2bin($encrypted_data);
+		$salt = substr($encrypted_data, 0, SODIUM_CRYPTO_PWHASH_SALTBYTES);
+		$nonce = substr($encrypted_data, SODIUM_CRYPTO_PWHASH_SALTBYTES, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+		$encrypted_data = substr($encrypted_data, SODIUM_CRYPTO_PWHASH_SALTBYTES + SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+		$derived_key = sodium_crypto_pwhash(
+			SODIUM_CRYPTO_SECRETBOX_KEYBYTES,
+			$password,
+			$salt,
+			SODIUM_CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE,
+			SODIUM_CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE
+		);
+
+		$data = sodium_crypto_secretbox_open($encrypted_data, $nonce, $derived_key);
+		sodium_memzero($password);
+		sodium_memzero($derived_key);
+		sodium_memzero($nonce);
+		sodium_memzero($salt);
+		sodium_memzero($encrypted_data);
+
+		if ($data === false) {
+			return null;
+		}
+
+		return $data;
+	}
+
 	static public function checkWritePermissions(): array
 	{
 		$data_root = realpath(DATA_ROOT);
