@@ -30,7 +30,7 @@ use KD2\HTML\CSSParser;
 class Emails
 {
 	const RENDER_FORMATS = [
-		null => 'Texte brut',
+		'' => 'Texte brut',
 		Render::FORMAT_MARKDOWN => 'MarkDown',
 	];
 
