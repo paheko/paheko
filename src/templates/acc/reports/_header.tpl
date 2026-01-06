@@ -32,7 +32,7 @@
 			<li{if $current == "journal"} class="current"{/if}><a href="{$admin_url}acc/reports/journal.php?{$criterias_query_no_provisional}">Journal général</a></li>
 			<li{if $current == "ledger"} class="current"{/if}><a href="{$admin_url}acc/reports/ledger.php?{$criterias_query_no_provisional}">Grand livre</a></li>
 			<li{if $current == "statement"} class="current"{/if}><a href="{$admin_url}acc/reports/statement.php?{$criterias_query}">Compte de résultat</a></li>
-			<li{if $current == "balance_sheet"} class="current"{/if}><a href="{$admin_url}acc/reports/balance_sheet.php?{$criterias_query}">Bilan</a></li>
+			<li{if $current == "balance_sheet"} class="current"{/if}><a href="{$admin_url}acc/reports/balance_sheet.php?{$criterias_query_no_provisional}">Bilan</a></li>
 		{/if}
 		</ul>
 
