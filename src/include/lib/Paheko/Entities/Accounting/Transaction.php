@@ -180,7 +180,7 @@ class Transaction extends Entity
 		$lines_with_accounts = [];
 
 		foreach ($this->getLines() as $line) {
-			if (!array_key_exists($line->id_account, $this->_accounts)) {
+			if (!isset($line->id_account) || !array_key_exists($line->id_account, $this->_accounts)) {
 				$accounts[] = $line->id_account;
 			}
 
@@ -204,11 +204,19 @@ class Transaction extends Entity
 
 		foreach ($this->getLines() as &$line) {
 			$l = $line->asArray();
-			$l['account_code'] = $this->_accounts[$line->id_account]->code ?? null;
-			$l['account_label'] = $this->_accounts[$line->id_account]->label ?? null;
-			$l['account_position'] = $this->_accounts[$line->id_account]->position ?? null;
+			$l['account_code'] = null;
+			$l['account_label'] = null;
+			$l['account_position'] = null;
+			$l['account_selector'] = null;
+
+			if (isset($line->id_account) && isset($this->_accounts[$line->id_account])) {
+				$l['account_code'] = $this->_accounts[$line->id_account]->code;
+				$l['account_label'] = $this->_accounts[$line->id_account]->label;
+				$l['account_position'] = $this->_accounts[$line->id_account]->position;
+				$l['account_selector'] = [$line->id_account => sprintf('%s — %s', $l['account_code'], $l['account_label'])];
+			}
+
 			$l['project_name'] = $line->id_project ? $projects[$line->id_project] : null;
-			$l['account_selector'] = [$line->id_account => sprintf('%s — %s', $l['account_code'], $l['account_label'])];
 			$l['is_deposited'] = $line->isDeposited();
 			$l['line'] =& $line;
 
