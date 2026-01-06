@@ -256,8 +256,9 @@ class UserTemplate extends \KD2\Brindille
 		if ($path !== null) {
 			$path = trim($path, '/');
 			$this->_tpl_path = $path;
+			$file = Files::get(File::CONTEXT_MODULES . '/' . $path);
 
-			if ($file = Files::get(File::CONTEXT_MODULES . '/' . $path)) {
+			if ($file) {
 				$this->setSourceFile($file);
 			}
 			else {
@@ -368,8 +369,8 @@ class UserTemplate extends \KD2\Brindille
 	 */
 	public function setSourceFile(File $file)
 	{
-		if ($file->type != $file::TYPE_FILE) {
-			throw new \InvalidArgumentException('Cannot construct a UserTemplate with a directory');
+		if ($file->isDir()) {
+			throw new UserException('Cannot construct a UserTemplate with a directory', 404);
 		}
 
 		$this->file = $file;
