@@ -191,6 +191,11 @@ class Charts
 		return DB::getInstance()->test(Chart::TABLE, 'country IS NULL OR code IS NULL');
 	}
 
+	static public function hasActiveCustomCharts(): bool
+	{
+		return DB::getInstance()->test(Chart::TABLE, 'archived = 0 AND (country IS NULL OR code IS NULL)');
+	}
+
 	static public function getOrInstall(string $id_or_code): int
 	{
 		if (ctype_digit($id_or_code)) {
@@ -262,7 +267,6 @@ class Charts
 
 	/**
 	 * Migrate old accounting charts to 2025
-	 * @todo FIXME: Put this in Upgrade migration for 1.3.15 version
 	 */
 	static public function migrateTo2025(): void
 	{
