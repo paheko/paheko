@@ -14,6 +14,11 @@ use const Paheko\ROOT;
 
 class Charts
 {
+	/**
+	 * @todo TODO/FIXME: rajouter 2 colonnes 'type' et 'revision' à la table acc_charts
+	 * et ne plus avoir "pca", "pcc" etc. mais uniquement "asso" "copro" "cse" "entreprise" etc.
+	 * pour que ça soit plus clair
+	 */
 	const BUNDLED_CHARTS = [
 		'fr_pca_2025' => 'Plan comptable associatif (révision 2025)',
 		'fr_pcc_2020' => 'Plan comptable des copropriétés (2005 révisé en 2024)',
@@ -88,6 +93,24 @@ class Charts
 		}
 
 		return self::install($chart_code);
+	}
+
+	static public function getDefaultChartId(string $country_code): ?int
+	{
+		$db = DB::getInstance();
+		$charts = ['PCA_2025', 'PCMN_2019', 'ASSO'];
+		$order = [];
+
+		foreach ($charts as $chart) {
+			$order[] = $db->where('code', $chart) . ' DESC';
+		}
+
+		$order[] = 'code';
+
+		$order = implode(', ', $order);
+		$sql = sprintf('SELECT id FROM acc_charts WHERE code IS NOT NULL AND country = ? ORDER BY %s LIMIT 1;', $order);
+
+		return $db->firstColumn($sql, $country_code) ?: null;
 	}
 
 	static public function install(string $chart_code): Chart

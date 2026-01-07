@@ -31,6 +31,9 @@ $chart_selector_default = null;
 if (Charts::hasActiveCustomCharts()) {
 	$chart_selector_default = 'Sélectionner un plan comptable';
 }
+elseif ($id = Charts::getDefaultChartId(Config::getInstance()->country)) {
+	$year->id_chart = $id;
+}
 
 $tpl->assign(compact('year', 'chart_selector_default'));
 
