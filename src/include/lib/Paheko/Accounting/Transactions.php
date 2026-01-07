@@ -213,7 +213,20 @@ class Transactions
 			unset($columns['locked']);
 		}
 
-		$columns['line_reference']['label'] = 'Réf. paiement';
+		$types_with_ref = [
+			Transaction::TYPE_REVENUE,
+			Transaction::TYPE_EXPENSE,
+			Transaction::TYPE_TRANSFER,
+			null
+		];
+
+		if (in_array($type, $types_with_ref)) {
+			$columns['line_reference']['label'] = 'Réf. paiement';
+		}
+		else {
+			unset($columns['line_reference']);
+		}
+
 		$columns['change']['select'] = sprintf('SUM(l.credit) * %d', $reverse);
 		$columns['change']['label'] = 'Montant';
 		$columns['project_code']['select'] = 'json_group_array(IFNULL(b.code, SUBSTR(b.label, 1, 10) || \'…\'))';
