@@ -109,6 +109,10 @@ class Backup
 		$db = null;
 
 		try {
+			if (!is_readable($path)) {
+				throw new \LogicException('permissions error: cannot read this file');
+			}
+
 			$db = new \SQLite3($path, \SQLITE3_OPEN_READONLY);
 			$version = DB::getVersion($db);
 			$db->close();
