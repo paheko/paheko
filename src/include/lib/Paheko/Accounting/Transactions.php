@@ -217,7 +217,6 @@ class Transactions
 			Transaction::TYPE_REVENUE,
 			Transaction::TYPE_EXPENSE,
 			Transaction::TYPE_TRANSFER,
-			null
 		];
 
 		if (in_array($type, $types_with_ref)) {
