@@ -216,7 +216,7 @@ class Transaction extends Entity
 				$l['account_selector'] = [$line->id_account => sprintf('%s — %s', $l['account_code'], $l['account_label'])];
 			}
 
-			$l['project_name'] = $line->id_project ? $projects[$line->id_project] : null;
+			$l['project_name'] = $line->id_project ? ($projects[$line->id_project] ?? null) : null;
 			$l['is_deposited'] = $line->isDeposited();
 			$l['line'] =& $line;
 
