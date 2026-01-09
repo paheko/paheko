@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Fix\sPHP\s8.5\swarning
-D 2026-01-09T20:30:14.811
+C Add\ssupport\sfor\sOFX\sfiles\sin\sassisted\sreconciliation
+D 2026-01-09T20:30:52.927
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -94,7 +94,8 @@ F src/include/lib/Paheko/API.php 4967393d7bb86d4abd56c082e68aaf3ad26e7bb43ba1d3a
 F src/include/lib/Paheko/API_Credentials.php 080411f723041753e4e39bd4a0b4df7b56948c6887d1c79c4b1ccfaff77d391b
 F src/include/lib/Paheko/Accounting/Accounts.php cb1f020196b6eb6f77246ab9280ac9ca2db0a12ecaacec9e6c7f3007acdf0a27
 F src/include/lib/Paheko/Accounting/AdvancedSearch.php b825eab46149464850c87cbfabee870db65720f385fa291f47f8b1478a383b0d
-F src/include/lib/Paheko/Accounting/AssistedReconciliation.php 5d628124d487525be1ddfbffe726c935f3ac277afea1e49b6e85db3445b7ea0e
+F src/include/lib/Paheko/Accounting/AssistedReconciliation.php 0db6007ebd19a26dc8913abeaca1d2f5113a9bc558a75b228de7d0154ad6d143
+F src/include/lib/Paheko/Accounting/CSV.php de147bc85f2af7104c8e7a1344fcf7cf27f271c72cb094821d989eb7258a3b93
 F src/include/lib/Paheko/Accounting/Charts.php a8aa6a7042d74b87656cc6c5421e613e893579aebc4dc8caae155c5ed212debc
 F src/include/lib/Paheko/Accounting/Export.php 9c0d0b2d3f834d95efecc211be213460cdbedab23dcaa619b65b88c7d4329058
 F src/include/lib/Paheko/Accounting/Graph.php 3d82a0886a4a1772ab5f809c9b830c0b10c4353574c523ceae87a6e8e707886b
@@ -178,7 +179,7 @@ F src/include/lib/Paheko/Static_Cache.php 447386e95463f265dc3cf16cbecf76f0580884
 F src/include/lib/Paheko/Template.php 82eda5ad4c71af5978c920baf278ba9708aa3b02952cfd4000ac1dc1816d550c
 F src/include/lib/Paheko/Upgrade.php 4ce773f86210bb79f7a55dea246ca5fcf792316242ab3163fe329fbd0c897c23
 F src/include/lib/Paheko/UserException.php 0d120a73a311bbca1847271a05c2ac7ebed2335e4a6fcaf75d0ab3320f97a98e
-F src/include/lib/Paheko/UserTemplate/CommonFunctions.php df6a6ef9438aff247f1667b5d0ecf517534b7134b701127d14ce28d27a64cff4
+F src/include/lib/Paheko/UserTemplate/CommonFunctions.php 65f20eb79e615bd3d2f1662680e6e4ff3f9a51947feb8f3b6d5ca48f6e509c9a
 F src/include/lib/Paheko/UserTemplate/CommonModifiers.php 9f99b2fda2da7dcde4e6d1eb85de1973fba33b990a80d2de0b520e38da0c3d19
 F src/include/lib/Paheko/UserTemplate/Functions.php ed249b5cc5bd179a14c4982516a7de99df3cee37b6df968719fe14a1a3b2ec98
 F src/include/lib/Paheko/UserTemplate/Modifiers.php 0c3e6a0f6d5ae700771e2e223247c3bb6f022e18902f7d477f533293794737b6
@@ -250,7 +251,7 @@ F src/templates/acc/accounts/deposit_form.tpl ec4de2efa84d7e9b77a20201ae6d3873a4
 F src/templates/acc/accounts/index.tpl 411908bf16ff3ed39204a23c094185d38410d0c208a40e595cd02db9ceb70dce
 F src/templates/acc/accounts/journal.tpl bb2decab3cd83d0f8057bd7de960aa9a24a5b55e4edc68b4c8b001cde42ed616
 F src/templates/acc/accounts/reconcile.tpl e4c4ba3a3b5b2692e3ba956b5a58b64e4ad9bc75bd2738e92470a8824bde2c82
-F src/templates/acc/accounts/reconcile_assist.tpl c5e05b7ccb53f9ad2a937c2c00489ebf53574226bf57ad05f467ee2bd5e96ca6
+F src/templates/acc/accounts/reconcile_assist.tpl 20cab52a012d6fc61e61a54865bd354b6f7b0469c96f4b97bdd06d5da2a54ada
 F src/templates/acc/accounts/simple.tpl 27ef650d5990a128d1eee0799a21ee61d29badb2e50e8c5e05cf65338c809656
 F src/templates/acc/accounts/users.tpl 8098d38f0a9c958cbefa9f534cffc6982d9789ddf49c56e1402112c31afc4b9f
 F src/templates/acc/charts/_country_input.tpl 287d91ed7a1ac2e1545d22d02e53b22199b0e198211a3149e799bff4ecc6e017
@@ -508,7 +509,7 @@ F src/www/admin/acc/accounts/deposit.php 8214bf49a3b2a7094e36bf17cc6fd0931fa0ea9
 F src/www/admin/acc/accounts/index.php 8e62e8fe2f71623c366d26527a6933d03687b1bed2045d957fde57edf712e31c
 F src/www/admin/acc/accounts/journal.php 46417e1962ce3866facb248885b6dbafd92e0f7172d1ba5844ee9439ffb9c0a6
 F src/www/admin/acc/accounts/reconcile.php 48c1e30455a5e91460f2c79ae20443c28a0436df205608045577bb1fcace3d53
-F src/www/admin/acc/accounts/reconcile_assist.php 903c1d1f953846d1fc0228ffa7667f1acaf46acbc73c0e0b9da8d1e379ac0a6c
+F src/www/admin/acc/accounts/reconcile_assist.php c43d413538453eadd47a12497f7e5d0e95fc0603326984c816e399be6eda720f
 F src/www/admin/acc/accounts/simple.php c6244022f7d1db73a5ce835804a6dc5f8553864b913397019891425faa302a60
 F src/www/admin/acc/accounts/users.php 210c364b5e3ebcfea92127db0a3d0fae8bae6080376d6d8971e8ee535a3cda4a
 F src/www/admin/acc/charts/accounts/_inc.php 58ead67c4adecb1684593d397144748adc1fa9bb7d3d90c3ca77cd91b0bdf28e
@@ -754,7 +755,7 @@ F src/www/admin/static/styles/03-forms.css 908bdb768b84c3b7378bb7ca0e59db0433b34
 F src/www/admin/static/styles/04-dialogs.css 2fa5a0e16d64f635c6bb2bae8b1d8b18dd9c6749482c61aa25dacebc5f4022ee
 F src/www/admin/static/styles/05-navigation.css 929f8338fdc10d56fa554641b3424224ba86c489447d8404a7dbea35ce0ee5dd
 F src/www/admin/static/styles/06-tables-common.css 6830241beaf0f96a837611079ace365d4b1830085b1a4aeffc3659ee963d2aed
-F src/www/admin/static/styles/07-tables.css 83321a42185c7ed253ee94d1596a90dce95328794b945aa1d9bc66b342723a0c
+F src/www/admin/static/styles/07-tables.css 7595b135d34b29bc57f365aaab0cfbd04471d00565e75cf1dc55c90bc5cce4a8
 F src/www/admin/static/styles/10-accounting.css a8f9336d9e3186c42cd012e89b0ed838653a7925bc8a7552dcf1daeb28deb6c5
 F src/www/admin/static/styles/config.css 6abccccc4412519d6a81898b785d75bcb2cb08902b686e3cce9e33f0e1ffff78
 F src/www/admin/static/styles/mailing.css 5bc74034c0424cc746aab43b3b4047c6ec5c5554170ca14861274a8a05a162da
@@ -833,24 +834,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php b3a3a122376a784b3d86dac9b14c1e0c7c1b3e2f4ae833e7c5c38561927d1f8d
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 5c49f5d617f98c9e7a31770a84c32337a318d35579a0eb2c1083431534e61ca6
-R e519119108efd767f47186f914896cb8
+P fb6a5fcd9f6cc907f17690a0a70de6deb3de0f04feedf14d14352d55d8e9954d
+R b309cca766cfc7a70dd1e605ff6d6de1
 U bohwaz
-Z c9272388f376674858a13a3f27888cb8
+Z d9a1c7a2574a60843f223bacb039a25a
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmlhZVYACgkQksnacbiI
-6jR0Jg/8Djru/uhgH5OYstUPR6ehY+8zp5uPUyIH+n4fueDs8IdRmr3/McQEYPt0
-9wxzxNxVUzFQFaG6Z38P1LbTFnohb7vZaZCLv6w7/JEHw6+ejh6CwTmSvrfhNyqJ
-kTEXUqBtV0+pSJyH8aU1TxyUWvyS+EyC4vVMj1RG5j1AwHu/5kdaVkZwyQktAFkv
-+nw/m/TfiDZfbf2Wi9emxUHodYVvHwZfBOZQESn+YuVzNIyXNCb0niL8KjEF+83d
-l/f2TaeJCwEe9DWiEBcSD8VZZYJiBqtEHtT581Tw+FSuNCjIC9yM6xGMSq7KX7Fk
-w87unaMD9njv0S5iphyUtieGcyu9Y0RNt3qba0WnhoSQxhC3OLcJI0cTASfoNEeu
-KmMiBgs2Sjl+aNStHEczFDwrxc3bLDSxgzONs33jMDyHVlWw26hsWYgq9WTpVzZ8
-k2hOelC/rA9JE+M/VASkwfhNCH1e1s3+i/eo4J7ILt+Gwg/Ubo951HcnmgZhi4QT
-kvwkzoKgoMSjI8xeJrmrzSewBXeagU4sM27M+a7vzu3oi22/+VYKntH2phboSfO/
-WeoQMr2MSdbxQ1V7T7MXY2zugiYU9NTGQEzukoW/G18fVKtZWDta8WvFoMezHjTi
-vIR/eWDfvQPyKFsnK+DuBJaO3BmILyd0oR2DOAtCzGQWSvMLN6M=
-=iwhR
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmlhZXwACgkQksnacbiI
+6jSm0Q/+M6YFvf5fzKlzHbqtvU57fnT0pn2Am3Ww99UhfDf4kHHV20cC9vAsqP60
+InZtyKQdCid9HmPcN+gkWqnMf3qX/REoMyUEUUvPzxgb0A0fh5Ieuj11nj2ut0ZF
+un+q8+yurzkvBTXI2X43CfSgz1jzR5MJrnitr7yZ/sqn8h8h7JF+Zyrgg72BgnL5
+YLIpsfWacDHBHa7nyFKtrDI0kBu8991JsA+b+ESwWrJDqd8wZEiJNADhjEgkmIpA
+9FYwd/80YepRJnMQKPPSuzwNdR3inijdOHZ34HYD+Fsv0Dfz8RWR0SBvAZXXnSRt
+e2V/dhcywwp39A9QfMbp77HSN/TKkUsGO+MsejaG9LnH2rvd4ldYsKl1nMYiIO0a
+mHfrz0uDAKOPmNeTr91Hz8LHQUcixpoFtF1gAfOJp0RP3CrfoUse4kIzHJ7qh0gx
+iVhzAQEGGNGvHEP7PS0T4LjcJ9gPXmz3IQE5yfDpAXyGe0LaOOxvgHIHC+EdiiZi
+678POe7MhYL/HWxCm8Et0kmTDjmmQ91OrkBCf41viNdinkaaYGAUBoU+kJ8fqkY2
+O3s9bj7MrkJyI1SPv4o4be/OXoIgQesCMPbVnI0COa8bnn3zYiLm12lwX/zk/zua
++fk9ceg19dCQgWg9WiVD+J+1CulNqLxYbw7wHoJVyE4gokByZkc=
+=jhY6
 -----END PGP SIGNATURE-----

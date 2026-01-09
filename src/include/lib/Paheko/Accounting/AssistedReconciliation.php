@@ -2,12 +2,13 @@
 
 namespace Paheko\Accounting;
 
-use Paheko\CSV_Custom;
+use Paheko\Accounting\CSV;
 use Paheko\UserException;
 use Paheko\Utils;
 use Paheko\Users\Session;
 use Paheko\Entities\Accounting\Account;
 use Paheko\Entities\Accounting\Transaction;
+use Paheko\Entities\Accounting\Year;
 
 /**
  * Provides assisted reconciliation
@@ -32,7 +33,8 @@ class AssistedReconciliation
 	public function __construct(Account $account)
 	{
 		$this->account = $account;
-		$this->csv = new CSV_Custom(Session::getInstance(), 'acc_reconcile_csv');
+		$this->csv = new CSV(Session::getInstance(), 'acc_reconcile_csv');
+		$this->csv->ofx_balance_as_transaction = true;
 		$this->csv->setColumns(self::COLUMNS);
 		$this->csv->setMandatoryColumns(['label', 'date']);
 		$this->csv->setModifier(function (\stdClass $line) use ($account) {
@@ -56,19 +58,22 @@ class AssistedReconciliation
 				$line->balance = (substr($line->balance, 0, 1) == '-' ? -1 : 1) * Utils::moneyToInteger($line->balance);
 			}
 
-			$line->new_params = http_build_query([
-				'a00' => abs($line->amount),
-				'l' => $line->label,
-				'dt' => $date ? $date->format('Y-m-d') : '',
-				't' => $line->amount < 0 ? Transaction::TYPE_EXPENSE : Transaction::TYPE_REVENUE,
-				'ab' => $account->code,
-			]);
+			if (!empty($line->amount)
+				&& !preg_match('/^Solde(?:\s+au\s+.*?)$/i', $line->label)) {
+				$line->new_params = http_build_query([
+					'a00' => abs($line->amount),
+					'l' => $line->label,
+					'dt' => $date ? $date->format('Y-m-d') : '',
+					't' => $line->amount < 0 ? Transaction::TYPE_EXPENSE : Transaction::TYPE_REVENUE,
+					'ab' => $account->code,
+				]);
+			}
 
 			return $line;
 		});
 	}
 
-	public function csv(): CSV_Custom
+	public function csv(): CSV
 	{
 		return $this->csv;
 	}
@@ -86,13 +91,15 @@ class AssistedReconciliation
 		$this->csv->skip($skip);
 	}
 
-	public function getStartAndEndDates(): ?array
+	public function getStartAndEndDates(Year $year): ?array
 	{
 		$start = $end = null;
 
 		if (!$this->csv->ready()) {
 			return compact('start', 'end');
 		}
+
+		$in_year = 0;
 
 		foreach ($this->csv->iterate() as $line) {
 			if (null === $start || $line->date < $start) {
@@ -102,6 +109,14 @@ class AssistedReconciliation
 			if (null === $end || $line->date > $end) {
 				$end = $line->date;
 			}
+
+			if ($line->date >= $year->start_date && $line->date <= $year->end_date) {
+				$in_year++;
+			}
+		}
+
+		if (!$in_year) {
+			throw new UserException('Aucune écriture du fichier ne se situe dans les dates de l\'exercice comptable sélectionné');
 		}
 
 		return compact('start', 'end');
@@ -204,7 +219,7 @@ class AssistedReconciliation
 				$prev = null;
 			}
 
-			if (isset($line->csv) && !isset($line->journal) && !$prev) {
+			if (isset($line->csv, $line->csv->new_params) && !isset($line->journal) && !$prev) {
 				$line->add = true;
 				$prev = $line->csv;
 			}

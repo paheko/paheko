@@ -86,8 +86,9 @@ class CommonFunctions
 		}
 		elseif ($type === 'file') {
 			$max_file_size ??= Utils::return_bytes(Utils::getMaxUploadSize());
+			$accept = $attributes['accept'] ?? null;
 
-			if (isset($attributes['accept']) && $attributes['accept'] == 'csv') {
+			if ($accept === 'csv' || $accept === 'csv+ofx') {
 				$attributes['accept'] = '.csv,text/csv,application/csv,.CSV,.txt,.TXT';
 				$help = ($help ?? '') . PHP_EOL . 'Format accepté : CSV';
 
@@ -96,6 +97,11 @@ class CommonFunctions
 					$attributes['accept'] .= ',.ods,.ODS,application/vnd.oasis.opendocument.spreadsheet'
 						. ',.xls,.XLS,application/vnd.ms-excel'
 						. ',.xlsx,.XLSX,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+				}
+
+				if ($accept === 'csv+ofx') {
+					$help .= ', OFX';
+					$attributes['accept'] = ',.ofx,application/x-ofx';
 				}
 			}
 			elseif (isset($attributes['accept']) && $attributes['accept'] === 'image') {
