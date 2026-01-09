@@ -65,8 +65,7 @@ class CSV_Custom
 
 		$path = $file['tmp_name'];
 
-		$this->loadFile($path);
-		$this->file_name = $file['name'];
+		$this->loadFile($path, $file['name']);
 
 		@unlink($path);
 	}
@@ -95,10 +94,12 @@ class CSV_Custom
 		return Conversion::canConvertToCSV();
 	}
 
-	public function loadFile(string $path): void
+	public function loadFile(string $path, string $file_name): void
 	{
-		// Automatically convert
-		if (strtolower(substr($path, -4)) !== '.csv' && Conversion::canConvertToCSV()) {
+		$ext = strtolower(substr($file_name, -4));
+
+		// Automatically convert from XLSX/XLS/ODS/etc.
+		if ($ext !== '.csv' && $this->canConvert()) {
 			$path = Conversion::toCSVAuto($path);
 		}
 
@@ -115,6 +116,27 @@ class CSV_Custom
 		if (!count($this->csv)) {
 			throw new UserException('Ce fichier est vide (aucune ligne trouvée).');
 		}
+
+		$this->file_name = $file_name;
+	}
+
+	public function append(array $row): void
+	{
+		if (empty($this->csv)) {
+			// Start array at one, not zero
+			$this->csv = [1 => $row];
+		}
+		else {
+			$this->csv[] = $row;
+		}
+	}
+
+	public function prepend(array $row): void
+	{
+		array_unshift($this->csv, $row);
+
+		// Re-number array to start at one, not zero
+		$this->csv = array_combine(range(1, count($this->csv)), array_values($this->csv));
 	}
 
 	public function iterate(): \Generator
