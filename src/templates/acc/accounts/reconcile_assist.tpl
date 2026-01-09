@@ -26,7 +26,7 @@
 		<fieldset>
 			<legend>Relevé de compte</legend>
 			<dl>
-				{input type="file" name="file" label="Fichier à importer" accept="csv+ofx" required=1}
+				{input type="file" name="file" label="Fichier à importer" accept="csv+ofx+qif" required=1}
 				{include file="common/_csv_help.tpl" more_text="Le fichier doit obligatoirement disposer, soit d'une colonne 'Montant', soit de deux colonnes 'Débit' et 'Crédit'."}
 			</dl>
 			<p class="submit">

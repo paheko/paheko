@@ -3,6 +3,7 @@
 namespace Paheko\Accounting;
 
 use Paheko\CSV_Custom;
+use KD2\Office\QIFParser;
 use KD2\Office\OFXParser;
 
 class CSV extends CSV_Custom
@@ -24,6 +25,37 @@ class CSV extends CSV_Custom
 		}
 
 		$this->file_name = $file_name;
+	}
+
+	protected function loadQIF(string $path)
+	{
+		$transactions = (new QIFParser)->parse(file_get_contents($path));
+
+		$table = ['date', 'label', 'amount'];
+		$extended = false;
+
+		if (array_key_exists('reference', $this->columns)
+			&& array_key_exists('p_reference', $this->columns)
+			&& array_key_exists('notes', $this->columns)) {
+			$extended = true;
+			$table[] = 'p_reference';
+			$table[] = 'notes';
+		}
+
+		$this->setTranslationTable($table);
+		$this->skip(0);
+		$date_format = 'Y-m-d';
+
+		foreach ($transactions as $t) {
+			$row = [$t->date->format($date_format), $t->label, $t->amount];
+
+			if ($extended) {
+				$row[] = $t->check_number;
+				$row[] = $t->memo;
+			}
+
+			$this->append($row);
+		}
 	}
 
 	protected function loadOFX(string $path): void
@@ -49,11 +81,10 @@ class CSV extends CSV_Custom
 			}
 
 			$this->setTranslationTable($table);
-
 			$this->skip(0);
+			$date_format = 'Y-m-d';
 
 			// FIXME: return alert if account number doesn't match current account
-			$date_format = 'Y-m-d';
 
 			foreach ($account->statement->transactions as $t) {
 				$row = [$t->date->format($date_format), $t->name, $t->amount];
