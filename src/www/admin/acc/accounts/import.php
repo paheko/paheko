@@ -1,0 +1,79 @@
+<?php
+namespace Paheko;
+
+use Paheko\Accounting\Accounts;
+use Paheko\Accounting\CSV;
+use Paheko\Accounting\Export;
+use Paheko\Accounting\Transactions;
+use Paheko\Accounting\Years;
+use Paheko\Users\Session;
+
+require_once __DIR__ . '/../_inc.php';
+
+$session = Session::getInstance();
+$session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
+$user = $session->getUser();
+
+if (!CURRENT_YEAR_ID) {
+	Utils::redirect(ADMIN_URL . 'acc/years/?msg=OPEN');
+}
+
+$year = $current_year;
+$year->assertCanBeModified();
+
+$account = Accounts::get((int)qg('id'));
+
+if (!$account) {
+	throw new UserException("Le compte demandé n'existe pas.");
+}
+
+$csrf_key = 'acc_import_' . $account->id();
+$csv = new CSV($session, 'acc_import_account');
+$transactions = null;
+$import = $_POST['t']['import'] ?? null;
+
+if (!empty($_GET['cancel'])) {
+	$csv->clear();
+	Utils::redirect(Utils::getSelfURI(['id' => $account->id()]));
+}
+
+$columns = Export::COLUMNS[Export::SIMPLE];
+$columns = array_flip($columns);
+
+$csv->setColumns($columns, $columns);
+$csv->setMandatoryColumns(['date', 'label', 'amount']);
+
+$form->runIf(f('load') && isset($_FILES['file']['tmp_name']), function () use ($csv) {
+	$csv->uploadAuto($_FILES['file']);
+	Utils::redirect(Utils::getSelfURI());
+}, $csrf_key);
+
+if ($csv->ready()) {
+	$csv->orderBy('date');
+	$transactions = $account->matchImportTransactions($year, $csv, $_POST['t'] ?? null);
+
+	$form->runIf('save', function () use ($transactions, $csv) {
+		$db = DB::getInstance();
+		$db->begin();
+
+		foreach ($transactions as $i => $t) {
+			if (empty($_POST['t'][$i]['import'])) {
+				continue;
+			}
+
+			try {
+				$t->save();
+			}
+			catch (UserException $e) {
+				throw new UserException(sprintf("Écriture #%d : %s", $ref, $e->getMessage()), $e->getCode(), $e);
+			}
+		}
+
+		$db->commit();
+		$csv->clear();
+	}, $csrf_key, '!acc/accounts/journal.php?msg=IMPORT&id=' . $account->id());
+}
+
+$tpl->assign(compact('account', 'csrf_key', 'year', 'csv', 'transactions'));
+
+$tpl->display('acc/accounts/import.tpl');

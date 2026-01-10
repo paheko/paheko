@@ -2,8 +2,6 @@
 
 namespace Paheko\Entities\Accounting;
 
-use DateTime;
-use KD2\DB\Date;
 use Paheko\Config;
 use Paheko\CSV_Custom;
 use Paheko\DB;
@@ -14,6 +12,11 @@ use Paheko\UserException;
 use Paheko\ValidationException;
 use Paheko\Accounting\Accounts;
 use Paheko\Accounting\Charts;
+
+use KD2\DB\Date;
+use KD2\DB\EntityManager as EM;
+
+use DateTime;
 
 class Account extends Entity
 {
@@ -1059,4 +1062,70 @@ class Account extends Entity
 		return $t;
 	}
 
+	public function matchImportTransactions(Year $year, CSV_Custom $csv, ?array $source = null): array
+	{
+		$i = 0;
+		$out = [];
+
+		foreach ($csv->iterate() as $row) {
+			$row->date = Utils::parseDateTime($row->date);
+			$row->amount = Utils::moneyToInteger($row->amount);
+
+			$transaction = EM::findOne(Transaction::class,
+				'SELECT * FROM @TABLE WHERE date = ? AND (label = ? COLLATE U_NOCASE OR (reference IS NOT NULL AND reference = ? COLLATE U_NOCASE)) AND id_year = ?;',
+				$row->date,
+				$row->label,
+				$row->reference ?? null,
+				$year->id(),
+			);
+
+			if ($transaction && $transaction->sum() !== $row->amount) {
+				$transaction = null;
+			}
+
+			if (null === $transaction) {
+				$transaction = new Transaction;
+				$transaction->id_year = $year->id();
+				$transaction->importForm((array) $row);
+
+				$line = new Line;
+				$line->id_account = $this->id();
+				$line2 = null;
+
+				if (!empty($source[$i])) {
+					$transaction->importForm($source[$i]);
+					$line->importForm([
+						'reconciled' => !empty($source[$i]['reconcile']),
+						'reference'  => $source[$i]['payment_ref'] ?? null,
+					]);
+					$amount = Utils::moneyToInteger($source[$i]['amount'] ?? 0);
+
+					$line2 = new Line;
+					$line2->credit = $amount > 0 ? abs($amount) : 0;
+					$line2->debit = $amount < 0 ? abs($amount) : 0;
+					$line2->id_account = isset($source[$i]['account']) ? (int)key($source[$i]['account']) : null;
+				}
+				else {
+					$line->reference = $row->p_reference ?? null;
+					$line->reconciled = true;
+					$amount = $row->amount;
+				}
+
+				$line->credit = $amount < 0 ? abs($amount) : 0;
+				$line->debit = $amount > 0 ? abs($amount) : 0;
+				$transaction->addLine($line);
+
+				if ($line2) {
+					$transaction->addLine($line2);
+				}
+
+				$transaction->type = $transaction->findTypeFromAccounts();
+			}
+
+			$out[$i] = $transaction;
+			$i++;
+		}
+
+		return $out;
+	}
 }
