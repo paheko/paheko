@@ -112,7 +112,8 @@ table.list td {
     display: block;
 }
 
-td.actions *, nav.tabs, .icn-btn, .pagination, a.icn {
+td.actions *, nav.tabs, .icn-btn, .pagination, a.icn, p.actions,
+table thead label, table tfoot label, table thead button span {
     display: none !important;
 }
 
