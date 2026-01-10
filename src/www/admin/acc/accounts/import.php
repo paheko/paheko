@@ -12,7 +12,6 @@ require_once __DIR__ . '/../_inc.php';
 
 $session = Session::getInstance();
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
-$user = $session->getUser();
 
 if (!CURRENT_YEAR_ID) {
 	Utils::redirect(ADMIN_URL . 'acc/years/?msg=OPEN');
@@ -53,8 +52,6 @@ $columns = [
 
 $csv->setColumns($columns, $columns);
 $csv->setMandatoryColumns(['date', 'label', ['amount', ['debit', 'credit']]]);
-
-//if (empty($_POST))  $csv->clear();
 
 $form->runIf(f('load') && isset($_FILES['file']['tmp_name']), function () use ($csv) {
 	$csv->upload($_FILES['file']);
