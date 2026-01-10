@@ -61,7 +61,6 @@ $form->runIf(f('load') && isset($_FILES['file']['tmp_name']), function () use ($
 }, $csrf_key);
 
 if ($csv->ready()) {
-	$csv->orderBy('date');
 	$transactions = $account->matchImportTransactions($year, $csv, $_POST['t'] ?? null);
 
 	$form->runIf('save', function () use ($transactions, $csv) {

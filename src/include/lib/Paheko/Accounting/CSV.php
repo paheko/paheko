@@ -2,8 +2,11 @@
 
 namespace Paheko\Accounting;
 
+use Paheko\Files\Conversion;
 use Paheko\Users\Session;
 use Paheko\CSV_Custom;
+use Paheko\CSV as CSV_Utils;
+use Paheko\Utils;
 
 use KD2\Office\QIFParser;
 use KD2\Office\OFXParser;
@@ -30,10 +33,82 @@ class CSV extends CSV_Custom
 			$this->loadQIF($path);
 		}
 		else {
-			parent::loadFile($path, $file_name);
+			$this->loadCSV($path, $file_name);
 		}
 
 		$this->file_name = $file_name;
+	}
+
+	public function loadCSV(string $path, string $file_name): void
+	{
+		$ext = strtolower(substr($file_name, -4));
+
+		// Automatically convert from XLSX/XLS/ODS/etc.
+		if ($ext !== '.csv' && $this->canConvert()) {
+			$path = Conversion::toCSVAuto($path);
+		}
+
+		if (!$path) {
+			throw new UserException('Ce fichier n\'est pas dans un format accepté.');
+		}
+
+		if (filesize($path) > $this->max_file_size) {
+			throw new UserException(sprintf('Ce fichier CSV est trop gros (taille maximale : %s)', Utils::format_bytes($this->max_file_size)));
+		}
+
+		$skip_until = null;
+		$stop_at = null;
+
+		$this->csv = [];
+		$prev = null;
+		$i = 1;
+
+		foreach (CSV_Utils::iterate($path) as $line => $row) {
+			if (null !== $skip_until) {
+				foreach ($skip_until as $key => $value) {
+					if (!array_key_exists($key, $row) || $row[$key] !== $value) {
+						continue(2);
+					}
+				}
+
+				$skip_until = null;
+			}
+			elseif (null !== $stop_at) {
+				$stop = true;
+
+				foreach ($stop_at as $key => $value) {
+					if (!array_key_exists($key, $row) || $row[$key] !== $value) {
+						$stop = false;
+						break;
+					}
+				}
+
+				if ($stop) {
+					break;
+				}
+			}
+
+			// XLSX Crédit Mutuel
+			if ($line === 1 && false !== stripos($row[0], 'Votre situation financière au')) {
+				$skip_until = ['Date', 'Valeur', 'Libellé', 'Débit', 'Crédit'];
+				$stop_at = ['', '', '', ''];
+				$this->setTranslationTable(['date', null, 'label', 'debit', 'credit', null, null]);
+				$this->skip(1);
+			}
+			elseif (null === $skip_until) {
+				if (null !== $prev
+					&& count($prev) !== count($row)) {
+					throw new UserException(sprintf('Ligne %d : le nombre de colonne diffère de la ligne précédente, cela peut indiquer un fichier corrompu ou comportant plusieurs feuilles différentes', $line));
+				}
+
+				$this->csv[$i++] = $row;
+				$prev = $row;
+			}
+		}
+
+		if (!count($this->csv)) {
+			throw new UserException('Ce fichier est vide (aucune ligne trouvée).');
+		}
 	}
 
 	/**
