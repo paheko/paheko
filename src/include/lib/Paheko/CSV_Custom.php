@@ -17,7 +17,7 @@ class CSV_Custom
 	protected array $mandatory_columns = [];
 	protected int $skip = 1;
 	protected $modifier = null;
-	protected array $_default;
+	protected ?array $_default = null;
 	protected ?string $cache_key = null;
 	protected int $max_file_size = 1024*1024*10;
 	protected ?string $file_name = null;
@@ -146,36 +146,36 @@ class CSV_Custom
 			throw new \LogicException('Missing columns or translation table');
 		}
 
-		for ($i = 0; $i < count($this->csv); $i++) {
-			if ($i < $this->skip) {
+		$i = 0;
+
+		foreach ($this->csv as $line => $row) {
+			if ($i++ < $this->skip) {
 				continue;
 			}
 
-			yield $i+1 => $this->getLine($i + 1);
+			yield $line => $this->getLine($line, $row);
 		}
 	}
 
-	public function getLine(int $i): ?\stdClass
+	public function getLine(int $i, ?array $row = null): ?\stdClass
 	{
 		if (!isset($this->csv[$i])) {
 			return null;
 		}
 
-		if (!isset($this->_default)) {
-			$this->_default = array_fill_keys($this->translation, null);
-		}
+		$this->_default ??= array_fill_keys($this->translation, null);
+		$row ??= $this->csv[$i];
+		$row_with_defaults = $this->_default;
 
-		$row = $this->_default;
-
-		foreach ($this->csv[$i] as $col => $value) {
+		foreach ($row as $col => $value) {
 			if (!isset($this->translation[$col])) {
 				continue;
 			}
 
-			$row[$this->translation[$col]] = trim((string)$value);
+			$row_with_defaults[$this->translation[$col]] = trim((string)$value);
 		}
 
-		$row = (object) $row;
+		$row = (object) $row_with_defaults;
 
 		if (null !== $this->modifier) {
 			try {
@@ -296,19 +296,20 @@ class CSV_Custom
 			throw new UserException('Aucune colonne n\'a été sélectionnée');
 		}
 
-		foreach ($this->mandatory_columns as $column) {
+		foreach ($this->getMandatoryColumns() as $column) {
 			// Either one of these columns is mandatory
 			if (is_array($column)) {
 				$found = false;
 				$names = [];
 
 				foreach ($column as $c) {
-					if (in_array($c, $table, true)) {
-						$found = true;
-						break;
-					}
-					else {
-						$names[] = $this->columns[$c];
+					foreach ((array) $c as $key) {
+						if (in_array($key, $table, true)) {
+							$found = true;
+							break;
+						}
+
+						$names[] = $this->columns[$key];
 					}
 				}
 
@@ -317,10 +318,8 @@ class CSV_Custom
 					throw new UserException(sprintf('Une des colonnes (%s) est obligatoire, mais aucune n\'a été sélectionnée ou n\'existe.', implode(', ', $names)));
 				}
 			}
-			else {
-				if (!in_array($column, $table, true)) {
-					throw new UserException(sprintf('La colonne "%s" est obligatoire mais n\'a pas été sélectionnée ou n\'existe pas.', $this->columns[$column]));
-				}
+			elseif (!in_array($column, $table, true)) {
+				throw new UserException(sprintf('La colonne "%s" est obligatoire mais n\'a pas été sélectionnée ou n\'existe pas.', $this->columns[$column]));
 			}
 		}
 
@@ -391,34 +390,46 @@ class CSV_Custom
 		return implode(', ', $c);
 	}
 
-	public function getMandatoryColumnsString(): string
+	protected function getColumnNamesFromArray(array $labels, array $selected)
 	{
-		if (!empty($this->columns_defaults)) {
-			$c = array_intersect_key($this->columns_defaults, $this->columns);
-		}
-		else {
-			$c = $this->columns;
-		}
-
 		$names = [];
 
-		foreach ($this->getMandatoryColumns() as $column) {
+		foreach ($selected as $column) {
 			if (is_array($column)) {
 				$list = [];
 
-				foreach ($column as $column2) {
-					$list[] = $c[$column2];
+				foreach ($column as $item) {
+					$column_labels = [];
+
+					// In case an alternative key is a list of keys
+					foreach ((array)$item as $key) {
+						$column_labels[] = $labels[$key];
+					}
+
+					$list[] = implode(' et ', $column_labels);
 				}
 
 				$names[] = implode(' ou ', $list);
-				unset($list, $column2);
+				unset($list, $item, $column_labels);
 			}
 			else {
-				$names[] = $c[$column];
+				$names[] = $labels[$column];
 			}
 		}
 
 		return implode(', ', $names);
+	}
+
+	public function getMandatoryColumnsString(): string
+	{
+		if (!empty($this->columns_defaults)) {
+			$labels = array_intersect_key($this->columns_defaults, $this->columns);
+		}
+		else {
+			$labels = $this->columns;
+		}
+
+		return $this->getColumnNamesFromArray($labels, $this->getMandatoryColumns());
 	}
 
 	public function getColumns(): array
@@ -500,9 +511,14 @@ class CSV_Custom
 			throw new \InvalidArgumentException('Unknown column: ' . $column);
 		}
 
-		usort($this->csv, fn($a, $b) => strcmp($a[$col] ?? '', $b[$col] ?? ''));
+		$header = array_slice($this->csv, 0, $this->skip);
+		$rows = array_slice($this->csv, $this->skip);
+
+		usort($rows, fn($a, $b) => strcmp($a[$col] ?? '', $b[$col] ?? ''));
+
+		$rows = $header + $rows;
 
 		// Renumber array
-		$this->csv = array_combine(range(1, count($this->csv)), array_values($this->csv));
+		$this->csv = array_combine(range(1, count($rows)), array_values($rows));
 	}
 }
