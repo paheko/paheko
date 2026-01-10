@@ -304,7 +304,7 @@ class DynamicList implements \Countable
 	public function count(): int
 	{
 		if (null === $this->count_result) {
-			$sql = $this->SQL(true);
+			$sql = sprintf('SELECT %s FROM %s WHERE %s;', $this->count, $this->count_tables ?? $this->tables, $this->conditions);
 			$this->count_result = DB::getInstance()->firstColumn($sql, $this->parameters);
 		}
 
@@ -515,7 +515,7 @@ class DynamicList implements \Countable
 		return null;
 	}
 
-	public function SQL(bool $count = false)
+	public function SQL()
 	{
 		$start = ($this->page - 1) * $this->per_page;
 		$db = DB::getInstance();
@@ -561,19 +561,11 @@ class DynamicList implements \Countable
 		}
 
 		$group = $this->group ? 'GROUP BY ' . $this->group : '';
-		$tables = null;
-
-		if ($count) {
-			$tables = $this->count_tables;
-			$select = $this->count;
-		}
-
-		$tables ??= $this->tables;
 
 		$sql = sprintf('SELECT %s FROM %s WHERE %s %s ORDER BY %s',
-			$select, $tables, $this->conditions, $group, $order);
+			$select, $this->tables, $this->conditions, $group, $order);
 
-		if (!$count && null !== $this->per_page) {
+		if (null !== $this->per_page) {
 			$sql .= sprintf(' LIMIT %d,%d', $start, $this->per_page);
 		}
 
