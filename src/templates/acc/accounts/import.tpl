@@ -92,6 +92,16 @@
 	});
 	{/literal}
 	</script>
+{elseif $csv->loaded()}
+	<form method="post" action="{$self_url}">
+		{include file="common/_csv_match_columns.tpl"}
+
+		<p class="submit">
+			{csrf_field key=$csrf_key}
+			{linkbutton href="?id=%d&cancel=1"|args:$account.id label="Annuler" shape="left"}
+			{button type="submit" name="set_columns" label="Continuer" class="main" shape="right"}
+		</p>
+	</form>
 {else}
 	<form method="post" action="{$self_url}" enctype="multipart/form-data">
 

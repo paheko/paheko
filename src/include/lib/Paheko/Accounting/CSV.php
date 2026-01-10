@@ -7,6 +7,7 @@ use Paheko\Users\Session;
 use Paheko\CSV_Custom;
 use Paheko\CSV as CSV_Utils;
 use Paheko\Utils;
+use Paheko\UserException;
 
 use KD2\Office\QIFParser;
 use KD2\Office\OFXParser;
@@ -109,20 +110,14 @@ class CSV extends CSV_Custom
 		if (!count($this->csv)) {
 			throw new UserException('Ce fichier est vide (aucune ligne trouvée).');
 		}
-	}
 
-	/**
-	 * Upload and automatically set translation table for CSV import
-	 * @throws UserException
-	 */
-	public function uploadAuto(?array $file): void
-	{
-		$this->upload($file);
-
-		$ext = strtolower(substr($this->file_name, -4));
-
-		if ($ext !== '.ofx' && $ext !== '.qif') {
-			$this->setTranslationTableAuto();
+		if (!$this->translation) {
+			try {
+				$this->setTranslationTableAuto();
+			}
+			catch (UserException $e) {
+				// Ignore any error, this just means the user will have to choose columns
+			}
 		}
 	}
 

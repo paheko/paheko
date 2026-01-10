@@ -94,7 +94,7 @@ class CommonFunctions
 
 				if ($accept === 'csv+ofx+qif') {
 					$help .= ', relevé bancaire (OFX, QIF)';
-					$attributes['accept'] = ',.ofx,OFX,application/x-ofx,.qif,.QIF';
+					$attributes['accept'] .= ',.ofx,OFX,application/x-ofx,.qif,.QIF';
 				}
 
 				if (Conversion::canConvertToCSV()) {

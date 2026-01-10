@@ -1072,7 +1072,7 @@ class Account extends Entity
 			$row->date = Utils::parseDateTime($row->date);
 
 			if (isset($row->credit)) {
-				$row->amount = $row->credit ? $row->credit : $row->debit;
+				$row->amount = $row->credit ? $row->credit : '-' . trim($row->debit, '-');
 			}
 
 			$row->amount = Utils::moneyToInteger($row->amount);
