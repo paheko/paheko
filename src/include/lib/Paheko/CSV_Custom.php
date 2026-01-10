@@ -108,13 +108,45 @@ class CSV_Custom
 			throw new UserException(sprintf('Ce fichier CSV est trop gros (taille maximale : %s)', Utils::format_bytes($this->max_file_size)));
 		}
 
-		$this->csv = CSV::readAsArray($path);
+		$this->csv = null;
+		$rows = [];
+		$prev = null;
+		$i = 1;
 
-		if (!count($this->csv)) {
+		foreach (CSV::iterate($path) as $line => $row) {
+			$r = $this->parseLine($line, $row);
+
+			if (-1 === $r) {
+				break;
+			}
+			elseif (0 === $r) {
+				continue;
+			}
+
+			if (null !== $prev
+				&& count($prev) !== count($row)) {
+				throw new UserException(sprintf('Ligne %d : le nombre de colonne diffère de la ligne précédente, cela peut indiquer un fichier corrompu ou comportant plusieurs feuilles différentes', $line));
+			}
+
+			$rows[$i++] = $row;
+			$prev = $row;
+		}
+
+		if (!count($rows)) {
 			throw new UserException('Ce fichier est vide (aucune ligne trouvée).');
 		}
 
+		$this->csv = $rows;
 		$this->file_name = $file_name;
+	}
+
+	/**
+	 * Allow for special parsing, here nothing is done
+	 * @return int 1 for adding row to output, -1 to stop the loop, 0 to ignore the line
+	 */
+	protected function parseLine(int $line, array &$row): int
+	{
+		return 1;
 	}
 
 	public function append(array $row): void

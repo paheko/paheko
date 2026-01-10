@@ -54,6 +54,8 @@ $columns = [
 $csv->setColumns($columns, $columns);
 $csv->setMandatoryColumns(['date', 'label', ['amount', ['debit', 'credit']]]);
 
+//if (empty($_POST))  $csv->clear();
+
 $form->runIf(f('load') && isset($_FILES['file']['tmp_name']), function () use ($csv) {
 	$csv->upload($_FILES['file']);
 }, $csrf_key, Utils::getSelfURI());
@@ -79,7 +81,7 @@ if ($csv->ready()) {
 				$t->save();
 			}
 			catch (UserException $e) {
-				throw new UserException(sprintf("Écriture #%d : %s", $ref, $e->getMessage()), $e->getCode(), $e);
+				throw new UserException(sprintf("Ligne %d : %s", $i, $e->getMessage()), $e->getCode(), $e);
 			}
 		}
 

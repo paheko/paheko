@@ -1064,12 +1064,10 @@ class Account extends Entity
 
 	public function matchImportTransactions(Year $year, CSV_Custom $csv, ?array $source = null): array
 	{
-		$i = 0;
 		$out = [];
-		$csv->skip(2);
 
 		foreach ($csv->iterate() as $i => $row) {
-			$row->date = Utils::parseDateTime($row->date);
+			$row->date = Utils::parseDateTime($row->date, Date::class);
 
 			if (isset($row->credit)) {
 				$row->amount = $row->credit ? $row->credit : '-' . trim($row->debit, '-');
@@ -1078,16 +1076,17 @@ class Account extends Entity
 			$row->amount = Utils::moneyToInteger($row->amount);
 
 			$transaction = EM::findOne(Transaction::class,
-				'SELECT * FROM @TABLE WHERE date = ? AND (label = ? COLLATE U_NOCASE OR (reference IS NOT NULL AND reference = ? COLLATE U_NOCASE)) AND id_year = ?;',
+				'SELECT t.* FROM @TABLE t
+				INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
+				WHERE l.id_account = ? AND t.date = ? AND t.id_year = ?
+				GROUP BY t.id
+				HAVING SUM(l.debit - l.credit) = ?
+				LIMIT 1;',
+				$this->id(),
 				$row->date,
-				$row->label,
-				$row->reference ?? null,
 				$year->id(),
+				$row->amount,
 			);
-
-			if ($transaction && $transaction->sum() !== $row->amount) {
-				$transaction = null;
-			}
 
 			if (null === $transaction) {
 				$transaction = new Transaction;
@@ -1129,7 +1128,6 @@ class Account extends Entity
 			}
 
 			$out[$i] = $transaction;
-			$i++;
 		}
 
 		return $out;

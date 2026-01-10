@@ -5,7 +5,6 @@ namespace Paheko\Accounting;
 use Paheko\Files\Conversion;
 use Paheko\Users\Session;
 use Paheko\CSV_Custom;
-use Paheko\CSV as CSV_Utils;
 use Paheko\Utils;
 use Paheko\UserException;
 
@@ -34,91 +33,77 @@ class CSV extends CSV_Custom
 			$this->loadQIF($path);
 		}
 		else {
-			$this->loadCSV($path, $file_name);
+			parent::loadFile($path, $file_name);
+
+			// Try to set translation table automatically, this might work in some cases
+			if (!$this->translation) {
+				try {
+					$this->setTranslationTableAuto();
+				}
+				catch (UserException $e) {
+					// Ignore any error, this just means the user will have to choose columns
+				}
+			}
 		}
 
 		$this->file_name = $file_name;
 	}
 
-	public function loadCSV(string $path, string $file_name): void
+	/**
+	 * Custom CSV parser, try to match some bank accounts
+	 */
+	protected function parseLine(int $line, array &$row): int
 	{
-		$ext = strtolower(substr($file_name, -4));
+		static $bank = null, $skip_until = null, $stop_at = null;
 
-		// Automatically convert from XLSX/XLS/ODS/etc.
-		if ($ext !== '.csv' && $this->canConvert()) {
-			$path = Conversion::toCSVAuto($path);
+		// Reset parser
+		if ($line === 1) {
+			$bank = $skip_until = $stop_at = null;
 		}
 
-		if (!$path) {
-			throw new UserException('Ce fichier n\'est pas dans un format accepté.');
-		}
-
-		if (filesize($path) > $this->max_file_size) {
-			throw new UserException(sprintf('Ce fichier CSV est trop gros (taille maximale : %s)', Utils::format_bytes($this->max_file_size)));
-		}
-
-		$skip_until = null;
-		$stop_at = null;
-
-		$this->csv = [];
-		$prev = null;
-		$i = 1;
-
-		foreach (CSV_Utils::iterate($path) as $line => $row) {
-			if (null !== $skip_until) {
-				foreach ($skip_until as $key => $value) {
-					if (!array_key_exists($key, $row) || $row[$key] !== $value) {
-						continue(2);
-					}
+		if (null !== $skip_until) {
+			foreach ($skip_until as $key => $value) {
+				if (!array_key_exists($key, $row) || $row[$key] !== $value) {
+					return 0;
 				}
-
-				$skip_until = null;
 			}
-			elseif (null !== $stop_at) {
-				$stop = true;
 
-				foreach ($stop_at as $key => $value) {
-					if (!array_key_exists($key, $row) || $row[$key] !== $value) {
-						$stop = false;
-						break;
-					}
-				}
+			$skip_until = null;
+		}
+		elseif (null !== $stop_at) {
+			$stop = true;
 
-				if ($stop) {
+			foreach ($stop_at as $key => $value) {
+				if (!array_key_exists($key, $row) || $row[$key] !== $value) {
+					$stop = false;
 					break;
 				}
 			}
 
-			// XLSX Crédit Mutuel
-			if ($line === 1 && false !== stripos($row[0], 'Votre situation financière au')) {
-				$skip_until = ['Date', 'Valeur', 'Libellé', 'Débit', 'Crédit'];
-				$stop_at = ['', '', '', ''];
-				$this->setTranslationTable(['date', null, 'label', 'debit', 'credit', null, null]);
-				$this->skip(1);
-			}
-			elseif (null === $skip_until) {
-				if (null !== $prev
-					&& count($prev) !== count($row)) {
-					throw new UserException(sprintf('Ligne %d : le nombre de colonne diffère de la ligne précédente, cela peut indiquer un fichier corrompu ou comportant plusieurs feuilles différentes', $line));
-				}
-
-				$this->csv[$i++] = $row;
-				$prev = $row;
+			if ($stop) {
+				return -1;
 			}
 		}
 
-		if (!count($this->csv)) {
-			throw new UserException('Ce fichier est vide (aucune ligne trouvée).');
+		// XLSX Crédit Mutuel
+		if ($line === 1
+			&& false !== stripos($row[0], 'Votre situation financière au')) {
+			$bank = 'CM';
+			$skip_until = ['Date', 'Valeur', 'Libellé', 'Débit', 'Crédit'];
+			$stop_at = ['', '', ''];
+			$this->setTranslationTable(['date', null, 'label', 'debit', 'credit', null, null]);
+			$this->skip(1);
+		}
+		elseif (null === $skip_until) {
+			return 1;
+		}
+		// Find account number
+		elseif ($bank === 'CM'
+			&& preg_match('/R.I.B. : ([\d\s]+)/', $row[0], $match)) {
+			$this->account_number = preg_replace('/\s+/', '', $match[1]);
 		}
 
-		if (!$this->translation) {
-			try {
-				$this->setTranslationTableAuto();
-			}
-			catch (UserException $e) {
-				// Ignore any error, this just means the user will have to choose columns
-			}
-		}
+		return 0;
 	}
 
 	protected function loadQIF(string $path)
