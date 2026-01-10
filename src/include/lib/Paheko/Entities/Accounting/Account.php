@@ -1066,9 +1066,15 @@ class Account extends Entity
 	{
 		$i = 0;
 		$out = [];
+		$csv->skip(2);
 
-		foreach ($csv->iterate() as $row) {
+		foreach ($csv->iterate() as $i => $row) {
 			$row->date = Utils::parseDateTime($row->date);
+
+			if (isset($row->credit)) {
+				$row->amount = $row->credit ? $row->credit : $row->debit;
+			}
+
 			$row->amount = Utils::moneyToInteger($row->amount);
 
 			$transaction = EM::findOne(Transaction::class,
@@ -1089,12 +1095,12 @@ class Account extends Entity
 				$transaction->importForm((array) $row);
 
 				$line = new Line;
-				$line2 = null;
-				$amount = $row->amount;
-
 				$line->id_account = $this->id();
-				$line->credit = $amount < 0 ? abs($amount) : 0;
-				$line->debit = $amount > 0 ? abs($amount) : 0;
+				$line2 = null;
+
+				// Inverted, as this is a bank account
+				$line->credit = $row->amount < 0 ? abs($row->amount) : 0;
+				$line->debit = $row->amount > 0 ? abs($row->amount) : 0;
 
 				if (!empty($source[$i])) {
 					$transaction->importForm($source[$i]);
@@ -1104,8 +1110,8 @@ class Account extends Entity
 					]);
 
 					$line2 = new Line;
-					$line2->credit = $amount > 0 ? abs($amount) : 0;
-					$line2->debit = $amount < 0 ? abs($amount) : 0;
+					$line2->credit = $line->debit;
+					$line2->debit = $line->credit;
 					$line2->id_account = isset($source[$i]['account']) ? (int)key($source[$i]['account']) : null;
 				}
 				else {
