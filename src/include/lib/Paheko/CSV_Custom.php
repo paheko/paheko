@@ -393,7 +393,7 @@ class CSV_Custom
 
 	public function getMandatoryColumnsString(): string
 	{
-	if (!empty($this->columns_defaults)) {
+		if (!empty($this->columns_defaults)) {
 			$c = array_intersect_key($this->columns_defaults, $this->columns);
 		}
 		else {
