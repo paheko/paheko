@@ -21,6 +21,7 @@ class CSV_Custom
 	protected ?string $cache_key = null;
 	protected int $max_file_size = 1024*1024*10;
 	protected ?string $file_name = null;
+	protected array $cache_properties = ['csv', 'translation', 'skip', 'file_name'];
 
 	public function __construct(?Session $session = null, ?string $key = null)
 	{
@@ -33,26 +34,22 @@ class CSV_Custom
 		if ($this->cache_key && !Static_Cache::hasExpired($this->cache_key)) {
 			$data = Static_Cache::import($this->cache_key);
 
-			$this->csv = $data['csv'];
-			$this->translation = $data['translation'];
-			$this->skip = $data['skip'];
-			$this->file_name = $data['file_name'];
+			foreach ($this->cache_properties as $key) {
+				$this->$key = $data[$key];
+			}
 		}
 	}
 
 	public function __destruct()
 	{
 		if ($this->session && $this->cache_key && ($this->csv || $this->translation || $this->skip !== 1)) {
-			Static_Cache::export($this->cache_key,
-				[
-					'csv'         => $this->csv,
-					'translation' => $this->translation,
-					'skip'        => $this->skip,
-					'file_name'   => $this->file_name,
-				],
-				new \DateTime('+3 hours')
-			);
+			$data = [];
 
+			foreach ($this->cache_properties as $key) {
+				$data[$key] = $this->$key;
+			}
+
+			Static_Cache::export($this->cache_key, $data, new \DateTime('+3 hours'));
 			Static_Cache::prune();
 		}
 	}
@@ -175,7 +172,7 @@ class CSV_Custom
 				continue;
 			}
 
-			$row[$this->translation[$col]] = trim($value);
+			$row[$this->translation[$col]] = trim((string)$value);
 		}
 
 		$row = (object) $row;
@@ -490,8 +487,22 @@ class CSV_Custom
 		return reset($this->csv) ?: null;
 	}
 
-	public function hasRawHeaderColumn(string $label)
+	public function hasRawHeaderColumn(string $label): bool
 	{
 		return in_array($label, $this->getRawHeader(), true);
+	}
+
+	public function orderBy(string $column): void
+	{
+		$col = array_search($column, $this->translation, true);
+
+		if ($col === false) {
+			throw new \InvalidArgumentException('Unknown column: ' . $column);
+		}
+
+		usort($this->csv, fn($a, $b) => strcmp($a[$col] ?? '', $b[$col] ?? ''));
+
+		// Renumber array
+		$this->csv = array_combine(range(1, count($this->csv)), array_values($this->csv));
 	}
 }
