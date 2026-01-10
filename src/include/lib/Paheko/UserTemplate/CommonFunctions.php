@@ -124,7 +124,15 @@ class CommonFunctions
 		elseif (isset($source) && is_array($source) && isset($source[$source_name])) {
 			$current_value = $source[$source_name];
 		}
-		elseif (isset($default) && ($type != 'checkbox' || empty($_POST))) {
+		elseif ($type === 'checkbox') {
+			if (isset($_POST[$name . '_present']) || isset($_POST[$name])) {
+				$current_value = !empty($_POST[$name]) ? $params['value'] : null;
+			}
+			elseif (isset($default)) {
+				$current_value = $default;
+			}
+		}
+		elseif (isset($default)) {
 			$current_value = $default;
 		}
 
@@ -413,13 +421,21 @@ class CommonFunctions
 
 			$input = sprintf('<span id="%s_container" class="input-list">%s%s</span>', htmlspecialchars($attributes['id']), $button, $values);
 		}
-		elseif ($type === 'money') {
+		elseif ($type === 'money' || $type === 'money-no-currency') {
 			if (null !== $current_value && !$current_value_from_user) {
 				$current_value = Utils::money_format($current_value, ',', '');
 			}
 
-			$currency = Config::getInstance()->currency;
-			$input = sprintf('<nobr><input type="text" pattern="\s*-?[0-9 ]+([.,][0-9]{1,2})?\s*" inputmode="decimal" size="8" %s value="%s" /><b>%s</b></nobr>', $attributes_string, htmlspecialchars((string) $current_value), $currency);
+			$input = sprintf(
+				'<input type="text" pattern="\s*-?[0-9 ]+([.,][0-9]{1,2})?\s*" inputmode="decimal" size="8" %s value="%s" class="money" />',
+				$attributes_string,
+				htmlspecialchars((string) $current_value)
+			);
+
+			if ($type !== 'money-no-currency') {
+				$currency = Config::getInstance()->currency;
+				$input = sprintf('<nobr>%s<b>%s</b></nobr>', $input, $currency);
+			}
 		}
 		else {
 			$value = isset($attributes['value']) ? '' : sprintf(' value="%s"', htmlspecialchars((string)$current_value));
