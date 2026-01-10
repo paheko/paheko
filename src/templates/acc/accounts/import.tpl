@@ -103,6 +103,7 @@
 		</p>
 	</form>
 {else}
+
 	<form method="post" action="{$self_url}" enctype="multipart/form-data">
 
 		<fieldset>
@@ -111,6 +112,9 @@
 				{input type="file" name="file" label="Fichier à importer" accept="csv+ofx+qif" required=true}
 				{include file="common/_csv_help.tpl" csv=$csv more_text="Si le fichier comporte des écritures dont la date est en dehors de l'exercice courant, elles seront ignorées."}
 			</dl>
+			<p>
+				{linkbutton shape="settings" label="Configurer les règles d'import" href="rules/"}
+			</p>
 		</fieldset>
 
 		<p class="help">
