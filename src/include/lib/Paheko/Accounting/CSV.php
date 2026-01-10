@@ -2,13 +2,22 @@
 
 namespace Paheko\Accounting;
 
+use Paheko\Users\Session;
 use Paheko\CSV_Custom;
+
 use KD2\Office\QIFParser;
 use KD2\Office\OFXParser;
 
 class CSV extends CSV_Custom
 {
 	public bool $ofx_balance_as_transaction = false;
+	protected ?string $account_number = null;
+
+	public function __construct(?Session $session = null, ?string $key = null)
+	{
+		parent::__construct($session, $key);
+		$this->cache_properties[] = 'account_number';
+	}
 
 	public function loadFile(string $path, string $file_name): void
 	{
@@ -27,6 +36,21 @@ class CSV extends CSV_Custom
 		$this->file_name = $file_name;
 	}
 
+	/**
+	 * Upload and automatically set translation table for CSV import
+	 * @throws UserException
+	 */
+	public function uploadAuto(?array $file): void
+	{
+		$this->upload($file);
+
+		$ext = strtolower(substr($this->file_name, -4));
+
+		if ($ext !== '.ofx' && $ext !== '.qif') {
+			$this->setTranslationTableAuto();
+		}
+	}
+
 	protected function loadQIF(string $path)
 	{
 		$transactions = (new QIFParser)->parse(file_get_contents($path));
@@ -39,7 +63,6 @@ class CSV extends CSV_Custom
 			&& array_key_exists('notes', $this->columns)) {
 			$extended = true;
 			$table[] = 'p_reference';
-			$table[] = 'notes';
 		}
 
 		$this->setTranslationTable($table);
@@ -47,15 +70,20 @@ class CSV extends CSV_Custom
 		$date_format = 'Y-m-d';
 
 		foreach ($transactions as $t) {
-			$row = [$t->date->format($date_format), $t->label, $t->amount];
+			// In most banks, memo is mostly the second line of the transaction label… that sucks
+			$label = trim(sprintf('%s %s', (string)$t->label, (string)$t->memo));
+
+			$row = [$t->date->format($date_format), $label, $t->amount];
 
 			if ($extended) {
 				$row[] = $t->check_number;
-				$row[] = $t->memo;
 			}
 
 			$this->append($row);
 		}
+
+		// Make sure list is ordered by date, as some banks have weird ordering
+		$this->orderBy('date');
 	}
 
 	protected function loadOFX(string $path): void
@@ -77,27 +105,30 @@ class CSV extends CSV_Custom
 				$extended = true;
 				$table[] = 'reference';
 				$table[] = 'p_reference';
-				$table[] = 'notes';
 			}
 
 			$this->setTranslationTable($table);
 			$this->skip(0);
 			$date_format = 'Y-m-d';
 
-			// FIXME: return alert if account number doesn't match current account
+			// This is to alert if account number doesn't match current account
+			$this->account_number = $account->full_number;
 
 			foreach ($account->statement->transactions as $t) {
-				$row = [$t->date->format($date_format), $t->name, $t->amount];
+				// In most banks, memo is mostly the second line of the transaction label… that sucks
+				$label = trim(sprintf('%s %s', (string)$t->label, (string)$t->memo));
+				$row = [$t->date->format($date_format), $label, $t->amount];
 
 				if ($extended) {
 					$row[] = $t->id;
 					$row[] = $t->check_number;
-					$row[] = $t->memo;
 				}
-
 
 				$this->append($row);
 			}
+
+			// Make sure list is ordered by date, as some banks have weird ordering
+			$this->orderBy('date');
 
 			if ($this->ofx_balance_as_transaction
 				&& !$extended) {
@@ -132,8 +163,6 @@ class CSV extends CSV_Custom
 					]);
 				}
 			}
-
-			//echo '<pre>'; var_dump($this->csv); $this->clear(); exit;
 		}
 		catch (\InvalidArgumentException | UserException $e) {
 			throw new UserException('Fichier OFX invalide: ' . $e->getmessage(), 400, $e);
