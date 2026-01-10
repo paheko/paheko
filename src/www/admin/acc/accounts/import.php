@@ -27,6 +27,10 @@ if (!$account) {
 	throw new UserException("Le compte demandé n'existe pas.");
 }
 
+if ($account->type !== $account::TYPE_BANK) {
+	throw new UserException('Ce compte n\'est pas un compte bancaire');
+}
+
 $csrf_key = 'acc_import_' . $account->id();
 $csv = new CSV($session, 'acc_import_account');
 $transactions = null;
@@ -38,10 +42,18 @@ if (!empty($_GET['cancel'])) {
 }
 
 $columns = Export::COLUMNS[Export::SIMPLE];
-$columns = array_flip($columns);
+$columns = [
+	'label'       => 'Libellé',
+	'date'        => 'Date',
+	'reference'   => 'Numéro pièce comptable',
+	'p_reference' => 'Référence paiement',
+	'amount'      => 'Montant',
+	'debit'       => 'Débit',
+	'credit'      => 'Crédit',
+];
 
 $csv->setColumns($columns, $columns);
-$csv->setMandatoryColumns(['date', 'label', 'amount']);
+$csv->setMandatoryColumns(['date', 'label', ['amount', ['debit', 'credit']]]);
 
 $form->runIf(f('load') && isset($_FILES['file']['tmp_name']), function () use ($csv) {
 	$csv->uploadAuto($_FILES['file']);

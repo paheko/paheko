@@ -1089,8 +1089,12 @@ class Account extends Entity
 				$transaction->importForm((array) $row);
 
 				$line = new Line;
-				$line->id_account = $this->id();
 				$line2 = null;
+				$amount = $row->amount;
+
+				$line->id_account = $this->id();
+				$line->credit = $amount < 0 ? abs($amount) : 0;
+				$line->debit = $amount > 0 ? abs($amount) : 0;
 
 				if (!empty($source[$i])) {
 					$transaction->importForm($source[$i]);
@@ -1098,7 +1102,6 @@ class Account extends Entity
 						'reconciled' => !empty($source[$i]['reconcile']),
 						'reference'  => $source[$i]['payment_ref'] ?? null,
 					]);
-					$amount = Utils::moneyToInteger($source[$i]['amount'] ?? 0);
 
 					$line2 = new Line;
 					$line2->credit = $amount > 0 ? abs($amount) : 0;
@@ -1108,11 +1111,8 @@ class Account extends Entity
 				else {
 					$line->reference = $row->p_reference ?? null;
 					$line->reconciled = true;
-					$amount = $row->amount;
 				}
 
-				$line->credit = $amount < 0 ? abs($amount) : 0;
-				$line->debit = $amount > 0 ? abs($amount) : 0;
 				$transaction->addLine($line);
 
 				if ($line2) {

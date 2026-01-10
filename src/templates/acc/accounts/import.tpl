@@ -14,8 +14,8 @@
 				<tr>
 					<td>Importer</td>
 					<td>Date</td>
-					<th width="30%">Libellé</th>
 					<td>Montant</td>
+					<th width="30%">Libellé</th>
 					<td width="20%">Compte</td>
 					<td>Pièce comptable</td>
 					<td>Réf. paiement</td>
@@ -29,8 +29,8 @@
 					{if $t->exists()}
 						<td class="num">{link label=$t.id target="_blank" href="!acc/transactions/details.php?id=%d"|args:$t.id}</td>
 						<td>{$t.date|date_short}</td>
-						<th>{$t.label}</th>
 						<td class="money">{$t->getSumForAccount($account->id)|money_currency_html|raw}</td>
+						<th>{$t.label}</th>
 						<td><?=nl2br(htmlspecialchars(implode("\n", $t->listAccountsAssoc($account->id))))?></td>
 						<td>{$t.reference}</td>
 						<td>{$t->getPaymentReference()}</td>
@@ -41,13 +41,20 @@
 						$new_transactions = true;
 						$enabled = !isset($_POST['t']) || !empty($_POST['t'][$i]['import']);
 						$selected_account = $_POST['t'][$i]['account'] ?? null;
+						$sum = $t->getSumForAccount($account->id) * -1;
+						$types = [
+							$account::TYPE_CASH,
+							$account::TYPE_BANK,
+							$account::TYPE_OUTSTANDING,
+							$sum < 0 ? $account::TYPE_EXPENSE : $account::TYPE_REVENUE,
+						];
+						$types = rawurlencode(implode('|', $types));
 						?>
 						<td class="checkbox">{input type="checkbox" name="t[%d][import]"|args:$i value="1" default=$enabled}</td>
-						<td style="white-space: pre">{input type="date" required=true name="t[%d][date]"|args:$i default=$t.date}</td>
+						<td>{$t.date|date_short}</td>
+						<td class="money">{$sum|money_currency_html|raw}</td>
 						<th>{input type="text" required=true name="t[%d][label]"|args:$i default=$t.label class="full-width"}</th>
-						<?php $sum = $t->getSumForAccount($account->id) * -1; ?>
-						<td class="money">{input type="money-no-currency" name="amount" required=true name="t[%d][amount]"|args:$i default=$sum}</td>
-						<td>{input type="list" required=true name="t[%d][account]"|args:$i target="!acc/charts/accounts/selector.php" default=$selected_account}</td>
+						<td>{input type="list" required=true name="t[%d][account]"|args:$i target="!acc/charts/accounts/selector.php?types=%s"|args:$types default=$selected_account}</td>
 						<td>{input type="text" name="t[%d][reference]"|args:$i default=$t.reference size=15}</td>
 						<td>{input type="text" name="t[%d][payment_ref]"|args:$i default=$t->getPaymentReference() size=15}</td>
 						<td class="checkbox">{input type="checkbox" name="t[%d][reconcile]"|args:$i value=1 default=$reconciled}</td>
