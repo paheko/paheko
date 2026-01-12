@@ -346,7 +346,7 @@ class CSV_Custom
 				}
 
 				if (!$found) {
-					$names = array_map(fn($a) => '"' . $a . '"', $column);
+					$names = array_map(fn($a) => '"' . $a . '"', $names);
 					throw new UserException(sprintf('Une des colonnes (%s) est obligatoire, mais aucune n\'a été sélectionnée ou n\'existe.', implode(', ', $names)));
 				}
 			}
