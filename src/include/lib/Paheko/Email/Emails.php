@@ -287,7 +287,7 @@ class Emails
 
 		// Use the last recipient content to forward to MAIL_TEST_RECIPIENTS, just change the recipient
 		if (MAIL_TEST_RECIPIENTS
-			&& $context === self::CONTEXT_BULK
+			&& ($context === self::CONTEXT_BULK || $context === self::CONTEXT_NOTIFICATION)
 			&& count($ids)) {
 			$recipient_pgp_key = null;
 
