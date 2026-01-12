@@ -168,7 +168,7 @@ class Transaction extends Entity
 		$revenue = null;
 		$expense = null;
 		$thirdparty = null;
-		$other = null;
+		$other = [];
 
 		foreach ($lines as $i => $line) {
 			if ($line->account_type === Account::TYPE_REVENUE) {
