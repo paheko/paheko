@@ -345,7 +345,7 @@ orange</code></pre>
 </tr>
 <tr>
 <td style="text-align: left;"><code>count</code></td>
-<td style="text-align: left;">Booléen ou texte. Si ce paramètre est <code>TRUE</code>, le nombre de résultats sera retourné. Si une chaîne de texte est indiquée, elle sera utilisée dans la clause <code>COUNT(&lt;texte&gt;)</code>.</td>
+<td style="text-align: left;">Booléen ou texte. Si ce paramètre est <code>TRUE</code>, le nombre de résultats sera retourné.</td>
 </tr>
 </tbody>
 </table>
@@ -358,11 +358,7 @@ orange</code></pre>
 
 {{#articles count=true assign="result"}}
 {{/articles}}
-Il y a {{$result.count}} articles.
-
-{{#articles count="DISTINCT title"}}
-    Il y a {{$count}} articles avec un titre différent.
-{{/articles}}</code></pre>
+Il y a {{$result.count}} articles.</code></pre>
 <h1 id="membres">Membres</h1>
 <h2 id="users">users</h2>
 <p>Liste les membres.</p>

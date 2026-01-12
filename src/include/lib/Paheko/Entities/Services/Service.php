@@ -149,7 +149,6 @@ class Service extends Entity
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->groupBy('su.id_user');
 		$list->orderBy('paid', true);
-		$list->setCount('COUNT(DISTINCT su.id_user)');
 
 		$list->setExportCallback(function (&$row) {
 			$row->status = $row->status == -1 ? 'En retard' : ($row->status == 1 ? 'En cours' : '');

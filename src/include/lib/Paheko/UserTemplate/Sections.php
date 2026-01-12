@@ -711,10 +711,6 @@ class Sections
 			$list->orderBy($params['order'], $params['desc'] ?? false);
 		}
 
-		if (isset($params['count'])) {
-			$list->setCount(self::_moduleReplaceJSONExtract($params['count'], $table));
-		}
-
 		if (isset($params['group'])) {
 			$list->groupBy(self::_moduleReplaceJSONExtract($params['group'], $table));
 		}
@@ -1608,26 +1604,39 @@ class Sections
 				}
 			}
 
-			// Allow for count=true, count=1 and also count="DISTINCT user_id" count="id"
-			if (!empty($params['count'])) {
-				$params['select'] = sprintf('COUNT(%s) AS count', $params['count'] == 1 ? '*' : $params['count']);
-				$params['order'] = '1';
+			$group = '';
+
+			if (isset($params['group'])) {
+				$group .= 'GROUP BY ' . $params['group'];
+			}
+
+			if (isset($params['having'])) {
+				$group .= 'HAVING ' . $params['having'];
 			}
 
 			if (!empty($params['where']) && !preg_match('/^\s*AND\s+/i', $params['where'])) {
 				$params['where'] = ' AND ' . $params['where'];
 			}
 
-			$sql = sprintf('SELECT %s FROM %s WHERE 1 %s %s %s ORDER BY %s LIMIT %d,%d;',
-				$params['select'],
-				$params['tables'],
-				$params['where'] ?? '',
-				isset($params['group']) ? 'GROUP BY ' . $params['group'] : '',
-				isset($params['having']) ? 'HAVING ' . $params['having'] : '',
-				$params['order'],
-				$params['begin'],
-				$params['limit']
-			);
+			// If count=true or count=1, then wrap query and return count
+			if (!empty($params['count'])) {
+				$sql = sprintf('SELECT COUNT(*) AS count FROM (SELECT 1 FROM %s WHERE 1 %s %s);',
+					$params['tables'],
+					$params['where'] ?? '',
+					$group
+				);
+			}
+			else {
+				$sql = sprintf('SELECT %s FROM %s WHERE 1 %s %s ORDER BY %s LIMIT %d,%d;',
+					$params['select'],
+					$params['tables'],
+					$params['where'] ?? '',
+					$group,
+					$params['order'],
+					$params['begin'],
+					$params['limit']
+				);
+			}
 		}
 
 		if (isset($tpl->module->name)) {

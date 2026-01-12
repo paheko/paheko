@@ -123,7 +123,6 @@ class Services_User
 
 		$list->orderBy('date', true);
 		$list->groupBy('su.id');
-		$list->setCount('COUNT(DISTINCT su.id)');
 		return $list;
 	}
 

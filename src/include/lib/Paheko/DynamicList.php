@@ -335,11 +335,6 @@ class DynamicList implements \Countable
 		return $url;
 	}
 
-	public function setCount(string $count)
-	{
-		$this->count = $count;
-	}
-
 	public function setCountTables(string $tables)
 	{
 		$this->count_tables = $tables;
@@ -564,8 +559,8 @@ class DynamicList implements \Countable
 		$tables = null;
 
 		if ($count) {
+			$select = '1';
 			$tables = $this->count_tables;
-			$select = $this->count;
 		}
 
 		$tables ??= $this->tables;
@@ -573,7 +568,10 @@ class DynamicList implements \Countable
 		$sql = sprintf('SELECT %s FROM %s WHERE %s %s',
 			$select, $tables, $this->conditions, $group);
 
-		if (!$count) {
+		if ($count) {
+			$sql = sprintf('SELECT %s FROM (%s);', $this->count, $sql);
+		}
+		else {
 			$sql .= sprintf(' ORDER BY %s', $order);
 
 			if (null !== $this->per_page) {
