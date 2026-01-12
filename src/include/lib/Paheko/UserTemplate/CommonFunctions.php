@@ -450,7 +450,7 @@ class CommonFunctions
 			$input = sprintf('<input type="hidden" name="%s" value="1" />', preg_replace('/(?=\[|$)/', '_present', $name, 1)) . $input;
 		}
 		elseif (!empty($copy)) {
-			$input .= sprintf('<input type="button" onclick="var a = this.parentNode.querySelector(\'input\'); a.focus(); a.select(); document.execCommand(\'copy\'); this.value = \'Copié !\'; this.focus(); return false;" onblur="this.value = \'Copier\';" value="Copier" title="Copier dans le presse-papier" />', $params['name']);
+			$input .= '<input type="button" onclick="var a = this.previousElementSibling; a.focus(); a.select(); document.execCommand(\'copy\'); this.value = \'Copié !\'; this.focus(); return false;" onblur="this.value = \'Copier\';" value="Copier" title="Copier dans le presse-papier" />';
 		}
 
 		$input .= $suffix;

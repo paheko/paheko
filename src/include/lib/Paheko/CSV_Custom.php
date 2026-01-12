@@ -75,15 +75,14 @@ class CSV_Custom
 			throw new \InvalidArgumentException('Chemin invalide : ce fichier source n\'existe pas');
 		}
 
-		$this->file_name = Utils::basename($path);
-
 		$path = $file->getLocalOrCacheFilePath();
 
 		if (!$path) {
 			throw new \LogicException('File contents not found');
 		}
 
-		$this->loadFile($path);
+		$file_name = Utils::basename($path);
+		$this->loadFile($path, $file_name);
 	}
 
 	public function canConvert(): bool

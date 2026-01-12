@@ -44,7 +44,7 @@ class Security
 		?string $password,
 		#[\SensitiveParameter]
 		string $encrypted_data
-	): string
+	): ?string
 	{
 		if (!function_exists('sodium_memzero')) {
 			throw new \LogicException('The "sodium" PHP extension is required');

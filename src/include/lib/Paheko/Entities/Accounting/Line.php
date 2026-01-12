@@ -5,6 +5,7 @@ namespace Paheko\Entities\Accounting;
 use Paheko\DB;
 use Paheko\Entity;
 use Paheko\ValidationException;
+use Paheko\UserException;
 use Paheko\Utils;
 use Paheko\Accounting\Accounts;
 
@@ -45,7 +46,7 @@ class Line extends Entity
 				$value = abs(Utils::moneyToInteger($value));
 			}
 			catch (\InvalidArgumentException $e) {
-				throw new UserException($e->getMessage, 0, $e);
+				throw new UserException($e->getMessage(), 0, $e);
 			}
 		}
 		elseif ($key == 'id_project' && $value == 0) {
