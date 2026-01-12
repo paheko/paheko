@@ -579,7 +579,7 @@ class Functions
 		if (!empty($params['notification'])) {
 			$context = Emails::CONTEXT_NOTIFICATION;
 		}
-		elseif (count($params['to']) == 1) {
+		elseif (count($params['to']) === 1) {
 			$context = Emails::CONTEXT_PRIVATE;
 		}
 		else {
