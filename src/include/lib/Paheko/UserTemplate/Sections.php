@@ -1611,7 +1611,7 @@ class Sections
 			}
 
 			if (isset($params['having'])) {
-				$group .= 'HAVING ' . $params['having'];
+				$group .= ' HAVING ' . $params['having'];
 			}
 
 			if (!empty($params['where']) && !preg_match('/^\s*AND\s+/i', $params['where'])) {
