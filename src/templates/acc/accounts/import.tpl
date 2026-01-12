@@ -103,6 +103,14 @@
 		</p>
 	</form>
 {else}
+
+	<div class="block help">
+		<h3>Cette page permet d'importer un relevé bancaire provenant du site de votre banque.</h3>
+		<p>Les opérations présentes dans le relevé pourront être transformées en écritures comptables.</p>
+		<p>Cela permet de créer rapidement toutes les écritures liées au compte bancaire.</p>
+		{*<p>Pour automatiser la reconnaissance des écritures, il est aussi possible de <a href="">définir des règles d'import</a>.</p>*}
+	</div>
+
 	<form method="post" action="{$self_url}" enctype="multipart/form-data">
 
 		<fieldset>
