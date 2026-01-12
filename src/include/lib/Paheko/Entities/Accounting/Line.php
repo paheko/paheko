@@ -41,7 +41,12 @@ class Line extends Entity
 	public function filterUserValue(string $type, $value, string $key)
 	{
 		if ($key == 'credit' || $key == 'debit') {
-			$value = abs(Utils::moneyToInteger($value));
+			try {
+				$value = abs(Utils::moneyToInteger($value));
+			}
+			catch (\InvalidArgumentException $e) {
+				throw new UserException($e->getMessage, 0, $e);
+			}
 		}
 		elseif ($key == 'id_project' && $value == 0) {
 			$value = null;

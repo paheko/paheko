@@ -357,7 +357,7 @@ class Utils
 		return true;
 	}
 
-	static public function moneyToInteger($value): int
+	static public function moneyToInteger($value, bool $throw_on_invalid = true): ?int
 	{
 		if (null === $value || trim($value) === '') {
 			return 0;
@@ -372,7 +372,11 @@ class Utils
 		}
 
 		if (!preg_match('/^(-?)(\d+)(?:[,.](\d{1,3}))?/', $value, $match)) {
-			throw new \InvalidArgumentException(sprintf('Le montant est invalide : %s. Exemple de format accepté : 142,02', $value));
+			if ($throw_on_invalid) {
+				throw new \InvalidArgumentException(sprintf('Le montant est invalide : %s. Exemple de format accepté : 142,02', $value));
+			}
+
+			return null;
 		}
 
 		$cents = $match[3] ?? '0';

@@ -39,7 +39,7 @@ class Modifiers
 		'parse_datetime' => ['?DateTimeInterface|scalar', '?string'],
 		'parse_time' => ['?DateTimeInterface|scalar'],
 		'math' => ['scalar+', '...' => 'scalar+'],
-		'money_int' => ['callback' => [Utils::class, 'moneyToInteger'], 'types' => ['scalar+=']],
+		'money_int' => ['scalar+='],
 		'array_transpose' => ['callback' => [Utils::class, 'array_transpose'], 'types' => ['?array']],
 		'check_siret_number' => ['callback' => [Utils::class, 'checkSIRET'], 'types' => ['scalar+=']],
 		'check_email' => ['scalar+='],
@@ -354,6 +354,16 @@ EOS;
 		}
 
 		return sprintf('%02d:%02d', $t[0], $t[1]);
+	}
+
+	static public function money_int($value): int
+	{
+		try {
+			return Utils::moneyToInteger($value, true);
+		}
+		catch (\InvalidArgumentException $e) {
+			throw new UserException($e->getMessage(), 0, $e);
+		}
 	}
 
 	static public function math($expression, ... $params)
