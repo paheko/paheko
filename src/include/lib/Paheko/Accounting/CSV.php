@@ -22,7 +22,7 @@ class CSV extends CSV_Custom
 		$this->cache_properties[] = 'account_number';
 	}
 
-	public function loadFile(string $path, string $file_name): void
+	public function loadFile(string $path, ?string $file_name = null): void
 	{
 		$ext = strtolower(substr($file_name, -4));
 

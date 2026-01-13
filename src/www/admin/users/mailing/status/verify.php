@@ -15,7 +15,7 @@ if (!$email) {
 }
 
 if (!$email->canSendVerificationAfterFail()) {
-	throw new UserException(sprintf('Il n\'est pas possible de renvoyer une vérification à cette adresse pour le moment, il faut attendre %d jours.', Email::RESEND_VERIFICATION_DELAY));
+	throw new UserException(sprintf('Il n\'est pas possible de renvoyer une vérification à cette adresse pour le moment, il faut attendre %d jours.', $email::RESEND_VERIFICATION_DELAY));
 }
 
 $csrf_key = 'send_verification';

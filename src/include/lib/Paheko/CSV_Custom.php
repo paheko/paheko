@@ -90,7 +90,7 @@ class CSV_Custom
 		return Conversion::canConvertToCSV();
 	}
 
-	public function loadFile(string $path, string $file_name): void
+	public function loadFile(string $path, ?string $file_name = null): void
 	{
 		$ext = strtolower(substr($file_name, -4));
 

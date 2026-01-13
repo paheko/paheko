@@ -4,6 +4,7 @@ namespace Paheko\UserTemplate;
 
 use Paheko\Config;
 use Paheko\Utils;
+use Paheko\UserException;
 
 use Paheko\Web\Render\Markdown;
 

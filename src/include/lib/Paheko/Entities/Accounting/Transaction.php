@@ -954,7 +954,7 @@ class Transaction extends Entity
 		// or we won't be able to create project-less transactions
 		// from plugins etc.
 		if (self::TYPE_ADVANCED === $this->type
-			&& $config->analytical_mandatory) {
+			&& $config->get('analytical_mandatory')) {
 			$has_project = false;
 
 			foreach ($this->getLines() as $line) {

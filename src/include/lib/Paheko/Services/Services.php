@@ -26,7 +26,7 @@ class Services
 	{
 		$out = [];
 
-		foreach (self::listGroupedWithFees(null, 2) as $service) {
+		foreach (self::listGroupedWithFees() as $service) {
 			$s = [
 				'label' => self::getLongLabel($service),
 				'options' => [

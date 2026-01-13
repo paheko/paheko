@@ -33,7 +33,7 @@ if (isset($_GET['y']) && $_GET['y'] !== 'ok') {
 }
 
 // Validate and save re-subscribe request from confirmation email
-$form->runIf(isset($_GET['v'], $_GET['e']), function () use ($email, $hash) {
+$form->runIf(isset($_GET['v'], $_GET['e']), function () use ($email) {
 	if (!$email->confirmPreferences($_GET)) {
 		throw new UserException('La requête est invalide, merci de recommencer.');
 	}
@@ -43,8 +43,8 @@ $verified = !empty($_GET['y']);
 $address_required = false;
 
 // Save preferences
-$form->runIf('save', function () use ($email, $verified, $hash, &$address_required) {
-	$r = $email->savePreferencesFromUserForm($_POST, $verified);
+$form->runIf('save', function () use ($email, $hash, &$address_required) {
+	$r = $email->savePreferencesFromUserForm($_POST);
 
 	if ($r === 'confirmation_required') {
 		$address_required = true;

@@ -31,7 +31,7 @@ if ($target == 'category') {
 	$tpl->assign('categories', Categories::listWithStats(Categories::WITHOUT_HIDDEN));
 }
 elseif ($target == 'service') {
-	$tpl->assign('services', Services::listWithStats(true));
+	$tpl->assign('services', Services::listWithStats());
 }
 elseif ($target == 'search') {
 	$search_list = Search::list(SearchEntity::TARGET_USERS, Session::getUserId());
