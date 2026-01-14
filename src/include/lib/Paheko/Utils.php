@@ -366,12 +366,34 @@ class Utils
 		// Remove whitespace characters
 		$value = preg_replace('/\h/u', '', $value);
 
-		// Remove US thousands separator, if cents separator is a point
-		if (strpos($value, '.') === strlen($value) - 3) {
-			$value = str_replace(',', '', $value);
+		// Remove plus sign
+		if (substr($value, 0, 1) === '+') {
+			$value = substr($value, 1);
 		}
 
-		if (!preg_match('/^(-?)(\d+)(?:[,.](\d{1,3}))?/', $value, $match)) {
+		// Replace international decimal notation: ,12 ; 123,45 ; 1.043,12
+		if (substr($value, 0, 1) === ','
+			|| strpos($value, ',') > strpos($value, '.')) {
+			$value = strtr($value, ['.' => '', ',' => '.']);
+		}
+
+		// Remove US thousands separator
+		$value = str_replace(',', '', $value);
+
+		if (substr($value, 0, 1) === '-') {
+			$sign = -1;
+			$value = substr($value, 1);
+		}
+		else {
+			$sign = 1;
+		}
+
+		$parts = explode('.', $value);
+
+		if (count($parts) > 2
+			|| !count($parts)
+			|| !(empty($parts[0]) || ctype_digit($parts[0]))
+			|| !(empty($parts[1]) || ctype_digit($parts[1]))) {
 			if ($throw_on_invalid) {
 				throw new \InvalidArgumentException(sprintf('Le montant est invalide : %s. Exemple de format accepté : 142,02', $value));
 			}
@@ -379,8 +401,9 @@ class Utils
 			return null;
 		}
 
-		$cents = $match[3] ?? '0';
+		$cents = $parts[1] ?? '00';
 
+		// pad cents with zeros
 		if (strlen($cents) === 1) {
 			$cents .= '0';
 		}
@@ -388,12 +411,13 @@ class Utils
 		$more = (int) substr($cents, 2, 1);
 		$cents = (int) substr($cents, 0, 2);
 
+		// Round if cent of a cent, eg. 1,505 -> 1,51 / 1,504 -> 1,50
 		if ($more >= 5) {
 			$cents++;
 		}
 
-		$value = $match[1] . $match[2] . str_pad((string)$cents, 2, '0', STR_PAD_LEFT);
-		$value = (int) $value;
+		$value = $parts[0] . str_pad((string)$cents, 2, '0', STR_PAD_LEFT);
+		$value = $sign * (int) $value;
 		return $value;
 	}
 
