@@ -20,7 +20,7 @@
 {if $pending_count}
 	{include file="acc/transactions/_pending_message.tpl"}
 {/if}
-{$list->count()}
+
 {if !$list->count()}
 	<p class="alert block">
 		Aucune écriture à afficher.
