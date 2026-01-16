@@ -321,6 +321,7 @@ class Conversion
 			&& in_array($extension, self::GNUMERIC_FORMATS, true)) {
 			// format=automatic *should* produce YYYY/MM/DD format
 			// locale=fr_FR will make sure numbers are correctly formatted
+			// sheet='$sheet_name' extracts only this sheet
 			$cmd = 'ssconvert --export-type="Gnumeric_stf:stf_assistant" -O "format=automatic locale=fr_FR.UTF-8" %s %s %s 2>&1';
 		}
 
