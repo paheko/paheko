@@ -520,7 +520,7 @@ class Conversion
 	 * 2. OnlyOffice downloads the URL and converts the document, then returns a new URL pointing to the converted document
 	 * 3. We download the converted document from the supplied URL
 	 *
-	 * @see https://api1.onlyoffice.com/editors/conversionapi
+	 * @see https://api.onlyoffice.com/docs/docs-api/additional-api/conversion-api/request/
 	 */
 	static public function onlyoffice(string $source, string $destination, string $format, string $ext): bool
 	{
